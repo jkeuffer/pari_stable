@@ -1434,7 +1434,7 @@ fastnu(GEN p, GEN f, GEN beta, GEN pdr)
   if (gcmp1(h)) { avma = av; return NULL; }
   nu = (GEN)factmod0(lift(h),p)[1];
   if (lg(nu) > 2) { avma = av; return NULL; }
-  return gerepileupto(av, gcopy((GEN)nu[1]));
+  return gerepilecopy(av, (GEN)nu[1]);
 }
  
 /* return the prime element in Zp[phi] */
