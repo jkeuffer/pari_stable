@@ -1254,7 +1254,7 @@ FpXQX_from_Kronecker(GEN z, GEN pol, GEN p)
   x[i] = (long)FpX_res(normalizepol_i(t,N), pol, p);
   return normalizepol_i(x, i+1);
 }
-/*Unused/untested*/
+
 GEN
 FpXQX_red(GEN z, GEN T, GEN p)
 {
