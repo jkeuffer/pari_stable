@@ -2087,6 +2087,7 @@ entree functions_basic[]={
 {"ellj",1,(void*)jell,5,"Gp"},
 {"elllocalred",2,(void*)localreduction,5,"GG"},
 {"elllseries",99,(void*)lseriesell,5,"GGDGp"},
+{"ellminimalmodel",99,(void*)ellminimalmodel,5,"GD&"},
 {"ellorder",2,(void*)orderell,5,"GG"},
 {"ellordinate",29,(void*)ordell,5,"GGp"},
 {"ellpointtoz",29,(void*)zell,5,"GGp"},

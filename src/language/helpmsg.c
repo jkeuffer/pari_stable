@@ -137,6 +137,7 @@ char *helpmessages_basic[]={
   "ellj(x): elliptic j invariant of x",
   "elllocalred(e,p):  e being an elliptic curve, returns [f,kod,[u,r,s,t],c], where f is the conductor's exponent, kod is the kodaira type for e at p, [u,r,s,t] is the change of variable needed to make e minimal at p, and c is the local Tamagawa number c_p",
   "elllseries(e,s,{A=1}): L-series at s of the elliptic curve e, where A a cut-off point close to 1",
+  "ellminimalmodel(e,{&v}): return the standard minimal integral model of the rational elliptic curve e. Sets v to the corresponding change of variables",
   "ellorder(e,p): order of the point p on the elliptic curve e over Q, 0 if non-torsion",
   "ellordinate(e,x): y-coordinates corresponding to x-ordinate x on elliptic curve e",
   "ellpointtoz(e,P): lattice point z corresponding to the point P on the elliptic curve e",

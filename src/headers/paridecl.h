@@ -723,6 +723,7 @@ GEN     elleisnum(GEN om, long k, long flag, long prec);
 GEN     elleta(GEN om, long prec);
 GEN     ellheight0(GEN e, GEN a, long flag,long prec);
 GEN     ellinit0(GEN x,long flag,long prec);
+GEN     ellminimalmodel(GEN E, GEN *ptv);
 long    ellrootno(GEN e, GEN p);
 GEN     ellsigma(GEN om, GEN z, long flag, long prec);
 GEN     elltors0(GEN e, long flag);
