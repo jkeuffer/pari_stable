@@ -651,7 +651,7 @@ od(1, y^3 - y - 1), 0; 0, 0, 0, 0, Mod(1, y^3 - y - 1)], [], [y^3 - y - 1, [
 
 [14.229975145405511722395637833443108790]
 
-[1.121117107152756229]
+[0.9238383258036808024]
 
 ? setrand(1);bnfclassunit(x^2-x-100000)
   ***   Warning: insufficient precision for fundamental units, not given.
@@ -1428,5 +1428,5 @@ x^15 - 15*x^11 + 75*x^7 - x^5 - 125*x^3 + 5*x + 1
 ? getheap
 [198, 135140]
 ? print("Total time spent: ",gettime);
-Total time spent: 5500
+Total time spent: 15376
 ? \q

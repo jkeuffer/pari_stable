@@ -1232,27 +1232,79 @@ gauss_get_prec(GEN x, long prec)
   gauss_is_zero = &real0;
 }
 
+static long
+gauss_get_pivot_NZ(GEN x, GEN x0/* unused */, GEN c, long i0)
+{
+  long i,lx = lg(x);
+  if (c)
+    for (i=i0; i<lx; i++)
+    {
+      if (c[i]) continue;
+      if (!gcmp0((GEN)x[i])) break;
+    }
+  else
+    for (i=i0; i<lx; i++)
+      if (!gcmp0((GEN)x[i])) break;
+  return i;
+
+}
+
+/* ~ 0 compared to reference y */
+static int
+approx_0(GEN x, GEN y)
+{
+  long tx = typ(x);
+  if (tx == t_COMPLEX)
+    return approx_0((GEN)x[1], y) && approx_0((GEN)x[2], y);
+  if (gcmp0(x)) return 1;
+  return tx == t_REAL && (gexpo(y) - gexpo(x) > bit_accuracy(lg(x)));
+}
+
+static long
+gauss_get_pivot_max(GEN x, GEN x0, GEN c, long i0)
+{
+  long i,k,e, ex = -HIGHEXPOBIT, lx = lg(x);
+  GEN p;
+  if (c)
+    for (i=i0; i<lx; i++)
+    {
+      if (c[i]) continue;
+      e = gexpo((GEN)x[i]);
+      if (e > ex) { ex=e; k=i; }
+    }
+  else
+    for (i=i0; i<lx; i++)
+    {
+      e = gexpo((GEN)x[i]);
+      if (e > ex) { ex=e; k=i; }
+    }
+  p = (GEN)x[k];
+  return approx_0(p, (GEN)x0[k])? i: k;
+}
+
 /* return the transform of x under a standard Gauss pivot. r = dim ker(x).
  * d[k] contains the index of the first non-zero pivot in column k
  */
 static GEN
-gauss_pivot_keep(GEN x, long prec, GEN *dd, long *rr)
+gauss_pivot_keep(GEN x0, long prec, GEN *dd, long *rr)
 {
-  GEN c,d,p,mun;
+  GEN x,c,d,p,mun;
   long i,j,k,r,t,n,m,av,lim;
+  long (*get_pivot)(GEN,GEN,GEN,long);
 
-  if (typ(x)!=t_MAT) err(typeer,"gauss_pivot");
-  n=lg(x)-1; if (!n) { *dd=NULL; *rr=0; return cgetg(1,t_MAT); }
+  if (typ(x0)!=t_MAT) err(typeer,"gauss_pivot");
+  n=lg(x0)-1; if (!n) { *dd=NULL; *rr=0; return cgetg(1,t_MAT); }
 
-  gauss_get_prec(x,prec); m=lg(x[1])-1; r=0;
-  x=dummycopy(x); mun=negi(gun);
-  c=new_chunk(m+1); for (k=1; k<=m; k++) c[k]=0;
-  d=(GEN)gpmalloc((n+1)*sizeof(long));
+  x = dummycopy(x0); mun = negi(gun);
+  get_pivot = use_maximal_pivot(x)? gauss_get_pivot_max: gauss_get_pivot_NZ;
+  m=lg(x[1])-1; r=0;
+  c=cgetg(m+1,t_VECSMALL); for (k=1; k<=m; k++) c[k]=0;
+  d=cgetg(n+1,t_VECSMALL);
   av=avma; lim=stack_lim(av,1);
   for (k=1; k<=n; k++)
   {
-    j=1; while (j<=m && (c[j] || gauss_is_zero(gcoeff(x,j,k)))) j++;
-    if (j>m)
+    j = get_pivot((GEN)x[k], (GEN)x0[k], c, 1);
+    if (j > m)
     {
       r++; d[k]=0;
       for(j=1; j<k; j++)
@@ -1282,21 +1334,23 @@ gauss_pivot_keep(GEN x, long prec, GEN *dd, long *rr)
  * d[k] contains the index of the first non-zero pivot in column k
  */
 static void
-gauss_pivot(GEN x, long prec, GEN *dd, long *rr)
+gauss_pivot(GEN x0, long prec, GEN *dd, long *rr)
 {
-  GEN c,d,mun,p;
+  GEN x,c,d,mun,p;
   long i,j,k,r,t,n,m,av,lim;
+  long (*get_pivot)(GEN,GEN,GEN,long);
 
-  if (typ(x)!=t_MAT) err(typeer,"gauss_pivot");
-  n=lg(x)-1; if (!n) { *dd=NULL; *rr=0; return; }
+  if (typ(x0)!=t_MAT) err(typeer,"gauss_pivot");
+  n=lg(x0)-1; if (!n) { *dd=NULL; *rr=0; return; }
 
-  gauss_get_prec(x,prec); m=lg(x[1])-1; r=0;
-  x=dummycopy(x); mun=negi(gun);
-  c=new_chunk(m+1); for (k=1; k<=m; k++) c[k]=0;
+  x = dummycopy(x0); mun = negi(gun);
+  get_pivot = use_maximal_pivot(x)? gauss_get_pivot_max: gauss_get_pivot_NZ;
+  m=lg(x[1])-1; r=0;
+  c=cgetg(m+1, t_VECSMALL); for (k=1; k<=m; k++) c[k]=0;
   d=(GEN)gpmalloc((n+1)*sizeof(long)); av=avma; lim=stack_lim(av,1);
   for (k=1; k<=n; k++)
   {
-    j=1; while (j<=m && (c[j] || gauss_is_zero(gcoeff(x,j,k)))) j++;
+    j = get_pivot((GEN)x[k], (GEN)x0[k], c, 1);
     if (j>m) { r++; d[k]=0; }
     else
     {
@@ -1325,12 +1379,8 @@ ker0(GEN x, long prec)
   GEN d,y;
   long i,j,k,r,n, av = avma, tetpil;
 
-  x=gauss_pivot_keep(x,prec,&d,&r);
-  if (!r)
-  {
-    avma=av; if (d) free(d);
-    return cgetg(1,t_MAT);
-  }
+  x = gauss_pivot_keep(x,prec,&d,&r);
+  if (!r) { avma=av; return cgetg(1,t_MAT); }
   n = lg(x)-1; tetpil=avma; y=cgetg(r+1,t_MAT);
   for (j=k=1; j<=r; j++,k++)
   {
@@ -1347,7 +1397,7 @@ ker0(GEN x, long prec)
 	p[i] = zero;
     p[k]=un; for (i=k+1; i<=n; i++) p[i]=zero;
   }
-  free(d); return gerepile(av,tetpil,y);
+  return gerepile(av,tetpil,y);
 }
 
 GEN
