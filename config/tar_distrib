@@ -1,7 +1,0 @@
-#! /bin/sh
-
-case "`tar 2>&1`" in
-  *"--help"*) inc="-T";; # GNU
-           *) inc="-I";; # Solaris
-esac
-echo $inc
