@@ -1604,10 +1604,10 @@ apell1(GEN e, GEN p)
   ty = ti = NULL; /* gcc -Wall */
 
   if (DEBUGLEVEL) (void)timer2();
-  c4 = gmod(gdivgs((GEN)e[10],  -48), p);
-  c6 = gmod(gdivgs((GEN)e[11], -864), p);
+  c4 = lift_intern( gmod(gdivgs((GEN)e[10],  -48), p) );
+  c6 = lift_intern( gmod(gdivgs((GEN)e[11], -864), p) );
   /* once #E(Fp) is know mod B >= pordmin, it is completely determined */
-  pordmin = gceil(gmul2n(gsqrt(p,DEFAULTPREC),2)); /* ceil( 4sqrt(p) ) */
+  pordmin = addis(sqrti(gmul2n(p,4)), 1); /* ceil( 4sqrt(p) ) */
   p1p = addsi(1, p);
   p2p = shifti(p1p, 1);
   x = 0; u = c6; KRO = kronecker(u, p); KROold = - KRO;
