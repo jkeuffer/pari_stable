@@ -20,7 +20,7 @@ between parentheses). Add about 25% to running times for comparison with
 other versions.
 
 Clock frequency in MHz when known, in BM (BogoMIPS) otherwise.
-                                                       Bench 
+                                                       Bench
 Arch / proc:         OS:          Compiler:         sta:    dyn:  GP version:
 ==============================================================================
 DEC/Alpha
@@ -40,7 +40,7 @@ alpha21064   172Mhz  OSF1-3.0        cc            34104   35564  2.1.1
 Sun/SPARC
 UltraSPARC60 450MHz  Solaris-7       gcc            3970    4010  2.0.19    IS
 UltraSPARC60 450MHz  Solaris-7        cc            5070    5210  2.0.19    IS
-UltraSPARC2i 440MHz  Solaris-8       gcc-2.95.2     3914    4230  2.2.1 
+UltraSPARC2i 440MHz  Solaris-8       gcc-2.95.2     3914    4230  2.2.1
 Ultra250     400MHz  Solaris-7       gcc            4510    4560  2.0.19    IS
 Ultra250     400MHz  Solaris-7        cc            5950    6090  2.0.19    IS
 UltraSPARC60 360MHz  Solaris-2.6     gcc            5034    5209  2.0.16    IS
@@ -88,10 +88,11 @@ AMD Athlon   850MHz  Linux-2.2.17    gcc            1364    1342  2.1.0     JC
 AMD Duron    700MHz  Linux-2.4.0    egcs            2066    2138  2.0.20    QL
 AMD Athlon   500MHz  Linux-2.2.13    gcc            2736    2724  2.0.18    MS
 AMD K6-2     350Mhz  Linux-2.0.34   egcs           (4856)  (4756) 2.0.11    SH
-AMD K6-2     350Mhz  Linux-2.0.36    gcc            5154    4850  2.0.17 
+AMD K6-2     350Mhz  Linux-2.0.36    gcc            5154    4850  2.0.17
 AMD K6       266MHz  Linux-2.2.5    pgcc            5861    6001  2.0.16(16)IS
 AMD K6       233Mhz  Linux-2.2.14    gcc            6968    7158  2.0.18    QL
 IBM/Cyrix    200MHz  Linux-2.0.35    gcc           13190   13729  2.0.15    AP
+PentiumIV   1600MHz  Linux-2.4.18-3  gcc-2.96        938     960  2.2.4
 PentiumIV   1400MHz  Linux-2.4.4-4   gcc-2.95.3     1318    1354  2.1.3     HG
 PentiumIII  1000MHz  Linux-2.4.7-10  gcc-2.96       1104    1124  2.2.3
 PentiumIII   933MHz  Linux-2.2.15   egcs            1450    1485  2.0.20    IS
@@ -129,10 +130,10 @@ Pentium      133MHz  FreeBSD-2.2.5   gcc           15231   17259  2.0.10    KK
 486DX2        50MHz  Linux-2.0.33    gcc          213710  216224  2.0.9     LG
 486DX         50MHz  DOS-5 + EMX     gcc           77126!      -  2.0.20
 *i860         40MHz  Concentrix      cc           147989!      -  2.0.9     LG
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Intel/ARM
 *StrongARM   110MHz  Linux-2.4.5     gcc-2.95.2    17162!      -  2.1.1     BA
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Intel/ia64
 *Itanium     800MHz  Linux-2.4.9     gcc-3.0.1      2557    2474  2.1.2 (28)BA
 ------------------------------------------------------------------------------
@@ -256,8 +257,8 @@ hppa kernel. Remove +z from compiler flags
 (19) replace err by pari_err in src/kernel/sparcv7/level0.S [in 2.0.16 or 17]
 (20) asmarch incorrectly defaulted to MicroSPARC (bypassed using Configure -a)
 (22) same machine as above, native binary compiled with mingw32-gcc-2.95.2
-     had to modify Odos/Makefile (to link with readline-4.0). 
-     PROBLEMS: 
+     had to modify Odos/Makefile (to link with readline-4.0).
+     PROBLEMS:
       * when started from the shell, on ^C GP quits! OK when started from GUI
       * stdin redirection from the shell (gp < file) doesn't work (SEGV in gp).
       * ANSI escape sequences are printed "as is" (so don't enable colors)
