@@ -1328,9 +1328,10 @@ intersect_ker(GEN P, GEN MA, GEN U, GEN l)
 void
 FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
 {
-  pari_sp lbot, ltop=avma;
-  long vp,vq,np,nq,e,pg;
-  GEN A,B,Ap,Bp;
+  pari_sp lbot, ltop = avma;
+  long vp, vq, np, nq, e;
+  ulong pg;
+  GEN A, B, Ap, Bp;
   GEN *gptr[2];
   vp=varn(P);vq=varn(Q);
   np=degpol(P);nq=degpol(Q);
@@ -1345,7 +1346,7 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
   if (pg > 1)
   {
     GEN ipg = utoipos(pg);
-    if (smodis(l,pg) == 1)
+    if (umodiu(l,pg) == 1)
       /*We do not need to use relative extension in this setting, so
         we don't. (Well,now that we don't in the other case also, it is more
        dubious to treat cases apart...)*/
