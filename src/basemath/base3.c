@@ -650,24 +650,6 @@ basistoalg(GEN nf, GEN x)
   }
 }
 
-/* return the (N-dimensional) vector of coeffs of p */
-GEN
-pol_to_vec(GEN x, long N)
-{
-  long i, l;
-  GEN z = cgetg(N+1,t_COL);
-  if (typ(x) != t_POL)
-  {
-    z[1] = (long)x;
-    for (i=2; i<=N; i++) z[i]=zero;
-    return z;
-  }
-  l = lgef(x)-1; x++;
-  for (i=1; i<l ; i++) z[i]=x[i];
-  for (   ; i<=N; i++) z[i]=zero;
-  return z;
-}
-
 /* gmul(A, pol_to_vec(x)), A t_MAT (or t_VEC) of compatible dimensions */
 GEN
 mulmat_pol(GEN A, GEN x)

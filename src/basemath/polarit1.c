@@ -938,7 +938,7 @@ col_to_ff(GEN x, long v)
 }
 
 GEN
-col_to_pol(GEN x, long v)
+vec_to_pol(GEN x, long v)
 {
   long i, k = lg(x);
   GEN p;
@@ -950,6 +950,24 @@ col_to_pol(GEN x, long v)
   return p;
 }
 
+/* return the (N-dimensional) vector of coeffs of p */
+GEN
+pol_to_vec(GEN x, long N)
+{
+  long i, l;
+  GEN z = cgetg(N+1,t_COL);
+  if (typ(x) != t_POL)
+  {
+    z[1] = (long)x;
+    for (i=2; i<=N; i++) z[i]=zero;
+    return z;
+  }
+  l = lgef(x)-1; x++;
+  for (i=1; i<l ; i++) z[i]=x[i];
+  for (   ; i<=N; i++) z[i]=zero;
+  return z;
+}
+
 /* vector of polynomials (in v) whose coeffs are given by the columns of x */
 GEN
 mat_to_vecpol(GEN x, long v)
@@ -958,7 +976,7 @@ mat_to_vecpol(GEN x, long v)
   GEN y = cgetg(lx, t_VEC);
 
   for (j=1; j<lx; j++)
-    y[j] = (long)col_to_pol((GEN)x[j], v);
+    y[j] = (long)vec_to_pol((GEN)x[j], v);
   return y;
 }
 
