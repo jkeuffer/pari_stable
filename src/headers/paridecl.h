@@ -482,7 +482,6 @@ GEN     polcompositum0(GEN pol1, GEN pol2,long flag);
 GEN     primedec(GEN nf,GEN p);
 GEN     rnfbasis(GEN bnf, GEN order);
 GEN     rnfdet(GEN nf, GEN order);
-GEN     rnfdet0(GEN nf, GEN x, GEN y);
 GEN     rnfdet2(GEN nf, GEN A, GEN I);
 GEN     rnfdiscf(GEN nf, GEN pol);
 GEN     rnfequation(GEN nf, GEN pol2);
