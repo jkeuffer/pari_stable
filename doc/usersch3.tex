@@ -4686,7 +4686,8 @@ sensitive to the current precision. The precision is updated internally but,
 in very rare cases, a wrong result may be returned if the initial precision
 was not sufficient.
 
-\syn{galois}{x,\var{prec}}.
+\syn{galois}{x,\var{prec}}. To enable new format, set global variable
+\tet{new_galois_format} to $1$.
 
 \subsecidx{polred}$(x,\{\fl=0\},\{fa\})$: finds polynomials with reasonably
 small coefficients defining subfields of the number field defined by $x$.
