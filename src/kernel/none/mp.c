@@ -571,16 +571,17 @@ addir(GEN x, GEN y)
     return itor(x, 3 + ((-e)>>TWOPOTBITS_IN_LONG));
   }
 
-  ly=lg(y);
+  ly = lg(y);
   if (e > 0)
   {
     l = ly - (e>>TWOPOTBITS_IN_LONG);
     if (l<3) return rcopy(y);
   }
   else l = ly + ((-e)>>TWOPOTBITS_IN_LONG)+1;
+  z = (GEN)avma;
   y = addrr(itor(x,l), y);
-  z = y+l; ly = lg(y); while (ly--) z[ly] = y[ly];
-  avma=(gpmem_t)z; return z;
+  ly = lg(y); while (ly--) *--z = y[ly];
+  avma = (gpmem_t)z; return z;
 }
 
 GEN
@@ -588,7 +589,7 @@ addrr(GEN x, GEN y)
 {
   long lx, sx = signe(x), ex = expo(x);
   long ly, sy = signe(y), ey = expo(y);
-  long e, i, j, lz;
+  long e, i, j, lz, ez;
   int flag, f2;
   GEN z;
   LOCAL_OVERFLOW;
@@ -701,23 +702,39 @@ addrr(GEN x, GEN y)
 
   x = z+2; i=0; while (!x[i]) i++;
   lz -= i; z += i;
-  j = bfffo(z[2]);
-  if (j)
-  {
-    x = z;
-    if (flag != 1)
-    { /* z was extended by d+1 words (in fact e bits = d words + m bits) */
-      long m = e & (BITS_IN_LONG-1);
-      /* setting the first j bits to 0, are the leading m-1 bits = 0? */
-      if (j >= m
-           || ((z[lz-1] >> (BITS_IN_LONG-m+1)) << (BITS_IN_LONG-m+1+j)) == 0)
-      { /* final shift cancels the m bits extension: shorten z */
-        lz--; z++;
+  j = bfffo(z[2]); /* need to shift left by j bits to normalize mantissa */
+  ez = ey - (j | (i<<TWOPOTBITS_IN_LONG));
+  if (flag != 1)
+  { /* z was extended by d+1 words [should be e bits = d words + m bits] */
+    long m = e & (BITS_IN_LONG-1);
+
+    /* not worth keeping extra word if less than 4 significant bits in there */
+    if (m - j < 4)
+    { /* shorten z */
+      int roundup;
+      lz--;
+      /* once shifted, is highest bit of cancelled word set to 1? */
+      roundup = (z[lz]<<j) & HIGHBIT;
+      /* if we need to shift anyway, shorten from left
+       * If not, shorten from right, neutralizing last word of z */
+      if (j == 0) stackdummy(z + lz, 1);
+      else
+      {
+        GEN t = z;
+        z++; shift_left(z,t,2,lz-1, 0,j);
+      }
+      if (roundup)
+      {
+        i = lz-1;
+        while (++z[i] == 0 && i > 1) i--;
+        /* extend z to the left? */
+        if (i == 1) { avma = (gpmem_t)z; z = new_chunk(1); z[2] = 1; }
       }
     }
-    shift_left(z,x,2,lz-1, 0,j);
+    else if (j) shift_left(z,z,2,lz-1, 0,j);
   }
-  z[1] = evalsigne(sx) | evalexpo(ey - (j | (i<<TWOPOTBITS_IN_LONG)));
+  else if (j) shift_left(z,z,2,lz-1, 0,j);
+  z[1] = evalsigne(sx) | evalexpo(ez);
   z[0] = evaltyp(t_REAL) | evallg(lz);
   avma = (gpmem_t)z; return z;
 }
