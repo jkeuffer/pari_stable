@@ -36,6 +36,8 @@ bit machine)
    ? rnfpolred(nfinit(quadpoly(904,y)),quadray(904,1))
      ***   division by zero in gdiv, gdivgs or ginv
 
+4  qfbhclassno(x < 0) may give a wrong result
+
 3  many functions assume MAXVARN is a free variable, yielding bogus
    results if the input involve it (only affect library programming).
 
