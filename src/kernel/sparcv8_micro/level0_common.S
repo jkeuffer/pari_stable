@@ -14,11 +14,9 @@ with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /* This file defines some "level 0" kernel functions for SPARC V8 */
-/* With gcc, those symbols are inline and defined in level0.h     */
 /* overflow hiremainder                                           */
 /* addll addllx subll subllx shiftl shiftlr mulll addmul          */
 
-#ifndef __GNUC__
 #if defined(NO_UNDERSCORE) || defined(linux)
 #  define C(entrypoint) entrypoint
 #elif defined(sun) || defined(NeXT)
@@ -105,4 +103,3 @@ C(overflow): .skip  4
 	.comm C(overflow),8
 	.comm C(hiremainder),8
 #endif
-#endif /* !defined(__GNUC__) */
