@@ -664,7 +664,7 @@ gtrace(GEN x)
   return NULL; /* not reached */
 }
 
-/* Cholesky Decomposition for positive definite matrix a
+/* Cholesky Decomposition for positive definite matrix a [matrix Q, Algo 2.7.6]
  * If a is not positive definite:
  *   if flag is zero: raise an error
  *   else: return NULL. */
