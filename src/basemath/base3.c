@@ -1837,6 +1837,7 @@ ideallistzstarall(GEN bnf,long bound,long flag)
   GEN y,nf,p,z,z2,p1,p2,p3,fa,pr,ideal,lu,lu2,funits,racunit,embunit;
 
   nf=checknf(bnf);
+  if (bound <= 0) return cgetg(1,t_VEC);
   z = cgetg(bound+1,t_VEC);
   for (i=2; i<=bound; i++) z[i] = lgetg(1,t_VEC);
   if (do_units)
