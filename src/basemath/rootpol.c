@@ -606,7 +606,7 @@ lower_bound(GEN p, long *k, double eps)
 }
 
 /* returns the maximum of the modulus of p with a relative error tau */
-static GEN
+GEN
 max_modulus(GEN p, double tau)
 {
   GEN r,q,aux,gunr;
