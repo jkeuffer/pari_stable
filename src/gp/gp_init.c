@@ -36,53 +36,7 @@ extern int   whatnow(char *s, int silent);
 
 static void whatnow0(char *s) { whatnow(s,0); }
 
-entree functions_gp[]={
-{"allocatemem",0,(void*)allocatemem0,11,"vD0,L,"},
-{"default",0,(void*)default0,11,"D\"\",r,D\"\",s,D0,L,"},
-{"error",0,(void*)error0,11,"vs*"},
-{"extern",1,(void*)extern0,11,"s"},
-{"input",0,(void*)input0,11,""},
-{"global",88,NULL,11,NULL},
-{"print",0,(void*)print,11,"vs*"},
-{"print1",0,(void*)print1,11,"vs*"},
-{"printp",0,(void*)printp,11,"vs*"},
-{"printp1",0,(void*)printp1,11,"vs*"},
-{"printtex",0,(void*)printtex,11,"vs*"},
-{"quit",0,(void*)gp_quit,11,"v"},
-{"read",0,(void*)read0,11,"D\"\",s,"},
-{"system",70,(void*)system0,11,"vs"},
-{"trap",0,(void*)trap0,11,"D\"\",r,DIDI"},
-{"whatnow",1,(void*)whatnow0,11,"vr"},
-{"write",99,(void*)write0,11,"vss*"},
-{"write1",99,(void*)write1,11,"vss*"},
-{"writebin",99,(void*)gpwritebin,11,"vsDG"},
-{"writetex",99,(void*)writetex,11,"vss*"},
-
-{NULL,0,NULL,0,NULL} /* sentinel */
-};
-
-char *helpmessages_gp[]={
-  "allocatemem({s=0}): allocates a new stack of s bytes. doubles the stack if s is omitted",
-  "default({opt},{v},{flag}): set the default opt to v. If v is omitted, print the current default for opt. If no argument is given, print a list of all defaults as well as their values. If flag is non-zero, return the result instead of printing it on screen. See manual for details",
-  "error(\"msg\"): abort script with error message msg",
-  "extern(cmd): execute shell command cmd, and feeds the result to GP (as if loading from file)",
-  "input(): read an expression from the input file or standard input",
-  "global(x): declare x to be a global variable",
-  "print(a): outputs a (in raw format) ending with newline",
-  "print1(a): outputs a (in raw format) without ending with newline",
-  "printp(a): outputs a (in beautified format) ending with newline",
-  "printp1(a): outputs a (in beautified format) without ending with newline",
-  "printtex(a): outputs a in TeX format",
-  "quit(): quits GP and return to the system",
-  "read({filename}): read from the input file filename. If filename is omitted, reread last input file (be it from readfile or \\r)",
-  "system(a): a being a string, execute the system command a (not valid on every machine)",
-  "trap({err}, {rec}, {seq}): try to execute seq, trapping error err (all of them if err ommitted); sequence rec is executed if the error occurs and is the result of the command. When seq is omitted, define rec as a default handler for error err (a break loop will be started if rec omitted). If rec is the empty string \"\" pop out the last default handler",
-  "whatnow(fun): if f was present in GP version 1.39.15 or lower, gives the new function name",
-  "write(filename,a): write the string expression a (same output as print) to filename",
-  "write1(filename,a): write the string expression a (same output as print1) to filename",
-  "writebin(filename,{x}): write x as a binary object to file filename. If x is omitted, write all session variables",
-  "writetex(filename,a): write the string expression a (same format as print) to filename, in TeX format",
-};
+#include "gp_init.h"
 
 /* Backward Compatibility */
 

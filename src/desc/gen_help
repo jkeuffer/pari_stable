@@ -1,0 +1,19 @@
+#!/usr/bin/perl -w
+use PARI::822;
+
+$class=$ARGV[0];
+print "char *helpmessages_${class}[]={\n";
+$/="\n;";
+PARI::822::read(\%funcs,$ARGV[1]);
+foreach my $name (sort keys %funcs)
+{
+      my %func=%{$funcs{$name}};
+      next if ($func{'Class'} ne $class);
+      my $help=$func{'Help'};
+      $help =~ s/\n/ /g;
+      print "  \"$help\",\n";
+}
+print <<EOF
+};
+
+EOF

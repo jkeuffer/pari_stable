@@ -564,7 +564,14 @@ fi
 cat >> $file << EOT
 pariinl.h: parilvl0.h parilvl1.h
 	cat parilvl0.h parilvl1.h > pariinl.h
+EOT
 
+cat >> $file << EOT
+$src/desc/Def: 
+	cd $src/desc; make Def
+
+$src/gp/gp_init.h $src/gp/highlvl.h $src/language/init.h: $src/desc/Def
+	cd $src/desc; make 
 EOT
 
 if test -s $src_dir/kernel/$kernlvl0/MakeLVL0.SH; then
@@ -593,9 +600,16 @@ for dir in basemath modules language gp graph gpdyn graphdyn systems; do
     cflags="$cflags -I$src/language \$(RLINCLUDE)"
     depend="$src/language/anal.h $src/gp/gp.h ./paricfg.h"
     ;;
-  gp_init|plotport)
+  gp_init)
+    cflags="$cflags -I$src/graph"
+    depend="$src/graph/rect.h $src/gp/gp_init.h"
+    ;;
+  plotport)
     cflags="$cflags -I$src/graph"
     depend="$src/graph/rect.h"
+    ;;
+  highlvl)
+    depend="$src/gp/highlvl.h"
     ;;
   plotQt)
     cflags="$cflags \$(PLOTCFLAGS)"
@@ -606,8 +620,11 @@ for dir in basemath modules language gp graph gpdyn graphdyn systems; do
     cflags="$cflags \$(PLOTCFLAGS)"
     depend="$src/graph/rect.h"
     ;;
-  init|es|sumiter)
+  es|sumiter)
     depend="$src/language/anal.h"
+    ;;
+  init)
+    depend="$src/language/anal.h $src/language/init.h" 
     ;;
   anal)
     depend="$src/language/anal.h $src/headers/parinf.h"

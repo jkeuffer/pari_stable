@@ -1,0 +1,11 @@
+#!/usr/bin/perl -w
+use PARI::822;
+
+PARI::822::read(\%funcs,$_,1) for ( grep {-f $_ && ! m{/CVS/}} @ARGV);
+
+@func= sort keys %funcs;
+for $f (@func)
+{
+  $funcs{$f}->{'Class'}='basic' if (!defined($funcs{$f}->{'Class'}));
+}
+PARI::822::write(\%funcs);
