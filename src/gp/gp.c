@@ -1806,7 +1806,11 @@ get_line_from_file(FILE *file, Buffer *b, char *prompt)
     char *end = filtre(s, f_flag);
     if (*s)
     {
-      if (read_more) s = end;
+      if (read_more)
+      {
+        s = end;
+	if (wait_for_brace && end[-1] == RBRACE) end[-1]=0;
+      }
       else if (end[-1] == '\\')
       {
         if (*s=='?') break;
