@@ -809,77 +809,75 @@ cxpolylog(long m, GEN x, long prec)
 GEN
 polylog(long m, GEN x, long prec)
 {
-  long av,av1,limpile,tetpil,l,e,sx,i;
-  GEN p1,p2,n,y,logx,logx2;
-  GEN *gptr[4];
+  long av,av1,limpile,l,e,i,G;
+  GEN z,p1,p2,n,y,logx;
 
   if (m<0) err(talker,"negative index in polylog");
   if (!m) return gneg(ghalf);
   if (gcmp0(x)) return gcopy(x);
-  av=avma;
+  av = avma;
   if (m==1)
-  {
-    p1=glog(gsub(gun,x),prec); tetpil=avma;
-    return gerepile(av,tetpil,gneg(p1));
-  }
-  l=precision(x);
+    return gerepileupto(av, gneg(glog(gsub(gun,x), prec)));
+
+  l = precision(x);
   if (!l) { l=prec; x=gmul(x, realun(l)); }
-  e=gexpo(gnorm(x)); if (!e || e== -1) return cxpolylog(m,x,prec);
-  if (e>0)
+  e = gexpo(gnorm(x)); if (!e || e== -1) return cxpolylog(m,x,prec);
+  if (e > 0)
   {
-    logx=glog(x,l); sx=gsigne(gimag(x));
+    long sx = gsigne(gimag(x));
+    logx = glog(x,l);
     if (!sx)
     {
-      if (m&1)
-        sx = gsigne(greal(gsub(gun,x)));
-      else
-        sx = -gsigne(greal(x));
+      if (m&1) sx = gsigne(gsub(gun,greal(x)));
+      else     sx = - gsigne(greal(x));
     }
-    x=ginv(x);
+    z = cgetg(3,t_COMPLEX);
+    z[1] = zero;
+    z[2] = ldivri(mppi(l), mpfact(m-1));
+    if (sx < 0) z[2] = lnegr((GEN)z[2]);
+    x = ginv(x);
   }
+  G = -bit_accuracy(l);
+  n = icopy(gun);
   av1=avma; limpile=stack_lim(av1,1);
-  y=x; n=gun; p1=x;
-  do
+  y=x; p1=x;
+  for (i=2; ; i++)
   {
-    n=addsi(1,n); p1=gmul(x,p1); p2=gdiv(p1,gpuigs(n,m));
-    y=gadd(y,p2);
+    n[2] = i; p1 = gmul(x,p1); p2 = gdiv(p1,gpuigs(n,m));
+    y = gadd(y,p2);
+    if (gexpo(p2) <= G) break;
+
     if (low_stack(limpile, stack_lim(av1,1)))
-    {
+    { GEN *gptr[2]; gptr[0]=&y; gptr[1]=&p1;
       if(DEBUGMEM>1) err(warnmem,"polylog");
-      gptr[0]=&y; gptr[1]=&n; gptr[2]=&p1; gptr[3]=&p2;
-      gerepilemany(av1,gptr,4);
+      gerepilemany(av1,gptr,2);
     }
   }
-  while (gexpo(p2) > -bit_accuracy(l));
-  tetpil=avma;
-  if (e<=0) return gerepile(av,tetpil,gcopy(y));
-  logx2=gsqr(logx); p1=gneg_i(ghalf);
-  for (i=m-2; i>=0; i-=2)
-  {
-    p1 = gadd(izeta(m-i,l), gmul(p1,gdivgs(logx2,(i+1)*(i+2))));
+  if (e < 0) return gerepileupto(av, y);
+
+  if (m == 2)
+  { /* same formula as below, written more efficiently */
+    y = gneg_i(y);
+    p1 = gmul2n(gsqr(gsub(logx, z)), -1); /* = (log(-x))^2 / 2 */
+    p1 = gadd(divrs(gsqr(mppi(l)), 6), p1);
+    p1 = gneg_i(p1);
   }
-  if (m&1) p1 = gmul(logx,p1);
-  p2=cgetg(3,t_COMPLEX); p2[1]=zero;
-  p2[2]=ldiv(gmulsg(sx,mppi(l)),mpfact(m-1));
-  p1=gadd(gmul2n(p1,1), gmul(p2,gpuigs(logx,m-1)));
-  if ((m&1) == 0) y = gneg_i(y);
-  tetpil=avma; return gerepile(av,tetpil,gadd(p1,y));
+  else
+  {
+    GEN logx2 = gsqr(logx); p1 = gneg_i(ghalf);
+    for (i=m-2; i>=0; i-=2)
+      p1 = gadd(izeta(m-i,l), gmul(p1,gdivgs(logx2,(i+1)*(i+2))));
+    if (m&1) p1 = gmul(logx,p1); else y = gneg_i(y);
+    p1 = gadd(gmul2n(p1,1), gmul(z,gpuigs(logx,m-1)));
+  }
+
+  return gerepileupto(av, gadd(y,p1));
 }
 
 GEN
 dilog(GEN x, long prec)
 {
-  GEN p1,p2,p3,y;
-  long av=avma,tetpil;
-
-  if (gcmpgs(gnorm(x),1)<1)
-  {
-    tetpil=avma; return gerepile(av,tetpil,polylog(2,x,prec));
-  }
-  y=gneg_i(polylog(2,ginv(x),prec)); p3=mppi(prec); p2=gdivgs(gsqr(p3),6);
-  p1=glog(gneg_i(x),prec); p1=gadd(p2,gmul2n(gsqr(p1),-1));
-  p1 = gneg_i(p1); tetpil=avma;
-  return gerepile(av,tetpil,gadd(y,p1));
+  return gpolylog(2, x, prec);
 }
 
 GEN
