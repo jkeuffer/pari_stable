@@ -1018,6 +1018,7 @@ hnfdivide(GEN A, GEN B)
   GEN u, b, m, r;
 
   if (!n) return 1;
+  if (lg(B)-1 != n) err(consister,"hnfdivide");
   u = cgetg(n+1, t_COL);
   for (k=1; k<=n; k++)
   {
