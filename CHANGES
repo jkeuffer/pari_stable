@@ -158,6 +158,8 @@ BA  2- Add support for GNU/Hurd.
     5- FpM_rank
     6- declare cornacchia, cornacchia2 + allow factor( an elt in Z[i] )
     7- put back bruteall [ used by Math::Pari ]
+BA  8- Configure support for sparc64, x86_64 and ppc64
+BA  9- x86_64 level0 inline assembly kernel
 
   Removed
     1- obsolete macro leadingcoeff [kept for backward compatibility but
