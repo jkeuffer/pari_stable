@@ -1062,22 +1062,29 @@ special_pivot(GEN x)
   return x;
 }
 
-/* x matrix */
-GEN 
-norml1(GEN x)
+/* x matrix: compute a bound for | \sum e_i x_i | ^ 2, e_i = 0,1 */
+static GEN 
+my_norml2(GEN x)
 {
   long i,j, lx = lg(x);
-  GEN s = gzero;
-  for (j=1; j<lx; j++)
+  GEN S = gzero;
+  for (i=1; i<lx; i++)
   {
-    GEN c = (GEN)x[j];
-    for (i=1; i<lx; i++)
+    GEN p = gzero;
+    GEN m = gzero;
+    for (j=1; j<lx; j++)
     {
-      GEN t = (GEN)c[i];
-      if (!gcmp0(t)) s = gadd(s, gabs(t,0));
+      GEN u = gcoeff(x,i,j);
+      long s = gsigne(u);
+      if      (s < 0) m = gadd(m,u);
+      else if (s > 0) p = gadd(p,u);
     }
+    if (m != gzero) m = gneg(m);
+    if (gcmp(p,m) > 0) m = p;
+
+    S = gadd(S, gsqr(m));
   }
-  return s;
+  return S;
 }
 
 GEN sindexrank(GEN x);
@@ -1139,8 +1146,9 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
     {
       GEN p1 = sindexrank(BL);
       GEN p2 = rowextract_p(BL, (GEN)p1[1]); /* invertible */
-      double Nx = gtodouble(norml1(invmat(p2)));
+      double Nx = gtodouble(my_norml2(invmat(p2)));
       C = (long)sqrt(s*n0*n0/4. / Nx);
+      if (C == 0) C = 1;
       M = dbltor((Nx * C*C + s*n0*n0/4.) * 1.00001);
     }
     else
