@@ -1077,6 +1077,8 @@ GEN     Fp_add_pol_scal(GEN y,GEN x,GEN p);
 GEN     Fp_centermod(GEN T,GEN mod);
 GEN     Fp_chinese_coprime(GEN x,GEN y,GEN Tx,GEN Ty,GEN Tz,GEN p);
 GEN     Fp_compo_mod_pol(GEN T,GEN x,GEN pol,GEN p);
+GEN     Fp_factor_rel(GEN P, GEN l, GEN Q);
+GEN     Fp_factor_rel0(GEN P, GEN l, GEN Q);
 void    Fp_intersect(long n, GEN P, GEN Q, GEN l
 		     , GEN *SP, GEN *SQ, GEN MA, GEN MB);
 GEN     Fp_inv_isom(GEN S,GEN Tp, GEN p);

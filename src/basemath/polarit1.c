@@ -2148,6 +2148,41 @@ spec_Fq_pow_mod_pol(GEN x, GEN p, GEN a, GEN S)
   setvarn(z, varn(x)); return gerepileupto(av, z);
 }
 
+static long isabsolutepol(GEN f, GEN pp, GEN a)
+{
+  int i,res=1;
+  GEN c;
+  for(i=2; i<lg(f); i++)
+  {
+    c = (GEN) f[i];
+    switch(typ(c))
+    {
+    case t_INT: /* OK*/
+      break;
+    case t_INTMOD:
+      if (gcmp((GEN)c[1],pp))
+	err(typeer,"factmod9");
+      break;
+    case t_POLMOD:
+      if (gcmp((GEN)c[1],a))
+	err(typeer,"factmod9");
+      isabsolutepol((GEN)c[1],pp,gzero);
+      isabsolutepol((GEN)c[2],pp,gzero);
+      if (degree((GEN)c[1])>0)
+	res = 0;
+      break;
+    case t_POL:
+      isabsolutepol(c,pp,gzero);
+      if (degree(c)>0)
+	res = 0;
+      break;
+    default:
+      err(typeer,"factmod9");
+    }
+  }
+  return res;
+}
+
 GEN
 factmod9(GEN f, GEN pp, GEN a)
 {
@@ -2158,6 +2193,24 @@ factmod9(GEN f, GEN pp, GEN a)
   if (typ(a)!=t_POL || typ(f)!=t_POL || gcmp0(a)) err(typeer,"factmod9");
   vf=varn(f); va=varn(a);
   if (va<=vf) err(talker,"polynomial variable must be of higher priority than finite field\nvariable in factorff");
+  if (isabsolutepol(f, pp, a))
+  {
+    GEN z= Fp_factor_rel0(lift(lift(f)), pp, lift(a));
+    GEN t=(GEN)z[1],ex=(GEN)z[2];
+    unfp = gmodulsg(1,pp);
+    unfq = gmodulcp(gmul(unfp, polun[va]), a);
+    nbfact=lg(t);
+    tetpil=avma;
+    y=cgetg(3,t_MAT);
+    u=cgetg(nbfact,t_COL); y[1]=(long)u;
+    v=cgetg(nbfact,t_COL); y[2]=(long)v;
+    for (j=1; j<nbfact; j++)
+    {
+      u[j] = lmul((GEN)t[j],unfq);
+      v[j] = lstoi(ex[j]);
+    }
+    return gerepile(av,tetpil,y);
+  }
   p = is_bigint(pp)? 0: itos(pp);
   unfp=gmodulsg(1,pp); a=gmul(unfp,a);
   unfq=gmodulo(gmul(unfp,polun[va]), a); a = (GEN)unfq[1];

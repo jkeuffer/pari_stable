@@ -1109,7 +1109,7 @@ GEN Fp_factor_rel0(GEN P,GEN l, GEN Q)
 {
   ulong ltop=avma,tetpil;
   GEN V,ex,F,y,R;
-  long n,nbfact=0,nmax=degree(P);
+  long n,nbfact=0,nmax=lgef(P)-2;
   long i;
   F=factmod0(P,l);
   n=lg((GEN)F[1]);
@@ -1131,16 +1131,16 @@ GEN Fp_factor_rel0(GEN P,GEN l, GEN Q)
   tetpil=avma; y=cgetg(3,t_VEC);
   y[1]=lcopy(V);
   y[2]=lcopy(ex);
-  (void)sort_factor(y,cmpii);
+  (void)sort_factor(y,cmp_pol);
   return gerepile(ltop,tetpil,y);
 }
-GEN Fp_factor_rel(GEN P,GEN l, GEN Q)
+GEN Fp_factor_rel(GEN P, GEN l, GEN Q)
 {
   long tetpil,av=avma;
   long nbfact;
   long j;
   GEN y,u,v;
-  GEN z=Fp_factor_rel0(P,l,Q),t=(GEN)z[1],ex=(GEN)z[2];
+  GEN z=Fp_factor_rel0(P,l,Q),t = (GEN) z[1],ex = (GEN) z[2];
   nbfact=lg(t);
   tetpil=avma; y=cgetg(3,t_MAT);
   u=cgetg(nbfact,t_COL); y[1]=(long)u;
