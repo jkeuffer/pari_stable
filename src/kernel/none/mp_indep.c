@@ -54,10 +54,11 @@ pari_rand(void)
 #endif
 }
 
+/* assume N > 0 */
 GEN
 randomi(GEN N)
 {
-  long lx, i, t, n;
+  long lx, i, n;
   GEN x, xMSW, xd, Nd;
 
   lx = lgefint(N); x = cgeti(lx);
@@ -66,14 +67,18 @@ randomi(GEN N)
   for (i=2; i<lx; i++) { *xd = pari_rand(); xd = int_precW(xd); }
 
   Nd = int_MSW(N); n = *Nd;
-  xd = xMSW; t = lx-1;
-  for (i=2; i<t; i++)
-  {
-    if ((ulong)*xd < (ulong)*Nd) break;
-    xd = int_precW(xd);
-    Nd = int_precW(Nd);
-  }
-  if (i == t) n--;
+  xd = xMSW;
+  if (lx == 3) n--;
+  else
+    for (i=3; i<lx; i++)
+    {
+      xd = int_precW(xd);
+      Nd = int_precW(Nd);
+      if (*xd != *Nd) {
+        if ((ulong)*xd > (ulong)*Nd) n--;
+        break;
+      }
+    }
   /* MSW needs to be generated between 0 and n */
   if (n) n = (long)((((ulong)*xMSW) / (HIGHBIT*2.)) * (n + 1));
   *xMSW = (long)n;
