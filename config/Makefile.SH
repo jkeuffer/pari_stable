@@ -110,6 +110,10 @@ else
   exec="gp-sta gp-dyn"
 fi
 doexec="env \"LD_LIBRARY_PATH=.;\$\$LD_LIBRARY_PATH\" $src/test/dotest $sizeof_long"
+case "$sizeof_long" in
+  4) numbits=32;;
+  8) numbits=64;;
+esac
 if test -z "$emacs"; then
   install_emacs_files=
   pari_elc=
@@ -237,6 +241,11 @@ kerntest\$(_O): ../src/test/kerntest.c
 
 kerntest: $KERNOBJS mp\$(_O) kerntest\$(_O)
 	$(CC) \$(CFLAGS) \$(CPPFLAGS) -o \$@ $KERNOBJS kerntest\$(_O) \$(LIBS)
+
+test-kernel:: kerntest
+	@./kerntest > gp.out;\
+	diff -c gp.out $src/test/$numbits/kernel > kern.dif;\
+	if test -s kern.dif; then echo "KERNEL BUG"; else echo OK; fi
 EOT
 if test -n "$ranlib"; then
 cat >> $file << EOT

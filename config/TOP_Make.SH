@@ -52,7 +52,7 @@ dft target::
 	@echo "	ctags			Generate VI/VIM tags file in ./src"
 	@echo "	etags			Generate Emacs  tags file in ./src"
 
-gp all bench test-compat test-graphic install cleanobj cleantest install-bin install-doc install-lib-sta install-bin-sta dobench::
+gp all bench test-kernel test-compat test-graphic install cleanobj cleantest install-bin install-doc install-lib-sta install-bin-sta dobench::
 	cd $objdir; \$(MAKE) \$@
 
 gp.dbg::
