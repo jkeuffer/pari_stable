@@ -1374,7 +1374,7 @@ hnf_special(GEN x, long remove)
     for (i=1,j=1; j<co; j++)
       if (!gcmp0((GEN)x[j])) 
       {
-        x[i] = x[j];
+        x[i]  = x[j];
         x2[i] = x2[j]; i++;
       }
     setlg(x,i);
@@ -2462,13 +2462,12 @@ fix_rows(GEN A)
 }
 
 GEN
-hnflll_i(GEN A, GEN *ptB)
+hnflll_i(GEN A, GEN *ptB, int remove)
 {
   gpmem_t av = avma, lim = stack_lim(av,3);
   long m1 = 1, n1 = 1; /* alpha = m1/n1. Maybe 3/4 here ? */
   long row[2], do_swap,i,n,k;
   GEN z,B, **lambda, *D;
-  GEN *gptr[4];
 
   if (typ(A) != t_MAT) err(typeer,"hnflll");
   n = lg(A);
@@ -2505,27 +2504,33 @@ hnflll_i(GEN A, GEN *ptB)
         reduce2(A,B,k,i,row,lambda,D);
         if (low_stack(lim, stack_lim(av,3)))
         {
-          GEN a = (GEN)lambda, b = (GEN)(D-1); /* gcc -Wall */
-          gptr[0]=&A; gptr[1]=&a; gptr[2]=&b; gptr[3]=&B; 
+          GEN b = (GEN)(D-1);
           if (DEBUGMEM) err(warnmem,"hnflll (reducing), i = %ld",i);
-          gerepilemany(av,gptr,B? 4: 3); lambda = (GEN**)a; D = (GEN*)(b+1);
+          gerepileall(av, B? 4: 3, &A, (GEN*)&lambda, &b, &B);
+          D = (GEN*)(b+1);
         }
       }
       k++;
     }
     if (low_stack(lim, stack_lim(av,3)))
     {
-      GEN a = (GEN)lambda, b = (GEN)(D-1); /* gcc -Wall */
-      gptr[0]=&A; gptr[1]=&a; gptr[2]=&b; gptr[3]=&B; 
-      if (DEBUGMEM) err(warnmem,"hnflll, k = %ld / %ld",k,n);
-      gerepilemany(av,gptr,B? 4: 3); lambda = (GEN**)a; D = (GEN*)(b+1);
+      GEN b = (GEN)(D-1);
+      if (DEBUGMEM) err(warnmem,"hnflll, k = %ld / %ld",k,n-1);
+      gerepileall(av, B? 4: 3, &A, (GEN*)&lambda, &b, &B);
+      D = (GEN*)(b+1);
     }
   }
   /* handle trivial case: return negative diag coeff otherwise */
   if (n == 2) (void)findi_normalize((GEN)A[1], B,1,lambda);
   A = fix_rows(A);
-  gptr[0] = &A; gptr[1] = &B;
-  gerepilemany(av, gptr, B? 2: 1);
+  if (remove)
+  {
+    for (i = 1; i < n; i++)
+      if (findi((GEN)A[i])) break;
+    i--;
+    A += i; A[0] = evaltyp(t_MAT) | evallg(n-i);
+  }
+  gerepileall(av, B? 2: 1, &A, &B);
   if (B) *ptB = B;
   return A;
 }
@@ -2534,7 +2539,7 @@ GEN
 hnflll(GEN A)
 {
   GEN B, z = cgetg(3, t_VEC);
-  z[1] = (long)hnflll_i(A, &B);
+  z[1] = (long)hnflll_i(A, &B, 0);
   z[2] = (long)B; return z;
 }
 
