@@ -58,9 +58,7 @@ long   evallg(long x);
 long   evallgef(long x);
 long   evalvalp(long x);
 long   evalexpo(long x);
-#ifndef __M68K__
 long   expi(GEN x);
-#endif
 double gtodouble(GEN x);
 GEN    icopy(GEN x);
 GEN    icopy_av(GEN x, GEN y);
@@ -81,6 +79,8 @@ void   mulsii(long x, GEN y, GEN z);
 long   mulssmod(ulong a, ulong b, ulong c);
 void   mulssz(long x, long y, GEN z);
 GEN    new_chunk(long x);
+GEN    realun(long prec);
+GEN    realzero(long prec);
 void   resiiz(GEN x, GEN y, GEN z);
 GEN    resis(GEN x, long y);
 GEN    ressi(long x, GEN y);
@@ -234,6 +234,16 @@ utoi(ulong x)
   return y;
 }
 
+INLINE GEN stoi(long);
+INLINE GEN realzero(long);
+
+INLINE GEN
+stosmall(long x)
+{
+  if (labs(x) & SMALL_MASK) return stoi(x);
+  return (GEN) (1 | (x<<1));
+}
+
 #  ifndef __M68K__
 INLINE GEN
 stoi(long x)
@@ -258,16 +268,6 @@ itos(GEN x)
   p1=x[2]; if (p1 < 0) err(affer2);
   return (s>0) ? p1 : -(long)p1;
 }
-#endif
-
-INLINE GEN
-stosmall(long x)
-{
-  if (labs(x) & SMALL_MASK) return stoi(x);
-  return (GEN) (1 | (x<<1));
-}
-
-#  ifndef __M68K__
 
 INLINE void
 affii(GEN x, GEN y)
@@ -691,6 +691,21 @@ gtodouble(GEN x)
 
   if (typ(x)==t_REAL) return rtodbl(x);
   gaffect(x,(GEN)reel4); return rtodbl((GEN)reel4);
+}
+
+INLINE GEN
+realzero(long prec)
+{
+  GEN x=cgetr(3);
+  x[1]=evalexpo(-bit_accuracy(prec));
+  x[2]=0; return x;
+}
+
+INLINE GEN
+realun(long prec)
+{
+  GEN x=cgetr(prec); affsr(1,x);
+  return x;
 }
 
 INLINE long

@@ -5,9 +5,6 @@ case "$asmarch" in
   *) ASMARCH=$asmarch;;
 esac
 
-if test ! -s $src_dir/kernel/$ASMARCH/Makefile.SH; then
-  echo "No Makefile for asmarch $asmarch !" >&2; fi
-
 echo Extracting $file
 rm -f $file
 
@@ -50,8 +47,12 @@ done
 # We don't want to recompile everything when only changing a prototype
 hlist="$hlist paridecl"
 
-OBJS=''
-for f in $kernel $basemath $modules $language; do
+KERNOBJS=''
+for f in $kernel; do
+  KERNOBJS="$KERNOBJS $f\$(_O)"
+done
+OBJS=$KERNOBJS
+for f in $basemath $modules $language; do
   OBJS="$OBJS $f\$(_O)"
 done
 OBJSGP=''
@@ -230,6 +231,12 @@ lib-dyn: \$(LIBPARI_DYN)
 \$(LIBPARI_STA): \$(OBJS)
 	-\$(RM) \$@
 	\$(AR) r \$@ \$(OBJS)
+
+kerntest\$(_O): ../src/test/kerntest.c 
+	$(CC) -c \$(CFLAGS) -I$src/language \$(CPPFLAGS) -o \$@ \$<
+
+kerntest: $KERNOBJS mp\$(_O) kerntest\$(_O)
+	$(CC) \$(CFLAGS) \$(CPPFLAGS) -o \$@ $KERNOBJS kerntest\$(_O) \$(LIBS)
 EOT
 if test -n "$ranlib"; then
 cat >> $file << EOT
@@ -453,7 +460,9 @@ $install_emacs_files: $pari_elc
 EOT
 fi
 
-. $src_dir/kernel/$ASMARCH/Makefile.SH
+if test -s $src_dir/kernel/$ASMARCH/Makefile.SH; then
+  . $src_dir/kernel/$ASMARCH/Makefile.SH
+fi
 HUGELINE=
 for dir in basemath modules language gp graph gpdyn graphdyn; do
   eval list='$'$dir

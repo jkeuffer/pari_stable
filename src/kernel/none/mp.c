@@ -60,6 +60,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
   shift_right2((z2),(z1),(imin),(imax),(f),(sh),(_m));\
 }
 
+#define MASK(x) (((ulong)(x)) & (LGEFINTBITS | SIGNBITS))
+int
+egalii(GEN x, GEN y)
+{
+  long i;
+  if (MASK(x[1]) != MASK(y[1])) return 0;
+  i = lgefint(x)-1; while (i>1 && x[i]==y[i]) i--;
+  return i==1;
+}
+#undef MASK
 
 #ifdef INLINE
 INLINE

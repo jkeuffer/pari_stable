@@ -662,17 +662,6 @@ vecegal(GEN x, GEN y)
 }
 #undef MASK
 
-#define MASK(x) (((ulong)(x)) & (LGEFINTBITS | SIGNBITS))
-int
-egalii(GEN x, GEN y)
-{
-  long i;
-  if (MASK(x[1]) != MASK(y[1])) return 0;
-  i = lgefint(x)-1; while (i>1 && x[i]==y[i]) i--;
-  return i==1;
-}
-#undef MASK
-
 int
 gegal(GEN x, GEN y)
 {
@@ -1242,20 +1231,6 @@ gaffsg(long s, GEN x)
 /*         Affect the content of x to y, whenever possible         */
 /*                                                                 */
 /*******************************************************************/
-GEN
-realzero(long prec)
-{
-  GEN x=cgetr(3);
-  x[1]=evalexpo(-bit_accuracy(prec));
-  x[2]=0; return x;
-}
-GEN
-realun(long prec)
-{
-  GEN x=cgetr(prec); affsr(1,x);
-  return x;
-}
-
 void
 gaffect(GEN x, GEN y)
 {
