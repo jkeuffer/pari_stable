@@ -506,7 +506,7 @@ isprincipalell(GEN id)
   long i;
   GEN p1,p2,logdisc,be;
 
-  p1=isprincipalgen(bnfz,id); logdisc=(GEN)p1[1];
+  p1=isprincipalgenforce(bnfz,id); logdisc=(GEN)p1[1];
   be=basistoalg(bnfz,(GEN)p1[2]);
   for (i=rc+1; i<=gc; i++)
     be=gmul(be,gpui((GEN)vecalpha[i],modii(mulii((GEN)logdisc[i],(GEN)uu[i]),gell),0));
