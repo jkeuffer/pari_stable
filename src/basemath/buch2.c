@@ -2187,7 +2187,7 @@ bnfnewprec(GEN bnf, long prec)
   r1 = itos(gmael(nf,2,1));
   r2 = itos(gmael(nf,2,2));
   ru = r1 + r2;
-  pl1 = gexpo(funits);
+  pl1 = (ru == 1 && r1 == 0)? 0: gexpo(funits);
   pl2 = gexpo(ro);
   prec1 = prec;
   prec += ((ru + r2 - 1) * (pl1 + (ru + r2) * pl2)) >> TWOPOTBITS_IN_LONG;
