@@ -803,6 +803,7 @@ gadd(GEN x, GEN y)
           z = cgetg(ly,t_SER);
 	  if (l)
 	  {
+            if (l > lx-2) { avma = av; return gcopy(x); }
             for (i=2; i<=l+1; i++) z[i] = lcopy((GEN)x[i]);
             for (   ; i < ly; i++) z[i] = ladd((GEN)x[i],(GEN)y[i-l]);
 	    z[1] = x[1]; return z;

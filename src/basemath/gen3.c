@@ -1390,74 +1390,64 @@ gsubst(GEN x, long v, GEN y)
       return gerepileupto(av,z);
 
     case t_SER:
-      vx=varn(x);
-      if (vx > v)
-        return (ty==t_MAT)? gscalmat(x,ly-1): gcopy(x);
+      vx = varn(x);
+      if (vx > v) return (ty==t_MAT)? gscalmat(x,ly-1): gcopy(x);
       ex = valp(x);
       if (vx < v)
       {
         if (!signe(x)) return gcopy(x);
         /* a ameliorer */
         av=avma; setvalp(x,0); p1=gconvsp(x,0); setvalp(x,ex);
-        p2=gsubst(p1,v,y); tetpil=avma; z=tayl(p2,vx,lx-2);
-        if (ex)
-        {
-          p1=gpowgs(polx[vx],ex); tetpil=avma; z=gmul(z,p1);
-        }
-        return gerepile(av,tetpil,z);
+        p2=gsubst(p1,v,y); z = tayl(p2,vx,lx-2);
+        if (ex) z = gmul(z, gpowgs(polx[vx],ex));
+        return gerepileupto(av, z);
       }
       switch(ty) /* here vx == v */
       {
         case t_SER:
-	  ey=valp(y); vy=varn(y);
-	  if (ey<1) return zeroser(vy,ey*(ex+lx-2));
-	  l=(lx-2)*ey+2;
-	  if (ex) { if (l>ly) l=ly; }
+	  ey = valp(y);
+          vy = varn(y);
+	  if (ey < 1) return zeroser(vy,ey*(ex+lx-2));
+	  l = (lx-2)*ey+2;
+	  if (ex) { if (l>ly) l = ly; }
 	  else
 	  {
-	    if (gcmp0(y)) l=ey+2;
-	    else { if (l>ly) l=ey+ly; }
+	    if (gcmp0(y)) l = ey+2;
+	    else if (l>ly) l = ey+ly;
 	  }
-	  if (vy!=vx)
+	  if (vy != vx)
 	  {
-	    av=avma; z = zeroser(vy,0);
-	    for (i=lx-1; i>=2; i--)
-              z = gadd((GEN)x[i], gmul(y,z));
+	    av = avma; z = zeroser(vy,0);
+	    for (i=lx-1; i>=2; i--) z = gadd((GEN)x[i], gmul(y,z));
 	    if (ex) z = gmul(z, gpowgs(y,ex));
 	    return gerepileupto(av,z);
 	  }
 
-	  av=avma; limite=stack_lim(av,1);
-          t=cgetg(ly,t_SER);
+	  av = avma; limite=stack_lim(av,1);
+          t = cgetg(ly,t_SER);
           z = scalarser((GEN)x[2],varn(y),l-2);
-	  for (i=2; i<ly; i++) t[i]=y[i];
-	
+	  for (i=2; i<ly; i++) t[i] = y[i];
 	  for (i=3,jb=ey; jb<=l-2; i++,jb+=ey)
 	  {
 	    for (j=jb+2; j<l; j++)
-	    {
-	      p1=gmul((GEN)x[i],(GEN)t[j-jb]);
-	      z[j]=ladd((GEN)z[j],p1);
-	    }
+	      z[j] = ladd((GEN)z[j], gmul((GEN)x[i],(GEN)t[j-jb]));
 	    for (j=l-1-jb-ey; j>1; j--)
 	    {
-	      p1=gzero;
+	      p1 = gzero;
 	      for (k=2; k<j; k++)
-		p1=gadd(p1,gmul((GEN)t[j-k+2],(GEN)y[k]));
-	      p2=gmul((GEN)t[2],(GEN)y[j]);
-	      t[j]=ladd(p1,p2);
+		p1 = gadd(p1, gmul((GEN)t[j-k+2],(GEN)y[k]));
+	      t[j]=ladd(p1, gmul((GEN)t[2],(GEN)y[j]));
 	    }
             if (low_stack(limite, stack_lim(av,1)))
 	    {
-	      GEN *gptr[2];
 	      if(DEBUGMEM>1) err(warnmem,"gsubst");
-	      gptr[0]=&z; gptr[1]=&t; gerepilemany(av,gptr,2);
+	      gerepileall(av,2, &z,&t);
 	    }
 	  }
 	  if (!ex) return gerepilecopy(av,z);
 
-          if (l<ly) { setlg(y,l); p1=gpowgs(y,ex); setlg(y,ly); }
-          else p1=gpowgs(y,ex);
+          if (l < ly) { setlg(y,l); p1 = gpowgs(y,ex); setlg(y,ly); }
+          else p1 = gpowgs(y,ex);
           tetpil=avma; return gerepile(av,tetpil,gmul(z,p1));
 
         case t_POL: case t_RFRAC: case t_RFRACN:
@@ -2181,7 +2171,8 @@ deg1pol(GEN x1, GEN x0,long v)
 {
   GEN x = cgetg(4,t_POL);
   x[1] = evalsigne(1) | evalvarn(v) | evallgef(4);
-  x[2] = lcopy(x0); x[3] = lcopy(x1); return normalizepol_i(x,4);
+  x[2] = lcopy(x0);
+  x[3] = lcopy(x1); return normalizepol_i(x,4);
 }
 
 /* same, no copy */
@@ -2190,7 +2181,8 @@ deg1pol_i(GEN x1, GEN x0,long v)
 {
   GEN x = cgetg(4,t_POL);
   x[1] = evalsigne(1) | evalvarn(v) | evallgef(4);
-  x[2] = (long)x0; x[3] = (long)x1; return normalizepol_i(x,4);
+  x[2] = (long)x0;
+  x[3] = (long)x1; return normalizepol_i(x,4);
 }
 
 static GEN

@@ -627,8 +627,7 @@ gpow(GEN x, GEN n, long prec)
   av = avma;
   if (tx == t_POL || tx == t_RFRAC || tx == t_RFRACN)
   {
-    x = tayl(x,gvar(x),precdl);
-    tx = t_SER;
+    x = _toser(x); tx = t_SER;
   }
   if (tx == t_SER)
   {
@@ -1111,7 +1110,7 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
 {
   long i, lx, tx;
   pari_sp av;
-  GEN y,z;
+  GEN y, z;
   if (zetan) *zetan=gzero;
   if (typ(n)!=t_INT) err(talker,"second arg must be integer in gsqrtn");
   if (!signe(n)) err(talker,"1/0 exponent in gsqrtn");
@@ -1174,13 +1173,11 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
     if (zetan) *zetan = rootsof1complex(n,prec);
     return y;
 
-  case t_POL: case t_RFRAC: case t_RFRACN:
-    x = tayl(x, gvar(x), precdl); /* fall through */
-  case t_SER:   
-    return gerepileupto(av, ser_sqrtn(x, itos(n), prec));
   default:
-    err(typeer,"gsqrtn");
+    av = avma; if (!(y = _toser(x))) break;
+    return gerepileupto(av, ser_sqrtn(x, itos(n), prec));
   }
+  err(typeer,"gsqrtn");
   return NULL;/* not reached */
 }
 
