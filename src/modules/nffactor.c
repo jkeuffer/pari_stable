@@ -7,7 +7,6 @@
 /* $Id$ */
 #include "pari.h"
 
-int cmp_pol(GEN x, GEN y);
 GEN hensel_lift(GEN pol,GEN fk,GEN fkk,GEN p,long e);
 GEN hensel_lift_fact(GEN pol, GEN fact, GEN p, GEN pev, long e);
 GEN nf_get_T2(GEN base, GEN polr);

@@ -31,7 +31,7 @@ galoisconj(GEN nf)
 GEN
 galoisconj2pol(GEN x,long nbmax, long prec)
 {
-  long av=avma,tetpil,i,n,v,nbauto;
+  long av=avma,i,n,v,nbauto;
   GEN y,w,polr,p1,p2;
 
   n=lgef(x)-3; if (n<=0) return cgetg(1,t_VEC);
@@ -58,12 +58,12 @@ galoisconj2pol(GEN x,long nbmax, long prec)
     }
   }
   setlg(y,1+nbauto);
-  tetpil=avma; return gerepile(av,tetpil,gcopy(y));
+  return gerepileupto(av, gen_sort(y, 0, cmp_pol));
 }
 GEN
 galoisconj2(GEN nf,long nbmax,long prec)
 {
-  long av=avma,tetpil,i,j,n,r1,ru,nbauto;
+  long av=avma,i,j,n,r1,ru,nbauto;
   GEN x,y,w,polr,p1,p2;
   if (typ(nf)==t_POL) return galoisconj2pol(x,nbmax,prec);
   nf=checknf(nf); x=(GEN)nf[1];
@@ -97,7 +97,7 @@ galoisconj2(GEN nf,long nbmax,long prec)
     }
   }
   setlg(y,1+nbauto);
-  tetpil=avma; return gerepile(av,tetpil,gcopy(y));
+  return gerepileupto(av, gen_sort(y, 0, cmp_pol));
 }
 /*************************************************************************/
 /**									**/
@@ -2468,18 +2468,23 @@ galoisconj4(GEN T, GEN den, long flag)
     return stoi(ga.p);		/* Avoid computing the discriminant */
   }
   if (!den)
-    den = gabs(mycoredisc(discsr(T)), DEFAULTPREC);
+    den = absi(mycoredisc(discsr(T)));
   else
   {
     if (typ(den) != t_INT)
       err(talker, "Second arg. must be integer in galoisconj4");
-    den = gabs(den, DEFAULTPREC);
+    den = absi(den);
   }
   gb.l = stoi(ga.l);
   initborne(T, den, &gb, ga.ppp);
   if (DEBUGLEVEL >= 1)
     timer2();
-  L = gmul(gtrunc(rootpadic(T, gb.l, gb.valabs)), gmodulcp(gun, gb.ladicabs));
+  {
+    GEN f = rootpadic(T, gb.l, gb.valabs);
+    GEN _p = gmael(f,1,2);
+    L = gmul(gtrunc(f), gmodulcp(gun, gb.ladicabs));
+    gunclone(_p);
+  }
   if (DEBUGLEVEL >= 1)
     msgtimer("rootpadic()");
   M = matrixbase2(L, T, den);
@@ -2519,13 +2524,12 @@ galoisconj4(GEN T, GEN den, long flag)
     grp[6]=(long)res;
     return gerepile(ltop, lbot, grp);
   }
-  lbot = avma;
-  aut = cgetg(n + 1, t_COL);
+  aut = cgetg(n + 1, t_VEC);
   for (i = 1; i <= n; i++)
     aut[i] = (long) permtopol((GEN) res[i], L2, M2, den, varn(T));
   if (DEBUGLEVEL >= 1)
     msgtimer("Calcul polynomes");
-  return gerepile(ltop, lbot, aut);
+  return gerepileupto(ltop, gen_sort(aut, 0, cmp_pol));
 }
 /* Calcule le nombre d'automorphisme de T avec forte probabilité*/
 /* pdepart premier nombre premier a tester*/
