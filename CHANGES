@@ -71,6 +71,7 @@ BA 30- cotan(x) wasn't accepted
    33- trap + ^C + next would interrupt \r or read()
 IZ 34- external prettyprinter incompatible with colors
    35- idealval used much larger numbers than necessary
+   36- sqrtint very inefficient (computed with full precision all along)
 
   Changed
 BA  1- more efficient quadratic Hensel lift
@@ -87,7 +88,6 @@ BA  3- more efficient factorff when pol belongs to Fp[X] (based on Fp_isom)
    10- restore \o2 to previous meaning, use \o3 for alternate prettyprinter
    11- normalized output of idealfactor (sort factors)
    12- slightly better TeXization (\left / \right)
-   13- use all 32 initial bits for 1st approximation in sqrtint
 
   Added
     1- new library function zerovec
