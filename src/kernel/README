@@ -8,40 +8,32 @@ The list of
 
 *******************************************************************
 The "level 0 kernel" symbols are :
-    overflow hiremainder
-    addll addllx subll subllx shiftl shiftlr mulll addmul
-    divll bfffo (& tabshi)
+  overflow hiremainder
+  addll addllx subll subllx shiftl shiftlr mulll addmul
+  divll bfffo (+ tabshi)
 For a generic architecture (no assembler kernel), they are defined in
 "none/level0.c" and, if inlining is possible (C++ or gcc), with
-"none/level0.h". Otherwise, in $asmarch/level0.s (except for 680x0: in
-m68k/mp.s) or $asmarch/level0.h respectively. The corresponding object file
-is "kernel.o".
-
-NB: for sparcv8, "divll" has to use hiremainder, thus differs if the other
-operations are inlined (and hiremainder stored into a specific register).
+"none/level0.h". Otherwise, in $asmarch/level0.s or $asmarch/level0.h
+respectively. The corresponding object file is "kernel.o".
 
 *******************************************************************
 The "level 1 kernel" symbols are many. Some of them can be inlined, the
 others not.
 The "inline level 1" symbols are :
-    absi absr addsii addssz affii affsi affsr cgetg cgeti cgetr
-    cmpir cmpsr divise divisii divisz divrrz divsiz divss divssz
-    dvmdiiz dvmdis dvmdisz dvmdsi dvmdsiz dvmdss dvmdssz expi
-    icopy itos modis mpadd mpaff mpcmp mpdiv mpdivis mpmul mpsub
-    mulsii mulssz negi negr rcopy resiiz resis ressi shiftr stoi
-    subii subir subri subrr subsi subsr vali
- (the following ones are not in mp.s)
-    gtodouble smodis addssmod subssmod mulssmod divssmod
+  addsii addssmod adduumod addssz affii affsi affui affsr cgetg cgeti cgetr
+  cmpir cmpsr divise divisii divisz divrrz divsiz divss divssmod divssz
+  dvmdiiz dvmdis dvmdisz dvmdsi dvmdsiz dvmdss dvmdssz evallg evallgef
+  evalvalp evalexpo expi gtodouble icopy icopy_av itor itos itou modis mpabs
+  mpadd mpaff mpcmp mpcopy mpdiv mpdivis mpdivisis mpmul mpneg mpsub mulsii
+  mulssmod mulssz new_chunk random_bits realun realzero realzero_bit resiiz
+  resis ressi rtor shiftr smodis stor stoi subii subir subri subrr subsi subsr
+  subssmod umodui umuluu utoi vali
+
 The "not-inline level 1" symbols are :
-    mpnegz mpabsz affir affrr shifti mptrunc mpent cmpsi cmpii cmprr
-    addss addsi addii addsr addir addrr mulss smulss mulsi mulsr mulrr
-    mulir convi confrac vals modss resss divsi modsi modss resss divsi
-    modsi divis divir divri diviiz mpdivz divsr modii modiiz divrs
-    dvmdii divrr
-    mulii mymulii
- (the following ones are not in mp.s)
-    truedvmdii invrev diviirev diviiexactfullrev diviiexact2 smodsi
-    absi_equal absi_cmp absr_cmp muliispec addiispec quickmulii
-    sqrispec quicksqri sqri karamulrr1 karamulrr2 karamulrr karamulir
-    dbltor rtodbl
-    cgiv
+  absi_cmp absi_equal absr_cmp addii addir addrr addsi addsr addss affir
+  affrr bezout cbezout cgiv cmpii cmprr cmpsi dbltor diviiexact diviuexact
+  diviiz divir divis divis_rem diviu_rem divri divrr divrs divsi divsi_rem
+  divsr dvmdii egalii gcdii invmod ishiftr isqrti modii modiiz modiu modsi
+  modss modui mpdivz mpent mptrunc mulii mulir mulrr mulsi mulsr mulss mului
+  muluu pari_rand31 pari_rand randomi ratlift resmod2n resss rtodbl shifti
+  shift_r shifti3 smodsi sqri truedvmdii umodiu vals
