@@ -104,6 +104,7 @@ LGr39- very rare SEGV in idealprimedec() [ typo in init_norm(), using FpX_red
    45- issquare(5, &n) --> SEGV
    46- factor(x in Q[i] \ Z[i]) --> rubbish [ typo in factor_gauss() ]
    47- ellrootno & elllseries didn't check their arguments
+   48- rnfisnorminit(non-monic polynomial) --> SEGV
 
   Added
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu

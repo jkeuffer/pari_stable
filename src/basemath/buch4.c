@@ -674,6 +674,7 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
   if (!nf) nf = checknf(bnf);
 
   relpol = get_bnfpol(relpol, &bnfabs, &nfabs);
+  if (!gcmp1(leading_term(relpol))) err(impl,"non monic relative equation");
   drel = degpol(relpol);
   if (varncmp(varn(relpol), vbas) >= 0)
     err(talker,"main variable must be of higher priority in rnfisnorminit");
