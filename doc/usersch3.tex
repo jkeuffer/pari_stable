@@ -2418,7 +2418,8 @@ $\teb{sigma}(x,k)$), where $k$ is a C long integer.
 \subsecidx{sqrtint}$(x)$: integer square root of $x$, which must be a
 non-negative integer. The result is non-negative and rounded towards zero.
 
-\syn{racine}{x}.
+\syn{sqrti}{x}. Also available is \tet{sqrtremi}$(x,\&r)$ which returns
+$s$ such that $s^2 = x+r$, with $0 \leq r \leq 2s$.
 
 \subsecidx{zncoppersmith}$(P, N, X, \{B=N\})$: finds all integers $x_0$ with
 $|x0| \leq X$ such that
