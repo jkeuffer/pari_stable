@@ -54,6 +54,7 @@ GEN    divss(long x, long y);
 GEN    divss_rem(long x, long y, long *rem);
 void   divssz(long x, long y, GEN z);
 ulong  Fl_add(ulong a, ulong b, ulong p);
+long   Fl_center(ulong u, ulong p, ulong ps2);
 ulong  Fl_div(ulong a, ulong b, ulong p);
 ulong  Fl_mul(ulong a, ulong b, ulong p);
 ulong  Fl_sqr(ulong a, ulong p);
@@ -818,6 +819,10 @@ Fl_sub(ulong a, ulong b, ulong p)
   ulong res = a - b;
   return (res > a) ? res + p: res;
 }
+
+/* centerlift(u mod p) */
+INLINE long
+Fl_center(ulong u, ulong p, ulong ps2) { return (long) (u > ps2)? u - p: u; }
 
 INLINE ulong
 Fl_mul(ulong a, ulong b, ulong p)

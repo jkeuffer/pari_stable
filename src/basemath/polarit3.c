@@ -2156,13 +2156,6 @@ u_chinese_coprime(GEN a, ulong b, GEN q, ulong p, ulong qinv, GEN pq)
   avma = av; return addii(a, ax); /* in ]-q, pq[ assuming a in -]-q,q[ */
 }
 
-/* centerlift(u mod p) */
-long
-u_center(ulong u, ulong p, ulong ps2)
-{
-  return (long) (u > ps2)? u - p: u;
-}
-
 GEN
 ZX_init_CRT(GEN Hp, ulong p, long v)
 {
@@ -2170,7 +2163,7 @@ ZX_init_CRT(GEN Hp, ulong p, long v)
   GEN H = cgetg(l, t_POL);
   H[1] = evalsigne(1) | evalvarn(v);
   for (i=2; i<l; i++)
-    H[i] = lstoi(u_center(Hp[i], p, lim));
+    H[i] = lstoi(Fl_center(Hp[i], p, lim));
   return H;
 }
 
@@ -2185,7 +2178,7 @@ ZM_init_CRT(GEN Hp, ulong p)
     cp = (GEN)Hp[j];
     c = cgetg(m, t_COL);
     H[j] = (long)c;
-    for (i=1; i<l; i++) c[i] = lstoi(u_center(cp[i],p, lim));
+    for (i=1; i<l; i++) c[i] = lstoi(Fl_center(cp[i],p, lim));
   }   
   return H;
 }
@@ -3096,7 +3089,7 @@ ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound)
     if (!H)
     {
       stable = 0; q = utoi(p);
-      H = stoi(u_center(Hp, p, p>>1));
+      H = stoi(Fl_center(Hp, p, p>>1));
     }
     else /* could make it probabilistic ??? [e.g if stable twice, etc] */
     {

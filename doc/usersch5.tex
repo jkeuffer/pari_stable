@@ -524,6 +524,10 @@ positive representative of $x + y$ modulo $m$.
 \fun{ulong}{Fl_sub}{ulong x, ulong y, ulong m} returns the smallest
 positive representative of $x - y$ modulo $m$.
 
+\fun{long}{Fl_center}{ulong x, ulong m, ulong mo2} returns the representative
+in $]-m/2,m/2]$ of $x$ modulo $m$. Assume $0 \leq x < m$ and
+$\kbd{mo2} = m \kbd{>>} 1$.
+
 \fun{ulong}{Fl_mul}{ulong x, ulong y, ulong m} returns the smallest positive
 representative of $x y$ modulo $m$.
 

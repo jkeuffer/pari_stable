@@ -34,7 +34,6 @@ extern GEN to_polmod(GEN x, GEN mod);
 extern GEN vconcat(GEN Q1, GEN Q2);
 extern int approx_0(GEN x, GEN y);
 extern long FpX_split_Berlekamp(GEN *t, GEN pp);
-extern long u_center(ulong u, ulong p, ulong ps2);
 extern void gerepilecoeffs2(pari_sp av, GEN x, int n, GEN y, int o);
 
 GEN matratlift(GEN M, GEN mod, GEN amax, GEN bmax, GEN denom);
@@ -188,7 +187,7 @@ s_centermod(long x, ulong pp, ulong pps2)
 {
   long y = x % (long)pp;
   if (y < 0) y += pp;
-  return u_center(y, pp,pps2);
+  return Fl_center(y, pp,pps2);
 }
 
 /* for internal use */
