@@ -403,6 +403,23 @@ gcmp(GEN x, GEN y)
   av=avma; y=gneg_i(y); f=gsigne(gadd(x,y)); avma=av; return f;
 }
 
+static int
+lexcmp_scal_vec(GEN x, GEN y)
+{
+  long fl;
+  if (lg(y)==1) return 1;
+  fl = lexcmp(x,(GEN)y[1]);
+  if (fl) return fl;
+  return -1;
+}
+
+static int
+lexcmp_vec_mat(GEN x, GEN y)
+{
+  if (lg(x)==1) return -1;
+  return lexcmp_scal_vec(x,y);
+}
+
 /* as gcmp for vector/matrices, using lexicographic ordering on components */
 int
 lexcmp(GEN x, GEN y)
@@ -410,52 +427,33 @@ lexcmp(GEN x, GEN y)
   const long tx=typ(x), ty=typ(y);
   long lx,ly,l,fl,i;
 
-  ly=lg(y);
   if (!is_matvec_t(tx))
   {
     if (!is_matvec_t(ty)) return gcmp(x,y);
-    if (ly==1) return 1;
-    fl = lexcmp(x,(GEN)y[1]);
-    if (fl) return fl;
-    return (ly>2)? -1:0;
+    return  lexcmp_scal_vec(x,y);
   }
-
-  lx=lg(x);
   if (!is_matvec_t(ty))
-  {
-    if (lx==1) return -1;
-    fl = lexcmp(y,(GEN)x[1]);
-    if (fl) return -fl;
-    return (lx>2)? 1:0;
-  }
+    return -lexcmp_scal_vec(y,x);
 
   /* x and y are matvec_t */
-  if (ly==1) return (lx==1)?0:1;
-  if (lx==1) return -1;
   if (ty==t_MAT)
   {
     if (tx != t_MAT)
-    {
-      fl = lexcmp(x,(GEN)y[1]);
-      if (fl) return fl;
-      return (ly>2)?-1:0;
-    }
+      return lexcmp_vec_mat(x,y);
   }
   else if (tx==t_MAT)
-  {
-    fl = lexcmp(y,(GEN)x[1]);
-    if (fl) return -fl;
-    return (ly>2)?1:0;
-  }
-
+    return -lexcmp_vec_mat(y,x);
+   
   /* tx = ty = t_MAT, or x and y are both vect_t */
-  l=min(lx,ly);
+  lx = lg(x);
+  ly = lg(y); l = min(lx,ly);
   for (i=1; i<l; i++)
   {
     fl = lexcmp((GEN)x[i],(GEN)y[i]);
     if (fl) return fl;
   }
-  return (ly != lx)? -1 : 0;
+  if (lx == ly) return 0;
+  return (lx < ly)? -1 : 1;
 }
 
 /*****************************************************************/
