@@ -226,7 +226,7 @@ u_LucasMod(ulong n, ulong P, ulong N)
   j = BITS_IN_LONG - j;
   for (; j; m<<=1,j--)
   { /* v = v_k, v1 = v_{k+1} */
-    if ((long)m < 0)
+    if (((long)m) < 0)
     { /* set v = v_{2k+1}, v1 = v_{2k+2} */
       v = adduumod(mulssmod(v,v1,N), mP, N);
       v1= adduumod(mulssmod(v1,v1,N),m2, N);
@@ -255,7 +255,7 @@ u_IsLucasPsP(ulong n, ulong P)
   for (i=1; i<v; i++)
   {
     if (!z) return 1;
-    z = addssmod(mulssmod(z,z, n), m2, n);
+    z = adduumod(mulssmod(z,z, n), m2, n);
     if (z == 2) return 0;
   }
   return 0;

@@ -771,7 +771,7 @@ INLINE ulong
 adduumod(ulong a, ulong b, ulong p)
 {
   ulong res = a + b;
-  return (res >= p) ? res - p : res;
+  return (res >= p || res < a) ? res - p : res;
 }
 
 INLINE long
