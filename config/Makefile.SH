@@ -302,7 +302,7 @@ all: $exec lib-sta
 lib-sta: \$(LIBPARI_STA)
 lib-dyn: \$(LIBPARI_DYN)
 
-\$(LIBPARI_STA): $src/funclist \$(OBJS)
+\$(LIBPARI_STA): $add_funclist \$(OBJS)
 	-\$(RM) \$@
 	\$(AR) r \$@ \$(OBJS)
 EOT
@@ -338,7 +338,7 @@ tune-dyn: tune.o lib-dyn
 tune-sta: tune.o lib-sta
 	\$(LD) \$(LDFLAGS) -o \$@ \$< \$(GMPOBJS) ./\$(LIBPARI_STA) \$(LIBS)
 
-gp-sta: $src/funclist \$(OBJS) \$(OBJSGP) \$(GNUPLOT_OBJS)
+gp-sta: $add_funclist \$(OBJS) \$(OBJSGP) \$(GNUPLOT_OBJS)
 	\$(RM) \$@
 	\$(LD) -o \$@ \$(LDFLAGS) \$(OBJS) \$(OBJSGP) \$(GNUPLOT_OBJS) \$(RUNPTH) \$(RLLIBS) \$(PLOTLIBS) \$(LIBS)
 
@@ -511,11 +511,11 @@ EOT
   fi
   cat >> $file << EOT
 
-gp-dyn: $src/funclist \$(OBJSGP) \$(LIBPARI_DYN) \$(GNUPLOT_OBJS) \$(EXPORT_LIB)
+gp-dyn: $add_funclist \$(OBJSGP) \$(LIBPARI_DYN) \$(GNUPLOT_OBJS) \$(EXPORT_LIB)
 	\$(RM) \$@
 	\$(LD) -o \$@ \$(LDFLAGS) \$(OBJSGP) \$(GNUPLOT_OBJS) \$(RUNPTH) \$(TOPLDDYN) \$(LDDYN) \$(PLOTLIBS) \$(LIBS)
 
-\$(LIBPARI_DYN): $src/funclist \$(OBJS) \$(EXPORT_FILE)
+\$(LIBPARI_DYN): $add_funclist \$(OBJS) \$(EXPORT_FILE)
 	-\$(RM) \$(LIBPARI_DYN)
 	\$(DLLD_IGNORE)\$(DLLD) -o \$@ \$(DLLDFLAGS) \$(OBJS) \$(EXTRADLLDFLAGS) \$(EXPORT_FILE)
 	-if test "\$(LIBPARI_SONAME)" != "\$(LIBPARI_SO)"; then \
@@ -559,7 +559,7 @@ $src/funclist::
 	@sh $cfg/mv-if-diff $src/funclist.tmp $src/funclist
 	@cd $desc && \$(MAKE) 
 
-$src/gp/gp_init.h $src/gp/highlvl.h $src/language/init.h $src/language/members.h: $src/funclist
+$src/gp/gp_init.h $src/gp/highlvl.h $src/language/init.h $src/language/members.h: $add_funclist
 EOT
 
 if test -s $src_dir/kernel/$kernlvl0/MakeLVL0.SH; then

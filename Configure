@@ -57,6 +57,7 @@ if test -z "$zcat" -a -n "$gzip"; then zcat="$gzip -dc"; fi
 . ./get_as   # AS, ASFLAGS, KERNELCPPFLAGS, gnuas
 . ./get_ld   # $_ld_list
 . ./get_dlld # $_dlld_list, fix libpari_base
+. ./get_perl # $_perl_list
 ####################### CONFIGURE - LIBC ####################################
 . ./get_double_format # doubleformat, sizeof_long, update pretty
 . ./get_libc # $_has_list, update LIBS
@@ -143,6 +144,7 @@ for variable in\
   X11 X11_INC X11_LIBS which_graphic_lib graphic_lib_dll gnuplot gnuplot_libs\
   FLTKDIR FLTK_LIBS\
   $_install_list\
+  $_perl_list\
   $_cc_list\
   $_ld_list\
   $_dlld_list\
