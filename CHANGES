@@ -82,6 +82,9 @@ XR 48- rare bug in bnrL1 (wrong value!)
    51- removed all dangerous occurences of constpi/consteuler (cf 41-)
    52- typo in det() [forgot to divide by a pivot]
    53- divide by 0 error in lllgramintern (precision problem)
+   54- suminf(k=1,suminf(j=1,.067^(k+j)/k^4/(k+j))) ran forever
+   55- factor(2*x + 2) --> [2*x + 2, 1] (instead of stripping the content)
+   56- (ultra-rare) stack corruption in mpqs_solve_linear_system()
 
   Changed
 XR  1- modulus choice in bnrstark
@@ -105,6 +108,7 @@ GN 16- minor tuning in pollardbrent() for huge integers (call ECM sooner)
        Moved win32/* --> Odos
 OR 18- new version of pari.el
 XR 19- new modular round 4 implementation 
+BA 20- improved algorithms in galconj.c
 
   Added
     1- an optional argument to next()
