@@ -291,7 +291,7 @@ _powpolmodsimple(Cache *C, Red *R, GEN jac)
   R->red = &_redsimple;
   for (j=1; j<ph; j++)
     w[j] = (long)_powpolmod(C, centermodii((GEN)w[j], R->N, R->N2), R, &sqrmod);
-  w = FpV_red( gmul(C->matinvvite, w), R->N );
+  w = centermod_i( gmul(C->matinvvite, w), R->N, R->N2 );
   return vec_to_pol(w, 0);
 }
 
