@@ -1319,9 +1319,9 @@ when $x$ is real, otherwise identical to \kbd{log}.
 \syn{glog}{x,\var{prec}} or $\teb{glogagm}(x,\var{prec})$.
 
 \subsecidx{lngamma}$(x)$: principal branch of the logarithm of the gamma
-function of $x$. Can have much larger arguments than \kbd{gamma} itself.
-In the present version \vers, the $p$-adic \kbd{lngamma} function is not
-implemented.
+function of $x$. This function is analytic on the complex plane with
+non-positive integers removed. Can have much larger arguments than \kbd{gamma}
+itself. The $p$-adic \kbd{lngamma} function is not implemented.
 
 \syn{glngamma}{x,\var{prec}}.
 
@@ -1337,8 +1337,8 @@ is then better to use the functional equation linking the value at $x$ to the
 value at $1/x$, which takes a trivial form for the variant below. Power
 series, polynomial, rational and vector/matrix arguments are allowed.
 
-For the variants to follow we need a notation: let $\Re_m$
-denotes $\Re$ or $\Im$ depending whether $m$ is odd or even.
+For the variants to follow we need a notation: let $\Re_m$ denotes $\Re$ or
+$\Im$ depending whether $m$ is odd or even.
 
 If $\fl=1$: modified $m^\text{th}$ polylogarithm of $x$, called
 $\tilde D_m(x)$ in Zagier, defined for $|x|\le1$ by

@@ -109,6 +109,7 @@ IS 25- config/get_head would not work only if one invoked $PWD/Configure
    34- polredabs(x^4-x^3-31*x^2-12*x+144) was not reduced [ typo in subfield
        detection algorithm ]
    35- nffactor(nfinit(a^2+1),x^2+[]) --> SEGV
+GH 36- lngamma was not even continuous : its argument was reduced mod 2Pi
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.
