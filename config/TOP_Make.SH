@@ -2,23 +2,14 @@ file=Makefile
 echo "Extracting $file"
 rm -f $file
 
-file=Makefile.$objdir
-rm -f $file
-
 case "$status" in
   alpha|beta|kernel) suf_status=".$status";;
   *) suf_status=;;
 esac
 
-tar="/bin/tar"
 filename=pari-$version.$patch$suf_status
 tarfile=$filename.tar
 ztarfile=$filename.tgz
-case "`$tar 2>&1`" in
-  *"--help"*) inc="-T";; # GNU
-           *) inc="-I";; # Solaris
-esac
-tarinc="$inc $config_dir/MANIFEST"
 
 dbgobjdir=`echo "$objdir" | sed -e 's/\.[dbgprf]*$//'`
 dbgobjdir=$dbgobjdir.dbg
@@ -54,10 +45,13 @@ dft target::
 	@echo "	tune	                Generate tuning utility"
 
 gp all bench test-kernel test-compat test-graphic install cleanobj cleantest install-bin install-doc install-lib-sta install-bin-sta dobench tune::
-	cd $objdir; \$(MAKE) \$@
+	cd \`$config_dir/objdir\`; \$(MAKE) \$@
 
-gp.dbg::
-	cd $dbgobjdir; \$(MAKE) gp
+dbg gp.dbg::
+	cd \`$config_dir/objdir\`.dbg; \$(MAKE) gp
+
+prf gp.prf::
+	cd \`$config_dir/objdir\`.prf; \$(MAKE) gp
 
 doc docps docpdf gpman cleandoc::
 	cd doc; \$(MAKE) \$@
@@ -75,7 +69,7 @@ setdir::
 
 tar:
 	\$(RM) $ztarfile
-	$tar cf $tarfile $tarinc
+	tar cf $tarfile \`$config_dir/tar_distrib\` $config_dir/MANIFEST
 
 distrib: tar setdir
 	gzip $tarfile
@@ -91,9 +85,4 @@ etags:
 ctags:
 	src/make_vi_tags $TOP/src
 
-benchbx: $ztarfile
-	rcp $ztarfile pari@$bxmachine:PARINEW
-	rsh $bxmachine -l pari "cd PARINEW; $bxgzip -dc $ztarfile|tar xf -; ./makeall $filename"
 EOT
-
-$ln_s $file Makefile

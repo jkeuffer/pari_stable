@@ -52,9 +52,11 @@ config/locatelib
 config/locatesymbol
 config/look
 config/myread
+config/objdir
 config/paricfg.h.SH
 config/paricfgDOS.h.SH
 config/rl_version.c
+config/tar_distrib
 config/version
 doc/appa.tex
 doc/appb.tex
