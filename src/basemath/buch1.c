@@ -751,7 +751,7 @@ static GEN
 qfr3_pf(GEN D, long p)
 {
   GEN y = primeform_u(D,p);
-  return qfr3_red(y, Disc, isqrtD);
+  return qfr3_canon(qfr3_red(y, Disc, isqrtD));
 }
 
 #define qfi_pf primeform_u
