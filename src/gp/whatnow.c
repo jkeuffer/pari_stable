@@ -648,7 +648,7 @@ whatnow(char *s, int flag)
   if (!ep) err(bugparier,"whatnow");
   pariputs("New syntax: "); term_color(c_ERR);
   pariputsf("%s%s ===> %s%s\n\n",s,wp.oldarg,wp.name,wp.newarg);
-  term_color(c_NONE);
+  term_color(c_HELP);
   print_text(ep->help); pariputc('\n');
-  return 1;
+  term_color(c_NONE); return 1;
 }
