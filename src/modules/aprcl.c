@@ -1047,7 +1047,7 @@ aprcl(GEN N)
   calcjac(N, et);
   if (dotime)
   {
-    sgtjac = (void)timer2();
+    sgtjac = timer2();
     fprintferr("Jacobi sums and tables computed\nq-values: ");
   }
   sgtaut = 0;

@@ -31,7 +31,6 @@ checkell(GEN e)
 {
   long lx=lg(e);
   if (typ(e)!=t_VEC || lx<14) err(elliper1);
-  return lx;
 }
 
 void
