@@ -87,6 +87,9 @@ void   print_prefixed_text(char *s, char *prefix, char *str);
 GEN    gp_history(gp_hist *H, long p, char *old, char *entry);
 GEN    set_hist_entry(gp_hist *H, GEN x);
 
+char*  get_analyseur(void);
+void   set_analyseur(char *s);
+
 void term_color(int c);
 char *term_get_color(int c);
 void hit_return(void);

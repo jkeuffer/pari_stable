@@ -50,8 +50,6 @@ ENDEXTERN
 
 extern void  err_clean(void);
 extern void  gp_output(GEN z, gp_data *G);
-extern char* _analyseur(void);
-extern void  _set_analyseur(char *s);
 extern void  errcontext(char *msg, char *s, char *entry);
 extern void  err_recover(long numerr);
 extern void  free_graph(void);
@@ -1845,10 +1843,10 @@ escape0(char *tch)
 static void
 escape(char *tch)
 {
-  char *old = _analyseur();
-  _set_analyseur(tch); /* for error messages */
+  char *old = get_analyseur();
+  set_analyseur(tch); /* for error messages */
   escape0(tch);
-  _set_analyseur(old);
+  set_analyseur(old);
 }
 /********************************************************************/
 /*                                                                  */
@@ -2534,7 +2532,7 @@ static int
 silent(void)
 {
   if (gpsilent) return 1;
-  { char c = _analyseur()[1]; return separe(c); }
+  { char c = get_analyseur()[1]; return separe(c); }
 }
 
 GEN
@@ -2604,7 +2602,7 @@ break_loop(long numerr)
   {
     Buffer *oldb = (Buffer*)bufstack->prev->value;
     msg = "Starting break loop (type 'break' to go back to GP)";
-    old = s = _analyseur();
+    old = s = get_analyseur();
     t = oldb->buf;
     /* something fishy, probably a ^C, or we overran analyseur */
     if (!s || !s[-1] || s < t || s >= t + oldb->len) s = NULL;
@@ -2640,7 +2638,7 @@ break_loop(long numerr)
     /* break loop initiated by ^C. Empty input --> continue computation */
     if (numerr == siginter && *(b->buf) == 0) { handle_C_C = go_on = 1; break; }
   }
-  if (old && !s) _set_analyseur(old);
+  if (old && !s) set_analyseur(old);
   b = NULL; infile = oldinfile;
   pop_buffer(); return go_on;
 }

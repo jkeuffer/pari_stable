@@ -962,6 +962,32 @@ err_catch(long errnum, jmp_buf env, void *data)
   return (void*)v;
 }
 
+/* kill last handler for error n */
+static void
+err_leave_default(long n)
+{
+  stack *s = err_catch_stack, *lasts = NULL;
+
+  if (n < 0) n = noer;
+  if (!s || !err_catch_array[n]) return;
+  for ( ;s ; lasts = s, s = s->prev)
+  {
+    cell *c = (cell*)s->value;
+    if (c->flag == n)
+    { /* kill */
+      stack *v = s->prev;
+      free((void*)s); s = v;
+      if (lasts) lasts->prev = s;
+      break;
+    }
+  }
+  if (!lasts)
+  {
+    err_catch_stack = s;
+    if (!s) reset_traps(0);
+  }
+}
+
 /* reset traps younger than V (included) */
 void
 err_leave(void **V)
@@ -994,34 +1020,6 @@ err_seek(long n)
   }
   if (!t) reset_traps(1);
   return t;
-}
-
-/* kill last handler for error n */
-void
-err_leave_default(long n)
-{
-  stack *s = err_catch_stack, *lasts = NULL;
-  cell *c;
-
-  if (n < 0) n = noer;
-  if (!s || !err_catch_array[n]) return;
-  for (;s; s = s->prev)
-  {
-    c = (cell*)s->value;
-    if (c->flag == n)
-    { /* kill */
-      stack *v = s->prev;
-      free((void*)s); s = v;
-      if (lasts) lasts->prev = s;
-      break;
-    }
-    else lasts = s;
-  }
-  if (!lasts)
-  {
-    err_catch_stack = s;
-    if (!s) reset_traps(0);
-  }
 }
 
 /* untrapped error: remove all traps depending from a longjmp */
@@ -1213,6 +1211,63 @@ err(long numerr, ...)
   if (ret || (trapped && default_exception_handler &&
               default_exception_handler(numerr))) { flusherr(); return; }
   err_recover(numerr);
+}
+
+/* Try f (trapping error e), recover using r (break_loop, if NULL) */
+GEN
+trap0(char *e, char *r, char *f)
+{
+  VOLATILE long numerr = -1;
+  VOLATILE GEN x = gnil;
+  char *F;
+       if (!strcmp(e,"errpile")) numerr = errpile;
+  else if (!strcmp(e,"typeer")) numerr = typeer;
+  else if (!strcmp(e,"gdiver2")) numerr = gdiver2;
+  else if (!strcmp(e,"invmoder")) numerr = invmoder;
+  else if (!strcmp(e,"accurer")) numerr = accurer;
+  else if (!strcmp(e,"archer")) numerr = archer;
+  else if (*e) err(impl,"this trap keyword");
+  /* TO BE CONTINUED */
+
+  if (f && r)
+  { /* explicit recovery text */
+    VOLATILE gpmem_t av = avma;
+    char *a = get_analyseur();
+    void *catcherr;
+    jmp_buf env;
+
+    if (setjmp(env))
+    {
+      avma = av;
+      err_leave(&catcherr);
+      x = lisseq(r);
+    }
+    else
+    {
+      catcherr = err_catch(numerr, env, NULL);
+      x = lisseq(f);
+      err_leave(&catcherr);
+    }
+    set_analyseur(a);
+    return x;
+  }
+
+  F = f? f: r; /* define a default handler */
+ /* default will execute F (or start a break loop), then jump to
+  * environnement */
+  if (F)
+  {
+    if (!*F || (*F == '"' && F[1] == '"')) /* unset previous handler */
+    {/* TODO: find a better interface
+      * TODO: no leaked handler from the library should have survived
+      */
+      err_leave_default(numerr);
+      return x;
+    }
+    F = pari_strdup(F);
+  }
+  (void)err_catch(numerr, NULL, F);
+  return x;
 }
 
 /*******************************************************************/

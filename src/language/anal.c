@@ -53,7 +53,6 @@ static entree *installep(void *f,char *name,int l,int v,int add,entree **table);
 static entree *skipentry(void);
 
 extern void killbloc0(GEN x, int inspect);
-extern void err_leave_default(long n);
 extern int term_width(void);
 extern GEN addsmulsi(long a, long b, GEN Y);
 
@@ -362,13 +361,13 @@ parse_option_string(char *arg, char *template, long flag, char **failure, char *
  *      [0-9]+
  */
 char*
-_analyseur(void)
+get_analyseur(void)
 {
   return analyseur;
 }
 
 void
-_set_analyseur(char *s)
+set_analyseur(char *s)
 {
   analyseur = s;
 }
@@ -3657,63 +3656,5 @@ alias0(char *s, char *old)
   x[0] = evaltyp(t_STR)|evallg(2); /* for getheap */
   x[1] = (long)ep;
   (void)installep(x, s, strlen(s), EpALIAS, 0, functions_hash + hash);
-}
-
-/* Try f (trapping error e), recover using r (break_loop, if NULL) */
-GEN
-trap0(char *e, char *r, char *f)
-{
-  VOLATILE gpmem_t av = avma;
-  VOLATILE long numerr = -1;
-  VOLATILE GEN x = gnil;
-  char *F;
-       if (!strcmp(e,"errpile")) numerr = errpile;
-  else if (!strcmp(e,"typeer")) numerr = typeer;
-  else if (!strcmp(e,"gdiver2")) numerr = gdiver2;
-  else if (!strcmp(e,"invmoder")) numerr = invmoder;
-  else if (!strcmp(e,"accurer")) numerr = accurer;
-  else if (!strcmp(e,"archer")) numerr = archer;
-  else if (*e) err(impl,"this trap keyword");
-  /* TO BE CONTINUED */
-
-  if (f && r)
-  { /* explicit recovery text */
-    char *a = analyseur;
-    void *catcherr;
-    jmp_buf env;
-
-    if (setjmp(env))
-    {
-      avma = av;
-      err_leave(&catcherr);
-      x = lisseq(r);
-      skipseq();
-    }
-    else
-    {
-      catcherr = err_catch(numerr, env, NULL);
-      x = lisseq(f);
-      err_leave(&catcherr);
-    }
-    analyseur = a;
-    return x;
-  }
-
-  F = f? f: r; /* define a default handler */
- /* default will execute F (or start a break loop), then jump to
-  * environnement */
-  if (F)
-  {
-    if (!*F || (*F == '"' && F[1] == '"')) /* unset previous handler */
-    {/* TODO: find a better interface
-      * TODO: no leaked handler from the library should have survived
-      */
-      err_leave_default(numerr);
-      return x;
-    }
-    F = pari_strdup(F);
-  }
-  (void)err_catch(numerr, NULL, F);
-  return x;
 }
 
