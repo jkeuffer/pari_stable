@@ -16,7 +16,15 @@ if test "$gnuas" = "yes"; then do_cpp=yes; fi
 ker=$src/kernel/sparcv8
 kernel1=$ker/level0_$asmarch.S
 kernel2=$ker/level0.S
-level0=$ker/level0.h
+
+if test "$osname" = "nextstep" -o "$osname" = "linux"
+then
+  level0=$src/kernel/none/asm0.h
+else
+  level0=$ker/level0.h
+fi
+level1=$src/kernel/none/level1.h
+
 if test "$osname" = "nextstep" -o "$osname" = "linux" -o "$do_cpp" = "yes"
 then
 cat >> $file << EOT
@@ -27,9 +35,7 @@ kernel2.s: $kernel2
 EOT
 kernel1=kernel1.s
 kernel2=kernel2.s
-level0=$src/kernel/none/asm0.h
 fi
-level1=$src/kernel/none/level1.h
 
 cat >> $file << EOT
 pariinl.h: $level0 $level1
