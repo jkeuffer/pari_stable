@@ -83,6 +83,8 @@ AMD Athlon  XP1800+  Linux-2.4.17    gcc-3.0.4       616     616  2.2.3 (30)PE
 AMD Athlon  MP1800+  Linux-2.4.9     gcc-2.96        696     688  2.2.3 (29)HC
 AMD Athlon  1200MHz  Linux-2.4.7     gcc-2.96       1002     992  2.1.2     CL
 AMD Athlon  1100MHz  Linux-2.4.2-2   gcc            1078    1076  2.1.1     DP
+AMD Duron   1200MHz  Linux-2.4.19    gcc-3.2         789     800  2.2.4     QL
+AMD Duron   1200MHz  Linux-2.4.19    gcc-2.95.3      834     851  2.2.4     QL
 AMD Duron   1000MHz  Linux-2.4.0    egcs            1364    1428  2.0.20    QL
 AMD Athlon   850MHz  Linux-2.2.17    gcc            1364    1342  2.1.0     JC
 AMD Duron    700MHz  Linux-2.4.0    egcs            2066    2138  2.0.20    QL
