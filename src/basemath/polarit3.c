@@ -2389,6 +2389,25 @@ u_invmod(ulong x, ulong p)
   return xv;
 }
 
+int
+u_val(ulong n, ulong p)
+{
+  ulong dummy;
+  return svaluation(n,p,&dummy);
+}
+
+/* assume p^k is SMALL */
+int
+u_pow(int p, int k)
+{
+  int i, pk;
+
+  if (!k) return 1;
+  if (p == 2) return 1<<k;
+  pk = p; for (i=2; i<=k; i++) pk *= p;
+  return pk;
+}
+
 #if 0
 static ulong
 umodratu(GEN a, ulong p)

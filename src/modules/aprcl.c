@@ -293,24 +293,6 @@ powpolmod(red_t *R, int k, int pk, GEN jac)
   return _powpolmod(pk, jac, R, _sqr);
 }
 
-/* FIXME: these 2 could be exported */
-static long
-u_val(ulong n, ulong p)
-{
-  ulong dummy;
-  return svaluation(n,p,&dummy);
-}
-static int
-u_pow(int p, int k)
-{
-  int i, pk;
-
-  if (!k) return 1;
-  if (p == 2) return 1<<k;
-  pk = p; for (i=2; i<=k; i++) pk *= p;
-  return pk;
-}
-
 static GEN
 e(ulong t)
 {

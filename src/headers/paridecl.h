@@ -1313,6 +1313,8 @@ GEN     u_FpX_normalize(GEN z, ulong p);
 GEN     u_FpX_sub(GEN x, GEN y, ulong p);
 GEN     u_FpX_gcd(GEN a, GEN b, ulong p);
 ulong   u_invmod(ulong x, ulong p);
+int     u_pow(int p, int k);
+int     u_val(ulong n, ulong p);
 
 /* rootpol.c */
 
