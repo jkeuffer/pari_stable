@@ -1541,6 +1541,40 @@ indexrank(GEN x)
 #else
 #  define MASK (0x7fff0000UL)
 #endif
+GEN
+FpM_mul(GEN x, GEN y, GEN p)
+{
+  long i,j,l,lx=lg(x), ly=lg(y);
+  GEN z;
+  if (ly==1) return cgetg(ly,t_MAT);
+  if (lx != lg(y[1])) err(operi,"* [mod p]",t_MAT,t_MAT);
+  z=cgetg(ly,t_MAT);
+  if (lx==1)
+  {
+    for (i=1; i<ly; i++) z[i]=lgetg(1,t_COL);
+    return z;
+  }
+  l=lg(x[1]);
+  for (j=1; j<ly; j++)
+  {
+    z[j] = lgetg(l,t_COL);
+    for (i=1; i<l; i++)
+    { 
+      ulong av;
+      GEN p1,p2;
+      int k;
+      p1=gzero; av=avma;
+      for (k=1; k<lx; k++)
+      {
+	p2=mulii(gcoeff(x,i,k),gcoeff(y,k,j));
+	p1=addii(p1,p2);
+      }
+      coeff(z,i,j)=lpileupto(av,p?modii(p1,p):p1);
+    }
+  }
+  return z;
+}
+
 static GEN
 ker_mod_p_small(GEN x, GEN pp, long nontriv)
 {
