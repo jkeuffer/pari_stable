@@ -404,7 +404,9 @@ vector for $n$.
 \syn{bittest}{x,n}, where $n$ and the result are \kbd{long}s.
 
 \subsecidx{ceil}$(x)$: ceiling of $x$. When $x$ is in $\R$,
-the result is the smallest integer greater than or equal to $x$.
+the result is the smallest integer greater than or equal to $x$. Applied to a
+rational function, $\kbd{ceil}(x)$ returns the euclidian quotient of the
+numerator by the denominator.
 
 \syn{gceil}{x}.
 
@@ -507,8 +509,10 @@ types are forbidden.
 
 \syn{denom}{x}.
 
-\subsecidx{floor}$(x)$: floor of $x$. When $x$ is in $\R$,
-the result is the largest integer smaller than or equal to $x$.
+\subsecidx{floor}$(x)$: floor of $x$. When $x$ is in $\R$, the result is the
+largest integer smaller than or equal to $x$. Applied to a rational function,
+$\kbd{floor}(x)$ returns the euclidian quotient of the numerator by the
+denominator.
 
 \syn{gfloor}{x}.
 
@@ -620,7 +624,7 @@ $(1,\omega)$.
 \syn{greal}{x}.
 
 \subsecidx{round}$(x,\{\&e\})$: If $x$ is in $\R$, rounds $x$ to the nearest
-integer and set $e$ to the number of error bits, that is the binary exponent
+integer and sets $e$ to the number of error bits, that is the binary exponent
 of the difference between the original and the rounded value (the
 ``fractional part''). If the exponent of $x$ is too large compared to its
 precision (i.e.~$e>0$), the result is undefined and an error occurs if $e$
@@ -663,13 +667,14 @@ exact value, you can use \kbd{length(Str(x))}, which is much slower.
 
 \syn{gsize}{x} which returns a \kbd{long}.
 
-\subsecidx{truncate}$(x,\{\&e\})$: truncate $x$ and set $e$ to the number of
+\subsecidx{truncate}$(x,\{\&e\})$: truncates $x$ and sets $e$ to the number of
 error bits. When $x$ is in $\R$, this means that the part after the decimal
-point is chopped away, integer and set $e$ to the number of error bits that
-is the binary exponent of the difference between the original and the
-truncated value (the ``fractional part''). If the exponent of $x$ is too
-large compared to its precision (i.e.~$e>0$), the result is undefined and an
-error occurs if $e$ was not given.
+point is chopped away, $e$ is the binary exponent of the difference between
+the original and the truncated value (the ``fractional part''). If the
+exponent of $x$ is too large compared to its precision (i.e.~$e>0$), the
+result is undefined and an error occurs if $e$ was not given. The function
+applies componentwise on rational functions and vector / matrices; $e$ is
+then the maximal number of error bits.
 
 Note a very special use of \kbd{truncate}: when applied to a power series, it
 transforms it into a polynomial or a rational function with denominator

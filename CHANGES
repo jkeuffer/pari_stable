@@ -89,6 +89,9 @@ XR 56- updated factorpadic to use new Round 4
 BA 57- nfgaloisconj: discrepancies between 32/64 bits architectures
    58- random(1 << 32) could have 32 bits
    59- missing newline in error messages on startup (reading .gprc)
+   60- silent codeword overflows (e.g. O(x^100000))
+IZ 61- updated gnuplot support
+   62- x="a"; eval(x) --> error
 
   Added
 IZ  1- [gnuplot] look up directory tree for gnuplot related files
@@ -102,6 +105,9 @@ HC  4- optional argument to direuler (length of result)
     1- default binary produced by Configure -g is now static
     2- improved the heuristics in ellisoncurve
 HC  3- extend the range of direuler (maxp was 2^16)
+
+  Removed
+    1- sunview "support" (didn't work, hard to test, X11 is a better standard)
 
 ===========================================================================
 Done for version 2.0.17.beta (released 24/09/99):

@@ -131,7 +131,6 @@ src/graph/plotX.c
 src/graph/plotgnuplot.c
 src/graph/plotnull.c
 src/graph/plotport.c
-src/graph/plotsun.c
 src/graph/rect.h
 src/headers/pari.h
 src/headers/pari68k.h

@@ -15,8 +15,6 @@ Priority classification (first column): [subjective and debatable!]
 
 ***************************   BUGS (general)     ****************************
 
-5  silent overflows in codeword-handling macros: O(2^50000) --> O(2^-15535)
-
 5  gegal should return 0, not raise an error when its arguments can't be
    subtracted
 
@@ -49,6 +47,9 @@ size of neighbouring intervals don't differ too much.
 
 3  after allocatemem() / default(parisize, ...), the rest of the command is
 discarded (ends by a longjmp).
+
+3  [readline]: \r<TAB>  completes files whose name start with "r". 
+               \r <TAB> works ok.
 
 2  under GP after an error, memory is only recovered from "entire variables".
 Individual components of lists/vectors/matrices are left alone if the
@@ -113,6 +114,9 @@ polynomial multiplication + remainder is O(n^2) [+ can use Karatsuba/FFT]
 3  p-adic ellztopoint
 
 ***************************   LIBRARY DESIGN   ****************************
+
+4  a system of DEBUGLEVEL classes [e.g \g 5 "LLL" ] (such that the user can
+easily define new ones)
 
 4  a way to trap PARI errors, esp. all kinds of overflows (exponent, degree,
 stack, ...). Something like:
