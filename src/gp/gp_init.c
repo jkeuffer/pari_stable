@@ -28,7 +28,6 @@ extern GEN   default0(char *a, char *b, long flag);
 extern void  error0(GEN *g);
 extern GEN   extern0(char *cmd);
 extern void  gp_quit(void);
-extern void  gpwritebin(char *s, GEN x);
 extern GEN   input0(void);
 extern void  kill0(entree *ep);
 extern void  print0(GEN *g,long flag);
@@ -36,14 +35,8 @@ extern GEN   read0(char *s);
 extern void  system0(char *cmd);
 extern GEN   trap0(char *e, char *f, char *r);
 extern int   whatnow(char *s, int silent);
-extern void  write0(char *s, GEN *g, long flag);
 
 static void whatnow0(char *s) { whatnow(s,0); }
-static void print   (GEN *g) { print0(g, f_RAW); }
-static void printp  (GEN *g) { print0(g, f_PRETTYOLD); }
-static void printtex(GEN *g) { print0(g, f_TEX); }
-static void print1  (GEN *g) { print0(g, f_NOEOL | f_RAW); }
-static void printp1 (GEN *g) { print0(g, f_NOEOL | f_PRETTYOLD); }
 
 entree functions_gp[]={
 {"allocatemem",0,(void*)allocatemem0,11,"vD0,L,"},
@@ -62,10 +55,10 @@ entree functions_gp[]={
 {"system",70,(void*)system0,11,"vs"},
 {"trap",0,(void*)trap0,11,"D\"\",r,DI,DI"},
 {"whatnow",1,(void*)whatnow0,11,"vr"},
-{"write",99,(void*)write0,11,"vss*D0,L,"},
-{"write1",99,(void*)write0,11,"vss*D5,L,"},
+{"write",99,(void*)write0,11,"vss*"},
+{"write1",99,(void*)write1,11,"vss*"},
 {"writebin",99,(void*)gpwritebin,11,"vsDG"},
-{"writetex",99,(void*)write0,11,"vss*D4,L,"},
+{"writetex",99,(void*)writetex,11,"vss*"},
 
 {NULL,0,NULL,0,NULL} /* sentinel */
 };

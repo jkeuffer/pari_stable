@@ -36,7 +36,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
   int readline_init = 1;
 BEGINEXTERN
 #  if defined(__cplusplus) && defined(__SUNPRO_CC)
-  extern char*readline(char*); /* bad prototype for readline() in readline.h */
+  extern char* readline(char*); /* bad prototype for readline() in readline.h */
 #  else
 #   ifdef READLINE_LIBRARY
 #     include <readline.h>
@@ -48,17 +48,16 @@ BEGINEXTERN
 ENDEXTERN
 #endif
 
-extern void  err_clean(void);
-extern void  gp_output(GEN z, gp_data *G);
-extern void  errcontext(char *msg, char *s, char *entry);
-extern void  err_recover(long numerr);
-extern void  free_graph(void);
-extern void  gp_expand_path(gp_path *p);
-extern int   gp_init_entrees(module *modlist, entree **hash, int force);
-extern void  init_defaults(int force);
-extern void  init_graph(void);
-extern void  pari_sig_init(void (*f)(int));
-extern int   whatnow(char *s, int flag);
+extern void err_clean(void);
+extern void gp_output(GEN z, gp_data *G);
+extern void errcontext(char *msg, char *s, char *entry);
+extern void free_graph(void);
+extern void gp_expand_path(gp_path *p);
+extern int  gp_init_entrees(module *modlist, entree **hash, int force);
+extern void init_defaults(int force);
+extern void init_graph(void);
+extern void pari_sig_init(void (*f)(int));
+extern int  whatnow(char *s, int flag);
 
 static char *DFT_PRETTYPRINTER = "tex2mail -TeX -noindent -ragged -by_par";
 
@@ -71,7 +70,6 @@ static char *DFT_PRETTYPRINTER = "tex2mail -TeX -noindent -ragged -by_par";
 static char prompt[MAX_PROMPT_LEN], prompt_cont[MAX_PROMPT_LEN];
 
 static int tm_is_waiting = 0, handle_C_C = 0, gpsilent = 0;
-static char thestring[256];
 
 static ulong paribufsize, primelimit;
 
@@ -166,7 +164,7 @@ gp_preinit(void)
 
   bufstack = NULL;
 
-  primelimit = 500000; 
+  primelimit = 500000;
   bot = (gpmem_t)0;
   top = (gpmem_t)(1000000*sizeof(long));
   strcpy(prompt,      DFT_PROMPT);
@@ -240,38 +238,44 @@ get_sep_colon_ok(char *t)
   return get_sep0(t,0);
 }
 
+/* "atoul" + optional [km] suffix */
+static ulong
+my_int(char *s)
+{
+  ulong n = 0;
+  char *p = s;
+
+  while (isdigit((int)*p)) { n = 10*n + (*p++ - '0'); }
+  switch(*p)
+  {
+    case 'k': case 'K': n *= 1000;    p++; break;
+    case 'm': case 'M': n *= 1000000; p++; break;
+  }
+  if (*p) err(talker2,"I was expecting an integer here", s, s);
+  return n;
+}
+
 static long
 get_int(char *s, long dflt)
 {
   char *p = get_sep(s);
-  long n=atol(p);
+  long n;
+  int minus = 0;
+  
+  if (*p == '-') { minus = 1; p++; }
+  if (!isdigit((int)*p)) return dflt;
 
-  if (*p == '-') p++;
-  while (isdigit((int)*p)) { p++; dflt=n; }
-  switch(*p)
-  {
-    case 'k': case 'K': dflt *= 1000;    p++; break;
-    case 'm': case 'M': dflt *= 1000000; p++; break;
-  }
-  if (*p) err(talker2,"I was expecting an integer here", s, s);
-  return dflt;
+  n = (long)my_int(p);
+  if (n < 0) err(talker2,"integer too large in get_int",s,s);
+  return minus? -n: n;
 }
 
 static ulong
 get_uint(char *s)
 {
-  ulong n = 0;
-
-  s = get_sep(s);
-  if (*s == '-') err(talker,"arguments must be positive integers");
-  while (isdigit((int)*s)) { n = 10*n + (*s++ - '0'); }
-  switch(*s)
-  {
-    case 'k': case 'K': n *= 1000;    s++; break;
-    case 'm': case 'M': n *= 1000000; s++; break;
-  }
-  if (*s) err(talker,"I was expecting an integer here");
-  return n;
+  char *p = get_sep(s);
+  if (*p == '-') err(talker2,"arguments must be positive integers",s,s);
+  return my_int(p);
 }
 
 /* tell TeXmacs GP will start outputing data */
@@ -286,55 +290,8 @@ tm_start_output(void)
 static void
 tm_end_output(void)
 {
-  if (tm_is_waiting) { printf("%c", DATA_END); fflush(stdout); } 
+  if (tm_is_waiting) { printf("%c", DATA_END); fflush(stdout); }
   tm_is_waiting = 0;
-}
-
-/* print a sequence of (NULL terminated) GEN */
-void
-print0(GEN *g, long flag)
-{
-  pariout_t T = *(GP_DATA->fmt); /* copy */
-
-  added_newline = (flag & f_NOEOL) == 0;
-  T.prettyp = flag & ~f_NOEOL;
-
-  for( ; *g; g++)
-    if (typ(*g)==t_STR)
-      pariputs(GSTR(*g)); /* otherwise it's surrounded by "" */
-    else
-      gen_output(*g, &T);
-
-  if (added_newline) pariputc('\n');
-  pariflush();
-}
-
-/* write a sequence of (NULL terminated) GEN, to file s */
-void
-write0(char *s, GEN *g, long flag)
-{
-  int i = added_newline;
-  s = expand_tilde(s);
-  if (GP_DATA->flags & SECURE)
-  {
-    fprintferr("[secure mode]: about to write to '%s'. OK ? (^C if not)\n",s);
-    hit_return();
-  }
-  switchout(s); free(s);
-  print0(g,flag); added_newline = i;
-  switchout(NULL);
-}
-
-void
-gpwritebin(char *s, GEN x)
-{
-  s = expand_tilde(s);
-  if (GP_DATA->flags & SECURE)
-  {
-    fprintferr("[secure mode]: about to write to '%s'. OK ? (^C if not)\n",s);
-    hit_return();
-  }
-  writebin(s,x); free(s);
 }
 
 Buffer *
@@ -574,7 +531,7 @@ gp_get_color(char **st)
       c = (atoi(a[2])<<8) | atoi(a[0]) | (atoi(a[1])<<4);
       trans = (*(a[1]) == 0);
       v = s + 1;
-    } 
+    }
     else { c = c_NONE; trans = 0; }
   }
   if (trans) c = c | (1<<12);
@@ -612,7 +569,7 @@ sd_colors(char *v, int flag)
     for (*t=0,c=c_ERR; c < c_LAST; c++)
     {
       n = gp_colors[c];
-      if (n == c_NONE) 
+      if (n == c_NONE)
         sprintf(t,"no");
       else
       {
@@ -1055,7 +1012,7 @@ has_ext_help(void)
   }
   return 0;
 }
- 
+
 static int
 compare_str(char **s1, char **s2) { return strcmp(*s1, *s2); }
 
@@ -1212,21 +1169,23 @@ user_member(void)
 static void
 center(char *s)
 {
-  long i, pad = term_width() - strlen(s);
-  char *u = thestring;
+  long i, l = strlen(s), pad = term_width() - l;
+  char *buf, *u;
 
   if (pad<0) pad=0; else pad >>= 1;
+  u = buf = (char*)gpmalloc(l + pad + 2);
   for (i=0; i<pad; i++) *u++ = ' ';
   while (*s) *u++ = *s++;
-  *u++='\n'; *u=0; pariputs(thestring);
+  *u++ = '\n'; *u = 0;
+  pariputs(buf); free(buf);
 }
 
 static void
 community(void)
 {
   long len = strlen(GPMISCDIR) + 1024;
-  char *s = gpmalloc(len);
-  
+  char *s = (char*)gpmalloc(len);
+
   sprintf(s, "The standard distribution of GP/PARI includes a reference \
 manual, a tutorial, a reference card and quite a few examples. They should \
 have been installed in the directory '%s'. If not you should ask the person \
@@ -1394,7 +1353,7 @@ filter_quotes(char *s)
   int doubquote = 0;
   char *str, *t;
 
-  for (i=0; i < l; i++) 
+  for (i=0; i < l; i++)
     switch(s[i])
     {
       case '\'': quote++; break;
@@ -1405,7 +1364,7 @@ filter_quotes(char *s)
                           + doubquote * (strlen(DOUBQUOTE)-1)
                           + backquote * (strlen(BACKQUOTE)-1) + 1);
   t = str;
-  for (i=0; i < l; i++) 
+  for (i=0; i < l; i++)
     switch(s[i])
     {
       case '\'': t = _cat(t, QUOTE); break;
@@ -1416,31 +1375,36 @@ filter_quotes(char *s)
   *t = 0; return str;
 }
 
-#define MAX_LINE_LEN 255
+static int
+nl_read(char *s) { size_t l = strlen(s); return s[l-1] == '\n'; }
+
+#define nbof(a) sizeof(a) / sizeof(a[0])
+/* query external help program for s. num < 0 [keyword] or chapter number */
 static void
 external_help(char *s, int num)
 {
   long nbli = term_height()-3, li = 0;
-  char buf[MAX_LINE_LEN+1], *str, *opt = "", *ar = "";
+  char buf[256], ar[32], *str, *opt = "";
   pariFILE *z;
   FILE *f;
 
   if (!GP_DATA->help) err(talker,"no external help program");
   s = filter_quotes(s);
   str = gpmalloc(strlen(GP_DATA->help) + strlen(s) + 64);
+  *ar = 0;
   if (num < 0)
     opt = "-k";
   else if (s[strlen(s)-1] != '@')
-    { ar = thestring; sprintf(ar,"@%d",num); }
+    sprintf(ar,"@%d",num);
   sprintf(str,"%s -fromgp %s %c%s%s%c",GP_DATA->help,opt, SHELL_Q,s,ar,SHELL_Q);
   z = try_pipe(str,0); f = z->file;
   free(str);
   free(s);
-  while (fgets(buf,MAX_LINE_LEN,f))
+  while (fgets(buf, nbof(buf), f))
   {
     if (!strncmp("ugly_kludge_done",buf,16)) break;
-    buf[MAX_LINE_LEN]=0; pariputs(buf);
-    if (++li > nbli) { hit_return(); li = 0; }
+    pariputs(buf);
+    if (nl_read(buf) && ++li > nbli) { hit_return(); li = 0; }
   }
   pari_fclose(z);
 }
@@ -1499,7 +1463,7 @@ aide0(char *s, int flag)
     if (long_help) external_help(s,3); else commands(n);
     return;
   }
-  /* Get meaningful entry on \ps 5 */ 
+  /* Get meaningful entry on \ps 5 */
   if (*s == '\\') { s1 = s+1; skip_alpha(s1); *s1 = '\0';}
 
   if (flag & h_APROPOS) { external_help(s,-1); return; }
@@ -1769,7 +1733,7 @@ escape0(char *tch)
 	{
 	  GEN g[2]; g[0] = x; g[1] = NULL;
 	  s = get_sep_colon_ok(s); if (!*s) s = current_logfile;
-	  write0(s, g, f_RAW); return;
+	  write0(s, g); return;
 	}
       }
       pariputc('\n'); return;
@@ -1860,7 +1824,7 @@ escape(char *tch)
 static int get_line_from_file(char *prompt, filtre_t *F, FILE *file);
 #define err_gprc(s,t,u) { fprintferr("\n"); err(talker2,s,t,u); }
 
-static void 
+static void
 init_filtre(filtre_t *F, void *data)
 {
   F->data = data;
@@ -1897,11 +1861,7 @@ static FILE *
 gprc_chk(char *s)
 {
   FILE *f = fopen(s, "r");
-  if (f && !(GP_DATA->flags & QUIET))
-  {
-    fprintferr("Reading GPRC: %s ...", s);
-    added_newline = 0;
-  }
+  if (f && !(GP_DATA->flags & QUIET)) fprintferr("Reading GPRC: %s ...", s);
   return f;
 }
 
@@ -2109,6 +2069,7 @@ gp_initrc(void)
 static char *
 do_time(long flag)
 {
+  static char buf[64];
   static long last = 0;
   long delay = (flag == ti_LAST)? last: TIMER(GP_DATA->T);
   char *s;
@@ -2121,7 +2082,7 @@ do_time(long flag)
     case ti_LAST:      s = "  ***   last result computed in "; break;
     default: return NULL;
   }
-  strcpy(thestring,s); s = thestring+strlen(s);
+  strcpy(buf,s); s = buf+strlen(s);
   strcpy(s, term_get_color(c_TIME)); s+=strlen(s);
   if (delay >= 3600000)
   {
@@ -2146,7 +2107,7 @@ do_time(long flag)
   sprintf(s, "%ld ms", delay); s+=strlen(s);
   strcpy(s, term_get_color(c_NONE));
   if (flag != ti_INTERRUPT) { s+=strlen(s); *s++='.'; *s++='\n'; *s=0; }
-  return thestring;
+  return buf;
 }
 
 static void
@@ -2171,42 +2132,35 @@ gp_sighandler(int sig)
     case SIGBREAK: gp_handle_SIGINT(); return;
 #endif
 #ifdef SIGINT
-    case SIGINT: gp_handle_SIGINT(); return;
+    case SIGINT:   gp_handle_SIGINT(); return;
 #endif
 
 #ifdef SIGSEGV
-    case SIGSEGV:
-      msg="GP (Segmentation Fault)";
-      break;
+    case SIGSEGV: msg = "GP (Segmentation Fault)"; break;
 #endif
-
 #ifdef SIGBUS
-    case SIGBUS:
-      msg="GP (Bus Error)";
-      break;
+    case SIGBUS:  msg = "GP (Bus Error)"; break;
 #endif
-
 #ifdef SIGFPE
-    case SIGFPE:
-      msg="GP (Floating Point Exception)";
-      break;
+    case SIGFPE:  msg = "GP (Floating Point Exception)"; break;
 #endif
 
 #ifdef SIGPIPE
     case SIGPIPE:
-      if (GP_DATA->pp->file && pari_outfile == GP_DATA->pp->file->file)
+    {
+      pariFILE *f = GP_DATA->pp->file;
+      if (f && pari_outfile == f->file)
       {
-        pariFILE *f = GP_DATA->pp->file;
         GP_DATA->pp->file = NULL; /* to avoid oo recursion on error */
         pari_outfile = stdout; pari_fclose(f);
       }
       err(talker, "Broken Pipe, resetting file stack...");
+      /* fall through [actually not, but pacifies compiler] */
+    }
 #endif
-
-    default:
-      msg="signal handling";
+    default: msg = "signal handling"; break;
   }
-  err(bugparier,msg);
+  err(bugparier, msg);
 }
 
 static void
@@ -2228,13 +2182,13 @@ do_prompt(int in_comment, char *p)
 {
   static char buf[MAX_PROMPT_LEN + 24]; /* + room for color codes */
   char *s;
-  
+
   if (GP_DATA->flags & TEST) return prompt;
   s = buf; *s = 0;
   /* escape sequences bug readline, so use special bracing (if available) */
   brace_color(s, c_PROMPT, 0);
   s += strlen(s);
-  if (in_comment) 
+  if (in_comment)
     strcpy(s, COMMENTPROMPT);
   else
     do_strftime(p,s, MAX_PROMPT_LEN-1);
@@ -2271,7 +2225,7 @@ file_input(Buffer *b, char **s0, input_method *IM)
     s = b->buf + used;
     if (! IM->fgets(s, left, IM->file))
       return first? NULL: *s0; /* EOF */
-     
+
     l = strlen(s); first = 0;
     if (l+1 < left || s[l-1] == '\n') return *s0; /* \n */
     used += l;
@@ -2284,7 +2238,7 @@ input_loop(filtre_t *F, input_method *IM)
 {
   Buffer *b = (Buffer*)F->data;
   char *to_read, *s = b->buf;
- 
+
   /* read first line */
   handle_C_C = 0;
   while (! (to_read = IM->getline(b,&s,IM)) )
@@ -2305,7 +2259,7 @@ input_loop(filtre_t *F, input_method *IM)
     F->t = s;
     (void)filtre0(F);
     if (IM->free) free(to_read);
-   
+
     if (! F->more_input) break;
 
     /* read continuation line */
@@ -2324,7 +2278,7 @@ get_line_from_file(char *prompt, filtre_t *F, FILE *file)
   const int TeXmacs = ((GP_DATA->flags & TEXMACS) && file == stdin);
   char *s;
   input_method IM;
- 
+
   IM.file = file;
   IM.fgets= TeXmacs? &fgets_texmacs: &fgets;
   IM.prompt = NULL;
@@ -2335,7 +2289,7 @@ get_line_from_file(char *prompt, filtre_t *F, FILE *file)
     if (TeXmacs) tm_start_output();
     return 0;
   }
- 
+
   s = ((Buffer*)F->data)->buf;
   if (*s && prompt) /* don't echo if from gprc */
   {
@@ -2421,13 +2375,31 @@ check_meta(char *buf)
   return 1;
 }
 
+/* kill all history entries since loc */
+static void
+prune_history(gp_hist *H, long loc)
+{
+  long i, j;
+  i = (H->total-1) % H->size;
+  j = H->total - loc;
+  for ( ; j > 0; i--,j--)
+  {
+    if (H->res[i])
+    {
+      gunclone(H->res[i]);
+      H->res[i] = NULL;
+    }
+    if (!i) i = H->size;
+  }
+  H->total = loc;
+}
+
 /* If there are other buffers open (bufstack != NULL), we are doing an
  * immediate read (with read, extern...) */
 static GEN
 gp_main_loop(int ismain)
 {
   gp_hist *H  = GP_DATA->hist;
-  long i, j;
   gpmem_t av;
   VOLATILE GEN z = gnil;
   Buffer *b = new_buffer();
@@ -2449,25 +2421,15 @@ gp_main_loop(int ismain)
       outtyp = GP_DATA->fmt->prettyp;
       recover(0);
       if (setjmp(environnement))
-      {
+      { /* recover from error */
         char *s = (char*)global_err_data;
-
         if (s && *s) outerr(lisseq(s));
 	avma = top;
-        i = (H->total-1) % H->size;
-	j = H->total - tloc;
-	for ( ; j; i--,j--)
-	{
-	  gunclone(H->res[i]);
-          H->res[i] = NULL;
-	  if (!i) i = H->size;
-	}
-        H->total = tloc;
+        prune_history(H, tloc);
         GP_DATA->fmt->prettyp = outtyp;
         kill_all_buffers(b);
       }
     }
-    added_newline = 1;
     if (paribufsize != b->len) fix_buffer(b, paribufsize);
 
     for(;;)
@@ -2490,7 +2452,6 @@ gp_main_loop(int ismain)
     }
     av = avma;
     z = readseq(b->buf, GP_DATA->flags & STRICTMATCH);
-    if (!added_newline) pariputc('\n'); /* last output was print1() */
     if (! ismain) continue;
     if (GP_DATA->flags & CHRONO)
       pariputs(do_time(ti_REGULAR));
@@ -2538,10 +2499,8 @@ silent(void)
 GEN
 default0(char *a, char *b, long flag)
 {
-  if (flag) flag=d_RETURN;
-  else
-    flag = silent()? d_SILENT: d_ACKNOWLEDGE;
-  return setdefault(a,b,flag);
+  return setdefault(a,b, flag? d_RETURN
+                             : silent()? d_SILENT: d_ACKNOWLEDGE);
 }
 
 GEN
@@ -2568,16 +2527,6 @@ system0(char *s)
 #else
   err(archer);
 #endif
-}
-
-void
-error0(GEN *g)
-{
-  term_color(c_ERR);
-  if (!added_newline) pariputc('\n');
-  pariputs("###   User error:\n\n   ");
-  print0(g,f_RAW); term_color(c_NONE);
-  err_recover(talker);
 }
 
 int
@@ -2657,12 +2606,7 @@ gp_exception_handler(long numerr)
 }
 
 static void
-testint(char *s, long *d)
-{
-  if (!s) return;
-  *d = get_int(s, 0);
-  if (*d <= 0) err(talker,"arguments must be positive integers");
-}
+testuint(char *s, ulong *d) { if (s) *d = get_uint(s); }
 
 static char *
 read_arg(int *nread, char *t, long argc, char **argv)
@@ -2713,12 +2657,11 @@ read_opt(long argc, char **argv)
   pre = initrc? gp_initrc(): NULL;
 
   /* override the values from gprc */
-  testint(b, (long*)&paribufsize); if (paribufsize < 10) paribufsize = 10;
-  if (p)
-      primelimit = get_uint(p);		/* There is no atou()... */
-  testint(s, (long*)&top);
+  testuint(b, &paribufsize); if (paribufsize < 10) paribufsize = 10;
+  testuint(p, &primelimit);
+  testuint(s, (ulong*)&top);
   if (GP_DATA->flags & (EMACS|TEXMACS)) disable_color = 1;
-  pari_outfile=stdout; return pre;
+  pari_outfile = stdout; return pre;
 }
 
 #ifdef WINCE

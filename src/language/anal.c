@@ -421,8 +421,12 @@ GEN flisexpr(char *s){ return flisseq0(s, expr);}
 GEN
 readseq(char *c, int strict)
 {
+  GEN z;
   check_new_fun=NULL; skipping_fun_def=0;
-  doskipseq(c, strict); return lisseq(c);
+  added_newline = 1;
+  doskipseq(c, strict); z = lisseq(c);
+  if (!added_newline) pariputc('\n'); /* last output was print1() */
+  return z;
 }
 
 entree *

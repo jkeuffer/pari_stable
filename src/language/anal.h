@@ -241,8 +241,20 @@ typedef struct input_method {
   char * (*getline)(Buffer*, char**, struct input_method*);
 } input_method;
 
-/* output format */
-enum { f_RAW, f_PRETTYMAT, f_PRETTYOLD, f_PRETTY, f_TEX, f_NOEOL = 16 };
+/* GP output && output format */
+enum { f_RAW, f_PRETTYMAT, f_PRETTYOLD, f_PRETTY, f_TEX };
+
+void error0(GEN *g);
+void gpwritebin(char *s, GEN x);
+void print   (GEN *g);
+void print0(GEN *g, long flag);
+void print1  (GEN *g);
+void printp  (GEN *g);
+void printp1 (GEN *g);
+void printtex(GEN *g);
+void write0  (char *s, GEN *g);
+void write1  (char *s, GEN *g);
+void writetex(char *s, GEN *g);
 
 /* for output */
 typedef struct {

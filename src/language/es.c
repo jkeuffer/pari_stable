@@ -2987,6 +2987,54 @@ readbin(char *name, FILE *f)
 
 /*******************************************************************/
 /**                                                               **/
+/**                             GP I/O                            **/
+/**                                                               **/
+/*******************************************************************/
+/* print a sequence of (NULL terminated) GEN */
+void
+print0(GEN *g, long flag)
+{
+  pariout_t T = GP_DATA? *(GP_DATA->fmt): DFLT_OUTPUT; /* copy */
+  T.prettyp = flag;
+  for( ; *g; g++)
+    if (typ(*g)==t_STR)
+      pariputs(GSTR(*g)); /* text surrounded by "" otherwise */
+    else
+      gen_output(*g, &T);
+}
+
+#define PR_NL() {added_newline = 1; pariputc('\n'); pariflush(); }
+#define PR_NO() {added_newline = 0; pariflush(); }
+void print   (GEN *g) { print0(g, f_RAW);       PR_NL(); }
+void printp  (GEN *g) { print0(g, f_PRETTYOLD); PR_NL(); }
+void printtex(GEN *g) { print0(g, f_TEX);       PR_NL(); }
+void print1  (GEN *g) { print0(g, f_RAW);       PR_NO(); }
+void printp1 (GEN *g) { print0(g, f_PRETTYOLD); PR_NO(); }
+
+void error0(GEN *g) { err(user, g); }
+
+static char *
+wr_check(char *s) {
+  char *t = expand_tilde(s);
+  if (GP_DATA && GP_DATA->flags & SECURE)
+  {
+    fprintferr("[secure mode]: about to write to '%s'. OK ? (^C if not)\n",t);
+    hit_return();
+  }
+  return t;
+}
+
+static void wr_init(char *s)    { char *t=wr_check(s); switchout(t);   free(t);}
+void gpwritebin(char *s, GEN x) { char *t=wr_check(s); writebin(t, x); free(t);}
+
+#define WR_NL() {pariputc('\n'); pariflush(); switchout(NULL); }
+#define WR_NO() {pariflush(); switchout(NULL); }
+void write0  (char *s, GEN *g) { wr_init(s); print0(g, f_RAW); WR_NL(); }
+void writetex(char *s, GEN *g) { wr_init(s); print0(g, f_TEX); WR_NL(); }
+void write1  (char *s, GEN *g) { wr_init(s); print0(g, f_RAW); WR_NO(); }
+
+/*******************************************************************/
+/**                                                               **/
 /**                       HISTORY HANDLING                        **/
 /**                                                               **/
 /*******************************************************************/

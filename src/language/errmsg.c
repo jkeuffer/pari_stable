@@ -67,6 +67,8 @@ char *errmessage[]=
   "incorrect type",
 /* consister */
   "inconsistent data",
+/* user */
+  "",
 
     /*  MP.S  */
 

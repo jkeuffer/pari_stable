@@ -1148,6 +1148,12 @@ err(long numerr, ...)
         errcontext(s,ch1,va_arg(ap,char *));
     }
   }
+  else if (numerr == user)
+  {
+    GEN *g = va_arg(ap, GEN*);
+    pariputsf("  ###   user error: ");
+    print0(g, f_RAW);
+  }
   else
   {
     pariputsf("  ***   %s", errmessage[numerr]);
