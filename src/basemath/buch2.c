@@ -2492,7 +2492,7 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
   long av = avma,av0,av1,limpile,i,j,k,ss,cmptglob,lgsub;
   long N,R1,R2,RU,PRECREG,PRECREGINT,KCCO,KCCOPRO,RELSUP;
   long extrarel,nlze,sreg,nrelsup,nreldep,phase,slim,matcopymax;
-  long first = 1, sfb_increase = 0, sfb_trials = 0;
+  long first = 1, sfb_increase = 0, sfb_trials = 0, precdouble = 0;
   long **mat,**matcopy,*ex;
   double cbach,cbach2,drc,LOGD2,lim,LIMC,LIMC2;
   GEN p1,p2,lmatt2,fu,zu,nf,D,xarch,met,W,reg,lfun,z,clh,vperm,subfb;
@@ -2546,6 +2546,7 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
 INCREASEGEN:
   if (precpb)
   {
+    precdouble++;
     prec=(PRECREG<<1)-2;
     if (DEBUGLEVEL)
     {
@@ -2792,8 +2793,8 @@ INCREASEGEN:
   c1 = compute_check(sublambda,p1,&parch,&reg);
   /* precision problems? */
   if (!c1 || gcmpgs(gmul2n(c1,1),3) < 0)
-  {
-    precpb = "compute_check";
+  { /* has to be a prec. problem unless we cheat on Bach constant */
+    if (!precdouble) precpb = "compute_check";
     goto INCREASEGEN;
   }
   if (gcmpgs(c1,3) > 0)
