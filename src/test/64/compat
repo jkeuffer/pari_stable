@@ -879,9 +879,9 @@ mod(x^5, x^6 + 108)
 ? gcd(12345678,87654321)
 9
 ? getheap()
-[215, 43374]
+[215, 43381]
 ? getrand()
-282802998
+1446304080
 ? getstack()
 0
 ? globalred(acurve)
@@ -2671,7 +2671,7 @@ d(391, 3120), mod(2081, 3120)]]
 ? getstack()
 0
 ? getheap()
-[621, 106841]
+[621, 106848]
 ? print("Total time spent: ",gettime());
-Total time spent: 4860
+Total time spent: 4424
 ? \q
