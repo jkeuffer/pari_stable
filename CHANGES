@@ -74,11 +74,12 @@ BA  3- more efficient factorff when pol belongs to Fp[X] (based on Fp_isom)
     5- made poltchebi efficient
     6- write all real zeroes in exponential format (0e28) in format 'g'
     7- bnfsunit: try to compute S-units even when the class group is large
+                 reduce class group generators
     8- 0.e N now inputs a real 0 of decimal exponent N (was N-defaultprecision)
 
   Added
     1- new library function zerovec
-    2- Hoeij's algorithm for modular factors recombination (factor over Z[X])
+    2- van Hoeij's algo. for modular factors recombination (factor over Z[X])
     3- algdep for p-adic numbers
 
   Removed
