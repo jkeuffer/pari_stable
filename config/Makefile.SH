@@ -22,7 +22,7 @@ kernel="kernel mp"
 inline="mpinl"
 khlist="pariinl"
 
-graph="plot plotport"
+graph="plotport"
 gp="gp gp_init gp_rl highlvl whatnow"
 case "$osname" in
   cygwin*) graphdyn="plot-dyn plotport-dyn";
@@ -32,6 +32,10 @@ esac
 language=`ls $src_dir/language/*.c | sed 's,.*/\(.*\)\.c,\1,'`
 basemath=`ls $src_dir/basemath/*.c | sed 's,.*/\(.*\)\.c,\1,'`
 modules=`ls $src_dir/modules/*.c   | sed 's,.*/\(.*\)\.c,\1,'`
+case "$osname" in
+  os2) systems=os2;;
+  *)   systems=;;
+esac
 
 if test -s $src_dir/kernel/$ASMARCH/MakeVar.SH; then
   . $src_dir/kernel/$ASMARCH/MakeVar.SH
@@ -56,30 +60,13 @@ done
 # We don't want to recompile everything when only changing a prototype
 hlist="$hlist paridecl"
 
-KERNOBJS=''
-for f in $kernel; do
-  KERNOBJS="$KERNOBJS $f\$(_O)"
-done
-OBJS=$KERNOBJS
-for f in $basemath $modules $language; do
-  OBJS="$OBJS $f\$(_O)"
-done
-OBJSGP=''
-OBJSDGP=''
-for f in $gp $graph; do
-  OBJSGP="$OBJSGP $f\$(_O)"
-  OBJSDGP="$OBJSDGP $f-dyn\$(_O)"
-done
-for f in $inline; do
-  OBJS="$OBJS $f\$(_O)"
-done
-
 case "$which_graphic_lib" in
 none)
   PLOTFILE=plotnull.c
   PLOTCFLAGS=
   PLOTLIBS=
   plotrunpath=
+  graph="$graph plotnull"
   ;;
 gnuplot)
   PLOTFILE=plotgnuplot.c
@@ -91,6 +78,14 @@ gnuplot)
     os2) libgnuplot=$gnuplot/gnuplot.a;;
     *) libgnuplot=$gnuplot/libgnuplot.a;;
   esac
+  graph="$graph plotgnuplot"
+  ;;
+gnuplot-dynamic)
+  PLOTFILE=plotgnuplot.c
+  PLOTCFLAGS="-DDYNAMIC_PLOTTING -DDYNAMIC_PLOTTING_RUNTIME_LINK=NULL"
+  PLOTLIBS=
+  plotrunpath=
+  graph="$graph plotgnuplot"
   ;;
 X11)
   PLOTFILE=plotX.c
@@ -98,8 +93,28 @@ X11)
   PLOTLIBS="-L$X11 -lX11 $extralib"
   if test "$osname" = concentrix; then PLOTLIBS="-lX11"; fi
   plotrunpath=$X11
+  graph="$graph plotX"
   ;;
 esac
+
+KERNOBJS=''
+for f in $kernel; do
+  KERNOBJS="$KERNOBJS $f\$(_O)"
+done
+OBJS=$KERNOBJS
+for f in $basemath $modules $language $systems; do
+  OBJS="$OBJS $f\$(_O)"
+done
+OBJSGP=''
+OBJSDGP=''
+
+for f in $gp $graph; do
+  OBJSGP="$OBJSGP $f\$(_O)"
+  OBJSDGP="$OBJSDGP $f-dyn\$(_O)"
+done
+for f in $inline; do
+  OBJS="$OBJS $f\$(_O)"
+done
 
 case "$runpathprefix" in
   -R) RUNPTH_FINAL="-R$runpath"
@@ -135,6 +150,11 @@ case "$static" in
   y) dft=sta; libdft= ;;
 esac
 
+CPPFLAGS="-I. -I$src/headers"
+if test "$has_dlopen" = builtin -a X"$osname" = Xos2; then
+  CPPFLAGS="$CPPFLAGS -I$src/systems/os2"
+fi
+
 cat > $file << EOT
 # Makefile for Pari/GP -- $pretty
 #
@@ -148,7 +168,7 @@ ASFLAGS    = $ASFLAGS
 AR	   = ar
 
 CC         = $CC
-CPPFLAGS   = -I. -I$src/headers
+CPPFLAGS   = $CPPFLAGS
 CFLAGS     = $cflags
 LD         = $LD
 LDFLAGS    = $LDFLAGS
@@ -514,7 +534,7 @@ if test -s $src_dir/kernel/$ASMARCH/Makefile.SH; then
   . $src_dir/kernel/$ASMARCH/Makefile.SH
 fi
 HUGELINE=
-for dir in basemath modules language gp graph gpdyn graphdyn; do
+for dir in basemath modules language gp graph gpdyn graphdyn systems; do
   eval list='$'$dir
   for f in $list; do
 
@@ -522,11 +542,6 @@ for dir in basemath modules language gp graph gpdyn graphdyn; do
   depend=
   cflags=
   case "$f" in
-  plot)
-    source="$src/graph/\$(PLOTFILE)"
-    cflags="\$(PLOTCFLAGS)"
-    depend="$src/graph/rect.h"
-    ;;
   gp|gp_rl)
     cflags="-I$src/language \$(RLINCLUDE)"
     depend="$src/language/anal.h $src/gp/gp.h ./paricfg.h"
@@ -535,10 +550,13 @@ for dir in basemath modules language gp graph gpdyn graphdyn; do
     cflags="-I$src/graph"
     depend="$src/graph/rect.h"
     ;;
-  plot-dyn)
-    source="$src/graph/\$(PLOTFILE)"
+  plot*-dyn)
     cflags="\$(DYNFLAGS) \$(PLOTCFLAGS)"
     depend="$src/graph/rect.h \$(LIBPARI).dll libpari_dll.h libpari_globals.h \$(LIBPARI).dll"
+    ;;
+  plot*)
+    cflags="\$(PLOTCFLAGS)"
+    depend="$src/graph/rect.h"
     ;;
   gp-dyn|gp_rl-dyn)
     source=$src\/`echo $dir | sed -e "s/dyn//"`\/`echo $f | cut -f1 -d-`.c

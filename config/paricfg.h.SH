@@ -141,7 +141,7 @@ yes) echo '#define USE_SIGRELSE 1' >> $file;;
 esac
 
 case $has_dlopen in
-yes) cat >> $file << EOT
+yes|builtin) cat >> $file << EOT
 #define HAS_DLOPEN
 #define DL_DFLT_NAME "libpari.$sodest"
 EOT
