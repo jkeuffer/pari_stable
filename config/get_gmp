@@ -1,1 +1,67 @@
-#TODO
+_gmp_list="gmp GMPLIBS GMPINCLUDE"
+gmp=
+if test -z "$disable_gmp"; then
+  gmp_add="$TOP/gmp-$osname-$arch $TOP/gmp"
+  pth="$with_gmp_lib $gmp_add $libpth"
+  lib=gmp; . ./locatelib
+  gmp=$try
+fi
+
+if test -n "$gmp"; then
+  pth="$with_gmp_includes\
+      /usr/local/include\
+      /usr/include\
+      /opt/include\
+      /opt/local/include\
+      /opt/gnu/include\
+  "
+  x=`./locate 'gmp.h' '' $pth`
+  case $x in
+   ?:/*|/*) gmp_include=`echo $x | sed 's,/gmp.h,,'`
+     echo ..."Found gmp header in $gmp_include"
+     ;;
+    *) echo ..."But no header file has been found"
+       gmp=;;
+  esac
+fi
+
+if test -n "$gmp"; then
+  GMPINCLUDE="-I$gmp_include"
+  GMPLIBS="-L$gmp -lgmp"
+  LIBS="$LIBS $GMPLIBS"
+fi
+
+if test -z "$gmp"; then
+  echo "### Building without GNU MP support"
+else
+  if test "$fastread" = yes; then
+    exe=$osname-$arch-rlv$$
+    $CC $extraflag $GMPINCLUDE -o $exe gmp_version.c $GMPLIBS 2> /dev/null
+    if test -r $exe; then gmp=`$exe`; else gmp="?.?"; fi
+    rm -f $exe $exe$exe_suff
+    echo "Using GNU MP, version $gmp"
+  fi
+
+  if test "$fastread" != yes; then
+    cat << EOM
+==========================================================================
+EOM
+    echo $n "Do you want to use GNU MP library instead of the native kernel? $c"
+    rep='y n'; dflt=y; . ./myread
+    case $ans in
+      n) gmp=;;
+    esac
+  fi
+fi
+
+if test -n "$gmp"; then
+  case "$pretty" in
+    *GMP*)
+      pretty=`echo $pretty | sed "s/GMP/GMP-$gmp/"` ;;
+    /$kernlvl1)
+      pretty=`echo $pretty | sed "s/$kernlvl1/GMP-$gmp/"` ;;
+    *)
+      pretty=`echo $pretty | sed "s, *kernel,/GMP-$gmp kernel,"` ;;
+  esac
+  kernlvl1=gmp
+fi

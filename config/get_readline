@@ -8,23 +8,26 @@ rl_attempted_completion_over rl_completion_query_items \
 rl_completion_matches rl_completion_func_t \
 RLINCLUDE RLLIBS"
 
-readline_add="$GP_READLINE $TOP/readline-$osname-$arch $TOP/readline"
-pth="$readline_add $libpth"
-lib=readline; . ./locatelib
-rl_fullname=$try
+readline=
+if test -z "$disable_readline"; then
+  readline_add="$GP_READLINE $TOP/readline-$osname-$arch $TOP/readline"
+  pth="$with_readline_lib $readline_add $libpth"
+  lib=readline; . ./locatelib
+  rl_fullname=$try
+fi
 
 if test -n "$readline"; then
 # Readline -- Headers
   case "$osname" in
     os2) incpth=`echo $C_INCLUDE_PATH | sed -e 's/\([^;]\)$/\1;/g' -e 's%;%/readline %g' -e 's,\\\\,/,g'` ;;
-      cygwin*) incpth="\
-       $cygtop/usr/local/include/readline\
-       $cygtop/usr/local/include\
-       $cygtop/usr/include/readline\
-       $cygtop/usr/include\
-       $cygtop/H-${arch}-cygwin32/${arch}-cygwin32/include\
-     ";;
-      *) incpth="\
+    cygwin*) incpth="\
+      $cygtop/usr/local/include/readline\
+      $cygtop/usr/local/include\
+      $cygtop/usr/include/readline\
+      $cygtop/usr/include\
+      $cygtop/H-${arch}-cygwin32/${arch}-cygwin32/include\
+      ";;
+    *) incpth="\
       /usr/local/include/readline\
       /usr/include/readline\
       /opt/include/readline\
@@ -36,63 +39,63 @@ if test -n "$readline"; then
       /opt/include\
       /opt/local/include\
       /opt/gnu/include\
-    ";;
-    esac
-    pth="$readline_add $incpth"
-    x=`./locate 'readline.h' '' $pth`
-    CPPF_defined=
-    case $x in
-     ?:/*|/*) rl_include=`echo $x | sed 's,/readline.h,,'`
-         echo ..."Found readline header in $rl_include"
-         if (test -r "$rl_include/history.h"); then
-            echo ..."Found history header in $rl_include"
-           rl_history=yes
-         else
-            echo ..."No history header in $rl_include"
-         fi
-         if (grep CPPFunction $x > /dev/null 2>&1); then CPPF_defined=yes; fi
-         if (grep rl_message  $x > /dev/null 2>&1); then rl_message=yes; fi
-         if (grep rl_completion_matches $x > /dev/null 2>&1); then
-           rl_completion_matches=yes;
-         fi
-         if (grep rl_completion_func_t $x > /dev/null 2>&1); then
-           rl_completion_func_t=yes;
-         fi
-         if (grep "rl_refresh_line *()" $x > /dev/null 2>&1); then
-           rl_refresh_line_oldproto=yes
-         fi
-         if (grep rl_completion_append_character $x > /dev/null 2>&1); then
-           rl_appendchar=yes
-         fi
-         if (grep rl_generic_bind $x > /dev/null 2>&1); then
-           rl_genericbind=yes
-         fi
-         if (grep rl_attempted_completion_over $x > /dev/null 2>&1); then
-           rl_attempted_completion_over=yes;
-         fi
-         if (grep rl_completion_query_items $x > /dev/null 2>&1); then
-           rl_completion_query_items=yes;
-         fi
-         if (grep rl_bind_key_in_map $x > /dev/null 2>&1); then
-           rl_bind_key_in_map=yes;
-         fi
-         if (grep rl_library_version $x > /dev/null 2>&1); then
-           rl_library_version=yes;
-          rl_extra_flags="-DHAS_RL_LIBRARY_VERSION"
-         fi
-         if (grep rl_save_prompt $x > /dev/null 2>&1); then
-           rl_save_prompt=yes;
-         else # might be defined but not declared (old readline)
-          lib=$rl_fullname; sym=rl_save_prompt; . ./locatesymbol
-          _rl_save_prompt=$try
-         fi;;
-      *) echo ..."But no header file has been found"
-         readline=;;
-    esac
-  fi
+      ";;
+  esac
+  pth="$with_readline_includes $readline_add $incpth"
+  x=`./locate 'readline.h' '' $pth`
+  CPPF_defined=
+  case $x in
+   ?:/*|/*) rl_include=`echo $x | sed 's,/readline.h,,'`
+     echo ..."Found readline header in $rl_include"
+     if (test -r "$rl_include/history.h"); then
+        echo ..."Found history header in $rl_include"
+       rl_history=yes
+     else
+        echo ..."No history header in $rl_include"
+     fi
+     if (grep CPPFunction $x > /dev/null 2>&1); then CPPF_defined=yes; fi
+     if (grep rl_message  $x > /dev/null 2>&1); then rl_message=yes; fi
+     if (grep rl_completion_matches $x > /dev/null 2>&1); then
+       rl_completion_matches=yes;
+     fi
+     if (grep rl_completion_func_t $x > /dev/null 2>&1); then
+       rl_completion_func_t=yes;
+     fi
+     if (grep "rl_refresh_line *()" $x > /dev/null 2>&1); then
+       rl_refresh_line_oldproto=yes
+     fi
+     if (grep rl_completion_append_character $x > /dev/null 2>&1); then
+       rl_appendchar=yes
+     fi
+     if (grep rl_generic_bind $x > /dev/null 2>&1); then
+       rl_genericbind=yes
+     fi
+     if (grep rl_attempted_completion_over $x > /dev/null 2>&1); then
+       rl_attempted_completion_over=yes;
+     fi
+     if (grep rl_completion_query_items $x > /dev/null 2>&1); then
+       rl_completion_query_items=yes;
+     fi
+     if (grep rl_bind_key_in_map $x > /dev/null 2>&1); then
+       rl_bind_key_in_map=yes;
+     fi
+     if (grep rl_library_version $x > /dev/null 2>&1); then
+       rl_library_version=yes;
+      rl_extra_flags="-DHAS_RL_LIBRARY_VERSION"
+     fi
+     if (grep rl_save_prompt $x > /dev/null 2>&1); then
+       rl_save_prompt=yes;
+     else # might be defined but not declared (old readline)
+       lib=$rl_fullname; sym=rl_save_prompt; . ./locatesymbol
+       _rl_save_prompt=$try
+     fi;;
+    *) echo ..."But no header file has been found"
+       readline=;;
+  esac
+fi
 
+if test -n "$readline"; then
   pth="$readline_add $libpth"
-  if test -n "$readline"; then
 # Readline -- Allocation
   lib=$rl_fullname; sym=alloca; . ./locatesymbol
   if test -n "$try"; then # alloca needed

@@ -60,14 +60,10 @@ if test -z "$zcat" -a -n "$gzip"; then zcat="$gzip -dc"; fi
 . ./get_libc # $_has_list, update LIBS
 ####################### CONFIGURE - LIBRARIES ###############################
 # Looking for libraries: gmp, X11, gnuplot, readline
+echo Checking for optional libraries and headers...
 . ./get_libpth # initialize
-# GMP
-if test "$kernlvl1" = "gmp"; then
-  . ./get_gmp  # libgmp
-  LIBS="$LIBS -lgmp"
-fi
+. ./get_gmp  # $_gmp_list
 if test "$optimization" != profiling; then
-  echo Checking for optional libraries and headers...
   . ./get_X11  # X11, Xincroot, extralib
   . ./get_gnuplot_libs # gnuplot, gnuplot_libs
   . ./get_readline # $_readline_list (includes 'readline')
@@ -130,6 +126,7 @@ for variable in\
   $_ld_list\
   $_dlld_list\
   $_readline_list\
+  $_gmp_list\
   $_has_list; do
   eval "echo $variable=\'"'$'"$variable\'" \>\> $dflt_conf_file
 done

@@ -74,6 +74,16 @@ while test $# -gt 0; do
   --graphic=*|--graphi=*|--graph=*|--grap=*|--gra=*|--gr=*|--g=*)
 	       graph_cmd=yes
 	       which_graphic_lib=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
+  --disable-readline) disable_readline=yes ;;
+  --with-readline-lib=*)
+      with_readline_lib=`echo "$1" | sed -e 's/[-a-z]*=//'` ;;
+  --with-readline-includes=*)
+      with_readline_includes=`echo "$1" | sed -e 's/[-a-z]*=//'` ;;
+  --disable-gmp) disable_gmp=yes ;;
+  --with-gmp-lib=*)
+      with_gmp_lib=`echo "$1" | sed -e 's/[-a-z]*=//'` ;;
+  --with-gmp-includes=*)
+      with_gmp_includes=`echo "$1" | sed -e 's/[-a-z]*=//'` ;;
   *) echo "*** Unrecognized option $1." >&2; error=true;;
   esac
   shift
@@ -109,6 +119,14 @@ Installation directories:
   --miscdir=<dir>       for documentation, examples and emacs macros
   --datadir=<dir>       for precomputed data (Galois resolvents for polgalois)
   --includedir=<dir>    for C header files
+
+  --disable-readline    do not link with GNU readline
+  --with-readline-includes=DIR specify location of readline headers
+  --with-readline-lib=DIR  specify location of readline libs
+  --disable-gmp         use the native kernel instead of GNU MP
+  --with-gmp-includes=DIR specify location of gmp headers
+  --with-gmp-lib=DIR    specify location of gmp libs
+
 EOT
 exit 1
 ;;

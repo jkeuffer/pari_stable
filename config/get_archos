@@ -98,7 +98,6 @@ EOM
   fi
 fi
 
-
 case "$kernlvl0" in
   none)          prettyk="C portable";;
   sparcv7)       prettyk=SparcV7;;
@@ -117,9 +116,5 @@ case "$kernlvl1" in
   *) prettyk="$prettyk/$kernlvl1";;
 esac
 
-# 'i386 (running ix86 kernel)'  looks ugly
-if test "$pretty" != "$prettyk" -a \( "$pretty" != "i386" -o "$prettyk" != "ix86" \)
-then
-  pretty="$pretty ($prettyk kernel)"
-fi
+pretty="$pretty ($prettyk kernel)"
 echo "Building for architecture: $pretty"

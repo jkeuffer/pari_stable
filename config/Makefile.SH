@@ -185,6 +185,11 @@ if test "$has_dlopen" = builtin -a X"$osname" = Xos2; then
   CPPFLAGS="$CPPFLAGS -I$src/systems/os2"
 fi
 
+case "$ln_s" in
+  *cp*) ln_objdir=".";;
+  *)    ln_objdir="$objdir"
+esac
+
 cat > $file << EOT
 # Makefile for Pari/GP -- $pretty
 #
@@ -275,6 +280,11 @@ INSTALL = $cfg/install
 INSTALL_PROGRAM = \$(INSTALL)
 INSTALL_DATA = \$(INSTALL) -m 644
 
+# Readline
+RLINCLUDE = $RLINCLUDE
+RLLIBS    = $RLLIBS
+# GMP
+GMPINCLUDE = $GMPINCLUDE
 # Graphic library.
 PLOTCFLAGS = $PLOTCFLAGS
 PLOTLIBS   = $PLOTLIBS
@@ -282,22 +292,6 @@ GNUPLOT_OBJS = $GNUPLOT_OBJS
 # Try uncommenting this line if you're using X11 and linking fails
 #  PLOTLIBS=-L$X11 -lX11
 
-EOT
-if test -n "$readline"; then
-cat >> $file << EOT
-
-RLINCLUDE = $RLINCLUDE
-RLLIBS    = $RLLIBS
-
-EOT
-fi
-
-case "$ln_s" in
-  *cp*) ln_objdir=".";;
-  *)    ln_objdir="$objdir"
-esac
-
-cat >> $file << EOT
 TOPLDDYN     = -L$TOP/$objdir \$(RLLIBS)
 
 OBJS   = $OBJS
