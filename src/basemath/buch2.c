@@ -881,7 +881,8 @@ triv_gen(GEN nf, GEN x, long c, long flag)
   if (!(flag & nf_GEN)) return cgetg(1,t_COL);
   y = cgetg(4,t_VEC);
   y[1] = (long)zerocol(c);
-  y[2] = (long)algtobasis(nf,x);
+  x = (typ(x) == t_COL)? gcopy(x): algtobasis(nf,x);
+  y[2] = (long)x;
   y[3] = lstoi(BIGINT); return y;
 }
 
