@@ -705,12 +705,15 @@ RgXQX_sqr(GEN x, GEN T)
   return RgXQX_red(RgX_sqr(x), T);
 }
 
+GEN
+RgXQ_mul(GEN y, GEN x, GEN T) { return RgX_rem(RgX_mul(y, x), T); }
+GEN
+RgXQ_sqr(GEN x, GEN T) { return RgX_rem(RgX_sqr(x), T); }
+
 static GEN
-_sqr(void *data, GEN x)
-{ return RgX_rem(RgX_sqr(x), (GEN)data); }
+_sqr(void *data, GEN x) { return RgXQ_sqr(x, (GEN)data); }
 static GEN
-_mul(void *data, GEN x, GEN y)
-{ return RgX_rem(RgX_mul(x,y), (GEN)data); }
+_mul(void *data, GEN x, GEN y) { return RgXQ_mul(x,y, (GEN)data); }
 
 /* x,T in Rg[X], n in N, compute lift(x^n mod T)) */
 GEN

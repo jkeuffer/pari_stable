@@ -68,7 +68,7 @@ BA 15- polsubcyclo() used too much memory for large conductors.
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu
     2- exported FFTinit() / FFT() wrappers to rootpol.c:fft() [not under GP yet]
     3- routines Rg_to_Fl, Rg_to_Fp, RgX_to_FpX, RgX_to_FpXQX, RgX_to_FqX,
-       RgV_to_FpV.
+       RgV_to_FpV, RgXQ_mul, RgXQ_sqr.
 
   Changed
     1- renamed gegal --> gequal, gegalgs --> gequalgs, gegalsg --> gequalsg,
