@@ -1067,7 +1067,13 @@ idealmat_mul(GEN nf, GEN x, GEN y)
     for (i=1; i<=rx; i++)
       for (j=1; j<=ry; j++)
         m[(i-1)*ry+j]=(long)element_muli(nf,(GEN)x[i],(GEN)y[j]);
-    y=hnfmod(m, detint(m));
+    if (isnfscalar((GEN)x[1]) && isnfscalar((GEN)y[1]))
+    {
+      GEN p1 = mulii(gcoeff(x,1,1),gcoeff(y,1,1));
+      y = hnfmodid(m, p1);
+    }
+    else 
+      y=hnfmod(m, detint(m));
   }
   else
   {
@@ -1518,44 +1524,44 @@ chk_vdir(GEN nf, GEN vdir)
 }
 
 GEN
-ideallllredall(GEN nf, GEN x, GEN vdir, long prec, long precint)
+ideallllredall(GEN nf, GEN I, GEN vdir, long prec, long precint)
 {
-  long tx,N,av,tetpil,i,j;
-  GEN iax,ix,res,ax,p1,p2,y,alpha,beta,pol;
+  long tx,N,av,i,j;
+  GEN aI0,I0,res,aI,p1,y,x,Nx,b,c,pol;
 
   nf = checknf(nf);
   vdir = chk_vdir(nf,vdir);
   pol = (GEN)nf[1]; N = lgef(pol)-3;
-  tx = idealtyp(&x,&ax); ix=x; iax=ax;
-  res = ax? cgetg(3,t_VEC): NULL;
+  tx = idealtyp(&I,&aI); I0=I; aI0=aI;
+  res = aI? cgetg(3,t_VEC): NULL;
   if (tx == id_PRINCIPAL)
   {
-    if (gcmp0(x))
+    if (gcmp0(I))
     {
       y = cgetg(1, t_MAT);
-      if (!ax) return y;
-      res[2] = lcopy(ax);
+      if (!aI) return y;
+      res[2] = lcopy(aI);
     }
     else
     {
       y = idmat(N);
-      if (!ax) return y;
+      if (!aI) return y;
       av = avma;
-      res[2] = lpileupto(av, gsub(ax, get_arch(nf,x,prec)));
+      res[2] = lpileupto(av, gsub(aI, get_arch(nf,I,prec)));
     }
     res[1] = (long)y; return res;
   }
   av = avma;
-  if (tx != id_MAT || lg(x) != N+1) x = idealhermite_aux(nf,x);
+  if (tx != id_MAT || lg(I) != N+1) I = idealhermite_aux(nf,I);
 
   if (DEBUGLEVEL>=6) msgtimer("entering idealllred");
-  p1=content(x); if (!gcmp1(p1)) x=gdiv(x,p1);
+  c = content(I); if (!gcmp1(c)) I = gdiv(I,c);
 
   for (i=1; ; i++)
   {
-    p1=computet2twist(nf,vdir);
+    p1 = computet2twist(nf,vdir);
     if (DEBUGLEVEL>=6) msgtimer("twisted T2");
-    y = qf_base_change(p1,x,1);
+    y = qf_base_change(p1,I,1);
     j = 1 + (gexpo(y)>>TWOPOTBITS_IN_LONG);
     if (j<0) j=0;
     p1 = lllgramintern(y,100,1,j+precint);
@@ -1566,35 +1572,40 @@ ideallllredall(GEN nf, GEN x, GEN vdir, long prec, long precint)
     if (DEBUGLEVEL) err(warnprec,"ideallllredall",precint);
     nf=nfnewprec(nf,(j>>1)+precint);
   }
-  y = gmul(x,(GEN)p1[1]);
+  y = gmul(I,(GEN)p1[1]); /* small elt in I */
   if (DEBUGLEVEL>=6) msgtimer("lllgram");
-
-  i=2; while (i<=N && gcmp0((GEN)y[i])) i++;
-  if (i>N)
+  if (isnfscalar(y))
   {
-    if (x!=ix) x = gerepileupto(av,x); else { avma=av; x = gcopy(x); }
-    if (!ax) return x;
-    if (ax==iax) ax = gcopy(ax);
-    res[1]=(long)x; res[2]=(long)ax; return res;
+    if (I!=I0) I = gerepileupto(av,I); else { avma=av; I = gcopy(I); }
+    if (!aI) return I;
+    if (aI==aI0) aI = gcopy(aI);
+    res[1]=(long)I; res[2]=(long)aI; return res;
   }
-  alpha = gmul((GEN)nf[7], y);
-  /* beta = norm(alpha) / alpha */
-  beta = gmul(subres(pol,alpha), ginvmod(alpha,pol));
-  beta = algtobasis_intern(nf,beta);
-  if (DEBUGLEVEL>=6) msgtimer("alpha/beta");
 
-  p2 = cgetg(N+1,t_MAT);
+  x = gmul((GEN)nf[7], y);
+  Nx = subres(pol,x);
+  b = gmul(Nx, ginvmod(x,pol));
+  b = algtobasis_intern(nf,b);
+  if (DEBUGLEVEL>=6) msgtimer("x/b");
+
+  p1 = cgetg(N+1,t_MAT); /* = I Nx / x integral */
   for (i=1; i<=N; i++)
-    p2[i] = (long)element_muli(nf,beta,(GEN)x[i]);
-  p1=content(p2); if (!gcmp1(p1)) p2=gdiv(p2,p1);
+    p1[i] = (long)element_muli(nf,b,(GEN)I[i]);
+  c = content(p1); if (!gcmp1(c)) p1 = gdiv(p1,c);
   if (DEBUGLEVEL>=6) msgtimer("new ideal");
-  if (ax) y = gclone(gneg_i(get_arch(nf,y,prec)));
+  if (aI) y = gclone(gneg_i(get_arch(nf,y,prec)));
 
-  p1 = detint(p2); tetpil = avma;
-  p2 = gerepile(av,tetpil,hnfmod(p2,p1));
+  if (isnfscalar((GEN)I[1]))
+  /* c = content (I Nx / x) = Nx / den(I/x) --> d = den(I/x) = Nx / c
+   * p1 = (d I / x); I[1,1] = I \cap Z --> d I[1,1] belongs to p1 and Z
+   */
+    p1 = hnfmodid(p1, mulii(gcoeff(I,1,1), divii(Nx, c)));
+  else
+    p1 = hnfmod(p1, detint(p1));
+  p1 = gerepileupto(av, p1);
   if (DEBUGLEVEL>=6) msgtimer("final hnf");
-  if (!ax) return p2;
-  res[1]=(long)p2; res[2]=ladd(ax,y);
+  if (!aI) return p1;
+  res[1]=(long)p1; res[2]=ladd(aI,y);
   gunclone(y); return res;
 }
 
