@@ -459,6 +459,7 @@ nfhilbert0(GEN nf,GEN a,GEN b,GEN p)
 extern GEN isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag);
 extern GEN vconcat(GEN Q1, GEN Q2);
 extern GEN mathnfspec(GEN x, GEN *ptperm, GEN *ptdep, GEN *ptB, GEN *ptC);
+extern GEN factorback_i(GEN fa, GEN nf, int red);
 /* S a list of prime ideal in primedec format. Return res:
  * res[1] = generators of (S-units / units), as polynomials
  * res[2] = [perm, HB, den], for bnfissunit
@@ -519,7 +520,7 @@ bnfsunit(GEN bnf,GEN S,long prec)
     for(i--; i; i--)
     {
       fa[2] = pow[i];
-      p1[i] = (long)factorback(fa, nf);
+      p1[i] = (long)factorback_i(fa, nf, 1);
     }
     ClS[3]=(long)p1; /* gen */
     res[5]=(long) ClS;

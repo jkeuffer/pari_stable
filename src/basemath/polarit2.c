@@ -1632,13 +1632,19 @@ divide_conquer_prod(GEN x, GEN (*mul)(GEN,GEN))
 static GEN static_nf;
 
 static GEN
+myidealmulred(GEN x, GEN y) { return idealmulred(static_nf, x, y, 0); }
+
+static GEN
+myidealpowred(GEN x, GEN n) { return idealpowred(static_nf, x, n, 0); }
+
+static GEN
 myidealmul(GEN x, GEN y) { return idealmul(static_nf, x, y); }
 
 static GEN
 myidealpow(GEN x, GEN n) { return idealpow(static_nf, x, n); }
 
 GEN
-factorback(GEN fa, GEN nf)
+factorback_i(GEN fa, GEN nf, int red)
 {
   long av=avma,k,l,lx;
   GEN ex, x;
@@ -1653,8 +1659,16 @@ factorback(GEN fa, GEN nf)
   if (nf)
   {
     static_nf = nf;
-    _mul = &myidealmul;
-    _pow = &myidealpow;
+    if (red)
+    {
+      _mul = &myidealmulred;
+      _pow = &myidealpowred;
+    }
+    else
+    {
+      _mul = &myidealmul;
+      _pow = &myidealpow;
+    }
   }
   else
   {
@@ -1666,6 +1680,12 @@ factorback(GEN fa, GEN nf)
       x[l++] = (long)_pow((GEN)fa[k],(GEN)ex[k]);
   setlg(x,l);
   return gerepileupto(av, divide_conquer_prod(x, _mul));
+}
+
+GEN
+factorback(GEN fa, GEN nf)
+{
+  return factorback_i(fa,nf,0);
 }
 
 GEN
