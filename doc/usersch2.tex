@@ -19,17 +19,14 @@ To start the calculator, the general command line syntax is:
 \kbd{gp [-s \var{stacksize}] [-p \var{primelimit}] [\var{files}]}
 
 \noindent
-where items within brackets are optional\footnote{*}{On old Macintoshs
-(pre-Mac OS X era), even after clicking on the gp icon, once in the MPW
-Shell, you still need to type explicitly a command of the above form.}. The
-[\var{files}] argument is a list of files written in the GP scripting
-language, which will be loaded on startup. The ones starting with a minus
-sign are \emph{flags}, setting some internal parameters of \kbd{gp}, or
-\var{defaults}. See \secref{se:defaults} below for a list and explanation of
-all defaults, there are many more than just those two. These defaults can be
-changed by adding parameters to the input line as above, or interactively
-during a \kbd{gp} session or in a preferences file (also known as
-\tet{gprc}).
+where items within brackets are optional. The [\var{files}] argument is a
+list of files written in the GP scripting language, which will be loaded on
+startup. The ones starting with a minus sign are \emph{flags}, setting some
+internal parameters of \kbd{gp}, or \var{defaults}. See \secref{se:defaults}
+below for a list and explanation of all defaults, there are many more than
+just those two. These defaults can be changed by adding parameters to the
+input line as above, or interactively during a \kbd{gp} session or in a
+preferences file (also known as \tet{gprc}).
 
 \unix Some features were developed on UNIX platforms, and depend heavily on
 the operating system in use. It is \emph{possible} that some of these will be
@@ -426,13 +423,13 @@ Independently of the setting of this default, an object can be printed
 in any of the three formats at any time using the commands \b{a}, \b{m}
 and~\b{b} respectively (see below).
 
-\subsecidx{parisize}\label{se:parisize} (default, 1M bytes on the Mac, 4M
-otherwise): \kbd{gp}, and in fact any program using the PARI library, needs a stack
-in which to do its computations. \kbd{parisize} is the stack size, in bytes.
-It is strongly recommended you increase this default (using the \kbd{-s}
-command-line switch, or a \tet{gprc}) if you can afford it. Don't increase it
-beyond the actual amount of RAM installed on your computer or \kbd{gp} will spend
-most of its time paging.
+\subsecidx{parisize}\label{se:parisize} (default 4M, resp.~8M on a 32-bit,
+resp.~64-bit machine): \kbd{gp}, and in fact any program using the PARI
+library, needs a stack in which to do its computations. \kbd{parisize} is the
+stack size, in bytes. It is strongly recommended you increase this default
+(using the \kbd{-s} command-line switch, or a \tet{gprc}) if you can afford
+it. Don't increase it beyond the actual amount of RAM installed on your
+computer or \kbd{gp} will spend most of its time paging.
 
 In case of emergency, you can use the \tet{allocatemem} function to
 increase \kbd{parisize}, once the session is started.
@@ -452,10 +449,11 @@ immediate parent. Environment expansion is performed.
 \tet{tex2mail} looks much nicer than the built-in ``beautified
 format'' ($\kbd{output} = 2$).
 
-\subsecidx{primelimit} (default \kbd{200k} on the Mac, and \kbd{500k}
-otherwise): \kbd{gp} precomputes a list of all primes less than \kbd{primelimit}
-at initialization time. These are used by many arithmetical functions. If
-you don't plan to invoke any of them, you can just set this to 1.
+\subsecidx{primelimit} (default \kbd{500k}): \kbd{gp} precomputes a list of
+all primes less than \kbd{primelimit} at initialization time. These are used
+by many arithmetical functions. If you don't plan to invoke any of them, you
+can just set this to 1. The maximal value is $2^32 - 1$ (resp $2^64 - 1$)
+on a 32-bit (resp.~64-bit) machine.
 
 \subsecidx{prompt} (default \kbd{"? "}): a string that will be printed as
 prompt. Note that most usual escape sequences are available there: \b{e} for
@@ -2255,15 +2253,12 @@ values read from the preferences file.
 When \kbd{gp} is started, it looks for a customization file, or \kbd{gprc} in the
 following places (in this order, only the first one found will be loaded):
 
-\noindent$\bullet$ On the Macintosh (only), \kbd{gp} looks in the directory which
-contains the \kbd{gp} executable itself for a file called \kbd{gprc}. No other places
-are examined.
+\noindent$\bullet$ On the Macintosh (only), \kbd{gp} looks in the directory
+which contains the \kbd{gp} executable itself for a file called \kbd{gprc}.
 
-\noindent$\bullet$ If the operating system supports environment variables
-(essentially, anything but MacOS), \kbd{gp} checks whether the environment variable
-\tet{GPRC} is set. Under DOS, you can set it in \kbd{AUTOEXEC.BAT}.
-On Unix, this can be done with something like:
-\smallskip
+\noindent$\bullet$ \kbd{gp} checks whether the environment variable
+\tet{GPRC} is set. Under DOS, you can set it in \kbd{AUTOEXEC.BAT}. On Unix,
+this can be done with something like: \smallskip
 
 \settabs\+\indent&\kbd{GPRC=/my/dir/anyname; export GPRC}\quad&\cr
 
