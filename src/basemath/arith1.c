@@ -675,7 +675,7 @@ gcarreparfait(GEN x)
 
 /* assume y odd, return kronecker(x,y) * s */
 long
-krouu(ulong x, ulong y, long s)
+krouu_s(ulong x, ulong y, long s)
 {
   ulong x1 = x, y1 = y, z;
   while (x1)
@@ -728,7 +728,7 @@ kronecker(GEN x, GEN y)
     z = resii(y,x); y = x; x = z;
   }
   avma = av;
-  return krouu(itou(x), itou(y), s);
+  return krouu_s(itou(x), itou(y), s);
 }
 
 GEN
@@ -754,7 +754,7 @@ krogs(GEN x, long y)
     if (odd(r) && gome(x)) s = -s;
     y1 >>= r;
   }
-  return krouu(umodiu(x, y1), y1, s);
+  return krouu_s(umodiu(x, y1), y1, s);
 }
 
 long
@@ -786,7 +786,7 @@ krosg(long x, GEN y)
   /* x=3 mod 4 && y=3 mod 4 ? (both are odd here) */
   if (x & modBIL(y) & 2) s = -s;
   u = umodiu(y, (ulong)x);
-  avma = av; return krouu(u, (ulong)x, s);
+  avma = av; return krouu_s(u, (ulong)x, s);
 }
 
 long
@@ -810,7 +810,17 @@ kross(long x, long y)
     y1 >>= r;
   }
   x = x % (long)y1; if (x < 0) x += y1;
-  return krouu((ulong)x, y1, s);
+  return krouu_s((ulong)x, y1, s);
+}
+
+long
+krouu(ulong x, ulong y)
+{
+  long r;
+  if (y & 1) return krouu_s(x, y, 1);
+  if (!odd(x)) return 0;
+  r = vals(y);
+  return krouu_s(x, y >> r, (odd(r) && ome(x))? -1: 1);
 }
 
 /*********************************************************************/
@@ -941,8 +951,60 @@ hil(GEN x, GEN y, GEN p)
 /*                                                                 */
 /*******************************************************************/
 
-#define sqrmod(x,p) (resii(sqri(x),p))
+#define sqrumod(m, p) (muluumod(m,m,p))
+/* Tonelli-Shanks. Assume p is prime and (a,p) = -1. */
+ulong
+usqrtmod(ulong a, ulong p)
+{
+  long i, e;
+  ulong k, p1, q, v, y, w, m;
 
+  if (!a) return 0;
+  p1 = p - 1; e = vals(p1);
+  if (e == 0) /* p = 2 */
+  {
+    if (p != 2) err(talker,"composite modulus in usqrtmod: %lu",p);
+    return ((a & 1) == 0)? 0: 1;
+  }
+  q = p1 >> e; /* q = (p-1)/2^oo is odd */
+  if (e == 1) y = p1;
+  else /* look for an odd power of a primitive root */
+    for (k=2; ; k++)
+    { /* loop terminates for k < p (even if p composite) */
+      i = krouu(k, p);
+      if (i >= 0)
+      {
+        if (i) continue;
+        err(talker,"composite modulus in mpsqrtmod: %lu",p);
+      }
+      y = m = powuumod(k, q, p);
+      for (i=1; i<e; i++)
+	if ((m = sqrumod(m,p)) == 1) break;
+      if (i == e) break; /* success */
+    }
+
+  p1 = powuumod(a, q >> 1, p); /* a ^ [(q-1)/2] */
+  if (!p1) return 0;
+  v = muluumod(a, p1, p);
+  w = muluumod(v, p1, p);
+  while (w != 1)
+  { /* a*w = v^2, y primitive 2^e-th root of 1
+       a square --> w even power of y, hence w^(2^(e-1)) = 1 */
+    p1 = sqrumod(w,p);
+    for (k=1; p1 != 1 && k < e; k++) p1 = sqrumod(p1,p);
+    if (k == e) err(talker,"composite modulus in usqrtmod: %lu?", p);
+    /* w ^ (2^k) = 1 --> w = y ^ (u * 2^(e-k)), u odd */
+    p1 = y;
+    for (i=1; i < e-k; i++) p1 = sqrumod(p1,p);
+    y = sqrumod(p1, p); e = k;
+    w = muluumod(y, w, p);
+    v = muluumod(v, p1, p);
+  }
+  p1 = p - v; if (v > p1) v = p1;
+  return v;
+}
+
+#define sqrmod(x,p) (resii(sqri(x),p))
 static GEN ffsqrtmod(GEN a, GEN p);
 
 /* Tonelli-Shanks. Assume p is prime and return NULL if (a,p) = -1. */
@@ -950,11 +1012,14 @@ GEN
 mpsqrtmod(GEN a, GEN p)
 {
   pari_sp av = avma, av1,lim;
-  long i,k,e;
-  GEN p1,q,v,y,w,m;
+  long i, k, e;
+  GEN p1, q, v, y, w, m;
 
   if (typ(a) != t_INT || typ(p) != t_INT) err(arither1);
   if (signe(p) <= 0 || is_pm1(p)) err(talker,"not a prime in mpsqrtmod");
+  if (lgefint(p) == 3) 
+    return utoi( usqrtmod(umodiu(a, (ulong)p[2]), (ulong)p[2]) );
+
   p1 = addsi(-1,p); e = vali(p1);
   
   /* If `e' is "too big", use Cipolla algorithm ! [GTL] */

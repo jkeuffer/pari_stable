@@ -33,9 +33,7 @@ GEN    addii(GEN x, GEN y);
 GEN    addir(GEN x, GEN y);
 GEN    addrr(GEN x, GEN y);
 GEN    addsi(long x, GEN y);
-void   addsii(long x, GEN y, GEN z);
 ulong  adduumod(ulong a, ulong b, ulong p);
-void   addssz(long x, long y, GEN z);
 void   affii(GEN x, GEN y);
 void   affsi(long s, GEN x);
 void   affui(long s, GEN x);
@@ -48,7 +46,6 @@ GEN    cgetr(long x);
 int    cmpir(GEN x, GEN y);
 int    cmpsr(long x, GEN y);
 int    divise(GEN x, GEN y);
-long   divisii(GEN x, long y, GEN z);
 void   divrrz(GEN x, GEN y, GEN z);
 void   divsiz(long x, GEN y, GEN z);
 GEN    divsi_rem(long x, GEN y, long *rem);
@@ -92,9 +89,7 @@ int    mpdivisis(GEN x, long y, GEN z);
 GEN    mpmul(GEN x, GEN y);
 GEN    mpneg(GEN x);
 GEN    mpsub(GEN x, GEN y);
-void   mulsii(long x, GEN y, GEN z);
 ulong  muluumod(ulong a, ulong b, ulong c);
-void   mulssz(long x, long y, GEN z);
 GEN    new_chunk(size_t x);
 long   random_bits(long k);
 GEN    rdivii(GEN x, GEN y, long prec);
@@ -463,17 +458,6 @@ minss(long x, long y)
   return x<y?x:y;
 }
 
-INLINE void
-addssz(long x, long y, GEN z)
-{
-  if (typ(z)==t_INT) gopssz(addss,x,y,z);
-  else
-  {
-    const pari_sp av=avma;
-    affir(addss(x, y), z); avma=av;
-  }
-}
-
 INLINE GEN
 addii(GEN x, GEN y)
 {
@@ -529,17 +513,6 @@ subsi(long x, GEN y)
   return addsi_sign(x, y, -signe(y));
 }
 
-INLINE void
-mulssz(long x, long y, GEN z)
-{
-  if (typ(z)==t_INT) gopssz(mulss,x,y,z);
-  else
-  {
-    const pari_sp av=avma;
-    affir(mulss(x,y), z); avma=av;
-  }
-}
-
 INLINE ulong
 umuluu(ulong x, ulong y, ulong *rem)
 {
@@ -547,28 +520,6 @@ umuluu(ulong x, ulong y, ulong *rem)
   x=mulll(x,y); *rem=hiremainder; return x;
 }
 
-
-INLINE void
-mulsii(long x, GEN y, GEN z)
-{
-  const pari_sp av=avma;
-  affii(mulsi(x,y),z); avma=av;
-}
-
-INLINE void
-addsii(long x, GEN y, GEN z)
-{
-  const pari_sp av=avma;
-  affii(addsi(x,y),z); avma=av;
-}
-
-INLINE long
-divisii(GEN x, long y, GEN z)
-{
-  long rem;
-  const pari_sp av=avma; affii(divis_rem(x,y, &rem),z); avma=av;
-  return rem;
-}
 
 INLINE long
 vali(GEN x)
@@ -725,7 +676,7 @@ INLINE void
 divsiz(long x, GEN y, GEN z)
 {
   long junk;
-  affsr(sdivsi_rem(x,y,&junk), z);
+  gaffsg(sdivsi_rem(x,y,&junk), z);
 }
 
 INLINE void

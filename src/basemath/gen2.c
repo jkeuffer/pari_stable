@@ -1654,11 +1654,8 @@ gsigne(GEN x)
 {
   switch(typ(x))
   {
-    case t_INT: case t_REAL:
-      return signe(x);
-
-    case t_FRAC:
-      return (signe(x[2])>0) ? signe(x[1]) : -signe(x[1]);
+    case t_INT: case t_REAL: return signe(x);
+    case t_FRAC: return signe(x[1]);
   }
   err(typeer,"gsigne");
   return 0; /* not reached */

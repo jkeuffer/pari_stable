@@ -330,7 +330,6 @@ GEN     sqcompreal(GEN x);
 GEN     znstar(GEN x);
 long    carrecomplet(GEN x, GEN *pt);
 long    cgcd(long a,long b);
-void    check_quaddisc(GEN x, long *s, long *r, char *f);
 long    clcm(long a,long b);
 long    hil(GEN x, GEN y, GEN p);
 long    hil0(GEN x, GEN y, GEN p);
@@ -344,9 +343,12 @@ long    krogs(GEN x, long y);
 long    kronecker(GEN x, GEN y);
 long    krosg(long s, GEN x);
 long    kross(long x, long y);
-void    lucas(long n, GEN *ln, GEN *ln1);
-ulong   u_gener_fact(ulong p, GEN fa);
+long    krouu(ulong x, ulong y);
 ulong   u_gener(ulong p);
+ulong   u_gener_fact(ulong p, GEN fa);
+ulong   usqrtmod(ulong a, ulong p);
+void    check_quaddisc(GEN x, long *s, long *r, char *f);
+void    lucas(long n, GEN *ln, GEN *ln1);
 
 /* arith2.c */
 

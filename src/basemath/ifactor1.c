@@ -195,8 +195,6 @@ miller(GEN n, long k)
 /**                      PSEUDO PRIMALITY (LUCAS)                   **/
 /**                                                                 **/
 /*********************************************************************/
-extern long krouu(ulong x, ulong y, long s);
-
 /* compute n-th term of Lucas sequence modulo N.
  * v_{k+2} = P v_{k+1} - v_k, v_0 = 2, v_1 = P.
  * Assume n > 0 */
@@ -296,7 +294,7 @@ IsLucasPsP0(GEN N)
   {
     ulong c = b*b - 4; /* = 1 mod 4 */
     if (i == 64 && carreparfait(N)) return 0; /* avoid oo loop if N = m^2 */
-    if (krouu(umodiu(N,c), c, 1) < 0) break;
+    if (krouu(umodiu(N,c), c) < 0) break;
   }
   if (lgefint(N) == 3) return u_IsLucasPsP(itou(N), b);
 

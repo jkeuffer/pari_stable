@@ -866,7 +866,7 @@ copart(char *s, ulong x, long start)
 }
 
 /* convert abs(x) != 0 to str. Prepend '-' if (minus) */
-static char *
+char *
 itostr(GEN x, int minus)
 {
   long l, d;
