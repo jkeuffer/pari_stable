@@ -114,7 +114,7 @@ RS 21- gcc-3.4 breaks on compatibility code to support old readline versions
        arith1.c to qfb.c
    12- reinstate cornacchia + cornacchia2 with a different interface [ use
        cornacchia in qfbsolve ]
-   13- allow non-real arguments in incgamc
+   13- allow non-real arguments in incgamc, incgam
 MW 14- ellap: if E has CM by a principal order, use Cornacchia instead
        of Shanks/Mestre
    15- more efficient algorithm for issquare(t_FRAC | t_RFRAC)
