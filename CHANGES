@@ -65,8 +65,9 @@ BA  6- improved ffinit()
     7- rewrote time-critical parts of bnrstark
     8- all 'input filter' code removed from GP. es.c:filtre() now handles the
        full filtering [and has become reentrant]
-    9- isprime() now guarantees primality.
+    9- isprime() now guarantees primality
 BA 10- improved polsubcyclo()
+BA 11- new interface for galoissubcyclo
 
   Added
     1- mplog2() function --> faster mplog()
