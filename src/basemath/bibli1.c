@@ -1741,7 +1741,7 @@ static GEN
 do_exhaustive(GEN P, GEN N, int x, GEN B) 
 {
   GEN tst, sol = cget1(2*x + 2, t_VECSMALL);
-  int j, l;
+  long j, l;
 
   for (j = -x; j <= x; j++)
   {
