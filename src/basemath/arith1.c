@@ -1846,7 +1846,7 @@ bestappr(GEN x, GEN k)
       err(talker,"incorrect bound type in bestappr");
     k = gcvtoi(k,&e);
   }
-  if (cmpis(k,1) < 0) k=gun;
+  if (signe(k) <= 0) k=gun;
   tx=typ(x); if (tx == t_FRACN) x = gred(x);
   switch(tx)
   {
