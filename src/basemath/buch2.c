@@ -2314,12 +2314,9 @@ compute_vecG(GEN nf,long prec)
   long r1, i, j, ind, n = min(lg(M[1])-1, 9);
 
   r1 = nf_get_r1(nf);
-  vecG=cgetg(1 + n*(n+1)/2,t_VEC);
-  if (nfgetprec(nf) > prec)
-  {
-    M = gprec_w(M,prec);
-    G = gprec_w(G,prec);
-  }
+  vecG = cgetg(1 + n*(n+1)/2,t_VEC);
+  /* copy necessary: migh come from an nf clone which is later destroyed */
+  if (nfgetprec(nf) > prec) G = gprec_w(G,prec); else G = gcopy(G);
   Gtw = gmul2n(G, 10);
   for (ind=j=1; j<=n; j++)
     for (i=1; i<=j; i++) vecG[ind++] = (long)shift_G(G,Gtw,i,j,r1);
