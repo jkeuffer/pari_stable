@@ -24,8 +24,11 @@
   \baselineskip=13pt
 \else     %NO
   \magnification=\magstephalf
-  \checkfile{wantpdfoutput} % check if we want PDF output
-  \ifeof\std \else \PDFtrue \fi
+  \ifx\pdfoutput\undefined
+     \PDFfalse
+  \else
+     \PDFtrue
+  \fi
 \fi
 
 % if paricfg.tex is there (Configure succeeded), input it, otherwise use
