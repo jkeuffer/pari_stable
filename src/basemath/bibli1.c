@@ -441,10 +441,10 @@ ZRED(long k, long l, GEN x, GEN h, GEN L, GEN B, long K)
 static GEN
 round_safe(GEN q)
 {
-  long e;
   if (typ(q) == t_INT) return q;
   if (expo(q) > 30)
   {
+    long e;
     q = grndtoi(q, &e);
     if (e > 0) return NULL;
   } else
@@ -1948,13 +1948,13 @@ redall(pslq_M *M, long i, long jsup)
   long j, k, n = M->n;
   GEN t,b;
   GEN A = M->A, B = M->B, H = M->H, y = M->y;
-  const GEN p1 = (GEN)B[i];
+  const GEN Bi = (GEN)B[i];
 
   for (j=jsup; j>=1; j--)
   {
-    long junk;
-    t = grndtoi(gdiv(gcoeff(H,i,j), gcoeff(H,j,j)), &junk);
-    if (gcmp0(t)) continue;
+    pari_sp av = avma;
+    t = round_safe( gdiv(gcoeff(H,i,j), gcoeff(H,j,j)) );
+    if (!t || gcmp0(t)) { avma = av; continue; }
 
     b = (GEN)B[j];
     y[j] = ladd((GEN)y[j], gmul(t,(GEN)y[i]));
@@ -1963,7 +1963,7 @@ redall(pslq_M *M, long i, long jsup)
     for (k=1; k<=n; k++)
     {
       coeff(A,i,k) = lsub(gcoeff(A,i,k), gmul(t,gcoeff(A,j,k)));
-      b[k] = ladd((GEN)b[k], gmul(t,(GEN)p1[k]));
+      b[k] = ladd((GEN)b[k], gmul(t,(GEN)Bi[k]));
     }
   }
 }
@@ -2060,7 +2060,13 @@ init_timer(pslq_timer *T)
 static int
 is_zero(GEN x, long e)
 {
-  return gcmp0(x) || gexpo(x) < e;
+  if (gcmp0(x)) return 1;
+  if (typ(x) == t_REAL)
+  {
+    long ex = expo(x);
+    return (ex < e || (lg(x) == 3 && ex < (e>>1)));
+  }
+  return gexpo(x) < e;
 }
 
 static GEN
@@ -2149,11 +2155,10 @@ one_step_gen(pslq_M *M, GEN tabga, long prec)
   SWAP(M, m);
   if (m <= n-2)
   {
-    GEN t0, tinv, t1c, t2c, t1, t2, t3, t4;
-    t0 = gadd(gnorm(gcoeff(H,m,m)), gnorm(gcoeff(H,m,m+1)));
-    tinv = ginv(gsqrt(t0, prec));
-    t1 = gmul(tinv, gcoeff(H,m,m));
-    t2 = gmul(tinv, gcoeff(H,m,m+1));
+    GEN tinv, t3, t4, t1c, t2c, t1 = gcoeff(H,m,m), t2 = gcoeff(H,m,m+1);
+    tinv = ginv( gsqrt(gadd(gnorm(t1), gnorm(t2)), prec) );
+    t1 = gmul(t1, tinv);
+    t2 = gmul(t2, tinv);
     if (M->flreal) { t1c = t1; t2c = t2; }
     else           { t1c = gconj(t1); t2c = gconj(t2); }
     if (DEBUGLEVEL>3) M->T->t12 += timer();
