@@ -2,7 +2,7 @@
 ? default(compatible,3)
    compatible = 3 (use old functions, ignore case)
   ***   Warning: user functions re-initialized.
-? +3
+? gettime;+3
 3
 ? -5
 -5
@@ -2681,5 +2681,5 @@ d(391, 3120), mod(2081, 3120)]]
 ? getheap()
 [621, 118541]
 ? print("Total time spent: ",gettime());
-Total time spent: 1360
+Total time spent: 1340
 ? \q
