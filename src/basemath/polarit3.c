@@ -391,19 +391,17 @@ FpXQ_powers(GEN x, long l, GEN T, GEN p)
 {
   GEN V=cgetg(l+2,t_VEC);
   long i;
-  V[1] = (long) scalarpol(gen_1,varn(T));
-  if (l==0) return V;
-  V[2] = lcopy(x);
-  if (l==1) return V;
-  V[3] = (long) FpXQ_sqr(x,T,p);
-  for(i=4;i<l+2;i++)
-    V[i] = (long) FpXQ_mul((GEN) V[i-1],x,T,p);
-#if 0
-  TODO: Karim proposes to use squaring:
-  V[i] = (long) ((i&1)?FpXQ_sqr((GEN) V[(i+1)>>1],T,p)
-                       :FpXQ_mul((GEN) V[i-1],x,T,p));
-  Please profile it.
-#endif
+  gel(V,1) = polun[varn(T)]; if (l==0) return V;
+  gel(V,2) = gcopy(x);       if (l==1) return V;
+  gel(V,3) = FpXQ_sqr(x,T,p);
+  if ((degpol(x)<<1) < degpol(T)) {
+    for(i = 4; i < l+2; i++)
+      gel(V,i) = FpXQ_mul(gel(V,i-1),x,T,p);
+  } else { /* use squarings if degree(x) is large */
+    for(i = 4; i < l+2; i++)
+      gel(V,i) = (i&1)? FpXQ_sqr(gel(V, (i+1)>>1),T,p)
+                      : FpXQ_mul(gel(V, i-1),x,T,p);
+  }
   return V;
 }
 #if 0
