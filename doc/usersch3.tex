@@ -1712,14 +1712,17 @@ algorithms used.
 
    The polynomials or rational functions to be factored must have scalar
 coefficients. In particular PARI does \emph{not} know how to factor
-multivariate polynomials.
+multivariate polynomials. See \tet{factormod} and \tet{factorff} for the
+algorithms used over finite fields, \tet{factornf} for the algorithms over
+number fields. Over $\Q$, \idx{van Hoeij}'s method is used, which is able to
+cope with hundreds of modular factors.
 
    Note that PARI tries to guess in a sensible way over which ring you want
 to factor. Note also that factorization of polynomials is done up to
 multiplication by a constant. In particular, the factors of rational
 polynomials will have integer coefficients, and the content of a polynomial
 or rational function is discarded and not included in the factorization. If
-you need it, you can always ask for the content explicitly:
+needed, you can always ask for the content explicitly:
 
 \bprog
 ? factor(t^2 + 5/2*t + 1)
@@ -1732,7 +1735,7 @@ you need it, you can always ask for the content explicitly:
 %2 = 1/2
 @eprog
 
-\noindent See also \tet{factornf}.
+\noindent See also \tet{factornf} and \tet{nffactor}.
 
 \syn{factor0}{x,\var{lim}}, where \var{lim} is a C integer.
 Also available are
@@ -3693,12 +3696,16 @@ considered as a \idx{Dirichlet series}.
 
 \subsecidx{factornf}$(x,t)$: factorization of the univariate polynomial $x$
 over the number field defined by the (univariate) polynomial $t$. $x$ may
-have coefficients in $\Q$ or in the number field. The main variable of
-$t$ must be of \emph{lower} priority than that of $x$ (see
-\secref{se:priority}). However if
-the coefficients of the number field occur explicitly (as polmods) as
-coefficients of $x$, the variable of these polmods \emph{must} be the same as
-the main variable of $t$. For example
+have coefficients in $\Q$ or in the number field. The algorithm reduces to
+factorization over $\Q$ (\idx{Trager}'s trick). The direct approach of
+\tet{nffactor}, which uses \idx{van Hoeij}'s method in a relative setting, is
+in general faster.
+
+The main variable of $t$ must be of \emph{lower} priority than that of $x$
+(see \secref{se:priority}). However if the coefficients of the number field
+occur explicitly (as polmods) as coefficients of $x$, the variable of these
+polmods \emph{must} be the same as the main variable of $t$. For example
+
 \bprog
 ? factornf(x^2 + Mod(y, y^2+1), y^2+1);
 ? factornf(x^2 + 1, y^2+1); \\@com these two are OK
