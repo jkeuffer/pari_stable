@@ -290,6 +290,7 @@ GH 56- more robust thue(): faster enumeration of small solution, don't assume
        obtained.
    57- remove log() flag: decide alone whether to use AGM or not.
        Rewrote logagm and mpexp1
+   58- make ??? index search ignore case [ ???bernoulli will find Bernoulli ]
 
   Added
     1- make test-all [ all available test suites (SLOW !)]
