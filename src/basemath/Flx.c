@@ -175,15 +175,6 @@ Fl_Flx(ulong x, long sv)
 /* Take an integer and return a scalar polynomial mod p,
  * with evalvarn=vs */
 
-GEN
-Z_Flx(GEN x, ulong p, long vs)
-{
-  GEN a = cgetg(3, t_VECSMALL);
-  a[1] = vs;
-  a[2] = (long)umodiu(x, p); 
-  return a;
-}
-
 /* return x[0 .. dx] mod p as t_VECSMALL. Assume x a t_POL*/
 GEN
 ZX_Flx(GEN x, ulong p)
@@ -196,16 +187,24 @@ ZX_Flx(GEN x, ulong p)
   return Flx_renormalize(a,lx);
 }
 
-/* return x[0 .. dx] as t_VECSMALL. Assume x an FpX */
-GEN
-FpX_Flx(GEN x)
+GEN 
+ZXX_Flxy(GEN B, ulong p, long vs)
 {
+  long lb=lg(B);
   long i;
-  long lx = lg(x); 
-  GEN a = cgetg(lx, t_VECSMALL);
-  a[1]=((ulong)x[1])&VARNBITS;
-  for (i=2; i<lx; i++) a[i] = (long)itou((GEN)x[i]);
-  return a;
+  GEN b=cgetg(lb,t_POL);
+  b[1]=B[1];
+  for (i=2; i<lb; i++) 
+    switch (typ(B[i]))
+    {
+    case t_INT:  
+      b[i] = (long)Fl_Flx(umodiu((GEN)B[i], p), vs);
+      break;           
+    case t_POL:
+      b[i] = (long)ZX_Flx((GEN)B[i], p);
+      break;
+    }
+  return b;
 }
 
 GEN
@@ -555,6 +554,7 @@ Flx_mulspec(GEN a, GEN b, ulong p, long na, long nb)
   return Flx_shiftip(av,c0, v);
 }
 
+
 GEN
 Flx_mul(GEN x, GEN y, ulong p)
 {
@@ -609,7 +609,9 @@ Flx_sqrspec_basecase(GEN x, ulong p, long nx)
   z -= 2; return z;
 }
 
-GEN
+#if 0
+/* used only by Flx_sqrspec #if 0 code.*/
+static GEN
 Flx_2_mul(GEN x, ulong p)
 {
   long i, l = lg(x);
@@ -617,6 +619,7 @@ Flx_2_mul(GEN x, ulong p)
   for (i=2; i<l; i++) z[i] = (long)adduumod(x[i], x[i], p);
   z[1] = x[1]; return z;
 }
+#endif
 
 static GEN
 Flx_sqrspec_sqri(GEN a, ulong p, long na)
@@ -928,7 +931,8 @@ Flx_invmontgomery_newton(GEN T, ulong p)
 /*
  * x/polrecip(P)+O(x^n)
  */
-GEN Flx_invmontgomery(GEN T, ulong p)
+GEN
+Flx_invmontgomery(GEN T, ulong p)
 {
   pari_sp ltop=avma;
   long l=lg(T);
@@ -951,7 +955,8 @@ GEN Flx_invmontgomery(GEN T, ulong p)
 /* Compute x mod T where lg(x)<=2*lg(T)-2
  * and mg is the Montgomery inverse of T. 
  */
-GEN Flx_redmontgomery(GEN x, GEN mg, GEN T, ulong p)
+GEN
+Flx_redmontgomery(GEN x, GEN mg, GEN T, ulong p)
 {
   pari_sp ltop=avma;
   GEN z;
@@ -1327,14 +1332,18 @@ _Flxq_mul(void *data, GEN x, GEN y)
 
 
 /* n-Power of x in Z/pZ[X]/(pol), as t_VECSMALL. */
-/* FIXME: assume n > 0 */
 GEN
 Flxq_pow(GEN x, GEN n, GEN pol, ulong p)
 {
   pari_sp av = avma;
   Flxq_muldata D;
   GEN y;
-  x=Flx_rem(x, pol, p);
+  if (!signe(n)) return Fl_Flx(1,varn(pol));
+  if (signe(n) < 0)
+    x=Flxq_inv(x,pol,p);
+  else
+    x=Flx_rem(x, pol, p);
+  if (is_pm1(n)) return x;
   D.pol = pol;
   D.p   = p;
 #if 0

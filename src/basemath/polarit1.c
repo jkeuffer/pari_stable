@@ -291,7 +291,7 @@ root_mod_4(GEN f)
 #undef i_mod4
 
 /* p even, accept p = 4 for p-adic stuff */
-static GEN
+INLINE GEN
 root_mod_even(GEN f, ulong p)
 {
   switch(p)
@@ -305,7 +305,7 @@ root_mod_even(GEN f, ulong p)
 
 /* by checking f(0..p-1) */
 static GEN
-Flx_roots(GEN f, ulong p)
+Flx_roots_naive(GEN f, ulong p)
 {
   long d = degpol(f), n = 0;
   ulong s = 1UL, r;
@@ -333,16 +333,6 @@ Flx_roots(GEN f, ulong p)
   setlg(y, n+1); return y;
 }
 
-static GEN
-vec_to_mod(GEN x, GEN p)
-{
-  long i, l;
-  if (isonstack(p)) p = icopy(p);
-  l = lg(x);
-  for (i=1; i<l; i++) x[i] = (long)mod((GEN)x[i], p);
-  return x;
-}
-
 GEN
 rootmod2(GEN f, GEN pp)
 {
@@ -352,9 +342,11 @@ rootmod2(GEN f, GEN pp)
 
   if (!factmod_init(&f, pp, &p)) { avma = av; return cgetg(1,t_COL); }
   if (!p) err(talker,"prime too big in rootmod2");
-  if (p & 1) y = gerepileupto(av, Flv_ZV( Flx_roots(FpX_Flx(f), p) ));
-  else { avma = av; y = root_mod_even(f,p); }
-  return vec_to_mod(y, pp);
+  if (p & 1) 
+    y = Flv_ZV(Flx_roots_naive(ZX_Flx(f,p), p));
+  else 
+    y = root_mod_even(f,p);
+  return gerepileupto(av, FpV(y, pp));
 }
 
 /* assume x reduced mod p, monic, squarefree. Return one root, or NULL if
@@ -461,9 +453,11 @@ rootmod(GEN f, GEN p)
 
   if (!factmod_init(&f, p, NULL)) { avma=av; return cgetg(1,t_COL); }
   q = modBIL(p);
-  if (q & 1) y = gerepileupto(av, FpX_roots_i(f, p));
-  else { avma = av; y = root_mod_even(f,q); }
-  return vec_to_mod(y, p);
+  if (q & 1) 
+    y = FpX_roots_i(f, p);
+  else 
+    y = root_mod_even(f,q);
+  return gerepileupto(av, FpV(y, p));
 }
 
 GEN
