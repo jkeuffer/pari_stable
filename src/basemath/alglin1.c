@@ -1428,7 +1428,7 @@ FpM_gauss(GEN a, GEN b, GEN p)
   li = lg(a[1])-1;
   if (li != aco && (li < aco || b)) err(mattype1,"gauss");
   b = check_b(b,li, &iscol); av = avma;
-  if (OK_ULONG(p))
+  if (lgefint(p) == 3)
   {
     ulong pp = (ulong)p[2];
     a = ZM_Flm(a, pp);
@@ -2490,8 +2490,6 @@ FpM_FpV_mul(GEN x, GEN y, GEN p)
   return z;
 }
 
-/*FIXME: Does it assume OK_ULONG ?*/
-
 GEN
 Flm_Flv_mul(GEN x, GEN y, ulong p)
 {
@@ -2501,15 +2499,31 @@ Flm_Flv_mul(GEN x, GEN y, ulong p)
   if (lx==1) return cgetg(1,t_VECSMALL);
   l = lg(x[1]);
   z = cgetg(l,t_VECSMALL);
-  for (i=1; i<l; i++)
+  if (u_OK_ULONG(p))
   {
-    ulong p1 = 0;
-    for (k=1; k<lx; k++)
+    for (i=1; i<l; i++)
     {
-      p1 += coeff(x,i,k) * y[k];
-      if (p1 & HIGHBIT) p1 %= p;
+      ulong p1 = 0;
+      for (k=1; k<lx; k++)
+      {
+        p1 += coeff(x,i,k) * y[k];
+        if (p1 & HIGHBIT) p1 %= p;
+      }
+      z[i] = p1 % p;
     }
-    z[i] = p1 % p;
+  }
+  else
+  {
+    for (i=1; i<l; i++)
+    {
+      ulong p1 = 0;
+      for (k=1; k<lx; k++)
+      {
+        ulong t = muluumod(coeff(x,i,k), y[k], p);
+        p1 = adduumod(p1, t, p);
+      }
+      z[i] = p1;
+    }
   }
   return z;
 }
@@ -2598,7 +2612,7 @@ FpM_ker_i(GEN x, GEN p, long deplin)
 
   if (typ(x)!=t_MAT) err(typeer,"FpM_ker");
   n=lg(x)-1; if (!n) return cgetg(1,t_MAT);
-  if (OK_ULONG(p))
+  if (lgefint(p) == 3)
   {
     ulong pp = (ulong)p[2];
     y = ZM_Flm(x, pp);
