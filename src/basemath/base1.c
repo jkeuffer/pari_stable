@@ -1790,7 +1790,6 @@ chk_gen_init(FP_chk_fun *chk, GEN r, GEN mat)
 
   d->u = mat;
   d->ZKembed = gmul(d->M, mat);
-  if (d->prec > DEFAULTPREC) r = gmul(r, realun(DEFAULTPREC));
 
   bound = d->bound;
   prev = NULL;
@@ -1833,7 +1832,7 @@ chk_gen_init(FP_chk_fun *chk, GEN r, GEN mat)
     fprintferr("chk_gen_init: new prec = %ld (initially %ld)\n", prec, d->prec);
   if (prec > d->prec) err(bugparier, "polredabs (precision problem)");
   if (prec < d->prec) d->ZKembed = gprec_w(d->ZKembed, prec);
-  return gmul(bound, dbltor(1.000001));
+  return bound;
 }
 
 /* store phi(beta mod z). */
