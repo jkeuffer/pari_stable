@@ -92,6 +92,8 @@ IZ 37- [OS/2:] ^C would only work once
    43- nfinit(x^2-4*3,4) --> SEGV
    44- Compilation failure on ORIGIN + Irix: rename 'sgi' --> 'SG' in
        basemath/galconj.c
+   45- '\r a' where file 'a' is empty --> "a is not a GP binary file".
+
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available
