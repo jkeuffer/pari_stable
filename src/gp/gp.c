@@ -2408,6 +2408,8 @@ break_loop(long numerr)
   char *s, *t, *msg;
 
   if (b) jump_to_given_buffer(b);
+  push_stack(&bufstack, (void*)new_buffer());
+  b = current_buffer; /* buffer created above */
   if (setjmp(b->env))
   {
     msg = "back to break loop";
@@ -2415,14 +2417,12 @@ break_loop(long numerr)
   }
   else
   {
+    Buffer *oldb = (Buffer*)bufstack->prev->value;
     msg = "Starting break loop (type 'break' to go back to GP)";
     old = s = _analyseur();
-    t = current_buffer->buf;
+    t = oldb->buf;
     /* something fishy, probably a ^C, or we overran analyseur */
-    if (!s || !s[-1] || s < t || s >= t + current_buffer->len) s = NULL;
-
-    push_stack(&bufstack, (void*)new_buffer());
-    b = current_buffer; /* buffer created above */
+    if (!s || !s[-1] || s < t || s >= t + oldb->len) s = NULL;
     b->flenv = 1; oldinfile = infile;
   }
 
