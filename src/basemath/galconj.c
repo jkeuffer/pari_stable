@@ -291,7 +291,11 @@ initgaloisborne(GEN T, GEN dn, long prec, GEN *ptL, GEN *ptprep, GEN *ptdis)
     if (ptdis) *ptdis = dis;
   }
   else
+  {
+    if (typ(dn) != t_INT || signe(dn) <= 0)
+      err(talker, "incorrect denominator in initgaloisborne: %Z", dn);
     den = dn;
+  }
   if (ptprep) *ptprep = prep;
   *ptL = L; return den;
 }

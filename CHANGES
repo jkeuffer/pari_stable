@@ -122,6 +122,7 @@ BA 60- add "const" keyword to allow building with g++
    63- wrong reconstruction bounds in nffactor
    64- short help message for isprime/ispseudoprime
    65- issquare(t_FRAC or t_RFRAC, &x) did not work [ worked without &x ]
+   66- nfgaloisconj(x^2+1,4, 0) --> SEGV [ bad input ]
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available
