@@ -2407,7 +2407,7 @@ computean(GEN dtcr, long n, long deg, long prec)
 
 	  qg = mulss(q, p);
           if (lgefint(qg) > 3) break;
-          q = qg[2]; if (q > n) break;
+          q = qg[2]; if ((ulong)q > (ulong)n) break;
           
           al++;
 	  if (odd(al) && !fldiv) chi = gmul(chi, chi1);
@@ -2439,7 +2439,7 @@ computean(GEN dtcr, long n, long deg, long prec)
 
 	qg = mulss(q, p);
         if (lgefint(qg) > 3) break;
-        q = qg[2]; if (q > n) break;
+        q = qg[2]; if ((ulong)q > (ulong)n) break;
 
 	if (!fldiv) chi = gmul(chi, chi2);
       }
@@ -2468,7 +2468,7 @@ computean(GEN dtcr, long n, long deg, long prec)
 
 	  qg = mulss(q, p);
           if (lgefint(qg) > 3) break;
-          q = qg[2]; if (q > n) break;
+          q = qg[2]; if ((ulong)q > (ulong)n) break;
           
           chi2 = gmul(chi2, chi12);
           chi1 = gadd(chi2, gmul(chi1, chi11));
@@ -2500,7 +2500,7 @@ computean(GEN dtcr, long n, long deg, long prec)
 
 	  qg = mulss(q, p);
           if (lgefint(qg) > 3) break;
-          q = qg[2]; if (q > n) break;
+          q = qg[2]; if ((ulong)q > (ulong)n) break;
 	
 	  if (!v) chi = gmul(chi, chi1);
 	}
