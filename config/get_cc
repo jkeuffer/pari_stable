@@ -145,8 +145,10 @@ else
                   OPTFLAGS=-O2; cflags=-m486;;
     osf1-*)       OPTFLAGS='-O4 -migrate -ifo -Olimit 9999';;
     sunos-*)      OPTFLAGS=-fast; PRFFLAGS='-pg -Bstatic';;
-    solaris-*)    OPTFLAGS='-fast -fsimple=1 -xalias_level=any'
-                  PRFFLAGS=-xpg;;
+    solaris-*)    OPTFLAGS='-fast -fsimple=1'; PRFFLAGS=-xpg;
+                case "$arch" in
+                  sparc*) OPTFLAGS="$OPTFLAGS -xalias_level=any";;
+                esac;;
     concentrix-*) OPTFLAGS=-Ogi;;
     *)            OPTFLAGS=-O;;
   esac
