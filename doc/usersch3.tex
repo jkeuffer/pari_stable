@@ -1300,29 +1300,25 @@ pseudo-primes after 10 successful trials of the \idx{Rabin-Miller} test are
 declared primes.
 
 \bigskip
-\subsecidx{addprimes}$(\{x=[\,]\})$: adds the primes contained in the vector
-$x$ (or the single integer $x$) to the table computed upon GP initialization
-(by \kbd{pari\_init} in library mode), and returns a row vector whose first
-entries contain all primes added by the user and whose last entries have been
-filled up with 1's. In total the returned row vector has 100 components.
-Whenever \kbd{factor} or \kbd{smallfact} is subsequently called, first the
-primes in the table computed by \kbd{pari\_init} will be checked, and then
-the additional primes in this table. If $x$ is empty or omitted, just returns
-the current list of extra primes.
+\subsecidx{addprimes}$(\{x=[\,]\})$: adds the ``primes'' contained in the
+vector $x$ (or the single integer $x$) to the table computed upon GP
+initialization (by \kbd{pari\_init} in library mode), and returns a row
+vector entries contain all such user primes. Whenever \kbd{factor} or
+\kbd{smallfact} is subsequently called, first the primes in the table
+computed by \kbd{pari\_init} will be checked, and then the additional
+primes in this table. If $x$ is empty or omitted, just returns the current
+list of extra primes.
 
 The entries in $x$ are not checked for primality. They need only be positive
 integers not divisible by any of the pre-computed primes. It's in fact a nice
 trick to add composite numbers, which for example the function
-$\kbd{factor}(x,0)$ was not able to factor. In case the message ``impossible
-inverse modulo $\langle$\var{some integermod}$\rangle$'' shows up afterwards,
-you have just stumbled over a non-trivial factor. Note that the arithmetic
-functions in the narrow sense, like \teb{eulerphi}, do \var{not} use this
-extra table.
+$\kbd{factor}(x,0)$ was not able to factor. In case the message
+``impossible inverse modulo $\langle$\var{some INTMOD}$\rangle$'' shows up
+afterwards, you have just stumbled over a non-trivial factor. Note that the
+arithmetic functions in the narrow sense, like \teb{eulerphi}, do \var{not}
+use this extra table.
 
-The present PARI version \vers\ allows up to 100 user-specified
-primes to be appended to the table. This limit may be changed
-by altering \kbd{NUMPRTBELT} in file \kbd{init.c}. To remove primes from the
-list use \kbd{removeprimes}.
+To remove primes from the list use \kbd{removeprimes}.
 
 \syn{addprimes}{x}.
 
