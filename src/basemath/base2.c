@@ -3263,69 +3263,59 @@ rnfpolred(GEN nf, GEN pol, long prec)
   tetpil=avma; return gerepile(av,tetpil,gcopy(w));
 }
 
+extern GEN vecpol_to_mat(GEN v, long n);
+
+/* given a relative polynomial pol over nf, compute a pseudo-basis for the
+ * extension, then an absolute basis */
 GEN
 makebasis(GEN nf,GEN pol)
-/* Etant donne un corps de nombres nf et un polynome relatif relpol,
-   construit une pseudo-base de l'extension puis calcule une base absolue
-   de cette extension pour une racine \theta de relpol. Renvoie le
-   polynome irreductible de theta sur Q et la matrice de la base */
 {
-  GEN elts,ids,polabs,plg,B,bs,p1,colonne,p2,rep,a;
-  GEN den,vbs,vbspro,mpro,vpro,rnf;
-  long av=avma,tetpil,n,N,m,i,j,k,v1,v2;
+  GEN elts,ids,polabs,plg,B,bs,p1,p2,a,den,vbs,vbspro,vpro,rnf;
+  long av=avma,n,N,m,i,j, v = varn(pol);
 
-  v1=varn((GEN)nf[1]); v2=varn(pol);
-  p1=rnfequation2(nf,pol);
-  polabs=(GEN)p1[1]; plg=(GEN)p1[2];
-  a=(GEN)p1[3];
-  rnf=cgetg(12,t_VEC); rnf[1]=(long)pol;
+  p1 = rnfequation2(nf,pol);
+  polabs= (GEN)p1[1];
+  plg   = (GEN)p1[2];
+  a     = (GEN)p1[3];
+  rnf = cgetg(12,t_VEC);
   for (i=2;i<=9;i++) rnf[i]=zero;
-  rnf[10]=(long)nf;
-  p2=cgetg(4,t_VEC); p2[1] = p2[2] = zero;
-  p2[3]=(long)a; rnf[11]=(long)p2;
+  rnf[1] =(long)pol;
+  rnf[10]=(long)nf; p2=cgetg(4,t_VEC);
+  rnf[11]=(long)p2; p2[1]=p2[2]=zero; p2[3]=(long)a;
   if (signe(a))
-    pol=gsubst(pol,v2,gsub(polx[v2],
-                           gmul(a,gmodulcp(polx[v1],(GEN)nf[1]))));
+    pol = gsubst(pol,v,gsub(polx[v],
+                            gmul(a,gmodulcp(polx[varn(nf[1])],(GEN)nf[1]))));
   p1=rnfpseudobasis(nf,pol);
-  if (DEBUGLEVEL>=2) { fprintferr("relative basis computed\n"); flusherr(); }
-  elts=(GEN)p1[1];ids=(GEN)p1[2];
-  N=lgef(pol)-3;n=lgef((GEN)nf[1])-3;m=n*N;
-  den=denom(content(lift(plg)));
-  vbs=cgetg(n+1,t_VEC);
-  vbs[1]=un;vbs[2]=(long)plg;
-  vbspro=gmul(den,plg);
+  elts= (GEN)p1[1];
+  ids = (GEN)p1[2];
+  if (DEBUGLEVEL>1) { fprintferr("relative basis computed\n"); flusherr(); }
+  N=lgef(pol)-3; n=lgef((GEN)nf[1])-3; m=n*N;
+  den = denom(content(lift(plg)));
+  vbs = cgetg(n+1,t_VEC);
+  vbs[1] = un; 
+  vbs[2] = (long)plg; vbspro = gmul(den,plg);
   for(i=3;i<=n;i++)
-    vbs[i]=ldiv(gmul((GEN)vbs[i-1],vbspro),den);
-  mpro=cgetg(n+1,t_MAT);
-  for(j=1;j<=n;j++)
-  {
-    p2=cgetg(n+1,t_COL);mpro[j]=(long)p2;
-    for(i=1;i<=n;i++)
-      p2[i]=(long)truecoeff(gmael(nf,7,j),i-1);
-  }
-  bs=gmul(vbs,mpro); B=idmat(m);
+    vbs[i] = ldiv(gmul((GEN)vbs[i-1],vbspro),den);
+  bs = gmul(vbs, vecpol_to_mat((GEN)nf[7],n));
+
   vpro=cgetg(N+1,t_VEC);
   for (i=1;i<=N;i++)
   {
     p1=cgetg(3,t_POLMOD);
     p1[1]=(long)polabs;
-    p1[2]=lpuigs(polx[v2],i-1); vpro[i]=(long)p1;
+    p1[2]=lpuigs(polx[v],i-1); vpro[i]=(long)p1;
   }
-  vpro=gmul(vpro,elts);
+  vpro=gmul(vpro,elts); B = cgetg(m+1, t_MAT);
   for(i=1;i<=N;i++)
     for(j=1;j<=n;j++)
     {
-      colonne=gmul(bs,element_mul(nf,(GEN)vpro[i],gmael(ids,i,j)));
-      p1=gtovec(lift_intern(colonne));
-      p2=cgetg(m+1,t_COL);
-      for(k=1;k<lg(p1);k++) p2[lg(p1)-k]=p1[k];
-      for(   ;k<=m;k++) p2[k]=zero;
-      B[(i-1)*n+j]=(long)p2;
+      p1 = gmul(bs, element_mul(nf,(GEN)vpro[i],gmael(ids,i,j)));
+      B[(i-1)*n+j] = (long)pol_to_vec(lift_intern(p1), m);
     }
-  rep=cgetg(4,t_VEC);
-  rep[1]=(long)polabs;
-  rep[2]=(long)B;
-  rep[3]=(long)rnf;
-  tetpil=avma;
-  return gerepile(av,tetpil,gcopy(rep));
+  p1 = content(B); B = gdiv(B,p1);
+  B = hnfmod(B, detint(B)); B = gmul(B,p1);
+  p1=cgetg(4,t_VEC);
+  p1[1]=(long)polabs;
+  p1[2]=(long)B;
+  p1[3]=(long)rnf; return gerepileupto(av, gcopy(p1));
 }
