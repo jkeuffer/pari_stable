@@ -2557,10 +2557,11 @@ nfreducemodpr(GEN nf, GEN x, GEN modpr)
 {
   gpmem_t av = avma;
   long i;
-  GEN pr = (GEN)modpr[mpr_PR];
-  GEN p = (GEN)pr[1];
+  GEN pr, p;
 
   checkmodpr(modpr);
+  pr = (GEN)modpr[mpr_PR];
+  p = (GEN)pr[1];
   if (typ(x) != t_COL) x = algtobasis(nf,x);
   for (i=lg(x)-1; i>0; i--)
     if (typ(x[i]) == t_INTMOD) { x = lift(x); break; }
