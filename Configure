@@ -1053,7 +1053,7 @@ if test -n "$DLLD"; then
     esac
   fi
   case "$osname" in 
-    freebsd|linux|sunos|solaris) DLLDFLAGS="$DLLDFLAGS -lc";;
+    freebsd|linux|sunos|solaris) DLLDFLAGS="$DLLDFLAGS -lc -lm";;
   esac
 
   if test "$fastread" != yes; then
