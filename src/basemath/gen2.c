@@ -385,10 +385,9 @@ gcmp_1(GEN x)
 int
 gcmp(GEN x, GEN y)
 {
-  long tx, ty, f;
+  long tx = typ(x), ty = typ(y), f;
   pari_sp av;
 
-  tx=typ(x); ty=typ(y);
   if (is_intreal_t(tx))
     { if (is_intreal_t(ty)) return mpcmp(x,y); }
   else
@@ -400,7 +399,11 @@ gcmp(GEN x, GEN y)
       return f > 0? 1
                   : f? -1: 0;
     }
-    if (!is_frac_t(tx)) err(typeer,"comparison");
+    if (!is_frac_t(tx)) 
+    {
+      if (ty == t_STR) return -1;
+      err(typeer,"comparison");
+    }
   }
   if (ty == t_STR) return -1;
   if (!is_intreal_t(ty) && !is_frac_t(ty)) err(typeer,"comparison");
