@@ -59,7 +59,7 @@ setprecr(long n)
 }
 
 entree functions_oldgp[] = {
-{"allocatemem",11,(void *)allocatemem0,2,"vLp"},
+{"allocatemem",11,(void *)allocatemoremem,2,"vLp"},
 {"box",35,(void *)rectbox,10,"vLGG"},
 {"color",2,(void *)rectcolor,2,"vLL"},
 {"cursor",11,(void*)rectcursor,10,"vLp"},

@@ -262,7 +262,6 @@ typedef struct Buffer {
   char *buf;
   ulong len;
   jmp_buf env;
-  int flenv;
 } Buffer;
 
 typedef struct input_method {

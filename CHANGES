@@ -123,6 +123,9 @@ LGr39- very rare SEGV in idealprimedec() [ typo in init_norm(), using FpX_red
        the trivial case when x is irreducible modulo some prime
    58- [from 2.2.9] typo in krosi -> wrong result [ affected aprcl only ]
    59- dirdiv([],[]) -> SEGV
+   60- using allocatemem() in files input with read() could corrupt stack
+       allocatemem() does not end by a longjmp anymore; it is still impossible
+       to use it in loops
 
   Added
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu

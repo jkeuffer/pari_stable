@@ -72,7 +72,7 @@ static long skipping_fun_def;
 static entree *check_new_fun;
 
 /* for control statements */
-enum { br_NONE = 0, br_BREAK, br_NEXT, br_MULTINEXT, br_RETURN };
+enum { br_NONE = 0, br_BREAK, br_NEXT, br_MULTINEXT, br_RETURN, br_ALLOCMEM, };
 static long br_status, br_count;
 static GEN br_res = NULL;
 
@@ -362,50 +362,51 @@ seq_init(char *t)
 static GEN
 lisseq0(char *t, GEN (*f)(void))
 {
-  const pari_sp av = avma;
+  pari_sp av = top - avma;
   char *olds = analyseur, *olde = mark.start;
-  GEN res;
+  GEN z;
 
   if (foreignExprHandler && *t == foreignExprSwitch)
     return (*foreignExprHandler)(t);
 
-  seq_init(t); res = f();
+  seq_init(t); z = f();
   analyseur = olds; mark.start = olde;
+  av = top - av; /* safer than recording av = avma: f() may call allocatemem */
   if (br_status)
   {
-    if (!br_res) { avma = av; return gnil; }
-    return gerepilecopy(av, br_res);
+    if (br_res) return gerepilecopy(av, br_res);
+    if (!z) { avma = av; return gnil; }
   }
-  if (res == NULL) { avma = av; return polx[fetch_user_var("NULL")]; }
+  if (z == NULL) { avma = av; return polx[fetch_user_var("NULL")]; }
   /* ep->value, beware: it may be killed anytime.  */
-  if (isclone(res)) { avma = av; return forcecopy(res); }
-  return gerepileupto(av, res);
+  if (isclone(z)) { avma = av; return forcecopy(z); }
+  return gerepileupto(av, z);
 }
 static GEN
 lisseq0_nobreak(char *t, GEN (*f)(void))
 {
-  const pari_sp av = avma;
+  pari_sp av = top - avma;
   char *olds = analyseur, *olde = mark.start;
-  GEN res;
+  GEN z;
 
   if (foreignExprHandler && *t == foreignExprSwitch)
     return (*foreignExprHandler)(t);
 
-  seq_init(t); res = f();
+  seq_init(t); z = f();
   analyseur = olds; mark.start = olde;
   if (br_status) err(talker,"break not allowed");
-
-  if (res == NULL) { avma = av; return polx[fetch_user_var("NULL")]; }
+  av = top - av; /* safer than recording av = avma: f() may call allocatemem */
+  if (z == NULL) { avma = av; return polx[fetch_user_var("NULL")]; }
   /* ep->value, beware: it may be killed anytime.  */
-  if (isclone(res)) { avma = av; return forcecopy(res); }
-  return gerepileupto(av, res);
+  if (isclone(z)) { avma = av; return forcecopy(z); }
+  return gerepileupto(av, z);
 }
 
 /* for sumiter: (void)lisseq(t) */
 void
 lisseq_void(char *t)
 {
-  const pari_sp av = avma;
+  const pari_sp av = top - avma;
   char *olds = analyseur, *olde = mark.start;
 
   if (foreignExprHandler && *t == foreignExprSwitch)
@@ -413,7 +414,8 @@ lisseq_void(char *t)
 
   seq_init(t); (void)seq();
   analyseur = olds; mark.start = olde;
-  avma = av;
+  /* safer than recording av = avma: f() may call allocatemem */
+  avma = top - av;
 }
 
 /* filtered lisexpr = remove blanks and comments */
@@ -439,7 +441,7 @@ readseq(char *c, int strict)
   char *olds = analyseur, *olde = mark.start;
   GEN z;
 
-  seq_init(c); skipseq(c);
+  seq_init(c); skipseq();
   if (*analyseur)
   {
     long n = 2 * term_width() - (17+19+1); /* Warning + unused... + . */
@@ -462,8 +464,8 @@ readseq(char *c, int strict)
   analyseur = olds; mark.start = olde;
   if (br_status)
   {
-    if (!br_res) return gnil;
-    return br_res;
+    if (br_res) return br_res;
+    if (!z) return gnil;
   }
   if (z == NULL) return polx[fetch_user_var("NULL")];
   if (!added_newline) pariputc('\n'); /* last output was print1() */
@@ -783,28 +785,42 @@ type0(GEN x)
 /*                              PARSER                             */
 /*                                                                 */
 /*******************************************************************/
+static void
+allocate_loop_err() {
+  err(talker2,"can't allow allocatemem() in loops", analyseur, mark.start);
+}
 
 static GEN
 seq(void)
 {
-  const pari_sp av = avma, lim = stack_lim(av,1);
+  const pari_sp av = top - avma;
   GEN res = gnil;
+  int allocmem = 0;
 
   for(;;)
   {
     while (separator(*analyseur)) analyseur++;
-    if (!*analyseur || *analyseur == ')' || *analyseur == ',') return res;
+    if (!*analyseur || *analyseur == ')' || *analyseur == ',') break;
     res = expr();
-    if (br_status || !separator(*analyseur)) return res;
+    if (br_status) {
+      if (br_status != br_ALLOCMEM) break;
+      br_status = br_NONE;
+      allocmem = 1;
+    }
 
-    if (low_stack(lim, stack_lim(av,1)))
+    if (((top - avma)>>1) > top - av)
     {
       if(DEBUGMEM>1) err(warnmem,"seq");
-      if (is_universal_constant(res)) avma = av;
+      if (is_universal_constant(res)) avma = top - av;
       else
-	res = gerepilecopy(av, res);
+	res = gerepilecopy(top - av, res);
     }
   }
+  if (allocmem) {
+    if (br_status) allocate_loop_err();
+    br_status = br_ALLOCMEM;
+  }
+  return res;
 }
 
 static GEN
@@ -822,7 +838,7 @@ gshift_r(GEN x, GEN n) {
 static GEN
 expr(void)
 {
-  pari_sp av = avma, lim = stack_lim(av, 2);
+  pari_sp av = top - avma;
   GEN aux,e,e1,e2,e3;
   F2GEN F1,F2,F3;
   int F0 = 0;
@@ -831,10 +847,10 @@ expr(void)
   e1 = e2 = e3 = UNDEF;
 L3:
 #define act(fun) \
-  aux = facteur(); if (br_status) return NULL;\
+  aux = facteur(); if (br_status) return aux;\
   e3 = fun(e3,aux); goto L
 
-  aux = facteur(); if (br_status) return NULL;
+  aux = facteur(); if (br_status) return aux;
   e3 = F3? F3(e3,aux): aux;
 L:
   switch(*analyseur)
@@ -850,7 +866,7 @@ L:
       if (analyseur[1] != '<') break;
       analyseur += 2;
       { char *old = analyseur; /* act(shift_l) + error checks */
-        aux = facteur(); if (br_status) return NULL;
+        aux = facteur(); if (br_status) return aux;
         if (typ(aux) != t_INT) err(talker2,"not an integer",old,mark.start);
         if (is_bigint(aux)) err(talker2,"shift operand too big",old,mark.start);
         e3 = gshift(e3, itos(aux)); goto L;
@@ -859,7 +875,7 @@ L:
       if (analyseur[1] != '>') break;
       analyseur += 2;
       { char *old = analyseur; /* act(shift_r) + error checks */
-        aux = facteur(); if (br_status) return NULL;
+        aux = facteur(); if (br_status) return aux;
         if (typ(aux) != t_INT) err(talker2,"not an integer",old,mark.start);
         if (is_bigint(aux)) err(talker2,"shift operand too big",old,mark.start);
         e3 = gshift(e3,-itos(aux)); goto L;
@@ -871,10 +887,10 @@ L2:
   if (e3 == UNDEF) goto L3;
   e2 = F2? F2(e2,e3): e3;
   e3 = UNDEF;
-  if (low_stack(lim, stack_lim(av,2)))
+  if ((top - avma)>>1 > top - bot)
   {
     if(DEBUGMEM>1) err(warnmem,"expr");
-    gerepileall(av, (e1==UNDEF)?1: 2, &e2, &e1);
+    gerepileall(top - av, (e1==UNDEF)?1: 2, &e2, &e1);
   }
 
   switch(*analyseur)
@@ -1298,8 +1314,7 @@ facteur(void)
     case '+': analyseur++; plus = 1; break;
     default: plus = 1; break;
   }
-  x = truc();
-  if (br_status) return NULL;
+  x = truc(); if (br_status) return x;
 
   for(;;)
     switch(*analyseur)
@@ -3205,7 +3220,6 @@ member_err(char *s)
 /**                        SIMPLE GP FUNCTIONS                     **/
 /**                                                                **/
 /********************************************************************/
-
 long
 loop_break()
 {
@@ -3216,7 +3230,7 @@ loop_break()
       return 1;
     case br_BREAK : if (! --br_count) br_status = br_NONE; /* fall through */
     case br_RETURN: return 1;
-
+    case br_ALLOCMEM: allocate_loop_err();
     case br_NEXT: br_status = br_NONE; /* fall through */
   }
   return 0;
@@ -3255,6 +3269,13 @@ break0(long n)
     err(talker2,"positive integer expected",mark.identifier,mark.start);
   br_count = n;
   br_status = br_BREAK; return NULL;
+}
+
+void
+allocatemem0(size_t newsize)
+{
+  (void)allocatemoremem(newsize);
+  br_status = br_ALLOCMEM;
 }
 
 void

@@ -8253,18 +8253,19 @@ should be useless in interactive usage.
 \subsubsecidx{allocatemem}$(\{x=0\})$: this is a very special operation which
 allows the user to change the stack size \emph{after} initialization. $x$
 must be a non-negative integer. If $x!=0$, a new stack of size $16*\lceil
-x/16\rceil$ bytes will be allocated, all the PARI data on the old stack will
-be moved to the new one, and the old stack will be discarded. If $x=0$, the
-size of the new stack will be twice the size of the old one.
+x/16\rceil$ bytes is allocated, all the PARI data on the old stack is
+moved to the new one, and the old stack is discarded. If $x=0$, the size of
+the new stack is twice the size of the old one.
 
-Although it is a function, this must be the \emph{last} instruction in any GP
-sequence. The technical reason is that this routine usually moves the stack,
-so objects from the current sequence might not be correct anymore. Hence, to
-prevent such problems, this routine terminates by a \kbd{longjmp} (just as an
-error would) and not by a return.
+Although it is a function, \kbd{allocatemem} cannot be used in loop-like
+constructs, or as part of a larger expression, e.g \kbd{2 + allocatemem()}.
+Such an attempt will raise an error. The technical reason is that this
+routine usually moves the stack, so objects from the current expression may
+not be correct anymore, e.g. loop indexes.
 
 \syn{allocatemoremem}{x}, where $x$ is an unsigned long, and the return type
-is void. \kbd{gp} uses a variant which ends by a \kbd{longjmp}.
+is void. \kbd{gp} uses a variant which makes sure it was not called within a
+loop.
 
 \subsubsecidx{default}$(\{\var{key}\},\{\var{val}\},\{\fl\})$: sets the default
 corresponding to keyword \var{key} to value \var{val}. \var{val} is a string

@@ -296,7 +296,7 @@ new_buffer(void)
   Buffer *b = (Buffer*) gpmalloc(sizeof(Buffer));
   b->len = paribufsize;
   b->buf = gpmalloc(b->len);
-  b->flenv = 0; return b;
+  return b;
 }
 
 void
@@ -322,19 +322,6 @@ kill_all_buffers(Buffer *B)
     if (b == B || !b) break;
     pop_buffer();
   }
-}
-
-static void
-jump_to_buffer(void)
-{
-  Buffer *b;
-  while ( (b = current_buffer) )
-  {
-    if (b->flenv) break;
-    pop_buffer();
-  }
-  if (!b) longjmp(GP_DATA->env, 0);
-  longjmp(b->env, 0);
 }
 
 static void
@@ -778,14 +765,6 @@ sd_output(const char *v, int flag)
   return z;
 }
 
-void
-allocatemem0(size_t newsize)
-{
-  (void)allocatemoremem(newsize);
-  err_clean();
-  jump_to_buffer();
-}
-
 static GEN
 sd_parisize(const char *v, int flag)
 {
@@ -794,7 +773,7 @@ sd_parisize(const char *v, int flag)
   if (n != oldn)
   {
     if (!bot) top = (pari_sp)n; /* no stack allocated yet */
-    if (flag != d_INITRC) allocatemem0(n);
+    if (flag != d_INITRC) allocatemoremem(n);
   }
   return r;
 }
@@ -2616,16 +2595,15 @@ gp_main_loop(int ismain)
 {
   gp_hist *H  = GP_DATA->hist;
   VOLATILE GEN z = gnil;
-  VOLATILE pari_sp av = avma;
+  VOLATILE pari_sp av = top - avma;
   Buffer *b = new_buffer();
   filtre_t F;
 
   init_filtre(&F, (void*)b);
   push_stack(&bufstack, (void*)b);
-  b->flenv = 1;
   for(;;)
   {
-    if (setjmp(b->env)) av = avma;
+    (void)setjmp(b->env);
     if (ismain)
     {
       static long tloc, outtyp;
@@ -2636,7 +2614,7 @@ gp_main_loop(int ismain)
       { /* recover from error */
         char *s = (char*)global_err_data;
         if (s && *s) outerr(lisseq(s));
-	avma = av = top;
+	avma = top; av = 0;
         prune_history(H, tloc);
         GP_DATA->fmt->prettyp = outtyp;
         kill_all_buffers(b);
@@ -2660,7 +2638,7 @@ gp_main_loop(int ismain)
       gpsilent = is_silent(b->buf);
       TIMERstart(GP_DATA->T);
     }
-    avma = av;
+    avma = top - av;
     z = readseq(b->buf, GP_DATA->flags & STRICTMATCH);
     if (! ismain) continue;
 
@@ -2766,7 +2744,6 @@ break_loop(long numerr)
   if (numerr == siginter)
     pariputs("[type <Return> in empty line to continue]\n");
   infile = stdin;
-  b->flenv = 1;
   for(;;)
   {
     GEN x;
