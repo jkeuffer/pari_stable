@@ -3868,7 +3868,7 @@ sturmpart(GEN x, GEN a, GEN b)
   t = typ(x);
   if (t != t_POL)
   {
-    if (t == t_INT || t == t_FRAC || t == t_FRACN) return 0;
+    if (t == t_INT || t == t_REAL || t == t_FRAC || t == t_FRACN) return 0;
     err(typeer,"sturm");
   }
   s=lgef(x); if (s==3) return 0;
