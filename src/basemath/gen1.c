@@ -39,7 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 else\
   gerepilemanyvec((pari_sp)z, tetpil, z+1, 2); }
 
-GEN quickmul(GEN a, GEN b, long na, long nb);
+extern GEN quickmul(GEN a, GEN b, long na, long nb);
+extern GEN shiftpol_i(GEN x, long v);
 
 #define cpifstack(x) isonstack(x)?gcopy(x):x
 /* y is a polmod, f is gadd or gmul */
@@ -87,85 +88,100 @@ op_polmod(GEN f(GEN,GEN), GEN x, GEN y, long tx)
 /* (static routines are not memory clean, but OK for gerepileupto) */
 /*******************************************************************/
 static GEN
-gred_rfrac_copy(GEN x1, GEN x2)
+gred_rfrac_copy(GEN n, GEN d)
 {
   GEN y = cgetg(3,t_RFRAC);
-  y[1] = lcopy(x1);
-  y[2] = lcopy(x2); return y;
+  y[1] = lcopy(n);
+  y[2] = lcopy(d); return y;
 }
 
-/* x[1] is scalar, non-zero */
+/* n is scalar, non-zero */
 static GEN
-gred_rfrac_simple(GEN x1, GEN x2)
+gred_rfrac_simple(GEN n, GEN d)
 {
-  GEN y, c = content(x2);
+  GEN y, c = content(d);
 
-  if (gcmp1(c)) return gred_rfrac_copy(x1,x2);
-  x1 = gdiv(x1, c);
-  x2 = gdiv(x2, c);
+  if (gcmp1(c)) return gred_rfrac_copy(n,d);
+  n = gdiv(n, c);
+  d = gdiv(d, c);
 
-  c = denom(x1);
+  c = denom(n);
   y = cgetg(3,t_RFRAC);
-  y[1] = lmul(x1,c);
-  y[2] = lmul(x2,c); return y;
+  y[1] = lmul(n,c);
+  y[2] = lmul(d,c); return y;
 }
 
 static GEN
-gred_rfrac2_i(GEN x1, GEN x2)
+gred_rfrac2_i(GEN n, GEN d)
 {
-  GEN y,p1,xx1,xx2,x3;
+  GEN y, p1, cn, cd, c;
   long tx,ty;
 
-  if (isexactzero(x1)) return gcopy(x1);
-  x1 = simplify_i(x1); tx = typ(x1);
-  x2 = simplify_i(x2); ty = typ(x2);
+  if (isexactzero(n)) return gcopy(n);
+  n = simplify_i(n); tx = typ(n);
+  d = simplify_i(d); ty = typ(d);
   if (ty!=t_POL)
   {
-    if (tx!=t_POL) return gred_rfrac_copy(x1,x2);
-    if (gvar2(x2) > varn(x1)) return gdiv(x1,x2);
+    if (tx!=t_POL) return gred_rfrac_copy(n,d);
+    if (gvar2(d) > varn(n)) return gdiv(n,d);
     err(talker,"incompatible variables in gred");
   }
   if (tx!=t_POL)
   {
-    if (varn(x2) < gvar2(x1)) return gred_rfrac_simple(x1,x2);
+    if (varn(d) < gvar2(n)) return gred_rfrac_simple(n,d);
     err(talker,"incompatible variables in gred");
   }
-  if (varn(x2) < varn(x1)) return gred_rfrac_simple(x1,x2);
-  if (varn(x2) > varn(x1)) return gdiv(x1,x2);
+  if (varn(d) < varn(n)) return gred_rfrac_simple(n,d);
+  if (varn(d) > varn(n)) return gdiv(n,d);
 
-  /* now x1 and x2 are polynomials with the same variable */
-  xx2 = content(x2); if (!gcmp1(xx2)) x2 = gdiv(x2,xx2);
-  xx1 = content(x1);
-  if (gcmp0(xx1))
+  /* now n and d are polynomials with the same variable */
+  cd = content(d); if (!gcmp1(cd)) d = gdiv(d,cd);
+  cn = content(n);
+  if (gcmp0(cn))
   {
-    x1 = gmul(x1,xx2);
-    x3 = gun;
-  }
-  else if (!gcmp1(xx1))
-  {
-    x1 = gdiv(x1,xx1);
-    x3 = gdiv(xx1,xx2);
-  }
-  else
-    x3 = ginv(xx2);
-  y = poldivrem(x1,x2,&p1);
-  if (!signe(p1)) return gmul(x3,y);
-
-  p1 = ggcd(x2,p1);
-  if (!isscalar(p1)) { x1=gdeuc(x1,p1); x2=gdeuc(x2,p1); }
-  if (typ(x3) == t_POL)
-  {
-    xx2 = denom(content(x3));
-    xx1 = gmul(x3, xx2);
+    long vn, vd = polvaluation(d, NULL);
+    if (vd)
+    {
+      vn = polvaluation(n, NULL);
+      if (vn) 
+      {
+        long v = min(vd, vd);
+        n = shiftpol_i(n, v);
+        d = shiftpol_i(d, v);
+        if (gcmp1(d)) d = NULL;
+      }
+    }
+    n = gdiv(n,cd);
+    return d? gred_rfrac_copy(n, d): n;
   }
   else
   {
-    xx1 = numer(x3);
-    xx2 = denom(x3);
+    if (!gcmp1(cn))
+    {
+      n = gdiv(n,cn);
+      c = gdiv(cn,cd);
+    }
+    else
+      c = ginv(cd);
+    y = poldivrem(n,d,&p1);
+    if (!signe(p1)) return gmul(c,y);
+    p1 = ggcd(d,p1);
   }
-  p1=cgetg(3,t_RFRAC);
-  p1[1]=lmul(x1,xx1);
-  p1[2]=lmul(x2,xx2); return p1;
+
+  if (!isscalar(p1)) { n=gdeuc(n,p1); d=gdeuc(d,p1); }
+  if (typ(c) == t_POL)
+  {
+    cd = denom(content(c));
+    cn = gmul(c, cd);
+  }
+  else
+  {
+    cn = numer(c);
+    cd = denom(c);
+  }
+  p1 = cgetg(3,t_RFRAC);
+  p1[1] = lmul(n,cn);
+  p1[2] = lmul(d,cd); return p1;
 }
 
 static GEN
@@ -915,11 +931,10 @@ mulscalrfrac(GEN x, GEN y)
   GEN p1, z, n, d, cx, cn, cd;
   long vx, vn, vd;
   pari_sp av = avma, tetpil;
-
-  if (gcmp0(x)) return gcopy(x);
-
-  n = (GEN)y[1]; if (gcmp0(n)) return gcopy(n);
+  n = (GEN)y[1];
   d = (GEN)y[2];
+
+  if (gcmp0(x) || gcmp0(n)) return gerepileupto(av, gdiv(gmul(x,n), d));
   vx = gvar(x);
   vn = gvar(n);
   vd = gvar(d);

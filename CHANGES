@@ -70,7 +70,9 @@ MSo11- various bugs in anal.c: uninitialized reads in get_op_fun(), double_op()
    16- O(y^5)/(1+x) + O(x^3)  --> O(x^3)
        O(y^5)/(1+x+O(x^3))    --> O(y^5) + O(y^5)*x + O(y^5)*x^2 + O(x^3)
        O(y) / (1+x)           --> O(y)
+       O(y) * 1/(1+x)         --> O(y)
    17- (0. * x) / x --> 0.E-28 * x
+   18- content(0.*x) --> 0
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.

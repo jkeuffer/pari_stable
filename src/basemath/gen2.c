@@ -606,8 +606,8 @@ minval(GEN x, GEN p, long first, long lx)
   return val;
 }
 
-static GEN
-shiftpol(GEN x, long v)
+GEN
+shiftpol_i(GEN x, long v)
 {
   long i, lz;
   GEN z;
@@ -626,7 +626,7 @@ polvaluation(GEN x, GEN *Z)
   if (!signe(x)) { if (Z) *Z = zeropol(varn(x)); return VERYBIGINT; }
   for (v = 0;; v++)
     if (!isexactzero((GEN)x[2+v])) break;
-  if (Z) *Z = shiftpol(x, v);
+  if (Z) *Z = shiftpol_i(x, v);
   return v;
 }
 long
@@ -636,7 +636,7 @@ ZX_valuation(GEN x, GEN *Z)
   if (!signe(x)) { if (Z) *Z = zeropol(varn(x)); return VERYBIGINT; }
   for (v = 0;; v++)
     if (signe((GEN)x[2+v])) break;
-  if (Z) *Z = shiftpol(x, v);
+  if (Z) *Z = shiftpol_i(x, v);
   return v;
 }
 long 
@@ -646,7 +646,7 @@ polvaluation_inexact(GEN x, GEN *Z)
   if (!signe(x)) { if (Z) *Z = zeropol(varn(x)); return VERYBIGINT; }
   for (v = 0;; v++)
     if (!gcmp0((GEN)x[2+v])) break;
-  if (Z) *Z = shiftpol(x, v);
+  if (Z) *Z = shiftpol_i(x, v);
   return v;
 }
 
