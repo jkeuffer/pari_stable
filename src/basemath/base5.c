@@ -246,9 +246,9 @@ rnfinitalg(GEN nf,GEN pol,long prec)
 
   f2 = idealdiv(nf, discsr(pol), (GEN)p1[3]);
   RES[4] = (long)idealsqrtn(nf, f2, gdeux, 1);
-  RES[5] = (long)rnfmakematrices(RES);
   RES[9] = lgetg(1,t_VEC); /* multiplication table: dummy */
   RES[10] = (long)nf;
+  RES[5] = (long)rnfmakematrices(RES);
   if (DEBUGLEVEL>1) msgtimer("matrices");
 
   rnfeq = rnfequation2(nf,pol);
