@@ -470,4 +470,13 @@ get_term_ftable_get(void) /* Establish runtime link with gnuplot engine */
     croak(buf);
     return 0;
 }
-#endif
+#else	/* !( defined HAS_DLOPEN ) */
+
+get_term_ftable_t *
+get_term_ftable_get(void) /* Establish runtime link with gnuplot engine */
+{
+    croak("No dlopen() support present, required for dynamic gnuplot-DLL link");
+    return NULL;
+}
+
+#endif	/* defined HAS_DLOPEN */ 
