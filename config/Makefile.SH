@@ -151,13 +151,13 @@ MV = mv -f
 LN = $ln_s
 
 # Change these installation directories to suit your needs.
-
-LIBDIR = $libdir
-BINDIR = $bindir
-DATADIR= $datadir
-MANDIR = $mandir
-MISCDIR = $miscdir
-INCLUDEDIR = $includedir
+# DESTDIR is used to install to a false hierachy (to build a Debian package)
+LIBDIR = \$(DESTDIR)$libdir
+BINDIR = \$(DESTDIR)$bindir
+DATADIR= \$(DESTDIR)$datadir
+MANDIR = \$(DESTDIR)$mandir
+MISCDIR = \$(DESTDIR)$miscdir
+INCLUDEDIR = \$(DESTDIR)$includedir
 
 INSTALL = $cfg/install
 INSTALL_PROGRAM = \$(INSTALL)
