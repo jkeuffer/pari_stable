@@ -1024,8 +1024,9 @@ long
 clcm(long a,long b)
 {
   long d;
+  if(!a) return 0;
   d=cgcd(a,b);
-  if(d!=1) return a*b/d;
+  if(d!=1) return a*(b/d);
   return a*b;
 }
 
@@ -1113,7 +1114,19 @@ mppgcd(GEN a, GEN b)
     avma = av; return shifti(r,v);
   }
 }
-
+GEN
+mpppcm(GEN x, GEN y)
+{
+  ulong av=avma;
+  GEN p1,p2;
+  if (typ(x) != t_INT || typ(y) != t_INT) err(arither1);
+  if (!signe(x)) return gzero;
+  p1 = mppgcd(x,y); 
+  if (is_pm1(p1)) { avma = av; return mulii(x,y); }
+  p2 = mulii(divii(y,p1), x);
+  if (signe(p2)<0) setsigne(p2,1);
+  return gerepileupto(av, p2);
+}
 /* Extended bezout. Return d=pgcd(a,b) and &u,&v */
 long
 cbezout(long a,long b,long *uu,long *vv)
