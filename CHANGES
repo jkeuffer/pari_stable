@@ -45,6 +45,8 @@ BA  1- gpflog could print some lines twice
    12- addrfrac: could return a t_RFRAC whose denominator wasn't a t_POL
    13- bnfcertify (zimmertbound): off by two error when reading bound
    14- very inefficient Hensel lift (used ideas from Shoup's NTL)
+   15- incorrect assumption on factor degrees in polcompositum (SEGV in rare
+       cases)
 
   Changed
     1- DOS distribution archives (GPM removed)
@@ -55,6 +57,7 @@ XR  4- don't compute discriminant in nffactor/nfroots + better bounds in nfsqff
     6- better modular arithmetic for polynomials (+ uniformized names)
     7- bnfinit: "looking hard" part overdone in random relations. Tuned down.
 XR  8- added flag in rnfconductor to check extension is abelian (under GRH)
+    9- made Vec("pari") return ["p","a","r","i"] instead of ["pari"]
 
   Added
     1- file README.WIN
