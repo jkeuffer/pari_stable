@@ -1737,6 +1737,28 @@ choose_params(GEN P, GEN N, GEN X, GEN B, int *pdelta, int *pt)
   }
 }
 
+static GEN 
+do_exhaustive(GEN P, GEN N, int x, GEN B) 
+{
+  GEN z, tst, sol = cgetg(1, t_VEC);
+  int j, l; 
+
+  for (j = -x; j <= x; j++)
+  {
+    z = stoi(j); 
+    tst = gcdii(FpX_eval(P, z, N), N);
+    
+    if (cmpii(tst, B) >= 0) /* We have found a factor of N >= B */
+    {
+      for (l = 1; l < lg(sol) && !egalii(z, (GEN)sol[l]); l++) /*empty*/;
+      if (l == lg(sol)) sol = concatsp(sol, z);
+    }
+  }
+  return sol; 
+}
+
+#define X_SMALL 1000
+
 /* General Coppersmith, look for a root x0 <= p, p >= B, p | N, |x0| <= X */
 GEN
 zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
@@ -1747,10 +1769,14 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
   if (typ(P0) != t_POL || typ(N) != t_INT) err(typeer, "Coppersmith");
   if (typ(X) != t_INT) X = gfloor(X);
   if (!B) B = N;
-  else {
-    bnd = 1; /* bnd-hack is only for the case B = N */
-    if (typ(B) != t_INT) B = gfloor(B);
-  }
+  if (typ(B) != t_INT) B = gceil(B);
+
+  if (cmpis(X, X_SMALL) <= 0) 
+    return do_exhaustive(P0, N, itos(X), B); 
+
+  /* bnd-hack is only for the case B = N */
+  if (!egalii(B,N)) bnd = 1;
+
   P = dummycopy(P0); d = degpol(P);
   if (!gcmp1((GEN)P[d+2]))
   {
@@ -1782,10 +1808,11 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
      * ...
      * P(Xi)^delta, XiP(Xi)^delta, ..., P(Xi)^delta(Xi)^t-1 */
     for (j = 1; j <= d;   j++) coeff(M, j, j) = (long)Xpowers[j-1];
-    for (     ; j <= dim; j++) coeff(M, j, j) = un;
 
     /* P-part */
-    row = d + 1; Q = P;
+    if (delta) row = d + 1; else row = 0; 
+
+    Q = P;
     for (i = 1; i < delta; i++)
     {
       for (j = 0; j < d; j++,row++)
