@@ -690,7 +690,7 @@ gadd(GEN x, GEN y)
   if (varncmp(vx, vy) < 0 || (vx==vy && tx>ty)) { swap(x,y); lswap(tx,ty); lswap(vx,vy); }
   if (ty==t_POLMOD) return op_polmod(gadd,x,y,tx);
 
-  /* here !isscalar(y) and vx >>= vy */
+  /* here !isscalar(y) and vx >= vy */
   if ( (varncmp(vx, vy) > 0 && (!is_matvec_t(tx) || !is_matvec_t(ty)))
     || (vx==vy && is_scalar_t(tx)) )
   {
