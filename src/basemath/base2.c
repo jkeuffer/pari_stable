@@ -1500,20 +1500,6 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
       pdr  = (GEN)w[4];
     }
 
-    /* begin: TEST */
-    {
-      GEN nu2;
-      long l2;
-
-      nu2   = (GEN)factmod(chi, p)[1];
-      l2    = lg(nu2) - 1;
-      nu2   = lift((GEN)nu2[l2]);
-      
-      if (gegal(nu2, nu) == 0)
-	err(talker, "IMPOSSIBLE");
-    }
-    /* end: TEST */
-    
     /* if Ea*Fa == N then O = Zp[alpha] */
     if (Ea*Fa == N) 
     {
