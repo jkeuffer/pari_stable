@@ -927,8 +927,7 @@ static long muldiv(long a,long b,long c)
 /* F = cycle decomposition of sigma, B = cycle decomposition of cl(tau).
  * Check all permutations pf who can possibly correspond to tau, such that
  * tau*sigma*tau^-1 = sigma^s and tau^d = sigma^t, where d = ord cl(tau)
- * x: vector of choices, G: vector allowing linear
- * access to elts of F. */
+ * x: vector of choices, G: vector allowing linear access to elts of F. */
 GEN
 testpermutation(GEN F, GEN B, long s, long t, long cut,
 		struct galois_test *td)
@@ -967,9 +966,9 @@ testpermutation(GEN F, GEN B, long s, long t, long cut,
   NN = divis(gpowgs(stoi(b), c * (d - 1)),cut);
   if (DEBUGLEVEL >= 4)
     fprintferr("GaloisConj:I will try %Z permutations\n", NN);
-  N1=100000;
+  N1=1000000;
   NQ=divis_rem(NN,N1,&R1);
-  if (cmpis(NQ,1000000000)>0)
+  if (cmpis(NQ,100000000)>0)
   {
     avma=avm;
     err(warner,"Combinatorics too hard : would need %Z tests!\n I'll skip it but you will get a partial result...",NN);
@@ -992,91 +991,88 @@ testpermutation(GEN F, GEN B, long s, long t, long cut,
 	  x[i++] = 0;
 	  if (i == j) { i++; j += d; }
 	}
+        p5 = (i == j - 1) ? -1 : i - j + d;
       }
-      else {start=1; i = a-1;}
-      for (p1 = 1, p5 = d; p1 <= i + 1; p1++, p5++)
-      {
-	  if (p5 == d)
-	  {
-	    p5 = 0;
-	    p4 = 0;
-	  }
-	  else
-	    p4 = x[p1 - 1];
-	  if (p5 == d - 1)
-	    p6 = p1 + 1 - d;
-	  else
-	    p6 = p1 + 1;
-	  V = 0;
-	  for (p2 = 1 + p4, p3 = 1 + x[p1]; p2 <= b; p2++)
-	  {
-	    V += mael(W,G[p6][p3],G[p1][p2]);
-	    p3 += s;
-	    if (p3 > b)
-	      p3 -= b;
-	  }
-	  p3 = 1 + x[p1] - s;
-	  if (p3 <= 0)
-	    p3 += b;
-	  for (p2 = p4; p2 >= 1; p2--)
-	  {
-	    V += mael(W,G[p6][p3],G[p1][p2]);
-	    p3 -= s;
-	    if (p3 <= 0)
-	      p3 += b;
-	  }
-	  ar[p1]=V;
+      else {start=1; i = a - 1; p5 = -1;}
+      /* p5 = (p1 % d) - 1 */
+      for (p1 = i + 1 ; p1 >= 1; p1--, p5--)
+      { 
+        if (p5 == - 1)
+        {
+          p5 = d - 1;
+          p6 = p1 + 1 - d;
+        }
+        else
+          p6 = p1 + 1;
+        p4 = p5 ? x[p1 - 1] : 0;
+        V = 0;
+        for (p2 = 1 + p4, p3 = 1 + x[p1]; p2 <= b; p2++)
+        {
+          V += mael(W,G[p6][p3],G[p1][p2]);
+          p3 += s;
+          if (p3 > b)
+            p3 -= b;
+        }
+        p3 = 1 + x[p1] - s;
+        if (p3 <= 0)
+          p3 += b;
+        for (p2 = p4; p2 >= 1; p2--)
+        {
+          V += mael(W,G[p6][p3],G[p1][p2]);
+          p3 -= s;
+          if (p3 <= 0)
+            p3 += b;
+        }
+        ar[p1] = ar[p1+1] + V;
       }
-      
-      for (p1 = i + 1; p1 >= 1; p1--)
-        ar[p1] += ar[p1+1];
+
       if ( -n <= ar[1] && ar[1] <= n )
       {
-	for (p1 = 1, p5 = d; p1 <= a; p1++, p5++)
-	{
-	  if (p5 == d)
-	  {
-	    p5 = 0;
-	    p4 = 0;
-	  }
-	  else
-	    p4 = x[p1 - 1];
-	  if (p5 == d - 1)
-	    p6 = p1 + 1 - d;
-	  else
-	    p6 = p1 + 1;
-	  for (p2 = 1 + p4, p3 = 1 + x[p1]; p2 <= b; p2++)
-	  {
-	    pf[G[p1][p2]] = G[p6][p3];
-	    p3 += s;
-	    if (p3 > b)
-	      p3 -= b;
-	  }
-	  p3 = 1 + x[p1] - s;
-	  if (p3 <= 0)
-	    p3 += b;
-	  for (p2 = p4; p2 >= 1; p2--)
-	  {
-	    pf[G[p1][p2]] = G[p6][p3];
-	    p3 -= s;
-	    if (p3 <= 0)
-	      p3 += b;
-	  }
-	}
-	if (verifietest(pf, td))
-	{
-	  if (DEBUGLEVEL >= 1)
-	  {
-	    GEN nb=addis(mulss(l2,N1),l1);
-	    msgtimer("testpermutation(%Z)", nb);
-	    if (DEBUGLEVEL >= 2 && hop)
-	      fprintferr("GaloisConj:%d hop sur %Z iterations\n", hop, nb);
-	  }
-	  avma = av;
-	  return pf;
-	}
-	else
-	  hop++;
+        for (p1 = 1, p5 = d; p1 <= a; p1++, p5++)
+        {
+          if (p5 == d)
+          {
+            p5 = 0;
+            p4 = 0;
+          }
+          else
+            p4 = x[p1 - 1];
+          if (p5 == d - 1)
+            p6 = p1 + 1 - d;
+          else
+            p6 = p1 + 1;
+          for (p2 = 1 + p4, p3 = 1 + x[p1]; p2 <= b; p2++)
+          {
+            pf[G[p1][p2]] = G[p6][p3];
+            p3 += s;
+            if (p3 > b)
+              p3 -= b;
+          }
+          p3 = 1 + x[p1] - s;
+          if (p3 <= 0)
+            p3 += b;
+          for (p2 = p4; p2 >= 1; p2--)
+          {
+            pf[G[p1][p2]] = G[p6][p3];
+            p3 -= s;
+            if (p3 <= 0)
+              p3 += b;
+          }
+        }
+        if (verifietest(pf, td))
+        {
+          if (DEBUGLEVEL >= 1)
+          {
+            GEN nb=addis(mulss(l2,N1),l1);
+            msgtimer("testpermutation(%Z)", nb);
+            if (DEBUGLEVEL >= 2 && hop)
+              fprintferr("GaloisConj:%d hop sur %Z iterations\n", hop, nb);
+          }
+          avma = av;
+          return pf;
+        }
+        else
+          hop++;
       }
     }
   }
@@ -1089,6 +1085,7 @@ testpermutation(GEN F, GEN B, long s, long t, long cut,
   avma = avm;
   return gzero;
 }
+
 int pari_compare_lg(GEN x, GEN y)
 {
   return lg(x)-lg(y);
