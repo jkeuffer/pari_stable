@@ -985,42 +985,23 @@ mat_to_vecpol(GEN x, long v)
 GEN
 vecpol_to_mat(GEN v, long n)
 {
-  long i,j,d,N = lg(v);
-  GEN p1,w, y = cgetg(N, t_MAT);
+  long j, N = lg(v);
+  GEN y = cgetg(N, t_MAT);
   if (typ(v) != t_VEC) err(typeer,"vecpol_to_mat");
-  n++;
-  for (j=1; j<N; j++)
-  {
-    p1 = cgetg(n,t_COL); y[j] = (long)p1;
-    w = (GEN)v[j];
-    if (typ(w) != t_POL) { p1[1] = (long)w; i=2; }
-    else
-    {
-      d=lgef(w)-1; w++;
-      for (i=1; i<d; i++) p1[i] = w[i];
-    }
-    for ( ; i<n; i++) p1[i] = zero;
-  }
+  for (j=1; j<N; j++) y[j] = (long)pol_to_vec((GEN)v[j], n);
   return y;
 }
+
 /* polynomial (in v) of polynomials (in w) whose coeffs are given by the columns of x */
 GEN
 mat_to_polpol(GEN x, long v,long w)
 {
-  long i,j, lx = lg(x), lcol = lg(x[1]);
+  long j, lx = lg(x);
   GEN y = cgetg(lx+1, t_POL);
   y[1]=evalsigne(1) | evallgef(lx+1) | evalvarn(v);
   y++;
-  for (j=1; j<lx; j++)
-  {
-    GEN p1, col = (GEN)x[j];
-    long k;
-    i=lcol+1; p1=cgetg(i,t_POL);
-    p1[1] = evalsigne(1) | evallgef(i) | evalvarn(w);
-    col--; for (k=2; k<i; k++) p1[k] = col[k];
-    y[j] = (long)normalizepol_i(p1,i);
-  }
-  return normalizepol_i(--y,lx+1);
+  for (j=1; j<lx; j++) y[j] = (long)vec_to_pol((GEN)x[j], w);
+  return normalizepol_i(--y, lx+1);
 }
 
 /* matrix whose entries are given by the coeffs of the polynomial v in
@@ -1028,22 +1009,11 @@ mat_to_polpol(GEN x, long v,long w)
 GEN
 polpol_to_mat(GEN v, long n)
 {
-  long i,j,d,N = lgef(v)-1;
-  GEN p1,w, y = cgetg(N, t_MAT);
+  long j, N = lgef(v)-1;
+  GEN y = cgetg(N, t_MAT);
   if (typ(v) != t_POL) err(typeer,"polpol_to_mat");
-  n++;v++;
-  for (j=1; j<N; j++)
-  {
-    p1 = cgetg(n,t_COL); y[j] = (long)p1;
-    w = (GEN)v[j];
-    if (typ(w) != t_POL) { p1[1] = (long)w; i=2; }
-    else
-    {
-      d=lgef(w)-1; w++;
-      for (i=1; i<d; i++) p1[i] = w[i];
-    }
-    for ( ; i<n; i++) p1[i] = zero;
-  }
+  v++;
+  for (j=1; j<N; j++) y[j] = (long)pol_to_vec((GEN)v[j], n);
   return y;
 }
 
