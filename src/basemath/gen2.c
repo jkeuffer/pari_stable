@@ -536,6 +536,9 @@ gegal(GEN x, GEN y)
       case t_INT:
         return egalii(x,y);
 
+      case t_REAL:
+        return cmprr(x,y) == 0;
+
       case t_POL:
         return polegal(x,y);
 

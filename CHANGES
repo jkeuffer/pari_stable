@@ -104,6 +104,7 @@ BA 27- [GMP kernel] factor(18295370635792208009) --> error
     9- upgrade pariemacs, see pariemacs.txt
    10- faster divll for portable kernel [ inspired by GMP ]
    11- allow system() under Windows (95 and higher)
+   12- use cmprr() in gegal(t_REAL, t_REAL)
 
   Added
     1- member function rnf.pol (polynomial generating absolute extension)
