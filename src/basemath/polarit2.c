@@ -1855,7 +1855,7 @@ deg1_from_roots(GEN L, long v)
   long i, l = lg(L);
   GEN z = cgetg(l,t_COL);
   for (i=1; i<l; i++)
-    z[i] = (long)deg1pol_i(gun, gneg((GEN)z[i]), v);
+    z[i] = (long)deg1pol_i(gun, gneg((GEN)L[i]), v);
   return z;
 }
 
