@@ -511,7 +511,7 @@ INLINE GEN
 divss(long x, long y) { return stoi(x / y); }
 
 INLINE GEN
-divss_rem(long x, long y, long *rem)
+divss_rem(long x, long y, ulong *rem)
 {
   long p1;
   LOCAL_HIREMAINDER;
@@ -526,7 +526,7 @@ divss_rem(long x, long y, long *rem)
 INLINE GEN
 dvmdss(long x, long y, GEN *z)
 {
-  long rem;
+  ulong rem;
   const GEN p1 = divss_rem(x,y, &rem);
   *z = stoi(rem); return p1;
 }
@@ -551,7 +551,7 @@ INLINE void
 dvmdssz(long x, long y, GEN z, GEN t)
 {
   const pari_sp av=avma;
-  long rem;
+  ulong rem;
   mpaff(divss_rem(x,y, &rem), z); affsi(rem,t); avma=av;
 }
 
