@@ -1336,7 +1336,7 @@ gmul(GEN x, GEN y)
             if (pol && varn(x) != varn(y))
               x = to_Kronecker(x,pol);
             z = quickmul(x+2, y+2, lgef(x)-2, lgef(y)-2);
-            if (p) z = Fp_pol(z,p);
+            if (p) z = FpX(z,p);
             if (pol) z = from_Kronecker(z,pol);
             z = gerepileupto(av, z);
           }

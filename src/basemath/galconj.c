@@ -308,7 +308,7 @@ initlift(GEN T, GEN den, GEN p, GEN L, GEN Lden, struct galois_borne *gb, struct
   lbot = avma;
   gl->Q = gpowgs(p, gl->e);
   gl->Q = gerepile(ltop, lbot, gl->Q);
-  gl->TQ = Fp_pol_red(T,gl->Q);
+  gl->TQ = FpX_red(T,gl->Q);
 }
 /*
  * T est le polynome \sum t_i*X^i S est un Polmod T 
@@ -337,12 +337,12 @@ compoTS(GEN T, GEN S, GEN Q, GEN mod)
 	    break;
 	if ((k << 1) < i)
 	{
-	  Spow[i + 1] = (long) Fp_mul_mod_pol((GEN) Spow[k + 1], (GEN) Spow[i - k + 1],Q,mod);
+	  Spow[i + 1] = (long) FpXQ_mul((GEN) Spow[k + 1], (GEN) Spow[i - k + 1],Q,mod);
 	  break;
 	}
 	else if ((k << 1) == i)	
 	{
-	  Spow[i + 1] = (long) Fp_sqr_mod_pol((GEN) Spow[k + 1],Q,mod);
+	  Spow[i + 1] = (long) FpXQ_sqr((GEN) Spow[k + 1],Q,mod);
 	  break;
 	}
 	for (k = i - 1; k > 0; k--)
@@ -350,21 +350,21 @@ compoTS(GEN T, GEN S, GEN Q, GEN mod)
 	    break;
 	if ((k << 1) < i)
 	{
-	  Spow[(k << 1) + 1] = (long) Fp_sqr_mod_pol((GEN) Spow[k + 1],Q,mod);
+	  Spow[(k << 1) + 1] = (long) FpXQ_sqr((GEN) Spow[k + 1],Q,mod);
 	  continue;
 	}
 	for (l = i - k; l > 0; l--)
 	  if (Spow[l + 1])
 	    break;
 	if (Spow[i - l - k + 1])
-	  Spow[i - k + 1] = (long) Fp_mul_mod_pol((GEN) Spow[i - l - k + 1], (GEN) Spow[l + 1],Q,mod);
+	  Spow[i - k + 1] = (long) FpXQ_mul((GEN) Spow[i - l - k + 1], (GEN) Spow[l + 1],Q,mod);
 	else
-	  Spow[l + k + 1] = (long) Fp_mul_mod_pol((GEN) Spow[k + 1], (GEN) Spow[l + 1],Q,mod);
+	  Spow[l + k + 1] = (long) FpXQ_mul((GEN) Spow[k + 1], (GEN) Spow[l + 1],Q,mod);
       }
   }
   for (i = 1; i < lg(Spow); i++)
     if (signe((GEN) T[i + 2]))
-      Spow[i] = (long) Fp_mul_pol_scal((GEN) Spow[i], (GEN) T[i + 2],mod);
+      Spow[i] = (long) FpX_Fp_mul((GEN) Spow[i], (GEN) T[i + 2],mod);
   return Spow;
 }
 
@@ -378,9 +378,9 @@ calcTS(GEN Spow, GEN P, GEN S, GEN Q, GEN mod)
   int     i;
   for (i = 1; i < lg(Spow); i++)
     if (signe((GEN) P[i + 2]))
-      res = Fp_add(res, (GEN) Spow[i],NULL);
-  res = Fp_mul_mod_pol(res,S,Q,mod);
-  res=Fp_add_pol_scal(res,(GEN)P[2],mod);
+      res = FpX_add(res, (GEN) Spow[i],NULL);
+  res = FpXQ_mul(res,S,Q,mod);
+  res=FpX_Fp_add(res,(GEN)P[2],mod);
   return res;
 }
 
@@ -394,8 +394,8 @@ calcderivTS(GEN Spow, GEN P, GEN mod)
   int     i;
   for (i = 1; i < lg(Spow); i++)
     if (signe((GEN) P[i + 2]))
-      res = Fp_add(res, Fp_mul_pol_scal((GEN) Spow[i], stoi(i),mod),NULL);
-  return Fp_pol_red(res,mod);
+      res = FpX_add(res, FpX_Fp_mul((GEN) Spow[i], stoi(i),mod),NULL);
+  return FpX_red(res,mod);
 }
 
 /*
@@ -417,10 +417,10 @@ monomorphismlift(GEN P, GEN S, GEN Q, GEN p, long e)
   x = varn(P);
   q = p; qm1=gun; /*during the run, we have p*qm1=q*/
   nb=hensel_lift_accel(e, &mask);
-  Pr = Fp_pol_red(P,q);
-  Qr = (P==Q)?Pr:Fp_pol_red(Q, q);/*A little speed up for automorphismlift*/
-  W=Fp_compo_mod_pol(deriv(Pr, x),S,Qr,q);
-  W=Fp_inv_mod_pol(W,Qr,q);
+  Pr = FpX_red(P,q);
+  Qr = (P==Q)?Pr:FpX_red(Q, q);/*A little speed up for automorphismlift*/
+  W=FpX_FpXQ_compo(deriv(Pr, x),S,Qr,q);
+  W=FpXQ_inv(W,Qr,q);
   qold = p;
   Prold = Pr;
   Qrold = Qr;
@@ -430,23 +430,23 @@ monomorphismlift(GEN P, GEN S, GEN Q, GEN p, long e)
   {
     qm1 = (mask&(1<<i))?sqri(qm1):mulii(qm1, q);
     q   =  mulii(qm1, p);
-    Pr = Fp_pol_red(P, q);
-    Qr = (P==Q)?Pr:Fp_pol_red(Q, q);/*A little speed up for automorphismlift*/
+    Pr = FpX_red(P, q);
+    Qr = (P==Q)?Pr:FpX_red(Q, q);/*A little speed up for automorphismlift*/
     ltop = avma;
     Sr = S;
     Spow = compoTS(Pr, Sr, Qr, q);
     if (i)
     {
-      W = Fp_mul_mod_pol(Wr, calcderivTS(Spow, Prold,qold), Qrold, qold);
-      W = Fp_neg(W, qold);
-      W = Fp_add_pol_scal(W, gdeux, qold);
-      W = Fp_mul_mod_pol(Wr, W, Qrold, qold);
+      W = FpXQ_mul(Wr, calcderivTS(Spow, Prold,qold), Qrold, qold);
+      W = FpX_neg(W, qold);
+      W = FpX_Fp_add(W, gdeux, qold);
+      W = FpXQ_mul(Wr, W, Qrold, qold);
     }
     Wr = W;
-    S = Fp_mul_mod_pol(Wr, calcTS(Spow, Pr, Sr, Qr, q),Qr,q);
+    S = FpXQ_mul(Wr, calcTS(Spow, Pr, Sr, Qr, q),Qr,q);
     lbot = avma;
     Wr = gcopy(Wr);
-    S = Fp_sub(Sr, S,NULL);
+    S = FpX_sub(Sr, S,NULL);
     gerepilemanysp(ltop, lbot, gptr, 2);
     qold = q;
     Prold = Pr;
@@ -482,7 +482,7 @@ poltopermtest(GEN f, struct galois_lift *gl, GEN pf)
     fp[i] = 1;
   for (i = 1; i < ll; i++)
   {
-    fx = Fp_poleval(f, (GEN) gl->L[i],gl->ladic);
+    fx = FpX_eval(f, (GEN) gl->L[i],gl->ladic);
     for (j = 1; j < ll; j++)
     {
       if (fp[j] && egalii(fx, (GEN) gl->Lden[j]))
@@ -523,39 +523,39 @@ bezout_lift_fact(GEN pola, GEN polb, GEN p, long e)
     timer2();
   nb=hensel_lift_accel(e, &mask);
   ae = pola;
-  be = Fp_poldivres(polb, ae, p, NULL);
-  g = (GEN) Fp_pol_extgcd(ae, be, p, &u, &v)[2];	/* deg g = 0 */
+  be = FpX_divres(polb, ae, p, NULL);
+  g = (GEN) FpX_extgcd(ae, be, p, &u, &v)[2];	/* deg g = 0 */
   if (!gcmp1(g))
   {
     g = mpinvmod(g, p);
-    u = Fp_mul_pol_scal(u,g,NULL);
-    v = Fp_mul_pol_scal(v,g,NULL);
+    u = FpX_Fp_mul(u,g,NULL);
+    v = FpX_Fp_mul(v,g,NULL);
   }
   for (pe = p,pem1 = gun, i = 0; i < nb; i++)
   {
     pem1 = (mask&(1<<i))?sqri(pem1):mulii(pem1, pe);
     pe2  =  mulii(pem1, p);
-    g = Fp_sub(polb, Fp_mul(ae, be,NULL),pe2);
+    g = FpX_sub(polb, FpX_mul(ae, be,NULL),pe2);
     g = gdivexact(g, pe);
-    z = Fp_mul(v, g, pe);
-    t = Fp_poldivres(z, ae, pe, &s);
-    t = Fp_add(Fp_mul(u, g,NULL), Fp_mul(t, be,NULL),pe);
-    be2 = Fp_add(be, Fp_mul_pol_scal(t, pe,NULL),NULL);
-    ae2 = Fp_add(ae, Fp_mul_pol_scal(s, pe,NULL),NULL);	/* already reduced mod pe2 */
-    g = Fp_add(Fp_mul(u, ae2,NULL), Fp_mul(v, be2,NULL),pe2);
-    g = Fp_add_pol_scal(Fp_neg(g,pe2),gun,pe2);
+    z = FpX_mul(v, g, pe);
+    t = FpX_divres(z, ae, pe, &s);
+    t = FpX_add(FpX_mul(u, g,NULL), FpX_mul(t, be,NULL),pe);
+    be2 = FpX_add(be, FpX_Fp_mul(t, pe,NULL),NULL);
+    ae2 = FpX_add(ae, FpX_Fp_mul(s, pe,NULL),NULL);	/* already reduced mod pe2 */
+    g = FpX_add(FpX_mul(u, ae2,NULL), FpX_mul(v, be2,NULL),pe2);
+    g = FpX_Fp_add(FpX_neg(g,pe2),gun,pe2);
     g = gdivexact(g, pe);
-    z = Fp_mul(v, g, pe);
-    t = Fp_poldivres(z, ae, pe, &s);
-    t = Fp_add(Fp_mul(u, g,NULL), Fp_mul(t, be,NULL),pe);
-    u = Fp_add(u, Fp_mul_pol_scal(t, pe,NULL),NULL);
-    v = Fp_add(v, Fp_mul_pol_scal(s, pe,NULL),NULL);
+    z = FpX_mul(v, g, pe);
+    t = FpX_divres(z, ae, pe, &s);
+    t = FpX_add(FpX_mul(u, g,NULL), FpX_mul(t, be,NULL),pe);
+    u = FpX_add(u, FpX_Fp_mul(t, pe,NULL),NULL);
+    v = FpX_add(v, FpX_Fp_mul(s, pe,NULL),NULL);
     pe = pe2;
     ae = ae2;
     be = be2;
   }
   lbot = avma;
-  g = Fp_mul(v, be,NULL);
+  g = FpX_mul(v, be,NULL);
   g = gerepile(ltop, lbot, g);
   if (DEBUGLEVEL >= 1)
     msgtimer("bezout_lift_fact()");
@@ -577,9 +577,9 @@ inittestlift(GEN Tmod, long elift, struct galois_lift *gl,
   gt->n = lg(gl->L) - 1;
   gt->g = lg(Tmod) - 1;
   gt->f = gt->n / gt->g;
-  Tp = Fp_pol_red(gl->T, gl->p);
+  Tp = FpX_red(gl->T, gl->p);
   pe = gpowgs(gl->p, elift);
-  S = Fp_pow_mod_pol(polx[v],pe, Tp,gl->p);
+  S = FpXQ_pow(polx[v],pe, Tp,gl->p);
   plift = automorphismlift(S, gl);
   if (DEBUGLEVEL >= 9)
     fprintferr("GaloisConj:plift = %Z\n", plift);
@@ -588,7 +588,7 @@ inittestlift(GEN Tmod, long elift, struct galois_lift *gl,
   if (frob)
   {
     GEN     tlift;
-    tlift = Fp_centermod(Fp_mul_pol_scal(plift,gl->den,gl->Q), gl->Q);
+    tlift = FpX_redc(FpX_Fp_mul(plift,gl->den,gl->Q), gl->Q);
     if (poltopermtest(tlift, gl, frob))
     {
       avma = ltop;
@@ -615,7 +615,7 @@ inittestlift(GEN Tmod, long elift, struct galois_lift *gl,
     autpow = cgetg(gt->n, t_VEC);
     autpow[1] = (long) plift;
     for (i = 2; i < gt->n; i++)
-      autpow[i] = (long) Fp_mul_mod_pol((GEN) autpow[i - 1],plift,gl->TQ,gl->Q);
+      autpow[i] = (long) FpXQ_mul((GEN) autpow[i - 1],plift,gl->TQ,gl->Q);
     if (DEBUGLEVEL >= 7)
       fprintferr("GaloisConj:inittestlift()4:avma=%ld\n", avma);
     for (i = 3; i <= gt->f; i++)
@@ -632,9 +632,9 @@ inittestlift(GEN Tmod, long elift, struct galois_lift *gl,
 	GEN     p1;
 	s = scalarpol((GEN) P[2],v);
 	for (j = 1; j < n; j++)
-	  s = Fp_add(s, Fp_mul_pol_scal((GEN) autpow[j], (GEN) P[j + 2],NULL),NULL);
-	p1 = Fp_mul_pol_scal((GEN) autpow[n], (GEN) P[n + 2],NULL);
-	s = Fp_add(s, p1,gl->Q);
+	  s = FpX_add(s, FpX_Fp_mul((GEN) autpow[j], (GEN) P[j + 2],NULL),NULL);
+	p1 = FpX_Fp_mul((GEN) autpow[n], (GEN) P[n + 2],NULL);
+	s = FpX_add(s, p1,gl->Q);
 	if (DEBUGLEVEL >= 7)
 	  fprintferr("GaloisConj:inittestlift()5:avma=%ld\n", avma);
 	gt->pauto[i] = (long) gerepileupto(ltop,s);
@@ -677,7 +677,7 @@ frobeniusliftall(GEN sg, GEN *psi, struct galois_lift *gl,
     for(j=1;j<=gt->g;j++)
       mael(C,i,j)=0;
   }
-  v = Fp_mul_mod_pol((GEN)gt->pauto[2], (GEN) gt->bezoutcoeff[m],gl->TQ,gl->Q);
+  v = FpXQ_mul((GEN)gt->pauto[2], (GEN) gt->bezoutcoeff[m],gl->TQ,gl->Q);
   for (i = 1; i < m; i++)
     pf[i] = 1 + i / d;
   av = avma;
@@ -696,13 +696,13 @@ frobeniusliftall(GEN sg, GEN *psi, struct galois_lift *gl,
       if (!mael(C,h,j))
       {
 	ulong av3=avma;
-	mael(C,h,j)= lclone(Fp_mul_mod_pol((GEN) gt->pauto[sg[pf[j]] + 1], 
+	mael(C,h,j)= lclone(FpXQ_mul((GEN) gt->pauto[sg[pf[j]] + 1], 
 					   (GEN) gt->bezoutcoeff[j],gl->TQ,gl->Q));
 	avma=av3;
       }
-      u = Fp_add(u, gmael(C,h,j),NULL);
+      u = FpX_add(u, gmael(C,h,j),NULL);
     }
-    u = Fp_centermod(Fp_mul_pol_scal(u,gl->den,gl->Q), gl->Q);
+    u = FpX_redc(FpX_Fp_mul(u,gl->den,gl->Q), gl->Q);
     if (poltopermtest(u, gl, frob))
     {
       if (DEBUGLEVEL >= 4 )
@@ -1333,15 +1333,15 @@ corpsfixeorbitemod(GEN L, GEN O, long x, GEN mod, GEN l, GEN p, GEN *U)
       for (j = 2; j < lg(O[i]); j++)
 	p1 = modii(mulii(p1, addsi(d, (GEN) L[mael(O,i,j)])),mod);
       PL[i] = (long) p1;
-      g = Fp_mul(g, deg1pol(gun,negi(p1),x),mod);
+      g = FpX_mul(g, deg1pol(gun,negi(p1),x),mod);
     }
     lbot = avma;
-    g = Fp_centermod(g,mod);
+    g = FpX_redc(g,mod);
     av = avma;
     if (DEBUGLEVEL >= 6)
       fprintferr("GaloisConj:corps fixe:%d:%Z\n", d, g);
     dg=deriv(g, x);
-    if (lgef(Fp_pol_gcd(g,dg,l))==3 && (p==gun || lgef(Fp_pol_gcd(g,dg,p))==3))
+    if (lgef(FpX_gcd(g,dg,l))==3 && (p==gun || lgef(FpX_gcd(g,dg,p))==3))
       break;
   } 
   if (d > dmax)
@@ -1401,15 +1401,15 @@ vandermondeinversemod(GEN L, GEN T, GEN den, GEN mod)
   GEN     M, P, Tp;
   M = cgetg(n, t_MAT);
   av=avma;
-  Tp = gclone(Fp_pol_red(deriv(T, x),mod)); /*clone*/
+  Tp = gclone(FpX_red(deriv(T, x),mod)); /*clone*/
   avma=av;
   for (i = 1; i < n; i++)
   {
     GEN z;
     av = avma;
-    z = mpinvmod(Fp_poleval(Tp, (GEN) L[i],mod),mod);
+    z = mpinvmod(FpX_eval(Tp, (GEN) L[i],mod),mod);
     z = modii(mulii(den,z),mod);
-    P = Fp_mul_pol_scal(Fp_deuc(T, deg1pol(gun,negi((GEN) L[i]),x),mod), z, mod); 
+    P = FpX_Fp_mul(FpX_div(T, deg1pol(gun,negi((GEN) L[i]),x),mod), z, mod); 
     M[i] = lgetg(n, t_COL);
     for (j = 1; j < n; j++)
       mael(M,i,j) = lcopy((GEN) P[1 + j]);
@@ -1649,7 +1649,7 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
     gp=stoi(p);
     if (Fp_is_squarefree(T,gp))
     {
-      s=Fp_pol_nbfact(T,gp);
+      s=FpX_nbfact(T,gp);
       if (n%s)
       {
 	avma = ltop;
@@ -2103,7 +2103,7 @@ s4makelift(GEN u, struct galois_lift *gl, GEN liftpow)
   int     i;
   liftpow[1] = (long) automorphismlift(u, gl);
   for (i = 2; i < lg(liftpow); i++)
-    liftpow[i] = (long) Fp_mul_mod_pol((GEN) liftpow[i - 1], (GEN) liftpow[1],gl->TQ,gl->Q);
+    liftpow[i] = (long) FpXQ_mul((GEN) liftpow[i - 1], (GEN) liftpow[1],gl->TQ,gl->Q);
 }
 static long
 s4test(GEN u, GEN liftpow, struct galois_lift *gl, GEN phi)
@@ -2117,10 +2117,10 @@ s4test(GEN u, GEN liftpow, struct galois_lift *gl, GEN phi)
   for (i = 1; i < d ; i++)
   {
     GEN z;
-    z = Fp_mul_pol_scal((GEN) liftpow[i], (GEN) u[i + 2],NULL);
-    res = Fp_add(res,z ,gl->Q);
+    z = FpX_Fp_mul((GEN) liftpow[i], (GEN) u[i + 2],NULL);
+    res = FpX_add(res,z ,gl->Q);
   }
-  res = Fp_centermod(Fp_mul_pol_scal(res,gl->den,gl->Q), gl->Q);
+  res = FpX_redc(FpX_Fp_mul(res,gl->den,gl->Q), gl->Q);
   if (DEBUGLEVEL >= 6)
     msgtimer("s4test()");
   bl = poltopermtest(res, gl, phi);
@@ -2133,18 +2133,18 @@ s4releveauto(GEN misom,GEN Tmod,GEN Tp,GEN p,long a1,long a2,long a3,long a4,lon
   ulong ltop=avma;
   GEN u1,u2,u3,u4,u5;
   GEN pu1,pu2,pu3,pu4;
-  pu1=Fp_mul( (GEN) Tmod[a2], (GEN) Tmod[a1],p);
-  u1 = Fp_chinese_coprime(gmael(misom,a1,a2),gmael(misom,a2,a1),
+  pu1=FpX_mul( (GEN) Tmod[a2], (GEN) Tmod[a1],p);
+  u1 = FpX_chinese_coprime(gmael(misom,a1,a2),gmael(misom,a2,a1),
 			 (GEN) Tmod[a2], (GEN) Tmod[a1],pu1,p);
-  pu2=Fp_mul( (GEN) Tmod[a4], (GEN) Tmod[a3],p);
-  u2 = Fp_chinese_coprime(gmael(misom,a3,a4),gmael(misom,a4,a3),
+  pu2=FpX_mul( (GEN) Tmod[a4], (GEN) Tmod[a3],p);
+  u2 = FpX_chinese_coprime(gmael(misom,a3,a4),gmael(misom,a4,a3),
 			 (GEN) Tmod[a4], (GEN) Tmod[a3],pu2,p);
-  pu3=Fp_mul( (GEN) Tmod[a6], (GEN) Tmod[a5],p);
-  u3 = Fp_chinese_coprime(gmael(misom,a5,a6),gmael(misom,a6,a5),
+  pu3=FpX_mul( (GEN) Tmod[a6], (GEN) Tmod[a5],p);
+  u3 = FpX_chinese_coprime(gmael(misom,a5,a6),gmael(misom,a6,a5),
 			 (GEN) Tmod[a6], (GEN) Tmod[a5],pu3,p);
-  pu4=Fp_mul(pu1,pu2,p);
-  u4 = Fp_chinese_coprime(u1,u2,pu1,pu2,pu4,p);
-  u5 = Fp_chinese_coprime(u4,u3,pu4,pu3,Tp,p);
+  pu4=FpX_mul(pu1,pu2,p);
+  u4 = FpX_chinese_coprime(u1,u2,pu1,pu2,pu4,p);
+  u5 = FpX_chinese_coprime(u4,u3,pu4,pu3,Tp,p);
   return gerepileupto(ltop,u5);
 }
 GEN
@@ -2182,7 +2182,7 @@ s4galoisgen(struct galois_lift *gl)
   phi = cgetg(lg(gl->L), t_VECSMALL);
   for (i = 1; i < lg(sg); i++)
     sg[i] = i;
-  Tp = Fp_pol_red(gl->T,p);
+  Tp = FpX_red(gl->T,p);
   TQ = gl->TQ;
   Tmod = lift((GEN) factmod(gl->T, p)[1]);
   isom = cgetg(lg(Tmod), t_VEC);
@@ -2204,7 +2204,7 @@ s4galoisgen(struct galois_lift *gl)
   }
   for (i = 1; i < lg(isom); i++)
     for (j = 1; j < lg(isom); j++)
-      mael(misom,i,j) = (long) Fp_compo_mod_pol((GEN) isominv[i],(GEN) isom[j],
+      mael(misom,i,j) = (long) FpX_FpXQ_compo((GEN) isominv[i],(GEN) isom[j],
 						(GEN) Tmod[j],p);
   liftpow = cgetg(24, t_VEC);
   av = avma;
@@ -2235,23 +2235,23 @@ s4galoisgen(struct galois_lift *gl)
     av2 = avma;
     for (j1 = 0; j1 < 4; j1++)
     {
-      u1 = Fp_add(Fp_mul_mod_pol((GEN) bezoutcoeff[sg[5]],
+      u1 = FpX_add(FpXQ_mul((GEN) bezoutcoeff[sg[5]],
 				 (GEN) pauto[1 + j1],TQ,Q),
-		  Fp_mul_mod_pol((GEN) bezoutcoeff[sg[6]],
+		  FpXQ_mul((GEN) bezoutcoeff[sg[6]],
 				 (GEN) pauto[((-j1) & 3) + 1],TQ,Q),Q);
       avm1 = avma;
       for (j2 = 0; j2 < 4; j2++)
       {
-	u2 = Fp_add(u1, Fp_mul_mod_pol((GEN) bezoutcoeff[sg[3]], 
+	u2 = FpX_add(u1, FpXQ_mul((GEN) bezoutcoeff[sg[3]], 
 				       (GEN) pauto[1 + j2],TQ,Q),NULL);
-	u2 = Fp_add(u2, Fp_mul_mod_pol((GEN) bezoutcoeff[sg[4]], (GEN)
+	u2 = FpX_add(u2, FpXQ_mul((GEN) bezoutcoeff[sg[4]], (GEN)
 				       pauto[((-j2) & 3) + 1],TQ,Q),Q);
 	avm2 = avma;
 	for (j3 = 0; j3 < 4; j3++)
 	{
-	  u3 = Fp_add(u2, Fp_mul_mod_pol((GEN) bezoutcoeff[sg[1]],
+	  u3 = FpX_add(u2, FpXQ_mul((GEN) bezoutcoeff[sg[1]],
 					 (GEN) pauto[1 + j3],TQ,Q),NULL);
-	  u3 = Fp_add(u3, Fp_mul_mod_pol((GEN) bezoutcoeff[sg[2]], (GEN)
+	  u3 = FpX_add(u3, FpXQ_mul((GEN) bezoutcoeff[sg[2]], (GEN)
 					 pauto[((-j3) & 3) + 1],TQ,Q),Q);
 	  if (DEBUGLEVEL >= 4)
 	    fprintferr("S4GaloisConj:Testing %d/3:%d/4:%d/4:%d/4:%Z\n",
@@ -2298,9 +2298,9 @@ suites4:
 	GEN     uu;
 	long    av3;
 	pj[6] = (w + pj[3]) & 3;
-	uu =Fp_add(Fp_mul_mod_pol((GEN) bezoutcoeff[sg[5]],
+	uu =FpX_add(FpXQ_mul((GEN) bezoutcoeff[sg[5]],
 			  (GEN) pauto[(pj[6] & 3) + 1],TQ,Q),
-		   Fp_mul_mod_pol((GEN) bezoutcoeff[sg[6]],
+		   FpXQ_mul((GEN) bezoutcoeff[sg[6]],
 			  (GEN) pauto[((-pj[6]) & 3) + 1],TQ,Q),Q);
 	av3 = avma;
 	for (i = 0; i < 4; i++)
@@ -2311,13 +2311,13 @@ suites4:
 	  if (DEBUGLEVEL >= 4)
 	    fprintferr("S4GaloisConj:Testing %d/3:%d/2:%d/2:%d/4:%Z:%Z\n",
 		       j - 1, w >> 1, l, i, sg, pj);
-	  u = Fp_add(uu, Fp_mul_mod_pol((GEN) pauto[(pj[4] & 3) + 1],
+	  u = FpX_add(uu, FpXQ_mul((GEN) pauto[(pj[4] & 3) + 1],
 				(GEN) bezoutcoeff[sg[1]],TQ,Q),Q);
-	  u = Fp_add(u,	 Fp_mul_mod_pol((GEN) pauto[((-pj[4]) & 3) + 1],
+	  u = FpX_add(u,	 FpXQ_mul((GEN) pauto[((-pj[4]) & 3) + 1],
 				(GEN) bezoutcoeff[sg[3]],TQ,Q),Q);
-	  u = Fp_add(u,	 Fp_mul_mod_pol((GEN) pauto[(pj[5] & 3) + 1],
+	  u = FpX_add(u,	 FpXQ_mul((GEN) pauto[(pj[5] & 3) + 1],
 				(GEN) bezoutcoeff[sg[2]],TQ,Q),Q);
-	  u = Fp_add(u,	 Fp_mul_mod_pol((GEN) pauto[((-pj[5]) & 3) + 1],
+	  u = FpX_add(u,	 FpXQ_mul((GEN) pauto[((-pj[5]) & 3) + 1],
 				(GEN) bezoutcoeff[sg[4]],TQ,Q),Q);
 	  if (s4test(u, liftpow, gl, tau))
 	    goto suites4_2;
@@ -2351,18 +2351,18 @@ suites4_2:
       h = j & 3;
       g = abcdef + ((j & 4) >> 1);
       i = h + abc - g;
-      u = Fp_mul_mod_pol((GEN) pauto[(g & 3) + 1],
-			 (GEN) bezoutcoeff[sg[1]],TQ,Q);
-      u = Fp_add(u, Fp_mul_mod_pol((GEN) pauto[((-g) & 3) + 1],
-				   (GEN) bezoutcoeff[sg[4]],TQ,Q),NULL);
-      u = Fp_add(u, Fp_mul_mod_pol((GEN) pauto[(h & 3) + 1],
-				   (GEN) bezoutcoeff[sg[2]],TQ,Q),NULL);
-      u = Fp_add(u, Fp_mul_mod_pol((GEN) pauto[((-h) & 3) + 1],
-				   (GEN) bezoutcoeff[sg[5]],TQ,Q),NULL);
-      u = Fp_add(u, Fp_mul_mod_pol((GEN) pauto[(i & 3) + 1],
-				   (GEN) bezoutcoeff[sg[3]],TQ,Q),NULL);
-      u = Fp_add(u, Fp_mul_mod_pol((GEN) pauto[((-i) & 3) + 1],
-				   (GEN) bezoutcoeff[sg[6]],TQ,Q),Q);
+      u = FpXQ_mul((GEN) pauto[(g & 3) + 1],
+		   (GEN) bezoutcoeff[sg[1]],TQ,Q);
+      u = FpX_add(u, FpXQ_mul((GEN) pauto[((-g) & 3) + 1],
+			      (GEN) bezoutcoeff[sg[4]],TQ,Q),NULL);
+      u = FpX_add(u, FpXQ_mul((GEN) pauto[(h & 3) + 1],
+			      (GEN) bezoutcoeff[sg[2]],TQ,Q),NULL);
+      u = FpX_add(u, FpXQ_mul((GEN) pauto[((-h) & 3) + 1],
+			      (GEN) bezoutcoeff[sg[5]],TQ,Q),NULL);
+      u = FpX_add(u, FpXQ_mul((GEN) pauto[(i & 3) + 1],
+			      (GEN) bezoutcoeff[sg[3]],TQ,Q),NULL);
+      u = FpX_add(u, FpXQ_mul((GEN) pauto[((-i) & 3) + 1],
+			      (GEN) bezoutcoeff[sg[6]],TQ,Q),Q);
       if (DEBUGLEVEL >= 4)
 	fprintferr("S4GaloisConj:Testing %d/8 %d:%d:%d\n",
 		   j, g & 3, h & 3, i & 3);
@@ -2557,10 +2557,10 @@ suite:				/* Dijkstra probably hates me. (Linus
     if (DEBUGLEVEL >= 9)
       fprintferr("GaloisConj:Inclusion:%Z\n", S);
     Pmod = lift((GEN)factmod(P, ip)[1]);
-    Tp = Fp_pol_red(T,ip);
+    Tp = FpX_red(T,ip);
     /*S not in Z[X]*/
     Sp = lift(gmul(S,gmodulcp(gun,ip)));
-    Pp = Fp_pol_red(P,ip);
+    Pp = FpX_red(P,ip);
     if (DEBUGLEVEL >= 4)
     {
       fprintferr("GaloisConj:psi=%Z\n", psi);
@@ -2570,9 +2570,9 @@ suite:				/* Dijkstra probably hates me. (Linus
     }
     for (i = 1; i <= gp; i++)
     {
-      Fi = Fp_pol_gcd(Tp, Fp_compo_mod_pol((GEN) Pmod[i], Sp,Tp,ip),ip);
+      Fi = FpX_gcd(Tp, FpX_FpXQ_compo((GEN) Pmod[i], Sp,Tp,ip),ip);
       /*normalize gcd*/
-      Fi = Fp_mul_pol_scal(Fi, mpinvmod((GEN) Fi[lgef(Fi) - 1],ip),ip);
+      Fi = FpX_Fp_mul(Fi, mpinvmod((GEN) Fi[lgef(Fi) - 1],ip),ip);
       if (DEBUGLEVEL >= 6)
 	fprintferr("GaloisConj:Fi=%Z  %d", Fi, i);
       for (j = 1; j <= gp; j++)
@@ -2651,10 +2651,10 @@ suite:				/* Dijkstra probably hates me. (Linus
      fprintferr("GaloisConj:Paut=%Z\n", tau);
     /*tau not in Z[X]*/
     tau = lift(gmul(tau,gmodulcp(gun,ip)));
-    tau = Fp_compo_mod_pol((GEN) Pmod[Pm], tau,Pp,ip);
-    tau = Fp_pol_gcd(Pp, tau,ip);
+    tau = FpX_FpXQ_compo((GEN) Pmod[Pm], tau,Pp,ip);
+    tau = FpX_gcd(Pp, tau,ip);
     /*normalize gcd*/
-    tau = Fp_mul_pol_scal(tau,mpinvmod((GEN) tau[lgef(tau) - 1],ip),ip);
+    tau = FpX_Fp_mul(tau,mpinvmod((GEN) tau[lgef(tau) - 1],ip),ip);
     if (DEBUGLEVEL >= 6)
       fprintferr("GaloisConj:tau=%Z\n", tau);
     for (g = 1; g < lg(Pmod); g++)
@@ -3058,7 +3058,7 @@ fixedfieldfactor(GEN L, GEN O, GEN perm, GEN M, GEN den, GEN mod,
   {
     g=polun[x];
     for (j = 1; j < lg(O[i]); j++)
-      g = Fp_mul(g, deg1pol(gun,negi((GEN) L[mael(O,i,j)]),x),mod);
+      g = FpX_mul(g, deg1pol(gun,negi((GEN) L[mael(O,i,j)]),x),mod);
     G[i]=(long)g;
   }  
   V=cgetg(lg(O),t_COL);
@@ -3275,7 +3275,7 @@ long znconductor(long n, GEN v, GEN V)
  * better.  
  */
 static GEN modulo;
-static GEN gsmul(GEN a,GEN b){return Fp_mul(a,b,modulo);}
+static GEN gsmul(GEN a,GEN b){return FpX_mul(a,b,modulo);}
 GEN 
 galoissubcyclo(long n, GEN H, GEN Z, long v)
 {
@@ -3380,6 +3380,6 @@ galoissubcyclo(long n, GEN H, GEN Z, long v)
   g=divide_conquer_prod(g,&gsmul);
   if (DEBUGLEVEL >= 1)
     msgtimer("computing products."); 
-  g=Fp_centermod(g,le);
+  g=FpX_redc(g,le);
   return gerepileupto(ltop,g);
 }

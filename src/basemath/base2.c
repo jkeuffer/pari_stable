@@ -860,13 +860,13 @@ dedek(GEN f, long mf, GEN p,GEN g)
       fprintferr("with parameters p=%Z,\n  f=%Z",p,f);
     fprintferr("\n");
   }
-  h = Fp_deuc(f,g,p);
+  h = FpX_div(f,g,p);
   k = gdiv(gadd(f, gneg_i(gmul(g,h))), p);
-  k = Fp_pol_gcd(k, Fp_pol_gcd(g,h, p), p);
+  k = FpX_gcd(k, FpX_gcd(g,h, p), p);
 
   dk = lgef(k)-3;
   if (DEBUGLEVEL>=3) fprintferr("  gcd has degree %ld\n", dk);
-  if (2*dk >= mf-1) return Fp_deuc(f,k,p);
+  if (2*dk >= mf-1) return FpX_div(f,k,p);
   return dk? (GEN)NULL: f;
 }
 
@@ -880,13 +880,13 @@ maxord(GEN p,GEN f,long mf)
   if (flw)
   {
     h = NULL; r = 0; /* gcc -Wall */
-    g = Fp_deuc(f, Fp_pol_gcd(f,derivpol(f), p), p);
+    g = FpX_div(f, FpX_gcd(f,derivpol(f), p), p);
   }
   else
   {
     w=(GEN)factmod(f,p)[1]; r=lg(w)-1;
     g = h = lift_intern((GEN)w[r]); /* largest factor */
-    for (j=1; j<r; j++) g = Fp_pol_red(gmul(g, lift_intern((GEN)w[j])), p);
+    for (j=1; j<r; j++) g = FpX_red(gmul(g, lift_intern((GEN)w[j])), p);
   }
   res = dedek(f,mf,p,g);
   if (res)
@@ -974,7 +974,7 @@ dbasis(GEN p, GEN f, long mf, GEN alpha, GEN U)
         else
           mod = mulii(pdp, (GEN)p2[2]); /* p2 = a / p^e */
       }
-      ha = Fp_res(ha, f, mod);
+      ha = FpX_res(ha, f, mod);
       if (p2) ha = gmul(ha,p2);
     }
     dh = lgef(ha)-2;
@@ -1027,19 +1027,19 @@ Decomp(GEN p,GEN f,long mf,GEN theta,GEN chi,GEN nu,long flag)
   while (lgef(b3) > 3)
   {
     GEN p1;
-    b1 = Fp_deuc(b1,b3, p);
-    b2 = Fp_pol_red(gmul(b2,b3), p);
-    b3 = Fp_pol_extgcd(b2,b1, p, &a1,&p1); /* p1 = junk */
+    b1 = FpX_div(b1,b3, p);
+    b2 = FpX_red(gmul(b2,b3), p);
+    b3 = FpX_extgcd(b2,b1, p, &a1,&p1); /* p1 = junk */
     p1 = leading_term(b3);
     if (!gcmp1(p1))
-    { /* Fp_pol_extgcd does not return normalized gcd */
+    { /* FpX_extgcd does not return normalized gcd */
       p1 = mpinvmod(p1,p);
       b3 = gmul(b3,p1);
       a1 = gmul(a1,p1);
     }
   }
   pdr = respm(f,derivpol(f),gpuigs(p,mf+1));
-  e = eleval(f,Fp_pol_red(gmul(a1,b2), p),theta);
+  e = eleval(f,FpX_red(gmul(a1,b2), p),theta);
   e = gdiv(polmodi(gmul(pdr,e), mulii(pdr,p)),pdr);
 
   pr = flag? gpowgs(p,flag): mulii(p,sqri(pdr));
@@ -1052,8 +1052,8 @@ Decomp(GEN p,GEN f,long mf,GEN theta,GEN chi,GEN nu,long flag)
     e = gdiv(polmodi(gmul(pdr,e), mulii(pdr,pk)), pdr);
   }
   f1 = gcdpm(f,gmul(pdr,gsubsg(1,e)), ph);
-  f1 = Fp_res(f1,f, pr);
-  f2 = Fp_res(Fp_deuc(f,f1, pr), f, pr);
+  f1 = FpX_res(f1,f, pr);
+  f2 = FpX_res(FpX_div(f,f1, pr), f, pr);
 
   if (DEBUGLEVEL>2)
   {
@@ -1794,12 +1794,12 @@ sylpm(GEN f1,GEN f2,GEN pm)
   GEN a,h;
 
   n=lgef(f1)-3; a=cgetg(n+1,t_MAT);
-  h = Fp_res(f2,f1,pm);
+  h = FpX_res(f2,f1,pm);
   for (j=1;; j++)
   {
     a[j] = (long)pol_to_vec(h,n);
     if (j == n) break;
-    h = Fp_res(shiftpol(h,v),f1,pm);
+    h = FpX_res(shiftpol(h,v),f1,pm);
   }
   return hnfmodid(a,pm);
 }
@@ -1878,7 +1878,7 @@ pradical(GEN nf, GEN p, GEN *modfrob)
     for (i=1; i<=N; i++)
       m[i]=(long)element_pow_mod_p(nf,(GEN)frob[i],p1, p);
   }
-  rad = ker_mod_p(m, p);
+  rad = Fp_ker(m, p);
   for (i=1; i<=N; i++)
     coeff(frob,i,i) = lsubis(gcoeff(frob,i,i), 1);
   *modfrob = frob; return rad;
@@ -1908,7 +1908,7 @@ pol_min(GEN alpha,GEN nf,GEN algebre,long kbar,GEN p)
     puiss[i] = (long) project(algebre,p1,k,kbar);
   }
   puiss = lift_intern(puiss);
-  p1 = (GEN)ker_mod_p(puiss, p)[1]; tetpil=avma;
+  p1 = (GEN)Fp_ker(puiss, p)[1]; tetpil=avma;
   return gerepile(av,tetpil,gtopolyrev(p1,0));
 }
 
@@ -2039,7 +2039,7 @@ prime_check_elt(GEN a, GEN pol, GEN p, GEN pf)
 
   mod = mulii(pf, gpowgs(p, (lgef(pol)-3)*v + 1));
 
-  x = Fp_pol_red(gmul(a,c), mod);
+  x = FpX_red(gmul(a,c), mod);
   M = sylvestermatrix_i(pol,x);
   if (det_mod_P_n(M,mod,p) == gzero)
   {
@@ -2188,11 +2188,11 @@ apply_kummer(GEN nf,GEN pol,GEN e,GEN p,long N,GEN *beta)
       pol[2] = laddii((GEN)pol[2],p);
     res[2] = (long) algtobasis_intern(nf,pol);
 
-    p1 = Fp_deuc(T,pol,p);
+    p1 = FpX_div(T,pol,p);
     res[5] = (long) centermod(algtobasis_intern(nf,p1), p);
 
     if (beta)
-      *beta = *beta? Fp_deuc(*beta,pol,p): p1;
+      *beta = *beta? FpX_div(*beta,pol,p): p1;
   }
   return res;
 }
@@ -2224,12 +2224,12 @@ primedec(GEN nf, GEN p)
 
   p1 = (GEN)f[1];
   for (i=2; i<np; i++)
-    p1 = Fp_pol_red(gmul(p1, (GEN)f[i]), p);
-  p1 = Fp_pol_red(gdiv(gadd(gmul(p1, Fp_deuc(T,p1,p)), gneg(T)), p), p);
+    p1 = FpX_red(gmul(p1, (GEN)f[i]), p);
+  p1 = FpX_red(gdiv(gadd(gmul(p1, FpX_div(T,p1,p)), gneg(T)), p), p);
   list = cgetg(N+1,t_VEC);
   indice=1; beta=NULL;
   for (i=1; i<np; i++) /* e = 1 or f[i] does not divide p1 (mod p) */
-    if (is_pm1(ex[i]) || signe(Fp_res(p1,(GEN)f[i],p)))
+    if (is_pm1(ex[i]) || signe(FpX_res(p1,(GEN)f[i],p)))
       list[indice++] = (long)apply_kummer(nf,(GEN)f[i],(GEN)ex[i],p,N,&beta);
   if (DEBUGLEVEL>=3) msgtimer("unramified factors");
 
@@ -2248,7 +2248,7 @@ primedec(GEN nf, GEN p)
       p1[i+lp] = (long) p2;
       p1[i] = ldiv(element_mul(nf,lift(p2),beta),p);
     }
-    ip = image_mod_p(p1, p);
+    ip = Fp_image(p1, p);
     if (lg(ip)>N) err(bugparier,"primedec (bad pradical)");
   }
   unmodp=gmodulsg(1,p); zmodp=gmodulsg(0,p);
@@ -2267,7 +2267,7 @@ primedec(GEN nf, GEN p)
     b = gmul(modfrob,algebre1);
     for (i=1;i<=kbar;i++)
       b[i] = (long) project(algebre,(GEN) b[i],k,kbar);
-    mat1 = ker_mod_p(lift_intern(b), p);
+    mat1 = Fp_ker(lift_intern(b), p);
     if (lg(mat1)>2)
     {
       GEN mat2 = cgetg(k+N+1,t_MAT);
@@ -2280,7 +2280,7 @@ primedec(GEN nf, GEN p)
 	beta = eval_pol(nf,(GEN)p1[i],alpha,algebre,algebre1);
         beta = lift_intern(beta);
 	for (j=1; j<=N; j++)
-	  mat2[k+j] = (long)Fp_vec(element_mulid(nf,beta,j), p);
+	  mat2[k+j] = (long)FpV(element_mulid(nf,beta,j), p);
 	h[c] = (long) image(mat2); c++;
       }
     }
@@ -2343,7 +2343,7 @@ nfreducemodpr(GEN nf, GEN x, GEN prhall)
     if (v) x=element_mul(nf,x,element_pow(nf,(GEN)prhall[2],stoi(v)));
     x = gmod(x,p);
   }
-  return Fp_vec(nfreducemodpr_i(x, prh), p);
+  return FpV(nfreducemodpr_i(x, prh), p);
 }
 
 /* public function */

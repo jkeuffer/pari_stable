@@ -288,7 +288,7 @@ hensel_lift_fact(GEN pol, GEN Q, GEN p, GEN pev, long e)
   if (DEBUGLEVEL > 4) (void)timer2();
   listb[1] = lmodii(lc, p);
   for (i=2; i < nf; i++)
-    listb[i] = (long)Fp_pol_red(gmul((GEN)listb[i-1], (GEN)Q[i-1]), p);
+    listb[i] = (long)FpX_red(gmul((GEN)listb[i-1], (GEN)Q[i-1]), p);
   for (i=nf-1; i>1; i--)
   {
     GEN a,b,u,v,a2,b2,s,t,pe,pe2,z,g, pem1;
@@ -296,7 +296,7 @@ hensel_lift_fact(GEN pol, GEN Q, GEN p, GEN pev, long e)
 
     a = (GEN)Q[i];     /* lead coeff(a) = 1 */
     b = (GEN)listb[i]; /* lc(C) \prod_{k<i} Q_k */
-    g = (GEN)Fp_pol_extgcd(a,b,p,&u,&v)[2]; /* deg g = 0 */
+    g = (GEN)FpX_extgcd(a,b,p,&u,&v)[2]; /* deg g = 0 */
     if (!gcmp1(g))
     {
       g = mpinvmod(g, p);
@@ -313,11 +313,11 @@ hensel_lift_fact(GEN pol, GEN Q, GEN p, GEN pev, long e)
       else pe2=pev;
       g = gadd(C, gneg_i(gmul(a,b)));
 
-      g = Fp_pol_red(g, pe2); g = gdivexact(g, pe);
-      z = Fp_pol_red(gmul(v,g), pe);
-      t = Fp_poldivres(z,a,pe, &s);
+      g = FpX_red(g, pe2); g = gdivexact(g, pe);
+      z = FpX_red(gmul(v,g), pe);
+      t = FpX_divres(z,a,pe, &s);
       t = gadd(gmul(u,g), gmul(t,b));
-      t = Fp_pol_red(t, pe);
+      t = FpX_red(t, pe);
       t = gmul(t,pe);
       s = gmul(s,pe);
       lbot = avma;
@@ -327,11 +327,11 @@ hensel_lift_fact(GEN pol, GEN Q, GEN p, GEN pev, long e)
 
       g = gadd(gun, gneg_i(gadd(gmul(u,a2),gmul(v,b2))));
 
-      g = Fp_pol_red(g, pe2); g = gdivexact(g, pe);
-      z = Fp_pol_red(gmul(v,g), pe);
-      t = Fp_poldivres(z,a,pe, &s);
+      g = FpX_red(g, pe2); g = gdivexact(g, pe);
+      z = FpX_red(gmul(v,g), pe);
+      t = FpX_divres(z,a,pe, &s);
       t = gadd(gmul(u,g), gmul(t,b));
-      t = Fp_pol_red(t, pe);
+      t = FpX_red(t, pe);
       u = gadd(u, gmul(t,pe));
       v = gadd(v, gmul(s,pe));
       pe = pe2; a = a2; b = b2;
@@ -347,7 +347,7 @@ hensel_lift_fact(GEN pol, GEN Q, GEN p, GEN pev, long e)
   if (!gcmp1(lc))
   {
     GEN g = mpinvmod(lc, pev);
-    C = Fp_pol_red(gmul(C, g), pev);
+    C = FpX_red(gmul(C, g), pev);
   }
   res[1] = (long)C; return res;
 }
@@ -375,16 +375,16 @@ polhensellift(GEN pol, GEN fct, GEN p, long exp)
 
   /* then we check that pol \equiv \prod f ; f \in fct mod p */
   p2 = (GEN)p1[1];
-  for (j = 2; j <= l; j++) p2 = Fp_mul(p2, (GEN)p1[j], p);
-  if (!gcmp0(Fp_sub(pol, p2, p)))
+  for (j = 2; j <= l; j++) p2 = FpX_mul(p2, (GEN)p1[j], p);
+  if (!gcmp0(FpX_sub(pol, p2, p)))
     err(talker, "not a correct factorization in polhensellift");
 
   /* finally we check that the elements of fct are coprime mod p */
-  if (gcmp0(discsr(Fp_pol(pol, p))))
+  if (gcmp0(discsr(FpX(pol, p))))
   {
     for (i = 1; i <= l; i++)
       for (j = 1; j < i; j++) 
-        if (lgef(Fp_pol_gcd((GEN)p1[i], (GEN)p1[j], p)) != 3)
+        if (lgef(FpX_gcd((GEN)p1[i], (GEN)p1[j], p)) != 3)
           err(talker, "polhensellift: factors %Z and %Z are not coprime",
                      p1[i], p1[j]);
   }
@@ -415,7 +415,7 @@ hensel_lift_fact_linear(GEN pol, GEN Q, GEN p, GEN pev, long e)
   }
   listb[1] = lmodii(lc, p);
   for (i=2; i < nf; i++)
-    listb[i] = (long)Fp_pol_red(gmul((GEN)listb[i-1], (GEN)Q[i-1]), p);
+    listb[i] = (long)FpX_red(gmul((GEN)listb[i-1], (GEN)Q[i-1]), p);
   for (i=nf-1; i>1; i--)
   {
     GEN a,b,u,v,a2,b2,s,t,pe,pe2,z,g, pem1;
@@ -423,7 +423,7 @@ hensel_lift_fact_linear(GEN pol, GEN Q, GEN p, GEN pev, long e)
 
     a = (GEN)Q[i];     /* lead coeff(a) = 1 */
     b = (GEN)listb[i]; /* lc(C) \prod_{k<i} Q_k */
-    g = (GEN)Fp_pol_extgcd(a,b,p,&u,&v)[2]; /* deg g = 0 */
+    g = (GEN)FpX_extgcd(a,b,p,&u,&v)[2]; /* deg g = 0 */
     if (!gcmp1(g))
     {
       g = mpinvmod(g, p);
@@ -440,11 +440,11 @@ hensel_lift_fact_linear(GEN pol, GEN Q, GEN p, GEN pev, long e)
       else pe2=pev;
       g = gadd(C, gneg_i(gmul(a,b)));
 
-      g = Fp_pol_red(g, pe2); g = gdivexact(g, pe);
-      z = Fp_pol_red(gmul(v,g), pe);
-      t = Fp_poldivres(z,a,pe, &s);
+      g = FpX_red(g, pe2); g = gdivexact(g, pe);
+      z = FpX_red(gmul(v,g), pe);
+      t = FpX_divres(z,a,pe, &s);
       t = gadd(gmul(u,g), gmul(t,b));
-      t = Fp_pol_red(t, pe);
+      t = FpX_red(t, pe);
       t = gmul(t,pe);
       s = gmul(s,pe);
       lbot = avma;
@@ -454,11 +454,11 @@ hensel_lift_fact_linear(GEN pol, GEN Q, GEN p, GEN pev, long e)
 
       g = gadd(gun, gneg_i(gadd(gmul(u,a2),gmul(v,b2))));
 
-      g = Fp_pol_red(g, pe2); g = gdivexact(g, pe);
-      z = Fp_pol_red(gmul(v,g), pe);
-      t = Fp_poldivres(z,a,pe, &s);
+      g = FpX_red(g, pe2); g = gdivexact(g, pe);
+      z = FpX_red(gmul(v,g), pe);
+      t = FpX_divres(z,a,pe, &s);
       t = gadd(gmul(u,g), gmul(t,b));
-      t = Fp_pol_red(t, pe);
+      t = FpX_red(t, pe);
       u = gadd(u, gmul(t,pe));
       v = gadd(v, gmul(s,pe));
       pe = pe2; a = a2; b = b2;
@@ -474,7 +474,7 @@ hensel_lift_fact_linear(GEN pol, GEN Q, GEN p, GEN pev, long e)
   if (!gcmp1(lc))
   {
     GEN g = mpinvmod(lc, pev);
-    C = Fp_pol_red(gmul(C, g), pev);
+    C = FpX_red(gmul(C, g), pev);
   }
   res[1] = (long)C; return res;
 }
@@ -1159,7 +1159,7 @@ squff(GEN a, long klim, long hint)
     GEN minuspolx;
     p += *pt++; if (!*pt) err(primer1);
     if (!smodis((GEN)a[da+2],p)) continue;
-    prime[2] = p; z = Fp_pol(a, prime);
+    prime[2] = p; z = FpX(a, prime);
     if (gcmp0(discsr(z))) continue;
     z = lift_intern(z);
 
@@ -1169,14 +1169,14 @@ squff(GEN a, long klim, long hint)
     w = polx[va]; minuspolx = gneg(w);
     while (d < (e>>1))
     {
-      d++; w = Fp_pow_mod_pol(w, prime, z, prime);
-      g = Fp_pol_gcd(z, gadd(w, minuspolx), prime);
+      d++; w = FpXQ_pow(w, prime, z, prime);
+      g = FpX_gcd(z, gadd(w, minuspolx), prime);
       tabdnew[d]=g; lgg=lgef(g)-3;
       if (lgg > 0)
       {
-	z = Fp_poldivres(z, g, prime, NULL);
+	z = FpX_divres(z, g, prime, NULL);
         e = lgef(z)-3;
-        w = Fp_poldivres(w, z, prime, ONLY_REM);
+        w = FpX_divres(w, z, prime, ONLY_REM);
         lgg /= d; nfacp += lgg;
         if (DEBUGLEVEL>5)
           fprintferr("   %3ld %s of degree %3ld\n",
@@ -1222,7 +1222,7 @@ squff(GEN a, long klim, long hint)
     if (lgg)
     {
       long n = lgg/d;
-      famod[nft] = (long)normalize_mod_p(g, prime);
+      famod[nft] = (long)FpX_normalize(g, prime);
       if (n > 1) (void)split_berlekamp(Q, (GEN*)(famod+nft),prime,primes2);
       nft += n;
     }

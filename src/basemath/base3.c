@@ -146,7 +146,7 @@ element_inv(GEN nf, GEN x)
   p1 = ginvmod(gmul((GEN)nf[7],x), (GEN)nf[1]);
   p1 = algtobasis_intern(nf,p1);
 
-  if (p) p1 = Fp_vec(p1, p);
+  if (p) p1 = FpV(p1, p);
   return gerepileupto(av,p1);
 }
 
@@ -206,7 +206,7 @@ element_div(GEN nf, GEN x, GEN y)
 
   p1 = gmul(gmul((GEN)nf[7],x), ginvmod(gmul((GEN)nf[7],y), (GEN)nf[1]));
   p1 = algtobasis_intern(nf, gres(p1, (GEN)nf[1]));
-  if (p) p1 = Fp_vec(p1,p);
+  if (p) p1 = FpV(p1,p);
   return gerepileupto(av,p1);
 }
 
@@ -396,12 +396,12 @@ element_pow_mod_p(GEN nf, GEN x, GEN n, GEN p)
     {
       y = element_sqri(nf, y);
       if (m<0) y=element_muli(nf, y, x);
-      y = Fp_vec_red(y, p);
+      y = FpV_red(y, p);
     }
     if (--i == 0) break;
     m = *++p1, j = BITS_IN_LONG;
   }
-  if (s<0)  y = Fp_vec_red(element_inv(nf,y), p);
+  if (s<0)  y = FpV_red(element_inv(nf,y), p);
   return av==avma? gcopy(y): gerepileupto(av,y);
 }
 
@@ -425,12 +425,12 @@ element_powid_mod_p(GEN nf, long I, GEN n, GEN p)
     {
       y = element_sqri(nf, y);
       if (m<0) y=element_mulid(nf, y, I);
-      y = Fp_vec_red(y, p);
+      y = FpV_red(y, p);
     }
     if (--i == 0) break;
     m = *++p1, j = BITS_IN_LONG;
   }
-  if (s<0)  y = Fp_vec_red(element_inv(nf,y), p);
+  if (s<0)  y = FpV_red(element_inv(nf,y), p);
   return av==avma? gcopy(y): gerepileupto(av,y);
 }
 
@@ -1011,7 +1011,7 @@ nfshanks(GEN nf,GEN x,GEN g0,GEN pr,GEN prhall)
 
   multab = get_multab(nf, g0inv);
   for (i=lg(multab)-1; i; i--)
-    multab[i]=(long)Fp_vec_red((GEN)multab[i], p);
+    multab[i]=(long)FpV_red((GEN)multab[i], p);
 
   for (i=1;;i++)
   {
@@ -1028,7 +1028,7 @@ nfshanks(GEN nf,GEN x,GEN g0,GEN pr,GEN prhall)
 
   multab = get_multab(nf, giant);
   for (i=lg(multab)-1; i; i--)
-    multab[i]=(long)Fp_vec_red((GEN)multab[i], p);
+    multab[i]=(long)FpV_red((GEN)multab[i], p);
 
   av1 = avma; lim=stack_lim(av1,2);
   for (k=1;;k++)

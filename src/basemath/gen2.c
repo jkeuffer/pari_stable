@@ -1985,7 +1985,7 @@ gsqr(GEN x)
       if (ff_poltype(&x,&p,&pol))
       {
         z = quicksqr(x+2, lgef(x)-2);
-        if (p) z = Fp_pol(z,p);
+        if (p) z = FpX(z,p);
         if (pol) z = from_Kronecker(z,pol);
         z = gerepileupto(av, z);
       }

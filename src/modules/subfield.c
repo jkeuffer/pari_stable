@@ -858,7 +858,7 @@ ffinit(GEN p,long n,long v)
     pol = gadd(gpowgs(polx[v],n), FpX_rand(n-1,v, p));
     if (is_irred_mod_p(pol, p)) break;
   }
-  return gerepileupto(av, Fp_pol(pol,p));
+  return gerepileupto(av, FpX(pol,p));
 }
 
 static GEN
