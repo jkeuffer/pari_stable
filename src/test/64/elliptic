@@ -58,7 +58,7 @@
 ? ellglobalred(acurve)
 [37, [1, -1, 2, 2], 1]
 ? ellheight(acurve,apoint)
-0.40889126591975072188708879805553617287
+0.40889126591975072188708879805553617288
 ? ellheight(acurve,apoint,1)
 0.40889126591975072188708879805553617300
 ? ellordinate(acurve,1)
@@ -111,7 +111,7 @@ q^101)
 ? l=elllseries(ccurve,2)
 0.38157540826071121129371040958008663666
 ? elllseries(ccurve,2,1.2)-l
-1.469367938527859384 E-38
+1.469367938527859385 E-38
 ? tcurve=ellinit([1,0,1,-19,26]);
 ? ellorder(tcurve,[1,2])
 6
@@ -159,5 +159,5 @@ q^101)
 ? getheap
 [57, 4345]
 ? print("Total time spent: ",gettime);
-Total time spent: 339
+Total time spent: 323
 ? \q
