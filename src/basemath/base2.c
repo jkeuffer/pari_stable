@@ -804,7 +804,7 @@ nfbasis(GEN x, GEN *pdK, long flag, GEN fa)
 {
   pari_sp av = avma;
   GEN bas; _nfbasis(x, flag, fa, &bas, pdK);
-  gerepileall(av, 2, &bas, pdK); return bas;
+  gerepileall(av, pdK? 2: 1, &bas, pdK); return bas;
 }
 
 GEN
@@ -3990,7 +3990,7 @@ GEN
 rnfpolredabs(GEN nf, GEN relpol, long flag)
 {
   GEN red, bas, z, elt, POL, pol, T, a;
-  long v, fl;
+  long v;
   pari_sp av = avma;
 
   if (typ(relpol)!=t_POL) err(typeer,"rnfpolredabs");
@@ -3998,15 +3998,15 @@ rnfpolredabs(GEN nf, GEN relpol, long flag)
   if (DEBUGLEVEL>1) (void)timer2();
   relpol = unifpol(nf,relpol,1);
   T = (GEN)nf[1];
-  if ((flag & nf_ADDZK) && (flag != (nf_ADDZK|nf_ABSOLUTE)))
+  if ((flag & nf_ADDZK) && !(flag&nf_ABSOLUTE))
     err(impl,"this combination of flags in rnfpolredabs");
-  fl = (flag & nf_ADDZK)? nf_ORIG: nf_RAW;
   if (flag & nf_PARTIALFACT)
   {
     long sa;
-    bas = NULL; /* -Wall */
     POL = _rnfequation(nf, relpol, &sa, NULL);
-    red = polredabs0(POL, fl | nf_PARTIALFACT);
+    bas = cgetg(3, t_VEC);
+    bas[1] = (long)POL;
+    bas[2] = (long)smallbase(POL,NULL);
     a = stoi(sa);
   }
   else
@@ -4022,26 +4022,22 @@ rnfpolredabs(GEN nf, GEN relpol, long flag)
       msgtimer("absolute basis");
       fprintferr("original absolute generator: %Z\n", POL);
     }
-    red = polredabs0(bas, fl);
   }
+  red = polredabs0(bas, (flag & nf_ADDZK)? nf_ADDZK: nf_RAW);
   pol = (GEN)red[1];
   if (DEBUGLEVEL>1) fprintferr("reduced absolute generator: %Z\n",pol);
   if (flag & nf_ABSOLUTE)
   {
     if (flag & nf_ADDZK)
     {
-      GEN t = (GEN)red[2], B = (GEN)bas[2];
-      GEN v = RXQ_powers(lift_intern(t), pol, degpol(pol)-1);
       z = cgetg(3, t_VEC);
       z[1] = (long)pol;
-      z[2] = lmul(v, B);
-      return gerepilecopy(av, z);
+      z[2] = red[2]; pol = z;
     }
     return gerepilecopy(av, pol);
   }
 
   elt = eltabstorel((GEN)red[2], T, relpol, a);
-
   pol = rnfcharpoly(nf,relpol,elt,v);
   if (!(flag & nf_ORIG)) return gerepileupto(av, pol);
   z = cgetg(3,t_VEC);

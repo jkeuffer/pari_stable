@@ -1805,24 +1805,23 @@ chk_gen_init(FP_chk_fun *chk, GEN gram, GEN mat)
   return bound;
 }
 
-/* store phi(beta mod z). Suitable for gerepileupto */
+/* store phi(beta mod z). */
 static GEN
-storeeval(GEN beta, GEN z, GEN lead)
+storeeval(GEN a, GEN x, GEN z, GEN lead)
 {
-  GEN y = cgetg(3,t_VEC);
-  z = gcopy(z);
-  beta = lead? gdiv(beta, lead): gcopy(beta);
+  GEN y, beta = modreverse_i(a, x);
+  if (lead) beta = gdiv(beta, lead);
+  y = cgetg(3,t_VEC);
   y[1] = (long)z;
-  y[2] = (long)to_polmod(beta,z);
-  return y;
+  y[2] = (long)to_polmod(beta,z); return y;
 }
 
 static GEN
 storeraw(GEN beta, GEN z)
 {
   GEN y = cgetg(3,t_VEC);
-  y[1] = lcopy(z);
-  y[2] = lcopy(beta); return y;
+  y[1] = (long)z;
+  y[2] = (long)beta; return y;
 }
 
 static void
@@ -1852,23 +1851,20 @@ findmindisc(GEN *py, GEN *pa)
 static GEN
 storepol(GEN x, GEN z, GEN a, GEN lead, long flag)
 {
-  GEN y, b;
+  GEN y;
   if (flag & nf_RAW)
     y = storeraw(a, z);
   else if (flag & nf_ORIG)
-  {
-    b = modreverse_i(a, x);
-    y = storeeval(b,z, lead);
-  }
+    y = storeeval(a, x, z, lead);
   else
-    y = gcopy(z);
+    y = z;
   return y;
 }
 
 static GEN
 storeallpol(GEN x, GEN z, GEN a, GEN lead, long flag)
 {
-  GEN y, b;
+  GEN y;
 
   if (flag & nf_RAW)
   {
@@ -1879,15 +1875,11 @@ storeallpol(GEN x, GEN z, GEN a, GEN lead, long flag)
   else if (flag & nf_ORIG)
   {
     long i, c = lg(z);
-    b = cgetg(c, t_VEC);
-    for (i=1; i<c; i++)
-      b[i] = (long)modreverse_i((GEN)a[i], x);
-
     y = cgetg(c,t_VEC);
-    for (i=1; i<c; i++) y[i] = (long)storeeval((GEN)b[i], (GEN)z[i], lead);
+    for (i=1; i<c; i++) y[i] = (long)storeeval((GEN)a[i], x, (GEN)z[i], lead);
   }
   else
-    y = gcopy(z);
+    y = z;
   return y;
 }
 
@@ -1933,8 +1925,8 @@ _polredabs(nfbasic_t *T, GEN *u)
 GEN
 polredabs0(GEN x, long flag)
 {
-  long i, l, vx;
   pari_sp av = avma;
+  long i, l, vx;
   GEN y, a, u;
   nfbasic_t T;
 
@@ -1967,15 +1959,25 @@ polredabs0(GEN x, long flag)
   if (flag & nf_ALL)
   {
     if (u) for (i=1; i<l; i++) a[i] = lmul(T.bas, gmul(u, (GEN)a[i]));
-    y = storeallpol(x,y,a,T.lead,flag);
+    y = storeallpol(x, y, a, T.lead, flag);
+    if (flag & nf_ADDZK) err(impl,"nf_ADDZK flag when nf_ALL set (polredabs)");
   }
   else
   {
-    findmindisc(&y, &a);
+    GEN z;
+    findmindisc(&y, &a); z = y;
     if (u) a = gmul(T.bas, gmul(u, a));
-    y = storepol(x,y,a,T.lead,flag);
+    y = storepol(x, y, a, T.lead, flag);
+    if (flag & nf_ADDZK)
+    {
+      GEN t, y0 = y, B = vecpol_to_mat(T.bas, lg(T.bas)-1);
+      t = (flag & nf_ORIG)? lift_intern((GEN)y[2]): modreverse_i(a, x);
+      y = cgetg(3, t_VEC);
+      y[1] = (long)y0;
+      y[2] = lmul(RXQ_powers(t, z, degpol(z)-1), B);
+    }
   }
-  return gerepileupto(av, y);
+  return gerepilecopy(av, y);
 }
 
 GEN

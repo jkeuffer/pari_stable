@@ -2592,22 +2592,14 @@ makescind(GEN nf, GEN polrel, long cl)
 {
   long i, l;
   pari_sp av = avma;
-  GEN pol, polabs, L, BAS, nf2, dabs, dk, bas;
+  GEN pol, L, BAS, nf2, dk;
   DH_t T;
   FP_chk_fun CHECK;
 
-  BAS = rnfpolredabs(nf, polrel, nf_ABSOLUTE|nf_ADDZK);
-  polabs = (GEN)BAS[1];
-  bas    = (GEN)BAS[2];
-  dabs = gmul(ZX_disc(polabs), gsqr(det2(vecpol_to_mat(bas, 2*cl))));
-
-  /* check result (a little): signature and discriminant */
-  dk  = (GEN)nf[3];
-  if (!egalii(dabs, gpowgs(dk,cl)) || sturm(polabs) != 2*cl)
-    err(bugparier, "quadhilbert");
+  BAS = rnfpolredabs(nf, polrel, nf_ABSOLUTE|nf_ADDZK|nf_PARTIALFACT);
 
   /* attempt to find the subfields using polred */
-  T.cl = cl;
+  T.cl = cl; dk  = (GEN)nf[3];
   T.dkpow = (cl & 1) ? NULL: gpowgs(dk, cl>>1);
   CHECK.f = &define_hilbert;
   CHECK.data = (void*)&T;
@@ -2848,13 +2840,13 @@ LABDOUB:
   if (DEBUGLEVEL) msgtimer("Recpolnum");
 
   /* we want a reduced relative polynomial */
-  if (!flag) return gerepileupto(av, rnfpolredabs(nf, polrel, 0));
+  if (!flag) return gerepileupto(av, rnfpolredabs(nf, polrel, nf_PARTIALFACT));
 
   /* we just want the polynomial computed */
   if (flag!=2) return gerepilecopy(av, polrel);
 
   /* we want a reduced absolute polynomial */
-  return gerepileupto(av, rnfpolredabs(nf, polrel, nf_ABSOLUTE));
+  return gerepileupto(av, rnfpolredabs(nf, polrel, nf_ABSOLUTE|nf_PARTIALFACT));
 }
 
 /********************************************************************/
