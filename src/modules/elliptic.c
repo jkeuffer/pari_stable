@@ -3177,7 +3177,7 @@ best_in_cycle(GEN e, GEN p, long k)
 static GEN
 tors(GEN e, long k, GEN p, GEN q, GEN v)
 {
-  GEN p1,r;
+  GEN r;
   if (q)
   {
     long n = k>>1;

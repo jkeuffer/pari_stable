@@ -644,7 +644,9 @@ sd_rl(const char *v, int flag)
 {
   static const char * const msg[] = {NULL,
 	"(bits 0x2/0x4 control matched-insert/arg-complete)"};
+#ifdef READLINE
   ulong o_readline_state = readline_state;
+#endif
   GEN res;
 
   res = sd_ulong(v,flag,"readline", &readline_state, 0, 7, (char**)msg);
