@@ -189,6 +189,7 @@ JD 74- [Configure:] detection of times()
    91- rare stack corruption in RgX_mul(t_POL, t_POL) [ when product of
        leading coefficient cancel, valuation is non-zero _and_ we use an
        "unsafe" gerepile right afterwards ]
+   92- component(Ser(x),2^31-1) --> SEGV
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.

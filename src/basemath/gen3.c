@@ -2339,13 +2339,12 @@ compo(GEN x, long n)
 {
   long l,tx=typ(x);
 
-  if (tx==t_POL && n+1 >= lg(x)) return gzero;
-  if (tx==t_SER && !signe(x)) return gzero;
+  if (tx == t_POL && n+1 >= lg(x)) return gzero;
+  if (tx == t_SER && !signe(x)) return gzero;
   if (!is_recursive_t(tx))
     err(talker, "this object doesn't have components (is a leaf)");
-  l=lontyp[tx]+n-1;
-  if (n<1 || l>=lg(x))
-    err(talker,"nonexistent component");
+  l = lontyp[tx]+n-1;
+  if (n < 1 || (ulong)l >= lg(x)) err(talker,"nonexistent component");
   return gcopy((GEN)x[l]);
 }
 
