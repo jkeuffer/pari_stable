@@ -1913,8 +1913,6 @@ geni(void) { return gi; }
  *     The unquoted components can be of any pari type (converted according to
  *     the current output format)
  *  s* any number of strings (see s)
- *  s*p idem, setting prettyp=1
- *  s*t idem, in TeX format.
  *  D  Has a default value. Format is "Dvalue,type," (the ending comma is
  *     mandatory). Ex: D0,L, (arg is long, 0 by default).
  *     Special syntax:

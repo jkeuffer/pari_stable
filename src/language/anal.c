@@ -2532,7 +2532,7 @@ skipidentifier(void)
             if (*analyseur == ',') analyseur++;
             else skipexpr();
           }
-          s++; if (*s == 'p' || *s == 't') s++;
+          s++;
           break;
         }
 
