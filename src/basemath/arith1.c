@@ -1948,50 +1948,80 @@ fibo(long n)
 /*                      CONTINUED FRACTIONS                        */
 /*                                                                 */
 /*******************************************************************/
-static GEN sfcont2(GEN b, GEN x, long k);
-
-GEN
-gcf(GEN x)
+static GEN
+icopy_lg(GEN x, long l)
 {
-  return sfcont(x,x,0);
-}
-
-GEN
-gcf2(GEN b, GEN x)
-{
-  return contfrac0(x,b,0);
-}
-
-GEN
-gboundcf(GEN x, long k)
-{
-  return sfcont(x,x,k);
-}
-
-GEN
-contfrac0(GEN x, GEN b, long flag)
-{
-  long lb,tb,i;
+  long lx = lgefint(x);
   GEN y;
-
-  if (!b || gcmp0(b)) return sfcont(x,x,flag);
-  tb = typ(b);
-  if (tb == t_INT) return sfcont(x,x,itos(b));
-  if (! is_matvec_t(tb)) err(typeer,"contfrac0");
-
-  lb=lg(b); if (lb==1) return cgetg(1,t_VEC);
-  if (tb != t_MAT) return sfcont2(b,x,flag);
-  if (lg(b[1])==1) return sfcont(x,x,flag);
-  y = (GEN) gpmalloc(lb*sizeof(long));
-  for (i=1; i<lb; i++) y[i]=coeff(b,1,i);
-  x = sfcont2(y,x,flag); free(y); return x;
+  
+  if (lx >= l) return icopy(x);
+  y = cgeti(l); affii(x, y); return y;
 }
 
-GEN
-sfcont(GEN x, GEN x1, long k)
+/* if y != NULL, stop as soon as partial quotients differ from y */
+static GEN
+Qsfcont(GEN x, GEN y, long k)
+{
+  GEN  z, p1, p2, p3;
+  long i, l, ly;
+
+  ly = lgefint(x[2]);
+  l = 3 + (long) ((ly-2) / pariC3);
+  if (k > 0 && ++k > 0 && l > k) l = k; /* beware overflow */
+  if ((ulong)l > LGBITS) l = LGBITS;
+
+  p1 = (GEN)x[1];
+  p2 = (GEN)x[2];
+  z = cgetg(l,t_VEC);
+  l--;
+  if (y) {
+    gpmem_t av = avma;
+    if (l >= lg(y)) l = lg(y)-1;
+    for (i = 1; i <= l; i++)
+    {
+      z[i] = y[i];
+      p3 = p2; if (!gcmp1((GEN)z[i])) p3 = mulii((GEN)z[i], p2);
+      p3 = subii(p1, p3);
+      if (signe(p3) < 0)
+      { /* partial quotient too large */
+        p3 = addii(p3, p2);
+        if (signe(p3) >= 0) i++; /* by 1 */
+        break;
+      }
+      if (cmpii(p3, p2) >= 0)
+      { /* partial quotient too small */
+        p3 = subii(p3, p2);
+        if (cmpii(p3, p2) < 0) i++; /* by 1 */
+        break;
+      }
+      if ((i & 0xff) == 0) gerepileall(av, 2, &p2, &p3);
+      p1 = p2; p2 = p3;
+    }
+  } else {
+    p1 = icopy_lg(p1, ly);
+    p2 = icopy(p2);
+    for (i = 1; i <= l; i++)
+    {
+      z[i] = (long)truedvmdii(p1,p2,&p3);
+      if (p3 == gzero) { i++; break; }
+      affii(p3, p1); cgiv(p3); p3 = p1;
+      p1 = p2; p2 = p3;
+    }
+  }
+  i--;
+  if (i > 2 && gcmp1((GEN)z[i]))
+  {
+    cgiv((GEN)z[i]); --i;
+    addsiz(1,(GEN)z[i], (GEN)z[i]);
+  }
+  setlg(z,i+1); return z;
+}
+
+static GEN
+sfcont(GEN x, long k)
 {
   gpmem_t av;
-  long lx,tx=typ(x),e,i,l,lx1,f;
+  long lx,tx=typ(x),e,i,l;
   GEN  y,p1,p2,p3;
 
   if (is_scalar_t(tx))
@@ -2012,53 +2042,12 @@ sfcont(GEN x, GEN x1, long k)
         p3 = cgetg(3, t_FRACN);
 	p3[1] = laddsi(signe(x), p2);
 	p3[2] = p1[2];
-	p1 = sfcont(p1,p1,k);
-	return gerepileupto(av, sfcont(p3,p1,k));
+	p1 = Qsfcont(p1,NULL,k);
+	return gerepilecopy(av, Qsfcont(p3,p1,k));
 
       case t_FRAC: case t_FRACN:
-        av = avma; lx1 = lgefint(x[2]);
-	l = 3 + (long) ((lx1-2) / pariC3);
-        if (k > 0 && ++k > 0 && l > k) l = k; /* beware overflow */
-	if ((ulong)l > LGBITS) l = LGBITS;
-	if (lgefint(x[1]) >= lx1)       
-          p1 = icopy((GEN)x[1]);
-	else
-        { p1 = cgeti(lx1); affii((GEN)x[1], p1); }
-	p2 = icopy((GEN)x[2]); lx1 = lg(x1);
-	y = cgetg(l,t_VEC);
-        f = (x != x1);
-        l--;
-        if (f && l > lx1) l = lx1;
-        i = 0;
-	while (!gcmp0(p2) && i < l)
-	{
-	  i++; y[i] = (long)truedvmdii(p1,p2,&p3);
-	  affii(p3,p1); cgiv(p3); p3 = p1;
-          p1 = p2; p2 = p3;
-	  if (f && !egalii((GEN)x1[i], (GEN)y[i]))
-          {
-            gpmem_t av1 = avma;
-            p1 = subii((GEN)x1[i], (GEN)y[i]);
-            if (is_pm1(p1))
-            {
-              if (i == lx1 || !gcmp1((GEN)x1[i+1]))
-              {
-                if ((GEN)y[i] == gzero)
-                  y[i] = licopy((GEN)x1[i]);
-                else
-                  affii((GEN)x1[i],(GEN)y[i]);
-              }
-            }
-            else i--;
-            avma = av1; break;
-          }
-	}
-	if (i > 2 && gcmp1((GEN)y[i]))
-	{
-	  cgiv((GEN)y[i]); --i; cgiv((GEN)y[i]);
-	  y[i] = laddsi(1,(GEN)y[i]);
-	}
-	setlg(y,i+1); return gerepileupto(av, y);
+        av = avma;
+        return gerepileupto(av, Qsfcont(x, NULL, k));
     }
     err(typeer,"sfcont");
   }
@@ -2068,7 +2057,7 @@ sfcont(GEN x, GEN x1, long k)
     case t_POL: return _vec(gcopy(x));
     case t_SER:
       av = avma; p1 = gtrunc(x);
-      return gerepileupto(av,sfcont(p1,p1,k));
+      return gerepileupto(av,sfcont(p1,k));
     case t_RFRAC:
     case t_RFRACN:
       av = avma;
@@ -2124,6 +2113,44 @@ sfcont2(GEN b, GEN x, long k)
   }
   setlg(y,i); 
   return gerepilecopy(av,y);
+}
+
+
+GEN
+gcf(GEN x)
+{
+  return sfcont(x,0);
+}
+
+GEN
+gcf2(GEN b, GEN x)
+{
+  return contfrac0(x,b,0);
+}
+
+GEN
+gboundcf(GEN x, long k)
+{
+  return sfcont(x,k);
+}
+
+GEN
+contfrac0(GEN x, GEN b, long flag)
+{
+  long lb,tb,i;
+  GEN y;
+
+  if (!b || gcmp0(b)) return sfcont(x,flag);
+  tb = typ(b);
+  if (tb == t_INT) return sfcont(x,itos(b));
+  if (! is_matvec_t(tb)) err(typeer,"contfrac0");
+
+  lb=lg(b); if (lb==1) return cgetg(1,t_VEC);
+  if (tb != t_MAT) return sfcont2(b,x,flag);
+  if (lg(b[1])==1) return sfcont(x,flag);
+  y = (GEN) gpmalloc(lb*sizeof(long));
+  for (i=1; i<lb; i++) y[i]=coeff(b,1,i);
+  x = sfcont2(y,x,flag); free(y); return x;
 }
 
 GEN
