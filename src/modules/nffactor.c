@@ -1374,7 +1374,7 @@ nf_DDF_roots(GEN pol, GEN polred, GEN nfpol, GEN lt, GEN init_fa, long nbf,
   {
     GEN q, r = (GEN)z[i];
 
-    r = nf_bestlift_to_pol(r, NULL, L);
+    r = nf_bestlift_to_pol(Clt? gmul(Clt,r): r, NULL, L);
     Cltx_r[2] = lneg(r); /* check P(r) == 0 */
     q = RXQX_divrem(C2ltpol, Cltx_r, nfpol, ONLY_DIVIDES); /* integral */
     if (q) { 

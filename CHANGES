@@ -111,6 +111,8 @@ IS 25- config/get_head would not work only if one invoked $PWD/Configure
    35- nffactor(nfinit(a^2+1),x^2+[]) --> SEGV
 GH 36- lngamma was not even continuous : its argument was reduced mod 2Pi
    37- contfrac(sqrt(2)/2,,2) --> trying to overwrite a universal object
+   38- nfroots(nfinit(a^2+a+1),x^2-a/4) --> []  (leading coeff not properly
+       taken into account in nf_DDF_roots)
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.
