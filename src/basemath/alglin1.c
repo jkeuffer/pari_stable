@@ -1886,8 +1886,7 @@ keri(GEN x)
 	  {
 	    pari_sp av1 = avma;
 	    p1 = subii(mulii(p,gcoeff(x,t,i)), mulii(q,gcoeff(x,j,i)));
-            p1 = gerepileuptoint(av1, diviiexact(p1,p0));
-	    coeff(x,t,i) = (long)p1;
+	    coeff(x,t,i) = lpileuptoint(av1, diviiexact(p1,p0));
 	  }
 	  if (low_stack(lim, stack_lim(av,1)))
           {
