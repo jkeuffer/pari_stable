@@ -1399,16 +1399,39 @@ famat_to_nf_modidele(GEN nf, GEN g, GEN e, GEN bid)
   return set_sign_mod_idele(nf, to_famat(g,e), t, module, sarch);
 }
 
+GEN
+vecmul(GEN x, GEN y)
+{
+  long i, lx = lg(x);
+  GEN z = cgetg(lx, typ(x));
+  for (i=1; i<lx; i++) z[i] = lmul((GEN)x[i], (GEN)y[i]);
+  return z;
+}
+
+GEN
+vecinv(GEN x)
+{
+  long i, lx = lg(x);
+  GEN z = cgetg(lx, typ(x));
+  for (i=1; i<lx; i++) z[i] = linv((GEN)x[i]);
+  return z;
+}
+
+GEN
+vecdiv(GEN x, GEN y) { return vecmul(x, vecinv(y)); }
+
 /* x,y assumed to be of the same type, either
- * 	t_COL/t_VEC: logarithmic distance components
+ * 	t_VEC: logarithmic distance components
+ * 	t_COL: multiplicative distance components [FIXME: find decent type]
  *	t_POLMOD: nf elt
  *	t_MAT: factorisation of nf elt */
 GEN
 arch_mul(GEN x, GEN y) {
   switch (typ(x)) {
     case t_POLMOD: return gmul(x, y);
+    case t_COL: return vecmul(x, y);
     case t_MAT:    return (x == y)? famat_sqr(x): famat_mul(x,y);
-    default:       return (x == y)? gmul2n(x,1): gadd(x,y); /* t_COL, t_VEC */
+    default:       return (x == y)? gmul2n(x,1): gadd(x,y); /* t_VEC */
   }
 }
 
@@ -1910,108 +1933,79 @@ ideallllred_elt(GEN nf, GEN I)
 GEN
 ideallllred(GEN nf, GEN I, GEN vdir, long prec)
 {
-  long tx,N,av,i, nfprec = nfgetprec(nf);
-  GEN Ired,I0,res,aI,p1,y,x,Nx,b,c1,c,pol;
+  ulong av = avma;
+  long N,i,nfprec;
+  GEN J,I0,Ired,res,aI,y,x,Nx,b,c1,c,pol;
 
+  nf = checknf(nf); nfprec = nfgetprec(nf);
   if (prec <= 0) prec = nfprec;
-  nf = checknf(nf);
-  vdir = chk_vdir(nf,vdir);
   pol = (GEN)nf[1]; N = lgef(pol)-3;
-  tx = idealtyp(&I,&aI); I0 = I;
-  res = aI? cgetg(3,t_VEC): NULL;
-  if (tx == id_PRINCIPAL)
+  Nx = x = c = c1 = NULL;
+  if (idealtyp(&I,&aI) == id_PRINCIPAL)
   {
-    if (gcmp0(I))
-    {
-      y = cgetg(1, t_MAT);
-      if (!aI) return y;
-      res[2] = lcopy(aI);
-    }
-    else
-    {
-      y = idmat(N);
-      if (!aI) return y;
-      av = avma;
-      res[2] = lpileupto(av, gsub(aI, get_arch(nf,I,prec)));
-    }
-    res[1] = (long)y; return res;
+    if (gcmp0(I)) { y=gun; I=cgetg(1,t_MAT); } else { y=I; I=idmat(N); }
+    goto END;
   }
-  av = avma;
-  if (DEBUGLEVEL>=6) msgtimer("entering idealllred");
+
+  if (DEBUGLEVEL>5) msgtimer("entering idealllred");
+  I0 = I;
   if (typ(I) != id_MAT || lg(I) != N+1) I = idealhermite_aux(nf,I);
   c1 = content(I); if (gcmp1(c1)) c1 = NULL; else I = gdiv(I,c1);
   if (2 * expi(gcoeff(I,1,1)) >= bit_accuracy(nfprec))
     Ired = gmul(I, lllintpartial(I));
   else
     Ired = I;
-  y = ideallllred_elt_i(&nf, Ired, vdir, &prec);
+  y = ideallllred_elt_i(&nf, Ired, chk_vdir(nf,vdir), &prec);
 
-  if (DEBUGLEVEL>=6) msgtimer("lllgram");
   if (isnfscalar(y))
   { /* already reduced */
-    if (!aI)
-    {
-      if (I == I0) { avma = av; return gcopy(I); }
-      return gerepileupto(av, gcopy(I));
-    }
-    if (I == I0)
-    {
-      avma = av;
-      I = gcopy(I);
-      aI = gcopy(aI);
-    }
-    else
-      switch(typ(aI))
-      {
-        case t_POLMOD: case t_MAT:
-          if (c1) c1 = gclone(c1);
-          I = gerepileupto(av, I);
-          if (c1) { aI = arch_mul(aI, c1); gunclone(c1); }
-          break;
-
-        default:
-          I = gerepileupto(av, I);
-          aI = gcopy(aI);
-      }
-    res[1]=(long)I; res[2]=(long)aI; return res;
+    if (!aI) { if (I == I0) I = gcopy(I); else avma = (ulong)I; }
+    y = NULL; goto END;
   }
+  if (DEBUGLEVEL>5) msgtimer("LLL reduction");
 
-  x = gmul((GEN)nf[7], y);
-  Nx = subres(pol,x);
+  x = gmul((GEN)nf[7], y); Nx = subres(pol,x);
   b = gmul(Nx, ginvmod(x,pol));
   b = algtobasis_intern(nf,b);
-  if (DEBUGLEVEL>=6) msgtimer("x/b");
-
-  p1 = cgetg(N+1,t_MAT); /* = I Nx / x integral */
+  J = cgetg(N+1,t_MAT); /* = I Nx / x integral */
   for (i=1; i<=N; i++)
-    p1[i] = (long)element_muli(nf,b,(GEN)Ired[i]);
-  c = content(p1); if (!gcmp1(c)) p1 = gdiv(p1,c);
-  if (DEBUGLEVEL>=6) msgtimer("new ideal");
-  if (aI)
-  {
-    switch(typ(aI))
-    {
-      case t_POLMOD: case t_MAT:
-        y = gmul(x, gdiv(c1? gmul(c,c1): c,Nx));
-        break;
-      default:
-        y = gneg_i(get_arch(nf,y,prec));
-    }
-    y = gclone(y);
-  }
-
+    J[i] = (long)element_muli(nf,b,(GEN)Ired[i]);
+  c = content(J); if (!gcmp1(c)) J = gdiv(J,c);
+ /* c = content (I Nx / x) = Nx / den(I/x) --> d = den(I/x) = Nx / c
+  * J = (d I / x); I[1,1] = I \cap Z --> d I[1,1] belongs to J and Z */
   if (isnfscalar((GEN)I[1]))
-   /* c = content (I Nx / x) = Nx / den(I/x) --> d = den(I/x) = Nx / c
-    * p1 = (d I / x); I[1,1] = I \cap Z --> d I[1,1] belongs to p1 and Z */
     b = mulii(gcoeff(I,1,1), divii(Nx, c));
   else
-    b = detint(p1);
-  p1 = gerepileupto(av, hnfmodid(p1,b));
-  if (DEBUGLEVEL>=6) msgtimer("final hnf");
-  if (!aI) return p1;
-  res[1] = (long)p1;
-  res[2] = (long)arch_mul(aI,y);
-  gunclone(y); return res;
+    b = detint(J);
+  I = hnfmodid(J,b);
+  if (DEBUGLEVEL>5) msgtimer("new ideal");
+
+END:
+  if (!aI) return gerepileupto(av, I);
+
+  switch(typ(aI))
+  {
+    case t_POLMOD: case t_MAT: /* compute y, I0 = J y */
+      if (!Nx) y = c1;
+      else
+      {
+        if (c1) c = gmul(c,c1);
+        y = gmul(x, gdiv(c,Nx));
+      }
+      break;
+
+    case t_COL:
+      if (y) y = vecinv(gmul(gmael(nf,5,1), y));
+      break;
+
+    default:
+      if (y) y = gneg_i(get_arch(nf,y,prec));
+      break;
+  }
+  if (y) aI = arch_mul(aI,y);
+  res = cgetg(3,t_VEC);
+  res[1] = (long)I;
+  res[2] = (long)aI; return gerepileupto(av, gcopy(res));
 }
 
 GEN

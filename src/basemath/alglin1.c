@@ -2650,6 +2650,14 @@ p_mat(long **mat, long *perm, long k0)
   avma=av;
 }
 
+static GEN
+col_dup(long n, GEN col)
+{
+   GEN c = new_chunk(n+1);
+   memcpy(c,col,(n+1)*sizeof(long));
+   return c;
+}
+
 #define gswap(x,y) { long *_t=x; x=y; y=_t; }
 
 /* HNF reduce a relation matrix (column operations + row permutation)
@@ -2660,22 +2668,31 @@ p_mat(long **mat, long *perm, long k0)
 **     to maintain perm than to copy rows. For columns we can do it directly
 **     using e.g. swap(mat[i], mat[j])
 **   k0 = integer. The k0 first lines of mat are dense, the others are sparse.
+**     Also if k0=0, mat is modified in place [from mathnfspec], otherwise
+**     it is left alone [from buchall]
 ** Output: cf ASCII art in the function body
 **
 ** row permutations applied to perm
 ** column operations applied to C.
 **/
 GEN
-hnfspec(long** mat, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
+hnfspec(long** mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
 {
-  long av=avma,av2,*p,i,j,k,lk0,col,lig,*matj;
+  long av=avma,av2,*p,i,j,k,lk0,col,lig,*matj, **mat;
   long n,s,t,lim,nlze,lnz,nr;
   GEN p1,p2,matb,matbnew,vmax,matt,T,extramat;
   GEN B,H,dep,permpro;
   GEN *gptr[4];
-  long co = lg(mat);
-  long li = lg(perm); /* = lg(mat[1]) */
+  long co = lg(mat0);
+  long li = lg(perm); /* = lg(mat0[1]) */
   int updateT = 1;
+
+  if (!k0) mat = mat0; /* in place */
+  else
+  { /* keep original mat0 safe, modify a copy */
+    mat = (long**)new_chunk(co); mat[0] = mat0[0];
+    for (j=1; j<co; j++) mat[j] = col_dup(li,mat0[j]);
+  }
 
   if (DEBUGLEVEL>5)
   {
