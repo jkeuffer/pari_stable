@@ -160,6 +160,7 @@ EOT
 echo $n "Shall we try to build pari $version.$patch ($status) now (y/n)? $c"
 dflt=n; rep='y n'; . $config_dir/myread
 
+mkobjdir=`$config_dir/objdir`
 cdobjdir=
 if test "$objdir" != "$mkobjdir"; then
   cdobjdir="cd $objdir; "
