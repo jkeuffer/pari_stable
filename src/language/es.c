@@ -435,10 +435,10 @@ term_height(void)
 static void
 putc80(char c)
 {
-  if (c == '\n') col_index = -1;
-  else if (col_index == MAX_WIDTH)
-    { putc('\n',pari_outfile); col_index = 0; }
-  putc(c, pari_outfile); col_index++;
+  if (c == '\n') col_index = 0;
+  else if (col_index == MAX_WIDTH) { normalOutC('\n'); col_index = 1; }
+  else col_index++;
+  normalOutC(c);
 }
 #undef MAX_WIDTH
 static void
