@@ -867,7 +867,6 @@ sub TeXprint_topod {
   s/\\hbox\s*\{(?:\\it\b\s*)?((?:\\[\{\}]|[^{}]|\{[^{}]*\})*)\}/$1/g;
 
   # substitute non-verbatim code
-print;
   if (/\\bprog/)
   {
     s/\s*\\bprog(?:tabs[^\n]*)?(?![a-zA-Z])\s*(.*?)(\\|@)eprog\s*/wrap_code($1)/ges;
@@ -970,7 +969,6 @@ sub to_pod {
   }
   $/='';			# Paragraph mode
   while (<DOC>) {
-  print "$_\n";
     &TeXprint_topod();
   }
   if ($pipe) {
