@@ -3138,7 +3138,7 @@ tate(GEN x)
 static GEN
 w(GEN x)
 {
-  if (!is_bigell(x)) err(member,"tate",mark.member,mark.start);
+  if (!is_bigell(x)) err(member,"w",mark.member,mark.start);
   if (!gcmp0((GEN)x[19])) err(talker,"curve not defined over a p-adic field");
   return (GEN)x[18];
 }
