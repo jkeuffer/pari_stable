@@ -466,15 +466,17 @@ static GEN
 shiftpol_ip(GEN x, long v)
 {
   long i, lx;
-  GEN y;
-  if (v <= 0 || !signe(x)) return x;
+  GEN y, z;
+  if (!v || !signe(x)) return x;
   lx = lg(x);
-  x += 2; y = x + v;
-  for (i = lx-3; i>=0; i--) y[i] = x[i];
-  for (i = 0   ; i< v; i++) x[i] = zero;
-  lx += v;
-  *--x = evalsigne(1);
-  *--x = evaltyp(t_POL) | evallg(lx); return x;
+  y = x + v;
+  z = x + lx;
+  /* stackdummy from normalizepol: move it up */
+  if (lg(z) != v) x[lx + v] = z[0];
+  for (i = lx-1; i >= 2; i--) y[i] = x[i];
+  for (i = v+1;  i >= 2; i--) x[i] = zero;
+  x[1] = evalsigne(1);
+  x[0] = evaltyp(t_POL) | evallg(lx+v); return x;
 }
 
 /* fast product (Karatsuba) of polynomials a,b. These are not real GENs, a+2,
@@ -493,7 +495,7 @@ RgX_mulspec(GEN a, GEN b, long na, long nb)
   if (na < nb) swapspec(a,b, na,nb);
   if (!nb) return zeropol(0);
 
-  if (v) (void)cgetg(v,t_STR); /* v gerepile-safe cells for shiftpol_ip */
+  if (v) (void)cgetg(v,t_VECSMALL); /* v gerepile-safe cells for shiftpol_ip */
   if (nb < MUL_LIMIT)
     return shiftpol_ip(mulpol(a,b,na,nb), v);
   i = (na>>1); n0 = na-i; na = i;
@@ -572,7 +574,7 @@ RgX_sqrspec(GEN a, long na)
   pari_sp av;
 
   while (na && isexactzero((GEN)a[0])) { a++; na--; v += 2; }
-  if (v) (void)new_chunk(v);
+  if (v) (void)cgetg(v, t_VECSMALL);
   if (na<SQR_LIMIT) return shiftpol_ip(sqrpol(a,na), v);
   i = (na>>1); n0 = na-i; na = i;
   av = avma; a0 = a+n0; n0a = n0;

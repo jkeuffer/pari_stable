@@ -186,6 +186,9 @@ JD 74- [Configure:] detection of times()
    88- wrong prototype used in rnfdet()  [ accepted 3 arguments instead of 2 ]
    89- typo in to_Kronecker [ when at least 3 variables involved ]
    90- typo in x = sqrt(t_PADIC)  [ returned either x or -x ]
+   91- rare stack corruption in RgX_mul(t_POL, t_POL) [ when product of
+       leading coefficient cancel, valuation is non-zero _and_ we use an
+       "unsafe" gerepile right afterwards ]
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.
