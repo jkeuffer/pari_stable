@@ -151,12 +151,8 @@ tmp=$runpath
 if test -n "$plotrunpath"; then
   tmp="$tmp$dir_sep$plotrunpath"
 fi
-RUNPTH_FINAL="$runpathprefix $tmp"
-RUNPTH="$runpathprefix $TOP/$objdir$dir_sep$tmp"
-if test -n "$LDisGCC"; then
-  RUNPTH_FINAL=-Wl,`echo $RUNPTH_FINAL | sed -e 's/  */,/g'`
-  RUNPTH=-Wl,`echo $RUNPTH | sed -e 's/  */,/g'`
-fi
+RUNPTH_FINAL=`$config_dir/ldflags $LDisGCC "$runpathprefix $tmp"`
+RUNPTH=`$config_dir/ldflags $LDisGCC "$runpathprefix $TOP/$objdir$dir_sep$tmp"`
 
 if test -z "$DLLD"; then
   exec="gp-sta"; static=y

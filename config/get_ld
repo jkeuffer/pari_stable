@@ -32,11 +32,8 @@ case "$osname-$arch" in
             full|profiling) ldflags="$ldflags -g0 -O4";;
           esac ;;
   linux-*|cygwin*|freebsd-*)
-    if test -n "$LDisGCC"; then
-      ldflags="$ldflags -Wl,-export-dynamic"
-    else
-      ldflags="$ldflags -export-dynamic"
-    fi ;;
+    tmp=`./ldflags $LDisGCC "-export-dynamic"`
+    ldflags="$ldflags $tmp" ;;
   os2-*)     ldflags="$ldlags -Zexe"
              case "$optimization" in
                full) ldflags="$ldflags -s";;

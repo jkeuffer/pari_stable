@@ -77,10 +77,7 @@ if test -n "$DLLD"; then
   case "$osname" in
     osf1|freebsd|linux|sunos|solaris) EXTRADLLDFLAGS='-lc ${LIBS}';;
   esac
-
-  if test -n "$DLLDisGCC"; then
-    DLLDFLAGS=-Wl,`echo $DLLDFLAGS | sed -e 's/  */,/g'`
-  fi
+  DLLDFLAGS=`./ldflags $DLLDisGCC "$DLLDFLAGS"`
   # assume DLLD = djgpp
   case "$osname" in
     os2) case "$optimization" in

@@ -12,13 +12,10 @@ case "$static" in
   y) dft=sta ;;
 esac
 
-RUNPTH="$runpathprefix $runpath"
-if test -n "$LDisGCC"; then
-  RUNPTH=-Wl,`echo $RUNPTH | sed -e 's/  */,/g'`
-fi
+RUNPTH=`config/ldflags $LDisGCC "$runpathprefix $runpath"`
 
 # remove soname imformation
-MYDLLDFLAGS=`echo $DLLDFLAGS | sed -e 's/-[hsoname]* \\$(LIBPARI.*)//'`
+MYDLLDFLAGS=`echo $DLLDFLAGS | sed -e 's/-[hsoname]*[,= \t]*\\$(LIBPARI.*)//'`
 
 cat > $file << EOT
 # Generic Makefile for PARI programs -- $pretty

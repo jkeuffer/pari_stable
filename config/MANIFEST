@@ -51,6 +51,7 @@ config/get_nl
 config/get_objdir
 config/get_readline
 config/get_static
+config/gmp_version.c
 config/gnu.c
 config/has_TIOCGWINSZ.c
 config/has_dlopen.c
@@ -67,6 +68,7 @@ config/has_ulong.c
 config/has_vsnprintf.c
 config/install
 config/kernel-name
+config/ldflags
 config/locate
 config/locatelib
 config/locatesymbol
