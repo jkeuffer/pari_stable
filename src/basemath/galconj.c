@@ -399,74 +399,6 @@ calcderivTS(GEN Spow, GEN P, GEN mod)
 }
 
 /*
- * Soit P un polynome de \ZZ[X] , p un nombre premier , S\in\FF_p[X]/(Q) tel
- * que P(S)=0 [p,Q] Relever S en S_0 tel que P(S_0)=0 [p^e,Q]
- * Unclean stack.
- */
-GEN
-monomorphismlift(GEN P, GEN S, GEN Q, GEN p, long e)
-{
-  ulong   ltop, lbot;
-  long    x;
-  GEN     q, qold, qm1;
-  GEN     W, Pr, Qr, Sr, Wr = gzero, Prold, Qrold, Spow;
-  long    i,nb,mask;
-  GEN    *gptr[2];
-  if (DEBUGLEVEL >= 1)
-    timer2();
-  x = varn(P);
-  q = p; qm1=gun; /*during the run, we have p*qm1=q*/
-  nb=hensel_lift_accel(e, &mask);
-  Pr = FpX_red(P,q);
-  Qr = (P==Q)?Pr:FpX_red(Q, q);/*A little speed up for automorphismlift*/
-  W=FpX_FpXQ_compo(deriv(Pr, x),S,Qr,q);
-  W=FpXQ_inv(W,Qr,q);
-  qold = p;
-  Prold = Pr;
-  Qrold = Qr;
-  gptr[0] = &S;
-  gptr[1] = &Wr;
-  for (i=0; i<nb;i++)
-  {
-    qm1 = (mask&(1<<i))?sqri(qm1):mulii(qm1, q);
-    q   =  mulii(qm1, p);
-    Pr = FpX_red(P, q);
-    Qr = (P==Q)?Pr:FpX_red(Q, q);/*A little speed up for automorphismlift*/
-    ltop = avma;
-    Sr = S;
-    Spow = compoTS(Pr, Sr, Qr, q);
-    if (i)
-    {
-      W = FpXQ_mul(Wr, calcderivTS(Spow, Prold,qold), Qrold, qold);
-      W = FpX_neg(W, qold);
-      W = FpX_Fp_add(W, gdeux, qold);
-      W = FpXQ_mul(Wr, W, Qrold, qold);
-    }
-    Wr = W;
-    S = FpXQ_mul(Wr, calcTS(Spow, Pr, Sr, Qr, q),Qr,q);
-    lbot = avma;
-    Wr = gcopy(Wr);
-    S = FpX_sub(Sr, S,NULL);
-    gerepilemanysp(ltop, lbot, gptr, 2);
-    qold = q;
-    Prold = Pr;
-    Qrold = Qr;
-  }
-  if (DEBUGLEVEL >= 1)
-    msgtimer("monomorphismlift()");
-  return S;
-}
-/*
- * Soit T un polynome de \ZZ[X] , p un nombre premier , S\in\FF_p[X]/(T) tel
- * que T(S)=0 [p,T] Relever S en S_0 tel que T(S_0)=0 [T,p^e]
- * Unclean stack.
- */
-GEN
-automorphismlift(GEN S, struct galois_lift *gl)
-{
-  return  monomorphismlift(gl->T, S, gl->T, gl->p, gl->e);
-}
-/*
  * Verifie que S est une solution presque surement et calcule sa permutation
  */
 static int
@@ -499,6 +431,113 @@ poltopermtest(GEN f, struct galois_lift *gl, GEN pf)
   return 1;
 }
 
+GEN polratlift(GEN P, GEN mod, GEN amax, GEN bmax, GEN denom);
+
+/*
+ * Soit P un polynome de \ZZ[X] , p un nombre premier , S\in\FF_p[X]/(Q) tel
+ * que P(S)=0 [p,Q] Relever S en S_0 tel que P(S_0)=0 [p^e,Q]
+ * Unclean stack.
+ */
+GEN
+monomorphismratlift(GEN P, GEN S, struct galois_lift *gl, GEN frob)
+{
+  ulong   ltop, lbot;
+  GEN Q=gl->T, p=gl->p;
+  long e=gl->e;
+  long    x;
+  GEN     q, qold, qm1, qm1old;
+  GEN     W, Pr, Qr, Sr, Wr = gzero, Prold, Qrold, Spow;
+  long    i,nb,mask;
+  GEN    *gptr[2];
+  if (DEBUGLEVEL >= 1)
+    timer2();
+  x = varn(P);
+  q = p; qm1=gun; /*during the run, we have p*qm1=q*/
+  nb=hensel_lift_accel(e, &mask);
+  Pr = FpX_red(P,q);
+  Qr = (P==Q)?Pr:FpX_red(Q, q);/*A little speed up for automorphismlift*/
+  W=FpX_FpXQ_compo(deriv(Pr, x),S,Qr,q);
+  W=FpXQ_inv(W,Qr,q);
+  qold = p; qm1old=gun;
+  Prold = Pr;
+  Qrold = Qr;
+  gptr[0] = &S;
+  gptr[1] = &Wr;
+  for (i=0; i<nb;i++)
+  {
+    qm1 = (mask&(1<<i))?sqri(qm1):mulii(qm1, q);
+    q   =  mulii(qm1, p);
+    Pr = FpX_red(P, q);
+    Qr = (P==Q)?Pr:FpX_red(Q, q);/*A little speed up for automorphismlift*/
+    ltop = avma;
+    Sr = S;
+    Spow = compoTS(Pr, Sr, Qr, q);
+    if (i)
+    {
+      W = FpXQ_mul(Wr, calcderivTS(Spow, Prold,qold), Qrold, qold);
+      W = FpX_neg(W, qold);
+      W = FpX_Fp_add(W, gdeux, qold);
+      W = FpXQ_mul(Wr, W, Qrold, qold);
+    }
+    Wr = W;
+    S = FpXQ_mul(Wr, calcTS(Spow, Pr, Sr, Qr, q),Qr,q);
+    S = FpX_sub(Sr, S, q);
+    lbot = avma;
+    Wr = gcopy(Wr);
+    S = gcopy(S);
+    gerepilemanysp(ltop, lbot, gptr, 2);
+    if (i && i<nb-1 && frob)
+    {
+      ulong btop=avma;
+      GEN tlift = polratlift(S,q,qm1old,qm1old,gl->den);
+      if (tlift)
+      {
+	long test;
+	if(DEBUGLEVEL>=4)
+	  fprintferr("MonomorphismLift: early solution %Z\n",tlift);
+	/*Rationals coefficients*/
+	tlift=lift(gmul(tlift,gmodulcp(gl->den,gl->ladic)));
+	if(DEBUGLEVEL>=4)
+	  fprintferr("MonomorphismLift: early solution %Z\n",tlift);
+        test=poltopermtest(tlift, gl, frob);
+	  fprintferr("MonomorphismLift: early solution %d\n",test);
+	if (test)
+	{
+	  avma=ltop;
+	  return NULL;
+	}
+      }
+      avma=btop;
+    }
+    qold = q;
+    qm1old=qm1;
+    Prold = Pr;
+    Qrold = Qr;
+  }
+  if (DEBUGLEVEL >= 1)
+    msgtimer("monomorphismlift()");
+  return S;
+}
+/*
+ * Soit T un polynome de \ZZ[X] , p un nombre premier , S\in\FF_p[X]/(T) tel
+ * que T(S)=0 [p,T] Relever S en S_0 tel que T(S_0)=0 [T,p^e]
+ * Unclean stack.
+ */
+  GEN
+automorphismlift(GEN S, struct galois_lift *gl, GEN frob)
+{
+  return  monomorphismratlift(gl->T, S, gl, frob);
+}
+  GEN
+monomorphismlift(GEN P, GEN S, GEN Q, GEN p, long e)
+{
+  struct galois_lift gl;
+  gl.T=Q;
+  gl.p=p;
+  gl.e=e;
+  return monomorphismratlift(P,S,&gl,NULL);
+}
+
 struct galois_testlift
 {
   long    n;
@@ -528,12 +567,15 @@ inittestlift(GEN Tmod, long elift, struct galois_lift *gl,
   Tp = FpX_red(gl->T, gl->p);
   pe = gpowgs(gl->p, elift);
   S = FpXQ_pow(polx[v],pe, Tp,gl->p);
-  plift = automorphismlift(S, gl);
+  plift = automorphismlift(S, gl, frob);
   if (DEBUGLEVEL >= 9)
     fprintferr("GaloisConj:plift = %Z\n", plift);
-  if (DEBUGLEVEL >= 7)
-    fprintferr("GaloisConj:inittestlift()1:avma=%ld\n", avma);
-  if (frob)
+  if (!plift)
+  {
+    avma = ltop;
+    return 1;
+  } 
+  else if (frob)
   {
     GEN     tlift;
     tlift = FpX_redc(FpX_Fp_mul(plift,gl->den,gl->Q), gl->Q);
@@ -546,7 +588,7 @@ inittestlift(GEN Tmod, long elift, struct galois_lift *gl,
   if (exit)
     return 0;
   if (DEBUGLEVEL >= 7)
-    fprintferr("GaloisConj:inittestlift()2:avma=%ld\n", avma);
+    fprintferr("GaloisConj:inittestlift()1:avma=%ld\n", avma);
   gt->bezoutcoeff = bezout_lift_fact(gl->T, Tmod, gl->p, gl->e);
   if (DEBUGLEVEL >= 1)
     timer2();
@@ -554,7 +596,7 @@ inittestlift(GEN Tmod, long elift, struct galois_lift *gl,
   gt->pauto[1] = (long) polx[v];
   gt->pauto[2] = (long) plift;
   if (DEBUGLEVEL >= 7)
-    fprintferr("GaloisConj:inittestlift()3:avma=%ld\n", avma);
+    fprintferr("GaloisConj:inittestlift()2:avma=%ld\n", avma);
   if (gt->f > 2)
   {
 
@@ -563,7 +605,7 @@ inittestlift(GEN Tmod, long elift, struct galois_lift *gl,
     for (i = 2; i < gt->n; i++)
       autpow[i] = (long) FpXQ_mul((GEN) autpow[i - 1],plift,gl->TQ,gl->Q);
     if (DEBUGLEVEL >= 7)
-      fprintferr("GaloisConj:inittestlift()4:avma=%ld\n", avma);
+      fprintferr("GaloisConj:inittestlift()3:avma=%ld\n", avma);
     for (i = 3; i <= gt->f; i++)
     {
       GEN     s, P;
@@ -582,7 +624,7 @@ inittestlift(GEN Tmod, long elift, struct galois_lift *gl,
 	p1 = FpX_Fp_mul((GEN) autpow[n], (GEN) P[n + 2],NULL);
 	s = FpX_add(s, p1,gl->Q);
 	if (DEBUGLEVEL >= 7)
-	  fprintferr("GaloisConj:inittestlift()5:avma=%ld\n", avma);
+	  fprintferr("GaloisConj:inittestlift()4:avma=%ld\n", avma);
 	gt->pauto[i] = (long) gerepileupto(ltop,s);
       }
     }
@@ -2059,7 +2101,7 @@ static void
 s4makelift(GEN u, struct galois_lift *gl, GEN liftpow)
 {
   int     i;
-  liftpow[1] = (long) automorphismlift(u, gl);
+  liftpow[1] = (long) automorphismlift(u, gl, NULL);
   for (i = 2; i < lg(liftpow); i++)
     liftpow[i] = (long) FpXQ_mul((GEN) liftpow[i - 1], (GEN) liftpow[1],gl->TQ,gl->Q);
 }

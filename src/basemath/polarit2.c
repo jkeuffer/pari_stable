@@ -3535,17 +3535,43 @@ GEN matratlift(GEN M, GEN mod, GEN amax, GEN bmax, GEN denom)
   }
   return N;
 }
+GEN polratlift(GEN P, GEN mod, GEN amax, GEN bmax, GEN denom)
+{
+  ulong ltop = avma;
+  GEN Q;
+  GEN a, b;
+  long l2;
+  long j;
+  if (typ(P)!=t_POL) err(typeer,"polratlift");
+  l2 = lg(P);
+  Q = cgetg(l2, t_POL);
+  Q[1]=P[1];
+  for (j = 2; j < l2; ++j)
+  {
+      if (ratlift((GEN) P[j], mod, &a, &b, amax, bmax)
+          && (!denom || gcmp0(modii(denom,b))))
+        Q[j] = ldiv(a, b);
+      else
+      {
+        avma=ltop;
+        return NULL;
+      }
+  }
+  return Q;
+}
 
 /* P,Q in Z[X,Y], nf in Z[Y] , monic irreducible. compute GCD in Q[Y]/(nf)[X]
  * 
  * We procede as follows
  * We compute the gcd modulo primes discarding bad primes as they are detected.
- * We try reconstruct the result with matratlift, stopping as soon as we get weird
- * denominators.
+ * We try reconstruct the result with matratlift, stopping as soon as we get
+ * weird denominators.
+ *
  * If matratlift succeed, we then try the full division.
  * Suppose we does not have sufficient accuracy to get the result right:
- * It is extremly rare that matratlift will succeed, and even if it does, the polynomial
- * we get has reasonnable coefficients, so the full division will not be to costly.
+ * It is extremly rare that matratlift will succeed, and even if it does, the
+ * polynomial we get has reasonnable coefficients, so the full division will
+ * not be too costly.
  *
  * FIXME: Handle rational coefficient for P and Q, and non-monic nf.
  * Add optional disc argument.
