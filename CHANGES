@@ -70,6 +70,7 @@ BA 30- cotan(x) wasn't accepted
    32- various bugs in gphelp -detex (??\a)
    33- trap + ^C + next would interrupt \r or read()
 IZ 34- external prettyprinter incompatible with colors
+   35- idealval used much larger numbers than necessary
 
   Changed
 BA  1- more efficient quadratic Hensel lift
@@ -84,6 +85,8 @@ BA  3- more efficient factorff when pol belongs to Fp[X] (based on Fp_isom)
     9- try to avoid errors due to precision loss (while computing archimedian
        components) in bnfnewprec/bnfmake
    10- restore \o2 to previous meaning, use \o3 for alternate prettyprinter
+   11- normalized output of idealfactor (sort factors)
+   12- slightly better TeXization (\left / \right)
 
   Added
     1- new library function zerovec
