@@ -221,8 +221,7 @@ append_vbs(GEN vbs, GEN D)
   l = lg(vbs); maxl = vbs[-1];
   if (l == maxl)
   {
-    vbs = (GEN)gprealloc((void*)(vbs-1), (2 + (maxl<<1))*sizeof(GEN),
-                                         (2 + maxl)*sizeof(GEN));
+    vbs = (GEN)gprealloc((void*)(vbs-1), (2 + (maxl<<1))*sizeof(GEN));
     *vbs = maxl<<1; vbs++; setlg(vbs, 1);
   }
   if (DEBUGLEVEL>5) fprintferr("appending D = %Z\n",D);
