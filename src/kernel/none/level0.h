@@ -116,16 +116,18 @@ mulll(ulong x, ulong y)
   const ulong xlo = LOWWORD(x), xhi = HIGHWORD(x);
   const ulong ylo = LOWWORD(y), yhi = HIGHWORD(y);
   ulong xylo,xymid,xyhi,xymidhi,xymidlo;
+  ulong xhl,yhl;
 
   xylo = xlo*ylo; xyhi = xhi*yhi;
-  xymid = (xhi+xlo)*(yhi+ylo) - (xyhi+xylo);
+  xhl = xhi+xlo; yhl = yhi+ylo;
+  xymid = xhl*yhl - (xyhi+xylo);
 
   xymidhi = HIGHWORD(xymid);
   xymidlo = xymid << BITS_IN_HALFULONG;
 
   xylo += xymidlo;
   hiremainder = xyhi + xymidhi + (xylo < xymidlo)
-     + (((((xhi+xlo) + (yhi+ylo)) >> 1) - xymidhi) & HIGHMASK);
+     + ((((xhl + yhl) >> 1) - xymidhi) & HIGHMASK);
 
   return xylo;
 }
@@ -136,9 +138,11 @@ addmul(ulong x, ulong y)
   const ulong xlo = LOWWORD(x), xhi = HIGHWORD(x);
   const ulong ylo = LOWWORD(y), yhi = HIGHWORD(y);
   ulong xylo,xymid,xyhi,xymidhi,xymidlo;
+  ulong xhl,yhl;
 
   xylo = xlo*ylo; xyhi = xhi*yhi;
-  xymid = (xhi+xlo)*(yhi+ylo) - (xyhi+xylo);
+  xhl = xhi+xlo; yhl = yhi+ylo;
+  xymid = xhl*yhl - (xyhi+xylo);
 
   xylo += hiremainder; xyhi += (xylo < hiremainder);
 
@@ -147,7 +151,7 @@ addmul(ulong x, ulong y)
 
   xylo += xymidlo;
   hiremainder = xyhi + xymidhi + (xylo < xymidlo)
-     + (((((xhi+xlo) + (yhi+ylo)) >> 1) - xymidhi) & HIGHMASK);
+     + ((((xhl + yhl) >> 1) - xymidhi) & HIGHMASK);
 
   return xylo;
 }
