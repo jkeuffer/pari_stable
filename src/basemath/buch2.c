@@ -338,7 +338,7 @@ static void
 pre_allocate(RELCACHE_t *cache, size_t n)
 {
   size_t len = (cache->last - cache->base) + n;
-  if (len > cache->len) reallocate(cache, len << 1);
+  if (len >= cache->len) reallocate(cache, len << 1);
 }
 
 /* Compute powers of prime ideals (P^0,...,P^a) in subFB (a > 1) */
@@ -2240,7 +2240,7 @@ bestappr_noer(GEN x, GEN k)
  * If c := Rz ~ 1, by Dirichlet's formula, then lambda is the full group of
  * units AND the full set of relations for the class group has been computed.
  *
- * In fact z is a very rough approximation and we only expect 0.8 < Rz < 1.3
+ * In fact z is a very rough approximation and we only expect 0.75 < Rz < 1.3
  *
  * Output: *ptkR = R, *ptU = basis of fundamental units (in terms lambda) */
 static int
@@ -2279,7 +2279,7 @@ compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR)
     fprintferr("\n ***** check = %f\n",c);
   }
 //  if (c < 0.75 || c > 1.3) { avma = av; return fupb_RELAT; }
-  if (c < 0.8 || c > 1.3) { avma = av; return fupb_RELAT; }
+  if (c < 0.75 || c > 1.3) { avma = av; return fupb_RELAT; }
   *ptkR = R; *ptL = L; return fupb_NONE;
 }
 
