@@ -19,6 +19,10 @@ GEN make_M(long n,long ru,GEN basis,GEN roo);
 GEN make_MC(long n,long r1,long ru,GEN M);
 GEN make_TI(GEN nf, GEN TI, GEN con);
 
+#define SFB_MAX 2
+#define SFB_STEP 2
+#define MIN_EXTRA 1
+
 static const int CBUCHG = (1<<4) - 1; /* of the forme 2^k-1 */
 static const int randshift = BITS_IN_RANDOM-1 - 4; /* BITS_IN_RANDOM-1 - k */
 
@@ -85,10 +89,11 @@ subfactorbasegen(long N,long m,long minsfb,GEN vperm)
   GEN y1,y2,perm,perm1,P,Q;
   double prod;
 
+  (void)new_chunk(lv);
   y1 = cgetg(lv,t_COL);
   y2 = cgetg(lv,t_COL);
   for (i=1,P=(GEN)vectbase[i];;P=Q)
-  { /* we'll sort ideals by norm (flag excluded ideals with "zero") */
+  { /* we'll sort ideals by norm (excluded ideals = "zero") */
     long e = itos((GEN)P[3]);
     long ef= e*itos((GEN)P[4]);
     
@@ -118,15 +123,19 @@ subfactorbasegen(long N,long m,long minsfb,GEN vperm)
   if (prod < m) return -1;
   n--;
 
-  /* take the first (wrt norm) n ideals, and put them first */
+  /* take the first (non excluded) n ideals (wrt norm), put them first, and
+   * sort the rest by increasing norm */
   for (j=1; j<=n; j++) y2[perm[j]] = zero;
-  perm1 = sindexsort(y2);
-  for (j=1; j<=n; j++) vperm[j] = perm[j];
-  for (   ; j<lv; j++) vperm[j] = perm1[j];
+  perm1 = sindexsort(y2); avma = av;
 
-  avma = av; subfactorbase=cgetg(n+1,t_COL);
+  if (vperm)
+  {
+    for (j=1; j<=n; j++) vperm[j] = perm[j];
+    for (   ; j<lv; j++) vperm[j] = perm1[j];
+  }
+  subfactorbase=cgetg(n+1,t_COL);
+  for (j=1; j<=n; j++) subfactorbase[j] = vectbase[perm[j]];
 
-  for (j=1; j<=n; j++) subfactorbase[j] = vectbase[vperm[j]];
   if (DEBUGLEVEL)
   {
     if (DEBUGLEVEL>3)
@@ -165,11 +174,11 @@ mulred(GEN nf,GEN x, GEN I, long prec,long precint)
 static void
 powsubfactgen(GEN nf,long a,long prec,long precint)
 {
-  long i,j,n=lg(subfactorbase)-1,N=lgef(nf[1])-3,RU;
+  long i,j,n=lg(subfactorbase),N=lgef(nf[1])-3,RU;
   GEN id, *pow;
 
-  powsubfactorbase = (GEN**) gpmalloc(sizeof(GEN*)*(n+1));
-  setlg(powsubfactorbase,n+1);
+  powsubfactorbase = (GEN**) gpmalloc(sizeof(GEN*)*n);
+  setlg(powsubfactorbase,n);
   if (DEBUGLEVEL)
   { fprintferr("Computing powers for sub-factor base:\n"); flusherr(); }
   RU=itos(gmael(nf,2,1)); RU = RU + (N-RU)/2;
@@ -177,7 +186,7 @@ powsubfactgen(GEN nf,long a,long prec,long precint)
   id[1] = (long)idmat(N);
   id[2] = (long)zerocol(RU); settyp(id[2],t_VEC);
 
-  for (i=1; i<=n; i++)
+  for (i=1; i<n; i++)
   {
     GEN vp = (GEN)subfactorbase[i];
     GEN z = cgetg(4,t_VEC);
@@ -200,7 +209,7 @@ powsubfactgen(GEN nf,long a,long prec,long precint)
     if (DEBUGLEVEL>7)
     {
       fprintferr("**** POWERS IN SUB-FACTOR BASE ****\n\n");
-      for (i=1; i<=n; i++)
+      for (i=1; i<n; i++)
       {
         pow = powsubfactorbase[i];
 	fprintferr("powsubfactorbase[%ld]:\n",i);
@@ -272,7 +281,7 @@ factorbasegen(GEN nf,long n2,long n)
     if (KC == 0 && p>n) { KCZ=i; KC=ip; }
   }
   if (!KC) return NULL;
-  KCZ2=i; KC2=ip; MAXRELSUP = min(50,4*KC);
+  KCZ2=i; KC2=ip; MAXRELSUP = min(50,4*KC) / SFB_MAX;
 
   vectbase=cgetg(KC+1,t_COL);
   for (i=1; i<=KCZ; i++)
@@ -2406,10 +2415,6 @@ buchall_for_degree_one_pol(GEN nf, GEN CHANGE, long flun)
   return gerepileupto(av, buchall_end(nf,CHANGE,flun,k,fu,clg1,clg2,reg,c_1,zu,W,B,xarch,matarch,vectbase,vperm));
 }
 
-#define SFB_MAX 2
-#define SFB_STEP 2
-#define MIN_EXTRA 1
-
 GEN
 buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
         long minsfb,long flun,long prec)
@@ -2486,8 +2491,8 @@ INCREASEGEN:
   ss = subfactorbasegen(N,(long)min(lim,LIMC2), minsfb, vperm);
   if (ss == -1) goto INCREASEGEN;
   lgsub = lg(subfactorbase);
-  subvperm = new_chunk(lgsub); ex = new_chunk(lgsub);
-  for (i=1; i<lgsub; i++) subvperm[i]=vperm[i];
+  ex = cgetg(lgsub,t_VECSMALL);
+  subvperm = gcopy(vperm);
 
   PRECREGINT = DEFAULTPREC
              + ((expi(D)*(lgsub-2)+((N*N)>>2))>>TWOPOTBITS_IN_LONG);
@@ -2567,7 +2572,7 @@ INCREASEGEN:
     { /* increase subfactorbase */
       sfb_increase = 0;
       if (++sfb_trials > SFB_MAX ||
-          subfactorbasegen(N,(long)min(lim,LIMC2), lgsub-1+SFB_STEP, vperm) < 0)
+          subfactorbasegen(N,(long)min(lim,LIMC2), lgsub-1+SFB_STEP, NULL) < 0)
         goto INCREASEGEN;
       if (DEBUGLEVEL) fprintferr("*** Increasing subfactorbase\n");
       if (powsubfactorbase)
@@ -2576,8 +2581,6 @@ INCREASEGEN:
         free(powsubfactorbase); powsubfactorbase = NULL;
       }
       lgsub = lg(subfactorbase);
-      subvperm = new_chunk(lgsub); ex = new_chunk(lgsub);
-      for (i=1; i<lgsub; i++) subvperm[i]=vperm[i];
       nreldep = nrelsup = 0;
     }
 
