@@ -732,8 +732,8 @@ struct poldata
 static GEN
 compute_data(GEN DATA, struct poldata PD, long d, GEN ff, GEN T,GEN p)
 {
-  long i,j,l,e,N;
-  GEN den,roo,pe,p1,p2,fk,fhk,MM,maxroot,pol,interp,bezoutC;
+  long i,j,l,e,N, lff = lg(ff);
+  GEN ffL,den,roo,pe,p1,p2,fk,fhk,MM,maxroot,pol,interp,bezoutC;    
 
   if (DEBUGLEVEL>1) { fprintferr("Entering compute_data()\n\n"); flusherr(); }
   pol = PD.pol; N = degpol(pol);
@@ -770,17 +770,15 @@ compute_data(GEN DATA, struct poldata PD, long d, GEN ff, GEN T,GEN p)
   }
   else
   {
-    GEN firstroot;    
-    long r = lg(ff);
+    GEN firstroot = cgetg(lff, t_VECSMALL);
     DATA = cgetg(15,t_VEC);
     DATA[2] = (long)p;
     DATA[4] = (long)T;
-    interp = cgetg(r, t_VEC);
-    firstroot = cgetg(r, t_VECSMALL);
+    interp = cgetg(lff, t_VEC);
     fk = cgetg(N+1,t_VEC);
-    for (l=1,j=1; j<r; j++)
+    for (l=1,j=1; j<lff; j++)
     { /* compute roots and fix ordering (Frobenius cycles) */
-      p1 = Fp_factor_irred((GEN)ff[j], p, (GEN)DATA[4]);
+      p1 = Fp_factor_irred((GEN)ff[j], p,T);
       interp[j] = (long)interpol(p1,T,p);
       firstroot[j] = l;
       for (i=1; i<lg(p1); i++,l++) fk[l] = p1[i];
@@ -799,7 +797,23 @@ compute_data(GEN DATA, struct poldata PD, long d, GEN ff, GEN T,GEN p)
   e = logint(shifti(vecmax(MM),20), p, &pe); /* overlift 2^20 [for d-1 test] */
   DATA[3] = (long)pe;
   DATA[6] = (long)roots_from_deg1(fk);
+
+#if 0
   fhk = hensel_lift_fact(pol,fk,(GEN)DATA[4],p,pe,e);
+#else
+  /* first lift in Zp to precision p^e */
+  ffL = hensel_lift_fact(pol,ff, NULL,p,pe,e);
+  fhk = NULL;
+  for (l=i=1; i<lff; i++)
+  { /* lift factorization of ff[i] in Qp[X] / T */
+    GEN L = (GEN)ffL[i];
+    long di = degpol(L);
+    p2 = cgetg(di+1, t_VEC);
+    for (j=1; j<=di; j++) p2[j] = fk[l++];
+    p1 = hensel_lift_fact(L,p2,T,p,pe,e);
+    fhk = fhk? concatsp(fhk, p1): p1;
+  }
+#endif
   DATA[5] = (long)roots_from_deg1(fhk);
 
   p1 = gmul(stoi(N), gsqrt(gpuigs(stoi(N-1),N-1),DEFAULTPREC));
@@ -832,7 +846,7 @@ static GEN
 subfields_of_given_degree(struct poldata PD,long d)
 {
   ulong av,av2;
-  long llist,i,nn;
+  long llist,i,nn,v;
   GEN listpotbl,ff,A,CSF,ESF,LSB,p,T,DATA,listdelta;
   GEN pol = PD.pol, dpol = PD.dis;
 
@@ -840,7 +854,8 @@ subfields_of_given_degree(struct poldata PD,long d)
   av = avma;
   p = choose_prime(pol,dpol,degpol(pol)/d,&ff,&listpotbl,&nn);
   if (!listpotbl) { avma=av; return cgetg(1,t_VEC); }
-  T = lift_intern(ffinit(p,nn, fetch_var()));
+  v = fetch_var(); name_var(v,"y");
+  T = lift_intern(ffinit(p,nn, v));
   DATA = NULL; LSB = cgetg(1,t_VEC); 
   i = 1; llist = lg(listpotbl);
 CHANGE: 
