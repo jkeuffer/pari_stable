@@ -801,7 +801,7 @@ wr_float(pariout_t *T, GEN x)
   {
     GEN arrondi = cgetr(3);
     ex = expo(x) - (long)((((double)BITS_IN_LONG)/pariK)*dec+2);
-    arrondi[1] = evalsigne(1)|evalexpo(ex);
+    arrondi[1] = (x[1] & ~EXPOBITS) | evalexpo(ex);
     arrondi[2] = x[2]; x = addrr(x,arrondi);
   }
   ex = expo(x); e = bit_accuracy(lg(x)); /* significant bits */
