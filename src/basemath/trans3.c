@@ -1777,16 +1777,17 @@ polylogp(long m, GEN x, long prec)
 GEN
 gpolylog(long m, GEN x, long prec)
 {
-  long i, lx, v, n;
-  pari_sp av=avma;
-  GEN a, y, p1, p2;
+  long i, lx, n, v;
+  pari_sp av = avma;
+  GEN a, y, p1;
 
-  if (m<=0)
+  if (m <= 0)
   {
-    p1=polx[0]; p2=gsub(gun,p1);
-    for (i=1; i<=(-m); i++)
-      p1=gmul(polx[0],gadd(gmul(p2,derivpol(p1)),gmulsg(i,p1)));
-    p1=gdiv(p1,gpowgs(p2,1-m));
+    GEN t = coefs_to_pol(2, negi(gun), gun); /* 1 - X */ 
+    p1 = polx[0];
+    for (i=2; i <= -m; i++)
+      p1 = gmul(polx[0], gadd(gmul(t,derivpol(p1)), gmulsg(i,p1)));
+    p1 = gdiv(p1, gpowgs(t,1-m));
     return gerepileupto(av, poleval(p1,x));
   }
 
@@ -1796,34 +1797,25 @@ gpolylog(long m, GEN x, long prec)
     case t_COMPLEX: case t_QUAD:
       return polylog(m,x,prec);
 
-    case t_INTMOD: case t_PADIC:
-      err(impl, "padic polylogarithm");
     case t_POLMOD:
-      p1=roots((GEN)x[1],prec); lx=lg(p1); p2=cgetg(lx,t_COL);
-      for (i=1; i<lx; i++) p2[i]=lpoleval((GEN)x[2],(GEN)p1[i]);
+      p1=roots((GEN)x[1],prec); lx=lg(p1);
+      for (i=1; i<lx; i++) p1[i]=lpoleval((GEN)x[2],(GEN)p1[i]);
       y=cgetg(lx,t_COL);
-      for (i=1; i<lx; i++) y[i]=(long)polylog(m,(GEN)p2[i],prec);
+      for (i=1; i<lx; i++) y[i]=(long)polylog(m,(GEN)p1[i],prec);
       return gerepileupto(av, y);
 
-    case t_POL: case t_RFRAC: case t_RFRACN:
-      p1=tayl(x,gvar(x),precdl);
-      return gerepileupto(av, gpolylog(m,p1,prec));
-
+    case t_INTMOD: case t_PADIC: err(impl, "padic polylogarithm");
     default:
       av = avma; if (!(y = _toser(x))) break;
       if (!m) { avma = av; return gneg(ghalf); }
-      if (m==1)
-      {
-	p1 = glog(gsub(gun,y),prec);
-	return gerepileupto(av, gneg(p1));
-      }
+      if (m==1) return gerepileupto(av, gneg( glog(gsub(gun,y),prec) ));
       if (gcmp0(y)) return gcopy(y);
-      if (valp(y)<=0) err(impl,"polylog around a!=0");
-      v = varn(y);
-      n = (lg(y)-2)/valp(y);
-      a = ggrando(polx[v],lg(y)-2);
+      v = valp(y);
+      if (v <= 0) err(impl,"polylog around a!=0");
+      n = (lg(y)-3 + v) / v;
+      a = zeroser(varn(y), lg(y)-2);
       for (i=n; i>=1; i--)
-	a = gmul(y, gadd(gpowgs(stoi(i),-m), a));
+	a = gmul(y, gadd(a, gpowgs(stoi(i),-m)));
       return gerepileupto(av, a);
 
     case t_VEC: case t_COL: case t_MAT:
