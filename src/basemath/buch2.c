@@ -1164,7 +1164,7 @@ isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag)
   if (gen)
   {
     z = cgetg(3,t_VEC);
-    z[2] = lgetg(1, t_MAT);
+    z[2] = (flag & nf_GENMAT)? lgetg(1, t_MAT): lmodulcp(gun,(GEN)nf[1]);
   }
   id = C;
   for (i=1; i<l; i++) /* compute prod P[i]^e[i] */
@@ -1192,10 +1192,7 @@ isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag)
         if (flag & nf_GENMAT)
           y[2] = (gcmp1(u)&&lg(id[2])>1)? id[2]: (long)arch_mul((GEN)id[2], u);
         else
-        {
-          t = basistoalg(nf, famat_to_nf(nf, (GEN)id[2]));
-          y[2] = (long)algtobasis(nf, gmul(t, u));
-        }
+          y[2] = (long)algtobasis(nf, gmul((GEN)id[2], u));
         y = gcopy(y);
       }
       return gerepileupto(av,y);
