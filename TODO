@@ -30,11 +30,6 @@ Unless specified otherwise, examples assume 32bit machine and default precision
 
 4  qfbclassno(x < 0) may give a wrong result [e.g x = -2878367]
 
-4  t_SER computations much too slow when number of terms increase, even
-   when applying a trivial formula, e.g cos(x) at \ps 10000
-
-4  besselk, besseljh not accurate for small x: besselk(1, 1.e-100) --> 2E-48 (!)
-
 3  many functions assume MAXVARN is a free variable, yielding bogus
    results if the input involve it (only affect library programming).
 
@@ -62,7 +57,7 @@ Unless specified otherwise, examples assume 32bit machine and default precision
 4  changing primelimit from within forprime loop yields unpredictable results
 
 3  after allocatemem() / default(parisize, ...), the rest of the command is
-discarded (ends by a longjmp).
+   discarded (ends by a longjmp).
 
 2  under GP after an error, memory is only recovered from "entire variables".
    Individual components of lists/vectors/matrices are left alone if the
@@ -102,9 +97,6 @@ Kernel:
 
 4  inline level0 routines should operate on _limbs_, not on words.
 
-3  inline more assembler kernels, alpha in particular (ix86 and sparc are
-   already inline).
-
 3  FFT for basic types and polynomials (say in A[X], for A = Z, F_q, ...)
 
 2  add support for different multiprecision kernels (a la LiDIA)
@@ -119,7 +111,7 @@ Misc:
 
 4  decent finite field package (remove all the nfxxxmodpr functions)
 
-4  rnfkummer (doesn't work)
+4  rnfkummer (very slow)
 
 4  nfsubfields [use known subfields to discard blocs right away] (current uses
    far too much memory)
@@ -133,7 +125,7 @@ Misc:
    in large intervals, sieve out multiple of small primes there, then use
    isprime() on the rest]
 
-3  zetak is very inefficient and unable to handle most fields of degree > 6
+3  zetak is very inefficient and unable to handle most fields of degree > 8
 
 3  have quadclassunit return bnf structure
 
@@ -215,13 +207,9 @@ Misc:
 3  a script to translate "legacy" GP code into something using GP2 function
    names
 
-3  write a gp-to-C compiler (adding #defines in anal.c + modifying the
-   table of functions in init.c, etc, to include the explicit function name).
-   Should be easy: the code is mostly there.
-
 3  write an analog of the 'echo' default which would print code as it is
    executed, not as it is read
 
-2  write a GP scripts debugger (cf above)
+2  write a GP scripts debugger
 
-2  write a GP scripts profiler (cf above)
+2  write a GP scripts profiler
