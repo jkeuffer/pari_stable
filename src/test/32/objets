@@ -83,9 +83,6 @@ x + 1
 37.000000000000000000000000000000000000
 ? real(5-7*I)
 5
-? arat=(x^3+x+1)/x^3;type(arat,14)
-  ***   expected character: ')' instead of: ...t=(x^3+x+1)/x^3;type(arat,14)
-                                                                        ^----
 ? shift(1,50)
 1125899906842624
 ? shift([3,4,-11,-12],-2)
@@ -127,5 +124,5 @@ O(x^12)
 ? getheap
 [63, 840]
 ? print("Total time spent: ",gettime);
-Total time spent: 20
+Total time spent: 0
 ? \q

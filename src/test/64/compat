@@ -1,7 +1,7 @@
    echo = 1 (on)
 ? default(compatible,3)
    compatible = 3 (use old functions, ignore case)
-  ***   Warning: user functions re-initialized.
+  *** default: Warning: user functions re-initialized.
 ? gettime;+3
 3
 ? -5
@@ -356,7 +356,7 @@ mod(x^3 + 5, x^5 - 5*x^3 + 5*x + 25)
 [1]
 
 ? setrand(1);buchgenfu(x^2-x-100000)
-  ***   Warning: insufficient precision for fundamental units, not given.
+  *** buchgenfu: Warning: insufficient precision for fundamental units, not given.
 
 [x^2 - x - 100000]
 
@@ -835,7 +835,7 @@ x^5 + 3021*x^4 - 786303*x^3 - 6826636057*x^2 - 546603588746*x + 385389051407
 [x^8 - x^7 + x^5 - x^4 + x^3 - x + 1 1]
 
 ? factpol2(x^15-1,0)
-  ***   this function has been suppressed.
+  *** factpol2: this function has been suppressed.
 ? fibo(100)
 354224848179261915075
 ? floor(-1/2)
@@ -943,7 +943,7 @@ mod(x^5, x^6 + 108)
  168, 420, 360, 1785, 658, 2542; 84, 140, 360, 315, 1582, 588, 2266; 70, 120
 , 315, 280, 1421, 532, 2046; 60, 105, 280, 252, 1290, 486, 1866]]
 ? hermitehavas(amat)
-  ***   this function has been suppressed.
+  *** hermitehavas: this function has been suppressed.
 ? hermitemod(amat,detint(amat))
 
 [420 0 0 0 210 168 175]
@@ -1500,7 +1500,7 @@ x
 [0 1 -1]
 
 ? kerint2(matrix(4,6,x,y,2520/(x+y)))
-  ***   this function has been suppressed.
+  *** kerint2: this function has been suppressed.
 ? f(u)=u+1;
 ? print(f(5));kill(f);
 6
@@ -1586,7 +1586,7 @@ x
 [-60 -105 280 252 -486 471 1290]
 
 ? lll1(m)
-  ***   this function has been suppressed.
+  *** lll1: this function has been suppressed.
 ? lllgram(m)
 
 [1 1 27 -27 69 0 141]
@@ -1604,7 +1604,7 @@ x
 [0 1 3 -17 3 -7 3]
 
 ? lllgram1(m)
-  ***   this function has been suppressed.
+  *** lllgram1: this function has been suppressed.
 ? lllgramint(m)
 
 [1 1 27 -27 69 0 141]
@@ -1676,7 +1676,7 @@ x
 ; 1, 0, 0, 0, 0, 0, 0; 0, 1, 0, 0, 0, 0, 0; 0, 0, 1, 0, 0, 0, 0; 0, 0, 0, 1,
  0, 0, 0; 0, 0, 0, 0, 1, 0, 0; 0, 0, 0, 0, 0, 1, 0; 0, 0, 0, 0, 0, 0, 1]]
 ? lllrat(m)
-  ***   this function has been suppressed.
+  *** lllrat: this function has been suppressed.
 ? \precision=96
    realprecision = 96 significant digits
 ? ln(2)
@@ -2443,8 +2443,6 @@ q^101)
 16
 ? setunion(aset,bset)
 ["-2", "-5", "1", "2", "3", "5", "7"]
-? arat=(x^3+x+1)/x^3;settype(arat,14)
-(x^3 + x + 1)/x^3
 ? shift(1,50)
 1125899906842624
 ? shift([3,4,-11,-12],-2)
@@ -2696,7 +2694,7 @@ d(391, 3120), mod(2081, 3120)]]
 ? getstack()
 0
 ? getheap()
-[621, 108607]
+[619, 108529]
 ? print("Total time spent: ",gettime());
-Total time spent: 1916
+Total time spent: 1850
 ? \q
