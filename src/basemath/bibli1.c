@@ -2878,14 +2878,14 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
 
       case min_VECSMALL:
 	{
-	  ulong norm = (ulong)rint(p);
+	  ulong norm = (ulong)(p + 0.5);
 	  res[norm]++;
 	}
 	break;
 
       case min_VECSMALL2:
 	{
-	  ulong norm = (ulong)rint(p);
+	  ulong norm = (ulong)(p + 0.5);
 	  if ((norm&1) == 0) res[norm>>1]++;
 	}
 	break;
