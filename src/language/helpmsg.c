@@ -248,7 +248,7 @@ char *helpmessages_basic[]={
   "modreverse(x): reverse polymod of the polymod x, if it exists",
   "moebius(x): Moebius function of x",
   "newtonpoly(x,p): Newton polygon of polynomial x with respect to the prime p",
-  "next(): interrupt execution of current instruction sequence, and start another iteration of innermost enclosing loop",
+  "next({n=1}): interrupt execution of current instruction sequence, and start another iteration from the n-th innermost enclosing loops",
   "nextprime(x): smallest prime number>=x",
   "nfalgtobasis(nf,x): transforms the algebraic number x into a column vector on the integral basis nf.zk",
   "nfbasis(x,{flag=0},{p}): integral basis of the field Q[a], where a is a root of the polynomial x, using the round 4 algorithm. Second and third args are optional. Binary digits of flag mean 1: assume that no square of a prime>primelimit divides the discriminant of x, 2: use round 2 algorithm instead. If present, p provides the matrix of a partial factorization of the discriminant of x, useful if one wants only an order maximal at certain primes only",
