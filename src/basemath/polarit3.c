@@ -4657,8 +4657,6 @@ QX_invmod(GEN A0, GEN B0)
   return gerepileupto(av, gdiv(U,D));
 }
 
-extern GEN FpX_rand(long d1, long v, GEN p);
-
 /* irreducible (unitary) polynomial of degree n over Fp */
 GEN
 ffinit_rand(GEN p,long n)
