@@ -1870,7 +1870,7 @@ sori(GEN g, pariout_t *T)
   if (!is_graphicvec_t(tg))
   {
     if (is_frac_t(tg) && gsigne(g) < 0) pariputc('-');
-    close_paren = 1;
+    pariputc('('); close_paren = 1;
   }
   switch(tg)
   {
