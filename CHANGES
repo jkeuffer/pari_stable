@@ -59,6 +59,7 @@ GH  8- thue(thueinit(x^3 - 2), 2) --> SEGV
 BA 13- polrootsmod(,,1) could return a line vector instead of a column.
    14- issquare(Pol(1)) --> SEGV
 BA 15- polsubcyclo() used too much memory for large conductors.
+   16- typo in quadtoc() --> quadgen(odd t_INT)*1. was wrong
 
   Added
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu

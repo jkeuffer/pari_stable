@@ -1568,8 +1568,8 @@ quadtoc(GEN x, long prec)
   if (prec < 3) return realzero_bit( gexpo(x) );
 
   av = avma; Q = (GEN) x[1];
-  /* should be sqri(Q[3]), but is 0,1 ! see quaddisc */
-  z = itor(subii((GEN)Q[3], shifti((GEN)Q[2],2)), prec);
+  /* should be sqri(Q[3]), but is 0,1 ! see quadpoly */
+  z = itor(subsi(signe((GEN)Q[3])? 1: 0, shifti((GEN)Q[2],2)), prec);
   z = gsub(gsqrt(z,prec), (GEN)Q[3]);
   if (signe((GEN)Q[2]) < 0) /* Q[2] = -D/4 or (1-D)/4 */
     setexpo(z, expo(z)-1);
