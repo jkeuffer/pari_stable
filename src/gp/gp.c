@@ -36,6 +36,7 @@ ENDEXTERN
 #endif
 
 char*  _analyseur(void);
+void   _set_analyseur(char *s);
 void   err_recover(long numerr);
 void   free_graph(void);
 void   gp_expand_path(char *v);
@@ -339,6 +340,20 @@ jump_to_buffer()
     if (b->flenv) break;
     pop_buffer();
   }
+  if (!b) longjmp(environnement, 0);
+  longjmp(b->env, 0);
+}
+
+static void
+jump_to_given_buffer(Buffer *buf)
+{
+  Buffer *b;
+  while ( (b = current_buffer) )
+  {
+    if (b == buf) break;
+    pop_buffer();
+  }
+  if (!b->env) { b = NULL; err(warner,"no environmnent tied to buffer"); }
   if (!b) longjmp(environnement, 0);
   longjmp(b->env, 0);
 }
@@ -2328,23 +2343,31 @@ void errcontext(char *msg, char *s, char *entry);
 int
 break_loop(long numerr)
 {
-  Buffer *oldb = current_buffer, *b = new_buffer();
-  char *s, *t, *msg;
-  int go_on = 0;
-  push_stack(&bufstack, (void*)b);
+  static Buffer *b = NULL;
+  VOLATILE int go_on = 0;
+  char *s, *t, *msg, *old = NULL;
+
+  if (b) jump_to_given_buffer(b);
+  
+  b = new_buffer();
+  if (setjmp(b->env))
+  {
+    msg = "back to break loop";
+    s = t = NULL;
+  }
+  else
+  {
+    msg = "Starting break loop (type 'break' to go back to GP)";
+    old = s = _analyseur();
+    t = current_buffer->buf;
+    /* something fishy, probably a ^C, or we overran analyseur */
+    if (!s || !s[-1] || s < t || s >= t + current_buffer->len) s = NULL;
+    b->flenv = 1;
+    push_stack(&bufstack, (void*)b);
+  }
 
   term_color(c_ERR);
-  fprintferr("\n");
-
-  msg = "Starting break loop (type 'break' to go back to GP)";
-  /* sanity check */
-  s = _analyseur();
-  t = oldb->buf;
-  if (!s || !s[-1] || s < t || s >= t + oldb->len)
-   /* something fishy, probably a ^C, or we overran analyseur */
-    print_prefixed_text(msg, NULL, NULL);
-  else
-    errcontext(msg, s, t);
+  fprintferr("\n"); errcontext(msg, s, t);
   term_color(c_NONE);
   if (numerr == siginter) pariputs("['' or 'next' will continue]\n");
   infile = stdin;
@@ -2373,7 +2396,8 @@ break_loop(long numerr)
     }
     if (numerr == siginter && flag == 2) { go_on = 1; break; }
   }
-  pop_buffer(); return go_on;
+  if (old && !s) _set_analyseur(old);
+  pop_buffer(); b = NULL; return go_on;
 }
 
 int
