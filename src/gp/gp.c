@@ -2493,7 +2493,7 @@ static int
 is_interactive(void)
 {
   ulong f = GP_DATA->flags;
-#if defined(UNIX) || defined(__EMX__)
+#if defined(UNIX) || defined(__EMX__) || defined(_WIN32)
   return (infile == stdin && !(f & TEXMACS)
                           && (f & EMACS || isatty(fileno(stdin))));
 #else
