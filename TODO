@@ -128,10 +128,6 @@ Misc:
    in large intervals, sieve out multiple of small primes there, then use
    isprime() on the rest]
 
-3  \ and % (euclidean division) could accept more arguments (e.g t_REAL)
-   x \ y := floor(x/y) if y > 0 and floor(x/y) + 1 if y < 0
-   x % y := x - y(x\y) [ hence 0 <= x%y < |y| ]
-
 3  zetak is very inefficient and unable to handle most fields of degree > 6
 
 3  have quadclassunit return bnf structure

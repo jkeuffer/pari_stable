@@ -45,6 +45,8 @@ Done for version 2.2.2 (released ??/??/2001):
    10- recent pdftex failed to compile users.tex  (\pdfannotlink undefined)
    11- !nf.sign[1] was parsed as (!nf.sign)[1]
    12- matrix(0,1) --> "identical index variables in matrix" [from 2.2.1 F48]
+   13- bnfinit could miss some relations in the "small norm" phase
+   14- x % y incorrect when y < 0 inexact (2 % -3. --> -1.)
 
   Changes
     1- allow compressing *.dvi files for the online help system
@@ -60,11 +62,14 @@ Done for version 2.2.2 (released ??/??/2001):
     9- specified precisely lex() [see manual]. Now:
        lex([0,0],[0]) = 1 (was -1), lex(0,[0]) = -1 (was 0)
    10- allow factorback([x, e]) for prod x[i]^e[i]
+   11- don't store empty lines in history [cf 2.2.1 F57]
+   12- extend x \ y, x \/ y and divrem(x,y)
 
   Added
 BA  1- New function 'vectorsmall'.
     2- allow setting variable in divrem
     3- GP operator #l for length(l)
+    4- a warning in zsign ("increase precision?") when dubious result
  
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.1 (released 18/10/2001):
