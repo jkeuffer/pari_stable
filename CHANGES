@@ -52,6 +52,8 @@ BA  1- gp2c description of == operator was broken.
        in ellglobalred]. Replaced it by a clean wrapper.
 GH  8- thue(thueinit(x^3 - 2), 2) --> SEGV
     9- reorder([1]) --> SEGV (bad input, but sanity check was wrong)
+   10- rnfconductor(,1) [ = rnf_is_abelian() ] didn't accept polynomials with
+       POLMOD coeffs + used a wrong algorithm [ not modular + wrong result ]
 
   Added
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu

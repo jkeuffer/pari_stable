@@ -1479,51 +1479,48 @@ rnfnormgroup(GEN bnr, GEN polrel)
 }
 
 static GEN
-liftpol(GEN pol, GEN q, long v)
+liftpol(GEN pol, GEN q)
 {
   long i, l = lg(pol);
-  GEN y = cgetg(l, t_POL);
-  y[1] = pol[1];
+  GEN y = cgetg(l, t_POL); y[1] = pol[1];
   for (i = 2; i < l; i++)
-  {
-    y[i] = (long)lift_intern(poleval((GEN)pol[i], q));
-    if (typ(y[i]) == t_POL) setvarn(y[i], v);
-  }
+    y[i] = (long)lift_intern(poleval(lift_intern((GEN)pol[i]), q));
   return y;
 }
 
-/* FIXME: check should be done mod p [ p \nmid Norm(disc(pol)) ]*/
 static int
 rnf_is_abelian(GEN nf, GEN pol)
 {
-  GEN ro, rores, nfL, L, eq, mod, d;
+  GEN modpr, pr, T, pp, ro, nfL, eq, C, z, a, sig;
   long i, j, l, v = varn(nf[1]);
+  ulong p, k, ka;
 
   eq = rnfequation2(nf,pol);
-  L = (GEN)eq[1];
-  mod = dummycopy(L); setvarn(mod, v);
-  nfL = _initalg(mod, nf_PARTIALFACT, DEFAULTPREC);
-  ro = nfroots(nfL, liftpol(pol, (GEN)eq[2], v));
-  l = lg(ro)-1;
-  if (l != degpol(pol)) return 0;
-  if (isprime(stoi(l))) return 1;
-  ro = Q_remove_denom(ro, &d);
-  if (!d) rores = ro;
-  else
-  {
-    rores = cgetg(l+1, t_VEC);
-    for (i=1; i<=l; i++)
-      rores[i] = (long)rescale_pol((GEN)ro[i], d);
+  C =   dummycopy((GEN)eq[1]); setvarn(C, v);
+  a = lift_intern((GEN)eq[2]); setvarn(a, v); /* root of nf[1] */
+  nfL = _initalg(C, nf_PARTIALFACT, DEFAULTPREC);
+  z = nfrootsall_and_pr(nfL, liftpol(pol, a));
+  if (!z) return 0;
+  ro = (GEN)z[1]; l = lg(ro)-1;
+  if (l < 6 || isprime(utoipos(l))) return 1;
+
+  pr = (GEN)z[2];
+  modpr = nf_to_ff_init(nfL, &pr, &T, &pp);
+  p = itou(pp);
+  k = umodiu((GEN)eq[3], p);
+  ka = (k * itou(nf_to_ff(nfL, a, modpr))) % p;
+  sig= cgetg(l+1, t_VECSMALL);
+  /* image of c = ro[1] + k a [distinguished root of C] by the l automorphisms
+   * sig[i]: ro[1] -> ro[i] */
+  for (i = 1; i <= l; i++)
+    sig[i] = Fl_add(ka, itou(nf_to_ff(nfL, (GEN)ro[i], modpr)), p);
+  ro = Q_primpart(ro);
+  for (i=2; i<=l; i++) { /* start at 2, since sig[1] = identity */
+    ro[i] = (long)ZX_to_Flx((GEN)ro[i], p);
+    for (j=2; j<i; j++)
+      if (Flx_eval((GEN)ro[j], sig[i], p)
+       != Flx_eval((GEN)ro[i], sig[j], p)) return 0;
   }
-  /* assume roots are sorted by increasing degree */
-  for (i=1; i<l; i++)
-    for (j=1; j<i; j++)
-    {
-      GEN a = RgX_RgXQ_compo((GEN)rores[j], (GEN)ro[i], mod);
-      GEN b = RgX_RgXQ_compo((GEN)rores[i], (GEN)ro[j], mod);
-      if (d) a = gmul(a, gpowgs(d, degpol(ro[i]) - degpol(ro[j])));
-      if (!gequal(a, b)) return 0;
-    }
   return 1;
 }
 

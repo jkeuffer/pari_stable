@@ -1331,69 +1331,31 @@ nf_DDF_roots(GEN pol, GEN polred, GEN nfpol, GEN lt, GEN init_fa, long nbf,
   return z;
 }
 
-/* return the factorization of the square-free polynomial x.
-   The coeff of x are in Z_nf and its leading term is a rational integer.
-   deg(x) > 1, deg(nfpol) > 1
-   If fl = 1, return only the roots of x in nf
-   If fl = 2, as fl=1 if pol splits, [] otherwise */
-static GEN
-nfsqff(GEN nf, GEN pol, long fl)
+static long
+nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
+              GEN *lt, GEN *Fa, GEN *pr, GEN *Tp)
 {
-  long n, nbf, ct, maxf, dpol = degpol(pol);
-  ulong pp;
-  pari_sp av = avma;
-  GEN pr, C0, dk, bad, polbase, init_fa = NULL;
-  GEN N2, rep, polmod, polred, lt, nfpol;
+  GEN nfpol = (GEN)nf[1], dk, bad;
+  long maxf, n = degpol(nfpol), dpol = degpol(polbase), nbf = 0;
   byteptr pt = diffptr;
-  nfcmbf_t T;
-  nflift_t L;
-  pari_timer ti, ti_tot;
+  ulong pp = 0;
 
-  if (DEBUGLEVEL>2) { TIMERstart(&ti); TIMERstart(&ti_tot); }
-  nfpol = (GEN)nf[1]; n = degpol(nfpol);
-  polbase = unifpol(nf, pol, t_COL);
-  if (typ(polbase) != t_POL) err(typeer, "nfsqff");
-  polmod  = unifpol(nf, pol, t_POLMOD);
-  /* heuristic */
-  if (dpol*3 < n) 
-  {
-    GEN z, t;
-    long i;
-    if (DEBUGLEVEL>2) fprintferr("Using Trager's method\n");
-    z = (GEN)polfnf(polmod, nfpol)[1];
-    if (fl) {
-      long l = lg(z);
-      for (i = 1; i < l; i++)
-      {
-        t = (GEN)z[i]; if (degpol(t) > 1) break;
-        z[i] = lneg(gdiv((GEN)t[2], (GEN)t[3]));
-      }
-      if (fl == 2 && i != l) { avma = av; return cgetg(1,t_VEC); }
-      setlg(z, i);
-    }
-    return gerepilecopy(av, z);
-  }
-
-  pol = simplify_i(lift(polmod));
-  lt  = leading_term(polbase); /* t_INT */
-  if (gcmp1(lt)) lt = NULL;
-
+  *lt  = leading_term(polbase); /* t_INT */
+  if (gcmp1(*lt)) *lt = NULL;
   dk = absi((GEN)nf[3]);
-  bad = mulii(dk,(GEN)nf[4]); if (lt) bad = mulii(bad, lt);
-
-  polred = pr = NULL; /* gcc -Wall */
-  nbf = 0; pp = 0;
-  L.Tp = NULL;
+  bad = mulii(dk,(GEN)nf[4]); if (*lt) bad = mulii(bad, *lt);
 
   /* FIXME: slow factorization of large polynomials over large Fq */
   maxf = 1;
-  if (dpol > 100) /* tough */
-  {
-    if (n >= 20) maxf = 4;
-  }
-  else
-  {
-    if (n >= 15) maxf = 4;
+  if (ct > 1) {
+    if (dpol > 100) /* tough */
+    {
+      if (n >= 20) maxf = 4;
+    }
+    else
+    {
+      if (n >= 15) maxf = 4;
+    }
   }
   
   for (ct = 5;;)
@@ -1446,31 +1408,85 @@ nfsqff(GEN nf, GEN pol, long fl)
       anbf = fl? FqX_split_deg1(&fa, red, q, aT, ap)
                : FqX_split_by_degree(&fa, red, q, aT, ap);
     }
-    if (fl == 2 && anbf < dpol) return cgetg(1,t_VEC);
+    if (fl == 2 && anbf < dpol) return anbf;
     if (anbf <= 1)
     {
-      if (!fl) /* irreducible */
-        return gerepilecopy(av, mkvec(QXQX_normalize(polmod, nfpol)));
-      if (!anbf) return cgetg(1,t_VEC); /* no root */
+      if (!fl) return anbf; /* irreducible */
+      if (!anbf) return 0; /* no root */
     }
 
     if (!nbf || anbf < nbf
-             || (anbf == nbf && cmpii((GEN)apr[4], (GEN)pr[4]) > 0))
+             || (anbf == nbf && cmpii((GEN)apr[4], (GEN)(*pr)[4]) > 0))
     {
-      nbf = anbf; pr = apr;
-      L.Tp = aT; init_fa = fa;
+      nbf = anbf;
+      *pr = apr;
+      *Tp = aT;
+      *Fa = fa;
     }
     else avma = av2;
     if (DEBUGLEVEL>3)
       fprintferr("%3ld %s at prime\n  %Z\nTime: %ld\n",
                  anbf, fl?"roots": "factors", apr, TIMER(&ti_pr));
-    if (--ct <= 0) break;
+    if (--ct <= 0) return nbf;
   }
+}
+
+/* return the factorization of the square-free polynomial x.
+   The coeff of x are in Z_nf and its leading term is a rational integer.
+   deg(x) > 1, deg(nfpol) > 1
+   If fl = 1, return only the roots of x in nf
+   If fl = 2, as fl=1 if pol splits, [] otherwise */
+static GEN
+nfsqff(GEN nf, GEN pol, long fl)
+{
+  long n, nbf, dpol = degpol(pol);
+  pari_sp av = avma;
+  GEN pr, C0, polbase, init_fa = NULL;
+  GEN N2, rep, polmod, polred, lt, nfpol;
+  nfcmbf_t T;
+  nflift_t L;
+  pari_timer ti, ti_tot;
+
+  if (DEBUGLEVEL>2) { TIMERstart(&ti); TIMERstart(&ti_tot); }
+  nfpol = (GEN)nf[1]; n = degpol(nfpol);
+  polbase = unifpol(nf, pol, t_COL);
+  if (typ(polbase) != t_POL) err(typeer, "nfsqff");
+  polmod  = unifpol(nf, pol, t_POLMOD);
+  /* heuristic */
+  if (dpol*3 < n) 
+  {
+    GEN z, t;
+    long i;
+    if (DEBUGLEVEL>2) fprintferr("Using Trager's method\n");
+    z = (GEN)polfnf(polmod, nfpol)[1];
+    if (fl) {
+      long l = lg(z);
+      for (i = 1; i < l; i++)
+      {
+        t = (GEN)z[i]; if (degpol(t) > 1) break;
+        z[i] = lneg(gdiv((GEN)t[2], (GEN)t[3]));
+      }
+      setlg(z, i);
+      if (fl == 2 && i != l) { avma = av; return cgetg(1,t_VEC); }
+    }
+    return gerepilecopy(av, z);
+  }
+
+  nbf = nf_pick_prime(5, nf, polbase, fl, &lt, &init_fa, &pr, &L.Tp);
+  if (fl == 2 && nbf < dpol) return cgetg(1,t_VEC);
+  if (nbf <= 1)
+  {
+    if (!fl) /* irreducible */
+      return gerepilecopy(av, mkvec(QXQX_normalize(polmod, nfpol)));
+    if (!nbf) return cgetg(1,t_VEC); /* no root */
+  }
+
   if (DEBUGLEVEL>2) {
     msgTIMER(&ti, "choice of a prime ideal");
     fprintferr("Prime ideal chosen: %Z\n", pr);
   }
 
+  pol = simplify_i(lift(polmod));
   L.tozk = (GEN)nf[8];
   L.topow= Q_remove_denom((GEN)nf[7], &L.topowden);
   T.ZC = L2_bound(nf, L.tozk, &(T.dn));
@@ -1496,8 +1512,11 @@ nfsqff(GEN nf, GEN pol, long fl)
   if (DEBUGLEVEL>2) TIMERstart(&ti);
   polred = ZqX_normalize(polbase, lt, &L); /* monic */
 
-  if (fl) return gerepilecopy(av,
-                   nf_DDF_roots(pol, polred, nfpol, lt, init_fa, nbf, fl, &L));
+  if (fl) {
+    GEN z = nf_DDF_roots(pol, polred, nfpol, lt, init_fa, nbf, fl, &L);
+    if (lg(z) == 1) { avma = av; return cgetg(1, t_VEC); }
+    return gerepilecopy(av,z);
+  }
 
   {
     pari_sp av2 = avma;
@@ -1524,6 +1543,16 @@ nfsqff(GEN nf, GEN pol, long fl)
   if (DEBUGLEVEL>2)
     fprintferr("Total Time: %ld\n===========\n", TIMER(&ti_tot));
   return gerepileupto(av, rep);
+}
+
+GEN
+nfrootsall_and_pr(GEN nf, GEN pol)
+{
+  GEN J1,J2, pr, T, z = nfsqff(checknf(nf), pol, 2);
+  if (lg(z) == 1) return NULL;
+  (void)nf_pick_prime(1, nf, unifpol(nf, pol, t_COL), 2,
+                      &J1, &J2, &pr, &T);
+  return mkvec2(z, pr);
 }
 
 /* return the characteristic polynomial of alpha over nf, where alpha
