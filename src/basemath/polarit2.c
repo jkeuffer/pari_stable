@@ -1092,7 +1092,11 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
     if (i > r) continue;
 
     n = r; r = i;
-    if (r == 1) { list[1] = (long)P; setlg(list,2); return list; }
+    if (r <= 1)
+    {
+      if (r == 0) err(bugparier,"LLL_cmbf [no factor]");
+      list[1] = (long)P; setlg(list,2); return list;
+    }
 
     setlg(u, r+1);
     for (i=1; i<=r; i++) setlg(u[i], n+1);
