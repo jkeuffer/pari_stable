@@ -2198,7 +2198,7 @@ factmod9(GEN f, GEN pp, GEN a)
     GEN z= Fp_factor_rel0(lift(lift(f)), pp, lift(a));
     GEN t=(GEN)z[1],ex=(GEN)z[2];
     unfp = gmodulsg(1,pp);
-    unfq = gmodulcp(gmul(unfp, polun[va]), a);
+    unfq = gmodulcp(gmul(unfp, polun[va]), gmul(unfp,a));
     nbfact=lg(t);
     tetpil=avma;
     y=cgetg(3,t_MAT);
