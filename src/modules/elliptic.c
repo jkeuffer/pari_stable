@@ -1037,6 +1037,10 @@ static GEN
 reduce_z(GEN z, long prec, SL2_red *T)
 {
   GEN Z = gdiv(z, T->W2);
+  long t = typ(z);
+
+  if (!is_scalar_t(t) || t == t_INTMOD || t == t_PADIC || t == t_POLMOD)
+    err(typeer,"reduction mod SL2 (reduce_z)");
   T->x = ground(gdiv(gimag(Z), gimag(T->tau)));
   Z = gsub(Z, gmul(T->x,T->tau));
   T->y = ground(greal(Z));
