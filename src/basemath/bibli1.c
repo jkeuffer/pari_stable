@@ -1673,7 +1673,7 @@ lindep2(GEN x, long bit)
     if (im) p1[lx+1] = lcvtoi(gshift((GEN)im[i],bit),&e);
   }
   p1 = (GEN)lllint_ip(p2,100)[1];
-  p1[0] = evaltyp(t_VEC) | evallg(lx);
+  p1[0] = evaltyp(t_COL) | evallg(lx);
   return gerepilecopy(av, p1);
 }
 
