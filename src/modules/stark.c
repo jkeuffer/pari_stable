@@ -31,7 +31,7 @@ extern GEN bnrGetSurj(GEN bnr1, GEN bnr2);
 typedef struct {
   GEN L0, L1, L11, L2; /* VECSMALL of p */
   GEN *L1ray, *L11ray; /* precomputed isprincipalray(pr), pr | p */
-  GEN *rayZ; /* recomputed isprincipalray(i), i < condZ */
+  GEN *rayZ; /* precomputed isprincipalray(i), i < condZ */
   long condZ; /* generates cond(bnr) \cap Z, assumed small */
 } LISTray;
 
@@ -2423,8 +2423,12 @@ computean(GEN dtcr, LISTray *R, long n, long deg)
   for (i=1; i<l; i++, avma = av2)
   {
     p = L[i];
-    ray = R->rayZ[p % condZ];
-    chi  = EvalChar(&C, ray);
+    if (condZ == 1) chi = C.val[0]; /* 1 */
+    else
+    {
+      ray = R->rayZ[p % condZ];
+      chi  = EvalChar(&C, ray);
+    }
     chi1 = chi;
     for (q=p;;)
     {
@@ -2459,7 +2463,10 @@ computean(GEN dtcr, LISTray *R, long n, long deg)
     GEN ray1, ray2, chi11, chi12, chi2;
 
     p = L[i]; ray1 = R->L11ray[i]; /* use pr1 pr2 = (p) */
-    ray2 = gsub(R->rayZ[p % condZ],  ray1);
+    if (condZ == 1)
+      ray2 = gneg(ray1);
+    else
+      ray2 = gsub(R->rayZ[p % condZ],  ray1);
     chi11 = EvalChar(&C, ray1);
     chi12 = EvalChar(&C, ray2);
 
