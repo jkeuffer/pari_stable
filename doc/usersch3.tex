@@ -1578,9 +1578,10 @@ factorization, all of whose exponents are equal to $1$.
 
 Finally, if $f$ is a vector of $2$ vectors of the same length the second of
 which being integral (dummy factorization), say of the form $f = [x,e]$,
-return the product of the $x[i]^{e[i]}$. In case separate \typ{VEC} $x$ and
-$e$ are originally available, it is more convenient (and legible) to use
-this trick than to build a legitimate factorization; compare
+return the product of the $x[i]^{e[i]}$. For example, in case separate
+\typ{VEC} $x$ and $e$ are originally available, it is more convenient (and
+legible) to use this trick than to build a legitimate factorization;
+compare
 \bprog
 factorback([x, e])
 factorback(concat(Mat(x~), e~))
