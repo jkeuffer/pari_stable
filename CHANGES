@@ -186,7 +186,8 @@ GTo 9- Implemented Cipolla's algorithm for sqrt(Mod(x, p))
    16- allow polredabs to use a partial factorisation of disc(nf) [as polred,
        but inconsistent values. Backward compatibility problem here...]
    17- routine ellminimalmodel()
-   18- systems/ directory (currently for OS/2 only)
+IZ 18- systems/ directory (currently for OS/2 only)
+IZ 19- [OS/2:] install() for OS/2 system  (using builtin dlopen)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.2 (released 10/01/2002):
