@@ -126,6 +126,7 @@ HC 12- gamma function for integral/rational arguments
    24- idealtwoelt was very slow when a small prime with many divisors
        divided the index (use approximation theorem)
    25- content(scalar) = abs(scalar) [when it makes sense]
+   26- changed the interface to ispseudoprime and isprime
 
   Added
     1- mplog2() function --> faster mplog()
