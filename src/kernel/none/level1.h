@@ -67,6 +67,7 @@ ulong  Fl_add(ulong a, ulong b, ulong p);
 long   Fl_center(ulong u, ulong p, ulong ps2);
 ulong  Fl_div(ulong a, ulong b, ulong p);
 ulong  Fl_mul(ulong a, ulong b, ulong p);
+ulong  Fl_neg(ulong x, ulong p);
 ulong  Fl_sqr(ulong a, ulong p);
 ulong  Fl_sub(ulong a, ulong b, ulong p);
 int    dvdii(GEN x, GEN y);
@@ -874,6 +875,8 @@ Fl_add(ulong a, ulong b, ulong p)
   ulong res = a + b;
   return (res >= p || res < a) ? res - p : res;
 }
+INLINE ulong
+Fl_neg(ulong x, ulong p) { return x ? p - x: 0; }
 
 INLINE ulong
 Fl_sub(ulong a, ulong b, ulong p)
