@@ -3114,6 +3114,7 @@ quadhilbertreal(GEN D, GEN flag, long prec)
   VOLATILE GEN pol, bnf, bnr, dataC, bnrh, nf, exp;
   void *catcherr = NULL;
 
+  (void)&prec; /* prevent longjmp clobbering it */
   if (DEBUGLEVEL) timer2();
 
   disable_dbg(0);

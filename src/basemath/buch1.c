@@ -45,7 +45,6 @@ static GEN  **powsubfactorbase,vperm,subfactorbase,Disc,sqrtD,isqrtD;
 
 GEN buchquad(GEN D, double c, double c2, long RELSUP0, long flag, long prec);
 extern GEN roots_to_pol_intern(GEN L, GEN a, long v, int plus);
-extern GEN roots_to_pol(GEN L, long v);
 extern GEN colreducemodmat(GEN x, GEN y, GEN *Q);
 
 GEN

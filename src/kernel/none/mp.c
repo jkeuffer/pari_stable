@@ -213,7 +213,7 @@ affir(GEN x, GEN y)
   if (!s)
   {
     y[1] = evalexpo(-bit_accuracy(ly));
-    y[2] = 0; return;
+    return;
   }
 
   lx=lgefint(x); sh=bfffo(x[2]);
@@ -244,7 +244,7 @@ affrr(GEN x, GEN y)
 {
   long lx,ly,i;
 
-  y[1] = x[1]; if (!signe(x)) { y[2]=0; return; }
+  y[1] = x[1]; if (!signe(x)) return;
 
   lx=lg(x); ly=lg(y);
   if (lx>=ly)
@@ -554,9 +554,9 @@ addrr(GEN x, GEN y)
     if (!sx)
     {
       if (e > 0) ex=ey;
-      z=cgetr(3); z[1]=evalexpo(ex); z[2]=0; return z;
+      return realzero_bit(ex);
     }
-    if (e > 0) { z=cgetr(3); z[1]=evalexpo(ey); z[2]=0; return z; }
+    if (e > 0) return realzero_bit(ey);
     lz = 3 + ((-e)>>TWOPOTBITS_IN_LONG);
     lx = lg(x); if (lz>lx) lz=lx;
     z = cgetr(lz); while(--lz) z[lz]=x[lz];
@@ -564,7 +564,7 @@ addrr(GEN x, GEN y)
   }
   if (!sx)
   {
-    if (e < 0) { z=cgetr(3); z[1]=evalexpo(ex); z[2]=0; return z; }
+    if (e < 0) return realzero_bit(ex);
     lz = 3 + (e>>TWOPOTBITS_IN_LONG);
     ly = lg(y); if (lz>ly) lz=ly;
     z = cgetr(lz); while (--lz) z[lz]=y[lz];
@@ -630,8 +630,7 @@ addrr(GEN x, GEN y)
     if (i==lx)
     {
       avma = (long)(z+lz);
-      e = evalexpo(ey - bit_accuracy(lx));
-      z=cgetr(3); z[1]=e; z[2]=0; return z;
+      return realzero_bit(ey - bit_accuracy(lx));
     }
     f2 = ((ulong)y[i] > (ulong)x[i]);
   }
@@ -784,9 +783,8 @@ mulsr(long x, GEN y)
   if (!s)
   {
     if (x<0) x = -x;
-    e = y[1] + (BITS_IN_LONG-1)-bfffo(x);
-    if (e & ~EXPOBITS) err(muler2);
-    z=cgetr(3); z[1]=e; z[2]=0; return z;
+    e = expo(y) + (BITS_IN_LONG-1)-bfffo(x);
+    return realzero_bit(e);
   }
   if (x<0) { s = -s; x = -x; }
   if (x==1) { z=rcopy(y); setsigne(z,s); return z; }
@@ -798,8 +796,7 @@ mulsr(long x, GEN y)
 
   sh = bfffo(hiremainder); m = BITS_IN_LONG-sh;
   if (sh) shift_left2(z,z, 2,lx-1, garde,sh,m);
-  e = evalexpo(m+e);
-  z[1] = evalsigne(s) | e; return z;
+  z[1] = evalsigne(s) | evalexpo(m+e); return z;
 }
 
 GEN
@@ -812,12 +809,12 @@ mulrr(GEN x, GEN y)
   LOCAL_HIREMAINDER;
   LOCAL_OVERFLOW;
 
-  e = evalexpo(expo(x)+expo(y));
-  if (!sx || !sy) { z=cgetr(3); z[1]=e; z[2]=0; return z; }
+  e = expo(x)+expo(y);
+  if (!sx || !sy) return realzero_bit(e);
   if (sy<0) sx = -sx;
   lz=lg(x); ly=lg(y);
   if (lz>ly) { lz=ly; z=x; x=y; y=z; flag=1; } else flag = (lz!=ly);
-  z=cgetr(lz); z[1] = evalsigne(sx) | e;
+  z=cgetr(lz); z[1] = evalsigne(sx) | evalexpo(e);
   if (lz==3)
   {
     if (flag)
@@ -883,11 +880,7 @@ mulir(GEN x, GEN y)
   if (!sx) return gzero;
   if (!is_bigint(x)) return mulsr(itos(x),y);
   sy=signe(y); ey=expo(y);
-  if (!sy)
-  {
-    e = evalexpo(expi(x)+ey);
-    z=cgetr(3); z[1]=e; z[2]=0; return z;
-  }
+  if (!sy) return realzero_bit(expi(x)+ey);
 
   if (sy<0) sx = -sx;
   lz=lg(y); z=cgetr(lz);
@@ -1112,13 +1105,7 @@ divri(GEN x, GEN y)
   long av,lx,s=signe(y);
 
   if (!s) err(diver8);
-  if (!signe(x))
-  {
-    const long ex = evalexpo(expo(x) - expi(y));
-
-    if (ex<0) err(diver12);
-    z=cgetr(3); z[1]=ex; z[2]=0; return z;
-  }
+  if (!signe(x)) return realzero_bit(expo(x) - expi(y));
   if (!is_bigint(y)) return divrs(x, s>0? y[2]: -y[2]);
 
   lx=lg(x); z=cgetr(lx);
@@ -1206,12 +1193,7 @@ divrs(GEN x, long y)
   LOCAL_HIREMAINDER;
 
   if (!y) err(diver6);
-  if (!s)
-  {
-    z=cgetr(3); z[1] = x[1] - (BITS_IN_LONG-1) + bfffo(y);
-    if (z[1]<0) err(diver7);
-    z[2]=0; return z;
-  }
+  if (!s) return realzero_bit(expo(x) - (BITS_IN_LONG-1)+bfffo(y));
   if (y<0) { s = -s; y = -y; }
   if (y==1) { z=rcopy(x); setsigne(z,s); return z; }
 
@@ -1233,10 +1215,10 @@ divrr(GEN x, GEN y)
   GEN z,x1;
 
   if (!sy) err(diver9);
-  e = evalexpo(expo(x) - expo(y));
-  if (!sx) { z=cgetr(3); z[1]=e; z[2]=0; return z; }
+  e = expo(x) - expo(y);
+  if (!sx) return realzero_bit(e);
   if (sy<0) sx = -sx;
-  e = evalsigne(sx) | e;
+  e = evalsigne(sx) | evalexpo(e);
   lx=lg(x); ly=lg(y);
   if (ly==3)
   {
@@ -2216,9 +2198,8 @@ karamulrr1(GEN x, GEN y)
   /* ensure that lg(y) >= lg(x) */
   if (lx>ly) { lx=ly; z=x; x=y; y=z; flag=1; } else flag = (lx!=ly);
   if (lx < MULRR_LIMIT) return mulrr(x,y);
-  sx=signe(x); sy=signe(y);
-  e = evalexpo(expo(x)+expo(y));
-  if (!sx || !sy) { z=cgetr(3); z[2]=0; z[1]=e; return z; }
+  sx=signe(x); sy=signe(y); e = expo(x)+expo(y);
+  if (!sx || !sy) return realzero_bit(e);
   if (sy<0) sx = -sx;
   ly=lx+flag; z=cgetr(lx);
   lz2 = (lx>>1); lz3 = lx-lz2;
@@ -2246,7 +2227,7 @@ karamulrr1(GEN x, GEN y)
     garde = (hi[lx+2] << 1);
     shift_left(z,hi,2,lx+1, garde, 1);
   }
-  z[1]=evalsigne(sx) | e;
+  z[1]=evalsigne(sx) | evalexpo(e);
   if (garde < 0)
   { /* round to nearest */
     i=lx+2; do z[--i]++; while (z[i]==0);
@@ -2264,8 +2245,8 @@ karamulrr2(GEN x, GEN y)
   if (lx>ly) { lx=ly; z=x; x=y; y=z; flag=1; } else flag = (lx!=ly);
   if (lx < MULRR2_LIMIT) return mulrr(x,y);
   ly=lx+flag; sx=signe(x); sy=signe(y);
-  e = evalexpo(expo(x)+expo(y));
-  if (!sx || !sy) { z=cgetr(3); z[2]=0; z[1]=e; return z; }
+  e = expo(x)+expo(y);
+  if (!sx || !sy) return realzero_bit(e);
   if (sy<0) sx = -sx;
   z=cgetr(lx);
   hi=quickmulii(y+2,x+2,ly-2,lx-2);
@@ -2279,7 +2260,7 @@ karamulrr2(GEN x, GEN y)
     garde = (hi[lx] << 1);
     shift_left(z,hi,2,lx-1, garde, 1);
   }
-  z[1]=evalsigne(sx) | e;
+  z[1]=evalsigne(sx) | evalexpo(e);
   if (garde < 0)
   { /* round to nearest */
     i=lx; do z[--i]++; while (z[i]==0);
@@ -2333,7 +2314,7 @@ dbltor(double x)
   const int expo_len = 11; /* number of bits of exponent */
   LOCAL_HIREMAINDER;
 
-  if (x==0) { z[1]=evalexpo(-308); z[2]=0; return z; }
+  if (x==0) return realzero_bit(-308);
   fi.f = x;
   e = ((fi.i & (HIGHBIT-1)) >> mant_len) - exp_mid;
   z[1] = evalexpo(e) | evalsigne(x<0? -1: 1);
@@ -2388,7 +2369,7 @@ dbltor(double x)
   const int shift = mant_len-32;
   const int expo_len = 11; /* number of bits of exponent */
 
-  if (x==0) { z=cgetr(3); z[1]=evalexpo(-308); z[2]=0; return z; }
+  if (x==0) return realzero_bit(-308);
   fi.f = x; z=cgetr(4);
   {
     const ulong a = fi.i[INDEX0];

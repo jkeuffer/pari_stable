@@ -584,6 +584,7 @@ GEN     permtonum(GEN x);
 GEN     polint(GEN xa, GEN ya, GEN x, GEN *dy);
 GEN     polrecip(GEN x);
 GEN     polymodrecip(GEN x);
+GEN     roots_to_pol(GEN a, long v);
 GEN     setintersect(GEN x, GEN y);
 long    setisset(GEN x);
 GEN     setminus(GEN x, GEN y);

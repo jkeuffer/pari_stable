@@ -81,6 +81,7 @@ void   mulssz(long x, long y, GEN z);
 GEN    new_chunk(long x);
 GEN    realun(long prec);
 GEN    realzero(long prec);
+GEN    realzero_bit(long bitprec);
 void   resiiz(GEN x, GEN y, GEN z);
 GEN    resis(GEN x, long y);
 GEN    ressi(long x, GEN y);
@@ -295,8 +296,8 @@ affsr(long s, GEN x)
 
   if (!s)
   {
-    l = -bit_accuracy(lg(x));
-    x[1]=evalexpo(l); x[2]=0; return;
+    x[1] = evalexpo(-bit_accuracy(lg(x)));
+    return;
   }
   if (s<0) { x[1] = evalsigne(-1); s = -s; }
   else x[1] = evalsigne(1);
@@ -326,10 +327,11 @@ shiftr(GEN x, long n)
 INLINE int
 cmpir(GEN x, GEN y)
 {
-  long av;
+  ulong av;
   GEN z;
 
   if (!signe(x)) return -signe(y);
+  if (!signe(y)) return  signe(x);
   av=avma; z=cgetr(lg(y)); affir(x,z); avma=av;
   return cmprr(z,y); /* cmprr does no memory adjustment */
 }
@@ -337,7 +339,7 @@ cmpir(GEN x, GEN y)
 INLINE int
 cmpsr(long x, GEN y)
 {
-  long av;
+  ulong av;
   GEN z;
 
   if (!x) return -signe(y);
@@ -694,11 +696,17 @@ gtodouble(GEN x)
 }
 
 INLINE GEN
+realzero_bit(long bitprec)
+{
+  GEN x=cgetr(2);
+  x[1]=evalexpo(bitprec);
+  return x;
+}
+
+INLINE GEN
 realzero(long prec)
 {
-  GEN x=cgetr(3);
-  x[1]=evalexpo(-bit_accuracy(prec));
-  x[2]=0; return x;
+  return realzero_bit(-bit_accuracy(prec));
 }
 
 INLINE GEN

@@ -22,8 +22,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 
 extern GEN polrecip_i(GEN x);
-extern GEN poldeflate(GEN x0, long *m);
-extern GEN roots_to_pol(GEN a, long v);
 #define pariINFINITY 100000
 #define NEWTON_MAX 10
 
@@ -1470,6 +1468,14 @@ conformal_mapping(GEN *radii, GEN ctr, GEN p, long k, long bitprec,
   gptr[0]=F; gptr[1]=G; gerepilemany(ltop,gptr,2);
 }
 
+static GEN
+myrealzero()
+{
+  GEN x = cgetr(3);
+  x[1] = evalexpo(-bit_accuracy(3));
+  return x;
+}
+
 /* split p, this time with no scaling. returns in F and G two polynomials
 such that |p-FG|< 2^(-bitprec)|p| */
 static void
@@ -1480,7 +1486,7 @@ split_2(GEN p, long bitprec, GEN ctr, double thickness, GEN *F, GEN *G)
   long n=degpol(p),i,j,k,bitprec2;
   GEN q,FF,GG,R;
   GEN *radii = (GEN*) cgetg(n+1, t_VEC);
-  for (i=2; i<n; i++) radii[i]=realzero(3);
+  for (i=2; i<n; i++) radii[i]=myrealzero(3);
   aux = thickness/(double) n/4.;
   radii[1] = rmin = min_modulus(p, aux);
   radii[n] = rmax = max_modulus(p, aux);
@@ -1752,8 +1758,10 @@ mygprec_absolute(GEN x, long bitprec)
   {
     case t_REAL:
       e=gexpo(x);
-      if (e<-bitprec || !signe(x)) { y=dbltor(0.); setexpo(y,-bitprec); }
-      else y=mygprec(x,bitprec+e);
+      if (e<-bitprec || !signe(x))
+        y=realzero_bit(-bitprec);
+      else
+        y=mygprec(x,bitprec+e);
       break;
     case t_COMPLEX:
       if (gexpo((GEN)x[2])<-bitprec)
@@ -1929,11 +1937,7 @@ all_roots(GEN p, long bitprec)
   long bitprec0, bitprec2,n=degpol(p),i,e,h;
   ulong av;
 
-#if 0
   pd = poldeflate(p, &h);
-#else
-  pd = p; h = 1;
-#endif
   e = 2*gexpo(cauchy_bound(pd)); if (e<0) e=0;
   bitprec0=bitprec + gexpo(pd) - gexpo(leading_term(pd)) + (long)log2(n/h)+1+e;
   for (av=avma,i=1;; i++,avma=av)
@@ -1949,7 +1953,7 @@ all_roots(GEN p, long bitprec)
     if (e<-2*bitprec2) e=-2*bitprec2; /* to avoid e=-pariINFINITY */
     if (e < 0)
     {
-      e = a_posteriori_errors(q,roots_pol,e);
+      e = a_posteriori_errors(p,roots_pol,e);
       if (e < -bitprec) return roots_pol;
     }
     if (DEBUGLEVEL > 7)
