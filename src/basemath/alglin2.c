@@ -3474,6 +3474,7 @@ gsmithall(GEN x,long all)
     if (typ(T) == t_POL && signe(T))
     {
       GEN d = leading_term(T);
+      if (gcmp0(d)) { T = RgX_renormalize(T); d = leading_term(T); }
       if (!gcmp1(d))
       {
         gcoeff(x,k,k) = gdiv(T,d);
