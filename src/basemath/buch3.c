@@ -1750,14 +1750,13 @@ rayclassnolistessimp(GEN sous, GEN fac)
 static GEN
 factormul(GEN fa1,GEN fa2)
 {
-  GEN p,pnew,e,enew,v,P, y = cgetg(3,t_MAT);
-  long i,c,lx;
+  GEN p, pnew, e, enew, v, P, y = concat_factor(fa1,fa2);
+  long i, c, lx;
 
-  p = concatsp((GEN)fa1[1],(GEN)fa2[1]); y[1] = (long)p;
-  e = concatsp((GEN)fa1[2],(GEN)fa2[2]); y[2] = (long)e;
-  v = sindexsort(p); lx = lg(p);
-  pnew = cgetg(lx,t_COL); for (i=1; i<lx; i++) pnew[i] = p[v[i]];
-  enew = cgetg(lx,t_COL); for (i=1; i<lx; i++) enew[i] = e[v[i]];
+  p = (GEN)y[1]; v = sindexsort(p); lx = lg(p);
+  e = (GEN)y[2];
+  pnew = vecextract_p(p, v);
+  enew = vecextract_p(e, v);
   P = gen_0; c = 0;
   for (i=1; i<lx; i++)
   {
@@ -1778,13 +1777,12 @@ static GEN
 factordivexact(GEN fa1,GEN fa2)
 {
   long i,j,k,c,lx1,lx2;
-  GEN Lpr,Lex,y,Lpr1,Lex1,Lpr2,Lex2,p1;
+  GEN Lpr,Lex,Lpr1,Lex1,Lpr2,Lex2,p1;
 
   Lpr1 = (GEN)fa1[1]; Lex1 = (GEN)fa1[2]; lx1 = lg(Lpr1);
   Lpr2 = (GEN)fa2[1]; Lex2 = (GEN)fa2[2]; lx2 = lg(Lpr1);
-  y = cgetg(3,t_MAT);
-  Lpr = cgetg(lx1,t_COL); y[1] = (long)Lpr;
-  Lex = cgetg(lx1,t_COL); y[2] = (long)Lex;
+  Lpr = cgetg(lx1,t_COL);
+  Lex = cgetg(lx1,t_COL);
   for (c=0,i=1; i<lx1; i++)
   {
     j = isinvector(Lpr2,(GEN)Lpr1[i],lx2-1);
@@ -1797,17 +1795,27 @@ factordivexact(GEN fa1,GEN fa2)
     }
   }
   setlg(Lpr,c+1);
-  setlg(Lex,c+1); return y;
+  setlg(Lex,c+1); return mkmat2(Lpr, Lex);
+}
+/* remove index k */
+static GEN
+factorsplice(GEN fa, long k)
+{
+  GEN p = gel(fa,1), e = gel(fa,2), P, E;
+  long i, l = lg(p) - 1;
+  P = cgetg(l,t_COL);
+  E = cgetg(l,t_COL);
+  for (i=1; i<k; i++) { P[i] = p[i]; E[i] = e[i]; }
+  p++; e++;
+  for (   ; i<l; i++) { P[i] = p[i]; E[i] = e[i]; }
+  return mkmat2(P,E);
 }
 
 static GEN
 factorpow(GEN fa,long n)
 {
-  GEN y;
   if (!n) return trivfact();
-  y = cgetg(3,t_MAT);
-  y[1] = fa[1];
-  y[2] = lmulsg(n, (GEN)fa[2]); return y;
+  return mkmat2(gel(fa,1), gmulsg(n, (GEN)fa[2]));
 }
 
 /* Etant donne la liste des zidealstarinit et des matrices d'unites
@@ -1818,7 +1826,7 @@ GEN
 discrayabslist(GEN bnf, GEN lists)
 {
   pari_sp av = avma;
-  long ii,jj,i,j,k,clhss,ep,clhray,lx,ly,r1,degk,nz;
+  long ii,jj,j,k,clhss,ep,clhray,lx,ly,r1,degk,nz;
   long n,R1,lP;
   GEN hlist,blist,dlist,nf,dkabs,b,h,d;
   GEN ideal,arch,fa,P,ex,idealrel,mod,pr,dlk,arch2,p3,fac;
@@ -1847,34 +1855,23 @@ discrayabslist(GEN bnf, GEN lists)
       lP = lg(P)-1; idealrel = trivfact();
       for (k=1; k<=lP; k++)
       {
-        GEN normp;
+        GEN NprS, fad;
         long S = 0, normps, normi;
 	pr = (GEN)P[k]; ep = itos((GEN)ex[k]);
 	normi = ii; normps = itos(idealnorm(nf,pr));
 	for (j=1; j<=ep; j++)
 	{
-          GEN fad, fad1, fad2;
           if (j < ep) { fac2[k] = lstoi(ep-j); fad = fac; }
-          else
-          {
-            fad = cgetg(3,t_MAT);
-            fad1 = cgetg(lP,t_COL); fad[1] = (long)fad1;
-            fad2 = cgetg(lP,t_COL); fad[2] = (long)fad2;
-            for (i=1; i< k; i++) { fad1[i] = fac1[i];  fad2[i] = fac2[i]; }
-            for (   ; i<lP; i++) { fad1[i] = fac1[i+1];fad2[i] = fac2[i+1]; }
-          }
+          else fad = factorsplice(fac, k);
           normi /= normps;
-          clhss = rayclassnolists((GEN)blist[normi],(GEN)hlist[normi], fad);
-          if (j==1 && clhss==clhray)
-	  {
-	    clhray = 0; fac2[k] = ex[k]; goto LLDISCRAY;
-	  }
+          clhss = rayclassnolists((GEN)blist[normi], (GEN)hlist[normi], fad);
+          if (j==1 && clhss==clhray) { clhray = 0; goto LLDISCRAY; }
           if (clhss == 1) { S += ep-j+1; break; }
           S += clhss;
 	}
 	fac2[k] = ex[k];
-	normp = to_famat_all((GEN)pr[1], (GEN)pr[4]);
-	idealrel = factormul(idealrel, factorpow(normp,S));
+	NprS = to_famat_all((GEN)pr[1], mulsi(S, (GEN)pr[4]));
+	idealrel = factormul(idealrel, NprS);
       }
       dlk = factordivexact(factorpow(factor(utoipos(ii)),clhray), idealrel);
       arch2 = dummycopy(arch);
@@ -2312,19 +2309,12 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
           normi = ii; normps= itos(gpowgs(gprime,resp));
           for (j=1; j<=ep; j++)
           {
-            GEN fad, fad1, fad2;
+            GEN fad;
             if (clhss==1) S++;
             else
             {
               if (j < ep) { fac2[k] = (long)utoipos(ep-j); fad = fac; }
-              else
-              {
-                fad = cgetg(3,t_MAT);
-                fad1 = cgetg(lP,t_COL); fad[1] = (long)fad1;
-                fad2 = cgetg(lP,t_COL); fad[2] = (long)fad2;
-                for (i=1; i<k; i++) { fad1[i]=fac1[i];   fad2[i]=fac2[i]; }
-                for (   ; i<lP; i++){ fad1[i]=fac1[i+1]; fad2[i]=fac2[i+1]; }
-              }
+              else fad = factorsplice(fac, k);
               normi /= normps;
 	      dlk = rayclassnolistessimp(getcompobig(raylist,normi),fad);
               if (allarch) dlk = (GEN)dlk[karch+1];
