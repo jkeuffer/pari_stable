@@ -321,6 +321,7 @@ void    checkrnf(GEN rnf);
 GEN     galois(GEN x, long prec);
 GEN     galoisapply(GEN nf, GEN aut, GEN x);
 GEN     get_bnf(GEN x,int *t);
+GEN     get_bnfpol(GEN x, GEN *bnf, GEN *nf);
 GEN     get_nf(GEN x,int *t);
 GEN     get_nfpol(GEN x, GEN *nf);
 GEN     get_primeid(GEN x);
@@ -1114,6 +1115,7 @@ long    vals(ulong x);
 
 GEN     nffactor(GEN nf,GEN x);
 GEN     nffactormod(GEN nf,GEN pol,GEN pr);
+int     nfisgalois(GEN nf, GEN x);
 GEN     nfroots(GEN nf,GEN pol);
 GEN     rnfcharpoly(GEN nf,GEN T,GEN alpha,int n);
 GEN     rnfdedekind(GEN nf,GEN T,GEN pr);

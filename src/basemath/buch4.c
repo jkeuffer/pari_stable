@@ -593,42 +593,26 @@ bnfsunit(GEN bnf,GEN S,long prec)
   return gerepilecopy(ltop,res);
 }
 
-/* cette fonction est l'equivalent de isunit, sauf qu'elle donne le resultat
- * avec des s-unites: si x n'est pas une s-unite alors issunit=[]~;
- * si x est une s-unite alors
- * x=\prod_{i=0}^r {e_i^issunit[i]}*prod{i=r+1}^{r+s} {s_i^issunit[i]}
- * ou les e_i sont les unites du corps (comme dans isunit)
- * et les s_i sont les s-unites calculees par sunit (dans le meme ordre).
- */
-GEN
-bnfissunit(GEN bnf,GEN suni,GEN x)
+static GEN
+make_unit(GEN bnf, GEN suni, GEN *px)
 {
   long lB, cH, i, k, ls;
-  gpmem_t tetpil, av = avma;
   GEN den,gen,S,v,p1,xp,xm,xb,N,HB,perm;
 
-  bnf = checkbnf(bnf);
-  if (typ(suni)!=t_VEC || lg(suni)!=7) err(typeer,"bnfissunit");
-  switch (typ(x))
-  {
-    case t_INT: case t_FRAC: case t_FRACN:
-    case t_POL: case t_COL:
-      x = basistoalg(bnf,x); break;
-    case t_POLMOD: break;
-    default: err(typeer,"bnfissunit");
-  }
-  if (gcmp0(x)) return cgetg(1,t_COL);
-
+  if (gcmp0(*px)) return NULL;
   S = (GEN) suni[6]; ls=lg(S);
-  if (ls==1) return isunit(bnf,x);
+  if (ls==1) return cgetg(1, t_COL);
+
+  xb = algtobasis(bnf,*px); p1 = Q_denom(xb);
+  N = mulii(gnorm(gmul(*px,p1)), p1); /* relevant primes divide N */
+  if (is_pm1(N)) return zerocol(ls -1);
 
   p1 = (GEN)suni[2];
   perm = (GEN)p1[1];
-  HB = (GEN)p1[2]; den = (GEN)p1[3];
+  HB = (GEN)p1[2];
+  den = (GEN)p1[3];
   cH = lg(HB[1]) - 1;
   lB = lg(HB) - cH;
-  xb = algtobasis(bnf,x); p1 = Q_denom(xb);
-  N = mulii(gnorm(gmul(x,p1)), p1); /* relevant primes divide N */
   v = cgetg(ls, t_VECSMALL);
   for (i=1; i<ls; i++)
   {
@@ -642,7 +626,7 @@ bnfissunit(GEN bnf,GEN suni,GEN x)
   for (i=1; i<=cH; i++)
   {
     GEN w = gdiv((GEN)v[i], den);
-    if (typ(w) != t_INT) { avma = av; return cgetg(1,t_COL); }
+    if (typ(w) != t_INT) return NULL;
     v[i] = (long)w;
   }
   p1 += cH;
@@ -657,11 +641,38 @@ bnfissunit(GEN bnf,GEN suni,GEN x)
     if (k > 0) xp = gmul(xp, gpowgs(p1, k));
     else       xm = gmul(xm, gpowgs(p1,-k));
   }
-  if (xp != gun) x = gmul(x,xp);
-  if (xm != gun) x = gdiv(x,xm);
-  p1 = isunit(bnf,x);
-  if (lg(p1)==1) { avma = av; return cgetg(1,t_COL); }
-  tetpil=avma; return gerepile(av,tetpil,concat(p1,v));
+  if (xp != gun) *px = gmul(*px,xp);
+  if (xm != gun) *px = gdiv(*px,xm);
+  return v;
+}
+
+/* cette fonction est l'equivalent de isunit, sauf qu'elle donne le resultat
+ * avec des s-unites: si x n'est pas une s-unite alors issunit=[]~;
+ * si x est une s-unite alors
+ * x=\prod_{i=0}^r {e_i^issunit[i]}*prod{i=r+1}^{r+s} {s_i^issunit[i]}
+ * ou les e_i sont les unites du corps (comme dans isunit)
+ * et les s_i sont les s-unites calculees par sunit (dans le meme ordre).
+ */
+GEN
+bnfissunit(GEN bnf,GEN suni,GEN x)
+{
+  gpmem_t av = avma;
+  GEN v, w;
+
+  bnf = checkbnf(bnf);
+  if (typ(suni)!=t_VEC || lg(suni)!=7) err(typeer,"bnfissunit");
+  switch (typ(x))
+  {
+    case t_INT: case t_FRAC: case t_FRACN:
+    case t_POL: case t_COL:
+      x = basistoalg(bnf,x); break;
+    case t_POLMOD: break;
+    default: err(typeer,"bnfissunit");
+  }
+  v = NULL;
+  if ( (w = make_unit(bnf, suni, &x)) ) v = isunit(bnf, x);
+  if (!v || lg(v) == 1) { avma = av; return cgetg(1,t_COL); }
+  return gerepileupto(av, concat(v, w));
 }
 
 static void
@@ -682,26 +693,29 @@ fa_pr_append(GEN nf,GEN rel,GEN N,GEN *prod,GEN *S1,GEN *S2)
 }
 
 GEN
-rnfisnorminit(GEN bnf, GEN relpol, int galois)
+rnfisnorminit(GEN T, GEN relpol, int galois)
 {
   gpmem_t av = avma;
-  long i, l, drel, k = 0; /* important */
-  GEN prod, S1, S2, gen, cyc, nf, T, rnfeq, rel, res, y = cgetg(8, t_VEC);
+  long i, l, drel, k;
+  GEN prod, S1, S2, gen, cyc, bnf, nf, rnfeq, rel, res, y = cgetg(9, t_VEC);
 
-  bnf = checkbnf(bnf);
-  nf = checknf(bnf); T = (GEN)nf[1];
-  if (relpol)
+  T = get_bnfpol(T, &bnf, &nf);
+  if (!bnf) bnf = bnfinit0(nf? nf: T, 1, NULL, DEFAULTPREC);
+  if (!nf) nf = checknf(bnf);
+  if (relpol && !gcmp0(relpol))
   {
     rnfeq = _rnfequation(bnf, relpol, &k, NULL);
-    rel = bnfinit0(rnfeq, 1, NULL, nfgetprec(bnf));
+    rel = bnfinit0(rnfeq, 1, NULL, nfgetprec(nf));
   }
   else
   { /* over Q */
-    rel = bnf;
+    rel = bnf; k = 0;
     bnf = bnfinit0(polx[MAXVARN],2,NULL,0);
     relpol = T;
   }
   drel = degpol(relpol);
+  if (galois < 0 || galois > 2) err(flagerr, "rnfisnorminit");
+  if (galois == 2) galois = nfisgalois(nf, relpol);
 
   prod = gun; S1 = S2 = cgetg(1, t_VEC);
   res = gmael(rel,8,1);
@@ -724,7 +738,8 @@ rnfisnorminit(GEN bnf, GEN relpol, int galois)
   y[4] = (long)get_theta_abstorel(T, relpol, stoi(-k));
   y[5] = (long)prod;
   y[6] = (long)S1;
-  y[7] = (long)S2; return gerepilecopy(av, y);
+  y[7] = (long)S2;
+  y[8] = lstoi(galois); return gerepilecopy(av, y);
 }
 
 /* T as output by rnfisnorminit
@@ -742,9 +757,9 @@ rnfisnorm(GEN T, GEN x, long flag)
   GEN nf, aux, H, Y, M, A, suni, sunitrel, futu, tu, w;
   GEN prod, S1, S2;
   GEN res = cgetg(3,t_VEC);
-  long L, i, drel;
+  long L, i, drel, itu;
 
-  if (typ(T) != t_VEC || lg(T) != 8)
+  if (typ(T) != t_VEC || lg(T) != 9)
     err(talker,"please apply rnfisnorminit first");
   bnf = checkbnf(bnf);
   rel = checkbnf(rel);
@@ -762,7 +777,9 @@ rnfisnorm(GEN T, GEN x, long flag)
   prod = (GEN)T[5];
   S1   = (GEN)T[6];
   S2   = (GEN)T[7];
-  if (flag > 1)
+  if (flag && !gcmp0((GEN)T[8]))
+    err(warner,"useless flag in rnfisnorm: the extension is Galois");
+  if (flag > 0)
   {
     byteptr d = diffptr;
     long p = 0;
@@ -776,6 +793,7 @@ rnfisnorm(GEN T, GEN x, long flag)
   }
   else if (flag < 0)
     fa_pr_append(nf,rel,stoi(-flag),&prod,&S1,&S2);
+  /* overkill: prime ideals dividing x would be enough */
   fa_pr_append(nf,rel,idealnorm(nf,x), &prod,&S1,&S2);
 
   /* computation on T-units */
@@ -789,17 +807,19 @@ rnfisnorm(GEN T, GEN x, long flag)
 
   A = lift(bnfissunit(bnf,suni,x));
   L = lg(sunitrel);
+  itu = lg(nf[6])-1; /* index of torsion unit in bnfsunit(nf) output */
   M = cgetg(L+1,t_MAT);
   for (i=1; i<L; i++)
   {
-    GEN u = (GEN)sunitrel[i];
-    u = poleval(u, theta);
-    M[i] = llift( bnfissunit(bnf,suni, gnorm(u)) );
-    if (lg(M[i]) == 1) err(bugparier,"rnfisnorm");
+    GEN u = poleval((GEN)sunitrel[i], theta); /* abstorel */
     sunitrel[i] = (long)u;
+    u = bnfissunit(bnf,suni, gnorm(u));
+    if (lg(u) == 1) err(bugparier,"rnfisnorm");
+    u[itu] = llift((GEN)u[itu]); /* lift root of 1 part */
+    M[i] = (long)u;
   }
-  aux = zerocol(lg(A)-1); aux[lg(futu)-1] = (long)w;
-  M[L] = (long)aux; /* correspond to 1 */
+  aux = zerocol(lg(A)-1); aux[itu] = (long)w;
+  M[L] = (long)aux;
   H = hnfall0(M, 0);
   Y = gmul((GEN)H[2], inverseimage((GEN)H[1],A));
   /* Y: sols of MY = A over Q */

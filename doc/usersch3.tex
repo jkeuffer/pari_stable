@@ -5143,8 +5143,8 @@ $S$: all the places above the primes $p \leq \fl$ (resp.~$p|\fl$) if $\fl>0$
 
 The answer is guaranteed (i.e.~\var{a} is a norm iff $q = 1$) if the field is
 Galois, or, under \idx{GRH}, if $S$ contains all primes less than
-$12\log^2\left|\text{disc}(\var{Ext})\right|$, where \var{Ext} is the normal
-closure of $\var{ext} / \var{bnf}$.
+$12\log^2\left|\text{disc}(\var{M})\right|$, where \var{M} is the normal
+closure of $L/K$.
 
 If \tet{rnfisnorminit} has determined (or was told) that $L/K$ is
 \idx{Galois}, and $\fl \neq 0$, a Warning is issued (so that you can set
@@ -5178,7 +5178,7 @@ If $\fl = 1$, $L/K$ is assumed to be Galois (unchecked), which speeds up
 
 If $\fl = 2$, let the routine determine whether $L/K$ is Galois.
 
-\syn{rnfisnorm}{\var{bnf},\var{ext},\fl}.
+\syn{rnfisnorminit}{\var{pol},\var{polrel},\fl}.
 
 \subsecidx{rnfkummer}$(\var{bnr},\{\var{subgroup}\},\{deg=0\})$: \var{bnr}
 being as output by \kbd{bnrinit}, finds a relative equation for the
