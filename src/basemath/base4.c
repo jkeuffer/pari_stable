@@ -1447,6 +1447,7 @@ idealintersect(GEN nf, GEN x, GEN y)
   nf=checknf(nf); N=lgef(nf[1])-3;
   if (idealtyp(&x,&z)!=t_MAT || lg(x)!=N+1) x=idealhermite_aux(nf,x);
   if (idealtyp(&y,&z)!=t_MAT || lg(y)!=N+1) y=idealhermite_aux(nf,y);
+  if (lg(x) == 1 || lg(y) == 1) { avma = av; return cgetg(1, t_MAT); }
   dx=denom(x); if (!gcmp1(dx))   y = gmul(y,dx);
   dy=denom(y); if (!gcmp1(dy)) { x = gmul(x,dy); dx = mulii(dx,dy); }
   z = kerint(concatsp(x,y)); lz=lg(z);
