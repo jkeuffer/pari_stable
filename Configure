@@ -120,7 +120,7 @@ for variable in\
   kernlvl0 kernlvl1\
   gnuas AS ASFLAGS KERNELCPPFLAGS\
   LD LDFLAGS LIBS\
-  runpath runpathprefix LDDYN DYNLIBS DYNFLAGS DYNRELOC\
+  dir_sep runpath runpathprefix LDDYN DYNLIBS DYNFLAGS DYNRELOC\
   ranlib gzip zcat emacs perl ln_s make_sh\
   sizeof_long doubleformat\
   X11 Xincroot extralib which_graphic_lib graphic_lib_dll gnuplot gnuplot_libs\

@@ -161,9 +161,9 @@ case "$runpathprefix" in
       fi
       RUNPTH="-R$TOP/$objdir $RUNPTH_FINAL";;
   *-rpath*)
-      tmp="$runpath:$plotrunpath"
+      tmp="$runpath$dir_sep$plotrunpath"
       RUNPTH_FINAL="$runpathprefix $tmp"
-      RUNPTH="$runpathprefix $TOP/$objdir:$tmp";;
+      RUNPTH="$runpathprefix $TOP/$objdir$dir_sep$tmp";;
 esac
 
 if test -z "$DLLD"; then
@@ -171,7 +171,7 @@ if test -z "$DLLD"; then
 else
   exec="gp-sta gp-dyn"
 fi
-doexec="env \"LD_LIBRARY_PATH=.;\$\$LD_LIBRARY_PATH\" \$(SHELL) $src/test/dotest \$(SIZEOF_LONG)"
+doexec="env \"LD_LIBRARY_PATH=.$dir_sep\$\$LD_LIBRARY_PATH\" \$(SHELL) $src/test/dotest \$(SIZEOF_LONG)"
 case "$sizeof_long" in
   4) numbits=32;;
   8) numbits=64;;
@@ -220,7 +220,7 @@ DLLDFLAGS  = $DLLDFLAGS
 EXTRADLLDFLAGS = $EXTRADLLDFLAGS
 CPP        = $CPP
 
-# HIGHLY EXPERIMENTAL (only tested with gmp-4.0 on ix86 and Ultra):
+# HIGHLY EXPERIMENTAL (only tested with gmp-4.0 on ix86 and Ultra).
 # If you've configured and compiled GMP and would like to tune PARI using
 # the nice cycle counting functions in GMP, uncomment the 4 lines below
 # (correct the first one to the path to your gmp source tree).
@@ -230,8 +230,8 @@ CPP        = $CPP
 #GMPO1 = \$(GMP)/time.o \$(GMP)/freq.o
 #GMPOBJS=\$(GMPO1) \$(GMPO2)
 #
-#You may need to add a few object files to GMPOBJS. On UltraSparc,
-#uncomment the following line:
+#You may need to add a few object files to GMPOBJS. On UltraSparc, uncomment
+#the following line
 #GMPO2 = \$(GMP)/sparcv9.o
 
 _O	   = .o
@@ -287,7 +287,7 @@ INSTALL_DATA = \$(INSTALL) -m 644
 PLOTCFLAGS = $PLOTCFLAGS
 PLOTLIBS   = $PLOTLIBS
 GNUPLOT_OBJS = $GNUPLOT_OBJS
-# Try uncommenting this line if you're using X11 and linking fails:
+# Try uncommenting this line if you're using X11 and linking fails
 #  PLOTLIBS=-L$X11 -lX11
 
 EOT
