@@ -2371,10 +2371,10 @@ extern int approx_0(GEN x, GEN y);
 
 /* x + r ~ x ? Assume x,r are t_POL, deg(r) <= deg(x) */
 static int
-pol_approx0(GEN r, GEN x, int inexact)
+pol_approx0(GEN r, GEN x, int exact)
 {
   long i, lx,lr;
-  if (!inexact) return gcmp0(x);
+  if (exact) return gcmp0(r);
   lx = lgef(x);
   lr = lgef(r); if (lr < lx) lx = lr;
   for (i=2; i<lx; i++)
@@ -2387,12 +2387,12 @@ polgcdnun(GEN x, GEN y)
 {
   long av1, av = avma, lim = stack_lim(av,1);
   GEN r, yorig = y;
-  int inexact = (isinexactreal(x) || isinexactreal(y));
+  int exact = !(isinexactreal(x) || isinexactreal(y));
 
   for(;;)
   {
     av1 = avma; r = gres(x,y);
-    if (pol_approx0(r, x, inexact))
+    if (pol_approx0(r, x, exact))
     {
       avma = av1;
       if (lgef(y) == 3 && inexact) { avma = av; return gun; }
