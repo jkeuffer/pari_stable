@@ -361,7 +361,11 @@ hilb2nf(GEN nf,GEN a,GEN b,GEN p)
 {
   ulong av = avma;
   long rep;
-  GEN pol = coefs_to_pol(3, lift(a), zero, lift(b));
+  GEN pol;
+
+  if (typ(a) != t_POLMOD) a = basistoalg(nf, a);
+  if (typ(b) != t_POLMOD) b = basistoalg(nf, b);
+  pol = coefs_to_pol(3, lift(a), zero, lift(b));
   /* varn(nf.pol) = 0, pol is not a valid GEN  [as in Pol([x,x], x)].
    * But it is only used as a placeholder, hence it is not a problem */
 
