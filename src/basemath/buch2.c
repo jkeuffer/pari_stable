@@ -14,11 +14,11 @@ extern GEN get_arch_real(GEN nf,GEN x,GEN *emb,long prec);
 extern GEN get_arch(GEN nf,GEN x,long prec);
 extern GEN get_roots(GEN x,long r1,long ru,long prec);
 extern long ideal_is_zk(GEN ideal,long N);
-extern GEN idealpowred_prime(GEN nf, GEN vp, GEN n, long prec);
 extern long int_elt_val(GEN nf, GEN x, GEN p, GEN b, long v);
 extern GEN make_M(long n,long ru,GEN basis,GEN roo);
 extern GEN make_MC(long n,long r1,long ru,GEN M);
 extern GEN make_MDI(GEN nf, GEN TI, GEN *a, GEN *b);
+extern GEN init_idele(GEN nf);
 
 #define SFB_MAX 2
 #define SFB_STEP 2
@@ -652,7 +652,7 @@ add_to_fact(long l, long v, long e)
 static GEN
 split_ideal(GEN nf, GEN x, GEN xar, long prec, GEN vperm)
 {
-  GEN id,vdir,x0,y,p1;
+  GEN id,vdir,x0,y,p1,z;
   long v1,v2,nbtest,bou,i, ru = lg(xar);
   int flag = (gexpo(gcoeff(x,1,1)) < 100);
 
@@ -679,12 +679,13 @@ split_ideal(GEN nf, GEN x, GEN xar, long prec, GEN vperm)
   }
   v1=itos((GEN)vperm[1]);
   v2=itos((GEN)vperm[2]);
+  z = init_idele(nf);
   for(nbtest = 0;;)
   {
     long ex1 = mymyrand() >> randshift;
     long ex2 = mymyrand() >> randshift;
-    id=idealpowred_prime(nf,(GEN)vectbase[v1],stoi(ex1),prec);
-    p1=idealpowred_prime(nf,(GEN)vectbase[v2],stoi(ex2),prec);
+    z[1]=vectbase[v1]; id=idealpowred(nf,z,stoi(ex1),prec);
+    z[1]=vectbase[v2]; p1=idealpowred(nf,z,stoi(ex2),prec);
     id = idealmulh(nf,idealmul(nf,x0,id),p1);
     for (i=1; i<ru; i++) vdir[i] = lstoi(mymyrand() >> randshift);
     for (bou=1; bou<ru; bou++)
@@ -723,12 +724,70 @@ get_split_expo(GEN xalpha, GEN yalpha, GEN vperm)
   }
 }
 
+static GEN
+init_red_mod_units(GEN bnf, GEN *pts, long prec)
+{
+  GEN s = gzero, p1,s1,mat, matunit = (GEN)bnf[3];
+  long i,j, RU = lg(matunit);
+
+  if (RU == 1) { *pts = NULL; return NULL; }
+  mat = cgetg(RU,t_MAT);
+  for (j=1; j<RU; j++)
+  {
+    p1=cgetg(RU+1,t_COL); mat[j]=(long)p1;
+    s1=gzero;
+    for (i=1; i<RU; i++)
+    {
+      p1[i] = lreal(gcoeff(matunit,i,j));
+      s1 = gadd(s1, gsqr((GEN)p1[i]));
+    }
+    p1[RU]=zero; if (gcmp(s1,s) > 0) s = s1;
+  }
+  s = gsqrt(gmul2n(s,RU),prec);
+  if (gcmpgs(s,100000000) < 0) s = stoi(100000000);
+  *pts = s; return mat;
+}
+
+static GEN
+red_mod_units(GEN col, GEN mat, GEN C, long prec)
+{
+  long i,RU;
+  GEN x;
+  
+  if (!mat) return NULL;
+  RU = lg(mat); x = cgetg(RU+1,t_COL);
+  for (i=1; i<RU; i++) x[i]=lreal((GEN)col[i]);
+  x[RU] = (long)C;
+  x = concatsp(mat, x);
+  x = (GEN)lll(x,prec)[RU];
+  if (signe(x[RU]) < 0) x = gneg_i(x);
+  if (!gcmp1((GEN)x[RU])) err(bugparier,"red_mod_units");
+  setlg(x,RU); return x;
+}
+
+#if 0
+static GEN
+red_pol_mod_units(GEN bnf, GEN x, GEN mat, GEN C, long prec)
+{
+  GEN u,v, nf = checknf(bnf);
+  long i;
+  if (!mat) return x;
+  v = red_mod_units(get_arch(nf,x,prec),mat,C,prec);
+  u = check_units(bnf,"red_pol_mod_units");
+  x = basistoalg(nf,x);
+  for (i=1; i<lg(u); i++)
+    if (signe(v[i]))
+      x = gmul(x, powgi(basistoalg(nf,(GEN)u[i]), (GEN)v[i]));
+  return x;
+}
+#endif
+
 /* assume x in HNF */
 static GEN
 isprincipalall0(GEN bnf, GEN x, long *ptprec, long flall)
 {
   long i,j,colW,colB,N,R1,R2,RU,e,c, prec = *ptprec;
-  GEN xalpha,yalpha,u2,y,p1,p2,p3,p4,xar,gen,cyc,u1inv,xc,ex;
+  GEN xar,xalpha,yalpha,u2,y,p1,p2,p3,p4,gen,cyc,u1inv,xc,ex;
   GEN W       = (GEN)bnf[1];
   GEN B       = (GEN)bnf[2];
   GEN matunit = (GEN)bnf[3];
@@ -744,7 +803,7 @@ isprincipalall0(GEN bnf, GEN x, long *ptprec, long flall)
   xc = content(x); if (!gcmp1(xc)) x=gdiv(x,xc);
 
   colW=lg(W)-1; colB=lg(B)-1;
-  xar=cgetg(RU+1,t_VEC); for (i=1; i<=RU; i++) xar[i]=zero;
+  xar = zerovec(RU);
   p1 = split_ideal(nf,x,xar,prec,vperm);
   if (p1 != xar) xar = cleancol(p1,N,prec);
 
@@ -801,29 +860,9 @@ isprincipalall0(GEN bnf, GEN x, long *ptprec, long flall)
 
   if (RU > 1)
   {
-    s=gzero; p4=cgetg(RU+1,t_MAT);
-    for (j=1; j<RU; j++)
-    {
-      p2=cgetg(RU+1,t_COL); p4[j]=(long)p2;
-      p1=gzero;
-      for (i=1; i<RU; i++)
-      {
-        p2[i] = lreal(gcoeff(matunit,i,j));
-        p1 = gadd(p1, gsqr((GEN)p2[i]));
-      }
-      p2[RU]=zero; if (gcmp(p1,s)>0) s=p1;
-    }
-    p2=cgetg(RU+1,t_COL); p4[RU]=(long)p2;
-    for (i=1; i<RU; i++) p2[i]=lreal((GEN)col[i]);
-    s=gsqrt(gmul2n(s,RU+1),prec);
-    if (gcmpgs(s,100000000)<0) s=stoi(100000000);
-    p2[RU]=(long)s;
-
-    p4=(GEN)lll(p4,prec)[RU];
-    if (signe(p4[RU]) < 0) p4 = gneg_i(p4);
-    if (!gcmp1((GEN)p4[RU])) err(bugparier,"isprincipal(2)");
-    setlg(p4,RU);
-    col = gadd(col, gmul(matunit,p4));
+    GEN mat = init_red_mod_units(bnf,&s,prec);
+    s = red_mod_units(col,mat,s,prec);
+    if (s) col = gadd(col, gmul(matunit, s));
   }
 
   s2 = gun;
@@ -934,6 +973,53 @@ isprincipalall(GEN bnf,GEN x,long flag)
 
     if (DEBUGLEVEL) err(warnprec,"isprincipalall0",pr);
     avma = av1; bnf = bnfnewprec(bnf,pr); setrand(c);
+  }
+}
+
+/* isprincipal for C * \prod P[i]^e[i] */
+GEN
+isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag)
+{
+  long av = avma, l = lg(P), i,prec,c;
+  GEN id,id2, nf = checknf(bnf), z = cgetg(3,t_VEC);
+
+  prec = prec_unit_matrix(bnf); /* precision of unit matrix */
+  id = C; z[2] = lmodulcp(gun, (GEN)nf[1]);
+  for (i=1; i<l; i++) /* compute prod P[i]^e[i] */
+    if (signe(e[i]))
+    {
+      z[1] = P[i]; id2 = idealpowred(bnf,z, (GEN)e[i],prec);
+      id = id? idealmulred(nf,id,id2,prec): id2;
+    }
+  if (id == C)
+  {
+    if (!C) id = gun;
+    return isprincipalall(bnf, id, flag);
+  }
+  c = getrand();
+  for (;;)
+  {
+    long av1 = avma;
+    GEN y = isprincipalall0(bnf, (GEN)id[1],&prec,flag);
+    if (y)
+    {
+      if (typ(y) == t_VEC)
+      {
+        GEN u = (GEN)y[2];
+        u = gmul((GEN)id[2], basistoalg(nf,u));
+        y[2] = (long)algtobasis(nf,u);
+        y = gcopy(y);
+      }
+      else
+      {
+        y = gmul((GEN)id[2], basistoalg(nf,y));
+        y = algtobasis(nf,y);
+      }
+      return gerepileupto(av,y);
+    }
+
+    if (DEBUGLEVEL) err(warnprec,"isprincipalall0",prec);
+    avma = av1; bnf = bnfnewprec(bnf,prec); setrand(c);
   }
 }
 
@@ -1680,7 +1766,7 @@ static void
 class_group_gen(GEN nf,GEN cyc,GEN clh,GEN u1,GEN u2,GEN vperm,
                 GEN *ptclg1,GEN *ptclg2, long prec)
 {
-  GEN basecl,baseclorig,I,J,p1,dmin,d, Vbase = vectbase;
+  GEN z,basecl,baseclorig,I,J,p1,dmin,d, Vbase = vectbase;
   long i,j,s,inv, lo = lg(cyc), lo0 = lo;
 
   if (DEBUGLEVEL)
@@ -1703,17 +1789,18 @@ class_group_gen(GEN nf,GEN cyc,GEN clh,GEN u1,GEN u2,GEN vperm,
   }
   baseclorig = cgetg(lo,t_VEC); /* generators = Vbase * u1 (LLL-reduced) */
   basecl = cgetg(lo,t_VEC);
+  z = init_idele(nf);
   for (j=1; j<lo; j++)
   {
     p1 = gcoeff(u1,1,j);
-    I = idealpowred_prime(nf,(GEN)Vbase[1],p1,prec);
+    z[1]=Vbase[1]; I = idealpowred(nf,z,p1,prec);
     if (signe(p1)<0) I[1] = lmul((GEN)I[1],denom((GEN)I[1]));
     for (i=2; i<lo0; i++)
     {
       p1=gcoeff(u1,i,j); s=signe(p1);
       if (s)
       {
-	J = idealpowred_prime(nf,(GEN)Vbase[i],p1,prec);
+	z[1]=Vbase[i]; J = idealpowred(nf,z,p1,prec);
         if (s<0) J[1] = lmul((GEN)J[1],denom((GEN)J[1]));
 	I = idealmulh(nf,I,J);
 	I = ideallllred(nf,I,NULL,prec);

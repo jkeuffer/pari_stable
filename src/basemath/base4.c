@@ -312,22 +312,6 @@ idealmul0(GEN nf, GEN x, GEN y, long flag, long prec)
 }
 
 GEN
-idealpowred(GEN nf, GEN x, GEN n, long prec)
-{
-  long av=avma, tetpil;
-  x = idealpow(nf,x,n); tetpil=avma;
-  return gerepile(av,tetpil, ideallllred(nf,x,NULL,prec));
-}
-
-GEN
-idealmulred(GEN nf, GEN x, GEN y, long prec)
-{
-  long av=avma,tetpil;
-  x = idealmul(nf,x,y); tetpil=avma;
-  return gerepile(av,tetpil,ideallllred(nf,x,NULL,prec));
-}
-
-GEN
 idealinv0(GEN nf, GEN ix, long flag)
 {
   switch(flag)
@@ -1136,7 +1120,12 @@ idealmul(GEN nf, GEN x, GEN y)
   p1 = gerepileupto(av,p1);
   if (!f) return p1;
 
-  if (ax && ay) ax = gadd(ax,ay);
+  if (ax && ay)
+  {
+    if (typ(ax) == t_POLMOD) ax = gmul(ax,ay);
+    else
+      ax = (ax == ay)? gmul2n(ax,1): gadd(ax,ay);
+  }
   else
   {
     if (ax)
@@ -1261,10 +1250,13 @@ idealinv(GEN nf, GEN x)
 static GEN
 idealpowprime(GEN nf, GEN vp, GEN n)
 {
-  GEN n1, x = dummycopy(vp);
+  GEN n1, x;
   long s = signe(n);
 
-  if (s < 0) n=negi(n);
+  nf = checknf(nf);
+  if (s == 0) return idmat(lgef(nf[1])-3);
+  if (s < 0) n = negi(n);
+  x = dummycopy(vp);
   n1 = gceil(gdiv(n,(GEN)x[3]));
   x[1]=(long)powgi((GEN)x[1],n1);
   if (s < 0)
@@ -1317,7 +1309,10 @@ idealpow(GEN nf, GEN x, GEN n)
     }
   x = gerepileupto(av, x);
   if (!ax) return x;
-  res[1]=(long)x; res[2]=lmul(n,ax); return res;
+  ax = (typ(ax) == t_POLMOD)? powgi(ax,n): gmul(n,ax);
+  res[1]=(long)x;
+  res[2]=(long)ax;
+  return res;
 }
 
 /* Return ideal^e in number field nf. e is a C integer. */
@@ -1328,42 +1323,54 @@ idealpows(GEN nf, GEN ideal, long e)
   affsi(e,court); return idealpow(nf,ideal,court);
 }
 
-/* compute vp^n (vp prime, n integer), reducing along the way if n is big */
 GEN
-idealpowred_prime(GEN nf, GEN vp, GEN n, long prec)
+init_idele(GEN nf)
 {
-  long av=avma,tetpil,i,m,RU, s = signe(n);
   GEN x = cgetg(3,t_VEC);
-  ulong j;
-
+  long RU;
+  nf = checknf(nf);
   RU = itos(gmael(nf,2,1)) + itos(gmael(nf,2,2));
-  x[2] =(long)zerocol(RU); settyp(x[2],t_VEC);
+  x[2] = (long)zerovec(RU); return x;
+}
+
+/* compute z^n (z ideal, n integer), reducing along the way if n is big */
+GEN
+idealpowred(GEN nf, GEN z, GEN n, long prec)
+{
+  long i,m,av=avma, s = signe(n);
+  ulong j;
+  GEN x = z;
+
   if (absi_cmp(n,stoi(16)) < 0)
   {
-    x[1] = s? (long)idealpowprime(nf,vp,n):
-              (long)idmat(lgef(nf[1])-3);
-    tetpil=avma;
-    return gerepile(av,tetpil,ideallllred(nf,x,NULL,prec));
+    x = idealpow(nf,x,n);
+    return gerepileupto(av, ideallllred(nf,x,NULL,prec));
   }
-
   i = lgefint(n)-1; m=n[i]; j=HIGHBIT;
   while ((m&j)==0) j>>=1;
-  x[1] = (long)prime_to_ideal_aux(nf,vp);
   for (j>>=1; j; j>>=1)
   {
     x = idealmul(nf,x,x);
-    if (m&j) x[1] = (long)idealmulprime(nf,(GEN)x[1],vp);
+    if (m&j) x = idealmul(nf,x,z);
     x = ideallllred(nf,x,NULL,prec);
   }
   for (i--; i>=2; i--)
     for (m=n[i],j=HIGHBIT; j; j>>=1)
     {
       x = idealmul(nf,x,x);
-      if (m&j) x[1] = (long)idealmulprime(nf,(GEN)x[1],vp);
+      if (m&j) x = idealmul(nf,x,z);
       x = ideallllred(nf,x,NULL,prec);
     }
   if (s < 0) x = idealinv(nf,x);
   return gerepileupto(av,x);
+}
+
+GEN
+idealmulred(GEN nf, GEN x, GEN y, long prec)
+{
+  long av=avma;
+  x = idealmul(nf,x,y);
+  return gerepileupto(av, ideallllred(nf,x,NULL,prec));
 }
 
 long
@@ -1526,12 +1533,12 @@ GEN
 ideallllredall(GEN nf, GEN I, GEN vdir, long prec, long precint)
 {
   long tx,N,av,i,j;
-  GEN aI0,I0,res,aI,p1,y,x,Nx,b,c,pol;
+  GEN I0,res,aI,p1,y,x,Nx,b,c,pol;
 
   nf = checknf(nf);
   vdir = chk_vdir(nf,vdir);
   pol = (GEN)nf[1]; N = lgef(pol)-3;
-  tx = idealtyp(&I,&aI); I0=I; aI0=aI;
+  tx = idealtyp(&I,&aI); I0=I;
   res = aI? cgetg(3,t_VEC): NULL;
   if (tx == id_PRINCIPAL)
   {
@@ -1574,10 +1581,32 @@ ideallllredall(GEN nf, GEN I, GEN vdir, long prec, long precint)
   y = gmul(I,(GEN)p1[1]); /* small elt in I */
   if (DEBUGLEVEL>=6) msgtimer("lllgram");
   if (isnfscalar(y))
-  {
-    if (I!=I0) I = gerepileupto(av,I); else { avma=av; I = gcopy(I); }
-    if (!aI) return I;
-    if (aI==aI0) aI = gcopy(aI);
+  { /* already reduced */
+    if (!aI) 
+    {
+      if (I == I0) { avma = av; return gcopy(I); }
+      return gerepileupto(av, gcopy(I));
+    }
+    if (I == I0)
+    {
+      avma = av;
+      I = gcopy(I);
+      aI = gcopy(aI);
+    }
+    else
+    {
+      if (typ(aI) == t_POLMOD)
+      {
+        c = gclone(c);
+        I = gerepileupto(av, I);
+        aI = gmul(c,aI); gunclone(c);
+      }
+      else
+      {
+        I = gerepileupto(av, I);
+        aI = gcopy(aI);
+      }
+    }
     res[1]=(long)I; res[2]=(long)aI; return res;
   }
 
@@ -1592,7 +1621,11 @@ ideallllredall(GEN nf, GEN I, GEN vdir, long prec, long precint)
     p1[i] = (long)element_muli(nf,b,(GEN)I[i]);
   c = content(p1); if (!gcmp1(c)) p1 = gdiv(p1,c);
   if (DEBUGLEVEL>=6) msgtimer("new ideal");
-  if (aI) y = gclone(gneg_i(get_arch(nf,y,prec)));
+  if (aI)
+  {
+    y = (typ(aI) == t_POLMOD)? gmul(x,c): gneg_i(get_arch(nf,y,prec));
+    y = gclone(y);
+  }
 
   if (isnfscalar((GEN)I[1]))
   /* c = content (I Nx / x) = Nx / den(I/x) --> d = den(I/x) = Nx / c
@@ -1604,7 +1637,9 @@ ideallllredall(GEN nf, GEN I, GEN vdir, long prec, long precint)
   p1 = gerepileupto(av, p1);
   if (DEBUGLEVEL>=6) msgtimer("final hnf");
   if (!aI) return p1;
-  res[1]=(long)p1; res[2]=ladd(aI,y);
+  res[1]=(long)p1;
+  aI = (typ(aI)==t_POLMOD)? gmul(aI,y): gadd(aI,y);
+  res[2]=(long)aI;
   gunclone(y); return res;
 }
 

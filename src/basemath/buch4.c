@@ -6,6 +6,7 @@
 /*******************************************************************/
 /* $Id$ */
 #include "pari.h"
+#include "parinf.h"
 
 static long
 psquare(GEN a,GEN p)
@@ -455,6 +456,7 @@ nfhilbert0(GEN nf,GEN a,GEN b,GEN p)
   return nfhilbert(nf,a,b);
 }
 
+extern GEN isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag);
 extern GEN vconcat(GEN Q1, GEN Q2);
 extern GEN mathnfspec(GEN x, GEN *ptperm, GEN *ptdep, GEN *ptB, GEN *ptC);
 /* S a list of prime ideal in primedec format. Return res:
@@ -527,7 +529,7 @@ bnfsunit(GEN bnf,GEN S,long prec)
   if (ls>1)
   {
     GEN den, Sperm, perm, dep, B, U1 = U;
-    long lH, lB;
+    long lH, lB, fl = nf_GEN|nf_FORCE;
 
    /* U1 = upper left corner of U, invertible. S * U1 = principal ideals
     * whose generators generate the S-units */
@@ -546,17 +548,12 @@ bnfsunit(GEN bnf,GEN S,long prec)
 
     setlg(Sperm, lH); fa[1] = (long)Sperm;
     for (i=1; i<lH; i++)
-    {
-      fa[2] = H[i];
-      sunit[i] = (long)factorback(fa, nf);
-    }
+      sunit[i] = isprincipalfact(bnf,Sperm,(GEN)H[i],NULL,fl)[2];
     for (i=1; i<lB; i++)
     {
-      fa[2] = B[i]; j = lH-1 + i;
-      sunit[j] = (long)idealmul(nf, (GEN)Sperm[j], factorback(fa, nf));
+      j = lH-1 + i;
+      sunit[j] = isprincipalfact(bnf,Sperm,(GEN)B[i],(GEN)Sperm[j],fl)[2];
     }
-    for (i=1; i<ls; i++)
-      sunit[i] = isprincipalgenforce(bnf, (GEN)sunit[i])[2];
 
     p1 = cgetg(4,t_VEC);
     den = dethnf_i(H); H = gmul(den, invmat(H)); 
