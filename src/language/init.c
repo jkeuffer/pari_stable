@@ -483,7 +483,7 @@ getheap()
   {
     m++; l+=4;
     if (! x[0]) /* user function */
-      l += (strlen((char *)(x+sizeof(entree*)))) / sizeof(long);
+      l += (strlen((char *)(x+2))) / sizeof(long);
     else if (x==bernzone)
       l += x[0];
     else /* GEN */

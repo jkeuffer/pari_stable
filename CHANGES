@@ -76,6 +76,7 @@ XR 39- [stark.c]: bugs in RecCoeff3, reduced memory use in ComputeArtinNumber
    44- f() = bug(x, &y) ---> syntax error
 XR 45- inefficiencies in ComputeArtinNumber for large modulus
 HC 46- no GC in dirmul
+   47- meaningless heap count for user functions
 
   Added
 IZ  1- [gnuplot] look up directory tree for gnuplot related files
