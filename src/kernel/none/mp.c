@@ -709,7 +709,7 @@ addrr(GEN x, GEN y)
     long m = e & (BITS_IN_LONG-1);
 
     /* not worth keeping extra word if less than 3 significant bits in there */
-    if (m - j < 3)
+    if (m - j < 3 && lz > 3)
     { /* shorten z */
       ulong last = (ulong)z[--lz]; /* cancelled word */
 
