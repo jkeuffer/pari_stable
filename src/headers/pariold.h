@@ -30,6 +30,8 @@
 #define pvaluation Z_pvalrem
 #define svaluation u_lvalrem
 
+#define apprgen padicappr
+#define apprgen9 padicappr
 #define ggrandocp ggrando
 #define glogagm glog
 #define logagm  mplog
