@@ -2462,11 +2462,7 @@ plindep(GEN x)
 
   ly = 2*lx - 1;
   m = cgetg(ly+1,t_MAT);
-  for (j=1; j<=ly; j++)
-  {
-    p1 = cgetg(lx+1, t_COL); m[j] = (long)p1;
-    for (i=1; i<=lx; i++) p1[i] = zero;
-  }
+  for (j=1; j<=ly; j++) m[j] = (long)zerocol(lx);
   a = negi((GEN)x[1]);
   for (i=1; i<lx; i++)
   {
@@ -2474,8 +2470,8 @@ plindep(GEN x)
     coeff(m,1  ,i) = x[i+1];
   }
   for (i=1; i<=lx; i++) coeff(m,i,lx-1+i) = (long)pn;
-  p1 = lllint(m);
-  return gerepileupto(av, gmul(m, (GEN)p1[1]));
+  m = lllint_ip(m, 100);
+  return gerepilecopy(av, (GEN)m[1]);
 }
 
 GEN
