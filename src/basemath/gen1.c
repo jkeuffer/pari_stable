@@ -184,23 +184,11 @@ gred_rfrac2_i(GEN n, GEN d)
   p1[2] = lmul(d,cd); return p1;
 }
 
-static GEN
-gred_rfrac_i(GEN x)
-{
-  return gred_rfrac2_i((GEN)x[1], (GEN)x[2]);
-}
-
 GEN
 gred_rfrac2(GEN x1, GEN x2)
 {
   pari_sp av = avma;
   return gerepileupto(av, gred_rfrac2_i(x1, x2));
-}
-
-GEN
-gred_rfrac(GEN x)
-{
-  return gred_rfrac2((GEN)x[1], (GEN)x[2]);
 }
 
 /* x1,x2 t_INT, return x1/x2 in reduced form */
