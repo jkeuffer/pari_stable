@@ -479,7 +479,7 @@ galois(GEN x, long prec)
 	  if (l>6) err(bugparier,"galois (bug4)");
 	  p2=(l==6)? transroot(p1,2,5):transroot(p1,1,l);
 	  p3=gzero;
-	  for (i=1; i<=5; i=j)
+	  for (i=1; i<=5; i++)
 	  {
 	    j = i+1; if (j>5) j -= 5;
 	    p3 = gadd(p3,gmul(gmul((GEN)p2[i],(GEN)p2[j]),
