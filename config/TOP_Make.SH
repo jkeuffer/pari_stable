@@ -41,6 +41,7 @@ dft target::
 	@echo "	dbg	                Compile gp binary suitable for debugging"
 	@echo "	prf	                Compile gp binary suitable for profiling"
 	@echo "	distrib			Create a new distribution"
+	@echo "	bzdist			Create a new bzip2'ed distribution"
 	@echo "	ctags			Generate VI/VIM tags file in ./src"
 	@echo "	etags			Generate Emacs  tags file in ./src"
 	@echo "	tune	                Generate tuning utility"
@@ -81,6 +82,9 @@ tar:
 distrib: tar setdir
 	gzip $tarfile
 	mv $tarfile.gz $ztarfile
+
+bzdist: tar setdir
+	bzip2 $tarfile
 
 dosdistrib: gpman
 	-zip -kr GPB${dosversion}.ZIP GP.EXE README README.DOS ../EMX/README.DOC ../RSX/README.TXT
