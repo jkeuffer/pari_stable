@@ -442,16 +442,15 @@ gprec_w(GEN x, long pr)
 /**                     RECIPROCAL POLYNOMIAL                     **/
 /**                                                               **/
 /*******************************************************************/
-
+/* return coefficients s.t x = x_0 X^n + ... + x_n */
 GEN
 polrecip(GEN x)
 {
-  long lx=lg(x),i,j;
-  GEN y;
+  long lx = lg(x), i, j;
+  GEN y = cgetg(lx,t_POL);
 
   if (typ(x) != t_POL) err(typeer,"polrecip");
-  y=cgetg(lx,t_POL); y[1]=x[1];
-  for (i=2,j=lx-1; i<lx; i++,j--) y[i]=lcopy((GEN)x[j]);
+  y[1] = x[1]; for (i=2,j=lx-1; i<lx; i++,j--) y[i] = lcopy((GEN)x[j]);
   return normalizepol_i(y,lx);
 }
 
@@ -459,11 +458,9 @@ polrecip(GEN x)
 GEN
 polrecip_i(GEN x)
 {
-  long lx=lg(x),i,j;
-  GEN y;
-
-  y=cgetg(lx,t_POL); y[1]=x[1];
-  for (i=2,j=lx-1; i<lx; i++,j--) y[i]=x[j];
+  long lx = lg(x), i, j;
+  GEN y = cgetg(lx,t_POL);
+  y[1] = x[1]; for (i=2,j=lx-1; i<lx; i++,j--) y[i] = x[j];
   return y;
 }
 

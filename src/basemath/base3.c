@@ -469,17 +469,16 @@ element_powid_mod_p(GEN nf, long I, GEN n, GEN p)
   long s,N;
   GEN y;
 
-  if (typ(n)!=t_INT) err(talker,"not an integer exponent in nfpow");
-  nf=checknf(nf); N=degpol(nf[1]);
-  s=signe(n);
+  if (typ(n) != t_INT) err(talker,"not an integer exponent in nfpow");
+  nf = checknf(nf); N = degpol(nf[1]);
+  s = signe(n);
+  if (s < 0) err(talker,"negative power in element_powid_mod_p");
   if (!s || I == 1) return gscalcol_i(gun,N);
-  y = zerocol(N); y[I] = un;
   D.nf = nf;
   D.p = p;
   D.I = I;
-  y = leftright_pow(y,n, (void*)&D, &_sqrmod, &_mulidmod);
-  if (s < 0) y = FpV_red(element_inv(nf,y), p);
-  return av==avma? gcopy(y): gerepileupto(av,y);
+  y = leftright_pow(vec_ei(N, I), n, (void*)&D, &_sqrmod, &_mulidmod);
+  return gerepileupto(av,y);
 }
 
 GEN

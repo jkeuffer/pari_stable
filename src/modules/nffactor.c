@@ -1434,7 +1434,7 @@ nfsqff(GEN nf, GEN pol, long fl)
       }
       avma = av2;
     }
-    apr = apply_kummer(nf,r,gun,ap);
+    apr = primedec_apply_kummer(nf,r,gun,ap);
 
     modpr = zk_to_ff_init(nf,&apr,&aT,&ap);
     red = modprX(polbase, nf, modpr);

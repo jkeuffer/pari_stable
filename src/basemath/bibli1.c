@@ -2578,11 +2578,11 @@ checkentries(pslqL2_M *Mbar)
 
   for (i=1; i<=n; i++)
   {
-    if (expodb(Mbar->y[i]) < -46) return 0;
+    if (dblexpo(Mbar->y[i]) < -46) return 0;
     p1 = Mbar->A[i];
     p2 = Mbar->B[i];
     for (j=1; j<=n; j++)
-      if (expodb(p1[j]) > 43 || expodb(p2[j]) > 43) return 0;
+      if (dblexpo(p1[j]) > 43 || dblexpo(p2[j]) > 43) return 0;
   }
   return 1;
 }
@@ -2599,7 +2599,7 @@ applybar(pslq_M *M, pslqL2_M *Mbar, GEN Abargen, GEN Bbargen)
     p2 = Mbar->B[i];
     for (j=1; j<=n; j++)
     {
-      if (expodb(p1[j]) >= 52 || expodb(p2[j]) >= 52) return 0;
+      if (dblexpo(p1[j]) >= 52 || dblexpo(p2[j]) >= 52) return 0;
       coeff(Abargen,i,j) = lstoi((long)floor(p1[j]));
       coeff(Bbargen,i,j) = lstoi((long)floor(p2[j]));
     }

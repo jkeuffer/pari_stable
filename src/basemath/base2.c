@@ -2032,7 +2032,7 @@ anti_uniformizer(GEN nf, GEN p, GEN u)
 
 /* pr = (p,u) of ramification index e */
 GEN
-apply_kummer(GEN nf,GEN u,GEN e,GEN p)
+primedec_apply_kummer(GEN nf,GEN u,GEN e,GEN p)
 {
   GEN t, T = (GEN)nf[1], pr = cgetg(6,t_VEC);
   long f = degpol(u), N = degpol(T);
@@ -2154,7 +2154,7 @@ _primedec(GEN nf, GEN p)
   {
     L = cgetg(k,t_VEC);
     for (i=1; i<k; i++)
-      L[i] = (long)apply_kummer(nf,(GEN)F[i],(GEN)ex[i],p);
+      L[i] = (long)primedec_apply_kummer(nf,(GEN)F[i],(GEN)ex[i],p);
     if (DEBUGLEVEL>5) msgtimer("simple primedec");
     return L;
   }
@@ -2168,7 +2168,7 @@ _primedec(GEN nf, GEN p)
   L = cgetg(N+1,t_VEC); iL = 1;
   for (i=1; i<k; i++)
     if (is_pm1(ex[i]) || signe(FpX_rem(f,(GEN)F[i],p)))
-      L[iL++] = (long)apply_kummer(nf,(GEN)F[i],(GEN)ex[i],p);
+      L[iL++] = (long)primedec_apply_kummer(nf,(GEN)F[i],(GEN)ex[i],p);
     else /* F[i] | (f,g,h), happens at least once by Dedekind criterion */
       ex[i] = 0;
   if (DEBUGLEVEL>2) msgtimer("%ld Kummer factors", iL-1);

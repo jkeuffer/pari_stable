@@ -618,7 +618,7 @@ randomi(GEN N)
 
 #ifdef LONG_IS_64BIT
 long
-expodb(double x)
+dblexpo(double x)
 {
   union { double f; ulong i; } fi;
   const int mant_len = 52;  /* mantissa bits (excl. hidden bit) */
@@ -692,7 +692,7 @@ rtodbl(GEN x)
 #endif
 
 long
-expodb(double x)
+dblexpo(double x)
 {
   union { double f; ulong i[2]; } fi;
   const int mant_len = 52;  /* mantissa bits (excl. hidden bit) */
