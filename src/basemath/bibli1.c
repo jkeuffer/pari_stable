@@ -752,7 +752,7 @@ GEN
 lllgramintern(GEN x, long alpha, long flag, long prec)
 {
   GEN xinit,L,h,A,B,L1,L2,q,cst;
-  long retry = 2, av = avma,tetpil,lim,l,i,j,k,k1,lx=lg(x),n,kmax;
+  long retry = 2, av = avma,tetpil,lim,l,i,j,k,k1,lx=lg(x),n,kmax, KMAX = 0;
   long last_prec;
 
   if (typ(x) != t_MAT) err(typeer,"lllgram");
@@ -778,9 +778,9 @@ LABLLLGRAM:
   switch(retry--)
   {
     case 2: /* entry */ break;
-    case 1: /* failed already */
+    case 1: /* precision lost, try again */
       tetpil = avma; h = gcopy(h);
-      prec = (prec<<1)-2;
+      prec = (prec<<1)-2; KMAX = kmax;
       if (DEBUGLEVEL > 3) fprintferr("\n");
       if (DEBUGLEVEL) err(warnprec,"lllgramintern",prec);
       x = qf_base_change(gprec_w(xinit,prec),h,1);
@@ -864,7 +864,7 @@ LABLLLGRAM:
       }
       if (DEBUGLEVEL>9) fprintferr("New B = %Z\n",B);
     }
-    lllupdate(x,h,L,kmax,k,k-1);
+    lllupdate(x,h,L,KMAX? KMAX: kmax,k,k-1);
     L1 = gcoeff(L,k,k-1);
     L2 = gsqr(L1);
     q = gmul((GEN)B[k-1], gsub(cst,L2));
@@ -893,7 +893,7 @@ LABLLLGRAM:
     }
     else
     {
-      for (l=k-2; l; l--) lllupdate(x,h,L,kmax,k,l);
+      for (l=k-2; l; l--) lllupdate(x,h,L, KMAX? KMAX: kmax,k,l);
       if (++k > n) break;
     }
     if (low_stack(lim, stack_lim(av,1)))
