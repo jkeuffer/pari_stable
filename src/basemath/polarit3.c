@@ -1432,9 +1432,9 @@ GEN Fp_factor_irred(GEN P,GEN l, GEN Q)
   E=polpol_to_mat(E,np);
   MP = matrixpow(np,d,SP,P,l);
   M = gmul(MP,gmodulcp(gun,l));
-  IR = indexrank(M);
-  E = gtrans(extract(gtrans(E),(GEN)IR[1]));
-  M = gtrans(extract(gtrans(M),(GEN)IR[1]));
+  IR = (GEN)sindexrank(M)[1];
+  E = rowextract_p(E, IR);
+  M = rowextract_p(M, IR);
   M = lift(invmat(M));
   MQ = matrixpow(nq,d,SQ,Q,l);
   M = FpM_mul(MQ,M,l);

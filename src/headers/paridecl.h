@@ -72,6 +72,7 @@ GEN     mattodiagonal(GEN m);
 long    rank(GEN x);
 GEN     rowextract_i(GEN A, long x1, long x2);
 GEN     rowextract_p(GEN A, GEN p);
+GEN     sindexrank(GEN x);
 GEN     suppl(GEN x);
 GEN     suppl_intern(GEN x, GEN myid);
 GEN     vecextract_i(GEN A, long y1, long y2);

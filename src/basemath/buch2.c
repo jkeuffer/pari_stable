@@ -1524,8 +1524,8 @@ small_norm_for_buchall(long t,long **mat,GEN matarch,long nbrel,long LIMC,
 	p1=cgetg(KC+1,t_COL); tmp[j]=(long)p1;
 	for(i=1;i<=KC;i++) p1[i]=lstoi(mat[j][i]);
       }
-      tmp = (GEN)indexrank(tmp)[2]; k=lg(tmp)-1;
-      fprintferr("%ld; independent columns: %Z\n",lg(tmp)-1,tmp);
+      tmp = (GEN)sindexrank(tmp)[2]; k=lg(tmp)-1;
+      fprintferr("%ld; independent columns: %Z\n",k,tmp);
     }
     if(nbsmallnorm)
       fprintferr("\nnb. fact./nb. small norm = %ld/%ld = %.3f\n",
@@ -1851,11 +1851,11 @@ compute_multiple_of_R(GEN xarch,long RU,long N,GEN *ptsublambda)
 
   i = gprecision(mdet); /* truncate to avoid "near dependant" vectors */
   mdet_t = (i <= 4)? mdet: gprec_w(mdet,i-1);
-  v = (GEN)indexrank(mdet_t)[2]; /* list of independant column indices */
+  v = (GEN)sindexrank(mdet_t)[2]; /* list of independant column indices */
   /* check we have full rank for units */
   if (lg(v) != RU+1) { avma=av; return NULL; }
 
-  Im_mdet = extract(mdet,v);
+  Im_mdet = vecextract_p(mdet,v);
   /* integral multiple of R: the cols we picked form a Q-basis, they have an
    * index in the full lattice */
   kR = gdivgs(det2(Im_mdet), N);
