@@ -1224,7 +1224,7 @@ hnfideal_inv(GEN nf, GEN I)
 
   if (gcmp1(dI)) dI = NULL; else I = gmul(I,dI);
   NI = dethnf_i(I);
-  if (gcmp0(NI)) err(talker, "cannot invert zero ideal");
+  if (gcmp0(NI) || lg(I)==1) err(talker, "cannot invert zero ideal");
   I = idealmulh(nf,I, gmael(nf,5,7));
  /* I in HNF, hence easily inverted. Multiply by NI to get integer coeffs
   * d_K cancels while solving the linear equations. */
