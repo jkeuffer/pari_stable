@@ -24,6 +24,9 @@ extern GEN matrixpow(long n, long m, GEN y, GEN P,GEN l);
 extern GEN Fp_factor_irred(GEN P,GEN l, GEN Q);
 extern GEN FpX_rand(long d1, long v, GEN p);
 extern GEN hensel_lift_fact(GEN pol, GEN Q, GEN T, GEN p, GEN pe, long e);
+extern GEN ZX_disc_all(GEN x, ulong bound);
+extern GEN indexpartial(GEN P, GEN DP);
+extern GEN initgaloisborne(GEN T, GEN dn, GEN *ptL, GEN *ptprep, GEN *ptdis, long *ptprec);
 
 static GEN print_block_system(long N,GEN Y,long d,GEN vbs,long maxl);
 
@@ -933,11 +936,6 @@ fix_var(GEN x, long v)
   for (i=1; i<l; i++) { GEN t = (GEN)x[i]; setvarn(t[1],v); setvarn(t[2],v); }
   return x;
 }
-
-extern GEN vandermondeinverseprep(GEN T, GEN L);
-extern GEN ZX_disc_all(GEN x, ulong bound);
-extern GEN indexpartial(GEN P, GEN DP);
-extern GEN initgaloisborne(GEN T, GEN dn, GEN *ptL, GEN *ptprep, GEN *ptdis, long *ptprec);
 
 void
 subfields_poldata(GEN T, struct poldata *PD)
