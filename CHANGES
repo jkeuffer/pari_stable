@@ -104,7 +104,7 @@ IZ 16- readline: hit_return() would not work after Esc-H
    18- clean up in the bnrdisclist ray class group internal functions
 
   Added
-    1- files README.WIN, config/arch-osname, doc/tex2mail.1
+    1- files README.WIN, config/[arch-osname|locatesymbol], doc/tex2mail.1
 GN  2- Jebelean extended gcd + rational number reconstruction
 XR  3- new flag to rnfconductor (check extension is abelian)
 IZ  4- set of default colors (boldfg)
