@@ -699,6 +699,7 @@ matrice(GEN nlig, GEN ncol,entree *ep1, entree *ep2, char *ch)
   long c2[]={evaltyp(t_INT)|m_evallg(3), evalsigne(1)|evallgefint(3), 1};
 
   s=signe(ncol);
+  if (ep1 == ep2) err(talker, "identical index variables in matrix");
   if (typ(ncol)!=t_INT || s<0) err(talker,"bad number of columns in matrix");
   if (!s) return cgetg(1,t_MAT);
 
