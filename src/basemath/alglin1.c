@@ -309,7 +309,7 @@ concat(GEN x, GEN y)
       { lx = lg(x); i = 1; }
     else
     {
-      err_cat(x,y);
+      err(typeer,"concat");
       return NULL; /* not reached */
     }
     if (i>=lx) err(talker,"trying to concat elements of an empty vector");
