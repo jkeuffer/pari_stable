@@ -629,7 +629,7 @@ normlp(GEN L, long p, long n)
  * n0 = bound for |vS|^2
  * */
 static double
-get_Bhigh(long n0, long d, GEN t)
+get_Bhigh(long n0, long d)
 {
   double sqrtd = sqrt((double)d);
   double z = n0*sqrtd + sqrtd/2 * (d * (n0+1));
@@ -703,7 +703,7 @@ init_trace(trace_data *T, GEN S, nflift_t *L, GEN q)
     double *t = dalloc(h * sizeof(double));
     GEN c = (GEN)T->dPinvS[j];
     T->PinvSdbl[j] = t;
-    for (i=1; i < h; i++) t[i] = rtodbl(gmul(invd, (GEN)c[i]));
+    for (i=1; i < h; i++) t[i] = rtodbl(mpmul(invd, (GEN)c[i]));
   }
 
   T->d  = L->den;
@@ -770,7 +770,7 @@ nfcmbf(nfcmbf_t *T, GEN p, long a, long maxK, long klim)
   GEN C2ltpol, C = T->L->topowden, Tpk = T->L->Tpk;
   GEN Clt  = mul_content(C, lt);
   GEN C2lt = mul_content(C,Clt);
-  const double Bhigh = get_Bhigh(lfamod, dnf, q);
+  const double Bhigh = get_Bhigh(lfamod, dnf);
   trace_data _T1, _T2, *T1, *T2;
   pari_timer ti;
 
@@ -1155,7 +1155,7 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long k, long rec)
   * write S = S1 q + S0, P = P1 q + P0
   * |S1 vS + P1 vP|^2 <= Bhigh for all (vS,vP) assoc. to true factors */
   Btra = mulrr(ZC, mulsr(dP*dP, normlp(Br, 2, dnf)));
-  Bhigh = get_Bhigh(n0, dnf, gceil(Btra));
+  Bhigh = get_Bhigh(n0, dnf);
   C = (long)ceil(sqrt(Bhigh/n0)) + 1; /* C^2 n0 ~ Bhigh */
   Bnorm = dbltor( n0 * C * C + Bhigh );
   ZERO = zeromat(n0, dnf);
@@ -1464,13 +1464,13 @@ nfsqff(GEN nf, GEN pol, long fl)
     if (!aT)
     { /* degree 1 */
       red = u_Fp_FpX(red, pp);
-      if (!u_FpX_is_squarefree(red, pp)) continue;
+      if (!u_FpX_is_squarefree(red, pp)) { avma = av2; continue; }
       anbf = fl? u_FpX_nbroots(red, pp): u_FpX_nbfact(red, pp);
     }
     else
     {
       GEN q;
-      if (!FqX_is_squarefree(red,aT,ap)) continue;
+      if (!FqX_is_squarefree(red,aT,ap)) { avma = av2; continue; }
       q = gpowgs(ap, degpol(aT));
       anbf = fl? FqX_split_deg1(&fa, red, q, aT, ap)
                : FqX_split_by_degree(&fa, red, q, aT, ap);
@@ -1489,6 +1489,7 @@ nfsqff(GEN nf, GEN pol, long fl)
       nbf = anbf; pr = apr;
       L.Tp = aT; init_fa = fa;
     }
+    else avma = av2;
     if (DEBUGLEVEL>3)
       fprintferr("%3ld %s at prime\n  %Z\nTime: %ld\n",
                  anbf, fl?"roots": "factors", apr, TIMER(&ti_pr));

@@ -48,7 +48,8 @@ GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den);
 /* compute Newton sums S_1(P), ... , S_n(P). S_k(P) = sum a_j^k, a_j root of P
  * If N != NULL, assume p-adic roots and compute mod N [assume integer coeffs]
  * If T != NULL, compute mod (T,N) [assume integer coeffs if N != NULL]
- * If y0!= NULL, precomputed i-th powers, i=1..m, m = length(y0) */
+ * If y0!= NULL, precomputed i-th powers, i=1..m, m = length(y0).
+ * Not memory clena in the latter case */
 GEN
 polsym_gen(GEN P, GEN y0, long n, GEN T, GEN N)
 {
@@ -64,7 +65,7 @@ polsym_gen(GEN P, GEN y0, long n, GEN T, GEN N)
   {
     if (typ(y0) != t_COL) err(typeer,"polsym_gen");
     m = lg(y0)-1;
-    for (i=1; i<=m; i++) y[i] = lcopy((GEN)y0[i]);
+    for (i=1; i<=m; i++) y[i] = y0[i]; /* not memory clean */
   }
   else
   {
