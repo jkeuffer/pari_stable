@@ -2,13 +2,14 @@
 #include <anal.h>
 
 GEN   gzero, gun, gdeux;
-ulong top, bot, avma, memused = 0;
+gpmem_t top, bot, avma;
+ulong memused = 0;
 long  DEBUGLEVEL,DEBUGMEM = 0;
 
 void specinit()
 {
   long size = 100000L;
-  bot = (long)malloc(size);
+  bot = (gpmem_t)malloc(size);
   top = avma = bot + size;
   gzero = malloc(2);
   gzero[0] = evaltyp(t_INT)|evallg(2);
