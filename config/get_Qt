@@ -6,10 +6,13 @@ if test -n "$with_qt"; then
   QTDIR=
   case "$with_qt" in
   yes)
-     pth="/usr/lib /usr/local/lib"
-     QTDIR=`locatedir qt3 $pth`
+     pth="/usr/local/lib /usr/local/share /usr/lib /usr/share"
+     QTDIR=`locatedir qt $pth`
      if test -z "$QTDIR"; then
-       QTDIR=`locatedir qt2 $pth`
+       QTDIR=`locatedir qt3 $pth`
+       if test -z "$QTDIR"; then
+         QTDIR=`locatedir qt2 $pth`
+       fi
      fi;;
   *) if test ! -d "$with_qt"; then
       echo "### Qt directory '$with_qt' not found"
