@@ -1244,7 +1244,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
   }
   if (DEBUGLEVEL>2)
     fprintferr("* Time LLL: %ld\n* Time Check Factor: %ld\n",ti_LLL,ti_CF);
-  get_timer(id); return list;
+  (void)get_timer(id); return list;
 }
 
 /* Return P(h * x) */
@@ -1355,7 +1355,7 @@ combine_factors(GEN target, GEN famod, GEN p, long klim, long hint)
     /* remove last elt, possibly unfactored. Add all new ones. */
     setlg(res, l); res = concatsp(res, L);
   }
-  get_timer(id); return res;
+  (void)get_timer(id); return res;
 }
 
 #define u_FpX_div(x,y,p) u_FpX_divrem((x),(y),(p),(0),NULL)
@@ -1430,7 +1430,7 @@ DDF(GEN a, long hint)
       fprintferr("...tried prime %3ld (%-3ld factor%s). Time = %ld\n",
                   p, nfacp, nfacp==1?"": "s", timer2());
     if (min_deg(lbit-1,tabbit) > klim) { 
-      get_timer(id);
+      (void)get_timer(id);
       avma = av; return _col(a);
     }
     if (nfacp < nmax)
@@ -1468,7 +1468,7 @@ DDF(GEN a, long hint)
   res = combine_factors(a, famod, prime, da-1, hint);
   if (DEBUGLEVEL>2)
     fprintferr("Total Time: %ld\n===========\n", ti + gentimer(id));
-  get_timer(id);
+  (void)get_timer(id);
   return gerepilecopy(av, res);
 }
 
