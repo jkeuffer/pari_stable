@@ -34,6 +34,7 @@ caract2_i(GEN p, GEN x, int v, GEN (subres_f)(GEN,GEN,GEN*))
   GEN p1, p2 = leading_term(p);
 
   if (!signe(x)) return gpowgs(polx[v], lgef(p)-3);
+  if (typ(x) != t_POL) x = scalarpol(x,v);
   x = gneg_i(x); x[2] = ladd((GEN)x[2], polx[MAXVARN]);
   p1=subres_f(p, x, NULL);
   if (typ(p1) == t_POL && varn(p1)==MAXVARN)
