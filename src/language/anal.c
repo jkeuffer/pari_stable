@@ -2251,10 +2251,12 @@ identifier(void)
 
       free_args((gp_args*)ep->args);
       ep->args = NULL;
+      ep->valence = EpNEW;
     /* Fall through */
 
     case EpNEW: /* new function */
     {
+      GEN tokill = EpVALENCE(ep) == EpUSER?(GEN)ep->value:NULL;
       GEN tmpargs = (GEN)avma;
       char *start;
       long len, narg, nloc;
@@ -2313,7 +2315,7 @@ identifier(void)
       ((char *) newfun)[len] = 0;
      /* wait till here for gunclone because of strncopy above. In pathological
       * cases, e.g. (f()=f()=x), new text is given by value of old one! */
-      if (EpVALENCE(ep) == EpUSER) gunclone((GEN)ep->value);
+      if (tokill) gunclone(tokill);
       ep->value = (void *)ptr;
       ep->valence = EpUSER;
       check_new_fun=NULL;
