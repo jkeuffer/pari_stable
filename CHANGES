@@ -129,6 +129,8 @@ BA 60- add "const" keyword to allow building with g++
    70- nfnewprec(nfinit(x,3)) --> SEGV
    71- bnrconductorofchar(0,0)--> SEGV [bad input]
    72- qfjacobi( non-square matrix )  --> SEGV [bad input]
+   73- matmultodiagonal([;],matrix(0,1)); --> SEGV [bad input]
+
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available

@@ -844,25 +844,22 @@ matmuldiagonal(GEN m, GEN d)
   return y;
 }
 
-/* compute m*n assuming the result is a diagonal matrix */
+/* compute A*B assuming the result is a diagonal matrix */
 GEN
-matmultodiagonal(GEN m, GEN n)
+matmultodiagonal(GEN A, GEN B)
 {
-  long lx,i,j;
-  GEN s,y;
+  long i, j, hA, hB, lA = lg(A), lB = lg(B);
+  GEN y = idmat(lB-1);
 
-  if (typ(m)!=t_MAT || typ(n)!=t_MAT) err(typeer,"matmultodiagonal");
-  lx=lg(n); y=idmat(lx-1);
-  if (lx == 1)
-    { if (lg(m) != 1) err(consister,"matmultodiagonal"); }
-  else
-    { if (lg(m) != lg(n[1])) err(consister,"matmultodiagonal"); }
-  for (i=1; i<lx; i++)
+  if (typ(A) != t_MAT || typ(B) != t_MAT) err(typeer,"matmultodiagonal");
+  hA = (lA == 1)? lB: lg(A[1]);
+  hB = (lB == 1)? lA: lg(B[1]);
+  if (lA != hB || lB != hA) err(consister,"matmultodiagonal");
+  for (i=1; i<lB; i++)
   {
-    s = gzero;
-    for (j=1; j<lx; j++)
-      s = gadd(s,gmul(gcoeff(m,i,j),gcoeff(n,j,i)));
-    coeff(y,i,i) = (long)s;
+    GEN z = gzero;
+    for (j=1; j<lA; j++) z = gadd(z, gmul(gcoeff(A,i,j),gcoeff(B,j,i)));
+    coeff(y,i,i) = (long)z;
   }
   return y;
 }
