@@ -483,6 +483,10 @@ to_polmod(GEN x, GEN mod)
   return z;
 }
 
+/* is -1 not a square in Zp, assume p prime */
+INLINE int
+Zp_nosquare_m1(GEN p) { return (mod4(p) & 2); /* 2 or 3 mod 4 */ }
+
 GEN
 gadd(GEN x, GEN y)
 {
@@ -633,11 +637,11 @@ gadd(GEN x, GEN y)
             return z;
 
 	  case t_PADIC:
-	    if (krosg(-1,(GEN)y[2])== -1)
+	    if (Zp_nosquare_m1((GEN)y[2]))
 	    {
-	      z=cgetg(3,t_COMPLEX);
-              z[1]=ladd((GEN)x[1],y);
-	      z[2]=lcopy((GEN)x[2]); return z;
+	      z = cgetg(3,t_COMPLEX);
+              z[1] = ladd((GEN)x[1],y);
+	      z[2] = lcopy((GEN)x[2]); return z;
 	    }
 	    av=avma; l = signe(y[4])? precp(y): 1;
 	    p1=cvtop(x,(GEN)y[2], l + valp(y)); tetpil=avma;
@@ -1262,7 +1266,7 @@ gmul(GEN x, GEN y)
 	    gerepilemanyvec(av,tetpil, z+1,2); return z;
 	
 	  case t_PADIC:
-	    if (krosg(-1,(GEN)y[2]))
+	    if (Zp_nosquare_m1((GEN)y[2]))
 	    {
 	      z=cgetg(3,t_COMPLEX);
 	      z[1]=lmul((GEN)x[1],y);
@@ -1931,7 +1935,7 @@ gdiv(GEN x, GEN y)
 	    return gerepile(av,tetpil, gdiv(p2,p1));
 
 	  case t_PADIC:
-	    if (krosg(-1,(GEN)y[2])== -1)
+	    if (Zp_nosquare_m1((GEN)y[2]))
 	    {
 	      z=cgetg(3,t_COMPLEX);
 	      z[1]=ldiv((GEN)x[1],y);

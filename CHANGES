@@ -133,6 +133,7 @@ BA 47- bitneg(1,0) --> SEGV (caused by 2.2.5 A10).
    52- misleading error message rtodber "overflow or underflow in R->dbl"
        (in fact, only overflow)
    53- quadgen(-8) * 0. --> SEGV
+   54- I + O(2^10) --> error
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.
