@@ -1884,7 +1884,7 @@ apprgen9(GEN f, GEN a)
     ps_1=itos(p)-1; x2=ggrandocp(p,1);
   }
   f = poleval(f,gadd(a,gmul(p,polx[varn(f)])));
-  f = gdiv(f,gpuigs(p,ggval(f,p)));
+  f = gdiv(f,gpowgs(p,ggval(f,p)));
 
   d=degpol(T); vecg=cgetg(d+1,t_COL);
   for (i=1; i<=d; i++)
@@ -1934,34 +1934,32 @@ cmp_padic(GEN x, GEN y)
 /*   Using Buchmann--Lenstra   */
 /*******************************/
 
-/* factor nf[1] in Zp to precision pr */
+/* factor T = nf[1] in Zp to precision k */
 static GEN
-padicff2(GEN nf,GEN p,long pr)
+padicff2(GEN nf,GEN p,long k)
 {
-  long N=degpol(nf[1]),i,j,d,l;
-  GEN mat,V,D,fa,p1,pk,dec_p,pke,a,theta;
+  GEN z, mat, D, U,fa, pk, dec_p, Ui, mulx;
+  long i, l;
 
-  pk=gpuigs(p,pr); dec_p=primedec(nf,p);
-  l=lg(dec_p); fa=cgetg(l,t_COL);
+  mulx = eltmul_get_table(nf, gmael(nf,8,2)); /* mul by (x mod T) */
+  dec_p = primedec(nf,p);
+  l = lg(dec_p); fa = cgetg(l,t_COL);
+  D = NULL; /* -Wall */
   for (i=1; i<l; i++)
   {
-    p1 = (GEN)dec_p[i];
-    pke = idealpows(nf,p1, pr * itos((GEN)p1[3]));
-    V = smithall(pke, &D, NULL);
-    for (d=1; d<=N; d++)
-      if (! egalii(gcoeff(V,d,d),pk)) break;
-    a=ginv(D); theta=gmael(nf,8,2); mat=cgetg(d,t_MAT);
-    for (j=1; j<d; j++)
-    {
-      p1 = gmul(D, element_mul(nf,theta,(GEN)a[j]));
-      setlg(p1,d); mat[j]=(long)p1;
-    }
-    fa[i]=(long)caradj(mat,0,NULL);
+    GEN P = (GEN)dec_p[i];
+    long e = itos((GEN)P[3]), ef = e * itos((GEN)P[4]);
+    D = smithall(idealpows(nf,P, k*e), &U, NULL);
+    Ui= ginv(U); setlg(Ui, ef+1); /* cf smithrel */
+    U = rowextract_i(U, 1, ef);
+    mat = gmul(U, gmul(mulx, Ui));
+    fa[i] = (long)caradj(mat,0,NULL);
   }
-  a = cgetg(l,t_COL); pk = icopy(pk);
+  pk = gcoeff(D,1,1); /* = p^k */
+  z = cgetg(l,t_COL); pk = icopy(pk);
   for (i=1; i<l; i++)
-    a[i] = (long)pol_to_padic((GEN)fa[i],pk,p,pr);
-  return a;
+    z[i] = (long)pol_to_padic((GEN)fa[i],pk,p,k);
+  return z;
 }
 
 static GEN
@@ -2372,7 +2370,7 @@ factmod9(GEN f, GEN p, GEN T)
   frobinv = gpowgs(p, degpol(T)-1);
 
   X = polx[vf];
-  q = gpuigs(p, degpol(T));
+  q = gpowgs(p, degpol(T));
   e = nbfact = 1;
   pk = 1;
   f3 = NULL;
