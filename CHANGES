@@ -82,7 +82,7 @@ MW 33- (recent) typo in localred (char 2)
    34- 2.2.3-C20 had broken backward compatibility: restore
        [inefficient, useless] previous output of nfelt*modpr routines
    35- idealappr(nfinit(y),matid(2),1) --> SEGV  [bad input]
-
+   36- sqrtn(0,...) ---> error
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).
@@ -100,6 +100,8 @@ IZ  8- [library:] unified access to diffptr (NEXT_PRIME_VIADIFF macro)
    10- major cleanup in thue / thueinit
    11- major cleanup in rnfkummer (use elements in factored form)
    12- improved quadray(D < 0) when relative degree is huge
+   13- improved bnfisprincipal when class group large: use factorisation
+       (+idealred) instead of arch. components (require much less precision)
 
   Added
  BA 1- Add PARI_VERSION and PARI_VERSION_CODE to paricfg.h

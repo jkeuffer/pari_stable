@@ -25,6 +25,7 @@ extern GEN nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec);
 extern GEN get_nfindex(GEN bas);
 extern GEN sqred1_from_QR(GEN x, long prec);
 extern GEN computeGtwist(GEN nf, GEN vdir);
+extern GEN famat_to_nf(GEN nf, GEN f);
 extern GEN famat_to_arch(GEN nf, GEN fa, long prec);
 extern GEN to_famat_all(GEN x, GEN y);
 extern int addcolumntomatrix(GEN V, GEN invp, GEN L);
@@ -1034,12 +1035,12 @@ isprincipalall0(GEN bnf, GEN x, long *ptprec, long flag)
   vectbase = (GEN)bnf[5]; /* needed by factorgensimple */
 
   /* factor x */
-  xc = content(x); if (!gcmp1(xc)) x = gdiv(x,xc);
+  x = Q_primitive_part(x, &xc);
 
-  p1 = init_idele(nf);
-  p1[1] = (long)x;
-  p1[2] = lgetg(1,t_MAT); /* compute archimedean part as a famat */
-  xar= split_ideal(nf,p1,prec,vperm);
+  xar = init_idele(nf);
+  xar[1] = (long)x;
+  xar[2] = lgetg(1,t_MAT); /* compute archimedean part as a famat */
+  xar = split_ideal(nf,xar,prec,vperm);
 
   lW = lg(W)-1; Wex = zerocol(lW);
   lB = lg(B)-1; Bex = zerocol(lB); get_split_expo(Wex,Bex,vperm);
@@ -1079,6 +1080,12 @@ isprincipalall0(GEN bnf, GEN x, long *ptprec, long flag)
   Q = gdiv(dethnf_i(x), get_norm_fact(gen, ex, &d));
   col = isprincipalarch(bnf, col, Q, gun, d, &e);
   if (col && !fact_ok(nf,x, col,gen,ex)) col = NULL;
+  if (!col && !gcmp0(ex))
+  {
+    p1 = isprincipalfact(bnf, gen, gneg(ex), x, flag);
+    col = (GEN)p1[2];
+    e = itos((GEN)p1[3]);
+  }
   if (!col)
   {
     *ptprec = prec + (e >> TWOPOTBITS_IN_LONG) + (MEDDEFAULTPREC-2);
@@ -1090,6 +1097,7 @@ isprincipalall0(GEN bnf, GEN x, long *ptprec, long flag)
     err(warner,"precision too low for generators, not given");
     e = 0;
   }
+  if (!xc) xc = gun;
   y = cgetg(4,t_VEC);
   y[1] = lcopy(ex);
   y[2] = e? lmul(xc,col): lgetg(1,t_COL);
