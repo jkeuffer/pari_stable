@@ -489,7 +489,7 @@ print_prefixed_text(char *s, char *prefix, char *str)
       _new_line(prefix); linelen = prelen;
       if (space) { str++; len--; space = 0; }
     }
-    pariputs(str); if (!len && str[len-1] != '\n') pariputc('\n');
+    pariputs(str); if (!len || str[len-1] != '\n') pariputc('\n');
     if (space) { linelen++; len--; }
     for (i=0; i<linelen; i++) pariputc(' ');
     pariputc('^');
