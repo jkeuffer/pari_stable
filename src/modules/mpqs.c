@@ -569,7 +569,8 @@ mpqs_find_k(GEN N, long tries)
     109,113,127,131,137,139
   };
   pari_sp av = avma;
-  long best_k = 1, k, p, N_mod_4 = mod4(N);
+  long best_k = 1, k, N_mod_4 = mod4(N);
+  ulong p;
   GEN kN;
   double best_value = 1, value, dp;
   long i, j;
@@ -634,7 +635,7 @@ mpqs_count_primes(void)
  * If a prime factor of N is found during the construction, it is returned
  * in f, otherwise f = 0  (such a factor necessarily fits into a C long). */
 static long*
-mpqs_create_FB(long size, GEN kN, long k, ulong *f)
+mpqs_create_FB(long size, GEN kN, ulong k, ulong *f)
 {
   ulong p = 0;
   long i, kr, *FB;
