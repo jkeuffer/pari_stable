@@ -688,7 +688,7 @@ mpdivis(GEN x, GEN y, GEN z)
 
 /* assume 0 <= k < 32. Return random 0 <= x < (1<<k) */
 INLINE long
-random_bits(k) { return pari_rand31() >> (31 - k); }
+random_bits(long k) { return pari_rand31() >> (31 - k); }
 
 INLINE ulong
 itou(GEN x)
