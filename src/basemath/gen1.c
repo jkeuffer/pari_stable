@@ -908,24 +908,22 @@ gadd(GEN x, GEN y)
   }
   if (ty == t_POLMOD) /* is_const_t(tx) in this case */
     return add_polmod_scal((GEN)y[1], (GEN)y[2], x);
+  vy = gvar(y);
   if (is_scalar_t(tx))  {
-    vy = gvar(y);
     if (tx == t_POLMOD)
     {
       vx = varn(x[1]);
-      if (vx != vy) {
+      if (vx == vy) y = gmod(y, (GEN)x[1]); /* error if ty == t_SER */
+      else
         if (varncmp(vx,vy) > 0) return add_scal(y, x, ty, vy);
-        return add_polmod_scal((GEN)x[1], (GEN)x[2], y);
-      }
-      /* error if ty == t_SER */
-      return add_polmod_scal((GEN)x[1], (GEN)x[2], gmod(y, (GEN)x[1]));
+      return add_polmod_scal((GEN)x[1], (GEN)x[2], y);
     }
     return add_scal(y, x, ty, vy);
   }
   /* x and y are not scalars, ty != t_MAT */
   vx = gvar(x);
-  vy = gvar(y);
   if (vx != vy) { /* x or y is treated as a scalar */
+    if (is_vec_t(tx) || is_vec_t(ty)) err(operf,"+",x,y);
     return (varncmp(vx, vy) < 0)? add_scal(x, y, tx, vx)
                                 : add_scal(y, x, ty, vy);
   }
