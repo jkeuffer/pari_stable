@@ -541,7 +541,7 @@ polhensellift(GEN pol, GEN fct, GEN p, long exp)
     err(talker, "not a polynomial in polhensellift");
   if ((typ(fct) != t_COL && typ(fct) != t_VEC) || (lg(fct) < 3))
     err(talker, "not a factorization in polhensellift");
-  if (typ(p) != t_INT || !isprime(p))
+  if (typ(p) != t_INT || !IsLucasPsP(p))
     err(talker, "not a prime number in polhensellift");
   if (exp < 1)
     err(talker, "not a positive exponent in polhensellift");

@@ -648,14 +648,15 @@ treatspecialsigma(GEN nf, GEN gf, int raw, long prec)
     return NULL;
   }
 
-  p1 = gcoeff(gf,1,1);
+  p1 = gcoeff(gf,1,1); /* integer > 0 */
   p2 = gcoeff(gf,2,2);
   if (gcmp1(p2)) { fl = 0; tryf = p1; }
   else {
     if (Ds % 16 != 8 || !egalii(content(gf),gdeux)) return NULL;
     fl = 1; tryf = shifti(p1,-1);
   }
-  if (cmpis(tryf, 3) <= 0 || !gcmp0(resii(D, tryf)) || !isprime(tryf))
+  /* tryf integer > 0 */
+  if (cmpis(tryf, 3) <= 0 || signe(resii(D, tryf)) || !isprime(tryf))
     return NULL;
 
   i = itos(tryf); if (fl) i *= 4;

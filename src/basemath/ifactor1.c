@@ -3417,7 +3417,7 @@ ifac_whoiswho(GEN *partial, GEN *where, long after_crack)
       continue;
     }
     scan[2] =
-      (isprime((GEN)(*scan)) ?
+      (IsLucasPsP((GEN)(*scan)) ?
        (larger_compos ? un : deux) : /* un- or finished prime */
        zero);			/* composite */
 
@@ -3579,7 +3579,7 @@ ifac_crack(GEN *partial, GEN *where)
   } /* while carrecomplet */
 
   /* check whether our composite hasn't become prime */
-  if (exp1 > 1 && hint != 15 && isprime((GEN)(**where)))
+  if (exp1 > 1 && hint != 15 && IsLucasPsP((GEN)(**where)))
   {
     (*where)[2] = un;
     if (DEBUGLEVEL >= 4)
@@ -3620,7 +3620,7 @@ ifac_crack(GEN *partial, GEN *where)
       if (moebius_mode) return 0; /* no need to carry on... */
     } /* while is_odd_power */
 
-    if (exp2 > 1 && hint != 15 && isprime((GEN)(**where)))
+    if (exp2 > 1 && hint != 15 && IsLucasPsP((GEN)(**where)))
     { /* Something nice has happened and our composite has become prime */
       (*where)[2] = un;
       if (DEBUGLEVEL >= 4)

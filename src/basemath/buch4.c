@@ -690,7 +690,7 @@ rnfisnorm(GEN bnf,GEN ext,GEN x,long flag,long PREC)
 {
   long lgsunitrelnf,i;
   gpmem_t ltop = avma;
-  GEN relnf,aux,vec,tors,xnf,H,Y,M,A,suni,sunitrelnf,sunitnormnf,prod;
+  GEN listp,relnf,aux,vec,tors,xnf,H,Y,M,A,suni,sunitrelnf,sunitnormnf,prod;
   GEN res = cgetg(3,t_VEC), S1,S2;
 
   if (typ(ext)!=t_VEC || lg(ext)!=4) err (typeer,"bnfisnorm");
@@ -715,18 +715,24 @@ rnfisnorm(GEN bnf,GEN ext,GEN x,long flag,long PREC)
     vecconcat(bnf,relnf,vec,&prod,&S1,&S2);
   }
 
-  if (flag>1)
+  if (flag > 1)
   {
-    for (i=2; i<=flag; i++)
-      if (isprime(stoi(i)) && signe(resis(prod,i)))
-      {
-	prod=mulis(prod,i);
-	S1=concatsp(S1,primedec(bnf,stoi(i)));
-	S2=concatsp(S2,primedec(relnf,stoi(i)));
-      }
+    i = cgcd(flag, smodis(prod,flag));
+    if (i > 1) flag /= i; /* don't include same primes twice */
+    listp = (GEN)factor(stoi(flag))[1];
+    for (i=1; i<lg(listp); i++)
+    {
+      GEN p = (GEN)listp[i];
+      prod = mulii(prod,p);
+      S1 = concatsp(S1,primedec(bnf,p));
+      S2 = concatsp(S2,primedec(relnf,p));
+    }
   }
-  else if (flag<0)
-    vecconcat(bnf,relnf,(GEN)factor(stoi(-flag))[1],&prod,&S1,&S2);
+  else if (flag < 0)
+  {
+    listp = (GEN)factor(stoi(-flag))[1];
+    vecconcat(bnf,relnf,listp,&prod,&S1,&S2);
+  }
 
   if (flag)
   {
@@ -735,7 +741,7 @@ rnfisnorm(GEN bnf,GEN ext,GEN x,long flag,long PREC)
     vecconcat(bnf,relnf,(GEN) factor(absi(normdiscrel))[1],
 	      &prod,&S1,&S2);
   }
-  vec=(GEN) idealfactor(bnf,x)[1]; aux=cgetg(2,t_VEC);
+  vec=(GEN)idealfactor(bnf,x)[1]; aux=cgetg(2,t_VEC);
   for (i=1; i<lg(vec); i++)
     if (signe(resii(prod,gmael(vec,i,1))))
     {
