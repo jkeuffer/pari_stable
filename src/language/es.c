@@ -733,6 +733,7 @@ GENtoGENstr(GEN x)
   char *s;
   GEN z;
   T.prettyp = f_RAW;
+  T.sp = 0;
   s = GENtostr0(x, &T, &gen_output);
   z = STRtoGENstr(s); free(s); return z;
 }
@@ -823,14 +824,14 @@ wr_intsgn(GEN x, int minus)
 
 /* write int. T->fieldw: field width (pad with ' ') */
 static void
-wr_int(pariout_t *T, GEN x, int nosign)
+wr_int(pariout_t *T, GEN x, int addsign)
 {
   long sx = signe(x);
   pari_sp av = avma;
   char *s;
 
   if (!sx) { blancs(T->fieldw - 1); pariputc('0'); return; }
-  s = itostr(x, sx < 0 && !nosign);
+  s = itostr(x, sx < 0 && addsign);
   blancs( T->fieldw - strlen(s) );
   pariputs(s); avma = av;
 }
@@ -955,7 +956,7 @@ wr_float(pariout_t *T, GEN x, int f_format)
  * sigd: number of sigd to print (all if <0).
  */
 static void
-wr_real(pariout_t *T, GEN x, int nosign)
+wr_real(pariout_t *T, GEN x, int addsign)
 {
   pari_sp av;
   long sx = signe(x), ex = expo(x);
@@ -976,7 +977,7 @@ wr_real(pariout_t *T, GEN x, int nosign)
       pariputsf("0.E%ld", ex10(ex) + 1);
     return;
   }
-  if (!nosign && sx < 0) pariputc('-'); /* print sign if needed */
+  if (addsign && sx < 0) pariputc('-'); /* print sign if needed */
   av = avma;
   wr_float(T,x, (T->format == 'g' && ex >= -32) || T->format == 'f');
   avma = av;
@@ -1460,10 +1461,10 @@ wr_monome(pariout_t *T, GEN a, const char *v, long d)
   else
   {
     sig = isfactor(a);
-    if (sig) { sp_sign_sp(T,sig); bruti(a,T,sig); }
+    if (sig) { sp_sign_sp(T,sig); bruti(a,T,0); }
     else
     {
-      sp_sign_sp(T,1); pariputc('('); bruti(a,T,sig); pariputc(')');
+      sp_sign_sp(T,1); pariputc('('); bruti(a,T,1); pariputc(')');
     }
     if (d) { pariputc('*'); monome(v,d); }
   }
@@ -1478,14 +1479,14 @@ wr_texnome(pariout_t *T, GEN a, const char *v, long d)
   else
   {
     sig = isfactor(a);
-    if (sig) { putsigne(sig); texi(a,T,sig); }
+    if (sig) { putsigne(sig); texi(a,T,0); }
     else
     {
       if (T->TeXstyle & TEXSTYLE_PAREN)
         pariputs(" + (");
       else
 	pariputs(" + \\left(");
-      texi_nobrace(a,T,sig);		/* With braces no auto-linebreaks */
+      texi_nobrace(a,T,1);		/* With braces no auto-linebreaks */
       if (T->TeXstyle & TEXSTYLE_PAREN)
         pariputs(") ");
       else
@@ -1504,44 +1505,44 @@ wr_texnome(pariout_t *T, GEN a, const char *v, long d)
 }
 
 static void
-wr_lead_monome(pariout_t *T, GEN a,const char *v, long d, int nosign)
+wr_lead_monome(pariout_t *T, GEN a,const char *v, long d, int addsign)
 {
   long sig = isone(a);
   if (sig)
   {
-    if (!nosign && sig<0) pariputc('-');
+    if (addsign && sig<0) pariputc('-');
     monome(v,d);
   }
   else
   {
-    if (isfactor(a)) bruti(a,T,nosign);
+    if (isfactor(a)) bruti(a,T,addsign);
     else
     {
-      pariputc('('); bruti(a,T,0); pariputc(')');
+      pariputc('('); bruti(a,T,1); pariputc(')');
     }
     if (d) { pariputc('*'); monome(v,d); }
   }
 }
 
 static void
-wr_lead_texnome(pariout_t *T, GEN a,const char *v, long d, int nosign)
+wr_lead_texnome(pariout_t *T, GEN a,const char *v, long d, int addsign)
 {
   long sig = isone(a);
   if (sig)
   {
-    if (!nosign && sig<0) pariputc('-');
+    if (addsign && sig<0) pariputc('-');
     texnome(v,d);
   }
   else
   {
-    if (isfactor(a)) texi(a,T,nosign);
+    if (isfactor(a)) texi(a,T,addsign);
     else
     {
       if (T->TeXstyle & TEXSTYLE_PAREN)
         pariputs(" (");
       else
         pariputs(" \\left(");
-      texi_nobrace(a,T,0);		/* With braces no auto-linebreaks */
+      texi_nobrace(a,T,1);		/* With braces no auto-linebreaks */
       if (T->TeXstyle & TEXSTYLE_PAREN)
         pariputs(") ");
       else
@@ -1558,7 +1559,7 @@ wr_lead_texnome(pariout_t *T, GEN a,const char *v, long d, int nosign)
 }
 
 void
-bruti(GEN g, pariout_t *T, int nosign)
+bruti(GEN g, pariout_t *T, int addsign)
 {
   long tg,l,i,j,r;
   GEN a,b;
@@ -1570,7 +1571,7 @@ bruti(GEN g, pariout_t *T, int nosign)
   r = isone(g);
   if (r)
   {
-    if (!nosign && r<0) pariputc('-');
+    if (addsign && r<0) pariputc('-');
     pariputc('1'); return;
   }
 
@@ -1578,21 +1579,21 @@ bruti(GEN g, pariout_t *T, int nosign)
   switch(tg)
   {
     case t_SMALL: pariputsf("%ld",smalltos(g)); break;
-    case t_INT: wr_intsgn(g, !nosign && signe(g) < 0); break;
-    case t_REAL: wr_real(T,g,nosign); break;
+    case t_INT: wr_intsgn(g, addsign && signe(g) < 0); break;
+    case t_REAL: wr_real(T,g,addsign); break;
 
     case t_INTMOD: case t_POLMOD:
       pariputs(new_fun_set? "Mod(": "mod(");
-      bruti((GEN)g[2],T,0); comma_sp(T);
-      bruti((GEN)g[1],T,0); pariputc(')'); break;
+      bruti((GEN)g[2],T,1); comma_sp(T);
+      bruti((GEN)g[1],T,1); pariputc(')'); break;
 
     case t_FRAC: case t_FRACN: case t_RFRAC: case t_RFRACN:
       r = isfactor((GEN)g[1]); if (!r) pariputc('(');
-      bruti((GEN)g[1],T,nosign);
+      bruti((GEN)g[1],T,addsign);
       if (!r) pariputc(')');
       pariputc('/');
       r = isdenom((GEN)g[2]); if (!r) pariputc('(');
-      bruti((GEN)g[2],T,0);
+      bruti((GEN)g[2],T,1);
       if (!r) pariputc(')');
       break;
 
@@ -1600,17 +1601,17 @@ bruti(GEN g, pariout_t *T, int nosign)
       a = (GEN)g[r+1]; b = (GEN)g[r+2]; v = r? "w": "I";
       if (isnull(a))
       {
-        wr_lead_monome(T,b,v,1,nosign);
+        wr_lead_monome(T,b,v,1,addsign);
         return;
       }
-      bruti(a,T,nosign);
+      bruti(a,T,addsign);
       if (!isnull(b)) wr_monome(T,b,v,1);
       break;
 
     case t_POL: v = get_var(ordvar[varn(g)], buf);
       /* hack: we want g[i] = coeff of degree i. */
       i = degpol(g); g += 2; while (isnull((GEN)g[i])) i--;
-      wr_lead_monome(T,(GEN)g[i],v,i,nosign);
+      wr_lead_monome(T,(GEN)g[i],v,i,addsign);
       while (i--)
       {
         a = (GEN)g[i];
@@ -1623,7 +1624,7 @@ bruti(GEN g, pariout_t *T, int nosign)
       if (signe(g))
       { /* hack: we want g[i] = coeff of degree i. */
         l = i + lg(g)-2; g += (2-i);
-        wr_lead_monome(T,(GEN)g[i],v,i,nosign);
+        wr_lead_monome(T,(GEN)g[i],v,i,addsign);
         while (++i < l)
         {
           a = (GEN)g[i];
@@ -1660,17 +1661,17 @@ bruti(GEN g, pariout_t *T, int nosign)
 
     case t_QFR: case t_QFI: r = (tg == t_QFR);
       if (new_fun_set) pariputs("Qfb("); else pariputs(r? "qfr(": "qfi(");
-      bruti((GEN)g[1],T,0); comma_sp(T);
-      bruti((GEN)g[2],T,0); comma_sp(T);
-      bruti((GEN)g[3],T,0);
-      if (r) { comma_sp(T); bruti((GEN)g[4],T,0); }
+      bruti((GEN)g[1],T,1); comma_sp(T);
+      bruti((GEN)g[2],T,1); comma_sp(T);
+      bruti((GEN)g[3],T,1);
+      if (r) { comma_sp(T); bruti((GEN)g[4],T,1); }
       pariputc(')'); break;
 
     case t_VEC: case t_COL:
       pariputc('['); l = lg(g);
       for (i=1; i<l; i++)
       {
-        bruti((GEN)g[i],T,0);
+        bruti((GEN)g[i],T,1);
         if (i<l-1) comma_sp(T);
       }
       pariputc(']'); if (tg==t_COL) pariputc('~');
@@ -1681,7 +1682,7 @@ bruti(GEN g, pariout_t *T, int nosign)
       pariputs("List(["); l = lgeflist(g);
       for (i=2; i<l; i++)
       {
-        bruti((GEN)g[i],T,0);
+        bruti((GEN)g[i],T,1);
         if (i<l-1) comma_sp(T);
       }
       pariputs("])"); break;
@@ -1701,14 +1702,14 @@ bruti(GEN g, pariout_t *T, int nosign)
       if (l==2) 
       {
         pariputs(new_fun_set? "Mat(": "mat(");
-        if (r == 2) { bruti(gcoeff(g,1,1),T,0); pariputc(')'); return; }
+        if (r == 2) { bruti(gcoeff(g,1,1),T,1); pariputc(')'); return; }
       }
       pariputc('[');
       for (i=1; i<l; i++)
       {
 	for (j=1; j<r; j++)
 	{
-	  bruti(gcoeff(g,i,j),T,0);
+	  bruti(gcoeff(g,i,j),T,1);
           if (j<r-1) comma_sp(T);
 	}
 	if (i<l-1) { pariputc(';'); sp(T); }
@@ -1725,7 +1726,7 @@ matbruti(GEN g, pariout_t *T)
 {
   long i,j,r,l;
 
-  if (typ(g) != t_MAT) { bruti(g,T,0); return; }
+  if (typ(g) != t_MAT) { bruti(g,T,1); return; }
 
   r=lg(g); if (r==1 || lg(g[1])==1) { pariputs("[;]\n"); return; }
   pariputc('\n'); l = lg(g[1]);
@@ -1734,7 +1735,7 @@ matbruti(GEN g, pariout_t *T)
     pariputc('[');
     for (j=1; j<r; j++)
     {
-      bruti(gcoeff(g,i,j),T,0); if (j<r-1) pariputc(' ');
+      bruti(gcoeff(g,i,j),T,1); if (j<r-1) pariputc(' ');
     }
     if (i<l-1) pariputs("]\n\n"); else pariputs("]\n");
   }
@@ -1778,12 +1779,12 @@ sori(GEN g, pariout_t *T)
   const char *v;
   char buf[32];
 
-  if (tg == t_INT) { wr_int(T,g,0); return; }
+  if (tg == t_INT) { wr_int(T,g,1); return; }
   if (tg != t_MAT && tg != t_COL) T->fieldw = 0;
   switch (tg)
   {
     case t_SMALL: pariputsf("%ld",smalltos(g)); return;
-    case t_REAL: wr_real(T,g,0); return;
+    case t_REAL: wr_real(T,g,1); return;
     case t_STR:
       pariputc('"'); pariputs(GSTR(g)); pariputc('"'); return;
     case t_LIST:
@@ -1953,15 +1954,15 @@ sori(GEN g, pariout_t *T)
 
 /* this follows bruti exactly */
 void
-texi(GEN g, pariout_t *T, int nosign)
+texi(GEN g, pariout_t *T, int addsign)
 {
     pariputc('{');
-    texi_nobrace(g, T, nosign);
+    texi_nobrace(g, T, addsign);
     pariputc('}');
 }
 
 void
-texi_nobrace(GEN g, pariout_t *T, int nosign)
+texi_nobrace(GEN g, pariout_t *T, int addsign)
 {
   long tg,i,j,l,r;
   GEN a,b;
@@ -1972,7 +1973,7 @@ texi_nobrace(GEN g, pariout_t *T, int nosign)
   r = isone(g);
   if (r)
   {
-    if (!nosign && r<0) pariputc('-');
+    if (addsign && r<0) pariputc('-');
     pariputs("1"); return;
   }
 
@@ -1980,36 +1981,36 @@ texi_nobrace(GEN g, pariout_t *T, int nosign)
   switch(tg)
   {
     case t_SMALL: pariputsf("%ld",smalltos(g)); break;
-    case t_INT: wr_intsgn(g, !nosign && signe(g) < 0); break;
-    case t_REAL: wr_real(T,g,nosign); break;
+    case t_INT: wr_intsgn(g, addsign && signe(g) < 0); break;
+    case t_REAL: wr_real(T,g,addsign); break;
 
     case t_INTMOD: case t_POLMOD:
-      texi((GEN)g[2],T,0); pariputs(" mod ");
-      texi((GEN)g[1],T,0); break;
+      texi((GEN)g[2],T,1); pariputs(" mod ");
+      texi((GEN)g[1],T,1); break;
 
     case t_FRAC: case t_FRACN: case t_RFRAC: case t_RFRACN:
       if (T->TeXstyle & TEXSTYLE_FRAC)
 	pariputs("\\frac");		/* Assume that texi() puts braces */
-      texi((GEN)g[1],T,nosign); 
+      texi((GEN)g[1],T,addsign); 
       if (!(T->TeXstyle & TEXSTYLE_FRAC))
 	  pariputs("\\over");
-      texi((GEN)g[2],T,0); break;
+      texi((GEN)g[2],T,1); break;
 
     case t_COMPLEX: case t_QUAD: r = (tg==t_QUAD);
       a = (GEN)g[r+1]; b = (GEN)g[r+2]; v = r? "w": "I";
       if (isnull(a))
       {
-        wr_lead_texnome(T,b,v,1,nosign);
+        wr_lead_texnome(T,b,v,1,addsign);
         break;
       }
-      texi(a,T,nosign);
+      texi(a,T,addsign);
       if (!isnull(b)) wr_texnome(T,b,v,1);
       break;
 
     case t_POL: v = get_texvar(ordvar[varn(g)], buf, sizeof(buf));
       /* hack: we want g[i] = coeff of degree i. */
       i = degpol(g); g += 2; while (isnull((GEN)g[i])) i--;
-      wr_lead_texnome(T,(GEN)g[i],v,i,nosign);
+      wr_lead_texnome(T,(GEN)g[i],v,i,addsign);
       while (i--)
       {
         a = (GEN)g[i];
@@ -2022,7 +2023,7 @@ texi_nobrace(GEN g, pariout_t *T, int nosign)
       if (signe(g))
       { /* hack: we want g[i] = coeff of degree i. */
         l = i + lg(g)-2; g += (2-i);
-        wr_lead_texnome(T,(GEN)g[i],v,i,nosign);
+        wr_lead_texnome(T,(GEN)g[i],v,i,addsign);
         while (++i < l)
         {
           a = (GEN)g[i];
@@ -2056,17 +2057,17 @@ texi_nobrace(GEN g, pariout_t *T, int nosign)
     }
     case t_QFR: case t_QFI: r = (tg == t_QFR);
       if (new_fun_set) pariputs("Qfb("); else pariputs(r? "qfr(": "qfi(");
-      texi((GEN)g[1],T,0); pariputs(", ");
-      texi((GEN)g[2],T,0); pariputs(", ");
-      texi((GEN)g[3],T,0);
-      if (r) { pariputs(", "); texi((GEN)g[4],T,0); }
+      texi((GEN)g[1],T,1); pariputs(", ");
+      texi((GEN)g[2],T,1); pariputs(", ");
+      texi((GEN)g[3],T,1);
+      if (r) { pariputs(", "); texi((GEN)g[4],T,1); }
       pariputc(')'); break;
 
     case t_VEC:
       pariputs("\\pmatrix{ "); l = lg(g);
       for (i=1; i<l; i++)
       {
-	texi((GEN)g[i],T,0); if (i<lg(g)-1) pariputc('&');
+	texi((GEN)g[i],T,1); if (i<lg(g)-1) pariputc('&');
       }
       pariputs("\\cr}\n"); break;
 
@@ -2074,7 +2075,7 @@ texi_nobrace(GEN g, pariout_t *T, int nosign)
       pariputs("\\pmatrix{ "); l = lgeflist(g);
       for (i=2; i<l; i++)
       {
-	texi((GEN)g[i],T,0); if (i < l-1) pariputc('&');
+	texi((GEN)g[i],T,1); if (i < l-1) pariputc('&');
       }
       pariputs("\\cr}\n"); break;
 
@@ -2082,7 +2083,7 @@ texi_nobrace(GEN g, pariout_t *T, int nosign)
       pariputs("\\pmatrix{ "); l = lg(g);
       for (i=1; i<l; i++)
       {
-	texi((GEN)g[i],T,0); pariputs("\\cr\n");
+	texi((GEN)g[i],T,1); pariputs("\\cr\n");
       }
       pariputc('}'); break;
 
@@ -2110,7 +2111,7 @@ texi_nobrace(GEN g, pariout_t *T, int nosign)
         {
           for (j=1; j<r; j++)
           {
-            texi(gcoeff(g,i,j),T,0); if (j<r-1) pariputc('&');
+            texi(gcoeff(g,i,j),T,1); if (j<r-1) pariputc('&');
           }
           pariputs("\\cr\n ");
         }
@@ -2315,8 +2316,8 @@ gen_output(GEN x, pariout_t *T)
     case f_PRETTYMAT: matbruti(y, T); break;
     case f_PRETTY:
     case f_PRETTYOLD: sori (y, T); break;
-    case f_RAW      : bruti(y, T, 0); break;
-    case f_TEX      : texi (y, T, 0); break;
+    case f_RAW      : bruti(y, T, 1); break;
+    case f_TEX      : texi (y, T, 1); break;
   }
   avma = av;
 }
