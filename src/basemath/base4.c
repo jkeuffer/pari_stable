@@ -1622,39 +1622,40 @@ idealappr0(GEN nf, GEN x, long fl)
     fact=x; list=(GEN)fact[1]; ep=(GEN)fact[2]; r=lg(list);
     if (r==1) return gscalcol_i(gun,N);
     for (i=1; i<r; i++)
-      if (signe(ep[i])<0)
+      if (signe(ep[i]) < 0) break;
+    if (i < r)
+    {
+      ep1=cgetg(r,t_COL);
+      for (i=1; i<r; i++)
+        ep1[i] = (signe(ep[i])>=0)? zero: lnegi((GEN)ep[i]);
+      fact[2]=(long)ep1; beta=idealappr0(nf,fact,1);
+      fact2=idealfactor(nf,beta);
+      p1=(GEN)fact2[1]; r2=lg(p1);
+      ep2=(GEN)fact2[2]; l=r+r2-1;
+      z=cgetg(l,t_VEC); for (i=1; i<r; i++) z[i]=list[i];
+      ep1=cgetg(l,t_VEC);
+      for (i=1; i<r; i++)
+        ep1[i] = (signe(ep[i])<=0)? zero: licopy((GEN)ep[i]);
+      j=r-1;
+      for (i=1; i<r2; i++)
       {
-	ep1=cgetg(r,t_COL);
-	for (i=1; i<r; i++)
-          ep1[i] = (signe(ep[i])>=0)? zero: lnegi((GEN)ep[i]);
-	fact[2]=(long)ep1; beta=idealappr0(nf,fact,1);
-	fact2=idealfactor(nf,beta);
-	p1=(GEN)fact2[1]; r2=lg(p1);
-        ep2=(GEN)fact2[2]; l=r+r2-1;
-        z=cgetg(l,t_VEC); for (i=1; i<r; i++) z[i]=list[i];
-	ep1=cgetg(l,t_VEC);
-	for (i=1; i<r; i++)
-          ep1[i] = (signe(ep[i])<=0)? zero: licopy((GEN)ep[i]);
-	j=r-1;
-	for (i=1; i<r2; i++)
-	{
-	  p3=(GEN)p1[i]; k=1;
-	  while (k<r &&
-            (    !gegal((GEN)p3[1],gmael(list,k,1))
-	      || !element_val(nf,(GEN)p3[2],(GEN)list[k]) )) k++;
-	  if (k==r) { j++; z[j]=(long)p3; ep1[j]=ep2[i]; }
-	}
-        fact=cgetg(3,t_MAT);
-        fact[1]=(long)z; setlg(z,j+1);
-        fact[2]=(long)ep1; setlg(ep1,j+1);
-	alpha=idealappr0(nf,fact,1); tetpil=avma;
-	if (DEBUGLEVEL>2)
-	{
-	  fprintferr(" alpha = "); outerr(alpha);
-	  fprintferr(" beta = "); outerr(beta);
-	}
-	return gerepile(av,tetpil,element_div(nf,alpha,beta));
-      }	
+        p3=(GEN)p1[i]; k=1;
+        while (k<r &&
+          (    !gegal((GEN)p3[1],gmael(list,k,1))
+            || !element_val(nf,(GEN)p3[2],(GEN)list[k]) )) k++;
+        if (k==r) { j++; z[j]=(long)p3; ep1[j]=ep2[i]; }
+      }
+      fact=cgetg(3,t_MAT);
+      fact[1]=(long)z; setlg(z,j+1);
+      fact[2]=(long)ep1; setlg(ep1,j+1);
+      alpha=idealappr0(nf,fact,1); tetpil=avma;
+      if (DEBUGLEVEL>2)
+      {
+        fprintferr(" alpha = "); outerr(alpha);
+        fprintferr(" beta = "); outerr(beta);
+      }
+      return gerepile(av,tetpil,element_div(nf,alpha,beta));
+    }	
     y=idmat(N);
     for (i=1; i<r; i++)
     {
