@@ -814,13 +814,14 @@ ComputeArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
     
     vB[i]= set_sign_mod_idele(nf, NULL,vB[i], cond,sarch);
     beta2 = element_mul(nf, vB[i], muslambda);
-    tr = gmod(gmul(vt, beta2), den);
 
+    tr = gmod(gmul(vt, beta2), den);
+    s0 = powgi(z,tr);
     for (ic = 1; ic <= nChar; ic++)
     {
       long ind = vN[ic][i]; 
       GEN val = (GEN)lC[ic]->val[ind];
-      s[ic] = gadd(s[ic], gmul(val, powgi(z,tr)));
+      s[ic] = gadd(s[ic], gmul(val, s0));
     }
 
     if (low_stack(lim, stack_lim(av2, 1)))
