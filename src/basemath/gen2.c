@@ -474,9 +474,15 @@ lexcmp(GEN x, GEN y)
 static int
 polegal(GEN x, GEN y)
 {
-  long i, lx = lgef(x);
+  long i, lx;
 
-  if (x[1] != y[1] && (lgef(y) != lx || lx > 3)) return 0;
+  while (lgef(x) == 3) { x = (GEN)x[2]; if (typ(x) != t_POL) break; }
+  while (lgef(y) == 3) { y = (GEN)y[2]; if (typ(y) != t_POL) break; }
+  if (typ(x) != t_POL) return (typ(y)==t_POL)? 0: gegal(x,y);
+  if (typ(y) != t_POL) return (typ(x)==t_POL)? 0: gegal(x,y);
+  lx = lgef(x);
+  if (lx == 2) return (lgef(y) == 2);
+  if (x[1] != y[1]) return 0;
   for (i = 2; i < lx; i++)
     if (!gegal((GEN)x[i],(GEN)y[i])) return 0;
   return 1;

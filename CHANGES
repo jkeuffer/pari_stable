@@ -63,6 +63,8 @@ IS 17- [AIX:] various compilation problems + select better CFLAGS
 IS 18- [HPUX:] remove -E from DLCFLAGS
    19- bnrconductor(bnfinit(x)) --> SEGV [ missing check ]
    20- ellpow(E,...,-1) --> stack error [ from 2.2.5 ]
+   21- a:b:c; c/a/b == c/b/a --> 0
+
 
   Changed
     1- rnf structure (removed useless components)
