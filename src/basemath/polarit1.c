@@ -1570,7 +1570,7 @@ ZpX_liftroots(GEN f, GEN S, GEN q, long e)
   else
   { /* totally split: use trace trick */
     pari_sp av = avma;
-    GEN z = gel(f, d-1);/* -trace(roots) */
+    GEN z = gel(f, d+1);/* -trace(roots) */
     for(i=1; i<n;i++) z = addii(z, gel(y,i));
     z = modii(negi(z), gpowgs(q,e));
     gel(y,n) = gerepileuptoint(av,z);
