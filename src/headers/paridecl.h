@@ -1310,6 +1310,7 @@ long    vals(ulong x);
 
 /* nffactor.c */
 
+GEN     FqX_factor(GEN x, GEN T, GEN p);
 GEN     nffactor(GEN nf,GEN x);
 GEN     nffactormod(GEN nf,GEN pol,GEN pr);
 int     nfisgalois(GEN nf, GEN x);
@@ -1556,6 +1557,7 @@ GEN     Fq_pow(GEN x, GEN n, GEN pol, GEN p);
 GEN     Fq_red(GEN x, GEN T, GEN p);
 GEN     Fq_sub(GEN x, GEN y, GEN T/*unused*/, GEN p);
 GEN     FqV_roots_to_pol(GEN V, GEN p, GEN Tp, long v);
+GEN     FqV_red(GEN z, GEN T, GEN p);
 GEN     FqX_div(GEN x, GEN y, GEN T, GEN p);
 GEN     FqX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *z);
 GEN     FqX_rem(GEN x, GEN y, GEN T, GEN p);
