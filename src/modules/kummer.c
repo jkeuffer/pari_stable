@@ -49,16 +49,6 @@ groupproduct(GEN B, GEN T)
   return c;
 }
 
-static GEN
-grouppows(GEN B, long ex)
-{
-  long lB = lg(B),j;
-  GEN c = cgetg(lB,t_VEC);
- 
-  for (j=1; j<lB; j++) c[j] = lpowgs((GEN)B[j], ex);
-  return c;
-}
-
 static int
 ok_x(GEN X, GEN arch, GEN vecmunit2, GEN msign)
 {
@@ -461,7 +451,7 @@ isprincipalell(GEN bnfz, GEN id, GEN vecalpha, GEN uu)
   GEN y,logdisc,be;
 
   y = isprincipalgenforce(bnfz,id);
-  logdisc = (GEN)y[1];
+  logdisc = gmod((GEN)y[1], gell);
   be = basistoalg(bnfz,(GEN)y[2]);
   for (i=rc+1; i<l; i++)
     be = gmul(be, powgi((GEN)vecalpha[i], modii(mulii((GEN)logdisc[i],(GEN)uu[i]),gell)));
@@ -983,7 +973,7 @@ rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   for (j=1; j<=m-1; j++)
   {
     p3 = tauofalg(p3,U);
-    p4 = groupproduct(grouppows(p3,(j*d)%ell),(GEN)p1[m-j]);
+    p4 = groupproduct(p3, gmod(gmulsg((j*d)%ell,(GEN)p1[m-j]), gell));
     for (i=1; i<=rc; i++) p2[i] = lmul((GEN)p2[i],(GEN)p4[i]);
   }
   vecC=p2;
