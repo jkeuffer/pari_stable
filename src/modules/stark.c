@@ -255,8 +255,8 @@ InitQuotient0(GEN DA, GEN C)
 
   H = gcmp0(C)? DA: C;
   MrC  = gauss(H, DA);
-  D = diagonal(smith(hnf(MrC)));
-  MQ   = concatsp(gmul(H, D), DA);
+  (void)smithall(hnf(MrC), &U, NULL);
+  MQ   = concatsp(gmul(H, U), DA);
   D = smithall(hnf(MQ), &U, NULL);
 
   rep = cgetg(5, t_VEC);
@@ -346,8 +346,8 @@ ComputeIndex2Subgroup(GEN bnr, GEN C)
   T = gmul(C,ginv(U));
   subgrp  = subgrouplist(D, gdeux);
   nb = lg(subgrp) - 1;
-
-  for (i = 1; i < nb; i++) /* skip Id which comes last */
+  setlg(subgrp, nb); /* skip Id which comes last */
+  for (i = 1; i < nb; i++)
     subgrp[i] = (long)hnf(concatsp(gmul(T, (GEN)subgrp[i]), Mr));
 
   disable_dbg(-1);
@@ -1925,12 +1925,15 @@ GetST(GEN dataCR, long prec)
     av2 = avma;
     for (n = 1; n <= NN; n++)
     {
-      GEN csurn = gdivgs(c1, n), nsurc = ginv(csurn);
-      GEN lncsurn = glog(csurn, prec2);
+      GEN csurn, nsurc, lncsurn;
       GEN A,B,s,t, *gptr[2];
 
       if (DEBUGLEVEL>1 && n%100 == 0) fprintferr(" %ld", n);
       if (matan && IsZero(matan[n], degs[LChar[1]])) continue;
+
+      csurn = gdivgs(c1, n);
+      nsurc = ginv(csurn);
+      lncsurn = glog(csurn, prec2);
 
       Z[2] = (long)lncsurn; /* r >= 2 */
       for (i = 3; i <= r; i++)
@@ -1988,7 +1991,7 @@ GetST(GEN dataCR, long prec)
         }
       gaffect(p1, (GEN)S[t]);
       gaffect(p2, (GEN)T[t]);
-      FreeMat(matan, NN); avma = av2;
+      FreeMat(matan, NN); matan = NULL; avma = av2;
     }
     if (DEBUGLEVEL>1) fprintferr("\n");
     avma = av1;
