@@ -90,7 +90,7 @@ gpolvar(GEN x)
   else
   {
     long v=gvar(x);
-    if (v==BIGINT) err(typeer,"polvar");
+    if (v==BIGINT) err(typeer,"gpolvar");
     x = polx[v];
   }
   return gcopy(x);
@@ -1648,9 +1648,10 @@ roundr(GEN x)
   pari_sp av;
   GEN t;
   if (!s || (ex=expo(x)) < -1) return gen_0;
-  if (ex < 0) return s>0? gen_1: gen_m1;
+  if (ex == -1) return s>0? gen_1:
+                            absrnz_egal2n(x)? gen_0: gen_m1;
   av = avma;
-  t = real2n(-1, 3 + (ex>>TWOPOTBITS_IN_LONG)); /* = 0.5 */
+  t = real2n(-1, nbits2prec(ex+1)); /* = 0.5 */
   return gerepileuptoint(av, floorr( addrr(x,t) ));
 }
 
@@ -1698,19 +1699,22 @@ grndtoi(GEN x, long *e)
   *e = -(long)HIGHEXPOBIT;
   switch(tx)
   {
-    case t_INT: case t_INTMOD: case t_QUAD: case t_FRAC:
-      return ground(x);
-
+    case t_INT: case t_INTMOD: case t_QUAD: return gcopy(x);
+    case t_FRAC: return diviiround((GEN)x[1], (GEN)x[2]);
     case t_REAL:
-      av = avma; p1 = gadd(ghalf,x); ex = expo(p1);
-      if (ex < 0)
+      ex = expo(x);
+      if (!signe(x) || ex < -1) { *e = ex; return gen_0; }
+      av = avma;
+      p1 = addrr(real2n(-1,nbits2prec(ex+2)), x); e1 = expo(p1);
+      if (e1 < 0)
       {
-	if (signe(p1)>=0) { *e = expo(x); avma = av; return gen_0; }
+	if (signe(p1) >= 0) { *e = ex; avma = av; return gen_0; }
         *e = expo(addsr(1,x)); avma = av; return gen_m1;
       }
-      lx= lg(x); e1 = ex - bit_accuracy(lx) + 1;
+      lx = lg(x); 
+      e1 = e1 - bit_accuracy(lx) + 1;
       y = ishiftr_lg(p1, lx, e1);
-      if (signe(x)<0) y=addsi(-1,y);
+      if (signe(x) < 0) y = addsi(-1,y);
       y = gerepileuptoint(av,y);
 
       if (e1 <= 0) { av = avma; e1 = expo(subri(x,y)); avma = av; }
@@ -1723,8 +1727,7 @@ grndtoi(GEN x, long *e)
     case t_COMPLEX:
       av = avma; y = cgetg(3, t_COMPLEX);
       y[2] = lrndtoi((GEN)x[2], e);
-      if (!signe(y[2]))
-      {
+      if (!signe(y[2])) {
         avma = av;
         y = grndtoi((GEN)x[1], &e1);
       }

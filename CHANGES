@@ -63,6 +63,7 @@ BA 15- polsubcyclo() used too much memory for large conductors.
    17- subgrouplist([], [2]) --> [[;]]  (instead of [])
    18- typo in FqX_split [  (!degpol(x))  --> degpol(x) <= 0 ] -> very rare SEGV
    19- after alias(a, b); kill(b), invoking 'a' would access corrupted data
+   20- round(-0.5) --> -1 [ should be 0, as was output by round(-0.5, &e) ]
 
   Added
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu
