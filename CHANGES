@@ -33,6 +33,7 @@ Done for version ???? (released ??/??/99):
     5- for (A=1, 2, A = -A) --> SEGV
 IZ  6- [gnuplot] couldn't set terminal as the first graphing operation
 DE  7- typo in kernel/sparcv7/level0.S: err --> pari_err
+    8- TeXmacs interface (use new protocol)
 
   Added
 IZ  1- [gnuplot] look up directory tree for gnuplot related files

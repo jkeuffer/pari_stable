@@ -141,12 +141,14 @@ const_express(struct value*v)
 void*
 gp_alloc(unsigned long size, char *usage)
 {
+  (void)usage;
   return malloc(size);
 }
 
 void*
 gp_realloc(void *old, unsigned long size, char *usage)
 {
+  (void)usage;
   return realloc(old,size);
 }
 
@@ -465,6 +467,7 @@ void
 set_term_funcp3(FUNC_PTR change_p, void *term_p, TSET_FP tchange)
 {
     SET_OUTFILE;
+    (void)term_p;
     my_term_ftable.change_term_p = change_p;
     my_term_ftable.loaded = 1;
     if (tchange) {

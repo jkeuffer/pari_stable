@@ -142,6 +142,7 @@ pari_rl_forward_sexp(int count, int key)
 {
   int deep = 0, dir = 1, move_point, lfail;
 
+  (void)key;
   if (count < 0)
   {
     count = -count; dir = -1;
@@ -557,6 +558,7 @@ rl_short_help(int count, int key)
 static int
 rl_long_help(int count, int key)
 {
+  (void)count;
   return rl_short_help(-1,key);
 }
 

@@ -31,6 +31,7 @@ rectdraw0(long *w, long *x, long *y, long lw, long do_free)
   PariRect *e;
   RectObj *p1;
 
+  (void)do_free;
   PARI_get_plot(0);
 
 #if 0
@@ -133,6 +134,7 @@ rectdraw0(long *w, long *x, long *y, long lw, long do_free)
 void
 PARI_get_plot(long fatal)
 {
+  (void)fatal;
   if (pari_plot.init) {
     return;
   }

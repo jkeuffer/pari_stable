@@ -1126,7 +1126,7 @@ vandermondeinverse(GEN L, GEN T, GEN den)
 }
 /* Calcule le polynome associe a un vecteur conjugue v */
 static GEN
-vectopol(GEN v, GEN L, GEN M, GEN den, long x)
+vectopol(GEN v, GEN M, GEN den, long x)
 {
   ulong ltop = avma, lbot;
   GEN res;
@@ -2336,7 +2336,7 @@ suite:				/* Djikstra probably hates me. (Linus
     mod = gmodulcp(gun, ip);
     P = corpsfixeorbitemod(L, O, x, mod, gb->l, &PL);
     S = corpsfixeinclusion(O, PL);
-    S = vectopol(S, L, M, den, x);
+    S = vectopol(S, M, den, x);
     if (DEBUGLEVEL >= 6)
       fprintferr("GaloisConj:Inclusion:%Z\n", S);
     Pmod = (GEN) factmod(P, ip)[1];
@@ -2715,7 +2715,7 @@ galoisfixedfield(GEN gal, GEN perm, GEN p)
   O = vecpermorbite(perm);
   P = corpsfixeorbitemod((GEN) gal[3], O, x, mod, (GEN) gal[2], &PL);
   S = corpsfixeinclusion(O, PL);
-  S = vectopol(S, (GEN) gal[3], (GEN) gal[4], (GEN) gal[5], x);
+  S = vectopol(S, (GEN) gal[4], (GEN) gal[5], x);
   lbot = avma;
   res = cgetg(3, t_VEC);
   res[1] = (long) gcopy(P);

@@ -1462,7 +1462,7 @@ already_found_relation(long **mat,long s)
 
 /* if phase != 1 re-initialize static variables. If <0 return immediately */
 static long
-random_relation(long phase,long cmptglob,long lim,long LIMC,long N,long RU,
+random_relation(long phase,long cmptglob,long lim,long LIMC,long N,
                 long PRECREG,long PRECREGINT,GEN nf,GEN subfb,GEN lmatt2,
 		long **ma,GEN maarch,long *ex,GEN list_jideal)
 {
@@ -2585,8 +2585,8 @@ INCREASEGEN:
       powsubfbgen(nf,subfb,CBUCHG+1,PRECREG,PRECREGINT);
       av1 = avma;
     }
-    ss = random_relation(phase,cmptglob,slim,(long)LIMC,N,RU,PRECREG,
-                         PRECREGINT,nf,subfb,lmatt2,ma,maarch,ex,list_jideal);
+    ss = random_relation(phase,cmptglob,slim,(long)LIMC,N,PRECREG,PRECREGINT,
+                         nf,subfb,lmatt2,ma,maarch,ex,list_jideal);
     if (ss < 0) /* could not find relations */
     {
       if (phase == 0) { for (j=1; j<=KCCO; j++) free(mat[j]); free(mat); }
@@ -2752,12 +2752,15 @@ INCREASEGEN:
   class_group_gen(nf,met,clh,u1,u2,vperm, &clg1, &clg2, PRECREGINT);
 
   /* cleanup */
-  desallocate(matcopy);
-  i = lg(C)-sreg; C += sreg; C[0] = evaltyp(t_MAT)|evallg(i);
-  C = cleancol(C,N,PRECREG);
-  settyp(vperm, t_COL);
-  for (i=1; i<=KC; i++) vperm[i]=lstoi(vperm[i]);
+  if (flun < 0)
+  {
+    i = lg(C)-sreg; C += sreg; C[0] = evaltyp(t_MAT)|evallg(i);
+    C = cleancol(C,N,PRECREG);
+    settyp(vperm, t_COL);
+    for (i=1; i<=KC; i++) vperm[i]=lstoi(vperm[i]);
+  }
   c1 = gdiv(gmul(reg,clh),z);
+  desallocate(matcopy);
 
   return gerepileupto(av, buchall_end(nf,CHANGE,flun,k,fu,clg1,clg2,reg,c1,zu,W,B,xarch,C,vectbase,vperm));
 }

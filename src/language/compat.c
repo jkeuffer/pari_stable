@@ -15,8 +15,8 @@ static GEN
 sigmak0(long k, GEN x) {return gsumdivk(x,k);}
 
 static GEN
-lseriesell0(GEN a, GEN b, GEN c /*unused!*/, GEN d, long prec)
-  {return lseriesell(a,b,d,prec);}
+lseriesell0(GEN a, GEN b, GEN c, GEN d, long prec)
+  {(void)c; return lseriesell(a,b,d,prec);}
 
 static GEN
 subres0(GEN x, GEN y) { return subres(x,y); }

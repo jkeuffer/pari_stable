@@ -367,12 +367,10 @@ PARI_get_plot(long fatal)
 }
 
 long
-term_set(char *s) { return 1; }
+term_set(char *s) { (void)s; return 1; }
 
 long
-plot_outfile_set(char *s) { return 1; }
+plot_outfile_set(char *s) { (void)s; return 1; }
 
 void
-set_pointsize(double d) 
-{
-}
+set_pointsize(double d) { (void)d; }

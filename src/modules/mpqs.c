@@ -84,8 +84,6 @@ static char *COMB_str;
 static byteptr mpqs_diffptr = NULL;
 static long mpqs_prime_count = 0;
 
-/* state flags for cleanup if we get interrupted --GN */
-static char all_clean = 1;	/* set to 0 while mpqs() is busy */
 /* END: global variables to disappear as soon as possible */
 
 /******************************/
@@ -2969,8 +2967,12 @@ mpqs(GEN N)
   long iterations = 0;
   long av = avma;
 
+  /* state flags for cleanup if we get interrupted --GN */
+  static char all_clean = 1;	/* set to 0 while mpqs() is busy */
+
   if (DEBUGLEVEL >= 4)
   {
+    if (!all_clean) { /* TODO: clean up... */ }
     (void) timer2();		/* clear timer */
     fprintferr("MPQS: number to factor N = %Z\n", N);
   }

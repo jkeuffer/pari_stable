@@ -2576,7 +2576,7 @@ smallvectors(GEN a, GEN BORNE, GEN STOCKMAX, long flag, long prec,
       }
       else if (check)
       { /* don't waste time on the [x,0,...0] */
-        for (i=k+1; i<N; i++)
+        for (i=2; i<N; i++)
           if (signe(x[i])) break;
         if (i == N && signe(x[1])) x[1] = un;
       }
