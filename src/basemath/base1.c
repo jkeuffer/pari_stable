@@ -2046,7 +2046,7 @@ polredabs0(GEN x, long flag)
   {
     GEN z;
     findmindisc(&y, &a); z = y;
-    if (u) a = gmul(T.bas, gmul(u, a));
+    if (u && l > 1) a = gmul(T.bas, gmul(u, a));
     y = storepol(x, y, a, T.lead, flag);
     if (flag & nf_ADDZK)
     {
