@@ -386,8 +386,9 @@ carrecomplet(GEN x, GEN *pt)
   if (lgefint(x) == 3)
   {
     long a = scarrecomplet((ulong)x[2]);
+    if (!a) return 0;
     if (pt) *pt = stoi(a);
-    return a? 1: 0;
+    return 1;
   }
   if (!carresmod64[mod64(x)]
    || !carresmod63[smodis(x,63)]
