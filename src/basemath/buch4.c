@@ -515,8 +515,9 @@ bnfsunit(GEN bnf,GEN S,long prec)
   if (lg(H) > 1)
   { /* non trivial (rare!) */
     GEN U, D = smithall(H, &U, NULL);
+    D = mattodiagonal_i(D);
     card = detcyc(D, &i);
-    setlg(D,i); D = mattodiagonal_i(D);
+    setlg(D,i);
     p1=cgetg(i,t_VEC); pow=ZM_inv(U,gen_1);
     for(i--; i; i--)
       p1[i] = (long)factorback_i(gen, (GEN)pow[i], nf, 1);
