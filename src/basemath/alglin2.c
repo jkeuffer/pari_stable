@@ -1869,12 +1869,12 @@ END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
           p1[i1] = lsubii((GEN)p1[i1], mulii(p2,(GEN) Bk[i1]));
         T[j] = (long)ZV_lincomb(gun,negi(p2), (GEN)T[j],Tk);
       }
-    }
-    if (low_stack(lim, stack_lim(av2,1)))
-    {
-      if(DEBUGMEM>1) err(warnmem,"hnfspec[3], i = %ld", i);
-      for (j=1; j<co; j++) setlg(matb[j], i0+1); /* bottom can be forgotten */
-      gerepileall(av2, 2, &T, &matb);
+      if (low_stack(lim, stack_lim(av2,1)))
+      {
+        if(DEBUGMEM>1) err(warnmem,"hnfspec[3], (i,j) = %ld,%ld", i,j);
+        for (j=1; j<co; j++) setlg(matb[j], i0+1); /* bottom can be forgotten */
+        gerepileall(av2, 2, &T, &matb);
+      }
     }
   }
   gerepileall(av2, 2, &T, &matb);
