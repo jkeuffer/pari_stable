@@ -1180,6 +1180,7 @@ nfnewprec(GEN nf, long prec)
 
   if (typ(nf) != t_VEC) err(talker,"incorrect nf in nfnewprec");
   if (lg(nf) == 11) return bnfnewprec(nf,prec);
+  if (lg(nf) ==  7) return bnrnewprec(nf,prec);
   (void)checknf(nf);
   if (prec <= 0) 
   {
