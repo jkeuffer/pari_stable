@@ -29,7 +29,6 @@ extern GEN hnf_invimage(GEN A, GEN b);
 extern int hnfdivide(GEN A, GEN B);
 extern GEN colreducemodHNF(GEN x, GEN y, GEN *Q);
 extern GEN special_anti_uniformizer(GEN nf, GEN pr);
-extern GEN set_sign_mod_idele(GEN nf, GEN x, GEN y, GEN idele, GEN sarch);
 extern long int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *newx);
 
 static GEN mat_ideal_two_elt2(GEN nf, GEN x, GEN a);
@@ -1863,9 +1862,8 @@ isideal(GEN nf,GEN x)
   if (lx == 1) return 1;
   N = degpol(nf[1]); if (lg(x[1])-1 != N) return 0;
 
-  av = avma;
+  av = avma; x = Q_primpart(x);
   if (lx-1 != N) x = idealmat_to_hnf(nf,x);
-  x = primpart(x);
 
   for (i=1; i<=N; i++)
     for (j=2; j<=N; j++)
