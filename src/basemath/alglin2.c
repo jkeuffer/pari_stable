@@ -2425,7 +2425,6 @@ allhnfmod(GEN x, GEN dm, int flag)
     for (i = li-1; i > 0; i--)
     { /* check that dm*Id \subset L + add up missing dm*Id components */
       GEN d, c;
-      x[i] = x[i];
       d = bezout(gcoeff(x,i,i),dm, &u,&v);
       coeff(x,i,i) = (long)d;
       if (is_pm1(d))
