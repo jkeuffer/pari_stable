@@ -4,7 +4,7 @@
 GEN   gzero, gun, gdeux;
 pari_sp top, bot, avma;
 size_t memused = 0;
-long  DEBUGLEVEL,DEBUGMEM = 0;
+ulong  DEBUGLEVEL,DEBUGMEM = 0;
 
 void specinit()
 {
@@ -20,8 +20,10 @@ void specinit()
 
 void pari_err(long x, ...) { exit (0); }
 GEN gerepileuptoint(pari_sp av, GEN q){ return q; }
-void gerepilemanysp(pari_sp av, pari_sp tetpil, GEN* gptr[], long n){}
-void gerepilemany(pari_sp av, GEN* gptr[], long n){}
+void gerepilemanysp(pari_sp av, pari_sp tetpil, GEN* gptr[], int n){}
+void gerepilemany(pari_sp av, GEN* gptr[], int n){}
+/* used in addrr */
+void stackdummy(GEN z, long l) { z[0] = evaltyp(t_VECSMALL) | evallg(l); }
 
 void sorstring(char* b, long x)
 {
