@@ -44,6 +44,7 @@ BA  1- gpflog could print some lines twice
    11- bug in gcc-2.95 -O3 -fomit-frame-pointer [Linux]: SEGV in quicksqri
    12- addrfrac: could return a t_RFRAC whose denominator wasn't a t_POL
    13- bnfcertify (zimmertbound): off by two error when reading bound
+   14- very inefficient Hensel lift (used ideas from Shoup's NTL)
 
   Changed
     1- DOS distribution archives (GPM removed)
