@@ -3246,7 +3246,7 @@ the main variable of $t$. For example
 $n$ which is irreducible over $\F_p$. For instance if
 \kbd{P = ffinit(3,2,y)}, you can represent elements in $\F_{3^2}$ as polmods
 modulo \kbd{P}. This function is rather crude and expects $p$ to be
-relatively small ($p < 2^31$).
+relatively small ($p < 2^{31}$).
 
 \syn{ffinit}{p,n,v}, where $v$ is a variable number.
 
@@ -5872,7 +5872,11 @@ must be no singularities in the interval or at the boundaries. In practice
 this can be accomplished with a simple change of variable. Furthermore, for
 improper integrals, where one or both of the limits of integration are plus
 or minus infinity, the function must decrease sufficiently rapidly at
-infinity. This can often be accomplished through integration by parts.
+infinity. This can often be accomplished through integration by parts. 
+Finally, the function to be integrated should not be very small
+(compared to the current precision) on the entire interval. This can
+of course be accomplished by just multiplying by an appropriate
+constant.
 
 Note that \idx{infinity} can be represented with essentially no loss of
 accuracy by 1e4000. However beware of real underflow when dealing with

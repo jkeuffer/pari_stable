@@ -888,7 +888,7 @@ qromb(entree *ep, GEN a, GEN b, char *ch, long prec)
     {
       tetpil=avma; ss=polint_i(h+j-KLOC,s+j-KLOC,gzero,KLOC+1,&dss);
       j1=gexpo(ss); j2=gexpo(dss); lim=bit_accuracy(prec)-j-6;
-      if (j1-j2 > lim || (j1 < -lim && j2<j1-1))
+      if (j1-j2 > lim || j1 < -lim)
       {
         pop_val(ep); if (gcmp0(gimag(ss))) ss=greal(ss);
 	tetpil=avma; return gerepile(av,tetpil,gmulsg(sig,ss));
@@ -935,7 +935,7 @@ qromo(entree *ep, GEN a, GEN b, char *ch, long prec)
     {
       tetpil=avma; ss=polint_i(h+j-KLOC,s+j-KLOC,gzero,KLOC+1,&dss);
       j1=gexpo(ss); j2=gexpo(dss); lim=bit_accuracy(prec)-(3*j/2)-6;
-      if ( j1-j2 > lim || (j1 < -lim && j2<j1-1))
+      if ( j1-j2 > lim || j1 < -lim)
       {
         pop_val(ep); if (gcmp0(gimag(ss))) ss=greal(ss);
 	tetpil=avma; return gerepile(av,tetpil,gmulsg(sig,ss));
@@ -993,7 +993,7 @@ qromi(entree *ep, GEN a, GEN b, char *ch, long prec)
     {
       tetpil=avma; ss=polint_i(h+j-KLOC,s+j-KLOC,gzero,KLOC+1,&dss);
       j1=gexpo(ss); j2=gexpo(dss); lim=bit_accuracy(prec)-(3*j/2)-6;
-      if (j1-j2 > lim || (j1 < -lim && j2 < j1-1))
+      if (j1-j2 > lim || j1 < -lim)
       {
         pop_val(ep); if (gcmp0(gimag(ss))) ss=greal(ss);
 	tetpil=avma; return gerepile(av,tetpil,gmulsg(sig,ss));
