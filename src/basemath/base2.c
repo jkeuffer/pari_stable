@@ -727,7 +727,9 @@ static GEN dbasis(GEN p, GEN f, long mf, GEN alpha, GEN U);
 static GEN eltppm(GEN f,GEN pd,GEN theta,GEN k);
 static GEN maxord(GEN p,GEN f,long mf);
 static GEN nbasis(GEN ibas,GEN pd);
+#if 0
 static GEN nilord(GEN p,GEN fx,long mf,GEN gx);
+#endif
 static GEN nilord2(GEN p,GEN fx,long mf,GEN gx);
 static GEN testd(GEN p,GEN fa,long c,long Da,GEN alph2,long Ma,GEN theta);
 static GEN testb(GEN p,GEN fa,long Da,GEN theta,long Dt);
@@ -1319,6 +1321,7 @@ setup(GEN p,GEN f,GEN theta,GEN nut, long *La, long *Ma)
 
 #define RED 1
 
+#if 0
 static GEN
 nilord(GEN p,GEN fx,long mf,GEN gx)
 {
@@ -1394,6 +1397,7 @@ nilord(GEN p,GEN fx,long mf,GEN gx)
     }
   }
 }
+#endif
 
 /* reduce the element elt modulo rd, taking first of the denominators */
 static GEN

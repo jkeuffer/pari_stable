@@ -1262,7 +1262,7 @@ Mod(x^3 + 5, x^5 - 5*x^3 + 5*x + 25)
 
 ? aut=nfgaloisconj(nf3)
 [-x, x, -1/12*x^4 - 1/2*x, -1/12*x^4 + 1/2*x, 1/12*x^4 - 1/2*x, 1/12*x^4 + 1
-/2*x]
+/2*x]~
 ? nfgaloisapply(nf3,aut[5],Mod(x^5,x^6+108))
 Mod(-1/2*x^5 + 9*x^2, x^6 + 108)
 ? nfhilbert(nf,3,5)

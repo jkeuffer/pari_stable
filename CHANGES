@@ -85,7 +85,8 @@ XR 48- rare bug in bnrL1 (wrong value!)
    54- suminf(k=1,suminf(j=1,.067^(k+j)/k^4/(k+j))) ran forever
    55- factor(2*x + 2) --> [2*x + 2, 1] (instead of stripping the content)
    56- (ultra-rare) stack corruption in mpqs_solve_linear_system()
-   57- rl_refresh_line() prototype changed across readline's versions.
+   57- rl_refresh_line() prototype changed across readline's versions
+   58- incorrect handling of INTMODs modulo integers of different magnitude
 
   Changed
 XR  1- modulus choice in bnrstark
@@ -108,7 +109,7 @@ GN 16- minor tuning in pollardbrent() for huge integers (call ECM sooner)
    17- renamed directories dos -> Odos, o.xxx.xxx --> Oxxx.
        Moved win32/* --> Odos
 OR 18- new version of pari.el
-XR 19- new modular round 4 implementation 
+XR 19- new modular round 4 implementation (nilord2)
 BA 20- improved algorithms in galconj.c
 
   Added
