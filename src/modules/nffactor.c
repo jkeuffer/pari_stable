@@ -355,40 +355,90 @@ nffactor(GEN nf,GEN pol)
   rep[2] = (long)p1; return sort_factor(rep, cmp_pol);
 }
 
-/* return a bound for T_2(P), P | polbase */
+/* Assume n >= 1, return bin, bin[k+1] = binomial(n, k) */
+GEN
+vecbinome(long n)
+{
+  long d = (n + 1)/2, k;
+  GEN bin = cgetg(n+2, t_VEC), *C;
+  C = (GEN*)(bin + 1); /* C[k] = binomial(n, k) */
+  C[0] = gun;
+  for (k=1; k <= d; k++)
+  {
+    gpmem_t av = avma;
+    C[k] = gerepileuptoint(av, diviiexact(mulsi(k+1, C[k-1]), stoi(n-k)));
+  }
+  for (   ; k <= n; k++) C[k] = C[n - k];
+  return bin;
+}
+
+/* return a bound for T_2(P), P | polbase in C[X]
+ * NB: Mignotte bound: A | S ==>
+ *  |a_i| <= binom(d-1, i-1) || S ||_2 + binom(d-1, i) lc(S)
+ *
+ * Apply to sigma(S) for all embeddings sigma, then take the L_2 norm over
+ * sigma, then take the sup over i.
+ **/
 static GEN
 nf_factor_bound(GEN nf, GEN polbase)
 {
-  GEN lt,C,run,p1,p2, G = gmael(nf,5,2);
-  long i,prec,precnf, d = lgef(polbase), n = degpol(nf[1]);
+  gpmem_t av = avma;
+  GEN G = gmael(nf,5,2), lS = leading_term(polbase); /* t_INT */
+  GEN p1, C, N2, matGS, binlS, bin;
+  long prec, i, j, d = degpol(polbase), n = degpol(nf[1]), r1 = nf_get_r1(nf);
 
-  precnf = gprecision(G);
-  prec   = MEDDEFAULTPREC;
+  if (typ(lS) == t_COL) lS = (GEN)lS[1];
+  binlS = bin = vecbinome(d-1);
+  if (!gcmp1(lS)) binlS = gmul(lS, bin);
+
+  matGS = cgetg(d+2, t_MAT);
+  N2 = cgetg(n+1, t_VEC);
+  prec = gprecision(G);
   for (;;)
   {
-    run= realun(prec);
-    p1 = realzero(prec);
-    for (i=2; i<d; i++)
-    {
-      p2 = gmul(run, (GEN)polbase[i]);
-      p2 = gnorml2(gmul(G, p2));
-      if (!signe(p2)) continue;
-      if (lg(p2) == 3) break;
-      p1 = addrr(p1, gdiv(p2, binome(stoi(d), i-2)));
-    }
-    if (i == d) break;
+    nffp_t F;
 
-    prec = (prec<<1)-2;
-    if (prec > precnf)
+    for (j=0; j<=d; j++)
+      matGS[j+1] = lmul(G, (GEN)polbase[j+2]);
+    matGS = gtrans_i(matGS);
+    for (j=1; j <= r1; j++) /* N2[j] = || sigma_j(S) ||_2 */
     {
-      nffp_t F; remake_GM(nf, prec, &F); G = F.G;
-      if (DEBUGLEVEL>1) err(warnprec, "nf_factor_bound", prec);
+      N2[j] = lsqrt( QuickNormL2((GEN)matGS[j], DEFAULTPREC), DEFAULTPREC );
+      if (lg(N2[j]) == 3) goto PRECPB;
     }
+    for (   ; j <= n; j+=2)
+    {
+      GEN q1 = QuickNormL2((GEN)matGS[j  ], DEFAULTPREC);
+      GEN q2 = QuickNormL2((GEN)matGS[j+1], DEFAULTPREC);
+      p1 = gmul2n(mpadd(q1, q2), -1);
+      N2[j] = N2[j+1] = lsqrt( p1, DEFAULTPREC );
+      if (lg(N2[j]) == 3) goto PRECPB;
+    }
+    if (j > n) break; /* done */
+PRECPB:
+    prec = (prec<<1)-2;
+    remake_GM(nf, prec, &F); G = F.G;
+    if (DEBUGLEVEL>1) err(warnprec, "nf_factor_bound", prec);
   }
-  lt = (GEN)leading_term(polbase)[1];
-  p1 = gmul(p1, mulis(sqri(lt), n));
-  C = gpow(stoi(3), dbltor(0.75 + d), DEFAULTPREC);
-  return gdiv(gmul(C, p1), gmulsg(d, mppi(DEFAULTPREC)));
+
+  /* Take sup over 0 <= i <= d of
+   * sum_sigma | binom(d-1, i-1) ||sigma(S)||_2 + binom(d-1,i) lc(S) |^2 */
+
+  /* i = 0: n lc(S)^2 */
+  C = mulsi(n, sqri(lS));
+  /* i = d: sum_sigma ||sigma(S)||_2^2 */
+  p1 = gnorml2(N2); if (gcmp(C, p1) < 0) C = p1;
+  for (i = 1; i <= d-1; i++ )
+  {
+    GEN s = gzero;
+    for (j = 1; j <= n; j++)
+    {
+      p1 = mpadd( mpmul((GEN)bin[i], (GEN)N2[j]), (GEN)binlS[i+1] );
+      s = mpadd(s, gsqr(p1));
+    }
+    if (gcmp(C, s) < 0) C = s;
+  }
+  return gerepileupto(av, C);
 }
 
 static long
@@ -832,32 +882,31 @@ ZpX(GEN P, GEN pa, GEN ffproj)
 
 /* We want to be able to reconstruct x, |x|^2 < C, from x mod pr^k
  * We want B := min B_i >= C. Let alpha the LLL parameter,
- * y = 1/(alpha-1/4) > 4/3, the theoretical guaranteed bound following from
- *   (Npr)^2k = det(L)^2 <= B^n * y^(n*(n-1))/2
- * is
- * (FIXME??? (n / 2log(Npr)) [ log(C/n) + n*(n-1) * log(4)/4 ] )
+ * y = 1/(alpha-1/4) > 4/3, the theoretical guaranteed bound follows from
+ *    (Npr)^(2k/n) = det(L)^(2/n) <= 1/n sum B_i
+ *                                <= 1/n B sum y^i
+ *                                <= 1/n B y^(n-1) / (y-1)
  *
- *    2k log Npr > n log(C) + n(n-1)/2 * log(y) */
+ *  Hence log(B/n) >= 2k/n log(Npr) - (n-1)log(y) + log(y-1)
+ *                 >= log(C/n), provided
+ *   k >= [ log(C/n) + (n-1)log(y) - log(y-1) ] * n/(2log(Npr))
+ */
 static double
 bestlift_bound(GEN C, long n, double alpha, GEN Npr)
 {
+  const double y = 1 / (alpha - 0.25); /* = 2 if alpha = 3/4 */
   double t;
   if (typ(C) != t_REAL) C = gmul(C, realun(DEFAULTPREC));
   setlg(C, DEFAULTPREC);
-#if 0 /* FIXME (KB). I don't understand the old bound ! (which is worse) */
-  /* cheat: log(4)/4=0.347 > 0.15 */
-  t = rtodbl(mplog(divrs(C,n))) + n*(n-1) * 0.15;
-#else
-  t = rtodbl(mplog(C)) + (n-1) * log( 1/(alpha - 0.25) );
-  return (t * n) / (2.* log(gtodouble(Npr)));
-#endif
+  t = rtodbl(mplog(divrs(C,n))) + (n-1) * log(y) - log(y-1);
+  return ceil((t * n) / (2.* log(gtodouble(Npr))));
 }
 
 static void
 bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *T)
 {
-  const int y = 4;
-  const double alpha = ((double)y-1) / y; /* LLL parameter */
+  const int D = 4;
+  const double alpha = ((double)D-1) / D; /* LLL parameter */
   gpmem_t av = avma;
   GEN prk, PRK, B, GSmin, pa;
 
@@ -870,7 +919,7 @@ bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *T)
     pa = gcoeff(prk,1,1);
     PRK = hnfmodid(prk, pa);
 
-    PRK = lllint_i(PRK, y, 0, NULL, NULL, &B);
+    PRK = lllint_i(PRK, D, 0, NULL, NULL, &B);
     GSmin = vecmin(GS_norms(B, DEFAULTPREC));
     if (gcmp(GSmin, C) >= 0) break;
   }
@@ -911,7 +960,7 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long a, long rec)
 
   n0 = lg(famod) - 1;
  /* Lattice: (S PRK), small vector (vS vP). To find a bound for the image,
-  * write S = S1 q + S0, P = P1 q + P0 
+  * write S = S1 q + S0, P = P1 q + P0
   * q(S1 vS + P1 vP) <= Blow for all (vS,vP) assoc. to true factors */
   Blow = get_Blow(n0, dnf);
   C = (long)ceil(sqrt(Blow/n0)) + 1; /* C^2 n0 ~ Blow */
