@@ -21,7 +21,7 @@ find the most convenient site to fetch \kbd{gcc} at the address
 \noindent
 You can certainly compile PARI with a different compiler, but the PARI
 kernel takes advantage of some optimizations provided by \kbd{gcc} if it is
-available. This results in about 20\% speedup on most architectures%
+available. This results in at least 20\% speedup on most architectures%
 \footnote*{One notable exception is the native AIX C compiler on IBM
 RS/6000 workstations, which generates fast code even without any special
 help from the PARI kernel sources.}.
@@ -33,6 +33,11 @@ which we think is really worth a try). In any case, get them before
 proceeding if you want the functionalities they provide. All of them are free
 (though you ought to make a small donation to the FSF if you use (and like)
 GNU wares).
+
+  $\bullet$ GNU \kbd{MP} library. This provides an alternative multiprecision
+kernel, which is faster than PARI's native one. To enable detection of GMP,
+use \kbd{Configure --with-gmp}. \emph{This is an experimental feature, use at
+your own risk!}
 
   $\bullet$ GNU \kbd{readline} library. This provides line editing under GP,
 an automatic context-dependent completion, and an editable history of
@@ -127,6 +132,12 @@ version of the compiler. You can try
 compiler and run into trouble with a fussy \kbd{g++}, try to use
 \kbd{g++ -fpermissive}.
 
+\misctitle{Technical note 3:} \kbd{Configure} accepts many other flags
+besides the ones mentionned above. See \kbd{Configure --help} for a complete
+list. In particular, there are sets of flags related to GNU MP
+(\kbd{--with-gmp*}) and GNU readline library (\kbd{--with-readline*}).
+Note that autodetection of GMP is \emph{disabled} by default.
+
 \subsec{Troubleshooting and fine tuning:} Decide whether you agree with what
 \kbd{Configure} printed on your screen (in particular the architecture,
 compiler and optimization flags). Look for messages prepended by
@@ -147,15 +158,24 @@ case, we would appreciate a bug report including the complete output from
 the process.
 
 \subsec{Problems related to readline:}
-Even in interactive mode, you cannot directly tell \kbd{Configure}
-where the \kbd{readline} library and include files are. If they are not in a
-standard place, it won't find them. Nonetheless, it first searches the
-distribution toplevel for a \kbd{readline} directory. Thus, if you just want
-to give \kbd{readline} a try, as you probably should, you can get the source
-and compile it there (you don't need to install it). You can also use this
-feature together with a symbolic link, named \kbd{readline}, in the PARI
-toplevel directory if you have compiled the readline library somewhere else,
-without installing it to one of its standard locations. 
+\kbd{Configure} does not try very hard to find the \kbd{readline} library and
+include files. If they are not in a standard place, it won't find them.
+Nonetheless, it first searches the distribution toplevel for a \kbd{readline}
+directory. Thus, if you just want to give \kbd{readline} a try, as you
+probably should, you can get the source and compile it there (you don't need
+to install it). You can also use this feature together with a symbolic link,
+named \kbd{readline}, in the PARI toplevel directory if you have compiled the
+readline library somewhere else, without installing it to one of its standard
+locations. 
+
+You can also invoke \kbd{Configure} with one of the following arguments:
+
+   \kbd{--with-readline[=\emph{prefix to \kbd{lib/libreadline}.xx and
+\kbd{include/readline.h}}]}
+
+   \kbd{--with-readline-lib=\emph{path to \kbd{libreadline}.xx}}
+
+   \kbd{--with-readline-include=\emph{path to \kbd{readline.h}}}
 
 \misctitle{Linux:} Linux distributions have separate \kbd{readline} and
 \kbd{readline-devel} packages. You need both of them installed to compile gp
