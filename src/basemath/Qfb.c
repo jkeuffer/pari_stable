@@ -1046,10 +1046,18 @@ qfbimagsolvep(GEN Q, GEN p)
   }
   d = qf_disc(Q); if (kronecker(d,p) < 0) return gen_0;
   a = redimagsl2(Q, &N);
-  if (!signe(gel(a,2)) && is_pm1(gel(a,1)))
+  if (is_pm1(gel(a,1))) /* principal form */
   {
-    a = qfbsolve_cornacchia(gel(a,3), p, 0);
-    return gerepileupto(av, gmul(N, gtrans_i(a)));
+    ulong r;
+    if (!signe(gel(a,2)))
+    {
+      a = qfbsolve_cornacchia(gel(a,3), p, 0);
+      return gerepileupto(av, gmul(a, gtrans_i(N)));
+    }
+    /* x^2 + xy + ((1-d)/4)y^2 = p <==> (2x + y)^2 - d y^2 = 4p */
+    if (!cornacchia2(negi(d), p, &x, &y)) { avma = av; return gen_0; }
+    x = diviu_rem(subii(x,y), 2, &r); if (r) { avma = av; return gen_0; }
+    return gerepileupto(av, gmul(mkvec2(x,y), gtrans_i(N)));
   }
   b = redimagsl2(primeform(d, p, 0), &M);
   if (!gequal(a, b)) return gen_0;
