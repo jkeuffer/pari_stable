@@ -1297,7 +1297,7 @@ famat_to_nf_modideal_coprime(GEN nf, GEN g, GEN e, GEN id, GEN EX)
   if (minus)
   {
     minus = element_invmodideal(nf, minus, id);
-    if (plus) plus = element_mulmodideal(nf, minus, plus, id);
+    plus = plus? element_mulmodideal(nf, minus, plus, id): minus;
   }
   return plus? plus: gscalcol(gun, lg(id)-1);
 }
