@@ -2987,7 +2987,7 @@ bnrstark(GEN bnr,  GEN subgrp,  long flag,  long prec)
   subgrp = (GEN)p1[3];
 
   /* check the class field */
-  if (nf_get_r2(checknf(bnr)))
+  if (!gcmp0(gmael3(bnr, 2, 1, 2)))
     err(talker, "not a totally real class field in bnrstark");
 
   cl = itos(det(subgrp));
