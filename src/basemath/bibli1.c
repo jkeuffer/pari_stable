@@ -397,7 +397,7 @@ static void
 ZRED_gram(long k, long l, GEN x, GEN h, GEN L, GEN B, long K)
 {
   long i,lx;
-  GEN q = truedvmdii(addii(B,shifti(gcoeff(L,k,l),1)), shifti(B,1), NULL);
+  GEN q = truedivii(addii(B,shifti(gcoeff(L,k,l),1)), shifti(B,1));
   GEN xk,xl;
   if (!signe(q)) return;
   q = negi(q);
@@ -424,7 +424,7 @@ ZRED_gram(long k, long l, GEN x, GEN h, GEN L, GEN B, long K)
 static void
 ZRED(long k, long l, GEN x, GEN h, GEN L, GEN B, long K)
 {
-  GEN q = truedvmdii(addii(B,shifti(gcoeff(L,k,l),1)), shifti(B,1), NULL);
+  GEN q = truedivii(addii(B,shifti(gcoeff(L,k,l),1)), shifti(B,1));
   if (!signe(q)) return;
   q = negi(q);
   Zupdate_row(k,l,q,L,B);
