@@ -127,6 +127,7 @@ src/basemath/polarit1.c
 src/basemath/polarit2.c
 src/basemath/polarit3.c
 src/basemath/rootpol.c
+src/basemath/subcyclo.c
 src/basemath/subgroup.c
 src/basemath/trans1.c
 src/basemath/trans2.c
