@@ -404,7 +404,7 @@ nf_factor_bound(GEN nf, GEN polbase)
     for (j=1; j <= r1; j++) /* N2[j] = || sigma_j(S) ||_2 */
     {
       N2[j] = lsqrt( QuickNormL2((GEN)matGS[j], DEFAULTPREC), DEFAULTPREC );
-      if (lg(N2[j]) == 3) goto PRECPB;
+      if (lg(N2[j]) < DEFAULTPREC) goto PRECPB;
     }
     for (   ; j <= n; j+=2)
     {
@@ -412,7 +412,7 @@ nf_factor_bound(GEN nf, GEN polbase)
       GEN q2 = QuickNormL2((GEN)matGS[j+1], DEFAULTPREC);
       p1 = gmul2n(mpadd(q1, q2), -1);
       N2[j] = N2[j+1] = lsqrt( p1, DEFAULTPREC );
-      if (lg(N2[j]) == 3) goto PRECPB;
+      if (lg(N2[j]) < DEFAULTPREC) goto PRECPB;
     }
     if (j > n) break; /* done */
 PRECPB:
