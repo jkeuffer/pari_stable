@@ -17,21 +17,21 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #  undef lround
 #endif
 
-#define mael(ma,x1,x2) ( ((GEN) ((GEN)(ma))[x1]) [x2])
-#define mael2 mael
-#define mael3(ma,x1,x2,x3) ( ((GEN) mael2((ma),(x1),(x2))) [x3])
-#define mael4(ma,x1,x2,x3,x4) ( ((GEN) mael3((ma),(x1),(x2),(x3))) [x4])
-#define mael5(ma,x1,x2,x3,x4,x5) (\
-  ((GEN) mael4((ma),(x1),(x2),(x3),(x4))) [x5] \
-)
-#define gmael (GEN) mael
-#define gmael2 (GEN) mael
-#define gmael3 (GEN) mael3
-#define gmael4 (GEN) mael4
-#define gmael5 (GEN) mael5
+#define  mael(a,x1,x2)        (((GEN*)(a))[x1][x2])
+#define  mael3(a,x1,x2,x3)    (((GEN**)(a))[x1][x2][x3])
+#define  mael4(a,x1,x2,x3,x4) (((GEN***)(a))[x1][x2][x3][x4])
+#define  mael5(a,x1,x2,x3,x4) (((GEN****)(a))[x1][x2][x3][x4][x5])
 
-#define coeff(a,i,j)  ( ( (GEN) ( (GEN) (a))[j]) [i])
-#define gcoeff(a,i,j) (GEN)coeff((a),(i),(j))
+#define gmael(a,x1,x2)        (((GEN**)(a))[x1][x2])
+#define gmael3(a,x1,x2,x3)    (((GEN***)(a))[x1][x2][x3])
+#define gmael4(a,x1,x2,x3,x4) (((GEN****)(a))[x1][x2][x3][x4])
+#define gmael5(a,x1,x2,x3,x4) (((GEN*****)(a))[x1][x2][x3][x4][x5])
+
+#define  mael2  mael
+#define gmael2 gmael
+
+#define coeff(a,i,j)   mael((a),j,i)
+#define gcoeff(a,i,j) gmael((a),j,i)
 
 #define labsi   (long)absi
 #define labsr   (long)absr
