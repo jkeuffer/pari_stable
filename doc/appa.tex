@@ -186,7 +186,8 @@ of PARI can be built.
 \noindent in the distribution directory. If your \kbd{make} program supports
 parallel make, you can speed up the process by going to the \kbd{O$xxx$}
 directory that \kbd{Configure} created and doing a parallel make here (for
-instance \kbd{make -j4} with GNU make).
+instance \kbd{make -j4} with GNU make). It may even work from the toplevel
+directory.
 
 \subsubsec{Testing}
 
@@ -196,10 +197,10 @@ run a series of comparative tests on those two. To test only the default
 binary, use \kbd{make dobench} which starts the bench immediately.
 
 The static binary should be slightly faster. In any case, this should not
-take more than one minute (user time) on modern machines. See the file
-\kbd{MACHINES} to get an idea of how much time comparable systems need (we
+take more than a few seconds (user time) on modern machines. See the file
+\kbd{MACHINES} to get an idea of how much time comparable systems need. (We
 would appreciate a short note in the same format in case your system is not
-listed and you nevertheless have a working GP executable).
+listed and you nevertheless have a working GP executable.)
 
 If a \kbd{[BUG]} message shows up, something went wrong. Probably with the
 installation procedure, but it may be a bug in the Pari system, in which
