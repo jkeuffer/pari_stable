@@ -15,6 +15,10 @@ if test -z "$disable_readline"; then
   lib=readline; . ./locatelib
   rl_fullname=$try
 fi
+if test -n "$with_readline"; then
+  with_readline_lib="$with_readline_lib $with_readline/lib"
+  with_readline_includes="$with_readline_includes $with_readline/includes"
+fi
 
 if test -n "$readline"; then
 # Readline -- Headers

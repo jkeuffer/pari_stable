@@ -1,5 +1,9 @@
 _gmp_list="gmp GMPLIBS GMPINCLUDE"
 gmp=
+if test -n "$with_gmp"; then
+  with_gmp_lib="$with_gmp_lib $with_gmp/lib"
+  with_gmp_includes="$with_gmp_includes $with_gmp/includes"
+fi
 if test -z "$disable_gmp"; then
   gmp_add="$TOP/gmp-$osname-$arch $TOP/gmp"
   pth="$with_gmp_lib $gmp_add $libpth"
