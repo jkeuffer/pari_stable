@@ -405,7 +405,7 @@ bezout_lift_fact(GEN pola, GEN polb, GEN p, GEN pev, long e)
   return g;
 }
 static long
-inittestlift(GEN Tmod, long elift, struct galois_lift * gl, struct galois_testlift * gt, GEN frob)
+inittestlift(GEN Tmod, long elift, struct galois_lift * gl, struct galois_testlift * gt, GEN frob, long exit)
 {
   ulong ltop = avma;
   int i, j;
@@ -433,6 +433,8 @@ inittestlift(GEN Tmod, long elift, struct galois_lift * gl, struct galois_testli
       return 1;
     }
   }
+  if (exit)
+    return 0;
   modQ = gmodulcp(gun, gl->Q);
   TmodQ = gmul(gl->T, modQ);
   xmodQ = gmodulcp(gmul(polx[v], modQ), TmodQ);
@@ -662,7 +664,7 @@ freetest(struct galois_test * td)
  * Test si le nombre padique P est proche d'un entier inferieur a td->borne
  * en valeur absolue.
  */
-long
+static long
 padicisint(GEN P, struct galois_test * td)
 {
   long r;
@@ -1183,7 +1185,7 @@ permtopol(GEN p, GEN L, GEN M, GEN den, long x)
  * carre et u n'est pas un carre parfait et retourne u*f
  */
 GEN
-mycoredisc(GEN n)
+corediscpartial(GEN n)
 {
   ulong av = avma, tetpil, r;
   GEN y, p1, p2, ret;
@@ -1260,10 +1262,10 @@ splitorbite(GEN O)
   F = factor(stoi(n));
   fc = cgetg(lg(F[1]), t_VECSMALL);
   for (i = 1; i < lg(fc); i++)
-    fc[i] = itos(gpow(((GEN **) F)[1][i], ((GEN **) F)[2][i], DEFAULTPREC));
+    fc[i] = itos(powgi(((GEN **) F)[1][i], ((GEN **) F)[2][i]));
   lbot = avma;
   res = cgetg(lg(fc), t_VEC);
-  for (i = 1; i < lg(fc); i++)
+  for (i = lg(fc)-1; i >= 1; i--)
   {
     GEN v;
     v = cgetg(3, t_VEC);
@@ -1313,7 +1315,7 @@ galoisanalysis(GEN T, struct galois_analysis * ga, long calcul_l)
   F = factor(stoi(n));
   fc = cgetg(lg(F[1]), t_VECSMALL);
   for (i = 1; i < lg(fc); i++)
-    fc[i] = itos(gpow(((GEN **) F)[1][i], ((GEN **) F)[2][i], DEFAULTPREC));
+    fc[i] = itos(powgi(((GEN **) F)[1][i], ((GEN **) F)[2][i]));
   ppp = itos(((GEN **) F)[1][1]);	/* Plus Petit diviseur Premier */
   pgp = itos(((GEN **) F)[1][lg(F[1]) - 1]);	/* Plus Grand diviseur
 						 * Premier */
@@ -1477,7 +1479,7 @@ struct galois_borne
 /*
  * recalcule L avec une precision superieur
  */
-GEN
+static GEN
 recalculeL(GEN T, GEN Tp, GEN L, struct galois_borne * gb, struct galois_borne * ngb)
 {
   ulong ltop = avma, lbot = avma;
@@ -1516,9 +1518,14 @@ initborne(GEN T, GEN disc, struct galois_borne * gb, long ppp)
   ulong ltop = avma, lbot, av2;
   GEN borne, borneroots, borneabs;
   int i, j;
-  int n;
+  int n, extra;
   GEN L, M, z;
-  L = roots(T, DEFAULTPREC);
+  long prec;
+  prec=2;
+  for(i=2;i<lg(T);i++)
+    if (lg(T[i])>prec)
+      prec=lg(T[i]);
+  L = roots(T, prec);
   n = lg(L) - 1;
   for (i = 1; i <= n; i++)
   {
@@ -1527,32 +1534,36 @@ initborne(GEN T, GEN disc, struct galois_borne * gb, long ppp)
       break;
     L[i] = z[1];
   }
-  M = vandermondeinverse(L, gmul(T, realun(DEFAULTPREC)), disc);
+  M = vandermondeinverse(L, gmul(T, realun(prec)), disc);
   borne = gzero;
   for (i = 1; i <= n; i++)
   {
     z = gzero;
     for (j = 1; j <= n; j++)
-      z = gadd(z, gabs(((GEN **) M)[j][i], DEFAULTPREC));
+      z = gadd(z, gabs(((GEN **) M)[j][i], prec));
     if (gcmp(z, borne) > 0)
       borne = z;
   }
   borneroots = gzero;
   for (i = 1; i <= n; i++)
   {
-    z = gabs((GEN) L[i], DEFAULTPREC);
+    z = gabs((GEN) L[i], prec);
     if (gcmp(z, borneroots) > 0)
       borneroots = z;
   }
   borneabs = addsr(1, gpowgs(addsr(n, borneroots), n / ppp));
   lbot = avma;
-  borneroots = addsr(1, gmul2n(gmul(borne, borneroots), 5 + (n >> 1)));
+  borneroots = addsr(1, gmul(borne, borneroots));
   av2 = avma;
-  borneabs = gmul2n(gmul(borne, borneabs), 4);
-  gb->valsol = itos(gceil(gdiv(glog(borneroots, DEFAULTPREC), glog(gb->l, DEFAULTPREC))));
+  /*We want to reduce the probability of hop. prob=2^(-2-extra)*/
+  extra=itos(mpent(gdiv(glog(mpfact(itos(racine(stoi(n)))+2),DEFAULTPREC),glog(stoi(2),DEFAULTPREC))));
+  if (DEBUGLEVEL >= 4)
+    fprintferr("GaloisConj:extra=%d are you happy?\n", extra);
+  borneabs = gmul2n(gmul(borne, borneabs), 2+extra);
+  gb->valsol = itos(gceil(gdiv(glog(gmul2n(borneroots,4), prec), glog(gb->l, prec))));
   if (DEBUGLEVEL >= 4)
     fprintferr("GaloisConj:val1=%d\n", gb->valsol);
-  gb->valabs = max(gb->valsol, itos(gceil(gdiv(glog(borneabs, DEFAULTPREC), glog(gb->l, DEFAULTPREC)))));
+  gb->valabs = max(gb->valsol, itos(gceil(gdiv(glog(borneabs, prec), glog(gb->l, prec)))));
   if (DEBUGLEVEL >= 4)
     fprintferr("GaloisConj:val2=%d\n", gb->valabs);
   avma = av2;
@@ -2011,7 +2022,7 @@ s4galoisgen(struct galois_lift * gl)
   isom = cgetg(lg(Tmod), t_VEC);
   isominv = cgetg(lg(Tmod), t_VEC);
   misom = cgetg(lg(Tmod), t_MAT);
-  inittestlift(Tmod, 1, gl, &gt, NULL);
+  inittestlift(Tmod, 1, gl, &gt, NULL,0);
   bezoutcoeff = gt.bezoutcoeff;
   pauto = gt.pauto;
   for (i = 1; i < lg(pj); i++)
@@ -2292,7 +2303,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne * gb, const struct g
 	  fprintferr("Galoisconj:p=%d deg=%d fp=%d\n", p, deg, fp);
 	lo = (GEN *) listsousgroupes(deg, n / fp);
 	initlift(T, den, ip, gb->bornesol, L, &gl);
-	if (inittestlift((GEN) Tmod[1], fp / deg, &gl, &gt, frob))
+	if (inittestlift((GEN) Tmod[1], fp / deg, &gl, &gt, frob,lg(lo)==2))
 	{
 	  int k;
 	  sg = lg(lo) - 1;
@@ -2410,7 +2421,7 @@ suite:				/* Djikstra probably hates me. (Linus
       avma = ltop;
       return gzero;		/* Avoid computing the discriminant */
     }
-    Pden = gabs(mycoredisc(discsr(P)), DEFAULTPREC);
+    Pden = absi(corediscpartial(discsr(P)));
     Pgb.l = gb->l;
     initborne(P, Pden, &Pgb, Pga.ppp);
     if (Pgb.valabs > gb->valabs)
@@ -2533,7 +2544,7 @@ galoisconj4(GEN T, GEN den, long flag)
     return stoi(ga.p);		/* Avoid computing the discriminant */
   }
   if (!den)
-    den = absi(mycoredisc(discsr(T)));
+    den = absi(corediscpartial(discsr(T)));
   else
   {
     if (typ(den) != t_INT)

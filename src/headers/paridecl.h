@@ -713,6 +713,7 @@ void    vpariputs(char* format, va_list args);
 
 /* galconj.c */
 
+GEN     corediscpartial(GEN n);
 GEN     galoisconj(GEN nf);
 GEN     galoisconj0(GEN nf,long flag, GEN d, long prec);
 GEN     galoisconj2(GEN x, long nbmax, long prec);
