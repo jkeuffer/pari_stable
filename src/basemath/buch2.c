@@ -1856,7 +1856,9 @@ small_norm(RELCACHE_t *cache, FB_t *F, double LOGD, GEN nf,
     GEN IDEAL, ideal = (GEN)F->LP[noideal];
     pari_sp av2;
 
-    if (DEBUGLEVEL>1) fprintferr("\n*** Ideal no %ld: %Z\n", noideal, ideal);
+    if (DEBUGLEVEL>1)
+      fprintferr("\n*** Ideal no %ld: [%Z, %Z, %Z, %Z]\n",
+                 noideal, ideal[1], ideal[2], ideal[3], ideal[4]);
 #if 1 /* slower but seems to find more relations this way... */
     IDEAL = lllint_ip(prime_to_ideal(nf,ideal), 4);
 #else
