@@ -102,7 +102,6 @@ pari_init_stackcheck(void *stack_base)
 /* DEC cc doesn't like this line:
  * PARI_stack_limit = stack_base - ((rip.rlim_cur/16)*15); */
   PARI_stack_limit = (void*)((long)stack_base - (rip.rlim_cur/16)*15);
-  return;
 }
 #endif /* STACK_CHECK */
 
