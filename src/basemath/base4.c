@@ -1959,7 +1959,7 @@ ideallllred(GEN nf, GEN I, GEN vdir, long prec)
 
   if (isnfscalar(y))
   { /* already reduced */
-    if (!aI) { if (I == I0) I = gcopy(I); else avma = (ulong)I; }
+    if (!aI) I = gcopy(I);
     y = NULL; goto END;
   }
   if (DEBUGLEVEL>5) msgtimer("LLL reduction");
