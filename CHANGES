@@ -52,6 +52,8 @@ BA  5- [Configure:] add -lm -lc to EXTRADLLDFLAGS, not DLLDFLAGS
    11- factorpadic(z+y,2,4) --> SEGV
    12- wrong result in idealchinese when the y_i had denominator
 BA 13- sigma(n,-1) output a wrong result. 
+BA 14- inline alpha assembler broken (registers clobbered)
+GH 15- polsturm(1, 0, 1) ---> error  [ return 0! ]
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available

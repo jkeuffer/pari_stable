@@ -3864,8 +3864,13 @@ sturmpart(GEN x, GEN a, GEN b)
   pari_sp av = avma, lim = stack_lim(av, 1);
   GEN g,h,u,v;
 
-  if (typ(x) != t_POL) err(typeer,"sturm");
   if (gcmp0(x)) err(zeropoler,"sturm");
+  t = typ(x);
+  if (t != t_POL)
+  {
+    if (t == t_INT || t == t_FRAC || t == t_FRACN) return 0;
+    err(typeer,"sturm");
+  }
   s=lgef(x); if (s==3) return 0;
 
   sl = gsigne(leading_term(x));
