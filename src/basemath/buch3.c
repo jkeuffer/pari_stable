@@ -13,6 +13,7 @@ extern GEN gmul_mat_smallvec(GEN x, GEN y);
 extern GEN ideleaddone_aux(GEN nf,GEN x,GEN ideal);
 extern GEN logunitmatrix(GEN nf,GEN funits,GEN racunit,GEN bid);
 extern GEN vconcat(GEN Q1, GEN Q2);
+extern void minim_alloc(long n, double ***q, GEN *x, double **y,  double **z, double **v);
 
 static GEN
 get_full_rank(GEN nf, GEN v, GEN _0, GEN _1, GEN vecsign, GEN gen,

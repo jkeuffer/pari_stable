@@ -840,6 +840,7 @@ lllgramintern(GEN x, long alpha, long flag, long prec)
     if (prec < k) prec = k;
     x = gprec_w(x, prec+1);
   }
+  kmax = 1;
 
 LABLLLGRAM:
   switch(retry--)
@@ -848,7 +849,7 @@ LABLLLGRAM:
     case 1:
       if (kmax > 2)
       { /* some progress but precision loss, try again */
-        prec = (prec<<1)-2; KMAX = kmax;
+        prec = (prec<<1)-2; KMAX = kmax; kmax = 1;
         if (DEBUGLEVEL > 3) fprintferr("\n");
         if (DEBUGLEVEL) err(warnprec,"lllgramintern",prec);
         x = qf_base_change(gprec_w(xinit,prec),h,1);
@@ -873,7 +874,7 @@ LABLLLGRAM:
   L=cgetg(lx,t_MAT);
   B=cgetg(lx,t_COL);
   for (j=1; j<lx; j++) { L[j] = (long)zerocol(n); B[j] = zero; }
-  k=2; kmax=1; B[1]=coeff(x,1,1);
+  k=2; B[1]=coeff(x,1,1);
   if (gcmp0((GEN)B[1]))
   {
     if (flag) return NULL;
@@ -2477,7 +2478,7 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   long n = lg(a), av0 = avma, av1,av,tetpil,lim, i,j,k,s,maxrank;
   double p,BOUND,*v,*y,*z,**q, eps = 0.000001;
 
-  maxrank = 0; res = V = NULL; /* gcc -Wall */
+  maxrank = 0; res = V = invp = NULL; /* gcc -Wall */
   switch(flag)
   {
     case min_FIRST: res = cgetg(3,t_VEC); break;

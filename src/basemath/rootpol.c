@@ -868,6 +868,8 @@ fft(GEN Omega, GEN p, GEN f, long step, long l)
   for (i=0; i<l; i++) f[i]=ff[i+1];
 }
 
+extern void mpsincos(GEN x, GEN *s, GEN *c);
+
 /* return exp(ix), x a t_REAL */
 static GEN
 exp_i(GEN x)

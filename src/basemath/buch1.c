@@ -1559,6 +1559,7 @@ real_relations(long lim, long s, long LIMC, long *ex, long **mat, GEN glog2,
   limstack=stack_lim(av,1);
   if (first) nbtest = 0;
   current = 0;
+  p1 = NULL; /* gcc -Wall */
   while (s<lim)
   {
     form = real_random_form(ex);
