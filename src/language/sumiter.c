@@ -1017,8 +1017,8 @@ qromi(entree *ep, GEN a, GEN b, char *ch, long prec)
   GEN ss,dss,s,h,q1,p1,p,qlint,del,ddel,x,sum;
   long av = avma, av1,tetpil,j,j1,j2,lim,it,sig;
 
-  p=cgetr(prec); gaffect(ginv(a),p); a=p;
-  p=cgetr(prec); gaffect(ginv(b),p); b=p;
+  a = fix(ginv(a), prec);
+  b = fix(ginv(b), prec);
   qlint=subrr(b,a); sig= -signe(qlint);
   if (!sig)  { avma=av; return gzero; }
   if (sig>0) { setsigne(qlint,1); s=a; a=b; b=s; }
