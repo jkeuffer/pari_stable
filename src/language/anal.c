@@ -47,7 +47,6 @@ static void   skipidentifier();
 static void   skipseq();
 static void   skipstring();
 static void   skiptruc();
-static GEN    strtoGENstr_t();
 static entree *entry();
 static entree *installep(void *f,char *name,int l,int v,int add,entree **table);
 static entree *skipentry(void);
@@ -183,7 +182,7 @@ parse_option_string(char *arg, char *template, long flag, char **failure, char *
 	    id = id + l;
 	    break;
 	}
-	if ( !id && !negated && !negate 
+	if ( !id && !negated && !negate
 	     && (l > 2) && buf[0] == 'n' && buf[1] == 'o' ) {
 	    /* Try to find the flag without the prefix "no". */
 	    buf += 2; l -= 2;
@@ -450,7 +449,7 @@ check_proto(char *code)
       break;
     case ',': break;
     case '\n': return; /* Before the mnemonic */
-      
+
     case 'l':
     case 'v': err(talker2, "this code has to come first", s-1, code);
     default: err(talker2, "unknown parser code", s-1, code);
@@ -912,397 +911,9 @@ do_switch(int noparen, int matchcomma)
 
 /********************************************************************/
 /**                                                                **/
-/**                          READ FUNCTIONS                        **/
+/**                            STRINGS                             **/
 /**                                                                **/
 /********************************************************************/
-typedef struct matcomp
-{
-  GEN *ptcell;
-  GEN parent;
-  int full_col, full_row;
-  void *extra; /* so far used by check_pointers only */
-} matcomp;
-
-/* Return the content of the matrix cell and sets members of corresponding
- * matrix component 'c'.  Assume *analyseur = '[' */
-static GEN
-matcell(GEN p, matcomp *C)
-{
-  GEN *pt = &p;
-  long c,r, tx;
-  int full_col, full_row;
-  tx = full_col = full_row = 0; 
-  do {
-    analyseur++; p = *pt; tx = typ(p);
-    switch(tx)
-    {
-      case t_LIST:
-        c = check_array_index(lgef(p)-1) + 1;
-        pt = (GEN*)(p + c); match(']'); break;
-
-      case t_VEC: case t_COL:
-        c = check_array_index(lg(p));
-        pt = (GEN*)(p + c); match(']'); break;
-
-      case t_VECSMALL:
-        c = check_array_index(lg(p));
-        pt = (GEN*)(p + c); match(']');
-        if (*analyseur == '[') err(caracer1,analyseur,mark.start);
-        break;
-
-      case t_MAT:
-        if (lg(p)==1) err(talker2,"a 0x0 matrix has no elements",
-                                  analyseur,mark.start);
-        full_col = full_row = 0;
-        if (*analyseur==',') /* whole column */
-        {
-          analyseur++;
-          c = check_array_index(lg(p));
-          match(']');
-          if (*analyseur == '[')
-          { /* collapse [,c][r] into [r,c] */
-            analyseur++;
-            r = check_array_index(lg(p));
-            pt = (GEN*)(((GEN)p[c]) + r); /* &coeff(p,r,c) */
-            match(']');
-          }
-          else
-          {
-            full_col = 1;
-            pt = (GEN*)(p + c);
-          }
-          break;
-        }
-
-        r = check_array_index(lg(p[1]));
-        match(',');
-        if (*analyseur == ']') /* whole row */
-        {
-          analyseur++;
-          if (*analyseur == '[')
-          { /* collapse [r,][c] into [r,c] */
-            analyseur++;
-            c = check_array_index(lg(p));
-            pt = (GEN*)(((GEN)p[c]) + r); /* &coeff(p,r,c) */
-            match(']');
-          }
-          else
-          {
-            GEN p2 = cgetg(lg(p),t_VEC);
-            full_row = r; /* record row number */
-            for (c=1; c<lg(p); c++) p2[c] = coeff(p,r,c);
-            pt = &p2;
-          }
-        }
-        else
-        {
-          c = check_array_index(lg(p));
-          pt = (GEN*)(((GEN)p[c]) + r); /* &coeff(p,r,c) */
-          match(']');
-        }
-        break;
-
-      default:
-        err(caracer1,analyseur-1,mark.start);
-    }
-  } while (*analyseur == '[');
-  C->full_row = full_row;
-  C->full_col = full_col;
-  C->parent = p; C->ptcell = pt;
-  return (tx == t_VECSMALL)? stoi((long)*pt): *pt;
-}
-
-static GEN
-facteur(void)
-{
-  const char *old = analyseur;
-  GEN x,p1;
-  int plus=1;
-
-  switch(*analyseur)
-  {
-    case '-': plus=0; /* fall through */
-    case '+': analyseur++; break;
-  }
-  x = truc();
-  if (br_status) return NULL;
-
-  for(;;)
-    switch(*analyseur)
-    {
-      case '.':
-	analyseur++; x = read_member(x);
-        if (!x) err(talker2, "not a proper member definition",
-                    mark.member, mark.start);
-        break;
-      case '^':
-	analyseur++; p1 = facteur();
-        if (br_status) err(breaker,"here (after ^)");
-        x = gpow(x,p1,prec); break;
-      case '\'':
-	analyseur++; x = deriv(x,gvar9(x)); break;
-      case '~':
-	analyseur++; x = gtrans(x); break;
-      case '[':
-      {
-        matcomp c;
-        x = matcell(x, &c);
-        if (isonstack(x)) x = gcopy(x);
-        break;
-      }
-      case '!':
-	if (analyseur[1] != '=')
-	{
-	  if (typ(x) != t_INT) err(caseer,old,mark.start);
-	  analyseur++; x=mpfact(itos(x)); break;
-	} /* Fall through */
-
-      default:
-        return (plus || x==gnil)? x: gneg(x);
-    }
-}
-
-/* table array of length N+1, append one expr, growing array if necessary  */
-static void
-_append(GEN **table, long *n, long *N)
-{
-  if (++(*n) == *N)
-  {
-    *N <<= 1;
-    *table = (GEN*)gprealloc((void*)*table,(*N + 1)*sizeof(GEN));
-  }
-  (*table)[*n] = expr();
-  if (br_status) err(breaker,"array context");
-}
-
-#define check_var_name() \
-  if (!isalpha((int)*analyseur)) err(varer1,analyseur,mark.start);
-
-static GEN
-truc(void)
-{
-  long N,i,j,m,n,p;
-  GEN *table,p1;
-  char *old;
-
-  if (*analyseur == '!') /* NOT */
-  {
-    analyseur++; p1 = facteur();
-    if (br_status) err(breaker,"here (after !)");
-    return gcmp0(p1)? gun: gzero;
-  }
-  if (*analyseur == '\'') /* QUOTE */
-  {
-    const char* old;
-    entree *ep;
-    analyseur++; check_var_name();
-    old = analyseur; ep = entry();
-    switch(EpVALENCE(ep))
-    {
-      case EpVAR: case EpGVAR:
-        return (GEN)initial_value(ep);
-      default: err(varer1,old,mark.start);
-    }
-  }
-  if (*analyseur == '#') /* CARD */
-  {
-    analyseur++; p1 = facteur();
-    if (br_status) err(breaker,"here (after #)");
-    return stoi(glength(p1));
-  }
-  if (isalpha((int)*analyseur)) return identifier();
-
-  if (*analyseur == '"') return strtoGENstr_t();
-  if (isdigit((int)*analyseur) || *analyseur == '.') return constante();
-  switch(*analyseur++)
-  {
-    case '(': p1=expr(); match(')'); return p1;
-
-    case '[': /* constant array/vector */
-      if (*analyseur == ';' && analyseur[1] == ']')
-	{ analyseur += 2; return cgetg(1,t_MAT); } /* [;] */
-
-      n = 0; N = 1024;
-      table = (GEN*) gpmalloc((N + 1)*sizeof(GEN));
-
-      if (*analyseur != ']') _append(&table, &n, &N);
-      while (*analyseur == ',') { analyseur++; _append(&table, &n, &N); }
-      switch (*analyseur++)
-      {
-	case ']':
-        {
-          long tx;
-          if (*analyseur == '~') { analyseur++; tx=t_COL; } else tx=t_VEC;
-	  p1 = cgetg(n+1,tx);
-	  for (i=1; i<=n; i++) p1[i] = lcopy(table[i]);
-	  break;
-        }
-
-	case ';':
-	  m = n;
-	  do _append(&table, &n, &N); while (*analyseur++ != ']');
-	  p1 = cgetg(m+1,t_MAT); p = n/m + 1;
-	  for (j=1; j<=m; j++)
-	  {
-            GEN c = cgetg(p,t_COL); p1[j] = (long)c;
-	    for (i=j; i<=n; i+=m) *++c = lcopy(table[i]);
-	  }
-	  break;
-
-	default: /* can only occur in library mode */
-          err(talker,"incorrect vector or matrix");
-          return NULL; /* not reached */
-      }
-      free(table); return p1;
-
-    case '%':
-    old = analyseur-1;
-    if (!GP_DATA) err(talker2,"history not available", old, mark.start);
-    else
-    {
-      gp_hist *H = GP_DATA->hist;
-      p = 0;
-      while (*analyseur == '`') { analyseur++; p++; }
-      return p ? gp_history(H, -p        , old, mark.start)
-               : gp_history(H, number(&n), old, mark.start);
-    }
-  }
-  err(caracer1,analyseur-1,mark.start);
-  return NULL; /* not reached */
-}
-
-/* valid x opop, e.g x++ */
-static GEN
-double_op()
-{
-  static long mun[] = { evaltyp(t_INT) | _evallg(3), 
-                        evalsigne(-1)|evallgefint(3), 1 };
-  char c = *analyseur;
-  if (c == analyseur[1])
-    switch(c)
-    {
-      case '+': analyseur+=2; return gun; /* ++ */
-      case '-': analyseur+=2; return mun; /* -- */
-    }
-  return NULL;
-}
-
-/* return op if op= detected */
-static F2GEN
-get_op_fun()
-{
-  if (!*analyseur) return (F2GEN)NULL;
-
-  /* op= constructs ? */
-  if (analyseur[1] == '=')
-  {
-    switch(*analyseur)
-    {
-      case '+' : analyseur += 2; return &gadd;
-      case '-' : analyseur += 2; return &gsub;
-      case '*' : analyseur += 2; return &gmul;
-      case '/' : analyseur += 2; return &gdiv;
-      case '\\': analyseur += 2; return &gdivent;
-      case '%' : analyseur += 2; return &gmod;
-    }
-  }
-  else if (analyseur[2] == '=')
-  {
-    switch(*analyseur)
-    {
-      case '>' :
-        if (analyseur[1]=='>') { analyseur += 3; return &gshift_r; }
-        break;
-      case '<' :
-        if (analyseur[1]=='<') { analyseur += 3; return &gshift_l; }
-        break;
-      case '\\':
-        if (analyseur[1]=='/') { analyseur += 3; return &gdivround; }
-        break;
-    }
-  }
-  return (F2GEN)NULL;
-}
-
-static GEN
-expr_ass()
-{
-  GEN res = expr();
-  if (br_status) err(breaker,"assignment");
-  return res;
-}
-
-F2GEN
-affect_block(GEN *res)
-{
-  F2GEN f;
-  GEN r;
-  if (*analyseur == '=')
-  {
-    r = NULL; f = NULL;
-    if (analyseur[1] != '=') { analyseur++; r = expr_ass(); }
-  }
-  else if ((r = double_op()))  f = &gadd;
-  else if ((f = get_op_fun())) r = expr_ass();
-  *res = r; return f;
-}
-
-/* assign res at *pt in "simple array object" p */
-static GEN
-change_compo(matcomp *c, GEN res)
-{
-  GEN p = c->parent, *pt = c->ptcell;
-  long i;
-  int full_row = c->full_row, full_col = c->full_col;
-  char *old = analyseur;
-
-  if (typ(p) == t_VECSMALL)
-  {
-    if (typ(res) != t_INT || is_bigint(res))
-      err(talker2,"not a suitable VECSMALL component",old,mark.start);
-    *pt = (GEN)itos(res); return res;
-  }
-  if (full_row)
-  {
-    if (typ(res) != t_VEC || lg(res) != lg(p)) err(caseer2,old,mark.start);
-    for (i=1; i<lg(p); i++)
-    {
-      GEN p1 = gcoeff(p,full_row,i); if (isclone(p1)) killbloc(p1);
-      coeff(p,full_row,i) = lclone((GEN)res[i]);
-    }
-    return res;
-  }
-  if (full_col)
-    if (typ(res) != t_COL || lg(res) != lg(*pt)) err(caseer2,old,mark.start);
-
-  res = gclone(res);
-  if (isclone(*pt)) killbloc(*pt);
-  return *pt = res;
-}
-
-/* extract from p the needed component */
-static GEN
-matrix_block(GEN p)
-{
-  char *end, *ini = analyseur;
-  GEN res, cpt;
-  matcomp c;
-  F2GEN fun;
-
-  skip_matrix_block();
-  fun = affect_block(&res);
-  end = analyseur;
-  analyseur = ini;
-  cpt = matcell(p, &c);
-  if (res)
-  {
-    if (fun) res = fun(cpt, res);
-    res = change_compo(&c,res);
-    analyseur = end;
-  }
-  else res = isonstack(cpt)? gcopy(cpt): cpt; /* no assignment */
-  return res;
-}
 
 static char*
 init_buf(long len, char **ptbuf, char **ptlim)
@@ -1432,21 +1043,6 @@ readstring(char *src, char *s)
   match2(src, '"'); return src+1;
 }
 
-static GEN
-strtoGENstr_t()
-{
-  char *old = analyseur;
-  long n;
-  GEN x;
-
-  skipstring(); n = analyseur-old - 1; /* don't count the enclosing '"' */
-  old++; /* skip '"' */
-  n = (n+BYTES_IN_LONG) >> TWOPOTBYTES_IN_LONG;
-  x = cgetg(n+1, t_STR);
-  (void)translate(&old, GSTR(x), NULL,NULL);
-  return x;
-}
-
 /* return the first n0 chars of s as a GEN [s may not be 0-terminated] */
 static GEN
 _strtoGENstr(char *s, long n0)
@@ -1466,6 +1062,408 @@ strtoGENstr(char *s, long flag)
   x = _strtoGENstr(s, strlen(s));
   if (flag) free(s);
   return x;
+}
+
+/********************************************************************/
+/**                                                                **/
+/**                          READ FUNCTIONS                        **/
+/**                                                                **/
+/********************************************************************/
+typedef struct matcomp
+{
+  GEN *ptcell;
+  GEN parent;
+  int full_col, full_row;
+  void *extra; /* so far used by check_pointers only */
+} matcomp;
+
+/* Return the content of the matrix cell and sets members of corresponding
+ * matrix component 'c'.  Assume *analyseur = '[' */
+static GEN
+matcell(GEN p, matcomp *C)
+{
+  GEN *pt = &p;
+  long c,r, tx;
+  int full_col, full_row;
+  tx = full_col = full_row = 0;
+  do {
+    analyseur++; p = *pt; tx = typ(p);
+    switch(tx)
+    {
+      case t_LIST:
+        c = check_array_index(lgef(p)-1) + 1;
+        pt = (GEN*)(p + c); match(']'); break;
+
+      case t_VEC: case t_COL:
+        c = check_array_index(lg(p));
+        pt = (GEN*)(p + c); match(']'); break;
+
+      case t_VECSMALL:
+        c = check_array_index(lg(p));
+        pt = (GEN*)(p + c); match(']');
+        if (*analyseur == '[') err(caracer1,analyseur,mark.start);
+        break;
+
+      case t_MAT:
+        if (lg(p)==1) err(talker2,"a 0x0 matrix has no elements",
+                                  analyseur,mark.start);
+        full_col = full_row = 0;
+        if (*analyseur==',') /* whole column */
+        {
+          analyseur++;
+          c = check_array_index(lg(p));
+          match(']');
+          if (*analyseur == '[')
+          { /* collapse [,c][r] into [r,c] */
+            analyseur++;
+            r = check_array_index(lg(p));
+            pt = (GEN*)(((GEN)p[c]) + r); /* &coeff(p,r,c) */
+            match(']');
+          }
+          else
+          {
+            full_col = 1;
+            pt = (GEN*)(p + c);
+          }
+          break;
+        }
+
+        r = check_array_index(lg(p[1]));
+        match(',');
+        if (*analyseur == ']') /* whole row */
+        {
+          analyseur++;
+          if (*analyseur == '[')
+          { /* collapse [r,][c] into [r,c] */
+            analyseur++;
+            c = check_array_index(lg(p));
+            pt = (GEN*)(((GEN)p[c]) + r); /* &coeff(p,r,c) */
+            match(']');
+          }
+          else
+          {
+            GEN p2 = cgetg(lg(p),t_VEC);
+            full_row = r; /* record row number */
+            for (c=1; c<lg(p); c++) p2[c] = coeff(p,r,c);
+            pt = &p2;
+          }
+        }
+        else
+        {
+          c = check_array_index(lg(p));
+          pt = (GEN*)(((GEN)p[c]) + r); /* &coeff(p,r,c) */
+          match(']');
+        }
+        break;
+
+      default:
+        err(caracer1,analyseur-1,mark.start);
+    }
+  } while (*analyseur == '[');
+  C->full_row = full_row;
+  C->full_col = full_col;
+  C->parent = p; C->ptcell = pt;
+  return (tx == t_VECSMALL)? stoi((long)*pt): *pt;
+}
+
+static GEN
+facteur(void)
+{
+  const char *old = analyseur;
+  GEN x, p1;
+  int plus;
+
+  switch(*analyseur)
+  {
+    case '-': analyseur++; plus = 0; break;
+    case '+': analyseur++; plus = 1; break;
+    default: plus = 1; break;
+  }
+  x = truc();
+  if (br_status) return NULL;
+
+  for(;;)
+    switch(*analyseur)
+    {
+      case '.':
+	analyseur++; x = read_member(x);
+        if (!x) err(talker2, "not a proper member definition",
+                    mark.member, mark.start);
+        break;
+      case '^':
+	analyseur++; p1 = facteur();
+        if (br_status) err(breaker,"here (after ^)");
+        x = gpow(x,p1,prec); break;
+      case '\'':
+	analyseur++; x = deriv(x,gvar9(x)); break;
+      case '~':
+	analyseur++; x = gtrans(x); break;
+      case '[':
+      {
+        matcomp c;
+        x = matcell(x, &c);
+        if (isonstack(x)) x = gcopy(x);
+        break;
+      }
+      case '!':
+	if (analyseur[1] != '=')
+	{
+	  if (typ(x) != t_INT) err(caseer,old,mark.start);
+	  analyseur++; x=mpfact(itos(x)); break;
+	} /* Fall through */
+
+      default:
+        return (plus || x==gnil)? x: gneg(x);
+    }
+}
+
+/* table array of length N+1, append one expr, growing array if necessary  */
+static void
+_append(GEN **table, long *n, long *N)
+{
+  if (++(*n) == *N)
+  {
+    *N <<= 1;
+    *table = (GEN*)gprealloc((void*)*table,(*N + 1)*sizeof(GEN));
+  }
+  (*table)[*n] = expr();
+  if (br_status) err(breaker,"array context");
+}
+
+#define check_var_name() \
+  if (!isalpha((int)*analyseur)) err(varer1,analyseur,mark.start);
+
+static GEN
+truc(void)
+{
+  long N, i, j, m, n, p;
+  GEN *table, z;
+  char *old;
+
+  if (isalpha((int)*analyseur)) return identifier();
+  if (isdigit((int)*analyseur) || *analyseur == '.') return constante();
+
+  switch(*analyseur)
+  {
+    case '!': /* NOT */
+      analyseur++; z = facteur();
+      if (br_status) err(breaker,"here (after !)");
+      return gcmp0(z)? gun: gzero;
+
+    case ('\''): { /* QUOTE */
+      entree *ep;
+      analyseur++; check_var_name();
+      old = analyseur; ep = entry();
+      switch(EpVALENCE(ep))
+      {
+        case EpVAR: case EpGVAR:
+          return (GEN)initial_value(ep);
+        default: err(varer1,old,mark.start);
+      }
+    }
+    case '#': /* cardinal */
+      analyseur++; z = facteur();
+      if (br_status) err(breaker,"here (after #)");
+      return stoi(glength(z));
+
+    case '"': { /* string */
+      long n;
+      analyseur++; old = analyseur;
+      skipstring(); n = analyseur - old; /* do not count enclosing '"' */
+      n = (n+BYTES_IN_LONG) >> TWOPOTBYTES_IN_LONG;
+      z = cgetg(n+1, t_STR);
+      (void)translate(&old, GSTR(z), NULL,NULL);
+      return z;
+    }
+    case '(':
+      analyseur++;
+      z = expr(); match(')'); return z;
+
+    case '[': /* constant array/vector */
+      analyseur++;
+      if (*analyseur == ';' && analyseur[1] == ']')
+	{ analyseur += 2; return cgetg(1,t_MAT); } /* [;] */
+
+      n = 0; N = 1024;
+      table = (GEN*) gpmalloc((N + 1)*sizeof(GEN));
+
+      if (*analyseur != ']') _append(&table, &n, &N);
+      while (*analyseur == ',') { analyseur++; _append(&table, &n, &N); }
+      switch (*analyseur++)
+      {
+	case ']':
+        {
+          long tx;
+          if (*analyseur == '~') { analyseur++; tx=t_COL; } else tx=t_VEC;
+	  z = cgetg(n+1,tx);
+	  for (i=1; i<=n; i++) z[i] = lcopy(table[i]);
+	  break;
+        }
+
+	case ';':
+	  m = n;
+	  do _append(&table, &n, &N); while (*analyseur++ != ']');
+	  z = cgetg(m+1,t_MAT); p = n/m + 1;
+	  for (j=1; j<=m; j++)
+	  {
+            GEN c = cgetg(p,t_COL); z[j] = (long)c;
+	    for (i=j; i<=n; i+=m) *++c = lcopy(table[i]);
+	  }
+	  break;
+
+	default: /* can only occur in library mode */
+          err(talker,"incorrect vector or matrix");
+          return NULL; /* not reached */
+      }
+      free(table); return z;
+
+    case '%':
+    old = analyseur; analyseur++;
+    if (!GP_DATA) err(talker2,"history not available", old, mark.start);
+    else
+    {
+      gp_hist *H = GP_DATA->hist;
+      p = 0;
+      while (*analyseur == '`') { analyseur++; p++; }
+      return p ? gp_history(H, -p        , old, mark.start)
+               : gp_history(H, number(&n), old, mark.start);
+    }
+  }
+  err(caracer1,analyseur-1,mark.start);
+  return NULL; /* not reached */
+}
+
+/* valid x opop, e.g x++ */
+static GEN
+double_op()
+{
+  static long mun[] = { evaltyp(t_INT) | _evallg(3),
+                        evalsigne(-1)|evallgefint(3), 1 };
+  char c = *analyseur;
+  if (c == analyseur[1])
+    switch(c)
+    {
+      case '+': analyseur+=2; return gun; /* ++ */
+      case '-': analyseur+=2; return mun; /* -- */
+    }
+  return NULL;
+}
+
+/* return op if op= detected */
+static F2GEN
+get_op_fun()
+{
+  if (!*analyseur) return (F2GEN)NULL;
+
+  /* op= constructs ? */
+  if (analyseur[1] == '=')
+  {
+    switch(*analyseur)
+    {
+      case '+' : analyseur += 2; return &gadd;
+      case '-' : analyseur += 2; return &gsub;
+      case '*' : analyseur += 2; return &gmul;
+      case '/' : analyseur += 2; return &gdiv;
+      case '\\': analyseur += 2; return &gdivent;
+      case '%' : analyseur += 2; return &gmod;
+    }
+  }
+  else if (analyseur[2] == '=')
+  {
+    switch(*analyseur)
+    {
+      case '>' :
+        if (analyseur[1]=='>') { analyseur += 3; return &gshift_r; }
+        break;
+      case '<' :
+        if (analyseur[1]=='<') { analyseur += 3; return &gshift_l; }
+        break;
+      case '\\':
+        if (analyseur[1]=='/') { analyseur += 3; return &gdivround; }
+        break;
+    }
+  }
+  return (F2GEN)NULL;
+}
+
+static GEN
+expr_ass()
+{
+  GEN res = expr();
+  if (br_status) err(breaker,"assignment");
+  return res;
+}
+
+F2GEN
+affect_block(GEN *res)
+{
+  F2GEN f;
+  GEN r;
+  if (*analyseur == '=')
+  {
+    r = NULL; f = NULL;
+    if (analyseur[1] != '=') { analyseur++; r = expr_ass(); }
+  }
+  else if ((r = double_op()))  f = &gadd;
+  else if ((f = get_op_fun())) r = expr_ass();
+  *res = r; return f;
+}
+
+/* assign res at *pt in "simple array object" p */
+static GEN
+change_compo(matcomp *c, GEN res)
+{
+  GEN p = c->parent, *pt = c->ptcell;
+  long i;
+  int full_row = c->full_row, full_col = c->full_col;
+  char *old = analyseur;
+
+  if (typ(p) == t_VECSMALL)
+  {
+    if (typ(res) != t_INT || is_bigint(res))
+      err(talker2,"not a suitable VECSMALL component",old,mark.start);
+    *pt = (GEN)itos(res); return res;
+  }
+  if (full_row)
+  {
+    if (typ(res) != t_VEC || lg(res) != lg(p)) err(caseer2,old,mark.start);
+    for (i=1; i<lg(p); i++)
+    {
+      GEN p1 = gcoeff(p,full_row,i); if (isclone(p1)) killbloc(p1);
+      coeff(p,full_row,i) = lclone((GEN)res[i]);
+    }
+    return res;
+  }
+  if (full_col)
+    if (typ(res) != t_COL || lg(res) != lg(*pt)) err(caseer2,old,mark.start);
+
+  res = gclone(res);
+  if (isclone(*pt)) killbloc(*pt);
+  return *pt = res;
+}
+
+/* extract from p the needed component */
+static GEN
+matrix_block(GEN p)
+{
+  char *end, *ini = analyseur;
+  GEN res, cpt;
+  matcomp c;
+  F2GEN fun;
+
+  skip_matrix_block();
+  fun = affect_block(&res);
+  end = analyseur;
+  analyseur = ini;
+  cpt = matcell(p, &c);
+  if (res)
+  {
+    if (fun) res = fun(cpt, res);
+    res = change_compo(&c,res);
+    analyseur = end;
+  }
+  else res = isonstack(cpt)? gcopy(cpt): cpt; /* no assignment */
+  return res;
 }
 
 /* x = gzero: no default value, otherwise a t_STR, formal expression for
@@ -2172,7 +2170,7 @@ identifier(void)
       /* checking arguments */
       match('('); ch1 = analyseur;
       narg = check_args(); nloc = 0;
-      match(')'); 
+      match(')');
       /* Dirty, but don't want to define a local() function */
       if (*analyseur != '=' && strcmp(ep->name, "local") == 0)
         err(talker2, "local() bloc must appear before any other expression",
@@ -2579,11 +2577,11 @@ doskipseq(char *c, int strict)
   analyseur = olds;
 }
 
+/* analyseur points on the character following the starting " */
 /* skip any number of concatenated strings */
 static void
 skipstring()
 {
-  match('"');
   while (*analyseur)
     switch (*analyseur++)
     {
@@ -2735,22 +2733,27 @@ skiptruc(void)
   long i,m,n;
   char *old;
 
-  switch(*analyseur)
-  {
-    case '"': skipstring(); return;
-    case '!': case '#': analyseur++; skipfacteur(); return;
-    case '&': case '\'':
-      analyseur++; check_var_name();
-      (void)skipentry(); return;
-  }
   if (isalpha((int)*analyseur)) { skipidentifier(); return; }
   if (isdigit((int)*analyseur) || *analyseur== '.') { skipconstante(); return; }
-  switch(*analyseur++)
+  switch(*analyseur)
   {
+    case '"':
+      analyseur++; skipstring(); return;
+
+    case '!':
+    case '#':
+      analyseur++; skipfacteur(); return;
+
+    case '&':
+    case '\'':
+      analyseur++; check_var_name();
+      (void)skipentry(); return;
+
     case '(':
-      skipexpr(); match(')'); return;
+      analyseur++; skipexpr(); match(')'); return;
+
     case '[':
-      old = analyseur-1;
+      old = analyseur; analyseur++;
       if (*analyseur == ';' && analyseur[1] == ']')  /* [;] */
         { analyseur+=2; return; }
       n = 0;
@@ -2759,10 +2762,10 @@ skiptruc(void)
 	do { n++; skipexpr(); old=analyseur; } while (*analyseur++ == ',');
 	analyseur--;
       }
-      switch (*analyseur)
+      switch (*analyseur++)
       {
-	case ']': analyseur++; return;
-	case ';': analyseur++;
+	case ']': return;
+	case ';':
           for (m=2; ; m++)
           {
             for (i=1; i<n; i++) { skipexpr(); match(','); }
@@ -2774,7 +2777,9 @@ skiptruc(void)
 	default:
 	  err(talker2,"; or ] expected",old,mark.start);
       }
+
     case '%':
+      analyseur++;
       if (*analyseur == '`') { while (*++analyseur == '`') /*empty*/; return; }
       (void)number(&n); return;
   }
@@ -2847,7 +2852,7 @@ skipidentifier(void)
         match_comma();
         while (*analyseur)
         {
-          if (*analyseur == '"') skipstring();
+          if (*analyseur == '"') { analyseur++; skipstring(); }
           if (*analyseur == ',' || *analyseur == ')') break;
           analyseur++;
         }
@@ -2858,7 +2863,7 @@ skipidentifier(void)
         {
           while (*analyseur)
           {
-            if (*analyseur == '"') skipstring();
+            if (*analyseur == '"') { analyseur++; skipstring(); }
             if (*analyseur == ')') break;
             if (*analyseur == ',') analyseur++;
             else skipexpr();
@@ -2869,7 +2874,7 @@ skipidentifier(void)
 
         while (*analyseur)
         {
-          if (*analyseur == '"') skipstring();
+          if (*analyseur == '"') { analyseur++; skipstring(); }
           if (*analyseur == ',' || *analyseur == ')') break;
           skipexpr();
         }
