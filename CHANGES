@@ -80,6 +80,8 @@ HC 46- no GC in dirmul
    48- setrand(16);quadclassunit(48893) --> infinite loop
    49- rnfpolred(bnfinit(y^2+1),x) --> SEGV
    50- float overflow in polroots (e.g polroots(x^3 + 2^1024*x + 1))
+   51- charpoly(Mod(1,x^2+1)) --> SEGV
+   52- added GC in polsturm
 
   Added
 IZ  1- [gnuplot] look up directory tree for gnuplot related files
