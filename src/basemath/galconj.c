@@ -1254,7 +1254,7 @@ fixedfieldsurmer(GEN O, GEN mod, GEN l, GEN p, long v, GEN LN, long n, long m)
     sym[j]++;
     if (DEBUGLEVEL>=4) fprintferr("FixedField: Sym: %Z\n",sym);
     L=sympol_eval(sym, O, mod);
-    if (!fixedfieldtest(FpV_red(L,l))) continue;
+    if (L==gzero || !fixedfieldtest(FpV_red(L,l))) continue;
     P=FpX_center(FpV_roots_to_pol(L,mod,v),mod);
     if (!p || FpX_is_squarefree(P,p))
       return mkvec3(sym,L,P);
@@ -1275,23 +1275,25 @@ fixedfieldsympol(GEN O, GEN mod, GEN l, GEN p, long v)
 {
   pari_sp ltop=avma;
   GEN V=NULL;
-  long n=lg(O[1]);
+  long n=lg(O[1])*2;
   GEN LN=cgetg(n,t_MAT);
   GEN Ll=cgetg(n,t_MAT);
-  long i,nb;
+  long i,nb,ok=0;
   for(i=1, nb=1; i<n; i++, nb+=4)
   {
     LN[i]=(long)sympol_eval_newtonsum(i,O,mod);
     Ll[i]=(long)FpV_red((GEN)LN[i],l);
     if (DEBUGLEVEL>=6) fprintferr("FixedField: LN[%d]=%Z \n",i,Ll[i]);
-    if (i==n-1) nb=VERYBIGINT;
-    if (fixedfieldtests(Ll,i))
+    if (i==n) nb*=4;
+    ok = (ok || fixedfieldtests(Ll,i));
+    if (ok)
       if ((V=fixedfieldsurmer(O,mod,l,p,v,LN,i,nb)))
       {
         if (DEBUGLEVEL>=4) pariputsf("FixedField: Sym: %Z\n",(GEN)V[1]);
         return gerepilecopy(ltop,V);
       }
   }
+  err(talker,"p too small in fixedfieldsympol");
   return NULL;
 }
 
