@@ -1104,8 +1104,9 @@ static void
 primecertify(GEN bnf,GEN beta,long pp,GEN big)
 {
   long i,j,qq,nbcol,lb,nbqq,ra,N;
-  GEN nf,mat,mat1,qgen,decqq,newcol,Qh,Q,g;
+  GEN nf,mat,mat1,qgen,decqq,newcol,Qh,Q,g,ord;
 
+  ord = NULL; /* gcc -Wall */
   nbcol = 0; nf = (GEN)bnf[7]; N = lgef(nf[1])-3;
   lb = lg(beta)-1; mat = cgetg(1,t_MAT); qq = 1;
   for(;;)
@@ -1119,14 +1120,17 @@ primecertify(GEN bnf,GEN beta,long pp,GEN big)
     {
       Q = (GEN)decqq[i]; if (!gcmp1((GEN)Q[4])) break;
       /* Q has degree 1 */
-      if (!g) g = lift_intern(gener(qgen)); /* primitive root */
-
+      if (!g)
+      {
+        g = lift_intern(gener(qgen)); /* primitive root */
+        ord = decomp(stoi(qq-1));
+      }
       Qh = prime_to_ideal(nf,Q);
       newcol = cgetg(lb+1,t_COL);
       for (j=1; j<=lb; j++)
       {
         GEN t = to_Fp_simple((GEN)beta[j], Qh);
-        newcol[j] = (long)Fp_PHlog(t,g,qgen);
+        newcol[j] = (long)Fp_PHlog(t,g,qgen,ord);
       }
       if (DEBUGLEVEL>3)
       {

@@ -1017,14 +1017,23 @@ Fp_shanks(GEN x,GEN g0,GEN p, GEN q)
 
 /* Pohlig-Hellman */
 GEN
-Fp_PHlog(GEN a, GEN g, GEN p)
+Fp_PHlog(GEN a, GEN g, GEN p, GEN ord)
 {
   ulong av = avma;
   GEN v,t0,a0,b,q,g_q,n_q,ginv0,qj,ginv;
-  GEN ord = subis(p,1), fa = factor(ord), ex = (GEN)fa[2];
+  GEN fa, ex;
   long e,i,j,l;
 
+  if (!ord) ord = subis(p,1);
+  if (typ(ord) == t_MAT)
+  {
+    fa = ord;
+    ord= factorback(fa,NULL);
+  }
+  else
+    fa = decomp(ord);
   if (typ(g) == t_INTMOD) g = lift_intern(g);
+  ex = (GEN)fa[2];
   fa = (GEN)fa[1];
   l = lg(fa);
   ginv = mpinvmod(g,p);
@@ -1139,7 +1148,7 @@ nf_PHlog(GEN nf, GEN a, GEN g, GEN pr, GEN prhall)
       g = element_powmodpr(nf,g,q,prhall);
     }
     g = lift_intern((GEN)g[1]);
-    n_q = Fp_PHlog(a,g,p);
+    n_q = Fp_PHlog(a,g,p,NULL);
     if (q) n_q = mulii(q, n_q);
     return gerepileuptoint(av, n_q);
   }
@@ -1190,7 +1199,7 @@ znlog(GEN x, GEN g0)
       err(talker,"not an element of (Z/pZ)* in znlog");
     case t_INTMOD: x = (GEN)x[2]; break;
   }
-  return gerepileuptoint(av, Fp_PHlog(x,(GEN)g0[2],p));
+  return gerepileuptoint(av, Fp_PHlog(x,(GEN)g0[2],p,NULL));
 }
 
 GEN
