@@ -3128,8 +3128,9 @@ MORE:
     }
     if (!F.pow) powFBgen(&F, nf, CBUCHG+1);
     if (!random_relation(phase, &cache, PRECREG,MAXRELSUP,
-                         nf,vecG,list_jideal,&F)) goto START; /* could not find relations */
+                         nf,vecG,list_jideal,&F)) goto START;
     if (DEBUGLEVEL > 3 && phase == 0) dbg_outrel(&cache);
+    list_jideal = NULL;
   }
 
 PRECPB:
@@ -3185,14 +3186,9 @@ PRECPB:
   nlze = lg(pdep)>1? lg(pdep[1])-1: lg(B[1])-1;
   if (nlze) /* dependent rows */
   {
-    if (phase)
-    {
-      list_jideal = NULL;
-      if (++nreldep > MAXRELSUP || nlze > 40) sfb_increase = 1;
-    } else
-      list_jideal = vecextract_i(F.perm, 1, nlze);
-    phase = 1;
-    goto MORE;
+    if (++nreldep > MAXRELSUP || nlze > 40) sfb_increase = 1;
+    if (!phase) list_jideal = vecextract_i(F.perm, 1, nlze);
+    phase = 1; goto MORE;
   }
   phase = 1;
 
