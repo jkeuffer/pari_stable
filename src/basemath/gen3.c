@@ -1875,7 +1875,7 @@ ground(GEN x)
 {
   GEN y,p1;
   long i, lx, tx=typ(x);
-  gpmem_t av, tetpil;
+  gpmem_t av;
 
   switch(tx)
   {
