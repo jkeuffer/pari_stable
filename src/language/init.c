@@ -113,8 +113,12 @@ debug_stack(void)
 /*                               BLOCS                               */
 /*                                                                   */
 /*********************************************************************/
+/*#define DEBUG*/
 static long next_bloc;
 static GEN cur_bloc=NULL; /* current bloc in bloc list */
+#ifdef DEBUG
+static long NUM = 0;
+#endif
 
 /* Return x, where:
  * x[-3]: adress of next bloc
@@ -131,6 +135,9 @@ newbloc(long n)
   bl_num(x)  = next_bloc++;
   if (n) *x = 0; /* initialize first cell to 0. See killbloc */
   if (cur_bloc) bl_next(cur_bloc) = (long)x;
+#ifdef DEBUG
+fprintferr("+ %ld\n", ++NUM);
+#endif
   if (DEBUGMEM)
   {
     if (!n) err(warner,"mallocing NULL object in newbloc");
@@ -143,6 +150,9 @@ newbloc(long n)
 static void
 free_bloc(GEN x)
 {
+#ifdef DEBUG
+fprintferr("- %ld\n", NUM--);
+#endif
   if (DEBUGMEM > 2)
     fprintferr("killing bloc (no %ld): %08lx\n", bl_num(x), x);
   free((void*)bl_base(x));
@@ -734,101 +744,100 @@ getheap(void)
 /**                                                                **/
 /********************************************************************/
 
-/* Substitution globale des composantes du vecteur y aux variables de x */
+/* substitute globally componants of y for variables of x */
 GEN
 changevar(GEN x, GEN y)
 {
   long tx, ty, lx, vx, vy, i;
-  pari_sp av, tetpil;
-  GEN  p1,p2,z;
+  GEN  p1, p2, z;
+  pari_sp av;
 
   if (var_not_changed && y==polvar) return x;
-  tx=typ(x); if (!is_recursive_t(tx)) return gcopy(x);
-  ty=typ(y); if (! is_vec_t(ty)) err(typeer, "changevar");
-  if (is_scalar_t(tx))
+  tx = typ(x); if (!is_recursive_t(tx)) return gcopy(x);
+  ty = typ(y); if (!is_vec_t(ty)) err(typeer, "changevar");
+  if (is_const_t(tx)) return gcopy(x);
+
+  if (tx == t_POLMOD)
   {
-    if (tx!=t_POLMOD) return gcopy(x);
-    av=avma;
-    p1=changevar((GEN)x[1],y);
-    p2=changevar((GEN)x[2],y); tetpil=avma;
-    return gerepile(av,tetpil, gmodulcp(p2,p1));
+    av = avma;
+    p1 = changevar((GEN)x[1],y);
+    p2 = changevar((GEN)x[2],y);
+    return gerepileupto(av, gmodulcp(p2,p1));
   }
   if (tx == t_RFRAC)
   {
-    av=avma;
-    p1=changevar((GEN)x[1],y);
-    p2=changevar((GEN)x[2],y); tetpil=avma;
-    return gerepile(av,tetpil, gdiv(p1,p2));
+    av = avma;
+    p1 = changevar((GEN)x[1],y);
+    p2 = changevar((GEN)x[2],y);
+    return gerepileupto(av, gdiv(p1,p2));
   }
 
   lx = lg(x);
   if (tx == t_POL || tx == t_SER)
   {
-    vx=varn(x)+1; if (vx>=lg(y)) return gcopy(x);
-    p1=(GEN)y[vx];
+    vx = varn(x)+1; if (vx >= lg(y)) return gcopy(x);
+    p1 = (GEN)y[vx];
     if (!signe(x))
     {
-      vy=gvar(p1); if (vy > (long)MAXVARN) err(typeer, "changevar");
-      z=gcopy(x); setvarn(z,vy); return z;
+      vy = gvar(p1); if (vy == BIGINT) err(typeer, "changevar");
+      z = gcopy(x); setvarn(z,vy); return z;
     }
-    av=avma; p2=changevar((GEN)x[lx-1],y);
+    av = avma; p2 = changevar((GEN)x[lx-1],y);
     for (i=lx-2; i>=2; i--)
+      p2 = gadd(gmul(p2,p1), changevar((GEN)x[i],y));
+    if (tx == t_SER)
     {
-      p2 = gmul(p2,p1);
-      p2 = gadd(p2, changevar((GEN)x[i],y));
-    }
-    if (tx==t_SER)
-    {
-      p2 = gadd(p2, ggrandocp(p1,lx-2));
-      if (valp(x)) p2 = gmul(gpuigs(p1,valp(x)), p2);
+      p2 = gadd(p2, ggrando(p1,lx-2));
+      if (valp(x)) p2 = gmul(gpowgs(p1,valp(x)), p2);
     }
     return gerepileupto(av,p2);
   }
-  z=cgetg(lx,tx);
-  for (i=1; i<lx; i++) z[i]=lchangevar((GEN)x[i],y);
+  z = cgetg(lx,tx);
+  for (i=1; i<lx; i++) z[i] = lchangevar((GEN)x[i],y);
   return z;
 }
 
 GEN
 reorder(GEN x)
 {
-  long tx,lx,i,n, nvar = manage_var(manage_var_next,NULL);
+  long tx, lx, i, n, nvar;
   int *var,*varsort,*t1;
+  pari_sp av;
 
   if (!x) return polvar;
   tx=typ(x); lx=lg(x)-1;
-  if (! is_vec_t(tx)) err(typeer,"reorder");
-  if (! lx) return polvar;
+  if (!is_vec_t(tx)) err(typeer,"reorder");
+  if (!lx) return polvar;
 
-  varsort = (int *) gpmalloc(lx*sizeof(int));
-  var = (int *) gpmalloc(lx*sizeof(int));
-  t1 = (int *) gpmalloc(nvar*sizeof(int));
+  av = avma;
+  nvar = manage_var(manage_var_next,NULL);
+  varsort = (int *)new_chunk(lx);
+  var = (int *)new_chunk(lx);
+  t1 = (int *)new_chunk(nvar);
 
   for (n=0; n<nvar; n++) t1[n] = 0;
   for (n=0; n<lx; n++)
   {
     var[n] = i = gvar((GEN)x[n+1]);
-    varsort[n] = ordvar[var[n]]; /* position in polvar */
+    varsort[n] = ordvar[i]; /* position in polvar */
     if (i >= nvar) err(talker,"variable out of range in reorder");
     /* check if x is a permutation */
-    if (t1[i]) err(talker,"duplicated indeterminates in reorder");
+    if (t1[i]) err(talker,"duplicate indeterminates in reorder");
     t1[i] = 1;
   }
   qsort(varsort,lx,sizeof(int),(QSCOMP)pari_compare_int);
 
   for (n=0; n<lx; n++)
-  {
-    /* variables are numbered 0,1 etc... while polvar starts at 1. */
-    polvar[varsort[n]+1] = lpolx[var[n]];
-    ordvar[var[n]] = varsort[n];
+  { /* variables are numbered 0,1 etc... while polvar starts at 1. */
+    i = var[n];
+    polvar[varsort[n]+1] = lpolx[i];
+    ordvar[i] = varsort[n];
   }
 
   var_not_changed=1;
   for (i=0; i<nvar; i++)
     if (ordvar[i]!=i) { var_not_changed=0; break; }
-
-  free(t1); free(var); free(varsort);
-  return polvar;
+  avma = av; return polvar;
 }
 
 /*******************************************************************/
@@ -1621,7 +1630,7 @@ void
 stackdummy(GEN z, long l) {
   if (l > 0) {
     z[0] = evaltyp(t_VECSMALL) | evallg(l);
-#if DEBUG
+#ifdef DEBUG
     { long i; for (i = 1; i < l; i++) z[i] = 0; }
 #endif
   }
