@@ -379,7 +379,7 @@ convol(GEN x, GEN y)
 GEN
 gprec(GEN x, long l)
 {
-  long tx = typ(x), lx, i, pr;
+  long tx = typ(x), lx, i;
   GEN y;
 
   if (l <= 0) err(talker,"precision<=0 in gprec");
