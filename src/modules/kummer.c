@@ -195,14 +195,14 @@ rnfkummersimple(GEN bnr, GEN subgroup, long all, long prec)
     p3=basistoalg(nf,idealcoprime(nf,(GEN)genK[i],p1));
     listgamma[i]=listgamma0[i]=linv(p3);
     p2=idealpow(nf,(GEN)genK[i],(GEN)cyclicK[i]);
-    listalpha0[i]=(long)basistoalg(nf,(GEN)isprincipalgen(bnf,p2)[2]);
+    listalpha0[i]=(long)basistoalg(nf,(GEN)isprincipalgenforce(bnf,p2)[2]);
     listalpha[i]=lmul((GEN)listalpha0[i],gpui(p3,(GEN)cyclicK[i],0));
   }
   for (   ; i<=nbgenclK; i++)
   {
     p3=basistoalg(nf,idealcoprime(nf,(GEN)genK[i],p1));
     p2=idealpow(nf,(GEN)genK[i],(GEN)cyclicK[i]);
-    p2=basistoalg(nf,(GEN)isprincipalgen(bnf,p2)[2]);
+    p2=basistoalg(nf,(GEN)isprincipalgenforce(bnf,p2)[2]);
     p22=lift(ginv(gmul(unmodell,(GEN)cyclicK[i])));
     p2=gpui(p2,p22,0);listgamma0[i]=(long)p2;
     listgamma[i]=lmul(p2,gpui(p3,addis(mulii(p22,(GEN)cyclicK[i]),-1),0));
@@ -262,7 +262,7 @@ rnfkummersimple(GEN bnr, GEN subgroup, long all, long prec)
   vecbeta0=cgetg(lSp+1,t_VEC);
   for (j=1; j<=lSp; j++)
   {
-    p1=isprincipalgen(bnf,(GEN)Sp[j]);
+    p1=isprincipalgenforce(bnf,(GEN)Sp[j]);
     p2=basistoalg(nf,(GEN)p1[2]);
     for (i=1; i<=lastindex; i++)
       p2 = gmul(p2,gpui((GEN)listgamma[i],gmael(p1,1,i),0));
@@ -533,7 +533,7 @@ isvirtualunit(GEN v)
     if (ex%ell) err(talker,"not a virtual unit in isvirtualunit");
     q=idealmul(nfz,q,idealpow(nfz,(GEN)listpr[i],stoi(ex/ell)));
   }
-  p1=isprincipalgen(bnfz,q); logdisc=(GEN)p1[1];
+  p1=isprincipalgenforce(bnfz,q); logdisc=(GEN)p1[1];
   ga=basistoalg(nfz,(GEN)p1[2]);
   for (j=rc+1; j<=gc; j++)
     ga=gmul(ga,gpui((GEN)vecalpha[j],divii((GEN)logdisc[j],(GEN)cyc[j]),0));
