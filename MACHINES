@@ -27,11 +27,11 @@ DEC/Alpha
 alpha21264b  833MHz  OSF1-V5.1        cc            1867    2099  2.1.1     JC
 alpha21264   667Mhz  FreeBSD-4.0     gcc            2626!   2656  2.0.20    IS
 alpha21264   500MHz  OSF1-V4.0       gcc-2.8.1      3178    3436  2.1.0     JC
-alpha21164a  600MHz  Linux-2.2.13   egcs            4270    4350  2.0.19(28)IS
+alpha21164a  600MHz  Linux-2.2.13   egcs            4270    4350  2.0.19(26)IS
 alpha21164   600MHz  OSF1-V4.0D      cc             3996    4384  2.0.10    LG
 alpha21164   533Mhz  Linux 2.0.34    gcc           (4294)  (4385) 2.0.12    JC
 alpha21164   500Mhz  Linux-2.2.13   egcs-2.91.66    5167    5217  2.1.1
-alpha21164   500Mhz  Linux-2.2.13    gcc-2.95.3     4251    4407  2.2.1 (32)
+alpha21164   500Mhz  Linux-2.2.13    gcc-2.95.3     4251    4407  2.2.1 (27)
 alpha21064   172Mhz  OSF1-3.0        cc            34104   35564  2.1.1
 ------------------------------------------------------------------------------
 Sun/SPARC
@@ -42,15 +42,15 @@ Ultra250     400MHz  Solaris-2.7     gcc            4510    4560  2.0.19    IS
 Ultra250     400MHz  Solaris-2.7      cc            5950    6090  2.0.19    IS
 UltraSPARC60 360MHz  Solaris-2.6     gcc            5034    5209  2.0.16    IS
 UltraSPARC60 360MHz  Solaris-2.6      cc            6329    6453  2.0.16    IS
-UltraSPARC2i 360MHz  Solaris-2.7    egcs            5816    6286  2.0.16(18)HS
-UltraSPARC2i 333MHz  Solaris-2.7     gcc            5666    6818  2.0.20(19)
+UltraSPARC2i 360MHz  Solaris-2.7    egcs            5816    6286  2.0.16(17)HS
+UltraSPARC2i 333MHz  Solaris-2.7     gcc            5666    6818  2.0.20(18)
 UltraSPARC10 300MHz  Solaris-2.6     gcc           (5932)  (6102) 2.0.12    GN
 UltraSPARC   300MHz  Solaris-2.5     gcc            7643    7566  2.0.9     IS
 UltraSPARC2  296MHz  Solaris-2.5.1   gcc            6098    6277  2.0.16    IS
 UltraSPARC2  296MHz  Solaris-2.5.1    cc            7676    7869  2.0.16    IS
 UltraSPARC2i 270MHz  Solaris-2.7     gcc            9008    7860  2.0.16    IZ
 UltraSPARC2i 270MHz  Solaris-2.6      cc            9200    9970  2.0.10    LG
-UltraSPARC2  248MHz  Solaris-2.7     cc5            9420    9692  2.0.18(14)GN
+UltraSPARC2  248MHz  Solaris-2.7     cc5            9420    9692  2.0.18(13)GN
 UltraSPARC2  248MHz  Solaris-2.7    egcs            7218    7262  2.0.16    HS
 UltraSPARC   200MHz  Solaris-2.5.1   gcc            9226    9268  2.0.16    IS
 UltraSPARC   200MHz  Solaris-2.5.1    cc           11226   11755  2.0.16    IS
@@ -63,7 +63,7 @@ UltraSPARC   167MHz  Solaris-2.5     cc            16241   17048  2.0.9     LG
 UltraSPARC   143MHz  Solaris-2.5     gcc-2.95.3    11905   11723  2.2.1
 
 SuperSPARC2   75MHz  Solaris-2.5     gcc           16969   17013  2.0.10    LG
-SuperSPARC    50Mhz  Linux-2.2.14    gcc           41126   40854  2.0.18(22)BA
+SuperSPARC    50Mhz  Linux-2.2.14    gcc           41126   40854  2.0.18(20)BA
 SuperSPARC    40MHz  SunOS-4.1.3     gcc           31178   30456  2.0.19
 SuperSPARC    40Mhz  Solaris-2.5     gcc           31528   31576  2.0.16
 TurboSPARC   170MHz  Solaris-2.5     gcc           15907   16529  2.0.9     LG
@@ -72,8 +72,8 @@ MicroSPARC2  110MHz  SunOS-4.1.4     gcc           31476   32123  2.0.9     LG
 MicroSPARC2  110MHz  Solaris-2.5     gcc-2.7.2     23918   24165  2.2.1
 SPARCv7(SS2)  40MHz  SunOS-4.1.3     gcc          115212! 115364  2.0.9     LG
 SPARCv7(ELC)  33MHz  SunOS-4.1.1     gcc          139406!      -  2.0.8     GN
-SPARCv7(SS400)  ???  SunOS-4.1.4     gcc          107074  106494  2.0.16(21)DE
-SPARCv7(HWS210) ???  Linux-2.2.5     gcc           98488!      -  2.0.16(15)DE
+SPARCv7(SS400)  ???  SunOS-4.1.4     gcc          107074  106494  2.0.16(19)DE
+SPARCv7(HWS210) ???  Linux-2.2.5     gcc           98488!      -  2.0.16(14)DE
 ------------------------------------------------------------------------------
 Intel/x86
 AMS Athlon  1100MHz  Linux-2.4.2-2   gcc            1078    1076  2.1.1     DP
@@ -83,7 +83,7 @@ AMD Duron    700MHz  Linux-2.4.0    egcs            2066    2138  2.0.20    QL
 AMD Athlon   500MHz  Linux-2.2.13    gcc            2736    2724  2.0.18    MS
 AMD K6-2     350Mhz  Linux-2.0.34   egcs           (4856)  (4756) 2.0.11    SH
 AMD K6-2     350Mhz  Linux-2.0.36    gcc            5154    4850  2.0.17 
-AMD K6       266MHz  Linux-2.2.5    pgcc            5861    6001  2.0.16(17)IS
+AMD K6       266MHz  Linux-2.2.5    pgcc            5861    6001  2.0.16(16)IS
 AMD K6       233Mhz  Linux-2.2.14    gcc            6968    7158  2.0.18    QL
 IBM/Cyrix    200MHz  Linux-2.0.35    gcc           13190   13729  2.0.15    AP
 PentiumIII  1000MHz  Linux-2.2.15    gcc            1068    1164  2.2.0     XR
@@ -93,12 +93,12 @@ PentiumIII   733MHz  Linux-2.2.14   egcs            2080    2090  2.0.19    IS
 PentiumIII   533MHz  Linux-2.2.14    gcc            2710    2730  2.0.19    IS
 PentiumIII   500MHz  Linux-2.2.12   egcs            3154    3176  2.0.18    HC
 PentiumII    450MHz  Linux-2.0.35    gcc            3220    3230  2.1.1     TT
-PentiumII    400MHz  Linux-2.3.99    gcc            3392    3410  2.0.20(27)GH
+PentiumII    400MHz  Linux-2.3.99    gcc            3392    3410  2.0.20(25)GH
 PentiumII    400MHz  Linux-2.2.14    gcc            3886    3902  2.0.20    GH
-PentiumII    350MHz  Linux-2.2.16    gcc            3848    3876  2.1.0 (23)
-PentiumII    350MHz  Win98         mingw            4412!      -  2.1.0 (24)
-PentiumII    350MHz  Win98 + Cygwin1 gcc            4490!      -  2.1.0 (25)
-PentiumII    350MHz  Win98 + RSX     gcc            9436!      -  2.0.20(26)
+PentiumII    350MHz  Linux-2.2.16    gcc            3848    3876  2.1.0 (21)
+PentiumII    350MHz  Win98         mingw            4412!      -  2.1.0 (22)
+PentiumII    350MHz  Win98 + Cygwin1 gcc            4490!      -  2.1.0 (23)
+PentiumII    350MHz  Win98 + RSX     gcc            9436!      -  2.0.20(24)
 PentiumII    350Mhz  Linux 2.0.36   pgcc-2.92.21   (3310)  (3340) 2.0.12(11)PE
 PentiumII    350Mhz  Linux 2.0.36   egcs-2.92.21   (3352)  (3402) 2.0.12(11)PE
 PentiumII    350Mhz  Linux 2.0.36    gcc           (3600)  (3610) 2.0.12    PE
@@ -150,7 +150,7 @@ HP/PA-RISC
 HPPA9000/778  134MHz HPUX-10.20      cc            18898!  29138! 2.0.19(9)
 *HPPA9000/778 134MHz HPUX-10.20      cc           (23666!)     -  2.0.12(10)
 HPPA9000/735  100MHz HPUX-10.20      cc           (25106!)(38898!)2.0.12(9)
-HPPA9000/735  100MHz HPUX-09-07      cc            25714!      -  2.0.16(16)IS
+HPPA9000/735  100MHz HPUX-09-07      cc            25714!      -  2.0.16(15)IS
 HPPA9000/720     ??? HPUX-10.20      cc            66138!      -  2.0.9
 *HPPA9000/720    ??? HPUX-10.20      cc           101114! 119626  2.0.9
 HPPA9000/712   90MHz HPUX-10.20      cc           (26756!)(45196!) 2.0.12(9)
@@ -227,35 +227,35 @@ Binutils: 2.9.1.0.4 or 2.9.1.0.15
 
 (12) used LD = cc -Wl,-rpath,my_exotic_DLL_path
 
-(14) use /opt/SUNWspro/bin/fpversion to get explicit recommended CFLAGS.
+(13) use /opt/SUNWspro/bin/fpversion to get explicit recommended CFLAGS.
 
-(15) use asmarch=sparcv7
-(16) Configure defaults to hpux-none. Use Configure -a and specify the
+(14) use asmarch=sparcv7
+(15) Configure defaults to hpux-none. Use Configure -a and specify the
 hppa kernel. Remove +z from compiler flags
-(17) CFLAGS = -mk6 -march=i586 -O6
-(18) 256kb L2 Cache - Ultra U5
-(19) 2  MB L2 Cache - Ultra U10
-(21) replace err by pari_err in src/kernel/sparcv7/level0.S [in 2.0.16 or 17]
-(22) asmarch incorrectly defaulted to MicroSPARC (bypassed using Configure -a)
-(23) gcc 2.95.2 : SEGV in bench! After correcting correct (but dirty) code
+(16) CFLAGS = -mk6 -march=i586 -O6
+(17) 256kb L2 Cache - Ultra U5
+(18) 2  MB L2 Cache - Ultra U10
+(19) replace err by pari_err in src/kernel/sparcv7/level0.S [in 2.0.16 or 17]
+(20) asmarch incorrectly defaulted to MicroSPARC (bypassed using Configure -a)
+(21) gcc 2.95.2 : SEGV in bench! After correcting correct (but dirty) code
        in quicksqri(), obtained the given timings [other: remove flag
        -fomit-frame-pointer from CFLAGS when compiling mp.o]
      gcc 2.7.2.1 + pari-2.1 out of the box: no [BUG], but slower
      (sta: 4309,  dyn: 4483)
-(24) same machine as above, native binary compiled with mingw32-gcc-2.95.2
+(22) same machine as above, native binary compiled with mingw32-gcc-2.95.2
      had to modify Odos/Makefile (to link with readline-4.0). 
      PROBLEMS: 
       * when started from the shell, on ^C GP quits! OK when started from GUI
       * stdin redirection from the shell (gp < file) doesn't work (SEGV in gp).
       * ANSI escape sequences are printed "as is" (so don't enable colors)
-(25) same machine as above, running Win98. Used 'make gp-sta'
+(23) same machine as above, running Win98. Used 'make gp-sta'
      (gp-dyn is the default, and compilation fails [ld -shared no supported])
      bench 'elliptic' fails as described in INSTALL, ok otherwise
-(26) same machine as above, using the RSX compatibility package
-(27) Xeon
-(28) RedHat-7.0 + alpha has a broken glibc-2.1.x [issquare(8388609^2) = 0 !]
+(24) same machine as above, using the RSX compatibility package
+(25) Xeon
+(26) RedHat-7.0 + alpha has a broken glibc-2.1.x [issquare(8388609^2) = 0 !]
      Updating to glibc-2.2 fixes the problem.
-(32) gcc-2.95.3 -O + new inline assembler [gcc-2.95.2 and gcc-2.95.3 -O3 both
+(27) gcc-2.95.3 -O + new inline assembler [gcc-2.95.2 and gcc-2.95.3 -O3 both
 produce a broken binary]
 
 =============================================================================
