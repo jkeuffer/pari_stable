@@ -347,7 +347,7 @@ initell0(GEN x, long prec)
   else
   {
     w1= gmul2n(gabs((GEN)w2[1],prec), 1);
-    q = gexp(gmul(PiI2n(prec,0), gdiv(w2,w1)), prec);
+    q = gexp(gmul(PiI2n(0,prec), gdiv(w2,w1)), prec);
   }
   y[15] = (long)w1;
   y[16] = (long)w2;
