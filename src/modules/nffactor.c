@@ -982,7 +982,9 @@ nf_check_factors(nfcmbf_t *T, GEN P, GEN M_L, GEN famod, GEN pk)
   {
     GEN c = (GEN)piv[i];
     pari_sp av = avma, lim = stack_lim(av, 2);
-    if (DEBUGLEVEL) fprintferr("nf_LLL_cmbf: checking factor %ld\n",i);
+    if (DEBUGLEVEL)
+      fprintferr("nf_LLL_cmbf: checking factor %ld (avma - bot = %lu)\n",
+                 i, avma - bot);
 
     y = lt;
     for (j=1; j<=n0; j++)
