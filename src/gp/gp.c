@@ -86,13 +86,13 @@ usage(char *s)
 {
   printf("### Usage: %s [options] [GP files]\n", s);
   printf("Options are:\n");
-  printf("\t[-f]\t\tFaststart: do not read .gprc\n");
-  printf("\t[-q]\t\tQuiet mode: do not print banner and history numbers\n");
-  printf("\t[-p primelimit]\tPrecalculate primes up to the limit\n");
-  printf("\t[-s stacksize]\tStart with the PARI stack of given size (in bytes)\n");
+  printf("\t[-f,--fast]\tFaststart: do not read .gprc\n");
+  printf("\t[-q,--quiet]\tQuiet mode: do not print banner and history numbers\n");
+  printf("\t[-p,--primelimit primelimit]\n\t\t\tPrecalculate primes up to the limit\n");
+  printf("\t[-s,--stacksize stacksize]\n\t\t\tStart with the PARI stack of given size (in bytes)\n");
   printf("\t[--emacs]\tRun as if in Emacs shell\n");
   printf("\t[--help]\tPrint this message\n");
-  printf("\t[--test]\t\tTest mode. No history, wrap long lines (bench only)\n");
+  printf("\t[--test]\tTest mode. No history, wrap long lines (bench only)\n");
   printf("\t[--texmacs]\tRun as if using TeXmacs frontend\n");
   printf("\t[--version]\tOutput version info and exit\n");
   printf("\t[--version-short]\tOutput version number and exit\n\n");
@@ -2481,13 +2481,6 @@ typedef struct {
   char **v; /* args */
 } tm_cmd;
 
-static char *
-pari_strndup(char *s, long n)
-{
-  char *t = gpmalloc(n+1);
-  memcpy(t,s,n); t[n] = 0; return t;
-}
-
 static void
 parse_texmacs_command(tm_cmd *c, char *ch)
 {
@@ -2914,6 +2907,16 @@ read_arg(int *nread, char *t, long argc, char **argv)
   *nread = i+1; return argv[i];
 }
 
+static char *
+read_arg_equal(int *nread, char *t, long argc, char **argv)
+{
+  int i = *nread;
+  if (*t=='=' && isdigit((int)t[1])) return t+1;
+  if (*t || i==argc) usage(argv[0]);
+  *nread = i+1; return argv[i];
+}
+
+
 static void
 init_trivial_stack()
 {
@@ -2962,6 +2965,10 @@ read_opt(growarray *A, long argc, char **argv)
         if (strcmp(t, "texmacs") == 0) { GP_DATA->flags |= TEXMACS; break; }
         if (strcmp(t, "emacs") == 0) { GP_DATA->flags |= EMACS; break; }
         if (strcmp(t, "test") == 0) { GP_DATA->flags |= TEST; initrc = 0; break; }
+        if (strcmp(t, "quiet") == 0) { GP_DATA->flags |= QUIET; break; }
+        if (strcmp(t, "fast") == 0) { initrc = 0; break; }
+        if (strncmp(t, "primelimit",10) == 0) {p = read_arg_equal(&i,t+10,argc,argv); break; }
+        if (strncmp(t, "stacksize",9) == 0) {s = read_arg_equal(&i,t+9,argc,argv); break; }
        /* fall through */
       default:
 	usage(argv[0]);

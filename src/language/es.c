@@ -663,6 +663,13 @@ pari_strdup(const char *s)
   memcpy(t,s,n); return t;
 }
 
+char *
+pari_strndup(char *s, long n)
+{
+  char *t = gpmalloc(n+1);
+  memcpy(t,s,n); t[n] = 0; return t;
+}
+
 /* returns a malloc-ed string, which should be freed after usage */
 char *
 GENtostr0(GEN x, pariout_t *T, void (*do_out)(GEN, pariout_t*))
