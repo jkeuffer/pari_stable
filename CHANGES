@@ -83,6 +83,9 @@ IZ 34- external prettyprinter incompatible with colors
    44- leftover debugging statements in gphelp -to_pod
    45- zeta(x) didn't always use the precision of x (contrary to the other
        trans. functions)
+   46- some Warnings from MIPSPro 7.2.1 compiler (contributed by PM)
+BA 47- gdiv(SER,POL) --> SEGV when POL has lgef < lg
+   48- check relative pol is monic before calling a rnf* function
 
   Changed
 BA  1- more efficient quadratic Hensel lift
@@ -110,6 +113,7 @@ BA  3- more efficient factorff when pol belongs to Fp[X] (based on Fp_isom)
 IZ  4- default values for 'colors' (light/dark) and 'prettyprinter' (tex2mail)
     5- hnflll implementation (old one was preliminary and didn't work at all)
 GN  6- squfof implementation
+    7- numerical derivation
 
   Removed
     1- quadrayimagwei, preliminary implementation to quadray(D < 0) 
