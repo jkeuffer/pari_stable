@@ -2028,7 +2028,7 @@ ideallllred(GEN nf, GEN I, GEN vdir, long prec)
   if (typ(I) != id_MAT || lg(I) != N+1) I = idealhermite_aux(nf,I);
   I = primitive_part(I, &c1);
   if (2 * expi(gcoeff(I,1,1)) >= bit_accuracy(nfprec))
-    Ired = gmul(I, lllintpartial(I));
+    Ired = lllint_ip(I);
   else
     Ired = I;
   y = ideallllred_elt_i(&nf, Ired, chk_vdir(nf,vdir), &prec);
@@ -3021,7 +3021,7 @@ nfhermitemod(GEN nf, GEN pseudo, GEN detmat)
   unnf = gscalcol(gun,N);
 
   den = denom(detmat); if (!gcmp1(den)) detmat = gmul(den,detmat);
-  detmat = gmul(detmat,lllintpartial(detmat));
+  detmat = lllint_ip(detmat);
 
   av = avma; lim = stack_lim(av,1);
   def = co; ldef = (li>co)? li-co+1: 1;

@@ -1439,7 +1439,7 @@ zarchstar(GEN nf,GEN x,GEN arch,long nba)
   r = nba+1; for (i=1; i<=N; i++) setlg(bas[i], r);
   if (!zk)
   {
-    x = gmul(x,lllintpartial(x));
+    x = lllint_ip(x);
     bas = gmul(bas, x);
   }
 
