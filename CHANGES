@@ -45,6 +45,8 @@ XR  9- possible overflow in ComputeCoeff [ bnrstark() ]
    10- numtoperm(2,x) --> SEGV [check arguments now]
    11- rnfkummer could fail with "missing units"
    12- factornf(P, non-monic t) --> error
+   13- forsubgroup/subgrouplist idn't check their arguments nor accepted SNF
+       matrices
 
   Changed
     1- removed useless parameter prec in many bnr* and rnf* functions
