@@ -360,7 +360,7 @@ dblogr(GEN x) {
   return log(l) + LOG2 * (expo(x) - (long)(BITS_IN_LONG-1));
 }
 static GEN /* beware overflow */
-dblexp(double x) { return fabs(x) < 1000.? dbltor(exp(x)): mpexp(dbltor(x)); }
+dblexp(double x) { return fabs(x) < 100.? dbltor(exp(x)): mpexp(dbltor(x)); }
 
 double
 mylog2(GEN z)
