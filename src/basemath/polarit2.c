@@ -3425,15 +3425,16 @@ GEN
 polfnf(GEN a, GEN t)
 {
   GEN x0,y,p1,p2,u,fa,n,unt,dent,alift;
-  long av=avma,tetpil,lx,v,i,k,vt;
+  long av=avma,tetpil,lx,i,k;
 
   if (typ(a)!=t_POL || typ(t)!=t_POL) err(typeer,"polfnf");
   if (gcmp0(a)) return gcopy(a);
-  vt=varn(t); v=varn(a);
   a = fix_relative_pol(t,a,0);
-  alift = lift(a); p1 = content(alift);
-  if (!gcmp1(p1)) { a = gdiv(a, p1); alift = lift(a); }
-  dent=discsr(t); unt = gmodulsg(1,t);
+  alift = lift(a);
+  p1 = content(alift); if (!gcmp1(p1)) { a = gdiv(a, p1); alift = lift(a); }
+  p1 = content(t); if (!gcmp1(t)) t = gdiv(t, p1);
+
+  dent = ZX_disc(t); unt = gmodulsg(1,t);
   u = lift(gdiv(a, gmul(unt,nfgcd(alift,derivpol(alift), t, dent))));
   n = ZY_ZXY_resultant(t, u, &k);
   if (DEBUGLEVEL > 4) fprintferr("polfnf: choosing k = %ld\n",k);
@@ -3443,12 +3444,12 @@ polfnf(GEN a, GEN t)
   y=cgetg(3,t_MAT);
   p1=cgetg(lx,t_COL); y[1]=(long)p1;
   p2=cgetg(lx,t_COL); y[2]=(long)p2;
-  x0 = gadd(polx[v],gmulsg(k,polx[vt]));
+  x0 = gadd(polx[varn(a)], gmulsg(k,polx[varn(t)]));
   for (i=1; i<lx; i++)
   {
     GEN b, pro = nfgcd(u, poleval((GEN)fa[i], x0), t, dent);
     long e;
-    pro=gmul(unt,pro);
+    pro = gmul(unt,pro);
     p1[i] = (typ(pro)==t_POL)? ldiv(pro,leading_term(pro)): (long)pro;
     if (gcmp1((GEN)p1[i])) err(talker,"reducible modulus in factornf");
     e=0; while (poldivis(a,(GEN)p1[i], &b)) { a = b; e++; }
