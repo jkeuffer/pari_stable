@@ -5,4 +5,4 @@ version='2.1'
 patch='0'
 
 # Status: alpha, beta, released, development
-status='development'
+status='released'
