@@ -60,8 +60,10 @@ if (!defined $docdir) {
 }
 
 if ($docdir =~ /^\./) {
-  require Cwd;
-  $docdir = Cwd::cwd() . "/$docdir";
+  eval {
+    require Cwd;
+    $docdir = Cwd::cwd() . "/$docdir";
+  }
 }
 
 $xdvi = $ENV{GPXDVI} || "xdvi";
@@ -137,6 +139,10 @@ sub init
   &inittr();
 
   $indent = "   ";
+  # avoid Glob.pm! (for minimal Windows install)
+  opendir(DIR, $docdir) || die "$docdir not found";
+  @file_list = grep { /usersch.*tex/ } readdir(DIR);
+  closedir(DIR);
 
   chdir($docdir);
   $docfile = "usersch3.tex";
@@ -174,7 +180,13 @@ sub choose_chap
   }
 }
 
-use POSIX 'setsid';
+sub safe_setsid
+{
+  eval {
+    require POSIX;
+    POSIX::setsid(); # detach from terminal (^C will not kill xdvi)
+  };
+}
 
 sub open_dvi_then_quit
 {
@@ -188,7 +200,7 @@ sub open_dvi_then_quit
   if ($f =~ /\//) { $dvifile = "$f"; } else { $dvifile = "$docdir/$f"; }
   print "displaying \'$dvifile\'.";
   print "\n" if (!$fromgp);
-  setsid; # detach from terminal (^C will not kill xdvi)
+  safe_setsid();
   system("$viewer $f 2>/dev/null >/dev/null&");
   cleanexit();
 }
@@ -206,7 +218,7 @@ sub treat
     $found = 0;
     $searchall = 1;
     $help = $_;
-    while (<usersch*.tex*>)
+    for (@file_list)
     {
       if (/usersch(.*)\.tex/)
       {
@@ -393,7 +405,7 @@ sub posttex
   $out = `tex $texfile.tex 2>&1 < /dev/null`;
   $? == 0 && -f "$texfile.dvi"
     || die "could not create '$texfile.dvi': status=$?, $out";
-  setsid; # detach from terminal (^C will not kill xdvi)
+  safe_setsid();
   system("($xdvi $texfile.dvi 2>/dev/null >/dev/null; rm -f $texfile.tex $texfile.dvi $texfile.log;rmdir $tmpdir)&");
 }
 
