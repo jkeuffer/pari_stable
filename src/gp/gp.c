@@ -637,16 +637,31 @@ static GEN
 sd_debug(char *v, int flag)
 { return sd_ulong(v,flag,"debug",&DEBUGLEVEL, 0,20,NULL); }
 
+#ifdef READLINE
+ulong readline_state = DO_ARGS_COMPLETE;
+#endif
+
 static GEN
 sd_rl(char *v, int flag)
 {
 #ifdef READLINE
+  static const char * const msg[] = {NULL,
+	"(bits 0x2/0x4 control matched-insert/arg-complete)"};
+  ulong o_readline_state;
+  GEN res;
+
   if (!readline_init && *v && *v != '0') {
     init_readline();
     readline_init = 1;
   }
+  o_readline_state = readline_state;
+  res = sd_ulong(v,flag,"readline", &readline_state, 0, 7, (char**)msg);
+  if (o_readline_state != readline_state)
+    sd_gptoggle(readline_state ? "1" : "0", d_SILENT, "readline", USE_READLINE);
+  return res;
+#else
+    sd_gptoggle(v, flag, "readline", USE_READLINE);
 #endif
-  return sd_gptoggle(v,flag,"readline", USE_READLINE);
 }
 
 static GEN
@@ -2073,7 +2088,7 @@ gp_initrc(void)
     for ( ; *s; s = nexts)
     {
       nexts = next_expr(s);
-      if (!strncmp(s,"read",4))
+      if (!strncmp(s,"read",4) && (s[4] == ' ' || s[4] == '\t' || s[4] == '"'))
       { /* read file */
 	s += 4;
 	t = gpmalloc(strlen(s) + 1);
@@ -2209,10 +2224,13 @@ brace_color(char *s, int c, int force)
 {
   if (disable_color || (gp_colors[c] == c_NONE && !force)) return;
 #ifdef RL_PROMPT_START_IGNORE
-  *s++ = RL_PROMPT_START_IGNORE;
+  if (GP_DATA->flags & USE_READLINE)
+    *s++ = RL_PROMPT_START_IGNORE;
 #endif
   strcpy(s, term_get_color(c));
 #ifdef RL_PROMPT_START_IGNORE
+  if (!(GP_DATA->flags & USE_READLINE))
+    return;
   s+=strlen(s);
   *s++ = RL_PROMPT_END_IGNORE; *s = 0;
 #endif

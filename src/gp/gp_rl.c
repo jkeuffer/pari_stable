@@ -61,8 +61,6 @@ static entree *current_ep = NULL;
 
 static int pari_rl_back;
 extern RLCI rl_last_func;
-static int do_args_complete = 1;
-static int do_matched_insert = 0;
 static int did_init_matched = 0;
 
 #ifdef HAS_RL_SAVE_PROMPT
@@ -88,22 +86,32 @@ static int did_init_matched = 0;
 #  define USER_COMPLETION ((GF)username_completion_function)
 #endif
 
-#define ELECTRIC_PAREN 1
-#define ARGS_COMPLETE  2
 static int
-change_state(char *msg, int *opt, int count)
+change_state(char *msg, ulong flag, int count)
 {
-  int c;
+  int c = (readline_state & flag) != 0;
+  ulong o_readline_state = readline_state;
 
   switch(count)
   {
     default: c = 0; break; /* off */
     case -1: c = 1; break; /* on  */
-    case -2: c = 1 - *opt; /* toggle */
+    case -2: c = 1 - c; /* toggle */
   }
-  *opt = c;
+  if (c)
+    readline_state |= flag;
+  else {
+    readline_state &= ~flag;
+    if (!readline_state && o_readline_state)
+	readline_state = 1;
+  }
   SAVE_PROMPT();
-  rl_message("%s: %s.", msg, c? "on": "off");
+#if 0				/* Does not work well... */
+  rl_message("%s[%s: %s] %s", term_get_color(c_PROMPT),
+	     msg, c? "on": "off", term_get_color(c_INPUT));
+#else
+  rl_message("[%s: %s] ", msg, c? "on": "off");
+#endif
   c = rl_read_key();
   RESTORE_PROMPT();
   rl_clear_message();
@@ -118,7 +126,7 @@ pari_rl_complete(int count, int key)
 
   pari_rl_back = 0;
   if (count <= 0)
-    return change_state("complete args", &do_args_complete, count);
+    return change_state("complete args", DO_ARGS_COMPLETE, count);
 
   rl_begin_undo_group();
   if (rl_last_func == pari_rl_complete)
@@ -127,6 +135,28 @@ pari_rl_complete(int count, int key)
   if (pari_rl_back && (pari_rl_back <= rl_point))
     rl_point -= pari_rl_back;
   rl_end_undo_group(); return ret;
+}
+
+static int did_matched_insert;
+
+static int
+pari_rl_matched_insert_suspend(int count, int key)
+{
+  ulong o_readline_state = readline_state;
+
+  did_matched_insert = (readline_state & DO_MATCHED_INSERT);
+  readline_state &= ~DO_MATCHED_INSERT;
+  if (!readline_state && o_readline_state)
+    readline_state = 1;
+  return 1;
+}
+
+static int
+pari_rl_matched_insert_restore(int count, int key)
+{
+  if (did_matched_insert)
+    readline_state |= DO_MATCHED_INSERT;
+  return 1;
 }
 
 static const char paropen[] = "([{";
@@ -139,9 +169,9 @@ pari_rl_matched_insert(int count, int key)
   int i = 0, ret;
 
   if (count <= 0)
-    return change_state("electric parens", &do_matched_insert, count);
+    return change_state("electric parens", DO_MATCHED_INSERT, count);
   while (paropen[i] && paropen[i] != key) i++;
-  if (!paropen[i] || !do_matched_insert || GP_DATA->flags & EMACS)
+  if (!paropen[i] || !(readline_state & DO_MATCHED_INSERT) || GP_DATA->flags & EMACS)
     return ((RLCI)rl_insert)(count,key);
   rl_begin_undo_group();
   ((RLCI)rl_insert)(count,key);
@@ -155,7 +185,7 @@ pari_rl_default_matched_insert(int count, int key)
 {
     if (!did_init_matched) {
 	did_init_matched = 1;
-	do_matched_insert = 1;
+	readline_state |= DO_MATCHED_INSERT;
     }
     return pari_rl_matched_insert(count, key);
 }
@@ -537,17 +567,37 @@ pari_completion(char *text, int START, int END)
     while (j <= END && isspace((int)rl_line_buffer[j])) j++;
     k = END;
     while (k > j && isspace((int)rl_line_buffer[k])) k--;
-    /* If we are in empty parens, output function help */
-    if (do_args_complete && k == j
+    /* If we are in empty parens, insert the default arguments */
+    if ((readline_state & DO_ARGS_COMPLETE) && k == j
          && (rl_line_buffer[j] == ')' || !rl_line_buffer[j])
 	 && (iend - i < MAX_KEYWORD)
 	 && ( strncpy(buf, rl_line_buffer + i, iend - i),
 	      buf[iend - i] = 0, 1)
 	 && (ep = is_entry(buf)) && ep->help)
      {
+#if 1
+      char *s = ep->help;
+
+      while (is_keyword_char(*s)) s++;
+      if (*s++ == '(')
+      { /* Function, print arguments! */
+        char *endh = s;
+        while (*endh && *endh != ')' && *endh != '(') endh++;
+        if (*endh == ')')
+        { /* Well-formed help.  */
+          char *str = strncpy((char*) gpmalloc(endh-s + 1), s, endh-s);
+          char **ret = (char**)gpmalloc(sizeof(char*)*2);
+          str[endh-s] = 0;
+          ret[0] = str; ret[1] = NULL;
+          if (GP_DATA->flags & EMACS) ret = matches_for_emacs("",ret);
+          return ret;
+        }
+      }
+#else			/* Why duplicate F1 (and emit a bell)?! */
       rl_print_aide(buf,h_RL);
       rl_attempted_completion_over = 1;
       return NULL;
+#endif
     }
   }
   for(i=END-1;i>=start;i--)
@@ -631,6 +681,8 @@ init_readline(void)
   Defun("long-help", rl_long_help, -1);
   Defun("pari-complete", pari_rl_complete, '\t');
   Defun("pari-matched-insert", pari_rl_default_matched_insert, -1);
+  Defun("pari-matched-insert-suspend", pari_rl_matched_insert_suspend, -1);
+  Defun("pari-matched-insert-restore", pari_rl_matched_insert_restore, -1);
   Defun("pari-forward-sexp", pari_rl_forward_sexp, -1);
   Defun("pari-backward-sexp", pari_rl_backward_sexp, -1);
 
@@ -645,6 +697,13 @@ init_readline(void)
   KSbind("[11~", rl_short_help,  emacs_meta_keymap); /* f1, xterm */
   KSbind("OP",   rl_short_help,  vi_movement_keymap); /* f1, vt100 */
   KSbind("[11~", rl_short_help,  vi_movement_keymap); /* f1, xterm */
+  /* XTerm may signal start/end of paste by eming F200/F201 */
+  /* XXXX For vi mode something more intelligent is needed - to switch to the
+     insert mode - and back when restoring. */
+  KSbind("[200~", pari_rl_matched_insert_suspend,  emacs_meta_keymap);  /* pre-paste xterm */
+  KSbind("[200~", pari_rl_matched_insert_suspend,  vi_movement_keymap); /* pre-paste xterm */
+  KSbind("[201~", pari_rl_matched_insert_restore,  emacs_meta_keymap);  /* post-paste xterm */
+  KSbind("[201~", pari_rl_matched_insert_restore,  vi_movement_keymap); /* post-paste xterm */
 #  endif
   Bind('(', pari_rl_matched_insert, emacs_standard_keymap);
   Bind('[', pari_rl_matched_insert, emacs_standard_keymap);

@@ -30,6 +30,10 @@ extern ulong init_opts;
 extern char *current_logfile;
 extern jmp_buf environnement;
 
+extern ulong readline_state;
+#define DO_MATCHED_INSERT	2
+#define DO_ARGS_COMPLETE	4
+
 /* for do_time() */
 enum { ti_NOPRINT, ti_REGULAR, ti_LAST, ti_INTERRUPT };
 
