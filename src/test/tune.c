@@ -145,12 +145,12 @@ static double speed_logagm(speed_param *s)
 
 static double speed_logcx(speed_param *s)
 { GEN z; setexpo(s->x,0); z = gadd(gun, gmul(gi, s->x));
-  glog(z,0);
-  disable(s); TIME_FUN(glog(z,0)); }
+  glog(z,s->size);
+  disable(s); TIME_FUN(glog(z,s->size)); }
 static double speed_logcxagm(speed_param *s)
 { GEN z; setexpo(s->x,0); z = gadd(gun, gmul(gi, s->x));
-  glog(z,0);
-  enable(s); TIME_FUN(glog(z,0)); }
+  glog(z,s->size);
+  enable(s); TIME_FUN(glog(z,s->size)); }
 
 static double speed_atan(speed_param *s)
 { setexpo(s->x, 0); disable(s);
