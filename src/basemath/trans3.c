@@ -778,7 +778,7 @@ incgam0(GEN s, GEN x, GEN g, long prec)
   if (typ(x) != t_REAL) x = gtofp(x, prec);
   if (!signe(x)) { avma = av; return g? gcopy(g): ggamma(s,prec); }
   z = real_i(s);
-  if (gcmp(subrs(x,1),z) > 0 || gsigne(z) <= 0)
+  if (gsigne(z) <= 0 || gexpo(z) < -10 || gcmp(subrs(x,1),z) > 0)
     z = incgam2(s,x,prec);
   else
     z = gsub(g? g: ggamma(s,prec), incgamc(s,x,prec));

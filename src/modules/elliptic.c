@@ -2368,13 +2368,17 @@ lseriesell(GEN e, GEN s, GEN A, long prec)
   av1 = avma; lim = stack_lim(av1,1);
   for (n = 1; n <= l; n++)
   {
-    GEN p1, p2, gn = utoipos(n);
+    GEN p1, gn = utoipos(n);
     p1 = gdiv(incgam0(s,mulsr(n,cga),gs,prec), gpow(gn,s,prec));
-    p2 = flun? p1: gdiv(gmul(ns, incgam(s2,mulsr(n,cgb),prec)),
-                        gpow(gn, s2,prec));
-    if (eps < 0) p2 = gneg_i(p2);
-    z = gadd(z, gmul(gadd(p1,p2),
-                     ((ulong)n<LGBITS)? (GEN)v[n]: akell(e,gn)));
+    if (flun)
+      p1 = gmul2n(p1, 1);
+    else
+    {
+      GEN p2 = gdiv(gmul(ns, incgam(s2,mulsr(n,cgb),prec)), gpow(gn, s2,prec));
+      if (eps < 0) p2 = gneg_i(p2);
+      p1 = gadd(p1, p2);
+    }
+    z = gadd(z, gmul(p1, ((ulong)n<LGBITS)? (GEN)v[n]: akell(e,gn)));
     if (low_stack(lim, stack_lim(av1,1)))
     {
       if(DEBUGMEM>1) err(warnmem,"lseriesell");
