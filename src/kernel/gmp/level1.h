@@ -27,21 +27,21 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #  undef  INLINE
 #endif
 
-#define int_MSW(x) ((x)+2)
+#define int_MSW(x) ((x)+lgefint((x))-1)
 /*x being a t_INT, return a pointer to the most significant word of x.*/
 
-#define int_LSW(x) ((x)+lgefint((x))-1)
+#define int_LSW(x) (x+2)
 /*x being a t_int, return a pointer to the least significant word of x.*/
 
-#define int_precW(x) ((x)+1)
+#define int_precW(x) ((x)-1)
 /*x pointing to a mantissa word, return the previous (less significant)
  * mantissa word.*/
 
-#define int_nextW(x) ((x)-1)
+#define int_nextW(x) ((x)+1)
 /*x pointing to a mantissa word, return the next (more significant) mantissa
  * word.*/
 
-#define int_W(x,l) ((x)+lgefint((x))-1-(l))
+#define int_W(x,l) ((x)+2+(l))
 /*x being a t_INT, return a pointer to the l-th least significant word of x.*/
 
 #ifndef INLINE
@@ -219,10 +219,9 @@ INLINE GEN
 icopy_av(GEN x, GEN y)
 {
   register long lx = lgefint(x);
-  register long ly = lx;
-  y -= lx; 
-  while (--lx > 0) y[lx]=x[lx];
-  y[0] = evaltyp(t_INT)|evallg(ly);
+  long l=lx;
+  y -= lx; while (--lx >= 0) y[lx]=x[lx];
+  setlg(y,l);
   return y;
 }
 
@@ -316,25 +315,19 @@ affsi(long s, GEN x)
 }
 
 INLINE void
-affsr(long x, GEN y)
+affsr(long s, GEN x)
 {
-  long sh, i, ly = lg(y);
+  long l;
 
-  if (!x)
+  if (!s)
   {
-    y[1] = evalexpo(-bit_accuracy(ly));
+    x[1] = evalexpo(-bit_accuracy(lg(x)));
     return;
   }
-  if (x < 0) {
-    x = -x; sh = bfffo(x);
-    y[1] = evalsigne(-1) | evalexpo((BITS_IN_LONG-1)-sh);
-  }
-  else
-  {
-    sh = bfffo(x);
-    y[1] = evalsigne(1) | evalexpo((BITS_IN_LONG-1)-sh);
-  }
-  y[2] = x<<sh; for (i=3; i<ly; i++) y[i]=0;
+  if (s<0) { x[1] = evalsigne(-1); s = -s; }
+  else x[1] = evalsigne(1);
+  l=bfffo(s); x[1] |= evalexpo((BITS_IN_LONG-1)-l);
+  x[2] = s<<l; for (l=3; l<lg(x); l++) x[l]=0;
 }
 
 INLINE void
@@ -491,11 +484,11 @@ divisii(GEN x, long y, GEN z)
 INLINE long
 vali(GEN x)
 {
-  long lx,i;
+  long i;
 
   if (!signe(x)) return -1;
-  i = lx = lgefint(x)-1; while (!x[i]) i--;
-  return ((lx-i)<<TWOPOTBITS_IN_LONG) + vals(x[i]);
+  i = 2; while (!x[i]) i++;
+  return ((i-2)<<TWOPOTBITS_IN_LONG) + vals(x[i]);
 }
 
 INLINE GEN
@@ -711,7 +704,7 @@ mpdivis(GEN x, GEN y, GEN z)
 
 /* assume 0 <= k < 32. Return random 0 <= x < (1<<k) */
 INLINE long
-random_bits(long k) { return pari_rand31() >> (31 - k); }
+random_bits(k) { return pari_rand31() >> (31 - k); }
 
 INLINE ulong
 itou(GEN x)
@@ -814,7 +807,7 @@ INLINE long
 expi(GEN x)
 {
   const long lx=lgefint(x);
-  return lx==2? -HIGHEXPOBIT: bit_accuracy(lx)-bfffo(x[2])-1;
+  return lx==2? -HIGHEXPOBIT: bit_accuracy(lx)-bfffo(x[lx-1])-1;
 }
 
 #endif

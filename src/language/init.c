@@ -102,6 +102,14 @@ pop_stack(stack **pts)
   return a;
 }
 
+void debug_stack(void)
+{
+  GEN z;
+  fprintferr("bot=0x%lx\t top=0x%lx\n",bot,top);
+  for(z=(GEN)top;z>=(GEN)avma;z--)
+    fprintferr("0x%p:\t0x%lx\t%lu\n",z,*z,*z);
+}
+
 #ifdef STACK_CHECK
 /*********************************************************************/
 /*                                                                   */
@@ -500,6 +508,8 @@ init_stack(size_t size)
   memused = 0; return s;
 }
 
+extern int pari_kernel_init(void);
+
 /* initialize PARI data. You can call pari_addfunctions() first to add other
  * routines to the default set */
 void
@@ -518,6 +528,7 @@ pari_init(size_t parisize, ulong maxprime)
   (void)init_stack(parisize);
   diffptr = initprimes(maxprime);
   init_universal_constants();
+  if (pari_kernel_init()) err(talker,"Cannot initialize kernel");
 
   varentries = (entree**) gpmalloc((MAXVARN+1)*sizeof(entree*));
   polvar = (GEN) gpmalloc((MAXVARN+1)*sizeof(long));
@@ -1330,7 +1341,7 @@ gcopy_av(GEN x, GEN *AVMA)
   GEN y;
 
   if (tx == t_SMALL) return x;
-  lx = lg(x); *AVMA = y = *AVMA - lx;
+  lx = (tx == t_INT)?lgefint(x):lg(x); *AVMA = y = *AVMA - lx;
   if (! is_recursive_t(tx))
   {
     for (i=0; i<lx; i++) y[i] = x[i];
@@ -1391,6 +1402,7 @@ long
 taille(GEN x)
 {
   long i,n,lx, tx = typ(x);
+  if (tx == t_INT) return lgefint(x);
   n = lg(x);
   if (is_recursive_t(tx))
   {

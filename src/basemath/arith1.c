@@ -360,39 +360,15 @@ gracine(GEN a)
   return garith_proto(racine,a,1); /* hm. --GN */
 }
 
-/* Use l as lgefint(a) [a may have more digits] */
-static GEN
-racine_r(GEN a, long l)
-{
-  pari_sp av;
-  long s;
-  GEN x,y,z;
-
-  if (l <= 4) return utoi(mpsqrtl(a));
-  av = avma;
-  s = 2 + ((l-1) >> 1);
-  setlgefint(a, s);
-  x = addis(racine_r(a, s), 1); setlgefint(a, l);
-  /* x = good approx (from above) of sqrt(a): about l/2 correct bits */
-  x = shifti(x, (l - s)*(BITS_IN_LONG/2));
-  do
-  { /* one or two iterations should do the trick */
-    z = shifti(addii(x,divii(a,x)), -1);
-    y = x; x = z;
-  }
-  while (cmpii(x,y) < 0);
-  avma = (pari_sp)y;
-  return gerepileuptoint(av,y);
-}
-
 GEN
 racine_i(GEN a, int roundup)
 {
   pari_sp av = avma;
-  long k,m,l = lgefint(a);
-  GEN x = racine_r(a, l);
+  long k,m;
+  GEN x = isqrti(a);
   if (roundup && signe(x))
   {
+    long l=lgefint(a);
     m = modBIL(x);
     k = (m * m != a[l-1] || !egalii(sqri(x),a));
     avma = (pari_sp)x;
@@ -407,13 +383,13 @@ racine(GEN a)
   if (typ(a) != t_INT) err(arither1);
   switch (signe(a))
   {
-    case 1: return racine_i(a,0);
+    case 1: return isqrti(a);
     case 0: return gzero;
     case -1:
     {
       GEN x = cgetg(3,t_COMPLEX);
       x[1] = zero;
-      x[2] = (long)racine_i(a,0); return x;
+      x[2] = (long)isqrti(a); return x; /* a<0 but isqrti use abs(a)*/
     }
   }
   return NULL; /* not reached */

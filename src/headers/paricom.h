@@ -267,7 +267,7 @@ extern int new_galois_format;
 #define bern(i)       (bernzone + 3 + (i)*bernzone[2])
 
 /* works only for POSITIVE integers */
-#define modBIL(x) (((x)[lgefint(x)-1]))
+#define modBIL(x)  (*int_LSW(x))
 #define mod64(x)  (modBIL(x) & 63)
 #define mod32(x)  (modBIL(x) & 31)
 #define mod16(x)  (modBIL(x) & 15)

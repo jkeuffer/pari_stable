@@ -71,26 +71,39 @@ case "$osname" in
         if test "$arch" = m68k; then asmarch=none; fi ;;
 esac
 
-if test "$kernel" = no; then
-  asmarch=none;
-  echo "assembler micro kernel disabled"
+if test  -n "$kernel"; then
+  tmp_kern=`./kernel-name $kernel $asmarch`
+  kernlvl0=`echo "$tmp_kern" | sed -e 's/\(.*\)-.*/\1/'`
+  kernlvl1=`echo "$tmp_kern" | sed -e 's/.*-\(.*\)/\1/'`
 else
   if test "$fastread" != yes; then
   cat << EOM
 ==========================================================================
 An optimized Pari kernel is available for these architectures
 ("none" means that we will use the portable C version of GP/PARI)
+("-gmp" means we will use the GMP library (that need to be installed))
 EOM
-  rep='none sparcv7 sparcv8_super sparcv8_micro m68k ix86 alpha hppa'
+  rep='none sparcv7 sparcv8_super sparcv8_micro m68k ix86 alpha hppa
+  none-gmp sparcv7-gmp sparcv8_super-gmp sparcv8_micro-gmp ix86-gmp alpha-gmp hppa-gmp'
+  #Note: m68k GMP do not exists, use none-gmp
   . ./display
   echo $n ..."Which of these apply, if any ? $c"
-  dflt=$asmarch; . ./myread; asmarch=$ans
+  dflt=$asmarch; . ./myread; 
+  tmp_kern=`./kernel-name $ans $asmarch`
+  kernlvl0=`echo "$tmp_kern" | sed -e 's/\(.*\)-.*/\1/'`
+  kernlvl1=`echo "$tmp_kern" | sed -e 's/.*-\(.*\)/\1/'`
   cat << EOM
 ==========================================================================
 EOM
+  else
+    tmp_kern=`./kernel-name auto $asmarch`
+    kernlvl0=`echo "$tmp_kern" | sed -e 's/\(.*\)-.*/\1/'`
+    kernlvl1=`echo "$tmp_kern" | sed -e 's/.*-\(.*\)/\1/'`
   fi
 fi
-case "$asmarch" in
+
+
+case "$kernlvl0" in
   none)          prettyk="C portable";;
   sparcv7)       prettyk=SparcV7;;
   sparcv8_super) prettyk=SuperSparc;;
@@ -100,10 +113,17 @@ case "$asmarch" in
   hppa)          prettyk=HPPA;;
   alpha)         prettyk=Alpha;;
   ppc)           prettyk=PPC;;
-  *)             prettyk="$asmarch";;
+  *)             prettyk="$kernlvl0";;
 esac
+
+case "$kernlvl1" in
+  gmp) prettyk="$prettyk/GMP";;
+  none) ;;
+  *) prettyk="$prettyk/$kernlvl1";;
+esac
+
 # 'i386 (running ix86 kernel)'  looks ugly
-if test "$arch" != "$asmarch" -a \( "$arch" != "i386" -o "$asmarch" != "ix86" \)
+if test "$arch" != "$kernlvl0" -a \( "$arch" != "i386" -o "$prettyk" != "ix86" \)
 then
   pretty="$pretty ($prettyk kernel)"
 fi

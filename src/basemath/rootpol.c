@@ -338,9 +338,10 @@ log2ir(GEN x)
   if (signe(x)==0) return (double) -pariINFINITY;
   if (typ(x)==t_INT)
   {
-    if (lgefint(x)==3) return (double) log2( (double)(ulong) x[2]);
-    l=(double)(ulong) x[2]+
-	(double)(ulong) x[3] / exp2((double) BITS_IN_LONG);
+    GEN m=int_MSW(x);
+    if (lgefint(x)==3) return (double) log2( (double)(ulong) *m);
+    l=(double)(ulong) *m +
+	(double)(ulong) *int_precW(m) / exp2((double) BITS_IN_LONG);
     return log2(l)+ (double) BITS_IN_LONG * (lgefint(x)-3.);
   }
   /* else x is real */

@@ -10,7 +10,7 @@
 if test "$gnuas" = "yes"; then do_cpp=yes; fi
 
 ker=$src/kernel/sparcv8
-kernel1=$ker/level0_$asmarch.S
+kernel1=$ker/level0_$kernlvl0.S
 kernel2=$ker/level0.S
 
 if test "$osname" = "nextstep" -o "$osname" = "linux"
@@ -19,7 +19,6 @@ then
 else
   level0=$ker/level0.h
 fi
-level1=$src/kernel/none/level1.h
 
 if test "$osname" = "nextstep" -o "$osname" = "linux" -o "$do_cpp" = "yes"
 then
@@ -34,16 +33,11 @@ kernel2=kernel2.s
 fi
 
 cat >> $file << EOT
-pariinl.h: $level0 $level1
-	cat $level0 $level1 > \$@
-kernel.o:  $kernel1
+parilvl0.h: $level0 
+	cat $level0 > parilvl0.h
+kernel\$(_O):  $kernel1
 	\$(AS) \$(ASFLAGS) -o \$@ $kernel1
-kernel2.o: $kernel2
+kernel2\$(_O): $kernel2
 	\$(AS) \$(ASFLAGS) -o \$@ $kernel2
-# Level 1 kernel is the generic one
-mp.o: .headers $src/kernel/none/mp.c
-	\$(CC) -c \$(CFLAGS) \$(CPPFLAGS) -o \$@ $src/kernel/none/mp.c
-mpinl.o: .headers $level1
-	\$(CC) -c \$(CFLAGS) \$(CPPFLAGS) -o \$@ $src/kernel/none/level1.c
 
 EOT

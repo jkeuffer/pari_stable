@@ -59,9 +59,14 @@ if test -z "$zcat" -a -n "$gzip"; then zcat="$gzip -dc"; fi
 . ./get_double_format # doubleformat, sizeof_long, update pretty
 . ./get_libc # $_has_list, update LIBS
 ####################### CONFIGURE - LIBRARIES ###############################
-# Looking for libraries: X11, gnuplot, readline
+# Looking for libraries: gmp, X11, gnuplot, readline
+. ./get_libpth # initialize
+# GMP
+if test "$kernlvl1" = "gmp"; then
+  . ./get_gmp  # libgmp
+  LIBS="$LIBS -lgmp"
+fi
 if test "$optimization" != profiling; then
-  . ./get_libpth # initialize
   echo Checking for optional libraries and headers...
   . ./get_X11  # X11, Xincroot, extralib
   . ./get_gnuplot_libs # gnuplot, gnuplot_libs
@@ -112,6 +117,7 @@ esac
 for variable in\
   pari_release pari_release_verbose version libpari_base static TOP objdir\
   arch asmarch osname pretty\
+  kernlvl0 kernlvl1\
   gnuas AS ASFLAGS KERNELCPPFLAGS\
   LD LDFLAGS LIBS\
   runpath runpathprefix LDDYN DYNLIBS DYNFLAGS DYNRELOC\

@@ -1,0 +1,24 @@
+#! /bin/sh
+name=$1;
+arch=$2;
+
+case "$name" in
+  *-*) 
+  kernlvl0=`echo "$name" | sed -e 's/\(.*\)-.*/\1/'`
+  kernlvl1=`echo "$name" | sed -e 's/.*-\(.*\)/\1/'`
+  ;;
+  gmp) #Alias for auto-gmp
+  kernlvl0="$arch"; kernlvl1="gmp";;
+  *)
+  kernlvl0="$name"; kernlvl1="none";;
+esac
+
+if [ "$kernlvl0" = "auto" ]; then
+  kernlvl0="$arch";
+fi
+
+case "$kernlvl0" in
+  m68k)	kernlvl1="m68k";;
+esac
+
+echo "$kernlvl0-$kernlvl1"

@@ -15,23 +15,93 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /***********************************************************************/
 /**								      **/
-/**		         MULTIPRECISION KERNEL           	      **/
+/**		                GMP KERNEL                     	      **/
 /**                                                                   **/
+/** BA2002Sep24                                                       **/
 /***********************************************************************/
-/* most of the routines in this file are commented out in 68k */
-/* version (#ifdef __M68K__) since they are defined in mp.s   */
+/*
+ * GMP t_INT as just like normal t_INT, just the mantissa is the other way
+ * round
+ *
+ * 
+ *   `How would you like to live in Looking-glass House, Kitty?  I
+ *   wonder if they'd give you milk in there?  Perhaps Looking-glass
+ *   milk isn't good to drink--But oh, Kitty! now we come to the
+ *   passage.  You can just see a little PEEP of the passage in
+ *   Looking-glass House, if you leave the door of our drawing-room
+ *   wide open:  and it's very like our passage as far as you can see,
+ *   only you know it may be quite different on beyond.  Oh, Kitty!
+ *   how nice it would be if we could only get through into Looking-
+ *   glass House!  I'm sure it's got, oh! such beautiful things in it!
+ *                                                                             
+ *  Though the Looking Glass,  Lewis Carrol
+ *  
+ *  (pityful attempt to beat GN code/comments rate)
+ *  */
+
 #include "pari.h"
+#include <gmp.h>
+
+ulong overflow;
+ulong hiremainder;
+
+int pari_kernel_init(void)
+{
+  /*Montgomery mult is not supported*/
+  setmontgomerylimit(0);
+  /*setresiilimit(50);*/
+  /* Use gpmalloc instead of malloc */
+  mp_set_memory_functions((void *(*)()) gpmalloc
+		  	,(void *(*)()) gprealloc
+		        ,(void (*)()) free);
+
+  return 0;
+}
+
+#define LIMBS(x)  ((x)+2)
+#define NLIMBS(x) (lgefint(x)-2)
+
+#ifdef INLINE
+INLINE
+#endif
+void
+xmpn_copy(long *x, long *y, long n)
+{
+  while (--n >= 0) x[n]=y[n];
+}
+
+#ifdef INLINE
+INLINE
+#endif
+void
+xmpn_mirror(long *x, long n)
+{
+  long i;
+  for(i=0;i<(n>>1);i++)
+  {
+    ulong m=x[i];
+    x[i]=x[n-1-i];
+    x[n-1-i]=m;
+  }
+}
+
+#ifdef INLINE
+INLINE
+#endif
+GEN
+icopy_ef(GEN x, long l)
+{
+  register long lx = lgefint(x);
+  const GEN y = cgeti(l);
+
+  while (--lx > 0) y[lx]=x[lx];
+  return y;
+}
 
 #ifndef REGISTER_MP_OPERANDS
 ulong overflow;
 ulong hiremainder;
 #endif
-
-int pari_kernel_init(void)
-{
-  /*nothing to do*/
-  return 0;
-}
 
 /* NOTE: arguments of "spec" routines (muliispec, addiispec, etc.) aren't
  * GENs but pairs (long *a, long na) representing a list of digits (in basis
@@ -79,10 +149,8 @@ int pari_kernel_init(void)
 int
 egalii(GEN x, GEN y)
 {
-  long i;
   if (MASK(x[1]) != MASK(y[1])) return 0;
-  i = lgefint(x)-1; while (i>1 && x[i]==y[i]) i--;
-  return i==1;
+  return !mpn_cmp(LIMBS(x),LIMBS(y),NLIMBS(x)); /* Note that NLIMBS(x)==NLIMBS(y)*/
 }
 #undef MASK
 
@@ -98,25 +166,16 @@ INLINE
 GEN
 addsispec(long s, GEN x, long nx)
 {
-  GEN xd, zd = (GEN)avma;
+  GEN  zd;
   long lz;
-  LOCAL_OVERFLOW;
 
-  lz = nx+3; (void)new_chunk(lz);
-  xd = x + nx;
-  *--zd = addll(*--xd, s);
-  if (overflow)
-    for(;;)
-    {
-      if (xd == x) { *--zd = 1; break; } /* enlarge z */
-      *--zd = ((ulong)*--xd) + 1;
-      if (*zd) { lz--; break; }
-    }
-  else lz--;
-  while (xd > x) *--zd = *--xd;
-  *--zd = evalsigne(1) | evallgefint(lz);
-  *--zd = evaltyp(t_INT) | evallg(lz);
-  avma=(pari_sp)zd; return zd;
+  lz = nx+3; zd = cgeti(lz);
+  if (mpn_add_1(LIMBS(zd),x,nx,s))
+    zd[lz-1]=1;
+  else
+    lz--;
+  zd[1] = evalsigne(1) | evallgefint(lz);
+  return zd;
 }
 
 #define swapspec(x,y, nx,ny) {long _a=nx;GEN _z=x; nx=ny; ny=_a; x=y; y=_z;}
@@ -127,30 +186,20 @@ INLINE
 GEN
 addiispec(GEN x, GEN y, long nx, long ny)
 {
-  GEN xd,yd,zd;
+  GEN zd;
   long lz;
-  LOCAL_OVERFLOW;
 
   if (nx < ny) swapspec(x,y, nx,ny);
   if (ny == 1) return addsispec(*y,x,nx);
-  zd = (GEN)avma;
-  lz = nx+3; (void)new_chunk(lz);
-  xd = x + nx;
-  yd = y + ny;
-  *--zd = addll(*--xd, *--yd);
-  while (yd > y) *--zd = addllx(*--xd, *--yd);
-  if (overflow)
-    for(;;)
-    {
-      if (xd == x) { *--zd = 1; break; } /* enlarge z */
-      *--zd = ((ulong)*--xd) + 1;
-      if (*zd) { lz--; break; }
-    }
-  else lz--;
-  while (xd > x) *--zd = *--xd;
-  *--zd = evalsigne(1) | evallgefint(lz);
-  *--zd = evaltyp(t_INT) | evallg(lz);
-  avma=(pari_sp)zd; return zd;
+  lz = nx+3; zd = cgeti(lz);
+
+  if (mpn_add(LIMBS(zd),x,nx,y,ny))
+    zd[lz-1]=1;
+  else
+    lz--;
+
+  zd[1] = evalsigne(1) | evallgefint(lz);
+  return zd;
 }
 
 /* assume x >= y */
@@ -160,26 +209,15 @@ INLINE
 GEN
 subisspec(GEN x, long s, long nx)
 {
-  GEN xd, zd = (GEN)avma;
+  GEN zd;
   long lz;
-  LOCAL_OVERFLOW;
+  lz = nx + 2; zd = cgeti(lz);
+  
+  mpn_sub_1 (LIMBS(zd), x, nx, s);
+  if (! zd[lz - 1]) { --lz; }
 
-  lz = nx+2; (void)new_chunk(lz);
-  xd = x + nx;
-  *--zd = subll(*--xd, s);
-  if (overflow)
-    for(;;)
-    {
-      *--zd = ((ulong)*--xd) - 1;
-      if (*xd) break;
-    }
-  if (xd == x)
-    while (*zd == 0) { zd++; lz--; } /* shorten z */
-  else
-    do  *--zd = *--xd; while (xd > x);
-  *--zd = evalsigne(1) | evallgefint(lz);
-  *--zd = evaltyp(t_INT) | evallg(lz);
-  avma=(pari_sp)zd; return zd;
+  zd[1] = evalsigne(1) | evallgefint(lz);
+  return zd;
 }
 
 /* assume x > y */
@@ -189,34 +227,17 @@ INLINE
 GEN
 subiispec(GEN x, GEN y, long nx, long ny)
 {
-  GEN xd,yd,zd;
+  GEN zd;
   long lz;
-  LOCAL_OVERFLOW;
-
   if (ny==1) return subisspec(x,*y,nx);
-  zd = (GEN)avma;
-  lz = nx+2; (void)new_chunk(lz);
-  xd = x + nx;
-  yd = y + ny;
-  *--zd = subll(*--xd, *--yd);
-  while (yd > y) *--zd = subllx(*--xd, *--yd);
-  if (overflow)
-    for(;;)
-    {
-      *--zd = ((ulong)*--xd) - 1;
-      if (*xd) break;
-    }
-  if (xd == x)
-    while (*zd == 0) { zd++; lz--; } /* shorten z */
-  else
-    do  *--zd = *--xd; while (xd > x);
-  *--zd = evalsigne(1) | evallgefint(lz);
-  *--zd = evaltyp(t_INT) | evallg(lz);
-  avma=(pari_sp)zd; return zd;
+  lz = nx+2; zd = cgeti(lz);
+  
+  mpn_sub (LIMBS(zd), x, nx, y, ny);
+  while (lz >= 3 && zd[lz - 1] == 0) { lz--; }
+  
+  zd[1] = evalsigne(1) | evallgefint(lz);
+  return zd;
 }
-
-#ifndef __M68K__
-
 /* prototype of positive small ints */
 static long pos_s[] = {
   evaltyp(t_INT) | _evallg(3), evalsigne(1) | evallgefint(3), 0 };
@@ -247,30 +268,33 @@ affir(GEN x, GEN y)
     y[1] = evalexpo(-bit_accuracy(ly));
     return;
   }
-
-  lx = lgefint(x); sh = bfffo(x[2]);
+  lx = lgefint(x); sh = bfffo(*int_MSW(x));
   y[1] = evalsigne(s) | evalexpo(bit_accuracy(lx)-sh-1);
   if (sh) {
     if (lx <= ly)
     {
       for (i=lx; i<ly; i++) y[i]=0;
-      shift_left(y,x,2,lx-1, 0,sh);
+      if(mpn_lshift(LIMBS(y),LIMBS(x),lx-2,sh)) err(talker,"GMP affir 2");
+      xmpn_mirror(LIMBS(y),lx-2);
       return;
     }
-    shift_left(y,x,2,ly-1, x[ly],sh);
+    if(mpn_lshift(LIMBS(y),LIMBS(x)+lx-ly,ly-2,sh)) err(talker,"GMP affir 1");
+    y[2]|=((ulong) x[lx-ly+1])>>(BITS_IN_LONG-sh);
+    xmpn_mirror(LIMBS(y),ly-2);
     /* lx > ly: round properly */
-    if ((x[ly]<<sh) & HIGHBIT) roundr_up_ip(y, ly);
+    if ((x[lx-ly+1]<<sh) & HIGHBIT) roundr_up_ip(y, ly);
   }
   else {
+    GEN xd=int_MSW(x);
     if (lx <= ly)
     {
-      for (i=2; i<lx; i++) y[i]=x[i];
+      for (i=2; i<lx; i++,xd=int_precW(xd)) y[i]=*xd;
       for (   ; i<ly; i++) y[i]=0;
       return;
     }
-    for (i=2; i<ly; i++) y[i]=x[i];
+    for (i=2; i<ly; i++,xd=int_precW(xd)) y[i]=*xd;
     /* lx > ly: round properly */
-    if (x[ly] & HIGHBIT) roundr_up_ip(y, ly);
+    if (x[2+lx-ly] & HIGHBIT) roundr_up_ip(y, ly);
   }
 }
 
@@ -293,17 +317,104 @@ affrr(GEN x, GEN y)
   if (x[ly] & HIGHBIT) roundr_up_ip(y, ly);
 }
 
-static GEN
-shifti_spec(GEN x, long lx, long n)
+GEN
+shifti(GEN x, long n)
+{
+  const long s=signe(x);
+  long lz,lx,m;
+  GEN z;
+
+  if (!s) return gzero;
+  if (!n) return icopy(x);
+  lx = lgefint(x);
+  if (n > 0)
+  {
+    long d = n>>TWOPOTBITS_IN_LONG;
+    long i;
+
+    m = n & (BITS_IN_LONG-1);
+
+    lz = lx + d + (m!=0);  
+    z = cgeti(lz); 
+    for (i=0; i<d; i++) LIMBS(z)[i] = 0;
+
+    if (!m) xmpn_copy(LIMBS(z)+d, LIMBS(x), NLIMBS(x)); 
+    else
+    {
+      ulong carry = mpn_lshift(LIMBS(z)+d, LIMBS(x), NLIMBS(x), m); 
+      if (carry) z[lz - 1] = carry; 
+      else lz--; 
+    }
+  }
+  else
+  {
+    long d = (-n)>>TWOPOTBITS_IN_LONG;
+
+    n = -n;
+    lz = lx - d;
+    if (lz<3) return gzero;
+    z = cgeti(lz);
+    m = n & (BITS_IN_LONG-1);
+
+    if (!m) xmpn_copy(LIMBS(z), LIMBS(x) + d, NLIMBS(x) - d);
+    else
+    {
+      mpn_rshift(LIMBS(z), LIMBS(x) + d, NLIMBS(x) - d, m); 
+      if (z[lz - 1] == 0)
+      {
+        if (lz == 3) { avma = (pari_sp)(z+3); return gzero; }
+        lz--; 
+      }
+    }
+  }
+  z[1] = evalsigne(s)|evallgefint(lz);
+  return z;
+}
+
+GEN
+shifti3(GEN x, long n, long flag)
+{
+  long s, lyorig, ly, i, m, lx = lgefint(x);
+  GEN y = shifti(x, n);
+
+  if (!flag || n >= 0 || (s = signe(x)) >= 0) return y;
+  if (y == gzero) return stoi(-1);
+  err(impl,"GMP shifti3");
+  n = -n;
+  /* With FLAG: round up instead of rounding down */
+  ly = lgefint(y);
+  lyorig = lx - (n>>TWOPOTBITS_IN_LONG);
+  m = n & (BITS_IN_LONG-1);
+  /* Check low bits of x */
+  i = lx; flag = 0;
+  while (--i >= lyorig)
+    if (x[lx-i]) { flag = 1; break; }  /* Need to increment y by 1 */
+  if (!flag && m)
+    flag = x[lyorig - 1] & ((1<<m) - 1);
+  if (flag) { /* Increment y */
+    for (i = ly;;)
+    { /* Extend y on the left? */
+      if (--i < 2) { ly++; y = new_chunk(1); y[2] = 1; break; }
+      if (++y[i]) break;
+      /* Now propagate the bit into the next longword */
+    }
+  }
+  y[1] = evalsigne(s)|evallgefint(ly);
+  y[0] = evaltyp(t_INT)|evallg(ly); return y;
+}
+
+GEN
+ishiftr_spec(GEN x, long lx, long n)
 {
   long ly, i, m, s = signe(x);
   GEN y;
   if (!s) return gzero;
   if (!n) 
   {
-    y = cgeti(lx); 
+    y = cgeti(lx); /* cf icopy. But applies to a t_REAL! */
     y[1] = evalsigne(s) | evallgefint(lx);
     while (--lx > 1) y[lx]=x[lx];
+    xmpn_mirror(LIMBS(y),NLIMBS(y));
     return y;
   }
   if (n > 0)
@@ -342,53 +453,10 @@ shifti_spec(GEN x, long lx, long n)
       for (i=2; i<ly; i++) y[i]=x[i];
     }
   }
+  xmpn_mirror(LIMBS(y),ly-2);
   y[1] = evalsigne(s)|evallgefint(ly);
   y[0] = evaltyp(t_INT)|evallg(ly); return y;
 }
-
-GEN
-shifti(GEN x, long n)
-{
-  return shifti_spec(x, lgefint(x), n);
-}
-
-GEN
-shifti3(GEN x, long n, long flag)
-{
-  long s, lyorig, ly, i, m, lx = lgefint(x);
-  GEN y = shifti_spec(x, lx, n);
-
-  if (!flag || n >= 0 || (s = signe(x)) >= 0) return y;
-  if (y == gzero) return stoi(-1);
-  n = -n;
-  /* With FLAG: round up instead of rounding down */
-  ly = lgefint(y);
-  lyorig = lx - (n>>TWOPOTBITS_IN_LONG);
-  m = n & (BITS_IN_LONG-1);
-  /* Check low bits of x */
-  i = lx; flag = 0;
-  while (--i >= lyorig)
-    if (x[i]) { flag = 1; break; }  /* Need to increment y by 1 */
-  if (!flag && m)
-    flag = x[lyorig - 1] & ((1<<m) - 1);
-  if (flag) { /* Increment y */
-    for (i = ly;;)
-    { /* Extend y on the left? */
-      if (--i < 2) { ly++; y = new_chunk(1); y[2] = 1; break; }
-      if (++y[i]) break;
-      /* Now propagate the bit into the next longword */
-    }
-  }
-  y[1] = evalsigne(s)|evallgefint(ly);
-  y[0] = evaltyp(t_INT)|evallg(ly); return y;
-}
-
-GEN ishiftr_spec(GEN x, long lx, long n)
-{
-  /*This is a kludge since x is not an integer*/
-  return shifti_spec(x, lx, n);
-}
-
 
 GEN ishiftr(GEN x, long s)
 {
@@ -400,10 +468,11 @@ GEN ishiftr(GEN x, long s)
   return ishiftr_spec(x, lx, n);
 }
 
+
 GEN
 mptrunc(GEN x)
 {
-  long d,e,i,s,m;
+  long d,e,m,i,s;
   GEN y;
 
   if (typ(x)==t_INT) return icopy(x);
@@ -414,11 +483,13 @@ mptrunc(GEN x)
 
   y=cgeti(d); y[1] = evalsigne(s) | evallgefint(d);
   if (++m == BITS_IN_LONG)
-    for (i=2; i<d; i++) y[i]=x[i];
+    for (i=2; i<d; i++) y[d-i+1]=x[i];
   else
   {
-    register const ulong sh = BITS_IN_LONG - m;
-    shift_right2(y,x, 2,d,0, sh,m);
+    GEN z=cgeti(d);
+    for (i=2; i<d; i++) z[d-i+1]=x[i];
+    mpn_rshift(LIMBS(y),LIMBS(z),d-2,BITS_IN_LONG-m);
+    avma=(pari_sp)y;
   }
   return y;
 }
@@ -427,38 +498,37 @@ mptrunc(GEN x)
 GEN
 mpent(GEN x)
 {
-  long d,e,i,lx,m;
   GEN y;
-
+  long d,e,m,i,lx;
   if (typ(x)==t_INT) return icopy(x);
   if (signe(x) >= 0) return mptrunc(x);
   if ((e=expo(x)) < 0) return stoi(-1);
   d = (e>>TWOPOTBITS_IN_LONG) + 3;
   m = e & (BITS_IN_LONG-1);
   lx=lg(x); if (d>lx) err(precer, "mpent (precision loss in trucation)");
-  y = new_chunk(d);
+  y = cgeti(d+1);
   if (++m == BITS_IN_LONG)
   {
-    for (i=2; i<d; i++) y[i]=x[i];
+    for (i=2; i<d; i++) y[d-i+1]=x[i];
     i=d; while (i<lx && !x[i]) i++;
     if (i==lx) goto END;
   }
   else
   {
-    register const ulong sh = BITS_IN_LONG - m;
-    shift_right2(y,x, 2,d,0, sh,m);
+    GEN z=cgeti(d);
+    for (i=2; i<d; i++) z[d-i+1]=x[i];
+    mpn_rshift(LIMBS(y),LIMBS(z),d-2,BITS_IN_LONG-m);
     if (x[d-1]<<m == 0)
     {
       i=d; while (i<lx && !x[i]) i++;
       if (i==lx) goto END;
     }
   }
-  /* set y:=y+1 */
-  for (i=d-1; i>=2; i--) { y[i]++; if (y[i]) goto END; }
-  y=new_chunk(1); y[2]=1; d++;
+  if (mpn_add_1(LIMBS(y),LIMBS(y),d,1))
+    y[d++]=1; 
 END:
   y[1] = evalsigne(-1) | evallgefint(d);
-  y[0] = evaltyp(t_INT) | evallg(d); return y;
+  return y;
 }
 
 int
@@ -486,7 +556,7 @@ int
 cmpii(GEN x, GEN y)
 {
   const long sx = signe(x), sy = signe(y);
-  long lx,ly,i;
+  long lx,ly;
 
   if (sx<sy) return -1;
   if (sx>sy) return 1;
@@ -495,9 +565,10 @@ cmpii(GEN x, GEN y)
   lx=lgefint(x); ly=lgefint(y);
   if (lx>ly) return sx;
   if (lx<ly) return -sx;
-  i=2; while (i<lx && x[i]==y[i]) i++;
-  if (i==lx) return 0;
-  return ((ulong)x[i] > (ulong)y[i]) ? sx : -sx;
+  if (sx>0)
+    return mpn_cmp(LIMBS(x),LIMBS(y),NLIMBS(x));
+  else
+    return -mpn_cmp(LIMBS(x),LIMBS(y),NLIMBS(x));
 }
 
 int
@@ -786,24 +857,24 @@ addrr(GEN x, GEN y)
   z[0] = evaltyp(t_REAL) | evallg(lz);
   avma = (pari_sp)z; return z;
 }
-#endif 
 
 /***********************************************************************/
 /**								      **/
 /**		          MULTIPLICATION                 	      **/
 /**                                                                   **/
 /***********************************************************************/
-#define _sqri_l 47
-#define _muli_l 25 /* optimal on PII 350MHz + gcc 2.7.2.1 (gp-dyn) */
-#define _mulr_l 333
+
+#define _sqri_l -1
+#define _muli_l -1
+#define _mulr_l 72
 
 #if 1 /* for tunings */
 long KARATSUBA_SQRI_LIMIT = _sqri_l;
 long KARATSUBA_MULI_LIMIT = _muli_l;
 long KARATSUBA_MULR_LIMIT = _mulr_l;
 
-void setsqri(long a) { KARATSUBA_SQRI_LIMIT = a; }
-void setmuli(long a) { KARATSUBA_MULI_LIMIT = a; }
+void setsqri(long a) {} /*NOOP*/ 
+void setmuli(long a) {} /*NOOP*/
 void setmulr(long a) { KARATSUBA_MULR_LIMIT = a; }
 
 GEN
@@ -822,7 +893,7 @@ speci(GEN x, long nx)
 #  define KARATSUBA_MULR_LIMIT _mulr_l
 #endif
 
-#ifndef __M68K__
+
 GEN
 mulss(long x, long y)
 {
@@ -837,12 +908,11 @@ mulss(long x, long y)
   if (hiremainder)
   {
     z=cgeti(4); z[1] = evalsigne(s) | evallgefint(4);
-    z[2]=hiremainder; z[3]=p1; return z;
+    z[3]=hiremainder; z[2]=p1; return z;
   }
   z=cgeti(3); z[1] = evalsigne(s) | evallgefint(3);
   z[2]=p1; return z;
 }
-#endif
 
 GEN
 muluu(ulong x, ulong y)
@@ -856,7 +926,7 @@ muluu(ulong x, ulong y)
   if (hiremainder)
   {
     z=cgeti(4); z[1] = evalsigne(1) | evallgefint(4);
-    z[2]=hiremainder; z[3]=p1; return z;
+    z[3]=hiremainder; z[2]=p1; return z;
   }
   z=cgeti(3); z[1] = evalsigne(1) | evallgefint(3);
   z[2]=p1; return z;
@@ -869,17 +939,12 @@ INLINE
 GEN
 mulsispec(long x, GEN y, long ny)
 {
-  GEN yd, z = (GEN)avma;
   long lz = ny+3;
-  LOCAL_HIREMAINDER;
-
-  (void)new_chunk(lz);
-  yd = y + ny; *--z = mulll(x, *--yd);
-  while (yd > y) *--z = addmul(x,*--yd);
-  if (hiremainder) *--z = hiremainder; else lz--;
-  *--z = evalsigne(1) | evallgefint(lz);
-  *--z = evaltyp(t_INT) | evallg(lz);
-  avma=(pari_sp)z; return z;
+  GEN z=cgeti(lz);
+  ulong hi = mpn_mul_1 (LIMBS(z), y, ny, x);
+  if (hi) { z[lz - 1] = hi; } else lz--;
+  z[1] = evalsigne(1) | evallgefint(lz);
+  return z;
 }
 
 GEN
@@ -893,32 +958,23 @@ mului(ulong x, GEN y)
   setsigne(z,s); return z;
 }
 
-/* a + b*Y, assume Y >= 0, 0 <= a,b <= VERYBIGINT */
+/* a + b*Y, assume y >= 0, 0 <= a,b <= VERYBIGINT */
 GEN
-addsmulsi(long a, long b, GEN Y)
+addsmulsi(long a, long b, GEN y)
 {
-  GEN yd,y,z;
-  long ny,lz;
-  LOCAL_HIREMAINDER;
-  LOCAL_OVERFLOW;
-
-  if (!signe(Y)) return stoi(a);
-
-  y = Y+2; z = (GEN)avma;
-  ny = lgefint(Y)-2;
-  lz = ny+3;
-
-  (void)new_chunk(lz);
-  yd = y + ny; *--z = addll(a, mulll(b, *--yd));
-  if (overflow) hiremainder++; /* can't overflow */
-  while (yd > y) *--z = addmul(b,*--yd);
-  if (hiremainder) *--z = hiremainder; else lz--;
-  *--z = evalsigne(1) | evallgefint(lz);
-  *--z = evaltyp(t_INT) | evallg(lz);
+  GEN z;
+  long i, lz;
+  ulong hi;
+  if (!signe(y)) return stoi(a);
+  lz = lgefint(y)+1;
+  z = cgeti(lz);
+  z[2]=a;
+  for(i=3;i<lz;i++) z[i]=0;
+  hi=mpn_addmul_1(LIMBS(z), LIMBS(y), NLIMBS(y), b);
+  if (hi) z[lz-1]=hi; else lz--;
+  z[1] = evalsigne(1) | evallgefint(lz);
   avma=(pari_sp)z; return z;
 }
-
-#ifndef __M68K__
 
 GEN
 mulsi(long x, GEN y)
@@ -960,7 +1016,28 @@ mulsr(long x, GEN y)
   z[1] = evalsigne(s) | evalexpo(m+e); return z;
 }
 
-static GEN quickmulii(GEN a, GEN b, long na, long nb);
+#ifdef INLINE
+INLINE
+#endif
+GEN
+muliispec(GEN x, GEN y, long nx, long ny);
+
+#ifdef INLINE
+INLINE
+#endif
+GEN
+quickmulii(GEN x, GEN y, long nx, long ny)
+{
+  GEN z;
+  xmpn_mirror(x,nx);
+  if (x!=y) xmpn_mirror(y,ny);
+  z=muliispec(x, y, nx, ny);
+  xmpn_mirror(LIMBS(z),NLIMBS(z));
+  xmpn_mirror(x,nx);
+  if (x!=y) xmpn_mirror(y,ny);
+  return z;
+}
+
 /*#define KARAMULR_VARIANT*/
 
 #ifdef KARAMULR_VARIANT
@@ -1195,7 +1272,6 @@ divsi(long x, GEN y)
   if (s<0) p1 = -p1;
   SAVE_HIREMAINDER; return stoi(p1);
 }
-#endif
 
 GEN
 modui(ulong x, GEN y)
@@ -1214,21 +1290,13 @@ modui(ulong x, GEN y)
 ulong
 umodiu(GEN y, ulong x)
 {
-  long sy=signe(y),ly,i;
-  LOCAL_HIREMAINDER;
-
+  long sy=signe(y);
+  long hi;
   if (!x) err(diver4);
   if (!sy) return 0;
-  ly = lgefint(y);
-  if (x <= (ulong)y[2]) hiremainder=0;
-  else
-  {
-    if (ly==3) return (sy > 0)? (ulong)y[2]: x - (ulong)y[2];
-    hiremainder=y[2]; ly--; y++;
-  }
-  for (i=2; i<ly; i++) (void)divll(y[i],x);
-  if (!hiremainder) return 0;
-  return (sy > 0)? hiremainder: x - hiremainder;
+  hi = mpn_mod_1(LIMBS(y),NLIMBS(y),x);
+  if (!hi) return 0;
+  return (sy > 0)? hi: x - hi;
 }
 
 GEN
@@ -1238,7 +1306,7 @@ modiu(GEN y, ulong x) { return utoi(umodiu(y,x)); }
 GEN
 diviu(GEN y, ulong x)
 {
-  long sy=signe(y),ly,i;
+  long sy=signe(y),ly;
   GEN z;
   LOCAL_HIREMAINDER;
 
@@ -1246,18 +1314,15 @@ diviu(GEN y, ulong x)
   if (!sy) { hiremainder=0; SAVE_HIREMAINDER; return gzero; }
 
   ly = lgefint(y);
-  if (x <= (ulong)y[2]) hiremainder=0;
-  else
-  {
-    if (ly==3) { hiremainder=itou(y); SAVE_HIREMAINDER; return gzero; }
-    hiremainder=y[2]; ly--; y++;
-  }
-  z = cgeti(ly); z[1] = evallgefint(ly) | evalsigne(1);
-  for (i=2; i<ly; i++) z[i]=divll(y[i],x);
+  if (ly == 3 && (ulong)x > (ulong)y[2])
+    { hiremainder = itou(y); SAVE_HIREMAINDER; return gzero; }
+
+  z = cgeti(ly); 
+  hiremainder = mpn_divrem_1(LIMBS(z), 0, LIMBS(y), NLIMBS(y), x);
+  if (z [ly - 1] == 0) ly--;
+  z[1] = evallgefint(ly) | evalsigne(1);
   SAVE_HIREMAINDER; return z;
 }
-
-#ifndef __M68K__
 
 GEN
 modsi(long x, GEN y)
@@ -1285,7 +1350,7 @@ modsi(long x, GEN y)
 GEN
 divis(GEN y, long x)
 {
-  long sy=signe(y),ly,s,i;
+  long sy=signe(y),ly,s;
   GEN z;
   LOCAL_HIREMAINDER;
 
@@ -1294,15 +1359,14 @@ divis(GEN y, long x)
   if (x<0) { s = -sy; x = -x; } else s=sy;
 
   ly = lgefint(y);
-  if ((ulong)x <= (ulong)y[2]) hiremainder=0;
-  else
-  {
-    if (ly==3) { hiremainder=itos(y); SAVE_HIREMAINDER; return gzero; }
-    hiremainder=y[2]; ly--; y++;
-  }
-  z = cgeti(ly); z[1] = evallgefint(ly) | evalsigne(s);
-  for (i=2; i<ly; i++) z[i]=divll(y[i],x);
+  if (ly == 3 && (ulong)x > (ulong)y[2])
+  { hiremainder = itos(y); SAVE_HIREMAINDER; return gzero; }
+
+  z = cgeti(ly); 
+  hiremainder = mpn_divrem_1(LIMBS(z), 0, LIMBS(y), NLIMBS(y), x);
   if (sy<0) hiremainder = - ((long)hiremainder);
+  if (z[ly - 1] == 0) ly--;
+  z[1] = evallgefint(ly) | evalsigne(s);
   SAVE_HIREMAINDER; return z;
 }
 
@@ -1540,7 +1604,6 @@ divrr(GEN x, GEN y)
   x[1] = evalsigne(sx) | evalexpo(e);
   return x;
 }
-#endif /* !defined(__M68K__) */
 
 /* The following ones are not in mp.s (mulii is, with a different algorithm) */
 
@@ -1556,10 +1619,9 @@ GEN
 dvmdii(GEN x, GEN y, GEN *z)
 {
   long sx=signe(x),sy=signe(y);
-  long lx, ly, lz, i, j, sh, k, lq, lr;
+  long lx, ly, lq;
   pari_sp av;
-  ulong si,qp,saux, *xd,*rd,*qd;
-  GEN r,q,x1;
+  GEN r,q;
 
   if (!sy) err(dvmer1);
   if (!sx)
@@ -1568,23 +1630,21 @@ dvmdii(GEN x, GEN y, GEN *z)
     *z=gzero; return gzero;
   }
   lx=lgefint(x);
-  ly=lgefint(y); lz=lx-ly;
-  if (lz <= 0)
+  ly=lgefint(y); lq=lx-ly;
+  if (lq <= 0)
   {
-    if (lz == 0)
+    if (lq == 0)
     {
-      for (i=2; i<lx; i++)
-        if (x[i] != y[i])
-        {
-          if ((ulong)x[i] > (ulong)y[i]) goto DIVIDE;
-          goto TRIVIAL;
-        }
-      if (z == ONLY_REM) return gzero;
-      if (z) *z = gzero;
-      if (sx < 0) sy = -sy;
-      return stoi(sy);
+      long s=mpn_cmp(LIMBS(x),LIMBS(y),NLIMBS(x));
+      if (s>0) goto DIVIDE;
+      if (s==0) 
+      {
+        if (z == ONLY_REM) return gzero;
+        if (z) *z = gzero;
+        if (sx < 0) sy = -sy;
+        return stoi(sy);
+      }
     }
-TRIVIAL:
     if (z == ONLY_REM) return icopy(x);
     if (z) *z = icopy(x);
     return gzero;
@@ -1593,157 +1653,66 @@ DIVIDE: /* quotient is non-zero */
   av=avma; if (sx<0) sy = -sy;
   if (ly==3)
   {
-    LOCAL_HIREMAINDER;
-    si = y[2];
-    if (si <= (ulong)x[2]) hiremainder=0;
-    else
-    {
-      hiremainder = x[2]; lx--; x++;
-    }
-    q = new_chunk(lx); for (i=2; i<lx; i++) q[i]=divll(x[i],si);
+    ulong lq = lx;
+    ulong si;
+    q  = cgeti(lq);
+    si = mpn_divrem_1(LIMBS(q), 0, LIMBS(x), NLIMBS(x), y[2]);
+    if (q[lq - 1] == 0) lq--;
     if (z == ONLY_REM)
     {
-      avma=av; if (!hiremainder) return gzero;
+      avma=av; if (!si) return gzero;
       r=cgeti(3);
       r[1] = evalsigne(sx) | evallgefint(3);
-      r[2]=hiremainder; return r;
+      r[2] = si; return r;
     }
-    q[1] = evalsigne(sy) | evallgefint(lx);
-    q[0] = evaltyp(t_INT) | evallg(lx);
+    q[1] = evalsigne(sy) | evallgefint(lq);
     if (!z) return q;
-    if (!hiremainder) { *z=gzero; return q; }
+    if (!si) { *z=gzero; return q; }
     r=cgeti(3);
     r[1] = evalsigne(sx) | evallgefint(3);
-    r[2] = hiremainder; *z=r; return q;
+    r[2] = si; *z=r; return q;
   }
-
-  x1 = new_chunk(lx); sh = bfffo(y[2]);
-  if (sh)
-  { /* normalize so that highbit(y) = 1 (shift left x and y by sh bits)*/
-    register const ulong m = BITS_IN_LONG - sh;
-    r = new_chunk(ly);
-    shift_left2(r, y,2,ly-1, 0,sh,m); y = r;
-    shift_left2(x1,x,2,lx-1, 0,sh,m);
-    x1[1] = ((ulong)x[2]) >> m;
-  }
-  else
-  {
-    x1[1]=0; for (j=2; j<lx; j++) x1[j]=x[j];
-  }
-  x=x1; si=y[2]; saux=y[3];
-  for (i=0; i<=lz; i++)
-  { /* x1 = x + i */
-    LOCAL_HIREMAINDER;
-    LOCAL_OVERFLOW;
-    if ((ulong)x1[1] == si)
-    {
-      qp = MAXULONG; k=addll(si,x1[2]);
-    }
-    else
-    {
-      hiremainder=x1[1]; overflow=0;
-      qp=divll(x1[2],si); k=hiremainder;
-    }
-    if (!overflow)
-    {
-      long k3 = subll(mulll(qp,saux), x1[3]);
-      long k4 = subllx(hiremainder,k);
-      while (!overflow && k4) { qp--; k3=subll(k3,saux); k4=subllx(k4,si); }
-    }
-    hiremainder=0;
-    for (j=ly-1; j>1; j--)
-    {
-      x1[j] = subll(x1[j], addmul(qp,y[j]));
-      hiremainder+=overflow;
-    }
-    if ((ulong)x1[1] < hiremainder)
-    {
-      overflow=0; qp--;
-      for (j=ly-1; j>1; j--) x1[j] = addllx(x1[j],y[j]);
-    }
-    x1[1]=qp; x1++;
-  }
-
-  lq = lz+2;
-  if (!z)
-  {
-    qd = (ulong*)av;
-    xd = (ulong*)(x + lq);
-    if (x[1]) { lz++; lq++; }
-    while (lz--) *--qd = *--xd;
-    *--qd = evalsigne(sy) | evallgefint(lq);
-    *--qd = evaltyp(t_INT) | evallg(lq);
-    avma = (pari_sp)qd; return (GEN)qd;
-  }
-
-  j=lq; while (j<lx && !x[j]) j++;
-  lz = lx-j;
   if (z == ONLY_REM)
   {
-    if (lz==0) { avma = av; return gzero; }
-    rd = (ulong*)av; lr = lz+2;
-    xd = (ulong*)(x + lx);
-    if (!sh) while (lz--) *--rd = *--xd;
-    else
-    { /* shift remainder right by sh bits */
-      const ulong shl = BITS_IN_LONG - sh;
-      ulong l;
-      xd--;
-      while (--lz) /* fill r[3..] */
-      {
-        l = *xd >> sh;
-        *--rd = l | (*--xd << shl);
-      }
-      l = *xd >> sh;
-      if (l) *--rd = l; else lr--;
-    }
-    *--rd = evalsigne(sx) | evallgefint(lr);
-    *--rd = evaltyp(t_INT) | evallg(lr);
-    avma = (pari_sp)rd; return (GEN)rd;
-  }
-
-  lr = lz+2;
-  rd = NULL; /* gcc -Wall */
-  if (lz)
-  { /* non zero remainder: initialize rd */
-    xd = (ulong*)(x + lx);
-    if (!sh)
+    ulong lr = lgefint(y);
+    ulong lq = lgefint(x)-lgefint(y)+3;
+    GEN r = cgeti(lr);
+    GEN q = cgeti(lq);
+    mpn_tdiv_qr(LIMBS(q), LIMBS(r),0, LIMBS(x), NLIMBS(x), LIMBS(y), NLIMBS(y));
+    if (!r[lr - 1])
     {
-      rd = (ulong*)avma; (void)new_chunk(lr);
-      while (lz--) *--rd = *--xd;
+      while(lr>2 && !r[lr - 1]) lr--;
+      if (lr == 2) {avma=av; return gzero;} /* exact division */
     }
-    else
-    { /* shift remainder right by sh bits */
-      const ulong shl = BITS_IN_LONG - sh;
-      ulong l;
-      rd = (ulong*)x; /* overwrite shifted y */
-      xd--;
-      while (--lz)
-      {
-        l = *xd >> sh;
-        *--rd = l | (*--xd << shl);
-      }
-      l = *xd >> sh;
-      if (l) *--rd = l; else lr--;
-    }
-    *--rd = evalsigne(sx) | evallgefint(lr);
-    *--rd = evaltyp(t_INT) | evallg(lr);
-    rd += lr;
+    r[1] = evalsigne(sx) | evallgefint(lr);
+    avma = (pari_sp) r; return r; 
   }
-  qd = (ulong*)av;
-  xd = (ulong*)(x + lq);
-  if (x[1]) lq++;
-  j = lq-2; while (j--) *--qd = *--xd;
-  *--qd = evalsigne(sy) | evallgefint(lq);
-  *--qd = evaltyp(t_INT) | evallg(lq);
-  q = (GEN)qd;
-  if (lr==2) *z = gzero;
   else
-  { /* rd has been properly initialized: we had lz > 0 */
-    while (lr--) *--qd = *--rd;
-    *z = (GEN)qd;
+  {
+    ulong lq = lgefint(x)-lgefint(y)+3;
+    ulong lr = lgefint(y);
+    GEN q = cgeti(lq);
+    GEN r = cgeti(lr);
+    mpn_tdiv_qr(LIMBS(q), LIMBS(r),0, LIMBS(x), NLIMBS(x), LIMBS(y), NLIMBS(y));
+    if (q[lq - 1] == 0) lq--;
+    q[1] = evalsigne(sy) | evallgefint(lq);
+    if (!z) { avma = (pari_sp)q; return q; }
+    if (!r[lr - 1])
+    {
+      while(lr>2 && !r[lr - 1]) lr--;
+      if (lr == 2) {avma=(pari_sp) q; *z=gzero; return q;} /* exact division */
+    }
+    r[1] = evalsigne(sx) | evallgefint(lr);
+    avma = (pari_sp) r; *z = r; return q; 
   }
-  avma = (pari_sp)qd; return q;
+}
+
+/* assume y > x > 0. return y mod x */
+
+static ulong
+resiu(GEN y, ulong x)
+{
+  return mpn_mod_1(LIMBS(y), NLIMBS(y), x);
 }
 
 /***********************************************************************/
@@ -1810,7 +1779,6 @@ cgcd(long a,long b)
     return ((long)ugcd((ulong)b, (ulong)a)) << v;
 }
 
-/*Warning: will overflow silently if gcd does not fit*/
 long
 clcm(long a,long b)
 {
@@ -1839,51 +1807,6 @@ gcduu(ulong a, ulong b)
   return r;
 }
 
-/* assume y > x > 0. return y mod x */
-static ulong
-resiu(GEN y, ulong x)
-{
-  long i, ly = lgefint(y);
-  LOCAL_HIREMAINDER;
-
-  hiremainder = 0;
-  for (i=2; i<ly; i++) (void)divll(y[i],x);
-  return hiremainder;
-}
-
-/* Assume x>y>0, both of them odd. return x-y if x=y mod 4, x+y otherwise */
-void
-gcd_plus_minus(GEN x, GEN y, GEN res)
-{
-  pari_sp av = avma;
-  long lx = lgefint(x)-1;
-  long ly = lgefint(y)-1, lt,m,i;
-  GEN t;
-
-  if ((x[lx]^y[ly]) & 3) /* x != y mod 4*/
-    t = addiispec(x+2,y+2,lx-1,ly-1);
-  else
-    t = subiispec(x+2,y+2,lx-1,ly-1);
-
-  lt = lgefint(t)-1; while (!t[lt]) lt--;
-  m = vals(t[lt]); lt++;
-  if (m == 0) /* 2^32 | t */
-  {
-    for (i = 2; i < lt; i++) res[i] = t[i];
-  }
-  else if (t[2] >> m)
-  {
-    shift_right(res,t, 2,lt, 0,m);
-  }
-  else
-  {
-    lt--; t++;
-    shift_right(res,t, 2,lt, t[1],m);
-  }
-  res[1] = evalsigne(1)|evallgefint(lt);
-  avma = av;
-}
-
 /* uses modified right-shift binary algorithm now --GN 1998Jul23 */
 GEN
 gcdii(GEN a, GEN b)
@@ -1907,9 +1830,8 @@ gcdii(GEN a, GEN b)
     if (!u) return absi(b);
     return gcduu((ulong)b[2], u);
   }
-
   /* larger than gcd: "avma=av" gerepile (erasing t) is valid */
-  av = avma; (void)new_chunk(lgefint(b)); /* HACK */
+  av = avma; (void)new_chunk(lgefint(b)+1); /* HACK */
   t = resii(a,b);
   if (!signe(t)) { avma=av; return absi(b); }
 
@@ -1923,30 +1845,22 @@ gcdii(GEN a, GEN b)
     case -1: p1=b; b=a; a=p1;
   }
   if (is_pm1(b)) { avma=av; return shifti(gun,v); }
-
-  /* we have three consecutive memory locations: a,b,t.
-   * All computations are done in place */
-
-  /* a and b are odd now, and a>b>1 */
-  while (lgefint(a) > 3)
-  {
-    /* if a=b mod 4 set t=a-b, otherwise t=a+b, then strip powers of 2 */
-    /* so that t <= (a+b)/4 < a/2 */
-    gcd_plus_minus(a,b, t);
-    if (is_pm1(t)) { avma=av; return shifti(gun,v); }
-    switch(absi_cmp(t,b))
-    {
-      case -1: p1 = a; a = b; b = t; t = p1; break;
-      case  1: p1 = a; a = t; t = p1; break;
-      case  0: avma = av; b=shifti(b,v); return b;
-    }
-  }
-  {
-    long r[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
-    r[2] = (long) ugcd((ulong)b[2], (ulong)a[2]);
-    avma = av; return shifti(r,v);
+ {
+  /* general case */
+  /*This serve two purposes: 1) mpn_gcd destroy its input and need an extra
+   * limb 2) this allows us to use icopy instead of gerepile later.  NOTE: we
+   * must put u before d else the final icopy could fail.
+   */
+  GEN res= cgeti(lgefint(a)+1);
+  GEN ca = icopy_ef(a,lgefint(a)+1);
+  GEN cb = icopy_ef(b,lgefint(b)+1);
+  long l = mpn_gcd(LIMBS(res), LIMBS(ca), NLIMBS(ca), LIMBS(cb), NLIMBS(cb));
+  res[1] = evalsigne(1)|evallgefint(l+2);
+  avma=av;
+  return shifti(res,v);
   }
 }
+
 
 /* private version of mulss */
 ulong
@@ -2129,14 +2043,14 @@ red_montgomery(GEN T, GEN N, ulong inv)
   *--Td = evalsigne(1) | evallgefint(k);
   *--Td = evaltyp(t_INT) | evallg(k);
 #ifdef DEBUG
-{
-  long l = lgefint(N)-2, s = BITS_IN_LONG*l;
-  GEN R = shifti(gun, s);
-  GEN res = resii(mulii(T, mpinvmod(R, N)), N);
-  if (k > lgefint(N)
-    || !egalii(resii(Td,N),res)
-    || cmpii(Td, addii(shifti(T, -s), N)) >= 0) err(bugparier,"red_montgomery");
-}
+  {
+    long l = lgefint(N)-2, s = BITS_IN_LONG*l;
+    GEN R = shifti(gun, s);
+    GEN res = resii(mulii(T, mpinvmod(R, N)), N);
+    if (k > lgefint(N)
+        || !egalii(resii(Td,N),res)
+        || cmpii(Td, addii(shifti(T, -s), N)) >= 0) err(bugparier,"red_montgomery");
+  }
 #endif
   avma = (pari_sp)Td; return Td;
 }
@@ -2150,9 +2064,9 @@ invrev(ulong b)
   ulong x;
   switch(b & 7)
   {
-    case 3:
-    case 5:  x = b+8; break;
-    default: x = b; break;
+  case 3:
+  case 5:  x = b+8; break;
+  default: x = b; break;
   } /* x = b^(-1) mod 2^4 */
   x = x*(2-b*x);
   x = x*(2-b*x);
@@ -2163,131 +2077,14 @@ invrev(ulong b)
   return x;
 }
 
-/* assume xy>0, y odd */
-GEN
-diviuexact(GEN x, ulong y)
-{
-  long i,lz,lx;
-  ulong q, yinv;
-  GEN z, z0, x0, x0min;
-
-  if (y == 1) return icopy(x);
-  lx = lgefint(x);
-  if (lx == 3) return utoi((ulong)x[2] / y);
-  yinv = invrev(y);
-  lz = (y <= (ulong)x[2]) ? lx : lx-1;
-  z = new_chunk(lz);
-  z0 = z + lz;
-  x0 = x + lx; x0min = x + lx-lz+2;
-
-  while (x0 > x0min)
-  {
-    *--z0 = q = yinv*((ulong)*--x0); /* i-th quotient */
-    if (!q) continue;
-    /* x := x - q * y */
-    { /* update neither lowest word (could set it to 0) nor highest ones */
-      register GEN x1 = x0 - 1;
-      LOCAL_HIREMAINDER;
-      (void)mulll(q,y);
-      if (hiremainder)
-      {
-        if ((ulong)*x1 < hiremainder)
-        {
-          *x1 -= hiremainder;
-          do (*--x1)--; while ((ulong)*x1 == MAXULONG);
-        }
-        else
-          *x1 -= hiremainder;
-      }
-    }
-  }
-  i=2; while(!z[i]) i++;
-  z += i-2; lz -= i-2;
-  z[0] = evaltyp(t_INT)|evallg(lz);
-  z[1] = evalsigne(1)|evallg(lz);
-  avma = (pari_sp)z; return z;
-}
-
 /* Find z such that x=y*z, knowing that y | x (unchecked)
  * Method: y0 z0 = x0 mod B = 2^BITS_IN_LONG ==> z0 = 1/y0 mod B.
  *    Set x := (x - z0 y) / B, updating only relevant words, and repeat */
 GEN
 diviiexact(GEN x, GEN y)
 {
-  long lx, ly, lz, vy, i, ii, sx = signe(x), sy = signe(y);
-  pari_sp av;
-  ulong y0inv,q;
-  GEN z;
-
-  if (!sy) err(dvmer1);
-  if (!sx) return gzero;
-  vy = vali(y); av = avma;
-  (void)new_chunk(lgefint(x)); /* enough room for z */
-  if (vy)
-  { /* make y odd */
-#if 0
-    if (vali(x) < vy) err(talker,"impossible division in diviiexact");
-#endif
-    y = shifti(y,-vy);
-    x = shifti(x,-vy);
-  }
-  else x = icopy(x); /* necessary because we destroy x */
-  avma = av; /* will erase our x,y when exiting */
-  /* now y is odd */
-  ly = lgefint(y);
-  if (ly == 3)
-  {
-    x = diviuexact(x,(ulong)y[2]);
-    if (signe(x)) setsigne(x,sx*sy); /* should have x != 0 at this point */
-    return x;
-  }
-  lx = lgefint(x); if (ly>lx) err(talker,"impossible division in diviiexact");
-  y0inv = invrev(y[ly-1]);
-  i=2; while (i<ly && y[i]==x[i]) i++;
-  lz = (i==ly || (ulong)y[i] < (ulong)x[i]) ? lx-ly+3 : lx-ly+2;
-  z = new_chunk(lz);
-
-  y += ly - 1; /* now y[-i] = i-th word of y */
-  for (ii=lx-1,i=lz-1; i>=2; i--,ii--)
-  {
-    long limj;
-    LOCAL_HIREMAINDER;
-    LOCAL_OVERFLOW;
-
-    z[i] = q = y0inv*((ulong)x[ii]); /* i-th quotient */
-    if (!q) continue;
-
-    /* x := x - q * y */
-    (void)mulll(q,y[0]); limj = max(lx - lz, ii+3-ly);
-    { /* update neither lowest word (could set it to 0) nor highest ones */
-      register GEN x0 = x + (ii - 1), y0 = y - 1, xlim = x + limj;
-      for (; x0 >= xlim; x0--, y0--)
-      {
-        *x0 = subll(*x0, addmul(q,*y0));
-        hiremainder += overflow;
-      }
-      if (hiremainder && limj != lx - lz)
-      {
-        if ((ulong)*x0 < hiremainder)
-        {
-          *x0 -= hiremainder;
-          do (*--x0)--; while ((ulong)*x0 == MAXULONG);
-        }
-        else
-          *x0 -= hiremainder;
-      }
-    }
-  }
-#if 0
-  i=2; while(i<lz && !z[i]) i++;
-  if (i==lz) err(bugparier,"diviiexact");
-#else
-  i=2; while(!z[i]) i++;
-#endif
-  z += i-2; lz -= (i-2);
-  z[0] = evaltyp(t_INT)|evallg(lz);
-  z[1] = evalsigne(sx*sy)|evallg(lz);
-  avma = (pari_sp)z; return z;
+  /*TODO: use mpn_bdivmod instead*/
+  return divii(x,y);
 }
 
 long
@@ -2301,21 +2098,20 @@ smodsi(long x, GEN y)
 int
 absi_equal(GEN x, GEN y)
 {
-  long lx,i;
+  long lx;
 
   if (!signe(x)) return !signe(y);
   if (!signe(y)) return 0;
 
   lx=lgefint(x); if (lx != lgefint(y)) return 0;
-  i=2; while (i<lx && x[i]==y[i]) i++;
-  return (i==lx);
+  return !mpn_cmp(LIMBS(x),LIMBS(y),NLIMBS(x));
 }
 
 /* x and y are integers. Return sign(|x| - |y|) */
 int
 absi_cmp(GEN x, GEN y)
 {
-  long lx,ly,i;
+  long lx,ly;
 
   if (!signe(x)) return signe(y)? -1: 0;
   if (!signe(y)) return 1;
@@ -2323,9 +2119,7 @@ absi_cmp(GEN x, GEN y)
   lx=lgefint(x); ly=lgefint(y);
   if (lx>ly) return 1;
   if (lx<ly) return -1;
-  i=2; while (i<lx && x[i]==y[i]) i++;
-  if (i==lx) return 0;
-  return ((ulong)x[i] > (ulong)y[i])? 1: -1;
+  return mpn_cmp(LIMBS(x),LIMBS(y),NLIMBS(x));
 }
 
 /* x and y are reals. Return sign(|x| - |y|) */
@@ -2355,9 +2149,10 @@ absr_cmp(GEN x, GEN y)
 
 /********************************************************************/
 /**                                                                **/
-/**               INTEGER MULTIPLICATION (KARATSUBA)               **/
+/**               INTEGER MULTIPLICATION                           **/
 /**                                                                **/
 /********************************************************************/
+
 /* nx >= ny = num. of digits of x, y (not GEN, see mulii) */
 #ifdef INLINE
 INLINE
@@ -2365,39 +2160,23 @@ INLINE
 GEN
 muliispec(GEN x, GEN y, long nx, long ny)
 {
-  GEN z2e,z2d,yd,xd,ye,zd;
-  long p1,lz;
-  LOCAL_HIREMAINDER;
+  GEN zd;
+  long lz;
+  ulong hi;
 
+  if (nx < ny) swapspec(x,y, nx,ny);
   if (!ny) return gzero;
-  zd = (GEN)avma; lz = nx+ny+2;
-  (void)new_chunk(lz);
-  xd = x + nx;
-  yd = y + ny;
-  ye = yd; p1 = *--xd;
+  if (ny == 1)
+    return mulsispec(*y, x, nx);
+    
+  lz = nx+ny+2;
+  zd = cgeti(lz);
+  hi = mpn_mul(LIMBS(zd), x, nx, y, ny);
+  if (!hi) lz--;
+  /*else zd[lz-1]=hi; GH tell me it is not neccessary.*/
 
-  *--zd = mulll(p1, *--yd); z2e = zd;
-  while (yd > y) *--zd = addmul(p1, *--yd);
-  *--zd = hiremainder;
-
-  while (xd > x)
-  {
-    LOCAL_OVERFLOW;
-    yd = ye; p1 = *--xd;
-
-    z2d = --z2e;
-    *z2d = addll(mulll(p1, *--yd), *z2d); z2d--;
-    while (yd > y)
-    {
-      hiremainder += overflow;
-      *z2d = addll(addmul(p1, *--yd), *z2d); z2d--;
-    }
-    *--zd = hiremainder + overflow;
-  }
-  if (*zd == 0) { zd++; lz--; } /* normalize */
-  *--zd = evalsigne(1) | evallgefint(lz);
-  *--zd = evaltyp(t_INT) | evallg(lz);
-  avma=(pari_sp)zd; return zd;
+  zd[1] = evalsigne(1) | evallgefint(lz);
+  return zd;
 }
 
 #ifdef INLINE
@@ -2406,144 +2185,19 @@ INLINE
 GEN
 sqrispec(GEN x, long nx)
 {
-  GEN z2e,z2d,yd,xd,zd,x0,z0;
-  long p1,lz;
-  LOCAL_HIREMAINDER;
+  GEN zd;
+  long lz;
 
   if (!nx) return gzero;
-  zd = (GEN)avma; lz = (nx+1) << 1;
-  z0 = new_chunk(lz);
-  if (nx == 1)
-  {
-    *--zd = mulll(*x, *x);
-    *--zd = hiremainder; goto END;
-  }
-  xd = x + nx;
+  if (nx==1) return muluu(*x,*x);
+    
+  lz = (nx<<1)+2;
+  zd = cgeti(lz);
+  mpn_mul_n(LIMBS(zd), x, x, nx);
+  if (zd[lz-1]==0) lz--;
 
-  /* compute double products --> zd */
-  p1 = *--xd; yd = xd; --zd;
-  *--zd = mulll(p1, *--yd); z2e = zd;
-  while (yd > x) *--zd = addmul(p1, *--yd);
-  *--zd = hiremainder;
-
-  x0 = x+1;
-  while (xd > x0)
-  {
-    LOCAL_OVERFLOW;
-    p1 = *--xd; yd = xd;
-
-    z2e -= 2; z2d = z2e;
-    *z2d = addll(mulll(p1, *--yd), *z2d); z2d--;
-    while (yd > x)
-    {
-      hiremainder += overflow;
-      *z2d = addll(addmul(p1, *--yd), *z2d); z2d--;
-    }
-    *--zd = hiremainder + overflow;
-  }
-  /* multiply zd by 2 (put result in zd - 1) */
-  zd[-1] = ((*zd & HIGHBIT) != 0);
-  shift_left(zd, zd, 0, (nx<<1)-3, 0, 1);
-
-  /* add the squares */
-  xd = x + nx; zd = z0 + lz;
-  p1 = *--xd;
-  zd--; *zd = mulll(p1,p1);
-  zd--; *zd = addll(hiremainder, *zd);
-  while (xd > x)
-  {
-    p1 = *--xd;
-    zd--; *zd = addll(mulll(p1,p1)+ overflow, *zd);
-    zd--; *zd = addll(hiremainder + overflow, *zd);
-  }
-
-END:
-  if (*zd == 0) { zd++; lz--; } /* normalize */
-  *--zd = evalsigne(1) | evallgefint(lz);
-  *--zd = evaltyp(t_INT) | evallg(lz);
-  avma=(pari_sp)zd; return zd;
-}
-
-/* return (x shifted left d words) + y. Assume d > 0, x > 0 and y >= 0 */
-static GEN
-addshiftw(GEN x, GEN y, long d)
-{
-  GEN z,z0,y0,yd, zd = (GEN)avma;
-  long a,lz,ly = lgefint(y);
-
-  z0 = new_chunk(d);
-  a = ly-2; yd = y+ly;
-  if (a >= d)
-  {
-    y0 = yd-d; while (yd > y0) *--zd = *--yd; /* copy last d words of y */
-    a -= d;
-    if (a)
-      z = addiispec(x+2, y+2, lgefint(x)-2, a);
-    else
-      z = icopy(x);
-  }
-  else
-  {
-    y0 = yd-a; while (yd > y0) *--zd = *--yd; /* copy last a words of y */
-    while (zd >= z0) *--zd = 0;    /* complete with 0s */
-    z = icopy(x);
-  }
-  lz = lgefint(z)+d;
-  z[1] = evalsigne(1) | evallgefint(lz);
-  z[0] = evaltyp(t_INT) | evallg(lz); return z;
-}
-
-/* Fast product (Karatsuba) of integers. a and b are "special" GENs
- * c,c0,c1,c2 are genuine GENs.
- */
-static GEN
-quickmulii(GEN a, GEN b, long na, long nb)
-{
-  GEN a0,c,c0;
-  long n0, n0a, i;
-  pari_sp av;
-
-  if (na < nb) swapspec(a,b, na,nb);
-  if (nb == 1) return mulsispec(*b, a, na);
-  if (nb == 0) return gzero;
-  if (nb < KARATSUBA_MULI_LIMIT) return muliispec(a,b,na,nb);
-  i=(na>>1); n0=na-i; na=i;
-  av=avma; a0=a+na; n0a=n0;
-  while (!*a0 && n0a) { a0++; n0a--; }
-
-  if (n0a && nb > n0)
-  { /* nb <= na <= n0 */
-    GEN b0,c1,c2;
-    long n0b;
-
-    nb -= n0;
-    c = quickmulii(a,b,na,nb);
-    b0 = b+nb; n0b = n0;
-    while (!*b0 && n0b) { b0++; n0b--; }
-    if (n0b)
-    {
-      c0 = quickmulii(a0,b0, n0a,n0b);
-
-      c2 = addiispec(a0,a, n0a,na);
-      c1 = addiispec(b0,b, n0b,nb);
-      c1 = quickmulii(c1+2,c2+2, lgefint(c1)-2,lgefint(c2)-2);
-      c2 = addiispec(c0+2, c+2, lgefint(c0)-2,lgefint(c) -2);
-
-      c1 = subiispec(c1+2,c2+2, lgefint(c1)-2,lgefint(c2)-2);
-    }
-    else
-    {
-      c0 = gzero;
-      c1 = quickmulii(a0,b, n0a,nb);
-    }
-    c = addshiftw(c,c1, n0);
-  }
-  else
-  {
-    c = quickmulii(a,b,na,nb);
-    c0 = quickmulii(a0,b,n0a,nb);
-  }
-  return gerepileuptoint(av, addshiftw(c,c0, n0));
+  zd[1] = evalsigne(1) | evallgefint(lz);
+  return zd;
 }
 
 /* actual operations will take place on a+2 and b+2: we strip the codewords */
@@ -2556,7 +2210,7 @@ mulii(GEN a,GEN b)
   sa=signe(a); if (!sa) return gzero;
   sb=signe(b); if (!sb) return gzero;
   if (sb<0) sa = -sa;
-  z = quickmulii(a+2,b+2, lgefint(a)-2,lgefint(b)-2);
+  z = muliispec(a+2,b+2, lgefint(a)-2,lgefint(b)-2);
   setsigne(z,sa); return z;
 }
 
@@ -2592,7 +2246,8 @@ resiimul(GEN x, GEN sy)
 GEN
 resmod2n(GEN x, long n)
 {
-  long hi,l,k,lx,ly;
+  ulong hi;
+  long l,k,lx,ly;
   GEN z, xd, zd;
 
   if (!signe(x) || !n) return gzero;
@@ -2622,47 +2277,16 @@ resmod2n(GEN x, long n)
   return z;
 }
 
-static GEN
-quicksqri(GEN a, long na)
-{
-  GEN a0,c;
-  long n0, n0a, i;
-  pari_sp av;
-
-  if (na < KARATSUBA_SQRI_LIMIT) return sqrispec(a,na);
-  i=(na>>1); n0=na-i; na=i;
-  av=avma; a0=a+na; n0a=n0;
-  while (!*a0 && n0a) { a0++; n0a--; }
-  c = quicksqri(a,na);
-  if (n0a)
-  {
-    GEN t, c1, c0 = quicksqri(a0,n0a);
-#if 0
-    c1 = shifti(quickmulii(a0,a, n0a,na),1);
-#else /* slower !!! */
-    t = addiispec(a0,a,n0a,na);
-    t = quicksqri(t+2,lgefint(t)-2);
-    c1= addiispec(c0+2,c+2, lgefint(c0)-2, lgefint(c)-2);
-    c1= subiispec(t+2, c1+2, lgefint(t)-2, lgefint(c1)-2);
-#endif
-    c = addshiftw(c,c1, n0);
-    c = addshiftw(c,c0, n0);
-  }
-  else
-    c = addshiftw(c,gzero,n0<<1);
-  return gerepileuptoint(av, c);
-}
-
 GEN
-sqri(GEN a) { return quicksqri(a+2, lgefint(a)-2); }
+sqri(GEN a) { return sqrispec(a+2, lgefint(a)-2); }
 
-/********************************************************************/
-/**                                                                **/
-/**              EXPONENT / CONVERSION t_REAL --> double           **/
-/**                                                                **/
-/********************************************************************/
+ /********************************************************************/
+ /**                                                                **/
+ /**              EXPONENT / CONVERSION t_REAL --> double           **/
+ /**                                                                **/
+ /********************************************************************/
 
-#ifdef LONG_IS_64BIT
+ #ifdef LONG_IS_64BIT
 long
 expodb(double x)
 {
@@ -3104,6 +2728,297 @@ rgcduu(ulong d, ulong d1, ulong vmax,
   }
 }
 
+
+/*==================================
+ * invmod(a,b,res)
+ *==================================
+ *    If a is invertible, return 1, and set res  = a^{ -1 }
+ *    Otherwise, return 0, and set res = gcd(a,b)
+ *
+ * This is sufficiently different from bezout() to be implemented separately
+ * instead of having a bunch of extra conditionals in a single function body
+ * to meet both purposes.
+ */
+
+int
+invmod(GEN a, GEN b, GEN *res)
+{
+  pari_sp av;
+  long s;
+  ulong g;
+  ulong xv,xv1;		/* Lehmer stage recurrence matrix */
+
+  if (typ(a) != t_INT || typ(b) != t_INT) err(arither1);
+  if (!signe(b)) { *res=absi(a); return 0; }
+  av = avma;
+  if (lgefint(b) == 3) /* single-word affair */
+  {
+    GEN d1 = modiu(a, (ulong)(b[2]));
+    if (d1 == gzero)
+    {
+      if (b[2] == 1L)
+        { *res = gzero; return 1; }
+      else
+        { *res = absi(b); return 0; }
+    }
+    g = xgcduu((ulong)(b[2]), (ulong)(d1[2]), 1, &xv, &xv1, &s);
+    avma = av;
+    if (g != 1UL) { *res = utoi(g); return 0; }
+    xv = xv1 % (ulong)(b[2]); if (s < 0) xv = ((ulong)(b[2])) - xv;
+    *res = utoi(xv); return 1;
+  }
+  else
+  {
+    /* general case */
+    /*This serve two purposes:
+     * 1) mpn_gcdext destroy its input and need an extra limb
+     * 2) this allows us to use icopy instead of gerepile later.
+     * NOTE: we must put u before d else the final icopy could fail.
+     */
+    GEN  ca, cb, u, v, d;
+    long lu, l, su;
+    GEN na = modii(a,b);
+    if (!signe(na)) {avma=av; *res=icopy(b); return 0;}
+    ca = icopy_ef(na,lgefint(na)+1);
+    cb = icopy_ef(b,lgefint(b)+1);
+    u = cgeti(lgefint(b)+1);
+    d = cgeti(lgefint(b)+1);
+    l = mpn_gcdext(LIMBS(d), LIMBS(u), &lu, LIMBS(cb), NLIMBS(cb), LIMBS(ca), NLIMBS(ca));
+    d[1] = evalsigne(1)|evallgefint(l+2);
+    if (lu<=0)
+    {
+      if (lu==0) su=0;
+      else {su=-1;lu=-lu;}
+    }
+    else
+      su=1;
+    u[1] = evalsigne(su)|evallgefint(lu+2);
+    if (!is_pm1(d)) {avma=av; *res=icopy(d); return 0;}
+    if (signe(b)<0) b=negi(b); 
+    v=diviiexact(subii(d,mulii(u,b)),na);
+    if (signe(v)<0) v=addii(v,b);
+    avma=av; *res=icopy(v); return 1;
+  }
+}
+
+/*==================================
+ * bezout(a,b,pu,pv)
+ *==================================
+ *    Return g = gcd(a,b) >= 0, and assign GENs u,v through pointers pu,pv
+ *    such that g = u*a + v*b.
+ * Special cases:
+ *    a == b == 0 ==> pick u=1, v=0
+ *    a != 0 == b ==> keep v=0
+ *    a == 0 != b ==> keep u=0
+ *    |a| == |b| != 0 ==> keep u=0, set v=+-1
+ * Assignments through pu,pv will be suppressed when the corresponding
+ * pointer is NULL  (but the computations will happen nonetheless).
+ */
+
+GEN
+bezout(GEN a, GEN b, GEN *pu, GEN *pv)
+{
+  GEN t,r;
+  GEN *pt;
+  long s;
+  int sa, sb;
+  ulong g;
+  ulong xu,xu1,xv,xv1;		/* Lehmer stage recurrence matrix */
+
+  if (typ(a) != t_INT || typ(b) != t_INT) err(arither1);
+  s = absi_cmp(a,b);
+  if (s < 0)
+  {
+    t=b; b=a; a=t;
+    pt=pu; pu=pv; pv=pt;
+  }
+  /* now |a| >= |b| */
+
+  sa = signe(a); sb = signe(b);
+  if (!sb)
+  {
+    if (pv != NULL) *pv = gzero;
+    switch(sa)
+    {
+    case  0:
+      if (pu != NULL) *pu = gun; return gzero;
+    case  1:
+      if (pu != NULL) *pu = gun; return icopy(a);
+    case -1:
+      if (pu != NULL) *pu = negi(gun); return(negi(a));
+    }
+  }
+  if (s == 0)			/* |a| == |b| != 0 */
+  {
+    if (pu != NULL) *pu = gzero;
+    if (sb > 0)
+    {
+      if (pv != NULL) *pv = gun; return icopy(b);
+    }
+    else
+    {
+      if (pv != NULL) *pv = negi(gun); return(negi(b));
+    }
+  }
+  /* now |a| > |b| > 0 */
+
+  if (lgefint(a) == 3)		/* single-word affair */
+  {
+    g = xxgcduu((ulong)(a[2]), (ulong)(b[2]), 0, &xu, &xu1, &xv, &xv1, &s);
+    sa = s > 0 ? sa : -sa;
+    sb = s > 0 ? -sb : sb;
+    if (pu != NULL)
+    {
+      if (xu == 0) *pu = gzero; /* can happen when b divides a */
+      else if (xu == 1) *pu = sa < 0 ? negi(gun) : gun;
+      else if (xu == 2) *pu = sa < 0 ? negi(gdeux) : gdeux;
+      else
+      {
+	*pu = cgeti(3);
+	(*pu)[1] = evalsigne(sa)|evallgefint(3);
+	(*pu)[2] = xu;
+      }
+    }
+    if (pv != NULL)
+    {
+      if (xv == 1) *pv = sb < 0 ? negi(gun) : gun;
+      else if (xv == 2) *pv = sb < 0 ? negi(gdeux) : gdeux;
+      else
+      {
+	*pv = cgeti(3);
+	(*pv)[1] = evalsigne(sb)|evallgefint(3);
+	(*pv)[2] = xv;
+      }
+    }
+    if (g == 1) return gun;
+    else if (g == 2) return gdeux;
+    else
+    {
+      r = cgeti(3);
+      r[1] = evalsigne(1)|evallgefint(3);
+      r[2] = g;
+      return r;
+    }
+  }
+  else
+  {
+    /* general case */
+    pari_sp av = avma;
+    /*This serve two purposes:
+     * 1) mpn_gcdext destroy its input and need an extra limb
+     * 2) this allows us to use icopy instead of gerepile later.
+     * NOTE: we must put u before d else the final icopy could fail.
+     */
+    GEN ca = icopy_ef(a,lgefint(a)+1);
+    GEN cb = icopy_ef(b,lgefint(b)+1);
+    GEN u = cgeti(lgefint(a)+1), v;
+    GEN d = cgeti(lgefint(a)+1);
+    long su,l,lu;
+    l = mpn_gcdext(LIMBS(d), LIMBS(u), &lu, LIMBS(ca), NLIMBS(ca), LIMBS(cb), NLIMBS(cb));
+    if (lu<=0)
+    {
+      if (lu==0) su=0;
+      else {su=-1;lu=-lu;}
+    }
+    else
+      su=1;
+    if (sa<0) su=-su;
+    d[1] = evalsigne(1)|evallgefint(l+2);
+    u[1] = evalsigne(su)|evallgefint(lu+2);
+    if (pv != NULL) v=diviiexact(subii(d,mulii(u,a)),b);
+    avma = av;
+    if (pu != NULL) *pu=icopy(u);
+    if (pv != NULL) *pv=icopy(v);
+    return icopy(d);
+  }
+}
+
+/*==================================
+ * cbezout(a,b,uu,vv)
+ *==================================
+ * Same as bezout() but for C longs.
+ *    Return g = gcd(a,b) >= 0, and assign longs u,v through pointers uu,vv
+ *    such that g = u*a + v*b.
+ * Special cases:
+ *    a == b == 0 ==> pick u=1, v=0 (and return 1, surprisingly)
+ *    a != 0 == b ==> keep v=0
+ *    a == 0 != b ==> keep u=0
+ *    |a| == |b| != 0 ==> keep u=0, set v=+-1
+ * Assignments through uu,vv happen unconditionally;  non-NULL pointers
+ * _must_ be used.
+ */
+long
+cbezout(long a,long b,long *uu,long *vv)
+{
+  long s,*t;
+  ulong d = labs(a), d1 = labs(b);
+  ulong r,u,u1,v,v1;
+
+#ifdef DEBUG_CBEZOUT
+  fprintferr("> cbezout(%ld,%ld,%p,%p)\n", a, b, (void *)uu, (void *)vv);
+#endif
+  if (!b)
+  {
+    *vv=0L;
+    if (!a)
+    {
+      *uu=1L;
+#ifdef DEBUG_CBEZOUT
+      fprintferr("< %ld (%ld, %ld)\n", 1L, *uu, *vv);
+#endif
+      return 0L;
+    }
+    *uu = a < 0 ? -1L : 1L;
+#ifdef DEBUG_CBEZOUT
+    fprintferr("< %ld (%ld, %ld)\n", (long)d, *uu, *vv);
+#endif
+    return (long)d;
+  }
+  else if (!a || (d == d1))
+  {
+    *uu = 0L; *vv = b < 0 ? -1L : 1L;
+#ifdef DEBUG_CBEZOUT
+    fprintferr("< %ld (%ld, %ld)\n", (long)d1, *uu, *vv);
+#endif
+    return (long)d1;
+  }
+  else if (d == 1)		/* frequently used by nfinit */
+  {
+    *uu = a; *vv = 0L;
+#ifdef DEBUG_CBEZOUT
+    fprintferr("< %ld (%ld, %ld)\n", 1L, *uu, *vv);
+#endif
+    return 1L;
+  }
+  else if (d < d1)
+  {
+/* bug in gcc-2.95.3:
+ * s = a; a = b; b = s; produces wrong result a = b. This is OK:  */
+    { long _x = a; a = b; b = _x; }	/* in order to keep the right signs */
+    r = d; d = d1; d1 = r;
+    t = uu; uu = vv; vv = t;
+#ifdef DEBUG_CBEZOUT
+    fprintferr("  swapping\n");
+#endif
+  }
+  /* d > d1 > 0 */
+  r = xxgcduu(d, d1, 0, &u, &u1, &v, &v1, &s);
+  if (s < 0)
+  {
+    *uu = a < 0 ? u : -(long)u;
+    *vv = b < 0 ? -(long)v : v;
+  }
+  else
+  {
+    *uu = a < 0 ? -(long)u : u;
+    *vv = b < 0 ? v : -(long)v;
+  }
+#ifdef DEBUG_CBEZOUT
+  fprintferr("< %ld (%ld, %ld)\n", (long)r, *uu, *vv);
+#endif
+  return (long)r;
+}
+
 /*==================================
  * lgcdii(d,d1,u,u1,v,v1,vmax)
  *==================================*/
@@ -3204,7 +3119,7 @@ lgcdii(ulong* d, ulong* d1,
   ld = lgefint(d); ld1 = lgefint(d1); lz = ld - ld1; /* >= 0 */
   if (lz > 1) return 0;		/* rare, quick and desperate exit */
 
-  d += 2; d1 += 2;		/* point at the leading `digits' */
+  d = int_MSW(d); d1 = int_MSW(d1);		/* point at the leading `digits' */
   dd1lo = 0;		        /* unless we find something better */
   sh = bfffo(*d);		/* obtain dividend left shift count */
 
@@ -3227,28 +3142,28 @@ lgcdii(ulong* d, ulong* d1,
       if (!(HIGHMASK & dd1)) return 0;
       if (ld1 > 3)
       {
-        dd1 += (d1[1] >> shc);
+        dd1 += (d1[-1] >> shc);
         if (ld1 > 4)
-          dd1lo = (d1[1] << sh) + (d1[2] >> shc);
+          dd1lo = (d1[-1] << sh) + (d1[-2] >> shc);
         else
-          dd1lo = (d1[1] << sh);
+          dd1lo = (d1[-1] << sh);
       }
     }
     /* following lines assume d to have 2 or more significant words */
-    dd = (*d << sh) + (d[1] >> shc);
+    dd = (*d << sh) + (d[-1] >> shc);
     if (ld > 4)
-      ddlo = (d[1] << sh) + (d[2] >> shc);
+      ddlo = (d[-1] << sh) + (d[-2] >> shc);
     else
-      ddlo = (d[1] << sh);
+      ddlo = (d[-1] << sh);
   }
   else
   {				/* no shift needed */
     if (lz) return 0;		/* div'd longer than div'r: o'flow automatic */
     dd1 = *d1;
     if (!(HIGHMASK & dd1)) return 0;
-    if(ld1 > 3) dd1lo = d1[1];
+    if(ld1 > 3) dd1lo = d1[-1];
     /* assume again that d has another significant word */
-    dd = *d; ddlo = d[1];
+    dd = *d; ddlo = d[-1];
   }
 #ifdef DEBUG_LEHMER
   fprintferr("  %lx:%lx, %lx:%lx\n", dd, ddlo, dd1, dd1lo);
@@ -3665,485 +3580,6 @@ lgcdii(ulong* d, ulong* d1,
   return res;
 }
 
-/*==================================
- * invmod(a,b,res)
- *==================================
- *    If a is invertible, return 1, and set res  = a^{ -1 }
- *    Otherwise, return 0, and set res = gcd(a,b)
- *
- * This is sufficiently different from bezout() to be implemented separately
- * instead of having a bunch of extra conditionals in a single function body
- * to meet both purposes.
- */
-
-int
-invmod(GEN a, GEN b, GEN *res)
-{
-  GEN v,v1,d,d1,q,r;
-  pari_sp av, av1, lim;
-  long s;
-  ulong g;
-  ulong xu,xu1,xv,xv1;		/* Lehmer stage recurrence matrix */
-  int lhmres;			/* Lehmer stage return value */
-
-  if (typ(a) != t_INT || typ(b) != t_INT) err(arither1);
-  if (!signe(b)) { *res=absi(a); return 0; }
-  av = avma;
-  if (lgefint(b) == 3) /* single-word affair */
-  {
-    d1 = modiu(a, (ulong)(b[2]));
-    if (d1 == gzero)
-    {
-      if (b[2] == 1L)
-        { *res = gzero; return 1; }
-      else
-        { *res = absi(b); return 0; }
-    }
-    g = xgcduu((ulong)(b[2]), (ulong)(d1[2]), 1, &xv, &xv1, &s);
-#ifdef DEBUG_LEHMER
-    fprintferr(" <- %lu,%lu\n", (ulong)(b[2]), (ulong)(d1[2]));
-    fprintferr(" -> %lu,%ld,%lu; %lx\n", g,s,xv1,avma);
-#endif
-    avma = av;
-    if (g != 1UL) { *res = utoi(g); return 0; }
-    xv = xv1 % (ulong)(b[2]); if (s < 0) xv = ((ulong)(b[2])) - xv;
-    *res = utoi(xv); return 1;
-  }
-
-  (void)new_chunk(lgefint(b));
-  d = absi(b); d1 = modii(a,d);
-
-  v=gzero; v1=gun;	/* general case */
-#ifdef DEBUG_LEHMER
-  fprintferr("INVERT: -------------------------\n");
-  output(d1);
-#endif
-  av1 = avma; lim = stack_lim(av,1);
-
-  while (lgefint(d) > 3 && signe(d1))
-  {
-#ifdef DEBUG_LEHMER
-    fprintferr("Calling Lehmer:\n");
-#endif
-    lhmres = lgcdii((ulong*)d, (ulong*)d1, &xu, &xu1, &xv, &xv1, MAXULONG);
-    if (lhmres != 0)		/* check progress */
-    {				/* apply matrix */
-#ifdef DEBUG_LEHMER
-      fprintferr("Lehmer returned %d [%lu,%lu;%lu,%lu].\n",
-	      lhmres, xu, xu1, xv, xv1);
-#endif
-      if ((lhmres == 1) || (lhmres == -1))
-      {
-	if (xv1 == 1)
-	{
-	  r = subii(d,d1); d=d1; d1=r;
-	  a = subii(v,v1); v=v1; v1=a;
-	}
-	else
-	{
-	  r = subii(d, mului(xv1,d1)); d=d1; d1=r;
-	  a = subii(v, mului(xv1,v1)); v=v1; v1=a;
-	}
-      }
-      else
-      {
-	r  = subii(muliu(d,xu),  muliu(d1,xv));
-	a  = subii(muliu(v,xu),  muliu(v1,xv));
-	d1 = subii(muliu(d,xu1), muliu(d1,xv1)); d = r;
-	v1 = subii(muliu(v,xu1), muliu(v1,xv1)); v = a;
-        if (lhmres&1)
-	{
-          setsigne(d,-signe(d));
-          setsigne(v,-signe(v));
-        }
-        else
-	{
-          if (signe(d1)) { setsigne(d1,-signe(d1)); }
-          setsigne(v1,-signe(v1));
-        }
-      }
-    }
-#ifdef DEBUG_LEHMER
-    else
-      fprintferr("Lehmer returned 0.\n");
-    output(d); output(d1); output(v); output(v1);
-    sleep(1);
-#endif
-
-    if (lhmres <= 0 && signe(d1))
-    {
-      q = dvmdii(d,d1,&r);
-#ifdef DEBUG_LEHMER
-      fprintferr("Full division:\n");
-      printf("  q = "); output(q); sleep (1);
-#endif
-      a = subii(v,mulii(q,v1));
-      v=v1; v1=a;
-      d=d1; d1=r;
-    }
-    if (low_stack(lim, stack_lim(av,1)))
-    {
-      GEN *gptr[4]; gptr[0]=&d; gptr[1]=&d1; gptr[2]=&v; gptr[3]=&v1;
-      if(DEBUGMEM>1) err(warnmem,"invmod");
-      gerepilemany(av1,gptr,4);
-    }
-  } /* end while */
-
-  /* Postprocessing - final sprint */
-  if (signe(d1))
-  {
-    /* Assertions: lgefint(d)==lgefint(d1)==3, and
-     * gcd(d,d1) is nonzero and fits into one word
-     */
-    g = xxgcduu((ulong)(d[2]), (ulong)(d1[2]), 1, &xu, &xu1, &xv, &xv1, &s);
-#ifdef DEBUG_LEHMER
-    output(d);output(d1);output(v);output(v1);
-    fprintferr(" <- %lu,%lu\n", (ulong)(d[2]), (ulong)(d1[2]));
-    fprintferr(" -> %lu,%ld,%lu; %lx\n", g,s,xv1,avma);
-#endif
-    if (g != 1UL) { avma = av; *res = utoi(g); return 0; }
-    /* (From the xgcduu() blurb:)
-     * For finishing the multiword modinv, we now have to multiply the
-     * returned matrix  (with properly adjusted signs)  onto the values
-     * v' and v1' previously obtained from the multiword division steps.
-     * Actually, it is sufficient to take the scalar product of [v',v1']
-     * with [u1,-v1], and change the sign if s==1.
-     */
-    v = subii(muliu(v,xu1),muliu(v1,xv1));
-    if (s > 0) setsigne(v,-signe(v));
-    avma = av; *res = modii(v,b);
-#ifdef DEBUG_LEHMER
-    output(*res); fprintfderr("============================Done.\n");
-    sleep(1);
-#endif
-    return 1;
-  }
-  /* get here when the final sprint was skipped (d1 was zero already) */
-  avma = av;
-  if (!egalii(d,gun)) { *res = icopy(d); return 0; }
-  *res = modii(v,b);
-#ifdef DEBUG_LEHMER
-  output(*res); fprintferr("============================Done.\n");
-  sleep(1);
-#endif
-  return 1;
-}
-
-/*==================================
- * bezout(a,b,pu,pv)
- *==================================
- *    Return g = gcd(a,b) >= 0, and assign GENs u,v through pointers pu,pv
- *    such that g = u*a + v*b.
- * Special cases:
- *    a == b == 0 ==> pick u=1, v=0
- *    a != 0 == b ==> keep v=0
- *    a == 0 != b ==> keep u=0
- *    |a| == |b| != 0 ==> keep u=0, set v=+-1
- * Assignments through pu,pv will be suppressed when the corresponding
- * pointer is NULL  (but the computations will happen nonetheless).
- */
-
-GEN
-bezout(GEN a, GEN b, GEN *pu, GEN *pv)
-{
-  GEN t,u,u1,v,v1,d,d1,q,r;
-  GEN *pt;
-  pari_sp av, av1, lim;
-  long s;
-  int sa, sb;
-  ulong g;
-  ulong xu,xu1,xv,xv1;		/* Lehmer stage recurrence matrix */
-  int lhmres;			/* Lehmer stage return value */
-
-  if (typ(a) != t_INT || typ(b) != t_INT) err(arither1);
-  s = absi_cmp(a,b);
-  if (s < 0)
-  {
-    t=b; b=a; a=t;
-    pt=pu; pu=pv; pv=pt;
-  }
-  /* now |a| >= |b| */
-
-  sa = signe(a); sb = signe(b);
-  if (!sb)
-  {
-    if (pv != NULL) *pv = gzero;
-    switch(sa)
-    {
-    case  0:
-      if (pu != NULL) *pu = gun; return gzero;
-    case  1:
-      if (pu != NULL) *pu = gun; return icopy(a);
-    case -1:
-      if (pu != NULL) *pu = negi(gun); return(negi(a));
-    }
-  }
-  if (s == 0)			/* |a| == |b| != 0 */
-  {
-    if (pu != NULL) *pu = gzero;
-    if (sb > 0)
-    {
-      if (pv != NULL) *pv = gun; return icopy(b);
-    }
-    else
-    {
-      if (pv != NULL) *pv = negi(gun); return(negi(b));
-    }
-  }
-  /* now |a| > |b| > 0 */
-
-  if (lgefint(a) == 3)		/* single-word affair */
-  {
-    g = xxgcduu((ulong)(a[2]), (ulong)(b[2]), 0, &xu, &xu1, &xv, &xv1, &s);
-    sa = s > 0 ? sa : -sa;
-    sb = s > 0 ? -sb : sb;
-    if (pu != NULL)
-    {
-      if (xu == 0) *pu = gzero; /* can happen when b divides a */
-      else if (xu == 1) *pu = sa < 0 ? negi(gun) : gun;
-      else if (xu == 2) *pu = sa < 0 ? negi(gdeux) : gdeux;
-      else
-      {
-	*pu = cgeti(3);
-	(*pu)[1] = evalsigne(sa)|evallgefint(3);
-	(*pu)[2] = xu;
-      }
-    }
-    if (pv != NULL)
-    {
-      if (xv == 1) *pv = sb < 0 ? negi(gun) : gun;
-      else if (xv == 2) *pv = sb < 0 ? negi(gdeux) : gdeux;
-      else
-      {
-	*pv = cgeti(3);
-	(*pv)[1] = evalsigne(sb)|evallgefint(3);
-	(*pv)[2] = xv;
-      }
-    }
-    if (g == 1) return gun;
-    else if (g == 2) return gdeux;
-    else
-    {
-      r = cgeti(3);
-      r[1] = evalsigne(1)|evallgefint(3);
-      r[2] = g;
-      return r;
-    }
-  }
-
-  /* general case */
-  av = avma;
-  (void)new_chunk(lgefint(b) + (lgefint(a)<<1)); /* room for u,v,gcd */
-  /* if a is significantly larger than b, calling lgcdii() is not the best
-   * way to start -- reduce a mod b first
-   */
-  if (lgefint(a) > lgefint(b))
-  {
-    d = absi(b), q = dvmdii(absi(a), d, &d1);
-    if (!signe(d1))		/* a == qb */
-    {
-      avma = av;
-      if (pu != NULL) *pu = gzero;
-      if (pv != NULL) *pv = sb < 0 ? negi(gun) : gun;
-      return (icopy(d));
-    }
-    else
-    {
-      u = gzero;
-      u1 = v = gun;
-      v1 = negi(q);
-    }
-    /* if this results in lgefint(d) == 3, will fall past main loop */
-  }
-  else
-  {
-    d = absi(a); d1 = absi(b);
-    u = v1 = gun; u1 = v = gzero;
-  }
-  av1 = avma; lim = stack_lim(av, 1);
-
-  /* main loop is almost identical to that of invmod() */
-  while (lgefint(d) > 3 && signe(d1))
-  {
-    lhmres = lgcdii((ulong *)d, (ulong *)d1, &xu, &xu1, &xv, &xv1, MAXULONG);
-    if (lhmres != 0)		/* check progress */
-    {				/* apply matrix */
-      if ((lhmres == 1) || (lhmres == -1))
-      {
-	if (xv1 == 1)
-	{
-	  r = subii(d,d1); d=d1; d1=r;
-	  a = subii(u,u1); u=u1; u1=a;
-	  a = subii(v,v1); v=v1; v1=a;
-	}
-	else
-	{
-	  r = subii(d, mului(xv1,d1)); d=d1; d1=r;
-	  a = subii(u, mului(xv1,u1)); u=u1; u1=a;
-	  a = subii(v, mului(xv1,v1)); v=v1; v1=a;
-	}
-      }
-      else
-      {
-	r  = subii(muliu(d,xu),  muliu(d1,xv));
-	d1 = subii(muliu(d,xu1), muliu(d1,xv1)); d = r;
-	a  = subii(muliu(u,xu),  muliu(u1,xv));
-	u1 = subii(muliu(u,xu1), muliu(u1,xv1)); u = a;
-	a  = subii(muliu(v,xu),  muliu(v1,xv));
-	v1 = subii(muliu(v,xu1), muliu(v1,xv1)); v = a;
-        if (lhmres&1)
-	{
-          setsigne(d,-signe(d));
-          setsigne(u,-signe(u));
-          setsigne(v,-signe(v));
-        }
-        else
-	{
-          if (signe(d1)) { setsigne(d1,-signe(d1)); }
-          setsigne(u1,-signe(u1));
-          setsigne(v1,-signe(v1));
-        }
-      }
-    }
-    if (lhmres <= 0 && signe(d1))
-    {
-      q = dvmdii(d,d1,&r);
-#ifdef DEBUG_LEHMER
-      fprintferr("Full division:\n");
-      printf("  q = "); output(q); sleep (1);
-#endif
-      a = subii(u,mulii(q,u1));
-      u=u1; u1=a;
-      a = subii(v,mulii(q,v1));
-      v=v1; v1=a;
-      d=d1; d1=r;
-    }
-    if (low_stack(lim, stack_lim(av,1)))
-    {
-      GEN *gptr[6]; gptr[0]=&d; gptr[1]=&d1; gptr[2]=&u; gptr[3]=&u1;
-      gptr[4]=&v; gptr[5]=&v1;
-      if(DEBUGMEM>1) err(warnmem,"bezout");
-      gerepilemany(av1,gptr,6);
-    }
-  } /* end while */
-
-  /* Postprocessing - final sprint */
-  if (signe(d1))
-  {
-    /* Assertions: lgefint(d)==lgefint(d1)==3, and
-     * gcd(d,d1) is nonzero and fits into one word
-     */
-    g = xxgcduu((ulong)(d[2]), (ulong)(d1[2]), 0, &xu, &xu1, &xv, &xv1, &s);
-    u = subii(muliu(u,xu), muliu(u1, xv));
-    v = subii(muliu(v,xu), muliu(v1, xv));
-    if (s < 0) { sa = -sa; sb = -sb; }
-    avma = av;
-    if (pu != NULL) *pu = sa < 0 ? negi(u) : icopy(u);
-    if (pv != NULL) *pv = sb < 0 ? negi(v) : icopy(v);
-    if (g == 1) return gun;
-    else if (g == 2) return gdeux;
-    else
-    {
-      r = cgeti(3);
-      r[1] = evalsigne(1)|evallgefint(3);
-      r[2] = g;
-      return r;
-    }
-  }
-  /* get here when the final sprint was skipped (d1 was zero already).
-   * Now the matrix is final, and d contains the gcd.
-   */
-  avma = av;
-  if (pu != NULL) *pu = sa < 0 ? negi(u) : icopy(u);
-  if (pv != NULL) *pv = sb < 0 ? negi(v) : icopy(v);
-  return icopy(d);
-}
-
-/*==================================
- * cbezout(a,b,uu,vv)
- *==================================
- * Same as bezout() but for C longs.
- *    Return g = gcd(a,b) >= 0, and assign longs u,v through pointers uu,vv
- *    such that g = u*a + v*b.
- * Special cases:
- *    a == b == 0 ==> pick u=1, v=0 (and return 1, surprisingly)
- *    a != 0 == b ==> keep v=0
- *    a == 0 != b ==> keep u=0
- *    |a| == |b| != 0 ==> keep u=0, set v=+-1
- * Assignments through uu,vv happen unconditionally;  non-NULL pointers
- * _must_ be used.
- */
-long
-cbezout(long a,long b,long *uu,long *vv)
-{
-  long s,*t;
-  ulong d = labs(a), d1 = labs(b);
-  ulong r,u,u1,v,v1;
-
-#ifdef DEBUG_CBEZOUT
-  fprintferr("> cbezout(%ld,%ld,%p,%p)\n", a, b, (void *)uu, (void *)vv);
-#endif
-  if (!b)
-  {
-    *vv=0L;
-    if (!a)
-    {
-      *uu=1L;
-#ifdef DEBUG_CBEZOUT
-      fprintferr("< %ld (%ld, %ld)\n", 1L, *uu, *vv);
-#endif
-      return 0L;
-    }
-    *uu = a < 0 ? -1L : 1L;
-#ifdef DEBUG_CBEZOUT
-    fprintferr("< %ld (%ld, %ld)\n", (long)d, *uu, *vv);
-#endif
-    return (long)d;
-  }
-  else if (!a || (d == d1))
-  {
-    *uu = 0L; *vv = b < 0 ? -1L : 1L;
-#ifdef DEBUG_CBEZOUT
-    fprintferr("< %ld (%ld, %ld)\n", (long)d1, *uu, *vv);
-#endif
-    return (long)d1;
-  }
-  else if (d == 1)		/* frequently used by nfinit */
-  {
-    *uu = a; *vv = 0L;
-#ifdef DEBUG_CBEZOUT
-    fprintferr("< %ld (%ld, %ld)\n", 1L, *uu, *vv);
-#endif
-    return 1L;
-  }
-  else if (d < d1)
-  {
-/* bug in gcc-2.95.3:
- * s = a; a = b; b = s; produces wrong result a = b. This is OK:  */
-    { long _x = a; a = b; b = _x; }	/* in order to keep the right signs */
-    r = d; d = d1; d1 = r;
-    t = uu; uu = vv; vv = t;
-#ifdef DEBUG_CBEZOUT
-    fprintferr("  swapping\n");
-#endif
-  }
-  /* d > d1 > 0 */
-  r = xxgcduu(d, d1, 0, &u, &u1, &v, &v1, &s);
-  if (s < 0)
-  {
-    *uu = a < 0 ? u : -(long)u;
-    *vv = b < 0 ? -(long)v : v;
-  }
-  else
-  {
-    *uu = a < 0 ? -(long)u : u;
-    *vv = b < 0 ? v : -(long)v;
-  }
-#ifdef DEBUG_CBEZOUT
-  fprintferr("< %ld (%ld, %ld)\n", (long)r, *uu, *vv);
-#endif
-  return (long)r;
-}
 
 /*==========================================================
  * ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
@@ -4189,7 +3625,6 @@ ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
   ulong vmax;
   ulong xu,xu1,xv,xv1;		/* Lehmer stage recurrence matrix */
   int lhmres;			/* Lehmer stage return value */
-
   if ((typ(x) | typ(m) | typ(amax) | typ(bmax)) != t_INT) err(arither1);
   if (signe(bmax) <= 0)
     err(talker, "ratlift: bmax must be > 0, found\n\tbmax=%Z\n", bmax);
@@ -4232,7 +3667,7 @@ ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
   v = gzero; v1 = gun;
   /* assert d1 > amax, v1 <= bmax here */
   lb = lgefint(bmax);
-  lbb = bfffo(bmax[2]);
+  lbb = bfffo(*int_MSW(bmax));
   s = 1;
   av1 = avma; lim = stack_lim(av, 1);
 
@@ -4282,7 +3717,7 @@ ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
      */
     r = addii(v,v1);
     lr = lb - lgefint(r);
-    lbr = bfffo(r[2]);
+    lbr = bfffo(*int_MSW(r));
     if (cmpii(r,bmax) > 0)	/* done, not found */
     {
       avma = av;
@@ -4303,7 +3738,7 @@ ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
 	vmax = 1UL << (lr-1);
       /* the latter is pessimistic but faster than a division */
     }
-    /* do a Lehmer-Jebelean round */
+    /* do a Lehmer-Jebelean round*/
     lhmres = lgcdii((ulong *)d, (ulong *)d1, &xu, &xu1, &xv, &xv1, vmax);
     if (lhmres != 0)		/* check progress */
     {				/* apply matrix */
@@ -4441,7 +3876,7 @@ ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
 #endif
     r = addii(v,v1);
     lr = lb - lgefint(r);
-    lbr = bfffo(r[2]);
+    lbr = bfffo(*int_MSW(r));
     if (cmpii(r,bmax) > 0)	/* done, not found */
     {
       avma = av;
@@ -4465,7 +3900,7 @@ ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
     fprintferr("rl-fs: vmax=%lu\n", vmax);
 #endif
     /* single-word "Lehmer", discarding the gcd or whatever it returns */
-    (void)rgcduu((ulong)d[2], (ulong)d1[2], vmax, &xu, &xu1, &xv, &xv1, &s0);
+    (void)rgcduu((ulong)*int_MSW(d), (ulong)*int_MSW(d1), vmax, &xu, &xu1, &xv, &xv1, &s0);
 #ifdef DEBUG_RATLIFT
     fprintferr("rl-fs: [%lu,%lu; %lu,%lu] %s\n",
 	       xu, xu1, xv, xv1,
@@ -4564,75 +3999,25 @@ usqrtsafe(ulong a)
   return x;
 }
 
-/* Assume a has <= 4 words, return trunc[sqrt(abs(a))] */
-static ulong
-mpsqrtl(GEN a)
-{
-  long l = lgefint(a);
-  ulong x,y,z,k,m;
-  int L, s;
-
-  if (l <= 3) return l==2? 0: usqrtsafe((ulong)a[2]);
-  s = bfffo(a[2]);
-  if (s > 1)
-  {
-    s &= ~1UL; /* make it even */
-    z = BITS_IN_LONG - s;
-    m = (ulong)(a[2] << s) | (a[3] >> z);
-    L = z>>1;
-  }
-  else
-  {
-    m = (ulong)a[2];
-    L = BITS_IN_LONG/2;
-  }
-  /* m = BIL-1 (bffo odd) or BIL first bits of a */
-  k = (long) sqrt((double)m);
-  if (L == BITS_IN_LONG/2 && k == MAXHALFULONG)
-    x = MAXULONG;
-  else
-    x = (k+1) << L;
-  do
-  {
-    LOCAL_HIREMAINDER;
-    LOCAL_OVERFLOW;
-    hiremainder = a[2];
-    if (hiremainder >= x) return x;
-    z = addll(x, divll(a[3],x));
-    z >>= 1; if (overflow) z |= HIGHBIT;
-    y = x; x = z;
-  }
-  while (x < y);
-  return y;
-}
-
-/* Use l as lgefint(a) [a may have more digits] */
-static GEN
-racine_r(GEN a, long l)
-{
-  pari_sp av;
-  long s;
-  GEN x,y,z;
-
-  if (l <= 4) return utoi(mpsqrtl(a));
-  av = avma;
-  s = 2 + ((l-1) >> 1);
-  setlgefint(a, s);
-  x = addis(racine_r(a, s), 1); setlgefint(a, l);
-  /* x = good approx (from above) of sqrt(a): about l/2 correct bits */
-  x = shifti(x, (l - s)*(BITS_IN_LONG/2));
-  do
-  { /* one or two iterations should do the trick */
-    z = shifti(addii(x,divii(a,x)), -1);
-    y = x; x = z;
-  }
-  while (cmpii(x,y) < 0);
-  avma = (pari_sp)y;
-  return gerepileuptoint(av,y);
-}
-
 /* Return trunc(sqrt(abs(a)))). a must be an integer*/
-GEN isqrti(GEN a) {return racine_r(a,lgefint(a));}
+GEN
+isqrti(GEN a)
+{
+  long l;
+  GEN res;
+  if (!signe(a)) return gzero;
+  l=(NLIMBS(a)+5)>>1;/* 2+ceil(na/2)*/
+  res= cgeti(l);
+  res[1] = evalsigne(1) | evallgefint(l);
+  mpn_sqrtrem(LIMBS(res),NULL,LIMBS(a),NLIMBS(a));
+  return res;
+}
+
+/********************************************************************/
+/**                                                                **/
+/**                             SHIFT                              **/
+/**                                                                **/
+/********************************************************************/
 
 /* target should point to a buffer of source_end - source + 1 ulongs.
 
@@ -4647,10 +4032,17 @@ GEN isqrti(GEN a) {return racine_r(a,lgefint(a));}
 void
 shift_r(ulong *target, ulong *source, ulong *source_end, ulong prepend, ulong sh)
 {
-  if (sh) {				/* shift_words_r() works */
+  err(warner,"GMP: shift_r is not tested");
+  if (sh)
+  {
     register ulong sh_complement = BITS_IN_LONG - sh;
-
-    shift_words_r(target, source, source_end, prepend, sh, sh_complement);
+    register ulong _k,_l = *source--;
+    *target-- = (_l>>(ulong)sh) | ((ulong)prepend<<(ulong)sh_complement);
+    while (source > source_end)
+    {
+      _k = _l<<(ulong)sh_complement; _l = *source--;
+      *target-- = (_l>>(ulong)sh) | _k;
+    }
   } else {
     int i;
 
@@ -4659,11 +4051,13 @@ shift_r(ulong *target, ulong *source, ulong *source_end, ulong prepend, ulong sh
   }
 }
 
-/********************************************************************/
-/**                                                                **/
-/**                         RANDOM INTEGERS                        **/
-/**                                                                **/
-/********************************************************************/
+ 
+ /********************************************************************/
+ /**                                                                **/
+ /**                         RANDOM INTEGERS                        **/
+ /**                                                                **/
+ /********************************************************************/
+ 
 static long pari_randseed = 1;
 
 /* BSD rand gives this: seed = 1103515245*seed + 12345 */
@@ -4704,27 +4098,25 @@ randomi(GEN N)
   long lx,i,nz;
   GEN x, p1;
 
-  lx = lgefint(N); x = new_chunk(lx);
-  nz = lx-1; while (!N[nz]) nz--; /* nz = index of last non-zero word */
-  for (i=2; i<lx; i++)
+  lx = lgefint(N); x = cgeti(lx);
+  nz = 2; while (!N[nz]) nz++; /* nz = index of last non-zero word */
+  for (i=lx-1; i>1; i--)
   {
     ulong n = N[i], r;
     if (n == 0) r = 0;
     else
     {
       pari_sp av = avma;
-      if (i < nz) n++; /* allow for equality if we can go down later */
+      if (i > nz) n++; /* allow for equality if we can go down later */
       p1 = muluu(n, pari_rand()); /* < n * 2^32, so 0 <= first word < n */
-      r = (lgefint(p1)<=3)? 0: p1[2]; avma = av;
+      r = (lgefint(p1)<=3)? 0: p1[3]; avma = av;
     }
     x[i] = r;
     if (r < (ulong)N[i]) break;
   }
-  for (i++; i<lx; i++) x[i] = pari_rand();
-  i=2; while (i<lx && !x[i]) i++;
-  i -= 2; x += i; lx -= i;
+  for (i--; i>1; i--) x[i] = pari_rand();
+  while (!x[lx-1]) lx--;
   x[1] = evalsigne(lx>2) | evallgefint(lx);
-  x[0] = evaltyp(t_INT) | evallg(lx);
   avma = (pari_sp)x; return x;
 }
 /* Normalize a non-negative integer.  */
@@ -4732,17 +4124,14 @@ void
 int_normalize(GEN x, long known_zero_words)
 {
   long xl = lgefint(x);
-  long i = 2 + known_zero_words, j;
-  while (i < xl) {
+  /* Normalize */
+  long i = xl - 1 - known_zero_words;
+  while (i > 1) {
     if (x[i])
       break;
-    i++;
+    i--;
   }
-  j = 2;
-  while (i < xl)
-    x[j++] = x[i++];
-  xl -= i - j;
-  setlgefint(x, xl);
-  if (xl == 2)
+  setlgefint(x, i+1);
+  if (i == 1)
     setsigne(x,0);
 }

@@ -2104,19 +2104,21 @@ binaire(GEN x)
   switch(tx)
   {
     case t_INT:
+    {
+      GEN xp=int_MSW(x);
       lx=lgefint(x);
       if (lx==2) { y=cgetg(2,t_VEC); y[1]=zero; return y; }
-      ly = BITS_IN_LONG+1; m=HIGHBIT; u=x[2];
+      ly = BITS_IN_LONG+1; m=HIGHBIT; u=*xp;
       while (!(m & u)) { m>>=1; ly--; }
       y = cgetg(ly+((lx-3)<<TWOPOTBITS_IN_LONG),t_VEC); ly=1;
       do { y[ly] = m & u ? un : zero; ly++; } while (m>>=1);
       for (i=3; i<lx; i++)
       {
-        m=HIGHBIT; u=x[i];
-        do { y[ly] = m & u ? un : zero; ly++; } while (m>>=1);
+	m=HIGHBIT; xp=int_precW(xp); u=*xp;
+	do { y[ly] = m & u ? un : zero; ly++; } while (m>>=1);
       }
       break;
-
+    }
     case t_REAL:
       ex=expo(x);
       if (!signe(x))
@@ -2175,9 +2177,9 @@ bittest(GEN x, long n)
   long l;
 
   if (!signe(x) || n<0) return 0;
-  l = lgefint(x)-1 - (n>>TWOPOTBITS_IN_LONG);
-  if (l < 2) return 0;
-  n = (1L << (n & (BITS_IN_LONG-1))) & x[l];
+  l = n>>TWOPOTBITS_IN_LONG;
+  if (l+2 > lgefint(x)) return 0;
+  n = (1L << (n & (BITS_IN_LONG-1))) & *int_W(x,l);
   return n? 1: 0;
 }
 
@@ -2300,56 +2302,37 @@ gbittest3(GEN x, GEN n, long c)
 /**                                                                   **/
 /***********************************************************************/
 
-/* Normalize a non-negative integer.  */
-static void
-inormalize(GEN x, long known_zero_words)
-{
-    int xl = lgefint(x);
-    int i, j;
-
-    /* Normalize */
-    i = 2 + known_zero_words;
-    while (i < xl) {
-        if (x[i])
-            break;
-        i++;
-    }
-    j = 2;
-    while (i < xl)
-        x[j++] = x[i++];
-    xl -= i - j;
-    setlgefint(x, xl);
-    if (xl == 2)
-        setsigne(x,0);
-}
+void int_normalize(GEN x, long known_zero_words);
 
 /* Truncate a non-negative integer to a number of bits.  */
 static void
 ibittrunc(GEN x, long bits, long normalized)
 {
-    int xl = lgefint(x);
-    int len_out = ((bits + BITS_IN_LONG - 1) >> TWOPOTBITS_IN_LONG) + 2;
-    int known_zero_words, i = 2 + xl - len_out;
+    int xl = lgefint(x) - 2;
+    int len_out = ((bits + BITS_IN_LONG - 1) >> TWOPOTBITS_IN_LONG);
+    int known_zero_words;
 
     if (xl < len_out && normalized)
         return;
         /* Check whether mask is trivial */
     if (!(bits & (BITS_IN_LONG - 1))) {
-        if (xl == len_out && normalized)
-            return;
-    } else if (len_out <= xl) {
-        /* Non-trival mask is given by a formula, if x is not
-           normalized, this works even in the exceptional case */
-        x[i] = x[i] & ((1 << (bits & (BITS_IN_LONG - 1))) - 1);
-        if (x[i] && xl == len_out)
-            return;
+	if (xl == len_out && normalized)
+	    return;
+    } else if (len_out <= xl) 
+    {
+      GEN xi=int_W(x, len_out-1);
+      /* Non-trival mask is given by a formula, if x is not
+         normalized, this works even in the exceptional case */
+      *xi = *xi & ((1 << (bits & (BITS_IN_LONG - 1))) - 1);
+      if (*xi && xl == len_out)
+        return;
     }
     /* Normalize */
-    if (xl <= len_out)                  /* Not normalized */
-        known_zero_words = 0;
+    if (xl <= len_out)			/* Not normalized */
+      known_zero_words = 0;
     else
-        known_zero_words = xl - len_out;
-    inormalize(x, known_zero_words);
+      known_zero_words = xl - len_out;
+    int_normalize(x, known_zero_words);
 }
 
 /* Increment/decrement absolute value of non-zero integer in place.
@@ -2359,30 +2342,36 @@ ibittrunc(GEN x, long bits, long normalized)
 static int
 incdec(GEN x, long incdec)
 {
-    long *xf = x + 2, *xl;
-    long len = lgefint(x);
-    const ulong uzero = 0;
+  long i, *xl;
+  long len = lgefint(x)-2;
+  const ulong uzero = 0;
 
-    xl = x + len;
-    if (incdec == 1) {
-        while (--xl >= xf) {
-            if ((ulong)*xl != ~uzero) {
-                (*xl)++;
-                return 0;
-            }
-            *xl = 0;
-        }
-        return 1;
-    } else {
-        while (--xl >= xf) {
-            if (*xl != 0) {
-                (*xl)--;
-                return 0;
-            }
-            *xl = (long)~uzero;
-        }
+  xl = int_LSW(x);
+  if (incdec == 1) 
+  {
+    for (i=1;i<len;i++)
+    {
+      xl=int_nextW(xl);
+      if ((ulong)*xl != ~uzero) {
+        (*xl)++;
         return 0;
+      }
+      *xl = 0;
     }
+    return 1;
+  } else 
+  {
+    for (i=1;i<len;i++)
+    {
+      xl=int_nextW(xl);
+      if (*xl != 0) {
+        (*xl)--;
+        return 0;
+      }
+      *xl = (long)~uzero;
+    }
+    return 0;
+  }
 }
 
 GEN
@@ -2398,37 +2387,45 @@ gbitneg(GEN x, long bits)
     if (bits == -1)
         return gsub(gneg(gun),x);
     if (bits == 0)
-        return gzero;
-    if (signe(x) == -1) {               /* Consider as if mod big power of 2 */
-        x = gcopy(x);
-        setsigne(x, 1);
-        incdec(x, -1);
-        /* Now truncate this! */
-        ibittrunc(x, bits, x[2]);
-        return x;
+	return gzero;
+    if (signe(x) == -1) {		/* Consider as if mod big power of 2 */
+	x = icopy(x);
+	setsigne(x, 1);
+	incdec(x, -1);
+	/* Now truncate this! */
+	ibittrunc(x, bits, *int_MSW(x));
+	return x;
     }
     xl = lgefint(x);
     len_out = ((bits + BITS_IN_LONG - 1) >> TWOPOTBITS_IN_LONG) + 2;
-    if (len_out > xl) {                 /* Need to grow */
-        GEN out = cgeti(len_out);
-        int j = 2;
+    if (len_out > xl) {			/* Need to grow */
+	GEN out = cgeti(len_out);
+        GEN outp, xp=int_MSW(x);
+	setlgefint(out, len_out);
+        outp = int_MSW(out);
 
-        if (!(bits & (BITS_IN_LONG - 1)))
-            out[2] = ~uzero;
-        else
-            out[2] = (1 << (bits & (BITS_IN_LONG - 1))) - 1;
-        for (i = 3; i < len_out - xl + 2; i++)
-            out[i] = ~uzero;
-        while (i < len_out)
-            out[i++] = ~x[j++];
-        setlgefint(out, len_out);
-        setsigne(out,1);
-        return out;
+	if (!(bits & (BITS_IN_LONG - 1)))
+	  *outp = ~uzero;
+	else
+	  *outp = (1 << (bits & (BITS_IN_LONG - 1))) - 1;
+	for (i = 1; i < len_out - xl; i++)
+        {
+          outp=int_precW(outp);
+          *outp = ~uzero;
+        }
+	while (i < len_out)
+        {
+          outp=int_precW(outp);
+	  *outp = ~*xp;
+          xp=int_precW(xp);
+        }
+	setsigne(out,1);
+	return out;
     }
-    x = gcopy(x);
+    x = icopy(x);
     for (i = 2; i < xl; i++)
-        x[i] = ~x[i];
-    ibittrunc(x, bits, x[2]);
+	x[i] = ~x[i];
+    ibittrunc(x, bits, *int_MSW(x));
     return x;
 }
 
@@ -2438,27 +2435,28 @@ static GEN
 ibitand(GEN x, GEN y)
 {
   long lx, ly, lout;
-  long *xp, *yp, *outp, *xlim;
+  long *xp, *yp, *outp;
   GEN out;
+  long i;
 
   lx=lgefint(x); ly=lgefint(y);
-  if (lx > ly)
-      lout = ly;
-  else
-      lout = lx;
-  xlim = x + lx;
-  xp = xlim + 2 - lout;
-  yp = y + 2 + ly - lout;
+  lout = min(lx,ly);
+  xp = int_LSW(x);
+  yp = int_LSW(y);
   out = cgeti(lout);
-  outp = out + 2;
-  while (xp < xlim)
-      *outp++ = (*xp++) & (*yp++);
-  setsigne(out,1);
-  setlgefint(out,lout);
+  out[1] = evalsigne(1) | evallgefint(lout);
+  outp = int_LSW(out);
+  for (i=2; i<lout; i++)
+  {
+      *outp = (*xp) & (*yp);
+      outp  = int_nextW(outp);
+      xp    = int_nextW(xp);
+      yp    = int_nextW(yp);
+  }
   if (lout == 2)
       setsigne(out,0);
-  else if ( !out[2] )
-      inormalize(out, 1);
+  else if ( !*int_MSW(out) )
+      int_normalize(out, 1);
   return out;
 }
 
@@ -2467,41 +2465,79 @@ ibitand(GEN x, GEN y)
 /* bitwise 'or' of two positive integers (any integers, but we ignore sign).
  * Inputs are not necessary normalized. */
 static GEN
-ibitor(GEN x, GEN y, long exclusive)
+ibitor(GEN x, GEN y)
 {
-  long lx, ly, lout;
-  long *xp, *yp, *outp, *xlim, *xprep;
-  GEN out;
+  long lx, ly;
+  long *xp, *yp, *outp;
+  GEN  out;
+  long i;
 
   lx=lgefint(x); ly=lgefint(y);
   if (lx < ly)
       swaplen(x,y,lx,ly);
-  lout = lx;
-  xlim = x + lx;
-  xp = xlim + 2 - ly;
-  yp = y + 2;
-  out = cgeti(lout);
-  outp = out + 2;
-  if (lx > ly) {
-      xprep = x + 2;
-      while (xprep < xp)
-          *outp++ = *xprep++;
+  xp = int_LSW(x);
+  yp = int_LSW(y);
+  out = cgeti(lx);
+  out[1] = evalsigne(1) | evallgefint(lx);
+  outp = int_LSW(out);
+  for (i=2;i<ly;i++)
+  {
+      *outp = (*xp) | (*yp);
+      outp  = int_nextW(outp);
+      xp    = int_nextW(xp);
+      yp    = int_nextW(yp);
   }
-  if (exclusive) {
-      while (xp < xlim)
-          *outp++ = (*xp++) ^ (*yp++);
-  } else {
-      while (xp < xlim)
-          *outp++ = (*xp++) | (*yp++);
+  for (   ;i<lx;i++)
+  {
+     *outp = *xp;
+     outp=int_nextW(outp);
+     xp    = int_nextW(xp);
   }
-  setsigne(out,1);
-  setlgefint(out,lout);
-  if (lout == 2)
-      setsigne(out,0);
-  else if ( !out[2] )
-      inormalize(out, 1);
+  if (lx == 2)
+    setsigne(out,0);
+    /* If input is normalized, this is not needed*/
+  else if ( !*int_MSW(out) )
+    int_normalize(out, 1);
   return out;
-}
+}  
+
+/* bitwise 'xor' of two positive integers (any integers, but we ignore sign).
+ * Inputs are not necessary normalized. */
+static GEN
+ibitxor(GEN x, GEN y)
+{
+  long lx, ly;
+  long *xp, *yp, *outp;
+  GEN  out;
+  long i;
+
+  lx=lgefint(x); ly=lgefint(y);
+  if (lx < ly)
+      swaplen(x,y,lx,ly);
+  xp = int_LSW(x);
+  yp = int_LSW(y);
+  out = cgeti(lx);
+  out[1] = evalsigne(1) | evallgefint(lx);
+  outp = int_LSW(out);
+  for (i=2;i<ly;i++)
+  {
+      *outp = (*xp) ^ (*yp);
+      outp  = int_nextW(outp);
+      xp    = int_nextW(xp);
+      yp    = int_nextW(yp);
+  }
+  for (   ;i<lx;i++)
+  {
+     *outp = *xp;
+     outp  = int_nextW(outp);
+     xp    = int_nextW(xp);
+  }
+  if (lx == 2)
+      setsigne(out,0);
+  else if ( !*int_MSW(out) )
+      int_normalize(out, 1);
+  return out;
+}  
 
 /* bitwise negated 'implies' of two positive integers (any integers, but we
  * ignore sign).  "Neg-Implies" is x & ~y unless "negated".
@@ -2509,45 +2545,42 @@ ibitor(GEN x, GEN y, long exclusive)
 static GEN
 ibitnegimply(GEN x, GEN y)
 {
-  long lx, ly, lout, inverted = 0;
-  long *xp, *yp, *outp, *xlim, *xprep;
+  long lx, ly, lout, lin;
+  long *xp, *yp, *outp;
   GEN out;
+  long i;
 
   lx=lgefint(x); ly=lgefint(y);
-  if (lx < ly) {
-      inverted = 1;
-      swaplen(x,y,lx,ly);
-  }  
-  /* x is longer than y */
-  lout = lx;
-  xlim = x + lx;
-  xp = xlim + 2 - ly;
-  yp = y + 2;
+  lin = min(lx,ly);
+  lout = max(lx,ly);
+  xp = int_LSW(x);
+  yp = int_LSW(y);
   out = cgeti(lout);
-  outp = out + 2;
-  if (lx > ly) {
-      xprep = x + 2;
-      if (!inverted) {                  /* x & ~y */
-          while (xprep < xp)
-              *outp++ = *xprep++;
-      } else {                          /* ~x & y */
-          while (xprep++ < xp)
-              *outp++ = 0;
-      }
+  out[1] = evalsigne(1) | evallgefint(lout);
+  outp = int_LSW(out);
+  for (i=2; i<lin; i++)
+  {
+      *outp = (*xp) & ~(*yp);
+      outp  = int_nextW(outp);
+      xp    = int_nextW(xp);
+      yp    = int_nextW(yp);
   }
-  if (inverted) {                       /* ~x & y */
-     while (xp < xlim)
-        *outp++ = ~(*xp++) & (*yp++);
-  } else {
-     while (xp < xlim)
-        *outp++ = (*xp++) & ~(*yp++);
+  for (   ;i<lx;i++)
+  {
+     *outp = *xp;
+     outp  = int_nextW(outp);
+     xp    = int_nextW(xp);
   }
-  setsigne(out,1);
-  setlgefint(out,lout);
+  for (   ;i<ly;i++)
+  {
+     *outp = ~(*yp);
+     outp  = int_nextW(outp);
+     yp    = int_nextW(yp);
+  }
   if (lout == 2)
       setsigne(out,0);
-  else if ( !out[2] )
-      inormalize(out, 1);
+  else if ( !*int_MSW(out) )
+      int_normalize(out, 1);
   return out;
 }
 
@@ -2580,7 +2613,7 @@ gbitor(GEN x, GEN y)
   sy=signe(y); if (!sy) return icopy(x);
   if (sx == 1) {
       if (sy == 1)
-          return ibitor(x,y,0);
+	  return ibitor(x,y);
       goto posneg;
   } else if (sy == -1) {
       ltop = avma;
@@ -2617,8 +2650,8 @@ gbitand(GEN x, GEN y)
   } else if (sy == -1) {
       ltop = avma;
       incdec(x, -1); incdec(y, -1);
-      z = ibitor(x,y,0);
-      incdec(x, 1); incdec(y, 1);       /* Restore x and y... */
+      z = ibitor(x,y);
+      incdec(x, 1); incdec(y, 1);	/* Restore x and y... */
       return inegate_inplace(z, ltop);
   } else {
       z = x; x = y; y = z;
@@ -2646,12 +2679,12 @@ gbitxor(GEN x, GEN y)
   sy=signe(y); if (!sy) return icopy(x);
   if (sx == 1) {
       if (sy == 1)
-          return ibitor(x,y,1);
+	  return ibitxor(x,y);
       goto posneg;
   } else if (sy == -1) {
       incdec(x, -1); incdec(y, -1);
-      z = ibitor(x,y,1);
-      incdec(x, 1); incdec(y, 1);       /* Restore x and y... */
+      z = ibitxor(x,y);
+      incdec(x, 1); incdec(y, 1);	/* Restore x and y... */
       return z;
   } else {
       z = x; x = y; y = z;
@@ -2660,7 +2693,7 @@ gbitxor(GEN x, GEN y)
       ltop = avma;
       incdec(y, -1);
       /* ~(x ^ ~y) == x ^ y */
-      z = ibitor(x,y,1);
+      z = ibitxor(x,y);
       incdec(y, 1);
   }
   return inegate_inplace(z, ltop);
@@ -2697,7 +2730,7 @@ gbitnegimply(GEN x, GEN y)              /* x & ~y */
       ltop = avma;
       incdec(x, -1);
       /* ~((~x) & ~y) == x | y */
-      z = ibitor(x,y,0);
+      z = ibitor(x,y);
       incdec(x, 1);
   }
   return inegate_inplace(z, ltop);

@@ -60,9 +60,8 @@ while test $# -gt 0; do
   --miscdir=*) dfltmiscdir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
   --datadir=*) dfltdatadir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
   --includedir=*) dfltincludedir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
-  --host=*)
-               target_host=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
-  --disable-kernel) kernel=no;;
+  --host=*) target_host=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
+  --kernel=*) kernel=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
   --builddir=*) dfltobjdir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
   -a|-ask|--ask)     fastread=no;;
   -g)          optimization=debugging;;
@@ -92,6 +91,7 @@ Options: some names can be abbreviated to one character (e.g -h = -help)
 -v, --verbhelp   a longer help message
 Build Options:
   --host=<arch-osname>  target achitecture
+  --kernel=<kern>       kernel used
   --graphic=<gr>        graphic library used (default X11) (none X11 gnuplot 
 	gnuplot-dynamic builtin.X11-gnuplot builtin.X11-gnuplot-dynamic)
   --builddir=<dir>      directory where the object files will be created

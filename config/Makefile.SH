@@ -1,10 +1,5 @@
 file=$objdir/Makefile
 
-case "$asmarch" in
-  sparcv8*) ASMARCH=sparcv8;;
-  *) ASMARCH=$asmarch;;
-esac
-
 echo Extracting $file
 rm -f $file
 
@@ -43,12 +38,20 @@ case "$osname" in
 	dlld_ignore=- ;;
   *)   systems=;;
 esac
+#FIXME:
+#This is a kludge to work around the fact that there is two kernels
+#in the sparcv8 directory...
+ 
+case "$kernlvl0" in
+  sparcv8*) dirlvl0=sparcv8;;
+  *) dirlvl0="$kernlvl0";;
+esac
 
-if test -s $src_dir/kernel/$ASMARCH/MakeVar.SH; then
-  . $src_dir/kernel/$ASMARCH/MakeVar.SH
+if test -s $src_dir/kernel/$dirlvl0/MakeVar.SH; then
+  . $src_dir/kernel/$dirlvl0/MakeVar.SH
 fi
 
-case "$ASMARCH" in
+case "$kernlvl0" in
   m68k) hlist=pari68k
   kerntest=kernel.old;; # OLD_CODES should be defined
   *) hlist=pariport
@@ -383,7 +386,7 @@ dotest-graphic::
 	@$doexec -g
 
 cleanobj: cleantest
-	-\$(RM) *\$(_O) *.s pariinl.h libpari* tune* $exec
+	-\$(RM) *\$(_O) *.s pariinl.h parilvl0.h parilvl1.h libpari* tune* $exec
 
 clean: cleanobj
 
@@ -598,12 +601,33 @@ $install_emacs_files: $pari_elc
 	\$(INSTALL_DATA)    $emx/pariemacs.txt  \$(EMACSDIR)
 	\$(INSTALL_DATA)    $emx/with-syntax.el     \$(EMACSDIR)
 	\$(INSTALL_DATA)    $emx/pari-translator.el \$(EMACSDIR)
+	
 EOT
 fi
 
-if test -s $src_dir/kernel/$ASMARCH/Makefile.SH; then
-  . $src_dir/kernel/$ASMARCH/Makefile.SH
+cat >> $file << EOT
+pariinl.h: parilvl0.h parilvl1.h
+	cat parilvl0.h parilvl1.h > pariinl.h
+
+EOT
+
+#FIXME:
+#This is a kludge to work around the fact that there is two kernels
+#in the sparcv8 directory...
+
+case "$kernlvl0" in
+  sparcv8*) dirlvl0=sparcv8;;
+  *) dirlvl0=$kernlvl0;;
+esac
+
+if test -s $src_dir/kernel/$dirlvl0/MakeLVL0.SH; then
+  . $src_dir/kernel/$dirlvl0/MakeLVL0.SH
 fi
+
+if test -s $src_dir/kernel/$kernlvl1/MakeLVL1.SH; then
+  . $src_dir/kernel/$kernlvl1/MakeLVL1.SH
+fi
+
 HUGELINE=
 for dir in basemath modules language gp graph gpdyn graphdyn systems; do
   eval list='$'$dir

@@ -484,7 +484,7 @@ sd_seriesprecision(const char *v, int flag)
 }
 
 static GEN
-sd_format(char *v, int flag)
+sd_format(const char *v, int flag)
 {
   pariout_t *fmt = GP_DATA->fmt;
   if (*v)
@@ -922,7 +922,7 @@ sd_prettyprinter(char *v, int flag)
 }
 
 static GEN
-sd_prompt_set(char *v, int flag, char *how, char *p)
+sd_prompt_set(const char *v, int flag, char *how, char *p)
 {
   if (*v)
   {
@@ -938,7 +938,7 @@ sd_prompt_set(char *v, int flag, char *how, char *p)
 }
 
 static GEN
-sd_prompt(char *v, int flag)
+sd_prompt(const char *v, int flag)
 {
   return sd_prompt_set(v, flag, "", prompt);
 }
@@ -1744,7 +1744,7 @@ escape0(char *tch)
     while (*s)
       if (*s++ == '=')
       {
-	GEN (*f)(char*, int) = NULL;
+	GEN (*f)(const char*, int) = NULL;
 	int len = (s-tch) - 1;
 	
 	if (!strncmp(tch,"precision",len))         f = sd_realprecision;

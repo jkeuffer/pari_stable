@@ -180,7 +180,7 @@ static GEN
 LucasMod(GEN n, long P, GEN N)
 {
   pari_sp av = avma, lim = stack_lim(av, 1);
-  GEN nd = n+2;
+  GEN nd = int_MSW(n);
   long i, m = *nd, j = 1+bfffo((ulong)m);
   GEN v = stoi(P), v1 = stoi(P*P - 2);
 
@@ -210,7 +210,8 @@ LucasMod(GEN n, long P, GEN N)
     }
     if (--i == 0) return v;
     j = BITS_IN_LONG;
-    m = *++nd;
+    nd=int_precW(nd);
+    m = *nd;
   }
 }
 

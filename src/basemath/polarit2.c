@@ -2092,7 +2092,7 @@ GEN
 leftright_pow(GEN x, GEN n, void *data,
              GEN (*sqr)(void*,GEN), GEN (*mul)(void*,GEN,GEN))
 {
-  GEN nd = n+2, y = x;
+  GEN nd = int_MSW(n), y = x;
   long i, m = *nd, j = 1+bfffo((ulong)m);
   pari_sp av = avma, lim = stack_lim(av, 1);
 
@@ -2112,7 +2112,8 @@ leftright_pow(GEN x, GEN n, void *data,
       }
     }
     if (--i == 0) return avma==av? gcopy(y): y;
-    m = *++nd; j = BITS_IN_LONG;
+    nd=int_precW(nd);
+    m = *nd; j = BITS_IN_LONG;
   }
 }
 

@@ -21,12 +21,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /********************************************************************/
 #include "pari.h"
 
+extern GEN ishiftr_spec(GEN x, long lx, long n);
+
 /********************************************************************/
 /**                                                                **/
 /**                 PRINCIPAL VARIABLE NUMBER                      **/
 /**                                                                **/
 /********************************************************************/
-extern GEN ishiftr_spec(GEN x, long lx, long n);
 
 int
 gvar(GEN x)
@@ -2099,17 +2100,19 @@ coefs_to_int(long n, ...)
 #ifdef LONG_IS_64BIT
   n >>= 1;
 #endif
-  x = cgetg(n+2, t_INT); y = x + 2;
+  x = cgetg(n+2, t_INT); 
   x[1] = evallgefint(n+2) | evalsigne(1);
+  y = int_MSW(x);
   for (i=0; i <n; i++)
   {
 #ifdef LONG_IS_64BIT
     ulong a = va_arg(ap, long);
     ulong b = va_arg(ap, long);
-    y[i] = (a << 32) | b;
+    *y = (a << 32) | b;
 #else
-    y[i] = va_arg(ap, long);
+    *y = va_arg(ap, long);
 #endif
+    y=int_precW(y);
   }
   return x;
 }
@@ -2127,8 +2130,8 @@ u2toi(ulong a, ulong b)
 #else
   x = cgetg(4, t_INT);
   x[1] = evallgefint(4)|evalsigne(1);
-  x[2] = a;
-  x[3] = b;
+  *(int_MSW(x)) = a;
+  *(int_LSW(x)) = b;
 #endif
   return x;
 }
