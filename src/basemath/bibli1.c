@@ -2502,9 +2502,10 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   minim_alloc(n, &q, &x, &y, &z, &v);
   av1=avma;
 
-  u = lllgramint(a); a = qf_base_change(a,u,1);
-  if (lg(a) != n)
+  u = lllgramint(a);
+  if (lg(u) != n)
     err(talker,"not a definite form in minim00");
+  a = qf_base_change(a,u,1);
 
   n--;
   a = gmul(a, realun(DEFAULTPREC)); r = sqred1(a);
