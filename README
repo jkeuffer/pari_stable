@@ -1,25 +1,8 @@
 This is PARI/GP, version 2.1.x (*).
 
-PARI/GP is free software; you can redistribute it and/or modify it under the
-terms of the GNU General Public License as published by the Free Software
-Foundation. It is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY WHATSOEVER.
+PARI/GP Number Theory-oriented Computer Algebra System
+        Copyright (C) 2000 The PARI Group, Bordeaux.
 
-Check the License for details. You should have received a copy of it, along
-with the package; see the file 'COPYING'. If not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
-
-
-(*) Version numbers have the shape: MAJOR.MINOR.patchlevel.status. The status
-increases through {alpha, beta, release}. New features are introduced during
-the `alpha' phase, tested during `beta', and declared stable when `release'
-is reached. The MAJOR version number (currently 2) won't change for a while.
-The MINOR version number (1) increases by 2 when a new status cycle starts (as
-soon as a `release' version is out) [odd numbers are reserved for `released'
-versions, even ones for alpha/beta phase]. The patchlevel goes up each time
-we feel an upgrade is necessary (improvement, bugfix, ...). `Release'
-versions may be updated with further patchlevels if sufficiently important
-bugs need to be fixed before the next cycle reaches completion.
 ==========================================================================
 
 To get started, run TeX on the file INSTALL.tex and have a look at the dvi
@@ -79,3 +62,26 @@ found at
   http://www.parigp-home.de/
 
   Thanks for your support, and have fun !
+
+========================================================================
+
+PARI/GP is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation. It is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY WHATSOEVER.
+
+Check the License for details. You should have received a copy of it, along
+with the package; see the file 'COPYING'. If not, write to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+
+(*) Version numbers have the shape: MAJOR.MINOR.patchlevel.status. The status
+increases through {alpha, beta, release}. New features are introduced during
+the `alpha' phase, tested during `beta', and declared stable when `release'
+is reached. The MAJOR version number (currently 2) won't change for a while.
+The MINOR version number (1) increases by 2 when a new status cycle starts (as
+soon as a `release' version is out) [odd numbers are reserved for `released'
+versions, even ones for alpha/beta phase]. The patchlevel goes up each time
+we feel an upgrade is necessary (improvement, bugfix, ...). `Release'
+versions may be updated with further patchlevels if sufficiently important
+bugs need to be fixed before the next cycle reaches completion.
