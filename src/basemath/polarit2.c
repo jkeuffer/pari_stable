@@ -2802,7 +2802,7 @@ GEN
 primitive_part(GEN x, GEN *ptc)
 {
   GEN c = content(x);
-  if (gcmp1(c)) c = NULL; else x = gdiv(x,c);
+  if (gcmp1(c)) c = NULL; else if (!gcmp0(c)) x = gdiv(x,c);
   if (ptc) *ptc = c;
   return x;
 }
@@ -2811,7 +2811,7 @@ GEN
 Q_primitive_part(GEN x, GEN *ptc)
 {
   GEN c = content(x);
-  if (gcmp1(c)) c = NULL; else x = Q_div_to_int(x,c);
+  if (gcmp1(c)) c = NULL; else if (!gcmp0(c)) x = Q_div_to_int(x,c);
   if (ptc) *ptc = c;
   return x;
 }
