@@ -118,6 +118,9 @@ BA 58- [GP internals:] trap() had an invalid prototype [DI,DI]
    61- [GP:] when using default 'colors' for input at \gn>1, first debugging
        msg could be colored
    62- [GP:] in break loop, trailing ; was ignored (all results were printed)
+XR 63- smarter precision increase in update_alpha() (ROUND 4) [stick to
+       padics don't go over Z]
+       Ex: factorpadic(polzagier(18,3), 2, 30) much faster than before.
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).
