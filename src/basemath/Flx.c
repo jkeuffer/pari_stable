@@ -41,6 +41,7 @@ GEN sqrispec(GEN x, long nx);
 
 long Flx_SQR_LIMIT = 200;
 long Flx_MUL_LIMIT = 100;
+long Flx_INVMONTGOMERY_LIMIT = 6000;
 
 #define both_odd(x,y) ((x)&(y)&1)
 
@@ -295,6 +296,27 @@ Flx_add(GEN x, GEN y, ulong p)
 }
 
 GEN
+Flx_subspec(GEN x, GEN y, ulong p, long lx, long ly)
+{
+  long i,lz;
+  GEN z;
+
+  if (ly <= lx)
+  {
+    lz = lx+2; z = cgetg(lz, t_VECSMALL)+2;
+    for (i=0; i<ly; i++) z[i] = (long)subuumod((ulong)x[i],(ulong)y[i],p);
+    for (   ; i<lx; i++) z[i] = x[i];
+  }
+  else
+  {
+    lz = ly+2; z = cgetg(lz, t_VECSMALL)+2;
+    for (i=0; i<lx; i++) z[i] = (long)subuumod((ulong)x[i],(ulong)y[i],p);
+    for (   ; i<ly; i++) z[i] = y[i]? (long)(p - y[i]): y[i];
+  }
+ return Flx_renormalize(z-2, lz);
+}
+
+GEN
 Flx_sub(GEN x, GEN y, ulong p)
 {
   long i,lz,lx = lg(x), ly = lg(y);
@@ -316,12 +338,21 @@ Flx_sub(GEN x, GEN y, ulong p)
 }
 
 GEN
+Flx_negspec(GEN x, ulong p, long l)
+{
+  long i;
+  GEN z = cgetg(l+2, t_VECSMALL) + 2;
+  for (i=0; i<l; i++) 
+    z[i] = x[i]? (long)p - x[i]: 0;
+  return z-2;
+}
+
+
+GEN
 Flx_neg(GEN x, ulong p)
 {
-  long i, l = lg(x);
-  GEN z = cgetg(l, t_VECSMALL);
+  GEN z = Flx_negspec(x+2, p, lgpol(x));
   z[1] = x[1];
-  for (i=2; i<l; i++) z[i] = x[i]? (long)p - x[i]: 0;
   return z;
 }
 
@@ -460,7 +491,7 @@ Flx_mulspec_basecase(GEN x, GEN y, ulong p, long nx, long ny)
     for (  ; i<nx; i++) z[i] = (long)Flx_mullimb(x+i,y,p,0,ny);
     for (  ; i<nz; i++) z[i] = (long)Flx_mullimb(x+i,y,p,i-nx+1,ny);
   }
-  z -= 2; return Flx_renormalize(z, lz);
+  z -= 2; return z; 
 }
 
 INLINE GEN
@@ -575,7 +606,7 @@ Flx_sqrspec_basecase(GEN x, ulong p, long nx)
       z[i] = (long)p1;
     }
   }
-  z -= 2; return Flx_renormalize(z,lz);
+  z -= 2; return z;
 }
 
 GEN
@@ -811,6 +842,135 @@ Flx_divrem(GEN x, GEN y, ulong p, GEN *pr)
   i=dy-1; while (i>=0 && !c[i]) i--;
   c = Flx_renormalize(c-2, i+3);
   *pr = c; return q;
+}
+
+long 
+Flx_valuation(GEN x)
+{
+  long i, l=lg(x);
+  if (l==2)  return VERYBIGINT;
+  for (i=2; i<l && x[i]==0; i++);
+  return i-2;
+}
+
+GEN
+Flx_recipspec(GEN x, long l, long n)
+{
+  long i;
+  GEN z=cgetg(n+2,t_VECSMALL)+2;
+  for(i=0; i<l; i++)
+    z[n-i-1] = x[i];
+  for(   ; i<n; i++)
+    z[n-i-1] = 0;
+  return Flx_renormalize(z-2,n+2);
+}
+
+GEN
+Flx_recip(GEN x)
+{
+  GEN z=Flx_recipspec(x+2,lgpol(x),lgpol(x));
+  z[1]=x[1];
+  return z;
+}
+
+/*
+ * x/polrecip(P)+O(x^n)
+ */
+static GEN 
+Flx_invmontgomery_basecase(GEN T, ulong p)
+{
+  long i, l=lg(T)-1, k;
+  GEN r=cgetg(l,t_VECSMALL); r[1]=T[1];
+  r[2]=0; r[3]=1;
+  for (i=4;i<l;i++)
+  {
+    r[i] = 0;
+    for (k=3;k<i;k++)
+      r[i]= (long) subuumod((ulong)r[i],muluumod((ulong)T[l-i+k],(ulong)r[k],p),p);
+  }
+  r = Flx_renormalize(r,l);
+  return r;
+}
+
+/*Use newton style inversion.
+ * Use log2(n) sqr +log2(n) mul*/
+static GEN 
+Flx_invmontgomery_newton(GEN T, ulong p)
+{
+  long i, l=lgpol(T);
+  GEN x, q, z;
+  pari_sp av;
+  x = Flx_recipspec(T+2,l-1,l);
+  x = Flx_neg(x,p);
+  q = Flx_copy(x); q[2]=1;
+  i = Flx_valuation(x);
+  av = avma;
+  for (  ; i<l; i<<=1)
+  {
+    new_chunk(l+2);
+    x=Flx_sqrspec(x+2,p,l);
+    z=Flx_mulspec(q+2,x+2,p,l,l);
+    avma=av;
+    /* We do full garbage collecting here since:
+     * 1) T is assumed to be large (else we use basecase)
+     * 2) This improve cache usage.
+     * Note that due to valuation handling of x, 
+     * q*x+q is faster than q*(x+1)
+     */
+    q=Flx_addspec(q+2,z+2,p,l,l);
+    x=Flx_addspec(x+2,NULL,p,l,0);
+  }
+  q=Flx_mulspec(q+2,Flx_polx(0)+2,p,l,2);
+  q[1]=T[1];
+  return Flx_renormalize(q,l+1);
+}
+
+/*
+ * x/polrecip(P)+O(x^n)
+ */
+GEN Flx_invmontgomery(GEN T, ulong p)
+{
+  pari_sp ltop=avma;
+  long l=lg(T);
+  GEN r;
+  ulong c=T[l-1], ci=1;
+  if (l<5) return Flx_zero(T[1]);
+  if (c!=1)
+  {
+    ci=invumod(c,p);
+    T=Flx_Fl_mul(T, ci, p);
+  }
+  if (l<Flx_INVMONTGOMERY_LIMIT)
+    r=Flx_invmontgomery_basecase(T,p);
+  else
+    r=Flx_invmontgomery_newton(T,p);
+  if (c!=1)  r=Flx_Fl_mul(r,ci,p);
+  return gerepileupto(ltop, r);
+}
+
+/* Compute x mod T where lg(x)<=2*lg(T)-2
+ * and mg is the Montgomery inverse of T. 
+ */
+GEN Flx_redmontgomery(GEN x, GEN mg, GEN T, ulong p)
+{
+  pari_sp ltop=avma;
+  GEN z;
+  long l=lgpol(x);
+  long lt=degpol(T); /*We discard the leading term*/
+  long lead=lt-1;
+  long ld=l-lt+1;
+  long lm=min(ld,lgpol(mg));
+  if (l<=lt)
+    return Flx_copy(x);
+  new_chunk(lt);
+  z=Flx_recipspec(x+2+lead,ld,ld);              /* z = rec(x)*/
+  z=Flx_mulspec(z+2,mg+2,p,min(ld,lgpol(z)),lm);/* z = rec(x) * mg */
+  z=Flx_recipspec(z+2,lgpol(z),ld);             /* z = rec (rec(x) * mg) */
+  z=Flx_mulspec(z+2,T+2,p,min(ld,lgpol(z)),lt); /* z *= pol */
+  avma=ltop;
+  z=Flx_subspec(x+2,z+2,p,lt,min(lt,lgpol(z))); /* z = x - z */
+  z[1]=T[1];
+  return z;
 }
 
 GEN
@@ -1134,22 +1294,37 @@ Flxq_sqr(GEN y,GEN pol,ulong p)
 
 typedef struct {
   GEN pol;
+  GEN mg;
   ulong p;
 } Flxq_muldata;
 
 
 static GEN
-_u_sqr(void *data, GEN x)
+_sqr_montgomery(void *data, GEN x)
+{
+  Flxq_muldata *D = (Flxq_muldata*)data;
+  return Flx_redmontgomery(Flx_sqr(x,D->p),D->mg, D->pol, D->p);
+}
+static GEN
+_mul_montgomery(void *data, GEN x, GEN y)
+{
+  Flxq_muldata *D = (Flxq_muldata*)data;
+  return Flx_redmontgomery(Flx_mul(x,y,D->p),D->mg, D->pol, D->p);
+}
+
+static GEN
+_Flxq_sqr(void *data, GEN x)
 {
   Flxq_muldata *D = (Flxq_muldata*)data;
   return Flxq_sqr(x, D->pol, D->p);
 }
 static GEN
-_u_mul(void *data, GEN x, GEN y)
+_Flxq_mul(void *data, GEN x, GEN y)
 {
   Flxq_muldata *D = (Flxq_muldata*)data;
   return Flxq_mul(x,y, D->pol, D->p);
 }
+
 
 /* n-Power of x in Z/pZ[X]/(pol), as t_VECSMALL. */
 /* FIXME: assume n > 0 */
@@ -1159,9 +1334,20 @@ Flxq_pow(GEN x, GEN n, GEN pol, ulong p)
   pari_sp av = avma;
   Flxq_muldata D;
   GEN y;
+  x=Flx_rem(x, pol, p);
   D.pol = pol;
   D.p   = p;
-  y = leftright_pow(x, n, (void*)&D, &_u_sqr, &_u_mul);
+#if 0
+  /* not tuned*/
+  if ( pol[2] && cmpis(n,30)>=0)
+  {
+    /*We do not handle polynomials multiple of x yet*/
+    D.mg  = Flx_invmontgomery(pol,p);
+    y = leftright_pow(x, n, (void*)&D, &_sqr_montgomery, &_mul_montgomery);
+  }
+  else
+#endif
+    y = leftright_pow(x, n, (void*)&D, &_Flxq_sqr, &_Flxq_mul);
   return gerepileupto(av, y);
 }
 
