@@ -73,11 +73,12 @@ EOT
 fi
 
 exe=$osname-$arch-gnu$$
-if ($CC $CFLAGS gnu.c 2>/dev/null); then :
+if ($CC gnu.c 2>/dev/null); then :
 else
   echo "***************************************************************"
   echo "*  C compiler is not functional. Aborting.                    *"
   echo "***************************************************************"
+  echo "Compiler was: $CC"
   exit 1;
 fi
 rm -f $exe $exe$exe_suff
