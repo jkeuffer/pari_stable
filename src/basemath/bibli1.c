@@ -2332,8 +2332,28 @@ rnfpolredabs(GEN nf, GEN relpol, long flag, long prec)
 /**                              MINIM                             **/
 /**                                                                **/
 /********************************************************************/
-long addcolumntomatrix(long *V,long n,long r,GEN *INVP,long *L);
+long addcolumntomatrix(long *V,long n,GEN *INVP,long *L);
 GEN gmul_mat_smallvec(GEN x, GEN y, long hx, long ly);
+
+void
+minim_alloc(long n, double ***q, long **x, double **y,  double **z, double **v)
+{
+  long i, s;
+  double **Q;
+
+  *x = (long*)    new_chunk(n);
+  *q = (double**) new_chunk(n);
+
+  /* correct alignment for the following */
+  s = avma % sizeof(double); avma -= s;
+  if (avma<bot) err(errpile);
+
+  s = (n * sizeof(double))/sizeof(long);
+  *y = (double*) new_chunk(s);
+  *z = (double*) new_chunk(s);
+  *v = (double*) new_chunk(s); Q = *q;
+  for (i=1; i<n; i++) Q[i] = (double*) new_chunk(s);
+}
 
 /* Minimal vectors for the integral definite quadratic form: a.
  * Result u:
@@ -2360,18 +2380,7 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   }
   av=avma;
 
-  x = (long*)    new_chunk(n);
-  q = (double**) new_chunk(n);
-
-  /* correct alignment for the following */
-  s = avma % sizeof(double); avma -= s;
-  if (avma<bot) err(errpile);
-
-  s = (n * sizeof(double))/sizeof(long);
-  y = (double*) new_chunk(s);
-  z = (double*) new_chunk(s);
-  v = (double*) new_chunk(s);
-  for (j=1; j<n; j++) q[j] = (double*) new_chunk(s);
+  minim_alloc(n, &q, &x, &y, &z, &v);
   av1=avma;
 
   u = lllgramint(a); a = qf_base_change(a,u,1);
@@ -2421,7 +2430,7 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   k = n; y[n] = z[n] = 0;
   x[n] = (long) sqrt(borne/v[n]+eps);
   if (flag == min_PERF) invp = idmat(maxrank);
-  for(;;)
+  for(;;x[1]--)
   {
     do
     {
@@ -2476,21 +2485,18 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
 
       case min_PERF:
       {
-        long av2=avma, I=1, newran;
+        long av2=avma, I=1;
 
         for (i=1; i<=n; i++)
           for (j=i; j<=n; j++,I++) V[I] = x[i]*x[j];
-        newran = addcolumntomatrix(V,maxrank,s,&invp,liste);
-        if (newran == s)
+        if (! addcolumntomatrix(V,maxrank,&invp,liste))
         {
-          avma=av2;
           if (DEBUGLEVEL>1) { fprintferr("."); flusherr(); }
+          avma=av2; continue;
         }
-        else
-        {
+
           if (DEBUGLEVEL>1) { fprintferr("*"); flusherr(); }
-          s = newran;
-          if (s == maxrank)
+        if (++s == maxrank)
           {
             if (DEBUGLEVEL>1) { fprintferr("\n"); flusherr(); }
             avma=av0; return stoi(s);
@@ -2508,8 +2514,6 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
           }
         }
       }
-    }
-    x[1]--;
   }
   switch(flag)
   {

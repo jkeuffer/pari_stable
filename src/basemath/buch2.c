@@ -7,7 +7,7 @@
 /* $Id$ */
 #include "pari.h"
 #include "parinf.h"
-long addcolumntomatrix(long *V, long n,long r,GEN *INVP,long *L);
+long addcolumntomatrix(long *V, long n,GEN *INVP,long *L);
 double check_bach(double cbach, double B);
 GEN get_arch_real(GEN nf,GEN x,GEN *emb,long prec);
 GEN get_arch(GEN nf,GEN x,long prec);
@@ -1100,8 +1100,9 @@ gmul_mat_smallvec(GEN x, GEN y, long hx, long ly)
 }
 
 static double
-get_minkovski(long prec, long N, long R1, GEN D, GEN gborne)
+get_minkovski(long N, long R1, GEN D, GEN gborne)
 {
+  const long prec = DEFAULTPREC;
   GEN p1,p2, pi = mppi(prec);
   double bound;
 
@@ -1111,11 +1112,8 @@ get_minkovski(long prec, long N, long R1, GEN D, GEN gborne)
   p2 = gpui(gdivsg(4,pi), gdivgs(stoi(N-R1),N),prec);
   p1 = gmul(p1,p2);
   bound = gtodouble(gmul(p1, gpui(absi(D), dbltor(1./(double)N),prec)));
-  bound = bound*gtodouble(gborne);
-  if (DEBUGLEVEL)
-  {
-    fprintferr("Bound for norms = %.0f\n",bound); flusherr();
-  }
+  bound *= gtodouble(gborne);
+  if (DEBUGLEVEL) { fprintferr("Bound for norms = %.0f\n",bound); flusherr(); }
   return bound;
 }
 
@@ -1129,15 +1127,18 @@ wr_rel(long *col)
   fprintferr("\n");
 }
 
+void minim_alloc(long n,double ***q,long **x,double **y,double **z,double **v);
+
 static long
 small_norm_for_buchall(long t,long **mat,GEN matarch,long nbrel,long LIMC,
 		       long PRECREG,GEN nf,GEN gborne,long nbrelpid,GEN invp,
 		       long *L)
 {
-  long av=avma,av1,av2,av3,tetpil,limpile, *x,i,j,k,noideal,ran,keep_old_invp;
+  const double eps = 0.000001;
+  double *y,*zz,**qq,*vv, MINKOVSKI_BOUND,IDEAL_BOUND,normideal;
+  long av=avma,av1,av2,av3,tetpil,limpile, *x,i,j,k,noideal;
   long nbsmallnorm,nbsmallfact,R1,RU, N = lgef(nf[1])-3;
-  double *y,*zz,**qq,*vv, MINKOVSKI_BOUND,IDEAL_BOUND,normideal,eps;
-  GEN D,V,alpha,T2,ideal,rrr,cbase,T2vec,prvec;
+  GEN V,alpha,M,T2,ideal,rrr,cbase,T2vec,prvec,oldinvp;
 
   if (gsigne(gborne)<=0) return t;
   if (DEBUGLEVEL)
@@ -1146,23 +1147,16 @@ small_norm_for_buchall(long t,long **mat,GEN matarch,long nbrel,long LIMC,
     nbsmallnorm = nbsmallfact = 0; flusherr();
   }
   R1=itos(gmael(nf,2,1)); RU = R1 + itos(gmael(nf,2,2));
-  D=(GEN)nf[3]; j=N+1; T2=gmael(nf,5,3);
+  M = gmael(nf,5,1); T2 = gmael(nf,5,3);
   prvec=cgetg(3,t_VECSMALL);
   prvec[1]=(PRECREG>BIGDEFAULTPREC)? (PRECREG>>1)+1: DEFAULTPREC;
   prvec[2]=PRECREG;
   T2vec=cgetg(3,t_VEC);
   T2vec[1]=(long)gprec_w(T2,prvec[1]);
   T2vec[2]=(long)T2;
-  x=(long*)gpmalloc(j*sizeof(long));
-  y=(double*)gpmalloc(j*sizeof(double));
-  zz=(double*)gpmalloc(j*sizeof(double));
-  vv=(double*)gpmalloc(j*sizeof(double));
-  qq=(double**)gpmalloc(j*sizeof(double*));
-  for (k=1; k<=N; k++) qq[k]=(double*)gpmalloc(j*sizeof(double));
-
+  minim_alloc(N+1, &qq, &x, &y, &zz, &vv);
   V=new_chunk(KC+1); av1=avma;
-  MINKOVSKI_BOUND = get_minkovski(DEFAULTPREC,N,R1,D,gborne);
-  eps = 0.000001;
+  MINKOVSKI_BOUND = get_minkovski(N,R1,(GEN)nf[3],gborne);
   for (noideal=1; noideal<=KC; noideal++)
   {
     long flbreak = 0, nbrelideal=0;
@@ -1170,9 +1164,9 @@ small_norm_for_buchall(long t,long **mat,GEN matarch,long nbrel,long LIMC,
     ideal=(GEN)vectbase[KC+1-noideal];
     if (DEBUGLEVEL>1)
     {
-      fprintferr("\n*** Ideal no %ld: S = %ld, ",noideal,t);
-      fprintferr("prime = %ld, ",itos((GEN)ideal[1]));
-      fprintferr("ideal = "); outerr(ideal);
+      fprintferr("\n*** Ideal no %ld: S = %ld, prime = %Z, ideal =",
+                  noideal, t, ideal[1]);
+      outerr(ideal);
     }
     normideal = gtodouble(powgi((GEN)ideal[1],(GEN)ideal[4]));
     IDEAL_BOUND = MINKOVSKI_BOUND*pow(normideal,2./(double)N);
@@ -1195,14 +1189,15 @@ small_norm_for_buchall(long t,long **mat,GEN matarch,long nbrel,long LIMC,
     x[0]=k=N; y[N]=zz[N]=0; x[N]= (long) sqrt(IDEAL_BOUND/vv[N]);
     for(;; x[1]--)
     {
-      for(;;) /* looking for primitive element of small norm */
-      {
+      GEN p1, *newcol;
+      long *colt;
 	double p;
 
+      for(;;) /* looking for primitive element of small norm */
+      {
 	if (k>1)
 	{
-	  /* We need to define `l' for NeXTgcc 2.5.8 */
-	  long l=k-1;
+	  long l = k-1; /* need to define `l' for NeXTgcc 2.5.8 */
 	  zz[l]=0;
 	  for (j=k; j<=N; j++) zz[l] += qq[l][j]*x[j];
 	  p=x[k]+zz[k];
@@ -1221,15 +1216,11 @@ small_norm_for_buchall(long t,long **mat,GEN matarch,long nbrel,long LIMC,
 	  if (!x[1] && y[1]<=eps) { flbreak=1; break; }
 	  if (ccontent(x)==1) /* primitive */
 	  {
-	    if (DEBUGLEVEL>4)
-            {
-              fprintferr("** Found one element: AVMA = %ld\n",avma);
-              flusherr();
-            }
 	    av3=avma; alpha=gmul(ideal,gmul_mat_smallvec(cbase,x,N,N));
 	    j=N; while (j>=2 && !signe(alpha[j])) --j;
 	    if (j!=1)
 	    {
+              long av4 = avma;
 	      if (DEBUGLEVEL)
 	      {
 		if (DEBUGLEVEL>1)
@@ -1237,22 +1228,16 @@ small_norm_for_buchall(long t,long **mat,GEN matarch,long nbrel,long LIMC,
 		  fprintferr(".");
 		  if (DEBUGLEVEL>7)
 		  {
-		    GEN bq = gzero, cq;
+		    GEN gx = cgetg(N+1,t_COL);
 		    outerr(gdiv(idealnorm(nf,alpha), idealnorm(nf,ideal)));
-		    for (j=1; j<=N; j++)
-		    {
-		      cq=gzero;
-		      for (i=j+1; i<=N; i++)
-			cq=gadd(cq,gmulgs(gcoeff(rrr,j,i),x[i]));
-		      cq=gaddgs(cq,x[j]);
-		      bq=gadd(bq,gmul(gsqr(cq),gcoeff(rrr,j,j)));
-		    }
-		    outerr(bq);
+		    for (i=1; i<=N; i++) gx[i] = lstoi(x[i]);
+		    outerr(qfeval(rrr,gx));
 		  }
 		}
 		nbsmallnorm++; flusherr();
 	      }
-	      if (factorisealpha(nf,alpha,KCZ,LIMC)) break; /* can factor it */
+              /* can factor it ? */
+	      if (factorisealpha(nf,alpha,KCZ,LIMC)) { avma = av4; break; }
 	    }
 	    avma=av3;
 	  }
@@ -1261,30 +1246,29 @@ small_norm_for_buchall(long t,long **mat,GEN matarch,long nbrel,long LIMC,
       }
       if (flbreak) { flbreak=0; break; }
 
-      if (t && t<KC) /* matrix empty or maximal rank */
+      oldinvp = invp;
+      if (t && t < KC)
       {
 	for (i=1; i<=KC; i++) V[i]=0;
 	for (i=1; i<=primfact[0]; i++) V[primfact[i]] = expoprimfact[i];
-	keep_old_invp=0; ran=addcolumntomatrix(V,KC,t,&invp,L);
-      }
-      else { keep_old_invp=1; ran=t+1; }
-      if (ran==t)
-	{ if (DEBUGLEVEL>1) { fprintferr("*"); flusherr(); } }
-      else
+	
+        if (! addcolumntomatrix(V,KC,&invp,L))
       {
-	GEN p1, *newcol; /* record the new relation */
-        long *colt;
+          if (DEBUGLEVEL>1) { fprintferr("*"); flusherr(); }
+          avma = av3; continue;
+        }
+      }
 
-	t=ran; newcol=(GEN*)matarch[t]; colt=mat[t];
+      /* record the new relation */
+      t++; newcol=(GEN*)matarch[t]; colt=mat[t];
         colt[0] = primfact[1]; /* for already_found_relation */
-	for (j=1; j<=primfact[0]; j++)
-	  colt[primfact[j]] = expoprimfact[j];
+      for (i=1; i<=primfact[0]; i++) colt[primfact[i]] = expoprimfact[i];
 
-	p1=gmul(gmael(nf,5,1),alpha);
-	for (j=1; j<=R1; j++)
-	  gaffect(glog((GEN)p1[j],PRECREG), newcol[j]);
-	for (   ; j<=RU; j++)
-	  gaffect(gmul2n(glog((GEN)p1[j],PRECREG),1), newcol[j]);
+      p1 = gmul(M, alpha);
+      for (i=1; i<=R1; i++)
+        gaffect(glog((GEN)p1[i],PRECREG), newcol[i]);
+      for (   ; i<=RU; i++)
+        gaffect(gmul2n(glog((GEN)p1[i],PRECREG),1), newcol[i]);
 
 	if (DEBUGLEVEL)
 	{
@@ -1298,17 +1282,13 @@ small_norm_for_buchall(long t,long **mat,GEN matarch,long nbrel,long LIMC,
 	  flusherr(); nbsmallfact++;
 	}
 	if (t>=nbrel) { flbreak=1; break; }
-	nbrelideal++; if (nbrelideal==nbrelpid) break;
-      }
-      if (keep_old_invp)
-	avma=av3;
-      else if (low_stack(limpile, stack_lim(av2,1)))
+      if (++nbrelideal == nbrelpid) break;
+
+      if (low_stack(limpile, stack_lim(av2,1)))
       {
 	if(DEBUGMEM>1) err(warnmem,"small_norm");
-        tetpil=avma; invp=gerepile(av2,tetpil,gcopy(invp));
+        invp = gerepileupto(av2, gcopy(invp));
       }
-      if (DEBUGLEVEL>4)
-        { fprintferr("** Found one element: AVMA = %ld\n",avma); flusherr(); }
     }
     if (flbreak) break;
     tetpil=avma; invp=gerepile(av1,tetpil,gcopy(invp));
@@ -1340,8 +1320,6 @@ small_norm_for_buchall(long t,long **mat,GEN matarch,long nbrel,long LIMC,
     else
       fprintferr("\nnb. small norm = 0\n");
   }
-  for (j=1; j<=N; j++) free(qq[j]);
-  free(qq); free(x); free(y); free(zz); free(vv);
   avma=av; return t;
 }
 
@@ -1363,7 +1341,7 @@ ideallllredpart1(GEN nf, GEN I, GEN matt2, long N, long PRECREGINT)
   idealpro[1] = (long)I;
   idealpro[2] = (long)m; /* elt of small (weighted) T2 norm in I */
   idealpro[3] = labsi( subres(gmul((GEN)nf[7],m), (GEN)nf[1]) ); /* |Nm| */
-  if (DEBUGLEVEL>5) fprintferr("\nidealpro = %Z\n");
+  if (DEBUGLEVEL>5) fprintferr("\nidealpro = %Z\n",idealpro);
   return idealpro;
 }
 
@@ -1880,19 +1858,18 @@ relationrank(long **mat,long n,long r,long *L)
   return ptinvp;
 }
 
-/* Etant donnes une matrice dans M_{ n,r }(Q), de rang maximum r < n, un
- * vecteur colonne V a n lignes, la matrice *INVP et le vecteur ligne *L
- * donnes par le programme relationrank() ci-dessus, on teste si le vecteur V
- * est lineairement independant des colonnes de la matrice; si la reponse est
- * non, on rend le rang de la matrice; si la reponse est oui, on rend le rang
- * de la matrice + 1, on met dans *INVP l'inverse de la nouvelle matrice
- * *INVP et dans *L le nouveau vecteur ligne *L
+/* Input: a matrix in M_{ n,r }(Q), of maximal rank r < n, a n-dimensional
+ * column vector V, the matrix *INVP and the row vector *L as given by
+ * relationrank()
+ *
+ * If V depends linearly from the columns of the matrix, return 0.
+ * Otherwise, update *INVP and *L and return 1.
  */
 long
-addcolumntomatrix(long *V, long n,long r,GEN *INVP,long *L)
+addcolumntomatrix(long *V, long n,GEN *INVP,long *L)
 {
-  long av = avma,i,k;
   GEN ptinvp,y;
+  long i, k;
 
   if (DEBUGLEVEL>4)
   {
@@ -1908,22 +1885,20 @@ addcolumntomatrix(long *V, long n,long r,GEN *INVP,long *L)
     fprintferr("vector in new basis = \n"); outerr(y);
     fprintferr("base change matrix = \n"); outerr(ptinvp);
     fprintferr("list = [");
-    for (i=1; i<=n-1; i++) fprintferr("%ld,",L[i]);
+    for (i=1; i<n; i++) fprintferr("%ld,",L[i]);
     fprintferr("%ld]\n",L[n]); flusherr();
   }
   k=1; while (k<=n && (gcmp0((GEN)y[k]) || L[k])) k++;
-  if (k>n) avma=av;
-  else
-  {
+  if (k > n) return 0;
+
     *INVP = relationrank_partial(ptinvp,y,k,n);
-    L[k]=1; r++;
-  }
+  L[k] = 1;
   if (DEBUGLEVEL>4)
   {
     fprintferr("*** Leaving addcolumntomatrix(). AVMA = %ld\n",avma);
     flusherr();
   }
-  return r;
+  return 1;
 }
 
 /* a usage special: uniquement pour passer du format smallbnf au format bnf
