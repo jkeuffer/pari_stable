@@ -29,7 +29,7 @@ XR = Xavier Roblot
 YU = Yoshiaki Uchikawa
 
 ===========================================================================
-Done for version ??? (released ??/??/2000):
+Done for version 2.0.21 (released ??/09/2000):
   Fixed
     1- trap(gdiver2,a,1/0) <C-D> trap(,a,1/0); trap(gdiver2,a,1/0) --> crash
     2- lllgramintern could reduce a wrong lattice (after precision problems)
@@ -72,6 +72,8 @@ BA 30- cotan(x) wasn't accepted
 IZ 34- external prettyprinter incompatible with colors
    35- idealval used much larger numbers than necessary
    36- sqrtint very inefficient (computed with full precision all along)
+   37- bnfisprincipal couldn't deal with some non-Galois fields
+   38- listcreate allowed creating longer lists than GP could later handle
 
   Changed
 BA  1- more efficient quadratic Hensel lift
