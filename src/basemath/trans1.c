@@ -264,7 +264,7 @@ puiss0(GEN x)
 static GEN
 puissii(GEN a, GEN n, long s)
 {
-  long av,*p,man,k,nb,lim;
+  long av,*p,m,k,i,lim;
   GEN y;
 
   if (!signe(a)) return gzero; /* a==0 */
@@ -280,24 +280,24 @@ puissii(GEN a, GEN n, long s)
   }
   /* be paranoid about memory consumption */
   av=avma; lim=stack_lim(av,1);
-  y = a; p = n+2; man = *p;
-  /* normalize, i.e set highest bit to 1 (we know man != 0) */
-  k = 1+bfffo(man); man<<=k; k = BITS_IN_LONG-k;
+  y = a; p = n+2; m = *p;
+  /* normalize, i.e set highest bit to 1 (we know m != 0) */
+  k = 1+bfffo(m); m<<=k; k = BITS_IN_LONG-k;
   /* first bit is now implicit */
-  for (nb=lgefint(n)-2;;)
+  for (i=lgefint(n)-2;;)
   {
-    for (; k; man<<=1,k--)
+    for (; k; m<<=1,k--)
     {
       y = sqri(y);
-      if (man < 0) y = mulii(y,a); /* first bit is set: multiply by base */
+      if (m < 0) y = mulii(y,a); /* first bit is set: multiply by base */
       if (low_stack(lim, stack_lim(av,1)))
       {
         if (DEBUGMEM>1) err(warnmem,"puissii");
         y = gerepileuptoint(av,y);
       }
     }
-    if (--nb == 0) break;
-    man = *++p, k = BITS_IN_LONG;
+    if (--i == 0) break;
+    m = *++p; k = BITS_IN_LONG;
   }
   setsigne(y,s); return gerepileuptoint(av,y);
 }
@@ -307,7 +307,7 @@ puissii(GEN a, GEN n, long s)
 GEN
 rpowsi(ulong a, GEN n, long prec)
 {
-  long av,*p,man,k,nb,lim;
+  long av,*p,m,k,i,lim;
   GEN y, unr = realun(prec);
   GEN (*sq)(GEN);
   GEN (*mulsg)(long,GEN);
@@ -317,17 +317,17 @@ rpowsi(ulong a, GEN n, long prec)
   if (is_pm1(n)) { affsr(a, unr); return unr; }
   /* be paranoid about memory consumption */
   av=avma; lim=stack_lim(av,1);
-  y = stoi(a); p = n+2; man = *p;
-  /* normalize, i.e set highest bit to 1 (we know man != 0) */
-  k = 1+bfffo(man); man<<=k; k = BITS_IN_LONG-k;
+  y = stoi(a); p = n+2; m = *p;
+  /* normalize, i.e set highest bit to 1 (we know m != 0) */
+  k = 1+bfffo(m); m<<=k; k = BITS_IN_LONG-k;
   /* first bit is now implicit */
   sq = &sqri; mulsg = &mulsi;
-  for (nb=lgefint(n)-2;;)
+  for (i=lgefint(n)-2;;)
   {
-    for (; k; man<<=1,k--)
+    for (; k; m<<=1,k--)
     {
       y = sq(y);
-      if (man < 0) y = mulsg(a,y); /* first bit is set: multiply by base */
+      if (m < 0) y = mulsg(a,y);
       if (lgefint(y) >= prec && typ(y) == t_INT) /* switch to t_REAL */
       { 
         sq = &gsqr; mulsg = &mulsr;
@@ -340,8 +340,8 @@ rpowsi(ulong a, GEN n, long prec)
         y = gerepileuptoleaf(av,y);
       }
     }
-    if (--nb == 0) break;
-    man = *++p, k = BITS_IN_LONG;
+    if (--i == 0) break;
+    m = *++p, k = BITS_IN_LONG;
   }
   if (typ(y) == t_INT) { affir(y, unr); y = unr ; }
   return gerepileuptoleaf(av,y);
