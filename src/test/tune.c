@@ -458,7 +458,7 @@ main(int argc, char **argv)
           s = argv[i];
         }
         speed_unittime = atof(s); break;
-      default: if (!isdigit(*s)) error(argv);
+      default: if (!isdigit((int)*s)) error(argv);
         i = atol(s); if (i >= numberof(param) || i < 0) error(argv);
         one(&param[i]); return 0;
     }
