@@ -1108,6 +1108,7 @@ GEN     polfnf(GEN a, GEN t);
 GEN     polhensellift(GEN pol, GEN fct, GEN p, long exp);
 GEN     polresultant0(GEN x, GEN y,long v,long flag);
 GEN     polsym(GEN x, long n);
+GEN     primitive_part(GEN x, GEN *c);
 GEN     quadgen(GEN x);
 GEN     quadpoly(GEN x);
 GEN     quadpoly0(GEN x, long v);

@@ -3089,7 +3089,7 @@ rnfequation0(GEN nf, GEN B, long flall)
 {
   ulong av = avma;
   long v,vpol,k,lA,lB;
-  GEN A,C,LPRS;
+  GEN cC,A,C,LPRS;
 
   if (typ(nf)==t_POL) A=nf; else { nf=checknf(nf); A=(GEN)nf[1]; }
   B = fix_relative_pol(nf,B,1);
@@ -3107,6 +3107,7 @@ rnfequation0(GEN nf, GEN B, long flall)
 
   k = 0; C = ZY_ZXY_resultant_all(A, B, &k, flall? &LPRS: NULL);
   if (gsigne(leadingcoeff(C)) < 0) C = gneg_i(C);
+  C = primitive_part(C, &cC);
   if (flall)
   {
     GEN w,a,b; /* a,b,c root of A,B,C = compositum, c = b - k a */

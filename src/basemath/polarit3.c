@@ -3406,8 +3406,8 @@ ZX_caract(GEN A, GEN B, long v)
 static GEN
 trivial_case(GEN A, GEN B)
 {
-  if (deg(A) == 0) A = (GEN)A[2];
   if (typ(A) == t_INT) return gpowgs(A, deg(B));
+  if (deg(A) == 0) return trivial_case((GEN)A[2],B);
   return NULL;
 }
 

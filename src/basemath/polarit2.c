@@ -28,7 +28,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define both_even(a,b) ((((a)|(b))&1) == 0)
 
 GEN gassoc_proto(GEN f(GEN,GEN),GEN,GEN);
-GEN primitive_part(GEN x, GEN *c);
 
 GEN
 polsym(GEN x, long n)
