@@ -10,13 +10,15 @@
 
 if test -z "$__gnuc__" -o "$osname" = "nextstep" -o "$osname" = "linux"; then
   kernel="$kernel kernel2"
+  if test "$gnuas" = "yes"; then do_cpp=yes; fi
 fi
 
 ker=$src/kernel/sparcv8
 kernel1=$ker/level0_$asmarch.S
 kernel2=$ker/level0.S
 level0=$ker/level0.h
-if test "$osname" = "nextstep" -o "$osname" = "linux" -o "$gnuas" = "yes"; then
+if test "$osname" = "nextstep" -o "$osname" = "linux" -o "$do_cpp" = "yes"
+then
 cat >> $file << EOT
 kernel1.s: $kernel1
 	\$(CPP) $KERNELCPPFLAGS $kernel1 > \$@
