@@ -765,7 +765,7 @@ init_pow_p_mod_pT(GEN p, GEN T)
   GEN p1, S = cgetg(n, t_VEC);
   if (n == 1) return S;
   S[1] = (long)Fp_pow_mod_pol(polx[v], p, T, p);
-#if 1 /* use as many squarings as possible */
+  /* use as many squarings as possible */
   for (i=2; i < n; i+=2)
   {     
     p1 = gsqr((GEN)S[i>>1]);
@@ -774,13 +774,6 @@ init_pow_p_mod_pT(GEN p, GEN T)
     p1 = gmul((GEN)S[i], (GEN)S[1]);
     S[i+1] = (long)Fp_res(p1, T, p);
   }       
-#else
-  for (i=2; i < n; i++)
-  { 
-    p1 = gmul((GEN)S[i-1], (GEN)S[1]);
-    S[i] = (long)Fp_res(p1, T, p);
-  } 
-#endif
   return S;
 } 
 
@@ -822,7 +815,6 @@ factcantor0(GEN f, GEN pp, long flag)
   /* to hold factors and exponents */
   t = (GEN*)cgetg(d+1,t_VEC); ex = new_chunk(d+1);
   vf=varn(f); e = nbfact = 1;
-  f = lift_intern(f);
   for(;;)
   {
     f2 = Fp_pol_gcd(f,derivpol(f), pp);
@@ -1100,7 +1092,7 @@ split_berlekamp(GEN Q, GEN *t, GEN pp, GEN pps2)
         for (i=2; i<=d; i++)
           Fp_pol_addmul(pol, (GEN)vker[i], mymyrand()%p, p);
       }
-      polt = small_to_pol(pol+2, lgef(pol), p);
+      polt = small_to_pol(pol);
       setvarn(polt,vu);
     }
     else

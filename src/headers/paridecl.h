@@ -1141,7 +1141,7 @@ GEN     modulargcd(GEN a,GEN b);
 GEN     normalize_mod_p(GEN z, GEN p);
 GEN     quickmul(GEN a, GEN b, long na, long nb);
 GEN     quicksqr(GEN a, long na);
-GEN     small_to_pol(GEN z, long l, long p);
+GEN     small_to_pol(GEN z);
 GEN     stopoly(long m, long p, long v);
 GEN     stopoly_gen(GEN m, GEN p, long v);
 
