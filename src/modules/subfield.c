@@ -378,7 +378,7 @@ static GEN
 cand_for_subfields(GEN A,GEN DATA,GEN *ptlistdelta)
 {
   long N,m,i,j,d,lf;
-  GEN M,T,pe,p,pol,fk,fhk,g,p1;
+  GEN M,T,pe,p,pol,fhk,g;
   GEN _d_1_term,delta,listdelta,whichdelta,firstroot;
 
   pol=(GEN)DATA[1];
@@ -386,10 +386,8 @@ cand_for_subfields(GEN A,GEN DATA,GEN *ptlistdelta)
   pe= (GEN)DATA[3];
   T = (GEN)DATA[4];
   fhk=(GEN)DATA[5];
-  fk= (GEN)DATA[6];
-  M = (GEN)DATA[8]; N=deg(pol); m=lg(A)-1; d=N/m;
+  M = (GEN)DATA[8]; N=deg(pol); m=lg(A)-1; d=N/m; /* m | M */
   firstroot = (GEN)DATA[13];
-  if (N % m) err(talker,"incompatible block system in cand_for_subfields");
 
   delta = cgetg(m+1,t_VEC);
   lf = lg(firstroot);
@@ -398,33 +396,27 @@ cand_for_subfields(GEN A,GEN DATA,GEN *ptlistdelta)
   _d_1_term = gzero;
   for (i=1; i<=m; i++)
   {
-    GEN Ai=(GEN)A[i], col = cgetg(d+1,t_VEC);
-
-    p1 = gun;
+    GEN Ai = (GEN)A[i], p1 = gun;
     for (j=1; j<=d; j++)
-    {
-      col[j] = fk[Ai[j]];
       p1 = FpXQ_mul(p1, (GEN)fhk[Ai[j]], T,pe);
-    }
+    delta[i] = (long)p1;
+    if (DEBUGLEVEL>2) fprintferr("delta[%ld] = %Z\n",i,p1);
     /* g = prod (X - delta[i])
      * if g o h = 0 (pol), we'll have h(Ai[j]) = delta[i] for all j */
-    if (DEBUGLEVEL>2) fprintferr("delta[%ld] = %Z\n",i,p1);
-    /* fk[k] belongs to whichdelta[k] */
+    /* fk[k] belongs to block number whichdelta[k] */
     for (j=1; j<=d; j++) whichdelta[Ai[j]] = i;
-    delta[i] = (long)p1;
     if (typ(p1) == t_POL) p1 = constant_term(p1);
     _d_1_term = addii(_d_1_term, p1);
   }
   _d_1_term = centermod(_d_1_term, pe); /* Tr(g) */
   if (absi_cmp(_d_1_term, (GEN)M[3]) > 0) return gdeux; /* d-1 test */
-
-  for (i=1; i<lf; i++) listdelta[i] = delta[whichdelta[firstroot[i]]];
   g = FqV_roots_to_pol(delta, T, pe, 0);
   g = centermod(polsimplify(g), pe); /* assume g in Z[X] */
   if (DEBUGLEVEL>2) fprintferr("pol. found = %Z\n",g);
-  if (!FpX_is_squarefree(g, p)) return gzero;
   if (!ok_coeffs(g,M)) return gun;
+  if (!FpX_is_squarefree(g, p)) return gzero;
 
+  for (i=1; i<lf; i++) listdelta[i] = delta[whichdelta[firstroot[i]]];
   *ptlistdelta = listdelta; return g;
 }
 
@@ -626,10 +618,12 @@ choose_prime(GEN pol,GEN dpol,long d,GEN *ptff,GEN *ptlistpotbl, long *ptnn)
 }
 
 static GEN
-bound_for_coeff(long m,GEN rr,long r1, GEN *maxroot)
+bound_for_coeff(long m,GEN rr, GEN *maxroot)
 {
-  long i, lrr=lg(rr);
+  long i,r1, lrr=lg(rr);
   GEN p1,b1,b2,B,M, C = matpascal(m-1);
+
+  for (r1=0; typ(rr[r1+1]) == t_REAL; r1++) /* empty */;
 
   rr = gabs(rr,0); *maxroot = vecmax(rr);
   for (i=1; i<lrr; i++)
@@ -680,7 +674,7 @@ init_traces(GEN ff, GEN T, GEN p)
   return y;
 }
 
-/* return H in Z[X]/(p,T), H[ D[1] ] = 1, H[ D[i] ] = 0 otherwise. H is the
+/* return C in Z[X]/(p,T), C[ D[1] ] = 1, C[ D[i] ] = 0 otherwise. H is the
  * list of degree 1 polynomials X - D[i]  (come directly from factorization) */
 static GEN
 interpol(GEN H, GEN T, GEN p)
@@ -688,15 +682,24 @@ interpol(GEN H, GEN T, GEN p)
   long i, m = lg(H);
   GEN X = polx[0],d,p1,p2,a;
 
-  p1=polun[0]; p2=gun; a = gneg(gmael(H,1,2)); /* = D[1] */
+  p1=polun[0]; p2=gun; a = gneg(constant_term(H[1])); /* = D[1] */
   for (i=2; i<m; i++)
   {
-    d = gmael(H,i,2); /* -D[i] */
+    d = constant_term(H[i]); /* -D[i] */
     p1 = FpXQX_mul(p1,gadd(X,d), T,p);
     p2 = FpXQ_mul(p2, gadd(a,d), T,p);
   }
   p2 = FpXQ_inv(p2, T,p);
   return FpXQX_FpXQ_mul(p1,p2, T,p);
+}
+
+static GEN
+roots_from_deg1(GEN x)
+{
+  long i,l = lg(x);
+  GEN r = cgetg(l,t_VEC);
+  for (i=1; i<l; i++) r[i] = lneg(constant_term(x[i]));
+  return r;
 }
 
 /* ff = factmod(nf[1], p), d = requested degree for subfield. Return DATA,
@@ -719,27 +722,28 @@ interpol(GEN H, GEN T, GEN p)
 static GEN
 compute_data(GEN DATA, long d, GEN nf, GEN ff, GEN T, GEN p)
 {
-  long i,j,l,e,N,pp;
-  GEN pe,p1,p2,fk,fhk,MM,dpol,maxroot,maxMM,pol,ind,interp,bezoutC;
+  long i,j,l,e,N;
+  GEN roo,pe,p1,p2,fk,fhk,MM,dpol,maxroot,pol,ind,interp,bezoutC;
 
   if (DEBUGLEVEL>1) { fprintferr("Entering compute_data()\n\n"); flusherr(); }
   pol = (GEN)nf[1]; N = deg(pol);
+  ind = (GEN)nf[4];
+  roo = (GEN)nf[6];
   if (DATA) /* update (translate) an existing DATA */
   {
     GEN Xm1 = gsub(polx[varn(pol)], gun);
-    DATA[14] = laddis((GEN)DATA[14],1);
-    pol = poleval(pol, Xm1);
-    nf = dummycopy(nf); nf[1]=(long)pol;
-    nf[6] = (long)dummycopy((GEN)nf[6]);
-    p1 = (GEN)nf[6]; l = lg(p1);
-    for (i=1; i<l; i++) p1[i] = ladd(gun,(GEN)p1[i]);
-    /* don't update ff (useless), only fk, interp, and bezoutC */
+    GEN TR = addis((GEN)DATA[14],1);
+    DATA[14] = (long)TR;
+    pol = poleval(pol, gsub(polx[varn(pol)], TR));
+    p1 = dummycopy(roo); l = lg(p1);
+    for (i=1; i<l; i++) p1[i] = ladd(TR, (GEN)p1[i]);
+    roo = p1;
+
     fk = (GEN)DATA[6]; l=lg(fk);
+    for (i=1; i<l; i++) fk[i] = lsub(Xm1, (GEN)fk[i]);
+
     interp = (GEN)DATA[10];
-    bezoutC = (GEN)DATA[12];
-    for (i=1; i<l; i++)
-      fk[i] = lsub(Xm1, (GEN)fk[i]);
-    l = lg(interp);
+    bezoutC = (GEN)DATA[12]; l = lg(interp);
     for (i=1; i<l; i++)
     {
       if (deg(interp[i]) > 0) /* do not turn polun[0] into gun */
@@ -771,6 +775,7 @@ compute_data(GEN DATA, long d, GEN nf, GEN ff, GEN T, GEN p)
       firstroot[j] = l;
       for (i=1; i<lg(p1); i++,l++) fk[l] = p1[i];
     }
+    DATA[9] = (long)ind;
     DATA[10]= (long)interp;
     DATA[11]= (long)init_traces(ff, T,p);
     DATA[12]= (long)get_bezout(pol,ff,p);
@@ -778,29 +783,21 @@ compute_data(GEN DATA, long d, GEN nf, GEN ff, GEN T, GEN p)
     DATA[14]= zero;
   }
   DATA[1] = (long)pol;
-  MM = bound_for_coeff(d, (GEN)nf[6], nf_get_r1(nf), &maxroot);
+  MM = bound_for_coeff(d, roo, &maxroot);
   MM = gmul2n(MM,1);
   DATA[8] = (long)MM;
-  pp = itos(p); maxMM = vecmax(MM);
-  for (e=1,pe=p; cmpii(pe, maxMM) < 0; ) { pe = mulis(pe,pp); e++; }
+  e = logint(shifti(vecmax(MM),20), p, &pe); /* overlift 2^20 [for d-1 test] */
   DATA[3] = (long)pe;
-  p1 = cgetg(N+1,t_VEC);
-  for (l=1; l<=N; l++) p1[l] = lneg(gmael(fk,l,2));
-  DATA[6] = (long)p1;
-
+  DATA[6] = (long)roots_from_deg1(fk);
   fhk = hensel_lift_fact(pol,fk,(GEN)DATA[4],p,pe,e);
-  p1 = cgetg(N+1,t_VEC);
-  for (l=1; l<=N; l++) p1[l] = lneg(gmael(fhk,l,2));
-  DATA[5] = (long)p1;
+  DATA[5] = (long)roots_from_deg1(fhk);
 
   p1 = gmul(stoi(N), gsqrt(gpuigs(stoi(N-1),N-1),DEFAULTPREC));
   p2 = gpuigs(maxroot, N/d + N*(N-1)/2);
-  ind = (GEN)nf[4];
   dpol = mulii(sqri(ind),(GEN)nf[3]);
   p1 = gdiv(gmul(p1,p2), gsqrt(absi(dpol),DEFAULTPREC));
   p1 = shifti(ceil_safe(p1), 1);
   DATA[7] = lmulii(p1,ind);
-  DATA[9] = (long)ind;
 
   if (DEBUGLEVEL>1) {
     fprintferr("f = %Z\n",DATA[1]);
