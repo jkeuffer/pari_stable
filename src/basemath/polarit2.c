@@ -1159,9 +1159,8 @@ squff(GEN a, long klim, long hint)
     GEN minuspolx;
     p += *pt++; if (!*pt) err(primer1);
     if (!smodis((GEN)a[da+2],p)) continue;
-    prime[2] = p; z = FpX(a, prime);
-    if (gcmp0(discsr(z))) continue;
-    z = lift_intern(z);
+    prime[2] = p; z = FpX_red(a, prime);
+    if (!Fp_is_squarefree(z, prime)) continue;
 
     for (j=0; j<lbit-1; j++) tabkbit[j] = 0;
     tabkbit[j] = 1;
@@ -1174,9 +1173,8 @@ squff(GEN a, long klim, long hint)
       tabdnew[d]=g; lgg=lgef(g)-3;
       if (lgg > 0)
       {
-	z = FpX_divres(z, g, prime, NULL);
-        e = lgef(z)-3;
-        w = FpX_divres(w, z, prime, ONLY_REM);
+	z = FpX_div(z, g, prime); e = lgef(z)-3;
+        w = FpX_res(w, z, prime);
         lgg /= d; nfacp += lgg;
         if (DEBUGLEVEL>5)
           fprintferr("   %3ld %s of degree %3ld\n",
