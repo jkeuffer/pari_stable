@@ -2057,9 +2057,9 @@ idealred_elt_i(GEN *ptnf, GEN I, GEN vdir, long *ptprec)
     u = lllintern(y, 100, 1, prec);
     if (u) break;
 
-    if (i == MAXITERPOL) err(accurer,"ideallllred");
+    if (i == MAXITERPOL) err(accurer,"idealred");
     prec = (prec<<1)-2;
-    if (DEBUGLEVEL) err(warnprec,"ideallllred",prec);
+    if (DEBUGLEVEL) err(warnprec,"idealred",prec);
     nf = nfnewprec(nf, e + prec);
   }
   *ptprec = prec;
@@ -2084,15 +2084,16 @@ ideallllred(GEN nf, GEN I, GEN vdir, long prec)
 {
   pari_sp av = avma;
   long N, i, nfprec;
-  GEN J, Ired, res, aI, y, x, Nx, b, c1, c, pol;
+  GEN J, Ired, res, aI, y, x, T, b, c1, c, pol;
 
   nf = checknf(nf); nfprec = nfgetprec(nf);
   if (prec <= 0) prec = nfprec;
   pol = (GEN)nf[1]; N = degpol(pol);
-  Nx = x = c = c1 = NULL;
+  T = x = c = c1 = NULL;
   if (idealtyp(&I,&aI) == id_PRINCIPAL)
   {
     if (gcmp0(I)) { y=gun; I=cgetg(1,t_MAT); } else { y=I; I=idmat(N); }
+    if (!aI) return I;
     goto END;
   }
   if (typ(I) != id_MAT || lg(I) != N+1) I = idealhermite_aux(nf,I);
@@ -2105,45 +2106,48 @@ ideallllred(GEN nf, GEN I, GEN vdir, long prec)
 
   if (isnfscalar(y))
   { /* already reduced */
-    if (!aI) I = gcopy(I);
+    if (!aI) return gerepilecopy(av, I);
     y = NULL; goto END;
   }
 
-  x = gmul((GEN)nf[7], y); Nx = subres(pol,x);
-  b = gmul(Nx, QX_invmod(x,pol));
+  x = gmul((GEN)nf[7], y); /* algebraic integer */
+  b = Q_remove_denom(QX_invmod(x,pol), &T);
   b = algtobasis_i(nf,b);
-  J = cgetg(N+1,t_MAT); /* = I Nx / x integral */
+  if (T)
+  {
+    GEN T2; b = Q_primitive_part(b, &T2);
+    if (T2) { T = diviiexact(T, T2); if (is_pm1(T)) T = NULL; }
+  }
+  /* b = T x^(-1), T rat. integer, minimal such that b alg. integer */
+  if (!T) /* x is a unit, I already reduced */
+  {
+    if (!aI) return gerepilecopy(av, I);
+    y = NULL; goto END;
+  }
+
+  J = cgetg(N+1,t_MAT); /* = I T/ x integral */
   for (i=1; i<=N; i++)
     J[i] = (long)element_muli(nf,b,(GEN)Ired[i]);
   J = Q_primitive_part(J, &c);
- /* c = content (I Nx / x) = Nx / den(I/x) --> d = den(I/x) = Nx / c
+ /* c = content (I T / x) = T / den(I/x) --> d = den(I/x) = T / c
   * J = (d I / x); I[1,1] = I \cap Z --> d I[1,1] belongs to J and Z */
   if (isnfscalar((GEN)I[1]))
-    b = mulii(gcoeff(I,1,1), c? diviiexact(Nx, c): Nx);
+    b = mulii(gcoeff(I,1,1), c? diviiexact(T, c): T);
   else
     b = detint(J);
   I = hnfmodid(J,b);
-
-END:
   if (!aI) return gerepileupto(av, I);
 
+END:
   switch(typ(aI))
   {
-    case t_POLMOD: /* compute y, I0 = J y */
-      if (!Nx) y = c1;
-      else
-      {
-        c = mul_content(c,c1);
-        y = c? gmul(x, gdiv(c,Nx)): gdiv(x, Nx);
-      }
-      break;
-
+    case t_POLMOD: y = x; /*Fall through*/
     case t_MAT: /* compute y, I0 = J y */
-      if (!Nx) y = c1;
+      if (!T) y = c1;
       else
       {
         c = mul_content(c,c1);
-        y = c? gmul(y, gdiv(c,Nx)): gdiv(y, Nx);
+        y = c? gmul(y, gdiv(c,T)): gdiv(y, T);
       }
       break;
 
