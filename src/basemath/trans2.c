@@ -934,23 +934,26 @@ bernreal(long n, long prec)
 static GEN
 bernfracspec(long k)
 {
-  long n, K = k+1;
+  ulong n, K = k+1;
   gpmem_t av, lim;
-  GEN s,c,N,h;
+  GEN s, c, N, b;
 
-  c = N = stoi(K); s = gun; h = gzero;
+  c = N = utoi(K); s = gun; b = gzero;
   av = avma; lim = stack_lim(av,2);
-  for (n=2; ; n++)
+  for (n=2; ; n++) /* n <= k+1 */
   {
-    c = gdivgs(gmulgs(c,n-k-2),n);
-    h = gadd(h, gdivgs(gmul(c,s), n));
-    if (n==K) return gerepileupto(av,h);
-    N[2] = n; s = addii(s, gpuigs(N,k));
+    c = diviiexact(muliu(c,k+2-n), utoi(n));
+    if (n & 1) setsigne(c, 1); else setsigne(c, -1);
+    /* c = (-1)^(n-1) binomial(k+1, n),  s = 1^k + ... + (n-1)^k */
+
+    b = gadd(b, gdivgs(mulii(c,s), n));
+    if (n == K) return gerepileupto(av, b);
+
+    N[2] = n; s = addii(s, gpowgs(N,k));
     if (low_stack(lim, stack_lim(av,2)))
     {
-      GEN *gptr[3]; gptr[0]=&c; gptr[1]=&h; gptr[2]=&s;
       if (DEBUGMEM>1) err(warnmem,"bernfrac");
-      gerepilemany(av,gptr,3);
+      gerepileall(av,3, &c,&b,&s);
     }
   }
 }
@@ -959,46 +962,35 @@ GEN
 bernfrac(long k)
 {
   if (!k) return gun;
-  if (k==1) return gneg(ghalf);
-  if (k<0 || k&1) return gzero;
+  if (k == 1) return gneg(ghalf);
+  if (k < 0 || k & 1) return gzero;
   return bernfracspec(k);
-}
-
-static GEN
-bernvec2(long k)
-{
-  GEN B = cgetg(k+2,t_VEC);
-  long i;
-
-  for (i=1; i<=k; i++)
-    B[i+1]=(long)bernfracspec(i<<1);
-  B[1]=un; return B;
 }
 
 /* mpbern as exact fractions */
 GEN
 bernvec(long nb)
 {
-  long n, m, i, j, d1, d2;
-  gpmem_t av, tetpil;
-  GEN  p1,y;
+  GEN y = cgetg(nb+2,t_VEC);
+  long n, i;
 
-  if (nb < 300) return bernvec2(nb);
+  if (nb > 46340 && BITS_IN_LONG == 32) err(impl, "bernvec for n > 46340");
 
-  y=cgetg(nb+2,t_VEC); y[1]=un;
-  for (i=1; i<=nb; i++)
-  {
-    av=avma; p1=gzero;
-    n=8; m=5; d1=i-1; d2=2*i-3;
-    for (j=d1; j>0; j--)
-    {
-      p1 = gmulsg(n*m, gadd(p1,(GEN)y[j+1]));
-      p1 = gdivgs(p1, d1*d2);
-      n+=4; m+=2; d1--; d2-=2;
+  y[1] = un;
+  for (n = 1; n <= nb; n++)
+  { /* compute y[n+1] = B_{2n} */
+    gpmem_t av = avma;
+    GEN b = gmul2n(stoi(1-2*n), -1); /* 1 + (2n+1)B_1 = (1-2n) /2 */
+    GEN c = gun;
+    ulong u1 = 2*n + 1, u2 = n, d1 = 1, d2 = 1;
+
+    for (i = 1; i < n; i++)
+    { 
+      c = diviiexact(muliu(c, u1*u2), utoi(d1*d2)); /* = binomial(2n+1, 2*i) */
+      b = gadd(b, gmul(c, (GEN)y[i+1]));
+      u1 -= 2; u2--; d1++; d2 += 2;
     }
-    p1 = gsubsg(1,gdivgs(gaddsg(1,p1),2*i+1));
-    tetpil=avma; p1 = gmul2n(p1,-2*i);
-    y[i+1] = lpile(av,tetpil,p1);
+    y[n+1] = lpileupto(av, gdivgs(b, -(1+2*n)));
   }
   return y;
 }
