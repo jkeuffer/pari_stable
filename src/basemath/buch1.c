@@ -381,18 +381,18 @@ findbezk_pol(GEN nf, GEN x)
   y[1] = x[1]; return y;
 }
 
+/* allow t_QF[IR], and t_VEC/t_COL with 3 components */
 GEN
 form_to_ideal(GEN x)
 {
   long tx = typ(x);
-  GEN b,c, y = cgetg(3, t_MAT);
-  if (tx != t_QFR && tx != t_QFI) err(typeer,"form_to_ideal");
-  c = cgetg(3,t_COL); y[1] = (long)c;
-  c[1] = x[1]; c[2] = zero;
-  c = cgetg(3,t_COL); y[2] = (long)c;
-  b = negi((GEN)x[2]);
-  if (mpodd(b)) b = addis(b,1);
-  c[1] = lshifti(b,-1); c[2] = un; return y;
+  GEN b, y = cgetg(3, t_MAT);
+  if ((is_vec_t(tx) || lg(x) != 4)
+       && tx != t_QFR && tx != t_QFI) err(typeer,"form_to_ideal");
+  b = negi((GEN)x[2]); if (mpodd(b)) b = addis(b,1);
+  y[1] = (long)mkcol2((GEN)x[1], gzero);
+  y[2] = (long)mkcol2((GEN)shifti(b,-1), gun);
+  return y;
 }
 
 /* P as output by quadhilbertimag, convert forms to ideals */
