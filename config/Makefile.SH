@@ -161,10 +161,8 @@ case "$sizeof_long" in
 esac
 if test -z "$emacs"; then
   install_emacs_files=
-  pari_elc=
 else
   install_emacs_files=install_emacs_files
-  pari_elc=elc
 fi
 case "$static" in
   n) dft=dyn; libdft=lib-dyn;;
@@ -288,8 +286,6 @@ TOPLDDYN     = -L$TOP/$objdir \$(RLLIBS)
 OBJS   = $OBJS
 OBJSGP = $OBJSGP
 OBJSDGP = $OBJSDGP
-
-dft: gp $pari_elc
 
 gp: gp-$dft ../gp$suffix$exe_suff $libdft
 
