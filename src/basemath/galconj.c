@@ -1643,7 +1643,7 @@ splitorbite(GEN O)
   res[2] = lgetg(lg(fc), t_VECSMALL);
   for (i = 1; i < lg(fc); i++)
   {
-    gmael(res,1,lg(fc) - i) = cyc_powtoperm(O, n / fc[i]);
+    mael(res,1,lg(fc) - i) = (long)cyc_powtoperm(O, n / fc[i]);
     mael(res,2,lg(fc) - i) = fc[i];
   }
   if ( DEBUGLEVEL>=4 )
@@ -1661,6 +1661,7 @@ splitorbite(GEN O)
  * modulo l ppp:  plus petit diviseur premier du degre de T. primepointer:
  * permet de calculer les premiers suivant p.
  */
+enum ga_code {ga_all_normal=1,ga_ext_2=2,ga_non_wss=4};
 struct galois_analysis
 {
   long    p;
@@ -1669,7 +1670,7 @@ struct galois_analysis
   long    l;
   long    ppp;
   long    p4;
-  enum {ga_all_normal=1,ga_ext_2=2,ga_non_wss=4} group;
+  enum ga_code group;
   byteptr primepointer;
 };
 void
@@ -1678,7 +1679,7 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l, long karma_type
   gpmem_t ltop=avma;
   long n,p;
   long i;
-  enum {k_amoeba=0,k_snake=1,k_fish=2,k_bird=4,k_rodent=6,k_dog=8,k_human=9,k_cat=12} karma;
+  enum k_code {k_amoeba=0,k_snake=1,k_fish=2,k_bird=4,k_rodent=6,k_dog=8,k_human=9,k_cat=12} karma;
   long group,linf;
   /*TODO: complete the table to at least 200*/
   const int prim_nonss_orders[]={36,48,56,60,72,75,80,96,108,120,132,0};
@@ -1809,7 +1810,7 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l, long karma_type
 	  deg = norm_o;
 	  order = o;
 	  plift = p;
-	  karma=cgcd(p-1,karma_type);
+	  karma=(enum k_code)cgcd(p-1,karma_type);
 	  pp = primepointer;
 	  group |= ga_all_normal;
 	}
@@ -1819,7 +1820,7 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l, long karma_type
       {
 	order = o;
 	plift = p;
-	karma=cgcd(p-1,karma_type);
+	karma=(enum k_code)cgcd(p-1,karma_type);
 	pp = primepointer;
       }
     }
@@ -1870,7 +1871,7 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l, long karma_type
     O[1]=l;
   }  
   ga->p = plift;
-  ga->group = group;
+  ga->group = (enum ga_code)group;
   ga->deg = deg;
   ga->ord = order;
   ga->l = O[1];
@@ -2714,7 +2715,7 @@ galoisfindfrobenius(GEN T, GEN L, GEN M, GEN den, struct galois_frobenius *gf,
     struct galois_borne *gb, const struct galois_analysis *ga)
 {
   gpmem_t lbot, ltop=avma;
-  long try=0;
+  long Try=0;
   long n = degpol(T), deg, gmask;
   byteptr primepointer = ga->primepointer;
   GEN Lden,frob;
@@ -2765,8 +2766,8 @@ galoisfindfrobenius(GEN T, GEN L, GEN M, GEN den, struct galois_frobenius *gf,
 	  avma = ltop;
 	  return NULL;
 	}
-	try++;
-	if ( (ga->group&ga_non_wss) && try > n )
+	Try++;
+	if ( (ga->group&ga_non_wss) && Try > n )
 	  err(warner, "galoisconj _may_ hang up for this polynomial");
       }
     }
