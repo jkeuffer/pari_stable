@@ -2373,7 +2373,7 @@ hnffinal(GEN matgen,GEN perm,GEN* ptdep,GEN* ptB,GEN* ptC)
       fprintferr("B = %Z\n",B);
     }
   }
-  p1 = hnfall(matgen);
+  p1 = hnflll(matgen);
   H = (GEN)p1[1]; /* lnz x lnz */
   U = (GEN)p1[2]; /* col x col */
   /* Only keep the part above the H (above the 0s is 0 since the dep rows
