@@ -1889,6 +1889,8 @@ anell(GEN e, long n)
   GEN p1,p2,an;
 
   checkell(e);
+  for (i=1; i<=5; i++)
+    if (typ(e[i]) != t_INT) err(typeer,"anell");
   if (n <= 0) return cgetg(1,t_VEC);
   if (n>TEMPMAX) err(impl,"anell for n>=2^24 (or 2^32 for 64 bit machines)");
   an = cgetg(n+1,t_VEC); an[1] = un;
