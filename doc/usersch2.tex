@@ -1034,12 +1034,8 @@ the complete evaluation of \kbd{x[1]}, and the result is not modifiable).
 
 \point{Priority 6}
 %
-\kbd{!} (unary, prefix): logical \var{not}. \kbd{!$x$} return $1$ if $x$ is
-equal to $0$ (specifically, if \kbd{gcmp0($x$)==1}), and $0$ otherwise.
-
-\kbd{\#} (unary, prefix): cardinality; \kbd{\#$x$} returns \kbd{length($x$)}.
-
-\kbd{'} (unary, prefix): quote its argument without evaluating it.
+\kbd{'} (unary, prefix): quote its argument (a variable name) without
+evaluating it.
 \bprog
 ? a = x + 1; x = 1;
 ? subst(a,x,1)
@@ -1048,8 +1044,6 @@ equal to $0$ (specifically, if \kbd{gcmp0($x$)==1}), and $0$ otherwise.
 ? subst(a,'x,1)
 %1 = 2
 @eprog
-
-\point{Priority 5}
 %
 \kbd{\pow}: powering.
 
@@ -1065,6 +1059,13 @@ current precision. It behaves as $(f(x))'$ otherwise.
 
 \kbd{.}\var{member} (unary, postfix): \kbd{$x$.\var{member}} extracts
 \var{member} from structure $x$ (see~\secref{se:member}).
+
+\point{Priority 5}
+%
+\kbd{!} (unary, prefix): logical \var{not}. \kbd{!$x$} return $1$ if $x$ is
+equal to $0$ (specifically, if \kbd{gcmp0($x$)==1}), and $0$ otherwise.
+
+\kbd{\#} (unary, prefix): cardinality; \kbd{\#$x$} returns \kbd{length($x$)}.
 
 \point{Priority 4}
 %
@@ -1086,7 +1087,7 @@ same sign), then $\kbd{x \b{ } y} = q$, $\kbd{x\%y} = r$.
 $+\infty$ when the exact quotient would be a half-integer).
 
 \kbd{<<}, \kbd{>>}: left and right binary shift: \kbd{x<<n}$~=~x * 2^n$
-if $n>0$, and $x \b{/} 2^{-n}$ otherwise; and
+if $n>0$, and $x \b{/} 2^{-n}$ otherwise. Right shift is defined by
 \kbd{x>>n}$~=~$\kbd{x<<(-n)}.
 
 \point{Priority 2}
@@ -1114,7 +1115,7 @@ and aborted as soon as the final truth value is known. Thus, for instance,
 produce an error since the second argument need not (and will not) be processed
 when the first is already zero (false).
 
-\misctitle{Remark:} For the optimal efficiency, you should use the
+\misctitle{Remark:} For optimal efficiency, you should use the
 \kbd{++}, \kbd{--} and \var{op}\kbd{=} operators whenever possible:
 \bprog
 ? a = 200000;
