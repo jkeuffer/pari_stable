@@ -26,7 +26,6 @@ extern GEN get_arch_real(GEN nf,GEN x,GEN *emb,long prec);
 extern GEN T2_from_embed_norm(GEN x, long r1);
 extern GEN vconcat(GEN A, GEN B);
 extern long int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *newx);
-extern GEN mul_content(GEN cx, GEN cy);
 extern GEN RXQX_red(GEN P, GEN T);
 extern GEN prodid(GEN nf, GEN I);
 

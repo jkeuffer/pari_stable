@@ -511,6 +511,7 @@ GEN     hnfall_i(GEN A, GEN *ptB, long remove);
 long    isideal(GEN nf,GEN x);
 long    isinvector(GEN v, GEN x, long n);
 GEN     minideal(GEN nf,GEN ix,GEN vdir,long prec);
+GEN     mul_content(GEN cx, GEN cy);
 GEN     nfdetint(GEN nf,GEN pseudo);
 GEN     nfhermite(GEN nf, GEN x);
 GEN     nfhermitemod(GEN nf, GEN x, GEN detmat);

@@ -20,7 +20,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                                                                 */
 /*******************************************************************/
 #include "pari.h"
-extern GEN mul_content(GEN cx, GEN cy);
 extern long polegal_spec(GEN x, GEN y);
 extern GEN mulmat_pol(GEN A, GEN x);
 extern GEN idealsqrtn(GEN nf, GEN x, GEN gn, int strict);
