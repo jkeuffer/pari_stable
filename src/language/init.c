@@ -1284,7 +1284,7 @@ gcopy_av(GEN x, GEN *AVMA)
   long i,lx,tx=typ(x);
   GEN y;
 
-  if (tx == t_SMALL) return (*--AVMA = x);
+  if (tx == t_SMALL) return x;
   lx = lg(x); *AVMA = y = *AVMA - lx;
   if (! is_recursive_t(tx))
   {
