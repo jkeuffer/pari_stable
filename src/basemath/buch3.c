@@ -1421,7 +1421,8 @@ static GEN
 rnfnormgroup0(GEN bnr, GEN polrel, GEN rnf)
 {
   long av=avma,i,j,reldeg,sizemat,prime,nfac,k;
-  GEN bnf,polreldisc,nf,raycl,group,detgroup,fa,pr,famo,ep,fac,col,p1,bd,upnf;
+  GEN bnf,polreldisc,nf,raycl,group,detgroup,fa,pr;
+  GEN reldisc,famo,ep,fac,col,p1,bd,upnf;
   byteptr d = diffptr;
 
   checkbnr(bnr); bnf=(GEN)bnr[1]; raycl=(GEN)bnr[5];
@@ -1433,52 +1434,66 @@ rnfnormgroup0(GEN bnr, GEN polrel, GEN rnf)
   k = cmpis(detgroup,reldeg);
   if (k<0) err(talker,"not an Abelian extension in rnfnormgroup?");
   if (!rnf && !k) return group;
+
+  polreldisc=discsr(polrel);
   
   if (rnf)
   {
-    polreldisc=gmael(rnf,3,1);  
-    k=degree(gmael3(bnr,1,7,1));
-    bd=gmulsg(k,glog(gmael3(bnr,1,7,3),DEFAULTPREC));
-    bd=gadd(bd,glog(mpabs(det(polreldisc)),DEFAULTPREC));
-    k=reldeg*k;p1=gaddgs(gmulsg(k,dbltor(2.5)),5);
-    bd=gfloor(gsqr(gadd(gmulsg(4,bd),p1)));
-    if (DEBUGLEVEL) fprintferr("rnfnormgroup: bound for primes = %Z\n", bd);
+    reldisc=gmael(rnf,3,1);  
     upnf=nfinit0(gmael(rnf,11,1),1,DEFAULTPREC);
   }
   else
   {
-    polreldisc=idealhermite(nf,discsr(polrel));
-    bd = upnf = NULL;
+    reldisc = idealhermite(nf,polreldisc);
+    upnf = NULL;
   }
+
+  k=degree(gmael3(bnr,1,7,1));
+  bd=gmulsg(k,glog(gmael3(bnr,1,7,3),DEFAULTPREC));
+  bd=gadd(bd,glog(mpabs(det(reldisc)),DEFAULTPREC));
+  k=reldeg*k;p1=gaddgs(gmulsg(k,dbltor(2.5)),5);
+  bd=gfloor(gsqr(gadd(gmulsg(4,bd),p1)));
+  if (rnf && DEBUGLEVEL) 
+    fprintferr("rnfnormgroup: bound for primes = %Z\n", bd);
 
   sizemat=lg(group)-1; prime = 0;
   for(;;)
   {
     prime += *d++; if (!*d) err(primer1);
-    if (rnf && cmpis(bd,prime) <= 0) break;
+    if (cmpis(bd,prime) <= 0) break;
     fa=primedec(nf,stoi(prime));
     for (i=1; i<lg(fa); i++)
     {
       pr = (GEN)fa[i];
-      if (idealval(nf,polreldisc,pr)==0 && 
-	  (!rnf || (cmpis((GEN)pr[4], 1) == 0)))
+      if (idealval(nf,reldisc,pr)==0)
       {
-	if (rnf)
-	  famo=idealfactor(upnf,rnfidealup(rnf,pr));
-	else
-	  famo=nffactormod(nf,polrel,pr);
-	ep=(GEN)famo[2]; fac=(GEN)famo[1];
-        nfac=lg(ep)-1; 
-	if (rnf)
-	  k=itos(gmael(fac,1,4));
-	else 
-	  k=lgef((GEN)fac[1])-3;
-	for (j=1; j<=nfac; j++)
+	if (element_val(nf,polreldisc,pr) == 0)
 	{
-	  if (!gcmp1((GEN)ep[j])) err(bugparier,"rnfnormgroup");
-	  if ((rnf && cmpis(gmael(fac,j,4),k)) ||
-	      (!rnf && lgef(fac[j])-3 != k))
-	    err(talker,"non Galois extension in rnfnormgroup");
+	  famo=nffactormod(nf,polrel,pr);
+	  ep=(GEN)famo[2]; 
+	  fac=(GEN)famo[1];
+	  nfac=lg(ep)-1; 
+	  k=lgef((GEN)fac[1])-3;
+	  for (j=1; j<=nfac; j++)
+	  {
+	    if (!gcmp1((GEN)ep[j])) err(bugparier,"rnfnormgroup");
+	    if (lgef(fac[j])-3 != k)
+	      err(talker,"non Galois extension in rnfnormgroup");
+	  }
+	}
+	else
+	{
+	  famo=idealfactor(upnf,rnfidealup(rnf,pr));	
+	  ep=(GEN)famo[2]; 
+	  fac=(GEN)famo[1];
+	  nfac=lg(ep)-1; 
+	  k=itos(gmael(fac,1,4));
+	  for (j=1; j<=nfac; j++)
+	  {
+	    if (!gcmp1((GEN)ep[j])) err(bugparier,"rnfnormgroup");
+	    if (cmpis(gmael(fac,j,4),k))
+	      err(talker,"non Galois extension in rnfnormgroup");
+	  }
 	}
 	col=gmulsg(k,isprincipalrayall(bnr,pr,nf_REGULAR));
 	p1=cgetg(sizemat+2,t_MAT);
@@ -1486,12 +1501,12 @@ rnfnormgroup0(GEN bnr, GEN polrel, GEN rnf)
 	p1[sizemat+1]=(long)col;
 	group=hnf(p1); detgroup=dethnf(group);
         k=cmpis(detgroup,reldeg);
-	if (k>0) err(bugparier,"rnfnormgroup");
         if (k<0) err(talker,"not an Abelian extension in rnfnormgroup");
 	if (!rnf && !k) { cgiv(detgroup); return gerepileupto(av,group); }
       }
     }
   }
+  if (k>0) err(bugparier,"rnfnormgroup");
   cgiv(detgroup); return gerepileupto(av,group);
 }
 
