@@ -93,7 +93,6 @@ ENDEXTERN
 #endif
 /**************************************************************************/
 
-static int add_help_keywords;
 static int pari_rl_back;
 static int did_init_matched = 0;
 static entree *current_ep = NULL;
@@ -367,75 +366,8 @@ get_matches(int code, const char *text, GF f)
   return matches;
 }
 
-static char *
-add_junk(char *name, const char *text, long junk)
-{
-  char *s = strncpy(gpmalloc(strlen(name)+1+junk),text,junk);
-  strcpy(s+junk,name); return s;
-}
-
-/* Generator function for command completion.  STATE lets us know whether
- * to start from scratch; without any state (i.e. STATE == 0), then we
- * start at the top of the list.
- */
-static char *
-hashtable_generator (const char *text, int state, entree **hash)
-{
-  static int hashpos, len, junk, n;
-  static entree* ep;
-  static char *TEXT;
-
- /* If this is a new word to complete, initialize now:
-  *  + indexes hashpos (GP hash list) and n (keywords specific to long help).
-  *  + file completion and keyword completion use different word boundaries,
-  *    have TEXT point to the keyword start.
-  *  + save the length of TEXT for efficiency.
-  */
-  if (!state)
-  {
-    n = hashpos = 0; ep=hash[hashpos];
-    len=strlen(text); junk=len-1;
-    while (junk >= 0 && is_keyword_char(text[junk])) junk--;
-    junk++; len -= junk; TEXT = (char*)text + junk;
-  }
-
-  /* First check the keywords list */
-  if (add_help_keywords)
-  {
-    for ( ; keyword_list[n]; n++)
-      if (!strncmp(keyword_list[n],TEXT,len))
-        return add_junk(keyword_list[n++], text, junk);
-  }
-
-  /* Return the next name which partially matches from the command list. */
-  for(;;)
-    if (!ep)
-    {
-      if (++hashpos >= functions_tblsz) return NULL; /* no names matched */
-      ep = hash[hashpos];
-    }
-    else if (strncmp(ep->name,TEXT,len))
-      ep = ep->next;
-    else
-      break;
-  current_ep = ep; ep = ep->next;
-  return add_junk(current_ep->name,text,junk);
-}
-
-static char *
-command_generator(const char *text, int  state)
-{
-  return hashtable_generator(text,state, functions_hash);
-}
-static char *
-member_generator(const char *text, int  state)
-{
-  return hashtable_generator(text,state, members_hash);
-}
-
 #define DFLT 0
 #define ENTREE 1
-
 static char *
 generator(void *list, const char *text, int *nn, int len, int typ)
 {
@@ -465,7 +397,6 @@ generator(void *list, const char *text, int *nn, int len, int typ)
   }
   return NULL; /* no names matched */
 }
-
 static char *
 old_generator(const char *text,int state)
 {
@@ -481,7 +412,6 @@ old_generator(const char *text,int state)
   }
   return generator((void *)functions_oldgp,text,&n,len,ENTREE);
 }
-
 static char *
 default_generator(const char *text,int state)
 {
@@ -489,6 +419,91 @@ default_generator(const char *text,int state)
 
   if (!state) { n=0; len=strlen(text); }
   return generator(gp_default_list,text,&n,len,DFLT);
+}
+
+static char *
+add_prefix(char *name, const char *text, long junk)
+{
+  char *s = strncpy(gpmalloc(strlen(name)+1+junk),text,junk);
+  strcpy(s+junk,name); return s;
+}
+static void
+init_prefix(const char *text, int *len, int *junk, char **TEXT)
+{
+  long l = strlen(text), j = l-1;
+  while (j >= 0 && is_keyword_char(text[j])) j--;
+  j++;
+  *TEXT = (char*)text + j;
+  *junk = j;
+  *len  = l - j;
+}
+/* Generator function for command completion.  STATE lets us know whether
+ * to start from scratch; without any state (i.e. STATE == 0), then we
+ * start at the top of the list. */
+static char *
+hashtable_generator(const char *text, int state, entree **hash)
+{
+  static int hashpos, len, junk;
+  static entree* ep;
+  static char *TEXT;
+
+ /* If this is a new word to complete, initialize now:
+  *  + indexes hashpos (GP hash list) and n (keywords specific to long help).
+  *  + file completion and keyword completion use different word boundaries,
+  *    have TEXT point to the keyword start.
+  *  + save the length of TEXT for efficiency.
+  */
+  if (!state)
+  {
+    hashpos = 0; ep = hash[hashpos];
+    init_prefix(text, &len, &junk, &TEXT);
+  }
+
+  /* Return the next name which partially matches from the command list. */
+  for(;;)
+    if (!ep)
+    {
+      if (++hashpos >= functions_tblsz) return NULL; /* no names matched */
+      ep = hash[hashpos];
+    }
+    else if (strncmp(ep->name,TEXT,len))
+      ep = ep->next;
+    else
+      break;
+  current_ep = ep; ep = ep->next;
+  return add_prefix(current_ep->name,text,junk);
+}
+static char *
+command_generator(const char *text, int state)
+{ return hashtable_generator(text,state, functions_hash); }
+static char *
+member_generator(const char *text, int state)
+{ return hashtable_generator(text,state, members_hash); }
+
+static char *
+ext_help_generator(const char *text, int state)
+{
+  static int len, junk, n, def, key;
+  static char *TEXT;
+  if (!state) {
+    n = 0;
+    def = key = 1;
+    init_prefix(text, &len, &junk, &TEXT);
+  }
+  if (def)
+  {
+    char *s = default_generator(TEXT, state);
+    if (s) return add_prefix(s, text, junk);
+    def = 0;
+  }
+  if (key)
+  {
+    for ( ; keyword_list[n]; n++)
+      if (!strncmp(keyword_list[n],TEXT,len))
+        return add_prefix(keyword_list[n++], text, junk);
+    key = 0; state = 0;
+  }
+  return command_generator(text, state);
 }
 
 static void
@@ -567,7 +582,8 @@ pari_completion(char *text, int START, int END)
       if (first == start) return add_space(start);
       return get_matches(-1, text, FILE_COMPLETION);
     case '?':
-      if (rl_line_buffer[first+1] == '?') add_help_keywords = 1;
+      if (rl_line_buffer[first+1] == '?')
+        return get_matches(-1, text, ext_help_generator);
       return get_matches(-1, text, command_generator);
   }
 
@@ -638,7 +654,6 @@ pari_completion(char *text, int START, int END)
         return get_matches(-1, text, member_generator);
       break;
     }
-  add_help_keywords = 0;
   return get_matches(END, text, command_generator);
 }
 
