@@ -2756,7 +2756,7 @@ rnfdedekind(GEN nf,GEN P0,GEN pr)
 static GEN
 rnfordmax(GEN nf, GEN pol, GEN pr, GEN disc)
 {
-  pari_sp av=avma,av1,lim;
+  pari_sp av = avma, av1, lim;
   long i,j,k,n,v1,v2,vpol,m,cmpt,sep;
   GEN p,T,q,q1,modpr,A,Aa,Aaa,A1,I,R,p1,p2,p3,multab,multabmod,Aainv;
   GEN pip,baseIp,baseOp,alpha,matprod,alphainv,matC,matG,vecpro,matH;
@@ -2915,9 +2915,8 @@ rnfordmax(GEN nf, GEN pol, GEN pr, GEN disc)
     A = H; I = Hid;
     if (low_stack(lim, stack_lim(av1,1)) || (cmpt & 3) == 0)
     {
-      GEN *gptr[2]; gptr[0]=&A; gptr[1]=&I;
       if(DEBUGMEM>1) err(warnmem,"rnfordmax");
-      gerepilemany(av1,gptr,2);
+      gerepileall(av1,2, &A,&I);
     }
   }
 }

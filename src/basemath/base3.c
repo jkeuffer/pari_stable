@@ -1005,18 +1005,20 @@ nfreducemodidele(GEN nf,GEN x,GEN idele,GEN sarch)
   return (gexpo(y) > gexpo(x))? x: y;
 }
 
+/* assume k >= 0 */
 GEN
 element_powmodideal(GEN nf,GEN x,GEN k,GEN ideal)
 {
   GEN y = gscalcol_i(gun,degpol(nf[1]));
   for(;;)
   {
-    if (mpodd(k)) y=element_mulmodideal(nf,x,y,ideal);
-    k=shifti(k,-1); if (!signe(k)) return y;
+    if (mpodd(k)) y = element_mulmodideal(nf,x,y,ideal);
+    k = shifti(k,-1); if (!signe(k)) return y;
     x = element_sqrmodideal(nf,x,ideal);
   }
 }
 
+/* assume k >= 0 */
 GEN
 element_powmodidele(GEN nf,GEN x,GEN k,GEN idele,GEN sarch)
 {
