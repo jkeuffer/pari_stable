@@ -301,6 +301,7 @@ GEN     hclassno(GEN x);
 long    hil0(GEN x, GEN y, GEN p);
 long    hil(GEN x, GEN y, GEN p);
 long    isfundamental(GEN x);
+long    isperfectpower(GEN x, GEN *y);
 long    isprimeAPRCL(GEN N);
 long    isprime(GEN x);
 long    isprimeSelfridge(GEN x);
@@ -1151,6 +1152,7 @@ long    group_ident(GEN G, GEN S);
 /* ifactor1.c */
 
 long    BSW_psp(GEN N);
+long    is_357_power(GEN x, GEN *pt, long *mask);
 long    millerrabin(GEN n, long k);
 GEN     nextprime(GEN n);
 GEN     plisprime(GEN N, long flag);

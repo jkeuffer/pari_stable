@@ -1855,8 +1855,6 @@ mpqs_get_relation(long pos, FILE *FREL)
   return buf;
 }
 
-/* the following two reside in src/basemath/ifactor1.c */
-extern long is_odd_power(GEN x, GEN *pt, long *mask);
 extern int miller(GEN n, long k);
 
 #define isprobableprime(n) (miller((n),17))
@@ -1876,7 +1874,7 @@ split(GEN N, long *e, long *res)
   mask = 7;
   /* 5th/7th powers aren't worth the trouble. OTOH once we have the hooks for
    * dealing with cubes, higher powers can be handled essentially for free) */
-  if ( (flag = is_odd_power(N, &base, &mask)) )
+  if ( (flag = is_357_power(N, &base, &mask)) )
   {
     if (res) *res = (long)base; else affii(base, N); 
     *e = lstoi(flag);
