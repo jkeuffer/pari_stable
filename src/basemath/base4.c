@@ -1225,7 +1225,7 @@ to_famat(GEN g, GEN e)
 GEN
 to_famat_all(GEN x, GEN y) { return to_famat(_col(x), _col(y)); }
 
-/* assume (num(g[i]), id) = 1 and for all i. return prod g[i]^e[i] mod id */
+/* assume (num(g[i]), id) = 1 for all i. Return prod g[i]^e[i] mod id */
 GEN
 famat_to_nf_modideal_coprime(GEN nf, GEN g, GEN e, GEN id)
 {
@@ -1247,44 +1247,47 @@ famat_to_nf_modideal_coprime(GEN nf, GEN g, GEN e, GEN id)
   return t? t: gscalcol(gun, lg(id)-1);
 }
 
-/* assume prh has degree 1 and coprime to numerator(x) */
-GEN
-nf_to_Fp_simple(GEN x, GEN prh)
+/* assume pr has degree 1 and coprime to numerator(x) */
+static GEN
+nf_to_Fp_simple(GEN x, GEN modpr, GEN p)
 {
-  GEN ch = denom(x), p = gcoeff(prh,1,1);
-  if (!is_pm1(ch))
-  {
-    x = gmul(gmul(x,ch), mpinvmod(ch,p));
-  }
-  ch = colreducemodHNF(gmod(x, p), prh, NULL);
-  return (GEN)ch[1]; /* in Fp^* */
+  GEN c, r = zk_to_ff(Q_primitive_part(x, &c), modpr);
+  if (c) r = gmod(gmul(r, c), p);
+  return r;
 }
 
-GEN
-famat_to_Fp_simple(GEN nf, GEN g, GEN e, GEN prh)
+static GEN
+famat_to_Fp_simple(GEN nf, GEN x, GEN modpr, GEN p)
 {
-  GEN t = gun, h,n, p = gcoeff(prh,1,1), q = subis(p,1);
-  long i, th, lx = lg(g);
-  for (i=1; i<lx; i++)
+  GEN h, n, t = gun, g = (GEN)x[1], e = (GEN)x[2], q = subis(p,1);
+  long i, l = lg(g);
+
+  for (i=1; i<l; i++)
   {
     n = (GEN)e[i]; n = modii(n,q);
     if (!signe(n)) continue;
-    h = (GEN)g[i]; th = typ(h);
-    if (th == t_POL || th == t_POLMOD) h = algtobasis(nf, h);
-    if (th != t_COL) h = gmod(h, p); else h = nf_to_Fp_simple(h, prh);
+
+    h = (GEN)g[i];
+    switch(typ(h))
+    {
+      case t_POL: case t_POLMOD: h = algtobasis(nf, h);  /* fall through */
+      case t_COL: h = nf_to_Fp_simple(h, modpr, p); break;
+      default: h = gmod(h, p);
+    }
     t = mulii(t, powmodulo(h, n, p)); /* not worth reducing */
   }
   return modii(t, p);
 }
 
-/* cf famat_to_nf_modideal_coprime, but id is a prime of degree 1 (=prh) */
+/* cf famat_to_nf_modideal_coprime, but id is a prime of degree 1 (=pr) */
 GEN
-to_Fp_simple(GEN nf, GEN x, GEN prh)
+to_Fp_simple(GEN nf, GEN x, GEN pr)
 {
+  GEN T, p, modpr = zk_to_ff_init(nf, &pr, &T, &p);
   switch(typ(x))
   {
-    case t_COL: return nf_to_Fp_simple(x,prh);
-    case t_MAT: return famat_to_Fp_simple(nf,(GEN)x[1],(GEN)x[2],prh);
+    case t_COL: return nf_to_Fp_simple(x,modpr,p);
+    case t_MAT: return famat_to_Fp_simple(nf,x,modpr,p);
     default: err(impl,"generic conversion to finite field");
   }
   return NULL;

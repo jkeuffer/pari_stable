@@ -21,32 +21,35 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "parinf.h"
 
-extern GEN detcyc(GEN cyc);
+extern GEN Fp_PHlog(GEN a, GEN g, GEN p, GEN ord);
 extern GEN FqX_factor(GEN x, GEN T, GEN p);
-extern long FqX_is_squarefree(GEN P, GEN T, GEN p);
-extern GEN sqred1_from_QR(GEN x, long prec);
-extern GEN famat_reduce(GEN fa);
-extern long int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *newx);
-extern GEN make_integral(GEN nf, GEN L0, GEN f, GEN *listpr, GEN *ptd1);
-extern GEN idealprodprime(GEN nf, GEN L);
 extern GEN anti_unif_mod_f(GEN nf, GEN pr, GEN sqf);
-extern GEN unif_mod_f(GEN nf, GEN pr, GEN sqf);
+extern GEN arch_mul(GEN x, GEN y);
+extern GEN check_and_build_cycgen(GEN bnf);
 extern GEN colreducemodHNF(GEN x, GEN y, GEN *Q);
+extern GEN detcyc(GEN cyc);
+extern GEN famat_reduce(GEN fa);
 extern GEN famat_to_nf_modideal_coprime(GEN nf, GEN g, GEN e, GEN id);
 extern GEN famat_to_nf_modidele(GEN nf, GEN g, GEN e, GEN bid);
-extern GEN check_and_build_cycgen(GEN bnf);
 extern GEN gmul_mat_smallvec(GEN x, GEN y);
-extern GEN ideleaddone_aux(GEN nf,GEN x,GEN ideal);
-extern GEN logunitmatrix(GEN nf,GEN funits,GEN racunit,GEN bid);
-extern GEN vconcat(GEN Q1, GEN Q2);
-extern void minim_alloc(long n, double ***q, GEN *x, double **y,  double **z, double **v);
-extern GEN to_famat_all(GEN x, GEN y);
-extern GEN trivfact(void);
-extern GEN arch_mul(GEN x, GEN y);
-extern GEN isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag);
 extern GEN idealaddtoone_i(GEN nf, GEN x, GEN y);
 extern GEN ideallllred_elt(GEN nf, GEN I);
+extern GEN idealprodprime(GEN nf, GEN L);
+extern GEN ideleaddone_aux(GEN nf,GEN x,GEN ideal);
+extern GEN isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag);
+extern GEN logunitmatrix(GEN nf,GEN funits,GEN racunit,GEN bid);
+extern GEN make_integral(GEN nf, GEN L0, GEN f, GEN *listpr, GEN *ptd1);
+extern GEN sqred1_from_QR(GEN x, long prec);
 extern GEN subgroupcondlist(GEN cyc, GEN bound, GEN listKer);
+extern GEN to_Fp_simple(GEN nf, GEN x, GEN ffproj);
+extern GEN to_famat_all(GEN x, GEN y);
+extern GEN trivfact(void);
+extern GEN unif_mod_f(GEN nf, GEN pr, GEN sqf);
+extern GEN vconcat(GEN Q1, GEN Q2);
+extern long FqX_is_squarefree(GEN P, GEN T, GEN p);
+extern long int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *newx);
+extern void minim_alloc(long n, double ***q, GEN *x, double **y,  double **z, double **v);
+extern void rowselect_p(GEN A, GEN B, GEN p, long init);
 
 /* FIXME: obsolete, see zarchstar (which is much slower unfortunately). */
 static GEN
@@ -1192,9 +1195,6 @@ lowerboundforregulator(GEN bnf)
   return x;
 }
 
-extern GEN to_Fp_simple(GEN nf, GEN x, GEN prh);
-extern GEN Fp_PHlog(GEN a, GEN g, GEN p, GEN ord);
-
 /* Compute a square matrix of rank length(beta) associated to a family
  * (P_i), 1<=i<=length(beta), of primes s.t. N(P_i) = 1 mod pp, and
  * (P_i,beta[j]) = 1 for all i,j */
@@ -1202,7 +1202,7 @@ static void
 primecertify(GEN bnf,GEN beta,long pp,GEN big)
 {
   long i,j,qq,nbcol,lb,nbqq,ra,N;
-  GEN nf,mat,mat1,qgen,decqq,newcol,Qh,Q,g,ord;
+  GEN nf,mat,mat1,qgen,decqq,newcol,Q,g,ord,modpr;
 
   ord = NULL; /* gcc -Wall */
   nbcol = 0; nf = (GEN)bnf[7]; N = degpol(nf[1]);
@@ -1223,11 +1223,11 @@ primecertify(GEN bnf,GEN beta,long pp,GEN big)
         g = lift_intern(gener(qgen)); /* primitive root */
         ord = decomp(stoi(qq-1));
       }
-      Qh = prime_to_ideal(nf,Q);
+      modpr = zkmodprinit(nf, Q);
       newcol = cgetg(lb+1,t_COL);
       for (j=1; j<=lb; j++)
       {
-        GEN t = to_Fp_simple(nf, (GEN)beta[j], Qh);
+        GEN t = to_Fp_simple(nf, (GEN)beta[j], modpr);
         newcol[j] = (long)Fp_PHlog(t,g,qgen,ord);
       }
       if (DEBUGLEVEL>3)
@@ -2129,8 +2129,6 @@ rayclassnointern(GEN blist, GEN h)
   }
   return L;
 }
-
-extern void rowselect_p(GEN A, GEN B, GEN p, long init);
 
 static GEN
 rayclassnointernarch(GEN blist, GEN h, GEN matU)

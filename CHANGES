@@ -63,6 +63,7 @@ IZ 12- [gnuplot + dynamic link:] allow building even when dlopen() not available
    21- try to make sure life of GP variables is not too short. Was:
          v = [0,0]; v + [v=0,v=0] --> SEGV
          u = Mod(x*Mod(1,2),polcyclo(25)*Mod(1,2)); sum(i=1,4,u=u^32) --> SEGV
+   22- typo in to_Fp_simple [ bnfcertify(bnfinit(x^2-40!)) --> type error ]
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).
