@@ -2290,7 +2290,11 @@ two_rank(GEN x)
 }
 
 #define MAXFORM 11
-#define _low(x) ({GEN __x=(GEN)x; modBIL(__x);})
+#if 0 /* gcc-ism */
+#  define _low(x) ({GEN __x=(GEN)x; modBIL(__x);})
+#else
+#  define _low(x) modBIL(x)
+#endif
 
 /* h(x) for x<0 using Baby Step/Giant Step.
  * Assumes G is not too far from being cyclic.
