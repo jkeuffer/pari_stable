@@ -61,7 +61,7 @@ extern int  bfffo(ulong x);
 ({ ulong __value, __arg1 = (a), __arg2 = (b); \
    __asm__ ("sub %2,%3,%0\n\taddc %%r0,%%r0,%1\n\tsubi 1,%1,%1" \
         : "=r" (__value), "=r" (overflow) \
-        : "r" (__arg1), "r" (__arg2) , "r" ((ulong) 1)\
+        : "r" (__arg1), "r" (__arg2) \
         : "cc"); \
   __value; \
 })
