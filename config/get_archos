@@ -64,9 +64,7 @@ esac
 #
 #   Modifications for pretty name and asm file
 #
-case "$osname" in
-  nextstep|cygwin*|linux|freebsd|os2) pretty="$pretty running $osname";;
-esac
+pretty="$pretty running $osname";;
 
 tmp_kern=auto-none
 if test  -n "$kernel"; then
