@@ -2066,6 +2066,17 @@ output\cr
 \+& \kbd{s*} & any number of strings, possibly 0 (see \kbd{s})\cr
 \+& \kbd{D\var{xxx}} &  argument has a default value\cr
 
+The \kbd{s*} code is technical and you probably do not need it, but we give
+its description for completeness. It reads all remaining arguments in
+\tev{string context} (see \secref{se:strings}), and sends a
+(\kbd{NULL}-terminated) list of \kbd{GEN*} pointing to these. The automatic
+concatenation rules in string context are implemented so that adjacent strings 
+are read as different arguments, as if they had been comma-separated. For
+instance, if the remaining argument sequence is: \kbd{"xx" 1, "yy"}, the
+\kbd{s*} atom will send a \kbd{GEN *g = \obr \&a, \&b, \&c, NULL\cbr}, where
+$a$, $b$, $c$ are \kbd{GEN}s of type \typ{STR} (content \kbd{xx}), \typ{INT}
+and \typ{STR} (content \kbd{yy}).
+
 The format to indicate a default value (atom starts with a \kbd{D}) is
 ``\kbd{D\var{value},\var{type},}'', where \var{type} is the code for any
 mandatory atom (previous group), \var{value} is any valide GP expression
