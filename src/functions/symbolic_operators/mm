@@ -1,5 +1,5 @@
 Function: _--
-Class: operator
+Class: symbolic_operators
 Description: 
  (*bptr):bptr				--$1
  (*small):small				--$1

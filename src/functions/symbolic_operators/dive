@@ -1,5 +1,5 @@
 Function: _/=_
-Class: operator
+Class: symbolic_operators
 Description: 
  (*small, gen):void	        $"cannot divide small: use \= instead."
  (*int, gen):void	        $"cannot divide int: use \= instead."

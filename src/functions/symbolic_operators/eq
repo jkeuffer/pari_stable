@@ -1,5 +1,5 @@
 Function: _==_
-Class: operator
+Class: symbolic_operators
 C-Name: geq
 Prototype: GG
 Description: 
@@ -8,6 +8,7 @@ Description:
  (small, int):bool:parens               cmpsi($1, $2) == 0
  (int, small):bool:parens               cmpis($1, $2) == 0
  (int, int):bool                        egalii($1, $2)
+ (real,real):bool                       cmprr($1, $2) == 0
  (mp, mp):bool:parens                   mpcmp($1, $2) == 0
  (typ, typ):bool:parens                 $(1) == $(2)
  (typ, #str):bool:parens                $(1) == $(typ:2)

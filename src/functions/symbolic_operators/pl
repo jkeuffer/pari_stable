@@ -1,5 +1,5 @@
 Function: +_
-Class: operator
+Class: symbolic_operators
 Description: 
  (small):small:parens			$1
  (int):int:parens:copy			$1

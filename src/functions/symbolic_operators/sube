@@ -1,5 +1,5 @@
 Function: _-=_
-Class: operator
+Class: symbolic_operators
 Description: 
  (*small, small):small:parens		$1 -= $(2)
  (*int, small):int:parens		$1 = subis($1, $2)

@@ -1,5 +1,5 @@
 Function: !_
-Class: operator
+Class: symbolic_operators
 C-Name: gnot
 Prototype: G
 Description: 

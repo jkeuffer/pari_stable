@@ -1,5 +1,5 @@
 Function: _/_
-Class: operator
+Class: symbolic_operators
 C-Name: gdiv
 Prototype: GG
 Description: 

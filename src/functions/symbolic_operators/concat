@@ -1,5 +1,5 @@
 Function: __
-Class: operator
+Class: symbolic_operators
 Description: 
  (genstr, genstr):genstr	        concat($1, $2)
  (genstr, gen):genstr		        concat($1, $2)
