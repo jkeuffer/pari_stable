@@ -990,23 +990,20 @@ idealmulprime(GEN nf, GEN x, GEN vp)
 GEN
 idealmulh(GEN nf, GEN ix, GEN iy)
 {
-  long N,i, f = 0;
+  long f = 0;
   GEN res,x,y,dy;
 
   if (typ(ix)==t_VEC) {f=1;  x=(GEN)ix[1];} else x=ix;
   if (typ(iy)==t_VEC && lg(iy)==3) {f+=2; y=(GEN)iy[1];} else y=iy;
   if (f) res = cgetg(3,t_VEC);
 
-  if (typ(y)==t_VEC)
-    y = idealmulspec(nf,x,(GEN)y[1],(GEN)y[2],(GEN)y[3]);
+  if (typ(y)==t_VEC) dy = (GEN)y[3];
   else
   {
-
-    N=lg(x)-1; dy=gcoeff(y,1,1);
-    for (i=2; i<=N; i++) dy=mulii(dy,gcoeff(y,i,i));
+    dy = dethnf_i(y);
     y = ideal_two_elt(nf,y);
-    y = idealmulspec(nf,x,(GEN)y[1],(GEN)y[2],dy);
   }
+  y = idealmulspec(nf,x,(GEN)y[1],(GEN)y[2], dy);
 
   if (!f) return y;
   res[1]=(long)y;
@@ -1109,59 +1106,6 @@ idealmul(GEN nf, GEN x, GEN y)
   res[1]=(long)p1; res[2]=(long)ax; return res;
 }
 
-/* different of nf */
-GEN
-differente(GEN nf, GEN premiers)
-{
-  long av=avma,i,j,vi,ei,v,nb_p,vpc;
-  GEN ideal,diff,liste_id,p1,pcon,pr,pol,a,alpha;
-
-  pol=(GEN)nf[1];
-  if (DEBUGLEVEL>1) fprintferr("Computing different\n");
-  if (gcmp1((GEN)nf[4]))
-  {
-    p1 = derivpol(pol);
-    return gerepileupto(av,idealhermite_aux(nf,p1));
-  }
-
-  ideal = gmul((GEN)nf[3],ginv(gmael(nf,5,4)));
-  pcon = content(ideal);
-  if (!gcmp1(pcon)) ideal=gdiv(ideal,pcon);
-
-  ideal=hnfmodid(ideal,divii((GEN)nf[3],pcon));
-  if (DEBUGLEVEL>1) msgtimer("hnf(D*delta^-1)");
-
-  if (!premiers)
-  {
-    premiers=factor(absi((GEN)nf[3]));
-    if (DEBUGLEVEL>1) msgtimer("factor(D)");
-  }
-  diff=idmat(lgef(nf[1])-3); nb_p=lg(premiers[1]);
-
-  for (i=1; i<nb_p; i++)
-  {
-    pr=gcoeff(premiers,i,1); liste_id = primedec(nf,pr);
-    vi=itos(gcoeff(premiers,i,2)); vpc=ggval(pcon,pr);
-    for (j=1; j<lg(liste_id); j++)
-    {
-      p1=(GEN)liste_id[j]; ei=itos((GEN)p1[3]);
-      if (ei>1)
-      {
-	if (DEBUGLEVEL>1) fprintferr("treating %Z\n",p1);
-	if (signe(ressi(ei,pr)))
-          v = ei-1;
-	else
-	  v = ei*(vi-vpc)-idealval(nf,ideal,p1);
-        a = gpuigs(pr, 1+(v-1)/ei);
-        alpha = element_pow(nf,(GEN)p1[2],stoi(v));
-        v *= itos((GEN)p1[4]);
-	diff = idealmulspec(nf,diff,a,alpha,gpuigs(pr,v));
-      }
-    }
-  }
-  return gerepileupto(av,diff);
-}
-
 /* norm of an ideal */
 GEN
 idealnorm(GEN nf, GEN x)
@@ -1184,33 +1128,34 @@ idealnorm(GEN nf, GEN x)
 }
 
 /* inverse */
+GEN gauss_triangle_i(GEN A, GEN B);
 
-/* P.M & M.H. */
+/* rewritten from original code by P.M & M.H.
+ *
+ * I^(-1) = { x \in K, Tr(x D^(-1) I) \in Z }, D different of K/Q
+ *
+ * nf[5][6] = d_K * D^(-1) is integral = d_K T^(-1), T = (Tr(wi wj))
+ * nf[5][7] = same in suitable form for ideal multiplication */
 static GEN
-hnfideal_inv(GEN nf, GEN x)
+hnfideal_inv(GEN nf, GEN I)
 {
-  long N = lgef(nf[1])-3;
-  GEN denx = denom(x), detx,dual,p1;
+  GEN dI = denom(I), NI,a,dual;
 
-  if (gcmp1(denx)) denx = NULL; else x = gmul(x,denx);
-  detx = dethnf(x);
-  if (gcmp0(detx)) err(talker, "cannot invert zero ideal");
-  x = idealmulh(nf,x, gmael(nf,5,7));
-  dual = gauss(x, gmul(detx, gmael(nf,5,6)));
-  dual = gdiv(gtrans(dual), detx);
+  if (gcmp1(dI)) dI = NULL; else I = gmul(I,dI);
+  NI = dethnf_i(I);
+  if (gcmp0(NI)) err(talker, "cannot invert zero ideal");
+  I = idealmulh(nf,I, gmael(nf,5,7));
+ /* I in HNF, hence easily inverted. Multiply by NI to get integer coeffs
+  * d_K cancels while solving the linear equations. */
+  dual = gtrans( gauss_triangle_i(I, gmul(NI, gmael(nf,5,6))) );
+  a = content(dual);
+  if (!is_pm1(a)) { dual = gdivexact(dual,a); NI = divii(NI,a); }
 
- /* nf[5][4] is a dense symmetric matrix.  We computed
-  * nf[5][6] = fieldd * ginv(nf[5][4]) in initalg.
-  * x is upper triangular (HNF), and easily inverted.
-  * The factor fieldd cancels while solving the linear equations.
-  */
-  p1 = denom(dual); dual = gmul(dual, p1);
-  dual = hnfmod(dual, gdiv(gpowgs(p1,N),detx));
-  if (denx) p1 = gdiv(p1,denx);
-  return gdiv(dual,p1);
+  dual = hnfmodid(dual, NI);
+  if (dI) NI = gdiv(NI,dI);
+  return gdiv(dual,NI);
 }
 
-/* Calcule le dual de mat_id pour la forme trace */
 GEN
 oldidealinv(GEN nf, GEN x)
 {
@@ -2674,9 +2619,8 @@ nfkermodpr(GEN nf, GEN x, GEN prhall)
   {
     j=1;
     while (j<=m && (c[j] || gcmp0(gcoeff(x,j,k)))) j++;
-    if (j>m) { r++; d[k]=0; }
-    else
-    {
+    if (j > m) { r++; d[k]=0; continue; }
+
       p=element_divmodpr(nf,munnf,gcoeff(x,j,k),prhall);
       c[j]=k; d[k]=j; coeff(x,j,k)=(long)munnf;
       for (i=k+1; i<=n; i++)
@@ -2684,7 +2628,8 @@ nfkermodpr(GEN nf, GEN x, GEN prhall)
       for (t=1; t<=m; t++)
 	if (t!=j)
 	{
-	  p=gcoeff(x,t,k); coeff(x,t,k)=(long)zeronf;
+        p = gcoeff(x,t,k); if (gcmp0(p)) continue;
+        coeff(x,t,k) = (long)zeronf;
 	  for (i=k+1; i<=n; i++)
             coeff(x,t,i)=ladd(gcoeff(x,t,i),
 	                      element_mulmodpr(nf,p,gcoeff(x,j,i),prhall));
@@ -2694,7 +2639,6 @@ nfkermodpr(GEN nf, GEN x, GEN prhall)
         if (DEBUGMEM>1) err(warnmem,"nfkermodpr, k = %ld / %ld",k,n);
         av2=avma; x=gerepile(av1,av2,gcopy(x));
       }
-    }		
   }
   if (!r) { avma=av0; return cgetg(1,t_MAT); }
   av1=avma; y=cgetg(r+1,t_MAT);
