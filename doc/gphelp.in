@@ -206,7 +206,7 @@ sub open_viewer_then_quit
   $f = "$docdir/$F.pdf" if (! -f "$f");
   die "could not find \'$F\'" if (! -f "$f");
 
-  $redirect = "2>/dev/null >/dev/null &";
+  $redirect = ' 2>/dev/null >/dev/null &';
   if ($f =~ /\.dvi/)
   { # DVI
     $viewer = ($f =~ /refcard/)? $xdviref: $xdvi;
