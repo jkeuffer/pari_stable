@@ -93,6 +93,7 @@ extern void dbg_rel(long s, GEN col);
 
 #define RANDOM_BITS 4
 static const int CBUCHG = (1<<RANDOM_BITS) - 1;
+static const int MAXRELSUP = 50;
 
 /* used by factor[elt|gen|gensimple] to return factorizations of smooth elts
  * HACK: MAX_FACTOR_LEN never checked, we assume default value is enough
@@ -2028,8 +2029,7 @@ remove_content(GEN I)
 }
 
 static int
-rnd_rel(RELCACHE_t *cache, FB_t *F, long MAXRELSUP, GEN nf, GEN vecG,
-        GEN L_jid, long *pjid)
+rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN vecG, GEN L_jid, long *pjid)
 {
   long nbG = lg(vecG)-1, lgsub = lg(F->subFB), jlist = 1, jid = *pjid;
   long i, j, cptlist = 0, cptzer = 0;
@@ -2954,20 +2954,51 @@ nf_cloneprec(GEN nf, long prec, GEN *pnf)
   avma = av; return *pnf = nf;
 }
 
+static void
+trivial_rel(RELCACHE_t *cache, FB_t *F, long RU)
+{
+  const long RELSUP = 5;
+  const long n = F->KC + RU-1 + RELSUP; /* expected # of needed relations */
+  long i, j, k, p;
+  GEN c, P;
+  REL_t *rel;
+
+  if (DEBUGLEVEL) fprintferr("KCZ = %ld, KC = %ld, n = %ld\n", F->KCZ,F->KC,n);
+  reallocate(cache, 10*n + 50); /* make room for lots of relations */
+  cache->end = cache->base + n;
+  for (rel = cache->base + 1, i = 1; i <= F->KCZ; i++)
+  { /* trivial relations (p) = prod P^e */
+    p = F->FB[i]; P = F->LV[p];
+    if (!isclone(P)) continue;
+
+    /* all prime divisors in FB */
+    c = col_0(F->KC); k = F->iLP[p];
+    rel->nz = k+1;
+    rel->R  = c; c += k;
+    rel->ex = NULL;
+    rel->m  = NULL;
+    rel->pow= NULL; /* = F->pow */
+    for (j = lg(P)-1; j; j--) c[j] = itos(gmael(P,j,3));
+    rel++;
+  }
+  cache->last = rel - 1;
+  if (DEBUGLEVEL) fprintferr("After trivial relations, cglob = %ld\n",
+               cache->last - cache->base);
+}
+
 static GEN
 buch(GEN *pnf, double cbach, double cbach2, long nbrelpid, long flun, 
      long PRECREG)
 {
   pari_sp av, av2;
-  long N, R1, R2, RU, KCCO, LIMC, LIMC2, lim, zc, i, j, k, jid, MAXRELSUP;
+  long N, R1, R2, RU, LIMC, LIMC2, lim, zc, i, jid;
   long nreldep, sfb_change, sfb_trials, nlze, precdouble = 0, precadd = 0;
   double drc, LOGD, LOGD2;
   GEN vecG, fu, zu, nf, D, A, W, R, Res, z, h, L_jid, PERM;
   GEN M, res, L, resc, B, C, lambda, dep, clg1, clg2, Vbase;
   char *precpb = NULL;
-  const int RELSUP = 5, minsFB = 3;
+  const int minsFB = 3;
   RELCACHE_t cache;
-  REL_t *rel;
   FB_t F;
 
   nf = *pnf; *pnf = NULL;
@@ -3006,36 +3037,7 @@ START:
   if (!Res || !subFBgen(&F, nf, min(lim,LIMC2) + 0.5, minsFB)) goto START;
   PERM = dummycopy(F.perm); /* to be restored in case of precision increase */
   av2 = avma;
-  KCCO = F.KC+RU-1 + RELSUP; /* expected # of needed relations */
-  if (DEBUGLEVEL) fprintferr("KCZ = %ld, KC = %ld, KCCO = %ld\n",
-                             F.KCZ, F.KC, KCCO);
-  MAXRELSUP = min(50, 4*F.KC);
-  reallocate(&cache, 10*KCCO + MAXRELSUP); /* make room for lots of relations */
-  rel = cache.base + 1;
-  for (i=1; i<=F.KCZ; i++)
-  { /* trivial relations (p) = prod P^e */
-    long p = F.FB[i];
-    GEN c, P = F.LV[p];
-    if (!isclone(P)) continue;
-
-    /* all prime divisors in FB */
-    c = col_0(F.KC); k = F.iLP[p];
-    rel->nz = k+1;
-    rel->R  = c; c += k;
-    rel->ex = NULL;
-    rel->m  = NULL;
-    rel->pow= NULL; /* = F.pow */
-    for (j = lg(P)-1; j; j--) c[j] = itos(gmael(P,j,3));
-    rel++;
-  }
-  cache.last = rel - 1;
-  if (DEBUGLEVEL)
-    fprintferr("After trivial relations, cglob = %ld\n",
-               cache.last - cache.base);
-  /* initialize for other relations */
-  cache.end = cache.base + KCCO;
-
-  /* Relations through elements of small norm */
+  trivial_rel(&cache, &F, RU);
   if (nbrelpid > 0) {small_norm(&cache,&F,LOGD,nf,nbrelpid,LIMC2); avma = av2;}
 
   /* Random relations */
@@ -3062,7 +3064,7 @@ MORE:
 	fprintferr("\n(need %ld more relation%s)\n", nlze, (nlze==1)?"":"s");
     if (!sfb_change)
     {
-      if (!rnd_rel(&cache,&F, MAXRELSUP,nf,vecG,L_jid,&jid)) goto START;
+      if (!rnd_rel(&cache,&F, nf, vecG, L_jid, &jid)) goto START;
       if (W) { if (jid == F.KC) jid = 1; else jid++; }
     }
     L_jid = NULL;
@@ -3091,6 +3093,7 @@ PRECPB:
   {
     long l = cache.last - cache.chk, j;
     GEN mat = cgetg(l+1, t_VEC), emb = cgetg(l+1, t_MAT);
+    REL_t *rel;
     for (j=1,rel = cache.chk + 1; rel <= cache.last; rel++,j++)
     {
       mat[j] = (long)rel->R;
@@ -3160,7 +3163,7 @@ PRECPB:
   if (flun & nf_UNITS)
   {
     long e;
-    fu = getfu(nf,&A,flun,&e,PRECREG);
+    fu = getfu(nf, &A, flun, &e, PRECREG);
     if (e <= 0 && (flun & nf_FORCE))
     {
       if (e < 0) precadd = (DEFAULTPREC-2) + ((-e) >> TWOPOTBITS_IN_LONG);
