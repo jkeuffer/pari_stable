@@ -1816,7 +1816,7 @@ FlxqX_safegcd(GEN P, GEN Q, GEN T, ulong p)
 /*                                                                 */
 /*******************************************************************/
 
-/*Preliminary implementation to speed up Fp_isom*/
+/*Preliminary implementation to speed up FpX_ffisom*/
 typedef struct {
   GEN S, T, mg;
   ulong p;

@@ -1027,7 +1027,7 @@ FpXQX_safegcd(GEN P, GEN Q, GEN T, GEN p)
 /*                                                                 */
 /*******************************************************************/
 
-/*Preliminary implementation to speed up Fp_isom*/
+/*Preliminary implementation to speed up FpX_ffisom*/
 typedef struct {
   GEN S, T, p;
 } FpXYQQ_muldata;
@@ -1796,7 +1796,7 @@ Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
  * that Q | P(R) mod l.  If P and Q have the same degree, it is of course an
  * isomorphism.  */
 GEN
-Fp_isom(GEN P,GEN Q,GEN l)
+FpX_ffisom(GEN P,GEN Q,GEN l)
 {
   pari_sp av = avma;
   GEN SP, SQ, R;
