@@ -295,7 +295,6 @@ GetDeg(GEN dataCR)
 /********************************************************************/
 
 static GEN AllStark(GEN data,  GEN nf,  long flag,  long prec);
-static GEN InitChar0(GEN dataD, long prec);
 static GEN QuadGetST(GEN dataCR, GEN vChar, long prec);
 
 /* Let A be a finite abelian group given by its relation and let C
@@ -398,9 +397,8 @@ ComputeIndex2Subgroup(GEN bnr, GEN C)
   Mr = diagonal(gmael(bnr, 5, 2));
   D = smithall(gauss(C, Mr), &U, NULL);
   T = gmul(C,ginv(U));
-  subgrp  = subgrouplist(D, gdeux);
-  nb = lg(subgrp) - 1;
-  setlg(subgrp, nb); /* skip Id which comes last */
+  subgrp  = subgrouplist(D, _vec(gdeux));
+  nb = lg(subgrp);
   for (i = 1; i < nb; i++)
     subgrp[i] = (long)hnf(concatsp(gmul(T, (GEN)subgrp[i]), Mr));
 
@@ -453,8 +451,7 @@ GetIndex(GEN pr, GEN bnr, GEN subgroup)
     mpr[2] = mod[2];
     bnrpr = buchrayinitgen(bnf, mpr);
     cycpr = gmael(bnrpr, 5, 2);
-    M = bnrGetSurj(bnr, bnrpr);
-    M = gmul(M, subgroup);
+    M = gmul(bnrGetSurj(bnr, bnrpr), subgroup);
     subpr = hnf(concatsp(M, diagonal(cycpr)));
     /* e = #(bnr/subgroup) / #(bnrpr/subpr) */
     e = itos( diviiexact(dethnf_i(subgroup), dethnf_i(subpr)) );
@@ -474,55 +471,47 @@ GetIndex(GEN pr, GEN bnr, GEN subgroup)
   return gerepileupto(av, rep);
 }
 
+static GEN get_listCR(GEN dataD);
+static GEN InitChar(GEN bnr, GEN listCR, long prec);
 
 /* Given a conductor and a subgroups, return the corresponding
-   complexity and precision required using quickpol */
-static GEN
+   complexity and precision required using quickpol. Fill data[5] with
+   listCR */
+static long
 CplxModulus(GEN data, long *newprec, long prec)
 {
-  long pr, dprec;
-  pari_sp av = avma, av2;
-  GEN nf, cpl, pol, p1;
+  long pr, dprec, ex;
+  pari_sp av;
+  GEN pol, listCR, cpl, bnr = (GEN)data[1], nf = checknf(bnr);
 
-  nf = gmael3(data, 1, 1, 7);
-
-  p1 = cgetg(6, t_VEC);
-
-  p1[1] = data[1];
-  p1[2] = data[2];
-  p1[3] = data[3];
-  p1[4] = data[4];
-
-  if (DEBUGLEVEL >= 2)
+  if (DEBUGLEVEL>1)
     fprintferr("\nTrying modulus = %Z and subgroup = %Z\n",
-	       mael3(p1, 1, 2, 1), (GEN)p1[2]);
+	       mael(bnr, 2, 1), (GEN)data[2]);
 
+  listCR = get_listCR((GEN)data[3]);
   dprec = DEFAULTPREC;
-
-  av2 = avma;
-  for (;;)
+  for (av = avma;; avma = av)
   {
-    p1[5] = (long)InitChar0((GEN)data[3], dprec);
-    pol   = gerepileupto(av2, AllStark(p1, nf, -1, dprec));
+    data[5] = (long)InitChar(bnr, listCR, dprec);
+    pol = AllStark(data, nf, -1, dprec);
     if (!gcmp0(leading_term(pol)))
     {
-      cpl = gnorml2(gtovec(pol));
+      cpl = QuickNormL2(pol, DEFAULTPREC);
       if (!gcmp0(cpl)) break;
     }
-    pr = gexpo(pol)>>(TWOPOTBITS_IN_LONG+1);
+    pr = gexpo(pol) >> (TWOPOTBITS_IN_LONG+1);
     if (pr < 0) pr = 0;
     dprec = max(dprec, pr) + EXTRA_PREC;
 
-    if (DEBUGLEVEL >= 2) err(warnprec, "CplxModulus", dprec);
+    if (DEBUGLEVEL>1) err(warnprec, "CplxModulus", dprec);
   }
+  ex = gexpo(cpl); avma = av;
+  if (DEBUGLEVEL>1) fprintferr("cpl = 2^%ld\n", ex);
 
-  if (DEBUGLEVEL >= 2) fprintferr("cpl = %Z\n", cpl);
-
-  pr = gexpo(pol)>>TWOPOTBITS_IN_LONG;
+  pr = gexpo(pol) >> TWOPOTBITS_IN_LONG;
   if (pr < 0) pr = 0;
   *newprec = max(prec, pr + EXTRA_PREC);
-
-  return gerepileupto(av, cpl);
+  data[5] = (long)listCR; return ex;
 }
 
 /* Let f be a conductor without infinite part and let C be a
@@ -536,11 +525,12 @@ CplxModulus(GEN data, long *newprec, long prec)
 static GEN
 FindModulus(GEN dataC, long fl, long *newprec, long prec, long bnd)
 {
+  const long limnorm = 400;
   long n, i, narch, nbp, maxnorm, minnorm, N, nbidnn, s, c, j, nbcand;
-  long limnorm, first = 1, pr;
-  pari_sp av = avma, av1, av0;
+  long first = 1, pr, rb, oldcpl = -1;
+  pari_sp av = avma, av1;
   GEN bnr, rep, bnf, nf, f, arch, m, listid, idnormn, bnrm, ImC;
-  GEN candD, D, bpr, indpr, sgp, p1, p2, rb;
+  GEN candD, bpr, indpr, sgp, p1, p2;
 
   bnr = (GEN)dataC[1];
   sgp = gmael(dataC, 2, 4);
@@ -549,11 +539,10 @@ FindModulus(GEN dataC, long fl, long *newprec, long prec, long bnd)
   N   = degpol(nf[1]);
   f   = gmael3(bnr, 2, 1, 1);
 
-  rep = cgetg(6, t_VEC);
-  for (i = 1; i <= 5; i++) rep[i] = zero;
+  rep = NULL;
 
   /* if cpl < rb, it is not necessary to try another modulus */
-  rb = powgi(gmul((GEN)nf[3], det(f)), gmul2n(gmael(bnr, 5, 1), 3));
+  rb = expi( powgi(gmul((GEN)nf[3], det(f)), gmul2n(gmael(bnr, 5, 1), 3)) );
 
   bpr = divcond(bnr);
   nbp = lg(bpr) - 1;
@@ -579,30 +568,27 @@ FindModulus(GEN dataC, long fl, long *newprec, long prec, long bnd)
      If we cannot find a suitable conductor of norm < limnorm, we stop */
   maxnorm = 50;
   minnorm = 1;
-  limnorm = 400;
 
   if (DEBUGLEVEL >= 2)
     fprintferr("Looking for a modulus of norm: ");
 
-  av0 = avma;
   for(;;)
   {
     /* compute all ideals of norm <= maxnorm */
     disable_dbg(0);
     listid = ideallist(nf, maxnorm);
     disable_dbg(-1);
-    av1 = avma;
 
+    av1 = avma;
     for (n = minnorm; n <= maxnorm; n++)
     {
       if (DEBUGLEVEL >= 2) fprintferr(" %ld", n);
+      avma = av1;
 
       idnormn = (GEN)listid[n];
       nbidnn  = lg(idnormn) - 1;
       for (i = 1; i <= nbidnn; i++)
       {
-	rep = gerepilecopy(av1, rep);
-
         /* finite part of the conductor */
 	m[1] = (long)idealmul(nf, f, (GEN)idnormn[i]);
 
@@ -627,11 +613,11 @@ FindModulus(GEN dataC, long fl, long *newprec, long prec, long bnd)
           nbcand = lg(candD) - 1;
           for (c = 1; c <= nbcand; c++)
           {
+            GEN D  = (GEN)candD[c];
+            long cpl;
+
             /* check if m is the conductor */
-            D  = (GEN)candD[c];
-            disable_dbg(0);
             p1 = conductor(bnrm, D, -1);
-            disable_dbg(-1);
             if (!signe(p1)) continue;
 
             /* check the splitting of primes */
@@ -642,22 +628,20 @@ FindModulus(GEN dataC, long fl, long *newprec, long prec, long bnd)
             }
             if (j <= nbp) continue;
 
-            p2 = cgetg(6, t_VEC);
+            p2 = cgetg(6, t_VEC); /* p2[5] filled in CplxModulus */
             p2[1] = (long)bnrm;
             p2[2] = (long)D;
             p2[3] = (long)InitQuotient(bnrm, D);
             p2[4] = (long)InitQuotient(bnrm, ImC);
-
-            p1 = CplxModulus(p2, &pr, prec);
-
-            if (first == 1 || gcmp(p1, (GEN)rep[5]) < 0)
+            cpl = CplxModulus(p2, &pr, prec);
+            if (oldcpl < 0 || cpl < oldcpl)
             {
               *newprec = pr;
-              for (j = 1; j <= 4; j++) rep[j] = p2[j];
-              rep[5] = (long)p1;
+              if (rep)    gunclone(rep);
+              rep    = gclone(p2);
+              oldcpl = cpl;
             }
-
-            if (!fl || gcmp(p1, rb) < 0) goto END; /* OK */
+            if (!fl || oldcpl < rb) goto END; /* OK */
 
             if (DEBUGLEVEL>1) fprintferr("Trying to find another modulus...");
             first--;
@@ -673,15 +657,13 @@ FindModulus(GEN dataC, long fl, long *newprec, long prec, long bnd)
       }
     }
     /* if necessary compute more ideals */
-    rep = gerepilecopy(av0, rep);
-
     minnorm = maxnorm;
     maxnorm <<= 1;
     if (maxnorm > limnorm)
       err(talker, "Cannot find a suitable modulus in FindModulus");
   }
 END:
-  rep[5] = (long)InitChar0((GEN)rep[3], *newprec);
+  rep[5] = (long)InitChar((GEN)rep[1], (GEN)rep[5], *newprec);
   return gerepilecopy(av, rep);
 }
 
@@ -1099,13 +1081,12 @@ InitChar(GEN bnr, GEN listCR, long prec)
 }
 
 /* compute the list of characters to consider for AllStark and
-   initialize the data to compute with them */
+   initialize precision-independent data to compute with them */
 static GEN
-InitChar0(GEN dataD, long prec)
+get_listCR(GEN dataD)
 {
   GEN MrD, listCR, p1, chi, lchi, Surj, cond, bnr, p2, Mr, d, allCR;
   long hD, h, nc, i, j, lD, tnc;
-  pari_sp av = avma;
 
   Surj = gmael(dataD, 2, 3);
   MrD  = gmael(dataD, 2, 2);
@@ -1150,10 +1131,8 @@ InitChar0(GEN dataD, long prec)
     if (!egalii(d, gdeux))
       allCR[tnc++] = (long)ConjChar(lchi, Mr);
   }
-
-  setlg(listCR, nc);
   disable_dbg(-1);
-  return gerepileupto(av, InitChar(bnr, listCR, prec));
+  setlg(listCR, nc); return listCR;
 }
 
 /* recompute dataCR with the new precision */
@@ -2689,7 +2668,7 @@ AllStark(GEN data,  GEN nf,  long flag,  long newprec)
   dataCR = (GEN)data[5];
 
   v = 1;
-  while(gcmp1((GEN)cond1[v])) v++;
+  while (gcmp1((GEN)cond1[v])) v++;
 
   cl = lg(dataCR)-1;
   degs = GetDeg(dataCR);
