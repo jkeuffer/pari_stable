@@ -34,6 +34,16 @@ typedef struct Rectangle_s {long x, y, width, height;} Rectangle;
 typedef struct Segment_s {long x1, y1, x2, y2;} Segment;
 typedef char* String;
 
+#ifdef __APPLE__
+/* window does not show up after fork(): infinite loop in Carbon routine
+ * ClearMenuBar(), called from Fl_mac.cxx:fl_open_display(). */
+#  define BROKEN_FORK
+#endif
+
+#ifdef BROKEN_FORK
+jmp_buf fltk_env;
+#endif
+
 class Plotter: public Fl_Window {
 
 public:
@@ -269,7 +279,11 @@ int Plotter::handle(int event)
     switch(Fl::event_button())
     {
     case 1:
+#ifdef BROKEN_FORK
+     longjmp(fltk_env);
+#else
      exit(0);
+#endif
     case 2:
      {
        static int flag=0;
@@ -307,6 +321,10 @@ int Plotter::handle(int event)
 void
 rectdraw0(long *w, long *x, long *y, long lw, long do_free)
 {
+    Plotter *win;
+#ifdef BROKEN_FORK
+    if (setjmp(fltk_env)) { delete(win); return; }
+#else
     if (fork()) return;  // parent process returns
     
     //
@@ -317,17 +335,18 @@ rectdraw0(long *w, long *x, long *y, long lw, long do_free)
     os_signal(SIGBUS, SIG_IGN);
 
     freeall();  // PARI stack isn't needed anymore, keep rectgraph
+#endif
     PARI_get_plot(1);
 
-    Plotter *win = new Plotter( w, x, y, lw);
     Fl::visual(FL_DOUBLE|FL_INDEX);
+    win = new Plotter( w, x, y, lw);
     win->size_range(1,1);
     win->box(FL_FLAT_BOX);
     win->end();
     win->show();
     Fl::run();
     if (do_free) { free(w); free(x); free(y); }
-    exit( 0);
+    exit(0);
 }
 
 void
