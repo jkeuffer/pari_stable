@@ -994,8 +994,10 @@ GEN     rnfdedekind(GEN nf,GEN T,GEN pr);
 GEN     unifpol(GEN nf,GEN pol,long flag);
 
 /* polarit1.c */
+GEN     Fp_inv_isom(GEN S,GEN Tp, GEN p);
 long    Fp_is_squarefree(GEN f, GEN p);
 long    Fp_is_totally_split(GEN f, GEN p);
+GEN     Fp_isom(GEN l,GEN P,GEN Q);
 long    Fp_pol_nbfact(GEN u, GEN pp);
 GEN     apprgen(GEN f, GEN a);
 GEN     apprgen9(GEN f, GEN a);

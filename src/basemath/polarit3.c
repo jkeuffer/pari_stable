@@ -768,7 +768,186 @@ GEN ffsqrtnmod(GEN a, GEN n, GEN T, GEN p, GEN *zetan)
     a=gerepileupto(ltop,a);
   return a;
 }
+/*******************************************************************/
+/*  Isomorphisms between finite fields                             */
+/*                                                                 */
+/*******************************************************************/
+static GEN
+matrixpow(long n, GEN y, GEN P,GEN l)
+{
+  ulong av=avma;
+  GEN M,Z;
+  long d,i,j;
+  Z=cgetg(n+1,t_VEC);
+  if(n>0)
+    Z[1]=lpolun[varn(P)];
+  for(i=2;i<=n;i++)
+    Z[i]=(long)Fp_mul_mod_pol(y,(GEN)Z[i-1],P,l);
+  M=cgetg(n+1,t_MAT);
+  for (i=1;i<=n;i++)
+  {
+    M[i] = lgetg(n+1, t_COL);
+    d=lgef((GEN)Z[i])-3;
+    for (j = 1; j <= d+1 ; j++)
+      mael(M,i,j) = licopy((GEN) mael(Z,i,1 + j));
+    for (     ; j <= n; j++)
+      mael(M,i,j) = zero;
+  }
+  return gerepileupto(av,M);
+}
+/* compute the reciprocical ismorphism of S mod Tp, i.e. V such that
+   V(S)=X  mod T,p*/  
+GEN
+Fp_inv_isom(GEN S,GEN Tp, GEN p)
+{
+  ulong   ltop = avma, lbot;
+  GEN     M, U, V;
+  int     n, i;
+  long    x;
+  x = varn(Tp);
+  U = polun[x];
+  n = degree(Tp);
+  M = matrixpow(n,S,Tp,p);
+  V = cgetg(n + 1, t_COL);
+  for (i = 1; i <= n; i++)
+    V[i] = zero;
+  V[2] = un;
+  V = inverseimage_mod_p(M,V,p);
+  lbot = avma;
+  V = gtopolyrev(V, x);
+  return gerepile(ltop, lbot, V);
+}
+/* Let l be a prime number P, Q in ZZ[X].
+ * P and Q are both irreducible modulo l and of the same degree.
+ * Output an isomorphism between FF_l[X]/P and FF_l[X]/Q
+ * as a polynomial R such that Q|P(R) mod l
+ */
 
+GEN
+Fp_isom(GEN l,GEN P,GEN Q)
+{  
+  ulong ltop=avma;
+  long x,n,e,pg;
+  GEN q,m,MA,MB,R=gzero;
+  GEN A,B,Ap,Bp;
+  x=varn(P);n=degree(P);
+  e=pvaluation(stoi(n),l,&q);
+  pg=itos(q);
+  avma=ltop; 
+  if (DEBUGLEVEL>=2) timer2();
+  m=Fp_pow_mod_pol(polx[x],l,P,l);
+  MA=matrixpow(n,m,P,l);
+  m=Fp_pow_mod_pol(polx[x],l,Q,l);
+  MB=matrixpow(n,m,Q,l);
+  if (DEBUGLEVEL>=2) msgtimer("matrixpow");
+  A=B=Ap=Bp=zeropol(x);
+  if (pg>1)
+  {
+    if (gcmp0(modis(addis(l,-1),pg)))
+      /*We do not need to use relative extension in this setting, so
+        we don't*/
+    {
+      GEN L,An,Bn,ipg,z;
+      z=lift((GEN)rootmod(cyclo(pg,x),l)[1]);
+      z=negi(z);
+      ipg=stoi(pg);
+      if (DEBUGLEVEL>=4) timer2();
+      A=(GEN)ker_mod_p(gaddmat(z, MA),l)[1];/*SEGV on bad input*/
+      A=gtopolyrev(A,x);
+      B=(GEN)ker_mod_p(gaddmat(z, MB),l)[1];/*SEGV on bad input*/
+      B=gtopolyrev(B,x);
+      if (DEBUGLEVEL>=4) msgtimer("ker_mod_p");
+      An=(GEN) Fp_pow_mod_pol(A,ipg,P,l)[2];
+      Bn=(GEN) Fp_pow_mod_pol(B,ipg,Q,l)[2];
+      z=modii(mulii(An,mpinvmod(Bn,l)),l);
+      L=mpsqrtnmod(z,ipg,l,NULL); 
+      if (DEBUGLEVEL>=4) msgtimer("mpsqrtnmod");
+      B=Fp_mul_pol_scal(B,L,l);
+    }
+    else
+    {
+      GEN L,An,Bn,ipg,U,lU,z;
+      z=gneg(polx[MAXVARN]);
+      U=gmael(factmod(cyclo(pg,MAXVARN),l),1,1);
+      lU=lift(U);
+      ipg=stoi(pg);
+      if (DEBUGLEVEL>=4) timer2();
+      A=(GEN)Fq_ker(gaddmat(z, MA),lU,l)[1];/*SEGV on bad input*/
+      A=gmul(A,gmodulcp(gmodulcp(gun,l),U));
+      A=gtopolyrev(A,x);  
+      B=(GEN)Fq_ker(gaddmat(z, MB),lU,l)[1];/*SEGV on bad input*/
+      B=gmul(B,gmodulcp(gmodulcp(gun,l),U));
+      B=gtopolyrev(B,x);
+      if (DEBUGLEVEL>=4) msgtimer("Fq_ker");
+      An=lift(lift((GEN)lift(gpowgs(gmodulcp(A,P),pg))[2])); 
+      Bn=lift(lift((GEN)lift(gpowgs(gmodulcp(B,Q),pg))[2]));
+      z=Fp_inv_mod_pol(Bn,lU,l);
+      z=Fp_mul_mod_pol(An,z,lU,l);
+      L=ffsqrtnmod(z,ipg,lU,l,NULL); 
+      if (DEBUGLEVEL>=4) msgtimer("ffsqrtn");
+      B=gsubst(lift(lift(gmul(B,L))),MAXVARN,gzero);
+      A=gsubst(lift(lift(A)),MAXVARN,gzero);
+    }
+  }
+  if (e!=0)
+  {
+    GEN V1,moinsun,Ay,By,lmun;
+    int i,j;
+    moinsun=stoi(-1);
+    lmun=addis(l,-1);
+    MA=gaddmat(moinsun,MA);
+    MB=gaddmat(moinsun,MB);
+    Ay=By=polun[x];
+    V1=cgetg(n+1,t_COL);
+    V1[1]=un;
+    for(i=2;i<=n;i++) V1[i]=zero;
+    for(j=0;j<e;j++)
+    { 
+      if (j)
+      {
+	Ay=Fp_mul_mod_pol(Ay,Fp_pow_mod_pol(Ap,lmun,P,l),P,l);
+	for(i=1;i<lgef(Ay)-1;i++) V1[i]=Ay[i+1];
+	for(;i<=n;i++) V1[i]=zero;
+      }
+      Ap=inverseimage_mod_p(MA,V1,l);
+      Ap=gtopolyrev(Ap,x);
+      if (j)
+      {
+	By=Fp_mul_mod_pol(By,Fp_pow_mod_pol(Bp,lmun,Q,l),Q,l);
+	for(i=1;i<lgef(By)-1;i++) V1[i]=By[i+1];
+	for(;i<=n;i++) V1[i]=zero;
+      }
+      Bp=inverseimage_mod_p(MB,V1,l);
+      Bp=gtopolyrev(Bp,x);
+      if (DEBUGLEVEL>=4) msgtimer("inverseimage_mod_p");
+    }
+  }
+  A=Fp_add(A,Ap,l);
+  B=Fp_add(B,Bp,l);
+  R=Fp_inv_isom(A,P,l);
+  R=Fp_compo_mod_pol(R,B,Q,l);
+  return gerepileupto(ltop,R);
+}
+#if 0
+static bnfactor(P,l,d)
+{
+	GEN A,R;
+	long n,k,m;
+	n=poldegree(P);
+	A=;
+	m=n/d;
+	R=polun[varn(P)];
+	for(k=0,k<m;k++)
+	{
+	  R=Fp_mul(R,deg1pol(
+	  prod(k=0,n/d-1,x-A^(l^(d*k)));
+	}
+}
+GEN factorrel(GEN P, GEN l, GEN Q)
+{
+  
+}
+#endif 
 /*******************************************************************/
 int ff_poltype(GEN *x, GEN *p, GEN *pol);
 

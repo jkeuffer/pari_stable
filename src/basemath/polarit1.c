@@ -2243,6 +2243,8 @@ factmod9(GEN f, GEN pp, GEN a)
   for (j=1; j<nbf; j++) fqunclone((GEN)u[j], a, pp);
   (void)sort_factor(y, cmp_pol); return y;
 }
+/* See also: Isomorphisms between finite field and relative
+ * factorization in polarit3.c */
 
 /*******************************************************************/
 /*                                                                 */

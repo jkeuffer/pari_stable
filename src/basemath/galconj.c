@@ -2081,61 +2081,6 @@ a4galoisgen(GEN T, struct galois_test *td)
 }
 
 /* Groupe S4 */
-/*Fonction provisoire
- *
- *return une racine de T1 modulo T2
- */
-GEN
-Fpisom(GEN p, GEN T1, GEN T2)
-{
-  ulong   ltop = avma, lbot;
-  GEN     T, res;
-  long    v;
-  if (T1 == T2)
-    return polx[varn(T1)];
-  v = varn(T2);
-  setvarn(T2, MAXVARN);
-  T = (GEN) factmod9(T1, p, T2)[1];
-  setvarn(T2, v);
-  res = gneg(((GEN **) T)[1][2]);
-  lbot = avma;
-  res = lift(lift(res)); 
-  setvarn(res, v);
-  return gerepile(ltop, lbot, res);
-}
-
-GEN
-Fpinvisom(GEN S,GEN Tp, GEN p)
-{
-  ulong   ltop = avma, lbot;
-  GEN     M, U, V;
-  int     n, i, j;
-  long    x;
-  x = varn(Tp);
-  U = polun[x];
-  n = degree(Tp);
-  M = cgetg(n + 1, t_MAT);
-  for (i = 1; i <= n; i++)
-  {
-    long     d;
-    M[i] = lgetg(n + 1, t_COL); 
-    if (i > 1)
-      U = Fp_mul_mod_pol(U, S,Tp,p);
-    d = degree((GEN) U);
-    for (j = 1; j <= d + 1; j++)
-      mael(M,i,j) = U[1 + j];
-    for (j = d + 2; j <= n; j++)
-      mael(M,i,j) = zero;
-  }
-  V = cgetg(n + 1, t_COL);
-  for (i = 1; i <= n; i++)
-    V[i] = zero;
-  V[2] = un;
-  V = gaussmodulo(M, p,V);
-  lbot = avma;
-  V = gtopolyrev(V, x);
-  return gerepile(ltop, lbot, V);
-}
 static void
 s4makelift(GEN u, struct galois_lift *gl, GEN liftpow)
 {
@@ -2236,11 +2181,11 @@ s4galoisgen(struct galois_lift *gl)
   for (i = 1; i < lg(isom); i++)
   {
     misom[i] = lgetg(lg(Tmod), t_COL);
-    isom[i] = (long) Fpisom(p, (GEN) Tmod[1], (GEN) Tmod[i]);
+    isom[i] = (long) Fp_isom(p, (GEN) Tmod[1], (GEN) Tmod[i]);
     if (DEBUGLEVEL >= 6)
       fprintferr("S4GaloisConj:Computing isomorphisms %d:%Z\n", i,
 		 (GEN) isom[i]);
-    isominv[i] = (long) Fpinvisom((GEN) isom[i], (GEN) Tmod[i],p);
+    isominv[i] = (long) Fp_inv_isom((GEN) isom[i], (GEN) Tmod[i],p);
   }
   for (i = 1; i < lg(isom); i++)
     for (j = 1; j < lg(isom); j++)
