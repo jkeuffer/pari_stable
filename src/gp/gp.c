@@ -2767,6 +2767,7 @@ read_opt(long argc, char **argv)
 {
   char *b=NULL, *p=NULL, *s=NULL, **pre;
   int i=1, initrc=1;
+  long TOP;
 
   pari_outfile=stderr;
   while (i<argc)
@@ -2804,7 +2805,7 @@ read_opt(long argc, char **argv)
   /* override the values from gprc */
   testint(b, &paribufsize); if (paribufsize < 10) paribufsize = 10;
   testint(p, &primelimit);
-  testint(s, &top);
+  testint(s, &TOP); top = (ulong)TOP;
   if (under_emacs || under_texmacs) disable_color=1;
   pari_outfile=stdout; return pre;
 }

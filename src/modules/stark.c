@@ -1546,6 +1546,7 @@ ComputeCoeff(GEN datachi, long n, long deg, long prec)
   cond =  gmael3(bnr, 2, 1, 1);
 
   /* dataray = InitGetRay(bnr, nmax); */
+  dataray = NULL; /* gcc -Wall */
 
   matan  = InitMatAn(n, deg, 0);
   matan2 = InitMatAn(n, deg, 0);
@@ -2358,6 +2359,7 @@ computean(GEN dtcr, long n, long deg, long prec)
   bnr = (GEN)dtcr[4];
   bnf = (GEN)bnr[1];
   /* dataray = InitGetRay(bnr, nmax); */
+  dataray = NULL;
 
   id = gmael3(bnr, 2, 1, 1);
   idZ= itos(gcoeff(id, 1, 1)); /* generates id \cap Z, assumed small */

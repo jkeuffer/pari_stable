@@ -2008,8 +2008,8 @@ bittest_many(GEN x, GEN gn, long c)
   }
   skip = (b1 < b2);			/* Skip the first word of the shift */
   l_res = l2 - l1 + 1 + 2 - skip + extra_words;	/* A coarse estimate */
-  p = new_chunk(l_res) + 2 + extra_words;
-  shift_r(p - skip, x + l1, x + l2 + 1, 0, b2);
+  p = (ulong*) (new_chunk(l_res) + 2 + extra_words);
+  shift_r(p - skip, (ulong*)x + l1, (ulong*)x + l2 + 1, 0, b2);
   if (two_adic) {			/* Check the low bits of x */
 	int i = lx, nonzero = 0;
 
@@ -2046,7 +2046,7 @@ bittest_many(GEN x, GEN gn, long c)
   if (pnew >= p - 2 + l_res)
       return gzero;
   l_res -= (pnew - p);
-  res = pnew - 2;
+  res = (GEN)(pnew - 2);
   res[1] = evalsigne(1)|evallgefint(l_res);
   res[0] = evaltyp(t_INT)|evallg(l_res);
   return res;
