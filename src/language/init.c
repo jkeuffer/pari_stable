@@ -938,7 +938,7 @@ err_leave_default(long n)
 }
 
 /* untrapped error: remove all traps depending from a longjmp */
-static void
+void
 err_clean()
 {
   stack *s = err_catch_stack, *lasts = NULL;
