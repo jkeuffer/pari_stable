@@ -279,15 +279,15 @@ static GEN
 scalar_get_arch_real(long R1, long RU, GEN u, GEN *emb, long prec)
 {
   GEN v, x, p1;
-  long i;
+  long i, s;
 
-  i = gsigne(u);
-  if (!i) err(talker,"0 in get_arch_real");
+  s = gsigne(u);
+  if (!s) err(talker,"0 in get_arch_real");
   x = cgetg(RU+1, t_COL);
   for (i=1; i<=RU; i++) x[i] = (long)u;
 
   v = cgetg(RU+1, t_COL);
-  p1 = (i > 0)? glog(u,prec): gzero;
+  p1 = (s > 0)? glog(u,prec): gzero;
   for (i=1; i<=R1; i++) v[i] = (long)p1;
   if (i <= RU)
   {
