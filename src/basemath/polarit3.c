@@ -2608,10 +2608,10 @@ u_FpX_resultant(GEN a, GEN b, ulong p)
   avma = av; return mulssmod(res, powuumod(b[2], da, p), p);
 }
 
-/* assuming the PRS finishes on a degree 1 polynomial, C0 + C1X, set *Ci
- * and return resultant */
+/* assuming the PRS finishes on a degree 1 polynomial C0 + C1X, with "generic"
+ * degree sequence as given by dglist, set *Ci and return resultant(a,b) */
 ulong
-u_FpX_resultant_all(GEN a, GEN b, ulong *C0, ulong *C1, GEN dglist, ulong p)
+u_FpX_resultant_all(GEN a, GEN b, long *C0, long *C1, GEN dglist, ulong p)
 {
   long da,db,dc,cnt,ind;
   ulong lb,av,cx = 1, res = 1UL;
@@ -2657,7 +2657,11 @@ u_FpX_resultant_all(GEN a, GEN b, ulong *C0, ulong *C1, GEN dglist, ulong p)
     da = db; /* = deg(a) */
     db = dc; /* = deg(b) */
   }
-  if (!C0) { setlg(dglist,ind+1); return 0; }
+  if (!C0)
+  {
+    if (ind+1 > lg(dglist)) setlg(dglist,ind+1);
+    return 0;
+  }
 
   if (da == 1) /* last non-constant polynomial has degree 1 */
   {
@@ -2943,14 +2947,14 @@ ZY_ZXY_ResBound(GEN A, GEN B)
   ulong av = avma;
   GEN a = gzero, b = gzero, run = realun(DEFAULTPREC);
   long i , lA = lgef(A), lB = lgef(B);
-  for (i=2; i<lA; i++) a = gadd(a, gmul(gsqr((GEN)A[i]),run));
+  for (i=2; i<lA; i++) a = addii(a, sqri((GEN)A[i]));
   for (i=2; i<lB; i++)
   {
-    GEN t = gmul((GEN)B[i], run);
+    GEN t = (GEN)B[i];
     if (typ(t) == t_POL) t = gnorml1(t, 0);
-    b = gadd(b, gsqr(t));
+    b = addii(b, sqri(t));
   }
-  b = gmul(gpowgs(a, deg(B)), gpowgs(b, deg(A)));
+  b = gmul(gpowgs(mulir(a,run), deg(B)), gpowgs(mulir(b,run), deg(A)));
   avma = av; return 1 + (gexpo(b)>>1);
 }
 
@@ -2962,9 +2966,9 @@ ZY_ZXY_ResBound(GEN A, GEN B)
  * such that R(X) = Res_Y(A, B(X + lambda Y)) is squarefree, reset *lambda to
  * the chosen value and return R
  *
- * If LPRS is non-NULL, set it to the last non-constant polynomial in the PRS */
+ * If LERS is non-NULL, set it to the last non-constant polynomial in the PRS */
 GEN
-ZY_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LPRS)
+ZY_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LERS)
 {
   int checksqfree = lambda? 1: 0, delete = 0, first = 1;
   ulong av = avma, av2, lim, bound;
@@ -2976,9 +2980,9 @@ ZY_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LPRS)
   ulong p = 27449; /* p = prime(3000) */
 
   dglist = H0p = H1p = C0 = C1 = NULL; /* gcc -Wall */
-  if (LPRS)
+  if (LERS)
   {
-    if (!lambda) err(talker,"ZY_ZXY_resultant_all: LPRS needs lambda");
+    if (!lambda) err(talker,"ZY_ZXY_resultant_all: LERS needs lambda");
     C0 = cgetg(dres+2, t_VECSMALL);
     C1 = cgetg(dres+2, t_VECSMALL);
     dglist = cgetg(dres+1, t_VECSMALL);
@@ -3019,33 +3023,37 @@ INIT:
     a = u_Fp_FpX(A, 0, p);
     for (i=2; i<lb; i++)
       b[i] = (long)u_Fp_FpX((GEN)B[i], 0, p);
-    if (LPRS)
+    if (LERS)
     {
-      GEN rk,t;
       if (!b[lb-1] || deg(a) < deg(A)) continue; /* p | lc(A)lc(B) */
       if (checksqfree)
-      {
-        t = subresall(FpX(A, stoi(p)), gmul(B, gmodulss(1, p)), &rk);
-        if (deg(rk) != 1) goto INIT; 
-
-        Hp = u_Fp_FpX(lift_intern(t),0,p); rk = lift_intern(rk);
-        H0p = u_Fp_FpX((GEN)rk[2],0,p);
-        H1p = u_Fp_FpX((GEN)rk[3],0,p);
-      }
-      else
-      {
-        for (i=0,n = 0; i <= dres; n++)
+      { /* find degree list for generic Euclidean Remainder Sequence */
+        int goal = min(deg(a), deg(b)); /* longest possible */
+        for (n=1; n <= goal; n++) dglist[n] = 0;
+        setlg(dglist, 1);
+        for (n=0; n <= dres; n++)
         {
-          i++; ev = vec_u_FpX_eval(b, n, p);
-          x[i] = n;
-          y[i] = u_FpX_resultant_all(a, ev, C0+i, C1+i, dglist, p);
-          if (!C1[i]) i--; /* C1(i) = 0. No way to recover C0(i) */
+          ev = vec_u_FpX_eval(b, n, p);
+          (void)u_FpX_resultant_all(a, ev, NULL, NULL, dglist, p);
+          if (lg(dglist)-1 == goal) break;
         }
-        u_FpV_polint_all(x,y,C0,C1, p);
-        Hp = (GEN)y[1];
-        H0p= (GEN)C0[1];
-        H1p= (GEN)C1[1];
+        /* last pol in ERS has degree > 1 ? */
+        goal = lg(dglist)-1;
+        if (dglist[goal] != 0 || dglist[goal-1] != 1) goto INIT;
+        if (DEBUGLEVEL) fprintferr("Degree list for ERS: %Z\n",dglist);
       }
+
+      for (i=0,n = 0; i <= dres; n++)
+      {
+        i++; ev = vec_u_FpX_eval(b, n, p);
+        x[i] = n;
+        y[i] = u_FpX_resultant_all(a, ev, C0+i, C1+i, dglist, p);
+        if (!C1[i]) i--; /* C1(i) = 0. No way to recover C0(i) */
+      }
+      u_FpV_polint_all(x,y,C0,C1, p);
+      Hp = (GEN)y[1];
+      H0p= (GEN)C0[1];
+      H1p= (GEN)C1[1];
     }
     else
     {
@@ -3069,40 +3077,28 @@ INIT:
       if (!u_FpX_is_squarefree(Hp, p)) goto INIT;
       if (DEBUGLEVEL>4) fprintferr("Final lambda = %ld\n",*lambda);
       checksqfree = 0;
-      if (LPRS)
-      {
-        int goal = min(deg(a), deg(b));
-        for (n=1; n <= dres; n++) dglist[n] = 0;
-        for (n=0; n <= dres; n++)
-        {
-          ev = vec_u_FpX_eval(b, n, p);
-          (void)u_FpX_resultant_all(a, ev, NULL, NULL, dglist, p);
-          if (lg(dglist)-1 == goal) break;
-        }
-        if (DEBUGLEVEL) fprintferr("Degree list for ERS: %Z\n",dglist);
-      }
     }
 
-    if (LPRS)
+    if (LERS)
     {
-      int stable0, stable1;
+      int stable;
       if (!H) 
       {
-        q = utoi(p);
+        q = utoi(p); stable = 0;
         H = init_CRT(Hp, p,vX);
-        H0= init_CRT(H0p, p,vX); stable0 = 0;
-        H1= init_CRT(H1p, p,vX); stable1 = 0;
+        H0= init_CRT(H0p, p,vX);
+        H1= init_CRT(H1p, p,vX);
       }
       else /* probabilistic for H0,H1 */
       {
         GEN qp = muliu(q,p);
-        (void)incremental_CRT(H, Hp,  q,qp, p);
-        stable0 = incremental_CRT(H0,H0p, q,qp, p);
-        stable1 = incremental_CRT(H1,H1p, q,qp, p);
+        stable = incremental_CRT(H, Hp,  q,qp, p);
+        stable &= incremental_CRT(H0,H0p, q,qp, p);
+        stable &= incremental_CRT(H1,H1p, q,qp, p);
         q = qp;
       }
       if (DEBUGLEVEL>5) msgtimer("resultant mod %ld (bound 2^%ld)", p,expi(q));
-      if ((ulong)expi(q) >= bound && stable0 && stable1) break; /* DONE */
+      if (stable && (ulong)expi(q) >= bound) break; /* DONE */
     }
     else
     {
@@ -3124,18 +3120,18 @@ INIT:
     {
       GEN *gptr[4]; gptr[0] = &H; gptr[1] = &q; gptr[2] = &H0; gptr[3] = &H1;
       if (DEBUGMEM>1) err(warnmem,"ZY_ZXY_resultant");
-      gerepilemany(av2,gptr,LPRS? 4: 2); b = u_allocpol(deg(B), 0);
+      gerepilemany(av2,gptr,LERS? 4: 2); b = u_allocpol(deg(B), 0);
     }
   }
   setvarn(H, vX); if (delete) delete_var();
   if (cB) H = gmul(H, gpowgs(cB, deg(A)));
-  if (LPRS)
+  if (LERS)
   {
     GEN *gptr[2];
     GEN z = cgetg(3, t_VEC);
     z[1] = (long)H0;
-    z[2] = (long)H1; *LPRS = z;
-    gptr[0]=&H; gptr[1]=LPRS;
+    z[2] = (long)H1; *LERS = z;
+    gptr[0]=&H; gptr[1]=LERS;
     gerepilemany(av, gptr, 2);
     return H;
   }
@@ -3196,6 +3192,7 @@ GEN
 ZX_resultant(GEN A, GEN B)
 {
   ulong av = avma, av2, lim, Hp, bound;
+  int stable;
   GEN q, a, b, H;
   byteptr d = diffptr + 3000;
   ulong p = 27449; /* p = prime(3000) */
@@ -3212,15 +3209,19 @@ ZX_resultant(GEN A, GEN B)
     b = u_Fp_FpX(B, 0, p);
     Hp= u_FpX_resultant(a, b, p);
     if (!H) 
+    {
+      stable = 0;
       H = init_CRT_i(Hp, &q, p);
+    }
     else /* could make it probabilistic ??? [e.g if stable twice, etc] */
     {
       GEN qp = muliu(q,p);
-      (void)incremental_CRT_i(&H, Hp, q,qp, p);
+      stable = incremental_CRT_i(&H, Hp, q,qp, p);
       q = qp;
     }
-    if (DEBUGLEVEL>5) msgtimer("resultant mod %ld (bound 2^%ld)", p,expi(q));
-    if ((ulong)expi(q) >= bound) break; /* DONE */
+    if (DEBUGLEVEL>5)
+      msgtimer("resultant mod %ld (bound 2^%ld, stable = %d)",p,expi(q),stable);
+    if (stable && (ulong)expi(q) >= bound) break; /* DONE */
     if (low_stack(lim, stack_lim(av,2)))
     {
       GEN *gptr[2]; gptr[0] = &H; gptr[1] = &q;
