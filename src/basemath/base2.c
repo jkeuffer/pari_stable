@@ -1571,7 +1571,7 @@ testb2(decomp_t *S, long D, GEN theta, GEN pmf, GEN ns)
 {
   long v = varn(S->chi);
   ulong t, m = is_bigint(S->p)? 0: (ulong)S->p[2];
-  GEN T0 = S->phi;
+  GEN T0 = S->phi, chi0 = S->chi;
 
   if (DEBUGLEVEL>4) fprintferr("  Increasing Fa\n");
   for (t = 1;; t++)
@@ -1581,6 +1581,7 @@ testb2(decomp_t *S, long D, GEN theta, GEN pmf, GEN ns)
     /* phi non-primary ? */
     if (factcp(S, pmf, ns) > 1) { composemod(S, S->phi, T0); return 1; }
     if (degpol(S->nu) == D) break;
+    S->chi = chi0;
   }
   S->phi0 = T0; return 0; /* F_phi=lcm(F_alpha, F_theta)=D and E_phi=E_alpha */
 }
