@@ -1974,24 +1974,22 @@ padicff2(GEN nf,GEN p,long k)
 static GEN
 padicff(GEN x,GEN p,long pr)
 {
-  GEN q,basden,bas,invbas,mul,dx,dK,nf,fa,g,e;
-  long n=degpol(x);
-  pari_sp av=avma;
+  pari_sp av = avma;
+  GEN q, bas, invbas, mul, dK, nf, fa, g, e, dx = absi(ZX_disc(x));
+  long n = degpol(x);
 
   nf=cgetg(10,t_VEC); nf[1]=(long)x;
   fa = cgetg(3,t_MAT);
   g = cgetg(3,t_COL); fa[1] = (long)g;
   e = cgetg(3,t_COL); fa[2] = (long)e;
-  dx = ZX_disc(x);
-  g[1] = (long)p; e[1] = lstoi(pvaluation(absi(dx),p,&q));
+  g[1] = (long)p; e[1] = lstoi(pvaluation(dx,p,&q));
   g[2] = (long)q; e[2] = un;
 
   bas = nfbasis(x, &dK, 0, fa);
   nf[3] = (long)dK;
   nf[4] = divise( diviiexact(dx, dK), p )? (long)p: un;
-  basden = get_bas_den(bas);
   invbas = QM_inv(vecpol_to_mat(bas,n), gun);
-  mul = get_mul_table(x,basden,invbas);
+  mul = get_mul_table(x,bas,invbas);
   nf[7]=(long)bas;
   nf[8]=(long)invbas;
   nf[9]=(long)mul; nf[2]=nf[5]=nf[6]=zero;

@@ -3094,17 +3094,15 @@ rnfsimplifybasis(GEN bnf, GEN order)
   return gerepilecopy(av, p1);
 }
 
+extern GEN prodid(GEN nf, GEN I);
 GEN
 rnfdet2(GEN nf, GEN A, GEN I)
 {
-  pari_sp av,tetpil;
-  long i;
+  pari_sp av = avma;
   GEN p1;
-
-  nf=checknf(nf); av = tetpil = avma;
-  p1=idealhermite(nf,det(matbasistoalg(nf,A)));
-  for(i=1;i<lg(I);i++) { tetpil=avma; p1=idealmul(nf,p1,(GEN)I[i]); }
-  tetpil=avma; return gerepile(av,tetpil,p1);
+  nf = checknf(nf);
+  p1 = idealmul(nf, det(matbasistoalg(nf, A)), prodid(nf, I));
+  return gerepileupto(av, p1);
 }
 
 GEN

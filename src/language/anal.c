@@ -3153,6 +3153,7 @@ pol(GEN x) /* polynomial */
       case typ_GAL: return (GEN)x[1];
     }
     if (typ(x)==t_POLMOD) return (GEN)x[2];
+    if (typ(x)==t_VEC && lg(x) == 14) return gmael(x,11,1);
     err(member,"pol",mark.member,mark.start);
   }
   return (GEN)y[1];

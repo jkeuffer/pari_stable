@@ -34,6 +34,26 @@ TP = Thomas Papanikolaou
 XR = Xavier Roblot
 YU = Yoshiaki Uchikawa
 
+Done for version 2.2.6 (released ??/04/2003):
+  Fixed
+    1- rnfidealtwoelt, rnfidealmult --> SEGV
+
+  Changed
+    1- rnf structure (removed useless components)
+    2- rnfidealreltoabs, rnfidealup: now return a Z-basis as a vector of
+       elements in the relative extension, instead of a meaningless HNF matrix
+       wrt an unknown basis. Was especially dangerous if the extension also
+       existed in nfinit form, since the HNF matrices were _not_ ideals wrt
+       this nf structure. [ also consistent with rnfeltreltoabs ]
+    3- rnfidealabstorel now requires input in the above form, so use
+       rnfidealabstorel(rnf, nf.zk * A), if A is a strandard ideal in HNF
+       form. Used to require matrices in HNF form, which was confusing since
+       ideals such as A gave wrong results [ HNF wrt different implicit bases ].
+
+  Added
+    1- member function rnf.pol (polynomial generating absolute extension)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.5 (released 11/02/2003):
   Fixed
     1- [bnfinit:] typo in be_honest() --> SEGV when cbach2 > cbach [from 2.2.4]

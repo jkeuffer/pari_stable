@@ -37,7 +37,7 @@ extern ulong smulss(ulong x, ulong y, ulong *rem);
 void
 checkrnf(GEN rnf)
 {
-  if (typ(rnf)!=t_VEC || lg(rnf)!=12) err(idealer1);
+  if (typ(rnf)!=t_VEC || lg(rnf)!=14) err(idealer1);
 }
 
 GEN
@@ -960,9 +960,11 @@ GEN
 get_mul_table(GEN x,GEN basden,GEN invbas)
 {
   long i,j, n = degpol(x);
-  GEN z,d, mul = cgetg(n*n+1,t_MAT), bas=(GEN)basden[1], den=(GEN)basden[2];
-
-  for (j=1; j<=n*n; j++) mul[j]=lgetg(n+1,t_COL);
+  GEN z, d, bas, den, mul = cgetg(n*n+1,t_MAT);
+  
+  if (typ(basden[1]) != t_VEC) basden = get_bas_den(basden); /*integral basis*/
+  bas = (GEN)basden[1];
+  den = (GEN)basden[2];
   for (i=1; i<=n; i++)
     for (j=i; j<=n; j++)
     {
