@@ -52,6 +52,7 @@ BA 16- result was not always complete in nfgaloisconj()
         polmods/intmods].
    22- Make sure result is a t_POL before doing a setvarn in caract2_i()
    23- precision problems in ClxModulus (bnrstark()) [check leading term!=0]
+   24- elltors() could miss some points: determine needed precision first
 
   Added
 IZ  1- [gnuplot] look up directory tree for gnuplot related files

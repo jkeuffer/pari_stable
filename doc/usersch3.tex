@@ -6338,13 +6338,11 @@ is void. GP uses a variant which ends by a \kbd{longjmp}.
 corresponding to keyword \var{key} to value \var{val}. \var{val} is a string
 (which of course accepts numeric arguments without adverse effects, due to the
 expansion mechanism). See \secref{se:defaults} for a list of available
-defaults, and \secref{se:meta} for some shortcut alternatives.
-\label{se:default}
+defaults, and \secref{se:meta} for some shortcut alternatives. Typing
+\kbd{default()} (or \b{d}) yields the complete default list as well as
+their current values.\label{se:default}
 
 If \var{val} is omitted, prints the current value of default \var{key}.
-If \var{key} is omitted, prints the current values of all the defaults.
-In short, typing \kbd{default()} has the same effect as \b{d}.
-
 If $\fl$ is set, returns the result instead of printing it.
 
 \subsubsecidx{error}$(\{\var{str}\}*)$: outputs its argument list (each of
