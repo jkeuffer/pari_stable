@@ -1188,11 +1188,15 @@ intnuminitgen(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, long m,
   return gerepilecopy(ltop, intinit_end(&D, nt, ntn));
 }
 
-static void
+/* Assigns the values of the function weighted by w[k] at quadrature points x[k]
+ * [replacing the weights]. Return the index of the last non-zero coeff */
+static long
 weight(void *E, GEN (*eval)(GEN,void*), GEN x, GEN w)
 {
   long k, l = lg(x);
   for (k = 1; k < l; k++) w[k] = lmul((GEN)w[k], eval((GEN)x[k], E));
+  k--; while (k >= 1) if (!gcmp0((GEN)w[k--])) break;
+  return k;
 }
 /* compute the necessary tabs, weights multiplied by f(t).
  * If flag set, assumes that f(-t) = conj(f(t)). */
@@ -1201,9 +1205,9 @@ intfuncinitintern(void *E, GEN (*eval)(GEN, void*), GEN tab, long flag)
 {
   GEN tabxp = TABxp(tab), tabwp = TABwp(tab);
   GEN tabxm = TABxm(tab), tabwm = TABwm(tab);
+  long L = weight(E, eval, tabxp, tabwp), L0 = lg(tabxp);
 
   TABw0(tab) = gmul(TABw0(tab), eval(TABx0(tab), E));
-  weight(E, eval, tabxp, tabwp);
   if (lg(tabxm) > 1) weight(E, eval, tabxm, tabwm);
   else
   {
@@ -1211,11 +1215,19 @@ intfuncinitintern(void *E, GEN (*eval)(GEN, void*), GEN tab, long flag)
     if (flag) tabwm = gconj(tabwp);
     else
     {
+      long L2;
       tabwm = dummycopy(tabwp);
-      weight(E, eval, tabxm, tabwm);
+      L2 = weight(E, eval, tabxm, tabwm);
+      if (L > L2) L = L2;
     }
     TABxm(tab) = tabxm;
     TABwm(tab) = tabwm;
+  }
+  if (L < L0)
+  { /* catch up functions whose growth at oo was not adequately described */
+    setlg(tabxp, L+1);
+    setlg(tabwp, L+1);
+    if (lg(tabxm) > 1) { setlg(tabxm, L+1); setlg(tabwm, L+1); }
   }
   return tab;
 }
