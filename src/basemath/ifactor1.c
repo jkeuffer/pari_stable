@@ -21,6 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 extern GEN decomp_limit(GEN n, GEN limit);
 extern int BSW_isprime(GEN x);
+extern int BSW_isprime_small(GEN x);
 extern ulong ucarrecomplet(ulong A);
 extern GEN mpqs(GEN N);/* in src/modules/mpqs.c,
 		        * returns a factor, a vector of factors, or NULL */

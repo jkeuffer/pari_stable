@@ -21,6 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "parinf.h"
 
+extern GEN detcyc(GEN cyc);
 extern GEN FqX_factor(GEN x, GEN T, GEN p);
 extern long FqX_is_squarefree(GEN P, GEN T, GEN p);
 extern GEN sqred1_from_QR(GEN x, long prec);
