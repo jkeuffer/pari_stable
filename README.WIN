@@ -2,7 +2,7 @@ This file describes the various ways you can run PARI/GP in a (relatively
 recent) Windows environment (95 or higher). For earlier versions of Windows,
 see README.DOS.
 
-The only way to have a fully functionnal GP is to install GNU/Linux. It's a
+The only way to have a fully functional GP is to install GNU/Linux. It's a
 one hour job to install a minimal Linux system from current Linux
 distributions, without any technical background. The LILO boot system enables
 you to have Windows and Linux coexisting peacefully on your hard drive.
@@ -47,7 +47,7 @@ process them with Winzip (see www.winzip.com) for instance.
 Fetch the cygwin library (CYGWIN1.DLL) from Cygnus Solutions (now a
 subsidiary of Red Hat) from http://sources.redhat.com/cygwin/ [ the Download
 and Installation process is automated and quite simple, you should be home in
-a few mouse clicks. Be sure to install at least the "cygwin" package ].
+a few mouse clicks. Be sure to install at least the "cygwin" package! ].
 Then fetch the GP binary
 
   ftp://megrez.math.u-bordeaux.fr/pub/pari/windows/cygwin/gp-xxx.exe.gz
@@ -82,7 +82,7 @@ PROBLEMS:
       - redirecting standard input as in 'gp < file' crashes gp
 
     SOLUTION: None of these things occur if you start gp by double-clicking
-    on its icon, as is customary for Windows application. ^C still doesnt
+    on its icon, as is customary for Windows application. ^C still doesn't
     always interrupt computations, but at least it doesn't kill gp.
 
   * colors don't work (escape sequences printed "as is").
