@@ -101,19 +101,17 @@ isint(GEN n, long *ptk)
     case t_INT:
       *ptk = itos(n); return 1;
     case t_REAL:
-      p1 = gfloor(n); 
-      if (gcmp(p1,n)==0) {*ptk = itos(p1); return 1;}
-      else return 0;
-    case t_FRAC: case t_FRACN: 
+      p1 = gfloor(n); if (!gegal(p1,n)) return 0;
+      *ptk = itos(p1); return 1;
+    case t_FRAC: return 0;
+    case t_FRACN: 
       p1 = dvmdii((GEN)n[1],(GEN)n[2],&p2);
-      if (!signe(p2)) {*ptk = itos(p1); return 1;}
-      else return 0;
+      if (signe(p2)) return 0;
+      *ptk = itos(p1); return 1;
     case t_COMPLEX:
-      if (gcmp0((GEN)n[2])) return isint((GEN)n[1],ptk);
-      else return 0;
+      return gcmp0((GEN)n[2]) && isint((GEN)n[1],ptk);
     case t_QUAD:
-      if (gcmp0((GEN)n[3])) return isint((GEN)n[2],ptk);
-      else return 0;
+      return gcmp0((GEN)n[3]) && isint((GEN)n[2],ptk);
     default: err(typeer,"isint"); return 0; /* not reached */
   }
 }
@@ -144,8 +142,7 @@ norml1(GEN n, long prec)
 /**                                                                   **/
 /***********************************************************************/
 
-/* computes sum_{k=0}^m n!*((-1)^flag*z^2/4)^k/(k!*(k+n)!) */
-
+/* computes sum_{k=0}^m n! * ((-1)^flag*z^2/4)^k / (k!*(k+n)!) */
 static GEN
 _jbessel(GEN n, GEN z, long flag, long m)
 {
@@ -191,32 +188,32 @@ jbesselintern(GEN n, GEN z, long flag, long prec)
       if (isint(setlgcx2(n,prec),&ki))
       {
 	k = labs(ki);
-	p2 = gdiv(gpowgs(gmul2n(z,-1),k),mpfact(k));
-	if ((flag&1) && (ki<0) && (k&1)) p2 = gneg(p2);
+	p2 = gdiv(gpowgs(gmul2n(z,-1),k), mpfact(k));
+	if ((flag&k&1) && ki < 0) p2 = gneg(p2);
       }  
-      else p2 = gdiv(gpow(gmul2n(z,-1),n,prec),ggamma(gaddgs(n,1),prec));
+      else
+        p2 = gdiv(gpow(gmul2n(z,-1),n,prec), ggamma(gaddgs(n,1),prec));
       if (gcmp0(z)) return gerepilecopy(av, p2);
+      x = gtodouble(gabs(z,prec));
+      L = x*1.3591409;
+      B = bit_accuracy(prec)*LOG2/(2*L);
+      N = 1 + B;
+/* 3 Newton iterations are enough except in pathological cases */
+      N = (N + B)/(log(N)+1);
+      N = (N + B)/(log(N)+1);
+      N = (N + B)/(log(N)+1);
+      lim = max((long)(L*N),2);
+      precnew  = prec;
+      if (x >= 1.0) precnew += 1 + (long)(x/(LOG2*BITS_IN_LONG));
+      znew = setlgcx(z,precnew);
+      if (k >= 0) nnew = stoi(k);
       else
       {
-	x = gtodouble(gabs(z,prec));
-	L = x*1.3591409;
-	B = bit_accuracy(prec)*LOG2/(2*L);
-	N = 1 + B;
-/* 3 Newton iterations are enough except in pathological cases */
-	N = (N + B)/(log(N)+1);	N = (N + B)/(log(N)+1);	N = (N + B)/(log(N)+1);
-	lim = max((long)(L*N),2);
-	precnew  = prec;
-	if (x >= 1.0) precnew += 1 + (long)(x/(LOG2*BITS_IN_LONG));
-	znew = setlgcx(z,precnew);
-	if (k >= 0) p1 = setlgcx(_jbessel(stoi(k),znew,flag,lim),prec);
-	else
-	{
-	  i = precision(n);
-	  nnew = (i && (i < precnew)) ? setlgcx(n,precnew) : n;
-	  p1 = setlgcx(_jbessel(nnew,znew,flag,lim),prec);
-	}
-	tetpil = avma; return gerepile(av,tetpil,gmul(p2,p1));
+        i = precision(n);
+        nnew = (i && i < precnew)? setlgcx(n,precnew): n;
       }
+      p1 = setlgcx(_jbessel(nnew,znew,flag,lim),prec);
+      return gerepileupto(av, gmul(p2,p1));
 
     case t_VEC: case t_COL: case t_MAT:
       lz=lg(z); y=cgetg(lz,typ(z));
@@ -242,13 +239,8 @@ jbesselintern(GEN n, GEN z, long flag, long prec)
     case t_PADIC: err(impl,"p-adic jbessel function");
     default:
       av = avma; if (!(y = _toser(z))) break;
-      if (isint(setlgcx2(n,prec),&ki))
-      {
-	k = labs(ki);
-	p1 = _jbessel(stoi(k),y,flag,lg(y)-2);
-      }
-      else p1 = _jbessel(n,y,flag,lg(y)-2);
-      return gerepilecopy(av,p1);
+      if (isint(setlgcx2(n,prec),&ki)) n = stoi(labs(ki));
+      return gerepilecopy(av, _jbessel(n,z,flag,lg(z)-2));
   }
   err(typeer,"jbessel");
   return NULL; /* not reached */
@@ -446,11 +438,10 @@ kbessel(GEN nu, GEN gx, long prec)
   avma=av; return yfin;
 }
 
-/* computes sum_{k=0}^m ((-1)^flag*z^2/4)^k/(k!*(k+n)!)*(H(k)+H(k+n))
- +sum_{k=0}^{n-1}((-1)^(flag+1)*z^2/4)^(k-n)*(n-k-1)!/k!. Ici n
+/* computes sum_{k=0}^m ((-1)^flag*z^2/4)^k / (k!*(k+n)!) * (H(k)+H(k+n))
+ + sum_{k=0}^{n-1} ((-1)^(flag+1)*z^2/4)^(k-n) * (n-k-1)!/k!. Ici n
  doit etre un long. Attention, contrairement a _jbessel, pas de n! devant.
  Quand flag > 1, calculer exactement les H(k) et factorielles */
-
 static GEN
 _kbessel(long n, GEN z, long flag, long m, long prec)
 {
@@ -1819,6 +1810,10 @@ gpolylog(long m, GEN x, long prec)
       y=cgetg(lx,t_COL);
       for (i=1; i<lx; i++) y[i]=(long)polylog(m,(GEN)p2[i],prec);
       return gerepileupto(av, y);
+
+    case t_POL: case t_RFRAC: case t_RFRACN:
+      p1=tayl(x,gvar(x),precdl);
+      return gerepileupto(av, gpolylog(m,p1,prec));
 
     default:
       av = avma; if (!(y = _toser(x))) break;
