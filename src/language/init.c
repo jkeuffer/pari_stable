@@ -1717,8 +1717,8 @@ long
 _get_time(pari_timer *T, long Ticks, long TickPerSecond)
 {
   long s  = Ticks / TickPerSecond;
-  long us = (long) (Ticks % TickPerSecond) * (1000. / TickPerSecond);
-  long delay = (s - T->s) + (us - T->us) / 1000;
+  long us = (long) (Ticks % TickPerSecond) * (1000000. / TickPerSecond);
+  long delay = 1000 * (s - T->s) + (us - T->us) / 1000;
   T->us = us;
   T->s  = s; return delay;
 }
@@ -1745,7 +1745,7 @@ long
 TIMER(pari_timer *T)
 {
   struct tms t; times(&t);
-  return _get_time(T, t.tms_utim, CLK_TCK);
+  return _get_time(T, t.tms_utime, CLK_TCK);
 }
 #elif USE_GETRUSAGE
 
