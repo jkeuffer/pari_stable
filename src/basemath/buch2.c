@@ -655,16 +655,14 @@ split_ideal(GEN nf, GEN x, GEN xar, long prec, GEN vperm)
 
   if (flag && factorgensimple(nf,x)) return xar;
 
-  x0 = cgetg(3,t_VEC);
+  id = x; x0 = cgetg(3,t_VEC);
   x = gmul(x, lllintpartial(x));
   x0[1]=(long)x; x0[2]=(long)xar;
   y = ideallllred(nf,x0,NULL,prec);
-  if (gcmp0((GEN)y[2])) flag = !flag;
+  if (gcmp0((GEN)y[2]))
+    { flag = !flag; x0[1] = (long)id; }
   else
-  {
-    flag = 1; x=(GEN)y[1];
-    x = hnfmod(x, detint(x));
-  }
+    { flag = 1; x=(GEN)y[1]; }
   if (flag && factorgensimple(nf,x)) return (GEN)y[2];
 
   vdir = cgetg(ru,t_VEC);
