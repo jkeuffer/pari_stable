@@ -2298,7 +2298,8 @@ gprl_input(Buffer *b, char **endp, char *prompt)
 
 #define ask_filtre(t) filtre("",NULL,t)
 
-static int				/* True if more than one line read */
+/* True if more than one line read */
+static int
 input_loop(Buffer *b, char *already_read, FILE *file, char *prompt)
 {
   const int TeXmacs = (under_texmacs && file == stdin);
