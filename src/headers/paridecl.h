@@ -162,7 +162,6 @@ long    kronecker(GEN x, GEN y);
 long    krosg(long s, GEN x);
 long    kross(long x, long y);
 void    lucas(long n, GEN *ln, GEN *ln1);
-long    millerrabin(GEN n, long k);
 GEN     mpfact(long n);
 GEN     mpfactr(long n, long prec);
 GEN     mpinvmod(GEN a, GEN m);
@@ -171,7 +170,6 @@ GEN     mpppcm(GEN a, GEN b);
 GEN     mpsqrtmod(GEN a, GEN p);
 GEN     mpsqrtnmod(GEN a, GEN n, GEN p, GEN *zetan);
 GEN     order(GEN x);
-GEN     plisprime(GEN N, long flag);
 GEN     pnqn(GEN x);
 GEN     powmodulo(GEN a, GEN n, GEN m);
 GEN     qfbclassno0(GEN x,long flag);
@@ -894,43 +892,46 @@ GEN     trunc0(GEN x, GEN *pte);
 GEN     zeropol(long v);
 GEN     zeroser(long v, long prec);
 
-/* ifactor.c */
+/* ifactor1.c */
+
+long    millerrabin(GEN n, long k);
 GEN     nextprime(GEN n);
+GEN     plisprime(GEN N, long flag);
 GEN     precprime(GEN n);
 
 /* init.c */
 
-long       allocatemoremem(ulong newsize);
-GEN        changevar(GEN x, GEN y);
-void       checkmemory(GEN x);
-void       disable_dbg(long val);
-void       err(long numerr, ...);
-void      *err_catch(long errnum, jmp_buf env, void *data);
-void       err_leave(void **v);
-void       freeall(void);
-void       genmsgtimer(long t, char *format, ...);
-long       gentimer(long i);
-GEN        gerepile(long ltop, long lbot, GEN q);
-void       gerepilemany(long av, GEN* g[], long n);
-void       gerepilemanycoeffs(long av, GEN x, long n);
-void       gerepilemanysp(long av, long tetpil, GEN* g[], long n);
-void       gerepilemanyvec(long av, long tetpil, long *g, long n);
-GEN        gerepileupto(long av, GEN q);
-GEN        gerepileuptoint(long av, GEN q);
-GEN        gerepileuptoleaf(long av, GEN q);
-long       get_timer(long t);
-char*      gpmalloc(size_t bytes);
-char*      gprealloc(void *pointer,size_t newsize,size_t oldsize);
-void       gunclone(GEN x);
-void       killbloc(GEN x);
-void       msgtimer(char *format, ...);
-GEN        newbloc(long n);
-void       pari_init(long parisize, long maxprime);
-GEN        reorder(GEN x);
-void       stackdummy(GEN x, long l);
+long    allocatemoremem(ulong newsize);
+GEN     changevar(GEN x, GEN y);
+void    checkmemory(GEN x);
+void    disable_dbg(long val);
+void    err(long numerr, ...);
+void   *err_catch(long errnum, jmp_buf env, void *data);
+void    err_leave(void **v);
+void    freeall(void);
+void    genmsgtimer(long t, char *format, ...);
+long    gentimer(long i);
+GEN     gerepile(long ltop, long lbot, GEN q);
+void    gerepilemany(long av, GEN* g[], long n);
+void    gerepilemanycoeffs(long av, GEN x, long n);
+void    gerepilemanysp(long av, long tetpil, GEN* g[], long n);
+void    gerepilemanyvec(long av, long tetpil, long *g, long n);
+GEN     gerepileupto(long av, GEN q);
+GEN     gerepileuptoint(long av, GEN q);
+GEN     gerepileuptoleaf(long av, GEN q);
+long    get_timer(long t);
+char*   gpmalloc(size_t bytes);
+char*   gprealloc(void *pointer,size_t newsize,size_t oldsize);
+void    gunclone(GEN x);
+void    killbloc(GEN x);
+void    msgtimer(char *format, ...);
+GEN     newbloc(long n);
+void    pari_init(long parisize, long maxprime);
+GEN     reorder(GEN x);
+void    stackdummy(GEN x, long l);
 stackzone* switch_stack(stackzone *z, long n);
-long       timer(void);
-long       timer2(void);
+long    timer(void);
+long    timer2(void);
 
 /* mp.c ou mp.s */
 
