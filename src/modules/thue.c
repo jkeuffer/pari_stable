@@ -480,7 +480,6 @@ thueinit(GEN pol, long flag, long prec)
   if (typ(pol)!=t_POL) err(notpoler,"thueinit");
   if (degpol(pol) <= 2) err(talker,"invalid polynomial in thue (need deg>2)");
 
-  if (!gisirreducible(pol)) err(redpoler,"thueinit");
   s = sturm(pol);
   if (s)
   {
@@ -493,7 +492,8 @@ thueinit(GEN pol, long flag, long prec)
      * the time not sharp, ie 10 to 30 decimal digits above what is _really_
      * necessary. Note that the limiting step is the reduction. See paper. */
     PREC = 3 + (long)((5.83 + (dr+4)*5 + log(fact(dr+3)) + (dr+3)*log(dr+2) +
-		     (dr+3)*log(d) + log(log(2*d*(dr+2))) + (dr+1)) / 10.);
+		     (dr+3)*log(d) + log(log(2*d*(dr+2))) + (dr+1))
+                     / ((BYTES_IN_LONG/4)* 10.));
     if (PREC < prec) PREC = prec;
     for (;;)
     {
@@ -506,6 +506,7 @@ thueinit(GEN pol, long flag, long prec)
   else
   {
     GEN c0 = gun, ro = roots(pol, DEFAULTPREC);
+    if (!gisirreducible(pol)) err(redpoler,"thueinit");
     for (k=1; k<lg(ro); k++) c0 = gmul(c0, imag_i((GEN)ro[k]));
     c0 = ginv( mpabs(c0) );
     tnf = cgetg(3,t_VEC);
