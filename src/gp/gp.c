@@ -1707,8 +1707,8 @@ print_hash_list(const char *s)
       print_entree(ep,n);
 }
 
-static void
-what_readline(char **buf)
+static char *
+what_readline()
 {
   char *s;
 #ifdef READLINE
@@ -1736,7 +1736,7 @@ what_readline(char **buf)
 #else
   s = "not compiled in";
 #endif
-  *buf = s;
+  return s;
 }
 
 static void
@@ -1751,26 +1751,27 @@ print_shortversion(void)
   pariputsf("%lu.%lu.%lu\n", major,minor,patch); exit(0);
 }
 
-static void
-what_cc(char **buf)
+static char *
+what_cc()
 {
   char *s;
 #ifdef GCC_VERSION
-  s = stackmalloc(4 + strlen(GCC_VERSION) + 1);
 #  ifdef __cplusplus
-  (void)sprintf(s, "g++-%s", GCC_VERSION);
+#    define Format "g++-%s"
 #  else
-  (void)sprintf(s, "gcc-%s", GCC_VERSION);
+#    define Format "gcc-%s"
 #  endif
+  s = stackmalloc(4 + strlen(GCC_VERSION) + 1);
+  (void)sprintf(s, Format, GCC_VERSION);
 #else
 #  ifdef _MSC_VER
   s = stackmalloc(32);
-  (void)sprintf(buf, "MSVC-%i", _MSC_VER);
+  (void)sprintf(s, "MSVC-%i", _MSC_VER);
 #  else
-  s = stackmalloc(1); *s = 0;
+  s = NULL;
 #  endif
 #endif
-  *buf = s;
+  return s;
 }
 
 static void
@@ -1779,13 +1780,14 @@ print_version(void)
   pari_sp av = avma;
   char *buf, *ver;
 
-  center(PARIVERSION); center(PARIINFO);
-  what_cc(&ver);
-  buf = stackmalloc(strlen(__DATE__) + strlen(ver) + 32);
-  if (*ver) (void)sprintf(buf, "compiled: %s, %s", __DATE__, ver);
-  else      (void)sprintf(buf, "compiled: %s", __DATE__);
+  center(PARIVERSION);
+  center(PARIINFO);
+  ver = what_cc();
+  buf = stackmalloc(strlen(__DATE__) +  32 + ver? strlen(ver): 0);
+  if (ver) (void)sprintf(buf, "compiled: %s, %s", __DATE__, ver);
+  else     (void)sprintf(buf, "compiled: %s", __DATE__);
   center(buf);
-  what_readline(&ver);
+  ver = what_readline();
   buf = stackmalloc(strlen(ver) + 64);
   (void)sprintf(buf, "(readline %s, extended help%s available)", ver,
                 has_ext_help()? "": " not");
@@ -2193,7 +2195,7 @@ gp_initrc(growarray *A, char *path)
   FILE *file = gprc_get(path);
   Buffer *b;
   filtre_t F;
-  int c = 0;
+  VOLATILE int c = 0;
 
   if (!file) return;
   b = new_buffer();
@@ -2916,6 +2918,14 @@ read_arg(int *nread, char *t, long argc, char **argv)
   *nread = i+1; return argv[i];
 }
 
+static void
+init_trivial_stack()
+{
+  const size_t s = 2048;
+  bot = (pari_sp)gpmalloc(s);
+  avma = top = bot + s;
+}
+
 void
 read_opt(growarray *A, long argc, char **argv)
 {
@@ -2947,7 +2957,10 @@ read_opt(growarray *A, long argc, char **argv)
 	initrc = 0; break;
       case '-':
         if (strcmp(t, "version-short") == 0) { print_shortversion(); exit(0); }
-        if (strcmp(t, "version") == 0) { print_version(); exit(0); }
+        if (strcmp(t, "version") == 0) { 
+          init_trivial_stack(); print_version();
+          free((void*)bot); exit(0);
+        }
         if (strcmp(t, "texmacs") == 0) { GP_DATA->flags |= TEXMACS; break; }
         if (strcmp(t, "emacs") == 0) { GP_DATA->flags |= EMACS; break; }
         if (strcmp(t, "test") == 0) { GP_DATA->flags |= TEST; initrc = 0; break; }
