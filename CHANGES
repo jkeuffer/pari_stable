@@ -48,6 +48,7 @@ IZ 11- shift(x > 0,, flag!=0) didn't act as the docs said [flag now ignored]
    13- could get NaN in max_modulus (polroots) --> havoc later
    14- missing normalizepol() in centermod(t_POL,)
    15- [Follow-up to 2.2.2-F10] even more recent pdftex failed again
+   16- not enough GC when printing a huge t_PADIC
 
   Changed
 BA  1- improved Fp_isom
@@ -57,6 +58,8 @@ IZ  2- remove all dependance on __OPTIMIZE__ for inlining [cf 2.0.14 F-24]
     5- improvements in bnrstark (precompute common data)
     6- improved ffinit()
     7- rewrote time-critical parts of bnrstark
+    8- all 'input filter' code removed from GP. es.c:filtre() now handles the
+       full filtering [and has become reentrant]
 
   Added
     1- mplog2() function --> faster mplog()
