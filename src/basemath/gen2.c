@@ -1044,6 +1044,12 @@ gabs(GEN x, long prec)
       }
       return gcopy(x);
 
+   case t_SER:
+     if (valp(x) || !signe(x) || lg(x)<3)
+       err(talker,"abs is not analytic at 0");
+     if (gsigne((GEN) x[2])<0) return gneg(x);
+     return gcopy(x);
+
     case t_VEC: case t_COL: case t_MAT:
       lx=lg(x); y=cgetg(lx,tx);
       for (i=1; i<lx; i++)
