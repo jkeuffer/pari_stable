@@ -2959,7 +2959,7 @@ smallvectors(GEN a, GEN BORNE, long stockmax, long noer, FP_chk_fun *CHECK)
   v = cgetg(N,t_VEC);
   dummy = cgetg(1,t_STR);
 
-  av = avma; lim = stack_lim(av,1);
+  av = avma; lim = stack_lim(av,2);
   if (check) norms = cgetg(stockmax+1,t_VEC);
   S = cgetg(stockmax+1,t_VEC);
   x = cgetg(N,t_COL);
@@ -3009,7 +3009,7 @@ smallvectors(GEN a, GEN BORNE, long stockmax, long noer, FP_chk_fun *CHECK)
         k++; fl=0;
       }
 
-      if (low_stack(lim, stack_lim(av,1)))
+      if (low_stack(lim, stack_lim(av,2)))
       {
         int cnt = 4;
 	if(DEBUGMEM>1) err(warnmem,"smallvectors");
@@ -3047,13 +3047,10 @@ smallvectors(GEN a, GEN BORNE, long stockmax, long noer, FP_chk_fun *CHECK)
     {
       if (checkcnt < 5 && mpcmp(norme1, borne2) < 0)
       {
-        if (check(data,x))
-        {
-          borne1 = mpadd(norme1,eps);
-          borne2 = mpmul(borne1,alpha);
-          s = 0; checkcnt = 0;
-        }
-        else { checkcnt++ ; continue; /* main */}
+        if (!check(data,x)) { checkcnt++ ; continue; /* main */}
+        borne1 = mpadd(norme1,eps);
+        borne2 = mpmul(borne1,alpha);
+        s = 0; checkcnt = 0;
       }
     }
     else if (mpcmp(norme1,normax1) > 0) normax1 = norme1;
@@ -3069,18 +3066,26 @@ smallvectors(GEN a, GEN BORNE, long stockmax, long noer, FP_chk_fun *CHECK)
         if (!check) goto END;
         per = sindexsort(norms);
         if (DEBUGLEVEL) fprintferr("sorting...\n");
-        for (i=1; i<=s; i++)
-        {
+        for (j=0,i=1; i<=s; i++)
+        { /* let N be the minimal norm so far for x satisfying 'check'. Keep
+           * all elements of norm N */
           long k = per[i];
-          if (check(data,(GEN)S[k]))
+          norme1 = (GEN)norms[k];
+          if (j  && mpcmp(norme1, borne1) > 0) break;
+          if (j  || check(data,(GEN)S[k]))
           {
-            S[1] = S[k]; avma = av2;
-            borne1 = mpadd(norme1,eps);
-            borne2 = mpmul(borne1,alpha);
-            s = 1; checkcnt = 0; break;
+            if (!j) borne1 = mpadd(norme1,eps);
+            S[++j] = S[k];
           }
         }
-        if (checkcnt) s = 0;
+        avma = av2; s = j;
+        if (j)
+        {
+          checkcnt = 0;
+          for (i=1; i<=s; i++) norms[i] = (long)norme1;
+          borne1 = mpadd(norme1,eps);
+          borne2 = mpmul(borne1,alpha);
+        }
       }
     }
   }
@@ -3088,18 +3093,20 @@ END:
   if (s < stockmax) stockmax = s;
   if (check)
   {
-    GEN per, alph,pols,p;
+    GEN per, alph, pols, p;
     if (DEBUGLEVEL) fprintferr("final sort & check...\n");
+    s = stockmax;
     setlg(norms,s+1); per = sindexsort(norms);
     alph = cgetg(s+1,t_VEC);
     pols = cgetg(s+1,t_VEC);
     for (j=0,i=1; i<=s; i++)
     {
       long k = per[i];
-      if (j && mpcmp((GEN)norms[k], borne1) > 0) break;
+      norme1 = (GEN)norms[k];
+      if (j && mpcmp(norme1, borne1) > 0) break;
       if ((p = check(data,(GEN)S[k])))
       {
-        if (!j) borne1 = gadd((GEN)norms[k],eps);
+        if (!j) borne1 = gadd(norme1,eps);
         j++; pols[j]=(long)p; alph[j]=S[k];
       }
     }

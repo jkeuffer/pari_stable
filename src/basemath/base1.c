@@ -1912,7 +1912,7 @@ _polredabs(nfbasic_t *T, GEN *u)
     d.M    = F.M;
     if (R)
     {
-      v = fincke_pohst(_vec(R),NULL,100,1, 0, &chk);
+      v = fincke_pohst(_vec(R),NULL,200,1, 0, &chk);
       if (v) break;
     }
     if (i==MAXITERPOL) err(accurer,"polredabs0");
