@@ -106,14 +106,14 @@ void *PARI_stack_limit = NULL;
 
 /* Set PARI_stack_limit to (a little above) the lowest safe address that can
  * be used on the stack. Leave PARI_stack_limit at its initial value (NULL)
- * to show no check should be made [init failed].
+ * to show no check should be made [init failed]. Assume stack grows downward.
  */
 static void
 pari_init_stackcheck(void *stack_base)
 {
   struct rlimit rip;
 
-  if (getrlimit(RLIMIT_STACK, &rip)) return;
+  if (getrlimit(RLIMIT_STACK, &rip) || rip.rlim_cur  == RLIM_INFINITY) return;
 /* DEC cc doesn't like this line:
  * PARI_stack_limit = stack_base - ((rip.rlim_cur/16)*15); */
   PARI_stack_limit = (void*)((long)stack_base - (rip.rlim_cur/16)*15);
