@@ -1488,26 +1488,22 @@ static int
 update_phi(decomp_t *S, GEN *ptpdr, GEN *ptpmr, GEN pmf, GEN ns)
 {
   GEN pdr, pmr = *ptpmr, X = polx[ varn(S->f) ];
-  long first = 1;
 
+  if (!S->chi) {
+    kill_cache(ns);
+    S->chi = mycaract(S->f, S->phi, S->p, pmf, ns);
+  }
   kill_cache(ns);
-  if (!S->chi) S->chi = mycaract(S->f, S->phi, S->p, pmf, ns);
-
   for (;;)
   {
     pdr = respm(S->chi, derivpol(S->chi), pmr);
     if (signe(pdr)) break;
 
     S->phi = gadd(S->phi, gmul(S->p, X));
-    if (first)
-    { /* check whether we can get a decomposition */
-      first = 0;
-      if (factcp(S, S->f, NULL, NULL) > 1) return 0;
-    }
-    /* nchi was too reduced at this point; try a larger precision */
-    pmr  = sqri(pmr);
+    if (factcp(S, S->f, pmr, ns) > 1) return 0;
+    kill_cache(ns);
+    pmr  = sqri(pmr); /* try a larger precision */
   }
-  kill_cache(ns); /* again: contains data from f */
 
   if (is_pm1(pdr))
     pmr = gun;
