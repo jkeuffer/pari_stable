@@ -1412,10 +1412,10 @@ famat_to_nf_modidele(GEN nf, GEN g, GEN e, GEN bid)
 GEN
 famat_to_arch(GEN nf, GEN fa, long prec)
 {
-  GEN g,e, M = gmael(nf,5,1), y = NULL;
-  long r1,i,l;
+  GEN g,e, y = NULL;
+  long i,l;
 
-  if (lg(fa) == 1) return zerovec(lg(M[1])-1);
+  if (lg(fa) == 1) return zerovec(degpol(nf[1]));
   g = (GEN)fa[1]; 
   e = (GEN)fa[2]; l = lg(e);
   for (i=1; i<l; i++)
@@ -1423,13 +1423,11 @@ famat_to_arch(GEN nf, GEN fa, long prec)
     GEN t, x = (GEN)g[i];
     if (typ(x) != t_COL) x = algtobasis(nf,x);
     x = primpart(x);
-    t = vecpow(gmul(M, x), (GEN)e[i]);
-    y = y? vecmul(y,t): t;
+    /* multiplicative arch would be better (save logs), but exponents overflow
+     * [ could keep track of expo separately, but not worth it ] */
+    t = gmul(get_arch(nf,x,prec), (GEN)e[i]);
+    y = y? gadd(y,t): t;
   }
-  r1 = nf_get_r1(nf);
-  l = lg(y); settyp(y, t_VEC);
-  for (i=1; i<=r1;i++) y[i] = llog((GEN)y[i], prec);
-  for (   ; i<l; i++)  y[i] = lmul2n(glog((GEN)y[i], prec), 1);
   return y;
 }
 
