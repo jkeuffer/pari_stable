@@ -750,15 +750,34 @@ nfdivres(GEN nf, GEN a, GEN b)
 /**			      (Z_K/I)^*					**/
 /**									**/
 /*************************************************************************/
+/* return sign(sigma_k(x)), x t_COL (integral, primitive) */
+static long
+eval_sign(GEN M, GEN x, long k)
+{
+  long i, l = lg(x);
+  GEN z = mpmul(gcoeff(M,k,1), (GEN)x[1]);
+  for (i = 2; i < l; i++)
+    z = mpadd(z, mpmul(gcoeff(M,k,i), (GEN)x[i]));
+  if (lg(z) < DEFAULTPREC) err(precer,"zsigne");
+  return signe(z);
+}
+
+static void
+const_sign(GEN v, GEN arch, GEN s)
+{
+  long i,j, l = lg(v);
+  for (j=i=1; i<l; i++)
+    if (signe(arch[i])) v[j++] = (long)s;
+  setlg(v, j);
+}
 
 /* return (column) vector of R1 signatures of x (coeff modulo 2)
- * if arch = NULL, assume arch = [0,..0]
- */
+ * if arch = NULL, assume arch = [0,..0] */
 GEN
 zsigne(GEN nf,GEN x,GEN arch)
 {
-  GEN _0,_1, vecsign, rac = (GEN)nf[6];
-  long i,j,l,e,B;
+  GEN _0, _1, M, vecsign;
+  long i,j,l,s;
   gpmem_t av0, av;
 
   if (!arch) return cgetg(1,t_COL);
@@ -766,40 +785,35 @@ zsigne(GEN nf,GEN x,GEN arch)
   l = lg(arch); vecsign = cgetg(l,t_COL);
   _0 = gmodulss(0,2);
   _1 = gmodulss(1,2); av = avma;
+  nf = checknf(nf);
+  M = gmael(nf,5,1);
   switch(typ(x))
   {
     case t_MAT: /* factorisation */
     {
-      GEN t = (GEN)x[1], e = (GEN)x[2];
-      for (j=i=1; i<l; i++)
-        if (signe(arch[i])) vecsign[j++] = (long)_0;
-      setlg(vecsign,j);
-      if (j==1) { avma = av0; return cgetg(1, t_COL); }
-      for (i=1; i<lg(t); i++)
-      {
-        GEN p1 = (GEN)e[i];
-        if (mpodd(p1))
-          vecsign = gadd(vecsign, zsigne(nf,(GEN)t[i],arch));
-      }
+      GEN g = (GEN)x[1], e = (GEN)x[2];
+      const_sign(vecsign, arch, _0);
+      if (lg(vecsign)==1) { avma = av0; return cgetg(1, t_COL); }
+      for (i=1; i<lg(g); i++)
+        if (mpodd((GEN)e[i]))
+          vecsign = gadd(vecsign, zsigne(nf,(GEN)g[i],arch));
       return gerepileupto(av0, vecsign);
     }
-    case t_COL: x = gmul((GEN)nf[7],x); break;
-    case t_POLMOD: x = (GEN)x[2];
+    case t_POLMOD: x = (GEN)x[2];      /* fall through */
+    case t_POL: x = algtobasis(nf, x); /* fall through */
+    case t_COL: if (!isnfscalar(x)) break;
+                x = (GEN)x[1];         /* fall through */
+    case t_INT: case t_FRAC:
+    {
+      s = gsigne(x); if (!s) err(talker,"zero element in zsigne");
+      const_sign(vecsign, arch, (s > 0)? _0: _1);
+      return vecsign;
+    }
   }
-  if (gcmp0(x)) err(talker,"zero element in zsigne");
-
-  B = bit_accuracy(precision((GEN)rac[1]));
-  e = gexpo(x);
+  x = primpart(x);
   for (j=i=1; i<l; i++)
     if (signe(arch[i]))
-    {
-      GEN y = poleval(x,(GEN)rac[i]);
-      if (lg(y) == 3 && typ(y) == t_REAL)
-        err(warner,"dubious value in zsigne. Increase nf precision?");
-      if (e + gexpo((GEN)rac[i]) - gexpo(y) > B)
-        err(precer, "zsigne");
-      vecsign[j++] = (gsigne(y) > 0)? (long)_0: (long)_1;
-    }
+      vecsign[j++] = (eval_sign(M, x, i) > 0)? (long)_0: (long)_1;
   avma = av; setlg(vecsign,j); return vecsign;
 }
 
