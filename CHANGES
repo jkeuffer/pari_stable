@@ -107,7 +107,8 @@ BA 31- uninitialized memory read in divrr(x,y), when lg(y) < lg(x), leading
    44-  polredabs(x^4+9670527181567158504671*x^2+4840282594390812607599424249,16);
         --> impossible concatenation in concat [ from 2.2.5 ]
    45- [Cygwin compilation:] incorrect cygtop [ --> readline not found ]
-  
+   46- [Cygwin:] DLL build. libpari.dll and gp-dyn build OK. Install still does        not work
+
   Changed
     1- rnf structure (removed useless components)
     2- rnfidealreltoabs, rnfidealup: now return a Z-basis as a vector of
@@ -161,6 +162,7 @@ IZ  8- logstyle and TeXstyle defaults
     1- remove emacs/compile [ integrated in Makefile ]
     2- src/kernel/sparcv[89]
     3- config/MANIFEST [ now built dynamically ]
+    4- config/Makefile.DLLs [ use recent libtool instead of dirty hacks ]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.5 (released 11/02/2003):

@@ -21,7 +21,7 @@ case "$osname-$arch" in
   os2-*)  soname= ; sodest= ; DLSUFFIX=dll
           libpari_base=`echo "$libpari_base" | sed 's/\./_/g'` # 8.3 DLL name
        ;;
-# cygwin-*)soname= ; sodest= ; DLSUFFIX=dll ;; FIXME: gp-dyn.exe crashes
+  cygwin-*)soname= ; sodest= ; DLSUFFIX=dll ;;
   *) do_dll=no ;;
 esac
 
@@ -75,6 +75,7 @@ if test -n "$DLLD"; then
   fi
   case "$osname" in
     os2) DLLDFLAGS="$CFLAGS -Zdll" ;; # assume DLLD = gcc
+    cygwin) DLLDFFLAGS="-Wl,--out-implib=\$(LIBPARI_SO)\$(_A),--export-all-symbols";;
   esac
   if test -n "$DLLDisGCC"; then
     DLLDFLAGS="-shared -mimpure-text \$(CFLAGS) $DLLDFLAGS"

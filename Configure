@@ -88,11 +88,7 @@ fi
 echo "Hi-Res Graphics: $which_graphic_lib"
 # For dynamic linking, before and after installing
 runpath="$libdir" 
-case "$osname" in
-  *cygwin*) LDDYN="-L$libdir -lpari_dll"
-	    DYNLIBS=-lpari_dll ; DYNFLAGS=-Dlibpari_USE_DLL ;;
-  *)        LDDYN="-L$libdir -l$libpari_base" ;;
-esac
+LDDYN="-L$libdir -l$libpari_base"
 # Which copy, SHELL ?
 case "$osname" in
   os2) ln_s=cp;      make_sh=sh;;
@@ -136,7 +132,7 @@ for variable in\
   arch asmarch osname pretty\
   kernlvl0 kernlvl1\
   gnuas AS ASFLAGS KERNELCPPFLAGS LIBS modules_build\
-  dir_sep runpath runpathprefix LDDYN DYNLIBS DYNFLAGS DYNRELOC\
+  dir_sep runpath runpathprefix LDDYN\
   ranlib gzip zcat emacs perl ln_s make_sh\
   sizeof_long doubleformat\
   X11 Xincroot extralib which_graphic_lib graphic_lib_dll gnuplot gnuplot_libs\

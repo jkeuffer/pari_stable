@@ -18,10 +18,6 @@ inline="mpinl"
 
 graph="plotport"
 gp="gp gp_init gp_rl highlvl whatnow"
-case "$osname" in
-  cygwin*) graphdyn="plot-dyn plotport-dyn";
-           gpdyn="gp-dyn gp_init-dyn gp_rl-dyn";;
-esac
 
 language=`ls $src_dir/language/*.c | sed 's,.*/\(.*\)\.c,\1,'`
 basemath=`ls $src_dir/basemath/*.c | sed 's,.*/\(.*\)\.c,\1,'`
@@ -127,7 +123,6 @@ OBJSDGP=''
 
 for f in $gp $graph; do
   OBJSGP="$OBJSGP $f\$(_O)"
-  OBJSDGP="$OBJSDGP $f-dyn\$(_O)"
 done
 for f in $inline; do
   OBJS="$OBJS $f\$(_O)"
@@ -246,9 +241,6 @@ RUNPTH_FINAL = $RUNPTH_FINAL
 LDDYN        = $LDDYN
 DLCFLAGS     = $DLCFLAGS
 LIBS         = $LIBS
-DYNLIBS      = $DYNLIBS
-DYNFLAGS     = $DYNFLAGS
-DYNRELOC     = $DYNRELOC
 
 RM = rm -f
 MV = mv -f
@@ -530,8 +522,7 @@ VERSION_VERBOSE = $pari_release_verbose
 
 EOT
   fi
-  if test -z "$DYNLIBS"; then
-    cat >> $file << EOT
+  cat >> $file << EOT
 
 gp-dyn: \$(OBJSGP) \$(LIBPARI_DYN) \$(GNUPLOT_OBJS) \$(EXPORT_LIB)
 	\$(RM) \$@
@@ -542,19 +533,12 @@ gp-dyn: \$(OBJSGP) \$(LIBPARI_DYN) \$(GNUPLOT_OBJS) \$(EXPORT_LIB)
 	\$(DLLD_IGNORE)\$(DLLD) -o \$@ \$(DLLDFLAGS) \$(OBJS) \$(EXTRADLLDFLAGS) \$(EXPORT_FILE)
 
 EOT
-    if test "$soname" != "$sodest"; then
-      cat >> $file << EOT
+  if test "$soname" != "$sodest"; then
+    cat >> $file << EOT
 	-\$(RM) \$(LIBPARI_SONAME)
 	-\$(RM) \$(LIBPARI_SO)
 	-\$(LN) \$(LIBPARI_DYN) \$(LIBPARI_SONAME)
 	-\$(LN) \$(LIBPARI_DYN) \$(LIBPARI_SO)
-EOT
-    fi
-  else
-    cat >> $file << EOT
-gp-dyn: \$(OBJSDGP) \$(LIBPARI_DYN)
-	\$(RM) \$@
-	\$(LD) -o \$@ \$(LDFLAGS) \$(OBJSDGP) \$(RUNPTH) \$(TOPLDDYN) \$(LDDYN) \$(PLOTLIBS) \$(LIBS) \$(DYNLIBS)
 EOT
   fi
 fi
@@ -619,23 +603,9 @@ for dir in basemath modules language gp graph gpdyn graphdyn systems; do
     cflags="$cflags -I$src/graph"
     depend="$src/graph/rect.h"
     ;;
-  plot*-dyn)
-    cflags="\$(DYNFLAGS) \$(PLOTCFLAGS)"
-    depend="$src/graph/rect.h \$(LIBPARI).dll libpari_dll.h libpari_globals.h \$(LIBPARI).dll"
-    ;;
   plot*)
     cflags="$cflags \$(PLOTCFLAGS)"
     depend="$src/graph/rect.h"
-    ;;
-  gp-dyn|gp_rl-dyn)
-    source=$src\/`echo $dir | sed -e "s/dyn//"`\/`echo $f | cut -f1 -d-`.c
-    cflags="$cflags \$(DYNFLAGS) -I$src/language \$(RLINCLUDE)"
-    depend="$src/language/anal.h $src/gp/gp.h ./paricfg.h libpari_dll.h libpari_globals.h \$(LIBPARI).dll"
-    ;;
-  gp_init-dyn|plotport-dyn)
-    source=$src\/`echo $dir | sed -e "s/dyn//"`\/`echo $f | cut -f1 -d-`.c
-    cflags="$cflags \$(DYNFLAGS) -I$src/graph"
-    depend="$src/graph/rect.h libpari_dll.h libpari_globals.h \$(LIBPARI).dll"
     ;;
   init|es|sumiter)
     depend="$src/language/anal.h"
@@ -654,10 +624,5 @@ $f\$(_O): .headers $depend $source
 done
 #to avoid execing too many "cat".
 echo "$HUGELINE" >> $file
-
-if test -n "$DYNFLAGS"; then
-  echo "include Makefile.DLLs" >> $file
-  cp $config_dir/Makefile.DLLs $objdir
-fi
 
 echo ".PHONY: gp dft"  >> $file
