@@ -31,9 +31,9 @@ library yourself.
 
 2) PostScript Documentation (GPD): GPD_xxxx.ZIP
   user's manual, tutorial and reference card, in PostScript format
+  The same documents are available in PDF format from PARI home page.
 
 3) TeX Documentation (GPM): GPM_xxxx.ZIP
-  [ The same documents are available in PDF format from PARI home page. ]
   Also contains the script GPHELP (translates Pari documentation
   to plain text, handles indexing), which requires Perl (not included).
   You may have to fix paths in the first lines of the script.
