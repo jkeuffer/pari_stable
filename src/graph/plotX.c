@@ -18,6 +18,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                       HIGH RESOLUTION PLOT                      */
 /*                                                                 */
 /*******************************************************************/
+
+#ifdef BOTH_GNUPLOT_AND_X11		/* The switch support in plotgnuplot */
+#  define rectdraw0		X11_rectdraw0
+#  define term_set		X11_term_set
+#  define PARI_get_plot		X11_PARI_get_plot
+#  define plot_outfile_set	X11_plot_outfile_set
+#  define set_pointsize		X11_set_pointsize
+#  define pari_plot		pari_X11plot
+#endif
+
 #include "pari.h"
 #include "rect.h"
 #include "../language/anal.h"
@@ -159,6 +169,9 @@ rectdraw0(long *w, long *x, long *y, long lw, long do_free)
 
   /* child process goes on */
   freeall();  /* PARI stack isn't needed anymore, keep rectgraph */
+  /* if gnuplot X11 plotting is active, may get SIGPIPE...  XXXX Better disable
+   * some X callback? */
+  os_signal(SIGPIPE, SIG_IGN);
   PARI_get_plot(1);
   display = XOpenDisplay(NULL);
   font_info = XLoadQueryFont(display, "9x15");

@@ -30,13 +30,17 @@ typedef struct PARI_plot {
 } PARI_plot;
 
 extern PARI_plot pari_plot, pari_psplot;
+#ifdef BOTH_GNUPLOT_AND_X11
+extern PARI_plot pari_X11plot;
+#endif
+extern PARI_plot *pari_plot_engine;
 
-#define w_height (pari_plot.height)
-#define w_width (pari_plot.width)
-#define f_height (pari_plot.fheight)
-#define f_width (pari_plot.fwidth)
-#define h_unit (pari_plot.hunit)
-#define v_unit (pari_plot.vunit)
+#define w_height (pari_plot_engine->height)
+#define w_width (pari_plot_engine->width)
+#define f_height (pari_plot_engine->fheight)
+#define f_width (pari_plot_engine->fwidth)
+#define h_unit (pari_plot_engine->hunit)
+#define v_unit (pari_plot_engine->vunit)
 #define lmargin (f_width*10)
 #define rmargin (h_unit - 1)
 #define tmargin (v_unit - 1)

@@ -31,6 +31,8 @@ static void PARI_get_psplot(void);
 static long current_color[NUMRECT];
 PariRect **rectgraph = NULL;
 PARI_plot pari_plot, pari_psplot;
+PARI_plot *pari_plot_engine = &pari_plot;
+PARI_plot pari_X11plot;			/* Used if BOTH_GNUPLOT_AND_X11 */
 long  rectpoint_itype = 0;
 long  rectline_itype  = 0;
 
@@ -208,6 +210,8 @@ free_graph(void)
 {
   int i;
 
+  if (!rectgraph)
+      return;
   for (i=0; i<NUMRECT; i++)
   {
     PariRect *e=rectgraph[i];
@@ -216,6 +220,7 @@ free_graph(void)
     free((void *)e);
   }
   free((void *)rectgraph);
+  rectgraph = 0;
 }
 
 static PariRect *

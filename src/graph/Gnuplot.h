@@ -472,7 +472,15 @@ void myterm_table_not_loaded_v4i4d(int term_xmin, int term_xmax,
 #  define list_terms		(*my_term_ftablep->term_funcs[TTABLE_LIST])
 #  define plotsizes_scale	(*my_term_ftablep->set_sizesp)
 #  define plotsizes_scale_get	(*my_term_ftablep->get_sizesp)
+
+#ifdef USE_SET_FEEDBACK_RECTANGLE
+/* If DLL has it, but was compiled with older Gnuplot.h */
 #  define set_mouse_feedback_rectangle	(*my_term_ftablep->mouse_feedback_func)
+#else
+#  define set_mouse_feedback_rectangle(term_xmin, term_xmax, term_ymin, term_ymax, plot_xmin, plot_xmax, plot_ymin, plot_ymax)	\
+	((my_term_ftablep->loaded & 2) ?	\
+	 ((*my_term_ftablep->mouse_feedback_func)(term_xmin, term_xmax, term_ymin, term_ymax, plot_xmin, plot_xmax, plot_ymin, plot_ymax), 0) : 0)
+#endif	/* defined USE_SET_FEEDBACK_RECTANGLE */
 
 #  define scaled_xmax()	((int)termprop(xmax)*plotsizes_scale_get(0))
 #  define scaled_ymax()	((int)termprop(ymax)*plotsizes_scale_get(1))
@@ -572,7 +580,8 @@ plotsizes_get(int flag)	{ return (flag ? ysize : xsize); }
 
 struct t_ftable my_term_ftable =
 {
-	1, (FUNC_PTR)&change_term, &term_set_output,
+	2,		/* bit 2 means it has mys_mouse_feedback_rectangle */
+	(FUNC_PTR)&change_term, &term_set_output,
 	&plotsizes_scale, &plotsizes_get,
 	{&term_start_plot, &term_end_plot, 
 	 &term_start_multiplot, &term_end_multiplot, &term_init, &list_terms},

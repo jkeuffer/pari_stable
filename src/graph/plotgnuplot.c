@@ -25,6 +25,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define SET_OPTIONS_FROM_STRING
 #define GNUPLOT_OUTLINE_STDOUT
 #define DONT_POLLUTE_INIT
+
+/* The gnuplot library may reference a function with *this* name */
+#define mys_mouse_feedback_rectangle set_mouse_feedback_rectangle
 #include "Gnuplot.h"
 
 #ifdef __EMX__
@@ -33,8 +36,36 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #  define DEF_TERM (getenv("DISPLAY") ? "X11" : "dumb")
 #endif
 
+#ifdef BOTH_GNUPLOT_AND_X11
+#  ifdef GNUPLOT_AND_X11_PREFER_GNUPLOT
+#    define DEFAULT_IS_BUILTIN 0
+#  else	/* !( defined GNUPLOT_AND_X11_PREFER_GNUPLOT ) */ 
+#    define DEFAULT_IS_BUILTIN 1
+#  endif	/* defined GNUPLOT_AND_X11_PREFER_GNUPLOT */ 
+#endif
+
+#  ifdef BOTH_GNUPLOT_AND_X11
+int is_builtin = DEFAULT_IS_BUILTIN;
+int X11_init;
+static void my_rectdraw0(long *w, long *x, long *y, long lw, long do_free);
+#  endif
+
 void
 rectdraw0(long *w, long *x, long *y, long lw, long do_free)
+#  ifdef BOTH_GNUPLOT_AND_X11
+{
+    if (is_builtin) {
+	X11_rectdraw0(w, x, y, lw, do_free);
+	return;
+    }
+    
+    my_rectdraw0(w, x, y, lw, do_free);
+    return;
+}
+
+static void
+my_rectdraw0(long *w, long *x, long *y, long lw, long do_free)
+#  endif	/* defined BOTH_GNUPLOT_AND_X11 */
 {
   double *ptx,*pty;
   long i,j,x0,y0, hjust, vjust, hgap, vgap, hgapsize, vgapsize;
@@ -196,11 +227,22 @@ rectdraw0(long *w, long *x, long *y, long lw, long do_free)
 void
 PARI_get_plot(long fatal)
 {
-  (void)fatal;
-  if (pari_plot.init) {
-    return;
+#ifdef BOTH_GNUPLOT_AND_X11    
+  if (is_builtin) {
+      if (X11_init)
+	  return;
+      if (getenv("DISPLAY")) {
+	  X11_PARI_get_plot(fatal);
+	  X11_init = 1;
+	  return;	  
+      }
+      is_builtin = 0;			/* Don't defaut to X11 if no DISPLAY */
   }
+#endif	/* defined BOTH_GNUPLOT_AND_X11 */ 
+  if (pari_plot.init)
+    return;
   term_set( DEF_TERM );
+  (void)fatal;
 }
 
 
@@ -211,6 +253,32 @@ term_set(char *s)
   double x, y;
   static int had_error;
 
+#ifdef BOTH_GNUPLOT_AND_X11    
+  if (is_builtin) {
+      if (!strcmp(s,"builtin")) {
+	  if (!getenv("DISPLAY"))
+	      goto complain;
+	  return X11_term_set(s);	  
+      }
+      is_builtin = 0;
+      /* The following line may switch on Gnuplot's X11 term first: */
+      /* PARI_get_plot(1); */
+  } else if (!strcmp(s,"builtin")) {
+/*      if (!X11_init) {*/
+	  if (!getenv("DISPLAY")) {
+	    complain:
+	      croak("The builtin-X11 plotting requires DISPLAY environment variable set");
+	  }	  
+	  /* Restore the safe state by switching to a do-little terminal */
+	  if (pari_plot.init && strcmp(pari_plot.name, "dumb"))
+	      term_set("dumb");
+	  is_builtin = 1;
+	  X11_PARI_get_plot(1);
+	  X11_init = 1;
+/*      }*/
+      return X11_term_set(s);
+  }
+#endif	/* defined BOTH_GNUPLOT_AND_X11     */ 
   setup_gpshim();
   if (*s == 0)
       s = pari_plot.name;
@@ -274,8 +342,12 @@ term_set(char *s)
 }
 
 long
-plot_outfile_set(char *s) { 
+plot_outfile_set(char *s)
+{ 
     int normal = (strcmp(s,"-") == 0);
+
+    /* Intentionally no check for is_builtin, let it always affect gnuplot:
+       this way one can set the outfile before switching the terminal... */
 
     setup_gpshim();
     /* Delegate all the hard work to term_set_output() */
@@ -295,27 +367,96 @@ plot_outfile_set(char *s) {
 void
 set_pointsize(double d) 
 {
+#ifdef BOTH_GNUPLOT_AND_X11    
+    if (is_builtin) {
+	X11_set_pointsize(d);
+	return;
+    }
+#endif	/* defined BOTH_GNUPLOT_AND_X11     */ 
     pointsize = d;
     if (pari_plot.init)
 	setpointsize(d);
 }
 
-#ifdef DYNAMIC_PLOTTING_RUNTIME_LINK
+#ifdef HAS_DLOPEN
 #include <dlfcn.h>
 
 get_term_ftable_t *
 get_term_ftable_get(void) /* Establish runtime link with gnuplot engine */
 {
-    char *s = getenv("GNUPLOT_DRAW_DLL"), buf[4096];
+    char *s = getenv("GNUPLOT_DRAW_DLL"), *s1, buf[4096];
     void *h, *f;
     int mode = RTLD_LAZY;
+    char fbuf[2048];
 
 #ifdef RTLD_GLOBAL
 	mode |= RTLD_GLOBAL;
 #endif
 
+#ifdef DYNAMIC_PLOTTING_RUNTIME_LINK
     if (!s)
 	s = DYNAMIC_PLOTTING_RUNTIME_LINK;
+#endif
+#ifndef DYNAMIC_PLOTTING_RUNTIME_LINK_NO_PERL
+    /* Allow user disabling by setting GNUPLOT_DRAW_DLL_NO_PERL=1 */
+    if (!s && (!(s1 = getenv("GNUPLOT_DRAW_DLL_NO_PERL")) || !atoi(s1))) {
+	char cmdbuf[256];
+	FILE *p;
+	char ext[256];
+	char *sub;
+	char name[256];
+	char *n = "Gnuplot";
+
+	/* Make 2 runs of Perl to shorten the command length */
+	/* Find the directory of the Term::Gnuplot's PM and DLL extension */
+	sprintf(cmdbuf, "perl -MTerm::Gnuplot -MConfig -wle %c"
+		"print $INC{qq(Term/Gnuplot.pm)};print $Config{dlext}%c",
+		SHELL_Q, SHELL_Q);
+	p = popen(cmdbuf, "r");
+	if (!p || !fgets(fbuf, sizeof(fbuf), p) || !fgets(ext, sizeof(ext), p))
+	    goto end_find;
+	pclose(p);
+	/* Find the directory of the DLL file */
+	sub = strrchr(fbuf,'/');
+	if (!sub)
+	    goto end_find;
+	/* Do as XSLoader */
+	sub[0] = 0;
+	sub = strrchr(fbuf,'/');
+	if (!sub)
+	    goto end_find;
+	if (sub - fbuf >= 9 && !strncmp(sub - 9, "/blib/lib",9)) {
+	    strcpy(sub - 3,"arch/"); /* Uninstalled module */
+	    sub++;
+	}
+	strcpy(sub + 1,"auto/Term/Gnuplot/");
+	/* Find the name of the DLL file */
+	sprintf(cmdbuf, "perl -MDynaLoader -we %c"
+		"package DynaLoader; "
+		"print mod2fname([qw(Term Gnuplot)]) if defined &mod2fname%c",
+		SHELL_Q, SHELL_Q);
+	p = popen(cmdbuf, "r");
+	if (p) {
+	    if (fgets(name, sizeof(name), p))
+		n = name;
+	    pclose(p);
+	}
+	if (strlen(fbuf) + 10 + strlen(n) + strlen(ext) > sizeof(fbuf))
+	    croak("Buffer overflow finding gnuplot DLL");
+	strcpy(sub + strlen(sub), n);
+	strcpy(sub + strlen(sub), ".");
+	strcpy(sub + strlen(sub), ext);
+	sub[strlen(sub)-1] = 0;	/* Trailing \n of ext */
+	s = fbuf;
+    }
+  end_find:
+#endif
+    if (!s)    /* The trailing \n is important: one may put . to the command */
+	croak("Can't find Gnuplot drawing engine DLL,\n\t"
+	      "set GNUPLOT_DRAW_DLL environment variable"
+	      " to the name of the DLL,\n\t"
+	      "or install Perl module Term::Gnuplot, e.g., by running\n\t\t"
+	      "perl -MCPAN -e \"install Term::Gnuplot\"\n");
     h = dlopen(s, mode);
     if (!h) {
 	sprintf(buf,"Can't load Gnuplot drawing engine from '%s': %s", s, dlerror());
