@@ -21,6 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /* Flx.c */
 GEN     Fl_Flx(ulong x, long sv);
 GEN     Flm_FlxV(GEN x, long sv);
+GEN     Flm_FlxX(GEN x, long v,long w);
 GEN     Flm_ZM(GEN z);
 GEN     Flv_Flx(GEN x, long vs);
 GEN     Flv_ZC(GEN z);
@@ -58,27 +59,34 @@ GEN     Flx_sqr(GEN x, ulong p);
 GEN     Flx_sub(GEN x, GEN y, ulong p);
 long    Flx_valuation(GEN x);
 GEN     Flx_zero(long v);
+GEN     FlxV_Flm(GEN v, long n);
+GEN     FlxV_Flv_innerprod(GEN V, GEN W, ulong p);
+GEN     FlxX_Flm(GEN v, long n);
 GEN     FlxX_ZXX(GEN B);
 GEN     FlxYqQ_pow(GEN x, GEN n, GEN S, GEN T, ulong p);
 GEN     Flxq_inv(GEN x,GEN T,ulong p);
 GEN     Flxq_invsafe(GEN x, GEN T, ulong p);
 GEN     Flxq_mul(GEN y,GEN x,GEN pol,ulong p);
 GEN     Flxq_pow(GEN x, GEN n, GEN pol, ulong p);
+GEN     Flxq_powers(GEN x, long l, GEN T, ulong p);
 GEN     Flxq_sqr(GEN y,GEN pol,ulong p);
+GEN     FlxqX_divrem(GEN x, GEN y, GEN T, ulong p, GEN *pr);
 GEN     FlxqXQ_pow(GEN x, GEN n, GEN S, GEN T, ulong p);
 GEN     ZM_Flm(GEN x, ulong p);
 GEN     ZV_Flv(GEN x, ulong p);
 GEN     ZX_Flx(GEN x, ulong p);
-GEN     ZXX_Flxy(GEN B, ulong p, long vs);
+GEN     ZXV_FlxV(GEN v, ulong p);
 GEN     ZXX_FlxX(GEN B, ulong p, long v);
 
  /* alglin1.c */
 
 GEN     Flm_Flv_mul(GEN x, GEN y, ulong p);
 GEN     Flm_deplin(GEN x, ulong p);
+GEN     Flm_indexrank(GEN x, ulong p);
 GEN     Flm_inv(GEN x, ulong p);
 GEN     Flm_ker(GEN x, ulong p);
 GEN     Flm_ker_sp(GEN x, ulong p, long deplin);
+GEN     Flm_mul(GEN x, GEN y, ulong p);
 GEN     FpC_FpV_mul(GEN x, GEN y, GEN p);
 GEN     FpM_FpV_mul(GEN x, GEN y, GEN p);
 GEN     FpM_deplin(GEN x, GEN p);
