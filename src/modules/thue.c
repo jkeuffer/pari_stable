@@ -462,7 +462,7 @@ static double
 fact(double x)
 {
   double ft = 1.0;
-  x = (int)x; while (x>1) { ft *= x; x--; }
+  x = floor(x); while (x>1) { ft *= x; x--; }
   return ft ;
 }
 
