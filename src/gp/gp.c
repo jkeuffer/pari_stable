@@ -507,7 +507,7 @@ sd_format(char *v, int flag)
   {
     char s[128];
     sprintf(s, "%c%ld.%ld", fmt->format, fmt->fieldw, fmt->sigd);
-    return strtoGENstr(s,0);
+    return strtoGENstr(s);
   }
   if (flag == d_ACKNOWLEDGE)
     pariputsf("   format = %c%ld.%ld\n", fmt->format, fmt->fieldw, fmt->sigd);
@@ -591,7 +591,7 @@ sd_colors(char *v, int flag)
       t += strlen(t);
       if (c < c_LAST - 1) { *t++=','; *t++=' '; }
     }
-    if (flag==d_RETURN) return strtoGENstr(s,0);
+    if (flag==d_RETURN) return strtoGENstr(s);
     pariputsf("   colors = \"%s\"\n",s);
   }
   return gnil;
@@ -816,7 +816,7 @@ sd_filename(char *v, int flag, char *s, char **f)
     do_strftime(v,s, l-1); free(v);
     *f = pari_strdup(s); free(s); free(old);
   }
-  if (flag == d_RETURN) return strtoGENstr(*f,0);
+  if (flag == d_RETURN) return strtoGENstr(*f);
   if (flag == d_ACKNOWLEDGE) pariputsf("   %s = \"%s\"\n",s,*f);
   return gnil;
 }
@@ -860,7 +860,7 @@ sd_help(char *v, int flag)
     GP_DATA->help = expand_tilde(v);
   }
   str = GP_DATA->help? GP_DATA->help: "none";
-  if (flag == d_RETURN) return strtoGENstr(str,0);
+  if (flag == d_RETURN) return strtoGENstr(str);
   if (flag == d_ACKNOWLEDGE)
     pariputsf("   help = \"%s\"\n", str);
   return gnil;
@@ -877,7 +877,7 @@ sd_path(char *v, int flag)
     if (flag == d_INITRC) return gnil;
     gp_expand_path(p);
   }
-  if (flag == d_RETURN) return strtoGENstr(p->PATH,0);
+  if (flag == d_RETURN) return strtoGENstr(p->PATH);
   if (flag == d_ACKNOWLEDGE)
     pariputsf("   path = \"%s\"\n",p->PATH);
   return gnil;
@@ -930,7 +930,7 @@ sd_prompt_set(char *v, int flag, char *how, char *p)
     strcat(p,"\n");
 #endif
   }
-  if (flag == d_RETURN) return strtoGENstr(p,0);
+  if (flag == d_RETURN) return strtoGENstr(p);
   if (flag == d_ACKNOWLEDGE)
     pariputsf("   prompt%s = \"%s\"\n", how, p);
   return gnil;

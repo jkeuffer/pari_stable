@@ -110,6 +110,8 @@ IZ 37- [OS/2:] ^C would only work once
    55- qflll(matrix(2,3,x,y,x+y)) --> SEGV
 IZ 56- default(primelimit, 2156858852) --> SEGV and other signed/unsigned
        conversion problems.
+IZ 57- printtex("x1") and printtex("x_1") gave same output
+IZ 58- printtex(t_STR) [ protect special characters, eg ~ or \ ]
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available
@@ -164,6 +166,9 @@ IZ 29- improve portability of make_vi_tags (cf 'make ctags')
    34- broken Configure into many smaller files (config/get_*)
    35- let gphelp write all cross-references as [label:LABELNAME] (was [??])
 IZ 36- cache optimization in initprimes() [ default(primelimit,.) ]
+   37- Str() now takes multiple arguments as print(). Str(,1) replaced by
+       Strexpand()
+   38- prototype of strtoGENstr() [remove flag]
 
   Added:
     1- [TeXmacs:] contextual completion (<TAB>)
@@ -172,6 +177,7 @@ BA  2- routines ishiftr, gfloor2n
 BA  4- [Configure:] --builddir flag
 IZ  5- File README.os2
     6- Allow nfroots(, P) [ roots in Q ]
+    7- routines Strexpand(), Strtex()
 
   Removed
     1- macro definition BITS_IN_RANDOM (useless)

@@ -166,7 +166,7 @@ GEN     lisseq(char *t);
 long    manage_var(long n, entree *ep);
 void    name_var(long n, char *s);
 GEN     readseq(char *c, int strict);
-GEN     strtoGENstr(char *s, long flag);
+GEN     strtoGENstr(char *s);
 
 /* arith1.c */
 
@@ -772,6 +772,7 @@ GEN     zell(GEN e, GEN z, long prec);
 
 /* es.c */
 
+char*   GENtoTeXstr(GEN x);
 char*   GENtostr(GEN x);
 void    brute(GEN g, char format, long dec);
 void    bruteall(GEN g, char format, long dec, long flbl);
@@ -810,6 +811,7 @@ void    pariflush(void);
 void    pariputc(char c);
 void    pariputs(const char *s);
 void    pariputsf(const char *format, ...);
+char*   pGENtostr(GEN *g, long flag);
 int     popinfile(void);
 GEN     readbin(char *name, FILE *f);
 void    sor(GEN g, char fo, long dd, long chmp);

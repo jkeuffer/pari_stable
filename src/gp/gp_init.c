@@ -30,7 +30,6 @@ extern GEN   extern0(char *cmd);
 extern void  gp_quit(void);
 extern GEN   input0(void);
 extern void  kill0(entree *ep);
-extern void  print0(GEN *g,long flag);
 extern GEN   read0(char *s);
 extern void  system0(char *cmd);
 extern GEN   trap0(char *e, char *f, char *r);

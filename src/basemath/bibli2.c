@@ -631,7 +631,7 @@ static GEN
 gtostr(GEN x)
 {
   char *s=GENtostr(x);
-  x = strtoGENstr(s,0); free(s); return x;
+  x = strtoGENstr(s); free(s); return x;
 }
 
 GEN

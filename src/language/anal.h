@@ -255,6 +255,9 @@ void printtex(GEN *g);
 void write0  (char *s, GEN *g);
 void write1  (char *s, GEN *g);
 void writetex(char *s, GEN *g);
+GEN Str(GEN *g);
+GEN Strexpand(GEN *g);
+GEN Strtex(GEN *g);
 
 /* for output */
 typedef struct {

@@ -668,6 +668,48 @@ GENtostr0(GEN x, pariout_t *T, void (*do_out)(GEN, pariout_t*))
 char *
 GENtostr(GEN x) { return GENtostr0(x, NULL, &gen_output); }
 
+/* Returns gpmalloc()ed string */
+char *
+GENtoTeXstr(GEN x) {
+  pariout_t T = DFLT_OUTPUT;
+
+  T.prettyp = f_TEX;
+  T.fieldw = 0;
+  return GENtostr0(x, &T, &gen_output);
+}
+
+/* see print0(). Returns gpmalloc()ed string */
+char *
+pGENtostr(GEN *g, long flag) {
+  pariout_t T = DFLT_OUTPUT;
+  char *t = pari_strdup("");
+  long tlen = 0;
+
+  T.prettyp = flag;
+  for( ; *g; g++)
+  {
+    char *t2, *s = GENtostr0(*g, &T, &gen_output);
+    tlen += strlen(s);
+    t2 = gpmalloc(tlen + 1);
+    (void)sprintf(t2, "%s%s", t, s);
+    free(s); free(t); t = t2;
+  }
+  return t;
+}
+GEN Str0(GEN *g, long flag) {
+  char *t = pGENtostr(g, flag);
+  GEN z = strtoGENstr(t);
+  free(t); return z;
+}
+GEN Str(GEN *g)    { return Str0(g, f_RAW); }
+GEN Strtex(GEN *g) { return Str0(g, f_TEX); }
+GEN
+Strexpand(GEN *g) {
+  char *s = pGENtostr(g, f_RAW), *t = expand_tilde(s);
+  GEN z = strtoGENstr(t);
+  free(t); free(s); return z;
+}
+
 /********************************************************************/
 /**                                                                **/
 /**                         WRITE AN INTEGER                       **/
@@ -1102,17 +1144,60 @@ get_var(long v, char *buf)
   sprintf(buf,"#<%d>",(int)v); return buf;
 }
 
+static void
+do_append(char **sp, char c, char *last, int count)
+{
+  if (*sp + count > last)
+    err(talker, "TeX variable name too long");
+  while (count--)
+    *(*sp)++ = c;
+}
+
 static char *
-get_texvar(long v, char *buf)
+get_texvar(long v, char *buf, int len)
 {
   entree *ep = varentries[v];
-  char *s, *t = buf;
+  char *s, *t = buf, *e = buf + len - 1;
 
   if (!ep) err(talker, "this object uses debugging variables");
   s = ep->name;
-  if (strlen(s)>=64) err(talker, "TeX variable name too long");
+  if (strlen(s) >= len) err(talker, "TeX variable name too long");
   while(isalpha((int)*s)) *t++ = *s++;
-  *t = 0; if (isdigit((int)*s) || *s++ == '_') sprintf(t,"_{%s}",s);
+  *t = 0;
+  if (isdigit((int)*s) || *s == '_') {
+    int seen1 = 0, seen = 0;
+
+    /* Skip until the first non-underscore */
+    while (*s == '_') s++, seen++;
+
+    /* Special-case integers and empty subscript */
+    if (*s == 0 || isdigit((unsigned char)*s))
+      seen++;
+
+    do_append(&t, '_', e, 1);
+    do_append(&t, '{', e, 1);
+    do_append(&t, '[', e, seen - 1);
+    while (1) {
+      if (*s == '_')
+        seen1++, s++;
+      else {
+        if (seen1) {
+          do_append(&t, ']', e, (seen >= seen1 ? seen1 : seen) - 1);
+          do_append(&t, ',', e, 1);
+          do_append(&t, '[', e, seen1 - 1);
+          if (seen1 > seen)
+            seen = seen1;
+          seen1 = 0;
+        }
+        if (*s == 0)
+          break;
+        do_append(&t, *s++, e, 1);
+      }
+    }
+    do_append(&t, ']', e, seen - 1);
+    do_append(&t, '}', e, 1);
+    *t = 0;
+  }
   return buf;
 }
 
@@ -1835,7 +1920,7 @@ texi(GEN g, pariout_t *T, int nosign)
       if (!isnull(b)) wr_texnome(T,b,v,1);
       break;
 
-    case t_POL: v = get_texvar(ordvar[varn(g)],buf);
+    case t_POL: v = get_texvar(ordvar[varn(g)], buf, sizeof(buf));
       /* hack: we want g[i] = coeff of degree i. */
       i = degpol(g); g += 2; while (isnull((GEN)g[i])) i--;
       wr_lead_texnome(T,(GEN)g[i],v,i,nosign);
@@ -1846,7 +1931,7 @@ texi(GEN g, pariout_t *T, int nosign)
       }
       break;
 
-    case t_SER: v = get_texvar(ordvar[varn(g)],buf);
+    case t_SER: v = get_texvar(ordvar[varn(g)], buf, sizeof(buf));
       i = valp(g);
       if (signe(g))
       { /* hack: we want g[i] = coeff of degree i. */
@@ -1915,9 +2000,20 @@ texi(GEN g, pariout_t *T, int nosign)
       pariputc('}'); break;
 
     case t_STR:
-      pariputs("\\mbox{"); pariputs(GSTR(g));
+    {
+      char *s;
+  
+      pariputs("\\mbox{");
+      s = GSTR(g);
+      while (*s) {
+	if (strchr("\\{}$_^%#&~", *s))
+	  pariputc('\\');		/* What to do with \\ ? */
+	pariputc(*s);
+	if (strchr("^~", *s++))
+	  pariputs("{}");
+      }
       pariputc('}'); break;
-
+    }
     case t_MAT:
       pariputs("\\pmatrix{\n "); r = lg(g);
       if (r>1)
@@ -3017,7 +3113,7 @@ print0(GEN *g, long flag)
   pariout_t T = GP_DATA? *(GP_DATA->fmt): DFLT_OUTPUT; /* copy */
   T.prettyp = flag;
   for( ; *g; g++)
-    if (typ(*g)==t_STR)
+    if (flag != f_TEX && typ(*g)==t_STR)
       pariputs(GSTR(*g)); /* text surrounded by "" otherwise */
     else
       gen_output(*g, &T);

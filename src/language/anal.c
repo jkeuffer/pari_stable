@@ -1060,16 +1060,7 @@ _strtoGENstr(char *s, long n0)
 }
 
 GEN
-strtoGENstr(char *s, long flag)
-{
-  GEN x;
-
-  if (flag) s = expand_tilde(s);
-  x = _strtoGENstr(s, strlen(s));
-  if (flag) free(s);
-  return x;
-}
-
+strtoGENstr(char *s) { return _strtoGENstr(s, strlen(s)); }
 /********************************************************************/
 /**                                                                **/
 /**                          READ FUNCTIONS                        **/
