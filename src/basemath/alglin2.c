@@ -1556,197 +1556,328 @@ comterm:
   z[3]=(long)p1; return gerepile(av0,tetpil,z);
 }
 
-/* HNF by Bo Majewski and Allan Steele */
+/***********************************************************************/
+/*                                                                     */
+/*                 HNFLLL (Havas, Majewski, Mathews)                   */
+/*                                                                     */
+/***********************************************************************/
 
-/* premier indice non nul de la j-eme ligne de la matrice b */
-static long
-depthvector(GEN b,long j)
+/* negate in place, except universal constants */
+static GEN
+mynegi(GEN x)
 {
-  long lv = lg(b), i = 1;
+  static long mun[]={evaltyp(t_INT)|m_evallg(3),evalsigne(-1)|evallgefint(3),1};
+  long s = signe(x);
 
-  while (i<lv && gcmp0(gcoeff(b,j,i))) i++;
-  return (i==lv)?-1:i;
+  if (!s) return gzero;
+  if (is_pm1(x))
+    return (s>0)? mun: gun;
+  setsigne(x,-s); return x;
 }
 
+/* We assume y > 0 */
 static GEN
-incompleteprod(GEN b,long k,long l,long deb,long fin)
+divnearest(GEN x, GEN y)
 {
-  GEN p1 = gzero;
-  long j;
+  GEN r, q = dvmdii(x,y,&r);
+  long av = avma, s=signe(r), t;
 
-  for (j=deb; j<=fin; j++)
-    p1 = addii(p1,mulii(gcoeff(b,k,j),gcoeff(b,l,j)));
-  return p1;
+  if (!s) { cgiv(r); return q; }
+  if (s<0) r = mynegi(r);
+
+  y = shifti(y,-1); t = cmpii(r,y);
+  avma=av; cgiv(r);
+  if (t < 0 || (t == 0 && s > 0)) return q;
+  return addsi(s,q);
 }
 
 static void
-redlll(GEN b,GEN mu,long l,long c,long k)
+Minus(long j, GEN **lambda)
 {
-  long i,j, lb;
-  GEN q, p1=gcoeff(b,l,c);
+  long k, n = lg(lambda);
 
-  if (signe(p1)) q=gdivround(gcoeff(b,k,c),p1); else q=ground(gcoeff(mu,k,l));
+  for (k=1  ; k<j; k++) lambda[j][k] = mynegi(lambda[j][k]);
+  for (k=j+1; k<n; k++) lambda[k][j] = mynegi(lambda[k][j]);
+}
+
+static void
+neg_col(GEN M)
+{
+  long i;
+  for (i = lg(M)-1; i; i--)
+    M[i] = (long)mynegi((GEN)M[i]);
+}
+
+/* M_k = M_k + q M_i  (col operations) */
+static void
+elt_col(GEN Mk, GEN Mi, GEN q)
+{
+  long j;
+  if (is_pm1(q))
+  {
+    if (signe(q) > 0)
+    {
+      for (j = lg(Mk)-1; j; j--)
+        if (signe(Mi[j])) Mk[j] = laddii((GEN)Mk[j], (GEN)Mi[j]);
+    }
+    else
+    {
+      for (j = lg(Mk)-1; j; j--)
+        if (signe(Mi[j])) Mk[j] = lsubii((GEN)Mk[j], (GEN)Mi[j]);
+    }
+  }
+  else
+    for (j = lg(Mk)-1; j; j--)
+      if (signe(Mi[j])) Mk[j] = laddii((GEN)Mk[j], mulii(q, (GEN)Mi[j]));
+}
+
+/* index of first non-zero entry */
+static long
+findi(GEN M)
+{
+  long i, n = lg(M);
+  for (i=1; i<n; i++)
+    if (signe(M[i])) return i;
+  return 0;
+}
+
+static void
+reduce2(GEN A, GEN B, long k, long j, long *row, GEN **lambda, GEN *D)
+{
+  GEN q;
+  long i, row0, row1;
+
+  row0 = findi((GEN)A[j]);
+  if (row0 && signe(gcoeff(A,row0,j)) < 0)
+  {
+    neg_col((GEN)A[j]);
+    neg_col((GEN)B[j]); Minus(j,lambda);
+  }
+
+  row1 = findi((GEN)A[k]);
+  if (row1 && signe(gcoeff(A,row1,k)) < 0)
+  {
+    neg_col((GEN)A[k]);
+    neg_col((GEN)B[k]); Minus(k,lambda);
+  }
+
+  row[0]=row0; row[1]=row1;
+  if (row0)
+    q = truedvmdii(gcoeff(A,row0,k), gcoeff(A,row0,j), NULL);
+  else if (absi_cmp(shifti(lambda[k][j], 1), D[j]) > 0)
+    q = divnearest(lambda[k][j], D[j]);
+  else
+    return;
+
   if (signe(q))
   {
-    q=negi(q); lb=lg(b);
-    for (j=1; j<lb; j++)
-      coeff(b,k,j) = laddii(gcoeff(b,k,j),mulii(q,gcoeff(b,l,j)));
-    coeff(mu,k,l)=ladd(gcoeff(mu,k,l),q);
-    for (i=1; i<l; i++)
+    GEN *Lk = lambda[k], *Lj = lambda[j];
+    q = mynegi(q);
+    if (row0) elt_col((GEN)A[k],(GEN)A[j],q);
+    elt_col((GEN)B[k],(GEN)B[j],q);
+    Lk[j] = addii(Lk[j], mulii(q,D[j]));
+    if (is_pm1(q))
     {
-      p1=gcoeff(mu,l,i);
-      if (gsigne(p1))
-	coeff(mu,k,i) = ladd(gcoeff(mu,k,i),gmul(q,p1));
+      if (signe(q) > 0)
+      {
+        for (i=1; i<j; i++)
+          if (signe(Lj[i])) Lk[i] = addii(Lk[i], Lj[i]);
+      }
+      else
+      {
+        for (i=1; i<j; i++)
+          if (signe(Lj[i])) Lk[i] = subii(Lk[i], Lj[i]);
+      }
     }
+    else
+    {
+      for (i=1; i<j; i++)
+        if (signe(Lj[i])) Lk[i] = addii(Lk[i], mulii(q,Lj[i]));
+    }
+  }
+}
+
+static void
+hnfswap(GEN A, GEN B, long k, GEN **lambda, GEN *D)
+{
+  GEN t,p1,p2;
+  long i,j,n = lg(A);
+
+  swap(A[k],A[k-1]);
+  swap(B[k],B[k-1]);
+  for (j=k-2; j; j--)
+  {
+    p1 = lambda[k-1][j];
+    lambda[k-1][j] = lambda[k][j];
+    lambda[k][j] = p1;
+  }
+  for (i=k+1; i<n; i++)
+  {
+    p1 = mulii(lambda[i][k-1], D[k]);
+    p2 = mulii(lambda[i][k], lambda[k][k-1]);
+    t = subii(p1,p2);
+
+    p1 = mulii(lambda[i][k], D[k-2]);
+    p2 = mulii(lambda[i][k-1], lambda[k][k-1]);
+    lambda[i][k-1] = divii(addii(p1,p2), D[k-1]);
+
+    lambda[i][k] = divii(t, D[k-1]);
+  }
+  p1 = mulii(D[k-2],D[k]);
+  p2 = sqri(lambda[k][k-1]);
+  D[k-1] = divii(addii(p1,p2), D[k-1]);
+}
+
+static GEN
+fix_rows(GEN A)
+{
+  long i,j, h,n = lg(A);
+  GEN cB,cA,B = cgetg(n,t_MAT);
+  if (n == 1) return B;
+  h = lg(A[1]);
+  for (j=1; j<n; j++)
+  {
+    cB = cgetg(h, t_COL);
+    cA = (GEN)A[j]; B[j] = (long)cB;
+    for (i=h>>1; i; i--) { cB[h-i] = cA[i]; cB[i] = cA[h-i]; }
+  }
+  return B;
+}
+
+GEN
+hnflll(GEN A)
+{
+  long m1 = 1, n1 = 1; /* alpha = m1/n1. Maybe 3/4 here ? */
+  long av = avma, lim = stack_lim(av,3), do_swap,i,n,k, row[2];
+  GEN z,B, **lambda, *D;
+
+  if (typ(A) != t_MAT) err(typeer,"hnflll");
+  n = lg(A); B = idmat(n-1); A = gcopy(fix_rows(A));
+  D = (GEN*) cgetg(n+1, t_VEC); D++; /* hack: need a "sentinel" D[0] */
+  lambda = (GEN**) cgetg(n,t_MAT);
+  for (i=1; i<n; i++) { D[i] = gun; lambda[i] = (GEN*)zerocol(n-1); }
+  D[0] = gun; k = 2;
+  while (k < n)
+  {
+    reduce2(A,B,k,k-1,row,lambda,D);
+    if (row[0])
+      do_swap = (!row[1] || row[0] <= row[1]);
+    else if (row[1])
+      do_swap = 0;
+    else
+    { /* row[0] == row[1] == 0*/
+      long av1=avma;
+      z = addii(mulii(D[k-2],D[k]), sqri(lambda[k][k-1]));
+      z = mulsi(n1,z);
+      do_swap = (cmpii(z, mulsi(m1,sqri(D[k-1]))) < 0);
+      avma=av1;
+    }
+    if (do_swap)
+    {
+      hnfswap(A,B,k,lambda,D);
+      if (k>2) k--;
+    }
+    else
+    {
+      for (i=k-2; i; i--) reduce2(A,B,k,i,row,lambda,D);
+      k++;
+    }
+    if (low_stack(lim, stack_lim(av,3)))
+    {
+      GEN a = (GEN)lambda, b = (GEN)(D-1); /* gcc -Wall */
+      GEN *gptr[4]; gptr[0]=&A; gptr[1]=&B; gptr[2]=&a; gptr[3]=&b;
+      if (DEBUGMEM) err(warnmem,"hnflll");
+      gerepilemany(av,gptr,4); lambda = (GEN**)a; D = (GEN*)(b+1);
+    }
+  }
+  for (i=1; i<n; i++)
+    if (!gcmp0((GEN)A[i])) break;
+  i--; A += i; A[0] = evaltyp(t_MAT)|evallg(n-i);
+  A = fix_rows(A);
+  z = cgetg(3,t_VEC);
+  z[1] = (long)A;
+  z[2] = (long)B; return gerepileupto(av, gcopy(z));
+}
+
+/* Variation on HNFLLL: Extended GCD */
+
+static void
+reduce1(GEN A, GEN B, long k, long j, GEN **lambda, GEN *D)
+{
+  GEN q;
+  long i;
+
+  if (signe(A[j]))
+    q = divnearest((GEN)A[k],(GEN)A[j]);
+  else if (absi_cmp(shifti(lambda[k][j], 1), D[j]) > 0)
+    q = divnearest(lambda[k][j], D[j]);
+  else
+    return;
+
+  if (! gcmp0(q))
+  {
+    q = mynegi(q);
+    A[k] = laddii((GEN)A[k], mulii(q,(GEN)A[j]));
+    elt_col((GEN)B[k],(GEN)B[j],q);
+    lambda[k][j] = addii(lambda[k][j], mulii(q,D[j]));
+    for (i=1; i<j; i++)
+      if (signe(lambda[j][i]))
+        lambda[k][i] = addii(lambda[k][i], mulii(q,lambda[j][i]));
   }
 }
 
 GEN
-hnflll(GEN x)
+extendedgcd(GEN A)
 {
-  long n,m,i,j,k,ii,jj,p,c,s,av=avma,tetpil,kmax,ok;
-  GEN q,qneg,p1,bnew,B,mu,mmu,cst,E,U,y,t,BB;
+  long m1 = 1, n1 = 1; /* alpha = m1/n1. Maybe 3/4 here ? */
+  long av = avma, tetpil, do_swap,i,j,n,k;
+  GEN p1,p2,B, **lambda, *D;
 
-  if (typ(x)!=t_MAT) err(typeer,"hnflll");
-  n=lg(x)-1;
-  if (!n)
+  n = lg(A); B = idmat(n-1); A = gcopy(A);
+  D = (GEN*) cgeti(n); lambda = (GEN**) cgetg(n,t_MAT);
+  for (i=0; i<n; i++) D[i] = gun;
+  for (i=1; i<n; i++)
   {
-    y=cgetg(3,t_VEC);
-    y[1]=lgetg(1,t_MAT);
-    y[2]=lgetg(1,t_MAT); return y;
+    lambda[i] = (GEN*) cgetg(n,t_COL);
+    for(j=1;j<n;j++) lambda[i][j] = gzero;
   }
-  cst=gdivgs(stoi(9),10);
-  x=gcopy(x); n=lg(x)-1; m=lg(x[1])-1; p=n+m;
-  bnew=cgetg(p+1,t_MAT);
-  for (j=1; j<=n; j++) bnew[j]=x[j];
-  for (j=n+1; j<=p; j++)
+  k = 2;
+  while (k < n)
   {
-    p1=cgetg(m+1,t_COL); bnew[j]=(long)p1;
-    for (i=1; i<=m; i++) p1[i]=(i==(j-n))?un:zero;
-  }
-  x=bnew; c=n+1;
-  for (i=1; i<=m; i++) c=min(c,depthvector(x,i));
-  s=0; mu=cgetg(m+2,t_MAT);
-  for (j=1; j<=m; j++) mu[j]=lgetg(m+2,t_COL); B=cgetg(m+2,t_COL);
-  while (c<=n)
-  {
-    k=2; kmax=1;
-    B[1]=(long)incompleteprod(x,1,1,c+1,p);
-    while (k<=m-c+1)
+    reduce1(A,B,k,k-1,lambda,D);
+    if (signe(A[k-1])) do_swap = 1;
+    else if (!signe(A[k]))
     {
-      if (k>kmax)
-      {
-	kmax=k;
-	for (j=1; j<k; j++)
-	{
-	  mmu=incompleteprod(x,k,j,c+1,p);
-	  for (i=1; i<j; i++) mmu=gsub(mmu,gmul(gcoeff(mu,j,i),gcoeff(mu,k,i)));
-	  coeff(mu,k,j)=(long)mmu;
-	}
-	for (j=1; j<k; j++) coeff(mu,k,j)=ldiv(gcoeff(mu,k,j),(GEN)B[j]);
-	B[k]=(long)incompleteprod(x,k,k,c+1,p);
-	for (j=1; j<k; j++)
-	  B[k]=lsub((GEN)B[k],gmul((GEN)B[j],gsqr(gcoeff(mu,k,j))));
-      }
-      redlll(x,mu,k-1,c,k);
-      ok = (absi(gcoeff(x,k-1,c))>absi(gcoeff(x,k,c))) ||
-	  (gegal(gcoeff(x,k-1,c),gcoeff(x,k,c)) &&
-	    (gcmp((GEN) B[k],
-	          gmul(gsub(cst,gsqr(gcoeff(mu,k,k-1))), (GEN) B[k-1])) < 0) );
-      while (ok)
-      {
-	for (j=1; j<=p; j++)
-	{
-	  t=gcoeff(x,k,j); coeff(x,k,j)=coeff(x,k-1,j);
-	  coeff(x,k-1,j)=(long)t;
-	}
-	for (j=1; j<=k-2; j++)
-	{
-	  t=gcoeff(mu,k,j); coeff(mu,k,j)=coeff(mu,k-1,j);
-	  coeff(mu,k-1,j)=(long)t;
-	}
-	mmu=gcoeff(mu,k,k-1);
-	BB=gadd((GEN)B[k],gmul(gmul(mmu,mmu),(GEN)B[k-1]));
-	q=gdiv((GEN)B[k-1],BB);
-	coeff(mu,k,k-1)=lmul(mmu,q);
-	B[k]=lmul((GEN)B[k],q); B[k-1]=(long)BB;
-	for (i=k+1; i<=kmax; i++)
-	{
-	  t=gcoeff(mu,i,k);
-	  coeff(mu,i,k)=lsub(gcoeff(mu,i,k-1),gmul(mmu,t));
-	  coeff(mu,i,k-1)=ladd(t,gmul(gcoeff(mu,k,k-1),gcoeff(mu,i,k)));
-	}
-	if (k>2) k--;
-	redlll(x,mu,k-1,c,k);
-        ok=(absi(gcoeff(x,k-1,c))>absi(gcoeff(x,k,c))) ||
-	   (gegal(gcoeff(x,k-1,c),gcoeff(x,k,c)) &&
-	     (gcmp((GEN) B[k],
-	           gmul(gsub(cst,gsqr(gcoeff(mu,k,k-1))), (GEN) B[k-1])) < 0));
-      }
-      for (i=k-2; i; i--) redlll(x,mu,i,c,k);
+      long av1=avma;
+      p1 = addii(mulii(D[k-2],D[k]), sqri(lambda[k][k-1]));
+      p1 = mulsi(n1,p1);
+      p2 = mulsi(m1,sqri(D[k-1]));
+      do_swap = (cmpii(p1,p2) < 0);
+      avma=av1;
+    }
+    else do_swap = 0;
+
+    if (do_swap)
+    {
+      hnfswap(A,B,k,lambda,D);
+      if (k>2) k--;
+    }
+    else
+    {
+      for (i=k-2; i; i--) reduce1(A,B,k,i,lambda,D);
       k++;
     }
-    s++; c=n+1;
-    for (i=1; i<=m-s; i++) c=min(c,depthvector(x,i));
   }
-  s=m-s+1;
-  if (signe(gcoeff(x,s,depthvector(x,s)))<0)
-    for (j=1; j<=p; j++)
-      coeff(x,s,j)=lnegi(gcoeff(x,s,j));
-  for (i=s+1; i<=m; i++)
+  if (signe(A[n-1])<0)
   {
-    if (signe(gcoeff(x,i,depthvector(x,i)))<0)
-      for (j=1; j<=p; j++)
-	coeff(x,i,j)=lnegi(gcoeff(x,i,j));
-    for (j=i-1; j>=s; j--)
-    {
-      k=depthvector(x,j);
-      qneg=negi(gdivent(gcoeff(x,i,k),gcoeff(x,j,k)));
-      for (jj=1; jj<=p; jj++)
-	coeff(x,i,jj)=laddii(gcoeff(x,i,jj),mulii(qneg,gcoeff(x,j,jj)));
-    }
+    A[n-1] = (long)mynegi((GEN)A[n-1]);
+    neg_col((GEN)B[n-1]);
   }
-  for (k=s; k<=m; k++)
-  {
-    for (j=1; j<s; j++)
-    {
-      mmu=incompleteprod(x,k,j,n+1,p);
-      for (i=1; i<j; i++) mmu=gsub(mmu,gmul(gcoeff(mu,j,i),gcoeff(mu,k,i)));
-      coeff(mu,k,j)=(long)mmu;
-    }
-    for (j=1; j<s; j++) coeff(mu,k,j)=ldiv(gcoeff(mu,k,j),(GEN)B[j]);
-    B[k]=(long)incompleteprod(x,k,k,n+1,p);
-    for (j=1; j<s; j++)
-      B[k]=lsub((GEN)B[k],gmul(gsqr(gcoeff(mu,k,j)),(GEN)B[j]));
-    for (j=s-1; j; j--)
-    {
-      qneg=negi(ground(gcoeff(mu,k,j)));
-      if (signe(qneg))
-      {
-	for (jj=1; jj<=p; jj++)
-	  coeff(x,k,jj)=laddii(gcoeff(x,k,jj),mulii(qneg,gcoeff(x,j,jj)));
-	for (i=1; i<j; i++)
-	  if (gsigne(gcoeff(mu,j,i)))
-	    coeff(mu,k,i)=ladd(gcoeff(mu,k,i),gmul(qneg,gcoeff(mu,j,i)));
-      }
-    }
-  }
-  tetpil=avma; y=cgetg(3,t_VEC);
-  E=cgetg(n+1,t_MAT);
-  for (i=1; i<=n; i++)
-  {
-    p1=cgetg(m-s+2,t_COL); E[i]=(long)p1;
-    for (ii=1; ii<=m-s+1; ii++)
-      p1[ii]=lcopy(gcoeff(x,m-ii+1,i));
-  }
-  y[1]=(long)E; U=cgetg(m+1,t_MAT);
-  for (i=1; i<=m; i++)
-  {
-    p1=cgetg(m+1,t_COL); U[i]=(long)p1;
-    for (ii=m; ii>=1; ii--)
-      p1[m-ii+1]=lcopy(gcoeff(x,ii,i+n));
-  }
-  y[2]=(long)U; return gerepile(av,tetpil,y);
+  tetpil = avma;
+  p1 = cgetg(3,t_VEC);
+  p1[1]=lcopy((GEN)A[n-1]);
+  p1[2]=lcopy(B);
+  return gerepile(av,tetpil,p1);
 }
 
 /* HNF with permutation */
