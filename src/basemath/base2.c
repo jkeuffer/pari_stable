@@ -1285,7 +1285,13 @@ mycaract(GEN f, GEN beta, GEN p, GEN pp, GEN ns)
     chi2 = chi;
   
   if (!pp) return chi2;
- 
+
+  if (cmpii(denom(content(chi2)), pp) > 0)
+  { /* this can happen if gamma is incorrect */
+    if (p1) beta = gmul(beta, p1);
+    return mycaract(f, beta, p, NULL, NULL);
+  }
+  
   return redelt(chi2, pp, pp);
 }
 
@@ -1511,7 +1517,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
       }
       else  
       {
-	chib = mycaract(chi, beta, p, pmr, ns);
+	chib = mycaract(chi, beta, p, pmf, ns);
 	vb = vstar(p, chib);
 	eq = (long)(vb[0] / vb[1]);
 	er = (long)(vb[0]*Ea / vb[1] - eq*Ea);
@@ -1549,13 +1555,13 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
       if (!gcmp1(denom(content(chig))))
       {
 	/* the valuation of beta was wrong... This also means 
-           that chi_gamma has more than one factor modulo p    */
+	   that chi_gamma has more than one factor modulo p   */
 	vb = vstar(p, chig);
 	eq = (long)(-vb[0] / vb[1]);
 	er = (long)(-vb[0]*Ea / vb[1] - eq*Ea);
 	if (eq) gamm = gmul(gamm, gpowgs(p, eq));
 	if (er) 
-        {
+	{
 	  gamm = gmul(gamm, gpowgs(nu, er));
 	  gamm = gmod(gamm, chi);
 	  gamm = redelt(gamm, p, pmr);
