@@ -229,7 +229,7 @@ GEN subcyclo_orbits(GEN O, GEN powz, GEN le)
   {
     GEN s=gzero;
     gpmem_t av=avma;
-    new_chunk(lle);
+    (void)new_chunk(lle);
     for(j=1;j<=m;j++)
       s=addii(s,(GEN)powz[mael(O,i,j)]);
     avma=av; /* HACK */

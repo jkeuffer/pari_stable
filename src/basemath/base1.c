@@ -747,7 +747,7 @@ nfiso0(GEN a, GEN b, long fliso)
     }
     y = gen_sort(y, 0, cmp_pol);
     settyp(y, t_VEC);
-    if (vb == 0) delete_var();
+    if (vb == 0) (void)delete_var();
   }
   lx = lg(y); if (lx==1) { avma=av; return gzero; }
   for (i=1; i<lx; i++)
