@@ -1262,7 +1262,8 @@ check_pointers(unsigned int ptrs, matcomp *init[])
     }
 }
 
-#define match_comma() if (matchcomma) match(','); else matchcomma = 1
+#define match_comma() \
+  do { if (matchcomma) match(','); else matchcomma = 1; } while (0);
 
 static void
 skipdecl(void)
