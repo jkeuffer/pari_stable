@@ -500,22 +500,31 @@ get_Selmer(GEN bnf, GEN cycgen, long rc)
   return concatsp(algtobasis(bnf,concatsp(fu,tu)), vecextract_i(cycgen,1,rc));
 }
 
-static GEN
+
+GEN
 lift_if_rational(GEN x)
 {
+  long lx, i;
   GEN y;
-  if (typ(x) != t_POLMOD) return x;
-  y = (GEN)x[2];
-  if (typ(y) == t_POL && degpol(y) > 0) return x;
-  return y;
+
+  switch(typ(x))
+  {
+    default: break;
+
+    case t_POLMOD:
+      y = (GEN)x[2];
+      if (typ(y) == t_POL && degpol(y) > 0) return x;
+      return y;
+  
+    case t_POL: lx = lgef(x);
+      for (i=2; i<lx; i++) x[i] = (long)lift_if_rational((GEN)x[i]);
+      break;
+    case t_VEC: case t_COL: case t_MAT: lx = lg(x);
+      for (i=1; i<lx; i++) x[i] = (long)lift_if_rational((GEN)x[i]);
+  }
+  return x;
 }
 
-static void
-pollift_if_rational(GEN x)
-{
-  long lx = lgef(x), i;
-  for (i=2; i<lx; i++) x[i] = (long)lift_if_rational((GEN)x[i]);
-}
 
 /* if all!=0, give all equations of degree 'all'. Assume bnr modulus is the
  * conductor */
@@ -1086,7 +1095,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
       {
         be = compute_beta(X, vecWB, gell, bnfz);
         P = compute_polrel(nfz, &T, be, g, ell);
-        pollift_if_rational(P);
+        P = lift_if_rational(P);
         if (DEBUGLEVEL>1) fprintferr("polrel(beta) = %Z\n", P);
         if (!all && gegal(subgroup, rnfnormgroup(bnr, P))) return P; /* DONE */
         res = concatsp(res, P);
