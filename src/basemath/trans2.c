@@ -1517,28 +1517,29 @@ cxlngamma(GEN x, long prec)
   setexpo(pitemp,1);/* now pitemp = Pi */
   addrrz((GEN)p4[1],p7, (GEN)p4[1]);
 
-  gaffect(ginv(gsqr(p2)), p3); e = gexpo(p3);
-
   p5 = cgetc(l2);
   setlg(p5[1], 4);
   setlg(p5[2], 4);
   p71 = cgetr(l2); p7 = bern(p);
   if (bernzone[2]>4) { setlg(p71,4); affrr(p7,p71); p7=p71; }
   p7 = divrs(p7, 2*p*(2*p-1)); gaffect(p7,p5);
+  p3 = ginv(gsqr(p2)); e = gexpo(p3);
 
   s=0; l1=4; av1=avma;
   for (k=p-1; k>0; k--)
   {
-    setlg(p3[1],l1); setlg(p3[2],l1);
+    setlg(p3[1], l1);
+    setlg(p3[2], l1);
     p6 = gmul(p3,p5); p7 = bern(k);
     if (bernzone[2]>l1) { setlg(p71,l1); affrr(p7,p71); p7=p71; }
     p7 = divrs(p7, (2*k)*(2*k-1));
     s -= e; l1 += (s>>TWOPOTBITS_IN_LONG); if (l1>l2) l1=l2;
     s &= (BITS_IN_LONG-1); p7 = addrr(p7, (GEN)p6[1]);
-    setlg(p5[1],l1); affrr(p7, (GEN)p5[1]); p7 = (GEN)p6[2];
-    setlg(p5[2],l1); affrr(p7, (GEN)p5[2]); avma=av1;
+    setlg(p5[1], l1); affrr(p7, (GEN)p5[1]); p7 = (GEN)p6[2];
+    setlg(p5[2], l1); affrr(p7, (GEN)p5[2]); avma=av1;
   }
-  setlg(p5[1],l2); setlg(p5[2],l2);
+  setlg(p5[1],l2);
+  setlg(p5[2],l2);
   p6 = gdiv(p5,p2); setlg(p6[1],l2); setlg(p6[2],l2);
   p4 = gadd(p4,p6); setlg(p4[1],l2); setlg(p4[2],l2);
 
