@@ -1,10 +1,9 @@
-This file refers to pari.el version 2.33
+This file refers to pari.el version 2.38
 
 Users that are used to previous versions should read the part concerning hooks.
-Also, one key-binging has been changed: M-RET (meta-return) is not linked
-anymore to 'gp-copy-input which copies the input at the end of the buffer
-but to 'gp-C-j which splits the line. The same effect can be obtained via
-C-j. The command 'gp-copy-input is available via M-c (meta-c).
+Also, one key-binging has been changed: M-RET (meta-return) does not copy
+the input at the end of the buffer but splits the line. The same effect can be
+obtained via C-j. The command 'gp-copy-input is available via M-c (meta-c).
 If your version of emacs is at least 20, then customization of most of the
 variables is now possible through the menu-bar.
 !! The variables 'gp-stack-size and 'gp-prime-limit are now *integers*.
@@ -73,7 +72,7 @@ line of your program be
 (In fact you can put anything on this first line, provided you include
 the string "-*-gp-script-*-").
 
-Common commands:
+Common commands (short description):
 
 KEY      LISP-NAME             DESCRIPTION
 ===      =========             ===========
@@ -146,9 +145,9 @@ M-n      gp-previous-cmd       Step to the previous command.
 C-n      next-line             Step to the next line.
 C-p      previous-line         Step to the previous line.
          gp-toggle             Exchange behaviour of C-p/M-p and C-n/M-n.
-C-kp-subtract
+C-kp-subtract (that's the Ctrl+"-" from the numerical keypad)
          gp-remove-last-output Erases last output.
-M-kp-subtract
+M-kp-subtract (that's the Meta+"-" from the numerical keypad)
          gp-remove-last-action Erases last input and its output.
 
 
@@ -169,7 +168,7 @@ C-u M-x gp gp-start-with-parameters
 C-u M-o                        Quit editing a completion file.
 
 Note that most of these commands use the emacs meta key.
-This may be marked `left' `right' `extended character'  `<>'
+This one may be marked `left' `right' `extended character'  `<>'
 or various other markings. If your keyboard has not got a meta key. You
 can use the escape key as a prefix.
 
@@ -291,6 +290,12 @@ Troubles may occur with "}". A "}" followed by a newline indicates the
 end of a function definition (starting with a "}"). Spaces ot tab-characters
 are *not* allowed there. So if you use "}" in a string, simply don't
 have it followed by a newline --- and pari.el won't get confused.
+
+If you usually use font-lock and not hilit19, some troubles may arise.
+In order to (most probably) prevent them, add the following lines
+to your .emacs file:
+
+  (setq hilit-mode-enable-list '(gp-mode gp-script-mode))
 
 NOTE: in order to set the colours, emacs has to be in charge from the
 moment you send a command until GP outputs an answer. Thus it will appear
@@ -446,7 +451,9 @@ file under the shape:
     ; To have mistakes displayed on a separate window:
     '(gp-no-separate-window-for-mistakes nil)
     ; To define GP-browser style (1, 2 or 3):
-    '(gp-browser-style 3))
+    '(gp-browser-style 3)
+    ; To set locked mode:
+    '(gp-locked-modep t))
   (custom-set-faces)
 
 Within  the customization-window, you should save these values for them
@@ -522,6 +529,21 @@ separate window.
 Alternatively, you can delete last output through the key C-kp-subtract
 (Control and the - from the numerical keypad), and all of last input and
 out via M-kp-subtract.
+
+===========================================================================
+
+LOCKED MODE:
+============
+
+While working with gp, it is often convenient to pick up a previous input
+and modify it. The trouble with this method is that the first input is
+destroyed and your file becomes less readable. You can use M-c to copy the
+input arounf the cursor to the end and then modify it, but you may be
+lazier than that... With the locked mode, any tentative modification of an
+earlier input will result in the copying of this input to the end of your
+file and the modification is carried out there. That's the meaning of the
+variable 'gp-locked-mode which is t (true) by default. You can set it to
+nil (false) if this behaviour is not what you expect.
 
 ===========================================================================
 Notes
@@ -609,6 +631,8 @@ Notes
               (setq gp-no-separate-window-for-mistakes nil)
               ; To define GP-browser style (1, 2 or 3):
               (setq gp-browser-style 3)
+              ; To set locked mode:
+              (setq gp-locked-modep t)
               )))
 
    A change in prompt, which has not gone to the .gprc (see below), *has to*
@@ -683,9 +707,10 @@ Notes
    a version of emacs below 20.3, the installation of the menu-bar item
    may be quite slow (some 20s on fast machines), while it is instantaneous
    with emacs 20.3 or higher. There may be troubles with XEmacs as far as
-   colors are concerned, nothing that I know of.
+   colors are concerned, but nothing that I know of.
 ===========================================================================
 
+  Modified: Olivier Ramare 1-July-2000 version 2.37 
   Modified: Olivier Ramare 29-October-1999 version 2.33 
   Modified: Olivier Ramare 4-September-1999 version 2.32.
   Modified: Olivier Ramare 23-June-1999 version 2.31.
@@ -694,4 +719,4 @@ Notes
   Modified: Karim Belabas 13-January-1998 version 2.19.
   Modified from the original file pari.txt written by David Carlisle
 
-  29-October-1999 version 2.33 (This file refers to pari.el version 2.33)
+  1-July-2000 version 2.38 (This file refers to pari.el version 2.38)
