@@ -55,7 +55,7 @@ constpi(long prec)
 #define k1  545140134
 #define k2  13591409
 #define k3  640320
-#define alpha2 (1.4722004/(BYTES_IN_LONG/4))  /* 3*log(k3/12)/(32*log(2)) */
+#define alpha2 (1.4722004/(BYTES_IN_LONG/4))  /* 3*log(k3/12) / log(2^BIL) */
 
   if (gpi && lg(gpi) >= prec) return;
 
@@ -69,14 +69,14 @@ constpi(long prec)
   p2 = addsi(k2, mulss(n,k1));
   p1 = itor(p2, prec);
 
-  /* initialisation longueur mantisse */
+  /* initialize mantissa length */
   if (prec>=4) l=4; else l=prec;
   setlg(p1,l); alpha=l;
 
   av2 = avma;
   while (n)
   {
-    if (n < CBRTVERYBIGINT)
+    if (n < CBRTVERYBIGINT) /* p3 = n1(n1-2)(n1-4) / n^3 */
       p3 = divrs(mulsr(n1-4,mulsr(n1*(n1-2),p1)),n*n*n);
     else
     {
@@ -86,14 +86,15 @@ constpi(long prec)
 	p3 = divrs(divrs(divrs(mulsr(n1-4,mulsr(n1,mulsr(n1-2,p1))),n),n),n);
     }
     p3 = divrs(divrs(p3,100100025), 327843840);
-    subisz(p2,k1,p2); subirz(p2,p3,p1);
-    alpha += alpha2; l = (long)(1+alpha); /* nouvelle longueur mantisse */
-    if (l>prec) l=prec;
+    subisz(p2,k1,p2);
+    subirz(p2,p3,p1);
+    alpha += alpha2; l = (long)(1+alpha); /* new mantissa length */
+    if (l > prec) l = prec;
     setlg(p1,l); avma = av2;
     n--; n1-=6;
   }
   p1 = divsr(53360,p1);
-  mulrrz(p1,gsqrt(stoi(k3),prec), tmppi);
+  mulrrz(p1,mpsqrt(stor(k3,prec)), tmppi);
   gunclone(gpi); avma = av1;  gpi = tmppi;
 }
 
