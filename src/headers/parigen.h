@@ -119,7 +119,7 @@ typedef int (*QSCOMP)(const void *, const void *);
 #define evalsigne(x)   (((long)(x)) << SIGNSHIFT)
 #define evalprecp(x)   (((long)(x)) << PRECPSHIFT)
 #define evalexpo(x)    (HIGHEXPOBIT + (x))
-#define evalvalp(x)    (HIGHVALPBIT + (x))
+#define m_evalvalp(x)  (HIGHVALPBIT + (x))
 #define evallgefint(x) (x)
 #define m_evallg(x)    (x)
 #define m_evallgef(x)  (x)

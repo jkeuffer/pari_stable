@@ -43,6 +43,7 @@ GEN    dvmdss(long x, long y, GEN *z);
 void   dvmdssz(long x, long y, GEN z, GEN t);
 ulong  evallg(ulong x);
 ulong  evallgef(ulong x);
+ulong  evalvalp(ulong x);
 #ifndef __M68K__
 long   expi(GEN x);
 #endif
@@ -94,6 +95,14 @@ evallgef(ulong x)
 {
   if (x & ~LGEFBITS) err(errlgef);
   return m_evallgef(x);
+}
+
+INLINE ulong
+evalvalp(ulong x)
+{
+  const long v = m_evalvalp(x);
+  if (v & ~VALPBITS) err(errvalp);
+  return v;
 }
 
 INLINE GEN
