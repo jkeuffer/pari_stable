@@ -1406,6 +1406,13 @@ long    FqX_nbfact(GEN u, GEN T, GEN p);
 long    FqX_nbroots(GEN f, GEN T, GEN p);
 GEN     FpX_rand(long d, long v, GEN p);
 GEN     FpX_roots(GEN f, GEN p);
+GEN     RM_to_RXV(GEN x, long v);
+GEN     RM_to_RXX(GEN x, long v,long w);
+GEN     RV_to_RX(GEN x, long v);
+GEN     RX_to_RV(GEN x, long N);
+GEN     RXV_to_RM(GEN v, long n);
+GEN     RXX_to_RM(GEN v, long n);
+GEN     RXY_swap(GEN x, long n, long w);
 GEN     apprgen(GEN f, GEN a);
 GEN     apprgen9(GEN f, GEN a);
 GEN     factcantor(GEN x, GEN p);
@@ -1418,14 +1425,10 @@ GEN     factorpadic4(GEN x, GEN p, long r);
 GEN     ffinit(GEN p,long n, long v);
 int     gdvd(GEN x, GEN y);
 long    hensel_lift_accel(long n, long *pmask);
-GEN     mat_to_polpol(GEN x, long v,long w);
-GEN     mat_to_vecpol(GEN x, long v);
 GEN     padicsqrtnlift(GEN a, GEN n, GEN S, GEN p, long e);
-GEN     pol_to_vec(GEN x, long N);
 int     poldvd(GEN x, GEN y, GEN *z);
 GEN     poldivrem(GEN x, GEN y, GEN *pr);
 GEN     poldivrem_i(GEN x, GEN y, GEN *pr, long vx);
-GEN     polpol_to_mat(GEN v, long n);
 GEN     rootmod(GEN f, GEN p);
 GEN     rootmod0(GEN f, GEN p,long flag);
 GEN     rootmod2(GEN f, GEN p);
@@ -1436,9 +1439,6 @@ GEN     rootpadicliftroots(GEN f, GEN S, GEN q, long e);
 GEN     roots2(GEN pol,long PREC);
 GEN     rootsold(GEN x, long l);
 GEN     simplefactmod(GEN f, GEN p);
-GEN     swap_polpol(GEN x, long n, long w);
-GEN     vec_to_pol(GEN x, long v);
-GEN     vecpol_to_mat(GEN v, long n);
 
 /* polarit2.c */
 

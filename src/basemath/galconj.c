@@ -201,7 +201,7 @@ vandermondeinverse(GEN L, GEN T, GEN den, GEN prep)
   for (i = 1; i <= n; i++)
   {
     P = gdiv(gdeuc(T, gsub(polx[x], (GEN) L[i])), (GEN) prep[i]);
-    M[i] = (long)pol_to_vec(P,n);
+    M[i] = (long)RX_to_RV(P,n);
   }
   return gerepileupto(ltop, gmul(den, M));
 }

@@ -988,7 +988,7 @@ nf_to_Zq(GEN x, GEN T, GEN pk, GEN pks2, GEN proj)
   if (typ(x) != t_COL) return centermodii(x, pk, pks2);
   y = gmul(proj, x);
   if (!T) return centermodii(y, pk, pks2);
-  y = vec_to_pol(y, varn(T));
+  y = RV_to_RX(y, varn(T));
   return centermod_i(FpX_rem(y, T, pk), pk, pks2);
 }
 

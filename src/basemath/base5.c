@@ -265,14 +265,14 @@ makenfabs(GEN rnf)
 
   M = modulereltoabs(rnf, (GEN)rnf[7]);
   n = lg(M)-1;
-  M = vecpol_to_mat(Q_remove_denom(M, &d), n);
+  M = RXV_to_RM(Q_remove_denom(M, &d), n);
   if (d) M = gdiv(hnfcenter_ip(hnfmodid(M, d)), d);
   else   M = idmat(n);
 
   NF[1] = (long)pol;
   NF[3] = (long)mulii(gpowgs((GEN)nf[3], degpol(rnf[1])),
                       idealnorm(nf, (GEN)rnf[3]));
-  NF[7] = (long)lift_intern( mat_to_vecpol(M,varn(pol)) );
+  NF[7] = (long)lift_intern( RM_to_RXV(M,varn(pol)) );
   NF[8] = (long)linvmat(M);
   NF[9] = (long)get_mul_table(pol, (GEN)NF[7], (GEN)NF[8]);
   /* possibly wrong, but correct prime divisors [for primedec] */
@@ -307,7 +307,7 @@ rnfinitalg(GEN nf, GEN pol, long prec)
 
   bas = rnfallbase(nf,pol, &D,&d, &f);
   B = matbasistoalg(nf,(GEN)bas[1]);
-  bas[1] = (long)lift_if_rational( mat_to_vecpol(B,vpol) );
+  bas[1] = (long)lift_if_rational( RM_to_RXV(B,vpol) );
   delta = cgetg(3,t_VEC);
   delta[1] = (long)D;
   delta[2] = (long)d;

@@ -515,7 +515,7 @@ FpX_Berlekamp_ker(GEN u, GEN p)
   w = v = FpXQ_pow(polx[varn(u)],p,u,p);
   for (j=2; j<=N; j++)
   {
-    p1 = pol_to_vec(w, N);
+    p1 = RX_to_RV(w, N);
     p1[j] = laddis((GEN)p1[j], -1);
     Q[j] = (long)p1;
     if (j < N)
@@ -537,7 +537,7 @@ FqX_Berlekamp_ker(GEN u, GEN T, GEN q, GEN p)
   w = v = FpXQYQ_pow(polx[varn(u)], q, u, T, p);
   for (j=2; j<=N; j++)
   {
-    p1 = pol_to_vec(w, N);
+    p1 = RX_to_RV(w, N);
     p1[j] = laddgs((GEN)p1[j], -1);
     Q[j] = (long)p1;
     if (j < N)
@@ -1084,7 +1084,7 @@ col_to_ff(GEN x, long v)
 }
 
 GEN
-vec_to_pol(GEN x, long v)
+RV_to_RX(GEN x, long v)
 {
   long i, k = lg(x);
   GEN p;
@@ -1099,7 +1099,7 @@ vec_to_pol(GEN x, long v)
 
 /* return the (N-dimensional) vector of coeffs of p */
 GEN
-pol_to_vec(GEN x, long N)
+RX_to_RV(GEN x, long N)
 {
   long i, l;
   GEN z = cgetg(N+1,t_COL);
@@ -1117,54 +1117,52 @@ pol_to_vec(GEN x, long N)
 
 /* vector of polynomials (in v) whose coeffs are given by the columns of x */
 GEN
-mat_to_vecpol(GEN x, long v)
+RM_to_RXV(GEN x, long v)
 {
   long j, lx = lg(x);
   GEN y = cgetg(lx, t_VEC);
-  for (j=1; j<lx; j++) y[j] = (long)vec_to_pol((GEN)x[j], v);
+  for (j=1; j<lx; j++) y[j] = (long)RV_to_RX((GEN)x[j], v);
   return y;
 }
 
 /* matrix whose entries are given by the coeffs of the polynomials in
  * vector v (considered as degree n-1 polynomials) */
 GEN
-vecpol_to_mat(GEN v, long n)
+RXV_to_RM(GEN v, long n)
 {
   long j, N = lg(v);
   GEN y = cgetg(N, t_MAT);
-  if (typ(v) != t_VEC) err(typeer,"vecpol_to_mat");
-  for (j=1; j<N; j++) y[j] = (long)pol_to_vec((GEN)v[j], n);
+  for (j=1; j<N; j++) y[j] = (long)RX_to_RV((GEN)v[j], n);
   return y;
 }
 
 /* polynomial (in v) of polynomials (in w) whose coeffs are given by the columns of x */
 GEN
-mat_to_polpol(GEN x, long v,long w)
+RM_to_RXX(GEN x, long v,long w)
 {
   long j, lx = lg(x);
   GEN y = cgetg(lx+1, t_POL);
   y[1]=evalsigne(1) | evalvarn(v);
   y++;
-  for (j=1; j<lx; j++) y[j] = (long)vec_to_pol((GEN)x[j], w);
+  for (j=1; j<lx; j++) y[j] = (long)RV_to_RX((GEN)x[j], w);
   return normalizepol_i(--y, lx+1);
 }
 
 /* matrix whose entries are given by the coeffs of the polynomial v in
  * two variables (considered as degree n polynomials) */
 GEN
-polpol_to_mat(GEN v, long n)
+RXX_to_RM(GEN v, long n)
 {
   long j, N = lg(v)-1;
   GEN y = cgetg(N, t_MAT);
-  if (typ(v) != t_POL) err(typeer,"polpol_to_mat");
   v++;
-  for (j=1; j<N; j++) y[j] = (long)pol_to_vec((GEN)v[j], n);
+  for (j=1; j<N; j++) y[j] = (long)RX_to_RV((GEN)v[j], n);
   return y;
 }
 
 /* P(X,Y) --> P(Y,X), n-1 is the degree in Y */
 GEN
-swap_polpol(GEN x, long n, long w)
+RXY_swap(GEN x, long n, long w)
 {
   long j, lx = lg(x), ly = n+3;
   long v=varn(x);
@@ -1245,7 +1243,7 @@ FpX_split_Berlekamp(GEN *t, GEN p)
   else
   {
     vker = FpX_Berlekamp_ker(u,p);
-    vker = mat_to_vecpol(vker,vu);
+    vker = RM_to_RXV(vker,vu);
   }
   d = lg(vker)-1;
   po2 = shifti(p, -1); /* (p-1) / 2 */
@@ -1347,7 +1345,7 @@ FqX_split_Berlekamp(GEN *t, GEN q, GEN T, GEN p)
   long d, i, ir, L, la, lb;
 
   vker = FqX_Berlekamp_ker(u,T,q,p);
-  vker = mat_to_vecpol(vker,vu);
+  vker = RM_to_RXV(vker,vu);
   d = lg(vker)-1;
   qo2 = shifti(q, -1); /* (q-1) / 2 */
   pol = cgetg(N+3,t_POL);
@@ -2053,7 +2051,7 @@ padicff(GEN x,GEN p,long pr)
   bas = nfbasis(x, &dK, 0, fa);
   nf[3] = (long)dK;
   nf[4] = dvdii( diviiexact(dx, dK), p )? (long)p: un;
-  invbas = QM_inv(vecpol_to_mat(bas,n), gun);
+  invbas = QM_inv(RXV_to_RM(bas,n), gun);
   mul = get_mul_table(x,bas,invbas);
   nf[7]=(long)bas;
   nf[8]=(long)invbas;

@@ -1024,11 +1024,11 @@ FpXYQQ_redswap(GEN x, GEN S, GEN T, GEN p)
   long n=degpol(S);
   long m=degpol(T);
   long v=varn(T),w=varn(S);
-  GEN V = swap_polpol(x,n,w);
+  GEN V = RXY_swap(x,n,w);
   setvarn(T,w);
   V = FpXQX_red(V,T,p);
   setvarn(T,v);
-  V = swap_polpol(V,m,w);
+  V = RXY_swap(V,m,w);
   return gerepilecopy(ltop,V); 
 }
 static GEN
@@ -1439,7 +1439,7 @@ GEN FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zetan)
 GEN
 FpXQ_matrix_pow(long n, long m, GEN y, GEN P, GEN l)
 {
-  return vecpol_to_mat(FpXQ_powers(y,m-1,P,l),n);
+  return RXV_to_RM(FpXQ_powers(y,m-1,P,l),n);
 }
 
 GEN
@@ -1467,12 +1467,12 @@ FpM_Frobenius(GEN M, long r, GEN p, long v)
   GEN W, V = cgetg(r+2,t_VEC);
   long i;
   V[1] = (long) polx[v]; if (!r) return V;
-  V[2] = (long) vec_to_pol((GEN)M[2],v);
+  V[2] = (long) RV_to_RX((GEN)M[2],v);
   W = (GEN)M[2];
   for (i = 3; i <= r+1; ++i)
   {
     W = FpM_FpV_mul(M,W,p);
-    V[i] = (long) vec_to_pol(W,v);
+    V[i] = (long) RV_to_RX(W,v);
   }
   return V;
 }
@@ -1511,7 +1511,7 @@ FpXQV_FpX_Frobenius(GEN V, GEN P, GEN T, GEN p)
   GEN M,W,Mi;
   GEN *gptr[2];
   long lV=lg(V);
-  GEN  PV=pol_to_vec(P, lgpol(P));
+  GEN  PV=RX_to_RV(P, lgpol(P));
   M=cgetg(l+1,t_VEC);
   M[1]=(long)scalarpol(poleval(P,gun),v);
   M[2]=(long)FpXV_FpV_innerprod(V,PV,p);
@@ -1533,7 +1533,7 @@ FpXQV_FpX_Frobenius(GEN V, GEN P, GEN T, GEN p)
     btop=(pari_sp)W;
     M[i]=(long)Mi;
   }
-  return vecpol_to_mat(M,l);
+  return RXV_to_RM(M,l);
 }
 
 static GEN
@@ -1582,7 +1582,7 @@ FpM_Frobenius_pow(GEN M, long d, GEN T, GEN p)
   long i,l=degpol(T);
   GEN R, W = (GEN) M[2];
   for (i = 2; i <= d; ++i) W = FpM_FpV_mul(M,W,p);
-  R=FpXQ_matrix_pow(l,l,vec_to_pol(W,varn(T)),T,p);
+  R=FpXQ_matrix_pow(l,l,RV_to_RX(W,varn(T)),T,p);
   return gerepilecopy(ltop,R);
 }
 
@@ -1634,7 +1634,7 @@ intersect_ker(GEN P, GEN MA, GEN U, GEN l)
          gmul((GEN)U[i+2],(GEN)R[r])),l);
   R=gtrans_i(R);
   for(i=1;i<lg(R);i++)
-    R[i]=(long)vec_to_pol((GEN)R[i],vu);
+    R[i]=(long)RV_to_RX((GEN)R[i],vu);
   A=gtopolyrev(R,vp);
   return gerepileupto(ltop,A);
 }
@@ -1685,12 +1685,12 @@ Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       if (lg(A)!=2)
 	err(talker,"ZZ_%Z[%Z]/(%Z) is not a field in Fp_intersect"
 	    ,l,polx[vp],P);
-      A=vec_to_pol((GEN)A[1],vp);
+      A=RV_to_RX((GEN)A[1],vp);
       B=FpM_ker(gaddmat(z, MB),l);
       if (lg(B)!=2)
 	err(talker,"ZZ_%Z[%Z]/(%Z) is not a field in Fp_intersect"
 	    ,l,polx[vq],Q);
-      B=vec_to_pol((GEN)B[1],vq);
+      B=RV_to_RX((GEN)B[1],vq);
       if (DEBUGLEVEL>=4) msgtimer("FpM_ker");
       An=(GEN) FpXQ_pow(A,ipg,P,l)[2];
       Bn=(GEN) FpXQ_pow(B,ipg,Q,l)[2];
@@ -1754,7 +1754,7 @@ Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
 	for(;i<=np;i++) VP[i]=zero;
       }
       Ap=FpM_invimage(MA,VP,l);
-      Ap=vec_to_pol(Ap,vp);
+      Ap=RV_to_RX(Ap,vp);
       if (j)
       {
 	By=FpXQ_mul(By,FpXQ_pow(Bp,lmun,Q,l),Q,l);
@@ -1762,7 +1762,7 @@ Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
 	for(;i<=nq;i++) VQ[i]=zero;
       }
       Bp=FpM_invimage(MB,VQ,l);
-      Bp=vec_to_pol(Bp,vq);
+      Bp=RV_to_RX(Bp,vq);
       if (DEBUGLEVEL>=4) msgtimer("FpM_invimage");
     }
   }/*FpX_add is not clean, so we must do it *before* lbot=avma*/
@@ -1804,11 +1804,11 @@ Fp_factorgalois(GEN P,GEN l, long d, long w, GEN MP)
   Tl=gcopy(P); setvarn(Tl,w);
   V=cgetg(m+1,t_VEC);
   V[1]=lpolx[w];
-  z=pol_to_vec((GEN)V[1],n);
+  z=RX_to_RV((GEN)V[1],n);
   for(k=2;k<=m;k++)
   {
     z=FpM_FpV_mul(M,z,l);
-    V[k]=(long)vec_to_pol(z,w);
+    V[k]=(long)RV_to_RX(z,w);
   }
   if (DEBUGLEVEL>=4) msgtimer("Fp_factorgalois: roots");
   R=FqV_roots_to_pol(V,Tl,l,v);
@@ -1864,7 +1864,7 @@ Fp_factor_irred(GEN P, GEN Q, GEN l)
   }
   else
   {
-    E = polpol_to_mat(E,np);
+    E = RXX_to_RM(E,np);
     MP= FpXQ_matrix_pow(np,d,SP,P,l);
     IR= (GEN)FpM_indexrank(MP,l)[1];
     E = rowextract_p(E, IR);
@@ -1881,7 +1881,7 @@ Fp_factor_irred(GEN P, GEN Q, GEN l)
       V[i]=(long)FpM_mul(FQ,(GEN)V[i-1],l);
     res = cgetg(d+1,t_COL);
     for(i=1;i<=d;i++)
-      res[i]=(long)mat_to_polpol((GEN)V[i],vp,vq);
+      res[i]=(long)RM_to_RXX((GEN)V[i],vp,vq);
   }
   if (DEBUGLEVEL>=4) msgtimer("factor_irred");
   return gerepilecopy(ltop,res);

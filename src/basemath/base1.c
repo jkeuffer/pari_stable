@@ -1153,7 +1153,7 @@ nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec)
   mat[1] = (long)F.M;
   mat[2] = (long)F.G;
 
-  invbas = QM_inv(vecpol_to_mat(T->bas, lg(T->bas)-1), gun);
+  invbas = QM_inv(RXV_to_RM(T->bas, lg(T->bas)-1), gun);
   nf[8] = (long)invbas;
   nf[9] = (long)get_mul_table(x, F.basden, invbas);
   if (DEBUGLEVEL) msgtimer("mult. table");
@@ -1182,7 +1182,7 @@ static GEN
 hnffromLLL(GEN nf)
 {
   GEN d, x;
-  x = vecpol_to_mat((GEN)nf[7], degpol(nf[1]));
+  x = RXV_to_RM((GEN)nf[7], degpol(nf[1]));
   x = Q_remove_denom(x, &d);
   if (!d) return x; /* power basis */
   return gauss(hnfmodid(x, d), x);
@@ -1391,11 +1391,11 @@ nfpolred(int part, nfbasic_t *T)
   if (DEBUGLEVEL>1) fprintferr("xbest = %Z\n",xbest);
   rev = modreverse_i(phi, x);
   for (i=1; i<=n; i++) a[i] = (long)RX_RXQ_compo((GEN)a[i], rev, xbest);
-  mat = vecpol_to_mat(Q_remove_denom(a, &d), n);
+  mat = RXV_to_RM(Q_remove_denom(a, &d), n);
   if (d) mat = gdiv(hnfmodid(mat,d), d); else mat = idmat(n);
 
   (void)carrecomplet(diviiexact(dxbest,T->dK), &(T->index));
-  T->bas= mat_to_vecpol(mat, v);
+  T->bas= RM_to_RXV(mat, v);
   T->dx = dxbest;
   T->x  = xbest; return rev;
 }
@@ -1405,7 +1405,7 @@ get_nfindex(GEN bas)
 {
   pari_sp av = avma;
   long n = lg(bas)-1;
-  GEN d, mat = vecpol_to_mat(Q_remove_denom(bas, &d), n);
+  GEN d, mat = RXV_to_RM(Q_remove_denom(bas, &d), n);
   if (!d) { avma = av; return gun; }
   return gerepileuptoint(av, diviiexact(gpowgs(d, n), det(mat)));
 }
@@ -1434,9 +1434,9 @@ nfbasic_init(GEN x, long flag, GEN fa, nfbasic_t *T)
     GEN mat;
     bas = (GEN)x[2]; x = (GEN)x[1];
     if (typ(bas) == t_MAT)
-      { mat = bas; bas = mat_to_vecpol(mat,varn(x)); }
+      { mat = bas; bas = RM_to_RXV(mat,varn(x)); }
     else
-        mat = vecpol_to_mat(bas, lg(bas)-1);
+        mat = RXV_to_RM(bas, lg(bas)-1);
     index = get_nfindex(bas);
     dx = ZX_disc(x);
     dK = diviiexact(dx, sqri(index));
@@ -2050,7 +2050,7 @@ polredabs0(GEN x, long flag)
     y = storepol(x, y, a, T.lead, flag);
     if (flag & nf_ADDZK)
     {
-      GEN t, y0 = y, B = vecpol_to_mat(T.bas, lg(T.bas)-1);
+      GEN t, y0 = y, B = RXV_to_RM(T.bas, lg(T.bas)-1);
       t = (flag & nf_ORIG)? lift_intern((GEN)y[2]): modreverse_i(a, x);
       y = cgetg(3, t_VEC);
       y[1] = (long)y0;

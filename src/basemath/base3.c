@@ -691,7 +691,7 @@ GEN
 _algtobasis_cp(GEN nf, GEN x)
 { return typ(x) == t_COL? gcopy(x): algtobasis(nf, x); }
 
-/* gmul(A, pol_to_vec(x)), A t_MAT (or t_VEC) of compatible dimensions */
+/* gmul(A, RX_to_RV(x)), A t_MAT (or t_VEC) of compatible dimensions */
 GEN
 mulmat_pol(GEN A, GEN x)
 {

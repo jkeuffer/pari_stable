@@ -4472,7 +4472,7 @@ nfgcd(GEN P, GEN Q, GEN nf, GEN den)
       if (dR == 0) return scalarpol(gun, x);
       if (mod && dR > dM) continue; /* p divides Res(P/gcd, Q/gcd). Discard. */
 
-      R = polpol_to_mat(R, d);
+      R = RXX_to_RM(R, d);
       /* previous primes divided Res(P/gcd, Q/gcd)? Discard them. */
       if (!mod || dR < dM) { M = R; mod = stoi(p); dM = dR; continue; }
       if (low_stack(st_lim, stack_lim(btop, 1)))
@@ -4488,7 +4488,7 @@ nfgcd(GEN P, GEN Q, GEN nf, GEN den)
       /* I suspect it must be better to take amax > bmax*/
       bo = racine(shifti(mod, -1));
       if ((sol = matratlift(M, mod, bo, bo, den)) == NULL) continue;
-      sol = mat_to_polpol(sol,x,y);
+      sol = RM_to_RXX(sol,x,y);
       dsol = primpart(sol);
       if (gcmp0(pseudorem_i(P, dsol, nf))
        && gcmp0(pseudorem_i(Q, dsol, nf))) break;

@@ -1196,7 +1196,7 @@ polzagreel(long n, long m, long prec)
       g[d-k+j] = lmpadd((GEN)g[d-k+j], mulri(b,(GEN)v[d-k+j]));
     g[d-k] = (long)b;
   }
-  g = gmul(vec_to_pol(g,0), gpowgs(Bx,r));
+  g = gmul(RV_to_RX(g,0), gpowgs(Bx,r));
   for (j=0; j<=r; j++)
   {
     if (j) g = derivpol(g);

@@ -344,7 +344,7 @@ static GEN
 downtoK(toK_s *T, GEN x)
 {
   long degKz = lg(T->invexpoteta1) - 1;
-  GEN y = gmul(T->invexpoteta1, pol_to_vec(lift(x), degKz));
+  GEN y = gmul(T->invexpoteta1, RX_to_RV(lift(x), degKz));
   return gmodulcp(gtopolyrev(y,varn(T->polnf)), T->polnf);
 }
 
@@ -677,7 +677,7 @@ Stelt(GEN nf, GEN id, GEN polrel)
     I[i] = (long)matid;
   }
   x = cgetg(3,t_VEC);
-  x[1] = (long)vecpol_to_mat(A, degpol(polrel));
+  x[1] = (long)RXV_to_RM(A, degpol(polrel));
   x[2] = (long)I;
   return prodid(nf, (GEN)nfhermite(nf,x)[2]);
 }
@@ -1013,7 +1013,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   /* step 8 */
   if (DEBUGLEVEL>2) fprintferr("Step 8\n");
   p1 = RXQ_powers(lift_intern(COMPO.p), COMPO.R, degK-1);
-  p1 = vecpol_to_mat(p1, degKz);
+  p1 = RXV_to_RM(p1, degKz);
   T.invexpoteta1 = invmat(p1); /* left inverse */
   T.polnf = polnf;
   T.tau = tau;
