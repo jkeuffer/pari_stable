@@ -2753,9 +2753,147 @@ primitive_part(GEN x, GEN *ptc)
 }
 
 GEN
-primpart(GEN x)
+Q_primitive_part(GEN x, GEN *ptc)
 {
-  return primitive_part(x, NULL);
+  GEN c = content(x);
+  if (gcmp1(c)) c = NULL; else x = Q_div_to_int(x,c);
+  if (ptc) *ptc = c;
+  return x;
+}
+
+GEN
+primpart(GEN x) { return primitive_part(x, NULL); }
+
+GEN
+Q_primpart(GEN x) { return Q_primitive_part(x, NULL); }
+
+static GEN
+_rd(GEN a, GEN d)
+{
+  long t = typ(a);
+  if (t == t_INT) a = mulii(a,d);
+  else
+  { /* t_FRAC: x/y */
+    GEN x = (GEN)a[1], y = (GEN)a[2];
+    gpmem_t av = avma;
+    if (t != t_FRAC) err(typeer,"remove_denom");
+    a = mulii(x, diviiexact(d, y));
+    a = gerepileuptoint(av, a);
+  }
+  return a;
+}
+
+/* return a * d/n. a: rational; d,n,result: integral. NULL represents 1 */
+static GEN
+_rc(GEN a, GEN n, GEN d)
+{
+  long t = typ(a);
+  gpmem_t av = avma;
+  if (t == t_INT)
+  {
+    a = diviiexact(a,n);
+    if (d) a = gerepileuptoint(av, mulii(a,d));
+  }
+  else
+  { /* t_FRAC: x/y --> d != NULL */
+    GEN x = (GEN)a[1], y = (GEN)a[2];
+    if (t != t_FRAC) err(typeer,"Q_div_to_int");
+    a = mulii(diviiexact(x, n), diviiexact(d, y));
+    a = gerepileuptoint(av, a);
+  }
+  return a;
+}
+
+/* return y = x * d, assuming x rationnal, and d,y integral */
+GEN
+Q_remove_denom(GEN x, GEN d)
+{
+  long i, j, h, l;
+  GEN y;
+  
+  if (typ(d) != t_INT) err(typeer,"Q_remove_denom");
+
+  switch (typ(x))
+  {
+    case t_VEC: case t_COL: l = lg(x);
+      y = cgetg(l, typ(x));
+      for (i=1; i<l; i++)
+        y[i] = (long)_rd((GEN)x[i], d);
+      break;
+
+    case t_POL: l = lgef(x);
+      y = cgetg(l, typ(x)); y[1] = x[1];
+      for (i=2; i<l; i++)
+        y[i] = (long)_rd((GEN)x[i], d);
+      break;
+
+    case t_MAT: l = lg(x);
+      y = cgetg(l, t_MAT);
+      if (l == 1) break;
+      h = lg(x[1]);
+      for (j=1; j<l; j++)
+      {
+        GEN c = (GEN)x[j], C = cgetg(h,t_COL);
+        for (i=1; i<l; i++) C[i] = (long)_rd((GEN)c[i], d);
+        y[j] = (long)C;
+      }
+      break;
+
+    default: err(typeer,"Q_div_to_int");
+      y = NULL; /* not reached */
+  }
+  return y;
+}
+
+/* return y = x / c, assuming x,c rationnal, and y integral */
+GEN
+Q_div_to_int(GEN x, GEN c)
+{
+  long i, j, h, l, t = typ(c);
+  GEN d, n, y;
+
+  if (t == t_INT)
+  {
+    n = c;
+    d = NULL;
+  }
+  else
+  {
+    if (t != t_FRAC) err(typeer,"Q_div_to_int");
+    n = (GEN)c[1];
+    d = (GEN)c[2]; if (is_pm1(n)) return Q_remove_denom(x,d);
+  }
+
+  switch(typ(x))
+  {
+    case t_VEC: case t_COL: l = lg(x);
+      y = cgetg(l, typ(x));
+      for (i=1; i<l; i++)
+        y[i] = (long)_rc((GEN)x[i], n,d);
+      break;
+
+    case t_POL: l = lgef(x);
+      y = cgetg(l, typ(x)); y[1] = x[1];
+      for (i=2; i<l; i++)
+        y[i] = (long)_rc((GEN)x[i], n,d);
+      break;
+
+    case t_MAT: l = lg(x);
+      y = cgetg(l, t_MAT);
+      if (l == 1) break;
+      h = lg(x[1]);
+      for (j=1; j<l; j++)
+      {
+        GEN c = (GEN)x[j], C = cgetg(h,t_COL);
+        for (i=1; i<l; i++) C[i] = (long)_rc((GEN)c[i], n,d);
+        y[j] = (long)C;
+      }
+      break;
+
+    default: err(typeer,"Q_div_to_int");
+      y = NULL; /* not reached */
+  }
+  return y;
 }
 
 /*******************************************************************/

@@ -1158,6 +1158,10 @@ GEN     vecpol_to_mat(GEN v, long n);
 
 /* polarit2.c */
 
+GEN     Q_div_to_int(GEN x, GEN c);
+GEN     Q_remove_denom(GEN x, GEN d);
+GEN     Q_primitive_part(GEN x, GEN *ptc);
+GEN     Q_primpart(GEN x);
 GEN     bezoutpol(GEN a, GEN b, GEN *u, GEN *v);
 GEN     centermod(GEN x, GEN p);
 GEN     centermodii(GEN x, GEN p, GEN po2);

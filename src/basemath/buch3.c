@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 extern GEN colreducemodHNF(GEN x, GEN y, GEN *Q);
 extern GEN famat_to_nf_modideal_coprime(GEN nf, GEN g, GEN e, GEN id);
+extern GEN famat_to_nf_modidele(GEN nf, GEN g, GEN e, GEN bid);
 extern GEN makeprimetoideal(GEN nf,GEN UV,GEN uv,GEN x);
 extern GEN check_and_build_cycgen(GEN bnf);
 extern GEN gmul_mat_smallvec(GEN x, GEN y);
@@ -152,46 +153,16 @@ buchnarrow(GEN bnf)
   v[3] = (long)basecl; return gerepilecopy(av, v);
 }
 
-static GEN
-compute_fact(GEN nf, GEN u1, GEN gen)
-{
-  GEN p1, G, basecl;
-  long prec,i,j, l = lg(u1), h = lg(u1[1]); /* l > 1 */
+/********************************************************************/
+/**                                                                **/
+/**                  REDUCTION MOD IDELE                           **/
+/**                                                                **/
+/********************************************************************/
 
-  basecl = cgetg(l,t_VEC);
-  prec = nfgetprec(nf);
-  G = cgetg(3,t_VEC);
-  G[2] = lgetg(1,t_MAT);
-  for (j=1; j<l; j++)
-  {
-    GEN g, z = NULL;
-    for (i=1; i<h; i++)
-    {
-      p1 = gcoeff(u1,i,j);
-      if (!signe(p1)) continue;
-
-      g = (GEN)gen[i];
-      if (typ(g) != t_MAT)
-      {
-        G[1] = un;
-        G[2] = (long)to_famat_all(g, gun);
-      }
-      else
-      {
-        G[1] = (long)g;
-        G[2] = lgetg(1,t_MAT);
-      }
-      g = G;
-      p1 = idealpowred(nf,g,p1,prec);
-      z = z? idealmulred(nf,z,p1,prec): p1;
-    } 
-    basecl[j] = (long)z;
-  }
-  return basecl;
-}
-
+/* "compare" two nf elt. Goal is to quickly sort for uniqueness of
+ * representation, not uniqueness of represented element ! */
 static int
-mycmp(GEN x, GEN y)
+elt_cmp(GEN x, GEN y)
 {
   long tx = typ(x), ty = typ(y);
   if (ty == tx)
@@ -208,7 +179,7 @@ famat_reduce(GEN fa)
   if (lg(fa) == 1) return trivfact();
   g = (GEN)fa[1]; l = lg(g);
   e = (GEN)fa[2];
-  L = gen_sort(g, cmp_IND|cmp_C, &mycmp);
+  L = gen_sort(g, cmp_IND|cmp_C, &elt_cmp);
   G = cgetg(l, t_COL);
   E = cgetg(l, t_COL);
   for (k=i=1; i<l; i++,k++) 
@@ -224,6 +195,48 @@ famat_reduce(GEN fa)
   F = cgetg(3, t_MAT);
   setlg(G, k); F[1] = (long)G;
   setlg(E, k); F[2] = (long)E; return F;
+}
+
+static GEN
+compute_fact(GEN nf, GEN u1, GEN gen)
+{
+  GEN G, basecl;
+  long prec,i,j, l = lg(u1), h = lg(u1[1]); /* l > 1 */
+
+  basecl = cgetg(l,t_VEC);
+  prec = nfgetprec(nf);
+  G = cgetg(3,t_VEC);
+  G[2] = lgetg(1,t_MAT);
+
+  for (j=1; j<l; j++)
+  {
+    GEN g,e, z = NULL;
+    for (i=1; i<h; i++)
+    {
+      e = gcoeff(u1,i,j); if (!signe(e)) continue;
+
+      g = (GEN)gen[i];
+      if (typ(g) != t_MAT)
+      {
+        if (z) 
+          z[2] = (long)arch_mul((GEN)z[2], to_famat_all(g, e));
+        else
+        {
+          z = cgetg(3,t_VEC);
+          z[1] = 0;
+          z[2] = (long)to_famat_all(g, e);
+        }
+        continue;
+      }
+
+      G[1] = (long)g;
+      g = idealpowred(nf,G,e,prec);
+      z = z? idealmulred(nf,z,g,prec): g;
+    }
+    z[2] = (long)famat_reduce((GEN)z[2]);
+    basecl[j] = (long)z;
+  }
+  return basecl;
 }
 
 /* given two coprime integral ideals x and f (f HNF), compute "small"
@@ -292,11 +305,94 @@ anti_unif_mod_f(GEN nf, GEN pr, GEN sqf)
   }
 }
 
+/* write x = x1 x2, x2 maximal s.t. (x2,f) = 1, return x2 */
 static GEN
-compute_gen(GEN nf, GEN u1, GEN gen, GEN bid)
+coprime_part(GEN x, GEN f)
+{
+  for (;;)
+  {
+    f = mppgcd(x, f); if (is_pm1(f)) break;
+    x = diviiexact(x, f);
+  }
+  return x;
+}
+
+/* x t_INT, f ideal. Write x = x1 x2, x2 maximal s.t. (x2,f) = 1, return x2 */
+static GEN
+nf_coprime_part(GEN nf, GEN x, GEN f, GEN *listpr)
+{
+  long v, j, lp = lg(listpr);
+  GEN x2, ex, p, pr;
+
+#if 0 /*1) via many gcds. Expensive ! */
+  f = hnfmodid(f, x); /* first gcd is less expensive since x in Z */
+  x = gscalmat(x, degpol(nf[1]));
+  for (;;)
+  {
+    if (gcmp1(gcoeff(f,1,1))) break;
+    x = idealdivexact(nf, x, f);
+    f = hnfmodid(concatsp(f,x), gcoeff(x,1,1)); /* gcd(f,x) */
+  }
+  x2 = x;
+#else /*2) from prime decomposition */
+  x2 = NULL;
+  for (j=1; j<lp; j++)
+  {
+    pr = listpr[j]; p = (GEN)pr[1];
+    v = ggval(x, p); if (!v) continue;
+
+    ex = mulsi(v, (GEN)pr[3]); /* = v_pr(x) > 0 */
+    x2 = x2? idealmulpowprime(nf, x2, pr, ex)
+           : idealpow(nf, pr, ex);
+  }
+#endif
+  return x2;
+}
+
+/* L0 in K, (L0,f) = 1. Return L integral, L = L0 mod f */
+static GEN
+make_integral(GEN nf, GEN L0, GEN f, GEN *listpr)
+{
+  GEN fZ, t, L, D2, d1, d2, d = denom(L0);
+
+  if (is_pm1(d)) return L0;
+  
+  L = Q_remove_denom(L0, d); /* L0 = L / d, L integral */
+  fZ = gcoeff(f,1,1);
+  /* Kill denom part coprime to fZ */
+  d2 = coprime_part(d, fZ);
+  t = mpinvmod(d2, fZ); if (!is_pm1(t)) L = gmul(L,t);
+  if (egalii(d, d2)) return L;
+
+  d1 = diviiexact(d, d2);
+  /* L0 = (L / d1) mod f. d1, hence L, not coprime to f
+   * write (d1) = D1 D2, D2 minimal, (D2,f) = 1.
+   * If indeed (L/d1, f) = 1, then L in D1 */
+  D2 = nf_coprime_part(nf, d1, f, listpr);
+  t = idealaddtoone_i(nf, D2, f); /* in D2, 1 mod f */
+  L = element_muli(nf,t,L); /* in D1 D2 = (d1) */
+  return Q_div_to_int(L, d1); /* exact division */
+}
+
+/* v_pr(L0 * cx). tau = pr[5] or (more efficient) mult. table for pr[5] */
+static long
+fast_val(GEN nf,GEN L0,GEN cx,GEN pr,GEN tau)
+{
+  GEN p = (GEN)pr[1];
+  long v = int_elt_val(nf,L0,p,tau,NULL);
+  if (cx)
+  {
+    long w = ggval(cx, p);
+    if (w) v += w * itos((GEN)pr[3]);
+  }
+  return v;
+}
+
+static GEN
+compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
 {
   GEN f, fZ, basecl, module, fa, fa2, *listpr, *listep, *vecinvpi, *vectau;
-  GEN p, pr, t, sqf, EX, sarch, cyc;
+  GEN pr, t, sqf, EX, sarch, cyc;
   long i,j,l,lp;
 
   /* basecl = generators in factored form */
@@ -327,122 +423,92 @@ compute_gen(GEN nf, GEN u1, GEN gen, GEN bid)
   l = lg(basecl);
   for (i=1; i<l; i++)
   {
-    GEN d, tau, invpi, mulI, g, I, a, *e, *L;
-    long la, v, w, k;
-    /* g = [I, a=famat(L,e)] is a generator, I integral */
-    g = (GEN)basecl[i];
-    I = (GEN)g[1];
-    a = famat_reduce((GEN)g[2]);
-    L = (GEN*)dummycopy((GEN)a[1]);
-    e = (GEN*)a[2]; la = lg(e);
-    mulI = NULL;
-    if (gcmp1(gcoeff(I,1,1))) I = NULL; /* Z_K */
+    GEN d, invpi, mulI, G, I, A, e, L, newL;
+    long la, v, k;
+    /* G = [I, A=famat(L,e)] is a generator, I integral */
+    G = (GEN)basecl[i];
+    I = (GEN)G[1];
+    A = (GEN)G[2];
+      L = (GEN)A[1];
+      e = (GEN)A[2];
+    /* no reduction took place in compute_fact --> everybody still coprime
+     * to f + no denominators */
+    if (!I)
+    {
+      basecl[i] = (long)famat_to_nf_modidele(nf, L, e, bid);
+      continue;
+    }
 
     /* compute mulI so that mulI * I coprime to f
-     * FIXME: use idealcoprime ??? (less efficient) */
-    if (I)
-      for (j=1; j<lp; j++)
-      {
-        invpi = vecinvpi[j];
-        pr    = listpr[j]; 
-        v = idealval(nf,I,pr);
-        if (v) {
-          if (!invpi) invpi = vecinvpi[j] = anti_unif_mod_f(nf, pr, sqf);
-          t = element_pow(nf,invpi,stoi(v));
-          mulI = mulI? element_mul(nf, mulI, t): t;
-        }
+     * FIXME: use idealcoprime ??? (Less efficient. Fix idealcoprime!) */
+    mulI = NULL;
+    for (j=1; j<lp; j++)
+    {
+      invpi = vecinvpi[j];
+      pr    = listpr[j]; 
+      v = idealval(nf, I, pr);
+      if (v) {
+        if (!invpi) invpi = vecinvpi[j] = anti_unif_mod_f(nf, pr, sqf);
+        t = element_pow(nf,invpi,stoi(v));
+        mulI = mulI? element_mul(nf, mulI, t): t;
       }
+    }
 
     /* make all components of L coprime to f. 
      * Assuming (L^e * I, f) = 1, then newL^e * mulI = L^e */
-    if (I)
-      for (k=1; k<la; k++)
+    la = lg(e); newL = cgetg(la, t_VEC);
+    for (k=1; k<la; k++)
+    {
+      GEN L0, cx, LL = (GEN)L[k];
+      if (typ(LL) != t_COL) LL = algtobasis(nf, LL);
+
+      L0 = Q_primitive_part(LL, &cx); /* LL = L0*cx (faster element_val) */
+      for (j=1; j<lp; j++)
       {
-        GEN D2, z, L0, cx, LL = L[k];
-        if (typ(LL) != t_COL) LL = algtobasis(nf, LL);
-
-        /* write LL = cx * L0 (faster element_val) */
-        L0 = primitive_part(LL, &cx);
-        for (j=1; j<lp; j++)
-        {
-          invpi = vecinvpi[j];
-          pr  = listpr[j]; p = (GEN)pr[1];
-          tau = vectau[j];
-
-          v = int_elt_val(nf,L0,p,tau,NULL);
-          if (cx)
-          {
-            w = ggval(cx, p);
-            if (w) v += w * itos((GEN)pr[3]);
-          }
-          /* v = val_pr(LL) */
-          if (v) {
-            if (!invpi) invpi = vecinvpi[j] = anti_unif_mod_f(nf, pr, sqf);
-            t = element_pow(nf,invpi,stoi(v));
-            LL = element_mul(nf,LL, t);
-          }
+        invpi = vecinvpi[j];
+        pr  = listpr[j];
+        v = fast_val(nf, L0,cx, pr,vectau[j]); /* = val_pr(LL) */
+        if (v) {
+          if (!invpi) invpi = vecinvpi[j] = anti_unif_mod_f(nf, pr, sqf);
+          t = element_pow(nf,invpi,stoi(v));
+          LL = element_mul(nf, LL, t);
         }
-
-        L[k] = LL;
-        d = mppgcd(denom(LL), fZ); if (is_pm1(d)) continue;
-        /* Denominator (hence numerator) of L not coprime to f. Make it so */
-        /* write (d) = D1 D2,  D2 minimal, (D2,f) = 1 */
-
-#if 0 /*1) via many gcds */
-        D2 = gscalmat(d, degpol(nf[1]));
-        cx = hnfmodid(f, d);
-        for (;;)
-        {
-          D2 = idealdivexact(nf, D2, cx);
-          cx = hnfmodid(concatsp(f,D2), d);
-          if (gcmp1(gcoeff(cx,1,1))) break;
-        }
-#else /*2) from prime decomposition */
-        D2 = NULL;
-        for (j=1; j<lp; j++)
-        {
-          GEN ex;
-          pr = listpr[j]; p = (GEN)pr[1];
-          v = ggval(d, p); if (!v) continue;
-
-          ex = mulsi(v, (GEN)pr[3]); /* v_pr(d) > 0 */
-          D2 = D2? idealmulpowprime(nf, D2, pr, ex)
-                 : idealpow(nf, pr, ex);
-        }
-#endif
-        z = idealaddtoone_i(nf, D2, f); /* in D2, 1 mod f */
-        L[k] = gdivexact(element_mul(nf,z,LL), d);
       }
+      LL = make_integral(nf, LL, f, listpr);
+      newL[k] = (long)FpV_red(LL, fZ);
+    }
 
-    /* g in nf, = L^e mod f */
-    g = famat_to_nf_modideal_coprime(nf, (GEN)L, gmod((GEN)e,EX), f);
+    /* G in nf, = L^e mod f */
+    G = famat_to_nf_modideal_coprime(nf, newL, gmod(e,EX), f);
     d = NULL;
     if (mulI)
-    { /* reduce mulI  mod f * numer(mulI) */
+    { /* reduce mulI mod (f * numer(mulI)) */
       GEN mod;
       d = denom(mulI); if (is_pm1(d)) d = NULL;
-      if (d) mulI = gmul(mulI,d);
+      if (d) mulI = Q_remove_denom(mulI,d);
       mod = idealmul(nf,f, idealadd(nf,f,mulI));
       mulI = colreducemodHNF(mulI, mod, NULL);
-      g = element_muli(nf, g, mulI);
+      G = element_muli(nf, G, mulI);
 
-      /* L^e * I = g/d * I mod f */
-      g = colreducemodHNF(g, mod, NULL);
+      /* L^e * I = (G/d * I) mod f */
+      G = colreducemodHNF(G, mod, NULL);
     }
 
-    g = set_sign_mod_idele(nf,a,g,module,sarch);
-    if (I)
-    {
-      I = idealmul(nf,I,g);
-      if (d) I = gdivexact(I,d);
-      /* more or less useless, but quite cheap at this point */
-      I = idealmodidele(nf,I,module,sarch);
-    }
-    else I = g;
+    G = set_sign_mod_idele(nf,A,G,module,sarch);
+    I = idealmul(nf,I,G);
+    if (d) I = Q_div_to_int(I,d);
+    /* more or less useless, but cheap at this point */
+    I = idealmodidele(nf,I,module,sarch);
     basecl[i] = (long)I;
   }
   return basecl;
 }
+
+/********************************************************************/
+/**                                                                **/
+/**                   INIT RAY CLASS GROUP                         **/
+/**                                                                **/
+/********************************************************************/
 
 static GEN
 buchrayall(GEN bnf,GEN module,long flag)
@@ -536,7 +602,7 @@ buchrayall(GEN bnf,GEN module,long flag)
   clg[1] = (long)detcyc(met);
   clg[2] = (long)met;
   /* met[1] = group exponent */
-  if (add_gen) clg[3] = (long)compute_gen(nf,u1,genplus,bid);
+  if (add_gen) clg[3] = (long)compute_raygen(nf,u1,genplus,bid);
   if (!do_init) return gerepilecopy(av, clg);
 
   u2 = cgetg(Ri+1,t_MAT);

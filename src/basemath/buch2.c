@@ -1990,7 +1990,7 @@ class_group_gen(GEN nf,GEN W,GEN C,GEN Vbase,long prec, GEN nf0,
                 GEN *ptclg1,GEN *ptclg2)
 {
   GEN z,G,Ga,ga,GD,cyc,X,Y,D,U,V,Ur,Ui,Uir,I,J;
-  long i,j,s,lo,lo0;
+  long i,j,lo,lo0;
 
   if (DEBUGLEVEL)
     { fprintferr("\n#### Computing class group generators\n"); (void)timer2(); }
@@ -2018,14 +2018,12 @@ class_group_gen(GEN nf,GEN W,GEN C,GEN Vbase,long prec, GEN nf0,
   {
     GEN p1 = gcoeff(Uir,1,j);
     z[1]=Vbase[1]; I = idealpowred(nf0,z,p1,prec);
-    if (signe(p1)<0) I[1] = lmul((GEN)I[1],denom((GEN)I[1]));
     for (i=2; i<lo0; i++)
     {
-      p1 = gcoeff(Uir,i,j); s = signe(p1);
-      if (s)
+      p1 = gcoeff(Uir,i,j); 
+      if (signe(p1))
       {
 	z[1]=Vbase[i]; J = idealpowred(nf0,z,p1,prec);
-        if (s<0) J[1] = lmul((GEN)J[1],denom((GEN)J[1]));
 	I = idealmulh(nf0,I,J);
 	I = ideallllred(nf0,I,NULL,prec);
       }
