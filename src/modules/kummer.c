@@ -787,7 +787,7 @@ compute_polrel(GEN nfz, toK_s *T, GEN be, long g, long ell)
 
   root = cgetg(ell + 2, t_POL);
   root[1] = evalsigne(1) | evalvarn(0) | evallgef(ell + 2);
-  root[2] = zero;
+  for (i = 0; i < ell; i++) root[2+i] = zero;
   for (i = 0; i < m; i++)
   { /* compute (1/be) ^ (-mu) instead of be^mu [mu << 0].
      * 1/be = C_invbe * prim_invbe */
