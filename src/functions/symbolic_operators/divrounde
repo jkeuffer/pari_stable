@@ -1,7 +1,10 @@
 Function: _\/=_
 Class: symbolic_operators
 Description: 
- (*int, int):int:parens			$1 = gdivround($1, $2)
- (*pol, gen):gen:parens			$1 = gdivround($1, $2)
- (*gen, gen):gen:parens			$1 = gdivround($1, $2)
+ (*int:long, int):int:parens:long	$*1 = (long) gdivround($1, $2)
+ (*int, int):int:parens			 $1 = gdivround($1, $2)
+ (*pol:long, gen):gen:parens:long	$*1 = (long) gdivround($1, $2)
+ (*pol, gen):gen:parens			 $1 = gdivround($1, $2)
+ (*gen:long, gen):gen:parens:long	$*1 = (long) gdivround($1, $2)
+ (*gen, gen):gen:parens			 $1 = gdivround($1, $2)
 
