@@ -2776,22 +2776,20 @@ rnfisfree(GEN bnf, GEN order)
 /**		      COMPOSITUM OF TWO NUMBER FIELDS                **/
 /**								     **/
 /**********************************************************************/
-
 #define nexta(a) (a>0 ? -a : 1-a)
 
 GEN
 polcompositum0(GEN pol1, GEN pol2, long flall)
 {
   long av=avma,tetpil,i,v,a,l;
-  GEN pro1,p1,p2,p3,p4,p5,fa,rk,y;
+  GEN pro1,p1,p2,fa,rk,y;
 
   if (typ(pol1)!=t_POL || typ(pol2)!=t_POL) err(typeer,"polcompositum0");
   if (lgef(pol1)<=3 || lgef(pol2)<=3) err(constpoler,"compositum");
   v = varn(pol1);
   if (varn(pol2)!=v) err(talker,"not the same variable in compositum");
-  if (lgef(ggcd(pol1,derivpol(pol1))) > 3 ||
-      lgef(ggcd(pol2,derivpol(pol2))) > 3)
-        err(talker,"not a separable polynomial in compositum");
+  if (!issquarefree(pol1) || !issquarefree(pol2))
+    err(talker,"not a separable polynomial in compositum");
 
   for (a=1; ; a=nexta(a))
   {
@@ -2806,27 +2804,27 @@ polcompositum0(GEN pol1, GEN pol2, long flall)
     pro1 = gadd(polx[MAXVARN],gmulsg(a,polx[v]));
     p1 = gsubst(pol2,v,pro1);
     p2 = subresall(pol1,p1,&rk);
-    if (typ(rk)!=t_POL || lgef(rk)!=4 || lgef(ggcd(p2,deriv(p2,MAXVARN)))!=3)
-      continue;
-    p2 = gsubst(p2,MAXVARN,polx[v]);
-    fa = factor(p2); fa = (GEN)fa[1];
-    if (flall)
-    {
-      l=lg(fa); y=cgetg(l,t_VEC);
-      for (i=1; i<l; i++)
-      {
-        p3=cgetg(5,t_VEC); p3[1]=fa[i]; y[i]=(long)p3;
-        p4=gmodulcp(polx[v],(GEN)fa[i]);
-        p5=gneg_i(gdiv(gsubst((GEN)rk[2],MAXVARN,p4),
-                       gsubst((GEN)rk[3],MAXVARN,p4)));
-        p3[2]=(long)p5;
-        p3[3]=ladd(p4,gmulsg(a,p5));
-        p3[4]=lstoi(-a);
-      }
-    }
-    else y=fa;
-    tetpil=avma; return gerepile(av,tetpil,gcopy(y));
+    if (typ(rk)==t_POL && lgef(rk)==4 && issquarefree(p2)) break;
   }
+  p2 = gsubst(p2,MAXVARN,polx[v]);
+  fa = factpol(p2,0,clcm(degree(pol1), degree(pol2)));
+  y = fa = (GEN)fa[1];
+  if (flall)
+  {
+    l=lg(fa); y=cgetg(l,t_VEC);
+    for (i=1; i<l; i++)
+    {
+      GEN v = cgetg(5,t_VEC); y[i] = (long)v;
+      v[1] = fa[i]; 
+      p1=gmodulcp(polx[v],(GEN)fa[i]);
+      p2=gneg_i(gdiv(gsubst((GEN)rk[2],MAXVARN,p1),
+                     gsubst((GEN)rk[3],MAXVARN,p1)));
+      v[2] = (long)p2;
+      v[3] = ladd(p1,gmulsg(a,p2));
+      v[4] = lstoi(-a);
+    }
+  }
+  return gerepileupto(av, gcopy(y));
 }
 
 GEN
@@ -2858,7 +2856,7 @@ rnfequation0(GEN nf, GEN pol2, long flall)
   for (a=2; a<l2; a++)
     p2[a] = (lgef(pol2[a]) < l1)? pol2[a]: lres((GEN)pol2[a],pol1);
   pol2=p2;
-  if (lgef(ggcd(pol2,derivpol(pol2)))>3)
+  if (!issquarefree(pol2))
     err(talker,"not a separable relative equation in rnfequation");
   pol2=lift_intern(pol2);
 
