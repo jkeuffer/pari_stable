@@ -511,12 +511,12 @@ bnfsunit(GEN bnf,GEN S,long prec)
     GEN D,U, ClS = cgetg(4,t_VEC);
 
     D = smithall(H, &U, NULL);
-    card = dethnf_i(p1);
+    card = dethnf_i(D);
     ClS[1] = (long)card; /* h */
-    for(i=1; i<lg(p1); i++)
-      if (gcmp1((GEN)p1[i])) break;
-    setlg(p1,i);
-    ClS[2]=(long)p1; /* cyc */
+    for(i=1; i<lg(D); i++)
+      if (gcmp1((GEN)D[i])) break;
+    setlg(D,i);
+    ClS[2]=(long)D; /* cyc */
 
     p1=cgetg(i,t_VEC); pow=ZM_inv(U,gun);
     for(i--; i; i--)
