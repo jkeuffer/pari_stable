@@ -1746,9 +1746,11 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
 
   if (typ(P0) != t_POL || typ(N) != t_INT) err(typeer, "Coppersmith");
   if (typ(X) != t_INT) X = gfloor(X);
-  if (typ(B) != t_INT) B = gfloor(B);
-  if (gcmp0(B)) B = N; else bnd = 1; /* bnd-hack is only for the case B = N */
-
+  if (!B) B = N;
+  else {
+    bnd = 1; /* bnd-hack is only for the case B = N */
+    if (typ(B) != t_INT) B = gfloor(B);
+  }
   P = dummycopy(P0); d = degpol(P);
   if (!gcmp1((GEN)P[d+2]))
   {
