@@ -856,7 +856,7 @@ veceint1(GEN C, GEN nmax, long prec)
 {
   long k, n, nstop, i, cd, nmin, G, a, chkpoint;
   pari_sp av, av1;
-  GEN y,e1,e2,F0,F,M2,f,den,minvn,mcn,p1,vdiff,ap,unr,zeror,deninit;
+  GEN y,e1,e2,F0,F,den,minvn,mcn,p1,vdiff,unr;
 
   if (!nmax) return eint1(C,prec);
 
@@ -876,48 +876,56 @@ veceint1(GEN C, GEN nmax, long prec)
   nmin=n-10; if (nmin<nstop) nmin=nstop;
   if(DEBUGLEVEL>1) fprintferr("nstop = %ld\n",nstop);
 
-  e1=mpexp(negr(mulsr(n,C)));
-  e2=mpexp(mulsr(10,C));
+  e1 = mpexp(mulsr(-n,C));
+  e2 = mpexp(mulsr(10,C));
   unr = realun(prec);
-  zeror=realzero(prec); deninit=negr(unr);
-  f=cgetg(3,t_COL); M2=cgetg(3,t_VEC); av1=avma;
+  av1 = avma;
 
   F0=(GEN)y[n]; chkpoint = n;
   affrr(eint1(mulsr(n,C),prec), F0);
   do
   {
+    GEN Mx, My;
     if (DEBUGLEVEL>1 && n < chkpoint)
       { fprintferr("%ld ",n) ; chkpoint -= (itos(nmax) / 20); }
-    minvn=divrs(unr,-n); mcn=mulrr(C,minvn);
-    M2[1] = (long)zeror; M2[2] = lsubrr(minvn,C);
-    f[1]=(long)zeror; f[2]=ldivrs(e1,-n);
+    minvn = divrs(unr,-n);
+    mcn   = divrs(C,  -n);
+    vdiff = _vec( divrs(e1,-n) ); cd = 1; /* cd = #vdiff */
     affrr(mulrr(e1,e2), e1);
-    vdiff=cgetg(2,t_VEC); vdiff[1]=f[2];
-    for (cd=a=1,n--; n>=nmin; n--,a++)
+    for (a=1,n--; n>=nmin; n--,a++)
     {
       F = F0;
-      ap = stoi(a); den = deninit;
+      den = stor(-a, prec);
       for (k=1;;)
       {
-	if (k>cd)
+	if (k > cd)
         {
-          cd++; p1 = (GEN)f[2];
-          f[2] = lmul(M2,f);
-          f[1] = (long)p1;
-          M2[1] = laddrr((GEN)M2[1],mcn);
-          M2[2] = laddrr((GEN)M2[2],minvn);
-          vdiff = concatsp(vdiff,(GEN)f[2]);
+          GEN z;
+          if (cd == 1)
+          {
+            My = subrr(minvn,C);
+            z = mulrr(My, (GEN)vdiff[cd]);
+            Mx = mcn;
+          }
+          else
+          {
+            z = addrr(mulrr(Mx,(GEN)vdiff[cd-1]), mulrr(My, (GEN)vdiff[cd]));
+            Mx = addrr(Mx,mcn);
+          }
+          My = addrr(My,minvn);
+          vdiff = concatsp(vdiff, z);
+          cd++;
         }
-	p1 = mulrr(mulri(den,ap),(GEN)vdiff[k]);
+	p1 = mulrr(den, (GEN)vdiff[k]);
         if (expo(p1) < G) { affrr(F,(GEN)y[n]); break; }
-	F = addrr(F,p1); ap = mulis(ap,a);
-	k++; den = divrs(den,-k);
+	F = addrr(F,p1); k++;
+        den = mulrs(divrs(den, -k), a);
       }
     }
     avma=av1; n++; F0=(GEN)y[n]; nmin -= 10;
     if (nmin < nstop) nmin=nstop;
   }
-  while(n>nstop);
+  while(n > nstop);
   for(i=1; i<=nstop; i++)
     affrr(eint1(mulsr(i,C),prec), (GEN)y[i]);
   if (DEBUGLEVEL>1) fprintferr("\n");
