@@ -70,7 +70,7 @@ pari_init_stackcheck(void *stack_base)
   if (getrlimit(RLIMIT_STACK, &rip))
      return;
 
-  PARI_stack_limit = stack_base - (rip.rlim_cur/16)*15;
+  PARI_stack_limit = stack_base - (long)((rip.rlim_cur/16)*15);
   return;
 }
 

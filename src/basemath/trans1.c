@@ -554,6 +554,9 @@ gpow(GEN x, GEN n, long prec)
   av=avma;
   if (gcmp0(x))
   {
+    long tn = typ(n);
+    if (!is_scalar_t(tn) || tn == t_PADIC || tn == t_INTMOD)
+      err(talker,"zero to a forbidden power in gpow");
     n = greal(n);
     if (gsigne(n) <= 0)
       err(talker,"zero to a non positive exponent in gpow");

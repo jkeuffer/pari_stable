@@ -3473,7 +3473,7 @@ findmin(GEN nf, GEN ideal, GEN muf,long prec)
 GEN
 rnflllgram(GEN nf, GEN pol, GEN order,long prec)
 {
-  long av=avma,tetpil,i,j,k,l,kk,kmax,r1,ru,lx,n,vnf;
+  long av=avma,tetpil,i,j,k,l,kk,kmax,r1,ru,lx,vnf;
   GEN p1,p2,M,I,U,ronf,poll,unro,roorder,powreorder,mth,s,MC,MPOL,MCS;
   GEN B,mu,Bf,temp,ideal,x,xc,xpol,muf,mufc,muno,y,z,Ikk_inv;
 
@@ -3482,50 +3482,42 @@ rnflllgram(GEN nf, GEN pol, GEN order,long prec)
   nf=checknf(nf);
   if (typ(order)!=t_VEC || lg(order)<3)
     err(talker,"not a pseudo-matrix in rnflllgram");
-  M=(GEN)order[1]; I=gcopy((GEN)order[2]); lx=lg(I); n=lg(I)-1;
-
-/* Initialize U to the n x n identity matrix with coefficients in nf in
-   the form of polymods */
-
-  U=cgetg(n+1,t_MAT);
-  for (j=1; j<=n; j++)
-  {
-    p1=cgetg(n+1,t_COL); U[j]=(long)p1;
-    for (i=1; i<=n; i++) p1[i]=(i==j)?un:zero;
-  }
+  M=(GEN)order[1]; I=(GEN)order[2]; lx=lg(I);
+  if (lx < 3) return gcopy(order);
+  U=idmat(lx-1); I = dummycopy(I);
 
 /* Compute the relative T2 matrix of powers of theta */
 
   vnf=varn(nf[1]); ronf=(GEN)nf[6]; ru=lg(ronf); poll=lift(pol);
   r1=itos(gmael(nf,2,1));
-  unro=cgetg(n+1,t_COL); for (i=1; i<=n; i++) unro[i]=un;
+  unro=cgetg(lx,t_COL); for (i=1; i<lx; i++) unro[i]=un;
   roorder=cgetg(ru,t_VEC);
   for (i=1; i<ru; i++)
     roorder[i]=lroots(gsubst(poll,vnf,(GEN)ronf[i]),prec);
-  powreorder=cgetg(n+1,t_MAT);
+  powreorder=cgetg(lx,t_MAT);
   p1=cgetg(ru,t_COL); powreorder[1]=(long)p1;
   for (i=1; i<ru; i++) p1[i]=(long)unro;
-  for (k=2; k<=n; k++)
+  for (k=2; k<lx; k++)
   {
     p1=cgetg(ru,t_COL); powreorder[k]=(long)p1;
     for (i=1; i<ru; i++)
     {
-      p2=cgetg(n+1,t_COL); p1[i]=(long)p2;
-      for (j=1; j<=n; j++)
+      p2=cgetg(lx,t_COL); p1[i]=(long)p2;
+      for (j=1; j<lx; j++)
 	p2[j] = lmul(gmael(roorder,i,j),gmael3(powreorder,k-1,i,j));
     }
   }
-  mth=cgetg(n+1,t_MAT);
-  for (l=1; l<=n; l++)
+  mth=cgetg(lx,t_MAT);
+  for (l=1; l<lx; l++)
   {
-    p1=cgetg(n+1,t_COL); mth[l]=(long)p1;
-    for (k=1; k<=n; k++)
+    p1=cgetg(lx,t_COL); mth[l]=(long)p1;
+    for (k=1; k<lx; k++)
     {
       p2=cgetg(ru,t_COL); p1[k]=(long)p2;
       for (i=1; i<ru; i++)
       {
 	s=gzero;
-	for (j=1; j<=n; j++)
+	for (j=1; j<lx; j++)
 	  s = gadd(s,gmul(gconj(gmael3(powreorder,k,i,j)),
 	                  gmael3(powreorder,l,i,j)));
 	p2[i]=(long)s;
@@ -3537,11 +3529,11 @@ rnflllgram(GEN nf, GEN pol, GEN order,long prec)
    with coefficients polymod */
 
   MC=cgetg(lx,t_MAT); MPOL=cgetg(lx,t_MAT);
-  for (j=1; j<=n; j++)
+  for (j=1; j<lx; j++)
   {
     p1=cgetg(lx,t_COL); MC[j]=(long)p1;
     p2=cgetg(lx,t_COL); MPOL[j]=(long)p2;
-    for (i=1; i<=n; i++)
+    for (i=1; i<lx; i++)
     {
       p2[i]=(long)basistoalg(nf,gcoeff(M,i,j));
       p1[i]=(long)nftocomplex(nf,(GEN)p2[i]);
@@ -3639,7 +3631,7 @@ rnflllgram(GEN nf, GEN pol, GEN order,long prec)
       kk++; if (DEBUGLEVEL) fprintferr("%ld ",kk);
     }
   }
-  while (kk<=n);
+  while (kk<lx);
   if (DEBUGLEVEL) fprintferr("\n");
   p1=gmul(MPOL,U); tetpil=avma;
   y=cgetg(3,t_VEC); z=cgetg(3,t_VEC); y[1]=(long)z;
@@ -3651,7 +3643,7 @@ rnflllgram(GEN nf, GEN pol, GEN order,long prec)
 GEN
 rnfpolred(GEN nf, GEN pol, long prec)
 {
-  long av=avma,tetpil,i,j,k,n,N,vpol,flbnf;
+  long av=avma,tetpil,i,j,k,n,N,flbnf, vpol = varn(pol);
   GEN id,id2,newid,newor,p1,p2,al,newpol,w,z;
   GEN bnf,zk,newideals,ideals,order,neworder;
 
@@ -3661,6 +3653,11 @@ rnfpolred(GEN nf, GEN pol, long prec)
     case 10: flbnf=0; break;
     case 11: flbnf=1; bnf=nf; nf=checknf((GEN)nf[7]); break;
     default: err(idealer1);
+  }
+  if (lgef(pol) <= 4) 
+  {
+    w=cgetg(2,t_VEC);
+    w[1]=lpolx[vpol]; return w;
   }
   id=rnfpseudobasis(nf,pol); N=lgef(nf[1])-3;
   if (flbnf && gcmp1(gmael3(bnf,8,1,1))) /* if bnf is principal */
@@ -3680,7 +3677,7 @@ rnfpolred(GEN nf, GEN pol, long prec)
   }
   id2=rnflllgram(nf,pol,id,prec);
   z=(GEN)id2[1]; newid=(GEN)z[2]; newor=(GEN)z[1];
-  n=lg(newor)-1; w=cgetg(n+1,t_VEC); vpol=varn(pol);
+  n=lg(newor)-1; w=cgetg(n+1,t_VEC);
   for (j=1; j<=n; j++)
   {
     p1=(GEN)newid[j]; al=gmul(gcoeff(p1,1,1),(GEN)newor[j]);

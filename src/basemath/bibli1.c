@@ -2823,7 +2823,7 @@ fincke_pohst(GEN a,GEN bound,GEN stockmax,long flag, long prec,
   i = check? 2: 1; if (i == n) i--;
   for (   ; i<n; i++)
   {
-    res = smallvectors(gram,bound? bound: gceil(gcoeff(gram,i,i)),
+    res = smallvectors(gram,gceil(bound? bound: gcoeff(gram,i,i)),
                        stockmax,flag,prec,check);
     if (!res) goto PRECPB;
     if (!check || lg(res[2]) > 1) break;

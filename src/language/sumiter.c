@@ -478,7 +478,7 @@ GEN
 direulerall(entree *ep, GEN a, GEN b, char *ch, GEN c)
 {
   GEN p1,x,x1,s,polnum,polden,c0;
-  long av0 = avma,av,tetpil,lim = (av0+bot)>>1, prime = 0,q,n,i,j,k,k1,tx,lx;
+  long av0 = avma,av,tetpil,lim = (av0+bot)>>1, prime = 0,n,i,j,k,tx,lx;
   byteptr p = diffptr;
 
   if (!c) c = b;

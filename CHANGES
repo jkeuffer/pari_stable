@@ -78,6 +78,7 @@ XR 45- inefficiencies in ComputeArtinNumber for large modulus
 HC 46- no GC in dirmul
    47- meaningless heap count for user functions
    48- setrand(16);quadclassunit(48893) --> infinite loop
+   49- rnfpolred(bnfinit(y^2+1),x) --> SEGV
 
   Added
 IZ  1- [gnuplot] look up directory tree for gnuplot related files

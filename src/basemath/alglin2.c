@@ -2066,7 +2066,7 @@ trivsmith(long all)
   z=cgetg(4,t_VEC);
   z[1]=lgetg(1,t_MAT);
   z[2]=lgetg(1,t_MAT);
-  z[3]=lgetg(1,t_VEC); return z;
+  z[3]=lgetg(1,t_MAT); return z;
 }
 
 /* Return the smith normal form d of matrix x. If all != 0 return [d,u,v],
