@@ -1588,7 +1588,7 @@ rnfnormgroup(GEN bnr, GEN polrel)
 static GEN
 liftpol(GEN pol, GEN q, long v)
 {
-  long i, l = lgef(pol);
+  long i, l = lg(pol);
   GEN y = cgetg(l, t_POL);
   y[1] = pol[1];
   for (i = 2; i < l; i++)
@@ -2255,7 +2255,7 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
   else
     matarchunit = (GEN)NULL;
 
-  p = cgeti(3); p[1] = evalsigne(1)|evallgef(3);
+  p = cgeti(3); p[1] = evalsigne(1)|evallgefint(3);
   sqbou = (long)sqrt((double)bound) + 1;
   av = avma; lim = stack_lim(av,1);
   z = bigcgetvec(bound); for (i=2;i<=bound;i++) putcompobig(z,i,cgetg(1,t_VEC));

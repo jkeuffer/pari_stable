@@ -6,7 +6,7 @@ Help: pollead(x,{v}): leading coefficient of polynomial or series x, or x
  itself if x is a scalar. Error otherwise. With respect to the main variable
  of x if v is omitted, with respect to the variable v otherwise
 Description: 
- (@pol):gen:parens:copy	(GEN)$(1)[lgef($1)-1]
+ (@pol):gen:parens:copy	(GEN)$(1)[lg($1)-1]
  (gen):gen	pollead($1, -1)
  (gen, var):gen	pollead($1, $2)
 

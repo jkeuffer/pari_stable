@@ -517,7 +517,7 @@ lift_if_rational(GEN x)
       if (typ(y) == t_POL && degpol(y) > 0) return x;
       return y;
   
-    case t_POL: lx = lgef(x);
+    case t_POL: lx = lg(x);
       for (i=2; i<lx; i++) x[i] = (long)lift_if_rational((GEN)x[i]);
       break;
     case t_VEC: case t_COL: case t_MAT: lx = lg(x);
@@ -802,7 +802,7 @@ compute_polrel(GEN nfz, toK_s *T, GEN be, long g, long ell)
   powtau_prim_invbe = powtau(prim_invbe, m, T->tau);
 
   root = cgetg(ell + 2, t_POL);
-  root[1] = evalsigne(1) | evalvarn(0) | evallgef(ell + 2);
+  root[1] = evalsigne(1) | evalvarn(0);
   for (i = 0; i < ell; i++) root[2+i] = zero;
   for (i = 0; i < m; i++)
   { /* compute (1/be) ^ (-mu) instead of be^mu [mu << 0].
@@ -833,7 +833,7 @@ compute_polrel(GEN nfz, toK_s *T, GEN be, long g, long ell)
     GEN z, D, Rk = gmul(prim_Rk, prim_root);
     C_Rk = mul_content(C_Rk, C_root);
     Rk = mod_Xell_a(Rk, 0, ell, NULL, NULL); /* mod X^ell - 1 */
-    for (i = 2; i < lgef(Rk); i++)
+    for (i = 2; i < lg(Rk); i++)
     {
       z = mod_Xell_a((GEN)Rk[i], vT, ell, num_t,den_t); /* mod T^ell - t */
       Rk[i] = (long)RXQX_red(z, nfzpol); /* mod nfz.pol */

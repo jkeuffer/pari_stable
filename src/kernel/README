@@ -20,7 +20,7 @@ others not.
 The "inline level 1" symbols are :
   addsii addssmod adduumod addssz affii affsi affui affsr cgetg cgeti cgetr
   cmpir cmpsr divise divisii divisz divrrz divsiz divss divssmod divssz
-  dvmdiiz dvmdis dvmdisz dvmdsi dvmdsiz dvmdss dvmdssz evallg evallgef
+  dvmdiiz dvmdis dvmdisz dvmdsi dvmdsiz dvmdss dvmdssz evallg 
   evalvalp evalexpo expi gtodouble icopy icopy_av itor itos itou modis mpabs
   mpadd mpaff mpcmp mpcopy mpdiv mpdivis mpdivisis mpmul mpneg mpsub mulsii
   mulssmod mulssz new_chunk random_bits realun realzero realzero_bit resiiz

@@ -428,7 +428,7 @@ poltopermtest(GEN f, struct galois_lift *gl, GEN pf)
   pari_sp ltop;
   GEN     fx, fp;
   long     i, j,ll;
-  for (i = 2; i< lgef(f); i++)
+  for (i = 2; i< lg(f); i++)
     if (cmpii((GEN)f[i],gl->gb->bornesol)>0 
 	&& cmpii((GEN)f[i],gl->gb->lbornesol)<0)
     {
@@ -651,7 +651,7 @@ GEN matheadlong(GEN W, GEN mod)
 
 long polheadlong(GEN P, long n, GEN mod)
 {
-  return (lgef(P)>n+2)?intheadlong((GEN)P[n+2],mod):0;
+  return (lg(P)>n+2)?intheadlong((GEN)P[n+2],mod):0;
 }
 /*
  * 
@@ -1200,7 +1200,7 @@ fixedfieldpolsigma(GEN sigma, GEN p, GEN Tp, GEN sym, GEN deg, long g)
     {
       s=FpX_add(s,FpX_Fp_mul(FpXQ_pow(f,stoi(deg[j]),Tp,p),stoi(sym[j]),p),p);
     }
-  npows = brent_kung_optpow(lgef(Tp)-4,g-1);
+  npows = brent_kung_optpow(lg(Tp)-4,g-1);
   pows  = FpXQ_powers(sigma,npows,Tp,p);
   for(i=2; i<=g;i++)
   {
@@ -1234,7 +1234,7 @@ fixedfieldnewtonsumaut(GEN sigma, GEN p, GEN Tp, GEN e, long g)
   long rt;
   sigma=lift(gmul(sigma,gmodulsg(1,p)));
   f=polx[varn(sigma)];
-  rt=brent_kung_optpow(lgef(Tp)-4,g-1);
+  rt=brent_kung_optpow(lg(Tp)-4,g-1);
   V=FpXQ_powers(sigma,rt,Tp,p);
   s=FpXQ_pow(f,e,Tp,p);
   for(i=2; i<=g;i++)
@@ -1460,7 +1460,7 @@ vectopol(GEN v, GEN M, GEN den , GEN mod, long x)
   av=avma;
   mod2=gclone(shifti(mod,-1));/*clone*/
   avma=av;
-  z[1]=evalsigne(1)|evalvarn(x)|evallgef(n+1);
+  z[1] = evalsigne(1)|evalvarn(x);
   for (i=2; i<=n; i++)
   {
     p1=gzero; av=avma;
@@ -1488,7 +1488,7 @@ permtopol(GEN p, GEN L, GEN M, GEN den, GEN mod, long x)
   av=avma;
   mod2=gclone(shifti(mod,-1)); /*clone*/
   avma=av;
-  z[1]=evalsigne(1)|evalvarn(x)|evallgef(n+1);
+  z[1] = evalsigne(1)|evalvarn(x);
   for (i=2; i<=n; i++)
   {
     p1=gzero; av=avma;
@@ -2130,13 +2130,13 @@ s4test(GEN u, GEN liftpow, struct galois_lift *gl, GEN phi)
 {
   pari_sp ltop=avma;
   GEN     res;
-  int     bl,i,d = lgef(u)-2;
+  int     bl,i,d = lg(u)-2;
   if (DEBUGLEVEL >= 6) (void)timer2();
   if ( !d ) return 0;
   res=(GEN)u[2];
   for (i = 1; i < d; i++)
   {
-    if (lgef(liftpow[i])>2)
+    if (lg(liftpow[i])>2)
       res=addii(res,mulii(gmael(liftpow,i,2), (GEN) u[i + 2])); 
   }
   res=modii(mulii(res,gl->den),gl->Q);
@@ -2699,7 +2699,7 @@ galoisgenfixedfield(GEN Tp, GEN Pmod, GEN V, GEN ip, struct galois_borne *gb, GE
     tau = lift(gmul(tau,gmodulcp(gun,ip)));
     tau = FpX_FpXQ_compo((GEN) Pmod[gp], tau,Pp,ip);
     tau = FpX_gcd(Pp, tau,ip);
-    tau = FpX_Fp_mul(tau,mpinvmod((GEN) tau[lgef(tau) - 1],ip),ip);
+    tau = FpX_Fp_mul(tau, mpinvmod(leading_term(tau), ip), ip);
     for (g = 1; g <= gp; g++)
       if (gegal(tau, (GEN) Pmod[g]))
 	break;
@@ -2735,7 +2735,7 @@ galoisgenfixedfield(GEN Tp, GEN Pmod, GEN V, GEN ip, struct galois_borne *gb, GE
       tau = lift(gmul(tau,gmodulcp(gun,ip)));
       tau = FpX_FpXQ_compo((GEN) Pmod[gp], tau,Pp,ip);
       tau = FpX_gcd(Pp, tau,ip);
-      tau = FpX_Fp_mul(tau,mpinvmod((GEN) tau[lgef(tau) - 1],ip),ip);
+      tau = FpX_Fp_mul(tau,mpinvmod(leading_term(tau),ip),ip);
       for (g = 1; g < lg(Pmod); g++)
 	if (gegal(tau, (GEN) Pmod[g]))
 	  break;

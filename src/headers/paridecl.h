@@ -1463,7 +1463,7 @@ ulong   powusmod(ulong x, long n, ulong p);
 GEN     powgumod(GEN x, ulong n0, GEN p);
 GEN     rescale_pol(GEN P, GEN h);
 GEN     unscale_pol(GEN P, GEN h);
-GEN     stopoly(long m, long p, long v);
+GEN     stopoly(ulong m, ulong p, long v);
 GEN     stopoly_gen(GEN m, GEN p, long v);
 GEN     u_FpXQ_pow(GEN x, GEN n, GEN pol, ulong p);
 GEN     u_FpX_divrem(GEN x, GEN y, ulong p, GEN *pr);

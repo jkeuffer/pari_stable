@@ -356,7 +356,7 @@ print_block_system(long N,GEN Y,long d,GEN vbs,long maxl)
 static GEN
 polsimplify(GEN x)
 {
-  long i,lx = lgef(x);
+  long i,lx = lg(x);
   for (i=2; i<lx; i++)
     if (typ(x[i]) == t_POL) x[i] = (long)constant_term(x[i]);
   return x;
@@ -366,7 +366,7 @@ polsimplify(GEN x)
 static long
 ok_coeffs(GEN g,GEN M)
 {
-  long i, lg = lgef(g)-1; /* g is monic, and cst term is ok */
+  long i, lg = lg(g)-1; /* g is monic, and cst term is ok */
   for (i=3; i<lg; i++)
     if (absi_cmp((GEN)g[i], (GEN)M[i]) > 0) return 0;
   return 1;
@@ -456,7 +456,7 @@ trace(GEN x, GEN Trq, GEN p)
   long i, l;
   GEN s;
   if (typ(x) == t_INT) return modii(mulii(x, (GEN)Trq[1]), p);
-  l = lgef(x)-1; if (l == 1) return gzero;
+  l = lg(x)-1; if (l == 1) return gzero;
   x++; s = mulii((GEN)x[1], (GEN)Trq[1]);
   for (i=2; i<l; i++)
     s = addii(s, mulii((GEN)x[i], (GEN)Trq[i]));
@@ -470,7 +470,7 @@ poltrace(GEN x, GEN Trq, GEN p)
   long i,l;
   GEN y;
   if (typ(x) == t_INT || varn(x) != 0) return trace(x, Trq, p);
-  l = lgef(x); y = cgetg(l,t_POL); y[1]=x[1];
+  l = lg(x); y = cgetg(l,t_POL); y[1]=x[1];
   for (i=2; i<l; i++) y[i] = (long)trace((GEN)x[i],Trq,p);
   return y;
 }
@@ -1032,7 +1032,7 @@ subfieldsall(GEN nf)
     L = lift_intern( galoissubfields(G, 0, varn(pol)));
     l = lg(L);
     S = cgetg(l, t_VECSMALL);
-    for (i=1; i<l; i++) S[i] = lgef(gmael(L,i,1));
+    for (i=1; i<l; i++) S[i] = lg(gmael(L,i,1));
     p = gen_sort(S, cmp_IND | cmp_C, NULL);
     return gerepilecopy(av,  vecextract_p(L, p));
   }

@@ -1071,7 +1071,7 @@ issquarefree(GEN x)
   }
   if (tx != t_POL) err(typeer,"issquarefree");
   d = ggcd(x, derivpol(x));
-  avma = av; return (lgef(d) == 3);
+  avma = av; return (lg(d) == 3);
 }
 
 GEN

@@ -100,8 +100,7 @@ mysquare(GEN p)
   pari_sp ltop, lbot;
 
   if (n==-1) return gcopy(p);
-  nn=n<<1; s=cgetg(nn+3,t_POL);
-  s[1] = evalsigne(1) | evalvarn(varn(p)) | evallgef(nn+3);
+  nn=n<<1; s=cgetg(nn+3,t_POL); s[1] = p[1];
   for (i=0; i<=n; i++)
   {
     aux1=gzero; ltop=avma;
@@ -146,26 +145,26 @@ karasquare(GEN p)
 
   if (n<=KARASQUARE_LIMIT) return mysquare(p);
   ltop=avma;
-  var=evalsigne(1)+evalvarn(varn(p)); n0=n>>1; n1=n-n0-1;
-  setlgef(p,n0+3); /* hack to have the first half of p */
+  n0=n>>1; n1=n-n0-1;
+  setlg(p, n0+3); /* hack to have the first half of p */
   s0=karasquare(p);
-  p1=cgetg(n1+3,t_POL); p1[1]=var+evallgef(n1+3);
+  p1=cgetg(n1+3,t_POL); p1[1]=p[1];
   for (i=2; i<=n1+2; i++) p1[i]=p[1+i+n0];
   s2=karasquare(p1);
   s1=karasquare(gadd(p,p1));
   s1=gsub(s1,gadd(s0,s2));
   nn0=n0<<1;
-  aux=cgetg((n<<1)+3,t_POL); aux[1]=var+evallgef(2*n+3);
-  var=lgef(s0);
+  aux=cgetg((n<<1)+3,t_POL); aux[1]=p[1];
+  var=lg(s0);
   for (i=2; i<var; i++) aux[i]=s0[i];
   for (   ; i<=nn0+2; i++) aux[i]=zero;
-  var=lgef(s2);
+  var=lg(s2);
   for (i=2; i<var; i++) aux[2+i+nn0]=s2[i];
   for (i=var-2; i<=(n1<<1); i++) aux[4+i+nn0]=zero;
   aux[3+nn0]=zero;
-  for (i=3; i<=lgef(s1); i++)
+  for (i=3; i<=lg(s1); i++)
     aux[i+n0]=ladd((GEN) aux[i+n0],(GEN) s1[i-1]);
-  setlgef(p,n+3); /* recover all the polynomial p */
+  setlg(p, n+3); /* recover all the polynomial p */
   return gerepilecopy(ltop,aux);
 }
 
@@ -173,7 +172,7 @@ static GEN
 cook_square(GEN p)
 {
   GEN p0,p1,p2,p3,q,aux0,aux1,r,aux,plus,moins;
-  long n=degpol(p),n0,n3,i,j,var;
+  long n=degpol(p),n0,n3,i,j;
   pari_sp ltop = avma;
 
   if (n<=COOK_SQUARE_LIMIT) return karasquare(p);
@@ -181,8 +180,7 @@ cook_square(GEN p)
   n0=(n+1)/4; n3=n+1-3*n0;
   p0=cgetg(n0+2,t_POL); p1=cgetg(n0+2,t_POL); p2=cgetg(n0+2,t_POL);
   p3=cgetg(n3+2,t_POL);
-  var=evalsigne(1)|evalvarn(varn(p));
-  p0[1]=p1[1]=p2[1]=var|evallgef(n0+2); p3[1]=var|evallgef(n3+2);
+  p0[1]=p1[1]=p2[1]=p3[1] = p[1];
 
   for (i=0; i<n0; i++)
   {
@@ -238,7 +236,7 @@ cook_square(GEN p)
 		   gadd(gmulgs((GEN)q[0],-20),gmulgs((GEN)plus[1],15)),
 		   gadd(gmulgs((GEN)plus[2],-6),(GEN)plus[3])),
 	      720);
-  q=cgetg(2*n+3,t_POL); q[1]=var|evallgef(2*n+3);
+  q = cgetg(2*n+3,t_POL); q[1] = p[1];
   for (i=0; i<=2*n; i++) q[i+2]=zero;
   for (i=0; i<=6; i++)
   {
@@ -258,16 +256,16 @@ graeffe(GEN p)
   if (n==0) return gcopy(p);
   n0=n>>1; n1=(n-1)>>1;
   auxi=evalsigne(1)|evalvarn(varn(p));
-  p0=cgetg(n0+3,t_POL); p0[1]=auxi|evallgef(n0+3);
-  p1=cgetg(n1+3,t_POL); p1[1]=auxi|evallgef(n1+3);
+  p0=cgetg(n0+3,t_POL); p0[1]=auxi;
+  p1=cgetg(n1+3,t_POL); p1[1]=auxi;
   for (i=0; i<=n0; i++) p0[i+2]=p[2+(i<<1)];
   for (i=0; i<=n1; i++) p1[i+2]=p[3+(i<<1)];
 
   s0=cook_square(p0);
   s1=cook_square(p1); ns1 = degpol(s1);
   ss1 = cgetg(ns1+4, t_POL);
-  ss1[1] = auxi | evallgef(ns1+4);
-  ss1[2]=zero;
+  ss1[1] = auxi;
+  ss1[2] = zero;
   for (i=0; i<=ns1; i++) ss1[3+i]=lneg((GEN)s1[2+i]);
   /* now ss1 contains -x * s1 */
   return gadd(s0,ss1);
@@ -307,7 +305,7 @@ square_free_factorization(GEN pol)
     x[2]=lgetg(2,t_COL); p1=(GEN)x[2]; p1[1]=(long)pol; return x;
   }
   A=new_chunk(deg+1); v1=gdivexact(pol,t1); v=v1; i=0;
-  while (lgef(v)>3)
+  while (lg(v)>3)
   {
     v=modulargcd(t1,v1); i++;
     A[i]=(long)gdivexact(v1,v);
@@ -484,7 +482,7 @@ mygprec(GEN x, long bitprec)
   switch(tx)
   {
     case t_POL:
-      lx=lgef(x); y=cgetg(lx,tx); y[1]=x[1];
+      lx=lg(x); y=cgetg(lx,tx); y[1]=x[1];
       for (i=2; i<lx; i++) y[i]=(long) mygprecrc((GEN)x[i],bitprec,e);
       break;
 
@@ -498,7 +496,7 @@ after making product by 2^shift */
 static GEN
 pol_to_gaussint(GEN p, long shift)
 {
-  long i, l = lgef(p);
+  long i, l = lg(p);
   GEN q = cgetg(l, t_POL); q[1] = p[1];
   for (i=2; i<l; i++) q[i] = (long)gfloor2n((GEN)p[i], shift);
   return q;
@@ -537,7 +535,7 @@ homothetie2n(GEN p, long e)
 {
   if (e)
   {
-    long i,n=lgef(p)-1;
+    long i,n=lg(p)-1;
     for (i=2; i<=n; i++) myshiftrc((GEN) p[i],(n-i)*e);
   }
 }
@@ -548,7 +546,7 @@ homothetie_gauss(GEN p, long e,long f)
 {
   if (e || f)
   {
-    long i, n=lgef(p)-1;
+    long i, n=lg(p)-1;
     for (i=2; i<=n; i++) p[i]=(long) myshiftic((GEN) p[i],f+(n-i)*e);
   }
 }
@@ -1168,12 +1166,12 @@ split_fromU(GEN p, long k, double delta, long bitprec,
   pari_sp ltop;
   double mu,gamma;
 
-  pp=gdiv(p,(GEN)p[2+n]);
+  pp = gdiv(p,(GEN)p[2+n]);
   Lmax=4; while (Lmax<=n) Lmax=(Lmax<<1);
   parameters(pp,&mu,&gamma,polreal,param,param2);
 
-  H =cgetg(k+2,t_POL); H[1] =evalsigne(1) | evalvarn(varn(p)) | evallgef(k+2);
-  FF=cgetg(k+3,t_POL); FF[1]=evalsigne(1) | evalvarn(varn(p)) | evallgef(k+3);
+  H =cgetg(k+2,t_POL); H[1] = p[1];
+  FF=cgetg(k+3,t_POL); FF[1]= p[1];
   FF[k+2]=un;
 
   NN=(long) (0.5/delta); NN+=(NN%2); if (NN<2) NN=2;
@@ -1214,7 +1212,7 @@ optimize_split(GEN p, long k, double delta, long bitprec,
 static void
 scalepol2n(GEN p, long e)
 {
-  long i,n=lgef(p)-1;
+  long i,n=lg(p)-1;
   for (i=2; i<=n; i++) p[i]=lmul2n((GEN)p[i],(i-n)*e);
 }
 
@@ -1226,7 +1224,7 @@ scalepol(GEN p, GEN R, long bitprec)
   long i;
 
   aux = gR = mygprec(R,bitprec); q = mygprec(p,bitprec);
-  for (i=lgef(p)-2; i>=2; i--)
+  for (i=lg(p)-2; i>=2; i--)
   {
     q[i]=lmul(aux,(GEN)q[i]);
     aux = gmul(aux,gR);
@@ -1243,11 +1241,11 @@ conformal_pol(GEN p, GEN a, long bitprec)
   pari_sp av, limit;
 
   aux = pui = cgetg(4,t_POL);
-  pui[1] = evalsigne(1) | evalvarn(varn(p)) | evallgef(4);
+  pui[1] = p[1];
   pui[2] = (long)negr(unr);
   pui[3] = lconj(a); /* X conj(a) - 1 */
   num = cgetg(4,t_POL);
-  num[1] = pui[1];
+  num[1] = p[1];
   num[2] = lneg(a);
   num[3] = (long)unr; /* X - a */
   r = (GEN)p[2+n];
@@ -1538,10 +1536,10 @@ split_0_2(GEN p, long bitprec, GEN *F, GEN *G)
   {
     if (k>n/2) k=n/2;
     bitprec2+=(k<<1);
-    FF=cgetg(k+3,t_POL); FF[1]=evalsigne(1)|evalvarn(varn(p))|evallgef(k+3);
+    FF = cgetg(k+3,t_POL); FF[1] = p[1];
     for (i=0; i<k; i++) FF[i+2]=zero;
     FF[k+2]=(long) myrealun(bitprec2);
-    GG=cgetg(n-k+3,t_POL); GG[1]=evalsigne(1)|evalvarn(varn(p))|evallgef(n-k+3);
+    GG = cgetg(n-k+3,t_POL); GG[1] = p[1];
     for (i=0; i<=n-k; i++) GG[i+2]=q[i+k+2];
   }
   else
@@ -1587,12 +1585,10 @@ split_0(GEN p, long bitprec, GEN *F, GEN *G)
   if (k>0)
   {
     if (k>n/2) k=n/2;
-    FF=cgetg(k+3,t_POL);
-    FF[1]=evalsigne(1) | evalvarn(varn(p)) | evallgef(k+3);
+    FF = cgetg(k+3,t_POL); FF[1] = p[1];
     for (i=0; i<k; i++) FF[i+2] = zero;
     FF[k+2]=(long) myrealun(bitprec);
-    GG=cgetg(n-k+3,t_POL);
-    GG[1]=evalsigne(1) | evalvarn(varn(p)) | evallgef(n-k+3);
+    GG=cgetg(n-k+3,t_POL); GG[1] = p[1];
     for (i=0; i<=n-k; i++) GG[i+2]=p[i+k+2];
   }
   else
@@ -1811,7 +1807,7 @@ mygprec_special(GEN x, long bitprec)
   switch(tx)
   {
     case t_POL:
-      lx=lgef(x); y=cgetg(lx,tx); y[1]=x[1]; e=gexpo(x);
+      lx=lg(x); y=cgetg(lx,tx); y[1]=x[1]; e=gexpo(x);
       for (i=2; i<lx; i++) y[i]=(long) mygprecrc_special((GEN)x[i],bitprec,e);
       break;
 
@@ -1909,7 +1905,7 @@ isvalidcoeff(GEN x)
 static long
 isvalidpol(GEN p)
 {
-  long i,n = lgef(p);
+  long i,n = lg(p);
   for (i=2; i<n; i++)
     if (!isvalidcoeff((GEN)p[i])) return 0;
   return 1;
@@ -1944,7 +1940,7 @@ roots_com(GEN q, long bitprec)
 {
   GEN L, p;
   long v = polvaluation_inexact(q, &p);
-  if (lgef(p) == 3) L = cgetg(1,t_VEC); /* constant polynomial */
+  if (lg(p) == 3) L = cgetg(1,t_VEC); /* constant polynomial */
   else L = isexactpol(p)? solve_exact_pol(p,bitprec): all_roots(p,bitprec);
   if (v)
   {
@@ -2001,7 +1997,7 @@ isrealappr(GEN x, long e)
       err(impl,"isrealappr for type t_QUAD");
     case t_POL: case t_SER: case t_RFRAC: case t_RFRACN:
     case t_VEC: case t_COL: case t_MAT:
-      lx = (tx==t_POL)?lgef(x): lg(x);
+      lx = lg(x);
       for (i=lontyp[tx]; i<lx; i++)
         if (! isrealappr((GEN)x[i],e)) return 0;
       return 1;
@@ -2036,7 +2032,7 @@ roots(GEN p, long l)
     return cgetg(1,t_VEC); /* constant polynomial */
   }
   if (!isvalidpol(p)) err(talker,"invalid coefficients in roots");
-  if (lgef(p) == 3) return cgetg(1,t_VEC); /* constant polynomial */
+  if (lg(p) == 3) return cgetg(1,t_VEC); /* constant polynomial */
 
   if (l < 3) l = 3;
   L = roots_com(p, bit_accuracy(l)); n = lg(L);

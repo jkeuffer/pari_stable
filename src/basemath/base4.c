@@ -1607,7 +1607,7 @@ idealnorm(GEN nf, GEN x)
     case id_PRINCIPAL:
       x = gnorm(basistoalg(nf,x)); break;
     default:
-      if (lg(x) != lgef(nf[1])-2) x = idealhermite_aux(nf,x);
+      if (lg(x) != lg(nf[1])-2) x = idealhermite_aux(nf,x);
       x = dethnf(x);
   }
   tx = typ(x);

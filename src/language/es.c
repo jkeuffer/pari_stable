@@ -1112,7 +1112,7 @@ voir2(GEN x, long nb, long bl)
     if (tx == t_STR) 
       pariputs("chars:");
     else if (tx == t_INT)
-      pariputsf("(%c,lgef=%ld):", vsigne(x), lgefint(x));
+      pariputsf("(%c,lgefint=%ld):", vsigne(x), lgefint(x));
     else if (tx == t_REAL)
       pariputsf("(%c,expo=%ld):", vsigne(x), expo(x));
     if (nb<0) nb = (tx==t_INT)? lgefint(x): lx;
@@ -1124,17 +1124,14 @@ voir2(GEN x, long nb, long bl)
   if (tx == t_PADIC)
     pariputsf("(precp=%ld,valp=%ld):", precp(x), valp(x));
   else if (tx == t_POL)
-  {
-    lx = lgef(x);
-    pariputsf("(%c,varn=%ld,lgef=%ld):", vsigne(x), varn(x), lx);
-  }
+    pariputsf("(%c,varn=%ld):", vsigne(x), varn(x));
   else if (tx == t_SER)
     pariputsf("(%c,varn=%ld,prec=%ld,valp=%ld):",
                vsigne(x), varn(x),lg(x)-2, valp(x));
   else if (tx == t_LIST)
   {
     lx = lgeflist(x);
-    pariputsf("(lgef=%ld):", lx);
+    pariputsf("(lgeflist=%ld):", lx);
   }
   for (i=1; i<lx; i++) sorstring(VOIR_STRING2,x[i]);
   bl+=2; pariputc('\n');
@@ -1407,7 +1404,7 @@ isnull(GEN g)
     case t_POLMOD:
       return isnull((GEN)g[2]);
     case t_POL:
-      for (i=lgef(g)-1; i>1; i--)
+      for (i=lg(g)-1; i>1; i--)
 	if (!isnull((GEN)g[i])) return 0;
       return 1;
   }
@@ -1438,7 +1435,7 @@ isone(GEN g)
       return isone((GEN)g[1]) * isone((GEN)g[2]);
     case t_POL:
       if (!signe(g)) return 0;
-      for (i=lgef(g)-1; i>2; i--)
+      for (i=lg(g)-1; i>2; i--)
 	if (!isnull((GEN)g[i])) return 0;
       return isone((GEN)g[2]);
   }
@@ -1467,7 +1464,7 @@ isfactor(GEN g)
       if (isnull((GEN)g[3])) return isfactor((GEN)g[2]);
       return 0;
     case t_POL: deja = 0; sig = 1;
-      for (i=lgef(g)-1; i>1; i--)
+      for (i=lg(g)-1; i>1; i--)
         if (!isnull((GEN)g[i]))
 	{
 	  if (deja) return 0;
@@ -1495,7 +1492,7 @@ isdenom(GEN g)
     case t_QUAD: return isnull((GEN)g[3]);
 
     case t_POL: deja = 0;
-      for (i=lgef(g)-1; i>1; i--)
+      for (i=lg(g)-1; i>1; i--)
         if (!isnull((GEN)g[i]))
 	{
 	  if (deja) return 0;

@@ -782,7 +782,7 @@ pslg(GEN x)
 {
   long tx;
   if (gcmp0(x)) return 2;
-  tx = typ(x); return is_scalar_t(tx)? 3: lgef(x);
+  tx = typ(x); return is_scalar_t(tx)? 3: lg(x);
 }
 
 static GEN

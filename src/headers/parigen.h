@@ -46,16 +46,17 @@ typedef int (*QSCOMP)(const void *, const void *);
 #define LOWWORD(a) ((a) & LOWMASK)
 
 /* Order of bits in codewords:
- *  x[0]         TYPBITS, CLONEBIT, LGBITS
- *  x[1].real    SIGNBITS, EXPOBITS
- *       int     SIGNBITS, LGEFINTBITS
- *       ser,pol SIGNBITS, VARNBITS ,LGEFBITS 
- *       padic   VALPBITS, PRECPBITS 
+ *  x[0]       TYPBITS, CLONEBIT, LGBITS
+ *  x[1].real  SIGNBITS, EXPOBITS
+ *       int   SIGNBITS, LGBITS
+ *       pol   SIGNBITS, VARNBITS
+ *       ser   SIGNBITS, VARNBITS, VALPBITS
+ *       padic VALPBITS, PRECPBITS 
  * Length of bitfields are independent and satisfy:
  *  TYPnumBITS  + LGnumBITS   + 1 <= BITS_IN_LONG (optimally =)
  *  SIGNnumBITS + EXPOnumBITS     <= BITS_IN_LONG
  *  SIGNnumBITS + LGnumBITS       <= BITS_IN_LONG
- *  SIGNnumBITS + LGEFnumBITS + 2 <= BITS_IN_LONG
+ *  SIGNnumBITS + VALPnumBITS + 2 <= BITS_IN_LONG
  *  VALPnumBITS               + 1 <= BITS_IN_LONG */
 #define TYPnumBITS   7
 #define SIGNnumBITS  2
@@ -63,21 +64,19 @@ typedef int (*QSCOMP)(const void *, const void *);
 #ifdef LONG_IS_64BIT
 #  define   LGnumBITS 32
 #  define EXPOnumBITS 48
-#  define LGEFnumBITS 46 /* otherwise MAXVARN too large */
-#  define VALPnumBITS 32
+#  define VALPnumBITS 46 /* otherwise MAXVARN too large */
 #else
 #  define   LGnumBITS 24
 #  define EXPOnumBITS 24
-#  define LGEFnumBITS 16
 #  define VALPnumBITS 16 
 #endif
 
 /* no user serviceable parts below :-) */
-#define VARNnumBITS (BITS_IN_LONG - SIGNnumBITS - LGEFnumBITS)
+#define VARNnumBITS (BITS_IN_LONG - SIGNnumBITS - VALPnumBITS)
 #define PRECPSHIFT VALPnumBITS
-#define  VARNSHIFT LGEFnumBITS
+#define  VARNSHIFT VALPnumBITS
 #define   TYPSHIFT (BITS_IN_LONG - TYPnumBITS)
-#define  SIGNSHIFT (LGEFnumBITS+VARNnumBITS)
+#define  SIGNSHIFT (VALPnumBITS+VARNnumBITS)
 
 #define EXPOBITS    ((1UL<<EXPOnumBITS)-1)
 #define SIGNBITS    (0xffffUL << SIGNSHIFT)
@@ -85,7 +84,6 @@ typedef int (*QSCOMP)(const void *, const void *);
 #define PRECPBITS   (~VALPBITS)
 #define LGBITS      ((1UL<<LGnumBITS)-1)
 #define LGEFINTBITS LGBITS
-#define LGEFBITS    ((1UL<<LGEFnumBITS)-1)
 #define VALPBITS    ((1UL<<VALPnumBITS)-1)
 #define VARNBITS    (MAXVARN<<VARNSHIFT)
 #define MAXVARN     ((1UL<<VARNnumBITS)-1)
@@ -102,7 +100,6 @@ typedef int (*QSCOMP)(const void *, const void *);
 #define evallgefint(x)  (x)
 #define evallgeflist(x) (x)
 #define _evallg(x)    (x)
-#define _evallgef(x)  (x)
 
 #define typ(x)        ((((ulong)(x))&1)? (long)t_SMALL: (long)((((ulong*)(x))[0]) >> TYPSHIFT))
 #define settyp(x,s)   (((ulong*)(x))[0]=\
@@ -120,10 +117,6 @@ typedef int (*QSCOMP)(const void *, const void *);
 #define signe(x)      ((((long*)(x))[1]) >> SIGNSHIFT)
 #define setsigne(x,s) (((ulong*)(x))[1]=\
                         (((ulong*)(x))[1]&(~SIGNBITS)) | (ulong)evalsigne(s))
-
-#define lgef(x)       ((long)(((ulong*)(x))[1] & LGEFBITS))
-#define setlgef(x,s)  (((ulong*)(x))[1]=\
-                        (((ulong*)(x))[1]&(~LGEFBITS)) | evallgef(s))
 
 #define lgeflist(x)      (((long*)(x))[1])
 #define setlgeflist(x,l) (((ulong*)(x))[1]=(ulong)(l))

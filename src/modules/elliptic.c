@@ -55,7 +55,7 @@ checkch(GEN z)
 static GEN
 RHSpol(GEN e)
 {
-  GEN z = cgetg(6, t_POL); z[1] = evalsigne(1)|evallgef(6);
+  GEN z = cgetg(6, t_POL); z[1] = evalsigne(1);
   z[2] = e[8];
   z[3] = lmul2n((GEN)e[7],1);
   z[4] = e[6];

@@ -612,9 +612,9 @@ element_val(GEN nf, GEN x, GEN vp)
 long
 polegal_spec(GEN x, GEN y)
 {
-  long i = lgef(x);
+  long i = lg(x);
 
-  if (i != lgef(y)) return 0;
+  if (i != lg(y)) return 0;
   for (i--; i > 1; i--)
     if (!gegal((GEN)x[i],(GEN)y[i])) return 0;
   return 1;
@@ -695,7 +695,7 @@ mulmat_pol(GEN A, GEN x)
   long i,l;
   GEN z;
   if (typ(x) != t_POL) return gmul(x,(GEN)A[1]); /* scalar */
-  l=lgef(x)-1; if (l == 1) return typ(A)==t_VEC? gzero: zerocol(lg(A[1])-1);
+  l=lg(x)-1; if (l == 1) return typ(A)==t_VEC? gzero: zerocol(lg(A[1])-1);
   x++; z = gmul((GEN)x[1], (GEN)A[1]);
   for (i=2; i<l ; i++) 
     if (!gcmp0((GEN)x[i])) z = gadd(z, gmul((GEN)x[i], (GEN)A[i]));

@@ -413,7 +413,7 @@ addrfrac(GEN x, GEN y)
   p1 = poldivres(n, delta, &p2); /* we want gcd(n,delta) */
   if (gcmp0(p2))
   {
-    if (lgef(d) == 3) /* "constant" denominator */
+    if (lg(d) == 3) /* "constant" denominator */
     {
       d = (GEN)d[2];
            if (gcmp_1(d)) p1 = gneg(p1);
@@ -699,7 +699,7 @@ gadd(GEN x, GEN y)
 
     switch(ty)
     {
-      case t_POL: ly=lgef(y);
+      case t_POL: ly=lg(y);
 	if (ly==2) return isexactzero(x)? zeropol(vy): scalarpol(x,vy);
 
 	z = cgetg(ly,t_POL); z[1] = y[1];
@@ -769,12 +769,12 @@ gadd(GEN x, GEN y)
       switch (ty)
       {
 	case t_POL:
-          lx = lgef(x); ly = lgef(y); if (lx < ly) { swap(x,y); lswap(lx,ly); }
+          lx = lg(x); ly = lg(y); if (lx < ly) { swap(x,y); lswap(lx,ly); }
           z = cgetg(lx,t_POL); z[1] = x[1];
           for (i=2; i<ly; i++) z[i]=ladd((GEN)x[i],(GEN)y[i]);
           for (   ; i<lx; i++) z[i]=lcopy((GEN)x[i]);
           (void)normalizepol_i(z, lx);
-          if (lgef(z) == 2) { avma = (pari_sp)(z + lx); z = zeropol(vx); }
+          if (lg(z) == 2) { avma = (pari_sp)(z + lx); z = zeropol(vx); }
           return z;
 
 	case t_SER:
@@ -892,7 +892,7 @@ to_primitive(GEN x, GEN *cx)
 {
   if (typ(x) != t_POL)
     { *cx = x; x = gun; }
-  else if (lgef(x) == 3)
+  else if (lg(x) == 3)
     { *cx = (GEN)x[2]; x = gun; }
   else
     { *cx = content(x); if (!gcmp1(*cx)) x = gdiv(x,*cx); }
@@ -919,9 +919,9 @@ mulscalrfrac(GEN x, GEN y)
   {
     long td;
     p1 = ggcd(x,d); if (isnonscalar(p1)) { x=gdeuc(x,p1); d=gdeuc(d,p1); }
-    if (typ(x) == t_POL && lgef(x) == 3) x = (GEN)x[2];
+    if (typ(x) == t_POL && lg(x) == 3) x = (GEN)x[2];
     td = typ(d);
-    if (td == t_POL && lgef(d) == 3) { d = (GEN)d[2]; td = typ(d); }
+    if (td == t_POL && lg(d) == 3) { d = (GEN)d[2]; td = typ(d); }
     if (is_scalar_t(td))
       return gerepileupto(av, gdiv(gmul(x,n), d));
     x = to_primitive(x, &cx);
@@ -969,7 +969,7 @@ GEN
 to_Kronecker(GEN P, GEN Q)
 {
   /* P(X) = sum Mod(.,Q(Y)) * X^i, lift then set X := Y^(2n-1) */
-  long i,j,k,l, lx = lgef(P), N = (degpol(Q)<<1) + 1, vQ = varn(Q);
+  long i,j,k,l, lx = lg(P), N = (degpol(Q)<<1) + 1, vQ = varn(Q);
   GEN p1, y = cgetg((N-2)*(lx-2) + 2, t_POL);
   for (k=i=2; i<lx; i++)
   {
@@ -978,14 +978,13 @@ to_Kronecker(GEN P, GEN Q)
     if (is_scalar_t(l) || varn(p1)<vQ) { y[k++] = (long)p1; j = 3; }
     else
     {
-      l = lgef(p1);
+      l = lg(p1);
       for (j=2; j < l; j++) y[k++] = p1[j];
     }
     if (i == lx-1) break;
     for (   ; j < N; j++) y[k++] = zero;
   }
-  y[1] = evalsigne(1)|evalvarn(vQ)|evallgef(k);
-  return y;
+  y[1] = Q[1]; setlg(y, k); return y;
 }
 
 int
@@ -995,7 +994,7 @@ ff_poltype(GEN *x, GEN *p, GEN *pol)
   long i, lx;
 
   if (!signe(P)) return 0;
-  lx = lgef(P); Q = *pol;
+  lx = lg(P); Q = *pol;
   for (i=2; i<lx; i++)
   {
     p1 = (GEN)P[i]; if (typ(p1) != t_POLMOD) {Q=NULL;break;}
@@ -1013,7 +1012,7 @@ ff_poltype(GEN *x, GEN *p, GEN *pol)
   }
   if (Q) {
     *x = P = to_Kronecker(P, Q);
-    *pol = Q; lx = lgef(P);
+    *pol = Q; lx = lg(P);
   }
   pr = *p; y = cgetg(lx, t_POL);
   for (i=lx-1; i>1; i--)
@@ -1041,7 +1040,7 @@ ff_poltype(GEN *x, GEN *p, GEN *pol)
     }
     y[i] = p1[2];
   }
-  y[1] = evalsigne(1)|evalvarn(varn(P))|evallgef(lx);
+  y[1] = P[1];
   *x = y; *p = pr; return (Q || pr);
 }
 
@@ -1468,15 +1467,15 @@ gmul(GEN x, GEN y)
     {
       case t_POL:
 	if (isexactzero(y)) return zeropol(vy);
-        ly = lgef(y); z = cgetg(ly,t_POL); z[1]=y[1];
-        for (i=2; i<ly; i++) z[i]=lmul(x,(GEN)y[i]);
+        ly = lg(y); z = cgetg(ly,t_POL); z[1] = y[1];
+        for (i=2; i<ly; i++) z[i] = lmul(x,(GEN)y[i]);
         return normalizepol_i(z,ly);
 	
       case t_SER:
 	if (!signe(y)) return gcopy(y);
-	ly=lg(y); z=cgetg(ly,t_SER);
-	for (i=2; i<ly; i++) z[i]=lmul(x,(GEN)y[i]);
-	z[1]=y[1]; return normalize(z);
+	ly = lg(y); z = cgetg(ly,t_SER); z[1] = y[1];
+	for (i=2; i<ly; i++) z[i] = lmul(x,(GEN)y[i]);
+        return normalize(z);
 	
       case t_RFRAC: return mulscalrfrac(x,y);
       case t_RFRACN: av=avma; z=cgetg(3,t_RFRACN);
@@ -1510,7 +1509,7 @@ gmul(GEN x, GEN y)
             /* fprintferr("HUM"); */
             if (pol && varn(x) != varn(y))
               x = to_Kronecker(x,pol);
-            z = quickmul(x+2, y+2, lgef(x)-2, lgef(y)-2);
+            z = quickmul(x+2, y+2, lg(x)-2, lg(y)-2);
             if (p) z = FpX(z,p);
             if (pol) z = from_Kronecker(z,pol);
             z = gerepileupto(av, z);
@@ -1518,10 +1517,10 @@ gmul(GEN x, GEN y)
           else
           {
             avma = av;
-            z = quickmul(a+2, b+2, lgef(a)-2, lgef(b)-2);
+            z = quickmul(a+2, b+2, lg(a)-2, lg(b)-2);
           }
 #else
-          z = quickmul(x+2, y+2, lgef(x)-2, lgef(y)-2);
+          z = quickmul(x+2, y+2, lg(x)-2, lg(y)-2);
 #endif
           setvarn(z,vx); return z;
         }
@@ -1676,7 +1675,7 @@ gsqr(GEN x)
       av = avma;
       if (ff_poltype(&x,&p,&pol))
       {
-        z = quicksqr(x+2, lgef(x)-2);
+        z = quicksqr(x+2, lg(x)-2);
         if (p) z = FpX(z,p);
         if (pol) z = from_Kronecker(z,pol);
         z = gerepileupto(av, z);
@@ -1684,7 +1683,7 @@ gsqr(GEN x)
       else
       {
         avma = av;
-        z = quicksqr(a+2, lgef(a)-2);
+        z = quicksqr(a+2, lg(a)-2);
       }
       setvarn(z, vx); return z;
     }
@@ -2118,8 +2117,7 @@ gdiv(GEN x, GEN y)
     }
     switch(tx)
     {
-      case t_POL: lx = lgef(x);
-      case t_SER: z[1] = x[1];
+      case t_POL: case t_SER: z[1] = x[1];
       case t_VEC: case t_COL: case t_MAT:
         for (i=lontyp[tx]; i<lx; i++) z[i]=ldiv((GEN)x[i],y);
         return z;
@@ -2127,13 +2125,13 @@ gdiv(GEN x, GEN y)
     err(operf,"/",x,y);
   }
 
-  ly=lg(y); 
+  ly = lg(y); 
   if (vy<vx || (vy==vx && is_scalar_t(tx)))
   {
     switch(ty)
     {
       case t_POL:
-	if (lgef(y)==3) return gdiv(x,(GEN)y[2]);
+	if (ly == 3) return gdiv(x,(GEN)y[2]);
         if (isexactzero(x)) return zeropol(vy);
         return gred_rfrac2(x,y);
 
@@ -2168,7 +2166,7 @@ gdiv(GEN x, GEN y)
       switch(ty)
       {
 	case t_POL:
-          if (lgef(y)==3) return gdiv(x,(GEN)y[2]);
+          if (ly == 3) return gdiv(x,(GEN)y[2]);
           if (isexactzero(x)) return zeropol(vy);
           return gred_rfrac2(x,y);
 

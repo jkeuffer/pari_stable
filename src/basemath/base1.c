@@ -152,7 +152,7 @@ checkprimeid(GEN id)
 void
 check_pol_int(GEN x, char *s)
 {
-  long k = lgef(x)-1;
+  long k = lg(x)-1;
   for ( ; k>1; k--)
     if (typ(x[k])!=t_INT) err(talker,"polynomial not in Z[X] in %s",s);
 }
@@ -268,9 +268,9 @@ tschirnhaus(GEN x)
   GEN u, p1 = cgetg(5,t_POL);
 
   if (typ(x)!=t_POL) err(notpoler,"tschirnhaus");
-  if (lgef(x) < 4) err(constpoler,"tschirnhaus");
+  if (lg(x) < 4) err(constpoler,"tschirnhaus");
   if (v) { u=dummycopy(x); setvarn(u,0); x=u; }
-  p1[1] = evalsigne(1)|evalvarn(0)|evallgef(5);
+  p1[1] = evalsigne(1)|evalvarn(0);
   do
   {
     a = random_bits(2); if (a==0) a  = 1; p1[4] = lstoi(a);
@@ -278,7 +278,7 @@ tschirnhaus(GEN x)
     a = random_bits(3); if (a>=4) a -= 8; p1[2] = lstoi(a);
     u = caract2(x,p1,v); av2 = avma;
   }
-  while (lgef(srgcd(u,derivpol(u))) > 3); /* while u not separable */
+  while (lg(srgcd(u,derivpol(u))) > 3); /* while u not separable */
   if (DEBUGLEVEL>1)
     fprintferr("Tschirnhaus transform. New pol: %Z",u);
   avma=av2; return gerepileupto(av,u);
@@ -287,9 +287,9 @@ tschirnhaus(GEN x)
 int
 gpolcomp(GEN p1, GEN p2)
 {
-  int s,j = lgef(p1)-2;
+  int s,j = lg(p1)-2;
 
-  if (lgef(p2)-2 != j)
+  if (lg(p2)-2 != j)
     err(bugparier,"gpolcomp (different degrees)");
   for (; j>=2; j--)
   {
@@ -769,7 +769,7 @@ nfiso0(GEN a, GEN b, long fliso)
     y = (GEN)polfnf(a,b)[1]; lx = lg(y);
     for (i=1; i<lx; i++)
     {
-      if (lgef(y[i]) != 4) { setlg(y,i); break; }
+      if (lg(y[i]) != 4) { setlg(y,i); break; }
       y[i] = (long)gneg_i(lift_intern(gmael(y,i,2)));
     }
     y = gen_sort(y, 0, cmp_pol);
@@ -821,7 +821,7 @@ quicktrace(GEN x, GEN sym)
   if (signe(x))
   {
     sym--;
-    for (i=lgef(x)-1; i>1; i--)
+    for (i=lg(x)-1; i>1; i--)
       p1 = gadd(p1, gmul((GEN)x[i],(GEN)sym[i]));
   }
   return p1;
@@ -849,7 +849,7 @@ trace_col(GEN x, GEN T)
 GEN
 pol_to_monic(GEN pol, GEN *lead)
 {
-  long n = lgef(pol)-1;
+  long n = lg(pol)-1;
 
   if (n==1 || gcmp1((GEN)pol[n])) { *lead = NULL; return pol; }
   return primitive_pol_to_monic(primpart(pol), lead);
@@ -1342,7 +1342,7 @@ canon_pol(GEN z)
 {
   long i,s;
 
-  for (i=lgef(z)-2; i>=2; i-=2)
+  for (i=lg(z)-2; i>=2; i-=2)
   {
     s = signe(z[i]);
     if (s > 0)

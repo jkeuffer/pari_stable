@@ -460,7 +460,7 @@ polcarrecomplet(GEN x, GEN *pt)
   GEN y,a,b;
 
   if (!signe(x)) return 1;
-  l=lgef(x); if ((l&1) == 0) return 0; /* odd degree */
+  l=lg(x); if ((l&1) == 0) return 0; /* odd degree */
   i=2; while (isexactzero((GEN)x[i])) i++;
   if (i&1) return 0;
   av2 = avma; a = (GEN)x[i];
@@ -1277,7 +1277,7 @@ GEN
 chinois(GEN x, GEN y)
 {
   pari_sp av,tetpil;
-  long i,lx,vx, tx = typ(x);
+  long i,lx, tx = typ(x);
   GEN z,p1,p2,d,u,v;
 
   if (gegal(x,y)) return gcopy(x);
@@ -1302,9 +1302,8 @@ chinois(GEN x, GEN y)
       gerepilemanyvec(av,tetpil,z+1,2); return z;
 
     case t_POL:
-      lx=lgef(x); vx=varn(x); z=cgetg(lx,tx);
-      if (lx!=lgef(y) || vx!=varn(y)) break;
-      z[1]=evalsigne(1)|evallgef(lx)|evalvarn(vx);
+      lx=lg(x); z = cgetg(lx,tx); z[1] = x[1];
+      if (lx != lg(y) || varn(x) != varn(y)) break;
       for (i=2; i<lx; i++) z[i]=(long)chinois((GEN)x[i],(GEN)y[i]);
       return z;
 
@@ -1866,8 +1865,8 @@ sfcont(GEN x, long k)
     case t_RFRAC:
     case t_RFRACN:
       av = avma;
-      l = typ(x[1]) == t_POL? lgef(x[1]): 3;
-      if (lgef(x[2]) > l) l = lgef(x[2]);
+      l = typ(x[1]) == t_POL? lg(x[1]): 3;
+      if (lg(x[2]) > l) l = lg(x[2]);
       if (k > 0 && l > k+1) l = k+1;
       y = cgetg(l,t_VEC);
       p1 = (GEN)x[1];
@@ -2025,7 +2024,7 @@ bestappr_mod(GEN x, GEN A, GEN B)
     }
     case t_COMPLEX: case t_POL: case t_SER: case t_RFRAC:
     case t_RFRACN: case t_VEC: case t_COL: case t_MAT:
-      lx = (tx==t_POL)? lgef(x): lg(x); y=cgetg(lx,tx);
+      lx = lg(x); y=cgetg(lx,tx);
       for (i=1; i<lontyp[tx]; i++) y[i]=x[i];
       for (   ; i<lx; i++)
       {
@@ -2082,7 +2081,7 @@ bestappr(GEN x, GEN k)
 
    case t_COMPLEX: case t_POL: case t_SER: case t_RFRAC:
    case t_RFRACN: case t_VEC: case t_COL: case t_MAT:
-      lx = (tx==t_POL)? lgef(x): lg(x); y=cgetg(lx,tx);
+      lx = lg(x); y=cgetg(lx,tx);
       for (i=1; i<lontyp[tx]; i++) y[i]=x[i];
       for (   ; i<lx; i++) y[i]=(long)bestappr((GEN)x[i],k);
       return y;
@@ -2255,7 +2254,7 @@ quadpoly0(GEN x, long v)
   if (v < 0) v = 0;
   check_quaddisc(x, &sx, &res, "quadpoly");
   y = cgetg(5,t_POL);
-  y[1] = evalsigne(1) | evalvarn(v) | evallgef(5);
+  y[1] = evalsigne(1) | evalvarn(v);
 
   av = avma; p1 = shifti(x,-2); setsigne(p1,-signe(p1));
   y[2] = (long) p1; /* - floor(x/4) [ = -x/4 or (1-x)/4 ] */

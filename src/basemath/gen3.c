@@ -64,12 +64,8 @@ gvar2(GEN x)
     case t_POLMOD:
       return _varPOLMOD(x);
 
-    case t_SER:
+    case t_POL: case t_SER:
       for (i=2; i < lg(x); i++) { w=gvar((GEN)x[i]); if (w<v) v=w; }
-      return v;
-
-    case t_POL:
-      for (i=2; i<lgef(x); i++) { w=gvar((GEN)x[i]); if (w<v) v=w; }
       return v;
   }
   for (i=1; i<lg(x); i++) { w=gvar2((GEN)x[i]); if (w<v) v=w; }
@@ -129,8 +125,7 @@ gprecision(GEN x)
   if (is_scalar_t(tx)) return precision(x);
   switch(tx)
   {
-    case t_POL: lx=lgef(x);
-    case t_VEC: case t_COL: case t_MAT:
+    case t_POL: case t_VEC: case t_COL: case t_MAT:
       k=VERYBIGINT;
       for (i=lontyp[tx]; i<lx; i++)
       {
@@ -185,8 +180,6 @@ padicprec(GEN x, GEN p)
       return precp(x)+valp(x);
 
     case t_POL:
-      lx=lgef(x);
-
     case t_COMPLEX: case t_QUAD: case t_POLMOD: case t_SER: case t_RFRAC:
     case t_RFRACN: case t_VEC: case t_COL: case t_MAT:
       for (s=VERYBIGINT, i=lontyp[tx]; i<lx; i++)
@@ -216,7 +209,7 @@ poldegree(GEN x, long v)
       w = varn(x);
       if (v < 0 || v == w) return degpol(x);
       if (v < w) return 0;
-      lx = lgef(x); d = DEGREE0;
+      lx = lg(x); d = DEGREE0;
       for (i=2; i<lx; i++)
       {
         long e = poldegree((GEN)x[i], v);
@@ -255,14 +248,14 @@ pollead(GEN x, long v)
     case t_POL:
       if (v < 0 || v == w)
       {
-	l=lgef(x);
+	l=lg(x);
 	return (l==2)? gzero: gcopy((GEN)x[l-1]);
       }
       if (v < w) return gcopy(x);
       av = avma; xinit = x;
       x = gsubst(gsubst(x,w,polx[MAXVARN]),v,polx[0]);
       if (gvar(x)) { avma = av; return gcopy(xinit); }
-      l = lgef(x); if (l == 2) { avma = av; return gzero; }
+      l = lg(x); if (l == 2) { avma = av; return gzero; }
       tetpil = avma; x = gsubst((GEN)x[l-1],MAXVARN,polx[w]);
       return gerepile(av,tetpil,x);
 
@@ -307,7 +300,7 @@ isinexactreal(GEN x)
       return isinexactreal((GEN)x[1]) || isinexactreal((GEN)x[2]);
   }
   if (is_noncalc_t(tx)) return 0;
-  lx = (tx==t_POL)? lgef(x): lg(x);
+  lx = lg(x);
   for (i=lontyp[tx]; i<lx; i++)
     if (isinexactreal((GEN)x[i])) return 1;
   return 0;
@@ -330,7 +323,7 @@ isexactzeroscalar(GEN g)
       return isexactzeroscalar((GEN)g[1]) && isexactzeroscalar((GEN)g[2]);
     case t_QUAD:
       return isexactzeroscalar((GEN)g[2]) && isexactzeroscalar((GEN)g[3]);
-    case t_POL: return lgef(g) == 2;
+    case t_POL: return lg(g) == 2;
   }
   return 0;
 }
@@ -354,7 +347,7 @@ isexactzero(GEN g)
     case t_QUAD:
       return isexactzero((GEN)g[2]) && isexactzero((GEN)g[3]);
 
-    case t_POL: return lgef(g) == 2;
+    case t_POL: return lg(g) == 2;
     case t_VEC: case t_COL: case t_MAT:
       for (i=lg(g)-1; i; i--)
 	if (!isexactzero((GEN)g[i])) return 0;
@@ -384,7 +377,7 @@ ismonome(GEN x)
 {
   long i;
   if (typ(x)!=t_POL || !signe(x)) return 0;
-  for (i=lgef(x)-2; i>1; i--)
+  for (i=lg(x)-2; i>1; i--)
     if (!isexactzero((GEN)x[i])) return 0;
   return 1;
 }
@@ -466,16 +459,16 @@ gmulsg(long s, GEN y)
 
     case t_POL:
       if (!s || !signe(y)) return zeropol(varn(y));
-      ly=lgef(y); z=cgetg(ly,t_POL); z[1]=y[1];
+      z = cgetg(ly,t_POL); z[1]=y[1];
       for (i=2; i<ly; i++) z[i]=lmulsg(s,(GEN)y[i]);
       return normalizepol_i(z, ly);
 
     case t_SER:
       if (!s) return zeropol(varn(y));
       if (gcmp0(y)) return gcopy(y);
-      z=cgetg(ly,ty);
+      z = cgetg(ly,t_SER); z[1]=y[1];
       for (i=2; i<ly; i++) z[i]=lmulsg(s,(GEN)y[i]);
-      z[1]=y[1]; return normalize(z);
+      return normalize(z);
 
     case t_RFRAC:
       if (!s) return zeropol(gvar(y));
@@ -580,13 +573,10 @@ gdivgs(GEN x, long s)
       z[2]=ldivgs((GEN)x[2],s);
       return z;
 
-    case t_POL: lx=lgef(x); z=cgetg(lx,tx);
+    case t_POL: case t_SER:
+      z = cgetg(lx,tx); z[1] = x[1];
       for (i=2; i<lx; i++) z[i]=ldivgs((GEN)x[i],s);
-      z[1]=x[1]; return z;
-
-    case t_SER: z=cgetg(lx,tx);
-      for (i=2; i<lx; i++) z[i]=ldivgs((GEN)x[i],s);
-      z[1]=x[1]; return z;
+      return z;
 
     case t_RFRAC:
       av = avma;
@@ -838,7 +828,7 @@ gmodulcp(GEN x,GEN y)
       z[1]=lcopy(y);
       if (is_scalar_t(tx))
       {
-        z[2] = (lgef(y) > 3)? lcopy(x): lmod(x,y);
+        z[2] = (lg(y) > 3)? lcopy(x): lmod(x,y);
         return z;
       }
       if (tx!=t_POL && !is_rfrac_t(tx) && tx!=t_SER) break;
@@ -1177,8 +1167,7 @@ gmul2n(GEN x, long n)
 
     case t_POL: case t_COMPLEX: case t_SER:
     case t_VEC: case t_COL: case t_MAT:
-      lx = (tx==t_POL)? lgef(x): lg(x);
-      y=cgetg(lx,tx); l=lontyp[tx];
+      lx = lg(x); y=cgetg(lx,tx); l=lontyp[tx];
       for (i=1; i<l ; i++) y[i]=x[i];
       for (   ; i<lx; i++) y[i]=lmul2n((GEN)x[i],n);
       return y;
@@ -1325,10 +1314,10 @@ gconvsp(GEN x, int flpile)
   GEN p1,y;
 
   if (gcmp0(x)) return zeropol(v);
-  av=avma; y=dummycopy(x); settyp(y,t_POL);
+  av=avma; y = dummycopy(x);
   i=lg(x)-1; while (i>1 && gcmp0((GEN)y[i])) i--;
-  setlgef(y,i+1);
-  p1=gpowgs(polx[v],valp(x));
+  y[0] = evaltyp(t_POL) | evallg(i+1);
+  p1 = gpowgs(polx[v],valp(x));
   tetpil=avma; p1=gmul(p1,y);
   return flpile? gerepile(av,tetpil,p1): p1;
 }
@@ -1425,7 +1414,7 @@ gsubst(GEN x, long v, GEN y)
       tetpil=avma;
       return gerepile(av,tetpil,gmodulcp(p2,p1));
     }
-    lx=lgef(p2); tetpil=avma; z=cgetg(lx,t_POL); z[1]=p2[1];
+    lx=lg(p2); tetpil=avma; z=cgetg(lx,t_POL); z[1]=p2[1];
     for (i=2; i<lx; i++) z[i]=lmodulcp((GEN)p2[i],p1);
     return gerepile(av,tetpil, normalizepol_i(z,lx));
   }
@@ -1433,8 +1422,7 @@ gsubst(GEN x, long v, GEN y)
   switch(tx)
   {
     case t_POL:
-      l = lgef(x);
-      if (l==2)
+      if (lx==2)
         return (ty==t_MAT)? gscalmat(gzero,ly-1): gzero;
 
       vx = varn(x);
@@ -1442,13 +1430,13 @@ gsubst(GEN x, long v, GEN y)
       {
         if (gvar(y) > vx)
         { /* easy special case */
-          z = cgetg(l, t_POL); z[1] = x[1];
-          for (i=2; i<l; i++) z[i] = lsubst((GEN)x[i],v,y);
-          return normalizepol_i(z,l);
+          z = cgetg(lx, t_POL); z[1] = x[1];
+          for (i=2; i<lx; i++) z[i] = lsubst((GEN)x[i],v,y);
+          return normalizepol_i(z,lx);
         }
         /* general case */
-	av=avma; p1=polx[vx]; z= gsubst((GEN)x[l-1],v,y);
-	for (i=l-1; i>2; i--) z=gadd(gmul(z,p1),gsubst((GEN)x[i-1],v,y));
+	av=avma; p1=polx[vx]; z= gsubst((GEN)x[lx-1],v,y);
+	for (i=lx-1; i>2; i--) z=gadd(gmul(z,p1),gsubst((GEN)x[i-1],v,y));
 	return gerepileupto(av,z);
       }
       /* v <= vx */
@@ -1456,9 +1444,9 @@ gsubst(GEN x, long v, GEN y)
         return (vx > v)? gcopy(x): poleval(x,y);
 
       if (vx > v) return gscalmat(x,ly-1);
-      if (l==3) return gscalmat((GEN)x[2],ly-1);
-      av=avma; z=(GEN)x[l-1];
-      for (i=l-1; i>2; i--) z=gaddmat((GEN)x[i-1],gmul(z,y));
+      if (lx==3) return gscalmat((GEN)x[2],ly-1);
+      av=avma; z=(GEN)x[lx-1];
+      for (i=lx-1; i>2; i--) z=gaddmat((GEN)x[i-1],gmul(z,y));
       return gerepileupto(av,z);
 
     case t_SER:
@@ -1623,7 +1611,7 @@ recip(GEN x)
 GEN
 derivpol(GEN x)
 {
-  long i,lx = lgef(x)-1;
+  long i,lx = lg(x)-1;
   GEN y;
 
   if (lx<3) return zeropol(varn(x));
@@ -1673,8 +1661,7 @@ deriv(GEN x, long v)
       vx=varn(x); if (vx>v) return gzero;
       if (vx<v)
       {
-        lx = lgef(x);
-        y = cgetg(lx,t_POL);
+        lx = lg(x); y = cgetg(lx,t_POL);
         for (i=2; i<lx; i++) y[i] = lderiv((GEN)x[i],v);
         y[1] = evalvarn(vx);
         return normalizepol_i(y,i);
@@ -1752,28 +1739,27 @@ integ(GEN x, long v)
     }
     if (gcmp0(x)) return gzero;
 
-    y=cgetg(4,t_POL); y[1] = evalsigne(1) | evallgef(4) | evalvarn(v);
-    y[2]=zero; y[3]=lcopy(x); return y;
+    y = cgetg(4,t_POL);
+    y[1] = evalsigne(1) | evalvarn(v);
+    y[2] = zero;
+    y[3] = lcopy(x); return y;
   }
 
   switch(tx)
   {
     case t_POL:
-      vx=varn(x); lx=lgef(x);
+      vx=varn(x); lx=lg(x);
       if (lx==2) return zeropol(min(v,vx));
       if (vx>v)
       {
         y=cgetg(4,t_POL);
-	y[1] = signe(x)? evallgef(4) | evalvarn(v) | evalsigne(1)
-	               : evallgef(4) | evalvarn(v);
-        y[2]=zero; y[3]=lcopy(x); return y;
+	y[1] = x[1];
+        y[2] = zero;
+        y[3] = lcopy(x); return y;
       }
       if (vx<v) return triv_integ(x,v,tx,lx);
-      y=cgetg(lx+1,tx); y[2]=zero;
-      for (i=3; i<=lx; i++)
-        y[i]=ldivgs((GEN)x[i-1],i-2);
-      y[1] = signe(x)? evallgef(lx+1) | evalvarn(v) | evalsigne(1)
-                     : evallgef(lx+1) | evalvarn(v);
+      y = cgetg(lx+1,tx); y[1] = x[1]; y[2] = zero;
+      for (i=3; i<=lx; i++) y[i] = ldivgs((GEN)x[i-1],i-2);
       return y;
 
     case t_SER:
@@ -1785,8 +1771,8 @@ integ(GEN x, long v)
       }
       if (vx>v)
       {
-        y=cgetg(4,t_POL);
-        y[1] = evallgef(4) | evalvarn(v) | evalsigne(1);
+        y = cgetg(4,t_POL);
+        y[1] = evalvarn(v) | evalsigne(1);
         y[2]=zero; y[3]=lcopy(x); return y;
       }
       if (vx<v) return triv_integ(x,v,tx,lx);
@@ -1808,8 +1794,8 @@ integ(GEN x, long v)
       if (vx>v)
       {
 	y=cgetg(4,t_POL);
-	y[1] = signe(x[1])? evallgef(4) | evalvarn(v) | evalsigne(1)
-	                  : evallgef(4) | evalvarn(v);
+	y[1] = signe(x[1])? evalvarn(v) | evalsigne(1)
+	                  : evalvarn(v);
         y[2]=zero; y[3]=lcopy(x); return y;
       }
       if (vx<v)
@@ -1827,7 +1813,7 @@ integ(GEN x, long v)
       n = i+j + 2;
       y = gdiv(gtrunc(gmul((GEN)x[2], integ(tayl(x,v,n),v))), (GEN)x[2]);
       if (!gegal(deriv(y,v),x)) err(inter2);
-      if (typ(y)==t_RFRAC && lgef(y[1]) == lgef(y[2]))
+      if (typ(y)==t_RFRAC && lg(y[1]) == lg(y[2]))
       {
         GEN p2;
 	tx=typ(y[1]); p1=is_scalar_t(tx)? (GEN)y[1]: leading_term(y[1]);
@@ -1980,8 +1966,7 @@ ground(GEN x)
 
     case t_POL: case t_SER: case t_RFRAC: case t_RFRACN:
     case t_VEC: case t_COL: case t_MAT:
-      lx = (tx==t_POL)? lgef(x): lg(x);
-      y=cgetg(lx,tx);
+      lx = lg(x); y=cgetg(lx,tx);
       for (i=1; i<lontyp[tx]; i++) y[i]=x[i];
       for (   ; i<lx; i++) y[i]=lround((GEN)x[i]);
       if (tx==t_POL) return normalizepol_i(y, lx);
@@ -2041,8 +2026,7 @@ grndtoi(GEN x, long *e)
 
     case t_POL: case t_SER: case t_RFRAC: case t_RFRACN:
     case t_VEC: case t_COL: case t_MAT:
-      lx = (tx==t_POL)? lgef(x): lg(x);
-      y = cgetg(lx,tx);
+      lx = lg(x); y = cgetg(lx,tx);
       for (i=1; i<lontyp[tx]; i++) y[i] = x[i];
       for (   ; i<lx; i++)
       {
@@ -2244,7 +2228,7 @@ coefs_to_pol(long n, ...)
   long i;
   va_start(ap,n);
   x = cgetg(n+2, t_POL); y = x + 2;
-  x[1] = evallgef(n+2) | evalvarn(0);
+  x[1] = evalvarn(0);
   for (i=n-1; i >= 0; i--) y[i] = (long) va_arg(ap, GEN);
   va_end(ap); return normalizepol(x);
 }
@@ -2278,15 +2262,15 @@ GEN
 zeropol(long v)
 {
   GEN x = cgetg(2,t_POL);
-  x[1] = evallgef(2) | evalvarn(v); return x;
+  x[1] = evalvarn(v); return x;
 }
 
 GEN
 scalarpol(GEN x, long v)
 {
   GEN y=cgetg(3,t_POL);
-  y[1] = gcmp0(x)? evallgef(3) | evalvarn(v)
-                 : evallgef(3) | evalvarn(v) | evalsigne(1);
+  y[1] = gcmp0(x)? evalvarn(v)
+                 : evalvarn(v) | evalsigne(1);
   y[2]=lcopy(x); return y;
 }
 
@@ -2295,7 +2279,7 @@ GEN
 deg1pol(GEN x1, GEN x0,long v)
 {
   GEN x = cgetg(4,t_POL);
-  x[1] = evalsigne(1) | evalvarn(v) | evallgef(4);
+  x[1] = evalsigne(1) | evalvarn(v);
   x[2] = lcopy(x0);
   x[3] = lcopy(x1); return normalizepol_i(x,4);
 }
@@ -2305,7 +2289,7 @@ GEN
 deg1pol_i(GEN x1, GEN x0,long v)
 {
   GEN x = cgetg(4,t_POL);
-  x[1] = evalsigne(1) | evalvarn(v) | evallgef(4);
+  x[1] = evalsigne(1) | evalvarn(v);
   x[2] = (long)x0;
   x[3] = (long)x1; return normalizepol_i(x,4);
 }
@@ -2336,15 +2320,15 @@ gtopoly0(GEN x, long v, int reverse)
       if (reverse)
       {
 	while (lx-- && isexactzero((GEN)x[lx]));
-	i=lx+2; y=cgetg(i,t_POL);
-	y[1]=evallgef(i); if (!gcmp0(x)) y[1] |= evalsigne(1);
+	i = lx+2; y=cgetg(i,t_POL);
+	y[1] = gcmp0(x)? 0: evalsigne(1);
 	for (j=2; j<i; j++) y[j]=lcopy((GEN)x[j-1]);
       }
       else
       {
 	i=1; j=lx; while (lx-- && isexactzero((GEN)x[i++]));
 	i=lx+2; y=cgetg(i,t_POL);
-	y[1]=evallgef(i); if (!gcmp0(x)) y[1] |= evalsigne(1);
+	y[1] = gcmp0(x)? 0: evalsigne(1);
 	lx = j-1;
 	for (j=2; j<i; j++) y[j]=lcopy((GEN)x[lx--]);
       }
@@ -2402,7 +2386,7 @@ poltoser(GEN x, long v, long prec)
   if (is_scalar_t(tx) || vx > v) return scalarser(x, v, prec);
   if (vx < v) return coefstoser(x, v, prec);
 
-  lx = lgef(x); i = 2; while (i<lx && gcmp0((GEN)x[i])) i++;
+  lx = lg(x); i = 2; while (i<lx && gcmp0((GEN)x[i])) i++;
   l = lx-i; if (precdl > (ulong)l) l = (long)precdl;
   l += 2;
   y = cgetg(l,t_SER);
@@ -2525,7 +2509,7 @@ gtovec(GEN x)
   }
   if (tx==t_POL)
   {
-    lx=lgef(x); y=cgetg(lx-1,t_VEC);
+    lx=lg(x); y=cgetg(lx-1,t_VEC);
     for (i=1; i<=lx-2; i++) y[i]=lcopy((GEN)x[lx-i]);
     return y;
   }
@@ -2569,7 +2553,7 @@ compo(GEN x, long n)
 {
   long l,tx=typ(x);
 
-  if (tx==t_POL && n+1 >= lgef(x)) return gzero;
+  if (tx==t_POL && n+1 >= lg(x)) return gzero;
   if (tx==t_SER && !signe(x)) return gzero;
   if (!is_recursive_t(tx))
     err(talker, "this object doesn't have components (is a leaf)");
@@ -2805,7 +2789,7 @@ lift0(GEN x, long v)
       return y;
 
     case t_POL:
-      y=cgetg(lx=lgef(x),tx); y[1]=x[1];
+      lx=lg(x); y=cgetg(lx,tx); y[1]=x[1];
       for (i=2; i<lx; i++) y[i]=(long)lift0((GEN)x[i],v);
       return y;
 
@@ -2848,7 +2832,7 @@ lift_intern0(GEN x, long v)
     case t_SER: if (!signe(x)) return x; /* fall through */
     case t_FRAC: case t_FRACN: case t_COMPLEX: case t_QUAD: case t_POL:
     case t_RFRAC: case t_RFRACN: case t_VEC: case t_COL: case t_MAT:
-      lx = (tx==t_POL)? lgef(x): lg(x);
+      lx = lg(x);
       for (i = lx-1; i>=lontyp[tx]; i--)
         x[i] = (long) lift_intern0((GEN)x[i],v);
       return x;
@@ -2889,8 +2873,7 @@ centerlift0(GEN x, long v)
     case t_POL:
     case t_FRAC: case t_FRACN: case t_COMPLEX: case t_RFRAC:
     case t_RFRACN: case t_VEC: case t_COL: case t_MAT:
-      lx = (tx==t_POL)? lgef(x): lg(x);
-      y=cgetg(lx,tx); y[1]=x[1];
+      lx = lg(x); y=cgetg(lx,tx); y[1]=x[1];
       for (i=lontyp[tx]; i<lx; i++) y[i]=(long)centerlift0((GEN)x[i],v);
       return y;
 
@@ -2925,12 +2908,12 @@ op_ReIm(GEN f(GEN), GEN x)
   switch(tx)
   {
     case t_POL:
-      lx=lgef(x); av=avma;
+      lx=lg(x); av=avma;
       for (i=lx-1; i>=2; i--)
         if (!gcmp0(f((GEN)x[i]))) break;
       avma=av; if (i==1) return zeropol(varn(x));
 
-      z=cgetg(i+1,t_POL); z[1]=evalsigne(1)|evallgef(1+i)|evalvarn(varn(x));
+      z = cgetg(i+1,t_POL); z[1] = x[1];
       for (j=2; j<=i; j++) z[j] = (long)f((GEN)x[j]);
       return z;
 
@@ -3097,7 +3080,7 @@ geval(GEN x)
       return y;
 
     case t_POL:
-      lx=lgef(x); if (lx==2) return gzero;
+      lx=lg(x); if (lx==2) return gzero;
       {
 #define initial_value(ep) (GEN)((ep)+1) /* cf anal.h */
         entree *ep = varentries[varn(x)];
@@ -3161,7 +3144,7 @@ simplify_i(GEN x)
       y[2]=lmod(simplify_i((GEN)x[2]),(GEN)y[1]); return y;
 
     case t_POL:
-      lx=lgef(x); if (lx==2) return gzero;
+      lx=lg(x); if (lx==2) return gzero;
       if (lx==3) return simplify_i((GEN)x[2]);
       y=cgetg(lx,t_POL); y[1]=x[1];
       for (i=2; i<lx; i++) y[i]=(long)simplify_i((GEN)x[i]);
@@ -3504,7 +3487,7 @@ poleval(GEN x, GEN y)
   switch(tx)
   {
     case t_POL:
-      i = lgef(x)-1; imin = 2; break;
+      i = lg(x)-1; imin = 2; break;
 
     case t_RFRAC: case t_RFRACN:
       p1 = poleval((GEN)x[1],y);

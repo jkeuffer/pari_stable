@@ -57,7 +57,6 @@ void   dvmdsiz(long x, GEN y, GEN z, GEN t);
 GEN    dvmdss(long x, long y, GEN *z);
 void   dvmdssz(long x, long y, GEN z, GEN t);
 long   evallg(long x);
-long   evallgef(long x);
 long   evalvalp(long x);
 long   evalexpo(long x);
 long   expi(GEN x);
@@ -114,13 +113,6 @@ evallg(long x)
 {
   if (x & ~LGBITS) err(errlg);
   return _evallg(x);
-}
-
-INLINE long
-evallgef(long x)
-{
-  if (x & ~LGEFBITS) err(errlgef);
-  return _evallgef(x);
 }
 
 INLINE long

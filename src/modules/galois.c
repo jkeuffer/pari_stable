@@ -704,7 +704,7 @@ gpoly(GEN rr, long n1, long n2)
 static GEN
 new_pol(GEN r, GEN a)
 {
-  long i, j, l = lgef(a);
+  long i, j, l = lg(a);
   GEN x, z, v = cgetg(N+1, t_VEC);
   for (i=1; i<=N; i++)
   {

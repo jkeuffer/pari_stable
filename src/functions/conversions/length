@@ -7,6 +7,6 @@ Help: length(x): number of non code words in x, number of characters for a
 Description: 
  (vecsmall):lg	lg($1)
  (vec):lg	lg($1)
- (pol):small:parens	lgef($1)-2
+ (pol):small:parens	lg($1)-2
  (gen):small	glength($1)
 

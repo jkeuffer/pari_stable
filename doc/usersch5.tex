@@ -154,9 +154,6 @@ included through \kbd{pari.h} will give you access to the symbolic constants
 
 \fun{long}{lg}{GEN x} returns the length of~\kbd{x} in \B-bit words.
 
-\fun{long}{lgef}{GEN x} returns the effective length of the polynomial \kbd{x}
-in \B-bit words.
-
 \fun{long}{lgefint}{GEN x} returns the effective length of the integer \kbd{x}
 in \B-bit words.
 
@@ -201,10 +198,6 @@ this should be used with extreme care since usually the length is set
 otherwise, and increasing the length joins previously unrelated memory words
 to the root node of~\kbd{x}. This is, however, an extremely efficient way of
 truncating vectors or polynomials.
-
-\fun{void}{setlgef}{GEN x, long s} sets the effective length of \kbd{x}
-to~\kbd{s}, where \kbd{x} is a polynomial. The number \kbd{s} must be less
-than or equal to the length of~\kbd{x}.
 
 \fun{void}{setlgefint}{GEN x, long s} sets the effective length
 of the integer \kbd{x} to~\kbd{s}. The number \kbd{s} must be less than or

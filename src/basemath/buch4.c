@@ -53,11 +53,11 @@ lemma6(GEN pol,GEN p,long nu,GEN x)
   pari_sp ltop=avma;
   GEN gx,gpx;
 
-  for (i=lgef(pol)-2,gx=(GEN) pol[i+1]; i>1; i--)
+  for (i=lg(pol)-2,gx=(GEN) pol[i+1]; i>1; i--)
     gx=addii(mulii(gx,x),(GEN) pol[i]);
   if (psquare(gx,p)) return 1;
 
-  for (i=lgef(pol)-2,gpx=mulis((GEN) pol[i+1],i-1); i>2; i--)
+  for (i=lg(pol)-2,gpx=mulis((GEN) pol[i+1],i-1); i>2; i--)
     gpx=addii(mulii(gpx,x),mulis((GEN) pol[i],i-2));
 
   lambda=pvaluation(gx,p,&gx);
@@ -76,11 +76,11 @@ lemma7(GEN pol,long nu,GEN x)
   pari_sp ltop=avma;
   GEN gx,gpx,oddgx;
 
-  for (i=lgef(pol)-2,gx=(GEN) pol[i+1]; i>1; i--)
+  for (i=lg(pol)-2,gx=(GEN) pol[i+1]; i>1; i--)
     gx=addii(mulii(gx,x),(GEN) pol[i]);
   if (psquare(gx,gdeux)) return 1;
 
-  for (i=lgef(pol)-2,gpx=gmulgs((GEN) pol[i+1],i-1); i>2; i--)
+  for (i=lg(pol)-2,gpx=gmulgs((GEN) pol[i+1],i-1); i>2; i--)
     gpx=gadd(gmul(gpx,x),gmulgs((GEN) pol[i],i-2));
 
   lambda=vali(gx);
@@ -206,12 +206,12 @@ lemma6nf(GEN nf,GEN pol,GEN p,long nu,GEN x)
   pari_sp ltop=avma;
   GEN gx,gpx;
 
-  for (i=lgef(pol)-2,gx=(GEN) pol[i+1]; i>1; i--)
+  for (i=lg(pol)-2,gx=(GEN) pol[i+1]; i>1; i--)
     gx = gadd(gmul(gx,x),(GEN) pol[i]);
   if (psquarenf(nf,gx,p)) { avma=ltop; return 1; }
   lambda = idealval(nf,gx,p);
 
-  for (i=lgef(pol)-2,gpx=gmulgs((GEN) pol[i+1],i-1); i>2; i--)
+  for (i=lg(pol)-2,gpx=gmulgs((GEN) pol[i+1],i-1); i>2; i--)
     gpx=gadd(gmul(gpx,x),gmulgs((GEN) pol[i],i-2));
   mu = gcmp0(gpx)? BIGINT: idealval(nf,gpx,p);
 
@@ -228,12 +228,12 @@ lemma7nf(GEN nf,GEN pol,GEN p,long nu,GEN x,GEN zinit)
   pari_sp ltop=avma;
   GEN gx,gpx,p1;
 
-  for (i=lgef(pol)-2, gx=(GEN) pol[i+1]; i>1; i--)
+  for (i=lg(pol)-2, gx=(GEN) pol[i+1]; i>1; i--)
     gx=gadd(gmul(gx,x),(GEN) pol[i]);
   if (psquare2nf(nf,gx,p,zinit)) { avma=ltop; return 1; }
   lambda=idealval(nf,gx,p);
 
-  for (i=lgef(pol)-2,gpx=gmulgs((GEN) pol[i+1],i-1); i>2; i--)
+  for (i=lg(pol)-2,gpx=gmulgs((GEN) pol[i+1],i-1); i>2; i--)
     gpx=gadd(gmul(gpx,x),gmulgs((GEN) pol[i],i-2));
   if (!gcmp0(gpx)) mu=idealval(nf,gpx,p); else mu=BIGINT;
 
@@ -699,7 +699,7 @@ fa_pr_append(GEN nf,GEN rel,GEN N,GEN *prod,GEN *S1,GEN *S2)
 static GEN
 pol_up(GEN rnfeq, GEN x)
 {
-  long i, l = lgef(x);
+  long i, l = lg(x);
   GEN y = cgetg(l, t_POL); y[1] = x[1];
   for (i=2; i<l; i++) y[i] = (long)rnfelementreltoabs(rnfeq, (GEN)x[i]);
   return y;

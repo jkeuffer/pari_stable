@@ -60,6 +60,18 @@ This file lists the incompatible changes between Version 2.x and older versions
   - rnfisnorm() prototype has changed [ + need to call rnfisnorminit first ]
   - incgam4 renamed to incgam0, incgam3 renamed to incgamc
   - prototypes of buchall and smallbuchinit have changed (much simpler)
+  - the macros lgef / setlgef / evallgef have been removed. One should use
+    lg() for t_POLs as for most other types: the effective length is now
+    always equal to the length. Don't use lgef() in new code.
+
+    Compatibility #defines are provided, but they will break on hackish code
+    accessing directly the first component of t_POL objets, e.g
+
+      x = cgetg(20, t_POL);
+      x[1] = evalsigne(1) | evalvarn(0) | evallgef( 10 )  /* 10, not 20 */
+      ...
+      setlgef(x, 20); /* now create/use further coefficients */
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

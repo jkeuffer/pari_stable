@@ -50,13 +50,13 @@ makepoldeg1(GEN c, GEN d)
 {
   GEN z;
   if (signe(c)) {
-    z = cgetg(4,t_POL); z[1] = evalsigne(1)|evallgef(4);
+    z = cgetg(4,t_POL); z[1] = evalsigne(1);
     z[2] = (long)d; z[3] = (long)c;
   } else if (signe(d)) {
-    z = cgetg(3,t_POL); z[1] = evalsigne(1)|evallgef(3);
+    z = cgetg(3,t_POL); z[1] = evalsigne(1);
     z[2] = (long)d;
   } else {
-    z = cgetg(2,t_POL); z[1] = evalsigne(0)|evallgef(2);
+    z = cgetg(2,t_POL); z[1] = evalsigne(0);
   }
   return z;
 }
@@ -93,7 +93,7 @@ u_red_cyclo2n_ip(GEN x, int n)
   for (; i>0; i--)
     if (x[i]) break;
   i += 2;
-  z = cgetg(i, t_POL); z[1] = evalsigne(1)|evallgef(i);
+  z = cgetg(i, t_POL); z[1] = evalsigne(1);
   for (i--; i>=2; i--) z[i] = lstoi(x[i-1]);
   return z;
 }
@@ -102,11 +102,9 @@ static GEN
 red_cyclo2n_ip(GEN x, int n)
 {
   long i, pow2 = 1<<(n-1);
-  for (i = lgef(x)-1; i>pow2+1; i--)
+  for (i = lg(x)-1; i>pow2+1; i--)
     if (signe(x[i])) x[i-pow2] = lsubii((GEN)x[i-pow2], (GEN)x[i]);
-  for (; i>1; i--)
-    if (signe(x[i])) break;
-  setlgef(x,i+1); return x;
+  return normalizepol_i(x, i+1);
 }
 static GEN
 red_cyclo2n(GEN x, int n) { return red_cyclo2n_ip(dummycopy(x), n); }
@@ -120,7 +118,7 @@ smallpolrev(GEN x)
 
   while (lx-- && x[lx]==0) /* empty */;
   i = lx+2; y = cgetg(i,t_POL);
-  y[1] = evallgef(i) | evalsigne(1);
+  y[1] = evalsigne(1);
   for (j=2; j<i; j++) y[j] = lstoi(x[j-1]);
   return y;
 }
@@ -166,7 +164,7 @@ static GEN
 sqrmod3(GEN pol, Red *R)
 {
   GEN a,b,bma,A,B;
-  long lv=lgef(pol);
+  long lv = lg(pol);
 
   if (lv==2) return pol;
   if (lv==3) return sqrconst(pol, R);
@@ -182,7 +180,7 @@ static GEN
 sqrmod4(GEN pol, Red *R)
 {
   GEN a,b,A,B;
-  long lv=lgef(pol);
+  long lv = lg(pol);
 
   if (lv==2) return pol;
   if (lv==3) return sqrconst(pol, R);
@@ -198,7 +196,7 @@ static GEN
 sqrmod5(GEN pol, Red *R)
 {
   GEN c2,b,c,d,A,B,C,D;
-  long lv=lgef(pol);
+  long lv = lg(pol);
 
   if (lv==2) return pol;
   if (lv==3) return sqrconst(pol, R);

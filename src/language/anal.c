@@ -923,7 +923,7 @@ readvar()
   const char *old = analyseur;
   const GEN x = expr();
 
-  if (typ(x) != t_POL || lgef(x) != 4 ||
+  if (typ(x) != t_POL || lg(x) != 4 ||
     !gcmp0((GEN)x[2]) || !gcmp1((GEN)x[3])) err(varer1,old,mark.start);
   return varn(x);
 }
@@ -2470,14 +2470,15 @@ manage_var(long n, entree *ep)
 
   /* create polx[var] */
   p[0] = evaltyp(t_POL) | evallg(4);
-  p[1] = evalsigne(1) | evallgef(4) | evalvarn(var);
-  p[2] = zero; p[3] = un;
+  p[1] = evalsigne(1) | evalvarn(var);
+  p[2] = zero;
+  p[3] = un;
   polx[var] = p;
 
   /* create polun[nvar] */
   p += 4;
   p[0] = evaltyp(t_POL) | evallg(3);
-  p[1] = evalsigne(1) | evallgef(3) | evalvarn(var);
+  p[1] = evalsigne(1) | evalvarn(var);
   p[2] = un;
   polun[var] = p;
 

@@ -59,13 +59,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #define is_qf_t(t) ( (t) == t_QFR || (t) == t_QFI )
 #define is_mod_t(t) ( (t) == t_POLMOD || (t) == t_INTMOD )
-#define has_lgef_t(t) ((t) == t_INT || (t) == t_POL)
 
 /* #define is_graphicvec_t(t) ( is_matvec_t(t) || is_qf_t(t) ) */
 #define is_graphicvec_t(t) ( (t) >= t_QFR && (t) <= t_MAT )
 
 #define needsnewline(tx) (is_matvec(tx))
-#define isscalar(x) (is_scalar_t(typ(x)) || (typ(x)==t_POL && lgef(x)<=3))
-#define isnonscalar(x) (typ(x) == t_POL && lgef(x) > 3)
+#define isscalar(x) (is_scalar_t(typ(x)) || (typ(x)==t_POL && lg(x)<=3))
+#define isnonscalar(x) (typ(x) == t_POL && lg(x) > 3)
 
 #define is_noncalc_t(tx) ((tx) >= t_LIST)

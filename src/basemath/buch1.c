@@ -393,7 +393,7 @@ findbezk(GEN nf, GEN x)
 static GEN
 findbezk_pol(GEN nf, GEN x)
 {
-  long i, lx = lgef(x);
+  long i, lx = lg(x);
   GEN y = cgetg(lx,t_POL);
   for (i=2; i<lx; i++)
     if (! (y[i] = (long)findbezk(nf,(GEN)x[i])) ) return NULL;

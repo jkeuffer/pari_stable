@@ -89,6 +89,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define strtoGEN flisexpr
 #define permute numtoperm
 #define permuteInv permtonum
+#define evallgef(x) 0
+#define lgef lg
+#define setlgef setlg
 
 #define rcopy mpcopy
 #define absr  mpabs
@@ -305,10 +308,9 @@ enum manage_var_t {
 #define is_pm1(n)    is_pm1_lg   (n, lgefint(n))
 #define is_bigint(n) is_bigint_lg(n, lgefint(n))
 
-#define leading_term(x) ((GEN)(((GEN)(x))[lgef(x)-1]))
+#define leading_term(x) ((GEN)(((GEN)(x))[lg(x)-1]))
 #define constant_term(x) (signe(x)? ((GEN)(((GEN)(x))[2])): gzero)
-#define degpol(a) ((long)lgef(a)-3)
-#define evaldeg(d) (evallgef(d+3))
+#define degpol(a) ((long)lg(a)-3)
 
 #define odd(x) ((x) & 1)
 #define mpodd(x) (signe(x) && mod2(x))

@@ -1274,19 +1274,13 @@ other hand a variable of \emph{greater} priority would not be acceptable;
 see \secref{se:priority} for the problems which may arise.
 
 \subsec{Type \typ{POL} (polynomial):}\kbdsidx{t_POL}\sidx{polynomial} this
-type has a second codeword which is analogous to the one for integers. It
-contains a ``\emph{sign}'': 0 if the polynomial is equal to~0, and 1 if
-not (see however the important remark below), a \emph{variable number}
-(e.g.~0 for $x$, 1 for $y$, etc\dots), and an \emph{effective length}.
+type has a second codeword. It contains a ``\emph{sign}'': 0 if the
+polynomial is equal to~0, and 1 if not (see however the important remark
+below) and a \emph{variable number} (e.g.~0 for $x$, 1 for $y$, etc\dots).
 
 \noindent These data can be handled with the following macros:
 
 \teb{signe} and \teb{setsigne} as for reals and integers.
-
-\fun{long}{lgef}{GEN z} returns the \idx{effective length} of \kbd{z}.
-
-\fun{void}{setlgef}{GEN z, long l} sets the effective length of \kbd{z} to
-\kbd{l}.
 
 \fun{long}{varn}{GEN z} returns the variable number of the object \kbd{z}.
 
@@ -1294,36 +1288,35 @@ not (see however the important remark below), a \emph{variable number}
 \kbd{v}.
 
 The variable numbers encode the relative priorities of variables as discussed
-in \secref{se:priority}. We will give more details in \secref{se:vars}.
-Note also the function \fun{long}{gvar}{GEN z} which tries to return a
+in \secref{se:priority}. We will give more details in \secref{se:vars}. Note
+also the function \fun{long}{gvar}{GEN z} which tries to return a
 \idx{variable number} for \kbd{z}, even if \kbd{z} is not a polynomial or
-power series. The variable number of a scalar type is set by definition
-equal to \tet{BIGINT}.
+power series. The variable number of a scalar type is set by definition equal
+to \tet{BIGINT}.
 
-The components \kbd{z[2]}, \kbd{z[3]},\dots \kbd{z[lgef(z)-1]} point to the
+The components \kbd{z[2]}, \kbd{z[3]},\dots \kbd{z[lg(z)-1]} point to the
 coefficients of the polynomial \emph{in ascending order}, with \kbd{z[2]}
 being the constant term and so on. Note that the \idx{degree} of the
-polynomial is equal to its effective length minus three. The function
+polynomial is equal to its length minus three. The function
 
 \fun{long}{degree}{GEN x} returns the degree of \kbd{x} with respect to its
-main variable even when \kbd{x} is not a polynomial (a rational function
-for instance). By convention, the degree of $0$ is~$-1$.
+main variable even when \kbd{x} is not a polynomial (a rational function for
+instance). By convention, the degree of $0$ is~$-1$.
 
 \misctitle{Important remark}. A zero polynomial can be characterized by the
-fact that its sign is~0. However, its effective length may be equal to 2, or
-greater than 2. If it is greater than 2, this means that all the coefficients
-of the polynomial are equal to zero (as they should for a zero polynomial),
-but not all of these zeros are exact zeros, and more precisely the leading
-term \kbd{z[lgef(z)-1]} is not an exact zero.
+fact that its sign is~0. However, its length may be greater than 2, meaning
+that all the coefficients of the polynomial are equal to zero (as they should
+for a zero polynomial), but not all of these zeros are exact zeros, and more
+precisely the leading term \kbd{z[lg(z)-1]} is not an exact zero.
 
-\subsec{Type \typ{SER} (power series):}\kbdsidx{t_SER}\sidx{power series} This
-type also has a second codeword, which encodes a ``\emph{sign}'', i.e.~0
+\subsec{Type \typ{SER} (power series):}\kbdsidx{t_SER}\sidx{power series}
+This type also has a second codeword, which encodes a ``\emph{sign}'', i.e.~0
 if the power series is 0, and 1 if not, a \emph{variable number} as for
-polynomials, and an \emph{exponent}. This information can be handled with
-the following functions: \teb{signe}, \teb{setsigne}, \teb{varn},
-\teb{setvarn} as for polynomials, and \teb{valp}, \teb{setvalp} for the
-exponent as for $p$-adic numbers. Beware: do \emph{not} use \teb{expo} and
-\teb{setexpo} on power series.
+polynomials, and an \emph{exponent}. This information can be handled with the
+following functions: \teb{signe}, \teb{setsigne}, \teb{varn}, \teb{setvarn}
+as for polynomials, and \teb{valp}, \teb{setvalp} for the exponent as for
+$p$-adic numbers. Beware: do \emph{not} use \teb{expo} and \teb{setexpo} on
+power series.
 
 If the power series is non-zero, \kbd{z[2]}, \kbd{z[3]},\dots
 \kbd{z[lg(z)-1]} point to the coefficients of \kbd{z} in ascending order,
@@ -1332,46 +1325,44 @@ power series can be negative, i.e.~we are then dealing with a Laurent series
 (with a finite number of negative terms).
 
 \subsec{Type \typ{RFRAC} and \typ{RFRACN} (rational function):}%
-\kbdsidx{t_RFRAC}\kbdsidx{t_RFRACN}\sidx{rational function}
-\kbd{z[1]} points to the numerator, and \kbd{z[2]} on the denominator. The
-denominator must be of type polynomial. Note that a type \typ{RFRACN}
-rational function can be converted to irreducible form using the function
-\teb{gred}.
+\kbdsidx{t_RFRAC}\kbdsidx{t_RFRACN}\sidx{rational function} \kbd{z[1]} points
+to the numerator, and \kbd{z[2]} on the denominator. The denominator must be
+of type polynomial. Note that a type \typ{RFRACN} rational function can be
+converted to irreducible form using the function \teb{gred}.
 
 \subsec{Type \typ{QFR} (indefinite binary quadratic form):}%
-\kbdsidx{t_QFR}\sidx{indefinite binary quadratic form}
-\kbd{z[1]}, \kbd{z[2]}, \kbd{z[3]} point to the three coefficients of the
-form and should be of type integer. \kbd{z[4]} is Shanks's distance
-function, and should be of type real.
+\kbdsidx{t_QFR}\sidx{indefinite binary quadratic form} \kbd{z[1]},
+\kbd{z[2]}, \kbd{z[3]} point to the three coefficients of the form and should
+be of type integer. \kbd{z[4]} is Shanks's distance function, and should be
+of type real.
 
 \subsec{Type \typ{QFI} (definite binary quadratic form):}%
-\kbdsidx{t_QFI}\sidx{definite binary quadratic form}
-\kbd{z[1]}, \kbd{z[2]}, \kbd{z[3]} point to the three coefficients of the
-form. All three should be of type integer.
+\kbdsidx{t_QFI}\sidx{definite binary quadratic form} \kbd{z[1]}, \kbd{z[2]},
+\kbd{z[3]} point to the three coefficients of the form. All three should be
+of type integer.
 
 \subsec{Type \typ{VEC} and \typ{COL} (vector):}%
 \kbdsidx{t_VEC}\kbdsidx{t_COL}\sidx{row vector}\sidx{column vector}
-\kbd{z[1]}, \kbd{z[2]},\dots \kbd{z[lg(z)-1]} point to the components of
-the vector.
+\kbd{z[1]}, \kbd{z[2]},\dots \kbd{z[lg(z)-1]} point to the components of the
+vector.
 
-\subsec{Type \typ{MAT} (matrix):}\kbdsidx{t_MAT}\sidx{matrix}
-\kbd{z[1]}, \kbd{z[2]},\dots \kbd{z[lg(z)-1]} point to the column vectors
-of \kbd{z}, i.e.~they must be of type \typ{COL} and of the same length.
+\subsec{Type \typ{MAT} (matrix):}\kbdsidx{t_MAT}\sidx{matrix} \kbd{z[1]},
+\kbd{z[2]},\dots \kbd{z[lg(z)-1]} point to the column vectors of \kbd{z},
+i.e.~they must be of type \typ{COL} and of the same length.
 
-\noindent The next two types were introduced for specific GP use, and you will
-be much better off using the standard malloc'ed C constructs when programming
-in library mode. We quote them just for completeness, advising you not to use
-them:
+\noindent The next two types were introduced for specific GP use, and you
+will be much better off using the standard malloc'ed C constructs when
+programming in library mode. We quote them just for completeness, advising
+you not to use them:
 
-\subsec{Type \typ{LIST} (list):}\kbdsidx{t_LIST}\sidx{list}
-This one has a second codeword which contains an effective length (handled
-through \teb{lgef}~/ \teb{setlgef}). \kbd{z[2]},\dots, \kbd{z[lgef(z)-1]}
+\subsec{Type \typ{LIST} (list):}\kbdsidx{t_LIST}\sidx{list} This one has a
+second codeword which contains an effective length (handled through
+\teb{lgeflist}~/ \teb{setlgeflist}). \kbd{z[2]},\dots, \kbd{z[lgeflist(z)-1]}
 contain the components of the list.
 
 \subsec{Type \typ{STR} (character string):}%
-\kbdsidx{t_STR}\sidx{character string}
-\fun{char *}{GSTR}{z} (= \kbd{(z+1)}) points to the first character of the
-(\kbd{NULL}-terminated) string.
+\kbdsidx{t_STR}\sidx{character string} \fun{char *}{GSTR}{z} (= \kbd{(z+1)})
+points to the first character of the (\kbd{NULL}-terminated) string.
 
 \misctitle{Implementation note:} for the types including an exponent (or a
 valuation), we actually store a biased non-negative exponent (bit-ORing the
@@ -1380,15 +1371,15 @@ exponent: either \kbd{HIGHEXPOBIT} (for \typ{REAL}) or \kbd{HIGHVALPBIT} (for
 \typ{PADIC} and \typ{SER}). Of course, this is encapsulated by the
 exponent/valuation-handling macros and need not concern the library user.
 
-\section{PARI variables}\label{se:vars}
-\subsec{Multivariate objects}\sidx{variable (priority)}
+\section{PARI variables}\label{se:vars} \subsec{Multivariate
+objects}\sidx{variable (priority)}
 
-\noindent
-We now consider variables and formal computations, and give the technical
-details corresponding to the general discussion in \secref{se:priority}. As
-we have seen in \secref{se:impl}, the codewords for types \typ{POL} and
-\typ{SER} encode a ``variable number''. This is an integer, ranging from $0$
-to \kbd{MAXVARN}. The lower it is, the higher the variable priority.
+\noindent We now consider variables and formal computations, and give the
+technical details corresponding to the general discussion in
+\secref{se:priority}. As we have seen in \secref{se:impl}, the codewords for
+types \typ{POL} and \typ{SER} encode a ``variable number''. This is an
+integer, ranging from $0$ to \kbd{MAXVARN}. The lower it is, the higher the
+variable priority.
 
 In fact, the way an object will be considered in formal computations depends
 entirely on its ``principal variable number'' which is given by the function
@@ -1404,13 +1395,13 @@ But for polynomials and power series only the ``outermost'' number counts (we
 directly access $\tet{varn}(x)$ in the codewords): the representation is not
 symmetrical at all.
 
-Under GP, one need not worry too much since the interpreter will define
-the variables as it sees them\footnote{*}{
-More precisely, the first time a given identifier is read by the GP parser
-(and is not immediately interpreted as a function) a new variable is created,
-and it is assigned a strictly lower priority than any variable in use at this
-point. On startup, before any user input has taken place, 'x' is defined in
-this way and will thus always have maximal priority (and variable number $0$).}
+Under GP, one need not worry too much since the interpreter will define the
+variables as it sees them\footnote{*}{ More precisely, the first time a given
+identifier is read by the GP parser (and is not immediately interpreted as a
+function) a new variable is created, and it is assigned a strictly lower
+priority than any variable in use at this point. On startup, before any user
+input has taken place, 'x' is defined in this way and will thus always have
+maximal priority (and variable number $0$).}
 %
 and do the right thing with the polynomials produced (however, have a look at
 the remark in \secref{se:rempolmod}). 
@@ -1419,14 +1410,13 @@ But in library mode, they are tricky objects if you intend to build
 polynomials yourself (and not just let PARI functions produce them, which is
 usually less efficient). For instance, it does not make sense to have a
 variable number occur in the components of a polynomial whose main variable
-has a higher number (lower priority), even though there is nothing PARI can do
-to prevent you from doing it; see \secref{se:priority} for a discussion
-of possible problems in a similar situation.
+has a higher number (lower priority), even though there is nothing PARI can
+do to prevent you from doing it; see \secref{se:priority} for a discussion of
+possible problems in a similar situation.
 
-\subsec{Creating variables}
-A basic difficulty is to ``create'' a variable. As we have seen in
-\secref{se:intro4}, a plethora of objects is associated to variable
-number~$v$. Here is the complete list: \teb{polun}$[v]$ and
+\subsec{Creating variables} A basic difficulty is to ``create'' a variable.
+As we have seen in \secref{se:intro4}, a plethora of objects is associated to
+variable number~$v$. Here is the complete list: \teb{polun}$[v]$ and
 \teb{polx}$[v]$, which you can use in library mode and which represent,
 respectively, the monic monomials of degrees 0 and 1 in~$v$;
 \teb{varentries}$[v]$, and \teb{polvar}$[v]$. The latter two are only
@@ -1435,21 +1425,20 @@ properly defined before you can use a given integer as a variable number.
 
 Initially, this is done for $0$ (the variable \kbd{x} under GP), and
 \tet{MAXVARN}, which is there to address the need for a ``temporary'' new
-variable in library mode and cannot be input under GP.
-No documented library function can create from scratch an object involving
-\tet{MAXVARN} (of course, if the operands originally involve \kbd{MAXVARN},
-the function will abide). We call the latter type a ``temporary variable''.
-The regular variables meant to be used in regular objects, are called ``user
+variable in library mode and cannot be input under GP. No documented library
+function can create from scratch an object involving \tet{MAXVARN} (of
+course, if the operands originally involve \kbd{MAXVARN}, the function will
+abide). We call the latter type a ``temporary variable''. The regular
+variables meant to be used in regular objects, are called ``user
 variables\sidx{variable (user)}''.
 
-\subsubsec{User variables}\sidx{variable (user)}:
-When the program starts, \kbd{x} is the only user variable (number~$0$). To
-define new ones, use
+\subsubsec{User variables}\sidx{variable (user)}: When the program starts,
+\kbd{x} is the only user variable (number~$0$). To define new ones, use
 
 \fun{long}{fetch_user_var}{char *$s$}
 
-\noindent which inspects the user variable named $s$ (creating it if
-needed), and returns its variable number. 
+\noindent which inspects the user variable named $s$ (creating it if needed),
+and returns its variable number. 
 \bprog
 long v = fetch_user_var("y");
 GEN gy = polx[v];

@@ -162,8 +162,6 @@ char *errmessage[]=
   "the PARI stack overflows !",
 /* errlg */
   "object too big, length can't fit in a codeword",
-/* errlgef */
-  "degree overflow",
 /* errexpo */
   "exponent overflow",
 /* errvalp */

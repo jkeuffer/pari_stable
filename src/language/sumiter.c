@@ -913,7 +913,7 @@ sumpos2(entree *ep, GEN a, char *ch, long prec)
   dn = poleval(pol,gun);
   pol[2] = lsub((GEN)pol[2],dn);
   pol = gdiv(pol, gsub(gun,polx[0]));
-  for (k=1; k<=lgef(pol)-2; k++)
+  for (k=1; k<=lg(pol)-2; k++)
   {
     p1 = gmul((GEN)pol[k+1],stock[k]);
     if (odd(k)) p1 = gneg_i(p1);
@@ -1203,7 +1203,7 @@ polzagreel(long n, long m, long prec)
     if (j || !(m&1))
     {
       h = cgetg(n+3,t_POL);
-      h[1] = evalsigne(1)|evallgef(n+3);
+      h[1] = evalsigne(1);
       h[2] = g[2];
       for (k=1; k<n; k++)
 	h[k+2] = ladd(gmulsg(k+k+1,(GEN)g[k+2]), gmulsg(k<<1,(GEN)g[k+1]));

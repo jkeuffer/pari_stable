@@ -127,7 +127,7 @@ unifpol(GEN nf, GEN x, long flag)
 {
   if (typ(x)==t_POL && varn(x) < varn(nf[1]))
   {
-    long i, d = lgef(x);
+    long i, d = lg(x);
     GEN y = cgetg(d,t_POL); y[1] = x[1];
     for (i=2; i<d; i++) y[i] = (long)unifpol0(nf, (GEN)x[i], flag);
     return y;
@@ -285,7 +285,7 @@ nf_bestlift_to_pol(GEN elt, GEN bound, nflift_t *L)
 static GEN
 nf_pol_lift(GEN pol, GEN bound, nfcmbf_t *T)
 {
-  long i, l = lgef(pol);
+  long i, l = lg(pol);
   GEN x = cgetg(l,t_POL);
 
   x[1] = pol[1];
@@ -504,7 +504,7 @@ static long
 ZXY_get_prec(GEN P)
 {
   long i, j, z, prec = 0;
-  for (i=2; i<lgef(P); i++)
+  for (i=2; i<lg(P); i++)
   {
     GEN p = (GEN)P[i];
     if (typ(p) == t_INT)
@@ -514,7 +514,7 @@ ZXY_get_prec(GEN P)
     }
     else
     {
-      for (j=2; j<lgef(p); j++)
+      for (j=2; j<lg(p); j++)
       {
         z = lgefint(p[j]);
         if (z > prec) prec = z;
@@ -539,7 +539,7 @@ ZM_get_prec(GEN x)
 long
 ZX_get_prec(GEN x)
 {
-  long j, l, k = 2, lx = lgef(x);
+  long j, l, k = 2, lx = lg(x);
 
   for (j=2; j<lx; j++)
   {
@@ -566,7 +566,7 @@ nf_root_bounds(GEN P, GEN T)
   T = get_nfpol(T, &nf);
 
   prec = ZXY_get_prec(P);
-  l = lgef(P);
+  l = lg(P);
   if (nf && nfgetprec(nf) >= prec)
     R = (GEN)nf[6];
   else
@@ -729,7 +729,7 @@ FqX_centermod(GEN z, GEN T, GEN pk, GEN pks2)
   long i, l;
   GEN y;
   if (!T) return centermod_i(z, pk, pks2);
-  y = FpXQX_red(z, T, pk); l = lgef(y);
+  y = FpXQX_red(z, T, pk); l = lg(y);
   for (i = 2; i < l; i++)
   {
     GEN c = (GEN)y[i];
@@ -1018,7 +1018,7 @@ nf_to_Zq(GEN x, GEN T, GEN pk, GEN pks2, GEN proj)
 static GEN
 ZqX(GEN P, GEN pk, GEN T, GEN proj)
 {
-  long i, l = lgef(P);
+  long i, l = lg(P);
   GEN z, pks2 = shifti(pk,-1);
 
   z = cgetg(l,t_POL); z[1] = P[1];
@@ -1370,7 +1370,7 @@ nf_DDF_roots(GEN pol, GEN polred, GEN nfpol, GEN lt, GEN init_fa, long nbf,
   }
   else
     z = rootpadicfast(polred, L->p, L->k);
-  Cltx_r[1] = evalsigne(1) | evalvarn(varn(pol)) | evallgef(4);
+  Cltx_r[1] = evalsigne(1) | evalvarn(varn(pol));
   Cltx_r[3] = Clt? (long)Clt: un;
   C2ltpol  = C2lt? gmul(C2lt, pol): pol;
   for (m=1,i=1; i<lg(z); i++)
@@ -1599,13 +1599,13 @@ rnfcharpoly(GEN nf,GEN T,GEN alpha,int v)
   if (v<0) v = 0;
   T = fix_relative_pol(nf,T,1);
   if (typ(alpha) == t_POLMOD) alpha = lift_to_pol(alpha);
-  lT = lgef(T);
+  lT = lg(T);
   if (typ(alpha) != t_POL || varn(alpha) == vnf)
     return gerepileupto(av, gpowgs(gsub(polx[v], alpha), lT - 3));
   vT = varn(T);
   if (varn(alpha) != vT || v >= vnf)
     err(talker,"incorrect variables in rnfcharpoly");
-  if (lgef(alpha) >= lT) alpha = gmod(alpha,T);
+  if (lg(alpha) >= lT) alpha = gmod(alpha,T);
   if (lT <= 4)
     return gerepileupto(av, gsub(polx[v], alpha));
   p1 = caract2(T, unifpol(nf,alpha, t_POLMOD), v);

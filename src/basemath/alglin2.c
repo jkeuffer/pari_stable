@@ -94,7 +94,7 @@ easychar(GEN x, long v, GEN *py)
     case t_INT: case t_REAL: case t_INTMOD:
     case t_FRAC: case t_FRACN: case t_PADIC:
       p1=cgetg(4,t_POL);
-      p1[1]=evalsigne(1) | evallgef(4) | evalvarn(v);
+      p1[1]=evalsigne(1) | evalvarn(v);
       p1[2]=lneg(x); p1[3]=un;
       if (py)
       {
@@ -108,7 +108,7 @@ easychar(GEN x, long v, GEN *py)
     case t_COMPLEX: case t_QUAD:
       if (py) err(typeer,"easychar");
       p1 = cgetg(5,t_POL);
-      p1[1] = evalsigne(1) | evallgef(5) | evalvarn(v);
+      p1[1] = evalsigne(1) | evalvarn(v);
       p1[2] = lnorm(x); av = avma;
       p1[3] = lpileupto(av, gneg(gtrace(x)));
       p1[4] = un; return p1;
@@ -187,7 +187,7 @@ caradj(GEN x, long v, GEN *py)
   if ((p = easychar(x, v, py))) return p;
 
   l = lg(x); av0 = avma;
-  p = cgetg(l+2,t_POL); p[1] = evalsigne(1) | evallgef(l+2) | evalvarn(v);
+  p = cgetg(l+2,t_POL); p[1] = evalsigne(1) | evalvarn(v);
   p[l+1] = un;
   if (l == 1) { if (py) *py = cgetg(1,t_MAT); return p; }
   av = avma; t = gerepileupto(av, gneg(mattrace(x)));
@@ -393,8 +393,7 @@ QuickNormL2(GEN x, long prec)
 {
   pari_sp av = avma;
   GEN y = gmul(x, realun(prec));
-  if (typ(x) == t_POL)
-    *++y = evaltyp(t_VEC) | evallg(lgef(x)-1);
+  if (typ(x) == t_POL) *++y = evaltyp(t_VEC) | evallg(lg(x)-1);
   return gerepileupto(av, gnorml2(y));
 }
 
@@ -411,7 +410,7 @@ gnorml1(GEN x,long prec)
       return gabs(x,prec);
 
     case t_POL:
-      lx = lgef(x); s = gzero;
+      lx = lg(x); s = gzero;
       for (i=2; i<lx; i++) s = gadd(s, gabs((GEN)x[i],prec));
       break;
 
@@ -494,12 +493,7 @@ gconj(GEN x)
       z[3] = lneg((GEN) x[3]);
       break;
 
-    case t_POL:
-      lx = lgef(x); z = cgetg(lx,tx); z[1] = x[1];
-      for (i=2; i<lx; i++) z[i] = lconj((GEN)x[i]);
-      break;
-
-    case t_SER:
+    case t_POL: case t_SER:
       lx = lg(x); z = cgetg(lx,tx); z[1] = x[1];
       for (i=2; i<lx; i++) z[i] = lconj((GEN)x[i]);
       break;
@@ -551,7 +545,7 @@ conjvec(GEN x,long prec)
       break;
 
     case t_POLMOD:
-      y=(GEN)x[1]; lx=lgef(y);
+      y=(GEN)x[1]; lx=lg(y);
       if (lx<=3) return cgetg(1,t_COL);
       av=avma; p=NULL;
       for (i=2; i<lx; i++)
@@ -599,7 +593,7 @@ assmat(GEN x)
   if (typ(x)!=t_POL) err(notpoler,"assmat");
   if (gcmp0(x)) err(zeropoler,"assmat");
 
-  lx=lgef(x)-2; y=cgetg(lx,t_MAT);
+  lx=lg(x)-2; y=cgetg(lx,t_MAT);
   for (i=1; i<lx-1; i++)
   {
     p1=cgetg(lx,t_COL); y[i]=(long)p1;
@@ -646,12 +640,7 @@ gtrace(GEN x)
       }
       return gmul2n((GEN)x[2],1);
 
-    case t_POL:
-      lx = lgef(x); y = cgetg(lx,tx); y[1] = x[1];
-      for (i=2; i<lx; i++) y[i] = ltrace((GEN)x[i]);
-      return y;
-
-    case t_SER:
+    case t_POL: case t_SER:
       lx = lg(x); y = cgetg(lx,tx); y[1] = x[1];
       for (i=2; i<lx; i++) y[i] = ltrace((GEN)x[i]);
       return y;

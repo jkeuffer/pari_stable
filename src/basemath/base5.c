@@ -98,7 +98,7 @@ eltreltoabs(GEN rnfeq, GEN x)
   /* Mod(X + k alpha, polabs(X)), alpha root of the polynomial defining base */
   teta = gmodulcp(gsub(polx[va], gmulsg(k,lift_intern(alpha))), polabs);
   s = gzero;
-  for (i=lgef(x)-1; i>1; i--)
+  for (i=lg(x)-1; i>1; i--)
   {
     GEN c = (GEN)x[i];
     long tc = typ(c);
@@ -508,7 +508,7 @@ rnfelementdown(GEN rnf,GEN x)
       if (typ(z)==t_POLMOD && varn(z[1])==varn(rnf[1])) z = (GEN)z[2];
       if (gvar(z) <= varn(rnf[1]))
       {
-        if (lgef(z) > 3)
+        if (lg(z) > 3)
           err(talker,"element is not in the base field in rnfelementdown");
         z = (GEN)z[2];
       }

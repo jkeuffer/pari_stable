@@ -492,16 +492,15 @@ gpowgs(GEN x, long n)
 GEN
 pow_monome(GEN x, GEN nn)
 {
-  long n, m, i, j, dd;
+  long n, m, i, l, dd;
   pari_sp tetpil, av = avma;
   GEN p1,y;
   if (is_bigint(nn)) err(talker,"power overflow in pow_monome");
   n = itos(nn); m = labs(n);
-  j=lgef(x); dd=(j-3)*m+3;
-  p1=cgetg(dd,t_POL); m = labs(n);
-  p1[1] = evalsigne(1) | evallgef(dd) | evalvarn(varn(x));
+  l = lg(x); dd = (l-3)*m+3;
+  p1 = cgetg(dd,t_POL); p1[1] = x[1];
   for (i=2; i<dd-1; i++) p1[i]=zero;
-  p1[i]=lpuigs((GEN)x[j-1],m);
+  p1[i] = lpuigs((GEN)x[l-1],m);
   if (n>0) return p1;
 
   tetpil=avma; y=cgetg(3,t_RFRAC);

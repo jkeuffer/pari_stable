@@ -122,7 +122,7 @@ tchebi(long n, long v) /* Assume 4*n < VERYBIGINT */
       *r-- = (long)a;
       *r-- = zero;
     }
-  q[1] = evalsigne(1) | evalvarn(v) | evallgef(n+3);
+  q[1] = evalsigne(1) | evalvarn(v);
   return q;
 }
 
@@ -200,7 +200,7 @@ roots_to_pol_intern(GEN L, GEN a, long v, int plus)
   GEN p1,p2;
   if (lx == 1) return polun[v];
   p1 = cgetg(lx, t_VEC);
-  code = evalsigne(1)|evalvarn(v)|evallgef(5);
+  code = evalsigne(1)|evalvarn(v);
   for (k=1,i=1; i<lx-1; i+=2)
   {
     p2 = cgetg(5,t_POL); p1[k++] = (long)p2;
@@ -212,7 +212,7 @@ roots_to_pol_intern(GEN L, GEN a, long v, int plus)
   if (i < lx)
   {
     p2 = cgetg(4,t_POL); p1[k++] = (long)p2;
-    p2[1] = code = evalsigne(1)|evalvarn(v)|evallgef(4);
+    p2[1] = code = evalsigne(1)|evalvarn(v);
     p2[2] = plus? a[i]: lneg((GEN)a[i]);
     p2[3] = (long)L;
   }
@@ -233,7 +233,7 @@ roots_to_pol_r1r2(GEN a, long r1, long v)
   GEN p1;
   if (lx == 1) return polun[v];
   p1 = cgetg(lx, t_VEC);
-  code = evalsigne(1)|evalvarn(v)|evallgef(5);
+  code = evalsigne(1)|evalvarn(v);
   for (k=1,i=1; i<r1; i+=2)
   {
     GEN p2 = cgetg(5,t_POL); p1[k++] = (long)p2;
@@ -406,7 +406,7 @@ gprec(GEN x, long l)
       break;
 
     case t_POL:
-      lx=lgef(x); y=cgetg(lx,tx); y[1]=x[1];
+      y=cgetg(lx,tx); y[1]=x[1];
       for (i=2; i<lx; i++) y[i]=lprec((GEN)x[i],l);
       break;
 
@@ -433,7 +433,7 @@ gprec_w(GEN x, long pr)
       y=cgetr(pr); affrr(x,y); break;
 
     case t_POL:
-      lx=lgef(x); y=cgetg(lx,tx); y[1]=x[1];
+      lx=lg(x); y=cgetg(lx,tx); y[1]=x[1];
       for (i=2; i<lx; i++) y[i]=(long)gprec_w((GEN)x[i],pr);
       break;
 
@@ -456,7 +456,7 @@ gprec_w(GEN x, long pr)
 GEN
 polrecip(GEN x)
 {
-  long lx=lgef(x),i,j;
+  long lx=lg(x),i,j;
   GEN y;
 
   if (typ(x) != t_POL) err(typeer,"polrecip");
@@ -469,7 +469,7 @@ polrecip(GEN x)
 GEN
 polrecip_i(GEN x)
 {
-  long lx=lgef(x),i,j;
+  long lx=lg(x),i,j;
   GEN y;
 
   y=cgetg(lx,t_POL); y[1]=x[1];
@@ -935,7 +935,7 @@ RX_RXQ_compo(GEN f, GEN x, GEN T)
   GEN y;
 
   if (typ(f) != t_POL) return gcopy(f);
-  l = lgef(f)-1; y = (GEN)f[l];
+  l = lg(f)-1; y = (GEN)f[l];
   for (l--; l>=2; l--)
     y = gres(gadd(gmul(y,x), (GEN)f[l]), T);
   return gerepileupto(av, y);

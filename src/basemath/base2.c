@@ -479,13 +479,13 @@ allbase2(GEN f, int flag, GEN *dx, GEN *dK, GEN *ptw)
 {
   GEN w,w1,w2,a,pro,at,bt,b,da,db,q, *cf,*gptr[2];
   pari_sp av=avma,tetpil;
-  long n,h,j,i,k,r,s,t,v,mf;
+  long n,h,j,i,k,r,s,t,mf;
 
   w = ptw? *ptw: NULL;
   allbase_check_args(f,flag,dx, &w);
   w1 = (GEN)w[1];
   w2 = (GEN)w[2];
-  v = varn(f); n = degpol(f); h = lg(w1)-1;
+  n = degpol(f); h = lg(w1)-1;
   cf = (GEN*)cgetg(n+1,t_VEC);
   cf[2]=companion(f);
   for (i=3; i<=n; i++) cf[i]=mulmati(cf[2],cf[i-1]);
@@ -550,11 +550,10 @@ allbase2(GEN f, int flag, GEN *dx, GEN *dK, GEN *ptw)
   for (j=1; j<=n; j++)
     *dK = diviiexact(mulii(*dK,sqri(gcoeff(a,j,j))), sqri(da));
   tetpil=avma; *dK = icopy(*dK);
-  at=cgetg(n+1,t_VEC); v=varn(f);
+  at=cgetg(n+1,t_VEC);
   for (k=1; k<=n; k++)
   {
-    q=cgetg(k+2,t_POL); at[k]=(long)q;
-    q[1] = evalsigne(1) | evallgef(2+k) | evalvarn(v);
+    q=cgetg(k+2,t_POL); q[1] = f[1]; at[k] = (long)q;
     for (j=1; j<=k; j++) q[j+1] = ldiv(gcoeff(a,k,j),da);
   }
   gptr[0] = &at; gptr[1] = dK;
@@ -901,7 +900,7 @@ polmodiaux(GEN x, GEN y, GEN ys2)
 GEN
 polmodi(GEN x, GEN y)
 {
-  long lx=lgef(x), i;
+  long lx=lg(x), i;
   GEN ys2 = shifti(y,-1);
   for (i=2; i<lx; i++) x[i]=(long)polmodiaux((GEN)x[i],y,ys2);
   return normalizepol_i(x, lx);
@@ -911,7 +910,7 @@ polmodi(GEN x, GEN y)
 GEN
 polmodi_keep(GEN x, GEN y)
 {
-  long lx=lgef(x), i;
+  long lx=lg(x), i;
   GEN ys2 = shifti(y,-1);
   GEN z = cgetg(lx,t_POL);
   for (i=2; i<lx; i++) z[i]=(long)polmodiaux((GEN)x[i],y,ys2);
@@ -1725,22 +1724,23 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 static GEN
 testb2(GEN p, GEN fa, long Fa, GEN theta, GEN pmf, long Ft, GEN ns)
 {
-  long m, Dat, t, v = varn(fa);
+  long Dat, v = varn(fa);
+  ulong t, m;
   GEN b, w, phi, h;
 
   Dat = clcm(Fa, Ft) + 3;
   b = cgetg(5, t_VEC);
   m = p[2];
-  if (degpol(p) > 0 || m < 0) m = 0;
+  if (degpol(p) > 0 || ((long)m) < 0) m = 0;
 
   for (t = 1;; t++)
   {
-    h = m? stopoly(t, m, v): scalarpol(stoi(t), v);
+    h = m? stopoly(t, m, v): scalarpol(utoi(t), v);
     phi = gadd(theta, gmod(h, fa));
     w = factcp(p, fa, phi, pmf, ns);
     h = (GEN)w[3];
     if (h[2] > 1) { b[1] = un; break; }
-    if (lgef(w[2]) == Dat) { b[1] = deux; break; }
+    if (lg(w[2]) == Dat) { b[1] = deux; break; }
   }
 
   b[2] = (long)phi;
@@ -2546,8 +2546,7 @@ modprX_lift(GEN x, GEN modpr)
   GEN z;
 
   if (typ(x)!=t_POL) return gcopy(x); /* scalar */
-  l = lgef(x);
-  z = cgetg(l, t_POL); z[1] = x[1];
+  l = lg(x); z = cgetg(l, t_POL); z[1] = x[1];
   for (i=2; i<l; i++) z[i] = (long)ff_to_nf((GEN)x[i], modpr);
   return z;
 }
@@ -2560,8 +2559,7 @@ modprX(GEN x, GEN nf,GEN modpr)
   GEN z;
 
   if (typ(x)!=t_POL) return nf_to_ff(nf,x,modpr);
-  l = lgef(x);
-  z = cgetg(l,t_POL); z[1] = x[1];
+  l = lg(x); z = cgetg(l,t_POL); z[1] = x[1];
   for (i=2; i<l; i++) z[i] = (long)nf_to_ff(nf,(GEN)x[i],modpr);
   return normalizepol(z);
 }
@@ -2938,7 +2936,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
 static void
 check_pol(GEN x, long v)
 {
-  long i,tx, lx = lgef(x);
+  long i,tx, lx = lg(x);
   if (varn(x) != v)
     err(talker,"incorrect variable in rnf function");
   for (i=2; i<lx; i++)
@@ -2953,7 +2951,7 @@ GEN
 fix_relative_pol(GEN nf, GEN x, int chk_lead)
 {
   GEN xnf = (typ(nf) == t_POL)? nf: (GEN)nf[1];
-  long i, vnf = varn(xnf), lx = lgef(x);
+  long i, vnf = varn(xnf), lx = lg(x);
   if (typ(x) != t_POL || varn(x) >= vnf)
     err(talker,"incorrect polynomial in rnf function");
   x = dummycopy(x);
@@ -3397,14 +3395,14 @@ _rnfequation(GEN A, GEN B, long *pk, GEN *pLPRS)
 
   A = get_nfpol(A, &nf);
   B = fix_relative_pol(A,B,1);
-  lA = lgef(A);
-  lB = lgef(B);
+  lA = lg(A);
+  lB = lg(B);
   if (lA<=3 || lB<=3) err(constpoler,"rnfequation");
 
   check_pol_int(A,"rnfequation");
   B = primpart(lift_intern(B));
   for (k=2; k<lB; k++)
-    if (lgef(B[k]) >= lA) B[k] = lres((GEN)B[k],A);
+    if (lg(B[k]) >= lA) B[k] = lres((GEN)B[k],A);
 
   if (!nfissquarefree(A,B))
     err(talker,"inseparable relative equation in rnfequation");
@@ -3493,7 +3491,7 @@ mattocomplex(GEN nf, GEN x)
 static GEN
 nf_all_roots(GEN nf, GEN x, long prec)
 {
-  long i, j, l = lgef(x), ru = lg(nf[6]);
+  long i, j, l = lg(x), ru = lg(nf[6]);
   GEN y = cgetg(l, t_POL), v, z;
 
   x = unifpol(nf, x, t_COL);
