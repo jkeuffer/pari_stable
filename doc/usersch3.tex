@@ -1600,10 +1600,12 @@ to an omitted $B$.
 natural sense such that $x*u+y*v=\text{gcd}(x,y)$. The arguments
 must be both integers or both polynomials, and the result is a
 row vector with three components $u$, $v$, and $\text{gcd}(x,y)$.
+\sidx{extended gcd}
 
 \syn{vecbezout}{x,y} to get the vector, or $\teb{gbezout}(x,y, \&u, \&v)$
 which gives as result the address of the created gcd, and puts
 the addresses of the corresponding created objects into $u$ and $v$.
+\sidx{extended gcd}
 
 \subsecidx{bezoutres}$(x,y)$: as \kbd{bezout}, with the resultant of $x$ and
 $y$ replacing the gcd.
