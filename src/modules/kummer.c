@@ -878,7 +878,9 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   toK_s T;
   tau_s _tau, *tau;
   compo_s COMPO;
+  pari_timer t;
 
+  if (DEBUGLEVEL) TIMERstart(&t);
   checkbnrgen(bnr);
   bnf = (GEN)bnr[1];
   nf  = (GEN)bnf[7];
@@ -888,6 +890,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   /* step 7 */
   if (all) subgroup = NULL;
   p1 = conductor(bnr, subgroup, 2);
+  if (DEBUGLEVEL) msgTIMER(&t, "[rnfkummer] conductor");
   bnr      = (GEN)p1[2]; 
   subgroup = (GEN)p1[3];
   gell = get_gell(bnr,subgroup,all);
@@ -903,6 +906,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   compositum_red(&COMPO, polnf, cyclo(ell,vnf));
   /* step 2 */
   if (DEBUGLEVEL>2) fprintferr("Step 2\n");
+  if (DEBUGLEVEL) msgTIMER(&t, "[rnfkummer] compositum");
   degK  = degpol(polnf);
   degKz = degpol(COMPO.R);
   m = degKz / degK;
@@ -913,6 +917,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   if (DEBUGLEVEL>2) fprintferr("Step 3\n");
   /* could factor disc(R) using th. 2.1.6. */
   bnfz = bnfinit0(COMPO.R,1,NULL,prec);
+  if (DEBUGLEVEL) msgTIMER(&t, "[rnfkummer] bnfinit(Kz)");
   cycgen = check_and_build_cycgen(bnfz);
   nfz = (GEN)bnfz[7];
   clgp = gmael(bnfz,8,1);
@@ -921,6 +926,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   u = get_u(cyc, rc, gell);
 
   vselmer = get_Selmer(bnfz, cycgen, rc);
+  if (DEBUGLEVEL) msgTIMER(&t, "[rnfkummer] Selmer group");
   ru = (degKz>>1)-1;
   rv = rc+ru+1;
 
@@ -949,10 +955,10 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   p2 = vecB;
   for (j=1; j<=m-1; j++)
   {
-    GEN T = FpM_red(gmulsg((j*d)%ell,(GEN)p1[m-j]), gell);
+    GEN z = FpM_red(gmulsg((j*d)%ell,(GEN)p1[m-j]), gell);
     p2 = tauofvec(p2, tau);
     for (i=1; i<=rc; i++)
-      vecC[i] = (long)famat_mul((GEN)vecC[i], famat_factorback(p2, (GEN)T[i]));
+      vecC[i] = (long)famat_mul((GEN)vecC[i], famat_factorback(p2, (GEN)z[i]));
   }
   for (i=1; i<=rc; i++) vecC[i] = (long)famat_reduce((GEN)vecC[i]);
   /* step 5 */
@@ -1055,6 +1061,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   dK = lg(K)-1;
   y = cgetg(dK+1,t_VECSMALL);
   res = cgetg(1, t_VEC); /* in case all = 1 */
+  if (DEBUGLEVEL) msgTIMER(&t, "[rnfkummer] candidate list");
   while (dK)
   {
     for (i=1; i<dK; i++) y[i] = 0;
