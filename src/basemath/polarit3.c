@@ -1423,7 +1423,7 @@ Fp_inv_isom(GEN S,GEN T, GEN p)
     V[i] = zero;
   V[2] = un;
   V = FpM_invimage(M,V,p);
-  V = vec_to_pol(V, x);
+  V = gtopolyrev(V, x);
   return gerepileupto(ltop, V);
 }
 
