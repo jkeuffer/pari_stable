@@ -237,7 +237,7 @@ rtodbl(GEN x)
     if (a & HIGHBIT) { ex++; a=0; }
   }
   else b = 0;
-  if (ex > exp_mid) err(rtodber);
+  if (ex >= exp_mid) err(rtodber);
   ex += exp_mid;
   k = (a >> expo_len) | (ex << shift);
   if (s<0) k |= HIGHBIT;

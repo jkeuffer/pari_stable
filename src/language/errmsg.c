@@ -83,7 +83,7 @@ char *errmessage[]=
 /* errvalp */
   "valuation (valp) overflow",
 /* rtodber */
-  "underflow or overflow in a R->dbl conversion",
+  "overflow in R->dbl conversion",
 
   /*  ALGLIN.C  */
 
@@ -107,6 +107,7 @@ char *errmessage[]=
   "not enough precomputed primes, need primelimit ~ ",
 /* invmoder*/
   "impossible inverse modulo: ",
+
   /*  BASE.C  */
 
 /* constpoler */
