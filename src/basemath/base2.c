@@ -1867,36 +1867,33 @@ get_LV(GEN nf, GEN L, GEN p, long N)
   /* B[i] = L[i+1]...L[l], i = 1..(l-1) */
   B = cgetg(l+1, t_VEC); B[l] = 0;
   for (i=l; i>=2; i--)  B[i-1] = (long)mul_intersect((GEN)B[i], (GEN)LW[i], p);
-
-  for (i=1; i<=l; i++)
-    LV[i] = (long)hnfmodid(mul_intersect((GEN)A[i], (GEN)B[i], p), p);
+  for (i=1; i<=l; i++) LV[i] = (long)mul_intersect((GEN)A[i], (GEN)B[i], p);
   return LV;
 }
 
 /* P = Fp-basis (over O_K/p) for pr.
  * V = Z-basis for I_p/pr.
- * Return a p-uniformizer for pr */
+ * Return a p-uniformizer for pr. */
 static GEN
 uniformizer(GEN nf, norm_S *S, GEN P, GEN V, GEN p)
 {
   long i, l, f, m = lg(P)-1, N = degpol(nf[1]);
-  GEN PM, u, Mv, w, x, q;
+  GEN u, Mv, x, q;
 
   if (!m) return gscalcol_i(p,N);
   /* we want v_p(Norm(x)) = p^f, f = N-m */
   f = N - m;
   q = mulii(gpowgs(p,f), p);
 
-  PM= hnfmodid(P, p);
-  w = addone_aux2(PM, V);
-  u = centermod(element_sqr(nf, w), p);
+  u = FpM_invimage(concatsp(P, V), _ei(N,1), p);
+  setlg(u, lg(P));
+  u = centermod(gmul(P, u), p);
+  if (is_uniformizer(u, q, S)) return u;
+  u[1] = laddii((GEN)u[1], p); /* try p + u */
+  if (is_uniformizer(u, q, S)) return u;
 
-  x = dummycopy(u);
-  x[1] = laddii((GEN)x[1], p); /* try p + u */
-  if (is_uniformizer(x, q, S)) return x;
-
-  /* P/p ramified */
-  Mv = eltmul_get_table(nf, unnf_minus_x(w));
+  /* P/p ramified, u in P^2, not in Q for all other Q|p */
+  Mv = eltmul_get_table(nf, unnf_minus_x(u));
   l = lg(P);
   for (i=1; i<l; i++)
   {
