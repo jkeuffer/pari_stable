@@ -114,6 +114,12 @@ BA 77- typo in isinexactfield
    81- primes(-1) --> SEGV
    82- addprimes(0) wasn't rejected
    83- various inconsistant error bessages (e.g. factor("a"))
+   84- estimate for the precision of unit embeddings in isprincipalall
+   85- global("b") --> polvar corrupt
+   86- hnfmod --> hnfmodid whenever possible
+   87- check arguments in incgamc
+   88- non-rectangular matrices could trigger a SEGV (in error msg!)
+   89- qfminim(,,2) didn't like mixed t_REAL/ t_FRAC entries (typo)
 
   Added
 IZ  1- [gnuplot] look up directory tree for gnuplot related files
@@ -133,6 +139,8 @@ HC  3- extend the range of direuler (maxp was 2^16)
     4- trial divide by the "private primes" before the primality tests
     5- don't double stack automatically
     6- disable ff_poltype correction (for lack of decent finite fields) in gmul
+    7- slight optimization to hnf / hnfmod (skip zeroes)
+XR  8- nfsqff: choose a prime ideal with few factors + better heuristic bound
 
   Removed
     1- sunview "support" (didn't work, hard to test, X11 is a better standard)
