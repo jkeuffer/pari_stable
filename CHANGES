@@ -66,6 +66,9 @@ IS 13- function prototypes (missing 'extern')
    28- idealpow(,,,1) only reduced at the end, not after each multiplication
    29- typo in zbrent (always used bisection)
 BA 30- cotan(x) wasn't accepted
+   31- wrong internal prototype for thetanullk (prec not taken into account)
+   32- various bugs in gphelp -detex (??\a)
+   33- trap + ^C + next would interrupt \r or read()
 
   Changed
 BA  1- more efficient quadratic Hensel lift
@@ -77,6 +80,8 @@ BA  3- more efficient factorff when pol belongs to Fp[X] (based on Fp_isom)
     7- bnfsunit: try to compute S-units even when the class group is large
                  reduce class group generators
     8- 0.e N now inputs a real 0 of decimal exponent N (was N-defaultprecision)
+    9- try to avoid errors due to precision loss (while computing archimedian
+       components) in bnfnewprec/bnfmake
 
   Added
     1- new library function zerovec
