@@ -24,6 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #ifdef READLINE
 typedef int (*RLCI)(int, int); /* rl_complete and rl_insert functions */
+typedef char* (*GF)(const char*, int); /* generator function */
 
 BEGINEXTERN
 #ifdef HAS_RL_MESSAGE
@@ -42,7 +43,7 @@ BEGINEXTERN
 #  endif
 #endif
 #ifndef HAS_RL_MESSAGE
-extern int rl_message (const char *, ...);
+extern int rl_message (const char*, ...);
 extern int rl_clear_message();
 extern int rl_begin_undo_group(), rl_end_undo_group();
 extern int rl_read_key();
@@ -88,7 +89,6 @@ extern void* _rl_save_prompt(void);
 #  define DING rl_ding
 #else
 typedef char** (*CF)(char*, char* (*)(void)); /* completion function */
-typedef char* (*GF)(const char*, int); /* generator function */
 #  define COMPLETION_MATCHES(a,b) \
       ((CF)completion_matches)((char*)(a),(GF)(b))
 #  define FILE_COMPLETION ((GF)filename_completion_function)
@@ -335,7 +335,7 @@ matches_for_emacs(const char *text, char **matches)
 /* Attempt to complete on the contents of TEXT. END points to the end of the
  * word to complete. Return the array of matches, NULL if there are none. */
 static char **
-get_matches(int end, const char *text, char* f(const char*,int))
+get_matches(int end, const char *text, GF f)
 {
   char **matches;
 
