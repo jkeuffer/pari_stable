@@ -2011,12 +2011,6 @@ gp_sighandler(int sig)
       break;
 #endif
 
-#ifdef SIGPIPE
-    case SIGPIPE:
-      msg="GP (Broken Pipe)";
-      break;
-#endif
-
     default:
       msg="signal handling";
   }
