@@ -155,7 +155,7 @@ GEN
 ggprecision(GEN x)
 {
   long a = gprecision(x);
-  return stoi(a ? (long)bit_accuracy_mul(a, L2SL10): VERYBIGINT);
+  return utoipos(a ? (long)bit_accuracy_mul(a, L2SL10): VERYBIGINT);
 }
 
 GEN

@@ -299,11 +299,11 @@ root_mod_4(GEN f)
   no &= 3; ne &= 3;
   z3 = (no == ne);
   z1 = (no == ((4-ne)&3));
-  y=cgetg(1+z0+z1+z2+z3,t_COL); i = 1; p = stoi(4);
+  y=cgetg(1+z0+z1+z2+z3,t_COL); i = 1; p = utoipos(4);
   if (z0) y[i++] = zero;
   if (z1) y[i++] = un;
   if (z2) y[i++] = deux;
-  if (z3) y[i]   = lutoi(3UL);
+  if (z3) y[i]   = (long)utoipos(3);
   return y;
 }
 #undef i_mod4
@@ -1545,7 +1545,7 @@ rootpadic_i(GEN f, GEN p, long prec)
 
   z = modulargcd(f, derivpol(f));
   if (degpol(z) > 0) f = gdeuc(f,z);
-  q = (egalii(p,gdeux) && prec>=2)? stoi(4): p;
+  q = (egalii(p,gdeux) && prec>=2)? utoipos(4): p;
   rac = FpX_roots(FpX_red(f,q), q);
   lx = lg(rac); if (lx == 1) return rac;
   if (prec==1)
@@ -1840,7 +1840,7 @@ apprgen9(GEN f, GEN a)
   if (fl2)
   {
     x2 = zeropadic(p,2);
-    P = stoi(4);
+    P = utoipos(4);
   }
   else
   {
@@ -1930,13 +1930,17 @@ padicff(GEN x,GEN p,long pr)
   GEN q, bas, invbas, mul, dK, nf, fa, g, e, dx = absi(ZX_disc(x));
   long n = degpol(x);
 
-  nf=cgetg(10,t_VEC); nf[1]=(long)x;
+  nf = cgetg(10,t_VEC); nf[1] = (long)x;
+  if (is_pm1(q)) {
+    e = mkcol(gun);
+    g = mkcol(p);
+  } else {
+    e = mkcol2(stoi(Z_pvalrem(dx,p,&q)), gun);
+    g = mkcol2(p, q);
+  }
   fa = cgetg(3,t_MAT);
-  g = cgetg(3,t_COL); fa[1] = (long)g;
-  e = cgetg(3,t_COL); fa[2] = (long)e;
-  g[1] = (long)p; e[1] = lstoi(Z_pvalrem(dx,p,&q));
-  g[2] = (long)q; e[2] = un;
-  if (is_pm1(q)) { setlg(g, 2); setlg(e, 2); }
+  fa[1] = (long)g;
+  fa[2] = (long)e;
 
   bas = nfbasis(x, &dK, 0, fa);
   nf[3] = (long)dK;
@@ -2022,7 +2026,7 @@ factorpadic4(GEN f,GEN p,long prec)
     if (expo_is_squarefree((GEN)fa[2]))
     { /* no repeated factors: Hensel lift */
       p1 = hensel_lift_fact(fx, w, NULL, p, gpowgs(p,pr), pr);
-      p2 = stoi(ex[i]);
+      p2 = utoipos(ex[i]);
       for (k=1; k<lg(p1); k++,j++)
       {
         pols[j] = p1[k];
@@ -2047,7 +2051,7 @@ factorpadic4(GEN f,GEN p,long prec)
     {
       avma = av1;
       pols[j] = (long)fx;
-      exps[j] = lstoi(ex[i]); j++;
+      exps[j] = (long)utoipos(ex[i]); j++;
     }
   }
   if (lead)
@@ -2291,7 +2295,7 @@ typedef struct {
 } FqX_split_t;
 
 static void
-add(GEN z, GEN g, long d) { appendL(z, mkvec2(stoi(d), g)); }
+add(GEN z, GEN g, long d) { appendL(z, mkvec2(utoipos(d), g)); }
 /* return number of roots */
 long
 FqX_split_deg1(GEN *pz, GEN u, GEN q, GEN T, GEN p)

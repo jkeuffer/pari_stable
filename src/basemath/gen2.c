@@ -104,20 +104,15 @@ glength(GEN x)
 GEN
 matsize(GEN x)
 {
-  GEN y=cgetg(3,t_VEC);
-
+  long L = lg(x) - 1;
   switch(typ(x))
   {
-    case t_VEC:
-      y[1]=un; y[2]=lstoi(lg(x)-1); break;
-    case t_COL:
-      y[1]=lstoi(lg(x)-1); y[2]=un; break;
-    case t_MAT:
-      y[2]=lstoi(lg(x)-1);
-      y[1]=(lg(x)==1)? zero: lstoi(lg(x[1])-1); break;
-    default: err(typeer,"matsize");
+    case t_VEC: return mkvec2s(1, L);
+    case t_COL: return mkvec2s(L, 1);
+    case t_MAT: return mkvec2s(L? lg(x[1])-1: 0, L);
   }
-  return y;
+  err(typeer,"matsize");
+  return NULL; /* not reached */
 }
 
 /*******************************************************************/
@@ -1044,7 +1039,7 @@ vecmax(GEN x)
   GEN *p1,s;
 
   if (!is_matvec_t(tx)) return gcopy(x);
-  lx=lg(x); if (lx==1) return stoi(-VERYBIGINT);
+  lx=lg(x); if (lx==1) return utoineg(VERYBIGINT);
   if (tx!=t_MAT)
   {
     s=(GEN)x[1];
@@ -1054,7 +1049,7 @@ vecmax(GEN x)
   else
   {
     lx2 = lg(x[1]);
-    if (lx2==1) return stoi(-VERYBIGINT);
+    if (lx2==1) return utoineg(VERYBIGINT);
     s=gmael(x,1,1); i=2;
     for (j=1; j<lx; j++)
     {
@@ -1074,7 +1069,7 @@ vecmin(GEN x)
   GEN *p1,s;
 
   if (!is_matvec_t(tx)) return gcopy(x);
-  lx=lg(x); if (lx==1) return stoi(VERYBIGINT);
+  lx=lg(x); if (lx==1) return utoipos(VERYBIGINT);
   if (tx!=t_MAT)
   {
     s=(GEN)x[1];
@@ -1084,7 +1079,7 @@ vecmin(GEN x)
   else
   {
     lx2 = lg(x[1]);
-    if (lx2==1) return stoi(VERYBIGINT);
+    if (lx2==1) return utoipos(VERYBIGINT);
     s=gmael(x,1,1); i=2;
     for (j=1; j<lx; j++)
     {

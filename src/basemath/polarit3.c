@@ -989,7 +989,7 @@ static GEN fflgen(GEN l, long e, GEN r, GEN T ,GEN p, GEN *zeta)
     z = gaddgs(z, k%pp);
     while(u)
     {
-      z = FpX_add(z, monomial(stoi(u%pp),v,x), NULL);
+      z = FpX_add(z, monomial(utoipos(u%pp),v,x), NULL);
       u /= pp; v++;
     }
     if ( DEBUGLEVEL>=6 ) fprintferr("FF l-Gen:next %Z\n",z);
@@ -1034,7 +1034,7 @@ FpXQ_sqrtl(GEN a, GEN l, GEN T ,GEN p , GEN q, long e, GEN r, GEN y, GEN m)
     p2 = FpXQ_mul(z,m,T,p);
     for (i=1; !gcmp1(p2); i++) p2 = FpXQ_mul(p2,m,T,p);/*TODO: BS/GS instead*/
     p1= FpXQ_pow(y, modii(mulsi(i,gpowgs(l,e-k-1)), q), T,p);
-    m = FpXQ_pow(m,stoi(i),T,p);
+    m = FpXQ_pow(m,utoipos(i),T,p);
     e = k;
     v = FpXQ_mul(p1,v,T,p);
     y = FpXQ_pow(p1,l,T,p);
@@ -1330,15 +1330,13 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
 {
   pari_sp lbot, ltop=avma;
   long vp,vq,np,nq,e,pg;
-  GEN q;
   GEN A,B,Ap,Bp;
   GEN *gptr[2];
   vp=varn(P);vq=varn(Q);
   np=degpol(P);nq=degpol(Q);
   if (np<=0 || nq<=0 || n<=0 || np%n!=0 || nq%n!=0)
     err(talker,"bad degrees in FpX_ffintersect: %d,%d,%d",n,degpol(P),degpol(Q));
-  e = Z_pvalrem(stoi(n),l,&q);
-  pg=itos(q);
+  e = u_pvalrem(n, l, &pg);
   avma=ltop;
   if(!MA) MA=FpXQ_matrix_pow(np,np,FpXQ_pow(polx[vp],l,P,l),P,l);
   if(!MB) MB=FpXQ_matrix_pow(nq,nq,FpXQ_pow(polx[vq],l,Q,l),Q,l);
@@ -1346,16 +1344,16 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
   B=Bp=zeropol(vq);
   if (pg > 1)
   {
+    GEN ipg = utoipos(pg);
     if (smodis(l,pg) == 1)
       /*We do not need to use relative extension in this setting, so
         we don't. (Well,now that we don't in the other case also, it is more
        dubious to treat cases apart...)*/
     {
-      GEN L,An,Bn,ipg,z;
-      z=FpX_roots(FpX_red(cyclo(pg,-1),l), l);
+      GEN L,An,Bn,z;
+      z=FpX_roots(FpX_red(cyclo(pg,0),l), l);
       if (lg(z)<2) err(talker,"%Z is not a prime in FpX_ffintersect",l);
       z=negi((GEN)z[1]);
-      ipg=stoi(pg);
       if (DEBUGLEVEL>=4) (void)timer2();
       A=FpM_ker(gaddmat(z, MA),l);
       if (lg(A)!=2)
@@ -1381,21 +1379,19 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
     }
     else
     {
-      GEN L,An,Bn,ipg,U,z;
+      GEN L,An,Bn,U,z;
       U=lift(gmael(factmod(cyclo(pg,MAXVARN),l),1,1));
-      ipg=stoi(pg);
       A=intersect_ker(P, MA, U, l); 
       B=intersect_ker(Q, MB, U, l);
       if (DEBUGLEVEL>=4) (void)timer2();
-      An=(GEN) FpXYQQ_pow(A,stoi(pg),U,P,l)[2];
-      Bn=(GEN) FpXYQQ_pow(B,stoi(pg),U,Q,l)[2];
+      An=(GEN) FpXYQQ_pow(A,ipg,U,P,l)[2];
+      Bn=(GEN) FpXYQQ_pow(B,ipg,U,Q,l)[2];
       if (DEBUGLEVEL>=4) msgtimer("pows [P,Q]");
       z=FpXQ_inv(Bn,U,l);
       z=FpXQ_mul(An,z,U,l);
       L=FpXQ_sqrtn(z,ipg,U,l,NULL);
       if (DEBUGLEVEL>=4) msgtimer("FpXQ_sqrtn");
-      if ( !L )
-        err(talker,"Polynomials not irreducible in FpX_ffintersect");
+      if (!L) err(talker,"Polynomials not irreducible in FpX_ffintersect");
       B=FqX_Fq_mul(B,L,U,l);
       B=gsubst(B,MAXVARN,gzero);
       A=gsubst(A,MAXVARN,gzero);
@@ -1405,7 +1401,7 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
   {
     GEN VP,VQ,moinsun,Ay,By,lmun;
     int i,j;
-    moinsun=stoi(-1);
+    moinsun=utoineg(1);
     lmun=addis(l,-1);
     MA=gaddmat(moinsun,MA);
     MB=gaddmat(moinsun,MB);
@@ -2752,8 +2748,8 @@ FpY_FpXY_resultant(GEN a, GEN b0, GEN p)
   * P_{-n}(-X), where P_i is Lagrange polynomial: P_i(j) = delta_{i,j} */
   for (i=0,n = 1; i < dres; n++)
   {
-    x[++i] = lstoi(n);    y[i] = (long)FpX_eval_resultant(a,b, (GEN)x[i], p,la);
-    x[++i] = lsubis(p,n); y[i] = (long)FpX_eval_resultant(a,b, (GEN)x[i], p,la);
+    x[++i]=(long)utoipos(n); y[i]=(long)FpX_eval_resultant(a,b,(GEN)x[i],p,la);
+    x[++i]=lsubis(p,n);      y[i]=(long)FpX_eval_resultant(a,b,(GEN)x[i],p,la);
   }
   if (i == dres)
   {
@@ -3383,7 +3379,7 @@ fpinit_check(GEN p, long n, long l)
 {
   pari_sp ltop=avma;
   long q,o;
-  if (!isprime(stoi(n))) {avma=ltop; return 0;}
+  if (!isprime(utoipos(n))) {avma=ltop; return 0;}
   q = smodis(p,n);
   if (!q) {avma=ltop; return 0;}
   o = itos(order(gmodulss(q,n)));

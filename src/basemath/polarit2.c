@@ -684,7 +684,7 @@ Beauzamy_bound(GEN S)
     s = addrr(s, gdiv(itor(sqri(c), prec), (GEN)bin[i+1]));
   }
   /* s = [S]_2^2 */
-  C = gpow(stoi(3), dbltor(1.5 + d), prec); /* 3^{3/2 + d} */
+  C = powrshalf(stor(3,prec), 3 + 2*d); /* 3^{3/2 + d} */
   C = gdiv(gmul(C, s), gmulsg(4*d, mppi(prec)));
   lS = absi(leading_term(S));
   return mulir(lS, sqrtr(C));
@@ -709,7 +709,7 @@ factor_bound(GEN S)
 static GEN
 all_factor_bound(GEN x)
 {
-  long i, n = lg(x) - 3;
+  long i, n = degpol(x);
   GEN t, z = gzero;
   for (i=2; i<=n+2; i++) z = addii(z, sqri((GEN)x[i]));
   t = absi((GEN)x[n+2]);
@@ -783,7 +783,7 @@ cmbf(GEN pol, GEN famod, GEN bound, GEN p, long a, long b,
 nextK:
   if (K > maxK || 2*K > lfamod) goto END;
   if (DEBUGLEVEL > 3)
-    fprintferr("\n### K = %d, %Z combinations\n", K,binome(stoi(lfamod), K));
+    fprintferr("\n### K = %d, %Z combinations\n", K,binome(utoipos(lfamod), K));
   setlg(ind, K+1); ind[1] = 1;
   Sbound = (ulong) ((K+1)>>1);
   i = 1; curdeg = degpol[ind[1]];
@@ -1218,7 +1218,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
     av2 = avma;
     delta = b = 0; /* -Wall */
 AGAIN:
-    M_L = Q_div_to_int(CM_L, stoi(C));
+    M_L = Q_div_to_int(CM_L, utoipos(C));
     T2 = centermod( gmul(Tra, M_L), pa );
     if (first)
     { /* initialize lattice, using few p-adic digits for traces */
@@ -1267,7 +1267,7 @@ AGAIN:
       avma = av2; continue;
     }
 
-    CM_Lp = FpM_image(CM_L, stoi(27449)); /* inexpensive test */
+    CM_Lp = FpM_image(CM_L, utoipos(27449)); /* inexpensive test */
     if (lg(CM_Lp) != lg(CM_L))
     {
       if (DEBUGLEVEL>2) fprintferr("LLL_cmbf: rank decrease\n");
@@ -1278,7 +1278,7 @@ AGAIN:
     {
       pari_timer ti;
       if (DEBUGLEVEL>2) TIMERstart(&ti);
-      list = chk_factors(P, Q_div_to_int(CM_L,stoi(C)), bound, famod, pa);
+      list = chk_factors(P, Q_div_to_int(CM_L,utoipos(C)), bound, famod, pa);
       if (DEBUGLEVEL>2) ti_CF += TIMER(&ti);
       if (list) break;
       if (DEBUGLEVEL>2) fprintferr("LLL_cmbf: chk_factors failed");
@@ -1526,7 +1526,7 @@ DDF(GEN a, long hint, int fl)
     }
     np++;
   }
-  prime = stoi(chosenp);
+  prime = utoipos(chosenp);
   ap = lead? FpX_normalize(a, prime): FpX_red(a, prime);
   if (fl) return gerepilecopy(av, DDF_roots(a, ap, prime));
 
@@ -1659,7 +1659,7 @@ DDF2(GEN x, long hint)
   L = DDF(x, hint, 0);
   if (m > 1)
   {
-    GEN e, v, fa = decomp(stoi(m));
+    GEN e, v, fa = decomp(utoipos(m));
     long i,j,k, l;
 
     e = (GEN)fa[2]; k = 0;
@@ -1722,7 +1722,7 @@ fact_from_DDF(GEN fa, GEN e, long n)
   w = cgetg(n+1,t_COL); y[2] = (long)w;
   for (k=i=1; i<l; i++)
   {
-    GEN L = (GEN)fa[i], ex = stoi(e[i]);
+    GEN L = (GEN)fa[i], ex = utoipos(e[i]);
     long J = lg(L);
     for (j=1; j<J; j++,k++)
     {
@@ -2069,7 +2069,7 @@ gauss_factor(GEN x)
     long v, e = itos((GEN)E[i]);
     int is2 = egalii(p, gdeux);
     if (is2)
-    { w = cgetg(3, t_COMPLEX); w[1] = un; w[2] = un; }
+      w = mkcomplex(gun, gun);
     else
       w = vec_to_gauss(qfbimagsolvep(qfi(gun,gzero,gun),p));
     w2 = gauss_normal( gconj(w) );
@@ -2090,7 +2090,7 @@ gauss_factor(GEN x)
       if (is2) v <<= 1; /* 2 = w^2 I^3 */
       else {
         P2[j] = (long)w2;
-        E2[j] = lstoi(v); j++;
+        E2[j] = (long)utoipos(v); j++;
       }
       E[i] = lstoi(e + v);
     }
@@ -2100,7 +2100,7 @@ gauss_factor(GEN x)
       if (is2) v <<= 1; /* 2 is ramified */
       else {
         P2[j] = (long)w2;
-        E2[j] = lstoi(-v); j++;
+        E2[j] = (long)utoineg(v); j++;
       }
       E[i] = lstoi(e - v);
     }
@@ -4016,7 +4016,7 @@ poldisc0(GEN x, long v)
       return gerepileupto(av,p1);
 
     case t_COMPLEX:
-      return stoi(-4);
+      return utoineg(4);
 
     case t_QUAD: case t_POLMOD:
       return poldisc0((GEN)x[1], v);
@@ -4277,7 +4277,7 @@ newtonpoly(GEN x, GEN p)
   for (a=0, ind=1; a<n; a++)
   {
     if (vval[a] != VERYBIGINT) break;
-    y[ind++] = lstoi(VERYBIGINT);
+    y[ind++] = (long)utoipos(VERYBIGINT);
   }
   for (b=a+1; b<=n; a=b, b=a+1)
   {
@@ -4331,7 +4331,7 @@ polfnf(GEN a, GEN t)
   if (lx == 2)
   { /* P^k, k irreducible */
     p1[1] = lmul(unt,u);
-    p2[1] = lstoi(degpol(a) / degpol(u));
+    p2[1] = (long)utoipos(degpol(a) / degpol(u));
     return gerepilecopy(av, y);
   }
   x0 = gadd(polx[varn(a)], gmulsg(-k, gmodulcp(polx[varn(t)], t)));
@@ -4349,7 +4349,7 @@ polfnf(GEN a, GEN t)
       if (degpol(G) == 0) sqfree = 1;
     }
     p1[i] = ldiv(gmul(unt,F), leading_term(F));
-    p2[i] = lstoi(e);
+    p2[i] = (long)utoipos(e);
   }
   return gerepilecopy(av, sort_factor(y, cmp_pol));
 }
@@ -4481,14 +4481,14 @@ nfgcd(GEN P, GEN Q, GEN nf, GEN den)
 
       R = RgXX_to_RgM(FlxX_to_ZXX(R), d);
       /* previous primes divided Res(P/gcd, Q/gcd)? Discard them. */
-      if (!mod || dR < dM) { M = R; mod = stoi(p); dM = dR; continue; }
+      if (!mod || dR < dM) { M = R; mod = utoipos(p); dM = dR; continue; }
       if (low_stack(st_lim, stack_lim(btop, 1)))
       {
 	if (DEBUGMEM>1) err(warnmem,"nfgcd");
 	gerepileall(btop, 2, &M, &mod);
       }
 
-      ax = mulis(Fp_inv(stoi(p), mod), p);
+      ax = mulis(Fp_inv(utoipos(p), mod), p);
       M = gadd(R, gmul(ax, gsub(M, R)));
       mod = mulis(mod, p);
       M = lift(FpM_to_mod(M, mod));
