@@ -51,6 +51,7 @@ case "$graphic_lib_dll" in
 esac
 case "$osname" in
   cygwin) WIN_LIBS="-lgdi32 -lole32 -luuid -lwsock32 -lsupc++";;
+  darwin) WIN_LIBS="-framework Carbon -framework ApplicationServices -lsupc++";;
 esac
 case "$which_graphic_lib" in
 none)
