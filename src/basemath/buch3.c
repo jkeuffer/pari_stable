@@ -329,7 +329,7 @@ buchrayall(GEN bnf,GEN module,long flag)
   {
     GEN Id = idmat(degpol(nf[1])), arch = (GEN)module[2];
     u1 = ginv(U); setlg(u1,c);
-    u1 = reducemodHNF(U, h, NULL);
+    u1 = reducemodHNF(u1, h, NULL);
     genray = cgetg(c,t_VEC);
     for (j=1; j<c; j++)
     {
