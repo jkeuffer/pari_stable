@@ -132,6 +132,7 @@ DS 21- improvements in elltors() [ faster torsion bound, check bound > 1
    23- 'make all' now builds the documentation [ that way, 'make install' need
        not run a bunch of TeX commands as root ]
    24- improved idealaddtoone [use dedicated HNF variant]
+   25- rnfkummer: do not return rational coeffs as POLMODs: -1, not Mod(-1,pol)
 
   Added:
     1- [TeXmacs:] contextual completion (<TAB>)

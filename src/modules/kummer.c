@@ -530,6 +530,23 @@ get_Selmer(GEN bnf, GEN cycgen, long rc)
   return concatsp(algtobasis(bnf,concatsp(fu,tu)), vecextract_i(cycgen,1,rc));
 }
 
+static GEN
+lift_if_rational(GEN x)
+{
+  GEN y;
+  if (typ(x) != t_POLMOD) return x;
+  y = (GEN)x[2];
+  if (typ(y) == t_POL && degpol(y) > 0) return x;
+  return y;
+}
+
+static void
+pollift_if_rational(GEN x)
+{
+  long lx = lgef(x), i;
+  for (i=2; i<lx; i++) x[i] = (long)lift_if_rational((GEN)x[i]);
+}
+
 /* if all!=0, give all equations of degree 'all'. Assume bnr modulus is the
  * conductor */
 static GEN
@@ -615,6 +632,7 @@ rnfkummersimple(GEN bnr, GEN subgroup, GEN gell, long all)
       {/* be satisfies all congruences, x^ell - be is irreducible, signature
         * and relative discriminant are correct */
         be = compute_beta(X, vecWB, gell, bnf);
+        be = lift_if_rational(be);
         P = gsub(gpowgs(polx[0],ell), be);
         if (!all && gegal(rnfnormgroup(bnr,P),subgroup)) return P; /*DONE*/
         res = concatsp(res, P);
@@ -760,8 +778,8 @@ static GEN
 pol_from_Newton(GEN S)
 {
   long i, k, l = lg(S);
-  GEN c = cgetg(l, t_VEC);
-
+  GEN C = cgetg(l, t_VEC), c = C + 1;
+  c[0] = un;
   c[1] = S[1];
   for (k = 2; k < l; k++)
   {
@@ -769,7 +787,7 @@ pol_from_Newton(GEN S)
     for (i = 1; i < k; i++) s = gadd(s, gmul((GEN)S[i], (GEN)c[k-i]));
     c[k] = ldivgs(s, -k);
   }
-  return gadd(gpowgs(polx[0], l-1), gtopoly(c, 0));
+  return gtopoly(C, 0);
 }
 
 /* th. 5.3.5. and prop. 5.3.9. */
@@ -1076,6 +1094,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
       {
         be = compute_beta(X, vecWB, gell, bnfz);
         P = compute_polrel(nfz, &T, be, g, ell);
+        pollift_if_rational(P);
         if (DEBUGLEVEL>1) fprintferr("polrel(beta) = %Z\n", P);
         if (!all && gegal(subgroup, rnfnormgroup(bnr, P))) return P; /* DONE */
         res = concatsp(res, P);
