@@ -1818,7 +1818,7 @@ gerepile_gauss(GEN x,long k,long t,pari_sp av, long j, GEN c)
 /*******************************************************************/
 /*                                                                 */
 /*                    KERNEL of an m x n matrix                    */
-/*          return n - rk(x) linearly independant vectors          */
+/*          return n - rk(x) linearly independent vectors          */
 /*                                                                 */
 /*******************************************************************/
 static long

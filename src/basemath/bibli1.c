@@ -1181,7 +1181,7 @@ lllfp_marked(long *pMARKED, GEN x, long D, long flag, long prec, int gram)
   if (hx != lx)
   {
     if (gram) err(mattype1,"lllfp");
-    if (lx > hx) err(talker,"dependant vectors in lllfp");
+    if (lx > hx) err(talker,"dependent vectors in lllfp");
   }
   delta = divrs(stor(D-1, DEFAULTPREC), D);
   xinit = x;
@@ -1728,7 +1728,7 @@ lindep2(GEN x, long bit)
   if (lx<=2) return cgetg(1,t_VEC);
   re = greal(x);
   im = gimag(x); bit = (long) (bit/L2SL10);
-  /* independant over R ? */
+  /* independent over R ? */
   if (lx == 3 && real_indep(re,im,bit))
     { avma = av; return cgetg(1, t_VEC); }
 
@@ -1762,7 +1762,7 @@ lindep(GEN x, long prec)
   x = gmul(x, realun(prec)); if (tx != t_COL) settyp(x,t_COL);
   re = greal(x);
   im = gimag(x);
-  /* independant over R ? */
+  /* independent over R ? */
   if (n == 2 && real_indep(re,im,bit_accuracy(prec)))
     { avma = av; return cgetg(1, t_VEC); }
   if (EXP > -10) err(precer,"lindep");

@@ -51,7 +51,7 @@ typedef int (*QSCOMP)(const void *, const void *);
  *       int     SIGNBITS, LGEFINTBITS
  *       ser,pol SIGNBITS, VARNBITS ,LGEFBITS 
  *       padic   VALPBITS, PRECPBITS 
- * Length of bitfields are independant and satisfy:
+ * Length of bitfields are independent and satisfy:
  *  TYPnumBITS  + LGnumBITS   + 1 <= BITS_IN_LONG (optimally =)
  *  SIGNnumBITS + EXPOnumBITS     <= BITS_IN_LONG
  *  SIGNnumBITS + LGnumBITS       <= BITS_IN_LONG

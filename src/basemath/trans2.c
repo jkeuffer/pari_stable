@@ -1468,18 +1468,16 @@ cxlngamma(GEN x, long prec)
 
   if (gcmp0((GEN)x[2])) return glngamma((GEN)x[1],prec);
   l = precision(x); if (!l) l = prec;
-  l2 = l+1; y=cgetg(3,t_COMPLEX);
-  y[1]=lgetr(l); y[2]=lgetr(l); av=avma;
+  l2 = l+1; y = cgetc(l); av = avma;
 
-  p1=cgetg(3,t_COMPLEX); p1[1]=lgetr(l2); p1[2]=lgetr(l2);
-
+  p1 = cgetc(l2);
   flag = (typ(x[1]) != t_REAL || gsigne((GEN)x[1]) <= 0);
   if (!flag) flag = (gexpo((GEN)x[1]) < -1);
   if (flag && (gcmp0((GEN)x[2]) || gexpo((GEN)x[2]) > 16)) flag = 0;
   p2 = flag? gsub(gun,x): x;
   gaffect(p2,p1);
 
-  p2=gabs(p1,DEFAULTPREC);
+  p2 = gabs(p1,DEFAULTPREC);
   if (expo(p2)>1000)
   {
     n=0; beta = log(pariK4/(l-2)) / LOG2 + expo(p1);
@@ -1495,9 +1493,9 @@ cxlngamma(GEN x, long prec)
     {
       p = (long)(1+PI*(alpha+n));
       l2 += n>>TWOPOTBITS_IN_LONG;
-      p2=cgetg(3,t_COMPLEX); p2[1]=lgetr(l2); p2[2]=lgetr(l2);
+      p2 = cgetc(l2);
       addsrz(n,(GEN)p1[1],(GEN)p2[1]);
-      affrr((GEN)p1[2],(GEN)p2[2]);
+      affrr((GEN)p1[2],   (GEN)p2[2]);
     }
     else
     {
@@ -1507,24 +1505,24 @@ cxlngamma(GEN x, long prec)
       p2 = p1;
     }
   }
-  mpbern(p,l2); p3 = glog(p2,l2);
+  mpbern(p,l2);
 
-  p4=cgetg(3,t_COMPLEX);
-  p4[1] = (long)real2n(-1, l2);
-  subrrz((GEN)p2[1],(GEN)p4[1],(GEN)p4[1]);
+  p4 = cgetg(3,t_COMPLEX);
+  p4[1] = (long)subrr((GEN)p2[1], real2n(-1, l2));
   p4[2] = (long)rcopy((GEN)p2[2]);
-  gmulz(p4,p3,p4); gsubz(p4,p2,p4);
+  gsubz(gmul(p4, glog(p2,l2)), p2, p4);
 
   pitemp = mppi(l2); setexpo(pitemp,2);
-  p7 = mplog(pitemp); setexpo(pitemp,1);
-  setexpo(p7,-1); addrrz((GEN)p4[1],p7, (GEN)p4[1]);
+  p7 = mplog(pitemp); setexpo(p7,-1); /* log(2Pi) / 2 */
+  setexpo(pitemp,1);/* now pitemp = Pi */
+  addrrz((GEN)p4[1],p7, (GEN)p4[1]);
 
-  gaffect(ginv(gsqr(p2)),p3); e=gexpo(p3);
+  gaffect(ginv(gsqr(p2)), p3); e = gexpo(p3);
 
-  p5=cgetg(3,t_COMPLEX);
-  p5[1]=lgetr(l2); setlg(p5[1],4);
-  p5[2]=lgetr(l2); setlg(p5[2],4);
-  p71=cgetr(l2); p7 = bern(p);
+  p5 = cgetc(l2);
+  setlg(p5[1], 4);
+  setlg(p5[2], 4);
+  p71 = cgetr(l2); p7 = bern(p);
   if (bernzone[2]>4) { setlg(p71,4); affrr(p7,p71); p7=p71; }
   p7 = divrs(p7, 2*p*(2*p-1)); gaffect(p7,p5);
 

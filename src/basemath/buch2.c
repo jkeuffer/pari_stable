@@ -2050,9 +2050,9 @@ compute_multiple_of_R(GEN A,long RU,long N,GEN *ptlambda)
   for (   ; i<=RU; i++) T[i] = deux;
   mdet = concatsp(xreal,T); /* det(Span(mdet)) = N * R */
 
-  i = gprecision(mdet); /* truncate to avoid "near dependant" vectors */
+  i = gprecision(mdet); /* truncate to avoid "near dependent" vectors */
   mdet_t = (i <= 4)? mdet: gprec_w(mdet,i-1);
-  v = (GEN)sindexrank(mdet_t)[2]; /* list of independant column indices */
+  v = (GEN)sindexrank(mdet_t)[2]; /* list of independent column indices */
   /* check we have full rank for units */
   if (lg(v) != RU+1) { avma=av; return NULL; }
 
@@ -2333,7 +2333,7 @@ addcolumntomatrix(GEN V, GEN invp, GEN L)
 
 /* compute the rank of A in M_n,r(Z) (C long), where rank(A) = r <= n.
  * Starting from the identity (canonical basis of Q^n), we obtain a base
- * change matrix P by taking the independant columns of A and vectors from
+ * change matrix P by taking the independent columns of A and vectors from
  * the canonical basis. Update invp = 1/P, and L in {0,1}^n, with L[i] = 0
  * if P[i] = e_i, and 1 if P[i] = A_i (i-th column of A)
  */

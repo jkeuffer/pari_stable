@@ -3199,7 +3199,7 @@ best_in_cycle(GEN e, GEN p, long k)
   return (gsigne(d_ellLHS(e,p)) < 0)? invell(e,p): p;
 }
 
-/* <p,q> = E_tors, possibly NULL (= oo), p,q independant unless NULL
+/* <p,q> = E_tors, possibly NULL (= oo), p,q independent unless NULL
  * order p = k, order q = 2 unless NULL */
 static GEN
 tors(GEN e, long k, GEN p, GEN q, GEN v)

@@ -1524,7 +1524,7 @@ hnffinal(GEN matgen,GEN perm,GEN* ptdep,GEN* ptB,GEN* ptC)
   H += (lg(H)-1 - lnz); H[0] = evaltyp(t_MAT) | evallg(lnz+1);
   U = (GEN)p1[2]; /* col x col */
   /* Only keep the part above the H (above the 0s is 0 since the dep rows
-   * are dependant from the ones in matgen) */
+   * are dependent from the ones in matgen) */
   zc = col - lnz; /* # of 0 columns, correspond to units */
   if (nlze) { dep = gmul(dep,U); dep += zc; }
 
@@ -1919,7 +1919,7 @@ END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
    *       [        |     ] li */
 
   matbnew = cgetg(col+1,t_MAT); /* dense+toobig, maximal rank. For hnffinal */
-  dep    = cgetg(col+1,t_MAT); /* rows dependant from the ones in matbnew */
+  dep    = cgetg(col+1,t_MAT); /* rows dependent from the ones in matbnew */
   for (j=1; j<=col; j++)
   {
     GEN z = (GEN)extramat[j];
@@ -3061,7 +3061,7 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
       av = avma;
     }
   }
-  /* independant columns */
+  /* independent columns */
   if (!signe(mdet))
   {
     if (n)

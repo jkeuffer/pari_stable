@@ -2251,7 +2251,7 @@ initzeta(GEN pol, long prec)
   for (i=1; i<=N0; i++) { tabcstni[i] = gun; tabcstn[i] = mulsr(i,p1); }
   (void)switch_stack(zone,0);
 
-  /********** Calcul des coefficients a(i,j) independants de s **********/
+  /********** compute coefficients a(i,j), independent from s **********/
 
   zet=cgetg(R,t_VEC); zet[1] = lmpeuler(prec);
   for (i=2; i<R; i++) zet[i] = (long)gzeta(stoi(i),prec);
