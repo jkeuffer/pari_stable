@@ -936,14 +936,14 @@ END:
   if (cnt == 2) { 
     avma = av0; 
     res[1] = (long)_vec(T->pol);
-    res[2] = (long)_vec(T->fact);
+    res[2] = (long)T->fact;
   }
   else
   {
     setlg(listmod, cnt); setlg(fa, cnt);
     res[1] = (long)fa;
     res[2] = (long)listmod;
-    gerepilecopy(av0, res);
+    res = gerepilecopy(av0, res);
   }
   return res;
 }
