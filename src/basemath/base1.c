@@ -1336,7 +1336,7 @@ nfinit_basic(GEN x, long flag, GEN fa, basicnf_t *T)
     else
         mat = vecpol_to_mat(bas, lg(bas)-1);
     dx = ZX_disc(x);
-    index = ginv(det2(mat));
+    index = absi(ginv(det2(mat)));
     dK = diviiexact(dx, sqri(index));
     r1 = sturm(x);
   }
@@ -1803,6 +1803,8 @@ findmindisc(GEN *py, GEN *pa)
 {
   GEN v, dmin, z, b, discs, y = *py, a = *pa;
   long i,k, l = lg(y);
+  
+  if (l == 2) { *py = (GEN)y[1]; *pa = (GEN)a[1]; return; }
 
   discs = cgetg(l,t_VEC);
   for (i=1; i<l; i++) discs[i] = labsi(ZX_disc((GEN)y[i]));
@@ -1913,18 +1915,12 @@ polredabs0(GEN x, long flag, long prec)
     if (canon_pol((GEN)y[i]) < 0) a[i] = (long)gneg_i((GEN)a[i]);
   nv = remove_duplicates(y,a);
 
-  if (DEBUGLEVEL)
-    { fprintferr("%ld minimal vectors found.\n",nv-1); flusherr(); }
-  if (nv >= 10000) flag &= (~nf_ALL); /* should not happen */
-
-  if (DEBUGLEVEL) fprintferr("\n");
+  if (DEBUGLEVEL) fprintferr("%ld minimal vectors found.\n",nv-1);
   if (nv==1)
   {
     y = _vec(x);
     a = _vec(polx[vx]);
   }
-  if (varn(y[1]) != vx)
-    for (i=1; i<nv; i++) setvarn(y[i], vx);
   if (flag & nf_ALL)
     y = storeallpol(nf,y,a,phi,flag);
   else
