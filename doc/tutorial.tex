@@ -1156,33 +1156,15 @@ multivariate polynomials. \smallskip
 Other functions related to factoring are \kbd{padicappr}, \kbd{polrootsmod},
 \kbd{polrootspadic}, \kbd{polsturm}. Play with them a little.
 
-Now let's type \kbd{polsym(pol3,20)}, where \kbd{pol3} is the same polynomial
-as above. This gives the sum of the $k$-th powers of the roots of \kbd{pol3}
-up to $k=20$, of course computed using Newton's formula and not using
-\kbd{polroots}. You notice that every odd sum is zero (this is trivial since the
-polynomial is even), but also that the signs follow a regular pattern and
-that the  (non-zero) absolute values are powers of 2. This is true: prove it,
-and more precisely find an explicit formula for the $k$-th symmetric power
-not involving (non-rational) algebraic numbers. \smallskip
-
-You can also try the function \kbd{polkaramul} (for Karatsuba
-multiplication). Put the timer on (\kbd{\#}; well, if you've been very
-dedicated and followed this tutorial all the way from the beginning, the
-timer should already be on), and then set \kbd{pol4 = (x + 1)\pow 200;} (do
-not forget the semicolon, you don't want to see the result, just the timing).
-Similarly for the next few commands. Then type \kbd{pol5 = pol4 * pol4;}, and
-look at the timing. Now type instead \kbd{pol6 = polkaramul(pol4,pol4,5);}.
-This should be about twice as fast (it is platform dependent so the gain may
-vary). Try with other values than 5. Also type \kbd{ pol5 - pol6} just to be
-sure that the result is correct. So if you have polynomials which are that
-large, it may be worthwhile to use this function.
-
-  By the way, try \kbd{pol4\pow 2;}. Surprised? Well, if you write down the
-multiplication rules for polynomials, you'll notice that it's easier to
-compute a square than a general product (you can save about half of the
-computations). This is of course taken into account in the powering operation,
-but not when doing a multiplication, since GP does not check whether the two
-operands are equal.\medskip
+Now let's type \kbd{polsym(pol3,20)}, where \kbd{pol3} is the same
+polynomial as above. This gives the sum of the $k$-th powers of the roots
+of \kbd{pol3} up to $k=20$, of course computed using Newton's formula and
+not using \kbd{polroots}. You notice that every odd sum is zero (this is
+trivial since the polynomial is even), but also that the signs follow a
+regular pattern and that the  (non-zero) absolute values are powers of 2.
+This is true: prove it, and more precisely find an explicit formula for the
+$k$-th symmetric power not involving (non-rational) algebraic numbers.
+\medskip
 
 Now let's play a little with power series. We have already done so a little
 at the beginning.  Type
