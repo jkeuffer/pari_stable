@@ -234,7 +234,8 @@ record_factors(long N, long d, long jmax, ulong *tabkbit, ulong *tmp)
  * W = bezout coeffs W[i]V[i] + W[i+1]V[i+1] = 1
  *
  * link[i] = -j if V[i] = a[j]
- *            j if V[i] = V[j] * V[j+1] */
+ *            j if V[i] = V[j] * V[j+1]
+ * Arrays link, V, W have 2k - 2 elements */
 static void
 BuildTree(GEN link, GEN V, GEN W, GEN a, GEN p)
 {
@@ -243,7 +244,7 @@ BuildTree(GEN link, GEN V, GEN W, GEN a, GEN p)
 
   for (i=1; i<=k; i++) { V[i] = a[i]; link[i] = -i; }
 
-  for (j=1; j <= 2*k-4; j+=2,i++)
+  for (j=1; j <= 2*k-5; j+=2,i++)
   {
     minp = j;
     mind = deg(V[j]);
@@ -265,7 +266,7 @@ BuildTree(GEN link, GEN V, GEN W, GEN a, GEN p)
     link[i] = j;
   }
 
-  for (j=1; j <= 2*k-2; j+=2)
+  for (j=1; j <= 2*k-3; j+=2)
   {
     GEN d, u, v;
     d = FpX_extgcd((GEN)V[j], (GEN)V[j+1], p, &u, &v);
