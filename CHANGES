@@ -49,6 +49,7 @@ Done for version 2.2.9 (released ??/??/2004):
        window becomes independant of gp as under other OSes.
     5- elllseries did not accept complex arguments
 GN  6- [ix86 + Sun cc] build fails [ unsatisfied symbol reference to 'mulll' ]
+    7- [libpari] gprec_w didn't behave well for real zero
 
   Changed
     1- increased maximum binary exponent for t_REAL, and maximum GEN length

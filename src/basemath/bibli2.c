@@ -415,7 +415,9 @@ gprec_w(GEN x, long pr)
   switch(tx)
   {
     case t_REAL:
-      y = cgetr(pr); affrr(x,y); break;
+      if (!signe(x)) y = realzero(pr);
+      else { y = cgetr(pr); affrr(x,y); }
+      break;
    
     case t_COMPLEX: case t_POLMOD: case t_POL: case t_RFRAC:
     case t_VEC: case t_COL: case t_MAT:
