@@ -442,29 +442,28 @@ findbezk_pol(GEN nf, GEN x)
 }
 
 GEN
-form_to_ideal(GEN x, GEN D)
+form_to_ideal(GEN x)
 {
   long tx = typ(x);
   GEN b,c, y = cgetg(3, t_MAT);
   if (tx != t_QFR && tx != t_QFI) err(typeer,"form_to_ideal");
-  if (!D) D = discsr(x);
   c = cgetg(3,t_COL); y[1] = (long)c;
   c[1] = x[1]; c[2] = zero;
   c = cgetg(3,t_COL); y[2] = (long)c;
   b = negi((GEN)x[2]);
-  if (mpodd(D)) b = addis(b,1);
+  if (mpodd(b)) b = addis(b,1);
   c[1] = lshifti(b,-1); c[2] = un; return y;
 }
 
 /* P as output by quadhilbertimag, convert forms to ideals */
 static void
-convert_to_id(GEN D, GEN P)
+convert_to_id(GEN P)
 {
   long i,l = lg(P);
   for (i=1; i<l; i++)
   {
     GEN p1 = (GEN)P[i];
-    p1[1] = (long)form_to_ideal((GEN)p1[1], D);
+    p1[1] = (long)form_to_ideal((GEN)p1[1]);
   }
 }
 
@@ -476,7 +475,7 @@ convert_to_id(GEN D, GEN P)
 static GEN
 quadrayimagwei(GEN bnr, GEN flag, long prec)
 {
-  long av=avma,vpol,clno,clrayno,lc,i,j,ia,ell,fl;
+  long av=avma,clno,clrayno,lc,i,j,ia,ell,fl;
   byteptr p = diffptr;
   GEN allf,f,clray,bnf,nf,D,pol,fa,P,pp,pi,pial,clgp,cyc,gen,listl;
   GEN listray,pp1,pr2,listden,listc,pii2,ida,ap2,om1,om2,tau,d,al,s,v;
@@ -484,13 +483,13 @@ quadrayimagwei(GEN bnr, GEN flag, long prec)
   allf=conductor(bnr,gzero,1,prec);
   f=gmael(allf,1,1); clray=(GEN)allf[2];
   bnf=(GEN)bnr[1]; nf=(GEN)bnf[7]; D=(GEN)nf[3];
-  pol=(GEN)nf[1]; vpol=varn(pol);
+  pol=(GEN)nf[1];
   fa=(GEN)idealfactor(nf,f)[1];
   fl=itos(flag);
   if (lg(fa)==1)
   {
     P=quadhilbertimag(D,flag);
-    if (fl) convert_to_id(D,P);
+    if (fl) convert_to_id(P);
     return gerepileupto(av, gcopy(P));
   }
   if (lg(fa)==2)
@@ -819,7 +818,6 @@ quadrayimagsigma(GEN bnr, GEN flag, long prec)
   long av=avma,a,b,f2;
   GEN allf,bnf,nf,pol,w,gf,la,p1,labas,gfi,Ci,Cj,Cj2,D,nfun;
 
-  D = (GEN)nf[3];
   allf = conductor(bnr,gzero,2,prec);
   bnr = (GEN)allf[2];
   gf = gmael(allf,1,1);
@@ -827,10 +825,13 @@ quadrayimagsigma(GEN bnr, GEN flag, long prec)
   {
     if (typ(flag)!=t_INT) flag = (GEN)flag[2];
     p1 = quadhilbertimag(gmael3(bnr,1,7,3),flag);
-    if (itos(flag)) convert_to_id(D,p1);
+    if (itos(flag)) convert_to_id(p1);
     return gerepileupto(av, gcopy(p1));
   }
-  bnf = (GEN)bnr[1]; nf = (GEN)bnf[7]; pol = (GEN)nf[1];
+  bnf = (GEN)bnr[1];
+  nf = (GEN)bnf[7];
+  pol = (GEN)nf[1];
+  D = (GEN)nf[3];
   p1 = treatspecialsigma(nf,gf,flag,prec);
   if (p1) return gerepileupto(av, p1);
   w = gmodulcp(polx[varn(pol)],pol);
