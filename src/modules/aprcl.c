@@ -602,7 +602,7 @@ extend(GEN *ptv, int lz)
   }
 }
 
-static void
+static int
 extendtabs(GEN N, int p, int k)
 {
   const int pk = u_pow(p,k), L = lg(tabaall)-1, lz = pk - L;
@@ -610,18 +610,20 @@ extendtabs(GEN N, int p, int k)
 
   if (lz <= 0)
   {
-    if (tabcyc[pk]==0) filltabs(N,p,k,ltab);
-    return;
+    if (tabcyc[pk] != gzero) return 0;
   }
-  extend((GEN*)&tabaall, lz);
-  extend((GEN*)&tabtall, lz);
-  extend((GEN*)&tabcyc, lz);
-  extend(&tabE, lz);
-  extend(&tabTH, lz);
-  extend(&tabeta, lz);
-  extend(&sgt, lz);
-  extend(&ctsgt, lz);
-  filltabs(N,p,k, ltab);
+  else
+  {
+    extend((GEN*)&tabaall, lz);
+    extend((GEN*)&tabtall, lz);
+    extend((GEN*)&tabcyc, lz);
+    extend(&tabE, lz);
+    extend(&tabTH, lz);
+    extend(&tabeta, lz);
+    extend(&sgt, lz);
+    extend(&ctsgt, lz);
+  }
+  filltabs(N,p,k, ltab); return 1;
 }
 
 static GEN
@@ -833,7 +835,7 @@ step5(GEN N, int p, GEN et)
 
     if (smodis(N,q) == 0) return -1;
     k = u_val(q-1, p);
-    extendtabs(N,p,k);
+    if (extendtabs(N,p,k)) av = avma;
 
     if (p>=3)        fl = step4a(N,q,p,k, NULL);
     else if (k >= 3) fl = step4b(N,q,k);
