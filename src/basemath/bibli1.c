@@ -1799,7 +1799,8 @@ canon_pol(GEN z)
 }
 
 static GEN
-pols_for_polred(GEN x, GEN base, GEN LLLbase, GEN *pta)
+pols_for_polred0(GEN x, GEN base, GEN LLLbase, GEN *pta, 
+		int (*check)(GEN, GEN), GEN arg)
 {
   long i,j, v = varn(x), n = lg(base);
   GEN p1,p2,p3,y, a = cgetg(n,t_VEC);
@@ -1823,10 +1824,18 @@ pols_for_polred(GEN x, GEN base, GEN LLLbase, GEN *pta)
     if (canon_pol(p1) < 0 && pta)
       a[i] = (long) gneg_i((GEN)a[i]);
     y[i] = (long)p1; if (DEBUGLEVEL>=4) outerr(p1);
+    if (check && check(arg, p1)) return p1; 
   }
+  if (check) return NULL; /* no suitable polynomial found */
   (void)remove_duplicates(y,a);
   if (pta) *pta = a;
   return y;
+}
+
+static GEN
+pols_for_polred(GEN x, GEN base, GEN LLLbase, GEN *pta)
+{
+  return pols_for_polred0(x,base,LLLbase,pta,NULL,NULL);
 }
 
 GEN
@@ -1908,8 +1917,12 @@ LLL_nfbasis(GEN *ptx, GEN polr, GEN base, long prec)
 }
 
 /* x can be a polynomial, but also an nf or a bnf */
+/* if check != NULL, return the first polynomial pol
+   found such that check(arg, pol) != 0; return NULL
+   if there are no such pol */
 static GEN
-allpolred(GEN x, GEN *pta, long code, long prec)
+allpolred0(GEN x, GEN *pta, long code, long prec, 
+	   int (*check)(GEN,GEN), GEN arg)
 {
   GEN y,p1, base = NULL, polr = NULL;
   long av = avma;
@@ -1931,13 +1944,27 @@ allpolred(GEN x, GEN *pta, long code, long prec)
     }
   }
   p1 = LLL_nfbasis(&x,polr,base,prec);
-  y = pols_for_polred(x,base,p1,pta);
+  y = pols_for_polred0(x,base,p1,pta,check,arg);
+  if (check)
+  {
+    if(!y) 
+    { avma = av; return NULL; }
+    else
+    { return gerepileupto(av, y); }  
+  }
+
   if (pta)
   {
     GEN *gptr[2]; gptr[0]=&y; gptr[1]=pta;
     gerepilemany(av,gptr,2); return y;
   }
   return gerepileupto(av,y);
+}
+
+static GEN
+allpolred(GEN x, GEN *pta, long code, long prec)
+{
+  return allpolred0(x,pta,code,prec,NULL,NULL);
 }
 
 GEN
@@ -2180,6 +2207,12 @@ GEN
 polred(GEN x, long prec)
 {
   return allpolred(x,(GEN*)0,0,prec);
+}
+
+GEN 
+polredfirstpol(GEN x, long prec, int (*check)(GEN,GEN), GEN arg)
+{
+  return allpolred0(x,(GEN*)0,0,prec,check,arg);
 }
 
 GEN

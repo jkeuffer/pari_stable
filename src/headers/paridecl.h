@@ -489,6 +489,7 @@ GEN     minim2(GEN a, GEN borne, GEN stockmax);
 GEN     ordred(GEN x, long prec);
 GEN     perf(GEN a);
 GEN     polred(GEN x, long prec);
+GEN     polredfirstpol(GEN x, long prec, int (*check)(GEN,GEN), GEN bnf);
 GEN     polred0(GEN x, long flag, GEN p, long prec);
 GEN     polred2(GEN x, long prec);
 GEN     polredabs(GEN x, long prec);
