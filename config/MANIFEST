@@ -178,7 +178,6 @@ src/kernel/sparcv8/level0_sparcv8_micro.S
 src/kernel/sparcv8/level0_sparcv8_super.S
 src/kernel/sparcv9/README
 src/kernel/sparcv9/asmsparcv9.h
-src/language/TeXmacs.h
 src/language/anal.c
 src/language/anal.h
 src/language/compat.c
