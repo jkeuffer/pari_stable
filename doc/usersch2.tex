@@ -864,7 +864,11 @@ priority (which have been introduced later in the GP session) for external
 operations (typically between a polynomial and a polmod). For example, PARI
 will not recognize that \kbd{Mod(y, y\pow2 + 1)} is the same as \kbd{Mod(x,
 x\pow2 + 1)}. Hopefully, this problem will pass away when type ``element of a
-number field'' is eventually introduced. See \secref{se:priority} for a
+number field'' is eventually introduced. \footnote{*}{On the other hand, one can argue that
+there is no reason to consider these quantities equal.  E.g., one can be the
+opposite of another.  Compare with numerous discussions on whether ``the
+algebraic closure of $\Q$ is canonically defined'', or one needs to consider
+a groupoid of algebraic closures.} See \secref{se:priority} for a
 definition of ``priority'' and a discussion of (PARI's idea of) multivariate
 polynomial arithmetic.
 

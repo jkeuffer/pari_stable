@@ -1191,7 +1191,8 @@ considering the hierarchical structure of the variables; in particular, a
 polynomial in variable of \emph{lesser} priority (see \secref{se:priority})
 than the modulus variable is valid, since it can be considered as the
 constant term of a polynomial of degree 0 in the correct variable. On the
-other hand a variable of \emph{greater} priority would not be acceptable.
+other hand a variable of \emph{greater} priority would not be acceptable;
+see \secref{se:priority} for the problems which may arise.
 
 \subsec{Type \typ{POL} (polynomial):}\kbdsidx{t_POL}\sidx{polynomial} this
 type has a second codeword which is analogous to the one for integers. It
@@ -1340,7 +1341,8 @@ polynomials yourself (and not just let PARI functions produce them, which is
 usually less efficient). For instance, it does not make sense to have a
 variable number occur in the components of a polynomial whose main variable
 has a higher number (lower priority), even though there's nothing PARI can do
-to prevent you from doing it.
+to prevent you from doing it; see \secref{se:priority} for a discussion
+of possible problems in a similar situation.
 
 \subsec{Creating variables}
 A basic difficulty is to ``create'' a variable. As we have seen in
