@@ -35,6 +35,7 @@ Done for version 2.2.3 (released ??/??/2002):
     isprincipalfact is used in makecygen, even in case of precision problems]
     2- bnrisprincipal --> warning + "not an element in ..." [missing nf_FORCE]
     3- oo loop in isprincipalfact when increasing bnf precision
+    4- stack corruption in ellap (LARGE p)
 
   Changed
 BA  1- improved Fp_isom
