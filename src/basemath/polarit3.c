@@ -2552,8 +2552,8 @@ FpXQ_minpoly(GEN x, GEN T, GEN p)
 {
   ulong ltop=avma;
   GEN R=FpXQ_charpoly(x, T, p);
-  GEN G=FpX_gcd(R,deriv(R,-1),p);
-  G=FpX_Fp_mul(G, mpinvmod((GEN) G[lgef(G) - 1],p),p);
+  GEN G=FpX_gcd(R,derivpol(R),p);
+  G=FpX_normalize(G,p);
   G=FpX_div(R,G,p);
   return gerepileupto(ltop,G);
 }
@@ -2563,18 +2563,13 @@ static GEN
 u_chrem_coprime(GEN a, ulong b, GEN q, ulong p, ulong qinv, GEN pq)
 {
   ulong av = avma, d, amod = umodiu(a,p);
-  GEN ax,z;
-  int cmp;
+  GEN ax;
 
   if (b == amod) return NULL;
   d = (b > amod)? b - amod: p - (amod - b); /* (b - a) mod p */
   (void)new_chunk(lgefint(pq)<<1); /* HACK */
   ax = mului(mulssmod(d,qinv,p), q); /* d mod p, 0 mod q */
-  z = addii(a, ax);
-  cmp = cmpii(z,pq); avma = av;
-  if (!cmp) return gzero;
-  if (cmp > 0) return subii(z, pq);
-  return icopy(z);
+  avma = av; return addii(a, ax); /* in ]-q, pq[ assuming a in -]-q,q[ */
 }
 
 /* centerlift(u mod p) */
