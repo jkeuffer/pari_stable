@@ -542,15 +542,15 @@ positive representative of $x^n$ modulo $m$.
 modulo \kbd{p} (smallest positive representative). Assumes \kbd{p} to be
 prime, and \kbd{x} to be a square modulo \kbd{p}.
 
-\fun{ulong}{Fl_gener}{ulong p} returns a primitive root modulo \kbd{p},
+\fun{ulong}{Fl_gener}{ulong p} returns a \idx{primitive root} modulo \kbd{p},
 assuming \kbd{p} is prime.
 
 \fun{ulong}{Fl_gener_fact}{ulong p, GEN fa} as \kbd{Fl\_gener}, assuming
 \kbd{fa} is the factorization of $\kbd{p} - 1$. (As output by \kbd{factor}.)
 
-\fun{long}{krouu}{ulong x, ulong y} returns the Kronecker symbol $(x|y)$,
-i.e.$-1$, $0$ or $1$. Assumes \kbd{y} is non-zero. If \kbd{y} is prime, this
-is the Legendre symbol.
+\fun{long}{krouu}{ulong x, ulong y} returns the \idx{Kronecker symbol}
+$(x|y)$, i.e.$-1$, $0$ or $1$. Assumes \kbd{y} is non-zero. If \kbd{y} is an
+odd prime, this is the \idx{Legendre symbol}.
 
 \section{Level 1 kernel (operations on longs, integers and reals)}
 
@@ -1050,17 +1050,17 @@ root of $\kbd{x}$ modulo \kbd{p} (smallest non-negative residue), where
 Return \kbd{NULL} if \kbd{x} is not an \kbd{n}-th power residue. Otherwise,
 if \kbd{zn} is non-\kbd{NULL} set it to a primitive \kbd{n}-th root of $1$.
 
-\fun{long}{kross}{long x, long y} returns the Kronecker symbol $(x|y)$,
-i.e.$-1$, $0$ or $1$. If \kbd{y} is prime, this is the Legendre symbol.
-(Contrary to \kbd{krouu}, \kbd{kross} also supports $\kbd{y} = 0$)
+\fun{long}{kross}{long x, long y} returns the \idx{Kronecker symbol} $(x|y)$,
+i.e.$-1$, $0$ or $1$. If \kbd{y} is an odd prime, this is the \idx{Legendre
+symbol}. (Contrary to \kbd{krouu}, \kbd{kross} also supports $\kbd{y} = 0$)
 
-\fun{long}{krois}{GEN x, long y} returns the Kronecker symbol $(x|y)$
+\fun{long}{krois}{GEN x, long y} returns the \idx{Kronecker symbol} $(x|y)$
 of \typ{INT}~x and \kbd{long}~\kbd{y}. As \kbd{kross} otherwise.
 
-\fun{long}{krosi}{long x, GEN y} returns the Kronecker symbol $(x|y)$
+\fun{long}{krosi}{long x, GEN y} returns the \idx{Kronecker symbol} $(x|y)$
 of \kbd{long}~x and \typ{INT}~\kbd{y}. As \kbd{kross} otherwise.
 
-\fun{long}{kronecker}{GEN x, GEN y} returns the Kronecker symbol $(x|y)$
+\fun{long}{kronecker}{GEN x, GEN y} returns the \idx{Kronecker symbol} $(x|y)$
 of \typ{INT}s~x and~\kbd{y}. As \kbd{kross} otherwise.
 
 \fun{GEN}{Fp_gener}{GEN p} returns a primitive root modulo \kbd{p}, assuming
