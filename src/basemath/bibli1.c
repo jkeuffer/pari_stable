@@ -1239,7 +1239,7 @@ PRECPB:
           if (!in_place) H = H? gmul(H, h): h;
           xinit = gram? qf_base_change(xinit, h, 1): gmul(xinit, h);
           gerepileall(av, in_place? 1: 2, &xinit, &H);
-          x = mat_to_MP(xinit, prec); 
+          x = mat_to_MP(xinit, prec);
           h = idmat(n);
           retry = 1; /* never abort if x is exact */
           count_max = min(count_max << 1, 512);
@@ -1293,7 +1293,7 @@ PRECPB:
       if (!in_place) H = H? gmul(H, h): h;
       xinit = gram? qf_base_change(xinit, h, 1): gmul(xinit, h);
       gerepileall(av, in_place? 4: 5,&B,&L,&Q,&xinit, &H);
-      x = mat_to_MP(xinit, prec); 
+      x = mat_to_MP(xinit, prec);
       h = idmat(n);
     }
     else if (DEBUGLEVEL>5) fprintferr(" %ld",k);
@@ -1683,6 +1683,176 @@ lllintpartial_ip(GEN mat)
 {
   return lllintpartialall(mat,0);
 }
+
+/********************************************************************/
+/**                                                                **/
+/**                    COPPERSMITH ALGORITHM                       **/
+/**           Finding small roots of univariate equations.         **/
+/**                                                                **/
+/********************************************************************/
+
+static int
+check_condition(double beta, double tau, double rho, int d, int delta, int t)
+{
+  int dim = d*delta + t;
+
+  return (d*delta*(delta+1)/2 - beta*delta*dim + rho*delta*(delta - 1) / 2
+	  + rho * t * delta + tau*dim*(dim - 1)/2 <= 0);
+}
+
+static void
+choose_params(GEN P, GEN N, GEN X, GEN B, int *pdelta, int *pt)
+{
+  long d = degpol(P);
+  GEN P0 = leading_term(P);
+  double logN = gtodouble(glog(N, DEFAULTPREC));
+  double tau, beta, rho;
+  long delta, t;
+  tau = gtodouble(glog(X, DEFAULTPREC)) / logN;
+  beta = gtodouble(glog(B, DEFAULTPREC)) / logN;
+  if (tau >= beta * beta / d) err(talker, "bound too large");
+  /* TODO : remove P0 completely ! */
+  rho = gtodouble(glog(P0, DEFAULTPREC)) / logN;
+
+  /* Enumerate (delta,t) by increasing dimension of resulting lattice.
+   * Not subtle, but o(1) for computing time */
+  t = d; delta = 0;
+  for(;;)
+  {
+    t += d * delta + 1; delta = 0;
+    while (t >= 0) {
+      if (check_condition(beta, tau, rho, d, delta, t)) {
+        *pdelta = delta; *pt = t; return;
+      }
+      delta++; t -= d;
+    }
+  }
+}
+
+/* General Coppersmith, look for a root x0 <= p, p >= B, p | N, |x0| <= X */
+GEN
+zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
+{
+  GEN Q, R, N0, M, sh, short_pol, *Xpowers, z, r, sol, nsp, P, tst;
+  int delta, ltop = avma, i, j, row, d, l, dim, t, bnd = 5;
+
+  if (typ(P0) != t_POL || typ(N) != t_INT) err(typeer, "Coppersmith");
+  if (typ(X) != t_INT) X = gfloor(X);
+  if (!B) B = N;
+  if (typ(B) != t_INT) B = gfloor(B);
+
+  P = dummycopy(P0); d = degpol(P);
+  if (!gcmp1((GEN)P[d+2]))
+  {
+    P[d+2] = (long)bezout((GEN)P[d+2], N, &z, &r);
+    for (j = 0; j < d; j++) P[j+2] = lmodii(mulii((GEN)P[j+2], z), N);
+  }
+  if (DEBUGLEVEL >= 2) fprintferr("Modified P: %Z\n", P);
+
+  choose_params(P, N, X, B, &delta, &t);
+  if (DEBUGLEVEL >= 2)
+    fprintferr("Init: trying delta = %d, t = %d\n", delta, t);
+  for(;;)
+  {
+    dim = d * delta + t;
+
+    /* TODO: In case of failure do not recompute the full vector */
+    Xpowers = (GEN*)new_chunk(dim + 1);
+    Xpowers[0] = gun;
+    for (j = 1; j <= dim; j++) Xpowers[j] = gmul(Xpowers[j-1], X);
+
+    /* TODO: in case of failure, use the part of the matrix
+       already computed */
+    M = cgetg(dim + 1, t_MAT);
+    for (j = 1; j <= dim; j++) M[j] = (long)zerocol(dim);
+
+    /* Rows of M correspond to the polynomials
+     * N^delta, N^delta Xi, ... N^delta (Xi)^d-1,
+     * N^(delta-1)P(Xi), N^(delta-1)XiP(Xi), ... N^(delta-1)P(Xi)(Xi)^d-1,
+     * ...
+     * P(Xi)^delta, XiP(Xi)^delta, ..., P(Xi)^delta(Xi)^t-1 */
+    for (j = 1; j <= d;   j++) coeff(M, j, j) = (long)Xpowers[j-1];
+    for (     ; j <= dim; j++) coeff(M, j, j) = un;
+
+    /* P-part */
+    row = d + 1; Q = P;
+    for (i = 1; i < delta; i++)
+    {
+      for (j = 0; j < d; j++,row++)
+        for (l = j + 1; l <= row; l++)
+          coeff(M, l, row) = lmulii(Xpowers[l-1], (GEN)Q[l-j+1]);
+      Q = RgX_mul(Q, P);
+    }
+    for (j = 0; j < t; row++, j++)
+      for (l = j + 1; l <= row; l++)
+        coeff(M, l, row) = lmulii(Xpowers[l-1], (GEN)Q[l-j+1]);
+
+    /* N-part */
+    row = dim - t; N0 = N;
+    while (row >= 1)
+    {	
+      for (j = 0; j < d; j++,row--)
+        for (l = 1; l <= row; l++)
+          coeff(M, l, row) = lmulii(gmael(M, row, l), N0);
+      if (row >= 1) N0 = mulii(N0, N);
+    }
+    if (DEBUGLEVEL >= 2)
+    {
+      if (DEBUGLEVEL >= 6) fprintferr("Matrix to be reduced:\n%Z\n", M);
+      fprintferr("Entering LLL\nbitsize bound: %ld\n", expi(N0));
+      fprintferr("expected shvector bitsize: %ld\n", expi(dethnf_i(M))/dim);
+    }
+
+    sh = lllint_fp_ip(M, 4);
+    short_pol = (GEN)sh[1];
+    nsp = gzero;
+    for (j = 1; j <= dim; j++) nsp = addii(nsp, absi((GEN)short_pol[j]));
+
+    if (DEBUGLEVEL >= 2)
+    {
+      fprintferr("Candidate: %Z\n", short_pol);
+      fprintferr("bitsize Norm: %ld\n", expi(nsp));
+      fprintferr("bitsize bound: %ld\n", expi(mulsi(bnd, N0)));
+    }
+
+    if (cmpii(nsp, mulsi(bnd, N0)) < 0) break; /* SUCCESS */
+
+    /* Failed with the precomputed or supplied value */
+    t++; if (t == d) { delta++; t = 1; }
+    if (DEBUGLEVEL >= 2)
+      fprintferr("Increasing dim, delta = %d t = %d\n", delta, t);
+  }
+  bnd = itos(divii(nsp, N0)) + 1;
+
+  while (!signe(short_pol[dim])) dim--;
+
+  R = cgetg(dim + 2, t_POL); R[1] = P[1];
+  for (j = 1; j <= dim; j++)
+    R[j+1] = (long)diviiexact((GEN)short_pol[j], Xpowers[j-1]);
+  R[2] = (long)subii((GEN)R[2], mulsi(bnd - 1, N0));
+
+  sol = cgetg(1, t_VEC);
+  for (i = -bnd + 1; i < bnd; i++)
+  {
+    r = nfrootsQ(R);
+    if (DEBUGLEVEL >= 2) fprintferr("Roots: %Z\n", r);
+
+    for (j = 1; j < lg(r); j++)
+    {
+      z = (GEN)r[j];
+      tst = gcdii(FpX_eval(P, z, N), N);
+    
+      if (cmpii(tst, B) >= 0) /* We have found a factor of N >= B */
+      {
+        for (l = 1; l < lg(sol) && !egalii(z, (GEN)sol[l]); l++) /*empty*/;
+        if (l == lg(sol)) sol = concatsp(sol, z);
+      }
+    }
+    if (i < bnd) R[2] = (long)addii((GEN)R[2], N0);
+  }
+  return gerepilecopy(ltop, sol);
+}
+
 /********************************************************************/
 /**                                                                **/
 /**                   LINEAR & ALGEBRAIC DEPENDENCE                **/
@@ -2208,7 +2378,7 @@ pslq(GEN x)
   long prec;
   pari_sp av0 = avma, lim = stack_lim(av0,1), av;
   pslq_M M;
-  pslq_timer T; M.T = &T; 
+  pslq_timer T; M.T = &T;
 
   p1 = init_pslq(&M, x, &prec);
   if (p1) return p1;
@@ -2684,14 +2854,14 @@ ZM_zc_mul_i(GEN x, GEN y, long c, long l)
   return z;
 }
 GEN
-ZM_zc_mul(GEN x, GEN y) { 
+ZM_zc_mul(GEN x, GEN y) {
   long l = lg(x);
   if (l == 1) return cgetg(1, t_COL);
   return ZM_zc_mul_i(x,y, l, lg(x[1]));
 }
 
 /* x ZM, y a compatible zm (dimension > 0). */
-GEN 
+GEN
 ZM_zm_mul(GEN x, GEN y)
 {
   long j, c, l = lg(x), ly = lg(y);
@@ -2879,7 +3049,7 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
     {
       if (flag == min_FIRST)
       {
-        res[2] = lpileupto(av, ZM_zc_mul(u,x)); 
+        res[2] = lpileupto(av, ZM_zc_mul(u,x));
         av = avma;
         res[1] = lpileupto(av, ground(dbltor(p))); return res;
       }
@@ -3029,7 +3199,7 @@ clonefill(GEN S, long s, long t)
   return S;
 }
 
-INLINE void 
+INLINE void
 step(GEN x, GEN y, GEN inc, long k)
 {
   if (!signe(y[k]))
@@ -3111,7 +3281,7 @@ smallvectors(GEN q, GEN BORNE, long stockmax, FP_chk_fun *CHECK)
 	  p1 = mpmul((GEN)v[k], gsqr(mpadd((GEN)x[k], (GEN)z[k])));
 	  i = mpcmp(mpsub(mpadd(p1,(GEN)y[k]), borne1), gmul2n(p1,-epsbit));
           avma = av1; if (i <= 0) break;
-          
+
           step(x,y,inc,k);
 
           av1 = avma; /* same as above */
@@ -3191,7 +3361,7 @@ smallvectors(GEN q, GEN BORNE, long stockmax, FP_chk_fun *CHECK)
           borne2 = mpmul(borne1, alpha);
           checkcnt = 0;
         }
-        if (stockmax != stockmaxnew) 
+        if (stockmax != stockmaxnew)
         {
           stockmax = stockmaxnew;
           norms = cgetg(stockmax+1, t_VEC);

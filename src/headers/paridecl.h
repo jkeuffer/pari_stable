@@ -702,6 +702,7 @@ GEN     qflllgram0(GEN x, long flag, long prec);
 GEN     smallpolred(GEN x);
 GEN     smallpolred2(GEN x);
 char    *stackmalloc(size_t N);
+GEN     zncoppersmith(GEN P0, GEN N, GEN X, GEN B) ;
 
 /* bibli2.c */
 
@@ -1305,6 +1306,7 @@ GEN     muluu(ulong x, ulong y);
 long    pari_rand31(void);
 GEN     randomi(GEN x);
 int     ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax);
+GEN     resetloop(GEN a, GEN b);
 GEN     resmod2n(GEN x, long n);
 double  rtodbl(GEN x);
 GEN     setloop(GEN a);
@@ -1473,6 +1475,7 @@ GEN     newtonpoly(GEN x, GEN p);
 GEN     nfgcd(GEN P, GEN Q, GEN nf, GEN den);
 GEN     nfisincl(GEN a, GEN b);
 GEN     nfisisom(GEN a, GEN b);
+GEN     nfrootsQ(GEN x);
 GEN     poldeflate(GEN x0, long *m);
 GEN     poldeflate_i(GEN x0, long d);
 GEN     poldisc0(GEN x, long v);

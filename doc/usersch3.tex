@@ -2386,6 +2386,12 @@ non-negative integer. The result is non-negative and rounded towards zero.
 
 \syn{racine}{x}.
 
+\subsecidx{zncoppersmith}$(P, N, X, \{B=N\})$: finds all integers $x_0$ with
+$|x0| \leq X$ such that $\text{gcd}(N, P(x_0)) > B$. $X$ must be smaller than
+$\exp(\log^2 B / (\deg(P) \log N))$. 
+
+\syn{zncoppersmith}{P, N, X, B}, where an omitted $B$ is coded as \kbd{NULL}.
+
 \subsecidx{znlog}$(x,g)$: $g$ must be a primitive root mod a prime $p$, and
 the result is the discrete log of $x$ in the multiplicative group
 $(\Z/p\Z)^*$. This function uses a simple-minded combination of
