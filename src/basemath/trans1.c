@@ -636,9 +636,7 @@ gpow(GEN x, GEN n, long prec)
     x = ground(gmulsg(gexpo(x),n));
     if (is_bigint(x) || (ulong)x[2] >= (ulong)HIGHEXPOBIT)
       err(talker,"underflow or overflow in gpow");
-    avma = av; y = cgetr(3);
-    y[1] = evalexpo(itos(x));
-    y[2] = 0; return y;
+    avma = av; return realzero_bit(itos(x));
   }
   if (tx==t_INTMOD && typ(n)==t_FRAC)
   {
@@ -672,12 +670,7 @@ mpsqrt(GEN x)
 
   if (typ(x)!=t_REAL) err(typeer,"mpsqrt");
   s=signe(x); if (s<0) err(talker,"negative argument in mpsqrt");
-  if (!s)
-  {
-    y = cgetr(3);
-    y[1] = evalexpo(expo(x)>>1);
-    y[2] = 0; return y;
-  }
+  if (!s) return realzero_bit(expo(x) >> 1);
   l=lg(x); y=cgetr(l); av=avma;
 
   p1=cgetr(l+1); affrr(x,p1);
@@ -1141,10 +1134,7 @@ mpexp1(GEN x)
   GEN y,p1,p2,p3,p4,unr;
 
   if (typ(x)!=t_REAL) err(typeer,"mpexp1");
-  if (!sx)
-  {
-    y=cgetr(3); y[1]=x[1]; y[2]=0; return y;
-  }
+  if (!sx) return realzero_bit(expo(x));
   l=lg(x); y=cgetr(l); av=avma; /* room for result */
 
   l2 = l+1; ex = expo(x);
@@ -1533,12 +1523,7 @@ mpsc1(GEN x, long *ptmod8)
   GEN y,p1,p2,p3,p4,pitemp;
 
   if (typ(x)!=t_REAL) err(typeer,"mpsc1");
-  if (!signe(x))
-  {
-    y=cgetr(3);
-    y[1] = evalexpo((expo(x)<<1) - 1);
-    y[2] = 0; *ptmod8=0; return y;
-  }
+  if (!signe(x)) { *ptmod8=0; return realzero_bit((expo(x)<<1) - 1); }
   l=lg(x); y=cgetr(l); av=avma;
 
   l++; pitemp = mppi(l+1); setexpo(pitemp,-1);
@@ -1718,11 +1703,7 @@ mpsin(GEN x)
   GEN y,p1;
 
   if (typ(x)!=t_REAL) err(typeer,"mpsin");
-  if (!signe(x))
-  {
-    y=cgetr(3); y[1]=x[1]; y[2]=0;
-    return y;
-  }
+  if (!signe(x)) return realzero_bit(expo(x));
 
   av=avma; p1=mpsc1(x,&mod8); tetpil=avma;
   switch(mod8)
@@ -1798,8 +1779,8 @@ mpsincos(GEN x, GEN *s, GEN *c)
   if (typ(x)!=t_REAL) err(typeer,"mpsincos");
   if (!signe(x))
   {
-    p1=cgetr(3); *s=p1; p1[1]=x[1];
-    p1[2]=0; *c=addsr(1,x); return;
+    *s=realzero_bit(expo(x));
+    *c=addsr(1,x); return;
   }
 
   av=avma; p1=mpsc1(x,&mod8); tetpil=avma;

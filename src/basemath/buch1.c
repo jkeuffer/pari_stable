@@ -1596,10 +1596,13 @@ real_be_honest(long *ex)
 }
 
 static GEN
-gcdrealnoer(GEN a,GEN b,long *pte)
+gcdreal(GEN a,GEN b,long *pte)
 {
   long e;
   GEN k1,r;
+
+  if (!signe(a)) return mpcopy(b);
+  if (!signe(b)) return mpcopy(a);
 
   if (typ(a)==t_INT)
   {
@@ -1607,7 +1610,9 @@ gcdrealnoer(GEN a,GEN b,long *pte)
     k1=cgetr(lg(b)); affir(a,k1); a=k1;
   }
   else if (typ(b)==t_INT)
-    { k1=cgetr(lg(a)); affir(b,k1); b=k1; }
+  {
+    k1=cgetr(lg(a)); affir(b,k1); b=k1;
+  }
   if (expo(a)<-5) return absr(b);
   if (expo(b)<-5) return absr(a);
   a=absr(a); b=absr(b);
@@ -1629,13 +1634,13 @@ get_reg(GEN matc, long sreg)
   e = maxe = 0;
   for (i=2; i<=sreg; i++)
   {
-    reg = gcdrealnoer(gcoeff(matc,1,i),reg,&e);
+    reg = gcdreal(gcoeff(matc,1,i),reg,&e);
     if (!reg) return NULL;
     maxe = maxe? max(maxe,e): e;
   }
   if (DEBUGLEVEL)
   {
-    if (DEBUGLEVEL>7) { fprintferr("reg = "); outerr(reg); }
+    if (DEBUGLEVEL>7) fprintferr("reg = %Z",reg);
     msgtimer("regulator");
   }
   return reg;

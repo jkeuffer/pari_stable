@@ -1118,8 +1118,8 @@ gmul(GEN x, GEN y)
 	  case t_REAL: return mulrr(x,y);
 
 	  case t_FRAC: case t_FRACN:
-	    l=avma; p1=cgetr(lg(x)); tetpil=avma; gaffect(y,p1);
-	    p2=mulrr(p1,x); return gerepile(l,tetpil,p2);
+	    l=avma; p1=mulri(x,(GEN)y[1]); tetpil=avma;
+            return gerepile(l, tetpil, divri(p1, (GEN)y[2]));
 	
 	  case t_COMPLEX: z=cgetg(3,t_COMPLEX);
 	    z[1]=lmul(x,(GEN)y[1]);

@@ -38,10 +38,7 @@ mpatan(GEN x)
   GEN y,p1,p2,p3,p4,p5,unr;
 
   sx=signe(x);
-  if (!sx)
-  {
-    y=cgetr(3); y[1]=x[1]; y[2]=0; return y;
-  }
+  if (!sx) return realzero_bit(expo(x));
   l = lp = lg(x);
   if (sx<0) setsigne(x,1);
   u = cmprs(x,1);
@@ -205,7 +202,7 @@ gasin(GEN x, long prec)
   switch(typ(x))
   {
     case t_REAL: sx=signe(x);
-      if (!sx) { y=cgetr(3); y[1]=x[1]; y[2]=0; return y; }
+      if (!sx) return realzero_bit(expo(x));
       if (sx<0) setsigne(x,1);
       if (cmpsr(1,x)>=0) { setsigne(x,sx); return mpasin(x); }
 
@@ -274,12 +271,7 @@ mpacos(GEN x)
     y=mppi(2-l); setexpo(y,0); return y;
   }
   l=lg(x);
-  if (!u)
-  {
-    y = cgetr(3);
-    y[1] = evalexpo(-(bit_accuracy(l)>>1));
-    y[2] = 0; return y;
-  }
+  if (!u) return realzero_bit( -(bit_accuracy(l)>>1) );
   if (!v) return mppi(l);
   y=cgetr(l); av=avma;
 
@@ -377,11 +369,7 @@ mparg(GEN x, GEN y)
   sx=signe(x); sy=signe(y);
   if (!sy)
   {
-    if (sx>0)
-    {
-      theta=cgetr(3); theta[1]=y[1]-expo(x);
-      theta[2]=0; return theta;
-    }
+    if (sx>0) return realzero_bit(expo(y) - expo(x));
     return mppi(lg(x));
   }
   prec = lg(y); if (prec<lg(x)) prec = lg(x);
@@ -523,10 +511,7 @@ mpsh(GEN x)
   long l,av;
   GEN y,p1;
 
-  if (!signe(x))
-  {
-    y=cgetr(3); y[1]=x[1]; y[2]=0; return y;
-  }
+  if (!signe(x)) return realzero(expo(x));
   l=lg(x); y=cgetr(l); av=avma;
   p1=mpexp(x); p1 = addrr(p1, divsr(-1,p1));
   setexpo(p1, expo(p1)-1);
@@ -582,11 +567,7 @@ mpth(GEN x)
   long l,av;
   GEN y,p1,p2;
 
-  if (!signe(x))
-  {
-    y=cgetr(3); y[1]=x[1]; y[2]=0;
-    return y;
-  }
+  if (!signe(x)) return realzero_bit(expo(x));
   l=lg(x); y=cgetr(l); av=avma;
 
   p1=cgetr(l+1); affrr(x,p1);
@@ -790,17 +771,14 @@ gachz(GEN x, GEN y)
 /**                                                                **/
 /********************************************************************/
 
+/* |x| < 1 */
 static GEN
 mpath(GEN x)
 {
   long av;
   GEN y,p1;
 
-  if (!signe(x))
-  {
-    y=cgetr(3); y[1]=x[1]; y[2]=0;
-    return y;
-  }
+  if (!signe(x)) return realzero_bit(expo(x));
   y=cgetr(lg(x)); av=avma;
   p1 = addrs(divsr(2,subsr(1,x)),-1);
   affrr(mplog(p1), y); avma=av;
