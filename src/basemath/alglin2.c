@@ -2318,23 +2318,6 @@ mynegi(GEN x)
   setsigne(x,-s); return x;
 }
 
-/* We assume y > 0 */
-static GEN
-divnearest(GEN x, GEN y)
-{
-  GEN r, q = dvmdii(x,y,&r);
-  long s=signe(r), t;
-  gpmem_t av = avma;
-
-  if (!s) { cgiv(r); return q; }
-  if (s<0) r = mynegi(r);
-
-  y = shifti(y,-1); t = cmpii(r,y);
-  avma=av; cgiv(r);
-  if (t < 0 || (t == 0 && s > 0)) return q;
-  return addsi(s,q);
-}
-
 static void
 Minus(long j, GEN **lambda)
 {
@@ -2408,7 +2391,7 @@ reduce2(GEN A, GEN B, long k, long j, long *row, GEN **lambda, GEN *D)
   if (row0)
     q = truedvmdii(gcoeff(A,row0,k), gcoeff(A,row0,j), NULL);
   else if (absi_cmp(shifti(lambda[k][j], 1), D[j]) > 0)
-    q = divnearest(lambda[k][j], D[j]);
+    q = diviiround(lambda[k][j], D[j]);
   else
     return;
 
@@ -2568,9 +2551,9 @@ reduce1(GEN A, GEN B, long k, long j, GEN **lambda, GEN *D)
   long i;
 
   if (signe(A[j]))
-    q = divnearest((GEN)A[k],(GEN)A[j]);
+    q = diviiround((GEN)A[k],(GEN)A[j]);
   else if (absi_cmp(shifti(lambda[k][j], 1), D[j]) > 0)
-    q = divnearest(lambda[k][j], D[j]);
+    q = diviiround(lambda[k][j], D[j]);
   else
     return;
 
