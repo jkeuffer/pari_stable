@@ -330,12 +330,13 @@ mathilbert(long n) /* Hilbert matrix of order n */
   for (j=1; j<=n; j++)
   {
     p[j]=lgetg(n+1,t_COL);
-    for (i=1; i<=n; i++)
+    for (i=1+(j==1); i<=n; i++)
     {
       a=cgetg(3,t_FRAC); a[1]=un; a[2]=lstoi(i+j-1);
       coeff(p,i,j)=(long)a;
     }
   }
+  if ( n ) mael(p,1,1)=un; 
   return p;
 }
 
