@@ -664,7 +664,7 @@ pari_strdup(const char *s)
 }
 
 char *
-pari_strndup(char *s, long n)
+pari_strndup(const char *s, long n)
 {
   char *t = gpmalloc(n+1);
   memcpy(t,s,n); t[n] = 0; return t;
