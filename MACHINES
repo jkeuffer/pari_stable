@@ -154,7 +154,7 @@ IBM/POWER,PowerPC
 *POWER2       66MHz  AIX-4.2         cc            37592!      -  2.0.4 (3) GN
 ------------------------------------------------------------------------------
 IBM/S390
-*S390         630BM  Linux-2.4.17    gcc-2.95.4     6764    6574  2.1.3     BA
+*S390         630BM  Linux-2.4.17    gcc-2.95.4     6764    6574  2.1.3 (33)BA
 ------------------------------------------------------------------------------
 SGI/MIPS
 *R4000     50/70MHz  IRIX-5.2        gcc           70764   70114  2.0.9 (1) TP
@@ -282,6 +282,8 @@ CFLAGS= -fbranch-probabilities  -O3 -DGCC_INLINE -Wall -Wno-implicit
 (32) gp-dyn: add -fPIC to CFLAGS [or linking fails].
      Most gcc 2.95 ARM support lib have buggy (unsigned)%(unsigned)
 
+(33) LCDS System: 9672 G6 Model ZX7 (10 way processor, 32GB RAM)
+     DASD: Shark 2105-F20 (2.1 terabytes)
 =============================================================================
 Contributors:
   AW = Aleksander Wittlin
