@@ -993,6 +993,19 @@ init_padic_prec(long e, int BitPerFactor, long n0, double LOGp2)
 extern GEN sindexrank(GEN x);
 extern GEN vconcat(GEN Q1, GEN Q2);
 extern GEN gauss_intern(GEN a, GEN b);
+extern GEN lllgramint_i(GEN x, long alpha, GEN *ptfl, GEN *ptB);
+
+/* B grom lllgramint_i: return [ |b_i^*|^2, i ] */
+GEN
+GS_norms(GEN B, long prec)
+{
+  long i, l = lg(B);
+  GEN v = gmul(B, realun(prec));
+  l--; setlg(v, l);
+  for (i=1; i<l; i++)
+    v[i] = ldivrr((GEN)v[i+1], (GEN)v[i]);
+  return v;
+}
 
 /* Recombination phase of Berlekamp-Zassenhaus algorithm using a variant of
  * van Hoeij's knapsack
@@ -1010,7 +1023,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
   double logp = log(gtodouble(p)), LOGp2 = LOG2/logp;
   double b0 = log((double)dP*2) / logp;
   double k = gtodouble(glog(root_bound(P), DEFAULTPREC)) / logp;
-  GEN y, T, T2, TT, BL, m, u, norm, target, M, piv, list;
+  GEN B, y, T, T2, TT, BL, m, u, norm, target, M, piv, list;
   GEN run = realun(DEFAULTPREC);
   gpmem_t av, av2, lim;
   int did_recompute_famod = 0;
@@ -1035,7 +1048,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
     long b, goodb;
     double Nx;
 
-    if (DEBUGLEVEL>3)
+    if (DEBUGLEVEL>2)
       fprintferr("LLL_cmbf: %ld potential factors (tmax = %ld)\n", r, tmax);
     av2 = avma;
     if (tmax > 0)
@@ -1111,9 +1124,8 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
      * m = [                  ]   square matrix
      *     [ T2   p^(a-b) I_s ]   T2 = T * BL  truncated
      */
-    u = lllgramintern(gram_matrix(m), 4, 0, 0);
-    m = gmul(m,u);
-    (void)gram_schmidt(gmul(run,m), &norm);
+    u = lllgramint_i(gram_matrix(m), 4, NULL, &B);
+    norm = GS_norms(B, DEFAULTPREC);
     for (i=r+s; i>0; i--)
       if (cmprr((GEN)norm[i], M) < 0) break;
     if (i > r)
@@ -1145,8 +1157,8 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
 
     av2 = avma;
     piv = special_pivot(BL);
-    if (DEBUGLEVEL) fprintferr("special_pivot output:\n%Z\n",piv);
     if (!piv) { avma = av2; continue; }
+    if (DEBUGLEVEL) fprintferr("special_pivot output:\n%Z\n",piv);
 
     pas2 = shifti(pa,-1); target = P;
     for (i=1; i<=r; i++)

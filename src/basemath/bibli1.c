@@ -89,17 +89,17 @@ gscali(GEN x,GEN y)
 }
 
 static GEN
-lllall_trivial(GEN x, long n, long flag)
+lllall_trivial(GEN x, long flag)
 {
   GEN y;
-  if (!n)
-  {
+  if (lg(x) == 1)
+  { /* dim x = 0 */
     if (flag != lll_ALL) return cgetg(1,t_MAT);
     y=cgetg(3,t_VEC);
     y[1]=lgetg(1,t_MAT);
     y[2]=lgetg(1,t_MAT); return y;
   }
-  /* here n = 1 */
+  /* here dim = 1 */
   if (gcmp0((GEN)x[1]))
   {
     switch(flag ^ lll_GRAM)
@@ -123,24 +123,24 @@ lllall_trivial(GEN x, long n, long flag)
 }
 
 static GEN
-lllgramall_finish(GEN h,GEN fl,long flag,long n)
+lllgramall_finish(GEN h,GEN fl,long flag)
 {
-  long i, k;
+  long i, k, l = lg(fl);
   GEN y, g;
 
-  k=1; while (k<=n && !fl[k]) k++;
+  k=1; while (k<l && !fl[k]) k++;
   switch(flag)
   {
     case lll_KER: setlg(h,k);
       return h;
 
-    case lll_IM: h += k-1; h[0] = evaltyp(t_MAT)| evallg(n-k+2);
+    case lll_IM: h += k-1; h[0] = evaltyp(t_MAT)| evallg(l-k+1);
       return h;
   }
   y = cgetg(3,t_VEC);
   g = cgetg(k, t_MAT); for (i=1; i<k; i++) g[i] = h[i];
   y[1] = (long)g;
-  h += k-1; h[0] = evaltyp(t_MAT)| evallg(n-k+2);
+  h += k-1; h[0] = evaltyp(t_MAT)| evallg(l-k+1);
   y[2] = (long)h; return y;
 }
 
@@ -160,7 +160,7 @@ lllgramintwithcontent(GEN x, GEN veccon, long flag)
   GEN *gptr[8];
 
   if (typ(x) != t_MAT) err(typeer,"lllgramintwithcontent");
-  n=lx-1; if (n<=1) return lllall_trivial(x,n,flag);
+  n=lx-1; if (n<=1) return lllall_trivial(x,flag);
   if (lg((GEN)x[1])!=lx) err(mattype1,"lllgramintwithcontent");
   fl = new_chunk(lx);
 
@@ -371,7 +371,7 @@ lllgramintwithcontent(GEN x, GEN veccon, long flag)
       if (k>n)
       {
         if (DEBUGLEVEL>5) { fprintferr("\n"); flusherr(); }
-	return gerepilecopy(av0, lllgramall_finish(h,fl,flag,n));
+	return gerepilecopy(av0, lllgramall_finish(h,fl,flag));
       }
     }
     if (low_stack(lim, stack_lim(av,1)))
@@ -590,15 +590,15 @@ do_SWAP(GEN x, GEN h, GEN L, GEN B, long kmax, long k, GEN QR)
 
 /* x integer matrix */
 GEN
-lllgramall(GEN x, long alpha, long flag)
+lllgramint_i(GEN x, long alpha, GEN *ptfl, GEN *ptB)
 {
   long lx=lg(x), i, j, k, l, n, s, kmax;
-  gpmem_t av0=avma, av, lim;
+  gpmem_t av, lim;
   GEN u,B,L,h,fl, *gptr[4];
 
-  if (typ(x) != t_MAT) err(typeer,"lllgramall");
-  n = lx-1; if (n<=1) return lllall_trivial(x,n,flag);
-  if (lg((GEN)x[1]) != lx) err(mattype1,"lllgramall");
+  if (typ(x) != t_MAT) err(typeer,"lllgramint");
+  n = lx-1; if (n<=1) return NULL;
+  if (lg((GEN)x[1]) != lx) err(mattype1,"lllgramint");
   fl = cgetg(lx,t_VECSMALL);
 
   av = avma; lim = stack_lim(av,1); x = dummycopy(x);
@@ -658,7 +658,7 @@ lllgramall(GEN x, long alpha, long flag)
         REDI(k,l, x,h,L,(GEN)B[l+1],kmax);
         if (low_stack(lim, stack_lim(av,1)))
         {
-          if(DEBUGMEM>1) err(warnmem,"lllgramall[1]");
+          if(DEBUGMEM>1) err(warnmem,"lllgramint[1]");
           gptr[0]=&B; gptr[1]=&L; gptr[2]=&h; gptr[3]=&x;
           gerepilemany(av,gptr,4);
         }
@@ -667,13 +667,24 @@ lllgramall(GEN x, long alpha, long flag)
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"lllgramall[2]");
+      if(DEBUGMEM>1) err(warnmem,"lllgramint[2]");
       gptr[0]=&B; gptr[1]=&L; gptr[2]=&h; gptr[3]=&x;
       gerepilemany(av,gptr,4);
     }
   }
   if (DEBUGLEVEL>3) fprintferr("\n");
-  return gerepilecopy(av0,lllgramall_finish(h,fl,flag,n));
+  if (ptB)  *ptB  = B;
+  if (ptfl) *ptfl = fl;
+  return h;
+}
+
+GEN
+lllgramall(GEN x, long alpha, long flag)
+{
+  gpmem_t av0 = avma;
+  GEN fl, h = lllgramint_i(x,alpha,&fl,NULL);
+  if (!h) return lllall_trivial(x,flag);
+  return gerepilecopy(av0, lllgramall_finish(h,fl,flag));
 }
 
 static GEN
@@ -696,7 +707,7 @@ lllgramallgen(GEN x, long flag)
   int ps1,ps2,flc;
 
   if (typ(x) != t_MAT) err(typeer,"lllgramallgen");
-  n=lx-1; if (n<=1) return lllall_trivial(x,n,flag);
+  n=lx-1; if (n<=1) return lllall_trivial(x,flag);
   if (lg((GEN)x[1])!=lx) err(mattype1,"lllgramallgen");
 
   fl = new_chunk(lx);
@@ -806,7 +817,7 @@ lllgramallgen(GEN x, long flag)
       gerepilemany(av,gptr,3);
     }
   }
-  return gerepilecopy(av0, lllgramall_finish(h,fl,flag,n));
+  return gerepilecopy(av0, lllgramall_finish(h,fl,flag));
 }
 
 /* compute B[k], update mu(k,1..k-1) */
@@ -1743,7 +1754,7 @@ lllall0(GEN x, long flag)
   GEN u,B,L,q,r,h,la,p1,p2,p4,fl;
 
   if (typ(x) != t_MAT) err(typeer,"lllall0");
-  n=lx-1; if (n<=1) return lllall_trivial(x,n, flag | lll_GRAM);
+  n=lx-1; if (n<=1) return lllall_trivial(x, flag | lll_GRAM);
   fl = new_chunk(lx);
 
   av=avma; lim=stack_lim(av,1); x=dummycopy(x);
@@ -1847,7 +1858,7 @@ lllall0(GEN x, long flag)
       gptr[3]=&x; gerepilemany(av,gptr,4);
     }
   }
-  return gerepilecopy(av0, lllgramall_finish(h,fl,flag,n));
+  return gerepilecopy(av0, lllgramall_finish(h,fl,flag));
 }
 
 GEN
