@@ -278,9 +278,10 @@ extern int new_galois_format;
 #define mod8(x)   (modBIL(x) & 7)
 #define mod4(x)   (modBIL(x) & 3)
 #define mod2(x)   (modBIL(x) & 1)
-#define is_pm1(n)    ((lgefint(n)==3) && (((GEN)(n))[2]==1))
-#define is_bigint(n) ((lgefint(n)>3) || \
-		      ((lgefint(n)==3) && ((((GEN)(n))[2]) < 0)))
+#define is_bigint_lg(n,l) ((l)>3 || ((l)==3 && (((GEN)(n))[2] & HIGHBIT)))
+#define is_pm1_lg(n,l)    ((l)==3 && ((GEN)(n))[2]==1)
+#define is_pm1(n)    is_pm1_lg   (n, lgefint(n))
+#define is_bigint(n) is_bigint_lg(n, lgefint(n))
 
 #define leading_term(x) ((GEN)(((GEN)(x))[lgef(x)-1]))
 #define constant_term(x) (signe(x)? ((GEN)(((GEN)(x))[2])): gzero)
