@@ -852,7 +852,7 @@ FpV_roots_to_pol(GEN V, GEN p, long v)
   long i;
   GEN g=cgetg(lg(V),t_VEC);
   for(i=1;i<lg(V);i++)
-    g[i]=(long)deg1pol(gun,modii(negi((GEN)V[i]),p),v);
+    g[i] = (long)deg1pol_i(gun,modii(negi((GEN)V[i]),p),v);
   return gerepileupto(ltop,FpXV_prod(g,p));
 }
 
@@ -1282,7 +1282,7 @@ FqV_roots_to_pol(GEN V, GEN T, GEN p, long v)
   long k;
   GEN W = cgetg(lg(V),t_VEC);
   for(k=1; k < lg(V); k++)
-    W[k] = (long)deg1pol(gun,Fq_neg((GEN)V[k],T,p),v);
+    W[k] = (long)deg1pol_i(gun,Fq_neg((GEN)V[k],T,p),v);
   return gerepileupto(ltop, FpXQXV_prod(W, T, p));
 }
 
@@ -2540,9 +2540,9 @@ FpXQ_charpoly(GEN x, GEN T, GEN p)
   pari_sp ltop=avma;
   long v=varn(T);
   GEN R;
-  T=gcopy(T); setvarn(T,MAXVARN);
-  x=gcopy(x); setvarn(x,MAXVARN);
-  R=FpY_FpXY_resultant(T,deg1pol(gun,FpX_neg(x,p),v),p);
+  T = gcopy(T); setvarn(T, MAXVARN);
+  x = gcopy(x); setvarn(x, MAXVARN);
+  R = FpY_FpXY_resultant(T, deg1pol_i(gun,FpX_neg(x,p),v),p);
   return gerepileupto(ltop,R);
 }
 
@@ -3794,7 +3794,7 @@ ffinit_Artin_Shreier(GEN ip, long l)
   GEN x,xp,yp,y2pm1;
   GEN P, Q;
   xp=monomial(gun,p,0);
-  P = FpX_sub(xp,deg1pol(gun,gun,0),NULL);
+  P = FpX_sub(xp, deg1pol_i(gun,gun,0), NULL);
   if (l == 1) return P;
   x=polx[0];
   yp=monomial(gun,p,MAXVARN);

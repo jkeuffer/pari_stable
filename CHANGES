@@ -168,6 +168,7 @@ JD 74- [Configure:] detection of times()
        error, x + [] --> OK but x * [] --> [] instead of '[]*x' , etc. ]
    76- obscure bugs wrt polynomials with t_MAT coefficients created via Pol()
        [ e.g content(x*[;]) --> [;], primitive_part(x*[;]) --> [;] ]
+   77- incorrect behaviour in scalarpol() for exact 0 argument
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.

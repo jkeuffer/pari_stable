@@ -1382,7 +1382,7 @@ vandermondeinversemod(GEN L, GEN T, GEN den, GEN mod)
     av = avma;
     z = Fp_inv(FpX_eval(Tp, (GEN) L[i],mod),mod);
     z = modii(mulii(den,z),mod);
-    P = FpX_Fp_mul(FpX_div(T, deg1pol(gun,negi((GEN) L[i]),x),mod), z, mod); 
+    P = FpX_Fp_mul(FpX_div(T, deg1pol_i(gun,negi((GEN) L[i]),x),mod), z, mod); 
     M[i] = lgetg(n, t_COL);
     for (j = 1; j < n; j++)
       mael(M,i,j) = lcopy((GEN) P[1 + j]);
@@ -2598,7 +2598,7 @@ galoisgenfixedfield(GEN Tp, GEN Pmod, GEN V, GEN ip, struct galois_borne *gb, GE
     mael(PG,2,1)=2;
     mael3(PG,1,1,1)=2;
     mael3(PG,1,1,2)=1;
-    tau=deg1pol(stoi(-1),negi((GEN)P[3]),x);
+    tau = deg1pol_i(stoi(-1),negi((GEN)P[3]),x);
     tau = lift(gmul(tau,gmodulcp(gun,ip)));
     tau = FpX_FpXQ_compo((GEN) Pmod[gp], tau,Pp,ip);
     tau = FpX_gcd(Pp, tau,ip);

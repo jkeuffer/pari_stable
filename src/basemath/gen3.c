@@ -1997,13 +1997,15 @@ coefs_to_col(long n, ...)
 GEN
 scalarpol(GEN x, long v)
 {
-  GEN y=cgetg(3,t_POL);
+  GEN y;
+  if (isexactzero(x)) return zeropol(v);
+  y = cgetg(3,t_POL);
   y[1] = gcmp0(x)? evalvarn(v)
                  : evalvarn(v) | evalsigne(1);
   y[2]=lcopy(x); return y;
 }
 
-/* deg1pol(a,b,x)=a*x+b*/
+/* deg1pol(a,b,x)=a*x+b, assumes a != 0 */
 GEN
 deg1pol(GEN x1, GEN x0,long v)
 {
