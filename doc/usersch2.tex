@@ -944,6 +944,10 @@ to enter a string, just enclose it between double quotes \kbd{"}, like
 this: \kbd{"this is a string"}. The function \kbd{Str} can be used to
 transform any object into a string (see Chapter~3).
 
+\subsec{Small vectors} (type \tet{t_VECSMALL}): this is an internal type,
+used to code in an efficient way vectors containing only small integers (such
+as permutations). Most GP functions will refuse to operate on these objects.
+
 \section{GP operators}\label{se:operators}
 
 \noindent

@@ -28,6 +28,7 @@ char *helpmessages_basic[]={
   "Set({x=[]}): convert x into a set, i.e. a row vector with strictly increasing coefficients. Empty set if x is omitted",
   "Str({x=\"\"},{flag=0}): transforms any GEN x into a string. Empty string if x is omitted. If flag is set, perform tilde expansion on string",
   "Vec({x=[]}): transforms the object x into a vector. Used mainly if x is a polynomial or a power series. Empty vector if x is omitted",
+  "Vecsmall({x=[]}): transforms the object x into a VECSMALL. Empty vector if x is omitted",
   "abs(x): absolute value (or modulus) of x",
   "acos(x): inverse cosine of x",
   "acosh(x): inverse hyperbolic cosine of x",

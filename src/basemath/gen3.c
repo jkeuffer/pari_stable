@@ -2111,6 +2111,27 @@ gtovec(GEN x)
 }
 
 GEN
+gtovecsmall(GEN x)
+{
+  GEN V;
+  long tx, l,i;
+  
+  if (!x) return cgetg(1,t_VECSMALL);
+  tx = typ(x);
+  if (tx == t_VECSMALL) return gcopy(x);
+  if (tx == t_INT)
+  {
+    GEN u = cgetg(2, t_VECSMALL);
+    u[1] = itos(x); return u;
+  } 
+  if (!is_vec_t(tx)) err(typeer,"vectosmall");
+  l = lg(x);
+  V = cgetg(l,t_VECSMALL);
+  for(i=1;i<l;i++) V[i] = itos((GEN)x[i]);
+  return V;
+}
+
+GEN
 compo(GEN x, long n)
 {
   long l,tx=typ(x);

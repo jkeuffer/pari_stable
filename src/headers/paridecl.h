@@ -903,6 +903,7 @@ GEN     gtopoly(GEN x, long v);
 GEN     gtopolyrev(GEN x, long v);
 GEN     gtoser(GEN x, long v);
 GEN     gtovec(GEN x);
+GEN     gtovecsmall(GEN x);
 GEN     gtrunc(GEN x);
 int     gvar(GEN x);
 int     gvar2(GEN x);

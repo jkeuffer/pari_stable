@@ -439,6 +439,13 @@ taken into account, but this time by increasing order of degree.
 
 \syn{gtovec}{x}.
 
+\subsecidx{Vecsmall}$({x=[\,]})$: transforms the object $x$ into a row
+vector of type \typ{VECSMALL}. This acts as \kbd{Vec}, but only on a 
+limited set of objects (the result must be representable as a vector of small
+integers). In particular, polynomials and power series are forbidden.
+
+\syn{gtovecsmall}{x}.
+
 \subsecidx{binary}$(x)$: outputs the vector of the binary digits of $|x|$.
 Here $x$ can be an integer, a real number (in which case the result has two
 components, one for the integer part, one for the fractional part) or a

@@ -1898,6 +1898,7 @@ entree functions_basic[]={
 {"Set",0,(void*)gtoset,2,"DG"},
 {"Str",0,(void*)strtoGENstr,2,"D\"\",s,D0,L,"},
 {"Vec",0,(void*)gtovec,2,"DG"},
+{"Vecsmall",0,(void*)gtovecsmall,2,"DG"},
 {"abs",1,(void*)gabs,3,"Gp"},
 {"acos",1,(void*)gacos,3,"Gp"},
 {"acosh",1,(void*)gach,3,"Gp"},

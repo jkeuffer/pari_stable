@@ -872,7 +872,7 @@ matrix_block(GEN p, entree *ep)
         c = check_array_index(lgef(p)-1) + 1;
         pt = (GEN*)(p + c); match(']'); break;
 
-      case t_VEC: case t_COL:
+      case t_VEC: case t_COL: case t_VECSMALL:
         c = check_array_index(lg(p));
         pt = (GEN*)(p + c); match(']'); break;
 
@@ -912,13 +912,13 @@ matrix_block(GEN p, entree *ep)
   }
   old = analyseur;
   cpt = *pt;
+  if (tx == t_VECSMALL) cpt = stoi((long)cpt);
 
   if (*analyseur == '=') /* assignment or equality test */
   {
-     if (analyseur[1] == '=') return cpt; /* test */
-
-     analyseur++; old = analyseur; res = expr();
-     if (br_status) err(breaker,"assignment");
+    if (analyseur[1] == '=') return cpt;
+    analyseur++; old = analyseur; res = expr();
+    if (br_status) err(breaker,"assignment");
   }
   else if (repeated_op())
   { /* a++, a-- */
@@ -994,11 +994,18 @@ matrix_block(GEN p, entree *ep)
     return res;
   }
 
-  res = gclone(res);
+  if (tx == t_VECSMALL)
+  {
+    if (typ(res) != t_INT || is_bigint(res))
+      err(talker2,"not a suitable VECSMALL component",old,mark.start);
+    *pt = (GEN)itos(res); return res;
+  }
+
   /* sanity check in case v[i] = f(), where f destroys v */
   if (cpt != *pt)
     err(talker2,"variable on the left-hand side was affected during this function call. Check whether it is modified as a side effect there", old, mark.start);
 
+  res = gclone(res);
   if (full_col) /* whole col */
   {
     if (typ(res) != t_COL || lg(res) != lg(cpt))

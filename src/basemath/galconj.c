@@ -156,26 +156,6 @@ galoisconj2(GEN nf, long nbmax, long prec)
   7: memory
   9: complete detail
 */
-GEN vectosmall(GEN H)
-{
-  GEN V;
-  long l,i;
-  if ( typ(H) == t_VECSMALL )
-    return H;
-  if ( typ(H) == t_INT )
-  {
-    GEN u = cgetg(2, t_VECSMALL);
-    u[1] = itos(H);
-    return u;
-  } 
-  if (typ(H)!=t_VEC && typ(H)!=t_COL)
-    err(typeer,"vectosmall");
-  l=lg(H);
-  V=cgetg(l,t_VECSMALL);
-  for(i=1;i<l;i++)
-    V[i]=itos((GEN)H[i]);
-  return V;
-}
 /* retourne la permutation identite */
 GEN
 permidentity(long l)
@@ -1218,7 +1198,7 @@ testpermutation(GEN F, GEN B, long s, long t, long cut,
 /* Compute generators for the subgroup of (Z/nZ)* given in HNF. 
  * I apologize for the following spec:
  * If zns=znstar(2) then
- * zn2=vectosmall((GEN)zns[2]);
+ * zn2=gtovecsmall((GEN)zns[2]);
  * zn3=lift((GEN)zns[3]);
  * gen and ord : VECSMALL of length lg(zn3).
  * the result is in gen. 
@@ -1279,7 +1259,7 @@ int pari_compare_lg(GEN x, GEN y)
 /* Compute the elements of the subgroup of (Z/nZ)* given in HNF. 
  * I apologize for the following spec:
  * If zns=znstar(2) then
- * zn2=vectosmall((GEN)zns[2]);
+ * zn2=gtovecsmall((GEN)zns[2]);
  * zn3=lift((GEN)zns[3]);
  * card=cardinal of the subgroup(i.e phi(n)/det(lss))
  */
@@ -1326,7 +1306,7 @@ listsousgroupes(long m, long p)
   }
   zns = znstar(stoi(m));
   phi = itos((GEN) zns[1]);
-  zn2 = vectosmall((GEN)zns[2]);
+  zn2 = gtovecsmall((GEN)zns[2]);
   zn3 = lift((GEN)zns[3]);
   lss = subgrouplist((GEN) zns[2], 0);
   res = cgetg(lg(lss), t_VEC);
@@ -1917,8 +1897,8 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l, long karma_type
   O = cgetg(n+1,t_VECSMALL);
   for(i=1;i<=n;i++) O[i]=0;
   F = factor(stoi(n));
-  Fp=vectosmall((GEN)F[1]);
-  Fe=vectosmall((GEN)F[2]);
+  Fp=gtovecsmall((GEN)F[1]);
+  Fe=gtovecsmall((GEN)F[2]);
   np=lg(Fp)-1;
   Fpe=cgetg(np+1, t_VECSMALL);
   for (i = 1; i < lg(Fpe); i++)
@@ -2857,8 +2837,8 @@ galoisfrobeniuslift(GEN T, GEN den, GEN L,  GEN Lden, long gmask,
   gt.Cd=gcopy(gt.C);
 
   F=factor(stoi(gf->fp));
-  Fp=vectosmall((GEN)F[1]);
-  Fe=vectosmall((GEN)F[2]);
+  Fp=gtovecsmall((GEN)F[1]);
+  Fe=gtovecsmall((GEN)F[2]);
   frob = cgetg(lg(L), t_VECSMALL);
   for(k=lg(Fp)-1;k>=1;k--)
   {
@@ -3944,7 +3924,7 @@ galoissubcyclo(long n, GEN H, GEN Z, long v, long flag)
       Z=znstar(stoi(n));
     else if (typ(Z)!=t_VEC || lg(Z)!=4) 
       err(talker,"Optionnal parameter must be as output by znstar in galoissubcyclo");
-    zn2 = vectosmall((GEN)Z[2]);
+    zn2 = gtovecsmall((GEN)Z[2]);
     zn3 = lift((GEN)Z[3]);
     if ( lg(zn2) != lg(H) || lg(zn3) != lg(H))
       err(talker,"Matrix of wrong dimensions in galoissubcyclo");
@@ -3956,7 +3936,7 @@ galoissubcyclo(long n, GEN H, GEN Z, long v, long flag)
   else
   {
     H=lift_check_modulus(H,stoi(n));
-    H=vectosmall(H);
+    H=gtovecsmall(H);
     for (i=1;i<lg(H);i++)
       if (H[i]<0)
 	H[i]=mulssmod(-H[i],n-1,n);
