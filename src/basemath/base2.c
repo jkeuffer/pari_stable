@@ -3442,13 +3442,20 @@ rnfequation2(GEN nf,GEN pol2)
 static GEN
 nftau(long r1, GEN x)
 {
-  long i, ru = lg(x);
-  GEN s;
-
-  s = r1 ? (GEN)x[1] : gmul2n(greal((GEN)x[1]),1);
-  for (i=2; i<=r1; i++) s=gadd(s,(GEN)x[i]);
-  for ( ; i<ru; i++) s=gadd(s,gmul2n(greal((GEN)x[i]),1));
+  long i, l = lg(x);
+  GEN s = r1? (GEN)x[1]: gmul2n(greal((GEN)x[1]),1);
+  for (i=2; i<=r1; i++) s = gadd(s, (GEN)x[i]);
+  for (   ; i < l; i++) s = gadd(s, gmul2n(greal((GEN)x[i]),1));
   return s;
+}
+
+static GEN
+initmat(long l)
+{
+  GEN x = cgetg(l, t_MAT);
+  long i;
+  for (i = 1; i < l; i++) x[i] = lgetg(l, t_COL);
+  return x;
 }
 
 static GEN
@@ -3456,11 +3463,27 @@ nftocomplex(GEN nf, GEN x)
 {
   return gmul(gmael(nf,5,1), _algtobasis(nf, x));
 }
+/* assume x a square t_MAT, return a t_VEC of embeddings of its columns */
+static GEN
+mattocomplex(GEN nf, GEN x)
+{
+  long i,j, l = lg(x);
+  GEN v = cgetg(l, t_VEC);
+  for (j=1; j<l; j++)
+  {
+    GEN c = (GEN)x[j], b = cgetg(l, t_MAT);
+    for (i=1; i<l; i++) b[i] = (long)nftocomplex(nf, (GEN)c[i]);
+    b = gtrans_i(b); settyp(b, t_COL);
+    v[j] = (long)b;
+  }
+  return v;
+}
+
 static GEN
 nf_all_roots(GEN nf, GEN x, long prec)
 {
   long i, j, l = lgef(x), ru = lg(nf[6]);
-  GEN y = cgetg(l, t_POL), v, z;
+  GEN y = cgetg(l, t_POL), v, z, r;
 
   x = unifpol(nf, x, 0);
   y[1] = x[1];
@@ -3471,64 +3494,48 @@ nf_all_roots(GEN nf, GEN x, long prec)
   for (i=1; i<ru; i++)
   {
     for (j = 2; j < l; j++) z[j] = mael(y,j,i);
-    v[i] = lroots(z, prec);
+    r = roots(z, prec);
+    for (j = 1; j < lg(r); j++)
+      if (gcmp0(gmael(r,j,2))) r[j] = mael(r,j,1);
+    v[i] = (long)r;
   }
   return v;
 }
 
 static GEN
-rnfscal(GEN mth, GEN xth, GEN yth)
+rnfscal(GEN m, GEN x, GEN y)
 {
-  long n,ru,i,j,kk;
-  GEN x,y,m,res,p1,p2;
-
-  n = lg(mth)-1; ru = lg(gcoeff(mth,1,1));
-  res = cgetg(ru,t_COL);
-  for (kk=1; kk<ru; kk++)
-  {
-    m = cgetg(n+1,t_MAT);
-    for (j=1; j<=n; j++)
-    {
-      p1 = cgetg(n+1,t_COL); m[j] = (long)p1;
-      for (i=1; i<=n; i++) { p2=gcoeff(mth,i,j); p1[i]=p2[kk]; }
-    }
-    x = cgetg(n+1,t_VEC);
-    for (j=1; j<=n; j++) x[j] = (long)gconj((GEN)((GEN)xth[j])[kk]);
-    y = cgetg(n+1,t_COL);
-    for (j=1; j<=n; j++) y[j] = ((GEN)yth[j])[kk];
-    res[kk] = (long)gmul(x, gmul(m,y));
-  }
-  return res;
+  long i, l = lg(m);
+  GEN z = cgetg(l, t_COL);
+  for (i = 1; i < l; i++) z[i] = lmul(gtrans_i((GEN)x[i]), gmul((GEN)m[i], (GEN)y[i]));
+  return z;
 }
 
 static GEN
 rnfdiv(GEN x, GEN y)
 {
-  long i, ru = lg(x);
-  GEN z = cgetg(ru,t_COL);
-
-  for (i=1; i<ru; i++) z[i]=(long)gdiv((GEN)x[i],(GEN)y[i]);
+  long i, l = lg(x);
+  GEN z = cgetg(l, t_COL);
+  for (i = 1; i < l; i++) z[i] = ldiv((GEN)x[i], (GEN)y[i]);
   return z;
 }
 
 static GEN
 rnfmul(GEN x, GEN y)
 {
-  long i, ru = lg(x);
-  GEN z = cgetg(ru,t_COL);
-
-  for (i=1; i<ru; i++) z[i]=(long)gmul((GEN)x[i],(GEN)y[i]);
+  long i, l = lg(x);
+  GEN z = cgetg(l, t_COL);
+  for (i = 1; i < l; i++) z[i] = lmul((GEN)x[i], (GEN)y[i]);
   return z;
 }
 
 static GEN
 rnfvecmul(GEN x, GEN v)
 {
-  long i, lx = lg(v);
-  GEN y = cgetg(lx,typ(v));
-
-  for (i=1; i<lx; i++) y[i]=(long)rnfmul(x,(GEN)v[i]);
-  return y;
+  long i, l = lg(x);
+  GEN z = cgetg(l,t_COL);
+  for (i = 1; i < l; i++) z[i] = lmul((GEN)x[i], (GEN)v[i]);
+  return z;
 }
 
 static GEN
@@ -3594,8 +3601,8 @@ check_0(GEN B)
 
 #define swap(x,y) { long _t=x; x=y; y=_t; }
 static int
-do_SWAP(GEN MC, GEN MCS, GEN h, GEN mu, GEN B, long kmax, long k,
-        const int alpha, GEN nf, long r1, GEN I)
+do_SWAP(GEN I, GEN MC, GEN MCS, GEN h, GEN mu, GEN B, long kmax, long k,
+        const int alpha, long r1)
 {
   GEN p1, p2, muf, mufc, Bf, temp;
   long i, j;
@@ -3639,11 +3646,9 @@ rnflllgram(GEN nf, GEN pol, GEN order,long prec)
 {
   pari_sp av = avma;
   long i, j, k, l, kmax, r1, ru, lx;
-  GEN p1, p2, M, I, h, H, unro, roorder, powreorder, mth, s, MC, MPOL, MCS;
+  GEN p1, m, M, I, h, H, unro, roorder, powreorder, mth, s, MC, MPOL, MCS;
   GEN B, mu, y, z;
   const int alpha = 10;
-
-/* Initializations */
 
   nf = checknf(nf); r1 = nf_get_r1(nf);
   check_ZKmodule(order, "rnflllgram");
@@ -3654,65 +3659,52 @@ rnflllgram(GEN nf, GEN pol, GEN order,long prec)
   I = dummycopy(I);
   H = h = NULL;
 
-/* Compute the relative T2 matrix of powers of theta */
-
+  /* Compute the relative T2 matrix of powers of theta */
   roorder = nf_all_roots(nf, pol, prec); ru = lg(roorder);
-  
   unro = cgetg(lx,t_COL); for (i=1; i<lx; i++) unro[i] = un;
-  powreorder = cgetg(lx,t_MAT);
-  p1 = cgetg(ru,t_COL); powreorder[1] = (long)p1;
-  for (i=1; i<ru; i++) p1[i] = (long)unro;
-  for (k=2; k<lx; k++)
+  powreorder = cgetg(lx,t_MAT); powreorder[1] = (long)unro;
+  mth = cgetg(ru, t_VEC);
+  m = initmat(lx);
+  for (i = 1; i < ru; i++)
   {
-    p1 = cgetg(ru,t_COL); powreorder[k] = (long)p1;
-    for (i=1; i<ru; i++)
+    GEN ro = (GEN)roorder[i];
+    for (k=2; k<lx; k++)
     {
-      p2 = cgetg(lx,t_COL); p1[i] = (long)p2;
-      for (j=1; j<lx; j++)
-	p2[j] = lmul(gmael(roorder,i,j),gmael3(powreorder,k-1,i,j));
+      p1 = cgetg(lx, t_COL); powreorder[k] = (long)p1;
+      for (j=1; j < lx; j++)
+	p1[j] = lmul((GEN)ro[j], gmael(powreorder,k-1,j));
     }
-  }
-  mth = cgetg(lx,t_MAT);
-  for (l=1; l<lx; l++)
-  {
-    p1 = cgetg(lx,t_COL); mth[l] = (long)p1;
-    for (k=1; k<lx; k++)
+    for (l = 1; l < lx; l++)
     {
-      p2 = cgetg(ru,t_COL); p1[k] = (long)p2;
-      for (i=1; i<ru; i++)
+      for (k = 1; k <= l; k++)
       {
-	s = gzero;
-	for (j=1; j<lx; j++)
-	  s = gadd(s, gmul(gconj(gmael3(powreorder,k,i,j)),
-	                   gmael3(powreorder,l,i,j)));
-	p2[i] = (long)s;
+        s = gzero;
+        for (j = 1; j < lx; j++)
+          s = gadd(s, gmul(gconj(gmael(powreorder,k,j)),
+                                 gmael(powreorder,l,j)));
+        if (l == k)
+          coeff(m, l, l) = lreal(s);
+        else
+        {
+          coeff(m, k, l) = (long)s;
+          coeff(m, l, k) = lconj(s);
+        }
       }
     }
+    mth[i] = (long)dummycopy(m);
   }
-
+  /* Start LLL algorithm */
   MPOL = matbasistoalg(nf, M);
   MCS = cgetg(lx,t_MAT);
   MC = cgetg(lx,t_MAT);
-
-/* Start LLL algorithm */
 PRECPB:
-  if (!h)
-    h = idmat(lx-1);
-  else
+  if (h)
   { /* precision problem, recompute from scratch */
     H = H? gmul(H, h): h;
     MPOL = gmul(MPOL, h);
   }
-
-  for (j=1; j<lx; j++)
-  {
-    p1=cgetg(lx,t_COL); MC[j]=(long)p1;
-    for (i=1; i<lx; i++)
-    {
-      GEN c = gcoeff(MPOL,i,j);
-      p1[i] = (long)nftocomplex(nf,c);
-    }
-  }
+  h = idmat(lx-1);
+  MC = mattocomplex(nf, MPOL);
   mu = cgetg(lx,t_MAT);
   B  = cgetg(lx,t_COL);
   for (j=1; j<lx; j++)
@@ -3729,21 +3721,19 @@ PRECPB:
     GEN Ik_inv = NULL;
     if (DEBUGLEVEL) fprintferr("%ld ",k);
     if (k > kmax)
-    {
-/* Incremental Gram-Schmidt */
+    { /* Incremental Gram-Schmidt */
       kmax = k; MCS[k] = MC[k];
       for (j=1; j<k; j++)
       {
 	coeff(mu,k,j) = (long) rnfdiv(rnfscal(mth,(GEN)MCS[j],(GEN)MC[k]),
 	                              (GEN) B[j]);
-	MCS[k] = lsub((GEN) MCS[k], rnfvecmul(gcoeff(mu,k,j),(GEN)MCS[j]));
+	MCS[k] = lsub((GEN)MCS[k], rnfvecmul(gcoeff(mu,k,j),(GEN)MCS[j]));
       }
       B[k] = lreal(rnfscal(mth,(GEN)MCS[k],(GEN)MCS[k]));
       if (check_0((GEN)B[k])) goto PRECPB;
     }
     if (!RED(k, k-1, h, mu, MC, nf, I, &Ik_inv)) goto PRECPB;
-/* Test LLL condition */
-    if (do_SWAP(MC,MCS,h,mu,B,kmax,k,alpha, nf,r1,I))
+    if (do_SWAP(I,MC,MCS,h,mu,B,kmax,k,alpha, r1))
     {
       if (!B[k]) goto PRECPB;
       if (k > 2) k--;
