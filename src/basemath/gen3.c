@@ -770,16 +770,7 @@ gdivent(GEN x, GEN y)
 
   if (tx == t_INT)
   {
-    if (ty == t_INT)
-    {
-      GEN z,p1;
-      long av,tetpil;
-
-      if (signe(x)>=0) return divii(x,y);
-      av=avma; z=dvmdii(x,y,&p1);
-      if (p1==gzero) return z;
-      tetpil=avma; return gerepile(av,tetpil,addsi(-signe(y),z));
-    }
+    if (ty == t_INT) return truedvmdii(x,y,NULL);
     if (ty!=t_POL) err(typeer,"gdivent");
     return gzero;
   }
@@ -797,13 +788,13 @@ gdiventres(GEN x, GEN y)
 
   if (tx==t_INT)
   {
-    if (ty==t_INT) z[1]=(long)truedvmdii(x,y,(GEN*)(z+2));
-    else
+    if (ty==t_INT)
     {
-      if (ty!=t_POL) err(typeer,"gdiventres");
-      z[1]=zero; z[2]=licopy(x);
+      z[1]=(long)truedvmdii(x,y,(GEN*)(z+2));
+      return z;
     }
-    return z;
+    if (ty!=t_POL) err(typeer,"gdiventres");
+    z[1]=zero; z[2]=licopy(x); return z;
   }
   if (ty != t_POL) err(typeer,"gdiventres");
   if (tx == t_POL)
