@@ -237,10 +237,10 @@ lib-dyn: \$(LIBPARI_DYN)
 	\$(AR) r \$@ \$(OBJS)
 
 kerntest\$(_O): ../src/test/kerntest.c 
-	$(CC) -c \$(CFLAGS) -I$src/language \$(CPPFLAGS) -o \$@ \$<
+	\$(CC) -c \$(CFLAGS) -I$src/language \$(CPPFLAGS) -o \$@ \$<
 
 kerntest: $KERNOBJS mp\$(_O) kerntest\$(_O)
-	$(CC) \$(CFLAGS) \$(CPPFLAGS) -o \$@ $KERNOBJS kerntest\$(_O) \$(LIBS)
+	\$(CC) \$(CFLAGS) \$(CPPFLAGS) -o \$@ $KERNOBJS kerntest\$(_O) \$(LIBS)
 
 test-kernel:: kerntest
 	@./kerntest > gp.out;\
