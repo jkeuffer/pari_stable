@@ -222,7 +222,7 @@ GEN
 adj(GEN x)
 {
   GEN y;
-  caradj(x,MAXVARN,&y); return y;
+  (void)caradj(x,MAXVARN,&y); return y;
 }
 
 /*******************************************************************/
