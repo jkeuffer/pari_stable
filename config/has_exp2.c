@@ -1,2 +1,2 @@
 #include <math.h>
-main(){double x=exp2(1.0);}
+main(){exp2(1.);}

@@ -7,5 +7,4 @@
 #include <ctype.h>
 #include <sys/types.h>
 #include <memory.h>
-
 main(){ulong x;}

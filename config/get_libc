@@ -4,9 +4,10 @@ _has_list=
 echo Checking some common types...
 list=ulong; . ./look
 echo Looking in C lib for some symbols...
-extra_flags=
+extra_flags=-lm
 list=exp2; . ./look
 list=log2; . ./look
+extra_flags=
 list=strftime; . ./look
 case "$arch" in
   alpha) list='times ftime';; # gp-dyn has problems with getrusage 
