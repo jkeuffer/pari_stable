@@ -381,10 +381,11 @@ nffactormod0(GEN nf, GEN x, GEN pr)
   if (vx >= vn)
     err(talker,"polynomial variable must have highest priority in nffactormod");
 
+  prh = nfmodprinit(nf, pr);
+
   if (divise((GEN)nf[4], (GEN)pr[1]))
     return gerepileupto(av, nffactormod2(nf,x,pr));
 
-  prh = nfmodprinit(nf, pr);
   xrd = nfmod_pol_reduce(nf, prh, x);
   if (gcmp1((GEN)pr[4]))
   {
