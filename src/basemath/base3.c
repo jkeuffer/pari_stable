@@ -1309,6 +1309,27 @@ makeprimetoidealvec(GEN nf,GEN UV,GEN uv,GEN gen)
   return y;
 }
 
+GEN
+FpXQ_gener(GEN T, GEN p)
+{
+  long i,j, k, vT = varn(T), f = degpol(T);
+  GEN g, list, pf_1 = subis(gpowgs(p, f), 1);
+  gpmem_t av0 = avma, av;
+
+  list = (GEN)factor(pf_1)[1];
+  k = lg(list)-1;
+
+  for (i=1; i<=k; i++) list[i] = (long)diviiexact(pf_1, (GEN)list[i]);
+  for (av = avma;; avma = av)
+  {
+    g = FpX_rand(f, vT, p);
+    if (degpol(g) < 1) continue;
+    for (j=1; j<=k; j++)
+      if (gcmp1(FpXQ_pow(g, (GEN)list[j], T, p))) break;
+    if (j > k) return gerepilecopy(av0, g);
+  }
+}
+
 /* Given an ideal pr^ep, and an integral ideal x (in HNF form) compute a list
  * of vectors, each with 5 components as follows :
  * [[clh],[gen1],[gen2],[signat2],U.X^-1]. Each component corresponds to
@@ -1321,7 +1342,7 @@ static GEN
 zprimestar(GEN nf,GEN pr,GEN ep,GEN x,GEN arch)
 {
   gpmem_t av = avma, av1, tetpil;
-  long N, f, j, i, e, a, b;
+  long N, f, i, e, a, b;
   GEN prh,p,pf_1,list,v,p1,p3,p4,prk,uv,g0,newgen,pra,prb;
   GEN *gptr[2];
 
@@ -1339,20 +1360,7 @@ zprimestar(GEN nf,GEN pr,GEN ep,GEN x,GEN arch)
   else
   {
     GEN T, modpr = zk_to_ff_init(nf, &pr, &T, &p);
-    long k, vT = varn(T);
-
-    list = (GEN)factor(pf_1)[1];
-    k = lg(list)-1;
-    for (i=1; i<=k; i++) list[i] = (long)diviiexact(pf_1, (GEN)list[i]);
-    for (av1 = avma;; avma = av1)
-    {
-      p1 = FpX_rand(f, vT, p);
-      if (degpol(p1) < 1) continue;
-      for (j=1; j<=k; j++)
-	if (gcmp1(FpXQ_pow(p1, (GEN)list[j], T, p))) break;
-      if (j > k) break;
-    }
-    v = ff_to_nf(p1, modpr);
+    v = ff_to_nf(FpXQ_gener(T,p), modpr);
     v = algtobasis(nf, v);
   }
   /* v generates  (Z_K / pr)^* */
