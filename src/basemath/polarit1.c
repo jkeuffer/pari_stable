@@ -986,6 +986,30 @@ polpol_to_mat(GEN v, long n)
   return y;
 }
 
+/* P(X,Y) --> P(Y,X), n-1 is the degree in Y */
+GEN
+swap_polpol(GEN x, long n, long w)
+{
+  long j, lx = lgef(x), ly = n+3;
+  long v=varn(x);
+  GEN y = cgetg(ly, t_POL);
+  y[1]=evalsigne(1) | evallgef(ly) | evalvarn(v);
+  for (j=2; j<ly; j++)
+  {
+    long k;
+    GEN p1=cgetg(lx,t_POL);
+    p1[1] = evalsigne(1) | evallgef(lx) | evalvarn(w);
+    for (k=2; k<lx; k++)
+      if( j<lgef(x[k]))
+        p1[k] = mael(x,k,j);
+      else
+        p1[k] = zero;
+    y[j] = (long)normalizepol_i(p1,lx);
+  }
+  return normalizepol_i(y,ly);
+}
+
+
 
 /* set x <-- x + c*y mod p */
 static void

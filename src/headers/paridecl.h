@@ -1105,6 +1105,7 @@ GEN     roots2(GEN pol,long PREC);
 GEN     rootsold(GEN x, long l);
 GEN     setloop(GEN a);
 GEN     simplefactmod(GEN f, GEN p);
+GEN     swap_polpol(GEN x, long n, long w);
 GEN     vecpol_to_mat(GEN v, long n);
 
 /* polarit2.c */
