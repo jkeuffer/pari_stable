@@ -2913,29 +2913,25 @@ nfsuppl(GEN nf, GEN x, long n, GEN prhall)
   long k, s, t, N, lx=lg(x);
   gpmem_t av=avma, av2;
   GEN y,p1,p2,p,unmodp,zeromodp,unnf,zeronf,prh;
-  stackzone *zone;
 
   k=lx-1; if (k>n) err(suppler2);
   if (k && lg(x[1])!=n+1) err(talker,"incorrect dimension in nfsupl");
   N=degpol(nf[1]); prh=(GEN)prhall[1]; p=gcoeff(prh,1,1);
 
-  zone  = switch_stack(NULL, 2*(3 + 2*lg(p) + N+1) + (n+3)*(n+1));
-  switch_stack(zone,1);
   unmodp=gmodulsg(1,p); zeromodp=gmodulsg(0,p);
   unnf=gscalcol_proto(unmodp,zeromodp,N);
   zeronf=gscalcol_proto(zeromodp,zeromodp,N);
   y = idmat_intern(n,unnf,zeronf);
-  switch_stack(zone,0); av2=avma;
+  av2=avma;
 
   for (s=1; s<=k; s++)
   {
-    p1=nfsolvemodpr(nf,y,(GEN)x[s],prhall); t=s;
-    while (t<=n && gcmp0((GEN)p1[t])) t++;
+    p1=nfsolvemodpr(nf,y,(GEN)x[s],prhall);
+    t=s; while (t<=n && gcmp0((GEN)p1[t])) t++;
     avma=av2; if (t>n) err(suppler2);
     p2=(GEN)y[s]; y[s]=x[s]; if (s!=t) y[t]=(long)p2;
   }
-  avma=av; y=gcopy(y);
-  free(zone); return y;
+  return gerepilecopy(av, lift_intern(y));
 }
 
 /* Given two fractional ideals a and b, gives x in a, y in b, z in b^-1,

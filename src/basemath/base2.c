@@ -1013,7 +1013,7 @@ get_partial_order_as_pols(GEN p, GEN f)
 GEN
 Decomp(GEN p,GEN f,long mf,GEN theta,GEN chi,GEN nu,long flag)
 {
-  GEN res,pr,pk,ph,pdr,unmodp,b1,b2,b3,a1,e,f1,f2;
+  GEN res,pr,pk,ph,pdr,b1,b2,b3,a1,e,f1,f2;
 
   if (DEBUGLEVEL>2)
   {
@@ -1026,10 +1026,9 @@ Decomp(GEN p,GEN f,long mf,GEN theta,GEN chi,GEN nu,long flag)
     }
     fprintferr("\n");
   }
-  unmodp = gmodulsg(1,p);
-  b1=lift_intern(gmul(chi,unmodp));
-  a1=gun; b2=gun;
-  b3=lift_intern(gmul(nu,unmodp));
+  b1 = FpX_red(chi, p);
+  a1 = gun; b2 = gun;
+  b3 = FpX_red(nu, p);
   while (degpol(b3) > 0)
   {
     GEN p1;
@@ -1883,9 +1882,9 @@ pradical(GEN nf, GEN p, GEN *modfrob)
 }
 
 static GEN
-project(GEN algebre, GEN x, long k, long kbar)
+project(GEN algebre, GEN x, long k, long kbar, GEN p)
 {
-  x = inverseimage(algebre,x);
+  x = FpM_invimage(algebre,x,p);
   x += k; x[0] = evaltyp(t_COL) | evallg(kbar+1);
   return x;
 }
@@ -1903,19 +1902,18 @@ pol_min(GEN alpha,GEN nf,GEN algebre,long kbar,GEN p)
   puiss[1] = (long)gscalcol_i(gun,kbar);
   for (i=2; i<=N+1; i++)
   {
-    if (i>2) p1 = element_mul(nf,p1,alpha);
-    puiss[i] = (long) project(algebre,p1,k,kbar);
+    if (i>2) p1 = FpV_red(element_mul(nf,p1,alpha), p);
+    puiss[i] = (long) project(algebre,p1,k,kbar,p);
   }
-  puiss = lift_intern(puiss);
   p1 = (GEN)FpM_ker(puiss, p)[1]; tetpil=avma;
   return gerepile(av,tetpil,gtopolyrev(p1,0));
 }
 
 /* Evalue le polynome pol en alpha,element de nf */
 static GEN
-eval_pol(GEN nf,GEN pol,GEN alpha,GEN algebre,GEN algebre1)
+eval_pol(GEN nf,GEN pol,GEN alpha,GEN algebre,GEN algebre1, GEN p)
 {
-  gpmem_t av=avma,tetpil;
+  gpmem_t av=avma;
   long i,kbar,k, lx = lgef(pol)-1, N = degpol(nf[1]);
   GEN res;
 
@@ -1926,8 +1924,8 @@ eval_pol(GEN nf,GEN pol,GEN alpha,GEN algebre,GEN algebre1)
     res = element_mul(nf,alpha,res);
     res[1] = ladd((GEN)res[1],(GEN)pol[i]);
   }
-  res = project(algebre,res,k,kbar); tetpil=avma;
-  return gerepile(av,tetpil,gmul(algebre1,res));
+  res = project(algebre,res,k,kbar,p);
+  return gerepileupto(av, FpV_red(gmul(algebre1,res), p));
 }
 
 static GEN
@@ -2031,29 +2029,6 @@ extern GEN det_mod_P_n(GEN a, GEN N, GEN P);
 GEN sylvestermatrix_i(GEN x, GEN y);
 
 /* check if p^va doesnt divide norm x (or norm(x+p)) */
-#if 0
-/* compute norm mod p^whatneeded using Sylvester's matrix */
-/* looks slower than the new subresultant. Have to re-check this */
-static GEN
-prime_check_elt(GEN a, GEN pol, GEN p, GEN pf)
-{
-  GEN M,mod,x, c = denom(content(a));
-  long v = pvaluation(c, p, &x); /* x is junk */
-
-  mod = mulii(pf, gpowgs(p, degpol(pol)*v + 1));
-
-  x = FpX_red(gmul(a,c), mod);
-  M = sylvestermatrix_i(pol,x);
-  if (det_mod_P_n(M,mod,p) == gzero)
-  {
-    x[2] = ladd((GEN)x[2], mulii(p,c));
-    M = sylvestermatrix_i(pol,x);
-    if (det_mod_P_n(M,mod,p) == gzero) return NULL;
-    a[2] = ladd((GEN)a[2], p);
-  }
-  return a;
-}
-#else
 /* use subres to compute norm */
 static GEN
 prime_check_elt(GEN a, GEN pol, GEN p, GEN pf)
@@ -2065,7 +2040,6 @@ prime_check_elt(GEN a, GEN pol, GEN p, GEN pf)
   if (resii(divii(norme,pf),p) != gzero) return a;
   return NULL;
 }
-#endif
 
 #if 0
 static GEN
@@ -2155,7 +2129,7 @@ prime_two_elt(GEN nf, GEN p, GEN ideal)
 
   /* we want v_p(Norm(beta)) = p^f, f = N-m */
   av = avma; f = N-m; pf = gpuigs(p,f);
-  ideal = centerlift(ideal);
+  ideal = centermod(ideal, p);
   ideal = concatsp(gscalcol(p,N), ideal);
   ideal = ideal_better_basis(nf, ideal, p);
   beta = gmul((GEN)nf[7], ideal);
@@ -2207,10 +2181,10 @@ GEN
 primedec(GEN nf, GEN p)
 {
   gpmem_t av=avma,tetpil;
-  long i,j,k,kbar,np,c,indice,N,lp;
+  long i,j,k,kbar,np,c,indice,N;
   GEN ex,F,list,ip,elth;
   GEN modfrob,algebre,algebre1,b,mat1,T;
-  GEN alpha,beta,f,g,h,p1,p2,unmodp,zmodp,idmodp;
+  GEN alpha,beta,f,g,h,p1,UN;
 
   if (DEBUGLEVEL>=3) timer2();
   nf=checknf(nf); T=(GEN)nf[1]; N=degpol(T);
@@ -2229,7 +2203,7 @@ primedec(GEN nf, GEN p)
   }
 
   g = (GEN)F[1];
-  for (i=2; i<np; i++) g = FpX_red(gmul(g,(GEN)F[i]), p);
+  for (i=2; i<np; i++) g = FpX_mul(g,(GEN)F[i], p);
   h = FpX_div(T,g,p);
   f = FpX_red(gdivexact(gsub(gmul(g,h), T), p), p);
   list = cgetg(N+1,t_VEC);
@@ -2245,61 +2219,60 @@ primedec(GEN nf, GEN p)
 
   if (beta)
   {
-    beta = algtobasis_intern(nf,beta);
-    lp=lg(ip)-1; p1=cgetg(2*lp+N+1,t_MAT);
-    for (i=1; i<=N; i++) p1[i]=(long)element_mulid(nf,beta,i);
-    for (   ; i<=N+lp; i++)
+    long l = lg(ip)-1;
+    beta = FpV_red(algtobasis_intern(nf,beta), p);
+    p1=cgetg(2*l+N+1,t_MAT);
+    for (i=1; i<=N;   i++) p1[i] = (long)element_mulid(nf,beta,i);
+    for (   ; i<=N+l; i++)
     {
-      p2 = (GEN) ip[i-N];
-      p1[i+lp] = (long) p2;
-      p1[i] = ldiv(element_mul(nf,lift(p2),beta),p);
+      GEN p2 = (GEN)ip[i-N];
+      p1[i+l] = (long)p2;
+      p1[i] = (long)gdivexact(element_mul(nf,p2,beta),p);
     }
-    ip = FpM_image(p1, p);
+    ip = FpM_image(FpM_red(p1,p), p);
     if (lg(ip)>N) err(bugparier,"primedec (bad pradical)");
   }
-  unmodp=gmodulsg(1,p); zmodp=gmodulsg(0,p);
-  idmodp = idmat_intern(N,unmodp,zmodp);
-  ip = gmul(ip, unmodp);
+  UN = gscalcol(gun, N);
 
-  h=cgetg(N+1,t_VEC); h[1]=(long)ip;
+  h = cgetg(N+1,t_VEC); h[1] = (long)ip;
   for (c=1; c; c--)
   {
     elth=(GEN)h[c]; k=lg(elth)-1; kbar=N-k;
-    p1 = concatsp(elth,(GEN)idmodp[1]);
-    algebre = suppl_intern(p1,idmodp);
+    p1 = concatsp(elth, UN);
+    algebre = FpM_suppl(p1, p);
     algebre1 = cgetg(kbar+1,t_MAT);
     for (i=1; i<=kbar; i++) algebre1[i]=algebre[i+k];
-    b = gmul(modfrob,algebre1);
+    b = FpM_mul(modfrob,algebre1,p);
     for (i=1;i<=kbar;i++)
-      b[i] = (long) project(algebre,(GEN) b[i],k,kbar);
-    mat1 = FpM_ker(lift_intern(b), p);
-    if (lg(mat1)>2)
+      b[i] = (long) project(algebre,(GEN)b[i],k,kbar, p);
+    mat1 = FpM_ker(b, p);
+    if (lg(mat1) > 2)
     {
       GEN mat2 = cgetg(k+N+1,t_MAT);
       for (i=1; i<=k; i++) mat2[i]=elth[i];
-      alpha=gmul(algebre1,(GEN)mat1[2]);
+      alpha = FpM_FpV_mul(algebre1,(GEN)mat1[2], p);
       p1 = pol_min(alpha,nf,algebre,kbar,p);
-      p1 = (GEN)factmod(p1,p)[1];
+      p1 = (GEN)factmod0(p1,p)[1];
       for (i=1; i<lg(p1); i++)
       {
-	beta = eval_pol(nf,(GEN)p1[i],alpha,algebre,algebre1);
-        beta = lift_intern(beta);
+	beta = eval_pol(nf,(GEN)p1[i],alpha,algebre,algebre1,p);
 	for (j=1; j<=N; j++)
-	  mat2[k+j] = (long)FpV(element_mulid(nf,beta,j), p);
-	h[c] = (long) image(mat2); c++;
+	  mat2[k+j] = (long)FpV_red(element_mulid(nf,beta,j), p);
+	h[c] = (long)FpM_image(mat2, p); c++;
       }
     }
     else
     {
-      gpmem_t av1; p1 = cgetg(6,t_VEC);
-      list[indice++] = (long)p1;
-      p1[1]=(long)p; p1[4]=lstoi(kbar);
-      p1[2]=(long)prime_two_elt(nf,p,elth);
-      p1[5]=(long)lens(nf,p,(GEN)p1[2]);
-      av1=avma;
-      i = int_elt_val(nf,(GEN)p1[5],p,(GEN)p1[5],NULL,N-1);
-      avma=av1;
-      p1[3]=lstoi(i+1);
+      GEN z, u = prime_two_elt(nf,p,elth), v = lens(nf,p,u);
+      gpmem_t av1 = avma;
+      i = int_elt_val(nf,v,p,v,NULL,N-1);
+      avma = av1;
+      z = cgetg(6,t_VEC); list[indice++] = (long)z;
+      z[1] = (long)p;
+      z[2] = (long)u;
+      z[3] = lstoi(i+1);
+      z[4] = lstoi(kbar);
+      z[5] = (long)v;
     }
     if (DEBUGLEVEL>=3) msgtimer("h[%ld]",c);
   }
@@ -2606,7 +2579,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, GEN unnf, GEN id, GEN matId)
     for (j=2; j<=n; j++)
       R[j] = (long) rnfelementid_powmod(nf,multabmod,matId, j,q1,prhall);
     baseIp = nfkermodpr(nf,R,prhall);
-    baseOp = lift_intern(nfsuppl(nf,baseIp,n,prhall));
+    baseOp = nfsuppl(nf,baseIp,n,prhall);
     alpha=cgetg(n+1,t_MAT);
     for (j=1; j<lg(baseIp); j++) alpha[j]=baseOp[j];
     for (   ; j<=n; j++)

@@ -153,7 +153,7 @@ sort_factor_gen(GEN y, int (*cmp)(GEN,GEN))
 GEN
 centermod_i(GEN x, GEN p, GEN ps2)
 {
-  long i, lx;
+  long i, j, lx, hx;
   gpmem_t av;
   GEN y,p1;
 
@@ -182,6 +182,23 @@ centermod_i(GEN x, GEN p, GEN ps2)
 	p1=modii((GEN)x[i],p);
 	if (cmpii(p1,ps2)>0) p1=subii(p1,p);
 	y[i]=(long)p1;
+      }
+      return y;
+
+    case t_MAT: lx=lg(x);
+      y=cgetg(lx,t_MAT);
+      if (lx == 1) return y;
+      hx = lg(x[1]);
+      for (j=1; j<lx; j++)
+      {
+        GEN cx = (GEN)x[j], cy = cgetg(hx,t_COL);
+        y[j] = (long)cy;
+        for (i=1; i<hx; i++)
+        {
+          p1=modii((GEN)cx[i], p);
+          if (cmpii(p1,ps2)>0) p1=subii(p1,p);
+          cy[i]=(long)p1;
+        }
       }
       return y;
   }

@@ -1214,7 +1214,7 @@ u_FpM_gauss(GEN a, GEN b, long p)
   if (!aco) return cgetg(1,t_MAT);
   li = lg(a[1])-1;
   bco = lg(b)-1;
-  iscol = (typ(b)==t_COL);
+  iscol = (typ(b)!=t_MAT);
   piv = 0; /* gcc -Wall */
   for (i=1; i<=aco; i++)
   {
@@ -1284,18 +1284,19 @@ FpM_gauss(GEN a, GEN b, GEN p)
   li = lg(a[1])-1;
   if (li != aco && (li < aco || b)) err(mattype1,"gauss");
   b = check_b(b,li); av = avma;
+  iscol = (typ(b)==t_COL);
   if (OK_ULONG(p))
   {
     ulong pp=p[2];
     a = u_Fp_FpM(a, pp);
-    b = u_Fp_FpM(b, pp);
+    b = iscol? u_Fp_FpV(b, pp): u_Fp_FpM(b, pp);
     u = u_FpM_gauss(a,b, pp);
-    return gerepileupto(av, small_to_mat(u));
+    u = iscol? small_to_col(u): small_to_mat(u);
+    return gerepileupto(av, u);
   }
   lim = stack_lim(av,1);
   a = dummycopy(a);
   bco = lg(b)-1;
-  iscol = (typ(b)==t_COL);
   piv = NULL; /* gcc -Wall */
   for (i=1; i<=aco; i++)
   {
@@ -2080,41 +2081,49 @@ inverseimage(GEN m,GEN v)
 }
 
 /* x is an n x k matrix, rank(x) = k <= n. Return an invertible n x n matrix
- * whose first k columns are given by x. If rank(x)<k, the result may be wrong
- */
+ * whose first k columns are given by x. If rank(x) < k, undefined result. */
 GEN
-suppl_intern(GEN x, GEN myid)
+suppl(GEN x)
 {
   gpmem_t av = avma;
   long lx = lg(x), n,i,j;
   GEN y,p1;
-  stackzone *zone;
 
   if (typ(x) != t_MAT) err(typeer,"suppl");
   if (lx==1) err(talker,"empty matrix in suppl");
   n=lg(x[1]); if (lx>n) err(suppler2);
   if (lx == n) return gcopy(x);
 
-  zone  = switch_stack(NULL, n*n);
-  (void)switch_stack(zone,1);
-  y = myid? dummycopy(myid): idmat(n-1);
-  (void)switch_stack(zone,0);
+  y = idmat(n-1);
   gauss_get_prec(x,0);
   for (i=1; i<lx; i++)
   {
-    p1 = gauss(y,(GEN)x[i]); j=i;
-    while (j<n && gauss_is_zero((GEN)p1[j])) j++;
+    p1 = i==1? (GEN)x[1]: gauss(y,(GEN)x[i]);
+    j = i; while (j<n && gauss_is_zero((GEN)p1[j])) j++;
     if (j>=n) err(suppler2);
     p1=(GEN)y[i]; y[i]=x[i]; if (i!=j) y[j]=(long)p1;
   }
-  avma = av; y = gcopy(y);
-  free(zone); return y;
+  return gerepilecopy(av, y);
 }
 
 GEN
-suppl(GEN x)
+FpM_suppl(GEN x, GEN p)
 {
-  return suppl_intern(x,NULL);
+  gpmem_t av = avma;
+  long lx = lg(x), n,i,j;
+  GEN y,p1;
+  n=lg(x[1]); if (lx>n) err(suppler2);
+  if (lx == n) return gcopy(x);
+
+  y = idmat(n-1);
+  for (i=1; i<lx; i++)
+  {
+    p1 = i==1? (GEN)x[1]: FpM_gauss(y,(GEN)x[i],p);
+    j = i; while (j<n && gcmp0((GEN)p1[j])) j++;
+    if (j>=n) err(suppler2);
+    p1=(GEN)y[i]; y[i]=x[i]; if (i!=j) y[j]=(long)p1;
+  }
+  return gerepilecopy(av, y);
 }
 
 GEN
@@ -2246,24 +2255,19 @@ FpM_mul(GEN x, GEN y, GEN p)
 GEN
 FpM_FpV_mul(GEN x, GEN y, GEN p)
 {
-  long i,l,lx=lg(x), ly=lg(y);
+  long i,k,l,lx=lg(x), ly=lg(y);
   GEN z;
   if (lx != ly) err(operi,"* [mod p]",x,y);
-  z=cgetg(ly,t_COL);
   if (lx==1) return cgetg(1,t_COL);
-  l=lg(x[1]);
+  l = lg(x[1]);
+  z = cgetg(l,t_COL);
   for (i=1; i<l; i++)
   {
-    gpmem_t av;
-    GEN p1,p2;
-    int k;
-    p1=gzero; av=avma;
+    gpmem_t av = avma;
+    GEN p1 = gzero;
     for (k=1; k<lx; k++)
-    {
-      p2=mulii(gcoeff(x,i,k),(GEN)y[k]);
-      p1=addii(p1,p2);
-    }
-    z[i]=lpileupto(av,p?modii(p1,p):p1);
+      p1 = addii(p1, mulii(gcoeff(x,i,k),(GEN)y[k]));
+    z[i] = lpileupto(av,p?modii(p1,p):p1);
   }
   return z;
 }

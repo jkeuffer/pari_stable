@@ -2163,15 +2163,9 @@ FpV_red(GEN z, GEN p)
 GEN
 FpM_red(GEN z, GEN p)
 {
-  long i,j,l = lg(z), m = lg((GEN)z[1]);
-  GEN x,y;
-  x = cgetg(l,t_MAT);
-  for (i=1; i<l; i++)
-  {
-    x[i]=lgetg(m,t_MAT);y=(GEN)x[i];
-    for(j=1; j<m ; j++)
-      y[j] = lmodii(gmael(z,i,j),p);
-  }
+  long i, l = lg(z);
+  GEN x = cgetg(l,t_MAT);
+  for (i=1; i<l; i++) x[i] = (long)FpV_red((GEN)z[i], p);
   return x;
 }
 
@@ -2361,17 +2355,21 @@ u_Fp_FpX(GEN x, int malloc, ulong p)
 }
 
 GEN
+u_Fp_FpV(GEN x, ulong p)
+{
+  long i, n = lg(x);
+  GEN y = cgetg(n,t_VECSMALL);
+  for (i=1; i<n; i++) y[i] = (long)umodiu((GEN)x[i], p);
+  return y;
+}
+
+GEN
 u_Fp_FpM(GEN x, ulong p)
 {
-  long i,j,m,n = lg(x);
+  long j,n = lg(x);
   GEN y = cgetg(n,t_MAT);
   if (n == 1) return y;
-  m = lg(x[1]);
-  for (j=1; j<n; j++)
-  {
-    y[j] = (long)cgetg(m,t_VECSMALL);
-    for (i=1; i<m; i++) coeff(y,i,j) = (long)umodiu(gcoeff(x,i,j), p);
-  }
+  for (j=1; j<n; j++) y[j] = (long)u_Fp_FpV((GEN)x[j], p);
   return y;
 }
 
