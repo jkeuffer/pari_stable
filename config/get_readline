@@ -1,0 +1,156 @@
+readline_add="$GP_READLINE $TOP/readline-$osname-$arch $TOP/readline"
+pth="$readline_add $libpth"
+lib=readline; . ./locatelib
+rl_fullname=$try
+
+if test -n "$readline"; then
+# Readline -- Headers
+  case "$osname" in
+    os2) incpth=`echo $C_INCLUDE_PATH | sed -e 's/\([^;]\)$/\1;/g' -e 's%;%/readline %g' -e 's,\\\\,/,g'` ;;
+      cygwin*) incpth="\
+       $cygtop/usr/local/include/readline\
+       $cygtop/usr/local/include\
+       $cygtop/usr/include/readline\
+       $cygtop/usr/include\
+       $cygtop/H-${arch}-cygwin32/${arch}-cygwin32/include\
+     ";;
+      *) incpth="\
+      /usr/local/include/readline\
+      /usr/include/readline\
+      /opt/include/readline\
+      /opt/local/include/readline\
+      /opt/gnu/include/readline\
+      /usr/unsupported/include/readline\
+      /usr/local/include\
+      /usr/include\
+      /opt/include\
+      /opt/local/include\
+      /opt/gnu/include\
+    ";;
+    esac
+    pth="$readline_add $incpth"
+    x=`./locate 'readline.h' '' $pth`
+    CPPF_defined=
+    case $x in
+     ?:/*|/*) rl_include=`echo $x | sed 's,/readline.h,,'`
+         echo ..."Found readline header in $rl_include"
+         if (grep CPPFunction $x > /dev/null 2>&1); then CPPF_defined=yes; fi
+         if (grep rl_message  $x > /dev/null 2>&1); then rl_message=yes; fi
+         if (grep rl_completion_matches $x > /dev/null 2>&1); then
+           rl_completion_matches=yes;
+         fi
+         if (grep rl_completion_func_t $x > /dev/null 2>&1); then
+           rl_completion_func_t=yes;
+         fi
+         if (grep "rl_refresh_line *()" $x > /dev/null 2>&1); then
+           rl_refresh_line_oldproto=yes
+         fi
+         if (grep rl_completion_append_character $x > /dev/null 2>&1); then
+           rl_appendchar=yes
+         fi
+         if (grep rl_generic_bind $x > /dev/null 2>&1); then
+           rl_genericbind=yes
+         fi
+         if (grep rl_save_prompt $x > /dev/null 2>&1); then
+           rl_save_prompt=yes;
+         else # might be defined but not declared (old readline)
+          lib=$rl_fullname; sym=rl_save_prompt; . ./locatesymbol
+          _rl_save_prompt=$try
+         fi;;
+      *) echo ..."But no header file has been found"
+         readline=;;
+    esac
+  fi
+
+  pth="$readline_add $libpth"
+  if test -n "$readline"; then
+# Readline -- Allocation
+  lib=$rl_fullname; sym=alloca; . ./locatesymbol
+  if test -n "$try"; then # alloca needed
+    lib=iberty; . ./locatelib
+    rl_liberty="$try"
+  fi
+# Readline -- TermCap
+  lib=$rl_fullname; sym=tgetent; . ./locatesymbol
+  need_tgetent="$try"
+  if test -n "$need_tgetent"; then
+    lib=ncurses; . ./locatelib
+    if test -n "$try"; then # ncurses found. Does it contain tgetent ?
+      lib=$try; . ./locatesymbol
+    fi
+    if test -n "$try"; then
+      rl_ncurses=$ncurses
+      need_tgetent=
+    else # give termcap a try
+      lib=termcap; . ./locatelib
+      if test -n "$try"; then
+        rl_termcap=$termcap
+        need_tgetent=
+      fi
+    fi
+  fi
+# Readline -- CFLAGS
+  if (echo $rl_include | grep "readline$" > /dev/null); then
+    rl_include=`echo $rl_include | sed 's,/readline$,,'`
+    RLINCLUDE="-I$rl_include"
+  else # in case headers are not installed correctly
+    RLINCLUDE="-I$rl_include -DREADLINE_LIBRARY"
+  fi
+  RLLIBS="-L$readline -lreadline"
+  if test -n "$rl_ncurses"; then
+    echo ..."Library ncurses needed by readline"
+    RLLIBS="$RLLIBS -L$rl_ncurses -lncurses"
+  fi
+  if test -n "$rl_termcap"; then
+    echo ..."Library termcap needed by readline"
+    RLLIBS="$RLLIBS -L$rl_termcap -ltermcap"
+  fi
+  if test -n "$rl_liberty"; then
+    echo ..."Library liberty needed by readline"
+    RLLIBS="$RLLIBS -L$rl_liberty -liberty"
+  fi
+# Readline -- last chance for tgetent
+  if test -n "$need_tgetent"; then # try to compile anyway (in libc?)
+    list=readline; extra_flags="$RLLIBS $RLINCLUDE"; ./look
+    if test "$has_readline" = no; then
+      echo "cannot use readline: please install libncurses or libtermcap."
+      readline=
+    fi
+  fi
+fi
+
+if test -z "$readline"; then
+  echo "### Building without GNU readline support"
+else
+  if test "$fastread" = yes; then
+    exe=$osname-$arch-rlv$$
+    $CC $extraflag $RLINCLUDE -o $exe rl_version.c $RLLIBS 2> /dev/null
+    if test -r $exe; then readline=`$exe`; else readline=1.0; fi
+    rm -f $exe $exe$exe_suff
+    echo "Using GNU readline, version $readline"
+  fi
+  if test -z "$rl_appendchar"; then
+    echo ..."Library readline does not have completion_append_char"
+  fi
+  if test -z "$rl_genericbind"; then
+    echo ..."Library readline does not have rl_generic_bind"
+  fi
+  if test -z "$rl_save_prompt"; then
+    echo ..."Library readline does not have rl_save_prompt"
+    if test -n "$_rl_save_prompt"; then
+      echo ......"but it has _rl_save_prompt"
+    fi
+  fi
+
+  if test "$fastread" != yes; then
+    cat << EOM
+==========================================================================
+EOM
+    echo $n "Do you want to use GNU readline library within GP ? $c"
+    rep='y n'; dflt=y; . ./myread
+    case $ans in
+      n) readline=;;
+    esac
+  fi
+fi
+if test -n "$readline"; then readline_enabledp="t"; fi

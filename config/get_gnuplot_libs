@@ -1,0 +1,80 @@
+# At this moment $which_graphic_lib is either gnuplot-dynamic, or the argument
+# to --graphic option; $graph_cmd is "" unless --graphic option was specified.
+
+#   Look for it unconditionally, without read/write of
+#     $which_graphic_lib or $graph_cmd
+pth="$TOP/gnuplot-$osname-$arch $TOP/gnuplot\
+     $TOP/../gnuplot-$osname-$arch $TOP/../gnuplot\
+     $TOP/../../gnuplot-$osname-$arch $TOP/../../gnuplot $libpth"
+lib=gnuplot; . ./locatelib
+gnuplot_fullpath="$try"
+gnuplot_libs=
+case $gnuplot in
+  /*|[c-z]:/*)
+      addgnuplot=gnuplot
+      for lib in vga vesa jmgraph linuxvga gd png z
+      do
+          . ./locatelib
+          eval "elib=\$$lib"
+          case $elib in
+            /*|[c-z]:/*) gnuplot_libs="$gnuplot_libs -l$lib";;
+          esac
+      done
+      case "$which_graphic_lib" in
+      *gnuplot)
+          if test -z "$gnuplot_libs"; then
+      	echo "...I expect that no libraries are needed for gnuplot"
+          else
+      	echo "...I expect that libraries $gnuplot_libs are needed for gnuplot"
+          fi ;;
+      esac
+      ;;
+  *)
+      case "$which_graphic_lib" in
+      *gnuplot)
+          pth=`echo $pth | sed -e "s,$TOP,.,g"`
+          echo "###"
+          echo "### Could not find gnuplot library in $pth"
+          echo "###"
+          case "$osname" in
+      	os2) tlib=gnuplot.a ;;
+      	*)   tlib=libgnuplot.a ;;
+          esac
+          echo "### You may need to execute"
+          echo "###   ar cr $tlib version.o util.o term.o bitmap.o stdfn.o"
+          echo "### In the build directory of gnuplot-3.7, and move"
+          echo "### $tlib to ./gnuplot-$osname-$arch or ./gnuplot subdirs"
+          echo "### or to similarly-named directories up the directory tree." 
+          echo "###"
+          ;;
+      esac
+      ;;
+esac
+
+if test -z "$__gnuc__"; then
+ case "$which_graphic_lib" in
+   *gnuplot)
+    lib=$gnuplot_fullpath; sym=_eprintf; . ./locatesymbol
+    if test -n "$try"; then
+      echo "...Looks like gcc-compiled gnuplot.  I add -lgcc to graphic libraries"
+      _ogcc="$gcc" # $gcc overwritten by locatelib below
+      pth="$libpth /opt/local/gnu/lib /usr/local/gnu/lib"
+      gcclibspec="`gcc -v 2>&1 | grep specs | sed 's/.*specs from //'`"
+      if test -n "$gcclibspec"; then
+        pth="`dirname $gcclibspec` $pth"
+      fi
+      lib=gcc; . ./locatelib
+      if test -n "$gcc"; then
+        gnuplot_libs="$gnuplot_libs -L$gcc"
+      else
+        echo "...### I did not find -lgcc library in $pth."
+        echo "...### You may need to manually add something like -L/opt/gnu/lib to the "
+        echo "...###   PLOTLIBS = ..."
+        echo "...### line in your architecture-Makefile."
+      fi
+      gcc="$_ogcc" # restore $gcc
+      gnuplot_libs="$gnuplot_libs -lgcc"
+    fi
+    ;;
+ esac
+fi

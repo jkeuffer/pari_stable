@@ -1,0 +1,99 @@
+if test "$optimization" = profiling; then DLLD=; else
+  case "$osname" in
+    os2) DLLD=${DLLD-$LD};;
+    *)   DLLD=${DLLD-ld};;
+  esac
+  DLSUFFIX=so
+# Which suffix for Dynamic Lib?
+# Some linkers (SunOS 4) need minor and major lib version numbers.
+# Some others (SunOS 5) need a link from a .so
+# Some others (HPUX 09) do not want version numbers.
+#
+  soname=.$soname_num
+  case "$osname-$arch" in
+#    aix-*)  DLSUFFIX=a  ;; dynamic linking does not work!
+    sunos-*) sodest=.$VersionMajor$VersionMinor.$patch
+             soname=$sodest;;
+    *-alpha|solaris-*|linux-*|freebsd-*)
+      case $libpari_base in
+        pari) sodest=.$version.$patch;; # released versions
+        *) sodest=.$patch.0.0;; # unstable versions
+      esac ;;
+# FIXME: gp-dyn.exe crashes on startup
+#   cygwin*) soname= ; sodest= ; DLSUFFIX=dll;;
+    hpux-*) soname= ; sodest= ; DLSUFFIX=sl;;
+    irix-*) soname= ; sodest= ;;
+    os2-*)  soname= ; sodest= ; DLSUFFIX=dll
+	    # DLL names better be 8+3
+	    libpari_base=`echo "$libpari_base" | sed 's/\./_/g'`
+	 ;;
+    *) DLLD=;;
+  esac
+fi
+
+if test -n "$DLLD"; then
+# Which Dynamic Lib Linker?
+#
+  if test $DLLD = ld -a -n "$ld"; then
+    DLLD=$ld;
+  fi
+  if test "$fastread" != yes; then
+    echo $n ..."Which linker for building dynamic libs? $c"
+    dflt=$DLLD; rep=; . ./myread
+    DLLD=$ans
+  fi
+
+  GNUld=no
+  case "$DLLD" in
+    *ld)
+      if ($DLLD -v 2>&1 | grep GNU > /dev/null); then
+        echo "...Hum, this looks like GNU ld"
+        GNUld=yes
+      fi;;
+  esac
+
+# Which Flags for Dynamic Lib Linker ?
+#
+  if test "$GNUld" = yes; then
+    DLLDFLAGS="-shared -soname \$(LIBPARI_SONAME)"
+  else
+    # DLLD != GNU ld
+    case "$osname-$arch" in
+      aix-*)     DLLDFLAGS="-r" ;;
+      hpux-*)    DLLDFLAGS="-b -E" ;;
+      freebsd-*) DLLDFLAGS="-Bshareable -x" ;;
+      linux-*)   DLLDFLAGS="-shared -soname \$(LIBPARI_SONAME)" ;;
+      irix-*)    DLLDFLAGS="-shared -elf -no_unresolved -all" ;;
+      osf1-*)    DLLDFLAGS="-shared";
+         case "$optimization" in
+           full) DLLDFLAGS="$DLLDFLAGS -O3" ;;
+         esac;;
+      sunos-*)   DLLDFLAGS="-assert nodefinitions" ;;
+      solaris-*) DLLDFLAGS="-G -h \$(LIBPARI_SONAME)" ;;
+      os2-*)     DLLDFLAGS="$cflags -Zdll"
+         case "$optimization" in
+           full) DLLDFLAGS="$DLLDFLAGS -s";;
+         esac;;
+      *)         DLLD=;;
+    esac
+  fi
+  case "$osname" in
+    osf1) EXTRADLLDFLAGS='${LIBS}';;
+    freebsd|linux|sunos|solaris) EXTRADLLDFLAGS='-lc ${LIBS}';;
+  esac
+
+  if test "$fastread" != yes; then
+    echo $n ..."Which flags for linker? $c"
+    dflt=$DLLDFLAGS; rep=; . ./myread
+    DLLDFLAGS=$ans
+  fi
+fi
+
+if test -z "$DLLD"; then
+  echo "No Dynamic Lib"
+  static=y
+else
+  echo "Dynamic Lib linker is  $DLLD  $DLLDFLAGS"
+  static=${static-n}
+fi
+

@@ -1,0 +1,34 @@
+# Which Assembler ?
+if test -z "$AS"; then
+  echo Looking for an assembler ...
+  if test "$osname" = hpux
+  then AS=`./locate as '' /usr/ccs/bin /bin`   # We don't want GNU as
+  else AS=`./locate as '' $pathspace`
+  fi
+  case "$AS" in ?:/*|/*) echo ..."as is $AS";;
+      *) echo ..."I could not find as." ;; esac
+fi
+gnuas=no
+if (echo | $AS --version 2>&1 | grep GNU > /dev/null); then
+  gnuas=yes
+else
+  if (echo | $AS -v 2>&1 | grep GNU > /dev/null); then
+    gnuas=yes
+  fi
+fi
+if test "$gnuas" = yes; then
+  echo "...Hum, this looks like GNU as"
+  case "$osname-$asmarch" in
+    solaris-sparc*) KERNELCPPFLAGS="-DNO_UNDERSCORE $__GNUC__";;
+  esac
+else
+  case "$osname-$asmarch" in
+    osf1-alpha)     ASFLAGS="-O1";;
+    sunos-sparc*)   ASFLAGS="-P -I. $__GNUC__";;
+    solaris-sparc*) ASFLAGS="-P -I. $__GNUC__ -T";;
+    hpux-hppa)      ASFLAGS="+DA1.1";;
+    *)              ASFLAGS=;;
+  esac
+fi
+echo "Assembler is           $AS  $ASFLAGS"
+

@@ -1,0 +1,22 @@
+# Target directory for object files
+pre=O
+cst_objdir=$pre$osname-$arch;
+case "$optimization" in
+  full)      objdir=$pre$osname-$arch ;;
+  debugging) objdir=$pre$osname-$arch.dbg ;;
+  profiling) objdir=$pre$osname-$arch.prf ;;
+esac
+if test -n "$dfltobjdir"; then
+  objdir="$dfltobjdir"
+fi
+
+if test "$fastread" != yes; then
+  cat << EOT
+==========================================================================
+This is the name of the directory where all the object files will be:
+EOT
+  echo $n ..."Enter dir name : $c"
+  dflt=$objdir; rep=; . ./myread
+  objdir=$ans
+fi
+

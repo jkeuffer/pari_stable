@@ -1,0 +1,49 @@
+case "$osname" in
+  cygwin*)
+    ver=`uname -r | cut -d. -f1`
+    cygtop=/cygdrive/c
+    if test ! -d $cygtop; then
+      cygtop=/Cygnus/cygwin/B$ver
+      if test ! -d $cygtop; then
+        cygtop=/Cygnus/cygwin-B$ver
+        if test ! -d $cygtop; then
+          cygtop=/usr/${arch}-pc-cygwin
+          if test ! -d $cygtop; then
+            echo ..."I could not find Cygwin top directory" >&2
+          fi
+        fi
+      fi
+    fi
+    if test "$cygtop" = /cygdrive/c; then
+# cygnus for version 1.*
+      libpth="
+          /usr/local/lib\
+          /lib\
+      "
+      cygtop=/
+    else
+# cygnus for version 0.*
+      libpth="
+          $cygtop/H-${arch}-cygwin32/lib\
+          $cygtop/H-${arch}-cygwin32/${arch}-cygwin32/lib\
+      "
+    fi;;
+  os2) libpth=`echo $LIBRARY_PATH | sed 's/;/ /g' | sed 's,\\\\,/,g'`;;
+  *) libpth="\
+      /usr/local/lib\
+      /lib\
+      /usr/lib\
+      /opt/lib\
+      /opt/local/lib\
+      /opt/gnu/lib\
+      /lib/pa1.1\
+      /usr/lib/large\
+      /lib/large\
+      /usr/lib/small\
+      /lib/small\
+      /usr/ccs/lib\
+      /usc/ucblib\
+      /usr/shlib\
+      .\
+   ";;
+esac

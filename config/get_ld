@@ -1,0 +1,39 @@
+# Which Executable Linker ?
+#
+case "$osname" in
+  darwin) LIBS= ;;
+  *)      LIBS=-lm;;
+esac
+case "$osname-$arch" in
+  linux-*|cygwin*|freebsd-*)
+      LD=$CC; LDFLAGS="$cflags -Xlinker -export-dynamic"
+      runpathprefix='-Xlinker -rpath -Xlinker ';;
+  osf1-alpha)
+      LD=$ld; LIBS="$LIBS -lots -lc"; runpathprefix='-rpath '
+      LDFLAGS='-std0 -call_shared /usr/lib/cmplrs/cc/crt0.o'
+      case "$optimization" in
+	full|profiling) LDFLAGS="-g0 -O4 $LDFLAGS";;
+      esac;;
+  solaris-*) LD=$CC; LDFLAGS=$cflags; runpathprefix=-R ;;
+  os2-*)     LD=$CC; LDFLAGS="$cflags -Zexe"
+             case "$optimization" in
+               full) LDFLAGS="$LDFLAGS -s";;
+             esac;;
+  *)         LD=$CC; LDFLAGS=$cflags ;;
+esac
+
+if test "$fastread" != yes; then
+  echo $n ..."Which linker for building executables ? $c"
+  dflt=$LD; rep=; . ./myread
+  LD=$ans
+fi
+
+# Which Flags for Executable Linker?
+#
+if test "$fastread" != yes; then
+  echo $n ..."With which flags ? $c"
+  dflt=$LDFLAGS; rep=; . ./myread
+  LDFLAGS=$ans
+fi
+
+echo "Executable linker is   $LD  $LDFLAGS"

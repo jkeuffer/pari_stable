@@ -1,0 +1,38 @@
+if test "$fastread" != yes; then
+  if test -n "$X11"; then addX11="X11 builtin.X11-gnuplot-dynamic"; fi
+  if test -n "$X11" -a -n "$addgnuplot"; then
+      addX11="$addX11 builtin.X11-gnuplot"
+  fi
+  cat << EOT
+==========================================================================
+GP contains high resolution plotting functions. Choose among
+       none       $addX11         $addgnuplot	gnuplot-dynamic
+The `*-dynamic' version may be trailed by `,dll_base_name'.
+EOT
+  echo $n ..."Use which graphic library (\"none\" means no hi-res plot) ? $c"
+  rep="none $addX11 $addgnuplot gnuplot-dynamic";
+  dflt=$which_graphic_lib; . ./myread
+  which_graphic_lib=$ans
+  case "$which_graphic_lib" in
+  *,*)
+    graphic_lib_dll=`echo "$which_graphic_lib" | sed -e 's/[-a-z]*,//'`
+    which_graphic_lib=`echo "$which_graphic_lib" | sed -e 's/,.*//'`
+    ;;
+  esac
+
+  case "$which_graphic_lib" in
+    *gnuplot*) ;;
+    *)gnuplot=;;
+  esac
+else # fastread = yes
+  case "$which_graphic_lib" in
+  *,*)
+      graphic_lib_dll=`echo "$which_graphic_lib" | sed -e 's/[-a-z]*,//'`
+      which_graphic_lib=`echo "$which_graphic_lib" | sed -e 's/,.*//'`
+      ;;
+  esac
+  # TEST: --graphic was not given, X11 not found, and gnuplot library found
+  if test "$which_graphic_lib" = none -a -z "$graph_cmd" -a -n "$gnuplot"; then
+    which_graphic_lib=gnuplot
+  fi
+fi

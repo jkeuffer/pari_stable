@@ -1,0 +1,156 @@
+case "$osname-$arch" in
+  os2-*)   exe_suff=.exe; extraflag="-Zexe";;
+  cygwin*) exe_suff=.exe; extraflag="";;
+  *)       exe_suff=;     extraflag="";;
+esac
+
+if test -z "$CC"; then
+  echo Looking for the compilers ...
+  # Native Compilers
+  cc=`./locate cc '' $pathspace`
+  case "$osname" in
+    hpux) if test "$cc" = /usr/ccs/bin/cc -a -f /opt/ansic/bin/cc; then
+            cc=/opt/ansic/bin/cc; fi ;;  # This is a better compiler
+  esac
+  case "$cc" in ?:/*|/*) echo ..."cc is $cc";;
+      *) echo ..."I could not find cc.";; esac
+  # GNU Compilers
+  gcc=`./locate gcc '' $pathspace`
+  if test -z "$gcc"; then
+    exe=$osname-$arch-gnu$$
+    $cc $extraflag -o $exe gnu.c
+    if $exe; then gcc=$cc; fi; rm -f $exe
+  fi
+  case "$gcc" in
+?:/*|/*) echo ..."gcc is $gcc";;
+      *) echo ..."I could not find gcc."; gcc=;;
+  esac
+  if test -n "$gcc"; then
+    __gnuc__=`$gcc -v 2>&1 | sed -n 's/.*version //p'`
+    if test -z "$__gnuc__"; then __gnuc__=unknown; fi
+    echo GNU compiler version $__gnuc__
+  fi
+  case "$osname" in
+    aix)   __gnuc__=;; # Native compilers are faster
+    hpux)  __gnuc__=;; # versions older than 2.7 cannot build PIC code
+                       # gp built with recent versions has bugs
+    concentrix) case "$__gnuc__" in 2.[78].*);; *)
+              __gnuc__=;; esac;;
+  esac
+  # Choosing the compiler
+  if test -n "$__gnuc__"; then CC=$gcc; else CC=$cc; fi
+fi
+
+if test "$fastread" != yes; then
+  cat << EOT
+==========================================================================
+Only ANSI C and C++ compilers are supported.  Choosing the GNU compiler
+gcc/g++ enables the inlining of kernel routines (about 20% speedup; if you
+use g++, it is a good idea to include the -fpermissive flag).  If you choose
+not to use gcc, the C++ version of Pari will be a little faster because of
+general inlining, but can be used in library mode only with C++ programs (we
+_really_ recommand using gcc all the way through).
+EOT
+  echo $n ..."Which C compiler shall I use ? $c"
+  dflt=$CC; rep=; . ./myread
+  CC=$ans
+fi
+
+if test "$CC" != "$gcc"; then __gnuc__=; fi
+if test -z "$__gnuc__"; then
+  exe=$osname-$arch-gnu$$
+  $CC $extraflag -o $exe gnu.c
+  if $exe; then
+    __gnuc__=`$CC -v 2>&1 | sed -n 's/.*version //p'`
+    echo GNU compiler version $__gnuc__
+  fi
+  rm -f $exe
+fi
+
+# Which Flags for Compiler ?
+#
+cflags=
+ASMINLINE=
+if test -n "$__gnuc__"; then
+  __GNUC__="-D__GNUC__"
+  warn="-Wall -Wno-implicit"
+  OPTFLAGS=-O3
+  ASMINLINE=yes
+  case "$asmarch" in
+    alpha)
+      case "$__gnuc__" in
+        2.95.3*|3.*) OPTFLAGS=-O;; # avoid optimizer bugs
+        *) ASMINLINE=;; # doesn't work with 2.95.2.
+      esac
+    ;;
+  esac
+  OPTFLAGS="$OPTFLAGS -DGCC_INLINE $warn"
+  DBGFLAGS=${DBGFLAGS:-"-g $warn"}
+  # Some architectures need -fPIC for building dynamic lib
+  case "$osname-$arch" in hpux-*) DLCFLAGS=-fPIC;; esac
+  # Specific optimisations for some architectures
+  case "$osname-$arch" in
+    linux-i?86|cygwin*|os2-*) OPTFLAGS="$OPTFLAGS \
+      -malign-loops=2 -malign-jumps=2 -malign-functions=2";;
+    *-sparcv8*) cflags=-mv8;;
+  esac
+  # problems on some architectures
+  case "$osname" in
+    os2)      cflags="$cflags -Zmt -Zsysv-signals";;
+    nextstep) cflags="$cflags -traditional-cpp";;
+  esac
+
+  # omit-frame-pointer incompatible with -pg
+  PRFFLAGS="-pg $OPTFLAGS"
+  case "$optimization" in
+    full) OPTFLAGS="$OPTFLAGS -fomit-frame-pointer";;
+  esac
+else
+  DBGFLAGS=${DBGFLAGS:-'-g'}
+  PRFFLAGS='-pg'
+  case "$osname-$arch" in
+    hpux-*) # -Ae is for ANSI C + defines HPUX_SOURCE, +z for PIC code (HPUX cc)
+                  OPTFLAGS=-O; cflags=-Ae; DLCFLAGS=+z;;
+    # best tuning option, even for PPC604:
+    aix-*)        OPTFLAGS=-O2; cflags='-qlanglvl=ansi -qtune=601';;
+    cygwin*|linux-i?86|freebsd-i?86)
+                  OPTFLAGS=-O2; cflags=-m486;;
+    osf1-*)       OPTFLAGS='-O4 -migrate -ifo -Olimit 9999';;
+    sunos-*)      OPTFLAGS=-fast; PRFFLAGS='-pg -Bstatic';;
+    solaris-*)    OPTFLAGS=-fast; PRFFLAGS=-xpg;;
+    concentrix-*) OPTFLAGS=-Ogi;;
+    *)            OPTFLAGS=-O;;
+  esac
+  PRFFLAGS="$PRFFLAGS $OPTFLAGS"
+fi
+cflags="$cflags $DLCFLAGS"
+
+case "$optimization" in
+  full)      suffix=;     cflags="$OPTFLAGS $cflags";;
+  profiling) suffix=.prf; cflags="$PRFFLAGS $cflags";;
+  debugging) suffix=.dbg; cflags="-DMEMSTEP=1048576 $DBGFLAGS $cflags";;
+esac
+
+if test "$fastread" != yes; then
+  echo $n ..."With which flags ? $c"
+  dflt=${CFLAGS:-$cflags}; rep=; . ./myread
+  cflags=$ans
+fi
+
+# Here we should check it is an ANSI compiler...
+echo "C compiler is          $CC  $cflags"
+
+# Which C PreProcessor ?
+case "$osname" in
+  nextstep) cppfl="-traditional-cpp" ;;
+  freebsd)
+    if test "$PORTOBJFORMAT" = "elf"; then
+      cppfl="-DUSE_ELF"    
+      FREEBSD_ELF=1
+    else
+      FREEBSD_ELF=0
+    fi ;;
+esac
+CPP="$CC $cppfl -E -I."
+
+echo "C PreProcessor is      $CPP"
