@@ -1090,8 +1090,9 @@ the highest order longword.
 
 \fun{long}{mod2}{GEN x}, \fun{}{mod4}{x}, and so on up to \fun{}{mod64}{x},
 which give the residue class of \kbd{x} modulo the corresponding power of
-2, for {\it positive\/}~\kbd{x} (you will obtain weird results if you use
-these on the integer 0 or on negative numbers).
+2, for {\it positive\/}~\kbd{x}. By definition, $\kbd{mod}n(x) :=
+\kbd{mod}n(|x|)$ for $x < 0$ (the macros disregard the sign), and the
+result is undefined if $x = 0$.
 
 These macros directly access the binary data and are thus much faster than
 the generic modulo functions. Besides, they return long integers instead of
@@ -1099,17 +1100,14 @@ the generic modulo functions. Besides, they return long integers instead of
 
 \subsec{Type \typ{REAL} (real number):}\kbdsidx{t_REAL}\sidx{real number}
 this type has a second codeword z[1] which also encodes its sign (obtained
-or set using the same functions as for the integers), and a biased binary
-exponent (i.e.~the actual exponent value plus some constant bias, actually
-a power of~2, whose value is given by \kbd{HIGHEXPOBIT}). This exponent can
-be handled using the following macros:
+or set using the same functions as for the integers), and a binary
+exponent. This exponent can be handled using the following macros:
 
-\fun{long}{expo}{GEN z} returns the true (unbiased) exponent of \kbd{z}.
+\fun{long}{expo}{GEN z} returns the exponent of \kbd{z}.
 This is defined even when \kbd{z} is equal to zero, see
 \secref{se:whatzero}.
 
-\fun{void}{setexpo}{GEN z, long e} sets the exponent of \kbd{z} to \kbd{e},
-of course after adding the bias.
+\fun{void}{setexpo}{GEN z, long e} sets the exponent of \kbd{z} to \kbd{e}.
 
 \noindent Note the functions:
 
@@ -1119,18 +1117,20 @@ even if \kbd{z} is not a real number.
 \fun{long}{gsigne}{GEN z} which returns a sign for \kbd{z}, even when
 \kbd{z} is neither real nor integer (a rational number for instance).
 
-The real zero is characterized by having its sign equal to 0. However,
-usually the first mantissa word \kbd{z[2]} is defined and equal to~0. This
-fact must {\it never\/} be used to recognize a real~0. If \kbd{z} is not
-equal to~0, the first mantissa word \kbd{z[2]} is normalized, i.e.~its most
-significant bit is~1. The mantissa is (\kbd{z[2]},\kbd{z[3]},\dots,%
-\kbd{z[lg(z]-1]}) in base \kbd{2\pow BITS\_IN\_LONG}. Here, \kbd{z[2]} is
-the most significant longword, and the mantissa takes values between
-1 (included) and 2 (excluded). Thus, assume that \kbd{sizeof(long)} is 32 and
-the length is 4, the real number $3.5$ is represented as \kbd{z[0]} (encoding
-$\kbd{type} = \typ{REAL}$, $\kbd{lg} = 4$), \kbd{z[1]} (encoding $\kbd{sign} =
-1$, $\kbd{expo} = 1$), $\kbd{z[2]} = \kbd{0xe0000000}$,
-$\kbd{z[3]} = \kbd{0x0}$.
+The real zero is characterized by having its sign equal to 0. If \kbd{z} is
+not equal to~0, then is is represented as $2^e M$, where $e$ is the exponent,
+and $M\in [1, 2[$ is the mantissa of $z$, whose digits are stored in
+$\kbd{z[2]},\dots, \kbd{z[lg(z)-1]}$.
+
+More precisely, let $m$ be the integer (\kbd{z[2]},\dots, \kbd{z[lg(z)-1]})
+in base \kbd{2\pow BITS\_IN\_LONG}; here, \kbd{z[2]} is the most significant
+longword and is normalized, i.e.~its most significant bit is~1. Then we have
+$M := m \cdot 2^{1 - \kbd{bit\_accuracy(lg(z))}}$.
+
+Thus, the real number $3.5$ to accuracy \kbd{bit\_accuracy(lg(z))} is
+represented as \kbd{z[0]} (encoding $\kbd{type} = \typ{REAL}$, \kbd{lg(z)}),
+\kbd{z[1]} (encoding $\kbd{sign} = 1$, $\kbd{expo} = 1$), $\kbd{z[2]} =
+\kbd{0xe0000000}$, $\kbd{z[3]} =\dots = \kbd{z[lg(z)-1]} = \kbd{0x0}$.
 
 \subsec{Type \typ{INTMOD} (integermod):}\kbdsidx{t_INTMOD}\sidx{integermod}
 \kbd{z[1]} points to the modulus, and \kbd{z[2]} at the number representing
@@ -1160,9 +1160,8 @@ are useful and make sense.
 \kbd{[1]} which contains the following information: the $p$-adic precision
 (the exponent of $p$ modulo which the $p$-adic unit corresponding to
 \kbd{z} is defined if \kbd{z} is not~0), i.e.~one less than the number of
-significant $p$-adic digits, and the biased exponent of \kbd{z} (the bias
-being equal to \kbd{HIGHVALPBIT} here). This information can be handled
-using the following functions:
+significant $p$-adic digits, and the exponent of \kbd{z}. This information
+can be handled using the following functions:
 
 \fun{long}{precp}{GEN z} returns the $p$-adic precision of \kbd{z}.
 
@@ -1170,7 +1169,7 @@ using the following functions:
 to \kbd{l}.
 
 \fun{long}{valp}{GEN z} returns the $p$-adic valuation of \kbd{z} (i.e. the
-unbiased exponent). This is defined even if \kbd{z} is equal to~0, see
+exponent). This is defined even if \kbd{z} is equal to~0, see
 \secref{se:whatzero}.
 
 \fun{void}{setvalp}{GEN z, long e} sets the $p$-adic valuation of \kbd{z}
@@ -1249,12 +1248,11 @@ term \kbd{z[lgef(z)-1]} is not an exact zero.
 \subsec{Type \typ{SER} (power series):}\kbdsidx{t_SER}\sidx{power series} This
 type also has a second codeword, which encodes a ``{\it sign\/}'', i.e.~0
 if the power series is 0, and 1 if not, a {\it variable number\/} as for
-polynomials, and a {\it biased exponent\/} with a bias of
-\kbd{HIGHVALPBIT}. This information can be handled with the following
-functions: \teb{signe}, \teb{setsigne}, \teb{varn}, \teb{setvarn} as for
-polynomials, and \teb{valp}, \teb{setvalp} for the exponent as for $p$-adic
-numbers. Beware: do {\it not\/} use \teb{expo} and \teb{setexpo} on power
-series.
+polynomials, and an {\it exponent\/}. This information can be handled with
+the following functions: \teb{signe}, \teb{setsigne}, \teb{varn},
+\teb{setvarn} as for polynomials, and \teb{valp}, \teb{setvalp} for the
+exponent as for $p$-adic numbers. Beware: do {\it not\/} use \teb{expo} and
+\teb{setexpo} on power series.
 
 If the power series is non-zero, \kbd{z[2]}, \kbd{z[3]},\dots
 \kbd{z[lg(z)-1]} point to the coefficients of \kbd{z} in ascending order,
@@ -1303,6 +1301,13 @@ contain the components of the list.
 \kbdsidx{t_STR}\sidx{character string}
 \fun{char *}{GSTR}{z} (= \kbd{(z+1)}) points to the first character of the
 (\kbd{NULL}-terminated) string.
+
+\misctitle{Implementation note:} for the types including an exponent (or a
+valuation), we actually store a biased non-negative exponent (bit-ORing the
+biased exponent to the codeword), obtained by adding a constant to the true
+exponent: either \kbd{HIGHEXPOBIT} (for \typ{REAL}) or \kbd{HIGHVALPBIT} (for
+\typ{PADIC} and \typ{SER}). Of course, this is encapsulated by the
+exponent/valuation-handling macros and need not concern the library user.
 
 \section{PARI variables}\label{se:vars}
 \subsec{Multivariate objects}\sidx{variable (priority)}
