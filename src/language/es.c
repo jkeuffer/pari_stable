@@ -740,13 +740,13 @@ static void
 wr_vecsmall(GEN g)
 {
   long i,l;
-  pariputc('['); l = lg(g);
+  pariputs("Vecsmall(["); l = lg(g);
   for (i=1; i<l; i++)
   {
     pariputsf("%ld", g[i]);
     if (i<l-1) comma_sp();
   }
-  pariputc(']');
+  pariputs("])");
 }
 /********************************************************************/
 /**                                                                **/
