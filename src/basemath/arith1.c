@@ -2986,7 +2986,7 @@ hclassno(GEN x)
   if (!d) return gdivgs(gun,-12);
   if (-d > (VERYBIGINT>>1))
     err(talker,"discriminant too big in hclassno. Use quadclassunit");
-  h = 0; b = d&1; b2 = (-d)>>2; f=0;
+  h = 0; b = d&1; b2 = (1-d)>>2; f=0;
   if (!b)
   {
     for (a=1; a*a<b2; a++)

@@ -135,7 +135,7 @@ caract(GEN x, int v)
   x_k = dummycopy(polx[v]);
   for (k=0; k<=n; k++)
   {
-    GEN mk = utoineg(-k);
+    GEN mk = utoineg(k);
     x_k[2] = (long)mk;
     p3 = det(gaddmat_i(mk, x));
     p1 = gadd(gmul(p1, x_k), gmul(gmul(p2, p3), Q));

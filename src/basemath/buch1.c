@@ -119,29 +119,29 @@ getallforms(GEN D, long *pth, GEN *ptz)
  *   (pq, z) = 1  [coprime to all class group representatives]
  *   cl(P) = cl(Q) if P has order 2 in Cl(K)
  * Try to have e = 24 / gcd(24, (p-1)(q-1)) as small as possible */
-void
-get_pq(GEN D, GEN z, GEN flag, GEN *ptp, GEN *ptq)
+static void
+get_pq(GEN D, GEN z, GEN pq, GEN *ptp, GEN *ptq)
 {
   GEN wp = cgetg(MAXL,t_VECSMALL), wlf = cgetg(MAXL,t_VEC), court = icopy(gun);
   GEN form;
   long i, ell, p, l = 1, d = itos(D);
   byteptr diffell = diffptr + 2;
 
-  if (typ(flag)==t_VEC)
-  { /* assume flag = [p,q]. Check nevertheless */
-    for (i=1; i<lg(flag); i++)
+  if (pq && typ(pq)==t_VEC)
+  { /* assume pq = [p,q]. Check nevertheless */
+    for (i=1; i<lg(pq); i++)
     {
-      ell = itos((GEN)flag[i]);
+      ell = itos((GEN)pq[i]);
       if (smodis(z,ell) && kross(d,ell) > 0)
       {
-	form = redimag(primeform(D,(GEN)flag[i],0));
+	form = redimag(primeform(D,(GEN)pq[i],0));
 	if (!gcmp1((GEN)form[1])) {
-	  wp[l]  = flag[i];
+	  wp[l]  = pq[i];
           l++; if (l == 3) break;
 	}
       }
     }
-    if (l<3) err(talker,"[quadhilbert] incorrect values in flag: %Z", flag);
+    if (l<3) err(talker,"[quadhilbert] incorrect values in pq: %Z", pq);
     *ptp = (GEN)wp[1];
     *ptq = (GEN)wp[2]; return;
   }
@@ -211,12 +211,11 @@ gpq(GEN form, GEN p, GEN q, long e, GEN sqd, GEN u, long prec)
  *  if flag is non-zero.
  */
 static GEN
-quadhilbertimag(GEN D, GEN flag)
+quadhilbertimag(GEN D, GEN pq)
 {
   long h, i, e, prec;
   pari_sp av=avma;
   GEN z,L,P,p,q,qfp,u;
-  int raw = ((typ(flag)==t_INT && signe(flag)));
 
   if (DEBUGLEVEL>1) (void)timer2();
   if (cmpis(D,-11) >= 0) return polx[0];
@@ -224,7 +223,7 @@ quadhilbertimag(GEN D, GEN flag)
   if (DEBUGLEVEL>1) msgtimer("class number = %ld",h);
   if (h == 1) { avma=av; return polx[0]; }
 
-  get_pq(D, z, flag, &p, &q);
+  get_pq(D, z, pq, &p, &q);
   e = 24 / cgcd((smodis(p,24)-1) * (smodis(q,24)-1), 24);
   if(DEBUGLEVEL>1) fprintferr("p = %Z, q = %Z, e = %ld\n",p,q,e);
   qfp = primeform(D,p,0);
@@ -241,7 +240,7 @@ quadhilbertimag(GEN D, GEN flag)
     GEN uq = gmodulcp((GEN)qfq[2], shifti(q,1));
     u = chinois(up,uq);
   }
-  prec = raw? DEFAULTPREC: 3;
+  prec = 3;
   for(;;)
   {
     long ex, exmax = 0;
@@ -252,20 +251,18 @@ quadhilbertimag(GEN D, GEN flag)
     {
       GEN s = gpq((GEN)L[i], p, q, e, sqd, u, prec);
       if (DEBUGLEVEL>3) fprintferr("%ld ", i);
-      P[i] = raw? (long)mkvec2((GEN)L[i], s): (long)s;
-      ex = gexpo(s); if (ex > 0) exmax += ex;
+      P[i] = (long)s; ex = gexpo(s); if (ex > 0) exmax += ex;
     }
     if (DEBUGLEVEL>1) msgtimer("roots");
-    if (raw) { P = gcopy(P); break; }
     /* to avoid integer overflow (1 + 0.) */
     lead = (exmax < bit_accuracy(prec))? gun: realun(prec);
 
-    P = real_i(roots_to_pol_intern(lead,P,0,0));
+    P = real_i( roots_to_pol_intern(lead,P,0,0) );
     P = grndtoi(P,&exmax);
     if (DEBUGLEVEL>1) msgtimer("product, error bits = %ld",exmax);
     if (exmax <= -10)
     {
-      if (typ(flag)==t_VEC && !issquarefree(P)) { avma=av; return gzero; }
+      if (pq && !issquarefree(P)) { avma=av; return gzero; }
       break;
     }
     avma = av0; prec += (DEFAULTPREC-2) + (1 + (exmax >> TWOPOTBITS_IN_LONG));
@@ -277,19 +274,15 @@ quadhilbertimag(GEN D, GEN flag)
 GEN
 quadhilbert(GEN D, GEN flag, long prec)
 {
-  if (!flag) flag = gzero;
-  if (typ(D)!=t_INT)
+  if (typ(D) != t_INT)
   {
     D = checkbnf(D);
     if (degpol(gmael(D,7,1)) != 2)
       err(talker,"not a polynomial of degree 2 in quadhilbert");
-    D=gmael(D,7,3);
+    D = gmael(D,7,3);
   }
-  else
-  {
-    if (!isfundamental(D))
-      err(talker,"quadhilbert needs a fundamental discriminant");
-  }
+  else if (!isfundamental(D))
+    err(talker,"quadhilbert needs a fundamental discriminant");
   return (signe(D)>0)? quadhilbertreal(D,flag,prec)
                      : quadhilbertimag(D,flag);
 }
@@ -463,7 +456,7 @@ computeth2(GEN om, GEN la, long prec)
 /* Computes P_2(X)=polynomial in Z_K[X] closest to prod_gc(X-th2(gc)) where
    the product is over the ray class group bnr.*/
 static GEN
-computeP2(GEN bnr, GEN la, int raw, long prec)
+computeP2(GEN bnr, GEN la, long prec)
 {
   long clrayno, i, first = 1;
   pari_sp av=avma, av2;
@@ -486,14 +479,11 @@ PRECPB:
     GEN om = get_om(nf, idealdiv(nf,f,(GEN)listray[i]));
     GEN s = computeth2(om,lanum,prec);
     if (!s) { prec = (prec<<1)-2; goto PRECPB; }
-    P[i] = raw? (long)mkvec2((GEN)listray[i], s): (long)s;
+    P[i] = (long)s;
   }
-  if (!raw)
-  {
-    P0 = roots_to_pol(P, 0);
-    P = findbezk_pol(nf, P0);
-    if (!P) { prec = get_prec(P0, prec); goto PRECPB; }
-  }
+  P0 = roots_to_pol(P, 0);
+  P = findbezk_pol(nf, P0);
+  if (!P) { prec = get_prec(P0, prec); goto PRECPB; }
   return gerepilecopy(av, P);
 }
 
@@ -599,14 +589,11 @@ isZ(GEN I)
 
 /* Treat special cases directly. return NULL if not special case */
 static GEN
-treatspecialsigma(GEN nf, GEN gf, int raw, long prec)
+treatspecialsigma(GEN nf, GEN gf, long prec)
 {
-  GEN p1,p2,tryf, D = (GEN)nf[3];
-  long Ds,fl,i;
+  GEN p1, p2, tryf, D = (GEN)nf[3];
+  long Ds, fl, i = isZ(gf);
 
-  if (raw)
-    err(talker,"special case in Schertz's theorem. Odd flag meaningless");
-  i = isZ(gf);
   if (cmpis(D,-3)==0)
   {
     if (i == 4 || i == 5 || i == 7) return cyclo(i,0);
@@ -662,26 +649,21 @@ getallrootsof1(GEN bnf)
   }
 }
 
-/* Compute ray class field polynomial using sigma; if raw=1, pairs
-   [ideals,roots] are given instead so that congruence subgroups can be used */
+/* Compute ray class field polynomial using sigma */
 static GEN
-quadrayimagsigma(GEN bnr, int raw, long prec)
+quadrayimagsigma(GEN bnr, long prec)
 {
   GEN allf,bnf,nf,pol,w,f,la,P,labas,lamodf,u;
   long a,b,f2,i,lu;
 
-  allf = conductor(bnr,gzero,2); bnr = (GEN)allf[2];
+  allf = conductor(bnr,NULL,2); bnr = (GEN)allf[2];
   f = gmael(allf,1,1);
   bnf= (GEN)bnr[1];
   nf = (GEN)bnf[7];
   pol= (GEN)nf[1];
   if (gcmp1(gcoeff(f,1,1))) /* f = 1 ? */
-  {
-    P = quadhilbertimag((GEN)nf[3], stoi(raw));
-    if (raw) convert_to_id(P);
-    return gcopy(P);
-  }
-  P = treatspecialsigma(nf,f,raw,prec);
+    return quadhilbertimag((GEN)nf[3], NULL);
+  P = treatspecialsigma(nf,f,prec);
   if (P) return P;
 
   w = gmodulcp(polx[varn(pol)], pol);
@@ -708,7 +690,7 @@ quadrayimagsigma(GEN bnr, int raw, long prec)
         if (DEBUGLEVEL>1) fprintferr("\n");
         fprintferr("lambda = %Z\n",la);
       }
-      return computeP2(bnr,labas,raw,prec);
+      return computeP2(bnr,labas,prec);
     }
   err(bugparier,"quadrayimagsigma");
   return NULL;
@@ -718,7 +700,6 @@ GEN
 quadray(GEN D, GEN f, GEN flag, long prec)
 {
   GEN bnr,y,pol,bnf,lambda;
-  long raw;
   pari_sp av = avma;
 
   if (!flag) flag = gzero;
@@ -743,22 +724,16 @@ quadray(GEN D, GEN f, GEN flag, long prec)
     pol = quadpoly(D); setvarn(pol, fetch_user_var("y"));
     bnf = bnfinit0(pol, signe(D)>0?1:0, NULL, prec);
   }
-  raw = (mpodd(flag) && signe(D) < 0);
   bnr = bnrinit0(bnf,f,1);
-  if (gcmp1(gmael(bnr,5,1)))
-  {
-    avma = av; if (!raw) return polx[0];
-    y = cgetg(2,t_VEC); y[1] = (long)mkvec2(idmat(2), polx[0]);
-    return y;
-  }
+  if (gcmp1(gmael(bnr,5,1))) { avma = av; return polx[0]; }
   if (signe(D) > 0)
     y = bnrstark(bnr,gzero, gcmp0(flag)?1:5, prec);
   else
   {
     if (lambda)
-      y = computeP2(bnr,lambda,raw,prec);
+      y = computeP2(bnr,lambda,prec);
     else
-      y = quadrayimagsigma(bnr,raw,prec);
+      y = quadrayimagsigma(bnr,prec);
   }
   return gerepileupto(av, y);
 }
