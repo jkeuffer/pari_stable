@@ -1917,7 +1917,7 @@ geni(void) { return gi; }
  *     mandatory). Ex: D0,L, (arg is long, 0 by default).
  *     Special syntax:
  *       if type = G, &, I or V:  D[G&IV] all send NULL.
- *       if type = v: Dv sends -1.
+ *       if type = n: Dn sends -1.
  *
  *     The user-given args are read first, then completed by the defaults
  *
