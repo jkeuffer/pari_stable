@@ -140,7 +140,7 @@ enum { NONE, WARN, OLDFUN, OLDALL };
 #define new_fun_set (compatible == NONE || compatible == WARN)
 
 /* return type for GP functions */
-enum { RET_GEN, RET_INT, RET_VOID };
+enum { RET_GEN, RET_INT, RET_LONG, RET_VOID };
 
 #ifdef __EMX__
 #  define STACK_CHECK

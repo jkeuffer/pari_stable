@@ -445,7 +445,7 @@ static void
 check_proto(char *code)
 {
   char *s = code, *old;
-  if (*s == 'l' || *s == 'v') s++;
+  if (*s == 'l' || *s == 'v' || *s == 'i') s++;
   while (*s && *s != '\n') switch (*s++)
   {
     case '&':
@@ -478,6 +478,7 @@ check_proto(char *code)
     case '\n': return; /* Before the mnemonic */
 
     case 'l':
+    case 'i':
     case 'v': err(talker2, "this code has to come first", s-1, code);
     default: err(talker2, "unknown parser code", s-1, code);
   }
@@ -1834,7 +1835,8 @@ identifier(void)
     }
     /* return type */
     if      (*s == 'v') { ret = RET_VOID; s++; }
-    else if (*s == 'l') { ret = RET_INT;  s++; }
+    else if (*s == 'i') { ret = RET_INT;  s++; }
+    else if (*s == 'l') { ret = RET_LONG; s++; }
     else                  ret = RET_GEN;
     /* Optimized for G and p. */
     i = 0;
@@ -2019,6 +2021,10 @@ identifier(void)
 	break;
 
       case RET_INT:
+	m = (long)((int (*)(ANYARG))call)(_ARGS_);
+	res = stoi(m); break;
+
+      case RET_LONG:
 	m = ((long (*)(ANYARG))call)(_ARGS_);
 	res = stoi(m); break;
 
@@ -2871,7 +2877,7 @@ skipidentifier(void)
     }
     analyseur++;
 
-    if (*s == 'v' || *s == 'l') s++;
+    if (*s == 'v' || *s == 'l' || *s == 'i') s++;
     /* Optimized for G and p. */
     matchcomma = 0;
     while (*s == 'G') { match_comma(); skipexpr(); s++; }

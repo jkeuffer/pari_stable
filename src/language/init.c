@@ -2109,6 +2109,7 @@ geni(void) { return gi; }
  *
  * Return type (first char or immediately after 'x'): GEN by default, otherwise
  *  l Return long
+ *  i Return int
  *  v Return void
  *
  * Syntax requirements:
