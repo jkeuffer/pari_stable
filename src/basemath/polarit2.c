@@ -425,7 +425,7 @@ nextK:
       y = lc; /* check trailing coeff first */
       for (i=1; i<=K; i++)
         y = centermod_i(mulii(y, gmael(famod,ind[i],2)), pe, pes2);
-      if (resii((GEN)lctarget[2], y) != gzero)
+      if (!signe(y) || resii((GEN)lctarget[2], y) != gzero)
       {
         if (DEBUGLEVEL>6) fprintferr(".");
         avma = av; goto NEXT;
