@@ -33,8 +33,7 @@ static const int randshift = BITS_IN_RANDOM-1 - RANDOM_BITS;
 
 static long KC,KCZ,KCZ2,MAXRELSUP;
 static long primfact[500],expoprimfact[500];
-static long *FB, *numFB, *numideal;
-static GEN *idealbase, vectbase, powsubFB;
+static GEN *idealbase, vectbase, FB, numFB, powsubFB, numideal;
 
 /* FB[i]     i-th rational prime used in factor base
  * numFB[i]  index k such that FB[k]=i (0 if i is not prime)
@@ -70,7 +69,6 @@ static void
 desallocate(long **matcopy)
 {
   long i;
-  free(numFB); free(FB); free(numideal); free(idealbase);
   if (matcopy)
   {
     for (i=lg(matcopy)-1; i; i--) free(matcopy[i]);
@@ -226,10 +224,10 @@ FBgen(GEN nf,long n2,long n)
   GEN p2,p1,NormP,lfun;
   long prim[] = { evaltyp(t_INT)|m_evallg(3), evalsigne(1)|evallgefint(3),0 };
 
-  numFB= (long*)gpmalloc(sizeof(long)*(n2+1));
-  FB   = (long*)gpmalloc(sizeof(long)*(n2+1));
-  numideal     = (long*)gpmalloc(sizeof(long)*(n2+1));
-  idealbase    = (GEN *)gpmalloc(sizeof(GEN )*(n2+1));
+  numFB    = cgetg(n2+1,t_VECSMALL);
+  FB       = cgetg(n2+1,t_VECSMALL);
+  numideal = cgetg(n2+1,t_VECSMALL);
+  idealbase= (GEN*)cgetg(n2+1,t_VEC);
 
   lfun=realun(DEFAULTPREC);
   p=*delta++; i=0; ip=0; KC=0;
@@ -273,6 +271,10 @@ FBgen(GEN nf,long n2,long n)
   if (!KC) return NULL;
   KCZ2=i; KC2=ip; MAXRELSUP = min(50,4*KC);
 
+  setlg(FB,KCZ2);
+  setlg(numFB,KCZ2);
+  setlg(numideal,KCZ2);
+  setlg(idealbase,KCZ2);
   vectbase=cgetg(KC+1,t_COL);
   for (i=1; i<=KCZ; i++)
   {
@@ -2809,7 +2811,7 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
   }
   av0 = avma;
   matcopy = NULL;
-  powsubFB = NULL;
+  FB = powsubFB = NULL;
 
 INCREASEGEN:
   if (precpb)
@@ -2827,6 +2829,11 @@ INCREASEGEN:
   else
     cbach = check_bach(cbach,12.);
   if (first) first = 0; else { desallocate(matcopy); avma = av0; }
+
+  /* T2-LLL-reduce nf.zk */
+  LLLnf = get_LLLnf(nf, PRECREG);
+  if (!LLLnf) { precpb = "LLLnf"; goto INCREASEGEN; }
+
   sfb_trials = sfb_increase = 0;
   nreldep = nrelsup = 0;
   LIMC = cbach*LOGD2; if (LIMC < 20.) LIMC = 20.;
@@ -2834,9 +2841,6 @@ INCREASEGEN:
   if (LIMC2 < LIMC) LIMC2=LIMC;
   if (DEBUGLEVEL) { fprintferr("LIMC = %.1f, LIMC2 = %.1f\n",LIMC,LIMC2); }
 
-  /* T2-LLL-reduce nf.zk */
-  LLLnf = get_LLLnf(nf, PRECREG);
-  if (!LLLnf) { precpb = "LLLnf"; goto INCREASEGEN; }
 
   /* initialize FB, [sub]vperm */
   lfun = FBgen(nf,(long)LIMC2,(long)LIMC);
