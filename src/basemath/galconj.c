@@ -2137,7 +2137,7 @@ s4galoisgen(struct galois_lift *gl)
     if (DEBUGLEVEL >= 6)
       fprintferr("S4GaloisConj:Computing isomorphisms %d:%Z\n", i,
 		 (GEN) isom[i]);
-    isominv[i] = (long) Fp_inv_isom((GEN) isom[i], (GEN) Tmod[i],p);
+    isominv[i] = (long) FpXQ_ffisom_inv((GEN) isom[i], (GEN) Tmod[i],p);
   }
   for (i = 1; i < lg(isom); i++)
     for (j = 1; j < lg(isom); j++)

@@ -1466,7 +1466,7 @@ Flxq_matrix_pow(GEN y, long n, long m, GEN P, ulong l)
 /* compute the reciprocical isomorphism of S mod T,p, i.e. V such that
    V(S)=X  mod T,p*/
 GEN
-Fp_inv_isom(GEN S,GEN T, GEN p)
+FpXQ_ffisom_inv(GEN S,GEN T, GEN p)
 {
   pari_sp ltop = avma;
   int n = degpol(T);
@@ -1801,7 +1801,7 @@ FpX_ffisom(GEN P,GEN Q,GEN l)
   pari_sp av = avma;
   GEN SP, SQ, R;
   FpX_ffintersect(P,Q,degpol(P),l,&SP,&SQ,NULL,NULL);
-  R = Fp_inv_isom(SP,P,l);
+  R = FpXQ_ffisom_inv(SP,P,l);
   return gerepileupto(av, FpX_FpXQ_compo(R,SQ,Q,l));
 }
 GEN

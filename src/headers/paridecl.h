@@ -1514,7 +1514,6 @@ GEN     ZX_squff(GEN f, GEN *ex);
 /* polarit3.c */
 
 ulong   Fl_pow(ulong x, ulong n, ulong p);
-GEN     Fp_inv_isom(GEN S,GEN Tp, GEN p);
 GEN     Fp_powu(GEN x, ulong n0, GEN p);
 GEN     FpM_red(GEN z, GEN p);
 GEN     FpM_to_mod(GEN z, GEN p);
@@ -1545,6 +1544,7 @@ GEN     FpX_sub(GEN x,GEN y,GEN p);
 GEN     FpX_to_mod(GEN z, GEN p);
 GEN     FpXQ_charpoly(GEN x, GEN T, GEN p);
 GEN     FpXQ_div(GEN x,GEN y,GEN T,GEN p);
+GEN     FpXQ_ffisom_inv(GEN S,GEN Tp, GEN p);
 GEN     FpXQ_inv(GEN x,GEN T,GEN p);
 GEN     FpXQ_invsafe(GEN x, GEN T, GEN p);
 GEN     FpXQ_matrix_pow(long n, long m, GEN y, GEN P, GEN l);
