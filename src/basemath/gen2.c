@@ -1455,12 +1455,7 @@ ctop(GEN x, GEN p, long d)
   pari_sp av = avma; 
   GEN z, u = (GEN)x[1], v = (GEN)x[2];
   if (isexactzero(v)) return cvtop(u, p, d);
-  z = cgetg(5, t_PADIC); /* = -1 */
-  z[1] = evalprecp(d) | evalvalp(0);
-  z[2] = (long)p;
-  z[3] = lpowgs(p, d);
-  z[4] = laddis((GEN)z[3], -1);
-  z = gsqrt(z, 0); /* = I */
+  z = gsqrt(cvtop(negi(gun), p, d - ggval(v, p)), 0); /* = I */
   return gerepileupto(av, gadd(u, gmul(v, z)) );
 }
 
