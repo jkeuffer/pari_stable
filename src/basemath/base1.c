@@ -1759,12 +1759,13 @@ get_polmin(CG_data *d, GEN x)
 static GEN
 chk_gen(void *data, GEN x)
 {
-  pari_sp av = avma;
-  GEN g = get_polchar((CG_data*)data,x);
-  GEN h = modulargcd(g,derivpol(g));
+  pari_sp av = avma, av1;
+  GEN h, g = get_polchar((CG_data*)data,x);
+  av1 = avma;
+  h = modulargcd(g,derivpol(g));
   if (degpol(h)) { avma = av; return NULL; }
   if (DEBUGLEVEL>3) fprintferr("  generator: %Z\n",g);
-  return g;
+  avma = av1; return gerepileupto(av, g);
 }
 
 static GEN
