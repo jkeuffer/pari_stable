@@ -8,7 +8,6 @@ PARI/GP is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
 Foundation. It is distributed in the hope that it will be useful, but WITHOUT
 ANY WARRANTY WHATSOEVER.
-
 Check the License for details. You should have received a copy of it, along
 with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
@@ -52,6 +51,8 @@ extern GEN to_polmod(GEN x, GEN mod);
 extern GEN unnf_minus_x(GEN x);
 extern int isrational(GEN x);
 extern long int_elt_val(GEN nf, GEN x, GEN p, GEN bp, GEN *t);
+extern GEN gauss_realimag(GEN x, GEN y);
+extern void check_ZKmodule(GEN x, char *s);
 
 /* FIXME: backward compatibility. Should use the proper nf_* equivalents */
 #define compat_PARTIAL 1
@@ -2021,6 +2022,9 @@ get_powers(GEN mul, GEN p)
   return pow;
 }
 
+static void
+errprime(GEN p) { err(talker, "primedec: %Z is not prime", p); }
+
 /* minimal polynomial of a in A (dim A = d).
  * mul = multiplication table by a in A */
 static GEN
@@ -2029,6 +2033,7 @@ pol_min(GEN mul, GEN p)
   pari_sp av = avma;
   GEN z, pow = get_powers(mul, p);
   z = FpM_deplin(pow, p);
+  if (!z) errprime(p);
   return gerepileupto(av, gtopolyrev(z,0));
 }
 
@@ -2044,6 +2049,7 @@ get_pr(GEN nf, norm_S *S, GEN p, GEN P, GEN V, int ramif)
   av = avma;
   u = gerepilecopy(av, uniformizer(nf, S, P, V, p, ramif));
   t = anti_uniformizer(nf,p,u);
+  if (!t) errprime(p);
   av = avma;
   e = ramif? 1 + int_elt_val(nf,t,p,t,NULL): 1;
   f = degpol(nf[1]) - (lg(P)-1);
@@ -2071,7 +2077,7 @@ _primedec(GEN nf, GEN p)
   if (DEBUGLEVEL>5) msgtimer("factmod");
 
   k = lg(F);
-  if (k == 1) err(talker,"primedec: %Z is not a prime", p);
+  if (k == 1) errprime(p);
   if (signe(modii((GEN)nf[4],p))) /* p doesn't divide index */
   {
     L = cgetg(k,t_VEC);
@@ -2106,7 +2112,7 @@ _primedec(GEN nf, GEN p)
     GEN mulbeta, beta = NULL;
     for (i=1; i<k; i++)
       if (!ex[i]) beta = beta? FpX_mul(beta, (GEN)F[i], p): (GEN)F[i];
-    if (!beta) err(talker,"primedec: %Z is not a prime", p);
+    if (!beta) errprime(p);
     beta = FpV_red(algtobasis_i(nf,beta), p);
 
     mulbeta = FpM_red(eltmul_get_table(nf, beta), p);
@@ -3448,14 +3454,26 @@ nftau(long r1, GEN x)
 static GEN
 nftocomplex(GEN nf, GEN x)
 {
-  long ru,vnf,k;
-  GEN p2,p3,ronf;
+  return gmul(gmael(nf,5,1), _algtobasis(nf, x));
+}
+static GEN
+nf_all_roots(GEN nf, GEN x, long prec)
+{
+  long i, j, l = lgef(x), ru = lg(nf[6]);
+  GEN y = cgetg(l, t_POL), v, z;
 
-  p2 = (typ(x)==t_POLMOD)? (GEN)x[2]: gmul((GEN)nf[7],x);
-  vnf=varn(nf[1]);
-  ronf=(GEN)nf[6]; ru=lg(ronf); p3=cgetg(ru,t_COL);
-  for (k=1; k<ru; k++) p3[k]=lsubst(p2,vnf,(GEN)ronf[k]);
-  return p3;
+  x = unifpol(nf, x, 0);
+  y[1] = x[1];
+  for (i=2; i<l; i++) y[i] = (long) nftocomplex(nf, (GEN)x[i]);
+
+  v = cgetg(ru, t_VEC);
+  z = cgetg(l, t_POL); z[1] = x[1];
+  for (i=1; i<ru; i++)
+  {
+    for (j = 2; j < l; j++) z[j] = mael(y,j,i);
+    v[i] = lroots(z, prec);
+  }
+  return v;
 }
 
 static GEN
@@ -3464,21 +3482,21 @@ rnfscal(GEN mth, GEN xth, GEN yth)
   long n,ru,i,j,kk;
   GEN x,y,m,res,p1,p2;
 
-  n=lg(mth)-1; ru=lg(gcoeff(mth,1,1));
-  res=cgetg(ru,t_COL);
+  n = lg(mth)-1; ru = lg(gcoeff(mth,1,1));
+  res = cgetg(ru,t_COL);
   for (kk=1; kk<ru; kk++)
   {
-    m=cgetg(n+1,t_MAT);
+    m = cgetg(n+1,t_MAT);
     for (j=1; j<=n; j++)
     {
-      p1=cgetg(n+1,t_COL); m[j]=(long)p1;
+      p1 = cgetg(n+1,t_COL); m[j] = (long)p1;
       for (i=1; i<=n; i++) { p2=gcoeff(mth,i,j); p1[i]=p2[kk]; }
     }
-    x=cgetg(n+1,t_VEC);
-    for (j=1; j<=n; j++) x[j]=(long)gconj((GEN)((GEN)xth[j])[kk]);
-    y=cgetg(n+1,t_COL);
-    for (j=1; j<=n; j++) y[j]=((GEN)yth[j])[kk];
-    res[kk]=(long)gmul(x,gmul(m,y));
+    x = cgetg(n+1,t_VEC);
+    for (j=1; j<=n; j++) x[j] = (long)gconj((GEN)((GEN)xth[j])[kk]);
+    y = cgetg(n+1,t_COL);
+    for (j=1; j<=n; j++) y[j] = ((GEN)yth[j])[kk];
+    res[kk] = (long)gmul(x, gmul(m,y));
   }
   return res;
 }
@@ -3514,100 +3532,100 @@ rnfvecmul(GEN x, GEN v)
 }
 
 static GEN
-allonge(GEN v, long l)
-{
-  long r, r2, i;
-  GEN y = cgetg(l,t_COL);
-
-  r = lg(v); r2 = l-r;
-  for (i=1; i < r; i++) y[i] = v[i];
-  for (   ; i < l; i++) y[i] = lconj((GEN)v[i-r2]);
-  return y;
-}
-
-static GEN
-findmin(GEN nf, GEN ideal, GEN muf,long prec)
+findmin(GEN nf, GEN ideal, GEN muf)
 {
   pari_sp av = avma;
-  long i, l;
-  GEN m,y, G = gmael(nf,5,2);
+  GEN m, G = gmael(nf,5,2), M = gmael(nf,5,1);
 
   m = gmul(G, ideal);
-  m = lllintern(m,4,1,prec);
+  m = lllintern(m,4,1,0);
   if (!m)
   {
     ideal = lllint_ip(ideal,4);
     m = gmul(G, ideal);
-    m = lllintern(m,4,1,prec);
+    m = lllintern(m,4,1,0);
     if (!m) err(precer,"rnflllgram");
   }
   ideal = gmul(ideal,m);
-  l = lg(ideal); y = cgetg(l,t_MAT);
-  for (i=1; i<l; i++)
-    y[i] = (long)allonge(nftocomplex(nf,(GEN)ideal[i]),l);
-  m = ground(greal(gauss(y, allonge(muf,l))));
+  m = ground(gauss_realimag(gmul(M, ideal), muf));
   return gerepileupto(av, gmul(ideal,m));
 }
 
+static void
+RED(long k, long l, GEN U, GEN mu, GEN MC, GEN nf, GEN I, GEN *Ik_inv)
+{
+  GEN x, xc, xpol, ideal;
+  long i;
+
+  if (!*Ik_inv) *Ik_inv = idealinv(nf, (GEN)I[k]);
+  ideal = idealmul(nf,(GEN)I[l], *Ik_inv);
+  x = findmin(nf, ideal, gcoeff(mu,k,l));
+  if (gcmp0(x)) return;
+
+  xpol = basistoalg(nf,x); xc = nftocomplex(nf,x);
+  MC[k] = lsub((GEN)MC[k], rnfvecmul(xc,(GEN)MC[l]));
+  U[k] = lsub((GEN)U[k], gmul(xpol,(GEN)U[l]));
+  coeff(mu,k,l) = lsub(gcoeff(mu,k,l),xc);
+  for (i=1; i<l; i++)
+    coeff(mu,k,i) = lsub(gcoeff(mu,k,i),rnfmul(xc,gcoeff(mu,l,i)));
+}
 #define swap(x,y) { long _t=x; x=y; y=_t; }
 
 /* given a base field nf (e.g main variable y), a polynomial pol with
  * coefficients in nf    (e.g main variable x), and an order as output
- * by rnfpseudobasis, outputs a reduced order.
- */
+ * by rnfpseudobasis, outputs a reduced order. */
 GEN
 rnflllgram(GEN nf, GEN pol, GEN order,long prec)
 {
-  pari_sp av=avma,tetpil;
-  long i,j,k,l,kk,kmax,r1,ru,lx,vnf;
-  GEN p1,p2,M,I,U,ronf,poll,unro,roorder,powreorder,mth,s,MC,MPOL,MCS;
-  GEN B,mu,Bf,temp,ideal,x,xc,xpol,muf,mufc,muno,y,z,Ikk_inv;
+  pari_sp av = avma;
+  long i,j,k,l,kmax,r1,ru,lx;
+  GEN p1,p2,M,I,U,unro,roorder,powreorder,mth,s,MC,MPOL,MCS;
+  GEN B,mu,Bf,temp,muf,mufc,y,z;
+  const int alpha = 10;
 
-/* Initializations and verifications */
+/* Initializations */
 
-  nf=checknf(nf);
-  if (typ(order)!=t_VEC || lg(order)<3)
-    err(talker,"not a pseudo-matrix in rnflllgram");
-  M=(GEN)order[1]; I=(GEN)order[2]; lx=lg(I);
+  nf = checknf(nf); r1 = nf_get_r1(nf);
+  check_ZKmodule(order, "rnflllgram");
+  M = (GEN)order[1];
+  I = (GEN)order[2]; lx = lg(I);
   if (lx < 3) return gcopy(order);
   if (lx-1 != degpol(pol)) err(consister,"rnflllgram");
-  U=idmat(lx-1); I = dummycopy(I);
+  U = idmat(lx-1);
+  I = dummycopy(I);
 
 /* Compute the relative T2 matrix of powers of theta */
 
-  vnf=varn(nf[1]); ronf=(GEN)nf[6]; ru=lg(ronf); poll=lift(pol);
-  r1 = nf_get_r1(nf);
-  unro=cgetg(lx,t_COL); for (i=1; i<lx; i++) unro[i]=un;
-  roorder=cgetg(ru,t_VEC);
-  for (i=1; i<ru; i++)
-    roorder[i]=lroots(gsubst(poll,vnf,(GEN)ronf[i]),prec);
-  powreorder=cgetg(lx,t_MAT);
-  p1=cgetg(ru,t_COL); powreorder[1]=(long)p1;
-  for (i=1; i<ru; i++) p1[i]=(long)unro;
+  roorder = nf_all_roots(nf, pol, prec); ru = lg(roorder);
+  
+  unro = cgetg(lx,t_COL); for (i=1; i<lx; i++) unro[i] = un;
+  powreorder = cgetg(lx,t_MAT);
+  p1 = cgetg(ru,t_COL); powreorder[1] = (long)p1;
+  for (i=1; i<ru; i++) p1[i] = (long)unro;
   for (k=2; k<lx; k++)
   {
-    p1=cgetg(ru,t_COL); powreorder[k]=(long)p1;
+    p1 = cgetg(ru,t_COL); powreorder[k] = (long)p1;
     for (i=1; i<ru; i++)
     {
-      p2=cgetg(lx,t_COL); p1[i]=(long)p2;
+      p2 = cgetg(lx,t_COL); p1[i] = (long)p2;
       for (j=1; j<lx; j++)
 	p2[j] = lmul(gmael(roorder,i,j),gmael3(powreorder,k-1,i,j));
     }
   }
-  mth=cgetg(lx,t_MAT);
+  mth = cgetg(lx,t_MAT);
   for (l=1; l<lx; l++)
   {
-    p1=cgetg(lx,t_COL); mth[l]=(long)p1;
+    p1 = cgetg(lx,t_COL); mth[l] = (long)p1;
     for (k=1; k<lx; k++)
     {
-      p2=cgetg(ru,t_COL); p1[k]=(long)p2;
+      p2 = cgetg(ru,t_COL); p1[k] = (long)p2;
       for (i=1; i<ru; i++)
       {
-	s=gzero;
+	s = gzero;
 	for (j=1; j<lx; j++)
-	  s = gadd(s,gmul(gconj(gmael3(powreorder,k,i,j)),
-	                  gmael3(powreorder,l,i,j)));
-	p2[i]=(long)s;
+	  s = gadd(s, gmul(gconj(gmael3(powreorder,k,i,j)),
+	                   gmael3(powreorder,l,i,j)));
+	p2[i] = (long)s;
       }
     }
   }
@@ -3615,116 +3633,96 @@ rnflllgram(GEN nf, GEN pol, GEN order,long prec)
 /* Transform the matrix M into a matrix with coefficients in K and also
    with coefficients polymod */
 
-  MC=cgetg(lx,t_MAT); MPOL=cgetg(lx,t_MAT);
+  MCS = cgetg(lx,t_MAT);
+  MC = cgetg(lx,t_MAT);
+  MPOL = cgetg(lx,t_MAT);
   for (j=1; j<lx; j++)
   {
     p1=cgetg(lx,t_COL); MC[j]=(long)p1;
     p2=cgetg(lx,t_COL); MPOL[j]=(long)p2;
     for (i=1; i<lx; i++)
     {
-      p2[i]=(long)basistoalg(nf,gcoeff(M,i,j));
-      p1[i]=(long)nftocomplex(nf,(GEN)p2[i]);
+      GEN c = gcoeff(M,i,j);
+      p2[i] = (long)basistoalg(nf,c);
+      p1[i] = (long)nftocomplex(nf,c);
     }
   }
-  MCS=cgetg(lx,t_MAT);
 
 /* Start LLL algorithm */
-
-  mu=cgetg(lx,t_MAT); B=cgetg(lx,t_COL);
+  mu = cgetg(lx,t_MAT);
+  B  = cgetg(lx,t_COL);
   for (j=1; j<lx; j++)
   {
-    p1=cgetg(lx,t_COL); mu[j]=(long)p1; for (i=1; i<lx; i++) p1[i]=zero;
-    B[j]=zero;
+    mu[j] = (long)zerocol(lx - 1);
+    B[j] = zero;
   }
-  kk=2; if (DEBUGLEVEL) fprintferr("kk = %ld ",kk);
-  kmax=1; B[1]=lreal(rnfscal(mth,(GEN)MC[1],(GEN)MC[1]));
-  MCS[1]=lcopy((GEN)MC[1]);
+  k = 2; if (DEBUGLEVEL) fprintferr("k = ");
+  kmax = 1; B[1] = lreal(rnfscal(mth,(GEN)MC[1],(GEN)MC[1]));
+  MCS[1] = MC[1];
   do
   {
-    if (kk>kmax)
+    GEN Ik_inv = NULL;
+    if (DEBUGLEVEL) fprintferr("%ld ",k);
+    if (k > kmax)
     {
 /* Incremental Gram-Schmidt */
-      kmax=kk; MCS[kk]=lcopy((GEN)MC[kk]);
-      for (j=1; j<kk; j++)
+      kmax = k; MCS[k] = MC[k];
+      for (j=1; j<k; j++)
       {
-	coeff(mu,kk,j) = (long) rnfdiv(rnfscal(mth,(GEN)MCS[j],(GEN)MC[kk]),
+	coeff(mu,k,j) = (long) rnfdiv(rnfscal(mth,(GEN)MCS[j],(GEN)MC[k]),
 	                              (GEN) B[j]);
-	MCS[kk] = lsub((GEN) MCS[kk], rnfvecmul(gcoeff(mu,kk,j),(GEN)MCS[j]));
+	MCS[k] = lsub((GEN) MCS[k], rnfvecmul(gcoeff(mu,k,j),(GEN)MCS[j]));
       }
-      B[kk] = lreal(rnfscal(mth,(GEN)MCS[kk],(GEN)MCS[kk]));
-      if (gcmp0((GEN)B[kk])) err(lllger3);
+      B[k] = lreal(rnfscal(mth,(GEN)MCS[k],(GEN)MCS[k]));
+      if (gcmp0((GEN)B[k])) err(lllger3);
     }
-
-/* RED(k,k-1) */
-    l=kk-1; Ikk_inv=idealinv(nf, (GEN)I[kk]);
-    ideal=idealmul(nf,(GEN)I[l],Ikk_inv);
-    x=findmin(nf,ideal,gcoeff(mu,kk,l),2*prec-2);
-    if (!gcmp0(x))
-    {
-      xpol=basistoalg(nf,x); xc=nftocomplex(nf,xpol);
-      MC[kk]=lsub((GEN)MC[kk],rnfvecmul(xc,(GEN)MC[l]));
-      U[kk]=lsub((GEN)U[kk],gmul(xpol,(GEN)U[l]));
-      coeff(mu,kk,l)=lsub(gcoeff(mu,kk,l),xc);
-      for (i=1; i<l; i++)
-	coeff(mu,kk,i)=lsub(gcoeff(mu,kk,i),rnfmul(xc,gcoeff(mu,l,i)));
-    }
+    RED(k, k-1, U, mu, MC, nf, I, &Ik_inv);
 /* Test LLL condition */
-    p1=nftau(r1,gadd((GEN) B[kk],
-                     gmul(gnorml2(gcoeff(mu,kk,kk-1)),(GEN)B[kk-1])));
-    p2=gdivgs(gmulsg(9,nftau(r1,(GEN)B[kk-1])),10);
-    if (gcmp(p1,p2)<=0)
+    p1 = nftau(r1,gadd((GEN) B[k],
+                       gmul(gnorml2(gcoeff(mu,k,k-1)),(GEN)B[k-1])));
+    p2 = nftau(r1,(GEN)B[k-1]);
+    if (gcmp(gmulsg(alpha,p1), gmulsg(alpha-1,p2)) <= 0)
     {
 /* Execute SWAP(k) */
-      k=kk;
       swap(MC[k-1],MC[k]);
-      swap(U[k-1],U[k]);
-      swap(I[k-1],I[k]);
+      swap(U[k-1], U[k]);
+      swap(I[k-1], I[k]);
       for (j=1; j<=k-2; j++) swap(coeff(mu,k-1,j),coeff(mu,k,j));
-      muf=gcoeff(mu,k,k-1);
-      mufc=gconj(muf); muno=greal(rnfmul(muf,mufc));
-      Bf=gadd((GEN)B[k],rnfmul(muno,(GEN)B[k-1]));
-      p1=rnfdiv((GEN)B[k-1],Bf);
-      coeff(mu,k,k-1)=(long)rnfmul(mufc,p1);
-      temp=(GEN)MCS[k-1];
-      MCS[k-1]=ladd((GEN)MCS[k],rnfvecmul(muf,(GEN)MCS[k-1]));
-      MCS[k]=lsub(rnfvecmul(rnfdiv((GEN)B[k],Bf),temp),
-		  rnfvecmul(gcoeff(mu,k,k-1),(GEN)MCS[k]));
-      B[k]=(long)rnfmul((GEN)B[k],p1); B[k-1]=(long)Bf;
+      muf = gcoeff(mu,k,k-1);
+      mufc = gconj(muf); 
+      Bf = gadd((GEN)B[k], rnfmul(greal(rnfmul(muf,mufc)), (GEN)B[k-1]));
+      p1 = rnfdiv((GEN)B[k-1],Bf);
+      coeff(mu,k,k-1) = (long)rnfmul(mufc,p1);
+      temp = (GEN)MCS[k-1];
+      MCS[k-1] = ladd((GEN)MCS[k], rnfvecmul(muf,(GEN)MCS[k-1]));
+      MCS[k] = lsub(rnfvecmul(rnfdiv((GEN)B[k],Bf),temp),
+		    rnfvecmul(gcoeff(mu,k,k-1),(GEN)MCS[k]));
+      B[k] = (long)rnfmul((GEN)B[k],p1);
+      B[k-1] = (long)Bf;
       for (i=k+1; i<=kmax; i++)
       {
-	temp=gcoeff(mu,i,k);
-	coeff(mu,i,k)=lsub(gcoeff(mu,i,k-1),rnfmul(muf,gcoeff(mu,i,k)));
+	temp = gcoeff(mu,i,k);
+	coeff(mu,i,k) = lsub(gcoeff(mu,i,k-1), rnfmul(muf, gcoeff(mu,i,k)));
 	coeff(mu,i,k-1) = ladd(temp, rnfmul(gcoeff(mu,k,k-1),gcoeff(mu,i,k)));
       }
-      if (kk>2) { kk--; if (DEBUGLEVEL) fprintferr("%ld ",kk); }
+      if (k > 2) k--;
     }
     else
     {
-      for (l=kk-2; l; l--)
-      {
-/* RED(k,l) */
-	ideal=idealmul(nf,(GEN)I[l],Ikk_inv);
-	x=findmin(nf,ideal,gcoeff(mu,kk,l),2*prec-2);
-	if (!gcmp0(x))
-	{
-          xpol=basistoalg(nf,x); xc=nftocomplex(nf,xpol);
-	  MC[kk]=(long)gsub((GEN)MC[kk],rnfvecmul(xc,(GEN)MC[l]));
-	  U[kk]=(long)gsub((GEN)U[kk],gmul(xpol,(GEN)U[l]));
-	  coeff(mu,kk,l)=lsub(gcoeff(mu,kk,l),xc);
-	  for (i=1; i<l; i++)
-	    coeff(mu,kk,i) = lsub(gcoeff(mu,kk,i), rnfmul(xc,gcoeff(mu,l,i)));
-	}
-      }
-      kk++; if (DEBUGLEVEL) fprintferr("%ld ",kk);
+      for (l=k-2; l; l--) RED(k, l, U, mu, MC, nf, I, &Ik_inv);
+      k++;
     }
   }
-  while (kk<lx);
+  while (k < lx);
   if (DEBUGLEVEL) fprintferr("\n");
-  p1=gmul(MPOL,U); tetpil=avma;
-  y=cgetg(3,t_VEC); z=cgetg(3,t_VEC); y[1]=(long)z;
-  z[2]=lcopy(I); z[1]=(long)algtobasis(nf,p1);
-  y[2]=(long)algtobasis(nf,U);
-  return gerepile(av,tetpil,y);
+  p1 = gmul(MPOL,U);
+  y = cgetg(3,t_VEC);
+  z = cgetg(3,t_VEC);
+  z[1] = (long)algtobasis(nf,p1);
+  z[2] = lcopy(I);
+  y[1]=(long)z;
+  y[2] = (long)algtobasis(nf,U);
+  return gerepileupto(av, y);
 }
 
 GEN
