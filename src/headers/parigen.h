@@ -69,8 +69,8 @@ typedef long *GEN;
 #define  SIGNSHIFT (BITS_IN_LONG - SIGNnumBITS)
 
 #define EXPOBITS    ((1UL<<EXPOnumBITS)-1)
-#define SIGNBITS    (~((1<<SIGNSHIFT) - 1))
-#define  TYPBITS    (~((1<< TYPSHIFT) - 1))
+#define SIGNBITS    (~((1UL<<SIGNSHIFT) - 1))
+#define  TYPBITS    (~((1UL<< TYPSHIFT) - 1))
 #define PRECPBITS   (~VALPBITS)
 #define LGBITS      ((1UL<<LGnumBITS)-1)
 #define VALPBITS    ((1UL<<VALPnumBITS)-1)
