@@ -1015,7 +1015,7 @@ ffinit(GEN p,long n,long v)
   for(;; avma = av)
   {
     pol = gadd(gpowgs(polx[v],n), FpX_rand(n-1,v, p));
-    if (is_irred_mod_p(pol, p)) break;
+    if (FpX_is_irred(pol, p)) break;
   }
   return gerepileupto(av, FpX(pol,p));
 }

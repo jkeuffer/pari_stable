@@ -878,6 +878,18 @@ FpXQ_inv(GEN x,GEN T,GEN p)
   if (!U) err(talker,"non invertible polynomial in FpXQ_inv");
   return gerepileupto(av, U);
 }
+
+GEN
+FpXV_FpV_dotproduct(GEN V, GEN W, GEN p)
+{
+  long ltop=avma;
+  long i;
+  GEN z = FpX_Fp_mul((GEN)V[1],(GEN)W[1],NULL);
+  for(i=2;i<lg(V);i++)
+    z=FpX_add(z,FpX_Fp_mul((GEN)V[i],(GEN)W[i],NULL),NULL);
+  return gerepileupto(ltop,FpX_red(z,p));
+}
+
 /* generates the list of powers of x of degree 0,1,2,...,l*/
 GEN
 FpXQ_powers(GEN x, long l, GEN T, GEN p)
@@ -934,6 +946,8 @@ long brent_kung_optpow(long d, long n)
   return (d+l-1)/l;
 }
 
+/*Close to FpXV_FpV_dotproduct*/
+
 static GEN
 spec_compo_powers(GEN P, GEN V, long a, long n)
 {
@@ -948,7 +962,7 @@ spec_compo_powers(GEN P, GEN V, long a, long n)
  *manipulating formal power series, JACM 25:581-595, 1978)
  
  V must be as output by FpXQ_powers.
- For optimal permformance, l (of FpXQ_powers) must as output by
+ For optimal performance, l (of FpXQ_powers) must be as output by
  brent_kung_optpow
  */
 
@@ -1559,45 +1573,77 @@ intersect_ker(GEN P, GEN MA, GEN l, GEN U, GEN lU)
   return gerepileupto(ltop,gtopolyrev(A,vp));
 }
 #endif
-/*Let P a polynomial != 0 and phi the x^p Frobenius automorphism in FFp[X]/T
- * Compute P[phi](x)
- * i.e. If P=a_n*x^n+...+a_1*x+a_0, retourne a_n*x^(p^n)+...+a_1*x^p+a_0*x
+/* Let P a polynomial != 0 and M the matrix of the x^p Frobenius automorphism in
+ * FFp[X]/T. Compute P(M)
+ * not stack clean
  */
-#if 0
-/*Not now*/
-GEN polfrobenius(GEN P, GEN T, GEN p) 
+static GEN
+polfrobenius(GEN M, GEN p, long r, long v)
 {
-  ulong ltop=avma;
+  GEN V,W;
   long i;
-  GEN z=polx[varn(P)];
-  GEN res=FpX_Fp_mul(z,(GEN)P[2],p);
-  for(i=3;i<lgef(P);i++)
+  V = cgetg(r+2,t_VEC);
+  V[1] = (long) polx[v];
+  if (r == 0) return V;
+  V[2] = (long) gtopolyrev((GEN)M[2],v);
+  W = (GEN) M[2];
+  for (i = 3; i <= r+1; ++i)
   {
-    z=FpXQ_pow(z,p,T,p);
-    res=FpX_add(res,FpX_Fp_mul(z,(GEN)P[i],p),NULL);
+    W = FpM_FpV_mul(M,W,p);
+    V[i] = (long) gtopolyrev(W,v);
   }
-  return gerepileupto(ltop,FpX_red(res,p));
+  return V;
 }
-#endif
+
+static GEN
+matpolfrobenius(GEN V, GEN P, GEN T, GEN p)
+{
+  long i;
+  long l=degpol(T);
+  long v=varn(T);
+  GEN M,W;
+  GEN PV=gtovec(P);
+  PV=cgetg(degpol(P)+2,t_VEC);
+  for(i=1;i<lg(PV);i++)
+    PV[i]=P[1+i];
+  M=cgetg(l+1,t_VEC);
+  M[1]=(long)scalarpol(poleval(P,gun),v);
+  M[2]=(long)FpXV_FpV_dotproduct(V,PV,p);
+  W=cgetg(lg(V),t_VEC);
+  for(i=1;i<lg(W);i++)
+     W[i]=V[i];
+  for(i=3;i<=l;i++)
+  {
+    long j;
+    for(j=1;j<lg(W);j++)
+      W[j]=(long)FpXQ_mul((GEN)W[j],(GEN)V[j],T,p);
+    M[i]=(long)FpXV_FpV_dotproduct(W,PV,p);
+  }
+  return vecpol_to_mat(M,l);
+}
+
 /* Essentially we want to compute
  * FqM_ker(MA-polx[MAXVARN],lU,l)
  * To avoid use of matrix in Fq we procede as follows:
  * We compute FpM_ker(U(MA)) and then we recover
  * the eigen value by Galois action, see formula.
  */
-GEN
+static GEN
 intersect_ker(GEN P, GEN MA, GEN l, GEN U, GEN lU) 
 {
   ulong ltop=avma;
   long vp=varn(P);
   long vu=varn(lU), r=degpol(lU);
   long i;
-  GEN A, R, M, ib0;
+  GEN A, R, M, ib0, V;
   if (DEBUGLEVEL>=4) timer2();
-  M=lift(poleval(U,MA));
+  V=polfrobenius(MA,l,r,varn(U));
+  if (DEBUGLEVEL>=4) msgtimer("pol[frobenius]");
+  M=matpolfrobenius(V,lU,P,l);
   if (DEBUGLEVEL>=4) msgtimer("matrix cyclo");
   A=FpM_ker(M,l);
   if (DEBUGLEVEL>=4) msgtimer("kernel");
+  A=gerepileupto(ltop,A);
   if (lg(A)!=r+1)
     err(talker,"ZZ_%Z[%Z]/(%Z) is not a field in Fp_intersect"
 	,l,polx[vp],P);
@@ -1627,6 +1673,10 @@ intersect_ker(GEN P, GEN MA, GEN l, GEN U, GEN lU)
   not need to be of the same variable.  if MA (resp. MB) is not NULL,
   must be the matrix of the frobenius map in FF_l[X]/(P) (resp.
   FF_l[X]/(Q) ).  */
+/* Note on the implementation choice:
+ * We assume the prime p is very large
+ * so we handle Frobenius as matrices.
+ */
 void
 Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
 {
@@ -1691,14 +1741,16 @@ Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       B=intersect_ker(Q, MB, l, U, lU);
       /*Somewhat ugly, but it is a proof that POLYMOD are useful and
         powerful.*/
+      if (DEBUGLEVEL>=4) timer2();
       An=lift(lift((GEN)lift(gpowgs(gmodulcp(A,P),pg))[2]));
       Bn=lift(lift((GEN)lift(gpowgs(gmodulcp(B,Q),pg))[2]));
+      if (DEBUGLEVEL>=4) msgtimer("pows [P,Q]");
       z=FpXQ_inv(Bn,lU,l);
       z=FpXQ_mul(An,z,lU,l);
       L=ffsqrtnmod(z,ipg,lU,l,NULL);
+      if (DEBUGLEVEL>=4) msgtimer("ffsqrtn");
       if ( !L )
         err(talker,"Polynomials not irreducible in Fp_intersect");
-      if (DEBUGLEVEL>=4) msgtimer("ffsqrtn");
       B=gsubst(lift(lift(gmul(B,L))),MAXVARN,gzero);
       A=gsubst(lift(lift(A)),MAXVARN,gzero);
     }

@@ -20,15 +20,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                                                                   **/
 /***********************************************************************/
 #include "pari.h"
-extern GEN bsrch(GEN p, GEN fa, long Ka, GEN eta, long Ma);
-extern GEN eleval(GEN f,GEN h,GEN a);
 extern GEN get_bas_den(GEN bas);
 extern GEN get_mul_table(GEN x,GEN bas,GEN invbas,GEN *T);
 extern GEN pol_to_monic(GEN pol, GEN *lead);
-extern GEN respm(GEN f1,GEN f2,GEN pm);
-extern GEN setup(GEN p,GEN f,GEN theta,GEN nut, long *La, long *Ma);
-extern GEN sort_factor(GEN y, int (*cmp)(GEN,GEN));
-extern GEN vstar(GEN p,GEN h);
 
 /* see splitgen() for how to use these two */
 GEN
@@ -569,6 +563,14 @@ FpX_nbfact(GEN u, GEN p)
   GEN vker = Berlekamp_ker(u,p);
   avma = av; return lg(vker)-1;
 }
+
+/* Please use only use this function when you it is false, or that there is a
+ * lot of factors. If you believe f is irreducible or that it has few factors,
+ * then use `FpX_nbfact(f,p)==1' instead (faster).
+ */
+static GEN factcantor0(GEN f, GEN pp, long flag);
+long FpX_is_irred(GEN f, GEN p) { return !!factcantor0(f,p,2); }
+
 static GEN modulo;
 static GEN gsmul(GEN a,GEN b){return FpX_mul(a,b,modulo);}
 GEN
@@ -859,12 +861,6 @@ simplefactmod(GEN f, GEN p)
   return factcantor0(f,p,1);
 }
 
-GEN
-is_irred_mod_p(GEN f, GEN p)
-{
-  return factcantor0(f,p,2);
-}
-
 /* vector of polynomials (in v) whose coeffs are given by the columns of x */
 GEN
 mat_to_vecpol(GEN x, long v)
@@ -887,7 +883,7 @@ mat_to_vecpol(GEN x, long v)
 }
 
 /* matrix whose entries are given by the coeffs of the polynomials in 
- * vector v (considered as degree n polynomials) */
+ * vector v (considered as degree n-1 polynomials) */
 GEN
 vecpol_to_mat(GEN v, long n)
 {
