@@ -578,7 +578,7 @@ rnfidealreltoabs(GEN rnf,GEN x)
     }
   }
   p1 = gmul(basinv,p3); c = content(p1);
-  p2 = gmael3(x,1,1,1); /* x \cap Z */
+  p2 = gmael(p1,1,1); /* x \cap Z */
   if (is_pm1(c)) c = NULL; else { p1 = gdiv(p1, c); p2 = gdiv(p2, c); }
   p1 = hnfmodid(p1, p2);
   if (c) p1 = gmul(p1, c);
