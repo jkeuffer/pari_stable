@@ -87,6 +87,7 @@ BA  3- more efficient factorff when pol belongs to Fp[X] (based on Fp_isom)
    10- restore \o2 to previous meaning, use \o3 for alternate prettyprinter
    11- normalized output of idealfactor (sort factors)
    12- slightly better TeXization (\left / \right)
+   13- use all 32 initial bits for 1st approximation in sqrtint
 
   Added
     1- new library function zerovec
