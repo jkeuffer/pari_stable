@@ -3471,7 +3471,7 @@ gsmithall(GEN x,long all)
   for (k=1; k<=n; k++)
   {
     GEN T = gcoeff(x,k,k);
-    if (typ(T) == t_POL && signe(x))
+    if (typ(T) == t_POL && signe(T))
     {
       GEN d = leading_term(T);
       if (!gcmp1(d))
