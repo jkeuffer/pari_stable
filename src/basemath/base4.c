@@ -1384,36 +1384,33 @@ init_idele(GEN nf)
   x[2] = (long)zerovec(RU); return x;
 }
 
-/* compute z^n (z ideal, n integer), reducing along the way if n is big */
+/* compute x^n (x ideal, n integer), reducing along the way if n is big */
 GEN
-idealpowred(GEN nf, GEN z, GEN n, long prec)
+idealpowred(GEN nf, GEN x, GEN n, long prec)
 {
-  long i,m,av=avma, s = signe(n);
-  ulong j;
-  GEN x = z;
+  long i,j,m,av=avma, s = signe(n);
+  GEN y, p1;
 
   if (absi_cmp(n,stoi(16)) < 0)
   {
-    x = idealpow(nf,x,n);
-    return gerepileupto(av, ideallllred(nf,x,NULL,prec));
+    y = idealpow(nf,x,n);
+    return gerepileupto(av, ideallllred(nf,y,NULL,prec));
   }
-  i = lgefint(n)-1; m=n[i]; j=HIGHBIT;
-  while ((m&j)==0) j>>=1;
-  for (j>>=1; j; j>>=1)
+  p1 = n+2; m = *p1;
+  y = x; j=1+bfffo(m); m<<=j; j = BITS_IN_LONG-j;
+  for (i=lgefint(n)-2;;)
   {
-    x = idealmul(nf,x,x);
-    if (m&j) x = idealmul(nf,x,z);
-    x = ideallllred(nf,x,NULL,prec);
-  }
-  for (i--; i>=2; i--)
-    for (m=n[i],j=HIGHBIT; j; j>>=1)
+    for (; j; m<<=1,j--)
     {
-      x = idealmul(nf,x,x);
-      if (m&j) x = idealmul(nf,x,z);
-      x = ideallllred(nf,x,NULL,prec);
+      y = idealmul(nf,y,y);
+      if (m < 0) y = idealmul(nf,y,x);
+      y = ideallllred(nf,y,NULL,prec);
     }
-  if (s < 0) x = idealinv(nf,x);
-  return gerepileupto(av,x);
+    if (--i == 0) break;
+    m = *++p1, j = BITS_IN_LONG;
+  }
+  if (s < 0) y = idealinv(nf,y);
+  return gerepileupto(av,y);
 }
 
 GEN
