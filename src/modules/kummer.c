@@ -802,8 +802,8 @@ reducebeta(GEN bnfz, GEN be)
 
 /* cf. algo 5.3.18 */
 static GEN
-testx(GEN bnfz, GEN bnf, GEN X, GEN module, GEN subgroup, GEN vecMsup,
-      GEN vecWB, long g, GEN U)
+testx(GEN bnfz, GEN bnr, GEN X, GEN subgroup, GEN vecMsup, GEN vecWB, long g,
+      GEN U)
 {
   long i,l,lX;
   GEN be,polrelbe,p1,nf;
@@ -815,13 +815,11 @@ testx(GEN bnfz, GEN bnf, GEN X, GEN module, GEN subgroup, GEN vecMsup,
   l = lg(vecMsup);
   for (i=1; i<l; i++)
     if (gcmp0(FpV_red(gmul((GEN)vecMsup[i],X), gell))) return NULL;
-  be = gun;
-  for (i=1; i<lX; i++)
-    be = gmul(be, powgi((GEN)vecWB[i], (GEN)X[i]));
+  be = factorback(vecWB, X);
   if (DEBUGLEVEL>1) fprintferr("reducing beta = %Z\n",be);
   be = reducebeta(bnfz, be);
   if (DEBUGLEVEL>1) fprintferr("beta reduced = %Z\n",be);
-  nf = (GEN)bnf[7];
+  nf = checknf(bnr);
   polrelbe = computepolrelbeta((GEN)nf[1],be,g,U);
  
   p1 = unifpol(nf,polrelbe,0);
@@ -832,8 +830,9 @@ testx(GEN bnfz, GEN bnf, GEN X, GEN module, GEN subgroup, GEN vecMsup,
   p1 = denom(gtovec(p1));
   polrelbe = rescale_pol(polrelbe,p1);
   if (DEBUGLEVEL>1) fprintferr("polrelbe = %Z\n",polrelbe);
-  p1 = rnfconductor(bnf,polrelbe,0);
-  if (!gegal((GEN)p1[1],module) || !gegal((GEN)p1[3],subgroup)) return NULL;
+
+  p1 = rnfnormgroup(bnr,polrelbe);
+  if (!gegal(p1,subgroup)) return NULL;
   return polrelbe;
 }
 
@@ -891,7 +890,7 @@ rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   if (!vnf) err(talker,"main variable in kummer must not be x");
       /* step 7 */
   p1 = conductor(bnr,subgroup,2);
-      /* fin step 7 */
+      /* end step 7 */
   bnr = (GEN)p1[2]; 
   subgroup = (GEN)p1[3];
   rayclgp = (GEN)bnr[5];
@@ -1139,7 +1138,7 @@ rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
       X = (GEN)K[dK];
       for (j=1; j<dK; j++) X = gadd(X, gmulsg(y[j],(GEN)K[j]));
       X = FpV_red(X, gell);
-      finalresult = testx(bnfz,bnf,X,module,subgroup,vecMsup,vecWB,g,U);
+      finalresult = testx(bnfz,bnr,X,subgroup,vecMsup,vecWB,g,U);
       if (finalresult) return gerepilecopy(av, finalresult);
         /* step 20,21,22 */
       i = dK;
