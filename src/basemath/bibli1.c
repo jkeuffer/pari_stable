@@ -1894,23 +1894,20 @@ typedef struct {
 void
 init_dalloc()
 { /* correct alignment for dalloc */
-  avma -= avma % sizeof(double);
-  if (avma < bot) err(errpile);
+  new_chunk((avma % sizeof(double)) / sizeof(long));
 }
 
 double *
 dalloc(size_t n)
 {
-  if (avma - bot < n) err(errpile);
-  avma -= n; return (double*)avma;
+  return (double*)new_chunk(n / sizeof(long));
 }
 
 char *
 stackmalloc(size_t N)
 {
-  size_t n = nchar2nlong(N) * sizeof(long);
-  if (avma - bot < n) err(errpile);
-  avma -= n; return (char*)avma;
+  long n = nchar2nlong(N);
+  return (char*)new_chunk(n);
 }
 
 static double
