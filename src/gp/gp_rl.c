@@ -34,8 +34,10 @@ BEGINEXTERN
 #endif
 #ifdef READLINE_LIBRARY
 #  include <readline.h>
+#  include <history.h>
 #else
 #  include <readline/readline.h>
+#  include <readline/history.h>
 #endif
 #ifndef HAS_RL_MESSAGE
 extern int rl_message (const char *, ...);
@@ -655,5 +657,89 @@ init_readline(void)
   Bind(155, pari_rl_backward_sexp, emacs_dos_keymap); /* Alt-Left */
   Bind(157, pari_rl_forward_sexp,  emacs_dos_keymap); /* Alt-Right*/
 #endif
+}
+
+static int
+history_is_new(char *s)
+{
+  return (*s && (!history_length ||
+                  strcmp(s, history_get(history_length)->line)));
+}
+
+static void
+gp_add_history(char *s)
+{
+  if (history_is_new(s)) add_history(s);
+}
+
+extern void fix_buffer(Buffer *b, long newlbuf);
+extern int input_loop(filtre_t *F, input_method *IM);
+
+/* Read line; returns a malloc()ed string of the user input or NULL on EOF.
+   Increments the buffer size appropriately if needed; fix *endp if so. */
+static char *
+gprl_input(Buffer *b, char **endp, input_method *IM)
+{
+  long used = *endp - b->buf;
+  long left = b->len - used, l;
+  char *s;
+  
+  if (! (s = readline(IM->prompt)) ) return NULL; /* EOF */
+  l = strlen(s);
+  if ((ulong)left < l)
+  {
+    long incr = b->len;
+
+    if (incr < l) incr = l;
+    fix_buffer(b, b->len + incr);
+    *endp = b->buf + used;
+  }
+  gp_add_history(s); /* Makes a copy */
+  return s;
+}
+
+static void
+unblock_SIGINT(void)
+{
+#ifdef USE_SIGRELSE
+  sigrelse(SIGINT);
+#elif USE_SIGSETMASK
+  sigsetmask(0);
+#endif
+}
+
+/* request one line interactively.
+ * Return 0: EOF
+ *        1: got one line from readline or infile */
+int
+get_line_from_readline(char *prompt, filtre_t *F)
+{
+  const int index = history_length;
+  char *s;
+  input_method IM;
+ 
+  IM.prompt = prompt;
+  IM.getline= &gprl_input;
+  IM.free = 1;
+  if (! input_loop(F,&IM)) { pariputs("\n"); return 0; }
+
+  s = ((Buffer*)F->data)->buf;
+  if (*s)
+  {
+    if (history_length > index+1)
+    { /* Multi-line input. Remove incomplete lines */
+      int i = history_length;
+      while (i > index) {
+        HIST_ENTRY *e = remove_history(--i);
+        free(e->line); free(e);
+      }
+      gp_add_history(s);
+    }
+  
+    /* update logfile */
+    if (logfile) fprintf(logfile, "%s%s\n",prompt,s);
+  }
+  unblock_SIGINT(); /* bug in readline 2.0: need to unblock ^C */
+  return 1;
 }
 #endif

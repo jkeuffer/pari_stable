@@ -55,9 +55,9 @@ hit_return(void)
  *            if not return pointer to ending '\0' in t.
  */
 char *
-filtre0(filtre_t *F, int flag)
+filtre0(filtre_t *F)
 {
-  const int downcase = ((flag & f_KEEPCASE) == 0 && compatible == OLDALL);
+  const int downcase = F->downcase;
   char c, *s = F->s, *t;
 
   if (!F->t) F->t = gpmalloc(strlen(s)+1);
@@ -152,12 +152,13 @@ END:
 #undef MULTI_LINE_COMMENT
 
 char *
-filtre(char *s, int flag)
+filtre(char *s, int downcase)
 {
   filtre_t T;
   T.s = s;    T.in_string = 0; T.more_input = 0;
   T.t = NULL; T.in_comment= 0; T.wait_for_brace = 0;
-  return filtre0(&T, flag);
+  T.downcase = downcase;
+  return filtre0(&T);
 }
 
 GEN

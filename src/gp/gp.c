@@ -37,20 +37,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
   int readline_init = 1;
 BEGINEXTERN
 #  if defined(__cplusplus) && defined(__SUNPRO_CC)
-  /* readline.h gives a bad definition of readline() */
-  extern char*readline(char*);
+  extern char*readline(char*); /* bad prototype for readline() in readline.h */
 #  else
 #   ifdef READLINE_LIBRARY
 #     include <readline.h>
-#     include <history.h>
 #   else
 #     include <readline/readline.h>
-#     include <readline/history.h>
 #   endif
 #  endif
   extern int isatty(int);
 ENDEXTERN
-static void gp_add_history(char *s);
 #endif
 
 char*  _analyseur(void);
@@ -96,13 +92,6 @@ static ulong chrono, pariecho, primelimit, strictmatch;
 static ulong tglobal, histsize, paribufsize, lim_lines;
 static int tm_is_waiting = 0, handle_C_C = 0;
 static gp_format fmt;
-
-typedef struct Buffer {
-  char *buf;
-  long len;
-  jmp_buf env;
-  int flenv;
-} Buffer;
 
 #define current_buffer (bufstack?((Buffer*)(bufstack->value)):NULL)
 static stack *bufstack = NULL;
@@ -566,7 +555,7 @@ sd_colors(char *v, int flag)
       v = "1, 6, 3, 4, 5, 2, 3";	/* Assume recent ReadLine. */
     if (l <= 6 && strncmp(v, "boldfg", l) == 0)	/* Good for darkbg consoles */
       v = "[1,,1], [5,,1], [3,,1], [7,,1], [6,,1], [2,,1], [3,,1]";
-    v0 = v = filtre(v, f_REG);
+    v0 = v = filtre(v, 0);
     for (c=c_ERR; c < c_LAST; c++)
       gp_colors[c] = gp_get_color(&v);
     free(v0);
@@ -1639,7 +1628,7 @@ Type ?12 for how to get moral (and possibly technical) support.\n\n");
   pariputsf("\nparisize = %lu, primelimit = %lu\n", top-bot, primelimit);
 }
 
-static void
+void
 fix_buffer(Buffer *b, long newlbuf)
 {
   b->len = paribufsize = newlbuf;
@@ -2026,6 +2015,7 @@ init_filtre(filtre_t *F, void *data)
   F->data = data;
   F->in_string  = 0;
   F->in_comment = 0;
+  F->downcase = 0;
 }
 
 static char **
@@ -2239,19 +2229,16 @@ do_prompt(int in_comment, char *p)
   brace_color(s, c_INPUT, 1); return buf;
 }
 
-static void
-unblock_SIGINT(void)
+static char *
+fgets_texmacs(char *s, int n, FILE *f)
 {
-#ifdef USE_SIGRELSE
-  sigrelse(SIGINT);
-#elif USE_SIGSETMASK
-  sigsetmask(0);
-#endif
+  tm_start_output(); tm_end_output(); /* tell TeXmacs we need input */
+  return fgets(s,n,f);
 }
 
 /* Read from file (up to '\n' or EOF) and copy at s0 (points in b->buf) */
 static char *
-file_input(Buffer *b, char **s0, FILE *file, int TeXmacs)
+file_input(Buffer *b, char **s0, input_method *IM)
 {
   int first = 1;
   char *s = *s0;
@@ -2260,9 +2247,7 @@ file_input(Buffer *b, char **s0, FILE *file, int TeXmacs)
   used0 = used;
   for(;;)
   {
-    long left = b->len - used, ls;
-    /* if from TeXmacs, tell him we need input */
-    if (TeXmacs) { tm_start_output(); tm_end_output(); }
+    long left = b->len - used, l;
 
     if (left < 512)
     {
@@ -2271,46 +2256,31 @@ file_input(Buffer *b, char **s0, FILE *file, int TeXmacs)
       *s0 = b->buf + used0;
     }
     s = b->buf + used;
-    if (! fgets(s, left, file)) return first? NULL: *s0; /* EOF */
-    ls = strlen(s); first = 0;
-    if (ls+1 < left || s[ls-1] == '\n') return *s0; /* \n */
-    used += ls;
+    if (! IM->fgets(s, left, IM->file))
+      return first? NULL: *s0; /* EOF */
+     
+    l = strlen(s); first = 0;
+    if (l+1 < left || s[l-1] == '\n') return *s0; /* \n */
+    used += l;
   }
 }
 
-#ifdef READLINE
-/* Read line; returns a malloc()ed string of the user input or NULL on EOF.
-   Increments the buffer size appropriately if needed; fix *endp if so. */
-static char *
-gprl_input(Buffer *b, char **endp, char *prompt)
+/* Read a "complete line" and filter it. Return: 0 if EOF, 1 otherwise */
+int
+input_loop(filtre_t *F, input_method *IM)
 {
-  long used = *endp - b->buf;
-  long left = b->len - used, l;
-  char *s;
-  
-  if (! (s = readline(prompt)) ) return NULL; /* EOF */
-  l = strlen(s);
-  if ((ulong)left < l)
-  {
-    long incr = b->len;
-
-    if (incr < l) incr = l;
-    fix_buffer(b, b->len + incr);
-    *endp = b->buf + used;
-  }
-  return s;
-}
-#endif
-
-/* True if more than one line read */
-static int
-input_loop(filtre_t *F, char *to_read, FILE *file, char *prompt)
-{
-  const int TeXmacs = (under_texmacs && file == stdin);
-  const int f_flag = prompt? f_REG: f_REG | f_KEEPCASE;
   Buffer *b = (Buffer*)F->data;
-  char *s = b->buf;
-  int read = 0;
+  char *to_read, *s = b->buf;
+ 
+  /* read first line */
+  handle_C_C = 0;
+  while (! (to_read = IM->getline(b,&s,IM)) )
+  { /* EOF */
+    if (!handle_C_C) { check_filtre(F); return 0; }
+    /* received ^C in getline and coming back from break_loop();
+     * retry (as if "\n" were input) */
+    handle_C_C = 0;
+  }
 
   /* buffer is not empty, init filter */
   F->in_string = 0;
@@ -2320,24 +2290,18 @@ input_loop(filtre_t *F, char *to_read, FILE *file, char *prompt)
   {
     F->s = to_read;
     F->t = s;
-    (void)filtre0(F, f_flag);
+    (void)filtre0(F);
+    if (IM->free) free(to_read);
+   
     if (! F->more_input) break;
 
     /* read continuation line */
     s = F->end;
-#ifdef READLINE
-    if (!file) {
-      free(to_read);
-      to_read = gprl_input(b, &s, do_prompt(F->in_comment, prompt_cont));
-      if (to_read) gp_add_history(to_read);	/* Makes a copy */
-    } else
-#endif
-      to_read = file_input(b, &s, file,TeXmacs);
+    if (IM->prompt) IM->prompt = do_prompt(F->in_comment, prompt_cont);
+    to_read = IM->getline(b,&s, IM);
     if (!to_read) break;
-    read++;
   }
-  if (!file && to_read) free(to_read);
-  return read;
+  return 1;
 }
 
 /* prompt = NULL --> from gprc. Return 1 if new input, and 0 if EOF */
@@ -2345,24 +2309,21 @@ static int
 get_line_from_file(char *prompt, filtre_t *F, FILE *file)
 {
   const int TeXmacs = (under_texmacs && file == stdin);
-  Buffer *b = (Buffer*)F->data;
-  char *buf, *s = b->buf;
-
-  handle_C_C = 0;
-  while (! (buf = file_input(b,&s,file,TeXmacs)) )
-  { /* EOF */
-    if (!handle_C_C)
-    {
-      if (TeXmacs) tm_start_output();
-      check_filtre(F);
-      return 0;
-    }
-    /* received ^C in fgets and coming back from break_loop(),
-     * retry (as if "\n" were input) */
-    handle_C_C = 0;
+  char *s;
+  input_method IM;
+ 
+  IM.file = file;
+  IM.fgets= TeXmacs? &fgets_texmacs: &fgets;
+  IM.prompt = NULL;
+  IM.getline= &file_input;
+  IM.free = 0;
+  if (! input_loop(F,&IM))
+  {
+    if (TeXmacs) tm_start_output();
+    return 0;
   }
-  (void)input_loop(F,buf,file,prompt);
-
+ 
+  s = ((Buffer*)F->data)->buf;
   if (*s && prompt) /* don't echo if from gprc */
   {
     if (pariecho)
@@ -2374,63 +2335,6 @@ get_line_from_file(char *prompt, filtre_t *F, FILE *file)
   if (under_texmacs) tm_start_output();
   return 1;
 }
-
-#ifdef READLINE
-static int
-history_is_new(char *s)
-{
-  return (*s && (!history_length ||
-                  strcmp(s, history_get(history_length)->line)));
-}
-
-static void
-gp_add_history(char *s)
-{
-  if (history_is_new(s)) add_history(s);
-}
-
-/* request one line interactively.
- * Return 0: EOF
- *        1: got one line from readline or infile */
-static int
-get_line_from_readline(char *prompt, filtre_t *F)
-{
-  Buffer *b = (Buffer*)F->data;
-  char *buf, *s = b->buf;
-  int index, added;
-
-  if (! (buf = gprl_input(b, &s, prompt)) )
-  { /* EOF */
-    pariputs("\n");
-    check_filtre(F);
-    return 0;
-  }
-  /* Put the original read line into history */
-  index = history_length;
-  gp_add_history(buf);	/* Copies the entry */
-
-  added = input_loop(F,buf,NULL,prompt); /* free()s buf */
-  unblock_SIGINT(); /* bug in readline 2.0: need to unblock ^C */
-
-  s = b->buf;
-  if (*s)
-  {
-    if (added)
-    { /* Remove incomplete lines */
-      int i = history_length;
-      while (i > index) {
-        HIST_ENTRY *e = remove_history(--i);
-        free(e->line); free(e);
-      }
-      gp_add_history(s);
-    }
-  
-    /* update logfile */
-    if (logfile) fprintf(logfile, "%s%s\n",prompt,s);
-  }
-  return 1;
-}
-#endif
 
 static int
 get_line_from_user(char *prompt, filtre_t *F)
@@ -2454,6 +2358,7 @@ is_interactive(void)
 static int
 read_line(char *promptbuf, filtre_t *F)
 {
+  if (compatible == OLDALL) F->downcase = 1;
   if (is_interactive())
   {
 #ifdef READLINE

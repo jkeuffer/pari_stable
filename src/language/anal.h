@@ -195,21 +195,31 @@ enum { c_ERR, c_HIST, c_PROMPT, c_INPUT, c_OUTPUT, c_HELP, c_TIME, c_LAST };
 #define mf_TEST 32
 
 /* for filtre */
-#define f_COMMENT  0
-#define f_INIT     1
-#define f_KEEPCASE 2
-#define f_REG      4
-#define f_ENDFILE  8
-
 typedef struct {
   char *s, *t, *end; /* source, target, last char read */
-  int in_string, in_comment, more_input, wait_for_brace;
+  int in_string, in_comment, more_input, wait_for_brace, downcase;
   void *data;
 } filtre_t;
 
 #define LBRACE '{'
 #define RBRACE '}'
 
-extern char *filtre0(filtre_t *F, int flag);
+extern char *filtre0(filtre_t *F);
 extern char *filtre(char *s, int flag);
 extern void check_filtre(filtre_t *F);
+
+typedef struct Buffer {
+  char *buf;
+  long len;
+  jmp_buf env;
+  int flenv;
+} Buffer;
+
+typedef struct input_method {
+  int free;
+  char *prompt;
+  FILE *file;
+  char * (*fgets)(char *,int,FILE*);
+  char * (*getline)(Buffer*, char**, struct input_method*);
+} input_method;
+
