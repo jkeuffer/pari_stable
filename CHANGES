@@ -51,6 +51,9 @@ IS 13- function prototypes (missing 'extern')
        polred([x,x]), bezout(Mod(x,x^2+1),0) : SEGV
    16- check variable numbers in algtobasis: nfalgtobasis(nfinit(P(y), x))
    17- often printed more digits than were significant [ precision(Pi,20) ]
+   18- factorcantor(x^4 - x^3 - 2*x - 1, 3) --> SEGV [typo!]
+   19- matsupplement(non-exact entries): fixed zero test (--> |x| < eps)
+
 
   Changed
 BA  1- more efficient quadratic Hensel lift
