@@ -70,7 +70,7 @@ SuperSPARC    40Mhz  Solaris-2.5     gcc           31528   31576  2.0.16
 TurboSPARC   170MHz  Solaris-2.5     gcc           15907   16529  2.0.9     LG
 MicroSPARC2  110MHz  NextStep-v3     cc            37794!      -  2.0.9     LG
 MicroSPARC2  110MHz  SunOS-4.1.4     gcc           31476   32123  2.0.9     LG
-MicroSPARC2  110MHz  Solaris-2.5     gcc-2.7.2     23918   24165  2.2.1
+MicroSPARC2  110MHz  Solaris-2.5     gcc-2.7.2     24197   24107  2.2.2
 SPARCv7(SS2)  40MHz  SunOS-4.1.3     gcc          115212! 115364  2.0.9     LG
 SPARCv7(ELC)  33MHz  SunOS-4.1.1     gcc          139406!      -  2.0.8     GN
 SPARCv7(SS400)  ???  SunOS-4.1.4     gcc          107074  106494  2.0.16(19)DE
