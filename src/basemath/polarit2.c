@@ -2115,8 +2115,8 @@ gaussian_gcd(GEN x, GEN y)
     GEN z = gdiv(x,y);
     GEN r0 = greal(z), r = gfloor(r0);
     GEN i0 = gimag(z), i = gfloor(i0);
-    if (gcmp(r0, ghalf) > 0) r = addis(r,1);
-    if (gcmp(i0, ghalf) > 0) i = addis(i,1);
+    if (gcmp(gsub(r0,r), ghalf) > 0) r = addis(r,1);
+    if (gcmp(gsub(i0,i), ghalf) > 0) i = addis(i,1);
     if (gcmp0(i)) z = r;
     else
     {
@@ -2129,7 +2129,11 @@ gaussian_gcd(GEN x, GEN y)
   }
   if (signe(greal(x)) < 0) x = gneg(x);
   if (signe(gimag(x)) < 0) x = gmul(x, gi);
-  if (typ(x) == t_COMPLEX && gcmp0(gimag(x))) x = (GEN)x[1];
+  if (typ(x) == t_COMPLEX)
+  {
+    if      (gcmp0((GEN)x[2])) x = (GEN)x[1];
+    else if (gcmp0((GEN)x[1])) x = (GEN)x[2];
+  }
   return gerepileupto(av, gdiv(x, den));
 }
 
