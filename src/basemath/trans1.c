@@ -1168,11 +1168,12 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
   case t_INT: case t_FRAC: case t_FRACN: case t_REAL: case t_COMPLEX:
     i = (long) precision(n); if (i) prec=i;
     if (tx==t_INT && is_pm1(x) && signe(x)>0)
-      y = gun;    /*speed-up since there is no way to call rootsof1complex
-		    directly from gp*/
+     /*speed-up since there is no way to call rootsof1complex
+       directly from gp*/
+      y = realun(prec);
     else if (gcmp0(x))
     {
-      if (gsigne(n) < 0) err(gdiver);
+      if (signe(n) < 0) err(gdiver);
       if (isinexactreal(x))
         y = realzero_bit( itos( gfloor(gdivsg(gexpo(x), n)) ) );
       else
