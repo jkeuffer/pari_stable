@@ -2496,6 +2496,9 @@ u_FpX_divrem(GEN x, GEN y, ulong p, int malloc, GEN *pr)
   *pr = c; return q;
 }
 
+/*FIXME: Unify the following 3 divrem routines. Treat the case x,y (lifted) in
+ * R[X], y non constant. Given: (lifted) [inv(), mul()], (delayed) red() in R */
+
 /* x and y in Z[X]. Possibly x in Z */
 GEN
 FpX_divres(GEN x, GEN y, GEN p, GEN *pr)
@@ -2506,7 +2509,9 @@ FpX_divres(GEN x, GEN y, GEN p, GEN *pr)
 
   if (!p) return poldivres(x,y,pr);
   if (!signe(y)) err(talker,"division by zero in FpX_divres");
-  vx=varn(x); dy=degpol(y); dx=(typ(x)==t_INT)? 0: degpol(x);
+  vx = varn(x);
+  dy = degpol(y);
+  dx = (typ(x)==t_INT)? 0: degpol(x);
   if (dx < dy)
   {
     if (pr)
@@ -2695,6 +2700,106 @@ FpXQX_divres(GEN x, GEN y, GEN T, GEN p, GEN *pr)
     for (j=0; j<=i && j<=dz; j++)
       p1 = gsub(p1, gmul((GEN)z[j],(GEN)y[i-j]));
     tetpil=avma; rem[i]=lpile(av,tetpil, FpX_res(p1, T, p));
+  }
+  rem -= 2;
+  if (lead) gunclone(lead);
+  if (!sx) normalizepol_i(rem, lrem);
+  if (pr == ONLY_REM) return gerepileupto(av0,rem);
+  *pr = rem; return z-2;
+}
+
+/* R = any base ring */
+GEN
+RXQX_red(GEN P, GEN T)
+{
+  long i, l = lgef(P);
+  GEN Q = cgetg(l, t_POL);
+  Q[1] = P[1];
+  for (i=2; i<l; i++) Q[i] = lres((GEN)P[i], T);
+  return Q;
+}
+
+/* x and y in (R[Y]/T)[X]  (lifted), T in R[Y]. y preferably monic */
+GEN
+RXQX_divrem(GEN x, GEN y, GEN T, GEN *pr)
+{
+  long vx, dx, dy, dz, i, j, sx, lrem;
+  gpmem_t av0, av, tetpil;
+  GEN z,p1,rem,lead;
+
+  if (!signe(y)) err(talker,"division by zero in RXQX_divrem");
+  vx = varn(x);
+  dx = degpol(x);
+  dy = degpol(y);
+  if (dx < dy)
+  {
+    if (pr)
+    {
+      av0 = avma; x = RXQX_red(x, T);
+      if (pr == ONLY_DIVIDES) { avma=av0; return signe(x)? NULL: gzero; }
+      if (pr == ONLY_REM) return x;
+      *pr = x;
+    }
+    return zeropol(vx);
+  }
+  lead = leading_term(y);
+  if (!dy) /* y is constant */
+  {
+    if (pr && pr != ONLY_DIVIDES)
+    {
+      if (pr == ONLY_REM) return zeropol(vx);
+      *pr = zeropol(vx);
+    }
+    if (gcmp1(lead)) return gcopy(x);
+    av0 = avma; x = gmul(x, ginvmod(lead,T)); tetpil = avma;
+    return gerepile(av0,tetpil,RXQX_red(x,T));
+  }
+  av0 = avma; dz = dx-dy;
+  lead = gcmp1(lead)? NULL: gclone(ginvmod(lead,T));
+  avma = av0;
+  z = cgetg(dz+3,t_POL);
+  z[1] = evalsigne(1) | evallgef(dz+3) | evalvarn(vx);
+  x += 2; y += 2; z += 2;
+
+  p1 = (GEN)x[dx]; av = avma;
+  z[dz] = lead? lpileupto(av, gres(gmul(p1,lead), T)): lcopy(p1);
+  for (i=dx-1; i>=dy; i--)
+  {
+    av=avma; p1=(GEN)x[i];
+    for (j=i-dy+1; j<=i && j<=dz; j++)
+      p1 = gsub(p1, gmul((GEN)z[j],(GEN)y[i-j]));
+    if (lead) p1 = gmul(gres(p1, T), lead);
+    tetpil=avma; z[i-dy] = lpile(av,tetpil, gres(p1, T));
+  }
+  if (!pr) { if (lead) gunclone(lead); return z-2; }
+
+  rem = (GEN)avma; av = (gpmem_t)new_chunk(dx+3);
+  for (sx=0; ; i--)
+  {
+    p1 = (GEN)x[i];
+    for (j=0; j<=i && j<=dz; j++)
+      p1 = gsub(p1, gmul((GEN)z[j],(GEN)y[i-j]));
+    tetpil=avma; p1 = gres(p1, T); if (signe(p1)) { sx = 1; break; }
+    if (!i) break;
+    avma=av;
+  }
+  if (pr == ONLY_DIVIDES)
+  {
+    if (lead) gunclone(lead);
+    if (sx) { avma=av0; return NULL; }
+    avma = (gpmem_t)rem; return z-2;
+  }
+  lrem=i+3; rem -= lrem;
+  rem[0]=evaltyp(t_POL) | evallg(lrem);
+  rem[1]=evalsigne(1) | evalvarn(vx) | evallgef(lrem);
+  p1 = gerepile((gpmem_t)rem,tetpil,p1);
+  rem += 2; rem[i]=(long)p1;
+  for (i--; i>=0; i--)
+  {
+    av=avma; p1 = (GEN)x[i];
+    for (j=0; j<=i && j<=dz; j++)
+      p1 = gsub(p1, gmul((GEN)z[j],(GEN)y[i-j]));
+    tetpil=avma; rem[i]=lpile(av,tetpil, gres(p1, T));
   }
   rem -= 2;
   if (lead) gunclone(lead);

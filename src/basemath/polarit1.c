@@ -111,8 +111,7 @@ poldivis(GEN x, GEN y, GEN *z)
  *   if z = ONLY_REM  return remainder, otherwise return quotient
  *   if z != NULL set *z to remainder
  *   *z is the last object on stack (and thus can be disposed of with cgiv
- *   instead of gerepile)
- */
+ *   instead of gerepile) */
 GEN
 poldivres(GEN x, GEN y, GEN *pr)
 {
@@ -151,9 +150,10 @@ poldivres(GEN x, GEN y, GEN *pr)
     }
     return f(x,y);
   }
-  if (!signe(y)) err(talker,"euclidean division by zero (poldivres)");
 
-  dy=degpol(y); y_lead = (GEN)y[dy+2];
+  if (!signe(y)) err(talker,"division by zero in poldivrem");
+  dy = degpol(y);
+  y_lead = (GEN)y[dy+2];
   if (gcmp0(y_lead)) /* normalize denominator if leading term is 0 */
   {
     err(warner,"normalizing a polynomial with 0 leading term");
@@ -172,7 +172,7 @@ poldivres(GEN x, GEN y, GEN *pr)
     }
     return f(x, constant_term(y));
   }
-  dx=degpol(x);
+  dx = degpol(x);
   if (vx>vy || dx<dy)
   {
     if (pr)
@@ -183,11 +183,14 @@ poldivres(GEN x, GEN y, GEN *pr)
     }
     return zeropol(vy);
   }
-  dz=dx-dy; av=avma; /* to avoid gsub's later on */
+
+  /* x,y in R[X], y non constant */
+  dz = dx-dy; av = avma;
   p1 = new_chunk(dy+3);
   for (i=2; i<dy+3; i++)
   {
     GEN p2 = (GEN)y[i];
+    /* gneg to avoid gsub's later on */
     p1[i] = isexactzero(p2)? 0: (long)gneg_i(p2);
   }
   y = p1;
@@ -200,12 +203,13 @@ poldivres(GEN x, GEN y, GEN *pr)
     default: if (gcmp1(y_lead)) y_lead = NULL;
       mod = NULL;
   }
-  avy=avma; z=cgetg(dz+3,t_POL);
-  z[1]=evalsigne(1) | evallgef(dz+3) | evalvarn(vx);
+  avy=avma;
+  z = cgetg(dz+3,t_POL);
+  z[1] = evalsigne(1) | evallgef(dz+3) | evalvarn(vx);
   x += 2; y += 2; z += 2;
 
   p1 = (GEN)x[dx];
-  z[dz]=y_lead? (long)f(p1,y_lead): lcopy(p1);
+  z[dz] = y_lead? (long)f(p1,y_lead): lcopy(p1);
   for (i=dx-1; i>=dy; i--)
   {
     av1=avma; p1=(GEN)x[i];
