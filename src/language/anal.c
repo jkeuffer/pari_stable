@@ -2514,7 +2514,10 @@ disc(GEN x) /* discriminant */
     switch(t)
     {
       case typ_Q  : return discsr((GEN)x[1]);
-      case typ_CLA: return gmael3(x,1,3,1);
+      case typ_CLA:
+        x = gmael(x,1,3);
+        if (typ(x) != t_VEC || lg(x) != 3) break;
+        return (GEN)x[1];
       case typ_ELL: return (GEN)x[12];
     }
     err(member,"disc",mark.member,mark.start);
@@ -2567,28 +2570,39 @@ sign(GEN x) /* signature */
   return (GEN)y[2];
 }
 
+/* x assumed to be output by get_nf: ie a t_VEC with length 11 */
+static GEN
+nfmats(GEN x)
+{
+  GEN y;
+  if (!x) return NULL;
+  y = (GEN)x[5];
+  if (typ(y) == t_VEC && lg(y) != 8) return NULL;
+  return y;
+}
+
 static GEN
 t2(GEN x) /* T2 matrix */
 {
-  int t; x = get_nf(x,&t);
+  int t; x = nfmats(get_nf(x,&t));
   if (!x) err(member,"t2",mark.member,mark.start);
-  return gmael(x,5,3);
+  return (GEN)x[3];
 }
 
 static GEN
 diff(GEN x) /* different */
 {
-  int t; x = get_nf(x,&t);
+  int t; x = nfmats(get_nf(x,&t));
   if (!x) err(member,"diff",mark.member,mark.start);
-  return gmael(x,5,5);
+  return (GEN)x[5];
 }
 
 static GEN
 codiff(GEN x) /* codifferent */
 {
-  int t; x = get_nf(x,&t);
-  if (!x) err(member,"codiff",mark.member,mark.start);
-  return gdiv(gmael(x,5,6), absi((GEN) x[3]));
+  int t; GEN y = nfmats(get_nf(x,&t));
+  if (!y) err(member,"codiff",mark.member,mark.start);
+  return gdiv((GEN)y[6], absi((GEN)x[3]));
 }
 
 static GEN
@@ -2602,6 +2616,16 @@ mroots(GEN x) /* roots */
     err(member,"roots",mark.member,mark.start);
   }
   return (GEN)y[6];
+}
+
+/* assume x output by get_bnf: ie a t_VEC with length 10 */
+static GEN
+check_RES(GEN x, char *s)
+{
+  GEN y = (GEN)x[8];
+  if (typ(y) != t_VEC || lg(y) < 4)
+    err(member,s,mark.member,mark.start);
+  return y;
 }
 
 static GEN
@@ -2627,7 +2651,8 @@ clgp(GEN x) /* class group (3-component row vector) */
     err(member,"clgp",mark.member,mark.start);
   }
   if (t==typ_BNR) return (GEN)x[5];
-  return gmael(y,8,1);
+  y = check_RES(y, "clgp");
+  return (GEN)y[1];
 }
 
 static GEN
@@ -2644,7 +2669,8 @@ reg(GEN x) /* regulator */
     err(member,"reg",mark.member,mark.start);
   }
   if (t == typ_BNR) err(impl,"ray regulator");
-  return gmael(x,8,2);
+  y = check_RES(y, "reg");
+  return (GEN)y[2];
 }
 
 static GEN
@@ -2686,16 +2712,19 @@ tu(GEN x)
         res[1] = (long)y;
         res[2] = (long)x; return res;
       case typ_CLA:
-        if (lg(x[1])==11) break;
+        if (lg(x[1])==11)
+        {
+          x = (GEN) x[1]; y=(GEN)x[8];
+          if (typ(y) == t_VEC || lg(y) == 3) break;
+        }
       default: err(member,"tu",mark.member,mark.start);
     }
-    x = (GEN) x[1]; y=(GEN)x[8];
   }
   else
   {
     if (t == typ_BNR) err(impl,"ray torsion units");
     x = (GEN)y[7]; y=(GEN)y[8];
-    if (lg(y) > 5) y = (GEN)y[4];
+    if (typ(y) == t_VEC && lg(y) > 5) y = (GEN)y[4];
     else
     {
       y = rootsof1(x);
@@ -2710,14 +2739,14 @@ static GEN
 futu(GEN x) /*  concatenation of fu and tu, w is lost */
 {
   GEN fuc = fu(x);
-  return concat(fuc, (GEN)tu(x)[2]);
+  return concatsp(fuc, (GEN)tu(x)[2]);
 }
 
 static GEN
 tufu(GEN x) /*  concatenation of tu and fu, w is lost */
 {
   GEN fuc = fu(x);
-  return concat((GEN) tu(x)[2], fuc);
+  return concatsp((GEN)tu(x)[2], fuc);
 }
 
 static GEN
@@ -2729,7 +2758,9 @@ zkst(GEN bid)
     switch(lg(bid))
     {
       case 6: return (GEN) bid[2];   /* idealstarinit */
-      case 7: return gmael(bid,2,2); /* bnrinit */
+      case 7: bid = (GEN)bid[2]; /* bnrinit */
+        if (typ(bid) == t_VEC && lg(bid) > 2)
+          return (GEN)bid[2];
     }
   err(member,"zkst",mark.member,mark.start);
   return NULL; /* not reached */
