@@ -873,6 +873,7 @@ mpbern(long nb, long prec)
       if (d1 == 1) break;
       n += 4; m += 2; d1--; d2 -= 2;
       S = addrr(BERN(d1), S);
+      if ((d1 & 127) == 0) { set_bern(c0, i, S); S = BERN(i); avma = av; }
     }
     S = divrs(subsr(2*i, S), 2*i+1);
     setexpo(S, expo(S) - 2*i);
@@ -1610,9 +1611,9 @@ ggamdz(GEN x, GEN y)
 /********************************************************************/
 
 GEN
-psinew(GEN s0, long prec)
+cxpsi(GEN s0, long prec)
 {
-  pari_sp av;
+  pari_sp av, av2;
   GEN sum,z,a,res,tes,in2,sig,s,unr;
   long lim,nn,k;
   const long la = 3;
@@ -1622,7 +1623,7 @@ psinew(GEN s0, long prec)
   if (signe(sig) <= 0)
   {
     GEN pi = mppi(prec);
-    z = gsub(psinew(gsub(gun,s), prec), gmul(pi, gcotan(gmul(pi,s), prec)));
+    z = gsub(cxpsi(gsub(gun,s), prec), gmul(pi, gcotan(gmul(pi,s), prec)));
     gaffect(z, res); avma = av; return res;
   }
 
@@ -1650,195 +1651,33 @@ psinew(GEN s0, long prec)
   prec++; unr = realun(prec); /* one extra word of precision */
 
   a = gdiv(unr, gaddgs(s, nn)); /* 1 / (s+n) */
-  sum = gmul2n(a,-1);
+  av2 = avma; sum = gmul2n(a,-1);
   for (k = 0; k < nn; k++)
+  {
     sum = gadd(sum, gdiv(unr, gaddgs(s, k)));
+    if ((k & 127) == 0) sum = gerepileupto(av2, sum);
+  }
   z = gsub(glog(gaddgs(s, nn), prec), sum);
   if (DEBUGLEVEL>2) msgtimer("sum from 0 to N-1");
 
-  tes = divrs(bernreal(2*lim, prec), 2*lim);
   in2 = gsqr(a);
+  av2 = avma; tes = divrs(bernreal(2*lim, prec), 2*lim);
   for (k=2*lim-2; k>=2; k-=2)
   {
     tes = gadd(gmul(in2,tes), divrs(bernreal(k, prec), k));
+    if ((k & 255) == 0) tes = gerepileupto(av2, tes);
   }
   if (DEBUGLEVEL>2) msgtimer("Bernoulli sum");
   z = gsub(z, gmul(in2,tes));
   gaffect(z, res); avma = av; return res;
 }
 
-#if 0
-static GEN
-mppsi(GEN z)  /* version p=2 */
-{
-  long l, n, k, x, xx;
-  pari_sp av, av1, tetpil;
-  GEN zk,u,v,a,b;
-
-  av=avma; l=lg(z);
-  x=(long)(1 + (bit_accuracy(l)>>1)*LOG2 + 1.58*rtodbl(absr(z)));
-  if (expo(z)>=15 || x>46340) err(impl,"psi(x) for x>=29000");
-  xx=x*x; n=(long)(1+3.591*x);
-  a = stor(x, l);
-  a = mplog(a);
-  gaffect(a,u=cgetr(l));
-  gaffsg(1,b=cgetr(l));
-  gaffsg(1,v=cgetr(l)); av1=avma;
-  for (k=1; k<=n; k++)
-  {
-    zk = (k>1)? addsr(k-1,z): z;
-    divrrz(mulsr(xx,b),gsqr(zk),b);
-    divrrz(subrr(divrr(mulsr(xx,a),zk),b),zk,a);
-    addrrz(u,a,u); addrrz(v,b,v); avma=av1;
-  }
-  tetpil=avma; return gerepile(av,tetpil,divrr(u,v));
-}
-static GEN /* by Manfred Radimersky */
-mppsi(GEN z)
-{
-  long head, tail;
-  long len, num, k;
-  GEN a, b, f, s, x;
-
-  head = avma;
-  len = lg(z);
-  num = bit_accuracy(len);
-
-  if(signe(z) < 0) {
-    x = subsr(1, z);
-    s = mppsi(x);
-    f = mulrr(mppi(len), z);
-    mpsincos(f, &a, &b);
-    f = divrr(b, a);
-    a = mulrr(mppi(len), f);
-    tail = avma;
-    gerepile(head, tail, subrr(s, a));
-  }
-
-  a = stor(0, len);
-  x = cgetr(len);
-  affrr(z, x);
-  tail = avma;
-  while(cmprs(x, num >> 2) < 0) {
-    gaddz(a, ginv(x), a);
-    gaddgsz(x, 1, x);
-    avma = tail;
-  }
-
-  s = mplog(x);
-  gsubz(s, a, s);
-  b = gmul2n(x, 1);
-  gsubz(s, ginv(b), s);
-
-  mpbern(num, len);
-
-  affsr(-1, a);
-  gdivgsz(a, 2, a);
-  f = mulrr(x, x);
-  f = ginv(f);
-  k = 1;
-  do {
-    gmulz(a, f, a);
-    gdivgsz(a, k, b);
-    gmulz(b, bern(k), b);
-    gaddz(s, b, s);
-    k++;
-  } while(expo(s) - expo(b) < num);
-
-  return gerepilecopy(head, s);
-}
-static GEN
-cxpsi(GEN z, long prec) /* version p=2 */
-{
-  long l, n, k, x, xx;
-  pari_sp av, av1, tetpil;
-  GEN zk,u,v,a,b,p1;
-
-  if (gcmp0((GEN)z[2])) return gpsi((GEN)z[1],prec);
-  l = precision(z); if (!l) l = prec; av=avma;
-  x=(long)(1 + (bit_accuracy(l)>>1)*LOG2 + 1.58*gtodouble(gabs(z,DEFAULTPREC)));
-  xx=x*x; n=(long)(1+3.591*x);
-  a=cgetc(l); gaffsg(x,a);
-  b=cgetc(l); gaffsg(1,b);
-  u=cgetc(l);
-  v=cgetc(l); gaffsg(1,v);
-  p1=glog(a,l); gaffect(p1,a); gaffect(p1,u); av1=avma;
-  for (k=1; k<=n; k++)
-  {
-    zk=(k>1) ? gaddsg(k-1,z) : z;
-    gdivz(gmulsg(xx,b),gsqr(zk),b);
-    gdivz(gsub(gdiv(gmulsg(xx,a),zk),b),zk,a);
-    gaddz(u,a,u); gaddz(v,b,v); avma=av1;
-  }
-  tetpil=avma; return gerepile(av,tetpil,gdiv(u,v));
-}
-GEN
-cxpsi(GEN z, long prec) /* by Manfred Radimersky */
-{
-  long head, tail;
-  long bord, nubi, k;
-  GEN a, b, f, s, w, wn;
-
-  if (gcmp0((GEN)z[2])) return gpsi((GEN)z[1],prec);
-  head = avma;
-  nubi = bit_accuracy(prec);
-  bord = (nubi * nubi) >> 4;
-
-  if(signe((GEN) z[1]) < 0) {
-    w = gsubsg(1, z);
-    s = cxpsi(w, prec);
-    f = gmul(mppi(prec), z);
-    gsincos(f, &a, &b, prec);
-    f = gdiv(b, a);
-    a = gmul(mppi(prec), f);
-    tail = avma;
-    gerepile(head, tail, gsub(s, a));
-  }
-
-  a = cgetc(prec); gaffsg(0, a);
-  w = cgetc(prec); gaffect(z, w);
-  wn = gnorm(w);
-  tail = avma;
-  while(cmprs(wn, bord) < 0) {
-    gaddz(a, gdivsg(1, w), a);
-    gaddgsz((GEN) w[1], 1, (GEN) w[1]);
-    gaffect(gnorm(w), wn);
-    avma = tail;
-  }
-
-  s = glog(w, prec);
-  gsubz(s, a, s);
-  b = gmul2n(w, 1);
-  gsubz(s, gdivsg(1, b), s);
-
-  mpbern(nubi, prec);
-
-  gaffsg(-1, a);
-  gdivgsz(a, 2, a);
-  f = gmul(w, w);
-  f = gdivsg(1, f);
-  k = 1;
-  tail = avma;
-  do {
-    gmulz(a, f, a);
-    gdivgsz(a, k, b);
-    gmulz(b, bern(k), b);
-    gaddz(s, b, s);
-    bord = expo(gnorm(s)) - expo(gnorm(b));
-    k++;
-    avma = tail;
-  } while(bord < nubi << 1);
-
-  return gerepilecopy(head, s);
-}
-#endif
-
 GEN
 gpsi(GEN x, long prec)
 {
   switch(typ(x))
   {
-    case t_REAL: case t_COMPLEX: return psinew(x,prec);
+    case t_REAL: case t_COMPLEX: return cxpsi(x,prec);
     case t_INTMOD: case t_PADIC: err(typeer,"gpsi");
     case t_SER: err(impl,"psi of power series");
   }
