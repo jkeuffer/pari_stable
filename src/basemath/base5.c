@@ -280,29 +280,33 @@ lift_to_pol(GEN x)
   return (typ(y) != t_POL)? gtopoly(y,varn(x[1])): y;
 }
 
+extern GEN mulmat_pol(GEN A, GEN x);
+
 GEN
 rnfalgtobasis(GEN rnf,GEN x)
 {
-  long av=avma,tetpil,tx=typ(x),lx=lg(x),i,N;
+  long av=avma,tx=typ(x), i,lx;
   GEN z;
 
   checkrnf(rnf);
   switch(tx)
   {
     case t_VEC: case t_COL: case t_MAT:
-      z=cgetg(lx,tx);
+      lx = lg(x); z = cgetg(lx,tx);
       for (i=1; i<lx; i++) z[i]=(long)rnfalgtobasis(rnf,(GEN)x[i]);
       return z;
 
     case t_POLMOD:
       if (!polegal_spec((GEN)rnf[1],(GEN)x[1]))
 	err(talker,"not the same number field in rnfalgtobasis");
-      x=lift_to_pol(x); /* fall through */
+      x = lift_to_pol(x); /* fall through */
     case t_POL:
-      N=lgef(rnf[1])-3;
-      if (tx==t_POL && lgef(x)-3 >= N) x=gmod(x,(GEN)rnf[1]);
-      z=cgetg(N+1,t_COL); for (i=1; i<=N; i++) z[i]=(long)truecoeff(x,i-1);
-      tetpil=avma; return gerepile(av,tetpil,gmul((GEN)rnf[8],z));
+    { /* cf algtobasis_intern */
+      GEN P = (GEN)rnf[1];
+      long N = lgef(P)-3;
+      if (lgef(x)-3 >= N) x = gres(x,P);
+      return gerepileupto(av, mulmat_pol((GEN)rnf[8], x));
+    }
   }
   return gscalcol(x, lgef(rnf[1])-3);
 }
