@@ -1106,6 +1106,8 @@ rnfcharpoly(GEN nf,GEN T,GEN alpha,int v)
 
   nf=checknf(nf); if (v<0) v = 0;
   if (typ(alpha) == t_POLMOD) alpha = lift_to_pol(alpha);
+  if (typ(alpha) != t_POL) alpha = gtopoly(alpha,v);
+  if (typ(T) != t_POL) T = gtopoly(T,v);
   p1 = caract2(unifpol(nf,T,1), unifpol(nf,alpha,1), v);
   tetpil=avma; return gerepile(av,tetpil,unifpol(nf,p1,1));
 }
