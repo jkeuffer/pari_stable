@@ -698,6 +698,7 @@ idealadd(GEN nf, GEN x, GEN y)
 {
   long av=avma,N,tx,ty;
   GEN z,p1,dx,dy,dz;
+  int modid;
 
   tx = idealtyp(&x,&z);
   ty = idealtyp(&y,&z);
@@ -710,7 +711,16 @@ idealadd(GEN nf, GEN x, GEN y)
   dx=denom(x);
   dy=denom(y); dz=mulii(dx,dy);
   if (gcmp1(dz)) dz = NULL; else { x=gmul(x,dz); y=gmul(y,dz); }
-  p1=mppgcd(detint(x),detint(y));
+  if (isnfscalar((GEN)x[1]) && isnfscalar((GEN)y[1]))
+  {
+    p1 = mppgcd(gcoeff(x,1,1),gcoeff(y,1,1));
+    modid = 1;
+  }
+  else
+  {
+    p1 = mppgcd(detint(x),detint(y));
+    modid = 0;
+  }
   if (gcmp1(p1))
   {
     long i,j;
@@ -724,7 +734,9 @@ idealadd(GEN nf, GEN x, GEN y)
     }
     return z;
   }
-  z=hnfmod(concatsp(x,y),p1); if (dz) z=gdiv(z,dz);
+  z = concatsp(x,y);
+  z = modid? hnfmodid(z,p1): hnfmod(z, p1);
+  if (dz) z=gdiv(z,dz);
   return gerepileupto(av,z);
 }
 
@@ -950,11 +962,11 @@ idealaddmultoone(GEN nf, GEN list)
 /* multiplication */
 
 /* x integral ideal (without archimedean component) in HNF form
- * [a,alpha,n] corresponds to the ideal aZ_K+alpha Z_K of norm n (a is a
+ * [a,alpha,n] corresponds to the ideal aZ_K+alpha Z_K (a is a
  * rational integer). Multiply them
  */
 static GEN
-idealmulspec(GEN nf, GEN x, GEN a, GEN alpha, GEN n)
+idealmulspec(GEN nf, GEN x, GEN a, GEN alpha)
 {
   long i, N=lg(x)-1;
   GEN m;
@@ -962,10 +974,9 @@ idealmulspec(GEN nf, GEN x, GEN a, GEN alpha, GEN n)
   if (isnfscalar(alpha))
     return gmul(mppgcd(a,(GEN)alpha[1]),x);
   m = cgetg((N<<1)+1,t_MAT);
-  for (i=1; i<=N; i++) n = mulii(n,gcoeff(x,i,i));
   for (i=1; i<=N; i++) m[i]=(long)element_muli(nf,alpha,(GEN)x[i]);
   for (i=1; i<=N; i++) m[i+N]=lmul(a,(GEN)x[i]);
-  return hnfmod(m,n);
+  return hnfmodid(m, mulii(a, gcoeff(x,1,1)));
 }
 
 /* x ideal (matrix form,maximal rank), vp prime ideal (primedec). Output the
@@ -976,11 +987,10 @@ idealmulspec(GEN nf, GEN x, GEN a, GEN alpha, GEN n)
 GEN
 idealmulprime(GEN nf, GEN x, GEN vp)
 {
-  GEN dx, denx = denom(x);
+  GEN denx = denom(x);
 
   if (gcmp1(denx)) denx = NULL; else x=gmul(denx,x);
-  dx = powgi((GEN)vp[1], (GEN)vp[4]);
-  x = idealmulspec(nf,x, (GEN)vp[1], (GEN)vp[2], dx);
+  x = idealmulspec(nf,x, (GEN)vp[1], (GEN)vp[2]);
   return denx? gdiv(x,denx): x;
 }
 
@@ -991,19 +1001,14 @@ GEN
 idealmulh(GEN nf, GEN ix, GEN iy)
 {
   long f = 0;
-  GEN res,x,y,dy;
+  GEN res,x,y;
 
   if (typ(ix)==t_VEC) {f=1;  x=(GEN)ix[1];} else x=ix;
   if (typ(iy)==t_VEC && lg(iy)==3) {f+=2; y=(GEN)iy[1];} else y=iy;
   if (f) res = cgetg(3,t_VEC);
 
-  if (typ(y)==t_VEC) dy = (GEN)y[3];
-  else
-  {
-    dy = dethnf_i(y);
-    y = ideal_two_elt(nf,y);
-  }
-  y = idealmulspec(nf,x,(GEN)y[1],(GEN)y[2], dy);
+  if (typ(y) != t_VEC) y = ideal_two_elt(nf,y);
+  y = idealmulspec(nf,x,(GEN)y[1],(GEN)y[2]);
 
   if (!f) return y;
   res[1]=(long)y;
@@ -2633,12 +2638,12 @@ nfkermodpr(GEN nf, GEN x, GEN prhall)
 	  for (i=k+1; i<=n; i++)
             coeff(x,t,i)=ladd(gcoeff(x,t,i),
 	                      element_mulmodpr(nf,p,gcoeff(x,j,i),prhall));
+          if (low_stack(lim, stack_lim(av1,1)))
+          {
+            if (DEBUGMEM>1) err(warnmem,"nfkermodpr, k = %ld / %ld",k,n);
+            av2=avma; x=gerepile(av1,av2,gcopy(x));
+          }
 	}
-      if (low_stack(lim, stack_lim(av1,1)))
-      {
-        if (DEBUGMEM>1) err(warnmem,"nfkermodpr, k = %ld / %ld",k,n);
-        av2=avma; x=gerepile(av1,av2,gcopy(x));
-      }
   }
   if (!r) { avma=av0; return cgetg(1,t_MAT); }
   av1=avma; y=cgetg(r+1,t_MAT);
