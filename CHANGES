@@ -41,6 +41,7 @@ Done for version 2.2.3 (released ??/??/2002):
     7- fixed lower bound for p in nfsubfields (could get oo loop: pol never
        squarefree mod p)
     8- [Vecsmall([1, 2])][1][2][1] --> SEGV
+    9- typo in t_FRAC + t_PADIC  [only numerator of t_FRAC used]
 
   Changed
 BA  1- improved Fp_isom
