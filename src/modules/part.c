@@ -76,8 +76,7 @@ g(ulong q, ulong h)
     return gdivgs(mulsi((q-1)/h, subsi(q-1, mulss(h,h))), 12);
   if (k == 2)
     return gdivgs(mulsi((q-2)/h, subsi(q<<1, addsi(1, mulss(h,h)))), 24);
-  //TODO: expr for h-1 mod h
-  //TODO: gcd-style computation
+  /* TODO: expr for h-1 mod h  +  gcd-style computation */
   
   kh = h;
   if (MAXULONG/h > q)
