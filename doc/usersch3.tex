@@ -6251,6 +6251,8 @@ an odd function in a symmetric interval around 0. Try
 \noindent to see why. Hence, it's usually a good idea to try and plot the same
 curve with slightly different parameters.
 
+The other values toggle various display options:
+
 $\bullet$ 8: do not print the $x$-axis.
 
 $\bullet$ 16: do not print the $y$-axis.
@@ -6258,6 +6260,14 @@ $\bullet$ 16: do not print the $y$-axis.
 $\bullet$ 32: do not print frame.
 
 $\bullet$ 64: only plot reference points, do not join them.
+
+$\bullet$ 256: use splines to interpolate the points.
+
+$\bullet$ 512: plot no $x$-ticks.
+
+$\bullet$ 1024: plot no $y$-ticks.
+
+$\bullet$ 2048: plot all ticks with the same length.
 
 \subsecidx{plothraw}$(\var{listx},\var{listy},\{\fl=0\})$: given
 \var{listx} and \var{listy} two vectors of equal length, plots (in high

@@ -31,7 +31,11 @@ $version= "@version@";
 $miscdir= "@miscdir@";
 # no expanded material (@key@) below
 $wwwsite= "http://www.parigp-home.de/";
-$docdir = $ENV{GPDOCDIR} || $ENV{GPHELP_DOCDIR} || $miscdir;
+$docdir = $ENV{GPDOCDIR} || $ENV{GPHELP_DOCDIR};
+$docdir = './doc' if not $docdir and -f './doc/translations';
+$docdir = '../doc' if not $docdir and -f '../doc/translations';
+$docdir ||= $miscdir;
+
 $xdvi = $ENV{GPXDVI} || "xdvi";
 $xdviref = $ENV{GPXDVIREF} || "$xdvi -paper 29.7x21cm";
 $gzip = "gzip";
@@ -106,7 +110,7 @@ sub init
   $tmpdir = $ENV{GPTMPDIR} || $ENV{TMPDIR} || $ENV{GPHELP_TMPDIR} || "/tmp";
   $texfile = "$tmpdir/gp.help$$";
 
-  open(IN,"translations") || die("Could not find translation file");
+  open(IN,"translations") || die("Could not find translation file, docdir='$docdir'");
   while(<IN>)
   {
     chop; @_ = split(/ *\@ */);
