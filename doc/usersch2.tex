@@ -325,6 +325,13 @@ being executed. This can be useful when reading a file with the \b{r} or
 test files used to check whether \kbd{gp} has been built correctly (see
 \b{e}).
 
+\subsecidx{factor_add_primes} (default \kbd{0}): if this is set, the integer
+factorization machinery will call \kbd{addprimes} on primes
+factor that were difficult to find, so they are automatically tried first in
+other factorizations. If a routine is performing (or has performed) a
+factorization and is interrupted by an error or via Control-C, this let you
+recover the prime factors already found.
+
 \subsecidx{format} (default \kbd{"g0.28"} and \kbd{"g0.38"} on 32-bit and
 64-bit machines, respectively): of the form x$m.n$, where x is a letter in
 $\{\kbd{e},\kbd{f},\kbd{g}\}$, and $n$, $m$ are integers. If x is \kbd{f},

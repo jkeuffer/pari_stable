@@ -96,6 +96,7 @@ extern const long lontyp[];
 extern void* global_err_data;
 
 extern int new_galois_format;
+extern int factor_add_primes;
 
 enum manage_var_t {
   manage_var_create,

@@ -861,6 +861,10 @@ sd_logfile(const char *v, int flag)
 }
 
 static GEN
+sd_factor_add_primes(char *v, int flag)
+{ return sd_toggle(v,flag,"factor_add_primes", &factor_add_primes); }
+
+static GEN
 sd_new_galois_format(char *v, int flag)
 { return sd_toggle(v,flag,"new_galois_format", &new_galois_format); }
 
@@ -1000,6 +1004,7 @@ default_type gp_default_list[] =
   {"debugfiles",(void*)sd_debugfiles},
   {"debugmem",(void*)sd_debugmem},
   {"echo",(void*)sd_echo},
+  {"factor_add_primes",(void*)sd_factor_add_primes},
   {"format",(void*)sd_format},
   {"help",(void*)sd_help},
   {"histsize",(void*)sd_histsize},

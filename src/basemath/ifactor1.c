@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 
-int factor_add_primes = 1;
+int factor_add_primes = 0;
 
 /*C++ on ia64 do not like (long)NULL*/
 #define LNULL ((long)(GEN)NULL)
@@ -3516,9 +3516,8 @@ ifac_main(GEN *partial)
   }
   if (factor_add_primes && !(hint & 8))
   {
-    GEN p=(GEN)here[0];
-    if (lgefint(p)>3 || expi(p)>24)
-      addprimes(p);
+    GEN p = (GEN)here[0];
+    if (lgefint(p)>3 || (ulong)p[2] > 0x1000000UL) addprimes(p);
   }
   return here;
 }
