@@ -83,7 +83,7 @@ enum {
 
 /* trans.c */
 
-  infprecer, negexper, sqrter5, sqrter6, gamer2,
+  infprecer, negexper, sqrter5, gamer2,
   thetaer1,
 
 /* PAS D'ERREUR */

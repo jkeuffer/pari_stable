@@ -234,8 +234,6 @@ char *errmessage[]=
   "negative exponent",
 /* sqrter5 */
   "non quadratic residue in gsqrt",
-/* sqrter6 */
-  "odd exponent in gsqrt",
 /* gamer2 */
   "negative or zero integer argument in mpgamma",
 /* thetaer1 */

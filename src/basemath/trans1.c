@@ -890,7 +890,7 @@ padic_sqrt(GEN x)
   pari_sp av;
 
   if (gcmp0(x)) return padiczero(p, (e+1) >> 1);
-  if (e & 1) err(sqrter6);
+  if (e & 1) err(talker,"odd exponent in p-adic sqrt");
 
   y = cgetg(5,t_PADIC);
   pp = precp(x);
