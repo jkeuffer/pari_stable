@@ -480,7 +480,8 @@ subgroup_engine(subgp_iter *T)
       (void)pvaluation(T->bound,p,&B);
       B = _vec(B);
     }
-    T->subq = subgrouplist_i(cycI, B, itos((GEN)cycI[1]));
+    T->expoI = itos((GEN)cycI[1]);
+    T->subq = subgrouplist_i(cycI, B, T->expoI);
 
     lsubq = lg(T->subq);
     for (i=1; i<lsubq; i++)
