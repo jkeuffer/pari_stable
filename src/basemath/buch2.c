@@ -1409,7 +1409,7 @@ small_norm_for_buchall(long cglob,GEN *mat,GEN matarch,long LIMC, long PRECREG,
                        GEN nf,GEN gborne,long nbrelpid,GEN invp,GEN L,GEN LLLnf)
 {
   const int maxtry_DEP  = 20;
-  const int maxtry_FACT = 50000;
+  const int maxtry_FACT = 500;
   const double eps = 0.000001;
   double *y,*z,**q,*v, BOUND;
   gpmem_t av = avma, av1, av2, limpile;
@@ -1453,7 +1453,7 @@ small_norm_for_buchall(long cglob,GEN *mat,GEN matarch,long LIMC, long PRECREG,
 
     BOUND = v[2] + v[1] * q[1][2] * q[1][2];
     if (BOUND < v[1]) BOUND = v[1];
-    BOUND *= 1.3; /* at most 30% larger than smallest known vector */
+    BOUND *= 2; /* at most twice larger than smallest known vector */
     if (DEBUGLEVEL>1)
     {
       if (DEBUGLEVEL>3) fprintferr("\n");
