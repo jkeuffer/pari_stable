@@ -1207,14 +1207,14 @@ static void
 _u_Fp_addmul(uGEN b, long k, long i, ulong m, ulong p)
 {
   b[i] %= p;
-  b[k] += Fl_mul(m, b[i], p);
+  b[k] = Fl_add(b[k], Fl_mul(m, b[i], p), p);
   if (b[k] & MASK) b[k] %= p;
 }
 /* same m = 1 */
 static void
 _u_Fp_add(uGEN b, long k, long i, ulong p)
 {
-  b[k] += b[i];
+  b[k] = Fl_add(b[k], b[i], p);
   if (b[k] & MASK) b[k] %= p;
 }
 
