@@ -167,28 +167,24 @@ delete_from_bloclist(GEN x)
 }
 
 /* Recursively look for clones in the container and kill them. Then kill
- * container if clone. */
+ * container if clone. FIXME: SIGINT should be blocked until it returns */
 void
-killsubblocs(GEN x)
+killbloc(GEN x)
 {
   long i, lx;
   switch(typ(x)) /* HACK: if x is not a GEN, we have typ(x)=0 */
   {
     case t_VEC: case t_COL: case t_MAT:
       lx = lg(x);
-      for (i=1;i<lx;i++) killsubblocs((GEN)x[i]);
+      for (i=1;i<lx;i++) killbloc((GEN)x[i]);
       break;
     case t_LIST:
       lx = lgeflist(x);
-      for (i=2;i<lx;i++) killsubblocs((GEN)x[i]);
+      for (i=2;i<lx;i++) killbloc((GEN)x[i]);
       break;
   }
   if (isclone(x)) delete_from_bloclist(x);
 }
-
-/* FIXME: SIGINT should be blocked until killsubblocs() returns */
-void
-killbloc(GEN x) { killsubblocs(x); }
 void
 gunclone(GEN x) { delete_from_bloclist(x); }
 
@@ -2014,11 +2010,6 @@ msgtimer(char *format, ...)
 /*                   FUNCTIONS KNOWN TO THE ANALYZER               */
 /*                                                                 */
 /*******************************************************************/
-extern void alias0(char *s, char *old);
-extern GEN break0(long n);
-extern GEN next0(long n);
-extern GEN return0(GEN x);
-
 GEN
 geni(void) { return gi; }
 

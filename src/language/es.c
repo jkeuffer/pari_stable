@@ -21,7 +21,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 #include "anal.h"
-extern char *type_name(long t);
 
 void
 hit_return(void)
@@ -926,8 +925,6 @@ wr_vecsmall(pariout_t *T, GEN g)
 /**                        WRITE A REAL NUMBER                     **/
 /**                                                                **/
 /********************************************************************/
-extern ulong u_pow10(int n);
-
 /* e binary exponent, return exponent in base ten */
 static long
 ex10(long e) { return (long) ((e >= 0)? e*L2SL10: -(-e*L2SL10)-1); }
@@ -3066,7 +3063,6 @@ switchout(char *name)
 /**                    I/O IN BINARY FORM                         **/
 /**                                                               **/
 /*******************************************************************/
-extern GENbin* copy_bin_canon(GEN x);
 #define _fwrite(a,b,c,d) \
   if (fwrite((a),(b),(c),(d)) < (c)) err(talker,"write failed")
 #define _fread(a,b,c,d) \

@@ -21,8 +21,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 #include "anal.h"
-extern void changevalue_p(entree *ep, GEN x);
-extern GEN polint_i(GEN xa, GEN ya, GEN x, long n, GEN *ptdy);
 
 /********************************************************************/
 /**                                                                **/

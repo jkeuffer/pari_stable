@@ -45,6 +45,7 @@ typedef struct GENbin {
 #define GENbase(p) ((GEN)(p + 1))
 
 GENbin* copy_bin(GEN x);
+GENbin* copy_bin_canon(GEN x);
 GEN bin_copy(GENbin *p);
 
 /* stacks */
@@ -76,6 +77,7 @@ void push_stack(stack **pts, void *a);
 void *pop_stack(stack **pts);
 
 /* functions */
+void   changevalue_p(entree *ep, GEN x);
 void   changevalue(entree *ep, GEN val);
 entree *do_alias(entree *ep);
 int    is_identifier(char *s);
@@ -208,7 +210,7 @@ extern void *PARI_stack_limit;
 #define INIT_SIG_off (init_opts &= ~INIT_SIGm)
 
 /* gp_colors */
-extern void decode_color(int n, int *c);
+void decode_color(int n, int *c);
 #define c_NONE 0xffffUL
 enum { c_ERR, c_HIST, c_PROMPT, c_INPUT, c_OUTPUT, c_HELP, c_TIME, c_LAST };
 
@@ -234,9 +236,9 @@ typedef struct {
 #define LBRACE '{'
 #define RBRACE '}'
 
-extern char *filtre0(filtre_t *F);
-extern char *filtre(char *s, int flag);
-extern void check_filtre(filtre_t *F);
+char *filtre0(filtre_t *F);
+char *filtre(char *s, int flag);
+void check_filtre(filtre_t *F);
 
 typedef struct Buffer {
   char *buf;
@@ -252,6 +254,9 @@ typedef struct input_method {
   char * (*fgets)(char *,int,FILE*);
   char * (*getline)(Buffer*, char**, struct input_method*);
 } input_method;
+
+void fix_buffer(Buffer *b, long newlbuf);
+int input_loop(filtre_t *F, input_method *IM);
 
 /* GP output && output format */
 enum { f_RAW, f_PRETTYMAT, f_PRETTYOLD, f_PRETTY, f_TEX };
@@ -281,14 +286,30 @@ typedef struct {
   int TeXstyle;
 } pariout_t;
 
-extern void gen_output(GEN x, pariout_t *T);
-extern char *GENtostr0(GEN x, pariout_t *T, void(*do_out)(GEN, pariout_t *));
-extern void bruti(GEN g, pariout_t *T, int nosign);
-extern void matbruti(GEN g, pariout_t *T);
-extern void sori(GEN g, pariout_t *T);
-extern void texi(GEN g, pariout_t *T, int nosign);
-extern void texi_nobrace(GEN g, pariout_t *T, int nosign);
+void gen_output(GEN x, pariout_t *T);
+char *GENtostr0(GEN x, pariout_t *T, void(*do_out)(GEN, pariout_t *));
+void bruti(GEN g, pariout_t *T, int nosign);
+void matbruti(GEN g, pariout_t *T);
+void sori(GEN g, pariout_t *T);
+void texi(GEN g, pariout_t *T, int nosign);
+void texi_nobrace(GEN g, pariout_t *T, int nosign);
 extern pariout_t DFLT_OUTPUT;
+
+/* gp specific routines */
+void alias0(char *s, char *old);
+void allocatemem0(size_t newsize);
+GEN  break0(long n);
+GEN  default0(char *a, char *b, long flag);
+GEN  extern0(char *cmd);
+void gp_quit(void);
+GEN  input0(void);
+void kill0(entree *ep);
+GEN  next0(long n);
+GEN  read0(char *s);
+GEN  return0(GEN x);
+void system0(char *cmd);
+GEN  trap0(char *e, char *f, char *r);
+int  whatnow(char *s, int silent);
 
 /* GP_DATA->flags */
 enum { QUIET=1, TEST=2, SIMPLIFY=4, CHRONO=8, ECHO=16, STRICTMATCH=32,
@@ -296,13 +317,9 @@ enum { QUIET=1, TEST=2, SIMPLIFY=4, CHRONO=8, ECHO=16, STRICTMATCH=32,
 /* GP */
 #define pariputs_opt(s) if (!(GP_DATA->flags & QUIET)) pariputs(s)
 
-#if 0 /* to debug TeXmacs interface */
-#define DATA_BEGIN  ((char) 'B')
-#define DATA_END    ((char) 'E')
-#else
+/* TeXmacs */
 #define DATA_BEGIN  ((char) 2)
 #define DATA_END    ((char) 5)
-#endif
 #define DATA_ESCAPE ((char) 27)
 
 typedef struct {

@@ -23,17 +23,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "anal.h"
 #include "parinf.h"
 
-/* slightly more efficient than is_keyword_char. Not worth a static array. */
-#define is_key(c) (isalnum((int)(c)) || (c)=='_')
-
-#define separe(c) ((c)==';' || (c)==':')
+#define separe(c) ((c)==';')
 typedef GEN (*PFGEN)(ANYARG);
 typedef GEN (*F2GEN)(GEN,GEN);
 typedef GEN (*F1GEN)(GEN);
 
 char *gp_function_name=NULL;
-
-extern void killsubblocs(GEN x);
 
 static GEN    constante();
 static GEN    expr();
@@ -1528,7 +1523,7 @@ change_compo(matcomp *c, GEN res)
           old,mark.start);
 
   res = gclone(res);
-  killsubblocs(*pt);
+  killbloc(*pt);
   return *pt = res;
 }
 
@@ -2430,6 +2425,9 @@ constante()
 /**                   HASH TABLE MANIPULATIONS                     **/
 /**                                                                **/
 /********************************************************************/
+/* inline is_keyword_char(). Not worth a static array. */
+#define is_key(c) (isalnum((int)(c)) || (c)=='_')
+
 long
 is_keyword_char(char c) { return is_key(c); }
 
