@@ -1812,6 +1812,7 @@ deplin(GEN x0)
   c = cgetg(nl+1, t_VECSMALL);
   l = cgetg(nc+1, t_VECSMALL); /* not initialized */
   for (i=1; i<=nl; i++) { d[i] = gun; c[i] = 0; }
+  ck = NULL; /* gcc -Wall */
   for (k=1; k<=nc; k++)
   {
     ck = (GEN*)x[k];
