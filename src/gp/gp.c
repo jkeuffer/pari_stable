@@ -1126,26 +1126,29 @@ print_fun_list(char **list, int nbli)
   if (i) pariputc('\n');
 }
 
-#define LIST_LEN 1023
 static void
 commands(int n)
 {
-  int hashpos, s = 0, size = LIST_LEN;
+  const size_t LIST_LEN = 1023;
+  size_t size = LIST_LEN;
+  int i, s = 0;
   entree *ep;
   char **list = (char **) gpmalloc((size+1)*sizeof(char *));
 
-  for (hashpos = 0; hashpos < functions_tblsz; hashpos++)
-    for (ep = functions_hash[hashpos]; ep; ep = ep->next)
-      if ((n<0 && ep->menu) || ep->menu == n)
+  for (i = 0; i < functions_tblsz; i++)
+    for (ep = functions_hash[i]; ep; ep = ep->next)
+      if ((n < 0 && ep->menu) || ep->menu == n)
       {
         list[s] = ep->name;
         if (++s >= size)
         {
-	  size += (LIST_LEN + 1)*sizeof(char *);
-          list = (char**) gprealloc(list,size);
+	  size += (LIST_LEN+1);
+          list = (char**) gprealloc(list, size*sizeof(char *));
         }
       }
-  list[s]=NULL; print_fun_list(list,term_height()-4); free(list);
+  list[s] = NULL;
+  print_fun_list(list, term_height()-4);
+  free(list);
 }
 
 static void
