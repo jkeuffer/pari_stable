@@ -14,7 +14,7 @@ if test -n "$myuname"; then
   ultrix)   arch=mips;;
   nextstep) arch=`file /bin/sh | sed 's/.*(for architecture \(.*\))/\1/'`;;
   osf1)     case "$5" in alpha) arch=alpha;; esac;;
-  cygwin*)  arch=$HOSTTYPE;;
+  cygwin*)  arch=$HOSTTYPE; osname=cygwin;;
   linux)    arch=`uname -m`
 	    case "`cat /proc/cpuinfo`" in
 	    *SuperSparc*)   arch=sparcv8_super;;
