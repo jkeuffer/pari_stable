@@ -848,6 +848,7 @@ GEN     vecmin(GEN x);
 /* gen3.c */
 
 GEN     Mod0(GEN x, GEN y,long flag);
+GEN     ceil_safe(GEN x);
 GEN     centerlift(GEN x);
 GEN     centerlift0(GEN x,long v);
 GEN     coefs_to_int(long n, ...);
@@ -1100,6 +1101,7 @@ GEN     ginvmod(GEN x, GEN y);
 GEN     gisirreducible(GEN x);
 GEN     glcm(GEN x, GEN y);
 GEN     glcm0(GEN x, GEN y);
+long    logint(GEN B, GEN y, GEN *ptq);
 GEN     newtonpoly(GEN x, GEN p);
 GEN     nfisincl(GEN a, GEN b);
 GEN     nfisisom(GEN a, GEN b);

@@ -543,6 +543,16 @@ polhensellift(GEN pol, GEN fct, GEN p, long exp)
 
   p1 = lift(fct); /* make sure the coeffs are integers and not intmods */
   l = lg(p1) - 1;
+  for (i=1; i<=l; i++)
+  {
+    p2 = (GEN)p1[i];
+    if (typ(p2) != t_POL)
+    {
+      if (typ(p2) != t_INT)
+        err(talker, "not an integral factorization in polhensellift");
+      p1[i] = (long)scalarpol(p2, varn(pol));
+    }
+  }
 
   /* then we check that pol \equiv \prod f ; f \in fct mod p */
   p2 = (GEN)p1[1];
@@ -551,7 +561,7 @@ polhensellift(GEN pol, GEN fct, GEN p, long exp)
     err(talker, "not a correct factorization in polhensellift");
 
   /* finally we check that the elements of fct are coprime mod p */
-  if (gcmp0(discsr(FpX(pol, p))))
+  if (!FpX_is_squarefree(pol, p))
   {
     for (i = 1; i <= l; i++)
       for (j = 1; j < i; j++)
@@ -809,15 +819,48 @@ factor_quad(GEN x, GEN res, long *ptcnt)
   res[cnt++] = lmul(u, gsub(polx[v], z2)); *ptcnt = cnt;
 }
 
-static long
-get_e(GEN B, GEN p, GEN *ptpe)
+/* y > 1 and B integers. Let n such that y^(n-1) <= B < y^n.
+ * Return e = max(n,1), set *ptq = y^e if non-NULL */
+long
+logint(GEN B, GEN y, GEN *ptq)
 {
-  GEN pe;
-  long e;
-  for (e=1,pe=p; cmpii(pe, B) < 0; e++) pe = mulii(pe,p);
-  *ptpe =  pe; return e;
-}
+  ulong av = avma;
+  long e,i,fl;
+  GEN q,pow2, r = y;
 
+  if (typ(B) != t_INT) B = ceil_safe(B);
+  if (expi(B) <= (expi(y) << 6)) /* e small, be naive */
+  {
+    for (e=1; cmpii(r, B) < 0; e++) r = mulii(r,y);
+    goto END;
+  }
+  /* binary splitting: compute bits of e one by one */
+  /* compute pow2[i] = y^(2^i) [i < very crude upper bound for log_2(n)] */
+  pow2 = new_chunk(bit_accuracy(lgefint(B)));
+  pow2[0] = (long)y;
+  for (i=0,q=r;; )
+  {
+    fl = cmpii(r,B); if (fl >= 0) break;
+    q = r; r = sqri(q);
+    i++; pow2[i] = (long)r;
+  }
+  if (i == 0) { e = 1; goto END; } /* y <= B */
+
+  for (i--, e=1<<i;;)
+  { /* y^e = q < B <= r = q * y^(2^i) */
+    if (!fl) break; /* B = r */
+    /* q < B < r */
+    if (--i < 0) { if (fl > 0) e++; break; }
+    r = mulii(q, (GEN)pow2[i]);
+    fl = cmpii(r, B);
+    if (fl <= 0) { e += (1<<i); q = r; }
+  }
+  if (fl <= 0) { e++; r = mulii(r,y); }
+END:
+  if (ptq) *ptq = gerepileuptoint(av, icopy(r)); else avma = av;
+  return e;
+}
+    
 /* recombination of modular factors: van Hoeij's algorithm */
 
 /* compute Newton sums of P (i-th powers of roots, i=1..n)
@@ -1210,7 +1253,7 @@ combine_factors(GEN a, GEN famod, GEN p, long klim, long hint)
   GEN B = uniform_Mignotte_bound(a), res,y,lt,L,pe,pE,listmod,p1;
   long i,E,e,l, maxK = 3, nft = lg(famod)-1;
 
-  e = get_e(B, p, &pe);
+  e = logint(B, p, &pe);
   if (DEBUGLEVEL > 4) fprintferr("Mignotte bound: %Z^%ld\n", p,e);
 
   { /* overlift for the d-1 test */
@@ -1244,7 +1287,7 @@ combine_factors(GEN a, GEN famod, GEN p, long klim, long hint)
       if (DEBUGLEVEL > 4) fprintferr("making it monic\n");
       a = primitive_pol_to_monic(a, &lt);
       B = uniform_Mignotte_bound(a);
-      e = get_e(B, p, &pe);
+      e = logint(B, p, &pe);
 
       invlt = mpinvmod(lt,p);
       for (i = 1; i<lg(famod); i++)

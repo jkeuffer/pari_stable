@@ -672,16 +672,6 @@ bound_for_coeff(long m,GEN rr,long r1, GEN *maxroot)
   return M;
 }
 
-/* upper bound for floor(x) [avoid "precision loss in truncation"] */
-static GEN
-floor_bound(GEN x)
-{
-  long e;
-  GEN y = grndtoi(x, &e);
-  if (e>=0) y = addii(y, shifti(gun, e));
-  return y;
-}
-
 static GEN
 init_traces(GEN ff, GEN T, GEN p)
 {
@@ -830,7 +820,7 @@ compute_data(GEN DATA, long d, GEN nf, GEN ff, GEN T, GEN p)
   ind = (GEN)nf[4];
   dpol = mulii(sqri(ind),(GEN)nf[3]);
   p1 = gdiv(gmul(p1,p2), gsqrt(absi(dpol),DEFAULTPREC));
-  p1 = shifti(floor_bound(p1), 1);
+  p1 = shifti(ceil_safe(p1), 1);
   DATA[7] = lmulii(p1,ind);
   DATA[9] = (long)ind;
 

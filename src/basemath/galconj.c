@@ -19,6 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**									**/
 /*************************************************************************/
 #include "pari.h"
+#define mylogint(x,y) logint((x),(y),NULL)
 GEN
 galoisconj(GEN nf)
 {
@@ -175,28 +176,6 @@ GEN vectosmall(GEN H)
     V[i]=itos((GEN)H[i]);
   return V;
 }
-/*Compute the smallest integer greater than any incarnations of the real x*/
-/*Unclean*/
-static GEN
-myceil(GEN x)
-{
-  long e;
-  GEN y;
-  y=gcvtoi(x,&e);
-  if (e<0) e=0;
-  y=addii(y,shifti(gun,e));
-  return y;
-}
-
-/*TODO: do it without transcendental means like sqrtint. x real or
- *integer, y>=2 integer, return n long such that y^(n-1)<=x<y^n*/
-long mylogint(GEN x, GEN y, long prec)
-{
-  ulong av=avma;
-  long res=itos(myceil(gdiv(glog(x,prec),glog(y,prec))));
-  avma=av;
-  return res;
-}
 
 GEN vandermondeinverseprepold(GEN T, GEN L)
 {
@@ -299,7 +278,7 @@ galoisborne(GEN T, GEN dn, struct galois_borne *gb, long ppp)
     GEN res = divide_conquer_prod(gabs(prep,prec), mpmul);
     GEN dis;
     disable_dbg(0);
-    dis = ZX_disc_all(T, 1+mylogint(res,gdeux,prec));
+    dis = ZX_disc_all(T, 1+mylogint(res,gdeux));
     disable_dbg(-1);
     den = gclone(indexpartial(T,dis));
   }
@@ -329,13 +308,13 @@ galoisborne(GEN T, GEN dn, struct galois_borne *gb, long ppp)
   borneroots = addsr(1, gmul(borne, borneroots));
   av2 = avma;
   /*We use d-1 test, so we must overlift to 2^BITS_IN_LONG*/
-  gb->valsol = mylogint(gmul2n(borneroots,2+BITS_IN_LONG), gb->l, prec);
-  gb->valabs = mylogint(gmul2n(borneabs,2), gb->l, prec);
+  gb->valsol = mylogint(gmul2n(borneroots,2+BITS_IN_LONG), gb->l);
+  gb->valabs = mylogint(gmul2n(borneabs,2), gb->l);
   gb->valabs = max(gb->valsol,gb->valabs);
   if (DEBUGLEVEL >= 4)
     fprintferr("GaloisConj:val1=%ld val2=%ld\n", gb->valsol, gb->valabs);
   avma = av2;
-  gb->bornesol = gerepileupto(ltop, myceil(borneroots));
+  gb->bornesol = gerepileupto(ltop, ceil_safe(borneroots));
   if (DEBUGLEVEL >= 9)
     fprintferr("GaloisConj: Bound %Z\n",borneroots);
   gb->ladicsol = gpowgs(gb->l, gb->valsol);
@@ -385,7 +364,7 @@ initlift(GEN T, GEN den, GEN p, GEN L, GEN Lden, struct galois_borne *gb, struct
   gl->L = L;
   gl->Lden = Lden;
   ltop = avma;
-  gl->e = mylogint(gmul2n(gb->bornesol, 2+BITS_IN_LONG),p, DEFAULTPREC);
+  gl->e = mylogint(gmul2n(gb->bornesol, 2+BITS_IN_LONG),p);
   gl->e = max(2,gl->e);
   lbot = avma;
   gl->Q = gpowgs(p, gl->e);
@@ -3963,7 +3942,7 @@ galoissubcyclo(long n, GEN H, GEN Z, long v, long flag)
   borne=mulii(binome(stoi(u),i),gpowgs(stoi(o),i));
   if (DEBUGLEVEL >= 4)
     fprintferr("Subcyclo: borne=%Z\n",borne);
-  val=mylogint(shifti(borne,1),l,DEFAULTPREC);
+  val=mylogint(shifti(borne,1),l);
   avma=av;
   if (DEBUGLEVEL >= 4)
     fprintferr("Subcyclo: val=%ld\n",val);

@@ -1763,6 +1763,19 @@ gcvtoi(GEN x, long *e)
   return gtrunc(x);
 }
 
+/* smallest integer greater than any incarnations of the real x
+ * [avoid mpent() and "precision loss in truncation"] */
+GEN
+ceil_safe(GEN x)
+{
+  ulong av = avma;
+  long e;
+  GEN y = gcvtoi(x,&e);
+  if (e < 0) e = 0;
+  y = addii(y, shifti(gun,e));
+  return gerepileuptoint(av, y);
+}
+
 GEN
 gtrunc(GEN x)
 {
