@@ -323,7 +323,7 @@ powFBgen(FB_t *F, GEN nf, long a)
       if (DEBUGLEVEL>1) fprintferr(" %ld",j);
     }
     setlg(id2, j);
-    setlg(alg, j); Ord[i] = j - 1;
+    setlg(alg, j); Ord[i] = j;
     if (DEBUGLEVEL>1) fprintferr("\n");
   }
   F->pow->id2 = gclone(Id2);
@@ -3178,7 +3178,7 @@ PRECPB:
     if (low_stack(limpile, stack_lim(av2,1)))
     {
       if(DEBUGMEM>1) err(warnmem,"buchall");
-      gerepileall(av2,5, &W,&C,&B,&pdep,&nf);
+      gerepileall(av2,6, &W,&C,&B,&pdep,&nf,&F.subFB);
     }
   }
   oldrel = cache.last;
