@@ -109,6 +109,8 @@ BA 33- qfbprimeform(-3, 1) --> data corruption [ gzero's signe set to 1 ]
    44- [Windows installer:] online help did not work on most installations
    45- lines continuation with \ did not work with DOS fileformat
 BG 46- random(2^31) returned integers in [0, 2^32-1]  [ long/ulong problem ]
+   47- isprime(156499227435744375600531968861048687296374896432841731) --> SEGV
+       [ missing case in aprcl:sqrmod5() ]
 
   Changed
     1- bnfinit: [small_norm phase] speed up norm computations.

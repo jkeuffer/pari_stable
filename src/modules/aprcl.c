@@ -191,10 +191,17 @@ sqrmod5(GEN pol, red_t *R)
 
   if (lv==2) return pol;
   if (lv==3) return sqrconst(pol, R);
-  b = (GEN)pol[4];
   c = (GEN)pol[3]; c2 = shifti(c,1);
   d = (GEN)pol[2];
   if (lv==4)
+  {
+    A = sqri(d);
+    B = mulii(c2, d);
+    C = sqri(c);
+    return coefs_to_pol(3,A,B,C);
+  }
+  b = (GEN)pol[4];
+  if (lv==5)
   {
     A = mulii(b, subii(c2,b));
     B = addii(sqri(c), mulii(b, subii(shifti(d,1),b)));
@@ -202,7 +209,7 @@ sqrmod5(GEN pol, red_t *R)
     D = mulii(subii(d,b), addii(d,b));
   }
   else
-  {
+  { /* lv == 6 */
     GEN a = (GEN)pol[5], a2 = shifti(a,1);
     /* 2a(d - c) + b(2c - b) */
     A = addii(mulii(a2, subii(d,c)), mulii(b, subii(c2,b)));
@@ -232,10 +239,9 @@ _powpolmod(int pk, GEN jac, red_t *R, GEN (*_sqr)(GEN, red_t *))
   const GEN tabt = tabtall[pkfalse];
   const int efin = lg(taba)-1;
   GEN res,pol2, *vz;
-  int lv,tf,f,i;
+  int tf,f,i, lv = 1 << (kglob-1);
   pari_sp av;
 
-  lv = 1 << (kglob-1);
   vz = (GEN*)cgetg(lv+1,t_VEC);
   res = lift(jac); pol2 = _sqr(res, R);
   vz[1] = res;
