@@ -45,7 +45,6 @@
 [-0.999874125, 0.999874127, -0.999874127, 0.999874128]
 ? ploth(t=0,2*Pi,[sin(5*t),sin(7*t)],2,100)
   ***   multi-curves cannot be plot recursively.
-
 ? ploth(t=0,2*Pi,[sin(5*t),sin(7*t)],3,100)
 [-1.00000000, 0.999999999, -1.00000000, 0.999999999]
 ? plothraw(vector(501,k,k-1),vector(501,k,(k-1)*(k-1)/500))

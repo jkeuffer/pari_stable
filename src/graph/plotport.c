@@ -63,6 +63,29 @@ dsprintf9(double d, char *buf)
   return buf; /* Should not happen? */
 }
 
+typedef unsigned char screen[ISCR+1][JSCR+1];
+
+static void
+fill_gap(screen scr, long i, int jnew, int jpre)
+{
+  int mid, i_up, i_lo, up, lo;
+
+  if (jpre < jnew - 2) {
+    up = jnew - 1; i_up = i;
+    lo = jpre + 1; i_lo = i - 1;
+  } else if (jnew < jpre - 2) {
+    up = jpre - 1; i_up = i - 1;
+    lo = jnew + 1; i_lo = i;
+  } else return; /* if gap < 2, leave it as it is. */
+
+  mid = (jpre+jnew)/2;
+  if (mid>JSCR) mid=JSCR; else if (mid<0) mid=0;
+  if (lo<0) lo=0;
+  if (lo<=JSCR) while (lo <= mid) scr[i_lo][lo++] = ':';
+  if (up>JSCR) up=JSCR;
+  if (up>=0) while (up > mid) scr[i_up][up--] = ':';
+}
+
 #define QUARK  ((char*)NULL) /* Used as a special-case */
 static GEN quark_gen;
 
@@ -74,7 +97,7 @@ plot(entree *ep, GEN a, GEN b, char *ch,GEN ysmlu,GEN ybigu, long prec)
   long av = avma, av2,limite,jz,j,i,sig;
   int jnew, jpre = 0; /* for lint */
   GEN p1,p2,ysml,ybig,x,diff,dyj,dx,y[ISCR+1];
-  unsigned char scr[ISCR+1][JSCR+1];
+  screen scr;
   char buf[80], z;
 
   sig=gcmp(b,a); if (!sig) return;
@@ -116,34 +139,11 @@ plot(entree *ep, GEN a, GEN b, char *ch,GEN ysmlu,GEN ybigu, long prec)
   for (i=1; i<=ISCR; i++)
   {
     if (0<=jz && jz<=JSCR) scr[i][jz]=z; 
-    j=3+gtolong(gmul(gsub(y[i],ysml),dyj));
+    j = 3+gtolong(gmul(gsub(y[i],ysml),dyj));
     jnew = j/3;
-    if (i > 1)
-    {
-      int i_up, i_lo,  mid = (jpre+jnew)/2, up, lo;
-      int domid = 0;
-
-      /* If the gap is 1, leave it as it is. */
-      if (jpre < jnew - 2) {
-        up = jnew - 1; i_up = i;
-        lo = jpre + 1; i_lo = i - 1;
-        domid = 1;
-      } else if (jnew < jpre - 2) {
-        up = jpre - 1; i_up = i - 1;
-        lo = jnew + 1; i_lo = i;
-        domid = 1;
-      }
-      if (domid)
-      {
-	if (mid>JSCR) mid=JSCR; else if (mid<0) mid=0;
-	if (lo<0) lo=0;
-	if (lo<=JSCR) while (lo <= mid) scr[i_lo][lo++] = ':';
-	if (up>JSCR) up=JSCR;
-        if (up>=0) while (up > mid)  scr[i_up][up--] = ':';
-      }
-    }
+    if (i > 1) fill_gap(scr, i, jnew, jpre);
     if (0<=jnew && jnew<=JSCR) scr[i][jnew] = PICT(j);
-    avma=av2;
+    avma = av2;
     jpre = jnew;
   }
   p1=cgetr(3); gaffect(ybig,p1); pariputc('\n');
@@ -427,13 +427,16 @@ rectline0(long ne, double gx2, double gy2, long relative) /* code = ROt_MV/ROt_L
    ends, plot ticks where the label coordinate takes "round" values */
 
 static void
-rectticks(long ne, double dx1, double dy1, double dx2, double dy2, double l1, double l2, long flags)
+rectticks(PARI_plot *WW, long ne,
+          double dx1, double dy1, double dx2, double dy2,
+          double l1, double l2, long flags)
 {
   long dx,dy,dxy,dxy1,x1,y1,x2,y2,nticks,n,n1,dn;
   double minstep, maxstep, step, l_min, l_max, minl, maxl, dl, dtx, dty, x, y;
   double ddx, ddy;
   const double mult[3] = { 2./1., 5./2., 10./5. };
   PariRect *e = check_rect_init(ne);
+  int do_double = !(flags & TICKS_NODOUBLE);
 
   x1 = DTOL(dx1*RXscale(e) + RXshift(e));
   y1 = DTOL(dy1*RYscale(e) + RYshift(e));
@@ -441,20 +444,22 @@ rectticks(long ne, double dx1, double dy1, double dx2, double dy2, double l1, do
   y2 = DTOL(dy2*RYscale(e) + RYshift(e));
   dx = x2 - x1;
   dy = y2 - y1;
-  if (dx < 0)
-    dx = -dx;
-  if (dy < 0)
-    dy = -dy;
-  if (dx < dy)
-    dxy1 = dy;
-  else
-    dxy1 = dx;
-  dx /= h_unit;
-  dy /= v_unit;
+  if (dx < 0) dx = -dx;
+  if (dy < 0) dy = -dy;
+  dxy1 = max(dx, dy);
+  if (WW) {
+    dx /= WW->hunit;
+    dy /= WW->vunit;
+  }
+  else {
+    PARI_get_plot(0);
+    dx /= h_unit;
+    dy /= v_unit;
+  }
   dxy = sqrt(dx*dx + dy*dy);
   nticks = (dxy + 2.5)/4;
-  if (!nticks)
-    return;
+  if (!nticks) return;
+
   /* Now we want to find nticks (or less) "round" numbers between l1 and l2.
      For our purpose round numbers have "last significant" digit either 
 	*) any;
@@ -476,34 +481,30 @@ rectticks(long ne, double dx1, double dy1, double dx2, double dy2, double l1, do
     l_max -= d;
   }
   for (n = 0; ; n++) {
-    if (step >= maxstep)
-      return;
+    if (step >= maxstep) return;
+
     if (step >= minstep) {
       minl = ceil(l_min/step);
       maxl = floor(l_max/step);
       if (minl <= maxl && maxl - minl + 1 <= nticks) {
 	nticks = maxl - minl + 1;
         l_min = minl * step;
-        l_max = maxl * step;
-	if (!(flags & TICKS_NODOUBLE)) {
-	  /* Where to position doubleticks, variants:
- 	     small: each 5, double: each 10	(n===2 mod 3)
-	     small: each 2, double: each 10	(n===1  mod 3)
-	     small: each 1, double: each  5 */
-	  if (n % 3 == 2)
-	    dn = 2;
-          else
-	    dn = 5;
-	  n1 = ((long)minl) % dn;
-	}
-	break;
+        l_max = maxl * step; break;
       }
     }
     step *= mult[ n % 3 ];
   }
+  /* Where to position doubleticks, variants:
+     small: each 5, double: each 10	(n===2 mod 3)
+     small: each 2, double: each 10	(n===1  mod 3)
+     small: each 1, double: each  5 */
+  dn = (n % 3 == 2)? 2: 5;
+  n1 = ((long)minl) % dn; /* unused if do_double = FALSE */
+
   /* now l_min and l_max keep min/max values of l with ticks, and nticks is
      the number of ticks to draw. */
-  if (nticks > 1) {
+  if (nticks == 1) ddx = ddy = 0; /* unused: for lint */
+  else {
     dl = (l_max - l_min)/(nticks - 1);
     ddx = (dx2 - dx1) * dl / (l2 - l1);
     ddy = (dy2 - dy1) * dl / (l2 - l1);
@@ -516,12 +517,11 @@ rectticks(long ne, double dx1, double dy1, double dx2, double dy2, double l1, do
   for (n = 0; n < nticks; n++) {
     RectObj *z = (RectObj*) gpmalloc(sizeof(RectObj2P));
     double lunit = h_unit > 1 ? 1.5 : 2;
-    double l;
+    double l = (do_double && (n + n1) % dn == 0) ? lunit: 1;
 
     RoNext(z) = 0;
     RoLNx1(z) = RoLNx2(z) = x*RXscale(e) + RXshift(e);
     RoLNy1(z) = RoLNy2(z) = y*RYscale(e) + RYshift(e);
-    l = ((flags & TICKS_NODOUBLE) || (n + n1) % dn != 0) ? 1 : lunit;
 
     if (flags & TICKS_CLOCKW) {
       RoLNx1(z) += dtx*l;
@@ -1524,10 +1524,10 @@ rectsplines(long ne, double *x, double *y, long lx, long flag)
   }
   if (flag & PLOT_PARAMETRIC) {
       tas = new_chunk(4);
-      for (j = 1; j <= 4; j++)
-	  tas[j-1] = (long)stoi(j);
+      for (j = 1; j <= 4; j++) tas[j-1] = lstoi(j);
       quark_gen = cgetg(2 + 1, t_VEC);
   }
+  else tas = NULL; /* for lint */
   for (i = 0; i <= lx - 4; i++) {
       long oavma = avma;
 
@@ -1583,16 +1583,17 @@ static GEN
 rectplothrawin(long stringrect, long drawrect, dblPointList *data,
                long flags, PARI_plot *WW)
 {
-  PARI_plot W;
   GEN res;
   dblPointList y,x;
   double xsml,xbig,ysml,ybig,tmp;
-  long ltype=0, ltop=avma;
-  long is,js,i,lm,rm,tm,bm,nc,nbpoints, w[2], wx[2], wy[2];
+  long ltype, ltop=avma;
+  long i,nc,nbpoints, w[2], wx[2], wy[2];
 
   w[0]=stringrect; w[1]=drawrect;
   if (!data) return cgetg(1,t_VEC);
-  x=data[0]; nc=x.nb; xsml=x.xsml; xbig=x.xbig; ysml=x.ysml; ybig=x.ybig;
+  x = data[0]; nc = x.nb;
+  xsml = x.xsml; xbig = x.xbig;
+  ysml = x.ysml; ybig = x.ybig;
   if (xbig-xsml < 1.e-9)
   {
     tmp=fabs(xsml)/10; if (!tmp) tmp=0.1;
@@ -1604,26 +1605,39 @@ rectplothrawin(long stringrect, long drawrect, dblPointList *data,
     ybig+=tmp; ysml-=tmp;
   }
 
-  if (WW) /* no rectwindow has been supplied ==> ps or screen output */
-  {
-    W = *WW;
-    lm = W.fwidth*10; /* left margin   */
-    rm = W.hunit-1; /* right margin  */
-    tm = W.vunit-1; /* top margin    */
-    bm = W.vunit+W.fheight-1; /* bottom margin */
+  if (WW)
+  { /* no rectwindow supplied ==> ps or screen output */
+    char c1[16],c2[16],c3[16],c4[16];
+    PARI_plot W = *WW;
+    long lm = W.fwidth*10; /* left margin   */
+    long rm = W.hunit-1; /* right margin  */
+    long tm = W.vunit-1; /* top margin    */
+    long bm = W.vunit+W.fheight-1; /* bottom margin */
+    long is = W.width - (lm+rm);
+    long js = W.height - (tm+bm);
 
-    is = W.width - (lm+rm); js = W.height - (tm+bm);
     wx[0]=wy[0]=0; wx[1]=lm; wy[1]=tm;
-  /*
-   * Window size (W.width x W.height) is given in pixels, and
-   * correct pixels are 0..w_width-1.
-   *
-   * On the other hand, rect functions work with windows whose pixel
-   * range is [0,width].
-   */
-
+   /* Window size (W.width x W.height) is given in pixels, and
+    * correct pixels are 0..w_width-1.
+    * On the other hand, rect functions work with windows whose pixel
+    * range is [0,width]. */
     initrect(stringrect, W.width-1, W.height-1);
     if (drawrect != stringrect) initrect(drawrect, is-1, js-1);
+
+    /* draw labels on stringrect */
+    sprintf(c1,"%.5g",ybig); sprintf(c2,"%.5g",ysml);
+    sprintf(c3,"%.5g",xsml); sprintf(c4,"%.5g",xbig);
+
+    rectlinetype(stringrect,-2); /* Frame */
+    current_color[stringrect]=BLACK;
+    put_string( stringrect, lm, 0, c1,
+		RoSTdirRIGHT | RoSTdirHGAP | RoSTdirTOP);
+    put_string(stringrect, lm, W.height - bm, c2,
+		RoSTdirRIGHT | RoSTdirHGAP | RoSTdirVGAP);
+    put_string(stringrect, lm, W.height - bm, c3,
+		RoSTdirLEFT | RoSTdirTOP);
+    put_string(stringrect, W.width - rm - 1, W.height - bm, c4,
+		RoSTdirRIGHT | RoSTdirTOP);
   }
   RHasGraph(check_rect(drawrect)) = 1;
 
@@ -1639,15 +1653,15 @@ rectplothrawin(long stringrect, long drawrect, dblPointList *data,
     rectmove0(drawrect,xsml,ysml,0);
     rectbox0(drawrect,xbig,ybig,0);
     if (!(flags & PLOT_NO_TICK_X)) {
-      rectticks(drawrect, xsml, ysml, xbig, ysml, xsml, xbig,
+      rectticks(WW, drawrect, xsml, ysml, xbig, ysml, xsml, xbig,
 	TICKS_CLOCKW | do_double);
-      rectticks(drawrect, xbig, ybig, xsml, ybig, xbig, xsml,
+      rectticks(WW, drawrect, xbig, ybig, xsml, ybig, xbig, xsml,
 	TICKS_CLOCKW | do_double);
     }
     if (!(flags & PLOT_NO_TICK_Y)) {
-      rectticks(drawrect, xbig, ysml, xbig, ybig, ysml, ybig,
+      rectticks(WW, drawrect, xbig, ysml, xbig, ybig, ysml, ybig,
 	TICKS_CLOCKW | do_double);
-      rectticks(drawrect, xsml, ybig, xsml, ysml, ybig, ysml,
+      rectticks(WW, drawrect, xsml, ybig, xsml, ysml, ybig, ysml,
 	TICKS_CLOCKW | do_double);
     }
   }
@@ -1668,16 +1682,11 @@ rectplothrawin(long stringrect, long drawrect, dblPointList *data,
     rectline0(drawrect,xbig,0.0,0);
   }
 
-  if (flags & PLOT_PARAMETRIC) i=0; else i=1;
-  current_color[drawrect]=RED;
-  for (; ltype < nc; )
+  i = (flags & PLOT_PARAMETRIC)? 0: 1;
+  for (ltype = 0; ltype < nc; ltype++)
   {
-    if (nc>1)
-    {
-      if (ltype & 1) current_color[drawrect]=RED;
-      else current_color[drawrect]=SIENNA;
-    }
-    if (flags & PLOT_PARAMETRIC) x=data[i++];
+    current_color[drawrect] = ltype&1 ? SIENNA: RED;
+    if (flags & PLOT_PARAMETRIC) x = data[i++];
 
     y=data[i++]; nbpoints=y.nb;
     if ((flags & PLOT_POINTS_LINES) || (flags & PLOT_POINTS)) {
@@ -1698,29 +1707,12 @@ rectplothrawin(long stringrect, long drawrect, dblPointList *data,
 	    rectlines0(drawrect,x.d,y.d,nbpoints,0);	
 	}
     }
-    ltype++;				/* Graphs. */
   }
   for (i--; i>=0; i--) free(data[i].d);
   free(data);
 
   if (WW)
   {
-    char c1[16],c2[16],c3[16],c4[16];
-
-    sprintf(c1,"%.5g",ybig); sprintf(c2,"%.5g",ysml);
-    sprintf(c3,"%.5g",xsml); sprintf(c4,"%.5g",xbig);
-
-    rectlinetype(stringrect,-2); /* Frame */
-    current_color[stringrect]=BLACK;
-    put_string( stringrect, lm, 0, c1,
-		RoSTdirRIGHT | RoSTdirHGAP | RoSTdirTOP);
-    put_string(stringrect, lm, W.height - bm, c2,
-		RoSTdirRIGHT | RoSTdirHGAP | RoSTdirVGAP);
-    put_string(stringrect, lm, W.height - bm, c3,
-		RoSTdirLEFT | RoSTdirTOP);
-    put_string(stringrect, W.width - rm - 1, W.height - bm, c4,
-		RoSTdirRIGHT | RoSTdirTOP);
-
     if (flags & PLOT_POSTSCRIPT)
       postdraw0(w,wx,wy,2);
     else
@@ -1847,20 +1839,20 @@ GEN
 plothsizes_flag(long flag)
 {
   GEN vect = cgetg(1+6,t_VEC);
-  int i;
 
   PARI_get_plot(0);
-  for (i=1; i<=2; i++) vect[i]=lgeti(3);
-  affsi(w_width,(GEN)vect[1]); affsi(w_height,(GEN)vect[2]);
+  vect[1] = lstoi(w_width);
+  vect[2] = lstoi(w_height);
   if (flag) {
     vect[3] = (long)dbltor(h_unit*1.0/w_width);
     vect[4] = (long)dbltor(v_unit*1.0/w_height);
     vect[5] = (long)dbltor(f_width*1.0/w_width);
     vect[6] = (long)dbltor(f_height*1.0/w_height);
   } else {
-    for (; i <= 6; i++) vect[i]=lgeti(3);
-    affsi(h_unit, (GEN)vect[3]); affsi(v_unit, (GEN)vect[4]);
-    affsi(f_width,(GEN)vect[5]); affsi(f_height,(GEN)vect[6]);
+    vect[3] = lstoi(h_unit);
+    vect[4] = lstoi(v_unit);
+    vect[5] = lstoi(f_width);
+    vect[6] = lstoi(f_height);
   }
   return vect;
 }	
