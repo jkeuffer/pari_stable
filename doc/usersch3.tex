@@ -1774,7 +1774,9 @@ $p = 1$ is a valid special case which returns the unit form. Returns an
 error if $x$ is not a quadratic residue mod $p$. In the case where $x>0$,
 the ``distance'' component of the form is set equal to zero according to
 the current precision.
-\syn{primeform}{x,p,\var{prec}}
+
+\syn{primeform}{x,p,\var{prec}}, where the third variable $\var{prec}$ is a
+\kbd{long}, but is only taken into account when $x>0$.
 
 \subsecidx{qfbred}$(x,\{\fl=0\},\{D\},\{\var{isqrtD}\},\{\var{sqrtD}\})$:
 reduces the binary quadratic form $x$ (updating Shanks's distance function
@@ -1805,9 +1807,6 @@ $\teb{rhoreal}(x)$ (= $\teb{qfbred}(x,1)$),
 $\teb{redrealnod}(x,sq)$ (= $\teb{qfbred}(x,2,,isqrtD)$),
 
 $\teb{rhorealnod}(x,sq)$ (= $\teb{qfbred}(x,3,,isqrtD)$).
-
-\syn{primeform}{x,p,\var{prec}}, where the third variable $\var{prec}$ is a
-\kbd{long}, but is only taken into account when $x>0$.
 
 \subsecidx{quadclassunit}$(D,\{\fl=0\},\{\var{tech}=[]\})$:
 \idx{Buchmann-McCurley}'s sub-exponential algorithm for computing the class
