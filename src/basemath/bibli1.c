@@ -2836,7 +2836,7 @@ smallvectors(GEN a, GEN BORNE, long stockmax, long flag, FP_chk_fun *CHECK)
   gpmem_t av, av1, lim;
   GEN u,S,x,y,z,v,q,norme1,normax1,borne1,borne2,eps,p1,alpha,norms,dummy;
   GEN (*check)(void *,GEN) = CHECK? CHECK->f: NULL;
-  GEN data = CHECK? CHECK->data: NULL;
+  void *data = CHECK? CHECK->data: NULL;
   int skipfirst = CHECK? CHECK->skipfirst: 0;
 
   if (DEBUGLEVEL)
