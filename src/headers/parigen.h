@@ -27,106 +27,82 @@ typedef int (*QSCOMP)(const void *, const void *);
 #endif
 
 #ifdef LONG_IS_64BIT
-#  define MAXULONG     (0xffffffffffffffffUL)
-#  define MAXHALFULONG (0x00000000ffffffffUL)
-#  define HIGHBIT      (0x8000000000000000UL)
-#  define HIGHMASK     (0xffffffff00000000UL)
-#  define LOWMASK      (0x00000000ffffffffUL)
-#  define SMALL_MASK   (0x4000000000000000UL)
-
-#  define DEFAULTPREC     3
-#  define MEDDEFAULTPREC  4
-#  define BIGDEFAULTPREC  5
 #  define TWOPOTBYTES_IN_LONG  3
-#  define TWOPOTBITS_IN_LONG   6
-#  define BYTES_IN_LONG        8
-#  define BITS_IN_LONG        64
-#  define BITS_IN_HALFULONG   32
-/* For a 64-bit random generator, change the following 32 to 64 */
-#  define BITS_IN_RANDOM      32
-
 #else
-
-#  define MAXULONG     (0xffffffffUL)
-#  define MAXHALFULONG (0x0000ffffUL)
-#  define HIGHBIT      (0x80000000UL)
-#  define HIGHMASK     (0xffff0000UL)
-#  define LOWMASK      (0x0000ffffUL)
-#  define SMALL_MASK   (0x40000000UL)
-
-#  define DEFAULTPREC     4
-#  define MEDDEFAULTPREC  6
-#  define BIGDEFAULTPREC  8
 #  define TWOPOTBYTES_IN_LONG  2
-#  define TWOPOTBITS_IN_LONG   5
-#  define BYTES_IN_LONG        4
-#  define BITS_IN_LONG        32
-#  define BITS_IN_HALFULONG   16
-#  define BITS_IN_RANDOM      32
 #endif
 
+#define DEFAULTPREC    2 + (8>>TWOPOTBYTES_IN_LONG)
+#define MEDDEFAULTPREC 2 + (16>>TWOPOTBYTES_IN_LONG)
+#define BIGDEFAULTPREC 2 + (24>>TWOPOTBYTES_IN_LONG)
+#define TWOPOTBITS_IN_LONG (TWOPOTBYTES_IN_LONG+3)
+#define BYTES_IN_LONG (1UL<<TWOPOTBYTES_IN_LONG)
+#define BITS_IN_LONG  (1UL<<TWOPOTBITS_IN_LONG)
+#define HIGHBIT (1UL << (BITS_IN_LONG-1))
+#define BITS_IN_HALFULONG (BITS_IN_LONG>>1)
+#define MAXULONG (~0x0UL)
+#define MAXHALFULONG ((1UL<<BITS_IN_HALFULONG) - 1)
+#define LOWMASK  (MAXHALFULONG)
+#define HIGHMASK (~LOWMASK)
+#define SMALL_MASK (HIGHBIT>>1)
+/* You may want to change the following 32 to BITS_IN_LONG */
+#define BITS_IN_RANDOM 32
+
+/* Codeword x[0]        : TYPBITS, CLONEBIT, LGBITS
+ * Codeword x[1].real   : SIGNBITS,EXPOBITS
+ *               int    : SIGNBITS,LGEFINTBITS
+ *               ser,pol: SIGNBITS,VARNBITS,LGEFBITS 
+ *               padic  : VALPBITS,PRECPBITS 
+ * Need TYPnumBITS + LGnumBITS    + 1 <= BITS_IN_LONG
+ *      SIGNnumBITS + EXPOnumBITS     <= BITS_IN_LONG
+ *      SIGNnumBITS + LGnumBITS       <= BITS_IN_LONG
+ *      SIGNnumBITS + LGEFnumBITS + 2 <= BITS_IN_LONG
+ *      VALPnumbits               + 1 <= BITS_IN_LONG */
 #ifndef LONG_IS_64BIT
-/*  second codeword x[1], for types: INT,REAL,PADIC,POL,SER */
-#   define EXPOBITS    (0x00ffffffUL)
-#   define HIGHEXPOBIT (0x00800000L)
-#   define LGEFBITS    (0x0000ffffUL)
-#   define VALPBITS    (0x0000ffffUL) /* used only for type PADIC */
-#   define HIGHVALPBIT (0x00008000L)  /* used only for type PADIC, SER */
-#   define PRECPBITS   (0xffff0000UL) /* used only for type PADIC */
-#   define PRECPSHIFT  16
-#   define VARNSHIFT   16
-
 # ifndef OLD_CODES
-#   define SIGNBITS    (0xc0000000UL)
-#   define VARNBITS    (0x3fff0000UL)
-#   define LGEFINTBITS (0x00ffffffUL)
-#   define SIGNSHIFT   30
-#   define MAXVARN     16383
+#   define SIGNnumBITS  2
+#   define LGnumBITS   24
+#   define TYPnumBITS   7
 # else
-#   define SIGNBITS    (0xff000000UL)
-#   define VARNBITS    (0x00ff0000UL)
-#   define LGEFINTBITS (0x0000ffffUL)
-#   define SIGNSHIFT   24
-#   define MAXVARN     255
+#   define SIGNnumBITS  8
+#   define LGnumBITS   16
+#   define TYPnumBITS   8
 # endif
 
-/*  first codeword x[0] */
-# ifndef OLD_CODES
-#   define TYPBITS      (0xfe000000UL)
-#   define CLONEBIT     (0x01000000UL)
-#   define LGBITS       (0x00ffffffUL)
-#   define TYPSHIFT     25
-# else
-#   define TYPBITS      (0xff000000UL)
-#   define CLONEBIT     (0x00010000UL)
-#   define LGBITS       (0x0000ffffUL)
-#   define TYPSHIFT     24
-# endif
+#  define EXPOnumBITS  24
+#  define VALPnumBITS  16 
+#  define LGEFnumBITS  16
 #endif
 
 #ifdef LONG_IS_64BIT
-/*  first codeword x[0] */
-#  define TYPBITS      (0xffff000000000000UL)
-#  define CLONEBIT     (0x0000000100000000UL)
-#  define LGBITS       (0x00000000ffffffffUL)
-#  define TYPSHIFT     48
+#  define SIGNnumBITS  2
+#  define LGnumBITS   32
+#  define TYPnumBITS  15
 
-/*  second codeword x[1] */
-#  define SIGNBITS     (0xffff000000000000UL)
-#  define VARNBITS     (0x0000ffff00000000UL)
-#  define LGEFBITS     (0x00000000ffffffffUL)
-#  define SIGNSHIFT    48
-#  define MAXVARN      65535
-
-#  define EXPOBITS     (0x0000ffffffffffffUL)
-#  define HIGHEXPOBIT  (0x0000800000000000L)
-#  define LGEFINTBITS  (0x00000000ffffffffUL)
-#  define VALPBITS     (0x00000000ffffffffUL)
-#  define HIGHVALPBIT  (0x0000000080000000L)
-#  define PRECPBITS    (0xffffffff00000000UL)
-#  define PRECPSHIFT   32
-#  define VARNSHIFT    32
+#  define EXPOnumBITS 48
+#  define VALPnumBITS 32
+#  define LGEFnumBITS 32
 #endif
+
+#define VARNnumBITS (BITS_IN_LONG - SIGNnumBITS - LGEFnumBITS)
+#define PRECPSHIFT VALPnumBITS
+#define  VARNSHIFT LGEFnumBITS
+#define   TYPSHIFT (BITS_IN_LONG - TYPnumBITS)
+#define  SIGNSHIFT (LGEFnumBITS+VARNnumBITS)
+
+#define EXPOBITS    ((1UL<<EXPOnumBITS)-1)
+#define SIGNBITS    (0xffffUL << SIGNSHIFT)
+#define  TYPBITS    (0xffffUL <<  TYPSHIFT)
+#define PRECPBITS   (~VALPBITS)
+#define LGBITS      ((1UL<<LGnumBITS)-1)
+#define LGEFINTBITS LGBITS
+#define LGEFBITS    ((1UL<<LGEFnumBITS)-1)
+#define VALPBITS    ((1UL<<VALPnumBITS)-1)
+#define VARNBITS    (MAXVARN<<VARNSHIFT)
+#define MAXVARN     ((1UL<<VARNnumBITS)-1)
+#define HIGHEXPOBIT (1UL<<(EXPOnumBITS-1))
+#define HIGHVALPBIT (1UL<<(VALPnumBITS-1))
+#define CLONEBIT    (1UL<<LGnumBITS)
 
 #define evaltyp(x)     (((ulong)(x)) << TYPSHIFT)
 #define evalvarn(x)    (((ulong)(x)) << VARNSHIFT)
