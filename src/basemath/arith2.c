@@ -713,14 +713,14 @@ auxdecomp1(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
   if (typ(n) != t_INT) err(arither1);
   i = signe(n); if (!i) err(talker, "zero argument in factorint");
   (void)cgetg(3,t_MAT);
-  if (i<0) { (void)stoi(-1); (void)stoi(1); nb++; }
+  if (i<0) { (void)utoineg(1); (void)utoipos(1); nb++; }
   if (is_pm1(n)) return aux_end(NULL,nb);
 
   n = gclone(n); setsigne(n,1);
   i = vali(n);
   if (i)
   {
-    (void)stoi(2); (void)stoi(i); nb++;
+    (void)utoipos(2); (void)utoipos(i); nb++;
     av=avma; affii(shifti(n,-i), n); avma=av;
   }
   if (is_pm1(n)) return aux_end(n,nb);
@@ -745,7 +745,7 @@ auxdecomp1(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
   if (cmpii(pp,n) > 0)
   {
     nb++;
-    (void)icopy(n); (void)stoi(1); return aux_end(n,nb);
+    (void)icopy(n); (void)utoipos(1); return aux_end(n,nb);
   }
 
   /* trial divide by the "special primes" (usually huge composites...) */
@@ -762,7 +762,7 @@ auxdecomp1(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
   if ((k && cmpii(pp,n) > 0) || (all==1 && BSW_psp(n)))
   {
     nb++;
-    (void)icopy(n); (void)stoi(1); return aux_end(n,nb);
+    (void)icopy(n); (void)utoipos(1); return aux_end(n,nb);
   }
 
   /* now we have a large composite.  Use hint as is if all==1 */
@@ -1125,7 +1125,7 @@ phi(GEN n)
   if (is_pm1(n)) return gun;
   v = vali(n);
   n = absi(shifti(n,-v));
-  m = (v > 1 ? shifti(gun,v-1) : stoi(1));
+  m = v > 1 ? shifti(gun,v-1) : gun;
   if (is_pm1(n)) return gerepileuptoint(av,m);
 
   lim = tridiv_bound(n,1);
@@ -1168,7 +1168,7 @@ numbdiv(GEN n)
   if (is_pm1(n)) return gun;
   v = vali(n);
   n = absi(shifti(n,-v));
-  m = stoi(v+1);
+  m = utoipos(v+1);
   if (is_pm1(n)) return gerepileuptoint(av,m);
 
   lim = tridiv_bound(n,1);
@@ -1204,7 +1204,7 @@ sumdiv(GEN n)
   if (is_pm1(n)) return gun;
   v = vali(n);
   n = absi(shifti(n,-v));
-  m = (v ? addsi(-1,shifti(gun,v+1)) : stoi(1));
+  m = v ? addsi(-1,shifti(gun,v+1)) : gun;
   if (is_pm1(n)) return gerepileuptoint(av,m);
 
   lim = tridiv_bound(n,1);
@@ -1249,7 +1249,7 @@ sumdivk(GEN n, long k)
   if (k<0)  k = -k;
   v=vali(n);
   n=absi(shifti(n,-v));
-  m = stoi(1);
+  m = gun;
   while (v--)  m = addsi(1,shifti(m,k));
   if (is_pm1(n)) goto fin;
 

@@ -296,12 +296,12 @@ znstar(GEN n)
   {
     case 0:
       h[1] = lmul2n(gun,itos((GEN)ep[1])-2); h[2] = deux;
-      gen[1] = lstoi(5); gen[2] = laddis(gmul2n((GEN)h[1],1),-1);
+      gen[1] = (long)utoipos(5); gen[2] = laddis(gmul2n((GEN)h[1],1),-1);
       moduli[1] = moduli[2] = lmul2n(gun,itos((GEN)ep[1]));
       sizeh = nbp+1; i=3; j=2; break;
     case 4:
       h[1] = deux;
-      gen[1] = lstoi(3);
+      gen[1] = (long)utoipos(3);
       moduli[1] = lmul2n(gun,itos((GEN)ep[1]));
       sizeh = nbp; i=j=2; break;
     case 2: case 6:
@@ -416,9 +416,9 @@ carrecomplet(GEN x, GEN *pt)
   }
   if (lgefint(x) == 3)
   {
-    long a = ucarrecomplet((ulong)x[2]);
+    ulong a = ucarrecomplet((ulong)x[2]);
     if (!a) return 0;
-    if (pt) *pt = stoi(a);
+    if (pt) *pt = utoipos(a);
     return 1;
   }
   if (!carremod(umodiu(x, 64*63*65*11))) return 0;
@@ -598,9 +598,8 @@ gcarreparfait(GEN x)
       return gcarreparfait((GEN)x[2]);
 
     case t_RFRAC:
-      av=avma;
-      l=itos(gcarreparfait(gmul((GEN)x[1],(GEN)x[2])));
-      avma=av; return stoi(l);
+      av = avma; a = gcarreparfait(gmul((GEN)x[1],(GEN)x[2]));
+      avma = av; return a;
 
     case t_QFR: case t_QFI:
       return gcarreparfait((GEN)x[1]);
@@ -1188,7 +1187,7 @@ sqrt_Cipolla(GEN a, GEN p)
     avma = av1;
   }
 
-  u = stoi(t); v = gun; /* u+vX = t+X */
+  u = utoipos((ulong)t); v = gun; /* u+vX = t+X */
   e = vali(addsi(-1,p)); q = shifti(p, -e);
   /* p = 2^e q + 1  and  (p+1)/2 = 2^(e-1)q + 1 */
 
@@ -1305,7 +1304,7 @@ Fp_sqrt(GEN a, GEN p)
         err(talker,"composite modulus in Fp_sqrt: %Z",p);
       }
       av1 = avma;
-      y = m = Fp_pow(stoi(k),q,p);
+      y = m = Fp_pow(utoipos((ulong)k),q,p);
       for (i=1; i<e; i++)
 	if (gcmp1(m = sqrmod(m,p))) break;
       if (i == e) break; /* success */
@@ -1359,7 +1358,7 @@ mplgenmod(GEN l, long e, GEN r,GEN p,GEN *zeta)
   long k, i;
   for (k=1; ; k++)
   {
-    m1 = m = Fp_pow(stoi(k+1), r, p);
+    m1 = m = Fp_pow(utoipos(k+1), r, p);
     if (gcmp1(m)) { avma = av1; continue; }
     for (i=1; i<e; i++)
       if (gcmp1(m = Fp_pow(m,l,p))) break;
@@ -2482,7 +2481,7 @@ bestappr0(GEN x, GEN a, GEN b)
   if (!b) return bestappr(x,a);
   av = avma;
   t = bestappr_mod(x,a,b);
-  if (!t) { avma = av; return stoi(-1); }
+  if (!t) { avma = av; return utoineg(1); }
   return t;
 }
 
@@ -2597,10 +2596,10 @@ fundunit(GEN x)
   check_quaddisc_real(x, &r, "fundunit");
   sqd = sqrti(x); av2 = avma; lim = stack_lim(av2,2);
   a = shifti(addsi(r,sqd),-1);
-  f = cgetg(3,t_MAT); f[1] = lgetg(3,t_COL); f[2] = lgetg(3,t_COL);
-  coeff(f,1,1) = (long)a; coeff(f,1,2) = un;
-  coeff(f,2,1) = un;      coeff(f,2,2) = zero;
-  v = gdeux; u = stoi(r);
+  f = cgetg(3,t_MAT);
+  f[1] = (long)mkcol2(a, gun);
+  f[2] = (long)mkcol2(gun, gzero);
+  u = stoi(r); v = gdeux;
   for(;;)
   {
     u1 = subii(mulii(a,v),u);       flp = egalii(u,u1); u = u1;
@@ -2740,7 +2739,7 @@ end_classno(GEN h, GEN hin, GEN forms, long lform)
       p1 = fh;
       for (c=1; ; c++, p1 = gmul(p1,fh))
         if (gcmp1((GEN)p1[1])) break;
-      q = mulsi(-com, find_order(fh, stoi(c)));
+      q = mulsi(-com, find_order(fh, utoipos((ulong)c)));
     }
     q = gerepileuptoint(av, q);
   }
@@ -2981,13 +2980,13 @@ classno2(GEN x)
 GEN
 hclassno(GEN x)
 {
-  long d,a,b,h,b2,f;
+  long d, a, b, h, b2, f;
 
-  d= -itos(x); if (d>0 || (d & 3) > 1) return gzero;
+  d = -itos(x); if (d>0 || (d & 3) > 1) return gzero;
   if (!d) return gdivgs(gun,-12);
   if (-d > (VERYBIGINT>>1))
     err(talker,"discriminant too big in hclassno. Use quadclassunit");
-  h=0; b=d&1; b2=(b-d)>>2; f=0;
+  h = 0; b = d&1; b2 = (-d)>>2; f=0;
   if (!b)
   {
     for (a=1; a*a<b2; a++)
@@ -2997,18 +2996,24 @@ hclassno(GEN x)
   while (b2*3+d<0)
   {
     if (b2%b == 0) h++;
-    for (a=b+1; a*a<b2; a++)
-      if (b2%a == 0) h+=2;
-    if (a*a==b2) h++;
-    b+=2; b2=(b*b-d)>>2;
+    for (a=b+1; a*a < b2; a++)
+      if (b2%a == 0) h += 2;
+    if (a*a == b2) h++;
+    b += 2; b2 = (b*b-d)>>2;
   }
   if (b2*3+d==0)
   {
     GEN y = cgetg(3,t_FRAC);
-    y[1]=lstoi(3*h+1); y[2]=lstoi(3); return y;
+    y[1] = (long)utoipos(3*h+1);
+    y[2] = (long)utoipos(3); return y;
   }
-  if (f) return gaddsg(h,ghalf);
-  return stoi(h);
+  if (f) 
+  {
+    GEN y = cgetg(3,t_FRAC);
+    y[1] = (long)utoipos(2*h+1);
+    y[2] = deux; return y;
+  }
+  return utoipos(h);
 }
 
 /***********************************************************************/

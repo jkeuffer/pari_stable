@@ -2159,7 +2159,7 @@ imagecompl(GEN x)
   gauss_pivot(x,&d,&r);
   avma=av; y=cgetg(r+1,t_VEC);
   for (i=j=1; j<=r; i++)
-    if (!d[i]) y[j++]=lstoi(i);
+    if (!d[i]) y[j++] = (long)utoipos(i);
   if (d) free(d); return y;
 }
 
@@ -2406,7 +2406,10 @@ indexrank0(GEN x, GEN p, int vecsmall)
     qsort(p1+1, (size_t)r, sizeof(long), (QSCOMP)pari_compare_long);
   }
   if (!vecsmall)
-    for (i=1;i<=r;i++) { p1[i]=lstoi(p1[i]); p2[i]=lstoi(p2[i]); }
+    for (i=1;i<=r;i++) {
+      p1[i]=(long)utoipos(p1[i]);
+      p2[i]=(long)utoipos(p2[i]);
+    }
   return res;
 }
 

@@ -1127,7 +1127,7 @@ GEN
 Fp_shanks(GEN x,GEN g0,GEN p, GEN q)
 {
   pari_sp av=avma,av1,lim;
-  long lbaby,i,k,c;
+  long lbaby,i,k;
   GEN p1,smalltable,giant,perm,v,g0inv;
 
   x = modii(x,p);
@@ -1136,17 +1136,15 @@ Fp_shanks(GEN x,GEN g0,GEN p, GEN q)
   if (egalii(p1,x)) { avma = av; return shifti(q,-1); }
   p1 = sqrti(q);
   if (cmpis(p1,LGBITS) >= 0) err(talker,"module too large in Fp_shanks");
-  lbaby=itos(p1)+1; smalltable=cgetg(lbaby+1,t_VEC);
+  lbaby = itos(p1)+1; smalltable = cgetg(lbaby+1,t_VEC);
   g0inv = Fp_inv(g0, p); p1 = x;
 
-  c = 3 * lgefint(p);
   for (i=1;;i++)
   {
     av1 = avma;
-    if (is_pm1(p1)) { avma=av; return stoi(i-1); }
-    smalltable[i]=(long)p1; if (i==lbaby) break;
-    (void)new_chunk(c); p1 = mulii(p1,g0inv); /* HACK */
-    avma = av1; p1 = remii(p1, p);
+    if (is_pm1(p1)) { avma = av; return stoi(i-1); }
+    smalltable[i] = (long)p1; if (i==lbaby) break;
+    p1 = gerepileuptoint(av1, remii(mulii(p1,g0inv), p));
   }
   giant = remii(mulii(x, Fp_inv(p1,p)), p);
   p1=cgetg(lbaby+1,t_VEC);
@@ -1277,7 +1275,6 @@ ffshanks(GEN x, GEN g0, GEN q, GEN T, GEN p)
   for (i=1;;i++)
   {
     if (gcmp1(p1)) { avma = av; return stoi(i-1); }
-
     smalltable[i]=(long)p1; if (i==lbaby) break;
     p1 = FpXQ_mul(p1,g0inv, T,p);
   }
@@ -2037,10 +2034,8 @@ zideallog_sgn(GEN nf, GEN x, GEN sgn, GEN bid)
   }
   if (den)
   {
-    GEN g = cgetg(3, t_COL);
-    GEN e = cgetg(3, t_COL);
-    g[1] = (long)Q_muli_to_int(x,den); e[1] = un;
-    g[2] = (long)den;                  e[2] = lstoi(-1);
+    GEN g = mkcol2(Q_muli_to_int(x,den), den);
+    GEN e = mkcol2(gun, utoineg(1));
     y = famat_zlog(nf, g, e, sgn, bid);
   }
   else

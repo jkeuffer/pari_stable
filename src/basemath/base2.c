@@ -266,7 +266,7 @@ ordmax(GEN *cf, GEN p, long epsilon, GEN *ptdelta)
     long k;
     k = sp = itos(p);
     i=1; while (k < n) { k *= sp; i++; }
-    hard_case_exponent = stoi(i);
+    hard_case_exponent = utoipos(i);
   }
   T=cgetg(n+1,t_MAT); for (i=1; i<=n; i++) T[i]=lgetg(n+1,t_COL);
   T2=cgetg(2*n+1,t_MAT); for (i=1; i<=2*n; i++) T2[i]=lgetg(n+1,t_COL);
@@ -599,14 +599,13 @@ allbase(GEN f, int flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
   w = ptw? *ptw: NULL;
   allbase_check_args(f, flag, dx, &w);
   w1 = (GEN)w[1];
-  w2 = (GEN)w[2];
+  w2 = vec_to_vecsmall((GEN)w[2]);
   n = degpol(f); lw = lg(w1);
   ordmax = cgetg(1, t_VEC);
   /* "complete" factorization first */
   for (i=1; i<lw; i++)
   {
-    VOLATILE long mf = itos((GEN)w2[i]);
-    if (mf == 1) { ordmax = concatsp(ordmax, gun); continue; }
+    if (w2[i] == 1) { ordmax = concatsp(ordmax, gun); continue; }
 
     CATCH(invmoder) { /* caught false prime, update factorization */
       GEN x = (GEN)global_err_data;
@@ -622,13 +621,13 @@ allbase(GEN f, int flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
       w1[i] = u[1];
       w1 = concatsp(w1, vecextract_i(u, 2, l-1));
       N = *dx;
-      w2[i] = lstoi(Z_pvalrem(N, (GEN)w1[i], &N));
+      w2[i] = Z_pvalrem(N, (GEN)w1[i], &N);
       k  = lw;
       lw = lg(w1);
-      for ( ; k < lw; k++) w2[k] = lstoi(Z_pvalrem(N, (GEN)w1[k], &N));
+      for ( ; k < lw; k++) w2[k] = Z_pvalrem(N, (GEN)w1[k], &N);
     } RETRY {
-      if (DEBUGLEVEL) fprintferr("Treating p^k = %Z^%ld\n",w1[i],mf);
-      ordmax = concatsp(ordmax, mkvec( maxord((GEN)w1[i],f,mf) ));
+      if (DEBUGLEVEL) fprintferr("Treating p^k = %Z^%ld\n",w1[i],w2[i]);
+      ordmax = concatsp(ordmax, mkvec( maxord((GEN)w1[i],f,w2[i]) ));
     } ENDCATCH;
   }
 
@@ -700,7 +699,7 @@ allbase(GEN f, int flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
     for (j=1; j<lw; j++)
     {
       k = safe_Z_pvalrem(D, (GEN)w1[j], &D);
-      if (k) { W1[lfa] = w1[j]; W2[lfa] = lstoi(k); lfa++; }
+      if (k) { W1[lfa] = w1[j]; W2[lfa] = (long)utoipos(k); lfa++; }
     }
     setlg(W1, lfa);
     setlg(W2, lfa); *ptw = w;
@@ -721,7 +720,7 @@ update_fact(GEN x, GEN f)
   for (i=1; i<l; i++)
   {
     k = safe_Z_pvalrem(d, (GEN)p[i], &d);
-    if (k) { q[iq] = p[i]; e[iq] = lstoi(k); iq++; }
+    if (k) { q[iq] = p[i]; e[iq] = (long)utoipos(k); iq++; }
   }
   setlg(q,iq); setlg(e,iq);
   return merge_factor_i(decomp(d), g);
@@ -1149,7 +1148,7 @@ redelt(GEN a, GEN N, GEN p)
   return a;
 }
 
-/* compute the Newton sums of g(x) mod p */
+/* compute the Newton sums of g(x) mod p, assume deg g > 0 */
 GEN
 polsymmodp(GEN g, GEN p)
 {
@@ -1158,7 +1157,7 @@ polsymmodp(GEN g, GEN p)
   GEN s , y;
 
   y = cgetg(d + 1, t_COL);
-  y[1] = lstoi(d);
+  y[1] = (long)utoipos(d);
   for (k = 1; k < d; k++)
   {
     av1 = avma;
@@ -1238,13 +1237,14 @@ newtoncharpoly(GEN pp, GEN p, GEN NS)
   GEN c = cgetg(n + 2, t_VEC);
 
   if (!NS) return NULL;
-  c[1] = lstoi((n % 2)? -1: 1);
+  c[1] = (long)(n & 1 ? utoineg(1): gun);
   for (k = 2; k <= n+1; k++) c[k] = zero;
   for (k = 2; k <= n+1; k++)
   {
     pari_sp av2 = avma;
-    GEN z,  s = gzero;
-    long v = Z_pvalrem(stoi(k - 1), p, &z);
+    GEN s = gzero;
+    ulong z;
+    long v = u_pvalrem(k - 1, p, &z);
     for (j = 1; j < k; j++)
     {
       GEN t = mulii((GEN)NS[j], (GEN)c[k-j]);
@@ -1255,7 +1255,7 @@ newtoncharpoly(GEN pp, GEN p, GEN NS)
       s = gdiv(s, gpowgs(p, v));
       if (typ(s) != t_INT) return NULL;
     }
-    s = mulii(s, Fp_inv(z, pp));
+    s = mulii(s, Fp_inv(utoipos(z), pp));
     c[k] = (long)gerepileuptoint(av2, centermod(s, pp));
   }
   for (k = odd(n)? 1: 2; k <= n+1; k += 2) c[k] = lnegi((GEN)c[k]);
@@ -1444,7 +1444,7 @@ getprime(decomp_t *S, GEN phi, GEN chip, GEN nup, long *Lp, long *Ep,
    * so is pi + O(p) since 1/E < 1. May compute nu^r mod p^(s+1) */
 
   q = gpowgs(S->p, s+1);
-  nup = FpXQ_pow(nup, stoi(r), S->chi, q);
+  nup = FpXQ_pow(nup, utoipos(r), S->chi, q);
   return gdiv(compmod(nup, phi, S->chi, q), gpowgs(S->p, s));
 }
 
@@ -2047,7 +2047,7 @@ primedec_apply_kummer(GEN nf,GEN u,GEN e,GEN p)
 
   pr[1] = (long)p;
   pr[3] = (long)e;
-  pr[4] = lstoi(f);
+  pr[4] = (long)utoipos(f);
   if (f == N) /* inert */
   {
     pr[2] = (long)gscalcol_i(p,N);
@@ -2137,8 +2137,8 @@ get_pr(GEN nf, norm_S *S, GEN p, GEN P, GEN V, int ramif)
   pr = cgetg(6,t_VEC);
   pr[1] = (long)p;
   pr[2] = (long)u;
-  pr[3] = lstoi(e);
-  pr[4] = lstoi(f);
+  pr[3] = (long)utoipos(e);
+  pr[4] = (long)utoipos(f);
   pr[5] = (long)t; return pr;
 }
 
@@ -2535,7 +2535,7 @@ kill_denom(GEN x, GEN nf, GEN p, GEN modpr)
   {
     GEN tau = modpr_TAU(modpr);
     if (!tau) err(talker,"modpr initialized for integers only!");
-    x = element_mul(nf,x, element_pow(nf,tau,stoi(v)));
+    x = element_mul(nf,x, element_pow(nf, tau, utoipos(v)));
   }
   x = Q_primitive_part(x, &cx);
   x = FpV_red(x, p);

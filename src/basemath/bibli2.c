@@ -163,15 +163,15 @@ cyclo(long n, long v)
   for (d=1; d*d<=n; d++)
   {
     if (n%d) continue;
-    q=n/d;
-    m = mu(stoi(q));
+    q = n/d;
+    m = mu(utoipos(q));
     if (m)
     { /* y *= (x^d - 1) */
       if (m>0) yn = addmulXn(yn, gneg(yn), d);
       else     yd = addmulXn(yd, gneg(yd), d);
     }
     if (q==d) break;
-    m = mu(stoi(d));
+    m = mu(utoipos(d));
     if (m)
     { /* y *= (x^q - 1) */
       if (m>0) yn = addmulXn(yn, gneg(yn), q);
@@ -254,18 +254,15 @@ mathilbert(long n) /* Hilbert matrix of order n */
   long i,j;
   GEN a,p;
 
-  if (n<0) n = 0;
+  if (n < 0) n = 0;
   p = cgetg(n+1,t_MAT);
   for (j=1; j<=n; j++)
   {
-    p[j]=lgetg(n+1,t_COL);
+    p[j] = lgetg(n+1,t_COL);
     for (i=1+(j==1); i<=n; i++)
-    {
-      a=cgetg(3,t_FRAC); a[1]=un; a[2]=lstoi(i+j-1);
-      coeff(p,i,j)=(long)a;
-    }
+      coeff(p,i,j) = (long)mkfrac(gun, utoipos(i+j-1));
   }
-  if ( n ) mael(p,1,1)=un;
+  if (n) coeff(p,1,1) = un;
   return p;
 }
 
@@ -528,7 +525,7 @@ vecbinome(long n)
   for (k=1; k <= d; k++)
   {
     pari_sp av = avma;
-    C[k] = gerepileuptoint(av, diviiexact(mulsi(n-k+1, C[k-1]), stoi(k)));
+    C[k] = gerepileuptoint(av, diviiexact(mulsi(n-k+1, C[k-1]), utoipos(k)));
   }
   for (   ; k <= n; k++) C[k] = C[n - k];
   return bin;
@@ -550,7 +547,7 @@ polint_i(GEN xa, GEN ya, GEN x, long n, GEN *ptdy)
   if (!xa)
   {
     xa = cgetg(n+1, t_VEC);
-    for (i=1; i<=n; i++) xa[i] = lstoi(i);
+    for (i=1; i<=n; i++) xa[i] = (long)utoipos(i);
     xa++;
   }
   if (is_scalar_t(tx) && tx != t_INTMOD && tx != t_PADIC && tx != t_POLMOD)
@@ -1053,7 +1050,7 @@ gen_sort(GEN x, int flag, int (*cmp)(GEN,GEN))
   if (flag & cmp_C)
     for (i=1; i<lx; i++) y[i] = indx[i];
   else if (flag & cmp_IND)
-    for (i=1; i<lx; i++) y[i] = lstoi(indx[i]);
+    for (i=1; i<lx; i++) y[i] = (long)utoipos(indx[i]);
   else if (tx == t_VECSMALL)
     for (i=1; i<lx; i++) y[i] = x[indx[i]];
   else

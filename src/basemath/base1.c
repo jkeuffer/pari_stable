@@ -879,7 +879,7 @@ get_Tr(GEN mul, GEN x, GEN basden)
   T1 = cgetg(n+1,t_COL);
   sym = polsym(x, n-1);
 
-  T1[1]=lstoi(n);
+  T1[1] = (long)utoipos(n);
   for (i=2; i<=n; i++)
   {
     tr = quicktrace((GEN)bas[i], sym);
@@ -2042,7 +2042,7 @@ nf_pm1(GEN y)
 static GEN
 is_primitive_root(GEN nf, GEN fa, GEN x, long w)
 {
-  GEN y, exp = stoi(2), pp = (GEN)fa[1];
+  GEN y, exp = gdeux, pp = (GEN)fa[1];
   long i,p, l = lg(pp);
 
   for (i=1; i<l; i++)
@@ -2083,7 +2083,7 @@ rootsof1(GEN nf)
     GEN R = R_from_QR(gmael(nf,5,2), prec);
     if (R)
     {
-      y = fincke_pohst(mkvec(R),stoi(N),1000, 0, NULL);
+      y = fincke_pohst(mkvec(R), utoipos(N), 1000, 0, NULL);
       if (y) break;
     }
     if (i == MAXITERPOL) err(accurer,"rootsof1");
@@ -2099,7 +2099,7 @@ rootsof1(GEN nf)
   for (i=1; i<k; i++)
   {
     z = is_primitive_root(nf, d, (GEN)list[i], ws);
-    if (z) return gerepilecopy(av, mkvec2(stoi(ws), z));
+    if (z) return gerepilecopy(av, mkvec2(w, z));
   }
   err(bugparier,"rootsof1");
   return NULL; /* not reached */
@@ -2182,7 +2182,7 @@ zeta_get_limx(long r1, long r2, long bit)
   c1 = mulrs(powrfrac(real2n(1, DEFAULTPREC), -2*r2, N), N);
 
   p1 = gpowgs(Pi2n(1, DEFAULTPREC), r - 1);
-  p2 = gmul2n(mpmul(gpowgs(stoi(N),r), p1), -r2);
+  p2 = gmul2n(mpmul(gpowgs(utoipos(N),r), p1), -r2);
   c0 = sqrtr( mpdiv(p2, gpowgs(c1, r+1)) );
 
   A0 = mplog( gmul2n(c0, bit) ); p2 = gdiv(A0, c1);
@@ -2222,7 +2222,7 @@ zeta_get_i0(long r1, long r2, long bit, GEN limx)
 {
   pari_sp av = avma;
   GEN B = gmul(sqrtr( gdiv(gpowgs(mppi(DEFAULTPREC), r2-3), limx) ),
-               gmul2n(gpowgs(stoi(5), r1), bit + r2));
+               gmul2n(gpowgs(utoipos(5), r1), bit + r2));
   long i0 = get_i0(r1, r2, B, limx);
   if (DEBUGLEVEL>1) { fprintferr("i0 = %ld\n",i0); flusherr(); }
   avma = av; return i0;
@@ -2294,7 +2294,7 @@ initzeta(GEN pol, long prec)
     if (k&1) t = gneg(t);
     ck_even[k] = (long)t;
   }
-  gru = stoi(r);
+  gru = utoipos(r);
   for (k = 1; k <= r2+1; k++)
   {
     GEN t = gmul((GEN)zet[k], gsub(gru, gmul2n(gr1,-k)));
@@ -2320,8 +2320,8 @@ initzeta(GEN pol, long prec)
     for (   ; j<R; j++) p1[j] = zero;
     i++;
 
-    c_even = gdiv(c_even,gmul(gpowgs(stoi(i),r),gpowgs(stoi(2*i-1),r2)));
-    c_odd  = gdiv(c_odd, gmul(gpowgs(stoi(i),r2),gpowgs(stoi(2*i+1),r)));
+    c_even = gdiv(c_even,gmul(gpowgs(utoipos(i),r),gpowgs(utoipos(2*i-1),r2)));
+    c_odd  = gdiv(c_odd, gmul(gpowgs(utoipos(i),r2),gpowgs(utoipos(2*i+1),r)));
     c_even = gmul2n(c_even,-r2);
     c_odd  = gmul2n(c_odd,r1-r2);
     if (r1 & 1) { c_even = gneg_i(c_even); c_odd = gneg_i(c_odd); }

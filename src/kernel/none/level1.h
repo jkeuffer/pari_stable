@@ -30,8 +30,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #if !defined(INLINE) || defined(INLINE_IS_STATIC)
 GEN    mkcol(GEN x);
+GEN    mkcol2(GEN x, GEN y);
 GEN    mkcolcopy(GEN x);
 GEN    mkcomplex(GEN x, GEN y);
+GEN    mkfrac(GEN x, GEN y);
 GEN    mkmat(GEN x);
 GEN    mkmatcopy(GEN x);
 GEN    mkvec(GEN x);
@@ -44,6 +46,7 @@ GEN    mkvec4(GEN x, GEN y, GEN z, GEN t);
 GEN    mkveccopy(GEN x);
 GEN    mkvecs(long x);
 GEN    mkvecsmall(long x);
+GEN    mkvecsmall3(long x,long y, long z);
 void   affiz(GEN x, GEN y);
 void   affsz(long x, GEN y);
 GEN    addii(GEN x, GEN y);
@@ -254,12 +257,18 @@ cgetc(long l)
   return u;
 }
 INLINE GEN
+mkfrac(GEN x, GEN y) { GEN v = cgetg(3, t_FRAC);
+  v[1] = (long)x; v[2] = (long)y; return v; }
+INLINE GEN
 mkcomplex(GEN x, GEN y) { GEN v = cgetg(3, t_COMPLEX);
   v[1] = (long)x; v[2] = (long)y; return v; }
 INLINE GEN
 mkvec(GEN x) { GEN v = cgetg(2, t_VEC); v[1] = (long)x; return v; }
 INLINE GEN
 mkvecsmall(long x) { GEN v = cgetg(2, t_VECSMALL); v[1] = x; return v; }
+INLINE GEN
+mkvecsmall3(long x,long y, long z) { GEN v = cgetg(4, t_VECSMALL);
+  v[1]=x; v[2]=y; v[3]=z; return v; }
 INLINE GEN
 mkveccopy(GEN x) { GEN v = cgetg(2, t_VEC); v[1] = lcopy(x); return v; }
 INLINE GEN
@@ -277,6 +286,9 @@ mkvec2copy(GEN x, GEN y) {
   GEN v = cgetg(3,t_VEC); v[1] = lcopy(x); v[2] = lcopy(y); return v; }
 INLINE GEN
 mkcol(GEN x) { GEN v = cgetg(2, t_COL); v[1] = (long)x; return v; }
+INLINE GEN
+mkcol2(GEN x, GEN y) {
+  GEN v = cgetg(3,t_COL); v[1] = (long)x; v[2] = (long)y; return v; }
 INLINE GEN
 mkcolcopy(GEN x) { GEN v = cgetg(2, t_COL); v[1] = lcopy(x); return v; }
 INLINE GEN
