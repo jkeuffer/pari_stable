@@ -2133,7 +2133,7 @@ skipfacteur(void)
 static long
 skiptruc(void)
 {
-  long n=0;
+  long i,m,n=0;
   char *old;
 
   switch(*analyseur)
@@ -2165,19 +2165,15 @@ skiptruc(void)
       switch (*analyseur)
       {
 	case ']': analyseur++; return n;
-	case ';':
-	{
-	  long m, norig=n; /* number of elts in first line */
-	  old=analyseur;
-	  do {
-	    m=n;
-	    do { n++; analyseur++; skipexpr(); }
-	    while (*analyseur != ';' && *analyseur != ']');
-	    if (n-m != norig)
-	      err(talker2,"non rectangular matrix",old,mark.start);
-	  } while (*analyseur != ']');
-	  analyseur++; return n;
-	 }
+	case ';': analyseur++;
+          for (m=2; ; m++)
+          {
+            for (i=1; i<n; i++) { skipexpr(); match(','); }
+            skipexpr();
+            if (*analyseur == ']') break;
+            match(';');
+          }
+          analyseur++; return m*n;
 	default:
 	  err(talker2,"; or ] expected",old,mark.start);
 	  return 0; /* not reached */
@@ -2566,12 +2562,9 @@ diff(GEN x) /* different */
 static GEN
 codiff(GEN x) /* codifferent */
 {
-  GEN z;
   int t; x = get_nf(x,&t);
   if (!x) err(member,"codiff",mark.member,mark.start);
-  z = gmael(x,5,7);
-  z = idealhnf0(x,(GEN)z[1],(GEN)z[2]);
-  return gdiv(z, absi((GEN) x[3]));
+  return gdiv(gmael(x,5,6), absi((GEN) x[3]));
 }
 
 static GEN
