@@ -3194,21 +3194,12 @@ mpqs(GEN N)
 
     if (DEBUGLEVEL >= 6)
     {
+      pari_sp av = avma;
       if (!index_i)
-	fprintferr("MPQS: chose prime pattern 0x%lX for A\n",
-		   bin_index);
-      if (signe(B) < 0)
-      {
-	setsigne(B,1);
-	fprintferr("MPQS: chose Q_%ld(x) = %Z x^2 - %Z x + C\n",
-		   index_i, A, B);
-	setsigne(B,-1);
-      }
-      else
-      {
-	fprintferr("MPQS: chose Q_%ld(x) = %Z x^2 + %Z x + C\n",
-		   index_i, A, B);
-      }
+	fprintferr("MPQS: chose prime pattern 0x%lX for A\n", bin_index);
+      fprintferr("MPQS: chose Q_%ld(x) = %Z x^2 %c %Z x + C\n",
+                 index_i, A, signe(B) < 0? '-': '+', absi(B));
+      avma = av;
     }
 
     mpqs_sieve(FB, log_FB, start_1, start_2, sieve_array,
