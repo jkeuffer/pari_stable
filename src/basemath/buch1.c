@@ -741,7 +741,7 @@ quadrayimagsigma(GEN bnr, int raw, long prec)
 GEN
 quadray(GEN D, GEN f, GEN flag, long prec)
 {
-  GEN bnr,y,p1,pol,bnf,lambda;
+  GEN bnr,y,pol,bnf,lambda;
   long raw;
   pari_sp av = avma;
 

@@ -856,7 +856,7 @@ veceint1(GEN C, GEN nmax, long prec)
 {
   long k, n, nstop, i, cd, nmin, G, a, chkpoint;
   pari_sp av, av1;
-  GEN y,e1,e2,F0,F,den,minvn,mcn,p1,vdiff,unr;
+  GEN Mx, My, y, e1, e2, F0, F, den, minvn, mcn, p1, vdiff, unr;
 
   if (!nmax) return eint1(C,prec);
 
@@ -881,11 +881,11 @@ veceint1(GEN C, GEN nmax, long prec)
   unr = realun(prec);
   av1 = avma;
 
-  F0=(GEN)y[n]; chkpoint = n;
+  F0 = (GEN)y[n]; chkpoint = n;
   affrr(eint1(mulsr(n,C),prec), F0);
+  Mx = My = NULL; /* -Wall */
   do
   {
-    GEN Mx, My;
     if (DEBUGLEVEL>1 && n < chkpoint)
       { fprintferr("%ld ",n) ; chkpoint -= (itos(nmax) / 20); }
     minvn = divrs(unr,-n);

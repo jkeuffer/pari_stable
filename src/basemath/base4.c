@@ -1152,7 +1152,7 @@ append(GEN v, GEN x)
 static GEN
 famat_add(GEN f, GEN x)
 {
-  GEN t,h = cgetg(3,t_MAT);
+  GEN h = cgetg(3,t_MAT);
   if (lg(f) == 1)
   {
     h[1] = (long)_colcopy(x);

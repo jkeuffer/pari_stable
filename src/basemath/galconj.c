@@ -1092,7 +1092,7 @@ GEN
 listsousgroupes(long m, long p)
 {
   pari_sp ltop = avma;
-  GEN     zn, zns, lss, sg, res;
+  GEN     zn, zns, lss, res;
   int     k, card, i, phi;
   if (m == 2)
   {
