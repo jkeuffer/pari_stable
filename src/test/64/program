@@ -1,7 +1,7 @@
    echo = 1 (on)
 ? gettime;alias(ln,log)
 ? ln(2)
-0.69314718055994530941723212145817656807
+0.69314718055994530941723212145817656808
 ? for(x=1,5,print(x!))
 1
 2
@@ -113,5 +113,5 @@ og(p)/log(q))));
 ? getheap
 [22, 1577]
 ? print("Total time spent: ",gettime);
-Total time spent: 213
+Total time spent: 61
 ? \q
