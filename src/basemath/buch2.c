@@ -1315,6 +1315,15 @@ isprincipalall(GEN bnf,GEN x,long flag)
   }
 }
 
+static GEN
+add_principal_part(GEN nf, GEN u, GEN v, long flag)
+{
+  if (flag & nf_GENMAT)
+    return (isnfscalar(u) && gcmp1((GEN)u[1]))? v: arch_mul(v,u);
+  else
+    return element_mul(nf, v, u);
+}
+
 /* isprincipal for C * \prod P[i]^e[i] (C omitted if NULL) */
 GEN
 isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag)
@@ -1322,7 +1331,7 @@ isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag)
   long l = lg(e), i, prec, c;
   pari_sp av = avma;
   GEN id,id2, nf = checknf(bnf), z = NULL; /* gcc -Wall */
-  int gen = flag & (nf_GEN|nf_GENMAT);
+  int gen = flag & (nf_GEN|nf_GENMAT|nf_GEN_IF_PRINCIPAL);
 
   prec = prec_arch(bnf);
   if (gen)
@@ -1351,15 +1360,16 @@ isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag)
     GEN y = _isprincipal(bnf, gen? (GEN)id[1]: id,&prec,flag);
     if (y)
     {
-      GEN u = (GEN)y[2];
-      if (!gen || typ(y) != t_VEC) return gerepileupto(av,y);
-      if (flag & nf_GENMAT)
-        y[2] = (isnfscalar(u) && gcmp1((GEN)u[1]))? id[2]
-                                                  :(long)arch_mul((GEN)id[2],u);
+      if (flag & nf_GEN_IF_PRINCIPAL)
+      {
+        if (typ(y) == t_INT) { avma = av; return NULL; }
+        y = add_principal_part(nf, y, (GEN)id[2], flag);
+      }
       else
       {
-        u = lift_intern(basistoalg(nf, u));
-        y[2] = (long)algtobasis(nf, gmul((GEN)id[2], u));
+        GEN u = (GEN)y[2];
+        if (!gen || typ(y) != t_VEC) return gerepileupto(av,y);
+        y[2] = (long)add_principal_part(nf, u, (GEN)id[2], flag);
       }
       return gerepilecopy(av, y);
     }
