@@ -42,25 +42,45 @@ checkrnf(GEN rnf)
 }
 
 GEN
-checkbnf(GEN bnf)
+_checkbnf(GEN bnf)
 {
-  if (typ(bnf)!=t_VEC) err(idealer1);
-  switch (lg(bnf))
-  {
-    case 11: return bnf;
-    case 10:
-      if (typ(bnf[1])==t_POL)
-        err(talker,"please apply bnfinit first");
-      break;
-    case 7:
-      return checkbnf((GEN)bnf[1]);
+  if (typ(bnf) == t_VEC)
+    switch (lg(bnf))
+    {
+      case 11: return bnf;
+      case 7:  return checkbnf((GEN)bnf[1]);
 
-    case 3:
-      if (typ(bnf[2])==t_POLMOD)
-        return checkbnf((GEN)bnf[1]);
+      case 3:
+        if (typ(bnf[2])==t_POLMOD)
+          return checkbnf((GEN)bnf[1]);
+    }
+  return NULL;
+}
+
+GEN
+_checknf(GEN nf)
+{
+  if (typ(nf)==t_VEC)
+    switch(lg(nf))
+    {
+      case 10: return nf;
+      case 11: return checknf((GEN)nf[7]);
+      case 7:  return checknf((GEN)nf[1]);
+      case 3: if (typ(nf[2]) == t_POLMOD) return checknf((GEN)nf[1]);
+    }
+  return NULL;
+}
+
+GEN
+checkbnf(GEN x)
+{
+  GEN bnf = _checkbnf(x);
+  if (!bnf)
+  {
+    if (_checknf(x)) err(talker,"please apply bnfinit first");
+    err(idealer1);
   }
-  err(idealer1);
-  return NULL; /* not reached */
+  return bnf;
 }
 
 GEN
@@ -73,19 +93,15 @@ checkbnf_discard(GEN bnf)
 }
 
 GEN
-checknf(GEN nf)
+checknf(GEN x)
 {
-  if (typ(nf)==t_POL) err(talker,"please apply nfinit first");
-  if (typ(nf)!=t_VEC) err(idealer1);
-  switch(lg(nf))
+  GEN nf = _checknf(x);
+  if (!nf)
   {
-    case 10: return nf;
-    case 11: return checknf((GEN)nf[7]);
-    case 7:  return checknf((GEN)nf[1]);
-    case 3: if (typ(nf[2]) == t_POLMOD) return checknf((GEN)nf[1]);
+    if (typ(x)==t_POL) err(talker,"please apply nfinit first");
+    err(idealer1);
   }
-  err(idealer1);
-  return NULL; /* not reached */
+  return nf;
 }
 
 void
@@ -681,6 +697,16 @@ galoisapply(GEN nf, GEN aut, GEN x)
 
 GEN pol_to_monic(GEN pol, GEN *lead);
 int cmp_pol(GEN x, GEN y);
+
+GEN
+get_bnfpol(GEN x, GEN *bnf, GEN *nf)
+{
+  *bnf = _checkbnf(x);
+  *nf  = _checknf(x);
+  if (*nf) return (GEN)(*nf)[1];
+  if (typ(x) != t_POL) err(idealer1);
+  return x;
+}
 
 GEN
 get_nfpol(GEN x, GEN *nf)
