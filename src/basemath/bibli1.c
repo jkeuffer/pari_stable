@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /********************************************************************/
 #include "pari.h"
 #include "parinf.h"
+extern GEN extendedgcd(GEN A);
 extern GEN ZV_lincomb(GEN u, GEN v, GEN X, GEN Y);
 extern int addcolumntomatrix(GEN V,GEN INVP,GEN L);
 extern long expodb(double x);
@@ -2074,7 +2075,8 @@ init_pslq(pslq_M *M, GEN x, long *PREC)
   { /* exact components */
     pari_sp av = avma;
     x = Q_primpart(x); if (tx == t_COL) x = gtrans_i(x);
-    return gerepilecopy(av, (GEN)kerint(gtomat(x))[1]);
+    x = (GEN)extendedgcd(x)[2];
+    return gerepilecopy(av, (GEN)x[1]);
   }
   if (prec < DEFAULTPREC) prec = DEFAULTPREC;
   *PREC = prec;
