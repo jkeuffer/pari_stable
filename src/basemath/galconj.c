@@ -1453,6 +1453,7 @@ permtopol(GEN p, GEN L, GEN M, GEN den, GEN mod, long x)
   av=avma;
   mod2=gclone(shifti(mod,-1)); /*clone*/
   avma=av;
+  if (lg(p) != n) err(talker,"incorrect permutation in permtopol");
   z[1]=evalsigne(1)|evalvarn(x)|evallgef(n+1);
   for (i=2; i<=n; i++)
   {
