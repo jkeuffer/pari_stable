@@ -3,7 +3,7 @@ Class: symbolic_operators
 C-Name: gmod
 Prototype: GG
 Description: 
- (small, small):int		modss($1, $2)
+ (small, small):small		smodss($1, $2)
  (small, int):int		modsi($1, $2)
  (int, small):small		smodis($1, $2)
  (int, int):int	  	        modii($1, $2)
