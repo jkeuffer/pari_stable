@@ -1827,7 +1827,7 @@ gdiv(GEN x, GEN y)
 
 	  case t_FRAC: case t_FRACN:
 	    l=avma; p1=mulri(x,(GEN)y[2]); tetpil=avma;
-	    return gerepile(l, tetpil, divri(x,(GEN)y[1]));
+	    return gerepile(l, tetpil, divri(p1,(GEN)y[1]));
 
 	  case t_COMPLEX: z=cgetg(3,t_COMPLEX);
             l=avma; p1=gnorm(y);
