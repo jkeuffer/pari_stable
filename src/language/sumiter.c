@@ -277,7 +277,10 @@ suminf(entree *ep, GEN a, char *ch, long prec)
   {
     p1 = lisexpr(ch); if (did_break()) err(breaker,"suminf");
     x = gadd(x,p1); a = incloop(a);
-    if (gexpo(p1) <= gexpo(x)-G) { if (++fl==3) break; } else fl=0;
+    if (gcmp0(p1) || gexpo(p1) <= gexpo(x)-G)
+      { if (++fl==3) break; }
+    else
+      fl=0;
     if (low_stack(lim, stack_lim(av,1)))
     {
       if (DEBUGMEM>1) err(warnmem,"suminf");
