@@ -148,12 +148,14 @@ feature together with a symbolic link, named \kbd{readline}, in the PARI
 toplevel directory if you have compiled the readline library somewhere else,
 without installing it to one of its standard locations. 
 
-\misctitle{Linux:} several Linux distributions, e.g.~Mandrake and RedHat, have
-separate \kbd{readline} and \kbd{readline-devel} packages. You need both of
-them installed to compile gp with readline support. If only \kbd{readline}
-is installed, \kbd{Configure} will complain. \kbd{Configure} may also
-complain about a missing libncurses.so, in which case, you will have to
-install the \kbd{ncurses-devel} package.
+\misctitle{Linux:} Linux distributions have separate \kbd{readline} and
+\kbd{readline-devel} packages. You need both of them installed to compile gp
+with readline support. If only \kbd{readline} is installed, \kbd{Configure}
+will complain. \kbd{Configure} may also complain about a missing
+libncurses.so, in which case, you will have to install the
+\kbd{ncurses-devel} package (some distributions let you install
+\kbd{readline-devel} without \kbd{ncurses-devel}, which is a bug in their
+package dependency handling).
 
 \misctitle{Technical note:} Configure can build GP on different architectures
 simultaneously from the same toplevel sources. Instead of the \kbd{readline}
