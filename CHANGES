@@ -49,7 +49,7 @@ XR  9- possible overflow in ComputeCoeff [ bnrstark() ]
   Changed
     1- removed useless parameter prec in many bnr* and rnf* functions
     2- major update of bnr* functions [use elements in factored form]
-    3- use /var/tmp instead of /tmp as default tmp directory [faster on Solaris]
+    3- use /tmp instead of /var/tmp as default tmp directory [faster on Solaris]
 BA  4- Fp_PHlog (Pohlig-Hellman) can use a factorization of the subgroup order
     5- major update of buchall() [bnfinit]: accurate precision increase, cleanup
     6- [libpari:] rename permute/permuteInv to GP names numtoperm/permtonum
