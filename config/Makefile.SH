@@ -304,7 +304,7 @@ all: $exec lib-sta
 lib-sta: \$(LIBPARI_STA)
 lib-dyn: \$(LIBPARI_DYN)
 
-\$(LIBPARI_STA): \$(OBJS)
+\$(LIBPARI_STA): $src/funclist \$(OBJS)
 	-\$(RM) \$@
 	\$(AR) r \$@ \$(OBJS)
 EOT
@@ -340,7 +340,7 @@ tune-dyn: tune.o lib-dyn
 tune-sta: tune.o lib-sta
 	\$(LD) \$(LDFLAGS) -o \$@ \$< \$(GMPOBJS) ./\$(LIBPARI_STA) \$(LIBS)
 
-gp-sta: \$(OBJS) \$(OBJSGP) \$(GNUPLOT_OBJS)
+gp-sta: $src/funclist \$(OBJS) \$(OBJSGP) \$(GNUPLOT_OBJS)
 	\$(RM) \$@
 	\$(LD) -o \$@ \$(LDFLAGS) \$(OBJS) \$(OBJSGP) \$(GNUPLOT_OBJS) \$(RUNPTH) \$(RLLIBS) \$(PLOTLIBS) \$(LIBS)
 EOT
@@ -521,11 +521,11 @@ EOT
   fi
   cat >> $file << EOT
 
-gp-dyn: \$(OBJSGP) \$(LIBPARI_DYN) \$(GNUPLOT_OBJS) \$(EXPORT_LIB)
+gp-dyn: $src/funclist \$(OBJSGP) \$(LIBPARI_DYN) \$(GNUPLOT_OBJS) \$(EXPORT_LIB)
 	\$(RM) \$@
 	\$(LD) -o \$@ \$(LDFLAGS) \$(OBJSGP) \$(GNUPLOT_OBJS) \$(RUNPTH) \$(TOPLDDYN) \$(LDDYN) \$(PLOTLIBS) \$(LIBS)
 
-\$(LIBPARI_DYN): \$(OBJS) \$(EXPORT_FILE)
+\$(LIBPARI_DYN): $src/funclist \$(OBJS) \$(EXPORT_FILE)
 	-\$(RM) \$(LIBPARI_DYN)
 	\$(DLLD_IGNORE)\$(DLLD) -o \$@ \$(DLLDFLAGS) \$(OBJS) \$(EXTRADLLDFLAGS) \$(EXPORT_FILE)
 	-if test "\$(LIBPARI_SONAME)" != "\$(LIBPARI_SO)"; then \
@@ -564,10 +564,12 @@ fi
 cat >> $file << EOT
 pariinl.h: parilvl0.h parilvl1.h
 	cat parilvl0.h parilvl1.h > pariinl.h
-EOT
 
-cat >> $file << EOT
-$src/desc/Def: 
+$src/funclist::
+	ls -l $src/functions/*/* > $src/funclist.tmp
+	sh $cfg/mv-if-diff $src/funclist.tmp $src/funclist
+
+$src/desc/Def: $src/funclist
 	cd $src/desc; make Def
 
 $src/gp/gp_init.h $src/gp/highlvl.h $src/language/init.h: $src/desc/Def
@@ -641,4 +643,4 @@ done
 #to avoid execing too many "cat".
 echo "$HUGELINE" >> $file
 
-echo ".PHONY: gp dft"  >> $file
+echo ".PHONY: gp dft clean"  >> $file
