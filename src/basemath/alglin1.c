@@ -2566,8 +2566,13 @@ Flm_ker_sp(GEN x, ulong p, long deplin)
       c[j] = k; d[k] = j;
       piv = p - invumod(a, p); /* -1/a */
       ucoeff(x,j,k) = p-1;
-      for (i=k+1; i<=n; i++)
-	ucoeff(x,j,i) = (piv * ucoeff(x,j,i)) % p;
+      if (piv == 1) { /* nothing */ }
+      else if (OK_ulong)
+        for (i=k+1; i<=n; i++)
+          ucoeff(x,j,i) = (piv * ucoeff(x,j,i)) % p;
+      else
+        for (i=k+1; i<=n; i++)
+          ucoeff(x,j,i) = muluumod(piv, ucoeff(x,j,i), p);
       for (t=1; t<=m; t++)
       {
 	if (t == j) continue;
