@@ -1114,7 +1114,7 @@ matrixqz_aux(GEN A)
     if (!gcmp0(a))
     {
       a = denom(a);
-      if (!is_pm1(a)) A[k] = lmul((GEN)A[k], a);
+      if (!is_pm1(a)) A[k] = (long)Q_muli_to_int((GEN)A[k], a);
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
