@@ -568,7 +568,7 @@ allbase2(GEN f, int flag, GEN *dx, GEN *dK, GEN *ptw)
 }
 
 GEN
-base2(GEN x, GEN *dK) { return nfbasis0(x, compat_ROUND2, NULL); }
+base2(GEN x, GEN *pdK) { return nfbasis(x, pdK, compat_ROUND2, NULL); }
 
 GEN
 discf2(GEN x) { return nfdiscf0(x, compat_ROUND2, NULL); }
