@@ -1221,9 +1221,9 @@ AGAIN:
       GEN P1 = gscalmat(gpowgs(p, a-b), N0);
       first = 0;
       m = concatsp( m, vconcat(ZERO, P1) );
-      /*     [ C M_L        0    ]
-       * m = [                   ]   square matrix
-       *     [  T2'  p^(a-b) I_s ]   T2' = Tra * M_L  truncated
+      /*     [ C M_L        0     ]
+       * m = [                    ]   square matrix
+       *     [  T2'  p^(a-b) I_N0 ]   T2' = Tra * M_L  truncated
        */
     }
 
