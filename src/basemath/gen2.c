@@ -998,7 +998,22 @@ gabs(GEN x, long prec)
       y[2]=labsi((GEN)x[2]); return y;
 
     case t_COMPLEX:
-      l=avma; p1=gnorm(x); tetpil=avma;
+      l=avma; p1=gnorm(x);
+      switch(typ(p1))
+      {
+        case t_INT:
+          if (!carrecomplet(p1, &y)) break;
+          return gerepileupto(l, y);
+        case t_FRAC:
+        case t_FRACN:
+        {
+          GEN a,b;
+          if (!carrecomplet(p1[1], &a)) break;
+          if (!carrecomplet(p1[2], &b)) break;
+          return gerepileupto(l, gdiv(a,b));
+        }
+      }
+      tetpil=avma;
       return gerepile(l,tetpil,gsqrt(p1,prec));
 
     case t_QUAD:
