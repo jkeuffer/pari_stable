@@ -109,9 +109,6 @@ Misc:
    first element 1) --> huge improvement to all idealred computations (esp.
    bnfisprincipal, bnfinit)
 
-5  bivariate resultant over Z (polcompositum, charpoly, etc): use
-   interpolation + modular techniques
-
 4  graphics: allow FIG output (besides PostScript) [easier to edit!]
 
 4  decent finite field package (remove all the nfxxxmodpr functions)
