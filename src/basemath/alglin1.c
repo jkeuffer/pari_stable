@@ -1021,7 +1021,7 @@ gerepile_gauss_ker(GEN x, long m, long n, long k, long t, long av)
 }
 
 static void
-gerepile_gauss_Fp_ker(GEN x, GEN p, long m, long n, long k, long t, long av)
+gerepile_gauss_FpM_ker(GEN x, GEN p, long m, long n, long k, long t, long av)
 {
   long tetpil = avma,dec,u,A,i;
 
@@ -1698,7 +1698,7 @@ FpM_mul(GEN x, GEN y, GEN p)
 }
 
 static GEN
-u_Fp_ker(GEN x, GEN pp, long nontriv)
+u_FpM_ker(GEN x, GEN pp, long nontriv)
 {
   GEN y,c,d;
   long a,i,j,k,r,t,n,m,av0,tetpil, p = pp[2], piv;
@@ -1777,15 +1777,15 @@ u_Fp_ker(GEN x, GEN pp, long nontriv)
 }
 
 static GEN
-Fp_ker_i(GEN x, GEN p, long nontriv)
+FpM_ker_i(GEN x, GEN p, long nontriv)
 {
   GEN y,c,d,piv,mun;
   long i,j,k,r,t,n,m,av0,av,lim,tetpil;
 
-  if (typ(x)!=t_MAT) err(typeer,"Fp_ker");
+  if (typ(x)!=t_MAT) err(typeer,"FpM_ker");
   n=lg(x)-1; if (!n) return cgetg(1,t_MAT);
   if (lgefint(p) == 3 && p[2] < (MAXHALFULONG>>1))
-    return u_Fp_ker(x, p, nontriv);
+    return u_FpM_ker(x, p, nontriv);
 
   m=lg(x[1])-1; r=0; av0 = avma;
   x=dummycopy(x); mun=negi(gun);
@@ -1823,7 +1823,7 @@ Fp_ker_i(GEN x, GEN p, long nontriv)
             for (i=k+1; i<=n; i++)
               coeff(x,t,i) = laddii(gcoeff(x,t,i),mulii(piv,gcoeff(x,j,i)));
             if (low_stack(lim, stack_lim(av,1)))
-              gerepile_gauss_Fp_ker(x,p,m,n,k,t,av);
+              gerepile_gauss_FpM_ker(x,p,m,n,k,t,av);
           }
 	}
     }
@@ -1849,12 +1849,12 @@ Fp_ker_i(GEN x, GEN p, long nontriv)
 }
 
 static void
-Fp_gauss_pivot(GEN x, GEN p, GEN *dd, long *rr)
+FpM_gauss_pivot(GEN x, GEN p, GEN *dd, long *rr)
 {
   GEN c,d,piv;
   long i,j,k,r,t,n,m,av,lim;
 
-  if (typ(x)!=t_MAT) err(typeer,"Fp_gauss_pivot");
+  if (typ(x)!=t_MAT) err(typeer,"FpM_gauss_pivot");
   n=lg(x)-1; if (!n) { *dd=NULL; *rr=0; return; }
 
   m=lg(x[1])-1; r=0;
@@ -1895,24 +1895,24 @@ Fp_gauss_pivot(GEN x, GEN p, GEN *dd, long *rr)
 }
 
 GEN
-Fp_ker(GEN x, GEN p)
+FpM_ker(GEN x, GEN p)
 {
-  return Fp_ker_i(x, p, 0);
+  return FpM_ker_i(x, p, 0);
 }
 
 int
 ker_trivial_mod_p(GEN x, GEN p)
 {
-  return Fp_ker_i(x, p, 1)==NULL;
+  return FpM_ker_i(x, p, 1)==NULL;
 }
 
 GEN
-Fp_image(GEN x, GEN p)
+FpM_image(GEN x, GEN p)
 {
   GEN d,y;
   long j,k,r, av = avma;
 
-  Fp_gauss_pivot(x,p,&d,&r);
+  FpM_gauss_pivot(x,p,&d,&r);
 
   /* r = dim ker(x) */
   if (!r) { avma=av; if (d) free(d); return gcopy(x); }
@@ -1926,17 +1926,17 @@ Fp_image(GEN x, GEN p)
 }
 
 static GEN
-sFp_invimage(GEN mat, GEN y, GEN p)
+sFpM_invimage(GEN mat, GEN y, GEN p)
 {
   long av=avma,i, nbcol = lg(mat);
   GEN col,p1 = cgetg(nbcol+1,t_MAT),res;
 
   if (nbcol==1) return NULL;
-  if (lg(y) != lg(mat[1])) err(consister,"Fp_invimage");
+  if (lg(y) != lg(mat[1])) err(consister,"FpM_invimage");
 
   p1[nbcol] = (long)y;
   for (i=1; i<nbcol; i++) p1[i]=mat[i];
-  p1 = Fp_ker(p1,p); i=lg(p1)-1;
+  p1 = FpM_ker(p1,p); i=lg(p1)-1;
   if (!i) return NULL;
 
   col = (GEN)p1[i]; p1 = (GEN) col[nbcol];
@@ -1954,7 +1954,7 @@ sFp_invimage(GEN mat, GEN y, GEN p)
 
 /* Calcule l'image reciproque de v par m */
 GEN
-Fp_invimage(GEN m, GEN v, GEN p)
+FpM_invimage(GEN m, GEN v, GEN p)
 {
   long av=avma,j,lv,tv=typ(v);
   GEN y,p1;
@@ -1962,7 +1962,7 @@ Fp_invimage(GEN m, GEN v, GEN p)
   if (typ(m)!=t_MAT) err(typeer,"inverseimage");
   if (tv==t_COL)
   {
-    p1 = sFp_invimage(m,v,p);
+    p1 = sFpM_invimage(m,v,p);
     if (p1) return p1;
     avma = av; return cgetg(1,t_MAT);
   }
@@ -1971,7 +1971,7 @@ Fp_invimage(GEN m, GEN v, GEN p)
   lv=lg(v)-1; y=cgetg(lv+1,t_MAT);
   for (j=1; j<=lv; j++)
   {
-    p1 = sFp_invimage(m,(GEN)v[j],p);
+    p1 = sFpM_invimage(m,(GEN)v[j],p);
     if (!p1) { avma = av; return cgetg(1,t_MAT); }
     y[j] = (long)p1;
   }
@@ -2056,15 +2056,15 @@ Fq_gerepile_gauss_ker(GEN x, GEN T, GEN p, long m, long n, long k, long t, long 
 }
 
 static GEN
-Fq_ker_i(GEN x, GEN T, GEN p, long nontriv)
+FqM_ker_i(GEN x, GEN T, GEN p, long nontriv)
 {
   GEN y,c,d,piv,mun;
   long i,j,k,r,t,n,m,av0,av,lim,tetpil;
 
-  if (typ(x)!=t_MAT) err(typeer,"Fp_ker");
+  if (typ(x)!=t_MAT) err(typeer,"FpM_ker");
   n=lg(x)-1; if (!n) return cgetg(1,t_MAT);
   /*if (!is_bigint(p) && p[2] < (MAXHALFULONG>>1))
-    return u_Fp_ker(x, p, nontriv);*/
+    return u_FpM_ker(x, p, nontriv);*/
 
   m=lg(x[1])-1; r=0; av0 = avma;
   x=dummycopy(x); mun=negi(gun);
@@ -2127,9 +2127,9 @@ Fq_ker_i(GEN x, GEN T, GEN p, long nontriv)
   return gerepile(av0,tetpil,y);
 }
 GEN
-Fq_ker(GEN x, GEN T, GEN p)
+FqM_ker(GEN x, GEN T, GEN p)
 {
-  return Fq_ker_i(x, T, p, 0);
+  return FqM_ker_i(x, T, p, 0);
 }
 
 /*******************************************************************/

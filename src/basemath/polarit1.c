@@ -641,7 +641,7 @@ FpX_nbfact(GEN u, GEN pp)
     }
   }
   if (DEBUGLEVEL > 7) msgtimer("frobenius");
-  vker = Fp_ker(Q,pp);
+  vker = FpM_ker(Q,pp);
   if (DEBUGLEVEL > 7) msgtimer("kernel");
   avma=ltop;
   return lg(vker)-1;
@@ -1062,7 +1062,7 @@ split_berlekamp(GEN Q, GEN *t, GEN pp, GEN pps2)
     }
   }
   if (DEBUGLEVEL > 7) msgtimer("frobenius");
-  vker = mat_to_vecpol(Fp_ker(Q,pp), vu);
+  vker = mat_to_vecpol(FpM_ker(Q,pp), vu);
   if (DEBUGLEVEL > 7) msgtimer("kernel");
   d = lg(vker)-1;
   if (p)

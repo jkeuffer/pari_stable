@@ -1878,7 +1878,7 @@ pradical(GEN nf, GEN p, GEN *modfrob)
     for (i=1; i<=N; i++)
       m[i]=(long)element_pow_mod_p(nf,(GEN)frob[i],p1, p);
   }
-  rad = Fp_ker(m, p);
+  rad = FpM_ker(m, p);
   for (i=1; i<=N; i++)
     coeff(frob,i,i) = lsubis(gcoeff(frob,i,i), 1);
   *modfrob = frob; return rad;
@@ -1908,7 +1908,7 @@ pol_min(GEN alpha,GEN nf,GEN algebre,long kbar,GEN p)
     puiss[i] = (long) project(algebre,p1,k,kbar);
   }
   puiss = lift_intern(puiss);
-  p1 = (GEN)Fp_ker(puiss, p)[1]; tetpil=avma;
+  p1 = (GEN)FpM_ker(puiss, p)[1]; tetpil=avma;
   return gerepile(av,tetpil,gtopolyrev(p1,0));
 }
 
@@ -2248,7 +2248,7 @@ primedec(GEN nf, GEN p)
       p1[i+lp] = (long) p2;
       p1[i] = ldiv(element_mul(nf,lift(p2),beta),p);
     }
-    ip = Fp_image(p1, p);
+    ip = FpM_image(p1, p);
     if (lg(ip)>N) err(bugparier,"primedec (bad pradical)");
   }
   unmodp=gmodulsg(1,p); zmodp=gmodulsg(0,p);
@@ -2267,7 +2267,7 @@ primedec(GEN nf, GEN p)
     b = gmul(modfrob,algebre1);
     for (i=1;i<=kbar;i++)
       b[i] = (long) project(algebre,(GEN) b[i],k,kbar);
-    mat1 = Fp_ker(lift_intern(b), p);
+    mat1 = FpM_ker(lift_intern(b), p);
     if (lg(mat1)>2)
     {
       GEN mat2 = cgetg(k+N+1,t_MAT);

@@ -20,8 +20,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*******************************************************************/
 BEGINEXTERN
 /* alglin1.c */
+GEN     FpM_image(GEN x, GEN p);
+GEN     FpM_invimage(GEN m, GEN v, GEN p);
+GEN     FpM_ker(GEN x, GEN p);
 GEN     FpM_mul(GEN x, GEN y, GEN p);
-GEN     Fq_ker(GEN x, GEN T, GEN p);
+GEN     FqM_ker(GEN x, GEN T, GEN p);
 GEN     concat(GEN x, GEN y);
 GEN     concatsp(GEN x, GEN y);
 GEN     deplin(GEN x);
@@ -52,15 +55,12 @@ GEN     idmat(long n);
 GEN     idmat_intern(long n,GEN myun,GEN myzero);
 GEN     image(GEN x);
 GEN     image2(GEN x);
-GEN     Fp_image(GEN x, GEN p);
 GEN     imagecompl(GEN x);
 GEN     imagereel(GEN x, long prec);
 GEN     indexrank(GEN x);
 GEN     inverseimage(GEN mat, GEN y);
-GEN     Fp_invimage(GEN m, GEN v, GEN p);
 long    isdiagonal(GEN x);
 GEN     ker(GEN x);
-GEN     Fp_ker(GEN x, GEN p);
 GEN     keri(GEN x);
 GEN     matextract(GEN x, GEN l1, GEN l2);
 GEN     matimage0(GEN x,long flag);

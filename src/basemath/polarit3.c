@@ -1219,7 +1219,7 @@ Fp_inv_isom(GEN S,GEN T, GEN p)
   for (i = 1; i <= n; i++)
     V[i] = zero;
   V[2] = un;
-  V = Fp_invimage(M,V,p);
+  V = FpM_invimage(M,V,p);
   lbot = avma;
   V = gtopolyrev(V, x);
   return gerepile(ltop, lbot, V);
@@ -1263,17 +1263,17 @@ Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       z=negi(lift((GEN)z[1]));
       ipg=stoi(pg);
       if (DEBUGLEVEL>=4) timer2();
-      A=Fp_ker(gaddmat(z, MA),l);
+      A=FpM_ker(gaddmat(z, MA),l);
       if (lg(A)!=2)
 	err(talker,"ZZ_%Z[%Z]/(%Z) is not a field in Fp_intersect"
 	    ,l,polx[vp],P);
       A=gtopolyrev((GEN)A[1],vp);
-      B=Fp_ker(gaddmat(z, MB),l);
+      B=FpM_ker(gaddmat(z, MB),l);
       if (lg(B)!=2)
 	err(talker,"ZZ_%Z[%Z]/(%Z) is not a field in Fp_intersect"
 	    ,l,polx[vq],Q);
       B=gtopolyrev((GEN)B[1],vq);
-      if (DEBUGLEVEL>=4) msgtimer("Fp_ker");
+      if (DEBUGLEVEL>=4) msgtimer("FpM_ker");
       An=(GEN) FpXQ_pow(A,ipg,P,l)[2];
       Bn=(GEN) FpXQ_pow(B,ipg,Q,l)[2];
       z=modii(mulii(An,mpinvmod(Bn,l)),l);
@@ -1289,19 +1289,19 @@ Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       lU=lift(U);
       ipg=stoi(pg);
       if (DEBUGLEVEL>=4) timer2();
-      A=Fq_ker(gaddmat(z, MA),lU,l);
+      A=FqM_ker(gaddmat(z, MA),lU,l);
       if (lg(A)!=2) 
 	err(talker,"ZZ_%Z[%Z]/(%Z) is not a field in Fp_intersect"
 	    ,l,polx[vp],P);
       A=gmul((GEN)A[1],gmodulcp(gmodulcp(gun,l),U));
       A=gtopolyrev(A,vp);  
-      B=Fq_ker(gaddmat(z, MB),lU,l);
+      B=FqM_ker(gaddmat(z, MB),lU,l);
       if (lg(B)!=2)
 	err(talker,"ZZ_%Z[%Z]/(%Z) is not a field in Fp_intersect"
 	    ,l,polx[vq],Q);
       B=gmul((GEN)B[1],gmodulcp(gmodulcp(gun,l),U));
       B=gtopolyrev(B,vq);
-      if (DEBUGLEVEL>=4) msgtimer("Fq_ker");
+      if (DEBUGLEVEL>=4) msgtimer("FqM_ker");
       /*Somewhat ugly, but it is a proof that POLYMOD are useful and
         powerful.*/
       An=lift(lift((GEN)lift(gpowgs(gmodulcp(A,P),pg))[2])); 
@@ -1342,7 +1342,7 @@ Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
 	for(i=1;i<lgef(Ay)-1;i++) VP[i]=Ay[i+1];
 	for(;i<=np;i++) VP[i]=zero;
       }
-      Ap=Fp_invimage(MA,VP,l);
+      Ap=FpM_invimage(MA,VP,l);
       Ap=gtopolyrev(Ap,vp);
       if (j)
       {
@@ -1350,9 +1350,9 @@ Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
 	for(i=1;i<lgef(By)-1;i++) VQ[i]=By[i+1];
 	for(;i<=nq;i++) VQ[i]=zero;
       }
-      Bp=Fp_invimage(MB,VQ,l);
+      Bp=FpM_invimage(MB,VQ,l);
       Bp=gtopolyrev(Bp,vq);
-      if (DEBUGLEVEL>=4) msgtimer("Fp_invimage");
+      if (DEBUGLEVEL>=4) msgtimer("FpM_invimage");
     }
   }/*FpX_add is not clean, so we must do it *before* lbot=avma*/
   A=FpX_add(A,Ap,NULL);
