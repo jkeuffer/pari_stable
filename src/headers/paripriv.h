@@ -244,6 +244,8 @@ GEN  ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound);
 GEN  ZY_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LPRS);
 GEN  ZY_ZXY_resultant(GEN A, GEN B0, long *lambda);
 GEN  RgXQ_u_pow(GEN x, ulong n, GEN T);
+GEN  RgX_gcd_simple(GEN x, GEN y);
+GEN  RgX_extgcd_simple(GEN a, GEN b, GEN *pu, GEN *pv);
 
 /* b') Chinese Remainder Theorem */
 GEN ZM_init_CRT(GEN Hp, ulong p);

@@ -2793,8 +2793,8 @@ pol_approx0(GEN r, GEN x, int exact)
   return 1;
 }
 
-static GEN
-polgcdnun(GEN x, GEN y)
+GEN
+RgX_gcd_simple(GEN x, GEN y)
 {
   pari_sp av1, av = avma, lim = stack_lim(av, 1);
   GEN r, yorig = y;
@@ -2810,13 +2810,33 @@ polgcdnun(GEN x, GEN y)
       return (y==yorig)? gcopy(y): gerepileupto(av,y);
     }
     x = y; y = r;
-    if (low_stack(lim,stack_lim(av,1)))
-    {
-      GEN *gptr[2]; x = gcopy(x); gptr[0]=&x; gptr[1]=&y;
-      if(DEBUGMEM>1) err(warnmem,"polgcdnun");
-      gerepilemanysp(av,av1,gptr,2);
+    if (low_stack(lim,stack_lim(av,1))) {
+      if(DEBUGMEM>1) err(warnmem,"RgX_gcd_simple");
+      gerepileall(av,2, &x,&y);
     }
   }
+}
+GEN
+RgX_extgcd_simple(GEN a, GEN b, GEN *pu, GEN *pv)
+{
+  pari_sp av = avma;
+  GEN q, r, d, d1, u, v, v1;
+  int exact = !(isinexactreal(a) || isinexactreal(b));
+
+  d = a; d1 = b; v = gen_0; v1 = gen_1;
+  for(;;)
+  {
+    if (pol_approx0(d1, a, exact)) break;
+    q = poldivrem(d,d1, &r);
+    v = gadd(v, gneg_i(gmul(q,v1)));
+    u=v; v=v1; v1=u;
+    u=r; d=d1; d1=u;
+  }
+  u = gadd(d, gneg_i(gmul(b,v)));
+  u = RgX_div(u,a);
+
+  gerepileall(av, 3, &u,&v,&d);
+  return d;
 }
 
 static int issimplefield(GEN x);
@@ -2828,7 +2848,6 @@ issimplepol(GEN x)
     if (issimplefield((GEN)x[i])) return 1;
   return 0;
 }
-
 /* return 1 if coeff explosion is not possible */
 static int
 issimplefield(GEN x)
@@ -3869,7 +3888,7 @@ srgcd(GEN x, GEN y)
   if (can_use_modular_gcd(x) &&
       can_use_modular_gcd(y)) return modulargcd(x,y); /* Q[X] */
 
-  if (issimplepol(x) || issimplepol(y)) x = polgcdnun(x,y);
+  if (issimplepol(x) || issimplepol(y)) x = RgX_gcd_simple(x,y);
   else
   {
     dx=lg(x); dy=lg(y);

@@ -91,6 +91,8 @@ RS 21- gcc-3.4 breaks on compatibility code to support old readline versions
     5- routines truedivii, truedvmdis, truedivis
 BA  6- [GMP] faster divri routine.
 BA  7- support for real forms for qfbsolve.
+    8- routines RgX_gcd_simple, RgX_extgcd_simple [ when no coeff explosion
+       in base field ]
 
   Changed
     1- renamed gegal --> gequal, gegalgs --> gequalgs, gegalsg --> gequalsg,

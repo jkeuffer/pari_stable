@@ -3254,7 +3254,7 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
       }
       if (!c)
       {
-	b = gcoeff(x,i,i); if (!signe(b)) break;
+	b = gcoeff(x,i,i); if (!signe(b) || is_pm1(b)) break;
 
         for (k=1; k<i; k++)
         {
@@ -3359,11 +3359,27 @@ gbezout_step(GEN *pa, GEN *pb, GEN *pu, GEN *pv)
   if (!signe(a))
   {
     *pa = gen_0; *pu = gen_0;
-    *pb = gen_1;   *pv = gen_1; return b;
+    *pb = gen_1; *pv = gen_1; return b;
   }
   d = RgX_extgcd(a,b, pu,pv);
-  *pa = gdiv(a, d);
-  *pb = gdiv(b, d); return d;
+  if (degpol(d)) { a = RgX_div(a, d); b = RgX_div(b, d); }
+  else if (typ(d[2]) == t_REAL && lg(d[2]) == 3)
+#if 0
+  { /* possible accuracy problem */
+    GEN D = RgX_gcd_simple(a,b);
+    if (degpol(D)) { 
+      a = RgX_div(a, D); b = RgX_div(b, D);
+      d = RgX_extgcd(a,b, pu,pv); /* retry now */
+    }
+  }
+#else
+  {
+    GEN d = RgX_extgcd_simple(a,b, pu,pv);
+    if (degpol(d)) { a = RgX_div(a, d); b = RgX_div(b, d); }
+  }
+#endif
+  *pa = a;
+  *pb = b; return d;
 }
 
 /* return x or -x such that leading term is > 0 if meaningful */
@@ -3436,7 +3452,7 @@ gsmithall(GEN x,long all)
       }
       if (!c)
       {
-	b = gcoeff(x,i,i); if (!signe(b)) break;
+	b = gcoeff(x,i,i); if (degpol(b) <= 0) break;
 
         for (k=1; k<i; k++)
         {
@@ -3545,14 +3561,14 @@ Frobeniusform(GEN V, long n)
     M[i] = (long) zerocol(n);
   for (k=1,i=1;i<lg(V);i++,k++)
   {
-    GEN  P = (GEN)V[i];
+    GEN  P = gel(V,i);
     long d = degpol(P);
-    if (k+d-2 > n)
-      err(talker, "accuracy lost in matfrobenius");
+    while (gcmp0(gel(P, d+2))) d--;
+    if (k+d-1 > n) err(talker, "accuracy lost in matfrobenius");
     for (j=0; j<d-1; j++, k++)
-      coeff(M,k+1,k) = (long)gen_1;
+      gcoeff(M,k+1,k) = gen_1;
     for (j=0; j<d; j++)
-      coeff(M,k-j,k) = lneg((GEN)P[1+d-j]);
+      gcoeff(M,k-j,k) = gneg(gel(P, 1+d-j));
   }
   return M;
 }
@@ -3569,16 +3585,16 @@ build_frobeniusbc(GEN V, long n)
   z = gneg(polx[0]);
   for (k=1,l=1+m,i=1;i<=m;i++,k++)
   {
-    GEN  P = (GEN)V[i];
+    GEN  P = gel(V,i);
     long d = degpol(P);
+    while (gcmp0(gel(P, d+2))) d--;
     if (d <= 0) continue;
-    if (l+d-2 > n)
-      err(talker, "accuracy lost in matfrobenius");
-    coeff(M,k,i) = (long)gen_1;
+    if (l+d-1 > n) err(talker, "accuracy lost in matfrobenius");
+    gcoeff(M,k,i) = gen_1;
     for (j=1; j<d; j++,k++,l++)
     {
-      coeff(M,k,l)   = (long) z;
-      coeff(M,k+1,l) = (long)gen_1;
+      gcoeff(M,k,l)   = z;
+      gcoeff(M,k+1,l) = gen_1;
     }
   }
   return M;
