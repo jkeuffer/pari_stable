@@ -549,9 +549,9 @@ vecbinome(long n)
 GEN
 polint_i(GEN xa, GEN ya, GEN x, long n, GEN *ptdy)
 {
-  long i, m, ns=0, tx=typ(x);
+  long i, m, ns = 0, tx = typ(x);
   pari_sp av = avma, tetpil;
-  GEN den,ho,hp,w,y,c,d,dy;
+  GEN y, c, d, dy;
 
   if (!xa)
   {
@@ -565,26 +565,26 @@ polint_i(GEN xa, GEN ya, GEN x, long n, GEN *ptdy)
     for (i=0; i<n; i++)
     {
       dift = gabs(gsub(x,(GEN)xa[i]), MEDDEFAULTPREC);
-      if (!dif || gcmp(dift,dif)<0) { ns=i; dif=dift; }
+      if (!dif || gcmp(dift,dif)<0) { ns = i; dif = dift; }
     }
   }
-  c=new_chunk(n);
-  d=new_chunk(n); for (i=0; i<n; i++) c[i] = d[i] = ya[i];
-  y=(GEN)d[ns--];
+  c = new_chunk(n);
+  d = new_chunk(n); for (i=0; i<n; i++) c[i] = d[i] = ya[i];
+  y = (GEN)d[ns--];
   dy = NULL; tetpil = 0; /* gcc -Wall */
   for (m=1; m<n; m++)
   {
     for (i=0; i<n-m; i++)
     {
-      ho = gsub((GEN)xa[i],x);
-      hp = gsub((GEN)xa[i+m],x); den = gsub(ho,hp);
+      GEN ho = gsub((GEN)xa[i],x);
+      GEN hp = gsub((GEN)xa[i+m],x), den = gsub(ho,hp);
       if (gcmp0(den)) err(talker,"two abcissas are equal in polint");
-      w=gsub((GEN)c[i+1],(GEN)d[i]); den = gdiv(w,den);
-      c[i]=lmul(ho,den);
-      d[i]=lmul(hp,den);
+      den = gdiv(gsub((GEN)c[i+1],(GEN)d[i]), den);
+      c[i] = lmul(ho,den);
+      d[i] = lmul(hp,den);
     }
     dy = (2*(ns+1) < n-m)? (GEN)c[ns+1]: (GEN)d[ns--];
-    tetpil=avma; y=gadd(y,dy);
+    tetpil = avma; y = gadd(y,dy);
   }
   if (!ptdy) y = gerepile(av,tetpil,y);
   else
