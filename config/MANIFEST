@@ -246,9 +246,9 @@ src/modules/part.c
 src/modules/stark.c
 src/modules/subfield.c
 src/modules/thue.c
-src/systems/darwin.c
+src/systems/darwin/darwin.c
 src/systems/darwin/dlfcn.c
-src/systems/os2.c
+src/systems/os2/os2.c
 src/systems/os2/dlfcn.h
 src/systems/os2/pari.def.base
 src/test/32/analyz
