@@ -110,6 +110,7 @@ BA 31- uninitialized memory read in divrr(x,y), when lg(y) < lg(x), leading
    46- [Cygwin:] DLL build. libpari.dll and gp-dyn build OK. Install does
        not work in gp-sta (SEGV)
    47- rare SEGV in Round 4 when using non-primes in addprimes()
+   48- overflow when computing Euler's constant to 20000+ decimal digits
 
   Changed
     1- rnf structure (removed useless components)

@@ -156,21 +156,37 @@ consteuler(long prec)
   if (x < SQRTVERYBIGINT)
   {
     long xx = x*x;
-    for (k=1; k<=n; k++)
+    for (k=1; k<SQRTVERYBIGINT; k++)
     {
       divrsz(mulsr(xx,b),k*k, b);
       divrsz(addrr(divrs(mulsr(xx,a),k),b),k, a);
-      addrrz(u,a,u); addrrz(v,b,v); avma = av2;
+      addrrz(u,a,u);
+      addrrz(v,b,v); avma = av2;
+    }
+    for (   ; k<=n; k++)
+    {
+      divrsz(divrs(mulsr(xx,b),k), k, b);
+      divrsz(addrr(divrs(mulsr(xx,a),k),b),k, a);
+      addrrz(u,a,u);
+      addrrz(v,b,v); avma = av2;
     }
   }
   else
   {
     GEN xx = mulss(x,x);
-    for (k=1; k<=n; k++)
+    for (k=1; k<SQRTVERYBIGINT; k++)
     {
       divrsz(mulir(xx,b),k*k, b);
       divrsz(addrr(divrs(mulir(xx,a),k),b),k, a);
-      addrrz(u,a,u); addrrz(v,b,v); avma = av2;
+      addrrz(u,a,u);
+      addrrz(v,b,v); avma = av2;
+    }
+    for (   ; k<=n; k++)
+    {
+      divrsz(divrs(mulir(xx,b),k), k, b);
+      divrsz(addrr(divrs(mulir(xx,a),k),b),k, a);
+      addrrz(u,a,u);
+      addrrz(v,b,v); avma = av2;
     }
   }
   divrrz(u,v,tmpeuler);
