@@ -766,6 +766,7 @@ rnfdedekind(GEN nf,GEN P0,GEN pr)
     GEN X = polx[varn(P)], pal;
 
     pal = FqX_div(Prd,k, T,p);
+    pal = pol_ff_to_nf(pal, modpr);
     for (   ; j<=m+d; j++)
     {
       p1[j] = (long)RXQX_to_nf(nf,pal,m,veczero);
