@@ -5561,7 +5561,9 @@ If $\fl>0$, uses the LLL algorithm. $\fl$ is a parameter which should be
 between one half the number of decimal digits of precision and that number
 (see \kbd{algdep}).
 
-If $\fl<0$, returns as soon as one relation has been found.
+If $\fl<0$, $x$ is allowed to be (and in any case interpreted as) a matrix.
+Returns a non trivial element of the kernel of $x$, or $0$ if $x$ has trivial
+kernel.
 
 \syn{lindep0}{x,\fl,\var{prec}}. Also available is
 $\teb{lindep}(x,\var{prec})$ ($\fl=0$).
