@@ -1685,13 +1685,17 @@ GEN
 bnrclassnolist(GEN bnf,GEN L)
 {
   pari_sp av = avma;
-  long i, j, lx, lz;
+  long i, j, lz, l = lg(L);
   GEN v, z, V, h;
 
-  bnf = checkbnf(bnf); h = gmael3(bnf,8,1,1);
   if (typ(L) != t_VEC) err(typeer,"bnrclassnolist");
-  lx = lg(L); V = cgetg(lx,t_VEC);
-  for (i = 1; i < lx; i++)
+  if (l == 1) return cgetg(1, t_VEC);
+  z = gmael(L,1,1);
+  if (typ(z) != t_VEC || lg(z) != 3) err(typeer, "bnrclassnolist");
+
+  bnf = checkbnf(bnf); h = gmael3(bnf,8,1,1);
+  V = cgetg(l,t_VEC);
+  for (i = 1; i < l; i++)
   {
     z = gel(L,i); lz = lg(z);
     gel(V,i) = v = cgetg(lz,t_VEC);
@@ -1878,6 +1882,12 @@ discrayabslist(GEN bnf, GEN L)
   long i, j, lz, l = lg(L);
   GEN nf, v, z, V, D, d, h;
   disc_data ID;
+
+  if (typ(L) != t_VEC) err(typeer, "discrayabslist");
+  if (l == 1) return cgetg(1, t_VEC);
+  z = gel(L,1);
+  if (typ(z) != t_VEC || lg(z) != 3) err(typeer, "discrayabslist");
+  checkbid(gel(z,1));
 
   ID.bnf = bnf = checkbnf(bnf);
   nf = (GEN)bnf[7];
@@ -2304,8 +2314,8 @@ subgrouplist0(GEN bnr, GEN indexbound, long all)
 }
 
 GEN
-bnrdisclist0(GEN bnf, GEN borne, GEN arch)
+bnrdisclist0(GEN bnf, GEN L, GEN arch)
 {
-  if (typ(borne)!=t_INT) return discrayabslist(bnf,borne);
-  return discrayabslistarch(bnf,arch,itos(borne));
+  if (typ(L)!=t_INT) return discrayabslist(bnf,L);
+  return discrayabslistarch(bnf,arch,itos(L));
 }

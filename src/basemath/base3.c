@@ -2192,9 +2192,12 @@ zlog_units_noarch(GEN nf, GEN U, GEN bid)
 static GEN
 zlog_unitsarch(GEN sgnU, GEN bid)
 {
-  GEN liste = gel(bid,4), arch = gmael(bid,1,2);
-  return F2V_red_ip(gmul(gmael(liste, lg(liste)-1, 3),
-                         rowextract_p(sgnU, arch_to_perm(arch))));
+  GEN U, liste = gel(bid,4), arch = gmael(bid,1,2);
+  long i;
+  U = gmul(gmael(liste, lg(liste)-1, 3),
+           rowextract_p(sgnU, arch_to_perm(arch)));
+  for (i = 1; i < lg(U); i++) F2V_red_ip(gel(U,i));
+  return U;
 }
 
 /*  flag &1 : generators, otherwise no

@@ -3654,9 +3654,10 @@ numbers for all moduli less than some bound.
 \syn{bnrclassno}{\var{bnf},I}.
 
 \subsecidx{bnrclassnolist}$(\var{bnf},\var{list})$: $\var{bnf}$ being as
-output by \kbd{bnfinit}, and \var{list} being a list of modules with units as
+output by \kbd{bnfinit}, and \var{list} being a list of moduli (with units) as
 output by \kbd{ideallist} or \kbd{ideallistarch}, outputs the list of the
-class numbers of the corresponding ray class groups.
+class numbers of the corresponding ray class groups. To compute a single
+class number, \tet{bnrclassno} is more efficient.
 
 \bprog
 ? bnf = bnfinit(x^2 - 2);
@@ -3762,6 +3763,10 @@ where $n$ is the degree of the base field and $j$ is such that
 \kbd{pr = idealprimedec(\var{nf},p)[j]}.
 
 \noindent $m$ can be decoded using \tet{bnfdecodemodule}.
+
+
+Note that to compute such data for a single field, either \tet{bnrclassno}
+or \tet{bnrdisc} is more efficient.
 
 \syn{bnrdisclist0}{bnf,\var{bound},\var{arch}}.
 
@@ -4296,6 +4301,27 @@ finite part is as in original list, in the same order, and archimedean part
 is now \var{arch} (it was originally trivial). The information contained is
 of the same kind as was present in the input; see \tet{ideallist}, in
 particular the meaning of \fl.
+
+\bprog
+? bnf = bnfinit(x^2-2);
+? bnf.sign  
+%2 = [2, 0]                         \\@com two places at infinity
+? L = ideallist(bnf, 100, 0);
+? l = L[98]; vector(#l, i, l[i].clgp)
+%4 = [[42, [42]], [36, [6, 6]], [42, [42]]]
+? La = ideallistarch(bnf, L, [1,1]); \\@com add them to the modulus
+? l = La[98]; vector(#l, i, l[i].clgp)
+%6 = [[168, [42, 2, 2]], [144, [6, 6, 2, 2]], [168, [42, 2, 2]]]
+@eprog
+Of course, the results above are obvious: adding $t$ places at infinity will
+add $t$ copies of $\Z/2\Z$ to the ray class group. The following application
+is more typical:
+\bprog
+? L = ideallist(bnf, 100, 2);        \\@com units are required now
+? La = ideallistarch(bnf, L, [1,1]);
+? H = bnrclassnolist(bnf, La);
+? H[98];
+%6 = [2, 12, 2]
 
 \syn{ideallistarch}{\var{nf},\var{list},\var{arch}}.
 
