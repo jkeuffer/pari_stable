@@ -48,11 +48,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #  ifdef __GNUC__
 #    define VOLATILE __volatile__
 #    ifdef GCC_INLINE
-#      ifndef __OPTIMIZE__
-#        error "no inlining without -O. Put back -O or remove -DGCC_INLINE"
-#      else
-#        define INLINE __inline__ static
-#      endif
+#      define INLINE __inline__ static
 #    endif
 #  else
 #    define VOLATILE
