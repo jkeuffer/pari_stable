@@ -305,6 +305,16 @@ carhess(GEN x, long v)
 /*                            NORM                                 */
 /*                                                                 */
 /*******************************************************************/
+GEN
+cxnorm(GEN x) { return gadd(gsqr((GEN)x[1]), gsqr((GEN)x[2])); }
+GEN
+quadnorm(GEN x)
+{
+  GEN u = (GEN)x[3], v = (GEN)x[2];
+  GEN X = (GEN)x[1], b = (GEN)X[3], c = (GEN)X[2];
+  GEN z = signe(b)? gmul(v, gadd(u,v)): gsqr(v);
+  return gadd(z, gmul(c, gsqr(u)));
+}
 
 GEN
 gnorm(GEN x)
@@ -315,25 +325,11 @@ gnorm(GEN x)
 
   switch(tx)
   {
-    case t_INT:
-      return sqri(x);
-
-    case t_REAL:
-      return mulrr(x,x);
-
-    case t_FRAC:
-      return gsqr(x);
-
-    case t_COMPLEX: av = avma;
-      return gerepileupto(av, gadd(gsqr((GEN)x[1]), gsqr((GEN)x[2])));
-
-    case t_QUAD: av = avma;
-    {
-      GEN u = (GEN)x[3], v = (GEN)x[2];
-      GEN X = (GEN)x[1], b = (GEN)X[3], c = (GEN)X[2];
-      p1 = gcmp0(b)? gsqr(v): gmul(v, gadd(u,v));
-      return gerepileupto(av, gadd(p1, gmul(c, gsqr(u))));
-    }
+    case t_INT:  return sqri(x);
+    case t_REAL: return mulrr(x,x);
+    case t_FRAC: return gsqr(x);
+    case t_COMPLEX: av = avma; return gerepileupto(av, cxnorm(x));
+    case t_QUAD:    av = avma; return gerepileupto(av, quadnorm(x));
 
     case t_POL: case t_SER: case t_RFRAC: av = avma;
       return gerepileupto(av, greal(gmul(gconj(x),x)));

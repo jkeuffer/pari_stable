@@ -46,6 +46,9 @@ GEN setloop(GEN a);
 /* multiprecision */
 GEN   addrex01(GEN x);
 GEN   addumului(ulong a, ulong b, GEN Y);
+void  affr_fixlg(GEN z, GEN y);
+GEN   cxnorm(GEN x);
+GEN   quadnorm(GEN x);
 GEN   divgsns(GEN x, long i);
 GEN   divrsns(GEN x, long i);
 GEN   init_remiimul(GEN M);
