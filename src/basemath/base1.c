@@ -1721,6 +1721,7 @@ typedef struct {
   GEN u; /* matrix giving fincke-pohst-reduced Zk basis */
   GEN M; /* embeddings of initial (LLL-reduced) Zk basis */
   GEN bound; /* T2 norm of the polynomial defining nf */
+  nfbasic_t *T;
 } CG_data;
 
 /* characteristic pol of x */
@@ -1773,43 +1774,49 @@ static GEN
 chk_gen_init(FP_chk_fun *chk, GEN r, GEN mat)
 {
   CG_data *d = (CG_data*)chk->data;
-  GEN P,bound,prev,x,B;
-  long l = lg(r), N = l-1,i,prec;
+  nfbasic_t *T = d->T;
+  GEN P, bound, prev, x, M = cgetg(2, t_MAT);
+  GEN denbas, bas = Q_remove_denom(T->bas, &denbas);
+  long l = lg(r), N = l-1, i, dx, prec, rankM = 1;
   int skipfirst = 0;
 
   d->u = mat;
   d->ZKembed = gmul(d->M, mat);
 
+  M[1] = (long)gscalcol_i(denbas, N);
+
   bound = d->bound;
   prev = NULL;
   x = zerocol(N);
-  for (i=1; i<l; i++)
+  for (i = 1; i < l; i++)
   {
-    B = norm_ei_from_Q(r, i);
-    if (gcmp(B,bound) >= 0) continue; /* don't assume increasing norms */
+    GEN y1, y, M2, B = norm_ei_from_Q(r, i);
+    long j, new;
+    if (gcmp(B,bound) >= 0 && skipfirst != i-1) continue;
 
-    /* use canon_pol to recognized trivial automorphism P --> P(-x) */
-    x[i] = un; P = get_polmin(d,x); (void)canon_pol(P);
+    x[i] = un; P = get_polmin(d,x); dx = degpol(P);
     x[i] = zero;
-    if (degpol(P) == N)
-    {
+    if (dx == N)
+    { /* primitive element */
       if (gcmp(B,bound) < 0) bound = B ;
       continue;
     }
     if (DEBUGLEVEL>2) fprintferr("chk_gen_init: subfield %Z\n",P);
     if (skipfirst != i-1) continue;
-
-    /* Q(w[1],...,w[i-1]) = Q[X]/(prev) is a strict subfield of nf */
-    if (prev && degpol(prev) < N && !gegal(prev,P))
+    y1 = y = bas[i];
+    M2 = cgetg(dx, t_MAT);
+    for (j = 1; j < dx; j++)
     {
-      if (degpol(prev) * degpol(P) > 128) continue; /* too expensive */
-      P = compositum(prev,P);
-      P = (GEN)P[lg(P)-1]; (void)canon_pol(P);
-      if (degpol(P) == N) continue;
-      if (DEBUGLEVEL>2 && degpol(P) != degpol(prev))
-        fprintferr("chk_gen_init: subfield %Z\n",P);
+      if (j > 1) { y = gmul(y, y1); y = gres(y, T->x); }
+      M2[j] = (long)pol_to_vec(y, N);
     }
-    skipfirst++; prev = P;
+    M = image(concatsp(M, M2));
+    new = lg(M) - 1;
+    if (new > rankM) rankM = new;
+    if (rankM == N) continue;
+
+    /* Q(w[1],...,w[i-1]) is a strict subfield of nf */
+    skipfirst++;
   }
   /* x_1,...,x_skipfirst generate a strict subfield [unless N=skipfirst=1] */
   chk->skipfirst = skipfirst;
@@ -1923,6 +1930,7 @@ _polredabs(nfbasic_t *T, GEN *u)
   d.v = varn(T->x);
   d.r1= T->r1;
   d.bound = gmul(T2_from_embed(F.ro, d.r1), dbltor(1.00000001));
+  d.T = T;
   for (i=1; ; i++)
   {
     GEN R = R_from_QR(F.G, prec);
