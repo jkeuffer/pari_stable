@@ -51,16 +51,17 @@
 %%
 %% CROSS REFERENCING & INDEX
 %%
+\newif\ifsecondpass
+\newwrite\out
+\newwrite\aux
 \ifGPHELP % disable crossreferences
+  \def\condwrite#1#2{}
   \def\idx#1{#1}
   \def\toindex#1{}
   \def\tocwrite#1{}
   \def\label#1{}
   \def\ref#1{[{\bf ??}]} % all crossref marked as [??]
 \else % none of the following is needed by gphelp
-  \newif\ifsecondpass
-  \newwrite\out
-  \newwrite\aux
   \def\typeout#1{\immediate\write\out{#1}}
   \def\@namedef#1{\expandafter\def\csname#1\endcsname}
   \def\newlabel#1#2{\@ifundef{r@#1}{}{\message{Label `#1' multiply
