@@ -260,6 +260,8 @@ BA 21- type() does not allow to change object types anymore.
 JD 49- [timer: ] use sysconf(_SC_CLK_TCK) instead of CLK_TCK
        if available, and make sure one of these is available before choosing
        times() in Configure
+JD 50- check for 'exuberant-ctags' before 'ctags' in make_vi_tags [ and fail
+       gracefully if neither is found ]
 
   Added
     1- make test-all [ all available test suites (SLOW !)]

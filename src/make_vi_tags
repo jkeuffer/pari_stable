@@ -10,14 +10,15 @@ $tmptags="$src/tags.tmp";
 # Case sensitive?
 $tags = $^O eq 'os2' ? "$src/ctags" : "$src/tags";
 
-@tags=""; $old="";
+@tags = ""; $old = "";
+@files = (); find \&filter_c, $src;
 
-@files = ();
-
-find \&filter_c, $src;
-
-# assume ctags outputs sorted tags (e.g Exuberant Ctags)
-system('ctags', '-f', $tmptags,  @files);
+# Note that shell uses a different logic than perl,
+# so the following `&&' correspond to `||' in shell.
+# Assume ctags outputs sorted tags (e.g Exuberant Ctags)
+system('exuberant-ctags', '-f', $tmptags, @files)
+       && system('ctags', '-f', $tmptags, @files)
+       && die("ctags failed");
 
 getnames("$src/gp/gp_init.h");
 getnames("$src/language/init.h");
