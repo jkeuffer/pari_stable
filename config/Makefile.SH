@@ -242,7 +242,7 @@ test-compat: $exec dotest-compat
 test-graphic: $exec dotest-graphic
 
 cleantest:
-	\$(RM) out.* pari.ps
+	\$(RM) *.dif gp.out pari.ps
 
 dobench::
 	@$doexec

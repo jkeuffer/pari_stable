@@ -54,7 +54,9 @@ BA 16- result was not always complete in nfgaloisconj()
    23- precision problems in ClxModulus (bnrstark()) [check leading term!=0]
    24- elltors() could miss some points: determine needed precision first
    25- clean up files after an error (not only under GP)
-   26- more explicit error message divisors(huge integer)
+   26-  divisors(highly composite integer) --> "cryptic" error message
+   27- 'make clean' wasn't thorough
+   28- ellpointtoz(e, [0,0]) could correspond to the inverse point
 
   Added
 IZ  1- [gnuplot] look up directory tree for gnuplot related files

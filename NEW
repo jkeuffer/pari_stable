@@ -135,7 +135,7 @@ GP has been completely re-written:
      of functions on startup (you can document them using "addhelp").
 
    * On 32-bit machines, maximum number of variables has been increased from
-     254 to 16382. Arrays can have up to 16777215 elements (instead of 65535).
+     254 to 16382. Arrays can have up to 16777214 elements (instead of 65534).
      In addition vector/matrix operations in GP now perform orders of
      magnitudes faster than in version 1.39
 
