@@ -84,8 +84,9 @@ ISo37- many typos in the documentation
    43- plotrecthraw(0,[0]) --> SEGV
    44- plothraw([],[]) --> SEGV
 IZ 45- ix86 inline assembler compilation problem [divll]
-XR46-  forgotten case in Round4 [ nfdisc(x^12-10*x^11-57*x^10+740*x^9+353*x^8-16130*x^7+17749*x^6+100120*x^5-108466*x^4-292200*x^3+128380*x^2+380800*x+133112)
+XR 46- forgotten case in Round4 [ nfdisc(x^12-10*x^11-57*x^10+740*x^9+353*x^8-16130*x^7+17749*x^6+100120*x^5-108466*x^4-292200*x^3+128380*x^2+380800*x+133112)
 --> impossible inverse: Mod(2, ...) ]
+   47- sin(1e-100) ---> 9.999999999999999999735998397 E-101 [ precision loss ]
 
   Changed
 BA  1- improved Fp_isom
