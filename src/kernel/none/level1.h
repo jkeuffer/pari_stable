@@ -36,6 +36,7 @@ GEN    mkcomplex(GEN x, GEN y);
 GEN    mkfrac(GEN x, GEN y);
 GEN    mkintmodu(ulong x, ulong y);
 GEN    mkmat(GEN x);
+GEN    mkmat2(GEN x, GEN y);
 GEN    mkmatcopy(GEN x);
 GEN    mkvec(GEN x);
 GEN    mkvec2(GEN x, GEN y);
@@ -296,6 +297,8 @@ INLINE GEN
 mkcolcopy(GEN x) { GEN v = cgetg(2, t_COL); v[1] = lcopy(x); return v; }
 INLINE GEN
 mkmat(GEN x) { GEN v = cgetg(2, t_MAT); v[1] = (long)x; return v; }
+INLINE GEN
+mkmat2(GEN x, GEN y) { GEN v=cgetg(3,t_MAT); gel(v,1)=x; gel(v,2)=y; return v; }
 INLINE GEN
 mkmatcopy(GEN x) { GEN v = cgetg(2, t_MAT); v[1] = lcopy(x); return v; }
 
