@@ -698,15 +698,15 @@ powell(GEN e, GEN z, GEN n)
 GEN
 mathell(GEN e, GEN x, long prec)
 {
-  GEN y, h, *pdiag;
+  GEN y, h, pdiag;
   long lx = lg(x),i,j,tx=typ(x);
   pari_sp av = avma;
 
   if (!is_vec_t(tx)) err(elliper1);
-  y = cgetg(lx,t_MAT); pdiag = (GEN*) new_chunk(lx);
+  y = cgetg(lx,t_MAT); pdiag = new_chunk(lx);
   for (i=1; i<lx; i++)
   {
-    pdiag[i] = ghell(e,(GEN)x[i],prec);
+    pdiag[i] = (long)ghell(e,(GEN)x[i],prec);
     y[i] = lgetg(lx,t_COL);
   }
   for (i=1; i<lx; i++)
@@ -715,7 +715,7 @@ mathell(GEN e, GEN x, long prec)
     for (j=i+1; j<lx; j++)
     {
       h = ghell(e, addell(e,(GEN)x[i],(GEN)x[j]), prec);
-      h = gsub(h, gadd(pdiag[i],pdiag[j]));
+      h = gsub(h, gadd((GEN)pdiag[i],(GEN)pdiag[j]));
       coeff(y,j,i) = coeff(y,i,j) = lmul2n(h, -1);
     }
   }
