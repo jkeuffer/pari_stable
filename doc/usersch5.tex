@@ -20,11 +20,10 @@ them at your own risk!
 \section{Level 0 kernel (operations on unsigned longs)}
 
 \noindent
-For the non-68k versions, we need level 0 operations simulating basic
-operations of the 68020 processor (on which PARI was originally
-implemented). The type \tet{ulong} is defined in the file \kbd{parigen.h} as
-\kbd{unsigned long}. Note that in the prototypes below a \kbd{ulong} is
-sometimes implicitly typecast to \kbd{int} or \kbd{long}.
+Level 0 operations simulate basic operations of the 68020 processor on which
+PARI was originally implemented. The type \tet{ulong} is defined in the file
+\kbd{parigen.h} as \kbd{unsigned long}. Note that in the prototypes below a
+\kbd{ulong} is sometimes implicitly typecast to \kbd{int} or \kbd{long}.
 
 The global \kbd{ulong} variables \kbd{overflow} (which will contain
 only 0 or 1) and \kbd{hiremainder} used to be declared in the file
@@ -208,9 +207,9 @@ of length~\kbd{n}, and initializes its first codeword. Identical to
 {\tt cgetg(n,\typ{REAL})}.
 
 \fun{void}{cgiv}{GEN x} frees object \kbd{x} if it is the last created on the
-PARI stack (otherwise disaster occurs).
+PARI stack (otherwise nothing happens).
 
-\fun{GEN}{gerepile}{long p, long q, GEN x} general garbage collector
+\fun{GEN}{gerepile}{pari\_sp p, pari\_sp q, GEN x} general garbage collector
 for the PARI stack. See \secref{se:garbage} for a detailed explanation and
 many examples.
 
@@ -337,30 +336,42 @@ the real~\kbd{z}.
 
 \subsec{Comparison operators}
 
-\fun{long}{mpcmp}{GEN x, GEN y} compares the integer or real \kbd{x} to the
+\fun{int}{mpcmp}{GEN x, GEN y} compares the integer or real \kbd{x} to the
 integer or real~\kbd{y}. The result is the sign of $\kbd{x}-\kbd{y}$.
 
-\fun{long}{cmpsi}{long s, GEN x} compares the long \kbd{s} to the
+\fun{int}{cmpsi}{long s, GEN x} compares the long \kbd{s} to the
 integer~\kbd{x}.
 
-\fun{long}{cmpsr}{long s, GEN x} compares the long \kbd{s} to the real~\kbd{x}.
+\fun{int}{cmpsr}{long s, GEN x} compares the long \kbd{s} to the real~\kbd{x}.
 
-\fun{long}{cmpis}{GEN x, long s} compares the integer \kbd{x} to the
+\fun{int}{cmpis}{GEN x, long s} compares the integer \kbd{x} to the
 long~\kbd{s}.
 
-\fun{long}{cmpii}{GEN x, GEN y} compares the integer \kbd{x} to the
+\fun{int}{cmpii}{GEN x, GEN y} compares the integer \kbd{x} to the
 integer~\kbd{y}.
 
-\fun{long}{cmpir}{GEN x, GEN y} compares the integer \kbd{x} to the
+\fun{int}{cmpir}{GEN x, GEN y} compares the integer \kbd{x} to the
 real~\kbd{y}.
 
-\fun{long}{cmprs}{GEN x, long s} compares the real \kbd{x} to the
+\fun{int}{cmprs}{GEN x, long s} compares the real \kbd{x} to the
 long~\kbd{s}.
 
-\fun{long}{cmpri}{GEN x, GEN y} compares the real \kbd{x} to the
+\fun{int}{cmpri}{GEN x, GEN y} compares the real \kbd{x} to the
 integer~\kbd{y}.
 
-\fun{long}{cmprr}{GEN x, GEN y} compares the real \kbd{x} to the real~\kbd{y}.
+\fun{int}{cmprr}{GEN x, GEN y} compares the real \kbd{x} to the real~\kbd{y}.
+
+\fun{int}{egalii}{GEN x, GEN y} compares the integers \kbd{x} and~\kbd{y}.
+The result is $1$ if $\kbd{x} = \kbd{y}$, $0$ otherwise.
+
+\fun{int}{absi_cmp}{GEN x, GEN y} compares the integers \kbd{x} and~\kbd{y}.
+The result is the sign of $|\kbd{x}| - |\kbd{y}|$.
+
+\fun{int}{absi_equal}{GEN x, GEN y} compares the integers \kbd{x} and~\kbd{y}.
+The result is $1$ if $|\kbd{x}| = |\kbd{y}|$, $0$ otherwise.
+
+\fun{int}{absr_cmp}{GEN x, GEN y} compares the reals \kbd{x} and~\kbd{y}.
+The result is the sign of $|\kbd{x}| - |\kbd{y}|$.
 
 \subsec{Binary operations}
 
@@ -485,6 +496,13 @@ quotient of the integers \kbd{x} and \kbd{y} into the integer or real~\kbd{z},
 putting the address of the remainder into~\kbd{*r} (unless \kbd{r} is equal
 to \kbd{NULL} or \kbd{ONLY\_REM} as above).
 
+\fun{void}{diviiexact}{GEN x, GEN y} returns the Euclidean quotient $\kbd{x}
+/ \kbd{y}$, assuming $\kbd{y}$ divides $\kbd{x}$. Uses Jebelean algorithm
+(Jebelean-Krandick bidirectional exact division is not implemented).
+
+\fun{void}{diviuexact}{GEN x, ulong y} returns the Euclidean quotient $\kbd{x}
+/ \kbd{y}$, assuming $\kbd{y}$ divides $\kbd{x}$ and $\kbd{y}$ is \emph{odd}.
+
 \subsec{Miscellaneous functions}
 
 \fun{void}{addsii}{long s, GEN x, GEN z} assigns the sum of the long \kbd{s}
@@ -505,6 +523,8 @@ integer~\kbd{x}, assigns the quotient to the integer~\kbd{z} and returns
 \fun{void}{mulsii}{long s, GEN x, GEN z} assigns the product of the long
 \kbd{s} and the integer \kbd{x} into the integer~\kbd{z} (essentially
 identical to \kbd{mulsiz} except that \kbd{z} is specifically an integer).
+
+\fun{void}{addumului}{ulong a, ulong b, GEN x} return $a + b|X|$.
 
 \section{Level 2 kernel (operations on general PARI objects)}
 
