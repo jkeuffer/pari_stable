@@ -93,6 +93,8 @@ BA 33- qfbprimeform(-3, 1) --> data corruption [ gzero's signe set to 1 ]
    35- stack corruption when adding huge p-adics
    36- idealintersect did not allow fractional ideals
    37- Ser([1,2]) --> 1 + 2*x + O(x^2) [ OK ], but Ser([0,0]) --> O(x^16)
+   38- writebin() still produced incompatible output depending on the
+       multiprecision kernel.
 
   Changed
     1- bnfinit: [small_norm phase] speed up norm computations.
