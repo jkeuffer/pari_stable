@@ -2358,7 +2358,6 @@ galoismodulo11(GEN pol, GEN dpol)
   return EVEN? 7: 8;
 }
 
-/* return 1 iff we need to read a resolvent */
 static void
 init_isin(long n1, long n2, GROUP *tau, GROUP *ss, PERM *s0, resolv *R)
 {
