@@ -23,25 +23,34 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 const int narrow = 0; /* should set narrow = flag in buchquad, but buggy */
 
+/* For largeprime() hashtable. Note that hashed pseudoprimes are odd (unless
+ * 2 | index), hence the low order bit is not useful. So we hash
+ * HASHBITS bits starting at bit 1, not bit 0 */
+#define HASHBITS 10
+const int HASHT = 1 << HASHBITS;
+
+static long
+hash(long q) { return (q & ((1 << (HASHBITS+1)) - 1)) >> 1; }
+#undef HASHBITS
+
 /* See buch2.c:
  * precision en digits decimaux=2*(#digits decimaux de Disc)+50
- * on prendra les p decomposes tels que prod(p)>lim dans la subbase
+ * on prendra les p decomposes tels que prod(p)>lim dans la subFB
  * LIMC=Max(c.(log(Disc))^2,exp((1/8).sqrt(log(Disc).loglog(Disc))))
  * LIMC2=Max(6.(log(Disc))^2,exp((1/8).sqrt(log(Disc).loglog(Disc))))
- * subbase contient les p decomposes tels que prod(p)>sqrt(Disc)
- * lgsub=subbase[0]=#subbase;
- * subfactorbase est la table des form[p] pour p dans subbase
- * nbram est le nombre de p divisant Disc elimines dans subbase
- * powsubfactorbase est la table des puissances des formes dans subfactorbase
+ * subFB contient les indices des p decomposes tels que prod(p) > sqrt(Disc)
+ * powsubFB est la table des puissances des formes dans subFB
  */
-#define HASHT 1024 /* power of 2 */
-static const long CBUCH = 15; /* of the form 2^k-1 */
-static const long randshift=BITS_IN_RANDOM-1 - 4; /* BITS_IN_RANDOM-1-k */
 
-static long KC,KC2,lgsub,limhash,RELSUP,PRECREG;
-static long *primfact,*primfact1, *exprimfact,*exprimfact1, *badprim;
-static long *factorbase,*numfactorbase, *subbase, *vectbase, **hashtab;
-static GEN  **powsubfactorbase,vperm,subfactorbase,Disc,sqrtD,isqrtD;
+#define RANDOM_BITS 4
+static const long CBUCH = (1<<RANDOM_BITS)-1;
+static const long randshift=BITS_IN_RANDOM-1 - RANDOM_BITS;
+#undef RANDOM_BITS
+
+static long KC,KC2,limhash,RELSUP,PRECREG;
+static long *primfact,*exprimfact,*badprim;
+static long *FB,*numFB, **hashtab;
+static GEN  **powsubFB,vperm,subFB,Disc,sqrtD,isqrtD;
 
 GEN buchquad(GEN D, double c, double c2, long RELSUP0, long flag, long prec);
 extern GEN roots_to_pol_intern(GEN L, GEN a, long v, int plus);
@@ -52,6 +61,7 @@ extern GEN codeform5(GEN x, long prec);
 extern GEN comprealform5(GEN x, GEN y, GEN D, GEN sqrtD, GEN isqrtD);
 extern GEN redrealform5(GEN x, GEN D, GEN sqrtD, GEN isqrtD);
 extern GEN rhoreal_aux(GEN x, GEN D, GEN sqrtD, GEN isqrtD);
+extern GEN cgetalloc(GEN x, size_t l, long t);
 
 GEN
 quadclassunit0(GEN x, long flag, GEN data, long prec)
@@ -114,7 +124,7 @@ getallforms(GEN D, long *pth, GEN *ptz)
 
 #define MOD4(x) ((((GEN)x)[2])&3)
 #define MAXL 300
-/* find P and Q two non principal prime ideals (above p,q) such that 
+/* find P and Q two non principal prime ideals (above p,q) such that
  *   (pq, z) = 1  [coprime to all class group representatives]
  *   cl(P) = cl(Q) if P has order 2 in Cl(K)
  * Try to have e = 24 / gcd(24, (p-1)(q-1)) as small as possible */
@@ -246,7 +256,7 @@ quadhilbertimag(GEN D, GEN flag)
     long ex, exmax = 0;
     gpmem_t av0 = avma;
     GEN lead, sqd = gsqrt(negi(D),prec);
-    P = cgetg(h+1,t_VEC); 
+    P = cgetg(h+1,t_VEC);
     for (i=1; i<=h; i++)
     {
       GEN v, s = gpq((GEN)L[i], p, q, e, sqd, u, prec);
@@ -257,7 +267,7 @@ quadhilbertimag(GEN D, GEN flag)
         v[2] = (long)s;
       }
       else P[i] = (long)s;
-      ex = gexpo(s); if (ex > 0) exmax += ex; 
+      ex = gexpo(s); if (ex > 0) exmax += ex;
     }
     if (DEBUGLEVEL>=2) msgtimer("roots");
     if (raw) { P = gcopy(P); break; }
@@ -343,7 +353,7 @@ getallelts(GEN bnr)
     pows[i] = gk; /* powers of g[i] */
   }
 
-  C = cgetg(lc+1, t_VECSMALL); C[1] = c[lc]; 
+  C = cgetg(lc+1, t_VECSMALL); C[1] = c[lc];
   for (i=2; i<=lc; i++) C[i] = C[i-1] * c[lc-i+1];
   /* C[i] = c(k-i+1) * ... * ck */
   /* j < C[i+1] <==> j only involves g(k-i)...gk */
@@ -354,7 +364,7 @@ getallelts(GEN bnr)
   {
     GEN p1,p2;
     if (j == C[i+1]) i++;
-    p2 = pows[lc-i][j/C[i]]; 
+    p2 = pows[lc-i][j/C[i]];
     p1 = list[j%C[i] + 1];
     if (p1) p2 = idealmodidele(bnr, idealmul(nf,p2,p1));
     list[j + 1] = p2;
@@ -481,7 +491,7 @@ computeP2(GEN bnr, GEN la, int raw, long prec)
   long clrayno, i, first = 1;
   gpmem_t av=avma, av2;
   GEN listray,P0,P,f,lanum, nf = checknf(bnr);
-  
+
   f = gmael3(bnr,2,1,1);
   if (typ(la) != t_COL) la = algtobasis(nf,la);
   listray = getallelts(bnr);
@@ -793,7 +803,7 @@ quadray(GEN D, GEN f, GEN flag, long prec)
 #define comprealform(x,y) fix_signs(comprealform5(x,y,Disc,sqrtD,isqrtD))
 
 /* compute rho^n(x) */
-static GEN 
+static GEN
 rhoreal_pow(GEN x, long n)
 {
   long i;
@@ -803,7 +813,7 @@ rhoreal_pow(GEN x, long n)
     x = rhorealform(x);
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"rhoreal_pow");	
+      if(DEBUGMEM>1) err(warnmem,"rhoreal_pow");
       x = gerepilecopy(av, x);
     }
   }
@@ -851,11 +861,11 @@ comprealform3(GEN x, GEN y)
 static GEN
 initrealform5(long *ex)
 {
-  GEN form = powsubfactorbase[1][ex[1]];
-  long i;
+  GEN form = powsubFB[1][ex[1]];
+  long i, l = lg(subFB);
 
-  for (i=2; i<=lgsub; i++)
-    form = comprealform(form, powsubfactorbase[i][ex[i]]);
+  for (i=2; i<l; i++)
+    form = comprealform(form, powsubFB[i][ex[i]]);
   return form;
 }
 
@@ -869,9 +879,7 @@ buch_init(void)
 {
   if (DEBUGLEVEL) (void)timer2();
   primfact  = new_chunk(100);
-  primfact1 = new_chunk(100);
   exprimfact  = new_chunk(100);
-  exprimfact1 = new_chunk(100);
   badprim = new_chunk(100);
   hashtab = (long**) new_chunk(HASHT);
 }
@@ -887,7 +895,7 @@ check_bach(double cbach, double B)
 }
 
 static long
-factorisequad(GEN f, long kcz, long limp)
+factorquad(GEN f, long kcz, long limp)
 {
   long i, p, k, lo;
   gpmem_t av;
@@ -898,24 +906,23 @@ factorisequad(GEN f, long kcz, long limp)
   if (signe(x) < 0) x = absi(x);
   for (i=1; ; i++)
   {
-    p=factorbase[i]; q=dvmdis(x,p,&r);
+    p=FB[i]; q=dvmdis(x,p,&r);
     if (!signe(r))
     {
-      k=0; while (!signe(r)) { x=q; k++; q=dvmdis(x,p,&r); }
-      lo++; primfact[lo]=p; exprimfact[lo]=k;
+      for (k=0; !signe(r); k++) { x=q; q=dvmdis(x,p,&r); }
+      primfact[++lo]=p; exprimfact[lo]=k;
     }
     if (cmpis(q,p)<=0) break;
     if (i==kcz) { avma=av; return 0; }
   }
-  p = x[2]; avma=av;
-  /* p = itos(x) if lgefint(x)=3 */
-  if (lgefint(x)!=3 || p > limhash) return 0;
+  avma=av;
+  if (lgefint(x)!=3 || (p=x[2]) > limhash) return 0;
 
   if (p != 1 && p <= limp)
   {
     for (i=1; i<=badprim[0]; i++)
       if (p % badprim[i] == 0) return 0;
-    lo++; primfact[lo]=p; exprimfact[lo]=1;
+    primfact[++lo]=p; exprimfact[lo]=1;
     p = 1;
   }
   primfact[0]=lo; return p;
@@ -925,197 +932,190 @@ factorisequad(GEN f, long kcz, long limp)
 static long *
 largeprime(long q, long *ex, long np, long nrho)
 {
-  const long hashv = ((q & (2 * HASHT - 1)) - 1) >> 1;
-  long *pt, i;
+  const long hashv = hash(q);
+  long *pt, i, l = lg(subFB);
 
- /* If q = 0 (2048), very slim chance of getting a relation.
-  * And hashtab[-1] is undefined anyway */
-  if (hashv < 0) return NULL;
   for (pt = hashtab[hashv]; ; pt = (long*) pt[0])
   {
     if (!pt)
     {
-      pt = (long*) gpmalloc((lgsub+4)<<TWOPOTBYTES_IN_LONG);
+      pt = (long*) gpmalloc((l+3)<<TWOPOTBYTES_IN_LONG);
       *pt++ = nrho; /* nrho = pt[-3] */
       *pt++ = np;   /* np   = pt[-2] */
       *pt++ = q;    /* q    = pt[-1] */
       pt[0] = (long)hashtab[hashv];
-      for (i=1; i<=lgsub; i++) pt[i]=ex[i];
+      for (i=1; i<l; i++) pt[i]=ex[i];
       hashtab[hashv]=pt; return NULL;
     }
     if (pt[-1] == q) break;
   }
-  for(i=1; i<=lgsub; i++)
+  for(i=1; i<l; i++)
     if (pt[i] != ex[i]) return pt;
   return (pt[-2]==np)? (GEN)NULL: pt;
 }
 
-static long
-badmod8(GEN x)
+/* p | conductor of order of disc D ? */
+static int
+is_bad(GEN D, ulong p)
 {
-  long r = mod8(x);
-  if (!r) return 1;
-  if (signe(Disc) < 0) r = 8-r;
-  return (r < 4);
+  gpmem_t av = avma;
+  int r;
+  if (p == 2)
+  {
+    r = mod16(D) >> 1;
+    if (r && signe(D) < 0) r = 8-r;
+    return (r < 4);
+  }
+  r = (resii(D, muluu(p,p)) == gzero); /* p^2 | D ? */
+  avma = av; return r;
 }
 
-/* cree factorbase, numfactorbase, vectbase; affecte badprim */
-static void
-factorbasequad(GEN Disc, long n2, long n)
+/* create FB, numFB; fill badprim. Return L(kro_D, 1) */
+static GEN
+FBquad(GEN Disc, long n2, long n)
 {
-  long i, p, bad;
-  gpmem_t av = avma;
-  byteptr d=diffptr;
+  GEN Res = realun(DEFAULTPREC);
+  long i, p, bad, s;
+  gpmem_t av;
+  byteptr d = diffptr;
 
-  numfactorbase = (long*) gpmalloc(sizeof(long)*(n2+1));
-  factorbase    = (long*) gpmalloc(sizeof(long)*(n2+1));
-  KC=0; bad=0; i=0; p = *d++;
-  while (p<=n2)
+  numFB = cgetg(n2+1, t_VECSMALL);
+  FB    = cgetg(n2+1, t_VECSMALL);
+  av = avma;
+  KC = 0; bad = 0; i = 0;
+  if (maxprime() < n2) err(primer1);
+  for (p = 0;;) /* p <= n2 */
   {
-    switch(krogs(Disc,p))
+    NEXT_PRIME_VIADIFF(p, d);
+    if (!KC && p > n) KC = i;
+    if (p > n2) break;
+    s = krogs(Disc,p);
+    switch (s)
     {
       case -1: break; /* inert */
       case  0: /* ramified */
-      {
-        GEN p1 = divis(Disc,p);
-	if (smodis(p1,p) == 0)
-          if (p!=2 || badmod8(p1)) { badprim[++bad]=p; break; }
-        i++; numfactorbase[p]=i; factorbase[i] = -p; break;
-      }
+        if (is_bad(Disc, (ulong)p)) { badprim[++bad]=p; break; }
+        /* fall through */
       default:  /* split */
-        i++; numfactorbase[p]=i; factorbase[i] = p;
+        i++; numFB[p]=i; FB[i] = p; break;
     }
-    NEXT_PRIME_VIADIFF_CHECK(p, d);
-    if (KC == 0 && p>n) KC = i;
+    Res = mulsr(p, divrs(Res, p - s));
   }
-  if (!KC) { free(factorbase); free(numfactorbase); return; }
+  if (!KC) return NULL;
+  Res = gerepileupto(av, Res);
   KC2 = i;
-  vectbase = (long*) gpmalloc(sizeof(long)*(KC2+1));
-  for (i=1; i<=KC2; i++)
-  {
-    p = factorbase[i];
-    vectbase[i]=p; factorbase[i]=labs(p);
-  }
   if (DEBUGLEVEL)
   {
     msgtimer("factor base");
     if (DEBUGLEVEL>7)
     {
-      fprintferr("factorbase:\n");
-      for (i=1; i<=KC; i++) fprintferr("%ld ",factorbase[i]);
-      fprintferr("\n"); flusherr();
+      fprintferr("FB:\n");
+      for (i=1; i<=KC; i++) fprintferr("%ld ", FB[i]);
+      fprintferr("\n");
     }
   }
-  avma=av; badprim[0] = bad;
+  badprim[0] = bad; return Res;
 }
 
-/* cree vectbase and subfactorbase. Affecte lgsub */
-static long
-subfactorbasequad(double ll, long KC)
+/* create vperm, return subFB */
+static GEN
+subFBquad(GEN D, double PROD, long KC)
 {
-  long i,j,k,nbidp,p,pro[100], ss;
-  GEN y;
-  double prod;
+  long i, j, lgsub, ino, lv = KC+1;
+  double prod = 1.;
+  gpmem_t av;
+  GEN no;
 
-  i=0; ss=0; prod=1;
-  for (j=1; j<=KC && prod<=ll; j++)
+  vperm = cgetg(lv, t_VECSMALL);
+  av = avma;
+  no    = cgetg(lv, t_VECSMALL); ino = 1;
+  for (i=j=1; j < lv; j++)
   {
-    p = vectbase[j];
-    if (p>0) { pro[++i]=p; prod*=p; vperm[i]=j; } else ss++;
-  }
-  if (prod<=ll) return -1;
-  nbidp=i;
-  for (k=1; k<j; k++)
-    if (vectbase[k]<=0) vperm[++i]=k;
-
-  y=cgetg(nbidp+1,t_COL);
-  if (PRECREG) /* real */
-    for (j=1; j<=nbidp; j++)
-      y[j] = (long)redrealprimeform5(Disc, pro[j]);
-  else
-    for (j=1; j<=nbidp; j++) /* imaginary */
-      y[j] = (long)primeform(Disc,stoi(pro[j]),0);
-  subbase = (long*) gpmalloc(sizeof(long)*(nbidp+1));
-  lgsub = nbidp; for (j=1; j<=lgsub; j++) subbase[j]=pro[j];
-  if (DEBUGLEVEL>7)
-  {
-    fprintferr("subfactorbase: ");
-    for (i=1; i<=lgsub; i++)
-      { fprintferr("%ld: ",subbase[i]); outerr((GEN)y[i]); }
-    fprintferr("\n"); flusherr();
-  }
-  subfactorbase = y; return ss;
-}
-
-static void
-powsubfact(long n, long a)
-{
-  GEN unform, *y, **x = (GEN**) gpmalloc(sizeof(GEN*)*(n+1));
-  long i,j;
-
-  for (i=1; i<=n; i++)
-    x[i] = (GEN*) gpmalloc(sizeof(GEN)*(a+1));
-  if (PRECREG) /* real */
-  {
-    unform=cgetg(6,t_VEC);
-    unform[1]=un;
-    unform[2]=(mod2(Disc) == mod2(isqrtD))? (long)isqrtD: laddsi(-1,isqrtD);
-    unform[3]=lshifti(subii(sqri((GEN)unform[2]),Disc),-2);
-    unform[4]=zero;
-    unform[5]=(long)realun(PRECREG);
-    for (i=1; i<=n; i++)
+    long p = FB[j];
+    if (smodis(D, p) == 0) no[ino++] = j; /* ramified */
+    else
     {
-      y = x[i]; y[0] = unform;
-      for (j=1; j<=a; j++)
-	y[j] = comprealform(y[j-1],(GEN)subfactorbase[i]);
+      vperm[i] = j; i++;
+      prod *= p;
+      if (prod > PROD) break;
+    }
+  }
+  if (j > KC) return NULL;
+  lgsub = i;
+  for (j = 1; j <ino; i++,j++) vperm[i] = no[j];
+  for (     ; i < lv; i++)     vperm[i] = i;
+  avma = av;
+  return vecextract_i(vperm, 1, lgsub-1);
+}
+
+/* assume n >= 2 */
+static GEN **
+powsubFBquad(long n)
+{
+  long i,j, l = lg(subFB);
+  GEN F, unform, *y, **x = (GEN**)cgetg(l, t_VEC);
+
+  unform = primeform(Disc, gun, 0);
+  if (PRECREG) /* real */
+  {
+    unform = codeform5(unform, PRECREG);
+    for (i=1; i<l; i++)
+    {
+      F = redrealprimeform5(Disc, FB[subFB[i]]);
+      y = x[i] = (GEN*)cgetg(n+1, t_VEC);
+      y[0] = unform;
+      y[1] = F;
+      for (j=2; j<=n; j++) y[j] = comprealform(y[j-1], F);
     }
   }
   else /* imaginary */
   {
-    unform = primeform(Disc, gun, 0);
-    for (i=1; i<=n; i++)
+    for (i=1; i<l; i++)
     {
-      y = x[i]; y[0] = unform;
-      for (j=1; j<=a; j++)
-	y[j] = compimag(y[j-1],(GEN)subfactorbase[i]);
+      F = primeform(Disc, stoi(FB[subFB[i]]), 0);
+      y = x[i] = (GEN*)cgetg(n+1, t_VEC);
+      y[0] = unform;
+      y[1] = F;
+      for (j=2; j<=n; j++) y[j] = compimag(y[j-1], F);
     }
   }
-  if (DEBUGLEVEL) msgtimer("powsubfact");
-  powsubfactorbase = x;
+  if (DEBUGLEVEL) msgtimer("powsubFBquad");
+  return x;
 }
 
 static void
 desalloc(long **mat)
 {
   long i,*p,*q;
-
-  free(vectbase); free(factorbase); free(numfactorbase);
-  if (mat)
-  {
-    free(subbase);
-    for (i=1; i<lg(subfactorbase); i++) free(powsubfactorbase[i]);
-    for (i=1; i<lg(mat); i++) free(mat[i]);
-    free(mat); free(powsubfactorbase);
-    for (i=1; i<HASHT; i++)
-      for (p = hashtab[i]; p; p = q) { q=(long*)p[0]; free(p-3); }
-  }
+  for (i=1; i<lg(mat); i++) free(mat[i]);
+  free(mat);
+  for (i=1; i<HASHT; i++)
+    for (p = hashtab[i]; p; p = q) { q=(long*)p[0]; free(p-3); }
 }
 
-/* ~ L(kro_D, 1) */
-static GEN
-Lval1(GEN Disc)
+static void
+sub_fact(GEN col, GEN F)
 {
-  long p;
-  gpmem_t av=avma;
-  GEN y=realun(DEFAULTPREC);
-  byteptr d=diffptr;
-
-  for(p = *d++; p<=30000; p += *d++)
+  GEN b = (GEN)F[2];
+  long i, p, e;
+  for (i=1; i<=primfact[0]; i++)
   {
-    if (!*d) err(primer1);
-    y = mulsr(p, divrs(y, p-krogs(Disc,p)));
+    p = primfact[i]; e = exprimfact[i];
+    if (smodis(b, p<<1) > p) e = -e;
+    col[numFB[p]] -= e;
   }
-  return gerepileupto(av,y);
+}
+static void
+add_fact(GEN col, GEN F)
+{
+  GEN b = (GEN)F[2];
+  long i, p, e;
+  for (i=1; i<=primfact[0]; i++)
+  {
+    p = primfact[i]; e = exprimfact[i];
+    if (smodis(b, p<<1) > p) e = -e;
+    col[numFB[p]] += e;
+  }
 }
 
 #define comp(x,y) x? (PRECREG? compreal(x,y): compimag(x,y)): y
@@ -1129,7 +1129,7 @@ get_clgp(GEN Disc, GEN W, GEN *ptmet, long prec)
   if (DEBUGLEVEL) msgtimer("smith/class group");
   res=cgetg(c,t_VEC); init = (GEN*)cgetg(l,t_VEC);
   for (i=1; i<l; i++)
-    init[i] = primeform(Disc,stoi(labs(vectbase[vperm[i]])),prec);
+    init[i] = primeform(Disc,stoi(FB[vperm[i]]),prec);
   for (j=1; j<c; j++)
   {
     GEN p1 = NULL;
@@ -1142,48 +1142,46 @@ get_clgp(GEN Disc, GEN W, GEN *ptmet, long prec)
 }
 
 static GEN
-extra_relations(long LIMC, long *ex, long nlze, GEN extramatc)
+extra_relations(long LIMC, long nlze, GEN *ptextraC)
 {
-  long fpc, p, ep, i, j, k, nlze2, *col, *colg, s = 0, extrarel = nlze+2;
+  long fpc, i, k, nlze2, *col, *colg;
+  long s = 0, extrarel = nlze+2, lgsub = lg(subFB);
   gpmem_t av;
   long MAXRELSUP = min(50,4*KC);
-  GEN p1,form, extramat = cgetg(extrarel+1,t_MAT);
+  GEN p1, form, ex, extramat, extraC;
 
-  if (DEBUGLEVEL)
-  {
-    fprintferr("looking for %ld extra relations\n",extrarel);
-    flusherr();
-  }
-  for (j=1; j<=extrarel; j++) extramat[j]=lgetg(KC+1,t_COL);
-  nlze2 = PRECREG? max(nlze,lgsub): min(nlze+1,KC);
+  extramat = cgetg(extrarel+1, t_MAT);
+  extraC   = cgetg(extrarel+1, t_VEC);
+  for (i=1; i<=extrarel; i++) extramat[i] = lgetg(KC+1,t_VECSMALL);
+  if (!PRECREG)
+    for (i=1; i<=extrarel; i++) extraC[i] = lgetg(1,t_COL);
+
+  if (DEBUGLEVEL) fprintferr("looking for %ld extra relations\n",extrarel);
+  nlze2 = PRECREG? max(nlze,lgsub-1): min(nlze+1,KC);
   if (nlze2 < 3 && KC > 2) nlze2 = 3;
+  ex = cgetg(nlze2+1, t_VECSMALL);
   av = avma;
   while (s<extrarel)
   {
     form = NULL;
     for (i=1; i<=nlze2; i++)
     {
-      ex[i]=mymyrand()>>randshift;
+      ex[i] = mymyrand()>>randshift;
       if (ex[i])
       {
-        p1 = primeform(Disc,stoi(factorbase[vperm[i]]),PRECREG);
+        p1 = primeform(Disc,stoi(FB[vperm[i]]),PRECREG);
         p1 = gpuigs(p1,ex[i]); form = comp(form,p1);
       }
     }
     if (!form) continue;
 
-    fpc = factorisequad(form,KC,LIMC);
+    fpc = factorquad(form,KC,LIMC);
     if (fpc==1)
     {
       s++; col = (GEN)extramat[s];
       for (i=1; i<=nlze2; i++) col[vperm[i]] = -ex[i];
-      for (   ; i<=KC; i++) col[vperm[i]]= 0;
-      for (j=1; j<=primfact[0]; j++)
-      {
-        p=primfact[j]; ep=exprimfact[j];
-        if (smodis((GEN)form[2], p<<1) > p) ep = -ep;
-        col[numfactorbase[p]] += ep;
-      }
+      for (   ; i<=KC;    i++) col[vperm[i]] = 0;
+      add_fact(col, form);
       for (i=1; i<=KC; i++)
         if (col[i]) break;
       if (i>KC)
@@ -1191,29 +1189,23 @@ extra_relations(long LIMC, long *ex, long nlze, GEN extramatc)
         s--; avma = av;
         if (--MAXRELSUP == 0) return NULL;
       }
-      else { av = avma; if (PRECREG) coeff(extramatc,1,s) = form[4]; }
+      else { av = avma; if (PRECREG) extraC[s] = form[4]; }
     }
     else avma = av;
     if (DEBUGLEVEL)
     {
       if (fpc == 1) fprintferr(" %ld",s);
       else if (DEBUGLEVEL>1) fprintferr(".");
-      flusherr();
     }
   }
-  for (j=1; j<=extrarel; j++)
+  for (i=1; i<=extrarel; i++)
   {
     colg = cgetg(KC+1,t_COL);
-    col = (GEN)extramat[j]; extramat[j] = (long) colg;
-    for (k=1; k<=KC; k++)
-      colg[k] = lstoi(col[vperm[k]]);
+    col = (GEN)extramat[i]; extramat[i] = (long) colg;
+    for (k=1; k<=KC; k++) colg[k] = lstoi(col[vperm[k]]);
   }
-  if (DEBUGLEVEL)
-  {
-    fprintferr("\n");
-    msgtimer("extra relations");
-  }
-  return extramat;
+  if (DEBUGLEVEL) { fprintferr("\n"); msgtimer("extra relations"); }
+  *ptextraC = extraC; return extramat;
 }
 #undef comp
 
@@ -1224,20 +1216,20 @@ extra_relations(long LIMC, long *ex, long nlze, GEN extramatc)
 /*******************************************************************/
 
 static GEN
-imag_random_form(long current, long *ex)
+imag_random_form(long current, GEN ex)
 {
-  long i;
+  long i, l = lg(ex);
   gpmem_t av = avma;
   GEN form,pc;
 
   for(;;)
   {
-    form = pc = primeform(Disc,stoi(factorbase[current]),PRECREG);
-    for (i=1; i<=lgsub; i++)
+    form = pc = primeform(Disc,stoi(FB[current]),PRECREG);
+    for (i=1; i<l; i++)
     {
       ex[i] = mymyrand()>>randshift;
       if (ex[i])
-        form = compimag(form,powsubfactorbase[i][ex[i]]);
+        form = compimag(form,powsubFB[i][ex[i]]);
     }
     if (form != pc) return form;
     avma = av; /* ex = 0, try again */
@@ -1245,23 +1237,24 @@ imag_random_form(long current, long *ex)
 }
 
 static void
-imag_relations(long lim, long s, long LIMC, long *ex, long **mat)
+imag_relations(long lim, long s, long LIMC, long **mat)
 {
   static long nbtest;
-  long i, j, pp, fpc, b1, b2, ep, current, first = (s==0);
-  gpmem_t av = avma;
-  long *col,*fpd,*oldfact,*oldexp;
-  GEN pc,form,form1;
+  long i, pp, fpc, b1, b2, current, first = (s==0), lgsub = lg(subFB);
+  gpmem_t av;
+  long *col,*fpd;
+  GEN pc,form,form1, ex = cgetg(lgsub, t_VECSMALL);
 
+  av = avma;
   if (first) nbtest = 0 ;
   while (s<lim)
   {
     avma=av; nbtest++; current = first? 1+(s%KC): 1+s-RELSUP;
     form = imag_random_form(current,ex);
-    fpc = factorisequad(form,KC,LIMC);
+    fpc = factorquad(form,KC,LIMC);
     if (!fpc)
     {
-      if (DEBUGLEVEL>1) { fprintferr("."); flusherr(); }
+      if (DEBUGLEVEL>1) fprintferr(".");
       continue;
     }
     if (fpc > 1)
@@ -1269,63 +1262,38 @@ imag_relations(long lim, long s, long LIMC, long *ex, long **mat)
       fpd = largeprime(fpc,ex,current,0);
       if (!fpd)
       {
-        if (DEBUGLEVEL>1) { fprintferr("."); flusherr(); }
+        if (DEBUGLEVEL>1) fprintferr(".");
         continue;
       }
-      form1 = powsubfactorbase[1][fpd[1]];
-      for (i=2; i<=lgsub; i++)
-        form1 = compimag(form1,powsubfactorbase[i][fpd[i]]);
-      pc=primeform(Disc,stoi(factorbase[fpd[-2]]),0);
+      form1 = powsubFB[1][fpd[1]];
+      for (i=2; i<lgsub; i++)
+        form1 = compimag(form1,powsubFB[i][fpd[i]]);
+      pc=primeform(Disc,stoi(FB[fpd[-2]]),0);
       form1=compimag(form1,pc);
       pp = fpc << 1;
-      b1=smodis((GEN)form1[2], pp);
-      b2=smodis((GEN)form[2],  pp);
+      b1 = smodis((GEN)form1[2], pp);
+      b2 = smodis((GEN)form[2],  pp);
       if (b1 != b2 && b1+b2 != pp) continue;
 
-      s++; col = mat[s];
-      if (DEBUGLEVEL) { fprintferr(" %ld",s); flusherr(); }
-      oldfact = primfact; oldexp = exprimfact;
-      primfact = primfact1; exprimfact = exprimfact1;
-      (void)factorisequad(form1,KC,LIMC);
-
+      s++; col = mat[s]; if (DEBUGLEVEL) fprintferr(" %ld",s);
+      add_fact(col, form);
+      (void)factorquad(form1,KC,LIMC);
       if (b1==b2)
       {
-        for (i=1; i<=lgsub; i++)
-          col[numfactorbase[subbase[i]]] = fpd[i]-ex[i];
-        col[fpd[-2]]++;
-        for (j=1; j<=primfact[0]; j++)
-        {
-          pp=primfact[j]; ep=exprimfact[j];
-          if (smodis((GEN)form1[2], pp<<1) > pp) ep = -ep;
-          col[numfactorbase[pp]] -= ep;
-        }
+        for (i=1; i<lgsub; i++) col[subFB[i]] = fpd[i]-ex[i];
+        sub_fact(col, form1); col[fpd[-2]]++;
       }
       else
       {
-        for (i=1; i<=lgsub; i++)
-          col[numfactorbase[subbase[i]]] = -fpd[i]-ex[i];
-        col[fpd[-2]]--;
-        for (j=1; j<=primfact[0]; j++)
-        {
-          pp=primfact[j]; ep=exprimfact[j];
-          if (smodis((GEN)form1[2], pp<<1) > pp) ep = -ep;
-          col[numfactorbase[pp]] += ep;
-        }
+        for (i=1; i<lgsub; i++) col[subFB[i]] = -fpd[i]-ex[i];
+        add_fact(col, form1); col[fpd[-2]]--;
       }
-      primfact = oldfact; exprimfact = oldexp;
-    }	
+    }
     else
     {
-      s++; col = mat[s];
-      if (DEBUGLEVEL) { fprintferr(" %ld",s); flusherr(); }
-      for (i=1; i<=lgsub; i++)
-        col[numfactorbase[subbase[i]]] = -ex[i];
-    }
-    for (j=1; j<=primfact[0]; j++)
-    {
-      pp=primfact[j]; ep=exprimfact[j];
-      if (smodis((GEN)form[2], pp<<1) > pp) ep = -ep;
-      col[numfactorbase[pp]] += ep;
+      s++; col = mat[s]; if (DEBUGLEVEL) fprintferr(" %ld",s);
+      for (i=1; i<lgsub; i++) col[subFB[i]] = -ex[i];
+      add_fact(col, form);
     }
     col[current]--;
     if (!first && fpc == 1 && col[current] == 0)
@@ -1341,18 +1309,18 @@ imag_relations(long lim, long s, long LIMC, long *ex, long **mat)
 }
 
 static int
-imag_be_honest(long *ex)
+imag_be_honest()
 {
   long p, fpc, s = KC, nbtest = 0;
   gpmem_t av = avma;
-  GEN form;
+  GEN form, ex = cgetg(lg(subFB), t_VECSMALL);
 
   while (s<KC2)
   {
-    p = factorbase[s+1];
-    if (DEBUGLEVEL) { fprintferr(" %ld",p); flusherr(); }
+    p = FB[s+1];
+    if (DEBUGLEVEL) fprintferr(" %ld",p);
     form = imag_random_form(s+1,ex);
-    fpc = factorisequad(form,s,p-1);
+    fpc = factorquad(form,s,p-1);
     if (fpc == 1) { nbtest=0; s++; }
     else
       if (++nbtest > 20) return 0;
@@ -1368,20 +1336,20 @@ imag_be_honest(long *ex)
 /*******************************************************************/
 
 static GEN
-real_random_form(long *ex)
+real_random_form(GEN ex)
 {
-  long i;
+  long i, l = lg(ex);
   gpmem_t av = avma;
   GEN p1,form = NULL;
 
   for(;;)
   {
-    for (i=1; i<=lgsub; i++)
+    for (i=1; i<l; i++)
     {
       ex[i] = mymyrand()>>randshift;
 /*    if (ex[i]) KB: less efficient if I put this in. Why ??? */
       {
-        p1 = powsubfactorbase[i][ex[i]];
+        p1 = powsubFB[i][ex[i]];
         form = form? comprealform3(form,p1): p1;
       }
     }
@@ -1391,16 +1359,16 @@ real_random_form(long *ex)
 }
 
 static void
-real_relations(long lim, long s, long LIMC, long *ex, long **mat, GEN glog2,
-               GEN vecexpo)
+real_relations(long lim, long s, long LIMC, long **mat, GEN glog2, GEN C)
 {
   static long nbtest;
-  long i, j, p, fpc, b1, b2, ep, current, first = (s==0);
-  gpmem_t av = avma, av1, limstack;
-  long *col,*fpd,*oldfact,*oldexp;
+  long i, p, fpc, b1, b2, current, first = (s==0), lgsub = lg(subFB);
+  gpmem_t av, av1, limstack;
+  long *col,*fpd;
   long findecycle,nbrhocumule,nbrho;
-  GEN p1,p2,form,form0,form1,form2;
+  GEN p1,p2,form,form0,form1,form2, ex = cgetg(lgsub, t_VECSMALL);
 
+  av = avma;
   limstack=stack_lim(av,1);
   if (first) nbtest = 0;
   current = 0;
@@ -1411,7 +1379,7 @@ real_relations(long lim, long s, long LIMC, long *ex, long **mat, GEN glog2,
     if (!first)
     {
       current = 1+s-RELSUP;
-      p1 = redrealprimeform(Disc, factorbase[current]);
+      p1 = redrealprimeform(Disc, FB[current]);
       form = comprealform3(form,p1);
     }
     form0 = form; form1 = NULL;
@@ -1421,18 +1389,15 @@ real_relations(long lim, long s, long LIMC, long *ex, long **mat, GEN glog2,
     {
       if (low_stack(limstack, stack_lim(av,1)))
       {
-        GEN *gptr[2];
-        int c = 1;
-	if(DEBUGMEM>1) err(warnmem,"real_relations");	
-        gptr[0]=&form; if (form1) gptr[c++]=&form1;
-        gerepilemany(av1,gptr,c);
+	if(DEBUGMEM>1) err(warnmem,"real_relations");
+        gerepileall(av1, form1? 2: 1, &form, &form1);
       }
       if (nbrho < 0) nbrho = 0; /* first time in */
       else
       {
         if (findecycle) break;
-        form = rhorealform(form);
-        nbrho++; nbrhocumule++;
+        form = rhorealform(form); nbrho++;
+        nbrhocumule++;
         if (first)
         {
           if (absi_equal((GEN)form[1],(GEN)form0[1])
@@ -1455,10 +1420,10 @@ real_relations(long lim, long s, long LIMC, long *ex, long **mat, GEN glog2,
               egalii((GEN)form[2],(GEN)form0[2])) break;
         }
       }
-      nbtest++; fpc = factorisequad(form,KC,LIMC);
+      nbtest++; fpc = factorquad(form,KC,LIMC);
       if (!fpc)
       {
-        if (DEBUGLEVEL>1) { fprintferr("."); flusherr(); }
+        if (DEBUGLEVEL>1) fprintferr(".");
         continue;
       }
       if (fpc > 1)
@@ -1466,20 +1431,21 @@ real_relations(long lim, long s, long LIMC, long *ex, long **mat, GEN glog2,
 	fpd = largeprime(fpc,ex,current,nbrhocumule);
         if (!fpd)
         {
-          if (DEBUGLEVEL>1) { fprintferr("."); flusherr(); }
+          if (DEBUGLEVEL>1) fprintferr(".");
           continue;
         }
         if (!form1) form1 = initrealform5(ex);
         if (!first)
         {
-          p1 = redrealprimeform5(Disc, factorbase[current]);
+          p1 = redrealprimeform5(Disc, FB[current]);
           form1=comprealform(form1,p1);
         }
-        form1 = rhoreal_pow(form1, nbrho); nbrho = 0;
+        form1 = rhoreal_pow(form1, nbrho);
+        nbrho = 0;
         form2 = initrealform5(fpd);
         if (fpd[-2])
         {
-          p1 = redrealprimeform5(Disc, factorbase[fpd[-2]]);
+          p1 = redrealprimeform5(Disc, FB[fpd[-2]]);
           form2=comprealform(form2,p1);
         }
         form2 = rhoreal_pow(form2, fpd[-3]);
@@ -1489,73 +1455,55 @@ real_relations(long lim, long s, long LIMC, long *ex, long **mat, GEN glog2,
           setsigne(form2[3],-1);
         }
         p = fpc << 1;
-        b1=smodis((GEN)form2[2], p);
-        b2=smodis((GEN)form1[2], p);
+        b1 = smodis((GEN)form2[2], p);
+        b2 = smodis((GEN)form1[2], p);
         if (b1 != b2 && b1+b2 != p) continue;
 
         s++; col = mat[s]; if (DEBUGLEVEL) fprintferr(" %ld",s);
-        oldfact = primfact; oldexp = exprimfact;
-        primfact = primfact1; exprimfact = exprimfact1;
-        (void)factorisequad(form2,KC,LIMC);
+        add_fact(col, form1);
+        (void)factorquad(form2,KC,LIMC);
         if (b1==b2)
         {
-          for (i=1; i<=lgsub; i++)
-            col[numfactorbase[subbase[i]]] = fpd[i]-ex[i];
-          for (j=1; j<=primfact[0]; j++)
-          {
-            p=primfact[j]; ep=exprimfact[j];
-            if (smodis((GEN)form2[2], p<<1) > p) ep = -ep;
-            col[numfactorbase[p]] -= ep;
-          }
+          for (i=1; i<lgsub; i++) col[subFB[i]] = fpd[i]-ex[i];
+          sub_fact(col, form2);
           if (fpd[-2]) col[fpd[-2]]++; /* implies !first */
           p1 = subii((GEN)form1[4],(GEN)form2[4]);
           p2 = divrr((GEN)form1[5],(GEN)form2[5]);
         }
         else
         {
-          for (i=1; i<=lgsub; i++)
-            col[numfactorbase[subbase[i]]] = -fpd[i]-ex[i];
-          for (j=1; j<=primfact[0]; j++)
-          {
-            p=primfact[j]; ep=exprimfact[j];
-            if (smodis((GEN)form2[2], p<<1) > p) ep = -ep;
-            col[numfactorbase[p]] += ep;
-          }
+          for (i=1; i<lgsub; i++) col[subFB[i]] = -fpd[i]-ex[i];
+          add_fact(col, form2);
           if (fpd[-2]) col[fpd[-2]]--;
           p1 = addii((GEN)form1[4],(GEN)form2[4]);
           p2 = mulrr((GEN)form1[5],(GEN)form2[5]);
         }
-        primfact = oldfact; exprimfact = oldexp;
       }
       else
       {
 	if (!form1) form1 = initrealform5(ex);
         if (!first)
         {
-          p1 = redrealprimeform5(Disc, factorbase[current]);
+          p1 = redrealprimeform5(Disc, FB[current]);
           form1=comprealform(form1,p1);
         }
         form1 = rhoreal_pow(form1,nbrho); nbrho = 0;
 
 	s++; col = mat[s]; if (DEBUGLEVEL) fprintferr(" %ld",s);
-	for (i=1; i<=lgsub; i++)
-          col[numfactorbase[subbase[i]]] = -ex[i];
+	for (i=1; i<lgsub; i++) col[subFB[i]] = -ex[i];
+        add_fact(col, form1);
         p1 = (GEN) form1[4];
         p2 = (GEN) form1[5];
       }
-      for (j=1; j<=primfact[0]; j++)
-      {
-        p=primfact[j]; ep=exprimfact[j];
-        if (smodis((GEN)form1[2], p<<1) > p) ep = -ep;
-        col[numfactorbase[p]] += ep;
-      }
       p1 = mpadd(mulir(mulsi(EXP220,p1), glog2), mplog(absr(p2)));
-      affrr(shiftr(p1,-1), (GEN)vecexpo[s]);
+      affrr(shiftr(p1,-1), (GEN)C[s]);
       if (!first)
       {
         col[current]--;
         if (fpc == 1 && col[current] == 0)
-          { s--; for (i=1; i<=KC; i++) col[i]=0; }
+        {
+          s--; for (i=1; i<=KC; i++) col[i]=0;
+        }
         break;
       }
     }
@@ -1569,32 +1517,26 @@ real_relations(long lim, long s, long LIMC, long *ex, long **mat, GEN glog2,
 }
 
 static int
-real_be_honest(long *ex)
+real_be_honest()
 {
   long p, fpc, s = KC, nbtest = 0;
   gpmem_t av = avma;
-  GEN p1,form,form0;
+  GEN p1,form,form0, ex = cgetg(lg(subFB), t_VECSMALL);
 
   while (s<KC2)
   {
-    p = factorbase[s+1];
-    if (DEBUGLEVEL) { fprintferr(" %ld",p); flusherr(); }
+    p = FB[s+1];
+    if (DEBUGLEVEL) fprintferr(" %ld",p);
     form = real_random_form(ex);
     p1 = redrealprimeform(Disc, p);
     form0 = form = comprealform3(form,p1);
     for(;;)
     {
-      fpc = factorisequad(form,s,p-1);
+      fpc = factorquad(form,s,p-1);
       if (fpc == 1) { nbtest=0; s++; break; }
       form = rhorealform(form);
       if (++nbtest > 20) return 0;
-      if (narrow || absi_equal((GEN)form[1],(GEN)form[3]))
-	form = rhorealform(form);
-      else
-      {
-	setsigne(form[1],1);
-	setsigne(form[3],-1);
-      }
+      form = fix_signs(form);
       if (egalii((GEN)form[1],(GEN)form0[1])
        && egalii((GEN)form[2],(GEN)form0[2])) break;
     }
@@ -1604,7 +1546,7 @@ real_be_honest(long *ex)
 }
 
 static GEN
-gcdreal(GEN a,GEN b,long *pte)
+gcdreal(GEN a,GEN b)
 {
   long e;
   GEN k1,r;
@@ -1630,49 +1572,62 @@ gcdreal(GEN a,GEN b,long *pte)
     if (e > 0) return NULL;
     r=subrr(a,mulir(k1,b)); a=b; b=r;
   }
-  *pte=expo(b); return absr(a);
+  return absr(a);
 }
 
-static GEN
-get_reg(GEN matc, long sreg)
-{
-  long i,e,maxe;
-  GEN reg = mpabs(gcoeff(matc,1,1));
+enum { RELAT, LARGE, PRECI };
 
-  e = maxe = 0;
-  for (i=2; i<=sreg; i++)
+static int
+get_R(GEN C, long sreg, GEN z, GEN *ptR)
+{
+  GEN R = gun;
+  double c;
+  long i;
+
+  if (PRECREG)
   {
-    reg = gcdreal(gcoeff(matc,1,i),reg,&e);
-    if (!reg) return NULL;
-    maxe = maxe? max(maxe,e): e;
+    R = mpabs((GEN)C[1]);
+    for (i=2; i<=sreg; i++)
+    {
+      R = gcdreal((GEN)C[i], R);
+      if (!R) return PRECI;
+    }
+    if (DEBUGLEVEL)
+    {
+      if (DEBUGLEVEL>7) fprintferr("R = %Z",R);
+      msgtimer("regulator");
+    }
+    if (gexpo(R) <= -3)
+    {
+      if (DEBUGLEVEL) fprintferr("regulator is zero.\n");
+      return RELAT;
+    }
   }
-  if (DEBUGLEVEL)
-  {
-    if (DEBUGLEVEL>7) fprintferr("reg = %Z",reg);
-    msgtimer("regulator");
-  }
-  return reg;
+  c = gtodouble(gmul(z, R));
+  if (c < 0.75) return PRECI;
+  if (c > 1.5) return RELAT;
+  *ptR = R; return LARGE;
 }
 
 GEN
 buchquad(GEN D, double cbach, double cbach2, long RELSUP0, long flag, long prec)
 {
   gpmem_t av0 = avma, av;
-  long KCCO,KCCOPRO,i,j,s, *ex,**mat;
-  long extrarel,nrelsup,nreldep,LIMC,LIMC2,cp,nbram,nlze;
-  GEN p1,h,W,met,res,basecl,dr,pdep,C,B,extramat,extraC;
-  GEN R,vecexpo,glog2,resc,Res,z;
-  double c_1,drc,lim,LOGD;
+  long KCCO, i, j, s, **mat;
+  long nrelsup, nreldep, LIMC, LIMC2, cp, nlze;
+  GEN h, W, cyc, res, gen, pdep, C, B, extramat, extraC;
+  GEN R, resc, Res, z;
+  double drc, lim, LOGD, LOGD2;
+  const long MAXRELSUP = 7;
 
   Disc = D; if (typ(Disc)!=t_INT) err(typeer,"buchquad");
-  s=mod4(Disc);
-  glog2 = vecexpo = NULL; /* gcc -Wall */
+  s = mod4(Disc);
   switch(signe(Disc))
   {
     case -1:
       if (cmpis(Disc,-4) >= 0)
       {
-        p1=cgetg(6,t_VEC); p1[1]=p1[4]=p1[5]=un;
+        GEN p1=cgetg(6,t_VEC); p1[1]=p1[4]=p1[5]=un;
         p1[2]=p1[3]=lgetg(1,t_VEC); return p1;
       }
       if (s==2 || s==1) err(funder2,"buchquad");
@@ -1690,160 +1645,120 @@ buchquad(GEN D, double cbach, double cbach2, long RELSUP0, long flag, long prec)
   if (!isfundamental(Disc))
     err(warner,"not a fundamental discriminant in quadclassunit");
   buch_init(); RELSUP = RELSUP0;
-  dr = itor(Disc, 3);
-  drc = fabs(rtodbl(dr));
+  drc = fabs(gtodouble(Disc));
   LOGD = log(drc);
+  LOGD2 = LOGD * LOGD;
 
   lim = sqrt(drc);
-  resc = dbltor(lim); Res = Lval1(Disc);
   /* resc = sqrt(D) w / 2^r1 (2pi)^r2 ~ hR / L(chi,1) */
-  if (PRECREG)
-    resc = gmul2n(resc,-1);
-  else
-    resc = divrr(resc, mppi(DEFAULTPREC));
-  z = mulrr(Res, resc); /* ~ hR */
-  R = gun;
+  if (PRECREG) resc = dbltor(lim / 2.);
+  else         resc = dbltor(lim / PI);
   if (!PRECREG) lim /= sqrt(3.);
-
+  R = gun;
   cp = (long)exp(sqrt(LOGD*log(LOGD)/8.0));
   if (cp < 13) cp = 13;
   av = avma; cbach /= 2;
 
-INCREASE: avma = av; cbach = check_bach(cbach,6.);
+START: avma = av; cbach = check_bach(cbach,6.);
   nreldep = nrelsup = 0;
-  LIMC = (long)(cbach*LOGD*LOGD);
-  if (LIMC < cp) LIMC=cp;
-  LIMC2 = max(20, (long)(max(cbach,cbach2)*LOGD*LOGD));
+  LIMC = (long)(cbach*LOGD2);
+  if (LIMC < cp) { LIMC = cp; cbach = LIMC / LOGD2; }
+  LIMC2 = (long)(max(cbach,cbach2)*LOGD2);
   if (LIMC2 < LIMC) LIMC2 = LIMC;
   if (PRECREG)
   {
     PRECREG = max(prec+1, MEDDEFAULTPREC + 2*(expi(Disc)>>TWOPOTBITS_IN_LONG));
-    glog2  = mplog2(PRECREG);
     sqrtD  = gsqrt(Disc,PRECREG);
     isqrtD = gfloor(sqrtD);
   }
-  factorbasequad(Disc,LIMC2,LIMC);
-  if (!KC) goto INCREASE;
+  Res = FBquad(Disc,LIMC2,LIMC);
+  if (!Res) goto START;
 
-  vperm = cgetg(KC+1,t_VECSMALL); for (i=1; i<=KC; i++) vperm[i]=i;
-  nbram = subfactorbasequad(lim,KC);
-  if (nbram == -1) { desalloc(NULL); goto INCREASE; }
+  subFB = subFBquad(Disc, min(lim,LIMC2) + 0.5, KC);
+  if (!subFB) goto START;
+
   KCCO = KC + RELSUP;
-  if (DEBUGLEVEL) { fprintferr("KC = %ld, KCCO = %ld\n",KC,KCCO); flusherr(); }
-  powsubfact(lgsub,CBUCH+7);
+  if (DEBUGLEVEL) fprintferr("KC = %ld, KCCO = %ld\n",KC,KCCO);
+  powsubFB = powsubFBquad(CBUCH+1);
 
-  mat = (long**) gpmalloc((KCCO+1)*sizeof(long*));
-  setlg(mat, KCCO+1);
+  mat = (long**)cgetalloc(NULL, KCCO+1, t_VEC);
   for (i=1; i<=KCCO; i++)
   {
-    mat[i] = (long*) gpmalloc((KC+1)*sizeof(long));
-    for (j=1; j<=KC; j++) mat[i][j]=0;
+    GEN t = cgetalloc(NULL, KC+1, t_VECSMALL);
+    for (j=1; j<=KC; j++) t[j]=0;
+    mat[i] = t;
   }
-  ex = new_chunk(lgsub+1);
   limhash = ((ulong)LIMC < (MAXHALFULONG>>1))? LIMC*LIMC: HIGHBIT>>1;
   for (i=0; i<HASHT; i++) hashtab[i]=NULL;
 
-  s = lgsub+nbram+RELSUP;
+  s = lg(subFB)-1 + RELSUP;
+  C = cgetg(KCCO+1, t_VEC);
   if (PRECREG)
   {
-    vecexpo=cgetg(KCCO+1,t_VEC);
-    for (i=1; i<=KCCO; i++) vecexpo[i]=lgetr(PRECREG);
-    real_relations(s,0,LIMC,ex,mat,glog2,vecexpo);
-    real_relations(KCCO,s,LIMC,ex,mat,glog2,vecexpo);
+    GEN glog2  = mplog2(PRECREG);
+    for (i=1; i<=KCCO; i++) C[i] = lgetr(PRECREG);
+    real_relations(s,   0,LIMC,mat,glog2,C);
+    real_relations(KCCO,s,LIMC,mat,glog2,C);
+    if (DEBUGLEVEL>7) fprintferr("C: %Z\n", C);
   }
   else
   {
-    imag_relations(s,0,LIMC,ex,mat);
-    imag_relations(KCCO,s,LIMC,ex,mat);
+    for (i=1; i<=KCCO; i++) C[i] = lgetg(1,t_COL);
+    imag_relations(s,   0,LIMC,mat);
+    imag_relations(KCCO,s,LIMC,mat);
   }
+  W = hnfspec(mat,vperm,&pdep,&B,&C,lg(subFB)-1);
+  nlze = lg(pdep)>1? lg(pdep[1])-1: lg(B[1])-1;
+
+  if (nlze)
+  {
+MORE:
+    extramat = extra_relations(LIMC,nlze, &extraC);
+    if (!extramat) { desalloc(mat); goto START; }
+    W = hnfadd(W,vperm,&pdep,&B,&C, extramat,extraC);
+    nlze = lg(pdep)>1? lg(pdep[1])-1: lg(B[1])-1;
+    KCCO += lg(extramat)-1;
+    if (nlze)
+    {
+      if (++nreldep > 5) { desalloc(mat); goto START; }
+      goto MORE;
+    }
+  }
+
+  h = dethnf_i(W);
+  if (DEBUGLEVEL) fprintferr("\n#### Tentative class number: %Z\n", h);
+
+  z = mulrr(Res, resc); /* ~ hR if enough relations, a multiple otherwise */
+  switch(get_R(C, KCCO - (lg(B)-1) - (lg(W)-1), divir(h,z), &R))
+  {
+    case PRECI:
+      prec = (PRECREG<<1)-2;
+      desalloc(mat); goto START;
+
+    case RELAT:
+      if (++nrelsup <= MAXRELSUP) { nlze = min(KC, nrelsup); goto MORE; }
+      desalloc(mat); goto START;
+  }
+  /* DONE */
+
   if (KC2 > KC)
   {
     if (DEBUGLEVEL)
-      fprintferr("be honest for primes from %ld to %ld\n",
-                  factorbase[KC+1],factorbase[KC2]);
-    s = PRECREG? real_be_honest(ex): imag_be_honest(ex);
-    if (DEBUGLEVEL)
-    {
-      fprintferr("\n");
-      msgtimer("be honest");
-    }
-    if (!s) { desalloc(mat); goto INCREASE; }
-  }
-  C=cgetg(KCCO+1,t_MAT);
-  if (PRECREG)
-  {
-    for (i=1; i<=KCCO; i++)
-    {
-      C[i]=lgetg(2,t_COL); coeff(C,1,i)=vecexpo[i];
-    }
-    if (DEBUGLEVEL>7) { fprintferr("C: "); outerr(C); flusherr(); }
-  }
-  else
-    for (i=1; i<=KCCO; i++) C[i]=lgetg(1,t_COL);
-  W = hnfspec(mat,vperm,&pdep,&B,&C,lgsub);
-  nlze = lg(pdep)>1? lg(pdep[1])-1: lg(B[1])-1;
-
-  KCCOPRO=KCCO;
-  if (nlze)
-  {
-EXTRAREL:
-    s = PRECREG? 2: 1; extrarel=nlze+2;
-    extraC=cgetg(extrarel+1,t_MAT);
-    for (i=1; i<=extrarel; i++) extraC[i]=lgetg(s,t_COL);
-    extramat = extra_relations(LIMC,ex,nlze,extraC);
-    if (!extramat) { desalloc(mat); goto INCREASE; }
-    W = hnfadd(W,vperm,&pdep,&B,&C, extramat,extraC);
-    nlze = lg(pdep)>1? lg(pdep[1])-1: lg(B[1])-1;
-    KCCOPRO += extrarel;
-    if (nlze)
-    {
-      if (++nreldep > 5) { desalloc(mat); goto INCREASE; }
-      goto EXTRAREL;
-    }
-  }
-  /* tentative class number */
-  h = dethnf_i(W);
-  if (PRECREG)
-  {
-    /* tentative regulator */
-    R = get_reg(C, KCCOPRO - (lg(B)-1) - (lg(W)-1));
-    if (!R)
-    {
-      prec = (PRECREG<<1)-2;
-      desalloc(mat); goto INCREASE;
-    }
-    if (gexpo(R) <= -3)
-    {
-      if (++nrelsup <= 7)
-      {
-        if (DEBUGLEVEL) fprintferr("regulator is zero\n");
-        nlze=min(KC,nrelsup); goto EXTRAREL;
-      }
-      desalloc(mat); goto INCREASE;
-    }
+      fprintferr("be honest for primes from %ld to %ld\n", FB[KC+1],FB[KC2]);
+    s = PRECREG? real_be_honest(): imag_be_honest();
+    if (DEBUGLEVEL) { fprintferr("\n"); msgtimer("be honest"); }
+    if (!s) { desalloc(mat); goto START; }
   }
 
-  c_1 = gtodouble(gdiv(gmul(h,R), z));
-  if (c_1 < 0.75) { c_1 = 10.; nrelsup = 7; }
-  if (c_1 > 1.5)
-  {
-    if (++nrelsup <= 7)
-    {
-      if (DEBUGLEVEL) fprintferr("***** check = %f\n\n",c_1);
-      nlze=min(KC,nrelsup); goto EXTRAREL;
-    }
-    if (cbach < 5.99) { desalloc(mat); goto INCREASE; }
-    err(warner,"suspicious check. Suggest increasing extra relations.");
-  }
-  basecl = get_clgp(Disc,W,&met,PRECREG);
-  s = lg(basecl); desalloc(mat);
+  gen = get_clgp(Disc,W,&cyc,PRECREG);
+  desalloc(mat);
 
   res=cgetg(6,t_VEC);
   res[1]=(long)h;
-  res[2]=(long)met;
-  res[3]=(long)basecl;
+  res[2]=(long)cyc;
+  res[3]=(long)gen;
   res[4]=(long)R;
-  res[5]=(long)dbltor(c_1); return gerepilecopy(av0,res);
+  res[5]=ldiv(mpmul(R,h), z); return gerepilecopy(av0,res);
 }
 
 GEN
