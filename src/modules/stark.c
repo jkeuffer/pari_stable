@@ -1484,7 +1484,7 @@ PiBound(long x)
 }
 
 static void
-InitPrimesQuad(GEN bnr, long nmax, LISTray *R)
+InitPrimesQuad(GEN bnr, long N0, LISTray *R)
 {
   pari_sp av = avma;
   GEN bnf = (GEN)bnr[1], cond = gmael3(bnr,2,1,1);
@@ -1493,13 +1493,13 @@ InitPrimesQuad(GEN bnr, long nmax, LISTray *R)
   byteptr d = diffptr + 1;
   GEN *gptr[7];
 
-  l = 1 + PiBound(nmax);
+  l = 1 + PiBound(N0);
   R->L0 = cget1(l, t_VECSMALL);
   R->L2 = cget1(l, t_VECSMALL); R->condZ = condZ;
   R->L1 = cget1(l, t_VECSMALL); R->L1ray = (GEN*)cget1(l, t_VEC);
   R->L11= cget1(l, t_VECSMALL); R->L11ray= (GEN*)cget1(l, t_VEC);
   prime = stoi(2);
-  for (p = 2; p <= nmax; prime[2] = p) {
+  for (p = 2; p <= N0; prime[2] = p) {
     switch (krois(dk, p))
     {
     case -1: /* inert */
@@ -1539,19 +1539,19 @@ InitPrimesQuad(GEN bnr, long nmax, LISTray *R)
 }
 
 static void
-InitPrimes(GEN bnr, long nmax, LISTray *R)
+InitPrimes(GEN bnr, long N0, LISTray *R)
 {
   GEN bnf = (GEN)bnr[1], cond = gmael3(bnr,2,1,1);
   long np,p,j,k,l, condZ = itos(gcoeff(cond,1,1)), N = lg(cond)-1;
   GEN *tmpray, tabpr, prime, pr, nf = checknf(bnf);
   byteptr d = diffptr + 1;
 
-  R->condZ = condZ; l = PiBound(nmax) * N;
+  R->condZ = condZ; l = PiBound(N0) * N;
   tmpray = (GEN*)cgetg(N+1, t_VEC);
   R->L1 = cget1(l, t_VECSMALL);
   R->L1ray = (GEN*)cget1(l, t_VEC);
   prime = stoi(2);
-  for (p = 2; p <= nmax; prime[2] = p)
+  for (p = 2; p <= N0; prime[2] = p)
   {
     pari_sp av = avma;
     if (DEBUGLEVEL > 1 && (p & 2047) == 1) fprintferr("%ld ", p);
@@ -1560,7 +1560,7 @@ InitPrimes(GEN bnr, long nmax, LISTray *R)
     {
       pr  = (GEN)tabpr[j];
       np = itos_or_0( powgi((GEN)pr[1], (GEN)pr[4]) );
-      if (!np || np > nmax) break;
+      if (!np || np > N0) break;
       if (condZ % p == 0 && idealval(nf, cond, pr))
       {
         tmpray[j] = NULL; continue;
@@ -1841,7 +1841,7 @@ GetST(GEN dataCR, GEN vChar, long prec)
 {
   const long cl = lg(dataCR) - 1;
   pari_sp av, av1, av2;
-  long ncond, n, j, k, jc, nmax, prec2, i0, r1, r2;
+  long ncond, n, j, k, jc, n0, prec2, i0, r1, r2;
   GEN bnr, nf, racpi, *powracpi;
   GEN rep, N0, C, T, S, an, degs, limx;
   LISTray LIST;
@@ -1869,20 +1869,18 @@ GetST(GEN dataCR, GEN vChar, long prec)
  
   C  = cgetg(ncond+1, t_VEC);
   N0 = cgetg(ncond+1, t_VECSMALL);
-  nmax = 0;
+  n0 = 0;
   limx = zeta_get_limx(r1, r2, bit_accuracy(prec));
   for (j = 1; j <= ncond; j++)
   {
     C[j]  = mael(dataCR, mael(vChar,j,1), 2);
     N0[j] = zeta_get_N0((GEN)C[j], limx);
-    if (nmax < N0[j]) nmax  = N0[j];
+    if (n0 < N0[j]) n0  = N0[j];
   }
-  if ((ulong)nmax > maxprime())
-    err(talker, "Not enough precomputed primes (need all p <= %ld)", nmax);
+  if ((ulong)n0 > maxprime())
+    err(talker, "Not enough precomputed primes (need all p <= %ld)", n0);
   i0 = zeta_get_i0(r1, r2, bit_accuracy(prec), limx);
-
-  if (DEBUGLEVEL>1) fprintferr("nmax = %ld, i0 = %ld\n", nmax, i0);
-  InitPrimes(gmael(dataCR,1,4), nmax, &LIST);
+  InitPrimes(gmael(dataCR,1,4), n0, &LIST);
 
   prec2 = ((prec-2) << 1) + EXTRA_PREC;
   racpi = sqrtr(mppi(prec2));
@@ -1891,9 +1889,9 @@ GetST(GEN dataCR, GEN vChar, long prec)
   for (j=2; j<=r1; j++) powracpi[j] = mulrr(powracpi[j-1], racpi);
   cScT.powracpi = powracpi;
 
-  cScT.cS = (GEN*)cgetg(nmax+1, t_VEC);
-  cScT.cT = (GEN*)cgetg(nmax+1, t_VEC);
-  for (j=1; j<=nmax; j++) cScT.cS[j] = cScT.cT[j] = NULL;
+  cScT.cS = (GEN*)cgetg(n0+1, t_VEC);
+  cScT.cT = (GEN*)cgetg(n0+1, t_VEC);
+  for (j=1; j<=n0; j++) cScT.cS[j] = cScT.cT[j] = NULL;
 
   cScT.i0 = i0;
  
@@ -1936,7 +1934,7 @@ GetST(GEN dataCR, GEN vChar, long prec)
     avma = av1;
   }
   if (DEBUGLEVEL) msgtimer("S&T");
-  clear_cScT(&cScT, nmax);
+  clear_cScT(&cScT, n0);
   avma = av; return rep;
 }
 
@@ -2378,7 +2376,7 @@ QuadGetST(GEN dataCR, GEN vChar, long prec)
 {
   const long cl  = lg(dataCR) - 1;
   pari_sp av, av1, av2;
-  long ncond, n, j, k, nmax;
+  long ncond, n, j, k, n0;
   GEN rep, N0, C, T, S, cf, cfh, an, degs;
   LISTray LIST;
 
@@ -2398,17 +2396,17 @@ QuadGetST(GEN dataCR, GEN vChar, long prec)
   ncond = lg(vChar)-1;
   C    = cgetg(ncond+1, t_VEC);
   N0   = cgetg(ncond+1, t_VECSMALL);
-  nmax = 0;
+  n0 = 0;
   for (j = 1; j <= ncond; j++)
   {
     C[j]  = mael(dataCR, mael(vChar,j,1), 2);
     N0[j] = (long)(bit_accuracy(prec) * gtodouble((GEN)C[j]) * 0.35);
-    if (nmax < N0[j]) nmax = N0[j];
+    if (n0 < N0[j]) n0 = N0[j];
   }
-  if ((ulong)nmax > maxprime())
-    err(talker, "Not enough precomputed primes (need all p <= %ld)", nmax);
-  if (DEBUGLEVEL>1) fprintferr("nmax = %ld\n", nmax);
-  InitPrimesQuad(gmael(dataCR,1,4), nmax, &LIST);
+  if ((ulong)n0 > maxprime())
+    err(talker, "Not enough precomputed primes (need all p <= %ld)", n0);
+  if (DEBUGLEVEL>1) fprintferr("N0 = %ld\n", n0);
+  InitPrimesQuad(gmael(dataCR,1,4), n0, &LIST);
 
   cfh = sqrtr(mppi(prec));
   cf  = gmul2n(cfh, 1);
@@ -2617,7 +2615,7 @@ LABDOUB:
 
     n = zeta_get_N0(Cmax, zeta_get_limx(r1, r2, bit_accuracy(newprec)));
     if (n > bnd) n = bnd;
-    if (DEBUGLEVEL) fprintferr("nmax in QuickPol: %ld \n", n);
+    if (DEBUGLEVEL) fprintferr("N0 in QuickPol: %ld \n", n);
     InitPrimes(gmael(dataCR,1,4), n, &LIST);
 
     p0 = cgetg(3, t_COMPLEX);
