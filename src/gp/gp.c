@@ -1895,7 +1895,7 @@ escape0(char *tch)
         {
           long i, l = lg(x);
           err(warner,"setting %ld history entries", l-1);
-          for (i=1; i<l; i++) set_hist_entry((GEN)x[i]);
+          for (i=1; i<l; i++) (void)set_hist_entry((GEN)x[i]);
         }
       }
       break;
@@ -2559,7 +2559,7 @@ gp_main_loop(int ismain)
     av = avma;
     z = readseq(b->buf, strictmatch);
     if (!added_newline) pariputc('\n'); /* last output was print1() */
-    if (! ismain) continue;
+    if (! ismain) { avma = av; continue; }
     if (chrono) pariputs(do_time(ti_REGULAR)); else do_time(ti_NOPRINT);
     if (z == gnil) continue;
 
