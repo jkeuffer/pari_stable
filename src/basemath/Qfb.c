@@ -1,6 +1,6 @@
 /* $Id$
 
-Copyright (C) 2000  The PARI group.
+Copyright (C) 2000-2005  The PARI group.
 
 This file is part of the PARI/GP package.
 
@@ -746,9 +746,11 @@ qfr5_to_qfr(GEN x, GEN d0)
   y[3] = x[3];
   y[4] = (long)d0; return y;
 }
+
 /* Not stack-clean */
 GEN
-qfr3_to_qfr(GEN x, GEN d) {
+qfr3_to_qfr(GEN x, GEN d)
+{
   GEN z = cgetg(5, t_QFR);
   z[1] = x[1];
   z[2] = x[2];
@@ -757,17 +759,23 @@ qfr3_to_qfr(GEN x, GEN d) {
 }
 
 static int
-qfr_isreduced(GEN x, GEN isqrtD)
+abi_isreduced(GEN a, GEN b, GEN isqrtD)
 {
-  GEN b = (GEN)x[2];
   if (signe(b) > 0 && absi_cmp(b, isqrtD) <= 0)
   {
-    GEN t = addii_sign(isqrtD,1, shifti((GEN)x[1],1),-1);
+    GEN t = addii_sign(isqrtD,1, shifti(a,1),-1);
     long l = absi_cmp(b, t); /* compare |b| and |floor(sqrt(D)) - |2a|| */
     if (l > 0 || (l == 0 && signe(t) < 0)) return 1;
   }
   return 0;
 }
+
+INLINE int
+qfr_isreduced(GEN x, GEN isqrtD)
+{
+  return abi_isreduced((GEN)x[1],(GEN)x[2],isqrtD);
+}
+
 /* Not stack-clean */
 GEN
 qfr5_red(GEN x, GEN D, GEN sqrtD, GEN isqrtD) {
@@ -1024,6 +1032,23 @@ primeform(GEN x, GEN p, long prec)
   return y;
 }
 
+/* Let M and N in SL_2(Z), return (N*M^-1)[,1]
+ * 
+*/
+static GEN 
+SL2_div_mul_e1(GEN N, GEN M)
+{
+  GEN b = (GEN) coeff(M, 2, 1);
+  GEN d = (GEN) coeff(M, 2, 2);
+  GEN p2 = cgetg(3, t_VEC);
+  p2[1] = (long) subii(mulii((GEN) coeff(N, 1, 1), d),
+                       mulii((GEN) coeff(N, 1, 2), b));
+  p2[2] = (long) subii(mulii((GEN) coeff(N, 2, 1), d),
+                       mulii((GEN) coeff(N, 2, 2), b));
+  return p2;
+}
+
+
 static GEN
 qfbsolve_cornacchia(GEN c, GEN p, int swap)
 {
@@ -1064,20 +1089,117 @@ qfbimagsolvep(GEN Q, GEN p)
   }
   b = redimagsl2(primeform(d, p, 0), &M);
   if (!gequal(a, b)) return gen_0;
-  a = gcoeff(N,1,1); x = gcoeff(M,2,2);
-  b = gcoeff(N,1,2); y = gcoeff(M,2,1); /* M^(-1)[,1] = [x, -y]~ */
-  c = gcoeff(N,2,1);
-  d = gcoeff(N,2,2);
-  /* return (N * M^(-1))[,1] */
-  M = subii(mulii(a,x), mulii(b,y));
-  N = subii(mulii(c,x), mulii(d,y)); return gerepilecopy(av, mkvec2(M,N));
+  return gerepilecopy(av, SL2_div_mul_e1(N,M));
+}
+
+GEN
+redrealsl2step(GEN A)
+{
+  pari_sp ltop = avma;
+  GEN N;
+  GEN V = (GEN) A[1]; 
+  GEN M = (GEN) A[2];
+  GEN a = (GEN) V[1]; 
+  GEN b = (GEN) V[2];
+  GEN c = (GEN) V[3];
+  GEN d = qf_disc0(a,b,c);
+  GEN rd = racine(d); 
+  GEN ac = mpabs(c);
+  GEN r = addii(b, gmax(rd, ac));
+  GEN q = truedvmdii(r, mulsi(2, ac), NULL);
+  r = subii(mulii(mulis(q, 2), ac), b);
+  a = c; b = r;
+  c = truedvmdii(subii(sqri(r), d), mulsi(4, c), NULL);
+  q = mulis(q, signe(a));
+  N = cgetg(3, t_MAT);
+  N[1] = lgetg(3, t_COL);
+  coeff(N, 1, 1) =  coeff(M, 1, 2);
+  coeff(N, 2, 1) =  coeff(M, 2, 2);
+  N[2] = lgetg(3, t_COL);
+  coeff(N, 1, 2) = lsubii(mulii(q, (GEN) coeff(M, 1, 2)),
+                          (GEN) coeff(M, 1, 1));
+  coeff(N, 2, 2) = lsubii(mulii(q, (GEN) coeff(M, 2, 2)),  
+                          (GEN) coeff(M, 2, 1));
+  return gerepilecopy(ltop, mkvec2(mkvec3(a,b,c),N));
+}
+
+GEN
+redrealsl2(GEN V)
+{
+  pari_sp ltop = avma, btop, st_lim;
+  GEN u1, u2, v1, v2;
+  GEN M;
+  GEN a = (GEN) V[1];
+  GEN b = (GEN) V[2];
+  GEN c = (GEN) V[3];
+  GEN d = qf_disc0(a,b,c);
+  GEN rd = sqrti(d);
+  btop = avma; st_lim = stack_lim(btop, 1);
+  u1 = v2 = gen_1; v1 = u2 = gen_0; 
+  while (!abi_isreduced(a,b,rd))
+  {
+    GEN ac = mpabs(c);
+    GEN r = addii(b, gmax(rd,ac));
+    GEN q = truedvmdii(r, mulsi(2, ac), NULL);
+    r = subii(mulii(mulis(q, 2), ac), b);
+    a = c; b = r;
+    c = truedvmdii(subii(sqri(r), d), mulsi(4, c), NULL);
+    q = mulis(q, signe(a));
+    r = u1; u1 = v1; v1 = subii(mulii(q, v1), r);
+    r = u2; u2 = v2; v2 = subii(mulii(q, v2), r);
+    if (low_stack(st_lim, stack_lim(btop, 1)))
+    {
+      GEN *bptr[7];
+      bptr[0]=&a; bptr[1]=&b; bptr[2]=&c;
+      bptr[3]=&u1; bptr[4]=&u2;
+      bptr[5]=&v1; bptr[6]=&v2;
+      gerepilemany(ltop, bptr, 7);
+    }
+  }
+  M = cgetg(3, t_MAT);
+  M[1] = lgetg(3, t_COL);
+  coeff(M, 1, 1) = (long) u1;
+  coeff(M, 2, 1) = (long) u2;
+  M[2] = lgetg(3, t_COL);
+  coeff(M, 1, 2) = (long) v1;
+  coeff(M, 2, 2) = (long) v2;
+  return gerepilecopy(ltop, mkvec2(mkvec3(a,b,c),M));
+}
+
+GEN
+qfbrealsolvep(GEN Q, GEN p)
+{
+  pari_sp ltop = avma, btop, st_lim;
+  GEN N, P, M, d = qf_disc(Q);
+  if (kronecker(d, p) < 0) { avma = ltop; return gen_0; }
+  N = redrealsl2(Q);
+  P = primeform(d, p, DEFAULTPREC);
+  P[2] = lnegi((GEN) P[2]);/*This form leads to a smaller solution*/
+  P = M = redrealsl2(P);
+  btop = avma; st_lim = stack_lim(btop, 1);
+  while (!gequal((GEN) M[1], (GEN) N[1]))
+  {
+    M = redrealsl2step(M);
+    if (gequal((GEN) M[1], (GEN) P[1])) { avma = ltop; return gen_0; }
+    if (low_stack(st_lim, stack_lim(btop, 1))) M = gerepileupto(btop, M);
+  }
+  return gerepilecopy(ltop, SL2_div_mul_e1((GEN) N[2],(GEN) M[2]));
 }
 
 GEN
 qfbsolve(GEN Q,GEN n)
 {
-  if (typ(Q)!=t_QFI || typ(n)!=t_INT) err(typeer,"qfbsolve");
-  return qfbimagsolvep(Q,n);
+  if (typ(n)!=t_INT) err(typeer,"qfbsolve");
+  switch(typ(Q))
+  {
+  case t_QFI:
+    return qfbimagsolvep(Q,n);
+  case t_QFR:
+    return qfbrealsolvep(Q,n);
+  default:
+    err(typeer,"qfbsolve");
+    return NULL; /* NOT REACHED */
+  }
 }
 
 /* 1 if there exists x,y such that x^2 + dy^2 = p [prime], 0 otherwise */
