@@ -22,25 +22,25 @@ typedef struct var_cell {
 #define separe(c) ((c)==';' || (c)==':')
 typedef GEN (*PFGEN)(ANYARG);
 
-static GEN    constante(void);
-static GEN    expr(void);
-static GEN    facteur(void);
-static GEN    identifier(void);
+static GEN    constante();
+static GEN    expr();
+static GEN    facteur();
+static GEN    identifier();
 static GEN    matrix_block(GEN p, entree *ep);
 static GEN    read_member(GEN x);
-static GEN    seq(void);
-static GEN    truc(void);
+static GEN    seq();
+static GEN    truc();
 static long   number(long *nb);
 static void   doskipseq(char *s, int strict);
-static void   skipconstante(void);
-static void   skipexpr(void);
-static void   skipfacteur(void);
-static void   skipidentifier(void);
-static void   skipseq(void);
-static void   skipstring(void);
-static long   skiptruc(void);
+static void   skipconstante();
+static void   skipexpr();
+static void   skipfacteur();
+static void   skipidentifier();
+static void   skipseq();
+static void   skipstring();
+static long   skiptruc();
 static GEN    strtoGENstr_t();
-static entree *entry(void);
+static entree *entry();
 static entree *installep(void *f,char *name,int l,int v,int add,entree **table);
 static entree *skipentry(void);
 
@@ -517,12 +517,12 @@ L1:
     case '&':
       if (*++analyseur == '&') analyseur++;
       if (gcmp0(e)) { skipexpr(); return gzero; }
-      f[0]=(PFGEN)1; goto L1;
+      f[0]=(PFGEN)1L; goto L1;
 
     case '|':
       if (*++analyseur == '|') analyseur++;
       if (!gcmp0(e)) { skipexpr(); return gun; }
-      f[0]=(PFGEN)1; goto L1;
+      f[0]=(PFGEN)1L; goto L1;
   }
   return e;
 }
@@ -1225,13 +1225,75 @@ check_args()
   return nparam;
 }
 
-#define DFT_VAR (GEN)-1
+static GEN
+do_call(void *call, GEN x, GEN argvec[])
+{
+  return ((PFGEN)call)(x, argvec[1], argvec[2], argvec[3],
+	          argvec[4], argvec[5], argvec[6], argvec[7], argvec[8]);
+}
+
+static GEN
+fix(GEN x, long l)
+{
+  GEN y;
+  if (typ(x) == t_COMPLEX)
+  {
+    y = gcopy(x);
+    y[1] = (long)fix((GEN)y[1],l);
+    y[2] = (long)fix((GEN)y[2],l);
+  }
+  else 
+  {
+    y = cgetr(l); gaffect(x,y); 
+  }
+  return y;
+}
+
+static GEN
+num_deriv(void *call, GEN argvec[])
+{
+  GEN eps,a,b, x = argvec[0];
+  long pr = precision(x), pr2,l;
+  long av = avma, e, ex = gexpo(x);
+  if (!pr) pr = prec;
+  pr2 = (long)ceil(pr * 3.)/2;
+  l = 2+pr2;
+  e = pr2 * BITS_IN_HALFULONG;
+  if (ex == -HIGHEXPOBIT) ex = 0;
+
+  eps = realun(l); setexpo(eps, ex-e);
+  x = fix(x, l);           a = do_call(call, x, argvec);
+  x = fix(gadd(x, eps),l); b = do_call(call, x, argvec);
+  setexpo(eps, e-ex);
+  return gerepileupto(av, gmul(gsub(b,a), eps));
+}
+
+static GEN
+num_derivU(GEN p, GEN *arg, GEN *loc, int narg, int nloc)
+{
+  GEN eps,a,b, x = *arg;
+  long pr = precision(x), pr2,l;
+  long av = avma, e, ex = gexpo(x);
+  if (!pr) pr = prec;
+  pr2 = (long)ceil(pr * 3.)/2;
+  l = 2+pr2;
+  e = pr2 * BITS_IN_HALFULONG;
+  if (ex == -HIGHEXPOBIT) ex = 0;
+
+  eps = realun(l); setexpo(eps, ex-e);
+  *arg = x = fix(x,l);       a = call_fun(p,arg,loc,narg,nloc);
+  *arg = fix(gadd(x,eps),l); b = call_fun(p,arg,loc,narg,nloc);
+  setexpo(eps, e-ex);
+  return gerepileupto(av, gmul(gsub(b,a), eps));
+}
+
+#define DFT_VAR (GEN)-1L
 #define DFT_GEN (GEN)NULL
 
 static GEN
 identifier(void)
 {
-  long m,i,av,matchcomma;
+  long m,i,av,matchcomma, deriv;
   char *ch1;
   entree *ep;
   GEN res, newfun, ptr;
@@ -1273,6 +1335,7 @@ identifier(void)
   if (PARI_stack_limit && (void*) &ptr <= PARI_stack_limit)
       err(talker2, "deep recursion", mark.identifier, mark.start);
 #endif
+
   if (ep->code)
   {
     char *s = ep->code, *oldanalyseur = NULL, *buf, *limit, *bp;
@@ -1282,6 +1345,7 @@ identifier(void)
     GEN argvec[9];
     entree *pointers[9];
 
+    deriv = (*analyseur == '\'' && analyseur[1] == '(') && analyseur++;
     if (*analyseur == '(')
     {
       analyseur++;
@@ -1444,7 +1508,13 @@ identifier(void)
 #if 0 /* uncomment if using purify: unitialized read otherwise */
     for ( ; i<9; i++) argvec[i]=NULL;
 #endif
-    switch (ret)
+    if (deriv)
+    {
+      if (!i || (ep->code)[0] != 'G')
+        err(talker2, "can't derive this", mark.identifier, mark.start);
+      res = num_deriv(call, argvec);
+    }
+    else switch (ret)
     {
       default: /* case RET_GEN: */
 	res = ((PFGEN)call)(argvec[0], argvec[1], argvec[2], argvec[3],
@@ -1574,6 +1644,7 @@ identifier(void)
       defarg = f->arg;
       narg = f->narg;
       nloc = f->nloc;
+      deriv = (*analyseur == '\'' && analyseur[1] == '(') && analyseur++;
       if (*analyseur != '(') /* no args */
       {
 	if (*analyseur != '='  ||  analyseur[1] == '=')
@@ -1596,7 +1667,16 @@ identifier(void)
           }
         }
         if (*analyseur++ == ')' && (*analyseur != '=' || analyseur[1] == '='))
-          return call_fun((GEN)ep->value, arglist, defarg+narg, narg, nloc);
+        {
+          if (deriv)
+          {
+            if (!narg)
+              err(talker2, "can't derive this", mark.identifier, mark.start);
+            return num_derivU((GEN)ep->value, arglist, defarg+narg, narg, nloc);
+          }
+          else
+            return call_fun((GEN)ep->value, arglist, defarg+narg, narg, nloc);
+        }
 
         /* should happen only in cases like (f()= f()=); f (!!!) */
         analyseur--;
@@ -1887,7 +1967,7 @@ manage_var(long n, entree *ep)
 }
 
 long
-fetch_var()
+fetch_var(void)
 {
   return manage_var(0,NULL);
 }
@@ -1934,7 +2014,7 @@ delete_named_var(entree *ep)
 }
 
 long
-delete_var()
+delete_var(void)
 {
   return manage_var(1,NULL);
 }
@@ -2251,6 +2331,7 @@ skipidentifier(void)
   {
     char *s = ep->code;
 
+    if (*analyseur == '\'') analyseur++;
     if (*analyseur != '(')
     {
       if (EpVALENCE(ep) == 0) return; /* no mandatory argument */
@@ -2367,6 +2448,7 @@ skipidentifier(void)
       gp_args *f;
       int i;
 
+      if (*analyseur == '\'') analyseur++;
       if (*analyseur != '(')
       {
 	if ( *analyseur != '='  ||  analyseur[1] == '=' ) return;
