@@ -3860,7 +3860,7 @@ FpX_eval_resultant(GEN a, GEN b, GEN n, GEN p, GEN la)
 
 /* assume dres := deg(Res_Y(a,b), X) <= deg(a,Y) * deg(b,X) < p */
 static GEN
-u_FpY_FpXY_resultant(GEN a, GEN b, ulong p, long dres, GEN x, GEN y)
+u_FpY_FpXY_resultant(GEN a, GEN b, ulong p, ulong dres, GEN x, GEN y)
 {
   ulong i, n, la = (ulong)leading_term(a);
  /* Evaluate at dres+ 1 points: 0 (if dres even) and +/- n, so that P_n(X) =
@@ -4066,7 +4066,7 @@ FpY_FpXY_resultant(GEN a, GEN b0, GEN p)
     {
       x = cgetg(dres+2, t_VECSMALL);
       y = cgetg(dres+2, t_VECSMALL);
-      x = u_FpY_FpXY_resultant(a, b, pp, dres, x, y);
+      x = u_FpY_FpXY_resultant(a, b, pp, (ulong)dres, x, y);
     }
     return small_to_pol(x, vX);
   }
@@ -4223,7 +4223,7 @@ INIT:
       H1p= (GEN)C1[1];
     }
     else
-      Hp = u_FpY_FpXY_resultant(a, b, p, dres, x, y);
+      Hp = u_FpY_FpXY_resultant(a, b, p, (ulong)dres, x, y);
     if (!H && degpol(Hp) != dres) continue;
     if (dp != 1) Hp = u_FpX_Fp_mul(Hp, u_powmod(dp,-degA,p), p);
     if (checksqfree) {
