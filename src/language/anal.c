@@ -1808,7 +1808,6 @@ identifier(void)
       err(talker2, "deep recursion", mark.identifier, mark.start);
 #endif
 
-  gp_function_name=ep->name;
   if (ep->code)
   {
     char *s = ep->code, *oldanalyseur = NULL, *buf, *limit, *bp;
@@ -2009,6 +2008,7 @@ identifier(void)
 #if 0 /* uncomment if using purify: unitialized read otherwise */
     for ( ; i<9; i++) argvec[i]=NULL;
 #endif
+    gp_function_name=ep->name;
     if (deriv)
     {
       if (!i || (ep->code)[0] != 'G')
@@ -2033,6 +2033,7 @@ identifier(void)
 	((void (*)(ANYARG))call)(_ARGS_);
 	res = gnil; break;
       }
+    gp_function_name=NULL;
     if (has_pointer) check_pointers(has_pointer,init);
     if (!noparen) match(')');
     return res;
