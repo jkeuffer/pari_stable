@@ -787,6 +787,14 @@ col_to_MP(GEN x, long prec)
   for (j=1; j<l; j++) y[j] = (long)to_MP((GEN)x[j], prec);
   return y;
 }
+static GEN
+mat_to_MP(GEN x, long prec)
+{
+  long j, l = lg(x);
+  GEN y = cgetg(l, t_MAT);
+  for (j=1; j<l; j++) y[j] = (long)col_to_MP((GEN)x[j], prec);
+  return y;
+}
 
 static GEN
 to_mp(GEN x, long prec)
@@ -1134,7 +1142,7 @@ lllfp_marked(int MARKED, GEN x, long D, long flag, long prec, int gram)
   GEN xinit,L,h,B,L1,delta, Q, H = NULL;
   long retry = 2, lx = lg(x), hx, l, i, j, k, k1, n, kmax, KMAX;
   pari_sp av0 = avma, av, lim;
-  int isexact, gram_can_leave = 0;
+  int isexact, gram_can_leave = 1;
 
   if (typ(x) != t_MAT) err(typeer,"lllfp");
   n = lx-1; if (n <= 1) return idmat(n);
@@ -1166,7 +1174,7 @@ lllfp_marked(int MARKED, GEN x, long D, long flag, long prec, int gram)
   if (k == 2)
   {
     if (!prec) return lllint_marked(MARKED, x, D, gram, &h, NULL, NULL);
-    x = gmul(x, realun(prec+1));
+    x = mat_to_MP(x, prec);
     isexact = 1;
   }
   else
@@ -1181,6 +1189,11 @@ lllfp_marked(int MARKED, GEN x, long D, long flag, long prec, int gram)
   h = idmat(n);
 
 PRECPB:
+#ifdef LONG_IS_64BIT
+#  define PREC_THRESHOLD 32
+#else
+#  define PREC_THRESHOLD 62
+#endif
   switch(retry--)
   {
     case 2: break; /* entry */
@@ -1190,17 +1203,19 @@ PRECPB:
       gram_can_leave = 0;
       if (isexact || (gram && kmax > 2))
       { /* some progress but precision loss, try again */
-        prec = (prec<<1)-2; kmax = 1;
+        if (prec < PREC_THRESHOLD)
+          prec = (prec<<1)-2;
+        else
+          prec = (long)((prec-2) * 1.25 + 2);
         if (DEBUGLEVEL) err(warnprec,"lllfp",prec);
         x = isexact? xinit: gprec_w(xinit,prec);
         if (gram) x = qf_base_change(x,h,1); else x = gmul(x,h);
         if (isexact) {
-          x = gmul(x, realun(prec+1)); 
+          x = mat_to_MP(x, prec); 
           retry = 1; /* never abort if x is exact */
         }
         gerepileall(av,H? 4: 2,&h,&x,&H,&xinit);
-        if (DEBUGLEVEL) err(warner,"lllfp starting over");
-        break;
+        kmax = 1; break;
       } /* fall through */
     case 0: /* give up */
       if (DEBUGLEVEL > 3) fprintferr("\n");
@@ -1278,15 +1293,16 @@ PRECPB:
         }
         if (gram && isexact)
         {
-          if (gram_can_leave) { h = H; break; }
+          if (gram_can_leave) { if (H) h = H; break; }
 
-          if (DEBUGLEVEL>3) fprintferr("\nChecking LLL basis\n");
+          if (DEBUGLEVEL>3) fprintferr("\nChecking LLL basis...");
           H = H? gmul(H, h): h;
           xinit = qf_base_change(xinit, h, 1);
           x = xinit; h = idmat(n);
-          prec = n + (gexpo(x) >> TWOPOTBITS_IN_LONG);
+          prec = ((n<<2) + gexpo(x)) >> TWOPOTBITS_IN_LONG;
           if (prec < DEFAULTPREC) prec = DEFAULTPREC;
-          x = gmul(x, realun(prec));
+          if (DEBUGLEVEL>3) fprintferr("in precision %ld\n", prec);
+          x = mat_to_MP(x, prec);
           gram_can_leave = 1;
           k = 2; kmax = 1; continue;
         }
@@ -1711,7 +1727,7 @@ lindep(GEN x, long prec)
 
   if (! is_vec_t(tx)) err(typeer,"lindep");
   if (n <= 1) return cgetg(1,t_VEC);
-  x = gmul(x, realun(prec)); if (tx != t_COL) settyp(x,t_COL);
+  x = mat_to_MP(x, prec); if (tx != t_COL) settyp(x,t_COL);
   re = greal(x);
   im = gimag(x);
   /* independant over R ? */
@@ -1996,7 +2012,7 @@ init_pslq(pslq_M *M, GEN x, long *PREC)
     x = greal(x);
 
   if (DEBUGLEVEL>=3) { (void)timer(); init_timer(M->T); }
-  x = gmul(x, realun(prec)); settyp(x,t_VEC);
+  x = col_to_MP(x, prec); settyp(x,t_VEC);
   M->n = n;
   M->A = idmat(n);
   M->B = idmat(n);
@@ -2592,7 +2608,7 @@ gmul_mat_smallvec(GEN x, GEN y)
 {
   long c = lg(x), l = lg(x[1]), i, j;
   pari_sp av;
-  GEN z=cgetg(l,t_COL), s;
+  GEN z = cgetg(l,t_COL), s;
 
   for (i=1; i<l; i++)
   {
@@ -2610,7 +2626,7 @@ gmul_mati_smallvec(GEN x, GEN y)
 {
   long c = lg(x), l = lg(x[1]), i, j;
   pari_sp av;
-  GEN z=cgetg(l,t_COL), s;
+  GEN z = cgetg(l,t_COL), s;
 
   for (i=1; i<l; i++)
   {
@@ -2687,7 +2703,7 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   a = qf_base_change(a,u,1);
 
   n--;
-  a = gmul(a, realun(DEFAULTPREC)); r = sqred1(a);
+  a = mat_to_MP(a, DEFAULTPREC); r = sqred1(a);
   if (DEBUGLEVEL>4) { fprintferr("minim: r = "); outerr(r); }
   for (j=1; j<=n; j++)
   {
@@ -3097,7 +3113,7 @@ _fincke_pohst(GEN a,GEN B0,long stockmax,long noer, long PREC, FP_chk_fun *CHECK
       z[3] = lgetg(1,t_MAT); return z;
     }
     i = gprecision(a);
-    if (i) prec = i; else { a = gmul(a,realun(prec)); round = 1; }
+    if (i) prec = i; else { a = mat_to_MP(a, prec); round = 1; }
     if (DEBUGLEVEL>2) fprintferr("first LLL: prec = %ld\n", prec);
     u = lllgramintern(a,4,noer, (prec<<1)-2);
     if (!u) return NULL;
