@@ -20,7 +20,7 @@ if test -n "$gmp"; then
   "
   x=`./locate 'gmp.h' '' $pth`
   case $x in
-   ?:/*|/*) gmp_include=`dirname $x'`
+   ?:/*|/*) gmp_include=`dirname $x`
      echo ..."Found gmp header in $gmp_include"
      ;;
     *) echo ..."But no header file has been found"
