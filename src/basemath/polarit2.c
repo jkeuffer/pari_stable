@@ -1464,7 +1464,6 @@ DDF_roots(GEN pol, GEN polp, GEN p)
   GEN lc, lcpol, z, pe, pes2, bound;
   long i, m, e, lz, v = varn(pol);
   pari_sp av, lim;
-  int split;
   pari_timer T;
 
   if (DEBUGLEVEL>2) TIMERstart(&T);
@@ -1474,22 +1473,27 @@ DDF_roots(GEN pol, GEN polp, GEN p)
 
   bound = root_bound(pol);
   if (lc) bound = mulii(lc, bound);
-  e = logint(shifti(bound, 1), p, &pe);
+  e = logint(addis(shifti(bound, 1), 1), p, &pe);
   pes2 = shifti(pe, -1);
   if (DEBUGLEVEL>2) msgTIMER(&T, "Root bound");
 
   av = avma; lim = stack_lim(av,2);
-  z = lift_intern( rootmod(pol, p) );
-  split = (lg(z) - 1 == degpol(pol));
-  if (split)
-    z = deg1_from_roots(z, v);
+  z = lift_intern( rootmod(polp, p) );
+  lz = lg(z)-1;
+  if (lz > (degpol(pol) >> 2))
+  { /* many roots */
+    z = concatsp(deg1_from_roots(z, v),
+                 FpX_div(polp, FpV_roots_to_pol(z, p, v), p));
+    z = hensel_lift_fact(pol, z, NULL, p, pe, e);
+  }
   else
-    z = FpX_div(polp, FpV_roots_to_pol(z, p, v), p);
-  z = hensel_lift_fact(pol, z, NULL, p, pe, e);
-  lz = lg(z); if (!split) lz--;
+  {
+    z = rootpadicliftroots(pol, z, p, e);
+    z = deg1_from_roots(z, v);
+  }
   if (DEBUGLEVEL>2) msgTIMER(&T, "Hensel lift (mod %Z^%ld)", p,e);
 
-  for (m=1, i=1; i < lz; i++)
+  for (m=1, i=1; i <= lz; i++)
   {
     GEN q, r, y = (GEN)z[i];
     if (lc) y = gmul(y, lc);
