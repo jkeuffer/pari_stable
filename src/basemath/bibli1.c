@@ -2074,9 +2074,19 @@ init_pslq(pslq_M *M, GEN x, long *PREC)
   if (prec < 0)
   { /* exact components */
     pari_sp av = avma;
-    x = Q_primpart(x); if (tx == t_COL) x = gtrans_i(x);
+    GEN im, U = NULL;
+    x = Q_primpart(x);
+    im = gimag(x);
+    if (!gcmp0(im))
+    {
+      U = (GEN)extendedgcd(im)[2];
+      setlg(U, lg(U)-1); /* remove last column */
+      x = gmul(greal(x), U);
+    }
     x = (GEN)extendedgcd(x)[2];
-    return gerepilecopy(av, (GEN)x[1]);
+    x = (GEN)x[1];
+    if (U) x = gmul(U, x);
+    return gerepilecopy(av, x);
   }
   if (prec < DEFAULTPREC) prec = DEFAULTPREC;
   *PREC = prec;
