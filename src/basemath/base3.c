@@ -632,7 +632,7 @@ basistoalg(GEN nf, GEN x)
       for (i=1; i<lx; i++) z[i]=(long)basistoalg(nf,(GEN)x[i]);
       return z;
     case t_MAT: z=cgetg(lx,t_MAT);
-      if (!lx) return z;
+      if (lx == 1) return z;
       l = lg(x[1]);
       for (j=1; j<lx; j++)
       {
