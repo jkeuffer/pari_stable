@@ -1461,11 +1461,13 @@ vectors.
 \syn{chinois}{x,y}.
 
 \subsecidx{content}$(x)$: computes the gcd of all the coefficients of $x$,
-when this gcd makes sense. If $x$ is a scalar, this simply returns $x$. If $x$
-is a polynomial (and by extension a power series), it gives the usual content
-of $x$. If $x$ is a rational function, it gives the ratio of the contents of
-the numerator and the denominator. Finally, if $x$ is a vector or a matrix,
-it gives the gcd of all the entries.
+when this gcd makes sense. If $x$ is a scalar, this simply returns the
+absolute value of $x$ if $x$ is rationnal (\typ{INT}, \typ{FRAC} or
+\typ{FRACN}), and $x$ otherwise. If $x$ is a polynomial (and by extension a
+power series), it gives the usual content of $x$. If $x$ is a rational
+function, it gives the ratio of the contents of the numerator and the
+denominator. Finally, if $x$ is a vector or a matrix, it gives the gcd of all
+the entries.
 
 \syn{content}{x}.
 
