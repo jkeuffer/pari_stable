@@ -170,7 +170,7 @@ ellprint(GEN e)
     err(talker, "not an elliptic curve in ellprint");
   z[1] = lpolx[vx]; name_var(vx, "X");
   z[2] = lpolx[vy]; name_var(vy, "Y");
-  fprintferr("%Z = %Z\n", ellLHS(e, z), ellRHS(e, polx[vx]));
+  fprintferr("%Z - %Z\n", ellLHS(e, z), ellRHS(e, polx[vx]));
   (void)delete_var();
   (void)delete_var(); avma = av;
 }
