@@ -197,7 +197,7 @@ type0(GEN x, char *st)
   if (! *st) 
   {
     char *s = type_name(typ(x));
-    return strtoGENstr(s);
+    return STRtoGENstr(s);
   }
   tx = typ(x);
   t = get_type_num(st);

@@ -166,7 +166,8 @@ GEN     lisseq(char *t);
 long    manage_var(long n, entree *ep);
 void    name_var(long n, char *s);
 GEN     readseq(char *c, int strict);
-GEN     strtoGENstr(const char *s);
+GEN     STRtoGENstr(const char *s);
+GEN     strtoGENstr(char *s, long flag); /* FIXME: obsolete */
 
 /* arith1.c */
 

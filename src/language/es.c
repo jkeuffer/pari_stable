@@ -709,7 +709,7 @@ pGENtostr(GEN g, long flag) {
 }
 GEN Str0(GEN g, long flag) {
   char *t = pGENtostr(g, flag);
-  GEN z = strtoGENstr(t);
+  GEN z = STRtoGENstr(t);
   free(t); return z;
 }
 GEN Str(GEN g)    { return Str0(g, f_RAW); }
@@ -717,7 +717,7 @@ GEN Strtex(GEN g) { return Str0(g, f_TEX); }
 GEN
 Strexpand(GEN g) {
   char *s = pGENtostr(g, f_RAW), *t = expand_tilde(s);
-  GEN z = strtoGENstr(t);
+  GEN z = STRtoGENstr(t);
   free(t); free(s); return z;
 }
 
