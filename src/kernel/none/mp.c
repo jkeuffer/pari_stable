@@ -708,23 +708,21 @@ addrr(GEN x, GEN y)
   { /* z was extended by d+1 words [should be e bits = d words + m bits] */
     long m = e & (BITS_IN_LONG-1);
 
-    /* not worth keeping extra word if less than 4 significant bits in there */
-    if (m - j < 4)
+    /* not worth keeping extra word if less than 3 significant bits in there */
+    if (m - j < 3)
     { /* shorten z */
-      int roundup;
-      lz--;
-      /* once shifted, is highest bit of cancelled word set to 1? */
-      roundup = (z[lz]<<j) & HIGHBIT;
+      ulong last = (ulong)z[--lz]; /* cancelled word */
+
       /* if we need to shift anyway, shorten from left
        * If not, shorten from right, neutralizing last word of z */
       if (j == 0) stackdummy(z + lz, 1);
       else
       {
         GEN t = z;
-        z++; shift_left(z,t,2,lz-1, 0,j);
+        z++; shift_left(z,t,2,lz-1, last,j);
       }
-      if (roundup)
-      {
+      if ((last<<j) & HIGHBIT)
+      { /* round up */
         i = lz-1;
         while (++z[i] == 0 && i > 1) i--;
         /* extend z to the left? */
