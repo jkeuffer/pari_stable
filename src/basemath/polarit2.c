@@ -2764,7 +2764,16 @@ content(GEN x)
   GEN p1,p2;
 
   if (is_scalar_t(tx))
-    return tx==t_POLMOD? content((GEN)x[2]): gcopy(x);
+  {
+    switch (tx)
+    {
+      case t_INT: return absi(x);
+      case t_FRAC:
+      case t_FRACN: return gabs(x,0);
+      case t_POLMOD: return content((GEN)x[2]);
+    }
+    return gcopy(x);
+  }
   av = avma;
   switch(tx)
   {
