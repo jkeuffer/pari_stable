@@ -386,7 +386,7 @@ hilb2nf(GEN nf,GEN a,GEN b,GEN p)
 long
 nfhilbertp(GEN nf,GEN a,GEN b,GEN pr)
 {
-  GEN ord, ordp, p, prhall,t;
+  GEN ord, ordp, T,p, modpr,t;
   long va, vb, rep;
   gpmem_t av = avma;
 
@@ -407,9 +407,14 @@ nfhilbertp(GEN nf,GEN a,GEN b,GEN pr)
   /* quad. symbol is image of t by the quadratic character  */
   ord = subis( idealnorm(nf,pr), 1 ); /* |(O_K / pr)^*| */
   ordp= subis( p, 1);                 /* |F_p^*|        */
-  prhall = nfmodprinit(nf, pr);
-  t = element_powmodpr(nf, t, divii(ord, ordp), prhall); /* in F_p^* */
-  t = lift_intern((GEN)t[1]);
+  modpr = nf_to_ff_init(nf, &pr,&T,&p);
+  t = nf_to_ff(nf,t,modpr);
+  t = FpXQ_pow(t, diviiexact(ord, ordp), T,p); /* in F_p^* */
+  if (typ(t) == t_POL)
+  {
+    if (degpol(t)) err(bugparier,"nfhilbertp");
+    t = constant_term(t);
+  }
   rep = kronecker(t, p);
   avma = av; return rep;
 }
