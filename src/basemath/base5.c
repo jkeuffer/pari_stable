@@ -655,6 +655,7 @@ rnfidealup(GEN rnf,GEN x)
   n = degpol(rnf[1]);
   bas = (GEN)rnf[7]; bas2 = (GEN)bas[2];
 
+  (void)idealtyp(&x, &z); /* z is junk */
   I = cgetg(n+1,t_VEC); z = mkvec2((GEN)bas[1], I);
   for (i=1; i<=n; i++) I[i] = (long)idealmul(nf,x,(GEN)bas2[i]);
   return gerepilecopy(av, modulereltoabs(rnf, z));
