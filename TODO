@@ -153,6 +153,11 @@ Misc:
 
 ***************************   LIBRARY DESIGN   ****************************
 
+5  "PARI formats" have a %Z conversion character to print a GEN object. We
+   should support  %m.nZ, %0nZ, %-nZ, etc. with standard meanings.
+
+5  add (printf-style) library functions corresponding to GP routines print*
+
 4  a system of DEBUGLEVEL classes [e.g \g 5 "LLL" ] (such that the user can
    easily define new ones)
 
@@ -198,6 +203,9 @@ Misc:
    the machine. On shutdown all programs receive SIGTERM signal. I would like
    gp to be able to trap this signal and when it receives one, to execute
    some gp command, e.g saving all settings with full accuracy (e.g writebin).
+
+5  add a printf command: simple interface to pariputsf allowing only %Z
+   conversion characters  (see related entry in LIBRARY DESIGN section)
 
 5  remove limitation to 8 arguments for static functions (argvec[9])
 
