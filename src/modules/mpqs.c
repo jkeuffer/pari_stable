@@ -1858,7 +1858,8 @@ mpqs_get_relation(long pos, FILE *FREL)
 static int
 split(GEN N, long *e, long *res)
 {
-  long mask, flag;
+  ulong mask;
+  long flag;
   GEN base;
   if (isprobableprime(N)) { *e = un; return 1; }
   if (carrecomplet(N, &base))

@@ -668,8 +668,7 @@ polispower(GEN x, GEN K, GEN *pt)
 long
 ispower(GEN x, GEN K, GEN *pty)
 {
-  long mask;
-  ulong k;
+  ulong k, mask;
   GEN z;
 
   if (!K) return gisanypower(x, pty);
@@ -766,10 +765,10 @@ long
 isanypower(GEN x, GEN *pty)
 {
   pari_sp av = avma;
-  long ex, k = 1, mask = 7;
+  long ex, k = 1;
   GEN logx, y;
   byteptr d = diffptr;
-  ulong p = 0, e2, ex0 = 11;
+  ulong mask = 7, p = 0, ex0 = 11, e2;
 
   if (typ(x) != t_INT || cmpii(x, gdeux) < 0)
     err(talker, "isanypower: argument must be > 1");
