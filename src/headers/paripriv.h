@@ -214,6 +214,7 @@ GEN  TR_pol(GEN P, GEN c);
 GEN  bezout_lift_fact(GEN T, GEN Tmod, GEN p, long e);
 GEN  caractducos(GEN p, GEN x, int v);
 GEN  FpXQX_from_Kronecker(GEN z, GEN pol, GEN p);
+GEN  FpX_quad_root(GEN x, GEN p, int unknown);
 long FpX_split_Berlekamp(GEN *t, GEN pp);
 long FqX_is_squarefree(GEN P, GEN T, GEN p);
 GEN  FqX_split_all(GEN z, GEN T, GEN p);

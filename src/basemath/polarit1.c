@@ -366,8 +366,8 @@ rootmod2(GEN f, GEN pp)
 
 /* assume x reduced mod p, monic, squarefree. Return one root, or NULL if
  * irreducible */
-static GEN
-quadsolvemod(GEN x, GEN p, int unknown)
+GEN
+FpX_quad_root(GEN x, GEN p, int unknown)
 {
   GEN b = (GEN)x[3], c = (GEN)x[2];
   GEN s,u,D;
@@ -382,7 +382,7 @@ quadsolvemod(GEN x, GEN p, int unknown)
   if (unknown && kronecker(D,p) == -1) return NULL;
 
   s = Fp_sqrt(D,p);
-  if (!s) err(talker,"not a prime in quadsolvemod");
+  if (!s) err(talker,"not a prime in FpX_quad_root");
   u = addis(shifti(p,-1), 1); /* = 1/2 */
   return modii(mulii(u, subii(s,b)), p);
 }
@@ -430,7 +430,7 @@ FpX_roots_i(GEN f, GEN p)
       y[j++] = lsubii(p, (GEN)a[2]);
     else if (la==2)
     {
-      GEN r = quadsolvemod(a, p, 0);
+      GEN r = FpX_quad_root(a, p, 0);
       y[j++] = (long)r;
       y[j++] = (long)otherroot(a,r, p);
     }
@@ -1174,7 +1174,7 @@ FpX_split_Berlekamp(GEN *t, GEN p)
       if (la == 1) { set_irred(i); }
       else if (la == 2)
       {
-        GEN r = quadsolvemod(a,p,1);
+        GEN r = FpX_quad_root(a,p,1);
         if (r)
         {
           t[i] = deg1pol_i(gone, subii(p,r), vu); r = otherroot(a,r,p);

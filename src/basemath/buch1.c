@@ -705,9 +705,7 @@ quadray(GEN D, GEN f, GEN flag, long prec)
 
   if (flag)
   {
-    long t = typ(flag);
-    if (t == t_INT && !signe(flag)) flag = NULL;
-    if (t != t_VEC || lg(flag)!=3) err(flagerr,"quadray");
+    if (typ(flag) != t_VEC || lg(flag)!=3) err(flagerr,"quadray");
   }
   if (typ(D) != t_INT)
   {
@@ -720,13 +718,13 @@ quadray(GEN D, GEN f, GEN flag, long prec)
   {
     if (!isfundamental(D))
       err(talker,"quadray needs a fundamental discriminant");
-    pol = quadpoly(D); setvarn(pol, fetch_user_var("y"));
+    pol = quadpoly0(D, fetch_user_var("y"));
     bnf = bnfinit0(pol, signe(D)>0?1:0, NULL, prec);
   }
   bnr = bnrinit0(bnf,f,1);
   if (gcmp1(gmael(bnr,5,1))) { avma = av; return polx[0]; }
   if (signe(D) > 0)
-    y = bnrstark(bnr,gzero,prec);
+    y = bnrstark(bnr,NULL,prec);
   else
   {
     if (!flag) flag = get_lambda(bnr);

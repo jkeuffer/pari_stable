@@ -57,6 +57,8 @@ GN  6- [ix86 + Sun cc] build fails [ unsatisfied symbol reference to 'mulll' ]
 BA 11- [hi-res plot: fltk] line plotting was broken
    12- oo loops in prodinf [ e.g prodinf(x=2, zeta(x)) ]
    13- [compatible=3] wrong proto. for isoncurve, lex, sign, thetanullk
+   14- quadhilbert(D > 0) spent an unreasonable time to find a relative
+       equation defined over Q [ use Galois theory instead of naive search ]
 
   Changed
     1- increased maximum binary exponent for t_REAL, and maximum GEN length

@@ -35,7 +35,7 @@ typedef struct {
 
 /* Char evaluation */
 typedef struct {
-  long ord; 
+  long ord;
   GEN *val, chi;
 } CHI_t;
 
@@ -97,7 +97,7 @@ init_CHI(CHI_t *c, GEN CHI, GEN z)
     v[i] = gmul(v[i-1], z);
   v[0] = gmul(v[i-1], z);
   c->chi = (GEN)CHI[1];
-  c->ord = d; 
+  c->ord = d;
   c->val = v;
 }
 
@@ -321,7 +321,7 @@ InitQuotient(GEN bnr, GEN C)
   pari_sp av;
 
   dataquo[1] = lcopy(bnr);
-  av = avma;  Mrm = diagonal(gmael(bnr, 5, 2));
+  av = avma; Mrm = diagonal(gmael(bnr, 5, 2));
   dataquo[2] = lpileupto(av, InitQuotient0(Mrm, C));
 
   return dataquo;
@@ -776,7 +776,7 @@ ComputeArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
                                (ulong)lC[ic]->ord);
       for (j=1; j<i; j++) vN[ic][j] = vN[ic][i];
     }
-    
+
     vB[i]= set_sign_mod_idele(nf, NULL,vB[i], cond,sarch);
     beta2 = element_mul(nf, vB[i], muslambda);
 
@@ -784,7 +784,7 @@ ComputeArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
     s0 = powgi(z,tr);
     for (ic = 1; ic <= nChar; ic++)
     {
-      long ind = vN[ic][i]; 
+      long ind = vN[ic][i];
       GEN val = (GEN)lC[ic]->val[ind];
       s[ic] = gadd(s[ic], gmul(val, s0));
     }
@@ -798,7 +798,7 @@ ComputeArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
 
   classe = isprincipalray(bnr, idh);
   z = gpowgs(gneg_i(gi), lg(cond1)-1);
-  
+
   for (ic = 1; ic <= nChar; ic++)
   {
     s0 = gmul(s[ic], EvalChar(lC[ic], classe));
@@ -946,7 +946,7 @@ _data9(GEN arch, long r1, long r2)
 {
   GEN z = cgetg(5, t_VECSMALL);
   long i, b, q = 0;
- 
+
   for (i=1; i<=r1; i++) if (signe(arch[i])) q++;
   z[1] = q; b = r1 - q;
   z[2] = b;
@@ -1436,13 +1436,13 @@ ComputeCoeff(GEN dtcr, LISTray *R, long n, long deg)
 /********************************************************************/
 static void
 deg11(LISTray *R, long p, GEN bnr, GEN pr) {
-  GEN z = isprincipalray(bnr, pr); 
+  GEN z = isprincipalray(bnr, pr);
   appendL(R->L1, (GEN)p);
   appendL((GEN)R->L1ray, z);
 }
 static void
 deg12(LISTray *R, long p, GEN bnr, GEN Lpr) {
-  GEN z = isprincipalray(bnr, (GEN)Lpr[1]); 
+  GEN z = isprincipalray(bnr, (GEN)Lpr[1]);
   appendL(R->L11, (GEN)p);
   appendL((GEN)R->L11ray, z);
 }
@@ -1505,7 +1505,7 @@ InitPrimesQuad(GEN bnr, long N0, LISTray *R)
       break;
     }
     NEXT_PRIME_VIADIFF(p,d);
-  }  
+  }
   /* precompute isprincipalray(x), x in Z */
   R->rayZ = (GEN*)cgetg(condZ, t_VEC);
   for (i=1; i<condZ; i++)
@@ -1642,7 +1642,7 @@ ppgamma(ST_t *T, long prec)
   }
   else
   {
-    t = b; s = a; X = gadd(x2,ghalf); Y = x2; 
+    t = b; s = a; X = gadd(x2,ghalf); Y = x2;
     p1 = gsubst(gamdm,0,x2);
     p2 = gsubst(gam,0,x2);
   }
@@ -1653,11 +1653,11 @@ ppgamma(ST_t *T, long prec)
   cn_odd = gpowgs(p2, s-t); /* Gamma(Y)^{s-t} */
   for (i = 0; i < i0/2; i++)
   {
-    GEN C1,q1, A1 = aij[2*i+1], B1 = bij[2*i+1]; 
+    GEN C1,q1, A1 = aij[2*i+1], B1 = bij[2*i+1];
     GEN C2,q2, A2 = aij[2*i+2], B2 = bij[2*i+2];
 
     C1 = gmul(cf, gmul(bn, gmul(an, cn_evn)));
-    p1 = gdiv(C1, gsubgs(x, 2*i));  
+    p1 = gdiv(C1, gsubgs(x, 2*i));
     q1 = gdiv(C1, gsubgs(x, 2*i+1));
 
     /* an(x-u-1) = 2^t an(x-u) */
@@ -1668,7 +1668,7 @@ ppgamma(ST_t *T, long prec)
     C2 = gmul(cf, gmul(bn, gmul(an, cn_odd)));
     p2 = gdiv(C2, gsubgs(x, 2*i+1));
     q2 = gdiv(C2, gsubgs(x, 2*i+2));
-    for (j = 1; j <= r; j++)         
+    for (j = 1; j <= r; j++)
     {
       affect_coeff(p1, j, A1); affect_coeff(q1, j, B1);
       affect_coeff(p2, j, A2); affect_coeff(q2, j, B2);
@@ -2072,7 +2072,7 @@ computean(GEN dtcr, LISTray *R, long n, long deg)
       chi = gmul(chi, chi1);
     }
   }
-    
+
   /* 1 prime of degree 1 */
   L = R->L1; l = lg(L);
   for (i=1; i<l; i++, avma = av2)
@@ -2243,7 +2243,7 @@ get_cS_cT(ST_t *T, long n)
   for (i = i0 - 1; i > 1; i--)
   {
     A = aij[i]; t = gmul(t, nsurc);
-    B = bij[i]; s = gmul(s, nsurc); 
+    B = bij[i]; s = gmul(s, nsurc);
     for (j = odd(i)? T->rc2: T->rc1; j; j--)
     {
       s = gadd(s, gmul((GEN)Z[j], (GEN)B[j]));
@@ -2316,7 +2316,7 @@ GetST(GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
   degs = GetDeg(dataCR);
   ncond = lg(vChar)-1;
   nf_get_sign(nf,&r1,&r2);
- 
+
   C  = cgetg(ncond+1, t_VEC);
   N0 = cgetg(ncond+1, t_VECSMALL);
   n0 = 0;
@@ -2344,7 +2344,7 @@ GetST(GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
   for (j=1; j<=n0; j++) cScT.cS[j] = cScT.cT[j] = NULL;
 
   cScT.i0 = i0;
- 
+
   av1 = avma;
   for (jc = 1; jc <= ncond; jc++)
   {
@@ -2364,7 +2364,7 @@ GetST(GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
       GEN p1 = gzero, p2 = gzero;
       long c = 0;
       int **matan;
-      
+
       if (DEBUGLEVEL>1)
         fprintferr("\tcharacter no: %ld (%ld/%ld)\n", t,k,nChar);
       matan = ComputeCoeff((GEN)dataCR[t], &LIST, NN, d);
@@ -2394,6 +2394,7 @@ GetST(GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
 /*                                                                 */
 /*******************************************************************/
 
+#if 0
 typedef struct {
   long cl;
   GEN dkpow;
@@ -2415,7 +2416,7 @@ define_hilbert(void *S, GEN pol)
 /* let polrel define Hk/k,  find L/Q such that Hk=Lk and L and k are
    disjoint */
 static GEN
-makescind(GEN nf, GEN polrel, long cl)
+makescindold(GEN nf, GEN polrel, long cl)
 {
   long i, l;
   pari_sp av = avma;
@@ -2452,11 +2453,12 @@ makescind(GEN nf, GEN polrel, long cl)
         if (degpol(gcoeff(nffactor(nf, pol), 1, 1)) == cl) break;
       }
     if (i == l)
-      err(bugparier, "makescind (no polynomial found)");
+      err(bugparier, "makescindold (no polynomial found)");
   }
   pol = polredabs0(pol, nf_PARTIALFACT);
   return gerepileupto(av, pol);
 }
+#endif
 
 /* compute the Hilbert class field using genus class field theory when
    the exponent of the class group is 2 */
@@ -2481,7 +2483,7 @@ GenusField(GEN bnf)
     d = (GEN)div[c];
     if (mod4(d) == 1)
     {
-      GEN t = gsub(x2, d); 
+      GEN t = gsub(x2, d);
       if (!pol)
 	pol = t;
       else
@@ -2594,15 +2596,15 @@ LABDOUB:
     fprintferr("Checking the square-root of the Stark unit...\n");
 
   for (j = 1; j <= h; j++)
-    veczeta[j] = lmul2n(gch((GEN)veczeta[j], newprec), 1);    
+    veczeta[j] = lmul2n(gch((GEN)veczeta[j], newprec), 1);
   polrelnum = roots_to_pol_intern(realun(newprec),veczeta, 0,0);
   if (DEBUGLEVEL)
   {
     if (DEBUGLEVEL >= 2) fprintferr("polrelnum = %Z\n", polrelnum);
     msgtimer("Compute %s", (flag)? "quickpol": "polrelnum");
   }
-  
-  if (flag) 
+
+  if (flag)
     return gerepilecopy(av, polrelnum);
 
   /* we try to recognize this polynomial */
@@ -2623,7 +2625,7 @@ LABDOUB:
     /* we try to recognize this polynomial */
     polrel = RecCoeff(nf, polrelnum, v, newprec);
   }
-  
+
   if (!polrel) /* if it fails... */
   {
     long pr;
@@ -2652,6 +2654,71 @@ LABDOUB:
 /********************************************************************/
 /*                        Main functions                            */
 /********************************************************************/
+/* conj(Mod(x,y)), assume y normalized */
+static GEN
+quad_conj(GEN x, GEN y)
+{
+  GEN z, u, v, b;
+  pari_sp av;
+  long d;
+  if (typ(x) != t_POL || (d = degpol(x)) <= 0) return x;
+  u = (GEN)x[3]; /*Mod(ux + v, x^2 + bx + c)*/
+  v = (GEN)x[2]; b = (GEN)y[3];
+  z = cgetg(4, t_POL); z[1] = x[1]; av = avma;
+  z[2] = ladd(v, gmul(u,negi(b)));
+  z[3] = lneg(u); return z;
+}
+static GEN
+pol_quad_conj(GEN x, GEN y)
+{
+  long i, l = lg(x);
+  GEN z = cgetg(l, t_POL); z[1] = x[1];
+  for (i = 2; i < l; i++) z[i] = (long)quad_conj((GEN)x[i], y);
+  return z;
+}
+/* k = nf quadratic field, P relative equation of H_k (Hilbert class field)
+ * return T in Z[X], such that H_k / Q is the compositum of Q[X]/(T) and k */
+static GEN
+makescind(GEN nf, GEN P, long cl)
+{
+  GEN Pp, p, perm, pol, G, L, a, roo, nfpol = (GEN)nf[1];
+  long i, k, l, is_P;
+
+  P = lift(P);
+  pol = RgX_mul(P, pol_quad_conj(P, nfpol)); /* Norm_{k/Q}(P), irreducible/Q */
+  for (i = 2; i < lg(pol); i++)
+  {
+    GEN c = (GEN)pol[i];
+    if (typ(c) != t_POL) continue;
+    c = RgX_rem(c, nfpol); /* degree <= 0 polynomial [t_INT coeff] */
+    c = signe(c)? (GEN)c[2] : gzero;
+    pol[i] = (long)c;
+  }
+  /* pol = rnfequation(nf, P); */
+  G = galoisinit(pol, NULL, 0);
+  L = (GEN)G[6];
+  p = gmael(G,2,1);
+  a = FpX_quad_root(nfpol, p, 0);
+  Pp = gsubst(P, varn(nfpol), a);
+  Pp = FpX_red(Pp, p); /* P mod a prime above p (which splits) */
+  roo = (GEN)G[3];
+  is_P = gcmp0( FpX_eval(Pp, resii((GEN)roo[1],p), p) );
+  /* is roo[1] a root of P ? */
+  
+  perm = NULL; /*-Wall*/
+  for (i = 1; lg(L); i++)
+  {
+    perm = (GEN)L[i];
+    k = perm[1]; if (k == 1) continue;
+    k = gcmp0( FpX_eval(Pp, resii((GEN)roo[k],p), p) );
+    if (k != is_P) break; /* found one root of tau(P) */
+  }
+
+  l = perm_order(perm);
+  if (l != 2) perm = gpowgs(perm, l >> 1);
+  /* perm has order two and doesn't belong to Gal(H_k/k) */
+  return galoisfixedfield(G, perm, 1, varn(P));
+}
 
 /* compute the polynomial over Q of the Hilbert class field of
    Q(sqrt(D)) where D is a positive fundamental discriminant */
@@ -2660,35 +2727,27 @@ quadhilbertreal(GEN D, long prec)
 {
   pari_sp av = avma;
   long newprec;
-  VOLATILE long cl, v;
+  VOLATILE long cl;
   VOLATILE GEN pol, bnf, bnr, dataC, bnrh, nf, exp;
 
   (void)&prec; /* prevent longjmp clobbering it */
   if (DEBUGLEVEL) (void)timer2();
-
   disable_dbg(0);
+
   /* quick computation of the class number */
-
   cl = itos((GEN)quadclassunit0(D, 0, NULL, prec)[1]);
-  if (cl == 1)
-  {
-    disable_dbg(-1);
-    avma = av; return polx[0];
-  }
+  if (cl == 1) { disable_dbg(-1); avma = av; return polx[0]; }
 
-  /* initialize the polynomial defining Q(sqrt{D}) as a polynomial in y */
-  v = fetch_var();
 START:
-  /* compute the class group */
-  pol = quadpoly0(D, v);
+  pol = quadpoly0(D, fetch_user_var("y"));
   bnf = bnfinit0(pol, 1, NULL, prec);
   nf  = (GEN)bnf[7];
   disable_dbg(-1);
   if (DEBUGLEVEL) msgtimer("Compute Cl(k)");
 
-  /* if the exponent of the class group is 2, use rather Genus Field Theory */
+  /* if the exponent of the class group is 2, use Genus Theory */
   exp = gmael4(bnf, 8, 1, 2, 1);
-  if (gegal(exp, gtwo)) { (void)delete_var(); return GenusField(bnf); }
+  if (egalii(exp, gtwo)) return gerepileupto(av, GenusField(bnf));
 
   CATCH(precer) {
     prec += EXTRA_PREC; pol = NULL;
@@ -2698,22 +2757,23 @@ START:
     bnr   = buchrayinitgen(bnf, gone);
     dataC = InitQuotient(bnr, gzero);
     bnrh  = FindModulus(dataC, &newprec, prec);
+    if (DEBUGLEVEL) msgtimer("FindModulus");
 
     if (!bnrh)
     {
-      GEN Mcyc = diagonal(gmael(bnr, 5, 2));
-      long i, l = lg(Mcyc);
-      GEN vec = cgetg(l, t_VEC), M;
+      GEN M = diagonal(gmael(bnr, 5, 2));
+      long i, l = lg(M);
+      GEN vec = cgetg(l, t_VEC);
       for (i = 1; i < l; i++)
 	{
-	  M = gcopy(Mcyc);
+          GEN t = gcoeff(M,i,i);
 	  coeff(M,i,i) = one;
-	  vec[i] = (long)rnfequation(bnf, bnrstark(bnr, M, prec));
-	}  
-      return (vec);
+	  vec[i] = (long)bnrstark(bnr, M, prec);
+	  coeff(M,i,i) = (long)t;
+	}
+      CATCH_RELEASE();
+      return vec;
     }
-
-    if (DEBUGLEVEL) msgtimer("FindModulus");
 
     if (newprec > prec)
     {
@@ -2724,9 +2784,7 @@ START:
   } ENDCATCH;
   if (!pol) goto START;
 
-  pol = makescind(nf, pol, cl);
-  (void)delete_var();
-  return gerepileupto(av, pol);
+  return gerepileupto(av, makescind(nf, pol, cl));
 }
 
 static GEN
@@ -2749,7 +2807,7 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
   nf  = checknf(bnf);
   N   = degpol(nf[1]);
   if (N == 1) return galoissubcyclo(bnr, subgrp, 0, 0);
- 
+
   Mcyc = diagonal(gmael(bnr, 5, 2));
 
   /* check the bnf */
@@ -2788,7 +2846,7 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
       M = gcopy(subgrp);
       coeff(M,i,i) = one;
       vec[i] = (long)bnrstark(bnr, M, prec);
-    }  
+    }
     return (vec);
   }
 
