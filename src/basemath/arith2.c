@@ -900,33 +900,29 @@ boundfact(GEN n, long lim)
 /**                                                                   **/
 /***********************************************************************/
 
-/*Factorize n and output [fp,fe,fc] where
- * fp, fe and fc are vecsmall with n=prod{fp[i]^fe[i]}
- * and fc[i]=fp[i]^fe[i];
- */
-
+/*Factorize n and output [p,e,c] where
+ * p, e and c are vecsmall with n = prod{p[i]^e[i]} and c[i] = p[i]^e[i] */
 GEN
 decomp_small(long n)
 {
-  pari_sp ltop=avma;
+  pari_sp ltop = avma;
   GEN F = factor(stoi(n));
-  long i, l=lg(F[1]);
-  GEN f  = cgetg(4,t_VEC);
-  GEN fp = cgetg(l,t_VECSMALL);
-  GEN fe = cgetg(l,t_VECSMALL);
-  GEN fc = cgetg(l,t_VECSMALL);
+  long i, l = lg(F[1]);
+  GEN f = cgetg(4,t_VEC);
+  GEN p = cgetg(l,t_VECSMALL);
+  GEN e = cgetg(l,t_VECSMALL);
+  GEN c = cgetg(l,t_VECSMALL);
   pari_sp lbot = avma;
-  f[1] = (long) fp;
-  f[2] = (long) fe;
-  f[3] = (long) fc;
+  f[1] = (long)p;
+  f[2] = (long)e;
+  f[3] = (long)c;
   for(i = 1; i < l; i++)
   {
-    fp[i] = itos(gcoeff(F,i,1));
-    fe[i] = itos(gcoeff(F,i,2));
-    fc[i] = itos(powgi(gcoeff(F,i,1), gcoeff(F,i,2)));
+    p[i] = itos(gcoeff(F,i,1));
+    e[i] = itos(gcoeff(F,i,2));
+    c[i] = itos(powgi(gcoeff(F,i,1), gcoeff(F,i,2)));
   }
-  avma=lbot;
-  return gerepileupto(ltop,f);
+  avma = lbot; return gerepileupto(ltop,f);
 }
 
 /***********************************************************************/
