@@ -1979,7 +1979,7 @@ bestappr(GEN x, GEN k)
 
     case t_REAL:
       p1=gun; a=p0=gfloor(x); q1=gzero; q0=gun;
-      while (mpcmp(q0,k)<=0)
+      while (cmpii(q0,k)<=0)
       {
 	x = gsub(x,a);
 	if (gcmp0(x)) { p1=p0; q1=q0; break; }
