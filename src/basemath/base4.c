@@ -113,6 +113,7 @@ prime_to_ideal_aux(GEN nf, GEN vp)
   return hnfmodid(m,(GEN)vp[1]);
 }
 
+/* vp = [a,x,...], a in Z. Return (a,x)  [HACK: vp need not be prime] */
 GEN
 prime_to_ideal(GEN nf, GEN vp)
 {
@@ -1053,7 +1054,7 @@ idealaddmultoone(GEN nf, GEN list)
 /* multiplication */
 
 /* x integral ideal (without archimedean component) in HNF form
- * [a,alpha,n] corresponds to the ideal aZ_K+alpha Z_K (a is a
+ * [a,alpha] corresponds to the ideal aZ_K+alpha Z_K (a is a
  * rational integer). Multiply them
  */
 static GEN
