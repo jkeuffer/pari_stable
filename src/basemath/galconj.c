@@ -3384,13 +3384,14 @@ galoistestabelian(GEN gal)
 GEN galoisisabelian(GEN gal, long flag)
 {
   long i, j;
-  long test, n=lg(gal[7]);
+  long test, n;
   GEN M;
   gal = checkgal(gal);
   test=galoistestabelian(gal);
   if (!test) return gzero;
   if (flag==1)  return gun;
   if (flag) err(flagerr,"galoisisabelian");
+  n=lg(gal[7]);
   M=cgetg(n,t_MAT);
   for(i=1;i<n;i++)
   {
