@@ -541,6 +541,9 @@ overflow can occur, etc.
 \fun{ulong}{Fl_add}{ulong x, ulong y, ulong m} returns the smallest
 positive representative of $x + y$ modulo $m$.
 
+\fun{ulong}{Fl_neg}{ulong x, ulong m} returns the smallest
+positive representative of $-x$ modulo $m$.
+
 \fun{ulong}{Fl_sub}{ulong x, ulong y, ulong m} returns the smallest
 positive representative of $x - y$ modulo $m$.
 
@@ -702,7 +705,7 @@ and return the latter.
 \fun{GEN}{utoipos}{ulong s} converts the \emph{non-zero} \kbd{ulong}~\kbd{s}
 into a \typ{INT} and return the latter.
 
-\fun{GEN}{utoineg}{ulong s} converts the \empn{non-zero} \kbd{ulong}~\kbd{s}
+\fun{GEN}{utoineg}{ulong s} converts the \emph{non-zero} \kbd{ulong}~\kbd{s}
 into a \typ{INT} and return the latter.
 
 \fun{GEN}{utor}{ulong s, long prec} converts the \kbd{ulong}~\kbd{s} into a
