@@ -537,8 +537,6 @@ cleanarch(GEN x, long N, long prec)
   return y;
 }
 
-enum { RELAT, LARGE, PRECI };
-
 static GEN
 not_given(pari_sp av, long fl, long reason)
 {
@@ -547,9 +545,9 @@ not_given(pari_sp av, long fl, long reason)
     char *s;
     switch(reason)
     {
-      case LARGE: s = "fundamental units too large"; break;
-      case PRECI: s = "insufficient precision for fundamental units"; break;
-      default: s = "unknown problem with fundamental units";
+      case fupb_LARGE: s="fundamental units too large"; break;
+      case fupb_PRECI: s="insufficient precision for fundamental units"; break;
+      default: s="unknown problem with fundamental units";
     }
     err(warner,"%s, not given",s);
   }
@@ -629,17 +627,17 @@ getfu(GEN nf,GEN *ptA,long fl,long *pte,long prec)
   }
   if (prec <= 0) prec = gprecision(A);
   u = lllintern(greal(matep),100,1,prec);
-  if (!u) return not_given(av,fl,PRECI);
+  if (!u) return not_given(av,fl,fupb_PRECI);
 
   p1 = gmul(matep,u);
-  if (expgexpo(p1) > 20) { *pte = BIGINT; return not_given(av,fl,LARGE); }
+  if (expgexpo(p1) > 20) { *pte = BIGINT; return not_given(av,fl,fupb_LARGE); }
   matep = gexp(p1,prec);
   y = grndtoi(gauss_realimag(nf,matep), &e);
   *pte = -e;
-  if (e >= 0) return not_given(av,fl,PRECI);
+  if (e >= 0) return not_given(av,fl,fupb_PRECI);
   for (j=1; j<RU; j++)
     if (!gcmp1(idealnorm(nf, (GEN)y[j]))) break;
-  if (j < RU) { *pte = 0; return not_given(av,fl,PRECI); }
+  if (j < RU) { *pte = 0; return not_given(av,fl,fupb_PRECI); }
   A = gmul(A,u);
 
   /* y[i] are unit generators. Normalize: smallest L2 norm + lead coeff > 0 */
@@ -2078,13 +2076,13 @@ compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR)
   if (!lambda)
   {
     if (DEBUGLEVEL) fprintferr("truncation error in bestappr\n");
-    return PRECI;
+    return fupb_PRECI;
   }
   den = Q_denom(lambda);
   if (gcmp(den,D) > 0)
   {
     if (DEBUGLEVEL) fprintferr("D = %Z\nden = %Z\n",D,den);
-    return PRECI;
+    return fupb_PRECI;
   }
   L = Q_muli_to_int(lambda, den);
   H = hnfall_i(L, NULL, 1); r = lg(H)-1;
@@ -2097,8 +2095,8 @@ compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR)
     msgtimer("bestappr/regulator");
     fprintferr("\n ***** check = %f\n",c);
   }
-  if (c < 0.8 || c > 1.3) { avma = av; return RELAT; }
-  *ptkR = R; *ptL = L; return LARGE;
+  if (c < 0.8 || c > 1.3) { avma = av; return fupb_RELAT; }
+  *ptkR = R; *ptL = L; return fupb_NONE;
 }
 
 /* find the smallest (wrt norm) among I, I^-1 and red(I^-1) */
@@ -3151,10 +3149,10 @@ MORE:
   z = mulrr(Res, resc); /* ~ hR if enough relations, a multiple otherwise */
   switch (compute_R(lambda, divir(h,z), &L, &R))
   {
-    case PRECI: /* precision problem unless we cheat on Bach constant */
+    case fupb_PRECI: /* precision problem unless we cheat on Bach constant */
       if (!precdouble) precpb = "compute_R";
       goto START;
-    case RELAT: /* not enough relations */
+    case fupb_RELAT: /* not enough relations */
       if (++nrelsup <= MAXRELSUP) nlze = MIN_EXTRA; else sfb_increase = 1;
       goto MORE;
   }

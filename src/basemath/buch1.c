@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                                                                 */
 /*******************************************************************/
 #include "pari.h"
+#include "parinf.h"
 
 const int narrow = 0; /* should set narrow = flag in buchquad, but buggy */
 
@@ -1626,8 +1627,6 @@ gcdreal(GEN a,GEN b)
   return absr(a);
 }
 
-enum { RELAT, LARGE, PRECI };
-
 static int
 get_R(GEN C, long sreg, GEN z, GEN *ptR)
 {
@@ -1641,7 +1640,7 @@ get_R(GEN C, long sreg, GEN z, GEN *ptR)
     for (i=2; i<=sreg; i++)
     {
       R = gcdreal((GEN)C[i], R);
-      if (!R) return PRECI;
+      if (!R) return fupb_PRECI;
     }
     if (DEBUGLEVEL)
     {
@@ -1651,12 +1650,12 @@ get_R(GEN C, long sreg, GEN z, GEN *ptR)
     if (gexpo(R) <= -3)
     {
       if (DEBUGLEVEL) fprintferr("regulator is zero.\n");
-      return RELAT;
+      return fupb_RELAT;
     }
   }
   c = gtodouble(gmul(z, R));
-  if (c < 0.8 || c > 1.3) return RELAT;
-  *ptR = R; return LARGE;
+  if (c < 0.8 || c > 1.3) return fupb_RELAT;
+  *ptR = R; return fupb_NONE;
 }
 
 static int
@@ -1779,11 +1778,11 @@ MORE:
   z = mulrr(Res, resc); /* ~ hR if enough relations, a multiple otherwise */
   switch(get_R(C, KCCO - (lg(B)-1) - (lg(W)-1), divir(h,z), &R))
   {
-    case PRECI:
+    case fupb_PRECI:
       prec = (PRECREG<<1)-2;
       goto START;
 
-    case RELAT:
+    case fupb_RELAT:
       if (++nrelsup <= MAXRELSUP) { nlze = min(KC, nrelsup); goto MORE; }
       goto START;
   }

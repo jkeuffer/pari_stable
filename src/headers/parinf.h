@@ -67,6 +67,7 @@ typedef struct {
 /* for buchall */
 #define nf_ROOT1 512
 #define nf_UNITS 1024
+enum { fupb_NONE, fupb_RELAT, fupb_LARGE, fupb_PRECI };
 
 /* for discray */
 #define nf_REL  1
