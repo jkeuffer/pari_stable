@@ -56,17 +56,18 @@ GEN
 InitRU(GEN den, long prec)
 {
   GEN c,s, z;
-  gsincos(divri(gmul2n(mppi(prec),1), den), &c, &s, prec);
+  if (egalii(den, gdeux)) return stoi(-1);
+  gsincos(divri(gmul2n(mppi(prec),1), den), &s, &c, prec);
   z = cgetg(3, t_COMPLEX);
   z[1] = (long)c;
   z[2] = (long)s; return z;
 }
-/* Compute the image of logelt by chi as a complex number if flag = 0,
-   otherwise as a polmod, see InitChar in part 3 */
+/* Compute the image of logelt by chi as a complex number
+   see InitChar in part 3 */
 static GEN
-ComputeImagebyChar(GEN chi, GEN logelt, long flag)
+ComputeImagebyChar(GEN chi, GEN logelt)
 {
-  GEN gn = gmul((GEN)chi[1], logelt), x = (GEN)chi[flag? 4: 2];
+  GEN gn = gmul((GEN)chi[1], logelt), x = (GEN)chi[2];
   long d = itos((GEN)chi[3]), n = smodis(gn, d);
   /* x^d = 1 and, if d even, x^(d/2) = -1 */
   if ((d & 1) == 0)
@@ -134,39 +135,44 @@ ConjChar(GEN chi, GEN cyc)
   return p1;
 }
 
-/* compute the next element for FindEltofGroup */
-static GEN
-NextEltofGroup(GEN cyc, long l, long adec)
+typedef struct {
+  long r; /* rank = lg(gen) */
+  GEN j; /* current elt is gen[1]^j[1] ... gen[r]^j[r] */
+  GEN cyc; /* t_VECSMALL of elementary divisors */
+} GROUP_t;
+
+static int
+NextElt(GROUP_t *G)
 {
-  GEN p1;
-  long dj, j;
-
-  p1 = cgetg(l + 1, t_COL);
-
-  for (j = 1; j <= l; j++)
+  long i = 1;
+  while (++G->j[i] == G->cyc[i]) /* from 0 to cyc[i]-1 */
   {
-    dj = itos((GEN)cyc[j]);
-    p1[j] = lstoi(adec%dj);
-    adec /= dj;
+    G->j[i] = 0;
+    if (++i > G->r) return 0; /* no more elt */
   }
-
-  return p1;
+  return i; /* we have multiplied by gen[i] */
 }
 
 /* Compute all the elements of a group given by its SNF */
 static GEN
-FindEltofGroup(long order, GEN cyc)
+EltsOfGroup(long order, GEN cyc)
 {
-  long l, i;
+  long i;
   GEN rep;
+  GROUP_t G;
 
-  l = lg(cyc)-1;
+  G.cyc = gtovecsmall(cyc);
+  G.r = lg(cyc)-1;
+  G.j = vecsmall_const(G.r, 0);
 
   rep = cgetg(order + 1, t_VEC);
+  rep[order] = (long)small_to_col(G.j);
 
-  for  (i = 1; i <= order; i++)
-    rep[i] = (long)NextEltofGroup(cyc, l, i);
-
+  for  (i = 1; i < order; i++)
+  {
+    (void)NextElt(&G);
+    rep[i] = (long)small_to_col(G.j);
+  }
   return rep;
 }
 
@@ -182,7 +188,7 @@ ComputeLift(GEN dataC)
   cyc   = (GEN)dataC[2];
   surj  = (GEN)dataC[3];
 
-  eltq = FindEltofGroup(order, cyc);
+  eltq = EltsOfGroup(order, cyc);
 
   elt = cgetg(order + 1, t_VEC);
 
@@ -200,19 +206,16 @@ ComputeLift(GEN dataC)
 static GEN
 get_Char(GEN chi, long prec)
 {
-  GEN p2, d, _2ipi = gmul(gi, shiftr(mppi(prec), 1));
-  p2 = cgetg(5, t_VEC); d = denom(chi);
-  p2[1] = lmul(d, chi);
-  if (egalii(d, gdeux))
-    p2[2] = lstoi(-1);
-  else
-    p2[2] = lexp(gdiv(_2ipi, d), prec);
-  p2[3] = (long)d;
-  p2[4] = lmodulcp(polx[0], cyclo(itos(d), 0));
-  return p2;
+  GEN C = cgetg(5, t_VEC);
+  GEN d = denom(chi);
+  C[1] = lmul(d, chi);
+  C[2] = (long)InitRU(d, prec);
+  C[3] = (long)d;
+  C[4] = lmodulcp(polx[0], cyclo(itos(d), 0));
+  return C;
 }
 
-/* Let chi a character defined over bnr and primitif over bnrc,
+/* Let chi a character defined over bnr and primitive over bnrc,
    compute the corresponding primitive character and the vectors of
    prime ideals dividing bnr but not bnrc. Returns NULL if bnr = bnrc */
 static GEN
@@ -393,56 +396,67 @@ ComputeIndex2Subgroup(GEN bnr, GEN C)
   return gerepilecopy(av, subgrp);
 }
 
+GEN
+Order(GEN cyc, GEN x)
+{
+  ulong av = avma;
+  long i, l = lg(cyc);
+  GEN c,o,f = gun;
+  for (i = 1; i < l; i++)
+  {
+    o = (GEN)cyc[i];
+    c = mppgcd(o, (GEN)x[i]);
+    if (!is_pm1(c)) o = diviiexact(o,c);
+    f = mpppcm(f, o);
+  }
+  return gerepileuptoint(av, f);
+}
+
 /* Let pr be a prime (pr may divide mod(bnr)), compute the indexes
    e,f of the splitting of pr in the class field nf(bnr/subgroup) */
 static GEN
 GetIndex(GEN pr, GEN bnr, GEN subgroup)
 {
-  long av = avma, v, lg, i;
-  GEN bnf, mod, mod0, mpr0, mpr, bnrpr, subpr, M, e, f, dtQ, p1;
+  long av = avma, v, e, f;
+  GEN bnf, mod, mod0, bnrpr, subpr, M, dtQ, p1;
   GEN rep, cycpr, cycQ;
 
   bnf  = (GEN)bnr[1];
   mod  = gmael(bnr, 2, 1);
   mod0 = (GEN)mod[1];
 
-  /* Compute the part of mod coprime to pr */
   v = idealval(bnf, mod0, pr);
-  mpr0 = idealdivexact(bnf, mod0, idealpow(bnf, pr, stoi(v)));
-
-  mpr = cgetg(3, t_VEC);
-  mpr[1] = (long)mpr0;
-  mpr[2] = mod[2];
-  if (gegal(mpr0, mod0))
+  if (v == 0)
   {
     bnrpr = bnr;
     subpr = subgroup;
+    e = 1;
   }
   else
   {
+    GEN mpr = cgetg(3, t_VEC);
+    GEN mpr0 = idealdivpowprime(bnf, mod0, pr, stoi(v));
+    mpr[1] = (long)mpr0; /* part of mod coprime to pr */
+    mpr[2] = mod[2];
     bnrpr = buchrayinitgen(bnf, mpr);
     cycpr = gmael(bnrpr, 5, 2);
     M = bnrGetSurj(bnr, bnrpr);
     M = gmul(M, subgroup);
     subpr = hnf(concatsp(M, diagonal(cycpr)));
+    /* e = #(bnr/subgroup) / #(bnrpr/subpr) */
+    e = itos( divii(dethnf_i(subgroup), dethnf_i(subpr)) );
   }
-
-  /* e = #(bnr/subgroup) / #(bnrpr/subpr) */
-  e = gdiv(det(subgroup), det(subpr));
 
   /* f = order of [pr] in bnrpr/subpr */
   dtQ  = InitQuotient(bnrpr, subpr);
   p1   = isprincipalray(bnrpr, pr);
   p1   = gmul(gmael(dtQ, 2, 3), p1);
   cycQ = gmael(dtQ, 2, 2);
-  lg = lg(cycQ) - 1;
-  f  = gun;
-  for (i = 1; i <= lg; i++)
-    f = glcm(f, gdiv((GEN)cycQ[i], ggcd((GEN)cycQ[i], (GEN)p1[i])));
+  f  = itos( Order(cycQ, p1) );
 
-  rep = cgetg(3, t_VEC);
-  rep[1] = lcopy(e);
-  rep[2] = lcopy(f);
+  rep = cgetg(3, t_VECSMALL);
+  rep[1] = (long)e;
+  rep[2] = (long)f;
 
   return gerepileupto(av, rep);
 }
@@ -478,7 +492,6 @@ CplxModulus(GEN data, long *newprec, long prec)
     pol   = gerepileupto(av2, AllStark(p1, nf, -1, dprec));
     if (!gcmp0(leading_term(pol)))
     {
-      /* cpl   = mpabs(poldisc0(pol, 0)); */
       cpl = gnorml2(gtovec(pol));
       if (!gcmp0(cpl)) break;
     }
@@ -531,11 +544,11 @@ FindModulus(GEN dataC, long fl, long *newprec, long prec, long bnd)
   bpr = (GEN)idealfactor(nf, f)[1];
   nbp = lg(bpr) - 1;
 
-  indpr = cgetg(nbp + 1,t_VEC);
+  indpr = cgetg(nbp + 1,t_VECSMALL);
   for (i = 1; i <= nbp; i++)
   {
     p1 = GetIndex((GEN)bpr[i], bnr, sgp);
-    indpr[i] = lmulii((GEN)p1[1], (GEN)p1[2]);
+    indpr[i] = p1[1] * p1[2];
   }
 
   /* Initialization of the possible infinite part */
@@ -611,8 +624,7 @@ FindModulus(GEN dataC, long fl, long *newprec, long prec, long bnd)
             for (j = 1; j <= nbp; j++)
             {
               p1 = GetIndex((GEN)bpr[j], bnrm, D);
-              p1 = mulii((GEN)p1[1], (GEN)p1[2]);
-              if (egalii(p1, (GEN)indpr[j])) break; /* no good */
+              if (p1[1] * p1[2] == indpr[j]) break; /* no good */
             }
             if (j <= nbp) continue;
 
@@ -631,7 +643,7 @@ FindModulus(GEN dataC, long fl, long *newprec, long prec, long bnd)
               rep[5] = (long)p1;
             }
 
-            if (!fl || (gcmp(p1, rb) < 0))
+            if (!fl || gcmp(p1, rb) < 0)
             {
               rep[5] = (long)InitChar0((GEN)rep[3], *newprec);
               return gerepilecopy(av, rep);
@@ -663,24 +675,6 @@ FindModulus(GEN dataC, long fl, long *newprec, long prec, long bnd)
 /********************************************************************/
 /*                      2nd part: compute W(X)                      */
 /********************************************************************/
-
-typedef struct {
-  long r; /* rank = lg(gen) */
-  GEN j; /* current elt is gen[1]^j[1] ... gen[r]^j[r] */
-  GEN cyc; /* t_VECSMALL of elementary divisors */
-} GROUP_t;
-
-static int
-NextElt(GROUP_t *G)
-{
-  long i = 1;
-  while (++G->j[i] == G->cyc[i]) /* from 0 to cyc[i]-1 */
-  {
-    G->j[i] = 0;
-    if (++i > G->r) return 0; /* no more elt */
-  }
-  return i; /* we have multiplied by gen[i] */
-}
 
 /* compute W(chi) such that Ld(s,chi) = W(chi) Ld(1 - s, chi*),
    if flag != 0 do not check the result */
@@ -847,14 +841,11 @@ bnrrootnumber(GEN bnr, GEN chi, long flag, long prec)
   cyc  = gmael(bnr, 5, 2);
   for (i = 1; i < l; i++)
     chic[i] = ldiv((GEN)chi[i], (GEN)cyc[i]);
-  d = denom(chic);
+  d = denom(chic); /* order of chi */
 
   p2 = cgetg(4, t_VEC);
   p2[1] = lmul(d, chic);
-  if (egalii(d, gdeux))
-    p2[2] = lstoi(-1);
-  else
-    p2[2] = (long)InitRU(d, prec);
+  p2[2] = (long)InitRU(d, prec);
   p2[3] = (long)d;
 
   dtcr = cgetg(9, t_VEC);
@@ -923,21 +914,20 @@ ComputeAChi(GEN dtcr, long flag, long prec)
 
   for (i = 1; i <= l; i++)
   {
+    GEN B;
     ray = isprincipalray(bnrc, (GEN)diff[i]);
-    p1  = ComputeImagebyChar(chi, ray, 0);
+    p1  = ComputeImagebyChar(chi, ray);
 
     if (flag)
-      A = gmul(A, gsub(gun, gdiv(p1, idealnorm(nf, (GEN)diff[i]))));
-    else
+      B = gsub(gun, gdiv(p1, idealnorm(nf, (GEN)diff[i])));
+    else if (gcmp1(p1))
     {
-      if (gcmp1(p1))
-      {
-	A = gmul(A, glog(idealnorm(nf, (GEN)diff[i]), prec));
-	r++;
-      }
-      else
-	A = gmul(A, gsub(gun, p1));
+      B = glog(idealnorm(nf, (GEN)diff[i]), prec);
+      r++;
     }
+    else
+      B = gsub(gun, p1);
+    A = gmul(A, B);
   }
 
   if (flag) return A;
@@ -1088,7 +1078,7 @@ InitChar0(GEN dataD, long prec)
   allCR  = cgetg(h + 1, t_VEC); /* all characters, including conjugates */
   tnc = 1;
 
-  p1 = FindEltofGroup(hD, MrD);
+  p1 = EltsOfGroup(hD, MrD);
 
   for (i = 1; tnc <= h; i++)
   {
@@ -1111,14 +1101,9 @@ InitChar0(GEN dataD, long prec)
     listCR[nc++] = (long)p2;
     allCR[tnc++] = (long)lchi;
 
-    /* compute the order of chi */
-    p2 = cgetg(nbg + 1, t_VEC);
-    for (j = 1; j <= nbg; j++)
-      p2[j] = ldiv((GEN)lchi[j], (GEN)Mr[j]);
-    d = denom(p2);
-
     /* if chi is not real, add its conjugate character to allCR */
-    if (!gegal(d, gdeux))
+    d = Order(Mr, lchi);
+    if (!egalii(d, gdeux))
       allCR[tnc++] = (long)ConjChar(lchi, Mr);
   }
 
@@ -1227,7 +1212,7 @@ InitReduction(GEN CHI, long deg)
   avma = av; return A;
 }
 
-#if 1
+#if 0
 void
 pan(int **an, long n, long deg)
 {
@@ -2542,21 +2527,19 @@ QuadGetST(GEN dataCR, long prec)
   avma = av; return rep;
 }
 
+typedef struct {
+  long cl;
+  GEN dkpow;
+} DH_t;
+
 /* return 1 if the absolute polynomial pol (over Q) defines the
    Hilbert class field of the real quadratic field bnf */
-int
-define_hilbert(GEN bnf, GEN pol)
+static int
+define_hilbert(void *S, GEN pol)
 {
-  long cl;
-  GEN dk;
-
-  cl = itos(gmael3(bnf, 8, 1, 1));
-  dk = gmael(bnf, 7, 3);
-
-  if (degpol(pol) == cl)
-    if ((cl%2) || !egalii(discf(pol), gpowgs(dk,cl>>1))) return 1;
-
-  return 0;
+  DH_t *T = (DH_t*)S;
+  return (degpol(pol) == T->cl
+      && (T->cl & 1 || !egalii(discf(pol), T->dkpow)));
 }
 
 /* let polrel define Hk/k,  find L/Q such that Hk=Lk and L and k are
@@ -2566,6 +2549,7 @@ makescind(GEN bnf, GEN polabs, long cl, long prec)
 {
   long av = avma, i, l;
   GEN pol, p1, nf2, dabs, dk, bas;
+  DH_t T;
 
   /* check the result (a little): signature and discriminant */
   bas = allbase4(polabs,0,&dabs,NULL);
@@ -2575,7 +2559,9 @@ makescind(GEN bnf, GEN polabs, long cl, long prec)
 
   /* attempt to find the subfields using polred */
   p1 = cgetg(3,t_VEC); p1[1]=(long)polabs; p1[2]=(long)bas;
-  pol = polredfirstpol(p1, (prec<<1) - 2, &define_hilbert, bnf);
+  T.cl = cl;
+  T.dkpow = (cl & 1) ? NULL: gpowgs(dk, cl>>1);
+  pol = polredfirstpol(p1, (prec<<1) - 2, &define_hilbert, &T);
   if (DEBUGLEVEL) msgtimer("polred");
 
   if (!pol)
@@ -2588,7 +2574,7 @@ makescind(GEN bnf, GEN polabs, long cl, long prec)
     for (i = 1; i < l; i++)
     {
       pol = gmael(p1, i, 1);
-      if ((cl%2) || !gegal(sqri(discf(pol)), (GEN)nf2[3])) break;
+      if (cl & 1 || !egalii(sqri(discf(pol)), (GEN)nf2[3])) break;
     }
     if (i == l)
       for (i = 1; i < l; i++)
@@ -2609,31 +2595,27 @@ static GEN
 GenusField(GEN bnf, long prec)
 {
   long hk, c, l, av = avma;
-  GEN disc, quat, x2, pol, div, d;
+  GEN disc, x2, pol, div, d;
 
   hk   = itos(gmael3(bnf, 8, 1, 1));
   disc = gmael(bnf, 7, 3);
-  quat = stoi(4);
   x2   = gsqr(polx[0]);
 
-  if (gcmp0(modii(disc, quat))) disc = divii(disc, quat);
-
+  if (mod4(disc) == 0) disc = divis(disc, 4);
   div = divisors(disc);
-  c = 1;
   l = 0;
-  pol = NULL; /* gcc -Wall */
+  pol = NULL;
 
-  while(l < hk)
+  for (c = 2; l < hk; c++) /* skip c = 1 : div[1] = gun */
   {
-    c++;
     d = (GEN)div[c];
-
-    if (gcmp1(modii(d, quat)))
+    if (mod4(d) == 1)
     {
-      if (!l)
-	pol = gsub(x2, d);
+      GEN t = gsub(x2, d); 
+      if (!pol)
+	pol = t;
       else
-	pol=(GEN)compositum(pol, gsub(x2, d))[1];
+	pol = (GEN)compositum(pol, t)[1];
 
       l = degpol(pol);
     }
@@ -2742,7 +2724,7 @@ LABDOUB:
     for (j = 1; j <= cl; j++)
     {
       GEN CHI = gmael(dataCR,j,5);
-      GEN val = ComputeImagebyChar(CHI, sig, 0);
+      GEN val = ComputeImagebyChar(CHI, sig);
       GEN p2 = greal(gmul((GEN)Lp[j], val));
       if (itos((GEN)CHI[3]) != 2) p2 = gmul2n(p2, 1); /* character not real */
       z = gadd(z, p2);
@@ -3029,7 +3011,7 @@ bnrL1(GEN bnr, GEN sbgrp, long flag, long prec)
   lq = lg((GEN)Qt[2]) - 1;
 
   /* compute all the characters */
-  allCR = FindEltofGroup(cl, (GEN)Qt[2]);
+  allCR = EltsOfGroup(cl, (GEN)Qt[2]);
 
   /* make a list of all non-trivial characters modulo conjugation */
   listCR = cgetg(cl, t_VEC);

@@ -1382,7 +1382,7 @@ conductor(GEN bnr, GEN H, long all)
     ep = (all>=0)? itos((GEN)ex[k]): 1;
     for (j=1; j<=ep; j++)
     {
-      mod[1] = (long)idealdivexact(nf,ideal,pr);
+      mod[1] = (long)idealdivpowprime(nf,ideal,pr,gun);
       clhss = orderofquotient(bnf,mod,H,gen);
       if (!egalii(clhss,clhray)) break;
       if (all < 0) { avma = av; return gzero; }
@@ -1635,13 +1635,13 @@ discrayrelall(GEN bnr, GEN H, long flag)
     mod[1] = (long)ideal;
     for (j=1; j<=ep; j++)
     {
-      mod[1] = (long)idealdivexact(nf,(GEN)mod[1],pr);
+      mod[1] = (long)idealdivpowprime(nf,(GEN)mod[1],pr,gun);
       clhss = orderofquotient(bnf,mod,H,gen);
       if (flcond && j==1 && egalii(clhss,clhray)) { avma = av; return gzero; }
       if (is_pm1(clhss)) { S = addis(S, ep-j+1); break; }
       S = addii(S, clhss);
     }
-    idealrel = flrel? idealmul(nf,idealrel, idealpow(nf,pr, S))
+    idealrel = flrel? idealmulpowprime(nf,idealrel, pr, S)
                     : mulii(idealrel, powgi(idealnorm(nf,pr),S));
   }
   dlk = flrel? idealdivexact(nf,idealpow(nf,ideal,clhray), idealrel)
@@ -1730,7 +1730,7 @@ bnrconductorofchar(GEN bnr, GEN chi)
 {
   ulong av = avma;
   long nbgen,i;
-  GEN p1,m,U,d1,cyc;
+  GEN m,U,d1,cyc;
 
   checkbnrgen(bnr);
   cyc = gmael(bnr,5,2); nbgen = lg(cyc)-1;
@@ -1742,11 +1742,10 @@ bnrconductorofchar(GEN bnr, GEN chi)
   for (i=1; i<=nbgen; i++)
   {
     if (typ(chi[i]) != t_INT) err(typeer,"conductorofchar");
-    p1 = cgetg(2,t_COL); m[i] = (long)p1;
-    p1[1] = lmulii((GEN)chi[i], divii(d1, (GEN)cyc[i]));
+    m[i] = (long)_col(mulii((GEN)chi[i], divii(d1, (GEN)cyc[i])));
   }
-  p1 = cgetg(2,t_COL); m[i] = (long)p1;
-  p1[1] = (long)d1; U = (GEN)hnfall(m)[2];
+  m[i] = (long)_col(d1);
+  U = (GEN)hnfall(m)[2];
   setlg(U,nbgen+1);
   for (i=1; i<=nbgen; i++) setlg(U[i],nbgen+1); /* U = Ker chi */
   return gerepileupto(av, conductor(bnr,U,0));
@@ -2123,7 +2122,7 @@ decodemodule(GEN nf, GEN fa)
     fauxpr = itos((GEN)g[k]);
     j = (fauxpr%n)+1; fauxpr /= n*n;
     pr = (GEN)primedec(nf,stoi(fauxpr))[j];
-    id = idealmul(nf,id, idealpow(nf,pr,(GEN)e[k]));
+    id = idealmulpowprime(nf,id, pr,(GEN)e[k]);
   }
   return gerepileupto(av,id);
 }
@@ -2383,7 +2382,7 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
           if (!allarch && nba)
           {
             p1 = (GEN)primedec(nf,gprime)[ffs%degk+1];
-            ideal = idealmul(nf,ideal,idealpow(nf,p1,(GEN)ex[k]));
+            ideal = idealmulpowprime(nf,ideal,p1,(GEN)ex[k]);
           }
           S=0; clhss=0;
           normi = ii; normps= itos(gpuigs(gprime,resp));
@@ -2530,7 +2529,7 @@ subgroupcond(GEN bnr, GEN indexbound)
   listKer=cgetg(lp+lg(arch),t_VEC);
   for (i=1; i<=lp; )
   {
-    mod[1] = (long)idealdiv(nf,ideal,(GEN)primelist[i]);
+    mod[1] = (long)idealdivpowprime(nf,ideal,(GEN)primelist[i],gun);
     listKer[i++] = (long)bnrGetKer(bnr,mod);
   }
   mod[1] = (long)ideal; arch2 = dummycopy(arch);

@@ -1894,7 +1894,7 @@ canon_pol(GEN z)
 
 static GEN
 pols_for_polred(GEN x, GEN base, GEN LLLbase, GEN *pta, 
-		int (*check)(GEN, GEN), GEN arg)
+		int (*check)(void *, GEN), void *arg)
 {
   long i, v = varn(x), n = lg(base);
   GEN p1,p2,p3,y, a = cgetg(n,t_VEC);
@@ -2022,7 +2022,7 @@ LLL_nfbasis(GEN *ptx, GEN polr, GEN base, long prec)
    if there are no such pol */
 static GEN
 allpolred0(GEN x, GEN *pta, long code, long prec, 
-	   int (*check)(GEN,GEN), GEN arg)
+	   int (*check)(void *,GEN), void *arg)
 {
   GEN y,p1, base = NULL, polr = NULL;
   long av = avma;
@@ -2412,7 +2412,7 @@ polred(GEN x, long prec)
 }
 
 GEN 
-polredfirstpol(GEN x, long prec, int (*check)(GEN,GEN), GEN arg)
+polredfirstpol(GEN x, long prec, int (*check)(void *,GEN), void *arg)
 {
   return allpolred0(x,(GEN*)0,0,prec,check,arg);
 }

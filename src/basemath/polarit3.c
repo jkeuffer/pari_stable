@@ -2151,15 +2151,21 @@ small_to_vec(GEN z)
 }
 
 GEN
+small_to_col(GEN z)
+{
+  long i, l = lg(z);
+  GEN x = cgetg(l,t_COL);
+  for (i=1; i<l; i++) x[i] = lstoi(z[i]);
+  return x;
+}
+
+GEN
 small_to_mat(GEN z)
 {
   long i, l = lg(z);
   GEN x = cgetg(l,t_MAT);
   for (i=1; i<l; i++)
-  {
-    x[i] = (long)small_to_vec((GEN)z[i]);
-    settyp(x[i], t_COL);
-  }
+    x[i] = (long)small_to_col((GEN)z[i]);
   return x;
 }
 

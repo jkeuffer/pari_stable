@@ -276,25 +276,25 @@ forvec(entree *ep, GEN x, char *c, long flag)
   if (flag<0 || flag>2) err(flagerr);
   d->n = lg(x);
   d->ch = c;
-  d->fl = flag;
   d->a = (GEN*)cgetg(d->n,t_VEC); push_val(ep, (GEN)d->a);
-  d->m = (GEN*)cgetg(d->n,t_VEC);
-  d->M = (GEN*)cgetg(d->n,t_VEC);
   if (d->n == 1) lisseq(d->ch);
   else
   {
     long i, t = t_INT;
+    d->fl = flag;
+    d->m = (GEN*)cgetg(d->n,t_VEC);
+    d->M = (GEN*)cgetg(d->n,t_VEC);
     for (i=1; i<d->n; i++)
     {
-      GEN *c = (GEN*) x[i];
-      tx = typ(c);
-      if (! is_vec_t(tx) || lg(c)!=3)
+      GEN *e = (GEN*) x[i];
+      tx = typ(e);
+      if (! is_vec_t(tx) || lg(e)!=3)
 	err(talker,"not a vector of two-component vectors in forvec");
-      if (gcmp(c[1],c[2]) > 0) d->n = 0;
-      if (typ(c[1]) != t_INT) t = t_REAL;
-      /* in case x is an ep->value and c destroys it, we have to copy */
-      d->m[i] = gcopy(c[1]);
-      d->M[i] = gcopy(c[2]);
+      if (gcmp(e[1],e[2]) > 0) d->n = 0;
+      if (typ(e[1]) != t_INT) t = t_REAL;
+      /* in case x is an ep->value and lisexpr(d->ch) kills it, we have to copy */
+      d->m[i] = gcopy(e[1]);
+      d->M[i] = gcopy(e[2]);
     }
     if (t == t_INT) fvloop_i(1, d); else fvloop(1, d);
   }
