@@ -1194,7 +1194,8 @@ isqrti(GEN a)
 }
 
 /* compute sqrt(|a|), s being signe(a)*/
-GEN sqrtr_abs(GEN a, long s)
+GEN
+sqrtr_abs(GEN a, long s)
 {
   GEN res;
   mp_limb_t *b, *c;
