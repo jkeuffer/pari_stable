@@ -198,7 +198,7 @@ long mylogint(GEN x, GEN y, long prec)
   return res;
 }
 
-GEN vandermondeinverseprep(GEN T, GEN L)
+GEN vandermondeinverseprepold(GEN T, GEN L)
 {
   int     i, n = lg(L);
   GEN     V, dT;
@@ -206,6 +206,25 @@ GEN vandermondeinverseprep(GEN T, GEN L)
   V = cgetg(n, t_VEC);
   for (i = 1; i < n; i++)
     V[i] = (long) poleval(dT, (GEN) L[i]);
+  return V;
+}
+
+GEN vandermondeinverseprep(GEN T, GEN L)
+{
+  int     i, j, n = lg(L);
+  GEN     V;
+  V = cgetg(n, t_VEC);
+  for (i = 1; i < n; i++)
+  {
+    ulong ltop=avma;
+    GEN W=cgetg(n,t_VEC);
+    for (j = 1; j < n; j++)
+      if (i==j)
+	W[j]=un;
+      else
+	W[j]=lsub((GEN)L[i],(GEN)L[j]);
+    V[i]=lpileupto(ltop,divide_conquer_prod(W,&gmul));
+  }
   return V;
 }
 
@@ -218,7 +237,7 @@ vandermondeinverse(GEN L, GEN T, GEN den, GEN prep)
   long    x = varn(T);
   GEN     M, P;
   if (!prep)
-    prep=vandermondeinverseprep(L,T);
+    prep=vandermondeinverseprep(T,L);
   M = cgetg(n, t_MAT);
   for (i = 1; i < n; i++)
   {
@@ -262,7 +281,7 @@ galoisborne(GEN T, GEN dn, struct galois_borne *gb, long ppp)
   for (i = 2; i < lgef(T); i++)
     if (lg(T[i]) > prec)
       prec = lg(T[i]);
-  prec++;
+  /*prec++;*/
   if (DEBUGLEVEL>=4) gentimer(3);
   L = roots(T, prec);
   if (DEBUGLEVEL>=4) genmsgtimer(3,"roots");
@@ -2701,7 +2720,7 @@ galoistowerprime(GEN n, long up)
   T=cgetg(omega+1,t_VECSMALL);
   id=1;T[id]=1;
   for(i=1;i<=np;i++)
-    for(j=1;j<=Fe[i];j++)
+    for(j=1;j<=Fe[up?i:np+1-i];j++)
     {
       id++;
       T[id]=T[id-1]*Fp[up?i:np+1-i];
@@ -2758,7 +2777,7 @@ galoisfrobeniuslift(GEN T, GEN den, GEN L,  GEN Lden, long gmask,
   struct galois_lift gl;
   GEN frob,tower,res=NULL;
   long i,j,k,l;
-  long n=lg(L), deg=gf->deg;
+  long n=lg(L)-1, deg=gf->deg;
   long way;/*from home*/
   GEN *gptr[3];
   GEN ip=stoi(gf->p), aut;
@@ -2788,7 +2807,7 @@ galoisfrobeniuslift(GEN T, GEN den, GEN L,  GEN Lden, long gmask,
   }
   gt.Cd=gcopy(gt.C);
   for (way=0;way<=1;way++)
-    if((gmask&(1<<way)) && gf->fp%(way?2:deg) == 0)
+    if ((gmask&(1<<way)) && gf->fp%(way?2:deg) == 0)
     {
       tower=galoistowerprime(stoi(gf->fp),!way);
       for(k=lg(tower)-2;k>=1+way;k--)

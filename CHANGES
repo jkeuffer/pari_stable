@@ -6,7 +6,6 @@ CB = Cliff Bergman
 CW = Carl Witty
 DB = Dominique Bernardi
 DC = Dan Christensen
-MD = Mark Dickinson
 DE = Denis Excoffier
 DF = David Ford
 DS = Denis Simon
@@ -19,6 +18,7 @@ IK = Iwao Kimura
 IZ = Ilya Zakharevich
 KO = Kiyoshi Ohgishi
 LG = Louis Granboulan
+MD = Mark Dickinson
 MS = Michael Stoll
 OR = Olivier Ramare
 OV = Oliver Voigt
@@ -50,11 +50,15 @@ XR  9- possible overflow in ComputeCoeff [ bnrstark() ]
 XR 14- typo in nilord4 --> SEGV, e.g.
        nfdisc(x^16-363*x^14+53550*x^12-4091823*x^10+170172414*x^8 \\
          -3663509067*x^6+33703350345*x^4-63300912912*x^2+32451860736)
-   15- some messages didn't distinguish between MBytes and milllions of Bytes
+   15- some messages didn't distinguish between MBytes and millions of Bytes
    16- typo in BuildTree [hensel lift]: SEGV
    17- (rare) oo loop in polroots, e.g. x^5-2*x^4-32*x^3+72*x^2+218*x-491
    18- oo loop in ellpointtoz on certain rare inputs
    19- stack corruption in factorff
+BA 20- better interface for galoissubcyclo
+BA 21- galoisfixedfield(,,2) now works with non Galois subfields
+BA 22- nfgaloisconj now use `p-1'-test + better strategy
+BA 23- fix accuracy problems in vandermondeinverse
 
   Changed
     1- removed useless parameter prec in many bnr* and rnf* functions
@@ -64,10 +68,12 @@ BA  4- Fp_PHlog (Pohlig-Hellman) can use a factorization of the subgroup order
     5- major update of buchall() [bnfinit]: accurate precision increase, cleanup
     6- [libpari:] rename permute/permuteInv to GP names numtoperm/permtonum
     7- scalar + [;] --> error  [made it [;]]
+BA  8- factorback, chinese, lcm and gcd now accept a single vector
 
   Added
 BA  1- function pith() [= pi(x), naïve implementation]
     2- new target for Makefile: gp.dbg
+BA  3- library functions FpX_roots_to_pol, FqX_roots_to_pol
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.0 (released 30/04/2001):
@@ -130,7 +136,7 @@ BA 47- incorrect quoting in src/make_vi_tags (make ctags)
    51- error messages on GP metacommands (\...) indicated wrong context
    52- bnr functions might fail with "indefinite matrix in lllgram" [prec pb]
    53- nfhilbert(nf,a,b, pr | 2) would give bogus result if nf in variable 0 (x)
-MD 54- real(1 / (a+quadgen(...)*b)) was a / (a^2 + b^2)  [assumed quadgen(-1) !]
+MD 54- real(1 / (a+quadgen(...)*b)) was a / (a^2 + b^2)  [assumed quadgen(-4) !]
    55- wrong HNF (reduction not finished) when nblines >> nbcol [hnf(,0) only]
    56- rare problem in isprincipal (large non Galois base field)--> wrong 
        result (generators not required) or infinite loop.
@@ -171,7 +177,7 @@ XR  3- new flag to rnfconductor (check extension is abelian)
 IZ  4- set of default colors (boldfg)
     5- modular polynomial arithmetic ([uni|bi]variate resultant over Z,
        characteristic polynomial of algebraic numbers, nfgcd).
-       [undocumented, experminental]
+       [undocumented, experimental]
     6- Pohlig-Hellman discrete log over Fp and nf.zk / pr
 BA  7- flag to galoissubcyclo (also output conductor)
 
