@@ -1049,3 +1049,30 @@ lgcdii(ulong* d, ulong* d1,
 
   return res;
 }
+
+/* 1 / Mod(x,p) , or 0 if inverse doesn't exist. Assume x < p */
+ulong
+invumod(ulong x, ulong p)
+{
+  long s;
+  ulong xv, xv1, g = xgcduu(p, x, 1, &xv, &xv1, &s);
+  if (g != 1UL) return 0UL;
+  xv = xv1 % p; if (s < 0) xv = p - xv;
+  return xv;
+}
+
+long
+invsmod(long a, long m)
+{
+  m = labs(m);
+  if (a >= 0)
+  {
+    if (a > m) a %= m;
+  }
+  else
+  {
+    if (-a > m) a %= m;
+    a += m;
+  }
+  return (long)invumod((ulong)a, (ulong)m);
+}

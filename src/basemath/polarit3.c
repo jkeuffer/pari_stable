@@ -2346,18 +2346,6 @@ from_Kronecker(GEN z, GEN pol)
 /*                          MODULAR GCD                            */
 /*                                                                 */
 /*******************************************************************/
-extern ulong xgcduu(ulong d, ulong d1, int f, ulong* v, ulong* v1, long *s);
-/* 1 / Mod(x,p) , or 0 if inverse doesn't exist */
-ulong
-invumod(ulong x, ulong p)
-{
-  long s;
-  ulong xv, xv1, g = xgcduu(p, x, 1, &xv, &xv1, &s);
-  if (g != 1UL) return 0UL;
-  xv = xv1 % p; if (s < 0) xv = p - xv;
-  return xv;
-}
-
 int
 u_val(ulong n, ulong p)
 {
