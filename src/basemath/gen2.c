@@ -658,9 +658,11 @@ ggval(GEN x, GEN p)
       return valp(x);
 
     case t_POLMOD:
-      if (tp==t_INT) return ggval((GEN)x[2],p);
+      if (tp == t_INT) return ggval((GEN)x[2],p);
+      if (tp != t_POL) break;
+      if (varn(x[1]) != varn(p)) return 0;
       av = avma;
-      if (tp!=t_POL || !poldivis((GEN)x[1],p,&p1)) break;
+      if (!poldivis((GEN)x[1],p,&p1)) break;
       if (!poldivis((GEN)x[2],p,&p2)) { avma=av; return 0; }
       val=1; while (poldivis(p1,p,&p1)&&poldivis(p2,p,&p2)) val++;
       avma = av; return val;
