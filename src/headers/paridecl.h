@@ -449,6 +449,7 @@ GEN     zidealstarinitjoin(GEN nf, GEN bid1, GEN bid2, long flag);
 GEN     zidealstarinitjoinarch(GEN nf, GEN bid1, GEN arch, long nba, long flag);
 GEN     znlog(GEN x, GEN g);
 GEN     zsigne(GEN nf,GEN alpha,GEN arch);
+GEN     zsigns(GEN nf,GEN alpha);
 
 /* base4.c */
 
@@ -658,6 +659,7 @@ GEN     buchfu(GEN bignf);
 GEN     classgrouponly(GEN P,GEN data,long prec);
 GEN     isprincipal(GEN bignf, GEN x);
 GEN     isprincipalall(GEN bignf, GEN x,long flall);
+GEN     isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag);
 GEN     isprincipalforce(GEN bignf,GEN x);
 GEN     isprincipalgen(GEN bignf, GEN x);
 GEN     isprincipalgenforce(GEN bignf,GEN x);

@@ -817,6 +817,22 @@ zsigne(GEN nf,GEN x,GEN arch)
   avma = av; setlg(vecsign,j); return vecsign;
 }
 
+/* return the t_COL vector of signs of x; the matrix of such if x is a vector
+ * of nf elements */
+GEN
+zsigns(GEN nf, GEN x)
+{
+  long r1, i, l;
+  GEN arch, S;
+
+  nf = checknf(nf); r1 = nf_get_r1(nf);
+  arch = cgetg(r1+1,t_VEC); for (i=1; i<=r1; i++) arch[i] = un;
+  if (typ(x) != t_VEC) return zsigne(nf, x, arch);
+  l = lg(x); S = cgetg(l, t_MAT);
+  for (i=1; i<l; i++) S[i] = (long)zsigne(nf, (GEN)x[i], arch);
+  return S;
+}
+
 GEN
 lllreducemodmatrix(GEN x,GEN y)
 {
