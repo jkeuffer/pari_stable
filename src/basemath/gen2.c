@@ -142,8 +142,7 @@ gcopy(GEN x)
   if (! is_recursive_t(tx))
   {
     if (tx == t_INT && !signe(x)) return gzero; /* very common case */
-    lx = lg(x); 
-    y = new_chunk(lx);
+    lx = lg(x); y = new_chunk(lx);
     for (i=lx-1; i>=0; i--) y[i]=x[i];
   }
   else
@@ -184,11 +183,10 @@ forcecopy(GEN x)
   GEN y;
 
   if (tx == t_SMALL) return x;
-  lx=lg(x);
   if (! is_recursive_t(tx))
   {
     if (tx == t_INT && !signe(x)) return gzero; /* very common case */
-    y = new_chunk(lx);
+    lx = lg(x); y = new_chunk(lx);
     for (i=lx-1; i>=0; i--) y[i]=x[i];
   }
   else
