@@ -689,10 +689,11 @@ rnfisnorm(GEN bnf,GEN ext,GEN x,long flag,long PREC)
   GEN res = cgetg(3,t_VEC), S1,S2;
 
   if (typ(ext)!=t_VEC || lg(ext)!=4) err (typeer,"bnfisnorm");
+  if (typ(x)!=t_POL) x = basistoalg(bnf,x);
   bnf = checkbnf(bnf); relnf = (GEN)ext[3];
   if (gcmp0(x) || gcmp1(x) || (gcmp_1(x) && (degree((GEN)ext[1])&1)))
   {
-    res[1]=lcopy(x); res[2]=un; return res;
+    avma = (long)res; res[1]=lcopy(x); res[2]=un; return res;
   }
 
 /* construction de l'ensemble S des ideaux
