@@ -36,6 +36,7 @@ GEN     QM_inv(GEN M, GEN dM);
 GEN     ZM_inv(GEN M, GEN dM);
 GEN     concat(GEN x, GEN y);
 GEN     concatsp(GEN x, GEN y);
+GEN     concatsp3(GEN x, GEN y, GEN z);
 GEN     deplin(GEN x);
 GEN     det(GEN a);
 GEN     det0(GEN a,long flag);

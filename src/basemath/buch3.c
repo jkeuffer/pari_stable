@@ -21,7 +21,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "parinf.h"
 
-extern GEN concatsp3(GEN x, GEN y, GEN z);
 extern GEN check_and_build_cycgen(GEN bnf);
 extern GEN gmul_mat_smallvec(GEN x, GEN y);
 extern GEN ideleaddone_aux(GEN nf,GEN x,GEN ideal);

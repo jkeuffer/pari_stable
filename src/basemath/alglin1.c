@@ -1865,27 +1865,6 @@ deplin(GEN x0)
 /*           (kernel, image, complementary image, rank)            */
 /*                                                                 */
 /*******************************************************************/
-static long gauss_ex;
-static int (*gauss_is_zero)(GEN);
-
-static int
-real0(GEN x)
-{
-  return gcmp0(x) || (gexpo(x) < gauss_ex);
-}
-
-static void
-gauss_get_prec(GEN x, long prec)
-{
-  long pr = matprec(x);
-
-  if (!pr) { gauss_is_zero = &gcmp0; return; }
-  if (pr > prec) prec = pr;
-
-  gauss_ex = - (long)(0.85 * bit_accuracy(prec));
-  gauss_is_zero = &real0;
-}
-
 /* return the transform of x under a standard Gauss pivot. r = dim ker(x).
  * d[k] contains the index of the first non-zero pivot in column k
  * If a != NULL, use x - a Id instead (for eigen)
@@ -2140,50 +2119,73 @@ inverseimage(GEN m,GEN v)
   return y;
 }
 
+/* i-th vector in the standard basis */
+GEN
+_ei(long n, long i)
+{
+  GEN e = zerocol(n); e[i] = un; return e;
+}
+
+/* NB: d freed */
+static GEN
+get_suppl(GEN x, GEN d, long r)
+{
+  gpmem_t av;
+  GEN y,c;
+  long j,k,rx,n;
+
+  rx = lg(x)-1;
+  if (!rx) err(talker,"empty matrix in suppl");
+  n = lg(x[1])-1;
+  if (rx == n && r == 0) { free(d); return gcopy(x); }
+  y = cgetg(n+1, t_MAT);
+  av = avma;
+  c = vecsmall_const(n,0);
+  k = 1;
+  /* c = lines containing pivots (could get it from gauss_pivot, but cheap)
+   * In theory r = 0 and d[j] > 0 for all j, but why take chances? */
+  for (j=1; j<=rx; j++)
+    if (d[j])
+    {
+      c[ d[j] ] = 1;
+      y[k++] = x[j];
+    }
+  for (j=1; j<=n; j++)
+    if (!c[j]) y[k++] = j;
+  avma = av;
+
+  rx -= r;
+  for (j=1; j<=rx; j++)
+    y[j] = lcopy((GEN)y[j]);
+  for (   ; j<=n; j++)
+    y[j] = (long)_ei(n, y[j]);
+  free(d); return y;
+}
+
 /* x is an n x k matrix, rank(x) = k <= n. Return an invertible n x n matrix
  * whose first k columns are given by x. If rank(x) < k, undefined result. */
 GEN
 suppl(GEN x)
 {
   gpmem_t av = avma;
-  long lx = lg(x), n,i,j;
-  GEN y,p1;
+  GEN d;
+  long r;
 
-  if (typ(x) != t_MAT) err(typeer,"suppl");
-  if (lx==1) err(talker,"empty matrix in suppl");
-  n=lg(x[1]); if (lx>n) err(suppler2);
-  if (lx == n) return gcopy(x);
-
-  y = idmat(n-1);
-  gauss_get_prec(x,0);
-  for (i=1; i<lx; i++)
-  {
-    p1 = i==1? (GEN)x[1]: gauss(y,(GEN)x[i]);
-    j = i; while (j<n && gauss_is_zero((GEN)p1[j])) j++;
-    if (j>=n) err(suppler2);
-    p1=(GEN)y[i]; y[i]=x[i]; if (i!=j) y[j]=(long)p1;
-  }
-  return gerepilecopy(av, y);
+  gauss_pivot(x,&d,&r);
+  avma = av; return get_suppl(x,d,r);
 }
+
+static void FpM_gauss_pivot(GEN x, GEN p, GEN *dd, long *rr);
 
 GEN
 FpM_suppl(GEN x, GEN p)
 {
   gpmem_t av = avma;
-  long lx = lg(x), n,i,j;
-  GEN y,p1;
-  n=lg(x[1]); if (lx>n) err(suppler2);
-  if (lx == n) return gcopy(x);
+  GEN d;
+  long r;
 
-  y = idmat(n-1);
-  for (i=1; i<lx; i++)
-  {
-    p1 = i==1? (GEN)x[1]: FpM_gauss(y,(GEN)x[i],p);
-    j = i; while (j<n && gcmp0((GEN)p1[j])) j++;
-    if (j>=n) err(suppler2);
-    p1=(GEN)y[i]; y[i]=x[i]; if (i!=j) y[j]=(long)p1;
-  }
-  return gerepilecopy(av, y);
+  FpM_gauss_pivot(x,p, &d,&r);
+  avma = av; return get_suppl(x,d,r);
 }
 
 GEN
@@ -2229,8 +2231,6 @@ rank(GEN x)
   avma=av; if (d) free(d);
   return lg(x)-1 - r;
 }
-
-static void FpM_gauss_pivot(GEN x, GEN p, GEN *dd, long *rr);
 
 /* if p != NULL, assume x integral and compute rank over Fp */
 static GEN

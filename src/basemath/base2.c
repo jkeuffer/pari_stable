@@ -2033,7 +2033,7 @@ primedec(GEN nf, GEN p)
 {
   gpmem_t av = avma;
   long i,k,c,iL,N;
-  GEN ex,F,L,Ip,H,phi,mat1,T,beta,f,g,h,p1,UN;
+  GEN ex,F,L,Ip,H,phi,mat1,T,f,g,h,p1,UN;
 
   if (DEBUGLEVEL>2) timer2();
   nf = checknf(nf); T = (GEN)nf[1];
@@ -2057,13 +2057,13 @@ primedec(GEN nf, GEN p)
   h = FpX_div(T,g,p);
   f = FpX_red(gdivexact(gsub(gmul(g,h), T), p), p);
 
-  N = degpol(T); beta = h;
+  N = degpol(T);
   L = cgetg(N+1,t_VEC); iL = 1;
   for (i=1; i<k; i++)
     if (is_pm1(ex[i]) || signe(FpX_res(f,(GEN)F[i],p)))
       L[iL++] = (long)apply_kummer(nf,(GEN)F[i],(GEN)ex[i],p);
     else /* F[i] | (f,g,h), happens at least once by Dedekind criterion */
-      beta = FpX_mul(beta, (GEN)F[i], p);
+      ex[i] = 0;
   if (DEBUGLEVEL>2) msgtimer("Kummer factors");
 
   /* phi matrix of x -> x^p - x in algebra Z_K/p */
@@ -2074,16 +2074,15 @@ primedec(GEN nf, GEN p)
   h = cgetg(N+1,t_VEC);
   if (iL > 1)
   { /* split off Kummer factors */
+    GEN mulbeta, beta = NULL;
+    for (i=1; i<k; i++)
+      if (!ex[i]) beta = beta? FpX_mul(beta, (GEN)F[i], p): (GEN)F[i];
     beta = FpV_red(algtobasis_i(nf,beta), p);
-    k = lg(Ip)-1; p1 = cgetg(2*k+N+1,t_MAT);
-    for (i=1; i<=N;   i++) p1[i] = (long)element_mulid(nf,beta,i);
-    for (   ; i<=N+k; i++)
-    {
-      GEN p2 = (GEN)Ip[i-N];
-      p1[i+k] = (long)p2;
-      p1[i] = (long)gdivexact(element_muli(nf,p2,beta),p);
-    }
-    h[1] = (long)FpM_image(FpM_red(p1,p), p);
+
+    mulbeta = FpM_red(eltmul_get_table(nf, beta), p);
+    p1 = concatsp(mulbeta, Ip);
+    /* Fp-base of ideal (Ip, beta) in ZK/p */
+    h[1] = (long)FpM_image(p1, p);
   }
   else
     h[1] = (long)Ip;
