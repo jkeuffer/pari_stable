@@ -1902,52 +1902,55 @@ qfbred0(GEN x, long flag, GEN D, GEN isqrtD, GEN sqrtD)
 GEN
 primeform(GEN x, GEN p, long prec)
 {
-  gpmem_t av,tetpil;
-  long s=signe(x);
-  GEN y,b;
+  gpmem_t av;
+  long s, sx = signe(x);
+  GEN y, b, c;
 
-  if (typ(x) != t_INT || !s) err(arither1);
+  if (typ(x) != t_INT || !sx) err(arither1);
   if (typ(p) != t_INT || signe(p) <= 0) err(arither1);
   if (is_pm1(p))
-    return s<0? imag_unit_form_by_disc(x)
-              : real_unit_form_by_disc(x,prec);
-  if (s < 0)
+    return sx<0? imag_unit_form_by_disc(x)
+               : real_unit_form_by_disc(x,prec);
+  s = mod8(x);
+  if (sx < 0)
   {
-    y = cgetg(4,t_QFI); s = 8-mod8(x);
+    if (s) s = 8-s;
+    y = cgetg(4, t_QFI);
   }
   else
   {
-    y = cgetg(5,t_QFR); s = mod8(x);
-    y[4]=(long)realzero(prec);
+    y = cgetg(5, t_QFR);
+    y[4] = (long)realzero(prec);
   }
   switch(s&3)
   {
     case 2: case 3: err(funder2,"primeform");
   }
-  y[1] = (long)icopy(p); av = avma;
-  if (egalii(p,gdeux))
+  av = avma;
+  if (egalii(p, gdeux))
   {
     switch(s)
     {
-      case 0: y[2]=zero; break;
-      case 8: s=0; y[2]=zero; break;
-      case 1: s=1; y[2]=un; break;
-      case 4: s=4; y[2]=deux; break;
-      default: err(sqrter5);
+      case 0: b = gzero; break;
+      case 1: b = gun;   break;
+      case 4: b = gdeux; break;
+      default: err(sqrter5); b = NULL; /* -Wall */
     }
-    b=subsi(s,x); tetpil=avma; b=shifti(b,-3);
+    c = shifti(subsi(s,x), -3);
   }
   else
   {
     b = mpsqrtmod(x,p); if (!b) err(sqrter5);
-    if (mod2(b) == mod2(x)) y[2] = (long)b;
-    else
-    { tetpil = avma; y[2] = lpile(av,tetpil,subii(p,b)); }
+    s &= 1; /* s = x mod 2 */
+    /* mod(b) != mod2(x) ? [Warning: we may have b == 0] */
+    if ((!signe(b) && s) || mod2(b) != s) b = gerepileuptoint(av, subii(p,b));
 
-    av=avma; b=shifti(subii(sqri((GEN)y[2]),x),-2);
-    tetpil=avma; b=divii(b,p);
+    av = avma;
+    c = diviiexact(shifti(subii(sqri(b), x), -2), p);
   }
-  y[3]=lpile(av,tetpil,b); return y;
+  y[3] = lpileuptoint(av, c);
+  y[2] = (long)b;
+  y[1] = licopy(p); return y;
 }
 
 /*********************************************************************/
