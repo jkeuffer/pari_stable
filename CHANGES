@@ -55,6 +55,9 @@ GN  6- [Solaris + cc:] fix linker warnings (missing object types in
        bnr=bnrinit(bnfinit(y^12+6*y^10+31*y^8+84*y^6+159*y^4+166*y^2+1),4,1);
        rnfkummer(bnr,[1,0,0,0,0,0;0,1,0,0,0,0;0,0,1,0,0,0;0,0,0,1,0,0;0,0,0,0,2,1;0,0,0,0,0,1]);
         --> bug in gadd [ typo in FqX_split ]
+       Smaller test-case:
+         setrand(1701015992)
+         factorff(x^2+y+2, 3, y^3+y^2+2)
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.
