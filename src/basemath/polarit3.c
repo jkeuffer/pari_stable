@@ -66,12 +66,16 @@ specpol(GEN x, long nx)
 #  define MUL_LIMIT 10
 #endif
 
+#ifndef HIGHWORD
+#  define HIGHWORD(a) ((a) >> BITS_IN_HALFULONG)
+#endif
 /* 2p^2 < 2^BITS_IN_LONG */
 #ifdef LONG_IS_64BIT
-#  define OK_ULONG(p) (lgefint(p) == 3 && (ulong)p[2] <= 3037000493UL)
+#  define u_OK_ULONG(p) ((ulong)p <= 3037000493UL)
 #else
-#  define OK_ULONG(p) (lgefint(p) == 3 && (ulong)p[2] <= 46337UL)
+#  define u_OK_ULONG(p) ((ulong)p <= 46337UL)
 #endif
+#define OK_ULONG(p) (lgefint(p) == 3 && u_OK_ULONG(p[2]))
 
 /* multiplication in Fp[X], p small */
 
@@ -92,7 +96,10 @@ u_FpX_deriv(GEN z, ulong p)
   GEN x;
   if (l < 2) l = 2;
   x = cgetg(l,t_VECSMALL); x[1] = z[1]; z++;
-  for (i=2; i<l; i++) x[i] = ((i-1) * z[i]) % p;
+  if (HIGHWORD(l) | HIGHWORD(p))
+    for (i=2; i<l; i++) x[i] = mulssmod(i-1, z[i], p);
+  else
+    for (i=2; i<l; i++) x[i] = ((i-1) * z[i]) % p;
   return u_normalizepol(x,l);
 }
 
@@ -105,18 +112,6 @@ u_FpX_is_squarefree(GEN z, ulong p)
   GEN d = u_FpX_gcd(z, u_FpX_deriv(z,p) , p);
   avma = av; return (deg(d) == 0);
 }
-
-#if 0
-/* z in Z[X], return lift(z * Mod(1,p)), normalized */
-static GEN
-u_FpX_red(GEN z, ulong p)
-{
-  long i,l = lgef(z);
-  GEN x = cgetg(l,t_VECSMALL);
-  for (i=2; i<l; i++) x[i] = z[i] % p;
-  x[1] = z[1]; return u_normalizepol(x,l);
-}
-#endif
 
 static GEN
 u_FpX_addspec(GEN x, GEN y, long p, long lx, long ly)
@@ -148,6 +143,17 @@ u_FpX_mullimb(GEN x, GEN y, ulong p, long a, long b)
   return p1 % p;
 }
 
+ulong
+u_FpX_mullimb_safe(GEN x, GEN y, ulong p, long a, long b)
+{
+  ulong p1 = 0;
+  long i;
+  for (i=a; i<b; i++)
+    if (y[i]) 
+      p1 = addssmod(p1, mulssmod(y[i],x[-i],p), p);
+  return p1;
+}
+
 /* assume nx >= ny > 0 */
 static GEN
 s_FpX_mulspec(GEN x, GEN y, ulong p, long nx, long ny)
@@ -157,9 +163,18 @@ s_FpX_mulspec(GEN x, GEN y, ulong p, long nx, long ny)
 
   lz = nx+ny+1; nz = lz-2;
   z = cgetg(lz, t_VECSMALL) + 2; /* x:y:z [i] = term of degree i */
-  for (i=0; i<ny; i++)z[i] = (long)u_FpX_mullimb(x+i,y,p,0,i+1);
-  for (  ; i<nx; i++) z[i] = (long)u_FpX_mullimb(x+i,y,p,0,ny);
-  for (  ; i<nz; i++) z[i] = (long)u_FpX_mullimb(x+i,y,p,i-nx+1,ny);
+  if (u_OK_ULONG(p))
+  {
+    for (i=0; i<ny; i++)z[i] = (long)u_FpX_mullimb(x+i,y,p,0,i+1);
+    for (  ; i<nx; i++) z[i] = (long)u_FpX_mullimb(x+i,y,p,0,ny);
+    for (  ; i<nz; i++) z[i] = (long)u_FpX_mullimb(x+i,y,p,i-nx+1,ny);
+  }
+  else
+  {
+    for (i=0; i<ny; i++)z[i] = (long)u_FpX_mullimb_safe(x+i,y,p,0,i+1);
+    for (  ; i<nx; i++) z[i] = (long)u_FpX_mullimb_safe(x+i,y,p,0,ny);
+    for (  ; i<nz; i++) z[i] = (long)u_FpX_mullimb_safe(x+i,y,p,i-nx+1,ny);
+  }
   z -= 2; z[1]=0; return u_normalizepol(z, lz);
 }
 
@@ -704,20 +719,16 @@ FpX_sub(GEN x,GEN y,GEN p)
 GEN
 FpX_mul(GEN x,GEN y,GEN p)
 {
-  GEN z;
-  long vx=varn(x);
-  z = quickmul(y+2, x+2, lgef(y)-2, lgef(x)-2);
-  setvarn(z,vx); 
+  GEN z = quickmul(y+2, x+2, lgef(y)-2, lgef(x)-2);
+  setvarn(z,varn(x)); 
   if (!p) return z;
   return FpX_red(z, p);
 }
 GEN
 FpX_sqr(GEN x,GEN p)
 {
-  GEN z;
-  long vx=varn(x);
-  z = quicksqr(x+2, lgef(x)-2);
-  setvarn(z,vx); 
+  GEN z = quicksqr(x+2, lgef(x)-2);
+  setvarn(z,varn(x)); 
   if (!p) return z;
   return FpX_red(z, p);
 }
@@ -726,52 +737,36 @@ static GEN u_Fp_FpX(GEN x,int malloc, ulong p);
 #define u_FpX_div(x,y,p,malloc) u_FpX_divrem((x),(y),(p),(malloc),NULL)
 #define u_FpX_rem(x,y,p,malloc) u_FpX_divrem((x),(y),(p),(malloc),ONLY_REM)
 
-/* Product of y and x in Z/pZ[X]/(pol), as t_VECSMALL */
+/* Product of y and x in Z/pZ[X]/(pol), as t_VECSMALL. Assume OK_ULONG(p) */
 static GEN
 u_FpXQ_mul(GEN y,GEN x,GEN pol,ulong p)
 {
-  GEN z;
-  long vy = varn(y);
-  z = u_FpX_mul(y,x,p); setvarn(z,vy); 
+  GEN z = u_FpX_mul(y,x,p);
   return u_FpX_rem(z,pol,p, 0);
 }
-/* Square of y in Z/pZ[X]/(pol), as t_VECSMALL */
+/* Square of y in Z/pZ[X]/(pol), as t_VECSMALL. Assume OK_ULONG(p) */
 static GEN
 u_FpXQ_sqr(GEN y,GEN pol,ulong p)
 {
-  GEN z;
-  long vy = varn(y);
-  z = u_FpX_sqr(y,p);
-  setvarn(z,vy); 
+  GEN z = u_FpX_sqr(y,p);
   return u_FpX_rem(z,pol,p, 0);
 }
 
 /* Product of y and x in Z/pZ[X]/(pol)
- * return lift(lift(Mod(x*y*Mod(1,p),pol*Mod(1,p))));
- */
+ * return lift(lift(Mod(x*y*Mod(1,p),pol*Mod(1,p)))) */
 GEN
 FpXQ_mul(GEN y,GEN x,GEN pol,GEN p)
 {
-  GEN z;
-  long vy=varn(y);
-  z = quickmul(y+2, x+2, lgef(y)-2, lgef(x)-2);
-  setvarn(z,vy); 
-  z = FpX_red(z, p);
-  return FpX_res(z,pol, p);
+  GEN z = quickmul(y+2, x+2, lgef(y)-2, lgef(x)-2); setvarn(z,varn(y)); 
+  z = FpX_red(z, p); return FpX_res(z,pol, p);
 }
-/* 
- * Square of y in Z/pZ[X]/(pol)
- * return lift(lift(Mod(y^2*Mod(1,p),pol*Mod(1,p))));
- */
+/* Square of y in Z/pZ[X]/(pol)
+ * return lift(lift(Mod(y^2*Mod(1,p),pol*Mod(1,p)))) */
 GEN
 FpXQ_sqr(GEN y,GEN pol,GEN p)
 {
-  GEN z;
-  long vy=varn(y);
-  z = quicksqr(y+2,lgef(y)-2);
-  setvarn(z,vy); 
-  z = FpX_red(z, p);
-  return FpX_res(z,pol, p);
+  GEN z = quicksqr(y+2,lgef(y)-2); setvarn(z,varn(y)); 
+  z = FpX_red(z, p); return FpX_res(z,pol, p);
 }
 /*Modify y[2].
  *No reduction if p is NULL
@@ -792,7 +787,6 @@ FpX_Fp_add(GEN y,GEN x,GEN p)
  * 
  * else the result is lift(y*x*Mod(1,p))
  */
-
 GEN 
 FpX_Fp_mul(GEN y,GEN x,GEN p)
 {
@@ -813,10 +807,8 @@ FpX_Fp_mul(GEN y,GEN x,GEN p)
  *****************************************************************/
 /*****************************************************************
  Clean and with no reduced hypothesis.  Beware that some operations
- will be must slower with big unreduced coefficient
+ will be much slower with big unreduced coefficient
 *****************************************************************/
-
-
 
 /* Inverse of x in Z/pZ[X]/(pol)
  * return lift(lift(Mod(x*Mod(1,p),pol*Mod(1,p))^-1));
@@ -1734,26 +1726,6 @@ FpX_normalize(GEN z, GEN p)
   return FpX_Fp_mul(z, mpinvmod(p1,p), p);
 }
 
-/* as above, p is guaranteed small, and coeffs of z are C longs in [0,p-1],
- * coeffs are in z[0..l-1] (instead of z[2] for regular pols)
- * Set varn(z) = 0
- */
-GEN
-FpX_small(GEN z, GEN p, long l)
-{
-  long i;
-  GEN a,x = cgetg(l,t_POL);
-  if (isonstack(p)) p = icopy(p);
-  if (is_bigint(p)) err(talker, "not a small prime in FpX_small");
-  z -= 2;
-  for (i=2; i<l; i++) {
-    a = cgetg(3,t_INTMOD); x[i] = (long)a;
-    a[1] = (long)p;
-    a[2] = lstoi(z[i]);
-  }
-  return normalizepol_i(x,l);
-}
-
 GEN
 small_to_pol_i(GEN z, long l)
 {
@@ -1871,16 +1843,6 @@ u_Fp_FpX(GEN x, int malloc, ulong p)
   return u_normalizepol(a,lx);
 }
 
-#if 0
-/* divrem(x, y) in F_p[Y] / T, assume leading coeff of y is invertible
- * (T possibly reducible) */
-GEN
-Fq_res_long(GEN x, GEN y, GEN T, ulong p, GEN *pr)
-{
-  return NULL;
-}
-#endif
-
 static GEN 
 u_FpX_Fp_mul(GEN y, ulong x,ulong p, int malloc)
 {
@@ -1888,7 +1850,10 @@ u_FpX_Fp_mul(GEN y, ulong x,ulong p, int malloc)
   int i, l;
   if (!x) return u_zeropol(malloc);
   l = lgef(y); z = u_allocpol(l-3, malloc);
-  for(i=2; i<l; i++) z[i] = (y[i] * x) % p;
+  if (HIGHWORD(x) | HIGHWORD(p))
+    for(i=2; i<l; i++) z[i] = mulssmod(y[i], x, p);
+  else
+    for(i=2; i<l; i++) z[i] = (y[i] * x) % p;
   return z;
 }
 
@@ -1931,8 +1896,7 @@ u_FpX_divrem(GEN x, GEN y, ulong p, int malloc, GEN *pr)
   }
   dx = deg(x);
   x += 2;
-  y += 2;
-  dz = dx-dy;
+  y += 2; dz = dx-dy;
   if (dz < 0)
   {
     if (pr)
@@ -1949,34 +1913,59 @@ u_FpX_divrem(GEN x, GEN y, ulong p, int malloc, GEN *pr)
   inv = y[dy];
   if (inv != 1UL) inv = u_invmod(inv,p);
 
-  z[dz] = (inv*x[dx]) % p;
-  for (i=dx-1; i>=dy; --i)
+  if (u_OK_ULONG(p))
   {
-    p1 = p - x[i]; /* compute -p1 instead of p1 (pb with ulongs otherwise) */
-    for (j=i-dy+1; j<=i && j<=dz; j++)
+    z[dz] = (inv*x[dx]) % p;
+    for (i=dx-1; i>=dy; --i)
     {
-      p1 += z[j]*y[i-j];
-      if (p1 & HIGHBIT) p1 = p1 % p;
+      p1 = p - x[i]; /* compute -p1 instead of p1 (pb with ulongs otherwise) */
+      for (j=i-dy+1; j<=i && j<=dz; j++)
+      {
+        p1 += z[j]*y[i-j];
+        if (p1 & HIGHBIT) p1 = p1 % p;
+      }
+      p1 %= p;
+      z[i-dy] = p1? ((p - p1)*inv) % p: 0;
     }
-    p1 %= p;
-    z[i-dy] = p1? ((p - p1)*inv) % p: 0;
+  }
+  else
+  {
+    z[dz] = mulssmod(inv, x[dx], p);
+    for (i=dx-1; i>=dy; --i)
+    {
+      p1 = p - x[i]; /* compute -p1 instead of p1 (pb with ulongs otherwise) */
+      for (j=i-dy+1; j<=i && j<=dz; j++)
+        p1 = addssmod(p1, mulssmod(z[j],y[i-j],p), p);
+      z[i-dy] = p1? mulssmod(p - p1, inv, p): 0;
+    }
   }
   q = u_normalizepol(z-2, dz+3);
   if (!pr) return q;
 
   c = u_allocpol(dy,malloc) + 2;
-  for (i=0; i<dy; i++)
+  if (u_OK_ULONG(p))
   {
-    p1 = z[0]*y[i];
-    for (j=1; j<=i && j<=dz; j++)
+    for (i=0; i<dy; i++)
     {
-      p1 += z[j]*y[i-j];
-      if (p1 & HIGHBIT) p1 = p1 % p;
+      p1 = z[0]*y[i];
+      for (j=1; j<=i && j<=dz; j++)
+      {
+        p1 += z[j]*y[i-j];
+        if (p1 & HIGHBIT) p1 = p1 % p;
+      }
+      c[i] = subssmod(x[i], p1%p, p);
     }
-    p1 = x[i] - p1%p; if ((long)p1 < 0) p1 += p;
-    c[i] = p1;
   }
-
+  else
+  {
+    for (i=0; i<dy; i++)
+    {
+      p1 = mulssmod(z[0],y[i],p);
+      for (j=1; j<=i && j<=dz; j++)
+        p1 = addssmod(p1, mulssmod(z[j],y[i-j],p), p);
+      c[i] = subssmod(x[i], p1, p);
+    }
+  }
   i=dy-1; while (i>=0 && !c[i]) i--;
   c = u_normalizepol(c-2, i+3);
   if (pr == ONLY_REM) { free(q); return c; }
@@ -2088,7 +2077,7 @@ static GEN
 u_FpX_gcd(GEN a, GEN b, ulong p)
 {
   GEN c;
-  if (lgef(b) > lgef(a)) { c = b; b = a; a = c; }
+  if (lgef(b) > lgef(a)) swap(a, b);
   while (signe(b))
   {
     c = u_FpX_rem(a,b,p,0);
@@ -2129,38 +2118,6 @@ FpX_gcd(GEN x, GEN y, GEN p)
   }
   avma = av; return gerepileupto(av0, a);
 }
-
-#if 0
-/* a in Z[Y][X] --> Fp[Y][X] (assume p doesn't divide leading coeff) */
-GEN
-Fq_pol_red(GEN a, GEN p)
-{
-  long i, l = lgef(a);
-  GEN b = cgetg(l,t_POL);
-  b[1] = a[1];
-  for (i=2; i<l; i++) b[i] = (long)FpX_red((GEN)a[i],p);
-  return b;
-}
-
-/* x and y in Z[Y][X], return lift(gcd(x mod (p,T(Y)), y mod (p,T(Y))))
- * return NULL if monic prs is not defined */
-GEN
-FpXQ_gcd(GEN x, GEN y, GEN p, GEN T)
-{
-  GEN a,b,c;
-  long av0,av;
-
-  if (OK_ULONG(p)) return u_FpXQ_gcd(x,y,p);
-  av0=avma;
-  a = Fq_pol_red(x, p); av = avma;
-  b = Fq_pol_red(y, p);
-  while (signe(b))
-  {
-    av = avma; c = FpX_res(a,b,p); a=b; b=c;
-  }
-  avma = av; return gerepileupto(av0, a);
-}
-#endif
 
 static GEN
 u_FpX_sub(GEN x, GEN y, ulong p)
@@ -2431,18 +2388,19 @@ stopoly_gen(GEN m, GEN p, long v)
   return y;
 }
 
-/* modular resultant */
+/* modular power */
 ulong
 powuumod(ulong x, ulong n0, ulong p)
 {
   ulong y, z, n;
+  if (n0 == 2) return mulssmod(x,x,p); /* frequent special case */
   if (n0 == 1) return x; /* frequent special case */
   y = 1; z = x; n = n0;
   while (n)
   {
-    if (n&1) y = (y * z) % p;
+    if (n&1) y = mulssmod(y,z,p);
     n>>=1; if (!n) break;
-    z = (z * z) % p;
+    z = mulssmod(z,z,p);
   }
   return y;
 }
@@ -2471,11 +2429,11 @@ u_FpX_resultant(GEN a, GEN b, ulong p)
     a = b; b = c; d2 = deg(c);
     if (d2 < 0) { avma = av; return 0; }
   
-    if (lb != 1) res = (res * powuumod(lb, d0 - d2, p)) % p;
+    if (lb != 1) res = mulssmod(res, powuumod(lb, d0 - d2, p), p);
     if (d0 & d1 & 1) res = p - res;
     if (++cnt == 4) { cnt = 0; avma = av; }
   }
-  avma = av; return (res * powuumod(b[2], d1, p)) % p ;
+  avma = av; return mulssmod(res, powuumod(b[2], d1, p), p);
 }
 
 ulong
@@ -2498,24 +2456,24 @@ _u_FpX_mul(GEN a, GEN b)
 
 /* compute prod (x - a[i]) */
 GEN
-u_FpV_roots_to_pol(GEN a, ulong pp)
+u_FpV_roots_to_pol(GEN a, ulong p)
 {
   long i,k,lx = lg(a);
   GEN p1,p2;
   if (lx == 1) return polun[0];
-  p1 = cgetg(lx, t_VEC); global_pp = pp;
+  p1 = cgetg(lx, t_VEC); global_pp = p;
   for (k=1,i=1; i<lx-1; i+=2)
   {
     p2 = cgetg(5,t_VECSMALL); p1[k++] = (long)p2;
-    p2[2] = (a[i] * a[i+1]) % pp;
-    p2[3] = (pp<<1) - (a[i] + a[i+1]);
+    p2[2] = mulssmod(a[i], a[i+1], p);
+    p2[3] = (p<<1) - (a[i] + a[i+1]);
     p2[4] = 1; p2[1] = evallgef(5);
   }
   if (i < lx)
   {
     p2 = cgetg(4,t_POL); p1[k++] = (long)p2;
     p2[1] = evallgef(4);
-    p2[2] = pp - a[i];
+    p2[2] = p - a[i];
     p2[3] = 1;
   }
   setlg(p1, k); return divide_conquer_prod(p1, _u_FpX_mul);
@@ -2547,8 +2505,8 @@ u_pol_comp(GEN P, ulong u, ulong v, ulong p)
   {
     ulong t = P[i];
     y[i] = (t == 0)? 0: 
-                     (i&1)? (t * (u + (p - v))) % p
-                          : (t * (u + v)) % p;
+                     (i&1)? mulssmod(t, u + (p - v), p)
+                          : mulssmod(t, u + v, p);
   }
   return u_normalizepol(y,l);
 }
@@ -2596,42 +2554,83 @@ u_FpX_eval(GEN x, ulong y, ulong p)
     return (i==2)? x[2]: 0;
   p1 = x[i];
   /* specific attention to sparse polynomials (see poleval)*/
-  for (i--; i>=2; i=j-1)
+  if (u_OK_ULONG(p))
   {
-    for (j=i; !x[j]; j--)
-      if (j==2)
-      {
-	if (i != j) y = powuumod(y, i-j+1, p);
-	return (p1 * y) % p;
-      }
-    r = (i==j)? y: powuumod(y, i-j+1, p);
-    p1 = ((p1*r) + x[j]) % p;
+    for (i--; i>=2; i=j-1)
+    {
+      for (j=i; !x[j]; j--)
+        if (j==2)
+        {
+          if (i != j) y = powuumod(y, i-j+1, p);
+          return (p1 * y) % p;
+        }
+      r = (i==j)? y: powuumod(y, i-j+1, p);
+      p1 = ((p1*r) + x[j]) % p;
+    }
+  }
+  else
+  {
+    for (i--; i>=2; i=j-1)
+    {
+      for (j=i; !x[j]; j--)
+        if (j==2)
+        {
+          if (i != j) y = powuumod(y, i-j+1, p);
+          return mulssmod(p1, y, p);
+        }
+      r = (i==j)? y: powuumod(y, i-j+1, p);
+      p1 = addssmod(x[j], mulssmod(p1,r,p), p);
+    }
   }
   return p1;
+}
+
+static GEN
+u_FpX_div_by_X_x(GEN a, ulong x, ulong p)
+{
+  long l = lgef(a), i;
+  GEN z = u_allocpol(l-4, 0), a0, z0;
+  a0 = a + l-1;
+  z0 = z + l-2; *z0 = *a0--;
+  if (u_OK_ULONG(p))
+  {
+    for (i=l-3; i>1; i--) /* z[i] = (a[i+1] + x*z[i+1]) % p */
+    {
+      ulong t = (*a0-- + x *  *z0--) % p;
+      *z0 = t;
+    }
+  }
+  else
+  {
+    for (i=l-3; i>1; i--)
+    {
+      ulong t = addssmod(*a0--, mulssmod(x, *z0--, p), p);
+      *z0 = t;
+    }
+  }
+  return z;
 }
 
 /* xa, ya = t_VECSMALL */
 GEN
 u_FpV_polint(GEN xa, GEN ya, ulong p)
 {
-  GEN X_x,T,dP, P = NULL, Q = u_FpV_roots_to_pol(xa, p);
+  GEN T,dP, P = NULL, Q = u_FpV_roots_to_pol(xa, p);
   long i, n = lg(xa);
   ulong av, inv;
-  X_x = u_allocpol(1, 0);
-  X_x[3] = 1; /* X_x will hold X - x[i] */
   av = avma; (void)new_chunk(n+3); /* scratch space */
   for (i=1; i<n; i++)
   {
     if (!ya[i]) continue;
-    X_x[2] = p - xa[i]; T = u_FpX_div(Q, X_x, p, 0);
+    T = u_FpX_div_by_X_x(Q, xa[i], p);
     inv = u_invmod(u_FpX_eval(T,xa[i], p), p);
     if (i < n-1 && (ulong)(xa[i] + xa[i+1]) == p)
     {
-      dP = u_pol_comp(T, (ya[i] * inv) % p, (ya[i+1] * inv) % p, p);
+      dP = u_pol_comp(T, mulssmod(ya[i],inv,p), mulssmod(ya[i+1],inv,p), p);
       i++; /* x_i = -x_{i+1} */
     }
     else
-      dP = u_FpX_Fp_mul(T, (ya[i] * inv) % p, p, 0);
+      dP = u_FpX_Fp_mul(T, mulssmod(ya[i],inv,p), p, 0);
     avma = av;
     P = P? u_FpX_add(P, dP, p): dP;
   }
@@ -2680,7 +2679,7 @@ ZY_ZXY_resultant(GEN A, GEN B0, long *lambda)
 {
   int checksqfree = lambda? 1: 0, delete = 0;
   ulong av = avma, av2, lim;
-  long i,n, lb, dres = deg(A)*deg(B0);
+  long i,n, lb, dres = deg(A)*deg(B0), nmax = (dres+1)>>1;
   long vX = varn(B0), vY = varn(A); /* assume vX < vY */
   GEN x = cgetg(dres+2, t_VECSMALL);
   GEN y = cgetg(dres+2, t_VECSMALL), cB,B,q,a,b,ev,H,Hp,bound;
@@ -2716,16 +2715,16 @@ ZY_ZXY_resultant(GEN A, GEN B0, long *lambda)
     a = u_Fp_FpX(A, 0, p);
     for (i=2; i<lb; i++)
       b[i] = (long)u_Fp_FpX((GEN)B[i], 0, p);
-   /* Evaluate at 0 (possibly) and +/- n, so that P_n(X) = P_{-n}(-X),
+   /* Evaluate at 0 (if dres even) and +/- n, so that P_n(X) = P_{-n}(-X),
     * where P_i is Lagrange polynomial: P_i(j) = 1 if i=j, 0 otherwise */
-    for (i=0,n = 1; n <= (dres+1)>>1; n++)
+    for (i=0,n = 1; n <= nmax; n++)
     {
       ev = vec_u_FpX_eval(b, n, p);
       i++; x[i] = n;   y[i] = u_FpX_resultant(a, ev, p);
       ev = vec_u_FpX_eval(b, p-n, p);
       i++; x[i] = p-n; y[i] = u_FpX_resultant(a, ev, p);
     }
-    if (i != dres+1)
+    if (i == dres)
     {
       ev = vec_u_FpX_eval(b, 0, p);
       i++; x[i] = 0;   y[i] = u_FpX_resultant(a, ev, p);
