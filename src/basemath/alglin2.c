@@ -1670,7 +1670,7 @@ hnfspec(long** mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
    * operations in T. Leave the rows 1..lk0 alone [up to k0, coeff
    * explosion, between k0+1 and lk0, row is 0] */
   s = 0;
-  while (lig > lk0 && s < (HIGHBIT>>1))
+  while (lig > lk0 && s < (long)(HIGHBIT>>1))
   {
     for (i=lig; i>lk0; i--)
       if (count(mat,perm[i],col,&n) > 0) break;
