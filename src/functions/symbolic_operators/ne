@@ -1,0 +1,20 @@
+Function: _!=_
+Class: operator
+C-Name: gne
+Prototype: GG
+Description: 
+ (small, small):bool:parens		$(1) != $(2)
+ (lg, lg):bool:parens			$(1) != $(2)
+ (small, int):bool:parens		cmpsi($1, $2) != 0
+ (int, small):bool:parens		cmpis($1, $2) != 0
+ (int, int):negbool			egalii($1, $2)
+ (mp, mp):bool:parens			mpcmp($1, $2) != 0
+ (typ, typ):bool:parens			$(1) != $(2)
+ (typ, #str):bool:parens	 	$(1) != $(typ:2)
+ (#str, typ):bool:parens	 	$(typ:1) != $(2)
+ (str, str):bool                        strcmp($1, $2)
+ (typ, typ):bool:parens	                $(1) != $(2)
+ (small, gen):negbool                   gegalsg($1, $2)
+ (gen, small):negbool                   gegalgs($1, $2)
+ (gen, gen):negbool                     gegal($1, $2)
+

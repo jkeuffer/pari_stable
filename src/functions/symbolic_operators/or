@@ -1,0 +1,5 @@
+Function: _||_
+Class: operator
+Description: 
+ (bool, bool):bool:parens               $(1) || $(2)
+

@@ -1,0 +1,7 @@
+Function: _'
+Class: operator
+C-Name: deriv
+Prototype: GDn
+Description: 
+ (gen):gen                      deriv($1,-1)
+

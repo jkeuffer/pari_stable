@@ -1,0 +1,10 @@
+Function: _++
+Class: operator
+Description: 
+ (*bptr):bptr				++$1
+ (*small):small				++$1
+ (*int):int:parens			$1 = addis($1, 1)
+ (*real):real:parens			$1 = addrs($1, 1)
+ (*mp):mp:parens			$1 = mpadd($1, gun)
+ (*gen):gen:parens			$1 = gaddgs($1, 1)
+

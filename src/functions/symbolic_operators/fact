@@ -1,0 +1,7 @@
+Function: _!
+Class: operator
+C-Name: mpfact
+Prototype: L
+Description: 
+ (small):int			mpfact($1)
+
