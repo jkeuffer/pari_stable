@@ -225,8 +225,8 @@ adj(GEN x)
 /*                       HESSENBERG FORM                           */
 /*                                                                 */
 /*******************************************************************/
-#define swap(x,y) { long _t=x; x=y; y=_t; }
-#define gswap(x,y) { GEN _t=x; x=y; y=_t; }
+#define lswap(x,y) { long _t=x; x=y; y=_t; }
+#define swap(x,y) { GEN _t=x; x=y; y=_t; }
 
 GEN
 hess(GEN x)
@@ -246,8 +246,8 @@ hess(GEN x)
       p = gcoeff(x,i,m-1);
       if (gcmp0(p)) continue;
 
-      for (j=m-1; j<lx; j++) swap(coeff(x,i,j), coeff(x,m,j));
-      swap(x[i], x[m]); p = ginv(p);
+      for (j=m-1; j<lx; j++) lswap(coeff(x,i,j), coeff(x,m,j));
+      lswap(x[i], x[m]); p = ginv(p);
       for (i=m+1; i<lx; i++)
       {
         p1 = gcoeff(x,i,m-1);
@@ -1188,7 +1188,7 @@ ZV_lincomb(GEN u, GEN v, GEN X, GEN Y)
   if (!signe(u)) return ZV_Z_mul(v,Y);
   if (!signe(v)) return ZV_Z_mul(u,X);
   lx = lg(X); A = cgetg(lx,t_COL); m = lgefint(u)+lgefint(v)+4;
-  if (is_pm1(v)) { gswap(u,v); gswap(X,Y); }
+  if (is_pm1(v)) { swap(u,v); swap(X,Y); }
   if (is_pm1(u))
   {
     if (signe(u) > 0)
@@ -1387,7 +1387,8 @@ hnffinal(GEN matgen,GEN perm,GEN* ptdep,GEN* ptB,GEN* ptC)
     }
   }
   p1 = hnflll(matgen);
-  H = (GEN)p1[1]; /* lnz x lnz */
+  H = (GEN)p1[1]; /* lnz x lnz [disregarding initial 0 cols] */
+  H += (lg(H)-1 - lnz); H[0] = evaltyp(t_MAT) | evallg(lnz+1);
   U = (GEN)p1[2]; /* col x col */
   /* Only keep the part above the H (above the 0s is 0 since the dep rows
    * are dependant from the ones in matgen) */
@@ -1524,7 +1525,7 @@ col_dup(long n, GEN col)
 **   C   = r x (co-1) matrix of GEN
 **   perm= permutation vector (length li-1), indexing the rows of mat: easier
 **     to maintain perm than to copy rows. For columns we can do it directly
-**     using e.g. swap(mat[i], mat[j])
+**     using e.g. lswap(mat[i], mat[j])
 **   k0 = integer. The k0 first lines of mat are dense, the others are sparse.
 **     Also if k0=0, mat is modified in place [from mathnfspec], otherwise
 **     it is left alone [from buchall]
@@ -1579,13 +1580,13 @@ hnfspec(long** mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
     switch( count(mat,perm[i],col,&n) )
     {
       case 0: /* move zero lines between k0+1 and lk0 */
-	lk0++; swap(perm[i], perm[lk0]);
+	lk0++; lswap(perm[i], perm[lk0]);
         i=lig; continue;
 
       case 1: /* move trivial generator between lig+1 and li */
-	swap(perm[i], perm[lig]);
-        swap(T[n], T[col]);
-	gswap(mat[n], mat[col]); p = mat[col];
+	lswap(perm[i], perm[lig]);
+        lswap(T[n], T[col]);
+	swap(mat[n], mat[col]); p = mat[col];
 	if (p[perm[lig]] < 0) /* = -1 */
 	{ /* convert relation -g = 0 to g = 0 */
 	  for (i=lk0+1; i<lig; i++) p[perm[i]] = -p[perm[i]];
@@ -1621,9 +1622,9 @@ hnfspec(long** mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
     if (i == lk0) break;
 
     /* only 0, ±1 entries, at least 2 of them non-zero */
-    swap(perm[i], perm[lig]);
-    swap(T[n], T[col]); p1 = (GEN)T[col];
-    gswap(mat[n], mat[col]); p = mat[col];
+    lswap(perm[i], perm[lig]);
+    lswap(T[n], T[col]); p1 = (GEN)T[col];
+    swap(mat[n], mat[col]); p = mat[col];
     if (p[perm[lig]] < 0)
     {
       for (i=lk0+1; i<=lig; i++) p[perm[i]] = -p[perm[i]];
@@ -1668,10 +1669,10 @@ hnfspec(long** mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
       if ( (n = count2(mat,perm[i],col)) ) break;
     if (i == lk0) break;
 
-    swap(perm[i], perm[lig]);
-    swap(vmax[n], vmax[col]);
-    gswap(mat[n], mat[col]); p = mat[col];
-    swap(T[n], T[col]); p1 = (GEN)T[col];
+    lswap(perm[i], perm[lig]);
+    lswap(vmax[n], vmax[col]);
+    swap(mat[n], mat[col]); p = mat[col];
+    lswap(T[n], T[col]); p1 = (GEN)T[col];
     if (p[perm[lig]] < 0)
     {
       for (i=lk0+1; i<=lig; i++) p[perm[i]] = -p[perm[i]];
@@ -2014,7 +2015,7 @@ ZV_elem(GEN aj, GEN ak, GEN A, GEN U, long j, long k)
 {
   GEN p1,u,v,d;
 
-  if (!signe(ak)) { swap(A[j],A[k]); if (U) swap(U[j],U[k]); return; }
+  if (!signe(ak)) { lswap(A[j],A[k]); if (U) lswap(U[j],U[k]); return; }
   d = bezout(aj,ak,&u,&v);
   /* frequent special case (u,v) = (1,0) or (0,1) */
   if (!signe(u))
@@ -2029,10 +2030,10 @@ ZV_elem(GEN aj, GEN ak, GEN A, GEN U, long j, long k)
   { /* aj | ak */
     p1 = negi(divii(ak,aj));
     A[k]   = (long)ZV_lincomb(gun, p1, (GEN)A[k], (GEN)A[j]);
-    swap(A[j], A[k]);
+    lswap(A[j], A[k]);
     if (U) {
       U[k] = (long)ZV_lincomb(gun, p1, (GEN)U[k], (GEN)U[j]);
-      swap(U[j], U[k]);
+      lswap(U[j], U[k]);
     }
     return;
   }
@@ -2371,17 +2372,15 @@ reduce2(GEN A, GEN B, long k, long j, long *row, GEN **lambda, GEN *D)
   }
 }
 
-#define SWAP(x,y) {GEN _t=y; y=x; x=_t;}
-
 static void
 hnfswap(GEN A, GEN B, long k, GEN **lambda, GEN *D)
 {
   GEN t,p1,p2;
   long i,j,n = lg(A);
 
-  swap(A[k],A[k-1]);
-  if (B) swap(B[k],B[k-1]);
-  for (j=k-2; j; j--) SWAP(lambda[k-1][j], lambda[k][j]);
+  lswap(A[k],A[k-1]);
+  if (B) lswap(B[k],B[k-1]);
+  for (j=k-2; j; j--) swap(lambda[k-1][j], lambda[k][j]);
   for (i=k+1; i<n; i++)
   {
     p1 = mulii(lambda[i][k-1], D[k]);
@@ -2402,17 +2401,24 @@ hnfswap(GEN A, GEN B, long k, GEN **lambda, GEN *D)
 /* A[k] = 0,  A[nz] != 0,  k > nz,  A[j] = 0 for all j < nz.
  * "Deep insert" A[k] at nz */
 static void
-trivswap(GEN *A, long nz, long k, GEN **lambda, GEN *D)
+trivswap(GEN *A, GEN *B, long nz, long k, GEN **lambda, GEN *D)
 {
   GEN p1;
   long i,j,n = lg(A);
 
   p1 = A[nz]; /* cycle A */
-  for (j = nz; j < k; j++) SWAP(A[j+1], p1); 
+  for (j = nz; j < k; j++) swap(A[j+1], p1); 
   A[nz] = p1; /* = [0...0] */
 
+  if (B)
+  {
+    p1 = B[nz]; /* cycle B */
+    for (j = nz; j < k; j++) swap(B[j+1], p1); 
+    B[nz] = p1;
+  }
+
   p1 = D[nz]; /* cycle D */
-  for (j = nz; j < k; j++) SWAP(D[j+1], p1);
+  for (j = nz; j < k; j++) swap(D[j+1], p1);
   D[nz] = gun;
 
   for (j=k-1; j>=nz; j--) /* cycle lambda */
@@ -2443,7 +2449,7 @@ fix_rows(GEN A)
 }
 
 GEN
-hnflll_i(GEN A, GEN *ptB)
+hnflll_i(GEN A, GEN *ptB, int remove)
 {
   ulong av = avma, lim = stack_lim(av,3);
   long m1 = 1, n1 = 1; /* alpha = m1/n1. Maybe 3/4 here ? */
@@ -2472,16 +2478,16 @@ hnflll_i(GEN A, GEN *ptB)
   while (k < n)
   {
     reduce2(A,B,k,k-1,row,lambda,D);
-    if (!B)
-    { /* not interested in B. Eliminate 0 cols */
+    if (remove)
+    { /* not interested in kernel. Eliminate 0 cols */
       if (!row[0] || !row[1])
       {
         while (!findi((GEN)A[nzcol]) && nzcol < n) nzcol++;
         /* A[nzcol] != 0,  A[i] = 0 for i < nzcol */
         if (!row[0] && k-1 > nzcol)
-          {trivswap((GEN*)A,nzcol,k-1, lambda,D); nzcol++;}
+          {trivswap((GEN*)A,(GEN*)B,nzcol,k-1, lambda,D); nzcol++;}
         if (!row[1] && k   > nzcol)
-          {trivswap((GEN*)A,nzcol,k  , lambda,D); nzcol++;}
+          {trivswap((GEN*)A,(GEN*)B,nzcol,k  , lambda,D); nzcol++;}
         if (k <= nzcol) k = nzcol+1;
         continue;
       }
@@ -2519,9 +2525,13 @@ hnflll_i(GEN A, GEN *ptB)
       gerepilemany(av,gptr,B? 4: 3); lambda = (GEN**)a; D = (GEN*)(b+1);
     }
   }
-  for (i=nzcol; i<n; i++)
-    if (findi((GEN)A[i])) break;
-  i--; A += i; A[0] = evaltyp(t_MAT)|evallg(n-i);
+  if (remove)
+  {
+    for (i=nzcol; i<n; i++)
+      if (findi((GEN)A[i])) break;
+    i--; A += i; A[0] = evaltyp(t_MAT)|evallg(n-i);
+    if (B) { B += i; B[0] = evaltyp(t_MAT)|evallg(n-i); }
+  }
   A = fix_rows(A);
   gptr[0] = &A; gptr[1] = &B;
   gerepilemany(av, gptr, B? 2: 1);
@@ -2533,7 +2543,7 @@ GEN
 hnflll(GEN A)
 {
   GEN B, z = cgetg(3, t_VEC);
-  z[1] = (long)hnflll_i(A, &B);
+  z[1] = (long)hnflll_i(A, &B, 0);
   z[2] = (long)B; return z;
 }
 
@@ -2780,8 +2790,8 @@ hnfall_i(GEN A, GEN *ptB, long remove)
     r--;
     if (j < r) /* A[j] != 0 */
     {
-      swap(A[j], A[r]);
-      if (B) swap(B[j], B[r]);
+      lswap(A[j], A[r]);
+      if (B) lswap(B[j], B[r]);
       h[j]=h[r]; h[r]=li; c[li]=r;
     }
     p = gcoeff(A,li,r);
