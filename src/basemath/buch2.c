@@ -1950,18 +1950,15 @@ static GEN
 inverse_if_smaller(GEN nf, GEN I, long prec)
 {
   GEN J, d, dmin, I1;
-  int inv;
+
   J = (GEN)I[1];
   dmin = dethnf_i(J); I1 = idealinv(nf,I);
   J = (GEN)I1[1]; J = gmul(J,denom(J)); I1[1] = (long)J;
-  d = dethnf_i(J);
-  if (cmpii(d,dmin) < 0) {inv=1; I=I1; dmin=d;}
-  else                    inv=0;
+  d = dethnf_i(J); if (cmpii(d,dmin) < 0) {I=I1; dmin=d;}
   /* try reducing (often _increases_ the norm) */
   I1 = ideallllred(nf,I1,NULL,prec);
   J = (GEN)I1[1];
-  d = dethnf_i(J);
-  if (cmpii(d,dmin) < 0) {inv=1; I=I1;}
+  d = dethnf_i(J); if (cmpii(d,dmin) < 0) I=I1;
   return I;
 }
 
@@ -1980,11 +1977,24 @@ setlg_col(GEN U, long l)
   for (; c>U; c--) setlg(*c, l);
 }
 
+GEN
+get_Vbase(GEN W, GEN vectbase, GEN vperm)
+{
+  long i, l = lg(W);
+  GEN Vbase = cgetg(l,t_VEC);
+  if (typ(vperm) == t_VECSMALL)
+    for (i=1; i<l; i++) Vbase[i] = vectbase[vperm[i]];
+  else
+    for (i=1; i<l; i++) Vbase[i] = vectbase[itos((GEN)vperm[i])];
+  return Vbase;
+}
+
 /* compute class group (clg1) + data for isprincipal (clg2) */
 static void
-class_group_gen(GEN nf,GEN W,GEN C,GEN vperm,GEN *ptclg1,GEN *ptclg2,long prec)
+class_group_gen(GEN nf,GEN W,GEN C,GEN Vbase,long prec, GEN nf0,
+                GEN *ptclg1,GEN *ptclg2)
 {
-  GEN z,G,Ga,ga,GD,cyc,X,Y,D,U,V,Ur,Ui,Uir,I,J,Vbase;
+  GEN z,G,Ga,ga,GD,cyc,X,Y,D,U,V,Ur,Ui,Uir,I,J;
   long i,j,s,lo,lo0;
 
   if (DEBUGLEVEL)
@@ -2005,39 +2015,34 @@ class_group_gen(GEN nf,GEN W,GEN C,GEN vperm,GEN *ptclg1,GEN *ptclg2,long prec)
   * P invertible diagonal matrix (\pm 1) which is only implicitly defined
   * G = g Uir P + [Ga],  Uir = Ui + WX
   * g = G P Ur  + [ga],  Ur  = U + DY */
-  Vbase = cgetg(lo0,t_VEC);
-  if (typ(vperm) == t_VECSMALL)
-    for (i=1; i<lo0; i++) Vbase[i] = vectbase[vperm[i]];
-  else
-    for (i=1; i<lo0; i++) Vbase[i] = vectbase[itos((GEN)vperm[i])];
-
   G = cgetg(lo,t_VEC);
   Ga= cgetg(lo,t_VEC);
-  z = init_idele(nf);
+  z = init_idele(nf); z[2] = lgetg(1, t_MAT);
+  if (!nf0) nf0 = nf;
   for (j=1; j<lo; j++)
   {
     GEN p1 = gcoeff(Uir,1,j);
-    z[1]=Vbase[1]; I = idealpowred(nf,z,p1,prec);
+    z[1]=Vbase[1]; I = idealpowred(nf0,z,p1,prec);
     if (signe(p1)<0) I[1] = lmul((GEN)I[1],denom((GEN)I[1]));
     for (i=2; i<lo0; i++)
     {
       p1 = gcoeff(Uir,i,j); s = signe(p1);
       if (s)
       {
-	z[1]=Vbase[i]; J = idealpowred(nf,z,p1,prec);
+	z[1]=Vbase[i]; J = idealpowred(nf0,z,p1,prec);
         if (s<0) J[1] = lmul((GEN)J[1],denom((GEN)J[1]));
-	I = idealmulh(nf,I,J);
-	I = ideallllred(nf,I,NULL,prec);
+	I = idealmulh(nf0,I,J);
+	I = ideallllred(nf0,I,NULL,prec);
       }
     }
-    J = inverse_if_smaller(nf, I, prec);
+    J = inverse_if_smaller(nf0, I, prec);
     if (J != I)
     { /* update wrt P */
       neg_row(Y ,j); V[j] = lneg((GEN)V[j]);
       neg_row(Ur,j); X[j] = lneg((GEN)X[j]);
     }
     G[j] = (long)J[1]; /* generator, order cyc[j] */
-    Ga[j]= (long)J[2];
+    Ga[j]= (long)famat_to_arch(nf, (GEN)J[2], prec);
   }
   /* at this point Y = PY, Ur = PUr, V = VP, X = XP */
 
@@ -2463,20 +2468,20 @@ get_arch2(GEN nf, GEN a, long prec, int units)
 }
 
 static void
-my_class_group_gen(GEN bnf, GEN *ptcl, GEN *ptcl2, long prec)
+my_class_group_gen(GEN bnf, long prec, GEN nf0, GEN *ptcl, GEN *ptcl2)
 {
-  GEN W=(GEN)bnf[1], C=(GEN)bnf[4], vperm=(GEN)bnf[6], nf=(GEN)bnf[7], *gptr[2];
-  long av = avma;
+  ulong av = avma;
+  GEN W=(GEN)bnf[1], C=(GEN)bnf[4], nf=(GEN)bnf[7], *gptr[2];
+  GEN Vbase = get_Vbase(W, (GEN)bnf[5], (GEN)bnf[6]);
 
-  vectbase = (GEN)bnf[5]; /* needed by class_group_gen */
-  class_group_gen(nf,W,C,vperm,ptcl,ptcl2, prec);
+  class_group_gen(nf,W,C,Vbase,prec,nf0, ptcl,ptcl2);
   gptr[0]=ptcl; gptr[1]=ptcl2; gerepilemany(av,gptr,2);
 }
 
 GEN
 bnfnewprec(GEN bnf, long prec)
 {
-  GEN nf,ro,res,p1,funits,mun,matal,clgp,clgp2,y;
+  GEN nf0 = (GEN)bnf[7], nf,ro,res,p1,funits,mun,matal,clgp,clgp2,y;
   long r1,r2,ru,pl1,pl2,prec1;
 
   bnf = checkbnf(bnf);
@@ -2490,7 +2495,7 @@ bnfnewprec(GEN bnf, long prec)
   pl2 = gexpo(ro);
   prec1 = prec;
   prec += ((ru + r2 - 1) * (pl1 + (ru + r2) * pl2)) >> TWOPOTBITS_IN_LONG;
-  nf = nfnewprec((GEN)bnf[7],prec);
+  nf = nfnewprec(nf0,prec);
   res = cgetg(7,t_VEC);
   ro = (GEN)nf[6];
   mun = get_arch2(nf,funits,prec,1);
@@ -2511,7 +2516,7 @@ bnfnewprec(GEN bnf, long prec)
   y[6]=lcopy((GEN)bnf[6]);
   y[7]=(long)nf;
   y[8]=(long)res;
-  my_class_group_gen(y,&clgp,&clgp2,prec);
+  my_class_group_gen(y,prec,nf0, &clgp,&clgp2);
   res[1]=(long)clgp;
   y[9]=(long)clgp2;
   y[10]=lcopy((GEN)bnf[10]); return y;
@@ -2533,7 +2538,7 @@ bnfmake(GEN sbnf, long prec)
 {
   long av = avma, j,k,n,r1,r2,ru,lpf;
   GEN p1,x,bas,ro,nf,mun,funits,index;
-  GEN pfc,vp,mc,clgp,clgp2,res,y,W,racu,reg,matal;
+  GEN pfc,vp,mc,clgp,clgp2,res,y,W,racu,reg,matal,vectbase,Vbase;
 
   if (typ(sbnf)!=t_VEC || lg(sbnf)!=13)
     err(talker,"incorrect sbnf in bnfmake");
@@ -2571,7 +2576,8 @@ bnfmake(GEN sbnf, long prec)
     vectbase[j]=(long)decodeprime(nf,(GEN)pfc[j]);
   }
   W = (GEN)sbnf[7];
-  class_group_gen(nf,W,mc,vp,&clgp,&clgp2, prec); /* uses vectbase */
+  Vbase = get_Vbase(W,vectbase,vp);
+  class_group_gen(nf,W,mc,Vbase,prec,NULL, &clgp,&clgp2);
 
   reg = get_regulator(mun,prec);
   p1=cgetg(3,t_VEC); racu=(GEN)sbnf[10];
@@ -2791,7 +2797,7 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
   long sfb_increase=0, sfb_trials=0, precdouble=0, precadd=0;
   double cbach,cbach2,drc,LOGD2;
   GEN p1,vecT2,fu,zu,nf,LLLnf,D,xarch,W,R,Res,z,h,vperm,subFB;
-  GEN L,resc,B,C,c1,lambda,pdep,liste,invp,clg1,clg2, *mat;
+  GEN L,resc,B,C,c1,lambda,pdep,liste,invp,clg1,clg2,Vbase, *mat;
   GEN CHANGE=NULL, extramat=NULL, extraC=NULL, list_jideal=NULL;
   char *precpb = NULL;
 
@@ -3092,7 +3098,8 @@ MORE:
   /* class group generators */
   i = lg(C)-zc; C += zc; C[0] = evaltyp(t_MAT)|evallg(i);
   C = cleancol(C,N,PRECREG);
-  class_group_gen(nf,W,C,vperm, &clg1, &clg2, PRECREG);
+  Vbase = get_Vbase(W,vectbase,vperm);
+  class_group_gen(nf,W,C,Vbase,PRECREG,NULL, &clg1, &clg2);
 
   c1 = gdiv(gmul(R,h), z);
   desallocate(&mat);

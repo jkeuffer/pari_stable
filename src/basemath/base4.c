@@ -1075,8 +1075,7 @@ idealmulspec(GEN nf, GEN x, GEN a, GEN alpha)
 /* x ideal (matrix form,maximal rank), vp prime ideal (primedec). Output the
  * product. Can be used for arbitrary vp of the form [p,a,e,f,b], IF vp
  * =pZ_K+aZ_K, p is an integer, and norm(vp) = p^f; e and b are not used.
- * For internal use.
- */
+ * For internal use. */
 GEN
 idealmulprime(GEN nf, GEN x, GEN vp)
 {
@@ -1086,6 +1085,10 @@ idealmulprime(GEN nf, GEN x, GEN vp)
   x = idealmulspec(nf,x, (GEN)vp[1], (GEN)vp[2]);
   return denx? gdiv(x,denx): x;
 }
+
+GEN arch_mul(GEN x, GEN y);
+GEN vecpow(GEN x, GEN n);
+GEN vecmul(GEN x, GEN y);
 
 /* Assume ix and iy are integral in HNF form (or ideles of the same form).
  * HACK: ideal in iy can be of the form [a,b], a in Z, b in Z_K
@@ -1105,7 +1108,7 @@ idealmulh(GEN nf, GEN ix, GEN iy)
   if (!f) return y;
 
   res[1]=(long)y;
-  if (f==3) y = gadd((GEN)ix[2],(GEN)iy[2]);
+  if (f==3) y = arch_mul((GEN)ix[2], (GEN)iy[2]);
   else
   {
     y = (f==2)? (GEN)iy[2]: (GEN)ix[2];
@@ -1407,6 +1410,23 @@ famat_to_nf_modidele(GEN nf, GEN g, GEN e, GEN bid)
 }
 
 GEN
+famat_to_arch(GEN nf, GEN fa, long prec)
+{
+  GEN g = (GEN)fa[1], M = gmael(nf,5,1);
+  GEN e = (GEN)fa[2], y = NULL;
+  long i, l = lg(e);
+
+  for (i=1; i<l; i++)
+  {
+    GEN t, x = (GEN)g[i];
+    if (typ(x) != t_COL) x = algtobasis(nf,x);
+    t = vecpow(gmul(M, x), (GEN)e[i]);
+    y = y? vecmul(y,t): t;
+  }
+  return y? glog(y, prec): zerocol(lg(M[1])-1);
+}
+
+GEN
 vecmul(GEN x, GEN y)
 {
   long i,lx, tx = typ(x);
@@ -1425,6 +1445,17 @@ vecinv(GEN x)
   if (is_scalar_t(tx)) return ginv(x);
   lx = lg(x); z = cgetg(lx, tx);
   for (i=1; i<lx; i++) z[i] = (long)vecinv((GEN)x[i]);
+  return z;
+}
+
+GEN
+vecpow(GEN x, GEN n)
+{
+  long i,lx, tx = typ(x);
+  GEN z;
+  if (is_scalar_t(tx)) return powgi(x,n);
+  lx = lg(x); z = cgetg(lx, tx);
+  for (i=1; i<lx; i++) z[i] = (long)vecpow((GEN)x[i], n);
   return z;
 }
 
@@ -1450,8 +1481,9 @@ GEN
 arch_inv(GEN x) {
   switch (typ(x)) {
     case t_POLMOD: return ginv(x);
+    case t_COL:    return vecinv(x);
     case t_MAT:    return famat_inv(x);
-    default:       return gneg(x); /* t_COL, t_VEC */
+    default:       return gneg(x); /* t_VEC */
   }
 }
 
@@ -1459,6 +1491,7 @@ GEN
 arch_pow(GEN x, GEN n) {
   switch (typ(x)) {
     case t_POLMOD: return powgi(x,n);
+    case t_COL:    return vecpow(x,n);
     case t_MAT:    return famat_pow(x,n);
     default:       return gmul(n,x);
   }
