@@ -8,6 +8,7 @@ This file lists the incompatible changes between Version 2.x and older versions
 * The library PARI:
 ===================
   - gsize() renamed to sizedigit()  [conflict with gtk]
+  - hnfhavas removed (didn't work properly, hnflll provides an alternative)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

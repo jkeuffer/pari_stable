@@ -82,6 +82,8 @@ IZ 39- TeX quasi-parsing in gphelp
    45- various typos in rnfkummer (SEGV or 'non-maximal rank in nfhermite')
    46- Configure -l (no argument) didn't work anymore
 BA 47- incorrect quoting in src/make_vi_tags (make ctags)
+   48- 1/[;] --> error, whereas [;]^-1 --> [;]  [ now, allow 1/[;] ]
+   49- ??real  only gave the help on t_REALs, not on real()
 
   Changed
     1- DOS distribution archives (GPM removed)
@@ -106,6 +108,8 @@ IZ 16- readline: hit_return() would not work after Esc-H
    19- naming scheme for development versions library: libpari-2.2.so.0.0.0
    20- new Configure flags --share-prefix, --host
    21- allow library functions to return NULL to the GP interpreter
+   22- let A^-1 and 1/A return a left inverse of A if it exists [A had to be
+       square]
 
   Added
     1- files README.WIN, config/[arch-osname|locatesymbol], doc/tex2mail.1
@@ -116,6 +120,7 @@ IZ  4- set of default colors (boldfg)
 
   Removed
     1- obsolete undocumented functions oldidealinv, idealinv0
+    2- buggy function hnfhavas (hnflll is a better alternative)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.1.0 (released 17/11/2000):
