@@ -2115,6 +2115,7 @@ sqrispec(GEN x, long nx)
   GEN z2e,z2d,yd,xd,zd,x0,z0;
   long p1,lz;
   LOCAL_HIREMAINDER;
+  LOCAL_OVERFLOW;
 
   if (!nx) return gzero;
   zd = (GEN)avma; lz = (nx+1) << 1;
