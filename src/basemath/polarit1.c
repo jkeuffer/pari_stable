@@ -118,7 +118,6 @@ poldivres(GEN x, GEN y, GEN *pr)
 {
   ulong avy,av,av1;
   long ty=typ(y),tx,vx,vy,dx,dy,dz,i,j,sx,lrem;
-  int remainder;
   GEN z,p1,rem,y_lead,mod;
   GEN (*f)(GEN,GEN);
 
@@ -205,15 +204,18 @@ poldivres(GEN x, GEN y, GEN *pr)
   z[1]=evalsigne(1) | evallgef(dz+3) | evalvarn(vx);
   x += 2; y += 2; z += 2;
 
-  p1 = (GEN)x[dx]; remainder = (pr == ONLY_REM);
+  p1 = (GEN)x[dx];
   z[dz]=y_lead? (long)f(p1,y_lead): lcopy(p1);
   for (i=dx-1; i>=dy; i--)
   {
     av1=avma; p1=(GEN)x[i];
     for (j=i-dy+1; j<=i && j<=dz; j++)
-      if (y[i-j]) p1 = gadd(p1, gmul((GEN)z[j],(GEN)y[i-j]));
+      if (y[i-j] && z[j] != zero) p1 = gadd(p1, gmul((GEN)z[j],(GEN)y[i-j]));
     if (y_lead) p1 = f(p1,y_lead);
-    if (!remainder) p1 = avma==av1? gcopy(p1): gerepileupto(av1,p1);
+   
+    if (isexactzero(p1)) { avma=av1; p1 = gzero; }
+    else
+      p1 = avma==av1? gcopy(p1): gerepileupto(av1,p1);
     z[i-dy] = (long)p1;
   }
   if (!pr) return gerepileupto(av,z-2);
@@ -224,7 +226,7 @@ poldivres(GEN x, GEN y, GEN *pr)
     p1 = (GEN)x[i];
     /* we always enter this loop at least once */
     for (j=0; j<=i && j<=dz; j++)
-      if (y[i-j]) p1 = gadd(p1, gmul((GEN)z[j],(GEN)y[i-j]));
+      if (y[i-j] && z[j] != zero) p1 = gadd(p1, gmul((GEN)z[j],(GEN)y[i-j]));
     if (mod && avma==av1) p1 = gmul(p1,mod);
     if (!gcmp0(p1)) { sx = 1; break; } /* remainder is non-zero */
     if (!isinexactreal(p1) && !isexactzero(p1)) break;
@@ -248,13 +250,13 @@ poldivres(GEN x, GEN y, GEN *pr)
   {
     av1=avma; p1 = (GEN)x[i];
     for (j=0; j<=i && j<=dz; j++)
-      if (y[i-j]) p1 = gadd(p1, gmul((GEN)z[j],(GEN)y[i-j]));
+      if (y[i-j] && z[j] != zero) p1 = gadd(p1, gmul((GEN)z[j],(GEN)y[i-j]));
     if (mod && avma==av1) p1 = gmul(p1,mod);
     rem[i]=avma==av1? lcopy(p1):lpileupto(av1,p1);
   }
   rem -= 2;
   if (!sx) normalizepol_i(rem, lrem);
-  if (remainder) return gerepileupto(av,rem);
+  if (pr == ONLY_REM) return gerepileupto(av,rem);
   z -= 2;
   {
     GEN *gptr[2]; gptr[0]=&z; gptr[1]=&rem;
