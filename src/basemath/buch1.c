@@ -509,7 +509,7 @@ PRECPB:
     P = findbezk_pol(nf, P0);
     if (!P) { prec = get_prec(P0, prec); goto PRECPB; }
   }
-  return gerepileupto(av, gcopy(P));
+  return gerepilecopy(av, P);
 }
 
 #define nexta(a) (a>0 ? -a : 1-a)
@@ -802,10 +802,10 @@ rhoreal_pow(GEN x, long n)
     if (low_stack(lim, stack_lim(av,1)))
     {
       if(DEBUGMEM>1) err(warnmem,"rhoreal_pow");	
-      x = gerepileupto(av, gcopy(x));
+      x = gerepilecopy(av, x);
     }
   }
-  return gerepileupto(av, gcopy(x));
+  return gerepilecopy(av, x);
 }
 
 static GEN

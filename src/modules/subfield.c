@@ -875,7 +875,7 @@ CHANGE:
   for (i=1; i<llist; i++) free((void*)listpotbl[i]);
   free((void*)(listpotbl-1));
   if (DEBUGLEVEL) fprintferr("\nSubfields of degree %ld: %Z\n",d, LSB);
-  return gerepileupto(av, gcopy(LSB));
+  return gerepilecopy(av, LSB);
 }
 
 static GEN
@@ -954,8 +954,8 @@ subfields(GEN nf,GEN d)
 
   pol = get_nfpol(nf, &nf); /* in order to treat trivial cases */
   v0=varn(pol); N=degpol(pol); di=itos(d);
-  if (di==N) return gerepileupto(av, gcopy(_subfield(pol, polx[v0])));
-  if (di==1) return gerepileupto(av, gcopy(_subfield(polx[v0], pol)));
+  if (di==N) return gerepilecopy(av, _subfield(pol, polx[v0]));
+  if (di==1) return gerepilecopy(av, _subfield(polx[v0], pol));
   if (di < 1 || di > N || N % di) return cgetg(1,t_VEC);
 
   subfields_poldata(nf, &PD);

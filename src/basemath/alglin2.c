@@ -231,7 +231,8 @@ adj(GEN x)
 GEN
 hess(GEN x)
 {
-  long lx=lg(x),av=avma,tetpil,m,i,j;
+  ulong av = avma;
+  long lx=lg(x),m,i,j;
   GEN p,p1,p2;
 
   if (typ(x) != t_MAT) err(mattype1,"hess");
@@ -261,7 +262,7 @@ hess(GEN x)
       }
       break;
     }
-  tetpil=avma; return gerepile(av,tetpil,gcopy(x));
+  return gerepilecopy(av,x);
 }
 
 GEN
@@ -655,7 +656,8 @@ GEN
 sqred1intern(GEN a,long flag)
 {
   GEN b,p;
-  long av = avma,tetpil,i,j,k, lim=stack_lim(av,1), n=lg(a);
+  long i,j,k, n = lg(a);
+  ulong av = avma, lim=stack_lim(av,1);
 
   if (typ(a)!=t_MAT) err(typeer,"sqred1");
   if (n == 1) return cgetg(1, t_MAT);
@@ -687,10 +689,10 @@ sqred1intern(GEN a,long flag)
     if (low_stack(lim, stack_lim(av,1)))
     {
       if (DEBUGMEM>1) err(warnmem,"sqred1");
-      tetpil=avma; b=gerepile(av,tetpil,gcopy(b));
+      b=gerepilecopy(av,b);
     }
   }
-  tetpil=avma; return gerepile(av,tetpil,gcopy(b));
+  return gerepilecopy(av,b);
 }
 
 GEN
@@ -702,7 +704,8 @@ sqred1(GEN a)
 GEN
 sqred3(GEN a)
 {
-  long av=avma,tetpil,i,j,k,l, lim=stack_lim(av,1), n=lg(a);
+  ulong av = avma, lim = stack_lim(av,1);
+  long i,j,k,l, n = lg(a);
   GEN p1,b;
 
   if (typ(a)!=t_MAT) err(typeer,"sqred3");
@@ -729,10 +732,10 @@ sqred3(GEN a)
     if (low_stack(lim, stack_lim(av,1)))
     {
       if (DEBUGMEM>1) err(warnmem,"sqred3");
-      tetpil=avma; b=gerepile(av,tetpil,gcopy(b));
+      b=gerepilecopy(av,b);
     }
   }
-  tetpil=avma; return gerepile(av,tetpil,gcopy(b));
+  return gerepilecopy(av,b);
 }
 
 /* Gauss reduction (arbitrary symetric matrix, only the part above the
@@ -743,7 +746,8 @@ static GEN
 sqred2(GEN a, long no_signature)
 {
   GEN r,p,mun;
-  long av,tetpil,av1,lim,n,i,j,k,l,sp,sn,t;
+  ulong av,av1,lim;
+  long n,i,j,k,l,sp,sn,t;
 
   if (typ(a)!=t_MAT) err(typeer,"sqred2");
   n=lg(a); if (lg(a[1]) != n) err(mattype1,"sqred2");
@@ -794,7 +798,7 @@ sqred2(GEN a, long no_signature)
 	  if (low_stack(lim, stack_lim(av1,1)))
 	  {
 	    if(DEBUGMEM>1) err(warnmem,"sqred2");
-	    tetpil=avma; a=gerepile(av1,tetpil,gcopy(a));
+	    a=gerepilecopy(av1,a);
 	  }
 	  break;
 	}
@@ -802,7 +806,7 @@ sqred2(GEN a, long no_signature)
       if (k>n) break;
     }
   }
-  if (no_signature) { tetpil=avma; return gerepile(av,tetpil,gcopy(a)); }
+  if (no_signature) return gerepilecopy(av,a);
   avma=av;
   a=cgetg(3,t_VEC); a[1]=lstoi(sp); a[2]=lstoi(sn); return a;
 }
@@ -939,7 +943,8 @@ matrixqz0(GEN x,GEN p)
 GEN
 matrixqz(GEN x, GEN p)
 {
-  long av=avma,av1,tetpil,i,j,j1,m,n,t,lim,nfact;
+  ulong av = avma, av1, lim;
+  long i,j,j1,m,n,t,nfact;
   GEN p1,p2,p3,unmodp;
 
   if (typ(x)!=t_MAT) err(typeer,"matrixqz");
@@ -974,8 +979,7 @@ matrixqz(GEN x, GEN p)
     p3=det(p1); p1[n]=p2[n+1]; p3=ggcd(p3,det(p1));
     if (!signe(p3))
       err(impl,"matrixqz when the first 2 dets are zero");
-    if (gcmp1(p3))
-      { tetpil=avma; return gerepile(av,tetpil,gcopy(x)); }
+    if (gcmp1(p3)) return gerepilecopy(av,x);
 
     p3=factor(p3); p1=(GEN)p3[1]; nfact=lg(p1)-1;
   }
@@ -1001,17 +1005,18 @@ matrixqz(GEN x, GEN p)
       if (low_stack(lim, stack_lim(av1,1)))
       {
 	if (DEBUGMEM>1) err(warnmem,"matrixqz");
-	tetpil=avma; x=gerepile(av1,tetpil,gcopy(x));
+	x=gerepilecopy(av1,x);
       }
     }
   }
-  tetpil=avma; return gerepile(av,tetpil,gcopy(x));
+  return gerepilecopy(av,x);
 }
 
 static GEN
 matrixqz_aux(GEN x, long m, long n)
 {
-  long av = avma, lim = stack_lim(av,1), tetpil,i,j,k,in[2];
+  ulong av = avma, lim = stack_lim(av,1);
+  long i,j,k,in[2];
   GEN p1;
 
   for (i=1; i<=m; i++)
@@ -1042,7 +1047,7 @@ matrixqz_aux(GEN x, long m, long n)
     if (low_stack(lim, stack_lim(av,1)))
     {
       if(DEBUGMEM>1) err(warnmem,"matrixqz_aux");
-      tetpil=avma; x=gerepile(av,tetpil,gcopy(x));
+      x=gerepilecopy(av,x);
     }
   }
   return hnf(x);
@@ -1080,9 +1085,8 @@ matrixqz3(GEN x)
 	if (j1!=j) x[j1]=lsub((GEN)x[j1],gmul(gcoeff(x,k,j1),(GEN)x[j]));
       if (low_stack(lim, stack_lim(av1,1)))
       {
-	long tetpil = avma;
 	if(DEBUGMEM>1) err(warnmem,"matrixqz3");
-	x=gerepile(av1,tetpil,gcopy(x));
+	x=gerepilecopy(av1,x);
       }
     }
   }
@@ -1646,7 +1650,7 @@ hnfspec(long** mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
     if (low_stack(lim, stack_lim(av2,1)))
     {
       if(DEBUGMEM>1) err(warnmem,"hnfspec[1]");
-      T = gerepileupto(av2, gcopy(T));
+      T = gerepilecopy(av2, T);
     }
   }
 #endif
@@ -1689,7 +1693,7 @@ hnfspec(long** mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
     if (low_stack(lim, stack_lim(av2,1)))
     {
       if(DEBUGMEM>1) err(warnmem,"hnfspec[2]");
-      T = gerepileupto(av2,gcopy(T));
+      T = gerepilecopy(av2,T);
     }
   }
 
@@ -3219,13 +3223,12 @@ gsmithall(GEN x,long all)
       if (low_stack(lim, stack_lim(av,1)))
       {
 	if (DEBUGMEM>1) err(warnmem,"[5]: smithall");
-	tetpil=avma;
 	if (all)
 	{
 	  GEN *gptr[3]; gptr[0]=&x; gptr[1]=&ml; gptr[2]=&mr;
 	  gerepilemany(av,gptr,3);
 	}
-	else x=gerepile(av,tetpil,gcopy(x));
+	else x=gerepilecopy(av,x);
       }
     }
     while (c);

@@ -568,8 +568,7 @@ polhensellift(GEN pol, GEN fct, GEN p, long exp)
           err(talker, "polhensellift: factors %Z and %Z are not coprime",
                      p1[i], p1[j]);
   }
-  return gerepileupto(av, gcopy(hensel_lift_fact(pol, p1, NULL, p,
-						 gpowgs(p, exp), exp)));
+  return gerepilecopy(av, hensel_lift_fact(pol,p1,NULL,p,gpowgs(p,exp),exp));
 }
 
 #if 0
@@ -1408,7 +1407,7 @@ squff(GEN a, long hint)
   }
   if (DEBUGLEVEL > 4) msgtimer("splitting mod p = %ld",chosenp);
   res = combine_factors(a, famod, prime, da-1, hint);
-  return gerepileupto(av, gcopy(res));
+  return gerepilecopy(av, res);
 }
 
 /* A(X^d) --> A(X) */
@@ -1799,7 +1798,7 @@ factor(GEN x)
     case t_FRAC:
       p1 = decomp((GEN)x[1]);
       p2 = decomp((GEN)x[2]); p2[2] = (long)gneg_i((GEN)p2[2]);
-      return gerepileupto(av, gcopy(merge_factor_i(p1,p2)));
+      return gerepilecopy(av, merge_factor_i(p1,p2));
 
     case t_POL:
       tx=poltype(x,&p,&pol,&pa);
@@ -2474,7 +2473,8 @@ gcdmonome(GEN x, GEN y)
 static GEN
 polinvinexact(GEN x, GEN y)
 {
-  long i,dx=degpol(x),dy=degpol(y),lz=dx+dy, av=avma, tetpil;
+  ulong av = avma;
+  long i,dx=degpol(x),dy=degpol(y),lz=dx+dy;
   GEN v,z;
 
   if (dx < 0 || dy < 0) err(talker,"non-invertible polynomial in polinvmod");
@@ -2483,8 +2483,8 @@ polinvinexact(GEN x, GEN y)
   for (i=1; i<lz; i++) v[i]=zero;
   v[lz]=un; v=gauss(sylvestermatrix(y,x),v);
   for (i=2; i<dy+2; i++) z[i]=v[lz-i+2];
-  z = normalizepol_i(z, dy+2); tetpil = avma;
-  return gerepile(av,tetpil,gcopy(z));
+  z = normalizepol_i(z, dy+2);
+  return gerepilecopy(av,z);
 }
 
 static GEN
@@ -3696,8 +3696,7 @@ polfnf(GEN a, GEN t)
   p1[1] = (long)u;
   e = sqfree? 1: degpol(a)/degpol(u);
   p2[1] = lstoi(e);
-  (void)sort_factor(y, cmp_pol);
-  return gerepileupto(av, gcopy(y));
+  return gerepilecopy(av, sort_factor(y, cmp_pol));
 }
 
 extern GEN FpXQX_safegcd(GEN P, GEN Q, GEN T, GEN p);
@@ -3860,5 +3859,5 @@ nfgcd(GEN P, GEN Q, GEN nf, GEN den)
         break;
     }
   }
-  return gerepileupto(ltop, gcopy(sol));
+  return gerepilecopy(ltop, sol);
 }

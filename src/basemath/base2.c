@@ -257,10 +257,10 @@ rowred(GEN a, GEN rmod)
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      long j1,k1, tetpil = avma;
+      long j1,k1;
       GEN p1 = a;
       if(DEBUGMEM>1) err(warnmem,"rowred j=%ld", j);
-      p1 = gerepile(av,tetpil,gcopy(a));
+      p1 = gerepilecopy(av,a);
       for (j1=1; j1<r; j1++)
         for (k1=1; k1<c; k1++) coeff(a,j1,k1) = coeff(p1,j1,k1);
     }
@@ -759,10 +759,9 @@ nfbasis00(GEN x0, long flag, GEN p, long ret_basis, GEN *y)
   else
     basis = allbase4(x,smll,&disc,NULL); /* round 4 */
 
-  tetpil=avma;
-  if (!ret_basis)
-    return gerepile(av,tetpil,gcopy(disc));
+  if (!ret_basis) return gerepilecopy(av,disc);
 
+  tetpil=avma;
   if (!lead) basis = gcopy(basis);
   else
   {
@@ -1238,7 +1237,7 @@ newtoncharpoly(GEN a, GEN chi, GEN pp, GEN ns)
     if (low_stack(lim, stack_lim(av2, 1)))
     {
       if(DEBUGMEM>1) err(warnmem, "newtoncharpoly");
-      c = gerepileupto(av2, gcopy(c));
+      c = gerepilecopy(av2, c);
     }
   }
  
@@ -1300,14 +1299,14 @@ mycaract(GEN f, GEN beta, GEN p, GEN pp, GEN ns)
 static GEN
 factcp(GEN p, GEN f, GEN beta, GEN pp, GEN ns)
 {
-  long av,tetpil,l;
+  long av,l;
   GEN chi,nu, b = cgetg(4,t_VEC);
 
   chi=mycaract(f,beta,p,pp,ns);
   av=avma; nu=(GEN)factmod(chi,p)[1]; l=lg(nu)-1;
-  nu=lift_intern((GEN)nu[1]); tetpil=avma;
+  nu=lift_intern((GEN)nu[1]);
   b[1]=(long)chi;
-  b[2]=lpile(av,tetpil,gcopy(nu));
+  b[2]=lpilecopy(av,nu);
   b[3]=lstoi(l); return b;
 }
 
@@ -2141,7 +2140,8 @@ static GEN
 prime_two_elt(GEN nf, GEN p, GEN ideal)
 {
   GEN beta,a,pf, pol = (GEN)nf[1];
-  long av,tetpil,f, N=degpol(pol), m=lg(ideal)-1;
+  long f, N=degpol(pol), m=lg(ideal)-1;
+  ulong av;
 
   if (!m) return gscalcol_i(p,N);
 
@@ -2162,7 +2162,7 @@ prime_two_elt(GEN nf, GEN p, GEN ideal)
   a = centermod(algtobasis_intern(nf,a), p);
   if (resii(divii(subres(gmul((GEN)nf[7],a),pol),pf),p) == gzero)
     a[1] = laddii((GEN)a[1],p);
-  tetpil = avma; return gerepile(av,tetpil,gcopy(a));
+  return gerepilecopy(av,a);
 }
 
 static GEN
@@ -2479,7 +2479,7 @@ rnfelementid_powmod(GEN nf, GEN multab, GEN matId, long h, GEN n, GEN prhall)
     if (--i == 0) break;
     m = *++p1; k = BITS_IN_LONG;
   }
-  return gerepileupto(av, gcopy(y));
+  return gerepilecopy(av, y);
 }
 
 GEN
@@ -2514,8 +2514,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, GEN unnf, GEN id, GEN matId)
   prhall=nfmodprinit(nf,pr);
   q=cgetg(3,t_VEC); q[1]=(long)pr;q[2]=(long)prhall;
   p1=rnfdedekind(nf,pol,q);
-  if (gcmp1((GEN)p1[1]))
-    {tetpil=avma; return gerepile(av,tetpil,gcopy((GEN)p1[2]));}
+  if (gcmp1((GEN)p1[1])) return gerepilecopy(av,(GEN)p1[2]);
 
   sep=itos((GEN)p1[3]);
   A=gmael(p1,2,1);
@@ -2913,7 +2912,8 @@ rnfsteinitz(GEN nf, GEN order)
 GEN
 rnfbasis(GEN bnf, GEN order)
 {
-  long av=avma,tetpil,j,N,n;
+  ulong av = avma;
+  long j,N,n;
   GEN nf,A,I,classe,p1,p2,id;
 
   bnf = checkbnf(bnf);
@@ -2939,7 +2939,7 @@ rnfbasis(GEN bnf, GEN order)
     p2[n+1]=(long)element_mulvec(nf,(GEN)p1[2],(GEN)A[n]);
   }
   for (j=1; j<n; j++) p2[j]=A[j];
-  tetpil = avma; return gerepile(av,tetpil,gcopy(p2));
+  return gerepilecopy(av,p2);
 }
 
 /* Given bnf as output by buchinit and either an order as output by
@@ -2949,7 +2949,8 @@ rnfbasis(GEN bnf, GEN order)
 GEN
 rnfhermitebasis(GEN bnf, GEN order)
 {
-  long av=avma,tetpil,j,N,n;
+  ulong av = avma;
+  long j,N,n;
   GEN nf,A,I,p1,id;
 
   bnf = checkbnf(bnf); nf=(GEN)bnf[7];
@@ -2976,7 +2977,7 @@ rnfhermitebasis(GEN bnf, GEN order)
       else { avma=av; return gzero; }
     }
   }
-  tetpil=avma; return gerepile(av,tetpil,gcopy(A));
+  return gerepilecopy(av,A);
 }
 
 long
@@ -3050,7 +3051,7 @@ polcompositum0(GEN A, GEN B, long flall)
       w[4] = lstoi(-k); C[i] = (long)w;
     }
   }
-  settyp(C, t_VEC); return gerepileupto(av, gcopy(C));
+  settyp(C, t_VEC); return gerepilecopy(av, C);
 }
 
 GEN
@@ -3116,7 +3117,7 @@ rnfequation0(GEN nf, GEN B, long flall)
     w[2] = (long)to_polmod(a, (GEN)w[1]);
     w[3] = lstoi(-k); C = w;
   }
-  return gerepileupto(av, gcopy(C));
+  return gerepilecopy(av, C);
 }
 
 GEN
@@ -3430,7 +3431,8 @@ rnflllgram(GEN nf, GEN pol, GEN order,long prec)
 GEN
 rnfpolred(GEN nf, GEN pol, long prec)
 {
-  long av=avma,tetpil,i,j,k,n,N, vpol = varn(pol);
+  ulong av = avma;
+  long i,j,k,n,N, vpol = varn(pol);
   GEN id,id2,newid,newor,p1,p2,al,newpol,w,z;
   GEN bnf,zk,newideals,ideals,order,neworder;
 
@@ -3484,7 +3486,7 @@ rnfpolred(GEN nf, GEN pol, long prec)
     w[j]=(long)newpol;
     if (DEBUGLEVEL>=4) outerr(newpol);
   }
-  tetpil=avma; return gerepile(av,tetpil,gcopy(w));
+  return gerepilecopy(av,w);
 }
 
 extern GEN vecpol_to_mat(GEN v, long n);
@@ -3541,5 +3543,5 @@ makebasis(GEN nf,GEN pol)
   p1=cgetg(4,t_VEC);
   p1[1]=(long)polabs;
   p1[2]=(long)B;
-  p1[3]=(long)rnf; return gerepileupto(av, gcopy(p1));
+  p1[3]=(long)rnf; return gerepilecopy(av, p1);
 }

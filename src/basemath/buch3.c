@@ -300,7 +300,7 @@ buchrayall(GEN bnf,GEN module,long flag)
       { clg = cgetg(4,t_VEC); clg[3] = (long)genplus; }
     clg[1] = mael(bigres,1,1);
     clg[2] = (long)cyc;
-    if (!(flag & nf_INIT)) return gerepileupto(av,gcopy(clg));
+    if (!(flag & nf_INIT)) return gerepilecopy(av,clg);
     y = cgetg(7,t_VEC);
     y[1] = lcopy(bnf);
     y[2] = lcopy(bid);
@@ -866,7 +866,7 @@ minimforunits(GEN nf, long BORNE, long stockmax)
   }
   if (DEBUGLEVEL>=2){ fprintferr("\n"); flusherr(); }
   k = (s<stockmax)? s:stockmax; setlg(S,k+1);
-  S = gerepileupto(av, gcopy(S));
+  S = gerepilecopy(av, S);
   u = cgetg(4,t_VEC);
   u[1] = lstoi(s<<1);
   u[2] = lstoi(normax);
@@ -1016,7 +1016,7 @@ compute_M0(GEN M_star,long N)
           }
 	}
       }
-      if (!M0) avma = av; else M0 = gerepileupto(av, gcopy(M0));
+      if (!M0) avma = av; else M0 = gerepilecopy(av, M0);
     }
   }
   for (i=1;i<=4;i++) delete_var();
@@ -1402,7 +1402,7 @@ conductor(GEN bnr, GEN H, long all)
       if (all < 0) { avma = av; return gzero; }
     }
   if (all < 0) { avma = av; return gun; }
-  if (!all) return gerepileupto(av, gcopy(mod));
+  if (!all) return gerepilecopy(av, mod);
 
   bnr2 = buchrayall(bnf,mod,nf_INIT | nf_GEN);
   p1 = cgetg(4,t_VEC);
@@ -1442,7 +1442,7 @@ rnfnormgroup0(GEN bnr, GEN polrel, GEN rnf)
     if (rnf) return NULL;
     err(talker,"not an Abelian extension in rnfnormgroup?");
   }
-  if (!rnf && !k) return gerepileupto(av, gcopy(group));
+  if (!rnf && !k) return gerepilecopy(av, group);
 
   polreldisc=discsr(polrel);
 
@@ -1782,7 +1782,7 @@ rayclassnolist(GEN bnf,GEN lists)
       L[j] = lmulii(h, dethnf_i(hnf(m)));
     }
   }
-  return gerepileupto(av, gcopy(Llist));
+  return gerepilecopy(av, Llist);
 }
 
 static long
@@ -1963,7 +1963,7 @@ LLDISCRAY:
       d[jj] = (long)z;
     }
   }
-  return gerepileupto(av, gcopy(dlist));
+  return gerepilecopy(av, dlist);
 }
 
 #define SHLGVINT 15
@@ -2045,7 +2045,7 @@ zsimpjoin(GEN bidsimp, GEN bidp, GEN dummyfa, GEN matunit)
   for (i=1; i<c; i++) cyc[i] = coeff(met,i,i);
   y[2] = (long)cyc;
   y[4] = (long)vconcat((GEN)bidsimp[4],matunit);
-  return gerepileupto(av, gcopy(y));
+  return gerepilecopy(av, y);
 }
 
 static GEN
@@ -2157,7 +2157,7 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
   long degk,i,j,k,p2s,lfa,lp1,sqbou,cex, allarch;
   long ffs,fs,resp,flbou,nba, k2,karch,kka,nbarch,jjj,jj,square;
   long ii2,ii,ly,clhray,lP,ep,S,clhss,normps,normi,nz,r1,R1,n,c;
-  ulong q, av0 = avma, av,av1,lim,tetpil;
+  ulong q, av0 = avma, av,av1,lim;
   GEN nf,p,z,p1,p2,p3,fa,pr,normp,ideal,bidp,z2,matarchunit;
   GEN funits,racunit,embunit,sous,clh,sousray,raylist;
   GEN clhrayall,discall,faall,Id,idealrel,idealrelinit;
@@ -2224,7 +2224,7 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
     {
       if (DEBUGLEVEL>1) fprintferr("\nStarting rayclassno computations\n");
       flbou = 1;
-      tetpil = avma; z = gerepile(av,tetpil,gcopy(z));
+      z = gerepilecopy(av,z);
       av1 = avma; raylist = bigcgetvec(bound);
       for (i=1; i<=bound; i++)
       {
@@ -2232,7 +2232,7 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
         sousray = rayclassnointernarch(sous,clh,matarchunit);
 	putcompobig(raylist,i,sousray);
       }
-      tetpil = avma; raylist = gerepile(av1,tetpil,gcopy(raylist));
+      raylist = gerepilecopy(av1,raylist);
       z2 = bigcgetvec(sqbou);
       for (i=1; i<=sqbou; i++)
         putcompobig(z2,i, gcopy(getcompobig(z,i)));
@@ -2295,7 +2295,7 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
       {
 	if (DEBUGLEVEL>2)
           fprintferr("avma = %ld, t(z) = %ld ",avma-bot,taille2(z));
-        z = gerepileupto(av, gcopy(z));
+        z = gerepilecopy(av, z);
       }
       else
       {
@@ -2309,7 +2309,7 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
   if (!flbou)
   {
     if (DEBUGLEVEL>1) fprintferr("\nStarting rayclassno computations\n");
-    z = gerepileupto(av, gcopy(z));
+    z = gerepilecopy(av, z);
     av1 = avma; raylist = bigcgetvec(bound);
     for (i=1; i<=bound; i++)
     {
@@ -2320,7 +2320,7 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
   }
   if (DEBUGLEVEL>2)
     fprintferr("avma = %ld, t(r) = %ld ",avma-bot,taille2(raylist));
-  raylist = gerepileupto(av, gcopy(raylist));
+  raylist = gerepilecopy(av, raylist);
   if (DEBUGLEVEL>2)
     { fprintferr("avma = %ld ",avma-bot); msgtimer("zidealstarlist"); }
   /* following discrayabslist */
@@ -2464,13 +2464,13 @@ LDISCRAY:
         if(DEBUGMEM>1) err(warnmem,"[2]: discrayabslistarch");
         if (DEBUGLEVEL>2)
           fprintferr("avma = %ld, t(d) = %ld ",avma-bot,taille2(disclist));
-        disclist = gerepileupto(av1, gcopy(disclist));
+        disclist = gerepilecopy(av1, disclist);
         if (DEBUGLEVEL>2) { fprintferr("avma = %ld ",avma-bot); flusherr(); }
       }
     }
   }
   if (DEBUGLEVEL>2) msgtimer("discrayabs");
-  return gerepileupto(av0, gcopy(disclist));
+  return gerepilecopy(av0, disclist);
 }
 
 GEN
@@ -2521,7 +2521,8 @@ hnflistdivise(GEN list,GEN h)
 static GEN
 subgroupcond(GEN bnr, long indexbound)
 {
-  long av=avma,tetpil,i,j,lgi,lp;
+  ulong av = avma;
+  long i,j,lgi,lp;
   GEN li,p1,lidet,perm,nf,bid,ideal,arch,primelist,listkernels;
 
   checkbnrgen(bnr); bid=(GEN)bnr[2];
@@ -2551,7 +2552,7 @@ subgroupcond(GEN bnr, long indexbound)
   for (i=1; i<lgi; i++) lidet[i]=(long)dethnf_i((GEN)li[i]);
   perm = sindexsort(lidet); p1=li; li=cgetg(lgi,t_VEC);
   for (i=1; i<lgi; i++) li[i] = p1[perm[lgi-i]];
-  tetpil=avma; return gerepile(av,tetpil,gcopy(li));
+  return gerepilecopy(av,li);
 }
 
 GEN

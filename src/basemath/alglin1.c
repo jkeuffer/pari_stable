@@ -283,7 +283,7 @@ concat(GEN x, GEN y)
 
   if (!y)
   {
-    long av = avma, tetpil;
+    ulong av = avma;
     if (tx == t_LIST)
       { lx = lgef(x); i = 2; }
     else if (tx == t_VEC)
@@ -296,7 +296,7 @@ concat(GEN x, GEN y)
     if (i>=lx) err(talker,"trying to concat elements of an empty vector");
     y = (GEN)x[i++];
     for (; i<lx; i++) y = concatsp(y, (GEN)x[i]);
-    tetpil = avma; return gerepile(av,tetpil,gcopy(y));
+    return gerepilecopy(av,y);
   }
   ty = typ(y);
   if (tx==t_LIST || ty==t_LIST) return listconcat(x,y);
@@ -1123,11 +1123,11 @@ gauss_intern(GEN a, GEN b)
       if (low_stack(lim, stack_lim(av1,1)))
       {
         if(DEBUGMEM>1) err(warnmem,"gauss[2]. j=%ld", j);
-        u = gerepileupto(av1, gcopy(u));
+        u = gerepilecopy(av1, u);
       }
     }
   }
-  return gerepileupto(av, gcopy(u));
+  return gerepilecopy(av, u);
 }
 
 GEN
@@ -1290,11 +1290,11 @@ FpM_gauss(GEN a, GEN b, GEN p)
       if (low_stack(lim, stack_lim(av1,1)))
       {
         if(DEBUGMEM>1) err(warnmem,"gauss[2]. j=%ld", j);
-        u = gerepileupto(av1, gcopy(u));
+        u = gerepilecopy(av1, u);
       }
     }
   }
-  return gerepileupto(av, gcopy(u));
+  return gerepilecopy(av, u);
 }
 
 GEN
@@ -1378,7 +1378,7 @@ ZM_inv(GEN M, GEN dM)
  
   }
   if (DEBUGLEVEL>5) msgtimer("ZM_inv done");
-  return gerepileupto(av, gcopy(H));
+  return gerepilecopy(av, H);
 }
 
 /* same as above, M rational */
@@ -2637,13 +2637,14 @@ GEN
 eigen(GEN x, long prec)
 {
   GEN y,rr,p,ssesp,r1,r2,r3;
-  long e,i,k,l,ly,av,tetpil,ex, n = lg(x);
+  long e,i,k,l,ly,ex, n = lg(x);
+  ulong av = avma;
 
   if (typ(x)!=t_MAT) err(typeer,"eigen");
   if (n != 1 && n != lg(x[1])) err(mattype1,"eigen");
   if (n<=2) return gcopy(x);
 
-  av=avma; ex = 16 - bit_accuracy(prec);
+  ex = 16 - bit_accuracy(prec);
   y=cgetg(n,t_MAT);
   p=caradj(x,0,NULL); rr=roots(p,prec);
   for (i=1; i<n; i++)
@@ -2665,8 +2666,8 @@ eigen(GEN x, long prec)
     {
       if (k == n || ly == n)
       {
-        tetpil=avma; setlg(y,ly); /* x may not be diagonalizable */
-        return gerepile(av,tetpil,gcopy(y));
+        setlg(y,ly); /* x may not be diagonalizable */
+        return gerepilecopy(av,y);
       }
       r2 = (GEN)rr[k++];
       r3 = gsub(r1,r2);
@@ -2715,12 +2716,12 @@ det_simple_gauss(GEN a, long inexact)
         if (e > ex) { ex=e; k=j; }
       }
       p1 = gcoeff(a,i,k);
-      if (gcmp0(p1)) return gerepileupto(av, gcopy(p1));
+      if (gcmp0(p1)) return gerepilecopy(av, p1);
     }
     else if (gcmp0(p))
     {
       do k++; while(k<=nbco && gcmp0(gcoeff(a,i,k)));
-      if (k>nbco) return gerepileupto(av, gcopy(p));
+      if (k>nbco) return gerepilecopy(av, p);
     }
     if (k != i)
     {
@@ -2838,7 +2839,7 @@ det(GEN a)
     if (gcmp0(p))
     {
       k=i+1; while (k<=nbco && gcmp0(gcoeff(a,i,k))) k++;
-      if (k>nbco) return gerepileupto(av, gcopy(p));
+      if (k>nbco) return gerepilecopy(av, p);
       swap(a[k], a[i]); s = -s;
       p = gcoeff(a,i,i);
     }

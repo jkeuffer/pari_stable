@@ -369,7 +369,7 @@ ComputeIndex2Subgroup(GEN bnr, GEN C)
     rep[i] = (long)hnf(concatsp(gmul(CU, (GEN)subgrp[i]), Mr));
 
   disable_dbg(-1); 
-  return gerepileupto(av, gcopy(rep));
+  return gerepilecopy(av, rep);
 }
 
 /* Let pr be a prime (pr may divide mod(bnr)), compute the indexes
@@ -487,7 +487,8 @@ static GEN
 FindModulus(GEN dataC, long fl, long *newprec, long prec, long bnd)
 {
   long n, i, narch, nbp, maxnorm, minnorm, N, nbidnn, s, c, j, nbcand;
-  long av = avma, av1, av0, limnorm, tetpil, first = 1, pr;
+  long limnorm, first = 1, pr;
+  ulong av = avma, av1, av0;
   GEN bnr, rep, bnf, nf, f, arch, m, listid, idnormn, bnrm, ImC;
   GEN candD, D, bpr, indpr, sgp, p1, p2, rb;
 
@@ -550,8 +551,7 @@ FindModulus(GEN dataC, long fl, long *newprec, long prec, long bnd)
       nbidnn  = lg(idnormn) - 1;
       for (i = 1; i <= nbidnn; i++)
       {
-	tetpil = avma;
-	rep = gerepile(av1, tetpil, gcopy(rep));
+	rep = gerepilecopy(av1, rep);
 
         /* finite part of the conductor */
 	m[1] = (long)idealmul(nf, f, (GEN)idnormn[i]);
@@ -611,7 +611,7 @@ FindModulus(GEN dataC, long fl, long *newprec, long prec, long bnd)
 		  if (!fl || (gcmp(p1, rb) < 0))
 		  {
 		    rep[5] = (long)InitChar0((GEN)rep[3], *newprec);
-		    return gerepileupto(av, gcopy(rep));
+		    return gerepilecopy(av, rep);
 		  }
 		  if (DEBUGLEVEL >= 2)
 		    fprintferr("Trying to find another modulus...");
@@ -628,13 +628,12 @@ FindModulus(GEN dataC, long fl, long *newprec, long prec, long bnd)
 	    fprintferr("No, we're done!\nModulus = %Z and subgroup = %Z\n",  
 		       gmael3(rep, 1, 2, 1), rep[2]);
 	  rep[5] = (long)InitChar0((GEN)rep[3], *newprec);
-	  return gerepileupto(av, gcopy(rep));
+	  return gerepilecopy(av, rep);
 	}
       }
     }
     /* if necessary compute more ideals */
-    tetpil = avma;
-    rep = gerepile(av0, tetpil, gcopy(rep));
+    rep = gerepilecopy(av0, rep);
 
     minnorm = maxnorm;
     maxnorm <<= 1;
@@ -1093,7 +1092,7 @@ InitChar(GEN bnr, GEN listCR, long prec)
   }
 
   disable_dbg(-1);
-  return gerepileupto(av, gcopy(dataCR));
+  return gerepilecopy(av, dataCR);
 }
 
 /* compute the list of characters to consider for AllStark and
@@ -1188,7 +1187,7 @@ CharNewPrec(GEN dataCR, GEN nf, long prec)
     p1[2] = lexp(gdiv(gmul2n(gmul(gi, Pi), 1), (GEN)p1[3]), prec);
   }
 
-  return gerepileupto(av, gcopy(dataCR));
+  return gerepilecopy(av, dataCR);
 }
 
 /********************************************************************/
@@ -1918,7 +1917,7 @@ ppgamma(long a, long b, long c, long i0, long prec)
     }
   }
 
-  return gerepileupto(av, gcopy(aij));
+  return gerepilecopy(av, aij);
 }
 
 static GEN
@@ -2073,7 +2072,7 @@ GetST(GEN dataCR, long prec)
   rep = cgetg(3, t_VEC);
   rep[1] = (long)S;
   rep[2] = (long)T;
-  return gerepileupto(av, gcopy(rep));
+  return gerepilecopy(av, rep);
 }
 
 /* Given datachi, S(chi) and T(chi), return L(1, chi) if fl = 1,
@@ -2130,7 +2129,7 @@ GetValue(GEN datachi, GEN S, GEN T, long fl, long fl2, long prec)
     if (fl2) rep = gmul(A, rep);
   }
 
- return gerepileupto(av, gcopy(rep));
+ return gerepilecopy(av, rep);
 }
 
 /* return the order and the first non-zero term of L(s, chi0)
@@ -2165,7 +2164,7 @@ GetValue1(GEN bnr, long flag, long prec)
   rep[1] = lstoi(r);
   rep[2] = (long)c;
 
-  return gerepileupto(av, gcopy(rep));
+  return gerepilecopy(av, rep);
 }
 
 /********************************************************************/
@@ -2230,7 +2229,7 @@ RecCoeff2(GEN nf,  GEN beta,  GEN B,  long v,  long prec)
       plg   = gmul(M, cand2);
 
       if (TestOne(plg, beta, B, v, G, N))
-        return gerepileupto(av, gcopy(cand));
+        return gerepilecopy(av, cand);
     }
     avma = av2;
   }
@@ -2376,7 +2375,7 @@ RecCoeff(GEN nf,  GEN pol,  long v, long prec)
     pol[j] = (long)p1;
   }
   pol[j] = un;
-  return gerepileupto(av, gcopy(pol));
+  return gerepilecopy(av, pol);
 }
 
 /*******************************************************************/
@@ -3019,7 +3018,7 @@ LABDOUB:
     }
     
     if (flag < 0)
-      return gerepileupto(av, gcopy(polrelnum));
+      return gerepilecopy(av, polrelnum);
     
     /* we try to recognize this polynomial */
     polrel = RecCoeff(nf, polrelnum, v, newprec);
@@ -3068,7 +3067,7 @@ LABDOUB:
   if (!flag) return gerepileupto(av, rnfpolredabs(nf, polrel, 0, newprec));
 
   /* we just want the polynomial computed */
-  if (flag!=2) return gerepileupto(av, gcopy(polrel));
+  if (flag!=2) return gerepilecopy(av, polrel);
 
   /* we want a reduced absolute polynomial */
   return gerepileupto(av, rnfpolredabs(nf, polrel, 2, newprec));
@@ -3374,5 +3373,5 @@ bnrL1(GEN bnr, GEN sbgrp, long flag, long prec)
   else
     rep = L1;
 
-  return gerepileupto(av, gcopy(rep));
+  return gerepilecopy(av, rep);
 }

@@ -1340,7 +1340,7 @@ zprimestar(GEN nf,GEN pr,GEN ep,GEN x,GEN arch)
   p1[3] = (long)_vec(g0);
   p1[4] = (long)_vec(zsigne(nf,g0,arch));
   p1[5] = un;
-  if (e==1) return gerepileupto(av, gcopy(list));
+  if (e==1) return gerepilecopy(av, list);
 
   a=1; b=2; av1=avma;
   pra = prh; prb = (e==2)? prk: idealpow(nf,pr,gdeux);
@@ -1631,7 +1631,7 @@ zidealstarinitall(GEN nf, GEN ideal,long add_gen)
   y[4] = (long)fa2;
   y[5] = (long)U;
   if (add_gen) p1[3] = (long)compute_gen(nf,u1,gen, y);
-  return gerepileupto(av, gcopy(y));
+  return gerepilecopy(av, y);
 }
 
 GEN
@@ -1649,9 +1649,9 @@ zidealstarinit(GEN nf, GEN ideal)
 GEN
 zidealstar(GEN nf, GEN ideal)
 {
-  long av = avma,tetpil;
+  long av = avma;
   GEN y = zidealstarinitall(nf,ideal,1);
-  tetpil=avma; return gerepile(av,tetpil,gcopy((GEN)y[2]));
+  return gerepilecopy(av,(GEN)y[2]);
 }
 
 GEN
@@ -1814,7 +1814,7 @@ zidealstarinitjoin(GEN nf, GEN bid1, GEN bid2, long add_gen)
   y[4] = (long)liste;
   y[5] = (long)U;
   if (gen) p1[3] = (long)compute_gen(nf,u1,gen, y);
-  return gerepileupto(av,gcopy(y));
+  return gerepilecopy(av,y);
 }
 
 /* bid1: output from 'zidealstarinit' for module m1 (without arch. part)
@@ -1865,7 +1865,7 @@ zidealstarinitjoinarch(GEN nf, GEN bid1, GEN arch, long nba, long add_gen)
   y[4] = (long)liste;
   y[5] = (long)U;
   if (gen) p1[3] = (long)compute_gen(nf,u1,gen, y);
-  return gerepileupto(av,gcopy(y));
+  return gerepilecopy(av,y);
 }
 
 /* calcule la matrice des zinternallog des unites */
@@ -1994,7 +1994,7 @@ ideallistzstarall(GEN bnf,long bound,long flag)
       gerepilemany(av,gptr,do_units?2:1);
     }
   }
-  if (!do_units) return gerepileupto(av0, gcopy(z));
+  if (!do_units) return gerepilecopy(av0, z);
   y = cgetg(3,t_VEC);
   y[1] = lcopy(z);
   lu2 = cgetg(lg(z),t_VEC);
@@ -2065,8 +2065,8 @@ ideallist_arch(GEN nf,GEN list,GEN arch,long flun)
 static GEN
 ideallistarchall(GEN bnf,GEN list,GEN arch,long flag)
 {
-  long av,tetpil,i,j,lp1;
-  long do_units = flag & 2;
+  ulong av;
+  long i,j,lp1, do_units = flag & 2;
   GEN nf = checknf(bnf), p1,p2,p3,racunit,funits,lu2,lu,embunit,z,y;
 
   if (typ(list) != t_VEC || (do_units && lg(list) != 3))
@@ -2100,7 +2100,7 @@ ideallistarchall(GEN bnf,GEN list,GEN arch,long flag)
       p3[j] = lmul(gmael(p1,j,5), vconcat((GEN)p2[j],embunit));
     }
   }
-  tetpil=avma; y[2]=lpile(av,tetpil,gcopy(lu2)); return y;
+  y[2]=lpilecopy(av,lu2); return y;
 }
 
 GEN

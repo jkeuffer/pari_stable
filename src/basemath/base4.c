@@ -485,7 +485,7 @@ mat_ideal_two_elt(GEN nf, GEN x)
   xZ = gcoeff(x,1,1);
   if (gcmp1(xZ))
   {
-    y[1] = lpileupto(av,gcopy(cx));
+    y[1] = lpilecopy(av,cx);
     y[2] = (long)gscalcol(cx,N); return y;
   }
   a = NULL; /* gcc -Wall */
@@ -2014,7 +2014,7 @@ END:
   if (y) aI = arch_mul(aI,y);
   res = cgetg(3,t_VEC);
   res[1] = (long)I;
-  res[2] = (long)aI; return gerepileupto(av, gcopy(res));
+  res[2] = (long)aI; return gerepilecopy(av, res);
 }
 
 GEN
@@ -2728,7 +2728,8 @@ element_powmodpr(GEN nf,GEN x,GEN k,GEN prhall)
 GEN
 nfkermodpr(GEN nf, GEN x, GEN prhall)
 {
-  long i,j,k,r,t,n,m,av0,av,av1,av2,N,lim;
+  ulong av0,av,av1,lim;
+  long i,j,k,r,t,n,m,N;
   GEN c,d,y,unnf,munnf,zeromodp,zeronf,p,pp,prh;
 
   nf=checknf(nf); checkprhall(prhall);
@@ -2769,7 +2770,7 @@ nfkermodpr(GEN nf, GEN x, GEN prhall)
           if (low_stack(lim, stack_lim(av1,1)))
           {
             if (DEBUGMEM>1) err(warnmem,"nfkermodpr, k = %ld / %ld",k,n);
-            av2=avma; x=gerepile(av1,av2,gcopy(x));
+            x=gerepilecopy(av1,x);
           }
 	}
   }
@@ -2788,7 +2789,8 @@ nfkermodpr(GEN nf, GEN x, GEN prhall)
 GEN
 nfsolvemodpr(GEN nf, GEN a, GEN b, GEN prhall)
 {
-  long nbli,nbco,i,j,k,av=avma,tetpil;
+  ulong av = avma;
+  long nbli,nbco,i,j,k;
   GEN aa,x,p,m,u;
 
   nf=checknf(nf); checkprhall(prhall);
@@ -2843,7 +2845,7 @@ nfsolvemodpr(GEN nf, GEN a, GEN b, GEN prhall)
       m=gsub(m,element_mulmodpr(nf,gcoeff(aa,i,j),(GEN)x[j],prhall));
     x[i]=(long)element_divmodpr(nf,m,gcoeff(aa,i,i),prhall);
   }
-  tetpil=avma; return gerepile(av,tetpil,gcopy(x));
+  return gerepilecopy(av,x);
 }
 
 GEN

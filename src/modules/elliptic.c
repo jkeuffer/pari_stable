@@ -142,12 +142,9 @@ smallinitell0(GEN x, GEN y)
 GEN
 smallinitell(GEN x)
 {
-  GEN y;
-  long av,tetpil;
-
-  av=avma; y=cgetg(14,t_VEC);
-  smallinitell0(x,y); tetpil=avma;
-  return gerepile(av,tetpil,gcopy(y));
+  ulong av = avma;
+  GEN y = cgetg(14,t_VEC);
+  smallinitell0(x,y); return gerepilecopy(av,y);
 }
 
 GEN
@@ -358,19 +355,20 @@ initell0(GEN x, long prec)
 GEN
 initell(GEN x, long prec)
 {
-  long av=avma;
-  return gerepileupto(av, gcopy(initell0(x,prec)));
+  ulong av = avma;
+  return gerepilecopy(av, initell0(x,prec));
 }
 
 GEN
 coordch(GEN e, GEN ch)
 {
   GEN y,p1,p2,v,v2,v3,v4,v6,r,s,t,u;
-  long av,tetpil,i,lx = checkell(e);
+  long i,lx = checkell(e);
+  ulong av = avma;
 
   checkch(ch);
   u=(GEN)ch[1]; r=(GEN)ch[2]; s=(GEN)ch[3]; t=(GEN)ch[4];
-  av=avma; y=cgetg(lx,t_VEC);
+  y=cgetg(lx,t_VEC);
   v=ginv(u); v2=gsqr(v); v3=gmul(v,v2);v4=gsqr(v2); v6=gsqr(v3);
   y[1] = lmul(v,gadd((GEN)e[1],gmul2n(s,1)));
   y[2] = lmul(v2,gsub(gadd((GEN)e[2],gmulsg(3,r)),gmul(s,gadd((GEN)e[1],s))));
@@ -423,7 +421,7 @@ coordch(GEN e, GEN ch)
       }
     }
   }
-  tetpil=avma; return gerepile(av,tetpil,gcopy(y));
+  return gerepilecopy(av,y);
 }
 
 static GEN
@@ -443,11 +441,12 @@ GEN
 pointch(GEN x, GEN ch)
 {
   GEN y,v,v2,v3,mor,r,s,t,u;
-  long av,tetpil,tx,lx=lg(x),i;
+  long tx,lx=lg(x),i;
+  ulong av = avma;
 
   checkpt(x); checkch(ch);
   if (lx < 2) return gcopy(x);
-  av=avma; u=(GEN)ch[1]; r=(GEN)ch[2]; s=(GEN)ch[3]; t=(GEN)ch[4];
+  u=(GEN)ch[1]; r=(GEN)ch[2]; s=(GEN)ch[3]; t=(GEN)ch[4];
   tx=typ(x[1]); v=ginv(u); v2=gsqr(v); v3=gmul(v,v2); mor=gneg_i(r);
   if (is_matvec_t(tx))
   {
@@ -457,7 +456,7 @@ pointch(GEN x, GEN ch)
   }
   else
     y = pointch0(x,v2,v3,mor,s,t);
-  tetpil=avma; return gerepile(av,tetpil,gcopy(y));
+  return gerepilecopy(av,y);
 }
 
 /* Exactness of lhs and rhs in the following depends in non-obvious ways
@@ -658,7 +657,7 @@ powell(GEN e, GEN z, GEN n)
   s=signe(n);
   if (!s) { y=cgetg(2,t_VEC); y[1]=zero; return y; }
   if (s < 0) { n=negi(n); z = invell(e,z); }
-  if (is_pm1(n)) { tetpil=avma; return gerepile(av,tetpil,gcopy(z)); }
+  if (is_pm1(n)) return gerepilecopy(av,z);
 
   y=cgetg(2,t_VEC); y[1]=zero;
   for (i=lgefint(n)-1; i>2; i--)
@@ -679,7 +678,8 @@ GEN
 mathell(GEN e, GEN x, long prec)
 {
   GEN y,p1,p2, *pdiag;
-  long av=avma,tetpil,lx=lg(x),i,j,tx=typ(x);
+  long lx=lg(x),i,j,tx=typ(x);
+  ulong av = avma;
 
   if (!is_vec_t(tx)) err(elliper1);
   lx=lg(x); y=cgetg(lx,t_MAT); pdiag=(GEN*) new_chunk(lx);
@@ -698,7 +698,7 @@ mathell(GEN e, GEN x, long prec)
       p1[j]=(long)p2; coeff(y,i,j)=(long)p2;
     }
   }
-  tetpil=avma; return gerepile(av,tetpil,gcopy(y));
+  return gerepilecopy(av,y);
 }
 
 static GEN
@@ -2145,7 +2145,7 @@ lseriesell(GEN e, GEN s, GEN A, long prec)
     if (low_stack(lim, stack_lim(av1,1)))
     {
       if(DEBUGMEM>1) err(warnmem,"lseriesell");
-      tetpil=avma; z=gerepile(av1,tetpil,gcopy(z));
+      z = gerepilecopy(av1,z);
     }
   }
   tetpil=avma; return gerepile(av,tetpil,gdiv(z,gs));
@@ -2595,8 +2595,7 @@ cumulev(GEN *vtotal, GEN u, GEN r, GEN s, GEN t)
     v3[3] = ladd(gmul((GEN)v[1], s), (GEN)v[3]);
     v3[4] = ladd((GEN)v[4], gmul(temp, gadd(gmul((GEN)v[1], t), gmul((GEN)v[3], r))));
 
-    tetpil = avma;
-    v3 = gerepile(av, tetpil, gcopy(v3));
+    v3 = gerepilecopy(av, v3);
   }
   *vtotal = v3;
 }
@@ -2850,7 +2849,7 @@ torsellnagelllutz(GEN e)
   w[1] = lstoi(t);
   w[2] = (long)w2;
   w[3] = (long)w3;
-  return gerepileupto(av, gcopy(w));
+  return gerepilecopy(av, w);
 }
 
 /* Using Doud's algorithm */

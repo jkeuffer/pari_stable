@@ -3517,7 +3517,7 @@ mpqs(GEN N)
       if (mpqs_diffptr == diffptr) mpqs_diffptr = NULL;
       all_clean = 1;
       /* nuisance: fact may not be safe for a gcopy(), and thus
-	 gerepileupto(av, gcopy(fact)) will usually segfault on
+	 gerepilecopy(av, fact) will usually segfault on
 	 one of the NULL markers.  However, it is already a nice
 	 connected object, and it resides already the top of the
 	 stack, so... :^) --GN */

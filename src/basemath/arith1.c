@@ -221,7 +221,8 @@ GEN
 znstar(GEN n)
 {
   GEN p1,z,q,u,v,d,list,ep,h,gen,moduli,p,a;
-  long i,j,nbp,sizeh,av,tetpil;
+  long i,j,nbp,sizeh;
+  ulong av;
 
   if (typ(n) != t_INT) err(arither1);
   if (!signe(n))
@@ -294,7 +295,7 @@ znstar(GEN n)
   q=gun; for (i=1; i<=sizeh && !gcmp1((GEN)h[i]); i++) q=mulii(q,(GEN)h[i]);
   setlg(h,i); setlg(gen,i); z=cgetg(4,t_VEC);
   z[1]=(long)q; z[2]=(long)h; z[3]=(long)gen;
-  tetpil=avma; return gerepile(av,tetpil,gcopy(z));
+  return gerepilecopy(av,z);
 }
 
 /*********************************************************************/
@@ -1811,7 +1812,8 @@ sfcont(GEN x, GEN x1, long k)
 static GEN
 sfcont2(GEN b, GEN x, long k)
 {
-  long l1 = lg(b), tx = typ(x), i,tetpil, av = avma;
+  ulong av = avma;
+  long l1 = lg(b), tx = typ(x), i;
   GEN y,p1;
 
   if (k)
@@ -1840,8 +1842,8 @@ sfcont2(GEN b, GEN x, long k)
     y[i] = lfloor(x);
     p1 = gsub(x,(GEN)y[i]);
   }
-  setlg(y,i); tetpil=avma;
-  return gerepile(av,tetpil,gcopy(y));
+  setlg(y,i); 
+  return gerepilecopy(av,y);
 }
 
 GEN
@@ -1948,7 +1950,7 @@ bestappr(GEN x, GEN k)
       if (cmpii((GEN)x[2],k) <= 0)
       {
         if (av==avma) return gcopy(x);
-        tetpil=avma; return gerepile(av,tetpil,gcopy(x));
+        return gerepilecopy(av,x);
       }
 
     case t_REAL:

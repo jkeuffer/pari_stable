@@ -438,7 +438,8 @@ prodinf0(entree *ep, GEN a, char *ch, long flag, long prec)
 GEN
 prodinf(entree *ep, GEN a, char *ch, long prec)
 {
-  long fl,G,tetpil, av0 = avma, av,lim;
+  ulong av0 = avma, av,lim;
+  long fl,G;
   GEN p1,x = realun(prec);
 
   if (typ(a) != t_INT) err(talker,"non integral index in prodinf");
@@ -458,14 +459,14 @@ prodinf(entree *ep, GEN a, char *ch, long prec)
     }
     ep->value = (void*)a;
   }
-  pop_val(ep); tetpil=avma;
-  return gerepile(av0,tetpil,gcopy(x));
+  pop_val(ep); return gerepilecopy(av0,x);
 }
 
 GEN
 prodinf1(entree *ep, GEN a, char *ch, long prec)
 {
-  long fl,G,tetpil, av0 = avma, av,lim;
+  ulong av0 = avma, av,lim;
+  long fl,G;
   GEN p1,p2,x = realun(prec);
 
   if (typ(a) != t_INT) err(talker,"non integral index in prodinf1");
@@ -485,15 +486,15 @@ prodinf1(entree *ep, GEN a, char *ch, long prec)
     }
     ep->value = (void*)a;
   }
-  pop_val(ep); tetpil=avma;
-  return gerepile(av0,tetpil,gcopy(x));
+  pop_val(ep); return gerepilecopy(av0,x);
 }
 
 GEN
 prodeuler(entree *ep, GEN ga, GEN gb, char *ch, long prec)
 {
   long prime[] = {evaltyp(t_INT)|m_evallg(3), evalsigne(1)|evallgefint(3), 0};
-  long a,b,tetpil, av,av0 = avma, lim;
+  long a,b;
+  ulong av,av0 = avma, lim;
   GEN p1,x = realun(prec);
   byteptr p;
   
@@ -510,7 +511,7 @@ prodeuler(entree *ep, GEN ga, GEN gb, char *ch, long prec)
     if (low_stack(lim, stack_lim(av,1)))
     {
       if (DEBUGMEM>1) err(warnmem,"prodeuler");
-      x = gerepileupto(av, gcopy(x));
+      x = gerepilecopy(av, x);
     }
     if (ep->value == prime)
       prime[2] += *p++;
@@ -523,15 +524,15 @@ prodeuler(entree *ep, GEN ga, GEN gb, char *ch, long prec)
     p1 = lisexpr(ch); if (did_break()) err(breaker,"prodeuler");
     x = gmul(x,p1);
   }
-  pop_val(ep); tetpil=avma;
-  return gerepile(av0,tetpil,gcopy(x));
+  pop_val(ep); return gerepilecopy(av0,x);
 }
 
 GEN
 direulerall(entree *ep, GEN ga, GEN gb, char *ch, GEN c)
 {
   long prime[] = {evaltyp(t_INT)|m_evallg(3), evalsigne(1)|evallgefint(3), 0};
-  long av0 = avma,av,tetpil,lim = (av0+bot)>>1, p,n,i,j,k,tx,lx,a,b;
+  ulong av0 = avma,av, lim = (av0+bot)>>1;
+  long p,n,i,j,k,tx,lx,a,b;
   GEN x,y,s,polnum,polden;
   byteptr d;
 
@@ -610,13 +611,12 @@ direulerall(entree *ep, GEN ga, GEN gb, char *ch, GEN c)
     if (low_stack(lim, stack_lim(av,1)))
     {
       if (DEBUGMEM>1) err(warnmem,"direuler");
-      x = gerepileupto(av, gcopy(x));
+      x = gerepilecopy(av, x);
     }
     p += *d++; if (!*d) err(primer1);
     prime[2] = p;
   }
-  pop_val(ep); tetpil=avma;
-  return gerepile(av0,tetpil,gcopy(x));
+  pop_val(ep); return gerepilecopy(av0,x);
 }
 
 GEN

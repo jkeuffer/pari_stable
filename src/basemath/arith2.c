@@ -1155,25 +1155,27 @@ comp_gen(GEN z,GEN x,GEN y)
 static GEN
 compimag0(GEN x, GEN y, int raw)
 {
-  ulong tx = typ(x), av = avma, tetpil;
+  ulong tx = typ(x), av = avma;
   GEN z;
 
   if (typ(y) != tx || tx!=t_QFI) err(typeer,"composition");
   if (cmpii((GEN)x[1],(GEN)y[1]) > 0) { z=x; x=y; y=z; }
-  z=cgetg(4,t_QFI); comp_gen(z,x,y); tetpil=avma;
-  return gerepile(av,tetpil,raw? gcopy(z): redimag(z));
+  z=cgetg(4,t_QFI); comp_gen(z,x,y);
+  if (raw) return gerepilecopy(av,z);
+  return gerepileupto(av, redimag(z));
 }
 
 static GEN
 compreal0(GEN x, GEN y, int raw)
 {
-  ulong tx = typ(x), av = avma, tetpil;
+  ulong tx = typ(x), av = avma;
   GEN z;
 
   if (typ(y) != tx || tx!=t_QFR) err(typeer,"composition");
   z=cgetg(5,t_QFR); comp_gen(z,x,y);
-  z[4]=laddrr((GEN)x[4],(GEN)y[4]); tetpil=avma;
-  return gerepile(av,tetpil, raw? gcopy(z): redreal(z));
+  z[4]=laddrr((GEN)x[4],(GEN)y[4]);
+  if (raw) return gerepilecopy(av,z);
+  return gerepileupto(av,redreal(z));
 }
 
 GEN
@@ -1197,23 +1199,25 @@ compraw(GEN x, GEN y)
 GEN
 sqcompimag0(GEN x, long raw)
 {
-  long av = avma, tetpil;
+  long av = avma;
   GEN z = cgetg(4,t_QFI);
 
   if (typ(x)!=t_QFI) err(typeer,"composition");
-  sq_gen(z,x); tetpil=avma;
-  return gerepile(av,tetpil,raw? gcopy(z): redimag(z));
+  sq_gen(z,x);
+  if (raw) return gerepilecopy(av,z);
+  return gerepileupto(av,redimag(z));
 }
 
 static GEN
 sqcompreal0(GEN x, long raw)
 {
-  long av = avma, tetpil;
+  long av = avma;
   GEN z = cgetg(5,t_QFR);
 
   if (typ(x)!=t_QFR) err(typeer,"composition");
-  sq_gen(z,x); z[4]=lshiftr((GEN)x[4],1); tetpil=avma;
-  return gerepile(av,tetpil,raw? gcopy(z): redreal(z));
+  sq_gen(z,x); z[4]=lshiftr((GEN)x[4],1);
+  if (raw) return gerepilecopy(av,z);
+  return gerepileupto(av,redreal(z));
 }
 
 GEN
@@ -1699,7 +1703,7 @@ redreal0(GEN x, long flag, GEN D, GEN isqrtD, GEN sqrtD)
 GEN
 comprealform5(GEN x, GEN y, GEN D, GEN sqrtD, GEN isqrtD)
 {
-  long av = avma,tetpil;
+  ulong av = avma;
   GEN z = cgetg(6,t_VEC); comp_gen(z,x,y);
   if (x == y)
   {
@@ -1712,7 +1716,7 @@ comprealform5(GEN x, GEN y, GEN D, GEN sqrtD, GEN isqrtD)
     z[5] = lmulrr((GEN)x[5],(GEN)y[5]);
   }
   fix_expo(z); z = redrealform5(z,D,sqrtD,isqrtD);
-  tetpil=avma; return gerepile(av,tetpil,gcopy(z));
+  return gerepilecopy(av,z);
 }
 
 /* assume n!=0 */
@@ -1751,9 +1755,9 @@ powrealform(GEN x, GEN n)
 GEN
 redimag(GEN x)
 {
-  long av=avma, tetpil, fl;
+  long av=avma, fl;
   do x = rhoimag0(x, &fl); while (fl == 0);
-  tetpil=avma; x = gerepile(av,tetpil,gcopy(x));
+  x = gerepilecopy(av,x);
   if (fl == 2) setsigne(x[2], -signe(x[2]));
   return x;
 }
@@ -1785,7 +1789,8 @@ rhorealnod(GEN x, GEN isqrtD)
 GEN
 qfbred0(GEN x, long flag, GEN D, GEN isqrtD, GEN sqrtD)
 {
-  long tx=typ(x),av,tetpil,fl;
+  long tx=typ(x),fl;
+  ulong av;
 
   if (!is_qf_t(tx)) err(talker,"not a quadratic form in qfbred");
   if (!D) D = qf_disc(x,NULL,NULL);
@@ -1797,8 +1802,8 @@ qfbred0(GEN x, long flag, GEN D, GEN isqrtD, GEN sqrtD)
     case -1:
       if (!flag) return  redimag(x);
       if (flag !=1) err(flagerr,"qfbred");
-      av=avma; x = rhoimag0(x,&fl); tetpil=avma;
-      x = gerepile(av,tetpil,gcopy(x));
+      av=avma; x = rhoimag0(x,&fl);
+      x = gerepilecopy(av,x);
       if (fl == 2) setsigne(x[2], -signe(x[2]));
       return x;
   }

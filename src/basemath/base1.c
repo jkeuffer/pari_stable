@@ -688,7 +688,7 @@ galoisapply(GEN nf, GEN aut, GEN x)
 	                             : ladd((GEN)p1[1], p);
       y[2]=(long)p1;
       y[5]=(long)centermod(galoisapply(nf,aut,(GEN)x[5]), p);
-      tetpil=avma; return gerepile(av,tetpil,gcopy(y));
+      return gerepilecopy(av,y);
 
     case t_COL:
       N=degpol(pol);
@@ -723,7 +723,8 @@ get_nfpol(GEN x, GEN *nf)
 static GEN
 nfiso0(GEN a, GEN b, long fliso)
 {
-  long av=avma,tetpil,n,m,i,vb,lx;
+  ulong av = avma;
+  long n,m,i,vb,lx;
   GEN nfa,nfb,p1,y,la,lb;
 
   a = get_nfpol(a, &nfa);
@@ -796,7 +797,7 @@ nfiso0(GEN a, GEN b, long fliso)
     if (lb) p1 = poleval(p1, gmul(polx[vb],lb));
     y[i] = la? ldiv(p1,la): (long)p1;
   }
-  tetpil=avma; return gerepile(av,tetpil,gcopy(y));
+  return gerepilecopy(av,y);
 }
 
 GEN
@@ -1256,7 +1257,7 @@ initalgall0(GEN x, long flag, long prec)
     res[1]=(long)nf; nf = res;
     res[2]=lead? ldiv(rev,lead): (long)rev;
   }
-  return gerepileupto(av, gcopy(nf));
+  return gerepilecopy(av, nf);
 }
 
 GEN
@@ -1326,7 +1327,7 @@ nfnewprec(GEN nf, long prec)
   mat[1]=(long)M;
   if (typ(nf[8]) != t_INT) mat[2]=(long)MC; /* not a small nf */
   mat[3]=(long)mulmat_real(MC,M);
-  return gerepileupto(av, gcopy(y));
+  return gerepilecopy(av, y);
 }
 
 static long
@@ -1364,7 +1365,8 @@ is_primitive_root(GEN nf, GEN fa, GEN x, long w)
 GEN
 rootsof1(GEN nf)
 {
-  long av,tetpil,N,k,i,ws,prec;
+  ulong av;
+  long N,k,i,ws,prec;
   GEN algun,p1,y,R1,d,list,w;
 
   y=cgetg(3,t_VEC); av=avma; nf=checknf(nf);
@@ -1404,8 +1406,7 @@ rootsof1(GEN nf)
     p1 = is_primitive_root(nf,d,p1,ws);
     if (p1)
     {
-      tetpil=avma;
-      y[2]=lpile(av,tetpil,gcopy(p1));
+      y[2]=lpilecopy(av,p1);
       y[1]=lstoi(ws); return y;
     }
   }
@@ -1633,7 +1634,7 @@ initzeta(GEN pol, long prec)
       ck_odd[k] = ladd((GEN)ck_odd[k], gadd(p1,p2));
     }
   }
-  tetpil=avma; aij=gerepile(av,tetpil,gcopy(aij));
+  aij=gerepilecopy(av,aij);
   if (DEBUGLEVEL>=2) msgtimer("a(i,j)");
   p1=cgetg(5,t_VEC);
   p1[1]=lstoi(r1); p1[2]=lstoi(r2); p1[3]=lstoi(imax); p1[4]=(long)bnf;

@@ -1781,8 +1781,7 @@ mppsi(GEN z)
     k++;
   } while(expo(s) - expo(b) < num);
 
-  tail = avma;
-  return gerepile(head, tail, gcopy(s));
+  return gerepilecopy(head, s);
 }
 #endif
 
@@ -1869,8 +1868,7 @@ cxpsi(GEN z, long prec) /* by Manfred Radimersky */
     avma = tail;
   } while(bord < nubi << 1);
 
-  tail = avma;
-  return gerepile(head, tail, gcopy(s));
+  return gerepilecopy(head, s);
 }
 #endif
 

@@ -943,7 +943,7 @@ PRECPB:
     }
   }
   if (DEBUGLEVEL>3) fprintferr("\n");
-  return gerepileupto(av, gcopy(h));
+  return gerepilecopy(av, h);
 }
 
 static GEN
@@ -1148,7 +1148,7 @@ lllgram1(GEN x, long prec)
     }
   }
   while (k<=n);
-  tetpil=avma; return gerepile(av,tetpil,gcopy(u));
+  return gerepilecopy(av,u);
 }
 
 GEN
@@ -1469,7 +1469,7 @@ lindep2(GEN x, long bit)
   }
   p1 = (GEN)gmul(p2,lllint(p2))[1];
   p1[0] = evaltyp(t_VEC) | evallg(lx);
-  return gerepileupto(av, gcopy(p1));
+  return gerepilecopy(av, p1);
 }
 
 #define quazero(x) (gcmp0(x) || (typ(x)==t_REAL && expo(x) < EXP))
@@ -1582,7 +1582,7 @@ lindep(GEN x, long prec)
     if (low_stack(lim, stack_lim(av,1)))
     {
       if(DEBUGMEM>1) err(warnmem,"lindep");
-      b = (GEN*)gerepileupto(av0, gcopy((GEN)b));
+      b = (GEN*)gerepilecopy(av0, (GEN)b);
       av1 = avma;
     }
   }
@@ -2727,7 +2727,7 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
         if (low_stack(lim, stack_lim(av1,1)))
         {
           if(DEBUGMEM>1) err(warnmem,"minim00, rank>=%ld",s);
-          invp = gerepileupto(av1, gcopy(invp));
+          invp = gerepilecopy(av1, invp);
         }
       }
     }

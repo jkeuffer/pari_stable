@@ -399,7 +399,7 @@ matqpascal(long n, GEN q)
     for (   ; j<=i; j++) coeff(m,i,j) = coeff(m,i,i+1-j);
     for (   ; j<=n; j++) coeff(m,i,j) = zero;
   }
-  return gerepileupto(av, gcopy(m));
+  return gerepilecopy(av, m);
 }
 
 /********************************************************************/
@@ -411,13 +411,14 @@ matqpascal(long n, GEN q)
 GEN
 laplace(GEN x)
 {
-  long i,l,ec,av,tetpil;
+  ulong av = avma;
+  long i,l,ec;
   GEN y,p1;
 
   if (typ(x)!=t_SER) err(talker,"not a series in laplace");
   if (gcmp0(x)) return gcopy(x);
 
-  av=avma; ec=valp(x);
+  ec = valp(x);
   if (ec<0) err(talker,"negative valuation in laplace");
   l=lg(x); y=cgetg(l,t_SER);
   p1=mpfact(ec); y[1]=x[1];
@@ -426,7 +427,7 @@ laplace(GEN x)
     y[i]=lmul(p1,(GEN)x[i]);
     ec++; p1=mulsi(ec,p1);
   }
-  tetpil=avma; return gerepile(av,tetpil,gcopy(y));
+  return gerepilecopy(av,y);
 }
 
 /********************************************************************/
@@ -707,7 +708,8 @@ gtostr(GEN x)
 GEN
 gtoset(GEN x)
 {
-  long i,c,av,tetpil,tx,lx;
+  ulong av;
+  long i,c,tx,lx;
   GEN y;
 
   if (!x) return cgetg(1, t_VEC);
@@ -725,8 +727,7 @@ gtoset(GEN x)
   c=1;
   for (i=2; i<lx; i++)
     if (!gegal((GEN)y[i], (GEN)y[c])) y[++c] = y[i];
-  tetpil=avma; setlg(y,c+1);
-  return gerepile(av,tetpil,gcopy(y));
+  setlg(y,c+1); return gerepilecopy(av,y);
 }
 
 long
@@ -780,29 +781,27 @@ setunion(GEN x, GEN y)
 GEN
 setintersect(GEN x, GEN y)
 {
-  long av=avma,tetpil,i,lx,c;
+  long av=avma,i,lx,c;
   GEN z;
 
   if (!setisset(x) || !setisset(y)) err(talker,"not a set in setintersect");
   lx=lg(x); z=cgetg(lx,t_VEC); c=1;
   for (i=1; i<lx; i++)
     if (setsearch(y, (GEN)x[i], 0)) z[c++] = x[i];
-  tetpil=avma; setlg(z,c);
-  return gerepile(av,tetpil,gcopy(z));
+  setlg(z,c); return gerepilecopy(av,z);
 }
 
 GEN
 setminus(GEN x, GEN y)
 {
-  long av=avma,tetpil,i,lx,c;
+  long av=avma,i,lx,c;
   GEN z;
 
   if (!setisset(x) || !setisset(y)) err(talker,"not a set in setminus");
   lx=lg(x); z=cgetg(lx,t_VEC); c=1;
   for (i=1; i<lx; i++)
     if (setsearch(y, (GEN)x[i], 1)) z[c++] = x[i];
-  tetpil=avma; setlg(z,c);
-  return gerepile(av,tetpil,gcopy(z));
+  setlg(z,c); return gerepilecopy(av,z);
 }
 
 /***********************************************************************/
@@ -825,14 +824,14 @@ dirval(GEN x)
 GEN
 dirmul(GEN x, GEN y)
 {
-  long lx,ly,lz,dx,dy,av,tetpil,i,j,k,lim;
+  ulong av = avma, lim = stack_lim(av,1);
+  long lx,ly,lz,dx,dy,i,j,k;
   GEN z,p1;
 
   if (typ(x)!=t_VEC || typ(y)!=t_VEC) err(talker,"not a dirseries in dirmul");
-  av=avma; dx=dirval(x); dy=dirval(y); lx=lg(x); ly=lg(y);
+  dx=dirval(x); dy=dirval(y); lx=lg(x); ly=lg(y);
   if (ly-dy<lx-dx) { z=y; y=x; x=z; lz=ly; ly=lx; lx=lz; lz=dy; dy=dx; dx=lz; }
   lz=min(lx*dy,ly*dx);
-  lim = stack_lim(av,1);
   z=cgetg(lz,t_VEC); for (i=1; i<lz; i++) z[i]=zero;
   for (j=dx; j<lx; j++)
   {
@@ -852,20 +851,21 @@ dirmul(GEN x, GEN y)
     if (low_stack(lim, stack_lim(av,1)))
     {
       if (DEBUGLEVEL) fprintferr("doubling stack in dirmul\n");
-      z = gerepileupto(av,gcopy(z));
+      z = gerepilecopy(av,z);
     }
   }
-  tetpil=avma; return gerepile(av,tetpil,gcopy(z));
+  return gerepilecopy(av,z);
 }
 
 GEN
 dirdiv(GEN x, GEN y)
 {
-  long lx,ly,lz,dx,dy,av,tetpil,i,j;
+  ulong av = avma;
+  long lx,ly,lz,dx,dy,i,j;
   GEN z,p1;
 
   if (typ(x)!=t_VEC || typ(y)!=t_VEC) err(talker,"not a dirseries in dirmul");
-  av=avma; dx=dirval(x); dy=dirval(y); lx=lg(x); ly=lg(y);
+  dx=dirval(x); dy=dirval(y); lx=lg(x); ly=lg(y);
   if (dy!=1) err(talker,"not an invertible dirseries in dirdiv");
   lz=min(lx,ly*dx); p1=(GEN)y[1];
   if (!gcmp1(p1)) { y=gdiv(y,p1); x=gdiv(x,p1); }
@@ -887,7 +887,7 @@ dirdiv(GEN x, GEN y)
       }
     }
   }
-  tetpil=avma; return gerepile(av,tetpil,gcopy(z));
+  return gerepilecopy(av,z);
 }
 
 /*************************************************************************/

@@ -413,7 +413,7 @@ nffactormod0(GEN nf, GEN x, GEN pr)
   for (j = 1; j < l; j++)
     mael(rep, 1, j) = (long)unifpol(nf, gmael(rep, 1, j), 1);
 
-  return gerepileupto(av, gcopy(rep));
+  return gerepilecopy(av, rep);
 }
 
 GEN
@@ -1337,5 +1337,5 @@ rnfdedekind(GEN nf,GEN T,GEN pr)
 				      idealpows(nf, prinvp, d))); 
     base[2] = ldiv((GEN)base[2], p); /* cancel the factor p */
   }
-  res[2]=(long)base; return gerepileupto(av, gcopy(res));
+  res[2]=(long)base; return gerepilecopy(av, res);
 }

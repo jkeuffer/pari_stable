@@ -1211,16 +1211,15 @@ gcopy_av(GEN x, GEN *AVMA)
   long i,lx,tx=typ(x);
   GEN y;
 
+  if (tx == t_SMALL) return (*--AVMA = x);
+  lx = lg(x); *AVMA = y = *AVMA - lx;
   if (! is_recursive_t(tx))
   {
-    lx = (tx==t_INT)? lgefint(x): lg(x);
-    *AVMA = y = *AVMA - lx;
     for (i=0; i<lx; i++) y[i] = x[i];
   }
   else
   {
-    lx = (tx==t_POL || tx==t_LIST)? lgef(x): lg(x);
-    *AVMA = y = *AVMA - lx;
+    if (tx==t_POL || tx==t_LIST) lx = lgef(x);
     for (i=0; i<lontyp[tx]; i++) y[i] = x[i];
     for (   ; i<lx; i++)         y[i] = (long)gcopy_av((GEN)x[i], AVMA);
   }

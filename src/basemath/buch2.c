@@ -180,7 +180,7 @@ mulred(GEN nf,GEN x, GEN I, long prec)
   y[2] = x[2];
   y = ideallllred(nf,y,NULL,prec);
   y[1] = (long)ideal_two_elt(nf,(GEN)y[1]);
-  return gerepileupto(av, gcopy(y));
+  return gerepilecopy(av, y);
 }
 
 /* Compute powers of prime ideals (P^0,...,P^a) in subFB (a > 1)
@@ -267,7 +267,7 @@ FBgen(GEN nf,long n2,long n)
       if (k == lon)
         setisclone(p1); /* flag it: all prime divisors in FB */
       else
-        { setlg(p1,k); p1 = gerepile(av,av1,gcopy(p1)); }
+        { setlg(p1,k); p1 = gerepilecopy(av,p1); }
       idealbase[i] = p1;
     }
     if (!*delta) err(primer1);
@@ -610,7 +610,7 @@ buchfu(GEN bnf)
     y[2] = lcopy((GEN)res[6]); return y;
   }
   y[1] = (long)getfu(nf,&xarch,reg,2,&c,0);
-  y[2] = lstoi(c); return gerepileupto(av, gcopy(y));
+  y[2] = lstoi(c); return gerepilecopy(av, y);
 }
 
 /*******************************************************************/
@@ -1531,11 +1531,11 @@ small_norm_for_buchall(long cglob,GEN *mat,GEN matarch,long LIMC, long PRECREG,
       if (low_stack(limpile, stack_lim(av2,1)))
       {
 	if(DEBUGMEM>1) err(warnmem,"small_norm");
-        invp = gerepileupto(av2, gcopy(invp));
+        invp = gerepilecopy(av2, invp);
       }
     }
 ENDIDEAL:
-    invp = gerepileupto(av1, gcopy(invp));
+    invp = gerepilecopy(av1, invp);
     if (DEBUGLEVEL>1) msgtimer("for this ideal");
   }
 END:
@@ -2146,10 +2146,10 @@ relationrank(GEN *A, long r, GEN L)
     if (low_stack(lim, stack_lim(av,1)))
     {
       if(DEBUGMEM>1) err(warnmem,"relationrank");
-      invp = gerepileupto(av, gcopy(invp));
+      invp = gerepilecopy(av, invp);
     }
   }
-  return gerepileupto(av, gcopy(invp));
+  return gerepilecopy(av, invp);
 }
 
 static GEN
@@ -2172,12 +2172,12 @@ codeprime(GEN bnf, GEN pr)
 static GEN
 decodeprime(GEN nf, GEN co)
 {
-  long n,indi,av=avma,tetpil;
+  long n,indi,av=avma;
   GEN p,rem,p1;
 
   n=lg(nf[7])-1; p=dvmdis(co,n,&rem); indi=itos(rem)+1;
-  p1=primedec(nf,p); tetpil=avma;
-  return gerepile(av,tetpil,gcopy((GEN)p1[indi]));
+  p1=primedec(nf,p);
+  return gerepilecopy(av,(GEN)p1[indi]);
 }
 
 /* v = bnf[10] */
@@ -2367,7 +2367,7 @@ smallbuchinit(GEN pol,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpi
   for (k=1; k<lg(uni); k++)
     v3[k] = (long)algtobasis(bnf,(GEN)uni[k]);
   av1 = avma;
-  y[12] = gcmp0((GEN)bnf[10])? lpileupto(av1, gcopy(makematal(bnf)))
+  y[12] = gcmp0((GEN)bnf[10])? lpilecopy(av1, makematal(bnf))
                              : lcopy((GEN)bnf[10]);
   return gerepileupto(av,y);
 }
@@ -2435,7 +2435,7 @@ static GEN
 get_arch2(GEN nf, GEN a, long prec, int units)
 {
   long av = avma;
-  return gerepileupto(av, gcopy(get_arch2_i(nf,a,prec,units)));
+  return gerepilecopy(av, get_arch2_i(nf,a,prec,units));
 }
 
 static void
@@ -2563,7 +2563,7 @@ bnfmake(GEN sbnf, long prec)
   y[1]=(long)W;   y[2]=sbnf[8];        y[3]=(long)mun;
   y[4]=(long)mc;  y[5]=(long)vectbase; y[6]=(long)vp;
   y[7]=(long)nf;  y[8]=(long)res;      y[9]=(long)clgp2; y[10]=sbnf[12];
-  return gerepileupto(av,gcopy(y));
+  return gerepilecopy(av,y);
 }
 
 static GEN
@@ -2633,36 +2633,35 @@ bnfinit0(GEN P, long flag, GEN data, long prec)
 GEN
 classgrouponly(GEN P, GEN data, long prec)
 {
-  GEN y,z;
-  long av=avma,tetpil,i;
+  ulong av = avma;
+  GEN z;
 
   if (typ(P)==t_INT)
   {
-    z=quadclassunit0(P,0,data,prec); tetpil=avma;
-    y=cgetg(4,t_VEC); for (i=1; i<=3; i++) y[i]=lcopy((GEN)z[i]);
-    return gerepile(av,tetpil,y);
+    z=quadclassunit0(P,0,data,prec); setlg(z,4);
+    return gerepilecopy(av,z);
   }
-  z=(GEN)classgroupall(P,data,6,prec)[1]; tetpil=avma;
-  return gerepile(av,tetpil,gcopy((GEN)z[5]));
+  z=(GEN)classgroupall(P,data,6,prec)[1];
+  return gerepilecopy(av,(GEN)z[5]);
 }
 
 GEN
 regulator(GEN P, GEN data, long prec)
 {
+  ulong av = avma;
   GEN z;
-  long av=avma,tetpil;
 
   if (typ(P)==t_INT)
   {
     if (signe(P)>0)
     {
-      z=quadclassunit0(P,0,data,prec); tetpil=avma;
-      return gerepile(av,tetpil,gcopy((GEN)z[4]));
+      z=quadclassunit0(P,0,data,prec);
+      return gerepilecopy(av,(GEN)z[4]);
     }
     return gun;
   }
-  z=(GEN)classgroupall(P,data,6,prec)[1]; tetpil=avma;
-  return gerepile(av,tetpil,gcopy((GEN)z[6]));
+  z=(GEN)classgroupall(P,data,6,prec)[1];
+  return gerepilecopy(av,(GEN)z[6]);
 }
 
 #ifdef INLINE

@@ -1150,7 +1150,7 @@ FpXX_red(GEN z, GEN p)
 	if (lgef(res[i])<=3)
 	{
 	  if (lgef(res[i])==2) {avma=av;res[i]=zero;}
-	  else res[i]=lpileupto(av,gcopy(gmael(res,i,2)));
+	  else res[i]=lpilecopy(av,gmael(res,i,2));
 	}
       }
       else
@@ -1391,7 +1391,8 @@ static GEN fflgen(GEN l, long e, GEN r, GEN T ,GEN p, GEN *zeta)
 GEN
 ffsqrtlmod(GEN a, GEN l, GEN T ,GEN p , GEN q, long e, GEN r, GEN y, GEN m)
 {
-  long av = avma,tetpil,lim,i,k;
+  ulong av = avma,lim;
+  long i,k;
   GEN p1,p2,u1,u2,v,w,z;
 
   bezout(r,l,&u1,&u2);
@@ -1427,7 +1428,7 @@ ffsqrtlmod(GEN a, GEN l, GEN T ,GEN p , GEN q, long e, GEN r, GEN y, GEN m)
       gerepilemany(av,gptr,4);
     }
   }
-  tetpil=avma; return gerepile(av,tetpil,gcopy(v));
+  return gerepilecopy(av,v);
 }
 /*  n is an integer, a is in Fp[X]/(T), p is prime, T is irreducible mod p
 
@@ -1823,7 +1824,7 @@ Fp_factor_irred(GEN P,GEN l, GEN Q)
   res=cgetg(d+1,t_COL);
   for(i=1;i<=d;i++)
     res[i]=(long)mat_to_polpol((GEN)V[i],vp,vq);
-  return gerepileupto(ltop,gcopy(res));
+  return gerepilecopy(ltop,res);
 }
 GEN Fp_factor_rel0(GEN P,GEN l, GEN Q)
 {

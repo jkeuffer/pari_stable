@@ -1212,7 +1212,7 @@ rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
       for (j=1; j<dK; j++) X = gadd(X, gmulsg(y[j],(GEN)K[j]));
       X = FpV_red(X, gell);
       finalresult = testx(bnf,X,module,subgroup,vecMsup);
-      if (finalresult) return gerepileupto(av, gcopy(finalresult));
+      if (finalresult) return gerepilecopy(av, finalresult);
         /* step 20,21,22 */
       i = dK;
       do

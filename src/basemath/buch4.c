@@ -469,7 +469,8 @@ extern GEN factorback_i(GEN fa, GEN nf, int red);
 GEN
 bnfsunit(GEN bnf,GEN S,long prec)
 {
-  long i,j,ls,ltop=avma,lbot;
+  ulong ltop = avma;
+  long i,j,ls;
   GEN p1,nf,classgp,gen,M,U,H;
   GEN sunit,card,sreg,res,pow,fa = cgetg(3, t_MAT);
 
@@ -569,8 +570,8 @@ bnfsunit(GEN bnf,GEN S,long prec)
     if (typ(p) == t_VEC) p = (GEN) p[1];
     sreg = gmul(sreg,glog(p,prec));
   }
-  res[4]=(long) sreg; lbot=avma;
-  return gerepile(ltop,lbot,gcopy(res));
+  res[4]=(long) sreg;
+  return gerepilecopy(ltop,res);
 }
 
 /* cette fonction est l'equivalent de isunit, sauf qu'elle donne le resultat
@@ -677,7 +678,8 @@ vecconcat(GEN bnf,GEN relnf,GEN vec,GEN *prod,GEN *S1,GEN *S2)
 GEN
 rnfisnorm(GEN bnf,GEN ext,GEN x,long flag,long PREC)
 {
-  long lgsunitrelnf,i,lbot, ltop = avma;
+  long lgsunitrelnf,i;
+  ulong ltop = avma;
   GEN relnf,aux,vec,tors,xnf,H,Y,M,A,suni,sunitrelnf,sunitnormnf,prod;
   GEN res = cgetg(3,t_VEC), S1,S2;
 
@@ -787,8 +789,7 @@ rnfisnorm(GEN bnf,GEN ext,GEN x,long flag,long PREC)
   }
   res[1]=(long)aux;
   res[2]=(long)x;
-
-  lbot=avma; return gerepile(ltop,lbot,gcopy(res));
+  return gerepilecopy(ltop,res);
 }
 
 GEN

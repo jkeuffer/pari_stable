@@ -1416,7 +1416,7 @@ palogaux(GEN x)
       setvalp(y,valp(y)-1);
       if (!gcmp1((GEN)y[3])) y[3]=lshifti((GEN)y[3],-1);
     }
-    tetpil=avma; return gerepile(av1,tetpil,gcopy(y));
+    return gerepilecopy(av1,y);
   }
   y=gdiv(gaddgs(x,-1),gaddgs(x,1)); e=valp(y); pp=e+precp(y);
   if (egalii(gdeux,(GEN)x[2])) pp--;
@@ -1687,8 +1687,8 @@ gcos(GEN x, long prec)
       if (gcmp0(x)) return gaddsg(1,x);
       if (valp(x)<0) err(negexper,"gcos");
 
-      av=avma; gsincos(x,&u,&v,prec); tetpil=avma;
-      return gerepile(av,tetpil,gcopy(v));
+      av=avma; gsincos(x,&u,&v,prec);
+      return gerepilecopy(av,v);
 
     case t_INTMOD: case t_PADIC:
       err(typeer,"gcos");
@@ -1765,8 +1765,8 @@ gsin(GEN x, long prec)
       if (gcmp0(x)) return gcopy(x);
       if (valp(x)<0) err(negexper,"gsin");
 
-      av=avma; gsincos(x,&u,&v,prec); tetpil=avma;
-      return gerepile(av,tetpil,gcopy(u));
+      av=avma; gsincos(x,&u,&v,prec);
+      return gerepilecopy(av,u);
 
     case t_INTMOD: case t_PADIC:
       err(typeer,"gsin");

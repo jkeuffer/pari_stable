@@ -1505,7 +1505,8 @@ static GEN
 sagm(GEN x, long prec)
 {
   GEN p1,a,b,a1,b1,y;
-  long av,tetpil,l,ep;
+  long l,ep;
+  ulong av;
 
   if (gcmp0(x)) return gcopy(x);
   switch(typ(x))
@@ -1535,7 +1536,7 @@ sagm(GEN x, long prec)
 	b1=gsqrt(gmul(a,b),prec);
       }
       while (gexpo(gsub(b1,a1))-gexpo(b1) >= l);
-      tetpil=avma; return gerepile(av,tetpil,gcopy(a1));
+      return gerepilecopy(av,a1);
 
     case t_PADIC:
       av=avma; a1=x; b1=gun; l=precp(x);
@@ -1547,7 +1548,7 @@ sagm(GEN x, long prec)
 	if (ep<=0) { b1=gneg_i(b1); p1=gsub(b1,a1); ep=valp(p1)-valp(b1); }
       }
       while (ep<l && !gcmp0(p1));
-      tetpil=avma; return gerepile(av,tetpil,gcopy(a1));
+      return gerepilecopy(av,a1);
 
     case t_SER:
       av=avma; a1=x; b1=gun; l=lg(x)-2;
@@ -1558,7 +1559,7 @@ sagm(GEN x, long prec)
 	p1=gsub(b1,a1); ep=valp(p1)-valp(b1);
       }
       while (ep<l && !gcmp0(p1));
-      tetpil=avma; return gerepile(av,tetpil,gcopy(a1));
+      return gerepilecopy(av,a1);
 
     case t_INTMOD:
       err(impl,"agm of mod");

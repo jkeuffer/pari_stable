@@ -1263,7 +1263,7 @@ gsubst(GEN x, long v, GEN y)
 	      gptr[0]=&z; gptr[1]=&t; gerepilemany(av,gptr,2);
 	    }
 	  }
-	  if (!ex) { tetpil=avma; return gerepile(av,tetpil,gcopy(z)); }
+	  if (!ex) return gerepilecopy(av,z);
 
           if (l<ly) { setlg(y,l); p1=gpuigs(y,ex); setlg(y,ly); }
           else p1=gpuigs(y,ex);
@@ -1341,7 +1341,7 @@ recip(GEN x)
 	gptr[0]=&u; gptr[1]=&y; gerepilemany(av,gptr,2);
       }
     }
-    tetpil=avma; return gerepile(av,tetpil,gcopy(y));
+    return gerepilecopy(av,y);
   }
   y=gdiv(x,a); y[2]=un; y=recip(y);
   a=gdiv(polx[v],a); tetpil=avma;
@@ -2710,8 +2710,8 @@ simplify_i(GEN x)
 GEN
 simplify(GEN x)
 {
-  long av = avma;
-  return gerepileupto(av, gcopy(simplify_i(x)));
+  ulong av = avma;
+  return gerepilecopy(av, simplify_i(x));
 }
 
 /*******************************************************************/

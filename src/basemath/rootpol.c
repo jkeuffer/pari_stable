@@ -141,7 +141,8 @@ static GEN
 karasquare(GEN p)
 {
   GEN p1,s0,s1,s2,aux;
-  long n=degpol(p),n0,n1,i,var,nn0,ltop,lbot;
+  long n=degpol(p),n0,n1,i,var,nn0;
+  ulong ltop;
 
   if (n<=KARASQUARE_LIMIT) return mysquare(p);
   ltop=avma;
@@ -165,14 +166,15 @@ karasquare(GEN p)
   for (i=3; i<=lgef(s1); i++)
     aux[i+n0]=ladd((GEN) aux[i+n0],(GEN) s1[i-1]);
   setlgef(p,n+3); /* recover all the polynomial p */
-  lbot=avma; return gerepile(ltop,lbot,gcopy(aux));
+  return gerepilecopy(ltop,aux);
 }
 
 static GEN
 cook_square(GEN p)
 {
   GEN p0,p1,p2,p3,q,aux0,aux1,r,aux,plus,moins;
-  long n=degpol(p),n0,n3,i,j,ltop=avma,lbot,var;
+  long n=degpol(p),n0,n3,i,j,var;
+  ulong ltop = avma;
 
   if (n<=COOK_SQUARE_LIMIT) return karasquare(p);
 
@@ -244,7 +246,7 @@ cook_square(GEN p)
     for (j=0; j<=degpol(aux); j++)
       q[n0*i+j+2]=ladd((GEN)q[n0*i+j+2],(GEN)aux[j+2]);
   }
-  lbot=avma; return gerepile(ltop,lbot,gcopy(q));
+  return gerepilecopy(ltop,q);
 }
 
 static GEN
@@ -829,7 +831,8 @@ gmulbyi(GEN z)
 static void
 fft(GEN Omega, GEN p, GEN f, long Step, long l)
 {
-  long i,l1,l2,l3,rap=Lmax/l,rapi,Step4,ltop,lbot;
+  ulong ltop;
+  long i,l1,l2,l3,rap=Lmax/l,rapi,Step4;
   GEN f1,f2,f3,f02,f13,g02,g13,ff;
 
   if (l==2)
@@ -878,7 +881,7 @@ fft(GEN Omega, GEN p, GEN f, long Step, long l)
     ff[i+l2+1]=lsub(f02,f13);
     ff[i+l3+1]=lsub(g02,g13);
   }
-  lbot=avma; ff=gerepile(ltop,lbot,gcopy(ff));
+  ff=gerepilecopy(ltop,ff);
   for (i=0; i<l; i++) f[i]=ff[i+1];
 }
 
@@ -1126,7 +1129,8 @@ static GEN
 refine_H(GEN F, GEN G, GEN HH, long bitprec, long shiftbitprec)
 {
   GEN H=HH,D,aux;
-  long ltop=avma, limite=stack_lim(ltop,1),error=0,i,bitprec1,bitprec2,lbot;
+  ulong ltop=avma, limite=stack_lim(ltop,1);
+  long error=0,i,bitprec1,bitprec2;
 
   D=gsub(gun,gres(gmul(HH,G),F)); error=gexpo(D);
   bitprec2=bitprec+shiftbitprec;
@@ -1150,7 +1154,7 @@ refine_H(GEN F, GEN G, GEN HH, long bitprec, long shiftbitprec)
     D=gsub(gun,gres(gmul(H,G),F));
     error=gexpo(D); if (error<-bitprec1) error=-bitprec1;
   }
-  if (error<=-bitprec/2) { lbot=avma; return gerepile(ltop,lbot,gcopy(H)); }
+  if (error<=-bitprec/2) return gerepilecopy(ltop,H);
   avma=ltop; return gzero; /* procedure failed */
 }
 
@@ -1310,10 +1314,10 @@ shiftpol(GEN p, GEN b)
     if (low_stack(limit, stack_lim(av,1)))
     {
       if(DEBUGMEM>1) err(warnmem,"rootpol.c:shiftpol()");
-      q = gerepileupto(av, gcopy(q));
+      q = gerepilecopy(av, q);
     }
   }
-  return gerepileupto(av, gcopy(q));
+  return gerepilecopy(av, q);
 }
 
 /* return (conj(a)X-1)^n * p[ (X-a) / (conj(a)X-1) ] */

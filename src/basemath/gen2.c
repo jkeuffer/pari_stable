@@ -173,11 +173,10 @@ long
 taille(GEN x)
 {
   long i,n,lx, tx = typ(x);
-  if (! is_recursive_t(tx))
-    n = (tx==t_INT)? lgefint(x): lg(x);
-  else
+  n = lg(x);
+  if (is_recursive_t(tx))
   {
-    n = lx = (tx==t_POL || tx==t_LIST)? lgef(x): lg(x);
+    lx = (tx==t_POL || tx==t_LIST)? lgef(x): n;
     for (i=lontyp[tx]; i<lx; i++) n += taille((GEN)x[i]);
   }
   return n;
@@ -657,7 +656,7 @@ ggval(GEN x, GEN p)
             if (low_stack(limit, stack_lim(av,1)))
 	    {
 	      if(DEBUGMEM>1) err(warnmem,"ggval");
-	      x = gerepileupto(av, gcopy(x));
+	      x = gerepilecopy(av, x);
 	    }
 	  }
 	  avma = av; return val;

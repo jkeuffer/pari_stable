@@ -111,7 +111,8 @@ rnfmakematrices(GEN rnf)
 GEN
 rnfinitalg(GEN nf,GEN pol,long prec)
 {
-  long av=avma,tetpil,m,n,r1,r2,vnf,i,j,k,vpol,v1,r1j,r2j,lfac,degabs;
+  ulong av = avma;
+  long m,n,r1,r2,vnf,i,j,k,vpol,v1,r1j,r2j,lfac,degabs;
   GEN RES,sig,rac,p1,p2,liftpol,delta,RAC,ro,p3,bas;
   GEN f,f2,fac,fac1,fac2,id,p4,p5;
 
@@ -230,7 +231,7 @@ rnfinitalg(GEN nf,GEN pol,long prec)
   p4 = gdiv(p4,p3);
   p2[4]=(long)mat_to_vecpol(p4,vpol);
   p2[5]=linvmat(p4);
-  tetpil=avma; return gerepile(av,tetpil,gcopy(RES));
+  return gerepilecopy(av,RES);
 }
 
 GEN
@@ -413,7 +414,8 @@ rnfelementup(GEN rnf,GEN x)
 GEN
 rnfelementdown(GEN rnf,GEN x)
 {
-  long av=avma,tetpil,i,lx,tx;
+  ulong av = avma;
+  long i,lx,tx;
   GEN p1,z;
 
   checkrnf(rnf); tx=typ(x); lx=lg(x);
@@ -431,16 +433,8 @@ rnfelementdown(GEN rnf,GEN x)
 
       p1=rnfelementabstorel(rnf,x);
       if (typ(p1)==t_POLMOD && varn(p1[1])==varn(rnf[1])) p1=(GEN)p1[2];
-      if (gvar(p1)>varn(rnf[1]))
-      {
-	tetpil=avma;
-	return gerepile(av,tetpil,gcopy(p1));
-      }
-      if (lgef(p1)==3)
-      {
-	tetpil=avma;
-        return gerepile(av,tetpil,gcopy((GEN)p1[2]));
-      }
+      if (gvar(p1)>varn(rnf[1])) return gerepilecopy(av,p1);
+      if (lgef(p1)==3) return gerepilecopy(av,(GEN)p1[2]);
       err(talker,"element is not in the base field in rnfelementdown");
 
     default: return gcopy(x);
@@ -629,10 +623,10 @@ rnfidealabstorel(GEN rnf,GEN x)
 GEN
 rnfidealdown(GEN rnf,GEN x)
 {
-  long av=avma,tetpil;
+  long av=avma;
 
   checkrnf(rnf); x=rnfidealhermite(rnf,x);
-  tetpil=avma; return gerepile(av,tetpil,gcopy(gmael(x,2,1)));
+  return gerepilecopy(av,gmael(x,2,1));
 }
 
 /* lift ideal x to the relative extension, returns a Z-basis */
@@ -730,14 +724,11 @@ polnfmulscal(GEN nf,GEN s,GEN x)
 GEN
 polnfmul(GEN nf, GEN x, GEN y)
 {
-  long av,tetpil,m,i,d,imin,imax,lx,ly,lz;
+  ulong av;
+  long m,i,d,imin,imax,lx,ly,lz;
   GEN p1,z,zeronf;
 
-  if (gcmp0(x)||gcmp0(y))
-  {
-    z=cgetg(2,t_POL); z[1]=evallgef(2) | evalvarn(varn(x));
-    return z;
-  }
+  if (gcmp0(x) || gcmp0(y)) return zeropol(varn(x));
   m=degpol(nf[1]); av=avma;
   lx=degpol(x); ly=degpol(y); lz=lx+ly;
   zeronf=gscalcol_i(gzero,m);
@@ -750,7 +741,7 @@ polnfmul(GEN nf, GEN x, GEN y)
       p1=gadd(p1,element_mul(nf,(GEN)x[i+2],(GEN)y[d-i+2]));
     z[d+2]=(long)p1;
   }
-  tetpil=avma; return gerepile(av,tetpil,gcopy(z));
+  return gerepilecopy(av,z);
 }
 
 /* division euclidienne */

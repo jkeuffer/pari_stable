@@ -1275,8 +1275,7 @@ apprgen(GEN f, GEN a)
       }
     }
   }
-  tetpil=avma; setlg(pro,j+1);
-  return gerepile(av,tetpil,gcopy(pro));
+  setlg(pro,j+1); return gerepilecopy(av,pro);
 }
 
 /* Retourne le vecteur des racines p-adiques de f en precision r */
@@ -1337,8 +1336,7 @@ rootpadic(GEN f, GEN p, long r)
     p1 = apprgen(f,z);
     for (k=1; k<lg(p1); k++) y[++j]=p1[k];
   }
-  tetpil=avma; setlg(y,j+1);
-  return gerepile(av,tetpil,gcopy(y));
+  setlg(y,j+1); return gerepilecopy(av,y);
 }
 /*************************************************************************/
 /*                             rootpadicfast                             */
@@ -1590,8 +1588,7 @@ apprgen9(GEN f, GEN a)
     }
     if (!i) break;
   }
-  tetpil=avma; setlg(pro,j+1);
-  return gerepile(av,tetpil,gcopy(pro));
+  setlg(pro,j+1); return gerepilecopy(av,pro);
 }
 
 /*****************************************/
@@ -1922,7 +1919,7 @@ Kronecker_powmod(GEN x, GEN mod, GEN n)
       if (low_stack(lim, stack_lim(av,1)))
       {
         if(DEBUGMEM>1) err(warnmem,"Kronecker_powmod");
-        y = gerepileupto(av, gcopy(y));
+        y = gerepilecopy(av, y);
       }
     }
     if (--i == 0) break;
@@ -2473,7 +2470,8 @@ rootsold(GEN x, long l)
 GEN
 roots2(GEN pol,long PREC)
 {
-  long av = avma,tetpil,N,flagexactpol,flagrealpol,flagrealrac,ti,i,j;
+  ulong av = avma;
+  long N,flagexactpol,flagrealpol,flagrealrac,ti,i,j;
   long nbpol,k,av1,multiqol,deg,nbroot,fr,f;
   GEN p1,p2,rr,EPS,qol,qolbis,x,b,c,*ad,v,tabqol;
 
@@ -2485,7 +2483,7 @@ roots2(GEN pol,long PREC)
   {
     p1=gmul(realun(PREC),(GEN)pol[3]);
     p2=gneg_i(gdiv((GEN)pol[2],p1));
-    tetpil=avma; return gerepile(av,tetpil,gcopy(p2));
+    return gerepilecopy(av,p2);
   }
   EPS=realun(3); setexpo(EPS, 12 - bit_accuracy(PREC));
   flagrealpol=1; flagexactpol=1;
@@ -2593,7 +2591,7 @@ roots2(GEN pol,long PREC)
     }
     rr[i+1]=(long)x;
   }
-  tetpil=avma; return gerepile(av,tetpil,gcopy(rr));
+  return gerepilecopy(av,rr);
 
  RLAB:
   avma = av;
@@ -2713,7 +2711,7 @@ balanc(GEN x)
       }
     }
   }
-  return gerepileupto(av, gcopy(a));
+  return gerepilecopy(av, a);
 }
 
 #define SIGN(a,b) ((b)>=0.0 ? fabs(a) : -fabs(a))
@@ -2891,5 +2889,5 @@ zrhqr(GEN a,long prec)
     rr[i] = (long)cgetc(prec); gaffect(y, (GEN)rr[i]);
   }
   if (DEBUGLEVEL>3) { fprintferr("\npolished roots = %Z",rr); flusherr(); }
-  return gerepileupto(av, gcopy(rr));
+  return gerepilecopy(av, rr);
 }

@@ -535,7 +535,7 @@ Check_Small(int bound, GEN poly, GEN rhs)
     if (low_stack(lim,stack_lim(av,1)))
     {
       if(DEBUGMEM>1) err(warnmem,"Check_small");
-      SOL = gerepileupto(av, gcopy(SOL));
+      SOL = gerepilecopy(av, SOL);
     }
     if (x==0)
       {
@@ -617,12 +617,11 @@ GEN
 thueinit(GEN poly, long flag, long prec)
 {
   GEN thueres,ALH,csts,c0;
-  long av,tetpil,k,st;
+  ulong av = avma;
+  long k,st;
   double d,dr;
 
-  av=avma;
-
-  uftot=0;
+  uftot = NULL;
   if (checktnf(poly)) { uftot=(GEN)poly[2]; poly=(GEN)poly[1]; }
   else
     if (typ(poly)!=t_POL) err(notpoler,"thueinit");
@@ -662,8 +661,8 @@ thueinit(GEN poly, long flag, long prec)
     csts[4]=(long)x0; csts[5]=(long)eps3;
     csts[6]=(long)stoi(Prec);
 
-    thueres[7]=(long)csts; tetpil=avma;
-    return gerepile(av,tetpil,gcopy(thueres));
+    thueres[7]=(long)csts;
+    return gerepilecopy(av,thueres);
   }
 
   thueres=cgetg(3,t_VEC); c0=gun; Prec=4;
@@ -672,7 +671,7 @@ thueinit(GEN poly, long flag, long prec)
     c0=gmul(c0, gimag((GEN)roo[k]));
   c0=ginv(gabs(c0,Prec));
   thueres[1]=(long)poly; thueres[2]=(long)c0;
-  tetpil=avma; return gerepile(av,tetpil,gcopy(thueres));
+  return gerepilecopy(av,thueres);
 }
 
 /* Given a tnf structure as returned by thueinit, and a right-hand-side and
@@ -684,11 +683,12 @@ thue(GEN thueres, GEN rhs, GEN ne)
 {
   GEN Kstart,Old_B0,ALH,errdelta,Hmu,c0,poly,csts,bd;
   GEN xmay1,xmay2,b,zp1,tmp,q1,q2,q3,ep;
-  long Nb_It=0,upb,bi1,av,tetpil,i1,i2,i, flag,cf,fs;
+  long Nb_It=0,upb,bi1,i1,i2,i, flag,cf,fs;
+  ulong av = avma;
 
   if (!checktnf(thueres)) err(talker,"not a tnf in thue");
 
-  av=avma; SOL=cgetg(1,t_VEC);
+  SOL = cgetg(1,t_VEC);
   upb = 0; ep = NULL; /* gcc -Wall */
 
   if (lg(thueres)==8)
@@ -749,7 +749,7 @@ thue(GEN thueres, GEN rhs, GEN ne)
 		    Kstart=mulis(Kstart,10);
 		  }	
 		if ( CF_First_Pass(Kstart,errdelta) == -1 )
-		  { ne = gerepileupto(av, gcopy(ne)); Prec+=10;
+		  { ne = gerepilecopy(av, ne); Prec+=10;
 		  if(DEBUGLEVEL>=2) fprintferr("Increasing precision\n");
 		  thueres=thueinit(thueres,0,Prec);
 		  return(thue(thueres,rhs,ne)); }
@@ -817,7 +817,7 @@ thue(GEN thueres, GEN rhs, GEN ne)
     }
     if (DEBUGLEVEL>=2) fprintferr("Checking for small solutions\n");
     Check_Small((int)(gtodouble(x3)),poly,rhs);
-    tetpil=avma; return gerepile(av,tetpil,gcopy(SOL));
+    return gerepilecopy(av,SOL);
   }
 
   /* Case s=0. All the solutions are "small". */
@@ -826,7 +826,7 @@ thue(GEN thueres, GEN rhs, GEN ne)
   roo=roots(poly,Prec);
   Check_Small(gtolong(ground(gpui(gmul((GEN)poly[2],gdiv(gabs(rhs,Prec),c0)),
                                   ginv(gdeg),Prec) )), poly, rhs);
-  tetpil=avma; return gerepile(av,tetpil,gcopy(SOL));
+  return gerepilecopy(av,SOL);
 }
 
 static GEN *Relations; /* primes above a, expressed on generators of Cl(K) */
@@ -1061,7 +1061,8 @@ GEN
 bnfisintnorm(GEN bnf, GEN a)
 {
   GEN nf,pol,res,unit,x,id, *Primes;
-  long av = avma, tetpil,sa,i,j,norm_1;
+  long sa,i,j,norm_1;
+  ulong av = avma;
 
   bnf = checkbnf(bnf); nf = (GEN)bnf[7]; pol = (GEN)nf[1];
   if (typ(a)!=t_INT)
@@ -1099,5 +1100,5 @@ bnfisintnorm(GEN bnf, GEN a)
     }
     if (x) res = concatsp(res, gmod(x,pol));
   }
-  tetpil=avma; return gerepile(av,tetpil,gcopy(res));
+  return gerepilecopy(av,res);
 }
