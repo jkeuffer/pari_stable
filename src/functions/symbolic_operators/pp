@@ -7,8 +7,8 @@ Description:
  (*int):int:parens			 $1 = addis($1, 1)
  (*real:long):real:parens:long		$*1 = laddrs($1, 1)
  (*real):real:parens			 $1 = addrs($1, 1)
- (*mp:long):mp:parens:long		$*1 = lmpadd($1, gun)
- (*mp):mp:parens			 $1 = mpadd($1, gun)
+ (*mp:long):mp:parens:long		$*1 = lmpadd($1, gen_1)
+ (*mp):mp:parens			 $1 = mpadd($1, gen_1)
  (*gen:long):gen:parens:long		$*1 = laddgs($1, 1)
  (*gen):gen:parens			 $1 = gaddgs($1, 1)
 
