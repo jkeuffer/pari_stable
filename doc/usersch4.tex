@@ -1176,8 +1176,13 @@ type.
 \subsec{Type \typ{POLMOD} (polmod):}\kbdsidx{t_POLMOD}\sidx{polmod} exactly as
 for integermods, \kbd{z[1]} points to the modulus, and \kbd{z[2]} to a
 polynomial representing the class of~\kbd{z}. Both must be of type
-polynomial. However, one must obey the rules explained in Chapter 2
-concerning the hierarchical structure of the variables of a polymod.
+\typ{POL} in the same variable. However, \kbd{z[2]} is allowed to be a
+simplification of such a polynomial, e.g a scalar. This is quite tricky
+considering the hierarchical structure of the variables; in particular, a
+polynomial in variable of \var{lesser} priority than the modulus variable
+is valid, since it can be considered as the constant term of a polynomial
+of degree 0 in the correct variable. On the other hand a variable of
+\var{greater} priority would not be acceptable.
 
 \subsec{Type \typ{POL} (polynomial):}\kbdsidx{t_POL}\sidx{polynomial} this
 type has a second codeword which is analogous to the one for integers. It
