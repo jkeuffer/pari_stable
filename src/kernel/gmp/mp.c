@@ -1081,7 +1081,7 @@ resmod2n(GEN x, long n)
   xd = x + (2 + k);
   /* x = |k|...|1|#|... : copy the last l bits of # and the first k words
    *              ^--- initial xd  */
-  hi = *xd & ((1<<l) - 1); /* last l bits of # = top bits of result */
+  hi = ((ulong)*xd) & ((1UL<<l)-1); /* last l bits of # = top bits of result */
   if (!hi)
   { /* strip leading zeroes from result */
     xd--; while (k && !*xd) { k--; xd--; }
