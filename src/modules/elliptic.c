@@ -2824,7 +2824,7 @@ globalreduction(GEN E)
 {
   long k, l;
   pari_sp av = avma;
-  GEN c, P, result, N, v, e, c4, c6, D;
+  GEN c, P, N, v, e, c4, c6, D;
 
   v = ellintegralmodel(E);
   e = ell_to_small(E);
@@ -2849,10 +2849,7 @@ globalreduction(GEN E)
       cumule(&v, &e, (GEN)w[1], (GEN)w[2], (GEN)w[3], (GEN)w[4]);
   }
   standard_model(e, &v);
-  result = cgetg(4, t_VEC);
-  result[1] = (long)N;
-  result[2] = (long)v;
-  result[3] = (long)c; return gerepilecopy(av, result);
+  return gerepilecopy(av, _vec3(N,v,c));
 }
 
 /* accumulate the effects of variable changes [u,r,s,t] and [U,R,S,T].
@@ -3100,25 +3097,21 @@ torsellnagelllutz(GEN e)
   {
     if (t&3) err(bugparier,"torsell (bug2)");
     t2 = t>>1;
-    w2=cgetg(3,t_VEC); w2[1]=lstoi(t2); w2[2]=(long)gdeux;
+    w2 = _vec2(stoi(t2), gdeux);
     for (k=2; k<=t; k++)
       if (_orderell(e,(GEN)r[k]) == t2) break;
     if (k>t) err(bugparier,"torsell (bug3)");
 
     p1 = powell(e,(GEN)r[k],stoi(t>>2));
     k2 = (lg(p1)==3 && gegal((GEN)r[2],p1))? 3: 2;
-    w3=cgetg(3,t_VEC); w3[1]=r[k]; w3[2]=r[k2];
+    w3 = _vec2((GEN)r[k], (GEN)r[k2]);
   }
   if (v)
   {
     v[1] = linv((GEN)v[1]);
     w3 = pointch(w3,v);
   }
-  w=cgetg(4,t_VEC);
-  w[1] = lstoi(t);
-  w[2] = (long)w2;
-  w[3] = (long)w3;
-  return gerepilecopy(av, w);
+  return gerepilecopy(av, _vec3(stoi(t), w2,w3));
 }
 
 /* Using Doud's algorithm */
@@ -3217,8 +3210,8 @@ tors(GEN e, long k, GEN p, GEN q, GEN v)
       q = pointch(q,v);
     }
     r = cgetg(4,t_VEC);
-    r[1] = lstoi(2*k); p1 = cgetg(3,t_VEC); p1[1] = lstoi(k); p1[2] = deux;
-    r[2] = (long)p1;
+    r[1] = lstoi(2*k);
+    r[2] = (long)_vec2(stoi(k), gdeux);
     r[3] = (long)_vec2copy(p, q);
   }
   else

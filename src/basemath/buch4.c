@@ -521,27 +521,21 @@ bnfsunit(GEN bnf,GEN S,long prec)
   card = gun;
   if (lg(H) > 1)
   { /* non trivial (rare!) */
-    GEN D,U, ClS = cgetg(4,t_VEC);
-
-    D = smithall(H, &U, NULL);
+    GEN U, D = smithall(H, &U, NULL);
     for(i=1; i<lg(D); i++)
       if (gcmp1((GEN)D[i])) break;
     setlg(D,i); D = mattodiagonal_i(D); /* cf smithrel */
     card = detcyc(D);
-    ClS[1] = (long)card; /* h */
-    ClS[2] = (long)D; /* cyc */
-
     p1=cgetg(i,t_VEC); pow=ZM_inv(U,gun);
     for(i--; i; i--)
       p1[i] = (long)factorback_i(gen, (GEN)pow[i], nf, 1);
-    ClS[3]=(long)p1; /* gen */
-    res[5]=(long) ClS;
+    res[5] = (long)_vec3(card,D,p1);
   }
 
   /* S-units */
   if (ls>1)
   {
-    GEN den, Sperm, perm, dep, B, U1 = U;
+    GEN den, Sperm, perm, dep, B, A, U1 = U;
     long lH, lB, fl = nf_GEN|nf_FORCE;
 
    /* U1 = upper left corner of U, invertible. S * U1 = principal ideals
@@ -565,14 +559,12 @@ bnfsunit(GEN bnf,GEN S,long prec)
     for (j=1; j<lB; j++,i++)
       sunit[i] = isprincipalfact(bnf,Sperm,(GEN)B[j],(GEN)Sperm[i],fl)[2];
 
-    p1 = cgetg(4,t_VEC);
     den = dethnf_i(H); H = ZM_inv(H,den);
-    p1[1] = (long)perm;
-    p1[2] = (long)concatsp(H, gneg(gmul(H,B))); /* top part of inverse * den */
-    p1[3] = (long)den; /* keep denominator separately */
+    A = concatsp(H, gneg(gmul(H,B))); /* top part of inverse * den */
     sunit = basistoalg(nf,sunit);
-    res[2] = (long)p1; /* HNF in split form perm + (H B) [0 Id missing] */
+    /* HNF in split form perm + (H B) [0 Id missing] */
     res[1] = (long)lift_intern(sunit);
+    res[2] = (long)_vec3(perm,A,den);
   }
 
   /* S-regulator */

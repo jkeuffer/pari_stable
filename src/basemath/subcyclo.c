@@ -541,17 +541,12 @@ galoiscyclo(long n, long v)
 
 /* Convert a bnrinit(Q,n) to a znstar(n)
  * complex is set to 0 if the bnr is real and to 1 if it is complex.
- * Not stack clean 
- */
-GEN bnr_to_znstar(GEN bnr, long *complex)
+ * Not stack clean */
+GEN
+bnr_to_znstar(GEN bnr, long *complex)
 {
-  GEN zk;
-  GEN gen;
-  GEN cond;
-  long l2;
-  long i;
-  GEN p3;         /* vec */
-  GEN res;
+  GEN zk, gen, cond, v;
+  long l2, i;
   checkbnrgen(bnr);
   if (degpol(gmael3(bnr,1,7,1))!=1)
     err(talker,"bnr must be over Q in bnr_to_znstar");
@@ -562,10 +557,7 @@ GEN bnr_to_znstar(GEN bnr, long *complex)
   cond = gcoeff(gmael3(bnr,2,1,1), 1, 1);
   *complex = signe(gmael4(bnr,2,1,2,1));
   l2 = lg(gen);
-  res= cgetg(4,t_VEC); 
-  res[1]=zk[1];
-  res[2]=zk[2];
-  p3 = cgetg(l2, t_VEC);
+  v = cgetg(l2, t_VEC);
   for (i = 1; i < l2; ++i)
   {
     GEN x=(GEN) gen[i];
@@ -573,10 +565,9 @@ GEN bnr_to_znstar(GEN bnr, long *complex)
       x = gcoeff(x, 1, 1);
     else if (typ(x) == t_COL)
       x = (GEN) x[1];
-    p3[i] = (long) gmodulcp(mpabs(x), cond);
+    v[i] = (long) gmodulcp(absi(x), cond);
   }
-  res[3] = (long) p3;
-  return res;
+  return _vec3((GEN)zk[1], (GEN)zk[2], v);
 }
 
 GEN 

@@ -26,19 +26,20 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 GEN
 buchnarrow(GEN bnf)
 {
-  GEN nf, cyc, gen, GD, v, invpi, logs, p1, p2, R, basecl, met, u1, archp;
+  GEN nf, cyc, gen, GD, v, invpi, logs, p1, p2, R, basecl, met, u1, archp, clgp;
   long r1, i, j, ngen, t, lo, c;
   pari_sp av = avma;
 
   bnf = checkbnf(bnf);
   nf = checknf(bnf); r1 = nf_get_r1(nf);
-  if (!r1) return gcopy(gmael(bnf,8,1));
+  clgp = gmael(bnf,8,1);
+  if (!r1) return gcopy(clgp);
 
-  cyc = gmael3(bnf,8,1,2);
-  gen = gmael3(bnf,8,1,3);
+  cyc = (GEN)clgp[2];
+  gen = (GEN)clgp[3];
   v = FpM_image(zsignunits(bnf, NULL, 1), gdeux);
   t = lg(v)-1;
-  if (t == r1) { avma = av; return gcopy(gmael(bnf,8,1)); }
+  if (t == r1) { avma = av; return gcopy(clgp); }
 
   ngen = lg(gen)-1;
   p1 = cgetg(ngen+r1-t + 1,t_COL);
@@ -83,10 +84,7 @@ buchnarrow(GEN bnf)
     }
     basecl[j] = (long)p2;
   }
-  v = cgetg(4,t_VEC);
-  v[1] = lmul2n(gmael3(bnf,8,1,1), r1-t);
-  v[2] = (long)met;
-  v[3] = (long)basecl; return gerepilecopy(av, v);
+  return gerepilecopy(av, _vec3(shifti((GEN)clgp[1], r1-t), met,basecl));
 }
 
 /********************************************************************/
@@ -1569,7 +1567,7 @@ discrayrelall(GEN bnr, GEN H0, long flag)
 {
   pari_sp av = avma;
   long j, k, l, nz, flrel = flag & nf_REL, flcond = flag & nf_COND;
-  GEN bnf, nf, bid, ideal, archp, y, clhray, clhss, P, e, dlk, H;
+  GEN bnf, nf, bid, ideal, archp, clhray, clhss, P, e, dlk, H;
   zlog_S S;
 
   checkbnr(bnr);
@@ -1607,10 +1605,7 @@ discrayrelall(GEN bnr, GEN H0, long flag)
     if (flcond) { avma = av; return gzero; }
     nz++;
   }
-  y = cgetg(4,t_VEC);
-  y[1] = (long)clhray;
-  y[2] = lstoi(nz);
-  y[3] = (long)dlk; return gerepilecopy(av, y);
+  return gerepilecopy(av, _vec3(clhray, stoi(nz), dlk));
 }
 
 static GEN
@@ -1823,7 +1818,7 @@ discrayabslist(GEN bnf, GEN lists)
   long ii,jj,i,j,k,clhss,ep,clhray,lx,ly,r1,degk,nz;
   long n,R1,lP;
   GEN hlist,blist,dlist,nf,dkabs,b,h,d;
-  GEN z,ideal,arch,fa,P,ex,idealrel,mod,pr,dlk,arch2,p3,fac;
+  GEN ideal,arch,fa,P,ex,idealrel,mod,pr,dlk,arch2,p3,fac;
 
   bnf = checkbnf(bnf);
   hlist = rayclassnolist(bnf,lists);
@@ -1900,11 +1895,7 @@ LLDISCRAY:
       R1= clhray * nz;
       if (((n-R1)&3) == 2) /* r2 odd, set dlk = -dlk */
         dlk = factormul(to_famat_all(stoi(-1),gun), dlk);
-      z = cgetg(4,t_VEC);
-      z[1] = lstoi(n);
-      z[2] = lstoi(R1);
-      z[3] = (long)factormul(dlk,p3);
-      d[jj] = (long)z;
+      d[jj] = (long)_vec3(stoi(n), stoi(R1), factormul(dlk,p3));
     }
   }
   return gerepilecopy(av, dlist);
@@ -2365,19 +2356,16 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
         }
         else nz = r1-nba;
 LDISCRAY:
-        p1=cgetg(4,t_VEC); discall[karch+1]=(long)p1;
-	if (!clhray) p1[1]=p1[2]=p1[3]=zero;
+	if (!clhray) p1 = _vec3(gzero,gzero,gzero);
 	else
 	{
 	  p3 = factorpow(fadkabs,clhray);
           n = clhray * degk;
           R1= clhray * nz;
-	  if (((n-R1)&3)==2)
-	    dlk=factormul(to_famat_all(stoi(-1),gun), dlk);
-	  p1[1] = lstoi(n);
-          p1[2] = lstoi(R1);
-          p1[3] = (long)factormul(dlk,p3);
+	  if (((n-R1)&3)==2) dlk = factormul(to_famat_all(stoi(-1),gun), dlk);
+          p1 = _vec3(stoi(n), stoi(R1), factormul(dlk,p3));
 	}
+        discall[karch+1]=(long)p1;
       }
       if (allarch)
         p1 = _vec2(fa, discall);

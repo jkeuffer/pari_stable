@@ -223,10 +223,7 @@ member_clgp(GEN x) /* class group (3-component row vector) */
   {
     switch(t)
     {
-      case typ_QUA:
-        y = cgetg(4,t_VEC);
-        for(t=1; t<4; t++) y[t] = x[t];
-        return y;
+      case typ_QUA: return _vec3((GEN)x[1], (GEN)x[2], (GEN)x[3]);
       case typ_CLA: return gmael(x,1,5);
     }
     if (typ(x)==t_VEC)
@@ -522,12 +519,9 @@ member_area(GEN x)
 GEN
 member_tate(GEN x)
 {
-  GEN z = cgetg(4,t_VEC);
   if (!is_bigell(x)) member_err("tate");
   if (!gcmp0((GEN)x[19])) err(talker,"curve not defined over a p-adic field");
-  z[1]=x[15];
-  z[2]=x[16];
-  z[3]=x[17]; return z;
+  return _vec3((GEN)x[15], (GEN)x[16], (GEN)x[17]);
 }
 
 GEN

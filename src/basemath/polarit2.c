@@ -486,13 +486,7 @@ MultiLift(GEN f, GEN a, GEN T, GEN p, long e0, int flag)
   }
 
   if (flag)
-  {
-    E = cgetg(4, t_VEC);
-    E[1] = lstoi(e0);
-    E[2] = (long)link;
-    E[3] = (long)v;
-    E[4] = (long)w;
-  }
+    E = _vec4(stoi(e0), link, v, w);
   else
   {
     E = cgetg(k+1, t_VEC);

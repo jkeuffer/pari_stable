@@ -1965,7 +1965,7 @@ squfof(GEN n)
   ulong d1, d2;
   long tf = lgefint(n), nm4, cnt = 0;
   long a1, b1, c1, dd1, L1, a2, b2, c2, dd2, L2, a, q, c, qc, qcb;
-  GEN D1, D2, res;
+  GEN D1, D2;
   pari_sp av = avma;
   static long blacklist1[SQUFOF_BLACKLIST_SZ], blacklist2[SQUFOF_BLACKLIST_SZ];
   long blp1 = 0, blp2 = 0;
@@ -2125,11 +2125,7 @@ squfof(GEN n)
 	  { /* q^2 divides D1 hence n [ assuming n % 3 != 0 ] */
 	    avma = av;
 	    if (DEBUGLEVEL >= 4) fprintferr("SQUFOF: found factor %ld^2\n", q);
-	    res = cgetg(4, t_VEC);
-	    res[1] = lstoi(q);
-	    res[2] = deux;	/* exponent 2 */
-	    res[3] = LNULL; /* unknown status */
-	    return res;
+	    return _vec3(stoi(q), gdeux, NULL);	/* exponent 2, unknown status */
 	  }
 	  /* chase the inverse root form back along the ambiguous cycle */
 	  q = squfof_ambig(a, b1, dd1, D1);
@@ -2172,11 +2168,7 @@ squfof(GEN n)
 	  { /* q^2 divides D2 hence n [ assuming n % 5 != 0 ] */
 	    avma = av;
 	    if (DEBUGLEVEL >= 4) fprintferr("SQUFOF: found factor %ld^2\n", q);
-	    res = cgetg(4, t_VEC);
-	    res[1] = lstoi(q);
-	    res[2] = deux;	/* exponent 2 */
-	    res[3] = LNULL; /* unknown status */
-	    return res;
+	    return _vec3(stoi(q), gdeux, NULL);	/* exponent 2, unknown status */
 	  }
 	  /* chase the inverse root form along the ambiguous cycle */
 	  q = squfof_ambig(a, b2, dd2, D2);

@@ -39,6 +39,7 @@ GEN    _vec2s(long x, long y);
 GEN    _vec2copy(GEN x, GEN y);
 GEN    _vec3(GEN x, GEN y, GEN z);
 GEN    _vec3s(long x, long y, long z);
+GEN    _vec4(GEN x, GEN y, GEN z, GEN t);
 GEN    _veccopy(GEN x);
 GEN    _vecs(long x);
 GEN    _vecsmall(long x);
@@ -262,6 +263,10 @@ _vec2(GEN x, GEN y) {
 INLINE GEN
 _vec3(GEN x, GEN y, GEN z) {
   GEN v=cgetg(4,t_VEC); v[1]=(long)x; v[2]=(long)y; v[3]=(long)z; return v; }
+INLINE GEN
+_vec4(GEN x, GEN y, GEN z, GEN t) {
+  GEN v=cgetg(5,t_VEC); v[1]=(long)x; v[2]=(long)y; v[3]=(long)z; v[4]=(long)t;
+  return v; }
 INLINE GEN
 _vec2copy(GEN x, GEN y) {
   GEN v = cgetg(3,t_VEC); v[1] = lcopy(x); v[2] = lcopy(y); return v; }

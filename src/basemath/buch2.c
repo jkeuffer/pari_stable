@@ -2329,14 +2329,8 @@ class_group_gen(GEN nf,GEN W,GEN C,GEN Vbase,long prec, GEN nf0,
       setlg(G,lo); setlg(Ga,lo); setlg(GD,lo); break;
     }
   }
-  z = cgetg(4,t_VEC); *ptclg1 = z;
-  z[1]=(long)dethnf_i(W);
-  z[2]=(long)cyc;
-  z[3]=(long)G;
-  z = cgetg(4,t_VEC); *ptclg2 = z;
-  z[1]=(long)Ur;
-  z[2]=(long)ga;
-  z[3]=(long)GD;
+  *ptclg1 = _vec3(dethnf_i(W), cyc, G);
+  *ptclg2 = _vec3(Ur, ga,GD);
   if (DEBUGLEVEL) msgtimer("classgroup generators");
 }
 
@@ -2785,15 +2779,13 @@ cgetc_col(long n, long prec)
 static GEN
 buchall_for_degree_one_pol(GEN nf, long flun)
 {
-  GEN W,B,A,C,Vbase,res;
-  GEN fu=cgetg(1,t_VEC), R=gun, zu = _vec2(gdeux, utoineg(1));
-  GEN clg1=cgetg(4,t_VEC), clg2=cgetg(4,t_VEC);
+  GEN v = cgetg(1,t_VEC), m = cgetg(1,t_MAT);
+  GEN W, B, A, C, Vbase, res;
+  GEN fu = v, R = gun, zu = _vec2(gdeux, utoineg(1));
+  GEN clg1 = _vec3(gun,v,v), clg2 = _vec3(m,v,v);
 
-  clg1[1]=un; clg1[2]=clg1[3]=clg2[2]=clg2[3]=lgetg(1,t_VEC);
-  clg2[1]=lgetg(1,t_MAT);
-  W=B=A=C=cgetg(1,t_MAT);
-  Vbase=cgetg(1,t_COL);
-
+  W = B = A = C= m;
+  Vbase = cgetg(1,t_COL);
   res = get_clfu(clg1, R, zu, fu, flun);
   return buchall_end(nf,flun,res,clg2,W,B,A,C,Vbase);
 }

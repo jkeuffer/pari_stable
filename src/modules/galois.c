@@ -2441,7 +2441,7 @@ isin_G_H(buildroot *BR, long n1, long n2)
 GEN
 galoisbig(GEN pol, long prec)
 {
-  GEN dpol, res = cgetg(4,t_VEC);
+  GEN dpol;
   long *tab, t = 0;
   pari_sp av = avma;
   long tab8[]={0,
@@ -2501,8 +2501,5 @@ galoisbig(GEN pol, long prec)
     }
     for (i = 1; i < lg(BR.r); i++) gunclone((GEN)BR.r[i]);
   }
-  avma = av;
-  res[1]=lstoi(tab[t]);
-  res[2]=lstoi(EVEN? 1 : -1);
-  res[3]=lstoi(t); return res;
+  avma = av; return _vec3s(tab[t], EVEN? 1: -1, t);
 }
