@@ -15,8 +15,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #include "pari.h"
 
-
-/*Not very fast arithmetic with polynomials with small coefficients.*/
+/* Not so fast arithmetic with polynomials with small coefficients. */
 
 /***********************************************************************/
 /**                                                                   **/
@@ -24,12 +23,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                                                                   **/
 /***********************************************************************/
 /* Flx objects are defined as follows:
-   They are t_VECSMALL:
-   x[0]: codeword
-   x[1]=variable number (signe is not stored).
-   x[2]=a_0 x[3]=a_1, etc.
-   With 0<=a_i<l
-   where l is a ulong.
+   Let l an ulong. An Flx is a t_VECSMALL:
+   x[0] = codeword
+   x[1] = variable number (signe is not stored).
+   x[2] = a_0 x[3] = a_1, etc.
+   With 0 <= a_i < l
 */
 
 #define lswap(x,y) {long _z=x; x=y; y=_z;}
@@ -71,7 +69,6 @@ Flx_ZX_inplace(GEN z)
 }
 
 /*FIXME: should be zx_zv_lg*/
-
 GEN
 Flx_Flv_lg(GEN x, long N)
 {
@@ -357,11 +354,9 @@ Flx_shiftip(pari_sp av, GEN x, long v)
   *--y = evaltyp(t_VECSMALL) | evallg(ly); return y;
 }
 
-/* Require OK_ULONG*/
-
 INLINE ulong
 Flx_mullimb_ok(GEN x, GEN y, ulong p, long a, long b)
-{
+{ /* Assume OK_ULONG*/
   ulong p1 = 0;
   long i;
   for (i=a; i<b; i++)
@@ -460,40 +455,56 @@ Flx_mulspec(GEN a, GEN b, ulong p, long na, long nb)
   return Flx_shiftip(av,c0, v);
 }
 
-GEN Flx_mul(GEN x, GEN y, ulong p)
+GEN
+Flx_mul(GEN x, GEN y, ulong p)
 {
- GEN z=Flx_mulspec(x+2,y+2,p, lg(x)-2,lg(y)-2);
- z[1]=x[1];
- return z;
+ GEN z = Flx_mulspec(x+2,y+2,p, lg(x)-2,lg(y)-2);
+ z[1] = x[1]; return z;
 }
-/*FIXME: Assume OK_ULONG*/
+
 GEN
 Flx_sqrspec_basecase(GEN x, ulong p, long nx)
 {
-  long i,l,lz,nz;
+  long i, lz, nz;
   ulong p1;
   GEN z;
 
   if (!nx) return Flx_zero(x[1]);
   lz = (nx << 1) + 1, nz = lz-2;
   z = cgetg(lz, t_VECSMALL) + 2;
-  for (i=0; i<nx; i++)
+  if (u_OK_ULONG(p))
   {
-    l = (i+1)>>1;
-    p1 = Flx_mullimb_ok(x,x,p,0,l);
-    p1 <<= 1; if (p1 & HIGHBIT) p1 %= p;
-    if ((i&1) == 0)
-      p1 += x[i>>1] * x[i>>1];
-    z[i] = (long) (p1 % p);
+    for (i=0; i<nx; i++)
+    {
+      p1 = Flx_mullimb_ok(x,x,p,0, (i+1)>>1);
+      p1 <<= 1; if (p1 & HIGHBIT) p1 %= p;
+      if ((i&1) == 0) p1 += x[i>>1] * x[i>>1];
+      z[i] = (long) (p1 % p);
+    }
+    for (  ; i<nz; i++)
+    {
+      p1 = Flx_mullimb_ok(x,x,p,i-nx+1, (i+1)>>1);
+      p1 <<= 1; if (p1 & HIGHBIT) p1 %= p;
+      if ((i&1) == 0) p1 += x[i>>1] * x[i>>1];
+      z[i] = (long) (p1 % p);
+    }
   }
-  for (  ; i<nz; i++)
+  else
   {
-    l = (i+1)>>1;
-    p1 = Flx_mullimb_ok(x,x,p,i-nx+1,l);
-    p1 <<= 1; if (p1 & HIGHBIT) p1 %= p;
-    if ((i&1) == 0)
-      p1 += x[i>>1] * x[i>>1];
-    z[i] = (long) (p1 % p);
+    for (i=0; i<nx; i++)
+    {
+      p1 = Flx_mullimb(x,x,p,0, (i+1)>>1);
+      p1 = adduumod(p1, p1, p);
+      if ((i&1) == 0) p1 = adduumod(p1, muluumod(x[i>>1], x[i>>1], p), p);
+      z[i] = (long)p1;
+    }
+    for (  ; i<nz; i++)
+    {
+      p1 = Flx_mullimb(x,x,p,i-nx+1, (i+1)>>1);
+      p1 = adduumod(p1, p1, p);
+      if ((i&1) == 0) p1 = adduumod(p1, muluumod(x[i>>1], x[i>>1], p), p);
+      z[i] = (long)p1;
+    }
   }
   z -= 2; z[1]=x[1]; return Flx_renormalize(z,lz);
 }
@@ -535,11 +546,11 @@ Flx_sqrspec(GEN a, ulong p, long na)
   return Flx_shiftip(av,c0,v);
 }
 
-GEN Flx_sqr(GEN x, ulong p)
+GEN
+Flx_sqr(GEN x, ulong p)
 {
-  GEN z=Flx_sqrspec(x+2,p, lg(x)-2);
-  z[1]=x[1];
-  return z;
+  GEN z = Flx_sqrspec(x+2,p, lg(x)-2);
+  z[1] = x[1]; return z;
 }
 
 GEN
