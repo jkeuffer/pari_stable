@@ -2464,49 +2464,50 @@ simplify_i(GEN x)
       return gred(x);
 
     case t_COMPLEX:
-      if (isexactzero((GEN)x[2])) return simplify((GEN)x[1]);
+      if (isexactzero((GEN)x[2])) return simplify_i((GEN)x[1]);
       y=cgetg(3,t_COMPLEX);
-      y[1]=(long)simplify((GEN)x[1]);
-      y[2]=(long)simplify((GEN)x[2]); return y;
+      y[1]=(long)simplify_i((GEN)x[1]);
+      y[2]=(long)simplify_i((GEN)x[2]); return y;
 
     case t_QUAD:
-      if (isexactzero((GEN)x[3])) return simplify((GEN)x[2]);
+      if (isexactzero((GEN)x[3])) return simplify_i((GEN)x[2]);
       y=cgetg(4,t_QUAD);
       y[1]=x[1];
-      y[2]=(long)simplify((GEN)x[2]);
-      y[3]=(long)simplify((GEN)x[3]); return y;
+      y[2]=(long)simplify_i((GEN)x[2]);
+      y[3]=(long)simplify_i((GEN)x[3]); return y;
 
     case t_POLMOD: y=cgetg(3,t_POLMOD);
-      y[1]=(long)simplify((GEN)x[1]);
-      y[2]=lmod(simplify((GEN)x[2]),(GEN)y[1]); return y;
+      y[1]=(long)simplify_i((GEN)x[1]);
+      y[2]=lmod(simplify_i((GEN)x[2]),(GEN)y[1]); return y;
 
     case t_POL:
       lx=lgef(x); if (lx==2) return gzero;
-      if (lx==3) return simplify((GEN)x[2]);
+      if (lx==3) return simplify_i((GEN)x[2]);
       y=cgetg(lx,t_POL); y[1]=x[1];
-      for (i=2; i<lx; i++) y[i]=(long)simplify((GEN)x[i]);
+      for (i=2; i<lx; i++) y[i]=(long)simplify_i((GEN)x[i]);
       return y;
 
     case t_SER:
       if (!signe(x)) return gcopy(x);
       lx=lg(x);
       y=cgetg(lx,t_SER); y[1]=x[1];
-      for (i=2; i<lx; i++) y[i]=(long)simplify((GEN)x[i]);
+      for (i=2; i<lx; i++) y[i]=(long)simplify_i((GEN)x[i]);
       return y;
 
     case t_RFRAC: y=cgetg(3,t_RFRAC);
-      y[1]=(long)simplify((GEN)x[1]);
-      y[2]=(long)simplify((GEN)x[2]); return y;
+      y[1]=(long)simplify_i((GEN)x[1]);
+      y[2]=(long)simplify_i((GEN)x[2]); return y;
 
-    case t_RFRACN:
-      return simplify(gred_rfrac(x));
+    case t_RFRACN: y=cgetg(3,t_RFRAC);
+      y[1]=(long)simplify_i((GEN)x[1]);
+      y[2]=(long)simplify_i((GEN)x[2]); return gred_rfrac(y);
 
     case t_VEC: case t_COL: case t_MAT:
       lx=lg(x); y=cgetg(lx,tx);
-      for (i=1; i<lx; i++) y[i]=(long)simplify((GEN)x[i]);
+      for (i=1; i<lx; i++) y[i]=(long)simplify_i((GEN)x[i]);
       return y;
   }
-  err(typeer,"simplify");
+  err(typeer,"simplify_i");
   return NULL; /* not reached */
 }
 
