@@ -1083,14 +1083,10 @@ bnfisintnorm(GEN bnf, GEN a)
   norm_1 = 0; /* gcc -Wall */
   for (i=1; i<=sindex; i++)
   {
-    id = gun; x = normsol[i];
-    for (j=1; j<=Nprimes; j++) /* compute prod Primes[i]^u[i] */
-      if (x[j])
-      {
-	GEN id2 = Primes[j];
-	if (x[j] != 1) id2 = idealpow(nf,id2, stoi(x[j]));
-	id = idealmul(nf,id,id2);
-      }
+    x = normsol[i];
+    id = idealpow(nf,Primes[1], stoi(x[1]));
+    for (j=2; j<=Nprimes; j++) /* compute prod Primes[i]^u[i] */
+      id = idealmulpowprime(nf,id, Primes[j], stoi(x[j]));
     x = (GEN) isprincipalgenforce(bnf,id)[2];
     x = gmul((GEN)nf[7],x); /* x possible solution */
     if (signe(gnorm(gmodulcp(x,(GEN)nf[1]))) != sa)
@@ -1099,8 +1095,7 @@ bnfisintnorm(GEN bnf, GEN a)
       if (norm_1) x = gmul(unit,x);
       else
       {
-        if (DEBUGLEVEL > 2)
-          fprintferr("%Z eliminated because of sign\n",x);
+        if (DEBUGLEVEL > 2) fprintferr("%Z eliminated because of sign\n",x);
         x = NULL;
       }
     }
