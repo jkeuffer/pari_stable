@@ -3219,9 +3219,9 @@ ZX_caract(GEN A, GEN B, long v)
 }
 
 GEN
-ZX_resultant(GEN A, GEN B)
+ZX_resultant_all(GEN A, GEN B, ulong bound)
 {
-  ulong av = avma, av2, lim, Hp, bound;
+  ulong av = avma, av2, lim, Hp;
   int stable;
   GEN q, a, b, H;
   byteptr d = diffptr + 3000;
@@ -3229,7 +3229,7 @@ ZX_resultant(GEN A, GEN B)
 
   q = H = NULL;
   av2 = avma; lim = stack_lim(av,2);
-  bound = ZY_ZXY_ResBound(A,B);
+  if (!bound) bound = ZY_ZXY_ResBound(A,B);
   if (DEBUGLEVEL>4) fprintferr("bound for resultant: 2^%ld\n",bound);
 
   for(;;)
@@ -3262,16 +3262,20 @@ ZX_resultant(GEN A, GEN B)
   return gerepileuptoint(av, icopy(H));
 }
 
+GEN
+ZX_resultant(GEN A, GEN B) { return ZX_resultant_all(A,B,0); }
+
 /* assume x has integral coefficients */
 GEN
-ZX_disc(GEN x)
+ZX_disc_all(GEN x, ulong bound)
 {
   ulong av = avma;
-  GEN l, d = ZX_resultant(x, derivpol(x));
+  GEN l, d = ZX_resultant_all(x, derivpol(x), bound);
   l = leading_term(x); if (!gcmp1(l)) d = divii(d,l);
   if (deg(x) & 2) d = negi(d);
   return gerepileuptoint(av,d);
 }
+GEN ZX_disc(GEN x) { return ZX_disc_all(x,0); }
 
 int
 ZX_issquarefree(GEN x)
