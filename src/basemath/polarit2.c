@@ -863,9 +863,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
   double logp = log(gtodouble(p));
   double b0 = log((double)dP*2) / logp;
   double k = gtodouble(glog(root_bound(P), DEFAULTPREC)) / logp;
-  GEN y, T, T2, TT, BL, m, mGram, u, norm; 
-  GEN target = P;
-  GEN M, piv, list;
+  GEN y, T, T2, TT, BL, m, mGram, u, norm, target, M, piv, list;
 
   n0 = n = r = lg(famod) - 1;
   s = 2;
@@ -881,7 +879,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
   for(tmax = 0;; tmax += s) 
   {
     long b = (long)ceil(b0 + (tmax+s)*k);
-    GEN pas2, pa_b, ps2, pb = gpowgs(p, b), BE;
+    GEN pas2, pa_b, pb_as2, pbs2, pb = gpowgs(p, b), BE;
 
     if (a <= b)
     {
@@ -890,7 +888,8 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
       famod = hensel_lift_fact(P,famod,p,pa,a);
     }
     pa_b = gpowgs(p, a-b);
-    ps2 = shifti(pa_b,-1);
+    pb_as2 = shifti(pa_b,-1);
+    pbs2 = shifti(pb,-1);
     C = (long)(sqrt((double)s*n)/ 2);
     M = dbltor((C*C*n + s*n*n/4.) * 1.00001);
 
@@ -910,8 +909,9 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
       GEN p1 = (GEN)T2[i];
       for (j=1; j<=s; j++)
       {
-        GEN p3 = divii(modii((GEN)p1[j], pa), pb);
-        if (cmpii(p3,ps2) > 0) p3 = subii(p3,pa_b);
+        GEN r3, p3 = dvmdii(modii((GEN)p1[j], pa), pb, &r3);
+        if (cmpii(r3,  pbs2) > 0) p3 = addis(p3,1);
+        if (cmpii(p3,pb_as2) > 0) p3 = subii(p3,pa_b);
         p1[j] = (long)p3;
       }
     }
@@ -951,7 +951,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
       if (!piv) { avma = av; continue; }
     }
 
-    pas2 = shifti(pa,-1);
+    pas2 = shifti(pa,-1); target = P;
     for (i=1; i<=r; i++)
     {
       GEN q, p1 = (GEN)piv[i];
@@ -962,7 +962,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
           y = centermod_i(gmul(y, (GEN)famod[j]), pa, pas2);
 
       /* y is the candidate factor */
-      if (! (q = polidivis(target,y,bound)) ) { target = P; break; }
+      if (! (q = polidivis(target,y,bound)) ) break;
       if (signe(leading_term(y)) < 0) y = gneg(y);
       target = gdiv(q, leading_term(y));
       list[i] = (long)y;
