@@ -19,19 +19,23 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                                                                 */
 /*******************************************************************/
 #include "pari.h"
+
+#ifdef READLINE
+
 #include "paripriv.h"
 #include "../language/anal.h"
 #include "gp.h"
 
-#ifdef READLINE
 typedef int (*RLCI)(int, int); /* rl_complete and rl_insert functions */
 typedef char* (*GF)(const char*, int); /* generator function */
 
 BEGINEXTERN
+/***** Try to survive broken readline headers and obsolete versions *****/
 #ifdef HAS_RL_MESSAGE
 #  define USE_VARARGS
 #  define PREFER_STDARG
 #endif
+
 #ifdef READLINE_LIBRARY
 #  include <readline.h>
 #  ifdef HAS_HISTORY_H
@@ -43,25 +47,12 @@ BEGINEXTERN
 #    include <readline/history.h>
 #  endif
 #endif
-#ifndef HAS_RL_MESSAGE
-extern int rl_message (const char*, ...);
-extern int rl_clear_message(), rl_begin_undo_group(), rl_end_undo_group();
-extern int rl_read_key(), rl_stuff_char();
-extern char *filename_completion_function(char *text,int state);
-extern char *username_completion_function(char *text,int state);
+
+#ifndef HAS_HISTORY_H
+typedef struct HIST_ENTRY__ {char *line; void *data;} HIST_ENTRY;
+extern HIST_ENTRY *history_get(int);
+extern int history_length;
 #endif
-char **pari_completion(char *text, int start, int end);
-ENDEXTERN
-
-void print_fun_list(char **matches, int nbli);
-void aide(char *s, int flag);
-
-static int add_help_keywords;
-static entree *current_ep = NULL;
-
-static int pari_rl_back;
-extern RLCI rl_last_func;
-static int did_init_matched = 0;
 
 #ifdef HAS_RL_SAVE_PROMPT
 #  define SAVE_PROMPT() rl_save_prompt()
@@ -77,6 +68,17 @@ extern void* _rl_restore_prompt(void), _rl_save_prompt(void);
 #  endif
 #endif
 
+#ifndef HAS_RL_MESSAGE
+extern int rl_message (const char*, ...);
+extern int rl_clear_message(), rl_begin_undo_group(), rl_end_undo_group();
+extern int rl_read_key(), rl_stuff_char();
+extern char *filename_completion_function(char *text,int state);
+extern char *username_completion_function(char *text,int state);
+#endif
+
+extern RLCI rl_last_func;
+ENDEXTERN
+
 #ifdef HAS_RL_COMPLETION_MATCHES
 #  define COMPLETION_MATCHES(a,b) \
       rl_completion_matches((a),(b))
@@ -91,6 +93,12 @@ typedef char** (*CF)(const char*, GF); /* completion function */
 #  define USER_COMPLETION ((GF)username_completion_function)
 #  define DING ding
 #endif
+/**************************************************************************/
+
+static int add_help_keywords;
+static int pari_rl_back;
+static int did_init_matched = 0;
+static entree *current_ep = NULL;
 
 static int
 change_state(char *msg, ulong flag, int count)
@@ -192,8 +200,8 @@ static int
 pari_rl_default_matched_insert(int count, int key)
 {
     if (!did_init_matched) {
-	did_init_matched = 1;
-	readline_state |= DO_MATCHED_INSERT;
+      did_init_matched = 1;
+      readline_state |= DO_MATCHED_INSERT;
     }
     return pari_rl_matched_insert(count, key);
 }
@@ -300,9 +308,32 @@ add_paren(int end)
 static void
 match_concat(char **matches, char *s)
 {
-  matches[0] = (char*) gprealloc(matches[0], strlen(matches[0])+strlen(s)+1);
+  matches[0] = gprealloc(matches[0], strlen(matches[0])+strlen(s)+1);
   strcat(matches[0],s);
 }
+
+#define add_comma(x) (x==-2) /* from default_generator */
+
+/* a single match, possibly modify matches[0] in place */
+static void
+treat_single(int code, char **matches)
+{
+  if (add_paren(code))
+  {
+    match_concat(matches,"()");
+    pari_rl_back = 1;
+    if (rl_point == rl_end)
+#ifdef HAS_COMPLETION_APPEND_CHAR
+      rl_completion_append_character = '\0'; /* Do not append space. */
+#else
+      pari_rl_back = 2;
+#endif
+  }
+  else if (add_comma(code))
+    match_concat(matches,",");
+}
+#undef add_comma
+
 
 static char **
 matches_for_emacs(const char *text, char **matches)
@@ -326,45 +357,22 @@ matches_for_emacs(const char *text, char **matches)
   return matches;
 }
 
-#define add_comma(x) (x==-2) /* from default_generator */
-
-/* Attempt to complete on the contents of TEXT. END points to the end of the
- * word to complete. Return the array of matches, NULL if there are none. */
+/* Attempt to complete on the contents of TEXT. 'code' is used to
+ * differentiate between callers when a single match is found.
+ * Return the array of matches, NULL if there are none. */
 static char **
-get_matches(int end, const char *text, GF f)
+get_matches(int code, const char *text, GF f)
 {
-  char **matches;
-
-#ifdef HAS_COMPLETION_APPEND_CHAR
-  rl_completion_append_character = ' ';
-#endif
-  current_ep = NULL;
-  matches = COMPLETION_MATCHES(text, f);
-  if (matches && !matches[1]) /* a single match */
-  {
-    if (add_paren(end))
-    {
-      match_concat(matches,"()");
-      pari_rl_back = 1;
-      if (rl_point == rl_end)
-#ifdef HAS_COMPLETION_APPEND_CHAR
-        rl_completion_append_character = '\0'; /* Do not append space. */
-#else
-        pari_rl_back = 2;
-#endif
-    }
-    else if (add_comma(end))
-      match_concat(matches,",");
-  }
+  char **matches = COMPLETION_MATCHES(text, f);
+  if (matches && !matches[1]) treat_single(code, matches);
   if (GP_DATA->flags & EMACS) matches = matches_for_emacs(text,matches);
   return matches;
 }
-#undef add_comma
 
 static char *
 add_junk(char *name, const char *text, long junk)
 {
-  char *s = strncpy((char*) gpmalloc(strlen(name)+1+junk),text,junk);
+  char *s = strncpy(gpmalloc(strlen(name)+1+junk),text,junk);
   strcpy(s+junk,name); return s;
 }
 
@@ -454,7 +462,7 @@ generator(void *list, const char *text, int *nn, int len, int typ)
   *nn = n;
   if (def)
   {
-    name = strcpy((char*) gpmalloc(strlen(def)+1), def);
+    name = strcpy(gpmalloc(strlen(def)+1), def);
     return name;
   }
   return NULL; /* no names matched */
@@ -505,47 +513,73 @@ rl_print_aide(char *s, int flag)
 #endif
 }
 
+/* add a space between \<char> and following text. Attemting completion now
+ * would delete char. Hitting <TAB> again will complete properly */
+static char **
+add_space(int start)
+{
+  char **m;
+  int p = rl_point + 1;
+  rl_point = start + 2;
+  rl_insert(1, ' '); rl_point = p;
+#if 0 /* OK, but rings a bell */
+#  ifdef HAS_RL_ATTEMPTED_COMPLETION_OVER
+  rl_attempted_completion_over = 1;
+#  endif
+  return NULL;
+#else /* better: fake an empty completion, but donc append ' ' after it! */
+#  ifdef HAS_COMPLETION_APPEND_CHAR
+  rl_completion_append_character = '\0';
+#  endif
+  m = (char**)gpmalloc(2 * sizeof(char*));
+  m[0] = gpmalloc(1); *(m[0]) = 0;
+  m[1] = NULL; return m;
+#endif
+}
+
 char **
 pari_completion(char *text, int START, int END)
 {
   int i, first=0, start=START;
 
+#ifdef HAS_COMPLETION_APPEND_CHAR
+  rl_completion_append_character = ' ';
+#endif
+  current_ep = NULL;
 /* If the line does not begin by a backslash, then it is:
  * . an old command ( if preceded by "whatnow(" ).
  * . a default ( if preceded by "default(" ).
  * . a member function ( if preceded by "." within 4 letters )
  * . a file name (in current directory) ( if preceded by "read(" )
- * . a command
- */
+ * . a command */
   if (start >=1 && rl_line_buffer[start] != '~') start--;
   while (start && is_keyword_char(rl_line_buffer[start])) start--;
   if (rl_line_buffer[start] == '~')
   {
+    GF f = (GF)USER_COMPLETION;
     for(i=start+1;i<=END;i++)
-      if (rl_line_buffer[i] == '/')
-	return get_matches(-1,text,FILE_COMPLETION);
-    return get_matches(-1,text,USER_COMPLETION);
+      if (rl_line_buffer[i] == '/') { f = (GF)FILE_COMPLETION; break; }
+    return get_matches(-1, text, f);
   }
 
   while (rl_line_buffer[first] && isspace((int)rl_line_buffer[first])) first++;
   switch (rl_line_buffer[first])
   {
     case '\\':
-      if (first == start) text = rl_line_buffer+start+2;
-      return get_matches(-1,text,FILE_COMPLETION);
+      if (first == start) return add_space(start);
+      return get_matches(-1, text, FILE_COMPLETION);
     case '?':
       if (rl_line_buffer[first+1] == '?') add_help_keywords = 1;
-      return get_matches(-1,text,command_generator);
+      return get_matches(-1, text, command_generator);
   }
 
   while (start && rl_line_buffer[start] != '('
                && rl_line_buffer[start] != ',') start--;
   if (rl_line_buffer[start] == '(' && start)
   {
-#define MAX_KEYWORD 200
     int iend, j,k;
     entree *ep;
-    char buf[MAX_KEYWORD];
+    char buf[200];
 
     i = start;
 
@@ -556,15 +590,13 @@ pari_completion(char *text, int START, int END)
     if (iend - i == 7)
     {
       if (strncmp(rl_line_buffer + i,"default",7) == 0)
-	return get_matches(-2,text,default_generator);
+	return get_matches(-2, text, default_generator);
       if (strncmp(rl_line_buffer + i,"whatnow",7) == 0)
-	return get_matches(-1,text,old_generator);
+	return get_matches(-1, text, old_generator);
     }
     if (iend - i >= 4)
-    {
       if (strncmp(rl_line_buffer + i,"read",4) == 0)
-	return get_matches(-1,text,FILE_COMPLETION);
-    }
+	return get_matches(-1,text, FILE_COMPLETION);
 
     j = start + 1;
     while (j <= END && isspace((int)rl_line_buffer[j])) j++;
@@ -573,47 +605,46 @@ pari_completion(char *text, int START, int END)
     /* If we are in empty parens, insert the default arguments */
     if ((readline_state & DO_ARGS_COMPLETE) && k == j
          && (rl_line_buffer[j] == ')' || !rl_line_buffer[j])
-	 && (iend - i < MAX_KEYWORD)
+	 && (iend - i < sizeof(buf))
 	 && ( strncpy(buf, rl_line_buffer + i, iend - i),
 	      buf[iend - i] = 0, 1)
 	 && (ep = is_entry(buf)) && ep->help)
-     {
-#if 1
+    {
+#if 0 /* duplicate F1 */
+      rl_print_aide(buf,h_RL);
+#  ifdef HAS_RL_ATTEMPTED_COMPLETION_OVER
+      rl_attempted_completion_over = 1;
+#  endif
+      return NULL;
+#else
       char *s = ep->help;
-
       while (is_keyword_char(*s)) s++;
       if (*s++ == '(')
-      { /* Function, print arguments! */
-        char *endh = s;
-        while (*endh && *endh != ')' && *endh != '(') endh++;
-        if (*endh == ')')
-        { /* Well-formed help.  */
-          char *str = strncpy((char*) gpmalloc(endh-s + 1), s, endh-s);
+      { /* function call: insert arguments */
+        char *e = s; 
+        while (*e && *e != ')' && *e != '(') e++;
+        if (*e == ')')
+        { /* we just skipped over the arguments in short help text */
+          char *str = strncpy(gpmalloc(e-s + 1), s, e-s);
           char **ret = (char**)gpmalloc(sizeof(char*)*2);
-          str[endh-s] = 0;
+          str[e-s] = 0;
           ret[0] = str; ret[1] = NULL;
           if (GP_DATA->flags & EMACS) ret = matches_for_emacs("",ret);
           return ret;
         }
       }
-#else			/* Why duplicate F1 (and emit a bell)?! */
-      rl_print_aide(buf,h_RL);
-#ifdef HAS_RL_ATTEMPTED_COMPLETION_OVER
-      rl_attempted_completion_over = 1;
-#endif
-      return NULL;
 #endif
     }
   }
-  for(i=END-1;i>=start;i--)
+  for(i = END-1; i >= start; i--)
     if (!is_keyword_char(rl_line_buffer[i]))
     {
       if (rl_line_buffer[i] == '.')
-        return get_matches(-1,text,member_generator);
+        return get_matches(-1, text, member_generator);
       break;
     }
   add_help_keywords = 0;
-  return get_matches(END,text,command_generator);
+  return get_matches(END, text, command_generator);
 }
 
 /* long help if count < 0 */
@@ -632,7 +663,7 @@ rl_short_help(int count, int key)
 
   /* Check for \c type situation.  Could check for leading whitespace too... */
   if (off == 1 && rl_line_buffer[off-1] == '\\') off--;
-  if (off >= 8) {		/* Check for default(whatever) */
+  if (off >= 8) { /* Check for default(whatever) */
     int t = off - 1;
 
     while (t >= 7 && isspace((int)rl_line_buffer[t])) t--;
@@ -790,8 +821,7 @@ completion_word(long end)
   return s;
 }
 
-/* completion required with cursor on s + pos. Complete wrt strict left
- * prefix */
+/* completion required, cursor on s + pos. Complete wrt strict left prefix */
 void
 texmacs_completion(char *s, long pos)
 {
@@ -824,12 +854,6 @@ texmacs_completion(char *s, long pos)
   fflush(stdout);
 }
 
-#ifndef HAS_HISTORY_H
-extern int history_length;
-typedef struct HIST_ENTRY__ {char *line; void *data;} HIST_ENTRY;
-extern HIST_ENTRY *history_get(int);
-#endif
-
 static int
 history_is_new(char *s)
 {
@@ -837,9 +861,8 @@ history_is_new(char *s)
   if (!*s) return 0;
   if (!history_length) return 1;
   e = history_get(history_length);
-  /* paranoia: e should be non-NULL, unless readline is in a weird state */
-  if (!e) return 0;
-  return strcmp(s, e->line);
+  /* paranoia: e != NULL, unless readline is in a weird state */
+  return e? strcmp(s, e->line): 0;
 }
 
 static void
@@ -919,19 +942,19 @@ get_line_from_readline(char *prompt, char *bare_prompt, filtre_t *F)
     /* update logfile */
     if (logfile) switch (logstyle) {
     case logstyle_TeX:
-	fprintf(logfile,
-		"\\PARIpromptSTART|%s\\PARIpromptEND|%s\\PARIinputEND|%%\n",
-		bare_prompt,s);
-	break;
+      fprintf(logfile,
+              "\\PARIpromptSTART|%s\\PARIpromptEND|%s\\PARIinputEND|%%\n",
+              bare_prompt,s);
+      break;
     case logstyle_plain:
-	fprintf(logfile, "%s%s\n",bare_prompt,s);
-	break;
+      fprintf(logfile, "%s%s\n",bare_prompt,s);
+      break;
     case logstyle_color:
-	/* Can't do in one pass, since term_get_color() returns a static */
-	fprintf(logfile, "%s%s", term_get_color(c_PROMPT), bare_prompt);
-	fprintf(logfile, "%s%s", term_get_color(c_INPUT), s);
-	fprintf(logfile, "%s\n", term_get_color(c_NONE));
-	break;
+      /* Can't do in one pass, since term_get_color() returns a static */
+      fprintf(logfile, "%s%s", term_get_color(c_PROMPT), bare_prompt);
+      fprintf(logfile, "%s%s", term_get_color(c_INPUT), s);
+      fprintf(logfile, "%s\n", term_get_color(c_NONE));
+      break;
     }
   }
   unblock_SIGINT(); /* bug in readline 2.0: need to unblock ^C */

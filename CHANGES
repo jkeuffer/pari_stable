@@ -194,6 +194,9 @@ JD 74- [Configure:] detection of times()
    94- agm(-1,2) --> oo loop
    95- tanh(10^10) --> exponent overflow [ should be 1 ! ]
    96- gamma(exp(-373)) --> exponent overflow
+   97- readline: assume a file 'foo' exists, \rf<TAB> --> \foo [ r deleted! ]
+       [\r f<TAB> was OK]. Solution: just expand to '\r f'; hitting <TAB>
+       again completes properly --> \r foo.
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.
