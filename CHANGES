@@ -42,6 +42,7 @@ BA  8- Pocklington-Lehmer didn't stop factorisation after sqrt(N)
    10- more digits than were significant could be printed (ex: precision(Pi,1))
    11- rnfisnorm didn't accept vectors on Zk basis as argument
    12- [cygwin] fixed timer (always returned 0)
+IS 13- function prototypes (missing 'extern')
 
   Changed
 BA  1- more efficient quadratic Hensel lift
