@@ -2192,7 +2192,11 @@ primedec(GEN nf, GEN p)
 	h[c++] = (long)FpM_image(concatsp(H, I), p);
       }
       if (n == dim)
-        for (i=1; i<=n; i++) L[iL++] = (long)get_pr(nf,p,(GEN)h[--c], 1);
+        for (i=1; i<=n; i++)
+        {
+          H = (GEN)h[--c]; k = lg(H)-1;
+          L[iL++] = (long)get_pr(nf,p,H, N-k);
+        }
     }
     else /* A2 field ==> H maximal, f = N-k = dim(A2) */
       L[iL++] = (long)get_pr(nf,p,H, N-k);
