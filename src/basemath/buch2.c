@@ -309,7 +309,7 @@ powFBgen(FB_t *F, GEN nf, long a)
   long i, j, n = lg(F->subFB);
   GEN Id2, Alg, Ord;
 
-  if (DEBUGLEVEL) fprintferr("Computing powers for sub-factor base:\n");
+  if (DEBUGLEVEL) fprintferr("Computing powers for subFB: %Z\n",F->subFB);
   F->pow = (powFB_t*) gpmalloc(sizeof(powFB_t));
   Id2 = cgetg(n, t_VEC);
   Alg = cgetg(n, t_VEC);
@@ -2125,7 +2125,7 @@ compute_multiple_of_R(GEN A,long RU,long N,GEN *ptlambda)
    * index in the full lattice. Last column is T */
   kR = gdivgs(det2(Im_mdet), N);
   /* R > 0.2 uniformly */
-  if (gexpo(kR) < -3) { avma=av; return NULL; }
+  if (gcmp0(kR) || gexpo(kR) < -3) { avma=av; return NULL; }
 
   kR = mpabs(kR);
   lambda = gauss(Im_mdet,xreal); /* approximate rational entries */

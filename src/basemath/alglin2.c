@@ -1535,10 +1535,9 @@ hnffinal(GEN matgen,GEN perm,GEN* ptdep,GEN* ptB,GEN* ptC)
       fprintferr("B = %Z\n",B);
     }
   }
-  p1 = hnflll(matgen);
-  H = (GEN)p1[1]; /* lnz x lnz [disregarding initial 0 cols] */
+  /* H: lnz x lnz [disregarding initial 0 cols], U: col x col */
+  H = hnflll_i(matgen, &U, 0);
   H += (lg(H)-1 - lnz); H[0] = evaltyp(t_MAT) | evallg(lnz+1);
-  U = (GEN)p1[2]; /* col x col */
   /* Only keep the part above the H (above the 0s is 0 since the dep rows
    * are dependent from the ones in matgen) */
   zc = col - lnz; /* # of 0 columns, correspond to units */
@@ -2099,7 +2098,7 @@ hnfadd_i(GEN H, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, /* cf hnfspec */
   if (DEBUGLEVEL)
   {
     if (DEBUGLEVEL>7) fprintferr("H = %Z\nC = %Z\n",H,*ptC);
-    msgtimer("hnfadd (%ld)", lg(extramat)-1);
+    msgtimer("hnfadd (%ld + %ld)", lg(extratop)-1, lg(dep)-1);
   }
   return H;
 }
