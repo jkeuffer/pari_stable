@@ -261,7 +261,7 @@ produce a broken binary]
 (28) gp-dyn: add -fPIC to CFLAGS [or linking fails].
      gcc-2.96 fails
 (29) added -mcpu=athlon -march=athlon to CFLAGS (very minor speedup).
-     Don't know clock frequency for Athlon 1800+ (something like 1500-1600MHz)
+     clock frequency for Athlon 1800+ = 1530MHz
 (30) cpu=Athlon XP1800+ Mandrake 8.1, Linux-2.4.17
 CFLAGS= -fbranch-probabilities -fstrict-aliasing  -falign-jumps
 -foptimize-sibling-calls -fssa -maccumulate-outgoing-args
