@@ -1060,7 +1060,7 @@ if test -n "$readline"; then
   exe=$osname-$arch-rlv$$
   $CC $extraflag $RLINCLUDE -o $exe rl_version.c $RLLIBS 2>/dev/null
   if test -r $exe; then readline=`$exe`; else readline=1.0; fi
-#  rm -f $exe
+  rm -f $exe
 fi
 
 ####################### CONFIGURE - LIBC ####################################
