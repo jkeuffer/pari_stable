@@ -571,6 +571,18 @@ gpow(GEN x, GEN n, long prec)
     y[1] = evalexpo(itos(x));
     y[2] = 0; return y;
   }
+  if (tx==t_INTMOD && typ(n)==t_FRAC)
+  {
+    GEN p1;
+    if (!isprime(x[1])) err(talker,"modulus must be prime in gpow");
+    y=cgetg(3,tx); copyifstack(x[1],y[1]);
+    av=avma;
+    p1=mpsqrtnmod((GEN)x[2],(GEN)n[2],(GEN)x[1],NULL);
+    if(!p1) err(talker,"n-root does not exists in gpow");
+    p1=powmodulo(p1,(GEN)n[1],(GEN)x[1]);
+    y[2]=lpileupto(av,p1);
+    return y;
+  }
   i = (long) precision(n); if (i) prec=i;
   y=gmul(n,glog(x,prec)); tetpil=avma;
   return gerepile(av,tetpil,gexp(y,prec));
