@@ -70,6 +70,8 @@ IZ 12- [gnuplot + dynamic link:] allow building even when dlopen() not available
        print("a", [1])  prints  'a[1]'
 IZ  5- [gphelp:] allow uninstalled operation from $TOPDIR or $TOPDIR/Oarch
 IZ  6- [gphelp:] better error messages in case TeX compilation fails
+    7- [development version:] add version number for this file to the gp
+       header when using CVS
 
   Added
  BA 1- Add PARI_VERSION and PARI_VERSION_CODE to paricfg.h
