@@ -17,9 +17,11 @@ case "$src_dir"    in /*) src=$src_dir ;;    *) src=../$src_dir ;; esac
 kernel="kernel mp"
 inline="mpinl"
 
-graph="plotport"
+graph=
 gp="gp gp_init gp_rl whatnow"
-gplib="highlvl"
+DIRgplib="gp/highlvl graph/plotport"
+gplib=
+for i in $DIRgplib; do tmp=`basename $i`; gplib="$gplib $tmp"; done
 
 language=`ls $src_dir/language/*.c | sed 's,.*/\(.*\)\.c,\1,'`
 basemath=`ls $src_dir/basemath/*.c | sed 's,.*/\(.*\)\.c,\1,'`
@@ -117,11 +119,11 @@ for f in $kernel; do
   KERNOBJS="$KERNOBJS $f\$(_O)"
 done
 OBJS=$KERNOBJS
-for f in $basemath $gplib $graph $language $modules $systems; do
+for f in $basemath $gplib $language $modules $systems; do
   OBJS="$OBJS $f\$(_O)"
 done
 OBJSGP=''
-for f in $gp; do
+for f in $gp $graph; do
   OBJSGP="$OBJSGP $f\$(_O)"
 done
 for f in $inline; do
@@ -579,16 +581,17 @@ if test -s $src_dir/kernel/$kernlvl1/MakeLVL1.SH; then
 fi
 
 HUGELINE=
-for dir in basemath modules language gp graph gpdyn graphdyn systems; do
+for dir in basemath modules language gp DIRgplib graph graphdyn systems; do
   eval list='$'$dir
-  if test "$dir" = systems; then
-    SRC=$src/$dir/$osname
-  else
-    SRC=$src/$dir
-  fi
+  case "$dir" in
+    systems)  SRC=$src/$dir/$osname;;
+    DIRgplib) SRC=$src;;
+    *)        SRC=$src/$dir;;
+  esac
   for f in $list; do
 
   source="$SRC/$f.c"
+  f=`basename $f`
   depend=
   cflags="\$(CFLAGS) \$(CPPFLAGS)"
   compile='$(CC)'
