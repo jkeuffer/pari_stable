@@ -581,7 +581,8 @@ prodinf(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
   for(;;)
   {
     p1 = eval(a, E); x = gmul(x,p1); a = incloop(a);
-    if (gexpo(gsubgs(p1,1)) <= G) { if (++fl==3) break; } else fl=0;
+    p1 = gsubgs(p1, 1);
+    if (gcmp0(p1) || gexpo(p1) <= G) { if (++fl==3) break; } else fl=0;
     if (low_stack(lim, stack_lim(av,1)))
     {
       if (DEBUGMEM>1) err(warnmem,"prodinf");
@@ -604,7 +605,7 @@ prodinf1(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
   for(;;)
   {
     p2 = eval(a, E); p1 = gaddgs(p2,1); x = gmul(x,p1); a = incloop(a);
-    if (gcmp0(p1) || gexpo(p2) <= G) { if (++fl==3) break; } else fl=0;
+    if (gcmp0(p2) || gexpo(p2) <= G) { if (++fl==3) break; } else fl=0;
     if (low_stack(lim, stack_lim(av,1)))
     {
       if (DEBUGMEM>1) err(warnmem,"prodinf1");
