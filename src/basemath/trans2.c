@@ -1060,6 +1060,7 @@ cxgamma(GEN x, long prec)
   long l,l1,l2,u,i,k,e,s,n,p,av,av1;
   double alpha,beta,dk;
 
+  if (gcmp0((GEN)x[2])) return ggamma((GEN)x[1],prec);
   l = precision(x); if (!l) l = prec;
   l2 = l+1; y=cgetg(3,t_COMPLEX);
   y[1]=lgetr(l); y[2]=lgetr(l); av=avma;
@@ -1149,7 +1150,7 @@ ggamma(GEN x, long prec)
       return mpgamma(x);
 
     case t_COMPLEX:
-      return gcmp0((GEN)x[2])? ggamma((GEN)x[1],prec): cxgamma(x,prec);
+      return cxgamma(x,prec);
 
     case t_SER:
       return gexp(glngamma(x,prec),prec);
@@ -1277,6 +1278,7 @@ cxlngamma(GEN x, long prec)
   long l,l1,l2,flag,i,k,e,s,n,p,av,av1;
   double alpha,beta,dk;
 
+  if (gcmp0((GEN)x[2])) return glngamma((GEN)x[1],prec);
   l = precision(x); if (!l) l = prec;
   l2 = l+1; y=cgetg(3,t_COMPLEX);
   y[1]=lgetr(l); y[2]=lgetr(l); av=avma;
@@ -1381,7 +1383,7 @@ cxlngamma(GEN x, long prec)
 GEN
 glngamma(GEN x, long prec)
 {
-  long i,av,tetpil,n;
+  long i,av,n;
   GEN y,p1;
 
   switch(typ(x))
@@ -1394,17 +1396,18 @@ glngamma(GEN x, long prec)
       return mplngamma(x);
 
     case t_COMPLEX:
-      return gcmp0((GEN)x[2])? glngamma((GEN)x[1],prec): cxlngamma(x,prec);
+      return cxlngamma(x,prec);
 
     case t_SER:
-      av=avma; if (valp(x)) err(negexper,"glngamma");
-      if (!gcmp1((GEN)x[2])) err(impl,"lngamma around a!=1");
-      p1=gsubsg(1,x); n=(lg(x)-3)/valp(p1);
-      y=ggrando(polx[varn(x)],lg(x)-2);
+      if (valp(x)) err(negexper,"glngamma");
+      av = avma; p1 = gsubsg(1,x);
+      if (!valp(p1)) err(impl,"lngamma around a!=1");
+      n = (lg(x)-3)/valp(p1);
+      y = ggrando(polx[varn(x)],lg(x)-2);
       for (i=n; i>=2; i--)
 	y = gmul(p1,gadd(gdivgs(gzeta(stoi(i),prec),i),y));
-      y = gadd(mpeuler(prec),y); tetpil=avma;
-      return gerepile(av,tetpil,gmul(p1,y));
+      y = gadd(mpeuler(prec),y);
+      return gerepileupto(av, gmul(p1,y));
 
     case t_PADIC:
       err(impl,"p-adic lngamma function");
@@ -1592,6 +1595,7 @@ cxpsi(GEN z, long prec) /* version p=2 */
   long l,n,k,x,xx,av,av1,tetpil;
   GEN zk,u,v,a,b,p1;
 
+  if (gcmp0((GEN)z[2])) return gpsi((GEN)z[1],prec);
   l = precision(z); if (!l) l = prec; av=avma;
   x=(long)(1 + (bit_accuracy(l)>>1)*LOG2 + 1.58*rtodbl(gabs(z,DEFAULTPREC)));
   xx=x*x; n=(long)(1+3.591*x);
@@ -1617,6 +1621,7 @@ cxpsi(GEN z, long prec) /* by Manfred Radimersky */
   long bord, nubi, k;
   GEN a, b, f, s, w, wn;
 
+  if (gcmp0((GEN)z[2])) return gpsi((GEN)z[1],prec);
   head = avma;
   nubi = bit_accuracy(prec);
   bord = (nubi * nubi) >> 4;
