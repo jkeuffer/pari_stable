@@ -347,39 +347,46 @@ static void
 Zupdate_col(long k, long l, GEN q, long K, GEN h)
 {
   GEN *hl, *hk;
-  long i;
+  long i, qq;
 
   if (!h) return;
   hl = (GEN*)h[l]; hk = (GEN*)h[k];
-  if (is_pm1(q))
-  {
-    if (signe(q) > 0)
-      for (i=1;i<=K;i++) { if (signe(hl[i])) hk[i] = addii(hk[i],hl[i]); }
-    else
-      for (i=1;i<=K;i++) { if (signe(hl[i])) hk[i] = subii(hk[i],hl[i]); }
-  } else
-      for (i=1;i<=K;i++) if (signe(hl[i])) hk[i] = addii(hk[i],mulii(q,hl[i]));
+  if (is_bigint(q)) {
+    for (i=1;i<=K;i++) if (signe(hl[i])) hk[i] = addii(hk[i],mulii(q,hl[i]));
+    return;
+  }
+  qq = itos(q);
+  if (qq == 1) {
+    for (i=1;i<=K;i++) { if (signe(hl[i])) hk[i] = addii(hk[i],hl[i]); }
+  } else if (qq == -1) {
+    for (i=1;i<=K;i++) { if (signe(hl[i])) hk[i] = subii(hk[i],hl[i]); }
+  } else {
+    for (i=1;i<=K;i++) if (signe(hl[i])) hk[i] = addii(hk[i],mulsi(qq,hl[i]));
+  }
 }
 
 /* L[k,] += q * L[l,], l < k */
 static void
 Zupdate_row(long k, long l, GEN q, GEN L, GEN B)
 {
-  long i;
-  if (is_pm1(q))
+  long i, qq;
+  if (is_bigint(q))
   {
-    if (signe(q) > 0)
-    {
-      for (i=1;i<l; i++) coeff(L,k,i) = laddii(gcoeff(L,k,i),gcoeff(L,l,i));
-      coeff(L,k,l) = laddii(gcoeff(L,k,l), B);
-    } else {
-      for (i=1;i<l; i++) coeff(L,k,i) = lsubii(gcoeff(L,k,i),gcoeff(L,l,i));
-      coeff(L,k,l) = laddii(gcoeff(L,k,l), negi(B));
-    }
-  } else {
     for(i=1;i<l;i++)  coeff(L,k,i)=laddii(gcoeff(L,k,i),mulii(q,gcoeff(L,l,i)));
     coeff(L,k,l) = laddii(gcoeff(L,k,l), mulii(q,B));
+    return;
   }
+  qq = itos(q);
+  if (qq == 1) {
+    for (i=1;i<l; i++) coeff(L,k,i) = laddii(gcoeff(L,k,i),gcoeff(L,l,i));
+    coeff(L,k,l) = laddii(gcoeff(L,k,l), B); return;
+  }
+  if (qq == -1) {
+    for (i=1;i<l; i++) coeff(L,k,i) = lsubii(gcoeff(L,k,i),gcoeff(L,l,i));
+    coeff(L,k,l) = laddii(gcoeff(L,k,l), negi(B)); return;
+  }
+  for(i=1;i<l;i++)  coeff(L,k,i)=laddii(gcoeff(L,k,i),mulsi(qq,gcoeff(L,l,i)));
+  coeff(L,k,l) = laddii(gcoeff(L,k,l), mulsi(qq,B));
 }
 
 static void
@@ -425,7 +432,7 @@ ZRED_gram(long k, long l, GEN x, GEN h, GEN L, GEN B, long K)
     for(i=1;i<lx;i++) coeff(x,k,i)=xk[i]=laddii((GEN)xk[i],mulii(q,(GEN)xl[i]));
   }
   Zupdate_row(k,l,q,L,B);
-  Zupdate_col (k,l,q,K,h);
+  Zupdate_col(k,l,q,K,h);
 }
 
 static void
@@ -435,7 +442,7 @@ ZRED(long k, long l, GEN x, GEN h, GEN L, GEN B, long K)
   if (!signe(q)) return;
   q = negi(q);
   Zupdate_row(k,l,q,L,B);
-  Zupdate_col (k,l,q,K,h);
+  Zupdate_col(k,l,q,K,h);
   x[k] = (long)ZV_lincomb(gun, q, (GEN)x[k], (GEN)x[l]);
 }
 

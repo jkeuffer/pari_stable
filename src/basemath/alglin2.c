@@ -21,6 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /********************************************************************/
 #include "pari.h"
 extern GEN imagecomplspec(GEN x, long *nlze);
+extern void ZV_neg_ip(GEN M);
 
 /*******************************************************************/
 /*                                                                 */
@@ -1243,53 +1244,116 @@ ZV_Z_mul(GEN X, GEN c)
   A[0] = X[0]; return A;
 }
 
+/* X + v Y */
+static GEN
+ZV_lincomb1(GEN v, GEN X, GEN Y)
+{
+  long i, lx = lg(X);
+  GEN p1, p2, A = cgetg(lx,t_COL);
+  if (is_bigint(v))
+  {
+    long m = lgefint(v);
+    for (i=1; i<lx; i++)
+    {
+      p1=(GEN)X[i]; p2=(GEN)Y[i];
+      if      (!signe(p1)) A[i] = lmulii(v,p2);
+      else if (!signe(p2)) A[i] = licopy(p1);
+      else
+      {
+        pari_sp av = avma; (void)new_chunk(m+lgefint(p1)+lgefint(p2)); /*HACK*/
+        p2 = mulii(v,p2);
+        avma = av; A[i] = laddii(p1,p2);
+      }
+    }
+  }
+  else
+  {
+    long w = itos(v);
+    for (i=1; i<lx; i++)
+    {
+      p1=(GEN)X[i]; p2=(GEN)Y[i];
+      if      (!signe(p1)) A[i] = lmulsi(w,p2);
+      else if (!signe(p2)) A[i] = licopy(p1);
+      else
+      {
+        pari_sp av = avma; (void)new_chunk(1+lgefint(p1)+lgefint(p2)); /*HACK*/
+        p2 = mulsi(w,p2);
+        avma = av; A[i] = laddii(p1,p2);
+      }
+    }
+  }
+  return A;
+}
+/* -X + vY */
+static GEN
+ZV_lincomb_1(GEN v, GEN X, GEN Y)
+{
+  long i, m, lx = lg(X);
+  GEN p1, p2, A = cgetg(lx,t_COL);
+  m = lgefint(v);
+  for (i=1; i<lx; i++)
+  {
+    p1=(GEN)X[i]; p2=(GEN)Y[i];
+    if      (!signe(p1)) A[i] = lmulii(v,p2);
+    else if (!signe(p2)) A[i] = lnegi(p1);
+    else
+    {
+      pari_sp av = avma; (void)new_chunk(m+lgefint(p1)+lgefint(p2)); /* HACK */
+      p2 = mulii(v,p2);
+      avma = av; A[i] = lsubii(p2,p1);
+    }
+  }
+  return A;
+}
+GEN
+ZV_add(GEN x, GEN y)
+{
+  long i, lx = lg(x);
+  GEN A = cgetg(lx, t_COL);
+  for (i=1; i<lx; i++) A[i] = laddii((GEN)x[i], (GEN)y[i]);
+  return A;
+}
+GEN
+ZV_sub(GEN x, GEN y)
+{
+  long i, lx = lg(x);
+  GEN A = cgetg(lx, t_COL);
+  for (i=1; i<lx; i++) A[i] = lsubii((GEN)x[i], (GEN)y[i]);
+  return A;
+}
 /* X,Y columns; u,v scalars; everybody is integral. return A = u*X + v*Y
  * Not memory clean if (u,v) = (1,0) or (0,1) */
 GEN
 ZV_lincomb(GEN u, GEN v, GEN X, GEN Y)
 {
   pari_sp av;
-  long i,lx,m;
-  GEN p1,p2,A;
+  long i, lx, m, su, sv;
+  GEN p1, p2, A;
 
-  if (!signe(u)) return ZV_Z_mul(Y, v);
-  if (!signe(v)) return ZV_Z_mul(X, u);
-  lx = lg(X); A = cgetg(lx,t_COL); m = lgefint(u)+lgefint(v)+4;
-  if (is_pm1(v)) { swap(u,v); swap(X,Y); }
-  if (is_pm1(u))
+  su = signe(u); if (!su) return ZV_Z_mul(Y, v);
+  sv = signe(v); if (!sv) return ZV_Z_mul(X, u);
+  if (is_pm1(v))
   {
-    if (signe(u) > 0)
+    if (is_pm1(u))
     {
-      for (i=1; i<lx; i++)
-      {
-        p1=(GEN)X[i]; p2=(GEN)Y[i];
-        if      (!signe(p1)) A[i] = lmulii(v,p2);
-        else if (!signe(p2)) A[i] = licopy(p1);
-        else
-        {
-          av = avma; (void)new_chunk(m+lgefint(p1)+lgefint(p2)); /* HACK */
-          p2 = mulii(v,p2);
-          avma = av; A[i] = laddii(p1,p2);
-        }
-      }
+      if (su != sv) A = ZV_sub(X, Y);
+      else          A = ZV_add(X, Y);
+      if (su < 0) ZV_neg_ip(A);
     }
     else
     {
-      for (i=1; i<lx; i++)
-      {
-        p1=(GEN)X[i]; p2=(GEN)Y[i];
-        if      (!signe(p1)) A[i] = lmulii(v,p2);
-        else if (!signe(p2)) A[i] = lnegi(p1);
-        else
-        {
-          av = avma; (void)new_chunk(m+lgefint(p1)+lgefint(p2)); /* HACK */
-          p2 = mulii(v,p2);
-          avma = av; A[i] = lsubii(p2,p1);
-        }
-      }
+      if (sv > 0) A = ZV_lincomb1 (u, Y, X);
+      else        A = ZV_lincomb_1(u, Y, X);
     }
   }
+  else if (is_pm1(u))
+  {
+    if (su > 0) A = ZV_lincomb1 (v, X, Y);
+    else        A = ZV_lincomb_1(v, X, Y);
+  }
   else
+  {
+    lx = lg(X); A = cgetg(lx,t_COL); m = lgefint(u)+lgefint(v);
     for (i=1; i<lx; i++)
     {
       p1=(GEN)X[i]; p2=(GEN)Y[i];
@@ -1303,6 +1367,7 @@ ZV_lincomb(GEN u, GEN v, GEN X, GEN Y)
         avma = av; A[i] = laddii(p1,p2);
       }
     }
+  }
   return A;
 }
 
@@ -2306,8 +2371,8 @@ Minus(long j, GEN **lambda)
   for (k=j+1; k<n; k++) lambda[k][j] = mynegi(lambda[k][j]);
 }
 
-static void
-neg_col(GEN M)
+void
+ZV_neg_ip(GEN M)
 {
   long i;
   for (i = lg(M)-1; i; i--)
@@ -2353,7 +2418,7 @@ findi_normalize(GEN Aj, GEN B, long j, GEN **lambda)
   long r = findi(Aj);
   if (r && signe(Aj[r]) < 0)
   {
-    neg_col(Aj); if (B) neg_col((GEN)B[j]);
+    ZV_neg_ip(Aj); if (B) ZV_neg_ip((GEN)B[j]);
     Minus(j,lambda);
   }
   return r;
@@ -2596,7 +2661,7 @@ extendedgcd(GEN A)
   if (signe(A[n-1]) < 0)
   {
     A[n-1] = (long)mynegi((GEN)A[n-1]);
-    neg_col((GEN)B[n-1]);
+    ZV_neg_ip((GEN)B[n-1]);
   }
   z = cgetg(3,t_VEC);
   z[1] = A[n-1];
