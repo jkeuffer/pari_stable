@@ -48,6 +48,8 @@ extern long FqX_is_squarefree(GEN P, GEN T, GEN p);
 extern long int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *newx);
 extern void minim_alloc(long n, double ***q, GEN *x, double **y,  double **z, double **v);
 extern void rowselect_p(GEN A, GEN B, GEN p, long init);
+extern int hnfdivide(GEN A, GEN B);
+extern GEN perm_to_arch(GEN nf, GEN archp);
 
 /* FIXME: obsolete, see zarchstar (which is much slower unfortunately). */
 static GEN
