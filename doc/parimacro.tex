@@ -69,6 +69,7 @@
   \parskip=0pt plus 1pt
   \parindent=0pt
   \catcode`\_=11 % make _ an ordinary char (frequent in function names)
+  \catcode`\@=11 % make @ an ordinary char (appears in \_ expansion)
   \obeylines\input\jobname.toc
   \endgroup
 \fi
