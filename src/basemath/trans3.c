@@ -788,7 +788,9 @@ gzetaz(GEN x, GEN y)
 /**                                                                   **/
 /***********************************************************************/
 
-/* validity domain contains .005 < |x| < 230 */
+/* validity domain contains .005 < |x| < 230
+ * Li_m(x = e^z) = sum_n=0 zeta(m-n) z^n / n!
+ *    with zeta(1) := H_m - log(-z) */
 static GEN
 cxpolylog(long m, GEN x, long prec)
 {
