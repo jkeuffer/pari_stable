@@ -63,19 +63,19 @@ extern char    *errmessage[], *current_psfile;
 
 #define is_universal_constant(x) ((GEN)(x) >= gzero && (GEN)(x) <= gi)
 
-#define copyifstack(x,y) {ulong t=(ulong)(x); \
+#define copyifstack(x,y) {gpmem_t t=(gpmem_t)(x); \
 			  (y)=(t>=bot &&t<top)? lcopy((GEN)t): t;}
-#define icopyifstack(x,y) {ulong t=(ulong)(x); \
+#define icopyifstack(x,y) {gpmem_t t=(gpmem_t)(x); \
 			  (y)=(t>=bot &&t<top)? licopy((GEN)t): t;}
-#define isonstack(x) ((ulong)(x)>=bot && (ulong)(x)<top)
+#define isonstack(x) ((gpmem_t)(x)>=bot && (gpmem_t)(x)<top)
 
 /* Define this to (1) locally (in a given file, NOT here) to check
  * "random" garbage collecting
  */
 #ifdef DYNAMIC_STACK
-#  define low_stack(x,l) (avma < (ulong)(l))
+#  define low_stack(x,l) (avma < (gpmem_t)(l))
 #else
-#  define low_stack(x,l) (avma < (ulong)(x))
+#  define low_stack(x,l) (avma < (gpmem_t)(x))
 #endif
 
 #define stack_lim(av,n) (bot + (((av)-bot)>>(n)))

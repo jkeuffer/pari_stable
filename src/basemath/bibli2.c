@@ -907,7 +907,7 @@ genrand(GEN N)
   i -= 2; x += i; lx -= i;
   x[1] = evalsigne(lx>2) | evallgefint(lx);
   x[0] = evaltyp(t_INT) | evallg(lx);
-  avma = (long)x; return x;
+  avma = (gpmem_t)x; return x;
 }
 
 long

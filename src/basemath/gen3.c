@@ -379,7 +379,7 @@ ismonome(GEN x)
 
 /* assume z[1] was created last */
 #define fix_frac_if_int(z) if (is_pm1(z[2]))\
-  z = gerepileuptoint((long)(z+3), (GEN)z[1]);
+  z = gerepileuptoint((gpmem_t)(z+3), (GEN)z[1]);
 
 GEN
 gmulsg(long s, GEN y)
@@ -398,7 +398,7 @@ gmulsg(long s, GEN y)
 
     case t_INTMOD: z=cgetg(3,t_INTMOD); p2=(GEN)y[1];
       (void)new_chunk(lgefint(p2)<<2); /* HACK */
-      p1=mulsi(s,(GEN)y[2]); avma=(long)z;
+      p1=mulsi(s,(GEN)y[2]); avma=(gpmem_t)z;
       z[2]=lmodii(p1,p2); icopyifstack(p2,z[1]); return z;
 
     case t_FRAC:
@@ -458,7 +458,7 @@ gmulsg(long s, GEN y)
       if (!s) return zeropol(gvar(y));
       z = cgetg(3, t_RFRAC);
       i = ggcd(stoi(s),(GEN)y[2])[2];
-      avma = (long)z;
+      avma = (gpmem_t)z;
       if (i == 1)
       {
         z[1]=lmulgs((GEN)y[1], s);
@@ -568,7 +568,7 @@ gdivgs(GEN x, long s)
     case t_RFRAC:
       z = cgetg(3, t_RFRAC);
       i = ggcd(stoi(s),(GEN)x[1])[2];
-      avma = (long)z;
+      avma = (gpmem_t)z;
       if (i == 1)
       {
         z[2]=lmulsg(s,(GEN)x[2]);

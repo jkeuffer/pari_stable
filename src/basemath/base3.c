@@ -999,7 +999,10 @@ mul_matvec_mod_pr(GEN mat, GEN y, GEN prh)
     if (p1 == gzero) /* intended */
       res[i] = zero;
     else
-      av = res[i] = (long)icopy_av(p1, (GEN)av);
+    {
+      res[i] = (long)icopy_av(p1, (GEN)av);
+      av = (gpmem_t)res[i];
+    }
   }
   avma = av; return res;
 }

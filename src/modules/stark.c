@@ -2831,8 +2831,8 @@ LABDOUB:
 GEN
 quadhilbertreal(GEN D, GEN flag, long prec)
 {
-  VOLATILE long av = avma, cl;
-  long newprec;
+  VOLATILE gpmem_t av = avma;
+  VOLATILE long newprec, cl;
   VOLATILE GEN pol, bnf, bnr, dataC, bnrh, nf, exp;
   void *catcherr = NULL;
 

@@ -260,7 +260,7 @@ u_FpX_neg_i(GEN x, ulong p)
 
 /* shift polynomial + gerepile */
 static GEN
-u_FpX_shiftip(long av, GEN x, long v)
+u_FpX_shiftip(gpmem_t av, GEN x, long v)
 {
   long i, lx = lgef(x), ly;
   GEN y;
@@ -721,7 +721,7 @@ FpX_add(GEN x,GEN y,GEN p)
   for (i=2; i<ly; i++) z[i]=laddii((GEN)x[i],(GEN)y[i]);
   for (   ; i<lx; i++) z[i]=licopy((GEN)x[i]);
   (void)normalizepol_i(z, lx);
-  if (lgef(z) == 2) { avma = (long)(z + lx); z = zeropol(varn(x)); }
+  if (lgef(z) == 2) { avma = (gpmem_t)(z + lx); z = zeropol(varn(x)); }
   if (p) z= FpX_red(z, p);
   return z;
 }
@@ -747,7 +747,7 @@ FpX_sub(GEN x,GEN y,GEN p)
     for (   ; i<ly; i++) z[i]=lnegi((GEN)y[i]);
     /*polynomial is always normalized*/
   }
-  if (lgef(z) == 2) { avma = (long)(z + lz); z = zeropol(varn(x)); }
+  if (lgef(z) == 2) { avma = (gpmem_t)(z + lz); z = zeropol(varn(x)); }
   if (p) z= FpX_red(z, p);
   return z;
 }
@@ -1341,7 +1341,7 @@ FpXQX_safegcd(GEN P, GEN Q, GEN T, GEN p)
   P = FpXX_red(P, p);
   Q = FpXX_red(Q, p);
   if (!signe(P)) return gerepileupto(ltop, Q);
-  if (!signe(Q)) { avma = (ulong)P; return P; }
+  if (!signe(Q)) { avma = (gpmem_t)P; return P; }
   T = FpX_red(T, p);
 
   btop = avma; st_lim = stack_lim(btop, 1);
@@ -2493,7 +2493,7 @@ FpX_divres(GEN x, GEN y, GEN p, GEN *pr)
   }
   if (!pr) { if (lead) gunclone(lead); return z-2; }
 
-  rem = (GEN)avma; av = (long)new_chunk(dx+3);
+  rem = (GEN)avma; av = (gpmem_t)new_chunk(dx+3);
   for (sx=0; ; i--)
   {
     p1 = (GEN)x[i];
@@ -2507,12 +2507,12 @@ FpX_divres(GEN x, GEN y, GEN p, GEN *pr)
   {
     if (lead) gunclone(lead);
     if (sx) { avma=av0; return NULL; }
-    avma = (long)rem; return z-2;
+    avma = (gpmem_t)rem; return z-2;
   }
   lrem=i+3; rem -= lrem;
   rem[0]=evaltyp(t_POL) | evallg(lrem);
   rem[1]=evalsigne(1) | evalvarn(vx) | evallgef(lrem);
-  p1 = gerepile((long)rem,tetpil,p1);
+  p1 = gerepile((gpmem_t)rem,tetpil,p1);
   rem += 2; rem[i]=(long)p1;
   for (i--; i>=0; i--)
   {
@@ -2598,7 +2598,7 @@ FpXQX_divres(GEN x, GEN y, GEN T, GEN p, GEN *pr)
   }
   if (!pr) { if (lead) gunclone(lead); return z-2; }
 
-  rem = (GEN)avma; av = (long)new_chunk(dx+3);
+  rem = (GEN)avma; av = (gpmem_t)new_chunk(dx+3);
   for (sx=0; ; i--)
   {
     p1 = (GEN)x[i];
@@ -2612,12 +2612,12 @@ FpXQX_divres(GEN x, GEN y, GEN T, GEN p, GEN *pr)
   {
     if (lead) gunclone(lead);
     if (sx) { avma=av0; return NULL; }
-    avma = (long)rem; return z-2;
+    avma = (gpmem_t)rem; return z-2;
   }
   lrem=i+3; rem -= lrem;
   rem[0]=evaltyp(t_POL) | evallg(lrem);
   rem[1]=evalsigne(1) | evalvarn(vx) | evallgef(lrem);
-  p1 = gerepile((long)rem,tetpil,p1);
+  p1 = gerepile((gpmem_t)rem,tetpil,p1);
   rem += 2; rem[i]=(long)p1;
   for (i--; i>=0; i--)
   {
@@ -2689,7 +2689,7 @@ u_FpX_sub(GEN x, GEN y, ulong p)
 
 /* list of u_FpX in gptr, return then as GEN */
 static void
-u_gerepilemany(long av, GEN* gptr[], long n, long v)
+u_gerepilemany(gpmem_t av, GEN* gptr[], long n, long v)
 {
   GEN *l = (GEN*)gpmalloc(n*sizeof(GEN));
   long i;

@@ -521,11 +521,13 @@ do_SWAPI(GEN x, GEN h, GEN L, GEN B, long kmax, long k, long alpha, GEN fl)
       GEN t = gcoeff(L,i,k);
       p1 = subii(mulii((GEN)B[k+1],gcoeff(L,i,k-1)), mulii(la,t));
       p1 = divii(p1, Bk);
-      av = avma = coeff(L,i,k) = (long)icopy_av(p1,(GEN)av);
+      coeff(L,i,k) = (long)icopy_av(p1,(GEN)av);
+      av = avma = (gpmem_t)coeff(L,i,k);
 
       p1 = addii(mulii(la,gcoeff(L,i,k-1)), mulii((GEN)B[k-1],t));
       p1 = divii(p1, Bk);
-      av = avma = coeff(L,i,k-1) = (long)icopy_av(p1,(GEN)av);
+      coeff(L,i,k-1) = (long)icopy_av(p1,(GEN)av);
+      av = avma = (gpmem_t)coeff(L,i,k-1);
     }
     B[k] = ldivii(p2,Bk);
   }

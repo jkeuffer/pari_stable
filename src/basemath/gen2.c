@@ -1700,7 +1700,7 @@ normalize(GEN x)
   long i,j, lx = lg(x);
 
   if (typ(x)!=t_SER) err(typeer,"normalize");
-  if (lx==2) { setsigne(x,0); avma = (long) x; return x; }
+  if (lx==2) { setsigne(x,0); avma = (gpmem_t) x; return x; }
   if (! isexactzero((GEN)x[2])) { setsigne(x,1); return x; }
 
   for (i=3; i<lx; i++)
@@ -1712,7 +1712,7 @@ normalize(GEN x)
       j=i; i=2; while (j<lx) p1[i++] = lcopy((GEN)x[j++]);
       return gerepile((gpmem_t) (x+lx),tetpil,p1);
     }
-  avma = (long) (x+lx); return zeroser(varn(x),lx-2);
+  avma = (gpmem_t) (x+lx); return zeroser(varn(x),lx-2);
 }
 #else
 

@@ -220,7 +220,7 @@ poldivres(GEN x, GEN y, GEN *pr)
   }
   if (!pr) return gerepileupto(av,z-2);
 
-  rem = (GEN)avma; av1 = (long)new_chunk(dx+3);
+  rem = (GEN)avma; av1 = (gpmem_t)new_chunk(dx+3);
   for (sx=0; ; i--)
   {
     p1 = (GEN)x[i];
@@ -236,12 +236,12 @@ poldivres(GEN x, GEN y, GEN *pr)
   if (pr == ONLY_DIVIDES)
   {
     if (sx) { avma=av; return NULL; }
-    avma = (long)rem;
+    avma = (gpmem_t)rem;
     return gerepileupto(av,z-2);
   }
   lrem=i+3; rem -= lrem;
-  if (avma==av1) { avma = (long)rem; p1 = gcopy(p1); }
-  else p1 = gerepileupto((long)rem,p1);
+  if (avma==av1) { avma = (gpmem_t)rem; p1 = gcopy(p1); }
+  else p1 = gerepileupto((gpmem_t)rem,p1);
   rem[0]=evaltyp(t_POL) | evallg(lrem);
   rem[1]=evalsigne(1) | evalvarn(vx) | evallgef(lrem);
   rem += 2;

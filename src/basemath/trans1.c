@@ -531,7 +531,7 @@ powgi(GEN x, GEN n)
       else
       {
         mod = mulii(mod, gpowgs(p,v));
-        mod = gerepileuptoint((long)y, mod);
+        mod = gerepileuptoint((gpmem_t)y, mod);
       }
       y[1] = evalprecp(precp(x)+v) | evalvalp(e);
       icopyifstack(p, y[2]);

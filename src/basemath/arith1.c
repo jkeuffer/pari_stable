@@ -378,7 +378,7 @@ racine_r(GEN a, long l)
     y = x; x = z;
   }
   while (cmpii(x,y) < 0);
-  avma = (long)y;
+  avma = (gpmem_t)y;
   return gerepileuptoint(av,y);
 }
 

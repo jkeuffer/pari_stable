@@ -39,10 +39,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define absi  mpabs
 #define negi  mpneg
 #define negr  mpneg
-#define mpnegz(x,y)      {long av=avma;mpaff(mpneg(x),y);avma=av;}
-#define mpabsz(x,y)      {long av=avma;mpaff(mpabs(x),y);avma=av;}
-#define absrz(x,z)       mpabsz((x),(z))
-#define negrz(x,z)       mpnegz((x),(z))
+#define mpnegz(x,y) {gpmem_t av=avma;mpaff(mpneg(x),y);avma=av;}
+#define mpabsz(x,y) {gpmem_t av=avma;mpaff(mpabs(x),y);avma=av;}
+#define absrz(x,z)  mpabsz((x),(z))
+#define negrz(x,z)  mpnegz((x),(z))
 
 /* Common global variables: */
 

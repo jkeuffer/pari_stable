@@ -840,7 +840,7 @@ extern GEN rpowsi(ulong a, GEN n, long prec);
 extern GEN divrs2_safe(GEN x, long i);
 extern void dcxlog(double s, double t, double *a, double *b);
 extern double dnorm(double s, double t);
-extern GEN trans_fix_arg(long *prec, GEN *s0, GEN *sig, ulong *av, GEN *res);
+extern GEN trans_fix_arg(long *prec, GEN *s0, GEN *sig, gpmem_t *av, GEN *res);
 
 /* s0 a t_INT, t_REAL or t_COMPLEX.
  * If a t_INT, assume it's not a trivial case (i.e we have s0 > 1, odd)

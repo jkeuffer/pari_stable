@@ -3424,7 +3424,8 @@ extern void err_leave_default(long n);
 GEN
 trap0(char *e, char *r, char *f)
 {
-  VOLATILE long av = avma, numerr = -1;
+  VOLATILE gpmem_t av = avma;
+  VOLATILE long numerr = -1;
   VOLATILE GEN x = gnil;
   char *F;
        if (!strcmp(e,"errpile")) numerr = errpile;

@@ -850,7 +850,7 @@ is_int(GEN g)
 }
 
 static PERM
-isin_end(PERM S, PERM uu, PERM s0, GEN gpol, long av1)
+isin_end(PERM S, PERM uu, PERM s0, GEN gpol, gpmem_t av1)
 {
   PERM vv = permmul(S,uu), ww = permmul(vv,s0);
 

@@ -1797,7 +1797,8 @@ mpqs_eval_candidates(GEN A, GEN inv_A4, GEN B, GEN kN, long k,
 	GEN Qx_2, prod_pi_ei, pi_ei;
 	long lr = strlen(relations);
 	char *s, *t = gpmalloc(lr+1);
-	long pi, ei, av1 = avma;
+	long pi, ei;
+        gpmem_t av1 = avma;
 
 #ifdef MPQS_DEBUG_VERBOSE
 	fprintferr("\b(");
@@ -1859,7 +1860,8 @@ mpqs_eval_candidates(GEN A, GEN inv_A4, GEN B, GEN kN, long k,
 	GEN Qx_2, prod_pi_ei, pi_ei;
 	long lr = strlen(relations);
 	char *s, *t = gpmalloc(lr+1);
-	long pi, ei, av1 = avma;
+	long pi, ei;
+        gpmem_t av1 = avma;
 
 #ifdef MPQS_DEBUG_VERBOSE
 	fprintferr("\b(");

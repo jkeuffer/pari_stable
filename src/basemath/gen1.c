@@ -1613,7 +1613,7 @@ gsqr(GEN x)
 	
       case t_INTMOD: z=cgetg(3,t_INTMOD); p2=(GEN)x[1];
         (void)new_chunk(lgefint(p2)<<2); /* HACK */
-        p1=sqri((GEN)x[2]); avma=(long)z;
+        p1=sqri((GEN)x[2]); avma=(gpmem_t)z;
         z[2]=lmodii(p1,p2); icopyifstack(p2,z[1]); return z;
 
       case t_FRAC: case t_FRACN:
@@ -1800,7 +1800,7 @@ gdiv(GEN x, GEN y)
       case t_INTMOD:
         z=cgetg(3,t_INTMOD); p2=(GEN)y[1];
         (void)new_chunk(lgefint(p2)<<2); /* HACK */
-        p1=mulii(modii(x,p2), mpinvmod((GEN)y[2],p2)); avma=(long)z;
+        p1=mulii(modii(x,p2), mpinvmod((GEN)y[2],p2)); avma=(gpmem_t)z;
         z[2]=lmodii(p1,p2); icopyifstack(p2,z[1]); return z;
 
       case t_FRAC:
@@ -1808,7 +1808,7 @@ gdiv(GEN x, GEN y)
         p1 = mppgcd(x,(GEN)y[1]);
         if (is_pm1(p1))
         {
-          avma = (long)z; tetpil = 0;
+          avma = (gpmem_t)z; tetpil = 0;
           z[2] = licopy((GEN)y[1]);
         }
         else
@@ -1880,7 +1880,7 @@ gdiv(GEN x, GEN y)
 	{
 	  case t_INT: z=cgetg(3,t_INTMOD); p2=(GEN)x[1];
 	    (void)new_chunk(lgefint(p2)<<2); /* HACK */
-	    p1=mulii((GEN)x[2], mpinvmod(y,p2)); avma=(long)z;
+	    p1=mulii((GEN)x[2], mpinvmod(y,p2)); avma=(gpmem_t)z;
             z[2]=lmodii(p1,p2); icopyifstack(p2,z[1]); return z;
 
 	  case t_INTMOD: z=cgetg(3,t_INTMOD); p2=(GEN)x[1]; p1=(GEN)y[1];
@@ -1895,7 +1895,7 @@ gdiv(GEN x, GEN y)
 	  case t_FRAC: z=cgetg(3,t_INTMOD); p2=(GEN)x[1];
             (void)new_chunk(lgefint(p2)<<2); /* HACK */
             p1=mulii((GEN)y[2], mpinvmod((GEN)y[1],p2));
-            p1=mulii(modii(p1,p2),(GEN)x[2]); avma=(long)z;
+            p1=mulii(modii(p1,p2),(GEN)x[2]); avma=(gpmem_t)z;
             z[2]=lmodii(p1,p2); icopyifstack(p2,z[1]); return z;
 
 	  case t_FRACN:
@@ -1923,7 +1923,7 @@ gdiv(GEN x, GEN y)
             p1 = mppgcd(y,(GEN)x[1]);
             if (is_pm1(p1))
             {
-              avma = (long)z; tetpil = 0;
+              avma = (gpmem_t)z; tetpil = 0;
               z[1] = licopy((GEN)x[1]);
             }
             else
@@ -1949,7 +1949,7 @@ gdiv(GEN x, GEN y)
 	  case t_INTMOD: z=cgetg(3,t_INTMOD); p2=(GEN)y[1];
             (void)new_chunk(lgefint(p2)<<2); /* HACK */
 	    p1=mulii((GEN)y[2],(GEN)x[2]);
-	    p1=mulii(mpinvmod(p1,p2), modii((GEN)x[1],p2)); avma=(long)z;
+	    p1=mulii(mpinvmod(p1,p2), modii((GEN)x[1],p2)); avma=(gpmem_t)z;
 	    z[2]=lmodii(p1,p2); icopyifstack(p2,z[1]); return z;
 
 	  case t_FRAC: if (tx == t_FRACN) ty=t_FRACN;

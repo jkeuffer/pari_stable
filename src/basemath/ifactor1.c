@@ -1514,7 +1514,7 @@ ellfacteur(GEN n, int insist)
       gl = gun;
       av1 = avma;
       /* scratchspace for prod (x_i-x_j) */
-      avtmp = (long)new_chunk(8 * lgefint(n));
+      avtmp = (gpmem_t)new_chunk(8 * lgefint(n));
       /* the correct entry in XB to use depends on bstp and on where we are
        * on the helix.  As we skip from prime to prime, bstp will be incre-
        * mented by snextpr() each time we wrap around through residue class
@@ -1663,8 +1663,8 @@ GEN
 pollardbrent(GEN n)
 {
   long tf = lgefint(n), size = 0, delta, retries = 0, msg_mask;
-  long c0, c, k, k1, l, GGG;
-  gpmem_t avP, avx, av = avma;
+  long c0, c, k, k1, l;
+  gpmem_t GGG, avP, avx, av = avma;
   GEN x, x1, y, P, g, g1, res;
 
   if (DEBUGLEVEL >= 4) (void)timer2(); /* clear timer */
@@ -1736,8 +1736,8 @@ PB_RETRY:
   y = cgeti(tf); affsi(2, y);
   x1= cgeti(tf); affsi(2, x1);
   avx = avma;
-  avP = (long)new_chunk(2 * tf); /* enough for x = addsi(tf+1) */
-  GGG = (long)new_chunk(4 * tf); /* enough for P = modii(2tf+1, tf) */
+  avP = (gpmem_t)new_chunk(2 * tf); /* enough for x = addsi(tf+1) */
+  GGG = (gpmem_t)new_chunk(4 * tf); /* enough for P = modii(2tf+1, tf) */
 
   for (;;)			/* terminated under the control of c */
   {
@@ -4115,7 +4115,7 @@ ifac_decomp_break(GEN n, long (*ifac_break)(GEN n,GEN pairs,GEN here,GEN state),
       part = gerepileupto(tetpil, part);
     }
   }
-  avma = (long)pairs;
+  avma = (gpmem_t)pairs;
   if (DEBUGLEVEL >= 3)
   {
     fprintferr("IFAC: found %ld large prime (power) factor%s.\n",

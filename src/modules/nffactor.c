@@ -852,7 +852,7 @@ nffactor(GEN nf,GEN pol)
       while (gcmp0(rem));
       p3[j]=lstoi(e);
     }
-    avma = (long)y; y = gerepile(av, tetpil, y);
+    avma = (gpmem_t)y; y = gerepile(av, tetpil, y);
     p2=cgetg(i+1, t_COL); for (; i>=1; i--) p2[i]=lcopy((GEN)p3[i]);
     free(p3);
   }

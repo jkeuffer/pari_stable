@@ -1847,7 +1847,7 @@ factor(GEN x)
                 p2[2] = (long)deg1pol_i((GEN)p1[2], (GEN)p1[1], v);
             }
           }
-          killv = (avma != (ulong)pol);
+          killv = (avma != (gpmem_t)pol);
           if (killv) setvarn(pol, fetch_var());
           switch (typ2(tx))
           {
@@ -2384,7 +2384,7 @@ ggcd(GEN x, GEN y)
       if (!is_rfrac_t(ty)) err(operf,"g",x,y);
       p1 = gdiv((GEN)y[2], ggcd((GEN)x[2], (GEN)y[2]));
       tetpil = avma;
-      z[2] = lpile((long)z,tetpil,gmul(p1, (GEN)x[2]));
+      z[2] = lpile((gpmem_t)z,tetpil,gmul(p1, (GEN)x[2]));
       z[1] = lgcd((GEN)x[1], (GEN)y[1]); return z;
   }
   err(operf,"g",x,y);
@@ -2837,7 +2837,7 @@ pseudorem(GEN x, GEN y)
   return gerepilecopy(av, x);
 }
 
-extern void gerepilemanycoeffs2(long av, GEN x, long n, GEN y, long o);
+extern void gerepilemanycoeffs2(gpmem_t av, GEN x, long n, GEN y, long o);
 
 /* assume dx >= dy, y non constant
  * Compute z,r s.t lc(y)^(dx-dy+1) x = z y + r */
@@ -2927,7 +2927,7 @@ subresall(GEN u, GEN v, GEN *sol)
     r = pseudorem(u,v); dr = lgef(r);
     if (dr == 2)
     {
-      if (sol) { avma = (long)(r+2); *sol=gerepileupto(av,v); } else avma = av;
+      if (sol) { avma = (gpmem_t)(r+2); *sol=gerepileupto(av,v); } else avma = av;
       return gzero;
     }
     du = degpol(u); dv = degpol(v); degq = du-dv;

@@ -1204,7 +1204,7 @@ double
 dnorm(double s, double t) { return s*s + t*t; }
 
 GEN 
-trans_fix_arg(long *prec, GEN *s0, GEN *sig, ulong *av, GEN *res)
+trans_fix_arg(long *prec, GEN *s0, GEN *sig, gpmem_t *av, GEN *res)
 {
   GEN s, p1;
   long l;
@@ -1473,7 +1473,7 @@ mplngamma(GEN x)
   }
   /* t_REAL result */
   y[3] = y[0]; y += 3;
-  affrr(p4,y); avma = (long)y; return y;
+  affrr(p4,y); avma = (gpmem_t)y; return y;
 }
 
 static GEN

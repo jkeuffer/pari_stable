@@ -83,7 +83,7 @@ calc_block(long N,GEN Z,long d,GEN Y,GEN vbs,ulong maxl)
       }
       if (dk == nn)
       {
-	long av=avma;
+	gpmem_t av=avma;
         int Z_equal_Zp = 1;
 
         for (j=1; j<lnon; j++) non[j]=0;

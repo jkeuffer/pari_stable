@@ -1537,7 +1537,7 @@ gerepileupto(gpmem_t av, GEN q)
    */
 
   /* Beware: (long)(q+i) --> ((long)q)+i*sizeof(long) */
-  return gerepile(av, (long) (q+lg(q)), q);
+  return gerepile(av, (gpmem_t) (q+lg(q)), q);
 }
 
 /* internal */
@@ -1547,8 +1547,8 @@ gerepileuptoleaf(gpmem_t av, GEN q)
   long i;
   GEN q0;
 
-  if (!isonstack(q) || av==(long)q) { avma = av; return q; }
-  i=lg(q); avma = (long)(((GEN)av) -  i);
+  if (!isonstack(q) || av==(gpmem_t)q) { avma = av; return q; }
+  i=lg(q); avma = (gpmem_t)(((GEN)av) -  i);
   q0 = (GEN)avma; while (--i >= 0) q0[i]=q[i];
   return q0;
 }

@@ -696,7 +696,7 @@ rnfisnorm(GEN bnf,GEN ext,GEN x,long flag,long PREC)
   bnf = checkbnf(bnf); relnf = (GEN)ext[3];
   if (gcmp0(x) || gcmp1(x) || (gcmp_1(x) && (degpol(ext[1])&1)))
   {
-    avma = (long)res; res[1]=lcopy(x); res[2]=un; return res;
+    avma = (gpmem_t)res; res[1]=lcopy(x); res[2]=un; return res;
   }
 
 /* construction de l'ensemble S des ideaux

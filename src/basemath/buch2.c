@@ -460,7 +460,7 @@ cleancol(GEN x,long N,long PRECREG)
 #define LARGE 1
 #define PRECI 2
 static GEN
-not_given(long av, long flun, long reason)
+not_given(gpmem_t av, long flun, long reason)
 {
   if (labs(flun)==2)
   {

@@ -140,7 +140,7 @@ new_chunk(long x)
 #ifdef _WIN32
   if (win32ctrlc) dowin32ctrlc();
 #endif
-  avma = (long)z; return z;
+  avma = (gpmem_t)z; return z;
 }
 
 /* THE FOLLOWING ONES ARE IN mp.s */

@@ -796,7 +796,7 @@ idealadd(GEN nf, GEN x, GEN y)
   {
     long i,j;
     if (!dz) { avma=av; return idmat(N); }
-    avma = (long)dz; dz = gerepileupto((long)z, ginv(dz));
+    avma = (gpmem_t)dz; dz = gerepileupto((gpmem_t)z, ginv(dz));
     for (i=1; i<=N; i++)
     {
       z[i]=lgetg(N+1,t_COL);

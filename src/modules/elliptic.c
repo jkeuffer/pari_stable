@@ -2206,7 +2206,7 @@ static void cumule(GEN *vtotal, GEN *e, GEN u, GEN r, GEN s, GEN t);
 static void cumule1(GEN *vtotal, GEN *e, GEN v2);
 
 static GEN
-localreduction_result(long av, long f, long kod, long c, GEN v)
+localreduction_result(gpmem_t av, long f, long kod, long c, GEN v)
 {
   gpmem_t tetpil = avma;
   GEN result = cgetg(5, t_VEC);
@@ -2518,7 +2518,7 @@ globaltatealgo(GEN e)
   prims = decomp((GEN)e[12]);
   l = lg(p1 = (GEN)prims[1]);
   p2 = (GEN)prims[2];
-  if ((long)prims == avma) cgiv(prims);
+  if ((gpmem_t)prims == avma) cgiv(prims);
   result = cgetg(5, t_MAT);
   result[1] = (long)p1;
   result[2] = (long)p2;
