@@ -7,8 +7,9 @@ dbgobjdir=$dbgobjdir.dbg
 
 dosversion=`echo $version|sed -e 's/\.//g'`
 dosversion="_$dosversion$patch"
+__status__=$status
 case "$status" in
-  development*) status='development';;
+  development*) __status__='development';;
 esac
 
 cat > $file << EOT
@@ -16,7 +17,7 @@ cat > $file << EOT
 # next time Configure is run.
 #
 SHELL = $make_sh
-VERS = pari-$version.$patch $status
+VERS = pari-$version.$patch $__status__
 
 dft target::
 	@echo "Possible targets are:"
@@ -61,7 +62,7 @@ doc docps docpdf gpman cleandoc::
 clean:: cleandoc cleanobj
 
 distrib:
-	$config_dir/settar \$(VERS) $status
+	$config_dir/settar \$(VERS) $__status__
 tag:
 	@echo cvs tag release-$VersionMajor-$VersionMinor-$patch
 alpha: tag
