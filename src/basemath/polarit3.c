@@ -888,16 +888,50 @@ FpXQ_powers(GEN x, long l, GEN T, GEN p)
   V[1] = (long) scalarpol(gun,varn(T));
   if (l==0) return V;
   V[2] = lcopy(x);
-  for(i=3;i<l+2;i++)
+  if (l==1) return V;
+  V[3] = (long) FpXQ_sqr(x,T,p);
+  for(i=4;i<l+2;i++)
     V[i] = (long) FpXQ_mul((GEN) V[i-1],x,T,p);
+#if 0
+  TODO: Karim proposes to use squaring:
+  V[i] = (long) ((i&1)?FpXQ_sqr((GEN) V[(i+1)>>1],T,p)
+                       :FpXQ_mul((GEN) V[i-1],x,T,p));
+  Please profile it.
+#endif
   return V;
 }
-/*Return otpimal parameter l for the evaluation of n polynomials of degree d*/
+#if 0
+static long brent_kung_nbmul(long d, long n, long p)
+{
+  return p+n*((d+p-1)/p);
+}
+  TODO: This the the optimal parameter for the purpose of reducing
+  multiplications, but profiling need to be done to ensure it is not slower 
+  than the other option in practice
+/*Return optimal parameter l for the evaluation of n polynomials of degree d*/
 long brent_kung_optpow(long d, long n)
 {
-  long l=n*d;
-  if (n*d<=1) return 1;
-  l=(long)d/sqrt((double) n*d);
+  double r;
+  long f,c,pr;
+  if (n>=d ) return d;
+  pr=n*d;
+  if (pr<=1) return 1;
+  r=d/sqrt(pr);
+  c=(long)ceil(d/ceil(r));
+  f=(long)floor(d/floor(r));
+  return (brent_kung_nbmul(d, n, c) <= brent_kung_nbmul(d, n, f))?c:f;
+}
+#endif 
+/*Return optimal parameter l for the evaluation of n polynomials of degree d*/
+long brent_kung_optpow(long d, long n)
+{
+  double r;
+  long l,pr;
+  if (n>=d ) return d;
+  pr=n*d;
+  if (pr<=1) return 1;
+  r=d/sqrt(pr);
+  l=(long)r;
   return (d+l-1)/l;
 }
 
@@ -915,7 +949,7 @@ spec_compo_powers(GEN P, GEN V, long a, long n)
  *manipulating formal power series, JACM 25:581-595, 1978)
  
  V must be as output by FpXQ_powers.
- For optimal permformance, l (of FpXQ_powers) must as ouput by
+ For optimal permformance, l (of FpXQ_powers) must as output by
  brent_kung_optpow
  */
 
@@ -925,7 +959,7 @@ FpX_FpXQV_compo(GEN P, GEN V, GEN T, GEN p)
   ulong ltop=avma;
   long l=lg(V)-1;
   GEN z,u;
-  long d=deg(P);
+  long d=deg(P),cnt=0;
   if (d==-1) return zeropol(varn(T));
   if (d<l)
   {
@@ -941,9 +975,12 @@ FpX_FpXQV_compo(GEN P, GEN V, GEN T, GEN p)
     u=spec_compo_powers(P,V,d-l+2,l-2);
     z=FpX_add(u,FpXQ_mul(z,(GEN)V[l],T,p),NULL);
     d-=l-1;
+    cnt++;
   }
   u=spec_compo_powers(P,V,0,d);
   z=FpX_add(u,FpXQ_mul(z,(GEN)V[d+2],T,p),NULL);
+  cnt++;
+  if (DEBUGLEVEL>=8) fprintferr("FpX_FpXQV_compo: %d FpXQ_mul [%d]\n",cnt,l-1);
   return gerepileupto(ltop,FpX_red(z,p));
 }
 
@@ -1483,25 +1520,7 @@ GEN ffsqrtnmod(GEN a, GEN n, GEN T, GEN p, GEN *zetan)
 GEN
 matrixpow(long n, long m, GEN y, GEN P,GEN l)
 {
-  ulong av=avma;
-  GEN M,Z;
-  long d,i,j;
-  Z=cgetg(m+1,t_VEC);
-  if(m>0)
-    Z[1]=lpolun[varn(P)];
-  for(i=2;i<=m;i++)
-    Z[i]=(long)FpXQ_mul(y,(GEN)Z[i-1],P,l);
-  M=cgetg(m+1,t_MAT);
-  for (i=1;i<=m;i++)
-  {
-    M[i] = lgetg(n+1, t_COL);
-    d=deg(Z[i]);
-    for (j = 1; j <= d+1 ; j++)
-      mael(M,i,j) = licopy((GEN) mael(Z,i,1 + j));
-    for (     ; j <= n; j++)
-      mael(M,i,j) = zero;
-  }
-  return gerepileupto(av,M);
+  return vecpol_to_mat(FpXQ_powers(y,m-1,P,l),n);
 }
 /* compute the reciprocical isomorphism of S mod T,p, i.e. V such that
    V(S)=X  mod T,p*/
@@ -1524,6 +1543,84 @@ Fp_inv_isom(GEN S,GEN T, GEN p)
   V = gtopolyrev(V, x);
   return gerepile(ltop, lbot, V);
 }
+#if 0
+/*Old, trivial, implementation*/
+GEN
+intersect_ker(GEN P, GEN MA, GEN l, GEN U, GEN lU) 
+{
+  ulong ltop=avma;
+  long vp=varn(P), np=deg(P);
+  GEN A;
+  A=FqM_ker(gaddmat(gneg(polx[MAXVARN]), *MA),lU,l);
+  if (lg(A)!=2)
+    err(talker,"ZZ_%Z[%Z]/(%Z) is not a field in Fp_intersect"
+	,l,polx[vp],P);
+  A=gmul((GEN)A[1],gmodulcp(gmodulcp(gun,l),U));
+  return gerepileupto(ltop,gtopolyrev(A,vp));
+}
+#endif
+/*Let P a polynomial != 0 and phi the x^p Frobenius automorphism in FFp[X]/T
+ * Compute P[phi](x)
+ * i.e. If P=a_n*x^n+...+a_1*x+a_0, retourne a_n*x^(p^n)+...+a_1*x^p+a_0*x
+ */
+#if 0
+/*Not now*/
+GEN polfrobenius(GEN P, GEN T, GEN p) 
+{
+  ulong ltop=avma;
+  long i;
+  GEN z=polx[varn(P)];
+  GEN res=FpX_Fp_mul(z,(GEN)P[2],p);
+  for(i=3;i<lgef(P);i++)
+  {
+    z=FpXQ_pow(z,p,T,p);
+    res=FpX_add(res,FpX_Fp_mul(z,(GEN)P[i],p),NULL);
+  }
+  return gerepileupto(ltop,FpX_red(res,p));
+}
+#endif
+/* Essentially we want to compute
+ * FqM_ker(MA-polx[MAXVARN],lU,l)
+ * To avoid use of matrix in Fq we procede as follows:
+ * We compute FpM_ker(U(MA)) and then we recover
+ * the eigen value by Galois action, see formula.
+ */
+GEN
+intersect_ker(GEN P, GEN MA, GEN l, GEN U, GEN lU) 
+{
+  ulong ltop=avma;
+  long vp=varn(P);
+  long vu=varn(lU), r=deg(lU);
+  long i;
+  GEN A, R, M, ib0;
+  if (DEBUGLEVEL>=4) timer2();
+  M=lift(poleval(U,MA));
+  if (DEBUGLEVEL>=4) msgtimer("matrix cyclo");
+  A=FpM_ker(M,l);
+  if (DEBUGLEVEL>=4) msgtimer("kernel");
+  if (lg(A)!=r+1)
+    err(talker,"ZZ_%Z[%Z]/(%Z) is not a field in Fp_intersect"
+	,l,polx[vp],P);
+  /*The formula is 
+   * a_{r-1}=-\phi(a_0)/b_0
+   * a_{i-1}=\phi(a_i)+b_ia_{r-1}  i=r-1 to 1
+   * Where a_0=A[1] and b_i=U[i+2]
+   */
+  ib0=negi(mpinvmod((GEN)lU[2],l));
+  R=cgetg(r+1,t_MAT);
+  R[1]=A[1];
+  R[r]=(long)FpM_FpV_mul(MA,gmul((GEN)A[1],ib0),l);
+  for(i=r-1;i>1;i--)
+    R[i]=(long)FpV_red(gadd(FpM_FpV_mul(MA,(GEN)R[i+1],l),
+	  gmul((GEN)lU[i+2],(GEN)R[r])),l);
+  R=gtrans_i(R);
+  for(i=1;i<lg(R);i++)
+    R[i]=(long)gtopolyrev((GEN)R[i],vu);
+  A=gtopolyrev(R,vp);
+  A=gmul(A,gmodulcp(gmodulcp(gun,l),U));
+  return gerepileupto(ltop,A);
+}
+
 /* n must divide both the degree of P and Q.  Compute SP and SQ such
   that the subfield of FF_l[X]/(P) generated by SP and the subfield of
   FF_l[X]/(Q) generated by SQ are isomorphic of degree n.  P and Q do
@@ -1555,7 +1652,8 @@ Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
   {
     if (gcmp0(modis(addis(l,-1),pg)))
       /*We do not need to use relative extension in this setting, so
-        we don't*/
+        we don't. (Well,now that we don't in the other case also, it is more
+       dubious to treat cases apart...)*/
     {
       GEN L,An,Bn,ipg,z;
       z=rootmod(cyclo(pg,-1),l);
@@ -1586,24 +1684,11 @@ Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
     else
     {
       GEN L,An,Bn,ipg,U,lU,z;
-      z=gneg(polx[MAXVARN]);
       U=gmael(factmod(cyclo(pg,MAXVARN),l),1,1);
       lU=lift(U);
       ipg=stoi(pg);
-      if (DEBUGLEVEL>=4) timer2();
-      A=FqM_ker(gaddmat(z, MA),lU,l);
-      if (lg(A)!=2)
-	err(talker,"ZZ_%Z[%Z]/(%Z) is not a field in Fp_intersect"
-	    ,l,polx[vp],P);
-      A=gmul((GEN)A[1],gmodulcp(gmodulcp(gun,l),U));
-      A=gtopolyrev(A,vp);
-      B=FqM_ker(gaddmat(z, MB),lU,l);
-      if (lg(B)!=2)
-	err(talker,"ZZ_%Z[%Z]/(%Z) is not a field in Fp_intersect"
-	    ,l,polx[vq],Q);
-      B=gmul((GEN)B[1],gmodulcp(gmodulcp(gun,l),U));
-      B=gtopolyrev(B,vq);
-      if (DEBUGLEVEL>=4) msgtimer("FqM_ker");
+      A=intersect_ker(P, MA, l, U, lU); 
+      B=intersect_ker(Q, MB, l, U, lU);
       /*Somewhat ugly, but it is a proof that POLYMOD are useful and
         powerful.*/
       An=lift(lift((GEN)lift(gpowgs(gmodulcp(A,P),pg))[2]));
