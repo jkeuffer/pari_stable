@@ -3517,7 +3517,7 @@ poleval(GEN x, GEN y)
     /* specific attention to sparse polynomials */
     for ( ; i>=imin; i=j-1)
     {
-      for (j=i; gcmp0((GEN)x[j]); j--)
+      for (j=i; isexactzero((GEN)x[j]); j--)
         if (j==imin)
         {
           if (i!=j) y = gpowgs(y, i-j+1);
