@@ -168,7 +168,7 @@ if test -z "$DLLD"; then
 else
   exec="gp-sta gp-dyn"
 fi
-doexec="env \"LD_LIBRARY_PATH=.;\$\$LD_LIBRARY_PATH\" \$(SHELL) $src/test/dotest $sizeof_long"
+doexec="env \"LD_LIBRARY_PATH=.;\$\$LD_LIBRARY_PATH\" \$(SHELL) $src/test/dotest \$(SIZEOF_LONG)"
 case "$sizeof_long" in
   4) numbits=32;;
   8) numbits=64;;
@@ -201,6 +201,8 @@ SHELL      = $make_sh
 AS         = $AS
 ASFLAGS    = $ASFLAGS
 AR	   = ar
+
+SIZEOF_LONG= $sizeof_long
 
 CC_FLAVOR  =
 CC         = $CC \$(CC_FLAVOR)
