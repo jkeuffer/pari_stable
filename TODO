@@ -13,11 +13,28 @@ Priority classification (first column): [subjective and debatable!]
 1    probably not
 -    unclassified
 
+
 ***************************   BUGS (general)     ****************************
+Unless specified otherwise, examples assume default precisions (on a 32
+bit machine)
+
+5  "bad input" problems with hyperu:
+   ? hyperu(0,0,-1) \\ infinite loop
+   ? hyperu(1,2,0)
+   %1 = 51580834970224178120796801.23
+   ? hyperu(1,2,.0)
+   %2 = 2396734.892578125000000000000
+
+5  setrand(5);thueinit(polsubcyclo(precprime(2^17),3))
+  ***   non positive argument in mplog. \\ precision problem
 
 4  gcmp/gegal not transitive: [] == 0, [0] == 0, but [0] != []
 
-4  mateigen([1,1;1,2]) won't succeed at default precision (28 digits).
+4  mateigen([1,1;1,2]) won't succeed \\ works if precision is increased
+
+4  rnfpolred is numerically unstable:
+   ? rnfpolred(nfinit(quadpoly(904,y)),quadray(904,1))
+     ***   division by zero in gdiv, gdivgs or ginv
 
 3  many functions assume MAXVARN is a free variable, yielding bogus
    results if the input involve it (only affect library programming).
@@ -86,6 +103,9 @@ Kernel:
 4  finish t_REAL Karatsuba and diviiexact
 
 4  inline level0 routines should operate on _limbs_, not on words.
+
+3  inline more assembler kernels, alpha in particular (ix86 and sparc are
+   already inline).
 
 3  FFT for basic types and polynomials (say in A[X], for A = Z, F_q, ...)
 

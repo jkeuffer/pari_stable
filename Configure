@@ -791,6 +791,7 @@ if test -n "$__gnuc__"; then
   # Specific optimisations for some architectures
   case "$osname-$arch" in
     linux-i?86|cygwin*) OPTFLAGS="-O3 -DGCC_INLINE -fexpensive-optimizations -malign-loops=2 -malign-jumps=2 -malign-functions=2";;
+    linux-alpha*) OPTFLAGS="-O3 -DGCC_INLINE -fexpensive-optimizations";;
   esac
   case "$osname-$asmarch" in *-sparcv8*) CFLAGS="$CFLAGS -mv8" ;; esac
 else
