@@ -20,4 +20,4 @@ for dir in $extract_dir_list; do
     done
   fi
 done
-chmod +x $doc_dir/gphelp
+chmod +x $doc_dir/gphelp $misc_dir/tex2mail
