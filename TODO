@@ -15,20 +15,6 @@ Priority classification (first column): [subjective and debatable]
 ***************************   BUGS (general)     ****************************
 Unless specified otherwise, examples assume 32bit machine and default precision 
 
--  mathnfmod([1,2;2,0]/3,2) --> SEGV: easy to fix locally. But the
-   documentations specifies that the input must be integral and almost all
-   routines can be broken (SEGV) by forging clever enough invalid inputs.
-
-   PARI is not strongly typed, and thorough type checking is expensive if
-   repeated over and over again on the same objects. Adding more quick
-   specialized checks in each routine is not the solution: it will simply be a
-   little harder to break, at the expense of unmaintainable code. A solution
-   would be to allow dynamic GEN typing that would store type information once
-   it's computed. How useful would this be ?
-
--  O(x) * y --> O(x)
-   O(y) * x --> O(y) * x
-
 5  bnfinit sometimes gives wrong answers because we cheat on the value of
 Bach's bound, using B := 0.3 log^2 D by default, where 0.3 should really be 12
 (under GRH), or some suitably optimized bound following Bach's article. If
@@ -55,16 +41,32 @@ is wrong [second one is principal]. Group structure and regulator are correct!
 
 4  gcmp/gegal not transitive: [] == 0, [0] == 0, but [0] != []
 
+4  ellinit over Q_2 doesn't work (AGM loses too much precision)
+
+4  ellpointtoz over Q_p makes no difference between P and -P (corrected over
+   C by a cheap trick)
+
+3  mathnfmod([1,2;2,0]/3,2) --> SEGV: easy to fix locally. But the
+   documentations specifies that the input must be integral and almost all
+   routines can be broken (SEGV) by forging clever enough invalid inputs.
+
+   PARI is not strongly typed, and thorough type checking is expensive if
+   repeated over and over again on the same objects. Adding more quick
+   specialized checks in each routine is not the solution: it will simply be a
+   little harder to break, at the expense of unmaintainable code. A solution
+   would be to allow dynamic GEN typing that would store type information once
+   it's computed. How useful would this be ?
+
 3  some functions assume MAXVARN is a free variable, yielding bogus
    results if the input involves it (only affects library programming).
 
-3  ellinit over Q_2 doesn't work (AGM loses too much precision)
-
-3  ellpointtoz over Q_p makes no difference between P and -P (corrected over
-   C by a cheap trick)
-
 3  recursive plot easily fooled. One could split intervals in 3 + make sure
    size of neighbouring intervals don't differ too much.
+
+1  O(x) * y --> O(x)
+   O(y) * x --> O(y) * x
+   [ design flaw in the current model for multivariate power series. Some work
+   to change it, no application for this in the current PARI code... ]
 
 ***************************   BUGS (GP specific) ****************************
 
