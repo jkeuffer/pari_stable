@@ -15,6 +15,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #include "pari.h"
 extern GEN hnf0(GEN x, long r);
+extern GEN hnf_gauss(GEN A, GEN B);
+
 void push_val(entree *ep, GEN a);
 void pop_val(entree *ep);
 
@@ -29,8 +31,7 @@ typedef struct slist {
 } slist;
 
 typedef struct {
-  GEN hnfgroup;
-  GEN listKer;
+  GEN hnfgroup, gen;
   ulong count;
   slist *list;
 } sublist_t;
@@ -116,24 +117,17 @@ addcell(sublist_t *S, GEN H)
   S->count++;
 }
 
-extern int hnfdivide(GEN A, GEN B);
-
-/* 1 if h^(-1)*list[i] integral for some i, 0 otherwise */
-static int
-hnflistdivise(GEN list,GEN h)
-{
-  long i, n = lg(list);
-  for (i=1; i<n; i++)
-    if (hnfdivide(h, (GEN)list[i])) break;
-  return i < n;
-}
-
 static void
 list_fun(subgp_iter *T, GEN x)
 {
   sublist_t *S = (sublist_t*)T->fundata;
   GEN H = hnf(concatsp(S->hnfgroup,x));
-  if (S->listKer && hnflistdivise(S->listKer, H)) return; /* test conductor */
+  if (S->gen)
+  { /* test conductor */
+    long i, l = lg(S->gen);
+    for (i = 1; i < l; i++)
+      if ( hnf_gauss(H, (GEN)S->gen[i]) ) return;
+  }
   addcell(S, H); T->countsub++;
 }
 /* -------------------------------------------------------------- */
@@ -367,7 +361,7 @@ dopsub(subgp_iter *T, GEN p, GEN indexsubq)
       {
         fprintferr("  countsub = %ld\n", T->countsub);
         msgtimer("for this type");
-        if (T->fun != list_fun || !((sublist_t*)(T->fundata))->listKer)
+        if (T->fun != list_fun || !((sublist_t*)(T->fundata))->gen)
         {
           if (T->subq) p1 = mulis(p1,lg(T->subqpart)-1);
           if (cmpis(p1,T->countsub))
@@ -424,7 +418,7 @@ expand_sub(GEN x, long n)
 }
 
 extern GEN matqpascal(long n, GEN q);
-static GEN subgrouplist_i(GEN cyc, GEN bound, GEN expoI, GEN listKer);
+static GEN subgrouplist_i(GEN cyc, GEN bound, GEN expoI, GEN gen);
 
 static GEN
 init_powlist(long k, long p)
@@ -584,7 +578,7 @@ forsubgroup(entree *ep, GEN cyc, GEN bound, char *ch)
 }
 
 static GEN
-subgrouplist_i(GEN cyc, GEN bound, GEN expoI, GEN listKer)
+subgrouplist_i(GEN cyc, GEN bound, GEN expoI, GEN gen)
 {
   pari_sp av = avma;
   subgp_iter T;
@@ -599,7 +593,7 @@ subgrouplist_i(GEN cyc, GEN bound, GEN expoI, GEN listKer)
 
   S.list = sublist = (slist*) gpmalloc(sizeof(slist));
   S.hnfgroup = diagonal(cyc);
-  S.listKer = listKer;
+  S.gen = gen;
   S.count = 0;
   T.fun = &list_fun;
   T.fundata = (void*)&S;
@@ -639,7 +633,7 @@ subgrouplist(GEN cyc, GEN bound)
 }
 
 GEN
-subgroupcondlist(GEN cyc, GEN bound, GEN listKer)
+subgroupcondlist(GEN cyc, GEN bound, GEN L)
 {
-  return subgrouplist_i(cyc,bound,NULL,listKer);
+  return subgrouplist_i(cyc,bound,NULL,L);
 }

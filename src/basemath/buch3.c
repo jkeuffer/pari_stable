@@ -1251,6 +1251,8 @@ certifybuchall(GEN bnf)
 /*        RAY CLASS FIELDS: CONDUCTORS AND DISCRIMINANTS           */
 /*                                                                 */
 /*******************************************************************/
+/* Let bnr1, bnr2 be such that mod(bnr2) | mod(bnr1), compute the
+   matrix of the surjective map Cl(bnr1) ->> Cl(bnr2) */
 GEN
 bnrGetSurj(GEN bnr1, GEN bnr2)
 {
@@ -1262,22 +1264,6 @@ bnrGetSurj(GEN bnr1, GEN bnr2)
   for (i = 1; i < l; i++)
     M[i] = (long)isprincipalray(bnr2, (GEN)gen[i]);
   return M;
-}
-
-/* Kernel of the above map */
-static GEN
-bnrGetKer(GEN bnr, GEN mod2)
-{
-  long i, n;
-  pari_sp av = avma;
-  GEN P,U, bnr2 = buchrayall(bnr,mod2,nf_INIT);
-
-  P = bnrGetSurj(bnr, bnr2); n = lg(P);
-  P = concatsp(P, diagonal(gmael(bnr2,5,2)));
-  U = (GEN)hnfall(P)[2]; setlg(U,n);
-  for (i=1; i<n; i++) setlg(U[i], n);
-  U = concatsp(U, diagonal(gmael(bnr, 5,2)));
-  return gerepileupto(av, hnf(U));
 }
 
 /* s: <gen> = Cl_f --> Cl_f2 --> 0, H subgroup of Cl_f (generators given as
@@ -2489,45 +2475,29 @@ GEN
 discrayabslistarchsquare(GEN bnf, GEN arch, long bound)
 { return discrayabslistarchintern(bnf,arch,bound, -1); }
 
-/* Let bnr1, bnr2 be such that mod(bnr2) | mod(bnr1), compute the
-   matrix of the surjective map Cl(bnr1) ->> Cl(bnr2) */
 static GEN
 subgroupcond(GEN bnr, GEN indexbound)
 {
   pari_sp av = avma;
-  long i,j,lgi,lp;
-  GEN li,p1,lidet,perm,nf,bid,ideal,arch,arch2,primelist,listKer;
-  GEN mod = cgetg(3, t_VEC);
+  long i, k, l, le, la;
+  GEN e, li, p1, lidet, perm, L, nf = checknf(bnr);
+  zlog_S S;
 
-  checkbnrgen(bnr); bid=(GEN)bnr[2];
-  ideal=gmael(bid,1,1);
-  arch =gmael(bid,1,2); nf=gmael(bnr,1,7);
-  primelist=gmael(bid,3,1); lp=lg(primelist)-1;
-  mod[2] = (long)arch;
-  listKer=cgetg(lp+lg(arch),t_VEC);
-  for (i=1; i<=lp; )
-  {
-    mod[1] = (long)idealdivpowprime(nf,ideal,(GEN)primelist[i],gun);
-    listKer[i++] = (long)bnrGetKer(bnr,mod);
-  }
-  mod[1] = (long)ideal; arch2 = dummycopy(arch);
-  mod[2] = (long)arch2;
-  for (j=1; j<lg(arch); j++)
-    if (signe((GEN)arch[j]))
-    {
-      arch2[j] = zero; 
-      listKer[i++] = (long)bnrGetKer(bnr,mod);
-      arch2[j] = un;
-    }
-  setlg(listKer,i);
-
-  li = subgroupcondlist(gmael(bnr,5,2),indexbound,listKer);
-  lgi = lg(li);
+  checkbnr(bnr); init_zlog_bid(&S, (GEN)bnr[2]);
+  e = S.e; le = lg(e); la = lg(S.archp);
+  L = cgetg(le + la - 1, t_VEC);
+  i = 1;
+  for (k = 1; k < le; k++)
+    L[i++] = (long)bnr_log_gen_pr(bnr, &S, nf, itos((GEN)e[k]), k);
+  for (k = 1; k < la; k++)
+    L[i++] = (long)bnr_log_gen_arch(bnr, &S, k);
+  li = subgroupcondlist(gmael(bnr,5,2), indexbound, L);
+  l = lg(li);
   /* sort by increasing index */
-  lidet = cgetg(lgi,t_VEC);
-  for (i=1; i<lgi; i++) lidet[i] = (long)dethnf_i((GEN)li[i]);
-  perm = sindexsort(lidet); p1 = li; li = cgetg(lgi,t_VEC);
-  for (i=1; i<lgi; i++) li[i] = p1[perm[lgi-i]];
+  lidet = cgetg(l,t_VEC);
+  for (i=1; i<l; i++) lidet[i] = (long)dethnf_i((GEN)li[i]);
+  perm = sindexsort(lidet); p1 = li; li = cgetg(l,t_VEC);
+  for (i=1; i<l; i++) li[i] = p1[perm[l-i]];
   return gerepilecopy(av,li);
 }
 

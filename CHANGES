@@ -137,6 +137,8 @@ BA  5- Library .so link changed to libpari.so for all versions.
 BA 11- improve binomial (use divide_conquer_prod)
    12- improve bnrinit & idealstart when finite part of conductor is 1 (+
        improve stability)
+   13- subgrouplist(bnr,...) does not require bnr to contain generators anymore
+       ( bnrinit(,,1) ). Also much faster.
 
   Added
     1- make test-all [ all test suite (SLOW !)]
