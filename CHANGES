@@ -105,6 +105,7 @@ MSo44- [gp: \x] missing 'break' statement in escape()
          hilbert(-1+O(2^3), 12 + O(2^3)) accepted wheras 2-adic precision too
          low to decide 
 BA 50- [FreeBSD:] PORTOBJFORMAT undefined by the system --> Configure fails
+   51- rnfisnorm() [errors, SEGV]. Had to change the prototype.
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).
@@ -132,6 +133,7 @@ IZ  8- [library:] unified access to diffptr (NEXT_PRIME_VIADIFF macro)
    18- [library:] moved (formerly) gp-specific write* and print* to libpari
    19- nffactor: call factornf when deg(pol) << deg(nf) + remove a priori
        overlift for d-1/d-2 test [major overkill]
+   20- input format to rnfisnorm() [use rnfisnorminit]
 
   Added
  BA 1- Add PARI_VERSION and PARI_VERSION_CODE to paricfg.h
@@ -141,6 +143,7 @@ IZ  8- [library:] unified access to diffptr (NEXT_PRIME_VIADIFF macro)
     5- [gprc:] multiline constructs
  IZ 6- mnemonics for flags
     7- internal flag nf_GEN_IF_PRINCIPAL to bnfisprincipal [isprincipalall]
+    8- routine rnfisnorminit()
 
   Removed
     1- (useless, undocumented) macros buchgen*, buchinit*
