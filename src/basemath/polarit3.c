@@ -1804,8 +1804,14 @@ FpX_ffisom(GEN P,GEN Q,GEN l)
   R = FpXQ_ffisom_inv(SP,P,l);
   return gerepileupto(av, FpX_FpXQ_compo(R,SQ,Q,l));
 }
-GEN
-Fp_factorgalois(GEN P,GEN l, long d, long w, GEN MP)
+
+/* Let l be a prime number, P in ZZ[X]. P is irreducible modulo l.
+ * Compute the factorisation of P over the subfield of FF_l[X]/(P)
+ * of index d. MP must be the matrix of the Frobenius automorphism
+ * of FF_l[X]/(P).*/
+
+static GEN
+FpX_factorgalois(GEN P, GEN l, long d, long w, GEN MP)
 {
   pari_sp ltop=avma;
   GEN R,V,Tl,z,M;
@@ -1816,7 +1822,7 @@ Fp_factorgalois(GEN P,GEN l, long d, long w, GEN MP)
   m=n/d;
   if (DEBUGLEVEL>=4) (void)timer2();
   M=FpM_Frobenius_pow(MP,d,P,l);
-  if (DEBUGLEVEL>=4) msgtimer("Fp_factorgalois: Frobenius power");
+  if (DEBUGLEVEL>=4) msgtimer("FpX_factorgalois: Frobenius power");
   Tl=gcopy(P); setvarn(Tl,w);
   V=cgetg(m+1,t_VEC);
   V[1]=lpolx[w];
@@ -1826,9 +1832,9 @@ Fp_factorgalois(GEN P,GEN l, long d, long w, GEN MP)
     z=FpM_FpV_mul(M,z,l);
     V[k]=(long)RV_to_RX(z,w);
   }
-  if (DEBUGLEVEL>=4) msgtimer("Fp_factorgalois: roots");
+  if (DEBUGLEVEL>=4) msgtimer("FpX_factorgalois: roots");
   R=FqV_roots_to_pol(V,Tl,l,v);
-  if (DEBUGLEVEL>=4) msgtimer("Fp_factorgalois: pol");
+  if (DEBUGLEVEL>=4) msgtimer("FpX_factorgalois: pol");
   return gerepileupto(ltop,R);
 }
 
@@ -1854,7 +1860,7 @@ FpX_factorff_irred(GEN P, GEN Q, GEN l)
   if (DEBUGLEVEL>=4) msgtimer("FpXQ_matrix_pows");
   FpX_ffintersect(P,Q,d,l,&SP,&SQ,FP,FQ);
   av=avma;
-  E=Fp_factorgalois(P,l,d,vq,FP);
+  E = FpX_factorgalois(P,l,d,vq,FP);
   if (OK_ULONG(l))
   {
     ulong p = l[2];
