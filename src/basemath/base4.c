@@ -1751,9 +1751,9 @@ idealappr0(GEN nf, GEN x, long fl)
     fprintferr(" entree dans idealappr0() :\n");
     fprintferr(" x = "); outerr(x);
   }
+  nf=checknf(nf); N=lgef(nf[1])-3;
   if (fl)
   {
-    nf=checknf(nf); N=lgef(nf[1])-3;
     if (typ(x)!=t_MAT || lg(x)!=3)
       err(talker,"not a prime ideal factorization in idealappr0");
     fact=x; list=(GEN)fact[1]; ep=(GEN)fact[2]; r=lg(list);
@@ -1815,7 +1815,7 @@ idealappr0(GEN nf, GEN x, long fl)
   else
   {
     den=denom(x); if (gcmp1(den)) den=NULL; else x=gmul(den,x);
-    x=idealhermite_aux(nf,x); N=lgef(nf[1])-3;
+    x=idealhermite_aux(nf,x);
     fact=idealfactor(nf,x);
     list=(GEN)fact[1]; ep=(GEN)fact[2]; r=lg(list);
     if (r==1) { avma=av; return gscalcol_i(gun,N); }
