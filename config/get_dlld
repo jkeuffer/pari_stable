@@ -27,7 +27,13 @@ case "$osname-$arch" in
 esac
 
 # if DLLD is defined at this point, respect it, even if do_dll=no
-if test $do_dll=yes -a -z "$DLLD"; then DLLD="$CC"; fi
+if test $do_dll=yes -a -z "$DLLD"; then
+  if test -n "$__gnuc__" -o "$osname"=solaris; then
+    DLLD="$CC"
+  else
+    DLLD=$ld # don't take risks
+  fi
+fi
 
 GNUdlld=
 DLLDisGCC=
@@ -43,6 +49,7 @@ if test -n "$DLLD"; then
     DLLDisGCC=yes;
     GNUdlld=$GNULDused
   fi
+
   case "$DLLD" in
     *ld) if ($DLLD -v 2>&1 | grep GNU > /dev/null); then GNUdlld=yes; fi;;
   esac
