@@ -19,7 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  * (GMU MP Library is Copyright Free Software Foundation, Inc.) */
 #include <pari.h>
 
-/* you might wish to tweaked the Makefile so as to use GMP cycle counting
+/* you might wish to tweak the Makefile so as to use GMP cycle counting
  * functions (look for GMP in Oxxx/Makefile) */
 
 #define numberof(x) (sizeof(x) / sizeof((x)[0]))
@@ -50,109 +50,19 @@ typedef struct {
 } tune_param;
 
 /* ========================================================== */
-#ifndef GMP_TIMER
-#ifdef WINCE
-static double
-TIMER(int i)
-{
-  static DWORD oldticks[MAX_TIMER];
-  DWORD ticks = GetTickCount();
-  DWORD delay = ticks - oldticks[i];
-  oldticks[i] = ticks;
-  return (double)delay;
-}
-#elif defined(macintosh)
-# include <Events.h>
-static long
-TIMER()
-{
-  static long oldticks;
-  long ticks = TickCount(), delay = ticks - oldticks;
-
-  oldticks = ticks;
-  return 50. * delay / 3.;
-}
-#elif USE_TIMES
-
-# include <sys/times.h>
-# include <sys/time.h>
-# include <time.h>
-static long
-TIMER()
-{
-  static clock_t oldticks;
-  struct tms t;
-  double delay;
-
-  times(&t);
-  delay = (t.tms_utime - oldticks) * (1. / CLK_TCK);
-  oldticks = t.tms_utime;
-  return delay;
-}
-#elif USE_GETRUSAGE
-
-# include <sys/time.h>
-# include <sys/resource.h>
-static double
-TIMER()
-{
-  static long oldmusec,oldsec;
-  struct rusage r;
-  struct timeval t;
-  double delay;
-
-  getrusage(0,&r); t=r.ru_utime;
-  delay = (t.tv_sec - oldsec) + (t.tv_usec - oldmusec) * 1e-6;
-  oldmusec = t.tv_usec; oldsec = t.tv_sec;
-  return delay;
-}
-#elif USE_FTIME
-
-# include <sys/timeb.h>
-static double
-TIMER()
-{
-  static long oldmsec,oldsec;
-  struct timeb t;
-  double delay;
-
-  ftime(&t);
-  delay = (t.time - oldsec) + (t.millitm - oldmsec) / 1000.;
-  oldmsec = t.millitm; oldsec = t.time;
-  return delay;
-}
-#else
-
-# include <time.h>
-# ifndef CLOCKS_PER_SEC
-#   define CLOCKS_PER_SEC 1000000 /* may be false on YOUR system */
-# endif
-static double
-TIMER()
-{
-  static clock_t oldclocks;
-  clock_t t = clock();
-  double delay = (t-oldclocks) / (double)CLOCKS_PER_SEC;
-
-  oldclocks = t;
-  return delay;
-}
-#endif
-#endif /* GMP_TIMER */
-
 #ifdef GMP_TIMER
 /* needed to link with gmp-4.0/tune/{time,freq}.o */
-void speed_starttime(void);
-double speed_endtime(void);
-
 int speed_option_verbose = 0;
 extern double speed_unittime;
 extern int    speed_precision;
+void speed_starttime(void);
+double speed_endtime(void);
 #else
+static pari_timer __T;
 static double speed_unittime = 1e-4;
 static int    speed_precision= 1000;
-static void speed_starttime() { (void)TIMER(); }
-static double speed_endtime() { return TIMER(); }
+static void speed_starttime() { (void)TIMER(&__T); }
+static double speed_endtime() { return (double)TIMER(&__T)/1000.; }
 #endif
 
 /* ========================================================== */
