@@ -929,8 +929,7 @@ col_to_ff(GEN x, long v)
   GEN p;
 
   while (--k && gcmp0((GEN)x[k]));
-  if (k < 0) return gzero;
-  if (k == 0) return (GEN)x[1];
+  if (k <= 1) return k? (GEN)x[1]: gzero;
   i = k+2; p = cgetg(i,t_POL);
   p[1] = evalsigne(1) | evallgef(i) | evalvarn(v);
   x--; for (k=2; k<i; k++) p[k] = x[k];
@@ -944,6 +943,7 @@ vec_to_pol(GEN x, long v)
   GEN p;
 
   while (--k && gcmp0((GEN)x[k]));
+  if (!k) return zeropol(v);
   i = k+2; p = cgetg(i,t_POL);
   p[1] = evalsigne(1) | evallgef(i) | evalvarn(v);
   x--; for (k=2; k<i; k++) p[k] = x[k];
