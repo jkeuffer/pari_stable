@@ -1641,8 +1641,7 @@ nilord(GEN p, GEN fx, GEN dred, long mf, GEN gx, long flag)
 
     oE = Ea; opa = RX_RXQ_compo(pia, alph, fx);
 
-    if (DEBUGLEVEL >= 5)
-      fprintferr("  Fa = %ld and Ea = %ld \n", Fa, Ea);
+    if (DEBUGLEVEL>5) fprintferr("  (Fa, Ea) = (%ld,%ld)\n", Fa, Ea);
 
     /* change alpha such that nu = pia */
     if (La > 1)
@@ -1671,17 +1670,16 @@ nilord(GEN p, GEN fx, GEN dred, long mf, GEN gx, long flag)
 
     for (;;)
     {
-      if (DEBUGLEVEL >= 5)
-	fprintferr("  beta = %Z\n", beta);
+      if (DEBUGLEVEL>4) fprintferr("  beta = %Z\n", beta);
 
       if (fm == -1 || (!fm && eq > go_fm && !er))
       {
 	if (fm == 0) {
-	  if (DEBUGLEVEL >= 5) fprintferr("  ** switching to fast mode\n");
+	  if (DEBUGLEVEL>4) fprintferr("  ** switching to fast mode\n");
 	  fm = 1;
 	  chib = chig = NULL;
 	} else {
-	  if (DEBUGLEVEL >= 5) fprintferr("  ** switching to normal mode\n");
+	  if (DEBUGLEVEL>4) fprintferr("  ** switching to normal mode\n");
 	  fm = 0;
 	  go_fm = eq+2;
 	}
@@ -1712,8 +1710,8 @@ nilord(GEN p, GEN fx, GEN dred, long mf, GEN gx, long flag)
         er = (long)(L*Ea / E - eq*Ea);
       }
 
-      if (DEBUGLEVEL >= 5)
-	fprintferr("  eq = %ld and er = %ld (fm = %ld)\n", eq, er, fm);
+      if (DEBUGLEVEL>4)
+	fprintferr("  (eq,er) = (%ld,%ld), fm = %ld\n", eq, er, fm);
 
       /* eq and er are such that gamma = beta.p^-eq.nu^-er is a unit */
       if (eq) gamm = gdiv(beta, gpowgs(p, eq)); else gamm = beta;
@@ -1730,8 +1728,7 @@ nilord(GEN p, GEN fx, GEN dred, long mf, GEN gx, long flag)
 	gamm = redelt(gamm, p, p);
       }
 
-      if (DEBUGLEVEL >= 6)
-	fprintferr("  gamma = %Z\n", gamm);
+      if (DEBUGLEVEL>5) fprintferr("  gamma = %Z\n", gamm);
 
       if (!fm)
       {
@@ -1786,7 +1783,7 @@ nilord(GEN p, GEN fx, GEN dred, long mf, GEN gx, long flag)
 	Fg = degpol(nug);
 	if (Fa % Fg)
 	{ /* compute a new element such that F = lcm(Fa, Fg) */
-	  if (DEBUGLEVEL >= 5) fprintferr("  Increasing Fa\n");
+	  if (DEBUGLEVEL>4) fprintferr("  Increasing Fa\n");
 	
 	  if (testb2(&w, p, chi, Fa, gamm, pmf, Fg, ns))
 	  { /* at least 2 factors mod p ==> chi can be split */
@@ -1800,7 +1797,6 @@ nilord(GEN p, GEN fx, GEN dred, long mf, GEN gx, long flag)
       }
       else
       {
-	/* using fastnu: */
 	nug = fastnu(p, chi, gamm, pdr);
 	if (!nug) { fm = -1; continue; }
       }
@@ -1874,7 +1870,7 @@ nilord(GEN p, GEN fx, GEN dred, long mf, GEN gx, long flag)
 	pie = getprime(p, chi, eta, chie, nue, &Le, &Ee);
 	if (Ea%Ee)
 	{
-	  if (DEBUGLEVEL >= 5) fprintferr("  Increasing Ea\n");
+	  if (DEBUGLEVEL>4) fprintferr("  Increasing Ea\n");
 	  pie = redelt(pie, p, p);
 	  /* compute a new element such E = lcm(Ea, Ee) */	
 	  if (testc2(&w, p, chi, pmr, pmf, nu, Ea, pie, Ee, ns))
