@@ -2106,8 +2106,8 @@ dirzetak0(GEN nf, long N0)
   pol=(GEN)nf[1]; disc=(GEN)nf[4];
   c  = (GEN) gpmalloc((N0+1)*sizeof(long));
   c2 = (GEN) gpmalloc((N0+1)*sizeof(long));
-  c2[0]=c[0]=evaltyp(t_VEC) | evallg(N0+1);
-  c2[1]=c[1]=1; for (i=2; i<=N0; i++) c[i]=0;
+  c2[0] = c[0] = evaltyp(t_VEC) | evallg(N0+1);
+  c2[1] = c[1] = 1; for (i=2; i<=N0; i++) c[i]=0;
   court[2] = 0;
 
   maxprime_check((ulong)N0);
@@ -2124,19 +2124,18 @@ dirzetak0(GEN nf, long N0)
     for (j=1; j<lx; j++)
     {
       p1=powgi(court, (GEN)vect[j]); /* p1 = court^f */
-      if (cmpis(p1,N0) <= 0)
+      if (cmpis(p1,N0) > 0) continue;
+
+      q = p = (ulong)p1[2]; limk=N0/q;
+      for (k=2; k<=N0; k++) c2[k]=c[k];
+      while (q<=(ulong)N0)
       {
-        q = p = (ulong)p1[2]; limk=N0/q;
-        for (k=2; k<=N0; k++) c2[k]=c[k];
-        while (q<=(ulong)N0)
-        {
-          for (k=1; k<=limk; k++) c2[k*q] += c[k];
-          q = umuluu(q,p,&rem);
-          if (rem) break;
-          limk /= p;
-        }
-        p1=c; c=c2; c2=p1;
+        for (k=1; k<=limk; k++) c2[k*q] += c[k];
+        q = umuluu(q,p,&rem);
+        if (rem) break;
+        limk /= p;
       }
+      p1 = c; c = c2; c2 = p1;
     }
     avma=av;
     if (DEBUGLEVEL>6) fprintferr(" %ld",court[2]);
@@ -2321,13 +2320,14 @@ initzeta(GEN pol, long prec)
   /************* Calcul du nombre d'ideaux de norme donnee *************/
   coef = dirzetak0(nf,N0); tabj = cgetg(N0+1,t_MAT);
   if (DEBUGLEVEL>=2) msgtimer("coef");
-  colzero=cgetg(ru+2,t_COL); for (j=1; j<=ru+1; j++) colzero[j]=zero;
+  colzero = zerocol(ru+1);
   for (i=1; i<=N0; i++)
     if (coef[i])
     {
       GEN t = cgetg(ru+2,t_COL);
-      p1 = glog((GEN)tabcstn[i],prec); setsigne(p1, -signe(p1));
-      t[1] = lstoi(coef[i]); t[2] = lmul((GEN)t[1],p1);
+      p1 = mplog((GEN)tabcstn[i]); setsigne(p1, -signe(p1));
+      t[1] = lstoi(coef[i]);
+      t[2] = lmul((GEN)t[1],p1);
       for (j=2; j<=ru; j++)
       {
         pari_sp av2 = avma;
@@ -2416,7 +2416,7 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
   if (ts==t_REAL && !signe(gfrac(s))) { s=mptrunc(s); ts = t_INT; }
   if (ts==t_INT)
   {
-    sl=itos(s);
+    sl = itos(s);
     if (sl==1) err(talker,"s = 1 is a pole (gzetakall)");
     if (sl==0)
     {
@@ -2438,7 +2438,7 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
     val=s; valm=unmoins;
     if (sl < 0) /* r2 = 0 && odd(sl) */
     {
-      gammaunmoins2=ggamma(gmul2n(unmoins,-1),prec);
+      gammaunmoins2 = ggamma(gmul2n(unmoins,-1),prec);
       var1=var2=gun;
       for (i=2; i<=N0; i++)
 	if (coef[i])
