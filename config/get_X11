@@ -2,7 +2,6 @@ tdir=$osname-$arch-X11$$
 mkdir $tdir; cp Imakefile $tdir; cd $tdir
 if (xmkmf) >/dev/null 2>&1 && test -f Makefile; then
   eval `make gp-X11 2> /dev/null | grep -v make`
-  rm -f Makefile Makefile.bak
   x11pth="$usrlibdir $libdir";
 fi
 cd ..; rm -rf $tdir
@@ -13,31 +12,18 @@ if test ! -f $Xincroot/X11/Xos.h; then
   x11pth="\
     /usr/openwin/share/lib\
     /usr/openwin/lib\
-    /usr/X11R6/lib\
-    /usr/X11R5/lib\
-    /usr/X11R4/lib\
-    /usr/lib/X11R6\
-    /usr/lib/X11R5\
-    /usr/lib/X11R4\
-    /usr/local/X11R6/lib\
-    /usr/local/X11R5/lib\
-    /usr/local/X11R4/lib\
-    /usr/local/lib/X11R6\
-    /usr/local/lib/X11R5\
-    /usr/local/lib/X11R4\
+    /usr/X11R6/lib       /usr/X11R5/lib       /usr/X11R4/lib\
+    /usr/lib/X11R6       /usr/lib/X11R5       /usr/lib/X11R4\
+    /usr/local/X11R6/lib /usr/local/X11R5/lib /usr/local/X11R4/lib\
+    /usr/local/lib/X11R6 /usr/local/lib/X11R5 /usr/local/lib/X11R4\
     /usr/X11/lib\
     /usr/lib/X11\
     /usr/local/X11/lib\
     /usr/local/lib/X11\
-    /usr/X386/lib\
-    /usr/x386/lib\
     /usr/XFree86/lib/X11\
     /usr/lib\
     /usr/local/lib\
-    /usr/unsupported/lib\
     /usr/athena/lib\
-    /usr/local/x11r5/lib\
-    /usr/lpp/Xamples/lib\
   ";
   pth=`echo $x11pth | sed 's,/lib,/include,g'`
   x=`./locate X11/Xos.h '' $pth`
