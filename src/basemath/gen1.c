@@ -621,9 +621,15 @@ gadd(GEN x, GEN y)
       case t_COMPLEX:
         switch(ty)
 	{
-	  case t_COMPLEX: z=cgetg(3,t_COMPLEX);
-	    z[1]=ladd((GEN)x[1],(GEN)y[1]);
-	    z[2]=ladd((GEN)x[2],(GEN)y[2]); return z;
+	  case t_COMPLEX: z = cgetg(3,t_COMPLEX);
+	    z[2] = ladd((GEN)x[2],(GEN)y[2]);
+            if (isexactzero((GEN)z[2]))
+            {
+              avma = (pari_sp)(z+3);
+              return gadd((GEN)x[1],(GEN)y[1]);
+            }
+	    z[1] = ladd((GEN)x[1],(GEN)y[1]);
+            return z;
 
 	  case t_PADIC:
 	    if (krosg(-1,(GEN)y[2])== -1)
@@ -1262,14 +1268,19 @@ gmul(GEN x, GEN y)
       case t_COMPLEX:
         switch(ty)
 	{
-	  case t_COMPLEX: z=cgetg(3,t_COMPLEX); av=avma;
-            p1=gmul((GEN)x[1],(GEN)y[1]);
-            p2=gmul((GEN)x[2],(GEN)y[2]);
-	    x=gadd((GEN)x[1],(GEN)x[2]);
-            y=gadd((GEN)y[1],(GEN)y[2]);
-	    y=gmul(x,y); x=gadd(p1,p2);
-	    tetpil=avma; z[1]=lsub(p1,p2); z[2]=lsub(y,x);
-	    gerepilemanyvec(av,tetpil,z+1,2); return z;
+	  case t_COMPLEX: z = cgetg(3,t_COMPLEX); av = avma;
+            p1 = gmul((GEN)x[1],(GEN)y[1]);
+            p2 = gmul((GEN)x[2],(GEN)y[2]);
+	    x = gadd((GEN)x[1],(GEN)x[2]);
+            y = gadd((GEN)y[1],(GEN)y[2]);
+	    y = gmul(x,y); x = gadd(p1,p2);
+	    tetpil = avma; z[1] = lsub(p1,p2); z[2] = lsub(y,x);
+            if (isexactzero((GEN)z[2]))
+            {
+              avma = (pari_sp)z[1];
+              return gerepileupto((pari_sp)(z+3), (GEN)z[1]);
+            }
+	    gerepilemanyvec(av,tetpil, z+1,2); return z;
 	
 	  case t_PADIC:
 	    if (krosg(-1,(GEN)y[2]))
@@ -1599,11 +1610,16 @@ gsqr(GEN x)
 	return z;
 
       case t_COMPLEX:
-	z=cgetg(3,t_COMPLEX); av=avma;
-	p1=gadd((GEN)x[1],(GEN)x[2]);
-	p2=gadd((GEN)x[1],gneg_i((GEN)x[2]));
-	p3=gmul((GEN)x[1],(GEN)x[2]);
-	tetpil=avma;
+        if (isexactzero((GEN)x[1]))
+        {
+          av = avma;
+          return gerepileupto(av, gneg(gsqr((GEN)x[2])));
+        }
+	z = cgetg(3,t_COMPLEX); av = avma;
+	p1 = gadd((GEN)x[1],(GEN)x[2]);
+	p2 = gadd((GEN)x[1], gneg_i((GEN)x[2]));
+	p3 = gmul((GEN)x[1],(GEN)x[2]);
+	tetpil = avma;
 	z[1]=lmul(p1,p2); z[2]=lshift(p3,1);
 	gerepilemanyvec(av,tetpil,z+1,2);
 	return z;
