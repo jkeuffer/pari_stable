@@ -1580,29 +1580,28 @@ confrac(GEN x)
 GEN
 truedvmdii(GEN x, GEN y, GEN *z)
 {
-  long av=avma,tetpil;
-  GEN res, qu = dvmdii(x,y,&res);
+  long av = avma;
+  GEN r, q = dvmdii(x,y,&r); /* assume that r is last on stack */
   GEN *gptr[2];
 
-  if (signe(res)>=0)
+  if (signe(r)>=0)
   {
-    if (z == ONLY_REM) return gerepileuptoint(av,res);
-    if (z) *z = res; else cgiv(res);
-    return qu;
+    if (z == ONLY_REM) return gerepileuptoint(av,r);
+    if (z) *z = r; else cgiv(r);
+    return q;
   }
 
-  tetpil=avma;
   if (z == ONLY_REM)
   {
-    res = subiispec(y+2,res+2, lgefint(y)-2,lgefint(res)-2);
-    return gerepile(av,tetpil,res);
+    r = subiispec(y+2,r+2, lgefint(y)-2,lgefint(r)-2);
+    return gerepileuptoint(av, r);
   }
-  qu = addsi(-signe(y),qu);
-  if (!z) return gerepile(av,tetpil,qu);
+  q = addsi(-signe(y),q);
+  if (!z) return gerepileuptoint(av, q);
 
-  *z = subiispec(y+2,res+2, lgefint(y)-2,lgefint(res)-2);
-  gptr[0]=&qu; gptr[1]=z; gerepilemanysp(av,tetpil,gptr,2);
-  return qu;
+  *z = subiispec(y+2,r+2, lgefint(y)-2,lgefint(r)-2);
+  gptr[0]=&q; gptr[1]=z; gerepilemanysp(av,(long)r,gptr,2);
+  return q;
 }
 
 #if 0
