@@ -3241,7 +3241,7 @@ bnrL1(GEN bnr, GEN sbgrp, long flag, long prec)
       err(talker, "incorrect subgroup in bnrL1");
   }
 
-  cl = itos(det(sbgrp));
+  cl = labs(itos(det(sbgrp)));
   Qt = InitQuotient0(Mcyc, sbgrp);
   lq = lg((GEN)Qt[2]) - 1;
 
