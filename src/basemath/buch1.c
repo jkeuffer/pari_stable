@@ -1372,8 +1372,8 @@ static int
 imag_be_honest()
 {
   long p, fpc, s = KC, nbtest = 0;
-  gpmem_t av = avma;
   GEN F, ex = cgetg(lg(subFB), t_VECSMALL);
+  gpmem_t av = avma;
 
   while (s<KC2)
   {
@@ -1560,8 +1560,8 @@ static int
 real_be_honest()
 {
   long p, fpc, s = KC, nbtest = 0;
-  gpmem_t av = avma;
   GEN F,F0, ex = cgetg(lg(subFB), t_VECSMALL);
+  gpmem_t av = avma;
 
   while (s<KC2)
   {
