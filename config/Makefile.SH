@@ -565,12 +565,9 @@ pariinl.h: parilvl0.h parilvl1.h
 $src/funclist::
 	@ls -l $src/functions/*/* > $src/funclist.tmp
 	@sh $cfg/mv-if-diff $src/funclist.tmp $src/funclist
+	@cd $src/desc; \$(MAKE) 
 
-$src/desc/Def: $src/funclist
-	cd $src/desc; \$(MAKE) Def
-
-$src/gp/gp_init.h $src/gp/highlvl.h $src/language/init.h: $src/desc/Def 
-	cd $src/desc; \$(MAKE)
+$src/gp/gp_init.h $src/gp/highlvl.h $src/language/init.h: $src/funclist
 EOT
 
 if test -s $src_dir/kernel/$kernlvl0/MakeLVL0.SH; then
