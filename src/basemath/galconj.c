@@ -3219,13 +3219,12 @@ subgroupcoset(long n, GEN v)
 long
 sousgroupeelem(long n, GEN v, GEN cy, GEN bit)
 {
-  int     j, k, m, o, p, flag;
+  int     j, m, o, p, flag;
   for(j=1;j<n;j++) 
     bit[j]=0;
   m = 1;
   bit[m] = 1;
   cy[m++] = 1;
-  k++;
   do
   {
     flag = 0;
@@ -3238,7 +3237,6 @@ sousgroupeelem(long n, GEN v, GEN cy, GEN bit)
 	{
 	  flag = 1;
 	  bit[j] = 1;
-	  k++;
 	  cy[m++] = j;
 	}
       }
