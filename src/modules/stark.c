@@ -2305,7 +2305,7 @@ RecCoeff2(GEN nf,  RC_data *d,  long prec)
 
   av2 = avma;
 
-  for (i = bacmax; i >= bacmin; i--)
+  for (i = bacmax; i >= bacmin; i-=16)
   {
     p1 = lindep2(vec, i);
 
