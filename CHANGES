@@ -66,6 +66,7 @@ GN 16- assembler section of Sparc Makefiles relied on GNU make specific $<
 MSo17- off-by-1 error in Vec( t_STR )  [ memory corruption ]
    18- off-by-1 error in itostr(), e.g 10^11 [ memory corruption ]
 BA 19- [hi-res plot: X-Windows] rescaling bug
+MSo20- bittest(1,32) --> 1  [ off-by-1 error ]
 
   Changed
     1- bnfinit: [small_norm phase] speed up norm computations.

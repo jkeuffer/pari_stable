@@ -2349,13 +2349,14 @@ binaire(GEN x)
 long
 bittest(GEN x, long n)
 {
+  ulong u;
   long l;
 
-  if (!signe(x) || n<0) return 0;
+  if (!signe(x) || n < 0) return 0;
   l = n>>TWOPOTBITS_IN_LONG;
-  if (l+2 > lgefint(x)) return 0;
-  n = (1L << (n & (BITS_IN_LONG-1))) & *int_W(x,l);
-  return n? 1: 0;
+  if (l+3 > lgefint(x)) return 0;
+  u = (1UL << (n & (BITS_IN_LONG-1))) & *int_W(x,l);
+  return u? 1: 0;
 }
 
 GEN
