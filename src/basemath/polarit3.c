@@ -2941,9 +2941,7 @@ END:
   setvarn(H, vX); if (delvar) (void)delete_var();
   if (LERS)
   {
-    GEN z = cgetg(3, t_VEC);
-    z[1] = (long)H0;
-    z[2] = (long)H1; *LERS = z;
+    *LERS = _vec2(H0,H1);
     gerepileall(av, 2, &H, LERS);
     return H;
   }

@@ -730,9 +730,8 @@ quotient_group(GEN C, GEN G)
       j++;
     }
   }
-  Q = cgetg(3,t_VEC);
-  setlg(Qgen,j); Q[1] = (long)Qgen;
-  setlg(Qord,j); Q[2] = (long)Qord;
+  setlg(Qgen,j);
+  setlg(Qord,j); Q = _vec2(Qgen, Qord);
   if (group_order(Q) != n) err(talker,"galoissubgroup: not a WSS group");
   return gerepilecopy(ltop,Q);
 }
@@ -1013,7 +1012,7 @@ GEN
 groupelts_abelian_group(GEN S)
 {
   pari_sp ltop = avma;
-  GEN Qgen, Qord, Qelt, Q;
+  GEN Qgen, Qord, Qelt;
   long i, j, n = lg(S[1])-1, l = lg(S);
   Qord = cgetg(l, t_VECSMALL);
   Qgen = cgetg(l, t_VEC);
@@ -1028,10 +1027,9 @@ groupelts_abelian_group(GEN S)
       j++;
     }
   }
-  Q = cgetg(3,t_VEC);
-  setlg(Qgen,j); Q[1] = (long)Qgen;
-  setlg(Qord,j); Q[2] = (long)Qord;
-  return gerepilecopy(ltop,Q);
+  setlg(Qgen,j);
+  setlg(Qord,j); 
+  return gerepilecopy(ltop, _vec2(Qgen, Qord));
 }
  
 GEN 

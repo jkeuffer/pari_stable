@@ -1276,10 +1276,7 @@ fixedfieldsurmer(GEN O, GEN L, GEN mod, GEN l, GEN p, GEN S, GEN deg, long v, GE
 	GEN V;
 	if (DEBUGLEVEL>=4) 
 	  debug_surmer("FixedField: Sym: %Z\n",S,n);
-	V=cgetg(3,t_VEC);
-	V[1]=lcopy(s);/*do not swap*/
-	V[2]=lcopy(P);
-	return V;
+	return _vec2copy(s, P);/*do not swap*/
       }
       else
       {
@@ -3293,13 +3290,7 @@ galoisfixedfield(GEN gal, GEN perm, long flag, long y)
  */
 
 GEN
-galois_group(GEN gal)
-{
-  GEN G= cgetg(3,t_VEC);
-  G[1] = gal[7];
-  G[2] = gal[8];
-  return G;
-}
+galois_group(GEN gal) { return _vec2((GEN)gal[7], (GEN)gal[8]); }
 
 GEN
 checkgroup(GEN g, GEN *S)

@@ -452,9 +452,7 @@ isprincipalell(GEN bnfz, GEN id, GEN cycgen, GEN u, GEN gell, long rc)
     GEN e = modii(mulii((GEN)logdisc[i],(GEN)u[i]), gell);
     if (signe(e)) b = famat_mul(b, famat_pow((GEN)cycgen[i], e));
   }
-  y = cgetg(3,t_VEC);
-  y[1] = (long)logdisc; setlg(logdisc,rc+1);
-  y[2] = (long)b; return y;
+  setlg(logdisc,rc+1); return _vec2(logdisc, b);
 }
 
 static GEN

@@ -903,7 +903,7 @@ get_Tr(GEN mul, GEN x, GEN basden)
 GEN
 get_bas_den(GEN bas)
 {
-  GEN z,b,d,den, dbas = dummycopy(bas);
+  GEN b,d,den, dbas = dummycopy(bas);
   long i, l = lg(bas);
   int power = 1;
   den = cgetg(l,t_VEC);
@@ -914,9 +914,7 @@ get_bas_den(GEN bas)
     den[i] = (long)d; if (d) power = 0;
   }
   if (power) den = NULL; /* power basis */
-  z = cgetg(3,t_VEC);
-  z[1] = (long)dbas;
-  z[2] = (long)den; return z;
+  return _vec2(dbas, den);
 }
 
 /* allow x or y = NULL (act as 1) */
@@ -1481,12 +1479,7 @@ _initalg(GEN x, long flag, long prec)
   }
 
   nf = nfbasic_to_nf(&T, ro, prec);
-  if (flag & nf_ORIG)
-  {
-    GEN res = cgetg(3,t_VEC);
-    res[1] = (long)nf;
-    res[2] = (long)rev; nf = res;
-  }
+  if (flag & nf_ORIG) nf = _vec2(nf, rev);
   return gerepilecopy(av, nf);
 }
 
@@ -1665,9 +1658,7 @@ ordred(GEN x)
   if (typ(x) != t_POL) err(typeer,"ordred");
   if (!gcmp1(leading_term(x))) err(impl,"ordred");
   if (!signe(x)) return gcopy(x);
-  y = cgetg(3,t_VEC);
-  y[1] = (long)x;
-  y[2] = (long)idmat(degpol(x));
+  y = _vec2(x, idmat(degpol(x)));
   return gerepileupto(av, polred(y));
 }
 
@@ -1876,19 +1867,9 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
 static GEN
 storeeval(GEN a, GEN x, GEN z, GEN lead)
 {
-  GEN y, beta = modreverse_i(a, x);
+  GEN beta = modreverse_i(a, x);
   if (lead) beta = gdiv(beta, lead);
-  y = cgetg(3,t_VEC);
-  y[1] = (long)z;
-  y[2] = (long)to_polmod(beta,z); return y;
-}
-
-static GEN
-storeraw(GEN beta, GEN z)
-{
-  GEN y = cgetg(3,t_VEC);
-  y[1] = (long)z;
-  y[2] = (long)beta; return y;
+  return _vec2(z, to_polmod(beta,z));
 }
 
 static void
@@ -1920,7 +1901,7 @@ storepol(GEN x, GEN z, GEN a, GEN lead, long flag)
 {
   GEN y;
   if (flag & nf_RAW)
-    y = storeraw(a, z);
+    y = _vec2(z, a);
   else if (flag & nf_ORIG)
     y = storeeval(a, x, z, lead);
   else
@@ -1937,7 +1918,7 @@ storeallpol(GEN x, GEN z, GEN a, GEN lead, long flag)
   {
     long i, c = lg(z);
     y = cgetg(c,t_VEC);
-    for (i=1; i<c; i++) y[i] = (long)storeraw((GEN)a[i], (GEN)z[i]);
+    for (i=1; i<c; i++) y[i] = (long)_vec2((GEN)z[i], (GEN)a[i]);
   }
   else if (flag & nf_ORIG)
   {

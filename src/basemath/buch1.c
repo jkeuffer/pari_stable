@@ -253,15 +253,9 @@ quadhilbertimag(GEN D, GEN flag)
     P = cgetg(h+1,t_VEC);
     for (i=1; i<=h; i++)
     {
-      GEN v, s = gpq((GEN)L[i], p, q, e, sqd, u, prec);
+      GEN s = gpq((GEN)L[i], p, q, e, sqd, u, prec);
       if (DEBUGLEVEL>3) fprintferr("%ld ", i);
-      if (raw)
-      {
-        v = cgetg(3,t_VEC); P[i] = (long)v;
-        v[1] = L[i];
-        v[2] = (long)s;
-      }
-      else P[i] = (long)s;
+      P[i] = raw? (long)_vec2((GEN)L[i], s): (long)s;
       ex = gexpo(s); if (ex > 0) exmax += ex;
     }
     if (DEBUGLEVEL>1) msgtimer("roots");
@@ -308,12 +302,9 @@ quadhilbert(GEN D, GEN flag, long prec)
 
 /* Z-basis for a (over C) */
 static GEN
-get_om(GEN nf, GEN a)
-{
-  GEN om = cgetg(3,t_VEC);
-  om[1] = (long)to_approx(nf,(GEN)a[2]);
-  om[2] = (long)to_approx(nf,(GEN)a[1]);
-  return om;
+get_om(GEN nf, GEN a) {
+  return _vec2(to_approx(nf,(GEN)a[2]),
+               to_approx(nf,(GEN)a[1]));
 }
 
 /* Compute all elts in class group G = [|G|,c,g], c=cyclic factors, g=gens.
@@ -439,15 +430,9 @@ get_prec(GEN P, long prec)
 static GEN
 ellphistinit(GEN om, long prec)
 {
-  GEN p1,res,om1b,om2b, om1 = (GEN)om[1], om2 = (GEN)om[2];
+  GEN res,om1b,om2b, om1 = (GEN)om[1], om2 = (GEN)om[2];
 
-  if (gsigne(imag_i(gdiv(om1,om2))) < 0)
-  {
-    p1 = om1; om1 = om2; om2 = p1;
-    om = cgetg(3,t_VEC);
-    om[1] = (long)om1;
-    om[2] = (long)om2;
-  }
+  if (gsigne(imag_i(gdiv(om1,om2))) < 0) { swap(om1,om2); om = _vec2(om1,om2); }
   om1b = gconj(om1);
   om2b = gconj(om2); res = cgetg(4,t_VEC);
   res[1] = ldivgs(elleisnum(om,2,0,prec),12);
@@ -502,15 +487,9 @@ PRECPB:
   for (i=1; i<=clrayno; i++)
   {
     GEN om = get_om(nf, idealdiv(nf,f,(GEN)listray[i]));
-    GEN v, s = computeth2(om,lanum,prec);
+    GEN s = computeth2(om,lanum,prec);
     if (!s) { prec = (prec<<1)-2; goto PRECPB; }
-    if (raw)
-    {
-      v = cgetg(3,t_VEC); P[i] = (long)v;
-      v[1] = (long)listray[i];
-      v[2] = (long)s;
-    }
-    else P[i] = (long)s;
+    P[i] = raw? (long)_vec2((GEN)listray[i], s): (long)s;
   }
   if (!raw)
   {

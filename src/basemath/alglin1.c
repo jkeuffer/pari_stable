@@ -196,11 +196,7 @@ concatsp(GEN x, GEN y)
 
   if (! is_matvec_t(tx))
   {
-    if (! is_matvec_t(ty))
-    {
-      z=cgetg(3,t_VEC); z[1]=(long)x; z[2]=(long)y;
-      return z;
-    }
+    if (! is_matvec_t(ty)) return _vec2(x, y);
     z=cgetg(ly+1,ty);
     if (ty != t_MAT) p1 = x;
     else
@@ -324,11 +320,7 @@ concat(GEN x, GEN y)
 
   if (! is_matvec_t(tx))
   {
-    if (! is_matvec_t(ty))
-    {
-      z=cgetg(3,t_VEC); z[1]=lcopy(x); z[2]=lcopy(y);
-      return z;
-    }
+    if (! is_matvec_t(ty)) return _vec2copy(x, y);
     z=cgetg(ly+1,ty);
     if (ty != t_MAT) p1 = gcopy(x);
     else

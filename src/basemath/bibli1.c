@@ -103,7 +103,7 @@ static int
 FindApplyQ(GEN x, GEN mu, GEN B, long k, GEN Q, long prec)
 {
   long i, lx = lg(x)-1, lv = lx - (k-1);
-  GEN v, p1, beta, Nx, x2, x1, xd = x + (k-1);
+  GEN v, beta, Nx, x2, x1, xd = x + (k-1);
 
   x1 = (GEN)xd[1];
   x2 = gsqr(x1);
@@ -121,10 +121,7 @@ FindApplyQ(GEN x, GEN mu, GEN B, long k, GEN Q, long prec)
       beta = mpmul(x2, realun(prec)); /* make sure typ(beta) != t_INT */
     else
       beta = mpadd(x2, mpmul(Nx,x1));
-    beta = ginv(beta);
-    p1 = cgetg(3,t_VEC); Q[k] = (long)p1;
-    p1[1] = (long)beta;
-    p1[2] = (long)v;
+    Q[k] = (long)_vec2(ginv(beta), v);
 
     coeff(mu,k,k) = lmpneg(Nx);
   }
@@ -317,7 +314,7 @@ static GEN
 lll_finish(GEN h,GEN fl,long flag)
 {
   long i, k, l = lg(fl);
-  GEN y, g;
+  GEN g;
 
   k=1; while (k<l && !fl[k]) k++;
   switch(flag & (~lll_GRAM))
@@ -328,11 +325,9 @@ lll_finish(GEN h,GEN fl,long flag)
     case lll_IM: h += k-1; h[0] = evaltyp(t_MAT) | evallg(l-k+1);
       return h;
   }
-  y = cgetg(3,t_VEC);
   g = cgetg(k, t_MAT); for (i=1; i<k; i++) g[i] = h[i];
-  y[1] = (long)g;
   h += k-1; h[0] = evaltyp(t_MAT) | evallg(l-k+1);
-  y[2] = (long)h; return y;
+  return _vec2(g, h);
 }
 
 /* h[,k] += q * h[,l]. Inefficient if q = 0 */
@@ -3420,11 +3415,9 @@ END:
         j++; pols[j]=(long)p; alph[j]=S[k];
       }
     }
-    u = cgetg(3,t_VEC);
-    setlg(pols,j+1); u[1] = (long)pols;
-    setlg(alph,j+1); u[2] = (long)alph;
-    if (isclone(S)) { u[2] = (long)forcecopy(alph); gunclone(S); }
-    return u;
+    setlg(pols,j+1);
+    setlg(alph,j+1); if (isclone(S)) { alph = forcecopy(alph); gunclone(S); }
+    return _vec2(pols, alph);
   }
   u = cgetg(4,t_VEC);
   u[1] = lstoi(s<<1);

@@ -1012,9 +1012,8 @@ FpX_factcantor_i(GEN f, GEN pp, long flag)
     e *= p; f = poldeflate_i(f2, p);
   }
   if (flag > 1) return gun; /* irreducible */
-  y = cgetg(3, t_VEC);
-  y[1] = (long)t; setlg(t, nbfact);
-  y[2] = (long)E; setlg(E, nbfact); 
+  setlg(t, nbfact);
+  setlg(E, nbfact); y = _vec2((GEN)t, E);
   if (!flag) (void)sort_factor(y,cmpii);
   return y;
 }
@@ -1284,7 +1283,7 @@ FpX_factor_i(GEN f, GEN pp)
 {
   long e, N, nbfact, val, d = degpol(f);
   ulong p, k, j;
-  GEN pps2,E,y,f2,p1,g1,u, *t;
+  GEN pps2, E, f2, p1, g1, u, *t;
 
   if (!d) return trivfact();
   p = init_p(pp);
@@ -1325,9 +1324,8 @@ FpX_factor_i(GEN f, GEN pp)
     if (j % p) err(talker, "factmod: %lu is not prime", p);
     e *= p; f = poldeflate_i(f2, p);
   }
-  y = cgetg(3, t_VEC);
-  y[1] = (long)t; setlg(t, nbfact);
-  y[2] = (long)E; setlg(E, nbfact); return sort_factor(y,cmpii);
+  setlg(t, nbfact);
+  setlg(E, nbfact); return sort_factor(_vec2((GEN)t,E), cmpii);
 }
 GEN
 FpX_factor(GEN f, GEN p)
@@ -2293,12 +2291,7 @@ typedef struct {
 } FqX_split_t;
 
 static void
-add(GEN z, GEN g, long d)
-{
-  GEN L = cgetg(3, t_VEC);
-  L[1] = lstoi(d);
-  L[2] = (long)g; appendL(z, L);
-}
+add(GEN z, GEN g, long d) { appendL(z, _vec2(stoi(d), g)); }
 /* return number of roots */
 long
 FqX_split_deg1(GEN *pz, GEN u, GEN q, GEN T, GEN p)
@@ -2409,7 +2402,7 @@ FqX_sqf_split(GEN *t0, GEN q, GEN T, GEN p)
 static GEN
 FpX_factorff(GEN P,GEN l, GEN Q)
 {
-  GEN V,E,y, F = FpX_factor(P,l);
+  GEN V,E, F = FpX_factor(P,l);
   long lfact = 1, nmax = lgpol(P), n = lg((GEN)F[1]);
   long i;
   V = cgetg(nmax,t_VEC);
@@ -2424,16 +2417,15 @@ FpX_factorff(GEN P,GEN l, GEN Q)
       E[lfact] = mael(F,2,i); lfact++;
     }
   }
-  y = cgetg(3,t_VEC);
-  y[1] = (long)V; setlg(V,lfact);
-  y[2] = (long)E; setlg(E,lfact); return sort_factor(y,cmp_pol);
+  setlg(V,lfact);
+  setlg(E,lfact); return sort_factor(_vec2(V,E), cmp_pol);
 }
 
 static GEN
 FqX_factor_i(GEN f, GEN T, GEN p)
 {
   long pg, i, j, k, d, e, N, nbfact, pk;
-  GEN y, E, f2, f3, df1, df2, g1, u, q, frobinv, *t;
+  GEN E, f2, f3, df1, df2, g1, u, q, frobinv, *t;
 
   if (!signe(f)) err(zeropoler,"FqX_factor");
   d = degpol(f); if (!d) return trivfact();
@@ -2504,9 +2496,8 @@ FqX_factor_i(GEN f, GEN T, GEN p)
         t[j] = t[nbfact]; break;
       }
   }
-  y = cgetg(3, t_VEC);
-  y[1] = (long)t; setlg(t, nbfact);
-  y[2] = (long)E; setlg(E, nbfact); return sort_factor(y, cmp_pol);
+  setlg(t, nbfact);
+  setlg(E, nbfact); return sort_factor(_vec2((GEN)t, E), cmp_pol);
 }
 GEN
 factmod9(GEN f, GEN p, GEN T)

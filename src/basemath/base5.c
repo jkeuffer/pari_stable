@@ -301,9 +301,7 @@ rnfinitalg(GEN nf, GEN pol, long prec)
   bas = rnfallbase(nf,pol, &D,&d, &f);
   B = matbasistoalg(nf,(GEN)bas[1]);
   bas[1] = (long)lift_if_rational( RgM_to_RgXV(B,vpol) );
-  delta = cgetg(3,t_VEC);
-  delta[1] = (long)D;
-  delta[2] = (long)d;
+  delta = _vec2(D, d);
 
   rnf = cgetg(13, t_VEC);
   rnf[1] = (long)pol;
@@ -524,14 +522,12 @@ static GEN
 rnfprincipaltohermite(GEN rnf,GEN x)
 {
   pari_sp av = avma;
-  GEN z, bas = (GEN)rnf[7], nf = (GEN)rnf[10];
+  GEN bas = (GEN)rnf[7], nf = (GEN)rnf[10];
 
   x = rnfbasistoalg(rnf,x);
   x = rnfalgtobasis(rnf, gmul(x, gmodulcp((GEN)bas[1], (GEN)rnf[1])));
-  z = cgetg(3,t_VEC);
-  z[1] = (long)x; settyp(x, t_MAT);
-  z[2] = bas[2];
-  return gerepileupto(av, nfhermite(nf,z));
+  settyp(x, t_MAT);
+  return gerepileupto(av, nfhermite(nf, _vec2(x, (GEN)bas[2])));
 }
 
 GEN
@@ -638,9 +634,8 @@ rnfidealabstorel(GEN rnf, GEN x)
   N = m * degpol(rnf[1]);
   if (lg(x)-1 != N) err(typeer, "rnfidealabstorel");
   if (typ(x) != t_VEC) err(typeer,"rnfidealabstorel");
-  z = cgetg(3,t_VEC);
-  A = cgetg(N+1,t_MAT); z[1] = (long)A;
-  I = cgetg(N+1,t_VEC); z[2] = (long)I; id = idmat(m);
+  A = cgetg(N+1,t_MAT);
+  I = cgetg(N+1,t_VEC); z = _vec2(A,I); id = idmat(m);
   for (j=1; j<=N; j++)
   {
     GEN t = lift_intern( rnfelementabstorel(rnf, (GEN)x[j]) );
@@ -669,9 +664,7 @@ rnfidealup(GEN rnf,GEN x)
   n = degpol(rnf[1]);
   bas = (GEN)rnf[7]; bas2 = (GEN)bas[2];
 
-  z = cgetg(3,t_VEC); I = cgetg(n+1,t_VEC);
-  z[1] = bas[1];
-  z[2] = (long)I;
+  I = cgetg(n+1,t_VEC); z = _vec2((GEN)bas[1], I);
   for (i=1; i<=n; i++) I[i] = (long)idealmul(nf,x,(GEN)bas2[i]);
   return gerepilecopy(av, modulereltoabs(rnf, z));
 }

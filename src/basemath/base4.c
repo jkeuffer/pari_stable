@@ -2040,7 +2040,7 @@ ideallllred(GEN nf, GEN I, GEN vdir, long prec)
 {
   pari_sp av = avma;
   long N, i;
-  GEN J, res, aI, y, x, T, b, c1, c, pol;
+  GEN J, aI, y, x, T, b, c1, c, pol;
 
   nf = checknf(nf); 
   pol = (GEN)nf[1]; N = degpol(pol);
@@ -2116,9 +2116,7 @@ END:
       break;
   }
   if (y) aI = arch_mul(aI,y);
-  res = cgetg(3,t_VEC);
-  res[1] = (long)I;
-  res[2] = (long)aI; return gerepilecopy(av, res);
+  return gerepilecopy(av, _vec2(I, aI));
 }
 
 GEN
@@ -2758,10 +2756,9 @@ nfhermite(GEN nf, GEN x)
       gerepileall(av,3, &A,&I,&J);
     }
   }
-  y = cgetg(3,t_VEC);
-  A += k-m; A[0] = evaltyp(t_MAT)|evallg(m+1); y[1] = (long)A;
-  I += k-m; I[0] = evaltyp(t_VEC)|evallg(m+1); y[2] = (long)I;
-  return gerepilecopy(av0, y);
+  A += k-m; A[0] = evaltyp(t_MAT)|evallg(m+1);
+  I += k-m; I[0] = evaltyp(t_VEC)|evallg(m+1);
+  return gerepilecopy(av0, _vec2(A, I));
 }
 
 /* A torsion module M over Z_K will be given by a row vector [A,I,J] with
@@ -3131,7 +3128,5 @@ nfhermitemod(GEN nf, GEN x, GEN detmat)
       gerepileall(av,3, &A,&I,&J);
     }
   }
-  p1 = cgetg(3,t_VEC);
-  p1[1] = (long)A;
-  p1[2] = (long)I; return gerepilecopy(av0, p1);
+  return gerepilecopy(av0, _vec2(A, I));
 }

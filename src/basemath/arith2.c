@@ -1330,7 +1330,7 @@ core2partial(GEN n, long all)
 {
   pari_sp av = avma;
   long i;
-  GEN fa,p1,p2,e,c=gun,f=gun,y;
+  GEN fa,p1,p2,e,c=gun,f=gun;
 
   fa = auxdecomp(n,all);
   p1 = (GEN)fa[1];
@@ -1341,9 +1341,7 @@ core2partial(GEN n, long all)
     if (mod2(e))   c = mulii(c, (GEN)p1[i]);
     if (!gcmp1(e)) f = mulii(f, powgi((GEN)p1[i], shifti(e,-1)));
   }
-  y = cgetg(3,t_VEC);
-  y[1] = (long)c;
-  y[2] = (long)f; return gerepilecopy(av, y);
+  return gerepilecopy(av, _vec2(c,f));
 }
 
 GEN core(GEN n)  { return corepartial(n,1); }

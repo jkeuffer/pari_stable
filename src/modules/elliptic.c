@@ -167,11 +167,11 @@ ellprint(GEN e)
   pari_sp av = avma;
   long vx = fetch_var();
   long vy = fetch_var();
-  GEN z = cgetg(3,t_VEC);
+  GEN z;
   if (typ(e) != t_VEC || lg(e) < 6)
     err(talker, "not an elliptic curve in ellprint");
-  z[1] = lpolx[vx]; name_var(vx, "X");
-  z[2] = lpolx[vy]; name_var(vy, "Y");
+  name_var(vx, "X");
+  name_var(vy, "Y"); z = _vec2(polx[vx], polx[vy]);
   fprintferr("%Z - (%Z)\n", ellLHS(e, z), ellRHS(e, polx[vx]));
   (void)delete_var();
   (void)delete_var(); avma = av;
@@ -1028,7 +1028,7 @@ GEN
 elleta(GEN om, long prec)
 {
   pari_sp av = avma;
-  GEN y, y1, y2, E2, pi = mppi(prec);
+  GEN y1, y2, E2, pi = mppi(prec);
   SL2_red T;
   if (!get_periods(om, &T)) err(typeer,"elleta");
   E2 = trueE(T.Tau, 2, prec); /* E_2(Tau) */
@@ -1046,9 +1046,7 @@ elleta(GEN om, long prec)
   }
   else
     y1 = gsub(gmul(T.tau,y2), gdiv(PiI2(prec), T.w2));
-  y = cgetg(3, t_VEC);
-  y[1] = (long)y1;
-  y[2] = (long)y2; return gerepilecopy(av, y);
+  return gerepilecopy(av, _vec2(y1,y2));
 }
 
 static GEN
@@ -1125,9 +1123,7 @@ weipellnumall(SL2_red *T, GEN z, long flall, long prec)
   if (flall)
   {
     yp = gmul(u, gmul(gmul(u1,u2),yp));/* yp *= u (2i pi / w2)^3 */
-    v = cgetg(3,t_VEC);
-    v[1] = (long)y;
-    v[2] = lmul2n(yp,-1);
+    v = _vec2(y, gmul2n(yp,-1));
   }
   else v = y;
   return gerepilecopy(av, v);
@@ -2957,8 +2953,9 @@ taniyama(GEN e)
     }
   }
   w=gsub(gmul(polx[0],gmul(d,deriv(v,0))), ellLHS0(e,v));
-  tetpil=avma; s1=cgetg(3,t_VEC); s1[1]=lcopy(v); s1[2]=lmul2n(w,-1);
-  return gerepile(av,tetpil,s1);
+  tetpil = avma; s1 = cgetg(3,t_VEC);
+  s1[1] = lcopy(v);
+  s1[2] = lmul2n(w,-1); return gerepile(av,tetpil,s1);
 }
 
 /********************************************************************/
@@ -3221,8 +3218,8 @@ tors(GEN e, long k, GEN p, GEN q, GEN v)
     }
     r = cgetg(4,t_VEC);
     r[1] = lstoi(2*k); p1 = cgetg(3,t_VEC); p1[1] = lstoi(k); p1[2] = deux;
-    r[2] = (long)p1; p1 = cgetg(3,t_VEC); p1[1] = lcopy(p); p1[2] = lcopy(q);
-    r[3] = (long)p1;
+    r[2] = (long)p1;
+    r[3] = (long)_vec2copy(p, q);
   }
   else
   {

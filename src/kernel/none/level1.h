@@ -35,6 +35,7 @@ GEN    _mat(GEN x);
 GEN    _matcopy(GEN x);
 GEN    _vec(GEN x);
 GEN    _vec2(GEN x, GEN y);
+GEN    _vec2copy(GEN x, GEN y);
 GEN    _veccopy(GEN x);
 GEN    _vecsmall(long x);
 void   affiz(GEN x, GEN y);
@@ -253,10 +254,10 @@ INLINE GEN
 _veccopy(GEN x) { GEN v = cgetg(2, t_VEC); v[1] = lcopy(x); return v; }
 INLINE GEN
 _vec2(GEN x, GEN y) {
-  GEN v = cgetg(3,t_VEC);
-  v[1] = (long)x;
-  v[2] = (long)y; return v;
-}
+  GEN v = cgetg(3,t_VEC); v[1] = (long)x; v[2] = (long)y; return v; }
+INLINE GEN
+_vec2copy(GEN x, GEN y) {
+  GEN v = cgetg(3,t_VEC); v[1] = lcopy(x); v[2] = lcopy(y); return v; }
 INLINE GEN
 _col(GEN x) { GEN v = cgetg(2, t_COL); v[1] = (long)x; return v; }
 INLINE GEN

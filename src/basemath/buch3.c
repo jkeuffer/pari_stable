@@ -119,11 +119,7 @@ compute_fact(GEN nf, GEN u1, GEN gen)
         if (z) 
           z[2] = (long)arch_mul((GEN)z[2], to_famat_all(g, e));
         else
-        {
-          z = cgetg(3,t_VEC);
-          z[1] = 0;
-          z[2] = (long)to_famat_all(g, e);
-        }
+          z = _vec2(NULL, to_famat_all(g, e));
         continue;
       }
 
@@ -416,10 +412,8 @@ buchrayall(GEN bnf,GEN module,long flag)
     y[2] = (long)bid;
     y[3] = (long)El;
     y[4] = (long)idmat(ngen);
-    y[5] = (long)clg; u = cgetg(3,t_VEC);
-    y[6] = (long)u;
-      u[1] = lgetg(1,t_MAT);
-      u[2] = (long)idmat(RU);
+    y[5] = (long)clg;
+    y[6] = (long)_vec2(cgetg(1,t_MAT), idmat(RU));
     return gerepilecopy(av,y);
   }
 
@@ -590,10 +584,7 @@ isprincipalrayall(GEN bnr, GEN x, long flag)
     y = reducemodinvertible(y, (GEN)u[2]);
     alpha = element_div(nf, alpha, factorbackelt(init_units(bnf), y, nf));
   }
-  p1 = cgetg(3,t_VEC);
-  p1[1] = (long)ex;
-  p1[2] = (long)alpha;
-  return gerepilecopy(av, p1);
+  return gerepilecopy(av, _vec2(ex,alpha));
 }
 
 GEN
@@ -1407,9 +1398,7 @@ conductor(GEN bnr, GEN H0, long all)
   for (j = k = 1; k < l; k++)
     if (archp[k]) archp[j++] = archp[k];
   setlg(archp, j);
-  mod = cgetg(3,t_VEC);
-  mod[1] = (long)ideal;
-  mod[2] = (long)perm_to_arch(nf, archp);
+  mod = _vec2(ideal, perm_to_arch(nf, archp));
   if (!all) return gerepilecopy(av, mod);
 
   bnr2 = buchrayall(bnf, mod, nf_INIT | nf_GEN);
@@ -1894,9 +1883,8 @@ discrayabslist(GEN bnf, GEN lists)
 	idealrel = factormul(idealrel, factorpow(normp,S));
       }
       dlk = factordivexact(factorpow(factor(stoi(ii)),clhray), idealrel);
-      mod = cgetg(3,t_VEC);
-      mod[1] = (long)ideal; arch2 = dummycopy(arch);
-      mod[2] = (long)arch2; nz = 0;
+      arch2 = dummycopy(arch);
+      mod = _vec2(ideal, arch2); nz = 0;
       for (k=1; k<=r1; k++)
       {
 	if (signe(arch[k]))
@@ -2010,19 +1998,17 @@ zsimpjoin(GEN bidsimp, GEN bidp, GEN dummyfa, GEN matunit)
 static GEN
 rayclassnointern(GEN blist, GEN h)
 {
-  long lx,j;
-  GEN bid,qm,L,cyc,m,z;
+  long lx, j;
+  GEN bid, qm, L, m, H;
 
   lx = lg(blist); L = cgetg(lx,t_VEC);
   for (j=1; j<lx; j++)
   {
     bid = (GEN)blist[j];
     qm = gmul((GEN)bid[3],(GEN)bid[4]);
-    cyc = (GEN)bid[2];
-    m = concatsp(qm, diagonal(cyc));
-    z = cgetg(3,t_VEC); L[j] = (long)z;
-    z[1] = bid[1];
-    z[2] = lmulii(h, dethnf_i(hnf(m)));
+    m = concatsp(qm, diagonal((GEN)bid[2]));
+    H = mulii(h, dethnf_i(hnf(m)));
+    L[j] = (long)_vec2((GEN)bid[1], H);
   }
   return L;
 }
@@ -2031,7 +2017,7 @@ static GEN
 rayclassnointernarch(GEN blist, GEN h, GEN matU)
 {
   long lx,nc,k,kk,j,r1,jj,nba,nbarch;
-  GEN _2,bid,qm,Lray,cyc,m,z,z2,mm,rowsel;
+  GEN _2,bid,qm,Lray,cyc,m,z,H,mm,rowsel;
 
   if (!matU) return rayclassnointern(blist,h);
   lx = lg(blist); if (lx == 1) return blist;
@@ -2049,7 +2035,7 @@ rayclassnointernarch(GEN blist, GEN h, GEN matU)
              vconcat(diagonal(cyc), zeromat(r1,nc)),
              vconcat(zeromat(nc,r1), _2));
     m = hnf(m); mm = dummycopy(m);
-    z2 = cgetg(nbarch+1,t_VEC);
+    H = cgetg(nbarch+1,t_VEC);
     rowsel = cgetg(nc+r1+1,t_VECSMALL);
     for (k = 0; k < nbarch; k++)
     {
@@ -2058,11 +2044,9 @@ rayclassnointernarch(GEN blist, GEN h, GEN matU)
 	if (kk&1) rowsel[nba++] = nc + jj;
       setlg(rowsel, nba);
       rowselect_p(m, mm, rowsel, nc+1);
-      z2[k+1] = lmulii(h, dethnf_i(hnf(mm)));
+      H[k+1] = lmulii(h, dethnf_i(hnf(mm)));
     }
-    z = cgetg(3,t_VEC); Lray[j] = (long)z;
-    z[1] = bid[1];
-    z[2] = (long)z2;
+    Lray[j] = (long)_vec2((GEN)bid[1], H);
   }
   return Lray;
 }
@@ -2155,9 +2139,7 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
     for (i=1; i<=r1; i++) if (signe(arch[i])) nba++;
     if (nba) mod = cgetg(3,t_VEC);
   }
-  p1 = cgetg(3,t_VEC);
-  p1[1] = (long)idmat(degk);
-  p1[2] = (long)arch; bidp = zidealstarinitall(nf,p1,0);
+  bidp = zidealstarinitall(nf, _vec2(gun, arch), 0);
   if (allarch)
   {
     matarchunit = logunitmatrix(nf, U, sgnU, bidp);
@@ -2402,7 +2384,7 @@ LDISCRAY:
 	}
       }
       if (allarch)
-        { p1 = cgetg(3,t_VEC); p1[1]=(long)fa; p1[2]=(long)discall; }
+        p1 = _vec2(fa, discall);
       else
         { faall[1]=(long)fa; p1 = concatsp(faall, p1); }
       sousdisc[jj]=(long)p1;

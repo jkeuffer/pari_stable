@@ -310,10 +310,8 @@ subFB_change(FB_t *F, GEN nf, GEN L_jid)
 static GEN
 red(GEN nf, GEN I, GEN G0, GEN *pm)
 {
-  GEN m, y = cgetg(3,t_VEC);
-  y[1] = (long)I;
-  y[2] = lgetg(1, t_MAT);
-  y = ideallllred(nf, y, G0, 0);
+  GEN m, y;
+  y = ideallllred(nf, _vec2(I, cgetg(1,t_MAT)), G0, 0);
   m = (GEN)y[2];
   y = (GEN)y[1]; *pm = lg(m)==1? gun: gmael(m, 1, 1);
   return is_pm1(gcoeff(y,1,1))? NULL: ideal_two_elt(nf,y);
@@ -347,8 +345,8 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf)
   for (i=1; i<n; i++)
   {
     GEN M, m, alg, id2, vp = (GEN)F->LP[ F->subFB[i] ];
-    GEN z = cgetg(3,t_VEC); z[1] = vp[1]; z[2] = vp[2];
-    id2 = cgetg(a+1,t_VEC); Id2[i] = (long)id2; id2[1] = (long)z;
+    id2 = cgetg(a+1,t_VEC); Id2[i] = (long)id2;
+    id2[1] = (long)_vec2((GEN)vp[1], (GEN)vp[2]);
     alg = cgetg(a+1,t_VEC); Alg[i] = (long)alg; alg[1] = un;
     vp = prime_to_ideal(nf,vp);
     for (j=2; j<=a; j++)
@@ -1111,7 +1109,7 @@ testprimes(GEN bnf, long bound)
 GEN
 init_red_mod_units(GEN bnf, long prec)
 {
-  GEN z, s = gzero, p1,s1,mat, matunit = (GEN)bnf[3];
+  GEN s = gzero, p1,s1,mat, matunit = (GEN)bnf[3];
   long i,j, RU = lg(matunit);
 
   if (RU == 1) return NULL;
@@ -1129,9 +1127,7 @@ init_red_mod_units(GEN bnf, long prec)
   }
   s = gsqrt(gmul2n(s,RU),prec);
   if (expo(s) < 27) s = utoi(1UL << 27);
-  z = cgetg(3,t_VEC);
-  z[1] = (long)mat;
-  z[2] = (long)s; return z;
+  return _vec2(mat, s);
 }
 
 /* z computed above. Return unit exponents that would reduce col (arch) */
@@ -1273,7 +1269,7 @@ static GEN
 _isprincipal(GEN bnf, GEN x, long *ptprec, long flag)
 {
   long i,lW,lB,e,c, prec = *ptprec;
-  GEN Q,xar,Wex,Bex,U,y,p1,gen,cyc,xc,ex,d,col,A;
+  GEN Q,xar,Wex,Bex,U,p1,gen,cyc,xc,ex,d,col,A;
   GEN W       = (GEN)bnf[1];
   GEN B       = (GEN)bnf[2];
   GEN WB_C    = (GEN)bnf[4];
@@ -1361,12 +1357,9 @@ _isprincipal(GEN bnf, GEN x, long *ptprec, long flag)
     }
     err(warner,"precision too low for generators, not given");
   }
-  y = cgetg(3,t_VEC);
   if (xc && col) col = gmul(xc, col);
   if (!col) col = cgetg(1, t_COL);
-  if (flag & nf_GEN_IF_PRINCIPAL) return col;
-  y[1] = (long)ex;
-  y[2] = (long)col; return y;
+  return (flag & nf_GEN_IF_PRINCIPAL)? col: _vec2(ex, col);
 }
 
 static GEN
@@ -2633,16 +2626,16 @@ static GEN
 buchall_end(GEN nf,long fl,GEN res, GEN clg2, GEN W, GEN B, GEN A, GEN C,
             GEN Vbase)
 {
-  GEN p1, z;
+  GEN z;
   if (! (fl & nf_INIT))
   {
     GEN x = cgetg(5, t_VEC);
     x[1]=nf[1];
-    x[2]=nf[2]; p1=cgetg(3,t_VEC); p1[1]=nf[3]; p1[2]=nf[4];
-    x[3]=(long)p1;
+    x[2]=nf[2];
+    x[3]=(long)_vec2((GEN)nf[3], (GEN)nf[4]);
     x[4]=nf[7]; return _mat( concatsp(x, res) );
   }
-  z=cgetg(11,t_VEC);
+  z = cgetg(11,t_VEC);
   z[1]=(long)W;
   z[2]=(long)B;
   z[3]=(long)A;
@@ -2691,9 +2684,8 @@ bnfmake(GEN sbnf, long prec)
   W = (GEN)sbnf[7];
   class_group_gen(nf,W,C,Vbase,prec,NULL, &clgp,&clgp2);
 
-  p1 = cgetg(3,t_VEC); zu = (GEN)sbnf[10];
-  p1[1] = zu[1];
-  p1[2] = lmul(bas,(GEN)zu[2]); zu = p1;
+  zu = (GEN)sbnf[10];
+  zu = _vec2((GEN)zu[1], gmul(bas,(GEN)zu[2]));
 
   res = get_clfu(clgp, get_regulator(A), zu, fu, nf_UNITS);
   y = buchall_end(nf,nf_INIT,res,clgp2,W,(GEN)sbnf[8],A,C,Vbase);
@@ -2804,12 +2796,11 @@ static GEN
 buchall_for_degree_one_pol(GEN nf, long flun)
 {
   GEN W,B,A,C,Vbase,res;
-  GEN fu=cgetg(1,t_VEC), R=gun, zu=cgetg(3,t_VEC);
+  GEN fu=cgetg(1,t_VEC), R=gun, zu = _vec2(gdeux, utoineg(1));
   GEN clg1=cgetg(4,t_VEC), clg2=cgetg(4,t_VEC);
 
   clg1[1]=un; clg1[2]=clg1[3]=clg2[2]=clg2[3]=lgetg(1,t_VEC);
   clg2[1]=lgetg(1,t_MAT);
-  zu[1]=deux; zu[2]=lnegi(gun);
   W=B=A=C=cgetg(1,t_MAT);
   Vbase=cgetg(1,t_COL);
 
@@ -3164,7 +3155,7 @@ buchall(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long prec)
     if (lg(nf)==3) { CHANGE = (GEN)nf[2]; nf = (GEN)nf[1]; }
   }
   z = buch(&nf, cbach, cbach2, nbrelpid, flun, PRECREG);
-  if (CHANGE) { GEN v=cgetg(3,t_VEC); v[1]=(long)z; v[2]=(long)CHANGE; z = v; }
+  if (CHANGE) z = _vec2(z, CHANGE);
   z = gerepilecopy(av, z); if (nf) gunclone(nf);
   return z;
 }

@@ -2795,10 +2795,7 @@ extendedgcd(GEN A)
     A[n-1] = (long)mynegi((GEN)A[n-1]);
     ZV_neg_ip((GEN)B[n-1]);
   }
-  z = cgetg(3,t_VEC);
-  z[1] = A[n-1];
-  z[2] = (long)B;
-  return gerepilecopy(av, z);
+  return gerepilecopy(av, _vec2((GEN)A[n-1], B));
 }
 
 /* HNF with permutation. */

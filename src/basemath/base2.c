@@ -2819,9 +2819,8 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc)
   res[3] = lstoi(vt);
   res[1] = vt < 2? un: zero;
 
-  base = cgetg(3,t_VEC);
-  A = cgetg(m+d+1,t_MAT); base[1] = (long)A;
-  I = cgetg(m+d+1,t_VEC); base[2] = (long)I;
+  A = cgetg(m+d+1,t_MAT);
+  I = cgetg(m+d+1,t_VEC); base = _vec2(A, I);
  /* base[2] temporarily multiplied by p, for the final nfhermitemod,
   * which requires integral ideals */
   matid = gscalmat(p, n);
@@ -3009,11 +3008,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
       gerepileall(av1,2, &W,&I);
     }
   }
-  {
-    GEN res = cgetg(3,t_VEC);
-    res[1] = (long)W;
-    res[2] = (long)I; return gerepilecopy(av, res);
-  }
+  return gerepilecopy(av, _vec2(W, I));
 }
 
 static void
@@ -3144,9 +3139,8 @@ GEN
 rnfdiscf(GEN nf, GEN pol)
 {
   pari_sp av = avma;
-  GEN D, d, y = cgetg(3, t_VEC); (void)rnfallbase(nf,pol, &D, &d, NULL);
-  y[1] = (long)D;
-  y[2] = (long)d; return gerepilecopy(av, y);
+  GEN D, d; (void)rnfallbase(nf,pol, &D, &d, NULL);
+  return gerepilecopy(av, _vec2(D,d));
 }
 
 GEN
@@ -3754,7 +3748,7 @@ rnflllgram(GEN nf, GEN pol, GEN order,long prec)
 {
   pari_sp av = avma, lim = stack_lim(av,2);
   long j, k, l, kmax, r1, lx, count = 0;
-  GEN M, I, h, H, mth, MC, MPOL, MCS, B, mu, y, z;
+  GEN M, I, h, H, mth, MC, MPOL, MCS, B, mu, y;
   const int alpha = 10, MAX_COUNT = 4;
 
   nf = checknf(nf); r1 = nf_get_r1(nf);
@@ -3836,12 +3830,8 @@ PRECPB:
   if (H) h = gmul(H, h);
   if (DEBUGLEVEL) fprintferr("\n");
   y = cgetg(3,t_VEC);
-  z = cgetg(3,t_VEC);
-  z[1] = (long)algtobasis(nf,MPOL);
-  z[2] = lcopy(I);
-  y[1] = (long)z;
-  y[2] = (long)algtobasis(nf,h);
-  return gerepileupto(av, y);
+  y[1] = (long)_vec2(algtobasis(nf,MPOL), gcopy(I));
+  y[2] = (long)algtobasis(nf,h); return gerepileupto(av, y);
 }
 
 GEN
@@ -3869,9 +3859,7 @@ rnfpolred(GEN nf, GEN pol, long prec)
       newI[j] = (long)zk; al = gen_if_principal(bnf,(GEN)I[j]);
       newO[j] = (long)element_mulvec(nf, al, (GEN)O[j]);
     }
-    id = cgetg(3,t_VEC);
-    id[1] = (long)newO;
-    id[2] = (long)newI;
+    id = _vec2(newO, newI);
   }
 
   id = (GEN)rnflllgram(nf,pol,id,prec)[1];
@@ -3946,9 +3934,7 @@ makebasis(GEN nf, GEN pol, GEN rnfeq)
   }
   B = Q_remove_denom(B, &den);
   if (den) { B = hnfmodid(B, den); B = gdiv(B, den); } else B = idmat(m);
-  p1 = cgetg(3,t_VEC);
-  p1[1] = (long)polabs;
-  p1[2] = (long)B; return gerepilecopy(av, p1);
+  return gerepilecopy(av, _vec2(polabs, B));
 }
 
 /* relative polredabs. Returns relative polynomial by default (flag = 0)
@@ -3958,7 +3944,7 @@ makebasis(GEN nf, GEN pol, GEN rnfeq)
 GEN
 rnfpolredabs(GEN nf, GEN relpol, long flag)
 {
-  GEN red, bas, z, elt, POL, pol, T, a;
+  GEN red, bas, elt, POL, pol, T, a;
   long v, fl = (flag & nf_ADDZK)? nf_ADDZK: nf_RAW;
   pari_sp av = avma;
 
@@ -3996,20 +3982,13 @@ rnfpolredabs(GEN nf, GEN relpol, long flag)
   if (DEBUGLEVEL>1) fprintferr("reduced absolute generator: %Z\n",pol);
   if (flag & nf_ABSOLUTE)
   {
-    if (flag & nf_ADDZK)
-    {
-      z = cgetg(3, t_VEC);
-      z[1] = (long)pol;
-      z[2] = red[2]; pol = z;
-    }
+    if (flag & nf_ADDZK) pol = _vec2(pol, (GEN)red[2]);
     return gerepilecopy(av, pol);
   }
 
   elt = eltabstorel((GEN)red[2], T, relpol, a);
   pol = rnfcharpoly(nf,relpol,elt,v);
   if (!(flag & nf_ORIG)) return gerepileupto(av, pol);
-  z = cgetg(3,t_VEC);
-  z[1] = (long)pol;
-  z[2] = (long)to_polmod(modreverse_i((GEN)elt[2],(GEN)elt[1]), pol);
-  return gerepilecopy(av, z);
+  elt = to_polmod(modreverse_i((GEN)elt[2],(GEN)elt[1]), pol);
+  return gerepilecopy(av, _vec2(pol, elt));
 }

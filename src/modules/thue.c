@@ -427,7 +427,7 @@ new_sol(GEN z, GEN S)
 static void
 add_sol(GEN *pS, GEN x, GEN y)
 {
-  GEN u = cgetg(3,t_VEC); u[1] = (long)x; u[2] = (long)y;
+  GEN u = _vec2(x,y);
   if (new_sol(u, *pS)) *pS = concatsp(*pS, _vec(u));
 }
 
@@ -653,9 +653,7 @@ thueinit(GEN pol, long flag, long prec)
     if (!gisirreducible(pol)) err(redpoler,"thueinit");
     for (k=1; k<lg(ro); k++) c0 = gmul(c0, imag_i((GEN)ro[k]));
     c0 = ginv( mpabs(c0) );
-    tnf = cgetg(3,t_VEC);
-    tnf[1] = (long)pol;
-    tnf[2] = (long)c0;
+    tnf = _vec2(pol, c0);
   }
   return gerepilecopy(av,tnf);
 }

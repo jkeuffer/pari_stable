@@ -920,7 +920,7 @@ static GEN
 ComputeAChi(GEN dtcr, long flag, long prec)
 {
   long l, i, r;
-  GEN p1, ray, A, rep, diff, chi, bnrc, nf;
+  GEN p1, ray, A, diff, chi, bnrc, nf;
 
   diff = (GEN)dtcr[6];
   bnrc = (GEN)dtcr[3]; nf = checknf(bnrc);
@@ -947,13 +947,7 @@ ComputeAChi(GEN dtcr, long flag, long prec)
       B = gsub(gun, p1);
     A = gmul(A, B);
   }
-
-  if (flag) return A;
-
-  rep = cgetg(3, t_VEC);
-  rep[1] = lstoi(r);
-  rep[2] = (long)A;
-  return rep;
+  return flag? A: _vec2(stoi(r), A);
 }
 
 static GEN
@@ -1072,7 +1066,7 @@ InitChar(GEN bnr, GEN listCR, long prec)
 static GEN
 get_listCR(GEN dataD)
 {
-  GEN MrD, listCR, vecchi, chi, lchi, Surj, cond, bnr, p2, Mr, d, allCR;
+  GEN MrD, listCR, vecchi, chi, lchi, Surj, cond, bnr, Mr, d, allCR;
   long hD, h, nc, i, j, lD, tnc;
 
   Surj = gmael(dataD, 2, 3);
@@ -1107,10 +1101,7 @@ get_listCR(GEN dataD)
     if (gcmp0((GEN)cond[2])) continue;
 
     /* the infinite part of chi is non trivial */
-    p2 = cgetg(3, t_VEC);
-    p2[1] = (long)lchi;
-    p2[2] = (long)cond;
-    listCR[nc++] = (long)p2;
+    listCR[nc++] = (long)_vec2(lchi, cond);
     allCR[tnc++] = (long)lchi;
 
     /* if chi is not real, add its conjugate character to allCR */
@@ -1706,15 +1697,7 @@ ppgamma(ST_t *T, long prec)
 static GEN
 _cond(GEN dtcr, int quad)
 {
-  GEN cond;
-  if (quad) cond = (GEN)dtcr[7];
-  else
-  {
-    cond = cgetg(3, t_VEC);
-    cond[1] = dtcr[7];
-    cond[2] = dtcr[9];
-  }
-  return cond;
+  return  quad? (GEN)dtcr[7]: _vec2((GEN)dtcr[7], (GEN)dtcr[9]);
 }
 
 /* sort chars according to conductor */
@@ -1973,10 +1956,7 @@ GetValue(GEN dtcr, GEN W, GEN S, GEN T, long fl, long fl2, long prec)
       VL = gmul((GEN)A[2], VL);
       rchi = gadd(rchi, (GEN)A[1]);
     }
-
-    rep = cgetg(3, t_VEC);
-    rep[1] = (long)rchi;
-    rep[2] = (long)VL;
+    rep = _vec2(rchi, VL);
   }
   else
   { /* VL = S(chi) + W(chi).T(chi)) / (C(chi) sqrt(Pi)^{r1 - q}) */
@@ -2002,7 +1982,7 @@ static GEN
 GetValue1(GEN bnr, long flag, long prec)
 {
   GEN bnf = checkbnf(bnr), nf = checknf(bnf);
-  GEN hk, Rk, wk, c, rep, diff;
+  GEN hk, Rk, wk, c, diff;
   long i, l, r, r1, r2;
   pari_sp av = avma;
 
@@ -2022,11 +2002,7 @@ GetValue1(GEN bnr, long flag, long prec)
     for (i = 1; i <= l; i++)
       c = gmul(c, glog(idealnorm(nf, (GEN)diff[i]), prec));
   }
-
-  rep = cgetg(3, t_VEC);
-  rep[1] = lstoi(r);
-  rep[2] = (long)c;
-  return gerepilecopy(av, rep);
+  return gerepilecopy(av, _vec2(stoi(r), c));
 }
 
 /********************************************************************/
@@ -2962,14 +2938,7 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
   if (flag & 4)
   {
     rep = cgetg(cl + 1, t_VEC);
-    for (i = 1; i <= cl; i++)
-    {
-      p1 = cgetg(3, t_VEC);
-      p1[1] = allCR[i];
-      p1[2] = L1[i];
-
-      rep[i] = (long)p1;
-    }
+    for (i = 1; i <= cl; i++) rep[i] = (long)_vec2((GEN)allCR[i], (GEN)L1[i]);
   }
   else
     rep = L1;
