@@ -267,7 +267,7 @@ pariputsf(char *format, ...)
 #ifdef ESC
 #  undef ESC
 #endif
-#define ESC '\033'
+#define ESC  (0x1f & '[') /* C-[ = escape */
 
 void
 term_color(int c)
