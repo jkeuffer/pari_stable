@@ -1739,6 +1739,7 @@ identifier(void)
           { /* user supplied */
             match_comma();
             arglist[i] = expr();
+            skipdecl(); /* we'd be redefining fun, but don't know it yet */
             if (br_status) err(breaker,"here (reading function args)");
           }
         }
@@ -2541,10 +2542,7 @@ skipidentifier(void)
       {
 	if (do_switch(0,matchcomma))
           matchcomma = 1;
-	else
-        {
-          match_comma(); skipexpr();
-        }
+	else { match_comma(); skipexpr(); skipdecl(); }
       }
 
       if (*analyseur == ')')
