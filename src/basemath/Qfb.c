@@ -996,8 +996,12 @@ primeform(GEN x, GEN p, long prec)
 
   if (typ(x) != t_INT || !sx) err(arither1);
   if (typ(p) != t_INT || !sp) err(arither1);
-  if (is_pm1(p)) return sx<0? qfi_unit_by_disc(x)
-                            : qfr_unit_by_disc(x,prec);
+  if (is_pm1(p)) {
+    if (sx < 0) return qfi_unit_by_disc(x);
+    y = qfr_unit_by_disc(x,prec);
+    if (sp < 0) { gel(y,1) = negi(gel(y,1)); gel(y,3) = negi(gel(y,3)); }
+    return y;
+  }
   if (sp < 0 && sx < 0) err(impl,"negative definite t_QFI");
   if (lgefint(p) == 3)
   { 
