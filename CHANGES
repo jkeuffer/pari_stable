@@ -105,6 +105,7 @@ BA 51- [X-Windows] hi-res plot: window not redrawn properly (BackingStore pb)
    62- cosh(O(1)) --> division by 0
    63- sqrt(4*x^2) --> not an integer exponent for non invertible series in gpow
    64- besselj(0,O(1)) [or besseli] --> precision<=0 in gprec.
+   65- O(1)' --> O(x^-1)
 
   Changed
 BA  1- improved Fp_isom
@@ -138,6 +139,10 @@ HC 12- gamma function for integral/rational arguments
    25- content(scalar) = abs(scalar) [when it makes sense]
    26- changed the interface to ispseudoprime and isprime
    27- [internal] element_muli: check input is consistent
+   28- rewrote all LLL algorithms (use Householder, not Gram-Schmidt; do not
+       use Gram matrix; unified code).
+   29- INCOMPATIBILITY: the internal components of nf[5] have changed (MC and
+       T2 not needed anymore)
 
   Added
     1- mplog2() function --> faster mplog()

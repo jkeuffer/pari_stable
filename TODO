@@ -112,11 +112,6 @@ Misc:
 4  nfsubfields [use known subfields to discard blocs right away] (current uses
    far too much memory)
 
-4  LLL over R (not stable). Clean up bibli1.c (remove duplicate code)
-
-4  rethink the element_mul type of functions: multiplication table is O(n^3),
-   polynomial multiplication + remainder is O(n^2) [+ can use Karatsuba/FFT]
-
 3  zetak is very inefficient and unable to handle most fields of degree > 8
 
 3  have quadclassunit return bnf structure
