@@ -2021,7 +2021,9 @@ listcreate(long n)
   GEN list;
 
   if (n<0) err(talker,"negative length in listcreate");
-  list=cgetg(n+2,t_LIST); list[1]=evallgef(2);
+  n += 2;
+  if (n & ~LGEFBITS) err(talker,"list too long (max = %ld)",LGEFBITS-2);
+  list=cgetg(n,t_LIST); list[1]=evallgef(2);
   return list;
 }
 
