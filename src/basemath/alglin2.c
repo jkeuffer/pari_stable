@@ -2484,23 +2484,26 @@ allhnfmod(GEN x, GEN dm, int flag)
   }
   if (flag & hnf_PART) return x;
 
-  if (!modid)
+  b = cgetg(li, t_VEC);
+  if (modid) (void)vecconst(b, dm);
+  else
   { /* compute optimal value for dm */
-    dm = gcoeff(x,1,1);
-    for (i = 2; i < li; i++) dm = lcmii(dm, gcoeff(x,i,i));
+    b[1] = coeff(x,1,1);
+    for (i = 2; i < li; i++) b[i] = lmulii((GEN)b[i-1], gcoeff(x,i,i));
   }
+  dm = b;
 
-  ldm = lgefint(dm);
   for (i = li-2; i > 0; i--)
   {
     GEN diag = gcoeff(x,i,i);
+    ldm = lgefint(dm[i]);
     for (j = i+1; j < li; j++)
     {
       b = negi(truedvmdii(gcoeff(x,i,j), diag, NULL));
       p1 = ZV_lincomb(gun,b, (GEN)x[j], (GEN)x[i]);
       x[j] = (long)p1;
       for (k=1; k<i; k++)
-        if (lgefint(p1[k]) > ldm) p1[k] = lremii((GEN)p1[k], dm);
+        if (lgefint(p1[k]) > ldm) p1[k] = lremii((GEN)p1[k], (GEN)dm[i]);
       if (low_stack(lim, stack_lim(av,1)))
       {
         if (DEBUGMEM>1) err(warnmem,"allhnfmod[2]. i=%ld", i);
