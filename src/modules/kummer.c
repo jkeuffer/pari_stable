@@ -658,7 +658,9 @@ isvirtualunit(GEN bnf, GEN v, GEN cycgen, GEN cyc, GEN gell, long rc)
     eps = famat_mul(famat_inv(eps), v);
   }
   setlg(y, rc+1);
-  return concatsp(lift_intern(isunit(bnf,eps)), y);
+  b = isunit(bnf,eps);
+  if (lg(b) == 1) err(bugparier,"isvirtualunit");
+  return concatsp(lift_intern(b), y);
 }
 
 /* id a vector of elements in nfz = relative extension of nf by polrel,
