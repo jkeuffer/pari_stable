@@ -168,7 +168,7 @@ mulTp(GEN x, GEN y) { pari_sp av = avma;
 /* y PADIC, non zero x / y by converting x to padic */
 static GEN
 divTp(GEN x, GEN y) { pari_sp av = avma;
-  return gerepileupto(av, mulpp(cvtop2(x,y), y));
+  return gerepileupto(av, divpp(cvtop2(x,y), y));
 }
 /* x PADIC, x / y by converting y to padic */
 static GEN
