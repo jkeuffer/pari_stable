@@ -332,7 +332,7 @@ forvec_next_lt_i(GEN gd, GEN ignored)
       {
         i++;
         if (cmpii(d->a[i-1], d->a[i]) < 0) continue;
-        while (cmpii(d->a[i-1], d->M[i]) > 0)
+        while (cmpii(d->a[i-1], d->M[i]) >= 0)
         {
           i = imin - 1; if (!i) return NULL;
           imin = i;
@@ -369,7 +369,7 @@ forvec_next_lt(GEN gd, GEN v0)
       {
         i++;
         if (gcmp(v[i-1], v[i]) < 0) continue;
-        while (gcmp(v[i-1], d->M[i]) > 0)
+        while (gcmp(v[i-1], d->M[i]) >= 0)
         {
           i = imin - 1; if (!i) return NULL;
           imin = i;
