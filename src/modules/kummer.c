@@ -470,7 +470,7 @@ isvirtualunit(GEN bnfz, GEN v, GEN vecalpha, GEN cyc)
 
   p1=idealfactor(nfz,v);
   listpr = (GEN)p1[1]; llist = lg(listpr)-1;
-  listex = (GEN)p1[2]; q = idmat(degKz);
+  listex = (GEN)p1[2]; q = gun;
   for (i=1; i<=llist; i++)
   {
     ex = itos((GEN)listex[i]);

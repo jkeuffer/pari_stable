@@ -150,19 +150,16 @@ buchnarrow(GEN bnf)
   v[3] = (long)basecl; return gerepilecopy(av, v);
 }
 
-/* given two coprime ideals x (integral) and id, compute alpha in x,
- * alpha = 1 mod (id), with x/alpha nearly reduced.
- */
+/* given two coprime integral ideals x and f, compute "small" a in x,
+ * such that a = 1 mod (f). */
 static GEN
-findalpha(GEN nf,GEN x,GEN id)
+findalpha(GEN nf,GEN x,GEN f)
 {
-  GEN p1, y;
-  GEN alp = idealaddtoone_i(nf,x,id);
+  GEN p1,y, b = idealaddtoone_i(nf,x,f); /* a = b mod (x f) */
 
-  y = ideallllred_elt(nf, idealmullll(nf,x,id));
-  p1 = ground(element_div(nf,alp,y));
-  alp = gsub(alp, element_mul(nf,p1,y));
-  return gcmp0(alp)? y: alp;
+  y = ideallllred_elt(nf, idealmullll(nf,x,f));
+  p1 = ground(element_div(nf,b,y));
+  return gsub(b, element_mul(nf,p1,y)); /* != 0 since = 1 mod f */
 }
 
 static int
@@ -179,21 +176,22 @@ too_big(GEN nf, GEN bet)
 }
 
 static GEN
-idealmodidele(GEN nf, GEN x, GEN ideal, GEN sarch, GEN arch)
+idealmodidele(GEN nf, GEN x, GEN f, GEN sarch, GEN arch)
 {
   long av = avma,i,l;
   GEN p1,p2,alp,bet,b;
 
-  nf=checknf(nf); alp=findalpha(nf,x,ideal);
-  p1=idealdiv(nf,alp,x);
-  bet = element_div(nf,findalpha(nf,p1,ideal),alp);
+  nf = checknf(nf);
+  alp= findalpha(nf,x,f);
+  p1 = idealdiv(nf,alp,x); /* small, integral, = 1/x in Cl_f */
+  bet = element_div(nf,findalpha(nf,p1,f),alp);
   if (too_big(nf,bet) > 0) { avma=av; return x; }
   p1=(GEN)sarch[2]; l=lg(p1);
   if (l > 1)
   {
     b=bet; p2=lift_intern(gmul((GEN)sarch[3],zsigne(nf,bet,arch)));
     for (i=1; i<l; i++)
-    if (signe(p2[i])) bet = element_mul(nf,bet,(GEN)p1[i]);
+      if (signe(p2[i])) bet = element_mul(nf,bet,(GEN)p1[i]);
     if (b != bet && too_big(nf,bet) > 0) { avma=av; return x; }
   }
   return idealmul(nf,bet,x);
