@@ -79,6 +79,7 @@ IZ 39- TeX quasi-parsing in gphelp
    42- one extra blank line printed with some error messages [errcontext]
    43- no typechecks in subgrouplist and forsubgroup
    44- round4 [nfdisc]: make sure polmodi gets a polynomial, not an int (SEGV)
+   45- various typos in rnfkummer (SEGV or 'non-maximal rank in nfhermite')
 
   Changed
     1- DOS distribution archives (GPM removed)
