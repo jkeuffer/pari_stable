@@ -120,6 +120,7 @@ IZ 17- allow changing the gnuplot DLL name for gnuplot-dynamic at Configure-time
 MSo20- simplified polzagier()
 DS 21- improvements in elltors() [ faster torsion bound, check bound > 1
        before checking precision ]
+   22- minor improvements in plindep() [p-adic lindep/algdep]
 
   Added:
     1- [TeXmacs:] contextual completion (<TAB>)
