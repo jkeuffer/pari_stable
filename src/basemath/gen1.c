@@ -880,14 +880,16 @@ gadd(GEN x, GEN y)
 GEN
 fix_rfrac_if_pol(GEN x, GEN y)
 {
-  if (gcmp1(y)) return x;
+  gpmem_t av = avma;
+  y = simplify(y);
+  if (gcmp1(y)) { avma = av; return x; }
   if (typ(y) != t_POL)
   {
     if (typ(x) != t_POL || gvar2(y) > varn(x))
       return gdiv(x,y);
   }
   else if (varn(y) > varn(x)) return gdiv(x,y);
-  return NULL;
+  avma = av; return NULL;
 }
 
 static long
