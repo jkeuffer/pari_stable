@@ -156,6 +156,7 @@ _jbessel(GEN n, GEN z, long flag, long m)
     long v = valp(z);
     k = lg(p1)-2 - v;
     if (v < 0) err(negexper,"jbessel");
+    if (v == 0) err(impl,"jbessel around a!=0");
     if (k <= 0) return gadd(gun, zeroser(varn(z), 2*v));
     p1 = gprec(p1, k);
   }
@@ -455,6 +456,7 @@ _kbessel(long n, GEN z, long flag, long m, long prec)
     long v = valp(z);
     k = lg(p1)-2 - v;
     if (v < 0) err(negexper,"kbessel");
+    if (v == 0) err(impl,"kbessel around a!=0");
     if (k <= 0) return gadd(gun, zeroser(varn(z), 2*v));
     p1 = gprec(p1, k);
   }

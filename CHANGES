@@ -77,6 +77,8 @@ GH 15- polsturm(1, 0, 1) ---> error  [ return 0! ]
    32- typo in LLL_cmbf() [ rare infinite loop in factor() over Z[X] ]
 IS 33- [HPUX:] should compile with cc -Ae, not -Aa
    34- excessive memory usage in bnrstark() [ InitPrimes ]
+   35- bessel[jk](t_SER) not implemented around a!=0, but gave (bogus) results
+       [output error message for now]
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available
