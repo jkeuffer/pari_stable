@@ -24,6 +24,7 @@ prime(long n)
   byteptr p = diffptr;
   long c, prime = 0;
 
+  if (n <= 0) err(talker, "n-th prime meaningless if n = %ld",n);
   while (n--)
   {
     c = *p++; if (!c) err(primer1);
@@ -39,6 +40,7 @@ primes(long n)
   long c, prime = 0;
   GEN y,z;
 
+  if (n < 0) n = 0;
   z = y = cgetg(n+1,t_VEC);
   while (n--)
   {
@@ -244,7 +246,9 @@ addprimes(GEN prime)
   }
   if (tx != t_INT) err(typeer,"addprime");
   if (is_pm1(prime)) return primetab;
-  if (signe(prime) < 0) prime=absi(prime);
+  i = signe(prime);
+  if (i == 0) err(talker,"can't accept 0 in addprimes");
+  if (i < 0) prime=absi(prime); 
 
   p1=cgetg(1,t_VEC);
   for (i=1; i < lp; i++)

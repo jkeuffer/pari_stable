@@ -592,7 +592,7 @@ gcarreparfait(GEN x)
       for (i=1; i<l; i++) p1[i]=(long)gcarreparfait((GEN)x[i]);
       return p1;
   }
-  err(impl,"issquare for this type");
+  err(typeer,"issquare");
   return NULL; /* not reached */
 }
 
