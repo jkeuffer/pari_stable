@@ -257,37 +257,56 @@ initgaloisborne(GEN T, GEN dn, GEN *ptL, GEN *ptprep, GEN *ptdis, long *ptprec)
   *ptL = L; return den;
 }
 
+/* ||| M ||| with respect to || x ||_oo. Assume M square t_MAT */
+GEN
+matrixnorm(GEN M, long prec)
+{
+  long i,j, n = lg(M);
+  GEN B = realzero(prec);
+
+  for (i = 1; i < n; i++)
+  {
+    GEN z = gabs(gcoeff(M,i,1), prec);
+    for (j = 2; j < n; j++)
+      z = gadd(z, gabs(gcoeff(M,i,j), prec));
+    if (gcmp(z, B) > 0) B = z;
+  }
+  return B;
+}
+
+/* L a t_VEC/t_COL, return ||L||_oo */
+GEN
+supnorm(GEN L, long prec)
+{
+  long i, n = lg(L);
+  GEN z, B;
+
+  if (n == 1) return realzero(prec);
+  B = gabs((GEN)L[1], prec);
+  for (i = 2; i < n; i++)
+  {
+    z = gabs((GEN)L[i], prec);
+    if (gcmp(z, B) > 0) B = z;
+  }
+  return B;
+}
+
 GEN
 galoisborne(GEN T, GEN dn, struct galois_borne *gb, long ppp)
 {
   gpmem_t ltop = avma, av2;
   GEN     borne, borneroots, borneabs;
-  int     i, j;
   int     n;
-  GEN     L, M, z, prep, den;
+  GEN     L, M, prep, den;
   long    prec;
 
   den = initgaloisborne(T,dn, &L,&prep,NULL,&prec);
   if (!dn) den = gclone(den);
   M = vandermondeinverse(L, gmul(T, realun(prec)), den, prep);
   if (DEBUGLEVEL>=4) genmsgtimer(3,"vandermondeinverse");
-  borne = realzero(prec);
+  borne = matrixnorm(M, prec);
+  borneroots = supnorm(L, prec);
   n = degpol(T);
-  for (i = 1; i <= n; i++)
-  {
-    z = gzero;
-    for (j = 1; j <= n; j++)
-      z = gadd(z, gabs(gcoeff(M,i,j), prec));
-    if (gcmp(z, borne) > 0)
-      borne = z;
-  }
-  borneroots = realzero(prec);
-  for (i = 1; i <= n; i++)
-  {
-    z = gabs((GEN) L[i], prec);
-    if (gcmp(z, borneroots) > 0)
-      borneroots = z;
-  }
   borneabs = addsr(1, gmulsg(n, gpowgs(borneroots, n/ppp)));
   /*if (ppp == 1)
     borneabs = addsr(1, gmulsg(n, gpowgs(borneabs, 2)));*/
@@ -296,7 +315,7 @@ galoisborne(GEN T, GEN dn, struct galois_borne *gb, long ppp)
   /*We use d-1 test, so we must overlift to 2^BITS_IN_LONG*/
   gb->valsol = logint(gmul2n(borneroots,2+BITS_IN_LONG), gb->l,NULL);
   gb->valabs = logint(gmul2n(borneabs,2), gb->l,NULL);
-  gb->valabs = max(gb->valsol,gb->valabs);
+  gb->valabs = max(gb->valsol, gb->valabs);
   if (DEBUGLEVEL >= 4)
     fprintferr("GaloisConj:val1=%ld val2=%ld\n", gb->valsol, gb->valabs);
   avma = av2;
