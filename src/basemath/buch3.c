@@ -571,7 +571,7 @@ zimmertbound(long N,long R2,GEN DK)
   if (N < 2) return 1;
   if (N < 21)
   {
-    static double c[21][11] = {
+    static double c[19][11] = {
 {/*2*/  0.6931,     0.45158},
 {/*3*/  1.71733859, 1.37420604},
 {/*4*/  2.91799837, 2.50091538, 2.11943331},
