@@ -3161,6 +3161,7 @@ FpY_FpXY_resultant(GEN a, GEN b0, GEN p)
       x = cgetg(dres+2, t_VECSMALL);
       y = cgetg(dres+2, t_VECSMALL);
       x = u_FpY_FpXY_resultant(a, b, pp, (ulong)dres, x, y);
+      setvarn(x, vX);
     }
     return Flx_ZX(x);
   }
