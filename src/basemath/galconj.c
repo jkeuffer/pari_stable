@@ -1592,14 +1592,18 @@ indexpartial(GEN P)
   nb = lg(fa[1]);
   for (i = 1; i < nb; i++)
   {
+    GEN p=gmael(fa,1,i);
     GEN e=gmael(fa,2,i);
     if (DEBUGLEVEL>=5) gentimer(3);
-    if (i==nb-1 && !isprime(gmael(fa,1,i)))
-      p1 = powgi(gmael(fa,1,i),shifti(addis(e,1),-1));
+    p1 = powgi(p,shifti(e,-1));
+    if ( i==nb-1 )
+    {
+      if ( mod2(e) && !isprime(p) )
+	p1 = mulii(p1,p);
+    }
     else
     {
-      p1 = powgi(gmael(fa,1,i),shifti(e,-1));
-      if (cmpis(e,2)>=0)
+      if ( cmpis(e,2)>=0 )
 	p1=mppgcd(p1,respm(P,dP,p1));
     }
     res=mulii(res,p1);
@@ -1682,7 +1686,7 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
   ulong ltop=avma;
   long n,p;
   long i;
-  long group,omax;
+  long group;
   /*TODO: complete the table to at least 200*/
   const int prim_nonss_orders[]={36,48,56,60,72,75,80,96,108,0};
   GEN F,Fp,Fe,Fpe,O;
@@ -1699,7 +1703,7 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
   Fp=vectosmall((GEN)F[1]);
   Fe=vectosmall((GEN)F[2]);
   np=lg(Fp)-1;
-  Fpe=cgetg(lg(Fp), t_VECSMALL);
+  Fpe=cgetg(np+1, t_VECSMALL);
   for (i = 1; i < lg(Fpe); i++)
     Fpe[i] = itos(powgi(gmael(F,1,i), gmael(F,2,i)));
   /*In this part, we study the cardinal of the group to have an information
@@ -1713,8 +1717,8 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
   if ( n>12 && n%12 == 0 )
   {
     /*We need to know the greatest prime dividing n/12*/
-     if ( Fp[np] == 3 && Fe[np] == 1 )
-       group |= ga_ext_2;
+    if ( Fp[np] == 3 && Fe[np] == 1 )
+      group |= ga_ext_2;
   }
   phi_order = 1;
   order = 1;
@@ -1736,20 +1740,19 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
   }
   /*Now, we study the orders of the Frobenius elements*/
   plift = 0;
-  omax=0;
   nbmax = 8+(n>>1);
   nbtest = 0;
   deg = 0;
   for (p = 0, pp = primepointer = diffptr;
        (plift == 0 
-	 || (nbtest < nbmax && order != n && (nbtest <=8 || order != (n>>1))) 
-	 || (n == 24 && O[6] == 0 && O[4] == 0))
+	|| (nbtest < nbmax && order != n && (nbtest <=8 || order != (n>>1))) 
+	|| (n == 24 && O[6] == 0 && O[4] == 0))
          && (nbtest < 3 * nbmax || (!(group&ga_non_wss) && n%12 ) ) ;)
   {
     ulong   av;
     long    prime_incr;
     GEN     ip,FS,p1;
-    long o,norm_o;
+    long o,norm_o=1;
     prime_incr = *primepointer++;
     if (!prime_incr)
       err(primer1);
@@ -1780,54 +1783,51 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
     avma=av;
     if (!O[o]) 
       O[o]=p;
-    if (DEBUGLEVEL >= 6)
-      fprintferr("GaloisAnalysis:Nbtest=%ld,p=%ld,o=%ld,plift=%ld,ord=%ld\n",
-		   nbtest, p, o, plift, order);
-     if (o > omax) omax = o;
-     if (o >= order)
-     {
-       /*We try to find a power of the Frobenius which generate
-	 a normal subgroup just by looking at the order.*/
-	if (o * Fp[1] >= n)
-	  /*Subgroup of smallest index are normal*/
-	  norm_o = o;
-	else		
+    if (o % order == 0)
+    {
+      /*We try to find a power of the Frobenius which generate
+	a normal subgroup just by looking at the order.*/
+      if (o * Fp[1] >= n)
+	/*Subgroup of smallest index are normal*/
+	norm_o = o;
+      else		
+      {
+	norm_o = 1;
+	for (i = np; i > 0; i--)
 	{
-	  norm_o = 1;
-	  for (i = np; i > 0; i--)
-	  {
-	    if (o % Fpe[i] == 0)
-	      norm_o *= Fpe[i];
-	    else
-	      break;
-	  }
+	  if (o % Fpe[i] == 0)
+	    norm_o *= Fpe[i];
+	  else
+	    break;
 	}
-	if (norm_o != 1)
+      }
+      if (norm_o != 1)
+      {
+	if (!(group&ga_all_normal) || o > order || 
+	    (o == order && (plift == 0 || norm_o > deg)))
 	{
-	  if (!(group&ga_all_normal) || o > order || 
-	      (o == order && (plift == 0 || norm_o > deg)))
-	  {
-	    deg = norm_o;
-	    order = o;
-	    plift = p;
-	    pp = primepointer;
-	    group |= ga_all_normal;
-	  }
-	}
-	else if (!(group&ga_all_normal) && (plift == 0 || o > order))
-	{
-	  deg = Fp[np];
+	  deg = norm_o;
 	  order = o;
 	  plift = p;
 	  pp = primepointer;
+	  group |= ga_all_normal;
 	}
       }
+      else if (!(group&ga_all_normal) && (plift == 0 || o > order))
+      {
+	deg = Fp[np];
+	order = o;
+	plift = p;
+	pp = primepointer;
+      }
+    }
+    if (DEBUGLEVEL >= 5)
+      fprintferr("GaloisAnalysis:Nbtest=%ld,p=%ld,o=%ld,deg=%d,best p=%ld,ord=%ld\n",
+		 nbtest, p, o, norm_o, plift, order);
   }
-  /* This is to avoid looping on non-wss group. To be completed*/
-  if (plift == 0 || 
-      /*I am not 100% sure of this one, at least it is right for n<=72*/
-      (n > 24 && n%12 == 0 && Fp[np]==3 && !O[6]) || 
-      ((group&ga_non_wss) && omax == Fp[np]))
+  /* This is to avoid looping on non-wss group. 
+     To be checked for large groups.  */
+  if (plift == 0 || ((group&ga_non_wss) && order == Fp[np]))
   {
     deg = 0;
     err(warner, "Galois group almost certainly not weakly super solvable");
@@ -1872,7 +1872,7 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
   ga->p4 = O[4];
   if (DEBUGLEVEL >= 4)
     fprintferr("GaloisAnalysis:p=%ld l=%ld group=%ld deg=%ld ord=%ld\n",
-	       p, O[1], group, deg, order);
+	       plift, O[1], group, deg, order);
   if (DEBUGLEVEL >= 1)
     msgtimer("galoisanalysis()");
   avma = ltop;
