@@ -116,12 +116,12 @@ zmalloc(size_t x)
 void
 rectdraw0(long *w, long *x, long *y, long lw, long do_free)
 {
-  long *ptx,*pty,*c;
+  long *ptx,*pty,*c, shift;
   long *numpoints[MAX_COLORS],*numtexts[MAX_COLORS];
   long *xtexts[MAX_COLORS],*ytexts[MAX_COLORS];
   long rcolcnt[MAX_COLORS][ROt_MAX];
   long col,i,j,x0,y0,a,b,oldwidth,oldheight,force;
-  long rcnt[ROt_MAX+1];
+  long rcnt[ROt_MAX+1], hjust, vjust, hgap, vgap, hgapsize, vgapsize;
   char **texts[MAX_COLORS];
   PariRect *e;
   RectObj *p1;
@@ -148,6 +148,7 @@ rectdraw0(long *w, long *x, long *y, long lw, long do_free)
   display = XOpenDisplay(NULL);
   font_info = XLoadQueryFont(display, "9x15");
   if (!font_info) exiterr("cannot open 9x15 font");
+  hgapsize = h_unit;  vgapsize = v_unit;
 
   XSetErrorHandler(Xerror);
   XSetIOErrorHandler(IOerror);
@@ -316,10 +317,25 @@ rectdraw0(long *w, long *x, long *y, long lw, long do_free)
 		}
 		c[ROt_ML]++;break;
 	      case ROt_ST:
+		hjust = RoSTdir(p1) & RoSTdirHPOS_mask;
+		vjust = RoSTdir(p1) & RoSTdirVPOS_mask;
+		hgap = RoSTdir(p1) & RoSTdirHGAP;
+		if (hgap)
+		  hgap = (hjust == RoSTdirLEFT) ? hgapsize : -hgapsize;
+		vgap = RoSTdir(p1) & RoSTdirVGAP;
+		if (vgap)
+		  vgap = (vjust == RoSTdirBOTTOM) ? 2*vgapsize : -2*vgapsize;
+		if (vjust != RoSTdirBOTTOM)
+		  vgap -= ((vjust == RoSTdirTOP) ? 2 : 1)*(f_height - 1);
 		texts[col][c[ROt_ST]]=RoSTs(p1);
 		numtexts[col][c[ROt_ST]]=RoSTl(p1);
-		xtexts[col][c[ROt_ST]]= (long)((RoSTx(p1)+x0)*xs);
-		ytexts[col][c[ROt_ST]]= (long)((RoSTy(p1)+y0)*ys);
+		shift = (hjust == RoSTdirLEFT ? 0 :
+			 (hjust == RoSTdirRIGHT ? 2 : 1));
+		xtexts[col][c[ROt_ST]] 
+		    = (long)(( RoSTx(p1) + x0 + hgap
+			       - (strlen(RoSTs(p1)) * pari_plot.fwidth
+				  * shift)/2)*xs);
+		ytexts[col][c[ROt_ST]]= (long)((RoSTy(p1)+y0-vgap/2)*ys);
 		c[ROt_ST]++;break;
 	      default: break;
 	    }

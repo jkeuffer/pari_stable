@@ -75,7 +75,7 @@ typedef struct RectObjST {
   long code,color;
   long length;
   char *s;
-  long x,y;
+  long x,y,dir;
 } RectObjST;
 
 typedef struct RectObjPN {
@@ -171,6 +171,21 @@ typedef struct RectObjPS {
 #define RoSTl(rop) (RoST(rop)->length)
 #define RoSTx(rop) (RoST(rop)->x)
 #define RoSTy(rop) (RoST(rop)->y)
+#define RoSTdir(rop) (RoST(rop)->dir)
+
+#define RoSTdirLEFT	  0x00
+#define RoSTdirCENTER	  0x01
+#define RoSTdirRIGHT	  0x02
+#define RoSTdirHPOS_mask  0x03
+
+#define RoSTdirBOTTOM	  0x00
+#define RoSTdirVCENTER	  0x04
+#define RoSTdirTOP	  0x08
+#define RoSTdirVPOS_mask  0x0c
+
+#define RoSTdirHGAP	  0x10
+#define RoSTdirVGAP	  0x20
+
 
 #define RoPTTpen(rop) (RoPTT(rop)->pen)
 #define RoLNTpen(rop) (RoLNT(rop)->pen)
@@ -192,6 +207,12 @@ typedef struct RectObjPS {
 
 #define PLOT_POSTSCRIPT   0x80000
 
+#define RECT_CP_RELATIVE  0x1
+#define RECT_CP_NW        0x0
+#define RECT_CP_SW        0x2
+#define RECT_CP_SE        0x4
+#define RECT_CP_NE        0x6
+
 extern PariRect  **rectgraph;
 extern long  rectpoint_itype;
 extern long  rectline_itype;
@@ -199,6 +220,7 @@ extern long  rectline_itype;
 /* plotport.c */
 
 void    initrect(long ne, long x, long y);
+void    initrect_gen(long ne, GEN x, GEN y, long flag);
 void    killrect(long ne);
 void    plot(entree *ep, GEN a, GEN b, char *ch, long prec);
 GEN     ploth(entree *ep, GEN a, GEN b, char *ch, long prec, long flag, long numpoints);
@@ -206,15 +228,19 @@ GEN     ploth2(entree *ep, GEN a, GEN b, char *ch, long prec);
 GEN     plothmult(entree *ep, GEN a, GEN b, char *ch, long prec);
 GEN     plothraw(GEN listx, GEN listy, long flag);
 GEN     plothsizes();
+GEN     plothsizes_flag(long flag);
 void    postdraw(GEN list);
+void    postdraw_flag(GEN list, long flag);
 GEN     postploth(entree *ep,GEN a,GEN b,char *ch,long prec,long flag,long numpoints);
 GEN     postploth2(entree *ep,GEN a,GEN b,char *ch,long prec,long numpoints);
 GEN     postplothraw(GEN listx, GEN listy, long flag);
 void    rectbox(long ne, GEN gx2, GEN gy2);
 void    rectcolor(long ne, long color);
 void    rectcopy(long source, long dest, long xoff, long yoff);
+void    rectcopy_gen(long source, long dest, GEN xoff, GEN yoff, long flag);
 GEN     rectcursor(long ne);
 void    rectdraw(GEN list);
+void    rectdraw_flag(GEN list, long flag);
 void    rectline(long ne, GEN gx2, GEN gy2);
 void    rectlines(long ne, GEN listx, GEN listy, long flag);
 void    rectlinetype(long ne, long t);
@@ -231,6 +257,7 @@ void    rectrmove(long ne, GEN x, GEN y);
 void    rectrpoint(long ne, GEN x, GEN y);
 void    rectscale(long ne, GEN x1, GEN x2, GEN y1, GEN y2);
 void    rectstring(long ne, char *x);
+void    rectstring3(long ne, char *x, long dir);
 void    rectclip(long rect);
 
 /* architecture-dependent plot file (plotX.c, plotsun.c, plognuplot.c...) */

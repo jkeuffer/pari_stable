@@ -25,15 +25,19 @@ void
 rectdraw0(long *w, long *x, long *y, long lw, long do_free)
 {
   long *ptx,*pty;
-  long i,j,x0,y0;
+  long i,j,x0,y0, hjust, vjust, hgap, vgap, hgapsize, vgapsize;
   long good, seen_graph = 0;
   int point_type = -1, line_type = 0;
   PariRect *e;
   RectObj *p1;
+  int strdir = RoSTdirLEFT, can_justify = 1, shift = 0, xstart, xend;
 
   (void)do_free;
   PARI_get_plot(0);
 
+  hgapsize = h_unit;  vgapsize = v_unit;
+  if (hgapsize == 1)
+    hgapsize = 2;	/* Vertical direction is subjectively different! */
   /* Find the info about the *actual* x and y-coords of the
      rectangles.  Use the first rectangle with has_graph attribute. */
 
@@ -133,12 +137,32 @@ rectdraw0(long *w, long *x, long *y, long lw, long do_free)
 	  }
 	  break;
 	case ROt_ST:
-	  if (RoSTx(p1)+x0 < 0 || RoSTx(p1)+x0+RoSTl(p1)-1 >= w_width
+	  hjust = RoSTdir(p1) & RoSTdirHPOS_mask;
+	  vjust = RoSTdir(p1) & RoSTdirVPOS_mask;
+	  hgap = RoSTdir(p1) & RoSTdirHGAP;
+	  if (hgap)
+	    hgap = (hjust == RoSTdirLEFT) ? hgapsize : -hgapsize;
+	  vgap = RoSTdir(p1) & RoSTdirVGAP;
+	  if (vgap)
+	    vgap = (vjust == RoSTdirBOTTOM) ? vgapsize : -vgapsize;
+	  if (vjust != RoSTdirVCENTER)
+	    vgap += ((vjust == RoSTdirTOP) ? -1 : 1) * (f_height - 1)/2;
+	  if (strdir != hjust) {
+	      shift = (hjust == RoSTdirLEFT ? 0 :
+		       (hjust == RoSTdirRIGHT ? 2 : 1));
+	      can_justify = justify_text(shift); /* 1 for LEFT */
+	      strdir = RoSTdir(p1);
+	  }
+	  xstart = RoSTx(p1) + x0 + hgap
+	      - (can_justify ? 0 
+		 : ((RoSTl(p1) * pari_plot.fwidth - 1) * shift / 2));
+	  xend = xstart + (can_justify ? 0 : RoSTl(p1) * pari_plot.fwidth - 1);
+	  if (xstart < 0 || xend >= w_width
 	      || RoSTy(p1) + y0 < 0 || RoSTy(p1) + y0 >= w_height) {
 	  } else {
-	    put_text(RoSTx(p1)+x0,
-		     w_height - 1 - RoSTy(p1) - y0 + (f_height - 1)/2,
-		     RoSTs(p1));
+	      put_text(xstart,
+		       w_height - 1 - RoSTy(p1) - y0 + vgap,
+		       RoSTs(p1));
 	  }
 	  break;
 	case ROt_PTT:

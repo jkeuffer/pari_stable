@@ -10,6 +10,7 @@
 void push_val(entree *ep, GEN a);
 void pop_val(entree *ep);
 void postdraw0(long *w, long *x, long *y, long lw);
+void postdraw00(long *w, long *x, long *y, long lw, long scale);
 void rectdraw0(long *w, long *x, long *y, long lw, long do_free);
 static void PARI_get_psplot();
 
@@ -213,6 +214,31 @@ check_rect_init(long ne)
 }
 
 void
+initrect_gen(long ne, GEN x, GEN y, long flag)
+{
+  long xi, yi;
+  if (flag) {
+    double xd = gtodouble(x), yd = gtodouble(y);
+
+    PARI_get_plot(0);
+    xi = w_width - 1;  yi = w_height - 1;
+    if (xd)
+      xi = xd*xi + 0.5;
+    if (yd)
+      yi = yd*yi + 0.5;
+  } else {
+    xi = itos(x);  yi = itos(y);
+    if (!xi || !yi)
+      PARI_get_plot(0);
+    if (!xi)
+      xi = w_width - 1;
+    if (!yi)
+      yi = w_height - 1;
+  }
+  initrect(ne, xi, yi);
+}
+
+void
 initrect(long ne, long x, long y)
 {
   PariRect *e;
@@ -298,19 +324,19 @@ rectmove0(long ne, double x, double y, long relative)
 }
 
 void
-rectmove(long ne, GEN x, GEN y) /* code = 0 */
+rectmove(long ne, GEN x, GEN y)
 {
   rectmove0(ne,gtodouble(x),gtodouble(y),0);
 }
 
 void
-rectrmove(long ne, GEN x, GEN y) /* code = 0 */
+rectrmove(long ne, GEN x, GEN y)
 {
   rectmove0(ne,gtodouble(x),gtodouble(y),1);
 }
 
 void
-rectpoint0(long ne, double x, double y,long relative) /* code = 1 */
+rectpoint0(long ne, double x, double y,long relative) /* code = ROt_MV/ROt_PT */
 {
   PariRect *e = check_rect_init(ne);
   RectObj *z = (RectObj*) gpmalloc(sizeof(RectObj1P));
@@ -330,13 +356,13 @@ rectpoint0(long ne, double x, double y,long relative) /* code = 1 */
 }
 
 void
-rectpoint(long ne, GEN x, GEN y) /* code = 1 */
+rectpoint(long ne, GEN x, GEN y)
 {
   rectpoint0(ne,gtodouble(x),gtodouble(y),0);
 }
 
 void
-rectrpoint(long ne, GEN x, GEN y) /* code = 1 */
+rectrpoint(long ne, GEN x, GEN y)
 {
   rectpoint0(ne,gtodouble(x),gtodouble(y),1);
 }
@@ -350,7 +376,7 @@ rectcolor(long ne, long color)
 }
 
 void
-rectline0(long ne, double gx2, double gy2, long relative) /* code = 2 */
+rectline0(long ne, double gx2, double gy2, long relative) /* code = ROt_MV/ROt_LN */
 {
   long dx,dy,dxy,xmin,xmax,ymin,ymax,x1,y1,x2,y2;
   PariRect *e = check_rect_init(ne);
@@ -392,13 +418,13 @@ rectline0(long ne, double gx2, double gy2, long relative) /* code = 2 */
 }
 
 void
-rectline(long ne, GEN gx2, GEN gy2) /* code = 2 */
+rectline(long ne, GEN gx2, GEN gy2)
 {
   rectline0(ne, gtodouble(gx2), gtodouble(gy2),0);
 }
 
 void
-rectrline(long ne, GEN gx2, GEN gy2) /* code = 2 */
+rectrline(long ne, GEN gx2, GEN gy2)
 {
   rectline0(ne, gtodouble(gx2), gtodouble(gy2),1);
 }
@@ -431,13 +457,13 @@ rectbox0(long ne, double gx2, double gy2, long relative)
 }
 
 void
-rectbox(long ne, GEN gx2, GEN gy2) /* code = 3 */
+rectbox(long ne, GEN gx2, GEN gy2)
 {
   rectbox0(ne, gtodouble(gx2), gtodouble(gy2), 0);
 }
 
 void
-rectrbox(long ne, GEN gx2, GEN gy2) /* code = 3 */
+rectrbox(long ne, GEN gx2, GEN gy2)
 {
   rectbox0(ne, gtodouble(gx2), gtodouble(gy2), 1);
 }
@@ -467,7 +493,7 @@ killrect(long ne)
 }
 
 void
-rectpoints0(long ne, double *listx, double *listy, long lx) /* code = 4 */
+rectpoints0(long ne, double *listx, double *listy, long lx) /* code = ROt_MP */
 {
   long *ptx,*pty,x,y,i,cp=0;
   PariRect *e = check_rect_init(ne);
@@ -492,7 +518,7 @@ rectpoints0(long ne, double *listx, double *listy, long lx) /* code = 4 */
 }
 
 void
-rectpoints(long ne, GEN listx, GEN listy) /* code = 4 */
+rectpoints(long ne, GEN listx, GEN listy)
 {
   long i,lx, tx=typ(listx), ty=typ(listy);
   double *px,*py;
@@ -516,7 +542,7 @@ rectpoints(long ne, GEN listx, GEN listy) /* code = 4 */
 }
 
 void
-rectlines0(long ne, double *x, double *y, long lx, long flag) /* code = 5 */
+rectlines0(long ne, double *x, double *y, long lx, long flag) /* code = ROt_ML */
 {
   long i,I,*ptx,*pty;
   PariRect *e = check_rect_init(ne);
@@ -543,7 +569,7 @@ rectlines0(long ne, double *x, double *y, long lx, long flag) /* code = 5 */
 }
 
 void
-rectlines(long ne, GEN listx, GEN listy, long flag) /* code = 5 */
+rectlines(long ne, GEN listx, GEN listy, long flag)
 {
   long tx=typ(listx), ty=typ(listy), lx=lg(listx), i;
   double *x, *y;
@@ -567,14 +593,20 @@ rectlines(long ne, GEN listx, GEN listy, long flag) /* code = 5 */
 }
 
 static void
-put_string(long win, long x, long y, char *str)
+put_string(long win, long x, long y, char *str, long dir)
 {
-  rectmove0(win,(double)x,(double)y,0); rectstring(win,str);
+  rectmove0(win,(double)x,(double)y,0); rectstring3(win,str,dir);
+}
+
+void
+rectstring(long ne, char *str)
+{
+    rectstring3(ne,str,RoSTdirLEFT);
 }
 
 /* Allocate memory, then put string */
 void
-rectstring(long ne, char *str) /* code = 6 */
+rectstring3(long ne, char *str, long dir) /* code = ROt_ST */
 {
   PariRect *e = check_rect_init(ne);
   RectObj *z = (RectObj*) gpmalloc(sizeof(RectObjST));
@@ -586,13 +618,14 @@ rectstring(long ne, char *str) /* code = 6 */
   RoSTl(z) = l; RoSTs(z) = s;
   RoSTx(z) = DTOL(RXscale(e)*RXcursor(e)+RXshift(e));
   RoSTy(z) = DTOL(RYscale(e)*RYcursor(e)+RYshift(e));
+  RoSTdir(z) = dir;
   if (!RHead(e)) RHead(e)=RTail(e)=z;
   else { RoNext(RTail(e))=z; RTail(e)=z; }
   RoCol(z)=current_color[ne];
 }
 
 void
-rectpointtype(long ne, long type) /* code = 0 */
+rectpointtype(long ne, long type) /* code = ROt_PTT */
 {
  if (ne == -1) {
      rectpoint_itype = type;
@@ -608,7 +641,7 @@ rectpointtype(long ne, long type) /* code = 0 */
 }
 
 void
-rectpointsize(long ne, GEN size) /* code = 0 */
+rectpointsize(long ne, GEN size) /* code = ROt_PTS */
 {
  if (ne == -1) {
      set_pointsize(gtodouble(size));	/* Immediate set */
@@ -637,6 +670,40 @@ rectlinetype(long ne, long type)
   if (!RHead(e)) RHead(e)=RTail(e)=z;
   else { RoNext(RTail(e))=z; RTail(e)=z; }
  }
+}
+
+void
+rectcopy_gen(long source, long dest, GEN xoff, GEN yoff, long flag)
+{
+  long xi, yi;
+  if (flag & RECT_CP_RELATIVE) {
+    double xd = gtodouble(xoff), yd = gtodouble(yoff);
+
+    PARI_get_plot(0);
+    xi = w_width - 1;  yi = w_height - 1;
+    xi = xd*xi + 0.5;
+    yi = yd*yi + 0.5;
+  } else {
+    xi = itos(xoff);  yi = itos(yoff);
+  }
+  if (flag & ~RECT_CP_RELATIVE) {
+    PariRect *s = check_rect_init(source), *d = check_rect_init(dest);
+
+    switch (flag & ~RECT_CP_RELATIVE) {
+      case RECT_CP_NW:
+	break;
+      case RECT_CP_SW:
+	yi = RYsize(d) - RYsize(s) - yi;
+	break;
+      case RECT_CP_SE:
+	yi = RYsize(d) - RYsize(s) - yi;
+	/* FALL THROUGH */
+      case RECT_CP_NE:
+	xi = RXsize(d) - RXsize(s) - xi;
+	break;
+    }
+  }
+  rectcopy(source, dest, xi, yi);
 }
 
 void
@@ -679,7 +746,7 @@ rectcopy(long source, long dest, long xoff, long yoff)
 	RoNext(tail) = next; tail = next;
 	break;
       case ROt_ST:
-	next = (RectObj*) gpmalloc(sizeof(RectObjMP));
+	next = (RectObj*) gpmalloc(sizeof(RectObjST));
 	memcpy(next,p1,sizeof(RectObjMP));
 	RoSTs(next) = (char*) gpmalloc(RoSTl(p1)+1);
 	memcpy(RoSTs(next),RoSTs(p1),RoSTl(p1)+1);
@@ -1495,16 +1562,21 @@ rectplothrawin(long stringrect, long drawrect, dblPointList *data,
   if (WW)
   {
     char c1[16],c2[16],c3[16],c4[16];
+    int gap = rm + 2;
 
-    sprintf(c1,"%9.3f",ybig); sprintf(c2,"%9.3f",ysml);
-    sprintf(c3,"%9.3f",xsml); sprintf(c4,"%9.3f",xbig);
+    sprintf(c1,"%5.3f",ybig); sprintf(c2,"%5.3f",ysml);
+    sprintf(c3,"%5.3f",xsml); sprintf(c4,"%5.3f",xbig);
 
     rectlinetype(stringrect,-2); /* Frame */
     current_color[stringrect]=BLACK;
-    put_string(stringrect, 0, W.fheight - 1, c1);
-    put_string(stringrect, 0, W.height - (bm+ 2 * W.vunit), c2);
-    put_string(stringrect, lm-(W.fwidth*2), W.height-bm+W.fheight-1, c3);
-    put_string(stringrect, W.width-(W.fwidth*10), W.height-bm+W.fheight-1,c4);
+    put_string( stringrect, lm, 0, c1,
+		RoSTdirRIGHT | RoSTdirHGAP | RoSTdirTOP);
+    put_string(stringrect, lm, W.height - bm, c2,
+		RoSTdirRIGHT | RoSTdirHGAP | RoSTdirVGAP);
+    put_string(stringrect, lm, W.height - bm, c3,
+		RoSTdirLEFT | RoSTdirTOP);
+    put_string(stringrect, W.width - rm - 1, W.height - bm, c4,
+		RoSTdirRIGHT | RoSTdirTOP);
 
     if (flags & PLOT_POSTSCRIPT)
       postdraw0(w,wx,wy,2);
@@ -1625,14 +1697,28 @@ postploth2(entree *ep, GEN a, GEN b, char *ch, long prec,
 GEN
 plothsizes()
 {
+  return plothsizes_flag(0);
+}
+
+GEN
+plothsizes_flag(long flag)
+{
   GEN vect = cgetg(1+6,t_VEC);
   int i;
 
   PARI_get_plot(0);
-  for (i=1; i<7; i++) vect[i]=lgeti(3);
+  for (i=1; i<=2; i++) vect[i]=lgeti(3);
   affsi(w_width,(GEN)vect[1]); affsi(w_height,(GEN)vect[2]);
-  affsi(h_unit, (GEN)vect[3]); affsi(v_unit,  (GEN)vect[4]);
-  affsi(f_width,(GEN)vect[5]); affsi(f_height,(GEN)vect[6]);
+  if (flag) {
+    vect[3] = (long)dbltor(h_unit*1.0/w_width);
+    vect[4] = (long)dbltor(v_unit*1.0/w_height);
+    vect[5] = (long)dbltor(f_width*1.0/w_width);
+    vect[6] = (long)dbltor(f_height*1.0/w_height);
+  } else {
+    for (; i <= 6; i++) vect[i]=lgeti(3);
+    affsi(h_unit, (GEN)vect[3]); affsi(v_unit, (GEN)vect[4]);
+    affsi(f_width,(GEN)vect[5]); affsi(f_height,(GEN)vect[6]);
+  }
   return vect;
 }	
 
@@ -1652,7 +1738,7 @@ typedef struct srectangle {
 static void ps_point(FILE *psfile, int x, int y);
 static void ps_line(FILE *psfile, int x1, int y1, int x2, int y2);
 static void ps_rect(FILE *psfile, int x1, int y1, int x2, int y2);
-static void ps_string(FILE *psfile, int x, int y, char *c);
+static void ps_string(FILE *psfile, int x, int y, char *c, long dir);
 
 #undef ISCR
 #undef JSCR
@@ -1671,7 +1757,7 @@ PARI_get_psplot()
 }
 
 static void
-gendraw(GEN list,long ps)
+gendraw(GEN list, long ps, long flag)
 {
   long i,n,ne,*w,*x,*y;
   GEN x0,y0,win;
@@ -1683,23 +1769,42 @@ gendraw(GEN list,long ps)
   w = (long*)gpmalloc(n*sizeof(long));
   x = (long*)gpmalloc(n*sizeof(long));
   y = (long*)gpmalloc(n*sizeof(long));
+  if (flag)
+    PARI_get_plot(0);
   for (i=0; i<n; i++)
   {
     win=(GEN)list[3*i+1]; x0=(GEN)list[3*i+2]; y0=(GEN)list[3*i+3];
-    if (typ(win)!=t_INT || typ(x0)!=t_INT || typ(y0)!= t_INT)
+    if (typ(win)!=t_INT || (!flag && (typ(x0)!=t_INT || typ(y0)!= t_INT)))
       err(talker, "not an integer type in rectdraw");
+    if (flag) {
+      double xd = gtodouble(x0), yd = gtodouble(y0);
+      long xi, yi;
+
+      xi = w_width - 1;  yi = w_height - 1;
+      xi = xd*xi + 0.5;
+      yi = yd*yi + 0.5;
+      x[i] = xi; y[i] = yi;
+    } else {
+      x[i]=itos(x0); y[i]=itos(y0);
+    }
     ne=itos(win); check_rect(ne);
-    x[i]=itos(x0); y[i]=itos(y0); w[i]=ne;
+    w[i]=ne;
   }
-  if (ps) postdraw0(w,x,y,n); else rectdraw0(w,x,y,n, 1);
+  if (ps) postdraw00(w,x,y,n,flag); else rectdraw0(w,x,y,n, 1);
   free(x); free(y); free(w);
 }
 
 void
-postdraw(GEN list) { gendraw(list,1); }
+postdraw(GEN list) { gendraw(list, 1, 0); }
 
 void
-rectdraw(GEN list) { gendraw(list,0); }
+rectdraw(GEN list) { gendraw(list, 0, 0); }
+
+void
+postdraw_flag(GEN list, long flag) { gendraw(list, 1, flag); }
+
+void
+rectdraw_flag(GEN list, long flag) { gendraw(list, 0, flag); }
 
 static char*
 zmalloc(size_t x)
@@ -1710,18 +1815,38 @@ zmalloc(size_t x)
 void
 postdraw0(long *w, long *x, long *y, long lw)
 {
-  long *ptx,*pty,*numpoints,*numtexts,*xtexts,*ytexts;
+  postdraw00(w, x, y, lw, 0);
+}
+
+void
+postdraw00(long *w, long *x, long *y, long lw, long scale)
+{
+  long *ptx,*pty,*numpoints,*numtexts,*xtexts,*ytexts,*dirtexts;
   RectObj *p1;
   PariRect *e;
   long i,j,x0,y0;
   long a,b,c,d,nd[ROt_MAX+1];
   char **texts;
   FILE *psfile;
+  double xscale = 0.65, yscale = 0.65;
+  long fontsize = 16, xtick = 5, ytick = 5;
 
   SPoint *points, **lines, *SLine;
   SSegment *seg;
   SRectangle *rect, SRec;
 
+  if (scale) {
+    double termxsize, termysize, postxsize, postysize;
+
+    PARI_get_psplot(); 
+    postxsize = pari_psplot.width;
+    postysize = pari_psplot.height;
+    PARI_get_plot(0);
+    xscale *= pari_psplot.width  * 1.0/w_width;
+    fontsize = fontsize/(pari_psplot.width  * 1.0/w_width);
+    yscale *= pari_psplot.height * 1.0/w_height;
+    xtick = h_unit;  ytick = v_unit;
+  }
   psfile = fopen(current_psfile, "a");
   if (!psfile)
     err(openfiler,"postscript",current_psfile);
@@ -1730,7 +1855,7 @@ postdraw0(long *w, long *x, long *y, long lw)
 
   for (i=0; i<lw; i++)
   {
-    e=rectgraph[w[i]]; p1=RHead(e);
+    e = check_rect_init(w[i]); p1=RHead(e);
     while (p1)
     {
       if (RoType(p1) != ROt_MP) nd[RoType(p1)]++;
@@ -1747,6 +1872,7 @@ postdraw0(long *w, long *x, long *y, long lw)
   numtexts=(long*) zmalloc(nd[ROt_ST]*sizeof(long));
   xtexts = (long*) zmalloc(nd[ROt_ST]*sizeof(long));
   ytexts = (long*) zmalloc(nd[ROt_ST]*sizeof(long));
+  dirtexts = (long*) zmalloc(nd[ROt_ST]*sizeof(long));
   for (i=0; i<=ROt_MAX; i++) nd[i]=0;
 
   for (i=0; i<lw; i++)
@@ -1795,13 +1921,26 @@ postdraw0(long *w, long *x, long *y, long lw)
 	  numtexts[nd[ROt_ST]]=RoSTl(p1);
 	  xtexts[nd[ROt_ST]]=RoSTx(p1)+x0;
 	  ytexts[nd[ROt_ST]]=RoSTy(p1)+y0;
+	  dirtexts[nd[ROt_ST]]=RoSTdir(p1);
 	  nd[ROt_ST]++; break;
 	default: break;
       }
       p1=RoNext(p1);
     }
   }
-  fprintf(psfile,"%%!\n50 50 translate\n/Times-Roman findfont 16 scalefont setfont\n0.65 0.65 scale\n");
+  /* Definitions taken from post terminal of Gnuplot. */
+  fprintf(psfile,"%%!\n50 50 translate\n/Times-Roman findfont %ld scalefont setfont\n%g %g scale\n", fontsize, yscale,xscale);
+  fprintf(psfile,"/Lshow { moveto 90 rotate show -90 rotate } def\n/Rshow { 3 -1 roll dup 4 1 roll stringwidth pop sub Lshow } def\n/Cshow { 3 -1 roll dup 4 1 roll stringwidth pop 2 div sub Lshow } def\n");
+  fprintf(psfile,"/Xgap %ld def\n/Ygap %ld def\n", xtick, ytick);
+  fprintf(psfile,"/Bbox { gsave newpath 0 0 moveto true charpath pathbbox grestore } def\n");
+  fprintf(psfile,"/Height { Bbox 4 1 roll pop pop pop } def\n");
+  fprintf(psfile,"/TopAt { 3 -1 roll dup 4 1 roll Height 3 -1 roll add exch } def\n");
+  fprintf(psfile,"/VCenter { 3 -1 roll dup 4 1 roll Height 2 div 3 -1 roll add exch } def\n");
+  fprintf(psfile,"/Tgap { exch Ygap add exch } def\n");
+  fprintf(psfile,"/Bgap { exch Ygap sub exch } def\n");
+  fprintf(psfile,"/Lgap { Xgap add } def\n");
+  fprintf(psfile,"/Rgap { Xgap sub } def\n");
+
   for (i=0; i<nd[ROt_PT]; i++)
     ps_point(psfile,points[i].x,points[i].y);
   for (i=0; i<nd[ROt_LN]; i++)
@@ -1821,7 +1960,7 @@ postdraw0(long *w, long *x, long *y, long lw)
     }
   }
   for (i=0; i<nd[ROt_ST]; i++)
-    ps_string(psfile,xtexts[i],ytexts[i],texts[i]);
+    ps_string(psfile,xtexts[i],ytexts[i],texts[i], dirtexts[i]);
   fprintf(psfile,"stroke showpage\n"); fclose(psfile);
 #define xfree(pointer) if (pointer) free(pointer)
   xfree(points); xfree(seg); xfree(rect); xfree(numpoints);
@@ -1849,7 +1988,28 @@ ps_rect(FILE *psfile, int x1, int y1, int x2, int y2)
 }
 
 static void
-ps_string(FILE *psfile, int x, int y, char *c)
+ps_string(FILE *psfile, int x, int y, char *s, long dir)
 {
-  fprintf(psfile,"%d %d moveto 90 rotate\n(%s) show -90 rotate\n",y,x,c);
+    if (strpbrk(s, "(\\)")) {
+	fprintf(psfile,"(");
+	while (*s) {
+	    if ( *s=='(' || *s==')' || *s=='\\' )
+		fputc('\\', psfile);
+	    fputc(*s, psfile);
+	    s++;
+	}
+    } else
+	fprintf(psfile,"(%s", s);
+    fprintf(psfile,") %d %d %s%s%s%sshow\n",
+	    y, x,
+	    ((dir & RoSTdirVGAP)
+	     ? ((dir & RoSTdirVPOS_mask) == RoSTdirTOP ? "Tgap " : "Bgap ")
+	     : ""),
+	    ((dir & RoSTdirHGAP)
+	     ? ((dir & RoSTdirHPOS_mask) == RoSTdirRIGHT ? "Rgap " : "Lgap ")
+	     : ""),
+	    ((dir & RoSTdirVPOS_mask) == RoSTdirBOTTOM ? ""
+	     : (dir & RoSTdirVPOS_mask) == RoSTdirTOP ? "TopAt " : "VCenter "),
+	    ((dir & RoSTdirHPOS_mask) == RoSTdirLEFT ? "L"
+	     : ((dir & RoSTdirHPOS_mask) == RoSTdirRIGHT ? "R" : "C")));
 }
