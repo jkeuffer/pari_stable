@@ -75,7 +75,7 @@ extern int EXTERM_DLL_DPES;
 int EXTERM_DLL_DPES;
 #endif	/* defined BOTH_GNUPLOT_AND_X11 */
 
-typedef struct cell {
+typedef struct {
   void *env;
   void *data;
   long flag;
@@ -430,7 +430,7 @@ static void
 reset_traps(int warn)
 {
   long i;
-  if (warn) err(warner,"missing cell in err_catch_stack. Resetting all traps");
+  if (warn) err(warner,"missing cell in err_catch stack. Resetting all traps");
   for (i=0; i <= noer; i++) err_catch_array[i] = 0;
 }
 
@@ -990,7 +990,7 @@ err_leave(void **V)
   reset_traps(1);
 }
 
-/* We know somebody is trapping n (from err_catch_array).
+/* We know somebody is trapping n
  * Get last (most recent) handler for error n (or generic noer) killing all
  * more recent non-applicable handlers (now obsolete) */
 static cell *

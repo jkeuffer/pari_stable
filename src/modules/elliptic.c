@@ -1496,11 +1496,11 @@ addsell_part2(GEN e, GEN z1, GEN z2, GEN p, GEN p2inv)
 }
 
 static GEN
-negsell(GEN f)
+negsell(GEN f, GEN p)
 {
   GEN g = cgetg(3, t_VEC);
   g[1] = f[1];
-  g[2] = lnegi((GEN)f[2]);
+  g[2] = signe(f[2])? lsubii(p, (GEN)f[2]): f[2];
   return g;
 }
 
@@ -1514,7 +1514,7 @@ powsell(GEN e, GEN z, GEN n, GEN p)
   if (!s || !z) return NULL;
   if (s < 0)
   {
-    z = negsell(z);
+    z = negsell(z, p);
     n = negi(n);
   }
   if (is_pm1(n)) return z;
@@ -1608,7 +1608,7 @@ apell1(GEN e, GEN p)
     p1 = gcopy(fh);
     if (s < 3)
     { /* we're nearly done: naive search */
-      GEN q1 = p1, mf = negsell(f); /* -F */
+      GEN q1 = p1, mf = negsell(f, p); /* -F */
       for (i=1;; i++)
       {
         p1 = addsell(cp4,p1, f,p); /* h.f + i.F */
@@ -1629,7 +1629,7 @@ apell1(GEN e, GEN p)
       p1 = addsell(cp4,p1,f,p); /* h.f + i.F */
       if (!p1) { h = addii(h, mulsi(i,B)); goto FOUND; }
     }
-    mfh = negsell(fh);
+    mfh = negsell(fh, p);
     fg = addsell(cp4,p1,mfh,p); /* h.f + nb.F - h.f = nb.F */
     if (!fg) { h = mulsi(nb,B); goto FOUND; }
     u = cgetg(nb+1, t_VEC);
