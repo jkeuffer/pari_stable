@@ -128,6 +128,7 @@ IZ 52- [tex2mail:] \over wasn't allowed within \left( \right)
    59- [internal:] isprincipalfact() incorrect if flag contained 
        nf_GEN_IF_PRINCIPAL (was unused).
    60- bnfisintnorm(bnfinit(y^4+y+1), -1) --> SEGV [ could occur for any unit ]
+   61- stack corruption in matsnf() [ when GC occurs ]
 
   Changed
     1- rnf structure (removed useless components)
