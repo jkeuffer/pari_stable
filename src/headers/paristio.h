@@ -72,7 +72,7 @@ enum logstyles {
 #define TEXSTYLE_BREAK	4
 
 extern pari_sp avma,bot,top;
-#define DISABLE_MEMUSED(size_t)-1
+#define DISABLE_MEMUSED (size_t)-1
 extern size_t memused;
 extern byteptr diffptr;
 extern entree  **varentries;
