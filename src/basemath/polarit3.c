@@ -4152,10 +4152,23 @@ ZX_caract_sqf(GEN A, GEN B, long *lambda, long v)
   return gerepileupto(av, R);
 }
 
+
 GEN
 ZX_caract(GEN A, GEN B, long v)
 {
   return (degpol(A) < 16) ? caractducos(A,B,v): ZX_caract_sqf(A,B, NULL, v);
+}
+
+/* assume A integral, B in Q[v] */
+GEN
+QX_caract(GEN A, GEN B, long v)
+{
+  gpmem_t av = avma;
+  GEN cB, B0 = Q_primitive_part(B, &cB);
+  GEN ch = ZX_caract(A, B0, v);
+  if (cB)
+    ch = gerepilecopy(av, rescale_pol(ch, cB));
+  return ch;
 }
 
 static GEN
