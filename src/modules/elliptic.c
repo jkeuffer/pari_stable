@@ -1356,6 +1356,7 @@ addsell(GEN e, GEN z1, GEN z2, GEN p)
     p1 = resii(p1, p);
   }
   else p1 = subii(y2,y1);
+  (void)new_chunk(lgefint(p) << 3); /* gerepile HACK */
   p1 = mulii(p1, mpinvmod(p2, p));
   p1 = resii(p1, p);
   x = subii(sqri(p1), addii(x1,x2)); x = modii(x,p);
@@ -1614,6 +1615,7 @@ FOUND: /* success, found a point of exponent h */
     if (i) acon = centermod(subii(p2p,acon), bcon);
     p1 = ground(gdiv(gsub(p1p,acon),bcon));
     h = addii(acon, mulii(p1,bcon));
+    /* h = acon mod bcon, closest lift to p+1 */
     if (!i) break;
   }
   gunclone(tx);
