@@ -1003,13 +1003,14 @@ ginv(GEN x)
       icopyifstack(x[1],z[1]);
       z[2]=lmpinvmod((GEN)x[2],(GEN)x[1]); return z;
 
-    case t_FRAC: case t_FRACN: z=cgetg(3,tx);
+    case t_FRAC: case t_FRACN:
       s = signe(x[1]);
       if (!s) err(gdiver2);
       if (is_pm1(x[1]))
         return s>0? icopy((GEN)x[2]): negi((GEN)x[2]);
-      z[1]=licopy((GEN)x[2]);
-      z[2]=licopy((GEN)x[1]);
+      z = cgetg(3,tx);
+      z[1] = licopy((GEN)x[2]);
+      z[2] = licopy((GEN)x[1]);
       if (s < 0)
       {
 	setsigne(z[1],-signe(z[1]));
