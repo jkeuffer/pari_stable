@@ -29,6 +29,7 @@ This file lists the incompatible changes between Version 2.x and older versions
   - polred & polredabs do not take a 'prec' argument anymore [was unused]
   - gentimer / genmsgtimer have been removed. They are superseded by TIMER
     and msgTIMER which are fully reentrant and easier to use.
+  - (undocumented) macros buch[gen | genfu | init | iniftu]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

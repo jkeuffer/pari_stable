@@ -683,7 +683,7 @@ gmod(GEN x, GEN y)
       {
 	case t_INT: case t_REAL: case t_FRAC: case t_FRACN:
 	  av = avma;
-          return gerepileupto(av, gsub(x, gmul(quot(x,y),y)));
+          return gerepileupto(av, gsub(x, gmul(_quot(x,y),y)));
 
 	case t_POLMOD: case t_POL:
 	  return gzero;

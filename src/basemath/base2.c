@@ -51,12 +51,10 @@ extern GEN mulmat_pol(GEN A, GEN x);
 extern GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den);
 extern GEN pidealprimeinv(GEN nf, GEN x);
 extern GEN pol_to_monic(GEN pol, GEN *lead);
-extern GEN pol_to_vec(GEN x, long N);
 extern GEN quicktrace(GEN x, GEN sym);
 extern GEN sqr_by_tab(GEN tab, GEN x);
 extern GEN to_polmod(GEN x, GEN mod);
 extern GEN unnf_minus_x(GEN x);
-extern GEN vecpol_to_mat(GEN v, long n);
 extern int isrational(GEN x);
 extern long int_elt_val(GEN nf, GEN x, GEN p, GEN bp, GEN *t);
 
@@ -2151,7 +2149,7 @@ get_pr(GEN nf, GEN L, long i, GEN p, int appr)
   pr[5] = (long)t; return pr;
 }
 
-int
+static int
 use_appr(GEN L, GEN pp, long N)
 {
   long i, f, l = lg(L);
@@ -2170,11 +2168,10 @@ use_appr(GEN L, GEN pp, long N)
   return (prod * N * 10 < 1);
 }
 
-/* prime ideal decomposition of p sorted by increasing residual degree */
-GEN
-primedec(GEN nf, GEN p)
+/* prime ideal decomposition of p */
+static GEN
+_primedec(GEN nf, GEN p)
 {
-  gpmem_t av = avma;
   long i,k,c,iL,N;
   GEN ex,F,L,Lpr,Ip,H,phi,mat1,T,f,g,h,p1,UN;
   int appr;
@@ -2193,7 +2190,7 @@ primedec(GEN nf, GEN p)
     for (i=1; i<k; i++)
       L[i] = (long)apply_kummer(nf,(GEN)F[i],(GEN)ex[i],p);
     if (DEBUGLEVEL>5) msgtimer("simple primedec");
-    return gerepileupto(av, vecsort(L, stoi(4)));
+    return L;
   }
 
   g = (GEN)F[1];
@@ -2277,7 +2274,14 @@ primedec(GEN nf, GEN p)
   if (DEBUGLEVEL>2 && appr) fprintferr("using the approximation theorem\n");
   for (i=1; i<iL; i++) Lpr[i] = (long)get_pr(nf, L, i, p, appr);
   if (DEBUGLEVEL>2) msgtimer("finding uniformizers");
-  return gerepileupto(av, gen_sort(Lpr,0,cmp_prime_over_p));
+  return Lpr;
+}
+
+GEN
+primedec(GEN nf, GEN p)
+{
+  gpmem_t av = avma;
+  return gerepileupto(av, gen_sort(_primedec(nf,p), 0, cmp_prime_over_p));
 }
 
 /* return [Fp[x]: Fp] */
@@ -3153,49 +3157,54 @@ rnfdiscf(GEN nf, GEN pol)
   return rnfround2all(nf,pol,0);
 }
 
-/* given bnf as output by buchinit and a pseudo-basis of an order
- * in HNF [A,I] (or [A,I,D,d] it does not matter), tries to simplify the
- * HNF as much as possible. The resulting matrix will be upper triangular
- * but the diagonal coefficients will not be equal to 1. The ideals
- * are guaranteed to be integral and primitive.
- */
+GEN
+gen_if_principal(GEN bnf, GEN x)
+{
+  gpmem_t av = avma;
+  GEN z = isprincipalall(bnf,x, nf_GEN_IF_PRINCIPAL | nf_FORCE);
+  if (typ(z) == t_INT) { avma = av; return NULL; }
+  return z;
+}
+
+/* given bnf and a pseudo-basis of an order in HNF [A,I] (or [A,I,D,d] it
+ * does not matter), tries to simplify the HNF as much as possible. The
+ * resulting matrix will be upper triangular but the diagonal coefficients
+ * will not be equal to 1. The ideals are guaranteed to be integral and
+ * primitive. */
 GEN
 rnfsimplifybasis(GEN bnf, GEN order)
 {
-  gpmem_t av=avma,tetpil;
-  long j,N,n;
+  gpmem_t av = avma;
+  long j, n, l;
   GEN p1,id,Az,Iz,nf,A,I;
 
-  bnf = checkbnf(bnf);
+  bnf = checkbnf(bnf); nf = (GEN)bnf[7];
   if (typ(order)!=t_VEC || lg(order)<3)
     err(talker,"not a pseudo-basis in nfsimplifybasis");
-  A=(GEN)order[1]; I=(GEN)order[2]; n=lg(A)-1; nf=(GEN)bnf[7];
-  N=degpol(nf[1]); id=idmat(N); Iz=cgetg(n+1,t_VEC); Az=cgetg(n+1,t_MAT);
+  A = (GEN)order[1];
+  I = (GEN)order[2]; n = lg(A)-1;
+  id = idmat(degpol(nf[1]));
+  Iz = cgetg(n+1,t_VEC);
+  Az = cgetg(n+1,t_MAT);
   for (j=1; j<=n; j++)
   {
-    if (gegal((GEN)I[j],id)) { Iz[j]=(long)id; Az[j]=A[j]; }
-    else
+    if (gegal((GEN)I[j],id)) { Iz[j]=(long)id; Az[j]=A[j]; continue; }
+
+    Iz[j] = (long)Q_primitive_part((GEN)I[j], &p1);
+    Az[j] = p1? lmul((GEN)A[j],p1): A[j];
+    if (p1 && gegal((GEN)Iz[j], id)) continue;
+
+    p1 = gen_if_principal(bnf, (GEN)Iz[j]);
+    if (p1)
     {
-      p1 = content((GEN)I[j]);
-      if (!gcmp1(p1))
-      {
-	Iz[j]=(long)gdiv((GEN)I[j],p1); Az[j]=lmul((GEN)A[j],p1);
-      }
-      else Az[j]=A[j];
-      if (!gegal((GEN)Iz[j],id))
-      {
-	p1=isprincipalgen(bnf,(GEN)Iz[j]);
-	if (gcmp0((GEN)p1[1]))
-	{
-	  p1=(GEN)p1[2]; Iz[j]=(long)id;
-	  Az[j]=(long)element_mulvec(nf,p1,(GEN)Az[j]);
-	}
-      }
+      Iz[j] = (long)id;
+      Az[j] = (long)element_mulvec(nf,p1,(GEN)Az[j]);
     }
   }
-  tetpil=avma; p1=cgetg(lg(order),t_VEC); p1[1]=lcopy(Az); p1[2]=lcopy(Iz);
-  for (j=3; j<lg(order); j++) p1[j]=lcopy((GEN)order[j]);
-  return gerepile(av,tetpil,p1);
+  l = lg(order); p1 = cgetg(l, t_VEC);
+  p1[1] = (long)Az;
+  p1[2] = (long)Iz; for (j=3; j<l; j++) p1[j] = order[j];
+  return gerepilecopy(av, p1);
 }
 
 GEN
@@ -3249,6 +3258,16 @@ nfidealdet1(GEN nf, GEN a, GEN b)
   return gerepilecopy(av,res);
 }
 
+static GEN
+get_order(GEN nf, GEN O, char *s)
+{
+  if (typ(O) == t_POL)
+    return rnfpseudobasis(nf, O);
+  if (typ(O)!=t_VEC || lg(O) < 3)
+    err(talker,"not a pseudo-matrix in %s", s);
+  return O;
+}
+
 /* given a pseudo-basis of an order in HNF [A,I] (or [A,I,D,d]), gives an
  * n x n matrix (not in HNF) of a pseudo-basis and an ideal vector
  * [id,id,...,id,I] such that order = nf[7]^(n-1) x I.
@@ -3262,10 +3281,7 @@ rnfsteinitz(GEN nf, GEN order)
 
   nf = checknf(nf);
   Id = idmat(degpol(nf[1]));
-  if (typ(order) == t_POL) order = rnfpseudobasis(nf,order);
-  l = lg(order);
-  if (typ(order)!=t_VEC || l < 3)
-    err(talker,"not a pseudo-matrix in rnfsteinitz");
+  order = get_order(nf, order, "rnfsteinitz");
   A = matalgtobasis(nf, (GEN)order[1]);
   I = dummycopy((GEN)order[2]); n=lg(A)-1;
   if (typ(A) != t_MAT || typ(I) != t_VEC || lg(I) != n+1)
@@ -3297,109 +3313,100 @@ rnfsteinitz(GEN nf, GEN order)
       if (p1) A[i+1] = (long)element_mulvec(nf, p1,(GEN)A[i+1]);
     }
   }
+  l = lg(order);
   p1 = cgetg(l,t_VEC);
   p1[1]=(long)A;
   p1[2]=(long)I; for (i=3; i<l; i++) p1[i]=order[i];
   return gerepilecopy(av, p1);
 }
 
-/* Given bnf as output by buchinit and either an order as output by
- * rnfpseudobasis or a polynomial, and outputs a basis if it is free,
- * an n+1-generating set if it is not
- */
+/* Given bnf and either an order as output by rnfpseudobasis or a polynomial,
+ * and outputs a basis if it is free, an n+1-generating set if it is not */
 GEN
 rnfbasis(GEN bnf, GEN order)
 {
   gpmem_t av = avma;
-  long j,N,n;
-  GEN nf,A,I,classe,p1,p2,id;
+  long j, n;
+  GEN nf, A, I, cl, col, a, id;
 
-  bnf = checkbnf(bnf);
-  nf=(GEN)bnf[7]; N=degpol(nf[1]); id=idmat(N);
-  if (typ(order)==t_POL) order=rnfpseudobasis(nf,order);
-  if (typ(order)!=t_VEC || lg(order)<3)
-    err(talker,"not a pseudo-matrix in rnfbasis");
-  A=(GEN)order[1]; I=(GEN)order[2]; n=lg(A)-1;
+  bnf = checkbnf(bnf); nf = (GEN)bnf[7];
+  id = idmat(degpol(nf[1]));
+  order = get_order(nf, order, "rnfbasis");
+  I = (GEN)order[2]; n = lg(I)-1;
   j=1; while (j<n && gegal((GEN)I[j],id)) j++;
-  if (j<n) order=rnfsteinitz(nf,order);
-  A=(GEN)order[1]; I=(GEN)order[2]; classe=(GEN)I[n];
-  p1=isprincipalgen(bnf,classe);
-  if (gcmp0((GEN)p1[1]))
+  if (j<n)
   {
-    p2=cgetg(n+1,t_MAT);
-    p2[n]=(long)element_mulvec(nf,(GEN)p1[2],(GEN)A[n]);
+    order = rnfsteinitz(nf,order);
+    I = (GEN)order[2];
   }
-  else
+  A = (GEN)order[1];
+  col= (GEN)A[n]; A = vecextract_i(A, 1, n-1);
+  cl = (GEN)I[n];
+  a = gen_if_principal(bnf, cl);
+  if (!a)
   {
-    p1=ideal_two_elt(nf,classe);
-    p2=cgetg(n+2,t_MAT);
-    p2[n]=lmul((GEN)p1[1],(GEN)A[n]);
-    p2[n+1]=(long)element_mulvec(nf,(GEN)p1[2],(GEN)A[n]);
+    GEN p1 = ideal_two_elt(nf, cl);
+    A = concatsp(A, gmul((GEN)p1[1], col));
+    a = (GEN)p1[2];
   }
-  for (j=1; j<n; j++) p2[j]=A[j];
-  return gerepilecopy(av,p2);
+  A = concatsp(A, element_mulvec(nf, a, col));
+  return gerepilecopy(av, A);
 }
 
-/* Given bnf as output by buchinit and either an order as output by
- * rnfpseudobasis or a polynomial, and outputs a basis (not pseudo)
- * in Hermite Normal Form if it exists, zero if not
+/* Given bnf and either an order as output by rnfpseudobasis or a polynomial,
+ * and outputs a basis (not pseudo) in Hermite Normal Form if it exists, zero
+ * if not
  */
 GEN
 rnfhermitebasis(GEN bnf, GEN order)
 {
   gpmem_t av = avma;
-  long j,n;
-  GEN nf,A,I,p1,id;
+  long j, n;
+  GEN nf, A, I, a, id;
 
-  bnf = checkbnf(bnf); nf=(GEN)bnf[7];
+  bnf = checkbnf(bnf); nf = (GEN)bnf[7];
   id = idmat(degpol(nf[1]));
-  if (typ(order)==t_POL)
-  {
-    order = rnfpseudobasis(nf,order);
-    A = (GEN)order[1];
-  }
-  else
-  {
-    if (typ(order)!=t_VEC || lg(order)<3)
-      err(talker,"not a pseudo-matrix in rnfbasis");
-    A = dummycopy((GEN)order[1]);
-  }
-  I=(GEN)order[2]; n=lg(A)-1;
+  order = get_order(nf, order, "rnfbasis");
+  A = (GEN)order[1]; A = dummycopy(A);
+  I = (GEN)order[2]; n = lg(A)-1;
   for (j=1; j<=n; j++)
   {
     if (gegal((GEN)I[j],id)) continue;
 
-    p1 = isprincipalgen(bnf,(GEN)I[j]);
-    if (!gcmp0((GEN)p1[1])) { avma = av; return gzero; }
-    A[j] = (long)element_mulvec(nf,(GEN)p1[2],(GEN)A[j]);
+    a = gen_if_principal(bnf, (GEN)I[j]);
+    if (!a) { avma = av; return gzero; }
+    A[j] = (long)element_mulvec(nf, a, (GEN)A[j]);
   }
   return gerepilecopy(av,A);
+}
+
+static long
+_rnfisfree(GEN bnf, GEN order)
+{
+  long n, j;
+  GEN nf, p1, id, I;
+
+  bnf = checkbnf(bnf);
+  if (gcmp1(gmael3(bnf,8,1,1))) return 1;
+
+  nf = (GEN)bnf[7]; id = idmat(degpol(nf[1]));
+  order = get_order(nf, order, "rnfisfree");
+  I = (GEN)order[2]; n = lg(I)-1;
+  j=1; while (j<=n && gegal((GEN)I[j],id)) j++;
+  if (j>n) return 1;
+
+  p1 = (GEN)I[j];
+  for (j++; j<=n; j++)
+    if (!gegal((GEN)I[j],id)) p1 = idealmul(nf,p1,(GEN)I[j]);
+  return gcmp0( isprincipal(bnf,p1) );
 }
 
 long
 rnfisfree(GEN bnf, GEN order)
 {
-  gpmem_t av=avma;
-  long n,N,j;
-  GEN nf,p1,id,I;
-
-  bnf = checkbnf(bnf);
-  if (gcmp1(gmael3(bnf,8,1,1))) return 1;
-
-  nf=(GEN)bnf[7]; N=degpol(nf[1]); id=idmat(N);
-  if (typ(order)==t_POL) order=rnfpseudobasis(nf,order);
-  if (typ(order)!=t_VEC || lg(order)<3)
-    err(talker,"not a pseudo-matrix in rnfisfree");
-
-  I=(GEN)order[2]; n=lg(I)-1;
-  j=1; while (j<=n && gegal((GEN)I[j],id)) j++;
-  if (j>n) { avma=av; return 1; }
-
-  p1=(GEN)I[j];
-  for (j++; j<=n; j++)
-    if (!gegal((GEN)I[j],id)) p1=idealmul(nf,p1,(GEN)I[j]);
-  j = gcmp0(isprincipal(bnf,p1));
-  avma=av; return j;
+  gpmem_t av = avma;
+  long n = _rnfisfree(bnf, order);
+  avma = av; return n;
 }
 
 /**********************************************************************/
@@ -3821,59 +3828,55 @@ GEN
 rnfpolred(GEN nf, GEN pol, long prec)
 {
   gpmem_t av = avma;
-  long i,j,k,n,N, vpol = varn(pol);
-  GEN id,id2,newid,newor,p1,p2,al,newpol,w,z;
-  GEN bnf,zk,newideals,ideals,order,neworder;
+  long i, j, n, v = varn(pol);
+  GEN id, al, w, I, O, bnf;
 
   if (typ(pol)!=t_POL) err(typeer,"rnfpolred");
-  if (typ(nf)!=t_VEC) err(idealer1);
-  switch(lg(nf))
-  {
-    case 10: bnf = NULL; break;
-    case 11: bnf = nf; nf = checknf((GEN)nf[7]); break;
-    default: err(idealer1);
-      return NULL; /* not reached */
-  }
-  if (degpol(pol) <= 1)
-  {
-    w=cgetg(2,t_VEC);
-    w[1]=lpolx[vpol]; return w;
-  }
-  id=rnfpseudobasis(nf,pol); N=degpol(nf[1]);
+  bnf = nf; nf = checknf(bnf);
+  bnf = (nf == bnf)? NULL: checkbnf(bnf);
+  if (degpol(pol) <= 1) return _vec(polx[v]);
+
+  id = rnfpseudobasis(nf,pol);
   if (bnf && gcmp1(gmael3(bnf,8,1,1))) /* if bnf is principal */
   {
-    ideals=(GEN)id[2]; n=lg(ideals)-1; order=(GEN)id[1];
-    newideals=cgetg(n+1,t_VEC); neworder=cgetg(n+1,t_MAT);
-    zk=idmat(N);
+    GEN newI, newO, zk = idmat(degpol(nf[1]));
+    O = (GEN)id[1];
+    I = (GEN)id[2]; n = lg(I)-1;
+    newI = cgetg(n+1,t_VEC);
+    newO = cgetg(n+1,t_MAT);
     for (j=1; j<=n; j++)
     {
-      newideals[j]=(long)zk; p1=cgetg(n+1,t_COL); neworder[j]=(long)p1;
-      p2=(GEN)order[j];
-      al=(GEN)isprincipalgen(bnf,(GEN)ideals[j])[2];
-      for (k=1; k<=n; k++)
-	p1[k]=(long)element_mul(nf,(GEN)p2[k],al);
+      newI[j] = (long)zk; al = gen_if_principal(bnf,(GEN)I[j]);
+      newO[j] = (long)element_mulvec(nf, al, (GEN)O[j]);
     }
-    id=cgetg(3,t_VEC); id[1]=(long)neworder; id[2]=(long)newideals;
+    id = cgetg(3,t_VEC);
+    id[1] = (long)newO;
+    id[2] = (long)newI;
   }
-  id2=rnflllgram(nf,pol,id,prec);
-  z=(GEN)id2[1]; newid=(GEN)z[2]; newor=(GEN)z[1];
-  n=lg(newor)-1; w=cgetg(n+1,t_VEC);
+  
+  id = (GEN)rnflllgram(nf,pol,id,prec)[1];
+  O = (GEN)id[1];
+  I = (GEN)id[2]; n = lg(I)-1;
+  w = cgetg(n+1,t_VEC);
+  pol = lift(pol);
   for (j=1; j<=n; j++)
   {
-    p1=(GEN)newid[j]; al=gmul(gcoeff(p1,1,1),(GEN)newor[j]);
-    p1=basistoalg(nf,(GEN)al[n]);
+    GEN p1, newpol;
+
+    p1 = (GEN)I[j]; al = gmul(gcoeff(p1,1,1),(GEN)O[j]);
+    p1 = basistoalg(nf,(GEN)al[n]);
     for (i=n-1; i; i--)
-      p1=gadd(basistoalg(nf,(GEN)al[i]),gmul(polx[vpol],p1));
-    newpol=gtopoly(gmodulcp(gtovec(caract2(lift(pol),lift(p1),vpol)),
-                            (GEN) nf[1]), vpol);
+      p1 = gadd(basistoalg(nf,(GEN)al[i]), gmul(polx[v],p1));
+    p1 = gmodulcp(gtovec(caract2(pol,lift(p1),v)), (GEN)nf[1]);
+    newpol = gtopoly(p1, v);
+
     p1 = ggcd(newpol, derivpol(newpol));
-    if (degpol(p1)>0)
+    if (degpol(p1) > 0)
     {
-      newpol=gdiv(newpol,p1);
-      newpol=gdiv(newpol,leading_term(newpol));
+      newpol = gdiv(newpol, p1);
+      newpol = gdiv(newpol, leading_term(newpol));
     }
-    w[j]=(long)newpol;
-    if (DEBUGLEVEL>=4) outerr(newpol);
+    w[j] = (long)newpol;
   }
   return gerepilecopy(av,w);
 }

@@ -117,6 +117,7 @@ IZ  8- [library:] unified access to diffptr (NEXT_PRIME_VIADIFF macro)
    14- allow arbitrary prime degree in rnfkummer
    15- [library:] allow trapping invmoder and recovering the offending INTMOD
    16- improved factor over Z[X] for _huge_ degrees (factorizations mod p)
+   17- minor change in ordering for primedec output [use cmp_prime_over_p]
 
   Added
  BA 1- Add PARI_VERSION and PARI_VERSION_CODE to paricfg.h
@@ -125,6 +126,10 @@ IZ  8- [library:] unified access to diffptr (NEXT_PRIME_VIADIFF macro)
     4- [gprc:] test against VERSION number in .gprc
     5- [gprc:] multiline constructs
  IZ 6- mneumonics for flags
+    7- internal flag nf_GEN_IF_PRINCIPAL to bnfisprincipal [isprincipalall]
+
+  Removed
+    1- (useless, undocumented) macros buchgen*, buchinit*
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.3 (released 10/06/2002):

@@ -14,6 +14,7 @@ with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #include "pari.h"
+#include "parinf.h"
 extern GEN geni(void);
 
 static GEN
@@ -48,6 +49,32 @@ _factpol(GEN x, long t/*unused*/, long hint) { return factpol(x,hint); }
 
 static void
 suppressed(void) {err(talker,"this function has been suppressed");}
+
+#define BUCH_PROTO "GD0.3,G,D0.3,G,D5,G,D1,G,D4,L,D3,L,p"
+static GEN
+buchgen(GEN g1,GEN g2,GEN g3,GEN g4, GEN g5,long l1,long l2, long prec) {
+  return buchall(g1,g2,g3,g4,g5,l1,l2,0,prec);
+}
+static GEN
+buchgenfu(GEN g1,GEN g2,GEN g3,GEN g4, GEN g5,long l1,long l2,long prec) {
+  return buchall(g1,g2,g3,g4,g5,l1,l2,nf_UNITS,prec);
+}
+static GEN
+buchgenforcefu(GEN g1,GEN g2,GEN g3,GEN g4, GEN g5,long l1,long l2,long prec) {
+  return buchall(g1,g2,g3,g4,g5,l1,l2,nf_UNITS|nf_FORCE,prec);
+}
+static GEN
+buchinit(GEN g1,GEN g2,GEN g3,GEN g4, GEN g5,long l1,long l2,long prec) {
+  return buchall(g1,g2,g3,g4,g5,l1,l2,nf_INIT,prec);
+}
+static GEN
+buchinitfu(GEN g1,GEN g2,GEN g3,GEN g4, GEN g5,long l1,long l2,long prec) {
+  return buchall(g1,g2,g3,g4,g5,l1,l2,nf_INIT|nf_UNITS,prec);
+}
+static GEN
+buchinitforcefu(GEN g1,GEN g2,GEN g3,GEN g4, GEN g5,long l1,long l2,long prec) {
+  return buchall(g1,g2,g3,g4,g5,l1,l2,nf_INIT|nf_UNITS|nf_FORCE,prec);
+}
 
 entree oldfonctions[]={
 {"O",50,NULL,7,NULL},
@@ -89,13 +116,13 @@ entree oldfonctions[]={
 {"boundfact",21,(void *)boundfact,4,"GL"},
 {"buchcertify",10,(void *)certifybuchall,6,"lG"},
 {"buchfu",1,(void *)buchfu,6,"Gp"},
-{"buchgen",92,(void *)buchall,6,"GD0.3,G,D0.3,G,D5,G,D1,G,D4,L,D3,L,D0,L,p"},
-{"buchgenforcefu",95,(void *)buchall,6,"GD0.3,G,D0.3,G,D5,G,D1,G,D4,L,D3,L,D3,L,p"},
-{"buchgenfu",94,(void *)buchall,6,"GD0.3,G,D0.3,G,D5,G,D1,G,D4,L,D3,L,D2,L,p"},
-{"buchimag",96,(void *)buchimag,4,"GD0.1,G,D0.1,G,D5,G,"},
-{"buchinit",91,(void *)buchall,6,"GD0.3,G,D0.3,G,D5,G,D1,G,D4,L,D3,L,D-1,L,p"},
-{"buchinitforcefu",89,(void *)buchall,6,"GD0.3,G,D0.3,G,D5,G,D1,G,D4,L,D3,L,D-3,L,p"},
-{"buchinitfu",90,(void *)buchall,6,"GD0.3,G,D0.3,G,D5,G,D1,G,D4,L,D3,L,D-2,L,p"},
+{"buchgen",99,(void *)buchgen,6,BUCH_PROTO},
+{"buchgenforcefu",99,(void *)buchgenforcefu,6,BUCH_PROTO},
+{"buchgenfu",99,(void *)buchgenfu,6,BUCH_PROTO},
+{"buchimag",99,(void *)buchimag,4,"GD0.1,G,D0.1,G,D5,G,"},
+{"buchinit",99,(void *)buchinit,6,BUCH_PROTO},
+{"buchinitforcefu",99,(void *)buchinitforcefu,6,BUCH_PROTO},
+{"buchinitfu",99,(void *)buchinitfu,6,BUCH_PROTO},
 {"buchnarrow",1,(void *)buchnarrow,6,"Gp"},
 {"buchray",2,(void *)buchray,6,"GGp"},
 {"buchrayinit",2,(void *)buchrayinit,6,"GGp"},

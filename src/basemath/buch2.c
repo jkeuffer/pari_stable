@@ -33,6 +33,7 @@ extern int addcolumntomatrix(GEN V, GEN invp, GEN L);
 extern double check_bach(double cbach, double B);
 extern GEN gmul_mat_smallvec(GEN x, GEN y);
 extern GEN gmul_mati_smallvec(GEN x, GEN y);
+extern GEN get_arch(GEN nf,GEN x,long prec);
 extern GEN get_arch_real(GEN nf,GEN x,GEN *emb,long prec);
 extern GEN get_roots(GEN x,long r1,long prec);
 extern long int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *t);
@@ -441,55 +442,74 @@ factorelt(GEN nf,GEN x,GEN Nx,long kcz,long limp)
   return 0;
 }
 
+/* a, m real. Return  (Re(x) + a) + I * (Im(x) % m) */
 static GEN
-cleancol(GEN x,long N,long PRECREG)
+addRe_modIm(GEN x, GEN a, GEN m)
 {
-  long i, j, tx=typ(x), R1, RU;
-  gpmem_t av, tetpil;
-  GEN s,s2,re,pi4,im,y;
-
-  if (tx==t_MAT)
+  GEN re, im, z;
+  if (typ(x) == t_COMPLEX)
   {
-    y=cgetg(lg(x),tx);
-    for (j=1; j<lg(x); j++)
-      y[j]=(long)cleancol((GEN)x[j],N,PRECREG);
+    re = gadd((GEN)x[1], a);
+    im = gmod((GEN)x[2], m);
+    if (gcmp0(im)) z = re;
+    else
+    {
+      z = cgetg(3,t_COMPLEX);
+      z[1] = (long)re;
+      z[2] = (long)im;
+    }
+  }
+  else
+    z = gadd(x, a);
+  return z;
+}
+
+/* clean archimedean components */
+static GEN
+cleanarch(GEN x, long N, long prec)
+{
+  long i, R1, RU, tx = typ(x);
+  GEN s, y, pi2;
+
+  if (tx == t_MAT)
+  {
+    y = cgetg(lg(x), tx);
+    for (i=1; i < lg(x); i++)
+      y[i] = (long)cleanarch((GEN)x[i], N, prec);
     return y;
   }
-  if (!is_vec_t(tx)) err(talker,"not a vector/matrix in cleancol");
-  av = avma; RU=lg(x)-1; R1 = (RU<<1)-N;
-  re = greal(x); s=(GEN)re[1]; for (i=2; i<=RU; i++) s=gadd(s,(GEN)re[i]);
-  im = gimag(x); s = gdivgs(s,-N);
-  s2 = (N>R1)? gmul2n(s,1): NULL;
-  pi4=gmul2n(mppi(PRECREG),2);
-  tetpil=avma; y=cgetg(RU+1,tx);
-  for (i=1; i<=RU; i++)
+  if (!is_vec_t(tx)) err(talker,"not a vector/matrix in cleanarch");
+  RU = lg(x)-1; R1 = (RU<<1)-N;
+  s = gdivgs(sum(greal(x), 1, RU), -N); /* -log |norm(x)| / N */
+  y = cgetg(RU+1,tx);
+  pi2 = Pi2n(1, prec);
+  for (i=1; i<=R1; i++) y[i] = (long)addRe_modIm((GEN)x[i], s, pi2);
+  if (i <= RU)
   {
-    GEN p1=cgetg(3,t_COMPLEX); y[i]=(long)p1;
-    p1[1] = ladd((GEN)re[i], (i<=R1)?s:s2);
-    p1[2] = lmod((GEN)im[i], pi4);
+    GEN pi4 = Pi2n(2, prec), s2 = gmul2n(s, 1);
+    for (   ; i<=RU; i++) y[i] = (long)addRe_modIm((GEN)x[i], s2, pi4);
   }
-  return gerepile(av,tetpil,y);
+  return y;
 }
 
 #define RELAT 0
 #define LARGE 1
 #define PRECI 2
 static GEN
-not_given(gpmem_t av, long flun, long reason)
+not_given(gpmem_t av, long fl, long reason)
 {
-  if (labs(flun)==2)
+  if (! (fl & nf_FORCE))
   {
     char *s;
     switch(reason)
     {
-      case RELAT: s = "not enough relations for fundamental units"; break;
       case LARGE: s = "fundamental units too large"; break;
       case PRECI: s = "insufficient precision for fundamental units"; break;
       default: s = "unknown problem with fundamental units";
     }
     err(warner,"%s, not given",s);
   }
-  avma=av; return cgetg(1,t_MAT);
+  avma = av; return cgetg(1,t_MAT);
 }
 
 /* check whether exp(x) will get too big */
@@ -543,20 +563,17 @@ gauss_realimag(GEN x, GEN y)
 }
 
 GEN
-getfu(GEN nf,GEN *ptA,GEN reg,long flun,long *pte,long prec)
+getfu(GEN nf,GEN *ptA,GEN reg,long fl,long *pte,long prec)
 {
   long e, i, j, R1, RU, N=degpol(nf[1]);
   gpmem_t av = avma;
   GEN p1,p2,u,y,matep,s,A,vec;
-  GEN *gptr[2];
 
   if (DEBUGLEVEL) fprintferr("\n#### Computing fundamental units\n");
   R1 = itos(gmael(nf,2,1)); RU = (N+R1)>>1;
   if (RU==1) { *pte=BIGINT; return cgetg(1,t_VEC); }
 
   *pte = 0; A = *ptA;
-  if (gexpo(reg) < -8) return not_given(av,flun,RELAT);
-
   matep = cgetg(RU,t_MAT);
   for (j=1; j<RU; j++)
   {
@@ -568,26 +585,24 @@ getfu(GEN nf,GEN *ptA,GEN reg,long flun,long *pte,long prec)
   }
   if (prec <= 0) prec = gprecision(A);
   u = lllintern(greal(matep),100,1,prec);
-  if (!u) return not_given(av,flun,PRECI);
+  if (!u) return not_given(av,fl,PRECI);
 
   p1 = gmul(matep,u);
-  if (expgexpo(p1) > 20) { *pte = BIGINT; return not_given(av,flun,LARGE); }
+  if (expgexpo(p1) > 20) { *pte = BIGINT; return not_given(av,fl,LARGE); }
   matep = gexp(p1,prec);
   y = grndtoi(gauss_realimag(nf,matep), &e);
   *pte = -e;
-  if (e>=0) return not_given(av,flun,PRECI);
+  if (e >= 0) return not_given(av,fl,PRECI);
   for (j=1; j<RU; j++)
     if (!gcmp1(idealnorm(nf, (GEN)y[j]))) break;
-  if (j < RU) { *pte = 0; return not_given(av,flun,PRECI); }
+  if (j < RU) { *pte = 0; return not_given(av,fl,PRECI); }
   A = gmul(A,u);
 
   /* y[i] are unit generators. Normalize: smallest L2 norm + lead coeff > 0 */
   y = gmul((GEN)nf[7], y);
-  vec = cgetg(RU+1,t_COL); p2 = mppi(prec);
-  p1 = pureimag(p2);
-  p2 = pureimag(gmul2n(p2,1));
-  for (i=1; i<=R1; i++) vec[i]=(long)p1;
-  for (   ; i<=RU; i++) vec[i]=(long)p2;
+  vec = cgetg(RU+1,t_COL);
+  p1 = PiI2n(0,prec); for (i=1; i<=R1; i++) vec[i] = (long)p1;
+  p2 = PiI2n(1,prec); for (   ; i<=RU; i++) vec[i] = (long)p2;
   for (j=1; j<RU; j++)
   {
     p1 = (GEN)y[j]; p2 = QX_invmod(p1, (GEN)nf[1]);
@@ -605,8 +620,8 @@ getfu(GEN nf,GEN *ptA,GEN reg,long flun,long *pte,long prec)
     y[j] = (long)p1;
   }
   if (DEBUGLEVEL) msgtimer("getfu");
-  *ptA=A; gptr[0]=ptA; gptr[1]=&y;
-  gerepilemany(av,gptr,2); return y;
+  gerepileall(av,2, &A, &y);
+  *ptA = A; return y;
 }
 
 GEN
@@ -623,7 +638,7 @@ buchfu(GEN bnf)
     y[1] = lcopy((GEN)res[5]);
     y[2] = lcopy((GEN)res[6]); return y;
   }
-  y[1] = (long)getfu(nf,&A,reg,2,&c,0);
+  y[1] = (long)getfu(nf, &A, reg, nf_UNITS, &c, 0);
   y[2] = lstoi(c); return gerepilecopy(av, y);
 }
 
@@ -996,7 +1011,7 @@ isprincipalarch(GEN bnf, GEN col, GEN kNx, GEN e, GEN dx, long *pe)
   N = degpol(nf[1]);
   R1 = itos(gmael(nf,2,1));
   RU = (N + R1)>>1;
-  col = cleancol(col,N,prec); settyp(col, t_COL);
+  col = cleanarch(col,N,prec); settyp(col, t_COL);
   if (RU > 1)
   { /* reduce mod units */
     GEN u, z = init_red_mod_units(bnf,prec);
@@ -1044,7 +1059,7 @@ _isprincipal(GEN bnf, GEN x, long *ptprec, long flag)
   cyc = gmael3(bnf,8,1,2); c = lg(cyc)-1;
   gen = gmael3(bnf,8,1,3);
   ex = cgetg(c+1,t_COL);
-  if (c == 0 && !(flag & nf_GEN)) return ex;
+  if (c == 0 && !(flag & (nf_GEN|nf_GEN_IF_PRINCIPAL))) return ex;
 
   vectbase = (GEN)bnf[5]; /* needed by factorgensimple */
 
@@ -1066,7 +1081,10 @@ _isprincipal(GEN bnf, GEN x, long *ptprec, long flag)
   Q = gmul(U, A);
   for (i=1; i<=c; i++)
     Q[i] = (long)truedvmdii((GEN)Q[i],(GEN)cyc[i],(GEN*)(ex+i));
-  if (!(flag & nf_GEN)) return gcopy(ex);
+  if ((flag & nf_GEN_IF_PRINCIPAL))
+    { if (!gcmp0(ex)) return gzero; }
+  else if (!(flag & nf_GEN))
+    return gcopy(ex);
 
   /* compute arch component of the missing principal ideal */
   if (old_format)
@@ -1111,10 +1129,12 @@ _isprincipal(GEN bnf, GEN x, long *ptprec, long flag)
     err(warner,"precision too low for generators, not given");
     e = 0;
   }
-  if (!xc) xc = gun;
   y = cgetg(4,t_VEC);
+  if (!xc) xc = gun;
+  col = e? gmul(xc,col): cgetg(1,t_COL);
+  if (flag & nf_GEN_IF_PRINCIPAL) return col;
   y[1] = lcopy(ex);
-  y[2] = e? lmul(xc,col): lgetg(1,t_COL);
+  y[2] = (long)col;
   y[3] = lstoi(-e); return y;
 }
 
@@ -1122,11 +1142,12 @@ static GEN
 triv_gen(GEN nf, GEN x, long c, long flag)
 {
   GEN y;
+  if (flag & nf_GEN_IF_PRINCIPAL)
+    return (typ(x) == t_COL)? gcopy(x): algtobasis(nf,x);
   if (!(flag & nf_GEN)) return zerocol(c);
   y = cgetg(4,t_VEC);
   y[1] = (long)zerocol(c);
-  x = (typ(x) == t_COL)? gcopy(x): algtobasis(nf,x);
-  y[2] = (long)x;
+  y[2] = (long)((typ(x) == t_COL)? gcopy(x): algtobasis(nf,x));
   y[3] = lstoi(BIGINT); return y;
 }
 
@@ -1876,7 +1897,7 @@ trunc_error(GEN x)
 static GEN
 compute_multiple_of_R(GEN A,long RU,long N,GEN *ptlambda)
 {
-  GEN T,v,mdet,mdet_t,Im_mdet,kR,xreal,lambda, *gptr[2];
+  GEN T,v,mdet,mdet_t,Im_mdet,kR,xreal,lambda;
   long i, zc = lg(A)-1, R1 = 2*RU - N;
   gpmem_t av = avma;
 
@@ -1903,7 +1924,7 @@ compute_multiple_of_R(GEN A,long RU,long N,GEN *ptlambda)
   kR = mpabs(kR);
   lambda = gauss(Im_mdet,xreal); /* approximate rational entries */
   for (i=1; i<=zc; i++) setlg(lambda[i], RU);
-  gptr[0]=&lambda; gptr[1]=&kR; gerepilemany(av,gptr,2); 
+  gerepileall(av,2, &lambda, &kR); 
   *ptlambda = lambda; return kR;
 }
 
@@ -2004,11 +2025,11 @@ setlg_col(GEN U, long l)
   for (; c>U; c--) setlg(*c, l);
 }
 
-GEN
-get_Vbase(GEN W, GEN vectbase, GEN vperm)
+static GEN
+get_Vbase(long l, GEN vectbase, GEN vperm)
 {
-  long i, l = lg(W);
   GEN Vbase = cgetg(l,t_VEC);
+  long i;
   if (typ(vperm) == t_VECSMALL)
     for (i=1; i<l; i++) Vbase[i] = vectbase[vperm[i]];
   else
@@ -2216,33 +2237,24 @@ relationrank(GEN *A, long r, GEN L)
 }
 
 static GEN
-codeprime(GEN bnf, GEN pr)
+codeprime(GEN L, GEN pr)
 {
-  long j;
-  gpmem_t av=avma, tetpil;
-  GEN p,al,fa,p1;
+  long j, n, l, p = itos((GEN)pr[1]);
+  GEN al, fa;
 
-  p=(GEN)pr[1]; al=(GEN)pr[2]; fa=primedec(bnf,p);
-  for (j=1; j<lg(fa); j++)
-    if (gegal(al,gmael(fa,j,2)))
-    {
-      p1=mulsi(lg(al)-1,p); tetpil=avma;
-      return gerepile(av,tetpil,addsi(j-1,p1));
-    }
+  al = (GEN)pr[2]; n = lg(al)-1;
+  fa = (GEN)L[p]; l = lg(fa);
+  for (j=1; j<l; j++)
+    if (gegal(al, gmael(fa,j,2))) return utoi(j-1 + n*p);
   err(talker,"bug in codeprime/smallbuchinit");
   return NULL; /* not reached */
 }
 
 static GEN
-decodeprime(GEN nf, GEN co)
+decodeprime(GEN T, GEN L, long n)
 {
-  long n, indi;
-  gpmem_t av=avma;
-  GEN p,rem,p1;
-
-  n=lg(nf[7])-1; p=dvmdis(co,n,&rem); indi=itos(rem)+1;
-  p1=primedec(nf,p);
-  return gerepilecopy(av,(GEN)p1[indi]);
+  long t = itos(T);
+  return gmael(L, t/n, t%n + 1);
 }
 
 /* v = bnf[10] */
@@ -2302,7 +2314,7 @@ makecycgen(GEN bnf)
 static GEN
 makematal(GEN bnf)
 {
-  GEN W,B,pFB,vp,nf,ma, WB_C;
+  GEN W,B,pFB,nf,ma, WB_C;
   long lW,lma,j,prec;
 
   ma = get_matal((GEN)bnf[10]);
@@ -2311,11 +2323,9 @@ makematal(GEN bnf)
   W   = (GEN)bnf[1];
   B   = (GEN)bnf[2];
   WB_C= (GEN)bnf[4];
-  vp  = (GEN)bnf[6];
   nf  = (GEN)bnf[7];
   lW=lg(W)-1; lma=lW+lg(B);
-  pFB=cgetg(lma,t_VEC); ma=(GEN)bnf[5]; /* reorder factor base */
-  for (j=1; j<lma; j++) pFB[j] = ma[itos((GEN)vp[j])];
+  pFB = get_Vbase(lma, (GEN)bnf[5], (GEN)bnf[6]);
   ma = cgetg(lma,t_MAT);
 
   prec = prec_arch(bnf);
@@ -2396,161 +2406,169 @@ check_and_build_matal(GEN bnf)
   }
   return matal;
 }
+
+static GEN
+get_pr_lists(GEN FB)
+{
+  GEN pr, L;
+  long i, l = lg(FB), p, pmax;
+  
+  pmax = 0;
+  for (i=1; i<l; i++)
+  {
+    pr = (GEN)FB[i]; p = itos((GEN)pr[1]);
+    if (p > pmax) pmax = p;
+  }
+  L = cgetg(pmax+1, t_VEC);
+  for (p=1; p<=pmax; p++) L[p] = 0;
+  for (i=1; i<l; i++)
+  {
+    pr = (GEN)FB[i]; p = itos((GEN)pr[1]);
+    L[p] = (long) (L[p]? concatsp((GEN)L[p], _vec(pr)): _vec(pr));
+  } 
+  for (p=1; p<=pmax; p++)
+    if (L[p]) L[p] = (long)gen_sort((GEN)L[p],0,cmp_prime_over_p);
+  return L;
+}
+
+static GEN
+decode_pr_lists(GEN nf, GEN pfc)
+{
+  long i, p, pmax, n = degpol(nf[1]), l = lg(pfc);
+  GEN t, L;
+
+  pmax = 0;
+  for (i=1; i<l; i++)
+  {
+    t = (GEN)pfc[i]; p = itos(t) / n;
+    if (p > pmax) pmax = p;
+  }
+  L = cgetg(pmax+1, t_VEC);
+  for (p=1; p<=pmax; p++) L[p] = 0;
+  for (i=1; i<l; i++)
+  {
+    t = (GEN)pfc[i]; p = itos(t) / n;
+    if (!L[p]) L[p] = (long)primedec(nf, stoi(p));
+  } 
+  return L;
+}
 			
 GEN
 smallbuchinit(GEN pol,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,long minsFB,long prec)
 {
-  long k;
-  gpmem_t av=avma, av1;
-  GEN y,bnf,pFB,vp,nf,mas,res,uni,v1,v2,v3;
+  GEN y, bnf, pFB, nf, res, uni, L, p1;
+  gpmem_t av = avma;
+  long i;
 
   if (typ(pol)==t_VEC) bnf = checkbnf(pol);
   else
   {
-    bnf=buchall(pol,gcbach,gcbach2,gRELSUP,gborne,nbrelpid,minsFB,-3,prec);
+    const long fl = nf_INIT | nf_UNITS | nf_FORCE;
+    bnf = buchall(pol,gcbach,gcbach2,gRELSUP,gborne,nbrelpid,minsFB,fl,prec);
     bnf = checkbnf_discard(bnf);
   }
-  pFB=(GEN)bnf[5]; vp=(GEN)bnf[6]; nf=(GEN)bnf[7];
-  mas=(GEN)nf[5]; res=(GEN)bnf[8]; uni=(GEN)res[5];
+  nf  = (GEN)bnf[7];
+  res = (GEN)bnf[8];
+  uni = (GEN)res[5];
 
-  y=cgetg(13,t_VEC); y[1]=lcopy((GEN)nf[1]); y[2]=lcopy(gmael(nf,2,1));
-  y[3]=lcopy((GEN)nf[3]); y[4]=lcopy((GEN)nf[7]);
-  y[5]=lcopy((GEN)nf[6]); y[6]=lcopy((GEN)mas[5]);
-  y[7]=lcopy((GEN)bnf[1]); y[8]=lcopy((GEN)bnf[2]);
-  v1=cgetg(lg(pFB),t_VEC); y[9]=(long)v1;
-  for (k=1; k<lg(pFB); k++)
-    v1[k]=(long)codeprime(bnf,(GEN)pFB[itos((GEN)vp[k])]);
-  v2=cgetg(3,t_VEC); y[10]=(long)v2;
-  v2[1]=lcopy(gmael(res,4,1));
-  v2[2]=(long)algtobasis(bnf,gmael(res,4,2));
-  v3=cgetg(lg(uni),t_VEC); y[11]=(long)v3;
-  for (k=1; k<lg(uni); k++)
-    v3[k] = (long)algtobasis(bnf,(GEN)uni[k]);
-  av1 = avma;
-  y[12] = gcmp0((GEN)bnf[10])? lpilecopy(av1, makematal(bnf))
-                             : lcopy((GEN)bnf[10]);
-  return gerepileupto(av,y);
+  y = cgetg(13,t_VEC);
+  y[1] = nf[1];
+  y[2] = mael(nf,2,1);
+  y[3] = nf[3];
+  y[4] = nf[7];
+  y[5] = nf[6];
+  y[6] = mael(nf,5,5);
+  y[7] = bnf[1];
+  y[8] = bnf[2];
+
+  pFB = get_Vbase(lg(bnf[5]), (GEN)bnf[5], (GEN)bnf[6]);
+  L = get_pr_lists(pFB);
+  p1 = cgetg(lg(pFB), t_VEC);
+  for (i=1; i<lg(pFB); i++) p1[i] = (long)codeprime(L, (GEN)pFB[i]);
+  y[9] = (long)p1;
+
+  p1 = cgetg(3, t_VEC);
+  p1[1] = mael(res,4,1);
+  p1[2] = (long)algtobasis(bnf,gmael(res,4,2));
+  y[10] = (long)p1;
+
+  p1 = cgetg(lg(uni), t_VEC);
+  for (i=1; i<lg(uni); i++) p1[i] = (long)algtobasis(bnf,(GEN)uni[i]);
+  y[11] = (long)p1;
+  y[12] = gcmp0((GEN)bnf[10])? (long)makematal(bnf): bnf[10];
+  return gerepilecopy(av, y);
 }
 
 static GEN
-get_regulator(GEN mun,long prec)
-{
-  gpmem_t av, tetpil;
-  GEN p1;
-
-  if (lg(mun)==1) return gun;
-  av=avma; p1 = gtrans(greal(mun));
-  setlg(p1,lg(p1)-1); p1 = det(p1);
-  tetpil=avma; return gerepile(av,tetpil,gabs(p1,prec));
-}
-
-static GEN
-log_poleval(GEN P, GEN *ro, long i, GEN nf, long prec0)
-{
-  GEN x = poleval(P, (GEN)(*ro)[i]);
-  long prec = prec0, k = 0;
-  while (gcmp0(x) || ((k = gprecision(x)) && k < DEFAULTPREC))
-  {
-    prec = (prec-2)<<1;
-    if (DEBUGLEVEL) err(warnprec,"log_poleval",prec);
-    *ro = get_roots((GEN)nf[1], nf_get_r1(nf), prec);
-    x = poleval(P, (GEN)(*ro)[i]);
-  }
-  if (k > prec0) x = gprec_w(x,prec0);
-  return glog(x, prec0);
-}
-
-/* return corrected archimedian components
- * (= log(sigma_i(x)) - log(|Nx|)/[K:Q]) for a (matrix of elements) */
-static GEN
-get_arch2_i(GEN nf, GEN a, long prec, int units)
-{
-  GEN M,N, ro = dummycopy((GEN)nf[6]);
-  long j,k, la = lg(a), ru = lg(ro), r1 = nf_get_r1(nf);
-
-  M = cgetg(la,t_MAT); if (la == 1) return M;
-  if (typ(a[1]) == t_COL) a = gmul((GEN)nf[7], a);
-  if (units) N = NULL; /* no correction necessary */
-  else
-  {
-    GEN pol = (GEN)nf[1];
-    N = cgetg(la,t_VEC);
-    for (k=1; k<la; k++) N[k] = (long)gabs(subres(pol,(GEN)a[k]),0);
-    N = gdivgs(glog(N,prec), -degpol(pol)); /* - log(|norm|) / [K:Q] */
-  }
-  for (k=1; k<la; k++)
-  {
-    GEN p, c = cgetg(ru,t_COL); M[k] = (long)c;
-    for (j=1; j<ru; j++)
-    {
-      p = log_poleval((GEN)a[k],&ro,j,nf,prec);
-      if (N) p = gadd(p, (GEN)N[k]);
-      c[j]=(j<=r1)? (long) p: lmul2n(p,1);
-    }
-  }
-  return M;
-}
-
-static GEN
-get_arch2(GEN nf, GEN a, long prec, int units)
+get_regulator(GEN mun)
 {
   gpmem_t av = avma;
-  return gerepilecopy(av, get_arch2_i(nf,a,prec,units));
+  GEN A;
+
+  if (lg(mun)==1) return gun;
+  A = gtrans( greal(mun) );
+  setlg(A, lg(A)-1); 
+  return gerepileupto(av, gabs(det(A), 0));
+}
+
+/* return corrected archimedian components for elts of x (vector)
+ * (= log(sigma_i(x)) - log(|Nx|) / [K:Q]) */
+static GEN
+get_archclean(GEN nf, GEN x, long prec, int units)
+{
+  long k,N, la = lg(x);
+  GEN M = cgetg(la,t_MAT);
+
+  if (la == 1) return M;
+  N = degpol(nf[1]);
+  for (k=1; k<la; k++)
+  {
+    GEN c = get_arch(nf, (GEN)x[k], prec);
+    if (!units) c = cleanarch(c, N, prec);
+    M[k] = (long)c;
+  }
+  return M;
 }
 
 static void
 my_class_group_gen(GEN bnf, long prec, GEN nf0, GEN *ptcl, GEN *ptcl2)
 {
-  gpmem_t av = avma;
   GEN W=(GEN)bnf[1], C=(GEN)bnf[4], nf=(GEN)bnf[7];
-  GEN Vbase = get_Vbase(W, (GEN)bnf[5], (GEN)bnf[6]);
-
+  GEN Vbase = get_Vbase(lg(W), (GEN)bnf[5], (GEN)bnf[6]);
   class_group_gen(nf,W,C,Vbase,prec,nf0, ptcl,ptcl2);
-  gerepileall(av, 2, ptcl, ptcl2);
 }
 
 GEN
 bnfnewprec(GEN bnf, long prec)
 {
-  GEN nf0 = (GEN)bnf[7], nf,ro,res,p1,funits,mun,matal,clgp,clgp2,y;
-  long r1,r2,ru,pl1,pl2,prec1;
+  GEN nf0 = (GEN)bnf[7], nf, res, funits, mun, matal, clgp, clgp2, y;
+  gpmem_t av = avma;
+  long r1, r2, prec1;
 
   bnf = checkbnf(bnf);
   if (prec <= 0) return nfnewprec(checknf(bnf),prec);
-  y = cgetg(11,t_VEC);
-  funits = check_units(bnf,"bnfnewprec");
   nf = (GEN)bnf[7];
-  ro = (GEN)nf[6]; ru = lg(ro)-1;
   nf_get_sign(nf, &r1, &r2);
-  pl1 = (ru == 1 && r1 == 0)? 0: gexpo(funits);
-  pl2 = gexpo(ro);
-  prec1 = prec;
-  prec += ((ru + r2 - 1) * (pl1 + (ru + r2) * pl2)) >> TWOPOTBITS_IN_LONG;
-  nf = nfnewprec(nf0,prec);
-  res = cgetg(7,t_VEC);
-  ro = (GEN)nf[6];
-  mun = get_arch2(nf,funits,prec,1);
-  if (prec != prec1) { mun = gprec_w(mun,prec1); prec = prec1; }
-  res[2]=(long)get_regulator(mun,prec);
-  p1 = (GEN)bnf[8];
-  res[3]=lcopy((GEN)p1[3]);
-  res[4]=lcopy((GEN)p1[4]);
-  res[5]=lcopy((GEN)p1[5]);
-  res[6]=lcopy((GEN)p1[6]);
+  funits = algtobasis(nf, check_units(bnf,"bnfnewprec"));
 
-  y[1]=lcopy((GEN)bnf[1]);
-  y[2]=lcopy((GEN)bnf[2]);
-  y[3]=(long)mun;
+  prec1 = prec;
+  if (r2 > 1 || r1 != 0)
+    prec += 1 + (gexpo(funits) >> TWOPOTBITS_IN_LONG);
+  nf = nfnewprec(nf0,prec);
+  mun = get_archclean(nf,funits,prec,1);
+  if (prec != prec1) { mun = gprec_w(mun,prec1); prec = prec1; }
   matal = check_and_build_matal(bnf);
-  y[4]=(long)get_arch2(nf,matal,prec,0);
-  y[5]=lcopy((GEN)bnf[5]);
-  y[6]=lcopy((GEN)bnf[6]);
-  y[7]=(long)nf;
-  y[8]=(long)res;
+
+  y = dummycopy(bnf);
+  y[3] = (long)mun;
+  y[4] = (long)get_archclean(nf,matal,prec,0);
+  y[7] = (long)nf;
   my_class_group_gen(y,prec,nf0, &clgp,&clgp2);
-  res[1]=(long)clgp;
-  y[9]=(long)clgp2;
-  y[10]=lcopy((GEN)bnf[10]); return y;
+  res = dummycopy((GEN)bnf[8]);
+  res[1] = (long)clgp;
+  res[2] = (long)get_regulator(mun);
+  y[8] = (long)res;
+  y[9] = (long)clgp2; return gerepilecopy(av, y);
 }
 
 GEN
@@ -2577,13 +2595,21 @@ nfbasic_from_sbnf(GEN sbnf, nfbasic_t *T)
   T->basden = NULL;
 }
 
+static GEN
+get_clfu(GEN clgp, GEN reg, GEN c1, GEN zu, GEN fu, long k)
+{
+  GEN z = cgetg(7, t_VEC);
+  z[1]=(long)clgp; z[2]=(long)reg; z[3]=(long)c1;
+  z[4]=(long)zu;   z[5]=(long)fu;  z[6]=lstoi(k); return z;
+}
+
 GEN
 bnfmake(GEN sbnf, long prec)
 {
-  long j, k, l;
+  long j, k, l, n;
   gpmem_t av = avma;
-  GEN p1,bas,ro,nf,mun,funits;
-  GEN pfc,vp,mc,clgp,clgp2,res,y,W,racu,reg,matal,vectbase,Vbase;
+  GEN p1, bas, ro, nf, mun, fu, L;
+  GEN pfc, vp, mc, clgp, clgp2, res, y, W, zu, reg, matal, vectbase, Vbase;
   nfbasic_t T;
 
   if (typ(sbnf) != t_VEC || lg(sbnf) != 13) err(typeer,"bnfmake");
@@ -2595,48 +2621,48 @@ bnfmake(GEN sbnf, long prec)
   nf = nfbasic_to_nf(&T, ro, prec);
   bas = (GEN)nf[7];
 
-  p1 = (GEN)sbnf[11]; l = lg(p1); funits = cgetg(l, t_VEC);
-  for (k=1; k < l; k++) funits[k] = lmul(bas, (GEN)p1[k]);
-  mun = get_arch2_i(nf,funits,prec,1);
+  p1 = (GEN)sbnf[11]; l = lg(p1); fu = cgetg(l, t_VEC);
+  for (k=1; k < l; k++) fu[k] = lmul(bas, (GEN)p1[k]);
+  mun = get_archclean(nf,fu,prec,1);
 
   prec = gprecision(ro);
   matal = get_matal((GEN)sbnf[12]);
   if (!matal) matal = (GEN)sbnf[12];
-  mc = get_arch2_i(nf,matal,prec,0);
+  mc = get_archclean(nf,matal,prec,0);
 
-  pfc = (GEN)sbnf[9]; l = lg(pfc);
+  pfc = (GEN)sbnf[9];
+  l = lg(pfc);
   vectbase = cgetg(l,t_COL);
   vp       = cgetg(l,t_COL);
+  L = decode_pr_lists(nf, pfc);
+  n = degpol(nf[1]);
   for (j=1; j<l; j++)
   {
-    vectbase[j] = (long)decodeprime(nf,(GEN)pfc[j]);
+    vectbase[j] = (long)decodeprime((GEN)pfc[j], L, n);
     vp[j]       = lstoi(j);
   }
   W = (GEN)sbnf[7];
-  Vbase = get_Vbase(W,vectbase,vp);
+  Vbase = get_Vbase(lg(W),vectbase,vp);
   class_group_gen(nf,W,mc,Vbase,prec,NULL, &clgp,&clgp2);
 
-  reg = get_regulator(mun,prec);
-  p1 = cgetg(3,t_VEC); racu = (GEN)sbnf[10];
-  p1[1] = racu[1];
-  p1[2] = lmul(bas,(GEN)racu[2]); racu = p1;
+  reg = get_regulator(mun);
+  p1 = cgetg(3,t_VEC); zu = (GEN)sbnf[10];
+  p1[1] = zu[1];
+  p1[2] = lmul(bas,(GEN)zu[2]); zu = p1;
 
-  res=cgetg(7,t_VEC);
-  res[1]=(long)clgp; res[2]=(long)reg;    res[3]=(long)dbltor(1.0);
-  res[4]=(long)racu; res[5]=(long)funits; res[6]=lstoi(1000);
-
+  res = get_clfu(clgp,reg,dbltor(1.0),zu,fu,1000);
   y=cgetg(11,t_VEC);
   y[1]=(long)W;   y[2]=sbnf[8];        y[3]=(long)mun;
   y[4]=(long)mc;  y[5]=(long)vectbase; y[6]=(long)vp;
-  y[7]=(long)nf;  y[8]=(long)res;      y[9]=(long)clgp2; y[10]=sbnf[12];
-  return gerepilecopy(av,y);
+  y[7]=(long)nf;  y[8]=(long)res;      y[9]=(long)clgp2;
+  y[10] = sbnf[12]; return gerepilecopy(av,y);
 }
 
 static GEN
 classgroupall(GEN P, GEN data, long flag, long prec)
 {
   long court[3],doubl[4];
-  long flun, lx, minsFB=3, nbrelpid=4;
+  long fl, lx, minsFB=3, nbrelpid=4;
   gpmem_t av=avma;
   GEN bach=doubl,bach2=doubl,RELSUP=court,borne=gun;
 
@@ -2661,17 +2687,17 @@ classgroupall(GEN P, GEN data, long flag, long prec)
   }
   switch(flag)
   {
-    case 0: flun=-2; break;
-    case 1: flun=-3; break;
-    case 2: flun=-1; break;
+    case 0: fl = nf_INIT | nf_UNITS; break;
+    case 1: fl = nf_INIT | nf_UNITS | nf_FORCE; break;
+    case 2: fl = nf_INIT | nf_ROOT1; break;
     case 3: return smallbuchinit(P,bach,bach2,RELSUP,borne,nbrelpid,minsFB,prec);
-    case 4: flun=2; break;
-    case 5: flun=3; break;
-    case 6: flun=0; break;
+    case 4: fl = nf_UNITS; break;
+    case 5: fl = nf_UNITS | nf_FORCE; break;
+    case 6: fl = 0; break;
     default: err(flagerr,"classgroupall");
       return NULL; /* not reached */
   }
-  return buchall(P,bach,bach2,RELSUP,borne,nbrelpid,minsFB,flun,prec);
+  return buchall(P,bach,bach2,RELSUP,borne,nbrelpid,minsFB,fl,prec);
 }
 
 GEN
@@ -2754,27 +2780,22 @@ cgetc_col(long n, long prec)
 }
 
 static GEN
-buchall_end(GEN nf,GEN CHANGE,long fl,long k, GEN fu, GEN clg1, GEN clg2,
-            GEN reg, GEN c_1, GEN zu, GEN W, GEN B,
+buchall_end(GEN nf,GEN CHANGE,long fl,GEN res, GEN clg2, GEN W, GEN B,
             GEN A, GEN matarch, GEN vectbase, GEN vperm)
 {
-  long i, l = labs(fl)>1? 11: fl? 9: 8;
-  GEN p1,z, RES = cgetg(11,t_COL);
+  long l = (fl & nf_UNITS)? 7
+                          : (fl & nf_ROOT1)? 5: 4;
+  GEN p1, z;
 
-  setlg(RES,l);
-  RES[5]=(long)clg1;
-  RES[6]=(long)reg;
-  RES[7]=(long)c_1;
-  RES[8]=(long)zu;
-  RES[9]=(long)fu;
-  RES[10]=lstoi(k);
-  if (fl>=0)
+  setlg(res, l);
+  if (! (fl & nf_INIT))
   {
-    RES[1]=nf[1];
-    RES[2]=nf[2]; p1=cgetg(3,t_VEC); p1[1]=nf[3]; p1[2]=nf[4];
-    RES[3]=(long)p1;
-    RES[4]=nf[7];
-    z=cgetg(2,t_MAT); z[1]=(long)RES; return z;
+    GEN x = cgetg(5, t_VEC);
+    x[1]=nf[1];
+    x[2]=nf[2]; p1=cgetg(3,t_VEC); p1[1]=nf[3]; p1[2]=nf[4];
+    x[3]=(long)p1;
+    x[4]=nf[7];
+    z=cgetg(2,t_MAT); z[1]=(long)concatsp(x, res); return z;
   }
   z=cgetg(11,t_VEC);
   z[1]=(long)W;
@@ -2782,11 +2803,9 @@ buchall_end(GEN nf,GEN CHANGE,long fl,long k, GEN fu, GEN clg1, GEN clg2,
   z[3]=(long)A;
   z[4]=(long)matarch;
   z[5]=(long)vectbase;
-  for (i=lg(vperm)-1; i>0; i--) vperm[i]=lstoi(vperm[i]);
-  settyp(vperm, t_VEC);
-  z[6]=(long)vperm;
-  z[7]=(long)nf; RES+=4; RES[0]=evaltyp(t_VEC) | evallg(l-4);
-  z[8]=(long)RES;
+  z[6]=(long)small_to_vec(vperm);
+  z[7]=(long)nf;
+  z[8]=(long)res;
   z[9]=(long)clg2;
   z[10]=zero; /* dummy: we MUST have lg(bnf) != lg(nf) */
   if (CHANGE) { p1=cgetg(3,t_VEC); p1[1]=(long)z; p1[2]=(long)CHANGE; z=p1; }
@@ -2798,8 +2817,8 @@ buchall_for_degree_one_pol(GEN nf, GEN CHANGE, long flun)
 {
   long k = EXP220;
   gpmem_t av = avma;
-  GEN W,B,A,matarch,vectbase,vperm;
-  GEN fu=cgetg(1,t_VEC), reg=gun, c_1=gun, zu=cgetg(3,t_VEC);
+  GEN W,B,A,matarch,vectbase,vperm,res;
+  GEN fu=cgetg(1,t_VEC), R=gun, c1=gun, zu=cgetg(3,t_VEC);
   GEN clg1=cgetg(4,t_VEC), clg2=cgetg(4,t_VEC);
 
   clg1[1]=un; clg1[2]=clg1[3]=clg2[2]=clg2[3]=lgetg(1,t_VEC);
@@ -2808,7 +2827,8 @@ buchall_for_degree_one_pol(GEN nf, GEN CHANGE, long flun)
   W=B=A=matarch=cgetg(1,t_MAT);
   vectbase=cgetg(1,t_COL); vperm=cgetg(1,t_VEC);
 
-  return gerepilecopy(av, buchall_end(nf,CHANGE,flun,k,fu,clg1,clg2,reg,c_1,zu,W,B,A,matarch,vectbase,vperm));
+  res = get_clfu(clg1,R,c1,zu,fu,k);
+  return gerepilecopy(av, buchall_end(nf,CHANGE,flun,res,clg2,W,B,A,matarch,vectbase,vperm));
 }
 
 /* return (small set of) indices of columns generating the same lattice as x.
@@ -2867,7 +2887,7 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
   long sfb_increase=0, sfb_trials=0, precdouble=0, precadd=0;
   double cbach,cbach2,drc,LOGD2;
   GEN vecG,fu,zu,nf,D,A,W,R,Res,z,h,vperm,subFB;
-  GEN L,resc,B,C,c1,lambda,pdep,liste,invp,clg1,clg2,Vbase,first_nz, *mat;
+  GEN res,L,resc,B,C,lambda,pdep,liste,invp,clg1,clg2,Vbase,first_nz, *mat;
   GEN CHANGE=NULL, extramat=NULL, extraC=NULL, list_jideal=NULL;
   char *precpb = NULL;
 
@@ -2889,7 +2909,7 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
     /* P was non-monic and nfinit changed it ? */
     if (lg(nf)==3) { CHANGE = (GEN)nf[2]; nf = (GEN)nf[1]; }
   }
-  if (N<=1) return buchall_for_degree_one_pol(nf,CHANGE,flun);
+  if (N <= 1) return buchall_for_degree_one_pol(nf,CHANGE,flun);
   zu = rootsof1(nf);
   zu[2] = lmul((GEN)nf[7],(GEN)zu[2]);
   if (DEBUGLEVEL) msgtimer("initalg & rootsof1");
@@ -2909,10 +2929,7 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
               gsqrt(absi(D),DEFAULTPREC));
   resc = mulri(resc,(GEN)zu[1]);
   if (DEBUGLEVEL)
-  {
-    fprintferr("N = %ld, R1 = %ld, R2 = %ld\n",N,R1,R2);
-    fprintferr("D = %Z\n",D);
-  }
+    fprintferr("N = %ld, R1 = %ld, R2 = %ld\nD = %Z\n",N,R1,R2,D);
   av0 = avma; mat = NULL; FB = NULL; first_nz = NULL;
 
 START:
@@ -2934,7 +2951,10 @@ START:
     nf = nfnewprec(nf,PRECREG); av0 = avma;
   }
   else
+  {
     cbach = check_bach(cbach,12.);
+    if (N == 2 && cbach > 6.) cbach = 6.;
+  }
   precadd = 0;
 
   /* T2-LLL-reduce nf.zk */
@@ -3148,7 +3168,7 @@ MORE:
   if (!be_honest(nf,subFB,PRECLLL)) goto START;
 
   /* fundamental units */
-  if (flun < 0 || flun > 1)
+  if (flun & nf_INIT || flun & nf_UNITS)
   {
     GEN v = extract_full_lattice(L); /* L may be very large */
     if (v)
@@ -3157,13 +3177,13 @@ MORE:
       L = vecextract_p(L, v);
     }
     /* arch. components of fund. units */
-    A = cleancol(gmul(A,lllint(L)), N, PRECREG);
-    if (DEBUGLEVEL) msgtimer("cleancol");
+    A = cleanarch(gmul(A,lllint(L)), N, PRECREG);
+    if (DEBUGLEVEL) msgtimer("cleanarch");
   }
-  if (labs(flun) > 1)
+  if (flun & nf_UNITS)
   {
     fu = getfu(nf,&A,R,flun,&k,PRECREG);
-    if (k <= 0 && labs(flun) > 2)
+    if (k <= 0 && flun & nf_FORCE)
     {
       if (k < 0) precadd = (DEFAULTPREC-2) + ((-k) >> TWOPOTBITS_IN_LONG);
       (void)setrand(seed);
@@ -3173,12 +3193,12 @@ MORE:
 
   /* class group generators */
   i = lg(C)-zc; C += zc; C[0] = evaltyp(t_MAT)|evallg(i);
-  C = cleancol(C,N,PRECREG);
-  Vbase = get_Vbase(W,vectbase,vperm);
+  C = cleanarch(C,N,PRECREG);
+  Vbase = get_Vbase(lg(W),vectbase,vperm);
   class_group_gen(nf,W,C,Vbase,PRECREG,NULL, &clg1, &clg2);
 
-  c1 = gdiv(gmul(R,h), z);
   desallocate(&mat, &first_nz);
 
-  return gerepilecopy(av, buchall_end(nf,CHANGE,flun,k,fu,clg1,clg2,R,c1,zu,W,B,A,C,vectbase,vperm));
+  res = get_clfu(clg1, R, gdiv(gmul(R,h), z), zu, fu, k);
+  return gerepilecopy(av, buchall_end(nf,CHANGE,flun,res,clg2,W,B,A,C,vectbase,vperm));
 }

@@ -59,9 +59,14 @@ typedef struct {
 #define nf_FORCE 2
 #define nf_GIVEPREC 4
 #define nf_GENMAT 8
+#define nf_GEN_IF_PRINCIPAL 512
 
 /* for buchray */
 #define nf_INIT  4
+
+/* for buchall */
+#define nf_ROOT1 512
+#define nf_UNITS 1024
 
 /* for discray */
 #define nf_REL  1

@@ -674,13 +674,13 @@ vecconcat(GEN bnf,GEN relnf,GEN vec,GEN *prod,GEN *S1,GEN *S2)
     }
 }
 
-/* bnf est le corps de base (buchinitfu).
+/* bnf est le corps de base.
  * ext definit l'extension relative:
  * ext[1] est une equation relative du corps,
  * telle qu'une de ses racines engendre le corps sur Q.
  * ext[2] exprime le generateur (y) du corps de base,
  * en fonction de la racine (x) de ext[1],
- * ext[3] est le buchinitfu (sur Q) de l'extension.
+ * ext[3] est le bnf (sur Q) de l'extension.
 
  * si flag=0 c'est qu'on sait a l'avance que l'extension est galoisienne,
  * et dans ce cas la reponse est exacte.
@@ -689,8 +689,7 @@ vecconcat(GEN bnf,GEN relnf,GEN vec,GEN *prod,GEN *S1,GEN *S2)
 
  * la reponse est un vecteur v a 2 composantes telles que
  * x=N(v[1])*v[2].
- * x est une norme ssi v[2]=1.
- */
+ * x est une norme ssi v[2]=1. */
 GEN
 rnfisnorm(GEN bnf,GEN ext,GEN x,long flag,long PREC)
 {
@@ -817,13 +816,13 @@ rnfisnorm(GEN bnf,GEN ext,GEN x,long flag,long PREC)
 GEN
 bnfisnorm(GEN bnf,GEN x,long flag,long PREC)
 {
-  gpmem_t lbot, ltop = avma;
+  gpmem_t ltop = avma;
   GEN ext = cgetg(4,t_VEC);
 
   bnf = checkbnf(bnf);
   ext[1] = mael(bnf,7,1);
   ext[2] = zero;
   ext[3] = (long) bnf;
-  bnf = buchinitfu(polx[MAXVARN],NULL,NULL,0); lbot = avma;
-  return gerepile(ltop,lbot,rnfisnorm(bnf,ext,x,flag,PREC));
+  bnf = bnfinit0(polx[MAXVARN],2,NULL,0);
+  return gerepileupto(ltop, rnfisnorm(bnf,ext,x,flag,PREC));
 }

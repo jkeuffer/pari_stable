@@ -282,18 +282,6 @@ extern int new_galois_format;
 #define element_sqrmodideal(nf,x,ideal) (\
   nfreducemodideal((nf),element_sqr((nf),(x)),(ideal))\
 )
-#define buchgen(P,gcbach,gcbach2,prec) (\
-  buchall((P),(gcbach),(gcbach2),stoi(5),gzero,4,3,0,(prec))\
-)
-#define buchgenfu(P,gcbach,gcbach2,prec) (\
-  buchall((P),(gcbach),(gcbach2),stoi(5),gzero,4,3,2,(prec))\
-)
-#define buchinit(P,gcbach,gcbach2,prec) (\
-  buchall((P),(gcbach),(gcbach2),stoi(5),gzero,4,3,-1,(prec))\
-)
-#define buchinitfu(P,gcbach,gcbach2,prec) (\
-  buchall((P),(gcbach),(gcbach2),stoi(5),gzero,4,3,-2,(prec))\
-)
 
 /* output of get_nf and get_bnf */
 #define typ_NULL 0
