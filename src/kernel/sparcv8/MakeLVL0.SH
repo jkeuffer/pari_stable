@@ -3,7 +3,7 @@
 #   If not, they are "asm extern"
 #   The object kernel.o (resp. kernel2.o) contains entries for the functions
 #   that can (resp. cannot) be inline.
-#   Problem: "divll" uses "overflow", so kernel2.o is not the same when
+#   Problem: 'divll' uses 'hiremainder', so kernel2.o is not the same when
 #   compiled with gcc or with cc. We should try to find a workaround.
 # For NextStep or Linux
 #   We don't accept "asm inline" since it does not work (Ptitboul)
