@@ -122,6 +122,7 @@ IS 20- obscure compiler bug in rootpol.c:max_modulus() [don't modify tau]
    27- default values for used defined function arguments are evaluated when
        the function is called [used to be "when it's defined"]
    28- allow subgrouplist(znstar(5)) [didn't accept groups in general form]
+   29- taught GP about GP2C-style type declaration [ignored]
 
   Added
 BA  1- function pith() [= pi(x), naïve implementation]
