@@ -1738,7 +1738,7 @@ factorpadic2(GEN x, GEN p, long r)
 /*******************************************************************/
 extern GEN Decomp(GEN p,GEN f,long mf,GEN theta,GEN chi,GEN nu,long r);
 extern GEN nilord(GEN p, GEN fx, long mf, GEN gx, long flag);
-extern GEN hensel_lift_fact(GEN pol, GEN Q, GEN p, GEN pev, long e);
+extern GEN hensel_lift_fact(GEN pol, GEN Q, GEN T, GEN p, GEN pev, long e);
 
 static GEN
 squarefree(GEN f, GEN *ex)
@@ -1815,7 +1815,7 @@ factorpadic4(GEN f,GEN p,long prec)
     w = (GEN)factmod(fx,p)[1];
     if (!mfx)
     { /* no repeated factors: Hensel lift */
-      p1 = hensel_lift_fact(fx, lift_intern(w), p, gpowgs(p,pr), pr);
+      p1 = hensel_lift_fact(fx, lift_intern(w), NULL, p, gpowgs(p,pr), pr);
       p2 = stoi(ex[i]);
       for (k=1; k<lg(p1); k++,j++)
       {

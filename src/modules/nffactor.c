@@ -21,8 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "parinf.h"
 
-extern GEN hensel_lift(GEN pol,GEN fk,GEN fkk,GEN p,long e);
-extern GEN hensel_lift_fact(GEN pol, GEN fact, GEN p, GEN pev, long e);
+extern GEN hensel_lift_fact(GEN pol, GEN fact, GEN T, GEN p, GEN pev, long e);
 extern GEN nf_get_T2(GEN base, GEN polr);
 extern GEN nfreducemodpr_i(GEN x, GEN prh);
 extern GEN sort_factor(GEN y, int (*cmp)(GEN,GEN));
@@ -1098,7 +1097,7 @@ nfsqff(GEN nf,GEN pol, long fl)
     polred[i] = nfreducemodpr_i(gmul(lt,(GEN)polbase[i]), prh)[1];
 
   fact = lift_intern((GEN)factmod(polred,p)[1]);
-  rep = hensel_lift_fact(polred,fact,p,pk,k);
+  rep = hensel_lift_fact(polred,fact,NULL,p,pk,k);
 
   if (DEBUGLEVEL >= 4) msgtimer("computation of the p-adic factorization");
 

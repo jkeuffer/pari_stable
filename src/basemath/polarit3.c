@@ -777,7 +777,7 @@ u_FpXQ_sqr(GEN y,GEN pol,ulong p)
 }
 
 /* Inverse of x in Z/pZ[X]/(pol) or NULL if inverse doesn't exist
- * return lift(lift(Mod(x*Mod(1,p), pol*Mod(1,p))^-1)) */
+ * return lift(1 / (x mod (p,pol))) */
 GEN
 FpXQ_invsafe(GEN x, GEN T, GEN p)
 {
@@ -855,15 +855,19 @@ FpX_Fp_mul(GEN y,GEN x,GEN p)
  Clean and with no reduced hypothesis.  Beware that some operations
  will be much slower with big unreduced coefficient
 *****************************************************************/
-/* Inverse of x in Z/pZ[X]/(pol)
- * return lift(lift(Mod(x*Mod(1,p), pol*Mod(1,p))^-1)); */
+/* Inverse of x in Z[X] / (p,T)
+ * return lift(lift(Mod(x*Mod(1,p), T*Mod(1,p))^-1)); */
 GEN
-FpXQ_inv(GEN x,GEN pol,GEN p)
+FpXQ_inv(GEN x,GEN T,GEN p)
 {
-  ulong ltop=avma;
-  GEN U = FpXQ_invsafe(x, pol, p);
+  ulong av;
+  GEN U;
+
+  if (!T) return mpinvmod(x,p);
+  av = avma;
+  U = FpXQ_invsafe(x, T, p);
   if (!U) err(talker,"non invertible polynomial in FpXQ_inv");
-  return gerepileupto(ltop, U);
+  return gerepileupto(av, U);
 }
 /* generates the list of powers of x of degree 0,1,2,...,l*/
 GEN
@@ -952,9 +956,7 @@ FpX_FpXQ_compo(GEN T,GEN x,GEN pol,GEN p)
  * x in Z[X] and y in Z return x(y) mod p
  *
  * If p is very large (several longs) and x has small coefficients(<<p),
- * then Brent & Kung algorithm is faster.
- * 
- */
+ * then Brent & Kung algorithm is faster. */
 GEN
 FpX_eval(GEN x,GEN y,GEN p)
 {
@@ -1148,7 +1150,12 @@ FpXQX_red(GEN z, GEN T, GEN p)
   res[1] = evalsigne(1) | evalvarn(varn(z)) | evallgef(lgef(z));
   for(i=2;i<lgef(res);i++)
     if (typ(z[i])!=t_INT)
-      res[i]=(long)FpX_res((GEN)z[i],T,p);
+    {
+      if (T)
+        res[i]=(long)FpX_res((GEN)z[i],T,p);
+      else
+        res[i]=(long)FpX_red((GEN)z[i],p);
+    }
     else
       res[i]=lmodii((GEN)z[i],p);
   res=normalizepol_i(res,lgef(res));
@@ -1157,9 +1164,12 @@ FpXQX_red(GEN z, GEN T, GEN p)
 GEN
 FpXQX_mul(GEN x, GEN y, GEN T, GEN p)
 {
-  ulong ltop=avma;
+  ulong ltop;
   GEN z,kx,ky;
-  long vx=min(varn(x),varn(y));
+  long vx;
+  if (!T) return FpX_mul(x,y,p);
+  ltop = avma;
+  vx = min(varn(x),varn(y));
   kx= to_Kronecker(x,T);
   ky= to_Kronecker(y,T);
   z = quickmul(ky+2, kx+2, lgef(ky)-2, lgef(kx)-2);
@@ -1225,18 +1235,14 @@ FpXQX_safegcd(GEN P, GEN Q, GEN T, GEN p)
   {
     U = FpXQ_invsafe(leading_term(Q), T, p);
     if (!U) { avma = ltop; return NULL; }
-    do
+    do /* set P := P % Q */
     {
       q = FpXQ_mul(U, gneg(leading_term(P)), T, p);
       P = gadd(P, FpXQX_mul(monomial(q, dg, vx), Q, T, p));
       P = FpXQX_red(P, T, p); /* wasteful, but negligible */
       dg = lgef(P)-lgef(Q);
     } while (dg >= 0);
-    if (!signe(P))
-    {
-      Q = FpXQX_FpXQ_mul(Q, U, T, p); /* normalize GCD */
-      return gerepileupto(ltop, Q);
-    }
+    if (!signe(P)) break;
 
     if (low_stack(st_lim, stack_lim(btop, 1)))
     {
@@ -1246,6 +1252,8 @@ FpXQX_safegcd(GEN P, GEN Q, GEN T, GEN p)
     }
     swap(P, Q); dg = -dg;
   }
+  Q = FpXQX_FpXQ_mul(Q, U, T, p); /* normalize GCD */
+  return gerepileupto(ltop, Q);
 }
 
 /*******************************************************************/
@@ -1707,7 +1715,7 @@ GEN Fp_factor_irred(GEN P,GEN l, GEN Q)
   IR = (GEN)sindexrank(M)[1];
   E = rowextract_p(E, IR);
   M = rowextract_p(M, IR);
-  M = lift(invmat(M));
+  M = FpM_inv(lift(M),l);
   MQ = matrixpow(nq,d,SQ,Q,l);
   M = FpM_mul(MQ,M,l);
   M = FpM_mul(M,E,l);
@@ -1823,12 +1831,15 @@ FpM(GEN z, GEN p)
   }
   return x;
 }
-/* z in Z[X], return lift(z * Mod(1,p)), normalized*/
+/* z in Z[X] or Z, return lift(z * Mod(1,p)), normalized*/
 GEN
 FpX_red(GEN z, GEN p)
 {
-  long i,l = lgef(z);
-  GEN x = cgetg(l,t_POL);
+  long i,l;
+  GEN x;
+  if (typ(z) == t_INT) return modii(z,p);
+  l = lgef(z);
+  x = cgetg(l,t_POL);
   for (i=2; i<l; i++) x[i] = lmodii((GEN)z[i],p);
   x[1] = z[1]; return normalizepol_i(x,l);
 }
@@ -1863,10 +1874,18 @@ FpM_red(GEN z, GEN p)
 GEN
 FpX_normalize(GEN z, GEN p)
 {
-  long l = lgef(z)-1;
-  GEN p1 = (GEN)z[l]; /* leading term */
+  GEN p1 = leading_term(z);
   if (gcmp1(p1)) return z;
   return FpX_Fp_mul(z, mpinvmod(p1,p), p);
+}
+
+GEN
+FpXQX_normalize(GEN z, GEN T, GEN p)
+{
+  GEN p1 = leading_term(z);
+  if (gcmp1(p1)) return z;
+  if (!T) return FpX_normalize(z,p);
+  return FpXQX_FpXQ_mul(z, FpXQ_inv(p1,T,p), T,p);
 }
 
 GEN
@@ -2108,7 +2127,7 @@ u_FpX_divrem(GEN x, GEN y, ulong p, int malloc, GEN *pr)
   *pr = c; return q;
 }
 
-/* x and y in Z[X] */
+/* x and y in Z[X]. Possibly x in Z */
 GEN
 FpX_divres(GEN x, GEN y, GEN p, GEN *pr)
 {
@@ -2117,7 +2136,7 @@ FpX_divres(GEN x, GEN y, GEN p, GEN *pr)
 
   if (!p) return poldivres(x,y,pr);
   if (!signe(y)) err(talker,"division by zero in FpX_divres");
-  vx=varn(x); dy=deg(y); dx=deg(x);
+  vx=varn(x); dy=deg(y); dx=(typ(x)==t_INT)? 0: deg(x);
   if (dx < dy)
   {
     if (pr)
@@ -2201,6 +2220,110 @@ FpX_divres(GEN x, GEN y, GEN p, GEN *pr)
     for (j=0; j<=i && j<=dz; j++)
       p1 = subii(p1, mulii((GEN)z[j],(GEN)y[i-j]));
     tetpil=avma; rem[i]=lpile(av,tetpil, modii(p1,p));
+  }
+  rem -= 2;
+  if (lead) gunclone(lead);
+  if (!sx) normalizepol_i(rem, lrem);
+  if (pr == ONLY_REM) return gerepileupto(av0,rem);
+  *pr = rem; return z-2;
+}
+
+/* x and y in Z[Y][X]. Assume T irreducible mod p */
+GEN
+FpXQX_divres(GEN x, GEN y, GEN T, GEN p, GEN *pr)
+{
+  long vx,dx,dy,dz,i,j,av0,av,tetpil,sx,lrem;
+  GEN z,p1,rem,lead;
+
+  if (!p) return poldivres(x,y,pr);
+  if (!T) return FpX_divres(x,y,p,pr);
+  if (!signe(y)) err(talker,"division by zero in FpX_divres");
+  vx=varn(x); dy=deg(y); dx=deg(x);
+  if (dx < dy)
+  {
+    if (pr)
+    {
+      av0 = avma; x = FpXQX_red(x, T, p);
+      if (pr == ONLY_DIVIDES) { avma=av0; return signe(x)? NULL: gzero; }
+      if (pr == ONLY_REM) return x;
+      *pr = x;
+    }
+    return zeropol(vx);
+  }
+  lead = leading_term(y);
+  if (!dy) /* y is constant */
+  {
+    if (pr && pr != ONLY_DIVIDES)
+    {
+      if (pr == ONLY_REM) return zeropol(vx);
+      *pr = zeropol(vx);
+    }
+    if (gcmp1(lead)) return gcopy(x);
+    av0 = avma; x = gmul(x, FpXQ_inv(lead,T,p)); tetpil = avma;
+    return gerepile(av0,tetpil,FpXQX_red(x,T,p));
+  }
+  av0 = avma; dz = dx-dy;
+#if 0 /* FIXME: to be done */
+  if (OK_ULONG(p))
+  { /* assume ab != 0 mod p */
+    ulong pp = (ulong)p[2];
+    GEN a = u_Fp_FpX(x,1, pp);
+    GEN b = u_Fp_FpX(y,1, pp);
+    GEN zz= u_FpX_divrem(a,b,pp,1, pr);
+    if (pr && pr != ONLY_DIVIDES && pr != ONLY_REM)
+    {
+      rem = small_to_pol(*pr,vx);
+      free(*pr); *pr = rem;
+    }
+    z = small_to_pol(zz,vx);
+    free(zz); free(a); free(b); return z;
+  }
+#endif
+  lead = gcmp1(lead)? NULL: gclone(FpXQ_inv(lead,T,p));
+  avma = av0;
+  z=cgetg(dz+3,t_POL);
+  z[1]=evalsigne(1) | evallgef(dz+3) | evalvarn(vx);
+  x += 2; y += 2; z += 2;
+
+  p1 = (GEN)x[dx]; av = avma;
+  z[dz] = lead? lpileupto(av, FpX_res(gmul(p1,lead), T, p)): lcopy(p1);
+  for (i=dx-1; i>=dy; i--)
+  {
+    av=avma; p1=(GEN)x[i];
+    for (j=i-dy+1; j<=i && j<=dz; j++)
+      p1 = gsub(p1, gmul((GEN)z[j],(GEN)y[i-j]));
+    if (lead) p1 = gmul(FpX_res(p1, T, p), lead);
+    tetpil=avma; z[i-dy] = lpile(av,tetpil,FpX_res(p1, T, p));
+  }
+  if (!pr) { if (lead) gunclone(lead); return z-2; }
+
+  rem = (GEN)avma; av = (long)new_chunk(dx+3);
+  for (sx=0; ; i--)
+  {
+    p1 = (GEN)x[i];
+    for (j=0; j<=i && j<=dz; j++)
+      p1 = gsub(p1, gmul((GEN)z[j],(GEN)y[i-j]));
+    tetpil=avma; p1 = FpX_res(p1, T, p); if (signe(p1)) { sx = 1; break; }
+    if (!i) break;
+    avma=av;
+  }
+  if (pr == ONLY_DIVIDES)
+  {
+    if (lead) gunclone(lead);
+    if (sx) { avma=av0; return NULL; }
+    avma = (long)rem; return z-2;
+  }
+  lrem=i+3; rem -= lrem;
+  rem[0]=evaltyp(t_POL) | evallg(lrem);
+  rem[1]=evalsigne(1) | evalvarn(vx) | evallgef(lrem);
+  p1 = gerepile((long)rem,tetpil,p1);
+  rem += 2; rem[i]=(long)p1;
+  for (i--; i>=0; i--)
+  {
+    av=avma; p1 = (GEN)x[i];
+    for (j=0; j<=i && j<=dz; j++)
+      p1 = gsub(p1, gmul((GEN)z[j],(GEN)y[i-j]));
+    tetpil=avma; rem[i]=lpile(av,tetpil, FpX_res(p1, T, p));
   }
   rem -= 2;
   if (lead) gunclone(lead);
@@ -2319,8 +2442,7 @@ FpX_extgcd_long(GEN x, GEN y, GEN p, GEN *ptu, GEN *ptv)
 }
 
 /* x and y in Z[X], return lift(gcd(x mod p, y mod p)). Set u and v st
- * ux + vy = gcd (mod p)
- */
+ * ux + vy = gcd (mod p) */
 GEN
 FpX_extgcd(GEN x, GEN y, GEN p, GEN *ptu, GEN *ptv)
 {
@@ -2353,7 +2475,44 @@ FpX_extgcd(GEN x, GEN y, GEN p, GEN *ptu, GEN *ptv)
   *ptu = u; *ptv = v; return d;
 }
 
-GEN caractducos(GEN p, GEN x, int v);
+/* x and y in Z[Y][X], return lift(gcd(x mod T,p, y mod T,p)). Set u and v st
+ * ux + vy = gcd (mod T,p) */
+GEN
+FpXQX_extgcd(GEN x, GEN y, GEN T, GEN p, GEN *ptu, GEN *ptv)
+{
+  GEN a,b,q,r,u,v,d,d1,v1;
+  long ltop,lbot;
+
+#if 0 /* FIXME To be done...*/ 
+  if (OK_ULONG(p)) return FpXQX_extgcd_long(x,y,T,p,ptu,ptv);
+#endif
+  if (!T) return FpX_extgcd(x,y,p,ptu,ptv);
+  ltop=avma;
+  a = FpXQX_red(x, T, p);
+  b = FpXQX_red(y, T, p);
+  d = a; d1 = b; v = gzero; v1 = gun;
+  while (signe(d1))
+  {
+    q = FpXQX_divres(d,d1,T,p, &r);
+    v = gadd(v, gneg_i(gmul(q,v1)));
+    v = FpXQX_red(v,T,p);
+    u=v; v=v1; v1=u;
+    u=r; d=d1; d1=u;
+  }
+  u = gadd(d, gneg_i(gmul(b,v)));
+  u = FpXQX_red(u,T, p);
+  lbot = avma;
+  u = FpXQX_divres(u,a,T,p,NULL);
+  d = gcopy(d);
+  v = gcopy(v);
+  {
+    GEN *gptr[3]; gptr[0] = &d; gptr[1] = &u; gptr[2] = &v;
+    gerepilemanysp(ltop,lbot,gptr,3);
+  }
+  *ptu = u; *ptv = v; return d;
+}
+
+extern GEN caractducos(GEN p, GEN x, int v);
 
 GEN
 FpXQ_charpoly(GEN x, GEN T, GEN p)
