@@ -23,7 +23,6 @@ extern GEN u_FpM_deplin(GEN x, ulong p);
 extern GEN u_FpM_inv(GEN a, ulong p);
 extern GEN famat_ideallog(GEN nf, GEN g, GEN e, GEN bid);
 extern GEN famat_to_nf_modidele(GEN nf, GEN g, GEN e, GEN bid);
-extern GEN hnfall_i(GEN A, GEN *ptB, long remove);
 extern GEN vconcat(GEN A, GEN B);
 
 /*******************************************************************/

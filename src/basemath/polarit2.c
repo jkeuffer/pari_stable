@@ -962,8 +962,6 @@ gram_schmidt(GEN e, GEN *ptB)
   *ptB = B; return f;
 }
 
-extern GEN hnfall_i(GEN A, GEN *ptB, long remove);
-
 GEN
 special_pivot(GEN x)
 {

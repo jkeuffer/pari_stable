@@ -1075,8 +1075,6 @@ QV_elem(GEN aj, GEN ak, GEN A, long j, long k)
   A[j] = (long)QV_lincomb(aj,ak, p1,(GEN)A[j]);
 }
 
-extern GEN hnfall_i(GEN A, GEN *ptB, long remove);
-
 static GEN
 matrixqz_aux(GEN A)
 {

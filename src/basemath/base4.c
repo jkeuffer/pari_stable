@@ -24,7 +24,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #define principalideal_aux(nf,x) (principalideal0((nf),(x),0))
 
-extern GEN hnfall_i(GEN A, GEN *ptB, long remove);
 extern GEN makeprimetoideal(GEN nf,GEN UV,GEN uv,GEN x);
 extern GEN gauss_triangle_i(GEN A, GEN B,GEN t);
 extern GEN hnf_invimage(GEN A, GEN b);
