@@ -1471,6 +1471,7 @@ getprime(decomp_t *S, GEN phi, GEN chip, GEN nup, long *Lp, long *Ep)
     r += q*E;
     s += q*L;
   }
+  /* r > 0 minimal such that r L/E - s = 1/E */
 
   pip = RX_RXQ_compo(nup, phi, S->chi);
   pip = lift_intern(gpowgs(gmodulcp(pip, S->chi), r));
