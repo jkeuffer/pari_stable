@@ -850,7 +850,7 @@ nfsqff(GEN nf,GEN pol, long fl)
     { 
       p2 = gmul(run, (GEN)polbase[i]);
       p1 = addrr(p1, qfeval(T2, p2));
-      if (signe(p2) < 0) break;
+      if (signe(p1) < 0) break;
     }
 
     if (signe(p1) > 0) break;
