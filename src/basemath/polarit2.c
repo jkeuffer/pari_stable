@@ -558,7 +558,7 @@ cmbf(GEN target, GEN famod, GEN pe, long maxK, long klim,long hint)
   GEN res = cgetg(3, t_VEC);
   GEN bound = all_factor_bound(target);
 
-  if (!maxK) maxK = lfamod-1;
+  if (maxK < 0) maxK = lfamod-1;
 
   lc = absi(leading_term(target));
   lctarget = gmul(lc,target);
@@ -1058,18 +1058,18 @@ combine_factors(GEN a, GEN famod, GEN p, long klim, long hint)
 
   if (DEBUGLEVEL > 4) fprintferr("Mignotte bound: %Z\n", B);
   famod = hensel_lift_fact(a,famod,p,pe,e);
-  if (nft < 11) maxK = 0;
+  if (nft < 11) maxK = -1; /* few modular factors: try all posibilities */
   else
   {
     lt = leading_term(a);
-    if (!is_pm1(lt) && nft < 13) maxK = 0;
+    if (!is_pm1(lt) && nft < 13) maxK = -1;
   }
   L = cmbf(a, famod, pe, maxK, klim, hint);
 
   res     = (GEN)L[1];
   listmod = (GEN)L[2]; l = lg(listmod);
   famod = (GEN)listmod[l-1];
-  if (maxK && lg(famod)-1 > maxK)
+  if (maxK >= 0 && lg(famod)-1 > maxK)
   {
     a = (GEN)res[l-1];
     lt = leading_term(a);
