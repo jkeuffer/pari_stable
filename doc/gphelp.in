@@ -46,11 +46,8 @@ $version= "@version@";
 $miscdir= "@miscdir@";
 # no expanded material (@key@) below
 $wwwsite= "http://www.parigp-home.de/";
-$docdir = $ENV{GPDOCDIR} || $ENV{GPHELP_DOCDIR} || '';
-$docdir = './doc' if not $docdir and -f './doc/translations';
-$docdir = '../doc' if not $docdir and -f '../doc/translations';
-if ($docdir =~ (/^\./)) { chomp($cwd = `pwd`); $docdir = "$cwd/$docdir"; }
-$docdir ||= $miscdir;
+$docdir = $ENV{GPDOCDIR} || $ENV{GPHELP_DOCDIR} || $miscdir;
+$docdir .= "/doc" if (! -r "$docdir/translations");
 
 $xdvi = $ENV{GPXDVI} || "xdvi";
 $xdviref = $ENV{GPXDVIREF} || "$xdvi -paper 29.7x21cm";
