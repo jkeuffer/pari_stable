@@ -40,6 +40,10 @@ Done for version 2.2.2 (released ??/??/2001):
     1- allow compressing *.dvi files for the online help system
     2- index bound was restricted to MAXLONG in subgrouplist. Made it a GEN
     3- try to guess correct precision earlier in polgalois/polroots
+    4- allow GP pointers to 'matrix components', e.g issquare(25,&x[i][j])
+    5- changed assignment semantics to make it closer to C: x = y understood as
+       (evaluate Y:=y, then X:=x, then set X:=Y), e.g i = 0; i += (i=2) now
+       sets i to 4  (was 2)
 
   Added
 BA  1- New function 'vectorsmall'.
