@@ -665,7 +665,7 @@ get_trace(GEN ind, trace_data *T)
     /* quick approximate computation */
     for (j=1; j<=K; j++) t += T->PinvSdbl[ ind[j] ][i];
     r = floor(t + 0.5);
-    if (fabs(t + 0.5 - r) < 0.01)
+    if (fabs(t + 0.5 - r) < 0.0001)
     { /* dubious, compute exactly */
       z = gzero;
       for (j=1; j<=K; j++) z = addii(z, ((GEN**)T->dPinvS)[ ind[j] ][i]);
@@ -702,8 +702,10 @@ init_trace(trace_data *T, GEN S, nflift_t *L, GEN q)
   {
     double *t = dalloc(h * sizeof(double));
     GEN c = (GEN)T->dPinvS[j];
+    pari_sp av = avma;
     T->PinvSdbl[j] = t;
     for (i=1; i < h; i++) t[i] = rtodbl(mpmul(invd, (GEN)c[i]));
+    avma = av;
   }
 
   T->d  = L->den;
