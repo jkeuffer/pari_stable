@@ -54,6 +54,8 @@ BA  5- [Configure:] add -lm -lc to EXTRADLLDFLAGS, not DLLDFLAGS
 BA 13- sigma(n,-1) output a wrong result. 
 BA 14- inline alpha assembler broken (registers clobbered)
 GH 15- polsturm(1, 0, 1) ---> error  [ return 0! ]
+   16- "break loop" did not react correctly to allocatemem() read from a file
+       with \r (stopped reading file right away)
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available
