@@ -2444,54 +2444,51 @@ on online help is not relevant).
 
 Note that if for some reason the session crashes (due to a bug in your
 program or in the PARI system), you will usually stay under Emacs, but the
-\kbd{gp}
-buffer will be killed. To recover it, simply type again \kbd{M-x gp} (or
-\kbd{C-u M-x gp}), and a new session of \kbd{gp} will be started after the old one,
-so you can recover what you have typed. Note that this will of course
-\emph{not} work if for some reason you kill Emacs and start a new session.
+\kbd{gp} buffer will be killed. To recover it, simply type again \kbd{M-x gp}
+(or \kbd{C-u M-x gp}), and a new session of \kbd{gp} will be started after
+the old one, so you can recover what you have typed. Note that this will of
+course \emph{not} work if for some reason you kill Emacs and start a new
+session.
 
-\smallskip
-You also have at your disposal a few other commands and many possible
-customizations (colours, prompt). Read the file \kbd{emacs/pariemacs.txt} in
-standard distribution for details.
+\smallskip You also have at your disposal a few other commands and many
+possible customizations (colours, prompt). Read the file
+\kbd{emacs/pariemacs.txt} in standard distribution for details.
 
 
-\section{Using readline}
-\sidx{line editor}\sidx{completion}
+\section{Using readline} \sidx{line editor}\sidx{completion}
 
   Thanks to the initial help of Ilya Zakharevich, there is a possibility of
-line editing and command name completion outside of an Emacs buffer
-\emph{if} you have compiled \kbd{gp} with the GNU \idx{readline} library. If you
-don't have Emacs available, or can't stand using it, we really advise you
-to make sure you get this very useful library before configuring or
-compiling \kbd{gp}. In fact, with \kbd{readline}, even line editing becomes
-\emph{more} powerful outside an Emacs buffer!
+line editing and command name completion outside of an Emacs buffer \emph{if}
+you have compiled \kbd{gp} with the GNU \idx{readline} library. If you don't
+have Emacs available, or can't stand using it, we really advise you to make
+sure you get this very useful library before configuring or compiling
+\kbd{gp}. In fact, with \kbd{readline}, even line editing becomes \emph{more}
+powerful outside an Emacs buffer!
 
-\subsec{A (too) short introduction to readline}:
-\label{se:readline}
-  The basics are as follows (read the readline user manual~!), assume that
-\kbd{C-} stands for ``the \kbd{Control} key combined with another'' and the
-same for \kbd{M-} with the \kbd{Meta} key (generally \kbd{C-} combinations
-act on characters, while the \kbd{M-} ones operate on words). The \kbd{Meta}
-key might be called \kbd{Alt} on some keyboards, will display a black diamond
-on most others, and can safely be replaced by \kbd{Esc} in any case. Typing
-any ordinary key inserts text where the cursor stands, the arrow keys
-enabling you to move in the line. There are many more movement commands,
-which will be familiar to the Emacs user, for instance \kbd{C-a}/\kbd{C-e}
-will take you to the start/end of the line, \kbd{M-b}/\kbd{M-f} move the
-cursor backward/forward by a word, etc. Just press the \kbd{<Return>} key at
-any point to send your command to \kbd{gp}.
+\subsec{A (too) short introduction to readline}: \label{se:readline} The
+basics are as follows (read the readline user manual~!), assume that \kbd{C-}
+stands for ``the \kbd{Control} key combined with another'' and the same for
+\kbd{M-} with the \kbd{Meta} key (generally \kbd{C-} combinations act on
+characters, while the \kbd{M-} ones operate on words). The \kbd{Meta} key
+might be called \kbd{Alt} on some keyboards, will display a black diamond on
+most others, and can safely be replaced by \kbd{Esc} in any case. Typing any
+ordinary key inserts text where the cursor stands, the arrow keys enabling
+you to move in the line. There are many more movement commands, which will be
+familiar to the Emacs user, for instance \kbd{C-a}/\kbd{C-e} will take you to
+the start/end of the line, \kbd{M-b}/\kbd{M-f} move the cursor
+backward/forward by a word, etc. Just press the \kbd{<Return>} key at any
+point to send your command to \kbd{gp}.
 
   All the commands you type in are stored in a history (with multiline
-commands being saved as single concatenated lines). The Up and Down arrows (or
-\kbd{C-p}/\kbd{C-n}) will move you through it, \kbd{M-<}/\kbd{M->} sending
-you to the start/end of the history. \kbd{C-r}/\kbd{C-s} will start an
-incremental backward/forward search. You can kill text (\kbd{C-k} kills till
-the end of line, \kbd{M-d} to the end of current word) which you can then
-yank back using the \kbd{C-y} key (\kbd{M-y} will rotate the kill-ring).
+commands being saved as single concatenated lines). The Up and Down arrows
+(or \kbd{C-p}/\kbd{C-n}) will move you through it, \kbd{M-<}/\kbd{M->}
+sending you to the start/end of the history. \kbd{C-r}/\kbd{C-s} will start
+an incremental backward/forward search. You can kill text (\kbd{C-k} kills
+till the end of line, \kbd{M-d} to the end of current word) which you can
+then yank back using the \kbd{C-y} key (\kbd{M-y} will rotate the kill-ring).
 \kbd{C-\_} will undo your last changes incrementally (\kbd{M-r} undoes all
-changes made to the current line). \kbd{C-t} and \kbd{M-t} will transpose
-the character (word) preceding the cursor and the one under the cursor.
+changes made to the current line). \kbd{C-t} and \kbd{M-t} will transpose the
+character (word) preceding the cursor and the one under the cursor.
 
   Keeping the \kbd{M-} key down while you enter an integer (a minus sign
 meaning reverse behaviour) gives an argument to your next readline command
