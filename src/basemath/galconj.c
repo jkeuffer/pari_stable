@@ -300,7 +300,7 @@ galoisborne(GEN T, GEN dn, struct galois_borne *gb, long ppp)
   if (DEBUGLEVEL >= 4)
     fprintferr("GaloisConj:val1=%ld val2=%ld\n", gb->valsol, gb->valabs);
   avma = av2;
-  gb->bornesol = gerepileupto(ltop, ceil_safe(borneroots));
+  gb->bornesol = gerepileupto(ltop, ceil_safe(mulrs(borneroots,2)));
   if (DEBUGLEVEL >= 9)
     fprintferr("GaloisConj: Bound %Z\n",borneroots);
   gb->ladicsol = gpowgs(gb->l, gb->valsol);
@@ -369,6 +369,8 @@ poltopermtest(GEN f, struct galois_lift *gl, GEN pf)
     {
       if (DEBUGLEVEL>=4)
 	fprintferr("GaloisConj: Solution too large, discard it.\n");
+      if (DEBUGLEVEL>=8)
+	fprintferr("f=%Z\n borne=%Z\n l-borne=%Z\n",f,gl->gb->bornesol,gl->gb->lbornesol);
       return 0;
     }
   ll=lg(gl->L);
@@ -2785,6 +2787,8 @@ galoisgenfixedfield(GEN Tp, GEN Pmod, GEN V, GEN ip, struct galois_borne *gb, GE
   PL=(GEN)V[1];
   gp=lg(Pmod)-1;
   Pp = FpX_red(P,ip);
+  if (DEBUGLEVEL>=6)
+    fprintferr("GaloisConj: Fixed field %Z\n",P);
   if (degpol(P)==2)
   {
     PG=cgetg(3,t_VEC);
