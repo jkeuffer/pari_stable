@@ -1393,62 +1393,65 @@ GEN
 mplog(GEN x)
 {
   ulong av, ltop;
-  long EX,l,l1,l2,m,n,i,ex,s;
+  long EX,l,l1,l2,m,n,k,ex,s;
   double alpha,a,b;
-  GEN y,p1,p2,p3,p4,p5,unr;
+  GEN z,p1,y,y2,p4,p5,unr;
 
   if (typ(x)!=t_REAL) err(typeer,"mplog");
   if (signe(x)<=0) err(talker,"non positive argument in mplog");
 
   av = avma;
   l = lg(x); EX = expo(x);
-  y = cgetr(l); ltop = avma;
+  z = cgetr(l); ltop = avma;
 
-  l2 = l+1; p2=p1=cgetr(l2); affrr(x,p1);
+  l2 = l+1; y=p1=cgetr(l2); affrr(x,p1);
   setexpo(p1, 0);
   if (gcmp1(p1)) {
     if (!EX) { avma = av; return realzero(l); }
-    affrr(mulsr(EX, mplog2(l)), y);
-    avma = ltop; return y;
+    affrr(mulsr(EX, mplog2(l)), z);
+    avma = ltop; return z;
   }
   /* 1 < p1 < 2 */
-  av = avma;
+  av = avma; l -= 2;
   alpha = 1+p1[2]/C31; if (!alpha) alpha = 0.00000001;
-  l -= 2; alpha = -log(alpha);
-  a = alpha/LOG2;
+  a = -log(alpha)/LOG2;
   b = sqrt(BITS_IN_HALFULONG*l/3.0);
-  if (a<=b)
+  if (a <= b)
   {
     n = 1 + (long)sqrt(BITS_IN_HALFULONG*3.0*l);
     m = 1 + (long)(b-a);
     l2 += m>>TWOPOTBITS_IN_LONG;
     p4 = cgetr(l2); affrr(p1,p4);
     p1 = p4; av = avma;
-    for (i=1; i<=m; i++) p1 = mpsqrt(p1);
+    for (k=1; k<=m; k++) p1 = mpsqrt(p1);
     affrr(p1,p4); avma = av;
   }
   else
   {
-    n = 1 + (long)(BITS_IN_HALFULONG*l * LOG2/alpha);
+    n = 1 + (long)(BITS_IN_HALFULONG*l / a);
     m = 0; p4 = p1;
   }
   unr = realun(l2);
-  p2 = cgetr(l2);
-  p3 = cgetr(l2); av = avma;
+  y  = cgetr(l2);
+  y2 = cgetr(l2); av = avma;
+
+  /* want to compute log(X), X ~ 1  (X = p4) */
+  /* y = (X-1)/(X+1).  log(X) = log(1+y) - log(1-y) = 2 \sum_{k odd} y^k / * k */
 
   /* affrr needed here instead of setlg since prec may DECREASE */
   p1 = cgetr(l2); affrr(subrr(p4,unr), p1);
 
   p5 = addrr(p4,unr); setlg(p5,l2);
-  affrr(divrr(p1,p5), p2);
-  affrr(mulrr(p2,p2), p3);
-  affrr(divrs(unr,2*n+1), p4); setlg(p4,4); avma = av;
+  affrr(divrr(p1,p5), y); /* = (X-1) / (X+1) ~ 0 */
+  affrr(gsqr(y), y2); /* = y^2 */
+  k = 2*n + 1;
+  affrr(divrs(unr,k), p4); setlg(p4,4); avma = av;
 
-  s = 0; ex = expo(p3); l1 = 4;
-  for (i=n; i>=1; i--)
-  {
-    setlg(p3, l1); p5 = mulrr(p4,p3);
-    setlg(unr,l1); p1 = divrs(unr,2*i-1);
+  s = 0; ex = expo(y2); l1 = 4;
+  for (k -= 2; k > 0; k -= 2)
+  { /* compute sum_i=0^n  y^2i / (2i + 1), k = 2i+1 */
+    setlg(y2, l1); p5 = mulrr(p4,y2);
+    setlg(unr,l1); p1 = divrs(unr, k);
     s -= ex;
     l1 += s>>TWOPOTBITS_IN_LONG; if (l1>l2) l1=l2;
     s &= (BITS_IN_LONG-1);
@@ -1457,9 +1460,10 @@ mplog(GEN x)
     setlg(p5, l1); affrr(addrr(p1,p5), p4); avma=av;
   }
   setlg(p4, l2);
-  p2 = mulrr(p2,p4); setexpo(p2, expo(p2)+m+1);
-  if (EX) p2 = addrr(p2, mulsr(EX, mplog2(l2)));
-  affrr(p2, y); avma = ltop; return y;
+  y = mulrr(y,p4); /* = log(X)/2 */
+  setexpo(y, expo(y)+m+1);
+  if (EX) y = addrr(y, mulsr(EX, mplog2(l2)));
+  affrr(y, z); avma = ltop; return z;
 }
 
 GEN
