@@ -33,7 +33,12 @@ language=`ls $src_dir/language/*.c | sed 's,.*/\(.*\)\.c,\1,'`
 basemath=`ls $src_dir/basemath/*.c | sed 's,.*/\(.*\)\.c,\1,'`
 modules=`ls $src_dir/modules/*.c   | sed 's,.*/\(.*\)\.c,\1,'`
 
-if test m68k = "$ASMARCH"; then hlist=pari68k; else hlist=pariport; fi
+case "$ASMARCH" in
+  m68k) hlist=pari68k
+  kerntest=kernel.old;; # OLD_CODES should be defined
+  *) hlist=pariport
+  kerntest=kernel;;
+esac
 hlist="pari paritype paricast paricom parierr parigen paristio parisys $hlist"
 
 HEADERS=''
@@ -245,7 +250,7 @@ kerntest: $KERNOBJS mp\$(_O) kerntest\$(_O)
 
 test-kernel:: kerntest
 	@./kerntest > gp.out;\
-	diff -c gp.out $src/test/$numbits/kernel > kern.dif;\
+	diff -c gp.out $src/test/$numbits/$kerntest > kern.dif;\
 	if test -s kern.dif; then echo "KERNEL BUG"; else echo OK; fi
 EOT
 if test -n "$ranlib"; then

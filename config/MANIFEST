@@ -209,6 +209,7 @@ src/test/32/analyz
 src/test/32/compat
 src/test/32/elliptic
 src/test/32/kernel
+src/test/32/kernel.old
 src/test/32/graph
 src/test/32/linear
 src/test/32/nfields
