@@ -9,6 +9,7 @@ void recover(int flag);
 void pari_addfunctions(module **modlist_p, entree *func, char **help);
 int term_height();
 int term_width();
+void hit_return();
 
 extern ulong init_opts;
 extern char *current_logfile;
