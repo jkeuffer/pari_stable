@@ -2780,14 +2780,14 @@ hnfperm_i(GEN A, GEN *ptU, GEN *ptperm)
       else
         u[t++] = U[j];
     *ptU = u;
-    *ptperm = small_to_vec(perm);
+    *ptperm = perm;
     gerepileall(av, 3, &p, ptU, ptperm);
   }
   else
   {
     for (k=r,j=1; j<=n; j++)
       if (l[j]) p[k--] = (long)vecextract_p((GEN)A[j], perm);
-    if (ptperm) *ptperm = small_to_vec(perm);
+    if (ptperm) *ptperm = perm;
     gerepileall(av, ptperm? 2: 1, &p, ptperm);
   }
   return p;
@@ -2799,7 +2799,7 @@ hnfperm(GEN A)
   GEN U, perm, y = cgetg(4, t_VEC);
   y[1] = (long)hnfperm_i(A, &U, &perm);
   y[2] = (long)U;
-  y[3] = (long)perm; return y;
+  y[3] = (long)small_to_vec(perm); return y;
 }
 
 /* Hermite Normal Form */
