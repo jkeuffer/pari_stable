@@ -709,10 +709,10 @@ nfiso0(GEN a, GEN b, long fliso)
 {
   pari_sp av = avma;
   long n,m,i,vb,lx;
-  GEN nfa,nfb,p1,y,la,lb;
+  GEN nfa, nfb, p1, y, la, lb;
 
-  a = get_nfpol(a, &nfa);
-  b = get_nfpol(b, &nfb);
+  a = primpart(get_nfpol(a, &nfa)); 
+  b = primpart(get_nfpol(b, &nfb));
   if (fliso && nfa && !nfb) { p1=a; a=b; b=p1; p1=nfa; nfa=nfb; nfb=p1; }
   m=degpol(a);
   n=degpol(b); if (m<=0 || n<=0) err(constpoler,"nfiso or nfincl");

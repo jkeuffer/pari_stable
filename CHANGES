@@ -54,6 +54,7 @@ ellpointtoz(E,[x1,y1]); -->  impossible addition t_VEC + t_VEC.
     8- sum(i=2^32-10,2^32+10,1) --> 11  [ kind of overflow ] + didn't use the 
        t_INT interface ==> broken with GMP kernel
     9- polgalois(x^6-3*x^4+3) --> [24, -1, 1], should be [24, -1, 2]. From 2.2.4
+   10- nfisincl(x, x^2+1/2) --> SEGV   [ assumed integral inputs ]
 
   Changed
     1- bnfinit: [small_norm phase] speed up norm computations.
