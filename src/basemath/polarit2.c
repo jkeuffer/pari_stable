@@ -748,6 +748,7 @@ root_bound(GEN P)
 }
 
 extern GEN gscal(GEN x,GEN y);
+extern GEN sqscal(GEN x);
 
 /* return Gram-Schmidt orthogonal basis (f) associated to (e), B is the
  * vector of the (f_i . f_i)*/
@@ -777,6 +778,8 @@ gram_schmidt(GEN e, GEN *ptB)
   *ptB = B; return f;
 }
 
+extern GEN lincomb_integral(GEN u, GEN v, GEN X, GEN Y);
+
 /* gauss pivot on integer matrix x. Check that each line contains a single
  * non zero entry, equal to \pm 1 */
 GEN 
@@ -790,7 +793,7 @@ special_pivot(GEN x)
   x = dummycopy(x);
   for (i=1; i<lx; i++)
   {
-    p1 = (GEN)x[i];
+    p1 = (GEN)x[i]; p = NULL;
     for (j=1; j<hx; j++)
     {
       long a = absi_cmp((GEN)p1[j], gun);
