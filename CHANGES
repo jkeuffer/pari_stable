@@ -83,7 +83,7 @@ IZ 41- CLK_TCK may reside in time.h
    45- bnfinit(x^4+65,,[.1]) --> SEGV   (whenever c < c2)
    46- when host badily configured (~ not expanded), gp would die on startup 
 XR 47- factorpadic(, not a prime, ) --> SEGV
-
+   48- matrix(2,2,i,i, ...) allowed, with weird result
 
   Changed
     1- removed useless parameter prec in many bnr* and rnf* functions
