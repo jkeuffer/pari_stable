@@ -101,7 +101,7 @@ $2=\kbd{Recursive}$, \dots}
 i.e.~everything unset).
 
 \misctitle{Pointers}.\sidx{pointer} If a parameter in the function
-prototype is prefixed with a \& sign, as in 
+prototype is prefixed with a \& sign, as in
 
 \key{foo}$(x,\&e)$
 
@@ -180,7 +180,7 @@ integers, add \kbd{O(p\pow k)} to the result; finally, to obtain the
 \syn{gdiv}{x,y} for $x$ \kbd{/} $y$.
 
 \subseckbd{\bs}: The expression \kbd{$x$ \bs\ $y$} is the \idx{Euclidean
-quotient} of $x$ and $y$. If $y$ is a real scalar, this is defined as 
+quotient} of $x$ and $y$. If $y$ is a real scalar, this is defined as
 \kbd{floor($x$/$y$)} if $y > 0$, and \kbd{ceil($x$/$y$)} if $y < 0$ and
 the division is not exact. Hence the remainder \kbd{$x$ - ($x$\bs$y$)*$y$}
 is in $[0, |y|[$.
@@ -503,7 +503,7 @@ character string (type \typ{STR}, the empty string if $x$ is omitted). To
 recover an ordinary \kbd{GEN} from a string, apply \kbd{eval} to it. The
 arguments of \kbd{Str} are evaluated in string context (see
 \secref{se:strings}). If \fl\ is set, treat $x$ as a filename and perform
-\idx{environment expansion} on the string. This feature can be used to read 
+\idx{environment expansion} on the string. This feature can be used to read
 \idx{environment variable} values.
 
 \bprog
@@ -532,7 +532,7 @@ taken into account, but this time by increasing order of degree.
 \syn{gtovec}{x}.
 
 \subsecidx{Vecsmall}$({x=[\,]})$: transforms the object $x$ into a row
-vector of type \typ{VECSMALL}. This acts as \kbd{Vec}, but only on a 
+vector of type \typ{VECSMALL}. This acts as \kbd{Vec}, but only on a
 limited set of objects (the result must be representable as a vector of small
 integers). In particular, polynomials and power series are forbidden.
 
@@ -554,7 +554,7 @@ Negative numbers behave as if modulo a huge power of $2$.
 \syn{gbitand}{x,y}.
 
 \subsecidx{bitneg}$(x,\{n=-1\})$: \idx{bitwise negation} of an integer $x$,
-truncated to $n$ bits, that is the integer 
+truncated to $n$ bits, that is the integer
 $$\sum_{i=0}^n \kbd{not}(x_i) 2^i$$
 The special case $n=-1$ means no truncation: an infinite sequence of
 leading $1$ is then represented as a negative number.
@@ -851,7 +851,7 @@ An important use of \kbd{round} is to get exact results after a long
 approximate computation, when theory tells you that the coefficients
 must be integers.
 
-\syn{grndtoi}{x,\&e}, where $e$ is a \kbd{long} integer. Also available is 
+\syn{grndtoi}{x,\&e}, where $e$ is a \kbd{long} integer. Also available is
 $\teb{ground}(x)$.
 
 \subsecidx{simplify}$(x)$: this function tries to simplify the object $x$ as
@@ -1221,7 +1221,7 @@ $\kbd{gamma}(x+1/2)$.
 \syn{ggamma}{x,\var{prec}}.
 
 \subsecidx{hyperu}$(a,b,x)$: $U$-confluent hypergeometric function with
-parameters $a$ and $b$. The parameters $a$ and $b$ can be complex but 
+parameters $a$ and $b$. The parameters $a$ and $b$ can be complex but
 the present implementation requires $x$ to be positive.
 
 \syn{hyperu}{a,b,x,\var{prec}}.
@@ -1709,7 +1709,7 @@ command. A few examples:
 
 [0 0 16]
 ? nf = nfinit(x^2+1); fa = idealfactor(nf, 10)
-%5 = 
+%5 =
 [[2, [1, 1]~, 2, 1, [1, 1]~] 2]
 
 [[5, [-2, 1]~, 1, 1, [2, 1]~] 1]
@@ -1895,7 +1895,7 @@ If $\fl = 0$, checks whether $x$ is a Baillie-Pomerance-Selfridge-Wagstaff
 pseudo prime (strong Rabin-Miller pseudo prime for base $2$, with
 end-matching to catch square roots of $-1$, followed by strong Lucas test for
 the sequence $(P,-1)$, $P$ smallest positive integer such that $P^2 - 4$ is
-not a square mod $x$). 
+not a square mod $x$).
 
 There are no known composite numbers passing this test (in particular, all
 composites $\leq 10^{13}$ are correctly detected), although it is expected
@@ -2173,7 +2173,7 @@ $\Q(\sqrt{x})$, where $x\in\Q$.
 \idx{Hilbert class field} of the quadratic field of discriminant $D$.
 If $\fl$ is non-zero
 and $D<0$, outputs $[\var{form},\var{root}(\var{form})]$ (to be used for
-constructing subfields). If $\fl$ is non-zero and $D>0$, try hard to 
+constructing subfields). If $\fl$ is non-zero and $D>0$, try hard to
 get the best modulus.
 Uses complex multiplication in the imaginary case and \idx{Stark units}
 in the real case.
@@ -2207,7 +2207,7 @@ element of \kbd{bnf} necessary for Schertz's method. In that case, returns
 0 if $\lambda$ is not suitable.
 
 For $D>0$, uses Stark's conjecture. If $\fl$ is non-zero, try hard to
-get the best modulus. The function may fail with the following message 
+get the best modulus. The function may fail with the following message
 \bprog
 "Cannot find a suitable modulus in FindModulus"
 @eprog
@@ -2251,10 +2251,10 @@ negative $x$ is allowed, and the result in that case is \kbd{I*sqrtint(-x)}.
 
 \subsecidx{znlog}$(x,g)$: $g$ must be a primitive root mod a prime $p$, and
 the result is the discrete log of $x$ in the multiplicative group
-$(\Z/p\Z)^*$. This function uses a simple-minded combination of 
+$(\Z/p\Z)^*$. This function uses a simple-minded combination of
 Pohlig-Hellman algorithm and Shanks baby-step/giant-step which requires
 $O(\sqrt{q})$ storage, where $q$ is the largest prime factor of $p-1$. Hence
-it cannot be used when the largest prime divisor of $p-1$ is greater than 
+it cannot be used when the largest prime divisor of $p-1$ is greater than
 about $10^{13}$.
 
 \syn{znlog}{x,g}.
@@ -3597,7 +3597,7 @@ base field is $\Q$, the vastly simpler \tet{galoissubcyclo} is used instead.
 \fl\ is optional and may be set to 0 (default) to obtain a reduced relative
 polynomial, 1 to be satisfied with any relative polynomial, 2 to obtain an
 absolute polynomial and 3 to obtain the irreducible relative polynomial of
-the Stark unit. Example: 
+the Stark unit. Example:
 \bprog
 bnf = bnfinit(y^2 - 3);
 bnr = bnrinit(bnf, 5, 1);
@@ -3608,10 +3608,10 @@ returns the ray class field of $\Q(\sqrt{3})$ modulo $5$.
 \misctitle{Remark.} The result of the computation depends on the choice of
 a modulus verifying special conditions. By default the function will try
 few moduli, choosing the one giving the smallest result. In some cases
-where the result is however very large, you can tell the function to 
+where the result is however very large, you can tell the function to
 try more moduli by adding $4$ to the value of flag. Whether this flag is
 set or not, the function may fail in some extreme cases, returning the
-error message 
+error message
 
   \kbd{"Cannot find a suitable modulus in FindModule"}.
 
@@ -3736,8 +3736,8 @@ exceptions.
 \quad$\bullet$ for any $x\in G$ there exists a unique family
 $[e_1,\ldots,e_g]$ such that (no exceptions):
 
--- for $1\leq i \leq g$ we have $0\leq e_i<o_i$ 
-	
+-- for $1\leq i \leq g$ we have $0\leq e_i<o_i$
+
 -- $x=g_1^{e_1}g_2^{e_2}\ldots g_n^{e_n}$
 
 If present $den$ must be a suitable value for $\var{gal}[5]$.
@@ -4380,7 +4380,7 @@ else use a combination of flag $4$ and $2$ and the result is subject
 to the restriction of $\fl=2$, but a warning is issued when it is not
 proven complete.
 
-If $\fl=1$, use \kbd{nfroots} (require a number field). 
+If $\fl=1$, use \kbd{nfroots} (require a number field).
 
 If $\fl=2$, use complex approximations to the roots and an integral
 \idx{LLL}. The result is not guaranteed to be complete: some
@@ -4404,7 +4404,7 @@ exceptions having order 36(1 exception), 48(2), 56(1), 60(1), 72(5), 75(1),
 
 Hence $\fl = 4$ permits to quickly check whether a polynomial of order
 strictly less than $36$ is Galois or not. This method is much faster than
-\kbd{nfroots} and can be applied to polynomials of degree larger than $50$. 
+\kbd{nfroots} and can be applied to polynomials of degree larger than $50$.
 
 \syn{galoisconj0}{\var{nf},\fl,d,\var{prec}}. Also available are
 $\teb{galoisconj}(\var{nf})$ for $\fl=0$,
@@ -4459,7 +4459,7 @@ $MD$, $TI$, $MDI$ useful for certain computations in the number field $K$.
 
 \quad$\bullet$ $M$ is the $(r1+r2)\times n$ matrix whose columns represent
 the numerical values of the conjugates of the elements of the integral
-basis. 
+basis.
 
 \quad$\bullet$ $G$ is such that $T2 = {}^t G G$, where $T2$ is the quadratic
 form $T_2(x) = \sum |\sigma(x)|^2$, $\sigma$ running over the embeddings of
@@ -4788,7 +4788,7 @@ The binary digits of $\fl$ mean
 output and $a$ is an element expressed on a root of the polynomial $P$,
 whose minimal polynomial is equal to $x$.
 
-4: gives \emph{all} polynomials of minimal $T_2$ norm (of the two polynomials 
+4: gives \emph{all} polynomials of minimal $T_2$ norm (of the two polynomials
 $P(x)$ and $P(-x)$, only one is given).
 
 16: possibly use a suborder of the maximal order. The primes dividing the
@@ -5182,7 +5182,7 @@ rnfisnorm(T, 17)
 
 \syn{rnfisnorm}{\var{T},x,\fl}.
 
-\subsecidx{rnfisnorminit}$(\var{pol},\var{polrel},\{\fl=2\})$: 
+\subsecidx{rnfisnorminit}$(\var{pol},\var{polrel},\{\fl=2\})$:
 let $K$ be defined by a root of \var{pol}, and $L/K$ the extension defined by
 the polynomial \var{polrel}. As usual, \var{pol} can in fact be an \var{nf},
 or \var{bnf}, etc; if \var{pol} has degree $1$ (the base field is $\Q$),
@@ -5394,7 +5394,7 @@ derivative of a vector or matrix is done componentwise. One can use $x'$ as a
 shortcut if the derivative is with respect to the main variable of $x$.
 
 \syn{deriv}{x,v}, where $v$ is a \kbd{long}, and an omitted $v$ is coded as
-$-1$. When $x$ is a \typ{POL}, $\tet{derivpol}(x)$ is a shortcut for 
+$-1$. When $x$ is a \typ{POL}, $\tet{derivpol}(x)$ is a shortcut for
 $\kbd{deriv}(x, -1)$.
 
 \subsecidx{eval}$(x)$: replaces in $x$ the formal variables by the values that
@@ -5593,10 +5593,10 @@ polynomial \var{pol} in the interval $]a,b]$, using Sturm's algorithm. $a$
 
 \subsecidx{polsubcyclo}$(n,d,\{v=x\})$: gives polynomials (in variable
 $v$) defining the sub-Abelian extensions of degree $d$ of the cyclotomic
-field $\Q(\zeta_n)$, where $d\mid \phi(n)$. 
+field $\Q(\zeta_n)$, where $d\mid \phi(n)$.
 
 If there is exactly one such extension the output is a polynomial, else it is
-a vector of polynomials, eventually empty. 
+a vector of polynomials, eventually empty.
 
 To be sure to get a vector, you can use \kbd{concat([],polsubcyclo(n,d))}
 
@@ -5813,7 +5813,7 @@ elements are concatenated, from left to right, using the above rules.
 ? a = [[1,2]~, [3,4]~]; concat(a)
 %2 = [1, 2, 3, 4]~
 ? a[1] = Mat(a[1]); concat(a)
-%3 = 
+%3 =
 [1 3]
 
 [2 4]
@@ -6364,7 +6364,7 @@ extracted.
 If $y$ is a vector, which must have integer entries, these entries correspond
 to the component numbers to be extracted, in the order specified.
 
-If $y$ is a string, it can be 
+If $y$ is a string, it can be
 
 $\bullet$ a single (non-zero) index giving a component number (a negative
 index means we start counting from the end).
@@ -6490,7 +6490,7 @@ must be no singularities in the interval or at the boundaries. In practice
 this can be accomplished with a simple change of variable. Furthermore, for
 improper integrals, where one or both of the limits of integration are plus
 or minus infinity, the function must decrease sufficiently rapidly at
-infinity. This can often be accomplished through integration by parts. 
+infinity. This can often be accomplished through integration by parts.
 Finally, the function to be integrated should not be very small
 (compared to the current precision) on the entire interval. This can
 of course be accomplished by just multiplying by an appropriate
@@ -6568,7 +6568,7 @@ If $\fl=1$, do the product of the ($1+\var{expr}$) instead.
 \teb{prodinf1} with the same arguments ($\fl=1$).
 
 \subsecidx{solve}$(X=a,b,\var{expr})$: find a real root of expression
-\var{expr} between $a$ and $b$, under the condition 
+\var{expr} between $a$ and $b$, under the condition
 $\var{expr}(X=a) * \var{expr}(X=b) \le 0$.
 This routine uses Brent's method and can fail miserably if \var{expr} is
 not defined in the whole of $[a,b]$ (try \kbd{solve(x=1, 2, tan(x)}).
@@ -6842,7 +6842,7 @@ $$\kbd{ploth(X=-1,1,sin(1/X),2)}\quad
  \text{and}\quad\kbd{ploth(X=-1,1,sin(1/X))}$$
 for instance. But beware that if you are extremely unlucky, or choose too few
 reference points, you may draw some nice polygon bearing little resemblance
-to the original curve. For instance you should \emph{never} plot recursively 
+to the original curve. For instance you should \emph{never} plot recursively
 an odd function in a symmetric interval around 0. Try
 \bprog
   ploth(x = -20, 20, sin(x), 2)
@@ -7013,7 +7013,7 @@ if bit 32 is set (see the tutorial for an example).
 \subsecidx{plotterm}$(\var{term})$: sets terminal where high resolution
 plots go (this is currently only taken into account by the \kbd{gnuplot}
 graphical driver). Using the \kbd{gnuplot} driver, possible terminals are
-the same as in gnuplot. If \var{term} is "?", lists possible values. 
+the same as in gnuplot. If \var{term} is "?", lists possible values.
 
 Terminal options can be appended to the terminal name and space; terminal
 size can be put immediately after the name, as in \kbd{"gif=300,200"}.
@@ -7062,7 +7062,7 @@ be in $\R$.
 
 \bprog
 ? { forprime(p = 2, 12,
-      print(p); 
+      print(p);
       if (p == 3, p = 6);
     )
   }
@@ -7089,7 +7089,7 @@ successive steps are used in the order they appear in $s$.
 @eprog
 
 \subsubsecidx{forsubgroup}$(H=G,\{B\},\var{seq})$: executes \var{seq} for
-each subgroup $H$ of the \emph{abelian} group $G$ (given in 
+each subgroup $H$ of the \emph{abelian} group $G$ (given in
 SNF\sidx{Smith normal form} form or as a vector of elementary divisors),
 whose index is bounded by $B$. The subgroups are not ordered in any
 obvious way, unless $G$ is a $p$-group in which case Birkhoff's algorithm
@@ -7107,7 +7107,7 @@ example, the following prints all subgroups of index less than 2 in $G =
 @eprog
 The last one, for instance is generated by $(g_1, g_1 + g_2)$. This
 routine is intended to treat huge groups, when \tet{subgrouplist} is not an
-option due to the sheer size of the output. 
+option due to the sheer size of the output.
 
 For maximal speed the subgroups have been left as produced by the algorithm.
 To print them in canonical form (as left divisors of $G$ in
