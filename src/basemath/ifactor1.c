@@ -1810,46 +1810,10 @@ fin:
 /**                 (Cf. Algorithm 8.7.2 in ACiCNT)                   **/
 /**                                                                   **/
 /***********************************************************************/
+extern long scarrecomplet(ulong A);
+static long squfof_ambig(long a, long B, long C, long dd, GEN D, long *cntamb);
 
 #define SQUFOF_BLACKLIST_SZ 64
-
-static long
-squfof_ambig(long a, long B, long C, long dd, GEN D, long *cntamb);
-/* see below */
-
-#ifdef INLINE
-INLINE
-#endif
-long
-squfof_issquare(long A)
-{
-  /* emulate carrecomplet on single-word positive integers */
-  static int carresmod64[]={
-    1,1,0,0,1,0,0,0,0,1, 0,0,0,0,0,0,1,1,0,0,
-    0,0,0,0,0,1,0,0,0,0, 0,0,0,1,0,0,1,0,0,0,
-    0,1,0,0,0,0,0,0,0,1, 0,0,0,0,0,0,0,1,0,0,
-    0,0,0,0};
-  static int carresmod63[]={
-    1,1,0,0,1,0,0,1,0,1, 0,0,0,0,0,0,1,0,1,0,
-    0,0,1,0,0,1,0,0,1,0, 0,0,0,0,0,0,1,1,0,0,
-    0,0,0,1,0,0,1,0,0,1, 0,0,0,0,0,0,0,0,1,0,
-    0,0,0};
-  static int carresmod65[]={
-    1,1,0,0,1,0,0,0,0,1, 1,0,0,0,1,0,1,0,0,0,
-    0,0,0,0,0,1,1,0,0,1, 1,0,0,0,0,1,1,0,0,1,
-    1,0,0,0,0,0,0,0,0,1, 0,1,0,0,0,1,1,0,0,0,
-    0,1,0,0,1};
-  static int carresmod11[]={1,1,0,1,1,1,0,0,0,1,0};
-  long a;
-
-  if (!carresmod64[A & 0x3fUL]) return 0;
-  if (!carresmod63[A % 63UL]) return 0;
-  if (!carresmod65[A % 65UL]) return 0;
-  if (!carresmod11[A % 11UL]) return 0;
-
-  a = (long)sqrt((double)A);
-  return (a*a == A ? a : 0);
-}
 
 GEN
 squfof(GEN n, long quiet)
@@ -2062,7 +2026,7 @@ squfof(GEN n, long quiet)
     }
     if (act1)
     {
-      if ((a = squfof_issquare(a1)) != 0) /* square form? */
+      if ((a = scarrecomplet(a1)) != 0) /* square form? */
       {
 	if (mydebug >= 4)
 	{
@@ -2168,7 +2132,7 @@ squfof(GEN n, long quiet)
     }
     if (act2)
     {
-      if ((a = squfof_issquare(a2)) != 0) /* square form? */
+      if ((a = scarrecomplet(a2)) != 0) /* square form? */
       {
 	if (mydebug >= 4)
 	{

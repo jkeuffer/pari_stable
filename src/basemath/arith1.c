@@ -344,27 +344,37 @@ racine(GEN a)
 /**                      PERFECT SQUARE                             **/
 /**                                                                 **/
 /*********************************************************************/
+static int carresmod64[]={
+  1,1,0,0,1,0,0,0,0,1, 0,0,0,0,0,0,1,1,0,0, 0,0,0,0,0,1,0,0,0,0,
+  0,0,0,1,0,0,1,0,0,0, 0,1,0,0,0,0,0,0,0,1, 0,0,0,0,0,0,0,1,0,0,
+  0,0,0,0};
+static int carresmod63[]={
+  1,1,0,0,1,0,0,1,0,1, 0,0,0,0,0,0,1,0,1,0, 0,0,1,0,0,1,0,0,1,0,
+  0,0,0,0,0,0,1,1,0,0, 0,0,0,1,0,0,1,0,0,1, 0,0,0,0,0,0,0,0,1,0,
+  0,0,0};
+static int carresmod65[]={
+  1,1,0,0,1,0,0,0,0,1, 1,0,0,0,1,0,1,0,0,0, 0,0,0,0,0,1,1,0,0,1,
+  1,0,0,0,0,1,1,0,0,1, 1,0,0,0,0,0,0,0,0,1, 0,1,0,0,0,1,1,0,0,0,
+  0,1,0,0,1};
+static int carresmod11[]={1,1,0,1,1,1,0,0,0,1,0};
+
+/* emulate carrecomplet on single-word positive integers */
+long
+scarrecomplet(ulong A)
+{
+  long a;
+
+  if (!carresmod64[A & 0x3fUL]
+   || !carresmod63[A % 63UL]
+   || !carresmod65[A % 65UL]
+   || !carresmod11[A % 11UL]) return 0;
+  a = (long)sqrt((double)A);
+  return (a*a == A ? a : 0);
+}
 
 long
 carrecomplet(GEN x, GEN *pt)
 {
-  static int carresmod64[]={
-    1,1,0,0,1,0,0,0,0,1, 0,0,0,0,0,0,1,1,0,0,
-    0,0,0,0,0,1,0,0,0,0, 0,0,0,1,0,0,1,0,0,0,
-    0,1,0,0,0,0,0,0,0,1, 0,0,0,0,0,0,0,1,0,0,
-    0,0,0,0};
-  static int carresmod63[]={
-    1,1,0,0,1,0,0,1,0,1, 0,0,0,0,0,0,1,0,1,0,
-    0,0,1,0,0,1,0,0,1,0, 0,0,0,0,0,0,1,1,0,0,
-    0,0,0,1,0,0,1,0,0,1, 0,0,0,0,0,0,0,0,1,0,
-    0,0,0};
-  static int carresmod65[]={
-    1,1,0,0,1,0,0,0,0,1, 1,0,0,0,1,0,1,0,0,0,
-    0,0,0,0,0,1,1,0,0,1, 1,0,0,0,0,1,1,0,0,1,
-    1,0,0,0,0,0,0,0,0,1, 0,1,0,0,0,1,1,0,0,0,
-    0,1,0,0,1};
-  static int carresmod11[]={1,1,0,1,1,1,0,0,0,1,0};
-
   long av;
   GEN y;
 
@@ -372,12 +382,18 @@ carrecomplet(GEN x, GEN *pt)
   {
     case -1: return 0;
     case 0: if (pt) *pt=gzero; return 1;
-    case 1: if (!carresmod64[mod64(x)]) return 0;
   }
-  if (!carresmod63[smodis(x,63)]) return 0;
-  if (!carresmod65[smodis(x,65)]) return 0;
-  if (!carresmod11[smodis(x,11)]) return 0;
-  av=avma; y=racine(x);
+  if (lgefint(x) == 3)
+  {
+    long a = scarrecomplet((ulong)x[2]);
+    if (pt) *pt = stoi(a);
+    return a? 1: 0;
+  }
+  if (!carresmod64[mod64(x)]
+   || !carresmod63[smodis(x,63)]
+   || !carresmod65[smodis(x,65)]
+   || !carresmod11[smodis(x,11)]) return 0;
+  av=avma; y = racine(x);
   if (!egalii(sqri(y),x)) { avma=av; return 0; }
   if (pt) { *pt = y; avma=(long)y; } else avma=av; 
   return 1;
