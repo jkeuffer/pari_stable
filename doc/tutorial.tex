@@ -1434,8 +1434,11 @@ the rank of this curve must be high. Let's try and put some order into this
 (note that we work only with the integral points, but in general rational
 points should also be considered).
 
-Type \kbd{hv = ellheight(e, v)}. This gives the vector of canonical heights.
-Let us order the points according to their height. For this, type
+Type \kbd{hv = ellheight(e, Vec(v))}. (We convert the list to a vector
+because \typ{LIST}s are not accepted as input by most functions. They must be
+converted to a standard vector type first.) This gives the vector of
+canonical heights. Let us order the points according to their height. For
+this, type
 \bprog
   iv = vecsort(hv,, 1);    \\@com indirect sorting
   hv = vecextract(hv, iv);
