@@ -11,5 +11,5 @@ Function: _forvec_start
 Class: gp2c_internal
 Help: Initializes parameters for forvec_start.
 Description:
- (gen, small, &gen, &func_GG):vec:copy         forvec_start($1, $2, &$3, &$4)
+ (gen, small, &gen, &func_GG):vec    forvec_start($1, $2, &$3, &$4)
 
