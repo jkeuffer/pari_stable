@@ -51,6 +51,7 @@ Section "documentation" SecDOC
   SetOutPath "$INSTDIR"
   File "..\doc\gphelp"
   SetOutPath $INSTDIR\doc
+  File "acro.exe"
   File "..\doc\translations"
   File "..\doc\*.tex"
   File "..\doc\*.pdf"

@@ -1,6 +1,9 @@
-case "$which_graphic_lib" in
-  fltk) if test -z "$with_fltk"; then with_fltk=yes; fi ;;
-esac
+if test -z "$with_fltk"; then
+  case "$which_graphic_lib" in
+    fltk) with_fltk=yes;;
+  esac
+  if test -z "$X11"; then with_fltk=yes; fi
+fi
 if test -n "$with_fltk"; then
   which_graphic_lib=fltk
   FLTKDIR=

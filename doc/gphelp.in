@@ -51,9 +51,10 @@ $docdir = $ENV{GPDOCDIR} || $ENV{GPHELP_DOCDIR};
 if (!defined $docdir) {
   # work from TOPDIR/Oarch or TOPDIR too: may be uninstalled yet;
   my $d = $0; $d =~ s,/gphelp,,;
-  for ("$miscdir/doc", './doc', '../doc', $d) {
-    if (-r "$_/translations") {
-      $docdir = $_;
+  for ("$miscdir", '.', '..', $d) {
+    my $t = "$_/doc";
+    if (-r "$t/translations") {
+      $docdir = $t;
       last;
     }
   }
@@ -64,6 +65,7 @@ if ($docdir =~ /^\./) {
   eval {
     require Cwd;
     $docdir = Cwd::cwd() . "/$docdir";
+    $docdir =~ s,doc/\.\./doc,doc,;
   }
 }
 
@@ -192,7 +194,7 @@ sub safe_setsid
 sub open_viewer_then_quit
 {
   my $F = shift;
-  my ($f, $viewer);
+  my ($f, $viewer, $redirect);
   my $win32 = ($^O =~ /(cyg|ms)win/);
 
   $f = "$F.dvi";
@@ -204,20 +206,30 @@ sub open_viewer_then_quit
   $f = "$docdir/$F.pdf" if (! -f "$f");
   die "could not find \'$F\'" if (! -f "$f");
 
+  $redirect = "2>/dev/null >/dev/null &";
   if ($f =~ /\.dvi/)
   { # DVI
     $viewer = ($f =~ /refcard/)? $xdviref: $xdvi;
   }
+  elsif ($win32)
+  { # PDF Win32
+    $_ = `"$docdir/acro.exe"`;
+    chop; s/\"%1\"//; s,\\,/,g;
+    $viewer = $_;
+
+    $docdir =~ s,/cygdrive/(.),$1:, ; # Reader can't cope with Cygwin paths
+    $redirect = "";
+  }
   else
-  { # PDF
-    $viewer = ($win32)? "AcroRd32.exe": "acroread";
+  { # PDF generic
+    $viewer = "acroread";
   }
 
   if ($f =~ /\//) { $F = "$f"; } else { $F = "$docdir/$f"; }
   print "displaying \'$F\'.";
   print "\n" if (!$fromgp);
   safe_setsid();
-  system("$viewer $f 2>/dev/null >/dev/null &");
+  system("$viewer $F$redirect");
   cleanexit();
 }
 
@@ -384,7 +396,7 @@ sub apropos
 #
 sub tex_mktmp
 {
-  $basedir = $ENV{GPHELP_TMPDIR} || $ENV{GPTMPDIR} || $ENV{TMPDIR} || "/tmp";
+  my $basedir = $ENV{GPHELP_TMPDIR} || $ENV{GPTMPDIR} || $ENV{TMPDIR} || "/tmp";
   $tmpdir = "$basedir/gp.help$$";
   mkdir $tmpdir, 0755 || die("Cannot create temporary directory");
   $texfile = "$tmpdir/gp.help";

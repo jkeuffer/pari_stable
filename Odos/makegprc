@@ -21,4 +21,4 @@ EOT
 ;
 close(OUT);
 print "Done ...\n";
-sleep(3);
+sleep(2);
