@@ -49,6 +49,13 @@ cat > $file << EOT
 /* in readline 1, no arguments for rl_refresh_line() */
 #  define RL_REFRESH_LINE_OLDPROTO
 #endif
+#ifdef __MINGW32__
+#  define READLINE "4.0"
+#  define HAS_COMPLETION_APPEND_CHAR
+#  define HAS_RL_SAVE_PROMPT
+#  define HAS_RL_MESSAGE
+#  define CPPFunction_defined
+#endif
 
 /* No exp2, log2 in libc */
 #define NOEXP2

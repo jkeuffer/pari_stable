@@ -1,8 +1,7 @@
 # Makefile for Pari/GP -- ix86 running DOS (ix86 kernel)
-#
-#  This file was created by hand. Update it when config/ evolves
-#
-SHELL     = /bin/sh
+# This file was created by hand. Update it when config/ evolves
+# $Id$
+SHELL    = /bin/sh
 
 CFLAGS   = -O3 -DGCC_INLINE -Wall
 #  Uncomment for debugging version
@@ -11,15 +10,18 @@ CFLAGS   = -O3 -DGCC_INLINE -Wall
 
 LDOBJS  =$(OBJS)
 LDOBJSGP=$(OBJSGP)
-#  Uncomment if the shell complains about long lines
+#  Uncomment if the shell complains about long lines (bash will not, DOS will)
 #LDOBJS  =@objs
 #LDOBJSGP=@objsgp
 
-#  Correct according to your local configuration
-PREFIX=/usr/local/cross-tools/i386-mingw32
-PREFIXBIN=$(PREFIX)
+#  Correct according to your local configuration. We expect to find
+#    standard libraries    in $PREFIX/lib
+#    standard headers      in $PREFIX/include
+#    gcc                   in $PREFIXBIN/bin
+PREFIX=/usr/local/cross-tools/i386-mingw32msvc
 #PREFIX=/usr/local
 PREFIXBIN=/usr/local/cross-tools
+#PREFIXBIN=$(PREFIX)
 
 CC        = $(PREFIXBIN)/bin/gcc
 LD        = $(CC)
@@ -28,11 +30,12 @@ CPPFLAGS  = -I. -I../src/headers -I$(PREFIX)/include
 LDFLAGS   = -L$(PREFIX)/lib
 
 #  Uncomment (and correct) if you use EMX
-#EMXBIND    = emxbind -q C:/emx/bin/emxl.exe  gp gp.exe -C0
+#EMXBIND   = emxbind -q C:/emx/bin/emxl.exe  gp gp.exe -C0
 #LDFLAGS   = -Zsysv-signals
 
 RLLIBS    = -lreadline
-#  Uncomment if you use GPRL.ZIP
+#  Uncomment if you use GPRL.ZIP or correct if you installed readline in a
+#  non-standard place
 #RLDIR     = ../readline
 #RLINCLUDE = -I$(RLDIR)
 #RLLIBS    = -L$(RLDIR) -lreadline -ltermcap

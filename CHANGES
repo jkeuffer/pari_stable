@@ -35,6 +35,7 @@ BA  1- gpflog could print some lines twice
     2- return() could forget objects on heap
     3- polhensellift didn't accept factors which were not squarefree
     4- Configure missed some shared libraries (when only .so.version was there)
+    5- non-standard major/minor version number combo in libpari.so (Linux)
 
   Changed
     1- DOS distribution archives (GPM removed)
@@ -59,6 +60,7 @@ TH  5- support cygwin version 1
     8- trap (break loop) + NO readline + ^C at input time --> exit.
     9- qfminim(,,,1) --> nonsensical result (typo)
    10- SPARC + gcc-2.97 --> bug in addsmulsi (register reset too soon)
+   11- trapping allocatemem() could crash GP
    
   Changed
     1- release PARI under the GNU GPL. Remove COPYRIGHT file, add COPYING
