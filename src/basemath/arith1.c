@@ -734,6 +734,7 @@ kronecker(GEN x, GEN y)
   const pari_sp av = avma;
   GEN z;
   long s = 1, r;
+  ulong xu, yu;
 
   switch (signe(y))
   {
@@ -748,7 +749,7 @@ kronecker(GEN x, GEN y)
     y = shifti(y,-r);
   }
   x = modii(x,y);
-  while (lgefint(y) > 3) /* x < y */
+  while (lgefint(x) > 3) /* x < y */
   {
     r = vali(x);
     if (r)
@@ -760,8 +761,18 @@ kronecker(GEN x, GEN y)
     if (modBIL(x) & modBIL(y) & 2) s = -s;
     z = remii(y,x); y = x; x = z;
   }
-  avma = av;
-  return krouu_s(itou(x), itou(y), s);
+  xu = itou(x);
+  if (!xu) return is_pm1(y)? s: 0;
+  r = vals(xu);
+  if (r)
+  {
+    if (odd(r) && gome(y)) s = -s;
+    xu >>= r;
+  }
+  /* x=3 mod 4 && y=3 mod 4 ? (both are odd here) */
+  if (xu & modBIL(y) & 2) s = -s;
+  yu = umodiu(y, xu);
+  avma = av; return krouu_s(yu, xu, s);
 }
 
 GEN
@@ -770,24 +781,24 @@ gkrogs(GEN x, long y) { return arith_proto2gs(krois,x,y); }
 long
 krois(GEN x, long y)
 {
-  ulong y1;
+  ulong yu;
   long s = 1, r;
 
   if (y <= 0)
   {
     if (y == 0) return is_pm1(x);
-    y1 = (ulong)-y; if (signe(x) < 0) s = -1;
+    yu = (ulong)-y; if (signe(x) < 0) s = -1;
   }
   else
-    y1 = (ulong)y;
-  r = vals(y1);
+    yu = (ulong)y;
+  r = vals(yu);
   if (r)
   {
     if (!mpodd(x)) return 0;
     if (odd(r) && gome(x)) s = -s;
-    y1 >>= r;
+    yu >>= r;
   }
-  return krouu_s(umodiu(x, y1), y1, s);
+  return krouu_s(umodiu(x, yu), yu, s);
 }
 
 long
@@ -795,7 +806,7 @@ krosi(long x, GEN y)
 {
   const pari_sp av = avma;
   long s = 1, r;
-  ulong u;
+  ulong u, xu;
 
   switch (signe(y))
   {
@@ -809,7 +820,11 @@ krosi(long x, GEN y)
     if (odd(r) && ome(x)) s = -s;
     y = shifti(y,-r);
   }
-  (void)sdivsi_rem(x,y, &x);
+  if (x < 0) { x = -x; if (mod4(y) == 3) s = -s; }
+  xu = (ulong)x;
+  if (lgefint(y) == 3)
+    return krouu_s(xu, itou(y), s);
+  if (!x) return 0; /* y != 1 */
   r = vals(x);
   if (r)
   {
@@ -818,32 +833,32 @@ krosi(long x, GEN y)
   }
   /* x=3 mod 4 && y=3 mod 4 ? (both are odd here) */
   if (x & modBIL(y) & 2) s = -s;
-  u = umodiu(y, (ulong)x);
-  avma = av; return krouu_s(u, (ulong)x, s);
+  u = umodiu(y, xu);
+  avma = av; return krouu_s(u, xu, s);
 }
 
 long
 kross(long x, long y)
 {
-  ulong y1;
+  ulong yu;
   long s = 1, r;
 
   if (y <= 0)
   {
     if (y == 0) return (labs(x)==1);
-    y1 = (ulong)-y; if (x < 0) s = -1;
+    yu = (ulong)-y; if (x < 0) s = -1;
   }
   else
-    y1 = (ulong)y;
-  r = vals(y1);
+    yu = (ulong)y;
+  r = vals(yu);
   if (r)
   {
     if (!odd(x)) return 0;
     if (odd(r) && ome(x)) s = -s;
-    y1 >>= r;
+    yu >>= r;
   }
-  x = x % (long)y1; if (x < 0) x += y1;
-  return krouu_s((ulong)x, y1, s);
+  x %= (long)yu; if (x < 0) x += yu;
+  return krouu_s((ulong)x, yu, s);
 }
 
 long
