@@ -1168,18 +1168,18 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
 
 extern GEN primitive_pol_to_monic(GEN pol, GEN *ptlead);
 
-/* Return P(h * x). Assume P in Z[X], h in Z */
+/* Return P(h * x) */
 GEN
 unscale_pol(GEN P, GEN h)
 {
   long i, l = lgef(P);
   GEN hi = gun, Q = cgetg(l, t_POL);
   Q[1] = P[1];
-  Q[2] = licopy((GEN)P[2]);
+  Q[2] = lcopy((GEN)P[2]);
   for (i=3; i<l; i++)
   {
-    hi = mulii(hi,h);
-    Q[i] = lmulii((GEN)P[i], hi);
+    hi = gmul(hi,h);
+    Q[i] = lmul((GEN)P[i], hi);
   }
   return Q;
 }
