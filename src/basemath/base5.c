@@ -334,7 +334,10 @@ rnfelementreltoabs(GEN rnf,GEN x)
 	}
       }
       p1=(GEN)rnf[11]; polabs=(GEN)p1[1]; alpha=(GEN)p1[2]; k=(GEN)p1[3];
-      teta=gmodulcp(gsub(polx[va],gmul(k,(GEN)alpha[2])),polabs);
+      if (typ(alpha) == t_INT)
+	teta=gmodulcp(gsub(polx[va],gmul(k,alpha)),polabs);
+      else
+	teta=gmodulcp(gsub(polx[va],gmul(k,(GEN)alpha[2])),polabs);
       s=gzero;
       for (i=lgef(x)-1; i>1; i--)
       {
