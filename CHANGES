@@ -45,6 +45,7 @@ IZ 15- ploth() plots are 1/2-pixel off
 BA 16- result was not always complete in nfgaloisconj()
    17- type(1/y, RFRACN) --> SEGV + check compatibility before applying type()
    18- made 'secure' safer. Confirm before write, prevent from changing 'help'
+   19- gettime() called the wrong timer(): was reset in debug mode
 
   Added
 IZ  1- [gnuplot] look up directory tree for gnuplot related files

@@ -921,7 +921,7 @@ long
 getstack() { return top-avma; }
 
 long
-gettime() { return timer2(); }
+gettime() { return timer(); }
 
 /***********************************************************************/
 /**							              **/
