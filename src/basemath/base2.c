@@ -2208,7 +2208,7 @@ primedec(GEN nf, GEN p)
 {
   gpmem_t av=avma,tetpil;
   long i,j,k,kbar,np,c,indice,N,lp;
-  GEN ex,F,list,ip,elth,h;
+  GEN ex,F,list,ip,elth;
   GEN modfrob,algebre,algebre1,b,mat1,T;
   GEN alpha,beta,f,g,h,p1,p2,unmodp,zmodp,idmodp;
 
