@@ -1553,17 +1553,16 @@ x.j = correct\_ell\_if\_needed(x)[13];
 \label{se:strings}
 
 \noindent
-GP variables can now hold values of type character string
-(internal type \typ{STR}).
-This section describes how they are actually used, as well as some convenient
-tricks (automatic concatenation and expansion, keywords) valid in string
-context.
+GP variables can now hold values of type character string (internal type
+\typ{STR}). This section describes how they are actually used, as well as
+some convenient tricks (automatic concatenation and expansion, keywords)
+valid in string context.
 
-As explained above, the general way to input a string is to enclose characters
-between quotes~\kbd{"}. This is the only input construct where whitespace
-characters are significant: the string will contain the exact number
-of spaces you typed in. Besides, you can ``escape'' characters by putting a
-\kbd{\bs} just before them; this has the following effects:
+As explained above, the general way to input a string is to enclose
+characters between quotes~\kbd{"}. This is the only input construct where
+whitespace characters are significant: the string will contain the exact
+number of spaces you typed in. Besides, you can ``escape'' characters by
+putting a \kbd{\bs} just before them; this has the following effects:
 
 {
 \def\q{\quad}
@@ -1619,8 +1618,7 @@ before. Then typing \kbd{aaa} by itself in a string context will actually
 produce the correct output (i.e.~the string whose content is aaa), but in a
 fortuitous way. This \kbd{aaa} gets expanded to the monomial of degree one in
 the variable \kbd{aaa}, which is of course printed as \kbd{aaa}, and thus
-will expand to the three letters you were expecting. But you will have
-defined a variable as a side effect.
+will expand to the three letters you were expecting.
 
 $\bullet$ Since there are cases where expansion is not really desirable, we
 now distinguish between ``Keywords'' and ``Strings''. String is what has been
@@ -1630,16 +1628,13 @@ or not. Thus expansion is never performed on them. They get concatenated,
 though. The analyzer supplies automatically the quotes you have ``forgotten''
 and treats Keywords just as normal strings otherwise. For instance, if you
 type \kbd{"a"b+b} in Keyword context, you will get the string whose contents
-are ab+b. In String context, on the other hand, you would get a2\kbd{*}b
-(and you would have created the variable \kbd{b} in the process if it didn't
-exist before, but not the variable~\kbd{a}).
+are ab+b. In String context, on the other hand, you would get a2\kbd{*}b.
 
-All GP functions have prototypes (described in Chapter~3 below) which specify
-the types of arguments they expect: either generic PARI objects (GEN),
-or strings, or keywords, or unevaluated expression sequences.
-In the keyword case, only a very small set of words
-will actually be meaningful (the \kbd{default} function is a prominent
-example).
+All GP functions have prototypes (described in Chapter~3 below) which
+specify the types of arguments they expect: either generic PARI objects
+(GEN), or strings, or keywords, or unevaluated expression sequences. In the
+keyword case, only a very small set of words will actually be meaningful
+(the \kbd{default} function is a prominent example).
 
 Let's now try some not-so-stupid exercises to get the hang of it. Try to
 guess the results of the following commands without actually typing them,
@@ -1658,7 +1653,7 @@ generic matrices\sidx{generic matrix}:
 
 \bprog%
 ? genmat(u,v,s="x") = \idx{matrix}(u,v,i,j, eval(Str(s "" i "" j)))
-? genmat(2,3) + genmat(2,3,m)
+? genmat(2,3) + genmat(2,3,"m")
 \%1 =
 [x11 + m11 x12 + m12 x13 + m13]
 [x21 + m21 x22 + m22 x23 + m23]
@@ -1666,11 +1661,13 @@ generic matrices\sidx{generic matrix}:
 
 \noindent
 Note that the argument of \kbd{Str} is evaluated in string context, and
-really consists of 5 pieces (exercise: why are the empty strings necessary?).
-This part could also have been written as \kbd{concat(concat(Str(s), i), j)}
-(but \var{not} as \kbd{concat(Str(s), concat(i,j))}!). In practice,
-\kbd{Str} will often be easier to use than \kbd{concat}, if slightly more
-cryptic.
+really consists of 5 pieces (exercise: why are the empty strings
+necessary?). This part could also have been written as
+\kbd{concat(concat(Str(s), i), j)} (but \var{not} as \kbd{concat(Str(s),
+concat(i,j))}!). More simply, we could have written \kbd{concat([Str(s),
+i,j])}, or even \kbd{concat([s,i,j])}, silently assuming that \kbd{s} will
+indeed be a string. In practice \kbd{Str} is much more efficient, if
+slightly more cryptic.
 
 \noindent The arguments of the following functions are processed in string
 context:
