@@ -28,39 +28,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  * need to reintroduce codewords ]
  * Use speci(a,na) to visualize the coresponding GEN.
  */
-/* a + b*Y */
-GEN
-addsmulsi(long a, long b, GEN Y)
-{
-  GEN yd,y,z;
-  long ny,lz;
-  LOCAL_HIREMAINDER;
-  LOCAL_OVERFLOW;
-
-  if (!signe(Y)) return stoi(a);
-
-  y = Y+2; z = (GEN)avma;
-  ny = lgefint(Y)-2;
-  lz = ny+3;
-
-  (void)new_chunk(lz);
-  yd = y + ny; *--z = addll(a, mulll(b, *--yd));
-  while (overflow && yd > y) 
-  {
-    hiremainder++; overflow = (hiremainder == 0);
-    *--z = addmul(b,*--yd);
-  }
-  if (overflow) *--z = hiremainder+1;
-  else
-  {
-    while (yd > y) *--z = addmul(b,*--yd);
-    if (hiremainder) *--z = hiremainder; else lz--;
-  }
-  *--z = evalsigne(1) | evallgefint(lz);
-  *--z = evaltyp(t_INT) | evallg(lz);
-  avma=(long)z; return z;
-}
-
 
 /* z2 := z1[imin..imax].f shifted left sh bits (feeding f from the right) */
 #define shift_left2(z2,z1,imin,imax,f, sh,m) {\
@@ -754,6 +721,39 @@ mului(ulong x, GEN y)
   if (!s || !x) return gzero;
   z = mulsispec(x, y+2, lgefint(y)-2);
   setsigne(z,s); return z;
+}
+
+/* a + b*Y */
+GEN
+addsmulsi(long a, long b, GEN Y)
+{
+  GEN yd,y,z;
+  long ny,lz;
+  LOCAL_HIREMAINDER;
+  LOCAL_OVERFLOW;
+
+  if (!signe(Y)) return stoi(a);
+
+  y = Y+2; z = (GEN)avma;
+  ny = lgefint(Y)-2;
+  lz = ny+3;
+
+  (void)new_chunk(lz);
+  yd = y + ny; *--z = addll(a, mulll(b, *--yd));
+  while (overflow && yd > y) 
+  {
+    hiremainder++; overflow = (hiremainder == 0);
+    *--z = addmul(b,*--yd);
+  }
+  if (overflow) *--z = hiremainder+1;
+  else
+  {
+    while (yd > y) *--z = addmul(b,*--yd);
+    if (hiremainder) *--z = hiremainder; else lz--;
+  }
+  *--z = evalsigne(1) | evallgefint(lz);
+  *--z = evaltyp(t_INT) | evallg(lz);
+  avma=(long)z; return z;
 }
 
 #ifndef __M68K__
