@@ -2545,7 +2545,7 @@ QuadGetST(GEN dataCR, long prec)
   /* loop over conductors */
   for (j = 1; j <= ncond; j++)
   {
-    const GEN c1 = (GEN)C[j], c2 = gdivsg(2,c1), cexp = gexp(gneg(c2), prec);
+    const GEN c1 = (GEN)C[j], c2 = divsr(2,c1), cexp = mpexp(gneg(c2));
     const GEN LChar = (GEN)vChar[j];
     const long nChar = lg(LChar)-1, NN = N0[j];
     GEN veint1, vcn = cgetg(NN+1, t_VEC);
@@ -2554,7 +2554,7 @@ QuadGetST(GEN dataCR, long prec)
       fprintferr("* conductor no %ld/%ld (N = %ld)\n\tInit: ", j,ncond,NN);
     veint1 = veceint1(c2, stoi(NN), prec);
     vcn[1] = (long)cexp;
-    for (n=2; n<=NN; n++) vcn[n] = lmul((GEN)vcn[n-1], cexp);
+    for (n=2; n<=NN; n++) vcn[n] = lmulrr((GEN)vcn[n-1], cexp);
     av2 = avma;
     for (n=2; n<=NN; n++, avma = av2)
       affrr(divrs((GEN)vcn[n],n), (GEN)vcn[n]);
