@@ -5,14 +5,14 @@
 %
 % Permission is granted to copy, distribute and/or modify this document
 % under the terms of the GNU Free Documentation License
-\chapter{Specific Use of the GP Calculator}
+\chapter{Specific Use of the \kbd{gp} Calculator}
 
-Originally, \idx{GP} was designed as a debugging tool for the PARI system
+Originally, \tet{gp} was designed as a debugging tool for the PARI system
 library, and hence not much thought had been given to making it
-user-friendly. The situation has now changed somewhat, and GP is very
+user-friendly. The situation has now changed somewhat, and \kbd{gp} is very
 useful as a stand-alone tool. The operations and functions available in
-PARI and GP will be described in the next chapter. In the present one, we
-describe the specific use of the GP programmable calculator.
+PARI and \kbd{gp} will be described in the next chapter. In the present one, we
+describe the specific use of the \kbd{gp} programmable calculator.
 
 For starting the calculator, the general command line syntax is:
 
@@ -24,10 +24,10 @@ after clicking on the gp icon, once in the MPW Shell, you still need to type
 explicitly a command of the above form.}. The [\var{files}] argument is
 a list of files written in the GP scripting language, which will be loaded on
 startup. The ones starting with a minus sign are \emph{flags}, setting some
-internal parameters of GP, or \var{defaults}. See \secref{se:defaults} below
+internal parameters of \kbd{gp}, or \var{defaults}. See \secref{se:defaults} below
 for a list and explanation of all defaults, there are many more than just
 those two. These defaults can be changed by adding parameters to the input
-line as above, or interactively during a GP session or in a preferences file
+line as above, or interactively during a \kbd{gp} session or in a preferences file
 (also known as \tet{gprc}).
 
 \unix Some features were developed on UNIX platforms, and depend heavily
@@ -46,7 +46,7 @@ should also be possible (and then definitely advisable) to install
 available for DOS, OS/2 and Windows, thanks to the \tet{EMX}/\tet{RSX}
 runtime package (\kbd{install} excluded under DOS, since DLLs are not
 supported by the OS). For Windows 95 and higher, you can also use the
-\tet{Cygwin} compatibility library to run GP almost as if running a genuine
+\tet{Cygwin} compatibility library to run \kbd{gp} almost as if running a genuine
 Unix system. Note that a native \key{Linux} binary will be faster than one
 using any of these compatibility packages (see the \tet{MACHINES} benchmark
 file, included in the distribution).
@@ -59,8 +59,8 @@ gp executable, the stack size, the prime limit and the buffer size. Specific
 features of this Emacs shell will be indicated by an EMACS sign.\smallskip
 
 If a \idx{preferences file} (or \kbd{gprc}, to be discussed in
-\secref{se:gprc}) can be found, GP will then read it and execute the commands
-it contains. This provides an easy way to customize GP without having to
+\secref{se:gprc}) can be found, \kbd{gp} will then read it and execute the commands
+it contains. This provides an easy way to customize \kbd{gp} without having to
 delve into the code to hardwire it to your likings. The \var{files} argument
 is processed right after the \kbd{gprc}.
 
@@ -75,7 +75,8 @@ information, some initial defaults, and then waits after printing its prompt
 
 Note that at any point the user can type \kbd{Ctrl-C} (that is press
 simultaneously the \kbd{Control} and \kbd{C} keys): the current
-computation will be interrupted and control given back to the user at the GP
+computation will be interrupted and control given back to the user at the
+\kbd{gp}
 prompt.
 
 The top-level help information tells you that (as in many systems) to get
@@ -92,16 +93,16 @@ function.
 \unix If extended help (see \secref{se:exthelp}) is available on your
 system, you can double or triple the \kbd{?} sign to get much more:
 respectively the complete description of the function (e.g.~\kbd{??~sqrt}),
-or a list of GP functions relevant to your query (e.g.~ \kbd{???~"elliptic
+or a list of \kbd{gp} functions relevant to your query (e.g.~ \kbd{???~"elliptic
 curve"} or \kbd{???~"quadratic field"}).
 
-If GP was compiled with the right options (see Appendix A), a line
+If \kbd{gp} was compiled with the right options (see Appendix A), a line
 editor will be available to correct the command line, get automatic
 completions, and so on. See \secref{se:readline} for a short summary of
 available commands. This might not be available for all architectures.
 
 Whether extended on-line help and line editing are available or not is
-indicated in the GP banner, between the version number and the copyright
+indicated in the \kbd{gp} banner, between the version number and the copyright
 message.
 
 If you type \kbd{?\bs} you will get a short description of the metacommands
@@ -113,9 +114,9 @@ used to retrieve easily some information from complicated structures (you
 can define your own but they won't be shown here). We will soon describe
 these commands in more detail.
 
-As a general rule, under GP, commands starting with \b\ or with some
+As a general rule, under \kbd{gp}, commands starting with \b\ or with some
 other symbols like \kbd{?} or \kbd{\#}, are not computing commands, but are
-metacommands which allow the user to exchange information with GP. The
+metacommands which allow the user to exchange information with \kbd{gp}. The
 available metacommands can be divided into default setting commands
 (explained below) and simple commands (or keyboard shortcuts, to be dealt
 with in \secref{se:meta}).
@@ -124,7 +125,7 @@ with in \secref{se:meta}).
 \label{se:defaults}
 
 \noindent
-There are many internal variables in GP, defining how the system will behave
+There are many internal variables in \kbd{gp}, defining how the system will behave
 in certain situations, unless a specific override has been given. Most
 of them are a matter of basic customization (colors, prompt) and will be set
 once and for all in your \idx{preferences file} (see \secref{se:gprc}), but
@@ -138,13 +139,13 @@ is described in \secref{se:default}. The basic syntax is
 
 \noindent
 which sets the default \var{def} to \var{value}. In interactive use, most
-of these can be abbreviated using historic GP metacommands (mostly,
+of these can be abbreviated using historic \kbd{gp} metacommands (mostly,
 starting with \b), which we shall describe in the next section.
 
 Here we will only describe the available defaults and how they are used. Just
 be aware that typing \kbd{default} by itself will list all of them, as well
 as their current values (see \b{d}). Just after the default name, we give
-between parentheses the initial value when GP starts (assuming you did not
+between parentheses the initial value when \kbd{gp} starts (assuming you did not
 tamper with it using command-line switches or a~\tet{gprc}).
 
 \misctitle{Note:} the suffixes \kbd{k}, \kbd{M} or \kbd{G} can be appended to
@@ -179,7 +180,7 @@ instance,
 
 \noindent
 will prepend the time of day, in the form \kbd{(\var{hh}:\var{mm})}
-to GP's usual prompt.
+to \kbd{gp}'s usual prompt.
 
 $\bullet$ \teb{environment expansion}: When the string contains a sequence of
 the form \kbd{\$\var{SOMEVAR}} (e.g.~\kbd{\$HOME}) the environment is
@@ -189,21 +190,22 @@ the C and bash shells~--- \kbd{\til} by itself stands for your home
 directory, and \kbd{\til{}user} is expanded to \kbd{user}'s home directory.
 This is applied to all filenames\sidx{filename}. \label{se:envir}
 
-\subsecidx{buffersize} (default \kbd{30k}): GP input is buffered, which means
+\subsecidx{buffersize} (default \kbd{30k}): \kbd{gp} input is buffered, which means
 only so many bytes of data can be read at a time before a command is
 executed. This used to be a very important variable, to allow for very
-large input files to be read into GP, for example large matrices, without it
+large input files to be read into \kbd{gp}, for example large matrices, without it
 complaining about ``unused characters''. Currently, \kbd{buffersize} is
 automatically adjusted to the size of the data that are to be read. It will
 never go down by itself though. Thus this option may come in handy to decrease
 the buffer size after some unusually large \kbd{read}, when you don't need to
 keep gigantic buffers around anymore.
 
-\subsecidxunix{colors} (default \kbd{""}): this default is only usable if GP
+\subsecidxunix{colors} (default \kbd{""}): this default is only usable if
+\kbd{gp}
 \label{se:colors}
 is running within certain color-capable terminals. For instance \kbd{rxvt},
 \kbd{color\_xterm} and modern versions of \kbd{xterm} under X Windows, or
-standard Linux/DOS text consoles. It causes GP to use a small palette of
+standard Linux/DOS text consoles. It causes \kbd{gp} to use a small palette of
 colors for its output. With xterms, the colormap used corresponds to the
 resources \kbd{Xterm*color$n$} where $n$ ranges from $0$ to $15$ (see the
 file \kbd{misc/color.dft} for an example). Legal values for this default are
@@ -267,7 +269,7 @@ value of this default:
 
 \quad \kbd{compatible} = 0: no backward compatibility. In this mode, a very
 handy function, to be described in \secref{se:whatnow}, is \kbd{whatnow},
-which tells you what has become of your favourite functions, which GP
+which tells you what has become of your favourite functions, which \kbd{gp}
 suddenly can't seem to remember.
 
 \quad \kbd{compatible} = 1: warn when using obsolete functions, but
@@ -275,7 +277,7 @@ otherwise accept them. The output uses the new conventions though, and
 there may be subtle incompatibilities between the behaviour of former and
 current functions, even when they share the same name (the current function
 is used in such cases, of course!). We thought of this one as a transitory
-help for GP old-timers. Thus, to encourage switching to \kbd{compatible}=0,
+help for \kbd{gp} old-timers. Thus, to encourage switching to \kbd{compatible}=0,
 it is not possible to disable the warning.
 
 \quad \kbd{compatible} = 2: use only the old function naming scheme (as
@@ -307,11 +309,11 @@ some extra messages may be printed (some of it in French), according to
 what is going on (see~\b{g}).
 
 \subsecidx{debugfiles} (default \kbd{0}): file usage debugging level. If it
-is non-zero, GP will print information on file descriptors in use, from
+is non-zero, \kbd{gp} will print information on file descriptors in use, from
 PARI's point of view (see~\b{gf}).
 
 \subsecidx{debugmem} (default \kbd{0}): memory debugging level. If it is
-non-zero, GP will regularly print information on memory usage. If it's
+non-zero, \kbd{gp} will regularly print information on memory usage. If it's
 greater than 2, it will indicate any important garbage collecting and the
 function it is taking place in (see~\b{gm}).
 
@@ -324,7 +326,7 @@ compiled for debugging (see Appendix~A).
 (on) or 0 (off). When \kbd{echo} mode is on, each command is reprinted before
 being executed. This can be useful when reading a file with the \b{r} or
 \kbd{read} commands. For example, it is turned on at the beginning of the test
-files used to check whether GP has been built correctly (see \b{e}).
+files used to check whether \kbd{gp} has been built correctly (see \b{e}).
 
 \subsecidx{format} (default \kbd{"g0.28"} and \kbd{"g0.38"} on 32-bit and
 64-bit machines, respectively): of the form x$m.n$, where x is a letter in
@@ -345,18 +347,18 @@ number of characters to be used for printing integers, but is ignored if
 equal to 0 (which is the default). This is a feeble attempt at formatting.
 
 \subsecidxunix{help} (default: the location of the \kbd{gphelp} script): the
-name of the external help program which will be used from within GP when
+name of the external help program which will be used from within \kbd{gp} when
 extended help is invoked, usually through a \kbd{??} or \kbd{???} request
 (see \secref{se:exthelp}), or \kbd{M-H} under readline (see
 \secref{se:readline}).
 
-\subsecidx{histsize} (default \kbd{5000}): GP keeps a history of the last
+\subsecidx{histsize} (default \kbd{5000}): \kbd{gp} keeps a history of the last
 \kbd{histsize} results computed so far, which you can recover using the
 \kbd{\%} notation (see \secref{se:history}). When this number is exceeded,
 the oldest values are erased. Tampering with this default is the only way to
 get rid of the ones you don't need anymore.
 
-\subsecidx{lines} (default \kbd{0}): if set to a positive value, GP prints at
+\subsecidx{lines} (default \kbd{0}): if set to a positive value, \kbd{gp} prints at
 most that many lines from each result, terminating the last line shown with
 \kbd{[+++]} if further material has been suppressed. The various \kbd{print}
 commands (see \secref{se:gp_program}) are unaffected, so you can always type
@@ -365,7 +367,8 @@ screen width cannot be determined, a ``line'' is assumed to be 80 characters
 long.
 
 \subsecidx{log} (default \kbd{0}): this can be either 0 (off) or 1, 2, 3
-(on, see below for the various modes). When logging mode is turned on, GP
+(on, see below for the various modes). When logging mode is turned on,
+\kbd{gp}
 opens a log file, whose exact name is determined by the \kbd{logfile}
 default. Subsequently, all the commands and results will be written to that
 file (see \b{l}). In case a file with this precise name already existed, it
@@ -411,7 +414,7 @@ The third format is the \tev{prettyprint format}, or beautified format. In
 the present version \vers, this is not beautiful at all.
 
 \unix{\indent The fourth format is \tev{external prettyprint}, which pipes
-all GP output in TeX format to an external prettyprinter, according to the
+all \kbd{gp} output in TeX format to an external prettyprinter, according to the
 value of \tet{prettyprinter}. The default script (\tet{tex2mail}) converts
 its input to readable two-dimensional text.}
 
@@ -420,11 +423,11 @@ in any of the three formats at any time using the commands \b{a}, \b{m}
 and~\b{b} respectively (see below).
 
 \subsecidx{parisize}\label{se:parisize} (default, 1M bytes on the Mac, 4M
-otherwise): GP, and in fact any program using the PARI library, needs a stack
+otherwise): \kbd{gp}, and in fact any program using the PARI library, needs a stack
 in which to do its computations. \kbd{parisize} is the stack size, in bytes.
 It is strongly recommended you increase this default (using the \kbd{-s}
 command-line switch, or a \tet{gprc}) if you can afford it. Don't increase it
-beyond the actual amount of RAM installed on your computer or GP will spend
+beyond the actual amount of RAM installed on your computer or \kbd{gp} will spend
 most of its time paging.
 
 In case of emergency, you can use the \tet{allocatemem} function to
@@ -435,7 +438,7 @@ increase \kbd{parisize}, once the session is started.
 This is a list of directories, separated by colons ':' (semicolons ';' in the
 DOS world, since colons are pre-empted for drive names). When asked to read a
 file whose name does not contain \kbd{/} (i.e.~no explicit path was given),
-GP will look for it in these directories, in the order they were written in
+\kbd{gp} will look for it in these directories, in the order they were written in
 \kbd{path}. Here, as usual, '.' means the current directory, and '$.\,.$' its
 immediate parent. Environment expansion is performed.
 
@@ -446,7 +449,7 @@ experimental} but the default \tet{tex2mail} looks already much nicer than
 the built-in ``beautified format'' ($\kbd{output} = 2$).
 
 \subsecidx{primelimit} (default \kbd{200k} on the Mac, and \kbd{500k}
-otherwise): GP precomputes a list of all primes less than \kbd{primelimit}
+otherwise): \kbd{gp} precomputes a list of all primes less than \kbd{primelimit}
 at initialization time. These are used by many arithmetical functions. If
 you don't plan to invoke any of them, you can just set this to 1.
 
@@ -469,7 +472,7 @@ extra spaces in your prompt, then you'll have to get a more recent
 \kbd{readline}. See the file \kbd{misc/gprc.dft} for an example.
 
 \emacs {\bf Caution}: Emacs needs to know about the prompt pattern to
-separate your input from previous GP results, without ambiguity. It's not a
+separate your input from previous \kbd{gp} results, without ambiguity. It's not a
 trivial problem to adapt automatically this regular expression to an
 arbitrary prompt (which can be self-modifying!). Thus, in this version \vers,
 Emacs relies on the prompt being the default one. So, do not tamper with the
@@ -483,11 +486,11 @@ line-terminating backslash). Everything that applies to \kbd{prompt}
 applies to \kbd{prompt\_cont} as well.
 
 \subsecidx{psfile} (default \kbd{"pari.ps"}): name of the default file where
-GP is to dump its PostScript drawings (these will always be appended, so that
+\kbd{gp} is to dump its PostScript drawings (these will always be appended, so that
 no previous data are lost). Environment and time expansion are performed.
 
 \subsecidx{readline} (default \kbd{1}): switches readline line-editing
-facilities on and off. This may be useful if you are running GP in a Sun
+facilities on and off. This may be useful if you are running \kbd{gp} in a Sun
 \tet{cmdtool}, which interacts badly with readline. Of course, until readline
 is switched on again, advanced editing features like automatic completion
 and editing history are not available.
@@ -508,7 +511,8 @@ actually gives you 9 digits ($9 < \log_{10}(2^{32}) < 10$):
 \subsecidx{secure} (default \kbd{0}): this is a toggle which can be either 1
 (on) or 0 (off). If on, the \tet{system} and \tet{extern} command are
 disabled. These two commands are potentially dangerous when you execute
-foreign scripts since they let GP execute arbitrary UNIX commands. GP will
+foreign scripts since they let \kbd{gp} execute arbitrary UNIX commands.
+\kbd{gp} will
 ask for confirmation before letting you (or a script) unset this toggle.
 
 \subsecidx{seriesprecision} (default \kbd{16}): number of significant terms
@@ -533,7 +537,8 @@ processed will produce an error. Otherwise just a warning is printed. This
 can be useful when you're not sure how many parentheses you have to close after
 complicated nested loops.
 
-\subsecidx{TeXstyle} (default \kbd{0}): the bits of this default allow GP
+\subsecidx{TeXstyle} (default \kbd{0}): the bits of this default allow
+\kbd{gp}
 to use less rigid TeX formatting commands in the logfile. This default is
 only taken into account when $\kbd{log} = 3$. The bits of \kbd{TeXstyle}
 have the following meaning
@@ -576,7 +581,7 @@ probably of type complex with zero imaginary part (if you want to be sure, type
 
 \noindent
 Simple metacommands are meant as shortcuts and should not be used in GP
-scripts (see \secref{se:programming}). Beware that these, as all of GP input,
+scripts (see \secref{se:programming}). Beware that these, as all of \kbd{gp} input,
 are \emph{case sensitive}. For example, \b{Q} is not identical to \b{q}. In
 the following list, braces are used to denote optional arguments, with their
 default values when applicable, e.g.~$\{n=0\}$ means that if $n$ is not
@@ -587,7 +592,7 @@ first character is a digit, and with \b{r} or \b{w}, if the filename itself
 contains a space. In such cases, just use the underlying \tet{read} or
 \tet{write} function; see~\secref{se:write}).
 
-\subseckbd{?} $\{\var{command}\}$: GP on-line help interface.
+\subseckbd{?} $\{\var{command}\}$: \kbd{gp} on-line help interface.
 As already mentioned, if you type \kbd{?$n$} where $n$ is a number from 1
 to 11, you will get the list of functions in Section $3.n$ of the manual
 (the list of sections being obtained by simply typing \kbd{?}).
@@ -601,7 +606,7 @@ disposal as well, though a trifle less readable!). Much better help can be
 obtained through the extended help system (see below).
 
 \unix If the line before the copyright message indicates that extended help
-is available (this means \kbd{perl} is installed on your system, GP was
+is available (this means \kbd{perl} is installed on your system, \kbd{gp} was
 told about it at compile time, and the whole PARI distribution was
 correctly installed), you can add more \kbd{?} signs for extended
 functionalities:
@@ -613,7 +618,7 @@ chapter chosen, you can impose a given chapter by ending the keyword with
 Chapter~2 for section heading \kbd{Hello} (which doesn't exist, by the way).
 
 All operators (e.g.~\kbd{+}, \kbd{\&\&}, etc.) are accepted by this
-extended help, as well as a few other keywords describing key GP concepts,
+extended help, as well as a few other keywords describing key \kbd{gp} concepts,
 e.g.~\kbd{readline} (the line editor), \kbd{integer}, \kbd{nf} (``number
 field'' as used in most algebraic number theory computations), \kbd{ell}
 (elliptic curves), etc.
@@ -640,7 +645,7 @@ it knows about operators as well: you can type \kbd{??~*} or
 
 \noindent message. Also, you can ask for extended help on section
 number~$n$ in Chapter~3, just by typing \kbd{??~$n$} (where \kbd{?$n$} would
-yield merely a list of functions). Finally, a few key concepts in GP are
+yield merely a list of functions). Finally, a few key concepts in \kbd{gp} are
 documented in this way: metacommands (e.g \kbd{??~"??"}), defaults (e.g
 \kbd{??~psfile}) and type names (e.g \typ{INT} or \kbd{integer}), as well as
 various miscellaneous keywords such as \kbd{edit} (short summary of line
@@ -654,25 +659,25 @@ environment) containing the full user's manual. \kbd{??tutorial} and
 respectively.
 
 \misctitle{Technical note:} these functionalities are provided by an
-external \kbd{perl} script that you are free to use outside any GP session
+external \kbd{perl} script that you are free to use outside any \kbd{gp} session
 (and modify to your liking, if you are perl-knowledgeable). It is called
 \tet{gphelp}, lies in the \kbd{doc} subdirectory of your distribution
 (just make sure you run \kbd{Configure} first, see Appendix~A) and is
-really two programs in one. The one which is used from within GP is
+really two programs in one. The one which is used from within \kbd{gp} is
 \kbd{gphelp} which runs \TeX\ on a selected part of this manual, then opens
 a previewer. \kbd{gphelp -detex} is a text mode equivalent, which looks
 often nicer especially on a colour-capable terminal (see
 \kbd{misc/gprc.dft} for examples). The default \kbd{help} selects which
-help program will be used from within GP. You are welcome to improve this
+help program will be used from within \kbd{gp}. You are welcome to improve this
 help script, or write new ones (and we really would like to know about it
 so that we may include them in future distributions). By the way, outside
-of GP you can give more than one keyword as argument to \kbd{gphelp}.
+of \kbd{gp} you can give more than one keyword as argument to \kbd{gphelp}.
 
 \subseckbd{/*...*/}: comment. Everything between the stars is ignored by
-GP. These comments can span any number of lines.
+\kbd{gp}. These comments can span any number of lines.
 
 \subseckbd{\bs\bs}: one-line comment. The rest of the line
-is ignored by GP.
+is ignored by \kbd{gp}.
 
 \subsec{\b{a}} $\{n\}$: prints the object number $n$ ($\%n$)
 in raw format. If the number $n$ is omitted, print the latest computed object
@@ -682,7 +687,7 @@ in raw format. If the number $n$ is omitted, print the latest computed object
 format.
 
 \subsec{\b{c}}:\sidx{available commands} prints the list of all available
-hardcoded functions under GP, not including operators written as special
+hardcoded functions under \kbd{gp}, not including operators written as special
 symbols (see \secref{se:operators}). More information can be obtained using
 the \kbd{?} metacommand (see above). For user-defined functions / member
 functions, see \b{u} and \b{um}.
@@ -725,10 +730,10 @@ digits. Prints its current value if $n$ is omitted.
 \subsec{\b{ps}} $\{n\}$: sets \tet{seriesprecision} to $n$ significant terms.
 Prints its current value if $n$ is omitted.
 
-\subsec{\b{q}}: quits the GP session and returns to the system.
+\subsec{\b{q}}: quits the \kbd{gp} session and returns to the system.
 Shortcut for the function \tet{quit} (see \secref{se:quit}).
 
-\subsec{\b{r}} $\{$\var{filename}$\}$: \idx{read}s into GP all the commands
+\subsec{\b{r}} $\{$\var{filename}$\}$: \idx{read}s into \kbd{gp} all the commands
 contained in the named file as if they had been typed from the keyboard, one
 line after the other. Can be used in combination with the \b{w} command (see
 below). Related but not equivalent to the function \kbd{read} (see
@@ -736,13 +741,13 @@ below). Related but not equivalent to the function \kbd{read} (see
 input, there will be one history entry for each of them, whereas \kbd{read}
 would only record the last one. If \var{filename} is omitted, re-read the
 previously used input file (fails if no file has ever been successfully read
-in the current session). If a GP \tet{binary file} (see \secref{se:writebin})
+in the current session). If a \kbd{gp} \tet{binary file} (see \secref{se:writebin})
 is read using this command, it is silently loaded, without cluttering the
 history.
 
 \unix This command accepts compressed files in \idx{compress}ed (\kbd{.Z})
 or \idx{gzip}ped (\kbd{.gz} or \kbd{.z}) format. They will be uncompressed on
-the fly as GP reads them, without changing the files themselves.
+the fly as \kbd{gp} reads them, without changing the files themselves.
 
 \subsec{\b{s}}: prints the state of the PARI \idx{stack} and \idx{heap}.
 This is used primarily as a debugging device for PARI, and is not intended
@@ -750,16 +755,16 @@ for the casual user.
 
 \subsec{\b{t}}: prints the \idx{internal longword format} of all the PARI
 types. The detailed bit or byte format of the initial codeword(s) is
-explained in Chapter~4, but its knowledge is not necessary for a GP user.
+explained in Chapter~4, but its knowledge is not necessary for a \kbd{gp} user.
 
 \subsec{\b{u}}: prints the definitions of all user-defined functions.
 
 \subsec{\b{um}}: prints the definitions of all user-defined member functions.
 
 \subsec{\b{v}}: prints the \idx{version number} and implementation architecture
-(680x0, Sparc, Alpha, other) of the GP executable you are using. In library
+(680x0, Sparc, Alpha, other) of the \kbd{gp} executable you are using. In library
 mode, you can use instead the two character strings \kbd{PARIVERSION} and
-\kbd{PARIINFO}, which correspond to the first two lines printed by GP just
+\kbd{PARIINFO}, which correspond to the first two lines printed by \kbd{gp} just
 before the Copyright message.
 
 \subsec{\b{w}} $\{n\}$ $\{$\var{filename}$\}$: writes the object number
@@ -770,7 +775,7 @@ powerful, as you can have arbitrary filenames).
 
 \subsec{\b{x}}: prints the complete tree with addresses and contents (in
 hexadecimal) of the \idx{internal representation} of the latest computed
-object in GP. As for \b{s}, this is used primarily as a debugging device for
+object in \kbd{gp}. As for \b{s}, this is used primarily as a debugging device for
 PARI, and the format should be self-explanatory (a $*$ before an object --
 typically a modulus -- means the corresponding component is out of stack).
 However, used on a PARI integer, it can be used as a
@@ -816,14 +821,14 @@ $-\kbd{defaultprecision}$), see \secref{se:whatzero}.
 \kbd{Mod(n,m)}, \emph{not} \kbd{n\%m} (see \secref{se:Mod}).
 
 \subsec{Rational numbers}\sidx{rational number}
-(types \tet{t_FRAC} and \tet{t_FRACN}): under GP, all fractions are
+(types \tet{t_FRAC} and \tet{t_FRACN}): under \kbd{gp}, all fractions are
 automatically reduced to lowest terms, so it is in principle impossible to
 work with reducible fractions (of type \typ{FRACN}), although of course in
 library mode this is easy. To enter $n/m$ just type it as written. As
 explained in \secref{se:gdiv}, division will \emph{not} be performed, only
 reduction to lowest terms.\label{se:FRAC}
 
-If you really want a reducible fraction under GP, you must use the \kbd{type}
+If you really want a reducible fraction under \kbd{gp}, you must use the \kbd{type}
 function (see \secref{se:gptype}), by typing \kbd{type(x,FRACN)}. Be warned
 however that this function must be used with extreme care.
 
@@ -836,7 +841,7 @@ Chapter 1 that $x$ and $y$ can be of type \typ{INT}, \typ{REAL},
 \subsec{$p$-adic numbers}\sidx{p-adic number}\label{se:padic}
 (type \tet{t_PADIC}): to enter a $p$-adic number, simply write a
 rational or integer expression and add to it \kbd{O($p$\pow $k$)}, where $p$
-and $k$ are integers. This last expression indicates three things to GP:
+and $k$ are integers. This last expression indicates three things to \kbd{gp}:
 first that it is dealing with a \typ{PADIC} type (the fact that $p$ is an
 integer, and not a polynomial, which would be used to enter a series, see
 \secref{se:series}), secondly the ``prime'' $p$ (note that it is not
@@ -867,7 +872,7 @@ name \kbd{w} is of course just a suggestion, but corresponds to traditional
 usage. You can use any variable name that you like. However,
 quadratic numbers are always printed with a \kbd{w}, regardless of the
 discriminant. So beware, two numbers can be printed in the same way and not
-be equal. However GP will refuse to add or multiply them for example.
+be equal. However \kbd{gp} will refuse to add or multiply them for example.
 
 Now $(1,w)$ will be the ``canonical'' integral basis of the quadratic order
 (i.e.~$w=\sqrt{d}/2$ if $d\equiv 0 \mod 4$, and $w=(1+\sqrt{d})/2$ if
@@ -887,7 +892,7 @@ extensions of the $p$-adic field $\Q_p$, or \idx{finite field}s.
 variables\sidx{variable} occurring in a polmod are not free variables, it is
 essential in order to avoid inconsistencies that polmods use the same
 variable in internal operations (i.e.~between polmods) and variables of lower
-priority (which have been introduced later in the GP session) for external
+priority (which have been introduced later in the \kbd{gp} session) for external
 operations (typically between a polynomial and a polmod). For example, PARI
 will not recognize that \kbd{Mod(y, y\pow2 + 1)} is the same as \kbd{Mod(x,
 x\pow2 + 1)}. Hopefully, this problem will pass away when type ``element of a
@@ -934,14 +939,14 @@ polynomial expression and add to it \hbox{\kbd{O(\var{expr} \pow $k$)}},
 where \var{expr} is an expression which has non-zero valuation (it can be a
 polynomial, power series, or a rational function; the most common case being
 simply a variable name).
-This indicates to GP that it is dealing with a power series, and the desired
+This indicates to \kbd{gp} that it is dealing with a power series, and the desired
 precision is $k$ times the valuation of \var{expr} with respect to the
 main variable of \var{expr} (to check the ordering of the variables, or
 to modify it, use the function \kbd{reorder}; see~\secref{se:reorder}).
 
 \subsec{Rational functions}\sidx{rational function}
 (types \tet{t_RFRAC} and \tet{t_RFRACN}): as for fractions, all rational
-functions are automatically reduced to lowest terms under GP. All that was
+functions are automatically reduced to lowest terms under \kbd{gp}. All that was
 said about fractions in \secref{se:FRAC} remains valid here.
 
 \subsec{Binary quadratic forms of positive or negative discriminant}%
@@ -999,7 +1004,7 @@ object into a string (see Chapter~3).
 
 \subsec{Small vectors} (type \tet{t_VECSMALL}): this is an internal type,
 used to code in an efficient way vectors containing only small integers (such
-as permutations). Most GP functions will refuse to operate on these objects.
+as permutations). Most \kbd{gp} functions will refuse to operate on these objects.
 
 \section{GP operators}\label{se:operators}
 
@@ -1019,7 +1024,7 @@ instance), $$ x~\var{op}_1~y~\var{op}_2~z~\var{op}_2~x~\var{op}_3~y $$ is
 equivalent to $$ x~\var{op}_1~((y~\var{op}_2~z)~\var{op}_2~
 (x~\var{op}_3~y)).$$
 
-GP knows quite a lot of different operators, some of them unary (having only
+GP contains quite a lot of different operators, some of them unary (having only
 one argument), some binary, plus special selection operators. Unary operators
 are defined for either prefix (preceding their single argument: \var{op}~$x$)
 or postfix (following the argument: $x$~\var{op}) position, never both (some
@@ -1177,8 +1182,8 @@ time = 988 ms.
 @eprog
 
 \section{The general GP input line}
-\subsec{Generalities}. User interaction with a GP session proceeds as
-follows: a sequence of characters is typed by the user at the GP prompt. This
+\subsec{Generalities}. User interaction with a \kbd{gp} session proceeds as
+follows: a sequence of characters is typed by the user at the \kbd{gp} prompt. This
 can be either a \b~command, a function definition, an expression, or a
 sequence of expressions (i.e.~a program). In the latter two cases, after the
 last expression has been computed its result is put into an internal
@@ -1205,9 +1210,9 @@ the previous section), using the available operator symbols, function names
 \secref{se:user_defined}), and special variables. Please note that, from
 version $1.900$ on, there\sidx{case distinction} \emph{is} a distinction
 between lowercase and uppercase. Also, note that, outside of constant
-strings, blanks are completely ignored in the input to GP.
+strings, blanks are completely ignored in the input to \kbd{gp}.
 
-The special variable names known to GP are \tet{Euler} (Euler's constant
+The special variable names in GP are \tet{Euler} (Euler's constant
 $\gamma=0.577\dots$), \tet{I} (the square root of $-1$), \tet{Pi}
 (3.14\dots)~--- which could be thought of as functions with no arguments, and
 which may therefore be invoked without parentheses~---, and \tet{O} which
@@ -1224,15 +1229,15 @@ where $v$ is the $X$-adic valuation of \var{expr} (see \ref{se:padic}
 and~\ref{se:pol}).
 
 \subsec{Special editing characters}.\sidx{editing characters} A GP program
-can of course have more than one line. Since GP executes your commands as
+can of course have more than one line. Since \kbd{gp} executes your commands as
 soon as you have finished typing them, there must be a way to tell it to
 wait for the next line or lines of input before doing anything. There are
 three ways of doing this.
 
 The first one is simply to use the \idx{backslash character} \kbd{\bs} at the
 end of the line that you are typing, just before hitting \kbd{<Return>}. This
-tells GP that what you will write on the next line is the physical
-continuation of what you have just written. In other words, it makes GP
+tells \kbd{gp} that what you will write on the next line is the physical
+continuation of what you have just written. In other words, it makes \kbd{gp}
 forget your newline character. For example if you use this while defining a
 function, and if you ask for the definition of the function using
 \kbd{?name}, you will see that your backslash has disappeared and that
@@ -1247,7 +1252,7 @@ immediately followed by a newline. For example, you can type
 
 The second one is a slight variation on the first, and is mostly useful when
 defining a user function (see \secref{se:user_defined}): since an equal sign
-can never end a valid expression, GP will disregard a newline immediately
+can never end a valid expression, \kbd{gp} will disregard a newline immediately
 following an \kbd{=}.
 \bprog
 ? a =
@@ -1257,8 +1262,8 @@ following an \kbd{=}.
 
 The third one cannot be used everywhere, but is in general much more useful.
 It is the use of braces \kbd{\obr} and  \kbd{\cbr}.\sidx{brace characters}
-When GP sees an opening brace (\kbd{\obr}) \emph{at the beginning of a line}
-(modulo spaces as usual), it understands that you are typing a multi-line
+An opening brace (\kbd{\obr}) \emph{at the beginning of a line}
+(modulo spaces as usual) signals that you are typing a multi-line
 command, and newlines will be ignored until you type a closing brace
 \kbd{\cbr}. However, there is an important (but easily obeyed) restriction:
 inside an open brace-close brace pair, all your input lines will be
@@ -1273,19 +1278,19 @@ instance, the following program
 }
 @eprog
 
-\noindent would silently produce garbage, since what GP will really see is
+\noindent would silently produce garbage, since this is interpreted as
 \kbd{a=bb=c} which will assign the value of \kbd{c} to both \kbd{bb} and
-\kbd{a} (if this really is what you intended, you're a hopeless case).
+\kbd{a}. (If this really is what you intended, you are a hopeless case.)
 
 \section{The GP/PARI programming language}
 
-The GP calculator uses a purely interpreted language. The structure of this
-language is reminiscent of LISP with a functional notation, \kbd{f(x,y)}
-rather than \kbd{(f x y)}: all \idx{programming} constructs, such as
-\kbd{if}, \kbd{while,} etc... are functions \footnote{*}{Not exactly, since
-not all their arguments need be evaluated. For instance it would be stupid
-to evaluate both branches of an \kbd{if} statement: since only one will
-apply, GP only expands this one.} (see \secref{se:programming} for a
+The \kbd{gp} calculator uses a purely interpreted language GP. The structure
+of this language is reminiscent of LISP with a functional notation,
+\kbd{f(x,y)} rather than \kbd{(f x y)}: all \idx{programming} constructs,
+such as \kbd{if}, \kbd{while,} etc... are functions \footnote{*}{Not exactly,
+since not all their arguments need be evaluated. For instance it would be
+stupid to evaluate both branches of an \kbd{if} statement: since only one
+will apply, only this one is evaluated.} (see \secref{se:programming} for a
 complete list), and the main loop does not really execute, but rather
 evaluates (sequences of) expressions. Of course, it is by no means a true
 LISP.
@@ -1318,10 +1323,9 @@ so though, since we do some work to treat the quoted characters correctly
 (those preceded by a \b{)}.}.
 %
 As an important example, consider what happens when you use a variable name
-\emph{before} assigning a value into it. This is perfectly acceptable to GP,
-which considers this variable in fact as a polynomial of degree 1, with
-coefficients 1 in degree 1, 0 in degree 0, whose variable is the variable
-name you used.
+\emph{before} assigning a value into it. This is perfectly acceptable,
+this variable is considered as a monomial of degree 1 whose variable is the
+variable name you used.
 
   If later you assign a value to that variable, the objects which you have
 created before will still be considered as polynomials. If you want to obtain
@@ -1364,17 +1368,17 @@ formally on the coefficients as if the polynomial was univariate.
 This is not symmetrical. So if I enter \kbd{x + y} in a clean session,
 what happens ? This is understood as
 $$ x^1 + y*x^0 \in (\Z[y])[x] $$
-but how can GP decide that $x$ is ``more important'' than $y$ ? Why not
-$y^1 + x*y^0$, which is the same mathematical entity after all ?
+but how do we know that $x$ is ``more important'' than $y$ ? Why not $y^1 +
+x*y^0$, which is the same mathematical entity after all ?
 
-The answer is that variables are ordered implicitly by the GP interpreter:
+The answer is that variables are ordered implicitly by the \kbd{gp} interpreter:
 when a new identifier (e.g~$x$, or $y$ as above) is input, the corresponding
 variable is registered as having a strictly lower priority than any variable in
 use at this point\footnote{*}{This is not strictly true: if an
 identifier is interpreted as a user function, no variable is registered. Also,
 the variable $x$ is predefined and always has the highest possible priority.}
 %
-. To see the ordering used by GP at any given time, type $\tet{reorder}()$.
+. To see the ordering used by \kbd{gp} at any given time, type $\tet{reorder}()$.
 
 Given such an ordering, multivariate polynomials are stored so that the
 variable with the highest priority is the main variable. And so on,
@@ -1385,9 +1389,9 @@ object, and eventually a disaster.
 In any case, if you are working with expressions involving several variables
 and want to have them ordered in a specific manner in the internal
 representation just described, the simplest is just to write down the
-variables one after the other under GP before starting any real computations.
+variables one after the other under \kbd{gp} before starting any real computations.
 You could also define variables from your GPRC to have a consistant
-ordering of common variable names in all your GP sessions, e.g read in a file
+ordering of common variable names in all your \kbd{gp} sessions, e.g read in a file
 \kbd{variables.gp} containing
 \bprog
 x;y;z;t;a;b;c;d
@@ -1459,7 +1463,7 @@ into a variable. It always has a value, which can be any PARI object.
 with semicolons (';') and also with colons (':') for those who are used to
 BASIC. Such an expression sequence will be called simply a \var{seq}. A
 \var{seq} also has a value, which is the value of the last non-empty
-expression in the sequence. Under GP, the value of the \var{seq}, and only
+expression in the sequence. Under \kbd{gp}, the value of the \var{seq}, and only
 this last value, is always put on the stack (i.e. it will become the next
 object $\%n$). The values of the other expressions in the \var{seq} are
 discarded after the execution of the \var{seq} is complete, except of
@@ -1470,7 +1474,7 @@ printed if the line does not end with a semicolon (';').
 \subsec{User defined functions}.\sidx{user defined functions}
 \label{se:user_defined}
 
-It is very easy to define a new function under GP, which can then be used
+It is very easy to define a new function in GP, which can then be used
 like any other function. The syntax is as follows:
 
 \kbd{name(}\var{list of formal variables}\kbd{) = %
@@ -1642,8 +1646,8 @@ The operating system will automatically limit the \idx{recursion depth}:
                         ^---------------
 @eprog
 There's no way to increase the recursion limit (which may be different on
-your machine) from within, since it would simply crash the GP process. To
-increase it before launching GP, you can use \tet{ulimit} or \tet{limit},
+your machine) from within, since it would simply crash the \kbd{gp} process. To
+increase it before launching \kbd{gp}, you can use \tet{ulimit} or \tet{limit},
 depending on your shell, to raise the process available stack space
 (increase \tet{stacksize}).
 
@@ -1723,7 +1727,8 @@ x.j =
 You can redefine one of your own member functions simply by typing a new
 definition for it. On the other hand, as a safety measure, you can't redefine
 the built-in member functions, so typing the above text would in fact produce
-an error (you'd have to call it e.g.~\kbd{x.j2} in order for GP to accept it).
+an error (you'd have to call it e.g.~\kbd{x.j2} in order for \kbd{gp} to
+accept it).
 
 \misctitle{Warning:} contrary to user functions arguments, the structure
 accessed by a member function is \emph{not} copied before being used.
@@ -1799,11 +1804,11 @@ $\bullet$ Writing two strings alongside one another will just concatenate
 them, producing a longer string. Thus it is equivalent to type in
 \kbd{"a " "b"} or \kbd{"a b"}. A little tricky point in the first expression:
 the first whitespace is enclosed between quotes, and so is part of a string;
-while the second (before the \kbd{"b"}) is completely optional and GP
+while the second (before the \kbd{"b"}) is completely optional and \kbd{gp}
 actually suppresses it, as it would with any number of whitespace characters
 at this point (i.e.~outside of any string).
 
-$\bullet$ If you insert any expression when GP expects a string, it gets
+$\bullet$ If you insert any expression when a string is expected, it gets
 ``expanded'': it is evaluated as a standard GP expression, and the final
 result (as would have been printed if you had typed it by itself) is then
 converted to a string, as if you had typed it directly. For instance \kbd{"a"
@@ -1906,12 +1911,12 @@ in string context:
 \subsec{Errors.}\sidx{error}
 
 There are two kind of errors: syntax errors, and errors produced by functions
-in the PARI library. Both kinds will be fatal to your computation: GP will
+in the PARI library. Both kinds are fatal to your computation: \kbd{gp} will
 report the error, perform some cleanup (restore variables modified while
 evaluating the erroneous command, close open files, reclaim unused memory,
 etc.), and will output its usual prompt. 
 
-When reporting a syntax error, GP tries to give meaningful context by copying
+When reporting a syntax error, \kbd{gp} tries to give meaningful context by copying
 the sentence it was trying to read (whitespace and comments stripped
 out), indicating an error with a little caret like in
 \bprog
@@ -1926,25 +1931,26 @@ out), indicating an error with a little caret like in
                                                      ^--------------------
 @eprog
 \noindent
-GP error messages will often be mysterious, because GP cannot guess what
-you were trying to do and the error usually occurs once GP has been
+Error messages will often be mysterious, because \kbd{gp} cannot guess what
+you were trying to do and the error usually occurs once \kbd{gp} has been
 sidetracked. Let's have a look at the two messages above.
 
-The first error is a missing parenthesis, but from GP's point of view, you
+The first error is a missing parenthesis, but from \kbd{gp}'s point of view, you
 might as well have intended to give further arguments to \kbd{factor} (this is
-possible, and often useful, see the description of the function). Since GP
+possible, and often useful, see the description of the function). Since
+\kbd{gp}
 did not see the closing parenthesis, it tried to read a second argument,
 first looking for the comma that would separate it form the first. The error
-occurred at this point. So GP tells you that it was expecting a comma and saw
+occurred at this point. So \kbd{gp} tells you that it was expecting a comma and saw
 a blank.
 
 The second error is even weirder. It is a simple typo, \kbd{siN} instead of
-\kbd{sin} and GP tells us that is was expecting an equal sign a few
+\kbd{sin} and \kbd{gp} tells us that is was expecting an equal sign a few
 characters later? What happens is this: \kbd{siN} is not a recognized
 identifier, but from the context, it looks like a function (it is followed by
 an open parenthesis), then we have an argument, then a closing parenthesis.
 Then if \kbd{siN} were a known function we would evaluate it; but it is not,
-so GP assumes that you were trying to \emph{define} it, as in
+so \kbd{gp} assumes that you were trying to \emph{define} it, as in
 \bprog 
 ? if (siN(x)=sin(x), ...)
 @eprog
@@ -1953,11 +1959,11 @@ This is actually allowed (!) and defines the function \kbd{siN} as an alias for
 hence the test is meaningful, and false, so nothing happens. (Admittedly this
 doesn't look like a useful syntax but it can be interesting in other contexts
 to let functions define other functions. Anyway, it is allowed by the
-language definition.)  So GP tells you in good faith that to correctly define
+language definition.)  So \kbd{gp} tells you in good faith that to correctly define
 a function, you need an equal sign between its name and its body.
 
 Error messages from the library will usually be much clearer since, by
-definition, they answer a correctly worded query (otherwise GP would have
+definition, they answer a correctly worded query (otherwise \kbd{gp} would have
 protested first). Also they have more mathematical content, which should be
 easier to grasp than a parser's logic. For instance:
 \bprog
@@ -2000,12 +2006,12 @@ different modes we now describe.
 \subsec{Break loop}\label{se:breakloop}
 
 A \tev{break loop} is a special debugging mode that you enter whenever an
-error occurs, freezing the GP state, and preventing cleanup until you get out
+error occurs, freezing the \kbd{gp} state, and preventing cleanup until you get out
 of the loop. Any error: syntax error, library error, user error (from
 \tet{error}), even user interrupts like \kbd{C-c} (Control-C). When a break
-loop starts, a prompt is issued (\kbd{break>}). You can type in a GP command,
+loop starts, a prompt is issued (\kbd{break>}). You can type in a \kbd{gp} command,
 which is evaluated when you hit the \kbd{<Return>} key, and the result is
-printed as during the main GP loop, except that no history of results is kept
+printed as during the main \kbd{gp} loop, except that no history of results is kept
 Then the break loop prompt reappears and you can type further commands as
 long as you do not exit the loop. If you are using readline, the history of
 commands is kept, and line editing is available as usual. If you type in a
@@ -2013,8 +2019,8 @@ command that results in an error, you are sent back to the break loop prompt
 (errors does \var{not} terminate the loop).
 
 To get out of a break loop, you can use \tet{next}, \tet{break},
-\tet{return}, or \kbd{C-d} (\kbd{EOF}), any of which will let GP perform its
-usual cleanup, and send you back to the GP prompt. If the error is not fatal,
+\tet{return}, or \kbd{C-d} (\kbd{EOF}), any of which will let \kbd{gp} perform its
+usual cleanup, and send you back to the \kbd{gp} prompt. If the error is not fatal,
 inputing an empty line, i.e hitting the \kbd{<Return>} key at the
 \kbd{break>} prompt, will continue the temporarily interrupted computation.
 An empty line has no effect in case of a fatal error, to ensure you do not
@@ -2024,8 +2030,8 @@ cleanup (since user variables will be restored to their former values).
 In current version \vers, an error is non-fatal if and only if it was
 initiated by a \kbd{C-c} typed by the user.
 
-Break loops are useful as a debugging tool to inspect the values of GP
-variables to understand why an error occurred, or to change GP state in the
+Break loops are useful as a debugging tool to inspect the values of \kbd{gp}
+variables to understand why an error occurred, or to change \kbd{gp}'s state in the
 middle of a computation (increase debugging level, start storing results in a
 logfile, set variables to different values\dots): hit \kbd{C-c}, type in your
 modifications, then let the computation go on as explained above.
@@ -2049,7 +2055,7 @@ have context, whether the error comes from the library or the parser. The
 break> v
 0
 @eprog
-\noindent explaining the problem. We could have typed any GP command, not
+\noindent explaining the problem. We could have typed any \kbd{gp} command, not
 only the name of a variable, of course. There is no special set of commands
 becoming available during a break loop, as they would in most debuggers.
 
@@ -2060,14 +2066,14 @@ way. By default, you will be sent back to the prompt.
 \misctitle{Technical Note:} When you enter a break loop due to a PARI stack
 overflow, the PARI stack is reset so that you can run commands (otherwise the
 stack would immediately overflow again). Still, as explained above, you do
-not lose the value of any GP variable in the process.
+not lose the value of any \kbd{gp} variable in the process.
 
 \subsec{Error handlers}
 
 The break loop described above is a (sophisticated) example of an \tev{error
 handler}: a function that is executed whenever an error occurs, supposedly to
 try and recover. The break loop is quite a satisfactory error handler, but it
-may not be adequate for some purposes, for instance when GP runs in
+may not be adequate for some purposes, for instance when \kbd{gp} runs in
 non-interactive mode, detached from a terminal.
 
 So, you can define a different error handler, to be used in place of the
@@ -2134,7 +2140,7 @@ specific type should be intercepted, to be chosen among
 
 \noindent Omitting the error name means we are trapping all errors. For
 instance, the following can be used to check in a safe way whether
-\tet{install} works correctly in your GP:
+\tet{install} works correctly in your \kbd{gp}:
 \bprog
 broken_install() = 
 {
@@ -2154,7 +2160,7 @@ and \kbd{BROKEN} if the installed function did not behave as expected.
 \section{Interfacing GP with other languages}
 \noindent
 The PARI library was meant to be interfaced with C programs. This specific
-use will be dealt with extensively in Chapter~4. GP itself provides a
+use will be dealt with extensively in Chapter~4. \kbd{gp} itself provides a
 convenient, if simple-minded, interpreter, which enables you to execute
 rather intricate scripts (see \secref{se:programming}).
 
@@ -2169,7 +2175,7 @@ using scripts, before actually coding them in C for the sake of speed.
 \unix{Note that the \kbd{install} command enables you to concentrate on
 critical parts of your programs only (which can of course be written with the
 help of other mathematical libraries than PARI!), and to easily and
-efficiently import foreign functions for use under GP
+efficiently import foreign functions for use under \kbd{gp}
 (see~\secref{se:install}).}
 
 We are aware of three PARI-related public domain libraries. We \emph{neither
@@ -2188,7 +2194,7 @@ see \kbd{http://www.math.jussieu.fr/\til{}fermigie/PariPython/readme.html}},
 by St\'efane Fermigier (\kbd{fermigie@math.jussieu.fr}). Finaly, Michael Stoll
 (\kbd{Michael\_Stoll@math.uni-bonn.de}) has integrated PARI into \tet{CLISP},
 which is a Common Lisp implementation by Bruno Haible, Marcus Daniels and
-others. These provide interfaces to GP functions for use in \kbd{perl},
+others. These provide interfaces to \kbd{gp} functions for use in \kbd{perl},
 \kbd{python} or \kbd{Lisp} programs.\sidx{Perl}\sidx{Python}\sidx{Lisp}
 To our knowledge, only the \kbd{python} and \kbd{perl} interfaces have been
 upgraded to version 2.0 of PARI, the \kbd{CLISP} one being still based on
@@ -2197,25 +2203,26 @@ version 1.39.$xx$.
 \section{The preferences file}\sidx{startup}\sidx{preferences file}
 \label{se:gprc}
 
-This file, called \tet{gprc} in the sequel, is used to modify or extend GP
-default behaviour, in all GP sessions: e.g customize \kbd{default} values or
-load common user functions and aliases. GP opens the \kbd{gprc} file and
+This file, called \tet{gprc} in the sequel, is used to modify or extend
+\kbd{gp}
+default behaviour, in all \kbd{gp} sessions: e.g customize \kbd{default} values or
+load common user functions and aliases. \kbd{gp} opens the \kbd{gprc} file and
 processes the commands in there, \emph{before} doing anything else,
 e.g.~creating the PARI stack. If the file does not exist or cannot be read,
-GP will proceed to the initialization phase at once, eventually emitting a
+\kbd{gp} will proceed to the initialization phase at once, eventually emitting a
 prompt. If any explicit command line switches are given, they override the
 values read from the preferences file.
 
 \subsec{Where is it?}
-When GP is started, it looks for a customization file, or \kbd{gprc} in the
+When \kbd{gp} is started, it looks for a customization file, or \kbd{gprc} in the
 following places (in this order, only the first one found will be loaded):
 
-\noindent$\bullet$ On the Macintosh (only), GP looks in the directory which
-contains the GP executable itself for a file called \kbd{gprc}. No other places
+\noindent$\bullet$ On the Macintosh (only), \kbd{gp} looks in the directory which
+contains the \kbd{gp} executable itself for a file called \kbd{gprc}. No other places
 are examined.
 
 \noindent$\bullet$ If the operating system supports environment variables
-(essentially, anything but MacOS), GP checks whether the environment variable
+(essentially, anything but MacOS), \kbd{gp} checks whether the environment variable
 \tet{GPRC} is set. Under DOS, you can set it in \kbd{AUTOEXEC.BAT}.
 On Unix, this can be done with something like:
 \smallskip
@@ -2231,7 +2238,7 @@ On Unix, this can be done with something like:
 \noindent If so, the file named by \kbd{\$GPRC} is the \kbd{gprc}.
 
 \noindent$\bullet$ If \kbd{GPRC} is not set, and if the environment variable
-\kbd{HOME} is defined, GP then tries
+\kbd{HOME} is defined, \kbd{gp} then tries
 
 \kbd{\$HOME/.gprc} on a Unix system
 
@@ -2273,20 +2280,20 @@ $\bullet$ lines starting with \kbd{\#if} \var{boolean} are treated as
 comments if \var{boolean} evaluates to \kbd{false}, and read normally
 otherwise. The condition can be negated using either \kbd{\#if not} (or
 \kbd{\#if !}). If the rest of the current line is empty, the test applies to
-the next line (same behaviour as \kbd{=} under GP). Only three tests can be
+the next line (same behaviour as \kbd{=} under \kbd{gp}). Only three tests can be
 performed:
 
-\kbd{EMACS}: \kbd{true} if GP is running in an Emacs or TeXmacs shell (see
+\kbd{EMACS}: \kbd{true} if \kbd{gp} is running in an Emacs or TeXmacs shell (see
 \secref{se:emacs}).
 
-\kbd{READL}: \kbd{true} if GP is compiled with \kbd{readline} support (see
+\kbd{READL}: \kbd{true} if \kbd{gp} is compiled with \kbd{readline} support (see
 \secref{se:readline}).
 
 \kbd{VERSION} \var{op} \var{number}: where \var{op} is in the set
 $\{ \kbd{>}, \kbd{<}, \kbd{<=}, \kbd{>=} \}$, and \var{number} is a PARI
 version number of the form \var{Major}.\var{Minor}.\var{patch}, where the
 last two components can be omitted (i.e.~$1$ is understood as versio $1.0.0$).
-This is \kbd{true} if GP's version number satisfies the required
+This is \kbd{true} if \kbd{gp}'s version number satisfies the required
 inequality.
 
 \subsubsec{Commands:}
@@ -2300,7 +2307,7 @@ the available defaults (see \secref{se:defaults}), which will be set to
 (e.g.~for \kbd{prompt} or \kbd{help}).
 
 $\bullet$ \kbd{read "\var{some\_GP\_file}"} where \kbd{\var{some\_GP\_file}}
-is a regular GP script this time, which will be read just before GP prompts
+is a regular GP script this time, which will be read just before \kbd{gp} prompts
 you for commands, but after initializing the defaults. In particular, file
 input is delayed until the \kbd{gprc} has been fully loaded. This is the
 right place to input files containing \kbd{alias} commands, or your favorite
@@ -2344,10 +2351,11 @@ one (note the terminating \kbd{;} to separate the expressions):
 }
 @eprog
 
-\section{Using GP under GNU Emacs}
+\section{Using GNU Emacs}
 \label{se:emacs}
 
-If GNU \idx{Emacs} is installed on your machine, it is possible to use GP as
+If GNU \idx{Emacs} is installed on your machine, it is possible to use
+\kbd{gp} as
 a subprocess in \idx{Emacs}. To use this, you should include in your
 \kbd{.emacs} file the following lines:
 \bprog
@@ -2360,21 +2368,22 @@ a subprocess in \idx{Emacs}. To use this, you should include in your
 @eprog
 \noindent which autoloads functions from \kbd{pari.el}. See also
 \kbd{pariemacs.txt}. These files are included in the PARI distribution and
-are installed at the same time as GP. 
+are installed at the same time as \kbd{gp}. 
 
 Once this is done, under GNU Emacs if you type \kbd{M-x gp} (where as usual
 \kbd{M} is the \kbd{Meta} key, i.e.~Escape, or on SUN keyboards, the Left
-key), a special shell will be started, which in particular launches GP with
+key), a special shell will be started, which in particular launches \kbd{gp} with
 the default stack size, prime limit and input buffer size. If you type
-instead \kbd{C-u M-x gp}, you will be asked for the name of the GP
-executable, the stack size and the prime limit before the execution of GP
+instead \kbd{C-u M-x gp}, you will be asked for the name of the \kbd{gp}
+executable, the stack size and the prime limit before the execution of
+\kbd{gp}
 begins. If for any of these you simply type return, the default value will
 be used. On UNIX machines it will be the place you told \kbd{Configure}
 (usually \kbd{/usr/local/bin/gp}) for the executable, \kbd{10M} for the
 stack and \kbd{500k} for the prime limit.
 
 \smallskip
-  You can then work as usual under GP, but with two notable advantages (which
+  You can then work as usual under \kbd{gp}, but with two notable advantages (which
 don't really matter if readline is available to you, see below). First and
 foremost, you have at your disposal all the facilities of a text editor like
 Emacs, in particular for correcting or copying blocks. Second, you can have
@@ -2399,14 +2408,15 @@ the letters you have typed, the command name will be completed. If not,
 either the list of commands starting with the letters you typed will be
 displayed in a separate window (which you can then kill by typing as usual
 \kbd{C-x 1} or by typing in more letters), or ``no match found'' will be
-displayed in the Emacs command line. If your GP was linked with the readline
+displayed in the Emacs command line. If your \kbd{gp} was linked with the readline
 library, read the section on completion in the section below (the paragraph
 on online help is not relevant).
 
 Note that if for some reason the session crashes (due to a bug in your
-program or in the PARI system), you will usually stay under Emacs, but the GP
+program or in the PARI system), you will usually stay under Emacs, but the
+\kbd{gp}
 buffer will be killed. To recover it, simply type again \kbd{M-x gp} (or
-\kbd{C-u M-x gp}), and a new session of GP will be started after the old one,
+\kbd{C-u M-x gp}), and a new session of \kbd{gp} will be started after the old one,
 so you can recover what you have typed. Note that this will of course
 \emph{not} work if for some reason you kill Emacs and start a new session.
 
@@ -2416,15 +2426,15 @@ customizations (colours, prompt). Read the file \kbd{emacs/pariemacs.txt} in
 standard distribution for details.
 
 
-\section{Using GP with readline}
+\section{Using readline}
 \sidx{line editor}\sidx{completion}
 
   Thanks to the initial help of Ilya Zakharevich, there is a possibility of
 line editing and command name completion outside of an Emacs buffer
-\emph{if} you have compiled GP with the GNU \idx{readline} library. If you
+\emph{if} you have compiled \kbd{gp} with the GNU \idx{readline} library. If you
 don't have Emacs available, or can't stand using it, we really advise you
 to make sure you get this very useful library before configuring or
-compiling GP. In fact, with \kbd{readline}, even line editing becomes
+compiling \kbd{gp}. In fact, with \kbd{readline}, even line editing becomes
 \emph{more} powerful outside an Emacs buffer!
 
 \subsec{A (too) short introduction to readline}:
@@ -2440,7 +2450,7 @@ enabling you to move in the line. There are many more movement commands,
 which will be familiar to the Emacs user, for instance \kbd{C-a}/\kbd{C-e}
 will take you to the start/end of the line, \kbd{M-b}/\kbd{M-f} move the
 cursor backward/forward by a word, etc. Just press the \kbd{<Return>} key at
-any point to send your command to GP.
+any point to send your command to \kbd{gp}.
 
   All the commands you type in are stored in a history (with multiline
 commands being saved as single concatenated lines). The Up and Down arrows (or
@@ -2461,7 +2471,7 @@ prefer \idx{Vi}--style editing, \kbd{M-C-j} will toggle you to Vi mode.
   Of course you can change all these default bindings. For that you need to
 create a file named \kbd{.inputrc} in your home directory. For instance
 (notice the embedding conditional in case you would want specific bindings
-for GP):
+for \kbd{gp}):
 %
 \bprog
 $if Pari-GP
@@ -2499,7 +2509,7 @@ combination, put the following two lines in your \kbd{.inputrc}:
  \subsec{Command completion and online help}
 
   As in the Emacs shell, \kbd{<TAB>} will complete words for you. But, under
-readline, this mechanism will be context-dependent: GP will strive to only
+readline, this mechanism will be context-dependent: \kbd{gp} will strive to only
 give you meaningful completions in a given context (it will fail sometimes,
 but only under rare and restricted conditions).
 
@@ -2511,7 +2521,7 @@ version. After a '.', we expect a member keyword. And generally of course, we
 expect any GP symbol which may be found in the hashing lists: functions (both
 yours and GP's), and variables.
 
-  If, at any time, only one completion is meaningful, GP will provide it
+  If, at any time, only one completion is meaningful, \kbd{gp} will provide it
 together with
 
 $\bullet$ an ending comma if we're completing a default,

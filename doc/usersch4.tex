@@ -154,7 +154,7 @@ function which is hidden in PARI by a macro of the same name representing
 \kbd{(long)gdiv}.
 
 The macro $\teb{coeff}(x,m,n)$ exists with exactly the meaning of \kbd{x[m,n]}
-under GP when \kbd{x} is a matrix. This is a purely syntactical trick
+in GP when \kbd{x} is a matrix. This is a purely syntactical trick
 to reduce the number of typecasts and thus does not create a copy of the
 coefficient (contrary to all the library \emph{functions}). It can be put on
 the left side of an assignment statement, and its value, of type \kbd{long}
@@ -1090,8 +1090,8 @@ machine you are using, but it always contain the following data: the
 \emph{internal type number}\sidx{type number} associated to the symbolic type
 name, the \emph{length} of the root in longwords, and a technical bit
 which indicates whether the object is a clone (see below) or not. This last
-one is used by GP for internal garbage collecting, you will not have to worry
-about it.
+one is used by \kbd{gp} for internal garbage collecting, you will not have to
+worry about it.
 
 \noindent These data can be handled through the following \emph{macros}:
 
@@ -1357,7 +1357,7 @@ vector.
 \kbd{z[2]},\dots \kbd{z[lg(z)-1]} point to the column vectors of \kbd{z},
 i.e.~they must be of type \typ{COL} and of the same length.
 
-\noindent The next two types were introduced for specific GP use, and you
+\noindent The next two types were introduced for specific \kbd{gp} use, and you
 will be much better off using the standard malloc'ed C constructs when
 programming in library mode. We quote them just for completeness, advising
 you not to use them:
@@ -1404,7 +1404,7 @@ But for polynomials and power series only the ``outermost'' number counts (we
 directly access $\tet{varn}(x)$ in the codewords): the representation is not
 symmetrical at all.
 
-Under GP, one need not worry too much since the interpreter will define the
+Under \kbd{gp}, one need not worry too much since the interpreter will define the
 variables as it sees them\footnote{*}{ More precisely, the first time a given
 identifier is read by the GP parser (and is not immediately interpreted as a
 function) a new variable is created, and it is assigned a strictly lower
@@ -1429,12 +1429,12 @@ variable number~$v$. Here is the complete list: \teb{polun}$[v]$ and
 \teb{polx}$[v]$, which you can use in library mode and which represent,
 respectively, the monic monomials of degrees 0 and 1 in~$v$;
 \teb{varentries}$[v]$, and \teb{polvar}$[v]$. The latter two are only
-meaningful to GP, but they have to be set nevertheless. All of them must be
+meaningful to \kbd{gp}, but they have to be set nevertheless. All of them must be
 properly defined before you can use a given integer as a variable number.
 
-Initially, this is done for $0$ (the variable \kbd{x} under GP), and
+Initially, this is done for $0$ (the variable \kbd{x} under \kbd{gp}), and
 \tet{MAXVARN}, which is there to address the need for a ``temporary'' new
-variable in library mode and cannot be input under GP. No documented library
+variable in library mode and cannot be input under \kbd{gp}. No documented library
 function can create from scratch an object involving \tet{MAXVARN} (of
 course, if the operands originally involve \kbd{MAXVARN}, the function will
 abide). We call the latter type a ``temporary variable''. The regular
@@ -1465,12 +1465,12 @@ long v = gvar(gy);
 @eprog
 
 \noindent This is dangerous, especially when programming functions that
-will be used under GP. The code above reads the value of \kbd{y}, as it is
-currently known by the GP interpreter (possibly creating it in the
+will be used under \kbd{gp}. The code above reads the value of \kbd{y}, as it is
+currently known by the \kbd{gp} interpreter (possibly creating it in the
 process). All is well and good if \kbd{y} has not been tampered with in
-previous GP commands. But if \kbd{y} has been modified (e.g \kbd {y = 1}),
+previous \kbd{gp} commands. But if \kbd{y} has been modified (e.g \kbd {y = 1}),
 then the value of \kbd{gy} is not what you expected it to be and corresponds
-instead to the current value of the GP variable (e.g \kbd{gun}).
+instead to the current value of the \kbd{gp} variable (e.g \kbd{gun}).
 
 \subsubsec{Temporary variables}\sidx{variable (temporary)}: 
 \kbd{MAXVARN} is available, but is better left to pari internal functions
@@ -1498,9 +1498,9 @@ it, by calling the function
 \noindent after which the output machinery will use the name \kbd{s} to
 represent the variable number~\kbd{n}. The GP parser will \emph{not}
 recognize it by that name, however, and calling this on a variable known
-to~GP will raise an error. Temporary variables are meant to be used as free
+to~\kbd{gp} will raise an error. Temporary variables are meant to be used as free
 variables, and you should never assign values or functions to them as you
-would do with variables under~GP. For that, you need a user variable.
+would do with variables under~\kbd{gp}. For that, you need a user variable.
 
 All objects created by \kbd{fetch\_var} are on the heap and not on the stack,
 thus they are not subject to standard garbage collecting (they will not be
@@ -1545,18 +1545,18 @@ library mode: input and output of PARI objects.
 
 \noindent
 For \idx{input}, PARI provides you with two powerful high level functions
-which enables you to input your objects as if you were under GP. In fact,
+which enables you to input your objects as if you were under \kbd{gp}. In fact,
 the second one \emph{is} essentially the GP syntactical parser, hence you
 can use it not only for input but for (most) computations that you can do
-under GP. These functions are called \teb{flisexpr} and \teb{flisseq}. The
+under \kbd{gp}. These functions are called \teb{flisexpr} and \teb{flisseq}. The
 first one has the following syntax:\label{se:flisexpr}
 
 \fun{GEN}{flisexpr}{char *s}
 
 \noindent
-Its effect is to analyze the input string s and to compute the result as in
-GP.  However it is limited to one expression. If you want to read and
-evaluate a sequence of expressions, use
+Its effect is to analyze the input string s and to compute the result as a
+GP expression.  However it is limited to one expression. If you want to read
+and evaluate a sequence of expressions, use
 
 \fun{GEN}{flisseq}{char *s}
 
@@ -1597,7 +1597,7 @@ returns a \kbd{GEN}, it should satisfy \kbd{gerepileupto} assumptions (see
 
 \noindent
 For \idx{output}, there exist essentially three different functions (with
-variants), corresponding to the three main GP output formats (as described in
+variants), corresponding to the three main \kbd{gp} output formats (as described in
 \secref{se:output}), plus three extra ones, respectively devoted to
 \TeX\ output, string output, and (advanced) debugging.
 
@@ -1645,7 +1645,7 @@ used for printing integers:
 \kbd{sor(obj,'g',-1,0)} followed by a newline and a buffer flush.
 
 \noindent $\bullet$ The first extra format corresponds to the \teb{texprint}
-function of GP, and gives a \TeX\ output of the result. It is obtained by
+GP function, and gives a \TeX\ output of the result. It is obtained by
 using:
 
 \fun{void}{exe}{GEN obj, char x, long n}
@@ -1657,7 +1657,7 @@ converts a PARI \kbd{GEN} to an ASCII string. The syntax is
 string (which you should \kbd{free} after use).
 
 \noindent $\bullet$ The third and final one outputs the \idx{hexadecimal tree}
-corresponding to the GP command \kbd{\b x} using the function
+corresponding to the \kbd{gp} metacommand \kbd{\b x} using the function
 
 \fun{void}{voir}{GEN obj, long nb}, which will only output the first
 \kbd{nb} words corresponding to leaves (very handy when you have a look at
@@ -1680,7 +1680,7 @@ using the function \teb{switchin} which is analogous to \teb{switchout}.
 \misctitle{(Advanced) Remark}. All output is done according to the values
 of the \teb{pariOut}~/ \teb{pariErr} global variables which are pointers to
 structs of pointer to functions. If you really intend to use these, this
-probably means you are rewriting GP. In that case, have a look at the code in
+probably means you are rewriting \kbd{gp}. In that case, have a look at the code in
 \kbd{language/es.c} (\kbd{init80()} or \kbd{GENtostr()} for instance).
 
 \subsec{Errors}.\sidx{error}\kbdsidx{talker}
@@ -1695,7 +1695,7 @@ error handling routine \teb{err}. The basic syntax is
 
 \noindent
 This will print the corresponding error message and exit the program (in
-library mode; go back to the GP prompt otherwise).\label{se:err} You can
+library mode; go back to the \kbd{gp} prompt otherwise).\label{se:err} You can
 also use it in the more versatile guise
 \bprog
   err(talker, format, ...);
@@ -1727,7 +1727,7 @@ computation, just print the requested message and go on. The basic example is
 \noindent which is the exact equivalent of \kbd{err(talker,...)} except that
 you certainly do not want to stop the program at this point, just inform the
 user that something important has occurred (in particular, this output would be
-suitably highlighted under GP, whereas a simple \kbd{printf} would not).
+suitably highlighted under \kbd{gp}, whereas a simple \kbd{printf} would not).
 
 \subsec{Debugging output}.\sidx{debugging}\sidx{format}\label{se:dbg_output}
 
@@ -1736,7 +1736,7 @@ The global variables \teb{DEBUGLEVEL} and \teb{DEBUGMEM} (corresponding
 to the default \teb{debug} and \teb{debugmem}, see \secref{se:defaults})
 are used throughout the PARI code to govern the amount of diagnostic and
 debugging output, depending on their values. You can use them to debug your
-own functions, especially after having made them accessible under GP through
+own functions, especially after having made them accessible under \kbd{gp} through
 the command \teb{install} (see \secref{se:install}).
 
 For debugging output, you can use \kbd{printf} and the standard output
@@ -2125,9 +2125,9 @@ bugs, to add new functionalities to existing functions, or to improve their
 efficiency.
 
 Finally the last type is to add new functions to PARI. We explain here how
-to do this, so that in particular the new function can be called from GP.
+to do this, so that in particular the new function can be called from \kbd{gp}.
 
-\subsec{The calling interface from GP, parser codes}.
+\subsec{The calling interface from \kbd{gp}, parser codes}.
 \label{se:gp.interface}
 A \idx{parser code} is a character string describing all the GP parser
 needs to know about the function prototype. It contains a sequence of the
@@ -2225,9 +2225,9 @@ trivially be changed by modifying the definition of \kbd{argvec} in
 \kbd{anal.c:identifier()}. This limitation should disappear in future
 versions.
 
-When the function is called under GP, the prototype is scanned and each time
+When the function is called under \kbd{gp}, the prototype is scanned and each time
 an atom corresponding to a mandatory argument is met, a user-given argument
-is read (GP outputs an error message it the argument was missing). Each time
+is read (\kbd{gp} outputs an error message it the argument was missing). Each time
 an optional atom is met, a default value is inserted if the user omits the
 argument. The ``automatic'' atoms fill in the argument list transparently,
 supplying the current value of the corresponding variable (or a dummy
@@ -2243,7 +2243,7 @@ long name(GEN x)                    ----> "lG"
 int name(long x)                    ----> "iL"
 @eprog
 
-If you want more examples, GP gives you easy access to the parser codes
+If you want more examples, \kbd{gp} gives you easy access to the parser codes
 associated to all GP functions: just type \kbd{\b{h} \var{function}}. You
 can then compare with the C prototypes as they stand in the code.
 
@@ -2261,7 +2261,7 @@ in the PARI sources. One important thing to remember is to clean the stack
 before exiting your main function (usually using \kbd{gerepile}), since
 otherwise successive calls to the function will clutter the stack with
 unnecessary garbage, and stack overflow will occur sooner. Also, if it
-returns a \kbd{GEN} and you want it to be accessible to GP, you have to
+returns a \kbd{GEN} and you want it to be accessible to \kbd{gp}, you have to
 make sure this \kbd{GEN} is suitable for \kbd{gerepileupto} (see
 \secref{se:garbage}).
 
@@ -2271,9 +2271,9 @@ from the \kbd{warn} variants, this function does not return but ends with
 a \kbd{longjmp} statement. As well, instead of explicit \kbd{printf}~/
 \kbd{fprintf} statements, use the following encapsulated variants:
 
-\fun{void}{pariputs}{char *s}: write \kbd{s} to the GP output stream.
+\fun{void}{pariputs}{char *s}: write \kbd{s} to the \kbd{gp} output stream.
 
-\fun{void}{fprintferr}{char *s}: write \kbd{s} to the GP error stream (this
+\fun{void}{fprintferr}{char *s}: write \kbd{s} to the \kbd{gp} error stream (this
 function is in fact much more versatile, see \secref{se:dbg_output}).
 
 Declare all public functions in an appropriate header file, if you
@@ -2285,11 +2285,11 @@ be declared \kbd{static} in your file.
 Your function is now ready to be used in library mode after compilation and
 creation of the library. If possible, compile it as a shared library (see
 the \kbd{Makefile} coming with the \kbd{matexp} example in the
-distribution). It is however still inaccessible from GP.\smallskip
+distribution). It is however still inaccessible from \kbd{gp}.\smallskip
 
-\subsec{Integration with GP as a shared module}
+\subsec{Integration with \kbd{gp} as a shared module}
 
-To tell GP about your function, you must do the following. First, find a
+To tell \kbd{gp} about your function, you must do the following. First, find a
 name for it. It does not have to match the one used in library mode, but
 consistency is nice. It has to be a valid GP identifier, i.e.~use only
 alphabetic characters, digits and the underscore character (\kbd{\_}), the
@@ -2311,15 +2311,15 @@ part is not mandatory, but very useful if you want others to use your
 module.  \kbd{libname} is how the function is named in the library,
 usually the same name as one visible from C.
 
-Read that file from your GP session (from your \idx{preferences file} for
+Read that file from your \kbd{gp} session (from your \idx{preferences file} for
 instance, see \secref{se:gprc}), and that's it, you can use the new
-function \var{gpname} under GP (and we would very much like to hear about
+function \var{gpname} under \kbd{gp} (and we would very much like to hear about
 it!).
 
 \subsec{Integration the hard way}
 
 If \tet{install} is not available for your Operating System, things are more
-complicated: you have to hardcode your function in the GP binary (or
+complicated: you have to hardcode your function in the \kbd{gp} binary (or
 install \idx{Linux}). Here is what needs to be done: 
 
 You need to choose a section and add a file
@@ -2333,7 +2333,7 @@ Prototype: @com\var{code}
 Help:      @com\var{some help text}
 @eprog
 \noindent At this point you can rebuild the database by running \kbd{make
-Def} in the directory \kbd{desc}. Then, you can recompile GP.
+Def} in the directory \kbd{desc}. Then, you can recompile \kbd{gp}.
 
 \subsec{Example}.
 %
@@ -2346,7 +2346,7 @@ A complete description could look like this:
     compute the necessary data for ...");
 }
 @eprog
-\noindent which means we have a function \kbd{ClassGroupInit} under GP, which
+\noindent which means we have a function \kbd{ClassGroupInit} under \kbd{gp}, which
 calls the library function \kbd{bnfinit0} . The function has one mandatory
 argument, and possibly two more (two \kbd{'D'} in the code), plus the current
 real precision. More precisely, the first argument is a \kbd{GEN}, the second
@@ -2360,7 +2360,7 @@ argument was supplied by the user. This matches the C prototype (from
 @eprog
 
 This function is in fact coded in \kbd{basemath/buch2.c}, and will in this
-case be completely identical to the GP function \kbd{bnfinit} but GP does
+case be completely identical to the GP function \kbd{bnfinit} but \kbd{gp} does
 not need to know about this, only that it can be found somewhere in the
 shared library \kbd{libpari.so}.
 

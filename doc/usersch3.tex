@@ -80,7 +80,7 @@ want to adopt a new flag numbering scheme (for instance when noticing
 flags with the same meaning but different numeric values), it would break
 backward compatibility. The only advantage of explicit numeric values is that
 they are fast to type, so their use is only advised when using the calculator
-GP.
+\kbd{gp}.
 
 As an alternative, one can replace a numeric flag by a character string
 containing symbolic identifiers. For a generic flag, the mnemonic
@@ -443,7 +443,7 @@ will operate faster on such objects and memory consumption will be lower.
 On the other hand, care should be taken to avoid creating too many such
 objects.
 
-Under GP, the same effect can be obtained by assigning the object to a GP
+In GP, the same effect can be obtained by assigning the object to a GP
 variable (the value of which is a permanent object for the duration of the
 relevant library function call, and is treated as such). This value is
 subject to garbage collection, since it will be deleted when the value
@@ -686,7 +686,7 @@ $x$ is a matrix, the $n^{\text{th}}$ column, if $x$ is a polynomial, the
 $n^{\text{th}}$ coefficient (i.e.~of degree $n-1$), and for power series, the
 $n^{\text{th}}$ significant coefficient. The use of the function
 \kbd{component} implies the knowledge of the structure of the different PARI
-types, which can be recalled by typing \b{t} under GP.
+types, which can be recalled by typing \b{t} under \kbd{gp}.
 
 \syn{compo}{x,n}, where $n$ is a \kbd{long}.
 
@@ -708,7 +708,7 @@ polynomial of degree zero.
 
 \syn{truecoeff}{x,n}.
 
-The third method is specific to vectors or matrices under GP. If $x$ is a
+The third method is specific to vectors or matrices in GP. If $x$ is a
 (row or column) vector, then \tet{x[n]} represents the $n^{\text{th}}$
 component of $x$, i.e.~\kbd{compo(x,n)}. It is more natural and shorter to
 write. If $x$ is a matrix, \tet{x[m,n]} represents the coefficient of
@@ -1004,19 +1004,19 @@ complex) number using the current \idx{precision} held in the default
 \kbd{realprecision}. Note that only exact arguments are converted, while
 inexact arguments such as reals are not.
 
-Under GP this is transparent to the user, but when programming in library
+In GP this is transparent to the user, but when programming in library
 mode, care must be taken to supply a meaningful parameter \var{prec} as the
 last argument of the function if the first argument is an exact object.
 This parameter is ignored if the argument is inexact.
 
    Note that in library mode the precision argument \var{prec} is a word
 count including codewords, i.e.~represents the length in words of a real
-number, while under GP the precision (which is changed by the metacommand
+number, while under \kbd{gp} the precision (which is changed by the metacommand
 \b{p} or using \kbd{default(realprecision,...)}) is the number of significant
 decimal digits.
 
 Note that some accuracies attainable on 32-bit machines cannot be attained
-on 64-bit machines for parity reasons. For example the default GP accuracy
+on 64-bit machines for parity reasons. For example the default \kbd{gp} accuracy
 is 28 decimal digits on 32-bit machines, corresponding to \var{prec} having
 the value 5, but this cannot be attained on 64-bit machines.\smallskip
 
@@ -1046,7 +1046,7 @@ differently.
 
 $\bullet$ If the argument is a polynomial, power series or rational function,
 it is, if necessary, first converted to a power series using the current
-precision held in the variable \tet{precdl}. Under GP this again is
+precision held in the variable \tet{precdl}. Under \kbd{gp} this again is
 transparent to the user. When programming in library mode, however, the
 global variable \kbd{precdl} must be set before calling the function if the
 argument has an exact type (i.e.~not a power series). Here \kbd{precdl} is
@@ -1412,15 +1412,12 @@ integermod a non-prime (or a non-prime-adic), the result is undefined.
 \syn{gsqrt}{x,\var{prec}}.
 
 \subsecidx{sqrtn}$(x,n,\{\&z\})$: principal branch of the $n$th root of $x$,
-i.e.~such that $\text{Arg}(\text{sqrt}(x))\in{} ]-\pi/n, \pi/n]$.
-
-Integermod a prime and $p$-adics are allowed as arguments.
+i.e.~such that $\text{Arg}(\text{sqrt}(x))\in{} ]-\pi/n, \pi/n]$. Integermod
+a prime and $p$-adics are allowed as arguments.
 
 If $z$ is present, it is set to a suitable root of unity allowing to
 recover all the other roots. If it was not possible, z is
-set to zero.
-
-The following script computes all roots in all possible cases:
+set to zero. The following script computes all roots in all possible cases:
 
 \bprog
 sqrtnall(x,n)=
@@ -1449,7 +1446,8 @@ addhelp(sqrtnall,"sqrtnall(x,n):compute the vector of nth-roots of x");
 \syn{gth}{x,\var{prec}}.
 
 \subsecidx{teichmuller}$(x)$: Teichm\"uller character of the $p$-adic number
-$x$.
+$x$, i.e. the unique $(p-1)$-th root of unity congruent to $x / p^{v_p(x)}$
+modulo $p$.
 
 \syn{teich}{x}.
 
@@ -1509,7 +1507,7 @@ strong) probabilistic primality test, see \kbd{ispseudoprime}.
 
 \bigskip
 \subsecidx{addprimes}$(\{x=[\,]\})$: adds the ``primes'' contained in the
-vector $x$ (or the single integer $x$) to the table computed upon GP
+vector $x$ (or the single integer $x$) to the table computed upon \kbd{gp}
 initialization (by \kbd{pari\_init} in library mode), and returns a row
 vector entries contain all such user primes. Whenever \kbd{factor} or
 \kbd{smallfact} is subsequently called, first the primes in the table
@@ -1849,7 +1847,7 @@ The machinery underlying this function is still in a somewhat experimental
 state, but should be much faster on average than pure ECM as used by all
 PARI versions up to 2.0.8, at the expense of heavier memory use. You are
 invited to play with the flag settings and watch the internals at work by
-using GP's \tet{debuglevel} default parameter (level 3 shows just the
+using \kbd{gp}'s \tet{debuglevel} default parameter (level 3 shows just the
 outline, 4 turns on time keeping, 5 and above show an increasing amount
 of internal details). If you see anything funny happening, please let
 us know.
@@ -2763,7 +2761,7 @@ given as a lattice $[\omega_1,\omega_2]$).
 
 If $z$ is omitted or is a simple variable, computes the \emph{power series}
 expansion in $z$ (starting $z^{-2}+O(z^2)$). The number of terms to an
-\emph{even} power in the expansion is the default serieslength in GP, and the
+\emph{even} power in the expansion is the default serieslength in \kbd{gp}, and the
 second argument (C long integer) in library mode.
 
 Optional \fl\ is (for now) only taken into account when $z$ is numeric, and
@@ -2864,7 +2862,7 @@ a $\Z$-generating set, using \kbd{idealhnf(\var{nf},$x$)}.
 Concerning relative extensions, some additional definitions are necessary.
 When defining a relative extension, the base field $\var{nf}$ must be defined
 by a variable having a lower priority (see \secref{se:priority}) than the
-variable defining the extension. For example, under GP you can use the
+variable defining the extension. For example, under \kbd{gp} you can use the
 variable name $y$ (or $t$) to define the base field, and the variable name
 $x$ to define the relative extension.
 
@@ -3015,7 +3013,7 @@ where the parameters are to be understood as follows:
 
 $P$ is the defining polynomial for the number field, which must be in
 $\Z[X]$, irreducible and, preferably, monic. In fact, if you supply a
-non-monic polynomial at this point, GP will issue a warning, then
+non-monic polynomial at this point, \kbd{gp} will issue a warning, then
 \emph{transform your polynomial} so that it becomes monic. Instead of the
 normal result, say \kbd{res}, you then get a vector \kbd{[res,Mod(a,Q)]},
 where \kbd{Mod(a,Q) = Mod(X,P)} gives the change of variables.
@@ -3203,23 +3201,22 @@ $\var{bnf}[8]$ is a vector containing the last 6 components of
 regulator \kbd{\var{bnf}.reg}, the general ``check'' number which should be
 close to 1, the number of roots of unity and a generator \kbd{\var{bnf}.tu},
 the fundamental units \kbd{\var{bnf}.fu}, and finally the check on their
-computation. If the precision becomes insufficient, GP outputs a warning
+computation. If the precision becomes insufficient, \kbd{gp} outputs a warning
 (\kbd{fundamental units too large, not given}) and does not strive to
 compute the units by default ($\fl=0$).
 
-   When $\fl=1$, GP insists on finding the fundamental units exactly. The
-user should be warned that this can take a very long time when the
-coefficients of the fundamental units on the integral basis are very large.
-If the fundamental units are simply too large to be represented in this form,
-an error message is issued. They could be obtained using the so-called
-compact representation of algebraic numbers as a formal product of algebraic
-integers. The latter is implemented internally but not publicly accessible
-yet.
+   When $\fl=1$, we insist on finding the fundamental units exactly. Be
+warned that this can take a very long time when the coefficients of the
+fundamental units on the integral basis are very large. If the fundamental
+units are simply too large to be represented in this form, an error message
+is issued. They could be obtained using the so-called compact representation
+of algebraic numbers as a formal product of algebraic integers. The latter is
+implemented internally but not publicly accessible yet.
 
-   When $\fl=2$, on the contrary, it is initially agreed that GP
-will not compute units. Note that the resulting \var{bnf} will not be
-suitable for \kbd{bnrinit}, and that this flag provides negligible time
-savings. In short, it is deprecated.
+   When $\fl=2$, on the contrary, it is initially agreed that units are not
+computed. Note that the resulting \var{bnf} will not be suitable for
+\kbd{bnrinit}, and that this flag provides negligible time savings. In short,
+it is deprecated.
 
    When $\fl=3$, computes a very small version of \kbd{bnfinit}, a ``small
 big number field'' (or \var{sbnf} for short) which contains enough
@@ -3333,7 +3330,7 @@ as output by \kbd{bnfinit}$(x,3)$, computes the complete \kbd{bnfinit}
 information. The result is \emph{not} identical to what \kbd{bnfinit} would
 yield, but is functionally identical. The execution time is very small
 compared to a complete \kbd{bnfinit}. Note that if the default precision in
-GP (or $\var{prec}$ in library mode) is greater than the precision of the
+\kbd{gp} (or $\var{prec}$ in library mode) is greater than the precision of the
 roots $\var{sbnf}[5]$, these are recomputed so as to get a result with
 greater accuracy.
 
@@ -5689,7 +5686,7 @@ $\teb{resultant2}(x,y)$ ($\fl=1$).
 
 \subsecidx{polroots}$(\var{pol},\{\fl=0\})$: complex roots of the polynomial
 \var{pol}, given as a column vector where each root is repeated according to
-its multiplicity. The precision is given as for transcendental functions: under
+its multiplicity. The precision is given as for transcendental functions: in
 GP it is kept in the variable \kbd{realprecision} and is transparent to the
 user, but it must be explicitly given as a second argument in library mode.
 
@@ -5849,7 +5846,7 @@ polynomial.
 to\label{se:taylor}
 the simple variable $y$. $x$ can be of any reasonable type, for example a
 rational function. The number of terms of the expansion is transparent to the
-user under GP, but must be given as a second argument in library mode.
+user in GP, but must be given as a second argument in library mode.
 
 \syn{tayl}{x,y,n}, where the \kbd{long} integer $n$ is the desired number of
 terms in the expansion.
@@ -6232,7 +6229,7 @@ If $x$ is known to have integral entries, set $\fl=1$.
 \misctitle{Note:} The library function $\tet{FpM_ker}(x, p)$, where $x$ has
 integer entries \emph{reduced mod p} and $p$ is prime, is equivalent to, but
 orders of magnitude faster than, \kbd{matker(x*Mod(1,p))} and needs much
-less stack space. To use it under GP, type \kbd{install(FpM\_ker, GG)} first.
+less stack space. To use it under \kbd{gp}, type \kbd{install(FpM\_ker, GG)} first.
 
 \syn{matker0}{x,\fl}. Also available are $\teb{ker}(x)$ ($\fl=0$),
 $\teb{keri}(x)$ ($\fl=1$) and $\kbd{FpM\_ker}(x,p)$.
@@ -6662,7 +6659,7 @@ column vector (type \typ{COL}).
 \section{Sums, products, integrals and similar functions}
 \label{se:sums}
 
-Although the GP calculator is programmable, it is useful to have
+Although the \kbd{gp} calculator is programmable, it is useful to have
 preprogrammed a number of loops, including sums, products, and a certain
 number of recursions. Also, a number of functions from numerical analysis
 like numerical integration and summation of series will be described here.
@@ -6914,9 +6911,9 @@ Suntools/Sunview, Macintosh, and an Atari/Gem port were provided for
 previous versions. These \emph{may} be adapted in future releases.
 
    Under X11/Suntools, the physical window (opened by \kbd{plotdraw} or any
-of the \kbd{ploth*} functions) is completely separated from GP (technically,
+of the \kbd{ploth*} functions) is completely separated from \kbd{gp} (technically,
 a \kbd{fork} is done, and the non-graphical memory is immediately freed in
-the child process), which means you can go on working in the current GP
+the child process), which means you can go on working in the current \kbd{gp}
 session, without having to kill the window first. Under X11, this window can
 be closed, enlarged or reduced using the standard window manager functions.
 No zooming procedure is implemented though (yet).
@@ -6935,7 +6932,7 @@ unnecessary drawings from preceding sessions to appear. On the other hand, in
 this manner as many plots as desired can be kept in a single file. \smallskip
 
 \emph{None of the graphic functions are available within the PARI library, you
-must be under GP to use them}. The reason for that is that you really should
+must be under \kbd{gp} to use them}. The reason for that is that you really should
 not use PARI for heavy-duty graphical work, there are much better specialized
 alternatives around. This whole set of routines was only meant as a
 convenient, but simple-minded, visual aid. If you really insist on using
@@ -7225,11 +7222,11 @@ output is a PostScript program appended to the \kbd{psfile}.
 \subsecidx{psplothraw}$(\var{listx},\var{listy})$: same as \kbd{plothraw},
 except that the output is a PostScript program appended to the \kbd{psfile}.
 
-\section{Programming under GP}
+\section{Programming in GP}
 \sidx{programming}\label{se:programming}
 \subsecidx{Control statements}.
 
-  A number of control statements are available under GP. They are simpler and
+  A number of control statements are available in GP. They are simpler and
 have a syntax slightly different from their C counterparts, but are quite
 powerful enough to write any kind of program. Some of them are specific to
 GP, since they are made for number theorists. As usual, $X$ will denote any
@@ -7379,7 +7376,7 @@ the $seq$, hence in particular if $a$ is initially equal to zero the
 \label{se:gp_program}
 
   In addition to the general PARI functions, it is necessary to have some
-functions which will be of use specifically for GP, though a few of these can
+functions which will be of use specifically for \kbd{gp}, though a few of these can
 be accessed under library mode. Before we start describing these, we recall
 the difference between \emph{strings} and \emph{keywords} (see
 \secref{se:strings}): the latter don't get expanded at all, and you can type
@@ -7391,7 +7388,7 @@ message for the symbol $S$. The string \var{str} is expanded on the spot
 and stored as the online help for $S$. If $S$ is a function \emph{you} have
 defined, its definition will still be printed before the message \var{str}.
 It is recommended that you document global variables and user functions in
-this way. Of course GP won't protest if you don't do it.
+this way. Of course \kbd{gp} won't protest if you don't do it.
 
 There's nothing to prevent you from modifying the help of built-in PARI
 functions (but if you do, we'd like to hear why you needed to do it!).
@@ -7420,7 +7417,7 @@ prevent such problems, this routine terminates by a \kbd{longjmp} (just as an
 error would) and not by a return.
 
 \syn{allocatemoremem}{x}, where $x$ is an unsigned long, and the return type
-is void. GP uses a variant which ends by a \kbd{longjmp}.
+is void. \kbd{gp} uses a variant which ends by a \kbd{longjmp}.
 
 \subsubsecidx{default}$(\{\var{key}\},\{\var{val}\},\{\fl\})$: sets the default
 corresponding to keyword \var{key} to value \var{val}. \var{val} is a string
@@ -7434,7 +7431,7 @@ If \var{val} is omitted, prints the current value of default \var{key}.
 If $\fl$ is set, returns the result instead of printing it.
 
 \subsubsecidx{error}$(\{\var{str}\}*)$: outputs its argument list (each of
-them interpreted as a string), then interrupts the running GP program,
+them interpreted as a string), then interrupts the running \kbd{gp} program,
 returning to the input prompt.
 
 Example: \kbd{error("n = ", n, " is not squarefree !")}.
@@ -7444,7 +7441,7 @@ use only one argument, just by suppressing the commas.
 
 \subsubsecidxunix{extern}$(\var{str})$: the string \var{str} is the name
 of an external command (i.e.~one you would type from your UNIX shell prompt).
-This command is immediately run and its input fed into GP, just as if read
+This command is immediately run and its input fed into \kbd{gp}, just as if read
 from a file.
 
 \subsubsecidx{getheap}$()$: returns a two-component row vector giving the
@@ -7467,7 +7464,7 @@ purposes.
 
 \subsubsecidx{gettime}$()$: returns the time (in milliseconds) elapsed since
 either the last call to \kbd{gettime}, or to the beginning of the containing
-GP instruction (if inside GP), whichever came last.
+GP instruction (if inside \kbd{gp}), whichever came last.
 
 \syn{gettime}{}, returns a C long.
 
@@ -7498,19 +7495,19 @@ from the input file, usually standard input (i.e.~the keyboard). If a
 sequence of expressions is given, the result is the result of the last
 expression of the sequence. When using this instruction, it is useful to
 prompt for the string by using the \kbd{print1} function. Note that in the
-present version 2.19 of \kbd{pari.el}, when using GP under GNU Emacs (see
+present version 2.19 of \kbd{pari.el}, when using \kbd{gp} under GNU Emacs (see
 \secref{se:emacs}) one \emph{must} prompt for the string, with a string
 which ends with the same prompt as any of the previous ones (a \kbd{"? "}
 will do for instance).
 
 \subsubsecidxunix{install}$(\var{name},\var{code},\{\var{gpname}\},\{\var{lib}\})$:
 loads from dynamic library \var{lib} the function \var{name}. Assigns to it
-the name \var{gpname} in this GP session, with argument code \var{code} (see
+the name \var{gpname} in this \kbd{gp} session, with argument code \var{code} (see
 \secref{se:gp.interface} for an explanation of those). If \var{lib} is
 omitted, uses \kbd{libpari.so}. If \var{gpname} is omitted, uses
 \var{name}.\label{se:install}
 
-This function is useful for adding custom functions to the GP interpreter,
+This function is useful for adding custom functions to the \kbd{gp} interpreter,
 or picking useful functions from unrelated libraries. For instance, it
 makes the function \tet{system} obsolete:
 
@@ -7522,7 +7519,7 @@ gp.c            gp.h            gp_rl.c
 
 But it also gives you access to all (non static) functions defined in the
 PARI library. For instance, the function \kbd{GEN addii(GEN x, GEN y)} adds
-two PARI integers, and is not directly accessible under GP (it's eventually
+two PARI integers, and is not directly accessible under \kbd{gp} (it's eventually
 called by the \kbd{+} operator of course):
 
 \bprog
@@ -7535,7 +7532,7 @@ if needed, but will reload a symbol from the library, even it the latter has
 been recompiled.
 
 \misctitle{Caution:} This function may not work on all systems, especially
-when GP has been compiled statically. In that case, the first use of an
+when \kbd{gp} has been compiled statically. In that case, the first use of an
 installed function will provoke a Segmentation Fault, i.e.~a major internal
 blunder (this should never happen with a dynamically linked executable).
 Hence, if you intend to use this function, please check first on some
@@ -7608,11 +7605,11 @@ printtex(result);
 (You can use the automatic string expansion/concatenation process to have
 dynamic file names if you wish).
 
-\subsubsecidx{quit}$()$: exits GP.\label{se:quit}
+\subsubsecidx{quit}$()$: exits \kbd{gp}.\label{se:quit}
 
 \subsubsecidx{read}$(\{\var{str}\})$: reads in the file whose name results
 from the expansion of the string \var{str}. If \var{str} is omitted,
-re-reads the last file that was fed into GP. The return value is the result of
+re-reads the last file that was fed into \kbd{gp}. The return value is the result of
 the last expression evaluated.\label{se:read} If a GP \tet{binary file} is
 read using this command (see \secref{se:writebin}), the file is loaded and
 the last object in the file is returned.
@@ -7645,7 +7642,7 @@ from aborting computations in the usual way; the recovery sequence
 becomes the result of the command. If $e$ is omitted, all exceptions are
 trapped. Note in particular that hitting \kbd{\pow C} (Control-C) raises an
 exception. See \secref{se:errorrec} for an introduction to error recovery
-under GP.
+under \kbd{gp}.
 
 \bprog
 ? \\@com trap division by 0
@@ -7659,7 +7656,7 @@ under GP.
 If \var{seq} is omitted, defines \var{rec} as a default action when
 catching exception $e$, provided no other trap as above intercepts it first.
 The error message is printed, as well as the result of the evaluation of
-\var{rec}, and control is given back to the GP prompt. In particular, current
+\var{rec}, and control is given back to the \kbd{gp} prompt. In particular, current
 computation is then lost.
 
 The following error handler prints the list of all user variables, then
@@ -7685,7 +7682,7 @@ if $e$ is present) is disabled.
 individual exceptions. In the current version \vers, the following keywords
 are recognized, but the name list will be expanded and changed in the
 future (all library mode errors can be trapped: it's a matter of defining
-the keywords to GP, and there are currently far too many useless ones):
+the keywords to \kbd{gp}, and there are currently far too many useless ones):
 
 \kbd{accurer}: accuracy problem
 
@@ -7703,7 +7700,7 @@ the keywords to GP, and there are currently far too many useless ones):
 
 \kbd{errpile}: the PARI stack overflows
 
-\subsubsecidx{type}$(x,\{t\})$: this is useful only under GP. If $t$ is
+\subsubsecidx{type}$(x,\{t\})$: this is useful only under \kbd{gp}. If $t$ is
 not present, returns the internal type number of the PARI object $x$.
 Otherwise, makes a copy of $x$ and sets its type equal to type $t$, which
 can be either a number or, preferably since internal codes may eventually
@@ -7711,7 +7708,7 @@ change, a symbolic name such as \typ{FRACN} (you can skip the \typ{}
 part here, so that \kbd{FRACN} by itself would also be all right). Check out
 existing type names with the metacommand \b{t}.\label{se:gptype}
 
-  GP will not let you create meaningless objects in this way where the internal
+  \kbd{gp} will not let you create meaningless objects in this way where the internal
 structure does not match the type. This function can be useful to create
 reducible rationals (type \typ{FRACN}) or rational functions (type
 \typ{RFRACN}). In fact it's the only way to do so in GP. In this case, the
@@ -7751,7 +7748,7 @@ defined in the new session, they will be displayed in a funny way (see
 \secref{se:kill}).
 
 If $x$ is omitted, saves all user variables from the session, together with
-their names. Reading such a ``named object'' back in a GP session will set
+their names. Reading such a ``named object'' back in a \kbd{gp} session will set
 the corresponding user variable to the saved value. E.g after
 \bprog
 x = 1; writebin("log")
@@ -7769,7 +7766,7 @@ using \tet{gzip}, provided the file name has the standard \kbd{.gz}
 extension. \label{se:writebin}\sidx{binary file}
 
 In the present implementation, the binary files are architecture dependent
-and compatibility with future versions of GP is not guaranteed. Hence
+and compatibility with future versions of \kbd{gp} is not guaranteed. Hence
 binary files should not be used for long term storage (also, they are
 larger and harder to compress than text files).
 

@@ -1,13 +1,13 @@
 % $Id$
 % Copyright (c) 2000  The PARI Group
 %
-% This file is part of the PARI/GP documentation
+% This file is part of the PARI/\kbd{gp} documentation
 %
 % Permission is granted to copy, distribute and/or modify this document
 % under the terms of the GNU Free Documentation License
 
 % This should be compiled with plain TeX
-\def\TITLE{A Tutorial for Pari-GP}
+\def\TITLE{A Tutorial for Pari-\kbd{gp}}
 \input parimacro.tex
 \ifPDF
   \input pdfmacs.tex
@@ -19,7 +19,7 @@
 \vskip1.truecm
 \centerline{\mine for}
 \vskip1.truecm
-\centerline{\mine PARI / GP}
+\centerline{\mine PARI / \kbd{gp}}
 \vskip1.truecm
 \authors
 \centerline{last updated September 17, 2002}
@@ -28,62 +28,62 @@
 
 \copyrightpage
 
-This booklet is intended to be a guided tour and a tutorial to the GP
+This booklet is intended to be a guided tour and a tutorial to the \kbd{gp}
 calculator. Many examples will be given, but each time a new function is
 used, the reader should look at the appropriate section in the User's Manual
 for detailed explanations. Hence although this chapter can be read
 independently (for example to get rapidly acquainted with the possibilities
-of GP without having to read the whole manual), the reader will profit most
+of \kbd{gp} without having to read the whole manual), the reader will profit most
 from it by reading it in conjunction with the reference manual.
 
 \section{Greetings!}
 
 So you are sitting in front of your workstation (or terminal, or PC,\dots),
-and you type \kbd{gp} to get the program started (remember to always hit the
-\kbd{Enter} key and not the \kbd{Return} key on a Macintosh computer).
-
-It says hello in its particular manner, and then waits for you after its
-\kbd{prompt}, initially \kbd{?} (or something like {\bf gp}~\kbd{>}).
+and you type \kbd{gp} to get the program started. It says hello in its
+particular manner, and then waits for you after its \kbd{prompt}, initially
+\kbd{?} (or something like {\bf gp}~\kbd{>}).
 
 Type \kbd{2 + 2}. What happens? Maybe not what you expect. First of all, of
-course, you should tell GP that your input is finished, and this is done by
-hitting the \kbd{Return} (or \kbd{Newline}) key, or the \kbd{Enter} key on
-the Mac. If you do exactly this, you will get the expected answer. However
-some of you may be used to other systems like Macsyma or Maple. In this case,
-you will have subconsciously ended the line with a semicolon ``\kbd{;}''
-before hitting \kbd{Return}, since this is how it is done on those systems.
-In that case, you will simply see GP answering you with a smug expression,
-i.e.~a new prompt and no answer!  This is because a semicolon at the end of a
-line in GP tells it to keep the result, but not to print it (you will
-certainly want to use this feature if the output is several pages long).
+course, you should tell \kbd{gp} that your input is finished, and this is
+done by hitting the \kbd{Return} (or \kbd{Newline}) key, or the \kbd{Enter}
+key on the Mac. If you do exactly this, you will get the expected answer.
+However some of you may be used to other systems like Macsyma or Maple. In
+this case, you will have subconsciously ended the line with a semicolon
+``\kbd{;}'' before hitting \kbd{Return}, since this is how it is done on
+those systems. In that case, you will simply see \kbd{gp} answering you with
+a smug expression, i.e.~a new prompt and no answer!  This is because a
+semicolon at the end of a line tells \kbd{gp} not to print the result
+(it is still stored in the result history). You will certainly want to use
+this feature if the output is several pages long.
 
 Try \kbd{27 * 37}. Wow! even multiplication works. Actually, maybe those
 spaces are not necessary after all. Let's try \kbd{27*37}. Yup, seems to be
 ok. We'll still insert them in this document since it makes things easier to
-read, but as GP does not care about them, you don't have to type them all!
+read, but as \kbd{gp} does not care about them, you don't have to type them all!
 
 Now this session is getting lengthy, so the second thing one needs to learn
 is to quit. Each system has its quit signal (to name a few: \kbd{quit},
-\kbd{exit}, \kbd{system},\dots). In GP, you can use \kbd{quit} or \b{q}
+\kbd{exit}, \kbd{system},\dots). In \kbd{gp}, you can use \kbd{quit} or \b{q}
 (backslash q), the \kbd{q} being of course for quit. Try it.
 
-Now you've done it! You're out of GP, so how do you want to continue studying
-this tutorial? Get back in please (see above).
+Now you've done it! You're out of \kbd{gp}, so how do you want to continue
+studying this tutorial? Get back in please (see above).
 
 Let's get to more serious stuff. Let's see, I seem to remember that the
-decimal expansion of $1/7$ has some interesting properties. Let's see what GP
-has to say about this. Type \kbd{1 / 7}. What? This computer is making fun of
-me, it just spits back to me my own input, that's not what I want!
+decimal expansion of $1/7$ has some interesting properties. Let's see what
+\kbd{gp} has to say about this. Type \kbd{1 / 7}. What? This computer is
+making fun of me, it just spits back to me my own input, that's not what I
+want!
 
 Now stop complaining, and think a little. This system has been written mainly
-for pure mathematicians, and not for physicists (although they are welcome to
-use it). And mathematically, $1/7$ is an element of the field $\Q$ of
-rational numbers, so how else but $1/7$ can the computer give the answer to
-you? (well maybe $2/14$, but why complicate matters?). Seriously, the basic
-point here is that PARI, hence GP, will almost always try to give you a
-result which is as precise as possible (we will see why ``almost'' later),
-hence since here you gave an operation whose result can be represented
-exactly, that's what it gives you.
+for pure mathematicians (although anybody is welcome to use it). And
+mathematically, $1/7$ is an element of the field $\Q$ of rational numbers, so
+how else but $1/7$ can the computer give the answer to you? (well maybe
+$2/14$, but why complicate matters?). Seriously, the basic point here is that
+PARI, hence \kbd{gp}, will almost always try to give you a result which is as
+precise as possible (we will see why ``almost'' later), hence since here you
+gave an operation whose result can be represented exactly, that's what it
+gives you.
 
 OK, but I still want the decimal expansion of $1/7$. No problem. Type one of
 the following:
@@ -96,18 +96,17 @@ the following:
 Immediately a number of decimals of this fraction appear (28 on most systems,
 38 on the others), and the repeating pattern is $142857$. The reason is that
 you have included in the operations numbers like \kbd{0.}, \kbd{1.} or \kbd{7.}
-which are {\it imprecise\/} real numbers, hence GP cannot give you an exact
+which are {\it imprecise\/} real numbers, hence \kbd{gp} cannot give you an exact
 result.
 
 Why 28 / 38 decimals by the way? Well, it is the default initial precision,
-as indicated when you start GP. This has been chosen so that the
+as indicated when you start \kbd{gp}. This has been chosen so that the
 computations are very fast, and gives already 12 decimals more accuracy than
 conventional double precision floating point operations. The precise value
 depends on a technical reason: if your machine supports 64-bit integers (the
-standard library can handle integers up to $2^{64}$), the default precision
+standard C library can handle integers up to $2^{64}$), the default precision
 will be 38 decimals, and 28 otherwise. As the latter is most probably the
-case (if your machine is not a \kbd{DEC alpha}, that is), we'll assume it
-henceforth.
+case, we'll assume it henceforth.
 
 Only large mainframes or supercomputers have 28 digits of precision in their
 standard libraries, and that is their absolute limit. Not here of course. You
@@ -120,21 +119,23 @@ try \kbd{exp(1)}. Presto, comes out the value of $e$ to 28 digits. Try
 what you lose by working numerically.
 
 Let's see, what could we try now. Hum, \kbd{pi}? The answer is not that
-enlightening. \kbd{Pi}? Ah. This works better. But let's remember that GP
+enlightening. \kbd{Pi}? Ah. This works better. But let's remember that
+\kbd{gp}
 distinguishes between uppercase and lowercase letters. \kbd{pi} was as
-meaningless to it as \kbd{stupid garbage} would have been: in both cases GP
+meaningless to it as \kbd{stupid garbage} would have been: in both cases
+\kbd{gp}
 will just create a variable with that funny unknown name you just used. Try
 it! Note that it is actually equivalent to type \kbd{stupidgarbage}: all
 spaces are suppressed from the input. In the \kbd{27~*~37} example  it was
 not so conspicuous as we had an operator to separate the two operands. This
-has important consequences for the writing of GP scripts (more about this
+has important consequences for the writing of \kbd{gp} scripts (more about this
 later).
 
-By the way, you can ask GP about any identifier you think it might know
+By the way, you can ask \kbd{gp} about any identifier you think it might know
 about: just type it, prepending a question mark ``\kbd{?}''. Try \kbd{?Pi}
 and \kbd{?pi} for instance. On some systems, an extended online help might
 be available: try doubling the question mark to check whether it's the case on
-yours: \kbd{??Pi}. In fact the GP header already gave you that information if
+yours: \kbd{??Pi}. In fact the \kbd{gp} header already gave you that information if
 it was the case (just before the copyright message). As well, if it says
 something like ``\kbd{readline enabled}'' then you should have a look at
 \secref{se:readline} in the User's Manual before you go on: it will be much
@@ -160,8 +161,8 @@ In fact, it is known that $\exp(\pi*\sqrt{n})$ not only is not an integer
 or a rational number, but is even a transcendental number when $n$ is a
 non-zero rational number.
 
-So GP is just a fancy calculator, able to give me more decimals than I will
-ever need? Not so, GP is incredibly more powerful than an ordinary
+So \kbd{gp} is just a fancy calculator, able to give me more decimals than I will
+ever need? Not so, \kbd{gp} is incredibly more powerful than an ordinary
 calculator, even independently of its arbitrary precision possibilities.
 
 \noindent {\bf Additional comments} (you are supposed to skip this at first,
@@ -170,9 +171,9 @@ and come back later)
 1) If you are a PARI old timer, you will notice pretty soon (or maybe you
 have already?) that many many things changed between the older 1.39.xx
 versions and this one. And conspicuously, most function names have been
-changed. We sincerely think it's for the best since they are much more
+changed. We sincerely think it is for the best since they are much more
 logical now and the systematic prefixing is very convenient coupled with the
-automatic completion mechanism: it's now very easy to know what functions are
+automatic completion mechanism: it's now easy to know what functions are
 available to deal with, say, elliptic curves since they all share the prefix
 \kbd{ell}.
 
@@ -195,19 +196,19 @@ you will get the exact 0. Compare \kbd{0 * 1.4} and \kbd{0.~*~1.4}. \smallskip
 %
 3) Not only can the number of decimal places of real numbers be large, but the
 number of digits of integers also. Try \kbd{100!}. It is never necessary to
-tell GP in advance the size of the integers that it will encounter, since this
+tell \kbd{gp} in advance the size of the integers that it will encounter, since this
 is adjusted automatically. On the other hand, for many computations with real
 numbers, it is necessary to specify a default precision (initially 28 digits).
 \smallskip
 %
 4) Come back to 28 digits of precision (\kbd{\b{p} 28}), and type
 \kbd{exp(24 * Pi)}. As you can see the result is printed in exponential format.
-This is because GP never wants you to believe that a result is correct when it
+This is because \kbd{gp} never wants you to believe that a result is correct when it
 is not.
 
 We are working with 28 digits of precision, but the integer part of
-$\exp(24*\pi)$ has 33 decimal digits. Hence if GP had dutifully printed out 33
-digits, the last few digits would have been wrong. Hence GP wants to print only
+$\exp(24*\pi)$ has 33 decimal digits. Hence if \kbd{gp} had dutifully printed out 33
+digits, the last few digits would have been wrong. Hence \kbd{gp} wants to print only
 28 significant digits, but to do so it has to print in exponential format.
 \smallskip
 %
@@ -219,7 +220,7 @@ an exponential format! Do you understand why?
 
 Again let's try to see what's happening. The number you recalled had been
 computed only to 28 decimals, and even if you set the precision to 1000
-decimals, GP knows that your number has only 28 digits of accuracy but an
+decimals, \kbd{gp} knows that your number has only 28 digits of accuracy but an
 integral part with 33 digits. So you haven't improved things by increasing
 the precision. Or have you? What if we retype \kbd{exp(24 * Pi)} now that we
 have 40 digits? Try it. Now we do not have an exponential format, and we see
@@ -236,7 +237,7 @@ the default precision.  On the other hand, the \b{p} command changes both the
 precision and the output format.
 
 7) What if I forget what the current precision is and I don't feel like
-counting all the decimals? Well, you can learn about GP internal variables
+counting all the decimals? Well, you can learn about \kbd{gp} internal variables
 (and change them!) using \kbd{default}. Type \kbd{default(realprecision)},
 then \kbd{default(realprecision, 38)}. Huh? In fact this last command is
 strictly equivalent to \kbd{\b{p} 38}! (admittedly more cumbersome to type).
@@ -244,11 +245,11 @@ There are more ``defaults'' than just \kbd{format} and \kbd{realprecision}:
 type \kbd{default} by itself now, they are all there.
 
 8) Note that the \kbd{default} command reacts differently according to the
-number of input arguments. This is not an uncommon behaviour for GP functions.
+number of input arguments. This is not an uncommon behaviour for \kbd{gp} functions.
 You can see this from the online help (or the complete description in
 Chapter~3): any argument surrounded by braces \kbd{\obr\cbr} in the function
 prototype is optional (which really means that a {\it default} argument will be
-supplied by GP). You can then check out from the text what effect a given value
+supplied by \kbd{gp}). You can then check out from the text what effect a given value
 will have, and in particular the default one.
 
 \section{Warming up}
@@ -261,7 +262,7 @@ the computer scientist's: \kbd{floor(-3.4)} is equal to $-4$ whereas
 \kbd{truncate(-3.4)} is equal to $-3$).  You get a more cryptic error message,
 which you would immediately understand if you had read the additional
 comments of the preceding section. Since I told you not to read them, the
-explanation is simply that GP is unable to compute the integer part of
+explanation is simply that \kbd{gp} is unable to compute the integer part of
 \kbd{exp(24 * Pi)} given only 28 decimals of accuracy, since it has 33 digits.
 
 Some error messages are even much more cryptic than that and are sometimes
@@ -269,11 +270,12 @@ not so easy to understand (well, it's nothing compared to \TeX's error
 messages!).
 
 For instance, try \kbd{log(x)}. Not really clear, is it? But no matter, it
-simply tells you that GP simply does not understand what \kbd{log(x)} is
+simply tells you that \kbd{gp} simply does not understand what \kbd{log(x)} is
 (although it does know the \kbd{log} function, as \kbd{?log} will readily
 tell us).
 
-Now let's try \kbd{sqrt(-1)} to see what error message we get now. Haha! GP
+Now let's try \kbd{sqrt(-1)} to see what error message we get now. Haha!
+\kbd{gp}
 even knows about complex numbers, so impossible to trick it that way.
 Similarly, try typing \kbd{log(-2)}, \kbd{exp(I*Pi)}, \kbd{I\pow I},\dots
 So we have a lot of real and complex analysis at our disposal (note that
@@ -285,7 +287,7 @@ functions which is taken, specified in the manual). Again, beware that
 Just for fun, let's try \kbd{6*zeta(2) / Pi\pow2}. Pretty close, no?
 
 \medskip
-Now GP didn't seem to know what \kbd{log(x)} was, although it did know how to
+Now \kbd{gp} didn't seem to know what \kbd{log(x)} was, although it did know how to
 compute numerical values of \kbd{log}. This is annoying. Maybe it knows the
 exponential function? Let's give it a try. Type \kbd{exp(x)}. What's this? If
 you had had any experience with other systems, the answer should have simply
@@ -293,9 +295,9 @@ been \kbd{exp(x)} again. But here the answer is the Taylor expansion of the
 function around $\kbd{x}=0$, to 16 terms. 16 is the default
 \kbd{seriesprecision}, which can be changed by typing \kbd{\b{ps} $n$} or
 \kbd{default(seriesprecision, $n$)} where $n$ is the number of terms that you
-want in your power series (note the \kbd{O(x\pow16)} which ends the series,
-and which is trademark of this type of object in GP. It is the familiar
-``big--oh'' notation of analysis).
+want in your power series. (Note the \kbd{O(x\pow16)} which ends the series,
+and which is trademark of this type of object in \kbd{gp}. It is the familiar
+``big--oh'' notation of analysis.)
 
 You will thus automatically get the Taylor expansion of any function that can
 be expanded around $0$, and incidentally this explains why we weren't
@@ -336,9 +338,9 @@ Ser( (1 + x)^(-3) )
 @eprog
 
 Now try \kbd{(1 + x)\pow (1/2)}: we obtain a power series, since the
-result is an object which PARI does not know how to represent exactly (we
+result is an object which PARI does not know how to represent exactly. (We
 could teach PARI about algebraic functions, but then take \kbd{(1 + x)\pow Pi}
-as another example). This gives us still another solution to our preceding
+as another example.) This gives us still another solution to our preceding
 exercise: we can type \kbd{(1 + x)\pow (-3.)}. Since \kbd{-3.} is not an exact
 quantity, PARI has no means to know that we are dealing with a rational
 function, and will instead give you the power series, this time with real
@@ -370,11 +372,11 @@ it is still a complex number. Check it with \kbd{type(n)}. Hence if you then
 type \kbd{(1+x)\pow n}, instead of getting the polynomial
 \kbd{1 + 3*x + 3*x\pow 2 + x\pow 3} as expected, you obtain a power series.
 Worse, when you try to apply an arithmetic function, say the Euler totient
-function (known as \kbd{eulerphi} to GP), you get a sententious error message
+function (known as \kbd{eulerphi} to \kbd{gp}), you get a sententious error message
 recalling you that ``arithmetic functions want integer arguments''. You would
 have guessed yourself, but the message is difficult to understand since 3 looks
-like a genuine integer!!! (Please read again if this is not clear. It is a
-common source of incomprehension).
+like a genuine integer! (Please read again if this is not clear. It is a
+common source of incomprehension.)
 
 Similarly, \kbd{3 + x - x} is not the integer 3 but a constant polynomial
 (in the variable \kbd{x}), equal to $3 = 3x^0$.
@@ -382,13 +384,13 @@ Similarly, \kbd{3 + x - x} is not the integer 3 but a constant polynomial
 If you want the final expression to be in the simplest form possible (for
 example before applying an arithmetic function, or simply because things will
 go faster afterwards), apply the function \kbd{simplify} to the result. In
-fact, by default GP does this automatically at the end of a GP command. Note
+fact, by default \kbd{gp} does this automatically at the end of a \kbd{gp} command. Note
 that it does {\it not\/} simplify in intermediate expressions. This default
 can be switched off and on by the command \b{y}. This is why I asked you to
 type this before starting.
 
 2) As already stated, power series expansions are always implicitly around
-$\kbd{x}=0$. When we wanted them around $\kbd{x}=\kbd{a}$, we replaced
+$\kbd{x} = 0$. When we wanted them around $\kbd{x} = \kbd{a}$, we replaced
 \kbd{x} by \kbd{z + a} in the function we wanted to expand. For complicated
 functions, it may be simpler to use the substitution function \kbd{subst}.
 For example, if \kbd{p~= 1 / (x\pow 4 + 3*x\pow 3 + 5*x\pow 2 - 6*x + 7)},
@@ -398,6 +400,9 @@ write \kbd{subst(p, x, z+a)} (look up the exact description of the
 
 Now try typing \kbd{p = 1 + x + x\pow 2 + O(x\pow 10)}, then
 \kbd{subst(p, x, z+1)}. Do you understand why you get an error message?
+
+3) The valuation at $\kbd{x} = 0$ for a power series \kbd{p} is obtained
+as \kbd{valuation(p, x)}.
 
 \section{The Remaining PARI Types}
 Let's talk some more about the basic PARI types.
@@ -437,8 +442,8 @@ Type \kbd{m = [a,b,c; d,e,f]}. You have just entered a matrix with 2 rows and
 separated by semicolons ``\kbd{;}''. The matrix is printed naturally in a
 rectangle shape. If you want it printed horizontally just as you typed it,
 type \b{a}, or if you want this type of printing to be the permanent default
-type \kbd{default(output, 1)}. Type \kbd{default(output, 0)} if you want to
-come back to the original default.
+type \kbd{default(output, 0)}. Type \kbd{default(output, 1)} if you want to
+come back to the original output mode.
 
 Now type \kbd{m[1,2]}, \kbd{m[1,]}, \kbd{m[,2]}. Are explanations necessary?
 (In an expression such as \kbd{m[j,k]}, the \kbd{j} always refers to the
@@ -466,8 +471,7 @@ coefficients), and second they are numerically very unstable, which make them
 a severe test for linear algebra packages in numerical analysis.  Of course
 with PARI, no such problem can occur: since the coefficients are given as
 rational numbers, the computation will be done exactly, so there cannot be
-any numerical error. Try it. Type \kbd{d~=~matdet(h)} (you have to be a
-little patient, this is quite a complicated computation). The result is a
+any numerical error. Try it. Type \kbd{d~=~matdet(h)}. The result is a
 rational number (of course) of numerator equal to 1 and denominator having
 226 decimal digits. How do I know, by the way? I did not count! Instead,
 simply type \kbd{1.* d}. The result is now in exponential format, and the
@@ -487,12 +491,10 @@ that only 2 decimals agree! This catastrophic instability is as already
 mentioned one of the characteristics of Hilbert matrices. In fact, the
 situation is much worse than that. Type \kbd{norml2(1/h - 1/hr)} (the
 function \kbd{norml2} gives the square of the $L^2$ norm, i.e.~the sum of the
-squares of the coefficients). Again be patient since computing \kbd{1/h} will
-take even more time (not much) than computing \kbd{matdet(h)}. The result is
-larger than $10^{50}$, showing that some coefficients of \kbd{1/hr} are
-wrong by as much as $10^{24}$ (the largest error is in fact equal to $7.644
-\cdot 10^{24}$ for the coefficient of row 15 and column 14, which is a 28
-digit integer).
+squares of the coefficients). The result is larger than $10^{50}$, showing
+that some coefficients of \kbd{1/hr} are wrong by as much as $10^{24}$ (the
+largest error is in fact equal to $4.244 \cdot 10^{24}$ for the coefficient
+of row 15 and column 15, which is a 28 digit integer).
 
 To obtain the correct result after rounding for the inverse, we have to use a
 default precision of 56 digits (try it).
@@ -512,15 +514,16 @@ you type
 dummy variables which are used to number the rows and columns respectively
 (in the case of a vector only one is present of course). You must not forget,
 in addition to the dimensions of the vector or matrix, to indicate explicitly
-the names of these variables.
+the names of these variables. You may omit the variables and the final
+expression to get zero entries, as in \kbd{matrix(10,20)}.
 
 \misctitle{Warning.} The letter \kbd{I} is reserved for the complex number
-equal to the square root of $-1$. Hence it is absolutely forbidden to use
-it as a variable. Try typing \kbd{vector(10,I, I\pow 2)}, the error message
-that you get clearly indicates that GP does not consider \kbd{I} as a
-variable. There are two other reserved variable names: \kbd{Pi} and
-\kbd{Euler}. All function names are forbidden as well. On the other hand
-there is nothing special about \kbd{i}, \kbd{pi} or \kbd{euler}.
+equal to the square root of $-1$. Hence it is forbidden to use it as a
+variable. Try typing \kbd{vector(10,I, I\pow 2)}, the error message that you
+get clearly indicates that \kbd{gp} does not consider \kbd{I} as a variable.
+There are two other reserved variable names: \kbd{Pi} and \kbd{Euler}. All
+function names are forbidden as well. On the other hand there is nothing
+special about \kbd{i}, \kbd{pi} or \kbd{euler}.
 
 When creating vectors or matrices, it is often useful to use boolean
 operators and the \kbd{if()} statement (see the section on programming for
@@ -528,30 +531,30 @@ details on using this statement). Indeed, an \kbd{if} expression has a value,
 which is of course equal to the evaluated part of the \kbd{if}. So for
 example you can type
 \bprog
-matrix(8,8, i,j, if ((i-j)%2, x, 0))
+matrix(8,8, i,j, if ((i-j)%2, 1, 0))
 @eprog
-\noindent to get a checkerboard matrix of \kbd{x} and \kbd{0}. Note however
+\noindent to get a checkerboard matrix of \kbd{1} and \kbd{0}. Note however
 that a vector or matrix must be {\it created} first before being used. For
 example, it is forbidden to write
 \bprog
 for (i = 1, 5, v[i] = 1/i)
 @eprog
 \noindent if the vector \kbd{v} has not been created beforehand (for example
-by a \kbd{v = vector(5,j,0)} command).
+by a \kbd{v = vector(5)} command).
 
-\medskip The last PARI types which we have not yet played with are types
-which are closely linked to number theory (hence people not interested in
-number theory can skip ahead).
+\medskip The last PARI types which we have not yet played with are closely
+linked to number theory (hence people not interested in number theory can
+skip ahead).
 
 The first is the type ``integer--modulo''. Let us see an example. Type
 \kbd{n = 10\pow 15 + 3}. We want to know whether this number is prime or not. Of
 course we could make use of the built-in facilities of PARI, but let us do
 otherwise. We first trial divide by the built-in table of primes. We slightly
 cheat here and use a variant of the function \kbd{factor} which does exactly
-this. So type \kbd{factor(n, 200000)} (the last argument tells \kbd{factor}
+this. So type \kbd{factor(n, 200000)}. (The last argument tells \kbd{factor}
 to trial divide up to the given bound and stop at this point. You can set it
 to 0 to trial divide by the full set of built-in primes, which goes up to
-$500000$ by default).
+$500000$ by default.)
 
 The result is a 2 column matrix (as for all factoring functions), the first
 column giving the primes and the second their exponents. Here we get a single
@@ -573,9 +576,9 @@ $\kbd{a}^{n-1} = \kbd{Mod(1,n)}$
 %
 in the ring $R$, and this can be computed very efficiently. Type
 \kbd{a\pow (n-1)}. The result is definitely {\it not\/} equal to
-\kbd{Mod(1,n)}, thus {\it proving\/} that \kbd{n} is not a prime (if we had
+\kbd{Mod(1,n)}, thus {\it proving\/} that \kbd{n} is not a prime. If we had
 obtained \kbd{Mod(1,n)} on the other hand, it would have given us a hint that
-\kbd{n} is maybe prime, but never a proof).
+\kbd{n} is maybe prime, but never a proof.
 
 To find the factors is another story. One must use less naive techniques than
 trial division (or be very patient). To finish this example, type
@@ -584,12 +587,15 @@ you would have had to be very patient with trial division!
 
 Note that, as is the case with most ``prime''-producing functions, the
 ``prime'' factors given by \kbd{factor} are only strong pseudoprimes, and not
-\emph{proven} primes. Use \kbd{isprime( fa[,1] )} to rigorously prove
+\emph{proven} primes.  Use \kbd{isprime( fa[,1] )} to rigorously prove
 primality of the factors. The latter command applies \kbd{isprime} to all
 entries in the first column of \kbd{fa}, i.e to all pseudoprimes, and returns
 the column vector of results (all equal to 1, so the pseudoprimes are indeed
 primes). All arithmetic functions can be applied in this way to the entries
-of a vector or matrix.
+of a vector or matrix. In fact, it has been checked that the strong
+pseudoprimes output by \kbd{factor} (Baillie-Pomerance-Selfridge-Wagstaff
+pseudoprimes, without small divisors) are true primes at least up to
+$10^{13}$, so the above example was OK after all.
 \smallskip
 
 The second specifically number-theoretic type is the $p$-adic numbers. I have
@@ -597,13 +603,16 @@ no room for definitions, so please skip ahead if you have no use for such
 beasts. A $p$-adic number is entered as a rational or integer valued
 expression to which is added \kbd{O(p\pow n)} (or simply \kbd{O(p)} if
 $\kbd{n}=1$) where \kbd{p} is the prime and \kbd{n} the $p$-adic precision.
-Apart from the usual arithmetic operations, you can apply a number of
+Note that you have to explicitly type in \kbd{3\pow 2} for instance, \kbd{9}
+will not do. (Unless you want to cheat \kbd{gp} into believing that \kbd{9}
+is prime, but you had better know what you are doing in this case.) Apart
+from the usual arithmetic operations, you can apply a number of
 transcendental functions. For example, type \kbd{n = 569 + O(7\pow 8)}, then
 \kbd{s~=~sqrt(n)}, you obtain one of the square roots of \kbd{n} (if you want
-to check, type \kbd{s\pow 2 - n}). Type now \kbd{l~=~log(n)}, then \kbd{e =
-exp(l)}. If you know about $p$-adic logarithms, you will not be surprised that
-\kbd{e} is not equal to \kbd{n}. Type \kbd{(n/e)\pow 6}: \kbd{e} is in fact
-equal to \kbd{n} times a $(p-1)$-st root of unity.
+to check, type \kbd{s\pow 2 - n}). Type now \kbd{s = log(n)}, then \kbd{e =
+exp(s)}. If you know about $p$-adic logarithms, you will not be surprised
+that \kbd{e} is not equal to \kbd{n}. Type \kbd{(n/e)\pow 6}: \kbd{e} is in
+fact equal to \kbd{n} times the $(p-1)$-st root of unity \kbd{teichmuller(n)}.
 
 Incidentally, if you want to get back the integer 569 from the $p$-adic
 number \kbd{n}, type \kbd{lift(n)} or \kbd{truncate(n)}.
@@ -714,7 +723,7 @@ natural logarithms, which as you can see obeys a very simple pattern (can you
 prove it?).
 
 In many cases, one wants to perform some task only when an arithmetic
-condition is satisfied. GP gives you the following functions: \kbd{isprime}
+condition is satisfied. \kbd{gp} gives you the following functions: \kbd{isprime}
 as mentioned above, \kbd{issquare}, \kbd{isfundamental} to test whether an
 integer is a fundamental discriminant (i.e.~$1$ or the discriminant of the
 ring of integers of a quadratic field), and the \kbd{forprime}, \kbd{fordiv}
@@ -785,7 +794,7 @@ machine works with 32-bit long integers. If it is not the case, we leave it
 to you as a very good exercise to make the necessary modifications.
 
 Let's assume that we have 28 decimals of default precision (this is what we
-get automatically at the start of a GP session on 32-bit machines). Type
+get automatically at the start of a \kbd{gp} session on 32-bit machines). Type
 \kbd{e = exp(1)}. We get the number $e=2.718\dots$ to 28 decimals. Let us check
 how many correct decimals we really have. The hard (but reasonable) way is to
 proceed as follows. Change the precision to a substantially higher value, for
@@ -823,9 +832,9 @@ $0.5*10^{-30}$ is considered with 28 significant digit accuracy, hence the
 result will have approximately $28+30=58$ significant digits.
 
 Unfortunately, this philosophy cannot go too far. For example, when you
-type \kbd{cos(0)}, GP should give you exactly 1. Since it is reasonable for
+type \kbd{cos(0)}, \kbd{gp} should give you exactly 1. Since it is reasonable for
 a program to assume that a transcendental function never gives you an exact
-result, GP gives you $1.000\dots$ to one more mantissa word than the current
+result, \kbd{gp} gives you $1.000\dots$ to one more mantissa word than the current
 precision.
 \medskip
 OK, now let's see some more transcendental functions at work. Type
@@ -865,8 +874,8 @@ Type \kbd{zeta(1 + I)}. This also works. Now for fun, let us compute in a
 very naive way the first complex zero of \kbd{zeta}. We know that it is
 of the form $1/2 + i*t$ with $t$ between 14 and 15. Thus, we can use the
 following series of instructions. But instead of typing them directly, write
-them into a file, say \kbd{zeta.gp}, then type \kbd{\b{r} zeta.gp} under GP to
-read it in:
+them into a file, say \kbd{zeta.gp}, then type \kbd{\b{r} zeta.gp} under
+\kbd{gp} to read it in:
 \bprog
 {
   t1 = 1/2 + 14*I;
@@ -883,12 +892,12 @@ read it in:
 }
 @eprog
 
-Don't forget the braces: they tell GP that a sequence of instructions is going
+Don't forget the braces: they tell \kbd{gp} that a sequence of instructions is going
 to span many lines (another, less convenient, way would be to type \b{} at the
 end of each line to tell the parser that the input was not yet finished).
 By the way, you don't need to type in the suffix~\kbd{.gp} it will be
-supplied by GP, if you forget it (the suffix is not mandatory either, it is
-just more convenient to have all your GP scripts labeled in the same
+supplied by \kbd{gp}, if you forget it (the suffix is not mandatory either, it is
+just more convenient to have all your \kbd{gp} scripts labeled in the same
 distinctive way).
 
 We thus obtain the first zero to 25 significant digits.
@@ -956,34 +965,33 @@ one of the Numerical Recipes books for an explanation). The method which we
 presently use is considerably better, and is based on a combination of ideas of
 F.~Villegas, D.~Zagier and H.~Cohen.
 
-Similarly, type \kbd{\b{p} 28} (otherwise the time will be too long) and
-\kbd{sumpos(k=1, 1 / k\pow 2)}. Although once again the convergence is slow, a
-similar trick allows to compute the sum when the terms are positive (compare
-with the exact result \kbd{Pi\pow 2/6}). This is much less impressive because
-it is much slower, but is still useful.
+Similarly, try \kbd{sumpos(k=1, 1 / k\pow 2)}. Although once again the
+convergence is slow, a similar trick allows to compute the sum when the terms
+are positive (compare with the exact result \kbd{Pi\pow 2/6}). This is much
+less impressive because quite a bit slower, but still useful.
 
 Even better, \kbd{sumalt} can be used to sum divergent series! Type
 
-\centerline{\tt zet(s)= sumalt(k=1, (-1)\pow(k-1) / k\pow s) / (1 - 2\pow(1-s))}
+\centerline{\tt zet(s) = sumalt(k=1, (-1)\pow(k-1) / k\pow s) / (1 - 2\pow(1-s))}
 
 Then for positive values of \kbd{s} different from 1, \kbd{zet(s)} is equal
 to \kbd{zeta(s)} and the series converges, albeit slowly (sumalt doesn't
 care however). For negative \kbd{s}, the series diverges, but \kbd{zet(s)}
 still gives the correct result! Try \kbd{zet(-1)}, \kbd{zet(-2)},
 \kbd{zet(-1.5)}, and compare with the corresponding values of \kbd{zeta}.
-You should not push the game too far: \kbd{zet(-14.5)}, for example,
+You should not push the game too far: \kbd{zet(-100)}, for example,
 gives a completely wrong answer.
 
 Try \kbd{zet(I)}, and compare with \kbd{zeta(I)}. Even (some) complex values
-work, although the sum is not alternating any more!
-
-Similarly, try \kbd{sumalt(n=1, (-1)\pow n/(n+I))}.
+work, although the sum is not alternating any more! Similarly, try
+\kbd{sumalt(n=1, (-1)\pow n/(n+I))}.
 \medskip
 %
 More traditional functions are the numerical integration functions.
-For example, type \kbd{intnum(t=1,2, 1/t)} and presto! you get 26 decimals
-of $\log(2)$. Look at Chapter 3 to see the different integration functions
-which are available.
+Come back to \kbd{\b{p} 28} since these routines are very slow when working
+with too many significant digits. Try \kbd{intnum(t=1,2, 1/t)}
+and presto! you get 26 decimals of $\log(2)$. Look at Chapter 3 to see the
+available integration functions.
 
 With PARI, however, you can go further since complex types are allowed.
 For example, assume that we want to know the location of the zeros of the
@@ -995,15 +1003,14 @@ where $C_r$ is the circle of radius $r$ centered at the origin.
 Hence type
 \bprog
 fun(z) =
-{
-  local(u);
-  u = exp(z);
+{ local(u = exp(z));
+
   (u-1) / (u-z)
 }
-zero(r) = r/(2*Pi) * intnum(t=0, 2*Pi, fun(r*exp(I*t)) * exp(I*t))
+zero(r) = r/(2*Pi) * intnum(t=0, 2*Pi, real( fun(r*exp(I*t)) * exp(I*t) ))
 @eprog
 \noindent (Here \kbd{u} is a local variable to the function \kbd{f}: whenever
-a function is called, GP fills its argument list with the actual arguments
+a function is called, \kbd{gp} fills its argument list with the actual arguments
 given, and initializes the other declared parameters and local variables to
 0. It will then restore their former values upon exit. If, however, we had
 not declared \kbd{u} in the function prototype, it would be considered as a
@@ -1011,38 +1018,34 @@ global variable, whose value would be permanently changed. It is not
 mandatory to declare in this way all the parameters you use, but beware of
 side effects!)
 
-The function \kbd{zero(r)} will then count the number of zeros (we have simply
-made the change of variable $z = r*\exp(i*t)$).
+The function \kbd{zero(r)} will then count the number of zeros: we simply
+made the change of variable $z = r*\exp(i*t)$, and took the real part to
+avoid integrating the imaginary part.
 
 Now type \kbd{\b{p} 9} (otherwise the computation would take too long, and
-anyway we know that the result is an integer), then \kbd{zero(1)}, \kbd{zero(1.5)}.
-The result tells us that there are no zeros inside the unit disk, but that
-there are two (necessarily complex conjugate) whose modulus is between $1$
-and $1.5$. For the sake of completeness, let us compute them. Let $z$ be such
-a zero, and write $z=x+iy$ with $x$ and $y$ real. Then the equation $e^z-z=0$
-implies, after elementary transformations, that $e^{2x}=x^2+y^2$ and that
-$e^x\cos(y)=x$. Hence $y=\pm\sqrt{e^{2x}-x^2}$ and hence
-$e^x\cos(\sqrt{e^{2x}-x^2})=x$. Therefore, type
+anyway we know that the result is an integer), then \kbd{zero(1)},
+\kbd{zero(1.5)}. The result tells us that there are no zeros inside the unit
+disk, but that there are two (necessarily complex conjugate) whose modulus is
+between $1$ and $1.5$. For the sake of completeness, let us compute them. Let
+$z$ be such a zero, and write $z=x+iy$ with $x$ and $y$ real. Then the
+equation $e^z-z=0$ implies, after elementary transformations, that
+$e^{2x}=x^2+y^2$ and that $e^x\cos(y)=x$. Hence $y=\pm\sqrt{e^{2x}-x^2}$ and
+hence $e^x\cos(\sqrt{e^{2x}-x^2})=x$. Therefore, type 
 \bprog
 fun(x) =
-{
-  local(u);
-  u = exp(x);
-  u*cos(sqrt(u^2 - x^2)) - x
+{ local(u = exp(x));
+
+  u * cos(sqrt(u^2 - x^2)) - x
 }
 @eprog
-
-Then \kbd{fun(0)} is positive while \kbd{fun(1)} is negative. Come back to
-precision 28 and type
-
-\centerline{\tt x0 = solve(x=0,1, fun(x))}
-
-This quickly gives us the value of \kbd{x}, and we can then type
-
-\centerline{\tt z = x0 + I*sqrt(exp(2*x0) - x0\pow 2)}
-
+\noindent Then \kbd{fun(0)} is positive while \kbd{fun(1)} is negative. Come
+back to precision 28 and type
+\bprog
+  x0 = solve(x=0,1, fun(x))
+  z = x0 + I*sqrt(exp(2*x0) - x0^2)
+@eprog
 \noindent which (together with its complex conjugate) is the required zero.
-As a check, type \kbd{exp(z) - z}, and also \kbd{abs(z)}.
+As a check, type \kbd{exp(z) - z}.
 
 Of course you can integrate over contours which are more complicated than
 circles, but you must perform yourself the changes of variable as we have
@@ -1054,17 +1057,17 @@ The example above also shows the use of the \kbd{solve} function. To use
 problem to a real one. For example, to find the first complex zero of the
 Riemann zeta function as above, we could try typing
 
-\kbd{solve(t=14,15, real(zeta(1/2 + I*t)))},
+\kbd{solve(t=14,15, real( zeta(1/2 + I*t) ))},
 
 \noindent but this would not work because the real part is positive for
 \kbd{t=14} and \kbd{t=15}. As it happens, the imaginary part works. Type
 
-\kbd{solve(t=14,15, imag(zeta(1/2 + I*t)))},
+\kbd{solve(t=14,15, imag( zeta(1/2 + I*t) ))},
 
 \noindent and this now works. We could also narrow the search interval and
 type for instance
 
-\kbd{solve(t=14,14.2, real(zeta(1/2 + I*t)))}
+\kbd{solve(t=14,14.2, real( zeta(1/2 + I*t) ))}
 
 \noindent which would also work.
 
@@ -1077,7 +1080,7 @@ a plunge into these problems. Type
 
 \centerline{\tt gcd(x\pow 2 - 1, x\pow 2 - 3*x + 2)}
 
- No problem, the result is \kbd{x - 1} as expected. But now type
+\noindent The result is \kbd{x - 1} as expected. But now type
 
 \centerline{\tt gcd(x\pow 2 - 1., x\pow2 - 3.*x + 2.)}
 
@@ -1114,12 +1117,12 @@ nothing to do with the problem.
 We see that the components of the result are very close to 1. It is however
 tedious to look at all these real and imaginary parts. It would be impossible
 if we had many more. Let's do it automatically. Type
-\kbd{rr = round(real(rc))}, then \kbd{sqrt(norml2(rc-rr))}. We see that
+\kbd{rr = round( real(rc) )}, then \kbd{sqrt( norml2(rc - rr) )}. We see that
 \kbd{rr} is indeed all 1's, and that the L2-norm of \kbd{rc - rr} is around
-$10^{-27}$, reasonable enough when we work with 28 significant digits. Note
-that the function \kbd{norml2}, contrary to what it may seem, does not give the
-L2 norm but its square, hence we must take the square root (well, this is not
-absolutely necessary in this case!).
+$3.10^{-28}$, reasonable enough when we work with 28 significant digits! Note
+that the function \kbd{norml2}, contrary to what its name implies, does not
+give the L2 norm but its square, hence we must take the square root. (Well,
+this is not absolutely necessary in this case!).
 %
 \smallskip
 Now type \kbd{pol = x\pow 5 + x\pow 4 + 2*x\pow 3 - 2*x\pow 2 - 4*x - 3},
@@ -1135,18 +1138,28 @@ Similarly, we can type \kbd{lf(p)= lift(factormod(pol,p))}, and
 different factorizations, this time over $\F_p$. In fact, even better: type
 successively
 \bprog
-pol2 = x^3 + x^2 + x - 1
-fq = factorff(pol2, 3, t^3 + t^2 + t - 1)
-centerlift(lift(fq))
+T = ffinit(3,3, t)
+pol2 = subst(GF27, t, x)
+fq = factorff(pol2, 3, GF27)
+centerlift( lift(fq) )
 @eprog
 %
-This factors the polynomial \kbd{pol2} over the finite field $\F_3(\theta)$
-where $\theta$ is a root of the polynomial \kbd{t\pow 3 + t\pow 2 + t - 1}.
-This is of course a form of the field $\F_{27}$. We know that
+$T$, which is actually \kbd{t\pow 3 + t\pow 2 + t + 2} (with integermod
+coefficients), is defined above to be an irreducible polynomial of degree $3$
+over $\F_3$. This factors the polynomial \kbd{pol2} over the finite field
+$\F_3[t]/(T)$. This is of course a form of the field $\F_{27}$. We know that
 Gal$(\F_{27}/\F_3)$ is cyclic of order 3 generated by the Frobenius
 homomorphism $u\mapsto u^3$, and the roots that we have found give the action
-of the powers of the Frobenius on \kbd{t} (if you do not know what I am
-talking about, please try some more examples, it's not so hard to figure out).
+of the powers of the Frobenius on \kbd{t}. (If you do not know what I am
+talking about, please try some more examples, it's not so hard to figure
+out.) We took pain above to factor a polynomial in the variable $x$
+over a finite field defined by a polynomial in $t$, even though they were
+apparently one and the same. There is a crucial rule in all routines
+involving relative extensions: the variable associated to the base field is
+required to have lower priority than the variables of polynomials whose
+coefficients are taken in that base field. Have a look at the section on 
+{\it Variable priorities\/} in the user's manual (see ``The GP programming
+language'').
 
 Similarly, type \kbd{pol3 = x\pow 4 - 4*x\pow 2 + 16} and
 \kbd{fn = factornf(pol3,t\pow 2 + 1)}, and we get the factorization of the
@@ -1178,11 +1191,10 @@ and try to \kbd{factor} successively \kbd{pol}, \kbd{pol * 1.},
 \kbd{pol * Mod(1,Mod(1,3)*(t\pow2+1))}.
 
  In the present version \vers{}, it is {\it not} possible to factor over
-other rings than the ones mentioned above, for example GP cannot factor
-multivariate polynomials. \smallskip
-
-Other functions related to factoring are \kbd{padicappr}, \kbd{polrootsmod},
-\kbd{polrootspadic}, \kbd{polsturm}. Play with them a little.
+other rings than the ones mentioned above, for example \kbd{gp} cannot factor
+multivariate polynomials. Other functions related to factoring are
+\kbd{padicappr}, \kbd{polrootsmod}, \kbd{polrootspadic}, \kbd{polsturm}. Play
+with them a little.
 
 Now let's type \kbd{polsym(pol3,20)}, where \kbd{pol3} is the same
 polynomial as above. This gives the sum of the $k$-th powers of the roots
@@ -1416,7 +1428,7 @@ the curve, type \kbd{modul = elltaniyama(e)}, then
 \noindent to see that this indeed parametrizes the curve.
 
 Now type \kbd{x * u' / (2*v + 1)}, and we see that this is equal to the
-modular form \kbd{f} found above (the quote \kbd{'} tells GP to take the
+modular form \kbd{f} found above (the quote \kbd{'} tells \kbd{gp} to take the
 derivative of the expression with respect to its main variable). The
 functions \kbd{u} and \kbd{v}, considered on the upper half plane (with
 $x=e^{2i\pi\tau}$), are in fact modular {\it functions} for $\Gamma_0(5077)$.
@@ -1502,7 +1514,7 @@ structure.
 
 Let us see examples of all this at work.
 
-Type \kbd{qfbclassno(-10007)}. GP tells us that the result is 77. However,
+Type \kbd{qfbclassno(-10007)}. \kbd{gp} tells us that the result is 77. However,
 you may have noticed in the explanation above that the result is only
 {\it usually\/} correct. This is because the implementers of the algorithm
 have been lazy and have not put the complete Shanks algorithm into PARI,
@@ -1565,7 +1577,7 @@ If we want to use proven bounds under GRH, we have to type
 The double comma \kbd{,,} is not a typo, it means we omit an optional second
 argument (we would use it to compute the narrow class group, which would be
 the same here of course). As we want to use the optional {\it third}
-argument, we have to indicate to GP we skipped this one.
+argument, we have to indicate to \kbd{gp} we skipped this one.
 
 Now, if we believe in GRH, the class group is as we thought (see Chapter 3
 for a complete description of this function).
@@ -1822,7 +1834,7 @@ proceeding.
 
   It's not too late, let's redefine our number field: \kbd{NF = nfinit(nf, 3)}.
 The output is a two-component vector. The first component is the new
-\kbd{nf} (type \kbd{nf = NF[1];}). If you type \kbd{nf.pol}, you notice that GP
+\kbd{nf} (type \kbd{nf = NF[1];}). If you type \kbd{nf.pol}, you notice that \kbd{gp}
 indeed replaced your bad polynomial \kbd{T} by a much better one, which
 happens to be \kbd{A} (small wonder, \kbd{nfinit} internally called
 \kbd{polredabs}!). The second component enables you to switch conveniently to
@@ -1937,7 +1949,7 @@ ideal, and just type \kbd{idealnorm(nf,u)} whatever the chosen representation
 for \kbd{u}. We'll talk about ideals later on.
 
   If we want all the symmetric functions of \kbd{u} and not only the norm, we
-type \kbd{charpoly(u)} (we could write \kbd{charpoly(u, y)} to tell GP to
+type \kbd{charpoly(u)} (we could write \kbd{charpoly(u, y)} to tell \kbd{gp} to
 use the variable \kbd{y} for the characteristic polynomial). Note that this
 gives the characteristic polynomial of \kbd{u}, and not in general the
 minimal polynomial. Exercises: how does one (easily) find the minimal
@@ -2050,7 +2062,7 @@ description of \kbd{idealprimedec} in Chapter~3) and all ideal-related
 functions will accept them. On the other hand, the function \kbd{idealtwoelt}
 can be used to find a two-element $\Z_K$-basis of a given ideal (as $a\Z_K +
 b\Z_K$, where $a$ and $b$ belong to $K$), but this is {\it not} a valid
-representation for an ideal under GP, and most functions will choke on it (or
+representation for an ideal under \kbd{gp}, and most functions will choke on it (or
 worse, take it for something else and output a completely meaningless
 result). To be able to use such an ideal, you will first have to convert it
 to HNF form.
@@ -2478,7 +2490,7 @@ function) and \kbd{ideallog}.
 
 ----- TO BE COMPLETED -----
 
-\section{GP Programming}
+\section{\kbd{gp} Programming}
 
 ----- TO BE WRITTEN -----
 

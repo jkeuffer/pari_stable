@@ -29,24 +29,25 @@ It is possible to use PARI in three different ways:
 \quad 1) as a library, which can be called from an upper-level language
 application, for instance written in C or C$++$;
 
-\quad 2) as a sophisticated programmable calculator, named {\bf GP}, which
-contains most of the control instructions of a standard language like C;
+\quad 2) as a sophisticated programmable calculator, named \tet{gp}, whose
+language \tet{GP} contains most of the control instructions of a standard
+language like C;
 
 \quad 3) the compiler GP2C can translate GP code to C, and load them into the
-GP interpreter. A typical script compiled by GP2C will typically run 3 to 10
-times faster. The C code can also be edited and optimized by hand.
+\kbd{gp} interpreter. A typical script compiled by GP2C will typically run 3
+to 10 times faster. The C code can also be edited and optimized by hand.
 
-The use of GP is explained in chapters 2 and 3, and the programming in library
-mode is explained in chapters 3, 4 and 5. In the present Chapter 1, we give
-an overview of the system.
+The use of \kbd{gp} is explained in chapters 2 and 3, and the programming in
+library mode is explained in chapters 3, 4 and 5. In the present Chapter 1,
+we give an overview of the system.
 
-\subsectitle{Important note:} A tutorial for GP is provided in the standard
+\subsectitle{Important note:} A tutorial for \kbd{gp} is provided in the standard
 distribution (\kbd{tutorial.dvi}) and you should read this first (at
 least the beginning of it, you can skip the specialized topics you're not
 interested in). You can then start over and read the more boring stuff which
 lies ahead. But you should do that eventually, at the very least the various
 Chapter headings. You can have a quick idea of what is available by looking
-at the GP reference card (\kbd{refcard.dvi} or \kbd{refcard.ps}). In case
+at the \kbd{gp} reference card (\kbd{refcard.dvi} or \kbd{refcard.ps}). In case
 of need, you can then refer to the complete function description in Chapter 3.
 
 \subsectitle{How to get the latest version?}
@@ -264,7 +265,7 @@ known, but it is difficult to correct because the mathematical problem itself
 contains some amount of imprecision.
 
 \subsec{Strings}: These contain objects just as they would be printed by the
-GP calculator.
+\kbd{gp} calculator.
 
 \subsec{Notes}:
 
@@ -327,7 +328,7 @@ addition of two real numbers $x$ and $y$. The \idx{accuracy} of the result is
 \emph{a priori} unpredictable; it depends on the precisions of $x$ and $y$,
 on their sizes (i.e.~their exponents), and also on the size of $x+y$. PARI
 works out automatically the right precision for the result, even when it is
-working in calculator mode GP where there is a \idx{default precision}.
+working in calculator mode \kbd{gp} where there is a \idx{default precision}.
 
 In particular, this means that if an operation involves objects of
 different accuracies, some digits will be disregarded by PARI. It is a
@@ -351,7 +352,7 @@ The second part of the PARI philosophy is that PARI operations are in general
 quite permissive. For instance taking the exponential of a vector should not
 make sense. However, it frequently happens that a computation comes out with a
 result which is a vector with many components, and one wants to get the
-exponential of each one. This could easily be done either under GP or in
+exponential of each one. This could easily be done either under \kbd{gp} or in
 library mode, but in fact PARI assumes that this is exactly what you want to
 do when you take the exponential of a vector, so no work is necessary. Most
 transcendental functions work in the same way (see Chapter 3 for details).
