@@ -2132,7 +2132,7 @@ GEN
 eigen(GEN x, long prec)
 {
   GEN y,rr,p,ssesp,r1,r2,r3;
-  long i,k,l,ly,av,tetpil,nbrac,ex, n = lg(x);
+  long e,i,k,l,ly,av,tetpil,ex, n = lg(x);
 
   if (typ(x)!=t_MAT) err(typeer,"eigen");
   if (n != 1 && n != lg(x[1])) err(mattype1,"eigen");
@@ -2140,32 +2140,33 @@ eigen(GEN x, long prec)
 
   av=avma; ex = 16 - bit_accuracy(prec);
   y=cgetg(n,t_MAT);
-  p=caradj(x,0,NULL); rr=roots(p,prec); nbrac=lg(rr)-1;
-  for (i=1; i<=nbrac; i++)
+  p=caradj(x,0,NULL); rr=roots(p,prec);
+  for (i=1; i<n; i++)
   {
     GEN p1 = (GEN)rr[i];
     if (!signe(p1[2])) rr[i]=p1[1];
   }
-  ly=1; k=1; r2=(GEN)rr[1];
+  ly=1; k=2; r2=(GEN)rr[1];
   for(;;)
   {
-    r3 = ground(r2); if (gexpo(gsub(r2,r3)) < ex) r2 = r3;
+    r3 = grndtoi(r2, &e); if (e < ex) r2 = r3;
     ssesp = ker0(x,r2,prec); l = lg(ssesp);
-    if (l == 1)
+    if (l == 1 || ly + (l-1) > n)
       err(talker, "precision too low in eigen");
     for (i=1; i<l; ) y[ly++]=ssesp[i++]; /* done with this eigenspace */
 
     r1=r2; /* try to find a different eigenvalue */
     do
     {
-      if (k==nbrac)
+      if (k == n || ly == n)
       {
         tetpil=avma; setlg(y,ly); /* x may not be diagonalizable */
         return gerepile(av,tetpil,gcopy(y));
       }
-      k++; r2=(GEN)rr[k];
+      r2 = (GEN)rr[k++];
+      r3 = gsub(r1,r2);
     }
-    while (gexpo(gsub(r1,r2)) < ex);
+    while (gcmp0(r3) || gexpo(r3) < ex);
   }
 }
 
