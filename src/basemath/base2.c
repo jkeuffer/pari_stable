@@ -1199,12 +1199,15 @@ static GEN
 newtoncharpoly(GEN a, GEN chi, GEN pp, GEN ns)
 {
   GEN v, c, s, t;
-  long n = degree(chi), j, k, vn = varn(chi), av = avma;
+  long n = degree(chi), j, k, vn = varn(chi), av = avma, av2, lim;
 
   v = newtonsums(a, chi, pp, ns);
+  av2 = avma;
+  lim = stack_lim(av2, 1);
   c = cgetg(n + 2, t_VEC);
   c[1] = un;
   if (n%2) c[1] = lneg((GEN)c[1]);
+  for (k = 2; k <= n+1; k++) c[k] = zero;
 
   for (k = 2; k <= n+1; k++)
   {
@@ -1216,8 +1219,14 @@ newtoncharpoly(GEN a, GEN chi, GEN pp, GEN ns)
       s = gadd(s, t);
     }
     c[k] = ldiv(s, stoi(k - 1));
+
+    if (low_stack(lim, stack_lim(av2, 1)))
+    {
+      if(DEBUGMEM>1) err(warnmem, "newtoncharpoly");
+      c = gerepileupto(av2, gcopy(c));
+    }
   }
-  
+ 
   if (n%2)
   {
     for (k = 1; k <= n+1; k += 2) 
@@ -1235,8 +1244,8 @@ newtoncharpoly(GEN a, GEN chi, GEN pp, GEN ns)
 static GEN 
 mycaract(GEN f, GEN beta, GEN p, GEN pp, GEN ns)
 {
-  GEN p1, p2, p3, chi, npp;
-  long v = varn(f), n = degree(f);
+  GEN p1, p2, p3, chi, chi2, npp;
+  long j, v = varn(f), n = degree(f);
 
   if (gcmp0(beta)) return zeropol(v);
 
@@ -1263,14 +1272,21 @@ mycaract(GEN f, GEN beta, GEN p, GEN pp, GEN ns)
 
   if (p1)
   {
-    chi = poleval(chi,gdiv(polx[v], p1));
-    p1  = gpuigs(p1, n); 
-    chi = gmul(chi, p1);
+    chi2 = cgetg(n+3, t_POL);
+    chi2[1] = chi[1];
+    p2 = gun;
+    for (j = n+2; j >= 2; j--)
+    {
+      chi2[j] = lmul((GEN)chi[j], p2);
+      p2 = gmul(p2, p1);
+    }
   }
+  else 
+    chi2 = chi;
   
-  if (!pp) return chi;
+  if (!pp) return chi2;
  
-  return redelt(chi, pp, pp);
+  return redelt(chi2, pp, pp);
 }
 
 /* Factor characteristic polynomial of beta mod p */
