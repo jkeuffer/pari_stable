@@ -4051,34 +4051,35 @@ entries are expressed as a column vector on the integral basis
 
 \syn{algtobasis}{\var{nf},x}.
 
-\subsecidx{nfbasis}$(x,\{\fl=0\},\{p\})$: \idx{integral basis} of the number
-field defined by the irreducible, preferably monic, polynomial $x$,
-using a modified version of the \idx{round 4} algorithm by
-default. The binary digits of $\fl$ have the following meaning:
+\subsecidx{nfbasis}$(x,\{\fl=0\},\{fa\})$: \idx{integral basis} of the number
+field defined by the irreducible, preferably monic, polynomial $x$, using a
+modified version of the \idx{round 4} algorithm by default, due to David
+\idx{Ford}, Sebastian \idx{Pauli} and Xavier \idx{Roblot}. The binary digits
+of $\fl$ have the following meaning:
 
 1: assume that no square of a prime greater than the default \kbd{primelimit}
 divides the discriminant of $x$, i.e.~that the index of $x$ has only small
 prime divisors.
 
-2: use \idx{round 2} algorithm. For small degrees and coefficient size, this is
-sometimes a little faster. (This program is the translation into C of a program
-written by David \idx{Ford} in Algeb.)
+2: use \idx{round 2} algorithm. For small degrees and coefficient size, this
+is sometimes a little faster. (This program is the translation into C of a
+program written by David \idx{Ford} in Algeb.)
 
 Thus for instance, if $\fl=3$, this uses the round 2 algorithm and outputs
 an order which will be maximal at all the small primes.
 
-If $p$ is present, we assume (without checking!) that it is the two-column
+If $fa$ is present, we assume (without checking!) that it is the two-column
 matrix of the factorization of the discriminant of the polynomial $x$. Note
 that it does \var{not} have to be a complete factorization. This is
 especially useful if only a local integral basis for some small set of places
 is desired: only factors with exponents greater or equal to 2 will be
 considered.
 
-\syn{nfbasis0}{x,\fl,p}. An extended version
-is $\teb{nfbasis}(x,\&d,\fl,p)$, where $d$ will receive the discriminant of
-the number field (\var{not} of the polynomial $x$), and an omitted $p$ should
-be input as \kbd{gzero}. Also available are $\teb{base}(x,\&d)$ ($\fl=0$),
-$\teb{base2}(x,\&d)$ ($\fl=2$) and $\teb{factoredbase}(x,p,\&d)$.
+\syn{nfbasis0}{x,\fl,fa}. An extended version
+is $\teb{nfbasis}(x,\&d,\fl,fa)$, where $d$ will receive the discriminant of
+the number field (\var{not} of the polynomial $x$), and an omitted $fa$ should
+be input as \kbd{NULL}. Also available are $\teb{base}(x,\&d)$ ($\fl=0$),
+$\teb{base2}(x,\&d)$ ($\fl=2$) and $\teb{factoredbase}(x,fa,\&d)$.
 
 \subsecidx{nfbasistoalg}$(\var{nf},x)$: this is the inverse function of
 \kbd{nfalgtobasis}. Given an object $x$ whose entries are expressed on the
@@ -4093,20 +4094,20 @@ is particularly useful in conjunction with \kbd{nfhnfmod}.
 
 \syn{nfdetint}{\var{nf},x}.
 
-\subsecidx{nfdisc}$(x,\{\fl=0\},\{p\})$: \idx{field discriminant} of the
+\subsecidx{nfdisc}$(x,\{\fl=0\},\{fa\})$: \idx{field discriminant} of the
 number field defined by the integral, preferably monic, irreducible
-polynomial $x$. $\fl$ and $p$ are exactly as in \kbd{nfbasis}. That is, $p$
+polynomial $x$. $\fl$ and $fa$ are exactly as in \kbd{nfbasis}. That is, $fa$
 provides the matrix of a partial factorization of the discriminant of $x$,
 and binary digits of $\fl$ are as follows:
 
- 1: assume that no square of a prime greater than \kbd{primelimit}
+1: assume that no square of a prime greater than \kbd{primelimit}
 divides the discriminant.
 
- 2: use the round 2 algorithm, instead of the default \idx{round 4}.
-This should be
-slower except maybe for polynomials of small degree and coefficients.
+2: use the round 2 algorithm, instead of the default \idx{round 4}. This
+should be slower except maybe for polynomials of small degree and
+coefficients.
 
-\syn{nfdiscf0}{x,\fl,p} where, to omit $p$, you should input \kbd{gzero}. You
+\syn{nfdiscf0}{x,\fl,fa} where, to omit $fa$, you should input \kbd{NULL}. You
 can also use $\teb{discf}(x)$ ($\fl=0$).
 
 \subsecidx{nfeltdiv}$(\var{nf},x,y)$: given two elements $x$ and $y$ in
@@ -4608,7 +4609,7 @@ sufficient.
 
 \syn{galois}{x,\var{prec}}.
 
-\subsecidx{polred}$(x,\{\fl=0\},\{p\})$: finds polynomials with reasonably
+\subsecidx{polred}$(x,\{\fl=0\},\{fa\})$: finds polynomials with reasonably
 small coefficients defining subfields of the number field defined by $x$.
 One of the polynomials always defines $\Q$ (hence is equal to $x-1$),
 and another always defines the same number field as $x$ if $x$ is irreducible.
@@ -4625,12 +4626,12 @@ stored in the \tet{addprimes} table.
 giving the elements defining these subfields, the second giving the
 corresponding minimal polynomials.
 
-If $p$ is given, it is assumed that it is the two-column matrix of the
+If $fa$ is given, it is assumed that it is the two-column matrix of the
 factorization of the discriminant of the polynomial $x$.
 
-\syn{polred0}{x,\fl,p,\var{prec}}, where an omitted $p$ is
-coded by $gzero$. Also available are $\teb{polred}(x,\var{prec})$ and
-$\teb{factoredpolred}(x,p,\var{prec})$, both corresponding to $\fl=0$.
+\syn{polred0}{x,\fl,fa}, where an omitted $fa$ is coded by \kbd{NULL}. Also
+available are $\teb{polred}(x)$ and $\teb{factoredpolred}(x,fa)$, both
+corresponding to $\fl=0$.
 
 \subsecidx{polredabs}$(x,\{\fl=0\})$: finds one of the polynomial defining
 the same number field as the one defined by $x$, and such that the sum of the
@@ -4657,7 +4658,7 @@ $P(x)$ and $P(-x)$, only one is given).
 index of the order chosen are larger than \tet{primelimit} or divide integers
 stored in the \tet{addprimes} table.
 
-\syn{polredabs0}{x,\fl,\var{prec}}.
+\syn{polredabs0}{x,\fl}.
 
 \subsecidx{polredord}$(x)$: finds polynomials with reasonably small
 coefficients and of the same degree as that of $x$ defining suborders of the
