@@ -54,8 +54,8 @@ Then fetch the GP binary
 
   ftp://megrez.math.u-bordeaux.fr/pub/pari/windows/cygwin/gp-xxx.exe.gz
  
-and put it in the same directory as the dll (or dump the dll with your system
-libraries, as you prefer).
+and put it in the same directory as the dll (or dump the dll somewhere in
+your PATH, as you prefer).
 
 PROBLEMS:
   * no hi-res plots, most graphics commands disabled (you can still output to
@@ -63,9 +63,9 @@ PROBLEMS:
 
 NOTE: you might wish to download the full cygwin distribution from
 http://sources.redhat.com/cygwin/ [ the Download and Installation process is
-automated and quite simple, you should be home in a few mouse
-clicks...provided your internet connection is good enough. ]. It provides a
-neat gcc-based development environment under Windows, under which most Unix
+automated and quite simple, you should be home in a few mouse clicks...
+provided your internet connection is good enough. ]. It provides a neat
+gcc-based development environment under Windows, under which most Unix
 pacakges can easily be ported. In particular you will be able to build GP
 from the generic (unix) sources.
 
