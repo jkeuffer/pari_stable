@@ -470,6 +470,7 @@ lexcmp(GEN x, GEN y)
 /*                returns 1 if x == y, 0 otherwise               */
 /*                                                               */
 /*****************************************************************/
+#define MASK(x) (((ulong)(x)) & (TYPBITS | LGBITS))
 
 /* x,y t_POL */
 static int
@@ -479,17 +480,18 @@ polegal(GEN x, GEN y)
 
   while (lg(x) == 3) { x = (GEN)x[2]; if (typ(x) != t_POL) break; }
   while (lg(y) == 3) { y = (GEN)y[2]; if (typ(y) != t_POL) break; }
-  if (typ(x) != t_POL) return (typ(y)==t_POL)? 0: gegal(x,y);
-  if (typ(y) != t_POL) return (typ(x)==t_POL)? 0: gegal(x,y);
-  lx = lg(x);
-  if (lx == 2) return (lg(y) == 2);
+  if (MASK(x[0]) != MASK(y[0]))
+    return (typ(x) == t_POL || typ(y) == t_POL)? 0: gegal(x, y);
+  /* same typ, lg */
+  if (typ(x) != t_POL) return gegal(x, y);
+  /* typ = t_POL, non-constant or 0 */
+  lx = lg(x); if (lx == 2) return 1; /* 0 in two different vars are = */
   if (x[1] != y[1]) return 0;
   for (i = 2; i < lx; i++)
     if (!gegal((GEN)x[i],(GEN)y[i])) return 0;
   return 1;
 }
 
-#define MASK(x) (((ulong)(x)) & (TYPBITS | LGBITS))
 /* typ(x) = typ(y) = t_VEC/COL/MAT */
 static int
 vecegal(GEN x, GEN y)
