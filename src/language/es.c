@@ -2648,8 +2648,7 @@ check_magic(char *name, FILE *f)
 int
 file_is_binary(FILE *f)
 {
-  char c = fgetc(f);
-  int r = isprint(c);
+  int c = fgetc(f), r = isprint(c);
   ungetc(c,f); return (r == 0);
 }
 
