@@ -1387,10 +1387,10 @@ theta(GEN q, GEN z, long prec)
   long av=avma,tetpil,l,n;
   GEN ps,qn,qnold,y,zy,lq,ps2,p1,k,zold;
 
-  if (gexpo(q)>=0) err(thetaer1);
   l=precision(q); if (l) prec=l;
   p1=realun(prec); z=gmul(p1,z);
   if (!l) q=gmul(p1,q);
+  if (gexpo(q)>=0) err(thetaer1);
   zy = gimag(z);
   if (gcmp0(zy)) k=gzero;
   else
@@ -1423,11 +1423,13 @@ thetanullk(GEN q, long k, long prec)
   long av=avma,tetpil,l,n;
   GEN p1,ps,qn,y,ps2;
 
-  if (gexpo(q)>=0) err(thetaer1);
-  if (!(k&1)) return gzero;
-  n=0; qn=gun; ps2=gsqr(q); ps=gneg_i(ps2);
-  y=gun; l=precision(q);
+  l=precision(q);
   if (!l) { l=prec; q=gmul(q,realun(l)); }
+  if (gexpo(q)>=0) err(thetaer1);
+
+  if (!(k&1)) { avma = av; return gzero; }
+  ps2=gsqr(q); ps=gneg_i(ps2);
+  qn = gun; y = gun; n = 0;
 
   do
   {
