@@ -220,7 +220,7 @@ mpabs(GEN x)
 INLINE long
 smodis(GEN x, long y)
 {
-  const long av=avma; divis(x,y); avma=av;
+  const gpmem_t av=avma; divis(x,y); avma=av;
   if (!hiremainder) return 0;
   return (signe(x)>0) ? hiremainder: labs(y)+hiremainder;
 }
@@ -353,7 +353,7 @@ addssz(long x, long y, GEN z)
   if (typ(z)==t_INT) gops2ssz(addss,x,y,z);
   else
   {
-    const long av=avma;
+    const gpmem_t av=avma;
     const GEN p1=cgetr(lg(z));
 
     affsr(x,p1); affrr(addrs(p1,y),z); avma=av;
@@ -428,7 +428,7 @@ mulssz(long x, long y, GEN z)
   if (typ(z)==t_INT) gops2ssz(mulss,x,y,z);
   else
   {
-    const long av=avma;
+    const gpmem_t av=avma;
     const GEN p1=cgetr(lg(z));
 
     affsr(x,p1); mpaff(mulsr(y,p1),z); avma=av;
@@ -438,21 +438,21 @@ mulssz(long x, long y, GEN z)
 INLINE void
 mulsii(long x, GEN y, GEN z)
 {
-  const long av=avma;
+  const gpmem_t av=avma;
   affii(mulsi(x,y),z); avma=av;
 }
 
 INLINE void
 addsii(long x, GEN y, GEN z)
 {
-  const long av=avma;
+  const gpmem_t av=avma;
   affii(addsi(x,y),z); avma=av;
 }
 
 INLINE long
 divisii(GEN x, long y, GEN z)
 {
-  const long av=avma;
+  const gpmem_t av=avma;
   affii(divis(x,y),z); avma=av; return hiremainder;
 }
 
@@ -503,7 +503,7 @@ dvmdis(GEN x, long y, GEN *z)
 INLINE void
 dvmdssz(long x, long y, GEN z, GEN t)
 {
-  const long av=avma;
+  const gpmem_t av=avma;
   const GEN p1=divss(x,y);
 
   affsi(hiremainder,t); mpaff(p1,z); avma=av;
@@ -512,7 +512,7 @@ dvmdssz(long x, long y, GEN z, GEN t)
 INLINE void
 dvmdsiz(long x, GEN y, GEN z, GEN t)
 {
-  const long av=avma;
+  const gpmem_t av=avma;
   const GEN p1=divsi(x,y);
 
   affsi(hiremainder,t); mpaff(p1,z); avma=av;
@@ -521,7 +521,7 @@ dvmdsiz(long x, GEN y, GEN z, GEN t)
 INLINE void
 dvmdisz(GEN x, long y, GEN z, GEN t)
 {
-  const long av=avma;
+  const gpmem_t av=avma;
   const GEN p1=divis(x,y);
 
   affsi(hiremainder,t); mpaff(p1,z); avma=av;
@@ -530,7 +530,7 @@ dvmdisz(GEN x, long y, GEN z, GEN t)
 INLINE void
 dvmdiiz(GEN x, GEN y, GEN z, GEN t)
 {
-  const long av=avma;
+  const gpmem_t av=avma;
   GEN p;
 
   mpaff(dvmdii(x,y,&p),z); mpaff(p,t); avma=av;
@@ -545,14 +545,14 @@ modis(GEN x, long y)
 INLINE GEN
 ressi(long x, GEN y)
 {
-  const long av=avma;
+  const gpmem_t av=avma;
   divsi(x,y); avma=av; return stoi(hiremainder);
 }
 
 INLINE GEN
 resis(GEN x, long y)
 {
-  const long av=avma;
+  const gpmem_t av=avma;
   divis(x,y); avma=av; return stoi(hiremainder);
 }
 
@@ -562,7 +562,7 @@ divisz(GEN x, long y, GEN z)
   if (typ(z)==t_INT) gops2gsz(divis,x,y,z);
   else
   {
-    const long av=avma;
+    const gpmem_t av=avma;
     const GEN p1=cgetr(lg(z));
 
     affir(x,p1); affrr(divrs(p1,y),z); avma=av;
@@ -572,7 +572,7 @@ divisz(GEN x, long y, GEN z)
 INLINE void
 divsiz(long x, GEN y, GEN z)
 {
-  const long av=avma;
+  const gpmem_t av=avma;
 
   if (typ(z)==t_INT) gaffect(divsi(x,y),z);
   else
@@ -589,7 +589,7 @@ divsiz(long x, GEN y, GEN z)
 INLINE void
 divssz(long x, long y, GEN z)
 {
-  const long av=avma;
+  const gpmem_t av=avma;
 
   if (typ(z)==t_INT) gaffect(divss(x,y),z);
   else
@@ -604,21 +604,21 @@ divssz(long x, long y, GEN z)
 INLINE void
 divrrz(GEN x, GEN y, GEN z)
 {
-  const long av=avma;
+  const gpmem_t av=avma;
   mpaff(divrr(x,y),z); avma=av;
 }
 
 INLINE void
 resiiz(GEN x, GEN y, GEN z)
 {
-  const long av=avma;
+  const gpmem_t av=avma;
   affii(resii(x,y),z); avma=av;
 }
 
 INLINE int
 divise(GEN x, GEN y)
 {
-  const long av=avma;
+  const gpmem_t av=avma;
   const GEN p1=resii(x,y);
   avma=av; return p1 == gzero;
 }
@@ -666,7 +666,7 @@ mpdiv(GEN x, GEN y)
 INLINE int
 mpdivis(GEN x, GEN y, GEN z)
 {
-  const long av=avma;
+  const gpmem_t av=avma;
   GEN p2;
   const GEN p1=dvmdii(x,y,&p2);
 
@@ -680,7 +680,7 @@ mpdivis(GEN x, GEN y, GEN z)
 INLINE int
 mpdivisis(GEN x, long y, GEN z)
 {
-  const ulong av = avma;
+  const gpmem_t av = avma;
   GEN p1 = divis(x,y);
   if (hiremainder) { avma = av; return 0; }
   affii(p1,z); avma = av; return 1;

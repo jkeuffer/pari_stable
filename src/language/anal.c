@@ -183,7 +183,7 @@ _set_analyseur(char *s)
 static GEN
 lisseq0(char *t, GEN (*f)(void))
 {
-  const ulong av = avma;
+  const gpmem_t av = avma;
   char *olds = analyseur, *olde = mark.start;
   GEN res;
 
@@ -441,7 +441,7 @@ kill0(entree *ep)
 static GEN
 seq(void)
 {
-  const ulong av = avma, lim = stack_lim(av,1);
+  const gpmem_t av = avma, lim = stack_lim(av,1);
   GEN res = gnil;
 
   for(;;)
@@ -613,7 +613,7 @@ err_match(char *s, char c)
 static long
 readlong()
 {
-  const ulong av = avma;
+  const gpmem_t av = avma;
   const char *old = analyseur;
   long m;
   GEN arg = expr();

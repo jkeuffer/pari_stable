@@ -1220,7 +1220,7 @@ modii(GEN x, GEN y)
 void
 modiiz(GEN x, GEN y, GEN z)
 {
-  const long av = avma;
+  const gpmem_t av = avma;
   affii(modii(x,y),z); avma=av;
 }
 

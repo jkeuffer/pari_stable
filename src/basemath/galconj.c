@@ -667,7 +667,7 @@ frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
       h=sgi[pf[j]];
       if (!mael(C,h,j))
       {
-	ulong av3=avma;
+	gpmem_t av3=avma;
 	GEN r;
 	r=FpX_Fp_mul(FpXQ_mul((GEN) gt->pauto[h], 
 	      (GEN) gt->bezoutcoeff[j],gl->TQ,gl->Q),gl->den,gl->Q);
@@ -3491,7 +3491,7 @@ GEN galoisisabelian(GEN gal, long flag)
   M=cgetg(n,t_MAT);
   for(i=1;i<n;i++)
   {
-    ulong btop;
+    gpmem_t btop;
     GEN P;
     long k;
     M[i]=lgetg(n,t_COL);

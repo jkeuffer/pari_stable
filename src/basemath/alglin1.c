@@ -76,7 +76,6 @@ gtrans_i(GEN x)
   return y;
 }
 
-
 GEN
 gtrans(GEN x)
 {
@@ -424,7 +423,7 @@ get_range(char *s, long *a, long *b, long *cmpl, long lx)
 
   *a = 1; *b = max;
   if (*s == '^') { *cmpl = 1; s++; } else *cmpl = 0;
-  if (*s == 0) return 0;
+  if (!*s) return 0;
   if (*s != '.')
   {
     *a = str_to_long(s, &s);
@@ -1499,7 +1498,7 @@ detint(GEN x)
 }
 
 static void
-gerepile_gauss_ker(GEN x, long m, long n, long k, long t, ulong av)
+gerepile_gauss_ker(GEN x, long m, long n, long k, long t, gpmem_t av)
 {
   gpmem_t tetpil = avma, A;
   long dec,u,i;
@@ -1524,7 +1523,7 @@ gerepile_gauss_ker(GEN x, long m, long n, long k, long t, ulong av)
 }
 
 static void
-gerepile_gauss_FpM_ker(GEN x, GEN p, long m, long n, long k, long t, ulong av)
+gerepile_gauss_FpM_ker(GEN x, GEN p, long m, long n, long k, long t, gpmem_t av)
 {
   gpmem_t tetpil = avma, A;
   long dec,u,i;
@@ -1553,7 +1552,7 @@ gerepile_gauss_FpM_ker(GEN x, GEN p, long m, long n, long k, long t, ulong av)
 /* special gerepile for huge matrices */
 
 static void
-gerepile_gauss(GEN x,long m,long n,long k,long t,ulong av, long j, GEN c)
+gerepile_gauss(GEN x,long m,long n,long k,long t,gpmem_t av, long j, GEN c)
 {
   gpmem_t tetpil = avma, A;
   long dec,u,i;

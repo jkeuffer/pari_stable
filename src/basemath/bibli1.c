@@ -1206,7 +1206,7 @@ GEN
 lllintpartialall(GEN m, long flag)
 {
   const long ncol = lg(m)-1;
-  const long ltop1 = avma;
+  const gpmem_t ltop1 = avma;
   long ncolnz;
   GEN tm1, tm2, mid, *gptr[4];
 
@@ -1319,7 +1319,7 @@ lllintpartialall(GEN m, long flag)
     * try to replace (v, w) by (v, v - q*w) for some q.
     * We compute all inner products and check them repeatedly.
     */
-    const long ltop3 = avma; /* Excludes region with tm1 and mid */
+    const gpmem_t ltop3 = avma; /* Excludes region with tm1 and mid */
     long icol, lim, reductions, npass = 0;
     GEN dotprd = cgetg(ncol+1, t_MAT);
 
@@ -1344,7 +1344,7 @@ lllintpartialall(GEN m, long flag)
 
         for (ijdif=1; ijdif < ncol; ijdif++)
 	{
-          const long previous_avma = avma;
+          const gpmem_t previous_avma = avma;
 
           jcol = (icol + ijdif - 1) % ncol; jcol++; /* Hack for NeXTgcc 2.5.8 */
           k1 = (cmpii(gcoeff(dotprd,icol,icol),

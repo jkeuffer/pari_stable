@@ -2917,7 +2917,7 @@ trivsmith(long all)
 }
 
 static void
-snf_pile(ulong av, GEN *x, GEN *U, GEN *V)
+snf_pile(gpmem_t av, GEN *x, GEN *U, GEN *V)
 {
   GEN *gptr[3];
   int c = 1; gptr[0]=x;

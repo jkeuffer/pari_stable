@@ -1206,25 +1206,25 @@ FpXQ_pow(GEN x, GEN n, GEN pol, GEN p)
 GEN
 FpXX_red(GEN z, GEN p)
 {
-    GEN res;
-    int i;
-    res=cgetg(lgef(z),t_POL);
-    res[1] = evalsigne(1) | evalvarn(varn(z)) | evallgef(lgef(z));
-    for(i=2;i<lgef(res);i++)
-      if (typ(z[i])!=t_INT)
+  GEN res;
+  int i;
+  res=cgetg(lgef(z),t_POL);
+  res[1] = evalsigne(1) | evalvarn(varn(z)) | evallgef(lgef(z));
+  for(i=2;i<lgef(res);i++)
+    if (typ(z[i])!=t_INT)
+    {
+      gpmem_t av=avma;
+      res[i]=(long)FpX_red((GEN)z[i],p);
+      if (lgef(res[i])<=3)
       {
-	ulong av=avma;
-        res[i]=(long)FpX_red((GEN)z[i],p);
-	if (lgef(res[i])<=3)
-	{
-	  if (lgef(res[i])==2) {avma=av;res[i]=zero;}
-	  else res[i]=lpilecopy(av,gmael(res,i,2));
-	}
+        if (lgef(res[i])==2) {avma=av;res[i]=zero;}
+        else res[i]=lpilecopy(av,gmael(res,i,2));
       }
-      else
-        res[i]=lmodii((GEN)z[i],p);
-    res=normalizepol_i(res,lgef(res));
-    return res;
+    }
+    else
+      res[i]=lmodii((GEN)z[i],p);
+  res=normalizepol_i(res,lgef(res));
+  return res;
 }
 
 /*******************************************************************/
@@ -1335,8 +1335,7 @@ monomial(GEN a, int degpol, int v)
 GEN
 FpXQX_safegcd(GEN P, GEN Q, GEN T, GEN p)
 {
-  ulong btop;
-  gpmem_t ltop = avma, st_lim;
+  gpmem_t btop, ltop = avma, st_lim;
   long dg, vx = varn(P);
   GEN U, q;
   P = FpXX_red(P, p);
@@ -1692,7 +1691,7 @@ polfrobenius(GEN M, GEN p, long r, long v)
 static GEN
 matpolfrobenius(GEN V, GEN P, GEN T, GEN p)
 {
-  ulong btop;
+  gpmem_t btop;
   long i;
   long l=degpol(T);
   long v=varn(T);
@@ -1715,7 +1714,7 @@ matpolfrobenius(GEN V, GEN P, GEN T, GEN p)
   for(i=3;i<=l;i++)
   {
     long j;
-    ulong bbot;
+    gpmem_t bbot;
     GEN W2=cgetg(lV,t_VEC);
     for(j=1;j<lV;j++)
       W2[j]=(long)FpXQ_mul((GEN)W[j],(GEN)V[j],T,p);
