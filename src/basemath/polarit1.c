@@ -2177,7 +2177,7 @@ factorpadic0(GEN f,GEN p,long r,long flag)
 /*                                                                 */
 /*******************************************************************/
 extern GEN to_Kronecker(GEN P, GEN Q);
-static GEN spec_Fq_pow_mod_pol(GEN x, GEN S, GEN T, GEN p);
+static GEN spec_FqXQ_pow(GEN x, GEN S, GEN T, GEN p);
 
 static GEN
 to_Fq(GEN x, GEN T, GEN p)
@@ -2258,7 +2258,7 @@ FqX_split(GEN *t, long d, GEN q, GEN S, GEN T, GEN p)
     w = w0 = FqX_rand(dt,v, T,p);
     if (degpol(w) <= 0) continue;
     for (l=1; l<d; l++) /* sum_{0<i<d} w^(q^i), result in (F_q)^r */
-      w = gadd(w0, spec_Fq_pow_mod_pol(w, S, T, p));
+      w = gadd(w0, spec_FqXQ_pow(w, S, T, p));
     w = FpXQX_red(w, T,p);
     if (is2)
     {
@@ -2345,7 +2345,7 @@ init_pow_q_mod_pT(GEN X, GEN q, GEN u, GEN T, GEN p)
 
 /* compute x^q, S is as above */
 static GEN
-spec_Fq_pow_mod_pol(GEN x, GEN S, GEN T, GEN p)
+spec_FqXQ_pow(GEN x, GEN S, GEN T, GEN p)
 {
   pari_sp av = avma, lim = stack_lim(av, 1);
   GEN x0 = x+2, z = (GEN)x0[0];
@@ -2359,7 +2359,7 @@ spec_Fq_pow_mod_pol(GEN x, GEN S, GEN T, GEN p)
     z = gadd(z, d);
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"spec_Fq_pow_mod_pol");
+      if(DEBUGMEM>1) err(warnmem,"spec_FqXQ_pow");
       z = gerepileupto(av, z);
     }
   }
@@ -2404,7 +2404,7 @@ FqX_split_deg1(GEN *pz, GEN u, GEN q, GEN T, GEN p)
   v = X = polx[varn(u)];
   S = init_pow_q_mod_pT(X, q, u, T, p);
   appendL(z, S);
-  v = spec_Fq_pow_mod_pol(v, S, T, p);
+  v = spec_FqXQ_pow(v, S, T, p);
   g = FqX_gcd(gsub(v,X),u, T,p);
   dg = degpol(g);
   if (dg > 0) add(z, g, dg);
@@ -2425,7 +2425,7 @@ FqX_split_by_degree(GEN *pz, GEN u, GEN q, GEN T, GEN p)
   appendL(z, S);
   for (d=1; d <= N>>1; d++)
   {
-    v = spec_Fq_pow_mod_pol(v, S, T, p);
+    v = spec_FqXQ_pow(v, S, T, p);
     g = FqX_gcd(gsub(v,X),u, T,p);
     dg = degpol(g); if (dg <= 0) continue;
     /* all factors of g have degree d */
@@ -2478,7 +2478,7 @@ FqX_sqf_split(GEN *t0, GEN q, GEN T, GEN p)
   S = init_pow_q_mod_pT(X, q, u, T, p);
   for (d=1; d <= N>>1; d++)
   {
-    v = spec_Fq_pow_mod_pol(v, S, T, p);
+    v = spec_FqXQ_pow(v, S, T, p);
     g = FqX_gcd(gsub(v,X),u, T,p);
     dg = degpol(g); if (dg <= 0) continue;
 
