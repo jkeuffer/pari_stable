@@ -1786,15 +1786,15 @@ set_mulid(GEN V, GEN M, GEN Mi, long r1, long r2, long N, long k)
   V[k] = (long)Mk; return Mk;
 }
 
-/* mat = base change matrix, r = Cholesky form of the quadratic form [matrix
+/* mat = base change matrix, R = Cholesky form of the quadratic form [matrix
  * Q from algo 2.7.6] */
 static GEN
-chk_gen_init(FP_chk_fun *chk, GEN r, GEN mat)
+chk_gen_init(FP_chk_fun *chk, GEN R, GEN mat)
 {
   CG_data *d = (CG_data*)chk->data;
   nfbasic_t *T = d->T;
   GEN V, inv, P, bound, prev, x, M = cgetg(1, t_MAT);
-  long l = lg(r), N = l-1, r1 = d->r1, r2 = (N-r1)>>1;
+  long l = lg(R), N = l-1, r1 = d->r1, r2 = (N-r1)>>1;
   long i, v, dx, prec;
   int skipfirst = 0;
   pari_sp av;
@@ -1812,7 +1812,7 @@ chk_gen_init(FP_chk_fun *chk, GEN r, GEN mat)
   x = zerocol(N);
   for (i = 1; i < l; i++)
   {
-    GEN Mx, M2, B = norm_ei_from_Q(r, i);
+    GEN Mx, M2, B = norm_ei_from_Q(R, i);
     long j, h, rankM;
     if (gcmp(B,bound) >= 0 && skipfirst != i-1) continue;
 
