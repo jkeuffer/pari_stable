@@ -18,7 +18,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define LOCAL_OVERFLOW
 #define LOCAL_HIREMAINDER
 
-BEGINEXTERN
   extern ulong overflow, hiremainder;
   extern long addll(ulong a, ulong b);
   extern long addllx(ulong a, ulong b);
@@ -28,7 +27,6 @@ BEGINEXTERN
   extern long shiftlr(ulong x, ulong y);
   extern long mulll(ulong x, ulong y);
   extern long addmul(ulong x, ulong y);
-ENDEXTERN
 
 #else /* ASMINLINE */
 /* From the PARI source, using gcc __asm__ format. */

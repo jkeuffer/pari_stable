@@ -70,7 +70,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "paristio.h"
 #include "paricom.h"
 #include "parierr.h"
+BEGINEXTERN
 #include "paridecl.h"
+ENDEXTERN
 
 #if defined(__MWERKS__)
 #  include <SIOUX.h>
@@ -84,5 +86,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #endif
 
 #include "pariport.h"
+BEGINEXTERN
 #include "pariinl.h"
+ENDEXTERN
 #endif

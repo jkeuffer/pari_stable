@@ -18,7 +18,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                DECLARATIONS of PUBLIC FUNCTIONS                 */
 /*                                                                 */
 /*******************************************************************/
-BEGINEXTERN
 /* Flx.c */
 GEN     Fl_Flx(ulong x, long sv);
 GEN     Flm_FlxV(GEN x, long sv);
@@ -1767,4 +1766,3 @@ GEN     veceint1(GEN nmax, GEN C, long prec);
 GEN     weber0(GEN x, long flag,long prec);
 GEN     wf(GEN x, long prec);
 GEN     wf2(GEN x, long prec);
-ENDEXTERN
