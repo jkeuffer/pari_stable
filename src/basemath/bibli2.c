@@ -705,6 +705,24 @@ setsearch(GEN x, GEN y, long flag)
   avma=av;
   return res;
 }
+long 
+ZV_search(GEN x, GEN y) { return gen_search(x, y, 0, cmpii); }
+
+GEN
+ZV_sort_uniq(GEN L)
+{
+  long i, c, l = lg(L);
+  pari_sp av = avma;
+  GEN perm;
+
+  if (l < 2) return cgetg(1, typ(L));
+  perm = gen_sort(L, cmp_C, &cmpii);
+  L = vecextract_p(L, perm);
+  c = 1;
+  for (i = 2; i < l; i++)
+    if (!equalii((GEN)L[i], (GEN)L[c])) L[++c] = L[i];
+  setlg(L, c+1); return gerepilecopy(av, L);
+}
 
 #if 0
 GEN
