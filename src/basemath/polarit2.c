@@ -455,12 +455,12 @@ nextK:
           deg[k] = deg[i]; k++;
         }
       }
-      if (lfamod <= 2*K) goto END; /* = 2K in fact */
+      lfamod -= K;
+      if (lfamod <= K) goto END; /* = K in fact */
       i = 1; curdeg = deg[ind[1]];
       bound = all_factor_bound(target);
       lc = absi(leading_term(target));
       lctarget = gmul(lc,target);
-      lfamod -= K;
       if (DEBUGLEVEL > 2)
       { 
         fprintferr("\n"); msgtimer("to find factor %Z",y);
