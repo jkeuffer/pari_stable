@@ -190,17 +190,17 @@ initprimes1(ulong size, long *lenp, long *lastp)
 #ifndef PRIME_ARENA
 #  ifdef i386           /* gcc defines this? */
    /* Due to smaller ARENA_IN_ROOTS, smaller arena is OK; fit L1 cache */
-#    define PRIME_ARENA (63 * 1024) /* No slowdown even with 64K L1 cache */
+#    define PRIME_ARENA (63 * 1024UL) /* No slowdown even with 64K L1 cache */
 #  else
-#    define PRIME_ARENA (200 * 1024) /* No slowdown even with 256K L2 cache */
+#    define PRIME_ARENA (200 * 1024UL) /* No slowdown even with 256K L2 cache */
 #  endif
 #endif
 
-static long prime_arena = PRIME_ARENA;
+static ulong prime_arena = PRIME_ARENA;
 static double arena_in_roots = ARENA_IN_ROOTS;
 
-long
-good_arena_size(long rootnum, ulong remains, ulong primes)
+static ulong
+good_arena_size(ulong rootnum, ulong remains, ulong primes)
 {
   /* ARENA_IN_ROOTS below 12: some slowdown starts to be noticable
    * when things fit into the cache.
@@ -211,7 +211,7 @@ good_arena_size(long rootnum, ulong remains, ulong primes)
    * One may change it when small caches become uncommon, but the gain
    * is not going to be very noticable... */
 
-  long asize = arena_in_roots * rootnum; /* Make % overhead negligeable. */
+  ulong asize = (ulong)(arena_in_roots * rootnum);
   if (asize < prime_arena) asize = prime_arena - 1;
   if (asize > remains) asize = remains; /* + room for a sentinel byte */
   if (2 * primes < asize)               /* XXXX Better substitutes for 2? */
@@ -238,16 +238,16 @@ set_internal(long what, GEN g)
   long ret = 0;
 
   if (what == 1)
-    ret = prime_arena;
+    ret = (long)prime_arena;
   else if (what == 2)
-    ret = arena_in_roots * 1000;
+    ret = (long)(arena_in_roots * 1000);
   else
     err(talker, "panic: set_internal");
   if (g != NULL) {
     long val = itos(g);
 
     if (what == 1)
-      prime_arena = val;
+      prime_arena = (ulong)val;
     else if (what == 2)
       arena_in_roots = val / 1000.;
   }
@@ -260,9 +260,9 @@ set_internal(long what, GEN g)
 byteptr
 initprimes0(ulong maxnum, long *lenp, ulong *lastp)
 {
-  long k, size, alloced, asize, psize, rootnum;
+  long k, size, alloced, psize;
   byteptr q,r,s,fin, p, p1, fin1, plast, curdiff;
-  ulong last, remains, curlow;
+  ulong last, remains, curlow, rootnum, asize;
 
   if (maxnum <= 1ul<<17)        /* Arbitrary. */
     return initprimes1(maxnum>>1, lenp, (long*)lastp);
@@ -272,7 +272,7 @@ initprimes0(ulong maxnum, long *lenp, ulong *lastp)
   /* Checked to be enough up to 40e6, attained at 155893 */
   size = (long) (1.09 * maxnum/log((double)maxnum)) + 145;
   p1 = (byteptr) gpmalloc(size);
-  rootnum = (long) sqrt((double)maxnum); /* cast it back to a long */
+  rootnum = (ulong) sqrt((double)maxnum); /* cast it back to a long */
   rootnum |= 1;
   {
     byteptr p2 = initprimes0(rootnum, &psize, &last); /* recursive call */
@@ -283,7 +283,7 @@ initprimes0(ulong maxnum, long *lenp, ulong *lastp)
 
   asize = good_arena_size(rootnum, remains, psize);
   /* enough room on the stack ? */
-  alloced = (((byteptr)avma) - ((byteptr)bot) <= (size_t)asize);
+  alloced = (((byteptr)avma) <= ((byteptr)bot) + asize);
   if (alloced)
     p = (byteptr) gpmalloc(asize + 1);
   else
@@ -313,7 +313,7 @@ initprimes0(ulong maxnum, long *lenp, ulong *lastp)
       = p + the last even number which is <= curlow + p - 2 and 0 (mod p)
       = p + curlow + p - 2 - (curlow + p - 2) % 2p. */
       long k2 = k*k - curlow;
-  
+
 #if 0                                   /* XXXX Check which one is quickier! */
       if (k2 > 0) {                     /* May be due to ulong==>long wrap */
         k2 >>= 1;
@@ -332,7 +332,7 @@ initprimes0(ulong maxnum, long *lenp, ulong *lastp)
 #else
       if (k2 > 0) {
         r = p + (k2 >>= 1);
-        if (k2 <= remains) goto finish; /* Guard against an address wrap. */
+        if ((ulong)k2 <= remains) goto finish; /* Guard against address wrap. */
       }
       r = p - (((curlow+k-2) % (2*k)) >> 1) + k - 1;
     finish:
@@ -433,7 +433,7 @@ addprimes(GEN p)
   if (is_pm1(p)) return primetab;
   av = avma; i = signe(p);
   if (i == 0) err(talker,"can't accept 0 in addprimes");
-  if (i < 0) p = absi(p); 
+  if (i < 0) p = absi(p);
 
   lp = lg(primetab);
   L = cgetg(2*lp,t_VEC); k = 1;
@@ -514,19 +514,19 @@ removeprimes(GEN prime)
 
 /* where to stop trial dividing in factorization */
 
-static long
+static ulong
 tridiv_bound(GEN n, long all)
 {
-  long size = expi(n) + 1;
-  if (all > 1)                  /* bounded factoring */
-    return all;                 /* use the given limit */
+  ulong size = (ulong)expi(n) + 1;
+  if (all > 1)                /* bounded factoring */
+    return all;               /* use the given limit */
   if (all == 0)
-    return VERYBIGINT;          /* smallfact() case */
+    return (ulong)VERYBIGINT; /* smallfact() case */
   if (size <= 32)
-    return 16384;
+    return 16384UL;
   else if (size <= 512)
     return (size-16) << 10;
-  return 1L<<19;                /* Rho will generally be faster above this */
+  return 1UL<<19;             /* Rho will generally be faster above this */
 }
 
 /* function imported from ifactor1.c */
@@ -553,13 +553,14 @@ aux_end(GEN n, long nb)
   return z;
 }
 
-GEN 
+GEN
 auxdecomp1(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
                   GEN state, long all, long hint)
 {
   pari_sp av;
   long pp[] = { evaltyp(t_INT)|_evallg(4), 0,0,0 };
-  long nb = 0,i,k,lp,p,lim1;
+  long nb = 0,i,k,lp;
+  ulong p, lim1;
   byteptr d=diffptr+1;
 
   if (typ(n) != t_INT) err(arither1);
@@ -649,7 +650,7 @@ ifac_break_limit(GEN n, GEN pairs/*unused*/, GEN here, GEN state)
     diviiz((GEN)state[1],q, (GEN)state[1]);
   }
   if (DEBUGLEVEL>=3) fprintferr("IFAC: Stop: remaining %Z\n",state[1]);
-  /* check the stopping criterion, then restore stack */ 
+  /* check the stopping criterion, then restore stack */
   res = cmpii((GEN)state[1],(GEN)state[2]) <= 0;
   avma = ltop; return res;
 }
@@ -822,8 +823,8 @@ mu(GEN n)
 {
   byteptr d = diffptr+1;        /* point at 3 - 2 */
   pari_sp av = avma;
-  ulong p;
-  long s, v, lim1;
+  ulong p, lim1;
+  long s, v;
 
   if (typ(n) != t_INT) err(arither1);
   if (!signe(n)) err(arither2);
@@ -863,9 +864,9 @@ gissquarefree(GEN x)
 long
 issquarefree(GEN x)
 {
-  ulong p;
+  ulong p, lim1;
   pari_sp av = avma;
-  long tx, lim1;
+  long tx;
   GEN d;
 
   if (gcmp0(x)) return 0;
@@ -910,17 +911,19 @@ omega(GEN n)
 {
   byteptr d=diffptr+1;
   pari_sp av = avma;
-  long p,nb,v, lim1;
+  long nb,v;
+  ulong p, lim1;
 
   if (typ(n) != t_INT) err(arither1);
   if (!signe(n)) err(arither2);
   if (is_pm1(n)) return 0;
   v=vali(n);
   nb = v ? 1 : 0;
-  n = absi(shifti(n,-v)); p = 2;
+  n = absi(shifti(n,-v));
   if (is_pm1(n)) return nb;
-  lim1 = tridiv_bound(n,1);
 
+  lim1 = tridiv_bound(n,1);
+  p = 2;
   while (*d && p < lim1)
   {
     NEXT_PRIME_VIADIFF(p,d);
@@ -946,18 +949,19 @@ long
 bigomega(GEN n)
 {
   byteptr d=diffptr+1;
-  ulong p;
+  ulong p, lim1;
   pari_sp av = avma;
-  long nb,v, lim1;
+  long nb,v;
 
   if (typ(n) != t_INT) err(arither1);
   if (!signe(n)) err(arither2);
   if (is_pm1(n)) return 0;
   nb=v=vali(n);
-  n=absi(shifti(n,-v)); p = 2;
+  n=absi(shifti(n,-v));
   if (is_pm1(n)) { avma = av; return nb; }
-  lim1 = tridiv_bound(n,1);
 
+  lim1 = tridiv_bound(n,1);
+  p = 2;
   while (*d && p < lim1)
   {
     NEXT_PRIME_VIADIFF(p,d);
@@ -983,19 +987,20 @@ phi(GEN n)
 {
   byteptr d = diffptr+1;
   GEN m;
-  ulong p;
+  ulong p, lim1;
   pari_sp av = avma;
-  long v, lim1;
+  long v;
 
   if (typ(n) != t_INT) err(arither1);
   if (!signe(n)) err(arither2);
   if (is_pm1(n)) return gun;
   v = vali(n);
-  n = absi(shifti(n,-v)); p = 2;
+  n = absi(shifti(n,-v));
   m = (v > 1 ? shifti(gun,v-1) : stoi(1));
   if (is_pm1(n)) { return gerepileupto(av,m); }
-  lim1 = tridiv_bound(n,1);
 
+  p = 2;
+  lim1 = tridiv_bound(n,1);
   while (*d && p < lim1)
   {
     NEXT_PRIME_VIADIFF(p,d);
@@ -1026,19 +1031,20 @@ numbdiv(GEN n)
 {
   byteptr d=diffptr+1;
   GEN m;
-  long l, v, lim1;
-  ulong p;
+  long l, v;
+  ulong p, lim1;
   pari_sp av = avma;
 
   if (typ(n) != t_INT) err(arither1);
   if (!signe(n)) err(arither2);
   if (is_pm1(n)) return gun;
   v = vali(n);
-  n = absi(shifti(n,-v)); p = 2;
+  n = absi(shifti(n,-v));
   m = stoi(v+1);
   if (is_pm1(n)) return gerepileupto(av,m);
-  lim1 = tridiv_bound(n,1);
 
+  lim1 = tridiv_bound(n,1);
+  p = 2;
   while (*d && p < lim1)
   {
     NEXT_PRIME_VIADIFF(p,d);
@@ -1065,19 +1071,20 @@ sumdiv(GEN n)
 {
   byteptr d=diffptr+1;
   GEN m,m1;
-  ulong p;
+  ulong p, lim1;
   pari_sp av=avma;
-  long v, lim1;
+  long v;
 
   if (typ(n) != t_INT) err(arither1);
   if (!signe(n)) err(arither2);
   if (is_pm1(n)) return gun;
   v = vali(n);
-  n = absi(shifti(n,-v)); p = 2;
+  n = absi(shifti(n,-v));
   m = (v ? addsi(-1,shifti(gun,v+1)) : stoi(1));
   if (is_pm1(n)) { return gerepileupto(av,m); }
-  lim1 = tridiv_bound(n,1);
 
+  lim1 = tridiv_bound(n,1);
+  p = 2;
   while (*d && p < lim1)
   {
     NEXT_PRIME_VIADIFF(p,d);
@@ -1108,9 +1115,9 @@ sumdivk(GEN n, long k)
 {
   byteptr d=diffptr+1;
   GEN n1,m,m1,pk;
-  ulong p;
+  ulong p, lim1;
   pari_sp av = avma;
-  long k1,v, lim1;
+  long k1,v;
 
   if (!k) return numbdiv(n);
   if (k==1) return sumdiv(n);
@@ -1122,11 +1129,12 @@ sumdivk(GEN n, long k)
   if (k<0)  k = -k;
   v=vali(n);
   n=absi(shifti(n,-v));
-  p = 2; m = stoi(1);
+  m = stoi(1);
   while (v--)  m = addsi(1,shifti(m,k));
   if (is_pm1(n)) goto fin;
-  lim1 = tridiv_bound(n,1);
 
+  lim1 = tridiv_bound(n,1);
+  p = 2;
   while (*d && p < lim1)
   {
     NEXT_PRIME_VIADIFF(p,d);
@@ -1162,13 +1170,13 @@ divisors(GEN n)
   pari_sp tetpil,av=avma;
   long i,j,l;
   GEN *d,*t,*t1,*t2,*t3, nbdiv,e;
-  
+
   if (typ(n) != t_MAT || lg(n) != 3) n = auxdecomp(n,1);
 
   e = (GEN) n[2], n = (GEN) n[1]; l = lg(n);
   if (l>1 && signe(n[1]) < 0) { e++; n++; l--; } /* skip -1 */
   nbdiv = gun;
-  for (i=1; i<l; i++) 
+  for (i=1; i<l; i++)
   {
     e[i] = itos((GEN)e[i]);
     nbdiv = mulis(nbdiv,1+e[i]);
@@ -1357,7 +1365,7 @@ comp_gen(GEN z,GEN x,GEN y)
   }
   m = addii(mulii(mulii(y1,y2),n), mulii((GEN)y[3],x2));
   setsigne(m,-signe(m));
-  r = modii(m,v1); p1 = mulii(v2,r); 
+  r = modii(m,v1); p1 = mulii(v2,r);
   c3 = addii(mulii((GEN)y[3],d1), mulii(r,addii((GEN)y[2],p1)));
   z[1] = lmulii(v1,v2);
   z[2] = laddii((GEN)y[2], shifti(p1,1));
@@ -1680,36 +1688,29 @@ nudupl(GEN x, GEN l)
   tetpil=avma; return gerepile(av,tetpil,redimag(z));
 }
 
+static GEN
+mul_nucomp(void *l, GEN x, GEN y) { return nucomp(x, y, (GEN)l); }
+static GEN
+mul_nudupl(void *l, GEN x) { return nudupl(x, (GEN)l); }
+
 GEN
 nupow(GEN x, GEN n)
 {
-  pari_sp av,tetpil;
-  long i,j;
-  unsigned long m;
-  GEN y,l;
+  pari_sp av;
+  GEN y, l;
 
   if (typ(n) != t_INT) err(talker,"not an integer exponent in nupow");
   if (gcmp1(n)) return gcopy(x);
-  av=avma; y = imag_unit_form(x);
+  av = avma; y = imag_unit_form(x);
   if (!signe(n)) return y;
 
-  l = racine(shifti(racine((GEN)y[3]),1));
-  for (i=lgefint(n)-1; i>2; i--)
-    for (m=n[i],j=0; j<BITS_IN_LONG; j++,m>>=1)
-    {
-      if (m&1) y=nucomp(y,x,l);
-      x=nudupl(x,l);
-    }
-  for (m=n[2]; m>1; m>>=1)
-  {
-    if (m&1) y=nucomp(y,x,l);
-    x=nudupl(x,l);
-  }
-  tetpil=avma; y=nucomp(y,x,l);
-  if (signe(n)<0 && !egalii((GEN)y[1],(GEN)y[2])
-                 && !egalii((GEN)y[1],(GEN)y[3]))
-    setsigne(y[2],-signe(y[2]));
-  return gerepile(av,tetpil,y);
+  l = gclone( racine(shifti(racine((GEN)y[3]),1)) );
+  avma = av;
+  y = leftright_pow(x, n, (void*)l, &mul_nudupl, &mul_nucomp);
+  gunclone(l);
+  if (signe(n) < 0 && !egalii((GEN)y[1],(GEN)y[2])
+                   && !egalii((GEN)y[1],(GEN)y[3])) setsigne(y[2],-signe(y[2]));
+  return y;
 }
 
 /* reduction */
@@ -1827,7 +1828,7 @@ static GEN
 decodeform(GEN x, GEN d0)
 {
   GEN p1,p2;
-  
+
   if (lg(x) < 6) return add_distance(x,d0);
   /* x = (a,b,c, expo(d), d), d = exp(2*distance) */
   p1 = absr((GEN)x[5]);
@@ -1966,7 +1967,7 @@ powrealform(GEN x, GEN n)
     {
       if (m&1) y = y? comprealform5(y,x,D,sqrtD,isqrtD): x;
       if (m == 1 && i == 2) break;
-      x = comprealform5(x,x,D,sqrtD,isqrtD); 
+      x = comprealform5(x,x,D,sqrtD,isqrtD);
     }
   }
   d0 = mulri(d0,n);
@@ -2226,7 +2227,7 @@ bittest_many(GEN x, GEN gn, long c)
   if (l1 < 2) {
       if (two_adic)     /* If b1 < b2, bits are set by prepend in shift_r */
           extra_words = 2 - l1 - (b1 < b2);
-      else        
+      else
           partial_bits = b2 ? BITS_IN_LONG - b2 : 0;
       l1 = 2;
       b1 = (BITS_IN_LONG-1);            /* Include all bits in this word */
@@ -2318,7 +2319,7 @@ ibittrunc(GEN x, long bits, long normalized)
     if (!(bits & (BITS_IN_LONG - 1))) {
 	if (xl == len_out && normalized)
 	    return;
-    } else if (len_out <= xl) 
+    } else if (len_out <= xl)
     {
       GEN xi=int_W(x, len_out-1);
       /* Non-trival mask is given by a formula, if x is not
@@ -2347,7 +2348,7 @@ incdec(GEN x, long incdec)
   const ulong uzero = 0;
 
   xl = int_LSW(x);
-  if (incdec == 1) 
+  if (incdec == 1)
   {
     for (i=1;i<len;i++)
     {
@@ -2359,7 +2360,7 @@ incdec(GEN x, long incdec)
       *xl = 0;
     }
     return 1;
-  } else 
+  } else
   {
     for (i=1;i<len;i++)
     {
@@ -2379,7 +2380,7 @@ gbitneg(GEN x, long bits)
 {
     long xl, len_out, i;
     const ulong uzero = 0;
-    
+
     if (typ(x) != t_INT)
         err(typeer, "bitwise negation");
     if (bits < -1)
@@ -2499,7 +2500,7 @@ ibitor(GEN x, GEN y)
   else if ( !*int_MSW(out) )
     int_normalize(out, 1);
   return out;
-}  
+}
 
 /* bitwise 'xor' of two positive integers (any integers, but we ignore sign).
  * Inputs are not necessary normalized. */
@@ -2537,7 +2538,7 @@ ibitxor(GEN x, GEN y)
   else if ( !*int_MSW(out) )
       int_normalize(out, 1);
   return out;
-}  
+}
 
 /* bitwise negated 'implies' of two positive integers (any integers, but we
  * ignore sign).  "Neg-Implies" is x & ~y unless "negated".
@@ -2595,7 +2596,7 @@ inegate_inplace(GEN z, pari_sp ltop)
   if (!o)
       return z;
   else if (lgefint(z) == 2)
-      setsigne(z, 0);      
+      setsigne(z, 0);
   incdec(z,-1);                 /* Restore a normalized value */
   return gerepileupto(ltop, subis(z,1));
 }
