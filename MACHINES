@@ -136,6 +136,7 @@ MC68030       25MHz  SunOS-4.0.3     gcc          683736! 685248  2.0.9 (4)
 IBM/POWER,PowerPC
 *PowerMac3,3 500MHz  Linux-2.4.2     gcc            3742    3732  2.1.1     BA
 *PPC800(G3)  400MHz  Linux-2.4.3     gcc            4640    4624  2.2.0     GH
+*PPC???(G3)  350MHz  Mac OS X 10.1   gcc-2.95.2     5722!         2.1.2     NI
 *PPC750(G3)  266MHz  Linux-2.2.6     gcc            6944    6924  2.0.18    DE
 *PPC604e     233MHz  AIX-4.2         cc            (8616!)     -  2.0.12(3) GN
 *PPC604      133MHz  AIX-4.2         cc            21528!      -  2.0.4 (3) GN
@@ -273,6 +274,7 @@ Contributors:
   KK = Kimitoshi Kono
   LG = Louis Granboulan
   MS = Michael Stoll
+  NI = Nathaniel Irons
   PE = Philippe Elbaz-Vincent
   QL = Qing Liu
   SH = Steve Harding
