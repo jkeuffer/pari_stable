@@ -40,7 +40,7 @@ Done for version 2.2.4 (released 10/07/2002) [hopefully]:
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).
     2- use better bounds for size of factors in nffactor()
-    3- tuning for van Hoeij's factorizer (factor + nfinit)
+    3- tuning for van Hoeij's factorizer (factor + nffactor)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.3 (released 10/06/2002):
