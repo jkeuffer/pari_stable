@@ -2003,8 +2003,8 @@ static GEN
 gauss_primpart(GEN x, GEN *c)
 {
   GEN y, a = (GEN)x[1], b = (GEN)x[2], n = mppgcd(a, b);
-  if (n == gun) { *c = NULL; return x; }
-  *c = n; y = cgetg(3, t_COMPLEX);
+  *c = n; if (n == gun) return x;
+  y = cgetg(3, t_COMPLEX);
   y[1] = (long)diviiexact(a, n);
   y[2] = (long)diviiexact(b, n); return y;
 }
@@ -2033,10 +2033,17 @@ gauss_cmp(GEN x, GEN y)
   if (typ(x) != t_COMPLEX)
     return (typ(y) == t_COMPLEX)? -1: gcmp(x, y);
   if (typ(y) != t_COMPLEX) return 1;
-  v = absi_cmp((GEN)x[2], (GEN)y[2]);
+  v = cmpii((GEN)x[2], (GEN)y[2]);
   if (v) return v;
-  if (signe(x[1]) != signe(x[2])) return (signe(x[1]) == 1)? 1: -1;
   return gcmp((GEN)x[1], (GEN)y[1]);
+}
+
+static GEN
+gauss_normal(GEN x)
+{
+  if (signe(real_i(x)) < 0) x = gneg(x);
+  if (signe(imag_i(x)) < 0) x = gmul(x, gi);
+  return x;
 }
 
 static GEN
@@ -2050,6 +2057,119 @@ Ipow(long e) {
   return gun;
 }
 
+static GEN
+gauss_factor(GEN x)
+{
+  pari_sp av = avma;
+  GEN a = (GEN)x[1], b = (GEN)x[2], d = gun;
+  GEN n, y, fa, P, E, P2, E2;
+  long t1 = typ(a);
+  long t2 = typ(b), i, j, l, exp = 0;
+  if (is_frac_t(t1)) d = (GEN)a[2];
+  if (is_frac_t(t2)) d = mpppcm(d, (GEN)b[2]);
+  if (d == gun) y = x;
+  else
+  {
+    y = gmul(x, d);
+    a = (GEN)x[1]; t1 = typ(a);
+    b = (GEN)x[2]; t2 = typ(b);
+  }
+  if (t1 != t_INT || t2 != t_INT) return NULL;
+  y = gauss_primpart(y, &n);
+  fa = factor(gnorm(y)); P = (GEN)fa[1]; E = (GEN)fa[2];
+  l = lg(P);
+  P2 = cgetg(l, t_COL);
+  E2 = cgetg(l, t_COL);
+  for (j = 1, i = l-1; i > 0; i--) /* remove largest factors first */
+  {
+    GEN p = (GEN)P[i], w, w2, t, we, pe;
+    long v, e = itos((GEN)E[i]);
+    int is2 = egalii(p, gdeux);
+    if (is2)
+    { w = cgetg(3, t_COMPLEX); w[1] = un; w[2] = un; }
+    else
+      w = quad_to_gauss(cornacchia(gun, p));
+    w2 = gauss_normal( gconj(w) );
+    /* w * w2 * I^3 = p, w2 = gconj(w) * I */
+    pe = gpowgs(p, e);
+    we = gpowgs(w, e);
+    t = gauss_primpart_try( gmul(y, gconj(we)), pe );
+    if (t) y = t; /* y /= w^e */
+    else {
+      /* y /= conj(w)^e, should be y /= w2^e */
+      y = gauss_primpart_try( gmul(y, we), pe );
+      swap(w, w2); exp += 3 * e;
+    }
+    P[i] = (long)w;
+    v = pvaluation(n, p, &n);
+    if (v) {
+      exp += 3*v;
+      if (is2) v <<= 1; /* 2 = w^2 I^3 */
+      else {
+        P2[j] = (long)w2;
+        E2[j] = lstoi(v); j++;
+      }
+      E[i] = lstoi(e + v);
+    }
+    v = pvaluation(d, p, &d);
+    if (v) {
+      exp -= 3*v;
+      if (is2) v <<= 1; /* 2 is ramified */
+      else {
+        P2[j] = (long)w2;
+        E2[j] = lstoi(-v); j++;
+      }
+      E[i] = lstoi(e - v);
+    }
+    exp &= 3;
+  }
+  if (j > 1) {
+    GEN Fa = cgetg(3, t_MAT);
+    setlg(P2, j); Fa[1] = (long)P2;
+    setlg(E2, j); Fa[2] = (long)E2;
+    fa = concat_factor(fa, Fa);
+  }
+  if (!is_pm1(n) || !is_pm1(d))
+  {
+    GEN Fa = factor(gdiv(n, d));
+    P = (GEN)Fa[1]; l = lg(P);
+    E = (GEN)Fa[2];
+    for (i = j = 1; i < l; i++)
+    {
+      GEN w, p = (GEN)P[i];
+      long e;
+      int is2;
+      if (mod4(p) == 3) continue;
+      is2 = egalii(p, gdeux);
+      e = itos((GEN)E[i]);
+      if (is2)
+      { w = cgetg(3, t_COMPLEX); w[1] = un; w[2] = un; }
+      else
+        w = quad_to_gauss(cornacchia(gun, p));
+      P[i] = (long)w;
+      if (is2)
+        E[i] = lstoi(e << 1);
+      else
+      {
+        P = concatsp(P, gauss_normal( gconj(w) ));
+        E = concatsp(E, (GEN)E[i]);
+      }
+      exp += 3*e;
+      exp &= 3;
+    }
+    Fa[1] = (long)P;
+    Fa[2] = (long)E;
+    fa = concat_factor(fa, Fa);
+  }
+  fa = sort_factor_gen(fa, &gauss_cmp);
+
+  y = gmul(y, Ipow(exp));
+  if (!gcmp1(y)) {
+    fa[1] = (long)concatsp(_col(y), (GEN)fa[1]);
+    fa[2] = (long)concatsp(gun,     (GEN)fa[2]);
+  }
+  return gerepilecopy(av, fa);
+}
 
 GEN
 factor(GEN x)
@@ -2175,99 +2295,10 @@ factor(GEN x)
           return gerepile(av,tetpil,y);
         }
       }
-
     case t_COMPLEX:
-    {
-      pari_sp av = avma;
-      GEN a = (GEN)x[1], b = (GEN)x[2], d = gun;
-      GEN n, y, fa, P, E, P2, E2;
-      long t1 = typ(a);
-      long t2 = typ(b), i, j, l;
-      if (is_frac_t(t1)) d = (GEN)a[2];
-      if (is_frac_t(t2)) d = mpppcm(d, (GEN)b[2]);
-      if (d == gun) y = x;
-      else
-      {
-        y = gmul(x, d);
-        a = (GEN)x[1]; t1 = typ(a);
-        b = (GEN)x[2]; t2 = typ(b);
-      }
-      if (t1 != t_INT || t2 != t_INT) break;
-      y = gauss_primpart(y, &n);
-      fa = factor(gnorm(y)); P = (GEN)fa[1]; E = (GEN)fa[2];
-      l = lg(P);
-      P2 = cgetg(l, t_COL);
-      E2 = cgetg(l, t_COL);
-      for (i = j = 1; i < l; i++)
-      {
-        GEN p = (GEN)P[i], w, w2, t;
-        long v;
-        int is2 = egalii(p, gdeux);
-        if (is2)
-        { w = cgetg(3, t_COMPLEX); w[1] = un; w[2] = un; }
-        else
-          w = quad_to_gauss(cornacchia(gun, p));
-        w2 = gconj(w);
-        t = gauss_primpart_try( gmul(y, w2), p );
-        if (t) y = t;
-        else { y = gauss_primpart_try( gmul(y, w), p ); swap(w, w2); }
-        P[i] = (long)w;
-        v = pvaluation(n, p, &n);
-        if (v) {
-          if (is2) { 
-            y = gmul(y, Ipow(3*v));
-            v <<= 1;
-          }
-          else {
-            P2[j] = (long)w2;
-            E2[j] = lstoi(v); j++;
-          }
-          E[i] = laddis((GEN)E[i], v);
-        }
-        v = pvaluation(d, p, &d);
-        if (v) {
-          E[i] = lsubis((GEN)E[i], v);
-          if (is2) {
-            y = gmul(y, Ipow(3*v));
-            v <<= 1;
-          }
-          else {
-            P2[j] = (long)w2;
-            E2[j] = lstoi(-v); j++;
-          }
-        }
-      }
-      if (j > 1) {
-        GEN Fa = cgetg(3, t_MAT);
-        setlg(P2, j); Fa[1] = (long)P2;
-        setlg(E2, j); Fa[2] = (long)E2;
-        fa = concat_factor(fa, Fa);
-      }
-      if (!is_pm1(n) || !is_pm1(d))
-      {
-        GEN Fa = factor(gdiv(n, d));
-        P = (GEN)Fa[1]; l = lg(P);
-        E = (GEN)Fa[2];
-        for (i = j = 1; i < l; i++)
-        {
-          GEN p = (GEN)P[i];
-          if (mod4(p) == 1)
-          {
-            GEN w = quad_to_gauss( cornacchia(gun, p) );
-            P[i] = (long)w;
-            P = concatsp(P, gconj(w));
-            E = concatsp(E, (GEN)E[i]);
-          }
-        }
-        fa = concat_factor(fa, Fa);
-      }
-      fa = sort_factor_gen(fa, &gauss_cmp);
-      if (!gcmp1(y)) {
-        fa[1] = (long)concatsp(_col(y), (GEN)fa[1]);
-        fa[2] = (long)concatsp(gun,     (GEN)fa[2]);
-      }
-      return gerepilecopy(av, fa);
-    }
+      y = gauss_factor(x);
+      if (y) return y;
+
     case t_RFRACN:
       return gerepileupto(av, factor(gred_rfrac(x)));
     case t_RFRAC:
@@ -2493,7 +2524,7 @@ padic_gcd(GEN x, GEN y)
 
 /* x,y in Z[i], at least one of which is t_COMPLEX */
 static GEN
-gaussian_gcd(GEN x, GEN y)
+gauss_gcd(GEN x, GEN y)
 {
   pari_sp av = avma;
   GEN dx = denom(x);
@@ -2519,8 +2550,7 @@ gaussian_gcd(GEN x, GEN y)
     z = gsub(x, gmul(z,y));
     x = y; y = z;
   }
-  if (signe(real_i(x)) < 0) x = gneg(x);
-  if (signe(imag_i(x)) < 0) x = gmul(x, gi);
+  x = gauss_normal(x);
   if (typ(x) == t_COMPLEX)
   {
     if      (gcmp0((GEN)x[2])) x = (GEN)x[1];
@@ -2572,7 +2602,7 @@ zero_gcd(GEN x, GEN y)
       return gabs(x,0);
 
     case t_COMPLEX:
-      if (cx_isrational(x)) return gaussian_gcd(x, gzero);
+      if (cx_isrational(x)) return gauss_gcd(x, gzero);
       /* fall through */
     case t_REAL:
       return gun;
@@ -2636,7 +2666,7 @@ ggcd(GEN x, GEN y)
         return z;
 
       case t_COMPLEX:
-        if (cx_isrational(x) && cx_isrational(y)) return gaussian_gcd(x,y);
+        if (cx_isrational(x) && cx_isrational(y)) return gauss_gcd(x,y);
         return triv_cont_gcd(y,x);
 
       case t_PADIC:
@@ -2675,7 +2705,7 @@ ggcd(GEN x, GEN y)
             z[2] = licopy((GEN)y[2]); return z;
 
           case t_COMPLEX:
-            if (cx_isrational(y)) return gaussian_gcd(x,y);
+            if (cx_isrational(y)) return gauss_gcd(x,y);
           case t_QUAD:
             return triv_cont_gcd(y,x);
 
@@ -2704,7 +2734,7 @@ ggcd(GEN x, GEN y)
         switch(ty)
         {
           case t_COMPLEX:
-            if (cx_isrational(y)) return gaussian_gcd(x,y);
+            if (cx_isrational(y)) return gauss_gcd(x,y);
           case t_QUAD:
             return triv_cont_gcd(y,x);
 
