@@ -1410,8 +1410,15 @@ identifier(void)
         long len, v;
 
         analyseur++; ch1 = analyseur;
-        if ((res = read_member((GEN)ep->value))) return res;
-
+        if ((res = read_member((GEN)ep->value)))
+        {
+          if (*analyseur == '[')
+          {
+            matcomp c;
+            res = matcell(res, &c);
+          }
+          return res;
+        }
         /* define a new member function */
         v = varn(initial_value(ep));
         len = analyseur - ch1;
