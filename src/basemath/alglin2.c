@@ -212,6 +212,7 @@ adj(GEN x)
 /*                       HESSENBERG FORM                           */
 /*                                                                 */
 /*******************************************************************/
+#define swap(x,y) { long _t=x; x=y; y=_t; }
 
 GEN
 hess(GEN x)
@@ -228,30 +229,23 @@ hess(GEN x)
     for (i=m+1; i<lx; i++)
     {
       p = gcoeff(x,i,m-1);
-      if (!gcmp0(p))
+      if (gcmp0(p)) continue;
+
+      for (j=m-1; j<lx; j++) swap(coeff(x,i,j), coeff(x,m,j));
+      swap(x[i], x[m]); p = ginv(p);
+      for (i=m+1; i<lx; i++)
       {
-	for (j=m-1; j<lx; j++)
-	{
-	  p1 = gcoeff(x,i,j);
-	  coeff(x,i,j) = coeff(x,m,j);
-	  coeff(x,m,j) = (long)p1;
-	}
-	p1=(GEN)x[i]; x[i]=x[m]; x[m]=(long)p1;
-	for (i=m+1; i<lx; i++)
-        {
-          p1 = gcoeff(x,i,m-1);
-	  if (!gcmp0(p1))
-	  {
-	    p1 = gdiv(p1,p); p2 = gneg_i(p1);
-            coeff(x,i,m-1) = zero;
-	    for (j=m; j<lx; j++)
-	      coeff(x,i,j) = ladd(gcoeff(x,i,j), gmul(p2,gcoeff(x,m,j)));
-	    for (j=1; j<lx; j++)
-	      coeff(x,j,m) = ladd(gcoeff(x,j,m), gmul(p1,gcoeff(x,j,i)));
-	  }
-        }
-	break;
+        p1 = gcoeff(x,i,m-1);
+        if (gcmp0(p1)) continue;
+
+        p1 = gmul(p1,p); p2 = gneg_i(p1);
+        coeff(x,i,m-1) = zero;
+        for (j=m; j<lx; j++)
+          coeff(x,i,j) = ladd(gcoeff(x,i,j), gmul(p2,gcoeff(x,m,j)));
+        for (j=1; j<lx; j++)
+          coeff(x,j,m) = ladd(gcoeff(x,j,m), gmul(p1,gcoeff(x,j,i)));
       }
+      break;
     }
   tetpil=avma; return gerepile(av,tetpil,gcopy(x));
 }
@@ -1189,8 +1183,6 @@ hnf_special(GEN x, long remove)
   res[2] = (long)x2;
   return res;
 }
-
-#define swap(x,y) { long _t=x; x=y; y=_t; }
 
 GEN
 hnf0(GEN x, long remove)       /* remove: throw away lin.dep.columns, GN */
