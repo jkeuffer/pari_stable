@@ -301,13 +301,13 @@ pop_buffer()
   del_buffer(b);
 }
 
-/* kill all buffers until B is met */
+/* kill all buffers until B is met or nothing is left */
 static void
 kill_all_buffers(Buffer *B)
 {
   for(;;) {
     Buffer *b = current_buffer;
-    if (b == B) break;
+    if (b == B || !b) break;
     pop_buffer();
   }
 }
@@ -2057,10 +2057,11 @@ gp_main_loop(int ismain)
   long av, i,j;
   GEN z = gnil;
   Buffer *b = new_buffer();
-  b->flenv = 1;
-  setjmp(b->env);
-
-  push_stack(&bufstack, (void*)b);
+  if (!setjmp(b->env))
+  {
+    b->flenv = 1;
+    push_stack(&bufstack, (void*)b);
+  }
   for(; ; setjmp(b->env))
   {
     if (ismain)
