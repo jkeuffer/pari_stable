@@ -3259,11 +3259,11 @@ true module.
 
 \syn{decodemodule}{\var{nf},m}.
 
-\subsecidx{bnfinit}$(P,\{\fl=0\},\{\var{tech}=[\,]\})$: initialized a
-\var{bnf}, used in programs such as \kbd{bnfisprincipal}, \kbd{bnfisunit} or
-\kbd{bnfnarrow}. By default, the results are conditional on a heuristic
-strengthening of the GRH, see \ref{se:GRHbnf}. The result is a 10-component
-vector \var{bnf}.
+\subsecidx{bnfinit}$(P,\{\fl=0\},\{\var{tech}=[\,]\})$: initializes a
+\var{bnf} structure. Used in programs such as \kbd{bnfisprincipal},
+\kbd{bnfisunit} or \kbd{bnfnarrow}. By default, the results are conditional
+on a heuristic strengthening of the GRH, see \ref{se:GRHbnf}. The result is a
+10-component vector \var{bnf}.
 
 \noindent \item The first 6 and last 2 components are technical and in
 principle are not used by the casual user. However, for the sake of
