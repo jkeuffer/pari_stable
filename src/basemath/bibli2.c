@@ -1270,7 +1270,7 @@ cmp_vecint(GEN x, GEN y)
   return 0;
 }
 
-/* assume x and y in primedec format. */
+/* assume x and y come from the same primedec call (uniformizer unique) */
 int
 cmp_prime_over_p(GEN x, GEN y)
 {
