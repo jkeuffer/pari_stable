@@ -1163,10 +1163,11 @@ unbiased exponent). This is defined even if \kbd{z} is equal to~0, see
 \fun{void}{setvalp}{GEN z, long e} sets the $p$-adic valuation of \kbd{z}
 to \kbd{e}.
 
-In addition to this codeword, \kbd{z[2]} points to the prime $p$, \kbd{z[3]}
-points to $p^{\text{precp(z)}}$, and \kbd{z[4]} points to an integer
-representing the $p$-adic unit associated to \kbd{z} modulo \kbd{z[3]} (or
-points to zero if \kbd{z} is zero). To summarize, we have the equality:
+In addition to this codeword, \kbd{z[2]} points to the prime $p$,
+\kbd{z[3]} points to $p^{\text{precp(z)}}$, and \kbd{z[4]} points to an
+integer representing the $p$-adic unit associated to \kbd{z} modulo
+\kbd{z[3]} (and points to zero if \kbd{z} is zero). To summarize, if $z\neq
+0$, we have the equality:
 $$ \kbd{z} = p^{\text{valp(z)}} * (\kbd{z[4]} + O(\kbd{z[3]})) =
      p^{\text{valp(z)}} * (\kbd{z[4]} + O(p^{\text{precp(z)}})) $$
 

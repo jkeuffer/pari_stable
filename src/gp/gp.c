@@ -76,16 +76,6 @@ static stack *bufstack = NULL;
 #define RBRACE '}'
 #define pariputs_opt(s) if (!quiet_mode) pariputs(s)
 
-void
-hit_return()
-{
-  char tmp[16];
-  pariputs("---- (type return to continue) ----");
-  do fgets(tmp,16,stdin); while (tmp[strlen(tmp)-1] != '\n');
-  /* \n has to be echoed later if we are under emacs (E. Kowalski) */
-  pariputc('\n');
-}
-
 static void
 usage(char *s)
 {

@@ -39,6 +39,7 @@ void   print_prefixed_text(char *s, char *prefix, char *str);
 
 void term_color(int c);
 char *term_get_color(int c);
+void hit_return();
 
 void push_val(entree *ep, GEN a);
 void pop_val(entree *ep);

@@ -1291,6 +1291,7 @@ quaddisc(GEN x)
 /**                              FACTORIAL                          **/
 /**                                                                 **/
 /*********************************************************************/
+GEN muluu(ulong x, ulong y);
 
 GEN
 mpfact(long n)

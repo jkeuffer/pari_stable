@@ -18,6 +18,16 @@ static long decimals, chmp, initial;
 /* output a space or do nothing depending on original caller */
 static void (*sp)();
 
+void
+hit_return()
+{
+  char tmp[16];
+  pariputs("---- (type return to continue) ----");
+  do fgets(tmp,16,stdin); while (tmp[strlen(tmp)-1] != '\n');
+  /* \n has to be echoed later if we are under emacs (E. Kowalski) */
+  pariputc('\n');
+}
+
 /********************************************************************/
 /**                                                                **/
 /**                        INPUT FILTER                            **/
