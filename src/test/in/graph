@@ -1,6 +1,6 @@
 \p 38
 \e
-plotinit(0,500,500)
+gettime; plotinit(0,500,500)
 plotmove(0,0,0);plotbox(0,500,500)
 plotmove(0,200,150)
 plotcursor(0)

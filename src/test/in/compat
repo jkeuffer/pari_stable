@@ -1,6 +1,6 @@
 \e
 default(compatible,3)
-+3
+gettime; +3
 -5
 5+3
 5-3

@@ -1,6 +1,6 @@
    realprecision = 38 significant digits
    echo = 1 (on)
-? nfpol=x^5-5*x^3+5*x+25
+? gettime;nfpol=x^5-5*x^3+5*x+25
 x^5 - 5*x^3 + 5*x + 25
 ? qpol=y^3-y-1;un=Mod(1,qpol);w=Mod(y,qpol);p=un*(x^5-5*x+w)
 Mod(1, y^3 - y - 1)*x^5 + Mod(-5, y^3 - y - 1)*x + Mod(y, y^3 - y - 1)

@@ -1,6 +1,6 @@
    realprecision = 38 significant digits
    echo = 1 (on)
-? +3
+? gettime;+3
 3
 ? -5
 -5
@@ -126,5 +126,5 @@ O(x^12)
 ? getheap
 [65, 918]
 ? print("Total time spent: ",gettime);
-Total time spent: 10
+Total time spent: 0
 ? \q

@@ -1,7 +1,7 @@
 \p 38
 \e
 \\ Initialisations diverses
-nfpol=x^5-5*x^3+5*x+25
+gettime; nfpol=x^5-5*x^3+5*x+25
 qpol=y^3-y-1;un=Mod(1,qpol);w=Mod(y,qpol);p=un*(x^5-5*x+w)
 p2=x^5+3021*x^4-786303*x^3-6826636057*x^2-546603588746*x+3853890514072057
 fa=[11699,6;2392997,2;4987333019653,2]

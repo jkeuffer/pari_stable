@@ -1,6 +1,6 @@
    realprecision = 38 significant digits
    echo = 1 (on)
-? alias(ln,log)
+? gettime;alias(ln,log)
 ? ln(2)
 0.69314718055994530941723212145817656807
 ? for(x=1,5,print(x!))

@@ -1,6 +1,6 @@
 \e
-default(realprecision,9)
-t=plothsizes();
+\p9
+gettime; t=plothsizes();
 plotinit(0,t[1]-11,t[2]-11)
 plotscale(0,0,1000,0,1000);
 plotbox(0,500,500)

@@ -1,6 +1,6 @@
 \p 38
 \e
-ellinit([0,0,0,-1,0])
+gettime; ellinit([0,0,0,-1,0])
 ellinit([0,0,0,-17,0],1)
 ellj(I)
 ellsub(ellinit([0,0,0,-17,0]),[-1,4],[-4,2])

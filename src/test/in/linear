@@ -1,6 +1,6 @@
 \p 38
 \e
-algdep(2*cos(2*Pi/13),6)
+gettime; algdep(2*cos(2*Pi/13),6)
 algdep(2*cos(2*Pi/13),6,15)
 charpoly([1,2;3,4],z)
 charpoly(Mod(x^2+x+1,x^3+5*x+1),z)

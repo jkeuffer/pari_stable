@@ -1,6 +1,6 @@
 \p 38
 \e
-addprimes([nextprime(10^9),nextprime(10^10)])
+gettime; addprimes([nextprime(10^9),nextprime(10^10)])
 bestappr(Pi,10000)
 bezout(123456789,987654321)
 bigomega(12345678987654321)

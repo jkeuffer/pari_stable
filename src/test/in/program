@@ -1,6 +1,6 @@
 \p 38
 \e
-alias(ln,log)
+gettime; alias(ln,log)
 ln(2)
 for(x=1,5,print(x!))
 fordiv(10,x,print(x))

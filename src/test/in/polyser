@@ -1,6 +1,6 @@
 \p 38
 \e
-apol=x^3+5*x+1
+gettime; apol=x^3+5*x+1
 changevar(x+y,[z,t])
 deriv((x+y)^5,y)
 ((x+y)^5)'

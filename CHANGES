@@ -38,6 +38,7 @@ YU = Yoshiaki Uchikawa
 
 Done for version 2.2.7 (released ??/07/2003):
   Fixed
+    1- bench input files: should all start by a 'gettime()' instruction
 
   Changed
     1- bnfinit: [small_norm phase] speed up norm computations.

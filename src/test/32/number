@@ -1,6 +1,6 @@
    realprecision = 38 significant digits
    echo = 1 (on)
-? addprimes([nextprime(10^9),nextprime(10^10)])
+? gettime;addprimes([nextprime(10^9),nextprime(10^10)])
 [1000000007, 10000000019]
 ? bestappr(Pi,10000)
 355/113

@@ -1,7 +1,7 @@
 \\ A tres grande precision
 \p 2000
 \e
-abs(-0.01)
+gettime; abs(-0.01)
 agm(1,2)
 agm(1+O(7^5),8+O(7^5))
 4*arg(3+3*I)
