@@ -1589,7 +1589,7 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l, long karma_type
   long plift,nbmax,nbtest,deg;
   byteptr primepointer,pp;
 
-  if (!issquarefree(T))
+  if (!ZX_is_squarefree(T))
     err(talker, "Polynomial not squarefree in galoisinit");
   if (DEBUGLEVEL >= 1) (void)timer2();
   n = degpol(T);
