@@ -132,6 +132,7 @@ XR 96- incorrect output of quadray(D,,1) when D>0 and rayclass is trivial
 BA 98- incorrect object for gerepileupto in gscalcol
    99- try to detect bad input (e.g quad. form not > 0) in (integral) LLL
 XR100- typo in nffactor ("keep the value of i")
+IS101- work around an obscure gcc bug (gcc-2.96, alpha-linux) in stark.c
 
   Added
 IZ  1- [gnuplot] look up directory tree for gnuplot related files
