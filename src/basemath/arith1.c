@@ -1620,7 +1620,7 @@ Fp_powu(GEN A, ulong k, GEN N)
   muldata  D;
   montdata S;
 
-  if (lN == 3) return utoi( Fl_pow((ulong)A[2], k, (ulong)N[2]) );
+  if (lN == 3) return utoi( Fl_pow(itou(A), k, (ulong)N[2]) );
   if (k <= 2)
   { /* frequent special cases */
     if (k == 2) return remii(sqri(A),N);
