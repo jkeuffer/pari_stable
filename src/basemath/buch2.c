@@ -2009,7 +2009,7 @@ makematal(GEN bnf)
     for (;;)
     {
       long av1 = avma, c = getrand();
-      GEN y = isprincipalall0(bnf,id,prec,nf_GEN);
+      GEN y = isprincipalall0(bnf,id,prec, nf_GEN|nf_FORCE);
       if (typ(y) != t_INT) { ma[j] = y[2]; break; }
 
       prec = itos(y); avma = av1;
