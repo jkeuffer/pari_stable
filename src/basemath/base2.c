@@ -1252,7 +1252,7 @@ mycaract(GEN f, GEN beta, GEN p, GEN pp, GEN ns)
 
   if (gcmp0(beta)) return zeropol(v);
 
-  beta = primitive_part(beta,&p1);
+  beta = Q_primitive_part(beta,&p1);
   if (!pp)
     chi = ZX_caract(f, beta, v);
   else
@@ -2157,8 +2157,23 @@ anti_uniformizer2(GEN nf, GEN pr)
   return unnf_minus_x(z);
 }
 
-GEN
-nfmodprinit(GEN nf, GEN pr)
+#define mpr_TAU 1
+#define mpr_FFP 2
+#define mpr_PR  3
+#define mpr_T   4
+#define mpr_NFP 5
+#define SMALLMODPR 4
+#define LARGEMODPR 6
+static GEN
+modpr_TAU(GEN modpr)
+{
+  GEN tau = (GEN)modpr[mpr_TAU];
+  if (typ(tau) == t_INT && signe(tau) == 0) tau = NULL;
+  return tau;
+}
+
+static GEN
+modprinit(GEN nf, GEN pr, int zk)
 {
   gpmem_t av = avma;
   GEN res, tau, mul, x, p, T, pow, ffproj, nfproj, prh, c, gf;
@@ -2169,7 +2184,7 @@ nfmodprinit(GEN nf, GEN pr)
   f = itos(gf);
   N = degpol(nf[1]);
   prh = prime_to_ideal(nf, pr);
-  tau = anti_uniformizer2(nf, pr);
+  tau = zk? gzero: anti_uniformizer2(nf, pr);
   p = (GEN)pr[1];
 
   if (f == 1)
@@ -2182,11 +2197,10 @@ nfmodprinit(GEN nf, GEN pr)
       if (signe(x)) x = subii(p,x);
       ffproj[i] = (long)x;
     }
-    res = cgetg(5, t_COL);
-    res[1] = (long)prh;
-    res[2] = (long)tau;
-    res[3] = (long)ffproj;
-    res[4] = (long)pr; return gerepilecopy(av, res);
+    res = cgetg(SMALLMODPR, t_COL);
+    res[mpr_TAU] = (long)tau;
+    res[mpr_FFP] = (long)ffproj;
+    res[mpr_PR ] = (long)pr; return gerepilecopy(av, res);
   }
 
   c = cgetg(f+1, t_VECSMALL);
@@ -2210,25 +2224,22 @@ nfmodprinit(GEN nf, GEN pr)
     proj_modT = cgetg(f+1, t_MAT);
     for (i=1; i<=f; i++)
     {
-      GEN cx, p1 = primitive_part((GEN)basis[c[i]], &cx);
+      GEN cx, w = Q_primitive_part((GEN)basis[c[i]], &cx);
+      w = FpX_rem(w, T, p);
       if (cx)
       {
         cx = gmod(cx, p);
-        p1 = FpX_Fp_mul(FpX_rem(p1, T, p), cx, p);
+        w = FpX_Fp_mul(w, cx, p);
       }
-      proj_modT[i] = (long)pol_to_vec(p1, f);
+      proj_modT[i] = (long)pol_to_vec(w, f); /* w_i mod (T,p) */
     }
     ffproj = FpM_mul(proj_modT,ffproj,p);
 
-    if (N == f) T = (GEN)nf[1]; /* pr inert */
-    else
-      T = primpart(gmul((GEN)nf[7], (GEN)pr[2]));
-    res = cgetg(6, t_COL);
-    res[1] = (long)prh;
-    res[2] = (long)tau;
-    res[3] = (long)ffproj;
-    res[4] = (long)pr;
-    res[5] = (long)T; return gerepilecopy(av, res);
+    res = cgetg(SMALLMODPR+1, t_COL);
+    res[mpr_TAU] = (long)tau;
+    res[mpr_FFP] = (long)ffproj;
+    res[mpr_PR ] = (long)pr;
+    res[mpr_T  ] = (long)T; return gerepilecopy(av, res);
   }
 
   if (isprime(gf))
@@ -2281,42 +2292,58 @@ nfmodprinit(GEN nf, GEN pr)
   setlg(pow, f+1);
   ffproj = FpM_mul(FpM_inv(pow, p), ffproj, p);
 
-  res = cgetg(7, t_COL);
-  res[1] = (long)prh;
-  res[2] = (long)tau;
-  res[3] = (long)ffproj;
-  res[4] = (long)pr;
-  res[5] = (long)T;
-  res[6] = (long)nfproj; return gerepilecopy(av, res);
+  res = cgetg(LARGEMODPR, t_COL);
+  res[mpr_TAU] = (long)tau;
+  res[mpr_FFP] = (long)ffproj;
+  res[mpr_PR ] = (long)pr;
+  res[mpr_T  ] = (long)T;
+  res[mpr_NFP] = (long)nfproj; return gerepilecopy(av, res);
 }
+
+GEN
+nfmodprinit(GEN nf, GEN pr) { return modprinit(nf, pr, 0); }
+GEN
+zkmodprinit(GEN nf, GEN pr) { return modprinit(nf, pr, 1); }
 
 void
 checkmodpr(GEN modpr)
 {
-  if (typ(modpr) != t_COL || lg(modpr) < 5)
+  if (typ(modpr) != t_COL || lg(modpr) < SMALLMODPR)
     err(talker,"incorrect modpr format");
-  checkprimeid((GEN)modpr[4]);
+  checkprimeid((GEN)modpr[mpr_PR]);
 }
 
-GEN
-nf_to_ff_init(GEN nf, GEN *pr, GEN *T, GEN *p)
+
+static GEN
+to_ff_init(GEN nf, GEN *pr, GEN *T, GEN *p, int zk)
 {
-  GEN modpr = (typ(*pr) == t_COL)? *pr: nfmodprinit(nf, *pr);
-  *T = lg(modpr)==5? NULL: (GEN)modpr[5];
-  *pr = (GEN)modpr[4];
+  GEN modpr = (typ(*pr) == t_COL)? *pr: modprinit(nf, *pr, zk);
+  *T = lg(modpr)==SMALLMODPR? NULL: (GEN)modpr[mpr_T];
+  *pr = (GEN)modpr[mpr_PR];
   *p = (GEN)(*pr)[1]; return modpr;
+}
+GEN
+nf_to_ff_init(GEN nf, GEN *pr, GEN *T, GEN *p) {
+  GEN modpr = to_ff_init(nf,pr,T,p,0);
+  GEN tau = modpr_TAU(modpr);
+  if (!tau) modpr[mpr_TAU] = (long)anti_uniformizer2(nf, *pr);
+  return modpr;
+}
+GEN
+zk_to_ff_init(GEN nf, GEN *pr, GEN *T, GEN *p) {
+  return to_ff_init(nf,pr,T,p,1);
 }
 
 /* assume x in 'basis' form (t_COL) */
 GEN
 zk_to_ff(GEN x, GEN modpr)
 {
-  GEN pr = (GEN)modpr[4];
+  GEN pr = (GEN)modpr[mpr_PR];
   GEN p = (GEN)pr[1];
-  GEN y = gmul((GEN)modpr[3], x);
-  if (lg(modpr) == 5) return modii(y,p);
+  GEN y = gmul((GEN)modpr[mpr_FFP], x);
+  if (lg(modpr) == SMALLMODPR) return modii(y,p);
   y = FpV_red(y, p);
-  return col_to_ff(y, varn(modpr[5]));
+  return col_to_ff(y, varn(modpr[mpr_T]));
 }
 
 /* REDUCTION Modulo a prime ideal */
@@ -2330,8 +2357,13 @@ kill_denom(GEN x, GEN nf, GEN p, GEN modpr)
   if (gcmp1(den)) return x;
 
   v = ggval(den,p);
-  if (v) x = element_mul(nf,x, element_pow(nf,(GEN)modpr[2],stoi(v)));
-  x = primitive_part(x, &cx);
+  if (v) 
+  {
+    GEN tau = modpr_TAU(modpr);
+    if (!tau) err(talker,"modpr initialized for integers only!");
+    x = element_mul(nf,x, element_pow(nf,tau,stoi(v)));
+  }
+  x = Q_primitive_part(x, &cx);
   x = FpV_red(x, p);
   if (cx) x = FpV_red(gmul(gmod(cx, p), x), p);
   return x;
@@ -2364,22 +2396,22 @@ nfreducemodpr(GEN nf, GEN x, GEN modpr)
 {
   gpmem_t av = avma;
   long i;
-  GEN p, prh;
+  GEN pr = (GEN)modpr[mpr_PR];
+  GEN p = (GEN)pr[1];
 
   checkmodpr(modpr);
   if (typ(x) != t_COL) x = algtobasis(nf,x);
   for (i=lg(x)-1; i>0; i--)
     if (typ(x[i]) == t_INTMOD) { x = lift(x); break; }
-  prh = (GEN)modpr[1]; p = gcoeff(prh,1,1);
   x = kill_denom(x, nf, p, modpr);
-  return gerepilecopy(av, nfreducemodpr_i(x, prh));
+  return gerepilecopy(av, zk_to_ff(x, modpr));
 }
 
 GEN
 nf_to_ff(GEN nf, GEN x, GEN modpr)
 {
   gpmem_t av = avma;
-  GEN pr = (GEN)modpr[4];
+  GEN pr = (GEN)modpr[mpr_PR];
   GEN p = (GEN)pr[1];
   long t = typ(x);
 
@@ -2399,8 +2431,8 @@ nf_to_ff(GEN nf, GEN x, GEN modpr)
 GEN
 ff_to_nf(GEN x, GEN modpr)
 {
-  if (lg(modpr) < 7) return x;
-  return mulmat_pol((GEN)modpr[6], x);
+  if (lg(modpr) < LARGEMODPR) return x;
+  return mulmat_pol((GEN)modpr[mpr_NFP], x);
 }
 GEN
 modprM_lift(GEN x, GEN modpr)
@@ -3079,7 +3111,7 @@ rnfsteinitz(GEN nf, GEN order)
       A[i+1]= ladd(element_mulvec(nf, (GEN)p1[3], c1),
                    element_mulvec(nf, (GEN)p1[4], c2));
       I[i]  = (long)Id;
-      I[i+1]= (long)primitive_part(idealmul(nf,a,b), &p1);
+      I[i+1]= (long)Q_primitive_part(idealmul(nf,a,b), &p1);
       if (p1) A[i+1] = (long)element_mulvec(nf, p1,(GEN)A[i+1]);
     }
   }
