@@ -266,11 +266,12 @@ GEN
 primitive_pol_to_monic(GEN pol, GEN *ptlead)
 {
   long i,j,n = lgef(pol)-3;
-  GEN lead,fa,e, a = dummycopy(pol);
+  GEN lead,fa,e,a, POL = dummycopy(pol);
 
-  a += 2; lead = (GEN)a[n];
-  if (is_pm1(lead)) { if (ptlead) *ptlead = NULL; return a-2; }
-  fa = auxdecomp(absi(lead),0); lead = gun;
+  a = POL + 2; lead = (GEN)a[n];
+  if (signe(lead) < 0) { POL = gneg_i(POL); a = POL+2; lead = negi(lead); }
+  if (is_pm1(lead)) { if (ptlead) *ptlead = NULL; return POL; }
+  fa = auxdecomp(lead,0); lead = gun;
   e = (GEN)fa[2]; fa = (GEN)fa[1];
   for (i=lg(e)-1; i>0;i--) e[i] = itos((GEN)e[i]);
   for (i=lg(fa)-1; i>0; i--)
@@ -303,7 +304,7 @@ primitive_pol_to_monic(GEN pol, GEN *ptlead)
     }
     lead = mulii(lead, pk);
   }
-  if (ptlead) *ptlead = lead; return a-2;
+  if (ptlead) *ptlead = lead; return POL;
 }
 
 /* compute x1*x2^2 + x2*x3^2 + x3*x4^2 + x4*x1^2 */
