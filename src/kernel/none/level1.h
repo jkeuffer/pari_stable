@@ -397,7 +397,7 @@ affur(ulong x, GEN y)
   }
   sh = bfffo(x);
   y[1] = evalsigne(1) | _evalexpo((BITS_IN_LONG-1)-sh);
-  y[2] = x<<sh; for (i=3; i<ly; i++) y[i]=0;
+  y[2] = x<<sh; for (i=3; i<ly; i++) y[i] = 0;
 }
 
 INLINE void
@@ -412,7 +412,13 @@ realzero_bit(long bitprec) { GEN x=cgetr(2); x[1]=evalexpo(bitprec); return x; }
 INLINE GEN
 realzero(long prec) { return realzero_bit(-bit_accuracy(prec)); }
 INLINE GEN
-realun(long prec) { GEN x=cgetr(prec); affsr(1,x); return x; }
+realun(long prec) {
+  GEN x = cgetr(prec);
+  long i;
+  x[1] = evalsigne(1) | _evalexpo(0);
+  x[2] = HIGHBIT; for (i=3; i<prec; i++) x[i] = 0;
+  return x;
+}
 
 INLINE GEN
 stor(long s, long prec) { GEN z = cgetr(prec); affsr(s,z); return z; }
