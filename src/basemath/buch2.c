@@ -1830,7 +1830,7 @@ trunc_error(GEN x)
 static GEN
 compute_multiple_of_R(GEN xarch,long RU,long N,long PRECREG, GEN *ptsublambda)
 {
-  GEN v,mdet,Im_mdet,kR,sublambda,lambda,xreal;
+  GEN v,mdet,mdet_t,Im_mdet,kR,sublambda,lambda,xreal;
   GEN *gptr[2];
   long av = avma, i,j, sreg = lg(xarch)-1, R1 = 2*RU - N;
 
@@ -1841,13 +1841,18 @@ compute_multiple_of_R(GEN xarch,long RU,long N,long PRECREG, GEN *ptsublambda)
   mdet=cgetg(sreg+2,t_MAT); mdet[1]=(long)v;
   for (j=2; j<=sreg+1; j++) mdet[j]=xreal[j-1]; /* det(Span(mdet)) = N * R */
 
-  Im_mdet = imagereel(mdet,PRECREG);
+  i = gprecision(mdet); /* truncate to avoid "near dependant" vectors */
+  mdet_t = (i <= 4)? mdet: gprec_w(mdet,i-1);
+  v = (GEN)indexrank(mdet_t)[2]; /* list of independant column indices */
+  if (DEBUGLEVEL) msgtimer("indexrank");
   /* check we have full rank for units */
-  if (lg(Im_mdet) != RU+1) { avma=av; return NULL; }
+  if (lg(v) != RU+1) { avma=av; return NULL; }
 
+  Im_mdet = extract(mdet,v);
   /* integral multiple of R: the cols we picked form a Q-basis, they have an
    * index in the full lattice */
   kR = gdivgs(det2(Im_mdet), N);
+  if (DEBUGLEVEL) msgtimer("detreel");
   /* R > 0.2 uniformly */
   if (gexpo(kR) < -3) { avma=av; return NULL; }
 
