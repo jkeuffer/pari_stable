@@ -1527,9 +1527,11 @@ gaffect(GEN x, GEN y)
 GEN
 quadtoc(GEN x, long prec)
 {
-  pari_sp av = avma;
-  GEN z, Q = (GEN) x[1];
+  pari_sp av;
+  GEN z, Q;
+  if (prec < 3) return realzero_bit( gexpo(x) );
 
+  av = avma; Q = (GEN) x[1];
   /* should be sqri(Q[3]), but is 0,1 ! see quaddisc */
   z = itor(subii((GEN)Q[3], shifti((GEN)Q[2],2)), prec);
   z = gsub(gsqrt(z,prec), (GEN)Q[3]);
