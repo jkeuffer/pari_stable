@@ -856,6 +856,38 @@ extern GEN quad_polmod_norm(GEN x, GEN y);
 extern GEN quad_polmod_conj(GEN x, GEN y);
 
 GEN
+mpinv(GEN b)
+{
+  long i, l1, l = lg(b), e = expo(b), s = signe(b);
+  GEN x = cgetr(l), a = mpcopy(b);
+  double t;
+
+  a[1] = evalexpo(0) | evalsigne(1);
+  for (i = 3; i < l; i++) x[i] = 0;
+  t = (((double)HIGHBIT) * HIGHBIT) / (double)(ulong)a[2];
+  if (((ulong)t) & HIGHBIT)
+    x[1] = evalexpo(0) | evalsigne(1);
+  else {
+    t *= 2;
+    x[1] = evalexpo(-1) | evalsigne(1);
+  }
+  x[2] = (long)(ulong)t;
+  l1 = 1; l -= 2;
+  while (l1 < l)
+  {
+    l1 <<= 1; if (l1 > l) l1 = l;
+    setlg(a, l1 + 2);
+    setlg(x, l1 + 2);
+    /* TODO: mulrr(a,x) should be a half product (the higher half is known).
+     * mulrr(x, ) already is */
+    affrr(addrr(x, mulrr(x, subsr(1, mulrr(a,x)))), x);
+    avma = (pari_sp)a;
+  }
+  x[1] = evalexpo(expo(x)-e) | evalsigne(s);
+  avma = (pari_sp)x; return x;
+}
+
+GEN
 ginv(GEN x)
 {
   long s;
