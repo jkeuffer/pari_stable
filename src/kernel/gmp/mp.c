@@ -443,6 +443,9 @@ ishiftr_spec(GEN x, long lx, long n)
 
 GEN
 truncr(GEN x)
+{
+  long s, e, d, m, i;
+  GEN y;
   if ((s=signe(x)) == 0 || (e=expo(x)) < 0) return gzero;
   d = (e>>TWOPOTBITS_IN_LONG) + 3;
   m = e & (BITS_IN_LONG-1);
@@ -465,6 +468,8 @@ truncr(GEN x)
 GEN
 floorr(GEN x)
 {
+  long e, d, m, i, lx;
+  GEN y;
   if (signe(x) >= 0) return truncr(x);
   if ((e=expo(x)) < 0) return stoi(-1);
   d = (e>>TWOPOTBITS_IN_LONG) + 3;
