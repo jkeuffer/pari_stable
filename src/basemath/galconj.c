@@ -1076,18 +1076,18 @@ static GEN
 matrixbase2(GEN L, GEN T, GEN den)
 {
   ulong ltop = avma, lbot;
-  int i, j;
+  int i, j, n = lg(L);
   long x = varn(T);
   GEN M, P, Tp;
   if (DEBUGLEVEL >= 1)
     timer2();
-  M = cgetg(lg(L), t_MAT);
+  M = cgetg(n, t_MAT);
   Tp = deriv(T, x);
-  for (i = 1; i < lg(L); i++)
+  for (i = 1; i < n; i++)
   {
-    M[i] = lgetg(lg(L), t_COL);
-    P = gdiv(gdivround(T, gsub(polx[x], (GEN) L[i])), gsubst(Tp, x, (GEN) L[i]));
-    for (j = 1; j < lg(L); j++)
+    M[i] = lgetg(n, t_COL);
+    P = gdiv(gdeuc(T, gsub(polx[x], (GEN)L[i])), gsubst(Tp, x, (GEN) L[i]));
+    for (j = 1; j < n; j++)
       ((GEN *) M)[i][j] = P[1 + j];
   }
   if (DEBUGLEVEL >= 1)
@@ -1462,7 +1462,14 @@ initborne(GEN T, GEN disc, struct galois_borne * gb, long ppp)
   GEN L, M, z;
   L = roots(T, DEFAULTPREC);
   n = lg(L) - 1;
-  M = matrixbase2(L, T, disc);
+  for(i=1; i<=n; i++)
+  {
+    z = (GEN)L[i];
+    if (signe(z[2])) break;
+    L[i] = z[1];
+  }
+
+  M = matrixbase2(L, gmul(T, dbltor(1.)), disc);
   borne = gzero;
   for (i = 1; i <= n; i++)
   {
