@@ -218,27 +218,31 @@ principalideal(GEN nf, GEN x)
 static GEN
 mylog(GEN x, long prec)
 {
-  if (gcmp0(x))
-    err(precer,"get_arch");
+  if (gcmp0(x)) err(precer,"get_arch");
   return glog(x,prec);
 }
 
-/* for internal use */
+/* For internal use. Get archimedean components: [e_i log( sigma_i(x) )],
+ * with e_i = 1 (resp 2.) for i <= R1 (resp. > R1) */
 GEN
 get_arch(GEN nf,GEN x,long prec)
 {
-  long i,R1,RU;
-  GEN v,p1,p2;
+  long i, RU, R1 = nf_get_r1(nf);
+  GEN v;
 
-  R1=itos(gmael(nf,2,1)); RU = R1+itos(gmael(nf,2,2));
-  if (typ(x)!=t_COL) x = algtobasis_i(nf,x);
+  RU = lg(nf[6]) - 1;
+  if (typ(x) != t_COL) x = algtobasis_i(nf,x);
   v = cgetg(RU+1,t_VEC);
   if (isnfscalar(x)) /* rational number */
   {
-    p1 = glog((GEN)x[1],prec);
-    p2 = (RU > R1)? gmul2n(p1,1): NULL;
-    for (i=1; i<=R1; i++) v[i]=(long)p1;
-    for (   ; i<=RU; i++) v[i]=(long)p2;
+    GEN p1 = glog((GEN)x[1], prec);
+
+    for (i=1; i<=R1; i++) v[i] = (long)p1;
+    if (i <= RU)
+    {
+      p1 = gmul2n(p1,1);
+      for (   ; i<=RU; i++) v[i] = (long)p1;
+    }
   }
   else
   {
@@ -271,50 +275,59 @@ famat_get_arch_real(GEN nf,GEN x,GEN *emb,long prec)
   *emb = T; return A;
 }
 
+static GEN
+scalar_get_arch_real(long R1, long RU, GEN u, GEN *emb, long prec)
+{
+  GEN v, x, p1;
+  long i;
+
+  i = gsigne(u);
+  if (!i) err(talker,"0 in get_arch_real");
+  x = cgetg(RU+1, t_COL);
+  for (i=1; i<=RU; i++) x[i] = (long)u;
+
+  v = cgetg(RU+1, t_COL);
+  p1 = (i > 0)? glog(u,prec): gzero;
+  for (i=1; i<=R1; i++) v[i] = (long)p1;
+  if (i <= RU)
+  {
+    p1 = gmul2n(p1,1);
+    for (   ; i<=RU; i++) v[i] = (long)p1;
+  }
+  *emb = x; return v;
+}
+
 /* as above but return NULL if precision problem, and set *emb to the
  * embeddings of x */
 GEN
-get_arch_real(GEN nf,GEN x,GEN *emb,long prec)
+get_arch_real(GEN nf, GEN x, GEN *emb, long prec)
 {
-  long i, RU, R1;
-  GEN v, p1, p2;
+  long i, RU, R1 = nf_get_r1(nf);
+  GEN v, t;
 
-  R1 = nf_get_r1(nf);
   RU = lg(nf[6])-1;
   switch(typ(x))
   {
     case t_MAT: return famat_get_arch_real(nf,x,emb,prec);
-    case t_COL: break;
-    default: x = algtobasis_i(nf,x);
+
+    case t_POLMOD:
+    case t_POL: x = algtobasis_i(nf,x);   /* fall through */
+    case t_COL: if (!isnfscalar(x)) break;
+      x = (GEN)x[1]; /* fall through */
+    default: /* rational number */
+      return scalar_get_arch_real(R1, RU, x, emb, prec);
   }
   v = cgetg(RU+1,t_COL);
-  if (isnfscalar(x)) /* rational number */
+  x = gmul(gmael(nf,5,1), x);
+  for (i=1; i<=R1; i++)
   {
-    GEN u = (GEN)x[1];
-    long l = lg(x);
-    i = signe(u);
-    if (!i) err(talker,"0 in get_arch_real");
-    p1= (i > 0)? glog(u,prec): gzero;
-    p2 = (RU > R1)? gmul2n(p1,1): NULL;
-    for (i=1; i<=R1; i++) v[i] = (long)p1;
-    for (   ; i<=RU; i++) v[i] = (long)p2;
-    x = cgetg(l, t_COL);
-    for (i=1; i<l; i++) x[i] = (long)u;
+    t = gabs((GEN)x[i],prec); if (gcmp0(t)) return NULL;
+    v[i] = llog(t,prec);
   }
-  else
+  for (   ; i<=RU; i++)
   {
-    GEN t;
-    x = gmul(gmael(nf,5,1),x);
-    for (i=1; i<=R1; i++)
-    {
-      t = gabs((GEN)x[i],prec); if (gcmp0(t)) return NULL;
-      v[i] = llog(t,prec);
-    }
-    for (   ; i<=RU; i++)
-    {
-      t = gnorm((GEN)x[i]); if (gcmp0(t)) return NULL;
-      v[i] = llog(t,prec);
-    }
+    t = gnorm((GEN)x[i]); if (gcmp0(t)) return NULL;
+    v[i] = llog(t,prec);
   }
   *emb = x; return v;
 }
@@ -322,12 +335,12 @@ get_arch_real(GEN nf,GEN x,GEN *emb,long prec)
 GEN
 principalidele(GEN nf, GEN x, long prec)
 {
-  GEN p1,y = cgetg(3,t_VEC);
+  GEN p1, y = cgetg(3,t_VEC);
   gpmem_t av;
 
   p1 = principalideal(nf,x);
   y[1] = (long)p1;
-  av =avma; p1 = get_arch(nf,(GEN)p1[1],prec);
+  av = avma; p1 = get_arch(nf,(GEN)p1[1],prec);
   y[2] = lpileupto(av,p1); return y;
 }
 
