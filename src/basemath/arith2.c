@@ -116,7 +116,7 @@ initprimes1(ulong size, long *lenp, long *lastp)
   return (byteptr) gprealloc(p,r-p);
 }
 
-/*  Timing in ms (Athlon/850; reports 512M of secondary cache; looks
+/*  Timing in ms (Athlon/850; reports 512K of secondary cache; looks
     like there is 64K of quickier cache too).
 
     The algorithm of allocation starts to work regularly from
@@ -180,78 +180,242 @@ initprimes1(ulong size, long *lenp, long *lastp)
     into the account...
 */
 
-#ifndef ARENA_IN_ROOTS
-#  ifdef i386           /* gcc defines this? */
-#    define ARENA_IN_ROOTS      1.5
-#  else
-#    define ARENA_IN_ROOTS      10
-#  endif
-#endif
-#ifndef PRIME_ARENA
-#  ifdef i386           /* gcc defines this? */
-   /* Due to smaller ARENA_IN_ROOTS, smaller arena is OK; fit L1 cache */
-#    define PRIME_ARENA (63 * 1024UL) /* No slowdown even with 64K L1 cache */
-#  else
-#    define PRIME_ARENA (200 * 1024UL) /* No slowdown even with 256K L2 cache */
-#  endif
-#endif
-
-static ulong prime_arena = PRIME_ARENA;
-static double arena_in_roots = ARENA_IN_ROOTS;
-
-static ulong
-good_arena_size(ulong rootnum, ulong remains, ulong primes)
-{
-  /* ARENA_IN_ROOTS below 12: some slowdown starts to be noticable
+#ifndef SLOW2_IN_ROOTS
+  /* SLOW2_IN_ROOTS below 3: some slowdown starts to be noticable
    * when things fit into the cache.
-   * XXX The choice of 10 gives a slowdown of 1-2% on UltraSparcII,
-   * but makes calculations even for (the current) maximum of 436273009
+   * XXX The choice of 2.6 gives a slowdown of 1-2% on UltraSparcII,
+   * but makes calculations for "maximum" of 436273009 (not applicable anymore)
    * fit into 256K cache (still common for some architectures).
    *
    * One may change it when small caches become uncommon, but the gain
    * is not going to be very noticable... */
+#  ifdef i386           /* gcc defines this? */
+#    define SLOW2_IN_ROOTS      0.4
+#  else
+#    define SLOW2_IN_ROOTS      2.6
+#  endif
+#endif
+#ifndef CACHE_ARENA
+#  ifdef i386           /* gcc defines this? */
+   /* Due to smaller SLOW2_IN_ROOTS, smaller arena is OK; fit L1 cache */
+#    define CACHE_ARENA (63 * 1024UL) /* No slowdown even with 64K L1 cache */
+#  else
+#    define CACHE_ARENA (200 * 1024UL) /* No slowdown even with 256K L2 cache */
+#  endif
+#endif
 
-  ulong asize = (ulong)(arena_in_roots * rootnum);
-  if (asize < prime_arena) asize = prime_arena - 1;
-  if (asize > remains) asize = remains; /* + room for a sentinel byte */
-  if (2 * primes < asize)               /* XXXX Better substitutes for 2? */
-    asize -= primes;                    /* We access arena AND primes */
+#define CACHE_ALPHA	(0.29)		/* Cache performance model parameter */
+#define CACHE_CUTOFF	(0.055)		/* Cache performance not smooth here */
+
+static double slow2_in_roots = SLOW2_IN_ROOTS;
+
+typedef struct {
+    ulong arena;
+    double power;
+    double cutoff;
+} cache_model_t;
+
+static cache_model_t cache_model = { CACHE_ARENA, CACHE_ALPHA, CACHE_CUTOFF };
+
+/* Assume that some calculation requires a chunk of memory to be
+   accessed often in more or less random fashion (as in sieving).
+   Assume that the calculation can be done in steps by subdividing the
+   chunk into smaller subchunks (arenas) and treathing them
+   separately.  Assume that the overhead of subdivision is equivalent
+   to the number of arenas.
+
+   Find an optimal size of the arena taking into account the overhead
+   of subdivision, and the overhead of arena not fitting into the
+   cache.  Assume that arenas of size slow2_in_roots slows down the
+   calculation 2x (comparing to very big arenas; when cache hits do
+   not matter).  Since cache performance varies wildly with
+   architecture, load, and whether (especially with cache coloring
+   enabled), use an idealized cache model based on benchmarks above.
+
+   Assume that an independent region of FIXED_TO_CACHE bytes is accessed
+   very often concurrently with the arena access.
+ */
+ulong
+good_arena_size(ulong slow2_size, ulong total, ulong fixed_to_cache,
+		cache_model_t *cache_model, long model_type)
+{
+  ulong asize, cache_arena = cache_model->arena;
+  double Xmin, Xmax, A, B, C1, C2, D, V;
+  double alpha = cache_model->power, cut_off = cache_model->cutoff;
+
+  /* Estimated relative slowdown,
+     with overhead = max((fixed_to_cache+arena)/cache_arena - 1, 0):
+
+     1 + slow2_size/arena due to initialization overhead;
+
+     max(1, 2.33 * overhead^0.29 ) due to footprint > cache size.
+
+     [The latter is hard to substantiate theoretically, but this
+     function describes benchmarks pretty close; it does not hurt that
+     one can minimize it explicitly too ;-).  The switch between
+     diffenent choices of max() happens whe overhead=0.055.]
+
+     Thus the problem is minimizing (1 + slow2_size/arena)*overhead**0.29.
+     This boils down to F=((X+A)/(X+B))X^alpha, X=overhead, 
+     B = (1 - fixed_to_cache/cache_arena), A = B +
+     slow2_size/cache_arena, alpha = 0.29, and X>=0.055, X>-B.  It
+     turns out that the minimization problem is not very nasty.  (As
+     usual with minimization problems which depend on parameters,
+     different values of A,B lead to different algorithms.  However,
+     the boundaries between the domains in (A,B) plane where different
+     algorithms work are explicitly calculatable.)
+
+     Thus we need to find the rightmost root of (X+A)*(X+B) -
+     alpha(A-B)X to the right of 0.055 (if such exists and is below
+     Xmax).  Then we manually check the remaining region [0, 0.055].
+
+     Since we cannot trust the purely-experimental cache-hit slowdown
+     function, as a sanity check always prefer fitting into the
+     cache (or "almost fitting") if F-law predicts that the larger
+     value of the arena provides less than 10% speedup.
+
+   */
+
+  if (model_type != 0)
+      err(talker, "unsupported type of cache model"); /* Future expansion */
+
+  /* The simplest case: we fit into cache */
+  if (total + fixed_to_cache <= cache_arena)
+      return total;
+  /* The simple case: fitting into cache doesn't slow us down more than 10% */
+  if (cache_arena - fixed_to_cache > 10 * slow2_size) {
+      asize = cache_arena - fixed_to_cache;
+      if (asize > total) asize = total;	/* Automatically false... */
+      return asize;
+  }
+  /* Slowdown of not fitting into cache is significant.  Try to optimize.
+     Do not be afraid to spend some time on optimization - in trivial
+     cases we do not reach this point; any gain we get should
+     compensate the time spent on optimization.  */
+
+  B = (1 - ((double)fixed_to_cache)/cache_arena);
+  A = B + ((double)slow2_size)/cache_arena;
+  C2 = A*B;
+  C1 = (A + B - 1/alpha*(A - B))/2;
+  D = C1*C1 - C2;
+  if (D > 0)
+      V = cut_off*cut_off + 2*C1*cut_off + C2; /* Value at CUT_OFF */
+  else
+      V = 0;				/* Peacify the warning */
+  Xmin = cut_off;
+  Xmax = ((double)total - fixed_to_cache)/cache_arena; /* Two candidates */
+
+  if ( D <= 0 || (V >= 0 && C1 + cut_off >= 0) ) /* slowdown increasing */
+      Xmax = cut_off;			/* Only one candidate */
+  else if (V >= 0 &&			/* slowdown concave down */
+	   ((Xmax + C1) <= 0 || (Xmax*Xmax + 2*C1*Xmax + C2) <= 0))
+      /* DO NOTHING */;			/* Keep both candidates */
+  else if (V <= 0 && (Xmax*Xmax + 2*C1*Xmax + C2) <= 0) /* slowdown decreasing */
+      Xmin = cut_off;			/* Only one candidate */
+  else /* Now we know: two root, the largest is in CUT_OFF..Xmax */
+      Xmax = sqrt(D) - C1;
+  if (Xmax != Xmin) {	/* Xmin == CUT_OFF; Check which one is better */
+      double v1 = (cut_off + A)/(cut_off + B);
+      double v2 = 2.33 * (Xmax + A)/(Xmax + B) * pow(Xmax, alpha);
+
+      if (1.1 * v2 >= v1) /* Prefer fitting into the cache if slowdown < 10% */
+	  V = v1;
+      else {
+	  Xmin = Xmax;
+	  V = v2;
+      }
+  } else if (B > 0)			/* We need V */
+      V = 2.33 * (Xmin + A)/(Xmin + B) * pow(Xmin, alpha);
+  if (B > 0 && 1.1 * V > A/B)  /* Now Xmin is the minumum.  Compare with 0 */
+      Xmin = 0;
+
+  asize = (1 + Xmin)*cache_arena - fixed_to_cache;
+  if (asize > total) asize = total;	/* May happen due to approximations */
   return asize;
 }
 
 /* Use as in
-    install(set_internal,lLDG)          \\ Through some M too?
-    set_internal(2,100) \\ disable dependence on limit
+    install(set_optimize,lLDG)          \\ Through some M too?
+    set_optimize(2,1) \\ disable dependence on limit
+    \\ 1: how much cache usable, 2: slowdown of setup, 3: alpha, 4: cutoff
+    \\ 2,3,4 are in units of 0.001
 
-    { time_primes_arena(ar,limit) =
-        set_internal(1,floor(ar*1024));
+    { time_primes_arena(ar,limit) =     \\ ar = arena size in K
+        set_optimize(1,floor(ar*1024));
         default(primelimit, 200 000);   \\ 100000 results in *larger* malloc()!
         gettime;
-        default(primelimit, limit);
+        default(primelimit, floor(limit));
         if(ar >= 1, ar=floor(ar));
         print("arena "ar"K => "gettime"ms");
     }
 */
 long
-set_internal(long what, GEN g)
+set_optimize(long what, GEN g)
 {
   long ret = 0;
 
-  if (what == 1)
-    ret = (long)prime_arena;
-  else if (what == 2)
-    ret = (long)(arena_in_roots * 1000);
-  else
-    err(talker, "panic: set_internal");
+  switch (what) {
+  case 1:
+    ret = (long)cache_model.arena;
+    break;
+  case 2:
+    ret = (long)(slow2_in_roots * 1000);
+    break;
+  case 3:
+    ret = (long)(cache_model.power * 1000);
+    break;
+  case 4:
+    ret = (long)(cache_model.cutoff * 1000);
+    break;
+  default:
+    err(talker, "panic: set_optimize");
+    break;
+  }
   if (g != NULL) {
     long val = itos(g);
 
-    if (what == 1)
-      prime_arena = (ulong)val;
-    else if (what == 2)
-      arena_in_roots = val / 1000.;
+    switch (what) {
+    case 1:
+      cache_model.arena = (ulong)val;
+      break;
+    case 2:
+      slow2_in_roots = val / 1000.;
+      break;
+    case 3:
+      cache_model.power = val / 1000.;
+      break;
+    case 4:
+      cache_model.cutoff = val / 1000.;
+      break;
+    }
   }
   return ret;
+}
+
+static void
+sieve_chunk(byteptr known_primes, ulong start, byteptr data, ulong cnt)
+{   /* start must be odd;
+       prime differences (starting from (5-3)=2) start at known_primes[2],
+       are terminated by a 0 byte;
+
+       Checks cnt odd numbers starting at `start', setting bytes
+       starting at data to 0 or 1 depending on whether the
+       corresponding odd number is prime or not */
+    ulong p;
+    byteptr q, start_sieve, end_sieve = data + cnt;
+
+    memset(data, 0, cnt);
+    /* data corresponds to start.  q runs over primediffs.  */
+    /* Don't care about DIFFPTR_SKIP: false positives provide no problem */
+    for (q = known_primes + 2, p = 3; *q; p += *q++) {
+	/* first odd number which is >= start > p and divisible by p
+	   = last odd number which is <= start + 2p - 1 and 0 (mod p)
+	   = p + the last even number which is <= start + p - 1 and 0 (mod p)
+	   = p + the last even number which is <= start + p - 2 and 0 (mod p)
+	   = p + start + p - 2 - (start + p - 2) % 2p. */
+      start_sieve = data - (((start+p-2) % (p << 1)) >> 1) + p - 1;
+      for (; start_sieve < end_sieve; start_sieve += p) *start_sieve = 1;
+    }
 }
 
 /* Here's the workhorse.  This is recursive, although normally the first
@@ -260,12 +424,14 @@ set_internal(long what, GEN g)
 byteptr
 initprimes0(ulong maxnum, long *lenp, ulong *lastp)
 {
-  long k, size, alloced, psize;
-  byteptr q,r,s,fin, p, p1, fin1, plast, curdiff;
+  long size, alloced, psize;
+  byteptr q, fin, p, p1, fin1, plast, curdiff;
   ulong last, remains, curlow, rootnum, asize;
+  ulong prime_above = 3;
+  byteptr p_prime_above;
 
   if (maxnum <= 1ul<<17)        /* Arbitrary. */
-    return initprimes1(maxnum>>1, lenp, (long*)lastp);
+    return initprimes1(maxnum>>1, lenp, (long*)lastp); /* Break recursion */
 
   maxnum |= 1;                  /* make it odd. */
 
@@ -281,7 +447,10 @@ initprimes0(ulong maxnum, long *lenp, ulong *lastp)
   fin1 = p1 + psize - 1;
   remains = (maxnum - rootnum) >> 1; /* number of odd numbers to check */
 
-  asize = good_arena_size(rootnum, remains, psize);
+  /* Actually, we access primes array of psize too; but we access it
+     consequently, thus we do not include it in fixed_to_cache */
+  asize = good_arena_size(rootnum * slow2_in_roots, remains + 1, 0,
+			  &cache_model, 0) - 1;
   /* enough room on the stack ? */
   alloced = (((byteptr)avma) <= ((byteptr)bot) + asize);
   if (alloced)
@@ -296,55 +465,31 @@ initprimes0(ulong maxnum, long *lenp, ulong *lastp)
      numbers.  plast is a pointer which represents the last prime seen,
      it may point before p..fin-1. */
   plast = p - ((rootnum - last) >> 1) - 1;
-  while (remains)
+  p_prime_above = p1 + 2;
+  while (remains)	/* Cycle over arenas.  Performance is not crucial */
   {
-    if (asize > remains)
-    {
+    unsigned char was_delta;
+
+    if (asize > remains) {
       asize = remains;
       fin = p + asize;
     }
-    memset(p, 0, asize + 1);
-    /* p corresponds to curlow.  q runs over primediffs.  */
-    /* Don't care about DIFFPTR_SKIP: false positives provide no problem */
-    for (q = p1+2, k = 3; q <= fin1; k += *q++)
-    {/* first odd number which is >= curlow > p and divisible by p
-      = last odd number which is <= curlow + 2p - 1 and 0 (mod p)
-      = p + the last even number which is <= curlow + p - 1 and 0 (mod p)
-      = p + the last even number which is <= curlow + p - 2 and 0 (mod p)
-      = p + curlow + p - 2 - (curlow + p - 2) % 2p. */
-      long k2 = k*k - curlow;
+    /* Fake the upper limit appropriate for the given arena */
+    while (prime_above*prime_above <= curlow + (asize << 1) && *p_prime_above)
+	prime_above += *p_prime_above++;
+    was_delta = *p_prime_above;
+    *p_prime_above = 0;			/* Put a 0 sentinel for sieve_chunk */
 
-#if 0                                   /* XXXX Check which one is quickier! */
-      if (k2 > 0) {                     /* May be due to ulong==>long wrap */
-        k2 >>= 1;
-        if (k2 >= asize) {
-          if (k2 > remains) {
-            /* Can happen due to a conversion wrap only, so . */
-            goto small_k;
-          } else
-            break;                      /* All primes up to sqrt(top) checked */
-        }
-        r = p + k2;
-      } else {
-       small_k:
-        r = p - (((curlow+k-2) % (2*k)) >> 1) + k - 1;
-      }
-#else
-      if (k2 > 0) {
-        r = p + (k2 >>= 1);
-        if ((ulong)k2 <= remains) goto finish; /* Guard against address wrap. */
-      }
-      r = p - (((curlow+k-2) % (2*k)) >> 1) + k - 1;
-    finish:
-#endif
-      for (s = r; s < fin; s += k) *s = 1;
-    }
+    sieve_chunk(p1, curlow, p, asize);
+
+    *p_prime_above = was_delta;		/* Restore */
+    p[asize] = 0;			/* Put a 0 sentinel for ZZZ */
     /* now q runs over addresses corresponding to primes */
     for (q = p; ; plast = q++)
     {
       long d;
 
-      while (*q) q++;           /* use 0-sentinel at end */
+      while (*q) q++;			/* use ZZZ 0-sentinel at end */
       if (q >= fin) break;
       d = (q - plast) << 1;
       while (d >= DIFFPTR_SKIP)
