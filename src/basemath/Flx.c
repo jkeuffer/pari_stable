@@ -56,7 +56,7 @@ Flx_ZX(GEN z)
   long l=lg(z);
   GEN x = cgetg(l,t_POL);
   if (typ(z) != t_VECSMALL) err(bugparier,"Flx_ZX, not a VECSMALL");
-  for (i=2; i<l; i++) x[i] = lstoi(z[i]);
+  for (i=2; i<l; i++) x[i] = lutoi((ulong)z[i]);
   x[1] = evalsigne(l-2!=0)| z[1]; return x;
 }
 
@@ -66,7 +66,7 @@ GEN
 Flx_ZX_inplace(GEN z)
 {
   long i, l = lg(z);
-  for (i=2; i<l; i++) z[i] = lstoi(z[i]);
+  for (i=2; i<l; i++) z[i] = lutoi((ulong)z[i]);
   settyp(z, t_POL); z[1]=evalsigne(l-2!=0)|z[1]; return z;
 }
 
