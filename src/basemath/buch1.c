@@ -1661,13 +1661,19 @@ real_relations(long lim, long s, long LIMC, long *ex, long **mat, GEN glog2,
         if (first)
         {
           if (absi_equal((GEN)form[1],(GEN)form0[1])
-                && egalii((GEN)form[2],(GEN)form0[2])
-                && (!sens || signe(form0[1])==signe(form[1]))) findecycle=1;
+               && egalii((GEN)form[2],(GEN)form0[2])
+               && (!sens || signe(form0[1])==signe(form[1]))) findecycle=1;
         }
         else
         {
-          if (sens || !signe(addii((GEN)form[1],(GEN)form[3])))
+          if (sens)
             { form=rhorealform(form); nbrho++; }
+          else if (!signe(addii((GEN)form[1],(GEN)form[3])))
+          {
+            if (absi_equal((GEN)form[1],(GEN)form0[1]) &&
+                    egalii((GEN)form[2],(GEN)form0[2])) break;
+            form=rhorealform(form); nbrho++;
+          }
           else
             { setsigne(form[1],1); setsigne(form[3],-1); }
           if (egalii((GEN)form[1],(GEN)form0[1]) &&
