@@ -104,7 +104,7 @@ static GEN br_res = NULL;
  *      in parentheses), followed by a "truc", then by any succession of the
  *      following:
  *
- *        ~, _, ', !
+ *        ~, ', !
  *  or    ^ facteur
  *  or    matrix_block
  *  or    .member      (see gp_member_list)
@@ -119,8 +119,10 @@ static GEN br_res = NULL;
  *  or  %{ ` }*  or %number
  *
  *  identifier:
- *      entry ( { expr } { ,expr }* )
+ *      entry {'} ( { expr | &entry } { ,expr | &entry }* )
  *      The () are optional when arg list is void.
+ *      Note: the &entry form (pointer) is not implemented for user functions
+ *            yet.
  *
  *  matrix_block :
  *      [ A { { ; }A }*] where A = { expr } { { , }{ expr } }*
