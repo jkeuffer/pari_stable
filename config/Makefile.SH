@@ -49,10 +49,6 @@ case "$graphic_lib_dll" in
   NULL)	_graphic_lib_dll="$graphic_lib_dll" ;;
   *)	_graphic_lib_dll="\\\"$graphic_lib_dll\\\"" ;;
 esac
-case "$osname" in
-  cygwin) WIN_LIBS="-lgdi32 -lole32 -luuid -lwsock32 -lsupc++";;
-  darwin) WIN_LIBS="-framework Carbon -framework ApplicationServices -lsupc++";;
-esac
 case "$which_graphic_lib" in
 none)
   PLOTCFLAGS=
@@ -67,7 +63,7 @@ qt)
   ;;
 fltk)
   PLOTCFLAGS="-I\$(FLTKDIR)/include $X11_INC"
-  PLOTLIBS="-L\$(FLTKDIR)/lib -lfltk $X11_LIBS $WIN_LIBS"
+  PLOTLIBS="-L\$(FLTKDIR)/lib -lfltk $FLTK_LIBS
   graph="$graph plotfltk"
   ;;
 gnuplot)

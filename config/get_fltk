@@ -26,4 +26,9 @@ if test -n "$with_fltk"; then
     echo "### FLTK not found. Building without FLTK support"
     which_graphic_lib=none
   fi
+  case "$osname" in
+    cygwin) FLTK_LIBS="-lgdi32 -lole32 -luuid -lwsock32 -lsupc++" ;;
+    darwin) FLTK_LIBS="-framework Carbon -lsupc++" ;;
+    *)      FLTK_LIBS="$X11_LIBS" ;;
+  esac
 fi

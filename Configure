@@ -73,7 +73,7 @@ if test -n "$with_gmp"; then
 fi
 if test "$optimization" != profiling; then
   . ./get_X11  # X11, X11_INC, X11_LIBS
-  . ./get_fltk # FLTKDIR
+  . ./get_fltk # FLTKDIR, FLTK_LIBS
   . ./get_Qt   # QTDIR
   . ./get_gnuplot_libs # gnuplot, gnuplot_libs
   . ./get_readline # $_readline_list (includes 'readline')
@@ -138,6 +138,7 @@ for variable in\
   ranlib gzip zcat emacs perl ln_s make_sh\
   sizeof_long doubleformat\
   X11 X11_INC X11_LIBS which_graphic_lib graphic_lib_dll gnuplot gnuplot_libs\
+  FLTKDIR FLTK_LIBS\
   $_install_list\
   $_cc_list\
   $_ld_list\
