@@ -1,6 +1,6 @@
 !include "MUI.nsh"
 !define MUI_PRODUCT "PARI"
-!define MUI_VERSION "2.2.6"
+!define MUI_VERSION "2.2.7"
 
 ;--------------------------------
 AutoCloseWindow false
@@ -30,7 +30,7 @@ Section "pari (required)" SecCopy
   File "..\misc\tex2mail"
   File "..\Ocygwin-i386\libpari-2.2.dll"
   File "\cygwin\bin\cygwin1.dll"
-  File "\cygwin\bin\cygncurses6.dll"
+  File "\cygwin\bin\cygncurses7.dll"
   File "\cygwin\bin\cygreadline5.dll"
   File "\cygwin\bin\cygperl5_8_0.dll"
   File "\cygwin\bin\perl.exe"
@@ -40,6 +40,11 @@ Section "pari (required)" SecCopy
   WriteRegStr HKLM ${uninst} "UninstallString" '"$INSTDIR\uninstall.exe"'
   
   WriteUninstaller "$INSTDIR\Uninstall.exe"
+SectionEnd
+
+Section "Galois files" SecGAL
+  SetOutPath "$INSTDIR\galdata"
+  File "..\galdata\*"
 SectionEnd
 
 Section "documentation" SecDOC
@@ -79,10 +84,12 @@ SectionEnd
 
 LangString DESC_SecCopy ${LANG_ENGLISH} "Copy pari files to application folder."
 LangString DESC_DOC ${LANG_ENGLISH} "Install documentation and online help."
+LangString DESC_GAL ${LANG_ENGLISH} "Install Galois data files (degree > 7)."
 LangString DESC_SM ${LANG_ENGLISH} "Add PARI shortcuts to Start Menu and desktop."
 
 !insertmacro MUI_FUNCTIONS_DESCRIPTION_BEGIN
   !insertmacro MUI_DESCRIPTION_TEXT ${SecCopy} $(DESC_SecCopy)
+  !insertmacro MUI_DESCRIPTION_TEXT ${SecGAL} $(DESC_GAL)
   !insertmacro MUI_DESCRIPTION_TEXT ${SecSM} $(DESC_SM)
   !insertmacro MUI_DESCRIPTION_TEXT ${SecDOC} $(DESC_DOC)
 !insertmacro MUI_FUNCTIONS_DESCRIPTION_END
@@ -97,11 +104,12 @@ Section "Uninstall"
 
   Delete "$INSTDIR\perl.exe"
   Delete "$INSTDIR\cygwin1.dll"
-  Delete "$INSTDIR\cygncurses6.dll"
+  Delete "$INSTDIR\cygncurses7.dll"
   Delete "$INSTDIR\cygreadline5.dll"
   Delete "$INSTDIR\Uninstall.exe"
   Delete "$INSTDIR\cygperl5_8_0.dll"
   RMDir /r "$INSTDIR\doc"
+  RMDir /r "$INSTDIR\galdata"
 
   DeleteRegKey HKLM ${uninst}
   DeleteRegKey /ifempty HKLM "Software\PARI"
