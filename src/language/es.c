@@ -931,12 +931,12 @@ voir2(GEN x, long nb, long bl)
   sorstring(VOIR_STRING2,x[0]);
   if (! is_recursive_t(tx)) /* t_SMALL, t_INT, t_REAL, t_STR, t_VECSMALL */
   {
-    if (tx == t_STR)
-	pariputs("chars:");
+    if (tx == t_STR) 
+      pariputs("chars:");
     else if (tx == t_INT)
-	pariputsf("(%c,lgef=%ld):", vsigne(x), lgefint(x));
+      pariputsf("(%c,lgef=%ld):", vsigne(x), lgefint(x));
     else if (tx == t_REAL)
-	pariputsf("(%c,expo=%ld):", vsigne(x), expo(x));
+      pariputsf("(%c,expo=%ld):", vsigne(x), expo(x));
     if (nb<0) nb = (tx==t_INT)? lgefint(x): lx;
     if (tx == t_VECSMALL) nb = lx;
     for (i=1; i < nb; i++) sorstring(VOIR_STRING2,x[i]);

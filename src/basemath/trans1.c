@@ -1230,57 +1230,65 @@ paexp(GEN x)
   return gerepileupto(av, y);
 }
 
+static GEN
+cxexp(GEN x, long prec)
+{
+  GEN r,p1,p2, y = cgetg(3,t_COMPLEX);
+  ulong av = avma, tetpil;
+  r=gexp((GEN)x[1],prec);
+  gsincos((GEN)x[2],&p2,&p1,prec);
+  tetpil = avma;
+  y[1] = lmul(r,p1);
+  y[2] = lmul(r,p2);
+  gerepilemanyvec(av,tetpil,y+1,2);
+  return y;
+}
+
+static GEN
+serexp(GEN x, long prec)
+{
+  ulong av;
+  long i,j,lx,ly,ex;
+  GEN p1,y,xd,yd;
+ 
+  if (gcmp0(x)) return gaddsg(1,x);
+  lx = lg(x); ex = valp(x);
+  if (ex < 0) err(negexper,"gexp");
+  if (ex)
+  {
+    ly = lx+ex; y = cgetg(ly,t_SER);
+    y[1] = evalsigne(1) | evalvalp(0) | evalvarn(varn(x));
+    /* zd[i] = coeff of X^i in z */
+    xd = x+2-ex; yd = y+2; ly -= 2;
+    yd[0] = un;
+    for (i=1; i<ex; i++) yd[i]=zero;
+    for (   ; i<ly; i++)
+    {
+      av = avma; p1 = gzero;
+      for (j=ex; j<=i; j++)
+        p1 = gadd(p1, gmulgs(gmul((GEN)xd[j],(GEN)yd[i-j]),j));
+      yd[i] = lpileupto(av, gdivgs(p1,i));
+    }
+    return y;
+  }
+  av = avma; y = cgetg(lx, t_SER);
+  y[1] = x[1]; y[2] = zero;
+  for (i=3; i <lx; i++) y[i] = x[i];
+  p1 = gexp((GEN)x[2],prec);
+  y = gmul(p1, serexp(normalize(y),prec));
+  return gerepileupto(av, y);
+}
+
 GEN
 gexp(GEN x, long prec)
 {
-  long av,tetpil,ex;
-  GEN r,y,p1,p2;
-
   switch(typ(x))
   {
-    case t_REAL:
-      return mpexp(x);
-
-    case t_COMPLEX:
-      y=cgetg(3,t_COMPLEX); av=avma;
-      r=gexp((GEN)x[1],prec);
-      gsincos((GEN)x[2],&p2,&p1,prec);
-      tetpil=avma;
-      y[1]=lmul(r,p1); y[2]=lmul(r,p2);
-      gerepilemanyvec(av,tetpil,y+1,2);
-      return y;
-
-    case t_PADIC:
-      return paexp(x);
-
-    case t_SER:
-      if (gcmp0(x)) return gaddsg(1,x);
-
-      ex=valp(x); if (ex<0) err(negexper,"gexp");
-      if (ex)
-      {
-	long i,j,ly=lg(x)+ex;
-
-	y=cgetg(ly,t_SER);
-	y[1] = evalsigne(1) | evalvalp(0) | evalvarn(varn(x));
-        y[2] = un;
-	for (i=3; i<ex+2; i++) y[i]=zero;
-	for (   ; i<ly; i++)
-	{
-	  av=avma; p1=gzero;
-	  for (j=ex; j<i-1; j++)
-	    p1=gadd(p1,gmulgs(gmul((GEN)x[j-ex+2],(GEN)y[i-j]),j));
-	  tetpil=avma; y[i]=lpile(av,tetpil,gdivgs(p1,i-2));
-	}
-	return y;
-      }
-      av=avma; p1=gcopy(x); p1[2]=zero;
-      p2=gexp(normalize(p1),prec);
-      p1=gexp((GEN)x[2],prec); tetpil=avma;
-      return gerepile(av,tetpil,gmul(p1,p2));
-
-    case t_INTMOD:
-      err(typeer,"gexp");
+    case t_REAL: return mpexp(x);
+    case t_COMPLEX: return cxexp(x,prec);
+    case t_PADIC: return paexp(x);
+    case t_SER: return serexp(x,prec);
+    case t_INTMOD: err(typeer,"gexp");
   }
   return transc(gexp,x,prec);
 }
