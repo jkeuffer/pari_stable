@@ -29,12 +29,13 @@ modules=`ls $src_dir/modules/*.c   | sed 's,.*/\(.*\)\.c,\1,'`
 lib_prefix=lib
 dllib_prefix=lib
 case "$osname" in
-  os2)	systems=os2; dllib_prefix="";
+  os2)	systems=$osname; dllib_prefix="";
 	lib_prefix=lib	# Different, to allow gp-dyn link with DLL
 	export_lib_create=emximp; export_lib='$(DLLIBPARI)$(_A)'
 	export_file=pari.def; export_create="emxexp -u"
 	# Actually, the build will fail until the switch to -Zomf...
 	dlld_ignore=- ;;
+  darwin) systems=$osname;
   *)   systems=;;
 esac
 
@@ -172,8 +173,8 @@ case "$static" in
 esac
 
 CPPFLAGS="-I. -I$src/headers"
-if test "$has_dlopen" = builtin -a X"$osname" = Xos2; then
-  CPPFLAGS="$CPPFLAGS -I$src/systems/os2"
+if test "$has_dlopen" = builtin; then
+  CPPFLAGS="$CPPFLAGS -I$src/systems/$osname"
 fi
 
 case "$ln_s" in

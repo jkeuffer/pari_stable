@@ -32,7 +32,10 @@ if test "$has_dlopen" = no; then
     LIBS="-ldl $LIBS"
   fi
 fi
-if test "$has_dlopen" = no -a X"$osname" = Xos2; then
-  echo "Will use the builtin dlopen() support for OS/2..."
-  has_dlopen=builtin
+if test "$has_dlopen" = no; then
+  case "$osname" in
+    os2|darwin)
+      echo "Will use builtin dlopen() support for $osname..."
+      has_dlopen=builtin
+  esac
 fi
