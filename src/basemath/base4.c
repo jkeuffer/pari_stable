@@ -1259,15 +1259,17 @@ nf_to_Fp_simple(GEN x, GEN prh)
 }
 
 GEN
-famat_to_Fp_simple(GEN g, GEN e, GEN prh)
+famat_to_Fp_simple(GEN nf, GEN g, GEN e, GEN prh)
 {
   GEN t = gun, h,n, p = gcoeff(prh,1,1), q = subis(p,1);
-  long i, lx = lg(g);
+  long i, t, lx = lg(g);
   for (i=1; i<lx; i++)
   {
     n = (GEN)e[i]; n = modii(n,q);
     if (!signe(n)) continue;
-    h = nf_to_Fp_simple((GEN)g[i], prh);
+    h = (GEN)g[i]; t = typ(h);
+    if (t == t_POL || t == t_POLMOD) h = algtobasis(nf, h);
+    if (t != t_COL) h = gmod(h, p); else h = nf_to_Fp_simple(h, prh);
     t = mulii(t, powmodulo(h, n, p)); /* not worth reducing */
   }
   return modii(t, p);
@@ -1275,12 +1277,12 @@ famat_to_Fp_simple(GEN g, GEN e, GEN prh)
 
 /* cf famat_to_nf_modideal_coprime, but id is a prime of degree 1 (=prh) */
 GEN
-to_Fp_simple(GEN x, GEN prh)
+to_Fp_simple(GEN nf, GEN x, GEN prh)
 {
   switch(typ(x))
   {
     case t_COL: return nf_to_Fp_simple(x,prh);
-    case t_MAT: return famat_to_Fp_simple((GEN)x[1],(GEN)x[2],prh);
+    case t_MAT: return famat_to_Fp_simple(nf,(GEN)x[1],(GEN)x[2],prh);
     default: err(impl,"generic conversion to finite field");
   }
   return NULL;

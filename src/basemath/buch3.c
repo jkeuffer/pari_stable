@@ -1093,7 +1093,7 @@ lowerboundforregulator(GEN bnf)
   return x;
 }
 
-extern GEN to_Fp_simple(GEN x, GEN prh);
+extern GEN to_Fp_simple(GEN nf, GEN x, GEN prh);
 extern GEN Fp_PHlog(GEN a, GEN g, GEN p, GEN ord);
 
 /* Compute a square matrix of rank length(beta) associated to a family
@@ -1128,7 +1128,7 @@ primecertify(GEN bnf,GEN beta,long pp,GEN big)
       newcol = cgetg(lb+1,t_COL);
       for (j=1; j<=lb; j++)
       {
-        GEN t = to_Fp_simple((GEN)beta[j], Qh);
+        GEN t = to_Fp_simple(nf, (GEN)beta[j], Qh);
         newcol[j] = (long)Fp_PHlog(t,g,qgen,ord);
       }
       if (DEBUGLEVEL>3)
