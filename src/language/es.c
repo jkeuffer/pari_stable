@@ -2636,13 +2636,58 @@ readobj(FILE *f)
   return x;
 }
 
-#define MAGIC "\007\020" /* ^G^P */
+#define MAGIC "\020\001\022\011-\007\020" /* ^P^A^R^I-^G^P */
+#ifdef LONG_IS_64BIT
+#  define ENDIAN_CHECK 0x0102030405060708L
+#else
+#  define ENDIAN_CHECK 0x01020304L
+#endif
+const long BINARY_VERSION = 0;
+
+static int
+is_magic_ok(FILE *f)
+{
+  int L = strlen(MAGIC);
+  char *s = gpmalloc(L);
+  int r = (fread(s,1,L, f) == L && strncmp(s,MAGIC,L) == 0);
+  free(s); return r;
+}
+
+static int
+is_sizeoflong_ok(FILE *f)
+{
+  char c;
+  return (fread(&c,1,1, f) == 1 && c == sizeof(long));
+}
+
+static int
+is_long_ok(FILE *f, long L)
+{
+  long c;
+  return (fread(&c,sizeof(long),1, f) == 1 && c == L);
+}
+
 static void
 check_magic(char *name, FILE *f)
 {
-  char s[2];
-  if (fread(s,1,2, f) < 2) err(openfiler,"binary input",name);
-  if (strncmp(s,MAGIC,2)) err(talker,"%s is not a GP binary file",name);
+  if (!is_magic_ok(f))
+    err(talker, "%s is not a GP binary file",name);
+  if (!is_sizeoflong_ok(f))
+    err(talker, "%s not written for a %ld bit architecture",
+               name, sizeof(long)*8);
+  if (!is_long_ok(f, ENDIAN_CHECK))
+    err(talker, "unexpected endianness in %s",name);
+  if (!is_long_ok(f, BINARY_VERSION))
+    err(talker, "%s written by an incompatible version of GP",name);
+}
+
+static void
+write_magic(FILE *f)
+{
+  fprintf(f, MAGIC);
+  fprintf(f, "%c", sizeof(long));
+  wr_long(ENDIAN_CHECK, f);
+  wr_long(BINARY_VERSION, f);
 }
 
 int
@@ -2661,7 +2706,7 @@ writebin(char *name, GEN x)
   if (f) { check_magic(name,f); fclose(f); }
   f = fopen(name,"a");
   if (!f) err(openfiler,"binary output",name);
-  if (!already) fprintf(f, MAGIC);
+  if (!already) write_magic(f);
 
   if (x) writeGEN(x,f);
   else
