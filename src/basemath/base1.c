@@ -1775,14 +1775,12 @@ chk_gen_init(FP_chk_fun *chk, GEN r, GEN mat)
 {
   CG_data *d = (CG_data*)chk->data;
   nfbasic_t *T = d->T;
-  GEN P, bound, prev, x, M = cgetg(2, t_MAT);
-  long l = lg(r), N = l-1, i, dx, prec, rankM = 1;
+  GEN P, bound, prev, x, M = cgetg(1, t_MAT);
+  long l = lg(r), N = l-1, i, dx, prec, rankM = 0;
   int skipfirst = 0;
 
   d->u = mat;
   d->ZKembed = gmul(d->M, mat);
-
-  M[1] = (long)gscalcol_i(gun, N);
 
   bound = d->bound;
   prev = NULL;
@@ -1802,17 +1800,22 @@ chk_gen_init(FP_chk_fun *chk, GEN r, GEN mat)
     }
     if (DEBUGLEVEL>2) fprintferr("chk_gen_init: subfield %Z\n",P);
     if (skipfirst != i-1) continue;
-    y1 = y = Q_primpart((GEN)T->bas[i]);
+    y1 = (GEN)T->bas[i];
+    y = Q_primpart(y1);
+    if (y == y1) y = dummycopy(y1);
+    y1 = y;
     M2 = cgetg(dx, t_MAT);
+    y1[2] = zero; /* zero constant coeff */
     for (j = 1; j < dx; j++)
     {
       if (j > 1) { y = gmul(y, y1); y = Q_primpart(gres(y, T->x)); }
+      y[2] = zero; /* zero constant coeff */
       M2[j] = (long)pol_to_vec(y, N);
     }
     M = image(concatsp(M, M2));
     new = lg(M) - 1;
     if (new > rankM) rankM = new;
-    if (rankM == N) continue;
+    if (rankM == N-1) continue; /* 1 (constant coeff) is implicit */
 
     /* Q(w[1],...,w[i-1]) is a strict subfield of nf */
     skipfirst++;
