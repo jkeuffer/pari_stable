@@ -427,19 +427,19 @@ gpowgs(GEN x, long n)
   {
     case t_INT:
     {
-      long sx=signe(x), sr = (sx<0 && (n&1))? -1: 1;
+      long sx = signe(x), sr = (sx<0 && (n&1))? -1: 1;
       if (n>0) return puissii(x,(GEN)gn,sr);
       if (!sx) err(gdiver);
       if (is_pm1(x)) return (sr < 0)? icopy(x): gun;
       /* n<0, |x|>1 */
-      y=cgetg(3,t_FRAC); setsigne(gn,1);
-      y[1]=(sr>0)? un: lnegi(gun);
-      y[2]=(long)puissii(x,(GEN)gn,1); /* force denominator > 0 */
+      y = cgetg(3,t_FRAC); setsigne(gn,1);
+      y[1] = (sr>0)? un: lnegi(gun);
+      y[2] = (long)puissii(x,(GEN)gn,1); /* force denominator > 0 */
       return y;
     }
     case t_INTMOD:
-      y=cgetg(3,tx); copyifstack(x[1],y[1]);
-      y[2]=(long)Fp_pow((GEN)(x[2]),(GEN)gn,(GEN)(x[1]));
+      y = cgetg(3,t_INTMOD); copyifstack(x[1],y[1]);
+      y[2] = (long)Fp_pow((GEN)(x[2]),(GEN)gn,(GEN)(x[1]));
       return y;
     case t_FRAC:
     {
@@ -454,7 +454,7 @@ gpowgs(GEN x, long n)
         y = b; b = a; a = y;
       }
       /* HACK: puissii disregards the sign of gn */
-      y = cgetg(3,tx);
+      y = cgetg(3, t_FRAC);
       y[1] = (long)puissii(a,(GEN)gn,sr);
       y[2] = (long)puissii(b,(GEN)gn,1);
       return y;
@@ -463,28 +463,27 @@ gpowgs(GEN x, long n)
       return powgi(x,gn);
     case t_RFRAC:
     {
-      av=avma; y=cgetg(3,tx); m = labs(n);
-      y[1]=lpowgs((GEN)x[1],m);
-      y[2]=lpowgs((GEN)x[2],m);
-      if (n<0) y=ginv(y);	/* let ginv worry about normalizations */
+      av = avma; y = cgetg(3, t_RFRAC); m = labs(n);
+      y[1] = lpowgs((GEN)x[1],m);
+      y[2] = lpowgs((GEN)x[2],m);
+      if (n < 0) y = ginv(y);
       return gerepileupto(av,y);
     }
     default:
       m = labs(n);
-      av=avma; y=NULL; lim=stack_lim(av,1);
+      av = avma; y = NULL; lim = stack_lim(av,1);
       for (; m>1; m>>=1)
       {
         if (m&1) y = y? gmul(y,x): x;
-        x=gsqr(x);
+        x = gsqr(x);
         if (low_stack(lim, stack_lim(av,1)))
         {
-          GEN *gptr[2]; gptr[0]=&x; gptr[1]=&y;
           if(DEBUGMEM>1) err(warnmem,"[3]: gpowgs");
-          gerepilemany(av,gptr,y? 2: 1);
+          gerepileall(av, y? 2: 1, &x, &y);
         }
       }
       y = y? gmul(y,x): x;
-      if (n<=0) y=ginv(y);
+      if (n < 0) y = ginv(y);
       return gerepileupto(av,y);
   }
 }
