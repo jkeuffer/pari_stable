@@ -48,6 +48,7 @@ E=ellinit([1,0,1,-120039822036992245303534619191166796374,5042249924849106700108
 x1=1e100; y1=ellordinate(E,x1)[1];
 ellpointtoz(E,[x1,y1]); -->  impossible addition t_VEC + t_VEC.
        [ precision error ]
+    5- erfc(non scalar) --> type error
 
   Changed
     1- bnfinit: [small_norm phase] speed up norm computations.

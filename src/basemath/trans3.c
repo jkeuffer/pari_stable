@@ -1067,10 +1067,10 @@ veceint1(GEN C, GEN nmax, long prec)
 GEN
 gerfc(GEN x, long prec)
 {
-  pari_sp av=avma;
-  GEN p1,p2;
+  pari_sp av;
+  GEN p1, p2;
 
-  if (typ(x)!=t_REAL) { p1=cgetr(prec); gaffect(x,p1); x=p1; }
+  if (typ(x)!=t_REAL) return transc(&gerfc, x, prec);
   av = avma; p1 = incgam(ghalf,gsqr(x),prec);
   p2 = mpsqrt(mppi(lg(x)));
   p1 = divrr(p1,p2);
