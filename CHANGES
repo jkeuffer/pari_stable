@@ -307,6 +307,7 @@ BA 15- galoisisabelian, galoisexport, galoisidentify and galoissubgroups now
    19- new function isperfectpower
    20- forvec iterator
 GH 21- new function zncoppersmith
+   22- public interface to forvec() [ forvec_start + forvec_data, for GP2C ]
 
   Removed
     1- obsolete macro leadingcoeff [kept for backward compatibility but

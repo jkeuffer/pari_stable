@@ -205,17 +205,13 @@ fordiv(GEN a, entree *ep, char *ch)
  *   fl = 1: impose a1 <= ... <= an
  *   fl = 2:        a1 <  ... <  an
  */
-typedef struct {
-  GEN *a, *m, *M; /* current n-uplet, minima, Maxima */
-  long n; /* length */
-} fvdat;
 
 static GEN
-forvec_dummy(fvdat *d) { return NULL; } /* used for empty vector, n = 0 */
+forvec_dummy(forvec_data *d) { return NULL; } /* used for empty vector, n = 0 */
 
 /* increment and return d->a [over integers]*/
 static GEN
-forvec_next_i(fvdat *d)
+forvec_next_i(forvec_data *d)
 {
   long i = d->n;
   for (;;) {
@@ -228,7 +224,7 @@ forvec_next_i(fvdat *d)
 }
 /* increment and return d->a [generic]*/
 static GEN
-forvec_next(fvdat *d)
+forvec_next(forvec_data *d)
 {
   long i = d->n;
   for (;;) {
@@ -242,7 +238,7 @@ forvec_next(fvdat *d)
 
 /* non-decreasing order [over integers] */
 static GEN
-forvec_next_le_i(fvdat *d)
+forvec_next_le_i(forvec_data *d)
 {
   long i = d->n, imin = d->n;
   for (;;) {
@@ -275,7 +271,7 @@ forvec_next_le_i(fvdat *d)
 }
 /* non-decreasing order [generic] */
 static GEN
-forvec_next_le(fvdat *d)
+forvec_next_le(forvec_data *d)
 {
   long i = d->n, imin = d->n;
   for (;;) {
@@ -308,7 +304,7 @@ forvec_next_le(fvdat *d)
 }
 /* strictly increasing order [over integers] */
 static GEN
-forvec_next_lt_i(fvdat *d)
+forvec_next_lt_i(forvec_data *d)
 {
   long i = d->n, imin = d->n;
   for (;;) {
@@ -341,7 +337,7 @@ forvec_next_lt_i(fvdat *d)
 }
 /* strictly increasing order [generic] */
 static GEN
-forvec_next_lt(fvdat *d)
+forvec_next_lt(forvec_data *d)
 {
   long i = d->n, imin = d->n;
   for (;;) {
@@ -374,7 +370,7 @@ forvec_next_lt(fvdat *d)
 }
 
 GEN
-forvec_start(fvdat *d, GEN x, long flag, GEN (**next)(fvdat*))
+forvec_start(forvec_data *d, GEN x, long flag, GEN (**next)(forvec_data*))
 {
   long i, tx = typ(x), l = lg(x), t = t_INT;
 
@@ -427,8 +423,8 @@ void
 forvec(entree *ep, GEN x, char *c, long flag)
 {
   pari_sp av = avma;
-  fvdat D;
-  GEN (*next)(fvdat *);
+  forvec_data D;
+  GEN (*next)(forvec_data *);
   GEN v = forvec_start(&D, x, flag, &next);
   push_val(ep, v);
   while (v) {
