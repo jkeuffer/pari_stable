@@ -1265,11 +1265,11 @@ splitorbite(GEN O)
     fc[i] = itos(powgi(((GEN **) F)[1][i], ((GEN **) F)[2][i]));
   lbot = avma;
   res = cgetg(lg(fc), t_VEC);
-  for (i = lg(fc)-1; i >= 1; i--)
+  for (i = 1; i < lg(fc); i++)
   {
     GEN v;
     v = cgetg(3, t_VEC);
-    res[i] = (long) v;
+    res[lg(fc)-i] = (long) v;
     v[1] = (long) permcyclepow(O, n / fc[i]);
     v[2] = (long) stoi(fc[i]);
   }
@@ -2740,8 +2740,8 @@ GEN
 galoispermtopol(GEN gal, GEN perm)
 {
   gal = checkgal(gal);
-  if (typ(perm) != t_VEC)
-    err(typeer, "galoispermtopol:");
+  if (typ(perm) != t_VECSMALL)
+    err(typeer, "galoispermtopol");
   return permtopol(perm, (GEN) gal[3], (GEN) gal[4], (GEN) gal[5], varn((GEN) gal[1]));
 }
 GEN
@@ -2750,10 +2750,14 @@ galoisfixedfield(GEN gal, GEN perm, GEN p)
   ulong ltop = avma, lbot;
   GEN P, S, PL, O, res, mod;
   long x;
+  int i;
   x = varn((GEN) gal[1]);
   gal = checkgal(gal);
   if (typ(perm) != t_VEC)
-    err(typeer, "galoisfixedfield:");
+    err(typeer, "galoisfixedfield");
+  for(i=1;i<lg(perm);i++)
+    if (typ(perm[i]) != t_VECSMALL)
+      err(typeer, "galoisfixedfield");
   if (p)
   {
     if (typ(p) != t_INT)
