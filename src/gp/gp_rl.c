@@ -88,9 +88,9 @@ extern void* _rl_save_prompt(void);
 #  define USER_COMPLETION rl_username_completion_function
 #  define DING rl_ding
 #else
-typedef char** (*CF)(char*, char* (*)(void)); /* completion function */
+typedef char** (*CF)(const char*, GF); /* completion function */
 #  define COMPLETION_MATCHES(a,b) \
-      ((CF)completion_matches)((char*)(a),(GF)(b))
+      ((CF)completion_matches)((a),(b))
 #  define FILE_COMPLETION ((GF)filename_completion_function)
 #  define USER_COMPLETION ((GF)username_completion_function)
 #  define DING ding
