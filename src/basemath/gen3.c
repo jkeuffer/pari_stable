@@ -2862,13 +2862,8 @@ simplify_i(GEN x)
 
     case t_POLMOD: y=cgetg(3,t_POLMOD);
       y[1]=(long)simplify_i((GEN)x[1]);
-      i = typ(y[1]);
-      if (i != t_POL)
-      {
-        if (i == t_INT) y[0] = evallg(3)|evaltyp(t_INTMOD);
-        else y[1] = x[1]; /* invalid object otherwise */
-      }
-      y[2]=lmod(simplify_i((GEN)x[2]),(GEN)y[1]); return y;
+      if (typ(y[1]) != t_POL) y[1] = x[1]; /* invalid object otherwise */
+      y[2]=(long)simplify_i((GEN)x[2]); return y;
 
     case t_POL:
       lx=lg(x); if (lx==2) return gzero;
