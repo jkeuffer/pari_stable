@@ -1802,8 +1802,8 @@ fa = factor(2^2^7 +1)
 isprime( fa[,1] )
 @eprog
 \noindent An argument \var{lim} can be added, meaning that we look only for
-factors up to \var{lim}, or to \kbd{primelimit}, whichever is lowest (except
-when $\var{lim}=0$ where the effect is identical to setting
+prime factors $p < \var{lim}$, or up to \kbd{primelimit}, whichever is lowest
+(except when $\var{lim}=0$ where the effect is identical to setting
 $\var{lim}=\kbd{primelimit}$). In this case, the remaining part may actually
 be a proven composite! See \tet{factorint} for more information about the
 algorithms used.
