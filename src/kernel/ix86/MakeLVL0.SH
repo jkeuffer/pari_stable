@@ -10,6 +10,6 @@ level0.s: $level0/l0asm.c $level0/l0asm.h
 	  sed -e '/^#/d' -e '/^ *#line/d' -e 's/%  */%/g' \
 	      -e 's/\. /./g' -e 's/ :/:/g' > level0.s
 kernel\$(_O):  level0.s
-	\$(CC) -c \$(CFLAGS) \$(CPPFLAGS) -o kernel\$(_O) level0.s
+	\$(CC) -c \$(CFLAGS) \$(DLCFLAGS) \$(CPPFLAGS) -o kernel\$(_O) level0.s
 
 EOT

@@ -7,6 +7,6 @@ cat >> $file << EOT
 parilvl0.h: $level0/asm0.h $none/divll.h
 	cat $level0/asm0.h $none/divll.h > parilvl0.h
 kernel\$(_O): $none/level0.h pariinl.h
-	\$(CC) -c \$(CFLAGS) \$(CPPFLAGS) -o kernel\$(_O) $none/level0.c
+	\$(CC) -c \$(CFLAGS) \$(DLCFLAGS) \$(CPPFLAGS) -o kernel\$(_O) $none/level0.c
 EOT
 
