@@ -241,6 +241,16 @@ nfroots(GEN nf,GEN pol)
   return gerepileupto(av, gen_sort(A, 0, cmp_pol));
 }
 
+int
+nfisgalois(GEN nf, GEN x)
+{
+  gpmem_t av = avma;
+  long l;
+  if (degpol(x) <= 2) return 1;
+  l = lg(nfsqff(nf, x, 2));
+  avma = av; return l != 1;
+}
+
 /* return a minimal lift of elt modulo id */
 static GEN
 nf_bestlift(GEN elt, GEN bound, nflift_t *T)
@@ -1237,7 +1247,8 @@ nf_combine_factors(nfcmbf_t *T, GEN polred, GEN p, long a, long klim)
 /* return the factorization of the square-free polynomial x.
    The coeff of x are in Z_nf and its leading term is a rational integer.
    deg(x) > 1, deg(nfpol) > 1
-   If fl = 1,return only the roots of x in nf */
+   If fl = 1, return only the roots of x in nf
+   If fl = 2, as fl=1 if pol splits, [] otherwise */
 static GEN
 nfsqff(GEN nf, GEN pol, long fl)
 {
@@ -1254,7 +1265,7 @@ nfsqff(GEN nf, GEN pol, long fl)
   polbase = unifpol(nf,pol,0);
   polmod  = unifpol(nf,pol,1);
   /* heuristic */
-#if 0
+#if 1
   if (dpol*4 < n) 
   {
     if (DEBUGLEVEL>2) fprintferr("Using Trager's method\n");
@@ -1286,6 +1297,7 @@ nfsqff(GEN nf, GEN pol, long fl)
       if (DEBUGLEVEL>3)
         fprintferr("%3ld %s at prime ideal above %Z\n",
                    nbf, fl?"roots": "factors", p);
+      if (fl == 2 && nbf < dpol) return cgetg(1,t_VEC);
       if (nbf <= 1)
       {
         if (!fl) /* irreducible */
@@ -1357,6 +1369,7 @@ nfsqff(GEN nf, GEN pol, long fl)
       x_r[2] = lneg(r); /* check P(r) == 0 */
       q = RXQX_divrem(pol, x_r, nfpol, ONLY_DIVIDES);
       if (q) { pol = q; rep[m++] = (long)r; }
+      else if (fl == 2) return cgetg(1, t_VEC);
     }
     rep[0] = evaltyp(t_VEC) | evallg(m);
     return gerepilecopy(av, rep);
