@@ -367,7 +367,7 @@ clean: cleanobj cleantest cleanemacs
 .headers: $HEADERS
 	@touch \$@
 
-install: install-lib-$dft install-include install-bin install-man install-misc install-doc install-examples install-cfg
+install: install-lib-$dft install-include install-bin install-man install-misc install-doc install-examples install-cfg install-data
 
 install-include:
 	-mkdir -p \$(INCLUDEDIR)
@@ -463,10 +463,14 @@ install-examples:
 	-\$(INSTALL_DATA) $ex/taylor.gp   \$(EXDIR)
 
 install-data:
-	-cd $data; for d in \`ls\`; do \
-	   mkdir -p \$(DATADIR)/\$\$d && \
-	   for f in \`ls \$\$d\`; do \
-	     \$(INSTALL_DATA) \$\$d/\$\$f \$(DATADIR)/\$\$d; done >/dev/null; done
+	-if test -d $data; then cd $data; \
+	   for d in \`ls\`; do \
+	     mkdir -p \$(DATADIR)/\$\$d && \
+	     for f in \`ls \$\$d\`; do \
+	       \$(INSTALL_DATA) \$\$d/\$\$f \$(DATADIR)/\$\$d; \
+	     done >/dev/null;\
+	   done; \
+	 fi
 
 install-lib-sta: \$(LIBPARI_STA)
 	-mkdir -p \$(LIBDIR)
