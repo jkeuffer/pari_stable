@@ -3663,45 +3663,50 @@ arguments are forbidden.
 
 \syn{galoisapply}{\var{nf},\var{aut},x}.
 
-\subsecidx{nfgaloisconj}$(\var{nf},\{\fl=0\},\{d\})$: $\var{nf}$ being a number
-field as output by \kbd{nfinit}, computes the conjugates of a
-root $r$ of the non-constant polynomial $x=\var{nf\/}[1]$ expressed as
-polynomials in $r$. This can be used even if the number field $\var{nf}$ is not
-\idx{Galois} since some conjugates may lie in the field. As a note to old-timers
-of PARI, starting with version 2.0.17 this function works much better than in
-earlier versions.
-
+\subsecidx{nfgaloisconj}$(\var{nf},\{\fl=0\},\{d\})$: $\var{nf}$ being a
+number field as output by \kbd{nfinit}, computes the conjugates of a root
+$r$ of the non-constant polynomial $x=\var{nf\/}[1]$ expressed as
+polynomials in $r$. This can be used even if the number field $\var{nf}$ is
+not \idx{Galois} since some conjugates may lie in the field. As a note to
+old-timers of PARI, starting with version 2.0.17 this function works much
+better than in earlier versions.
 
 $\var{nf}$ can simply be a polynomial if $\fl\neq 1$.
 
-If no flags or $\fl=0$, if $\var{nf}$ is a number field use a combination of
-flag $4$ and $1$ and the result is always complete, else use a combination of
-flag $4$ and $2$ and the result is subject to the restriction of $\fl=2$.
-
+If no flags or $\fl=0$, if $\var{nf}$ is a number field use a combination
+of flag $4$ and $1$ and the result is always complete, else use a
+combination of flag $4$ and $2$ and the result is subject to the
+restriction of $\fl=2$.
 
 If $\fl=1$, use \kbd{nfroots} (require a number field). 
 
 If $\fl=2$, use complex approximations to the roots and an integral
-\idx{LLL}. The result is not guaranteed to be complete: some conjugates may be
-missing (especially so if the corresponding polynomial has a huge
-denominator). In that case, increasing the default precision may help.
+\idx{LLL}. The result is not guaranteed to be complete: some conjugates may
+be missing (especially so if the corresponding polynomial has a huge
+index). In that case, increasing the default precision may help.
 
-If $\fl=4$, use Allombert's algorithm and permutation testing. If the field is
-Galois with ``weakly'' super solvable Galois group, return the complete list of
-automorphisms, else only the identity element. If present, $d$ is assumed to be
-a multiple of the index of the power basis in the maximal order.
+If $\fl=4$, use Allombert's algorithm and permutation testing. If the field
+is Galois with ``weakly'' super solvable Galois group, return the complete
+list of automorphisms, else only the identity element. If present, $d$ is
+assumed to be a multiple of the index of the power basis in the maximal
+order.
 
-A group G is ``weakly'' super solvable if it contains a super solvable normal
-subgroup $H$ such that $G=H$ , or $G/H \cong A_4$ , or $G/H \cong S_4$ . Abelian and
-nilpotent groups are ``weakly'' super solvable.  In practice, almost all groups
-of small order are weakly super solvable, the exceptions having order 36(1
-exception), 48(2), 56(1), 60(1), 72(5), 75(1), 80(1), 96(10) and $\geq 108$.
+A group G is ``weakly'' super solvable if it contains a super solvable
+normal subgroup $H$ such that $G=H$ , or $G/H \simeq A_4$ , or $G/H \simeq
+S_4$. Abelian and nilpotent groups are ``weakly'' super solvable.  In
+practice, almost all groups of small order are weakly super solvable, the
+exceptions having order 36(1 exception), 48(2), 56(1), 60(1), 72(5), 75(1),
+80(1), 96(10) and $\geq 108$.
 
-Hence $\fl = 4$ permits to quickly check whether a polynomial of order strictly
-less than $36$ is Galois or not. This method is much faster than \kbd{nfroots}
-and be applied to polynomial of degree more than $50$. 
+Hence $\fl = 4$ permits to quickly check whether a polynomial of order
+strictly less than $36$ is Galois or not. This method is much faster than
+\kbd{nfroots} and be applied to polynomial of degree more than $50$. 
 
-\syn{galoisconj0}{\var{nf},\fl,d,\var{prec}}. Also available are $\teb{galoisconj}(\var{nf})$ for $\fl=0$, $\teb{galoisconj2}(\var{nf},n,\var{prec})$ for $\fl=2$ where $n$ is a bound on the number of conjugates, and  $\teb{galoisconj4}(\var{nf},d)$ corresponding to $\fl=4$.
+\syn{galoisconj0}{\var{nf},\fl,d,\var{prec}}. Also available are
+$\teb{galoisconj}(\var{nf})$ for $\fl=0$,
+$\teb{galoisconj2}(\var{nf},n,\var{prec})$ for $\fl=2$ where $n$ is a bound
+on the number of conjugates, and  $\teb{galoisconj4}(\var{nf},d)$
+corresponding to $\fl=4$.
 
 \subsecidx{nfhilbert}$(\var{nf},a,b,\{\var{pr}\})$: if \var{pr} is omitted,
 compute the global \idx{Hilbert symbol} $(a,b)$ in $\var{nf}$, that is $1$
