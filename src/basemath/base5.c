@@ -196,7 +196,7 @@ static GEN
 modulereltoabs(GEN rnf, GEN x)
 {
   GEN w = (GEN)x[1], I = (GEN)x[2], nf = (GEN)rnf[10], rnfeq = (GEN)rnf[11];
-  GEN M, basnf, cobasnf, T = (GEN)nf[1];
+  GEN M, basnf, cobasnf, T = (GEN)nf[1], polabs = (GEN)rnfeq[1];
   long i, j, k, n = lg(w)-1, m = degpol(T);
 
   M = cgetg(n*m+1, t_VEC);
@@ -211,7 +211,7 @@ modulereltoabs(GEN rnf, GEN x)
     for (j=1; j<=m; j++)
     {
       GEN c, z = Q_primitive_part(gmul(basnf,(GEN)id[j]), &c);
-      z = RgX_rem(gmul(om, RgX_rem(z,T)), T);
+      z = RgX_rem(gmul(om, RgX_rem(z,polabs)), polabs);
       c = mul_content(c, c0); if (c) z = gmul(c, z);
       M[k++] = (long)z;
     }
