@@ -217,8 +217,7 @@ get_Char(GEN chic, long prec)
 {
   GEN d, C;
   C = cgetg(4, t_VEC);
-  d = denom(chic);
-  C[1] = lmul(d, chic);
+  C[1] = (long)Q_remove_denom(chic, &d); if (!d) d = gun;
   C[2] = (long)InitRU(d, prec);
   C[3] = (long)d; return C;
 }
@@ -242,7 +241,7 @@ GetPrimChar(GEN chi, GEN bnr, GEN bnrc, long prec)
 {
   long nbg, i, j, l, nd;
   pari_sp av = avma;
-  GEN s, chic, cyc, U, M, p1, cond, condc, p2, nf;
+  GEN s, chic, cyc, U, M, cond, condc, p1, nf;
   GEN prdiff, Mrc;
 
   cond  = gmael(bnr,  2, 1);
@@ -259,20 +258,18 @@ GetPrimChar(GEN chi, GEN bnr, GEN bnrc, long prec)
   chic = cgetg(l, t_VEC);
   for (i = 1; i < l; i++)
   {
-    s  = gzero; p1 = (GEN)U[i + nbg];
+    GEN u = (GEN)U[i + nbg];
+    s  = gzero;
     for (j = 1; j <= nbg; j++)
-    {
-      p2 = gdiv((GEN)p1[j], (GEN)cyc[j]);
-      s  = gadd(s, gmul(p2,(GEN)chi[j]));
-    }
+      s  = gadd(s, gdiv(mulii((GEN)u[j], (GEN)chi[j]), (GEN)cyc[j]));
     chic[i] = (long)s;
   }
 
   condc = (GEN)condc[1];
-  p2 = divcond(bnr); l  = lg(p2);
+  p1 = divcond(bnr); l  = lg(p1);
   prdiff = cgetg(l, t_COL);
   for (nd=1, i=1; i < l; i++)
-    if (!idealval(nf, condc, (GEN)p2[i])) prdiff[nd++] = p2[i];
+    if (!idealval(nf, condc, (GEN)p1[i])) prdiff[nd++] = p1[i];
   setlg(prdiff, nd);
 
   p1  = cgetg(3, t_VEC);
@@ -460,7 +457,7 @@ GetIndex(GEN pr, GEN bnr, GEN subgroup)
     M = gmul(M, subgroup);
     subpr = hnf(concatsp(M, diagonal(cycpr)));
     /* e = #(bnr/subgroup) / #(bnrpr/subpr) */
-    e = itos( divii(dethnf_i(subgroup), dethnf_i(subpr)) );
+    e = itos( diviiexact(dethnf_i(subgroup), dethnf_i(subpr)) );
   }
 
   /* f = order of [pr] in bnrpr/subpr */
@@ -748,7 +745,8 @@ ComputeArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
   if (!gcmp1(gcoeff(idg, 1, 1)))
   {
     GEN p1 = idealfactor(nf, idg);
-    GEN p2 = factorcond(bnr);
+    GEN p2 = cgetg(3, t_MAT);
+    p2[1] = (long)divcond(bnr);
     p2[2] = (long)zerocol(lg(p2[1])-1);
     p1 = concat_factor(p1,p2);
 
