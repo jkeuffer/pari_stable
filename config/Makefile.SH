@@ -285,7 +285,7 @@ install-man::
 	\$(INSTALL_DATA) $doc/gphelp.1 \$(MANDIR)
 	\$(INSTALL_DATA) $doc/gp.1 \$(MANDIR)
 	-\$(RM) \$(MANDIR)/pari.1
-	-\$(LN) \$(MANDIR)/gp.1 \$(MANDIR)/pari.1
+	-\$(LN) gp.1 \$(MANDIR)/pari.1
 
 install-misc: $install_emacs_files
 
