@@ -737,55 +737,59 @@ hil(GEN x, GEN y, GEN p)
 GEN
 mpsqrtmod(GEN a, GEN p)
 {
-  long av = avma, av1,tetpil,lim,i,k,e;
-  GEN p1,p2,v,y,w,m1,m;
+  long av = avma, av1,lim,i,k,e;
+  GEN p1,q,v,y,w,m;
 
   if (typ(a) != t_INT || typ(p) != t_INT) err(arither1);
-  p1=addsi(-1,p); e=vali(p1);
+  p1 = addsi(-1,p); e = vali(p1);
   if (e == 0) /* p = 2 */
   {
     avma = av;
+    if (!egalii(p, gdeux))
+      err(talker,"composite modulus in mpsqrtmod: %Z",p);
     if (!signe(a) || !mod2(a)) return gzero;
     return gun;
   }
-  p2=shifti(p1,-e);
+  q = shifti(p1,-e); /* q = (p-1)/2^oo is odd */
   if (e == 1) y = p1;
   else
     for (k=2; ; k++)
-    {
+    { /* loop terminates for k < p (even if p composite) */
       av1 = avma;
-      m1 = m = powmodulo(stoi(k),p2,p);
+      y = m = powmodulo(stoi(k),q,p);
       for (i=1; i<e; i++)
-	if (gcmp1(m=sqrmod(m,p))) break;
-      if (i==e) { y = m1; break; }
+	if (gcmp1(m = sqrmod(m,p))) break;
+      if (i == e) break; /* success */
       avma = av1;
     }
-  /* y contient un generateur de (Z/pZ)* eleve a la puis (p-1)/2^e */
 
-  p1=shifti(p2,-1); p1=powmodulo(a,p1,p);
+  p1 = powmodulo(a, shifti(q,-1), p); /* a ^ [(q-1)/2] */
   if (!signe(p1)) { avma=av; return gzero; }
-
-  p2=mulii(p1,a); v = modii(p2,p);
-  p1=mulii(sqri(p1),a); w = modii(p1,p);
+  v = modii(mulii(a, p1), p);
+  w = modii(mulii(v, p1), p);
   lim = stack_lim(av,1);
   while (!gcmp1(w))
-  {
-    /* if p is not prime, next loop will not end */
-    p1=sqrmod(w,p); for (k=1; !gcmp1(p1); k++) p1 = sqrmod(p1,p);
-    if (k==e) { avma=av; return NULL; }
-    p1=y; for (i=1; i<e-k; i++) p1=sqrmod(p1,p);
-    e = k; v = modii(mulii(p1,v),p);
-    y = sqrmod(p1,p); w = modii(mulii(y,w),p);
+  { /* a*w = v^2, y primitive 2^e-th root of 1
+       a square --> w even power of y, hence w^(2^(e-1)) = 1 */
+    p1 = sqrmod(w,p);
+    for (k=1; !gcmp1(p1) && k < e; k++) p1 = sqrmod(p1,p);
+    if (k == e) { avma=av; return NULL; } /* p composite or (a/p) != 1 */
+    /* w ^ (2^k) = 1 --> w = y ^ (u * 2^(e-k)), u odd */
+    p1 = y;
+    for (i=1; i < e-k; i++) p1 = sqrmod(p1,p);
+    y = sqrmod(p1, p); e = k;
+    w = modii(mulii(y, w), p);
+    v = modii(mulii(v, p1), p);
     if (low_stack(lim, stack_lim(av,1)))
     {
-      GEN *gptr[3];
+      GEN *gptr[3]; gptr[0]=&y; gptr[1]=&w; gptr[2]=&v;
       if(DEBUGMEM>1) err(warnmem,"mpsqrtmod");
-      gptr[0]=&y; gptr[1]=&v; gptr[2]=&w;
       gerepilemany(av,gptr,3);
     }
   }
-  p1=subii(p,v); if (cmpii(v,p1)>0) v = p1;
-  tetpil=avma; return gerepile(av,tetpil,icopy(v));
+  av1 = avma;
+  p1 = subii(p,v); if (cmpii(v,p1) > 0) v = p1; else avma = av1;
+  return gerepileuptoint(av, v);
 }
 
 /*******************************************************************/
