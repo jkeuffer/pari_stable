@@ -245,6 +245,7 @@ GEN     type0(GEN x);
 
 /* arith1.c */
 
+GEN     Fp_gener(GEN p);
 GEN     bestappr(GEN x, GEN k);
 GEN     bestappr0(GEN x, GEN a, GEN b);
 long    carrecomplet(GEN x, GEN *pt);

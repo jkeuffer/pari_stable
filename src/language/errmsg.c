@@ -105,14 +105,10 @@ char *errmessage[]=
 
 /* arither1 */
   "not an integer argument in an arithmetic function",
-/* arither2 */
-  "non-positive argument (<= 0) in an arithmetic function",
 /* arither3 */
   "zero argument in an arithmetic function",
 /* funder2 */
   "discriminant not congruent to 0 or 1 mod 4",
-/* generer */
-  "primitive root does not exist in gener",
 /* primer1 */
   "not enough precomputed primes",
 /* primer2 */

@@ -1186,8 +1186,8 @@ err(long numerr, ...)
   term_color(c_NONE); va_end(ap);
   if (numerr==errpile)
   {
-    fprintferr("\n  current stack size: %lu (%.3f Mbytes)\n",
-      top-bot, (top-bot)/1048576.);
+    size_t d = top - bot;
+    fprintferr("\n  current stack size: %lu (%.3f Mbytes)\n", d, d/1048576.);
     fprintferr("  [hint] you can increase GP stack with allocatemem()\n");
   }
   pariOut = out;
