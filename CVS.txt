@@ -80,6 +80,13 @@ simultaneously accessed without tracking version numbers. Tag names are
 The tag release-2-1-patches denotes the stable branch 2.1 as a whole, and can
 be used to checkout up to date sources from that branch in between releases.
 
+For instance: 
+
+  cvs update -r release-2-1-patches
+
+produces the latest stable distribution with all relevant patches [the ones
+not affecting stability] backported.
+
 * On Windows 95/98/2000 + Cygwin, you may have to explicitly set HOME (e.g
 in your .bashrc) to some existing directory otherwise CVS will abort on
 startup (when trying to create a .cvspass file).
