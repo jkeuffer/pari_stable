@@ -1897,7 +1897,7 @@ be_honest(FB_t *F, GEN nf, long PRECLLL)
   if (!F->powsubFB) powsubFBgen(F, nf, CBUCHG+1, 0);
   M = gprec_w(gmael(nf,5,1), PRECLLL);
   G = gprec_w(gmael(nf,5,2), PRECLLL);
-  ru = lg(G);
+  ru = lg(nf[6]);
   vdir = cgetg(ru, t_VECSMALL);
   av = avma;
   for (iz=F->KCZ+1; iz<=F->KCZ2; iz++, avma = av)
@@ -1930,9 +1930,12 @@ be_honest(FB_t *F, GEN nf, long PRECLLL)
           vdir[k] = 10;
 	}
 	avma = av2; if (k < ru) break;
+        if (++nbtest > 50)
+        {
+          err(warner,"be_honest() failure on prime %Z\n", P[j]);
+          return 0;
+        }
       }
-      nbtest += ru-1;
-      if (nbtest > 200) return 0;
       F->KCZ++; /* SUCCESS, "enlarge" factorbase */
     }
   }
