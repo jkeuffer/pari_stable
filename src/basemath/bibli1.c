@@ -2729,38 +2729,42 @@ static GEN
 nf_get_T(GEN x, GEN w)
 {
   long i,j,k, n = degpol(x);
-  GEN p1,p2,p3;
+  GEN p1,p2,t;
   GEN ptrace = cgetg(n+2,t_VEC);
   GEN den = cgetg(n+1,t_VEC);
   GEN T = cgetg(n+1,t_MAT);
+  gpmem_t av;
 
-  ptrace[2]=lstoi(n);
+  ptrace[2] = lstoi(n);
   for (k=2; k<=n; k++)
   { /* cf polsym */
     GEN y = x + (n-k+1);
-    p1 = mulsi(k-1,(GEN)y[2]);
+    av = avma;
+    t = mulsi(k-1,(GEN)y[2]);
     for (i=3; i<=k; i++)
-      p1 = addii(p1,mulii((GEN)y[i],(GEN)ptrace[i]));
-    ptrace[i] = lnegi(p1);
+      t = addii(t, mulii((GEN)y[i],(GEN)ptrace[i]));
+    ptrace[i] = (long)gerepileuptoint(av, negi(t));
   }
   w = dummycopy(w);
   for (i=1; i<=n; i++)
   {
     den[i] = (long)denom(content((GEN)w[i]));
-    w[i] = lmul((GEN)w[i],(GEN)den[i]);
+    w[i] = (long)Q_remove_denom((GEN)w[i], (GEN)den[i]);
   }
   
   for (i=1; i<=n; i++)
   {
-    p1=cgetg(n+1,t_COL); T[i]=(long)p1;
+    p1 = cgetg(n+1,t_COL); T[i] = (long)p1;
     for (j=1; j<i ; j++) p1[j] = coeff(T,i,j);
     for (   ; j<=n; j++)
     { /* cf quicktrace */
-      p2 = gres(gmul((GEN)w[i],(GEN)w[j]),x);
-      p3 = gzero;
+      av = avma;
+      p2 = gres(gmul((GEN)w[i],(GEN)w[j]), x);
+      t = gzero;
       for (k=lgef(p2)-1; k>1; k--)
-        p3 = addii(p3, mulii((GEN)p2[k],(GEN)ptrace[k]));
-      p1[j]=(long)divii(p3, mulii((GEN)den[i],(GEN)den[j]));
+        t = addii(t, mulii((GEN)p2[k], (GEN)ptrace[k]));
+      t = diviiexact(t, mulii((GEN)den[i],(GEN)den[j]));
+      p1[j] = (long)gerepileuptoint(av, t);
     }
   }
   return T;
