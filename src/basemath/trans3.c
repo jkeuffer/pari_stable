@@ -1663,7 +1663,7 @@ twistpartialzeta(GEN p, GEN q, long N, long f, long c, GEN va, GEN cff)
     }
     if (low_stack(lim, stack_lim(av, 1)))
     {
-      if(DEBUGMEM>1) err(warnmem, "twistpartialpowser");
+      if(DEBUGMEM>1) err(warnmem, "twistpartialpowser, j = %ld/%ld", j,lva);
       gerepileall(av, 2, &rep, &ser);
     }
   }
@@ -1755,7 +1755,7 @@ zetap(GEN s)
   val = gdiv(sum(vtz, 1, f-1), cft);
 
   /* adjust the precision and return */
-  return gerepileupto(av, gadd(val, zeropadic(gp, prec)));
+  return gerepileupto(av, cvtop(val, gp, prec));
 }
 
 GEN
