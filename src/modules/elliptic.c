@@ -2330,9 +2330,9 @@ static long ellrootno_all(GEN e, GEN p, GEN* ptcond);
 GEN
 lseriesell(GEN e, GEN s, GEN A, long prec)
 {
+  pari_sp av = avma, av1, lim;
   long l, n, eps, flun;
-  pari_sp av=avma, av1, tetpil, lim;
-  GEN z,p1,p2,cg,v,cga,cgb,s2,ns,gs,N;
+  GEN z, cg, v, cga, cgb, s2, ns, gs, N;
 
   if (!A) A = gun;
   else
@@ -2341,32 +2341,34 @@ lseriesell(GEN e, GEN s, GEN A, long prec)
       err(talker,"cut-off point must be positive in lseriesell");
     if (gcmpgs(A,1) < 0) A = ginv(A);
   }
+  if (typ(s) == t_INT)
+  {
+    if (signe(s) <= 0) { avma = av; return gzero; }
+    gs = mpfactr(itos(s)-1, prec);
+  }
+  else
+    gs = ggamma(s,prec);
   flun = gcmp1(A) && gcmp1(s);
   eps = ellrootno_all(e,gun,&N);
   if (flun && eps < 0) return realzero(prec);
 
   cg = divrr(Pi2n(1, prec), gsqrt(N,prec));
-  cga = gmul(cg,A);
-  cgb = gdiv(cg,A);
-  l=(long)((pariC2*(prec-2) + fabs(gtodouble(s)-1.)*log(rtodbl(cga)))
+  cga = gmul(cg, A);
+  cgb = gdiv(cg, A);
+  l = (long)((pariC2*(prec-2) + fabs(gtodouble(s)-1.) * log(rtodbl(cga)))
             / rtodbl(cgb)+1);
   v = anell(e, min((ulong)l,TEMPMAX));
   s2 = ns = NULL; /* gcc -Wall */
-  if (!flun) { s2=gsubsg(2,s); ns=gpow(cg,gsubgs(gmul2n(s,1),2),prec); }
-  z=gzero;
-  if (typ(s)==t_INT)
+  if (!flun) { s2 = gsubsg(2,s); ns = gpow(cg, gsubgs(gmul2n(s,1),2),prec); }
+  z = gzero;
+  av1 = avma; lim = stack_lim(av1,1);
+  for (n = 1; n <= l; n++)
   {
-    if (signe(s)<=0) { avma=av; return gzero; }
-    gs=mpfactr(itos(s)-1,prec);
-  }
-  else gs=ggamma(s,prec);
-  av1=avma; lim=stack_lim(av1,1);
-  for (n=1; n<=l; n++)
-  {
-    p1=gdiv(incgam4(s,gmulsg(n,cga),gs,prec),gpow(stoi(n),s,prec));
-    p2=flun? p1: gdiv(gmul(ns,incgam(s2,gmulsg(n,cgb),prec)),
-                      gpow(stoi(n),s2,prec));
-    if (eps<0) p2=gneg_i(p2);
+    GEN p1, p2;
+    p1 = gdiv(incgam4(s,mulsr(n,cga),gs,prec), gpow(stoi(n),s,prec));
+    p2 = flun? p1: gdiv(gmul(ns, incgam(s2,mulsr(n,cgb),prec)),
+                        gpow(stoi(n), s2,prec));
+    if (eps < 0) p2 = gneg_i(p2);
     z = gadd(z, gmul(gadd(p1,p2),
                      ((ulong)n<=TEMPMAX)? (GEN)v[n]: akell(e,stoi(n))));
     if (low_stack(lim, stack_lim(av1,1)))
@@ -2375,7 +2377,7 @@ lseriesell(GEN e, GEN s, GEN A, long prec)
       z = gerepilecopy(av1,z);
     }
   }
-  tetpil=avma; return gerepile(av,tetpil,gdiv(z,gs));
+  return gerepileupto(av, gdiv(z,gs));
 }
 
 /********************************************************************/
@@ -2730,28 +2732,34 @@ ell_to_small(GEN E)
 static GEN
 ellintegralmodel(GEN e)
 {
-  GEN a = cgetg(6,t_VEC), v, prims, d, u;
+  GEN a = cgetg(6,t_VEC), v, L, u;
   long i, l, k;
 
   checkell(e);
+  L = cgetg(1, t_VEC);
   for (i = 1; i < 6; i++)
   {
-    a[i] = e[i];
-    switch(typ(a[i]))
+    a[i] = e[i]; u = (GEN)a[i];
+    switch(typ(u))
     {
-      case t_INT: case t_FRAC: case t_FRACN: break;
+      case t_INT: break;
+      case t_FRAC: case t_FRACN: /* partial factorization */
+        L = concatsp(L, (GEN)auxdecomp((GEN)u[2], 0)[1]);
+        break;
       default: err(talker, "not a rational curve in ellintegralmodel");
     }
   }
   /* a = [a1, a2, a3, a4, a6] */
-  d = denom(a);
-  if (is_pm1(d)) return NULL;
+  l = lg(L);
+  if (l == 1) return NULL;
+  L = sort(L);
+  for (k = i = 2; i < l; i++)
+    if (!egalii((GEN)L[i], (GEN)L[i-1])) L[k++] = L[i];
 
-  prims = (GEN)auxdecomp(d, 0)[1]; /* partial factorization */
-  l = lg(prims); u = gun;
+  l = k; u = gun;
   for (k = 1; k < l; k++)
   {
-    GEN p = (GEN)prims[k];
+    GEN p = (GEN)L[k];
     int n = 0, m;
     for (i = 1; i < 6; i++)
       if (!gcmp0((GEN)a[i]))
@@ -3656,9 +3664,9 @@ ellrootno_all(GEN e, GEN p, GEN* ptcond)
 long
 ellrootno(GEN e, GEN p)
 {
+  pari_sp av = avma;
   long s;
-  pari_sp av=avma;
   if (!p) p = gun;
-  s=ellrootno_all(e, p, NULL);
-  avma=av; return s;
+  s = ellrootno_all(e, p, NULL);
+  avma = av; return s;
 }

@@ -38,6 +38,9 @@ Done for version 2.2.6 (released ??/04/2003):
   Fixed
     1- rnfidealtwoelt, rnfidealmult --> SEGV
     2- agm(x+1, x+2) --> oo loop [2.2.5 F-61 was undone...]
+    3- setrand(1); elltors(ellinit(vector(5,k,random/random))) --> SEGV
+       [ incorrect use of partial factorization in ellintegralmodel -->
+       surviving denominator ] 
 
   Changed
     1- rnf structure (removed useless components)
