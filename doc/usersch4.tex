@@ -1402,20 +1402,20 @@ on its ``principal variable number'' which is given by the function
 
 \noindent which returns a \idx{variable number} for \kbd{z}, even if \kbd{z}
 is not a polynomial or power series. The variable number of a scalar type is
-set by definition equal to \tet{BIGINT} which is bigger than any legal
-variable number. The variable number of a recursive type which is not a
-polynomial or power series is the minimal variable number of its components.
-But for polynomials and power series only the ``outermost'' number counts (we
-directly access $\tet{varn}(x)$ in the codewords): the representation is not
-symmetrical at all.
+set by definition equal to \tet{BIGINT} which has lower priority than any
+legal variable number. The variable number of a recursive type which is not a
+polynomial or power series is the variable number with highest priority among
+its components. But for polynomials and power series only the ``outermost''
+number counts (we directly access $\tet{varn}(x)$ in the codewords): the
+representation is not symmetrical at all.
 
 Under \kbd{gp}, one need not worry too much since the interpreter will define
 the variables as it sees them\footnote{*}{ More precisely, the first time a
 given identifier is read by the GP parser (and is not immediately interpreted
 as a function) a new variable is created, and it is assigned a strictly lower
 priority than any variable in use at this point. On startup, before any user
-input has taken place, 'x' is defined in this way and will thus always have
-maximal priority (and variable number $0$).}
+input has taken place, 'x' is defined in this way and has initially maximal
+priority (and variable number $0$).}
 %
 and do the right thing with the polynomials produced (however, have a look at
 the remark in \secref{se:rempolmod}). 
@@ -1489,8 +1489,8 @@ using
 \noindent
 This returns a variable number which is guaranteed to be unused by the
 library at the time you get it and as long as you do not delete it (we will see
-how to do that shortly). This has \emph{lower} number (i.e.~\emph{higher}
-priority) than any temporary variable produced so far (\kbd{MAXVARN} is
+how to do that shortly). This has \emph{higher}
+priority than any temporary variable produced so far (\kbd{MAXVARN} is
 assumed to be the first such). This call updates all the aforementioned
 internal arrays. In particular, after the statement \kbd{v = fetch\_var()},
 you can use \kbd{polun[v]} and \kbd{polx[v]}. The variables created in this
