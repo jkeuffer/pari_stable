@@ -1158,24 +1158,30 @@ vstar(GEN p,GEN h, long *L, long *E)
   *E = k/w;
 }
 
-/* reduce the element a modulo N, taking first care of the denominators */
+static GEN
+redelt_i(GEN a, GEN N, GEN p, GEN *pda)
+{
+  GEN z;
+  a = Q_remove_denom(a, pda);
+  if (*pda)
+  {
+    long v = pvaluation(*pda, p, &z);
+    if (v) {
+      *pda = gpowgs(p, v);
+      N  = mulii(*pda, N);
+    }
+    else
+      *pda = NULL;
+    if (!is_pm1(z)) a = gmul(a, mpinvmod(z, N));
+  }
+  return centermod(a, N);
+}
+/* reduce the element a modulo N [ a power of p ], taking first care of the
+ * denominators */
 static GEN
 redelt(GEN a, GEN N, GEN p)
 {
-  GEN da, z;
-  a = Q_remove_denom(a, &da);
-  if (da)
-  {
-    long v = pvaluation(da, p, &z);
-    if (v) {
-      da = gpowgs(p, v);
-      N  = mulii(da, N);
-    }
-    else
-      da = NULL;
-    if (!is_pm1(z)) a = gmul(a, mpinvmod(z, N));
-  }
-  a = centermod(a, N);
+  GEN da; a = redelt_i(a, N, p, &da);
   if (da) a = gdiv(a, da);
   return a;
 }
@@ -1237,6 +1243,7 @@ newtonsums(GEN a, GEN da, GEN chi, long c, GEN pp, GEN ns)
   long j, k, n = degpol(chi);
   pari_sp av = avma, lim = stack_lim(av, 1);
 
+  a = centermod(a, pp);
   pa = polun[varn(a)]; dpa = gun;
   va = zerovec(c);
   for (j = 1; j <= c; j++)
@@ -1497,13 +1504,11 @@ update_phi(decomp_t *S, GEN *ptpdr, GEN *ptpmr, GEN ns)
 
   if (!S->chi) 
   {
+    long l;
     kill_cache(ns);
     S->chi = mycaract(S->f, S->phi, S->p, pmr, S->df, ns);
-  }
-
-  { /* check whether we can get a decomposition */
-    long l; S->nu = get_nu(S->chi, S->p, &l);
-    if (l > 1) return 0;
+    S->nu = get_nu(S->chi, S->p, &l);
+    if (l > 1) return 0; /* check whether we can get a decomposition */
   }
     
   for (;;)
@@ -1610,8 +1615,8 @@ static int
 loop(decomp_t *S, long nv, GEN pdr, GEN pmr, GEN pmf, long Ea, long Fa, GEN ns)
 {
   pari_sp av2 = avma, limit = stack_lim(av2, 1);
-  GEN beta, kapp = NULL;
-  GEN w, chib = NULL, gamm, chig = NULL, nug, delt = NULL;
+  GEN beta, Dkapp, kapp = NULL;
+  GEN w, chib = NULL, Dgamm, gamm, chig = NULL, nug, delt = NULL;
   long i, l, Fg, fm = 0, go_fm = 2, eq = 0, er = 0;
   long N = degpol(S->f), v = varn(S->f);
 
@@ -1655,20 +1660,25 @@ loop(decomp_t *S, long nv, GEN pdr, GEN pmr, GEN pmf, long Ea, long Fa, GEN ns)
     }
     if (DEBUGLEVEL>4) fprintferr("  (eq,er) = (%ld,%ld), fm = %ld\n", eq,er,fm);
 
-    /* gamma := beta . p^-eq . nu^-er is a unit */
+    /* compute gamma := beta . p^-eq . nu^-er  (is a unit) */
     gamm = beta;
-    if (eq) gamm = gdiv(gamm, gpowgs(S->p, eq));
+    Dgamm = eq ? gpowgs(S->p, eq): gun;
     if (er)
     { /* kappa = nu^-1 in Zp[phi] */
+      GEN q;
       if (!kapp)
       {
         kapp = QX_invmod(S->nu, S->chi);
-        kapp = redelt(kapp, pmr, S->p);
-        kapp = gmodulcp(kapp, S->chi);
+        kapp = redelt_i(kapp, pmr, S->p, &Dkapp);
       }
-      gamm = lift(gmul(gamm, gpowgs(kapp, er)));
-      gamm = redelt(gamm, S->p, S->p);
+      if (Dkapp) Dgamm = mulii(Dgamm, gpowgs(Dkapp, er));
+      q = mulii(S->p, Dgamm);
+      gamm = gmul(gamm, FpXQ_pow(kapp, stoi(er), S->chi, q));
+      gamm = FpX_rem(gamm, S->chi, q);
+      update_den(&gamm, &Dgamm, NULL);
+      gamm = centermod(gamm, mulii(S->p, Dgamm));
     }
+    if (!is_pm1(Dgamm)) gamm = gdiv(gamm, Dgamm);
     if (DEBUGLEVEL>5) fprintferr("  gamma = %Z\n", gamm);
 
     if (fm) {
@@ -1779,7 +1789,7 @@ loop(decomp_t *S, long nv, GEN pdr, GEN pmr, GEN pmf, long Ea, long Fa, GEN ns)
     if (low_stack(limit,stack_lim(av2,1)))
     {
       if (DEBUGMEM > 1) err(warnmem, "nilord");
-      gerepileall(av2, kapp? 2: 1, &beta, &kapp);
+      gerepileall(av2, kapp? 3: 1, &beta, &kapp, &Dkapp);
     }
   }
 }
@@ -1854,12 +1864,26 @@ nilord(decomp_t *S, GEN dred, long mf, long flag)
   return Decomp(S, flag);
 }
 
+/* Assume respm(f,g) | p^M. Return respm(f, g) mod p^M, using dynamic
+ * precision (until result is non-zero). */
+GEN
+fast_respm(GEN f, GEN g, GEN p, long M)
+{
+  long m = 32;
+  GEN R, q = NULL;
+  for(;; m <<= 1) {
+    if (M < 2*m) return respm(f,g, gpowgs(p, M));
+    q = q? sqri(q): gpowgs(p, m); /* p^m */
+    R = respm(f,g, q); if (signe(R)) return R;
+  }
+}
+
 GEN
 maxord_i(GEN p, GEN f, long mf, GEN w, long flag)
 {
   long l = lg(w)-1;
   GEN h = (GEN)w[l]; /* largest factor */
-  GEN D = respm(f, derivpol(f), gpowgs(p, mf + 1));
+  GEN D = fast_respm(f, derivpol(f), p, mf + 1);
   decomp_t S;
 
   S.f = f;
