@@ -851,7 +851,7 @@ RgX_div_by_X_x(GEN a, GEN x, GEN *r)
     GEN t = gadd((GEN)*a0--, gmul(x, (GEN)*z0--));
     *z0 = (long)t;
   }
-  if (r) *r = gadd(*a0, gmul(x, *z0));
+  if (r) *r = gadd((GEN)*a0, gmul(x, (GEN)*z0));
   return z;
 }
 
