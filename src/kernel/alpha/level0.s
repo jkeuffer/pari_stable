@@ -202,7 +202,7 @@ $Lend:
 	lda	$30,16($30)
 	ret	$31,($26),1
 
-	.end	__gmpn_invert_limb
+	.end	invert_word
 	.data
 $invtab:
 	.word 0xffff,0xffc0,0xff80,0xff40,0xff00,0xfec0,0xfe81,0xfe41
@@ -463,7 +463,7 @@ $invtab:
 	.word 0x0080,0x0070,0x0060,0x0050,0x0040,0x0030,0x0020,0x0010
 
 	.globl __clz_tab
-.rdata
+.data
 	.quad 0
 __clz_tab:
 	.byte 0
