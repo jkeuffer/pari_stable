@@ -1930,7 +1930,7 @@ _polredabs(nfbasic_t *T, GEN *u)
     d.M    = F.M;
     if (R)
     {
-      v = fincke_pohst(_vec(R),NULL,200,1, 0, &chk);
+      v = fincke_pohst(_vec(R),NULL,-1,1, 0, &chk);
       if (v) break;
     }
     if (i==MAXITERPOL) err(accurer,"polredabs0");
@@ -1974,7 +1974,7 @@ polredabs0(GEN x, long flag)
     y = _vec(x);
     a = _vec(polx[vx]);
   }
-  if (DEBUGLEVEL) fprintferr("%ld minimal vectors found.\n",l-1);
+  if (DEBUGLEVEL) fprintferr("Found %ld minimal polynomials.\n",l-1);
   if (flag & nf_ALL)
   {
     if (u) for (i=1; i<l; i++) a[i] = lmul(T.bas, gmul(u, (GEN)a[i]));

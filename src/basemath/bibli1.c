@@ -2953,6 +2953,16 @@ perf(GEN a)
   return minim00(a,gzero,gzero,min_PERF);
 }
 
+static GEN
+clonefill(GEN S, long s, long t)
+{ /* initialize to dummy values */
+  GEN T = S, dummy = cgetg(1, t_STR);
+  long i;
+  for (i = s+1; i <= t; i++) S[i]=(long)dummy;
+  S = gclone(S); if (isclone(T)) gunclone(T);
+  return S;
+}
+
 /* q is the Gauss reduction (sqred1) of the quadratic form */
 /* general program for positive definit quadratic forms (real coeffs).
  * One needs BORNE != 0; LLL reduction done in fincke_pohst().
@@ -2963,10 +2973,11 @@ smallvectors(GEN q, GEN BORNE, long stockmax, FP_chk_fun *CHECK)
 {
   long N, n, i, j, k, s, epsbit, prec, checkcnt = 1;
   pari_sp av, av1, lim;
-  GEN u,S,x,y,z,v,norme1,normax1,borne1,borne2,eps,p1,alpha,norms,dummy;
+  GEN u,S,x,y,z,v,norme1,normax1,borne1,borne2,eps,p1,alpha,norms;
   GEN (*check)(void *,GEN) = CHECK? CHECK->f: NULL;
   void *data = CHECK? CHECK->data: NULL;
   int skipfirst = CHECK? CHECK->skipfirst: 0;
+  int stockall = (stockmax < 0);
 
   if (DEBUGLEVEL)
     fprintferr("smallvectors looking for norm <= %Z\n",gprec_w(BORNE,3));
@@ -2980,9 +2991,9 @@ smallvectors(GEN q, GEN BORNE, long stockmax, FP_chk_fun *CHECK)
   borne2 = mpmul(borne1,alpha);
   N = lg(q); n = N-1;
   v = cgetg(N,t_VEC);
-  dummy = cgetg(1,t_STR);
 
   av = avma; lim = stack_lim(av,2);
+  if (stockall) stockmax = 200;
   if (check) norms = cgetg(stockmax+1,t_VEC);
   S = cgetg(stockmax+1,t_VEC);
   x = cgetg(N,t_COL);
@@ -3034,14 +3045,10 @@ smallvectors(GEN q, GEN BORNE, long stockmax, FP_chk_fun *CHECK)
 
       if (low_stack(lim, stack_lim(av,2)))
       {
+        GEN dummy = cgetg(1, t_STR);
         int cnt = 4;
 	if(DEBUGMEM>1) err(warnmem,"smallvectors");
-	if (stockmax)
-        { /* initialize to dummy values */
-          GEN T = S;
-          for (i=s+1; i<=stockmax; i++) S[i]=(long)dummy;
-          S = gclone(S); if (isclone(T)) gunclone(T);
-        }
+	if (stockmax) S = clonefill(S, s, stockmax);
         if (check)
         {
           cnt += 3;
@@ -3061,7 +3068,7 @@ smallvectors(GEN q, GEN BORNE, long stockmax, FP_chk_fun *CHECK)
     /* x = 0: we're done */
     if (!signe(x[1]) && !signe(y[1])) goto END;
 
-    av1=avma; p1 = gsqr(mpadd((GEN)x[1],(GEN)z[1]));
+    av1 = avma; p1 = gsqr(mpadd((GEN)x[1],(GEN)z[1]));
     norme1 = mpadd((GEN)y[1], mpmul(p1, (GEN)v[1]));
     if (mpcmp(norme1,borne1) > 0) { avma=av1; continue; /* main */ }
 
@@ -3071,8 +3078,8 @@ smallvectors(GEN q, GEN BORNE, long stockmax, FP_chk_fun *CHECK)
       if (checkcnt < 5 && mpcmp(norme1, borne2) < 0)
       {
         if (!check(data,x)) { checkcnt++ ; continue; /* main */}
-        borne1 = mpadd(norme1,eps);
-        borne2 = mpmul(borne1,alpha);
+        borne1 = mpadd(norme1, eps);
+        borne2 = mpmul(borne1, alpha);
         s = 0; checkcnt = 0;
       }
     }
@@ -3082,11 +3089,13 @@ smallvectors(GEN q, GEN BORNE, long stockmax, FP_chk_fun *CHECK)
       if (check) norms[s] = (long)norme1;
       S[s] = (long)dummycopy(x);
       if (s == stockmax)
-      {
-        pari_sp av2 = avma;
-        GEN per;
+      { /* overflow */
+        GEN per, Sold = S;
+        pari_sp av2;
 
         if (!check) goto END;
+        if (stockall) { stockmax *= 2; S = cgetg(stockmax+1, t_VEC); }
+        av2 = avma;
         per = sindexsort(norms);
         if (DEBUGLEVEL) fprintferr("sorting...\n");
         for (j=0,i=1; i<=s; i++)
@@ -3095,21 +3104,22 @@ smallvectors(GEN q, GEN BORNE, long stockmax, FP_chk_fun *CHECK)
           long k = per[i];
           norme1 = (GEN)norms[k];
           if (j  && mpcmp(norme1, borne1) > 0) break;
-          if (j  || check(data,(GEN)S[k]))
+          if (j  || check(data,(GEN)Sold[k]))
           {
-            if (!j) borne1 = gclone( mpadd(norme1,eps) );
-            S[++j] = S[k];
+            if (!j) borne1 = mpadd(norme1,eps);
+            S[++j] = Sold[k];
           }
         }
-        s = j;
-        if (!j) avma = av2;
-        else
+        s = j; avma = av2;
+        if (s)
         {
-          GEN t = borne1;
-          checkcnt = 0; norme1 = mpsub(borne1,eps);
+          if (isclone(Sold)) { S = clonefill(S, s, stockmax); gunclone(Sold); }
+          norme1 = (GEN)norms[ per[i-1] ];
+          norms = cgetg(stockmax+1, t_VEC);
           for (i=1; i<=s; i++) norms[i] = (long)norme1;
-          borne1 = gcopy(borne1); gunclone(t);
-          borne2 = mpmul(borne1,alpha);
+          borne1 = mpadd(norme1, eps);
+          borne2 = mpmul(borne1, alpha);
+          checkcnt = 0;
         }
       }
     }
