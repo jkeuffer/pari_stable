@@ -62,6 +62,7 @@ while test $# -gt 0; do
   --includedir=*) dfltincludedir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
   --host=*) target_host=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
   --kernel=*) kernel=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
+  --builddir) dfltobjdir=auto;;
   --builddir=*) dfltobjdir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
   -a|-ask|--ask)     fastread=no;;
   -g)          optimization=debugging;;

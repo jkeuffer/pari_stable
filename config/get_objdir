@@ -1,13 +1,27 @@
 # Target directory for object files
 pre=O
 cst_objdir=$pre$osname-$arch;
-case "$optimization" in
-  full)      objdir=$cst_objdir;;
-  debugging) objdir=$cst_objdir.dbg ;;
-  profiling) objdir=$cst_objdir.prf ;;
-esac
+objdir=$cst_objdir
 if test -n "$dfltobjdir"; then
-  objdir="$dfltobjdir"
+  if test "$dfltobjdir"=auto; then
+    case "$asmarch" in
+      $kernlvl0);;
+      sparcv8_micro)
+         if test "$arch" != sparcv9; then objdir=$objdir-$kernlvl0; fi ;;
+      *) objdir=$objdir-$kernlvl0 ;;
+    esac
+    if test -n "$with_gmp"; then objdir=$objdir-gmp; fi
+    dfltobjdir=
+  else
+    objdir="$dfltobjdir"
+  fi
+fi
+if test -z "$dfltobjdir"; then
+  case "$optimization" in
+    full)      objdir=$objdir;;
+    debugging) objdir=$objdir.dbg ;;
+    profiling) objdir=$objdir.prf ;;
+  esac
 fi
 
 if test "$fastread" != yes; then
