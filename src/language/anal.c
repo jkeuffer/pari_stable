@@ -266,7 +266,7 @@ install(void *f, char *name, char *code)
   else
   {
     char *s = name;
-    if (isalpha(*s))
+    if (isalpha((int)*s))
       while (is_keyword_char(*++s)) /* empty */;
     if (*s) err(talker2,"not a valid identifier", s, name);
     ep = installep(f, name, strlen(name), EpINSTALL, 0, functions_hash + hash);
