@@ -637,9 +637,7 @@ static GEN
 sd_debug(char *v, int flag)
 { return sd_ulong(v,flag,"debug",&DEBUGLEVEL, 0,20,NULL); }
 
-#ifdef READLINE
 ulong readline_state = DO_ARGS_COMPLETE;
-#endif
 
 static GEN
 sd_rl(char *v, int flag)
