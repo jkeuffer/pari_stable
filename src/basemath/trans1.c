@@ -763,7 +763,6 @@ sqrtr_abs(GEN x, long s)
   pari_sp av, av0;
   long l, l1, i, ex;
   double beta;
-  ulong u;
   GEN y, a, t;
 
   if (!s) return realzero_bit(expo(x) >> 1);
@@ -771,20 +770,22 @@ sqrtr_abs(GEN x, long s)
 
   a = cgetr(l+1); affrr(x,a);
   beta = sqrt((double)(ulong)a[2]);
-  ex = expo(a);
+  ex = expo(a); t = cgetr(l+1);
   if (ex & 1) {
     a[1] = evalsigne(1) | evalexpo(1);
-    u = (ulong)(beta * (1UL << BITS_IN_HALFULONG));
+    beta = beta * (1UL << BITS_IN_HALFULONG);
+#ifdef LONG_IS_64BIT
+    if (a[2] >= -(1 << 11))
+      t[1] = evalexpo(1) | evalsigne(1); t[2] = (long)~0; 
+    else
+#endif
+      t[1] = evalexpo(0) | evalsigne(1); t[2] = (long)(ulong)beta;/* ~ sqrt(a) */
   } else {
     a[1] = evalsigne(1) | evalexpo(0);
-    u = (ulong)(beta * ((1UL << BITS_IN_HALFULONG) * 0.707106781186547524));
+    beta = beta * ((1UL << BITS_IN_HALFULONG) * 0.707106781186547524);
+    t[1] = evalexpo(0) | evalsigne(1); t[2] = (long)(ulong)beta;/* ~ sqrt(a) */
   }
   /* |x| = 2^(ex/2) a */
-  t = cgetr(l+1);
-  if (u)
-  { t[1] = evalexpo(0) | evalsigne(1); t[2] = (long)u; /* ~ sqrt(a) */ }
-  else
-  {  t[1] = evalexpo(1) | evalsigne(1); t[2] = (long)HIGHBIT; }
   for (i = 3; i <= l; i++) t[i] = 0;
 
   l--; l1 = 1; av = avma;
