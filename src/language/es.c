@@ -2712,8 +2712,8 @@ write_magic(FILE *f)
 int
 file_is_binary(FILE *f)
 {
-  int c = fgetc(f), r = isprint(c);
-  ungetc(c,f); return (r == 0);
+  int c = fgetc(f); ungetc(c,f);
+  return (isprint(c) == 0 && isspace(c) == 0);
 }
 
 void
