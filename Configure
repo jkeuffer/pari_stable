@@ -344,7 +344,9 @@ case "$asmarch" in
   ppc)           prettyk=PPC;;
   *)             prettyk="$asmarch";;
 esac
-if test "$arch" != "$asmarch"; then
+# 'i386 (running ix86 kernel)'  looks ugly
+if test "$arch" != "$asmarch" -a \( "$arch" != "i386" -o "$asmarch" != "x86" \)
+then
   pretty="$pretty ($prettyk kernel)"
 fi
 echo "Building for architecture: $pretty"
