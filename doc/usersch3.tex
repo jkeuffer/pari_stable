@@ -3230,11 +3230,11 @@ and would like to skip part of a lengthy \kbd{bnfinit} computation.
 
 \syn{buchfu}{\var{bnf}}.
 
-\subsecidx{bnrL1}$(\var{bnr},\var{subgroup},\{\fl=0\})$:
+\subsecidx{bnrL1}$(\var{bnr},\{\var{subgroup}\},\{\fl=0\})$:
 \var{bnr} being the number field data which is output by
 \kbd{bnrinit(,,1)} and \var{subgroup} being a square matrix defining a
 congruence subgroup of the ray class group corresponding to \var{bnr}
-(or $0$ for the trivial congruence subgroup), returns for each
+(the trivial congruence subgroup if omitted), returns for each
 \idx{character} $\chi$ of the ray class group which is trivial on this
 subgroup, the value at $s = 1$ (or $s = 0$) of the abelian
 $L$-function associated to $\chi$. For the value at $s = 0$, the
@@ -3258,14 +3258,14 @@ Example:
 \bprog
 bnf = bnfinit(x^2 - 229);
 bnr = bnrinit(bnf,1,1);
-bnrL1(bnr, 0)
+bnrL1(bnr)
 @eprog\noindent
 returns the order and the first non-zero term of the abelian
 $L$-functions $L(s, \chi)$ at $s = 0$ where $\chi$ runs through the
 characters of the class group of $\Q(\sqrt{229})$. Then
 \bprog
 bnr2 = bnrinit(bnf,2,1);
-bnrL1(bnr2,0,2)
+bnrL1(bnr2,,2)
 @eprog\noindent
 returns the order and the first non-zero terms of the abelian
 $L$-functions $L_S(s, \chi)$ at $s = 0$ where $\chi$ runs through the
@@ -3275,7 +3275,8 @@ $2$ (note that the ray class group modulo $2$ is in fact the class
 group, so \kbd{bnrL1(bnr2,0)} returns exactly the same answer as
 \kbd{bnrL1(bnr,0)}!).
 
-\syn{bnrL1}{\var{bnr},\var{subgroup},\fl,\var{prec}}
+\syn{bnrL1}{\var{bnr},\var{subgroup},\fl,\var{prec}}, where an omitted
+\var{subgroup} is coded as \kbd{NULL}.
 
 \subsecidx{bnrclass}$(\var{bnf},\var{ideal},\{\fl=0\})$:
 $\var{bnf}$ being a big number field
@@ -3448,10 +3449,10 @@ field and $\zeta = e^{2i\pi/N}$ where $N$ is the order of $g$ ($N=12$ as
 
 \syn{bnrrootnumber}{\var{bnf},\var{chi},\fl}
 
-\subsecidx{bnrstark}${(\var{bnr},\var{subgroup},\{\fl=0\})}$: \var{bnr}
+\subsecidx{bnrstark}${(\var{bnr},\{\var{subgroup}\},\{\fl=0\})}$: \var{bnr}
 being as output by \kbd{bnrinit(,,1)}, finds a relative equation for the
 class field corresponding to the modulus in \var{bnr} and the given
-congruence subgroup using \idx{Stark units} (set $\var{subgroup}=0$ if you
+congruence subgroup using \idx{Stark units} (omit $\var{subgroup}=0$ if you
 want the whole ray class group). The main variable of \var{bnr} must not be
 $x$, and the ground field and the class field must be totally real. When the
 base field is $\Q$, the vastly simpler \tet{galoissubcyclo} is used instead.
@@ -3481,7 +3482,8 @@ In this case, the corresponding congruence group is a product of cyclic
 groups and, for the time being, the class field has to be obtained by
 splitting this group into its cyclic components.
 
-\syn{bnrstark}{\var{bnr},\var{subgroup},\fl}.
+\syn{bnrstark}{\var{bnr},\var{subgroup},\fl}, where an omitted \var{subgroup}
+is coded by \kbd{NULL}.
 
 \subsecidx{dirzetak}$(\var{nf},b)$: gives as a vector the first $b$
 coefficients of the \idx{Dedekind} zeta function of the number field $\var{nf}$
@@ -5037,17 +5039,19 @@ rnfisnorm(bnf,ext,17, 1)
 
 \syn{rnfisnorm}{\var{bnf},ext,x,\fl,\var{prec}}.
 
-\subsecidx{rnfkummer}$(\var{bnr},\var{subgroup},\{deg=0\})$: \var{bnr}
+\subsecidx{rnfkummer}$(\var{bnr},\{\var{subgroup}\},\{deg=0\})$: \var{bnr}
 being as output by \kbd{bnrinit}, finds a relative equation for the
 class field corresponding to the module in \var{bnr} and the given
-congruence subgroup. If \var{deg} is positive, outputs the list of all
-relative equations of degree \var{deg} contained in the ray class field
-defined by \var{bnr}.
+congruence subgroup (the full ray class field if \var{subgroup} is omitted).
+If \var{deg} is positive, outputs the list of all relative equations of
+degree \var{deg} contained in the ray class field defined by \var{bnr}.
 
-(THIS PROGRAM IS STILL IN DEVELOPMENT STAGE)
+THIS PROGRAM IS STILL IN DEVELOPMENT STAGE: it currently only works for
+subgroups of prime index.
 
-\syn{rnfkummer}{\var{bnr},\var{subgroup},\var{deg},\var{prec}},
-where \var{deg} is a \kbd{long}.
+\syn{rnfkummer}{\var{bnr},\var{subgroup},\var{deg},\var{prec}}, where
+\var{deg} is a \kbd{long} and an omitted \var{subgroup} is coded as
+\kbd{NULL}
 
 \subsecidx{rnflllgram}$(\var{nf},\var{pol},\var{order})$: given a polynomial
 \var{pol} with coefficients in \var{nf} defining a relative extension $L$ and
