@@ -30,9 +30,13 @@ done
 # not found? detect missing lib*.so (missing *-devel package)
 if test -z "$try"; then
   if test "$osname" = linux -a  -n "$_pb"; then
+    case "$lib" in
+      X11) rpmlib=XFree86; devlib=xlibs ;;
+      *) rpmlib=$lib; devlib=lib$lib ;;
+    esac
     echo "###"
     echo "### lib$lib.so not found. Please install $lib development files."
-    echo "### They usually come in $lib-devel (RPM) or lib$lib-dev (Debian) packages"
+    echo "### They usually come in $rpmlib-devel (RPM) or $devlib-dev (Debian) packages"
     echo "###"
   fi
 fi
