@@ -212,24 +212,24 @@ new_coords(GEN e, GEN x, GEN *pta, GEN *ptb, int flag, long prec)
   return gmul2n(gadd(p1, gsqrt(gsub(gsqr(p1), gmul2n(gmul(a,x),2)),prec)), -1);
 }
 
-/* a1, b1 are t_REALs */
+/* a1, b1 are non-0 t_REALs */
 static GEN
-do_agm(GEN *ptx1, GEN a1, GEN b1, long prec)
+do_agm(GEN *ptx1, GEN a1, GEN b1)
 {
-  const long G = 6 - bit_accuracy(prec), s = signe(b1);
+  const long s = signe(b1), l = min(lg(a1), lg(b1)), G = 6 - bit_accuracy(l);
   GEN p1, r1, a, b, x, x1;
 
-  x1 = gmul2n(gsub(a1,b1),-2);
+  x1 = gmul2n(subrr(a1,b1),-2);
   if (gcmp0(x1)) err(precer,"initell");
   for(;;)
   {
     a = a1; b = b1; x = x1;
-    b1 = sqrtr(gmul(a,b)); setsigne(b1, s);
-    a1 = gmul2n(gadd(gadd(a,b), gmul2n(b1,1)),-2);
-    r1 = gsub(a1,b1);
-    p1 = sqrtr( gdiv(gadd(x,r1),x) );
-    x1 = gmul(x,gsqr(gmul2n(gaddsg(1,p1),-1)));
-    if (gcmp0(r1) || gexpo(r1) <= G + gexpo(b1)) break;
+    b1 = sqrtr(mulrr(a,b)); setsigne(b1, s);
+    a1 = gmul2n(addrr(addrr(a,b), gmul2n(b1,1)),-2);
+    r1 = subrr(a1,b1);
+    p1 = sqrtr( divrr(addrr(x,r1),x) );
+    x1 = mulrr(x, gsqr(gmul2n(addsr(1,p1),-1)));
+    if (!signe(r1) || expo(r1) <= G + expo(b1)) break;
   }
   *ptx1 = x1; return ginv(gmul2n(a1,2));
 }
@@ -356,7 +356,7 @@ initell0(GEN x, long prec)
   y[14] = (long)p1;
 
   (void)new_coords(y, NULL, &a1, &b1, 0, 0);
-  u2 = do_agm(&x1,a1,b1,prec); /* 1/4M */
+  u2 = do_agm(&x1,a1,b1); /* 1/4M */
 
   w = gaddsg(1, ginv(gmul2n(gmul(u2,x1),1)));
   q = gsqrt(gaddgs(gsqr(w),-1),prec);
