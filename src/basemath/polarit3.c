@@ -1411,7 +1411,7 @@ extern GEN polpol_to_mat(GEN v, long n);
 GEN Fp_factor_irred(GEN P,GEN l, GEN Q)
 {
   ulong ltop=avma,av;
-  GEN SP,SQ,MP,MQ,M,MF,E,V,MPT,res;
+  GEN SP,SQ,MP,MQ,M,MF,E,V,IR,res;
   long np=degree(P),nq=degree(Q);
   long i,d=cgcd(np,nq);
   long vp=varn(P),vq=varn(Q);
@@ -1423,18 +1423,19 @@ GEN Fp_factor_irred(GEN P,GEN l, GEN Q)
   }
   MF=matrixpow(nq,nq,FpXQ_pow(polx[vq],l,Q,l),Q,l);
   Fp_intersect(d,P,Q,l,&SP,&SQ,NULL,MF);
+  av=avma;
   E=Fp_factorgalois(P,l,d,vq);
   E=polpol_to_mat(E,np);
-  av=avma;
   MP = matrixpow(np,d,SP,P,l);
-  MQ = matrixpow(nq,d,SQ,Q,l);
-  MPT=gtrans(MP);
-  M = FpM_mul(MPT,MP,NULL);
-  M = gmul(M,gmodulcp(gun,l));
+  M = gmul(MP,gmodulcp(gun,l));
+  IR = indexrank(M);
+  E = gtrans(extract(gtrans(E),(GEN)IR[1]));
+  M = gtrans(extract(gtrans(M),(GEN)IR[1]));
   M = lift(invmat(M));
-  M = FpM_mul(MQ,FpM_mul(M,MPT,NULL),NULL);
+  MQ = matrixpow(nq,d,SQ,Q,l);
+  M = FpM_mul(MQ,M,l);
   M = FpM_mul(M,E,l);
-  M = gerepileupto(av,M);
+  /*M = gerepileupto(av,M);*/
   V = cgetg(d+1,t_VEC);
   V[1]=(long)M;
   for(i=2;i<=d;i++)
