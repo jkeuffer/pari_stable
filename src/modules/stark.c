@@ -1570,7 +1570,7 @@ ComputeCoeff(GEN datachi, long n, long deg, long prec)
       CopyCoeff(matan, matan2, n, deg);
       ray = GetRay(bnr, dataray, pr, prec);
       ki = ComputeImagebyChar((GEN)datachi[5], ray, 1);
-      ki2 = dummycopy(ki);
+      ki2 = ki;
 
       Bq = n/np;
       for (q1 = 1; q1 <= Bq; q1 *= np)
@@ -1903,7 +1903,7 @@ GetST(GEN dataCR, long prec)
     int **matan = NULL;
 
     if (DEBUGLEVEL>1)
-      fprintferr("* conductor no %ld/%ld (N = %ld)\n  Init:", jc,ncond,NN);
+      fprintferr("* conductor no %ld/%ld (N = %ld)\n\tInit: ", jc,ncond,NN);
 
     if (nChar == 1)
     { /* quadratic or trivial char, precompute for early abort later */
@@ -1981,7 +1981,8 @@ GetST(GEN dataCR, long prec)
       const GEN z = gmael3(dataCR, t, 5, 2);
       GEN p1 = gzero, p2 = gzero;
       
-      if (DEBUGLEVEL>1) fprintferr("\n   character no: %ld/%ld\n", t,k);
+      if (DEBUGLEVEL>1)
+        fprintferr("\tcharacter no: %ld (%ld/%ld)\n", t,k,nChar);
       if (!matan) matan = ComputeCoeff((GEN)dataCR[t], NN, d, prec);
       for (n = 1; n <= NN; n++)
         if ((an = EvalCoeff(z, matan[n], d)))
@@ -2344,13 +2345,12 @@ RecCoeff(GEN nf,  GEN pol,  long v, long prec)
 static int**
 computean(GEN dtcr, long n, long deg, long prec)
 {
-  long i, q, cp, al, v1, v2, v, fldiv, av, av1;
+  ulong av1, av = avma;
+  long i, p, q, cp, al, v1, v2, v, fldiv, idZ;
   int **matan, **reduc;
-  GEN bnf, ideal, dk, idno, p1, prime, chi, qg, chi1, chi2;
-  GEN chi11, chi12, bnr, pr, pr1, pr2, xray, xray1, xray2, dataray;
+  GEN bnf, id, dk, p1, prime, chi, qg, chi1, chi2;
+  GEN bnr, pr, pr1, pr2, xray, dataray, Rays;
   byteptr dp = diffptr;
-
-  av = avma;
 
   matan = InitMatAn(n, deg, 1);
   reduc = InitReduction(dtcr, deg);
@@ -2359,73 +2359,75 @@ computean(GEN dtcr, long n, long deg, long prec)
   bnf = (GEN)bnr[1];
   /* dataray = InitGetRay(bnr, nmax); */
 
-  ideal = gmael3(bnr, 2, 1, 1);
-  idno  = idealnorm(bnf, ideal);
-  dk    = gmael(bnf, 7, 3);
+  id = gmael3(bnr, 2, 1, 1);
+  idZ= itos(gcoeff(id, 1, 1)); /* generates id \cap Z, assumed small */
+  dk = gmael(bnf, 7, 3);
+  Rays = cgetg(idZ+1, t_VEC);
+  /* precompute GetRay(x), x in Z. Enough to do it for primes [TODO] */
+  for (i=1; i<=idZ; i++)
+    if (cgcd(i,idZ) == 1)
+      Rays[i] = (long)GetRay(bnr, dataray, stoi(i), prec);
 
-  prime = stoi(2);
+  p = 2; prime = stoi(p);
   dp++;
 
   av1 = avma;
 
   chi = chi1 = chi2 = NULL; /* gcc -Wall */
-  while (*dp && prime[2] <= n)
+  while (*dp && p <= n)
   {
-    qg = prime;
-    al = 1;
+    q = p;
 
-    switch (krogs(dk, prime[2]))
+    switch (krogs(dk, p))
     {
-      /* prime is inert */
+      /* p inert */
       case -1:
-	fldiv = divise(idno, prime);
+	fldiv = (idZ % p == 0);
 
 	if (!fldiv)
 	{
-	  xray = GetRay(bnr, dataray, prime, prec);
+	  xray = (GEN)Rays[p % idZ];
 	  chi  = ComputeImagebyChar((GEN)dtcr[5], xray, 1);
-	  chi1 = dummycopy(chi);
+	  chi1 = chi;
 	}
 
-       	while(cmpis(qg, n) <= 0)
+        al = 1;
+        for (;;)
 	{
-	  q = qg[2];
-
 	  for (cp = 1, i = q; i <= n; i += q, cp++)
-	    if(cp % prime[2])
+	    if(cp % p)
 	    {
-	      if (fldiv || al%2)
+	      if (fldiv || odd(al))
 		_0toCoeff(matan[i], deg);
 	      else
 		MulPolmodCoeff(chi, matan[i], reduc, deg);
 	    }
 
-	  qg = mulsi(q, prime);
-	  al++;
-
-	  if (al%2 && !fldiv)
-	    chi = gmul(chi, chi1);
+	  qg = mulss(q, p);
+          if (lgefint(qg) > 3) break;
+          q = qg[2]; if (q > n) break;
+          
+          al++;
+	  if (odd(al) && !fldiv) chi = gmul(chi, chi1);
  	}
 	break;
 
-    /* prime is ramified */
+    /* p ramified */
     case 0:
-      fldiv = divise(idno, prime);
+      fldiv = (idZ % p == 0);
 
       if (!fldiv)
       {
 	pr   = (GEN)primedec(bnf, prime)[1];
 	xray = GetRay(bnr, dataray, pr, prec);
 	chi  = ComputeImagebyChar((GEN)dtcr[5], xray, 1);
-	chi2 = dummycopy(chi);
+	chi2 = chi;
       }
 
-      while(cmpis(qg, n) <= 0)
+      for(;;)
       {
-	q = qg[2];
-
 	for (cp = 1, i = q; i <= n; i += q, cp++)
-	  if(cp % prime[2])
+	  if(cp % p)
           {
 	    if (fldiv)
 	      _0toCoeff(matan[i], deg);
@@ -2433,66 +2435,60 @@ computean(GEN dtcr, long n, long deg, long prec)
 	      MulPolmodCoeff(chi, matan[i], reduc, deg);
 	  }
 
-	qg = mulsi(q, prime);
-	al++;
+	qg = mulss(q, p);
+        if (lgefint(qg) > 3) break;
+        q = qg[2]; if (q > n) break;
 
-	if (cmpis(qg, n) <= 0 && !fldiv)
-	  chi = gmul(chi, chi2);
+	if (!fldiv) chi = gmul(chi, chi2);
       }
       break;
 
-    /* prime is split */
-    default: /* case 1: */
+    /* p split */
+    default:
       p1  = primedec(bnf, prime);
       pr1 = (GEN)p1[1];
       pr2 = (GEN)p1[2];
-      v1 = idealval(bnf, ideal, pr1);
-      v2 = idealval(bnf, ideal, pr2);
-
-      if (v1 + v2 == 0)
-      {
-	xray1 = GetRay(bnr, dataray, pr1, prec);
-	xray2 = GetRay(bnr, dataray, pr2, prec);
-	chi11 = ComputeImagebyChar((GEN)dtcr[5], xray1, 1);
-	chi12 = ComputeImagebyChar((GEN)dtcr[5], xray2, 1);
+      if (idZ % p)
+      { /* generic case, use pr1 pr2 = (p) */
+	GEN xray1 = GetRay(bnr, dataray, pr1, prec);
+	GEN xray2 = gsub((GEN)Rays[p % idZ],  xray1);
+	GEN chi11 = ComputeImagebyChar((GEN)dtcr[5], xray1, 1);
+	GEN chi12 = ComputeImagebyChar((GEN)dtcr[5], xray2, 1);
 
 	chi1 = gadd(chi11, chi12);
-	chi2 = dummycopy(chi12);
+	chi2 = chi12;
 
-	while(cmpis(qg, n) <= 0)
+	while (q <= n)
         {
-	  q = qg[2];
-
 	  for (cp = 1, i = q; i <= n; i += q, cp++)
-	    if(cp % prime[2])
+	    if(cp % p)
 	      MulPolmodCoeff(chi1, matan[i], reduc, deg);
 
-	  qg = mulsi(q, prime);
-	  al++;
-
-	  if(cmpis(qg, n) <= 0)
-          {
-	    chi2 = gmul(chi2, chi12);
-	    chi1 = gadd(chi2, gmul(chi1, chi11));
-	  }
+	  qg = mulss(q, p);
+          if (lgefint(qg) > 3) break;
+          q = qg[2]; if (q > n) break;
+          
+          chi2 = gmul(chi2, chi12);
+          chi1 = gadd(chi2, gmul(chi1, chi11));
 	}
       }
       else
       {
+        v1 = idealval(bnf, id, pr1);
+        v2 = idealval(bnf, id, pr2);
 	if (v1) { v  = v2; pr = pr2; } else { v  = v1; pr = pr1; }
 	
-	if (v == 0)
+	if (!v)
         {
 	  xray = GetRay(bnr, dataray, pr, prec);
 	  chi1 = ComputeImagebyChar((GEN)dtcr[5], xray, 1);
-	  chi  = gcopy(chi1);
+	  chi  = chi1;
 	}
 
-	while(cmpis(qg, n) <= 0)
+        for(;;)
         {
-	  q = qg[2];
 	  for (cp = 1, i = q; i <= n; i += q, cp++)
-	    if(cp % prime[2])
+	    if(cp % p)
             {
 	      if (v)
 		_0toCoeff(matan[i], deg);
@@ -2500,17 +2496,17 @@ computean(GEN dtcr, long n, long deg, long prec)
 		MulPolmodCoeff(chi, matan[i], reduc, deg);
 	    }
 
-	  qg = mulii(qg, prime);
-	  al++;
+	  qg = mulss(q, p);
+          if (lgefint(qg) > 3) break;
+          q = qg[2]; if (q > n) break;
 	
-	  if (!v && (cmpis(qg, n) <= 0))
-	    chi = gmul(chi, chi1);
+	  if (!v) chi = gmul(chi, chi1);
 	}
       }
       break;
     }
 
-    prime[2] += (*dp++);
+    p += (*dp++); prime[2] = p;
     avma = av1;
   }
 
@@ -2551,7 +2547,7 @@ QuadGetST(GEN data, long prec)
   {
     C[j]  = mael(dataCR, mael(vChar,j,1), 2);
     N0[j] = (long)(bit_accuracy(prec) * gtodouble((GEN)C[j]) * 0.35);
-    nmax  = max(nmax, N0[j]);
+    if (nmax < N0[j]) nmax = N0[j];
   }
   if (nmax >= VERYBIGINT)
     err(talker, "Too many coeffs (%ld) in QuadGetST: computation impossible", nmax);
@@ -2567,17 +2563,17 @@ QuadGetST(GEN data, long prec)
     const GEN c1 = (GEN)C[j], c2 = gdivsg(2,c1), cexp = gexp(gneg(c2), prec);
     const GEN LChar = (GEN)vChar[j];
     const long nChar = lg(LChar)-1, NN = N0[j];
-    const GEN veint1 = veceint1(c2, stoi(NN), prec);
-    GEN vcn = cgetg(NN+1, t_VEC);
+    GEN veint1, vcn = cgetg(NN+1, t_VEC);
 
+    if (DEBUGLEVEL>1)
+      fprintferr("* conductor no %ld/%ld (N = %ld)\n\tInit: ", j,ncond,NN);
+    veint1 = veceint1(c2, stoi(NN), prec);
     vcn[1] = (long)cexp;
     for (n=2; n<=NN; n++) vcn[n] = lmul((GEN)vcn[n-1], cexp);
     av2 = avma;
     for (n=2; n<=NN; n++) gaffect(divrs((GEN)vcn[n],n), (GEN)vcn[n]);
     avma = av2;
 
-    if (DEBUGLEVEL>1)
-      fprintferr("* conductor no %ld (N = %ld)\n  char. no:", j,NN);
     for (k = 1; k <= nChar; k++)
     {
       const long t = LChar[k], d = degs[t];
@@ -2585,7 +2581,8 @@ QuadGetST(GEN data, long prec)
       GEN p1 = gzero, p2 = gzero;
       int **matan;
 
-      if (DEBUGLEVEL>1) fprintferr(" %ld", t);
+      if (DEBUGLEVEL>1)
+        fprintferr("\tcharacter no: %ld (%ld/%ld)\n", t,k,nChar);
       matan = computean((GEN)dataCR[t], NN, d, prec);
       for (n = 1; n <= NN; n++)
 	if ((an = EvalCoeff(z, matan[n], d)))
