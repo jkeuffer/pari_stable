@@ -59,7 +59,6 @@ char *errmessage[]=
   "collecting garbage in",
 /* precer */
   "precision too low",
-
 /* siginter */
   "",
 /* typeer */
@@ -75,7 +74,6 @@ char *errmessage[]=
   "impossible assignment I-->S",
 /* affer3 */
   "impossible assignment I-->I",
-
 /* errpile */
   "the PARI stack overflows !",
 /* errlg */
@@ -105,8 +103,6 @@ char *errmessage[]=
 
 /* arither1 */
   "not an integer argument in an arithmetic function",
-/* arither3 */
-  "zero argument in an arithmetic function",
 /* funder2 */
   "discriminant not congruent to 0 or 1 mod 4",
 /* primer1 */

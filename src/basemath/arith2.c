@@ -732,7 +732,7 @@ auxdecomp1(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
   byteptr d=diffptr+1;
 
   if (typ(n) != t_INT) err(arither1);
-  i=signe(n); if (!i) err(arither3);
+  i = signe(n); if (!i) err(talker, "zero argument in factorint");
   (void)cgetg(3,t_MAT);
   if (i<0) { (void)stoi(-1); (void)stoi(1); nb++; }
   if (is_pm1(n)) return aux_end(NULL,nb);
@@ -977,9 +977,12 @@ GEN
 ifac_sumdivk(GEN n, long k, long hint);
 
 GEN
-gmu(GEN n)
-{
-  return arith_proto(mu,n,1);
+gmu(GEN n) { return arith_proto(mu,n,1); }
+
+INLINE void
+chk_arith(GEN n) {
+  if (typ(n) != t_INT) err(arither1);
+  if (!signe(n)) err(talker, "zero argument in an arithmetic function");
 }
 
 long
@@ -990,8 +993,7 @@ mu(GEN n)
   ulong p, lim1;
   long s, v;
 
-  if (typ(n) != t_INT) err(arither1);
-  if (!signe(n)) err(arither3);
+  chk_arith(n);
   if (is_pm1(n)) return 1;
   v = vali(n);
   if (v>1) return 0;
@@ -1078,8 +1080,7 @@ omega(GEN n)
   long nb,v;
   ulong p, lim1;
 
-  if (typ(n) != t_INT) err(arither1);
-  if (!signe(n)) err(arither3);
+  chk_arith(n);
   if (is_pm1(n)) return 0;
   v=vali(n);
   nb = v ? 1 : 0;
@@ -1117,8 +1118,7 @@ bigomega(GEN n)
   pari_sp av = avma;
   long nb,v;
 
-  if (typ(n) != t_INT) err(arither1);
-  if (!signe(n)) err(arither3);
+  chk_arith(n);
   if (is_pm1(n)) return 0;
   nb=v=vali(n);
   n=absi(shifti(n,-v));
@@ -1155,8 +1155,7 @@ phi(GEN n)
   pari_sp av = avma;
   long v;
 
-  if (typ(n) != t_INT) err(arither1);
-  if (!signe(n)) err(arither3);
+  chk_arith(n);
   if (is_pm1(n)) return gun;
   v = vali(n);
   n = absi(shifti(n,-v));
@@ -1199,8 +1198,7 @@ numbdiv(GEN n)
   ulong p, lim1;
   pari_sp av = avma;
 
-  if (typ(n) != t_INT) err(arither1);
-  if (!signe(n)) err(arither3);
+  chk_arith(n);
   if (is_pm1(n)) return gun;
   v = vali(n);
   n = absi(shifti(n,-v));
@@ -1239,8 +1237,7 @@ sumdiv(GEN n)
   pari_sp av=avma;
   long v;
 
-  if (typ(n) != t_INT) err(arither1);
-  if (!signe(n)) err(arither3);
+  chk_arith(n);
   if (is_pm1(n)) return gun;
   v = vali(n);
   n = absi(shifti(n,-v));
@@ -1285,8 +1282,7 @@ sumdivk(GEN n, long k)
 
   if (!k) return numbdiv(n);
   if (k==1) return sumdiv(n);
-  if (typ(n) != t_INT) err(arither1);
-  if (!signe(n)) err(arither3);
+  chk_arith(n);
   if (is_pm1(n)) return gun;
   k1 = k; n1 = n;
   if (k==-1) { m=sumdiv(n); k = 1; goto fin; }

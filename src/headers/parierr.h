@@ -44,8 +44,7 @@ enum {
 
 /* arith.c  */
 
-  arither1, arither3,
-  funder2, primer1, primer2, invmoder,
+  arither1, funder2, primer1, primer2, invmoder,
 
 /* base.c   */
   constpoler, notpoler, redpoler, zeropoler,
