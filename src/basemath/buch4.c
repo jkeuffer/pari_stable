@@ -665,7 +665,7 @@ GEN
 rnfisnorminit(GEN T, GEN relpol, int galois)
 {
   pari_sp av = avma;
-  long i, l, drel, vbas, v = varn(relpol);
+  long i, l, drel, vbas; 
   GEN prod, S1, S2, gen, cyc, bnf, nf, nfabs, rnfeq, bnfabs, res, k, polabs;
   GEN y = cgetg(9, t_VEC);
 
@@ -675,7 +675,7 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
 
   relpol = get_bnfpol(relpol, &bnfabs, &nfabs);
   drel = degpol(relpol);
-  if (varncmp(v, vbas) >= 0)
+  if (varncmp(varn(relpol), vbas) >= 0)
     err(talker,"main variable must be of higher priority in rnfisnorminit");
 
   rnfeq = NULL; /* no reltoabs needed */
@@ -707,7 +707,7 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
   if (galois == 2)
   {
     GEN P = rnfeq? pol_up(rnfeq, relpol, vbas): relpol;
-    galois = nfisgalois(gsubst(nfabs, v, polx[vbas]), P);
+    galois = nfisgalois(gsubst(nfabs, varn(nfabs[1]), polx[vbas]), P);
   }
 
   prod = gen_1; S1 = S2 = cgetg(1, t_VEC);
