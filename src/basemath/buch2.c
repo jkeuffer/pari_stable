@@ -1432,7 +1432,7 @@ small_norm_for_buchall(long cglob,GEN *mat,GEN matarch,long LIMC, long PRECREG,
   MINKOVSKI_BOUND = get_minkovski(N,R1,(GEN)nf[3],gborne);
   for (noideal=KC; noideal; noideal--)
   {
-    long nbrelideal=0, dependent = 0;
+    long nbrelideal=0, dependent = 0, oldcglob = cglob;
     GEN IDEAL, ideal = (GEN)vectbase[noideal];
     GEN normideal = idealnorm(nf,ideal);
 
@@ -1449,14 +1449,14 @@ small_norm_for_buchall(long cglob,GEN *mat,GEN matarch,long LIMC, long PRECREG,
     {
       v[k]=gtodouble(gcoeff(r,k,k));
       for (j=1; j<k; j++) q[j][k]=gtodouble(gcoeff(r,j,k));
-      if (DEBUGLEVEL>3) fprintferr("v[%ld]=%.0f ",k,v[k]);
+      if (DEBUGLEVEL>3) fprintferr("v[%ld]=%.4g ",k,v[k]);
     }
 
     BOUND = MINKOVSKI_BOUND * pow(gtodouble(normideal),2./(double)N);
     if (DEBUGLEVEL>1)
     {
       if (DEBUGLEVEL>3) fprintferr("\n");
-      fprintferr("BOUND = %.0f\n",BOUND); flusherr();
+      fprintferr("BOUND = %.4g\n",BOUND); flusherr();
     }
     BOUND += eps; av2=avma; limpile = stack_lim(av2,1);
     k = N; y[N]=z[N]=0; x[N]= (long) sqrt(BOUND/v[N]);
@@ -1532,7 +1532,7 @@ small_norm_for_buchall(long cglob,GEN *mat,GEN matarch,long LIMC, long PRECREG,
       }
     }
 ENDIDEAL:
-    invp = gerepilecopy(av1, invp);
+    if (cglob == oldcglob) avma =av1; else invp = gerepilecopy(av1, invp);
     if (DEBUGLEVEL>1) msgtimer("for this ideal");
   }
 END:
