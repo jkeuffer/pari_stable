@@ -1751,7 +1751,7 @@ chk_gen_init(FP_chk_fun *chk, GEN gram, GEN mat)
   for (i=1; i<l; i++)
   {
     B = gcoeff(gram,i,i);
-    if (gcmp(B,bound) >= 0) break;
+    if (gcmp(B,bound) >= 0) continue; /* don't assume increasing norms */
 
     x[i] = un; P = get_polmin(d,x);
     x[i] = zero;
