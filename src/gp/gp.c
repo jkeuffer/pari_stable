@@ -2498,7 +2498,6 @@ static GEN
 gp_main_loop(int ismain)
 {
   gp_hist *H  = GP_DATA->hist;
-  gpmem_t av = avma;
   VOLATILE GEN z = gnil;
   Buffer *b = new_buffer();
   filtre_t F;
@@ -2512,6 +2511,7 @@ gp_main_loop(int ismain)
 
   for (; ; setjmp(b->env))
   {
+    VOLATILE gpmem_t av;
     if (ismain)
     {
       static long tloc, outtyp;
@@ -2546,6 +2546,7 @@ gp_main_loop(int ismain)
       gpsilent = is_silent(b->buf);
       TIMERstart(GP_DATA->T);
     }
+    av = avma;
     z = readseq(b->buf, GP_DATA->flags & STRICTMATCH);
     if (! ismain) { avma = av; continue; }
 
