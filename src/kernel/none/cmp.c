@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /*They depend on absi_cmp_lg and absi_equal_lg in mp.c*/
 
-#define MASK(x) (((ulong)(x)) & (LGEFINTBITS | SIGNBITS))
+#define MASK(x) (((ulong)(x)) & (LGBITS | SIGNBITS))
 int
 egalii(GEN x, GEN y)
 {

@@ -3185,7 +3185,7 @@ readobj(FILE *f, int *ptc)
 #else
 #  define ENDIAN_CHECK 0x01020304L
 #endif
-const long BINARY_VERSION = 0;
+const long BINARY_VERSION = 1; /* since 2.2.9 */
 
 static int
 is_magic_ok(FILE *f)

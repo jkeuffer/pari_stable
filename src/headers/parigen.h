@@ -49,39 +49,30 @@ typedef long *GEN;
  *       int   SIGNBITS, LGBITS
  *       pol   SIGNBITS, VARNBITS
  *       ser   SIGNBITS, VARNBITS, VALPBITS
- *       padic VALPBITS, PRECPBITS 
- * Length of bitfields are independent and satisfy:
- *  TYPnumBITS  + LGnumBITS   + 1 <= BITS_IN_LONG (optimally =)
- *  SIGNnumBITS + EXPOnumBITS     <= BITS_IN_LONG
- *  SIGNnumBITS + LGnumBITS       <= BITS_IN_LONG
- *  SIGNnumBITS + VALPnumBITS + 2 <= BITS_IN_LONG
- *  VALPnumBITS               + 1 <= BITS_IN_LONG */
+ *       padic VALPBITS, PRECPBITS */
 #define TYPnumBITS   7
 #define SIGNnumBITS  2
 
 #ifdef LONG_IS_64BIT
-#  define   LGnumBITS 32
-#  define EXPOnumBITS 48
-#  define VALPnumBITS 46 /* otherwise MAXVARN too large */
+#  define VARNnumBITS 16 /* otherwise MAXVARN too large */
 #else
-#  define   LGnumBITS 24
-#  define EXPOnumBITS 24
-#  define VALPnumBITS 16 
+#  define VARNnumBITS 14
 #endif
 
 /* no user serviceable parts below :-) */
-#define VARNnumBITS (BITS_IN_LONG - SIGNnumBITS - VALPnumBITS)
+#define   LGnumBITS (BITS_IN_LONG - 1 - TYPnumBITS)
+#define VALPnumBITS (BITS_IN_LONG - SIGNnumBITS - VARNnumBITS)
+#define EXPOnumBITS (BITS_IN_LONG - SIGNnumBITS)
 #define PRECPSHIFT VALPnumBITS
 #define  VARNSHIFT VALPnumBITS
 #define   TYPSHIFT (BITS_IN_LONG - TYPnumBITS)
-#define  SIGNSHIFT (VALPnumBITS+VARNnumBITS)
+#define  SIGNSHIFT (BITS_IN_LONG - SIGNnumBITS)
 
 #define EXPOBITS    ((1UL<<EXPOnumBITS)-1)
-#define SIGNBITS    (0xffffUL << SIGNSHIFT)
-#define  TYPBITS    (0xffffUL <<  TYPSHIFT)
+#define SIGNBITS    (~((1<<SIGNSHIFT) - 1))
+#define  TYPBITS    (~((1<< TYPSHIFT) - 1))
 #define PRECPBITS   (~VALPBITS)
 #define LGBITS      ((1UL<<LGnumBITS)-1)
-#define LGEFINTBITS LGBITS
 #define VALPBITS    ((1UL<<VALPnumBITS)-1)
 #define VARNBITS    (MAXVARN<<VARNSHIFT)
 #define MAXVARN     ((1UL<<VARNnumBITS)-1)
@@ -89,8 +80,8 @@ typedef long *GEN;
 #define HIGHVALPBIT (1UL<<(VALPnumBITS-1))
 #define CLONEBIT    (1UL<<LGnumBITS)
 
-#define evaltyp(x)     (((ulong)(x)) << TYPSHIFT)
-#define evalvarn(x)    (((ulong)(x)) << VARNSHIFT)
+#define evaltyp(x)    (((ulong)(x)) << TYPSHIFT)
+#define evalvarn(x)   (((ulong)(x)) << VARNSHIFT)
 #define evalsigne(x)   (((long)(x)) << SIGNSHIFT)
 #define evalprecp(x)   (((long)(x)) << PRECPSHIFT)
 #define _evalexpo(x)  (HIGHEXPOBIT + (x))
@@ -118,9 +109,9 @@ typedef long *GEN;
 #define lgeflist(x)      (((long*)(x))[1])
 #define setlgeflist(x,l) (((ulong*)(x))[1]=(ulong)(l))
 
-#define lgefint(x)      ((long)(((ulong*)(x))[1] & LGEFINTBITS))
+#define lgefint(x)      ((long)(((ulong*)(x))[1] & LGBITS))
 #define setlgefint(x,s) (((ulong*)(x))[1]=\
-                          (((ulong*)(x))[1]&(~LGEFINTBITS)) | (ulong)evallgefint(s))
+                          (((ulong*)(x))[1]&(~LGBITS)) | (ulong)evallgefint(s))
 
 #define expo(x)       ((long) ((((ulong*)(x))[1] & EXPOBITS) - HIGHEXPOBIT))
 #define setexpo(x,s)  (((ulong*)(x))[1]=\
