@@ -6,7 +6,7 @@ b) ./Configure (--prefix=/exotic/dir/name if desired. Default is /usr/local)
 c) make all, make bench
 d) make install if desired
 e) copy misc/gprc.dft to /etc/gprc or $HOME/.gprc (personal installation)
-f) the data for polgalois() function (12 > degree > 6) is provided in a
+f) the data for polgalois() function (12 > degree > 7) is provided in a
 separate archive galdata.tgz, which you have to fetch separately.
 g) you can find documentation, tutorial and reference card in directory doc.
 
