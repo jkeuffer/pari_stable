@@ -137,42 +137,63 @@ integers, add \kbd{O(p\pow k)} to the result; finally, to obtain the
 
 \syn{gdiv}{x,y} for $x$ \kbd{/} $y$.
 
-\subseckbd{\bs}: The expression $x$ \kbd{\bs} $y$ is the
-% keep "Euclidean" and "quotient" on same line for gphelp
-\idx{Euclidean quotient} of $x$ and $y$. The types must be either both
-integer or both polynomials. The result is the Euclidean quotient. In the
-case of integer division, the quotient is such that the corresponding
-remainder is non-negative.
+\subseckbd{\bs}: The expression \kbd{$x$ \bs $y$} is the \idx{Euclidean
+quotient} of $x$ and $y$. If $y$ is a real scalar, this is defined as 
+\kbd{floor($x$/$y$)} if $y > 0$, and \kbd{floor($x$/$y$) + 1} if $y < 0$ and
+the division is not exact. Hence the remainder \kbd{$x$ - ($x$ \bs $y$) *
+$y$} is in $[0, |y|[$.
+
+Note that when $y$ is an integer and $x$ a polynomial, $y$ is first promoted
+to a polynomial of degree $0$. When $x$ is a vector or matrix, the operator
+is applied componentwise.
 
 \syn{gdivent}{x,y} for $x$ \kbd{\bs} $y$.
 
-\subseckbd{\bs/}: The expression $x$ \b{/} $y$ is the Euclidean
-quotient of $x$ and $y$.  The types must be either both integer or both
-polynomials. The result is the rounded Euclidean quotient. In the case of
-integer division, the quotient is such that the corresponding remainder is
-smallest in absolute value and in case of a tie the quotient closest to
-$+\infty$ is chosen.
+\subseckbd{\bs/}: The expression $x$ \b{/} $y$ evaluates to the rounded
+\idx{Euclidean quotient} of $x$ and $y$. This is the same as \kbd{$x$ \bs $y$}
+except for scalar division: the quotient is such that the corresponding
+remainder is smallest in absolute value and in case of a tie the quotient
+closest to $+\infty$ is chosen (hence the remainder would belong to
+$]-|y|/2, |y|/2]$).
+
+When $x$ is a vector or matrix, the operator is applied componentwise.
 
 \syn{gdivround}{x,y} for $x$ \b{/} $y$.
 
-\subseckbd{\%}: The expression $x$ \kbd{\%} $y$ is the
-% keep "Euclidean" and "remainder" on same line for gphelp
-\idx{Euclidean remainder} of $x$ and $y$. The modulus $y$ must be of type
-integer or polynomial. The result is the remainder, always non-negative in
-the case of integers. Allowed dividend types are scalar exact types when
-the modulus is an integer, and polynomials, polmods and rational functions
-when the modulus is a polynomial.
+\subseckbd{\%}: The expression \kbd{$x$ \% $y$} evaluates to the modular
+\idx{Euclidean remainder} of $x$ and $y$, which we now define. If $y$ is an
+integer, this is the smallest non-negative integer congruent to $x$ modulo
+$y$. If $y$ is a polynomial, this is the polynomial of smallest degree
+congruent to $x$ modulo $y$. When $y$ is a \typ{REAL}, a \typ{FRAC} or a
+\typ{FRACN}, $x \% y$ is defined as \kbd{$x$ - ($x$\bs$y$) * $y$}, which
+coincides with the definition for $y$ integer if and only if $x$ is an
+integer, but still satisfies $0 \leq x\kbd{\%}y < |y|$. For instance:
+\bprog
+? (1/2) % 3
+%1 = 2
+? 0.5 % 3
+  ***   forbidden division t_REAL % t_INT.
+? (1/2) % 3.
+%2 = 1/2
+@eprog
+Note that when $y$ is an integer and $x$ a polynomial, $y$ is first promoted
+to a polynomial of degree $0$. When $x$ is a vector or matrix, the operator
+is applied componentwise.
 
 \syn{gmod}{x,y} for $x$ \kbd{\%} $y$.
 
-\subsecidx{divrem}$(x,y)$: creates a column vector with two components,
-the first being the Euclidean quotient, the second the Euclidean remainder,
-of the division of $x$ by $y$. This avoids the need to do two divisions if
-one needs both the quotient and the remainder. The arguments must be both
-integers or both polynomials; in the case of integers, the remainder is 
-non-negative.
+\subsecidx{divrem}$(x,y,\{v\})$: creates a column vector with two components,
+the first being the Euclidean quotient (\kbd{$x$ \bs $y$}), the second the
+Euclidean remainder (\kbd{$x$ - ($x$\bs$y$)*y}), of the division of $x$ by
+$y$. This avoids the need to do two divisions if one needs both the quotient
+and the remainder. If $v$ is present, and $x$, $y$ are multivariate
+polynomials, divide with respect to the variable $v$.
 
-\syn{gdiventres}{x,y}.
+Beware that \kbd{divrem($x$,$y$)[2]} is in general not the same as
+\kbd{$x$ \% $y$}.
+
+\syn{divrem}{x,y,v},where $v$ is a \kbd{long}. Also available as
+$\teb{gdiventres}(x,y)$ when $v$ is not needed.
 
 \subseckbd{\pow}: The expression $x\hbox{\kbd{\pow}}n$ is \idx{powering}.
 If the exponent is an integer, then exact operations are performed using
