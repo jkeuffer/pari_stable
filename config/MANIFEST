@@ -79,6 +79,7 @@ examples/Inputrc
 examples/bench.gp
 examples/cl.gp
 examples/classno.gp
+examples/contfrac.gp
 examples/lucas.gp
 examples/matexp.c
 examples/rho.gp
