@@ -2963,6 +2963,20 @@ clonefill(GEN S, long s, long t)
   return S;
 }
 
+#define nexta(a) (a>0 ? -1-a : 1-a)
+INLINE void 
+step(GEN x, GEN y, GEN inc, long k)
+{
+  if (!signe(y[k]))
+    x[k] = laddis((GEN)x[k], 1); /* leading coeff > 0 */
+  else
+  {
+    long i = inc[k];
+    x[k] = laddis((GEN)x[k], i),
+    inc[k] = (i > 0)? -1-i: 1-i;
+  }
+}
+#undef nexta
 /* q is the Gauss reduction (sqred1) of the quadratic form */
 /* general program for positive definit quadratic forms (real coeffs).
  * One needs BORNE != 0; LLL reduction done in fincke_pohst().
@@ -2971,9 +2985,10 @@ clonefill(GEN S, long s, long t)
 static GEN
 smallvectors(GEN q, GEN BORNE, long stockmax, FP_chk_fun *CHECK)
 {
-  long N, n, i, j, k, s, epsbit, prec, checkcnt = 1;
+  long N = lg(q), n = N-1, i, j, k, s, epsbit, prec, checkcnt = 1;
   pari_sp av, av1, lim;
-  GEN u,S,x,y,z,v,norme1,normax1,borne1,borne2,eps,p1,alpha,norms;
+  GEN inc, u, S, x, y, z, v,  eps, p1, alpha, norms;
+  GEN norme1, normax1, borne1, borne2;
   GEN (*check)(void *,GEN) = CHECK? CHECK->f: NULL;
   void *data = CHECK? CHECK->data: NULL;
   int skipfirst = CHECK? CHECK->skipfirst: 0;
@@ -2989,8 +3004,8 @@ smallvectors(GEN q, GEN BORNE, long stockmax, FP_chk_fun *CHECK)
   normax1 = gzero;
   borne1= gadd(BORNE,eps);
   borne2 = mpmul(borne1,alpha);
-  N = lg(q); n = N-1;
   v = cgetg(N,t_VEC);
+  inc = vecsmall_const(n, 1);
 
   av = avma; lim = stack_lim(av,2);
   if (stockall) stockmax = 200;
@@ -3001,15 +3016,13 @@ smallvectors(GEN q, GEN BORNE, long stockmax, FP_chk_fun *CHECK)
   z = cgetg(N,t_COL);
   for (i=1; i<N; i++) { v[i] = coeff(q,i,i); x[i]=y[i]=z[i] = zero; }
 
-  x[n] = lmpent(mpsqrt(gdiv(borne1,(GEN)v[n])));
-  if (DEBUGLEVEL>3) { fprintferr("\nx[%ld] = %Z\n",n,x[n]); flusherr(); }
-
-  s = 0; k = n;
-  for(;; x[k] = laddis((GEN)x[k],-1)) /* main */
+  x[n] = zero; s = 0; k = n;
+  for(;; step(x,y,inc,k)) /* main */
   {
     do
     {
       int fl = 0;
+      if (check && inc[1] == 101) fl = 1; /* heuristic */
       if (k > 1)
       {
         k--;
@@ -3021,27 +3034,34 @@ smallvectors(GEN q, GEN BORNE, long stockmax, FP_chk_fun *CHECK)
         av1 = avma; p1 = gsqr(mpadd((GEN)x[k+1],(GEN)z[k+1]));
         p1 = mpadd((GEN)y[k+1], mpmul(p1,(GEN)v[k+1]));
 	y[k] = (long)gerepileuptoleaf(av1, p1);
-        /* reject the [x_1,...,x_skipfirst,0,...,0] */
-        if (k <= skipfirst && !signe(y[skipfirst])) goto END;
-
-        av1 = avma; p1 = mpsub(borne1, (GEN)y[k]);
-	if (signe(p1) < 0) { avma = av1; fl = 1; }
+        /* skip the [x_1,...,x_skipfirst,0,...,0] */
+        if (k <= skipfirst && !signe(y[skipfirst])) fl = 1;
         else
         {
-          p1 = mpadd(eps,mpsub(mpsqrt(gdiv(p1,(GEN)v[k])), (GEN)z[k]));
-          x[k] = (long)gerepileuptoleaf(av1,mpent(p1));
+          av1 = avma; p1 = mpsub(borne1, (GEN)y[k]); avma = av1;
+          if (signe(p1) < 0) fl = 1;
+          else
+            x[k] = lround( mpneg((GEN)z[k]) );
         }
       }
-      for(;; x[k] = laddis((GEN)x[k],-1))
+      for(;; step(x,y,inc,k))
       {
 	if (!fl)
 	{
-          av1 = avma; /* p1 >= 0 */
-	  p1 = mpmul((GEN)v[k], gsqr(mpadd((GEN)x[k],(GEN)z[k])));
+          av1 = avma;
+	  p1 = mpmul((GEN)v[k], gsqr(mpadd((GEN)x[k], (GEN)z[k])));
+	  i = mpcmp(mpsub(mpadd(p1,(GEN)y[k]), borne1), gmul2n(p1,-epsbit));
+          avma = av1; if (i <= 0) break;
+          
+          step(x,y,inc,k);
+
+          av1 = avma; /* same as above */
+	  p1 = mpmul((GEN)v[k], gsqr(mpadd((GEN)x[k], (GEN)z[k])));
 	  i = mpcmp(mpsub(mpadd(p1,(GEN)y[k]), borne1), gmul2n(p1,-epsbit));
           avma = av1; if (i <= 0) break;
 	}
-        k++; fl = 0;
+        fl = 0; inc[k] = 1;
+        if (++k > n) goto END;
       }
 
       if (low_stack(lim, stack_lim(av,2)))
@@ -3061,9 +3081,8 @@ smallvectors(GEN q, GEN BORNE, long stockmax, FP_chk_fun *CHECK)
       }
     }
     while (k > 1);
-
-    /* x = 0: we're done */
-    if (!signe(x[1]) && !signe(y[1])) goto END;
+    if (!signe(x[1]) && !signe(y[1])) continue; /* exclude 0 */
+    if (DEBUGLEVEL>3) output(x);
 
     av1 = avma; p1 = gsqr(mpadd((GEN)x[1],(GEN)z[1]));
     norme1 = mpadd((GEN)y[1], mpmul(p1, (GEN)v[1]));
