@@ -38,6 +38,7 @@ DE  7- typo in kernel/sparcv7/level0.S: err --> pari_err
       Ex: x;n;k;m; (n+m)==(k+1-k)*(n+m) was false.
    10- sumdiv(N,...) required single precision N
 BA 11- bound problems in nfgaloisconj()
+   12- infinite loop in do_agm()
 
   Added
 IZ  1- [gnuplot] look up directory tree for gnuplot related files

@@ -1399,11 +1399,9 @@ lindep2(GEN x, long bit)
   re=greal(x); im=gimag(x); flag = !gcmp0(im);
   if (lx == 3)
   { /* independant over R ? */
-    if (gexpo(gsub(gmul((GEN)re[1],(GEN)im[2]),
-                   gmul((GEN)re[2],(GEN)im[1]))) > - bit)
-    {
-      avma = av; return cgetg(1, t_VEC);
-    }
+    p1 = gsub(gmul((GEN)re[1],(GEN)im[2]),
+              gmul((GEN)re[2],(GEN)im[1]));
+    if (!gcmp0(p1) && gexpo(p1) > - bit) { avma = av; return cgetg(1, t_VEC); }
   }
   ly = flag? lx+2: lx+1;
   p2=cgetg(lx,t_MAT); bit = (long) (bit/L2SL10);
@@ -1424,7 +1422,7 @@ GEN
 lindep(GEN x, long prec)
 {
   GEN *b,*be,*bn,**m,qzer;
-  GEN c1,c2,c3,px,py,pxy,re,im,p3,p4,r,f,em;
+  GEN c1,c2,c3,px,py,pxy,re,im,p1,p2,r,f,em;
   long i,j,fl,i1, lx = lg(x), tx = typ(x), n = lx-1;
   long av = avma, lim = stack_lim(av,1), av0,av1,tetpil;
   const long EXP = - bit_accuracy(prec) + 2*n;
@@ -1435,8 +1433,9 @@ lindep(GEN x, long prec)
   re=greal(x); im=gimag(x);
   if (lx == 3)
   { /* independant over R ? */
-    if (gexpo(gsub(gmul((GEN)re[1],(GEN)im[2]),
-                   gmul((GEN)re[2],(GEN)im[1]))) > - bit_accuracy(prec))
+    p1 = gsub(gmul((GEN)re[1],(GEN)im[2]),
+              gmul((GEN)re[2],(GEN)im[1]));
+    if (!gcmp0(p1) && gexpo(p1) > - bit_accuracy(prec))
     {
       avma = av; return cgetg(1, t_VEC);
     }
@@ -1456,31 +1455,31 @@ lindep(GEN x, long prec)
   }
   px=sqscal(re);
   py=sqscal(im); pxy=gscal(re,im);
-  p3=mpsub(mpmul(px,py),gsqr(pxy));
-  if (quazero(re)) { re=im; px=py; fl=1; } else fl=quazero(p3);
+  p1=mpsub(mpmul(px,py),gsqr(pxy));
+  if (quazero(re)) { re=im; px=py; fl=1; } else fl=quazero(p1);
   av0 = av1 = avma;
   for (i=1; i<=n; i++)
   {
-    p4 = gscal(b[i],re);
-    if (fl) p4=gmul(gdiv(p4,px),re);
+    p2 = gscal(b[i],re);
+    if (fl) p2=gmul(gdiv(p2,px),re);
     else
     {
       GEN p5,p6,p7;
       p5=gscal(b[i],im);
-      p6=gdiv(gsub(gmul(py,p4),gmul(pxy,p5)),p3);
-      p7=gdiv(gsub(gmul(px,p5),gmul(pxy,p4)),p3);
-      p4=gadd(gmul(p6,re),gmul(p7,im));
+      p6=gdiv(gsub(gmul(py,p2),gmul(pxy,p5)),p1);
+      p7=gdiv(gsub(gmul(px,p5),gmul(pxy,p2)),p1);
+      p2=gadd(gmul(p6,re),gmul(p7,im));
     }
-    if (tx!=t_COL) p4=gtrans(p4);
-    p4=gsub(b[i],p4);
+    if (tx!=t_COL) p2=gtrans(p2);
+    p2=gsub(b[i],p2);
     for (j=1; j<i; j++)
       if (qzer[j]) affrr(bn[j],m[i][j]);
       else
       {
         gdivz(gscal(b[i],be[j]),bn[j],m[i][j]);
-        p4=gsub(p4,gmul(m[i][j],be[j]));
+        p2=gsub(p2,gmul(m[i][j],be[j]));
       }
-    gaffect(p4,be[i]); affrr(sqscal(be[i]),bn[i]);
+    gaffect(p2,be[i]); affrr(sqscal(be[i]),bn[i]);
     qzer[i]=quazero(bn[i]); avma=av1;
   }
   while (qzer[n])
@@ -1495,21 +1494,21 @@ lindep(GEN x, long prec)
     em=bn[1]; j=1;
     for (i=2; i<n; i++)
     {
-      p3=shiftr(bn[i],i);
-      if (cmprr(p3,em)>0) { em=p3; j=i; }
+      p1=shiftr(bn[i],i);
+      if (cmprr(p1,em)>0) { em=p1; j=i; }
     }
     i=j; i1=i+1;
     avma = av1; r = grndtoi(m[i1][i], &e);
     if (e >= 0) err(talker,"precision too low in lindep");
     r  = negi(r);
-    p3 = lincomb_integral(gun,r, b[i1],b[i]);
+    p1 = lincomb_integral(gun,r, b[i1],b[i]);
     av1 = avma;
-    b[i1]=b[i]; b[i]=p3; f=addir(r,m[i1][i]);
+    b[i1]=b[i]; b[i]=p1; f=addir(r,m[i1][i]);
     for (j=1; j<i; j++)
       if (!qzer[j])
       {
-        p3=mpadd(m[i1][j],mulir(r,m[i][j]));
-        affrr(m[i][j],m[i1][j]); mpaff(p3,m[i][j]);
+        p1=mpadd(m[i1][j],mulir(r,m[i][j]));
+        affrr(m[i][j],m[i1][j]); mpaff(p1,m[i][j]);
       }
     c1=addrr(bn[i1],mulrr(gsqr(f),bn[i]));
     if (!quazero(c1))
@@ -1519,9 +1518,9 @@ lindep(GEN x, long prec)
       affrr(c1,bn[i]); qzer[i1]=quazero(bn[i1]); qzer[i]=0;
       for (j=i+2; j<=n; j++)
       {
-        p3=addrr(mulrr(m[j][i1],c3),mulrr(m[j][i],c2));
+        p1=addrr(mulrr(m[j][i1],c3),mulrr(m[j][i],c2));
         subrrz(m[j][i],mulrr(f,m[j][i1]), m[j][i1]);
-        affrr(p3,m[j][i]);
+        affrr(p1,m[j][i]);
       }
     }
     else
@@ -1537,10 +1536,10 @@ lindep(GEN x, long prec)
       av1 = avma;
     }
   }
-  p3=cgetg(lx,t_COL); p3[n]=un; for (i=1; i<n; i++) p3[i]=zero;
-  p4 = (GEN)b; p4[0] = evaltyp(t_MAT) | evallg(lx);
-  p4=gauss(gtrans(p4),p3); tetpil=avma;
-  return gerepile(av,tetpil,gtrans(p4));
+  p1=cgetg(lx,t_COL); p1[n]=un; for (i=1; i<n; i++) p1[i]=zero;
+  p2 = (GEN)b; p2[0] = evaltyp(t_MAT) | evallg(lx);
+  p2=gauss(gtrans(p2),p1); tetpil=avma;
+  return gerepile(av,tetpil,gtrans(p2));
 }
 
 GEN
