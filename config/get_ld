@@ -34,6 +34,7 @@ case "$osname-$arch" in
   linux-*|cygwin*|freebsd-*)
     tmp=`./ldflags "$LDneedsWl" "-export-dynamic"`
     ldflags="$ldflags $tmp" ;;
+  aix-*)  ldflags='-brtl' ;; # in case we link against a shared library
   os2-*)  ldflags="$ldflags -Zexe"
           case "$optimization" in
             full) ldflags="$ldflags -s";;
