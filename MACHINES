@@ -95,9 +95,9 @@ PentiumIII   500MHz  Linux-2.2.12   egcs            3154    3176  2.0.18    HC
 PentiumII    450MHz  Linux-2.0.35    gcc            3220    3230  2.1.1     TT
 PentiumII    400MHz  Linux-2.3.99    gcc            3392    3410  2.0.20(25)GH
 PentiumII    400MHz  Linux-2.2.14    gcc            3886    3902  2.0.20    GH
-PentiumII    350MHz  Linux-2.2.16    gcc            3848    3876  2.1.0 (21)
-PentiumII    350MHz  Win98         mingw            4412!      -  2.1.0 (22)
-PentiumII    350MHz  Win98 + Cygwin1 gcc            4490!      -  2.1.0 (23)
+PentiumII    350MHz  Linux-2.2.16    gcc-2.95.2     3760    3784  2.2.1
+PentiumII    350MHz  Win98         mingw-2.95.2     4412!      -  2.1.0 (22)
+PentiumII    350MHz  Win98 + Cygwin1 gcc-2.95.2-5   4490!      -  2.1.0 (23)
 PentiumII    350MHz  Win98 + RSX     gcc            9436!      -  2.0.20(24)
 PentiumII    350Mhz  Linux 2.0.36   pgcc-2.92.21   (3310)  (3340) 2.0.12(11)PE
 PentiumII    350Mhz  Linux 2.0.36   egcs-2.92.21   (3352)  (3402) 2.0.12(11)PE
@@ -211,11 +211,7 @@ Whatever else I tried, linking failed:
 
 (10) compiled without +z flags
 
-(11) egcs (http://www.cygnus.com/egcs) and pgcc (http://www.gcc.ml.org):
-egcs=experimental gnu c
-pgcc=pentium gcc (relevant only for ix86 family, including cyrix, amd...)
-
-Relevant data:
+(11)
 CFLAGS (for egcs)= -O9 -malign-double -fschedule-insns2  -mpentium\
 -march=pentium -fomit-frame-pointer -fno-strength-reduce\
 -fno-inline-functions -fexpensive-optimizations
@@ -237,11 +233,6 @@ hppa kernel. Remove +z from compiler flags
 (18) 2  MB L2 Cache - Ultra U10
 (19) replace err by pari_err in src/kernel/sparcv7/level0.S [in 2.0.16 or 17]
 (20) asmarch incorrectly defaulted to MicroSPARC (bypassed using Configure -a)
-(21) gcc 2.95.2 : SEGV in bench! After correcting correct (but dirty) code
-       in quicksqri(), obtained the given timings [other: remove flag
-       -fomit-frame-pointer from CFLAGS when compiling mp.o]
-     gcc 2.7.2.1 + pari-2.1 out of the box: no [BUG], but slower
-     (sta: 4309,  dyn: 4483)
 (22) same machine as above, native binary compiled with mingw32-gcc-2.95.2
      had to modify Odos/Makefile (to link with readline-4.0). 
      PROBLEMS: 

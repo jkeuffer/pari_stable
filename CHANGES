@@ -94,13 +94,15 @@ XR 51- increase precision automatically when needed in quadhilbertreal
    56- obscure bugs with types FRACN/RFRACN [when simplifies to INT/POL]
 IZ 57- readline history: while inputing continuation lines, the partial
        command was not put into history until full command was run
+   58- not enough GC in polroots (dft) for huge degrees
 
   Changed
     1- removed useless parameter prec in many bnr* and rnf* functions
     2- major update of bnr* functions [use elements in factored form]
     3- use /tmp instead of /var/tmp as default tmp directory [faster on Solaris]
 BA  4- Fp_PHlog (Pohlig-Hellman) can use a factorization of the subgroup order
-    5- major update of buchall() [bnfinit]: accurate precision increase, cleanup
+    5- major update of buchall() [bnfinit]: accurate precision increase, use
+       multiplicative archimedean components (fewer logs), cleanup
     6- [libpari:] rename permute/permuteInv to GP names numtoperm/permtonum
     7- scalar + [;] --> error  [made it [;]]
 BA  8- factorback, chinese, lcm and gcd now accept a single vector
