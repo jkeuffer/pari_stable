@@ -6190,6 +6190,13 @@ $\sum_i m_{i,j}x_j\equiv y_i\pmod{d_i}$ if one exists, otherwise returns
 zero. Shorthand notation: $y$ (resp.~$d$) can be given as a single integer,
 in which case all the $y_i$ (resp.~$d_i$) above are taken to be equal to $y$
 (resp.~$d$).
+\bprog
+  ? m = [1,2;3,4];
+  ? matsolvemod(m, [3,4], [1,2]~)
+  %2 = [-2, 0]~
+  ? matsolvemod(m, 3, 1) \\ m X = [1,1]~ over F_3 
+  %3 = [-1, 1]~
+@eprog
 
 If $\fl=1$, all solutions are returned in the form of a two-component row
 vector $[x,u]$, where $x$ is a small integer solution to the system of
