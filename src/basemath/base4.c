@@ -2093,8 +2093,6 @@ ideallllred(GEN nf, GEN I, GEN vdir, long prec)
     if (gcmp0(I)) { y=gun; I=cgetg(1,t_MAT); } else { y=I; I=idmat(N); }
     goto END;
   }
-
-  if (DEBUGLEVEL>5) msgtimer("entering idealllred");
   I0 = I;
   if (typ(I) != id_MAT || lg(I) != N+1) I = idealhermite_aux(nf,I);
   I = primitive_part(I, &c1);
@@ -2109,7 +2107,6 @@ ideallllred(GEN nf, GEN I, GEN vdir, long prec)
     if (!aI) I = gcopy(I);
     y = NULL; goto END;
   }
-  if (DEBUGLEVEL>5) msgtimer("LLL reduction");
 
   x = gmul((GEN)nf[7], y); Nx = subres(pol,x);
   b = gmul(Nx, QX_invmod(x,pol));
@@ -2125,7 +2122,6 @@ ideallllred(GEN nf, GEN I, GEN vdir, long prec)
   else
     b = detint(J);
   I = hnfmodid(J,b);
-  if (DEBUGLEVEL>5) msgtimer("new ideal");
 
 END:
   if (!aI) return gerepileupto(av, I);

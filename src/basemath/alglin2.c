@@ -1651,14 +1651,6 @@ p_mat(long **mat, GEN perm, long k)
   avma = av;
 }
 
-static GEN
-col_dup(long n, GEN col)
-{
-   GEN c = new_chunk(n+1);
-   memcpy(c,col,(n+1)*sizeof(long));
-   return c;
-}
-
 /* M_k <- M_k + q M_i  (col operations) */
 static void
 elt_col(GEN Mk, GEN Mi, GEN q)
@@ -1690,28 +1682,19 @@ elt_col(GEN Mk, GEN Mi, GEN q)
 **     to maintain perm than to copy rows. For columns we can do it directly
 **     using e.g. lswap(mat[i], mat[j])
 **   k0 = integer. The k0 first lines of mat are dense, the others are sparse.
-**     Also if k0=0, mat is modified in place [from mathnfspec], otherwise
-**     it is left alone [from buchall]
 ** Output: cf ASCII art in the function body
 **
 ** row permutations applied to perm
-** column operations applied to C.
+** column operations applied to C. IN PLACE
 **/
 GEN
-hnfspec(long** mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
+hnfspec(long** mat, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
 {
   pari_sp av = avma, av2, lim;
-  long n, s, nlze, lnz, nr, i, j, k, lk0, col, lig, *p, *matj, **mat;
+  long n, s, nlze, lnz, nr, i, j, k, lk0, col, lig, *p, *matj;
   GEN p1, p2, matb, matbnew, vmax, matt, T, extramat, B, H, dep, permpro;
-  const long co = lg(mat0);
-  const long li = lg(perm); /* = lg(mat0[1]) */
-
-  if (!k0) mat = mat0; /* in place */
-  else
-  { /* keep original mat0 safe, modify a copy */
-    mat = (long**)new_chunk(co); mat[0] = mat0[0];
-    for (j=1; j<co; j++) mat[j] = col_dup(li,mat0[j]);
-  }
+  const long co = lg(mat);
+  const long li = lg(perm); /* = lg(mat[1]) */
 
   if (DEBUGLEVEL>5)
   {

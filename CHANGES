@@ -174,6 +174,9 @@ HC 21- new implementation of gamma()
    25- [sparcv8_super kernel:] replace asm divll with portable one
        (slightly slower but fixes many compilation problems, and easier to
        maintain on an architecture which has become hard to test)
+   26- buchall() [ bnfinit, etc ]: complete rewrite to avoid restarting from
+       scratch after a precision increase. All relations stored in algebraic
+       form, so that data is easily recomputed to higher accuracy if necessary.
 
   Added
     1- [Configure:] flag --with-ncurses-lib=*
