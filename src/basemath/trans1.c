@@ -558,44 +558,39 @@ static GEN
 ser_pui(GEN x, GEN n, long prec)
 {
   gpmem_t av, tetpil;
-  GEN y;
+  GEN y, p1, p2, lead;
 
-  if (gvar9(n) > varn(x))
+  if (gvar9(n) <= varn(x)) return gexp(gmul(n, glog(x,prec)), prec);
+  lead = (GEN)x[2];
+  if (gcmp1(lead))
   {
-    GEN p1,p2, lead = (GEN)x[2];
-    if (gcmp1(lead))
+    GEN X, Y, alp;
+    long lx, mi, i, j, d;
+
+    av = avma; alp = gclone(gadd(n,gun)); avma = av;
+    lx = lg(x);
+    y = cgetg(lx,t_SER);
+    y[1] = evalsigne(1) | evalvalp(0) | evalvarn(varn(x));
+    X = x+2;
+    Y = y+2;
+
+    d = mi = lx-3; while (mi>=1 && gcmp0((GEN)X[mi])) mi--;
+    Y[0] = un;
+    for (i=1; i<=d; i++)
     {
-      GEN X, Y, alp;
-      long lx, mi, i, j, d;
-
-      av = avma; alp = gclone(gadd(n,gun)); avma = av;
-      lx = lg(x);
-      y = cgetg(lx,t_SER);
-      y[1] = evalsigne(1) | evalvalp(0) | evalvarn(varn(x));
-      X = x+2;
-      Y = y+2;
-
-      d = mi = lx-3; while (mi>=1 && gcmp0((GEN)X[mi])) mi--;
-      Y[0] = un;
-      for (i=1; i<=d; i++)
+      av = avma; p1 = gzero;
+      for (j=1; j<=min(i,mi); j++)
       {
-	av = avma; p1 = gzero;
-	for (j=1; j<=min(i,mi); j++)
-	{
-	  p2 = gsubgs(gmulgs(alp,j),i);
-	  p1 = gadd(p1, gmul(gmul(p2,(GEN)X[j]),(GEN)Y[i-j]));
-	}
-	tetpil = avma; Y[i] = lpile(av,tetpil,gdivgs(p1,i));
+        p2 = gsubgs(gmulgs(alp,j),i);
+        p1 = gadd(p1, gmul(gmul(p2,(GEN)X[j]),(GEN)Y[i-j]));
       }
-      gunclone(alp); return y;
+      tetpil = avma; Y[i] = lpile(av,tetpil, gdivgs(p1,i));
     }
-    av = avma; p1 = gdiv(x,lead); p1[2] = un; /* in case it's inexact */
-    p1 = gpow(p1,n,prec);
-    p2 = gpow(lead,n,prec);
-    tetpil = avma; return gerepile(av,tetpil, gmul(p1,p2));
+    gunclone(alp); return y;
   }
-  av = avma; y = gmul(n, glog(x,prec)); tetpil = avma;
-  return gerepile(av,tetpil, gexp(y,prec));
+  p1 = gdiv(x,lead); p1[2] = un; /* in case it's inexact */
+  p1 = gpow(p1,  n, prec);
+  p2 = gpow(lead,n, prec); return gmul(p1, p2);
 }
 
 GEN
@@ -623,7 +618,8 @@ gpow(GEN x, GEN n, long prec)
     if (valp(x))
       err(talker,"not an integer exponent for non invertible series in gpow");
     if (lg(x) == 2) return gcopy(x); /* O(1) */
-    return ser_pui(x,n,prec);
+    av = avma;
+    return gerepileupto(av, ser_pui(x, n, prec));
   }
   av=avma;
   if (gcmp0(x))
@@ -904,17 +900,17 @@ gsqrt(GEN x, long prec)
       return padic_sqrt(x);
 
     case t_SER:
-      e=valp(x);
+      e = valp(x);
       if (gcmp0(x)) return zeroser(varn(x), (e+1)>>1);
       if (e & 1) err(sqrter6);
       av = avma;
-      /* trick: ser_pui assumes valp(x) = 0 */
-      y = ser_pui(x,ghalf,prec);
+      y = dummycopy(x); setvalp(y, 0);
+      y = ser_pui(y, ghalf, prec);
       if (typ(y) == t_SER) /* generic case */
         y[1] = evalsigne(1) | evalvalp(e>>1) | evalvarn(varn(x));
       else /* e.g coeffs are POLMODs */
-        y = gerepileupto(av, gmul(y, gpowgs(polx[varn(x)], e>>1)));
-      return y;
+        y = gmul(y, gpowgs(polx[varn(x)], e>>1));
+      return gerepileupto(av, y);
   }
   return transc(gsqrt,x,prec);
 }
@@ -1129,15 +1125,15 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
   case t_SER:   
     e=valp(x);m=itos(n);
     if (gcmp0(x)) return zeroser(varn(x), (e+m-1)/m);
-    if (e % m) err(talker,"incorrect valuation in gsqrt");
+    if (e % m) err(talker,"incorrect valuation in gsqrtn");
     av = avma;
-    /* trick: ser_pui assumes valp(x) = 0 */
-    y = ser_pui(x,ginv(n),prec);
+    y = dummycopy(x); setvalp(y, 0);
+    y = ser_pui(y, ginv(n), prec);
     if (typ(y) == t_SER) /* generic case */
       y[1] = evalsigne(1) | evalvalp(e/m) | evalvarn(varn(x));
     else /* e.g coeffs are POLMODs */
-      y = gerepileupto(av, gmul(y, gpowgs(polx[varn(x)], e/m)));
-    return y;
+      y = gmul(y, gpowgs(polx[varn(x)], e/m));
+    return gerepileupto(av, y);
   case t_INTMOD:
     z=gzero;
     /*This is not great, but else it will generate too much trouble*/
@@ -1320,9 +1316,10 @@ serexp(GEN x, long prec)
   long i,j,lx,ly,ex,mi;
   GEN p1,y,xd,yd;
  
-  if (gcmp0(x)) return gaddsg(1,x);
-  lx = lg(x); ex = valp(x);
+  ex = valp(x);
   if (ex < 0) err(negexper,"gexp");
+  if (gcmp0(x)) return gaddsg(1,x);
+  lx = lg(x);
   if (ex)
   {
     ly = lx+ex; y = cgetg(ly,t_SER);
@@ -1617,7 +1614,8 @@ glog(GEN x, long prec)
       return palog(x);
 
     case t_SER:
-      av=avma; if (valp(x)) err(negexper,"glog");
+      av=avma;
+      if (valp(x) || gcmp0(x)) err(talker,"log is not analytic at 0");
       p1=gdiv(derivser(x),x);
       tetpil=avma; p1=integ(p1,varn(x));
       if (gcmp1((GEN)x[2])) return gerepile(av,tetpil,p1);

@@ -15,7 +15,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /********************************************************************/
 /**                                                                **/
-/**                   TRANSCENDENTAL FONCTIONS                     **/
+/**                   TRANSCENDENTAL FUNCTIONS                     **/
 /**                          (part 2)                              **/
 /**                                                                **/
 /********************************************************************/
@@ -455,29 +455,28 @@ garg(GEN x, long prec)
 
 /********************************************************************/
 /**                                                                **/
-/**                 FONCTION COSINUS HYPERBOLIQUE                  **/
+/**                      HYPERBOLIC COSINE                         **/
 /**                                                                **/
 /********************************************************************/
 
 static GEN
 mpch(GEN x)
 {
-  long l;
   gpmem_t av;
   GEN y,p1;
 
   if (gcmp0(x)) return gaddsg(1,x);
 
-  l=lg(x); y=cgetr(l); av=avma;
-  p1=mpexp(x); p1 = addrr(p1, divsr(1,p1));
+  y = cgetr(lg(x)); av = avma;
+  p1 = mpexp(x); p1 = addrr(p1, ginv(p1));
   setexpo(p1, expo(p1)-1);
-  affrr(p1,y); avma=av; return y;
+  affrr(p1, y); avma = av; return y;
 }
 
 GEN
 gch(GEN x, long prec)
 {
-  gpmem_t av, tetpil;
+  gpmem_t av;
   GEN p1;
 
   switch(typ(x))
@@ -485,14 +484,11 @@ gch(GEN x, long prec)
     case t_REAL:
       return mpch(x);
 
-    case t_COMPLEX:
-      av=avma; p1=gexp(x,prec);
-      p1=gadd(p1,ginv(p1)); tetpil=avma;
-      return gerepile(av,tetpil,gmul2n(p1,-1));
-
     case t_SER:
-      av=avma; p1=gexp(x,prec); p1=gadd(p1,gdivsg(1,p1));
-      tetpil=avma; return gerepile(av,tetpil,gmul2n(p1,-1));
+      if (gcmp0(x) && valp(x) == 0) return gcopy(x);
+    case t_COMPLEX:
+      av = avma; p1 = gexp(x,prec); p1 = gadd(p1, ginv(p1));
+      return gerepileupto(av, gmul2n(p1,-1));
 
     case t_INTMOD: case t_PADIC:
       err(typeer,"gch");
@@ -512,28 +508,27 @@ gchz(GEN x, GEN y)
 
 /********************************************************************/
 /**                                                                **/
-/**                 FONCTION SINUS HYPERBOLIQUE                    **/
+/**                       HYPERBOLIC SINE                          **/
 /**                                                                **/
 /********************************************************************/
 
 static GEN
 mpsh(GEN x)
 {
-  long l;
   gpmem_t av;
   GEN y,p1;
 
-  if (!signe(x)) return realzero(expo(x));
-  l=lg(x); y=cgetr(l); av=avma;
-  p1=mpexp(x); p1 = addrr(p1, divsr(-1,p1));
+  if (!signe(x)) return realzero_bit(expo(x));
+  y = cgetr(lg(x)); av = avma;
+  p1 = mpexp(x); p1 = addrr(p1, divsr(-1,p1));
   setexpo(p1, expo(p1)-1);
-  affrr(p1,y); avma=av; return y;
+  affrr(p1,y); avma = av; return y;
 }
 
 GEN
 gsh(GEN x, long prec)
 {
-  gpmem_t av, tetpil;
+  gpmem_t av;
   GEN p1;
 
   switch(typ(x))
@@ -541,16 +536,11 @@ gsh(GEN x, long prec)
     case t_REAL:
       return mpsh(x);
 
-    case t_COMPLEX:
-      av=avma; p1=gexp(x,prec);
-      p1=gsub(p1,ginv(p1)); tetpil=avma;
-      return gerepile(av,tetpil,gmul2n(p1,-1));
-
     case t_SER:
-      if (gcmp0(x)) return gcopy(x);
-
-      av=avma; p1=gexp(x,prec); p1=gsub(p1,gdivsg(1,p1));
-      tetpil=avma; return gerepile(av,tetpil,gmul2n(p1,-1));
+      if (gcmp0(x) && valp(x) == 0) return gcopy(x);
+    case t_COMPLEX:
+      av = avma; p1 = gexp(x,prec); p1 = gsub(p1, ginv(p1));
+      return gerepileupto(av, gmul2n(p1,-1));
 
     case t_INTMOD: case t_PADIC:
       err(typeer,"gsh");

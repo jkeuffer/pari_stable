@@ -151,11 +151,18 @@ static GEN
 _jbessel(GEN n, GEN z, long flag, long m)
 {
   long k, limit;
-  gpmem_t av, tetpil;
+  gpmem_t av;
   GEN p1,s;
 
   p1 = gmul2n(gsqr(z),-2); if (flag & 1) p1 = gneg(p1);
-  if (typ(z) == t_SER) p1 = gprec(p1,lg(p1)-2-valp(z));
+  if (typ(z) == t_SER)
+  {
+    long v = valp(z);
+    k = lg(p1)-2 - v;
+    if (v < 0) err(negexper,"jbessel");
+    if (k <= 0) return gadd(gun, zeroser(varn(z), 2*v));
+    p1 = gprec(p1, k);
+  }
   s = gun;
   av = avma; limit = stack_lim(av,1);
   for (k=m; k>=1; k--)
@@ -164,7 +171,7 @@ _jbessel(GEN n, GEN z, long flag, long m)
     if (low_stack(limit,stack_lim(av,1)))
     {
       if (DEBUGMEM>1) err(warnmem,"jbessel");
-      tetpil = avma; s = gerepile(av,tetpil,gcopy(s));
+      s = gerepilecopy(av, s);
     }
   }
   return s;
@@ -189,7 +196,7 @@ jbesselintern(GEN n, GEN z, long flag, long prec)
 	if ((flag&1) && (ki<0) && (k&1)) p2 = gneg(p2);
       }  
       else p2 = gdiv(gpow(gmul2n(z,-1),n,prec),ggamma(gaddgs(n,1),prec));
-      if (gcmp0(z)) {tetpil = avma; return gerepile(av,tetpil,gcopy(p2));}
+      if (gcmp0(z)) return gerepilecopy(av, p2);
       else
       {
 	x = gtodouble(gabs(z,prec));
@@ -219,7 +226,7 @@ jbesselintern(GEN n, GEN z, long flag, long prec)
 	p1 = _jbessel(stoi(k),z,flag,lg(z)-2);
       }
       else p1 = _jbessel(n,z,flag,lg(z)-2);
-      tetpil = avma; return gerepile(av,tetpil,gcopy(p1));
+      return gerepilecopy(av,p1);
       
     case t_VEC: case t_COL: case t_MAT:
       lz=lg(z); y=cgetg(lz,typ(z));
@@ -325,10 +332,11 @@ jbesselh(GEN n, GEN z, long prec)
     case t_SER:
       if (gcmp0(z)) return gpowgs(z,k);
       av = avma;
-      z = gprec(z,lg(z)-2+(2*k+1)*valp(z));
+      if (valp(z) < 0) err(negexper,"jbesselh");
+      z = gprec(z, lg(z)-2 + (2*k+1)*valp(z));
       p1 = gdiv(_jbesselh(k,z,prec),gpowgs(z,k));
       for (i=1; i<=k; i++) p1 = gmulgs(p1,2*i+1);
-      tetpil=avma; return gerepile(av,tetpil,gcopy(p1));
+      return gerepilecopy(av,p1);
       
     case t_VEC: case t_COL: case t_MAT:
       lz=lg(z); y=cgetg(lz,typ(z));
@@ -459,11 +467,18 @@ static GEN
 _kbessel(long n, GEN z, long flag, long m, long prec)
 {
   long k, limit;
-  gpmem_t av, tetpil;
+  gpmem_t av;
   GEN p1,p2,p3,s,*tabh;
 
   p1 = gmul2n(gsqr(z),-2); if (flag & 1) p1 = gneg(p1);
-  if (typ(z) == t_SER) p1 = gprec(p1,lg(p1)-2-valp(z));
+  if (typ(z) == t_SER)
+  {
+    long v = valp(z);
+    k = lg(p1)-2 - v;
+    if (v < 0) err(negexper,"kbessel");
+    if (k <= 0) return gadd(gun, zeroser(varn(z), 2*v));
+    p1 = gprec(p1, k);
+  }
   tabh = (GEN*)cgetg(m+n+2,t_VEC); tabh[1] = gzero;
   if (flag <= 1)
   {
@@ -489,7 +504,7 @@ _kbessel(long n, GEN z, long flag, long m, long prec)
     if (low_stack(limit,stack_lim(av,1)))
     {
       if (DEBUGMEM>1) err(warnmem,"kbessel");
-      tetpil = avma; s = gerepile(av,tetpil,gcopy(s));
+      s = gerepilecopy(av, s);
     }
   }
   p3 = (flag <= 1) ? mpfactr(n,prec) : mpfact(n);
@@ -574,7 +589,7 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
       {
 	k = labs(ki);
 	p1 = _kbessel(k,z,flag+2,lg(z)-2,prec);
-	tetpil = avma; return gerepile(av,tetpil,gcopy(p1));
+	return gerepilecopy(av,p1);
       }
       else
       {
@@ -1836,6 +1851,7 @@ gpolylog(long m, GEN x, long prec)
 	p1=glog(gsub(gun,x),prec);
 	return gerepileupto(av, gneg(p1));
       }
+      if (gcmp0(x)) return gcopy(x);
       if (valp(x)<=0) err(impl,"polylog around a!=0");
       v=varn(x); n=(lg(x)-2)/valp(x); y=ggrando(polx[v],lg(x)-2);
       for (i=n; i>=1; i--)
