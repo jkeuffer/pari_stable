@@ -6898,8 +6898,7 @@ time = 3,460 ms.
 %1 = -2.40... E-104 - 2.7... E-106*I
 @eprog
 
-\synt{intcirc}{void *E, GEN (*eval)(GEN,void*), GEN a,GEN R,GEN tab, 
-long prec}.
+\synt{intcirc}{void *E, GEN (*eval)(GEN,void*), GEN a,GEN R,GEN tab, long prec}.
 
 \subsecidx{intfouriercos}$(X=a,b,z,\var{expr},\{\var{tab}\})$: numerical
 integration of $\var{expr}(X)\cos(2\pi zX)$ from $a$ to $b$, in other words
@@ -6908,8 +6907,7 @@ Fourier cosine transform (from $a$ to $b$) of the function represented by
 at infinity, but if they are, oscillations (i.e. $[[\pm1],\alpha I]$) are
 forbidden.
 
-\synt{intfouriercos}{void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, GEN z, 
-GEN tab, long prec}.
+\synt{intfouriercos}{void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, GEN z, GEN tab, long prec}.
 
 \subsecidx{intfourierexp}$(X=a,b,z,\var{expr},\{\var{tab}\})$: numerical
 integration of $\var{expr}(X)\exp(-2\pi zX)$ from $a$ to $b$, in other words
@@ -6918,8 +6916,7 @@ Fourier transform (from $a$ to $b$) of the function represented by
 and are not necessarily at infinity but if they are, oscillations (i.e.
 $[[\pm1],\alpha I]$) are forbidden.
 
-\synt{intfourierexp}{void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, GEN z, 
-GEN tab, long prec}.
+\synt{intfourierexp}{void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, GEN z, GEN tab, long prec}.
 
 \subsecidx{intfouriersin}$(X=a,b,z,\var{expr},\{\var{tab}\})$: numerical
 integration of $\var{expr}(X)\sin(2\pi zX)$ from $a$ to $b$, in other words
@@ -6928,8 +6925,7 @@ Fourier sine transform (from $a$ to $b$) of the function represented by
 at infinity but if they are, oscillations (i.e. $[[\pm1],\alpha I]$) are
 forbidden.
 
-\synt{intfouriersin}{void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, GEN z, 
-GEN tab, long prec}.
+\synt{intfouriersin}{void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, GEN z, GEN tab, long prec}.
 
 \subsecidx{intfuncinit}$(X=a,b,\var{expr},\{\fl=0\},\{m=0\})$:
 initalize tables for use with integral transforms such as \kbd{intmellininv},
@@ -6941,9 +6937,8 @@ computation twice as fast. See \kbd{intmellininvshort} for examples of the
 use of this function, which is particularly useful when the function $s(X)$
 is lengthy to compute, such as a gamma product.
 
-\synt{intfuncinit}{void *E, GEN (*eval)(GEN,void*), GEN a,GEN b,long m, 
-long flag, long prec}. Note that the order of $m$ and \fl are reversed
-compared to the \kbd{GP} syntax.
+\synt{intfuncinit}{void *E, GEN (*eval)(GEN,void*), GEN a,GEN b,long m, long flag, long prec}.
+Note that the order of $m$ and \fl are reversed compared to the \kbd{GP} syntax.
 
 \subsecidx{intlaplaceinv}$(X=sig,z,\var{expr},\{\var{tab}\})$: 
 numerical integration of $\var{expr}(X)e^{Xz}$ with respect to $X$ on the line 
@@ -6991,8 +6986,7 @@ time = 330 ms.
 %7 = 1.07... E-72 + 3.2... E-72*I \\@com too far now...
 @eprog
 
-\synt{intlaplaceinv}{void *E, GEN (*eval)(GEN,void*), GEN sig,GEN z, GEN tab, 
-long prec}.
+\synt{intlaplaceinv}{void *E, GEN (*eval)(GEN,void*), GEN sig,GEN z, GEN tab, long prec}.
 
 \subsecidx{intmellininv}$(X=sig,z,\var{expr},\{\var{tab}\})$: numerical 
 integration of $\var{expr}(X)z^{-X}$ with respect to $X$ on the line 
@@ -7022,8 +7016,7 @@ time = 1,190 ms. \\@com reasonable.
 time = 51,300 ms. \\@com slow because of $\Gamma(s)^3$.
 @eprog\noindent
 
-\synt{intmellininv}{void *E, GEN (*eval)(GEN,void*), GEN sig, GEN z, GEN tab, 
-long prec}.
+\synt{intmellininv}{void *E, GEN (*eval)(GEN,void*), GEN sig, GEN z, GEN tab, long prec}.
 
 \subsecidx{intmellininvshort}$(sig,z,tab)$: numerical integration 
 of $s(X)z^{-X}$ with respect to $X$ on the line $\Re(X)=sig$, divided by
@@ -7290,8 +7283,8 @@ time = 120 ms.
 %3 = -7.23... E-60 \\@com $64 = 2^6$ times faster, lost $45$ decimals.
 @eprog
 
-\synt{intnum}{void *E, GEN (*eval)(GEN,void*), GEN a,GEN b,GEN tab, 
-long prec}, where an omitted \var{tab} is coded as \kbd{NULL}.
+\synt{intnum}{void *E, GEN (*eval)(GEN,void*), GEN a,GEN b,GEN tab, long prec},
+where an omitted \var{tab} is coded as \kbd{NULL}.
 
 \subsecidx{intnuminit}$(a,b,\{m=0\})$: initialize tables for integration from
 $a$ to $b$, where $a$ and $b$ are coded as in \kbd{intnum}. Only the
@@ -7354,8 +7347,8 @@ rapidly decreasing functions. For example, if one wants to compute the
 $\int_0^\infty e^{-x^2}\,dx$ to 28 decimal digits, then one should set
 infinity equal to 10 for example, and certainly not to 1e1000.
 
-\synt{intnumromb}{void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, long flag, 
-long prec}, where $\kbd{eval}(x, E)$ returns the value of the function at $x$.
+\synt{intnumromb}{void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, long flag, long prec},
+where $\kbd{eval}(x, E)$ returns the value of the function at $x$.
 You may store any additional information required by \kbd{eval} in $E$, or set 
 it to \kbd{NULL}.
 
@@ -7611,8 +7604,7 @@ time = 11,770 ms.
 %5 = -1.9... E-305 \\@com now perfect, but slow.
 @eprog
 
-\synt{sumnum}{void *E, GEN (*eval)(GEN,void*), GEN a,GEN sig,GEN tab,long
-flag, long prec}.
+\synt{sumnum}{void *E, GEN (*eval)(GEN,void*), GEN a,GEN sig,GEN tab,long flag, long prec}.
 
 \subsecidx{sumnumalt}$(X=a,sig,\var{expr},\{\var{tab}\},\{\fl=0\})$: numerical
 summation of $(-1)^X\var{expr}(X)$, the variable $X$ taking integer values from 
@@ -7652,8 +7644,7 @@ time = 0 ms.
 %1 = -1.66... E-308 \\@com perfect
 @eprog
 
-\synt{sumnumalt}{void *E, GEN (*eval)(GEN,void*), GEN a, GEN sig, GEN tab,
-long flag, long prec}.
+\synt{sumnumalt}{void *E, GEN (*eval)(GEN,void*), GEN a, GEN sig, GEN tab, long flag, long prec}.
 
 \subsecidx{sumnuminit}$(sig,{m=0},{sgn=1})$: initialize tables for numerical 
 summation using \kbd{sumnum} (with $\var{sgn}=1$) or \kbd{sumnumalt} (with
