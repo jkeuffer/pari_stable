@@ -17,7 +17,7 @@ case "$arch" in
   ia64)          asmarch=ia64 ;         pretty=Itanium ;;
   hppa) case "$sizeof_long" in   
            4) asmarch=hppa;;
-           8) asmarch=none;;
+           8) asmarch=hppa64;;
            esac;                        pretty='HP Precision';;
   alpha)         asmarch=$arch;         pretty=Alpha ;;
   ppc)  case "$sizeof_long" in   
@@ -75,6 +75,7 @@ case "$kernlvl0" in
   ix86)          prettyk=ix86;;
   ia64)          prettyk=ia64;;
   hppa)          prettyk=HPPA;;
+  hppa64)        prettyk=HPPA64;;
   alpha)         prettyk=Alpha;;
   ppc)           prettyk=PPC;;
   x86_64)        prettyk="x86-64";;
