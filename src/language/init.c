@@ -1352,7 +1352,15 @@ gcopy_av(GEN x, GEN *AVMA)
   if (! is_recursive_t(tx))
   {
     if (tx == t_SMALL) return x;
-    lx = (tx == t_INT)? lgefint(x): lg(x);
+    if (tx == t_INT)
+    {
+      lx = lgefint(x);
+      *AVMA = y = *AVMA - lx;
+      y[0] = evaltyp(t_INT)|evallg(lx);
+      for (i=1; i<lx; i++) y[i] = x[i];
+      return y;
+    }
+    lx = lg(x);
     *AVMA = y = *AVMA - lx;
     for (i=0; i<lx; i++) y[i] = x[i];
   }
@@ -1380,8 +1388,12 @@ gcopy_av0(GEN x, GEN *AVMA)
     {
       if (!signe(x)) return NULL; /* special marker */
       lx = lgefint(x);
+      *AVMA = y = *AVMA - lx;
+      y[0] = evaltyp(t_INT)|evallg(lx);
+      for (i=1; i<lx; i++) y[i] = x[i];
+      return y;
     }
-    else lx = lg(x);
+    lx = lg(x);
     *AVMA = y = *AVMA - lx;
     for (i=0; i<lx; i++) y[i] = x[i];
   }
