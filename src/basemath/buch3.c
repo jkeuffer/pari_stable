@@ -368,7 +368,7 @@ static GEN
 buchrayall(GEN bnf,GEN module,long flag)
 {
   GEN nf, cyc, gen, Gen, u, clg, logs, p1, h, met, u1, u2, U, cycgen;
-  GEN bigres, bid, cycbid, genbid, x, y, funits, hmat, El;
+  GEN bigres, bid, cycbid, genbid, x, y, funits, H, El;
   long RU, Ri, j, ngen, lh;
   const int add_gen = flag & nf_GEN;
   const int do_init = flag & nf_INIT;
@@ -424,7 +424,8 @@ buchrayall(GEN bnf,GEN module,long flag)
   }
 
   cycgen = check_and_build_cycgen(bnf);
-  hmat = hnfall_i( get_dataunit(bnf, bid), do_init? &u: NULL, 1);
+  /* (log(Units)|D) * u = (0 | H) */
+  H = hnfall_i( get_dataunit(bnf, bid), do_init? &u: NULL, 1);
   logs = cgetg(ngen+1, t_MAT);
   /* FIXME: cycgen[j] is not necessarily coprime to bid, but it is made coprime
    * in famat_zlog using canonical uniformizers [from bid data]: no need to
@@ -440,11 +441,11 @@ buchrayall(GEN bnf,GEN module,long flag)
     }
     logs[j] = (long)zideallog(nf, p1, bid); /* = log(Gen[j]) */
   }
-  /* [ cyc  0   ]
-   * [-logs hmat] = relation matrix for Cl_f */
+  /* [ cyc  0 ]
+   * [-logs H ] = relation matrix for Cl_f */
   h = concatsp(
     vconcat(diagonal(cyc), gneg_i(logs)),
-    vconcat(zeromat(ngen, Ri), hmat)
+    vconcat(zeromat(ngen, Ri), H)
   );
   met = smithrel(hnf(h), &U, add_gen? &u1: NULL);
   clg = cgetg(add_gen? 4: 3, t_VEC);
@@ -466,8 +467,10 @@ buchrayall(GEN bnf,GEN module,long flag)
   y[4] = (long)U;
   y[5] = (long)clg; u = cgetg(3,t_VEC);
   y[6] = (long)u;
-    u[1] = lmul(u2, ginv(hmat));
+  /* log(Units) U2 = H (mod D)
+   * log(Units) U1 = 0 (mod D) */
     u[2] = (long)lllint_ip(u1,100);
+    u[1] = lmul(reducemodinvertible(u2,(GEN)u[2]), ginv(H));
   return gerepilecopy(av,y);
 }
 

@@ -1043,27 +1043,37 @@ GEN
 smithrel(GEN H, GEN *newU, GEN *newUi)
 { 
   GEN U, V, Ui, D = smithall(H, &U, newUi? &V: NULL);
-  long i, c, l = lg(D);
+  long i, j, c, l = lg(D);
 
   for (c=1; c<l; c++)
   {
     GEN t = gcoeff(D,c,c);
     if (is_pm1(t)) break;
   }
-  if (newU) *newU = rowextract_i(U, 1, c-1);
+  setlg(D, c); D = mattodiagonal_i(D);
+  if (newU) {
+    U = rowextract_i(U, 1, c-1);
+    for (i = 1; i < c; i++)
+    {
+      GEN d = (GEN)D[i], d2 = shifti(d, 1);
+      for (j = 1; j < lg(U); j++)
+        coeff(U,i,j) = (long)centermodii(gcoeff(U,i,j), d, d2);
+    }
+    *newU = U;
+  }
   if (newUi) { /* UHV = D --> U^-1 mod H = H(VD^-1 mod 1) mod H */
     if (c == 1) *newUi = cgetg(1, t_MAT);
     else
     { /* Ui = ZM_inv(U, gun); setlg(Ui, c); */
       setlg(V, c);
-      V = FpM_red(V, gcoeff(D,1,1));
+      V = FpM_red(V, (GEN)D[1]);
       Ui = gmul(H, V);
       for (i = 1; i < c; i++)
-        Ui[i] = (long)gdivexact((GEN)Ui[i], gcoeff(D,i,i));
+        Ui[i] = (long)gdivexact((GEN)Ui[i], (GEN)D[i]);
       *newUi = reducemodHNF(Ui, H, NULL);
     }
   }
-  setlg(D, c); return mattodiagonal_i(D);
+  return D;
 }
 
 /* given 2 integral ideals x, y in HNF s.t x | y | x^2, compute the quotient
