@@ -759,7 +759,8 @@ isprincipalall0(GEN bnf, GEN x, long prec, long flall)
   cyc = gmael(RES,1,2);
   gen = gmael(RES,1,3);
 
-  p1 = gauss(u1inv, gsub(xalpha, gmul(B,yalpha)));
+  /* p1 unused otherwise */
+  if (colW) p1 = gauss(u1inv, gsub(xalpha, gmul(B,yalpha)));
   p4 = cgetg(colW+colB+1,t_COL); c = lg(cyc)-1;
   ex = cgetg(c+1,t_COL);
   for (i=1; i<=c; i++)
@@ -2263,8 +2264,7 @@ GEN
 bnfinit0(GEN P, long flag, GEN data, long prec)
 {
 #if 0
-  THIS SHOULD BE DONE...
-
+  /* TODO: synchronize quadclassunit output with bnfinit */
   if (typ(P)==t_INT)
   {
     if (flag<4) err(impl,"specific bnfinit for quadratic fields");
@@ -2401,6 +2401,7 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
   GEN p1,p2,lmatt2,fu,zu,nf,D,xarch,met,W,reg,lfun,z,clh,vperm,subfb;
   GEN B,C,u1,u2,c1,sublambda,pdep,parch,liste,invp,clg1,clg2;
   GEN CHANGE=NULL, extramat=NULL, extraC=NULL, list_jideal = NULL;
+  char *precpb = NULL;
 
   if (DEBUGLEVEL) timer2();
 
@@ -2447,9 +2448,21 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
   powsubfb = NULL;
 
 INCREASEGEN:
+  if (precpb)
+  {
+    prec=(PRECREG<<1)-2;
+    if (DEBUGLEVEL)
+    {
+      char str[64]; sprintf(str,"buchall (%s)",precpb);
+      err(warnprec,str,prec);
+    }
+    precpb = NULL;
+    avma = av0; nf = nfnewprec(nf,prec); av0 = avma;
+  }
+  else
+    cbach = check_bach(cbach,12.);
   if (first) first = 0; else { desallocate(matcopy); avma = av0; }
   sfb_trials = sfb_increase = 0;
-  cbach = check_bach(cbach,12.);
   nreldep = nrelsup = 0;
   LIMC = cbach*LOGD2; if (LIMC < 20.) LIMC = 20.;
   LIMC2=max(3. * N, max(cbach,cbach2)*LOGD2);
@@ -2517,10 +2530,7 @@ INCREASEGEN:
   if (cmptglob < 0)
   {
     for (j=1; j<=KCCO; j++) free(mat[j]); free(mat);
-    prec=(PRECREG<<1)-2;
-    if (DEBUGLEVEL) err(warnprec,"buchall (small_norm)",prec);
-    avma = av0; nf = nfnewprec(nf,prec); av0 = avma;
-    cbach /= 2;
+    precpb = "small_norm";
     goto INCREASEGEN;
   }
   avma = av1; limpile=stack_lim(av1,1);
@@ -2590,13 +2600,7 @@ INCREASEGEN:
     if (ss < 0) /* could not find relations */
     {
       if (phase == 0) { for (j=1; j<=KCCO; j++) free(mat[j]); free(mat); }
-      if (ss != -1)
-      { /* precision problems */
-        prec=(PRECREG<<1)-2;
-	if (DEBUGLEVEL) err(warnprec,"buchall (random_relation)",prec);
-	avma = av0; nf = nfnewprec(nf,prec);
-        av0 = avma; cbach /= 2;
-      }
+      if (ss != -1) precpb = "random_relation"; /* precision pb */
       goto INCREASEGEN;
     }
     if (DEBUGLEVEL > 2) dbg_outrel(phase,cmptglob,vperm,ma,maarch);
@@ -2675,14 +2679,8 @@ INCREASEGEN:
     if (++nrelsup > MAXRELSUP) goto INCREASEGEN;
     nlze=MIN_EXTRA; goto LABELINT;
   }
-  if (!sublambda)
-  { /* anticipate precision problems */
-    prec=(PRECREG<<1)-2;
-    if (DEBUGLEVEL) err(warnprec,"buchall (bestappr)",prec);
-    avma = av0; nf = nfnewprec(nf,prec);
-    av0 = avma; cbach /= 2;
-    goto INCREASEGEN;
-  }
+  /* anticipate precision problems */
+  if (!sublambda) { precpb = "bestappr"; goto INCREASEGEN; }
 
   /* class number */
   if (DEBUGLEVEL) fprintferr("\n");
@@ -2696,12 +2694,10 @@ INCREASEGEN:
   p1 = gmul2n(divir(clh,z), 1);
   /* c1 should be close to 2, and not much smaller */
   c1 = compute_check(sublambda,p1,&parch,&reg);
+  /* precision problems? */
   if (!c1 || gcmpgs(gmul2n(c1,1),3) < 0)
-  { /* precision problems */
-    prec=(PRECREG<<1)-2;
-    if (DEBUGLEVEL) err(warnprec,"buchall (compute_check)",prec);
-    avma = av0; nf = nfnewprec(nf,prec);
-    av0 = avma; cbach /= 2;
+  {
+    precpb = "compute_check";
     goto INCREASEGEN;
   }
   if (gcmpgs(c1,3) > 0)
@@ -2737,14 +2733,7 @@ INCREASEGEN:
   {
     fu = getfu(nf,&xarch,reg,flun,&k,PRECREG);
     if (k) fu = gmul((GEN)nf[7],fu);
-    else if (labs(flun) > 2)
-    {
-      prec=(PRECREG<<1)-2;
-      if (DEBUGLEVEL) err(warnprec,"buchall (getfu)",prec);
-      avma = av0; nf = nfnewprec(nf,prec);
-      av0 = avma; cbach /= 2;
-      goto INCREASEGEN;
-    }
+    else if (labs(flun) > 2) { precpb = "getfu"; goto INCREASEGEN; }
   }
 
   /* class group generators */
