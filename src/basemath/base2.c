@@ -22,7 +22,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "parinf.h"
 
 extern GEN TR_pol(GEN P, GEN c);
-extern GEN addmulXn(GEN x, GEN y, long d);
 extern GEN norm_by_embed(long r1, GEN x);
 extern GEN ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound);
 extern GEN polsym_gen(GEN P, GEN y0, long n, GEN T, GEN N);

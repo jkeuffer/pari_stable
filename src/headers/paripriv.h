@@ -25,6 +25,8 @@ GEN arith_proto2(long f(GEN,GEN), GEN x, GEN n);
 GEN arith_proto2gs(long f(GEN,long), GEN x, long y);
 GEN garith_proto(GEN f(GEN), GEN x, int do_error);
 GEN garith_proto2gs(GEN f(GEN,long), GEN x, long y);
+GEN trans_fix_arg(long *prec, GEN *s0, GEN *sig, pari_sp *av, GEN *res);
+GEN transc(GEN (*f) (GEN, long), GEN x, long prec);
 
 GEN incloop(GEN a);
 GEN incpos(GEN a);

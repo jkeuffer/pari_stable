@@ -1725,7 +1725,6 @@ GEN     sqrtnr(GEN x, long n);
 GEN     palog(GEN x);
 GEN     powgi(GEN x, GEN n);
 GEN     teich(GEN x);
-GEN     transc(GEN (*f) (GEN, long), GEN x, long prec);
 
 /* trans2.c */
 

@@ -28,7 +28,6 @@ extern GEN divgsns(GEN x, long i);
 extern void dcxlog(double s, double t, double *a, double *b);
 extern double dnorm(double s, double t);
 extern double dabs(double s, double t);
-extern GEN trans_fix_arg(long *prec, GEN *s0, GEN *sig, pari_sp *av, GEN *res);
 
 GEN
 cgetc(long l)
@@ -1584,8 +1583,6 @@ END:
   }
   gaffect(y,res); avma = av; return res;
 }
-
-extern GEN addmulXn(GEN x, GEN y, long d);
 
 /* compute phi^(m)_s(x); s must be an integer */
 GEN
