@@ -1483,7 +1483,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
       pia  = redelt(pia, pmr, pmf);
     }
     
-    oE = Ea; opa = pia;
+    oE = Ea; opa = eleval(fx, pia, alph);
 
     if (DEBUGLEVEL >= 5)
       fprintferr("  Fa = %ld and Ea = %ld \n", Fa, Ea);
@@ -1499,6 +1499,20 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
       pmr  = (GEN)w[3];
       pdr  = (GEN)w[4];
     }
+
+    /* begin: TEST */
+    {
+      GEN nu2;
+      long l2;
+
+      nu2   = (GEN)factmod(chi, p)[1];
+      l2    = lg(nu2) - 1;
+      nu2   = lift((GEN)nu2[l2]);
+      
+      if (gegal(nu2, nu) == 0)
+	err(talker, "IMPOSSIBLE");
+    }
+    /* end: TEST */
     
     /* if Ea*Fa == N then O = Zp[alpha] */
     if (Ea*Fa == N) 
@@ -1533,7 +1547,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	eq = (long)(vb[0] / vb[1]);
 	er = (long)(vb[0]*Ea / vb[1] - eq*Ea);
       }
-
+      
       /* eq and er are such that gamma = beta.p^-eq.nu^-er is a unit */ 
       if (eq) gamm = gdiv(beta, gpowgs(p, eq));
       else gamm = beta;
