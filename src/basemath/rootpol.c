@@ -621,7 +621,10 @@ max_modulus(GEN p, double tau)
     rho=lower_bound(q,&k,eps);
     if (rho>exp2(-(double) e)) e = (long) -floor(log2(rho));
     r -= e / exp2((double)i);
-    if (++i == imax) { avma=ltop; return dbltor(exp2(r)); }
+    if (++i == imax) {
+      avma=ltop; 
+      return gpui(dbltor(2.),dbltor(r),DEFAULTPREC);
+    }
 
     if (k<nn)
       bitprec=(long) ((double) k* log2(1./tau2)+
