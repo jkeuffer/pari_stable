@@ -1207,7 +1207,8 @@ isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag)
       {
         GEN u = lift_intern(basistoalg(nf, (GEN)y[2]));
         if (flag & nf_GENMAT)
-          y[2] = (gcmp1(u)&&lg(id[2])>1)? id[2]: (long)arch_mul((GEN)id[2], u);
+          y[2] = (gcmp1(u)&&lg(id[2])>1)? id[2]: 
+                                          (long)arch_mul((GEN)id[2], (GEN)y[2]);
         else
           y[2] = (long)algtobasis(nf, gmul((GEN)id[2], u));
         y = gcopy(y);
@@ -1262,7 +1263,7 @@ isunit(GEN bnf,GEN x)
   logunit = (GEN)bnf[3]; RU = lg(logunit);
   p1 = gmael(bnf,8,4); /* roots of 1 */
   gn = (GEN)p1[1]; n = itos(gn);
-  z  = (GEN)p1[2];
+  z  = algtobasis(nf, (GEN)p1[2]);
   switch(tx)
   {
     case t_INT: case t_FRAC: case t_FRACN:
@@ -1330,8 +1331,8 @@ isunit(GEN bnf,GEN x)
   p1 = ground(gdiv(p1, pi2_sur_w));
   if (n > 2)
   {
-    GEN ro = gmael(nf,6,1);
-    GEN p2 = ground(gdiv(garg(poleval(z,ro), DEFAULTPREC), pi2_sur_w));
+    GEN ro = (GEN)gmul(rowextract_i(gmael(nf,5,1), 1, 1), z)[1];
+    GEN p2 = ground(gdiv(garg(ro, DEFAULTPREC), pi2_sur_w));
     p1 = mulii(p1,  mpinvmod(p2, gn));
   }
 
