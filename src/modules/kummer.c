@@ -54,16 +54,31 @@ prank(GEN cyc, long ell)
   return i-1;
 }
 
+/* increment y, which runs through [0,ell-1]^(k-1). Return 0 when done. */
 static int
-increment_y(GEN y, long dK, long ell)
+increment(GEN y, long k, long ell)
 {
-  long i = dK;
+  long i = k, j;
   do
   {
     if (--i == 0) return 0;
-    if (i < dK-1) y[i+1] = 0;
     y[i]++;
   } while (y[i] >= ell);
+  for (j = i+1; j < k; j++) y[j] = 0;
+  return 1;
+}
+
+/* as above, y increasing (y[i] <= y[i+1]) */
+static int
+increment_inc(GEN y, long k, long ell)
+{
+  long i = k, j;
+  do
+  {
+    if (--i == 0) return 0;
+    y[i]++;
+  } while (y[i] >= ell);
+  for (j = i+1; j < k; j++) y[j] = y[i];
   return 1;
 }
 
@@ -616,7 +631,7 @@ rnfkummersimple(GEN bnr, GEN subgroup, GEN gell, long all)
         if (!all && gegal(rnfnormgroup(bnr,P),subgroup)) return P; /*DONE*/
         res = concatsp(res, P);
       }
-    } while (increment_y(y, dK, ell));
+    } while (increment(y, dK, ell));
     y[dK--] = 0;
   }
   if (all) return res;
@@ -704,151 +719,124 @@ invimsubgroup(GEN bnrz, GEN bnr, GEN subgroup, toK_s *T)
   return hnfmod(concatsp(U, diagonal(raycycz)), (GEN)raycycz[1]);
 }
 
+/* t(b1,...,b_{k-1}) [prop 5.3.9] */
 static GEN
-vectau(GEN list)
+compute_t(GEN b, GEN r, long m, long ell)
 {
-  long i,j,k,n;
-  GEN listz,listc,yz,yc,listfl,s, y = cgetg(3,t_VEC);
+  long z, s, a, i, k = lg(b);
+  GEN t = cgetg(m+1, t_COL);
 
-  listz = (GEN)list[1];
-  listc = (GEN)list[2]; n = lg(listz);
-  yz = cgetg(n,t_VEC); y[1] = (long)yz;
-  yc = cgetg(n,t_VEC); y[2] = (long)yc;
-  listfl=cgetg(n,t_VECSMALL); for (i=1; i<n; i++) listfl[i] = 1;
-  k = 1;
-  for (i=1; i<n; i++)
+  for (a = 0; a < m; a++)
   {
-    if (!listfl[i]) continue;
-
-    yz[k] = listz[i];
-    s = (GEN)listc[i];
-    for (j=i+1; j<n; j++)
-    {
-      if (listfl[j] && gegal((GEN)listz[j],(GEN)listz[i]))
-      {
-        s = gadd(s,(GEN)listc[j]);
-        listfl[j] = 0;
-      }
-    }
-    yc[k] = (long)s; k++;
+    z = m-1 - a; s = r[1 + z] - ell;
+    for (i=1; i < k; i++) s += r[1 + ((z + b[i]) % m)];
+    t[1 + a] = lstoi(s / ell);
   }
-  setlg(yz, k);
-  setlg(yc, k); return y;
+  return t;
 }
 
+/* Return multinomial(k-1; m1,...,m_{k-1}) where the mi are the
+ * multiplicities of the bi [ assume b1 <= ... <= b_{k-1} ] */
 static GEN
-subtau(GEN listx, GEN listy)
+get_multinomial(GEN b)
 {
-  GEN y = cgetg(3,t_VEC);
-  y[1] = (long)concatsp((GEN)listx[1], (GEN)listy[1]);
-  y[2] = (long)concatsp((GEN)listx[2], gneg_i((GEN)listy[2]));
-  return vectau(y);
-}
+  long i, k = lg(b), a, m;
+  GEN z = mpfact(k - 1);
 
-static GEN
-negtau(GEN list)
-{
-  GEN y = cgetg(3,t_VEC);
-  y[1] = list[1];
-  y[2] = lneg((GEN)list[2]);
-  return y;
-}
-
-static GEN
-multau(GEN listx, GEN listy)
-{
-  GEN lzx,lzy,lcx,lcy,lzz,lcz, y = cgetg(3,t_VEC);
-  long nx,ny,i,j,k;
-
-  lzx=(GEN)listx[1]; lcx=(GEN)listx[2]; nx=lg(lzx)-1;
-  lzy=(GEN)listy[1]; lcy=(GEN)listy[2]; ny=lg(lzy)-1;
-  lzz = cgetg(nx*ny+1,t_VEC); y[1]=(long)lzz;
-  lcz = cgetg(nx*ny+1,t_VEC); y[2]=(long)lcz;
-  k = 0;
-  for (i=1; i<=nx; i++)
-    for (j=1; j<=ny; j++)
+  a = b[1]; m = 1;
+  for (i = 2; i < k; i++)
+  {
+    if (b[i] == a) m++;
+    else
     {
-      k++;
-      lzz[k] = ladd((GEN)lzx[i],(GEN)lzy[j]);
-      lcz[k] = lmul((GEN)lcx[i],(GEN)lcy[j]);
+      if (m > 1) z = diviiexact(z, mpfact(m));
+      a = b[i]; m = 1; 
     }
-  return vectau(y);
+  }
+  if (m > 1) z = diviiexact(z, mpfact(m));
+  return z;
+}
+
+/* r[b[1]] + ... + r[b[k-1]] + 1 = 0 mod ell ?*/
+static int
+b_suitable(GEN b, GEN r, long k, long ell)
+{
+  long i, s = 1;
+  for (i = 1; i < k; i++) s += r[ 1 + b[i] ];
+  return (s % ell) == 0;
 }
 
 static GEN
-mulpoltau(GEN poltau, GEN list)
+pol_from_Newton(GEN S)
 {
-  long i,j;
-  GEN y;
+  long i, k, l = lg(S);
+  GEN c = cgetg(l, t_VEC);
 
-  j = lg(poltau)-2;
-  y = cgetg(j+3,t_VEC);
-  y[1] = (long)negtau(multau(list,(GEN)poltau[1]));
-  for (i=2; i<=j+1; i++)
-    y[i] = (long)subtau((GEN)poltau[i-1],multau(list,(GEN)poltau[i]));
-  y[j+2] = poltau[j+1]; return y;
+  c[1] = S[1];
+  for (k = 2; k < l; k++)
+  {
+    GEN s = (GEN)S[k];
+    for (i = 1; i < k; i++) s = gadd(s, gmul((GEN)S[i], (GEN)c[k-i]));
+    c[k] = ldivgs(s, -k);
+  }
+  return gadd(gpowgs(polx[0], l-1), gtopoly(c, 0));
 }
 
 /* th. 5.3.5. and prop. 5.3.9. */
 static GEN
-compute_polrel(toK_s *T, GEN be, long g, long ell)
+compute_polrel(GEN nfz, toK_s *T, GEN be, long g, long ell)
 {
-  long i, a, b, j, vnf, m = T->m;
-  GEN e,u,u1,u2,u3,p1,p2,zet,be1,be2,listr,s,veczi,vecci,powtaubet;
-  GEN X = polx[0];
-
+  long i, k, m = T->m;
+  GEN r, powtaubet, S, X = polx[0], e = normtoK(T,be);
+    
   switch (ell)
-  {
-    case 2: err(bugparier,"rnfkummer (-1 not in nf!)"); break;
-    case 3: e = normtoK(T,be); u = tracetoK(T,be);
-      return gsub(gmul(X,gsub(gsqr(X),gmulsg(3,e))), gmul(e,u));
-    case 5: e = normtoK(T,be);
-      if (ell-1 == 2*m) /* d == 2 */
+  { /* special-cased for efficiency */
+    GEN p1, u;
+    case 2: err(bugparier,"rnfkummer (-1 not in nf?)"); break;
+    case 3: u = tracetoK(T,be);
+      p1 = gsub(gsqr(X), gmulsg(3,e));
+      return gsub(gmul(X,p1), gmul(e,u));
+    case 5:
+      if (m == 2)
       {
-	u = tracetoK(T,gpowgs(be,3));
-	p1=gadd(gmulsg(5,gsqr(e)), gmul(gsqr(X), gsub(gsqr(X),gmulsg(5,e))));
+	u = tracetoK(T, gpowgs(be,3));
+	p1 = gadd(gmulsg(5,gsqr(e)), gmul(gsqr(X), gsub(gsqr(X),gmulsg(5,e))));
 	return gsub(gmul(X,p1), gmul(e,u));
       }
-      be1 = tauofelt(be,T->tau);
-      be2 = tauofelt(be1,T->tau);
-      u1 = tracetoK(T,gmul(be,be1));
-      u2 = tracetoK(T,gmul(gmul(be,be2),gsqr(be1)));
-      u3 = tracetoK(T,gmul(gmul(gsqr(be),gpowgs(be1,3)),be2));
-      p1 = gsub(gsqr(X), gmulsg(10,e));
-      p1 = gsub(gmul(X,p1), gmulsg(5,gmul(e,u1)));
-      p1 = gadd(gmul(X,p1), gmul(gmulsg(5,e),gsub(e,u2)));
-      p1 = gsub(gmul(X,p1), gmul(e,u3));
-      return p1;
-
-    default: p2 = cgetg(3,t_VEC);
-      p2[1] = (long)_vec(gzero);
-      p2[2] = (long)_vec(gun); p1 = _vec(p2);
-      vnf = varn(T->polnf);
-      zet = gmodulcp(polx[vnf], cyclo(ell,vnf));
-      listr = cgetg(m+1,t_VECSMALL);
-      listr[1] = 1;
-      for (i=2; i<=m; i++) listr[i] = (listr[i-1]*g) % ell;
-      veczi=cgetg(m+1,t_VEC);
-      for (b=0; b<m; b++)
-      {
-	s = gzero;
-	for (a=0; a<m; a++)
-	  s = gaddgs(gmul(X,s), (listr[b+1] * listr[a+1]) % ell);
-	veczi[b+1]=(long)s;
+      else
+      { /* m = 4 */
+        GEN be1, be2, u1, u2, u3;
+        be1 = tauofelt(be, T->tau);
+        be2 = tauofelt(be1,T->tau);
+        u1 = tracetoK(T, gmul(be,be1));
+        u2 = tracetoK(T, gmul(gmul(be,be2),gsqr(be1)));
+        u3 = tracetoK(T, gmul(gmul(gsqr(be),gpowgs(be1,3)),be2));
+        p1 = gsub(gsqr(X), gmulsg(10,e));
+        p1 = gsub(gmul(X,p1), gmulsg(5,gmul(e,u1)));
+        p1 = gadd(gmul(X,p1), gmul(gmulsg(5,e),gsub(e,u2)));
+        return gsub(gmul(X,p1), gmul(e,u3));
       }
-      for (j=0; j<ell; j++)
-      {
-	GEN p3 = cgetg(3,t_VEC);
-	vecci = cgetg(m+1,t_VEC);
-	for (b=0; b<m; b++) vecci[b+1] = (long)gpowgs(zet, j * listr[b+1]);
-	p3[1] = (long)veczi;
-        p3[2] = (long)vecci;
-	p1 = mulpoltau(p1,p3);
-      }
-      powtaubet = powtau(be, m, T->tau);
-      err(impl,"difficult Kummer for ell>=7"); /* FIXME */
   }
-  return NULL; /* not reached */
+  /* general case */
+  r = cgetg(m+1,t_VECSMALL); /* r[i+1] = g^i mod ell */
+  r[1] = 1;
+  for (i=2; i<=m; i++) r[i] = (r[i-1] * g) % ell;
+  powtaubet = powtau(be, m, T->tau);
+  S = cgetg(ell+1, t_VEC); /* Newton sums */
+  S[1] = zero;
+  for (k = 2; k <= ell; k++)
+  {
+    GEN z, g = gzero, b = vecsmall_const(k-1, 0);
+    do
+    {
+      if (! b_suitable(b, r, k, ell)) continue;
+      z = factorbackelt(powtaubet, compute_t(b, r, m, ell), nfz);
+      if (typ(z) == t_COL) z = basistoalg(nfz, z);
+      g = gadd(g, gmul(get_multinomial(b), z));
+    } while (increment_inc(b, k, m));
+    S[k] = lmul(gmulsg(ell, e), tracetoK(T,g));
+  }
+  return pol_from_Newton(S);
 }
 
 typedef struct {
@@ -1087,12 +1075,12 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
       if (ok_congruence(X, gell, lW, vecMsup))
       {
         be = compute_beta(X, vecWB, gell, bnfz);
-        P = compute_polrel(&T, be, g, ell);
+        P = compute_polrel(nfz, &T, be, g, ell);
         if (DEBUGLEVEL>1) fprintferr("polrel(beta) = %Z\n", P);
         if (!all && gegal(subgroup, rnfnormgroup(bnr, P))) return P; /* DONE */
         res = concatsp(res, P);
       }
-    } while (increment_y(y, dK, ell));
+    } while (increment(y, dK, ell));
     y[dK--] = 0;
   }
   if (all) return res;
