@@ -499,14 +499,12 @@ MultiLift(GEN f, GEN a, GEN p, long e)
 
   if (DEBUGLEVEL > 3) timer2();
 
-  if (k < 2) err(talker,"bad arguments to BuildTree");
   v = cgetg(2*k - 2 + 1, t_VEC);
   w = cgetg(2*k - 2 + 1, t_VEC);
   link=cgetg(2*k - 2 + 1, t_VECSMALL);
   BuildTree(link, v, w, a, p);
 
   if (DEBUGLEVEL > 3) msgtimer("building tree"); 
-
 
   for (i = l; i > 1; i--) {
      TreeLift(link, v, w, p, E[i], E[i-1], f, i == 2);
@@ -525,12 +523,11 @@ MultiLift(GEN f, GEN a, GEN p, long e)
 GEN   
 hensel_lift_fact(GEN pol, GEN Q, GEN p, GEN pev, long e)
 {
-  GEN d = leading_term(pol);
+  GEN d;
+  if (lg(Q) == 2) { d = cgetg(2, t_VEC); d[1] = (long)pol; return d; }
+  d = leading_term(pol);
   if (!gcmp1(d))
-  {
-    d = modii(d, pev);
-    pol = FpX_Fp_mul(pol, d, p);
-  }
+    pol = FpX_Fp_mul(pol, mpinvmod(d, pev), pev);
   return MultiLift(pol, Q, p, e);
 }
 #endif
