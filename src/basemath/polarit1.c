@@ -1157,8 +1157,7 @@ GEN
 FpX_rand(long d1, long v, GEN p)
 {
   long i, d = d1+2;
-  GEN y;
-  y = cgetg(d,t_POL); y[1] = evalsigne(1) | evalvarn(v);
+  GEN y = cgetg(d,t_POL); y[1] = evalsigne(1) | evalvarn(v);
   for (i=2; i<d; i++) y[i] = (long)genrand(p);
   (void)normalizepol_i(y,d); return y;
 }
@@ -1168,8 +1167,7 @@ GEN
 FqX_rand(long d1, long v, GEN T, GEN p)
 {
   long i, d = d1+2, k = degpol(T), w = varn(T);
-  GEN y;
-  y = cgetg(d,t_POL); y[1] = evalsigne(1) | evalvarn(v);
+  GEN y = cgetg(d,t_POL); y[1] = evalsigne(1) | evalvarn(v);
   for (i=2; i<d; i++) y[i] = (long)FpX_rand(k, w, p);
   (void)normalizepol_i(y,d); return y;
 }
