@@ -4389,9 +4389,7 @@ arguments are forbidden.
 number field as output by \kbd{nfinit}, computes the conjugates of a root
 $r$ of the non-constant polynomial $x=\var{nf}[1]$ expressed as
 polynomials in $r$. This can be used even if the number field $\var{nf}$ is
-not \idx{Galois} since some conjugates may lie in the field. As a note to
-old-timers of PARI, starting with version 2.0.17 this function works much
-better than in earlier versions.
+not \idx{Galois} since some conjugates may lie in the field.
 
 $\var{nf}$ can simply be a polynomial if $\fl\neq 1$.
 
@@ -4416,16 +4414,35 @@ present, $d$ is assumed to be a multiple of the least common
 denominator of the conjugates expressed as polynomial in a root of
 \var{pol}.
 
-A group G is ``weakly'' super solvable if it contains a super solvable
+A group G is ``weakly'' super solvable (WKSS) if it contains a super solvable
 normal subgroup $H$ such that $G=H$ , or $G/H \simeq A_4$ , or $G/H \simeq
-S_4$. Abelian and nilpotent groups are ``weakly'' super solvable.  In
-practice, almost all groups of small order are ``weakly'' super solvable, the
-exceptions having order 36(1 exception), 48(2), 56(1), 60(1), 72(5), 75(1),
-80(1), 96(10) and $\geq 108$.
+S_4$. Abelian and nilpotent groups are WKSS.  In practice, almost all groups
+of small order are WKSS, the exceptions having order 36(1 exception), 48(2),
+56(1), 60(1), 72(5), 75(1), 80(1), 96(10) and $\geq 108$.
 
 Hence $\fl = 4$ permits to quickly check whether a polynomial of order
 strictly less than $36$ is Galois or not. This method is much faster than
 \kbd{nfroots} and can be applied to polynomials of degree larger than $50$.
+
+This routine can only compute $\Q$-automorphisms, but it may be used to get
+$K$-automorphism for any base field $K$ as follows:
+\bprog
+  rnfgaloisconj(nfK, R) = \\ K-automorphisms of L = K[X] / (R)
+  { local(polabs, N, H);
+    R *= Mod(1, nfK.pol);             \\ convert coeffs to polmod elts of K
+    polabs = rnfequation(nfK, R);
+    N = nfgaloisconj(polabs) % R;     \\ Q-automorphisms of L
+    H = [];
+    for(i=1, #N,                      \\ select the ones that fix K
+      if (subst(R, variable(R), Mod(N[i],R)) == 0, 
+        H = concat(H,N[i])
+      )
+    ); H
+  }
+  K  = nfinit(y^2 + 7);
+  polL = x^4 - y*x^3 - 3*x^2 + y*x + 1;
+  rnfgaloisconj(K, polL)             \\ K-automorphisms of L
+@eprog
 
 \syn{galoisconj0}{\var{nf},\fl,d,\var{prec}}. Also available are
 $\teb{galoisconj}(\var{nf})$ for $\fl=0$,
