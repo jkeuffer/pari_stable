@@ -33,7 +33,7 @@ static ulong vet[61][2] =
 static int tabfaux[12]={0,1,1,0,1,0,1,0,0,0,1,0};
 
 typedef struct red_t {
-  GEN T; /* x^n - 1 */
+  long n;
   GEN C; /* polcyclo(n) */
   GEN N; /* prime we are certifying */
   GEN (*red)(GEN x, struct red_t *);
@@ -58,9 +58,20 @@ makepoldeg1(GEN c, GEN d)
   return res;
 }
 
+/* T mod (x^n - 1), assume deg(T) < 2n */
+static GEN
+red_mod_xn_1(GEN T, long n)
+{
+  long i, d = degpol(T);
+  GEN y = dummycopy(T), z = y+2;
+  for (i = n; i<=d; i++)
+    z[i-n] = laddii((GEN)z[i-n], (GEN)z[i]);
+  return normalizepol_i(y, n+2);
+}
+
 static GEN
 _red2(GEN x, red_t *R) {
-  return FpX_red(gmod(gmod(x, R->T), R->C), R->N);
+  return FpX_red(gmod(red_mod_xn_1(x, R->n), R->C), R->N);
 }
 static GEN
 _red(GEN x, red_t *R) {
@@ -115,18 +126,6 @@ sqrmod4(GEN pol, red_t *R)
   return makepoldeg1(c,d);
 }
 
-/* x^n - 1 */
-static GEN
-xn_1(long n)
-{
-  GEN T = cgetg(n+3,t_POL);
-  long i;
-  T[1] = evalsigne(1)|evallgef(n+3);
-  T[2] = lstoi(-1);
-  for (i=3; i<=n+1; i++) T[i] = zero;
-  T[i] = un; return T;
-}
-
 static GEN
 _mul(GEN x, GEN y, red_t *R) {
   return R->red(gmul(x,y), R);
@@ -169,7 +168,7 @@ powpolmod(red_t *R, int k, int pk, GEN jac)
   } else if (pk == 4) {
     R->red = &_red; _sqr = &sqrmod4;
   } else if (k == 1 && pk >= 5) {
-    R->T = xn_1(pk);
+    R->n = pk;
     R->red = &_red2; _sqr = &sqrmod;
   } else {
     R->red = &_red; _sqr = &sqrmod;
