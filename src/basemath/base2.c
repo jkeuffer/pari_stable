@@ -2962,7 +2962,7 @@ rnfsteinitz(GEN nf, GEN order)
       if (p1) A[i+1] = (long)element_mulvec(nf, p1,(GEN)A[i+1]);
     }
   }
-  p1 = cgetg(n,t_VEC);
+  p1 = cgetg(l,t_VEC);
   p1[1]=(long)A;
   p1[2]=(long)I; for (i=3; i<l; i++) p1[i]=order[i];
   return gerepilecopy(av, p1);
