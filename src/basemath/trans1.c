@@ -392,6 +392,8 @@ pow_monome(GEN x, GEN nn)
   y[2]=lmul(p1,(GEN)y[1]); return gerepile(av,tetpil,y);
 }
 
+GEN powrealform(GEN x, GEN n);
+
 /* n is assumed to be an integer */
 GEN
 powgi(GEN x, GEN n)
@@ -465,6 +467,8 @@ powgi(GEN x, GEN n)
       y[4] = (long)powmodulo((GEN)x[4], n, pe);
       return y;
     }
+    case t_QFR:
+      if (signe(x[4])) return powrealform(x,n);
     case t_POL:
       if (ismonome(x)) return pow_monome(x,n);
     default:

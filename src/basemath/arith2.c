@@ -1065,31 +1065,31 @@ Qfb0(GEN x, GEN y, GEN z, GEN d, long prec)
 static void
 sq_gen(GEN z, GEN x)
 {
-  GEN d1,x2,y2,v1,v3,b3,c3,m,p1,r;
+  GEN d1,x2,y2,v1,v2,c3,m,p1,r;
 
   d1 = bezout((GEN)x[2],(GEN)x[1],&x2,&y2);
-  if (gcmp1(d1)) v1 = v3 = (GEN)x[1];
+  if (gcmp1(d1)) v1 = v2 = (GEN)x[1];
   else
   {
     v1 = divii((GEN)x[1],d1);
-    v3 = mulii(v1,mppgcd(d1,(GEN)x[3]));
+    v2 = mulii(v1,mppgcd(d1,(GEN)x[3]));
   }
-  m=mulii((GEN)x[3],x2); setsigne(m,-signe(m));
-  r=modii(m,v3); p1=mulii(v1,r); b3=shifti(p1,1);
-  c3=addii(mulii((GEN)x[3],d1),mulii(r,addii((GEN)x[2],p1)));
-  z[1]=lmulii(v3,v1);
-  z[2]=laddii((GEN)x[2],b3);
-  z[3]=ldivii(c3,v3);
+  m = mulii((GEN)x[3],x2); setsigne(m,-signe(m));
+  r = modii(m,v2); p1 = mulii(v1,r);
+  c3 = addii(mulii((GEN)x[3],d1), mulii(r,addii((GEN)x[2],p1)));
+  z[1] = lmulii(v1,v2);
+  z[2] = laddii((GEN)x[2], shifti(p1,1));
+  z[3] = ldivii(c3,v2);
 }
 
 void
 comp_gen(GEN z,GEN x,GEN y)
 {
-  GEN s,n,d,d1,x1,x2,y1,y2,v1,v2,b3,c3,m,p1,r;
+  GEN s,n,d,d1,x1,x2,y1,y2,v1,v2,c3,m,p1,r;
 
   if (x == y) { sq_gen(z,x); return; }
-  s=shifti(addii((GEN)x[2],(GEN)y[2]),-1);
-  n=subii((GEN)y[2],s);
+  s = shifti(addii((GEN)x[2],(GEN)y[2]),-1);
+  n = subii((GEN)y[2],s);
   d = bezout((GEN)y[1],(GEN)x[1],&y1,&x1);
   d1 = bezout(s,d,&x2,&y2);
   if (gcmp1(d1))
@@ -1099,17 +1099,17 @@ comp_gen(GEN z,GEN x,GEN y)
   }
   else
   {
-    v1=divii((GEN)x[1],d1);
-    v2=divii((GEN)y[1],d1);
+    v1 = divii((GEN)x[1],d1);
+    v2 = divii((GEN)y[1],d1);
     v1 = mulii(v1, mppgcd(d1,mppgcd((GEN)x[3],mppgcd((GEN)y[3],n))));
   }
   m = addii(mulii(mulii(y1,y2),n), mulii((GEN)y[3],x2));
   setsigne(m,-signe(m));
-  r=modii(m,v1); p1=mulii(v2,r); b3=shifti(p1,1);
-  c3=addii(mulii((GEN)y[3],d1),mulii(r,addii((GEN)y[2],p1)));
-  z[1]=lmulii(v1,v2);
-  z[2]=laddii((GEN)y[2],b3);
-  z[3]=ldivii(c3,v1);
+  r = modii(m,v1); p1 = mulii(v2,r); 
+  c3 = addii(mulii((GEN)y[3],d1), mulii(r,addii((GEN)y[2],p1)));
+  z[1] = lmulii(v1,v2);
+  z[2] = laddii((GEN)y[2], shifti(p1,1));
+  z[3] = ldivii(c3,v1);
 }
 
 static GEN
@@ -1191,7 +1191,7 @@ sqcompimagraw(GEN x) { return sqcompimag0(x,1); }
 static GEN
 real_unit_form_by_disc(GEN D, long prec)
 {
-  GEN y = cgetg(5,t_QFR), sqrtD;
+  GEN y = cgetg(5,t_QFR), isqrtD;
   long av = avma;
 
   if (typ(D) != t_INT || signe(D) <= 0) err(typeer,"real_unit_form_by_disc");
@@ -1200,12 +1200,12 @@ real_unit_form_by_disc(GEN D, long prec)
     case 2:
     case 3: err(funder2,"real_unit_form_by_disc");
   }
-  y[1]=un; sqrtD = racine(D);
-  /* we know that D and sqrtD are non-zero */
-  if (mod2(D) != mod2(sqrtD))
-    sqrtD = gerepileuptoint(av, addsi(-1,sqrtD));
-  y[2] = (long)sqrtD; av = avma;
-  y[3] = (long)gerepileuptoint(av, shifti(subii(sqri(sqrtD),D),-2));
+  y[1]=un; isqrtD = racine(D);
+  /* we know that D and isqrtD are non-zero */
+  if (mod2(D) != mod2(isqrtD))
+    isqrtD = gerepileuptoint(av, addsi(-1,isqrtD));
+  y[2] = (long)isqrtD; av = avma;
+  y[3] = (long)gerepileuptoint(av, shifti(subii(sqri(isqrtD),D),-2));
   y[4] = (long)realzero(prec); return y;
 }
 
@@ -1213,7 +1213,7 @@ GEN
 real_unit_form(GEN x)
 {
   long av = avma, prec = precision((GEN)x[4]);
-  GEN D, y = cgetg(5,t_QFR);
+  GEN D;
 
   if (!prec) err(talker,"not a t_REAL in 4th component of a t_QFR");
   D = qf_disc(x,NULL,NULL);
@@ -1488,80 +1488,222 @@ rhoimag0(GEN x, long *flag)
   z[2] = (long)b; *flag = 0; return z;
 }
 
-/* if sqrtD != NULL, compute Shanks' distance as well */
-static GEN
-rhoreal0(GEN x, GEN D, GEN isqrtD, GEN sqrtD)
+static void
+fix_expo(GEN x)
 {
-  long s = signe(x[3]);
-  GEN p1,p2, z = cgetg(5,t_QFR);
+  long e = expo(x[5]);
+  if (e >= EXP220)
+  {
+    x[4] = laddsi(1,(GEN)x[4]);
+    setexpo(x[5], e - EXP220);
+  }
+}
 
-  if (!sqrtD)
-    z[4] = x[4];
+GEN
+rhoreal_aux(GEN x, GEN D, GEN sqrtD, GEN isqrtD)
+{
+  GEN p1,p2, y = cgetg(6,t_VEC);
+  GEN b = (GEN)x[2];
+  GEN c = (GEN)x[3];
+  long s = signe(c);
+
+  y[1] = (long)c;
+  p2 = (absi_cmp(isqrtD,c) >= 0)? isqrtD: c;
+  setsigne(c,1);
+  p1 = shifti(c,1);
+  p2 = divii(addii(p2,b), p1);
+  setsigne(c,s);
+  y[2] = lsubii(mulii(p2,p1), b);
+
+  p1 = shifti(subii(sqri((GEN)y[2]),D),-2);
+  y[3] = ldivii(p1,(GEN)y[1]);
+
+  if (lg(x) <= 5) setlg(y,4);
   else
   {
-    p1 = divrr(addir((GEN)x[2],sqrtD), subir((GEN)x[2],sqrtD));
-    if (signe(p1)<0) setsigne(p1,1); /* p1 = |(b+sqrtD) / (b-sqrtD)| */
-    z[4] = laddrr(shiftr(mplog(p1),-1), (GEN) x[4]);
+    y[4] = x[4];
+    y[5] = x[5];
+    if (signe(b))
+    {
+      p1 = divrr(addir(b,sqrtD), subir(b,sqrtD));
+      y[5] = lmulrr(p1, (GEN)y[5]);
+      fix_expo(y);
+    }
   }
-  z[1] = x[3]; setsigne(z[1],1);
-  p1=shifti((GEN)z[1],1);
-  p2 = (cmpii(isqrtD,(GEN)z[1]) >= 0)? isqrtD: (GEN)z[1];
-  p2 = divii(addii(p2,(GEN)x[2]),p1);
-  z[2] = lsubii(mulii(p2,p1), (GEN)x[2]);
+  return y;
+}
 
-  setsigne(z[1],s);
-  p1=shifti(subii(sqri((GEN)z[2]),D),-2);
-  z[3] = ldivii(p1,(GEN)z[1]); return z;
+#define qf_NOD  2
+#define qf_STEP 1
+
+GEN
+codeform5(GEN x, long prec)
+{
+  GEN y = cgetg(6,t_VEC);
+  y[1]=x[1];
+  y[2]=x[2];
+  y[3]=x[3];
+  y[4]=zero;
+  y[5]=(long)realun(prec); return y;
+}
+
+static GEN
+add_distance(GEN x, GEN d0)
+{
+  GEN y = cgetg(5, t_QFR);
+  y[1] = licopy((GEN)x[1]);
+  y[2] = licopy((GEN)x[2]);
+  y[3] = licopy((GEN)x[3]);
+  y[4] = lcopy(d0); return y;
+}
+
+/* d0 = initial distance, assume |n| > 1 */
+static GEN
+decodeform(GEN x, GEN d0)
+{
+  GEN p1,p2;
+  
+  if (lg(x) < 6) return add_distance(x,d0);
+  /* x = (a,b,c, expo(d), d), d = exp(2*distance) */
+  p1 = absr((GEN)x[5]);
+  p2 = (GEN)x[4];
+  if (signe(p2))
+  {
+    long e = expo(p1);
+    p1 = shiftr(p1,-e);
+    p2 = addis(mulsi(EXP220,p2), e);
+    p1 = mplog(p1);
+    p1 = mpadd(p1, mulir(p2, glog(gdeux, lg(d0))));
+  }
+  else
+  { /* to avoid loss of precision */
+    p1 = gcmp1(p1)? NULL: mplog(p1);
+  }
+  if (p1)
+    d0 = addrr(d0, shiftr(p1,-1));
+  return add_distance(x, d0);
+}
+
+static long
+get_prec(GEN d)
+{
+  long k = lg(d);
+  long l = ((BITS_IN_LONG-1-expo(d))>>TWOPOTBITS_IN_LONG)+2;
+  if (l < k) l = k;
+  if (l < 3) l = 3;
+  return l;
+}
+
+static int
+real_isreduced(GEN x, GEN isqrtD)
+{
+  GEN a = (GEN)x[1];
+  GEN b = (GEN)x[2];
+  if (signe(b) > 0 && cmpii(b,isqrtD) <= 0 )
+  {
+    GEN p1 = subii(isqrtD, shifti(absi(a),1));
+    long l = absi_cmp(b, p1);
+    if (l > 0 || (l == 0 && signe(p1) < 0)) return 1;
+  }
+  return 0;
+}
+
+GEN
+redrealform5(GEN x, GEN D, GEN sqrtD, GEN isqrtD)
+{
+  while (!real_isreduced(x,isqrtD))
+    x = rhoreal_aux(x,D,sqrtD,isqrtD);
+  return x;
 }
 
 static GEN
 redreal0(GEN x, long flag, GEN D, GEN isqrtD, GEN sqrtD)
 {
-  long av=avma,l,step, use_d;
+  long av = avma, prec;
+  GEN d0;
 
   if (typ(x) != t_QFR) err(talker,"not a real quadratic form in redreal");
-  switch(flag)
-  {
-    case 0: use_d=1; step=0; break;
-    case 1: use_d=1; step=1; break;
-    case 2: use_d=0; step=0; break;
-    case 3: use_d=0; step=1; break;
-    default: err(flagerr,"qfbred");
-      return NULL; /* not reached */
-  }
 
-  if (!D) D = qf_disc(x,NULL,NULL);
-  else if (typ(D) != t_INT) err(arither1);
+  if (!D)
+    D = qf_disc(x,NULL,NULL);
+  else
+    if (typ(D) != t_INT) err(arither1);
 
-  if (!isqrtD || (use_d && !sqrtD))
-  {
-    l=max(lg(x[4]),3);
-    l=max(l,((BITS_IN_LONG-1-expo(x[4]))>>TWOPOTBITS_IN_LONG)+2);
-    sqrtD=gsqrt(D,l); isqrtD=mptrunc(sqrtD);
-  }
+  d0 = (GEN)x[4]; prec = get_prec(d0);
+  x = codeform5(x,prec);
+  if ((flag & qf_NOD)) setlg(x,4);
   else
   {
+    if (!sqrtD)
+      sqrtD = gsqrt(D,prec);
+    else
+    {
+      long l = typ(sqrtD);
+      if (!is_intreal_t(l)) err(arither1);
+    }
+  }
+  if (!isqrtD)
+    isqrtD = sqrtD? mptrunc(sqrtD): racine(D);
+  else
     if (typ(isqrtD) != t_INT) err(arither1);
-    if (sqrtD)
+
+  if (flag & qf_STEP)
+    x = rhoreal_aux(x,D,sqrtD,isqrtD);
+  else
+    x = redrealform5(x,D,sqrtD,isqrtD);
+  return gerepileupto(av, decodeform(x,d0));
+}
+
+GEN
+comprealform5(GEN x, GEN y, GEN D, GEN sqrtD, GEN isqrtD)
+{
+  long av = avma,tetpil;
+  GEN z = cgetg(6,t_VEC); comp_gen(z,x,y);
+  if (x == y)
+  {
+    z[4] = lshifti((GEN)x[4],1);
+    z[5] = lsqr((GEN)x[5]);
+  }
+  else
+  {
+    z[4] = laddii((GEN)x[4],(GEN)y[4]);
+    z[5] = lmulrr((GEN)x[5],(GEN)y[5]);
+  }
+  fix_expo(z); z = redrealform5(z,D,sqrtD,isqrtD);
+  tetpil=avma; return gerepile(av,tetpil,gcopy(z));
+}
+
+/* assume n!=0 */
+GEN
+powrealform(GEN x, GEN n)
+{
+  long av = avma, i,m;
+  GEN y,D,sqrtD,isqrtD,d0;
+
+  if (typ(x) != t_QFR)
+    err(talker,"not a real quadratic form in powreal");
+  if (gcmp1(n)) return gcopy(x);
+  if (gcmp_1(n)) return ginv(x);
+
+  d0 = (GEN)x[4];
+  D = qf_disc(x,NULL,NULL);
+  sqrtD = gsqrt(D, get_prec(d0));
+  isqrtD = mptrunc(sqrtD);
+  if (signe(n) < 0) { x = ginv(x); d0 = (GEN)x[4]; }
+  n = absi(n);
+  x = codeform5(x, lg(d0)); y = NULL;
+  for (i=lgefint(n)-1; i>1; i--)
+  {
+    m = n[i];
+    for (; m; m>>=1)
     {
-      l=typ(sqrtD); if (!is_intreal_t(l)) err(arither1);
+      if (m&1) y = y? comprealform5(y,x,D,sqrtD,isqrtD): x;
+      if (m == 1 && i == 2) break;
+      x = comprealform5(x,x,D,sqrtD,isqrtD); 
     }
   }
-  if (step)
-    x = rhoreal0(x,D,isqrtD,sqrtD);
-  else
-    for(;;)
-    {
-      if (signe(x[2]) > 0 && cmpii((GEN)x[2],isqrtD) <= 0 )
-      {
-        GEN p1=subii(isqrtD, shifti(absi((GEN)x[1]),1));
-
-        l = absi_cmp((GEN)x[2],p1);
-        if (l>0 || (l==0 && signe(p1)<0)) break;
-      }
-      x = rhoreal0(x,D,isqrtD,sqrtD);
-    }
-  l=avma; return gerepile(av,l,gcopy(x));
+  d0 = mulri(d0,n);
+  return gerepileupto(av, decodeform(y,d0));
 }
 
 GEN
@@ -1583,19 +1725,19 @@ redreal(GEN x)
 GEN
 rhoreal(GEN x)
 {
-  return redreal0(x,1,NULL,NULL,NULL);
+  return redreal0(x,qf_STEP,NULL,NULL,NULL);
 }
 
 GEN
 redrealnod(GEN x, GEN isqrtD)
 {
-  return redreal0(x,2,NULL,isqrtD,NULL);
+  return redreal0(x,qf_NOD,NULL,isqrtD,NULL);
 }
 
 GEN
 rhorealnod(GEN x, GEN isqrtD)
 {
-  return redreal0(x,3,NULL,isqrtD,NULL);
+  return redreal0(x,qf_STEP|qf_NOD,NULL,isqrtD,NULL);
 }
 
 GEN

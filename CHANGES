@@ -59,12 +59,15 @@ BA 24- bug in galconj.c:corediscpartial (could return half integer)
 TH 26- Configure doesn't handle cygwin new directory structure
 CW 27- polsturm(x,0,1) = 1 (should be 0)
    28- [library:] gentimer(3) didn't work
+PW 29- various bugs in qfminim(,,2)
+   30- ellap(e,2) gave wrong result when 2 | e.disc
   
   Changed
     1- renamed .DOC files to .txt (explorer getting confused...)
     2- moved MANIFEST to config/MANIFEST
 IZ  3- meaning of flags > 1 in plothraw
 IZ  4- output of \x (a bit more verbose)
+    5- unified basic t_QFR routines (use exponential distance internally)
 
   Added
 BA  1- Pocklington-Lehmer primality prover
