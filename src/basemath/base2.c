@@ -1622,7 +1622,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
       }
       delete_var();
 
-      if (!signe(modii((GEN)chie[2], pmr)))
+      if (!signe(modii(constant_term(chie), pmr)))
 	chie = mycaract(chi, eta, p, pmf, ns);
 	
       pie = getprime(p, chi, eta, chie, nue, &Le, &Ee);
