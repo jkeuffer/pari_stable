@@ -1827,26 +1827,27 @@ rayclassnolist(GEN bnf,GEN lists)
 {
   pari_sp av = avma;
   long i,j,lx,ly;
-  GEN blist,ulist,Llist,h,b,u,L,m;
+  GEN B,U,L,h,b,u,l,m;
 
-  if (typ(lists)!=t_VEC || lg(lists)!=3) err(typeer,"rayclassnolist");
   bnf = checkbnf(bnf); h = gmael3(bnf,8,1,1);
-  blist = (GEN)lists[1];
-  ulist = (GEN)lists[2];
-  lx = lg(blist); Llist = cgetg(lx,t_VEC);
+  B = (GEN)lists[1];
+  U = (GEN)lists[2];
+  if (typ(lists)!=t_VEC || lg(lists)!=3 || typ(B)!=t_VEC || typ(U)!=t_VEC)
+    err(typeer,"rayclassnolist");
+  lx = lg(B); L = cgetg(lx,t_VEC);
   for (i = 1; i < lx; i++)
   {
-    b = (GEN)blist[i]; /* bid's */
-    u = (GEN)ulist[i]; /* units zideallogs */
-    ly = lg(b); L = cgetg(ly,t_VEC); Llist[i] = (long)L;
+    b = (GEN)B[i]; /* bid's */
+    u = (GEN)U[i]; /* units zideallogs */
+    ly = lg(b); l = cgetg(ly,t_VEC); L[i] = (long)l;
     for (j=1; j<ly; j++)
     {
       GEN bid = (GEN)b[j], cyc = gmael(bid,2,2);
       m = concatsp((GEN)u[j], diagonal(cyc));
-      L[j] = lmulii(h, dethnf_i(hnf(m)));
+      l[j] = lmulii(h, dethnf_i(hnf(m)));
     }
   }
-  return gerepilecopy(av, Llist);
+  return gerepilecopy(av, L);
 }
 
 static long
