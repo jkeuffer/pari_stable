@@ -102,7 +102,7 @@ HC 12- gamma function for integral/rational arguments
    17- use relative van Hoeij algorithm in nffactor [not optimized yet]
    18- rewrote factorff() to use new modular functions
    19- rewrote primedec() to use new modular functions
-   20- rewrote most *modpr functions [IN PROGRESS]
+   20- rewrote most *modpr functions
    21- modified diagnostics for integral LLL to match floating point version
 
   Added
