@@ -786,7 +786,6 @@ GEN     Str(GEN g);
 GEN     Strexpand(GEN g);
 GEN     Strtex(GEN g);
 void    brute(GEN g, char format, long dec);
-void    bruteall(GEN g, char format, long dec, long flbl);
 void    bruterr(GEN x,char format,long dec);
 const char* eng_ord(long i);
 void    error0(GEN g);
