@@ -534,18 +534,19 @@ polhensellift(GEN pol, GEN fct, GEN p, long exp)
   pari_sp av = avma;
 
   /* we check the arguments */
-  if (typ(pol) != t_POL)
-    err(talker, "not a polynomial in polhensellift");
+  if (typ(pol) != t_POL) err(talker, "not a polynomial in polhensellift");
   if ((typ(fct) != t_COL && typ(fct) != t_VEC) || (lg(fct) < 3))
     err(talker, "not a factorization in polhensellift");
-  if (typ(p) != t_INT || !BSW_psp(p))
-    err(talker, "not a prime number in polhensellift");
-  if (exp < 1)
-    err(talker, "not a positive exponent in polhensellift");
+  if (typ(p) != t_INT) err(talker, "not a prime number in polhensellift");
+  if (exp < 1) err(talker, "not a positive exponent in polhensellift");
 
+  l = lgef(pol);
+  for (i = 2; i < l; i++)
+    if (typ(pol[i]) != t_INT)
+      err(talker, "not an integral polynomial in polhensellift");
   p1 = lift(fct); /* make sure the coeffs are integers and not intmods */
-  l = lg(p1) - 1;
-  for (i=1; i<=l; i++)
+  l = lg(p1);
+  for (i = 1; i < l; i++)
   {
     p2 = (GEN)p1[i];
     if (typ(p2) != t_POL)
@@ -558,14 +559,14 @@ polhensellift(GEN pol, GEN fct, GEN p, long exp)
 
   /* then we check that pol \equiv \prod f ; f \in fct mod p */
   p2 = (GEN)p1[1];
-  for (j = 2; j <= l; j++) p2 = FpX_mul(p2, (GEN)p1[j], p);
+  for (j = 2; j < l; j++) p2 = FpX_mul(p2, (GEN)p1[j], p);
   if (!gcmp0(FpX_sub(pol, p2, p)))
     err(talker, "not a correct factorization in polhensellift");
 
   /* finally we check that the elements of fct are coprime mod p */
   if (!FpX_is_squarefree(pol, p))
   {
-    for (i = 1; i <= l; i++)
+    for (i = 1; i < l; i++)
       for (j = 1; j < i; j++)
         if (degpol(FpX_gcd((GEN)p1[i], (GEN)p1[j], p)))
           err(talker, "polhensellift: factors %Z and %Z are not coprime",
