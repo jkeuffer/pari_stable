@@ -17,10 +17,10 @@
 %% which I modified from his GNU emacs reference card
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \def\TITLE{Pari/GP reference card}
-\def\versionnumber{2.17}% Version of this reference card
+\def\versionnumber{2.18}% Version of this reference card
 \def\PARIversion{2.2.8}% Version of PARI described on this reference card
 \def\year{2004}
-\def\month{August}
+\def\month{September}
 
 % ignore parimacro.tex's \magnification setting
 \let\oldmagnification\magnification
@@ -971,11 +971,27 @@ Ideals are elements, primes, or matrix of generators in HNF.\hfill\break
 \li{kernel of matrix $M$ in $(\ZZ_K/pr)^*$}{nfkermodpr$(\var{nf},M,prmod)$}
 \li{solve $M x = B$ in $(\ZZ_K/pr)^*$}{nfsolvemodpr$(\var{nf},M,B,prmod)$}
 
+\section{Galois theory over $\QQ$}
+\li{initializes a Galois group structure}{galoisinit$(\var{pol},\{den\})$}
+\li{action of $p$ in nfgaloisconj form}{galoispermtopol$(G,\{p\})$}
+\li{identifies as abstract group}{galoisidentify$(G)$}
+\li{exports a group for GAP or MAGMA}{galoisexport$(G)$}
+\li{subgroups of the Galois group $G$}{galoissubgroups$(G)$}
+\li{subfields from subgroups of $G$}{galoissubfields$(G,\fl,\{v\})$}
+\li{fixed field}{galoisfixedfield$(G,\var{perm},\fl,\{v\})$}
+\li{is $G$ abelian?}{galoisisabelian$(G,\fl)$}
+\li{abelian number fields}{galoissubcyclo(N,H,\fl,\{v\})}
+
 \section{Relative Number Fields (rnf)}
 Extension $L/K$ is defined by $g\in K[x]$. We have $order\subset L$.
 \hfill\break
 %
 \li{absolute equation of $L$}{rnfequation$(\var{nf},g,\fl)$}
+\li{relative {\tt nfalgtobasis}}{rnfalgtobasis$(\var{rnf},x)$}
+\li{relative {\tt nfbasistoalg}}{rnfbasistoalg$(\var{rnf},x)$}
+\li{relative {\tt idealhnf}}{rnfidealhnf$(\var{rnf},x)$}
+\li{relative {\tt idealmul}}{rnfidealmul$(\var{rnf},x,y)$}
+\li{relative {\tt idealtwoelt}}{rnfidealtwoelt$(\var{rnf},x)$}
 %
 \subsec{Lifts and Push-downs}
 \li{absolute $\rightarrow$ relative repres.\ for $x$}
@@ -987,11 +1003,6 @@ Extension $L/K$ is defined by $g\in K[x]$. We have $order\subset L$.
 \leavevmode idem for $x$ ideal:
 \kbd{$($rnfideal$)$reltoabs}, \kbd{abstorel}, \kbd{up}, \kbd{down}\hfill\break
 %
-\li{relative {\tt nfalgtobasis}}{rnfalgtobasis$(\var{rnf},x)$}
-\li{relative {\tt nfbasistoalg}}{rnfbasistoalg$(\var{rnf},x)$}
-\li{relative {\tt idealhnf}}{rnfidealhnf$(\var{rnf},x)$}
-\li{relative {\tt idealmul}}{rnfidealmul$(\var{rnf},x,y)$}
-\li{relative {\tt idealtwoelt}}{rnfidealtwoelt$(\var{rnf},x)$}
 %
 \subsec{Projective $\ZZ_K$-modules, maximal order}
 \li{relative {\tt polred}}{rnfpolred$(\var{nf},g)$}
