@@ -7518,10 +7518,10 @@ $X^{\alpha}$. In particular, $\alpha\le-2$ is equivalent to no $\alpha$ at all.
 \item a two-component vector $[\sigma,\alpha]$, where $\sigma$ is as
 before, $\alpha > 0$, and the function $f$ is now assumed to decrease like
 $\exp(-\alpha X)$. In this case it is essential that $\alpha$ be exactly the
-rate of exponential decrease, and it is usually a good idea to increase by
-$1$ the default value of $m$ used for the integration step. In practice, if
-the function is exponentially decreasing \kbd{sumnum} is slower than
-\kbd{sumpos} or \kbd{suminf}.
+rate of exponential decrease, and it is usually a good idea to increase
+the default value of $m$ used for the integration step. In practice, if
+the function is exponentially decreasing \kbd{sumnum} is slower and less
+accurate than \kbd{sumpos} or \kbd{suminf}, so should not be used.
 
 The function uses the \tet{intnum} routines and integration on the line
 $\Re(s) = \sigma$. The optional argument \var{tab} is as in intnum, except it
