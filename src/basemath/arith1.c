@@ -285,7 +285,7 @@ GEN
 racine(GEN a)
 {
   GEN x,y,z;
-  long av,tetpil,k;
+  long av,k;
 
   if (typ(a) != t_INT) err(arither1);
   switch (signe(a))
@@ -293,7 +293,7 @@ racine(GEN a)
     case 0: return gzero;
     case -1:
       x=cgetg(3,t_COMPLEX); x[1]=zero;
-      setsigne(a,1); x[2]= (long) racine(a); setsigne(a,-1);
+      setsigne(a,1); x[2]= (long)racine(a); setsigne(a,-1);
       return x;
 
     case 1:
@@ -305,7 +305,7 @@ racine(GEN a)
 	y = x; x = z;
       }
       while (cmpii(x,y) < 0);
-      tetpil=avma; return gerepile(av,tetpil,icopy(y));
+      avma = (long)y; return gerepileuptoint(av,y);
   }
   return NULL; /* not reached */
 }
@@ -1992,42 +1992,44 @@ gregula(GEN x, long prec)
 GEN
 regula(GEN x, long prec)
 {
-  long av = avma,av2,tetpil,lim,r,fl,rexp;
-  GEN ln2,reg,reg1,rsqd,y,u,v,a,u1,v1,sqd;
+  long av = avma,av2,lim,r,fl,rexp;
+  GEN reg,rsqd,y,u,v,u1,v1, sqd = racine(x);
 
-  if (typ(x) != t_INT) err(arither1);
   if (signe(x)<=0) err(arither2);
   r=mod4(x); if (r==2 || r==3) err(funder2,"regula");
 
-  sqd=racine(x); rsqd=gsqrt(x,prec);
-  if (gegal(sqri(sqd),x)) err(talker,"square argument in regula");
+  rsqd = gsqrt(x,prec);
+  if (egalii(sqri(sqd),x)) err(talker,"square argument in regula");
 
   rexp=0; reg=cgetr(prec); affsr(2,reg);
-  ln2 = mplog(reg);
   av2=avma; lim = stack_lim(av2,2);
-  a = shifti(addsi(r,sqd),-1);
-  v = gdeux; u = stoi(r);
+  u = stoi(r); v = gdeux;
   for(;;)
   {
-    u1=subii(mulii(a,v),u);
-    reg1=divri(addir(u1,rsqd),v);
-    v1=divii(subii(x,sqri(u1)),v); fl=gegal(v,v1);
-    if (gegal(u,u1) || fl) break;
-    v=v1; u=u1; a = divii(addii(sqd,u),v);
-    reg = mulrr(reg,reg1); rexp += expo(reg); setexpo(reg,0);
+    u1 = subii(mulii(divii(addii(u,sqd),v), v), u);
+    v1 = divii(subii(x,sqri(u1)),v); fl = egalii(v,v1);
+    if (fl || egalii(u,u1)) break;
+    reg = mulrr(reg, divri(addir(u1,rsqd),v));
+    rexp += expo(reg); setexpo(reg,0);
+    u = u1; v = v1;
     if (rexp & ~EXPOBITS) err(muler4);
     if (low_stack(lim, stack_lim(av2,2)))
     {
-      GEN *gptr[4]; gptr[0]=&a; gptr[1]=&reg; gptr[2]=&u; gptr[3]=&v;
+      GEN *gptr[3]; gptr[0]=&reg; gptr[1]=&u; gptr[2]=&v;
       if(DEBUGMEM>1) err(warnmem,"regula");
-      gerepilemany(av2,gptr,4);
+      gerepilemany(av2,gptr,3);
     }
   }
   reg = gsqr(reg); setexpo(reg,expo(reg)-1);
   if (fl) reg = mulrr(reg, divri(addir(u1,rsqd),v));
-  y = mplog(divri(reg,v)); u1 = mulsr(rexp,ln2);
-  if (signe(u1)) setexpo(u1, expo(u1)+1);
-  tetpil=avma; return gerepile(av,tetpil,gadd(y,u1));
+  y = mplog(divri(reg,v));
+  if (rexp)
+  {
+    u1 = mulsr(rexp, glog(gdeux, prec));
+    setexpo(u1, expo(u1)+1);
+    y = addrr(y,u1);
+  }
+  return gerepileupto(av, y);
 }
 
 /*************************************************************************/
