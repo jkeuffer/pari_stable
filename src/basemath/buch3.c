@@ -1566,17 +1566,15 @@ rnfnormgroup(GEN bnr, GEN polrel)
 GEN
 rnfconductor(GEN bnf, GEN polrel, long flag)
 {
-  long av=avma,tetpil,R1,i,v;
+  long av=avma,tetpil,R1,i;
   GEN nf,module,rnf,arch,bnr,group,p1,pol2;
 
   bnf = checkbnf(bnf); nf=(GEN)bnf[7];
   if (typ(polrel)!=t_POL) err(typeer,"rnfconductor");
   module=cgetg(3,t_VEC); R1=itos(gmael(nf,2,1));
-  v=varn(polrel);
   p1=unifpol((GEN)bnf[7],polrel,0);
   p1=denom(gtovec(p1));
-  pol2=gsubst(polrel,v,gdiv(polx[v],p1));
-  pol2=gmul(pol2,gpuigs(p1,degpol(pol2)));
+  pol2=rescale_pol(polrel, p1);
   if (flag)
   {
     rnf=rnfinitalg(bnf,pol2,DEFAULTPREC);
