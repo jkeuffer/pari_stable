@@ -4337,7 +4337,7 @@ nfgcd(GEN P, GEN Q, GEN nf, GEN den)
     for (p = 27449, primepointer = diffptr + 3000; ; )
     {
       NEXT_PRIME_VIADIFF_CHECK(p, primepointer);
-      /*Discard primes dividing disc(T) or leadingcoeff(PQ) */
+      /*Discard primes dividing disc(T) or lc(PQ) */
       if (!smodis(den, p)) continue;
       if (DEBUGLEVEL>5) fprintferr("nfgcd: p=%d\n",p);
       /*Discard primes when modular gcd does not exist*/
