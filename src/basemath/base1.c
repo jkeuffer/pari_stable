@@ -1392,7 +1392,7 @@ nfpolred(int part, nfbasic_t *T)
   rev = modreverse_i(phi, x);
   for (i=1; i<=n; i++) a[i] = (long)RX_RXQ_compo((GEN)a[i], rev, xbest);
   mat = vecpol_to_mat(Q_remove_denom(a, &d), n);
-  if (!is_pm1(d)) mat = gdiv(hnfmodid(mat,d), d); else mat = idmat(n);
+  if (d) mat = gdiv(hnfmodid(mat,d), d); else mat = idmat(n);
 
   (void)carrecomplet(diviiexact(dxbest,T->dK), &(T->index));
   T->bas= mat_to_vecpol(mat, v);
