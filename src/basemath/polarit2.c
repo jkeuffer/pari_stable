@@ -27,7 +27,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define both_odd(a,b) ((a)&(b)&1)
 #define addshift(x,y) addshiftpol((x),(y),1)
 
-extern GEN FpXQX_safegcd(GEN P, GEN Q, GEN T, GEN p);
 extern GEN ZY_ZXY_resultant(GEN A, GEN B0, long *lambda);
 extern GEN addshiftpol(GEN x, GEN y, long d);
 extern GEN cauchy_bound(GEN p);
@@ -4455,7 +4454,7 @@ nfgcd(GEN P, GEN Q, GEN nf, GEN den)
     den = mulii(den, gcdii(ZX_resultant(lP, nf), ZX_resultant(lQ, nf)));
   { /*Modular GCD*/
     pari_sp btop = avma, st_lim = stack_lim(btop, 1);
-    long p;
+    ulong p;
     long dM=0, dR;
     GEN M, dsol;
     GEN R, ax, bo;
@@ -4467,12 +4466,12 @@ nfgcd(GEN P, GEN Q, GEN nf, GEN den)
       if (!smodis(den, p)) continue;
       if (DEBUGLEVEL>5) fprintferr("nfgcd: p=%d\n",p);
       /*Discard primes when modular gcd does not exist*/
-      if ((R = FpXQX_safegcd(P, Q, nf, stoi(p))) == NULL) continue;
+      if ((R = FlxqX_safegcd(ZXX_to_FlxX(P,p,y), ZXX_to_FlxX(Q,p,y),ZX_to_Flx(nf,p), p)) == NULL) continue;
       dR = degpol(R);
       if (dR == 0) return scalarpol(gun, x);
       if (mod && dR > dM) continue; /* p divides Res(P/gcd, Q/gcd). Discard. */
 
-      R = RXX_to_RM(R, d);
+      R = RXX_to_RM(FlxX_to_ZXX(R), d);
       /* previous primes divided Res(P/gcd, Q/gcd)? Discard them. */
       if (!mod || dR < dM) { M = R; mod = stoi(p); dM = dR; continue; }
       if (low_stack(st_lim, stack_lim(btop, 1)))
@@ -4481,7 +4480,7 @@ nfgcd(GEN P, GEN Q, GEN nf, GEN den)
 	gerepileall(btop, 2, &M, &mod);
       }
 
-      ax = gmulgs(Fp_inv(stoi(p), mod), p);
+      ax = mulis(Fp_inv(stoi(p), mod), p);
       M = gadd(R, gmul(ax, gsub(M, R)));
       mod = mulis(mod, p);
       M = lift(FpM_to_mod(M, mod));

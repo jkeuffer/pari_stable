@@ -1550,6 +1550,59 @@ FlxX_to_Kronecker(GEN P, GEN Q)
   setlg(y, k); return y;
 }
 
+GEN
+FlxX_add(GEN x, GEN y, ulong p)
+{
+  long i,lz;
+  GEN z; 
+  long lx=lg(x);
+  long ly=lg(y);
+  if (ly>lx) swapspec(x,y, lx,ly);
+  lz = lx; z = cgetg(lz, t_POL); z[1]=x[1];
+  for (i=2; i<ly; i++) z[i] = (long) Flx_add((GEN)x[i], (GEN)y[i], p);
+  for (   ; i<lx; i++) z[i] = (long) vecsmall_copy((GEN)x[i]);
+  return FlxX_renormalize(z, lz);
+}
+
+/*Unused/untested*/
+GEN
+FlxX_sub(GEN x, GEN y, ulong p)
+{
+  long lx,ly,i,lz;
+  GEN z;
+  lx = lg(x); ly = lg(y);
+  lz=max(lx,ly);
+  z = cgetg(lz,t_POL);
+  if (lx >= ly)
+  {
+    z[1] = x[1];
+    for (i=2; i<ly; i++) z[i]=(long) Flx_sub((GEN)x[i],(GEN)y[i],p);
+    for (   ; i<lx; i++) z[i]=(long) vecsmall_copy((GEN)x[i]);
+    if (lx==ly) z = FlxX_renormalize(z, lz);
+  }
+  else
+  {
+    z[1] = y[1];
+    for (i=2; i<lx; i++) z[i]=(long) Flx_sub((GEN)x[i],(GEN)y[i],p);
+    for (   ; i<ly; i++) z[i]=(long) Flx_neg((GEN)y[i],p);
+  }
+  if (!lgpol(z)) { avma = (pari_sp)(z + lz); z = zeropol(varn(x)); }
+  return z;
+}
+
+GEN
+FlxX_shift(GEN a, long n)
+{
+  long i, l = lg(a);
+  GEN  b;
+  if (!signe(a)) return a;
+  b = cgetg(l+n, t_POL);
+  b[1] = a[1];
+  for (i=0; i<n; i++) b[2+i] = (long) zero_Flx(a[1]);
+  for (i=2; i<l; i++) b[i+n] = a[i];
+  return b;
+}
+
 /**************************************************************
  **                 FlxqX                                    **
  **                                                          **
@@ -1719,6 +1772,42 @@ FlxqX_divrem(GEN x, GEN y, GEN T, ulong p, GEN *pr)
   if (!sx) (void)FlxX_renormalize(rem, lr);
   if (pr == ONLY_REM) return gerepileupto(av0,rem);
   *pr = rem; return z-2;
+}
+
+GEN
+FlxqX_safegcd(GEN P, GEN Q, GEN T, ulong p)
+{
+  pari_sp btop, ltop = avma, st_lim;
+  long dg;
+  GEN U, q;
+  if (!lgpol(P)) return gcopy(Q);
+  if (!lgpol(Q)) return gcopy(P);
+  btop = avma; st_lim = stack_lim(btop, 1);
+  dg = lg(P)-lg(Q);
+  if (dg < 0) { swap(P, Q); dg = -dg; }
+  for(;;)
+  {
+    U = Flxq_invsafe(leading_term(Q), T, p);
+    if (!U) { avma = ltop; return NULL; }
+    do /* set P := P % Q */
+    {
+      q = Flxq_mul(U, Flx_neg(leading_term(P), p), T, p);
+      P = FlxX_add(P, FlxqX_Flxq_mul(FlxX_shift(Q, dg), q, T, p), p);
+      P = FlxqX_red(P, T, p); /* wasteful, but negligible */
+      dg = lg(P)-lg(Q);
+    } while (dg >= 0);
+    if (!signe(P)) break;
+
+    if (low_stack(st_lim, stack_lim(btop, 1)))
+    {
+      GEN *bptr[2]; bptr[0]=&P; bptr[1]=&Q;
+      if (DEBUGLEVEL>1) err(warnmem,"FpXQX_safegcd");
+      gerepilemany(btop, bptr, 2);
+    }
+    swap(P, Q); dg = -dg;
+  }
+  Q = FlxqX_Flxq_mul(Q, U, T, p); /* normalize GCD */
+  return gerepileupto(ltop, Q);
 }
 
 /*******************************************************************/

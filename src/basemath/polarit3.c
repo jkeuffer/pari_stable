@@ -423,7 +423,7 @@ FpX_sub(GEN x,GEN y,GEN p)
     for (i=2; i<ly; i++) z[i]=lsubii((GEN)x[i],(GEN)y[i]);
     for (   ; i<lx; i++) z[i]=licopy((GEN)x[i]);
     if (p) z = FpX_red(z, p);
-    else   z = FpX_renormalize(z, lz);
+    else if (lx == ly) z = FpX_renormalize(z, lz);
   }
   else
   {
@@ -431,7 +431,6 @@ FpX_sub(GEN x,GEN y,GEN p)
     for (i=2; i<lx; i++) z[i]=lsubii((GEN)x[i],(GEN)y[i]);
     for (   ; i<ly; i++) z[i]=lnegi((GEN)y[i]);
     if (p) z = FpX_red(z, p);
-    /*polynomial is always normalized*/
   }
   if (!lgpol(z)) { avma = (pari_sp)(z + lz); z = zeropol(varn(x)); }
   return z;
