@@ -495,7 +495,7 @@ FindModulus(GEN dataC, long fl, long *newprec, long prec, long bnd)
   sgp = gmael(dataC, 2, 4);
   bnf = (GEN)bnr[1];
   nf  = (GEN)bnf[7];
-  N   = degree((GEN)nf[1]);
+  N   = degpol(nf[1]);
   f   = gmael3(bnr, 2, 1, 1);
 
   rep = cgetg(6, t_VEC);
@@ -667,7 +667,7 @@ ComputeArtinNumber(GEN datachi, long flag, long prec)
   cond0 = gmael3(bnr, 2, 1, 1);
   cond1 = gmael3(bnr, 2, 1, 2);
   umod2 = gmodulcp(gun, gdeux);
-  N     = degree((GEN)nf[1]);
+  N     = degpol(nf[1]);
   Pi    = mppi(prec);
 
   G   = - bit_accuracy(prec) >> 1;
@@ -1000,7 +1000,7 @@ InitChar(GEN bnr, GEN listCR, long prec)
   Mr    = gmael(bnr, 5, 2);
   nbg   = lg(Mr) - 1;
   dk    = (GEN)nf[3];
-  N     = degree((GEN)nf[1]);
+  N     = degpol(nf[1]);
   r1    = nf_get_r1(nf);
   r2    = (N - r1) >> 1; gr2 = stoi(r2);
   prec2 = ((prec - 2)<<1) + EXTRA_PREC;
@@ -1167,7 +1167,7 @@ CharNewPrec(GEN dataCR, GEN nf, long prec)
   long av = avma, N, l, j, prec2;
 
   dk    =  (GEN)nf[3];
-  N     =  degree((GEN)nf[1]);
+  N     =  degpol((GEN)nf[1]);
   l     =  lg(dataCR) - 1;
   prec2 = ((prec - 2)<<1) + EXTRA_PREC;
 
@@ -1479,12 +1479,7 @@ InitGetRay(GEN bnr,  long nmax)
 
   rep[1] = (long)listid;
   rep[2] = (long)listcl;
-  /* rep[3] != NULL iff the field is totally real */
-  if (!cmpsi(degree(gmael(bnf, 7, 1)), gmael3(bnf, 7, 2, 1)))
-    rep[3] = un;
-  else
-    rep[3] = 0;
-
+  rep[3] = nf_get_r2((GEN)bnf[7])? 0: un; /* != 0 iff nf is totally real */
   return rep;
 }
 
@@ -1503,7 +1498,7 @@ GetRay(GEN bnr,  GEN dataray,  GEN pr, long prec)
   cond   =  gmael3(bnr, 2, 1, 1);
   bd     =  lg(listid) - 1;
   nf     =  gmael(bnr, 1, 7);
-  N      =  degree((GEN)nf[1]);
+  N      =  degpol(nf[1]);
 
   if (dataray[3])
     t2 = gmael(nf, 5, 4);
@@ -2204,7 +2199,7 @@ RecCoeff2(GEN nf,  GEN beta,  GEN B,  long v,  long prec)
 
   M    = gmael(nf, 5, 1);
   pol  = (GEN)nf[1];
-  N    = degree(pol);
+  N    = degpol(pol);
   vec  = gtrans((GEN)gtrans(M)[v]);
   velt = (GEN)nf[7];
 
@@ -2250,7 +2245,7 @@ RecCoeff3(GEN nf, GEN beta, GEN B, long v, long prec)
   GEN beta2, eps, nf2, Bd, maxBd = gpowgs(stoi(10), 8);
   long N, G, i, j, k, l, ct = 0, av = avma, prec2, nbs;
 
-  N   = degree((GEN)nf[1]);
+  N   = degpol(nf[1]);
   G   = min( - 20, - bit_accuracy(prec) >> 4);
 
   eps  = gpowgs(stoi(10), - max(8, (G >> 1)));
@@ -2802,7 +2797,7 @@ define_hilbert(GEN bnf, GEN pol)
   cl = itos(gmael3(bnf, 8, 1, 1));
   dk = gmael(bnf, 7, 3);
  
-  if (degree(pol) == cl)
+  if (degpol(pol) == cl)
     if ((cl%2) || !egalii(discf(pol), gpowgs(dk,cl>>1))) return 1;
 
   return 0;
@@ -2843,7 +2838,7 @@ makescind(GEN bnf, GEN polabs, long cl, long prec)
       for (i = 1; i < l; i++)
       {
         pol = gmael(p1, i, 1);
-        if (degree(gcoeff(nffactor(bnf, pol), 1, 1)) == cl) break;
+        if (degpol(gcoeff(nffactor(bnf, pol), 1, 1)) == cl) break;
       }
     if (i == l)
       err(bugparier, "makescind (no polynomial found)");
@@ -2884,7 +2879,7 @@ GenusField(GEN bnf, long prec)
       else
 	pol=(GEN)compositum(pol, gsub(x2, d))[1];
 
-      l = degree(pol);
+      l = degpol(pol);
     }
   }
 
@@ -2903,7 +2898,7 @@ AllStark(GEN data,  GEN nf,  long flag,  long newprec)
   GEN p0, p1, p2, S, T, polrelnum, polrel, Lp, W, A, veczeta, sig, valchi;
   GEN degs, ro, C, Cmax, dataCR, cond1, L1, *gptr[2], an, Pi;
 
-  N     = degree((GEN)nf[1]);
+  N     = degpol(nf[1]);
   r1    = nf_get_r1(nf);
   r2    = (N - r1)>>1;
   cond1 = gmael4(data, 1, 2, 1, 2);
@@ -3171,7 +3166,7 @@ bnrstark(GEN bnr,  GEN subgroup,  long flag,  long prec)
   bnf  = (GEN)bnr[1];
   nf   = (GEN)bnf[7];
   Mcyc = diagonal(gmael(bnr, 5, 2));
-  N    = degree((GEN)nf[1]);
+  N    = degpol(nf[1]);
   if (N == 1)
     err(talker, "the ground field must be distinct from Q");
 
@@ -3242,7 +3237,7 @@ bnrL1(GEN bnr, GEN sbgrp, long flag, long prec)
   cyc  = gmael(bnr, 5, 2);
   Mcyc = diagonal(cyc);
   ncc  = lg(cyc) - 1;
-  N    = degree((GEN)nf[1]);
+  N    = degpol(nf[1]);
 
   if (N == 1)
     err(talker, "the ground field must be distinct from Q");
