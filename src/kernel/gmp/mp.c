@@ -91,6 +91,17 @@ xmpn_mirror(mp_limb_t *x, long n)
 #ifdef INLINE
 INLINE
 #endif
+void
+xmpn_mirrorcopy(mp_limb_t *z, mp_limb_t *x, long n)
+{
+  long i;
+  for(i=0;i<n;i++)
+    z[i]=x[n-1-i];
+}
+
+#ifdef INLINE
+INLINE
+#endif
 GEN
 icopy_ef(GEN x, long l)
 {
@@ -1020,19 +1031,29 @@ INLINE
 GEN
 muliispec(GEN x, GEN y, long nx, long ny);
 
+
+/* We must have nx>=ny. This lets garbage on the stack.
+   This handle squares correctly (mpn_mul is optimized
+   for squares).
+*/
+
 #ifdef INLINE
 INLINE
 #endif
 GEN
 quickmulii(GEN x, GEN y, long nx, long ny)
 {
+  GEN cx=new_chunk(nx),cy;
   GEN z;
-  xmpn_mirror((mp_limb_t *)x,nx);
-  if (x!=y) xmpn_mirror((mp_limb_t *)y,ny);
-  z=muliispec(x, y, nx, ny);
-  xmpn_mirror(LIMBS(z),NLIMBS(z));
-  xmpn_mirror((mp_limb_t *)x,nx);
-  if (x!=y) xmpn_mirror((mp_limb_t *)y,ny);
+  xmpn_mirrorcopy(cx,x,nx);
+  if (x==y) cy=cx; /*If nx<ny cy will be too short*/
+  else
+  {
+    cy=new_chunk(ny);
+    xmpn_mirrorcopy(cy,y,ny);
+  }
+  z=muliispec(cx, cy, nx, ny);
+  xmpn_mirror(LIMBS(z), NLIMBS(z));
   return z;
 }
 
