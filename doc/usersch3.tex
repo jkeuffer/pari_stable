@@ -151,7 +151,7 @@ impossibilities are addition/subtraction between a scalar type and a vector
 or a matrix, between vector/matrices of incompatible sizes and between an
 intmod and a real number.
 
-\syn{gadd}{x,y} $x$ \kbd{+} $y$, $\teb{gsub}(x,y)$ for $x$ \kbd{-} $y$.
+\syn{gadd}{x,y} $x$ \kbd{+} $y$, \funs{gsub}{x,y} for $x$ \kbd{-} $y$.
 
 \subseckbd{*}: The expression $x$ \kbd{*} $y$ is the \idx{product} of $x$
 and $y$. Among the prominent impossibilities are multiplication between
@@ -168,7 +168,7 @@ If $x$ and $y$ are binary quadratic forms, compose them. See also
 \kbd{qfbnucomp} and \kbd{qfbnupow}.
 
 \syn{gmul}{x,y} for $x$ \kbd{*} $y$. Also available is
-$\teb{gsqr}(x)$ for $x$ \kbd{*} $x$ (faster of course!).
+\funs{gsqr}{x} for $x$ \kbd{*} $x$ (faster of course!).
 
 \subseckbd{/}: The expression $x$ \kbd{/} $y$ is the \idx{quotient} of $x$
 and $y$. In addition to the impossibilities for multiplication, note that if
@@ -253,7 +253,7 @@ Beware that \kbd{divrem($x$,$y$)[2]} is in general not the same as
 @eprog
 
 \syn{divrem}{x,y,v},where $v$ is a \kbd{long}. Also available as
-$\teb{gdiventres}(x,y)$ when $v$ is not needed.
+\funs{gdiventres}{x,y} when $v$ is not needed.
 
 \subseckbd{\pow}: The expression $x\hbox{\kbd{\pow}}n$ is \idx{powering}.
 If the exponent is an integer, then exact operations are performed using
@@ -332,21 +332,21 @@ compared using the standard lexicographic order.
 
 The standard boolean functions  \kbd{||} (\idx{inclusive or}), \kbd{\&\&}
 (\idx{and})\sidx{or} and \kbd{!} (\idx{not}) are also available, and the
-library syntax is $\teb{gor}(x,y)$, $\teb{gand}(x,y)$ and $\teb{gnot}(x)$
+library syntax is \funs{gor}{x,y}, \funs{gand}{x,y} and \funs{gnot}{x}
 respectively.
 
 In library mode, it is in fact usually preferable to use the two basic
-functions which are $\teb{gcmp}(x,y)$ which gives the sign (1, 0, or -1) of
-$x-y$, where $x$ and $y$ must be in $\R$, and $\teb{gequal}(x,y)$ which can be
+functions which are \funs{gcmp}{x,y} which gives the sign (1, 0, or -1) of
+$x-y$, where $x$ and $y$ must be in $\R$, and \funs{gequal}{x,y} which can be
 applied to any two PARI objects $x$ and $y$ and gives 1 (i.e.~true) if they are
-equal (but not necessarily identical), 0 (i.e.~false) otherwise. Particular
-cases of \teb{gequal} which should be used are $\teb{gcmp0}(x)$ ($x==0$ ?),
-$\teb{gcmp1}(x)$ ($x==1$ ?), and
-$\teb{gcmp_1}(x)$ ($x==-1$ ?).
+equal (but not necessarily identical), 0 (i.e.~false) otherwise. Comparisons
+to special constants are implemented and should be used instead of
+\kbd{gequal}: \funs{gcmp0}{x} ($x==0$ ?), \funs{gcmp1}{x} ($x==1$ ?), and
+\funs{gcmp_1}{x} ($x==-1$ ?).
 
-Note that $\teb{gcmp0}(x)$ tests whether $x$ is equal to zero, even if $x$ is
+Note that $\kbd{gcmp0}(x)$ tests whether $x$ is equal to zero, even if $x$ is
 not an exact object. To test whether $x$ is an exact object which is equal to
-zero, one must use $\tet{isexactzero}$.
+zero, one must use \funs{isexactzero}{x}.
 
 Also note that the \kbd{gcmp} and \kbd{gequal} functions return a C-integer,
 and \emph{not} a \kbd{GEN} like \kbd{gle} etc.
@@ -389,10 +389,10 @@ type integer, real or fraction.
 
 \syn{gsigne}{x}. The result is a \kbd{long}.
 
-\subsecidx{max}$(x,y)$ and \teb{min}$(x,y)$: creates the
+\subsecidx{max}$(x,y)$ and \funs{min}{x,y}: creates the
 maximum and minimum of $x$ and $y$ when they can be compared.
 
-\syn{gmax}{x,y} and $\teb{gmin}(x,y)$.
+\syn{gmax}{x,y} and \funs{gmin}{x,y}.
 
 \subsecidx{vecmax}$(x)$: if $x$ is a vector or a matrix, returns the maximum
 of the elements of $x$, otherwise returns a copy of $x$. Returns $-\infty$
@@ -481,9 +481,9 @@ integer or a polynomial.
 If $\fl$ is equal to $1$, the modulus of the created result is put on the
 heap and not on the stack, and hence becomes a permanent copy which cannot be
 erased later by garbage collecting (see \secref{se:garbage}). Functions
-will operate faster on such objects and memory consumption will be lower.
-On the other hand, care should be taken to avoid creating too many such
-objects.
+will operate a little faster on such objects and memory consumption will be
+lower. On the other hand, care should be taken to avoid creating too many
+such objects.
 
 In GP, the same effect can be obtained by assigning the object to a GP
 variable (the value of which is a permanent object for the duration of the
@@ -494,9 +494,9 @@ compatibility reasons (it can still be useful in library mode).
 
 \syn{Mod0}{x,y,\fl}. Also available are
 
-\item for $\fl=1$: $\teb{gmodulo}(x,y)$.
+\item for $\fl=1$: \funs{gmodulo}{x,y}.
 
-\item for $\fl=0$: $\teb{gmodulcp}(x,y)$.
+\item for $\fl=0$: \funs{gmodulcp}{x,y}.
 
 \subsecidx{Pol}$(x,\{v=x\})$: transforms the object $x$ into a polynomial with
 main variable $v$. If $x$ is a scalar, this gives a constant polynomial. If
@@ -530,8 +530,8 @@ function to $D$. Negative definite forms are not implemented,
 use their positive definite counterpart instead.
 
 \syn{Qfb0}{a,b,c,D,\var{prec}}. Also available are
-$\teb{qfi}(a,b,c)$ (when $b^2-4ac<0$), and
-$\teb{qfr}(a,b,c,d)$ (when $b^2-4ac>0$).\sidx{binary quadratic form}
+\funs{qfi}{a,b,c} (when $b^2-4ac<0$), and
+\funs{qfr}{a,b,c,d} (when $b^2-4ac>0$).\sidx{binary quadratic form}
 
 \subsecidx{Ser}$(x,\{v=x\})$: transforms the object $x$ into a power series
 with main variable $v$ ($x$ by default). If $x$ is a scalar, this gives a
@@ -705,7 +705,7 @@ fraction, complex, quadratic, polynomial, power series, rational function,
 vector or matrix, the lift is done for each coefficient. Reals are forbidden.
 
 \syn{centerlift0}{x,v}, where $v$ is a \kbd{long} and an omitted $v$ is coded
-as $-1$. Also available is \teb{centerlift}$(x)$ = \kbd{centerlift0($x$,-1)}.
+as $-1$. Also available is \funs{centerlift}{x} = \kbd{centerlift0($x$,-1)}.
 
 \subsecidx{changevar}$(x,y)$: creates a copy of the object $x$ where its
 variables are modified according to the permutation specified by the vector
@@ -725,7 +725,7 @@ list). In particular, the new variable names must be distinct.
 There are essentially three ways to extract the \idx{components} from a PARI
 object.
 
-The first and most general, is the function $\teb{component}(x,n)$ which
+The first and most general, is the function \funs{component}{x,n} which
 extracts the $n^{\text{th}}$-component of $x$. This is to be understood as
 follows: every PARI type has one or two initial \idx{code words}. The
 components are counted, starting at 1, after these code words. In particular
@@ -849,7 +849,7 @@ acts as \tet{truncate}. It is not allowed to have $x$ of type \typ{REAL}.
 @eprog
 
 \syn{lift0}{x,v}, where $v$ is a \kbd{long} and an omitted $v$ is coded as
-$-1$. Also available is \teb{lift}$(x)$ = \kbd{lift0($x$,-1)}.
+$-1$. Also available is \funs{lift}{x} = \kbd{lift0($x$,-1)}.
 
 \subsecidx{norm}$(x)$: algebraic norm of $x$, i.e.~the product of $x$ with
 its conjugate (no square roots are taken), or conjugates for polmods. For
@@ -933,7 +933,7 @@ In particular it is not possible to use it to obtain a polynomial from a
 power series. For that, see \kbd{truncate}.
 
 \syn{precision0}{x,n}, where $n$ is a \kbd{long}. Also available are
-$\teb{ggprecision}(x)$ (result is a \kbd{GEN}) and $\teb{gprec}(x,n)$, where
+\funs{ggprecision}{x} (result is a \kbd{GEN}) and \funs{gprec}{x,n}, where
 $n$ is a \kbd{long}.
 
 \subsecidx{random}$(\{N=2^{31}\})$: returns a random integer between $0$ and
@@ -977,7 +977,7 @@ important use of \kbd{round} is to get exact results after a long approximate
 computation, when theory tells you that the coefficients must be integers.
 
 \syn{grndtoi}{x,\&e}, where $e$ is a \kbd{long} integer. Also available is
-$\teb{ground}(x)$.
+\funs{ground}{x}.
 
 \subsecidx{simplify}$(x)$: this function simplifies $x$ as much as it can.
 Specifically, a complex or quadratic number whose imaginary part is an exact
@@ -1010,8 +1010,8 @@ In particular
 \subsecidx{sizebyte}$(x)$: outputs the total number of bytes occupied by the
 tree representing the PARI object $x$.
 
-\syn{taille2}{x} which returns a \kbd{long}. The
-function \teb{taille} returns the number of \emph{words} instead.
+\syn{taille2}{x} which returns a \kbd{long}; \funs{taille}{x} returns the
+number of \emph{words} instead.
 
 \subsecidx{sizedigit}$(x)$: outputs a quick bound for the number of decimal
 digits of (the components of) $x$, off by at most $1$. If you want the
@@ -1036,7 +1036,7 @@ a $p$-adic number, it transforms it into an integer or a rational number
 by chopping away the $O(p^k)$.
 
 \syn{gcvtoi}{x,\&e}, where $e$ is a \kbd{long} integer. Also available is
-\teb{gtrunc}$(x)$.
+\funs{gtrunc}{x}.
 
 \subsecidx{valuation}$(x,p)$:\label{se:valuation} computes the highest
 exponent of $p$ dividing $x$. If $p$ is of type integer, $x$ must be an
@@ -1063,7 +1063,7 @@ library mode the function \kbd{gvar} is more appropriate.
 
 \syn{gpolvar}{x}. However, in library mode, this function should not be used.
 Instead, test whether $x$ is a $p$-adic (type \typ{PADIC}), in which case $p$
-is in $x[2]$, or call the function $\key{gvar}(x)$ which returns the variable
+is in $x[2]$, or call the function \funs{gvar}{x} which returns the variable
 \emph{number} of $x$ if it exists, \kbd{BIGINT} otherwise.
 
 \section{Transcendental functions}\label{se:trans}
@@ -1287,7 +1287,7 @@ arguments $x$ are allowed in the present version \vers. If $\fl$ is equal to
 1, uses another implementation of this function which is often faster.
 
 \syn{kbessel}{\var{nu},x,\var{prec}} and
-$\teb{kbessel2}(\var{nu},x,\var{prec})$ respectively.
+\funs{kbessel2}{\var{nu},x,\var{prec}} respectively.
 
 \subsecidx{besseln}$(\var{nu},x)$: $N$-Bessel function of index \var{nu}
 and argument $x$.
@@ -1318,8 +1318,7 @@ If $n$ is present, outputs the $n$-dimensional vector
 $[\kbd{eint1}(x),\dots,\kbd{eint1}(nx)]$ ($x \geq 0$). This is faster than
 repeatedly calling \kbd{eint1($i$ * x)}.
 
-\syn{veceint1}{x,n,\var{prec}}. Also available is
-$\teb{eint1}(x,\var{prec})$.
+\syn{veceint1}{x,n,prec}. Also available is \funs{eint1}{x,prec}.
 
 \subsecidx{erfc}$(x)$: complementary error function
 $(2/\sqrt\pi)\int_x^\infty e^{-t^2}\,dt$ ($x\in\R$).
@@ -1363,7 +1362,7 @@ The result returned is $\int_x^\infty e^{-t}t^{s-1}\,dt$. When $y$ is given,
 assume (of course without checking!) that $y=\Gamma(s)$. For small $x$, this
 will speed up the computation.
 
-\syn{incgam}{s,x,\var{prec}} and $\teb{incgam0}(s,x,y,\var{prec})$,
+\syn{incgam}{s,x,\var{prec}} and \funs{incgam0}{s,x,y,prec},
 respectively (an omitted $y$ is coded as \kbd{NULL}).
 
 \subsecidx{incgamc}$(s,x)$: complementary incomplete gamma function.
@@ -1553,9 +1552,8 @@ $$f_2(x)=\sqrt{2}\eta(2x)\,/\,\eta(x)\quad\hbox{such that}\quad
 j=(f_2^{24}+16)^3/f_2^{24}.$$
 Note the identities $f^8=f_1^8+f_2^8$ and $ff_1f_2=\sqrt2$.
 
-\syn{weber0}{x,\fl,\var{prec}}, or
-$\teb{wf}(x,\var{prec})$, $\teb{wf1}(x,\var{prec})$ or
-$\teb{wf2}(x,\var{prec})$.
+\syn{weber0}{x,\fl,prec}, or \funs{wf}{x,prec}, \funs{wf1}{x,prec} or
+\funs{wf2}{x,prec}.
 
 \subsecidx{zeta}$(s)$: For $s$ a complex number, Riemann's zeta
 function \sidx{Riemann zeta-function} $\zeta(s)=\sum_{n\ge1}n^{-s}$,
@@ -1626,7 +1624,7 @@ modulo $M$. If $M \leq 2AB$, uniqueness is not guaranteed and the function
 fails with an error message. If rational reconstruction is not possible
 (no such $a/b$ exists for at least one component of $x$), returns $-1$.
 
-\syn{bestappr0}{x,A,B}. Also available is $\teb{bestappr}(x,A)$ corresponding
+\syn{bestappr0}{x,A,B}. Also available is \funs{bestappr}{x,A} corresponding
 to an omitted $B$.
 
 \subsecidx{bezout}$(x,y)$: finds $u$ and $v$ minimal in a
@@ -1635,7 +1633,7 @@ must be both integers or both polynomials, and the result is a
 row vector with three components $u$, $v$, and $\gcd(x,y)$.
 \sidx{extended gcd}
 
-\syn{vecbezout}{x,y} to get the vector, or $\teb{gbezout}(x,y, \&u, \&v)$
+\syn{vecbezout}{x,y} to get the vector, or \funs{gbezout}{x,y, \&u, \&v}
 which gives as result the address of the created gcd, and puts
 the addresses of the corresponding created objects into $u$ and $v$.
 
@@ -1643,8 +1641,8 @@ the addresses of the corresponding created objects into $u$ and $v$.
 $y$ replacing the gcd.
 \sidx{extended gcd}
 
-\syn{vecbezoutres}{x,y} to get the vector, or $\teb{subresext}(x,y, \&u,
-\&v)$ which gives as result the address of the created gcd, and puts the
+\syn{vecbezoutres}{x,y} to get the vector, or \funs{subresext}{x,y, \&u, \&v}
+which gives as result the address of the created gcd, and puts the
 addresses of the corresponding created objects into $u$ and $v$.
 
 \subsecidx{bigomega}$(x)$: number of prime divisors of $|x|$ counted with
@@ -1707,7 +1705,7 @@ significant.
 If $b$ is an integer, the command is understood as \kbd{contfrac($x,nmax$)}.
 
 \syn{contfrac0}{x,b,nmax}. Also available are
-$\teb{gboundcf}(x,nmax)$, $\teb{gcf}(x)$, or $\teb{gcf2}(b,x)$, where $nmax$
+\funs{gboundcf}{x,nmax}, \funs{gcf}{x}, or \funs{gcf2}{b,x}, where $nmax$
 is a C integer.
 
 \subsecidx{contfracpnqn}$(x)$: when $x$ is a vector or a one-row matrix, $x$
@@ -1727,9 +1725,8 @@ $n=df^2$ with $d$ squarefree, returns $d$. If $\fl$ is non-zero,
 returns the two-element row vector $[d,f]$.
 
 \syn{core0}{n,\fl}.
-Also available are
-$\teb{core}(n)$ (= \teb{core}$(n,0)$) and
-$\teb{core2}(n)$ (= \teb{core}$(n,1)$).
+Also available are \funs{core}{n} (= \funs{core0}{n,0}) and \funs{core2}{n}
+(= \funs{core0}{n,1}).
 
 \subsecidx{coredisc}$(n,\{\fl\})$: if $n$ is a non-zero integer written as
 $n=df^2$ with $d$ fundamental discriminant (including 1), returns $d$. If
@@ -1739,8 +1736,8 @@ an integer.
 
 \syn{coredisc0}{n,\fl}.
 Also available are
-$\teb{coredisc}(n)$ (= \teb{coredisc}$(n,0)$) and
-$\teb{coredisc2}(n)$ (= \teb{coredisc}$(n,1)$).
+\funs{coredisc}{n} (= \funs{coredisc}{n,0}) and
+\funs{coredisc2}{n} (= \funs{coredisc}{n,1}).
 
 \subsecidx{dirdiv}$(x,y)$: $x$ and $y$ being vectors of perhaps different
 lengths but with $y[1]\neq 0$ considered as \idx{Dirichlet series}, computes
@@ -1834,8 +1831,8 @@ See also \tet{factornf} and \tet{nffactor}.
 
 \syn{factor0}{x,\var{lim}}, where \var{lim} is a C integer.
 Also available are
-$\teb{factor}(x)$ (= $\teb{factor0}(x,-1)$),
-$\teb{smallfact}(x)$ (= $\teb{factor0}(x,0)$).
+\funs{factor}{x} (= \funs{factor0}{x,-1}),
+\funs{smallfact}{x} (= \funs{factor0}{x,0}).
 
 \subsecidx{factorback}$(f,\{e\},\{nf\})$: gives back the factored object
 corresponding to a factorization. The integer $1$ corresponds to the empty
@@ -1906,11 +1903,10 @@ usually faster than \kbd{factorcantor}.
 \subsecidx{factorff}$(x,p,a)$: factors the polynomial $x$ in the field
 $\F_q$ defined by the irreducible polynomial $a$ over $\F_p$. The
 coefficients of $x$ must be operation-compatible with $\Z/p\Z$. The result
-is a two-column matrix, the first column being the irreducible polynomials
-dividing $x$, and the second the exponents. It is recommended to use for
-the variable of $a$ (which will be used as variable of a polmod) a name
-distinct from the other variables used, so that a \kbd{lift()} of the
-result will be legible. If all the coefficients of $x$ are in $\F_p$, a much faster algorithm is applied, using the computation of isomorphisms between finite fields.
+is a two-column matrix: the first column contains the irreducible factors of
+$x$, and the second their exponents. If all the coefficients of $x$ are in
+$\F_p$, a much faster algorithm is applied, using the computation of
+isomorphisms between finite fields.
 
 \syn{factmod9}{x,p,a}.
 
@@ -1919,7 +1915,7 @@ gives a result which is an integer, while $\kbd{factorial}(x)$ gives a real
 number.
 
 \syn{mpfact}{x} for $x!$ and
-$\teb{mpfactr}(x,\var{prec})$ for $\kbd{factorial}(x)$. $x$ must be a \kbd{long}
+\funs{mpfactr}{x,prec} for $\kbd{factorial}(x)$. $x$ must be a \kbd{long}
 integer and not a PARI integer.
 
 \subsecidx{factorint}$(n,\{\fl=0\})$: factors the integer $n$ into a product of
@@ -1957,8 +1953,8 @@ different algorithm for computing the mod $p$ factorization is
 \kbd{factorcantor} which is sometimes faster.
 
 \syn{factormod}{x,p,\fl}. Also available are
-$\teb{factmod}(x,p)$ (which is equivalent to $\teb{factormod}(x,p,0)$) and
-$\teb{simplefactmod}(x,p)$ (= $\teb{factormod}(x,p,1)$).
+\funs{factmod}{x,p} (which is equivalent to \funs{factormod}{x,p,0}) and
+\funs{simplefactmod}{x,p} (= \funs{factormod}{x,p,1}).
 
 \subsecidx{fibonacci}$(x)$: $x^{\text{th}}$ Fibonacci number.
 
@@ -1991,9 +1987,9 @@ field (in particular rational): use modular gcd algorithm.
 \item general polynomials: use the \idx{subresultant algorithm} if
 coefficient explosion is likely (exact, non modular, coefficients).
 
-\syn{ggcd}{x,y}. For general polynomial inputs, $\teb{srgcd}(x,y)$ is also
+\syn{ggcd}{x,y}. For general polynomial inputs, \funs{srgcd}{x,y} is also
 available. For univariate \emph{rational} polynomials, one also has
-$\teb{modulargcd}(x,y)$.
+\funs{modulargcd}{x,y}.
 
 \subsecidx{hilbert}$(x,y,\{p\})$: \idx{Hilbert symbol} of $x$ and $y$ modulo
 $p$. If $x$ and $y$ are of type integer or fraction, an explicit third
@@ -2007,9 +2003,9 @@ modulus is not prime), or $p$-adic.
 \subsecidx{isfundamental}$(x)$: true (1) if $x$ is equal to 1 or to the
 discriminant of a quadratic field, false (0) otherwise.
 
-\syn{gisfundamental}{x}, but the
-simpler function $\teb{isfundamental}(x)$ which returns a \kbd{long}
-should be used if $x$ is known to be of type integer.
+\syn{gisfundamental}{x}, but the simpler function \funs{isfundamental}{x}
+which returns a \kbd{long} should be used if $x$ is known to be of type
+integer.
 
 \subsecidx{ispower}$(x,\{k\}, \{\&n\})$: 
  true (1) if $x$ is a $k$-th power, false (0) if not. If $n$ is 
@@ -2044,7 +2040,7 @@ exceedingly unlikely (and well worth a bug report).
 
 If $\fl=2$, use APRCL.
 
-\syn{gisprime}{x,\fl}, but the simpler function $\teb{isprime}(x)$
+\syn{gisprime}{x,\fl}, but the simpler function \funs{isprime}{x}
 which returns a \kbd{long} should be used if $x$ is known to be of
 type integer.
 
@@ -2068,7 +2064,7 @@ If $\fl > 0$, checks whether $x$ is a strong Miller-Rabin pseudo prime  for
 $\fl$ randomly chosen bases (with end-matching to catch square roots of
 $-1$).
 
-\syn{gispseudoprime}{x,\fl}, but the simpler function $\teb{ispseudoprime}(x)$
+\syn{gispseudoprime}{x,\fl}, but the simpler function \funs{ispseudoprime}{x}
 which returns a \kbd{long} should be used if $x$ is known to be of type
 integer.
 
@@ -2079,16 +2075,16 @@ particular the case when $x$ is an integer or a polynomial. This is \emph{not}
 the case for intmods (use quadratic reciprocity) or series (only check the
 leading coefficient).
 
-\syn{gcarrecomplet}{x,\&n}. Also available is $\teb{gcarreparfait}(x)$.
+\syn{gcarrecomplet}{x,\&n}. Also available is \funs{gcarreparfait}{x}.
 
 \subsecidx{issquarefree}$(x)$: true (1) if $x$ is squarefree, false (0) if not.
 Here $x$ can be an integer or a polynomial.
 
-\syn{gissquarefree}{x}, but the simpler function $\teb{issquarefree}(x)$
+\syn{gissquarefree}{x}, but the simpler function \funs{issquarefree}{x}
 which returns a \kbd{long} should be used if $x$ is known to be of type
-integer. This \teb{issquarefree} is just the square of the
-\idx{Moebius} function, and is computed as a multiplicative
-arithmetic function much like the latter.
+integer. This \teb{issquarefree} is just the square of the \idx{Moebius}
+function, and is computed as a multiplicative arithmetic function much like
+the latter.
 
 \subsecidx{kronecker}$(x,y)$:
 \idx{Kronecker symbol} $(x|y)$, where $x$ and $y$ must be of type integer. By
@@ -2216,10 +2212,10 @@ time = 0 ms.
 @eprog
 
 \syn{qfbclassno0}{D,\fl}. Also available:
-$\teb{classno}(D)$ (= $\teb{qfbclassno}(D)$),
-$\teb{classno2}(D)$ (= $\teb{qfbclassno}(D,1)$), and finally
-there exists the function $\teb{hclassno}(D)$ which computes the class
-number of an imaginary quadratic field by counting reduced forms, an $O(|D|)$
+\funs{classno}{D} (= \funs{qfbclassno}{D}),
+\funs{classno2}{D} (= \funs{qfbclassno}{D,1}), and finally
+we have the function \funs{hclassno}{D} which computes the class number of
+an imaginary quadratic field by counting reduced forms, an $O(|D|)$
 algorithm. See also \kbd{qfbhclassno}.
 
 \subsecidx{qfbcompraw}$(x,y)$ \idx{composition} of the binary quadratic forms
@@ -2240,12 +2236,16 @@ constant, but for optimal speed, one should take $l=|D|^{1/4}$, where $D$ is
 the common discriminant of $x$ and $y$. When $x$ and $y$ do not have the same
 discriminant, the result is undefined.
 
-\syn{nucomp}{x,y,l}. The auxiliary function
-$\teb{nudupl}(x,l)$ should be used instead for speed when $x=y$.
+The current implementation is straightforward and in general \emph{slower}
+than the generic routine (since the latter take advantadge of asymptotically
+fast operations and careful optimizations).
+
+\syn{nucomp}{x,y,l}. The auxiliary function \funs{nudupl}{x,l} can be
+used when $x=y$.
 
 \subsecidx{qfbnupow}$(x,n)$: $n$-th power of the primitive positive definite
 binary quadratic form $x$ using \idx{Shanks}'s NUCOMP and NUDUPL algorithms
-(see \kbd{qfbnucomp}).
+(see \kbd{qfbnucomp}, in particular the final warning).
 
 \syn{nupow}{x,n}.
 
@@ -2285,17 +2285,17 @@ to omit any of $D$, \var{isqrtD}, \var{sqrtD}.
 
 \noindent Also available are
 
-$\teb{redimag}(x)$ (= $\teb{qfbred}(x)$ where $x$ is definite),
+\funs{redimag}{x} (= \funs{qfbred}{x} where $x$ is definite),
 
 \noindent and for indefinite forms:
 
-$\teb{redreal}(x)$ (= $\teb{qfbred}(x)$),
+\funs{redreal}{x} (= \funs{qfbred}{x}),
 
-$\teb{rhoreal}(x)$ (= $\teb{qfbred}(x,1)$),
+\funs{rhoreal}{x} (= \funs{qfbred}{x,1}),
 
-$\teb{redrealnod}(x,sq)$ (= $\teb{qfbred}(x,2,,isqrtD)$),
+\funs{redrealnod}{x,sq} (= \funs{qfbred}{x,2,,isqrtD}),
 
-$\teb{rhorealnod}(x,sq)$ (= $\teb{qfbred}(x,3,,isqrtD)$).
+\funs{rhorealnod}{x,sq} (= \funs{qfbred}{x,3,,isqrtD}).
 
 \subsecidx{qfbsolve}$(Q,p)$: Solve the equation $Q(x,y)=p$ over the integers,
 where $Q$ is a binary quadratic form and $p$ a prime number.
@@ -2347,7 +2347,7 @@ small accuracy it is trivial to compute it to very high accuracy, see the
 tutorial).
 
 \syn{quadclassunit0}{D,\fl,tech}. Also available are
-$\teb{buchimag}(D,c_1,c_2)$ and $\teb{buchreal}(D,\fl,c_1,c_2)$.
+\funs{buchimag}{D,c_1,c_2} and \funs{buchreal}{D,\fl,c_1,c_2}.
 
 \subsecidx{quaddisc}$(x)$: discriminant of the quadratic field
 $\Q(\sqrt{x})$, where $x\in\Q$.
@@ -2428,8 +2428,8 @@ extra primes if $x$ is omitted.
 \subsecidx{sigma}$(x,\{k=1\})$: sum of the $k^{\text{th}}$ powers of the
 positive divisors of $|x|$. $x$ and $k$ must be of type integer.
 
-\syn{sumdiv}{x} (= $\teb{sigma}(x)$) or $\teb{gsumdivk}(x,k)$ (=
-$\teb{sigma}(x,k)$), where $k$ is a C long integer.
+\syn{sumdiv}{x} (= \funs{sigma}{x}) or \funs{gsumdivk}{x,k} (=
+\funs{sigma}{x,k}), where $k$ is a C long integer.
 
 \subsecidx{sqrtint}$(x)$: integer square root of $x$, which must be a
 non-negative integer. The result is non-negative and rounded towards zero.
@@ -2581,8 +2581,8 @@ No checking is done that $p$ is indeed prime. $E$ must be a medium or long
 vector of the type given by \kbd{ellinit}, defined over $\Q$, $\F_p$ or
 $\Q_p$. $E$ must be given by a Weierstrass equation minimal at $p$.
 
-\syn{ellap0}{E,p,\fl}. Also available are $\teb{apell}(E,p)$, corresponding
-to $\fl=0$, and $\teb{apell2}(E,p)$ ($\fl=1$).
+\syn{ellap0}{E,p,\fl}. Also available are \funs{apell}{E,p}, corresponding
+to $\fl=0$, and \funs{apell2}{E,p} ($\fl=1$).
 
 \subsecidx{ellbil}$(E,z1,z2)$: if $z1$ and $z2$ are points on the elliptic
 curve $E$, assumed to be integral given by a minimal model, this function
@@ -2651,11 +2651,10 @@ theta-functions and a trick due to J. Silverman. If $\fl=1$, use Tate's $4^n$
 algorithm. If $\fl=2$, use Mestre's AGM algorithm. The latter is much faster
 than the other two, both in theory (converges quadratically) and in practice.
 
-\syn{ellheight0}{E,z,\fl,\var{prec}}. The Archimedean
-contribution alone is given by the library function
-$\teb{hell}(E,z,\var{prec})$.
-Also available are $\teb{ghell}(E,z,\var{prec})$ ($\fl=0$) and
-$\teb{ghell2}(E,z,\var{prec})$ ($\fl=1$).
+\syn{ellheight0}{E,z,\fl,\var{prec}}. The Archimedean contribution alone is
+given by the library function \funs{hell}{E,z,\var{prec}}. Also available are
+\funs{ghell}{E,z,\var{prec}} ($\fl=0$) and \funs{ghell2}{E,z,\var{prec}}
+($\fl=1$).
 
 \subsecidx{ellheightmatrix}$(E,x)$: $x$ being a vector of points, this
 function outputs the Gram matrix of $x$ with respect to the N\'eron-Tate
@@ -2720,8 +2719,8 @@ arbitrarily set equal to zero. See also the description of member functions
 related to elliptic curves at the beginning of this section.
 
 \syn{ellinit0}{E,\fl,\var{prec}}. Also available are
-$\teb{initell}(E,\var{prec})$ ($\fl=0$) and
-$\teb{smallinitell}(E,\var{prec})$ ($\fl=1$).
+\funs{initell}{E,\var{prec}} ($\fl=0$) and
+\funs{smallinitell}{E,\var{prec}} ($\fl=1$).
 
 \subsecidx{ellisoncurve}$(E,z)$: gives 1 (i.e.~true) if the point $z$ is on
 the elliptic curve $E$, 0 otherwise. If $E$ or $z$ have imprecise coefficients,
@@ -2895,7 +2894,7 @@ Optional \fl\ is (for now) only taken into account when $z$ is numeric, and
 means 0: compute only $\wp(z)$, 1: compute $[\wp(z),\wp'(z)]$.
 
 \syn{ellwp0}{E,z,\fl,\var{prec},\var{precdl}}. Also available is
-\teb{weipell}$(E,\var{precdl})$ for the power series (in
+\funs{weipell}{E,\var{precdl}} for the power series (in
 $x=\kbd{polx[0]}$).
 
 \subsecidx{ellzeta}$(E,z)$: value of the Weierstrass $\zeta$ function of the
@@ -4130,8 +4129,8 @@ integral ideal. This can be much faster when the norm of the quotient is
 small even though the norms of $x$ and $y$ are large.
 
 \syn{idealdiv0}{\var{nf},x,y,\fl}. Also available
-are $\teb{idealdiv}(\var{nf},x,y)$ ($\fl=0$) and
-$\teb{idealdivexact}(\var{nf},x,y)$ ($\fl=1$).
+are \funs{idealdiv}{\var{nf},x,y} ($\fl=0$) and
+\funs{idealdivexact}{\var{nf},x,y} ($\fl=1$).
 
 \subsecidx{idealfactor}$(\var{nf},x)$: factors into prime ideal powers the
 ideal $x$ in the number field $\var{nf}$. The output format is similar to the
@@ -4151,7 +4150,7 @@ and $b$ are elements of $K$ given either as vectors on the integral basis
 $\var{nf}[7]$ or as algebraic numbers.
 
 \syn{idealhnf0}{\var{nf},a,b} where an omitted $b$ is coded as \kbd{NULL}.
-Also available is $\teb{idealhermite}(\var{nf},a)$ ($b$ omitted).
+Also available is \funs{idealhermite}{\var{nf},a} ($b$ omitted).
 
 \subsecidx{idealintersect}$(\var{nf},x,y)$: intersection of the two ideals
 $x$ and $y$ in the number field $\var{nf}$. When $x$ and $y$ are given by
@@ -4186,7 +4185,7 @@ If $\fl$ is present, its binary digits are toggles meaning
 of the units.
 
 \syn{ideallist0}{\var{nf},\var{bound},\fl}, where \var{bound} must
-be a C long integer. Also available is $\teb{ideallist}(\var{nf},\var{bound})$,
+be a C long integer. Also available is \funs{ideallist}{\var{nf},\var{bound}},
 corresponding to the case $\fl=0$.
 
 \subsecidx{ideallistarch}$(\var{nf},\var{list},\{\var{arch}=[\,]\},\{\fl=0\})$:
@@ -4229,7 +4228,7 @@ Archimedean information in $x$ and $y$ if both are given.
 If $\fl$ is non-zero, reduce the result using \kbd{idealred}.
 
 \syn{idealmul}{\var{nf},x,y} ($\fl=0$) or
-$\teb{idealmulred}(\var{nf},x,y,\var{prec})$ ($\fl\neq0$), where as usual,
+\funs{idealmulred}{\var{nf},x,y,\var{prec}} ($\fl\neq0$), where as usual,
 $\var{prec}$ is a C long integer representing the precision.
 
 \subsecidx{idealnorm}$(\var{nf},x)$: computes the norm of the ideal~$x$
@@ -4247,9 +4246,9 @@ that this is NOT the same as as $\kbd{idealpow}(\var{nf},x,k)$ followed by
 reduction, since the reduction is performed throughout the powering process.
 
 The library syntax corresponding to $\fl=0$ is
-$\teb{idealpow}(\var{nf},x,k)$. If $k$ is a \kbd{long}, you can use
-$\teb{idealpows}(\var{nf},x,k)$. Corresponding to $\fl=1$ is
-$\teb{idealpowred}(\var{nf},vp,k,\var{prec})$, where $\var{prec}$ is a
+\funs{idealpow}{\var{nf},x,k}. If $k$ is a \kbd{long}, you can use
+\funs{idealpows}{\var{nf},x,k}. Corresponding to $\fl=1$ is
+\funs{idealpowred}{\var{nf},vp,k,\var{prec}}, where $\var{prec}$ is a
 \kbd{long}.
 
 \subsecidx{idealprimedec}$(\var{nf},p)$: computes the prime ideal
@@ -4438,10 +4437,10 @@ is desired: only factors with exponents greater or equal to 2 will be
 considered.
 
 \syn{nfbasis0}{x,\fl,fa}. An extended version
-is $\teb{nfbasis}(x,\&d,\fl,fa)$, where $d$ will receive the discriminant of
+is \funs{nfbasis}{x,\&d,\fl,fa}, where $d$ will receive the discriminant of
 the number field (\emph{not} of the polynomial $x$), and an omitted $fa$ should
-be input as \kbd{NULL}. Also available are $\teb{base}(x,\&d)$ ($\fl=0$),
-$\teb{base2}(x,\&d)$ ($\fl=2$) and $\teb{factoredbase}(x,fa,\&d)$.
+be input as \kbd{NULL}. Also available are \funs{base}{x,\&d} ($\fl=0$),
+\funs{base2}{x,\&d} ($\fl=2$) and \funs{factoredbase}{x,fa,\&d}.
 
 \subsecidx{nfbasistoalg}$(\var{nf},x)$: this is the inverse function of
 \kbd{nfalgtobasis}. Given an object $x$ whose entries are expressed on the
@@ -4470,7 +4469,7 @@ should be slower except maybe for polynomials of small degree and
 coefficients.
 
 \syn{nfdiscf0}{x,\fl,fa} where, to omit $fa$, you should input \kbd{NULL}. You
-can also use $\teb{discf}(x)$ ($\fl=0$).
+can also use \funs{discf}{x} ($\fl=0$).
 
 \subsecidx{nfeltdiv}$(\var{nf},x,y)$: given two elements $x$ and $y$ in
 \var{nf}, computes their quotient $x/y$ in the number field $\var{nf}$.
@@ -4659,9 +4658,9 @@ $K$-automorphism for any base field $K$ as follows:
 @eprog
 
 \syn{galoisconj0}{\var{nf},\fl,d,\var{prec}}. Also available are
-$\teb{galoisconj}(\var{nf})$ for $\fl=0$,
-$\teb{galoisconj2}(\var{nf},n,\var{prec})$ for $\fl=2$ where $n$ is a bound
-on the number of conjugates, and  $\teb{galoisconj4}(\var{nf},d)$
+\funs{galoisconj}{\var{nf}} for $\fl=0$,
+\funs{galoisconj2}{\var{nf},n,\var{prec}} for $\fl=2$ where $n$ is a bound
+on the number of conjugates, and  \funs{galoisconj4}{\var{nf},d}
 corresponding to $\fl=4$.
 
 \subsecidx{nfhilbert}$(\var{nf},a,b,\{\var{pr}\})$: if \var{pr} is omitted,
@@ -5066,7 +5065,7 @@ If $fa$ is given, it is assumed that it is the two-column matrix of the
 factorization of the discriminant of the polynomial $x$.
 
 \syn{polred0}{x,\fl,fa}, where an omitted $fa$ is coded by \kbd{NULL}. Also
-available are $\teb{polred}(x)$ and $\teb{factoredpolred}(x,fa)$, both
+available are \funs{polred}{x} and \funs{factoredpolred}{x,fa}, both
 corresponding to $\fl=0$.
 
 \subsecidx{polredabs}$(x,\{\fl=0\})$: finds one of the polynomial defining
@@ -5639,7 +5638,7 @@ accuracy, we have
 @eprog
 
 \syn{glambdak}{\var{znf},x,\var{prec}} or
-$\teb{gzetak}(\var{znf},x,\var{prec})$.
+\funs{gzetak}{\var{znf},x,\var{prec}}.
 
 \subsecidx{zetakinit}$(x)$: computes a number of initialization data
 concerning the number field defined by the polynomial $x$ so as to be able
@@ -5670,7 +5669,7 @@ can be applied to other types.
 equal to 2) or power series zero (in all other cases), with precision given
 by $e$.
 
-\syn{zeropadic}{p,e} for a $p$-adic and \teb{zeroser}$(v,e)$ for a
+\syn{zeropadic}{p,e} for a $p$-adic and \funs{zeroser}{v,e} for a
 power series zero in variable $v$, which is a \kbd{long}. The precision $e$
 is a \kbd{long}.
 
@@ -5691,8 +5690,8 @@ in GP, and not in library mode. Do not confuse this with substitution (see
 output from the corresponding GP command, as if directly input from the
 keyboard (see \secref{se:strings}).\label{se:eval}
 
-\syn{geval}{x}. The more basic functions $\teb{poleval}(q,x)$,
-$\teb{qfeval}(q,x)$, and $\teb{hqfeval}(q,x)$ evaluate $q$ at $x$, where $q$
+\syn{geval}{x}. The more basic functions \funs{poleval}{q,x},
+\funs{qfeval}{q,x}, and \funs{hqfeval}{q,x} evaluate $q$ at $x$, where $q$
 is respectively assumed to be a polynomial, a quadratic form (a symmetric
 matrix), or an Hermitian form (an Hermitian complex matrix).
 
@@ -5721,17 +5720,14 @@ characteristic zero.
 as $-1$.
 
 \subsecidx{padicappr}$(\var{pol},a)$: vector of $p$-adic roots of the
-polynomial
-$pol$ congruent to the $p$-adic number $a$ modulo $p$ (or modulo 4 if $p=2$),
-and with the same $p$-adic precision as $a$. The number $a$ can be an
-ordinary $p$-adic number (type \typ{PADIC}, i.e.~an element of $\Q_p$) or
-can be an element of a finite extension of $\Q_p$, in which case it is of
-type \typ{POLMOD}, where at least one of the coefficients of the polmod is a
-$p$-adic number. In this case, the result is the vector of roots belonging to
-the same extension of $\Q_p$ as $a$.
+polynomial $pol$ congruent to the $p$-adic number $a$ modulo $p$, and with
+the same $p$-adic precision as $a$. The number $a$ can be an ordinary
+$p$-adic number (type \typ{PADIC}, i.e.~an element of $\Z_p$) or can be an
+integral element of a finite extension of $\Q_p$, given as a \typ{POLMOD}
+at least one of whose coefficients is a \typ{PADIC}. In this case, the result
+is the vector of roots belonging to the same extension of $\Q_p$ as $a$.
 
-\syn{apprgen9}{\var{pol},a}, but if $a$ is known to be simply a $p$-adic number
-(type \typ{PADIC}), the syntax $\teb{apprgen}(\var{pol},a)$ can be used.
+\syn{padicappr}{\var{pol},a}.
 
 \subsecidx{polcoeff}$(x,s,\{v\})$: coefficient of degree $s$ of the
 polynomial $x$, with respect to the main variable if $v$ is omitted, with
@@ -5740,7 +5736,7 @@ of degree $0$), and to rational functions provided the denominator is a
 monomial.
 
 \syn{polcoeff0}{x,s,v}, where $v$ is a \kbd{long} and an omitted $v$ is coded
-as $-1$. Also available is \teb{truecoeff}$(x,v)$.
+as $-1$. Also available is \funs{truecoeff}{x,v}.
 
 \subsecidx{poldegree}$(x,\{v\})$: degree of the polynomial $x$ in the main
 variable if $v$ is omitted, in the variable $v$ otherwise. This is to be
@@ -5754,7 +5750,7 @@ polynomial or rational function, it is the ordinary degree of $x$. Return an
 error otherwise.
 
 \syn{poldegree}{x,v}, where $v$ and the result are \kbd{long}s (and an
-omitted $v$ is coded as $-1$). Also available is \teb{degree}$(x)$, which is
+omitted $v$ is coded as $-1$). Also available is \funs{degree}{x}, which is
 equivalent to \kbd{poldegree($x$,-1)}.
 
 \subsecidx{polcyclo}$(n,\{v=x\})$: $n$-th cyclotomic polynomial, in variable
@@ -5767,7 +5763,7 @@ integers ($v$ is a variable number, usually obtained through \kbd{varn}).
 \var{pol} in the main variable is $v$ is omitted, in $v$ otherwise. The
 algorithm used is the \idx{subresultant algorithm}.
 
-\syn{poldisc0}{x,v}. Also available is \teb{discsr}$(x)$, equivalent
+\syn{poldisc0}{x,v}. Also available is \funs{discsr}{x}, equivalent
 to \kbd{poldisc0(x,-1)}.
 
 \subsecidx{poldiscreduced}$(f)$: reduced discriminant vector of the
@@ -5809,7 +5805,7 @@ power series $x$. This is computed with respect to the main variable of $x$
 if $v$ is omitted, with respect to the variable $v$ otherwise.
 
 \syn{pollead}{x,v}, where $v$ is a \kbd{long} and an omitted $v$ is coded as
-$-1$. Also available is \teb{leading_term}$(x)$.
+$-1$. Also available is \funs{leading_term}{x}.
 
 \subsecidx{pollegendre}$(n,\{v=x\})$: creates the $n^{\text{th}}$
 \idx{Legendre polynomial}, in variable $v$.
@@ -5835,8 +5831,8 @@ multivariate polynomials or huge coefficients), and slightly slower
 otherwise.
 
 \syn{polresultant0}{x,y,v,\fl}, where $v$ is a \kbd{long} and an omitted $v$
-is coded as $-1$. Also available are $\teb{subres}(x,y)$ ($\fl=0$) and
-$\teb{resultant2}(x,y)$ ($\fl=1$).
+is coded as $-1$. Also available are \funs{subres}{x,y} ($\fl=0$) and
+\funs{resultant2}{x,y} ($\fl=1$).
 
 \subsecidx{polroots}$(\var{pol},\{\fl=0\})$: complex roots of the polynomial
 \var{pol}, given as a column vector where each root is repeated according to
@@ -5854,7 +5850,7 @@ many iterations in roots'' or ``INTERNAL ERROR: incorrect result in roots'',
 use the default algorithm. This used to be the default root-finding function in
 PARI until version 1.39.06.
 
-\syn{roots}{\var{pol},\var{prec}} or $\teb{rootsold}(\var{pol},\var{prec})$.
+\syn{roots}{\var{pol},\var{prec}} or \funs{rootsold}{\var{pol},\var{prec}}.
 
 \subsecidx{polrootsmod}$(\var{pol},p,\{\fl=0\})$: row vector of roots modulo
 $p$ of the polynomial \var{pol}. The particular non-prime value $p=4$ is
@@ -5864,12 +5860,19 @@ repeated.
 If $p$ is very small, you may try setting $\fl=1$, which uses a naive search.
 
 \syn{rootmod}{\var{pol},p} ($\fl=0$) or
-$\teb{rootmod2}(\var{pol},p)$ ($\fl=1$).
+\funs{rootmod2}{\var{pol},p} ($\fl=1$).
 
-\subsecidx{polrootspadic}$(\var{pol},p,r)$: row vector of $p$-adic roots of the
-polynomial \var{pol} with $p$-adic precision equal to $r$. Multiple roots are
+\subsecidx{polrootspadic}$(\var{pol},p,r)$: row vector of $p$-adic roots of
+the polynomial \var{pol}, given to $p$-adic precision $r$. Multiple roots are
 \emph{not} repeated. $p$ is assumed to be a prime, and \var{pol} to be
-non-zero modulo $p$.
+non-zero modulo $p$. Note that this is not the same as the roots in
+$\Z/p^r\Z$, rather it gives approximations in $\Z/p^r\Z$ of the true
+roots living in $\Q_p$.
+
+If \var{pol} has inexact \typ{PADIC} coefficients, this is not always
+well-defined; in this case, the equation is first made integral, then lifted
+to $\Z$. Hence the roots given are approximations of the roots of a
+polynomial which is $p$-adically close to the input.
 
 \syn{rootpadic}{\var{pol},p,r}, where $r$ is a \kbd{long}.
 
@@ -5878,8 +5881,9 @@ polynomial \var{pol} in the interval $]a,b]$, using Sturm's algorithm. $a$
 (resp.~$b$) is taken to be $-\infty$ (resp.~$+\infty$) if omitted.
 
 \syn{sturmpart}{\var{pol},a,b}. Use \kbd{NULL} to omit an argument.
-\teb{sturm}\kbd{(\var{pol})} is equivalent to
-\key{sturmpart}\kbd{(\var{pol},NULL,NULL)}. The result is a \kbd{long}.
+\funs{sturm}{\var{pol}} is equivalent to
+\funs{sturmpart}{\var{pol},\kbd{NULL},\kbd{NULL}}. The result is a
+\kbd{long}.
 
 \subsecidx{polsubcyclo}$(n,d,\{v=x\})$: gives polynomials (in variable
 $v$) defining the sub-Abelian extensions of degree $d$ of the cyclotomic
@@ -5894,7 +5898,7 @@ The function \tet{galoissubcyclo} allows to specify more closely which sub-Abeli
 
 \syn{polsubcyclo}{n,d,v}, where $n$, $d$ and $v$ are \kbd{long} and $v$ is a
 variable number. When $(\Z/n\Z)^*$ is cyclic, you can use
-\teb{subcyclo}$(n,d,v)$, where $n$, $d$ and $v$ are \kbd{long} and $v$ is a
+\funs{subcyclo}{n,d,v}, where $n$, $d$ and $v$ are \kbd{long} and $v$ is a
 variable number.
 
 \subsecidx{polsylvestermatrix}$(x,y)$: forms the Sylvester matrix
@@ -5933,7 +5937,7 @@ alternating series'', Cohen et al., Experiment.~Math., vol.~9, 2000, pp.~3--12.
 %     PAGES = {3--12},
 
 \syn{polzagreel}{n,m,\var{prec}} if the result is only wanted as a polynomial
-with real coefficients to the precision $\var{prec}$, or $\teb{polzag}(n,m)$
+with real coefficients to the precision $\var{prec}$, or \funs{polzag}{n,m}
 if the result is wanted exactly, where $n$ and $m$ are \kbd{long}s.
 
 \subsecidx{serconvol}$(x,y)$: convolution (or \idx{Hadamard product}) of the
@@ -6092,7 +6096,7 @@ instead.
 @eprog
 
 \syn{algdep0}{x,k,\fl,\var{prec}}, where $k$ and $\fl$ are \kbd{long}s.
-Also available is $\teb{algdep}(x,k,\var{prec})$ ($\fl=0$).
+Also available is \funs{algdep}{x,k,\var{prec}} ($\fl=0$).
 
 \subsecidx{charpoly}$(A,\{v=x\},\{\fl=0\})$: \idx{characteristic polynomial}
 of $A$ with respect to the variable $v$, i.e.~determinant of $v*I-A$ if $A$
@@ -6119,8 +6123,8 @@ the coefficients are intmod a prime or real numbers, but is usually
 slower in other base rings.
 
 \syn{charpoly0}{A,v,\fl}, where $v$ is the variable number. Also available
-are the functions $\teb{caract}(A,v)$ ($\fl=1$), $\teb{carhess}(A,v)$
-($\fl=2$), and $\teb{caradj}(A,v,\var{pt})$ where, in this last case,
+are the functions \funs{caract}{A,v} ($\fl=1$), \funs{carhess}{A,v}
+($\fl=2$), and \funs{caradj}{A,v,\var{pt}} where, in this last case,
 \var{pt} is a \kbd{GEN*} which, if not equal to \kbd{NULL}, will receive
 the address of the adjoint matrix of $A$ (see \kbd{matadjoint}), so both
 can be obtained at once.
@@ -6192,7 +6196,7 @@ This is in general faster than the other variants. See the example in
 \secref{se:algdep} (\kbd{algdep}).
 
 \syn{lindep0}{x,\fl,\var{prec}}. Also available is
-$\teb{lindep}(x,\var{prec})$ ($\fl=0$).
+\funs{lindep}{x,\var{prec}} ($\fl=0$).
 
 \subsecidx{listcreate}$(n)$: creates an empty list of maximal length $n$.
 
@@ -6252,8 +6256,7 @@ If $\fl=1$, uses classical Gaussian elimination, which is better when the
 entries of the matrix are reals or integers for example, but usually much
 worse for more complicated entries like multivariate polynomials.
 
-\syn{det}{x} ($\fl=0$) and $\teb{det2}(x)$
-($\fl=1$).
+\syn{det}{x} ($\fl=0$) and \funs{det2}{x} ($\fl=1$).
 
 \subsecidx{matdetint}$(x)$: $x$ being an $m\times n$ matrix with integer
 coefficients, this function computes a \emph{multiple} of the determinant of the
@@ -6323,8 +6326,8 @@ If $\fl=4$, as in case 1 above, but uses a heuristic variant of \idx{LLL}
 reduction along the way. The matrix $U$ is in general close to optimal (in
 terms of smallest $L_2$ norm), but the reduction is slower than in case $1$.
 
-\syn{mathnf0}{x,\fl}. Also available are $\teb{hnf}(x)$ ($\fl=0$) and
-$\teb{hnfall}(x)$ ($\fl=1$). To reduce \emph{huge} (say $400 \times 400$ and
+\syn{mathnf0}{x,\fl}. Also available are \funs{hnf}{x} ($\fl=0$) and
+\funs{hnfall}{x} ($\fl=1$). To reduce \emph{huge} (say $400 \times 400$ and
 more) relation matrices (sparse with small entries), you can use the pair
 \kbd{hnfspec} / \kbd{hnfadd}. Since this is rather technical and the
 calling interface may change, they are not documented yet. Look at the code
@@ -6352,16 +6355,16 @@ the identity matrix. Assumes that $x$ has integer entries.
 
 \syn{idmat}{n} where $n$ is a \kbd{long}.
 
-Related functions are $\teb{gscalmat}(x,n)$, which creates $x$ times the
+Related functions are \funs{gscalmat}{x,n}, which creates $x$ times the
 identity matrix ($x$ being a \kbd{GEN} and $n$ a \kbd{long}), and
-$\teb{gscalsmat}(x,n)$ which is the same when $x$ is a \kbd{long}.
+\funs{gscalsmat}{x,n} which is the same when $x$ is a \kbd{long}.
 
 \subsecidx{matimage}$(x,\{\fl=0\})$: gives a basis for the image of the
 matrix $x$ as columns of a matrix. A priori the matrix can have entries of
 any type. If $\fl=0$, use standard Gauss pivot. If $\fl=1$, use
 \kbd{matsupplement}.
 
-\syn{matimage0}{x,\fl}. Also available is $\teb{image}(x)$ ($\fl=0$).
+\syn{matimage0}{x,\fl}. Also available is \funs{image}{x} ($\fl=0$).
 
 \subsecidx{matimagecompl}$(x)$: gives the vector of the column indices which
 are not extracted by the function \kbd{matimage}. Hence the number of
@@ -6410,8 +6413,8 @@ integer entries \emph{reduced mod p} and $p$ is prime, is equivalent to, but
 orders of magnitude faster than, \kbd{matker(x*Mod(1,p))} and needs much
 less stack space. To use it under \kbd{gp}, type \kbd{install(FpM\_ker, GG)} first.
 
-\syn{matker0}{x,\fl}. Also available are $\teb{ker}(x)$ ($\fl=0$),
-$\teb{keri}(x)$ ($\fl=1$) and $\kbd{FpM\_ker}(x,p)$.
+\syn{matker0}{x,\fl}. Also available are \funs{ker}{x} ($\fl=0$),
+\funs{keri}{x} ($\fl=1$).
 
 \subsecidx{matkerint}$(x,\{\fl=0\})$: gives an \idx{LLL}-reduced $\Z$-basis
 for the lattice equal to the kernel of the matrix $x$ as columns of the
@@ -6423,7 +6426,7 @@ If $\fl=1$, uses $\kbd{matrixqz}(x,-2)$. If LLL reduction of the final result
 is not desired, you can save time using \kbd{matrixqz(matker(x),-2)} instead.
 
 \syn{matkerint0}{x,\fl}. Also available is
-$\teb{kerint}(x)$ ($\fl=0$).
+\funs{kerint}{x} ($\fl=0$).
 
 \subsecidx{matmuldiagonal}$(x,d)$: product of the matrix $x$ by the diagonal
 matrix whose diagonal entries are those of the vector $d$. Equivalent to,
@@ -6443,7 +6446,7 @@ up to $x$). If $q$ is given, compute the $q$-Pascal triangle (i.e.~using
 $q$-binomial coefficients).
 
 \syn{matqpascal}{x,q}, where $x$ is a \kbd{long} and $q=\kbd{NULL}$ is used
-to omit $q$. Also available is $\teb{matpascal}(x)$.
+to omit $q$. Also available is \funs{matpascal}{x}.
 
 \subsecidx{matrank}$(x)$: rank of the matrix $x$.
 
@@ -6507,7 +6510,7 @@ that $U'XV' = D'$ holds. If this flag is set, $X$ is allowed to be of the
 form $D$ or $[U,V,D]$ as would normally be output with the cleanup flag
 unset.
 
-\syn{matsnf0}{X,\fl}. Also available is $\teb{smith}(X)$ ($\fl=0$).
+\syn{matsnf0}{X,\fl}. Also available is \funs{smith}{X} ($\fl=0$).
 
 \subsecidx{matsolve}$(x,y)$: $x$ being an invertible matrix and $y$ a column
 vector, finds the solution $u$ of $x*u=y$, using Gaussian elimination. This
@@ -6537,8 +6540,8 @@ system (so that all solutions can be obtained by adding $x$ to any linear
 combination of columns of $u$). If no solution exists, returns zero.
 
 \syn{matsolvemod0}{m,d,y,\fl}. Also available
-are $\teb{gaussmodulo}(m,d,y)$ ($\fl=0$)
-and $\teb{gaussmodulo2}(m,d,y)$ ($\fl=1$).
+are \funs{gaussmodulo}{m,d,y} ($\fl=0$)
+and \funs{gaussmodulo2}{m,d,y} ($\fl=1$).
 
 \subsecidx{matsupplement}$(x)$: assuming that the columns of the matrix $x$
 are linearly independent (if they are not, an error message is issued), finds
@@ -6606,8 +6609,8 @@ If $\fl=5$, case as case $4$, but $x$ may have polynomial coefficients.
 If $\fl=8$, same as case $0$, where $x$ may have polynomial coefficients.
 
 \syn{qflll0}{x,\fl,\var{prec}}. Also available are
-$\teb{lll}(x,\var{prec})$ ($\fl=0$), $\teb{lllint}(x)$ ($\fl=1$), and
-$\teb{lllkerim}(x)$ ($\fl=4$).
+\funs{lll}{x,\var{prec}} ($\fl=0$), \funs{lllint}{x} ($\fl=1$), and
+\funs{lllkerim}{x} ($\fl=4$).
 
 \subsecidx{qflllgram}$(x,\{\fl=0\})$: same as \kbd{qflll}, except that the
 matrix $x$ is the Gram matrix of the lattice vectors, and not the coordinates
@@ -6626,8 +6629,8 @@ $\fl=4$: $x$ has integer entries, gives the kernel and reduced image.
 $\fl=5$: same as $4$ for generic $x$.
 
 \syn{qflllgram0}{x,\fl,\var{prec}}. Also available are
-$\teb{lllgram}(x,\var{prec})$ ($\fl=0$), $\teb{lllgramint}(x)$ ($\fl=1$), and
-$\teb{lllgramkerim}(x)$ ($\fl=4$).
+\funs{lllgram}{x,\var{prec}} ($\fl=0$), \funs{lllgramint}{x} ($\fl=1$), and
+\funs{lllgramkerim}{x} ($\fl=4$).
 
 \subsecidx{qfminim}$(x,b,m,\{\fl=0\})$: $x$ being a square and symmetric
 matrix representing a positive definite quadratic form, this function
@@ -6776,7 +6779,7 @@ is as explained above.
 [0 0 1]
 @eprog
 
-\syn{extract}{x,y} or $\teb{matextract}(x,y,z)$.
+\syn{extract}{x,y} or \funs{matextract}{x,y,z}.
 
 \subsecidx{vecsort}$(x,\{k\},\{\fl=0\})$: sorts the vector $x$ in ascending
 order, using the heapsort method. $x$ must be a vector, and its components
@@ -6806,15 +6809,14 @@ For example, \kbd{vecextract(x, vecsort(x,,1))} is equivalent to
 \syn{vecsort0}{x,k,flag}. To omit $k$, use \kbd{NULL} instead. You can also
 use the simpler functions
 
-$\teb{sort}(x)$ (= $\kbd{vecsort0}(x,\text{NULL},0)$).
+\funs{sort}{x} (= \funs{vecsort0}{x,\kbd{NULL},0}).
 
-$\teb{indexsort}(x)$ (= $\kbd{vecsort0}(x,\text{NULL},1)$).
+\funs{indexsort}{x} (= \funs{vecsort0}{x,\kbd{NULL},1}).
 
-$\teb{lexsort}(x)$ (= $\kbd{vecsort0}(x,\text{NULL},2)$).
+\funs{lexsort}{x} (= \funs{vecsort0}{x,\kbd{NULL},2}).
 
-Also available are \teb{sindexsort} and \teb{sindexlexsort} which return a
-vector of C-long integers (private type \typ{VECSMALL}) $v$, where
-$v[1]\dots v[n]$ contain the indices.
+Also available are \funs{sindexsort}{x} and \funs{sindexlexsort}{x} which
+return a \typ{VECSMALL} $v$, where $v[1]\dots v[n]$ contain the indices.
 
 \subsecidx{vector}$(n,\{X\},\{\var{expr}=0\})$: creates a row vector (type
 \typ{VEC}) with $n$ components whose components are the expression

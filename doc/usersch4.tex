@@ -1973,10 +1973,14 @@ from the \kbd{warn} variants, this function does not return but ends with
 a \kbd{longjmp} statement. As well, instead of explicit \kbd{printf}~/
 \kbd{fprintf} statements, use the following encapsulated variants:
 
-\fun{void}{pariputs}{char *s}: write \kbd{s} to the \kbd{gp} output stream.
+\fun{void}{pariflush}{}: flush output stream.
 
-\fun{void}{fprintferr}{char *s}: write \kbd{s} to the \kbd{gp} error stream (this
-function is in fact much more versatile, see \secref{se:dbg_output}).
+\fun{void}{pariputc}{char c}: write character \kbd{c} to the output stream.
+
+\fun{void}{pariputs}{char *s}: write \kbd{s} to the output stream.
+
+\fun{void}{fprintferr}{char *s}: write \kbd{s} to the error stream
+(this function is in fact much more versatile, see \secref{se:dbg_output}).
 
 Declare all public functions in an appropriate header file, if you
 want to access them from C. For example, if dynamic

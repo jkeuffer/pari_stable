@@ -36,7 +36,7 @@ are specific to a set of types, although no consistency checks are made:
 e.g.~one may access the \kbd{sign} of a \typ{PADIC}, but the result is
 meaningless.
 
-\subsec{Conversions}
+\subsec{Length conversions}
 
 \fun{long}{ndec2nlong}{long x} converts a number of decimal digits to a number
 of words. Returns $ 1 + \kbd{floor}(x \times \B \log_2 10)$.
@@ -97,7 +97,7 @@ is not a \typ{REAL} (returns the largest exponent found among the components
 of \kbd{x}). When \kbd{x} is an exact~0, this returns
 \hbox{\kbd{-HIGHEXPOBIT}}, which is lower than any valid exponent.
 
-\fun{long}{valp}{GEN x} returns the 16-bit $p$-adic valuation (for
+\fun{long}{valp}{GEN x} returns the $p$-adic valuation (for
 a \typ{PADIC}) or $X$-adic valuation (for a \typ{SER}, taken with respect to
 the main variable) of~\kbd{x}.
 
@@ -275,6 +275,9 @@ has \kbd{gen\_0} constant term.
 
 \fun{GEN}{leading_term}{GEN x} returns the address the leading term of
 \typ{POL}~\kbd{x}. This may be an inexact $0$.
+
+\fun{GEN}{gel}{GEN x, long i} returns the address of the
+\kbd{x[i]} entry of~\kbd{x}. (\kbd{el} stands for element.)
 
 \fun{GEN}{gcoeff}{GEN x, long i, long j} returns the address of the
 \kbd{x[i,j]} entry of \typ{MAT}~\kbd{x}, i.e.~the coefficient at row~\kbd{i}
@@ -2114,6 +2117,23 @@ a \typ{REAL} or \typ{COMPLEX} whose components are \typ{REAL} of length
 
 \fun{GEN}{gcvtop}{GEN x, GEN p, long l} converts \kbd{x} into a \typ{PADIC}
 \kbd{p}-adic number of precision~\kbd{l}.
+
+\fun{GEN}{gprec}{GEN x, long l} returns a copy of $x$ whose precision is
+changed to $l$ digits. The precision change is done recursively on all
+components of $x$. Digits means \emph{decimal}, $p$-adic and $X$-adic digits
+for \typ{REAL}, \typ{SER}, \typ{PADIC} components, respectively.
+
+\fun{GEN}{gprec_w}{GEN x, long l} returns a shallow copy of $x$ whose
+\typ{REAL} components have their precision changed to $l$ \emph{words}. This
+is often more useful than \kbd{gprec}. Shallow copy means that unaffected
+components are not copied; in particular, this funciton is not suitable for
+\kbd{gerepileupto}.
+
+\fun{GEN}{gprec_wtrunc}{GEN x, long l} returns a shallow copy of $x$ whose
+\typ{REAL} components have their precision \emph{truncated} to $l$
+\emph{words}. Contrary to \kbd{gprec\_w}, this function may never increase
+the precision of~$x$. Shallow copy means that unaffected components are not
+copied; in particular, this funciton is not suitable for \kbd{gerepileupto}.
 
 \subsubsec{Modular objects}
 
