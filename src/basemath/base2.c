@@ -1072,10 +1072,9 @@ Decomp(GEN p,GEN f,long mf,GEN theta,GEN chi,GEN nu,long flag)
 }
 
 /* minimum extension valuation: res[0]/res[1] (both are longs) */
-static long *
-vstar(GEN p,GEN h)
+static void
+vstar(GEN p,GEN h, long *L, long *E)
 {
-  static long res[2];
   long m,first,j,k,v,w;
 
   m=degpol(h); first=1; k=1; v=0;
@@ -1087,7 +1086,8 @@ vstar(GEN p,GEN h)
       first=0;
     }
   m = cgcd(v,k);
-  res[0]=v/m; res[1]=k/m; return res;
+  *L = v/m;
+  *E = k/m;
 }
 
 /* reduce the element elt modulo rd, taking first care of the denominators */
@@ -1293,23 +1293,18 @@ static GEN
 getprime(GEN p, GEN chi, GEN phi, GEN chip, GEN nup, long *Lp, long *Ep)
 {
   long v = varn(chi), L, E, r, s;
-  GEN chin, pip, pp, vn;
+  GEN chin, pip, pp;
 
   if (gegal(nup, polx[v]))
     chin = chip;
   else
     chin = mycaract(chip, nup, p, NULL, NULL);
 
-  vn = vstar(p, chin);
-  L  = vn[0];
-  E  = vn[1];
-
+  vstar(p, chin, &L, &E);
   cbezout(L, -E, &r, &s);
-
   if (r <= 0)
   {
-    long q = (-r) / E;
-    q++;
+    long q = 1 + ((-r) / E);
     r += q*E;
     s += q*L;
   }
@@ -1319,8 +1314,7 @@ getprime(GEN p, GEN chi, GEN phi, GEN chip, GEN nup, long *Lp, long *Ep)
   pp  = gpowgs(p, s);
 
   *Lp = L;
-  *Ep = E;
-  return gdiv(pip, pp);
+  *Ep = E; return gdiv(pip, pp);
 }
 
 static GEN
@@ -1387,9 +1381,9 @@ update_alpha(GEN p, GEN fx, GEN alph, GEN chi, GEN pmr, GEN pmf, long mf,
 GEN
 nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 {
-  long Fa, La, Ea, oE, Fg, eq, er, v = varn(fx), i, nv, Le, Ee, N, l, vn;
+  long L, E, Fa, La, Ea, oE, Fg, eq, er, v = varn(fx), i, nv, Le, Ee, N, l, vn;
   GEN p1, alph, chi, nu, w, phi, pmf, pdr, pmr, kapp, pie, chib, ns;
-  GEN gamm, chig, nug, delt, beta, eta, chie, nue, pia, vb, opa;
+  GEN gamm, chig, nug, delt, beta, eta, chie, nue, pia, opa;
 
   if (DEBUGLEVEL >= 3)
   {
@@ -1494,9 +1488,9 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
       else
       {
 	chib = mycaract(chi, beta, NULL, NULL, ns);
-	vb = vstar(p, chib);
-	eq = (long)(vb[0] / vb[1]);
-	er = (long)(vb[0]*Ea / vb[1] - eq*Ea);
+	vstar(p, chib, &L, &E);
+	eq = (long)(L / E);
+	er = (long)(L*Ea / E - eq*Ea);
       }
 
       /* eq and er are such that gamma = beta.p^-eq.nu^-er is a unit */
@@ -1530,12 +1524,12 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 
       if (!chig || !gcmp1(denom(content(chig))))
       {
-	/* the valuation of beta was wrong... This means that
+	/* Valuation of beta was wrong. This means that
 	   either gamma fails the v*-test */
 	if (!chib) chib = mycaract(chi, beta, p, NULL, ns);
-	vb = vstar(p, chib);
-	eq = (long)(-vb[0] / vb[1]);
-	er = (long)(-vb[0]*Ea / vb[1] - eq*Ea);
+	vstar(p, chib, &L, &E);
+	eq = (long)(-L / E);
+	er = (long)(-L*Ea / E - eq*Ea);
 
  	if (eq) gamm = gmul(beta, gpowgs(p, eq));
 	else gamm = beta;
