@@ -47,7 +47,7 @@ else
   if test ! $x $execdir/gp.exe; then
     echo "build gp.exe first" >&2; exit 1
   fi
-  if (echo | gp -test -q 2> /dev/null); then
+  if (echo | gp --test -q 2> /dev/null); then
     gp=gp
   else
     gp="command /c gp"
@@ -81,7 +81,7 @@ for testdata in $testlist; do
 	*)   file_diff=$testname-$suf.dif
 	     gp=$execdir/gp-$suf;;
       esac
-      $gp -q -test < $file_in > $file_test 2>&1
+      $gp -q --test < $file_in > $file_test 2>&1
       diff -c $file_out $file_test > $file_diff
       pat=`grep "^[-+!] " $file_diff | grep -v "Total time"`
       time=`tail -2 $file_test | sed -n 's,.*Total time spent: \(.*\),\1,p'`

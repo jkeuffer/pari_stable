@@ -2914,7 +2914,7 @@ read_opt(growarray *A, long argc, char **argv)
         if (strcmp(t, "version") == 0) { print_version(); exit(0); }
         if (strcmp(t, "texmacs") == 0) { GP_DATA->flags |= TEXMACS; break; }
         if (strcmp(t, "emacs") == 0) { GP_DATA->flags |= EMACS; break; }
-        if (strcmp(t, "test") == 0) { GP_DATA->flags |= TEST; break; }
+        if (strcmp(t, "test") == 0) { GP_DATA->flags |= TEST; initrc = 0; break; }
        /* fall through */
       default:
 	usage(argv[0]);

@@ -925,7 +925,7 @@ The answer is t if success, and nil otherwise."
            (concat
              gp-file-name " -s " (number-to-string gp-stack-size)
                           " -p " (number-to-string gp-prime-limit)
-	     " -emacs"  ; -emacs requested by gp2.
+	     " --emacs"  ; --emacs requested by gp2.
              )))
  
 ;; Insert the command line string into the *PARI* buffer (for reference)

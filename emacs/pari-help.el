@@ -483,7 +483,7 @@ The available commands are
   (get-buffer-create "*Simple PARI*")
   (set-buffer "*Simple PARI*")
   (setq gp-browser-process
-    (gp-get-shell "simple-pari" "*Simple PARI*" (concat gp-file-name " -s 1000 -p 10 -emacs")))
+    (gp-get-shell "simple-pari" "*Simple PARI*" (concat gp-file-name " -s 1000 -p 10 --emacs")))
 
   ;; We should run the hook as the prompt may have
   ;; been changed in the .gprc:
