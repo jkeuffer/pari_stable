@@ -1074,7 +1074,7 @@ GEN
 LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
 {
   const long s = 2; /* # of traces added at each step */
-  long i,j,C,r,tmax,n0,n,dP = lgef(P)-3;
+  long i,j,C,r,S,tmax,n0,n,dP = lgef(P)-3;
   double logp = log(gtodouble(p));
   double b0 = log((double)dP*2) / logp;
   double k = gtodouble(glog(root_bound(P), DEFAULTPREC)) / logp;
@@ -1090,14 +1090,19 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
     TT[i] = 0;
     T [i] = lgetg(s+1, t_COL);
   }
-  for(tmax = 0;; tmax += s) 
-  { /* tmax = number of traces added so far */
-    long b = (long)ceil(b0 + (tmax+s)*k), goodb;
+  /* tmax = current number of traces used (and computed so far)
+   * S = number of traces used at the round's end = tmax + s */
+  for(tmax = 0;; tmax = S) 
+  {
     GEN pas2, pa_b, pb_as2, pbs2, pb, BE;
+    long b, goodb;
+
+    S = tmax + s;
+    b = (long)ceil(b0 + S*k);
 
     if (a <= b)
     {
-      a = ceil(b + 3*s*k) + 1;
+      a = ceil(b + 3*s*k) + 1; /* enough for 3 more rounds */
       pa = gpowgs(p,a);
       famod = hensel_lift_fact(P,famod,p,pa,a);
       /* recompute old Newton sums to new precision */
@@ -1109,15 +1114,16 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
     if (goodb > b) b = goodb;
     pa_b = gpowgs(p, a-b); pb_as2 = shifti(pa_b,-1);
     pb   = gpowgs(p, b);   pbs2    = shifti(pb,-1);
-    C = (long)(sqrt((double)s*n)/ 2.);
-    M = dbltor((C*C*n + (tmax+s)*n*n/4.) * 1.00001);
+
+    C = (long)sqrt(s*n0/4.);
+    M = dbltor(n0 * (C*C + s*n0/4.) * 1.00001);
 
     if (DEBUGLEVEL>3)
       fprintferr("LLL_cmbf: %ld potential factors (tmax = %ld)\n", r, tmax);
     for (i=1; i<=n0; i++)
     {
       GEN p1 = (GEN)T[i];
-      GEN p2 = polsym_gen((GEN)famod[i], (GEN)TT[i], tmax+s, pa);
+      GEN p2 = polsym_gen((GEN)famod[i], (GEN)TT[i], S, pa);
       TT[i] = (long)p2;
       p2 += 1+tmax; /* ignore traces number 0...tmax */
       for (j=1; j<=s; j++) p1[j] = p2[j];
@@ -1135,7 +1141,6 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
       }
     }
     if (gcmp0(T2)) continue;
-
     BE = cgetg(s+1, t_MAT);
     for (i=1; i<=s; i++)
     {
@@ -1147,6 +1152,10 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
     m = gscalmat(stoi(C), r);
     for (i=1; i<=r; i++)
       m[i] = (long)concatsp((GEN)m[i], (GEN)T2[i]);
+    /*     [ C BL      0      ]
+     * m = [                  ]   square matrix
+     *     [ T2   p^(a-b) I_S ]   T2 = T * BL  truncated
+     */
     m = concatsp(m, BE);
     mGram = gram_matrix(m);
     u = lllgramintern(mGram, 4, 0, 0);
