@@ -1178,6 +1178,28 @@ gerepilemanycoeffs(long av, GEN x, long n)
   }
 }
 
+void
+gerepilemanycoeffs2(long av, GEN x, long n, GEN y, long o)
+{
+  long i,j;
+
+  /* copy objects */
+  for (i=0; i<n; i++) x[i] = lclone((GEN)x[i]);
+  for (j=0; j<o; j++) y[j] = lclone((GEN)y[j]);
+  avma = av;
+  /* copy them back, kill clones */
+  for (--i; i>=0; i--)
+  {
+    GEN p1 = (GEN)x[i];
+    x[i] = (long)forcecopy(p1); gunclone(p1);
+  }
+  for (--j; j>=0; j--)
+  {
+    GEN p1 = (GEN)y[j];
+    y[j] = (long)forcecopy(p1); gunclone(p1);
+  }
+}
+
 /* Takes an array of pointers to GENs, of length n.
  * Cleans up the stack between av and tetpil, updating those GENs.
  */
