@@ -437,7 +437,7 @@ get_snf(GEN x)
   switch(typ(x))
   {
     case t_MAT:
-      if (isdiagonal(x)) return NULL;
+      if (!isdiagonal(x)) return NULL;
       cyc = mattodiagonal_i(x); break;
     case t_VEC:
     case t_COL: cyc = dummycopy(x); break;
@@ -449,7 +449,13 @@ get_snf(GEN x)
     if (typ(c) != t_INT) return NULL;
     if (!gcmp1(c)) break;
   }
-  setlg(cyc, n+1); return cyc;
+  setlg(cyc, n+1);
+  for ( ; n > 0; n--)
+  {
+    GEN c = (GEN)cyc[n];
+    if (typ(c) != t_INT) return NULL;
+  }
+  return cyc;
 }
 
 void
