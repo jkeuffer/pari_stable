@@ -2302,11 +2302,10 @@ gbittest3(GEN x, GEN n, long c)
 /** x & y (and), x | y (or), x ^ y (xor), ~x (neg), x & ~y (negimply) **/
 /**                                                                   **/
 /***********************************************************************/
-
-void int_normalize(GEN x, long known_zero_words);
+extern GEN int_normalize(GEN x, long known_zero_words);
 
 /* Truncate a non-negative integer to a number of bits.  */
-static void
+static GEN
 ibittrunc(GEN x, long bits, long normalized)
 {
     int xl = lgefint(x) - 2;
@@ -2333,7 +2332,7 @@ ibittrunc(GEN x, long bits, long normalized)
       known_zero_words = 0;
     else
       known_zero_words = xl - len_out;
-    int_normalize(x, known_zero_words);
+    return int_normalize(x, known_zero_words);
 }
 
 /* Increment/decrement absolute value of non-zero integer in place.
@@ -2394,8 +2393,7 @@ gbitneg(GEN x, long bits)
 	setsigne(x, 1);
 	incdec(x, -1);
 	/* Now truncate this! */
-	ibittrunc(x, bits, *int_MSW(x));
-	return x;
+	return ibittrunc(x, bits, *int_MSW(x));
     }
     xl = lgefint(x);
     len_out = ((bits + BITS_IN_LONG - 1) >> TWOPOTBITS_IN_LONG) + 2;
@@ -2426,8 +2424,7 @@ gbitneg(GEN x, long bits)
     x = icopy(x);
     for (i = 2; i < xl; i++)
 	x[i] = ~x[i];
-    ibittrunc(x, bits, *int_MSW(x));
-    return x;
+    return ibittrunc(x, bits, *int_MSW(x));
 }
 
 /* bitwise 'and' of two positive integers (any integers, but we ignore sign).
@@ -2457,7 +2454,7 @@ ibitand(GEN x, GEN y)
   if (lout == 2)
       setsigne(out,0);
   else if ( !*int_MSW(out) )
-      int_normalize(out, 1);
+      out = int_normalize(out, 1);
   return out;
 }
 
@@ -2498,7 +2495,7 @@ ibitor(GEN x, GEN y)
     setsigne(out,0);
     /* If input is normalized, this is not needed*/
   else if ( !*int_MSW(out) )
-    int_normalize(out, 1);
+    out = int_normalize(out, 1);
   return out;
 }
 
@@ -2536,7 +2533,7 @@ ibitxor(GEN x, GEN y)
   if (lx == 2)
       setsigne(out,0);
   else if ( !*int_MSW(out) )
-      int_normalize(out, 1);
+      out = int_normalize(out, 1);
   return out;
 }
 
@@ -2581,7 +2578,7 @@ ibitnegimply(GEN x, GEN y)
   if (lout == 2)
       setsigne(out,0);
   else if ( !*int_MSW(out) )
-      int_normalize(out, 1);
+      out = int_normalize(out, 1);
   return out;
 }
 

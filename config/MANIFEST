@@ -202,6 +202,7 @@ src/kernel/none/MakeLVL1.SH
 src/kernel/none/asm0.h
 src/kernel/none/gcd.c
 src/kernel/none/gcdll.c
+src/kernel/none/mp_indep.c
 src/kernel/none/ratlift.c
 src/kernel/none/int.h
 src/kernel/none/level0.c

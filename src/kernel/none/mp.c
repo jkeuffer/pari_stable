@@ -2713,90 +2713,20 @@ shift_r(ulong *target, ulong *source, ulong *source_end, ulong prepend, ulong sh
   }
 }
 
-/********************************************************************/
-/**                                                                **/
-/**                         RANDOM INTEGERS                        **/
-/**                                                                **/
-/********************************************************************/
-static long pari_randseed = 1;
-
-/* BSD rand gives this: seed = 1103515245*seed + 12345 */
-/*Return 31 ``random'' bits.*/
-long
-pari_rand31(void)
-{
-  pari_randseed = (1000276549*pari_randseed + 12347) & 0x7fffffff;
-  return pari_randseed;
-}
-
-long
-setrand(long seed) { return (pari_randseed = seed); }
-
-long
-getrand(void) { return pari_randseed; }
-
-ulong
-pari_rand(void)
-{
-#define GLUE2(hi, lo) (((hi) << BITS_IN_HALFULONG) | (lo))
-#if !defined(LONG_IS_64BIT)
-  return GLUE2((pari_rand31()>>12)&LOWMASK,
-               (pari_rand31()>>12)&LOWMASK);
-#else
-#define GLUE4(hi1,hi2, lo1,lo2) GLUE2(((hi1)<<16)|(hi2), ((lo1)<<16)|(lo2))
-#  define LOWMASK2 0xffffUL
-  return GLUE4((pari_rand31()>>12)&LOWMASK2,
-               (pari_rand31()>>12)&LOWMASK2,
-               (pari_rand31()>>12)&LOWMASK2,
-               (pari_rand31()>>12)&LOWMASK2);
-#endif
-}
-
-GEN
-randomi(GEN N)
-{
-  long lx,i,nz;
-  GEN x, p1;
-
-  lx = lgefint(N); x = new_chunk(lx);
-  nz = lx-1; while (!N[nz]) nz--; /* nz = index of last non-zero word */
-  for (i=2; i<lx; i++)
-  {
-    ulong n = N[i], r;
-    if (n == 0) r = 0;
-    else
-    {
-      pari_sp av = avma;
-      if (i < nz) n++; /* allow for equality if we can go down later */
-      p1 = muluu(n, pari_rand()); /* < n * 2^32, so 0 <= first word < n */
-      r = (lgefint(p1)<=3)? 0: p1[2]; avma = av;
-    }
-    x[i] = r;
-    if (r < (ulong)N[i]) break;
-  }
-  for (i++; i<lx; i++) x[i] = pari_rand();
-  i=2; while (i<lx && !x[i]) i++;
-  i -= 2; x += i; lx -= i;
-  x[1] = evalsigne(lx>2) | evallgefint(lx);
-  x[0] = evaltyp(t_INT) | evallg(lx);
-  avma = (pari_sp)x; return x;
-}
 /* Normalize a non-negative integer.  */
-void
+GEN
 int_normalize(GEN x, long known_zero_words)
 {
   long xl = lgefint(x);
   long i = 2 + known_zero_words, j;
   while (i < xl) {
-    if (x[i])
-      break;
+    if (x[i]) break;
     i++;
   }
   j = 2;
-  while (i < xl)
-    x[j++] = x[i++];
+  while (i < xl) x[j++] = x[i++];
   xl -= i - j;
   setlgefint(x, xl);
-  if (xl == 2)
-    setsigne(x,0);
+  if (xl == 2) setsigne(x,0);
+  return x;
 }
