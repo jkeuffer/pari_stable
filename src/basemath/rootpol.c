@@ -1562,7 +1562,7 @@ static void
 split_0_2(GEN p, long bitprec, GEN *F, GEN *G)
 {
   GEN q,b,FF,GG;
-  long n=lgef(p)-3,k,bitprec2,i;
+  long n=lgef(p)-3,k,bitprec2,i, eq;
   double auxnorm;
 
   step4=1;
@@ -1574,9 +1574,10 @@ split_0_2(GEN p, long bitprec, GEN *F, GEN *G)
   b=gdivgs(gdiv((GEN)q[n+1],(GEN)q[n+2]),-n);
   q=shiftpol(q,gadd(polx[varn(p)],b));
 
-  k=0; while
-      (gexpo((GEN)q[k+2])<-(bitprec2+2*(n-k)+gexpo(q))
-       || gcmp0((GEN)q[k+2])) k++;
+  k=0; eq=gexpo(q);
+  while
+      (k <= n/2 && (gexpo((GEN)q[k+2]) < -(bitprec2+2*(n-k)+eq)
+       || gcmp0((GEN)q[k+2]))) k++;
   if (k>0)
   {
     if (k>n/2) k=n/2;
@@ -1631,7 +1632,7 @@ split_0(GEN p, long bitprec, GEN *F, GEN *G)
   GEN FF,GG,q,R;
   long n=lgef(p)-3,k=0,i;
 
-  while (gexpo((GEN)p[k+2])<-bitprec) k++;
+  while (gexpo((GEN)p[k+2]) < -bitprec && k <= n/2) k++;
   if (k>0)
   {
     if (k>n/2) k=n/2;
@@ -1748,7 +1749,7 @@ a_posteriori_errors(GEN p, GEN roots_pol, long err)
   GEN sigma,overn,shatzle,x;
   long i,n=lgef(p)-3,e,e_max;
 
-  sigma=mygprec(dbltor(1.),10);
+  sigma = realun(3);
   setexpo(sigma,err+(long) log2((double) n)+1);
   overn=dbltor(1./n);
   shatzle=gdiv(gpui(sigma,overn,0),
@@ -1891,7 +1892,8 @@ all_roots(GEN p, long bitprec)
     e = gexpo(gsub(mygprec_special(p,bitprec2),m))
       - gexpo((GEN)q[2+n])+(long) log2((double)n)+1;
     if (e<-2*bitprec2) e=-2*bitprec2; /* to avoid e=-pariINFINITY */
-    if (a_posteriori_errors(q,roots_pol,e) < -bitprec) return roots_pol;
+    if (e < 0 && a_posteriori_errors(q,roots_pol,e) < -bitprec)
+      return roots_pol;
 
     tetpil=avma; roots_pol=gerepile(av,tetpil,gcopy(roots_pol));
   }
@@ -1969,7 +1971,6 @@ roots_com(GEN p, long l)
 {
   long bitprec;
 
-  if (gcmp0(p)) err(zeropoler,"roots");
   if (typ(p)!=t_POL)
   {
     if (!isvalidcoeff(p)) err(typeer,"roots");
@@ -2027,7 +2028,7 @@ isconj(GEN x, GEN y, long e)
 }
 
 /* returns the vector of roots of p, with guaranteed absolute error
- * BASE^(-(l-2)), where BASE=2^{ BITS_IN_LONG }.
+ * 2 ^ (- bit_accuracy(l))
  */
 GEN
 roots(GEN p, long l)
@@ -2035,8 +2036,10 @@ roots(GEN p, long l)
   long av,av1,tetpil,n,j,k,s, e = 5 - bit_accuracy(l);
   GEN p1,p2,p3,p22,res;
 
+  if (gcmp0(p) || gexpo(p) <= e) err(zeropoler,"roots");
   av=avma; p1=roots_com(p,l); n=lg(p1);
-  if (isrealappr(p,e))
+  if (n <= 1) return p1;
+  if (isreal(p))
   {
     p3=cgetg(n,t_COL); s=0;
     for (j=1; j<n; j++)
