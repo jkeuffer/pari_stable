@@ -30,7 +30,7 @@ squfof(n)=
     );
 
     if (abs(a)<=l,
-	q=vecconcat(q,abs(a));
+	q=concat(q,abs(a));
 	print(q); lq++;
     )
   );
