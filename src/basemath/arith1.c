@@ -2054,7 +2054,7 @@ sfcont(GEN x, long k)
 
   switch(tx)
   {
-    case t_POL: return _vec(gcopy(x));
+    case t_POL: return _veccopy(x);
     case t_SER:
       av = avma; p1 = gtrunc(x);
       return gerepileupto(av,sfcont(p1,k));

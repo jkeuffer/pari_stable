@@ -22,6 +22,7 @@ BEGINEXTERN
 /* alglin1.c */
 GEN     _col(GEN x);
 GEN     _vec(GEN x);
+GEN     _veccopy(GEN x);
 GEN     FpM_FpV_mul(GEN x, GEN y, GEN p);
 GEN     FpM_deplin(GEN x, GEN p);
 GEN     FpM_image(GEN x, GEN p);

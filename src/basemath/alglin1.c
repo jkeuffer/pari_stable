@@ -165,6 +165,8 @@ vconcat(GEN A, GEN B)
 }
 
 GEN
+_veccopy(GEN x) { GEN v = cgetg(2, t_VEC); v[1] = lcopy(x); return v; }
+GEN
 _vec(GEN x) { GEN v = cgetg(2, t_VEC); v[1] = (long)x; return v; }
 GEN
 _col(GEN x) { GEN v = cgetg(2, t_COL); v[1] = (long)x; return v; }
