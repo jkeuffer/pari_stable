@@ -1595,13 +1595,10 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
     err(typeer,"gzetakall");
   resi=(GEN)nfz[2]; C=(GEN)nfz[4]; cst=(GEN)nfz[5];
   cstlog=(GEN)nfz[6]; coef=(GEN)nfz[8]; coeflog=(GEN)nfz[9];
-  r1  =itos(gmael(nfz,1,1));
-  r2  =itos(gmael(nfz,1,2));
-  imax=itos(gmael(nfz,1,3));
-  N0=lg(coef)-1; ru=r1+r2;
-  /* from initzeta. Certainly excessive, at least if LONG_IS_64BIT */
-  bigprec = min(precision(cst), (prec2<<1) - 1);
-  prec = prec2+1;
+  r1   = itos(gmael(nfz,1,1));
+  r2   = itos(gmael(nfz,1,2)); ru = r1+r2;
+  imax = itos(gmael(nfz,1,3)); N0 = lg(coef)-1;
+  bigprec = precision(cst); prec = prec2+1;
 
   if (ts==t_COMPLEX && gcmp0(gimag(s))) { s=greal(s); ts = typ(s); }
   if (ts==t_REAL && !signe(gfrac(s))) { s=mptrunc(s); ts = t_INT; }
@@ -1611,12 +1608,9 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
     if (sl==1) err(talker,"s = 1 is a pole (gzetakall)");
     if (sl==0)
     {
+      avma = av;
       if (flag) err(talker,"s = 0 is a pole (gzetakall)");
-      if (ru == 1)
-      {
-        if (r1) return gneg(ghalf);
-        return gneg(resi);
-      }
+      if (ru == 1) return gneg(r1? ghalf: resi);
       return gzero;
     }
     if (sl<0 && (r2 || !odd(sl)))
@@ -1630,7 +1624,7 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
     gar=gpowgs(gammas2,r1);
     cs=gexp(gmul(cstlog,s),prec); 	
     val=s; valm=unmoins;
-    if (sl<0) /* r2 = 0 && odd(sl) */
+    if (sl < 0) /* r2 = 0 && odd(sl) */
     {
       gammaunmoins2=ggamma(gmul2n(unmoins,-1),prec);
       var1=var2=gun;
@@ -1748,7 +1742,7 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
       {
 	val  = gadd(val, gun);
         valm = gadd(valm,gun);
-	}
+      }
       else
       {
 	val  = gadd(val, gdeux);
