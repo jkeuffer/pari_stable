@@ -1708,25 +1708,26 @@ gerepilemanycoeffs2(pari_sp av, GEN x, int n, GEN y, int o)
   for (i=0; i<o; i++) y[i] = (long)bin_copy((GENbin*)y[i]);
 }
 
+INLINE void
+dec_gerepile(pari_sp *x, pari_sp av0, pari_sp av, pari_sp tetpil, size_t dec)
+{
+  if (*x < av && *x >= av0)
+  { /* update address if in stack */
+    if (*x < tetpil) *x += dec;
+    else err(talker, "significant pointers lost in gerepile! (please report)");
+  }
+}
+
 /* Takes an array of pointers to GENs, of length n.
  * Cleans up the stack between av and tetpil, updating those GENs. */
 void
 gerepilemanysp(pari_sp av, pari_sp tetpil, GEN* gptr[], int n)
 {
-  const pari_sp av2 = avma;
+  const pari_sp av0 = avma;
   const size_t dec = av-tetpil;
   int i;
-
   (void)gerepile(av,tetpil,NULL);
-  for (i=0; i<n; i++)
-  {
-    pari_sp *g1 = (pari_sp*) gptr[i];
-    if (*g1 < tetpil)
-    {
-      if (*g1 >= av2) *g1 += dec; /* Update address if in stack */
-      else if (*g1 >= av) err(gerper);
-    }
-  }
+  for (i=0; i<n; i++) dec_gerepile((pari_sp*)gptr[i], av0, av, tetpil, dec);
 }
 
 /* Takes an array of GENs (cast to longs), of length n.
@@ -1734,17 +1735,11 @@ gerepilemanysp(pari_sp av, pari_sp tetpil, GEN* gptr[], int n)
 void
 gerepilemanyvec(pari_sp av, pari_sp tetpil, long *g, int n)
 {
-  const pari_sp av2 = avma;
+  const pari_sp av0 = avma;
   const size_t dec = av-tetpil;
   int i;
-
   (void)gerepile(av,tetpil,NULL);
-  for (i=0; i<n; i++,g++)
-    if ((pari_sp)*g < tetpil)
-    {
-      if ((pari_sp)*g >= av2) *g += dec;/* Update addresses if in stack */
-      else if ((pari_sp)*g >= av) err(gerper);
-    }
+  for (i=0; i<n; i++,g++) dec_gerepile((pari_sp*)g, av0, av, tetpil, dec);
 }
 
 GEN
@@ -1815,32 +1810,28 @@ ok_gerepileupto(GEN x) { return _ok_gerepileupto(x, x); }
 GEN
 gerepile(pari_sp av, pari_sp tetpil, GEN q)
 {
-  pari_sp avmb;
-  size_t dec = av - tetpil;
-  GEN ll,a,b;
+  const size_t dec = av - tetpil;
+  const pari_sp av0 = avma;
+  GEN ll, a;
 
-  if (dec==0) return q;
-  if ((long)dec<0) err(talker,"lbot>ltop in gerepile");
+  if (dec == 0) return q;
+  if ((long)dec < 0) err(talker,"lbot>ltop in gerepile");
 
-  if ((pari_sp)q >= avma && (pari_sp)q < tetpil)
+
+  if ((pari_sp)q >= av0 && (pari_sp)q < tetpil)
     q = (GEN) (((pari_sp)q) + dec);
 
-  for (ll=(GEN)av, a=(GEN)tetpil; a > (GEN)avma; ) *--ll= *--a;
-  avmb = (pari_sp)ll;
+  for (ll = (GEN)av, a = (GEN)tetpil; a > (GEN)av0; ) *--ll = *--a;
+  avma = (pari_sp)ll;
   while (ll < (GEN)av)
   {
-    const long tl=typ(ll);
+    const long tl = typ(ll);
 
-    if (! is_recursive_t(tl)) { ll+=lg(ll); continue; }
-    a = ll+lontyp[tl];
-    ll += lg(ll); b = ll;
-    for (  ; a<b; a++)
-      if ((pari_sp)*a < av && (pari_sp)*a >= avma)
-      {
-	if ((pari_sp)*a < tetpil) *a += dec; else err(gerper);
-      }
+    if (! is_recursive_t(tl)) { ll += lg(ll); continue; }
+    a = ll+lontyp[tl]; ll += lg(ll);
+    for (  ; a < ll; a++) dec_gerepile((pari_sp*)a, av0, av, tetpil, dec);
   }
-  avma = avmb; return q;
+  return q;
 }
 
 long

@@ -15,9 +15,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 char *errmessage[]=
 {
-/* no_error */
-  "bug in error-handling code",
-
+/* force error into non-0 */
+  "",
 /* cant_deflate */
   "can't deflate",
 
@@ -164,8 +163,6 @@ char *errmessage[]=
 
 /* memer */
   "not enough memory",
-/* gerper */
-  "significant pointers are lost in gerepile !!! (please report)",
 
   /*  TRANS.C  */
 
