@@ -2977,6 +2977,8 @@ best_in_cycle(GEN e, GEN p, long k)
   return (gsigne(d_ellLHS(e,p)) < 0)? invell(e,p): p;
 }
 
+/* <p,q> = E_tors, possibly NULL (= oo), p,q independant unless NULL
+ * order p = k, order q = 2 unless NULL */
 static GEN
 tors(GEN e, long k, GEN p, GEN q, GEN v)
 {
@@ -2992,7 +2994,6 @@ tors(GEN e, long k, GEN p, GEN q, GEN v)
     p = best_in_cycle(e,p,k);
     if (v)
     {
-      v[1] = linv((GEN)v[1]);
       p = pointch(p,v);
       q = pointch(q,v);
     }
@@ -3007,10 +3008,7 @@ tors(GEN e, long k, GEN p, GEN q, GEN v)
     {
       p = best_in_cycle(e,p,k);
       if (v)
-      {
-        v[1] = linv((GEN)v[1]);
         p = pointch(p,v);
-      }
       r = cgetg(4,t_VEC);
       r[1] = lstoi(k); p1 = cgetg(2,t_VEC); p1[1] = r[1];
       r[2] = (long)p1; p1 = cgetg(2,t_VEC); p1[1] = lcopy(p);
@@ -3039,13 +3037,14 @@ torselldoud(GEN e)
   if (v) e = coordch(e,v);
 
   b = DEFAULTPREC + ((lgefint((GEN)e[12])-2) >> 1); /* b >= size of sqrt(D) */
-  prec = precision((GEN)e[15]);
+  w1 = (GEN)e[15];
+  prec = precision(w1);
   if (prec < b) err(precer, "torselldoud");
-  if (b < prec) { prec = b; e = gprec_w(e, b); }
+  if (b < prec) { prec = b; e = gprec_w(e, b); w1 = (GEN)e[15]; }
   b = torsbound(e);
   if (b==1) { avma=av; return tors(e,1,NULL,NULL, v); }
+  if (v) v[1] = linv((GEN)v[1]);
   w22 = gmul2n((GEN)e[16],-1);
-  w1 = (GEN)e[15];
   if (b % 4)
   {
     p = NULL;
@@ -3065,7 +3064,7 @@ torselldoud(GEN e)
   }
 
   ord = 0; tor1 = tor2 = NULL;
-  w12 = gmul2n((GEN)e[15],-1);
+  w12 = gmul2n(w1,-1);
   if ((p = torspnt(e,pointell(e,w12,prec),2)))
   {
     tor1 = p; ord++;
@@ -3076,24 +3075,24 @@ torselldoud(GEN e)
     tor2 = p; ord += 2;
   }
 
+  p = NULL;
   switch(ord)
   {
-    case 0:
+    case 0: /* no point of order 2 */
       for (i=9; i>1; i-=2)
       {
         if (b%i!=0) continue;
-        w1j=gdivgs((GEN)e[15],i);
+        w1j = gdivgs(w1,i);
         p = torspnt(e,pointell(e,w1j,prec),i);
         if (p) { k = i; break; }
       }
       break;
 
-    case 1:
-      p = NULL;
+    case 1: /* 1 point of order 2: w1 / 2 */
       for (i=12; i>2; i-=2)
       {
         if (b%i!=0) continue;
-        w1j=gdivgs((GEN)e[15],i);
+        w1j = gdivgs(w1,i);
         p = torspnt(e,pointell(e,w1j,prec),i);
         if (!p && i%4==0)
           p = torspnt(e,pointell(e,gadd(w22,w1j),prec),i);
@@ -3102,22 +3101,22 @@ torselldoud(GEN e)
       if (!p) { p = tor1; k = 2; }
       break;
 
-    case 2:
+    case 2: /* 1 point of order 2: w2 / 2 or (w1+w2) / 2 */
       for (i=5; i>1; i-=2)
       {
         if (b%i!=0) continue;
-        w1j = gdivgs((GEN)e[15],i);
+        w1j = gdivgs(w1,i);
         p = torspnt(e,pointell(e,gadd(w22,w1j),prec),i+i);
         if (p) { k = 2*i; break; }
       }
       if (!p) { p = tor2; k = 2; }
       tor2 = NULL; break;
 
-    case 3:
+    case 3: /* 2 points of order 2: w1/2 and w2/2 */
       for (i=8; i>2; i-=2)
       {
         if (b%(2*i)!=0) continue;
-        w1j=gdivgs((GEN)e[15],i);
+        w1j = gdivgs(w1,i);
         p = torspnt(e,pointell(e,w1j,prec),i);
         if (p) { k = i; break; }
       }
