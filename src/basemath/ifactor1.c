@@ -865,11 +865,12 @@ elladd2(long nbc, GEN *X1, GEN *X2, GEN *X3, GEN *X4, GEN *X5, GEN *X6)
     avma = av; return 1;
   }
 
-  while (i--, j--) /* nbc times, actually */
+  while (j--) /* nbc times, actually */
   {
     pari_sp av2 = avma;
-    GEN t, L = modii(mulii(subii(Y4[j], Y5[j]),
-			   mulii(gl, W[i])), N);
+    GEN t, L;
+    i--;
+    L = modii(mulii(subii(Y4[j], Y5[j]), mulii(gl, W[i])), N);
     t = subii(sqri(L), addii(X5[j], X4[j]));         affii(modii(t,N), X6[j]);
     t = subii(mulii(L, subii(X4[j], X6[j])), Y4[j]); affii(modii(t,N), Y6[j]);
     avma = av2; gl = modii(mulii(gl, A[i]), N);
@@ -920,18 +921,20 @@ elldouble(long nbc, GEN *X1, GEN *X2)
 
   while (i--) /* nbc times, actually */
   {
-    pari_sp av2 = avma;
-    GEN v, L = modii(mulii(addsi(1, mulsi(3, sqri(X1[i]))),
-                           i?mulii(gl,W[i]):gl), N);
+    pari_sp av2;
+    GEN v, w, L, GL = gl;
+
+    if (i) gl = modii(mulii(gl, Y1[i]), N);
+    av2 = avma;
+    L = modii(mulii(addsi(1, mulsi(3, sqri(X1[i]))),
+                    i? mulii(GL,W[i]): GL), N);
     if (signe(L)) /* half of zero is still zero */
       L = shifti(mod2(L)? addii(L, N): L, -1);
     v = modii(subii(sqri(L), shifti(X1[i],1)), N);
+    w = modii(subii(mulii(L, subii(X1[i], v)), Y1[i]), N);
     affii(v, X2[i]);
-    v = subii(mulii(L, subii(X1[i], v)), Y1[i]);
-    affii(modii(v, N), Y2[i]);
-    if (!i) break;
-    avma = av2; gl = modii(mulii(gl, Y1[i]), N);
-    if (!(i&7)) gl = gerepileuptoint(tetpil, gl);
+    affii(w, Y2[i]); avma = av2;
+    if (!(i&7) && i) gl = gerepileuptoint(tetpil, gl);
   }
   avma = av; return 0;
 }
