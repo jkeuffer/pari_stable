@@ -3450,14 +3450,13 @@ being as output by \kbd{bnrinit(,,1)}, finds a relative equation for the
 class field corresponding to the modulus in \var{bnr} and the given
 congruence subgroup using \idx{Stark units} (set $\var{subgroup}=0$ if you
 want the whole ray class group). The main variable of \var{bnr} must not be
-$x$, and the ground field and the class field must be totally real and not
-isomorphic to $\Q$ (over the rationnals, use \tet{polsubcyclo} or
-\tet{galoissubcyclo}). \fl\ is optional and may be set to 0 to obtain a
-reduced relative polynomial, 1 to be satisfied with any relative
-polynomial, 2 to obtain an absolute polynomial and 3 to obtain the
-irreducible relative polynomial of the Stark unit, 0 being default.
-Example: 
+$x$, and the ground field and the class field must be totally real. When the
+base field is $\Q$, the vastly simpler \tet{galoissubcyclo} is used instead.
 
+\fl\ is optional and may be set to 0 (default) to obtain a reduced relative
+polynomial, 1 to be satisfied with any relative polynomial, 2 to obtain an
+absolute polynomial and 3 to obtain the irreducible relative polynomial of
+the Stark unit. Example: 
 \bprog
 bnf = bnfinit(y^2 - 3);
 bnr = bnrinit(bnf, 5, 1);
@@ -3627,65 +3626,80 @@ is greater or equal to $2$.
 
 \syn{galoispermtopol}{\var{gal},\var{perm}}.
 
-\subsecidx{galoissubcyclo}$(N,H,\{fl=0\},\{v\})$: 
-This function compute the abelian extension of the rational field given by the
-modulus \var{N} and the congruence subgroup \var{H}.
+\subsecidx{galoissubcyclo}$(N,H,\{fl=0\},\{v\})$: computes the abelian
+extension of the rational field given by the modulus \var{N} and the
+congruence subgroup \var{H}.
 
-The modulus can be: 
+\noindent The modulus \var{N} can be: 
 
-\quad$\bullet$ a integer \var{n}.
+$\bullet$ A module, i.e an ideal in any form for \kbd{nfinit(y)}, or a
+2-component row vector containing an ideal and a 1-component row vector of
+flags indicating whether the infinite place is included in the modulus. For
+instance, a non-zero integer is a valid input, corresponding to a real
+abelian field.
 
-\quad$\bullet$ The output of \kbd{znstar(n)}.
+$\bullet$ The output of \kbd{bnrinit(bnfinit(y), m, 1)} where \kbd{m} is
+a module as above
 
-\quad$\bullet$ The output of \kbd{bnrinit(bnfinit(y),m,1))} where m is a module which may eventually have an infinite part.
+$\bullet$ The output of \kbd{znstar(n)}, in which case the modulus is
+assumed to be \kbd{[n, [1]]}, i.e $n\infty$.
 
-The subgroup \var{H} can be given by:
+\noindent The subgroup \var{H} can be given by:
 
-\quad$\bullet$ a generator, i.e. an integer or an integer modulo \var{n}.
+$\bullet$ a matrix, taken to be a HNF left divisor of the SNF
+giving the ray class group modulo \var{N}.
 
-\quad$\bullet$ a vector of generators.
+$\bullet$ a generator, i.e. an integer or an integer modulo \var{n}.
 
-\quad$\bullet$ a matrix, being taken to be a HNF left divisor of \var{N}, or \kbd{znstar(N)} if N is an integer.
+$\bullet$ a vector of generators.
 
-If $fl=0$, compute a polynomial (in the variable \var{v}) defining the subfield
-of $\Q(\zeta_n)$ fixed by the subgroup \var{H} of $(\Z/n\Z)^*$. 
+Beware that \var{H} is understood relatively to \var{N}; in particular, if
+the infinite place does not divide the module, e.g if \var{N} is an integer,
+then it is not a subgroup of $(\Z/N\Z)^*$, but of its quotient by 
+$\{\pm 1\}$. For instance, \kbd{galoissubcyclo(8, 3)} is $\Q$ since it has
+Galois group $(\Z/8\Z)^* / \{-1,3\} = \{1\}$, whereas
+\kbd{galoissubcyclo([8,[1]], 3)} is a quadratic field.
 
-If $fl=1$, compute only the (finite part of) conductor of the abelian extension.
+If $fl=0$, compute a polynomial (in the variable \var{v}) defining the class
+field associated to $(N,H)$, i.e the subfield of $\Q(\zeta_n)$ fixed by the
+subgroup \var{H} of $(\Z/n\Z)^*$ if $\infty | N$ or $(\Z/n\Z)^*/\{\pm1\}$
+if not. 
 
-If $fl=2$, output $[pol, f_0]$, where $pol$ is the polynomial as output when $fl=0$ and $f_0$ the conductor as output when $fl=1$.
+If $fl=1$, compute only the conductor of the abelian extension, as a module.
+
+If $fl=2$, output $[pol, N]$, where $pol$ is the polynomial as output when
+$fl=0$ and $N$ the conductor as output when $fl=1$.
 
 The following function can be used to compute all subfields of
-$\Q(\zeta_n)$ (of order less than \kbd{d}, if \kbd{d} is set):
-
+$\Q(\zeta_n)$ (of degree less than \kbd{d}, if \kbd{d} is set):
 \bprog
 subcyclo(n, d = -1)=
 {
-  local(Z,G,S);
+  local(Z,G, S = []);
   if (d < 0, d = n);
   Z = znstar(n);
   G = matdiagonal(Z[2]);
-  S = [];
   forsubgroup(H = G, d,
     S = concat(S, galoissubcyclo(Z, mathnf(concat(G,H))));
   );
   S
 }
-@eprog
-
-Alternatively this one can be used instead
-
+@eprog\noindent
+Alternatively this one computes subfields of exact degree $d$
 \bprog
-subcyclo(n, d = -1)=
+subcyclo(n, d)=
 {
   local(bnr,L);
-  if (d < 0, d = n);
-  bnr=bnrinit(bnfinit(y),[n,[1]],1);
-  L = subgrouplist(bnr,d,1);
-  vector(#L,i,galoissubcyclo(bnr,L[i]));
+  bnr = bnrinit(bnfinit(y), [n,[1]], 1);
+  L = subgrouplist(bnr, [d], 1);
+  vector(#L,i, galoissubcyclo(bnr,L[i]));
 }
-@eprog
+@eprog\noindent
+In the latter example, setting \kbd{L = subgrouplist(bnr, [d])} would produce
+subfields of exact conductor $n\infty$.
 
-\syn{galoissubcyclo}{N,H,fl,v} where \var{fl} is a C long integer, and \var{v} a variable number.
+\syn{galoissubcyclo}{N,H,fl,v} where \var{fl} is a C long integer, and
+\var{v} a variable number.
 
 \subsecidx{galoissubfields}$(G,\{fl=0\},\{v\})$: Output all the subfields of the Galois group \var{G},
 as a vector.
@@ -5143,14 +5157,14 @@ exactly equal to $B$ are computed. For instance
 %3 = [[3, 0; 0, 1]]
 ? bnr = bnrinit(bnfinit(x), [120,[1]], 1);
 ? L = subgrouplist(bnr, [8]);
-@eprog
-\noindent In the last example, $L$ corresponds to the 24 subfields of
+@eprog\noindent
+In the last example, $L$ corresponds to the 24 subfields of
 $\Q(\zeta_{120})$, of degree $8$ and conductor $120\infty$ (by setting \fl,
 we see there are a total of $43$ subgroups of degree $8$).
 \bprog
 ? vector(#L, i, galoissubcyclo(bnr, L[i]))
-@eprog
-\noindent will produce their equations. (For a general base field, you would
+@eprog\noindent
+will produce their equations. (For a general base field, you would
 have to rely on \tet{bnrstark}, or \tet{rnfkummer}.)
 
 \syn{subgrouplist0}{\var{bnr},\var{bound},\fl}, where $\fl$
@@ -6925,7 +6939,7 @@ HNF\sidx{Hermite normal form} form), one can for instance use
 [1, 0; 0, 2]
 [2, 0; 0, 1]
 [1, 0; 0, 1]
-@eprog
+@eprog\noindent
 Note that in this last representation, the index $[G:H]$ is given by the
 determinant. See \tet{galoissubcyclo} and \tet{galoisfixedfield} for
 \tet{nfsubfields} applications to \idx{Galois} theory.
