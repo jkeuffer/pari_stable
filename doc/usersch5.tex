@@ -780,10 +780,6 @@ polynomial part.
 \fun{GEN}{gcvtoi}{GEN x, long *e} same as \key{grndtoi} except that
 rounding is replaced by truncation.
 
-\fun{GEN}{gred[z]}{GEN x[, GEN z]} reduces \kbd{x} to lowest terms if \kbd{x}
-is a fraction or rational function, this is used internally to handle
-types \typ{FRAC} and \typ{RFRAC}.
-
 \fun{GEN}{content}{GEN x} creates the GCD of all the components of~\kbd{x}.
 
 \fun{GEN}{normalize}{GEN x} applied to an unnormalized power series~\kbd{x}
