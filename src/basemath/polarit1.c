@@ -2677,8 +2677,8 @@ rootsold(GEN x, long l)
     for (i=2; i<deg+2; i++)
     {
       av3=avma; p3=(GEN)xd0[i];
-      p4=gabs(greal(p3),l);
-      p5=gabs(gimag(p3),l);
+      p4 = gabs(greal(p3),l);
+      p5 = gabs(gimag(p3),l);
       xdabs[i]=lpileupto(av3, gadd(p4,p5));
     }
     av0=avma; xc=gcopy(ps); xd=gcopy(xd0); av2=avma;
@@ -2691,7 +2691,7 @@ rootsold(GEN x, long l)
       }
       else
       {
-        p3=gshift(p2,e); p4=poleval(xc,p3); p5=gnorm(p4); exc=0;
+        p3=gshift(p2,e); p4 = poleval(xc,p3); p5 = gnorm(p4); exc=0;
         while (exc >= -20)
         {
           p7 = gneg_i(gdiv(p4, poleval(xd,p3)));
@@ -2720,34 +2720,35 @@ rootsold(GEN x, long l)
             return roots2(x,l);
           }
         }
-        p1=(GEN)y[k+m*i]; setlg(p1[1],3); setlg(p1[2],3); gaffect(p3,p1);
-        avma=av2; p14=(GEN)p1[1]; p15=(GEN)p1[2];
-        for (ln=4; ln<=l; ln=(ln<<1)-2)
+        p1 = (GEN)y[k+m*i];
+        setlg(p1[1], 3);
+        setlg(p1[2], 3); gaffect(p3, p1); avma = av2;
+        p14 = (GEN)p1[1];
+        p15 = (GEN)p1[2];
+        for (ln = 4; ln <= l; ln = (ln<<1)-2)
         {
-          setlg(p14,ln); setlg(p15,ln);
-          if (gcmp0(p14)) { settyp(p14,t_INT); p14[1]=2; }
-          if (gcmp0(p15)) { settyp(p15,t_INT); p15[1]=2; }
-          p4=poleval(xc,p1);
-          p5=poleval(xd,p1); p6=gneg_i(gdiv(p4,p5));
-          settyp(p14,t_REAL); settyp(p15,t_REAL);
-          gaffect(gadd(p1,p6),p1); avma=av2;
+          setlg(p14,ln); if (gcmp0(p14)) { settyp(p14,t_INT); p14[1]=2; }
+          setlg(p15,ln); if (gcmp0(p15)) { settyp(p15,t_INT); p15[1]=2; }
+          p6 = gneg_i(gdiv(poleval(xc,p1), poleval(xd,p1)));
+          settyp(p14,t_REAL);
+          settyp(p15,t_REAL);
+          gaffect(gadd(p1,p6), p1); avma=av2;
         }
       }
-      setlg(p14,l); setlg(p15,l);
-      p7=gcopy(p1); p14=(GEN)(p7[1]); p15=(GEN)(p7[2]);
-      setlg(p14,l+1); setlg(p15,l+1);
+      setlg(p14,l);
+      setlg(p15,l); p7 = gcopy(p1); 
+      p14 = (GEN)p7[1]; setlg(p14,l+1);
+      p15 = (GEN)p7[2]; setlg(p15,l+1);
       if (gcmp0(p14)) { settyp(p14,t_INT); p14[1]=2; }
       if (gcmp0(p15)) { settyp(p15,t_INT); p15[1]=2; }
       for (ii=1; ii<=5; ii++)
       {
-        p4=poleval(ps,p7); p5=poleval(xd0,p7);
-        p6=gneg_i(gdiv(p4,p5)); p7=gadd(p7,p6);
-        p14=(GEN)(p7[1]); p15=(GEN)(p7[2]);
-        if (gcmp0(p14)) { settyp(p14,t_INT); p14[1]=2; }
-        if (gcmp0(p15)) { settyp(p15,t_INT); p15[1]=2; }
+        p7 = gadd(p7, gneg_i(gdiv(poleval(xc,p1), poleval(xd,p1))));
+        p14 = (GEN)p7[1]; if (gcmp0(p14)) { settyp(p14,t_INT); p14[1]=2; }
+        p15 = (GEN)p7[2]; if (gcmp0(p15)) { settyp(p15,t_INT); p15[1]=2; }
       }
-      gaffect(p7,p1); p4=poleval(ps,p7);
-      p6=gdiv(p4,poleval(xdabs,gabs(p7,l)));
+      gaffect(p7, p1); 
+      p6 = gdiv(poleval(ps,p7), poleval(xdabs,gabs(p7,l)));
       if (gexpo(p6)>=expmin)
       {
         avma=av;
