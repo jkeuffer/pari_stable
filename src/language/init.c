@@ -1906,7 +1906,13 @@ long
 TIMER(pari_timer *T)
 {
   struct tms t; times(&t);
-  return _get_time(T, t.tms_utime, CLK_TCK);
+  return _get_time(T, t.tms_utime,
+#ifdef _SC_CLK_TCK
+                      sysconf(_SC_CLK_TCK)
+#else
+                      CLK_TCK
+#endif
+  );
 }
 #elif USE_GETRUSAGE
 
@@ -2091,7 +2097,7 @@ geni(void) { return gi; }
  *
  * Currently the following functions have no code word, but a valence code.
  * 'O' 50, 'if' 80, 'until' 82, 'while' 81, 'global' 88,
- * Valences: 
+ * Valences:
  * 0  for functions without mandatory args.
  * 1  for functions with mandatory args.
  * 50 'O'

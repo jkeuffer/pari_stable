@@ -257,6 +257,9 @@ BA 21- type() does not allow to change object types anymore.
        information is discarded.
    48- modulargcd() was very inefficient for non-monic t_POLs
        [ e.g (poltchebi(x) - 1) / (x-1) ]
+JD 49- [timer: ] use sysconf(_SC_CLK_TCK) instead of CLK_TCK
+       if available, and make sure one of these is available before choosing
+       times() in Configure
 
   Added
     1- make test-all [ all available test suites (SLOW !)]
