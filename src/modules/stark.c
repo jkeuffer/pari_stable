@@ -2841,7 +2841,7 @@ quadhilbertreal(GEN D, GEN flag, long prec)
 {
   pari_sp av = avma;
   long newprec;
-  VOLATILE long cl;
+  VOLATILE long cl, v;
   VOLATILE GEN pol, bnf, bnr, dataC, bnrh, nf, exp;
 
   (void)&prec; /* prevent longjmp clobbering it */
@@ -2858,11 +2858,10 @@ quadhilbertreal(GEN D, GEN flag, long prec)
   }
 
   /* initialize the polynomial defining Q(sqrt{D}) as a polynomial in y */
-  pol = quadpoly(D);
-  setvarn(pol, fetch_var());
-
+  v = fetch_var();
 START:
   /* compute the class group */
+  pol = quadpoly0(D, v);
   bnf = bnfinit0(pol, 1, NULL, prec);
   nf  = (GEN)bnf[7];
   disable_dbg(-1);
