@@ -2331,8 +2331,19 @@ static void
 FpV_Fp_mul_part_ip(GEN z, GEN u, GEN p, long k)
 {
   long i;
-  for (i = 1; i <= k; i++) 
-    if (signe(z[i])) z[i] = lmodii(mulii(u,(GEN)z[i]), p);
+  if (is_pm1(u)) {
+    if (signe(u) > 0) {
+      for (i = 1; i <= k; i++) 
+        if (signe(z[i])) z[i] = lmodii((GEN)z[i], p);
+    } else {
+      for (i = 1; i <= k; i++) 
+        if (signe(z[i])) z[i] = lmodii(negi((GEN)z[i]), p);
+    }
+  }
+  else {
+    for (i = 1; i <= k; i++) 
+      if (signe(z[i])) z[i] = lmodii(mulii(u,(GEN)z[i]), p);
+  }
 }
 static void
 FpV_red_part_ip(GEN z, GEN p, long k)
@@ -2349,7 +2360,7 @@ allhnfmod(GEN x, GEN dm, int flag)
   pari_sp av, lim;
   const int modid = (flag & hnf_MODID);
   long li, co, i, j, k, def, ldef, ldm;
-  GEN a, b, w, p1, p2, u, v, DONE = NULL;
+  GEN a, b, p1, p2, u, v;
 
   if (typ(dm)!=t_INT) err(typeer,"allhnfmod");
   if (!signe(dm)) return hnf(x);
@@ -2357,7 +2368,6 @@ allhnfmod(GEN x, GEN dm, int flag)
 
   co = lg(x); if (co == 1) return cgetg(1,t_MAT);
   li = lg(x[1]);
-  if (modid) DONE = vecsmall_const(li - 1, 0);
   av = avma; lim = stack_lim(av,1);
   x = dummycopy(x);
 
@@ -2367,8 +2377,7 @@ allhnfmod(GEN x, GEN dm, int flag)
     ldef = li - co;
     if (!modid) err(talker,"nb lines > nb columns in hnfmod");
   }
-  /* Avoid wasteful divisions. To prevent coeff explosion, only reduce mod dm
-   * when lg(coeff) > ldm */
+  /* To prevent coeff explosion, only reduce mod dm when lg(coeff) > ldm */
   ldm = lgefint(dm);
   for (def = co-1,i = li-1; i > ldef; i--,def--)
   {
@@ -2402,70 +2411,82 @@ allhnfmod(GEN x, GEN dm, int flag)
       a[k++] = (long)vec_Cei(li-1, i, dm);
       for (     ; k <= co;  k++) a[k] = x[k-1];
       ldef--; if (ldef < 0) ldef = 0;
-      co++; def++; x = a; DONE[i] = 1;
+      co++; def++; x = a;
     }
   }
-  w = cgetg(modid? li+1: li, t_MAT);
-  setlg(w, li); b = dm;
-  for (def = co-1,i = li-1; i > ldef; i--,def--)
-  {
-    GEN d = bezout(gcoeff(x,i,def),b,&u,&v);
-    w[i] = x[def];
-    FpV_Fp_mul_part_ip((GEN)w[i], u, b, i-1);
-    coeff(w,i,i) = (long)d;
-    if (!modid && i > 1) b = diviiexact(b,d);
-  }
-  for (i = 1; i <= ldef; i++) w[i] = (long)vec_Cei(li-1, i, dm);
   if (modid)
   { /* w[li] is an accumulator, discarded at the end */
-    for (i = li-1; i > ldef; i--)
+    GEN w = cgetg(li+1, t_MAT); setlg(w, li);
+    x += co - li;
+    for (i = li-1; i > ldef; i--) w[i] = x[i];
+    for (        ; i > 0;    i--) w[i] = (long)vec_Cei(li-1, i, dm);
+    x = w;
+    for (i = li-1; i > 0; i--)
     { /* check that dm*Id \subset L + add up missing dm*Id components */
       GEN d, c;
-      if (DONE[i]) continue;
-      d = gcoeff(w,i,i); if (is_pm1(d)) continue;
-
-      c = cgetg(li, t_COL);
-      for (j = 1; j < i; j++) c[j] = lresii(gcoeff(w,j,i),d);
-      for (     ; j <li; j++) c[j] = zero;
-      if (!egalii(dm,d)) c = gmul(diviiexact(dm,d), c);
-      w[li] = (long)c;
-      for (j = i - 1; j > 0; j--)
+      x[i] = x[i];
+      d = bezout(gcoeff(x,i,i),dm, &u,&v);
+      coeff(x,i,i) = (long)d;
+      if (is_pm1(d))
       {
-        GEN a = gcoeff(w, j, li);
+        FpV_Fp_mul_part_ip((GEN)x[i], u, dm, i-1);
+        continue;
+      }
+      c = cgetg(li, t_COL);
+      for (j = 1; j < i; j++) c[j] = lresii(gcoeff(x,j,i),d);
+      for (     ; j <li; j++) c[j] = zero;
+      if (!egalii(dm, d)) c = gmul(c, diviiexact(dm, d));
+      x[li] = (long)c;
+      FpV_Fp_mul_part_ip((GEN)x[i], u, dm, i-1);
+      for (j = i - 1; j > ldef; j--)
+      {
+        GEN a = gcoeff(x, j, li);
         if (!signe(a)) continue;
-        ZV_elem(a, gcoeff(w,j,j), w, NULL, li,j);
-        FpV_red_part_ip((GEN)w[li], dm, j-1);
-        FpV_red_part_ip((GEN)w[j],  dm, j-1);
+        ZV_elem(a, gcoeff(x,j,j), x, NULL, li,j);
+        FpV_red_part_ip((GEN)x[li], dm, j-1);
+        FpV_red_part_ip((GEN)x[j],  dm, j-1);
       }
     }
   }
-  if (flag & hnf_PART) return w;
+  else
+  {
+    x += co - li; x[0] = evaltyp(t_MAT) | evallg(li); /* kill 0 columns */
+    b = dm;
+    for (i = li-1; i > 0; i--)
+    {
+      GEN d = bezout(gcoeff(x,i,i),b, &u,&v);
+      coeff(x,i,i) = (long)d;
+      FpV_Fp_mul_part_ip((GEN)x[i], u, b, i-1);
+      if (i > 1) b = diviiexact(b,d);
+    }
+  }
+  if (flag & hnf_PART) return x;
 
   if (!modid)
   { /* compute optimal value for dm */
-    dm = gcoeff(w,1,1);
-    for (i = 2; i < li; i++) dm = mpppcm(dm, gcoeff(w,i,i));
+    dm = gcoeff(x,1,1);
+    for (i = 2; i < li; i++) dm = mpppcm(dm, gcoeff(x,i,i));
   }
 
   ldm = lgefint(dm);
   for (i = li-2; i > 0; i--)
   {
-    GEN diag = gcoeff(w,i,i);
+    GEN diag = gcoeff(x,i,i);
     for (j = i+1; j < li; j++)
     {
-      b = negi(truedvmdii(gcoeff(w,i,j), diag, NULL));
-      p1 = ZV_lincomb(gun,b, (GEN)w[j], (GEN)w[i]);
-      w[j] = (long)p1;
+      b = negi(truedvmdii(gcoeff(x,i,j), diag, NULL));
+      p1 = ZV_lincomb(gun,b, (GEN)x[j], (GEN)x[i]);
+      x[j] = (long)p1;
       for (k=1; k<i; k++)
         if (lgefint(p1[k]) > ldm) p1[k] = lresii((GEN)p1[k], dm);
       if (low_stack(lim, stack_lim(av,1)))
       {
         if (DEBUGMEM>1) err(warnmem,"allhnfmod[2]. i=%ld", i);
-        gerepileall(av, 2, &w, &dm); diag = gcoeff(w,i,i);
+        gerepileall(av, 2, &x, &dm); diag = gcoeff(x,i,i);
       }
     }
   }
-  return gerepilecopy(av, w);
+  return gerepilecopy(av, x);
 }
 
 GEN
