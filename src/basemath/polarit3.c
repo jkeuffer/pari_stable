@@ -3403,6 +3403,14 @@ ZX_caract(GEN A, GEN B, long v)
   return ZX_caract_sqf(A, B, NULL, v);
 }
 
+static GEN
+trivial_case(GEN A, GEN B)
+{
+  if (deg(A) == 0) A = (GEN)A[2];
+  if (typ(A) == t_INT) return gpowgs(A, deg(B));
+  return NULL;
+}
+
 GEN
 ZX_resultant_all(GEN A, GEN B, ulong bound)
 {
@@ -3412,6 +3420,7 @@ ZX_resultant_all(GEN A, GEN B, ulong bound)
   byteptr d = diffptr + 3000;
   ulong p = 27449; /* p = prime(3000) */
 
+  if ((H = trivial_case(A,B)) || (H = trivial_case(B,A))) return H;
   q = H = NULL;
   av2 = avma; lim = stack_lim(av,2);
   if (!bound) bound = ZY_ZXY_ResBound(A,B);
