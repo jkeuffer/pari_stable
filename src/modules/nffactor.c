@@ -78,9 +78,11 @@ unifpol0(GEN nf,GEN pol,long flag)
   switch(typ(pol))
   {
     case t_INT: case t_FRAC: case t_RFRAC:
+      if (flag) return gcopy(pol);
       pol = gmul(pol,vun); break;
 
     case t_POL:
+      if (flag && !degpol(pol)) return gcopy(constant_term(pol));
       pol = gmodulcp(pol,f); /* fall through */
     case t_POLMOD:
       pol = algtobasis(nf,pol);
@@ -155,7 +157,7 @@ static GEN
 choose_prime(GEN nf, GEN bad, GEN *p, byteptr *PT)
 {
   GEN  q = icopy(gun), r, x = (GEN)nf[1];
-  ulong pp = itou(*p);
+  ulong pp = *p? itou(*p): 0;
   byteptr pt = *PT;
   gpmem_t av = avma;
   for (;;)
@@ -1038,6 +1040,8 @@ nf_combine_factors(nfcmbf_t *T, GEN polred, GEN p, long klim)
 
   /* FIXME: neither nfcmbf2 nor LLL_cmbf can handle the non-nf case */
 
+  T->res      = cgetg(nft+1,t_VEC);
+  T->nfactmod = nft;
   T->ZC = L2_bound(nf, &(T->dn));
   T->Br = nf_root_bounds(pol, nf);
 #if 0
@@ -1100,8 +1104,8 @@ nfsqff(GEN nf,GEN pol, long fl)
     fprintferr("Bound on T2-norm of a %s: %Z\n", fl?"root":"factor", C);
   }
 
-  ap = polred = pr = NULL; /* gcc -Wall */
-  nbf = 0; ap = cgeti(3); affui(0, ap);
+  p = polred = pr = NULL; /* gcc -Wall */
+  nbf = 0; ap = NULL;
   for (ct = 5;;)
   {
     GEN apr = choose_prime(nf, bad, &ap, &pt);
@@ -1113,7 +1117,7 @@ nfsqff(GEN nf,GEN pol, long fl)
     anbf = fl? FpX_nbroots(polred,ap): FpX_nbfact(polred,ap);
     if (!nbf || anbf < nbf)
     {
-      nbf = anbf; pr = apr; p = icopy(ap);
+      nbf = anbf; pr = apr; p = ap;
       if (DEBUGLEVEL>3)
         fprintferr("%3ld %s at prime ideal above %Z\n",
                    nbf, fl?"roots": "factors", p);
@@ -1168,8 +1172,6 @@ nfsqff(GEN nf,GEN pol, long fl)
   T.lt       = lt;
   T.fact     = (GEN)factmod0(polred,p)[1];
   T.nfact    = 0;
-  T.res      = cgetg(m,t_VEC);
-  T.nfactmod = m-1;
   T.pr       = pr;
   T.pa       = pk;
   T.a        = k;
