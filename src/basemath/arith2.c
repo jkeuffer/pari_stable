@@ -1010,7 +1010,7 @@ issquarefree(GEN x)
       av = avma; d = ggcd(x, derivpol(x));
       avma = av; return (lg(d) == 3);
     default: err(typeer,"issquarefree");
-      return NULL; /* not reached */
+      return 0; /* not reached */
   }
 }
 
