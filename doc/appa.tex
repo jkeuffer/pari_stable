@@ -350,15 +350,19 @@ They are also harder to upgrade: you will have to recompile them all instead
 of just installing the new dynamic library. On the other hand, there's no
 risk of breaking them by installing a new pari library.
 
-\subsec{The Galois package:} The default \kbd{polgalois} function can only
-compute Galois groups of polynomials of degree less or equal to 7. If you
-want to handle polynomials of degree bigger than 7 (and less than 11), you
-need to fetch a separate archive: \kbd{galdata.tgz} which can probably be
-found at the same place where you got the main PARI archive, and on the
-\kbd{pari} ftp server in any case. Untar the archive in the \kbd{datadir}
-directory which was chosen at \kbd{Configure} time (it's one of the last
-messages on the screen if you did not run \kbd{Configure -a}). You can then
-test the \kbd{polgalois} function with your favourite polynomials.
+\subsec{Extra packages:} The following optional packages endow PARI
+with some extra capabilities (a single package for now!). They
+
+$\bullet$ \kbd{galdata}: The default \kbd{polgalois} function can only
+compute Galois groups of polynomials of degree less or equal to 7. Install
+this package if you want to handle polynomials of degree bigger than 7 (and
+less than 11). \medskip
+
+To install package \emph{pack}, you need to fetch the separate archive:
+\emph{pack}\kbd{.tgz} which you can download from the \kbd{pari} server.
+Copy the archive in the PARI toplevel directory, then extract its
+contents; these will go to \kbd{data/\emph{pack}/}. Typing \kbd{make
+install-data} will then install all such packages.
 
 \subsec{The \kbd{GPRC} file:} Copy the file \kbd{misc/gprc.dft} (or
 \kbd{gprc.dos} if you're using \kbd{GP.EXE}) to \kbd{\$HOME/.gprc}. Modify

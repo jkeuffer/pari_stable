@@ -48,7 +48,7 @@ all::
 	@-cd doc && \$(MAKE) doc
 	@\$(MAKE) gp
 
-gp bench test-kernel $top_test_extra $top_dotest_extra install cleanobj cleantest install-bin install-doc install-lib-sta install-bin-sta dobench tune::
+gp bench test-kernel $top_test_extra $top_dotest_extra install cleanobj cleantest install-bin install-doc install-data install-lib-sta install-bin-sta dobench tune::
 	@dir=\`config/objdir\`; echo "Making \$@ in \$\$dir";\\
 	 if test ! -d \$\$dir; then echo "Please run Configure first!"; exit 1; fi;\\
 	cd \$\$dir && \$(MAKE) \$@
