@@ -963,6 +963,61 @@ abelian_group(GEN v)
   }
   return G;
 }
+
+GEN
+groupelts_center(GEN S)
+{
+  pari_sp ltop=avma;
+  long i,j;
+  long n=lg(S)-1, l=n;
+  GEN elts=bitvec_alloc(n+1);
+  GEN V;
+  for(i=1; i<=n; i++)
+  {
+    if (bitvec_test(elts,i)) {l--;  continue;}
+    for(j=1; j<=n; j++)
+      if (!perm_commute((GEN)S[i],(GEN)S[j]))
+      {
+        bitvec_set(elts,i); l--;
+        bitvec_set(elts,j);
+        break;
+      }
+  }
+  V=cgetg(l+1,t_VEC);
+  for (i=1, j=1; i<=n ;i++)
+    if (!bitvec_test(elts,i))
+      V[j++]=lcopy((GEN)S[i]);
+  return gerepileupto(ltop,V);
+}
+
+GEN groupelts_abelian_group(GEN S)
+{
+  pari_sp ltop=avma;
+  GEN Qgen,Qord,Qelt;
+  GEN Q;
+  long i,j;
+  long n=lg(S[1])-1;
+  long l=lg(S);
+  Qord = cgetg(l, t_VECSMALL);
+  Qgen = cgetg(l, t_VEC);
+  Qelt = cgetg(2, t_VEC);
+  Qelt[1] = (long) perm_identity(n);
+  for (i = 1, j = 1; i < l; ++i)
+  {
+    Qgen[j] = (long) S[i];
+    Qord[j] = (long) perm_relorder((GEN) Qgen[j], vecvecsmall_sort(Qelt));
+    if (Qord[j]!=1)
+    {
+      Qelt=perm_generate((GEN) Qgen[j], Qelt, Qord[j]);
+      j++;
+    }
+  }
+  setlg(Qgen,j); setlg(Qord,j);
+  Q=cgetg(3,t_VEC);
+  Q[1]=(long)Qgen;
+  Q[2]=(long)Qord;
+  return gerepilecopy(ltop,Q);
+}
  
 GEN 
 group_export_GAP(GEN G)

@@ -1022,6 +1022,10 @@ GEN     nextprime(GEN n);
 GEN     plisprime(GEN N, long flag);
 GEN     precprime(GEN n);
 
+/* groupid.c*/
+
+long    group_ident(GEN G, GEN S);
+
 /* init.c */
 
 long    TIMER(pari_timer *T);
@@ -1148,6 +1152,7 @@ GEN     rnfdedekind(GEN nf,GEN T,GEN pr);
 GEN     unifpol(GEN nf,GEN pol,long flag);
 
 /* part.c */
+
 GEN     numbpart(GEN x);
 
 /* perm.c */
@@ -1157,26 +1162,33 @@ GEN     bitvec_alloc(long n);
 long    bitvec_test(GEN bitvec, long b);
 void    bitvec_set(GEN bitvec, long b);
 void    bitvec_clear(GEN bitvec, long b);
+GEN     cyclicgroup(GEN g, long s);
 GEN     cyclicperm(long l, long d);
 GEN     cyc_powtoperm(GEN cyc, long exp);
 GEN     group_abelianHNF(GEN G, GEN L);
 GEN     group_abelianSNF(GEN G, GEN L);
+long    group_domain(GEN G);
 GEN     group_elts(GEN G, long n);
 GEN     group_export(GEN G, long format);
 long    group_isabelian(GEN G);
 long    group_order(GEN G);
+GEN     group_quotient(GEN G, GEN H);
 GEN     group_subgroups(GEN G);
+GEN     groupelts_center(GEN S);
+GEN     groupelts_abelian_group(GEN S);
 GEN     perm_cycles(GEN v);
 GEN     perm_identity(long l);
 GEN     perm_inv(GEN x);
 GEN     perm_mul(GEN s, GEN t);
 long    perm_order(GEN perm);
 GEN     perm_pow(GEN perm, long exp);
+GEN     quotient_group(GEN C, GEN G);
 GEN     vecperm_orbits(GEN v, long n);
 GEN     vecsmall_append(GEN V, long s);
 GEN     vecsmall_prepend(GEN V, long s);
 GEN     vecsmall_const(long n, long c);
 int     vecsmall_lexcmp(GEN x, GEN y);
+long    vecsmall_pack(GEN V, long base, long mod);
 int     vecsmall_prefixcmp(GEN x, GEN y);
 void    vecsmall_sort(GEN V);
 GEN     vecsmall_uniq(GEN V);

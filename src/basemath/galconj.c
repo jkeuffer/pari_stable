@@ -3352,8 +3352,8 @@ GEN
 galois_group(GEN gal)
 {
   GEN G;
-  gal = checkgal(gal);
-  G = cgetg(3,t_VEC);
+  gal  = checkgal(gal);
+  G    = cgetg(3,t_VEC);
   G[1] = gal[7];
   G[2] = gal[8];
   return G;
@@ -3395,4 +3395,19 @@ galoisexport(GEN gal, long format)
   pari_sp ltop=avma;
   GEN G=galois_group(gal);
   return gerepileupto(ltop,group_export(G,format));
+}
+
+GEN
+galoisidentify(GEN gal)
+{
+  pari_sp ltop=avma;
+  GEN G=galois_group(gal);
+  long idx=group_ident(G,(GEN)gal[6]);
+  long card=group_order(G);
+  GEN V;
+  avma=ltop;
+  V=cgetg(3,t_VEC);
+  V[1]=lstoi(card);
+  V[2]=lstoi(idx);
+  return V;
 }
