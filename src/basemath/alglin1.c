@@ -2480,7 +2480,7 @@ det(GEN a)
 /*                SPECIAL HNF (FOR INTERNAL USE !!!)               */
 /*                                                                 */
 /*******************************************************************/
-extern GEN lincomb_integral(GEN u, GEN v, GEN X, GEN Y);
+extern GEN ZV_lincomb(GEN u, GEN v, GEN X, GEN Y);
 extern GEN vconcat(GEN Q1, GEN Q2);
 
 static int
@@ -2836,7 +2836,7 @@ hnfspec(long** mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
       for (s=0, i=lk0+1; i<=lig; i++)
         absmax(s, matj[perm[i]] -= t*p[perm[i]]);
       vmax[j] = s;
-      T[j] = (long)lincomb_integral(gun,stoi(-t), (GEN)T[j],p1);
+      T[j] = (long)ZV_lincomb(gun,stoi(-t), (GEN)T[j],p1);
     }
     lig--; col--;
     if (low_stack(lim, stack_lim(av2,1)))
@@ -2890,7 +2890,7 @@ END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
       {
         for (i1=1; i1<i0; i1++)
           p1[i1] = lsubii((GEN)p1[i1], mulii(p2,(GEN) Bk[i1]));
-        T[j] = (long)lincomb_integral(gun,negi(p2), (GEN)T[j],Tk);
+        T[j] = (long)ZV_lincomb(gun,negi(p2), (GEN)T[j],Tk);
       }
     }
     if (low_stack(lim, stack_lim(av2,1)))

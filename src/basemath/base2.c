@@ -3013,22 +3013,6 @@ rnfisfree(GEN bnf, GEN order)
 /**		      COMPOSITUM OF TWO NUMBER FIELDS                **/
 /**								     **/
 /**********************************************************************/
-#define nexta(a) (a>0 ? -a : 1-a)
-
-/* write 'alpha + a beta' */
-static void
-print_elt(long a)
-{
-  fprintferr("trying beta ");
-  if (a)
-  {
-    if (a>0) fprintferr("- "); else fprintferr("+ ");
-    if (labs(a)>1) fprintferr("%ld alpha\n",labs(a));
-    else fprintferr("alpha\n");
-  }
-  flusherr();
-}
-
 extern GEN ZY_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LPRS);
 extern GEN squff2(GEN x, long klim, long hint);
 extern GEN to_polmod(GEN x, GEN mod);

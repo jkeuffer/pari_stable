@@ -20,7 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /********************************************************************/
 #include "pari.h"
 #include "parinf.h"
-extern GEN lincomb_integral(GEN u, GEN v, GEN X, GEN Y);
+extern GEN ZV_lincomb(GEN u, GEN v, GEN X, GEN Y);
 extern GEN roots_to_pol_r1r2(GEN a, long r1, long v);
 extern GEN makebasis(GEN nf,GEN pol);
 extern GEN caractducos(GEN p, GEN x, int v);
@@ -1236,7 +1236,7 @@ lllintpartialall(GEN m, long flag)
         dot12new = addii(dot12, mulii(q, dot22));
         dot11 = addii(dot11, mulii(q, addii(dot12, dot12new)));
         dot12 = dot12new;
-        tm[1] = (long)lincomb_integral(gun,q, (GEN)tm[1],(GEN)tm[2]);
+        tm[1] = (long)ZV_lincomb(gun,q, (GEN)tm[1],(GEN)tm[2]);
       }
 
       /* Interchange the output vectors v1 and v2.  */
@@ -1261,7 +1261,7 @@ lllintpartialall(GEN m, long flag)
       {
         coeff(tm1,1,icol) = coeff(tm,1,icol);
 	coeff(tm1,2,icol) = coeff(tm,2,icol);
-        mid[icol] = (long)lincomb_integral(
+        mid[icol] = (long)ZV_lincomb(
            gcoeff(tm,1,icol),gcoeff(tm,2,icol), (GEN)m[1],(GEN)m[2]);
       }
       for (icol = 3; icol <= ncol; icol++)
@@ -1289,7 +1289,7 @@ lllintpartialall(GEN m, long flag)
         coeff(tm1, 2, icol) = ladd(gmul(q1neg, gcoeff(tm,2,1)),
 				   gmul(q2neg, gcoeff(tm,2,2)));
         mid[icol] = ladd(curcol,
-          lincomb_integral(q1neg,q2neg, (GEN)mid[1],(GEN)mid[2]));
+          ZV_lincomb(q1neg,q2neg, (GEN)mid[1],(GEN)mid[2]));
       } /* for icol */
     } /* local block */
   }
@@ -1348,9 +1348,9 @@ lllintpartialall(GEN m, long flag)
 
 	    reductions++; q = negi(q);
 	    tm2[k1]=(long)
-              lincomb_integral(gun,q, (GEN)tm2[k1], (GEN)tm2[k2]);
+              ZV_lincomb(gun,q, (GEN)tm2[k1], (GEN)tm2[k2]);
 	    dotprd[k1]=(long)
-              lincomb_integral(gun,q, (GEN)dotprd[k1], (GEN)dotprd[k2]);
+              ZV_lincomb(gun,q, (GEN)dotprd[k1], (GEN)dotprd[k2]);
 	    coeff(dotprd, k1, k1) = laddii(gcoeff(dotprd,k1,k1),
 				           mulii(q, gcoeff(dotprd,k2,k1)));
 	    for (dcol = 1; dcol <= ncol; dcol++)
@@ -1551,7 +1551,7 @@ lindep(GEN x, long prec)
     avma = av1; r = grndtoi(m[i1][i], &e);
     if (e >= 0) err(talker,"precision too low in lindep");
     r  = negi(r);
-    p1 = lincomb_integral(gun,r, b[i1],b[i]);
+    p1 = ZV_lincomb(gun,r, b[i1],b[i]);
     av1 = avma;
     b[i1]=b[i]; b[i]=p1; f=addir(r,m[i1][i]);
     for (j=1; j<i; j++)
@@ -1776,8 +1776,8 @@ lllall0(GEN x, long flag)
       {
 	q = truedvmdii(addii(u,(GEN)B[k]),shifti((GEN)B[k],1), NULL);
         r = negi(q);
-        h[k] = (long)lincomb_integral(gun,r, (GEN)h[k],(GEN)h[k-1]);
-        x[k] = (long)lincomb_integral(gun,r, (GEN)x[k],(GEN)x[k-1]);
+        h[k] = (long)ZV_lincomb(gun,r, (GEN)h[k],(GEN)h[k-1]);
+        x[k] = (long)ZV_lincomb(gun,r, (GEN)x[k],(GEN)x[k-1]);
 	coeff(L,k,k-1)=laddii(gcoeff(L,k,k-1),mulii(r,(GEN)B[k]));
 	for (i=1; i<k-1; i++)
 	  coeff(L,k,i)=laddii(gcoeff(L,k,i),mulii(r,gcoeff(L,k-1,i)));
@@ -1815,8 +1815,8 @@ lllall0(GEN x, long flag)
 	{
 	  q = truedvmdii(addii(u,(GEN)B[l+1]),shifti((GEN)B[l+1],1), NULL);
           r = negi(q);
-	  h[k] = (long)lincomb_integral(gun,r,(GEN)h[k],(GEN)h[l]);
-	  x[k] = (long)lincomb_integral(gun,r,(GEN)x[k],(GEN)x[l]);
+	  h[k] = (long)ZV_lincomb(gun,r,(GEN)h[k],(GEN)h[l]);
+	  x[k] = (long)ZV_lincomb(gun,r,(GEN)x[k],(GEN)x[l]);
 	  coeff(L,k,l)=laddii(gcoeff(L,k,l),mulii(r,(GEN)B[l+1]));
 	  for (i=1; i<l; i++)
 	    coeff(L,k,i)=laddii(gcoeff(L,k,i),mulii(r,gcoeff(L,l,i)));

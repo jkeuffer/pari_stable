@@ -226,6 +226,7 @@ adj(GEN x)
 /*                                                                 */
 /*******************************************************************/
 #define swap(x,y) { long _t=x; x=y; y=_t; }
+#define gswap(x,y) { GEN _t=x; x=y; y=_t; }
 
 GEN
 hess(GEN x)
@@ -1134,41 +1135,86 @@ init_hnf(GEN x, GEN *denx, long *co, long *li, long *av)
   return gmul(x,*denx);
 }
 
-/* return c * X */
-#ifdef INLINE
-INLINE
-#endif
 GEN
-int_col_mul(GEN c, GEN X)
+ZV_copy(GEN x)
+{
+  long i, lx = lg(x);
+  GEN y = cgetg(lx, t_COL);
+  for (i=1; i<lx; i++) y[i] = signe(x[i])? licopy((GEN)x[i]): zero;
+  return y;
+}
+
+GEN
+ZM_copy(GEN x)
+{
+  long i, lx = lg(x);
+  GEN y = cgetg(lx, t_MAT);
+
+  for (i=1; i<lx; i++)
+    y[i] = (long)ZV_copy((GEN)x[i]);
+  return y;
+}
+
+/* return c * X. Not memory clean if c = 1 */
+GEN
+ZV_Z_mul(GEN c, GEN X)
 {
   long i,m = lg(X);
   GEN A = new_chunk(m);
-  for (i=1; i<m; i++) A[i] = lmulii(c,(GEN)X[i]);
+  if (is_pm1(c))
+  {
+    if (signe(c) > 0)
+      { for (i=1; i<m; i++) A[i] = X[i]; }
+    else
+      { for (i=1; i<m; i++) A[i] = lnegi((GEN)X[i]); }
+  }
+  else /* c = 0 should be exceedingly rare */
+    { for (i=1; i<m; i++) A[i] = lmulii(c,(GEN)X[i]); }
   A[0] = X[0]; return A;
 }
 
-/* X,Y columns; u,v scalars; everybody is integral. return A = u*X + v*Y */
+/* X,Y columns; u,v scalars; everybody is integral. return A = u*X + v*Y
+ * Not memory clean if (u,v) = (1,0) or (0,1) */
 GEN
-lincomb_integral(GEN u, GEN v, GEN X, GEN Y)
+ZV_lincomb(GEN u, GEN v, GEN X, GEN Y)
 {
   long av,i,lx,m;
   GEN p1,p2,A;
 
-  if (!signe(u)) return int_col_mul(v,Y);
-  if (!signe(v)) return int_col_mul(u,X);
+  if (!signe(u)) return ZV_Z_mul(v,Y);
+  if (!signe(v)) return ZV_Z_mul(u,X);
   lx = lg(X); A = cgetg(lx,t_COL); m = lgefint(u)+lgefint(v)+4;
-  if (gcmp1(u))
+  if (is_pm1(v)) { gswap(u,v); gswap(X,Y); }
+  if (is_pm1(u))
   {
-    for (i=1; i<lx; i++)
+    if (signe(u) > 0)
     {
-      p1=(GEN)X[i]; p2=(GEN)Y[i];
-      if      (!signe(p1)) A[i] = lmulii(v,p2);
-      else if (!signe(p2)) A[i] = licopy(p1);
-      else
+      for (i=1; i<lx; i++)
       {
-        av = avma; (void)new_chunk(m+lgefint(p1)+lgefint(p2));
-        p2 = mulii(v,p2);
-        avma = av; A[i] = laddii(p1,p2);
+        p1=(GEN)X[i]; p2=(GEN)Y[i];
+        if      (!signe(p1)) A[i] = lmulii(v,p2);
+        else if (!signe(p2)) A[i] = licopy(p1);
+        else
+        {
+          av = avma; (void)new_chunk(m+lgefint(p1)+lgefint(p2));
+          p2 = mulii(v,p2);
+          avma = av; A[i] = laddii(p1,p2);
+        }
+      }
+    }
+    else
+    {
+      for (i=1; i<lx; i++)
+      {
+        p1=(GEN)X[i]; p2=(GEN)Y[i];
+        if      (!signe(p1)) A[i] = lmulii(v,p2);
+        else if (!signe(p2)) A[i] = lnegi(p1);
+        else
+        {
+          av = avma; (void)new_chunk(m+lgefint(p1)+lgefint(p2));
+          p2 = mulii(v,p2);
+          avma = av; A[i] = lsubii(p2,p1);
+        }
       }
     }
   }
@@ -1189,6 +1235,7 @@ lincomb_integral(GEN u, GEN v, GEN X, GEN Y)
   return A;
 }
 
+/* x = [A,U], nbcol(A) = nbcol(U), A integral. Return [AV, UV], with AV HNF */
 GEN
 hnf_special(GEN x, long remove)
 {
@@ -1218,8 +1265,8 @@ hnf_special(GEN x, long remove)
       b = gcoeff(x,i,k); d = bezout(a,b,&u,&v);
       if (!is_pm1(d)) { a = divii(a,d); b = divii(b,d); }
       p1 = (GEN)x[j]; b = negi(b);
-      x[j] = (long)lincomb_integral(a,b, (GEN)x[k], p1);
-      x[k] = (long)lincomb_integral(u,v, p1, (GEN)x[k]);
+      x[j] = (long)ZV_lincomb(a,b, (GEN)x[k], p1);
+      x[k] = (long)ZV_lincomb(u,v, p1, (GEN)x[k]);
       p1 = (GEN)x2[j];
       x2[j]=  ladd(gmul(a, (GEN)x2[k]), gmul(b,p1));
       x2[k] = ladd(gmul(u,p1), gmul(v, (GEN)x2[k]));
@@ -1241,7 +1288,7 @@ hnf_special(GEN x, long remove)
       for (j=def+1; j<co; j++)
       {
 	b = negi(gdivent(gcoeff(x,i,j),p1));
-	x[j] = (long)lincomb_integral(gun,b, (GEN)x[j], (GEN)x[def]);
+	x[j] = (long)ZV_lincomb(gun,b, (GEN)x[j], (GEN)x[def]);
         x2[j]= ladd((GEN)x2[j], gmul(b, (GEN)x2[def]));
       }
       def--;
@@ -1267,8 +1314,8 @@ hnf_special(GEN x, long remove)
     setlg(x2,i);
   }
   tetpil=avma;
-  x = denx? gdiv(x,denx): gcopy(x);
-  x2 = gcopy(x2);
+  x = denx? gdiv(x,denx): ZM_copy(x);
+  x2 = ZM_copy(x2);
   {
     GEN *gptr[2]; gptr[0]=&x; gptr[1]=&x2;
     gerepilemanysp(av0,tetpil,gptr,2);
@@ -1279,75 +1326,82 @@ hnf_special(GEN x, long remove)
 }
 
 static void
-negate_icol(GEN x)
+ZV_neg(GEN x)
 {
   long i, lx = lg(x);
   for (i=1; i<lx ; i++) x[i]=lnegi((GEN)x[i]);
 }
 
-/* zero aj = Aij (!= 0)  using  ak = Aik (maybe 0) */
+/* zero aj = Aij (!= 0)  using  ak = Aik (maybe 0), via linear combination of
+ * A[j] and A[k] of determinant 1. If U != NULL, likewise update its columns */
 static void
-elem_icol(GEN aj, GEN ak, GEN A, GEN U, long j, long k)
+ZV_elem(GEN aj, GEN ak, GEN A, GEN U, long j, long k)
 {
   GEN p1,u,v,d;
 
   if (!signe(ak)) { swap(A[j],A[k]); if (U) swap(U[j],U[k]); return; }
   d = bezout(aj,ak,&u,&v);
-#if 0
+  /* frequent special case (u,v) = (1,0) or (0,1) */
   if (!signe(u))
   { /* ak | aj */
     p1 = negi(divii(aj,ak));
-    A[j]   = (long)lincomb_integral(gun, p1, (GEN)A[j], (GEN)A[k]);
+    A[j]   = (long)ZV_lincomb(gun, p1, (GEN)A[j], (GEN)A[k]);
     if (U)
-      U[j] = (long)lincomb_integral(gun, p1, (GEN)U[j], (GEN)U[k]);
+      U[j] = (long)ZV_lincomb(gun, p1, (GEN)U[j], (GEN)U[k]);
     return;
   }
   if (!signe(v))
   { /* aj | ak */
     p1 = negi(divii(ak,aj));
-    A[k]   = (long)lincomb_integral(gun, p1, (GEN)A[k], (GEN)A[j]);
+    A[k]   = (long)ZV_lincomb(gun, p1, (GEN)A[k], (GEN)A[j]);
     swap(A[j], A[k]);
     if (U) {
-      U[k] = (long)lincomb_integral(gun, p1, (GEN)U[k], (GEN)U[j]);
+      U[k] = (long)ZV_lincomb(gun, p1, (GEN)U[k], (GEN)U[j]);
       swap(U[j], U[k]);
     }
     return;
   }
-#endif
+
   if (!is_pm1(d)) { aj = divii(aj,d); ak = divii(ak,d); }
   if (DEBUGLEVEL>5) { fprintferr("(u,v) = (%Z, %Z); ",u,v); flusherr(); }
   p1 = (GEN)A[k]; aj = negi(aj);
-  A[k] = (long)lincomb_integral(u,v, (GEN)A[j],p1);
-  A[j] = (long)lincomb_integral(aj,ak, p1,(GEN)A[j]);
+  A[k] = (long)ZV_lincomb(u,v, (GEN)A[j],p1);
+  A[j] = (long)ZV_lincomb(aj,ak, p1,(GEN)A[j]);
   if (U)
   {
     p1 = (GEN)U[k];
-    U[k] = (long)lincomb_integral(u,v, (GEN)U[j],p1);
-    U[j] = (long)lincomb_integral(aj,ak, p1,(GEN)U[j]);
+    U[k] = (long)ZV_lincomb(u,v, (GEN)U[j],p1);
+    U[j] = (long)ZV_lincomb(aj,ak, p1,(GEN)U[j]);
   }
 }
 
 /* reduce A[i,j] mod A[i,j0] for j=j0+1... via column operations */
 static void
-reduce_icols(GEN A, GEN B, long i, long j0)
+ZM_reduce(GEN A, GEN U, long i, long j0)
 {
   long j, lA = lg(A);
   GEN d = gcoeff(A,i,j0);
-  if (signe(d) < 0) { negate_icol((GEN)A[j0]); if (B) negate_icol((GEN)B[j0]); }
+  if (signe(d) < 0)
+  {
+    ZV_neg((GEN)A[j0]);
+    if (U) ZV_neg((GEN)U[j0]);
+    d = gcoeff(A,i,j0);
+  }
   for (j=j0+1; j<lA; j++)
   {
     GEN q = truedvmdii(gcoeff(A,i,j), d, NULL);
     if (!signe(q)) continue;
 
     q = negi(q);
-    A[j] = (long)lincomb_integral(gun,q, (GEN)A[j], (GEN)A[j0]);
-    if (B)
-      B[j] = (long)lincomb_integral(gun,q,(GEN)B[j],(GEN)B[j0]);
+    A[j] = (long)ZV_lincomb(gun,q, (GEN)A[j], (GEN)A[j0]);
+    if (U)
+      U[j] = (long)ZV_lincomb(gun,q,(GEN)U[j],(GEN)U[j0]);
   }
 }
 
+/* remove: throw away lin.dep.columns */
 GEN
-hnf0(GEN A, long remove)       /* remove: throw away lin.dep.columns, GN */
+hnf0(GEN A, int remove)
 {
   long av0 = avma, s,li,co,av,tetpil,i,j,k,def,ldef,lim;
   GEN denx,a,p1;
@@ -1367,19 +1421,19 @@ hnf0(GEN A, long remove)       /* remove: throw away lin.dep.columns, GN */
 
       /* zero a = Aij  using  b = Aik */
       k = (j==1)? def: j-1;
-      elem_icol(a,gcoeff(A,i,k), A,NULL, j,k);
+      ZV_elem(a,gcoeff(A,i,k), A,NULL, j,k);
 
       if (low_stack(lim, stack_lim(av,1)))
       {
         if (DEBUGMEM>1) err(warnmem,"hnf[1]. i=%ld",i);
-        tetpil=avma; A=gerepile(av,tetpil,gcopy(A));
+        tetpil=avma; A=gerepile(av,tetpil,ZM_copy(A));
       }
     }
     p1 = gcoeff(A,i,def); s = signe(p1);
     if (s)
     {
-      if (s < 0) { negate_icol((GEN)A[def]); p1 = gcoeff(A,i,def); }
-      reduce_icols(A, NULL, i,def);
+      if (s < 0) ZV_neg((GEN)A[def]);
+      ZM_reduce(A, NULL, i,def);
       def--;
     }
     else
@@ -1387,7 +1441,7 @@ hnf0(GEN A, long remove)       /* remove: throw away lin.dep.columns, GN */
     if (low_stack(lim, stack_lim(av,1)))
     {
       if (DEBUGMEM>1) err(warnmem,"hnf[2]. i=%ld",i);
-      tetpil=avma; A=gerepile(av,tetpil,gcopy(A));
+      tetpil=avma; A=gerepile(av,tetpil,ZM_copy(A));
     }
   }
   if (remove)
@@ -1397,23 +1451,21 @@ hnf0(GEN A, long remove)       /* remove: throw away lin.dep.columns, GN */
     setlg(A,i);
   }
   tetpil=avma;
-  A = denx? gdiv(A,denx): gcopy(A);
+  A = denx? gdiv(A,denx): ZM_copy(A);
   return gerepile(av0,tetpil,A);
 }
 
 GEN
 hnf(GEN x) { return hnf0(x,1); }
 
-#define cmod(x,u,us2) \
-  {GEN a=modii((GEN)x,u); if (cmpii(a,us2)>0) a=subii(a,u); x=(long)a;}
-
 /* dm = multiple of diag element (usually detint(x)) */
 /* flag: don't/do append dm*matid. */
 static GEN
-allhnfmod(GEN x,GEN dm,long flag)
+allhnfmod(GEN x,GEN dm,int flag)
 {
-  long li,co,av0,av,tetpil,i,j,k,def,ldef,lim,ldm;
-  GEN a,b,w,p1,p2,d,u,v,dms2;
+  ulong av,tetpil,lim;
+  long li,co,i,j,k,def,ldef,ldm;
+  GEN a,b,w,p1,p2,d,u,v;
 
   if (typ(dm)!=t_INT) err(typeer,"allhnfmod");
   if (!signe(dm)) return hnf(x);
@@ -1421,9 +1473,9 @@ allhnfmod(GEN x,GEN dm,long flag)
   if (DEBUGLEVEL>6) fprintferr("Enter hnfmod");
 
   co=lg(x); if (co==1) return cgetg(1,t_MAT);
-  av0=avma; lim=stack_lim(av0,1);
-  dms2=shifti(dm,-1); li=lg(x[1]);
-  av=avma; x = dummycopy(x);
+  li=lg(x[1]);
+  av = avma; lim = stack_lim(av,1);
+  x = dummycopy(x);
 
   if (flag)
   {
@@ -1432,67 +1484,71 @@ allhnfmod(GEN x,GEN dm,long flag)
   else
   { /* concatenate dm * Id to x */
     x = concatsp(x, idmat_intern(li-1,dm,gzero));
-    for (i=1; i<co; i++) x[i] = lmod((GEN)x[i], dm);
     co += li-1;
   }
-  def=co-1; ldef=0;
+  /* Avoid wasteful divisions. we only want to prevent coeff explosion, so
+   * only reduce mod dm when lg(coeff) > ldm */
+  ldm = lgefint(dm);
+  def = co-1; ldef = 0;
   for (i=li-1; i>ldef; i--,def--)
-  {
     for (j=def-1; j; j--)
     {
+      coeff(x,i,j) = lresii(gcoeff(x,i,j), dm);
       a = gcoeff(x,i,j);
       if (!signe(a)) continue;
 
       k = (j==1)? def: j-1;
-      elem_icol(a,gcoeff(x,i,k), x,NULL, j,k);
+      /* do not reduce the appended dm [hnfmodid] */
+      if (flag || j != 1) coeff(x,i,k) = lresii(gcoeff(x,i,k), dm);
+      ZV_elem(a,gcoeff(x,i,k), x,NULL, j,k);
       p1 = (GEN)x[j];
       p2 = (GEN)x[k];
-      for (k=1; k<=i; k++)
+      for (k=1; k<i; k++)
       {
-        cmod(p1[k], dm, dms2);
-        cmod(p2[k], dm, dms2);
+        if (lgefint(p1[k]) > ldm) p1[k] = lresii((GEN)p1[k], dm);
+        if (lgefint(p2[k]) > ldm) p2[k] = lresii((GEN)p2[k], dm);
       }
-      if (low_stack(lim, stack_lim(av0,1)))
+      if (low_stack(lim, stack_lim(av,1)))
       {
         if (DEBUGMEM>1) err(warnmem,"allhnfmod[1]. i=%ld",i);
-	tetpil=avma; x=gerepile(av,tetpil,gcopy(x));
+	tetpil=avma; x=gerepile(av,tetpil,ZM_copy(x));
       }
     }
-  }
-  w=cgetg(li,t_MAT); b=dm;
+  w = cgetg(li,t_MAT); b = dm;
   for (i=li-1; i>=1; i--)
   {
     d = bezout(gcoeff(x,i,i+def),b,&u,&v);
     w[i] = lmod(gmul(u,(GEN)x[i+def]), b);
-    if (!signe(gcoeff(w,i,i))) coeff(w,i,i)=(long)d;
-    if (i > 1 && flag) b=divii(b,d);
+    if (!signe(gcoeff(w,i,i))) coeff(w,i,i) = (long)d;
+    if (flag && i > 1) b = diviiexact(b,d);
   }
-  ldm = lgefint(dm);
+  if (flag)
+  { /* compute optimal value for dm */
+    dm = gcoeff(w,1,1);
+    for (i=2; i<li; i++) dm = mpppcm(dm, gcoeff(w,i,i));
+    ldm = lgefint(dm);
+  }
   for (i=li-2; i>=1; i--)
   {
     GEN diag = gcoeff(w,i,i);
     for (j=i+1; j<li; j++)
     {
-      b = negi(gdivent(gcoeff(w,i,j), diag));
-      p1 = lincomb_integral(gun,b, (GEN)w[j], (GEN)w[i]);
+      b = negi(truedvmdii(gcoeff(w,i,j), diag, NULL));
+      p1 = ZV_lincomb(gun,b, (GEN)w[j], (GEN)w[i]);
       w[j] = (long)p1;
       for (k=1; k<i; k++)
-      {
-        p2 = (GEN)p1[k];
-        if (lgefint(p2) > ldm) p1[k] = lmodii(p2, dm);
-      }
-      if (low_stack(lim, stack_lim(av0,1)))
+        if (lgefint(p1[k]) > ldm) p1[k] = lresii((GEN)p1[k], dm);
+      if (low_stack(lim, stack_lim(av,1)))
       {
         if (DEBUGMEM>1) err(warnmem,"allhnfmod[2]. i=%ld", i);
-        tetpil=avma; w=gerepile(av,tetpil,gcopy(w));
+        tetpil=avma; w=gerepile(av,tetpil,ZM_copy(w));
         diag = gcoeff(w,i,i);
       }
     }
   }
   if (DEBUGLEVEL>6) { fprintferr("\nEnd hnfmod\n"); flusherr(); }
-  tetpil=avma; return gerepile(av0,tetpil,gcopy(w));
+  tetpil=avma; return gerepile(av,tetpil,ZM_copy(w));
 }
-#undef cmod
 
 GEN
 hnfmod(GEN x, GEN detmat) { return allhnfmod(x,detmat,1); }
@@ -1726,7 +1782,7 @@ hnflll_i(GEN A, GEN *ptB)
 
   if (typ(A) != t_MAT) err(typeer,"hnflll");
   n = lg(A);
-  A = gcopy(fix_rows(A));
+  A = ZM_copy(fix_rows(A));
   B = ptB? idmat(n-1): NULL;
   D = (GEN*) cgetg(n+1, t_VEC); D++; /* hack: need a "sentinel" D[0] */
   if (n == 2) /* handle trivial case: return negative diag coeff otherwise */
@@ -1843,7 +1899,7 @@ extendedgcd(GEN A)
   long av = avma, tetpil, do_swap,i,j,n,k;
   GEN p1,p2,B, **lambda, *D;
 
-  n = lg(A); B = idmat(n-1); A = gcopy(A);
+  n = lg(A); B = idmat(n-1); A = ZM_copy(A);
   D = (GEN*) cgeti(n); lambda = (GEN**) cgetg(n,t_MAT);
   for (i=0; i<n; i++) D[i] = gun;
   for (i=1; i<n; i++)
@@ -1920,9 +1976,14 @@ hnfperm(GEN A)
       t=l[j]; b=gcoeff(A,t,k);
       if (!signe(b)) continue;
 
-      elem_icol(b,gcoeff(A,t,j), A,U,k,j);
+      ZV_elem(b,gcoeff(A,t,j), A,U,k,j);
       d = gcoeff(A,t,j);
-      if (signe(d) < 0) { negate_icol((GEN)A[j]); negate_icol((GEN)U[j]); }
+      if (signe(d) < 0)
+      {
+        ZV_neg((GEN)A[j]);
+        ZV_neg((GEN)U[j]);
+        d = gcoeff(A,t,j);
+      }
       for (j1=1; j1<j; j1++)
       {
         if (!l[j1]) continue;
@@ -1930,8 +1991,8 @@ hnfperm(GEN A)
         if (!signe(q)) continue;
 
         q = negi(q);
-        A[j1] = (long)lincomb_integral(gun,q,(GEN)A[j1],(GEN)A[j]);
-        U[j1] = (long)lincomb_integral(gun,q,(GEN)U[j1],(GEN)U[j]);
+        A[j1] = (long)ZV_lincomb(gun,q,(GEN)A[j1],(GEN)A[j]);
+        U[j1] = (long)ZV_lincomb(gun,q,(GEN)U[j1],(GEN)U[j]);
       }
     }
     t=m; while (t && (c[t] || !signe(gcoeff(A,t,k)))) t--;
@@ -1946,8 +2007,8 @@ hnfperm(GEN A)
       perm[++r]=l[k]=t; c[t]=k;
       if (signe(p) < 0)
       {
-        negate_icol((GEN)A[k]);
-        negate_icol((GEN)U[k]);
+        ZV_neg((GEN)A[k]);
+        ZV_neg((GEN)U[k]);
 	p = gcoeff(A,t,k);
       }
       for (j=1; j<k; j++)
@@ -1957,8 +2018,8 @@ hnfperm(GEN A)
 	if (!signe(q)) continue;
 
         q = negi(q);
-        A[j] = (long)lincomb_integral(gun,q,(GEN)A[j],(GEN)A[k]);
-        U[j] = (long)lincomb_integral(gun,q,(GEN)U[j],(GEN)U[k]);
+        A[j] = (long)ZV_lincomb(gun,q,(GEN)A[j],(GEN)A[k]);
+        U[j] = (long)ZV_lincomb(gun,q,(GEN)U[j],(GEN)U[k]);
       }
     }
     if (low_stack(lim, stack_lim(av1,1)))
@@ -1995,26 +2056,6 @@ hnfperm(GEN A)
   return gerepile(av,tetpil,y);
 }
 
-GEN
-colint_copy(GEN x)
-{
-  long i, lx = lg(x);
-  GEN y = cgetg(lx, t_COL);
-  for (i=1; i<lx; i++) y[i] = signe(x[i])? licopy((GEN)x[i]): zero;
-  return y;
-}
-
-GEN
-matint_copy(GEN x)
-{
-  long i, lx = lg(x);
-  GEN y = cgetg(lx, t_MAT);
-
-  for (i=1; i<lx; i++)
-    y[i] = (long)colint_copy((GEN)x[i]);
-  return y;
-}
-
 /*====================================================================
  *	    Forme Normale d'Hermite (Version par colonnes 31/01/94)
  *====================================================================*/
@@ -2049,13 +2090,13 @@ hnfall_i(GEN A, GEN *ptB, long remove)
 	if (!signe(a)) continue;
 
         k = c[i]; /* zero a = Aij  using  Aik */
-        elem_icol(a,gcoeff(A,i,k), A,B,j,k);
-        reduce_icols(A,B, i,k);
+        ZV_elem(a,gcoeff(A,i,k), A,B,j,k);
+        ZM_reduce(A,B, i,k);
         if (low_stack(lim, stack_lim(av1,1)))
         {
           tetpil = avma;
-          A = matint_copy(A); gptr[0]=&A;
-          if (B) { B = matint_copy(B); gptr[1]=&B; }
+          A = ZM_copy(A); gptr[0]=&A;
+          if (B) { B = ZM_copy(B); gptr[1]=&B; }
           if (DEBUGMEM>1) err(warnmem,"hnfall[1], li = %ld", li);
           gerepilemanysp(av1,tetpil,gptr,B? 2: 1);
         }	
@@ -2074,11 +2115,11 @@ hnfall_i(GEN A, GEN *ptB, long remove)
     p = gcoeff(A,li,r);
     if (signe(p) < 0)
     {
-      negate_icol((GEN)A[r]);
-      if (B) negate_icol((GEN)B[r]);
+      ZV_neg((GEN)A[r]);
+      if (B) ZV_neg((GEN)B[r]);
       p = gcoeff(A,li,r);
     }
-    reduce_icols(A,B, li,r);
+    ZM_reduce(A,B, li,r);
     if (low_stack(lim, stack_lim(av1,1)))
     {
       GEN *gptr[2]; gptr[0]=&A; gptr[1]=&B;
@@ -2095,13 +2136,13 @@ hnfall_i(GEN A, GEN *ptB, long remove)
       if (!signe(a)) continue;
 
       k = c[i];
-      elem_icol(a,gcoeff(A,i,k), A,B, j,k);
-      reduce_icols(A,B, i,k);
+      ZV_elem(a,gcoeff(A,i,k), A,B, j,k);
+      ZM_reduce(A,B, i,k);
       if (low_stack(lim, stack_lim(av1,1)))
       {
         tetpil = avma;
-        A = matint_copy(A); gptr[0]=&A;
-        if (B) { B = matint_copy(B); gptr[1]=&B; }
+        A = ZM_copy(A); gptr[0]=&A;
+        if (B) { B = ZM_copy(B); gptr[1]=&B; }
         if (DEBUGMEM>1) err(warnmem,"hnfall[3], j = %ld", j);
         gerepilemanysp(av1,tetpil,gptr, B? 2: 1);
       }	
@@ -2297,7 +2338,7 @@ smithall(GEN x, long all)
 	      GEN *gptr[3]; gptr[0]=&x; gptr[1]=&ml; gptr[2]=&mr;
 	      gerepilemany(av,gptr,3);
 	    }
-	    else x=gerepileupto(av,gcopy(x));
+	    else x=gerepileupto(av, ZM_copy(x));
 	  }
 	}
       }
@@ -2359,7 +2400,7 @@ smithall(GEN x, long all)
 	  GEN *gptr[3]; gptr[0]=&x; gptr[1]=&ml; gptr[2]=&mr;
 	  gerepilemany(av,gptr,3);
 	}
-	else x=gerepileupto(av,gcopy(x));
+	else x=gerepileupto(av,ZM_copy(x));
       }
     }
   }
