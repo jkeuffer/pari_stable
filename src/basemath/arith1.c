@@ -2025,51 +2025,89 @@ qfbclassno0(GEN x,long flag)
   return NULL; /* not reached */
 }
 
+/* f^h = 1, return order(f) */
 static GEN
-end_classno(GEN h, GEN hin, GEN *formes, long ptforme)
+find_order(GEN f, GEN h)
 {
-  long av,i,j,lim,com;
-  GEN p1,p2,p3,q,hp,fh,fg,ftest, f = formes[0];
+  GEN fh, p,e;
+  long i,j,lim;
 
-  if (ptforme>11) ptforme = 11;
-  p2=factor(h); p1=(GEN)p2[1]; p2=(GEN)p2[2];
-  for (i=1; i<lg(p1); i++)
+  p = decomp(h);
+  e =(GEN)p[2];
+  p =(GEN)p[1];
+  for (i=1; i<lg(p); i++)
   {
-    lim = itos((GEN)p2[i]);
+    lim = itos((GEN)e[i]);
     for (j=1; j<=lim; j++)
     {
-      p3=divii(h,(GEN)p1[i]); fh=gpui(f,p3,0);
+      GEN p1 = divii(h,(GEN)p[i]);
+      fh = powgi(f,p1);
       if (!is_pm1(fh[1])) break;
-      h = p3;
+      h = p1;
     }
   }
-  q=ground(gdiv(hin,h)); hp=mulii(q,h);
-  for (i=1; i<ptforme; i++)
-  {
-    fg=gpui(formes[i],h,0); fh=gpui(fg,q,0);
-    if (!is_pm1(fh[1]))
-    {
-      av = avma; ftest = fg;
-      for (com=1; ; com++)
-      {
-	if (gegal((GEN) fh[1], (GEN) ftest[1]) &&
-	     absi_equal((GEN) fh[2], (GEN) ftest[2])) break;
-	ftest = gmul(ftest,fg);
-      }
-      if (signe(fh[2]) == signe(ftest[2])) com = -com;
-      avma = av; q = addsi(com,q);
-      hp = addii(hp, mulsi(com,h));
-    }
-  }
-  return hp;
+  return h;
 }
 
-/* calcul de h(x) pour x<0 par la methode de Shanks */
+static GEN
+end_classno(GEN h, GEN hin, GEN forms, long lform)
+{
+  long i,com;
+  GEN a,b,p1,q,fh,fg, f = (GEN)forms[0];
+
+  h = find_order(f,h); /* H = <f> */
+  q = ground(gdiv(hin,h)); /* approximate order of G/H */
+  for (i=1; i < lform; i++)
+  {
+    long av = avma; 
+    fg = powgi((GEN)forms[i], h);
+    fh = powgi(fg, q);
+    a = (GEN)fh[1];
+    if (is_pm1(a)) continue;
+    b = (GEN)fh[2]; p1 = fg;
+    for (com=1; ; com++)
+    {
+      if (egalii((GEN)p1[1], a) && absi_equal((GEN)p1[2], b)) break;
+      p1 = gmul(p1,fg);
+    }
+    if (signe(p1[2]) == signe(b)) com = -com;
+    /* f_i ^ h(q+com) = 1 */
+    avma = av; q = addsi(com,q);
+  }
+  return mulii(q,h);
+}
+
+static GEN
+to_form(GEN x, long f)
+{
+  return redimag(primeform(x, stoi(f), 0));
+}
+
+static long
+two_rank(GEN x)
+{
+  GEN p = (GEN)decomp(negi(x))[1];
+  long i,l = lg(p)-1;
+  for (i=1; i<=l; i++)
+    if (mod4((GEN)p[i]) == 3) break;
+  if (i>l) l--; else l -= 2;
+  return l;
+}
+
+#define MAXFORM 11
+#define _low(x) (__x=(GEN)x, __x[lgefint(__x)-1])
+
+/* h(x) for x<0 using Baby Step/Giant Step.
+ * Assumes G is not too far from being cyclic.
+ * 
+ * Compute G^2 instead of G so as to kill most of the non-cyclicity */
 GEN
 classno(GEN x)
 {
-  long av = avma, av2,c,ptforme,k,i,j,j1,lim,com,j2,s;
-  GEN count,index,tabla,tablb,hash,court,p1,p2,hin,h,f,fh,fg,ftest,formes[100];
+  long av = avma, av2,c,lforms,k,l,i,j,j1,j2,lim,com,s, forms[MAXFORM];
+  long r2;
+  GEN a,b,count,index,tabla,tablb,hash,p1,p2,hin,h,f,fh,fg,ftest;
+  GEN __x;
   byteptr p = diffptr;
 
   if (typ(x) != t_INT) err(arither1);
@@ -2084,30 +2122,26 @@ classno(GEN x)
   s = 1000;
   if (signe(p2))
   {
-    s = p2[2];
-    if (lgefint(p2)>3 || s<0)
-      err(talker,"discriminant too big in classno");
-    if (s<1000) s=1000;
+    if (is_bigint(p2)) err(talker,"discriminant too big in classno");
+    s = itos(p2); if (s < 1000) s = 1000;
   }
-  c=ptforme=0; court = stoi(2);
+  r2 = two_rank(x);
+  c=lforms=0;
   while (c <= s && *p)
   {
-    c += *p++; k=krogs(x,c);
-    if (k)
+    c += *p++; k = krogs(x,c);
+    if (!k) continue;
+
+    av2 = avma;
+    if (k > 0)
     {
-      av2=avma;
-      if (k>0)
-      {
-	divrsz(mulsr(c,p1),c-1,p1); avma=av2;
-	if (ptforme<100 && c>2)
-	{
-	  court[2]=c;
-	  formes[ptforme++]=redimag(primeform(x,court,0));
-	}
-      }
-      else { divrsz(mulsr(c,p1),c+1,p1); avma=av2; }
+      divrsz(mulsr(c,p1),c-1, p1);
+      if (lforms < MAXFORM && c > 2) forms[lforms++] = c; 
     }
+    else divrsz(mulsr(c,p1),c+1, p1);
+    avma = av2; 
   }
+  h = hin = shifti(ground(p1), -r2);
   s = 2*itos(gceil(gpui(p1,ginv(stoi(4)),DEFAULTPREC)));
   if (s>=10000) s=10000;
 
@@ -2116,12 +2150,12 @@ classno(GEN x)
   tabla = new_chunk(10000);
   tablb = new_chunk(10000);
   hash  = new_chunk(10000);
-  h = hin = ground(p1); f=formes[0];
-  p1 = fh = gpui(f,h,0);
+  f = gsqr(to_form(x, forms[0]));
+  p1 = fh = powgi(f, h);
   for (i=0; i<s; i++)
   {
-    p2=(GEN)p1[1]; tabla[i]=p2[lgefint(p2)-1];
-    p2=(GEN)p1[2]; tablb[i]=p2[lgefint(p2)-1];
+    tabla[i] = _low(p1[1]);
+    tablb[i] = _low(p1[2]);
     count[tabla[i]&255]++; p1=compimag(p1,f);
   }
   index[0]=0; for (i=0; i<=254; i++) index[i+1] = index[i]+count[i];
@@ -2132,26 +2166,24 @@ classno(GEN x)
   ftest=gpuigs(p1,0);
   for (com=0; ; com++)
   {
-    p1=(GEN)ftest[1]; k=p1[lgefint(p1)-1]; j=k&255;
+    a = (GEN)ftest[1]; k = _low(a);
+    b = (GEN)ftest[2]; l = _low(b); j = k&255;
     for (j1=index[j]; j1 < index[j+1]; j1++)
     {
-      j2=hash[j1];
-      if (tabla[j2] == k)
+      j2 = hash[j1];
+      if (tabla[j2] == k && tablb[j2] == l)
       {
-	p2=(GEN)ftest[2];
-	if (tablb[j2] == labs(p2[lgefint(p2)-1]))
-	{
-	  p1 = gmul(gpuigs(f,j2),fh);
-	  if (gegal((GEN) p1[1],(GEN) ftest[1]) &&
-	      absi_equal((GEN) p1[2],(GEN) ftest[2]))
-          {
-            /* p1 = ftest or ftest^(-1), we are done */
-            if (signe(p1[2]) == signe(ftest[2])) com = -com;
-            h = addii(addis(h,j2), mulss(s,com));
-            h = end_classno(h,hin,formes,ptforme);
-            avma = av; return icopy(h); /* safe: stack big enough */
-          }
-	}
+        p1 = gmul(gpuigs(f,j2),fh);
+        if (egalii((GEN)p1[1], a) && absi_equal((GEN)p1[2], b))
+        { /* p1 = ftest or ftest^(-1), we are done */
+          if (signe(p1[2]) == signe(b)) com = -com;
+          h = addii(addis(h,j2), mulss(s,com));
+          forms[0] = (long)f;
+          for (i=1; i<lforms; i++)
+            forms[i] = (long)gsqr(to_form(x, forms[i]));
+          h = end_classno(h,hin,forms,lforms);
+          return gerepileuptoint(av, shifti(h, r2));
+        }
       }
     }
     ftest = gmul(ftest,fg);
