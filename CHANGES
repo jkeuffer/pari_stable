@@ -96,6 +96,8 @@ BA 51- [X-Windows] hi-res plot: window not redrawn properly (BackingStore pb)
    54- infinite recursion in gaffect(t_POL, scalar)
    55- content([-1]) was -1 (should be 1)
    56- stack corruption in u_FpV_polint (used by modular bivariate resultant)
+   57- polroots() used too high a precision when checking errors a posteriori
+       (--> slow)
 
   Changed
 BA  1- improved Fp_isom
