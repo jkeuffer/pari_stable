@@ -4484,7 +4484,7 @@ nfgcd(GEN P, GEN Q, GEN nf, GEN den)
       ax = gmulgs(Fp_inv(stoi(p), mod), p);
       M = gadd(R, gmul(ax, gsub(M, R)));
       mod = mulis(mod, p);
-      M = lift(FpM(M, mod));
+      M = lift(FpM_to_mod(M, mod));
       /* I suspect it must be better to take amax > bmax*/
       bo = racine(shifti(mod, -1));
       if ((sol = matratlift(M, mod, bo, bo, den)) == NULL) continue;

@@ -1897,7 +1897,7 @@ to_intmod(GEN x, GEN p)
 
 /* z in Z[X], return z * Mod(1,p), normalized*/
 GEN
-FpX(GEN z, GEN p)
+FpX_to_mod(GEN z, GEN p)
 {
   long i,l = lg(z);
   GEN x = cgetg(l,t_POL);
@@ -1908,7 +1908,7 @@ FpX(GEN z, GEN p)
 
 /* z in Z^n, return z * Mod(1,p), normalized*/
 GEN
-FpV(GEN z, GEN p)
+FpV_to_mod(GEN z, GEN p)
 {
   long i,l = lg(z);
   GEN x = cgetg(l,typ(z));
@@ -1918,7 +1918,7 @@ FpV(GEN z, GEN p)
 }
 /* z in Mat m,n(Z), return z * Mod(1,p), normalized*/
 GEN
-FpM(GEN z, GEN p)
+FpM_to_mod(GEN z, GEN p)
 {
   long i,j,l = lg(z), m = lg((GEN)z[1]);
   GEN x,y,zi;
@@ -3846,7 +3846,7 @@ ffinit_fact(GEN p, long n)
     P = fpinit(p, F[1]);
   for (i = 2; i < lg(F); ++i)
     P = FpX_direct_compositum(fpinit(p, F[i]), P, p);
-  return gerepileupto(ltop,FpX(P,p));
+  return gerepileupto(ltop,FpX_to_mod(P,p));
 }
 
 GEN
@@ -3874,7 +3874,7 @@ ffinit_nofact(GEN p, long n)
     P = fpinit(p, n);
     if (Q) P = FpX_direct_compositum(P, Q, p);
   }
-  return gerepileupto(av, FpX(P,p));
+  return gerepileupto(av, FpX_to_mod(P,p));
 }
 
 GEN
@@ -3885,10 +3885,10 @@ ffinit(GEN p, long n, long v)
   if (n <= 0) err(talker,"non positive degree in ffinit");
   if (typ(p) != t_INT) err(typeer, "ffinit");
   if (v < 0) v = 0;
-  if (n == 1) return FpX(polx[v],p);
+  if (n == 1) return FpX_to_mod(polx[v],p);
   /*If we are in a easy case just use cyclo*/
   if (fpinit_check(p, n + 1, n))
-    return gerepileupto(ltop,FpX(cyclo(n + 1, v),p));
+    return gerepileupto(ltop,FpX_to_mod(cyclo(n + 1, v),p));
   if ((ulong)lgefint(p)-2 < BITS_IN_LONG-bfffo(n))
     P=ffinit_fact(p,n);
   else

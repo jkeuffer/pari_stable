@@ -366,7 +366,7 @@ rootmod2(GEN f, GEN pp)
     y = Flv_to_ZV(Flx_roots_naive(ZX_to_Flx(f,p), p));
   else 
     y = root_mod_even(f,p);
-  return gerepileupto(av, FpV(y, pp));
+  return gerepileupto(av, FpV_to_mod(y, pp));
 }
 
 /* assume x reduced mod p, monic, squarefree. Return one root, or NULL if
@@ -478,7 +478,7 @@ rootmod(GEN f, GEN p)
     y = FpX_roots_i(f, p);
   else 
     y = root_mod_even(f,q);
-  return gerepileupto(av, FpV(y, p));
+  return gerepileupto(av, FpV_to_mod(y, p));
 }
 
 GEN
@@ -1047,7 +1047,7 @@ factcantor0(GEN f, GEN pp, long flag)
   else
     for (j=1; j<nbfact; j++)
     {
-      u[j] = (long)FpX((GEN)t[j], pp);
+      u[j] = (long)FpX_to_mod((GEN)t[j], pp);
       v[j] = lutoi((ulong)E[j]);
     }
   return gerepileupto(av, y);
@@ -1458,7 +1458,7 @@ factmod(GEN f, GEN p)
   v = cgetg(nbfact,t_COL); y[2] = (long)v;
   for (j=1; j<nbfact; j++)
   {
-    u[j] = (long)FpX((GEN)t[j], p);
+    u[j] = (long)FpX_to_mod((GEN)t[j], p);
     v[j] = lutoi((ulong)E[j]);
   }
   return gerepileupto(av, y);
