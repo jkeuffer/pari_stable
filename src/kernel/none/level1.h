@@ -48,7 +48,7 @@ void   divisz(GEN x, long y, GEN z);
 void   divrrz(GEN x, GEN y, GEN z);
 void   divsiz(long x, GEN y, GEN z);
 GEN    divss(long x, long y);
-long   divssmod(long a, long b, long p);
+ulong  divuumod(ulong a, ulong b, ulong p);
 void   divssz(long x, long y, GEN z);
 void   dvmdiiz(GEN x, GEN y, GEN z, GEN t);
 GEN    dvmdis(GEN x, long y, GEN *z);
@@ -81,7 +81,7 @@ GEN    mpmul(GEN x, GEN y);
 GEN    mpneg(GEN x);
 GEN    mpsub(GEN x, GEN y);
 void   mulsii(long x, GEN y, GEN z);
-long   mulssmod(ulong a, ulong b, ulong c);
+ulong  muluumod(ulong a, ulong b, ulong c);
 void   mulssz(long x, long y, GEN z);
 GEN    new_chunk(long x);
 long   random_bits(long k);
@@ -783,8 +783,8 @@ subssmod(long a, long b, long p)
   return (res >= 0) ? res : res + p;
 }
 
-INLINE long
-mulssmod(ulong a, ulong b, ulong c)
+INLINE ulong
+muluumod(ulong a, ulong b, ulong c)
 {
   LOCAL_HIREMAINDER;
   {
@@ -794,19 +794,10 @@ mulssmod(ulong a, ulong b, ulong c)
   return hiremainder;
 }
 
-INLINE long
-divssmod(long a, long b, long p)
+INLINE ulong
+divuumod(ulong a, ulong b, ulong p)
 {
-  long v1 = 0, v2 = 1, v3, r, oldp = p;
-
-  while (b > 1)
-  {
-    v3 = v1 - (p / b) * v2; v1 = v2; v2 = v3;
-    r = p % b; p = b; b = r;
-  }
-
-  if (v2 < 0) v2 += oldp;
-  return mulssmod(a, v2, oldp);
+  return muluumod(a, u_invmod(b, p), p);
 }
 
 INLINE long

@@ -182,6 +182,9 @@ IZ 24- [tex2mail:] add a "cut here" sign when expression does not fit in the
    26- matsnf: allow rectangular matrices + improvements for singular matrices
    27- made startup errors ( GPRC ) non fatal.
    28- allow vecsort(t_VECSMALL)
+   29- renamed mulssmod/divssmod --> muluumod/divuumod and changed their
+       prototype (use ulong arguments, return ulong)  [ was already the case,
+       with various casts ]
 
   Added
     1- member function rnf.pol (polynomial generating absolute extension)

@@ -230,13 +230,13 @@ u_LucasMod(ulong n, ulong P, ulong N)
   { /* v = v_k, v1 = v_{k+1} */
     if (((long)m) < 0)
     { /* set v = v_{2k+1}, v1 = v_{2k+2} */
-      v = adduumod(mulssmod(v,v1,N), mP, N);
-      v1= adduumod(mulssmod(v1,v1,N),m2, N);
+      v = adduumod(muluumod(v,v1,N), mP, N);
+      v1= adduumod(muluumod(v1,v1,N),m2, N);
     }
     else
     {/* set v = v_{2k}, v1 = v_{2k+1} */
-      v1= adduumod(mulssmod(v,v1,N),mP, N);
-      v = adduumod(mulssmod(v,v,N), m2, N);
+      v1= adduumod(muluumod(v,v1,N),mP, N);
+      v = adduumod(muluumod(v,v,N), m2, N);
     }
   }
   return v;
@@ -257,7 +257,7 @@ u_IsLucasPsP(ulong n, ulong P)
   for (i=1; i<v; i++)
   {
     if (!z) return 1;
-    z = adduumod(mulssmod(z,z, n), m2, n);
+    z = adduumod(muluumod(z,z, n), m2, n);
     if (z == 2) return 0;
   }
   return 0;

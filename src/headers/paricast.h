@@ -235,6 +235,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define ltrace  (long)gtrace
 #define ltrans  (long)gtrans
 #define ltrunc  (long)gtrunc
+#define lutoi   (long)utoi
 
 #define zero    (long)gzero
 #define un      (long)gun

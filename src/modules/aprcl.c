@@ -423,7 +423,7 @@ computetabdl(ulong q)
   w[q-1] = qm1s2; a = 1;
   for (i=1; i<=qm3s2; i++)
   {
-    a = mulssmod(g,a,q);
+    a = muluumod(g,a,q);
     w[a]   = i;
     w[q-a] = i+qm1s2;
   }

@@ -120,7 +120,7 @@ L(GEN n, ulong q, GEN Pi, long prec)
   for (h = 1; h < q; h++, avma = av)
   {
     if (cgcd((long)q, (long)h) > 1) continue;
-    r = gdivgs(gsubgs(g(q, h), mulssmod(h, nmodq, q) << 1), q);
+    r = gdivgs(gsubgs(g(q, h), muluumod(h, nmodq, q) << 1), q);
     if (gcmp0(r))
       addsrz(1, res, res);
     else

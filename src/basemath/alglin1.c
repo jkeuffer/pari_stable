@@ -1181,14 +1181,14 @@ u_Fp_gauss_get_col(GEN a, uGEN b, ulong invpiv, long li, ulong p)
   ulong m = b[li] % p;
   long i,j;
 
-  u[li] = mulssmod(m, invpiv, p);
+  u[li] = muluumod(m, invpiv, p);
   for (i=li-1; i>0; i--)
   {
     m = p - b[i]%p;
     for (j = i+1; j <= li; j++)
-      m += mulssmod(ucoeff(a,i,j), u[j], p);
+      m += muluumod(ucoeff(a,i,j), u[j], p);
     m %= p;
-    if (m) m = mulssmod(p-m, u_invmod(ucoeff(a,i,i), p), p);
+    if (m) m = muluumod(p-m, u_invmod(ucoeff(a,i,i), p), p);
     u[i] = m;
   }
   return u;
@@ -1229,7 +1229,7 @@ static void
 _u_Fp_addmul(uGEN b, long k, long i, ulong m, ulong p)
 {
   b[i] %= p;
-  b[k] += mulssmod(m, b[i], p);
+  b[k] += muluumod(m, b[i], p);
   if (b[k] & MASK) b[k] %= p;
 }
 /* same m = 1 */
@@ -1375,7 +1375,7 @@ u_FpM_gauss_sp(GEN a, GEN b, ulong p)
       m = ( ucoeff(a,k,i) %= p );
       if (!m) continue;
 
-      m = p - mulssmod(m, invpiv, p); /* - 1/piv mod p */
+      m = p - muluumod(m, invpiv, p); /* - 1/piv mod p */
       if (m == 1)
       {
         for (j=i+1; j<=aco; j++) _u_Fp_add((uGEN)a[j],k,i, p);
@@ -1588,7 +1588,7 @@ u_FpM_Fp_mul_ip(GEN y, ulong x, ulong p)
   if (HIGHWORD(x | p))
     for(j=1; j<l; j++)
       for(i=1; i<m; i++)
-        ucoeff(y,i,j) = mulssmod(ucoeff(y,i,j), x, p);
+        ucoeff(y,i,j) = muluumod(ucoeff(y,i,j), x, p);
   else
     for(j=1; j<l; j++)
       for(i=1; i<m; i++)

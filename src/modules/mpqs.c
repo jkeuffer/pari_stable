@@ -1258,12 +1258,12 @@ mpqs_self_init(GEN A, GEN B, GEN N, GEN kN, long *FB, long *sqrt_mod_p_kN,
 
       tmp1 = (tmp - sqrt_mod_p_kN[j]) % p;
       if (tmp1 < 0) tmp1 += p;
-      tmp1 = mulssmod(tmp1, inv_A2[j], p);
+      tmp1 = muluumod(tmp1, inv_A2[j], p);
       tmp1 = (tmp1 + M_mod_p) % p;
 
       tmp2 = (tmp + sqrt_mod_p_kN[j]) % p;
       if (tmp2 < 0) tmp2 += p;
-      tmp2 = mulssmod(tmp2, inv_A2[j], p);
+      tmp2 = muluumod(tmp2, inv_A2[j], p);
       tmp2  = (tmp2 + M_mod_p) % p;
 
       start_1[j] = (tmp1 < 0) ? tmp1 + p : tmp1;
@@ -1367,7 +1367,7 @@ mpqs_self_init(GEN A, GEN B, GEN N, GEN kN, long *FB, long *sqrt_mod_p_kN,
       p = FB[start_index_FB_for_A + j];
       tmp = mpqs_invsmod(smodis(B, p), p);
       tmp2 = smodis (p2, p);
-      tmp = mulssmod(tmp2, tmp, p);
+      tmp = muluumod(tmp2, tmp, p);
       start_1[start_index_FB_for_A + j] =
 	start_2[start_index_FB_for_A + j] = (tmp + M) % p;
     }

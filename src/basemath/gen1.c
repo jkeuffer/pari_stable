@@ -1189,7 +1189,7 @@ gmul(GEN x, GEN y)
               icopyifstack(p2,z[1]);
               if (!is_bigint(p2))
               {
-                z[2] = lstoi(mulssmod(itos((GEN)x[2]),itos((GEN)y[2]), p2[2]));
+                z[2] = lutoi(muluumod(itou((GEN)x[2]),itou((GEN)y[2]), p2[2]));
                 return z;
               }
             }

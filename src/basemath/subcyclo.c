@@ -47,7 +47,7 @@ znstar_partial_coset_func(long n, GEN H, void (*func)(void *data,long c)
   {
     long k, m = i;
     for(j=1; j<d && m%ord[j]==0 ;j++) m /= ord[j];
-    cache[j] = mulssmod(cache[j],gen[j],n);
+    cache[j] = muluumod(cache[j],gen[j],n);
     for (k=1; k<j; k++) cache[k] = cache[j];
     (*func)(data, cache[j]);
   }
@@ -135,7 +135,7 @@ znstar_generate(long n, GEN V)
     long o=0;
     while(!bitvec_test(bits,g))
     {
-      g=mulssmod(g,v,n);
+      g=muluumod(g,v,n);
       o++;
     }
     if (o)
@@ -169,7 +169,7 @@ znstar_elts(long n, GEN H)
   {
     int     c = l * (ord[j] - 1);
     for (k = 1; k <= c; k++)	/* I like it */
-      sg[++l] = mulssmod(sg[k], gen[j], n);
+      sg[++l] = muluumod(sg[k], gen[j], n);
   }
   vecsmall_sort(sg);
   return sg;
@@ -291,7 +291,7 @@ znstar_hnf_generators(GEN Z, GEN M)
   {
     gen[j] = 1;
     for (h = 1; h < l; h++)
-      gen[j] = mulssmod(gen[j], 
+      gen[j] = muluumod(gen[j], 
           itos(powmodulo((GEN) zgen[h], gmael(M,j,h),m)),n);
   }
   avma=ltop;
@@ -366,13 +366,13 @@ GEN subcyclo_complex_cyclic(long n, long d, long m ,long z, long g, GEN powz, lo
   GEN V=cgetg(d+1,t_VEC);
   long base=1;
   long i,k;
-  for (i=1;i<=d;i++,base=mulssmod(base,z,n))
+  for (i=1;i<=d;i++,base=muluumod(base,z,n))
   {
     pari_sp ltop=avma;
     long ex=base;
     GEN s=gzero;
     (void)new_chunk(2*prec + 3);
-    for (k=0; k<m; k++, ex = mulssmod(ex,g,n))
+    for (k=0; k<m; k++, ex = muluumod(ex,g,n))
       s=gadd(s,(GEN)powz[ex]);
     avma=ltop;
     V[i]=lcopy(s);
@@ -388,13 +388,13 @@ subcyclo_cyclic(long n, long d, long m ,long z, long g, GEN powz, GEN le)
   long base=1;
   long i,k;
   long lle=le?lg(le)*2+1:2*lg(powz[1])+3;/*Assume dvmdii use lx+ly space*/
-  for (i=1;i<=d;i++,base=mulssmod(base,z,n))
+  for (i=1;i<=d;i++,base=muluumod(base,z,n))
   {
     pari_sp ltop=avma;
     long ex=base;
     GEN s=gzero;
     (void)new_chunk(lle); /* HACK */
-    for (k=0; k<m; k++, ex = mulssmod(ex,g,n))
+    for (k=0; k<m; k++, ex = muluumod(ex,g,n))
       s=gadd(s,(GEN)powz[ex]);
     avma=ltop;
     V[i]=le?lmodii(s,le):lcopy(s);
@@ -666,7 +666,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
       V=gcopy(sg);
       for (i=1;i<lg(V);i++)
         if (V[i]<0)
-          V[i]=mulssmod(-V[i],n-1,n);
+          V[i]=muluumod(-V[i],n-1,n);
       break;
     case t_VEC:
     case t_COL:

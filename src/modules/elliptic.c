@@ -1425,7 +1425,7 @@ apell2_intern(GEN e, ulong p)
         s += kross(e8 + i*(e72 + i*(e6 + (i<<2))), p);
     else
       for (i=1; i<p; i++)
-        s += kross(e8 + mulssmod(i, e72 + mulssmod(i, e6 + (i<<2), p), p), p);
+        s += kross(e8 + muluumod(i, e72 + muluumod(i, e6 + (i<<2), p), p), p);
     avma = av; return stoi(-s);
   }
 }
@@ -1827,7 +1827,7 @@ s_addell(sellpt *P, sellpt *Q, long c4, long p)
   if (P->x == Q->x)
   {
     if (! P->y || P->y != Q->y) { P->isnull = 1; return; }
-    num = addssmod(c4, mulssmod(3, mulssmod(P->x, P->x, p), p), p);
+    num = addssmod(c4, muluumod(3, muluumod(P->x, P->x, p), p), p);
     den = addssmod(P->y, P->y, p);
   }
   else
@@ -1835,9 +1835,9 @@ s_addell(sellpt *P, sellpt *Q, long c4, long p)
     num = subssmod(P->y, Q->y, p);
     den = subssmod(P->x, Q->x, p);
   }
-  lambda = divssmod(num, den, p);
-  num = subssmod(mulssmod(lambda, lambda, p), addssmod(P->x, Q->x, p), p);
-  P->y = subssmod(mulssmod(lambda, subssmod(Q->x, num, p), p), Q->y, p);
+  lambda = divuumod(num, den, p);
+  num = subssmod(muluumod(lambda, lambda, p), addssmod(P->x, Q->x, p), p);
+  P->y = subssmod(muluumod(lambda, subssmod(Q->x, num, p), p), Q->y, p);
   P->x = num; /* necessary in case P = Q: we need Q->x above */
 }
 
@@ -1919,14 +1919,14 @@ apell0(GEN e, long p)
     while (!KRO || KRO == KROold)
     {
       x++;
-      u = addssmod(c6, mulssmod(x, c4+mulssmod(x,x,p), p), p);
+      u = addssmod(c6, muluumod(x, c4+muluumod(x,x,p), p), p);
       KRO = kross(u,p);
     }
     KROold = KRO;
     f.isnull = 0;
-    f.x = mulssmod(x, u, p);
-    f.y = mulssmod(u, u, p);
-    cp4 = mulssmod(c4, f.y, p);
+    f.x = muluumod(x, u, p);
+    f.y = muluumod(u, u, p);
+    cp4 = muluumod(c4, f.y, p);
     s_powell(&fh, &f, h, cp4, p);
     s = (long) (sqrt(((float)pordmin)/B) / 2);
     if (!s) s = 1;

@@ -1219,9 +1219,9 @@ u_FpX_addmul(GEN x, GEN y, long c, long p)
   ly = lgef(y); l = min(lx,ly);
   if (p & ~MAXHALFULONG)
   {
-    for (i=2; i<l;  i++) x[i] = ((ulong)x[i]+ (ulong)mulssmod(c,y[i],p)) % p;
+    for (i=2; i<l;  i++) x[i] = ((ulong)x[i] + muluumod(c,y[i],p)) % p;
     if (l == lx)
-      for (   ; i<ly; i++) x[i] = mulssmod(c,y[i],p);
+      for (   ; i<ly; i++) x[i] = muluumod(c,y[i],p);
   }
   else
   {
