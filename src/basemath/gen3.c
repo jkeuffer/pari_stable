@@ -2451,13 +2451,10 @@ compo(GEN x, long n)
 static GEN
 multi_coeff(GEN x, long n, long v, long dx)
 {
-  long i;
-  GEN z;
-  if (dx == 0) return polcoeff_i((GEN)x[2], n, v);
-  z = cgetg(dx+3, t_POL);
-  z[1] = x[1];
-  for (i=2; i<dx+3; i++) z[i] = (long)polcoeff_i((GEN)x[i], n, v);
-  return normalizepol(z);
+  long i, lx = dx+3;
+  GEN z = cgetg(lx, t_POL); z[1] = x[1];
+  for (i = 2; i < lx; i++) z[i] = (long)polcoeff_i((GEN)x[i], n, v);
+  return normalizepol_i(z, lx);
 }
 
 /* assume x a t_POL */
@@ -2478,17 +2475,20 @@ _polcoeff(GEN x, long n, long v)
 static GEN
 _sercoeff(GEN x, long n, long v)
 {
-  long w, dx, ex;
+  long w, dx, ex, N;
+  GEN z;
   if (!signe(x)) return gzero;
-  dx = lg(x)-3; ex = valp(x); n -= ex;
+  dx = lg(x)-3; ex = valp(x); N = n - ex;
   if (v < 0 || v == (w=varn(x)))
   {
-    if (n > dx) err(talker,"non existent component in truecoeff");
-    return (n < 0)? gzero: (GEN)x[n+2];
+    if (N > dx) err(talker,"non existent component in truecoeff");
+    return (N < 0)? gzero: (GEN)x[N+2];
   }
-  if (w > v) return n? gzero: x;
+  if (w > v) return N? gzero: x;
   /* w < v */
-  return multi_coeff(x, n, v, dx);
+  z = multi_coeff(x, n, v, dx);
+  if (ex) z = gmul(z, gpowgs(polx[w], ex));
+  return z;
 }
 
 /* assume x a t_RFRAC(n) */
