@@ -868,7 +868,6 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
   GEN M, piv, list;
 
   n0 = n = r = lg(famod) - 1;
-  tmax = 0;
   s = 2;
   BL = idmat(n0);
   list = cgetg(n0+1, t_COL);
@@ -879,7 +878,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
     TT[i] = 0;
     T [i] = lgetg(s+1, t_COL);
   }
-  for(;;) 
+  for(tmax = 0;; tmax += s) 
   {
     long b = (long)ceil(b0 + (tmax+s)*k);
     GEN pas2, pa_b, ps2, pb = gpowgs(p, b), BE;
@@ -902,8 +901,8 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
       GEN p1 = (GEN)T[i];
       GEN p2 = polsym_gen((GEN)famod[i], (GEN)TT[i], tmax+s, pa);
       TT[i] = (long)p2;
-      p2++; /* ignore the 0-th trace */
-      for (j=1; j<=s; j++) p1[j] = p2[j+tmax];
+      p2 += 1+tmax; /* ignore traces number 0...tmax */
+      for (j=1; j<=s; j++) p1[j] = p2[j];
     }
     T2 = gmul(T, BL);
     for (i=1; i<=r; i++)
@@ -916,6 +915,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
         p1[j] = (long)p3;
       }
     }
+    if (gcmp0(T2)) continue;
 
     BE = cgetg(s+1, t_MAT);
     for (i=1; i<=s; i++)
@@ -943,7 +943,6 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
     setlg(u, r+1);
     for (i=1; i<=r; i++) setlg(u[i], n+1);
     BL = gmul(BL, u);
-    tmax += s;
     if (r*rec >= n0) continue;
 
     {
@@ -963,7 +962,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
           y = centermod_i(gmul(y, (GEN)famod[j]), pa, pas2);
 
       /* y is the candidate factor */
-      if (! (q = polidivis(target,y,bound)) ) break;
+      if (! (q = polidivis(target,y,bound)) ) { target = P; break; }
       if (signe(leading_term(y)) < 0) y = gneg(y);
       target = gdiv(q, leading_term(y));
       list[i] = (long)y;
