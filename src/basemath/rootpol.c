@@ -1842,7 +1842,7 @@ cauchy_bound(GEN p)
   for (i=0; i<n; i++)
   {
     y = (GEN)q[i+2]; if (gcmp0(y)) continue;
-    y = gmul(mpabs(y), lc);
+    y = gmul(gabs(y,DEFAULTPREC), lc);
     y = divrs(mplog(y), n-i);
     if (gcmp(y,x) > 0) x = y;
   }
