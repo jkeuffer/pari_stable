@@ -113,10 +113,13 @@ BA  5- Library .so link changed to libpari.so for all versions.
 BA  2- Add support for GNU/Hurd.
     3- conversion routines zv_ZC, zv_ZV, zm_ZM, and matrix multiplication:
        RM_zm_mul, ZM_zm_mul
+    4- output support for zm / Flm matrices (t_MAT with t_VECSMALLs instead
+       of t_COLs)
 
   Removed
     1- obsolete macro leadingcoeff [kept for backward compatibility but
        removed from the documentation]. Use leading_term.
+    2- obsolete undocumented type t_SMALL
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.7 (released 18/12/2003):

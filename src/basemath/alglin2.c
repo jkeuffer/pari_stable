@@ -1955,18 +1955,27 @@ END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
   if (DEBUGLEVEL)
     msgtimer("hnfspec [%ld x %ld] --> [%ld x %ld]",li-1,co-1, lig-1,col-1);
   if (CO > co)
-  { /* treat the rest */
-    long l = CO - co + 1;
-    GEN mat = cgetg(l, t_MAT), emb = cgetg(l, t_MAT), CC = *ptC, m0 = (GEN)mat0;
+  { /* treat the rest, N cols at a time (hnflll slow otherwise) */
+    const long N = 50;
+    long a, L = CO - co, l = min(L, N);
+    GEN mat = cgetg(N + 1, t_MAT), emb = cgetg(N + 1, t_MAT);
+    GEN CC = *ptC, m0 = (GEN)mat0;
     setlg(CC, CO); /* restore */
     CC += co-1;
     m0 += co-1;
-    for (j = 1 ; j < l; j++)
+    for (a = 1;;)
     {
-      mat[j] = (long)m0[j];
-      emb[j] = (long)CC[j];
+      for (j = 1 ; j <= l; j++)
+      {
+        mat[j] = (long)m0[j];
+        emb[j] = (long)CC[j];
+      }
+      setlg(mat, l+1); m0 += l;
+      setlg(emb, l+1); CC += l;
+      H = hnfadd_i(H, perm, ptdep, ptB, &C, mat, emb);
+      if (a == L) break;
+      a += N; if (a > L) { l = N - (a - L); a = L; }
     }
-    H = hnfadd_i(H, perm, ptdep, ptB, &C, mat, emb);
   }
   *ptC = C; return H;
 }

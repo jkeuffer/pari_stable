@@ -160,7 +160,6 @@ get_type_num(char *st)
       if (!strcmp(st,"FRACN")) return t_FRACN;
       if (!strcmp(st,"PADIC")) return t_PADIC;
       if (!strcmp(st,"RFRAC")) return t_RFRAC;
-      if (!strcmp(st,"SMALL")) return t_SMALL;
       break;
 
     case 6:

@@ -18,7 +18,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  *  - lontyp/lontyp2 in gen2.c
  *  - the assembly file mp.s...
  */
-#define t_SMALL    0
 #define t_INT      1
 #define t_REAL     2
 #define t_INTMOD   3

@@ -1271,7 +1271,6 @@ gcopy(GEN x)
   long tx=typ(x),lx,i;
   GEN y;
 
-  if (tx == t_SMALL) return x;
   if (! is_recursive_t(tx))
   {
     if (tx == t_INT && !signe(x)) return gzero; /* very common case */
@@ -1295,7 +1294,6 @@ gcopy_i(GEN x, long lx)
   long tx=typ(x),i;
   GEN y;
 
-  if (tx == t_SMALL) return x;
   y=cgetg(lx,tx);
   if (! is_recursive_t(tx))
     for (i=lx-1; i>0; i--) y[i]=x[i];
@@ -1314,7 +1312,6 @@ forcecopy(GEN x)
   long tx=typ(x),lx,i;
   GEN y;
 
-  if (tx == t_SMALL) return x;
   if (! is_recursive_t(tx))
   {
     if (tx == t_INT && !signe(x)) return gzero; /* very common case */
@@ -1340,7 +1337,6 @@ stackify(GEN x)
 {
   long tx=typ(x),lx,i;
 
-  if (tx == t_SMALL) return x;
   if (isclone(x)) return forcecopy(x);
   if (is_recursive_t(tx))
   {
@@ -1387,7 +1383,6 @@ gcopy_av(GEN x, GEN *AVMA)
 
   if (! is_recursive_t(tx))
   {
-    if (tx == t_SMALL) return x;
     if (tx == t_INT)
     {
       lx = lgefint(x);
@@ -1419,7 +1414,6 @@ gcopy_av0(GEN x, GEN *AVMA)
 
   if (! is_recursive_t(tx))
   {
-    if (tx == t_SMALL) return x;
     if (tx == t_INT)
     {
       if (!signe(x)) return NULL; /* special marker */
@@ -1453,7 +1447,6 @@ gcopy_av0_canon(GEN x, GEN *AVMA)
 
   if (! is_recursive_t(tx))
   {
-    if (tx == t_SMALL) return x;
     if (tx == t_INT)
     {
       if (!signe(x)) return NULL; /* special marker */

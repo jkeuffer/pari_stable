@@ -1096,17 +1096,12 @@ voir2(GEN x, long nb, long bl)
   if (!x) { pariputs("NULL\n"); return; }
   tx = typ(x);
   if (tx == t_INT && x == gzero) { pariputs("gzero\n"); return; }
-  if (tx == t_SMALL) {
-    pariputs("[SMALL ");
-    sorstring(VOIR_STRING2,(long)x);
-    pariputs("]\n"); return;
-  }
   sorstring(VOIR_STRING1,(ulong)x);
   
   lx = lg(x);
   pariputsf("%s(lg=%ld%s):",type_name(tx)+2,lx,isclone(x)? ",CLONE" : "");
   sorstring(VOIR_STRING2,x[0]);
-  if (! is_recursive_t(tx)) /* t_SMALL, t_INT, t_REAL, t_STR, t_VECSMALL */
+  if (! is_recursive_t(tx)) /* t_INT, t_REAL, t_STR, t_VECSMALL */
   {
     if (tx == t_STR) 
       pariputs("chars:");
@@ -1186,14 +1181,28 @@ voir2(GEN x, long nb, long bl)
       break;
 
     case t_MAT:
-      if (lx==1) return;
-      dx=lg((GEN)x[1]);
-      for (i=1; i<dx; i++)
-	for (j=1; j<lx; j++)
-	{
-	  blancs(bl); pariputsf("mat(%ld,%ld) = ",i,j);
-	  voir2(gcoeff(x,i,j),nb,bl);
-	}
+    {
+      GEN c = (GEN)x[1];
+      if (lx == 1) return;
+      if (typ(c) == t_VECSMALL)
+      {
+        for (i = 1; i < lx; i++)
+        {
+          blancs(bl); pariputsf("%ld%s column = ",i,eng_ord(i));
+          voir2((GEN)x[i],nb,bl);
+        }
+      }
+      else
+      {
+        dx = lg(c);
+        for (i=1; i<dx; i++)
+          for (j=1; j<lx; j++)
+          {
+            blancs(bl); pariputsf("mat(%ld,%ld) = ",i,j);
+            voir2(gcoeff(x,i,j),nb,bl);
+          }
+      }
+    }
   }
 }
 
@@ -1209,7 +1218,6 @@ type_name(long t)
   char *s;
   switch(t)
   {
-    case t_SMALL  : s="t_SMALL";   break;
     case t_INT    : s="t_INT";     break;
     case t_REAL   : s="t_REAL";    break;
     case t_INTMOD : s="t_INTMOD";  break;
@@ -1390,8 +1398,6 @@ isnull(GEN g)
   long i;
   switch (typ(g))
   {
-    case t_SMALL:
-      return !smalltos(g);
     case t_INT:
       return !signe(g);
     case t_COMPLEX:
@@ -1417,13 +1423,6 @@ isone(GEN g)
   long i;
   switch (typ(g))
   {
-    case t_SMALL:
-      switch(smalltos(g))
-      {
-        case  1: return  1;
-        case -1: return -1;
-      }
-      break;
     case t_INT:
       return (signe(g) && is_pm1(g))? signe(g): 0;
     case t_COMPLEX:
@@ -1614,6 +1613,19 @@ wr_lead_texnome(pariout_t *T, GEN a,const char *v, long d, int addsign)
   }
 }
 
+static void
+prints(GEN g, pariout_t *T, int addsign)
+{
+  (void)T; (void)addsign;
+  pariputsf("%ld", (long)g);
+}
+static void
+sors(GEN g, pariout_t *T)
+{
+  (void)T;
+  pariputsf("%ld", (long)g);
+}
+
 void
 bruti(GEN g, pariout_t *T, int addsign)
 {
@@ -1634,7 +1646,6 @@ bruti(GEN g, pariout_t *T, int addsign)
   tg = typ(g);
   switch(tg)
   {
-    case t_SMALL: pariputsf("%ld",smalltos(g)); break;
     case t_INT: wr_intsgn(g, addsign && signe(g) < 0); break;
     case t_REAL: wr_real(T,g,addsign); break;
 
@@ -1748,6 +1759,8 @@ bruti(GEN g, pariout_t *T, int addsign)
       return;
 
     case t_MAT:
+    {
+      void (*print)(GEN, pariout_t *, int);
       r = lg(g); if (r==1) { pariputs("[;]"); return; }
       l = lg(g[1]);
       if (l==1)
@@ -1755,23 +1768,25 @@ bruti(GEN g, pariout_t *T, int addsign)
         pariputsf(new_fun_set? "matrix(0,%ld)":"matrix(0,%ld,j,k,0)", r-1);
         return;
       }
+      print = (typ(g[1]) == t_VECSMALL)? prints: bruti;
       if (l==2) 
       {
         pariputs(new_fun_set? "Mat(": "mat(");
-        if (r == 2) { bruti(gcoeff(g,1,1),T,1); pariputc(')'); return; }
+        if (r == 2) { print(gcoeff(g,1,1),T,1); pariputc(')'); return; }
       }
       pariputc('[');
       for (i=1; i<l; i++)
       {
 	for (j=1; j<r; j++)
 	{
-	  bruti(gcoeff(g,i,j),T,1);
+	  print(gcoeff(g,i,j),T,1);
           if (j<r-1) comma_sp(T);
 	}
 	if (i<l-1) { pariputc(';'); sp(T); }
       }
       pariputc(']'); if (l==2) pariputc(')');
       break;
+    }
 
     default: sorstring(VOIR_STRING2,*g);
   }
@@ -1780,18 +1795,20 @@ bruti(GEN g, pariout_t *T, int addsign)
 void
 matbruti(GEN g, pariout_t *T)
 {
-  long i,j,r,l;
+  long i, j, r, l;
+  void (*print)(GEN, pariout_t *, int);
 
   if (typ(g) != t_MAT) { bruti(g,T,1); return; }
 
   r=lg(g); if (r==1 || lg(g[1])==1) { pariputs("[;]\n"); return; }
   pariputc('\n'); l = lg(g[1]);
+  print = (typ(g[1]) == t_VECSMALL)? prints: bruti;
   for (i=1; i<l; i++)
   {
     pariputc('[');
     for (j=1; j<r; j++)
     {
-      bruti(gcoeff(g,i,j),T,1); if (j<r-1) pariputc(' ');
+      print(gcoeff(g,i,j),T,1); if (j<r-1) pariputc(' ');
     }
     if (i<l-1) pariputs("]\n\n"); else pariputs("]\n");
   }
@@ -1839,7 +1856,6 @@ sori(GEN g, pariout_t *T)
   if (tg != t_MAT && tg != t_COL) T->fieldw = 0;
   switch (tg)
   {
-    case t_SMALL: pariputsf("%ld",smalltos(g)); return;
     case t_REAL: wr_real(T,g,1); return;
     case t_STR:
       pariputc('"'); pariputs(GSTR(g)); pariputc('"'); return;
@@ -1982,16 +1998,18 @@ sori(GEN g, pariout_t *T)
 	
     case t_MAT:
     {
+      void (*print)(GEN, pariout_t *);
       long lx = lg(g);
 
       if (lx==1) { pariputs("[;]\n"); return; }
-      pariputc('\n'); l=lg((GEN)g[1]);
+      pariputc('\n'); l=lg(g[1]);
+      print = (typ(g[1]) == t_VECSMALL)? sors: sori;
       for (i=1; i<l; i++)
       {
 	pariputc('[');
 	for (j=1; j<lx; j++)
 	{
-	  sori(gcoeff(g,i,j),T); if (j<lx-1) pariputc(' ');
+	  print(gcoeff(g,i,j),T); if (j<lx-1) pariputc(' ');
 	}
 	pariputs("]\n"); if (i<l-1) pariputc('\n');
       }
@@ -2036,7 +2054,6 @@ texi_nobrace(GEN g, pariout_t *T, int addsign)
   tg = typ(g);
   switch(tg)
   {
-    case t_SMALL: pariputsf("%ld",smalltos(g)); break;
     case t_INT: wr_intsgn(g, addsign && signe(g) < 0); break;
     case t_REAL: wr_real(T,g,addsign); break;
 
@@ -2162,20 +2179,25 @@ texi_nobrace(GEN g, pariout_t *T, int addsign)
 #endif
     }
     case t_MAT:
+    {
+      void (*print)(GEN, pariout_t *, int);
+
       pariputs("\\pmatrix{\n "); r = lg(g);
       if (r>1)
       {
+        print = (typ(g[1]) == t_VECSMALL)? prints: texi;
         l = lg(g[1]);
         for (i=1; i<l; i++)
         {
           for (j=1; j<r; j++)
           {
-            texi(gcoeff(g,i,j),T,1); if (j<r-1) pariputc('&');
+            print(gcoeff(g,i,j),T,1); if (j<r-1) pariputc('&');
           }
           pariputs("\\cr\n ");
         }
       }
       pariputc('}'); break;
+    }
   }
 }
 

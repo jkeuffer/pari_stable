@@ -101,16 +101,15 @@ typedef int (*QSCOMP)(const void *, const void *);
 #define evallgeflist(x) (x)
 #define _evallg(x)    (x)
 
-#define typ(x)        ((((ulong)(x))&1)? (long)t_SMALL: (long)((((ulong*)(x))[0]) >> TYPSHIFT))
+#define typ(x)        ((long)((((ulong*)(x))[0]) >> TYPSHIFT))
 #define settyp(x,s)   (((ulong*)(x))[0]=\
                         (((ulong*)(x))[0]&(~TYPBITS)) | evaltyp(s))
-#define smalltos(x)   (((long)(x))>>1)
 
 #define isclone(x)    (((ulong*) (x))[0] & CLONEBIT)
 #define setisclone(x) (((ulong*) (x))[0] |= CLONEBIT)
 #define unsetisclone(x) (((ulong*) (x))[0] &= (~CLONEBIT))
 
-#define lg(x)         ((((ulong)(x))&1UL)?1L: ((long)(((ulong*)(x))[0] & LGBITS)))
+#define lg(x)         ((long)(((ulong*)(x))[0] & LGBITS))
 #define setlg(x,s)    (((ulong*)(x))[0]=\
                         (((ulong*)(x))[0]&(~LGBITS)) | evallg(s))
 
