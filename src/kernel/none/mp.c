@@ -2318,8 +2318,8 @@ dbltor(double x)
 
   if (x==0) { z[1]=evalexpo(-308); z[2]=0; return z; }
   fi.f = x;
-  e = evalexpo(((fi.i & (HIGHBIT-1)) >> mant_len) - exp_mid);
-  z[1] = e | evalsigne(x<0? -1: 1);
+  e = ((fi.i & (HIGHBIT-1)) >> mant_len) - exp_mid;
+  z[1] = evalexpo(e) | evalsigne(x<0? -1: 1);
   z[2] = (fi.i << expo_len) | HIGHBIT;
   return z;
 }
@@ -2374,10 +2374,10 @@ dbltor(double x)
   if (x==0) { z=cgetr(3); z[1]=evalexpo(-308); z[2]=0; return z; }
   fi.f = x; z=cgetr(4);
   {
-    const ulong a = fi.i[INDEX0];
+    const ulong a = fi.i[INDEX0]
     const ulong b = fi.i[INDEX1];
-    e = evalexpo(((a & (HIGHBIT-1)) >> shift) - exp_mid);
-    z[1] = e | evalsigne(x<0? -1: 1);
+    e = ((a & (HIGHBIT-1)) >> shift) - exp_mid;
+    z[1] = evalexpo(e) | evalsigne(x<0? -1: 1);
     z[3] = b << expo_len;
     z[2] = HIGHBIT | b >> (BITS_IN_LONG-expo_len) | (a << expo_len);
   }
