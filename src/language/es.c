@@ -1906,6 +1906,9 @@ void
 outsor(GEN g) { sor(g,'g',-1,1); }
 
 void
+outtex(GEN g) { texe(g,'g',-1); }
+
+void
 output(GEN x)
 {
   outbrute(x); pariputc('\n'); pariflush();

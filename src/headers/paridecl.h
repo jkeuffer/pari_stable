@@ -715,6 +715,7 @@ void    outerr(GEN x);
 void    outmat(GEN x);
 void    output(GEN x);
 void    outsor(GEN x);
+void    outtex(GEN x);
 void    pari_fclose(pariFILE *f);
 pariFILE*   pari_fopen(char *s, char *mode);
 char*   pari_strdup(char *s);

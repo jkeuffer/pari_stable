@@ -237,39 +237,6 @@ gp_output(GEN x)
     }
 }
 
-/* Wait for prettyprinter for finish, to prevent new prompt from overwriting
- * the output.  Fill the output buffer, wait until it is read.
- * Better than sleep(2): give possibility to print */
-static void
-prettyp_wait()
-{
-  char *s = "                                                     \n";
-  int i = 400;
-
-  pariputs("\n\n"); pariflush(); /* start translation */
-  while (--i) pariputs(s);
-  pariputs("\n"); pariflush();
-}
-
-/* initialise external prettyprinter (tex2mail) */
-static int
-prettyp_init()
-{
-  if (!prettyprinter_file)
-  {
-    prettyprinter_file = try_pipe(prettyprinter, mf_OUT | mf_TEST);
-    if (!prettyprinter_file)
-    {
-      err(warner,"broken prettyprinter: '%s'",prettyprinter);
-      if (prettyprinter != prettyprinter_dft) free(prettyprinter);
-      prettyprinter = NULL; return 0;
-    }
-  }
-  pariflush();
-  pari_outfile = prettyprinter_file->file;
-  prettyp = f_TEX; return 1;
-}
-
 /* print a sequence of (NULL terminated) GEN */
 void
 print0(GEN *g, long flag)
@@ -1594,6 +1561,103 @@ gp_history(long p, long flag, char *old, char *entrypoint)
   return hist[p];
 }
 
+extern char *GENtostr0(GEN x, void(*do_out)(GEN));
+
+static void
+texmacs_output(GEN z, long n)
+{
+  char *sz = GENtostr0(z, &outtex);
+  printf("%cverbatim:",DATA_BEGIN);
+  printf("%clatex:", DATA_BEGIN);
+  printf("\\magenta\\%%%ld = \\blue ", n);
+  printf("%s%c", sz,DATA_END); free(sz);
+  printf("%c",DATA_END); fflush(stdout);
+}
+
+/* Wait for prettyprinter for finish, to prevent new prompt from overwriting
+ * the output.  Fill the output buffer, wait until it is read.
+ * Better than sleep(2): give possibility to print */
+static void
+prettyp_wait()
+{
+  char *s = "                                                     \n";
+  int i = 400;
+
+  pariputs("\n\n"); pariflush(); /* start translation */
+  while (--i) pariputs(s);
+  pariputs("\n"); pariflush();
+}
+
+/* initialise external prettyprinter (tex2mail) */
+static int
+prettyp_init()
+{
+  if (!prettyprinter_file)
+    prettyprinter_file = try_pipe(prettyprinter, mf_OUT | mf_TEST);
+  if (prettyprinter_file) return 1;
+
+  err(warner,"broken prettyprinter: '%s'",prettyprinter);
+  if (prettyprinter != prettyprinter_dft) free(prettyprinter);
+  prettyprinter = NULL; return 0;
+}
+
+/* n = history number. if n = 0 no history */
+static int
+tex2mail_output(GEN z, long n)
+{
+  FILE *o_out;
+  int o_prettyp;
+  
+  if (!(prettyprinter && prettyp_init())) return 0;
+  o_out = pari_outfile; /* save state */
+  o_prettyp = prettyp;
+
+  /* Emit first: there may be lines before the prompt */
+  if (n) term_color(c_OUTPUT);
+  pariflush();
+  pari_outfile = prettyprinter_file->file;
+  prettyp = f_TEX;
+
+  /* history number */
+  if (n)
+  {
+    if (*term_get_color(c_HIST) || *term_get_color(c_OUTPUT))
+    {
+      char col1[80];
+      strcpy(col1, term_get_color(c_HIST));
+      sprintf(thestring, "\\LITERALnoLENGTH{%s}\\%%%ld = \\LITERALnoLENGTH{%s}",
+              col1, n, term_get_color(c_OUTPUT));
+    }
+    else
+      sprintf(thestring, "\\%%%ld = ", n);
+    pariputs_opt(thestring);
+  }
+  /* output */
+  gp_output(z);
+
+  /* flush and restore */
+  prettyp_wait();
+  prettyp = o_prettyp;
+  pari_outfile = o_out;
+  if (n) term_color(c_NONE);
+  return 1;
+}
+
+static void
+normal_output(GEN z, long n)
+{
+  /* history number */
+  term_color(c_HIST);
+  sprintf(thestring, "%%%ld = ", n);
+  pariputs_opt(thestring);
+  /* output */
+  term_color(c_OUTPUT);
+  init_lim_lines(thestring,lim_lines);
+  gp_output(z);
+  init_lim_lines("",lim_lines);
+  term_color(c_NONE); pariputc('\n');
+}
+
 static void
 escape(char *tch)
 {
@@ -1634,19 +1698,9 @@ escape(char *tch)
       {
 	case 'a': brute   (x, fmt.format, -1); break;
 	case 'm': matbrute(x, fmt.format, -1); break;
+	case 'B': if (tex2mail_output(x,0)) return;  /* fall through */
 	case 'b': sor     (x, fmt.format, -1, fmt.field); break;
-	case 'B':
-        {
-          FILE *o_out = pari_outfile;
-          int o_typ = prettyp;
-          if (!(prettyprinter && prettyp_init()))
-            { sor(x, fmt.format, -1, fmt.field); break; }
-          gp_output(x);
-          prettyp_wait();
-          pari_outfile = o_out;
-          prettyp = o_typ; return;
-        }
-	case 'x': voir(x, get_int(s, -1)); return; 
+	case 'x': voir(x, get_int(s, -1)); 
         case 'w':
 	{
 	  GEN g[2]; g[0] = x; g[1] = NULL;
@@ -2200,66 +2254,6 @@ check_meta(char *buf)
   return 1;
 }
 
-static void
-texmacs_output(GEN z, long n)
-{
-  char *sz = GENtostr(z);
-  printf("%cverbatim:",DATA_BEGIN);
-  printf("%clatex:", DATA_BEGIN);
-  printf("\\magenta\\%%%ld = \\blue ", n);
-  printf("%s%c", sz,DATA_END); free(sz);
-  printf("%c",DATA_END); fflush(stdout);
-}
-
-static void
-tex2mail_output(GEN z, long n)
-{
-  FILE *o_out = pari_outfile; /* save state */
-  /* history number */
-  if (*term_get_color(c_HIST) || *term_get_color(c_OUTPUT))
-  {
-    char col1[80];
-    strcpy(col1, term_get_color(c_HIST));
-    sprintf(thestring, "\\LITERALnoLENGTH{%s}\\%%%ld = \\LITERALnoLENGTH{%s}",
-            col1, n, term_get_color(c_OUTPUT));
-  }
-  else
-    sprintf(thestring, "\\%%%ld = ", n);
-  pariputs_opt(thestring);
-  /* output */
-  gp_output(z);
-  term_color(c_NONE);
-
-  /* flush and restore */
-  prettyp_wait();
-  prettyp = f_PRETTY;
-  pari_outfile = o_out;
-}
-
-static void
-pretty_output(GEN z, long n)
-{
-  if (under_texmacs)
-    texmacs_output(z,n);
-  else
-    tex2mail_output(z,n);
-}
-
-static void
-normal_output(GEN z, long n)
-{
-  /* history number */
-  term_color(c_HIST);
-  sprintf(thestring, "%%%ld = ", n);
-  pariputs_opt(thestring);
-  /* output */
-  term_color(c_OUTPUT);
-  init_lim_lines(thestring,lim_lines);
-  gp_output(z);
-  init_lim_lines("",lim_lines);
-  term_color(c_NONE); pariputc('\n');
-}
-
 /* If there are other buffers open (bufstack != NULL), we are doing an
  * immediate read (with read, extern...) */
 static GEN
@@ -2334,15 +2328,9 @@ gp_main_loop(int ismain)
     if (test_mode) { init80(0); gp_output(z); pariputc('\n'); }
     else
     {
-      int prettyprint = (prettyprinter && prettyp == f_PRETTY);
-
-      /* Emit first: there may be lines before the prompt */
-      if (prettyprint) term_color(c_OUTPUT);
-
-      /* output z */
-      if (under_texmacs || (prettyprint && prettyp_init()))
-        pretty_output(z,tglobal);
-      else
+      if (under_texmacs)
+        texmacs_output(z,tglobal);
+      else if (prettyp != f_PRETTY || !tex2mail_output(z,tglobal))
         normal_output(z,tglobal);
     }
     pariflush();
