@@ -1336,7 +1336,7 @@ divrr(GEN x, GEN y)
 
 /* The following ones are not in mp.s (mulii is, with a different algorithm) */
 
-/* Integer division x / y:
+/* Integer division x / y: such that sign(r) = sign(x)
  *   if z = ONLY_REM return remainder, otherwise return quotient
  *   if z != NULL set *z to remainder
  *   *z is the last object on stack (and thus can be disposed of with cgiv
@@ -1670,7 +1670,7 @@ truedvmdii(GEN x, GEN y, GEN *z)
   }
 
   if (z == ONLY_REM)
-  {
+  { /* r += sign(y) * y, that is |y| */
     r = subiispec(y+2,r+2, lgefint(y)-2,lgefint(r)-2);
     return gerepileuptoint(av, r);
   }
