@@ -191,7 +191,7 @@ void *dlsym(void *handle, const char *symbol)
   }
   else
   {
-    malloc_sym = malloc(sym_len + 2);
+    malloc_sym = (char*)malloc(sym_len + 2);
     if (malloc_sym)
     {
       sprintf(malloc_sym, "_%s", symbol);
