@@ -1208,6 +1208,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
     if (r <= 1)
     {
       if (r == 0) err(bugparier,"LLL_cmbf [no factor]");
+      if (DEBUGLEVEL>2) fprintferr("LLL_cmbf: 1 factor\n");
       list[1] = (long)P; setlg(list,2); return list;
     }
 
@@ -1238,7 +1239,11 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
       target = gdiv(q, leading_term(y));
       list[i] = (long)y;
     }
-    if (i > r) { setlg(list,r+1); return list; }
+    if (i > r)
+    {
+      if (DEBUGLEVEL>2) fprintferr("LLL_cmbf: %ld factors\n", r);
+      setlg(list,r+1); return list;
+    }
   }
 }
 
