@@ -1075,8 +1075,7 @@ has_ext_help(void)
 
     for (s = buf; *s; s++)
     {
-      if (*s == '\\') s++;
-      if (*s == ' ') break;
+      if (*s == '\\') s++; else if (*s == ' ') break;
     }
     *s = 0; file = fopen(buf,"r");
     free(buf);
