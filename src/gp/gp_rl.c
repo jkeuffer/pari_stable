@@ -80,15 +80,13 @@ extern RLCI rl_last_func;
 ENDEXTERN
 
 #ifdef HAS_RL_COMPLETION_MATCHES
-#  define COMPLETION_MATCHES(a,b) \
-      rl_completion_matches((a),(b))
+#  define COMPLETION_MATCHES(a,b) rl_completion_matches((a),(b))
 #  define FILE_COMPLETION rl_filename_completion_function
 #  define USER_COMPLETION rl_username_completion_function
 #  define DING rl_ding
 #else
-typedef char** (*CF)(const char*, GF); /* completion function */
 #  define COMPLETION_MATCHES(a,b) \
-      ((CF)completion_matches)((a),(b))
+      (completion_matches((char*)(a),(CPFunction*)(b)))
 #  define FILE_COMPLETION ((GF)filename_completion_function)
 #  define USER_COMPLETION ((GF)username_completion_function)
 #  define DING ding
@@ -711,8 +709,7 @@ init_readline(void)
 #  ifdef _RL_FUNCTION_TYPEDEF
 #    define Bind(a,b,c) (rl_bind_key_in_map((a),(b),(c)))
 #  else
-#    define Bind(a,b,c) (((void(*)(int,Function*,Keymap)) rl_bind_key_in_map)\
-  ((a), (Function*)(b), (c)))
+#    define Bind(a,b,c) (rl_bind_key_in_map((a), (Function*)(b), (c)))
 #  endif
 #else
 #  define Bind(a,b,c)
@@ -721,8 +718,7 @@ init_readline(void)
 #ifdef _RL_FUNCTION_TYPEDEF
 #  define Defun(a,b,c) (rl_add_defun((a), (b), (c)))
 #else
-#  define Defun(a,b,c) (((void(*)(const char*,Function*,int)) rl_add_defun)\
-     ((a), (Function*)(b), (c)))
+#  define Defun(a,b,c) (rl_add_defun((char*)(a), (Function*)(b), (c)))
 #endif
 
   Defun("short-help", rl_short_help, -1);
