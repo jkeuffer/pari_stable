@@ -21,6 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "anal.h"
 extern void changevalue_p(entree *ep, GEN x);
+extern GEN polint_i(GEN xa, GEN ya, GEN x, long n, GEN *ptdy);
 
 /********************************************************************/
 /**                                                                **/
@@ -927,10 +928,6 @@ intnum0(entree *ep, GEN a, GEN b, char *ch, long flag, long prec)
   return NULL; /* not reached */
 }
 
-#define JMAX 25
-#define JMAXP JMAX+3
-#define KLOC 4
-
 /* we need to make a copy in any case, cf forpari */
 static GEN
 fix(GEN a, long prec)
@@ -939,192 +936,214 @@ fix(GEN a, long prec)
   gaffect(a,p); return p;
 }
 
-extern GEN polint_i(GEN xa, GEN ya, GEN x, long n, GEN *ptdy);
+#if 0
+GEN
+int_loop(entree *ep, char *ch)
+{
+  gpmem_t av = avma;
+  intstruct T;
+
+  T.in = NULL;
+  for(;;)
+  {
+    GEN x = Next(&T);
+    if (!x) return gerepileupto(av, T.out);
+    ep->value = (void*)x; 
+    T.in = lisexpr(ch);
+  }
+}
+#endif
+
+typedef struct {
+  entree *ep;
+  char *ch;
+} exprdat;
+
+/* f(x) */
+static GEN
+_eval(entree *ep, char *ch, GEN x)
+{
+  ep->value = (void*)x;
+  return lisexpr(ch);
+}
+static GEN
+_gp_eval(void *dat, GEN x)
+{
+  exprdat *E = (exprdat*)dat;
+  return _eval(E->ep, E->ch, x);
+}
+/* 1/x^2 f(1/x) */
+static GEN
+_gp_inv_eval(void *dat, GEN x)
+{
+  GEN y = ginv(x);
+  return gmul(_gp_eval(dat, y), gsqr(y));
+}
+
+#define swap(a,b) { GEN _x = a; a = b; b = _x; }
+static GEN
+interp(GEN h, GEN s, long j, long lim, long KLOC)
+{
+  gpmem_t av = avma;
+  long e1,e2;
+  GEN dss, ss = polint_i(h+j-KLOC,s+j-KLOC,gzero,KLOC+1,&dss);
+
+  e1 = gexpo(ss);
+  e2 = gexpo(dss);
+  if (e1-e2 <= lim && e1 >= -lim) { avma = av; return NULL; }
+  if (gcmp0(gimag(ss))) ss = greal(ss);
+  return ss;
+}
+
+
+GEN
+qrom3(void *dat, GEN (*eval)(void *, GEN), GEN a, GEN b, long prec)
+{
+  const long JMAX = 25, KLOC = 4;
+  GEN ss,s,h,p1,p2,qlint,del,x,sum;
+  long j, j1, it, sig;
+  gpmem_t av;
+
+  a = fix(a,prec);
+  b = fix(b,prec);
+  qlint = subrr(b,a); sig = signe(qlint);
+  if (!sig)  return gzero;
+  if (sig < 0) { setsigne(qlint,1); swap(a,b); }
+
+  s = new_chunk(JMAX+KLOC-1);
+  h = new_chunk(JMAX+KLOC-1);
+  h[0] = (long)realun(prec);
+
+  p1 = eval(dat, a); if (p1 == a) p1 = rcopy(p1);
+  p2 = eval(dat, b);
+  s[0] = lmul2n(gmul(qlint,gadd(p1,p2)),-1);
+  for (it=1,j=1; j<JMAX; j++, it<<=1)
+  {
+    h[j] = lshiftr((GEN)h[j-1],-2);
+    av = avma; del = divrs(qlint,it);
+    x = addrr(a, shiftr(del,-1));
+    for (sum = gzero, j1 = 1; j1 <= it; j1++, x = addrr(x,del))
+      sum = gadd(sum, eval(dat, x));
+    sum = gmul(sum,del); p1 = gadd((GEN)s[j-1], sum);
+    s[j] = lpileupto(av, gmul2n(p1,-1));
+
+    if (j >= KLOC && (ss = interp(h, s, j, bit_accuracy(prec)-j-6, KLOC)))
+      return gmulsg(sig,ss);
+  }
+  return NULL;
+}
+
+GEN
+qrom2(void *dat, GEN (*eval)(void *, GEN), GEN a, GEN b, long prec)
+{
+  const long JMAX = 16, KLOC = 4;
+  GEN ss,s,h,p1,qlint,del,ddel,x,sum;
+  long j, j1, it, sig;
+  gpmem_t av;
+
+  a = fix(a, prec);
+  b = fix(b, prec);
+  qlint = subrr(b,a); sig = signe(qlint);
+  if (!sig)  return gzero;
+  if (sig < 0) { setsigne(qlint,1); swap(a,b); }
+
+  s = new_chunk(JMAX+KLOC-1);
+  h = new_chunk(JMAX+KLOC-1);
+  h[0] = (long)realun(prec);
+
+  p1 = shiftr(addrr(a,b),-1);
+  s[0] = lmul(qlint, eval(dat, p1));
+  for (it=1, j=1; j<JMAX; j++, it*=3)
+  {
+    h[j] = ldivrs((GEN)h[j-1],9);
+    av = avma; del = divrs(qlint,3*it); ddel = shiftr(del,1);
+    x = addrr(a, shiftr(del,-1));
+    for (sum = gzero, j1 = 1; j1 <= it; j1++)
+    {
+      sum = gadd(sum, eval(dat, x)); x = addrr(x,ddel);
+      sum = gadd(sum, eval(dat, x)); x = addrr(x,del);
+    }
+    sum = gmul(sum,del); p1 = gdivgs((GEN)s[j-1],3);
+    s[j] = lpileupto(av, gadd(p1,sum));
+
+    if (j >= KLOC && (ss = interp(h, s, j, bit_accuracy(prec)-(3*j/2)-6, KLOC)))
+      return gmulsg(sig, ss);
+  }
+  return NULL;
+}
+
+static GEN
+romberg(int flag, GEN (*eval)(void*,GEN), entree *ep, char *ch, GEN a, GEN b,
+        long prec)
+{
+  exprdat E;
+  GEN z;
+
+  E.ep = ep;
+  E.ch = ch;
+  push_val(ep, NULL);
+  if (flag == 2) z = qrom2((void*)&E, eval, a,b, prec);
+  else           z = qrom3((void*)&E, eval, a,b, prec);
+  if (!z) err(intger2);
+  pop_val(ep); return z;
+}
 
 GEN
 qromb(entree *ep, GEN a, GEN b, char *ch, long prec)
 {
-  GEN ss,dss,s,h,p1,p2,qlint,del,x,sum;
-  long j, j1, j2, it, sig, lim;
-  gpmem_t av = avma, av1, tetpil;
-
-  a = fix(a,prec);
-  b = fix(b,prec);
-  qlint=subrr(b,a); sig=signe(qlint);
-  if (!sig)  { avma=av; return gzero; }
-  if (sig<0) { setsigne(qlint,1); s=a; a=b; b=s; }
-
-  s=new_chunk(JMAXP);
-  h=new_chunk(JMAXP);
-  h[0] = (long)realun(prec);
-
-  push_val(ep, a);
-  p1=lisexpr(ch); if (p1 == a) p1=rcopy(p1);
-  ep->value = (void*)b;
-  p2=lisexpr(ch);
-  s[0]=lmul2n(gmul(qlint,gadd(p1,p2)),-1);
-  for (it=1,j=1; j<JMAX; j++,it=it<<1)
-  {
-    h[j]=lshiftr((GEN)h[j-1],-2);
-    av1=avma; del=divrs(qlint,it); x=addrr(a,shiftr(del,-1));
-    for (sum=gzero,j1=1; j1<=it; j1++,x=addrr(x,del))
-    {
-      ep->value = (void*) x; sum=gadd(sum,lisexpr(ch));
-    }
-    sum = gmul(sum,del); p1 = gadd((GEN)s[j-1],sum);
-    tetpil = avma;
-    s[j]=lpile(av1,tetpil,gmul2n(p1,-1));
-
-    if (j>=KLOC)
-    {
-      tetpil=avma; ss=polint_i(h+j-KLOC,s+j-KLOC,gzero,KLOC+1,&dss);
-      j1=gexpo(ss); j2=gexpo(dss); lim=bit_accuracy(prec)-j-6;
-      if (j1-j2 > lim || j1 < -lim)
-      {
-        pop_val(ep); if (gcmp0(gimag(ss))) ss=greal(ss);
-	tetpil=avma; return gerepile(av,tetpil,gmulsg(sig,ss));
-      }
-      avma=tetpil;
-    }
-  }
-  err(intger2); return NULL; /* not reached */
+  gpmem_t av = avma;
+  return gerepileupto(av, romberg(3, &_gp_eval, ep, ch, a, b, prec));
 }
-
 GEN
 qromo(entree *ep, GEN a, GEN b, char *ch, long prec)
 {
-  GEN ss,dss,s,h,p1,qlint,del,ddel,x,sum;
-  long j, j1, j2, it, sig, lim;
-  gpmem_t av = avma, av1, tetpil;
-
-  a = fix(a, prec);
-  b = fix(b, prec);
-  qlint=subrr(b,a); sig=signe(qlint);
-  if (!sig)  { avma=av; return gzero; }
-  if (sig<0) { setsigne(qlint,1); s=a; a=b; b=s; }
-
-  s=new_chunk(JMAXP);
-  h=new_chunk(JMAXP);
-  h[0] = (long)realun(prec);
-
-  p1 = shiftr(addrr(a,b),-1); push_val(ep, p1);
-  p1=lisexpr(ch); s[0]=lmul(qlint,p1);
-
-  for (it=1, j=1; j<JMAX; j++, it*=3)
-  {
-    h[j] = ldivrs((GEN)h[j-1],9);
-    av1=avma; del=divrs(qlint,3*it); ddel=shiftr(del,1);
-    x=addrr(a,shiftr(del,-1)); sum=gzero;
-    for (j1=1; j1<=it; j1++)
-    {
-      ep->value = (void*)x; sum=gadd(sum,lisexpr(ch)); x=addrr(x,ddel);
-      ep->value = (void*)x; sum=gadd(sum,lisexpr(ch)); x=addrr(x,del);
-    }
-    sum = gmul(sum,del); p1 = gdivgs((GEN)s[j-1],3);
-    tetpil = avma; s[j]=lpile(av1,tetpil,gadd(p1,sum));
-
-    if (j>=KLOC)
-    {
-      tetpil=avma; ss=polint_i(h+j-KLOC,s+j-KLOC,gzero,KLOC+1,&dss);
-      j1=gexpo(ss); j2=gexpo(dss); lim=bit_accuracy(prec)-(3*j/2)-6;
-      if ( j1-j2 > lim || j1 < -lim)
-      {
-        pop_val(ep); if (gcmp0(gimag(ss))) ss=greal(ss);
-	tetpil=avma; return gerepile(av,tetpil,gmulsg(sig,ss));
-      }
-      avma=tetpil;
-    }
-  }
-  err(intger2); return NULL; /* not reached */
+  gpmem_t av = avma;
+  return gerepileupto(av, romberg(2, &_gp_eval, ep, ch, a, b, prec));
 }
-
-#undef JMAX
-#undef JMAXP
-#define JMAX 16
-#define JMAXP JMAX+3
-
 GEN
 qromi(entree *ep, GEN a, GEN b, char *ch, long prec)
 {
-  GEN ss,dss,s,h,q1,p1,qlint,del,ddel,x,sum;
-  long j, j1, j2, it, sig, lim;
-  gpmem_t av = avma, av1, tetpil;
+  gpmem_t av = avma;
+  GEN A = ginv(b), B = ginv(a);
+  return gerepileupto(av, romberg(2, &_gp_inv_eval, ep, ch, A, B, prec));
+}
 
-  a = fix(ginv(a), prec);
-  b = fix(ginv(b), prec);
-  qlint=subrr(b,a); sig= -signe(qlint);
-  if (!sig)  { avma=av; return gzero; }
-  if (sig>0) { setsigne(qlint,1); s=a; a=b; b=s; }
-
-  s=new_chunk(JMAXP);
-  h=new_chunk(JMAXP);
-  h[0] = (long)realun(prec);
-
-  x=divsr(2,addrr(a,b)); push_val(ep, x);
-  p1=gmul(lisexpr(ch),mulrr(x,x));
-  s[0]=lmul(qlint,p1);
-  for (it=1,j=1; j<JMAX; j++, it*=3)
-  {
-    h[j] = ldivrs((GEN)h[j-1],9);
-    av1=avma; del=divrs(qlint,3*it); ddel=shiftr(del,1);
-    x=addrr(a,shiftr(del,-1)); sum=gzero;
-    for (j1=1; j1<=it; j1++)
-    {
-      q1 = ginv(x); ep->value = (void*)q1;
-      p1=gmul(lisexpr(ch), gsqr(q1));
-      sum=gadd(sum,p1); x=addrr(x,ddel);
-
-      q1 = ginv(x); ep->value = (void*)q1;
-      p1=gmul(lisexpr(ch), gsqr(q1));
-      sum=gadd(sum,p1); x=addrr(x,del);
-    }
-    sum = gmul(sum,del); p1 = gdivgs((GEN)s[j-1],3);
-    tetpil=avma;
-    s[j]=lpile(av1,tetpil,gadd(p1,sum));
-
-    if (j>=KLOC)
-    {
-      tetpil=avma; ss=polint_i(h+j-KLOC,s+j-KLOC,gzero,KLOC+1,&dss);
-      j1=gexpo(ss); j2=gexpo(dss); lim=bit_accuracy(prec)-(3*j/2)-6;
-      if (j1-j2 > lim || j1 < -lim)
-      {
-        pop_val(ep); if (gcmp0(gimag(ss))) ss=greal(ss);
-	tetpil=avma; return gerepile(av,tetpil,gmulsg(sig,ss));
-      }
-    }
+/* a < b, assume b "small" (< 100 say) */
+static GEN
+rom_bsmall(entree *ep, GEN a, GEN b, char *ch, long prec)
+{
+  if (gcmpgs(a,-100) >= 0) return qromo(ep,a,b,ch,prec);
+  if (b == gun || gcmpgs(b, -1) >= 0)
+  { /* a < -100, b >= -1 */
+    GEN _1 = negi(gun); /* split at -1 */
+    return gadd(qromi(ep,a,_1,ch,prec),
+                qromo(ep,_1,b,ch,prec));
   }
-  err(intger2); return NULL; /* not reached */
+  /* a < -100, b < -1 */
+  return qromi(ep,a,b,ch,prec);
 }
 
 GEN
 rombint(entree *ep, GEN a, GEN b, char *ch, long prec)
 {
-  GEN aa,bb,mun,p1,p2,p3;
-  long l;
-  gpmem_t av, tetpil;
+  gpmem_t av = avma;
+  long l = gcmp(b,a);
+  GEN z;
 
-  l=gcmp(b,a); if (!l) return gzero;
-  if (l<0) { bb=a; aa=b; } else { bb=b; aa=a; }
-  av=avma; mun = negi(gun);
-  if (gcmpgs(bb,100)>=0)
+  if (!l) return gzero;
+  if (l < 0) swap(a,b);
+  if (gcmpgs(b,100) >= 0)
   {
-    if (gcmpgs(aa,1)>=0) return qromi(ep,a,b,ch,prec);
-    p1=qromi(ep,gun,bb,ch,prec);
-    if (gcmpgs(aa,-100)>=0)
-    {
-      p2=qromo(ep,aa,gun,ch,prec); tetpil=avma;
-      return gerepile(av,tetpil,gmulsg(l,gadd(p1,p2)));
-    }
-    p2=qromo(ep,mun,gun,ch,prec); p3=gadd(p2,qromi(ep,aa,mun,ch,prec));
-    tetpil=avma; return gerepile(av,tetpil,gmulsg(l,gadd(p1,p3)));
+    if (gcmpgs(a,1) >= 0)
+      z = qromi(ep,a,b,ch,prec);
+    else /* split at 1 */
+      z = gadd(rom_bsmall(ep,a,gun,ch,prec),
+               qromi(ep,gun,b,ch,prec));
   }
-  if (gcmpgs(aa,-100)>=0) return qromo(ep,a,b,ch,prec);
-  if (gcmpgs(bb,-1)>=0)
-  {
-    p1=qromi(ep,aa,mun,ch,prec); p2=qromo(ep,mun,bb,ch,prec); tetpil=avma;
-    return gerepile(av,tetpil,gmulsg(l,gadd(p1,p2)));
-  }
-  return qromi(ep,a,b,ch,prec);
+  else
+    z = rom_bsmall(ep,a,b,ch,prec);
+  if (l < 0) z = gneg(z);
+  return gerepileupto(av, z);
 }
 
 /********************************************************************/
