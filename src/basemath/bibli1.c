@@ -1429,29 +1429,30 @@ real_indep(GEN re, GEN im, long bitprec)
 GEN
 lindep2(GEN x, long bit)
 {
-  long tx=typ(x),lx=lg(x),ly,i,j,flag,e,tetpil, av = avma;
+  long tx=typ(x),lx=lg(x),ly,i,j,e, av = avma;
   GEN re,im,p1,p2;
 
   if (! is_vec_t(tx)) err(typeer,"lindep2");
   if (lx<=2) return cgetg(1,t_VEC);
-  re=greal(x); im=gimag(x);
+  re = greal(x);
+  im = gimag(x); bit = (long) (bit/L2SL10);
   /* independant over R ? */
   if (lx == 3 && real_indep(re,im,bit))
     { avma = av; return cgetg(1, t_VEC); }
 
-  flag = !gcmp0(im);
-  ly = flag? lx+2: lx+1;
-  p2=cgetg(lx,t_MAT); bit = (long) (bit/L2SL10);
+  if (gcmp0(im)) im = NULL;
+  ly = im? lx+2: lx+1;
+  p2=cgetg(lx,t_MAT);
   for (i=1; i<lx; i++)
   {
-    p1=cgetg(ly,t_COL); p2[i]=(long)p1;
-    for (j=1; j<lx; j++) p1[j]=(i==j) ? un : zero;
-    p1[lx]=lcvtoi(gshift((GEN)re[i],bit),&e);
-    if (flag) p1[lx+1]=lcvtoi(gshift((GEN)im[i],bit),&e);
+    p1 = cgetg(ly,t_COL); p2[i] = (long)p1;
+    for (j=1; j<lx; j++) p1[j] = (i==j)? un: zero;
+    p1[lx]           = lcvtoi(gshift((GEN)re[i],bit),&e);
+    if (im) p1[lx+1] = lcvtoi(gshift((GEN)im[i],bit),&e);
   }
-  p1=gmul(p2,lllint(p2)); p1=(GEN)p1[1];
-  p1[0]=evaltyp(t_VEC) | evallg(lx); tetpil=avma;
-  return gerepile(av,tetpil,gcopy(p1));
+  p1 = (GEN)gmul(p2,lllint(p2))[1];
+  p1[0] = evaltyp(t_VEC) | evallg(lx);
+  return gerepileupto(av, gcopy(p1));
 }
 
 #define quazero(x) (gcmp0(x) || (typ(x)==t_REAL && expo(x) < EXP))
@@ -1574,6 +1575,47 @@ lindep(GEN x, long prec)
   return gerepile(av,tetpil,gtrans(p2));
 }
 
+/* x is a vector of elts of a p-adic field */
+GEN
+plindep(GEN x)
+{
+  long av = avma,i,j, prec = VERYBIGINT, lx = lg(x)-1, ly,v;
+  GEN p = NULL, pn,p1,m,a;
+
+  if (lx < 2) return cgetg(1,t_VEC);
+  for (i=1; i<=lx; i++)
+  {
+    p1 = (GEN)x[i];
+    if (typ(p1) != t_PADIC) continue;
+
+    j = precp(p1); if (j < prec) prec = j;
+    if (!p) p = (GEN)p1[2];
+    else if (!egalii(p, (GEN)p1[2]))
+      err(talker,"inconsistent primes in plindep");
+  }
+  if (!p) err(talker,"not a p-adic vector in plindep");
+  v = ggval(x,p); pn = gpowgs(p,prec);
+  if (v != 0) x = gmul(x, gpowgs(p, -v));
+  x = lift_intern(gmul(x, gmodulcp(gun, pn)));
+
+  ly = 2*lx - 1;
+  m = cgetg(ly+1,t_MAT);
+  for (j=1; j<=ly; j++)
+  {
+    p1 = cgetg(lx+1, t_COL); m[j] = (long)p1;
+    for (i=1; i<=lx; i++) p1[i] = zero;
+  }
+  a = negi((GEN)x[1]);
+  for (i=1; i<lx; i++)
+  {
+    coeff(m,1+i,i) = (long)a;
+    coeff(m,1  ,i) = x[i+1];
+  }
+  for (i=1; i<=lx; i++) coeff(m,i,lx-1+i) = (long)pn;
+  p1 = lllint(m);
+  return gerepileupto(av, gmul(m, (GEN)p1[1]));
+}
+
 GEN
 algdep0(GEN x, long n, long bit, long prec)
 {
@@ -1589,8 +1631,10 @@ algdep0(GEN x, long n, long bit, long prec)
   p1[1] = un;
   p1[2] = (long)x; /* n >= 1 */
   for (i=3; i<=n+1; i++) p1[i]=lmul((GEN)p1[i-1],x);
-
-  p1 = bit? lindep2(p1,bit): lindep(p1,prec);
+  if (typ(x) == t_PADIC)
+    p1 = plindep(p1);
+  else
+    p1 = bit? lindep2(p1,bit): lindep(p1,prec);
   if (lg(p1) < 2)
     err(talker,"higher degree than expected in algdep");
 
