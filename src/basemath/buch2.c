@@ -1925,7 +1925,7 @@ compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR)
     return PRECI;
   }
   L = gmul(lambda,den);
-  H = hnf(L); r = lg(H)-1;
+  H = hnfall_i(L, NULL, 1); r = lg(H)-1;
   R = gdiv(dethnf_i(H), gpowgs(den, r));
   R = mpabs(gmul(*ptkR,R)); /* tentative regulator */
   c = gtodouble(gmul(R,z)); /* should be 2n (= 2 if we are done) */
