@@ -1244,8 +1244,7 @@ gcopy(GEN x)
     for (   ; i<lontyp2[tx]; i++) copyifstack(x[i],y[i]);
     for (   ; i<lx;          i++) y[i]=lcopy((GEN)x[i]);
   }
-  /* unsetisclone(y); useless because gunclone checks isonstack */
-  return y;
+  unsetisclone(y); return y;
 }
 
 GEN
@@ -1264,7 +1263,7 @@ gcopy_i(GEN x, long lx)
     for (   ; i<lontyp2[tx]; i++) copyifstack(x[i],y[i]);
     for (   ; i<lx;          i++) y[i]=lcopy((GEN)x[i]);
   }
-  return y;
+  unsetisclone(y); return y;
 }
 
 GEN

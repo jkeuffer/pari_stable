@@ -65,6 +65,8 @@ IZ 12- [gnuplot + dynamic link:] allow building even when dlopen() not available
          u = Mod(x*Mod(1,2),polcyclo(25)*Mod(1,2)); sum(i=1,4,u=u^32) --> SEGV
    22- typo in to_Fp_simple [ bnfcertify(bnfinit(x^2-40!)) --> type error ]
    23- memory leak in gp when handling '&' arguments 
+   24- removed hack in gcopy [ did not reset the isclone() flag because
+       gunclone checks isonstack(). But other routines may want to use it ].
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).
