@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  */
 #include "pari.h"
 
-static int curne,r,s,t,deg,Prec,ConstPrec,numroot;
+static int curne,r,s,t,deg,Prec,numroot;
 static GEN c1,c2,c3,c4,c5,c6,c7,c8,c10,c11,c12,c13,c14,c15,B0,x1,x2,x3,x0;
 static GEN halpha,eps3,gdeg,A,MatNE,roo,MatFU,Delta,Lambda,delta,lambda;
 static GEN Vect2,SOL,uftot;
@@ -80,7 +80,7 @@ Vecmax(GEN Vec, int size)
   int k, tno = 1;
   GEN tmax = (GEN)Vec[1];
   for (k=2; k<=size; k++)
-    if (gcmp((GEN)Vec[k],tmax)==1) { tmax=(GEN)Vec[k]; tno=k; }
+    if (gcmp((GEN)Vec[k],tmax) > 0) { tmax=(GEN)Vec[k]; tno=k; }
   return tno;
 }
 
@@ -115,81 +115,85 @@ inithue(GEN poly, long flag)
   r=s+t-1; halpha=gun;
   for (k=1; k<=deg; k++)
     halpha = gmul(halpha,gmax(gun,gabs((GEN)roo[k],Prec)));
-  halpha=gdiv(glog(halpha,Prec),gdeg);
+  halpha=gdivgs(glog(halpha,Prec),deg);
 
   de=derivpol(poly); c1=gabs(poleval(de,(GEN)roo[1]),Prec);
   for (k=2; k<=s; k++)
   {
     tmp=gabs(poleval(de,(GEN)roo[k]),Prec);
-    if (gcmp(tmp,c1)==-1) c1=tmp;
+    if (gcmp(tmp,c1) < 0) c1=tmp;
   }
 
-  c1=gdiv(gpui(gdeux,gsub(gdeg,gun),Prec),c1); c1=myround(c1,gun);
+  c1=gdiv(shifti(gun,deg-1),c1); c1=myround(c1,gun);
   c2=gabs(gsub((GEN)roo[1],(GEN)roo[2]),Prec);
 
   for (k=1; k<=deg; k++)
     for (j=k+1; j<=deg; j++)
     {
       tmp=gabs(gsub((GEN)roo[j],(GEN)roo[k]),Prec);
-      if (gcmp(c2,tmp)==1) c2=tmp;
+      if (gcmp(c2,tmp) > 0) c2=tmp;
     }
 
   c2=myround(c2,stoi(-1));
   if (t==0) x0=gun;
   else
   {
+    GEN rooI = gabs(gimag(roo), Prec);
     gpmin=gabs(poleval(de,(GEN)roo[s+1]),Prec);
     for (k=2; k<=t; k++)
     {
       tmp=gabs(poleval(de,(GEN)roo[s+k]),Prec);
-      if (gcmp(tmp,gpmin)==-1) gpmin=tmp;
+      if (gcmp(tmp,gpmin) < 0) gpmin=tmp;
     }
 
     /* Compute x0. See paper, Prop. 2.2.1 */
-    x0=gpui(gdiv(gpui(gdeux,gsub(gdeg,gun),Prec),
-                 gmul(gpmin,
-		      gabs((GEN)gimag(roo)[Vecmax(gabs(gimag(roo),Prec),deg)],Prec))),
+    x0=gpui(gdiv(shifti(gun,deg-1),
+                 gmul(gpmin, (GEN)rooI[Vecmax(rooI,deg)])),
 	    ginv(gdeg),Prec);
   }
 
   if (DEBUGLEVEL >=2) fprintferr("c1 = %Z\nc2 = %Z\n", c1, c2);
-
 }
 
 /* Computation of M, its inverse A and check of the precision (see paper) */
 static void
 T_A_Matrices(void)
 {
-  GEN eps1, eps2, nia, m1, IntM;
+  GEN p1, eps1, eps2, nia, m1, IntM;
   int i,j;
 
   m1 = rowextract_i(vecextract_i(MatFU, 1,r), 1,r); /* minor order r */
   m1 = glog(gabs(m1,Prec),Prec);
 
-  A=invmat(m1); IntM=gsub(gmul(A,m1),idmat(r));
+  A = invmat(m1);
+  IntM = gsub(gmul(A,m1),idmat(r));
 
-  eps2=gzero;
+  eps2 = gzero;
   for (i=1; i<=r; i++)
     for (j=1; j<=r; j++)
-      if (gcmp(eps2,gabs(gcoeff(IntM,i,j),20)) == -1)
-	eps2=gabs(gcoeff(IntM,i,j),20);
+    {
+      p1 = mpabs(gcoeff(IntM,i,j));
+      if (gcmp(eps2,p1) < 0) eps2 = p1;
+    }
 
-  eps1=gpui(gdeux,stoi((Prec-2)*32),Prec); eps2=gadd(eps2,ginv(eps1));
+  eps1 = shifti(gun,(Prec-2)*32);
+  eps2 = gadd(eps2, ginv(eps1));
 
-  nia=gzero;
+  nia = gzero;
   for (i=1; i<=r; i++)
     for (j=1; j<=r; j++)
-      if (gcmp(nia,gabs(gcoeff(A,i,j),20)) == -1)
-        nia = gabs(gcoeff(A,i,j),20);
+    {
+      p1 = mpabs(gcoeff(A,i,j));
+      if (gcmp(nia,p1) < 0) nia = p1;
+    }
 
   /* Check for the precision in matrix inversion. See paper, Lemma 2.4.2. */
-  if (gcmp(gmul(gadd(gmul(stoi(r),gmul(nia,eps1)),eps2),
-           gmul(gdeux,stoi(r))),gun) == -1)
-    err(precer,"thue");
+  p1 = gadd(gmulsg(r, gmul(nia,eps1)), eps2);
+  if (gcmp(gmulgs(p1, 2*r), gun) < 0) err(precer,"thue");
 
-  eps3=gmul(gdeux,gmul(gmul(gsqr(stoi(r)),nia),
-		       gadd(gmul(stoi(r),gdiv(nia,eps1)),eps2)));
-  myround(eps3,gun);
+  p1 = gadd(gmulsg(r, gdiv(nia,eps1)), eps2);
+  eps3 = gmul(gdeux, gmul(gmulsg(r*r,nia),p1));
+  eps3 = myround(eps3,gun);
 
   if (DEBUGLEVEL>=2) fprintferr("epsilon_3 -> %Z\n",eps3);
 }
@@ -199,15 +203,15 @@ static void
 ComputeConstants(void)
 {
   int k;
-
-  GEN Vect;
+  GEN Vect, absDelta;
 
   Vect=cgetg(r+1,t_COL); for (k=1; k<=r; k++) Vect[k]=un;
-  if (numroot <= r) Vect[numroot]=lsub(gun,gdeg);
+  if (numroot <= r) Vect[numroot]=lstoi(1-deg);
 
   Delta=gmul(A,Vect);
+  absDelta=gabs(Delta,Prec);
 
-  c5=(GEN)(gabs(Delta,Prec)[Vecmax(gabs(Delta,Prec),r)]);
+  c5=(GEN)absDelta[Vecmax(absDelta,r)];
   c5=myround(c5,gun); c7=mulsr(r,c5);
   c10=divsr(deg,c7); c13=divsr(deg,c5);
 
@@ -225,12 +229,12 @@ ComputeConstants(void)
 static void
 ComputeConstants2(GEN poly, GEN rhs)
 {
-  GEN Vect1, tmp;
+  GEN Vect1, tmp, absLambda;
   int k;
 
   Vect1=cgetg(r+1,t_COL);
   for (k=1; k<=r; k++) Vect1[k]=un;
-  Vect1=gmul(gabs(A,ConstPrec),Vect1);
+  Vect1=gmul(gabs(A,DEFAULTPREC),Vect1);
 
 
   Vect2=cgetg(r+1,t_COL);
@@ -241,21 +245,22 @@ ComputeConstants2(GEN poly, GEN rhs)
       else { Vect2[k]=llog(gabs(gdiv(rhs,gmul(poleval(derivpol(poly)
 						 ,(GEN)roo[numroot]),
 					 gcoeff(MatNE,k,curne))),Prec),Prec);
-      } 			
+      } 
     }
   Lambda=gmul(A,Vect2);
 
   tmp=(GEN)Vect1[Vecmax(Vect1,r)];
-  x2=gmax(x1,gpui(mulsr(10,mulrr(c4,tmp)),ginv(gdeg),ConstPrec));
+  x2=gmax(x1,gpui(mulsr(10,mulrr(c4,tmp)),ginv(gdeg),DEFAULTPREC));
   c14=mulrr(c4,tmp);
 
-  c6=gabs((GEN)Lambda[Vecmax(gabs(Lambda,ConstPrec),r)],ConstPrec);
+  absLambda = gabs(Lambda,DEFAULTPREC);
+  c6=(GEN)absLambda[ Vecmax(absLambda,r) ];
   c6=addrr(c6,dbltor(0.1)); c6=myround(c6,gun);
 
   c8=addrr(dbltor(1.23),mulsr(r,c6));
-  c11=mulrr(mulsr(2,c3),gexp(divrr(mulsr(deg,c8),c7),ConstPrec));
+  c11=mulrr(mulsr(2,c3),gexp(divrr(mulsr(deg,c8),c7),DEFAULTPREC));
 
-  tmp=gexp(divrr(mulsr(deg,c6),c5),ConstPrec);
+  tmp=gexp(divrr(mulsr(deg,c6),c5),DEFAULTPREC);
   c12=mulrr(mulsr(2,c3),tmp);
   c15=mulsr(2,mulrr(c14,tmp));
 
@@ -275,30 +280,33 @@ static GEN
 Logarithmic_Height(int s)
 {
   int i;
-  GEN LH=gun,mat;
+  GEN LH = gun, mat = gabs(MatFU,Prec);
 
-  mat=gabs(MatFU,Prec);
   for (i=1; i<=deg; i++)
-    LH = gmul(LH,gmax(gun,gabs(gcoeff(mat,i,s),Prec)));
-  return gmul(gdeux,gdiv(glog(LH,Prec),gdeg));
+    LH = gmul(LH, gmax(gun, gcoeff(mat,i,s)));
+  return gmul(gdeux, gdiv(glog(LH,Prec),gdeg));
 }
 
 /* Computation of the matrix ((\sigma_i(\eta_j)) used for M_1 and
    the computation of logarithmic heights */
-static void
+static int
 Compute_Fund_Units(GEN uf)
 {
   int i,j;
-  MatFU=cgetg(r+1,t_MAT);
 
-  for (i=1; i<=r; i++)
-    MatFU[i]=lgetg(deg+1,t_COL);
+  MatFU = cgetg(r+1,t_MAT);
+  for (i=1; i<=r; i++) MatFU[i] = lgetg(deg+1,t_COL);
   for (i=1; i<=r; i++)
   {
     if (typ(uf[i])!=t_POL) err(talker,"incorrect system of units");
     for (j=1; j<=deg; j++)
-      coeff(MatFU,j,i)=(long)poleval((GEN)uf[i],(GEN)roo[j]);
+    {
+      GEN p1 = poleval((GEN)uf[i],(GEN)roo[j]);
+      if (gcmp0(p1)) return 0; /* FAIL */
+      coeff(MatFU,j,i) = (long)p1;
+    }
   }
+  return 1;
 }
 
 /* Computation of the conjugates of the solutions to the norm equation */
@@ -333,12 +341,11 @@ Baker(GEN ALH, GEN Hmu)
   GEN c9=gun, gbak, hb0=gzero;
   int k,i1,i2;
 
-  gbak = gmul(gmul(gdeg,gsub(gdeg,gun)),gsub(gdeg,gdeux));
+  gbak = mulss(deg, (deg-1)*(deg-2)); /* safe */
 
   switch (numroot) {
   case 1: i1=2; i2=3; break;
   case 2: i1=1; i2=3; break;
-  case 3: i1=1; i2=2; break;
   default: i1=1; i2=2; break;
   }
 
@@ -372,8 +379,8 @@ Baker(GEN ALH, GEN Hmu)
   c9=myround(c9,gun);
   /* Compute B0 according to Lemma 2.3.3 */
   B0=gmax(gexp(gun,Prec),
-	  mulsr(2,divrr(addrr(mulrr(c9,glog(divrr(c9,c10),ConstPrec)),
-			      glog(c11,ConstPrec)),c10)));
+	  mulsr(2,divrr(addrr(mulrr(c9,glog(divrr(c9,c10),DEFAULTPREC)),
+			      glog(c11,DEFAULTPREC)),c10)));
 
   if (DEBUGLEVEL>=2) fprintferr("Baker -> %Z\nB0 -> %Z\n",c9,B0);
 }
@@ -389,7 +396,7 @@ Create_CF_Values(int i1, int i2, GEN *errdelta)
       delta=divrr((GEN)Delta[i2],(GEN)Delta[i1]);
       eps5=mulrs(eps3,r);
       *errdelta=mulrr(addsr(1,delta),
-		      divrr(eps5,subrr(gabs((GEN)Delta[i1],ConstPrec),eps5)));
+		      divrr(eps5,subrr(gabs((GEN)Delta[i1],DEFAULTPREC),eps5)));
 
       lambda=gdiv(gsub(gmul((GEN)Delta[i2],(GEN)Lambda[i1]),
 		       gmul((GEN)Delta[i1],(GEN)Lambda[i2])),
@@ -433,9 +440,9 @@ CF_First_Pass(GEN kappa, GEN errdelta)
   }
 
     if (r>1)
-      B0=divrr(glog(divrr(mulir(q,c15),l0),ConstPrec),c13);
+      B0=divrr(glog(divrr(mulir(q,c15),l0),DEFAULTPREC),c13);
     else
-    B0=divrr(glog(divrr(mulir(q,c11),mulrr(l0,gmul2n(mppi(ConstPrec),1))),ConstPrec),c10);
+    B0=divrr(glog(divrr(mulir(q,c11),mulrr(l0,gmul2n(mppi(DEFAULTPREC),1))),DEFAULTPREC),c10);
 
     if (DEBUGLEVEL>=2)
     fprintferr("CF_First_Pass successful !!\nB0 -> %Z\n",B0);
@@ -446,7 +453,7 @@ CF_First_Pass(GEN kappa, GEN errdelta)
 static void
 Check_Solutions(GEN xmay1, GEN xmay2, GEN poly, GEN rhs)
 {
-  GEN xx1, xx2, yy1, yy2, zz, u;
+  GEN xx1, xx2, yy1, yy2, u;
 
   yy1=ground(greal(gdiv(gsub(xmay2,xmay1), gsub((GEN)roo[1],(GEN)roo[2]))));
   yy2=gneg(yy1);
@@ -460,36 +467,32 @@ Check_Solutions(GEN xmay1, GEN xmay2, GEN poly, GEN rhs)
     if (!gcmp0(yy1))
     {
       if (gegal(gmul(poleval(poly,gdiv(xx1,yy1)),
-		     gpui(yy1,gdeg,Prec)),(GEN)rhs))
+		     gpowgs(yy1,deg)),(GEN)rhs))
       {
-	zz=cgetg(2,t_VEC); u=cgetg(3,t_VEC);
-	u[1]=(long)xx1; u[2]=(long)yy1; zz[1]=(long)u;
-	if (_thue_new(u)) SOL=concatsp(SOL,zz);
+	u=cgetg(3,t_VEC); u[1]=(long)xx1; u[2]=(long)yy1;
+	if (_thue_new(u)) SOL=concatsp(SOL, _vec(u));
       }
     }
-    else if (gegal(gpui(xx1,gdeg,Prec),(GEN)rhs))
+    else if (gegal(gpowgs(xx1,deg),(GEN)rhs))
     {
-      zz=cgetg(2,t_VEC); u=cgetg(3,t_VEC);
-      u[1]=(long)xx1; u[2]=(long)gzero; zz[1]=(long)u;
-      if (_thue_new(u)) SOL=concatsp(SOL,zz);
+      u=cgetg(3,t_VEC); u[1]=(long)xx1; u[2]=(long)gzero;
+      if (_thue_new(u)) SOL=concatsp(SOL, _vec(u));
     }
 
     xx2=ground(xx2);
     if (!gcmp0(yy2))
     {
       if (gegal(gmul(poleval(poly,gdiv(xx2,yy2)),
-		     gpui(yy2,gdeg,Prec)),(GEN)rhs))
+		     gpowgs(yy2,deg)),(GEN)rhs))
       {
-	zz=cgetg(2,t_VEC); u=cgetg(3,t_VEC);
-	u[1]=(long)xx2; u[2]=(long)yy2; zz[1]=(long)u;
-	if (_thue_new(u)) SOL=concatsp(SOL,zz);
+	u=cgetg(3,t_VEC); u[1]=(long)xx2; u[2]=(long)yy2;
+	if (_thue_new(u)) SOL=concatsp(SOL, _vec(u));
       }
     }
-    else if (gegal(gpui(xx2,gdeg,Prec),(GEN)rhs))
+    else if (gegal(gpowgs(xx2,deg),(GEN)rhs))
     {
-      zz=cgetg(2,t_VEC); u=cgetg(3,t_VEC);
-      u[1]=(long)xx2; u[2]=(long)gzero; zz[1]=(long)u;
-      if (_thue_new(u)) SOL=concatsp(SOL,zz);
+      u=cgetg(3,t_VEC); u[1]=(long)xx2; u[2]=(long)gzero;
+      if (_thue_new(u)) SOL=concatsp(SOL, _vec(u));
     }
   }
 }
@@ -520,7 +523,7 @@ TotRat(void)
 static void
 Check_Small(int bound, GEN poly, GEN rhs)
 {
-  GEN interm, xx, zz, u, maxr, tmp, ypot, xxn, xxnm1, yy;
+  GEN interm, xx, u, maxr, tmp, ypot, xxn, xxnm1, yy;
   gpmem_t av = avma, lim = stack_lim(av, 1);
   int x, j, bsupy, y;
   double bndyx;
@@ -538,57 +541,54 @@ Check_Small(int bound, GEN poly, GEN rhs)
       SOL = gerepilecopy(av, SOL);
     }
     if (x==0)
+    {
+      ypot=gmul(stoi(gsigne(rhs)),ground(gpui(gabs(rhs,0),ginv(gdeg),Prec)));
+      if (gegal(gpowgs(ypot,deg),rhs))
       {
-	ypot=gmul(stoi(gsigne(rhs)),ground(gpui(gabs(rhs,0),ginv(gdeg),Prec)));
-	if (gegal(gpui(ypot,gdeg,0),rhs))
-	  {
-	    zz=cgetg(2,t_VEC); u=cgetg(3,t_VEC);
-	    u[1]=(long)ypot; u[2]=(long)gzero; zz[1]=(long)u;
-	    if (_thue_new(u)) SOL=concatsp(SOL,zz);
-	  }
-	if (gegal(gpui(gneg(ypot),gdeg,0),rhs))
-	  {
-	    zz=cgetg(2,t_VEC); u=cgetg(3,t_VEC);
-	    u[1]=(long)gneg(ypot); u[2]=(long)gzero; zz[1]=(long)u;
-	    if (_thue_new(u)) SOL=concatsp(SOL,zz);
-	  }
+        u=cgetg(3,t_VEC); u[1]=(long)ypot; u[2]=(long)gzero;
+        if (_thue_new(u)) SOL=concatsp(SOL, _vec(u));
       }
+      if (gegal(gpowgs(gneg(ypot),deg),rhs))
+      {
+        u=cgetg(3,t_VEC); u[1]=(long)gneg(ypot); u[2]=(long)gzero;
+        if (_thue_new(u)) SOL=concatsp(SOL, _vec(u));
+      }
+    }
     else
+    {
+      bsupy=(int)(x>0?bndyx*x:-bndyx*x);
+
+      xx=stoi(x); xxn=gpowgs(xx,deg);
+      interm=gsub((GEN)rhs,gmul(xxn,(GEN)poly[2]));
+
+      /* Verifier ... */
+      xxnm1=xxn; j=2;
+      while(gcmp0(interm))
       {
-	bsupy=(int)(x>0?bndyx*x:-bndyx*x);
-	
-	xx=stoi(x); xxn=gpui(xx,gdeg,Prec);
-	interm=gsub((GEN)rhs,gmul(xxn,(GEN)poly[2]));
-
-	/* Verifier ... */
-	xxnm1=xxn; j=2;
-	while(gcmp0(interm))
-	  {
-	    xxnm1=gdiv(xxnm1,xx);
-	    interm=gmul((GEN)poly[++j],xxnm1);
-	  }
-
-	for(y=-bsupy; y<=bsupy; y++)
-	  {
-	    yy=stoi(y);
-	    if(y==0) {
-	      if (gegal(gmul((GEN)poly[2],xxn),rhs))
-		{
-		  zz=cgetg(2,t_VEC); u=cgetg(3,t_VEC);
-		  u[1]=(long)gzero; u[2]=(long)xx; zz[1]=(long)u;
-		  if (_thue_new(u)) SOL=concatsp(SOL,zz);
-		}	
-	    }
-	     else if (gcmp0(gmod(interm,yy)))
-	       if(gegal(poleval(poly,gdiv(yy,xx)),gdiv(rhs,xxn)))
-		/* Remplacer par un eval *homogene* */
-		 {
-		   zz=cgetg(2,t_VEC); u=cgetg(3,t_VEC);
-		   u[1]=(long)yy; u[2]=(long)xx; zz[1]=(long)u;
-		   if (_thue_new(u)) SOL=concatsp(SOL,zz);
-		}
-	  }
+        xxnm1 = gdiv(xxnm1,xx);
+        interm = gmul((GEN)poly[++j], xxnm1);
       }
+
+      for(y=-bsupy; y<=bsupy; y++)
+      {
+        yy = stoi(y);
+        if (y==0)
+        {
+          if (gegal(gmul((GEN)poly[2],xxn),rhs))
+          {
+            u=cgetg(3,t_VEC); u[1]=(long)gzero; u[2]=(long)xx;
+            if (_thue_new(u)) SOL=concatsp(SOL, _vec(u));
+          }
+        }
+        else if (gcmp0(gmod(interm,yy)))
+           /* FIXME: Remplacer par un eval *homogene* */
+           if(gegal(poleval(poly,gdiv(yy,xx)),gdiv(rhs,xxn)))
+           {
+             u=cgetg(3,t_VEC); u[1]=(long)yy; u[2]=(long)xx;
+             if (_thue_new(u)) SOL=concatsp(SOL, _vec(u));
+          }
+      }
+    }
   }
 }
 
@@ -623,16 +623,16 @@ thueinit(GEN poly, long flag, long prec)
 
   uftot = NULL;
   if (checktnf(poly)) { uftot=(GEN)poly[2]; poly=(GEN)poly[1]; }
-  else
-    if (typ(poly)!=t_POL) err(notpoler,"thueinit");
+  if (typ(poly)!=t_POL) err(notpoler,"thueinit");
   if (degpol(poly)<=2) err(talker,"invalid polynomial in thue (need deg>2)");
 
   if (!gisirreducible(poly)) err(redpoler,"thueinit");
-  st=sturm(poly);
+  st = sturm(poly);
   if (st)
   {
-    dr=(double)((st+lgef(poly)-5)>>1);
-    d=(double)degpol(poly); d=d*(d-1)*(d-2);
+    long dP = degpol(poly);
+    dr=(double)((st+dP-2)>>1);
+    d = (double)dP; d = d*(d-1)*(d-2);
     /* Try to guess the precision by approximating Baker's bound.
      * Note that the guess is most of the time pretty generous,
      * ie 10 to 30 decimal digits above what is *really* necessary.
@@ -640,37 +640,41 @@ thueinit(GEN poly, long flag, long prec)
      */
     Prec=3 + (long)((5.83 + (dr+4)*5 + log(fact(dr+3)) + (dr+3)*log(dr+2) +
 		     (dr+3)*log(d) + log(log(2*d*(dr+2))) + (dr+1)) / 10.);
-    ConstPrec=4;
-    if (Prec<prec) Prec = prec;
-    if (!checktnf(poly)) inithue(poly,flag);
+    if (Prec < prec) Prec = prec;
+    for (;;)
+    {
+      inithue(poly,flag);
+      if (Compute_Fund_Units(gmael(uftot,8,5))) break;
+      Prec = (Prec<<1)-2;
+      if (DEBUGLEVEL>1) err(warnprec,"thueinit",Prec);
+      uftot = NULL; avma = av;
+    }
 
-    thueres=cgetg(8,t_VEC);
-    thueres[1]=(long)poly;
-    thueres[2]=(long)uftot;
-    thueres[3]=(long)roo;
-    Compute_Fund_Units(gmael(uftot,8,5));
     ALH=cgetg(r+1,t_COL);
     for (k=1; k<=r; k++) ALH[k]=(long)Logarithmic_Height(k);
-    thueres[4]=(long)ALH;
-    thueres[5]=(long)MatFU;
     T_A_Matrices();
-    thueres[6]=(long)A;
-
     csts=cgetg(7,t_VEC);
-    csts[1]=(long)c1; csts[2]=(long)c2; csts[3]=(long)halpha;
-    csts[4]=(long)x0; csts[5]=(long)eps3;
-    csts[6]=(long)stoi(Prec);
+    csts[1]=(long)c1; csts[2]=(long)c2;   csts[3]=(long)halpha;
+    csts[4]=(long)x0; csts[5]=(long)eps3; csts[6]=(long)stoi(Prec);
 
-    thueres[7]=(long)csts;
+    thueres = cgetg(8,t_VEC);
+    thueres[1] = (long)poly;
+    thueres[2] = (long)uftot;
+    thueres[3] = (long)roo;
+    thueres[4] = (long)ALH;
+    thueres[5] = (long)MatFU;
+    thueres[6] = (long)A;
+    thueres[7] = (long)csts;
     return gerepilecopy(av,thueres);
   }
 
   thueres=cgetg(3,t_VEC); c0=gun; Prec=4;
   roo=roots(poly,Prec);
   for (k=1; k<lg(roo); k++)
-    c0=gmul(c0, gimag((GEN)roo[k]));
+    c0 = gmul(c0, gimag((GEN)roo[k]));
   c0=ginv(gabs(c0,Prec));
-  thueres[1]=(long)poly; thueres[2]=(long)c0;
+  thueres[1] = (long)poly;
+  thueres[2] = (long)c0;
   return gerepilecopy(av,thueres);
 }
 
@@ -693,16 +697,17 @@ thue(GEN thueres, GEN rhs, GEN ne)
 
   if (lg(thueres)==8)
   {
-    poly=(GEN)thueres[1]; deg=degpol(poly); gdeg=stoi(deg);
     uftot=(GEN)thueres[2];
+    if (!ne) ne = bnfisintnorm(uftot, rhs);
+    if (lg(ne)==1) { avma=av; return cgetg(1,t_VEC); }
+
+    poly=(GEN)thueres[1]; deg=degpol(poly); gdeg=stoi(deg);
     roo=gcopy((GEN)thueres[3]);
     ALH=(GEN)thueres[4];
     MatFU=gcopy((GEN)thueres[5]);
     A=gcopy((GEN)thueres[6]);
     csts=(GEN)thueres[7];
 
-    if (!ne) ne = bnfisintnorm(uftot, rhs);
-    if (lg(ne)==1) { avma=av; return cgetg(1,t_VEC); }
 
     c1=gmul(gabs(rhs,Prec), (GEN)csts[1]); c2=(GEN)csts[2];
     halpha=(GEN)csts[3];
@@ -712,7 +717,7 @@ thue(GEN thueres, GEN rhs, GEN ne)
     Prec=gtolong((GEN)csts[6]);
     b=cgetg(r+1,t_COL);
     tmp=divrr(c1,c2);
-    x1=gmax(x0,gpui(mulsr(2,tmp),ginv(gdeg),ConstPrec));
+    x1=gmax(x0,gpui(mulsr(2,tmp),ginv(gdeg),DEFAULTPREC));
     if(DEBUGLEVEL >=2) fprintferr("x1 -> %Z\n",x1);
 
     c3=mulrr(dbltor(1.39),tmp);
@@ -726,57 +731,57 @@ thue(GEN thueres, GEN rhs, GEN ne)
       {
 	ComputeConstants2(poly,rhs);
 	Baker(ALH,Hmu);
-	
+
 	i1=Vecmax(gabs(Delta,Prec),r);
 	if (i1!=1) i2=1; else i2=2;
 	do
-	  {
-	    fs=0; 	
-	    Create_CF_Values(i1,i2,&errdelta);
-	    if (DEBUGLEVEL>=2) fprintferr("Entering CF\n");
-	    Old_B0=gmul(B0,gdeux);
+        {
+          fs=0; 
+          Create_CF_Values(i1,i2,&errdelta);
+          if (DEBUGLEVEL>=2) fprintferr("Entering CF\n");
+          Old_B0=gmul(B0,gdeux);
 
-	    /* Try to reduce B0 while
-	     * 1) there was less than 10 reductions
-	     * 2) the previous reduction improved the bound of more than 0.1.
-	     */
-	    while (Nb_It<10 && gcmp(Old_B0,gadd(B0,dbltor(0.1))) == 1 && fs<2)
-	      {
-		cf=0; Old_B0=B0; Nb_It++; Kstart=stoi(10);
-		while (!fs && CF_First_Pass(Kstart,errdelta) == 0 && cf < 8 )
-		  {
-		    cf++;
-		    Kstart=mulis(Kstart,10);
-		  }	
-		if ( CF_First_Pass(Kstart,errdelta) == -1 )
-		  { ne = gerepilecopy(av, ne); Prec+=10;
-		  if(DEBUGLEVEL>=2) fprintferr("Increasing precision\n");
-		  thueres=thueinit(thueres,0,Prec);
-		  return(thue(thueres,rhs,ne)); }
+          /* Try to reduce B0 while
+           * 1) there was less than 10 reductions
+           * 2) the previous reduction improved the bound of more than 0.1.
+           */
+          while (Nb_It<10 && gcmp(Old_B0,gadd(B0,dbltor(0.1))) == 1 && fs<2)
+          {
+            cf=0; Old_B0=B0; Nb_It++; Kstart=stoi(10);
+            while (!fs && CF_First_Pass(Kstart,errdelta) == 0 && cf < 8 )
+            {
+              cf++;
+              Kstart=mulis(Kstart,10);
+            }
+            if ( CF_First_Pass(Kstart,errdelta) == -1 )
+            {
+              ne = gerepilecopy(av, ne); Prec+=10;
+              if(DEBUGLEVEL>=2) fprintferr("Increasing precision\n");
+              thueres=thueinit(thueres,0,Prec);
+              return(thue(thueres,rhs,ne));
+            }
 
-		if (cf==8 || fs) /* Semirational or totally rational case */
-		  {
-		    if (!fs)
-		      { ep=GuessQi(&q1,&q2,&q3); }
-		    bd=gmul(denom(bestappr(delta,gadd(B0,gabs(q2,Prec))))
-			    ,delta);
-		    bd=gabs(gsub(bd,ground(bd)),Prec);
-		    if(gcmp(bd,ep)==1 && !gcmp0(q3))
-		      {
-			fs=1;
-                      B0=gdiv(glog(gdiv(gmul(q3,c15),gsub(bd,ep)), Prec),c13);
-			if (DEBUGLEVEL>=2)
-                        fprintferr("Semirat. reduction ok. B0 -> %Z\n",B0);
-		      }
-		    else fs=2;
-		  }
-		else fs=0;
-		Nb_It=0; B0=gmin(Old_B0,B0); upb=gtolong(gceil(B0));
-	      }
-	    i2++; if (i2==i1) i2++;
-	  }
+            if (cf==8 || fs) /* Semirational or totally rational case */
+            {
+              if (!fs) { ep=GuessQi(&q1,&q2,&q3); }
+              bd=gmul(denom(bestappr(delta,gadd(B0,gabs(q2,Prec)))), delta);
+              bd=gabs(gsub(bd,ground(bd)),Prec);
+              if(gcmp(bd,ep)==1 && !gcmp0(q3))
+              {
+                fs=1;
+                B0=gdiv(glog(gdiv(gmul(q3,c15),gsub(bd,ep)), Prec),c13);
+                if (DEBUGLEVEL>=2)
+                  fprintferr("Semirat. reduction ok. B0 -> %Z\n",B0);
+              }
+              else fs=2;
+            }
+            else fs=0;
+            Nb_It=0; B0=gmin(Old_B0,B0); upb=gtolong(gceil(B0));
+          }
+          i2++; if (i2==i1) i2++;
+        }
 	while (fs == 2 && i2 <= r);
-	
+
 	if (fs == 2) TotRat();
 
 	if (DEBUGLEVEL >=2) fprintferr("x2 -> %Z\n",x2);
@@ -785,7 +790,7 @@ thue(GEN thueres, GEN rhs, GEN ne)
        * and 2 conjugates of x-\alpha y. Then check.
        */
 	zp1=dbltor(0.01);
-	x3=gmax(x2,gpui(mulsr(2,divrr(c14,zp1)),ginv(gdeg),ConstPrec));
+	x3=gmax(x2,gpui(mulsr(2,divrr(c14,zp1)),ginv(gdeg),DEFAULTPREC));
 
 	for (bi1=-upb; bi1<=upb; bi1++)
 	{
@@ -794,24 +799,24 @@ thue(GEN thueres, GEN rhs, GEN ne)
 	  for (i=1; i<=r; i++)
 	  {
 	    b[i]=(long)gdiv(gsub(gmul((GEN)Delta[i],stoi(bi1)),
-	                          gsub(gmul((GEN)Delta[i],(GEN)Lambda[i1]),
-				       gmul((GEN)Delta[i1],(GEN)Lambda[i]))),
-			     (GEN)Delta[i1]);
-	    if (gcmp(distoZ((GEN)b[i]),zp1)==1) { flag=0; break; }
+	                         gsub(gmul((GEN)Delta[i],(GEN)Lambda[i1]),
+				      gmul((GEN)Delta[i1],(GEN)Lambda[i]))),
+			    (GEN)Delta[i1]);
+	    if (gcmp(distoZ((GEN)b[i]),zp1) > 0) { flag=0; break; }
 	  }
-	
-	  if(flag)
-	    {
-	      for(i=1; i<=r; i++)
-		{
-		  b[i]=lround((GEN)b[i]);
-		  xmay1=gmul(xmay1,gpui(gcoeff(MatFU,1,i),(GEN)b[i],Prec));
-		  xmay2=gmul(xmay2,gpui(gcoeff(MatFU,2,i),(GEN)b[i],Prec));
-		}
-	      xmay1=gmul(xmay1,gcoeff(MatNE,1,curne));
-	      xmay2=gmul(xmay2,gcoeff(MatNE,2,curne));
-	      Check_Solutions(xmay1,xmay2,poly,rhs);
-	    }
+
+	  if (flag)
+          {
+            for(i=1; i<=r; i++)
+            {
+              b[i]=lround((GEN)b[i]);
+              xmay1=gmul(xmay1,gpui(gcoeff(MatFU,1,i),(GEN)b[i],Prec));
+              xmay2=gmul(xmay2,gpui(gcoeff(MatFU,2,i),(GEN)b[i],Prec));
+            }
+            xmay1=gmul(xmay1,gcoeff(MatNE,1,curne));
+            xmay2=gmul(xmay2,gcoeff(MatNE,2,curne));
+            Check_Solutions(xmay1,xmay2,poly,rhs);
+          }
 	}
       }
     }
@@ -1069,8 +1074,8 @@ bnfisintnorm(GEN bnf, GEN a)
   if (typ(a)!=t_INT)
     err(talker,"expected an integer in bnfisintnorm");
   sa = signe(a);
-  if (sa == 0)  { res=cgetg(2,t_VEC); res[1]=zero; return res; }
-  if (gcmp1(a)) { res=cgetg(2,t_VEC); res[1]=un;   return res; }
+  if (sa == 0)  return _vec(gzero);
+  if (gcmp1(a)) return _vec(gun);
 
   get_sol_abs(bnf, absi(a), &Primes);
 
