@@ -295,8 +295,8 @@ This function can be useful in connection with the function \kbd{concat}
 $(x \mod y)$, i.e.~an integermod or a polmod. $y$ must be an integer or a
 polynomial. If $y$ is an integer, $x$ must be an integer, a rational
 number, or a $p$-adic number compatible with the modulus $y$. If $y$ is a
-polynomial, $x$ must be a scalar, a polynomial, a rational function, or a
-power series. The result is put on the PARI stack.
+polynomial, $x$ must be a scalar (which is not a polmod), a polynomial, a
+rational function, or a power series.
 
 This function is not the same as $x$ \kbd{\%} $y$, the result of which is an
 integer or a polynomial.
@@ -307,6 +307,13 @@ erased later by garbage collecting (see \secref{se:garbage}). Functions
 will operate faster on such objects and memory consumption will be lower.
 On the other hand, care should be taken to avoid creating too many such
 objects.
+
+Under GP, the same effect can be obtained by assigning the object to a GP
+variable (the value of which is a permanent object for the duration of the
+relevant library function call, and is treated as such). This value is
+subject to garbage collection, since it will be deleted when the value
+changes. This is preferable and the above flag is only retained for
+compatibility reasons (it can still be useful in library mode).
 
 \syn{Mod0}{x,y,\fl}. Also available are
 
