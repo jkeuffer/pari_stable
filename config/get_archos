@@ -94,7 +94,8 @@ tmp_kern=`./kernel-name $tmp_kern $asmarch`
 kernlvl0=`echo "$tmp_kern" | sed -e 's/\(.*\)-.*/\1/'`
 kernlvl1=`echo "$tmp_kern" | sed -e 's/.*-\(.*\)/\1/'`
 case "$kernlvl1" in
-  auto|gmp|none) ;;
+  gmp|none) ;;
+  auto) kernlvl1=none ;;
   *) cat << EOM
 ###
 ### Level1 kernel = '$kernlvl1' unknown, using 'none'
