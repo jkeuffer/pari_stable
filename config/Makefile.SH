@@ -13,18 +13,12 @@ case "$examples_dir" in /*) ex=$examples_dir ;; *) ex=../$examples_dir ;; esac
 case "$misc_dir"   in /*) misc=$misc_dir ;;  *) misc=../$misc_dir ;; esac
 case "$src_dir"    in /*) src=$src_dir ;;    *) src=../$src_dir ;; esac
 
+#
 # File lists
+#
 kernel="kernel mp"
 inline="mpinl"
-
-#graph=
-#gp="gp gp_init gp_rl whatnow"
-#DIRgplib="gp/highlvl graph/plotport"
-graph=plotport
-gp="gp gp_init gp_rl whatnow highlvl"
-gplib=
-for i in $DIRgplib; do tmp=`basename $i`; gplib="$gplib $tmp"; done
-
+gp=`ls $src_dir/gp/*.c | sed 's,.*/\(.*\)\.c,\1,'`
 language=`ls $src_dir/language/*.c | sed 's,.*/\(.*\)\.c,\1,'`
 basemath=`ls $src_dir/basemath/*.c | sed 's,.*/\(.*\)\.c,\1,'`
 modules=`ls $src_dir/modules/*.c   | sed 's,.*/\(.*\)\.c,\1,'`
@@ -32,106 +26,86 @@ systems=
 if test -d "$src_dir/systems/$osname"; then
   systems=`ls $src_dir/systems/$osname/*.c | sed 's,.*/\(.*\)\.c,\1,'`
 fi
+# remove paridecl: no general recompilation when only changing a prototype
+hlist=`ls $src_dir/headers/*.h | grep -v paridecl | sed 's,.*/\(.*\)\.h,\1,'`
+# for installation put paridecl back. Remove \n otherwise make will choke.
+headerlist="paridecl `echo $hlist| tr '\n' ' '`"
+
+# special systems (OS/2 for now)
+shortlib_prefix=lib
 lib_prefix=lib
 dllib_prefix=lib
 case "$osname" in
-  os2)  dllib_prefix=	# != lib_prefix to allow gp-dyn link with DLL
+  os2)  shortlib_prefix= # 8.3 filenames
+        dllib_prefix= # != lib_prefix to allow gp-dyn link with DLL
 	export_lib_create=emximp; export_lib='$(DLLIBPARI)$(_A)'
 	export_file=pari.def; export_create="emxexp -u"
 	# Actually, the build will fail until the switch to -Zomf
 	dlld_ignore=- ;;
 esac
 
-hlist='pari paritype paricast paricom parierr parigen paristio parisys pariport'
-HEADERS=pariinl.h
-for f in $hlist; do
-  HEADERS="$HEADERS $src/headers/$f.h";
-done
-
-# We don't want to recompile everything when only changing a prototype
-hlist="$hlist paridecl"
-
-case "$graphic_lib_dll" in
-  NULL)	_graphic_lib_dll="$graphic_lib_dll" ;;
-  *)	_graphic_lib_dll="\\\"$graphic_lib_dll\\\"" ;;
-esac
+PLOTCFLAGS=
+PLOTLIBS=
 case "$which_graphic_lib" in
 none)
-  PLOTCFLAGS=
-  PLOTLIBS=
-  plotrunpath=
-  graph="$graph plotnull"
-  ;;
+  graph=plotnull;;
 qt)
   PLOTCFLAGS='-D__FANCY_WIN__ -I$(QTDIR)/include'
   PLOTLIBS='-L$(QTDIR)/lib -lqt'
-  graph="$graph plotQt"
-  ;;
+  graph=plotQt;;
 fltk)
   PLOTCFLAGS="-I\$(FLTKDIR)/include $X11_INC"
   PLOTLIBS="-L\$(FLTKDIR)/lib -lfltk $FLTK_LIBS"
-  graph="$graph plotfltk"
-  ;;
-gnuplot)
-  PLOTCFLAGS=
-  GNUPLOT_OBJS="bitmap\$(_O) term\$(_O) util\$(_O) version\$(_O) stdfn\$(_O)"
-  PLOTLIBS="$gnuplot_libs"
-  plotrunpath=
-  case "$osname" in
-    os2) libgnuplot=$gnuplot/gnuplot.a;;
-    *) libgnuplot=$gnuplot/libgnuplot.a;;
+  graph=plotfltk;;
+*gnuplot-dynamic*)
+  case "$graphic_lib_dll" in
+    NULL)tmp=NULL ;;
+    *)   tmp="\\\"$graphic_lib_dll\\\"" ;;
   esac
-  graph="$graph plotgnuplot"
-  ;;
-gnuplot-dynamic)
-  PLOTCFLAGS="-DDYNAMIC_PLOTTING -DDYNAMIC_PLOTTING_RUNTIME_LINK=$_graphic_lib_dll"
-  PLOTLIBS=
-  plotrunpath=
-  graph="$graph plotgnuplot"
-  ;;
-builtin.X11-gnuplot)
-  CFLAGS="$CFLAGS -DBOTH_GNUPLOT_AND_X11"
-  PLOTCFLAGS=$X11_INC
+  PLOTCFLAGS="-DDYNAMIC_PLOTTING -DDYNAMIC_PLOTTING_RUNTIME_LINK=$tmp"
+  graph=plotgnuplot;;
+*gnuplot*)
   GNUPLOT_OBJS="bitmap\$(_O) term\$(_O) util\$(_O) version\$(_O) stdfn\$(_O)"
-  PLOTLIBS="$gnuplot_libs $X11_LIBS"
-  plotrunpath=$X11
-  case "$osname" in
-    os2) libgnuplot=$gnuplot/gnuplot.a;;
-    *) libgnuplot=$gnuplot/libgnuplot.a;;
-  esac
-  graph="$graph plotgnuplot plotX"
-  ;;
-builtin.X11-gnuplot-dynamic)
-  CFLAGS="$CFLAGS -DBOTH_GNUPLOT_AND_X11"
-  PLOTCFLAGS="$X11_INC -DDYNAMIC_PLOTTING -DDYNAMIC_PLOTTING_RUNTIME_LINK=$_graphic_lib_dll"
-  PLOTLIBS=$X11_LIBS
-  plotrunpath=$X11
-  graph="$graph plotgnuplot plotX"
-  ;;
-X11)
-  PLOTCFLAGS=$X11_INC
-  PLOTLIBS=$X11_LIBS
-  plotrunpath=$X11
-  graph="$graph plotX"
+  PLOTLIBS=$gnuplot_libs
+  libgnuplot=$gnuplot/${shortlib_prefix}gnuplot.a
+  graph=plotgnuplot;;
+esac
+graph="plotport $graph"
+
+plotrunpath=
+case "$which_graphic_lib" in
+  *X11*)
+    case "$which_graphic_lib" in
+      *gnuplot*) CFLAGS="$CFLAGS -DBOTH_GNUPLOT_AND_X11" ;;
+    esac
+    PLOTCFLAGS="$PLOTCFLAGS $X11_INC"
+    PLOTLIBS="$PLOTLIBS $X11_LIBS"
+    plotrunpath=$X11
+    graph="plotX $graph"
   ;;
 esac
 
-KERNOBJS=''
+KERNOBJS=
 for f in $kernel; do
   KERNOBJS="$KERNOBJS $f\$(_O)"
 done
 OBJS=$KERNOBJS
-for f in $basemath $gplib $language $modules $systems; do
+for f in $basemath $language $modules $systems; do
   OBJS="$OBJS $f\$(_O)"
 done
-OBJSGP=''
+OBJSGP=
 for f in $gp $graph; do
   OBJSGP="$OBJSGP $f\$(_O)"
 done
 for f in $inline; do
   OBJS="$OBJS $f\$(_O)"
 done
+HEADERS=pariinl.h
+for f in $hlist; do
+  HEADERS="$HEADERS $src/headers/$f.h";
+done
 
+# runpath
 tmp=$runpath
 if test -n "$plotrunpath"; then
   tmp="$tmp$dir_sep$plotrunpath"
@@ -345,7 +319,7 @@ gp-sta: $add_funclist \$(OBJS) \$(OBJSGP) \$(GNUPLOT_OBJS)
 	\$(RM) \$@
 	\$(LD) -o \$@ \$(LDFLAGS) \$(OBJS) \$(OBJSGP) \$(GNUPLOT_OBJS) \$(RUNPTH) \$(RLLIBS) \$(PLOTLIBS) \$(LIBS)
 
-bench: $exec 
+bench: $exec
 	@\$(DOTEST) $test_basic
 dobench::
 	@\$(DOTEST) $test_basic
@@ -382,7 +356,7 @@ install-include:
 	-mkdir -p \$(INCLUDEDIR)
 	\$(INSTALL_DATA) paricfg.h                \$(INCLUDEDIR)
 	\$(INSTALL_DATA) pariinl.h                \$(INCLUDEDIR)
-	-for i in $hlist; do \\
+	-for i in $headerlist; do \\
 	   \$(INSTALL_DATA) $src/headers/\$\$i.h  \$(INCLUDEDIR); done
 	-\$(RM) \$(INCLUDEDIR)/genpari.h
 	-\$(LN) pari.h \$(INCLUDEDIR)/genpari.h
@@ -503,7 +477,7 @@ if test -z "$DLLD"; then
   cat >> $file << EOT
 
 \$(LIBPARI_DYN)::
-	@echo "Configure could not find a way to build a shared library on this machine."
+	@echo "Configure could not find a way to build a shared library on this machine"
 
 EOT
 else
@@ -570,7 +544,7 @@ pariinl.h: parilvl0.h parilvl1.h
 $src/funclist::
 	@-cksum \`ls -d $src/functions/*/* | grep -v CVS\` > $src/funclist.tmp
 	@-sh $cfg/mv-if-diff $src/funclist.tmp $src/funclist
-	@cd $desc && \$(MAKE) 
+	@cd $desc && \$(MAKE)
 
 $src/gp/gp_init.h $src/gp/highlvl.h $src/language/init.h $src/language/members.h: $add_funclist
 EOT
@@ -583,11 +557,10 @@ if test -s $src_dir/kernel/$kernlvl1/MakeLVL1.SH; then
 fi
 
 HUGELINE=
-for dir in basemath modules language gp DIRgplib graph graphdyn systems; do
+for dir in basemath modules language gp graph graphdyn systems; do
   eval list='$'$dir
   case "$dir" in
     systems)  SRC=$src/$dir/$osname;;
-    DIRgplib) SRC=$src;;
     *)        SRC=$src/$dir;;
   esac
   for f in $list; do
@@ -634,10 +607,7 @@ for dir in basemath modules language gp DIRgplib graph graphdyn systems; do
     depend="$src/language/anal.h $src/language/init.h"
     ;;
   anal)
-    depend="$src/language/anal.h $src/language/members.h $src/headers/parinf.h"
-    ;;
-  base1|bibli1|buch2)
-    depend="$src/headers/parinf.h"
+    depend="$src/language/anal.h $src/language/members.h"
     ;;
   esac
 HUGELINE="$HUGELINE
@@ -645,7 +615,7 @@ $f\$(_O): .headers $depend $source
 	$compile -c $cflags -o $f\$(_O) $source"
   done
 done
-#to avoid execing too many "cat".
+# avoid execing too many "cat". MS-DOS can't handle it
 echo "$HUGELINE" >> $file
 
 echo ".PHONY: gp dft clean"  >> $file
