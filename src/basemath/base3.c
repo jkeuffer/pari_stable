@@ -579,9 +579,10 @@ pol_to_vec(GEN x, long N)
 GEN
 mulmat_pol(GEN A, GEN x)
 {
-  long i,l=lgef(x)-1;
+  long i,l;
   GEN z;
-  if (l == 1) return zerocol(lg(A)==1? 0: lg(A[1])-1);
+  if (typ(x) != t_POL) return gscalcol(x, lg(A[1])-1);
+  l=lgef(x)-1; if (l == 1) return zerocol(lg(A[1])-1);
   x++; z = gmul((GEN)x[1], (GEN)A[1]);
   for (i=2; i<l ; i++) 
     if (!gcmp0((GEN)x[i]))z = gadd(z, gmul((GEN)x[i], (GEN)A[i]));

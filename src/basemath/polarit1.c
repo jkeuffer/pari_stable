@@ -9,7 +9,7 @@
 extern GEN bsrch(GEN p, GEN fa, long Ka, GEN eta, long Ma);
 extern GEN eleval(GEN f,GEN h,GEN a);
 extern GEN get_bas_den(GEN bas);
-extern GEN get_mul_table(GEN x,GEN bas,GEN invbas);
+extern GEN get_mul_table(GEN x,GEN bas,GEN invbas,GEN *T);
 extern GEN pol_to_monic(GEN pol, GEN *lead);
 extern GEN respm(GEN f1,GEN f2,GEN pm);
 extern GEN setup(GEN p,GEN f,GEN theta,GEN nut, long *La, long *Ma);
@@ -1723,7 +1723,7 @@ padicff(GEN x,GEN p,long pr)
     err(bugparier,"factorpadic2 (incorrect discriminant)");
   basden = get_bas_den(bas);
   invbas = invmat(vecpol_to_mat(bas,n));
-  mul = get_mul_table(x,basden,invbas);
+  mul = get_mul_table(x,basden,invbas,NULL);
   nf[7]=(long)bas;
   nf[8]=(long)invbas;
   nf[9]=(long)mul; nf[2]=nf[5]=nf[6]=zero;

@@ -1012,16 +1012,17 @@ get_roots(GEN x,long r1,long ru,long prec)
 
 extern GEN mulmat_pol(GEN A, GEN x);
 
-GEN
-get_T(GEN mul, GEN x, GEN basden)
+static GEN
+get_T(GEN mul, GEN x, GEN bas, GEN den)
 {
-  GEN tr,T,T1,sym, bas=(GEN)basden[1], den=(GEN)basden[2];
   long i,j,n = lg(bas)-1;
+  GEN tr,T,T1,sym;
   T = cgetg(n+1,t_MAT);
   T1 = cgetg(n+1,t_COL);
   sym = polsym(x, n-1);
 
-  for (i=1; i<=n; i++)
+  T1[1]=lstoi(n);
+  for (i=2; i<=n; i++)
   {
     tr = quicktrace((GEN)bas[i], sym);
     if (den && den[i]) tr = gdivexact(tr,(GEN)den[i]);
@@ -1066,7 +1067,7 @@ _mulii(GEN x, GEN y)
 }
 
 GEN
-get_mul_table(GEN x,GEN basden,GEN invbas)
+get_mul_table(GEN x,GEN basden,GEN invbas,GEN *T)
 {
   long i,j, n = lgef(x)-3;
   GEN z,d, mul = cgetg(n*n+1,t_MAT), bas=(GEN)basden[1], den=(GEN)basden[2];
@@ -1084,7 +1085,46 @@ get_mul_table(GEN x,GEN basden,GEN invbas)
       }
       mul[j+(i-1)*n] = mul[i+(j-1)*n] = (long)z;
     }
+  if (T) *T = get_T(mul,x,bas,den);
   return mul;
+}
+
+/* fill mat = nf[5], as well as nf[8] and nf[9]
+ * If (small) only compute a subset (use dummy 0s for the rest) */
+void
+get_nf_matrices(GEN nf, long small)
+{
+  GEN x=(GEN)nf[1],dK=(GEN)nf[3],index=(GEN)nf[4],ro=(GEN)nf[6],bas=(GEN)nf[7];
+  GEN basden,mul,invbas,M,MC,T,MDI,D,TI,A,dA,mat;
+  long r1 = itos(gmael(nf,2,1)), n = lg(bas)-1;
+
+  mat = cgetg(small? 4: 8,t_VEC); nf[5] = (long)mat;
+  basden = get_bas_den(bas);
+  M = make_M(basden,ro);
+  MC = make_MC(r1,M);
+  mat[1]=(long)M;
+  mat[3]=(long)mulmat_real(MC,M);
+  if (small) { nf[8]=nf[9]=mat[2]=zero; return; }
+
+  invbas = invmat(vecpol_to_mat(bas,n));
+  mul = get_mul_table(x,basden,invbas,&T);
+  if (DEBUGLEVEL) msgtimer("mult. table");
+  
+  nf[8]=(long)invbas;
+  nf[9]=(long)mul;
+
+  TI = gauss(T, gscalmat(dK, n));
+  MDI = make_MDI(nf,TI, &A, &dA);
+  mat[6]=(long)TI;
+  mat[7]=(long)MDI; /* needed in idealinv below */
+  if (is_pm1(index))
+    D = idealhermite_aux(nf, derivpol(x));
+  else
+    D = gmul(dA, idealinv(nf, A));
+  mat[2]=(long)MC;
+  mat[4]=(long)T;
+  mat[5]=(long)D;
+  if (DEBUGLEVEL) msgtimer("matrices");
 }
 
 /* Initialize the number field defined by the polynomial x (in variable v)
@@ -1106,7 +1146,7 @@ get_mul_table(GEN x,GEN basden,GEN invbas)
 GEN
 initalgall0(GEN x, long flag, long prec)
 {
-  GEN lead = NULL,nf,ro,bas,mat,M,MC,T,rev,dK,dx,index,fa,basden,res;
+  GEN lead = NULL,nf,ro,bas,mat,rev,dK,dx,index,fa,res;
   long av=avma,n,i,r1,r2,ru,PRECREG;
 
   if (DEBUGLEVEL) timer2();
@@ -1172,43 +1212,10 @@ initalgall0(GEN x, long flag, long prec)
   mael(nf,2,1)=lstoi(r1);
   mael(nf,2,2)=lstoi(r2);
   nf[3]=(long)dK;
-  nf[4]=(long)index; mat = cgetg(8,t_VEC);
-  nf[5]=(long)mat;
+  nf[4]=(long)index;
   nf[6]=(long)ro;
   nf[7]=(long)bas;
-
-  basden = get_bas_den(bas);
-  M = make_M(basden,ro);
-  MC = make_MC(r1,M);
-  mat[1]=(long)M;
-  mat[3]=(long)mulmat_real(MC,M);
-  if (flag & nf_SMALL)
-    nf[8]=nf[9]=mat[2]=mat[4]=mat[5]=mat[6]=mat[7]=zero;
-  else
-  {
-    GEN mul,invbas,MDI,D,TI,A,dA;
-
-    invbas = invmat(vecpol_to_mat(bas,n));
-    mul = get_mul_table(x,basden,invbas);
-    T = get_T(mul,x,basden);
-    if (DEBUGLEVEL) msgtimer("mult. table");
-    
-    nf[8]=(long)invbas;
-    nf[9]=(long)mul;
-
-    TI = gauss(T, gscalmat(dK, n));
-    MDI = make_MDI(nf,TI, &A, &dA);
-    mat[6]=(long)TI;
-    mat[7]=(long)MDI; /* needed in idealinv below */
-    if (is_pm1(index))
-      D = idealhermite_aux(nf, derivpol(x));
-    else
-      D = gmul(dA, idealinv(nf, A));
-    mat[2]=(long)MC;
-    mat[4]=(long)T;
-    mat[5]=(long)D;
-  }
-  if (DEBUGLEVEL) msgtimer("matrices");
+  get_nf_matrices(nf, flag & nf_SMALL);
 
   if (flag & nf_ORIG)
   {
