@@ -195,6 +195,7 @@ BA 46- --disable-kernel Configure option replaced by --kernel=none
    47- compute_polrel() [rnfkummer] was very slow for [L:K] > 5 (compute
        Newton sums directly)
    48- simplified fincke_pohst() [don't recompute gram_matrix]
+   49- faster trueeta()
 
   Added:
     1- [TeXmacs:] contextual completion (<TAB>)

@@ -1930,29 +1930,66 @@ eta(GEN x, long prec)
   return gerepileupto(av,inteta(q));
 }
 
+/* sqrt(3)/2 */
+static GEN
+sqrt32(long prec) { GEN z = mpsqrt(stor(3, prec)); setexpo(z, -1); return z; }
+
+#define swap(x,y) { long _t=x; x=y; y=_t; }
+/* exp(i x), x = k pi/12 */
+static GEN
+e12(long k, long prec)
+{
+  int s, sPi, sPiov2;
+  GEN z, t;
+  k %= 24;
+  if (k >12) { s = 1; k = 24 - k; } else s = 0; /* x -> 2pi - x */
+  if (k > 6) { sPi = 1; k = 12 - k; } else sPi = 0; /* x -> pi  - x */
+  if (k > 3) { sPiov2 = 1; k = 6 - k; } else sPiov2 = 0; /* x -> pi/2 - x */
+  z = cgetg(3, t_COMPLEX);
+  switch(k)
+  {
+    case 0: z[1] = licopy(gun); z[2] = zero; break;
+    case 1: t = gmul2n(addrs(sqrt32(prec), 1), -1);
+      z[1] = lmpsqrt(t);
+      z[2] = lmul2n(ginv((GEN)z[1]), -2); break;
+
+    case 2: z[1] = (long)sqrt32(prec); 
+            z[2] = (long)real2n(-1, prec); break;
+
+    case 3: z[1] = linv( gsqrt(gdeux, prec) );
+            z[2] = (long)mpcopy((GEN)z[1]); break;
+  }
+  if (sPiov2) swap(z[1], z[2]);
+  if (sPi) setsigne(z[1], -signe(z[1]));
+  if (s)   setsigne(z[2], -signe(z[2]));
+  return z;
+}
+
 /* returns the true value of eta(x) for Im(x) > 0, using reduction */
 GEN
 trueeta(GEN x, long prec)
 {
-  long tx = typ(x), l;
+  long tx = typ(x), l, Nmod24;
   pari_sp av = avma;
-  GEN q, q24, n, z, m, run;
+  GEN q, q24, N, n, m, run;
 
   if (!is_scalar_t(tx)) err(typeer,"trueeta");
   if (tx != t_COMPLEX || gsigne((GEN)x[2])<=0)
     err(talker,"argument must belong to upper half-plane");
   l = precision(x); if (l) prec=l;
-  z = exp_Ir(divrs(mppi(prec),12)); /* exp(2*I*Pi/24) */
   run = gsub(realun(DEFAULTPREC), gpowgs(stoi(10),-8));
   m = gun;
+  N = gzero;
   for(;;)
   {
-    n = ground(greal(x));
-    if (signe(n)) { x = gsub(x,n); m = gmul(m, powgi(z,n)); }
+    n = ground( greal(x) );
+    if (signe(n)) { x = gsub(x,n); N = addii(N, n); }
     if (gcmp(gnorm(x), run) > 0) break;
     x = gdivsg(-1,x);
     m = gmul(m, gsqrt(gmul(gi,gneg(x)), prec));
   }
+  Nmod24 = smodis(N, 24);
+  if (Nmod24) m = gmul(m, e12(Nmod24, prec));
   q = gmul(PiI2(prec), x);
   q24 = gexp(gdivgs(q, 24),prec);
   q = gpowgs(q24, 24);
