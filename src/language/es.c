@@ -1991,7 +1991,7 @@ texe(GEN g, char f, long d)
 }
 
 void
-brute(GEN g, char format, long sigd) { bruteall(g,format,sigd,1); }
+brute(GEN g, char f, long d) { bruteall(g,f,d,1); }
 
 void
 outbrute(GEN g) { bruteall(g,'g',-1,1); }

@@ -2058,7 +2058,7 @@ Fp_factor_irred(GEN P,GEN l, GEN Q)
     res[1]=lcopy(P);
     return res;
   }
-  if (DEBUGLEVEL>=4) timer2();
+  if (DEBUGLEVEL>=4) (void)timer2();
   FP=matrixpow(np,np,FpXQ_pow(polx[vp],l,P,l),P,l);
   FQ=matrixpow(nq,nq,FpXQ_pow(polx[vq],l,Q,l),Q,l);
   if (DEBUGLEVEL>=4) msgtimer("matrixpows");

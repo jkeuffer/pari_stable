@@ -21,6 +21,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "parinf.h"
 
+extern int cmbf_precs(GEN q, GEN A, GEN B, long *a, long *b, GEN *qa, GEN *qb);
+extern int isrational(GEN x);
 extern GEN mulmat_pol(GEN A, GEN x);
 extern GEN dim1proj(GEN prh);
 extern GEN centermod_i(GEN x, GEN p, GEN ps2);
