@@ -3585,7 +3585,7 @@ check_0(GEN B)
 {
   long i, l = lg(B);
   for (i = 1; i < l; i++)
-    if (gcmp0((GEN)B[i])) return 1;
+    if (gsigne((GEN)B[i]) <= 0) return 1;
   return 0;
 }
 
@@ -3674,7 +3674,7 @@ rel_T2(GEN nf, GEN pol, long lx, long prec)
 GEN
 rnflllgram(GEN nf, GEN pol, GEN order,long prec)
 {
-  pari_sp av = avma;
+  pari_sp av = avma, lim = stack_lim(av,2);
   long j, k, l, kmax, r1, lx;
   GEN M, I, h, H, mth, MC, MPOL, MCS, B, mu, y, z;
   const int alpha = 10;
@@ -3745,6 +3745,11 @@ PRECPB:
       for (l=k-2; l; l--) 
         if (!RED(k, l, h, mu, MC, nf, I, &Ik_inv)) goto PRECPB;
       k++;
+    }
+    if (low_stack(lim, stack_lim(av,2)))
+    {
+      if(DEBUGMEM>1) err(warnmem,"rnflllgram");
+      gerepileall(av, 8, &h,&H,&MPOL,&B,&MC,&MCS,&mu,&I);
     }
   }
   while (k < lx);
