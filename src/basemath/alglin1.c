@@ -2245,10 +2245,9 @@ inverseimage(GEN m,GEN v)
 
 /* i-th vector in the standard basis */
 GEN
-vec_ei(long n, long i)
-{
-  GEN e = zerocol(n); e[i] = un; return e;
-}
+vec_ei(long n, long i) { GEN e = zerocol(n); e[i] = un; return e; }
+GEN
+vec_Cei(long n, long i, GEN c) { GEN e = zerocol(n); e[i] = (long)c; return e; }
 
 /* NB: d freed */
 static GEN

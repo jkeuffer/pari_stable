@@ -2327,6 +2327,15 @@ hnf(GEN x) { return hnf0(x,1); }
 #define MOD  1
 #define PART 2
 
+/* u*c[1..k] mod b */
+static GEN
+update_up(GEN c, GEN u, GEN b, long k)
+{
+  long i;
+  for (i = 1; i <= k; i++) 
+    if (signe(c[i])) c[i] = lmodii(mulii(u,(GEN)c[i]), b);
+  return c;
+}
 /* dm = multiple of diag element (usually detint(x)) */
 /* flag & MOD:     don't/do append dm*matid. */
 /* flag & PART: don't reduce once diagonal is known; */
@@ -2356,7 +2365,9 @@ allhnfmod(GEN x, GEN dm, int flag)
    * only reduce mod dm when lg(coeff) > ldm */
   ldm = lgefint(dm);
   for (def = co-1,i = li-1; i > ldef; i--,def--)
-    for (j=def-1; j; j--)
+  {
+    coeff(x,i,def) = lresii(gcoeff(x,i,def), dm);
+    for (j = def-1; j; j--)
     {
       coeff(x,i,j) = lresii(gcoeff(x,i,j), dm);
       a = gcoeff(x,i,j);
@@ -2367,7 +2378,7 @@ allhnfmod(GEN x, GEN dm, int flag)
       ZV_elem(a,gcoeff(x,i,k), x,NULL, j,k);
       p1 = (GEN)x[j];
       p2 = (GEN)x[k];
-      for (k=1; k<i; k++)
+      for (k = 1; k < i; k++)
       {
         if (lgefint(p1[k]) > ldm) p1[k] = lresii((GEN)p1[k], dm);
         if (lgefint(p2[k]) > ldm) p2[k] = lresii((GEN)p2[k], dm);
@@ -2378,31 +2389,35 @@ allhnfmod(GEN x, GEN dm, int flag)
 	x = gerepilecopy(av, x);
       }
     }
+    if ((flag&MOD)==0 && !signe(coeff(x,i,def)))
+    { /* missing pivot on line i, insert column */
+      GEN a = cgetg(co + 1, t_MAT);
+      for (k = 1; k <= def; k++) a[k] = x[k];
+      a[k++] = (long)vec_Cei(li-1, i, dm);
+      for (     ; k <= co;  k++) a[k] = x[k-1];
+      ldef--; if (ldef < 0) ldef = 0;
+      co++; def++; x = a;
+    }
+  }
   w = cgetg(li,t_MAT); b = dm;
   for (def = co-1,i = li-1; i > ldef; i--,def--)
   {
     d = bezout(gcoeff(x,i,def),b,&u,&v);
-    w[i] = lmod(gmul(u,(GEN)x[def]), b);
-    if (!signe(gcoeff(w,i,i))) coeff(w,i,i) = (long)d;
+    w[i] = (long)update_up((GEN)x[def], u, b, i-1);
+    coeff(w,i,i) = (long)d;
     if ((flag & MOD) && i > 1) b = diviiexact(b,d);
   }
-  if (ldef > 0) /* implies flag&MOD = 0, prepend relevant cols from dm * Id */
-  {
-    for (i = 1; i <= ldef; i++) 
-    {
-      GEN t = zerocol(li-1); t[i] = (long)dm;
-      w[i] = (long)t;
-    }
-  }
+  for (i = 1; i <= ldef; i++) w[i] = (long)vec_Cei(li-1, i, dm);
   if (flag & PART) return w;
+
   /* compute optimal value for dm */
   dm = gcoeff(w,1,1);
-  for (i=2; i<li; i++) dm = mpppcm(dm, gcoeff(w,i,i));
+  for (i = 2; i < li; i++) dm = mpppcm(dm, gcoeff(w,i,i));
   ldm = lgefint(dm);
-  for (i=li-2; i>=1; i--)
+  for (i = li-2; i > 0; i--)
   {
     GEN diag = gcoeff(w,i,i);
-    for (j=i+1; j<li; j++)
+    for (j = i+1; j < li; j++)
     {
       b = negi(truedvmdii(gcoeff(w,i,j), diag, NULL));
       p1 = ZV_lincomb(gun,b, (GEN)w[j], (GEN)w[i]);
