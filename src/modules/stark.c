@@ -1713,11 +1713,14 @@ get_limx(long r1, long r2, long prec, GEN *pteps, long flag)
 static long
 GetBoundN0(GEN C,  long r1, long r2,  long prec, long flag)
 {
-  long av = avma, N0;
+  long av = avma;
   GEN eps, limx = get_limx(r1, r2, prec, &eps, flag);
 
-  N0 = itos(gfloor(gdiv(C, limx)));
-  avma = av; return N0;
+  limx = gfloor(gdiv(C, limx));
+  if (lgefint(limx)>3)
+    err(talker, "Too many coefficients (%Z) needed in GetST: computation impossible", limx);
+
+  avma = av; return itos(limx);
 }
 
 static long
@@ -1961,9 +1964,6 @@ GetST(GEN dataCR, long prec)
     err(talker, "Not enough precomputed primes (need all primes up to %ld)", nmax);
 
   i0 = GetBoundi0(r1, r2, prec);
-
-  if (nmax >= VERYBIGINT)
-      err(talker, "Too many coefficients (%ld) in GetST: computation impossible", nmax);
 
   if(DEBUGLEVEL > 1) fprintferr("nmax = %ld and i0 = %ld\n", nmax, i0);
 
@@ -2334,8 +2334,14 @@ RecCoeff3(GEN nf, GEN beta, GEN B, long v, long prec)
   
   if (nbs == 1) return gerepileupto(av, basistoalg(nf, sol));
  
-  if (DEBUGLEVEL)
-    fprintferr("RecCoeff3: too many solutions!\n");
+  if (DEBUGLEVEL >= 2)
+  {
+    if (nbs)
+      fprintferr("RecCoeff3: too many solutions!\n");
+    else
+      fprintferr("RecCoeff3: no solution found!\n");
+  }
+
   avma = av; return NULL;
 }
 
