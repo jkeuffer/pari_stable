@@ -845,8 +845,8 @@ extern int input_loop(filtre_t *F, input_method *IM);
 static char *
 gprl_input(Buffer *b, char **endp, input_method *IM)
 {
-  long used = *endp - b->buf;
-  long left = b->len - used, l;
+  ulong used = *endp - b->buf;
+  ulong left = b->len - used, l;
   char *s, *t;
 
   if (! (s = readline(IM->prompt)) ) return NULL; /* EOF */
@@ -857,11 +857,12 @@ gprl_input(Buffer *b, char **endp, input_method *IM)
    *   b"); }
    * and conforms with the other input methods anyway. */
   t = gpmalloc(l + 1);
-  (void)sprintf(t,"%s\n", s);
-  if ((ulong)left < l)
+  strncpy(t, s, l-1);
+  t[l-1] = '\n';
+  t[l]   = 0; /* equivalent to sprintf(t,"%s\n", s) */
+  if (left < l)
   {
-    long incr = b->len;
-
+    ulong incr = b->len;
     if (incr < l) incr = l;
     fix_buffer(b, b->len + incr);
     *endp = b->buf + used;

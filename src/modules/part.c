@@ -170,7 +170,7 @@ numbpart(GEN n)
   if (log10(gtodouble(n)) > 15)
     err(talker, "arg to partition function must be <10^15");
   est = estim(n);
-  prec = DEFAULTPREC + ((gtodouble(est)/LOG2) + 25) / BITS_IN_LONG;
+  prec = (ulong)(DEFAULTPREC + ((gtodouble(est)/LOG2) + 25) / BITS_IN_LONG);
   pinit(n, &C,&D,&Pi, prec);
   
   sum = cgetr (prec);

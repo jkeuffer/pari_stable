@@ -1588,7 +1588,7 @@ divrr(GEN x, GEN y)
   }
   /* i = lz-1 */
   /* round correctly */
-  if (x1[1] > si>>1)
+  if ((ulong)x1[1] > si>>1)
   {
     j=i; do x[--j]++; while (j && !x[j]);
   }
@@ -1968,10 +1968,9 @@ GEN
 red_montgomery(GEN T, GEN N, ulong inv)
 {
   pari_sp av;
-  GEN Te,Td,Ne,Nd, scratch;
-  ulong m,t,d,k = lgefint(N)-2;
+  GEN Te, Td, Ne, Nd, scratch;
+  ulong i, j, m, t, d, k = lgefint(N)-2;
   int carry;
-  long i,j;
   LOCAL_HIREMAINDER;
   LOCAL_OVERFLOW;
 
@@ -3728,7 +3727,7 @@ ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
     else			/* take difference of bit lengths */
     {
       lr = (lr << TWOPOTBITS_IN_LONG) - lbb + lbr;
-      if (lr > BITS_IN_LONG)
+      if ((ulong)lr > BITS_IN_LONG)
 	vmax = MAXULONG;
       else if (lr == 0)
 	vmax = 1UL;
@@ -3887,7 +3886,7 @@ ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
     else			/* take difference of bit lengths */
     {
       lr = (lr << TWOPOTBITS_IN_LONG) - lbb + lbr;
-      if (lr > BITS_IN_LONG)
+      if ((ulong)lr > BITS_IN_LONG)
 	vmax = MAXULONG;
       else if (lr == 0)
 	vmax = 1UL;

@@ -2295,12 +2295,12 @@ file_input(Buffer *b, char **s0, input_method *IM)
 {
   int first = 1;
   char *s = *s0;
-  long used0, used = s - b->buf;
+  ulong used0, used = s - b->buf;
 
   used0 = used;
   for(;;)
   {
-    long left = b->len - used, l;
+    ulong left = b->len - used, l;
 
     if (left < 512)
     {
