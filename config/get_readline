@@ -49,7 +49,7 @@ if test -n "$readline"; then
   x=`./locate 'readline.h' '' $pth`
   CPPF_defined=
   case $x in
-   ?:/*|/*) rl_include=`echo $x | sed 's,/readline.h,,'`
+   ?:/*|/*) rl_include=`dirname $x`
      echo ..."Found readline header in $rl_include"
      if (test -r "$rl_include/history.h"); then
         echo ..."Found history header in $rl_include"
@@ -127,7 +127,7 @@ if test -n "$readline"; then
   fi
 # Readline -- CFLAGS
   if (echo $rl_include | grep "readline$" > /dev/null); then
-    rl_include=`echo $rl_include | sed 's,/readline$,,'`
+    rl_include=`dirname $rl_include`
     RLINCLUDE="-I$rl_include"
   else # in case headers are not installed correctly
     RLINCLUDE="-I$rl_include -DREADLINE_LIBRARY"
