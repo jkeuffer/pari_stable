@@ -3325,6 +3325,7 @@ trap0(char *e, char *r, char *f)
        if (!strcmp(e,"errpile")) numerr = errpile;
   else if (!strcmp(e,"typeer")) numerr = typeer;
   else if (!strcmp(e,"gdiver2")) numerr = gdiver2;
+  else if (!strcmp(e,"invmoder")) numerr = invmoder;
   else if (!strcmp(e,"accurer")) numerr = accurer;
   else if (!strcmp(e,"archer")) numerr = archer;
   else if (*e) err(impl,"this trap keyword");

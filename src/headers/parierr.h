@@ -49,7 +49,7 @@ enum {
 /* arith.c  */
 
   arither1, arither2, facter, hiler1, funder2,
-  generer, primer1,
+  generer, primer1,invmoder,
 
 /* base.c   */
   polrationer, constpoler, notpoler, redpoler, zeropoler,
