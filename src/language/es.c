@@ -2177,8 +2177,11 @@ try_pipe(char *cmd, int flag)
       }
       else
       {
+        int i;
         c = err_catch(-1, env, NULL);
-        fprintf(file,"       \n\n"); fflush(file);
+        fprintf(file,"\n\n"); fflush(file);
+        for (i=1; i<400; i++) fprintf(file,"                         \n");
+        fprintf(file,"\n\n"); fflush(file);
       }
       err_leave(&c);
       if (!file) return NULL;

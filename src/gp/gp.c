@@ -249,22 +249,21 @@ prettyp_wait()
 }
 
 /* initialise external prettyprinter (tex2mail) */
-static void
+static int
 prettyp_init()
 {
   if (!prettyprinter_file)
   {
-    pariFILE *f = try_pipe(prettyprinter, mf_OUT | mf_TEST);
-    if (!f)
+    prettyprinter_file = try_pipe(prettyprinter, mf_OUT | mf_TEST);
+    if (!prettyprinter_file)
     {
       err(warner,"invalid prettyprinter: '%s'",prettyprinter);
-      free(prettyprinter); prettyprinter = NULL; return;
+      free(prettyprinter); prettyprinter = NULL; return 0;
     }
-    prettyprinter_file = f;
   }
   pariflush();
   pari_outfile = prettyprinter_file->file;
-  prettyp = f_TEX;
+  prettyp = f_TEX; return 1;
 }
 
 /* print a sequence of (NULL terminated) GEN */
@@ -2251,13 +2250,14 @@ gp_main_loop(int ismain)
     if (test_mode) { init80(0); gp_output(z); pariputc('\n'); }
     else
     { /* save state */
-      int prettyprint = (prettyprinter && prettyp == f_PRETTY);
       PariOUT *old = pariOut;
       FILE *o_out = pari_outfile;
       int o_prettyp = prettyp;
+      int prettyprint = (prettyprinter && prettyp == f_PRETTY);
 
+      if (prettyprint && !prettyp_init())
+        { prettyprint = 0; o_prettyp = prettyp = f_PRETTYMAT; }
       if (DEBUGLEVEL > 4) fprintferr("prec = [%ld, %ld]\n", prec,precdl);
-      if (prettyprint) prettyp_init();
 
       /* history number */
       if (prettyprint)
