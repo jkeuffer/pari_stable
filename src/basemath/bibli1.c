@@ -665,10 +665,10 @@ ZincrementalGS(GEN x, GEN L, GEN B, long k, GEN fl, int gram)
 
 /* x integer matrix. Beware: this function can return NULL */
 GEN
-lllint_marked(long MARKED, GEN x, long D, int gram,
+lllint_marked(long *pMARKED, GEN x, long D, int gram,
               GEN *pth, GEN *ptfl, GEN *ptB)
 {
-  long lx = lg(x), hx, i, j, k, l, n, kmax;
+  long lx = lg(x), hx, i, j, k, l, n, kmax, MARKED;
   pari_sp av, lim;
   GEN B,L,h,fl;
 
@@ -676,6 +676,7 @@ lllint_marked(long MARKED, GEN x, long D, int gram,
   fl = cgetg(lx,t_VECSMALL);
   if (ptfl) *ptfl = fl;
   n = lx-1; if (n <= 1) return NULL;
+  MARKED = pMARKED? *pMARKED: 0;
   hx = lg(x[1]);
   if (gram && hx != lx) err(mattype1,"lllint");
 
@@ -736,13 +737,7 @@ lllint_marked(long MARKED, GEN x, long D, int gram,
   if (ptB)  *ptB  = B;
   if (ptfl) *ptfl = fl;
   if (pth)  *pth = h;
-  if (MARKED && MARKED != 1)
-  {
-    if (B)  { swap( B[1],  B[MARKED]); }
-    if (fl) { swap(fl[1], fl[MARKED]); }
-    if (h)  { swap( h[1],  h[MARKED]); }
-    swap(x[1], x[MARKED]);
-  }
+  if (pMARKED) *pMARKED = MARKED;
   return h? h: x;
 }
 
@@ -750,7 +745,7 @@ lllint_marked(long MARKED, GEN x, long D, int gram,
 GEN
 lllint_i(GEN x, long D, int gram, GEN *pth, GEN *ptfl, GEN *ptB)
 {
-  return lllint_marked(0, x,D,gram,pth,ptfl,ptB);
+  return lllint_marked(NULL, x,D,gram,pth,ptfl,ptB);
 }
 
 /* return x * lllint(x). No garbage collection */
@@ -1168,10 +1163,10 @@ good_prec(GEN x, long kmax)
  * If MARKED != 0 make sure e[MARKED] is the first vector of the output basis
  * (which may then not be LLL-reduced) */
 GEN
-lllfp_marked(int MARKED, GEN x, long D, long flag, long prec, int gram)
+lllfp_marked(long *pMARKED, GEN x, long D, long flag, long prec, int gram)
 {
   GEN xinit,L,h,B,L1,delta, Q, H = NULL;
-  long retry = 2, lx = lg(x), hx, l, i, j, k, k1, n, kmax, KMAX;
+  long retry = 2, lx = lg(x), hx, l, i, j, k, k1, n, kmax, KMAX, MARKED;
   pari_sp av0 = avma, av, lim;
   int isexact, exact_can_leave, count, count_max = 8;
   const int in_place = (flag == 3);
@@ -1208,7 +1203,7 @@ lllfp_marked(int MARKED, GEN x, long D, long flag, long prec, int gram)
   }
   if (k == 2)
   {
-    if (!prec) return lllint_marked(MARKED, x, D, gram, &h, NULL, NULL);
+    if (!prec) return lllint_marked(pMARKED, x, D, gram, &h, NULL, NULL);
     x = mat_to_MP(x, prec);
     isexact = 1;
   }
@@ -1220,6 +1215,7 @@ lllfp_marked(int MARKED, GEN x, long D, long flag, long prec, int gram)
   }
  /* kmax = maximum column index attained during this run
   * KMAX = same over all runs (after PRECPB) */
+  MARKED = pMARKED? *pMARKED: 0;
   kmax = KMAX = 1;
   h = idmat(n);
 
@@ -1379,7 +1375,7 @@ PRECPB:
   }
   if (in_place) h = gmul(xinit, h);
   if (DEBUGLEVEL>3) fprintferr("\n");
-  if (MARKED && MARKED != 1) swap(h[1], h[MARKED]);
+  if (pMARKED) *pMARKED = MARKED;
   return gerepilecopy(av0, h);
 }
 
@@ -1387,19 +1383,19 @@ PRECPB:
 GEN
 lllint_fp_ip(GEN x, long D)
 {
-  return lllfp_marked(0, x,D, 3,DEFAULTPREC,0);
+  return lllfp_marked(NULL, x,D, 3,DEFAULTPREC,0);
 }
 
 GEN
 lllgramintern(GEN x, long D, long flag, long prec)
 {
-  return lllfp_marked(0, x,D,flag,prec,1);
+  return lllfp_marked(NULL, x,D,flag,prec,1);
 }
 
 GEN
 lllintern(GEN x, long D, long flag, long prec)
 {
-  return lllfp_marked(0, x,D,flag,prec,0);
+  return lllfp_marked(NULL, x,D,flag,prec,0);
 }
 
 GEN

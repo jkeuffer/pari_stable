@@ -29,8 +29,8 @@ extern GEN roots_to_pol_r1r2(GEN a, long r1, long v);
 extern GEN idealhermite_aux(GEN nf, GEN x);
 extern GEN cauchy_bound(GEN p);
 extern GEN galoisbig(GEN x, long prec);
-extern GEN lllfp_marked(int M, GEN x, long D, long flag, long prec, int gram);
-extern GEN lllint_marked(long M, GEN x, long D, int g, GEN *h, GEN *fl, GEN *B);
+extern GEN lllfp_marked(long *M, GEN x, long D, long flag, long prec, int gram);
+extern GEN lllint_marked(long *M, GEN x, long D, int g, GEN *h, GEN *f, GEN *B);
 extern GEN mulmat_pol(GEN A, GEN x);
 
 void
@@ -1241,12 +1241,13 @@ nftohnfbasis(GEN nf, GEN x)
   return gerepilecopy(av, nfbasechange(u, x));
 }
 
+#define swap(x,y) { long _t=x; x=y; y=_t; }
 static GEN
 get_red_G(nfbasic_t *T, GEN *pro)
 {
   GEN G, u, u0 = NULL;
   pari_sp av;
-  long i, prec, extraprec, n = degpol(T->x);
+  long i, prec, extraprec, n = degpol(T->x), MARKED = 1;
   nffp_t F;
 
   extraprec = (long) (0.25 * n * (sizeof(long) / 4));
@@ -1260,7 +1261,7 @@ get_red_G(nfbasic_t *T, GEN *pro)
     if (DEBUGLEVEL)
       fprintferr("get_red_G: starting LLL, prec = %ld (%ld + %ld)\n",
                   prec + F.extraprec, prec, F.extraprec);
-    if ((u = lllfp_marked(1, G, 100, 2, prec, 0)))
+    if ((u = lllfp_marked(&MARKED, G, 100, 2, prec, 0)))
     {
       if (typ(u) == t_MAT) break;
       u = (GEN)u[1];
@@ -1272,7 +1273,10 @@ get_red_G(nfbasic_t *T, GEN *pro)
     F.ro = NULL;
     if (DEBUGLEVEL) err(warnprec,"get_red_G", prec);
   }
-  *pro = F.ro; return u0? gmul(u0,u): u;
+  *pro = F.ro; 
+  if (u0) u = gmul(u0,u);
+  if (MARKED != 1) swap(u[1], u[MARKED]);
+  return u;
 }
 
 /* Return the base change matrix giving an LLL-reduced basis for the
@@ -1285,8 +1289,11 @@ get_LLL_basis(nfbasic_t *T, GEN *pro)
   if (T->r1 != degpol(T->x)) u = get_red_G(T, pro);
   else
   {
-    u = lllfp_marked(1, make_Tr(T->x, T->bas), 100, 0, DEFAULTPREC, 1);
+    long MARKED = 1;
+    u = lllfp_marked(&MARKED, make_Tr(T->x, T->bas), 100, 0, DEFAULTPREC, 1);
     if (!u) u = idmat(1);
+    else
+      if (MARKED != 1) swap(u[1], u[MARKED]);
   }
   return u;
 }
