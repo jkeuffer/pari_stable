@@ -857,7 +857,7 @@ nfinit_reduce(long flag, GEN *px, GEN *pdx, GEN *prev, GEN *pbase, long prec)
     for (i=1; i<=n; i++)
       base[i] = (long)eleval(polmax, (GEN)a[i], p1);
     p1 = vecpol_to_mat(base,n); p2=denom(p1); p1=gmul(p2,p1);
-    p1 = gdiv(hnfmod(p1,detint(p1)), p2);
+    p1 = gdiv(hnfmodid(p1,p2), p2);
     base = mat_to_vecpol(p1,v);
   }
   *px=polmax; *pdx=dx; *prev=rev; *pbase = base;

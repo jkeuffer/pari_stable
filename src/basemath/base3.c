@@ -810,27 +810,20 @@ zidealij(GEN x, GEN y)
   GEN p1,p2,p3,p4,d,z,x1;
   long j,N,c;
 
-  if(DEBUGLEVEL>=6)
-    {fprintferr("entree dans zidealij; avma-bot = %ld\n",avma-bot); flusherr();}
+  if(DEBUGLEVEL>5)
+    {fprintferr("entering zidealij; avma = %ld\n",avma); flusherr();}
   x1 = ginv(x);
   p1 = gmul(x1,y);
-  if(DEBUGLEVEL>=6)
-    {fprintferr("p1 = y/x; avma-bot = %ld\n",avma-bot); flusherr();}
   p2 = smith2(p1);
-  if(DEBUGLEVEL>=6)
-    {fprintferr("p2 = smith2(p1); avma-bot = %ld\n",avma-bot); flusherr();}
   p3 = ginv((GEN)p2[1]);
-  if(DEBUGLEVEL>=6)
-    {fprintferr("p3 = 1/p2[1]; avma-bot = %ld\n",avma-bot); flusherr();}
   p3 = reducemodmatrix(p3,p1);
   p3 = gmul(x,p3); N=lg(p3)-1;
-  if(DEBUGLEVEL>=6)
-    {fprintferr("p3 = x.p3 mod p1; avma-bot = %ld\n",avma-bot); flusherr();}
   for (j=1; j<=N; j++) coeff(p3,1,j)=laddsi(1,gcoeff(p3,1,j));
   p4 = smithclean(p2); d=(GEN)p4[3];
+  if(DEBUGLEVEL>5) {fprintferr("done; avma = %ld\n",avma); flusherr();}
 
   z=cgetg(4,t_VEC); c=lg(d); p1=cgetg(c,t_VEC);
-  /* transform p3 in a vector (gen) */
+  /* transform p3 into a vector */
   p3[0] = evaltyp(t_VEC) | evallg(c);
   for (j=1; j<c; j++) p1[j] = coeff(d,j,j);
   z[1]=(long)p1;

@@ -202,8 +202,8 @@ rnfinitalg(GEN nf,GEN pol,long prec)
     }
   }
   if (DEBUGLEVEL>1) msgtimer("p4");
-  p3=denom(p4); if (gcmp1(p3)) p3=NULL; else p4=gmul(p3,p4);
-  p4=hnfmod(p4,detint(p4));
+  p3 = denom(p4); 
+  p4 = hnfmodid(gmul(p3,p4), p3);
   if (DEBUGLEVEL>1) msgtimer("hnfmod");
   for (j=degabs-1; j>0; j--)
     if (cmpis(gcoeff(p4,j,j),2) > 0)
@@ -214,7 +214,7 @@ rnfinitalg(GEN nf,GEN pol,long prec)
           for (i=1; i<=j; i++)
             coeff(p4,i,k)=lsubii(gcoeff(p4,i,k),gcoeff(p4,i,j));
     }
-  if (p3) p4=gdiv(p4,p3);
+  p4 = gdiv(p4,p3);
   p2[4]=(long)mat_to_vecpol(p4,vpol);
   p2[5]=linvmat(p4);
   tetpil=avma; return gerepile(av,tetpil,gcopy(RES));
@@ -556,13 +556,13 @@ rnfidealnormabs(GEN rnf,GEN id)
 GEN
 rnfidealreltoabs(GEN rnf,GEN x)
 {
-  long av=avma,tetpil,i,j,k,n,m;
-  GEN nf,basinv,om,id,p1,p2,p3,p4,p5;
+  long av=avma,i,j,k,n,m;
+  GEN nf,basinv,om,id,p1,p2,p3,p4,p5,c;
 
   checkrnf(rnf);
-  x=rnfidealhermite(rnf,x);
+  x = rnfidealhermite(rnf,x);
   n=lgef(rnf[1])-3; nf=(GEN)rnf[10]; m=lgef(nf[1])-3;
-  basinv=(GEN)((GEN)rnf[11])[5];
+  basinv = gmael(rnf,11,5);
   p3=cgetg(n*m+1,t_MAT); p2=gmael(rnf,11,2);
   for (i=1; i<=n; i++)
   {
@@ -577,8 +577,12 @@ rnfidealreltoabs(GEN rnf,GEN x)
       p3[(i-1)*m+j]=(long)p5;
     }
   }
-  p1=gmul(basinv,p3); p2=detint(p1);
-  tetpil=avma; return gerepile(av,tetpil,hnfmod(p1,p2));
+  p1 = gmul(basinv,p3); c = content(p1);
+  p2 = gmael3(x,1,1,1); /* x \cap Z */
+  if (is_pm1(c)) c = NULL; else { p1 = gdiv(p1, c); p2 = gdiv(p2, c); }
+  p1 = hnfmodid(p1, p2);
+  if (c) p1 = gmul(p1, c);
+  return gerepileupto(av, p1);
 }
 
 GEN

@@ -890,6 +890,18 @@ triv_gen(GEN nf, GEN x, long c, long flag)
   y[3] = lstoi(BIGINT); return y;
 }
 
+static long
+prec_unit_matrix(GEN bnf)
+{
+  GEN a = (GEN)bnf[4];
+  long i,prec;
+
+  for (i=1; ; i++)
+    if ( (prec = gprecision((GEN)a[i])) ) return prec;
+  err(bugparier,"prec_unit_matrix");
+  return 0; /* not reached */
+}
+
 GEN
 isprincipalall(GEN bnf,GEN x,long flag)
 {
@@ -913,7 +925,7 @@ isprincipalall(GEN bnf,GEN x,long flag)
   if (lgef(nf[1])==4)
     return gerepileupto(av, triv_gen(nf, gcoeff(x,1,1), 0, flag));
 
-  pr = gprecision(gmael(bnf,4,1)); /* precision of unit matrix */
+  pr = prec_unit_matrix(bnf); /* precision of unit matrix */
   c = getrand();
   for (;;)
   {

@@ -1283,8 +1283,7 @@ allhnfmod(GEN x,GEN dm,long flag)
     x = p1;
   }
   else
-  {
-    /* concatenate dm * Id to x */
+  { /* concatenate dm * Id to x */
     x = concatsp(x, idmat_intern(li-1,dm,gzero));
     for (i=1; i<co; i++) x[i] = lmod((GEN)x[i], dm);
     co += li-1;

@@ -773,7 +773,7 @@ allbase4(GEN f,long code, GEN *y, GEN *ptw)
         }
         for (  ; j<=n; j++) p1[j]=a[j];
         for (  ; j<=2*n-k; j++) p1[j]=b[j+k-n];
-        a=hnfmod(p1,detint(p1));
+        a = hnfmodid(p1, da);
       }
     }
     if (DEBUGLEVEL>5)

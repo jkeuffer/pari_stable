@@ -428,7 +428,7 @@ rayclassno(GEN bnf,GEN ideal)
     for (i=1; i<=R3; i++)
       p1[i] = (i==(j-RU))?resbid2[i]:zero;
   }
-  hmat=hnfmod(dataunit,(GEN)resbid[1]);
+  hmat = hnfmodid(dataunit,(GEN)resbid2[1]);
   for (i=lg(hmat)-1 ; i; i--) clno = mulii(clno,gcoeff(hmat,i,i));
   avma=av; return icopy(clno);
 }

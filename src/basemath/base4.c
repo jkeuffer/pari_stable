@@ -1127,7 +1127,7 @@ idealnorm(GEN nf, GEN x)
       x = gnorm(basistoalg(nf,x)); break;
     default:
       if (lg(x) != lgef(nf[1])-2) x = idealhermite_aux(nf,x);
-      x = det(x);
+      x = dethnf(x);
   }
   tetpil=avma; return gerepile(av,tetpil,gabs(x,0));
 }
@@ -1272,15 +1272,13 @@ idealpow(GEN nf, GEN x, GEN n)
 
         denx=denom(x); if (gcmp1(denx)) denx=NULL; else x = gmul(x,denx);
         a=ideal_two_elt(nf,x); alpha=(GEN)a[2]; a=(GEN)a[1];
-        dx=gcoeff(x,1,1); for (i=2; i<=N; i++) dx=mulii(dx,gcoeff(x,i,i));
-
+        dx = gcoeff(x,1,1);
         m = cgetg(N+1,t_MAT); a = gpui(a,n1,0);
         alpha = element_pow(nf,alpha,n1);
         for (i=1; i<=N; i++) m[i]=(long)element_mulid(nf,alpha,i);
-        m = concatsp(m, gscalmat(a,N));
-        x = hnfmod(m, gpui(dx,n1,0));
+        x = hnfmodid(m, a);
         if (s<0) x = hnfideal_inv(nf,x);
-        if (denx) { denz=gpui(denx,negi(n),0); x=gmul(denz,x); }
+        if (denx) { denz=powgi(denx,negi(n)); x=gmul(denz,x); }
     }
   x = gerepileupto(av, x);
   if (!ax) return x;
@@ -1449,12 +1447,12 @@ idealintersect(GEN nf, GEN x, GEN y)
   nf=checknf(nf); N=lgef(nf[1])-3;
   if (idealtyp(&x,&z)!=t_MAT || lg(x)!=N+1) x=idealhermite_aux(nf,x);
   if (idealtyp(&y,&z)!=t_MAT || lg(y)!=N+1) y=idealhermite_aux(nf,y);
-  dx=denom(x); if (!gcmp1(dx)) y=gmul(y,dx);
-  dy=denom(y); if (!gcmp1(dy)) x=gmul(x,dy);
-  dx = mulii(dx,dy);
-  z=kerint(concatsp(x,y)); lz=lg(z);
+  dx=denom(x); if (!gcmp1(dx))   y = gmul(y,dx);
+  dy=denom(y); if (!gcmp1(dy)) { x = gmul(x,dy); dx = mulii(dx,dy); }
+  z = kerint(concatsp(x,y)); lz=lg(z);
   for (i=1; i<lz; i++) setlg(z[i], N+1);
-  z=gmul(x,z); z = hnfmod(z,detint(z));
+  z = gmul(x,z);
+  z = hnfmodid(z, glcm(gcoeff(x,1,1), gcoeff(y,1,1)));
   if (!gcmp1(dx)) z = gdiv(z,dx);
   return gerepileupto(av,z);
 }
