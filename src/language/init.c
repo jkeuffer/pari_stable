@@ -1925,7 +1925,7 @@ entree functions_basic[]={
 {"matintersect",2,(void*)intersect,8,"GG"},
 {"matinverseimage",2,(void*)inverseimage,8,"GG"},
 {"matisdiagonal",10,(void*)isdiagonal,8,"lG"},
-{"matker",99,(void*)matker0,8,"GD0,L,p"},
+{"matker",99,(void*)matker0,8,"GD0,L,"},
 {"matkerint",99,(void*)matkerint0,8,"GD0,L,"},
 {"matmuldiagonal",2,(void*)matmuldiagonal,8,"GG"},
 {"matmultodiagonal",2,(void*)matmultodiagonal,8,"GG"},
