@@ -723,7 +723,7 @@ mului(ulong x, GEN y)
   setsigne(z,s); return z;
 }
 
-/* a + b*Y */
+/* a + b*Y, assume Y >= 0, 0 <= a,b <= VERYBIGINT */
 GEN
 addsmulsi(long a, long b, GEN Y)
 {
@@ -740,17 +740,9 @@ addsmulsi(long a, long b, GEN Y)
 
   (void)new_chunk(lz);
   yd = y + ny; *--z = addll(a, mulll(b, *--yd));
-  while (overflow && yd > y) 
-  {
-    hiremainder++; overflow = (hiremainder == 0);
-    *--z = addmul(b,*--yd);
-  }
-  if (overflow) *--z = hiremainder+1;
-  else
-  {
-    while (yd > y) *--z = addmul(b,*--yd);
-    if (hiremainder) *--z = hiremainder; else lz--;
-  }
+  if (overflow) hiremainder++; /* result != 0 */
+  while (yd > y) *--z = addmul(b,*--yd);
+  if (hiremainder) *--z = hiremainder; else lz--;
   *--z = evalsigne(1) | evallgefint(lz);
   *--z = evaltyp(t_INT) | evallg(lz);
   avma=(long)z; return z;
