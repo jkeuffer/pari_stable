@@ -205,18 +205,15 @@ addfrac(GEN x, GEN y)
     z[2] = licopy(d); return z;
   }
   p1 = mppgcd(delta, p2);
-  if (is_pm1(p1))
-  {
-    avma = (long)z;
-    z[1] = licopy(n);
-  }
-  else
+  if (!is_pm1(p1))
   {
     delta = divii(delta, p1);
-    avma = (long)z;
-    z[1] = ldivii(n,p1);
+    n = divii(n, p1);
   }
-  z[2] = lmulii(d,delta); return z;
+  d = mulii(d,delta);
+  avma = (long)z;
+  z[1] = licopy(n);
+  z[2] = licopy(d); return z;
 }
 
 static GEN
