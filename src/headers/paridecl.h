@@ -391,6 +391,7 @@ GEN     element_div(GEN nf, GEN x, GEN y);
 GEN     element_inv(GEN nf, GEN x);
 GEN     element_invmodideal(GEN nf, GEN x, GEN ideal);
 GEN     element_mul(GEN nf,GEN x,GEN y);
+GEN     element_muli(GEN nf,GEN x,GEN y);
 GEN     element_mulid(GEN nf, GEN x, long i);
 GEN     element_mulvec(GEN nf, GEN x, GEN v);
 GEN     element_pow(GEN nf,GEN x,GEN k);

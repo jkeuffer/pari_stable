@@ -26,7 +26,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 extern GEN gauss_triangle_i(GEN A, GEN B,GEN t);
 extern GEN hnf_invimage(GEN A, GEN b);
-extern GEN element_muli(GEN nf, GEN x, GEN y);
 extern GEN colreducemodHNF(GEN x, GEN y, GEN *Q);
 extern GEN zinternallog_pk(GEN nf,GEN a0,GEN y,GEN pr,GEN prk,GEN list,GEN *psigne);
 extern GEN special_anti_uniformizer(GEN nf, GEN pr);
@@ -2007,7 +2006,7 @@ ideallllred(GEN nf, GEN I, GEN vdir, long prec)
   if (DEBUGLEVEL>5) msgtimer("entering idealllred");
   I0 = I;
   if (typ(I) != id_MAT || lg(I) != N+1) I = idealhermite_aux(nf,I);
-  c1 = content(I); if (gcmp1(c1)) c1 = NULL; else I = gdiv(I,c1);
+  I = primitive_part(I, &c1);
   if (2 * expi(gcoeff(I,1,1)) >= bit_accuracy(nfprec))
     Ired = gmul(I, lllintpartial(I));
   else

@@ -39,7 +39,7 @@
 ? 6/Pi^2*sumpos(n=1,n^-2)
 0.99999999999999999999999999999999999999
 ? getheap
-[19, 190]
+[19, 189]
 ? print("Total time spent: ",gettime);
-Total time spent: 500
+Total time spent: 180
 ? \q
