@@ -2056,6 +2056,12 @@ init_timer(pslq_timer *T)
   T->vmind = T->t12 = T->t1234 = T->reda = T->fin = T->ct = 0;
 }
 
+static int
+is_zero(GEN x, long e)
+{
+  return gcmp0(x) || gexpo(x) < e;
+}
+
 static GEN
 init_pslq(pslq_M *M, GEN x, long *PREC)
 {
@@ -2070,7 +2076,7 @@ init_pslq(pslq_M *M, GEN x, long *PREC)
   prec = gprecision(x)-1; if (prec < DEFAULTPREC) prec = DEFAULTPREC;
   *PREC = prec;
   M->EXP = - bit_accuracy(prec) + 2*n;
-  M->flreal = (gexpo(gimag(x)) < M->EXP);
+  M->flreal = is_zero(gimag(x), M->EXP);
   if (!M->flreal)
     return lindep(x,prec); /* FIXME */
   else
@@ -2160,7 +2166,7 @@ one_step_gen(pslq_M *M, GEN tabga, long prec)
     if (DEBUGLEVEL>=4) M->T->t1234 += timer();
   }
   for (i=1; i<=n-1; i++)
-    if (gexpo(gcoeff(H,i,i)) <= M->EXP) {
+    if (is_zero(gcoeff(H,i,i), M->EXP)) {
       m = vecabsminind(M->y); return (GEN)M->B[m];
     }
   for (i=m+1; i<=n; i++) redall(M, i, min(i-1,m+1));
@@ -2168,7 +2174,7 @@ one_step_gen(pslq_M *M, GEN tabga, long prec)
   if (DEBUGLEVEL>=4) M->T->reda += timer();
   if (gexpo(M->A) >= -M->EXP) return ginv(maxnorml2(M));
   m = vecabsminind(M->y);
-  if (gexpo((GEN)M->y[m]) <= M->EXP) return (GEN)M->B[m];
+  if (is_zero((GEN)M->y[m], M->EXP)) return (GEN)M->B[m];
 
   if (DEBUGLEVEL>=3)
   {
@@ -2408,7 +2414,7 @@ checkend(pslq_M *M)
   long i, m, n = M->n;
 
   for (i=1; i<=n-1; i++)
-    if (gexpo(gcoeff(M->H,i,i)) <= M->EXP)
+    if (is_zero(gcoeff(M->H,i,i), M->EXP))
     {
       m = vecabsminind(M->y);
       return (GEN)M->B[m];
@@ -2416,7 +2422,7 @@ checkend(pslq_M *M)
   if (gexpo(M->A) >= -M->EXP)
     return ginv( maxnorml2(M) );
   m = vecabsminind(M->y);
-  if (gexpo((GEN)M->y[m]) <= M->EXP) return (GEN)M->B[m];
+  if (is_zero((GEN)M->y[m], M->EXP)) return (GEN)M->B[m];
   return NULL;
 }
 
