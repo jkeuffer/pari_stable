@@ -1957,25 +1957,25 @@ END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
   if (CO > co)
   { /* treat the rest, N cols at a time (hnflll slow otherwise) */
     const long N = 60;
-    long a, L = CO - co, l = min(L, N);
+    long a, L = CO - co, l = min(L, N); /* L columns to add */
     GEN CC = *ptC, m0 = (GEN)mat0;
     setlg(CC, CO); /* restore */
     CC += co-1;
     m0 += co-1;
-    for (a = 1;;)
+    for (a = l;;)
     {
-      GEN mat = cgetg(N + 1, t_MAT), emb = cgetg(N + 1, t_MAT);
+      GEN mat = cgetg(l + 1, t_MAT), emb = cgetg(l + 1, t_MAT);
       for (j = 1 ; j <= l; j++)
       {
         mat[j] = (long)m0[j];
         emb[j] = (long)CC[j];
       }
-      setlg(mat, l+1); m0 += l;
-      setlg(emb, l+1); CC += l;
       H = hnfadd_i(H, perm, ptdep, ptB, &C, mat, emb);
       if (a == L) break;
+      CC += l;
+      m0 += l;
+      a += l; if (a > L) { l = L - (a - l); a = L; }
       gerepileall(av, 4, &H,&C,ptB,ptdep); 
-      a += N; if (a > L) { l = N - (a - L); a = L; }
     }
   }
   *ptC = C; return H;
