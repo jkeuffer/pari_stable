@@ -1270,13 +1270,11 @@ nfsqff(GEN nf, GEN pol, long fl)
   polbase = unifpol(nf,pol,0);
   polmod  = unifpol(nf,pol,1);
   /* heuristic */
-#if 1
-  if (dpol*4 < n) 
+  if (dpol*3 < n) 
   {
     if (DEBUGLEVEL>2) fprintferr("Using Trager's method\n");
     return gerepilecopy(av, (GEN)polfnf(polmod, nfpol)[1]);
   }
-#endif
 
   pol = simplify_i(lift(polmod));
   lt  = (GEN)leading_term(polbase)[1]; /* t_INT */
