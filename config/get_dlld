@@ -45,7 +45,7 @@ if test -n "$DLLD"; then
     DLLD=$ans
   fi
 
-  if test "$DLLD"="$CC" -a -n "$__gnuc__"; then
+  if test "$DLLD" = "$CC" -a -n "$__gnuc__"; then
     DLLDisGCC=yes;
     GNUdlld=$GNULDused
   else
