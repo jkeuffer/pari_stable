@@ -132,12 +132,11 @@ addsispec(long s, GEN x, long nx)
 {
   GEN xd, zd = (GEN)avma;
   long lz;
-  LOCAL_OVERFLOW;
 
   lz = nx+3; (void)new_chunk(lz);
   xd = x + nx;
-  *--zd = addll(*--xd, s);
-  if (overflow)
+  *--zd = *--xd + s;
+  if ((ulong)*zd < (ulong)s)
     for(;;)
     {
       if (xd == x) { *--zd = 1; break; } /* enlarge z */
