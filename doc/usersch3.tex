@@ -5224,14 +5224,19 @@ arguments. As usual, the generating vectors are taken to be the
 \var{columns} of the given matrix.
 
 \subsecidx{algdep}$(x,k,\{\fl=0\})$:\sidx{algebraic dependence} $x$ being
-real or complex, finds a polynomial of degree at most $k$ having $x$ as
-approximate root. The algorithm used is a variant of the \idx{LLL} algorithm
-due to Hastad, Lagarias and Schnorr (STACS 1986). Note that the polynomial
+real, complex, or $p$-adic, finds a polynomial of degree at most $k$ with
+integer coefficients having $x$ as approximate root. Note that the polynomial
 which is obtained is not necessarily the ``correct'' one (it's not even
 guaranteed to be irreducible!). One can check the closeness either by a
 polynomial evaluation or substitution, or by computing the roots of the
-polynomial given by algdep. If the precision is too low, the routine may
-enter an infinite loop.
+polynomial given by algdep.
+
+If $x$ is padic, $\fl$ is meaningless and the algorithm LLL-reduces the
+``dual lattice'' corresponding to the powers of $x$.
+
+Otherwise, if $\fl$ is zero, the algorithm used is a variant of the \idx{LLL}
+algorithm due to Hastad, Lagarias and Schnorr (STACS 1986). If the precision
+is too low, the routine may enter an infinite loop.
 
 If $\fl$ is non-zero, use a standard LLL. $\fl$ then indicates a precision,
 which should be between $0.5$ and $1.0$ times the number of decimal digits

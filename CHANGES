@@ -62,6 +62,7 @@ IS 13- function prototypes (missing 'extern')
    24- Odos/paricfg.h defined PARIINFO incorrectly
    25- inconsistenty t_POLMOD specification: Mod(x,y)+16 --> invalid object
    26- bnfsunit error (impossible I-->S) when large class group
+   27- qfminim([;],...) / qfperfection([;]) --> SEGV
 
   Changed
 BA  1- more efficient quadratic Hensel lift
@@ -73,6 +74,7 @@ BA  3- more efficient factorff when pol belongs to Fp[X] (based on Fp_isom)
   Added
     1- new library function zerovec
     2- Hoeij's algorithm for modular factors recombination (factor over Z[X])
+    3- algdep for p-adic numbers
 
   Removed
     1- quadrayimagwei, preliminary implementation to quadray(D < 0) 
