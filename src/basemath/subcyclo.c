@@ -130,12 +130,11 @@ znstar_generate(long n, GEN V)
   bits=znstar_partial_bits(n,res,r);
   for(i=1;i<lg(V);i++)
   {
-    long v=V[i];
-    long g=v;
-    long o=0;
-    while(!bitvec_test(bits,g))
+    ulong v = (ulong)V[i], g = v;
+    long o = 0;
+    while (!bitvec_test(bits, (long)g))
     {
-      g=muluumod(g,v,n);
+      g = muluumod(g, v, (ulong)n);
       o++;
     }
     if (o)
@@ -167,9 +166,9 @@ znstar_elts(long n, GEN H)
   sg[1] = 1;
   for (j = 1, l = 1; j < lg(gen); j++)
   {
-    int     c = l * (ord[j] - 1);
+    int c = l * (ord[j] - 1);
     for (k = 1; k <= c; k++)	/* I like it */
-      sg[++l] = muluumod(sg[k], gen[j], n);
+      sg[++l] = (long)muluumod((ulong)sg[k], (ulong)gen[j], (ulong)n);
   }
   vecsmall_sort(sg);
   return sg;
@@ -281,21 +280,19 @@ GEN
 znstar_hnf_generators(GEN Z, GEN M)
 {
   long l = lg(M);
-  GEN gen=cgetg(l, t_VECSMALL);
-  pari_sp ltop=avma;
-  GEN zgen= (GEN) Z[3];
-  long n = itos((GEN) Z[1]);
-  GEN m = stoi(n);
-  long j,h;
+  GEN gen = cgetg(l, t_VECSMALL);
+  pari_sp ltop = avma;
+  GEN zgen = (GEN) Z[3];
+  ulong n = itou((GEN)Z[1]);
+  long j, h;
   for (j = 1; j < l; j++)
   {
     gen[j] = 1;
     for (h = 1; h < l; h++)
-      gen[j] = muluumod(gen[j], 
-          itos(powmodulo((GEN) zgen[h], gmael(M,j,h),m)),n);
+      gen[j] = (long)muluumod((ulong)gen[j], 
+                  powuumod(itou((GEN)zgen[h]), itou(gmael(M,j,h)), n), n);
   }
-  avma=ltop;
-  return gen;
+  avma = ltop; return gen;
 }
 
 GEN
@@ -361,43 +358,21 @@ GEN subcyclo_complex_bound(pari_sp ltop, GEN V, long prec)
   return gerepileupto(ltop,borne);
 }
 
-GEN subcyclo_complex_cyclic(long n, long d, long m ,long z, long g, GEN powz, long prec)
-{
-  GEN V=cgetg(d+1,t_VEC);
-  long base=1;
-  long i,k;
-  for (i=1;i<=d;i++,base=muluumod(base,z,n))
-  {
-    pari_sp ltop=avma;
-    long ex=base;
-    GEN s=gzero;
-    (void)new_chunk(2*prec + 3);
-    for (k=0; k<m; k++, ex = muluumod(ex,g,n))
-      s=gadd(s,(GEN)powz[ex]);
-    avma=ltop;
-    V[i]=lcopy(s);
-  }
-  return V;
-}
-
 /* Newton sums mod le. if le==NULL, works with complex instead */
 GEN
 subcyclo_cyclic(long n, long d, long m ,long z, long g, GEN powz, GEN le)
 {
   GEN V=cgetg(d+1,t_VEC);
-  long base=1;
+  ulong base=1;
   long i,k;
-  long lle=le?lg(le)*2+1:2*lg(powz[1])+3;/*Assume dvmdii use lx+ly space*/
-  for (i=1;i<=d;i++,base=muluumod(base,z,n))
+  for (i=1; i<=d; i++,base = muluumod(base,z,n))
   {
-    pari_sp ltop=avma;
-    long ex=base;
-    GEN s=gzero;
-    (void)new_chunk(lle); /* HACK */
-    for (k=0; k<m; k++, ex = muluumod(ex,g,n))
-      s=gadd(s,(GEN)powz[ex]);
-    avma=ltop;
-    V[i]=le?lmodii(s,le):lcopy(s);
+    pari_sp av = avma;
+    long ex = base;
+    GEN s = gzero;
+    for (k=0; k<m; k++, ex = muluumod(ex,g,n)) s = gadd(s,(GEN)powz[ex]);
+    if (le) s = modii(s, le);
+    V[i] = lpileupto(av, s);
   }
   return V;
 }
