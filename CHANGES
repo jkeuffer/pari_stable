@@ -59,6 +59,7 @@ IZ 12- [gnuplot + dynamic link:] allow building even when dlopen() not available
    18- nfeltreducemodpr(nfinit(x),1,1) --> SEGV
    19- idealmul(nf, principal ideal, prime ideal) returned wrong result
        [introduced sometime in 2.2]
+   20- elltors(ellinit([...], 1)) --> SEGV
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).
