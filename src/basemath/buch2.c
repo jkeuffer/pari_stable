@@ -3027,6 +3027,11 @@ INCREASEGEN:
     }
     W = hnfadd(W,vperm,&pdep,&B,&C, extramat,extraC);
     nlze = lg(pdep)>1? lg(pdep[1])-1: lg(B[1])-1;
+    if (nlze)
+    {
+      list_jideal = cgetg(nlze+1, t_VECSMALL);
+      for (i=1; i<=nlze; i++) list_jideal[i] = vperm[i];
+    }
     KCCOPRO += extrarel;
     if (nlze && ++nreldep > MAXRELSUP) { sfb_increase=1; goto LABELINT; }
   }
