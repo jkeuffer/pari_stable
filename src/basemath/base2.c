@@ -3675,7 +3675,7 @@ GEN
 rnflllgram(GEN nf, GEN pol, GEN order,long prec)
 {
   pari_sp av = avma, lim = stack_lim(av,2);
-  long j, k, l, kmax, r1, lx;
+  long j, k, l, kmax, r1, lx, count = 0;
   GEN M, I, h, H, mth, MC, MPOL, MCS, B, mu, y, z;
   const int alpha = 10;
 
@@ -3688,17 +3688,16 @@ rnflllgram(GEN nf, GEN pol, GEN order,long prec)
   I = dummycopy(I);
   H = NULL;
   MPOL = matbasistoalg(nf, M);
-  MCS = cgetg(lx,t_MAT);
-  MC = cgetg(lx,t_MAT);
+  MCS = idmat(lx-1); /* dummy for gerepile */
 PRECNF:
   mth = rel_T2(nf, pol, lx, prec);
   h = NULL;
 PRECPB:
   if (h)
   { /* precision problem, recompute */
-    if (isidentity(h))
+    if (++count == 4 || isidentity(h))
     { /* no progress: increase nf precision */
-      prec = (prec<<1)-2;
+      prec = (prec<<1)-2; count = 0;
       if (DEBUGLEVEL) err(warnprec,"rnflllgram",prec);
       nf = nfnewprec(nf,prec); goto PRECNF;
     }
@@ -3749,7 +3748,7 @@ PRECPB:
     if (low_stack(lim, stack_lim(av,2)))
     {
       if(DEBUGMEM>1) err(warnmem,"rnflllgram");
-      gerepileall(av, 8, &h,&H,&MPOL,&B,&MC,&MCS,&mu,&I);
+      gerepileall(av, H?9:8, &mth,&h,&MPOL,&B,&MC,&MCS,&mu,&I,&H);
     }
   }
   while (k < lx);
