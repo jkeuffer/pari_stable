@@ -1398,7 +1398,7 @@ shiftaddress(GEN x, long dec)
   }
 }
 
-/* return a clone of x structured as a gcopy. To free it, free(base). */
+/* return a clone of x structured as a gcopy */
 GENbin*
 copy_bin(GEN x)
 {
