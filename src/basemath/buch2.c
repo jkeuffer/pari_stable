@@ -348,7 +348,6 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf, long a)
       alg[j] = (long)m;
       if (DEBUGLEVEL>1) fprintferr(" %ld",j);
     }
-#if 0 /* Something wrong here. */
     if (cache && j <= a)
     { /* vp^j principal */
       long k;
@@ -359,7 +358,6 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf, long a)
       rel->m = gclone(m);
       rel->ex= NULL; cache->last = rel;
     }
-#endif
     setlg(id2, j);
     setlg(alg, j); Ord[i] = j;
     if (DEBUGLEVEL>1) fprintferr("\n");
@@ -1882,7 +1880,7 @@ pseudomin(GEN I, GEN G)
   GEN m, GI = lllint_fp_ip(gmul(G, I), 100), p = gcoeff(G,n,n);
 
   m = gauss_get_col(G, (GEN)GI[1], p, n);
-  if (isnfscalar(m)) m = gauss_get_col(G, (GEN)GI[1], p, n);
+  if (isnfscalar(m)) m = gauss_get_col(G, (GEN)GI[2], p, n);
   if (DEBUGLEVEL>5) fprintferr("\nm = %Z\n",m);
   return m;
 }
@@ -3184,7 +3182,7 @@ PRECPB:
     goto MORE;
   }
 
-  zc = (cache.end - cache.base) - (lg(B)-1) - (lg(W)-1);
+  zc = (cache.last - cache.base) - (lg(B)-1) - (lg(W)-1);
   A = vecextract_i(C, 1, zc); /* cols corresponding to units */
   R = compute_multiple_of_R(A, RU, N, &lambda);
   if (!R)
