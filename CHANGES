@@ -146,6 +146,7 @@ XR 60- Configure/bench: use head -n # instead of head -# (deprecated and
    64- polredabs(x,1) did not work when x was already reduced
    65- polroots(x^3 + 0e-20) --> oo loop [ didn't handle nicely non-exact 0
        as a constant coeff ]
+   66- 'make doc' always rebuilt the documentation, even if it was up to date
 
   Changed
     1- bnfinit: [small_norm phase] speed up norm computations.
