@@ -92,6 +92,7 @@ MW 39- torsion group of [0,0,0,-6648,208633] reported as C2 instead of C6
        [when computing fundamental units]
    42- bnrL1(bnr with conductor 1) --> SEGV
    43- "impossible inverse modulo ..." when using addprimes() + ROUND 2
+   44- [gp: \x] missing 'break' statement in escape()
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).
