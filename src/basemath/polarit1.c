@@ -1905,7 +1905,7 @@ static GEN
 _red(void *data, GEN x)
 {
   struct muldata *D = (struct muldata*)data;
-  GEN t = from_Kronecker(FpX(t,D->p), D->pol);
+  GEN t = from_Kronecker(FpX(x,D->p), D->pol);
   setvarn(t, D->v);
   t = gres(t, D->mod);
   return lift_intern(to_Kronecker(t,D->pol));
