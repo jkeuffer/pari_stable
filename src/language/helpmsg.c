@@ -90,7 +90,7 @@ char *helpmessages_basic[]={
   "deriv(x,{y}): derivative of x with respect to the main variable of y, or to the main variable of x if y is omitted",
   "dilog(x): dilogarithm of x",
   "dirdiv(x,y): division of the Dirichlet series x by the Dirichlet series y",
-  "direuler(p=a,b,expr): Dirichlet Euler product of expression expr from p=a to p=b, limited to b terms. Expr should be a polynomial or rational function in p and X, and X is understood to mean p^(-s)",
+  "direuler(p=a,b,expr,{c}): Dirichlet Euler product of expression expr from p=a to p=b, limited to b terms. Expr should be a polynomial or rational function in p and X, and X is understood to mean p^(-s). If c is present, output only the first c terms",
   "dirmul(x,y): multiplication of the Dirichlet series x by the Dirichlet series y",
   "dirzetak(nf,b): Dirichlet series of the Dedekind zeta function of the number field nf up to the bound b-1",
   "divisors(x): gives a vector formed by the divisors of x in increasing order",

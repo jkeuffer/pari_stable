@@ -1094,6 +1094,7 @@ GEN     bnrstark(GEN bnr, GEN subgroup, long flag, long prec);
 
 /* sumiter.c */
 
+GEN     direulerall(entree *ep, GEN a, GEN b, char *ch, GEN c);
 GEN     direuler(entree *ep, GEN a, GEN b, char *ch);
 GEN     divsum(GEN num,entree *ep, char *ch);
 void    fordiv(GEN a, entree *ep, char *ch);

@@ -475,19 +475,22 @@ prodeuler(entree *ep, GEN a, GEN b, char *ch, long prec)
 }
 
 GEN
-direuler(entree *ep, GEN a, GEN b, char *ch)
+direulerall(entree *ep, GEN a, GEN b, char *ch, GEN c)
 {
   GEN p1,x,x1,s,polnum,polden,c0;
-  long av0 = avma,av,tetpil,lim = (av0+bot)>>1, prime = 0,n,i,j,k,tx,lx;
+  long av0 = avma,av,tetpil,lim = (av0+bot)>>1, prime = 0,q,n,i,j,k,k1,tx,lx;
   byteptr p = diffptr;
 
-  if (typ(a) != t_INT) err(talker,"non integral index in direuler");
-  if (gcmpgs(b,2)<0) { x=cgetg(2,t_VEC); x[1]=un; return x; }
+  if (!c) c = b;
+  if (typ(a) != t_INT || typ(c) != t_INT)
+    err(talker,"non integral index in direuler");
+  n = itos(c);
+  if (gcmpgs(b,2) < 0 || n <= 0) { x=cgetg(2,t_VEC); x[1]=un; return x; }
   if (gcmpgs(a,2) < 0) a = gdeux;
-  if (gcmpgs(b, MAXHALFULONG-1) > 0) b = stoi(MAXHALFULONG-1);
-  n = itos(b);
 
-  x1=cgetg(n+1,t_VEC); b = gcopy(b); av=avma;
+  x1 = cgetg(n+1,t_VEC);
+  b = (gcmp(c,b) < 0) ? gcopy(c) : gcopy(b);
+  av = avma;
   x=cgetg(n+1,t_VEC); x[1]=un; for (i=2; i<=n; i++) x[i]=zero;
 
   while (*p && gcmpgs(a,prime) > 0) prime += *p++;
@@ -555,6 +558,12 @@ direuler(entree *ep, GEN a, GEN b, char *ch)
   }
   pop_val(ep); tetpil=avma;
   return gerepile(av0,tetpil,gcopy(x));
+}
+
+GEN
+direuler(entree *ep, GEN a, GEN b, char *ch)
+{
+  return direulerall(ep,a,b,ch,NULL);
 }
 
 /********************************************************************/

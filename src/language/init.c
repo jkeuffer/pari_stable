@@ -1593,7 +1593,7 @@ entree functions_basic[]={
 {"deriv",14,(void*)deriv,7,"GDn"},
 {"dilog",1,(void*)dilog,3,"Gp"},
 {"dirdiv",2,(void*)dirdiv,7,"GG"},
-{"direuler",99,(void*)direuler,7,"V=GGI"},
+{"direuler",99,(void*)direulerall,7,"V=GGIDG"},
 {"dirmul",2,(void*)dirmul,7,"GG"},
 {"dirzetak",2,(void*)dirzetak,6,"GG"},
 {"divisors",18,(void*)divisors,4,"G"},
