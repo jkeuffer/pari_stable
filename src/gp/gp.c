@@ -2339,7 +2339,7 @@ read_line(filtre_t *F, char *PROMPT)
     else
 #endif
       res = get_line_from_user(PROMPT, F);
-    if (!disable_color) term_color(c_NONE);
+    if (!disable_color) { term_color(c_NONE); pariflush(); }
   }
   else
     res = get_line_from_file(DFT_PROMPT,F,infile);
@@ -2432,7 +2432,14 @@ gp_main_loop(int ismain)
     }
     if (paribufsize != b->len) fix_buffer(b, paribufsize);
 
-    if (! read_line(&F, NULL)) break;
+    if (! read_line(&F, NULL))
+    {
+    #ifdef _WIN32
+      Sleep(10); if (win32ctrlc) dowin32ctrlc();
+    #endif
+      if (popinfile()) gp_quit();
+      if (!ismain) { pop_buffer(); return z; }
+    }
     if (check_meta(b->buf)) continue;
 
     if (ismain)
@@ -2455,12 +2462,6 @@ gp_main_loop(int ismain)
     avma = av;
     if (!gpsilent) gp_output(z, GP_DATA);
   }
-#ifdef _WIN32
-  Sleep(10); if (win32ctrlc) dowin32ctrlc();
-#endif
-  if (popinfile()) gp_quit();
-  if (!ismain) pop_buffer();
-  return z;
 }
 
 GEN
