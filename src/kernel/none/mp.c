@@ -490,18 +490,19 @@ addir(GEN x, GEN y)
   GEN z;
 
   if (!signe(x)) return rcopy(y);
+  e = expo(y)-expi(x);
   if (!signe(y))
   {
-    l=lgefint(x)-(expo(y)>>TWOPOTBITS_IN_LONG);
 #if 0
-    if (l<3) err(adder3);
+    if (e>0) err(adder3);
 #else /* design issue: make 0.0 "absorbing" */
-    if (l<3) return rcopy(y);
+    if (e>0) return rcopy(y);
 #endif
-    z=cgetr(l); affir(x,z); return z;
+    z = cgetr(3 + ((-e)>>TWOPOTBITS_IN_LONG));
+    affir(x,z); return z;
   }
 
-  e = expo(y)-expi(x); ly=lg(y);
+  ly=lg(y);
   if (e>0)
   {
     l = ly - (e>>TWOPOTBITS_IN_LONG);
