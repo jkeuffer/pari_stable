@@ -780,12 +780,11 @@ static GEN
 compute_data(GEN DATA, struct poldata PD, long d, GEN ff, GEN T,GEN p)
 {
   long i,j,l,e,N, lff = lg(ff);
-  GEN ffL,den,roo,pe,p1,p2,fk,fhk,MM,maxroot,pol,interp,bezoutC;    
+  GEN ffL,roo,pe,p1,p2,fk,fhk,MM,maxroot,pol,interp,bezoutC;    
 
   if (DEBUGLEVEL>1) { fprintferr("Entering compute_data()\n\n"); flusherr(); }
   pol = PD.pol; N = degpol(pol);
   roo = PD.roo;
-  den = PD.den;
   if (DATA) /* update (translate) an existing DATA */
   {
     GEN Xm1 = gsub(polx[varn(pol)], gun);

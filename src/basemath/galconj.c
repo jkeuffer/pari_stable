@@ -499,7 +499,7 @@ monomorphismratlift(GEN P, GEN S, struct galois_lift *gl, GEN frob)
   long    e=gl->e, level=1;
   long    x;
   GEN     q, qold, qm1, qm1old;
-  GEN     W, Pr, Qr, Sr, Wr = gzero, Prold, Qrold, Spow;
+  GEN     W, Pr, Qr, Sr, Wr = gzero, Qrold, Spow;
   long    i,nb,mask;
   GEN    *gptr[2];
   if (DEBUGLEVEL == 1) (void)timer2();
@@ -512,7 +512,6 @@ monomorphismratlift(GEN P, GEN S, struct galois_lift *gl, GEN frob)
   W=FpX_FpXQ_compo(deriv(Pr, x),S,Qr,q);
   W=FpXQ_inv(W,Qr,q);
   qold = p; qm1old=gun;
-  Prold = Pr;
   Qrold = Qr;
   gptr[0] = &S;
   gptr[1] = &Wr;
@@ -547,7 +546,7 @@ monomorphismratlift(GEN P, GEN S, struct galois_lift *gl, GEN frob)
     gerepilemanysp(ltop, lbot, gptr, 2);
     if (i && i<nb-1 && frob && monoratlift(S,q,qm1old,gl,frob))
       return NULL;
-    qold = q; qm1old=qm1; Prold = Pr; Qrold = Qr;
+    qold = q; qm1old=qm1; Qrold = Qr;
     if (DEBUGLEVEL >= 2)
       msgtimer("MonomorphismLift: lift to prec %d",level);
   }
@@ -2756,9 +2755,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
   struct galois_test td;
   struct galois_frobenius gf;
   pari_sp lbot, ltop2, ltop = avma;
-  long    n, p, deg;
-  long    fp;
-  long    x;
+  long    n, p, deg, x;
   int     i, j;
   GEN     Lden, sigma;
   GEN     Tmod, res, pf = gzero, split, ip;
@@ -2807,7 +2804,6 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
   p=gf.p;
   ip=stoi(p);
   Tmod=gf.Tmod;
-  fp=gf.fp;
   O = perm_cycles(frob);
   split = splitorbite(O);
   deg=lg(O[1])-1;

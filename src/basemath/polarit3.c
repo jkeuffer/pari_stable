@@ -3335,7 +3335,7 @@ muliimod(GEN x, GEN y, GEN p)
 GEN
 FpX_resultant(GEN a, GEN b, GEN p)
 {
-  long da,db,dc,cnt;
+  long da,db,dc;
   pari_sp av, lim;
   GEN c,lb, res = gun;
 
@@ -3348,7 +3348,7 @@ FpX_resultant(GEN a, GEN b, GEN p)
     if (both_odd(da,db)) res = subii(p, res);
   }
   if (!da) return gun; /* = res * a[2] ^ db, since 0 <= db <= da = 0 */
-  cnt = 0; av = avma; lim = stack_lim(av,2);
+  av = avma; lim = stack_lim(av,2);
   while (db)
   {
     lb = (GEN)b[db+2];
@@ -4599,18 +4599,16 @@ static GEN
 f2init(long l)
 {
   long i;
-  GEN a, q, T, S;
+  GEN q, T, S;
 
   if (l == 1) return cyclo(3, MAXVARN);
 
-  a = gun;
   S = coefs_to_pol(4, gun,gun,gzero,gzero); /* #(#^2 + #) */
   setvarn(S, MAXVARN);
   q = coefs_to_pol(3, gun,gun, S); /* X^2 + X + #(#^2+#) */
 
   /* x^4+x+1, irred over F_2, minimal polynomial of a root of q */
   T = coefs_to_pol(5, gun,gzero,gzero,gun,gun);
-
   for (i=2; i<l; i++)
   { /* q = X^2 + X + a(#) irred. over K = F2[#] / (T(#))
      * ==> X^2 + X + a(#) b irred. over K for any root b of q

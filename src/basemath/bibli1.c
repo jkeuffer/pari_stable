@@ -2440,7 +2440,7 @@ pslqL2(GEN x)
   long lx = lg(x), n = lx-1, i, m, ctpro, flreal, flit, prec;
   pari_sp av0 = avma, lim = stack_lim(av0,1), av;
   double *tabgabar, gabar, tinvbar, t1bar, t2bar, t3bar, t4bar;
-  double **Pbar, **Abar, **Bbar, **Hbar, *ybar;
+  double **Pbar, **Abar, **Bbar, **Hbar;
   pslqL2_M Mbar, Mbarst;
   pslq_M M;
   pslq_timer T; M.T = &T;
@@ -2463,7 +2463,7 @@ pslqL2(GEN x)
   Pbar   = (double**)new_chunk(n);
 
   tabgabar = dalloc((n+1)*sizeof(double));
-  Mbar.y = ybar = dalloc((n+1)*sizeof(double));
+  Mbar.y = dalloc((n+1)*sizeof(double));
   Mbarst.y = dalloc((n+1)*sizeof(double));
 
   Mbar.W = dalloc((n+1)*sizeof(double));

@@ -481,7 +481,7 @@ GEN trivialsubgroups(void)
 long
 perm_relorder(GEN p, GEN S)
 {
-  pari_sp ltop=avma;
+  pari_sp ltop = avma;
   long n = 1;
   GEN  q = p;
   while (!vecvecsmall_search(S, q, 0))
@@ -489,8 +489,7 @@ perm_relorder(GEN p, GEN S)
     q = perm_mul(q, p);
     ++n;
   }
-  ltop=avma;
-  return n;
+  avma = ltop; return n;
 }
 
 GEN perm_generate(GEN S, GEN H, long o)
@@ -818,10 +817,9 @@ GEN group_subgroups(GEN G)
   long i, j;
   GEN gen=(GEN)G[1], ord=(GEN)G[2];
   GEN H;
-  long l, n = lg(gen);
+  long n = lg(gen);
   if (n == 1)
     return trivialsubgroups();
-  l = lg(gen[1]);/*now lg(gen)>1*/
   if (group_isA4S4(G))
   {
     GEN u=perm_mul((GEN) gen[1],(GEN) gen[2]);

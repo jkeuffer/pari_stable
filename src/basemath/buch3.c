@@ -308,7 +308,7 @@ static GEN
 compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
 {
   GEN f, fZ, basecl, module, fa, fa2, pr, t, EX, sarch, cyc, F;
-  GEN *listpr, *listep, *vecpi, *vecpinvpi, *vectau;
+  GEN *listpr, *vecpi, *vecpinvpi, *vectau;
   long i,j,l,lp;
 
   /* basecl = generators in factored form */
@@ -320,7 +320,6 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
   fa  = (GEN)bid[3];
   fa2 = (GEN)bid[4]; sarch = (GEN)fa2[lg(fa2)-1];
   listpr = (GEN*)fa[1]; F = init_unif_mod_fZ((GEN)listpr);
-  listep = (GEN*)fa[2];
 
   lp = lg(listpr);
   vecpinvpi = (GEN*)cgetg(lp, t_VEC);
@@ -588,7 +587,7 @@ bnrinit0(GEN bnf, GEN ideal, long flag)
 GEN
 rayclassno(GEN bnf,GEN ideal)
 {
-  GEN nf, h, D, bigres, bid, cycbid, funits, H;
+  GEN nf, h, D, bigres, bid, cycbid, H;
   pari_sp av = avma;
 
   bnf = checkbnf(bnf); nf = (GEN)bnf[7];
@@ -596,8 +595,6 @@ rayclassno(GEN bnf,GEN ideal)
   bid = zidealstarinitall(nf,ideal,0);
   cycbid = gmael(bid,2,2);
   if (lg(cycbid) == 1) return gerepileuptoint(av, icopy(h));
-
-  funits = check_units(bnf,"rayclassno");
   D = get_dataunit(bnf, bid);
   H = hnfmodid(D, (GEN)cycbid[1]); /* (Z_K/f)^* / units ~ Z^n / H */
   return gerepileuptoint(av, mulii(h, dethnf_i(H)));
@@ -1148,11 +1145,11 @@ lowerboundforregulator(GEN bnf)
 static void
 primecertify(GEN bnf,GEN beta,long pp,GEN big)
 {
-  long i,j,qq,nbcol,lb,nbqq,ra,N;
+  long i, j, qq, nbcol, lb, nbqq, ra;
   GEN nf,mat,mat1,qgen,decqq,newcol,Q,g,ord,modpr;
 
   ord = NULL; /* gcc -Wall */
-  nbcol = 0; nf = (GEN)bnf[7]; N = degpol(nf[1]);
+  nbcol = 0; nf = (GEN)bnf[7];
   lb = lg(beta)-1; mat = cgetg(1,t_MAT); qq = 1;
   for(;;)
   {
@@ -1223,13 +1220,13 @@ long
 certifybuchall(GEN bnf)
 {
   pari_sp av = avma;
-  long nbgen,i,j,p,N,R1,R2,R,bound;
+  long nbgen, i, j, p, N, R1, R2, bound;
   GEN big,nf,reg,rootsofone,funits,gen,p1,gbound,cycgen,cyc;
   byteptr delta = diffptr;
 
   bnf = checkbnf(bnf); nf = (GEN)bnf[7];
   N=degpol(nf[1]); if (N==1) return 1;
-  nf_get_sign(nf, &R1, &R2); R = R1+R2-1;
+  nf_get_sign(nf, &R1, &R2);
   funits = check_units(bnf,"bnfcertify");
   testprimes(bnf, zimmertbound(N,R2,absi((GEN)nf[3])));
   reg = gmael(bnf,8,2);
@@ -1514,7 +1511,7 @@ conductor(GEN bnr, GEN H0, long all)
 GEN
 rnfnormgroup(GEN bnr, GEN polrel)
 {
-  long i, j, reldeg, sizemat, p, nfac, k;
+  long i, j, reldeg, p, nfac, k;
   pari_sp av = avma;
   GEN bnf,index,discnf,nf,raycl,group,detgroup,fa,greldeg;
   GEN famo,ep,fac,col;
@@ -1538,7 +1535,6 @@ rnfnormgroup(GEN bnr, GEN polrel)
 
   discnf = (GEN)nf[3];
   index  = (GEN)nf[4];
-  sizemat=lg(group)-1;
   for (p=0 ;;)
   {
     long oldf = -1, lfa;

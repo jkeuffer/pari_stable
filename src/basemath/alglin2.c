@@ -2451,15 +2451,15 @@ findi_normalize(GEN Aj, GEN B, long j, GEN **lambda)
 }
 
 static void
-reduce2(GEN A, GEN B, long k, long j, long *row, GEN **lambda, GEN *D)
+reduce2(GEN A, GEN B, long k, long j, long *row0, long *row1, GEN **lambda, GEN *D)
 {
   GEN q;
-  long i, row0, row1;
+  long i;
 
-  row[0] = row0 = findi_normalize((GEN)A[j], B,j,lambda);
-  row[1] = row1 = findi_normalize((GEN)A[k], B,k,lambda);
-  if (row0)
-    q = truedvmdii(gcoeff(A,row0,k), gcoeff(A,row0,j), NULL);
+  *row0 = findi_normalize((GEN)A[j], B,j,lambda);
+  *row1 = findi_normalize((GEN)A[k], B,k,lambda);
+  if (*row0)
+    q = truedvmdii(gcoeff(A,*row0,k), gcoeff(A,*row0,j), NULL);
   else if (absi_cmp(shifti(lambda[k][j], 1), D[j]) > 0)
     q = diviiround(lambda[k][j], D[j]);
   else
@@ -2469,7 +2469,7 @@ reduce2(GEN A, GEN B, long k, long j, long *row, GEN **lambda, GEN *D)
   {
     GEN *Lk = lambda[k], *Lj = lambda[j];
     q = mynegi(q);
-    if (row0) elt_col((GEN)A[k],(GEN)A[j],q);
+    if (*row0) elt_col((GEN)A[k],(GEN)A[j],q);
     if (B) elt_col((GEN)B[k],(GEN)B[j],q);
     Lk[j] = addii(Lk[j], mulii(q,D[j]));
     if (is_pm1(q))
@@ -2541,7 +2541,7 @@ hnflll_i(GEN A, GEN *ptB, int remove)
 {
   pari_sp av = avma, lim = stack_lim(av,3);
   long m1 = 1, n1 = 1; /* alpha = m1/n1. Maybe 3/4 here ? */
-  long row[2], do_swap,i,n,k;
+  long do_swap,i,n,k;
   GEN z,B, **lambda, *D;
 
   if (typ(A) != t_MAT) err(typeer,"hnflll");
@@ -2555,11 +2555,12 @@ hnflll_i(GEN A, GEN *ptB, int remove)
   k = 2;
   while (k < n)
   {
-    reduce2(A,B,k,k-1,row,lambda,D);
-    if (row[0])
-      do_swap = (!row[1] || row[0] <= row[1]);
-    else if (!row[1])
-    { /* row[0] == row[1] == 0 */
+    long row0, row1;
+    reduce2(A,B,k,k-1,&row0,&row1,lambda,D);
+    if (row0)
+      do_swap = (!row1 || row0 <= row1);
+    else if (!row1)
+    { /* row0 == row1 == 0 */
       pari_sp av1 = avma;
       z = addii(mulii(D[k-2],D[k]), sqri(lambda[k][k-1]));
       do_swap = (cmpii(mulsi(n1,z), mulsi(m1,sqri(D[k-1]))) < 0);
@@ -2576,7 +2577,8 @@ hnflll_i(GEN A, GEN *ptB, int remove)
     {
       for (i=k-2; i; i--)
       {
-        reduce2(A,B,k,i,row,lambda,D);
+        long row0, row1;
+        reduce2(A,B,k,i,&row0,&row1,lambda,D);
         if (low_stack(lim, stack_lim(av,3)))
         {
           GEN b = (GEN)(D-1);

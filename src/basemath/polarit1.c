@@ -2502,7 +2502,7 @@ factmod9(GEN f, GEN p, GEN T)
 {
   pari_sp av = avma;
   long pg, i, j, k, d, e, N, va, nbfact, nbf, pk;
-  GEN S, ex, f2, f3, df1, df2, g1, u, q, unfp, unfq,  *t;
+  GEN ex, f2, f3, df1, df2, g1, u, q, unfp, unfq,  *t;
   GEN frobinv;
 
   if (typ(T)!=t_POL || typ(f)!=t_POL || gcmp0(T)) err(typeer,"factmod9");
@@ -2524,7 +2524,7 @@ factmod9(GEN f, GEN p, GEN T)
   }
 
   pg = is_bigint(p)? 0: itos(p);
-  S = df2  = NULL; /* gcc -Wall */
+  df2  = NULL; /* gcc -Wall */
   t = (GEN*)cgetg(d+1,t_VEC); ex = new_chunk(d+1);
 
   frobinv = gpowgs(p, degpol(T)-1);

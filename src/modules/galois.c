@@ -720,8 +720,8 @@ new_pol(GEN r, GEN a)
 static void
 tschirn(buildroot *BR)
 {
-  long i,k, v = varn(BR->p), l = lg(BR->r);
-  GEN a,h,u;
+  long i, k, v = varn(BR->p), l = lg(BR->r);
+  GEN a, h;
 
   if (l >= N) err(bugparier,"tschirn");
   if (DEBUGLEVEL)
@@ -734,7 +734,7 @@ tschirn(buildroot *BR)
     h = normalizepol( small_to_pol(a, 0) );
   } while (degpol(h) <= 0 || !ZX_is_squarefree(h));
   setvarn(h, v); k = 0;
-  u = ZX_caract_sqf(h, BR->p, &k, v);
+  (void)ZX_caract_sqf(h, BR->p, &k, v);
   a[1] += k;
 
   preci(BR, BR->prmax);
@@ -867,7 +867,7 @@ dbg_rac(long nri,long nbracint,long numi[],GEN racint[],long multi[])
 static PERM
 check_isin(buildroot *BR, resolv *R, GROUP tau, GROUP ss)
 {
-  long nogr, nocos, init, i, j, k, l, d, sp;
+  long nogr, nocos, init, i, j, k, l, d;
   pari_sp av1 = avma, av2;
   long nbgr,nbcos,nbracint,nbrac,lastnbri,lastnbrm;
   static long numi[M],numj[M],lastnum[M],multi[M],norac[M],lastnor[M];
@@ -876,7 +876,7 @@ check_isin(buildroot *BR, resolv *R, GROUP tau, GROUP ss)
   if (getpreci(BR) != BR->pr) preci(BR, BR->pr);
   nbcos = getcard_obj(ss);
   nbgr  = getcard_obj(tau);
-  lastnbri = lastnbrm = -1; sp = nbracint = nbrac = 0; /* gcc -Wall*/
+  lastnbri = lastnbrm = -1; nbracint = nbrac = 0; /* gcc -Wall*/
   for (nogr=1; nogr<=nbgr; nogr++)
   {
     PERM T = tau[nogr];

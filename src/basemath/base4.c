@@ -497,7 +497,7 @@ mat_ideal_two_elt(GEN nf, GEN x)
 {
   GEN y,a,beta,cx,xZ,mul;
   long i,lm, N = degpol(nf[1]);
-  pari_sp av0,av,tetpil;
+  pari_sp av, tetpil;
 
   y = cgetg(3,t_VEC); av = avma;
   if (lg(x[1]) != N+1) err(typeer,"ideal_two_elt");
@@ -517,7 +517,6 @@ mat_ideal_two_elt(GEN nf, GEN x)
     y[1] = (long)cx;
     y[2] = (long)gscalcol_i(cx, N); return y;
   }
-  av0 = avma;
   a = NULL; /* gcc -Wall */
   beta= cgetg(N+1, t_VEC);
   mul = cgetg(N+1, t_VEC); lm = 1; /* = lg(mul) */
@@ -2084,8 +2083,8 @@ GEN
 ideallllred(GEN nf, GEN I, GEN vdir, long prec)
 {
   pari_sp av = avma;
-  long N,i,nfprec;
-  GEN J,I0,Ired,res,aI,y,x,Nx,b,c1,c,pol;
+  long N, i, nfprec;
+  GEN J, Ired, res, aI, y, x, Nx, b, c1, c, pol;
 
   nf = checknf(nf); nfprec = nfgetprec(nf);
   if (prec <= 0) prec = nfprec;
@@ -2096,7 +2095,6 @@ ideallllred(GEN nf, GEN I, GEN vdir, long prec)
     if (gcmp0(I)) { y=gun; I=cgetg(1,t_MAT); } else { y=I; I=idmat(N); }
     goto END;
   }
-  I0 = I;
   if (typ(I) != id_MAT || lg(I) != N+1) I = idealhermite_aux(nf,I);
   I = primitive_part(I, &c1);
   if (2 * expi(gcoeff(I,1,1)) >= bit_accuracy(nfprec))
@@ -2817,7 +2815,7 @@ nfsmith(GEN nf, GEN x)
 {
   long i, j, k, l, c, n, m, N;
   pari_sp av, lim;
-  GEN p1,p3,p4,z,u,v,w,d,dinv,A,I,J;
+  GEN z,u,v,w,d,dinv,A,I,J;
 
   nf = checknf(nf); N = degpol(nf[1]);
   if (typ(x)!=t_VEC || lg(x)!=4) err(talker,"not a module in nfsmith");
@@ -2878,20 +2876,20 @@ nfsmith(GEN nf, GEN x)
       for (k=1; k<i; k++)
         for (l=1; l<i; l++)
         {
-          p3 = gcoeff(A,k,l);
-          if (gcmp0(p3)) continue;
+          GEN p2, p3, p1 = gcoeff(A,k,l);
+          if (gcmp0(p1)) continue;
 
-          p4 = idealmulelt(nf, p3, idealmul(nf,(GEN)J[l],(GEN)I[k]));
-          if (hnfdivide(b, p4)) continue;
+          p3 = idealmulelt(nf, p1, idealmul(nf,(GEN)J[l],(GEN)I[k]));
+          if (hnfdivide(b, p3)) continue;
 
           b = idealdiv(nf,(GEN)I[k],(GEN)I[i]);
-          p1 = idealdiv(nf,(GEN)J[i], idealmulelt(nf,p3,(GEN)J[l]));
-          p4 = gauss(p4, b);
-          l=1; while (l<=N && gcmp1(denom((GEN)p4[l]))) l++;
+          p2 = idealdiv(nf,(GEN)J[i], idealmulelt(nf,p1,(GEN)J[l]));
+          p3 = gauss(p2, b);
+          l=1; while (l<=N && gcmp1(denom((GEN)p3[l]))) l++;
           if (l>N) err(talker,"bug2 in nfsmith");
-          p3 = element_mulvecrow(nf,(GEN)b[l],A,k,i);
+          p1 = element_mulvecrow(nf,(GEN)b[l],A,k,i);
           for (l=1; l<=i; l++)
-            coeff(A,i,l) = ladd(gcoeff(A,i,l),(GEN)p3[l]);
+            coeff(A,i,l) = ladd(gcoeff(A,i,l),(GEN)p1[l]);
 
           k = l = i; c = 1;
         }

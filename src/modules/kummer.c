@@ -894,7 +894,7 @@ static GEN
 _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
 {
   long ell, i, j, m, d, dK, dc, rc, ru, rv, g, mginv, degK, degKz, vnf;
-  long l, lSp, lSml2, lSl2, lW;
+  long lSp, lSml2, lSl2, lW;
   GEN polnf,bnf,nf,bnfz,nfz,bid,ideal,cycgen,gell,p1,p2,wk,U,vselmer;
   GEN clgp,cyc,gen;
   GEN Q,idealz,gothf;
@@ -948,7 +948,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   nfz = (GEN)bnfz[7];
   clgp = gmael(bnfz,8,1);
   cyc = (GEN)clgp[2]; rc = prank(cyc,ell);
-  gen = (GEN)clgp[3]; l = lg(cyc);
+  gen = (GEN)clgp[3];
   u = get_u(cyc, rc, gell);
 
   vselmer = get_Selmer(bnfz, cycgen, rc);

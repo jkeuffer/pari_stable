@@ -1935,13 +1935,12 @@ random_rel(long phase, RELCACHE_t *cache, FB_t *F, long MAXRELSUP, GEN nf,
            GEN vecG, GEN L_jideal)
 {
   static long jideal, jdir;
-  long i, cptlist, cptzer, nbG, lgsub, r1, jlist = 1;
+  long i, cptlist, cptzer, nbG, lgsub, jlist = 1;
   pari_sp av, av1;
   GEN ideal, IDEAL, m, P, ex;
 
   if (phase != 1) { jideal=jdir=1; if (phase < 0) return 0; }
   if (!F->pow) powFBgen(F, nf, CBUCHG+1);
-  r1 = nf_get_r1(nf);
   nbG = lg(vecG)-1;
   lgsub = lg(F->subFB); ex = cgetg(lgsub, t_VECSMALL);
   cptzer = cptlist = 0;
@@ -2027,7 +2026,7 @@ static int
 be_honest(FB_t *F, GEN nf, long PRECLLL)
 {
   long ex, i, j, J, k, iz, nbtest, ru, lgsub = lg(F->subFB), KCZ0 = F->KCZ;
-  GEN G, M, P, ideal, m, vdir;
+  GEN P, ideal, m, vdir;
   pari_sp av;
 
   if (F->KCZ2 <= F->KCZ) return 1;
@@ -2038,8 +2037,6 @@ be_honest(FB_t *F, GEN nf, long PRECLLL)
     flusherr();
   }
   if (!F->pow) powFBgen(F, nf, CBUCHG+1);
-  M = gprec_w(gmael(nf,5,1), PRECLLL);
-  G = gprec_w(gmael(nf,5,2), PRECLLL);
   ru = lg(nf[6]);
   vdir = cgetg(ru, t_VECSMALL);
   av = avma;

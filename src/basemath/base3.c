@@ -2086,7 +2086,7 @@ GEN
 zidealstarinitjoinarch(GEN nf, GEN bid1, GEN arch, long add_gen)
 {
   pari_sp av=avma;
-  long i,nbp,lx1;
+  long i, lx1;
   GEN module1,struct1,fact1,liste1,U1,U;
   GEN module,liste,cyc,p1,y,u1,x,sarch, gen = add_gen? gun: NULL;
 
@@ -2114,7 +2114,6 @@ zidealstarinitjoinarch(GEN nf, GEN bid1, GEN arch, long add_gen)
     if (lg(struct1)<=3)
       err(talker,"please apply idealstar(,,2) and not idealstar(,,1)");
     gen = concatsp((GEN)struct1[3],(GEN)sarch[2]);
-    nbp = lg((GEN)fact1[1])-1;
   }
   p1 = cgetg(gen? 4: 3, t_VEC);
   p1[1] = (long)detcyc(cyc);

@@ -591,12 +591,10 @@ nf_root_bounds(GEN P, GEN T)
 static GEN
 L2_bound(GEN T, GEN tozk, GEN *ptden)
 {
-  GEN nf, M, L, prep, den, u;
+  GEN nf, M, L, prep, den;
   long prec;
 
   T = get_nfpol(T, &nf);
-  u = NULL; /* gcc -Wall */
-
   prec = ZX_get_prec(T) + ZM_get_prec(tozk);
   den = nf? gun: NULL;
   den = initgaloisborne(T, den, prec, &L, &prep, NULL);
@@ -754,7 +752,6 @@ FqX_centermod(GEN z, GEN T, GEN pk, GEN pks2)
 static GEN
 nfcmbf(nfcmbf_t *T, GEN p, long a, long maxK, long klim)
 {
-  long Sbound;
   GEN pol = T->pol, nf = T->nf, famod = T->fact, dn = T->dn;
   GEN bound = T->bound;
   GEN nfpol = (GEN)nf[1];
@@ -825,7 +822,6 @@ nextK:
   if (DEBUGLEVEL > 3)
     fprintferr("\n### K = %d, %Z combinations\n", K,binome(stoi(lfamod), K));
   setlg(ind, K+1); ind[1] = 1;
-  Sbound = ((K+1)>>1);
   i = 1; curdeg = degpol[ind[1]];
   for(;;)
   { /* try all combinations of K factors */

@@ -161,7 +161,7 @@ GEN
 numbpart(GEN n)
 {
   pari_sp ltop = avma, av;
-  GEN sum, est, N, C, D, Pi;
+  GEN sum, est, C, D, Pi;
   ulong q, max, prec;
 
   if (typ(n) != t_INT) err(typeer, "partition function");
@@ -174,7 +174,6 @@ numbpart(GEN n)
   pinit(n, &C,&D,&Pi, prec);
   
   sum = cgetr (prec);
-  N = itor (n, prec);
   max = (ulong)(sqrt( gtodouble(n) ) * 0.24 + 5);
 
   av = avma;

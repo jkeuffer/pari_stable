@@ -1229,7 +1229,7 @@ GEN
 inv_szeta_euler(long n, double lba, long prec)
 {
   GEN z, N, res = cgetr(prec);
-  pari_sp av0 = avma, av;
+  pari_sp av0 = avma;
   byteptr d =  diffptr + 2;
   double A = n / pariC2, D;
   long p, lim;
@@ -1242,7 +1242,6 @@ inv_szeta_euler(long n, double lba, long prec)
 
   prec++;
   z = gsub(gun, real2n(-n, prec));
-  av = avma;
   for (p = 3; p <= lim;)
   {
     long l = prec + 1 - (long)floor(A * log(p));

@@ -2578,12 +2578,11 @@ modprV(GEN z, GEN nf,GEN modpr)
 GEN
 modprM(GEN z, GEN nf,GEN modpr)
 {
-  long i,l = lg(z), m;
+  long i,l = lg(z);
   GEN x;
 
   if (typ(z) != t_MAT) return modprV(z,nf,modpr);
   x = cgetg(l,t_MAT); if (l==1) return x;
-  m = lg((GEN)z[1]);
   for (i=1; i<l; i++) x[i] = (long)modprV((GEN)z[i],nf,modpr);
   return x;
 }
@@ -3002,10 +3001,10 @@ get_d(GEN nf, GEN pol, GEN A)
 GEN
 rnfallbase(GEN nf, GEN pol, GEN *pD, GEN *pd, GEN *pf)
 {
-  long i, n, N, l, vpol, *ep;
+  long i, n, N, l, *ep;
   GEN p1, A, nfT, P, id, I, z, d, D, disc;
 
-  nf = checknf(nf); nfT = (GEN)nf[1]; vpol = varn(pol);
+  nf = checknf(nf); nfT = (GEN)nf[1];
   pol = fix_relative_pol(nf,pol,1);
   N = degpol(nfT);
   n = degpol(pol);
@@ -3426,11 +3425,11 @@ rnfequation0(GEN A, GEN B, long flall)
   C = _rnfequation(A, B, &k, flall? &LPRS: NULL);
   if (flall)
   {
-    GEN w,a,b; /* a,b,c root of A,B,C = compositum, c = b + k a */
+    GEN w,a; /* a,b,c root of A,B,C = compositum, c = b + k a */
     /* invmod possibly very costly */
     a = gmul((GEN)LPRS[1], QX_invmod((GEN)LPRS[2], C));
     a = gneg_i(gmod(a, C));
-    b = gadd(polx[varn(A)], gmulsg(k,a));
+    /* b = gadd(polx[varn(A)], gmulsg(k,a)); */
     w = cgetg(4,t_VEC); /* [C, a, n ] */
     w[1] = (long)C;
     w[2] = (long)to_polmod(a, (GEN)w[1]);

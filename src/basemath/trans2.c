@@ -516,8 +516,8 @@ gsh(GEN x, long prec)
     case t_INTMOD: case t_PADIC: err(typeer,"gsh");
     default:
       av = avma; if (!(y = _toser(x))) break;
-      if (gcmp0(x) && valp(x) == 0) return gcopy(x);
-      p1 = gexp(x,prec); p1 = gsub(p1, ginv(p1));
+      if (gcmp0(y) && valp(y) == 0) return gcopy(y);
+      p1 = gexp(y, prec); p1 = gsub(p1, ginv(p1));
       return gerepileupto(av, gmul2n(p1,-1));
   }
   return transc(gsh,x,prec);

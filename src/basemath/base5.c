@@ -686,10 +686,9 @@ GEN
 rnfidealtwoelement(GEN rnf, GEN x)
 {
   pari_sp av = avma;
-  GEN y, z, nf, NF;
+  GEN y, z, NF;
 
   checkrnf(rnf);
-  nf = (GEN)rnf[10];
   NF = check_and_build_nfabs(rnf);
   y = rnfidealreltoabs(rnf,x);
   y = algtobasis(NF, y); settyp(y, t_MAT);
