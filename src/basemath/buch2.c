@@ -1852,7 +1852,7 @@ random_relation(long phase,long cglob,long PRECREG,long MAXRELSUP,
   static long jideal, jdir;
   long i, maxcglob, cptlist, cptzer, nbG, lgsub, r1, jlist = 1;
   pari_sp av, av1;
-  GEN arch,col,colarch,ideal,m,P,ex;
+  GEN arch, col, colarch, ideal, m, P, ex;
 
   if (phase != 1) { jideal=jdir=1; if (phase<0) return 0; }
 
@@ -1929,9 +1929,9 @@ random_relation(long phase,long cglob,long PRECREG,long MAXRELSUP,
           GEN p1 = gmael3(F->powsubFB,i,ex[i],2);
           arch = arch? vecmul(arch, p1): p1;
         }
-      colarch = (GEN)matarch[cglob];
       /* arch = archimedean component (MULTIPLICATIVE form) of ideal */
       arch = vecdiv(arch, gmul(gmael(nf,5,1), m));
+      colarch = (GEN)matarch[cglob];
       set_log_embed(colarch, arch, r1, PRECREG);
       if (DEBUGLEVEL) dbg_newrel(jideal,jdir,phase,cglob,col,colarch,maxcglob);
 
