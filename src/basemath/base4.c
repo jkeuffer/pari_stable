@@ -1559,11 +1559,11 @@ computet2twist(GEN nf, GEN vdir)
   {
     GEN v = (GEN)vdir[j];
     if (gcmp0(v))
-      p1[j]=MC[j];
+      p1[j] = MC[j];
     else if (typ(v) == t_INT)
-      p1[j]=lmul2n((GEN)MC[j],itos(v)<<1);
+      p1[j] = lmul2n((GEN)MC[j],itos(v)<<1);
     else
-      p1[j]=lmul((GEN)MC[j],gpui(stoi(4),v,0));
+      p1[j] = lmul((GEN)MC[j],gpui(stoi(4),v,0));
   }
   return mulmat_real(p1,(GEN)mat[1]);
 }

@@ -670,9 +670,11 @@ get_norm_fact(GEN gen, GEN ex, GEN *pd)
 static long
 factorgensimple(GEN nf,GEN ideal)
 {
-  long i,v,av1 = avma,lo, L = lg(vectbase), N = lg(ideal)-1;
-  GEN x = dethnf_i(ideal);
-
+  long N,i,v,av1 = avma,lo, L = lg(vectbase);
+  GEN x;
+  if (typ(ideal) != t_MAT) ideal = (GEN)ideal[1]; /* idele */
+  x = dethnf_i(ideal);
+  N = lg(ideal)-1;
   if (gcmp1(x)) { avma=av1; primfact[0]=0; return 1; }
   for (lo=0, i=1; i<L; i++)
   {
@@ -738,45 +740,64 @@ add_to_fact(long l, long v, long e)
   }
 }
 
-/* factor x on vectbase (modulo principal ideals) */
-static GEN
-split_ideal(GEN nf, GEN x, long prec, GEN vperm)
+static void
+init_sub(long l, GEN perm, GEN *v, GEN *ex)
 {
-  GEN id = x,vdir,x0,y,p1,z,xar;
-  long v1,v2,nbtest,bou,i,ru;
+  long i;
+  *v = cgetg(l,t_VECSMALL);
+  *ex= cgetg(l,t_VECSMALL);
+  for (i=1; i<l; i++) (*v)[i] = itos((GEN)perm[i]);
+}
+
+/* factor x = x0[1] on vectbase (modulo principal ideals).
+ * We may have x0[2] = NULL (principal part not wanted), in which case,
+ * don't compute archimedean parts */
+static GEN
+split_ideal(GEN nf, GEN x0, long prec, GEN vperm)
+{
+  GEN p1,vdir,id,z,v,ex,y, x = (GEN)x0[1];
+  long nbtest_lim,nbtest,bou,i,ru, lgsub;
   int flag = (gexpo(gcoeff(x,1,1)) < 100);
 
-  x0 = init_idele(nf); xar = (GEN)x0[2];
-  if (flag && factorgensimple(nf,x)) return xar;
+  y = x0;
+  if (flag && factorgensimple(nf,y)) return y;
 
-  x = gmul(x, lllintpartial(x));
-  x0[1]=(long)x;
   y = ideallllred(nf,x0,NULL,prec);
-  if (gcmp0((GEN)y[2]))
-    { flag = !flag; x0[1] = (long)id; }
-  else
-    { flag = 1; x=(GEN)y[1]; }
-  if (flag && factorgensimple(nf,x)) return (GEN)y[2];
+  if (flag &&  ((!x0[2] && gegal((GEN)y[1], (GEN)x[1])) 
+             ||  (x0[2] && gcmp0((GEN)y[2])))) flag = 0; /* y == x0 */
+  if (flag && factorgensimple(nf,y)) return y;
 
-  ru = lg(xar); vdir = cgetg(ru,t_VEC);
+  z = init_idele(nf); ru = lg(z[2]);
+  if (!x0[2]) { z[2] = 0; x0 = x; } /* stop cheating */
+  vdir = cgetg(ru,t_VEC);
   for (i=2; i<ru; i++) vdir[i]=zero;
   for (i=1; i<ru; i++)
   {
     vdir[i]=lstoi(10);
-    y = ideallllred(nf,x0,vdir,prec); x=(GEN)y[1];
-    if (factorgensimple(nf,x)) return (GEN)y[2];
+    y = ideallllred(nf,x0,vdir,prec);
+    if (factorgensimple(nf,y)) return y;
     vdir[i]=zero;
   }
-  v1=itos((GEN)vperm[1]);
-  v2=itos((GEN)vperm[2]);
-  z = init_idele(nf);
-  for(nbtest = 0;;)
+  nbtest = 0; nbtest_lim = (ru-1) << 2; lgsub = 3;
+  init_sub(lgsub, vperm, &v, &ex);
+  for(;;)
   {
-    long ex1 = mymyrand() >> randshift;
-    long ex2 = mymyrand() >> randshift;
-    z[1]=vectbase[v1]; id=idealpowred(nf,z,stoi(ex1),prec);
-    z[1]=vectbase[v2]; p1=idealpowred(nf,z,stoi(ex2),prec);
-    id = idealmulh(nf,idealmul(nf,x0,id),p1);
+    int non0 = 0;
+    id = x0;
+    for (i=1; i<lgsub; i++) 
+    {
+      ex[i] = mymyrand() >> randshift;
+      if (ex[i])
+      { /* don't let id become too large as lgsub gets bigger: avoid
+           prec problems */
+        if (non0) id = ideallllred(nf,id,NULL,prec);
+        non0++;
+        z[1]=vectbase[v[i]]; p1=idealpowred(nf,z,stoi(ex[i]),prec);
+        id = idealmulh(nf,id,p1);
+      }
+    }
+    if (id == x0) continue;
+
     for (i=1; i<ru; i++) vdir[i] = lstoi(mymyrand() >> randshift);
     for (bou=1; bou<ru; bou++)
     {
@@ -786,15 +807,27 @@ split_ideal(GEN nf, GEN x, long prec, GEN vperm)
         vdir[bou]=lstoi(10);
       }
       nbtest++;
-      y = ideallllred(nf,id,vdir,prec); x=(GEN)y[1];
+      y = ideallllred(nf,id,vdir,prec);
       if (DEBUGLEVEL>2)
-        fprintferr("nbtest = %ld, ideal = %Z\n",nbtest,(long)x);
-      if (factorgensimple(nf,x))
+        fprintferr("nbtest = %ld, ideal = %Z\n",nbtest,y[1]);
+      if (factorgensimple(nf,y))
       {
         long l = primfact[0];
-        add_to_fact(l,v1,-ex1);
-        add_to_fact(l,v2,-ex2); return (GEN)y[2];
+        for (i=1; i<lgsub; i++) add_to_fact(l,v[i],-ex[i]);
+        return y;
       }
+    }
+    if (nbtest > nbtest_lim)
+    {
+      nbtest = 0;
+      if (lgsub < 7)
+      {
+        lgsub++; nbtest_lim <<= 2;
+        init_sub(lgsub, vperm, &v, &ex);
+      }
+      else nbtest_lim = VERYBIGINT; /* don't increase further */
+      if (DEBUGLEVEL)
+        fprintferr("split_ideal: increasing factorbase [%ld]\n",lgsub);
     }
   }
 }
@@ -972,7 +1005,7 @@ static GEN
 isprincipalall0(GEN bnf, GEN x, long *ptprec, long flag)
 {
   long i,lW,lB,e,c, prec = *ptprec;
-  GEN Q,xar,Wex,Bex,U,y,p1,gen,cyc,xc,ex,d,col,Garch,A;
+  GEN Q,xar,Wex,Bex,U,y,p1,gen,cyc,xc,ex,d,col,A;
   GEN W       = (GEN)bnf[1];
   GEN B       = (GEN)bnf[2];
   GEN WB_C    = (GEN)bnf[4];
@@ -989,7 +1022,11 @@ isprincipalall0(GEN bnf, GEN x, long *ptprec, long flag)
 
   /* factor x */
   xc = content(x); if (!gcmp1(xc)) x = gdiv(x,xc);
-  xar = split_ideal(nf,x,prec,vperm);
+
+  p1 = init_idele(nf); p1[1] = (long)x;
+  if (!(flag & nf_GEN)) p1[2] = 0; /* don't compute archimedean part */
+  xar = split_ideal(nf,p1,prec,vperm);
+
   lW = lg(W)-1; Wex = zerocol(lW);
   lB = lg(B)-1; Bex = zerocol(lB); get_split_expo(Wex,Bex,vperm);
 
@@ -1006,7 +1043,7 @@ isprincipalall0(GEN bnf, GEN x, long *ptprec, long flag)
   /* compute arch component of the missing principal ideal */
   if (old_format)
   {
-    GEN V = (GEN)clg2[2];
+    GEN Garch, V = (GEN)clg2[2];
     p1 = c? concatsp(gmul(V,Q), Bex): Bex;
     col = act_arch(p1, WB_C);
     if (c)
@@ -1023,7 +1060,7 @@ isprincipalall0(GEN bnf, GEN x, long *ptprec, long flag)
     if (lW) col = gadd(col, act_arch(A, ga));
     if (c)  col = gadd(col, act_arch(Q, GD));
   }
-  col = gsub(col, xar);
+  col = gsub(col, (GEN)xar[2]);
 
   /* find coords on Zk; Q = N (x / \prod gj^ej) = N(alpha), denom(alpha) | d */
   Q = gdiv(dethnf_i(x), get_norm_fact(gen, ex, &d));
