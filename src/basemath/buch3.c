@@ -2141,7 +2141,7 @@ decodemodule(GEN nf, GEN fa)
 static GEN
 discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
 {
-  byteptr ptdif=diffptr;
+  byteptr dif = diffptr + 1;
   long degk,i,j,k,lfa,lp1,sqbou,cex, allarch;
   long ffs,fs,resp,flbou,nba, k2,karch,kka,nbarch,jjj,jj,square;
   long ii2,ii,ly,clhray,lP,ep,S,clhss,normps,normi,nz,r1,R1,n,c;
@@ -2195,8 +2195,8 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
   else
     matarchunit = (GEN)NULL;
 
-  p = cgeti(3); p[1] = evalsigne(1)|evallgefint(3);
   sqbou = (long)sqrt((double)bound) + 1;
+  p = stoi(2);
   av = avma; lim = stack_lim(av,1);
   z = bigcgetvec(bound); for (i=2;i<=bound;i++) putcompobig(z,i,cgetg(1,t_VEC));
   if (allarch) bidp = zidealstarinitall(nf,idmat(degk),0);
@@ -2204,9 +2204,8 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
   putcompobig(z,1, _vec(zsimp(bidp,embunit))); 
   if (DEBUGLEVEL>1) fprintferr("Starting zidealstarunits computations\n");
   maxprime_check((ulong)bound);
-  for (p[2]=0; p[2]<=bound; )
+  while (p[2] <= bound)
   {
-    NEXT_PRIME_VIADIFF(p[2], ptdif);
     if (!flbou && p[2]>sqbou)
     {
       if (DEBUGLEVEL>1) fprintferr("\nStarting rayclassno computations\n");
@@ -2280,19 +2279,11 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
     {
       if(DEBUGMEM>1) err(warnmem,"[1]: discrayabslistarch");
       if (!flbou)
-      {
-	if (DEBUGLEVEL>2)
-          fprintferr("avma = %ld, t(z) = %ld ",avma-bot,taille2(z));
         z = gerepilecopy(av, z);
-      }
       else
-      {
-	if (DEBUGLEVEL>2)
-	  fprintferr("avma = %ld, t(r) = %ld ",avma-bot,taille2(raylist));
 	gerepileall(av, 2, &z, &raylist);
-      }
-      if (DEBUGLEVEL>2) { fprintferr("avma = %ld ",avma-bot); flusherr(); }
     }
+    NEXT_PRIME_VIADIFF(p[2], dif);
   }
   if (!flbou)
   {
@@ -2306,11 +2297,7 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
       putcompobig(raylist,i,sousray);
     }
   }
-  if (DEBUGLEVEL>2)
-    fprintferr("avma = %ld, t(r) = %ld ",avma-bot,taille2(raylist));
   raylist = gerepilecopy(av, raylist);
-  if (DEBUGLEVEL>2)
-    { fprintferr("avma = %ld ",avma-bot); msgtimer("zidealstarlist"); }
   /* following discrayabslist */
   if (DEBUGLEVEL>1)
     { fprintferr("Starting discrayabs computations\n"); flusherr(); }
