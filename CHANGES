@@ -45,6 +45,7 @@ BA  5- [Configure:] add -lm -lc to EXTRADLLDFLAGS, not DLLDFLAGS
        [from 2.2.4]
     7- typo in [imag|real]_be_honest: SEGV in quadclassunit(D,,[c,c2]), c2 > c
        [from 2.2.4]
+    8- typo in rnfisnorminit (pol_up)
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available
