@@ -2161,7 +2161,7 @@ coefs_to_int(long n, ...)
 #endif
     y=int_precW(y);
   }
-  return x;
+  va_end(ap); return x;
 }
 
 /* 2^32 a + b */
@@ -2194,7 +2194,20 @@ coefs_to_pol(long n, ...)
   x = cgetg(n+2, t_POL); y = x + 2;
   x[1] = evallgef(n+2) | evalvarn(0);
   for (i=n-1; i >= 0; i--) y[i] = (long) va_arg(ap, GEN);
-  return normalizepol(x);
+  va_end(ap); return normalizepol(x);
+}
+
+/* return [a_1, ..., a_n] */
+GEN
+coefs_to_vec(long n, ...)
+{
+  va_list ap;
+  GEN x;
+  long i;
+  va_start(ap,n);
+  x = cgetg(n+1, t_VEC);
+  for (i=1; i <= n; i++) x[i] = (long) va_arg(ap, GEN);
+  va_end(ap); return x;
 }
 
 GEN

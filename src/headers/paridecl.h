@@ -922,6 +922,7 @@ GEN     centerlift(GEN x);
 GEN     centerlift0(GEN x,long v);
 GEN     coefs_to_int(long n, ...);
 GEN     coefs_to_pol(long n, ...);
+GEN     coefs_to_vec(long n, ...);
 GEN     compo(GEN x, long n);
 GEN     deg1pol(GEN x1, GEN x0,long v);
 GEN     deg1pol_i(GEN x1, GEN x0,long v);
