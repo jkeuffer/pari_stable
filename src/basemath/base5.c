@@ -24,6 +24,7 @@ extern GEN mul_content(GEN cx, GEN cy);
 extern long polegal_spec(GEN x, GEN y);
 extern GEN mulmat_pol(GEN A, GEN x);
 extern GEN idealsqrtn(GEN nf, GEN x, GEN gn, int strict);
+extern GEN get_roots(GEN x,long r1,long prec);
 
 GEN
 matbasistoalg(GEN nf,GEN x)
