@@ -20,8 +20,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*******************************************************************/
 #include "pari.h"
 extern int ker_trivial_mod_p(GEN x, GEN p);
-long ideal_is_zk(GEN ideal,long N);
-GEN idealaddtoone_i(GEN nf, GEN x, GEN y);
+extern long ideal_is_zk(GEN ideal,long N);
+extern GEN famat_ideallog(GEN nf, GEN g, GEN e, GEN bid);
+extern GEN famat_to_nf_modidele(GEN nf, GEN g, GEN e, GEN bid);
+extern GEN hnfall_i(GEN A, GEN *ptB, long remove);
 
 /*******************************************************************/
 /*                                                                 */
@@ -1515,9 +1517,6 @@ zinternallog(GEN nf,GEN a,GEN list_set,long nbgen,GEN arch,GEN fa,long index)
   return y0;
 }
 
-extern GEN famat_to_nf_modidele(GEN nf, GEN g, GEN e, GEN bid);
-extern GEN hnfall_i(GEN A, GEN *ptB, long remove);
-
 static GEN
 compute_gen(GEN nf, GEN u1, GEN gen, GEN bid)
 {
@@ -1641,51 +1640,6 @@ idealstar0(GEN nf, GEN ideal,long flag)
   return NULL; /* not reached */
 }
 
-/* x is not integral, but check that v_p(x)=0 for all prime divisors of the
- * ideal. We need x = a/b with integral a and b, prime to ideal
- */
-static GEN
-rat_zinternallog(GEN nf, GEN x, GEN bid, GEN den)
-{
-  long nbp,i,v,k, N = lgef(nf[1])-3;
-  GEN list,ep,pr,p1,p2,p3,x1,dinv,ideal;
-
-  ideal = gmael(bid,1,1);
-  p1 = gcoeff(ideal,1,1); /* = ideal \cap Z */
-  if (gcmp1(mppgcd(p1, den)))
-  { /* den coprime to ideal: easy case */
-    x1 = gmul(x, den);
-    x1 = gmul(x1, mpinvmod(den, p1)); /* = x mod ideal */
-    return zideallog(nf,x1,bid);
-  }
-  list= gmael(bid,3,1); /* ideal = prod list[i]^ep[i] */
-  ep  = gmael(bid,3,2);
-  k=1; nbp=lg(list)-1;
-  for (i=1; i<=nbp; i++)
-  {
-    pr = (GEN)list[i];
-    v = ggval(den,(GEN)pr[1]);
-    if (!v) continue;
-    v = (v*itos((GEN)pr[3])) / itos((GEN)ep[i]) + 1;
-    if (v > k) k = v;
-  }
-  p3 = idealpows(nf, ideal, k);
-  dinv = idealinv(nf, hnfmodid(p3, den)); /* 1 / gcd(p3, den) */
-  p2 = gmul(den, dinv);
-  p3 = idealmul(nf,p3,dinv);
-  x1 = idealaddtoone_i(nf,p2,p3);
-  if (gcmp0(x1)) x1 = gscalcol(den, N);
-  /* x = a/b is suitable, with a=x1*x, b=x1 */
-  p1 = element_mul(nf,x1,x);
-  /* x1 is prime to ideal. Check that x1 * x also */
-  p2 = idealadd(nf,p1,ideal);
-  if (! ideal_is_zk(p2,N))
-    err(talker,"element is not coprime to ideal in zideallog");
-  p1 = zideallog(nf,p1,bid);
-  p2 = zideallog(nf,x1,bid);
-  return gsub(p1,p2);
-}
-
 void
 check_nfelt(GEN x, GEN *den)
 {
@@ -1707,11 +1661,9 @@ check_nfelt(GEN x, GEN *den)
   *den = d;
 }
 
-extern GEN famat_ideallog(GEN nf, GEN g, GEN e, GEN bid);
-
 /* Given x (not necessarily integral), and bid as output by zidealstarinit,
- * compute the vector of components on the generators bid[2]
- */
+ * compute the vector of components on the generators bid[2].
+ * Assume (x,bid) = 1 */
 GEN
 zideallog(GEN nf, GEN x, GEN bid)
 {
@@ -1740,7 +1692,13 @@ zideallog(GEN nf, GEN x, GEN bid)
   if (lg(x) != N+1) err(talker,"not an element in zideallog");
   check_nfelt(x, &den);
   if (den)
-    p1 = rat_zinternallog(nf,x,bid,den);
+  {
+    GEN g = cgetg(3, t_COL);
+    GEN e = cgetg(3, t_COL);
+    g[1] = lmul(x,den); e[1] = un;
+    g[2] = (long)den;   e[2] = lstoi(-1);
+    p1 = famat_ideallog(nf, g, e, bid);
+  }
   else
   {
     l=lg(bid[5])-1; fa=(GEN)bid[3]; fa2=(GEN)bid[4];

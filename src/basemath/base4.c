@@ -1252,7 +1252,7 @@ extern GEN set_sign_mod_idele(GEN nf, GEN x, GEN y, GEN idele, GEN sarch);
  *
  * EX = exponent of (O_K / pr^k)^* used to reduce the product in case the
  * e[i] are large */
-GEN
+static GEN
 famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prn, GEN EX)
 {
   long i,k, l = lg(g), N = lgef(nf[1])-3;
