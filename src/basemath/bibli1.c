@@ -3074,15 +3074,10 @@ smallvectors(GEN q, GEN BORNE, long stockmax, FP_chk_fun *CHECK)
         }
 	gerepileall(av,check?7:4,&x,&y,&z,&normax1,&borne1,&borne2,&norms);
       }
-      if (DEBUGLEVEL>3)
-      {
-	if (DEBUGLEVEL>5) fprintferr("%ld ",k);
-	if (k==n) fprintferr("\nx[%ld] = %Z\n",n,x[n]);
-      }
     }
     while (k > 1);
     if (!signe(x[1]) && !signe(y[1])) continue; /* exclude 0 */
-    if (DEBUGLEVEL>3) output(x);
+    if (DEBUGLEVEL>4) output(x);
 
     av1 = avma; p1 = gsqr(mpadd((GEN)x[1],(GEN)z[1]));
     norme1 = mpadd((GEN)y[1], mpmul(p1, (GEN)v[1]));
