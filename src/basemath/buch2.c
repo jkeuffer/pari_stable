@@ -88,7 +88,6 @@ extern void wr_rel(GEN col);
 extern void dbg_rel(long s, GEN col);
 
 #define SFB_MAX 2
-#define SFB_STEP 2
 #define MIN_EXTRA 1
 
 #define RANDOM_BITS 4
@@ -3105,10 +3104,9 @@ MORE:
     if (sfb_increase)
     {
       if (DEBUGLEVEL) fprintferr("*** Increasing sub factor base\n");
-      sfb_increase = 0;
-      if (++sfb_trials > SFB_MAX || !subFBgen_increase(&F, nf, SFB_STEP))
+      if (++sfb_trials > SFB_MAX || !subFBgen_increase(&F, nf, sfb_increase))
         goto START;
-      nreldep = nrelsup = 0;
+      sfb_increase = nreldep = nrelsup = 0;
     }
 
     if (phase)
@@ -3147,11 +3145,11 @@ PRECPB:
       err(warnprec,str,PRECREG);
     }
     nf = nfnewprec(nf, PRECREG);
-    M = gmael(nf, 5, 1); 
     if (F.pow && F.pow->arc) { gunclone(F.pow->arc); F.pow->arc = NULL; }
     for (i = 1; i < lg(PERM); i++) F.perm[i] = PERM[i];
     precpb = NULL; phase = 0; oldrel = cache.base;
   }
+  M = gmael(nf, 5, 1); 
   if (F.pow && !F.pow->arc) powFB_fill(&cache, M);
   /* reduce relation matrices */
   if (phase == 0)
@@ -3186,7 +3184,7 @@ PRECPB:
   nlze = lg(pdep)>1? lg(pdep[1])-1: lg(B[1])-1;
   if (nlze) /* dependent rows */
   {
-    if (++nreldep > MAXRELSUP || nlze > 40) sfb_increase = 1;
+    if (phase && (++nreldep > MAXRELSUP || nlze > 40)) sfb_increase = 1;
     if (!phase) list_jideal = vecextract_i(F.perm, 1, nlze);
     phase = 1; goto MORE;
   }
