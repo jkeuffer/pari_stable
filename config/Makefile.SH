@@ -385,7 +385,7 @@ dotest-graphic::
 	@$doexec -g
 
 cleanobj: cleantest
-	-\$(RM) *\$(_O) *.s pariinl.h parilvl0.h parilvl1.h libpari* tune* $exec
+	-\$(RM) *\$(_O) mp.c *.s pariinl.h parilvl0.h parilvl1.h libpari* tune* $exec
 
 clean: cleanobj
 
