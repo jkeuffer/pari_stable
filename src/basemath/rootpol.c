@@ -1767,23 +1767,36 @@ mygprec_special(GEN x, long bitprec)
 }
 
 static GEN
+fix_roots1(GEN r, GEN *m, long bitprec)
+{
+  long i, l = lg(r)-1;
+  GEN allr = cgetg(l+1, t_VEC);
+  for (i=1; i<=l; i++)
+  {
+    GEN p1 = (GEN)r[i];
+    allr[i] = lcopy(p1);
+    gunclone(p1);
+  }
+  return allr;
+}
+static GEN
 fix_roots(GEN r, GEN *m, long h, long bitprec)
 {
-  long i,j,k, l = lg(r)-1;
-  GEN allr, ro1 = (h==1)? NULL: initRUgen(h, bitprec);
+  long i, j, k, l, prec;
+  GEN allr, ro1;
+  if (h == 1) return fix_roots1(r, m, bitprec);
+  ro1 = initRUgen(h, bitprec);
+  prec = precision((GEN)r[1]);
+  l = lg(r)-1;
   allr = cgetg(h*l+1, t_VEC);
   for (k=1,i=1; i<=l; i++)
   {
     GEN p2, p1 = (GEN)r[i];
-    if (!ro1) allr[k++] = lcopy(p1);
-    else
-    {
-      p2 = (h == 2)? gsqrt(p1,0): gpow(p1, ginv(stoi(h)), 0);
-      for (j=0; j<h; j++) allr[k++] = lmul(p2, (GEN)ro1[j]);
-    }
+    p2 = (h == 2)? gsqrt(p1, prec): gsqrtn(p1, stoi(h), NULL, prec);
+    for (j=0; j<h; j++) allr[k++] = lmul(p2, (GEN)ro1[j]);
     gunclone(p1);
   }
-  if (ro1) *m = roots_to_pol(allr, varn(*m));
+  *m = roots_to_pol(allr, varn(*m));
   return allr;
 }
 
