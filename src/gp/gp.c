@@ -1734,8 +1734,7 @@ what_readline(char **buf)
             (GP_DATA->flags & USE_READLINE)? "enabled": "disabled",
             extra);
 #else
-  s = stackmalloc(32);
-  (void)sprintf(s, "not compiled in");
+  s = "not compiled in";
 #endif
   *buf = s;
 }
