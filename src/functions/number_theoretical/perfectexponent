@@ -1,0 +1,10 @@
+Function: perfectexponent
+Section: number_theoretical
+C-Name: perfectexponent
+Prototype: lGD&
+Help: perfectexponent(x,{&n}): return the maximal k >= 1 such that x = n^k is a
+ perfect power. If n is given puts the exact k-th root there.
+Description: 
+ (int):small       perfectexponent($1, NULL)
+ (int, &int):small perfectexponent($1, &$2)
+

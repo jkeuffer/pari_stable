@@ -178,9 +178,9 @@ Fl_gener_fact(ulong p, GEN fa)
   GEN L;
   if (p == 2) return 1;
 
-  if (!fa) { fa = L = (GEN)decomp(utoi(q))[1]; k = lg(fa)-1; } 
+  if (!fa) { fa = L = (GEN)decomp(utoi(q))[1]; k = lg(fa)-1; }
   else { fa = (GEN)fa[1]; k = lg(fa)-1; L = cgetg(k + 1, t_VECSMALL); }
- 
+
   for (i=1; i<=k; i++) L[i] = (long)(q / itou((GEN)fa[i]));
   for (x=2;;x++)
     if (x % p)
@@ -207,7 +207,7 @@ Fp_gener_fact(GEN p, GEN fa)
   q = subis(p, 1);
   if (!fa) { fa = V = (GEN)decomp(q)[1]; k = lg(fa)-1; }
   else { fa = (GEN)fa[1]; k = lg(fa)-1; V = cgetg(k + 1, t_VEC); }
- 
+
   for (i=1; i<=k; i++) V[i] = (long)diviiexact(q, (GEN)fa[i]);
   x = utoi(2UL);
   for (;; x[2]++)
@@ -222,7 +222,7 @@ Fp_gener_fact(GEN p, GEN fa)
   }
 }
 
-GEN 
+GEN
 Fp_gener(GEN p) { return Fp_gener_fact(p, NULL); }
 
 GEN
@@ -258,7 +258,7 @@ gener(GEN m)
   x = Fp_gener(p);
   if (e >= 2)
   {
-    GEN M = (e == 2)? m: sqri(p); 
+    GEN M = (e == 2)? m: sqri(p);
     if (gcmp1(Fp_pow(x, subis(p,1), M))) x = addii(x,p);
   }
   return gerepileupto(av, gmodulcp(x,m));
@@ -328,7 +328,7 @@ znstar(GEN n)
       u = Fp_inv(q, diviiexact(n,q));
       gen[i] = lmodulcp(addii(a,mulii(mulii(subsi(1,a),u),q)), n);
     }
-  
+
   for (i=sizeh; i>=2; i--)
     for (j=i-1; j>=1; j--)
       if (!dvdii((GEN)h[j],(GEN)h[i]))
@@ -442,10 +442,10 @@ carrecomplet(GEN x, GEN *pt)
     if (pt) *pt = stoi(a);
     return 1;
   }
-  if (!carremod((ulong)smodis(x, 64*63*65*11))) return 0;
+  if (!carremod(umodiu(x, 64*63*65*11))) return 0;
   av=avma; y = racine(x);
   if (!egalii(sqri(y),x)) { avma=av; return 0; }
-  if (pt) { *pt = y; avma=(pari_sp)y; } else avma=av; 
+  if (pt) { *pt = y; avma=(pari_sp)y; } else avma=av;
   return 1;
 }
 
@@ -473,8 +473,8 @@ polcarrecomplet(GEN x, GEN *pt)
   y = gtrunc(gsqrt(greffe(x,l,1),0)); av2 = avma;
   if (!gegal(gsqr(y), x)) { avma = av; return 0; }
   if (pt)
-  { 
-    avma = av2; 
+  {
+    avma = av2;
     if (!gcmp1(a))
     {
       if (!b) b = gsqrt(a,DEFAULTPREC);
@@ -578,7 +578,7 @@ gcarreparfait(GEN x)
         {
           v = pvaluation(a,(GEN)p[i],&p1);
           w = pvaluation(q,(GEN)p[i], &q);
-          if (v < w && (v&1 || kronecker(p1,(GEN)p[i]) == -1)) 
+          if (v < w && (v&1 || kronecker(p1,(GEN)p[i]) == -1))
             { avma = av; return gzero; }
         }
         if (kronecker(a,q) == -1) { avma = av; return gzero; }
@@ -633,6 +633,68 @@ gcarreparfait(GEN x)
   }
   err(typeer,"issquare");
   return NULL; /* not reached */
+}
+
+/*********************************************************************/
+/**                                                                 **/
+/**                        PERFECT POWER                            **/
+/**                                                                 **/
+/*********************************************************************/
+static int
+pow_check(ulong p, GEN *x, GEN *logx, long *k)
+{
+  GEN u, y;
+  long e;
+  setlg(*logx, DEFAULTPREC + (lg(*x)-2) / p);
+  u = divrs(*logx, p); y = grndtoi(mpexp(u), &e);
+  if (e >= -10 || !egalii(gpowgs(y, p), *x)) return 0;
+  *k *= p; *x = y; *logx = u;
+  return 1;
+}
+
+long
+perfectexponent(GEN x, GEN *pty)
+{
+  pari_sp av = avma;
+  long e2, ex, k = 1, mask = 7;
+  GEN logx, y;
+  byteptr d;
+  ulong p;
+
+  if (typ(x) != t_INT || gcmp(x, gdeux) < 0)
+    err(talker, "isperfectpower: argument must be > 1");
+  while (carrecomplet(x, &y)) { k <<= 1; x = y; }
+  while ( (ex = is_357_power(x, &y, &mask)) ) { k *= ex; x = y; }
+#if 0
+could work modulo
+  2772725671UL; /* = 1 mod 11,13,17,19,23,29 */
+  3231413279UL; /* = 1 mod 31,37,41,43,47 */
+  4211628979UL; /* = 1 mod 59,61,67,71 */
+  4004477927UL; /* = 1 mod 73,79,83,89 */
+#endif
+  e2 = expi(x) + 1;
+  logx = mplog( itor(x, DEFAULTPREC + (lg(x)-2) / 11) );
+  d = diffptr + 5; /* prime(5) = 11 */
+  p = 11;
+  while (p < e2)
+  {
+    if (pow_check(p, &x, &logx, &k)) {
+      e2 = expi(x) + 1;
+      continue; /* success, retry same p */
+    }
+    NEXT_PRIME_VIADIFF(p, d);
+    if (!*d) break;
+  }
+  while (p < e2)
+  {
+    if (pow_check(p, &x, &logx, &k)) {
+      e2 = expi(x) + 1;
+      continue; /* success, retry same p */
+    }
+    p = itou( nextprime(utoi(p + 1)) );
+  }
+  if (pty) *pty = gerepilecopy(av, x); else avma = av;
+  return k;
 }
 
 /*********************************************************************/
@@ -978,22 +1040,22 @@ Fl_sqrt(ulong a, ulong p)
  * Otherwise, is a constant times worse than the above one.
  * For p = 3 (mod 4), is about 3 times worse, and in average
  * is about 2 or 2.5 times worse.
- * 
+ *
  * But try both algorithms for e.g. S(n)=(2^n+3)^2-8 with
  * n = 750, 771, 779, 790, 874, 1176, 1728, 2604, etc.
  *
  * If X^2 = t^2 - a  is not a square in F_p, then
- * 
+ *
  *   (t+X)^(p+1) = (t+X)(t-X) = a
- *    
+ *
  * so we get sqrt(a) in F_p^2 by
- * 
+ *
  *   sqrt(a) = (t+X)^((p+1)/2)
- *    
+ *
  * If (a|p)=1, then sqrt(a) is in F_p.
  *
  * cf: LNCS 2286, pp 430-434 (2002)  [Gonzalo Tornaria] */
-static GEN  
+static GEN
 sqrt_Cipolla(GEN a, GEN p)
 {
   pari_sp av = avma, av1, lim;
@@ -1001,7 +1063,7 @@ sqrt_Cipolla(GEN a, GEN p)
   GEN q, n, u, v, d, d2, b, u2, v2, qptr;
 
   if (kronecker(a, p) < 0) return NULL;
-  
+
   av1 = avma;
   for(t=1; ; t++)
   {
@@ -1015,7 +1077,7 @@ sqrt_Cipolla(GEN a, GEN p)
   /* p = 2^e q + 1  and  (p+1)/2 = 2^(e-1)q + 1 */
 
   /* Compute u+vX := (t+X)^q */
-  av1 = avma; lim = stack_lim(av1, 1); 
+  av1 = avma; lim = stack_lim(av1, 1);
   qptr = q+2; man = *qptr;
   k = 1+bfffo(man); man<<=k; k=BITS_IN_LONG-k;
   for (nb=lgefint(q)-2;nb; nb--)
@@ -1038,14 +1100,14 @@ sqrt_Cipolla(GEN a, GEN p)
         u = modii(addii(u2, mulii(v2,n)), p);
       }
     }
-    
+
     if (low_stack(lim, stack_lim(av1, 1)))
     {
        GEN *gptr[2]; gptr[0]=&u; gptr[1]=&v;
        if (DEBUGMEM>1) err(warnmem, "sqrt_Cipolla");
        gerepilemany(av1,gptr,2);
     }
-    
+
     man = *++qptr; k = BITS_IN_LONG;
   }
 
@@ -1063,18 +1125,18 @@ sqrt_Cipolla(GEN a, GEN p)
        gerepilemany(av1,gptr,2);
     }
   }
-     
+
   /* Now u+vX = (t+X)^(2^(e-1)q); thus
-   * 
+   *
    *   (u+vX)(t+X) = sqrt(a) + 0 X
-   *    
+   *
    * Whence,
-   * 
+   *
    *   sqrt(a) = (u+vt)t - v*a
-   *   0       = (u+vt) 
-   *    
+   *   0       = (u+vt)
+   *
    * Thus a square root is v*a */
-     
+
   v = modii(mulii(v,a), p);
 
   u = subii(p,v); if (cmpii(v,u) > 0) v = u;
@@ -1093,11 +1155,11 @@ Fp_sqrt(GEN a, GEN p)
 
   if (typ(a) != t_INT || typ(p) != t_INT) err(arither1);
   if (signe(p) <= 0 || is_pm1(p)) err(talker,"not a prime in Fp_sqrt");
-  if (lgefint(p) == 3) 
+  if (lgefint(p) == 3)
     return utoi( Fl_sqrt(umodiu(a, (ulong)p[2]), (ulong)p[2]) );
 
   p1 = addsi(-1,p); e = vali(p1);
-  
+
   /* If `e' is "too big", use Cipolla algorithm ! [GTL] */
   if (e*(e-1) > 20 + 8 * bit_accuracy(lgefint(p)))
   {
@@ -1119,7 +1181,7 @@ Fp_sqrt(GEN a, GEN p)
   else /* look for an odd power of a primitive root */
     for (k=2; ; k++)
     { /* loop terminates for k < p (even if p composite) */
-  
+
       i = krosi(k,p);
       if (i >= 0)
       {
@@ -1180,7 +1242,7 @@ mplgenmod(GEN l, long e, GEN r,GEN p,GEN *zeta)
 {
   const pari_sp av1 = avma;
   GEN m, m1;
-  long k, i; 
+  long k, i;
   for (k=1; ; k++)
   {
     m1 = m = Fp_pow(stoi(k+1), r, p);
@@ -1234,7 +1296,7 @@ Fp_sqrtl(GEN a, GEN l, GEN p, GEN q,long e, GEN r, GEN y, GEN m)
   }
   tetpil=avma; return gerepile(av,tetpil,icopy(v));
 }
-/* a, n t_INT, p is prime. Return one solution of x^n = a mod p 
+/* a, n t_INT, p is prime. Return one solution of x^n = a mod p
 *
 * 1) If there is no solution, return NULL and if zetan!=NULL set *zetan=gzero.
 *
@@ -1242,7 +1304,7 @@ Fp_sqrtl(GEN a, GEN l, GEN p, GEN q,long e, GEN r, GEN y, GEN m)
 * a != 0, and m = 1 otherwise].
 * If zetan!=NULL, *zetan is set to a primitive mth root of unity so that
 * the set of solutions is { x*zetan^k; k=0..m-1 } */
-GEN 
+GEN
 Fp_sqrtn(GEN a, GEN n, GEN p, GEN *zetan)
 {
   pari_sp ltop = avma, lbot = 0, lim;
@@ -1261,7 +1323,7 @@ Fp_sqrtn(GEN a, GEN n, GEN p, GEN *zetan)
   if (!gcmp1(m))
   {
     GEN F = decomp(m);
-    long i, j, e; 
+    long i, j, e;
     GEN r, zeta, y, l;
     pari_sp av1 = avma;
     for (i = lg(F[1])-1; i; i--)
@@ -1662,7 +1724,7 @@ BSW_isprime(GEN x)
   pari_sp av = avma;
   long l, res;
   GEN F, p;
- 
+
   if (BSW_isprime_small(x)) return 1;
   F = (GEN)auxdecomp(subis(x,1), 0)[1];
   l = lg(F); p = (GEN)F[l-1];
@@ -1854,7 +1916,7 @@ icopy_lg(GEN x, long l)
 {
   long lx = lgefint(x);
   GEN y;
-  
+
   if (lx >= l) return icopy(x);
   y = cgeti(l); affii(x, y); return y;
 }
@@ -1913,7 +1975,7 @@ Qsfcont(GEN x, GEN y, long k)
   if (i > 1 && gcmp1((GEN)z[i]))
   {
     cgiv((GEN)z[i]); --i;
-    if (is_universal_constant(z[i])) 
+    if (is_universal_constant(z[i]))
       z[i] = laddsi(1, (GEN)z[i]); /* may be gzero */
     else
       addsiz(1,(GEN)z[i], (GEN)z[i]);
@@ -1942,7 +2004,7 @@ sfcont(GEN x, long k)
         p1 = cgetg(3, t_FRAC);
 	p1[1] = (long)p2;
 	p1[2] = lshifti(gun, e);
-       
+
         p3 = cgetg(3, t_FRAC);
 	p3[1] = laddsi(signe(x), p2);
 	p3[2] = p1[2];
@@ -2015,7 +2077,7 @@ sfcont2(GEN b, GEN x, long k)
     y[i] = lfloor(x);
     p1 = gsub(x,(GEN)y[i]);
   }
-  setlg(y,i); 
+  setlg(y,i);
   return gerepilecopy(av,y);
 }
 
@@ -2172,7 +2234,7 @@ bestappr(GEN x, GEN k)
           GEN n, d;
           a = divii(subii(k, q1), q0);
 	  p = addii(mulii(a,p0), p1); p1=p0; p0=p;
-          q = addii(mulii(a,q0), q1); q1=q0; q0=q; 
+          q = addii(mulii(a,q0), q1); q1=q0; q0=q;
           /* compare |y-p0/q0|, |y-p1/q1| */
           n = (GEN)y[1];
           d = (GEN)y[2];
@@ -2188,7 +2250,7 @@ bestappr(GEN x, GEN k)
 
     case t_REAL: {
       GEN kr;
-      
+
       if (!signe(x)) return gzero; /* faster. Besides itor crashes on x = 0 */
       kr = itor(k, lg(x));
       y = x;
@@ -2203,7 +2265,7 @@ bestappr(GEN x, GEN k)
         { /* next partial quotient will overflow limits */
           a = divii(subii(k, q1), q0);
 	  p = addii(mulii(a,p0), p1); p1=p0; p0=p;
-          q = addii(mulii(a,q0), q1); q1=q0; q0=q; 
+          q = addii(mulii(a,q0), q1); q1=q0; q0=q;
           /* compare |y-p0/q0|, |y-p1/q1| */
           if (absr_cmp(mpmul(q1, mpsub(mulir(q0,y), p0)),
                        mpmul(q0, mpsub(mulir(q1,y), p1))) < 0)
@@ -2319,7 +2381,7 @@ static GEN
 get_quad(GEN f, GEN pol, long r)
 {
   GEN y = cgetg(4,t_QUAD), c = (GEN)f[2], p1 = (GEN)c[1], q1 = (GEN)c[2];
-  
+
   y[1] = (long)pol;
   y[2] = r? lsubii(p1,q1): (long)p1;
   y[3] = (long)q1; return y;
@@ -2474,7 +2536,7 @@ end_classno(GEN h, GEN hin, GEN forms, long lform)
   q = diviiround(hin, h); /* approximate order of G/H */
   for (i=1; i < lform; i++)
   {
-    pari_sp av = avma; 
+    pari_sp av = avma;
     fg = powgi((GEN)forms[i], h);
     fh = powgi(fg, q);
     a = (GEN)fh[1];
@@ -2532,7 +2594,7 @@ conductor_part(GEN x, long r, GEN *ptD, GEN *ptreg, GEN *ptfa)
       if (k>=4) H = mulii(H,gpowgs(p,(k>>1)-1));
     }
   }
-  
+
   /* divide by [ O^* : O_K^* ] */
   if (s < 0)
   {
@@ -2573,7 +2635,7 @@ two_rank(GEN x)
 
 /* h(x) for x<0 using Baby Step/Giant Step.
  * Assumes G is not too far from being cyclic.
- * 
+ *
  * Compute G^2 instead of G so as to kill most of the non-cyclicity */
 GEN
 classno(GEN x)
@@ -2594,7 +2656,7 @@ classno(GEN x)
 
   p2 = gsqrt(absi(D),DEFAULTPREC);
   p1 = mulrr(divrr(p2,mppi(DEFAULTPREC)), dbltor(1.005)); /*overshoot by 0.5%*/
-  s = itos_or_0( mptrunc(shiftr(sqrtr(p2), 1)) ); 
+  s = itos_or_0( mptrunc(shiftr(sqrtr(p2), 1)) );
   if (!s) err(talker,"discriminant too big in classno");
   if (s < 10) s = 200;
   else if (s < 20) s = 1000;
@@ -2609,14 +2671,14 @@ classno(GEN x)
     k = krois(D,c); if (!k) continue;
     if (k > 0)
     {
-      if (lforms < MAXFORM) forms[lforms++] = c; 
+      if (lforms < MAXFORM) forms[lforms++] = c;
       d = c - 1;
     }
     else
       d = c + 1;
     av2 = avma;
     divrsz(mulsr(c,p1),d, p1);
-    avma = av2; 
+    avma = av2;
   }
   r2 = two_rank(D);
   h = hin = ground(gmul2n(p1, -r2));
@@ -3605,14 +3667,14 @@ primeform(GEN x, GEN p, long prec)
   y[1] = licopy(p); return y;
 }
 
-GEN 
+GEN
 redimagsl2(GEN V)
 {
   pari_sp ltop = avma;
   pari_sp st_lim = stack_lim(ltop, 1);
   GEN a,b,c, z, u1,u2,v1,v2;
   long skip = 1;
-  GEN p2,p3; 
+  GEN p2,p3;
   a = (GEN) V[1]; b = (GEN) V[2]; c = (GEN) V[3];
   u1 = v2 = gun;
   u2 = v1 = gzero;

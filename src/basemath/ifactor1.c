@@ -2344,7 +2344,7 @@ static ulong powersmod[106] = {
  * bit 2: 7th pwr;  set a bit to have the corresponding power examined --
  * and is updated appropriately for a possible follow-up call */
 long
-is_odd_power(GEN x, GEN *pt, long *mask)
+is_357_power(GEN x, GEN *pt, long *mask)
 {
   long lx = lgefint(x), exponent = 0, residue, resbyte;
   pari_sp av = avma;
@@ -3119,9 +3119,9 @@ ifac_crack(GEN *partial, GEN *where)
   {
     long mask = 7;
     if (DEBUGLEVEL == 4) fprintferr("IFAC: checking for odd power\n");
-    /* At debug levels > 4, is_odd_power() prints something more informative */
+    /* At debug levels > 4, is_357_power() prints something more informative */
     av = avma;
-    while ( (exp1 = is_odd_power((GEN)(**where), &factor, &mask)) )
+    while ( (exp1 = is_357_power((GEN)(**where), &factor, &mask)) )
     {
       if (exp2 == 1) exp2 = exp1; /* remember this after the loop */
       if (DEBUGLEVEL >= 4)
@@ -3135,7 +3135,7 @@ ifac_crack(GEN *partial, GEN *where)
         affsi(exp1 * itos(exponent), (GEN)((*where)[1]));
       exponent = (GEN)((*where)[1]);
       if (moebius_mode) return 0; /* no need to carry on */
-    } /* while is_odd_power */
+    } /* while is_357_power */
 
     if (exp2 > 1 && hint != 15 && BSW_psp((GEN)(**where)))
     { /* Something nice has happened and our composite has become prime */

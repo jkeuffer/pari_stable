@@ -2105,6 +2105,12 @@ must be of type integer.
 
 \syn{omega}{x}, the result is a \kbd{long}.
 
+\subsecidx{perfectexponent}$(x,\{\&n\})$: return the maximal $k \geq 1$ such
+that $x = n^k$ is a perfect power. If $n$ is given puts the exact $k$-th root
+there. 
+
+\syn{perfectexponent}{x, \&n}, the result is a \kbd{long}.
+
 \subsecidx{precprime}$(x)$: finds the largest pseudoprime (see
 \tet{ispseudoprime}) less than or equal to $x$. $x$ can be of any real type.
 Returns 0 if $x\le1$. Note that if $x$ is a prime, this function returns $x$
