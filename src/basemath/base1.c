@@ -128,7 +128,7 @@ checkprimeid(GEN id)
 void
 checkprhall(GEN prhall)
 {
-  if (typ(prhall) != t_VEC || lg(prhall) != 3 || typ(prhall[1]) != t_MAT)
+  if (typ(prhall) != t_COL || lg(prhall) < 5 || typ(prhall[1]) != t_MAT)
     err(talker,"incorrect prhall format");
 }
 

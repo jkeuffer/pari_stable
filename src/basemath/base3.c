@@ -491,6 +491,21 @@ element_mulid(GEN nf, GEN x, long i)
   return v;
 }
 
+/* table of multiplication by wi in ZK = Z[w1,..., wN] */
+GEN
+eltmulid_get_table(GEN nf, long i)
+{
+  long k,N;
+  GEN m, tab;
+
+  tab = get_tab(nf, &N);
+  tab += (i-1)*N;
+  m = cgetg(N+1,t_COL);
+  for (k=1; k<=N; k++) m[k] = tab[k];
+  return m;
+}
+
+/* table of multiplication by x in ZK = Z[w1,..., wN] */
 GEN
 eltmul_get_table(GEN nf, GEN x)
 {
@@ -1326,12 +1341,12 @@ zprimestar(GEN nf,GEN pr,GEN ep,GEN x,GEN arch)
   if (f==1) v[1]=gener(p)[2];
   else
   {
-    GEN prhall = cgetg(3,t_VEC);
+    GEN prhall = cgetg(5, t_COL);
     long psim;
     if (is_bigint(p)) err(talker,"prime too big in zprimestar");
     psim = itos(p);
     list = (GEN)factor(pf_1)[1]; nbp=lg(list)-1;
-    prhall[1]=(long)prh; prhall[2]=zero;
+    prhall[1]=(long)prh; prhall[2]=prhall[3]=prhall[4]=zero;
     for (n=psim; n>=0; n++)
     {
       m=n;

@@ -925,24 +925,28 @@ simplefactmod(GEN f, GEN p)
   return factcantor0(f,p,1);
 }
 
+GEN
+col_to_pol(GEN x, long v)
+{
+  long i, k = lg(x);
+  GEN p;
+
+  while (--k && gcmp0((GEN)x[k]));
+  i = k+2; p = cgetg(i,t_POL);
+  p[1] = evalsigne(1) | evallgef(i) | evalvarn(v);
+  x--; for (k=2; k<i; k++) p[k] = x[k];
+  return p;
+}
+
 /* vector of polynomials (in v) whose coeffs are given by the columns of x */
 GEN
 mat_to_vecpol(GEN x, long v)
 {
-  long i,j, lx = lg(x), lcol = lg(x[1]);
+  long j, lx = lg(x);
   GEN y = cgetg(lx, t_VEC);
 
   for (j=1; j<lx; j++)
-  {
-    GEN p1, col = (GEN)x[j];
-    long k = lcol;
-
-    while (k-- && gcmp0((GEN)col[k]));
-    i=k+2; p1=cgetg(i,t_POL);
-    p1[1] = evalsigne(1) | evallgef(i) | evalvarn(v);
-    col--; for (k=2; k<i; k++) p1[k] = col[k];
-    y[j] = (long)p1;
-  }
+    y[j] = (long)col_to_pol((GEN)x[j], v);
   return y;
 }
 
@@ -1164,10 +1168,10 @@ FqX_deriv(GEN f, GEN T, GEN p)
 {
   return FqX_red(derivpol(f), T, p);
 }
-static GEN
+GEN
 FqX_gcd(GEN P, GEN Q, GEN T, GEN p)
 {
-  GEN g = FpXQX_safegcd(P,Q,T,p);
+  GEN g = T? FpXQX_safegcd(P,Q,T,p): FpX_gcd(P,Q,p);
   if (!g) err(talker,"factmod9: %Z is reducible mod p!", T);
   return g;
 }

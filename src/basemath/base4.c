@@ -909,7 +909,7 @@ ideleaddone_aux(GEN nf,GEN x,GEN ideal)
   return nba? p3: gcopy(p3);
 }
 
-static GEN
+GEN
 unnf_minus_x(GEN x)
 {
   long i, N = lg(x);
@@ -940,35 +940,6 @@ GEN
 ideleaddone(GEN nf,GEN x,GEN idele)
 {
   return addone(ideleaddone_aux,nf,x,idele);
-}
-
-/* return integral x = 0 mod p/pr^e, (x,pr) = 1.
- * Don't reduce mod p here: caller may need result mod pr^k */
-GEN
-special_anti_uniformizer(GEN nf, GEN pr)
-{
-  GEN p = (GEN)pr[1], e = (GEN)pr[3];
-  return gdivexact(element_pow(nf,(GEN)pr[5],e), gpuigs(p,itos(e)-1));
-}
-
-GEN
-nfmodprinit(GEN nf, GEN pr)
-{
-  gpmem_t av;
-  GEN p,p1,prhall;
-
-  nf = checknf(nf); checkprimeid(pr);
-  prhall = cgetg(3,t_VEC);
-  prhall[1] = (long) prime_to_ideal(nf,pr);
-
-  av = avma; p = (GEN)pr[1];
-  p1 = cgetg(2,t_MAT);
-  p1[1] = (long)gmod(special_anti_uniformizer(nf, pr), p);
-  p1 = hnfmodid(idealhermite_aux(nf,p1), p);
-  p1 = idealaddtoone_i(nf,pr,p1);
-
-  /* p1 = 1 mod pr, p1 = 0 mod q^{e_q} for all other primes q | p */
-  prhall[2] = lpileupto(av, unnf_minus_x(p1)); return prhall;
 }
 
 /* given an element x in Z_K and an integral ideal y with x, y coprime,
@@ -1972,7 +1943,7 @@ computet2twist(GEN nf, GEN vdir)
     else if (typ(v) == t_INT)
       p1[j] = lmul2n((GEN)MC[j],itos(v)<<1);
     else
-      p1[j] = lmul((GEN)MC[j],gpui(stoi(4),v,0));
+      p1[j] = lmul((GEN)MC[j],powgi(stoi(4),v));
   }
   return mulmat_real(p1,(GEN)mat[1]);
 }

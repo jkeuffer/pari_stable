@@ -1431,7 +1431,6 @@ _FpXQYQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
   return gerepileupto(av, y);
 }
 
-
 typedef struct {
   GEN T, p, S;
   long v;

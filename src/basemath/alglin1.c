@@ -896,24 +896,7 @@ gaddmat_i(GEN x, GEN y)
 #define swap(x,y) { long _t=x; x=y; y=_t; }
 
 /* Assume x is a non-empty matrix. Return 0 if maximal pivot should not be
- * used, and the matrix precision (min real precision of coeffs) otherwise.
- */
-static long
-matprec(GEN x)
-{
-  long tx,i,j,l, k = VERYBIGINT, lx = lg(x), ly = lg(x[1]);
-  GEN p1;
-  for (i=1; i<lx; i++)
-    for (j=1; j<ly; j++)
-    {
-      p1 = gmael(x,i,j); tx = typ(p1);
-      if (!is_scalar_t(tx)) return 0;
-      l = precision(p1); if (l && l<k) k = l;
-    }
-  return (k==VERYBIGINT)? 0: k;
-}
-
-/* As above, returning 1 if the precision would be non-zero, 0 otherwise */
+ * used, 1 otherwise */
 static int
 use_maximal_pivot(GEN x)
 {
@@ -2061,7 +2044,7 @@ imagecomplspec(GEN x, long *nlze)
   GEN d,y;
   long i,j,k,l,r;
 
-  x = gtrans(x); l = lg(x);
+  x = gtrans_i(x); l = lg(x);
   gauss_pivot(x,&d,&r);
   avma=av; y = cgetg(l,t_VECSMALL);
   for (i=j=1, k=r+1; i<l; i++)

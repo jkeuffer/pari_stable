@@ -1113,6 +1113,7 @@ long    FpX_nbfact(GEN f, GEN p);
 long    FpX_nbroots(GEN f, GEN p);
 GEN     apprgen(GEN f, GEN a);
 GEN     apprgen9(GEN f, GEN a);
+GEN     col_to_pol(GEN x, long v);
 GEN     factcantor(GEN x, GEN p);
 GEN     factmod(GEN f, GEN p);
 GEN     factmod0(GEN f, GEN p);

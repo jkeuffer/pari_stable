@@ -21,6 +21,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "parinf.h"
 
+extern GEN FqX_gcd(GEN P, GEN Q, GEN T, GEN p);
+extern GEN ff_to_nf(GEN x, GEN prinit);
+extern GEN nf_to_ff_init(GEN nf, GEN *pr, GEN *T, GEN *p);
+extern GEN nf_to_ff(GEN nf, GEN x, GEN prinit);
 extern long init_padic_prec(long e, int BitPerFactor, long r, double LOGp2);
 extern double bound_vS(long tmax, GEN *BL);
 extern GEN GS_norms(GEN B, long prec);
@@ -44,12 +48,11 @@ extern GEN RXQX_red(GEN P, GEN T);
 extern GEN RXQX_divrem(GEN x, GEN y, GEN T, GEN *pr);
 #define RXQX_div(x,y,T) RXQX_divrem((x),(y),(T),NULL)
 #define RXQX_rem(x,y,T) RXQX_divrem((x),(y),(T),ONLY_REM)
+#define FqX_div(x,y,T,p) FpXQX_divres((x),(y),(T),(p),NULL)
+#define FqX_mul FpXQX_mul
+#define FqX_red FpXQX_red
 
-static GEN nffactormod2(GEN nf,GEN pol,GEN pr);
-static GEN nfmod_split2(GEN nf, GEN prhall, GEN polb, GEN v, GEN q);
-static GEN nfmod_pol_reduce(GEN nf,GEN prhall,GEN pol);
-static GEN nfmod_pol_divres(GEN nf,GEN prhall,GEN pol1,GEN pol2, GEN *pr);
-static GEN nfmod_pol_gcd(GEN nf,GEN prhall,GEN pol1,GEN pol2);
+static GEN nfmod_pol_reduce(GEN nf,GEN prinit,GEN pol);
 static GEN nfsqff(GEN nf,GEN pol,long fl);
 
 typedef struct /* for use in nfsqff */
@@ -118,190 +121,21 @@ unifpol(GEN nf,GEN pol,long flag)
   return unifpol0(nf,(GEN) pol, flag);
 }
 
-/* reduce the coefficients of pol modulo prhall */
+/* reduce the coefficients of pol modulo prinit */
 static GEN
-nfmod_pol_reduce(GEN nf,GEN prhall,GEN pol)
+nfmod_pol_reduce(GEN nf,GEN prinit,GEN pol)
 {
   long i;
   gpmem_t av=avma, tetpil;
   GEN p1;
 
-  if (typ(pol)!=t_POL) return nfreducemodpr(nf,pol,prhall);
-  pol=unifpol(nf,pol,0);
-
-  tetpil=avma; i=lgef(pol);
+  if (typ(pol)!=t_POL) return nf_to_ff(nf,pol,prinit);
+  pol = unifpol(nf,pol,0);
+  tetpil = avma; i = lgef(pol);
   p1=cgetg(i,t_POL); p1[1]=pol[1];
   for (i--; i>=2; i--)
-    p1[i] = (long) nfreducemodpr(nf,(GEN)pol[i],prhall);
+    p1[i] = (long) nf_to_ff(nf,(GEN)pol[i],prinit);
   return gerepile(av,tetpil, normalizepol(p1));
-}
-
-/* x^2 modulo prhall */
-static GEN
-nfmod_pol_sqr(GEN nf,GEN prhall,GEN x)
-{
-  gpmem_t av=avma, tetpil;
-  GEN px;
-
-  px = nfmod_pol_reduce(nf,prhall,x);
-  px = unifpol(nf,lift(px),1);
-  px = unifpol(nf,gsqr(px),0);
-  tetpil=avma;
-  return gerepile(av,tetpil,nfmod_pol_reduce(nf,prhall,px));
-}
-
-/* multiplication of x by y modulo prhall */
-static GEN
-nfmod_pol_mul(GEN nf,GEN prhall,GEN x,GEN y)
-{
-  gpmem_t av=avma, tetpil;
-  GEN px,py;
-
-  px = nfmod_pol_reduce(nf,prhall,x); px = unifpol(nf,lift(px),1);
-  py = nfmod_pol_reduce(nf,prhall,y); py = unifpol(nf,lift(py),1);
-  px = RXQX_mul(px,py, (GEN)nf[1]);
-  px = unifpol(nf,px,0);
-  tetpil=avma;
-  return gerepile(av,tetpil,nfmod_pol_reduce(nf,prhall,px));
-}
-
-/* Euclidan division of x by y modulo prhall */
-static GEN
-nfmod_pol_divres(GEN nf,GEN prhall,GEN x,GEN y, GEN *pr)
-{
-  long dx, dy, dz, i, j, k, n;
-  gpmem_t av=avma, av1, tetpil;
-  GEN z,p1,p3,px,py;
-
-  py = nfmod_pol_reduce(nf,prhall,y);
-  if (gcmp0(py))
-    err(talker, "division by zero in nfmod_pol_divres");
-
-  tetpil=avma;
-  px=nfmod_pol_reduce(nf,prhall,x);
-  dx=degpol(px); dy=degpol(py); dz=dx-dy;
-  if (dx<dy)
-  {
-    GEN vzero;
-
-    if (pr) *pr = gerepile(av,tetpil,px);
-    else avma = av;
-
-    n=degpol(nf[1]);
-    vzero = cgetg(n+1,t_COL);
-    n=degpol(nf[1]);
-    for (i=1; i<=n; i++) vzero[i]=zero;
-
-    z=cgetg(3,t_POL); z[2]=(long)vzero;
-    z[1]=evallgef(2) | evalvarn(varn(px));
-    return z;
-  }
-  p1 = NULL; /* gcc -Wall */
-
-  z=cgetg(dz+3,t_POL); z[1]=evalsigne(1) | evallgef(3+dz);
-  setvarn(z,varn(px));
-  z[dz+2] = (long) element_divmodpr(nf,(GEN)px[dx+2],(GEN)py[dy+2],prhall);
-  for (i=dx-1; i>=dy; --i)
-  {
-    av1=avma; p1=(GEN)px[i+2];
-    for (j=i-dy+1; j<=i && j<=dz; j++)
-      p1 = gsub(p1, element_mul(nf,(GEN)z[j+2],(GEN)py[i-j+2]));
-    p1 = nfreducemodpr(nf,p1,prhall);
-    tetpil=avma; p3=element_divmodpr(nf,p1,(GEN)py[dy+2],prhall);
-    z[i-dy+2]=lpile(av1,tetpil,p3);
-    z[i-dy+2]=(long)nfreducemodpr(nf,(GEN)z[i-dy+2],prhall);
-  }
-  av1=avma;
-  for (i=dy-1; i>=0; --i)
-  {
-    av1=avma; p1=((GEN)px[i+2]);
-    for (j=0; j<=i && j<=dz; j++)
-      p1 = gsub(p1, element_mul(nf,(GEN)z[j+2],(GEN)py[i-j+2]));
-    p1 = gerepileupto(av1, nfreducemodpr(nf,p1,prhall));
-    if (!gcmp0(p1)) break;
-  }
-
-  if (!pr) { avma = av1; return z; }
-
-  if (i<0)
-  {
-    avma=av1;
-    p3 = cgetg(3,t_POL); p3[2]=zero;
-    p3[1] = evallgef(2) | evalvarn(varn(px));
-    *pr=p3; return z;
-  }
-
-  p3=cgetg(i+3,t_POL);
-  p3[1]=evalsigne(1) | evallgef(i+3) | evalvarn(varn(px));
-  p3[i+2]=(long)nfreducemodpr(nf,p1,prhall);
-  for (k=i-1; k>=0; --k)
-  {
-    av1=avma; p1=((GEN)px[k+2]);
-    for (j=0; j<=k && j<=dz; j++)
-      p1 = gsub(p1, element_mul(nf,(GEN)z[j+2],(GEN)py[k-j+2]));
-    p3[k+2]=lpileupto(av1,nfreducemodpr(nf,p1,prhall));
-  }
-  *pr=p3; return z;
-}
-
-/* GCD of x and y modulo prhall */
-static GEN
-nfmod_pol_gcd(GEN nf,GEN prhall,GEN x,GEN y)
-{
-  gpmem_t av=avma;
-  GEN p1,p2;
-
-  if (lgef(x)<lgef(y)) { p1=y; y=x; x=p1; }
-  p1=nfmod_pol_reduce(nf,prhall,x);
-  p2=nfmod_pol_reduce(nf,prhall,y);
-  while (!isexactzero(p2))
-  {
-    GEN p3;
-
-    nfmod_pol_divres(nf,prhall,p1,p2,&p3);
-    p1=p2; p2=p3;
-  }
-  return gerepileupto(av,p1);
-}
-
-/* return pol^e modulo prhall and the polynomial pmod */
-static GEN
-nfmod_pol_pow(GEN nf,GEN prhall,GEN pmod,GEN pol,GEN e)
-{
-  long i, n = degpol(nf[1]);
-  gpmem_t av = avma;
-  GEN p1,p2,vun;
-
-  vun=cgetg(n+1,t_COL); vun[1]=un; for (i=2; i<=n; i++) vun[i]=zero;
-  p1=gcopy(polun[varn(pol)]); p1[2]=(long)vun;
-  if (gcmp0(e)) return p1;
-
-  p2=nfmod_pol_reduce(nf,prhall,pol);
-  for(;;)
-  {
-    if (!vali(e))
-    {
-      p1=nfmod_pol_mul(nf,prhall,p1,p2);
-      nfmod_pol_divres(nf,prhall,p1,pmod,&p1);
-    }
-    if (gcmp1(e)) break;
-
-    e=shifti(e,-1);
-    p2=nfmod_pol_sqr(nf,prhall,p2);
-    nfmod_pol_divres(nf,prhall,p2,pmod,&p2);
-  }
-  return gerepileupto(av,p1);
-}
-
-/* return the factor of nf.pol modulo p corresponding to pr */
-static GEN
-localpol(GEN nf, GEN pr)
-{
-  GEN g, pol = (GEN)nf[1], p = (GEN)pr[1];
-  if (degpol(pol) == itos((GEN)pr[4])) return pol; /* pr inert */
-
-  g = gmul((GEN)nf[7], (GEN)pr[2]); /* uniformizer */
-  g = primpart(g); return FpX_gcd(g,pol,p);
 }
 
 /* factorization of x modulo pr */
@@ -310,211 +144,27 @@ nffactormod(GEN nf, GEN x, GEN pr)
 {
   long j, l, vx = varn(x), vn;
   gpmem_t av = avma;
-  GEN rep, xrd, prh, p1;
+  GEN z, rep, xrd, prinit, T, p;
 
-  nf=checknf(nf);
+  nf = checknf(nf);
   vn = varn((GEN)nf[1]);
   if (typ(x)!=t_POL) err(typeer,"nffactormod");
   if (vx >= vn)
     err(talker,"polynomial variable must have highest priority in nffactormod");
 
-  prh = nfmodprinit(nf, pr);
-
-  if (divise((GEN)nf[4], (GEN)pr[1]))
-    return gerepileupto(av, nffactormod2(nf,x,pr));
-
-  xrd = nfmod_pol_reduce(nf, prh, x);
-  if (gcmp1((GEN)pr[4]))
-  {
-    for (j = 2; j < lg(xrd); j++)
-      xrd[j] = mael(xrd, j, 1);
-    rep = factmod(xrd, (GEN)pr[1]);
-    rep = lift(rep);
-  }
+  prinit = nf_to_ff_init(nf, &pr, &T, &p);
+  xrd = nfmod_pol_reduce(nf, prinit, x);
+  if (!T)
+    rep = factmod0(xrd, p);
   else
   {
-    GEN pol = localpol(nf, pr);
-    xrd = lift(unifpol(nf, xrd, 1));
-    p1  = gun;
-    for (j = 2; j < lg(xrd); j++)
-    {
-      xrd[j] = lmod((GEN)xrd[j], pol);
-      p1 = mpppcm(p1, denom(content((GEN)xrd[j])));
-    }
-    rep = factmod9(gmul(xrd, p1), (GEN)pr[1], pol);
-    rep = lift(lift(rep));
+    rep = factmod9(xrd, p, T);
+    rep = lift_intern(lift_intern(rep));
   }
 
-  l = lg((GEN)rep[1]);
-  for (j = 1; j < l; j++)
-    mael(rep, 1, j) = (long)unifpol(nf, gmael(rep, 1, j), 1);
-
+  z = (GEN)rep[1]; l = lg(z);
+  for (j = 1; j < l; j++) z[j] = (long)ff_to_nf((GEN)z[j], prinit);
   return gerepilecopy(av, rep);
-}
-
-/* factorization of x modulo pr */
-GEN
-nffactormod2(GEN nf,GEN pol,GEN pr)
-{
-  long lb, nbfact, psim, N, n, i, j, k, d, e, vf, r, kk;
-  gpmem_t av = avma, tetpil;
-  GEN y,ex,*t,f1,f2,f3,df1,g1,polb,pold,polu,vker;
-  GEN Q,f,x,u,v,v2,v3,vz,q,vun,vzero,prhall;
-
-  nf=checknf(nf);
-  if (typ(pol)!=t_POL) err(typeer,"nffactormod");
-  if (varn(pol) >= varn(nf[1]))
-    err(talker,"polynomial variable must have highest priority in nffactormod");
-
-  prhall=nfmodprinit(nf,pr); n=degpol(nf[1]);
-  vun = gscalcol_i(gun, n);
-  vzero = gscalcol_i(gzero, n);
-  q = vker = NULL; /* gcc -Wall */
-
-  f=unifpol(nf,pol,0); f=nfmod_pol_reduce(nf,prhall,f);
-  if (!signe(f)) err(zeropoler,"nffactormod");
-  d=degpol(f); vf=varn(f);
-  if (d == 0) return trivfact();
-  t  = (GEN*)new_chunk(d+1); ex = cgetg(d+1, t_VECSMALL);
-  x=gcopy(polx[vf]); x[3]=(long)vun; x[2]=(long)vzero;
-  if (d<=1) { nbfact=2; t[1] = f; ex[1]=1; }
-  else
-  {
-    q = (GEN)pr[1]; psim = VERYBIGINT;
-    if (!is_bigint(q)) psim = itos(q);
-   /* psim has an effect only when p is small. If too big, set it to a huge
-    * number (i.e ignore it) to avoid an error in itos on next line.
-    */
-    q=gpuigs(q, itos((GEN)pr[4]));
-    f1=f; e=1; nbfact=1;
-    while (lgef(f1)>3)
-    {
-      df1=deriv(f1,vf); f2=nfmod_pol_gcd(nf,prhall,f1,df1);
-      g1=nfmod_pol_divres(nf,prhall,f1,f2,NULL); k=0;
-      while (lgef(g1)>3)
-      {
-	k++;
-	if (k%psim == 0)
-	{
-	  k++; f2=nfmod_pol_divres(nf,prhall,f2,g1,NULL);
-	}
-	f3=nfmod_pol_gcd(nf,prhall,f2,g1);
-	u = nfmod_pol_divres(nf,prhall,g1,f3,NULL);
-	f2= nfmod_pol_divres(nf,prhall,f2,f3,NULL);
-	g1=f3;
-	if (lgef(u)>3)
-	{
-	  N=degpol(u); Q=cgetg(N+1,t_MAT);
-	  v3=cgetg(N+1,t_COL); Q[1]=(long)v3;
-	  v3[1]=(long)vun; for (i=2; i<=N; i++) v3[i]=(long)vzero;
-	
-	  v2 = v = nfmod_pol_pow(nf,prhall,u,x,q);
-	  for (j=2; j<=N; j++)
-	  {
-	    v3=cgetg(N+1,t_COL); Q[j]=(long)v3;
-	    for (i=1; i<=lgef(v2)-2; i++) v3[i]=v2[i+1];
-	    for (; i<=N; i++) v3[i]=(long)vzero;
-	    if (j<N)
-	    {
-	      v2=nfmod_pol_mul(nf,prhall,v2,v);
-	      nfmod_pol_divres(nf,prhall,v2,u,&v2);
-	    }
-	  }
-	  for (i=1; i<=N; i++)
-	    coeff(Q,i,i)=lsub((GEN)coeff(Q,i,i),vun);
-	  v2=nfkermodpr(nf,Q,prhall); r=lg(v2)-1; t[nbfact]=gcopy(u); kk=1;
-	  if (r>1)
-	  {
-	    vker=cgetg(r+1,t_COL);
-	    for (i=1; i<=r; i++)
-	    {
-	      v3=cgetg(N+2,t_POL);
-	      v3[1]=evalsigne(1)+evallgef(2+N); setvarn(v3,vf);
-	      vker[i]=(long)v3; for (j=1; j<=N; j++) v3[j+1]=coeff(v2,j,i);
-	      normalizepol(v3);
-	    }
-	  }
-	  while (kk<r)
-	  {
-	    v=gcopy(polun[vf]); v[2]=(long)vzero;
-	    for (i=1; i<=r; i++)
-	    {
-	      vz=cgetg(n+1,t_COL);
-	      for (j=1; j<=n; j++)
-		vz[j] = lmodsi(mymyrand()>>8, q);
-	      vz=nfreducemodpr(nf,vz,prhall);
-	      v=gadd(v,nfmod_pol_mul(nf,prhall,vz,(GEN)vker[i]));
-	    }
-	    for (i=1; i<=kk && kk<r; i++)
-	    {
-	      polb=t[nbfact+i-1]; lb=lgef(polb);
-	      if (lb>4)
-	      {
-		if(psim==2)
-		  polu=nfmod_split2(nf,prhall,polb,v,q);
-		else
-		{
-		  polu=nfmod_pol_pow(nf,prhall,polb,v,shifti(q,-1));
-                  polu=gsub(polu,vun);
-		}
-                pold=nfmod_pol_gcd(nf,prhall,polb,polu);
-		if (lgef(pold)>3 && lgef(pold)<lb)
-		{
-		  t[nbfact+i-1]=pold; kk++;
-		  t[nbfact+kk-1]=nfmod_pol_divres(nf,prhall,polb,pold,NULL);
-		}
-	      }
-	    }
-	  }
-	  for (i=nbfact; i<nbfact+r; i++) ex[i]=e*k;
-	  nbfact+=r;
-	}
-      }
-      e*=psim; j=(degpol(f2))/psim+3; f1=cgetg(j,t_POL);
-      f1[1] = evalsigne(1) | evallgef(j) | evalvarn(vf);
-      for (i=2; i<j; i++)
-	f1[i]=(long)element_powmodpr(nf,(GEN)f2[psim*(i-2)+2],
-				     gdiv(q,(GEN)pr[1]),prhall);
-    }
-  }
-  if (nbfact < 2)
-    err(talker, "%Z not a prime (nffactormod)", q);
-  for (j=1; j<nbfact; j++)
-  {
-    v = element_divmodpr(nf,vun,gmael(t,j,lgef(t[j])-1),prhall);
-    t[j] = unifpol(nf,nfmod_pol_mul(nf,prhall,v,(GEN)t[j]),1);
-  }
-
-  tetpil=avma; y=cgetg(3,t_MAT);
-  u=cgetg(nbfact,t_COL); y[1]=(long)u;
-  v=cgetg(nbfact,t_COL); y[2]=(long)v;
-  for (j=1,k=0; j<nbfact; j++)
-    if (ex[j])
-    {
-      k++;
-      u[k]=lcopy((GEN)t[j]);
-      v[k]=lstoi(ex[j]);
-    }
-  return gerepile(av,tetpil,y);
-}
-
-/* return pol + pol^2 + ... + pol^(q/2) modulo prhall and
-   the polynomial pmod */
-static GEN
-nfmod_split2(GEN nf,GEN prhall,GEN pmod,GEN pol,GEN exp)
-{
-  gpmem_t av = avma;
-  GEN p1,p2,q;
-
-  if (cmpis(exp,2)<=0) return pol;
-  p2=p1=pol; q=shifti(exp,-1);
-  while (!gcmp1(q))
-  {
-    p2=nfmod_pol_sqr(nf,prhall,p2);
-    nfmod_pol_divres(nf,prhall,p2,pmod,&p2);
-    q=shifti(q,-1); p1=gadd(p1,p2);
-  }
-  return gerepileupto(av,p1);
 }
 
 /* If p doesn't divide bad and has a divisor of degree 1, return it. */
@@ -1044,36 +694,35 @@ rnfdedekind(GEN nf,GEN P0,GEN pr)
 {
   long vt, r, d, n, m, i, j;
   gpmem_t av = avma;
-  GEN P,p1,p2,p,tau,g,vecun,veczero,matid;
-  GEN prhall,res,h,k,base,T;
+  GEN Prd,P,p1,p2,p,tau,g,vecun,veczero,matid;
+  GEN prinit,res,h,k,base,nfT,T;
 
-  nf = checknf(nf); T = (GEN)nf[1]; P = lift(P0);
-  res=cgetg(4,t_VEC);
-  if (typ(pr)==t_VEC && lg(pr)==3)
-  { prhall = (GEN)pr[2]; pr = (GEN)pr[1]; }
-  else
-    prhall=nfmodprinit(nf,pr);
-  p=(GEN)pr[1]; tau = gmul((GEN)nf[7], (GEN)pr[5]);
-  n=degpol(T); m=degpol(P);
+  nf = checknf(nf); nfT = (GEN)nf[1]; P = lift(P0);
+  res = cgetg(4,t_VEC);
+  prinit = nf_to_ff_init(nf,&pr, &T, &p);
+  tau = gmul((GEN)nf[7], (GEN)pr[5]);
+  n = degpol(nfT);
+  m = degpol(P);
 
   vecun = gscalcol_i(gun,n);
   veczero = zerocol(n);
 
-  p1 = lift((GEN)nffactormod(nf,P,pr)[1]);
-  r=lg(p1); if (r < 2) err(constpoler,"rnfdedekind");
+  Prd = nfmod_pol_reduce(nf, prinit, P);
+  p1 = (GEN)nffactormod(nf,Prd,prinit)[1];
+  r = lg(p1); if (r < 2) err(constpoler,"rnfdedekind");
   g = (GEN)p1[1];
-  for (i=2; i<r; i++) g = RXQX_mul(g, (GEN)p1[i], T);
-  h=nfmod_pol_divres(nf,prhall,P,g,NULL);
-  h=lift(unifpol(nf, lift(h), 1));
-  k = gsub(P, RXQX_mul(g,h,T));
-  k = gdiv(RXQX_mul(tau,k,T), p);
-  p2 = nfmod_pol_gcd(nf,prhall,g,h);
-  k  = nfmod_pol_gcd(nf,prhall,p2,k);
+  for (i=2; i<r; i++) g = FqX_mul(g, (GEN)p1[i], T, p);
+  h = FqX_div(Prd,g, T, p);
+  k = gsub(P, RXQX_mul(g,h, nfT));
+  k = gdivexact(RXQX_mul(tau,k,nfT), p);
+  k = nfmod_pol_reduce(nf, prinit, unifpol(nf,k,0));
 
-  d = degpol(k);  /* <= m */
-  vt= idealval(nf,discsr(P0),pr) - 2*d;
-  res[3]=lstoi(vt);
-  if (!d || vt<=1) res[1]=un; else res[1]=zero;
+  p2 = FqX_gcd(g,h,  T,p);
+  k  = FqX_gcd(p2,k, T,p); d = degpol(k);  /* <= m */
+
+  vt = idealval(nf,discsr(P0),pr) - 2*d;
+  res[3] = lstoi(vt);
+  res[1] = (!d || vt<=1)? un: zero;
 
   base=cgetg(3,t_VEC);
   p1=cgetg(m+d+1,t_MAT); base[1]=(long)p1;
@@ -1093,13 +742,12 @@ rnfdedekind(GEN nf,GEN P0,GEN pr)
     GEN prinvp = pidealprimeinv(nf,pr); /* again multiplied by p */
     GEN X = polx[varn(P)], pal;
 
-    pal = nfmod_pol_divres(nf,prhall,P,k,NULL);
-    pal = unifpol(nf, lift(pal), 1);
+    pal = FqX_div(Prd,k, T,p);
     for (   ; j<=m+d; j++)
     {
       p1[j] = (long)RXQX_to_nf(nf,pal,m,veczero);
       p2[j] = (long)prinvp;
-      pal = RXQX_rem(RXQX_mul(pal,X,T),P,T);
+      pal = RXQX_rem(RXQX_mul(pal,X,nfT),P,nfT);
     }
     /* the modulus is integral */
     base = nfhermitemod(nf,base, gmul(gpowgs(p, m-d),

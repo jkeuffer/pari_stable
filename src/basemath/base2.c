@@ -21,6 +21,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 
 #define RXQX_rem(x,y,T) RXQX_divrem((x),(y),(T),ONLY_REM)
+extern GEN FpXQYQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p);
+extern GEN unnf_minus_x(GEN x);
+extern GEN idealaddtoone_i(GEN nf, GEN x, GEN y);
+extern GEN eltmulid_get_table(GEN nf, long i);
+extern GEN _ei(long n, long i);
 extern GEN DDF2(GEN x, long klim, long hint);
 extern GEN Fp_factor_irred(GEN P,GEN l, GEN Q);
 extern GEN RXQX_divrem(GEN x, GEN y, GEN T, GEN *pr);
@@ -35,7 +40,7 @@ extern GEN merge_factor_i(GEN f, GEN g);
 extern GEN mulmat_pol(GEN A, GEN x);
 extern GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den);
 extern GEN nfidealdet1(GEN nf, GEN a, GEN b);
-extern GEN nfsuppl(GEN nf, GEN x, long n, GEN prhall);
+extern GEN nfsuppl(GEN nf, GEN x, long n, GEN prinit);
 extern GEN pol_to_monic(GEN pol, GEN *lead);
 extern GEN pol_to_vec(GEN x, long N);
 extern GEN quicktrace(GEN x, GEN sym);
@@ -1860,6 +1865,62 @@ nbasis(GEN ibas,GEN pd)
 /*                   BUCHMANN-LENSTRA ALGORITHM                    */
 /*                                                                 */
 /*******************************************************************/
+/* REDUCTION Modulo a prime ideal */
+
+/* x integral, reduce mod prh in HNF */
+GEN
+nfreducemodpr_i(GEN x, GEN prh)
+{
+  GEN p = gcoeff(prh,1,1);
+  long i,j;
+
+  x = dummycopy(x);
+  for (i=lg(x)-1; i>=2; i--)
+  {
+    GEN t = (GEN)prh[i], p1 = resii((GEN)x[i], p);
+    x[i] = (long)p1;
+    if (signe(p1) && is_pm1(t[i]))
+    {
+      for (j=1; j<i; j++)
+        x[j] = lsubii((GEN)x[j], mulii(p1, (GEN)t[j]));
+      x[i] = zero;
+    }
+  }
+  x[1] = lresii((GEN)x[1], p); return x;
+}
+
+/* for internal use */
+GEN
+nfreducemodpr(GEN nf, GEN x, GEN prinit)
+{
+  long i, v;
+  GEN p, prh, den;
+
+  for (i=lg(x)-1; i>0; i--)
+    if (typ(x[i]) == t_INTMOD) { x = lift(x); break; }
+  prh = (GEN)prinit[1]; p = gcoeff(prh,1,1);
+  den = denom(x);
+  if (!gcmp1(den))
+  {
+    GEN cx;
+    v = ggval(den,p);
+    if (v) x = element_mul(nf,x, element_pow(nf,(GEN)prinit[2],stoi(v)));
+    x = primitive_part(x, &cx);
+    x = FpV_red(x, p);
+    if (cx) x = FpV_red(gmul(gmod(cx, p), x), p);
+  }
+  return FpV(nfreducemodpr_i(x, prh), p);
+}
+
+/* public function */
+GEN
+nfreducemodpr2(GEN nf, GEN x, GEN prinit)
+{
+  gpmem_t av = avma; checkprhall(prinit);
+  if (typ(x) != t_COL) x = algtobasis(nf,x);
+  return gerepileupto(av, nfreducemodpr(nf,x,prinit));
+}
+
 GEN element_powid_mod_p(GEN nf, long I, GEN n, GEN p);
 
 /* return a Z basis of Z_K's p-radical, phi = x--> x^p-x */
@@ -1882,22 +1943,31 @@ pradical(GEN nf, GEN p, GEN *phi)
   *phi = frob; return rad;
 }
 
-/* minimal polynomial of a in A2 (dim A2 = d2). mula = multiplication
- * table by a in ZK/p */
+/* return powers of a: a^0, ... , a^d,  d = dim A */
 static GEN
-pol_min(GEN mula, GEN Mi2, GEN p)
+get_powers(GEN mul, GEN p)
+{
+  long i, d = lg(mul[1]);
+  GEN z, pow = cgetg(d+2,t_MAT), P = pow+1;
+
+  P[0] = (long)gscalcol_i(gun, d-1);
+  z = (GEN)mul[1];
+  for (i=1; i<=d; i++)
+  {
+    P[i] = (long)z; /* a^i */
+    if (i!=d) z = FpM_FpV_mul(mul, z, p);
+  }
+  return pow;
+}
+
+/* minimal polynomial of a in A (dim A = d).
+ * mul = multiplication table by a in A */
+static GEN
+pol_min(GEN mul, GEN p)
 {
   gpmem_t av = avma;
-  long i, d2 = lg(Mi2[1]);
-  GEN z, pow = cgetg(d2+2,t_MAT), P = pow+1;
-
-  P[0] = Mi2[1]; z = (GEN)mula[1];
-  for (i=1; i<=d2; i++)
-  {
-    P[i] = (long)FpM_FpV_mul(Mi2, z, p); /* a^i */
-    if (i!=d2) z = FpM_FpV_mul(mula, z, p);
-  }
-  z = (GEN)FpM_deplin(pow, p);
+  GEN z, pow = get_powers(mul, p);
+  z = FpM_deplin(pow, p);
   return gerepileupto(av, gtopolyrev(z,0));
 }
 
@@ -2099,17 +2169,19 @@ primedec(GEN nf, GEN p)
     Mi  = FpM_inv(M, p);
     M2  = vecextract_i(M, k+1,N); /* M = (H|M2) invertible */
     Mi2 = rowextract_i(Mi,k+1,N);
+    /* FIXME: FpM_mul(,M2) could be done with vecextract_p */
     phi2 = FpM_mul(Mi2, FpM_mul(phi,M2, p), p);
     mat1 = FpM_ker(phi2, p);
     dim = lg(mat1)-1; /* A2 product of 'dim' fields */
     if (dim > 1)
     { /* phi2 v = 0 <==> a = M2 v in Ker phi */
-      GEN I,R,r,a,mula, v = (GEN)mat1[2];
+      GEN I,R,r,a,mula,mul2, v = (GEN)mat1[2];
       long n;
 
       a = FpM_FpV_mul(M2,v, p);
       mula = FpM_red(eltmul_get_table(nf, a), p);
-      R = rootmod(pol_min(mula,Mi2,p), p); /* totally split mod p */
+      mul2 = FpM_mul(Mi2, FpM_mul(mula,M2, p), p);
+      R = rootmod(pol_min(mul2,p), p); /* totally split mod p */
 
       n = lg(R)-1;
       for (i=1; i<=n; i++)
@@ -2129,57 +2201,206 @@ primedec(GEN nf, GEN p)
   return gerepileupto(av, gen_sort(L,0,cmp_prime_over_p));
 }
 
-/* REDUCTION Modulo a prime ideal */
-
-/* x integral, reduce mod prh in HNF */
-GEN
-nfreducemodpr_i(GEN x, GEN prh)
+/* return [Fp[x]: Fp] */
+static long
+ffdegree(GEN x, GEN frob, GEN p)
 {
-  GEN p = gcoeff(prh,1,1);
-  long i,j;
+  gpmem_t av = avma;
+  long d, f = lg(frob)-1;
+  GEN y = x;
 
-  x = dummycopy(x);
-  for (i=lg(x)-1; i>=2; i--)
+  for (d=1; d < f; d++)
   {
-    GEN t = (GEN)prh[i], p1 = resii((GEN)x[i], p);
-    x[i] = (long)p1;
-    if (signe(p1) && is_pm1(t[i]))
-    {
-      for (j=1; j<i; j++)
-        x[j] = lsubii((GEN)x[j], mulii(p1, (GEN)t[j]));
-      x[i] = zero;
-    }
+    y = FpM_FpV_mul(frob, y, p);
+    if (gegal(y, x)) break;
   }
-  x[1] = lresii((GEN)x[1], p); return x;
+  avma = av; return d;
 }
 
-/* for internal use */
-GEN
-nfreducemodpr(GEN nf, GEN x, GEN prhall)
+static GEN
+lift_to_zk(GEN v, GEN c, long N)
 {
-  long i,v;
-  GEN p,prh,den;
+  GEN w = zerocol(N);
+  long i, l = lg(c);
+  for (i=1; i<l; i++) w[c[i]] = v[i];
+  return w;
+}
 
-  for (i=lg(x)-1; i>0; i--)
-    if (typ(x[i]) == t_INTMOD) { x=lift_intern(x); break; }
-  prh=(GEN)prhall[1]; p=gcoeff(prh,1,1);
-  den=denom(x);
+/* return integral x = 0 mod p/pr^e, (x,pr) = 1.
+ * Don't reduce mod p here: caller may need result mod pr^k */
+GEN
+special_anti_uniformizer(GEN nf, GEN pr)
+{
+  GEN p = (GEN)pr[1], e = (GEN)pr[3];
+  return gdivexact(element_pow(nf,(GEN)pr[5],e), gpowgs(p,itos(e)-1));
+}
+
+/* return t = 1 mod pr, t = 0 mod p / pr^e(pr/p) */
+static GEN
+anti_uniformizer2(GEN nf, GEN pr)
+{
+  GEN p = (GEN)pr[1], z;
+  z = gmod(special_anti_uniformizer(nf, pr), p);
+  z = eltmul_get_table(nf, z);
+  z = hnfmodid(z, p);
+  z = idealaddtoone_i(nf,pr,z);
+  return unnf_minus_x(z);
+}
+
+GEN
+nfmodprinit(GEN nf, GEN pr)
+{
+  gpmem_t av = avma;
+  GEN res, tau, mul, x, p, T, pow, ffproj, nfproj, prh, c, gf = (GEN)pr[4];
+  long N, i, k, f = itos(gf);
+
+  nf = checknf(nf); checkprimeid(pr);
+  N = degpol(nf[1]);
+  prh = prime_to_ideal(nf, pr);
+  tau = anti_uniformizer2(nf, pr);
+  p = (GEN)pr[1];
+
+  if (f == 1)
+  {
+    ffproj = cgetg(N+1, t_VEC);
+    ffproj[1] = un;
+    for (i=2; i<=N; i++)
+    {
+      x = gcoeff(prh,1,i);
+      if (signe(x)) x = subii(p,x);
+      ffproj[i] = (long)x;
+    }
+    res = cgetg(5, t_COL);
+    res[1] = (long)prh;
+    res[2] = (long)tau;
+    res[3] = (long)ffproj;
+    res[4] = (long)pr; return gerepilecopy(av, res);
+  }
+
+  c = cgetg(f+1, t_VECSMALL);
+  ffproj = cgetg(N+1, t_MAT);
+  for (k=i=1; i<=N; i++)
+  {
+    x = gcoeff(prh, i,i);
+    if (!is_pm1(x)) { c[k] = i; ffproj[i] = (long)_ei(N, k); k++; }
+    else
+      ffproj[i] = lneg(rowextract_p((GEN)prh[i], c));
+  }
+  if (! divise((GEN)nf[4], p))
+  {
+    if (N == f) T = (GEN)nf[1]; /* pr inert */
+    else
+      T = primpart(gmul((GEN)nf[7], (GEN)pr[2]));
+    res = cgetg(6, t_COL);
+    res[1] = (long)prh;
+    res[2] = (long)tau;
+    res[3] = (long)ffproj;
+    res[4] = (long)pr;
+    res[5] = (long)T; return gerepilecopy(av, res);
+  }
+
+  if (isprime(gf))
+  {
+    mul = eltmulid_get_table(nf, c[2]);
+    mul = vecextract_p(mul, c);
+  }
+  else
+  {
+    GEN v, u, u2, frob;
+    long deg,deg1,deg2;
+
+    /* matrix of Frob: x->x^p over Z_K/pr = < w[c1], ..., w[cf] > over Fp */
+    frob = cgetg(f+1, t_MAT);
+    for (i=1; i<=f; i++)
+    {
+      x = element_powid_mod_p(nf,c[i],p, p);
+      frob[i] = (long)FpM_FpV_mul(ffproj, x, p);
+    }
+    u = _ei(f,2); k = 2;
+    deg1 = ffdegree(u, frob, p);
+    while (deg1 < f)
+    {
+      k++; u2 = _ei(f, k);
+      deg2 = ffdegree(u2, frob, p);
+      deg = clcm(deg1,deg2);
+      if (deg == deg1) continue;
+      if (deg == deg2) { deg1 = deg2; u = u2; continue; }
+      u = gadd(u, u2);
+      while (ffdegree(u, frob, p) < deg) u = gadd(u, u2);
+      deg1 = deg;
+    }
+    v = lift_to_zk(u,c,N);
+
+    mul = cgetg(f+1,t_MAT);
+    mul[1] = (long)v; /* assume w_1 = 1 */
+    for (i=2; i<=f; i++) mul[i] = (long)element_mulid(nf,v,c[i]);
+  }
+
+  /* Z_K/pr = Fp(v), mul = mul by v */
+  mul = FpM_red(mul, p);
+  mul = FpM_mul(ffproj, mul, p);
+
+  pow = get_powers(mul, p);
+  T = gtopolyrev(FpM_deplin(pow, p), 0);
+  nfproj = cgetg(f+1, t_MAT);
+  for (i=1; i<=f; i++) nfproj[i] = (long)lift_to_zk((GEN)pow[i], c, N);
+
+  setlg(pow, f+1);
+  ffproj = FpM_mul(FpM_inv(pow, p), ffproj, p);
+
+  res = cgetg(7, t_COL);
+  res[1] = (long)prh;
+  res[2] = (long)tau;
+  res[3] = (long)ffproj;
+  res[4] = (long)pr;
+  res[5] = (long)T;
+  res[6] = (long)nfproj; return gerepilecopy(av, res);
+}
+
+/* assume x in 'basis' form (t_COL) */
+GEN
+nf_to_ff_init(GEN nf, GEN *pr, GEN *T, GEN *p)
+{
+  GEN prinit = (typ(*pr) == t_COL)? *pr: nfmodprinit(nf, *pr);
+  *T = lg(prinit)==5? NULL: (GEN)prinit[5];
+  *p = gcoeff(prinit[1],1,1);
+  *pr = (GEN)prinit[4]; return prinit;
+}
+
+GEN
+zk_to_ff(GEN x, GEN prinit)
+{
+  GEN p = gcoeff(prinit[1],1,1);
+  GEN y = gmul((GEN)prinit[3], x);
+  if (lg(prinit) == 5) return modii(y,p);
+  y = FpV_red(y, p);
+  return col_to_pol(y, varn(prinit[5]));
+}
+
+GEN
+nf_to_ff(GEN nf, GEN x, GEN prinit)
+{
+  GEN prh,p,den;
+  long v;
+  prh = (GEN)prinit[1]; p = gcoeff(prh,1,1);
+  den = denom(x);
   if (!gcmp1(den))
   {
-    v=ggval(den,p);
-    if (v) x=element_mul(nf,x,element_pow(nf,(GEN)prhall[2],stoi(v)));
-    x = gmod(x,p);
+    GEN cx;
+    v = ggval(den,p);
+    if (v) x = element_mul(nf,x, element_pow(nf,(GEN)prinit[2],stoi(v)));
+    x = primitive_part(x, &cx);
+    x = FpV_red(x, p);
+    if (cx) x = FpV_red(gmul(gmod(cx, p), x), p);
   }
-  return FpV(nfreducemodpr_i(x, prh), p);
+  return zk_to_ff(x, prinit);
 }
 
-/* public function */
 GEN
-nfreducemodpr2(GEN nf, GEN x, GEN prhall)
+ff_to_nf(GEN x, GEN prinit)
 {
-  gpmem_t av = avma; checkprhall(prhall);
-  if (typ(x) != t_COL) x = algtobasis(nf,x);
-  return gerepileupto(av, nfreducemodpr(nf,x,prhall));
+  if (lg(prinit) < 7) return x;
+  return mulmat_pol((GEN)prinit[6], x);
 }
 
 /*                        relative ROUND 2
@@ -2217,9 +2438,9 @@ rnfjoinmodules(GEN nf, GEN x, GEN y)
 }
 
 /* pas de gestion de pile : x et y sont des vecteurs dont les coefficients
- * sont les composantes sur nf[7]; avec reduction mod pr sauf si prhall=NULL */
+ * sont les composantes sur nf[7]; avec reduction mod pr sauf si prinit=NULL */
 static GEN
-rnfelement_mulidmod(GEN nf, GEN multab, GEN x, long h, GEN prhall)
+rnfelement_mulidmod(GEN nf, GEN multab, GEN x, long h, GEN prinit)
 {
   long j,k,N;
   GEN p1,c,v,s,znf;
@@ -2239,7 +2460,7 @@ rnfelement_mulidmod(GEN nf, GEN multab, GEN x, long h, GEN prhall)
       }
     if (s == gzero) s = znf;
     else
-      if (prhall) s = nfreducemodpr(nf,s,prhall);
+      if (prinit) s = nfreducemodpr(nf,s,prinit);
     v[k] = (long)s;
   }
   return v;
@@ -2248,7 +2469,7 @@ rnfelement_mulidmod(GEN nf, GEN multab, GEN x, long h, GEN prhall)
 /* pas de gestion de pile : x est un vecteur dont les coefficients sont les
  * composantes sur nf[7] */
 static GEN
-rnfelement_sqrmod(GEN nf, GEN multab, GEN x, GEN prhall)
+rnfelement_sqrmod(GEN nf, GEN multab, GEN x, GEN prinit)
 {
   long i,j,k,n;
   GEN p1,c,z,s;
@@ -2280,14 +2501,14 @@ rnfelement_sqrmod(GEN nf, GEN multab, GEN x, GEN prhall)
 	}
       }
     }
-    if (prhall) s = nfreducemodpr(nf,s,prhall);
+    if (prinit) s = nfreducemodpr(nf,s,prinit);
     z[k]=(long)s;
   }
   return z;
 }
 
 typedef struct {
-  GEN nf, multab, prhall;
+  GEN nf, multab, prinit;
   long h;
 } rnfeltmod_muldata;
 
@@ -2296,18 +2517,18 @@ _mul(void *data, GEN x, GEN y/* base; ignored */)
 {
   rnfeltmod_muldata *D = (rnfeltmod_muldata *) data;
   (void)y;
-  return rnfelement_mulidmod(D->nf,D->multab,x,D->h,D->prhall);
+  return rnfelement_mulidmod(D->nf,D->multab,x,D->h,D->prinit);
 }
 static GEN
 _sqr(void *data, GEN x)
 {
   rnfeltmod_muldata *D = (rnfeltmod_muldata *) data;
-  return rnfelement_sqrmod(D->nf,D->multab,x,D->prhall);
+  return rnfelement_sqrmod(D->nf,D->multab,x,D->prinit);
 }
 
 /* Compute x^n mod pr in the extension, assume n >= 0 */
 static GEN
-rnfelementid_powmod(GEN nf, GEN multab, GEN matId, long h, GEN n, GEN prhall)
+rnfelementid_powmod(GEN nf, GEN multab, GEN matId, long h, GEN n, GEN prinit)
 {
   gpmem_t av = avma;
   GEN y;
@@ -2319,7 +2540,7 @@ rnfelementid_powmod(GEN nf, GEN multab, GEN matId, long h, GEN n, GEN prhall)
   D.h = h;
   D.nf    = nf;
   D.multab= multab;
-  D.prhall= prhall;
+  D.prinit= prinit;
   y = leftright_pow(y, n, (void*)&D, &_sqr, &_mul);
   return gerepilecopy(av, y);
 }
@@ -2349,14 +2570,13 @@ rnfordmax(GEN nf, GEN pol, GEN pr, GEN id, GEN matId)
 {
   gpmem_t av=avma,av1,lim;
   long i,j,k,n,v1,v2,vpol,m,cmpt,sep;
-  GEN p,q,q1,prhall,A,Aa,Aaa,A1,I,R,p1,p2,p3,multab,multabmod,Aainv;
+  GEN p,q,q1,prinit,A,Aa,Aaa,A1,I,R,p1,p2,p3,multab,multabmod,Aainv;
   GEN pip,baseIp,baseOp,alpha,matprod,alphainv,matC,matG,vecpro,matH;
   GEN neworder,H,Hid,alphalistinv,alphalist,prhinv,T;
 
   if (DEBUGLEVEL>1) fprintferr(" treating %Z\n",pr);
-  prhall=nfmodprinit(nf,pr);
-  q=cgetg(3,t_VEC); q[1]=(long)pr;q[2]=(long)prhall;
-  p1=rnfdedekind(nf,pol,q);
+  prinit=nfmodprinit(nf,pr);
+  p1=rnfdedekind(nf,pol,prinit);
   if (gcmp1((GEN)p1[1])) return gerepilecopy(av,(GEN)p1[2]);
 
   sep=itos((GEN)p1[3]);
@@ -2434,9 +2654,9 @@ rnfordmax(GEN nf, GEN pol, GEN pr, GEN id, GEN matId)
     R=cgetg(n+1,t_MAT); multabmod = mymod(multab,p);
     R[1] = matId[1];
     for (j=2; j<=n; j++)
-      R[j] = (long) rnfelementid_powmod(nf,multabmod,matId, j,q1,prhall);
-    baseIp = nfkermodpr(nf,R,prhall);
-    baseOp = nfsuppl(nf,baseIp,n,prhall);
+      R[j] = (long) rnfelementid_powmod(nf,multabmod,matId, j,q1,prinit);
+    baseIp = nfkermodpr(nf,R,prinit);
+    baseOp = nfsuppl(nf,baseIp,n,prinit);
     alpha=cgetg(n+1,t_MAT);
     for (j=1; j<lg(baseIp); j++) alpha[j]=baseOp[j];
     for (   ; j<=n; j++)
@@ -2466,10 +2686,10 @@ rnfordmax(GEN nf, GEN pol, GEN pr, GEN id, GEN matId)
       {
 	p2 = gmul(alphainv, gcoeff(matprod,i,j));
 	for (k=1; k<=n; k++)
-	  p1[(i-1)*n+k]=(long)nfreducemodpr(nf,algtobasis(nf,(GEN)p2[k]),prhall);
+	  p1[(i-1)*n+k]=(long)nfreducemodpr(nf,algtobasis(nf,(GEN)p2[k]),prinit);
       }
     }
-    matG=nfkermodpr(nf,matC,prhall); m=lg(matG)-1;
+    matG=nfkermodpr(nf,matC,prinit); m=lg(matG)-1;
     vecpro=cgetg(3,t_VEC);
     p1=cgetg(n+m+1,t_MAT); vecpro[1]=(long)p1;
     p2=cgetg(n+m+1,t_VEC); vecpro[2]=(long)p2;
