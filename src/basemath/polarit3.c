@@ -1333,7 +1333,7 @@ static GEN fflgen(GEN l, long e, GEN r, GEN T ,GEN p, GEN *zeta)
  * m = y^(q/l)
  * y not an l-th power [ m != 1 ] */
 GEN
-ffsqrtlmod(GEN a, GEN l, GEN T ,GEN p , GEN q, long e, GEN r, GEN y, GEN m)
+FpXQ_sqrtl(GEN a, GEN l, GEN T ,GEN p , GEN q, long e, GEN r, GEN y, GEN m)
 {
   pari_sp av = avma, lim;
   long i,k;
@@ -1365,7 +1365,7 @@ ffsqrtlmod(GEN a, GEN l, GEN T ,GEN p , GEN q, long e, GEN r, GEN y, GEN m)
     w = FpXQ_mul(y,w,T,p);
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"ffsqrtlmod");
+      if(DEBUGMEM>1) err(warnmem,"FpXQ_sqrtl");
       gerepileall(av,4, &y,&v,&w,&m);
     }
   }
@@ -1380,7 +1380,7 @@ ffsqrtlmod(GEN a, GEN l, GEN T ,GEN p , GEN q, long e, GEN r, GEN y, GEN m)
  * of solutions is {x*zetan^k;k=0 to m-1}
  *
  * If a = 0, return 0 and (if zetan != NULL) set zetan = gun */
-GEN ffsqrtnmod(GEN a, GEN n, GEN T, GEN p, GEN *zetan)
+GEN FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zetan)
 {
   pari_sp ltop=avma, av1, lim;
   long i,j,e;
@@ -1388,9 +1388,9 @@ GEN ffsqrtnmod(GEN a, GEN n, GEN T, GEN p, GEN *zetan)
   GEN q,r,zeta,y,l,z;
 
   if (typ(a) != t_POL || typ(n) != t_INT || typ(T) != t_POL || typ(p)!=t_INT)
-    err(typeer,"ffsqrtnmod");
-  if (!degpol(T)) err(constpoler,"ffsqrtnmod");
-  if (!signe(n)) err(talker,"1/0 exponent in ffsqrtnmod");
+    err(typeer,"FpXQ_sqrtn");
+  if (!degpol(T)) err(constpoler,"FpXQ_sqrtn");
+  if (!signe(n)) err(talker,"1/0 exponent in FpXQ_sqrtn");
   if (gcmp1(n)) {if (zetan) *zetan=gun;return gcopy(a);}
   if (gcmp0(a)) {if (zetan) *zetan=gun;return gzero;}
 
@@ -1413,12 +1413,12 @@ GEN ffsqrtnmod(GEN a, GEN n, GEN T, GEN p, GEN *zetan)
       if (zetan) z = FpXQ_mul(z, FpXQ_pow(y,gpowgs(l,e-j),T,p), T,p);
       for (; j; j--)
       {
-	a = ffsqrtlmod(a,l,T,p,q,e,r,y,zeta);
+	a = FpXQ_sqrtl(a,l,T,p,q,e,r,y,zeta);
 	if (!a) {avma=ltop; return NULL;}
       }
       if (low_stack(lim, stack_lim(ltop,1)))
       { /* n can have lots of prime factors */
-	if(DEBUGMEM>1) err(warnmem,"ffsqrtnmod");
+	if(DEBUGMEM>1) err(warnmem,"FpXQ_sqrtn");
         gerepileall(av1,zetan? 2: 1, &a,&z);
       }
     }
@@ -1716,7 +1716,7 @@ Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       if (DEBUGLEVEL>=4) msgtimer("pows [P,Q]");
       z=FpXQ_inv(Bn,U,l);
       z=FpXQ_mul(An,z,U,l);
-      L=ffsqrtnmod(z,ipg,U,l,NULL);
+      L=FpXQ_sqrtn(z,ipg,U,l,NULL);
       if (DEBUGLEVEL>=4) msgtimer("ffsqrtn");
       if ( !L )
         err(talker,"Polynomials not irreducible in Fp_intersect");
