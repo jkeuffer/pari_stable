@@ -599,11 +599,6 @@ modulus \kbd{y} is copied onto the heap and not onto the PARI stack.
 binary exponent of the coefficients of~\kbd{x}. Returns
 \hbox{\kbd{-HIGHEXPOBIT}} if \kbd{x} has no components or is an exact zero.
 
-\fun{long}{gsize}{GEN x} returns 0 if \kbd{x} is exactly~0. Otherwise,
-returns \kbd{\key{gexpo}(x)} multiplied by $\log_{10}(2)$. This gives a
-crude estimate for the maximal number of decimal digits of the components
-of~\kbd{x}.
-
 \fun{long}{gsigne}{GEN x} returns the sign of~\kbd{x} ($-1$, 0 or 1) when
 \kbd{x} is an integer, real or (irreducible or reducible) fraction. Raises
 an error for all other types.
@@ -617,6 +612,11 @@ not zero, and a reasonable quantity obtained from the exponent of \kbd{x}
 if \kbd{x} is numerically equal to zero). If \kbd{x} is of type \typ{COMPLEX},
 returns the minimum of the precisions of the real and imaginary part.
 Otherwise, returns~0 (which stands in fact for infinite precision).
+
+\fun{long}{sizedigit}{GEN x} returns 0 if \kbd{x} is exactly~0. Otherwise,
+returns \kbd{\key{gexpo}(x)} multiplied by $\log_{10}(2)$. This gives a
+crude estimate for the maximal number of decimal digits of the components
+of~\kbd{x}.
 
 \subsec{Comparison operators and valuations}
 
