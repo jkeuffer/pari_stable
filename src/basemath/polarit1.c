@@ -1677,7 +1677,8 @@ rootpadiclift(GEN T, GEN S, GEN p, long e)
   qold = p ;  q = p; qm1 = gun;
   nb=hensel_lift_accel(e, &mask);
   Tr = FpX_red(T,q);
-  W=FpX_eval(deriv(Tr, x),S,q);
+  S = modii(S,q);
+  W=FpX_eval(deriv(Tr, x), S, q);
   W=Fp_inv(W,q);
   for(i=0;i<nb;i++)
   {
