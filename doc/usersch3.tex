@@ -1083,9 +1083,9 @@ small.
 
 \subsecidx{besselk}$(\var{nu},x,\{\fl=0\})$: $K$-Bessel function of index
 \var{nu} (which can be complex) and argument $x$. Only real and positive
-arguments
-$x$ are allowed in the present version \vers. If $\fl$ is equal to 1,
-uses another implementation of this function which is often faster.
+arguments $x$ are allowed in the present version \vers. If $\fl$ is equal to
+1, uses another implementation of this function which is often faster. In the
+present version \vers, this function is not very accurate when $x$ is small.
 
 \syn{kbessel}{\var{nu},x,\var{prec}} and
 $\teb{kbessel2}(\var{nu},x,\var{prec})$ respectively.
