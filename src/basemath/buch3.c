@@ -1320,18 +1320,22 @@ bnrisconductor(GEN arg0,GEN arg1,GEN arg2)
   return itos(conductor(bnr,sub,-1));
 }
 
+GEN
+isprincipalray_init(GEN bnf, GEN x)
+{
+  GEN z = cgetg(3,t_VEC);
+  z[2] = (long)quick_isprincipalgen(bnf, x);
+  z[1] = (long)x; return z;
+}
+
 /* special for isprincipalrayall */
 static GEN
 getgen(GEN bnf, GEN gen)
 {
   long i,l = lg(gen);
-  GEN p1, g = cgetg(l, t_VEC);
+  GEN g = cgetg(l, t_VEC);
   for (i=1; i<l; i++)
-  {
-    p1 = cgetg(3,t_VEC); g[i] = (long)p1;
-    p1[1] = (long)gen[i];
-    p1[2] = (long)quick_isprincipalgen(bnf, (GEN)gen[i]);
-  }
+    g[i] = (long)isprincipalray_init(bnf, (GEN)gen[i]);
   return g;
 }
 
