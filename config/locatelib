@@ -8,12 +8,17 @@ for dir in $pth; do
         # for .so and .sl
         try=`ls $dir/lib$lib.s? 2> /dev/null` 
         # in case it's missing a .so, but has e.g a .so.5. Take most recent
+        # Ex: RH systems where readline-dev is installed, but not ncurses-dev
+        # ==> libncurses.so is not here, which is a bug in RH.
+        # It would be better to ask user to install ncurses-dev than to do
+        # this awful kludge.
         if test -z "$try"; then
           try=`(ls $dir/lib$lib.s?.* | tail -1) 2> /dev/null` 
         fi
         if test -z "$try"; then
           try=`ls $dir/lib$lib.a 2> /dev/null`
-        else 
+        fi
+        if test -z "$try"; then
           try=$ok
         fi
       else
