@@ -1286,7 +1286,6 @@ GEN     vecsmall_vec(GEN z);
 
 long    Flx_nbfact(GEN z, long p);
 long    Flx_nbroots(GEN f, long p);
-GEN     FpV_roots_to_pol(GEN V, GEN p, long v);
 long    FpX_is_irred(GEN f, GEN p);
 long    FpX_is_squarefree(GEN f, GEN p);
 long    FpX_is_totally_split(GEN f, GEN p);
@@ -1398,10 +1397,16 @@ GEN     vecbezoutres(GEN x, GEN y);
 
 /* polarit3.c */
 
+GEN     Fp_factor_rel(GEN P, GEN l, GEN Q);
+GEN     Fp_factor_rel0(GEN P, GEN l, GEN Q);
+void    Fp_intersect(long n,GEN P,GEN Q,GEN l,GEN *SP,GEN *SQ,GEN MA,GEN MB);
+GEN     Fp_inv_isom(GEN S,GEN Tp, GEN p);
+GEN     Fp_isom(GEN P,GEN Q,GEN l);
 GEN     FpM(GEN z, GEN p);
 GEN     FpM_red(GEN z, GEN p);
 GEN     FpV(GEN z, GEN p);
 GEN     FpV_red(GEN z, GEN p);
+GEN     FpV_roots_to_pol(GEN V, GEN p, long v);
 GEN     FpX(GEN z, GEN p);
 GEN     FpX_FpXQ_compo(GEN T,GEN x,GEN pol,GEN p);
 GEN     FpX_FpXQV_compo(GEN T,GEN x,GEN pol,GEN p);
@@ -1436,14 +1441,10 @@ GEN     FpXQX_FpXQ_mul(GEN P, GEN U, GEN T, GEN p);
 GEN     FpXQX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *pr);
 GEN     FpXQX_normalize(GEN z, GEN T, GEN p);
 GEN     FpXV_FpV_innerprod(GEN V, GEN W, GEN p);
+GEN     FpXV_mul(GEN V, GEN p);
 GEN     FpXV_red(GEN z, GEN p);
 GEN     FpXX_red(GEN z, GEN p);
 GEN     FpY_FpXY_resultant(GEN a, GEN b0, GEN p);
-GEN     Fp_factor_rel(GEN P, GEN l, GEN Q);
-GEN     Fp_factor_rel0(GEN P, GEN l, GEN Q);
-void    Fp_intersect(long n,GEN P,GEN Q,GEN l,GEN *SP,GEN *SQ,GEN MA,GEN MB);
-GEN     Fp_inv_isom(GEN S,GEN Tp, GEN p);
-GEN     Fp_isom(GEN P,GEN Q,GEN l);
 GEN     Fq_inv(GEN x, GEN pol, GEN p);
 GEN     Fq_invsafe(GEN x, GEN pol, GEN p);
 GEN     Fq_add(GEN x, GEN y, GEN T/*unused*/, GEN p);
