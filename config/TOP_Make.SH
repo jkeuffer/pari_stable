@@ -20,6 +20,9 @@ case "`$tar 2>&1`" in
 esac
 tarinc="$inc $config_dir/MANIFEST"
 
+dbgobjdir=`echo "$objdir" | sed -e 's/\.[dbgprf]*$//'`
+dbgobjdir=$dbgobjdir.dbg
+
 dosversion=`echo $version|sed -e 's/\.//g'`
 dosversion="_$dosversion$patch"
 
@@ -52,8 +55,8 @@ dft target::
 gp all bench test-compat test-graphic install cleanobj cleantest install-bin install-doc install-lib-sta install-bin-sta dobench::
 	cd $objdir; \$(MAKE) \$@
 
-gp.dbg: $objdir.dbg/gp-sta
-	cd $objdir.dbg; \$(MAKE) gp
+gp.dbg:
+	cd $dbgobjdir; \$(MAKE) gp
 
 doc docps docpdf gpman cleandoc::
 	cd doc; \$(MAKE) \$@
