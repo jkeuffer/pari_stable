@@ -1,5 +1,5 @@
    echo = 1 (on)
-? plotinit(0,500,500)
+? gettime;plotinit(0,500,500)
 ? plotmove(0,0,0);plotbox(0,500,500)
 ? plotmove(0,200,150)
 ? plotcursor(0)
@@ -63,5 +63,5 @@
 ? getheap
 [9, 137]
 ? print("Total time spent: ",gettime);
-Total time spent: 172
+Total time spent: 164
 ? \q

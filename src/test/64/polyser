@@ -1,5 +1,5 @@
    echo = 1 (on)
-? apol=x^3+5*x+1
+? gettime;apol=x^3+5*x+1
 x^3 + 5*x + 1
 ? changevar(x+y,[z,t])
 y + z
@@ -161,5 +161,5 @@ name
 ? getheap
 [61, 7182]
 ? print("Total time spent: ",gettime);
-Total time spent: 104
+Total time spent: 109
 ? \q
