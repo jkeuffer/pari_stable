@@ -653,7 +653,7 @@ pow_check(ulong p, GEN *x, GEN *logx, long *k)
 }
 
 long
-perfectexponent(GEN x, GEN *pty)
+isperfectpower(GEN x, GEN *pty)
 {
   pari_sp av = avma;
   long e2, ex, k = 1, mask = 7;
@@ -694,7 +694,7 @@ could work modulo
     p = itou( nextprime(utoi(p + 1)) );
   }
   if (pty) *pty = gerepilecopy(av, x); else avma = av;
-  return k;
+  return k == 1? 0: k;
 }
 
 /*********************************************************************/

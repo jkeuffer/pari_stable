@@ -1982,6 +1982,12 @@ discriminant of a quadratic field, false (0) otherwise.
 simpler function $\teb{isfundamental}(x)$ which returns a \kbd{long}
 should be used if $x$ is known to be of type integer.
 
+\subsecidx{isperfectpower}$(x,\{\&n\})$: return the maximal $k \geq 1$ such
+that $x = n^k$ is a perfect power. If $n$ is given puts the exact $k$-th root
+there. 
+
+\syn{isperfectpower}{x, \&n}, the result is a \kbd{long}.
+
 \subsecidx{isprime}$(x,\{\fl=0\})$: true (1) if $x$ is a (proven) prime
 number, false (0) otherwise. This can be very slow when $x$ is indeed
 prime and has more than $1000$ digits, say. Use \tet{ispseudoprime} to
@@ -2104,12 +2110,6 @@ Hardy-Ramanujan-Rademacher formula.
 must be of type integer.
 
 \syn{omega}{x}, the result is a \kbd{long}.
-
-\subsecidx{perfectexponent}$(x,\{\&n\})$: return the maximal $k \geq 1$ such
-that $x = n^k$ is a perfect power. If $n$ is given puts the exact $k$-th root
-there. 
-
-\syn{perfectexponent}{x, \&n}, the result is a \kbd{long}.
 
 \subsecidx{precprime}$(x)$: finds the largest pseudoprime (see
 \tet{ispseudoprime}) less than or equal to $x$. $x$ can be of any real type.
