@@ -1,6 +1,6 @@
 !include "MUI.nsh"
 !define MUI_PRODUCT "PARI"
-!define MUI_VERSION "2.2.8"
+!define MUI_VERSION "2.2.10"
 
 ;--------------------------------
 AutoCloseWindow false
