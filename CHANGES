@@ -51,6 +51,8 @@ BA  1- gpflog could print some lines twice
    17- galoispermtopol didn't check permutation length (--> SEGV on bad input)
 XR 18- rnfinit(nf, T) -> bug in multiplication if nf = Q
    19- Pol(cotan(x)) -> SEGV
+   20- factor(tough polynomial over Z[X]) --> possible SEGV when padic
+       precision is increased [e.g factor(polzagier(60,0))]
 
   Changed
     1- DOS distribution archives (GPM removed)
