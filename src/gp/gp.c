@@ -434,7 +434,7 @@ sd_numeric(char *v, int flag, char *s, long *ptn, ulong Min, ulong Max,
     if (*ptn == n) return gnil;
     if (n > Max || n < Min)
     {
-      sprintf(thestring, "default: incorrect value for %s [%ud-%ud]",
+      sprintf(thestring, "default: incorrect value for %s [%lu-%lu]",
 	      s, Min, Max);
       err(talker2, thestring, v,v);
     }
@@ -450,10 +450,10 @@ sd_numeric(char *v, int flag, char *s, long *ptn, ulong Min, ulong Max,
 	  msg++; /* single msg, always printed */
 	else
 	  msg += n; /* one per possible value */
-	pariputsf("   %s = %ud %s\n", s, n, *msg);
+	pariputsf("   %s = %lu %s\n", s, n, *msg);
       }
       else if (Max != 1 || Min != 0)
-	pariputsf("   %s = %ud\n", s, n);
+	pariputsf("   %s = %lu\n", s, n);
       else /* toggle */
       {
 	if (n==1) pariputsf("   %s = 1 (on)\n", s);
@@ -1579,7 +1579,7 @@ print_hash_list(char *s)
 
     for(; n<=m; n++)
     {
-      pariputsf("*** hashcode = %ud\n",n);
+      pariputsf("*** hashcode = %lu\n",n);
       for (ep=functions_hash[n]; ep; ep=ep->next)
 	print_entree(ep,n);
     }
@@ -1636,7 +1636,7 @@ Type ?12 for how to get moral (and possibly technical) support.\n\n");
   sd_realprecision  ("",d_ACKNOWLEDGE);
   sd_seriesprecision("",d_ACKNOWLEDGE);
   sd_format         ("",d_ACKNOWLEDGE);
-  pariputsf("\nparisize = %ud, primelimit = %ud\n", top-bot, primelimit);
+  pariputsf("\nparisize = %lu, primelimit = %lu\n", top-bot, primelimit);
 }
 
 static void
