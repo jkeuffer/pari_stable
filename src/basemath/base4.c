@@ -468,7 +468,7 @@ addmul_mat(GEN a, long s, GEN b)
 static GEN
 mat_ideal_two_elt(GEN nf, GEN x)
 {
-  GEN TAB,y,a,beta,cx,xZ,mul, pol = (GEN)nf[1];
+  GEN y,a,beta,cx,xZ,mul, pol = (GEN)nf[1];
   long i,j,lm, N = lgef(pol)-3;
   ulong av,tetpil;
 
@@ -492,12 +492,11 @@ mat_ideal_two_elt(GEN nf, GEN x)
   beta= cgetg(N+1, t_VEC);
   mul = cgetg(N+1, t_VEC); lm = 1; /* = lg(mul) */
   /* look for a in x such that a O/xZ = x O/xZ */
-  TAB = gmod((GEN)nf[9], xZ); /* mult table in O/xZ */
   for (i=2; i<=N; i++)
   {
     GEN t, y = cgetg(N+1,t_MAT);
     a = (GEN)x[i];
-    for (j=1; j<=N; j++) y[j] = (long)element_mulid(TAB,a,j);
+    for (j=1; j<=N; j++) y[j] = (long)element_mulid(nf,a,j);
     /* columns of mul[i] = canonical generators for x[i] O/xZ as Z-module */
     t = gmod(y, xZ);
     if (gcmp0(t)) continue;
@@ -1061,12 +1060,12 @@ static GEN
 idealmulspec(GEN nf, GEN x, GEN a, GEN alpha)
 {
   long i, N=lg(x)-1;
-  GEN m, TAB, mod;
+  GEN m, mod;
 
   if (isnfscalar(alpha))
     return gmul(mppgcd(a,(GEN)alpha[1]),x);
   mod = mulii(a, gcoeff(x,1,1));
-  m = cgetg((N<<1)+1,t_MAT); TAB = gmod((GEN)nf[9],mod);
+  m = cgetg((N<<1)+1,t_MAT);
   for (i=1; i<=N; i++) m[i]=(long)element_muli(nf,alpha,(GEN)x[i]);
   for (i=1; i<=N; i++) m[i+N]=lmul(a,(GEN)x[i]);
   return hnfmodid(m,mod);
@@ -1547,16 +1546,16 @@ extern GEN gauss_triangle_i(GEN A, GEN B,GEN t);
 static GEN
 hnfideal_inv(GEN nf, GEN I)
 {
-  GEN dI = denom(I), IZ,dual;
+  GEN J, dI = denom(I), IZ,dual;
 
   if (gcmp1(dI)) dI = NULL; else I = gmul(I,dI);
   if (lg(I)==1) err(talker, "cannot invert zero ideal");
   IZ = gcoeff(I,1,1); /* I \cap Z */
   if (!signe(IZ)) err(talker, "cannot invert zero ideal");
-  I = idealmulh(nf,I, gmael(nf,5,7));
+  J = idealmulh(nf,I, gmael(nf,5,7));
  /* I in HNF, hence easily inverted; multiply by IZ to get integer coeffs
   * d_K cancels while solving the linear equations. */
-  dual = gtrans( gauss_triangle_i(I, gmael(nf,5,6), IZ) );
+  dual = gtrans( gauss_triangle_i(J, gmael(nf,5,6), IZ) );
   dual = hnfmodid(dual, IZ);
   if (dI) IZ = gdiv(IZ,dI);
   return gdiv(dual,IZ);
