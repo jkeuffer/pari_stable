@@ -1605,6 +1605,7 @@ check_args()
   char *old;
   GEN cell;
 
+  match('(');
   while (*analyseur != ')')
   {
     old=analyseur; nparam++; match_comma();
@@ -1634,6 +1635,7 @@ check_args()
     }
     else cell[1] = zero;
   }
+  analyseur++; /* match(')') */
   return nparam;
 }
 
@@ -2183,9 +2185,7 @@ identifier(void)
       check_new_fun = ep;
 
       /* checking arguments */
-      match('('); ch1 = analyseur;
       narg = check_args(); nloc = 0;
-      match(')');
       /* Dirty, but don't want to define a local() function */
       if (*analyseur != '=' && strcmp(ep->name, "local") == 0)
         err(talker2, "local() bloc must appear before any other expression",
@@ -2195,9 +2195,9 @@ identifier(void)
         skipping_fun_def++;
         while (strncmp(analyseur,"local(",6) == 0)
         {
-          analyseur += 6;
+          analyseur += 5; /* on '(' */
           nloc += check_args();
-          match(')'); while(separe(*analyseur)) analyseur++;
+          while(separe(*analyseur)) analyseur++;
         }
         start = analyseur; skipseq(); len = analyseur-start;
         skipping_fun_def--;
