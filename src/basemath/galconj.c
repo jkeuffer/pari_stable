@@ -2592,10 +2592,10 @@ galoisfrobeniuslift(GEN T, GEN den, GEN L,  GEN Lden,
   else
   {
     /*We need to normalise result so that psi[g]=1*/
-    long im=itos(mpinvmod(stoi(gf->psi[g]),stoi(gf->fp)));
+    long im=itos(mpinvmod(stoi(gf->psi[g]),stoi(deg)));
     GEN cp=perm_pow(res, im);
     for(i=1;i<lg(res);i++) res[i]=cp[i];
-    for(i=1;i<lg(gf->psi);i++) gf->psi[i]=mulssmod(im,gf->psi[i],gf->fp);
+    for(i=1;i<lg(gf->psi);i++) gf->psi[i]=mulssmod(im,gf->psi[i],deg);
     avma=av2;
     gf->deg=deg;
     return res;
