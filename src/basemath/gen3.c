@@ -197,14 +197,13 @@ padicprec(GEN x, GEN p)
   return 0; /* not reached */
 }
 
-/* Degre de x par rapport a la variable v si v>=0, par rapport a la variable
- * principale si v<0. On suppose x fraction rationnelle ou polynome.
- * Convention deg(0)=-1.
+/* Degree of x (scalar, t_POL, t_RFRAC) wrt variable v if v >= 0,
+ * wrt to main variable if v < 0.  Convention: deg(0) = -1.
  */
 long
 poldegree(GEN x, long v)
 {
-  long tx=typ(x), av, w, d;
+  long tx = typ(x), lx,w,i,d;
 
   if (is_scalar_t(tx)) return gcmp0(x)? -1: 0;
   switch(tx)
@@ -213,9 +212,13 @@ poldegree(GEN x, long v)
       w = varn(x);
       if (v < 0 || v == w) return degpol(x);
       if (v < w) return signe(x)? 0: -1;
-      av = avma; x = gsubst(gsubst(x,w,polx[MAXVARN]),v,polx[0]);
-      if (gvar(x)) { d = gcmp0(x)? -1: 0; } else d = degpol(x);
-      avma = av; return d;
+      lx = lgef(x); d = -1;
+      for (i=2; i<lx; i++)
+      {
+        long e = poldegree((GEN)x[i], v);
+        if (e > d) d = e;
+      }
+      return d;
 
     case t_RFRAC: case t_RFRACN:
       if (gcmp0((GEN)x[1])) return -1;
