@@ -949,7 +949,7 @@ dbasis(GEN p, GEN f, long mf, GEN alpha, GEN U)
     fprintferr("\n");
   }
   ha = pd = gpuigs(p,mf/2); pdp = mulii(pd,p);
-  dU = lgef(U)-3;
+  dU = typ(U)==t_POL? lgef(U)-3: 0;
   b = cgetg(n,t_MAT); /* Z[a] + U/p Z[a] is maximal */
   /* skip first column = gscalcol(pd,n) */
   for (c=1; c<n; c++)
@@ -958,7 +958,6 @@ dbasis(GEN p, GEN f, long mf, GEN alpha, GEN U)
     if (c == dU)
     {
       ha = gdiv(gmul(pd,eleval(f,U,alpha)),p);
-      if (typ(ha) != t_POL) ha = scalarpol(ha,0); /* variable number unused */
       ha = polmodi(ha,pdp);
     }
     else
