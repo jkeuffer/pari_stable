@@ -1951,7 +1951,7 @@ chk_vdir(GEN nf, GEN vdir)
   l = lg(vdir);
   if (l != lg(nf[6])) err(talker, "incorrect vector length in idealred");
   t = typ(vdir);
-  if (t == t_VECSMALL) return t;
+  if (t == t_VECSMALL) return vdir;
   if (t != t_VEC) err(talker, "not a vector in idealred");
   v = cgetg(l, t_VECSMALL);
   for (i=1; i<l; i++) v[i] = itos(gceil((GEN)vdir[i]));
