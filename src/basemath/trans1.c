@@ -809,7 +809,15 @@ GEN
 rootsof1complex(GEN n, long prec)
 {
   ulong ltop=avma;
-  GEN z,a=mppi(prec); setexpo(a,2); /* a =2*pi */
+  GEN z,a;
+  if (is_pm1(n)) return realun(prec);
+  if (lgefint(n)==3 && n[2]==2)
+  {
+    a=realun(prec);
+    setsigne(a,-1);
+    return a;
+  }
+  a=mppi(prec); setexpo(a,2); /* a=2*pi */
   a=divri(a,n);
   z = cgetg(3,t_COMPLEX);
   gsincos(a,(GEN*)(z+2),(GEN*)(z+1),prec);
@@ -822,7 +830,7 @@ rootsof1padic(GEN n, GEN y)
   ulong ltop=avma;
   GEN z,a,r;
   a=mpsqrtnmod(gun,n,(GEN)y[2],&z);
-  if (z==gzero){avma=ltop;return gzero;}
+  if (z==gzero){avma=ltop;return gzero;}/*should not happen*/
   r=cgetg(5,t_PADIC);
   r[1]=y[1];setvalp(r,0);/*rootsofunity are unramified*/
   r[2]=licopy((GEN)y[2]);
@@ -830,11 +838,132 @@ rootsof1padic(GEN n, GEN y)
   r[4]=(long)padicsqrtnlift(gun,n,z,(GEN)y[2],(GEN)y[3]);
   return gerepileupto(ltop,r);  
 }
+static GEN paexp(GEN x);
+/*compute the p^e th root of x p-adic*/ 
+GEN padic_sqrtn_ram(GEN x, long e)
+{
+  ulong ltop=avma;
+  GEN n,a;
+  GEN p=(GEN)x[2];
+  long v=0;
+  n=gpowgs((GEN) x[2],e);
+  if (valp(x))
+  {
+    GEN p1,z;
+    p1=dvmdsi(valp(x),n,&z);
+    if (signe(z))
+      err(talker,"n-root does not exists in gsqrtn");
+    v=itos(p1);
+    x=gcopy(x);setvalp(x,0);
+  }
+  /*If p=2 -1 is an root of unity in U1,we need an extra check*/
+  if (lgefint(p)==3 && p[2]==2 && mod8((GEN)x[4])!=signe((GEN)x[4]))
+    err(talker,"n-root does not exists in gsqrtn");
+  /*Other "n-root does not exists in gsqrtn" are caught by paexp...*/
+  a=paexp(gdiv(palog(x),n));
+  /*Here n=p^e and a^n=z*x where z is a root of unity. note that
+      z^p=z, so z^n=z. and if b=a/z then b^n=x. We say b=x/(a^(n-1))*/
+  a=gdiv(x,powgi(a,addis(n,-1)));
+  if (v)  {  a=gcopy(a);setvalp(a,v);  }
+  a=gerepileupto(ltop,a);
+  return a;
+}
+/*compute the nth root of x p-adic p prime with n*/ 
+GEN padic_sqrtn_unram(GEN x, GEN n, GEN *zetan)
+{
+  ulong ltop=avma,tetpil;
+  GEN a,r;
+  GEN p=(GEN)x[2];
+  long v=0;
+  /*check valuation*/
+  if (valp(x))
+  {
+    GEN p1,z;
+    p1=dvmdsi(valp(x),n,&z);
+    if (signe(z))
+      err(talker,"n-root does not exists in gsqrtn");
+    v=itos(p1);
+  }
+  a=mpsqrtnmod((GEN)x[4],n,p,zetan);
+  if (!a)
+    err(talker,"n-root does not exists in gsqrtn");
+  tetpil=avma;
+  r=cgetg(5,t_PADIC);
+  r[1]=x[1];setvalp(r,v);
+  r[2]=licopy(p);
+  r[3]=licopy((GEN)x[3]);
+  r[4]=(long)padicsqrtnlift((GEN)x[4],n,a,p,(GEN)x[3]);
+  if (zetan)
+  {
+    GEN z,*gptr[2];
+    z=cgetg(5,t_PADIC);
+    z[1]=x[1];setvalp(z,0);
+    z[2]=licopy(p);
+    z[3]=licopy((GEN)x[3]);
+    z[4]=(long)padicsqrtnlift(gun,n,*zetan,p,(GEN)x[3]);
+    gptr[0]=&r;gptr[1]=&z;
+    gerepilemanysp(ltop,tetpil,gptr,2);
+    *zetan=z;
+    return r;
+  }
+  else
+    return gerepile(ltop,tetpil,r);
+}
+GEN padic_sqrtn(GEN x, GEN n, GEN *zetan)
+{
+  ulong ltop=avma,tetpil;
+  GEN p=(GEN)x[2];
+  GEN q;
+  long e;
+  GEN *gptr[2];
+  /*First treat the ramified part using logarithms*/
+  e=pvaluation(n,p,&q);
+  tetpil=avma;
+  if (e)
+  {
+    x=padic_sqrtn_ram(x,e);
+  }
+  /*finished ?*/
+  if (is_pm1(q))
+  {
+    if (signe(q)<0)
+    {
+      tetpil=avma;
+      x=ginv(x);
+    }
+    if (zetan && e && lgefint(p)==3 && p[2]==2)/*-1 in Q_2*/
+    {
+      *zetan=negi(gun);
+      gptr[0]=&x;gptr[1]=zetan;
+      gerepilemanysp(ltop,tetpil,gptr,2);
+      return x;
+    }
+    if (zetan) *zetan=gun;
+    return gerepile(ltop,tetpil,x);
+  }
+  /*Now we use hensel lift for unramified case. 4x faster.*/
+  tetpil=avma;
+  x=padic_sqrtn_unram(x,q,zetan);
+  if (zetan)
+  {
+    if (e && lgefint(p)==3 && p[2]==2)/*-1 in Q_2*/
+    {
+      tetpil=avma;
+      x=gcopy(x);
+      *zetan=gneg(*zetan);
+    }
+    gptr[0]=&x;gptr[1]=zetan;
+    gerepilemanysp(ltop,tetpil,gptr,2);
+    return x;
+  }
+  return gerepile(ltop,tetpil,x);
+}
+
 GEN
 gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
 {
   long av,tetpil,i,lx,tx;
-  GEN y;
+  GEN y,z;
   if (zetan) *zetan=gzero;
   if (typ(n)!=t_INT) err(talker,"second arg must be integer in gsqrtn");
   if (!signe(n)) err(talker,"1/0 exponent in gsqrtn");
@@ -852,9 +981,9 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
     for (i=1; i<lx; i++) y[i]=(long)gsqrtn((GEN)x[i],n,NULL,prec);
     return y;
   }
-  if (tx==t_SER)
+  switch(tx)
   {
-    GEN z;
+  case t_SER: 
     if (valp(x))
       err(talker,"not invertible serie in gsqrtn");
     if (lg(x) == 2) return gcopy(x); /* O(1) */
@@ -862,10 +991,9 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
     z=ginv(n);
     z=ser_pui(x,z,prec);
     return gerepileupto(av,z);
-  }
-  if (tx==t_INTMOD)
-  {
-    GEN z=gzero;
+    
+  case t_INTMOD:
+    z=gzero;
     /*This is not great, but else it will generate too much trouble*/
     if (!isprime((GEN)x[1])) err(talker,"modulus must be prime in gsqrtn");
     if (zetan) 
@@ -883,25 +1011,27 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
     }
     if(!y[2]) err(talker,"n-root does not exists in gsqrtn");
     return y;
-  }
-  i = (long) precision(n); if (i) prec=i;
-  if (tx==t_INT && is_pm1(x) && signe(x)>0)
-    y=gun;    /*speed-up since there is no way to call rootsof1complex
+
+  case t_PADIC:
+    return padic_sqrtn(x,n,zetan);
+  case t_INT: case t_FRAC: case t_FRACN: case t_REAL: case t_COMPLEX:
+    i = (long) precision(n); if (i) prec=i;
+    if (tx==t_INT && is_pm1(x) && signe(x)>0)
+      y=gun;    /*speed-up since there is no way to call rootsof1complex
 		directly from gp*/
-  else
-  {
-    av=avma;
-    y=gmul(ginv(n),glog(x,prec)); tetpil=avma;
-    y=gerepile(av,tetpil,gexp(y,prec));
-  }
-  if (zetan)
-  {
-    if (tx==t_PADIC)
-      *zetan=rootsof1padic(n,y);
-    else 
+    else
+    {
+      av=avma;
+      y=gmul(ginv(n),glog(x,prec)); tetpil=avma;
+      y=gerepile(av,tetpil,gexp(y,prec));
+    }
+    if (zetan)
       *zetan=rootsof1complex(n,prec);
+    return y;
+  default:
+    err(typeer,"gsqrtn");
   }
-  return y;
+  return NULL;/*keep GCC happy*/
 }
 
 /********************************************************************/

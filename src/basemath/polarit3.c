@@ -742,20 +742,21 @@ GEN ffsqrtnmod(GEN a, GEN n, GEN T, GEN p, GEN *zetan)
 	a=ffsqrtlmod(a,l,T,p,q,e,r,y,zeta);
 	if (!a){avma=ltop;return NULL;}
 	j--;
-	if (low_stack(lim, stack_lim(ltop,1)))/* n can have lots of prime factors*/
+      }while (j);
+      if (low_stack(lim, stack_lim(ltop,1)))
+	  /* n can have lots of prime factors*/
+      {
+	if(DEBUGMEM>1) err(warnmem,"ffsqrtnmod");
+	if (zetan)
 	{
-	  if(DEBUGMEM>1) err(warnmem,"ffsqrtnmod");
-	  if (zetan)
-	  {
-	    z=gcopy(z);
-	    gptr[0]=&a;gptr[1]=&z;
-	    gerepilemanysp(av1,lbot,gptr,2);
-	  }
-	  else
-	    a=gerepileupto(av1,a);
+	  z=gcopy(z);
+	  gptr[0]=&a;gptr[1]=&z;
+	  gerepilemanysp(av1,lbot,gptr,2);
 	}
+	else
+	  a=gerepileupto(av1,a);
+	lbot=av1;
       }
-      while (j);
     }
   }  
   if (zetan)

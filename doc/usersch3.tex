@@ -1194,7 +1194,7 @@ sqrtnall(x,n)=
   local(V,r,z,r2);
   r = sqrtn(x,n, &z);
   if (!z, error("Impossible case in sqrtn"));
-  if (type(x) == "t_INTMOD",
+  if (type(x) == "t_INTMOD" || type(x)=="t_PADIC" ,
     r2 = r*z; n = 1;
     while (r2!=r, r2*=z;n++));
   V = vector(n); V[1] = r;

@@ -933,24 +933,29 @@ mpsqrtnmod(GEN a, GEN n, GEN p, GEN *zetan)
       e=pvaluation(q,l,&r);
       y=mplgenmod(l,e,r,p,&zeta);
       if (zetan) z=modii(mulii(z,powmodulo(y,gpowgs(l,e-j),p)),p);
-      for(;j;j--)
+      do
       {
 	lbot=avma;
 	if (!is_pm1(a) || signe(a)<0)
 	  a=mpsqrtlmod(a,l,p,q,e,r,y,zeta);
+	else
+	  a=icopy(a);
 	if (!a){avma=ltop;if (zetan)  *zetan=gzero;return NULL;}
-	if (low_stack(lim, stack_lim(ltop,1)))/* n can have lots of prime factors*/
+	j--;
+      }while (j);
+      if (low_stack(lim, stack_lim(ltop,1)))
+	/* n can have lots of prime factors*/
+      {
+	if(DEBUGMEM>1) err(warnmem,"mpsqrtnmod");
+	if (zetan)
 	{
-	  if(DEBUGMEM>1) err(warnmem,"mpsqrtnmod");
-	  if (zetan)
-	  {
-	    z=gcopy(z);
-	    gptr[0]=&a;gptr[1]=&z;
-	    gerepilemanysp(av1,lbot,gptr,2);
-	  }
-	  else
-	    a=gerepileupto(av1,a);
+	  z=gcopy(z);
+	  gptr[0]=&a;gptr[1]=&z;
+	  gerepilemanysp(av1,lbot,gptr,2);
 	}
+	else
+	  a=gerepile(av1,lbot,a);
+	lbot=av1;
       }
     }
   }
@@ -967,7 +972,7 @@ mpsqrtnmod(GEN a, GEN n, GEN p, GEN *zetan)
     gerepilemanysp(ltop,lbot,gptr,2);
   }
   else
-    a=gerepileupto(ltop,a);
+    a=gerepile(ltop,lbot,a);
   return a;
 }
 
