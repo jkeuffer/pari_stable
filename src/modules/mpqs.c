@@ -281,7 +281,7 @@ mpqs_sort_lp_file(char *filename)
   qsort(sort_table, i, sizeof(char *), mpqs_relations_cmp);
 
   /* copy results back to the original file, skipping exact duplicates */
-  pTMP = pari_fopen(filename, WRITE);
+  pTMP = pari_safefopen(filename, WRITE);
   TMP = pTMP->file;
   old_s = sort_table[0];
   if (fputs(sort_table[0], TMP) < 0)
@@ -380,7 +380,7 @@ mpqs_append_file(pariFILE *f, FILE *fp1)
 static long
 mpqs_mergesort_lp_file0(FILE *LPREL, FILE *LPNEW, long mode)
 {
-  pariFILE *pTMP = pari_fopen(TMP_str, WRITE);
+  pariFILE *pTMP = pari_safefopen(TMP_str, WRITE);
   FILE *TMP = pTMP->file;
   pariFILE *pCOMB = NULL;
   FILE *COMB = NULL; /* gcc -Wall */
@@ -435,7 +435,7 @@ mpqs_mergesort_lp_file0(FILE *LPREL, FILE *LPNEW, long mode)
 	     file first if it isn't open yet */
 	  if (!pCOMB)
 	  {
-	    pCOMB = pari_fopen(COMB_str, WRITE);
+	    pCOMB = pari_safefopen(COMB_str, WRITE);
 	    COMB = pCOMB->file;
 	  }
 	  if (fputs(line_new_old, COMB) < 0)
@@ -515,7 +515,7 @@ mpqs_mergesort_lp_file0(FILE *LPREL, FILE *LPNEW, long mode)
 	{
 	  if (!pCOMB)
 	  {
-	    pCOMB = pari_fopen(COMB_str, WRITE);
+	    pCOMB = pari_safefopen(COMB_str, WRITE);
 	    COMB = pCOMB->file;
 	  }
 	  if (fputs(line_new_old, COMB) < 0)
@@ -586,7 +586,7 @@ mpqs_mergesort_lp_file0(FILE *LPREL, FILE *LPNEW, long mode)
 	{
 	  if (!pCOMB)
 	  {
-	    pCOMB = pari_fopen(COMB_str, WRITE);
+	    pCOMB = pari_safefopen(COMB_str, WRITE);
 	    COMB = pCOMB->file;
 	  }
 	  if (fputs(line, COMB) < 0)
@@ -3240,12 +3240,12 @@ mpqs(GEN N)
   TMP_str = mpqs_get_filename("LPTMP");
 
   /* This was just for truncating */
-  pFREL  = pari_fopen(FREL_str,  WRITE); pari_fclose(pFREL);
-  pLPREL = pari_fopen(LPREL_str, WRITE); pari_fclose(pLPREL);
+  pFREL  = pari_safefopen(FREL_str,  WRITE); pari_fclose(pFREL);
+  pLPREL = pari_safefopen(LPREL_str, WRITE); pari_fclose(pLPREL);
 
-  pLPNEW = pari_fopen(LPNEW_str, WRITE);
+  pLPNEW = pari_safefopen(LPNEW_str, WRITE);
   LPNEW = pLPNEW->file;
-  pFNEW = pari_fopen(FNEW_str, WRITE);
+  pFNEW = pari_safefopen(FNEW_str, WRITE);
   FNEW = pFNEW->file;
 
   for(;;)
@@ -3367,7 +3367,7 @@ mpqs(GEN N)
     pari_fclose(pLPNEW);
     mpqs_sort_lp_file(LPNEW_str);
     tp = mpqs_mergesort_lp_file(LPREL_str, LPNEW_str, 0);
-    pLPNEW = pari_fopen(LPNEW_str, WRITE);
+    pLPNEW = pari_safefopen(LPNEW_str, WRITE);
     LPNEW = pLPNEW->file;
 
     /* combine whatever there is to be combined */
@@ -3468,7 +3468,7 @@ mpqs(GEN N)
 
     if (percentage < 1000)
     {
-      pFNEW = pari_fopen(FNEW_str, WRITE);
+      pFNEW = pari_safefopen(FNEW_str, WRITE);
       FNEW = pFNEW->file;
       /* at this point, LPNEW and FNEW are again open for writing */
       continue;			/* main loop */
@@ -3549,7 +3549,7 @@ mpqs(GEN N)
 	all_clean = 1;
 	avma=av; return NULL;
       }
-      pFNEW = pari_fopen(FNEW_str, WRITE);
+      pFNEW = pari_safefopen(FNEW_str, WRITE);
       FNEW = pFNEW->file;
     }
   } /* main loop */

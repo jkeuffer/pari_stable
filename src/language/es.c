@@ -2048,15 +2048,38 @@ pari_fclose(pariFILE *f)
   pari_kill_file(f);
 }
 
-pariFILE *
-pari_fopen(char *s, char *mode)
+static
+pari_open_file(FILE *f, char *s, char *mode)
 {
-  FILE *f = fopen(s, mode);
   if (!f) err(talker, "could not open requested file %s", s);
   if (DEBUGFILES)
     fprintferr("I/O: opening file %s (mode %s)\n", s, mode);
   return newfile(f,s,0);
 }
+
+pariFILE *
+pari_fopen(char *s, char *mode)
+{
+  return pari_open_file(fopen(s, mode), s, mode);
+}
+
+#ifdef O_EXCL
+/* open tmpfile s (a priori for writing) avoiding symlink attacks */
+pariFILE *
+pari_safefopen(char *s, char *mode)
+{
+  long fd = open(s, O_CREAT|O_EXCL|O_RDWR, S_IRUSR|S_IWUSR);
+
+  if (fd == -1) err(talker,"tempfile %s already exists",s);
+  return pari_open_file(fdopen(fd, mode), s, mode);
+}
+#else
+pariFILE *
+pari_safeopen(char *s, char *mode)
+{
+  return pari_open(s, mode)
+}
+#endif
 
 void
 pari_unlink(char *s)
@@ -2204,7 +2227,7 @@ os_open(char *s, int mode)
   h = CreateFile(ws,GENERIC_READ,FILE_SHARE_READ,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL);
   fd = (h == INVALID_HANDLE_VALUE)? (long)-1: (long)h;
 #else
-  fd = open(s,O_RDONLY);
+  fd = open(s,mode);
 #endif
   return fd;
 }
