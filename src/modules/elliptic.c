@@ -766,13 +766,8 @@ new_coords(GEN e, GEN x, GEN *pta, GEN *ptb, long prec)
   b = gmul2n(w,-1);
   r1 = gsub(a,b);
   p1 = gadd(x, gmul2n(gadd(e1,r0),-1));
-  if (gcmp0(p1))
-    p1 = gsqrt(gneg_i(gmul(a,r1)),prec);
-  else
-  {
-    GEN delta = gdiv(gmul(a,r1),gsqr(p1));
-    p1 = gmul2n(gmul(p1,gaddsg(1,gsqrt(gsubsg(1,gmul2n(delta,2)),prec))),-1);
-  }
+  p1 = gmul2n(p1,-1);
+  p1 = gadd(p1, gsqrt(gsub(gsqr(p1), gmul(a,r1)), prec));
   *pta = a; *ptb = b;
   return gmul(p1,gsqr(gmul2n(gaddsg(1,gsqrt(gdiv(gadd(p1,r1),p1),prec)),-1)));
 }
