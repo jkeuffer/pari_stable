@@ -980,33 +980,41 @@ divrem(GEN x, GEN y, long v)
 static int
 is_scal(long t) { return t==t_INT || t==t_FRAC || t==t_FRACN; }
 
+GEN
+diviiround(GEN x, GEN y)
+{
+  gpmem_t av1, av = avma;
+  GEN q,r;
+  int fl;
+
+  q = dvmdii(x,y,&r); /* q = x/y rounded towards 0, sgn(r)=sgn(x) */
+  if (r==gzero) return q;
+  av1 = avma;
+  fl = absi_cmp(shifti(r,1),y);
+  avma = av1; cgiv(r);
+  if (fl >= 0) /* If 2*|r| >= |y| */
+  {
+    long sz = signe(x)*signe(y);
+    if (fl || sz > 0) q = gerepileuptoint(av, addis(q,sz));
+  }
+  return q;
+}
+
 /* If x and y are not both scalars, same as gdivent.
  * Otherwise, compute the quotient x/y, rounded to the nearest integer
  * (towards +oo in case of tie). */
 GEN
 gdivround(GEN x, GEN y)
 {
-  gpmem_t av1, av = avma;
+  gpmem_t av1, av;
   long tx=typ(x),ty=typ(y);
   GEN q,r;
   int fl;
 
-  if (tx==t_INT && ty==t_INT)
-  {
-    q = dvmdii(x,y,&r); /* q = x/y rounded towards 0, sgn(r)=sgn(x) */
-    if (r==gzero) return q;
-    av1 = avma;
-    fl = absi_cmp(shifti(r,1),y);
-    avma = av1; cgiv(r);
-    if (fl >= 0) /* If 2*|r| >= |y| */
-    {
-      long sz = signe(x)*signe(y);
-      if (fl || sz > 0) q = gerepileuptoint(av, addis(q,sz));
-    }
-    return q;
-  }
+  if (tx==t_INT && ty==t_INT) return diviiround(x,y);
+  av = avma;
   if (is_scal(tx) && is_scal(ty))
-  { /* same as above but less efficient */
+  { /* same as diviiround but less efficient */
     q = quotrem(x,y,&r);
     av1 = avma;
     fl = gcmp(gmul2n(gabs(r,0),1), gabs(y,0));

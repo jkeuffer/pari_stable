@@ -845,7 +845,7 @@ colreducemodmat(GEN x, GEN y, GEN *Q)
   if (l == 1) return cgetg(1,t_COL);
   for (i = l-1; i>0; i--)
   {
-    q = negi(gdivround((GEN)x[i], gcoeff(y,i,i)));
+    q = negi(diviiround((GEN)x[i], gcoeff(y,i,i)));
     if (Q) (*Q)[i] = (long)q;
     if (signe(q)) x = gadd(x, gmul(q, (GEN)y[i]));
   }

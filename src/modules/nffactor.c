@@ -241,12 +241,12 @@ nf_bestlift(GEN elt, nfcmbf_t *T)
   {
     if (t == t_POL) elt = algtobasis_i(T->nf,elt);
     u = gmul(T->hinv,elt);
-    for (i=1; i<l; i++) u[i] = (long)gdivround((GEN)u[i], T->den);
+    for (i=1; i<l; i++) u[i] = (long)diviiround((GEN)u[i], T->den);
   }
   else
   {
     u = gmul(elt, (GEN)T->hinv[1]);
-    for (i=1; i<l; i++) u[i] = (long)gdivround((GEN)u[i], T->den);
+    for (i=1; i<l; i++) u[i] = (long)diviiround((GEN)u[i], T->den);
     elt = gscalcol(elt, l-1);
   }
   u = gsub(elt, gmul(T->h, u));

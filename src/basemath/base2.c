@@ -81,24 +81,12 @@ allbase_check_args(GEN f, long code, GEN *y, GEN *ptw1, GEN *ptw2)
 /*                            ROUND 2                              */
 /*                                                                 */
 /*******************************************************************/
-/*  Normalized quotient and remainder ( -1/2 |y| < r = x-q*y <= 1/2 |y| ) */
-static GEN
-rquot(GEN x, GEN y)
-{
-  gpmem_t av=avma,av1;
-  GEN u,v,w,p;
-
-  u=absi(y); v=shifti(x,1); w=shifti(y,1);
-  if (cmpii(u,v)>0) p=subii(v,u);
-  else p=addsi(-1,addii(u,v));
-  av1=avma; return gerepile(av,av1,divii(p,w));
-}
-
+/* Normalized remainder ( -1/2 |y| < r = x-q*y <= 1/2 |y| ) */
 /* space needed lx + 2*ly */
 static GEN
 rrmdr(GEN x, GEN y)
 {
-  gpmem_t av=avma,tetpil;
+  gpmem_t av = avma, tetpil;
   long k;
   GEN r,ys2;
 
@@ -108,9 +96,8 @@ rrmdr(GEN x, GEN y)
   k = absi_cmp(r, ys2);
   if (k>0 || (k==0 && signe(r)>0))
   {
-    avma = tetpil;
     if (signe(y) == signe(r)) r = subii(r,y); else r = addii(r,y);
-    return gerepile(av,tetpil,r);
+    return gerepileuptoint(av, r);
   }
   avma = tetpil; return r;
 }
@@ -267,7 +254,7 @@ rowred(GEN a, GEN rmod)
     for (k=j+1; k<c; k++)
       while (signe(gcoeff(a,j,k)))
       {
-	q=rquot(gcoeff(a,j,j),gcoeff(a,j,k));
+	q=diviiround(gcoeff(a,j,j),gcoeff(a,j,k));
 	pro=(long)mtran((GEN)a[j],(GEN)a[k],q,rmod, j);
 	a[j]=a[k]; a[k]=pro;
       }
@@ -275,7 +262,7 @@ rowred(GEN a, GEN rmod)
       for (k=j; k<r; k++) coeff(a,k,j)=lnegi(gcoeff(a,k,j));
     for (k=1; k<j; k++)
     {
-      q=rquot(gcoeff(a,j,k),gcoeff(a,j,j));
+      q=diviiround(gcoeff(a,j,k),gcoeff(a,j,j));
       a[k]=(long)mtran((GEN)a[k],(GEN)a[j],q,rmod, k);
     }
     if (low_stack(lim, stack_lim(av,1)))
@@ -540,11 +527,11 @@ allbase(GEN f, long code, GEN *y)
       for (s=r; s; s--)
         while (signe(gcoeff(bt,s,r)))
         {
-          q=rquot(gcoeff(at,s,s),gcoeff(bt,s,r));
+          q=diviiround(gcoeff(at,s,s),gcoeff(bt,s,r));
           pro=rtran((GEN)at[s],(GEN)bt[r],q);
           for (t=s-1; t; t--)
           {
-            q=rquot(gcoeff(at,t,s),gcoeff(at,t,t));
+            q=diviiround(gcoeff(at,t,s),gcoeff(at,t,t));
             pro=rtran(pro,(GEN)at[t],q);
           }
           at[s]=bt[r]; bt[r]=(long)pro;
@@ -555,7 +542,7 @@ allbase(GEN f, long code, GEN *y)
       {
         while (signe(gcoeff(at,j,k)))
         {
-          q=rquot(gcoeff(at,j,j),gcoeff(at,j,k));
+          q=diviiround(gcoeff(at,j,j),gcoeff(at,j,k));
           pro=rtran((GEN)at[j],(GEN)at[k],q);
           at[j]=at[k]; at[k]=(long)pro;
         }
@@ -564,7 +551,7 @@ allbase(GEN f, long code, GEN *y)
         for (k=1; k<=j; k++) coeff(at,k,j)=lnegi(gcoeff(at,k,j));
       for (k=j+1; k<=n; k++)
       {
-        q=rquot(gcoeff(at,j,k),gcoeff(at,j,j));
+        q=diviiround(gcoeff(at,j,k),gcoeff(at,j,j));
         at[k]=(long)rtran((GEN)at[k],(GEN)at[j],q);
       }
     }
@@ -2424,6 +2411,7 @@ nf_to_ff(GEN nf, GEN x, GEN modpr)
     case t_INT: return modii(x, p);
     case t_FRAC: return gmod(x, p);
     case t_POL: x = algtobasis(nf, x); break;
+    case t_COL: break;
     default: err(typeer,"nf_to_ff");
   }
   x = kill_denom(x, nf, p, modpr);
@@ -2459,6 +2447,7 @@ modprV(GEN z, GEN nf,GEN modpr)
   for (i=1; i<l; i++) x[i] = (long)nf_to_ff(nf,(GEN)z[i], modpr);
   return x;
 }
+/* assume z a t_VEC/t_COL/t_MAT */
 GEN
 modprM(GEN z, GEN nf,GEN modpr)
 {

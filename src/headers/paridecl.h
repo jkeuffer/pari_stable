@@ -885,6 +885,7 @@ GEN     denom(GEN x);
 GEN     deriv(GEN x, long v);
 GEN     derivpol(GEN x);
 GEN     derivser(GEN x);
+GEN     diviiround(GEN x, GEN y);
 GEN     divrem(GEN x, GEN y, long v);
 GEN     gand(GEN x, GEN y);
 GEN     gceil(GEN x);

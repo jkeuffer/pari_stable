@@ -1235,7 +1235,7 @@ lllintpartialall(GEN m, long flag)
  */
     while (npass2 < 2 || progress)
     {
-      GEN dot12new,q = gdivround(dot12, dot22);
+      GEN dot12new,q = diviiround(dot12, dot22);
 
       npass2++; progress = signe(q);
       if (progress)
@@ -1300,8 +1300,8 @@ lllintpartialall(GEN m, long flag)
 	GEN q1neg = subii(mulii(dot12, dot2i), mulii(dot22, dot1i));
         GEN q2neg = subii(mulii(dot12, dot1i), mulii(dot11, dot2i));
 
-        q1neg = gdivround(q1neg, det12);
-        q2neg = gdivround(q2neg, det12);
+        q1neg = diviiround(q1neg, det12);
+        q2neg = diviiround(q2neg, det12);
         coeff(tm1, 1, icol) = ladd(gmul(q1neg, gcoeff(tm,1,1)),
 				   gmul(q2neg, gcoeff(tm,1,2)));
         coeff(tm1, 2, icol) = ladd(gmul(q1neg, gcoeff(tm,2,1)),
@@ -1356,7 +1356,7 @@ lllintpartialall(GEN m, long flag)
 		? icol : jcol; 	/* index of larger column */
 	  k2 = icol + jcol - k1; 	/* index of smaller column */
 	  codi = gcoeff(dotprd,k2,k2);
-	  q = gcmp0(codi)? gzero: gdivround(gcoeff(dotprd,k1,k2), codi);
+	  q = gcmp0(codi)? gzero: diviiround(gcoeff(dotprd,k1,k2), codi);
 
 	  /* Try to subtract a multiple of column k2 from column k1.  */
 	  if (gcmp0(q)) avma = previous_avma;
