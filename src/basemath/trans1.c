@@ -1174,6 +1174,14 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
     if (tx==t_INT && is_pm1(x) && signe(x)>0)
       y=gun;    /*speed-up since there is no way to call rootsof1complex
 		directly from gp*/
+    else if (gcmp0(x))
+    {
+      if (gsigne(n) < 0) err(gdiver2);
+      if (isinexactreal(x))
+        y = realzero_bit( itos( gfloor(gdivsg(gexpo(x), n)) ) );
+      else
+        y = realzero(prec);
+    }
     else
     {
       av=avma;
