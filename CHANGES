@@ -85,6 +85,7 @@ RS 21- gcc-3.4 breaks on compatibility code to support old readline versions
        tough discrete logs ]
    32- [Configure:] add /lib64 and /usr/lib64 to library search path
    33- SEGV in nfeltpowmodpr() for primes of degree 1 [see 2.2.7-F21]
+       + inputs containing t_INTMODs yield unpredictable [wrong] results
 
   Added
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu
@@ -130,6 +131,8 @@ BA  7- support for real forms for qfbsolve.
 MW 13- ellap: if E has CM by a principal order, use Cornacchia instead
        of Shanks/Mestre
    14- more efficient algorithm for issquare(t_FRAC | t_RFRAC)
+   15- don't return t_INTMODs component in *modpr routines, but lifted
+       representatives.
 
   Removed
     1- obsolete implementation incgam1 [ use incgam. As far as private

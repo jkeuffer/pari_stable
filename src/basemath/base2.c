@@ -2563,7 +2563,7 @@ nfreducemodpr(GEN nf, GEN x, GEN modpr)
     if (typ(x[i]) == t_INTMOD) { x = lift(x); break; }
   x = kill_denom(x, nf, p, modpr);
   x = ff_to_nf(zk_to_ff(x,modpr), modpr);
-  return gerepileupto(av, FpV_to_mod(_algtobasis(nf,x), p));
+  return gerepilecopy(av, _algtobasis(nf,x));
 }
 
 GEN

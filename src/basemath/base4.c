@@ -2912,7 +2912,7 @@ element_powmodpr(GEN nf,GEN x,GEN k,GEN pr)
 
   nf = checknf(nf);
   modpr = nf_to_ff_init(nf,&pr,&T,&p);
-  z = nf_to_ff(nf,x,modpr);
+  z = nf_to_ff(nf,lift(x),modpr);
   z = Fq_pow(z,k,T,p);
   z = ff_to_nf(z,modpr);
   return gerepilecopy(av, _algtobasis(nf,z));
