@@ -626,12 +626,49 @@ choose_prime(GEN nf, GEN dk, GEN lim, long ct)
   return pr;
 }
 
+/* test if the discriminant of polbase modulo some few primes 
+   is non-zero. Return 1 if it is so (=> polbase is square-free)
+   and 0 otherwise (=> polbase may or may not be square-free) */
+static int
+is_sqf(GEN nf, GEN polbase)
+{
+  GEN lt, pr, prh, p2, p;
+  long i, d = lgef(polbase), ct = 3;
+
+  lt = (GEN)leading_term(polbase)[1];
+
+  while (ct > 0)
+  {
+    /* small primes tend to divide discriminants more often 
+       than large ones so we look at primes >= 101 */
+    pr = choose_prime(nf,lt,stoi(101),30); 
+    if (!pr) break;
+
+    p=(GEN)pr[1];
+    prh=prime_to_ideal(nf,pr);
+
+    p2=gcopy(polbase);
+    lt=mpinvmod(lt,p);
+
+    for (i=2; i<d; i++)
+      p2[i] = nfreducemodpr_i(gmul(lt,(GEN)p2[i]), prh)[1];
+    p2 = normalizepol(p2);
+
+    /* discriminant is non-zero => polynomial is square-free */
+    if (!gcmp0(p2) && !divise(discsr(p2),p))  { return 1; }
+    
+    ct--; 
+  }
+  
+  return 0;
+}
+
 /* return the roots of pol in nf */
 GEN
 nfroots(GEN nf,GEN pol)
 {
-  long av=avma,tetpil,i,d=lgef(pol),ct,fl=0;
-  GEN p1,p2,polbase,polmod,den,lt,pr,p,prh;
+  long av=avma,tetpil,i,d=lgef(pol),fl;
+  GEN p1,p2,polbase,polmod,den;
 
   p2=NULL; /* gcc -Wall */
   nf=checknf(nf);
@@ -671,32 +708,7 @@ nfroots(GEN nf,GEN pol)
   if (DEBUGLEVEL>=4)
     fprintferr("test if the polynomial is square-free\n");
 
-  /* test if the discriminant of pol modulo some few primes is non-zero */
-  ct = 3;
-  lt = (GEN)leading_term(polbase)[1];
-  for (;;)
-  {
-    /* small primes tend to divide discriminants more often 
-       than large ones so we look at primes >= 101 */
-    pr = choose_prime(nf,lt,stoi(101),30); 
-    if (!pr) break;
-
-    p=(GEN)pr[1];
-    prh=prime_to_ideal(nf,pr);
-
-    p2=gcopy(polbase);
-    lt=mpinvmod(lt,p);
-
-    for (i=2; i<d; i++)
-      p2[i] = nfreducemodpr_i(gmul(lt,(GEN)p2[i]), prh)[1];
-    p2 = normalizepol(p2);
-
-    /* discriminant is non-zero => polynomial is square-free */
-    if (!gcmp0(p2) && !divise(discsr(p2),p))  { fl = 1; break; }
-    
-    ct--; 
-    if (!ct) { fl = 0; break; }
-  }
+  fl = is_sqf(nf, polbase);
 
   /* the polynomial may not be square-free ... */
   if (!fl) 
@@ -770,8 +782,9 @@ nf_pol_eval(GEN nf,GEN pol,GEN elt)
 /* return the factorization of x in nf */
 GEN
 nffactor(GEN nf,GEN pol)
-{ GEN y,p1,p2,den,p3,p4,quot,pr,p,prh,lt, rep = cgetg(3,t_MAT);
-  long av = avma,tetpil,i,j,d,ct,fl=0;
+{ 
+  GEN y,p1,p2,den,p3,p4,quot,rep=cgetg(3,t_MAT);
+  long av = avma,tetpil,i,j,d,fl;
 
   if (DEBUGLEVEL >= 4) timer2();
 
@@ -809,32 +822,7 @@ nffactor(GEN nf,GEN pol)
   if (DEBUGLEVEL>=4)
     fprintferr("test if the polynomial is square-free\n");
 
-  /* test if the discriminant of pol modulo some few primes is non-zero */
-  ct = 3;
-  lt = (GEN)leading_term(p1)[1];
-  for (;;)
-  {
-    /* small primes tend to divide discriminants more often 
-       than large ones so we look at primes >= 101 */
-    pr = choose_prime(nf,lt,stoi(101),30); 
-    if (!pr) break;
-
-    p=(GEN)pr[1];
-    prh=prime_to_ideal(nf,pr);
-
-    p2=gcopy(p1);
-    lt=mpinvmod(lt,p);
-
-    for (i=2; i<d; i++)
-      p2[i] = nfreducemodpr_i(gmul(lt,(GEN)p2[i]), prh)[1];
-    p2 = normalizepol(p2);
-
-    /* discriminant is non-zero => polynomial is square-free */
-    if (!gcmp0(p2) && !divise(discsr(p2),p))  { fl = 1; break; }
-    
-    ct--; 
-    if (!ct) { fl = 0; break; }
-  }
+  fl = is_sqf(nf, p1);
 
   /* polynomial may not be square-free ... */
   if (!fl) 
