@@ -3409,9 +3409,9 @@ newtonpoly(GEN x, GEN p)
 
 extern int cmp_pol(GEN x, GEN y);
 extern GEN ZY_ZXY_resultant(GEN A, GEN B0, long *lambda);
+GEN squff2(GEN x, long klim, long hint);
 GEN matratlift(GEN M, GEN mod, GEN amax, GEN bmax, GEN denom);
 GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den);
-
 
 /* Factor polynomial a on the number field defined by polynomial t */
 GEN
@@ -3431,7 +3431,8 @@ polfnf(GEN a, GEN t)
   n = ZY_ZXY_resultant(t, u, &k);
   if (DEBUGLEVEL > 4) fprintferr("polfnf: choosing k = %ld\n",k);
 
-  fa=factor(n); fa=(GEN)fa[1]; lx=lg(fa);
+  /* n guaranteed to be squarefree */
+  fa = (GEN)squff2(n,0,0)[1]; lx=lg(fa);
   y=cgetg(3,t_MAT);
   p1=cgetg(lx,t_COL); y[1]=(long)p1;
   p2=cgetg(lx,t_COL); y[2]=(long)p2;
