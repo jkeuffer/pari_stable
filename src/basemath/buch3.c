@@ -1460,8 +1460,8 @@ conductor(GEN bnr, GEN H, long all)
   nf = (GEN)bnf[7]; r1 = nf_get_r1(nf);
   ideal= gmael(bid,1,1);
   arch = gmael(bid,1,2);
-  if (gcmp0(H)) H = NULL;
-  else
+  if (H && gcmp0(H)) H = NULL;
+  if (H)
   {
     p1 = gauss(H, diagonal(gmael(bnr,5,2)));
     if (!gcmp1(denom(p1))) err(talker,"incorrect subgroup in conductor");
