@@ -33,6 +33,36 @@ unsigned long _DLL_InitTerm(unsigned long modHandle, unsigned long flag)
 
 #endif
 
+HMODULE
+find_myself(void)
+{
+
+  static APIRET APIENTRY (*pDosQueryModFromEIP) (HMODULE * hmod, ULONG * obj, ULONG BufLen, PCHAR Buf,
+		    ULONG * Offset, ULONG Address);
+  HMODULE doscalls_h, mod;
+  static int failed;
+  ULONG obj, offset, rc;
+  char buf[260];
+
+  if (failed)
+	return 0;
+  failed = 1;
+  doscalls_h = (HMODULE)dlopen("DOSCALLS",0);
+  if (!doscalls_h)
+	return 0;
+/*  {&doscalls_handle, NULL, 360}, */	/* DosQueryModFromEIP */
+  rc = DosQueryProcAddr(doscalls_h, 360, 0, (PFN*)&pDosQueryModFromEIP);
+  if (rc)
+	return 0;
+  rc = pDosQueryModFromEIP(&mod, &obj, sizeof(buf), buf, &offset, (ULONG)dlopen);
+  if (rc)
+	return 0;
+  failed = 0;
+  handle_found = 1;
+  dllHandle = mod;
+  return mod;
+}
+
 void *
 dlopen(char *path, int mode)
 {
@@ -43,22 +73,25 @@ dlopen(char *path, int mode)
 
 	fail[0] = 0;
 	if (!path) {			/* Our own handle. */
-	    if (handle_found) {
+	    if (handle_found || find_myself()) {
 		if (handle_loaded)
 		    return (void*)dllHandle;
 		rc = DosQueryModuleName(dllHandle, sizeof(dllname), dllname);
 		if (rc) {
 	            strcpy(fail, "can't find my DLL name by the handle");
+		    retcode = rc;
 		    return 0;
 		}
 		rc = DosLoadModule(fail, sizeof fail, dllname, &handle);
 		if (rc) {
 	            strcpy(fail, "can't load my own DLL");
+		    retcode = rc;
 		    return 0;
 		}
 		handle_loaded = 1;
 		goto ret;
 	    }
+	    retcode = ERROR_MOD_NOT_FOUND;
             strcpy(fail, "can't load from myself: compiled without -DDLOPEN_INITTERM");
 	    return 0;
 	}
@@ -78,8 +111,10 @@ dlopen(char *path, int mode)
 		int n = beg+8-path;
 		memmove(tmp, path, n);
 		memmove(tmp+n, dot, strlen(dot)+1);
-		if (DosLoadModule(fail, sizeof fail, tmp, &handle) == 0)
+		rc = DosLoadModule(fail, sizeof fail, tmp, &handle);
+		if (rc == 0)
 			goto ret;
+		retcode = rc;
 	}
 	handle = 0;
 
@@ -87,6 +122,8 @@ dlopen(char *path, int mode)
 	_control87(fpflag, MCW_EM); /* Some modules reset FP flags on load */
 	return (void *)handle;
 }
+
+#define ERROR_WRONG_PROCTYPE 0xffffffff
 
 void *
 dlsym(void *handle, char *symbol)
@@ -100,7 +137,7 @@ dlsym(void *handle, char *symbol)
 		rc = DosQueryProcType((HMODULE)handle, 0, symbol, &type);
 		if (rc == 0 && type == PT_32BIT)
 			return (void *)addr;
-		rc = ERROR_CALL_NOT_IMPLEMENTED;
+		rc = ERROR_WRONG_PROCTYPE;
 	}
 	retcode = rc;
 	return NULL;
@@ -114,8 +151,13 @@ dlerror(void)
 
 	if (retcode == 0)
 		return NULL;
-	if (DosGetMessage(NULL, 0, buf, sizeof buf - 1, retcode,
-			  "OSO001.MSG", &len)) {
+	if (retcode == ERROR_WRONG_PROCTYPE) {
+		strcpy(buf, "Wrong procedure type");
+		len = strlen(buf);
+	}
+	if ((retcode != ERROR_WRONG_PROCTYPE)
+	    && DosGetMessage(NULL, 0, buf, sizeof buf - 1, retcode,
+			     "OSO001.MSG", &len)) {
 		if (fail[0])
 		  sprintf(buf, 
 "OS/2 system error code %d, possible problematic module: '%s'",

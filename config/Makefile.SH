@@ -32,8 +32,15 @@ esac
 language=`ls $src_dir/language/*.c | sed 's,.*/\(.*\)\.c,\1,'`
 basemath=`ls $src_dir/basemath/*.c | sed 's,.*/\(.*\)\.c,\1,'`
 modules=`ls $src_dir/modules/*.c   | sed 's,.*/\(.*\)\.c,\1,'`
+lib_prefix=lib
+dllib_prefix=lib
 case "$osname" in
-  os2) systems=os2;;
+  os2)	systems=os2; dllib_prefix="";
+	lib_prefix=lib	# Different, to allow gp-dyn link with DLL
+	export_lib_create=emximp; export_lib='$(DLLIBPARI)$(_A)'
+	export_file=pari.def; export_create="emxexp -u"
+	# Actually, the build will fail until the switch to -Zomf...
+	dlld_ignore=- ;;
   *)   systems=;;
 esac
 
@@ -190,12 +197,15 @@ AS         = $AS
 ASFLAGS    = $ASFLAGS
 AR	   = ar
 
-CC         = $CC
+CC_FLAVOR  =
+CC         = $CC \$(CC_FLAVOR)
 CPPFLAGS   = $CPPFLAGS
 CFLAGS     = $cflags
-LD         = $LD
+LD_FLAVOR  = \$(CC_FLAVOR)
+LD         = $LD \$(LD_FLAVOR)
 LDFLAGS    = $LDFLAGS
-DLLD       = $DLLD
+DLLD_FLAVOR  = \$(LD_FLAVOR)
+DLLD       = $DLLD \$(DLLD_FLAVOR)
 DLLDFLAGS  = $DLLDFLAGS
 EXTRADLLDFLAGS = $EXTRADLLDFLAGS
 CPP        = $CPP
@@ -216,12 +226,20 @@ CPP        = $CPP
 
 _O	   = .o
 _A	   = .a
-LIB_PREFIX = lib
-LIBPARI    = \$(LIB_PREFIX)$libpari_base
-LIBPARI_STA= \$(LIBPARI)\$(_A)
-LIBPARI_SO = \$(LIBPARI).$DLSUFFIX
+LIB_PREFIX = $lib_prefix
+DLLIB_PREFIX = $dllib_prefix
+LIBPARI_BASE = $libpari_base
+LIBPARI      = \$(LIB_PREFIX)\$(LIBPARI_BASE)
+DLLIBPARI    = \$(DLLIB_PREFIX)\$(LIBPARI_BASE)
+LIBPARI_STA  = \$(LIBPARI)\$(_A)
+LIBPARI_SO   = \$(DLLIBPARI).$DLSUFFIX
 LIBPARI_DYN   = \$(LIBPARI_SO)$sodest
 LIBPARI_SONAME= \$(LIBPARI_SO)$soname
+EXPORT_FILE   = $export_file
+EXPORT_CREATE = $export_create
+EXPORT_LIB = $export_lib
+EXPORT_LIB_CREATE = $export_lib_create
+DLLD_IGNORE = $dlld_ignore
 
 RUNPTH       = $RUNPTH
 RUNPTH_FINAL = $RUNPTH_FINAL
@@ -235,6 +253,7 @@ DYNRELOC     = $DYNRELOC
 RM = rm -f
 MV = mv -f
 LN = $ln_s
+CP_F = cp -f
 
 # Change these installation directories to suit your needs.
 # DESTDIR is used to install to a false hierachy (to build a Debian package)
@@ -499,15 +518,32 @@ if test -z "$DLLD"; then
 
 EOT
 else
+  if test -n "$export_file"; then
+    cat >> $file << EOT
+
+EXPORT_FILE_BASE = $src/systems/os2/pari.def.base
+VERSION_VERBOSE = $pari_release_verbose
+
+\$(EXPORT_FILE): \$(OBJS) \$(EXPORT_FILE_BASE)
+	cat \$(EXPORT_FILE_BASE) | sed 's/<DLL_BASE>/\$(DLLIBPARI)/' | sed 's/<VENDOR>/www.parigp-home.de\//' | sed 's/<VERSION>/\$(VERSION_VERBOSE)/' | sed 's/<DESCR>/GP\/PARI compiled with \$(CFLAGS)/' > \$@
+	\$(EXPORT_CREATE) \$(OBJS) >> \$@
+
+\$(DLLIBPARI)\$(_A): \$(EXPORT_FILE)
+	\$(EXPORT_LIB_CREATE) -o \$@ \$(EXPORT_FILE)
+
+EOT
+  fi
   if test -z "$DYNLIBS"; then
     cat >> $file << EOT
-gp-dyn: \$(OBJSGP) \$(LIBPARI_DYN) \$(GNUPLOT_OBJS)
+
+gp-dyn: \$(OBJSGP) \$(LIBPARI_DYN) \$(GNUPLOT_OBJS) \$(EXPORT_LIB)
 	\$(RM) \$@
 	\$(LD) -o \$@ \$(LDFLAGS) \$(OBJSGP) \$(GNUPLOT_OBJS) \$(RUNPTH) \$(TOPLDDYN) \$(LDDYN) \$(PLOTLIBS) \$(LIBS)
 
-\$(LIBPARI_DYN): \$(OBJS)
+\$(LIBPARI_DYN): \$(OBJS) \$(EXPORT_FILE)
 	-\$(RM) \$(LIBPARI_DYN)
-	\$(DLLD) -o \$@ \$(DLLDFLAGS) \$(OBJS) \$(EXTRADLLDFLAGS)
+	\$(DLLD_IGNORE)\$(DLLD) -o \$@ \$(DLLDFLAGS) \$(OBJS) \$(EXTRADLLDFLAGS) \$(EXPORT_FILE)
+
 EOT
     if test "$soname" != "$sodest"; then
       cat >> $file << EOT

@@ -37,14 +37,15 @@ extract_dir_list="$doc_dir $emacs_dir $misc_dir"
 # Version number and patch level.
 . $config_dir/version
 version=$VersionMajor.$VersionMinor
-pari_release="$VersionMajor.$VersionMinor.$patch"
+pari_release="$version.$patch"
 if test `expr $VersionMinor % 2` = 1; then
-  echo "Configuring pari-$version.$patch (STABLE)"
+  pari_release_verbose="$pari_release (STABLE)"
   libpari_base=pari
 else
-  echo "Configuring pari-$version.$patch (DEVELOPMENT VERSION)"
+  pari_release_verbose="$pari_release (DEVELOPMENT VERSION)"
   libpari_base=pari-$version
 fi
+echo "Configuring pari-$pari_release_verbose"
 
 cd $config_dir
 
@@ -517,11 +518,12 @@ if test -n "$__gnuc__"; then
   case "$osname-$arch" in hpux-*) DLCFLAGS=-fPIC;; esac
   # Specific optimisations for some architectures
   case "$osname-$arch" in
-    linux-i?86|cygwin*) OPTFLAGS="$OPTFLAGS \
+    linux-i?86|cygwin*|os2-*) OPTFLAGS="$OPTFLAGS \
       -malign-loops=2 -malign-jumps=2 -malign-functions=2";;
-    os2-*) cflags=-Zmt;;
     *-sparcv8*) cflags=-mv8;;
   esac
+  if test "X$osname" = Xos2; then cflags=-Zmt; fi
+
   # omit-frame-pointer incompatible with -pg
   PRFFLAGS="-pg $OPTFLAGS"
   case "$optimization" in
@@ -638,9 +640,10 @@ case "$osname-$arch" in
 	full|profiling) LDFLAGS="-g0 -O4 $LDFLAGS";;
       esac;;
   solaris-*) LD=$CC; LDFLAGS=$cflags; runpathprefix=-R ;;
-  os2-*)     LD=$CC; LDFLAGS="$cflags -Zexe"
+  os2-*)     LD=$CC;  cflags="$cflags -Zsysv-signals"; LDFLAGS="$cflags -Zexe"
+	     DLLD=$LD; DLLDFLAGS="$cflags -Zdll"
       case "$optimization" in
-	full) LDFLAGS="$LDFLAGS -s";;
+	full) LDFLAGS="$LDFLAGS -s"; DLLDFLAGS="$DLLDFLAGS -s";;
       esac;;
   *)         LD=$CC; LDFLAGS=$cflags ;;
 esac
@@ -684,6 +687,10 @@ if test "$optimization" = profiling; then DLLD=; else
 #   cygwin*) soname= ; sodest= ; DLSUFFIX=dll;;
     hpux-*)  soname= ; sodest= ; DLSUFFIX=sl;;
     irix-*)  soname= ; sodest= ;;
+    os2-*)  soname= ; sodest= ; DLSUFFIX=dll
+	    # DLL names better be 8+3
+	    libpari_base=`echo "$libpari_base" | sed 's/\./_/g'`
+	 ;;
     *) DLLD=;;
   esac
 fi
@@ -719,6 +726,7 @@ if test -n "$DLLD"; then
          esac;;
       sunos-*)   DLLDFLAGS="-assert nodefinitions" ;;
       solaris-*) DLLDFLAGS="-G -h \$(LIBPARI_SONAME)" ;;
+      os2-*)	 ;;
       *)         DLLD=;;
     esac
   fi
@@ -1357,7 +1365,7 @@ case "$osname" in
 esac
 
 for variable in\
-  pari_release\
+  pari_release pari_release_verbose\
   libpari_base version TOP config_dir src_dir emacs_dir doc_dir\
   bindir includedir mandir miscdir libdir datadir\
   optimization objdir static suffix\

@@ -1,6 +1,7 @@
-LIBRARY 'pari' INITINSTANCE TERMINSTANCE
-; Can't put http://www.parigp-home.de/, since it is split on :
-DESCRIPTION '@#www.parigp-home.de/:@VERSION@#@GP/PARI compiled with @CFLAGS@
+LIBRARY '<DLL_BASE>' INITINSTANCE TERMINSTANCE
+; Can't put http://www.parigp-home.de/ in VENDOR, since it is split on :
+; One needs to be glad that www.parigp-home.de/ is good enough...
+DESCRIPTION '@#<VENDOR>:<VERSION>#@<DESCR>'
 CODE LOADONCALL
 DATA LOADONCALL NONSHARED MULTIPLE
 EXPORTS

@@ -80,6 +80,7 @@ IS 33- [HPUX:] should compile with cc -Ae, not -Aa
    35- bessel[jk](t_SER) not implemented around a!=0, but gave (bogus) results
        [output error message for now]
 IZ 36- [OS/2:] rename static functions _core[2] (conflict with stdlib.h)
+IZ 37- [OS/2:] ^C would only work once
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available
@@ -97,12 +98,16 @@ BA  8- renamed mymyrand --> pari_rand31
     9- bnrstark: use partial factorization of discriminant when (pol)reducing
        the polynomial [could embark into hopeless factorizations]
    10- primedec: improved search for uniformizers when p | index
+IZ 11- [OS/2:] improve dlopen(NULL,...)
+IZ 12- [OS/2:] enable dynamic-linking build
+IZ 13- [OS/2:] use same CFLAGS as under Linux
 
   Added:
     1- [TeXmacs:] contextual completion (<TAB>)
 BA  2- routines ishiftr, gfloor2n
     3- routine random_bits
 BA  4- [Configure:] --builddir flag
+IZ  5- FIle README.os2
 
   Removed
     1- macro definition BITS_IN_RANDOM (useless)
