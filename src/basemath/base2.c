@@ -849,19 +849,17 @@ dedek(GEN f, long mf, GEN p,GEN g)
   GEN k,h;
   long dk;
 
-  if (DEBUGLEVEL>=3)
-  {
-    fprintferr("  entering dedek ");
-    if (DEBUGLEVEL>5)
-      fprintferr("with parameters p=%Z,\n  f=%Z",p,f);
-    fprintferr("\n");
-  }
   h = FpX_div(f,g,p);
   k = gdivexact(gadd(f, gneg_i(gmul(g,h))), p);
   k = FpX_gcd(k, FpX_gcd(g,h, p), p);
 
   dk = degpol(k);
-  if (DEBUGLEVEL>=3) fprintferr("  gcd has degree %ld\n", dk);
+  if (DEBUGLEVEL>2)
+  {
+    fprintferr("  dedek: gcd has degree %ld\n", dk);
+    if (DEBUGLEVEL>5)
+      fprintferr("initial parameters p=%Z,\n  f=%Z\n",p,f);
+  }
   if (2*dk >= mf-1) return FpX_div(f,k,p);
   return dk? (GEN)NULL: f;
 }
@@ -1117,12 +1115,10 @@ Decomp(GEN p,GEN f,long mf,GEN theta,GEN chi,GEN nu,long flag)
   f2 = FpX_div(fred,f1, pr);
   f2 = FpX_center(f2, pr);
 
-  if (DEBUGLEVEL>2)
+  if (DEBUGLEVEL>5)
   {
     fprintferr("  leaving Decomp");
-    if (DEBUGLEVEL>5)
-      fprintferr(" with parameters: f1 = %Z\nf2 = %Z\ne = %Z\n", f1,f2,e);
-    fprintferr("\n");
+    fprintferr(" with parameters: f1 = %Z\nf2 = %Z\ne = %Z\n\n", f1,f2,e);
   }
 
   if (flag)
@@ -2127,7 +2123,7 @@ uniformizer(GEN nf, GEN P, GEN p)
   }
 
   w = (GEN)nf[7];
-  D = QX_denom(w); if (is_pm1(D)) D = NULL;
+  D = denom(content(w)); if (is_pm1(D)) D = NULL;
   if (D)
   {
     long v = pvaluation(D, p, &a);
