@@ -27,7 +27,7 @@ if test "$fastread" != yes; then
 ==========================================================================
 I know of the following Operating Systems
 EOM
-  rep='os2 freebsd cygwin linux hpux aix osf1 solaris sunos nextstep concentrix irix';
+  rep='os2 freebsd netbsd cygwin linux hpux aix osf1 solaris sunos nextstep concentrix irix';
   . ./display
   echo $n ..."Any of these apply ? $c"
   dflt=$osname; . ./myread
@@ -53,7 +53,10 @@ case "$arch" in
   alpha)         asmarch=$arch;         pretty=Alpha ;;
   ppc)           asmarch=$arch;         pretty='Power PC' ;;
   arm*)          asmarch=none;          pretty=$arch ;;
-  mips)          asmarch=none;          pretty=Mips ;;
+  mips)          asmarch=none;          pretty=MIPS ;;
+  sh3)           asmarch=none;          pretty=SH-3 ;;
+  sh5)           asmarch=none;          pretty=SH-5 ;;
+  vax)           asmarch=none;          pretty=VAX ;;
   fx2800)        asmarch=none;          pretty='Alliant FX/2800' ;;
   s390)          asmarch=none;          pretty='S/390' ;;
   none)          asmarch=none;          pretty=unknown ;;
@@ -93,7 +96,7 @@ kernlvl0=`echo "$tmp_kern" | sed -e 's/\(.*\)-.*/\1/'`
 kernlvl1=`echo "$tmp_kern" | sed -e 's/.*-\(.*\)/\1/'`
 
 case "$kernlvl0" in
-  none)          prettyk="C portable";;
+  none)          prettyk="portable C";;
   sparcv7)       prettyk=SparcV7;;
   sparcv8_super) prettyk=SuperSparc;;
   sparcv8_micro) prettyk=MicroSparc;;

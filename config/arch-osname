@@ -11,13 +11,18 @@ if test -n "$myuname"; then
   fx2800)   arch=fx2800; osname=concentrix;;
   hp*)      osname=hpux; arch=`uname -m`
             if test "x$arch" = "x" ; then arch=hppa; fi ;;
-  freebsd|os2)  arch=ix86;;
+  netbsd|freebsd|os2)
+            arch=`uname -m`
+            if test -z "$arch"; then arch=${HOSTTYPE:-ix86}; fi
+            ;;
+  cygwin*)  arch=`uname -m`
+            if test -z "$arch"; then arch=${HOSTTYPE:-ix86}; fi
+            osname=cygwin;;
   ultrix)   arch=mips;;
   nextstep) arch=`file /bin/sh | sed 's/.*(for architecture \(.*\))/\1/'`;;
   darwin*)  arch=`uname -p`
             if test "$arch" = powerpc; then arch=ppc; fi ;;
   osf1)     case "$5" in alpha) arch=alpha;; esac;;
-  cygwin*)  arch=${HOSTTYPE:-i386}; osname=cygwin;;
   linux)    arch=`uname -m`
             if test "$arch" = sparc64; then arch=sparcv9; fi
 	    case "`cat /proc/cpuinfo`" in

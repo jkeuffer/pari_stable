@@ -31,7 +31,7 @@ fi
 if ($LDused -v 2>&1 | grep GNU > /dev/null); then GNULDused=yes; fi
 
 case "$osname-$arch" in
-  linux-*|cygwin*|freebsd-*)
+  linux-*|cygwin*|freebsd-*|netbsd-*)
     tmp=`./ldflags "$LDneedsWl" "-export-dynamic"`
     ldflags="$ldflags $tmp" ;;
   aix-*)  ldflags='-brtl' ;; # in case we link against a shared library
@@ -51,7 +51,7 @@ fi
 echo "Executable linker is   $LD  $LDFLAGS"
 
 case "$osname" in
-  osf1|linux|cygwin*|freebsd) runpathprefix='-rpath ' ;;
+  osf1|linux|cygwin*|freebsd|netbsd) runpathprefix='-rpath ' ;;
   solaris) runpathprefix='-R ' ;;
   hpux) runpathprefix='+b ' ;;
   aix) runpathprefix='-blibpath:' ;;

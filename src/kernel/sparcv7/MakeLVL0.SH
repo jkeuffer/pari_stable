@@ -2,7 +2,7 @@
 # Level 1 kernel is the C generic one
 level0=$src/kernel/none/asm0.h
 kernel1=$src/kernel/$kernlvl0/level0.S
-if test "$osname" = "nextstep" -o "$osname" = "linux" -o "$gnuas" = "yes";
+if test "$osname" = "nextstep" -o "$osname" = "linux" -o "$osname" = "netbsd" -o "$gnuas" = "yes";
 then
 cat >> $file << EOT
 kernel1.s: $kernel1

@@ -22,7 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*   If libpari.so is compiled with gcc, you should compile all   */
 /*   files with gcc                                               */
 
-#if defined(NO_UNDERSCORE) || defined(linux)
+#if defined(NO_UNDERSCORE) || defined(linux) || defined(__NetBSD__)
 #  define C(entrypoint) entrypoint
 #elif defined(sun) || defined(NeXT)
 #  ifdef __STDC__
@@ -31,13 +31,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #    define C(entrypoint) _/**/entrypoint
 #  endif
 #endif
-#if defined(sun) || defined(linux)
+#if defined(sun) || defined(linux) || defined(__NetBSD__)
 #  define GLOBL .global
 #elif defined(NeXT)
 #  define GLOBL .globl
 #endif
 
-#if   defined(sun) || defined(linux)
+#if   defined(sun) || defined(linux) || defined(__NetBSD__)
 	.seg	"data"
 	.align	4
 C(tabshi): .word	4,3,2,2,1,1,1,1,0,0,0,0,0,0,0,0

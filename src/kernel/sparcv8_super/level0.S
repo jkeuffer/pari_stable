@@ -24,10 +24,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #  else
 #  define C(entrypoint) _/**/entrypoint
 #  endif
-#elif defined(linux)
+#elif defined(linux) || defined(__NetBSD__)
 #  define C(entrypoint) entrypoint
 #endif
-#if defined(sun) || defined(linux)
+#if defined(sun) || defined(linux) || defined(__NetBSD__)
 #  define GLOBL .global
 #elif defined(NeXT)
 #  define GLOBL .globl

@@ -13,7 +13,7 @@ Check the License for details. You should have received a copy of it, along
 with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
-#if defined(NO_UNDERSCORE) || defined(linux)
+#if defined(NO_UNDERSCORE) || defined(linux) || defined(__NetBSD__)
 #  define C(entrypoint) entrypoint
 #elif defined(sun) || defined(NeXT)
 #  ifdef __STDC__
@@ -22,7 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #    define C(entrypoint) _/**/entrypoint
 #  endif
 #endif
-#if defined(sun) || defined(linux)
+#if defined(sun) || defined(linux) || defined(__NetBSD__)
 #  define GLOBL .global
 #elif defined(NeXT)
 #  define GLOBL .globl

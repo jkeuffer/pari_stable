@@ -36,7 +36,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
    global variable `hiremainder'. */
 
 /* This should ideally be determined at configure time. */
-#if defined(__EMX__) || defined(__DJGCC__) || defined(__GO32__) || (defined(linux) && !defined(__ELF__)) || defined(__386BSD__) || defined(__NetBSD__) || (defined(__FreeBSD__) && !defined(__ELF__)) || defined(NeXT) || defined(__CYGWIN32__) || defined(__MINGW32__)
+#if defined(__EMX__) || defined(__DJGCC__) || defined(__GO32__) || (defined(linux) && !defined(__ELF__)) || defined(__386BSD__) || (defined(__NetBSD__) && !defined(__ELF__)) || (defined(__FreeBSD__) && !defined(__ELF__)) || defined(NeXT) || defined(__CYGWIN32__) || defined(__MINGW32__)
 #  define ASM_UNDERSCORE
 #endif
 
