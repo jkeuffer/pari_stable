@@ -1,4 +1,2 @@
 Makefile
-Olinux-i686
-Olinux-i686.dbg
-Olinux-i686.prf
+O*
