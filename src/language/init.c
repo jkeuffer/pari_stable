@@ -1418,7 +1418,7 @@ bin_copy(GENbin *p)
   GEN x,y,base;
   long dx,len;
 
-  x   = p->x; if (!x) return gzero;
+  x   = p->x; if (!x) { free(p); return gzero; }
   len = p->len;
   base= p->base; dx = x - base;
   y = (GEN)memcpy((void*)new_chunk(len), (void*)GENbase(p), len*sizeof(long));
