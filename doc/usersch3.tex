@@ -904,7 +904,8 @@ number before applying \kbd{abs} and an exact result is returned if possible.
 %3 = 1.414213562373095048801688724
 @eprog
 \noindent If $x$ is a polynomial, returns $-x$ if the leading coefficient is
-real and negative else returns $x$.
+real and negative else returns $x$. For a power series, the constant
+coefficient is considered instead.
 
 \syn{gabs}{x,\var{prec}}.
 
