@@ -60,6 +60,7 @@ HC 23- fixed a severe bug in p-adic/integer addition (1+3^4+O(3^10))+3
        didn't work.
 HC 24- Corrected p-adic initell.
    25- ellj / eta (t_SER) truncated result to seriesprecision
+   26- possible overflow in u_FpM_gauss (from ZM_inv)
 
   Changed
 BA  1- improved Fp_isom
