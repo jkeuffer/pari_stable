@@ -38,7 +38,13 @@ TP = Thomas Papanikolaou
 XR = Xavier Roblot
 YU = Yoshiaki Uchikawa
 
-Done for version 2.2.7 (released ??/07/2003):
+Done for version 2.2.8 (released ??/??/2004):
+  Fixed
+  Changed
+  Added
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Done for version 2.2.7 (released 18/12/2003):
   Fixed
     1- bench input files: should all start by a 'gettime()' instruction
     2- bnfisnorm(bnfinit(x^2-11),1) --> [Mod(1, #), 1]   [ return a result
