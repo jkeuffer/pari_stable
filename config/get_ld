@@ -31,9 +31,6 @@ fi
 if ($LDused -v 2>&1 | grep GNU > /dev/null); then GNULDused=yes; fi
 
 case "$osname-$arch" in
-  osf1-*) case "$optimization" in
-            full|profiling) ldflags="$ldflags -g0 -O4";;
-          esac ;;
   linux-*|cygwin*|freebsd-*)
     tmp=`./ldflags "$LDneedsWl" "-export-dynamic"`
     ldflags="$ldflags $tmp" ;;
