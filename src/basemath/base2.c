@@ -1455,24 +1455,16 @@ update_alpha(GEN p, GEN fx, GEN alph, GEN chi, GEN pmr, GEN pmf, long mf,
 	     GEN ns)
 {
   long l, v = varn(fx);
-  GEN nalph = NULL, nchi, w, nnu, pdr, npmr, rep;
+  GEN nalph = alph, nchi = chi, w, nnu, pdr, npmr, rep;
 
   affii(gzero, (GEN)ns[1]); /* kill cache */
-
-  if (!chi)
-    nchi = mycaract(fx, alph, p, pmf, ns);
-  else
-  {
-    nchi  = chi;
-    nalph = alph;
-  }
+  if (!nchi) nchi = mycaract(fx, alph, p, pmf, ns);
 
   for (;;)
   {
     pdr = respm(nchi, derivpol(nchi), pmr);
     if (signe(pdr)) break;
-    if (!nalph) nalph = gadd(alph, gmul(p, polx[v]));
-    else nalph = gadd(nalph, gmul(p, polx[v]));
+    nalph = gadd(nalph, gmul(p, polx[v]));
     /* nchi was too reduced at this point; try a larger precision */
     pmr  = sqri(pmr);
     /* check whether we can get a decomposition */
