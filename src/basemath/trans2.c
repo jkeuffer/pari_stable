@@ -152,7 +152,9 @@ gatan(GEN x, long prec)
 /* |x| < 1, x != 0 */
 static GEN
 mpasin(GEN x) {
-  return mpatan( divrr(x, sqrtr( subsr(1, mulrr(x,x)) )) );
+  pari_sp av = avma;
+  GEN z = mpatan( divrr(x, sqrtr( subsr(1, mulrr(x,x)) )) );
+  return gerepileuptoleaf(av, z);
 }
 
 static GEN mpach(GEN x, long s);
@@ -171,7 +173,7 @@ gasin(GEN x, long prec)
         if (sx > 0) return Pi2n(-1, lg(x)); /* 1 */
         y = Pi2n(-1, lg(x)); setsigne(y, -1); return y; /* -1 */
       }
-      if (expo(x) < 0) { av = avma; return gerepileuptoleaf(av, mpasin(x)); }
+      if (expo(x) < 0) return mpasin(x);
       y = cgetg(3,t_COMPLEX);
       y[1] = (long)Pi2n(-1, lg(x));
       y[2] = (long)mpach(x, 1);
@@ -219,7 +221,8 @@ static GEN
 mpacos(GEN x)
 {
   pari_sp av = avma;
-  return gerepileuptoleaf(av, subrr(Pi2n(-1,lg(x)), mpasin(x)));
+  GEN z = mpatan( divrr(sqrtr( subsr(1, mulrr(x,x)) ), x) );
+  return gerepileuptoleaf(av, z);
 }
 
 GEN
@@ -487,10 +490,8 @@ static GEN
 mpash(GEN x)
 {
   pari_sp av = avma;
-  long s = signe(x);
-  GEN z = (s<0)? negr(x): x;
-  z = logr_abs( addrr(z, sqrtr( addrs(mulrr(z,z), 1) )) );
-  if (s<0) setsigne(z, -signe(z));
+  GEN z = logr_abs( addrr_sign(x,1, sqrtr( addrs(mulrr(x,x), 1) ), 1) );
+  if (signe(x) < 0) setsigne(z, -signe(z));
   return gerepileuptoleaf(av, z);
 }
 
