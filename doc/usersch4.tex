@@ -1367,9 +1367,11 @@ second codeword which contains an effective length (handled through
 \teb{lgeflist}~/ \teb{setlgeflist}). \kbd{z[2]},\dots, \kbd{z[lgeflist(z)-1]}
 contain the components of the list.
 
-\subsec{Type \typ{STR} (character string):}% \kbdsidx{t_STR}\sidx{character
-string} \fun{char *}{GSTR}{z} (= \kbd{(z+1)}) points to the first character
-of the (\kbd{NULL}-terminated) string.
+\subsec{Type \typ{STR} (character string):}%
+\kbdsidx{t_STR}\sidx{character string}
+
+\fun{char *}{GSTR}{z} (= \kbd{(z+1)}) points to the first character of the
+(\kbd{NULL}-terminated) string.
 
 \misctitle{Implementation note:} for the types including an exponent (or a
 valuation), we actually store a biased non-negative exponent (bit-ORing the
