@@ -9,8 +9,6 @@ e) copy misc/gprc.dft to /etc/gprc [sitewide] or $HOME/.gprc [personal]
 f) you can find documentation, tutorial and reference card in directory doc.
 
 That's it!
-f) the data for polgalois() function (12 > degree > 7) is provided in a
-separate archive galdata.tgz, which you have to fetch separately.
 
 Compile and read doc/INSTALL.tex (e.g cd doc; tex INSTALL; xdvi INSTALL) for
 more detailed information and various hints.

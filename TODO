@@ -1,9 +1,9 @@
-This file lists the things that ought to be implemented / fixed. It is
-hopelessly incomplete right now, but it's a start. Most items require major
-work, and may not be that desireable after all. If you intend to work on
-any of these things, have a look at CVS.txt and drop an email to pari-dev.
+This file lists the things that ought to be implemented / fixed.  Most
+items require major work, and some may not be that desireable after all.
+If you intend to work on any of these things, have a look at CVS.txt and
+drop an email to pari-dev.
 
-Priority classification (first column): [subjective and debatable!]
+Priority classification (first column): [subjective and debatable]
 5    as soon as possible
 4    should be done
 3    nice to have
@@ -28,15 +28,6 @@ Unless specified otherwise, examples assume 32bit machine and default precision
 
 -  O(x) * y --> O(x)
    O(y) * x --> O(y) * x
-
--  factorff(ffinit(211,223),211,ffinit(211,223,a))
-   ***   degree overflow
-   to_Kronecker(x,y) returns a polynomial whose degree is roughly 2deg(x)deg(y),
-   unfortunately, PARI does not support polynomials of large degree.
-
-   Solution: alias lgef to lg, and use exclusively lg for polynomials [ the
-   lgef mechanism is useful for t_INT, the gmp kernel relies on it. It is
-   quite useless for t_POL. ]
 
 5  bnfinit sometimes gives wrong answers because we cheat on the value of
 Bach's bound, using B := 0.3 log^2 D by default, where 0.3 should really be 12
@@ -104,18 +95,13 @@ is wrong [second one is principal]. Group structure and regulator are correct!
 
 ***************************  DOCUMENTATION    ****************************
 
-5  complete/update the tutorial (esp. section 11 and 12)
+5  add examples for all functions in Chapter 3
 
-4  add examples for all functions in Chapter 3
-
-4  separate chapter 4 and 5 and document the innards of PARI (entree,
-   pariFILE, bloc ...)
-
-2  HTML version (pod ? SGML ? yodl ???)
+4  document the innards of PARI (entree, pariFILE, bloc, CATCH/TRY, ...)
 
 ***************************  MISCELLANEOUS    ****************************
 
-5  write decent (specialized) benches
+5  write more benches (specialized ones) 
 
 3  use stat() instead of opendir() to check if a file is a directory.
 
@@ -199,7 +185,7 @@ Misc:
    p-adic fields, elliptic curves, ...). Would keep list of types small
    (and fast)
 
-3  sparse representations for multivariate polynomials and martrices.
+3  sparse representations for multivariate polynomials and matrices.
 
 3  type "element in" ([number|finite] field...), "point" on elliptic curve
 

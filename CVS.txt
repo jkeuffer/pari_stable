@@ -1,6 +1,6 @@
 The Concurrent Versions System (CVS, see http://www.cyclic.com) provides
 network-transparent source control for groups of developers. For ordinary
-users it provides a very convenient way to obtain patched versions in between
+users it provides a convenient way to obtain patched versions in between
 releases. CVS clients are available for most major platforms: Unix, MacOS,
 Windows (see http://www.wincvs.org/).
 
@@ -23,8 +23,8 @@ shell prompt
 
 This last command creates a local copy of the distribution from the
 distant repository (in local directory 'pari'), using GNU gzip to compress
-the files during the transfer [ if gzip is not installed on your machine,
-remove the -z3 flag ].
+the files during the transfer. (If gzip is not installed on your machine,
+remove the -z3 flag.)
 
 From now on, you can go to this pari directory and use any cvs command
 directly (without the cryptic -d argument), as long as you remain there
