@@ -1894,6 +1894,7 @@ bestappr_noer(GEN x, GEN k)
   return y;
 }
 
+extern GEN hnflll_i(GEN A, GEN *ptB);
 /* Input:
  * lambda = approximate rational entries: coords of units found so far on a
  * sublattice of maximal rank (sublambda)
