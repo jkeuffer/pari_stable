@@ -64,7 +64,7 @@ for testdata in $testlist; do
     $gp -q --test < $file_in > $file_test 2>&1
     diff -c $file_out $file_test > $file_diff
     pat=`grep "^[-+!] " $file_diff | grep -v "Total time"`
-    time=`tail -2 $file_test | sed -n 's,.*Total time spent: \(.*\),\1,p'`
+    time=`tail -n 2 $file_test | sed -n 's,.*Total time spent: \(.*\),\1,p'`
     if test -n "$time"; then
       eval t='$'time$suf
       if test -n "$exprbug"; then
@@ -126,7 +126,7 @@ case "x$buge" in
 esac
 if test -n "$file_diff"; then
 len=`wc -l $file_diff | sed -e 's/ *\([0-9]*\).*/\1/'`
-pat=`head -4 $file_diff|tail -1|grep "141,154"`
+pat=`head -n 4 $file_diff|tail -n 1|grep "141,154"`
 if test $len -eq 50  -a  -n "$pat"; then
 cat << EOT
 NOTE: the problem noted in 'elliptic' boils down to different FPU and
@@ -149,7 +149,7 @@ case "x$bugp" in
 esac
 if test -n "$file_diff"; then
 len=`wc -l $file_diff | sed -e 's/ *\([0-9]*\).*/\1/'`
-pat=`head -4 $file_diff|tail -1|grep "108,118"`
+pat=`head -n 4 $file_diff|tail -n 1|grep "108,118"`
 sys0190=`grep "^+ SYS0190\>" $file_diff`
 
 if test $len -eq 31  -a  -n "$sys0190"; then
