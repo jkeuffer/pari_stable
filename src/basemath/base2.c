@@ -1062,8 +1062,8 @@ Decomp(GEN p,GEN f,long mf,GEN theta,GEN chi,GEN nu,long flag)
   {
     b1=factorpadic4(f1,p,flag);
     b2=factorpadic4(f2,p,flag); res=cgetg(3,t_MAT);
-    res[1]=lconcat((GEN)b1[1],(GEN)b2[1]);
-    res[2]=lconcat((GEN)b1[2],(GEN)b2[2]); return res;
+    res[1]=(long)concatsp((GEN)b1[1],(GEN)b2[1]);
+    res[2]=(long)concatsp((GEN)b1[2],(GEN)b2[2]); return res;
   }
   else
   {
@@ -2995,7 +2995,7 @@ rnfisfree(GEN bnf, GEN order)
 /**								     **/
 /**********************************************************************/
 extern GEN ZY_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LPRS);
-extern GEN squff2(GEN x, long klim, long hint);
+extern GEN DDF2(GEN x, long klim, long hint);
 extern GEN to_polmod(GEN x, GEN mod);
 
 /* modular version. TODO: check that compositum2 is not slower */
@@ -3018,7 +3018,7 @@ polcompositum0(GEN A, GEN B, long flall)
   if (!ZX_is_squarefree(B)) err(talker,"compositum: %Z not separable", B);
 
   k = 1; C = ZY_ZXY_resultant_all(A, B, &k, flall? &LPRS: NULL);
-  C = squff2(C,0,0); /* C = Res_Y (A, B(X + kY)) guaranteed squarefree */
+  C = DDF2(C,0,0); /* C = Res_Y (A, B(X + kY)) guaranteed squarefree */
   if (flall)
   {
     long i,l = lg(C);

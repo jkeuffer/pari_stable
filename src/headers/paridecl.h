@@ -840,6 +840,7 @@ GEN     matsize(GEN x);
 GEN     normalize(GEN x);
 GEN     normalizepol(GEN x);
 GEN     normalizepol_i(GEN x, long lx);
+long    polvaluation(GEN x, GEN *z);
 GEN     pureimag(GEN x);
 long    pvaluation(GEN x, GEN p, GEN *py);
 long    sizedigit(GEN x);

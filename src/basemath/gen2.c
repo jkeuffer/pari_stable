@@ -587,6 +587,24 @@ minval(GEN x, GEN p, long first, long lx)
   return val;
 }
 
+long 
+polvaluation(GEN x, GEN *Z)
+{
+  long v;
+
+  if (!signe(x)) { if (Z) *Z = zeropol(varn(x)); return VERYBIGINT; }
+  for (v = 0;; v++)
+    if (!isexactzero((GEN)x[2+v])) break;
+  if (Z)
+  {
+    long i, lz = lgef(x)-v;
+    GEN z = cgetg(lz, t_POL);
+    for (i=2; i<lz; i++) z[i] = x[i];
+    z[1] = x[1]; setlgef(z,lz); *Z = z;
+  }
+  return v;
+}
+
 long
 ggval(GEN x, GEN p)
 {
@@ -630,10 +648,7 @@ ggval(GEN x, GEN p)
 	if (vx == v)
 	{
 	  if ((p>=(GEN)polx && p <= (GEN)(polx+MAXVARN)) || ismonome(p))
-          {
-            i=2; while (isexactzero((GEN)x[i])) i++;
-            return i-2;
-          }
+            return polvaluation(x, NULL);
 	  av = avma; limit=stack_lim(av,1);
 	  for (val=0; ; val++)
 	  {

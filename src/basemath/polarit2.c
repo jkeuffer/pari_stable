@@ -1319,14 +1319,14 @@ combine_factors(GEN a, GEN famod, GEN p, long klim, long hint)
   return res;
 }
 
-extern long split_berlekamp(GEN *t, GEN pp, GEN pps2);
+extern long split_berlekamp(GEN *t, GEN pp);
 #define u_FpX_div(x,y,p) u_FpX_divrem((x),(y),(p),(0),NULL)
 
-/* assume degree(a) > 0, a(0) != 0, and a squarefree */
+/* Assume a squarefree, degree(a) > 0, a(0) != 0 */
 static GEN
-squff(GEN a, long hint)
+DDF(GEN a, long hint)
 {
-  GEN PolX,lead,res,prime,primes2,famod,y,g,z,w,*tabd,*tabdnew;
+  GEN PolX,lead,res,prime,famod,y,g,z,w,*tabd,*tabdnew;
   long da = degpol(a), va = varn(a);
   long klim,chosenp,p,nfacp,lbit,j,d,e,np,nmax,nf,nft;
   ulong *tabbit, *tabkbit, *tmp, av = avma;
@@ -1398,7 +1398,7 @@ squff(GEN a, long hint)
     else avma = av0;
     np++;
   }
-  prime[2] = chosenp; primes2 = shifti(prime, -1);
+  prime[2] = chosenp;
   nf = nmax; nft = 1;
   y = cgetg(nf+1,t_COL); famod = cgetg(nf+1,t_COL);
   for (d = 1; nft <= nf; d++)
@@ -1408,8 +1408,8 @@ squff(GEN a, long hint)
     {
       long n = degpol(g)/d;
       famod[nft] = (long)small_to_pol(u_FpX_normalize(g, chosenp),va);
-      if (n > 1 && n != split_berlekamp((GEN*)(famod+nft),prime,primes2))
-        err(bugparier,"squff: wrong numbers of factors");
+      if (n > 1 && n != split_berlekamp((GEN*)(famod+nft),prime))
+        err(bugparier,"DDF: wrong numbers of factors");
       nft += n;
     }
   }
@@ -1507,13 +1507,15 @@ polinflate(GEN x0, long d)
   return y;
 }
 
+/* Distinct Degree Factorization (deflating first)
+ * Assume x squarefree, degree(x) > 0, x(0) != 0 */
 GEN
-squff2(GEN x, long hint)
+DDF2(GEN x, long hint)
 {
   GEN L;
   long m;
   x = poldeflate(x, &m);
-  L = squff(x, hint);
+  L = DDF(x, hint);
   if (m > 1)
   {
     GEN e, v, fa = decomp(stoi(m));
@@ -1533,67 +1535,84 @@ squff2(GEN x, long hint)
     {
       GEN L2 = cgetg(1,t_VEC);
       for (i=1; i < lg(L); i++)
-        L2 = concatsp(L2, squff(polinflate((GEN)L[i], v[k]), hint));
+        L2 = concatsp(L2, DDF(polinflate((GEN)L[i], v[k]), hint));
       L = L2;
     }
   }
   return L;
 }
 
+/* SquareFree Factorization. f = prod P^e, all e distinct, in Z[X] (char 0
+ * would be enough, if modulargcd --> ggcd). Return (P), set *ex = (e) */
+GEN
+ZX_squff(GEN f, GEN *ex)
+{
+  GEN T,V,W,P,e,cf;
+  long i,k,dW,n,val;
+
+  val = polvaluation(f, &f);
+  n = 1 + degpol(f); if (val) n++;
+  e = cgetg(n,t_VECSMALL);
+  P = cgetg(n,t_COL);
+ 
+  cf = content(f); if (gsigne(leading_term(f)) < 0) cf = gneg_i(cf);
+  if (!gcmp1(cf)) f = gdiv(f,cf);
+ 
+  T = modulargcd(derivpol(f), f);
+  V = gdeuc(f,T);
+  for (k=i=1;; k++)
+  {
+    W = modulargcd(T,V); T = gdeuc(T,W); dW = degpol(W);
+    /* W = prod P^e, e > k; V = prod P^e, e >= k */
+    if (dW != degpol(V)) { P[i] = ldeuc(V,W); e[i] = k; i++; }
+    if (dW <= 0) break;
+    k++; V = W;
+  }
+  if (val) { P[i] = lpolx[varn(f)]; e[i] = val; i++;}
+  setlg(P,i); *ex=e; return P;
+}
+
+GEN
+fact_from_DDF(GEN fa, GEN e, long n)
+{
+  GEN v,w, y = cgetg(3, t_MAT);
+  long i,j,k, l = lg(fa);
+ 
+  v = cgetg(n+1,t_COL); y[1] = (long)v;
+  w = cgetg(n+1,t_COL); y[2] = (long)w;
+  for (k=i=1; i<l; i++)
+  {
+    GEN L = (GEN)fa[i], ex = stoi(e[i]);
+    long J = lg(L);
+    for (j=1; j<J; j++,k++)
+    {
+      v[k] = lcopy((GEN)L[j]);
+      w[k] = (long)ex;
+    }
+  }
+  return y;
+}
+
 /* Factor x in Z[t]. Assume all factors have degree divisible by hint */
 GEN
 factpol(GEN x, long hint)
 {
-  GEN fa,p1,d,t,v,w, y = cgetg(3,t_MAT);
-  long av=avma,av2,lx,vx,i,j,k,ex,nbfac,zval;
+  ulong av = avma;
+  GEN fa,ex,y;
+  long n,i,l;
 
   if (typ(x)!=t_POL) err(notpoler,"factpol");
   if (!signe(x)) err(zeropoler,"factpol");
 
-  ex = nbfac = 0;
-  p1 = x+2; while (gcmp0((GEN)*p1)) p1++;
-  zval = p1 - (x + 2);
-  lx = lgef(x) - zval;
-  vx = varn(x);
-  if (zval)
+  fa = ZX_squff(x, &ex);
+  l = lg(fa); n = 0;
+  for (i=1; i<l; i++)
   {
-    x = cgetg(lx, t_POL); p1 -= 2;
-    for (i=2; i<lx; i++) x[i] = p1[i];
-    x[1] = evalsigne(1)|evalvarn(vx)|evallgef(lx);
-    nbfac++;
+    fa[i] = (long)DDF2((GEN)fa[i], hint);
+    n += lg(fa[i])-1;
   }
-  /* now x(0) != 0 */
-  if (lx==3) { fa = NULL;/* for lint */ goto END; }
-  p1 = cgetg(1,t_VEC); fa=cgetg(lx,t_VEC);
-  for (i=1; i<lx; i++) fa[i] = (long)p1;
-  d=content(x); if (gsigne(leading_term(x)) < 0) d = gneg_i(d);
-  if (!gcmp1(d)) x=gdiv(x,d);
-  if (lx==4) { nbfac++; ex++; fa[1] = (long)concatsp(p1,x); goto END; }
-
-  w=derivpol(x); t=modulargcd(x,w);
-  if (!gcmp1(t)) { x=gdeuc(x,t); w=gdeuc(w,t); }
-  k=1;
-  while (k)
-  {
-    ex++; w=gadd(w, gneg_i(derivpol(x))); k=signe(w);
-    if (k) { t=modulargcd(x,w); x=gdeuc(x,t); w=gdeuc(w,t); } else t=x;
-    if (degpol(t) > 0)
-    {
-      fa[ex] = (long)squff2(t,hint);
-      nbfac += lg(fa[ex])-1;
-    }
-  }
-END: av2=avma;
-  v=cgetg(nbfac+1,t_COL); y[1]=(long)v;
-  w=cgetg(nbfac+1,t_COL); y[2]=(long)w;
-  if (zval) { v[1]=lpolx[vx]; w[1]=lstoi(zval); k=1; } else k=0;
-  for (i=1; i<=ex; i++)
-    for (j=1; j<lg(fa[i]); j++)
-    {
-      k++; v[k]=lcopy(gmael(fa,i,j)); w[k]=lstoi(i);
-    }
-  gerepilemanyvec(av,av2,y+1,2);
-  return sort_factor(y, cmpii);
+  y = fact_from_DDF(fa,ex,n);
+  return gerepileupto(av, sort_factor(y, cmpii));
 }
 
 /***********************************************************************/
@@ -3675,7 +3694,7 @@ polfnf(GEN a, GEN t)
   if (DEBUGLEVEL > 4) fprintferr("polfnf: choosing k = %ld\n",k);
 
   /* n guaranteed to be squarefree */
-  fa = squff2(n,0); lx = lg(fa);
+  fa = DDF2(n,0); lx = lg(fa);
   y = cgetg(3,t_MAT);
   p1 = cgetg(lx,t_COL); y[1] = (long)p1;
   p2 = cgetg(lx,t_COL); y[2] = (long)p2;

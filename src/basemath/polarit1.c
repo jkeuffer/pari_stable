@@ -24,6 +24,9 @@ extern GEN get_bas_den(GEN bas);
 extern GEN get_mul_table(GEN x,GEN bas,GEN invbas,GEN *T);
 extern GEN pol_to_monic(GEN pol, GEN *lead);
 
+#define lswap(x,y) { long _t=x; x=y; y=_t; }
+#define swap(x,y) { GEN _t=x; x=y; y=_t; }
+
 /* see splitgen() for how to use these two */
 GEN
 setloop(GEN a)
@@ -389,6 +392,35 @@ rootmod2(GEN f, GEN pp)
   free(y); return g;
 }
 
+/* assume x reduced mod p, monic, squarefree. Return one root, or NULL if
+ * irreducible */
+static GEN
+quadsolvemod(GEN x, GEN p, int unknown)
+{
+  GEN b = (GEN)x[3], c = (GEN)x[2];
+  GEN s,u,D;
+  
+  if (egalii(p, gdeux))
+  {
+    if (signe(c)) return NULL;
+    return gun;
+  }
+  D = subii(sqri(b), shifti(c,2));
+  D = resii(D,p);
+  if (unknown && kronecker(D,p) == -1) return NULL;
+ 
+  s = mpsqrtmod(D,p); u = addis(shifti(p,-1), 1); /* = 1/2 */
+  return modii(mulii(u, subii(s,b)), p);
+}
+
+static GEN
+otherroot(GEN x, GEN r, GEN p)
+{
+  GEN s = addii((GEN)x[3], r);
+  s = subii(p, s); if (signe(s) < 0) s = addii(s,p);
+  return s;
+}
+
 /* by splitting */
 GEN
 rootmod(GEN f, GEN p)
@@ -397,7 +429,7 @@ rootmod(GEN f, GEN p)
   GEN y,pol,a,b,q,pol0;
 
   if (!factmod_init(&f, p, &i)) { avma=av; return cgetg(1,t_COL); }
-  i = p[lgefint(p)-1];
+  i = modBIL(p);
   if ((i & 1) == 0) { avma = av; return root_mod_even(f,i); }
   i=2; while (!signe(f[i])) i++;
   if (i == 2) j = 1;
@@ -437,22 +469,21 @@ rootmod(GEN f, GEN p)
   if (la) y[j+lb] = (long)FpX_normalize(a,p);
   pol = gadd(polx[varn(f)], gun); pol0 = constant_term(pol);
   while (j<=n)
-  {
-    a=(GEN)y[j]; la=degpol(a);
+  { /* cf split_berlekamp */
+    a = (GEN)y[j]; la = degpol(a);
     if (la==1)
       y[j++] = lsubii(p, constant_term(a));
     else if (la==2)
     {
-      GEN d = subii(sqri((GEN)a[3]), shifti((GEN)a[2],2));
-      GEN e = mpsqrtmod(d,p), u = addis(q, 1); /* u = 1/2 */
-      y[j++] = lmodii(mulii(u,subii(e,(GEN)a[3])), p);
-      y[j++] = lmodii(mulii(u,negi(addii(e,(GEN)a[3]))), p);
+      GEN r = quadsolvemod(a, p, 0);
+      y[j++] = (long)r;
+      y[j++] = (long)otherroot(a,r, p);
     }
     else for (pol0[2]=1; ; pol0[2]++)
     {
       b = ZX_s_add(FpXQ_pow(pol,q, a,p), -1); /* pol^(p-1)/2 - 1 */
       b = FpX_gcd(a,b, p); lb = degpol(b);
-      if (lb && lb<la)
+      if (lb && lb < la)
       {
         b = FpX_normalize(b, p);
         y[j+lb] = (long)FpX_div(a,b, p);
@@ -971,71 +1002,79 @@ split_berlekamp_addmul(GEN x, GEN y, long c, long p)
   if (i==1) setsigne(x,0); else { setsigne(x,1); setlgef(x,i+1); }
 }
 
-long
-split_berlekamp(GEN *t, GEN pp, GEN pps2)
+static long
+small_rand(long p)
 {
-  GEN u = *t, p1, p2, vker,pol;
-  long av,N = degpol(u), d,i,kk,l1,l2,p, vu = varn(u);
+  return (p==2)? ((mymyrand() & 0x1000) == 0): mymyrand() % p;
+}
+
+#define set_irred(i) { if ((i)>ir) swap(t[i],t[ir]); ir++;}
+
+long
+split_berlekamp(GEN *t, GEN p)
+{
+  GEN u = *t, a,b,po2,vker,pol;
+  long av,N = degpol(u), d,i,ir,L,la,lb,ps, vu = varn(u);
   ulong av0 = avma;
   
-  vker = Berlekamp_ker(u,pp);
+  vker = Berlekamp_ker(u,p);
   vker = mat_to_vecpol(vker,vu);
   d = lg(vker)-1;
-  p = is_bigint(pp)? 0: pp[2];
-  if (p)
+  ps = is_bigint(p)? 0: p[2];
+  if (ps)
   {
-    avma = av0; p1 = cgetg(d+1, t_VEC); /* hack: hidden gerepile */
-    for (i=1; i<=d; i++) p1[i] = (long)pol_to_small((GEN)vker[i]);
-    vker = p1;
+    avma = av0; a = cgetg(d+1, t_VEC); /* hack: hidden gerepile */
+    for (i=1; i<=d; i++) a[i] = (long)pol_to_small((GEN)vker[i]);
+    vker = a;
   }
+  po2 = shifti(p, -1); /* (p-1) / 2 */
   pol = cgetg(N+3,t_POL);
-
-  for (kk=1; kk<d; )
+  ir = 0;
+  /* t[i] irreducible for i < ir, still to be treated for i < L */
+  for (L=1; L<d; )
   {
     GEN polt;
-    if (p)
+    if (ps)
     {
-      if (p==2)
-      {
-        pol[2] = ((mymyrand() & 0x1000) == 0);
-        pol[1] = evallgef(pol[2]? 3: 2);
-        for (i=2; i<=d; i++)
-          split_berlekamp_addmul(pol,(GEN)vker[i],(mymyrand()&0x1000)?0:1, p);
-      }
-      else
-      {
-        pol[2] = mymyrand()%p; /* vker[1] = 1 */
-        pol[1] = evallgef(pol[2]? 3: 2);
-        for (i=2; i<=d; i++)
-          split_berlekamp_addmul(pol,(GEN)vker[i],mymyrand()%p, p);
-      }
+      pol[2] = small_rand(ps); /* vker[1] = 1 */
+      pol[1] = evallgef(pol[2]? 3: 2);
+      for (i=2; i<=d; i++)
+        split_berlekamp_addmul(pol,(GEN)vker[i],small_rand(ps), ps);
       polt = small_to_pol(pol,vu);
     }
     else
     {
-      pol[2] = (long)genrand(pp);
+      pol[2] = (long)genrand(p);
       pol[1] = evallgef(signe(pol[2])? 3: 2) | evalvarn(vu);
       for (i=2; i<=d; i++)
-        pol = gadd(pol, gmul((GEN)vker[i], genrand(pp)));
-      polt = FpX_red(pol,pp);
+        pol = gadd(pol, gmul((GEN)vker[i], genrand(p)));
+      polt = FpX_red(pol,p);
     }
-    for (i=1; i<=kk && kk<d; i++)
+    for (i=ir; i<L && L<d; i++)
     {
-      p1=t[i-1]; l1=degpol(p1);
-      if (l1>1)
+      a = t[i]; la = degpol(a);
+      if (la == 1) { set_irred(i); }
+      else if (la == 2)
       {
-        av = avma; p2 = FpX_res(polt, p1, pp);
-        if (lgef(p2) <= 3) { avma=av; continue; }
-        p2 = FpXQ_pow(p2,pps2, p1,pp);
-        if (!signe(p2)) err(talker,"%Z not a prime in split_berlekamp",pp);
-        p2 = ZX_s_add(p2, -1);
-        p2 = FpX_gcd(p1,p2, pp); l2=degpol(p2);
-        if (l2>0 && l2<l1)
+        GEN r = quadsolvemod(a,p,1);
+        if (r)
         {
-          p2 = FpX_normalize(p2, pp);
-          t[i-1] = p2; kk++;
-          t[kk-1] = FpX_div(p1,p2,pp);
-          if (DEBUGLEVEL > 7) msgtimer("new factor");
+          t[i] = deg1pol_i(gun, subii(p,r), vu); r = otherroot(a,r,p);
+          t[L] = deg1pol_i(gun, subii(p,r), vu); L++;
+        }
+        set_irred(i);
+      }
+      else
+      {
+        av = avma; b = FpX_res(polt, a, p);
+        if (degpol(b) == 0) { avma=av; continue; }
+        b = ZX_s_add(FpXQ_pow(b,po2, a,p), -1);
+        b = FpX_gcd(a,b, p); lb = degpol(b);
+        if (lb && lb < la)
+        {
+          b = FpX_normalize(b, p);
+          t[L] = FpX_div(a,b,p);
+          t[i]= b; L++;
         }
         else avma = av;
       }
@@ -1075,7 +1114,7 @@ factmod0(GEN f, GEN pp)
       {
         /* here u is square-free (product of irred. of multiplicity e * k) */
         t[nbfact] = FpX_normalize(u,pp);
-        d = (N==1)? 1: split_berlekamp(t+nbfact, pp, pps2);
+        d = (N==1)? 1: split_berlekamp(t+nbfact, pp);
         for (j=0; j<d; j++) ex[nbfact+j] = e*k;
         nbfact += d;
       }
@@ -1215,89 +1254,101 @@ pol_to_padic(GEN x, GEN pr, GEN p, long r)
 static GEN
 padic_trivfact(GEN x, GEN p, long r)
 {
-  GEN p1, y = cgetg(3,t_MAT);
-  p1=cgetg(2,t_COL); y[1]=(long)p1; p = icopy(p);
-  p1[1]=(long)pol_to_padic(x,gpowgs(p,r),p,r);
-  p1=cgetg(2,t_COL); y[2]=(long)p1;
-  p1[1]=un; return y;
+  GEN y = cgetg(3,t_MAT);
+  p = icopy(p);
+  y[1]=(long)_col(pol_to_padic(x,gpowgs(p,r),p,r));
+  y[2]=(long)_col(gun); return y;
 }
 
-/* a p-adic numbre, return vector of p-adic roots of f congruent to a mod p
+/* assume x reduced mod p. q = p^e (simplified version of int_to_padic) */
+GEN
+Fp_to_Zp(GEN x, GEN p, GEN q, long e)
+{
+  GEN y = cgetg(5, t_PADIC);
+  if (!signe(x)) y[1] = evalprecp(0) | evalvalp(e);
+  else           y[1] = evalprecp(e) | evalvalp(0);
+  y[2] = (long)p;
+  y[3] = (long)q;
+  y[4] = (long)x; return y;
+}
+
+/* f != 0 in Z[X], primitive, a t_PADIC s.t f(a) = 0 mod p */
+static GEN
+apprgen_i(GEN f, GEN a)
+{
+  GEN fp,u,p,q,P,res,a0,rac;
+  long prec,i,j,k;
+ 
+  fp = derivpol(f); u = ggcd(f,fp);
+  if (degpol(u) > 0) { f = gdeuc(f,u); fp = derivpol(f); }
+  p = (GEN)a[2]; 
+  P = egalii(p,gdeux)? stoi(4): p;
+  a0= gmod(a, P);
+  prec = gcmp0(a)? valp(a): precp(a);
+#if 0 /* assumption */
+  if (!gcmp0(FpX_eval(f,a0,P))) err(rootper2);
+#endif
+  if (!gcmp0(FpX_eval(fp,a0,p))) /* simple zero */
+  {
+    res = rootpadiclift(f, a0, p, prec);
+    res = strict_int_to_padic(res,p,gpowgs(p,prec),prec,NULL);
+    return _vec(res);
+  }
+ 
+  f = poleval(f, gadd(a, gmul(P,polx[varn(f)])));
+  f = padic_pol_to_int(f);
+  f = gdiv(f, gpowgs(p,ggval(f, p)));
+
+  res = cgetg(degpol(f)+1,t_VEC);
+  q = gpowgs(p,prec);
+  rac = lift_intern(rootmod(f, P));
+  for (j=i=1; i<lg(rac); i++)
+  {
+    u = apprgen_i(f, Fp_to_Zp((GEN)rac[i], p,q,prec));
+    for (k=1; k<lg(u); k++) res[j++] = ladd(a, gmul(P,(GEN)u[k]));
+  }
+  setlg(res,j); return res;
+}
+
+/* a t_PADIC, return vector of p-adic roots of f equal to a (mod p)
  * We assume 1) f(a) = 0 mod p (mod 4 if p=2).
  *           2) leading coeff prime to p. */
 GEN
 apprgen(GEN f, GEN a)
 {
-  GEN fp,p1,p,P,res,x,u,a0,rac;
-  long av=avma,i,j,k,n;
-
-  if (typ(f)!=t_POL) err(notpoler,"apprgen");
+  ulong av = avma;
+  if (typ(f) != t_POL) err(notpoler,"apprgen");
   if (gcmp0(f)) err(zeropoler,"apprgen");
   if (typ(a) != t_PADIC) err(rootper1);
-  f = padic_pol_to_int(f);
-  fp = derivpol(f); p1 = ggcd(f,fp);
-  if (lgef(p1)>3) { f = gdeuc(f,p1); fp = derivpol(f); }
-  p = (GEN)a[2]; 
-  P = egalii(p,gdeux)? stoi(4): p;
-  a0= gmod(a, P);
-  if (!gcmp0(FpX_eval(f,a0,P))) err(rootper2);
-  if (!gcmp0(FpX_eval(fp,a0,p))) /* simple zero */
-  {
-    long prec = gcmp0(a)? valp(a): precp(a);
-    res = rootpadiclift(f, a0, p, prec);
-    res = strict_int_to_padic(res,p,gpowgs(p,prec),prec,NULL);
-    return gerepilecopy(av,_vec(res));
-  }
-  n = degpol(f); res = cgetg(n+1,t_VEC);
-
-  x = ggrandocp(p, valp(a) | precp(a)); 
-  f = poleval(f, gadd(a, gmul(P,polx[varn(f)])));
-  f = padic_pol_to_int(f);
-  if (!gcmp0(f)) f = gdiv(f, gpowgs(p,ggval(f, p)));
-
-  rac = lift_intern(rootmod(f, P));
-  for (j=0,i=1; i<lg(rac); i++)
-  {
-    u = apprgen(f, gadd(x,(GEN)rac[i]));
-    for (k=1; k<lg(u); k++) res[++j] = ladd(a, gmul(P,(GEN)u[k]));
-  }
-  setlg(res,j+1); return gerepilecopy(av,res);
+  return gerepilecopy(av, apprgen_i(padic_pol_to_int(f), a));
 }
 
 static GEN
-_rootpadic(GEN f, GEN p, long prec)
+rootpadic_i(GEN f, GEN p, long prec)
 {
-  GEN fp,y,z,p1,q,rac;
+  GEN fp,y,z,q,rac;
   long lx,i,j,k;
 
-  fp = derivpol(f); p1 = ggcd(f,fp);
-  if (lgef(p1) > 3) { f = gdeuc(f,p1); fp = derivpol(f); }
+  fp = derivpol(f); z = ggcd(f,fp);
+  if (degpol(z) > 0) { f = gdeuc(f,z); fp = derivpol(f); }
   rac = rootmod(f, (egalii(p,gdeux) && prec>=2)? stoi(4): p);
   rac = lift_intern(rac); lx = lg(rac);
   if (prec==1)
   {
     y = cgetg(lx,t_COL);
     for (i=1; i<lx; i++)
-    {
-      z=cgetg(5,t_PADIC); y[i]=(long)z;
-      z[1] = evalprecp(1)|evalvalp(0);
-      z[2] = z[3] = (long)p;
-      z[4] = rac[i];
-    }
+      y[i] = (long)Fp_to_Zp((GEN)rac[i],p,p,1);
     return y;
   }
   y = cgetg(degpol(f)+1,t_COL);
   q = gpowgs(p,prec);
-  for (j=0,i=1; i<lx; i++)
+  for (j=i=1; i<lx; i++)
   {
-    z = strict_int_to_padic((GEN)rac[i], p, q, prec, NULL);
-    p1 = apprgen(f,z);
-    for (k=1; k<lg(p1); k++) y[++j] = p1[k];
+    z = apprgen_i(f, Fp_to_Zp((GEN)rac[i], p,q,prec));
+    for (k=1; k<lg(z); k++,j++) y[j] = z[k];
   }
-  setlg(y,j+1); return y;
+  setlg(y,j); return y;
 }
-
-#define swap(x,y) { long _t=x; x=y; y=_t; }
 
 /* reverse x in place */
 static void
@@ -1305,7 +1356,7 @@ polreverse(GEN x)
 {
   long i, j;
   if (typ(x) != t_POL) err(typeer,"polreverse");
-  for (i=2, j=lgef(x)-1; i<j; i++, j--) swap(x[i], x[j]);
+  for (i=2, j=lgef(x)-1; i<j; i++, j--) lswap(x[i], x[j]);
   (void)normalizepol(x);
 }
 
@@ -1331,7 +1382,6 @@ pnormalize(GEN f, GEN p, long prec, long n, GEN *plead, long *pprec, int *prev)
   return pol_to_monic(f, plead);
 }
 
-
 /* return p-adic roots of f, precision prec */
 GEN
 rootpadic(GEN f, GEN p, long prec)
@@ -1347,23 +1397,19 @@ rootpadic(GEN f, GEN p, long prec)
   f = padic_pol_to_int(f);
   f = pnormalize(f, p, prec, 1, &lead, &PREC, &reverse);
 
-  y = _rootpadic(f,p,PREC);
+  y = rootpadic_i(f,p,PREC);
   k = lg(y);
   if (lead)
-  {
     for (i=1; i<k; i++) y[i] = ldiv((GEN)y[i], lead);
-  }
   if (reverse)
-  {
     for (i=1; i<k; i++) y[i] = linv((GEN)y[i]);
-  }
   return gerepilecopy(av, y);
 }
 /*************************************************************************/
 /*                             rootpadicfast                             */
 /*************************************************************************/
 
-/*lift accelerator. The author of the idea is unknown.*/
+/* lift accelerator */
 long hensel_lift_accel(long n, long *pmask)
 {
   long a,j;
@@ -1537,29 +1583,28 @@ getprec(GEN x, long prec, GEN *p)
   return prec;
 }
 
-/* a appartenant a une extension finie de Q_p, retourne le vecteur des
- * racines de f congrues a a modulo p dans le cas ou on suppose f(a) congru a
- * 0 modulo p (ou a 4 si p=2).
- */
+/* a belongs to finite extension of Q_p, return all roots of f equal to a
+ * mod p. We assume f(a) = 0 (mod p) [mod 4 if p=2] */
 GEN
 apprgen9(GEN f, GEN a)
 {
-  GEN fp,p1,p,pro,x,x2,u,ip,t,vecg;
-  long av=avma,tetpil,v,ps_1,i,j,k,lu,n,prec,d,va,fl2;
+  GEN fp,p1,p,pro,x,x2,u,ip,T,vecg;
+  long av=avma,tetpil,v,ps_1,i,j,k,n,prec,d,va,fl2;
 
   if (typ(f)!=t_POL) err(notpoler,"apprgen9");
   if (gcmp0(f)) err(zeropoler,"apprgen9");
   if (typ(a)==t_PADIC) return apprgen(f,a);
   if (typ(a)!=t_POLMOD || typ(a[2])!=t_POL) err(rootper1);
-  fp=derivpol(f); p1=ggcd(f,fp);
-  if (lgef(p1)>3) { f=gdeuc(f,p1); fp=derivpol(f); }
-  t=(GEN)a[1];
+ 
+  fp = derivpol(f); u = ggcd(f,fp);
+  if (degpol(u) > 0) { f = gdeuc(f,u); fp = derivpol(f); }
+  T = (GEN)a[1];
   prec = getprec((GEN)a[2], BIGINT, &p);
-  prec = getprec(t, prec, &p);
+  prec = getprec(T, prec, &p);
   if (prec==BIGINT) err(rootper1);
 
-  p1=poleval(f,a); v=ggval(lift_intern(p1),p); if (v<=0) err(rootper2);
-  fl2=egalii(p,gdeux);
+  p1 = poleval(f,a); v = ggval(lift_intern(p1),p); if (v<=0) err(rootper2);
+  fl2 = egalii(p,gdeux);
   if (fl2 && v==1) err(rootper2);
   v=ggval(lift_intern(poleval(fp,a)), p);
   if (!v)
@@ -1572,10 +1617,10 @@ apprgen9(GEN f, GEN a)
     tetpil=avma; pro=cgetg(2,t_COL); pro[1]=lcopy(a);
     return gerepile(av,tetpil,pro);
   }
-  n=degpol(f); pro=cgetg(n+1,t_COL); j=0;
+  n=degpol(f); pro=cgetg(n+1,t_COL);
 
   if (is_bigint(p)) err(impl,"apprgen9 for p>=2^31");
-  x=gmodulcp(ggrandocp(p,prec), t);
+  x=gmodulcp(ggrandocp(p,prec), T);
   if (fl2)
   {
     ps_1=3; x2=ggrandocp(p,2); p=stoi(4);
@@ -1585,21 +1630,19 @@ apprgen9(GEN f, GEN a)
     ps_1=itos(p)-1; x2=ggrandocp(p,1);
   }
   f = poleval(f,gadd(a,gmul(p,polx[varn(f)])));
-  if (!gcmp0(f)) f=gdiv(f,gpuigs(p,ggval(f,p)));
-  d=degpol(t); vecg=cgetg(d+1,t_COL);
+  f = gdiv(f,gpuigs(p,ggval(f,p)));
+ 
+  d=degpol(T); vecg=cgetg(d+1,t_COL);
   for (i=1; i<=d; i++)
     vecg[i] = (long)setloop(gzero);
-  va=varn(t);
+  va=varn(T); j = 1;
   for(;;) /* loop through F_q */
   {
-    ip=gmodulcp(gtopoly(vecg,va),t);
+    ip=gmodulcp(gtopoly(vecg,va),T);
     if (gcmp0(poleval(f,gadd(ip,x2))))
     {
-      u=apprgen9(f,gadd(ip,x)); lu=lg(u);
-      for (k=1; k<lu; k++)
-      {
-        j++; pro[j]=ladd(a,gmul(p,(GEN)u[k]));
-      }
+      u = apprgen9(f,gadd(ip,x));
+      for (k=1; k<lg(u); k++) pro[j++] = ladd(a, gmul(p,(GEN)u[k]));
     }
     for (i=d; i; i--)
     {
@@ -1609,12 +1652,17 @@ apprgen9(GEN f, GEN a)
     }
     if (!i) break;
   }
-  setlg(pro,j+1); return gerepilecopy(av,pro);
+  setlg(pro,j); return gerepilecopy(av,pro);
 }
 
-/*****************************************/
-/*  Factorisation p-adique d'un polynome */
-/*****************************************/
+/*******************************************************************/
+/*                                                                 */
+/*                      FACTORIZATION in Zp[X]                     */
+/*                                                                 */
+/*******************************************************************/
+extern GEN ZX_squff(GEN f, GEN *ex);
+extern GEN fact_from_DDF(GEN fa, GEN e, long n);
+
 int
 cmp_padic(GEN x, GEN y)
 {
@@ -1628,7 +1676,11 @@ cmp_padic(GEN x, GEN y)
   return cmpii((GEN)x[4], (GEN)y[4]);
 }
 
-/* factorise le polynome T=nf[1] dans Zp avec la precision pr */
+/*******************************/
+/*   Using Buchmann--Lenstra   */
+/*******************************/
+
+/* factor nf[1] in Zp to precision pr */
 static GEN
 padicff2(GEN nf,GEN p,long pr)
 {
@@ -1681,81 +1733,57 @@ padicff(GEN x,GEN p,long pr)
 }
 
 GEN
-factorpadic2(GEN x, GEN p, long r)
+factorpadic2(GEN f, GEN p, long prec)
 {
-  long av=avma,av2,k,i,j,i1,f,nbfac;
-  GEN res,p1,p2,y,d,a,ap,t,v,w;
-  GEN *fa;
+  ulong av = avma;
+  GEN fa,ex,y;
+  long n,i,l;
 
-  if (typ(x)!=t_POL) err(notpoler,"factorpadic");
-  if (gcmp0(x)) err(zeropoler,"factorpadic");
-  if (r<=0) err(rootper4);
+  if (typ(f)!=t_POL) err(notpoler,"factorpadic");
+  if (gcmp0(f)) err(zeropoler,"factorpadic");
+  if (prec<=0) err(rootper4);
 
-  if (lgef(x)==3) return trivfact();
- if (!gcmp1(leading_term(x)))
+  n = degpol(f);
+  if (n==0) return trivfact();
+  if (n==1) return padic_trivfact(f,p,prec);
+  if (!gcmp1(leading_term(f)))
     err(impl,"factorpadic2 for non-monic polynomial");
-  if (lgef(x)==4) return padic_trivfact(x,p,r);
-  y=cgetg(3,t_MAT);
-  fa = (GEN*)new_chunk(lgef(x)-2);
-  d=content(x); a=gdiv(x,d);
-  ap=derivpol(a); t=ggcd(a,ap); v=gdeuc(a,t);
-  w=gdeuc(ap,t); j=0; f=1; nbfac=0;
-  while (f)
+  f = padic_pol_to_int(f);
+ 
+  fa = ZX_squff(f, &ex);
+  l = lg(fa); n = 0;
+  for (i=1; i<l; i++)
   {
-    j++; w=gsub(w,derivpol(v)); f=signe(w);
-    if (f) { res=ggcd(v,w); v=gdeuc(v,res); w=gdeuc(w,res); }
-    else res=v;
-    fa[j]=(lgef(res)>3) ? padicff(res,p,r) : cgetg(1,t_COL);
-    nbfac += (lg(fa[j])-1);
+    fa[i] = (long)padicff((GEN)fa[i],p,prec);
+    n += lg(fa[i])-1;
   }
-  av2=avma; y=cgetg(3,t_MAT);
-  p1=cgetg(nbfac+1,t_COL); y[1]=(long)p1;
-  p2=cgetg(nbfac+1,t_COL); y[2]=(long)p2;
-  for (i=1,k=0; i<=j; i++)
-    for (i1=1; i1<lg(fa[i]); i1++)
-    {
-      p1[++k]=lcopy((GEN)fa[i][i1]); p2[k]=lstoi(i);
-    }
-  y = gerepile(av,av2,y);
-  sort_factor(y, cmp_padic); return y;
+ 
+  y = fact_from_DDF(fa,ex,n);
+  return gerepileupto(av, sort_factor(y, cmp_padic));
 }
 
-/*******************************************************************/
-/*                                                                 */
-/*                FACTORISATION P-adique avec ROUND 4              */
-/*                                                                 */
-/*******************************************************************/
+/***********************/
+/*   Using ROUND 4     */
+/***********************/
 extern GEN Decomp(GEN p,GEN f,long mf,GEN theta,GEN chi,GEN nu,long r);
 extern GEN nilord(GEN p, GEN fx, long mf, GEN gx, long flag);
 extern GEN hensel_lift_fact(GEN pol, GEN Q, GEN T, GEN p, GEN pev, long e);
 
-static GEN
-squarefree(GEN f, GEN *ex)
+static int
+expo_is_squarefree(GEN e)
 {
-  GEN T,V,W,A,B;
-  long n,i,k;
-
-  T=ggcd(derivpol(f),f); V=gdeuc(f,T);
-  n=lgef(f)-2; A=cgetg(n,t_COL); B=cgetg(n,t_COL);
-  k=1; i=1;
-  do
-  {
-    W=ggcd(T,V); T=gdeuc(T,W);
-    if (lgef(V) != lgef(W))
-    {
-      A[i]=ldeuc(V,W); B[i]=k; i++;
-    }
-    k++; V=W;
-  }
-  while (lgef(V)>3);
-  setlg(A,i); *ex=B; return A;
+  long i, l = lg(e);
+  for (i=1; i<l; i++)
+    if (e[i] != 1) return 0;
+  return 1;
 }
 
 GEN
 factorpadic4(GEN f,GEN p,long prec)
 {
-  GEN w,g,poly,fx,y,p1,p2,ex,pols,exps,ppow,lead;
-  long v=varn(f),n=degpol(f),av,tetpil,mfx,i,k,j,r,pr;
+  ulong av = avma;
+  GEN w,g,poly,y,p1,p2,ex,pols,exps,ppow,lead;
+  long v=varn(f),n=degpol(f),mfx,i,k,j,r,pr;
   int reverse = 0;
 
   if (typ(f)!=t_POL) err(notpoler,"factorpadic");
@@ -1764,21 +1792,21 @@ factorpadic4(GEN f,GEN p,long prec)
   if (prec<=0) err(rootper4);
 
   if (n==0) return trivfact();
-  av=avma; f = padic_pol_to_int(f);
-  if (n==1) return gerepileupto(av, padic_trivfact(f,p,prec));
+  if (n==1) return padic_trivfact(f,p,prec);
+  f = padic_pol_to_int(f);
   f = pnormalize(f, p, prec, n-1, &lead, &pr, &reverse);
 
-  poly=squarefree(f,&ex);
-  pols=cgetg(n+1,t_COL);
-  exps=cgetg(n+1,t_COL); n = lg(poly);
-  for (j=1,i=1; i<n; i++)
+  poly = ZX_squff(f,&ex);
+  pols = cgetg(n+1,t_COL);
+  exps = cgetg(n+1,t_COL); n = lg(poly);
+  for (j=i=1; i<n; i++)
   {
-    long av1 = avma;
-    fx=(GEN)poly[i]; mfx=ggval(discsr(fx),p);
-    w = (GEN)factmod(fx,p)[1];
-    if (!mfx)
+    ulong av1 = avma;
+    GEN fx = (GEN)poly[i], fa = factmod0(fx,p);
+    w = (GEN)fa[1];
+    if (expo_is_squarefree((GEN)fa[2]))
     { /* no repeated factors: Hensel lift */
-      p1 = hensel_lift_fact(fx, lift_intern(w), NULL, p, gpowgs(p,pr), pr);
+      p1 = hensel_lift_fact(fx, w, NULL, p, gpowgs(p,pr), pr);
       p2 = stoi(ex[i]);
       for (k=1; k<lg(p1); k++,j++)
       {
@@ -1788,8 +1816,9 @@ factorpadic4(GEN f,GEN p,long prec)
       continue;
     }
     /* use Round 4 */
+    mfx = ggval(discsr(fx),p);
     r = lg(w)-1;
-    g = lift_intern((GEN)w[r]);
+    g = (GEN)w[r];
     p2 = (r == 1)? nilord(p,fx,mfx,g,pr)
                  : Decomp(p,fx,mfx,polx[v],fx,g, (pr<=mfx)? mfx+1: pr);
     if (p2)
@@ -1799,37 +1828,33 @@ factorpadic4(GEN f,GEN p,long prec)
       p2 = (GEN)p2[2];
       for (k=1; k<lg(p1); k++,j++)
       {
-        pols[j]=p1[k];
-        exps[j]=lmulis((GEN)p2[k],ex[i]);
+        pols[j] = p1[k];
+        exps[j] = lmulis((GEN)p2[k],ex[i]);
       }
     }
     else
     {
-      avma=av1;
-      pols[j]=(long)fx;
-      exps[j]=lstoi(ex[i]); j++;
+      avma = av1;
+      pols[j] = (long)fx;
+      exps[j] = lstoi(ex[i]); j++;
     }
   }
   if (lead)
-  {
-    p1 = gmul(polx[v],lead);
     for (i=1; i<j; i++)
     {
-      p2 = poleval((GEN)pols[i], p1);
-      pols[i] = ldiv(p2, content(p2));
+      p1 = (GEN)pols[i]; unscale_pol_i(p1, lead);
+      pols[i] = (long)primitive_part(p1,NULL);
     }
-  }
-
-  tetpil=avma; y=cgetg(3,t_MAT);
-  p1 = cgetg(j,t_COL); ppow = gpowgs(p,prec); p = icopy(p);
+  y = cgetg(3,t_MAT);
+  p1 = cgetg(j,t_COL); p = icopy(p); ppow = gpowgs(p,prec);
   for (i=1; i<j; i++)
   {
     if (reverse) polreverse((GEN)pols[i]);
     p1[i] = (long)pol_to_padic((GEN)pols[i],ppow,p,prec);
   }
-  y[1]=(long)p1; setlg(exps,j);
-  y[2]=lcopy(exps); y = gerepile(av,tetpil,y);
-  sort_factor(y, cmp_padic); return y;
+  y[1] = (long)p1; setlg(exps,j);
+  y[2] = lcopy(exps);
+  return gerepileupto(av, sort_factor(y, cmp_padic));
 }
 
 GEN
