@@ -1112,7 +1112,6 @@ err(long numerr, ...)
         errcontext(s,ch1,ch1); break;
 
       case talker2:
-      case member:
         strcat(s,va_arg(ap, char*)); /* fall through */
       default:
         ch1 = va_arg(ap,char *);

@@ -25,8 +25,6 @@ char *errmessage[]=
 
 /* caracer1 */
   "unexpected character",
-/* member */
-  "incorrect type in .",
 /* paramer1 */
   "unknown function or error in formal parameters",
 /* varer1 */

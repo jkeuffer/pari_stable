@@ -3150,7 +3150,9 @@ read_member(GEN x)
 void
 member_err(char *s)
 {
-  err(member,s,mark.member,mark.start);
+  char *str = stackmalloc(strlen(s) + 128);
+  sprintf(str, "incorrect type in %s", s);
+  err(talker2,str,mark.member,mark.start);
 }
 
 
