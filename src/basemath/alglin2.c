@@ -2556,7 +2556,7 @@ hnflll_i(GEN A, GEN *ptB, int remove)
         {
           GEN b = (GEN)(D-1);
           if (DEBUGMEM) err(warnmem,"hnflll (reducing), i = %ld",i);
-          gerepileall(av, B? 4: 3, &A, (GEN*)&lambda, &b, &B);
+          gerepileall(av, B? 4: 3, &A, &lambda, &b, &B);
           D = (GEN*)(b+1);
         }
       }
@@ -2566,7 +2566,7 @@ hnflll_i(GEN A, GEN *ptB, int remove)
     {
       GEN b = (GEN)(D-1);
       if (DEBUGMEM) err(warnmem,"hnflll, k = %ld / %ld",k,n-1);
-      gerepileall(av, B? 4: 3, &A, (GEN*)&lambda, &b, &B);
+      gerepileall(av, B? 4: 3, &A, &lambda, &b, &B);
       D = (GEN*)(b+1);
     }
   }
