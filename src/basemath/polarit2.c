@@ -1532,7 +1532,7 @@ DDF(GEN a, long hint, int fl)
   long chosenp, p, nfacp, np, nmax, ti = 0;
   pari_sp av = avma, av1;
   byteptr pt = diffptr;
-  const int MAXNP = max(5, (long)sqrt((double)da));
+  const int MAXNP = 7;
   pari_timer T, T2;
 
   if (DEBUGLEVEL>2) { TIMERstart(&T); TIMERstart(&T2); }
