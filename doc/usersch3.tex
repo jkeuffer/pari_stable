@@ -2569,11 +2569,11 @@ Finally, the last component $c$ is the local \idx{Tamagawa number} $c_p$.
 
 \subsecidx{elllseries}$(E,s,\{A=1\})$: $E$ being a medium or long vector
 given by \kbd{ellinit}, this computes the value of the L-series of $E$ at
-$s$. It is assumed that $E$ is a minimal model over $\Z$ and that the curve
-is a modular elliptic curve. The optional parameter $A$ is a cutoff point for
-the integral, which must be chosen close to 1 for best speed. The result
-must be independent of $A$, so this allows some internal checking of the
-function.
+$s$. In the present version \vers, $s$ must be a real number. It is assumed
+that $E$ is a minimal model over $\Z$. The optional parameter $A$ is a cutoff
+point for the integral, which must be chosen close to 1 for best speed. The
+result must be independent of $A$, so this allows some internal checking of
+the function.
 
 Note that if the conductor of the curve is large, say greater than $10^{12}$,
 this function will take an unreasonable amount of time since it uses an
