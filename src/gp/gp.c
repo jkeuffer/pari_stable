@@ -50,7 +50,7 @@ BEGINEXTERN
 #  endif
   extern int isatty(int);
 ENDEXTERN
-static int history_is_dup(char *s);
+static void gp_add_history(char *s);
 #endif
 
 char*  _analyseur(void);
@@ -2345,8 +2345,7 @@ input_loop(Buffer *b, char *already_read, FILE *file, char *prompt)
     if (!file) {
       free(already_read);
       already_read = gprl_input(b, &s, do_prompt(prompt_cont));
-      if (!history_is_dup(already_read))
-        add_history(already_read);	/* Makes a copy */
+      gp_add_history(already_read);	/* Makes a copy */
     } else
 #endif
       already_read = file_input(b,&s,file,TeXmacs);
@@ -2400,10 +2399,16 @@ get_line_from_user(char *prompt, Buffer *b)
 }
 #else	/* READLINE */
 static int
-history_is_dup(char *s)
+history_is_new(char *s)
 {
-  if (!history_length) return 0;
-  return !strcmp(s, history_get(history_length)->line);
+  return (*s && (!history_length ||
+                  strcmp(s, history_get(history_length)->line)));
+}
+
+static void
+gp_add_history(char *s)
+{
+  if (history_is_new(s)) add_history(s);
 }
 
 static int
@@ -2420,7 +2425,7 @@ get_line_from_user(char *prompt, Buffer *b)
     }
     /* Put the original read line into history */
     index = history_length;
-    if (!history_is_dup(buf)) add_history(buf);	/* Copies the entry */
+    gp_add_history(buf);	/* Copies the entry */
 
     added = input_loop(b,buf,NULL,prompt); /* free()s buf */
     unblock_SIGINT(); /* bug in readline 2.0: need to unblock ^C */
@@ -2434,7 +2439,7 @@ get_line_from_user(char *prompt, Buffer *b)
           HIST_ENTRY *e = remove_history(--i);
           free(e->line); free(e);
         }
-        if (!history_is_dup(s)) add_history(s);
+        gp_add_history(s);
       }
     
       /* update logfile */
