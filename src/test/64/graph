@@ -64,7 +64,7 @@
 ? plotmove(0,200,200);plotstring(0,"(0,0)")
 ? psdraw([0,10,10])
 ? getheap
-[9, 139]
+[9, 138]
 ? print("Total time spent: ",gettime);
 Total time spent: 166
 ? \q
