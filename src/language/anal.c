@@ -3137,8 +3137,8 @@ void err_leave_default(long n);
 GEN
 trap0(char *e, char *r, char *f)
 {
-  long av = avma, numerr = -1;
-  GEN x = gnil;
+  VOLATILE long av = avma, numerr = -1;
+  VOLATILE GEN x = gnil;
   char *F;
        if (!strcmp(e,"errpile")) numerr = errpile;
   else if (!strcmp(e,"typeer")) numerr = typeer;
@@ -3150,14 +3150,13 @@ trap0(char *e, char *r, char *f)
 
   if (f && r)
   { /* explicit recovery text */
-    long *AV = &av;      /* prevent longjmp from clobbering av + numerr */
-    char *a = analyseur; /* volatile would be cleaner, but not portable */
+    char *a = analyseur;
     void *catch;
     jmp_buf env;
 
     if (setjmp(env)) 
     {
-      avma = *AV;
+      avma = av;
       err_leave(&catch);
       x = lisseq(r);
       skipseq();

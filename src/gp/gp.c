@@ -2016,9 +2016,10 @@ static char *
 do_prompt()
 {
   static char buf[MAX_PROMPT_LEN + 24]; /* + room for color codes */
-  char *s = buf;
-
-  *s = 0;
+  char *s;
+  
+  if (test_mode) return prompt;
+  s = buf; *s = 0;
   /* escape sequences bug readline, so use special bracing (if available) */
   brace_color(s, c_PROMPT);
   s += strlen(s);
@@ -2141,9 +2142,8 @@ check_meta(char *buf)
 static GEN
 gp_main_loop(int ismain)
 {
-  char *promptbuf = prompt;
   long av, i,j;
-  GEN z = gnil;
+  VOLATILE GEN z = gnil;
   Buffer *b = new_buffer();
   if (!setjmp(b->env))
   {
@@ -2177,8 +2177,7 @@ gp_main_loop(int ismain)
 
     for(;;)
     {
-      if (! test_mode) promptbuf = do_prompt();
-      if (! read_line(promptbuf, b))
+      if (! read_line(do_prompt(), b))
       {
 #ifdef _WIN32
 	Sleep(10); if (win32ctrlc) dowin32ctrlc();

@@ -692,7 +692,7 @@ gegal(GEN x, GEN y)
     }
   {
     jmp_buf env;
-    long *AV = &avma;
+    VOLATILE long av = avma;
     void *c;
     if (setjmp(env)) i = 0;
     else
@@ -701,7 +701,7 @@ gegal(GEN x, GEN y)
       i = gcmp0(gadd(x, gneg_i(y)));
     }
     err_leave(&c);
-    avma = *AV;
+    avma = av;
   }
   return i;
 }

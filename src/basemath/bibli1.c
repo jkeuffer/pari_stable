@@ -2771,11 +2771,12 @@ get_Bnf(GEN nf)
  * flag = 2, return as soon as stockmax vectors found.
  * flag = 3, corresponds to 1+2 */
 GEN
-fincke_pohst(GEN a,GEN bound,GEN stockmax,long flag, long prec,
+fincke_pohst(GEN a,GEN BOUND,GEN stockmax,long flag, long PREC,
              GEN (*check)(GEN))
 {
-  long pr,av=avma,i,j,n;
-  GEN B,nf,r,rinvtrans,v,v1,u,s,res,z,vnorm,sperm,perm,uperm,basis,gram;
+  VOLATILE long pr,av=avma,i,j,n, prec = PREC;
+  VOLATILE GEN B,nf,r,rinvtrans,v,v1,u,s,res,z,vnorm,sperm,perm,uperm,basis;
+  VOLATILE GEN gram, bound = BOUND;
   void *catch = NULL;
 
   if (DEBUGLEVEL>2) { fprintferr("entering fincke_pohst\n"); flusherr(); }
