@@ -1237,6 +1237,7 @@ red_mod_2z(GEN x, GEN z)
 {
   GEN Z = gmul2n(z, 1), d = subrr(z, x); 
   /* require little accuracy */
+  if (!signe(d)) return x;
   setlg(d, 3 + ((expo(d) - expo(Z)) >> TWOPOTBITS_IN_LONG));
   return addrr(mulir(mpent(divrr(d, Z)), Z), x);
 }
