@@ -3374,124 +3374,127 @@ GEN torsell(GEN e) {return torselldoud(e);}
 
 /* p = 2 or 3 */
 static long
-neron(GEN e, GEN p, long* ptkod)
+neron(GEN e, long p, long* ptkod)
 {
   long kod, v4, v6, vd;
   pari_sp av=avma;
   GEN c4, c6, d, nv;
 
-  nv=localreduction(e,p);
-  kod=itos((GEN)nv[2]); *ptkod=kod;
+  nv = localred_carac_23(e,p);
+  *ptkod = kod = itos((GEN)nv[2]);
   c4=(GEN)e[10]; c6=(GEN)e[11]; d=(GEN)e[12];
-  v4=gcmp0(c4) ? 12 : ggval(c4,p);
-  v6=gcmp0(c6) ? 12 : ggval(c6,p);
-  vd=ggval(d,p);
-  avma=av;
-  switch(itos(p))
-  {
-    case 3:
-      if (labs(kod)>4) return 1;
-      else
-      {
-	switch(kod)
-	{
-	  case -1: case 1: return v4&1 ? 2 : 1;
-	  case -3: case 3: return (2*v6>vd+3) ? 2 : 1;
-	  case -4: case 2:
-	    switch (vd%6)
-	    {
-	      case 4: return 3;
-	      case 5: return 4;
-	      default: return v6%3==1 ? 2 : 1;
-	    }
-	  default: /* kod = -2 et 4 */
-	    switch (vd%6)
-	    {
-	      case 0: return 2;
-	      case 1: return 3;
-	      default: return 1;
-	    }
-	}
-      }
-    case 2:
-      if (kod>4) return 1;
-      else
-      {
-	switch(kod)
+  v4 = gcmp0(c4) ? 12 : Z_lval(c4,p);
+  v6 = gcmp0(c6) ? 12 : Z_lval(c6,p);
+  vd = Z_lval(d,p); avma = av;
+  if (p == 2) {
+    if (kod > 4) return 1;
+    switch(kod)
+    {
+      case 1: return (v6>0) ? 2 : 1;
+      case 2:
+        if (vd==4) return 1;
+        else
         {
-	  case 1: return (v6>0) ? 2 : 1;
-	  case 2:
-	    if (vd==4) return 1;
-	    else
-	    {
-	      if (vd==7) return 3;
-	      else return v4==4 ? 2 : 4;
-	    }
-	  case 3:
-	    switch(vd)
-	    {
-	      case 6: return 3;
-	      case 8: return 4;
-	      case 9: return 5;
-	      default: return v4==5 ? 2 : 1;
-	    }
-	  case 4: return v4>4 ? 2 : 1;
-	  case -1:
-	    switch(vd)
-	    {
-	      case 9: return 2;
-	      case 10: return 4;
-	      default: return v4>4 ? 3 : 1;
-	    }
-	  case -2:
-	    switch(vd)
-	    {
-	      case 12: return 2;
-	      case 14: return 3;
-	      default: return 1;
-	    }
-	  case -3:
-	    switch(vd)
-	    {
-	      case 12: return 2;
-	      case 14: return 3;
-	      case 15: return 4;
-	      default: return 1;
-	    }
-	  case -4: return v6==7 ? 2 : 1;
-	  case -5: return (v6==7 || v4==6) ? 2 : 1;
-	  case -6:
-	    switch(vd)
-	    {
-	      case 12: return 2;
-	      case 13: return 3;
-	      default: return v4==6 ? 2 : 1;
-	    }
-	  case -7: return (vd==12 || v4==6) ? 2 : 1;
-	  default: return v4==6 ? 2 : 1;
-	}
-      }
-    default: return 0; /* should not occur */
+          if (vd==7) return 3;
+          else return v4==4 ? 2 : 4;
+        }
+      case 3:
+        switch(vd)
+        {
+          case 6: return 3;
+          case 8: return 4;
+          case 9: return 5;
+          default: return v4==5 ? 2 : 1;
+        }
+      case 4: return v4>4 ? 2 : 1;
+      case -1:
+        switch(vd)
+        {
+          case 9: return 2;
+          case 10: return 4;
+          default: return v4>4 ? 3 : 1;
+        }
+      case -2:
+        switch(vd)
+        {
+          case 12: return 2;
+          case 14: return 3;
+          default: return 1;
+        }
+      case -3:
+        switch(vd)
+        {
+          case 12: return 2;
+          case 14: return 3;
+          case 15: return 4;
+          default: return 1;
+        }
+      case -4: return v6==7 ? 2 : 1;
+      case -5: return (v6==7 || v4==6) ? 2 : 1;
+      case -6:
+        switch(vd)
+        {
+          case 12: return 2;
+          case 13: return 3;
+          default: return v4==6 ? 2 : 1;
+        }
+      case -7: return (vd==12 || v4==6) ? 2 : 1;
+      default: return v4==6 ? 2 : 1;
+    }
+  } else {
+    if (labs(kod) > 4) return 1;
+    switch(kod)
+    {
+      case -1: case 1: return v4&1 ? 2 : 1;
+      case -3: case 3: return (2*v6>vd+3) ? 2 : 1;
+      case -4: case 2:
+        switch (vd%6)
+        {
+          case 4: return 3;
+          case 5: return 4;
+          default: return v6%3==1 ? 2 : 1;
+        }
+      default: /* kod = -2 et 4 */
+        switch (vd%6)
+        {
+          case 0: return 2;
+          case 1: return 3;
+          default: return 1;
+        }
+    }
   }
+}
+
+static long
+val_aux(GEN x, long p, long pk, long *u) {
+  long v;
+  GEN z;
+  if (!signe(x)) { *u = 0; return 12; }
+  v = Z_lvalrem(x,p,&z);
+  *u = smodis(z,pk); return v;
+}
+static void
+val_init(GEN e, long p, long pk,
+         long *v4, long *u, long *v6, long *v, long *vd, long *d1)
+{
+  GEN c4 = (GEN)e[10], c6 = (GEN)e[11], D = (GEN)e[12];
+  pari_sp av = avma;
+  *v4 = val_aux(c4, p,pk, u);
+  *v6 = val_aux(c6, p,pk, v);
+  *vd = val_aux(D , p,pk, d1); avma = av;
 }
 
 static long
 ellrootno_2(GEN e)
 {
-  long n2, kod, u, v, x1, y1, d1, v4, v6, w2;
-  pari_sp av=avma;
-  GEN p=gdeux,c4,c6,tmp,p6;
+  long n2, kod, u, v, x1, y1, d1, vd, v4, v6;
 
-  n2=neron(e,p,&kod); c4=(GEN)e[10]; c6=(GEN)e[11]; p6=stoi(64);
-  if (gcmp0(c4)) {v4=12; u=0;}
-  else {v4=Z_pvalrem(c4,p,&tmp); u=itos(modii(tmp,p6));}
-  if (gcmp0(c6)) {v6=12; v=0;}
-  else {v6=Z_pvalrem(c6,p,&tmp); v=itos(modii(tmp,p6));}
-  (void)Z_pvalrem((GEN)e[12],p,&tmp); d1=itos(modii(tmp,p6));
-  avma=av; x1=u+v+v;
+  val_init(e, 2, 64, &v4, &u, &v6, &v, &vd, &d1);
+  n2 = neron(e,2,&kod);
   if (kod>=5)
-    {w2=mpodd(addii((GEN)e[2],(GEN)e[3])) ? 1 : -1; avma=av; return w2;}
+    return odd(smodis((GEN)e[2],2) + smodis((GEN)e[3],2)) ? 1 : -1;
   if (kod<-9) return (n2==2) ? -kross(-1,v) : -1;
+  x1 = u+v+v;
   switch(kod)
   {
     case 1: return 1;
@@ -3515,7 +3518,7 @@ ellrootno_2(GEN e)
       {
 	case 1: return -kross(2,u*v);
 	case 2: return -kross(2,v);
-	case 3: y1 = smodis(gsubsg(u,gmul2n(c6,-5)),16); avma=av;
+	case 3: y1 = (u - (v << (v6-5))) % 16;
 	  return (y1==7 || y1==11) ? 1 : -1;
 	case 4: return (v%8==3 || (2*u+v)%8==7) ? 1 : -1;
 	case 5: return v6==8 ? kross(2,x1) : kross(-2,u);
@@ -3553,7 +3556,7 @@ ellrootno_2(GEN e)
       if (n2==1) return 1;
       else
       {
-	y1 = smodis(addsi(u, gmul2n(c6,-8)), 16); avma=av;
+	y1 = (u + (v << (v6-6))) % 16;
 	if (v6==10) return (y1==9 || y1==13) ? 1 : -1;
 	else return (y1==9 || y1==5) ? 1 : -1;
       }
@@ -3566,19 +3569,12 @@ ellrootno_2(GEN e)
 static long
 ellrootno_3(GEN e)
 {
-  long n2, kod, u, v, d1, r6, K4, K6, v4;
-  pari_sp av=avma;
-  GEN p=stoi(3),c4,c6,tmp,p4;
+  long n2, kod, u, v, d1, r6, K4, K6, vd, v4, v6;
 
-  n2=neron(e,p,&kod); c4=(GEN)e[10]; c6=(GEN)e[11]; p4=stoi(81);
-  if (gcmp0(c4)) { v4=12; u=0; }
-  else { v4=Z_pvalrem(c4,p,&tmp); u=itos(modii(tmp,p4)); }
-  if (gcmp0(c6)) v=0;
-  else {(void)Z_pvalrem(c6,p,&tmp); v=itos(modii(tmp,p4));}
-  (void)Z_pvalrem((GEN)e[12],p,&tmp); d1=itos(modii(tmp,p4));
-  avma=av;
-  r6=v%9; K4=kross(u,3); K6=kross(v,3);
-  if (kod>4) return K6;
+  val_init(e, 3, 81, &v4, &u, &v6, &v, &vd, &d1);
+  n2 = neron(e,3,&kod);
+  K6 = kross(v,3); if (kod>4) return K6;
+  r6 = v%9; K4 = kross(u,3);
   switch(kod)
   {
     case 1: case 3: case -3: return 1;
