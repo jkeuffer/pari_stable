@@ -143,7 +143,9 @@ _A	   = .a
 LIB_PREFIX = lib
 LIBPARI    = \$(LIB_PREFIX)pari
 LIBPARI_STA= \$(LIBPARI)\$(_A)
-LIBPARI_DYN= \$(LIBPARI).$sodest
+LIBPARI_SO = \$(LIBPARI).$DLSUFFIX
+LIBPARI_DYN   = \$(LIBPARI_SO).$sodest
+LIBPARI_SONAME= \$(LIBPARI_SO).$soname
 
 RUNPTH       = $RUNPTH
 RUNPTH_FINAL = $RUNPTH_FINAL
@@ -330,10 +332,10 @@ install-lib-dyn: \$(LIBPARI_DYN)
 EOT
 if test "$soname" != "$sodest"; then
   cat >> $file << EOT
-	-\$(RM) \$(LIBDIR)/\$(LIBPARI).$soname
-	-\$(RM) \$(LIBDIR)/\$(LIBPARI).$DLSUFFIX
-	-\$(LN) \$(LIBPARI_DYN) \$(LIBDIR)/\$(LIBPARI).$soname
-	-\$(LN) \$(LIBPARI_DYN) \$(LIBDIR)/\$(LIBPARI).$DLSUFFIX
+	-\$(RM) \$(LIBDIR)/\$(LIBPARI_SONAME)
+	-\$(RM) \$(LIBDIR)/\$(LIBPARI_SO)
+	-\$(LN) \$(LIBPARI_DYN) \$(LIBDIR)/\$(LIBPARI_SONAME)
+	-\$(LN) \$(LIBPARI_DYN) \$(LIBDIR)/\$(LIBPARI_SO)
 
 EOT
 fi
@@ -358,10 +360,10 @@ gp-dyn: \$(OBJSGP) \$(LIBPARI_DYN) \$(GNUPLOT_OBJS)
 EOT
     if test "$soname" != "$sodest"; then
       cat >> $file << EOT
-	-\$(RM) \$(LIBPARI).$soname
-	-\$(RM) \$(LIBPARI).$DLSUFFIX
-	-\$(LN) \$(LIBPARI_DYN) \$(LIBPARI).$soname
-	-\$(LN) \$(LIBPARI_DYN) \$(LIBPARI).$DLSUFFIX
+	-\$(RM) \$(LIBPARI_SONAME)
+	-\$(RM) \$(LIBPARI_SO)
+	-\$(LN) \$(LIBPARI_DYN) \$(LIBPARI_SONAME)
+	-\$(LN) \$(LIBPARI_DYN) \$(LIBPARI_SO)
 EOT
     fi
   else

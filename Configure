@@ -521,9 +521,13 @@ if test "$optimization" != profiling; then
 
   if test -n "$readline"; then
 # Readline -- TermCap
-    if test -n "`(nm $rl_fullname | grep tgetent)2>/dev/null`"; then
+    lib=$rl_fullname; sym=tgetent; . ./locatesymbol
+    if test -n "$try"; then # tgetent needed
       lib=ncurses; . ./locatelib
-      if test -n "$try" -a -n "`(nm $try | grep tgetent)2>/dev/null`"; then
+      if test -n "$try"; then # ncurses found. Does it contain tgetent ?
+        lib=$try; . ./locatesymbol
+      fi
+      if test -n "$try"; then
         rl_ncurses=$ncurses
       else
         lib=termcap; . ./locatelib
@@ -531,10 +535,10 @@ if test "$optimization" != profiling; then
       fi
     fi
 # Readline -- Allocation
-    rl_liberty=`(nm $rl_fullname | grep alloca)2>/dev/null`
-    if test -n "$rl_liberty"; then
+    lib=$rl_fullname; sym=alloca; . ./locatesymbol
+    if test -n "$try"; then # alloca needed
       lib=iberty; . ./locatelib
-      if test -z "$try"; then rl_liberty=; fi
+      rl_liberty="$try"
     fi
 # Readline -- Headers
     case "$osname" in
@@ -574,7 +578,8 @@ if test "$optimization" != profiling; then
          if (grep rl_save_prompt $x > /dev/null 2>&1); then
            rl_save_prompt=yes;
          else
-          _rl_save_prompt=`(nm $rl_fullname | grep rl_save_prompt)2>/dev/null`
+          lib=$rl_fullname; sym=rl_save_prompt; ./locatesymbol
+          _rl_save_prompt=$try
          fi;;
       *) echo ..."But no header file has been found"
          readline=;;
@@ -761,7 +766,8 @@ if test -z "$CC"; then
 fi
 
 if test "$which_graphic_lib" = gnuplot -a -z "$gcc"; then
-    if nm $gnuplot_fullpath | grep -c _eprintf 2>&1 > /dev/null ; then
+    lib=$gnuplot_fullpath; sym=_eprintf; ./locatesymbol
+    if test -n "$try"; then
 	echo "...Looks like gcc-compiled gnuplot.  I add -lgcc to graphic libraries"
 	_ogcc="$gcc"
 	opth="$pth"
@@ -974,7 +980,7 @@ if test "$optimization" = profiling; then DLLD=; else
 # Some others (SunOS 5) need a link from a .so
 # Some others (HPUX 09) do not want version numbers.
 #
-  soname=$DLSUFFIX.$soname_num
+  soname=$soname_num
   case "$osname-$arch" in
 #    aix-*)  DLSUFFIX=a  ;; dynamic linking does not work!
     sunos-*) sodest=$VersionMajor$VersionMinor.$patch
