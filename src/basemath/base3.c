@@ -1464,7 +1464,7 @@ zarchstar(GEN nf,GEN x,GEN arch,long nba)
   {
     if (DEBUGLEVEL>5) fprintferr("zarchstar: r = %ld\n",r);
     p1 = gpowgs(stoi(rr),N);
-    limr = is_bigint(p1)? BIGINT: p1[2];
+    limr = (cmpis(p1,BIGINT) >= 0)? BIGINT: p1[2];
     limr = (limr-1)>>1;
     k = zk? rr: 1; /* to avoid 0 */
     for ( ; k<=limr; k++)
