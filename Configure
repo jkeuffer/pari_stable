@@ -560,7 +560,7 @@ if test "$optimization" != profiling; then
          if (grep rl_save_prompt $x > /dev/null 2>&1); then
            rl_save_prompt=yes;
          else
-          lib=$rl_fullname; sym=rl_save_prompt; ./locatesymbol
+          lib=$rl_fullname; sym=rl_save_prompt; . ./locatesymbol
           _rl_save_prompt=$try
          fi;;
       *) echo ..."But no header file has been found"
@@ -748,7 +748,7 @@ if test -z "$CC"; then
 fi
 
 if test "$which_graphic_lib" = gnuplot -a -z "$gcc"; then
-    lib=$gnuplot_fullpath; sym=_eprintf; ./locatesymbol
+    lib=$gnuplot_fullpath; sym=_eprintf; . ./locatesymbol
     if test -n "$try"; then
 	echo "...Looks like gcc-compiled gnuplot.  I add -lgcc to graphic libraries"
 	_ogcc="$gcc"
