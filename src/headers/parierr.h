@@ -22,7 +22,7 @@ enum {
   diver11, diver12, divzer1, dvmer1, moder1,
   
   reser1, arier1, arier2, errpile, errlg,
-  errlgef, errvalp, rtodber,
+  errlgef, errexpo, errvalp, rtodber,
 
 /* alglin.c */
 
