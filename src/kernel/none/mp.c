@@ -3734,8 +3734,10 @@ cbezout(long a,long b,long *uu,long *vv)
   }
   else if (d < d1)
   {
+/* bug in gcc-2.95.3:
+ * s = a; a = b; b = s; produces wrong result a = b. This is OK:  */
+    { long _x = a; a = b; b = _x; }	/* in order to keep the right signs */
     r = d; d = d1; d1 = r;
-    s = a; a = b; b = s;	/* in order to keep the right signs */
     t = uu; uu = vv; vv = t;
 #ifdef DEBUG_CBEZOUT
     fprintferr("  swapping\n");
