@@ -26,6 +26,7 @@ extern GEN mulmat_pol(GEN A, GEN x);
 extern GEN idealsqrtn(GEN nf, GEN x, GEN gn, int strict);
 extern GEN lift_if_rational(GEN x);
 extern GEN get_mul_table(GEN x,GEN basden,GEN invbas);
+extern GEN rnfallbase(GEN nf, GEN pol, GEN *pD, GEN *pd, GEN *pfi);
 
 GEN
 matbasistoalg(GEN nf,GEN x)
@@ -297,7 +298,7 @@ rnfinitalg(GEN nf, GEN pol, long prec)
 {
   pari_sp av = avma;
   long vpol;
-  GEN rnf, delta, bas, f2, B, z;
+  GEN rnf, delta, bas, D,d,f, B;
 
   if (typ(pol)!=t_POL) err(notpoler,"rnfinitalg");
   nf = checknf(nf); vpol = varn(pol);
@@ -305,24 +306,21 @@ rnfinitalg(GEN nf, GEN pol, long prec)
   if (vpol >= varn(nf[1]))
     err(talker,"main variable must be of higher priority in rnfinitalg");
 
-  z = rnfpseudobasis(nf,pol);
+  bas = rnfallbase(nf,pol, &D,&d, &f);
+  B = matbasistoalg(nf,(GEN)bas[1]);
+  bas[1] = (long)lift_if_rational( mat_to_vecpol(B,vpol) );
   delta = cgetg(3,t_VEC);
-    delta[1] = z[3];
-    delta[2] = z[4];
-  B = matbasistoalg(nf,(GEN)z[1]);
-  bas = cgetg(3,t_VEC);
-    bas[1] = (long)lift_if_rational( mat_to_vecpol(B,vpol) );
-    bas[2] = (long)z[2];
-  f2 = idealdiv(nf, discsr(pol), (GEN)z[3]);
+  delta[1] = (long)D;
+  delta[2] = (long)d;
 
   rnf = cgetg(13, t_VEC);
   rnf[1] = (long)pol;
   rnf[3] = (long)delta;
-  rnf[4] = (long)idealsqrtn(nf, f2, gdeux, 1);
+  rnf[4] = (long)f;
   rnf[6] = (long)rnf_roots(nf, lift(pol), prec, (GEN*)rnf+2);
   rnf[7] = (long)bas;
   rnf[8] = (long)lift_if_rational( invmat(B) );
-  rnf[9] = lgetg(1,t_VEC); /* multiplication table: dummy */
+  rnf[9] = lgetg(1,t_VEC); /* dummy */
   rnf[10]= (long)nf;
   rnf[11] = (long)rnfequation2(nf,pol);
   rnf[12] = zero;
@@ -591,39 +589,34 @@ prodidnorm(GEN I)
 static GEN
 makenorms(GEN rnf)
 {
-  GEN nf = (GEN)rnf[10], t = prodid(nf, gmael(rnf,7,2));
-  GEN z = cgetg(3, t_VEC);
-  z[1] = (long)idealinv(nf, t);
-  z[2] = (long)dethnf(t); return z;
+  GEN f = (GEN)rnf[4];
+  return typ(f) == t_INT? gun: dethnf(f);
 }
 
 GEN
 rnfidealnormrel(GEN rnf, GEN id)
 {
   pari_sp av = avma;
-  GEN z, Ninit, nf = (GEN)rnf[10];
+  GEN z, nf = (GEN)rnf[10];
 
   checkrnf(rnf);
   if (degpol(rnf[1]) == 1) return idmat(degpol(nf[1]));
 
-  Ninit = check_and_build_norms(rnf);
   z = prodid(nf, (GEN)rnfidealhermite(rnf,id)[2]);
-  return gerepileupto(av, idealmul(nf,z, (GEN)Ninit[1]));
+  return gerepileupto(av, idealmul(nf,z, (GEN)rnf[4]));
 }
 
 GEN
 rnfidealnormabs(GEN rnf, GEN id)
 {
   pari_sp av = avma;
-  GEN z, Ninit;
+  GEN z;
 
   checkrnf(rnf);
   if (degpol(rnf[1]) == 1) return gun;
 
-  Ninit = check_and_build_norms(rnf);
-  id = rnfidealhermite(rnf,id);
-  z = prodidnorm((GEN)id[2]);
-  return gerepileupto(av, gdiv(z, (GEN)Ninit[2]));
+  z = prodidnorm( (GEN)rnfidealhermite(rnf,id)[2] );
+  return gerepileupto(av, gmul(z, check_and_build_norms(rnf)));
 }
 
 GEN
