@@ -51,19 +51,22 @@ pointer \tet{diffptr}. This is used as follows: when
 \noindent is called, this table is initialized with the successive
 differences of primes up to (just a little beyond) \kbd{maxprime}
 (see \secref{se:intro4}). \kbd{maxprime} has to be less than $436272744$,
-whatever memory is available. A
-difference of $0$ means we have reached the end of the table. The following
-example illustrates its use.
+whatever memory is available. A difference of $0$ means we have reached the
+end of the table. The largest prime computable using this table is
+available as the output of
+
+\kbd{ulong maxprime()}
+
+\noindent Here's a small example:
 %
 \bprog
 byteptr d = diffptr;
-long p = 0;
+ulong p = 0;
 
-while (p <= goal) /* @Ccom run through all primes up to \kbd{goal} */
+if (maxprime() < goal) err(primer1); /*@Ccom not enough primes */
+while (p <= goal) /*@Ccom run through all primes up to \kbd{goal} */
 {
-  p += *d;
-  if (*d == 0) err(primer1); /* {\rm not enough primes} */
-  d++;
+  p += *d++;
   ...
 }
 @eprog\noindent
