@@ -837,17 +837,15 @@ ZpX(GEN P, GEN pa, GEN ffproj)
  * is
  * (FIXME??? (n / 2log(Npr)) [ log(C/n) + n*(n-1) * log(4)/4 ] )
  *
- *    2k log Npr > n log(C) + n(n-1)/2 * log(y)
- *
- * As a starting value, we replace log(4)/4 ~ 0.347 by 0.15. While B too
- * small, double k and restart */
+ *    2k log Npr > n log(C) + n(n-1)/2 * log(y) */
 static double
 bestlift_bound(GEN C, long n, double alpha, GEN Npr)
 {
   double t;
   if (typ(C) != t_REAL) C = gmul(C, realun(DEFAULTPREC));
   setlg(C, DEFAULTPREC);
-#if 0 /* FIXME. I don't understand the old bound ! (which is worse) */
+#if 0 /* FIXME (KB). I don't understand the old bound ! (which is worse) */
+  /* cheat: log(4)/4=0.347 > 0.15 */
   t = rtodbl(mplog(divrs(C,n))) + n*(n-1) * 0.15;
 #else
   t = rtodbl(mplog(C)) + (n-1) * log( 1/(alpha - 0.25) );
