@@ -1678,7 +1678,11 @@ static void
 what_cc(char *buf)
 {
 #ifdef GCC_VERSION
+#  ifdef __cplusplus
+  sprintf(buf, "g++-%s", GCC_VERSION); return;
+#  else
   sprintf(buf, "gcc-%s", GCC_VERSION); return;
+#  endif
 #endif
 #ifdef _MSC_VER
   sprintf(buf,"MSVC-%s", _MSC_VER); return;
