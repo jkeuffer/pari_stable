@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 int new_galois_format = 0;
 
+extern GEN split_realimag(GEN x, long r1, long r2);
 extern GEN R_from_QR(GEN x, long prec);
 extern GEN to_polmod(GEN x, GEN mod);
 extern GEN roots_to_pol_r1r2(GEN a, long r1, long v);
@@ -1768,6 +1769,23 @@ norm_ei_from_Q(GEN Q, long k)
   return s;
 }
 
+/* set V[k] := matrix of multiplication by k */
+static GEN
+set_mulid(GEN V, GEN M, GEN Mi, long r1, long r2, long N, long k)
+{
+  GEN v, Mk = cgetg(N+1, t_MAT);
+  long i, e;
+  for (i = 1; i < k; i++) Mk[i] = mael(V, i, k);
+  for (     ; i <=N; i++) 
+  {
+    v = vecmul((GEN)M[k], (GEN)M[i]);
+    v = gmul(Mi, split_realimag(v, r1, r2));
+    Mk[i] = lrndtoi(v, &e);
+    if (e > -5) return NULL;
+  }
+  V[k] = (long)Mk; return Mk;
+}
+
 /* mat = base change matrix, r = Cholesky form of the quadratic form [matrix
  * Q from algo 2.7.6] */
 static GEN
@@ -1775,12 +1793,15 @@ chk_gen_init(FP_chk_fun *chk, GEN r, GEN mat)
 {
   CG_data *d = (CG_data*)chk->data;
   nfbasic_t *T = d->T;
-  GEN P, bound, prev, x, M = cgetg(1, t_MAT);
-  long l = lg(r), N = l-1, i, v, dx, prec, rankM = 0;
+  GEN V, inv, P, bound, prev, x, M = cgetg(1, t_MAT);
+  long l = lg(r), N = l-1, r1 = d->r1, r2 = (N-r1)>>1;
+  long i, v, dx, prec;
   int skipfirst = 0;
 
   d->u = mat;
   d->ZKembed = gmul(d->M, mat);
+  inv = ginv( split_realimag(d->ZKembed, r1, (N - r1)>>1) ); /*TODO: use QR?*/
+  V = cgetg(N+1, t_VEC);
 
   v = varn(T->x);
   bound = d->bound;
@@ -1788,8 +1809,8 @@ chk_gen_init(FP_chk_fun *chk, GEN r, GEN mat)
   x = zerocol(N);
   for (i = 1; i < l; i++)
   {
-    GEN y1, y, M2, B = norm_ei_from_Q(r, i);
-    long j, h, new;
+    GEN Mx, M2, B = norm_ei_from_Q(r, i);
+    long j, h, rankM;
     if (gcmp(B,bound) >= 0 && skipfirst != i-1) continue;
 
     x[i] = un; P = get_polmin(d,x); dx = degpol(P);
@@ -1801,32 +1822,25 @@ chk_gen_init(FP_chk_fun *chk, GEN r, GEN mat)
     }
     if (DEBUGLEVEL>2) fprintferr("chk_gen_init: subfield %Z\n",P);
     if (skipfirst != i-1) continue;
-    y1 = (GEN)T->bas[i];
-    y = Q_primpart(y1);
-    if (y == y1) y = dummycopy(y);
-    y[2] = zero; /* zero constant coeff */
+    Mx = set_mulid(V, d->ZKembed, inv, r1, r2, N, i);
+    if (!Mx) continue;
+    rankM = lg(M)-1;
     for (h = 1; h < dx; h++)
     {
-      long k = 1;
+      long r, k = 1;
       if (h > 1) M2 = cgetg(rankM+1, t_MAT);
       else
       {
         M2 = cgetg(rankM+2, t_MAT);
-        M2[k++] = (long)pol_to_vec(y, N);
+        M2[k++] = (long)vec_ei(N, i);
       }
-      for (j = 1; j <= rankM; j++)
-      {
-        GEN c = gmul(y, vec_to_pol((GEN)M[j], v));
-        c = Q_primpart(gres(c, T->x));
-        c[2] = zero; /* zero constant coeff */
-        M2[k++] = (long)pol_to_vec(c, N);
-      }
+      for (j = 1; j <= rankM; j++) M2[k++] = lmul(Mx, (GEN)M[j]);
       M = image(concatsp(M, M2));
-      new = lg(M) - 1;
-      if (new == rankM) break;
-      if (new > rankM) rankM = new;
+      r = lg(M) - 1;
+      if (r == rankM) break;
+      if (r > rankM) rankM = r;
     }
-    if (rankM+1 == N) continue; /* 1 (constant coeff) is implicit */
+    if (rankM == N) continue;
 
     /* Q(w[1],...,w[i-1]) is a strict subfield of nf */
     skipfirst++;

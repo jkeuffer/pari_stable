@@ -581,7 +581,7 @@ split_realimag_col(GEN z, long r1, long r2)
   return x;
 }
 
-static GEN
+GEN
 split_realimag(GEN x, long r1, long r2)
 {
   long i,l; GEN y;
