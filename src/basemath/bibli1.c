@@ -2055,7 +2055,7 @@ init_pslq(pslq_M *M, GEN x, long *PREC)
   for (k = 1; k <= n; k++)
     if (gcmp0((GEN)x[k])) return vec_ei(n, k);
   if (n <= 1) return cgetg(1, t_COL);
-  prec = gprecision(x);
+  prec = gprecision(x) - 1; /* don't trust the last word */
   if (prec < 0)
   { /* exact components */
     pari_sp av = avma;
@@ -2078,7 +2078,7 @@ init_pslq(pslq_M *M, GEN x, long *PREC)
   }
   if (prec < DEFAULTPREC) prec = DEFAULTPREC;
   *PREC = prec;
-  M->EXP = - bit_accuracy(prec) + max(2*n, 32);
+  M->EXP = - bit_accuracy(prec) + max(n, 8);
   M->flreal = is_zero(gimag(x), M->EXP, prec);
   if (!M->flreal)
     return lindep(x,prec); /* FIXME */
