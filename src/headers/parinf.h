@@ -20,9 +20,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /* for nfinit_reduce / _initalg */
 #define nf_NOROOTS     32
 #define nf_PARTIALFACT 16
-#define nf_REDUCE       8
+#define nf_RED          8
 #define nf_SMALL        4
-#define nf_PARTIAL      2
+#define nf_PARTRED      2
 #define nf_ORIG         1
 
 /* for isprincipal */

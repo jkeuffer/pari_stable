@@ -1197,12 +1197,7 @@ nftohnfbasis(GEN nf, GEN x)
 }
 
 typedef struct {
-  GEN x;
-  GEN dK;
-  GEN index;
-  GEN bas;
-  GEN dx;
-  GEN lead;
+  GEN x, dx, dK, index, bas, lead;
   long r1;
 } basicnf_t;
 
@@ -1262,9 +1257,43 @@ LLL_nfbasis(basicnf_t *T, GEN *ro)
   return u;
 }
 
+typedef struct {
+  GEN xbest, dxbest;
+  long ind, indmax, indbest;
+} ok_pol_t;
+
+/* is xn better than x ? */
+static int
+better_pol(GEN xn, GEN dxn, GEN x, GEN dx)
+{
+  int fl;
+  if (!x) return 1;
+  fl = absi_cmp(dxn, dx);
+  return (fl < 0 || (!fl && gpolcomp(xn, x) < 0));
+}
+
+static GEN
+ok_pol(void *TT, GEN xn)
+{
+  ok_pol_t *T = (ok_pol_t*)TT;
+  GEN dxn;
+  
+  if (++T->ind > T->indmax && T->xbest) return T->xbest;
+  
+  if (!ZX_is_squarefree(xn)) return NULL;
+  if (DEBUGLEVEL>3) outerr(xn);
+  dxn = ZX_disc(xn);
+  if (better_pol(xn, dxn, T->xbest, T->dxbest))
+  {
+    T->dxbest = dxn; T->xbest = xn; T->indbest = T->ind;
+  }
+  if (T->ind >= T->indmax) return T->xbest;
+  return NULL;
+}
+
 /* z in Z[X] with positive leading coeff. Set z := z(-X) or z(X) so that
  * second coeff is > 0. In place. */
-int
+static int
 canon_pol(GEN z)
 {
   long i,s;
@@ -1282,44 +1311,49 @@ canon_pol(GEN z)
   return 0;
 }
 
+static GEN _polred(GEN x, GEN a, GEN *pta, FP_chk_fun *CHECK);
+
 /* Seek a simpler, polynomial pol defining the same number field as
  * x (assumed to be monic at this point) */
 static GEN
-nfinit_reduce(long flag, basicnf_t *T)
+nfpolred(int part, basicnf_t *T)
 {
-  GEN phimax,dxn,p1,polmax;
   GEN x = T->x, dx = T->dx, a = T->bas;
-  long i, nmax, numb, flc, v = varn(x), n = lg(a)-1;
+  GEN phi, xbest, dxbest, mat, d, rev;
+  long i, n = lg(a)-1, v = varn(x);
+  ok_pol_t O;
+  FP_chk_fun chk;
 
-  if (n == 1)
+  if (degpol(x) == 1)
   {
     T->x = gsub(polx[v],gun);
     return gun;
   }
 
-  phimax = NULL;
-  polmax = x;
-  nmax = (flag & nf_PARTIAL)? min(n,3): n;
-  for (numb=0,i=2; i<=nmax || (!numb && i<=n); i++)
-  { /* cf _polred */
-    if (DEBUGLEVEL>2) { fprintferr("i = %ld\n",i); flusherr(); }
-    p1 = QX_caract(x, (GEN)a[i], v);
-    if (!ZX_is_squarefree(p1)) continue;
-
-    if (DEBUGLEVEL>3) outerr(p1);
-    dxn = ZX_disc(p1); flc = absi_cmp(dxn,dx); numb++;
-    if (flc > 0) continue;
-
-    if (!flc && gpolcomp(p1, polmax) >= 0) continue;
-    dx = dxn; polmax = p1; phimax = (GEN)a[i];
-  }
-  if (!numb)
+  O.ind    = 0;
+  O.indmax = part? min(n,3): n;
+  O.xbest  = NULL;
+  chk.f    = &ok_pol;
+  chk.data = (void*)&O;
+  if (!_polred(x, a, NULL, &chk))
     err(talker,"you found a counter-example to a conjecture, please report!");
-  if (!phimax) return NULL; /* no improvement */
+  xbest = O.xbest; dxbest = O.dxbest;
+  /* no improvement ? */
+  if (!better_pol(xbest, dxbest, x, dx)) return polx[v];
 
-  if (canon_pol(polmax) < 0) phimax = gneg_i(phimax);
-  T->x = polmax;
-  T->dx= dx; return phimax;
+  /* update T */
+  phi = (GEN)a[O.indbest];
+  if (canon_pol(xbest) < 0) phi = gneg_i(phi);
+  if (DEBUGLEVEL>1) fprintferr("xbest = %Z\n",xbest);
+  rev = modreverse_i(phi, x);
+  for (i=1; i<=n; i++) a[i] = (long)RX_RXQ_compo((GEN)a[i], rev, xbest);
+  d = denom(content(a)); mat = vecpol_to_mat(gmul(d, a), n);
+  if (!is_pm1(d)) mat = gdiv(hnfmodid(mat,d), d); else mat = idmat(n);
+
+  (void)carrecomplet(diviiexact(dxbest,T->dK), &(T->index));
+  T->bas= mat_to_vecpol(mat, v);
+  T->dx = dxbest;
+  T->x  = xbest; return rev;
 }
 
 void
@@ -1370,86 +1404,55 @@ nfinit_basic(GEN x, long flag, GEN fa, basicnf_t *T)
   T->index = index;
 }
 
+static GEN
+get_sign(long r1, long n)
+{
+  GEN s = cgetg(3, t_VEC);
+  s[1] = lstoi(r1);
+  s[2] = lstoi((n - r1) >> 1); return s;
+}
+
+
 /* Initialize the number field defined by the polynomial x (in variable v)
- * flag & nf_REDUCE
- *    try a polred first.
- * flag & nf_PARTIAL
- *    do a partial polred, not a polredabs
+ * flag & nf_RED:     try a polred first.
+ * flag & nf_PARTRED: as nf_RED but check the first two elements only.
  * flag & nf_ORIG
- *    do a polred and return [nfinit(x),Mod(a,red)], where
- *    Mod(a,red)=Mod(v,x) (i.e return the base change). */
+ *    do a polred and return [nfinit(x), Mod(a,red)], where
+ *    Mod(a,red) = Mod(v,x) (i.e return the base change). */
 GEN
 _initalg(GEN x, long flag, long prec)
 {
   const gpmem_t av = avma;
-  GEN lead,nf,ro,bas,rev,dK;
-  long n, r1;
+  GEN nf, ro, rev;
   int partial = (flag & nf_PARTIALFACT)? ba_PARTIAL: 0;
   basicnf_t T;
 
   nfinit_basic(x, partial, NULL, &T);
-  bas = T.bas;
-  x   = T.x; n = degpol(x);
-  dK  = T.dK;
-  r1  = T.r1;
-  lead = T.lead;
 
-  if (lead && !(flag & nf_REDUCE))
+  if (T.lead && !(flag & (nf_RED|nf_SMALL)))
   {
     err(warner,"non-monic polynomial. Result of the form [nf,c]");
-    flag |= nf_REDUCE | nf_ORIG;
+    flag |= nf_PARTRED | nf_ORIG;
   }
-  if (flag & nf_REDUCE)
+  if (flag & (nf_RED|nf_PARTRED))
   {
-    GEN mat, phi, d;
-    long i;
-
-    T.bas = bas = gmul(bas, LLL_nfbasis(&T, NULL));
-    phi = nfinit_reduce(flag, &T);
-
-    if (!phi) rev = polx[varn(x)];
-    else
-    {
-      if (DEBUGLEVEL>1) fprintferr("polmax = %Z\n",x);
-      (void)carrecomplet(diviiexact(T.dx,dK), &(T.index));
-      rev = modreverse_i(phi, x); x = T.x; /* in this order */
-
-#if 0
-{
-  GEN dmat, dpow, pow;
-      pow = RXQ_powers(rev, x, n-1);
-      pow = Q_remove_denom(pow, &dpow);
-      d = denom(content(bas)); bas = gmul(bas, d);
-      if (dpow) d = mulii(d,dpow);
-      mat = cgetg(n+1,t_MAT);
-      for (i=1; i<=n; i++) mat[i] = (long)mulmat_pol(pow, (GEN)bas[i]);
-      mat = Q_primitive_part(mat, &dmat);
-      if (dmat) d = diviiexact(d, dmat);
-}
-#else
-      for (i=1; i<=n; i++) bas[i] = (long)RX_RXQ_compo((GEN)bas[i], rev, x);
-      d = denom(content(bas)); mat = vecpol_to_mat(gmul(d, bas), n);
-#endif
-      if (!is_pm1(d)) mat = gdiv(hnfmodid(mat,d), d); else mat = idmat(n);
-      T.bas = bas = mat_to_vecpol(mat,varn(x));
-    }
-    rev = (flag & nf_ORIG)? gmodulcp(rev, x): NULL;
-    if (lead && rev) rev = gdiv(rev, lead);
+    T.bas = gmul(T.bas, LLL_nfbasis(&T, NULL));
+    rev = nfpolred(flag & nf_PARTRED, &T);
+    rev = (flag & nf_ORIG)? gmodulcp(rev, T.x): NULL;
+    if (T.lead && rev) rev = gdiv(rev, T.lead);
     if (DEBUGLEVEL) msgtimer("polred");
   } else rev = NULL;
 
-  bas = gmul(bas, LLL_nfbasis(&T, &ro));
+  T.bas = gmul(T.bas, LLL_nfbasis(&T, &ro));
   if (DEBUGLEVEL) msgtimer("LLL basis");
 
   nf = cgetg(10,t_VEC);
-  nf[1] = (long)x;
-  nf[2] = lgetg(3,t_VEC);
-  mael(nf,2,1) = lstoi(r1);
-  mael(nf,2,2) = lstoi((n - r1) >> 1);
-  nf[3] = (long)dK;
+  nf[1] = (long)T.x;
+  nf[2] = (long)get_sign(T.r1, degpol(T.x));
+  nf[3] = (long)T.dK;
   nf[4] = (long)T.index;
   nf[6] = (long)ro;
-  nf[7] = (long)bas;
+  nf[7] = (long)T.bas;
   get_nf_matrices(nf, prec, flag & nf_SMALL);
 
   if (rev)
@@ -1462,9 +1465,9 @@ _initalg(GEN x, long flag, long prec)
 }
 
 GEN
-initalgred(GEN x, long prec)  { return _initalg(x, nf_REDUCE, prec); }
+initalgred(GEN x, long prec)  { return _initalg(x, nf_RED, prec); }
 GEN
-initalgred2(GEN x, long prec) { return _initalg(x, nf_REDUCE|nf_ORIG, prec); }
+initalgred2(GEN x, long prec) { return _initalg(x, nf_RED|nf_ORIG, prec); }
 GEN
 initalg(GEN x, long prec)     { return _initalg(x, 0, prec); }
 
@@ -1475,10 +1478,10 @@ nfinit0(GEN x, long flag,long prec)
   {
     case 0:
     case 1: return _initalg(x,0,prec);
-    case 2: return _initalg(x,nf_REDUCE,prec);
-    case 3: return _initalg(x,nf_REDUCE|nf_ORIG,prec);
-    case 4: return _initalg(x,nf_REDUCE|nf_PARTIAL,prec);
-    case 5: return _initalg(x,nf_REDUCE|nf_ORIG|nf_PARTIAL,prec);
+    case 2: return _initalg(x,nf_RED,prec);
+    case 3: return _initalg(x,nf_RED|nf_ORIG,prec);
+    case 4: return _initalg(x,nf_PARTRED,prec);
+    case 5: return _initalg(x,nf_PARTRED|nf_ORIG,prec);
     default: err(flagerr,"nfinit");
   }
   return NULL; /* not reached */
@@ -1517,23 +1520,23 @@ nfnewprec(GEN nf, long prec)
 static long
 remove_duplicates(GEN y, GEN a)
 {
-  long k, i, nv = lg(y);
+  long k, i, l = lg(y);
   gpmem_t av = avma;
   GEN z;
 
-  if (nv < 2) return nv;
+  if (l < 2) return l;
   z = new_chunk(3);
   z[1] = (long)y;
   z[2] = (long)a; (void)sort_factor(z, gcmp);
-  for  (k=1, i=2; i<nv; i++)
+  for  (k=1, i=2; i<l; i++)
     if (!gegal((GEN)y[i], (GEN)y[k]))
     {
       k++;
       a[k] = a[i];
       y[k] = y[i];
     }
-  nv = k+1; setlg(a,nv); setlg(y,nv);
-  avma = av; return nv;
+  l = k+1; setlg(a,l); setlg(y,l);
+  avma = av; return k;
 }
 
 /* if CHECK != NULL, return the first polynomial pol found such that
@@ -1826,14 +1829,14 @@ findmindisc(GEN *py, GEN *pa)
 }
 
 static GEN
-storepol(GEN nf, GEN z, GEN a, GEN phi, long flag)
+storepol(GEN x, GEN z, GEN a, GEN phi, long flag)
 {
   GEN y, b;
   if (flag & nf_RAW)
     y = storeraw(a, z);
   else if (phi)
   {
-    b = modreverse_i(a, (GEN)nf[1]);
+    b = modreverse_i(a, x);
     y = storeeval(phi,b,z);
   }
   else
@@ -1843,7 +1846,7 @@ storepol(GEN nf, GEN z, GEN a, GEN phi, long flag)
 
 /* no garbage collecting, done in polredabs0 */
 static GEN
-storeallpol(GEN nf, GEN z, GEN a, GEN phi, long flag)
+storeallpol(GEN x, GEN z, GEN a, GEN phi, long flag)
 {
   GEN y, b;
 
@@ -1858,7 +1861,7 @@ storeallpol(GEN nf, GEN z, GEN a, GEN phi, long flag)
     long i, c = lg(z);
     b = cgetg(c, t_VEC);
     for (i=1; i<c; i++)
-      b[i] = (long)modreverse_i((GEN)a[i], (GEN)nf[1]);
+      b[i] = (long)modreverse_i((GEN)a[i], x);
 
     y = cgetg(c,t_VEC);
     for (i=1; i<c; i++) y[i] = (long)storeeval(phi, (GEN)b[i], (GEN)z[i]);
@@ -1910,26 +1913,25 @@ polredabs0(GEN x, long flag, long prec)
       prec = (prec<<1)-2; nf = nfnewprec(nf,prec);
       if (DEBUGLEVEL) err(warnprec,"polredabs0",prec);
     }
-    a = (GEN)v[2];
     y = (GEN)v[1];
+    a = (GEN)v[2];
   }
   nv = lg(a);
   for (i=1; i<nv; i++)
     if (canon_pol((GEN)y[i]) < 0) a[i] = (long)gneg_i((GEN)a[i]);
   nv = remove_duplicates(y,a);
-
-  if (DEBUGLEVEL) fprintferr("%ld minimal vectors found.\n",nv-1);
-  if (nv==1)
+  if (!nv)
   {
     y = _vec(x);
     a = _vec(polx[vx]);
   }
+  if (DEBUGLEVEL) fprintferr("%ld minimal vectors found.\n",nv);
   if (flag & nf_ALL)
-    y = storeallpol(nf,y,a,phi,flag);
+    y = storeallpol(x,y,a,phi,flag);
   else
   {
     findmindisc(&y, &a);
-    y = storepol(nf,y,a,phi,flag);
+    y = storepol(x,y,a,phi,flag);
   }
   return gerepileupto(av, y);
 }
