@@ -77,9 +77,13 @@ MSo11- various bugs in anal.c: uninitialized reads in get_op_fun(), double_op()
     2- renamed *res(te) routines to *rem(ainder). Eg poldivres --> poldivrem,
        nfdivres --> nfdivrem
 BA  3- Internal u_Fp* routines now are renamed Fl* and made public.
+BA  4- [GMP kernel] Library soname changed to libpari-gmp[-2.2].so.N.
+BA  5- Library .so link changed to libpari.so for all versions.
+       Static library changed to libpari.a for all versions.
 
   Added
     1- make test-all [ all test suite (SLOW !)]
+BA  2- Add support for GNU/Hurd.
 
   Removed
     1- obsolete macro leadingcoeff [kept for backward compatibility but
