@@ -644,24 +644,21 @@ ulong readline_state = DO_ARGS_COMPLETE;
 static GEN
 sd_rl(char *v, int flag)
 {
-#ifdef READLINE
   static const char * const msg[] = {NULL,
 	"(bits 0x2/0x4 control matched-insert/arg-complete)"};
-  ulong o_readline_state;
+  ulong o_readline_state = readline_state;
   GEN res;
 
+  res = sd_ulong(v,flag,"readline", &readline_state, 0, 7, (char**)msg);
+#ifdef READLINE
   if (!readline_init && *v && *v != '0') {
     init_readline();
     readline_init = 1;
   }
-  o_readline_state = readline_state;
-  res = sd_ulong(v,flag,"readline", &readline_state, 0, 7, (char**)msg);
   if (o_readline_state != readline_state)
     sd_gptoggle(readline_state ? "1" : "0", d_SILENT, "readline", USE_READLINE);
-  return res;
-#else
-    sd_gptoggle(v, flag, "readline", USE_READLINE);
 #endif
+  return res;
 }
 
 static GEN
