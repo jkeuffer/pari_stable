@@ -823,7 +823,7 @@ FpXQ_pow(GEN x, GEN n, GEN pol, GEN p)
 static GEN modulo;
 static GEN _FpX_mul(GEN a,GEN b){return FpX_mul(a,b,modulo);}
 GEN 
-FpXV_mul(GEN V, GEN p)
+FpXV_prod(GEN V, GEN p)
 {
   modulo = p; 
   return divide_conquer_prod(V, &_FpX_mul);
@@ -837,7 +837,7 @@ FpV_roots_to_pol(GEN V, GEN p, long v)
   GEN g=cgetg(lg(V),t_VEC);
   for(i=1;i<lg(V);i++)
     g[i]=(long)deg1pol(gun,modii(negi((GEN)V[i]),p),v);
-  return gerepileupto(ltop,FpXV_mul(g,p));
+  return gerepileupto(ltop,FpXV_prod(g,p));
 }
 
 /*******************************************************************/
@@ -1252,12 +1252,12 @@ FqX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *z)
 }
 
 static GEN Tmodulo;
-static GEN _FqX_mul(GEN a,GEN b){return FqX_mul(a,b,Tmodulo,modulo);}
+static GEN _FpXQX_mul(GEN a,GEN b){return FpXQX_mul(a,b,Tmodulo,modulo);}
 GEN 
-FqXV_mul(GEN V, GEN Tp, GEN p)
+FpXQXV_prod(GEN V, GEN Tp, GEN p)
 {
   modulo = p; Tmodulo = Tp;
-  return divide_conquer_prod(V, &_FqX_mul);
+  return divide_conquer_prod(V, &_FpXQX_mul);
 }
 GEN
 FqV_roots_to_pol(GEN V, GEN Tp, GEN p, long v)
@@ -1267,7 +1267,7 @@ FqV_roots_to_pol(GEN V, GEN Tp, GEN p, long v)
   GEN W = cgetg(lg(V),t_VEC);
   for(k=1; k < lg(V); k++)
     W[k] = (long)deg1pol(gun,Fq_neg((GEN)V[k],Tp,p),v);
-  return gerepileupto(ltop, FqXV_mul(W, Tp, p));
+  return gerepileupto(ltop, FpXQXV_prod(W, Tp, p));
 }
 
 GEN
