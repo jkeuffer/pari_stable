@@ -248,7 +248,7 @@ char *helpmessages_basic[]={
   "mateigen(x): eigenvectors of the matrix x given as columns of a matrix",
   "mathess(x): Hessenberg form of x",
   "mathilbert(n): Hilbert matrix of order n (n C-integer)",
-  "mathnf(x,{flag=0}): (upper triangular) Hermite normal form of x, basis for the lattice formed by the columns of x. flag is optional whose value range from 0 to 4 (0 if omitted), meaning : 0: naive algorithm. 1: Use Batut's algorithm. Output 2-component vector [H,U] such that H is the HNF of x, and U is a unimodular matrix such that xU=H. 2: Use Havas's algorithm. Output 3-component vector [H,U,P] such that H is the HNF of x, U is unimodular and P is a permutation of the rows such that P applied to xU gives H. 3: Use Batut's algorithm. Output [H,U,P] as in 2",
+  "mathnf(x,{flag=0}): (upper triangular) Hermite normal form of x, basis for the lattice formed by the columns of x. flag is optional whose value range from 0 to 4 (0 if omitted), meaning : 0: naive algorithm. 1: Use Batut's algorithm. Output 2-component vector [H,U] such that H is the HNF of x, and U is a unimodular matrix such that xU=H. 3: Use Batut's algorithm. Output [H,U,P] as in 2. 4: as 1, using a heuristic variant of LLL reduction along the way",
   "mathnfmod(x,d): (upper triangular) Hermite normal form of x, basis for the lattice formed by the columns of x, where d is a multiple of the non-zero determinant of this lattice",
   "mathnfmodid(x,d): (upper triangular) Hermite normal form of x concatenated with d times the identity matrix",
   "matid(n): identity matrix of order n (n C-integer)",
