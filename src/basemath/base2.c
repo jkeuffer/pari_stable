@@ -1186,6 +1186,8 @@ update_alpha(GEN p, GEN fx, GEN alph, GEN chi, GEN pmr, GEN pmf, long mf)
   return rep;
 }
 
+extern GEN Fp_factor_irred(GEN P,GEN l, GEN Q);
+
 /* flag != 0 iff we're looking for the p-adic factorization, 
    in which case it is the p-adic precision we want */
 GEN
@@ -1379,41 +1381,40 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	 vp(gamma - delta) > 0. This root can then be used to
 	 improved the approximation given by beta */
       nv = fetch_var();
-      w = factmod9(nug, p, gsubst(nu, varn(nu), polx[nv]));
-      w = lift(lift((GEN)w[1]));
+      w = Fp_factor_irred(nug, p, gsubst(nu, varn(nu), polx[nv]));
+      if (degree((GEN)w[1]) != 1) err(bugparier,"nilord (no root)");
 
       for (i = 1;; i++)
-	if (degree((GEN)w[i]) == 1)
-	{
-	  delt = gneg_i(gsubst(gcoeff(w, 2, i), nv, polx[v]));
-	  eta  = gsub(gamm, delt);	  
-	  if (typ(delt) == t_INT)
-	  {
-	    chie = poleval(chig, gadd(polx[v], delt));
-	    nue  = (GEN)factmod(chie, p)[1];
-	    l    = lg(nue) - 1;
-	    nue  = lift((GEN)nue[l]);
-	  }
-	  else
-	  { 
-	    p1   = factcp(p, chi, eta);
-	    chie = (GEN)p1[1]; 
-	    nue  = (GEN)p1[2]; 
-	    l    = itos((GEN)p1[3]);
-	  }
-	  if (l > 1)
-	  {
-            /* there are at least 2 factors mod. p => chi can be split */
-	    delete_var();      
-	    phi = eleval(fx, eta, alph);
-	    phi = redelt(phi, p, pmf);
-            if (flag) mf += 3;
-            return Decomp(p, fx, mf, phi, chie, nue, flag);
-	  }
-	  
-	  /* if vp(eta) = vp(gamma - delta) > 0 */
-	  if (gegal(nue, polx[v])) break;
-	}
+      {
+        delt = gneg_i(gsubst(gcoeff(w, 2, i), nv, polx[v]));
+        eta  = gsub(gamm, delt);	  
+        if (typ(delt) == t_INT)
+        {
+          chie = poleval(chig, gadd(polx[v], delt));
+          nue  = (GEN)factmod(chie, p)[1];
+          l    = lg(nue) - 1;
+          nue  = lift((GEN)nue[l]);
+        }
+        else
+        { 
+          p1   = factcp(p, chi, eta);
+          chie = (GEN)p1[1]; 
+          nue  = (GEN)p1[2]; 
+          l    = itos((GEN)p1[3]);
+        }
+        if (l > 1)
+        {
+          /* there are at least 2 factors mod. p => chi can be split */
+          delete_var();      
+          phi = eleval(fx, eta, alph);
+          phi = redelt(phi, p, pmf);
+          if (flag) mf += 3;
+          return Decomp(p, fx, mf, phi, chie, nue, flag);
+        }
+        
+        /* if vp(eta) = vp(gamma - delta) > 0 */
+        if (gegal(nue, polx[v])) break;
+      }
       delete_var();    
 
       if (!signe(modii((GEN)chie[2], pmr))) chie = mycaract(chi, eta);
