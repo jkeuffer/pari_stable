@@ -1674,6 +1674,22 @@ elt_col(GEN Mk, GEN Mi, GEN q)
       if (signe(Mi[j])) Mk[j] = laddii((GEN)Mk[j], mulii(q, (GEN)Mi[j]));
 }
 
+static GEN
+col_dup(long l, GEN col)
+{
+  GEN c = new_chunk(l);
+  memcpy(c,col,l * sizeof(long)); return c;
+}
+
+GEN
+col_extract(GEN R, GEN perm)
+{
+  long i, l = lg(perm);
+  GEN c = cgetg(l, t_COL);
+  for (i = 1; i < l; i++) c[i] = lstoi( R[perm[i]] );
+  return c;
+}
+
 /* HNF reduce a relation matrix (column operations + row permutation)
 ** Input:
 **   mat = (li-1) x (co-1) matrix of long
@@ -1688,30 +1704,40 @@ elt_col(GEN Mk, GEN Mi, GEN q)
 ** column operations applied to C. IN PLACE
 **/
 GEN
-hnfspec_i(long** mat, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
+hnfspec_i(long** mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
 {
   pari_sp av, lim;
-  long n, s, nlze, lnz, nr, i, j, k, lk0, col, lig, *p, *matj;
-  GEN p1, p2, matb, matbnew, vmax, matt, T, extramat, B, H, dep, permpro;
-  const long co = lg(mat);
-  const long li = lg(perm); /* = lg(mat[1]) */
+  long co, n, s, nlze, lnz, nr, i, j, k, lk0, col, lig, *p, *matj, **mat;
+  GEN p1, p2, matb, matbnew, vmax, matt, T, extramat, B, C, H, dep, permpro;
+  const long li = lg(perm); /* = lg(mat0[1]) */
+  const long CO = lg(mat0);
+
+  C = *ptC;
+  co = CO;
+  if (co > 300 && co > 1.5 * li)
+  { /* treat the rest at the end */
+    co = (long)(1.2 * li);
+    setlg(C, co);
+  }
 
   if (DEBUGLEVEL>5)
   {
     fprintferr("Entering hnfspec\n");
-    p_mat(mat,perm,0);
+    p_mat(mat0,perm,0);
   }
-  matt = cgetg(co,t_MAT); /* dense part of mat (top) */
-  for (j=1; j<co; j++)
+  matt = cgetg(co, t_MAT); /* dense part of mat (top) */
+  mat = (long**)cgetg(co, t_MAT);
+  for (j = 1; j < co; j++)
   {
-    p1=cgetg(k0+1,t_COL); matt[j]=(long)p1; matj = mat[j];
+    mat[j] = col_dup(li, (GEN)mat0[j]);
+    p1 = cgetg(k0+1,t_COL); matt[j]=(long)p1; matj = mat[j];
     for (i=1; i<=k0; i++) p1[i] = lstoi(matj[perm[i]]);
   }
   vmax = cgetg(co,t_VECSMALL);
   av = avma; lim = stack_lim(av,1);
 
   i = lig = li-1; col = co-1; lk0 = k0;
-  T = (k0 || (lg(*ptC) > 1 && lg((*ptC)[1]) > 1))? idmat(col): NULL;
+  T = (k0 || (lg(C) > 1 && lg(C[1]) > 1))? idmat(col): NULL;
   /* Look for lines with a single non-0 entry, equal to 1 in absolute value */
   while (i > lk0)
     switch( count(mat,perm[i],col,&n) )
@@ -1942,13 +1968,27 @@ END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
       p1[k] = (i <= k0)? y[i]: z[i];
     }
   }
-  if (T) *ptC = gmul(*ptC,T);
+  if (T) C = gmul(C,T);
   *ptdep = dep;
   *ptB = B;
-  H = hnffinal(matbnew,perm,ptdep,ptB,ptC);
+  H = hnffinal(matbnew, perm, ptdep, ptB, &C);
   if (DEBUGLEVEL)
     msgtimer("hnfspec [%ld x %ld] --> [%ld x %ld]",li-1,co-1, lig-1,col-1);
-  return H;
+  if (CO > co)
+  { /* treat the rest */
+    long l = CO - co + 1;
+    GEN extramat = cgetg(l, t_MAT), extraC = cgetg(l, t_MAT), CC = *ptC;
+    setlg(CC, CO); /* restore */
+    CC  += co-1;
+    mat = mat0 + co-1;
+    for (j = 1 ; j < l; j++)
+    {
+      extramat[j] = (long)col_extract((GEN)mat[j], perm);
+      extraC[j] = (long)CC[j];
+    }
+    H = hnfadd_i(H, perm, ptdep, ptB, &C, extramat, extraC);
+  }
+  *ptC = C; return H;
 }
 
 GEN

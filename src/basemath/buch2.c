@@ -66,6 +66,7 @@ check_and_build_obj(GEN S, int tag, GEN (*build)(GEN))
 /*                    GENERAL NUMBER FIELDS                        */
 /*                                                                 */
 /*******************************************************************/
+extern GEN col_extract(GEN R, GEN perm);
 extern GEN vecconst(GEN v, GEN x);
 extern GEN nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec);
 extern GEN get_nfindex(GEN bas);
@@ -190,6 +191,7 @@ reallocate(RELCACHE_t *M, long max)
   size_t l = max+1, gap = M->last - M->base;
   M->base = (REL_t*)gprealloc((void*)M->base, l * sizeof(REL_t));
   M->last = M->base + gap;
+  M->len = max;
 }
 
 /* don't take P|p if P ramified, or all other Q|p already there */
@@ -249,7 +251,21 @@ subFBgen(FB_t *F, GEN nf, double PROD, long minsFB)
   for (i=1; i<ino; i++, j++) F->perm[j] =  no[i];
   for (   ; j<lv; j++)       F->perm[j] =  perm[j];
   F->subFB = gclone(yes);
-  F->pow = NULL; avma = av; return 1;
+  F->pow = NULL; 
+  if (DEBUGLEVEL)
+  {
+    if (DEBUGLEVEL>3)
+    {
+      fprintferr("\n***** IDEALS IN FACTORBASE *****\n\n");
+      for (i=1; i<=F->KC; i++) fprintferr("no %ld = %Z\n",i,F->LP[i]);
+      fprintferr("\n***** IDEALS IN SUB FACTORBASE *****\n\n");
+      outerr(vecextract_p(F->LP,F->subFB));
+      fprintferr("\n***** INITIAL PERMUTATION *****\n\n");
+      fprintferr("perm = %Z\n\n",F->perm);
+    }
+    msgtimer("sub factorbase (%ld elements)",lg(F->subFB)-1);
+  }
+  avma = av; return 1;
 }
 static int
 subFB_increase(FB_t *F, GEN nf, long step)
@@ -2926,21 +2942,6 @@ extract_full_lattice(GEN x)
 }
 
 static GEN
-col_dup(long n, GEN col)
-{
-   GEN c = new_chunk(n+1);
-   memcpy(c,col,(n+1)*sizeof(long));
-   return c;
-}
-static GEN
-col_extract(REL_t *rel, FB_t *F)
-{
-  long i, l = lg(F->perm);
-  GEN c = cgetg(l, t_COL);
-  for (i = 1; i < l; i++) c[i] = lstoi( rel->R[ F->perm[i] ] );
-  return c;
-}
-static GEN
 nf_cloneprec(GEN nf, long prec, int *nfclone)
 {
   pari_sp av = avma;
@@ -3016,20 +3017,7 @@ START:
 
   Res = FBgen(&F, nf, LIMC2, LIMC);
   if (!Res || !subFBgen(&F, nf, min(lim,LIMC2) + 0.5, minsFB)) goto START;
-  PERM = dummycopy(F.perm);
-  if (DEBUGLEVEL)
-  {
-    if (DEBUGLEVEL>3)
-    {
-      fprintferr("\n***** IDEALS IN FACTORBASE *****\n\n");
-      for (i=1; i<=F.KC; i++) fprintferr("no %ld = %Z\n",i,F.LP[i]);
-      fprintferr("\n***** IDEALS IN SUB FACTORBASE *****\n\n");
-      outerr(vecextract_p(F.LP,F.subFB));
-      fprintferr("\n***** INITIAL PERMUTATION *****\n\n");
-      fprintferr("perm = %Z\n\n",F.perm);
-    }
-    msgtimer("sub factorbase (%ld elements)",lg(F.subFB)-1);
-  }
+  PERM = dummycopy(F.perm); /* to be restored in case of precision increase */
   KCCO = F.KC+RU-1 + RELSUP; /* expected # of needed relations */
   if (DEBUGLEVEL) fprintferr("relsup = %ld, KCZ = %ld, KC = %ld, KCCO = %ld\n",
                              RELSUP, F.KCZ, F.KC, KCCO);
@@ -3145,7 +3133,7 @@ PRECPB:
     C = cgetg(lgex+1, t_MAT);
     for (j=1,rel = oldrel + 1; rel <= cache.last; rel++,j++)
     {
-      mat[j] = (long)col_dup(F.KC, rel->R);
+      mat[j] = (long)rel->R;
       C[j] = (long)get_log_embed(rel, M, RU, R1, PRECREG);
     }
     W = hnfspec_i((long**)mat, F.perm, &pdep, &B, &C, lg(F.subFB)-1);
@@ -3157,7 +3145,7 @@ PRECPB:
     GEN exmat = cgetg(lgex+1,t_MAT), exC = cgetg(lgex+1,t_MAT);
     for (j=1,rel = oldrel + 1; rel <= cache.last; rel++,j++)
     {
-      exmat[j] = (long)col_extract(rel, &F);
+      exmat[j] = (long)col_extract(rel->R, F.perm);
       exC[j] = (long)get_log_embed(rel, M, RU, R1, PRECREG);
     }
     W = hnfadd_i(W, F.perm, &pdep, &B, &C, exmat, exC);
