@@ -241,9 +241,13 @@ buchrayall(GEN bnf,GEN module,long flag,long prec)
   x = idealhermite(nf,module);
   if (R3 || flag & (nf_INIT|nf_GEN))
   {
-    vecel=cgetg(ngen+1,t_VEC);
+    vecel = cgetg(ngen+1,t_VEC);
     for (j=1; j<=ngen; j++)
-      vecel[j]=(long)idealcoprime(nf,(GEN)gen[j],x);
+    {
+      p1 = idealcoprime(nf,(GEN)gen[j],x);
+      if (isnfscalar(p1)) p1 = (GEN)p1[1];
+      vecel[j]=(long)p1;
+    }
   }
   if (flag & nf_GEN)
   {
@@ -262,14 +266,14 @@ buchrayall(GEN bnf,GEN module,long flag,long prec)
     clg[2]=(long)cyc;
     if (!(flag & nf_INIT)) return gerepileupto(av,gcopy(clg));
     y = cgetg(7,t_VEC);
-      y[1]=lcopy(bnf);
-      y[2]=lcopy(bid);
-      y[3]=lcopy(vecel);
-      y[4]=(long)idmat(ngen);
+    y[1]=lcopy(bnf);
+    y[2]=lcopy(bid);
+    y[3]=lcopy(vecel);
+    y[4]=(long)idmat(ngen);
     y[5]=lcopy(clg); u=cgetg(3,t_VEC);
     y[6]=(long)u;
-      u[1]=lgetg(1,t_MAT);
-      u[2]=(long)idmat(lg(funits));
+    u[1]=lgetg(1,t_MAT);
+    u[2]=(long)idmat(lg(funits));
     return gerepileupto(av,y);
   }
   fa2=(GEN)bid[4]; sarch=(GEN)fa2[lg(fa2)-1];
@@ -436,64 +440,81 @@ rayclassno(GEN bnf,GEN ideal)
 GEN
 isprincipalrayall(GEN bnr, GEN x, long flag)
 {
-  long av=avma,tetpil,i,j,c,N,ngen,ngzk;
-  GEN bnf,nf,bid,vecel,vecep,matu,ep,p1,p2,p3,p4,beta,idep,y,rayclass;
+  long av=avma,i,j,c,N,ngen,ngzk;
+  GEN bnf,nf,bid,vecel,vecep,matu,ep,p1,p2,beta,idep,y,rayclass;
   GEN divray,genray,alpha,alphaall,racunit,res,funit,pol;
 
-  checkbnr(bnr); bnf=(GEN)bnr[1]; bid=(GEN)bnr[2];
-  vecel=(GEN)bnr[3]; matu=(GEN)bnr[4];
-  rayclass=(GEN)bnr[5]; nf=(GEN)bnf[7]; ngen=lg(vecel)-1;
-  idep=isprincipalgenforce(bnf,x);
+  checkbnr(bnr);
+  bnf = (GEN)bnr[1];
+  bid = (GEN)bnr[2];
+  vecel=(GEN)bnr[3]; ngen=lg(vecel)-1;
+  matu =(GEN)bnr[4];
+  rayclass=(GEN)bnr[5];
+  
+  nf = (GEN)bnf[7];
+  if (typ(x) == t_VEC && lg(x) == 3)
+  { idep = (GEN)x[2]; x = (GEN)x[1]; } /* precomputed */
+  else
+    idep = isprincipalgenforce(bnf,x);
   if (lg(idep[1]) != ngen+1)
     err(talker,"incorrect generator length in isprincipalray");
   pol=(GEN)nf[1]; N=lgef(pol)-3;
-  p2=cgetg(N+1,t_COL); p2[1]=un;
-  for (i=2; i<=N; i++) p2[i]=zero;
-  ep=(GEN)idep[1];
+  ep  =(GEN)idep[1];
+  beta=(GEN)idep[2]; p2 = NULL;
   for (i=1; i<=ngen; i++)
-    if (typ(vecel[i]) != t_INT)
-      p2=element_mul(nf,p2,element_pow(nf,(GEN)vecel[i],(GEN)ep[i]));
-  beta=element_div(nf,(GEN)idep[2],p2);
-  p3=zideallog(nf,beta,bid); ngzk=lg(p3)-1;
-  vecep=cgetg(ngen+ngzk+1,t_COL);
-  for (i=1; i<=ngen; i++) vecep[i]=ep[i];
-  for (   ; i<=ngen+ngzk; i++) vecep[i]=p3[i-ngen];
-  p1=gmul(matu,vecep);
-  divray=(GEN)rayclass[2]; c=lg(divray);
-  tetpil=avma; y=cgetg(c,t_COL);
+    if (typ(vecel[i]) != t_INT) /* <==> != 1 */
+    {
+      p1 = element_pow(nf, (GEN)vecel[i], (GEN)ep[i]);
+      p2 = p2? element_mul(nf,p2,p1): p1;
+    }
+  if (p2) beta = element_div(nf,beta,p2);
+  p1 = zideallog(nf,beta,bid); ngzk=lg(p1)-1;
+  vecep = cgetg(ngen+ngzk+1,t_COL);
+  for (i=1; i<=ngen;      i++) vecep[i] = ep[i];
+  for (   ; i<=ngen+ngzk; i++) vecep[i] = p1[i-ngen];
+  p1 = gmul(matu,vecep);
+  divray = (GEN)rayclass[2]; c=lg(divray);
+  y = cgetg(c,t_COL);
   for (i=1; i<c; i++)
     y[i] = lmodii((GEN)p1[i],(GEN)divray[i]);
-  if (!(flag & nf_GEN)) return gerepile(av,tetpil,y);
+  if (!(flag & nf_GEN)) return gerepileupto(av, y);
 
+  /* compute generator */
   if (lg(rayclass)<=3)
     err(talker,"please apply bnrinit(,,1) and not bnrinit(,,0)");
 
-  genray=(GEN)rayclass[3]; p1=idmat(N);
+  genray = (GEN)rayclass[3]; p2 = NULL;
   for (i=1; i<c; i++)
-    p1=idealmul(nf,idealpow(nf,(GEN)genray[i],(GEN)y[i]),p1);
-  alphaall = isprincipalgenforce(bnf,idealdiv(nf,x,p1));
+  {
+    p1 = idealpow(nf,(GEN)genray[i],(GEN)y[i]);
+    p2 = p2? idealmul(nf,p2,p1): p1;
+  }
+  if (p2) x = idealdiv(nf,x,p2);
+  alphaall = isprincipalgenforce(bnf,x);
   if (!gcmp0((GEN)alphaall[1])) err(bugparier,"isprincipalray (bug1)");
 
-  res=(GEN)bnf[8];
+  res = (GEN)bnf[8];
   funit = check_units(bnf,"isprincipalrayall");
-  racunit=(GEN)res[4];
   alpha = basistoalg(nf,(GEN)alphaall[2]);
-  p3=zideallog(nf,(GEN)alphaall[2],bid);
-  if (lg(p3)>1)
+  p1 = zideallog(nf,(GEN)alphaall[2],bid);
+  if (lg(p1) > 1)
   {
-    p4=(GEN)bnr[6]; p3=gmul((GEN)p4[1],p3);
-    if (!gcmp1(denom(p3))) err(bugparier,"isprincipalray (bug2)");
+    GEN mat = (GEN)bnr[6];
+    p1 = gmul((GEN)mat[1],p1);
+    if (!gcmp1(denom(p1))) err(bugparier,"isprincipalray (bug2)");
 
-    x=lllreducemodmatrix(p3,(GEN)p4[2]);
-    p3=gpui(gmodulcp((GEN)racunit[2],pol),(GEN)x[1],0);
+    x = lllreducemodmatrix(p1,(GEN)mat[2]);
+    racunit = gmael(res,4,2);
+    p1 = powgi(gmodulcp(racunit,pol), (GEN)x[1]);
     for (j=1; j<lg(funit); j++)
-      p3=gmul(p3,gpui(gmodulcp((GEN)funit[j],pol),(GEN)x[j+1],0));
-    alpha = gdiv(alpha,p3);
+      p1 = gmul(p1, powgi(gmodulcp((GEN)funit[j],pol), (GEN)x[j+1]));
+    alpha = gdiv(alpha,p1);
   }
-  tetpil=avma; p1=cgetg(4,t_VEC);
-  p1[1]=lcopy(y); p1[2]=(long)algtobasis(nf,alpha);
-  p1[3]=lmin((GEN)idep[3],(GEN)alphaall[3]);
-  return gerepile(av,tetpil,p1);
+  p1 = cgetg(4,t_VEC);
+  p1[1] = lcopy(y);
+  p1[2] = (long)algtobasis(nf,alpha);
+  p1[3] = lmin((GEN)idep[3],(GEN)alphaall[3]);
+  return gerepileupto(av, p1);
 }
 
 GEN
@@ -1221,32 +1242,32 @@ certifybuchall(GEN bnf)
  * retourne le ssgroupe s(H) de Cl_n
  */
 static GEN
-imageofgroup0(GEN gen,GEN bnr,GEN subgroup)
+imageofgroup0(GEN H,GEN bnr,GEN subgroup)
 {
   long j,l;
   GEN E,Delta = diagonal(gmael(bnr,5,2));
 
   if (gcmp0(subgroup)) return Delta;
 
-  l=lg(gen); E=cgetg(l,t_MAT);
+  l=lg(H); E=cgetg(l,t_MAT);
   for (j=1; j<l; j++)
-    E[j] = (long)isprincipalray(bnr,(GEN)gen[j]);
+    E[j] = (long)isprincipalray(bnr,(GEN)H[j]);
   E = concatsp(gmul(E,subgroup),Delta);
   return hnf(E);
 }
 
 static GEN
-imageofgroup(GEN gen,GEN bnr,GEN subgroup)
+imageofgroup(GEN H,GEN bnr,GEN subgroup)
 {
   long av = avma;
-  return gerepileupto(av,imageofgroup0(gen,bnr,subgroup));
+  return gerepileupto(av,imageofgroup0(H,bnr,subgroup));
 }
 
 /* retourne le cardinal de Cl_n / s(H) */
 static GEN
-cardofimagofquotientgroup(GEN H,GEN bnr2,GEN subgroup)
+cardofimagofquotientgroup(GEN H,GEN bnr,GEN subgroup)
 {
-  return dethnf_i(imageofgroup0(H,bnr2,subgroup));
+  return dethnf_i(imageofgroup0(H,bnr,subgroup));
 }
 
 static GEN
@@ -1295,6 +1316,21 @@ bnrisconductor(GEN arg0,GEN arg1,GEN arg2,long prec)
   return itos(conductor(bnr,sub,-1,prec));
 }
 
+/* special for isprincipalrayall */
+static GEN
+getH(GEN bnf, GEN gen)
+{
+  long i,l = lg(gen);
+  GEN p1, H = cgetg(l, t_VEC);
+  for (i=1; i<l; i++)
+  {
+    p1 = cgetg(3,t_VEC); H[i] = (long)p1;
+    p1[1] = (long)gen[i];
+    p1[2] = (long)isprincipalgenforce(bnf, (GEN)gen[i]);
+  }
+  return H;
+}
+
 /*   Given a number field bnf=bnr[1], a ray class group bnr (from buchrayinit),
  *   and a subgroup (HNF form) of the ray class group, compute the conductor
  *   of the subgroup (copy of discrayrelall) if all=0. If all > 0, compute
@@ -1308,7 +1344,7 @@ conductor(GEN bnr,GEN subgroup,long all,long prec)
 {
   long r1,j,av=avma,tetpil,k,ep,trivial=0;
   GEN bnf,nf,cl,cyc,gen,bid,ideal,arch,p1,p2,clhray,clhss;
-  GEN fa,arch2,bnr2,fa2,ex;
+  GEN H,fa,arch2,bnr2,fa2,ex;
 
   checkbnrgen(bnr); bnf=(GEN)bnr[1]; bid=(GEN)bnr[2];
   cl=(GEN)bnr[5]; cyc=(GEN)cl[2]; gen=(GEN)cl[3];
@@ -1322,6 +1358,7 @@ conductor(GEN bnr,GEN subgroup,long all,long prec)
       err(talker,"incorrect subgroup in conductor");
     if (gcmp1(det(p1))) trivial=1;
     clhray = absi(det(subgroup));
+    H = getH(bnf, gen);
   }
   fa=(GEN)bid[3]; fa2=(GEN)fa[1]; ex=(GEN)fa[2];
   p2=cgetg(3,t_VEC); p2[2]=(long)arch;
@@ -1336,7 +1373,7 @@ conductor(GEN bnr,GEN subgroup,long all,long prec)
       else
       {
 	bnr2=buchrayall(bnf,p2,nf_INIT,prec);
-	clhss=cardofimagofquotientgroup(gen,bnr2,subgroup);
+	clhss=cardofimagofquotientgroup(H,bnr2,subgroup);
       }
       if (!egalii(clhss,clhray)) break;
       if (all<0) { avma=av; return gzero; }
@@ -1352,7 +1389,7 @@ conductor(GEN bnr,GEN subgroup,long all,long prec)
       else
       {
 	bnr2=buchrayall(bnf,p2,nf_INIT,prec);
-	clhss=cardofimagofquotientgroup(gen,bnr2,subgroup);
+	clhss=cardofimagofquotientgroup(H,bnr2,subgroup);
       }
       if (!egalii(clhss,clhray)) arch2[k]=un;
       else if (all<0) { avma=av; return gzero; }
@@ -1362,7 +1399,7 @@ conductor(GEN bnr,GEN subgroup,long all,long prec)
 
   bnr2=buchrayall(bnf,p2,nf_INIT | nf_GEN,prec);
   tetpil=avma; p1=cgetg(4,t_VEC);
-  p1[3]=(long)imageofgroup(gen,bnr2,subgroup);
+  p1[3]=(long)imageofgroup(H,bnr2,subgroup);
   if (all==1) bnr2=(GEN)bnr2[5];
   p1[2]=lcopy(bnr2);
   p1[1]=lcopy(p2); return gerepile(av,tetpil,p1);
@@ -1459,7 +1496,7 @@ discrayrelall(GEN bnr,GEN subgroup,long flag,long prec)
   long r1,degk,j,av=avma,tetpil,k,ep,nbdezero;
   long trivial=0, flrel = flag & nf_REL, flcond = flag & nf_COND;
   GEN bnf,nf,cyc,gen,bid,ideal,arch,p1,p2,clhray,clhss;
-  GEN fa,dlk,arch2,bnr2,idealrel,fa2,ex,som;
+  GEN H,fa,dlk,arch2,bnr2,idealrel,fa2,ex,som;
 
   checkbnrgen(bnr); bnf=(GEN)bnr[1];
   cyc=gmael(bnr,5,2); gen=gmael(bnr,5,3);
@@ -1473,6 +1510,7 @@ discrayrelall(GEN bnr,GEN subgroup,long flag,long prec)
       err(talker,"incorrect subgroup in discray");
     if (gcmp1(det(p1))) trivial=1;
     clhray = det(subgroup);
+    H = getH(bnf,gen);
   }
   bid=(GEN)bnr[2]; ideal=gmael(bid,1,1); arch=gmael(bid,1,2);
   fa=(GEN)bid[3]; fa2=(GEN)fa[1]; ex=(GEN)fa[2];
@@ -1493,7 +1531,7 @@ discrayrelall(GEN bnr,GEN subgroup,long flag,long prec)
       else
       {
         bnr2=buchrayall(bnf,p2,nf_INIT,prec);
-        clhss=cardofimagofquotientgroup(gen,bnr2,subgroup);
+        clhss=cardofimagofquotientgroup(H,bnr2,subgroup);
       }
       if (j==1 && egalii(clhss,clhray) && flcond) { avma=av; return gzero; }
       if (is_pm1(clhss)) { som = addis(som, ep-j+1); break; }
@@ -1517,7 +1555,7 @@ discrayrelall(GEN bnr,GEN subgroup,long flag,long prec)
       else
       {
 	bnr2=buchrayall(bnf,p2,nf_INIT,prec);
-	clhss=cardofimagofquotientgroup(gen,bnr2,subgroup);
+	clhss=cardofimagofquotientgroup(H,bnr2,subgroup);
       }
       arch2[k]=un;
       if (egalii(clhss,clhray))
