@@ -976,16 +976,31 @@ computation, when theory tells you that the coefficients must be integers.
 \syn{grndtoi}{x,\&e}, where $e$ is a \kbd{long} integer. Also available is
 $\teb{ground}(x)$.
 
-\subsecidx{simplify}$(x)$: this function tries to simplify the object $x$ as
-much as it can. The simplifications do not concern rational functions (which
-PARI automatically tries to simplify), but type changes. Specifically, a
-complex or quadratic number whose imaginary part is exactly equal to 0
-(i.e.~not a real zero) is converted to its real part, and a polynomial of
-degree zero is converted to its constant term. For all types, this of course
-occurs recursively. This function is useful in any case, but in particular
-before the use of arithmetic functions which expect integer arguments, and
-not for example a complex number of 0 imaginary part and integer real part
-(which is however printed as an integer).
+\subsecidx{simplify}$(x)$: this function simplifies $x$ as much as it can.
+Specifically, a complex or quadratic number whose imaginary part is an exact
+0 (i.e.~not an approximate one as a \kbd{O(3)} or \kbd{0.E-28}) is converted
+to its real part, and a polynomial of degree $0$ is converted to its constant
+term. Simplifications occur recursively.
+
+This function is especially useful before using arithmetic functions,
+which expect integer arguments:
+\bprog
+? x = 1 + y - y
+%1 = 1
+? divisors(x)
+  *** divisors: not an integer argument in an arithmetic function
+? type(x)
+%2 = "t_POL"
+? type(simplify(x))
+%3 = "t_INT"
+@eprog
+Note that GP results are simplified as above before they are stored in the
+history. (Unless you disable automatic simplification with \b{y}, that is.)
+In particular
+\bprog
+? type(%1)
+%4 = "t_INT"
+@eprog
 
 \syn{simplify}{x}.
 
