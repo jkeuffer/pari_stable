@@ -1535,6 +1535,8 @@ ideallllredall(GEN nf, GEN I, GEN vdir, long prec, long precint)
   long tx,N,av,i,j;
   GEN I0,res,aI,p1,y,x,Nx,b,c1,c,pol;
 
+  if (prec <= 0)
+    precint = prec = (long)nfnewprec(nf,-1);
   nf = checknf(nf);
   vdir = chk_vdir(nf,vdir);
   pol = (GEN)nf[1]; N = lgef(pol)-3;
