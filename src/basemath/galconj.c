@@ -2583,6 +2583,8 @@ galoisgenfixedfield(GEN Tp, GEN Pmod, GEN V, GEN ip, struct galois_borne *gb, GE
 	    ,Pgb.valabs-gb->valabs);
       PL = ZpX_liftroots(P,PL,gb->l,Pgb.valabs);
     }
+    else if (Pgb.valabs < gb->valabs)
+      PL = FpV_red(PL, Pgb.ladicabs);
     PM = vandermondeinversemod(PL, P, Pden, Pgb.ladicabs);
     PG = galoisgen(P, PL, PM, Pden, &Pgb, &Pga);
     if (PG == gen_0) return NULL;
