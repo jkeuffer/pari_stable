@@ -2931,7 +2931,7 @@ Q_div_to_int(GEN x, GEN c)
   {
     if (t != t_FRAC) err(typeer,"Q_div_to_int");
     n = (GEN)c[1];
-    d = (GEN)c[2]; if (is_pm1(n)) return Q_remove_denom(x,d);
+    d = (GEN)c[2]; if (gcmp1(n)) return Q_remove_denom(x,d);
   }
 
   switch(typ(x))
