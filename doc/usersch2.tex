@@ -1370,7 +1370,7 @@ follows:
 zet(s) =
 \obr
 \q  local(j); /* not needed, and possibly confusing (see below) */
-\q  sumalt(j=1, (-1)\pow(j-1)*j\pow(-s)) / (1 - 2\pow(1-s))
+\q  sumalt(j=1, (-1)^(j-1)*j^(-s)) / (1 - 2^(1-s))
 \cbr
 \eprog
 
@@ -1820,8 +1820,8 @@ way:
 \b{\bs} self modifying prompt looking like \hbox{{\rm (18:03) \key{gp}} >}
 prompt   = "(\%R) \b{e}[1mgp\b{e}[m > "
 \h
-\b{\bs}  readline wants non-printing characters to be braced between \pow A/\pow B pairs
-\#if READL  prompt = "(\%R) \pow A\b{e}[1m\pow Bgp\pow A\b{e}[m\pow B > "
+\b{\bs}  readline wants non-printing characters to be braced between ^A/^B pairs
+\#if READL  prompt = "(\%R) ^A\b{e}[1m^Bgp^A\b{e}[m^B > "
 \h
 \b{\bs} escape sequences not supported under emacs
 \#if EMACS  prompt = "(\%R) gp > "

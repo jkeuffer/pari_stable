@@ -1071,19 +1071,19 @@ computed more efficiently (roughly one-half of the elementary
 multiplications can be saved). Also, squaring a $2$-adic number increases
 its precision. For example,
 \bprog%
-? (1 + O(2\pow 4))\pow 2
-\%1 = 1 + O(2\pow 5)
-? (1 + O(2\pow 4)) * (1 + O(2\pow 4))
-\%2 = 1 + O(2\pow 4)
+? (1 + O(2^4))^2
+\%1 = 1 + O(2^5)
+? (1 + O(2^4)) * (1 + O(2^4))
+\%2 = 1 + O(2^4)
 \eprog\noindent
 Note that this function is also called whenever one multiplies two objects
 which are known to be {\it identical}, e.g.~they are the value of the same
 variable, or we are computing a power.
 \bprog%
-? x = (1 + O(2\pow 4)); x * x
-\%3 = 1 + O(2\pow 5)
-? (1 + O(2\pow 4))\pow 4
-\%4 = 1 + O(2\pow 6)
+? x = (1 + O(2^4)); x * x
+\%3 = 1 + O(2^5)
+? (1 + O(2^4))^4
+\%4 = 1 + O(2^6)
 \eprog
 \noindent(note the difference between \kbd{\%2} and \kbd{\%3} above). No
 higher powers receive a special treatment. Raising a $3$-adic to the third
@@ -1377,13 +1377,13 @@ or rational function is discarded and not included in the factorization. If
 you need it, you can always ask for the content explicitly:
 
 \bprog%
-? factor(t\pow2 + 5/2*t + 1)
+? factor(t^2 + 5/2*t + 1)
 \%1 =
 [2*t + 1 1]
 \smallskip%
 [t + 2 1]
 \smallskip%
-? content(t\pow2 + 5/2*t + 1)
+? content(t^2 + 5/2*t + 1)
 \%2 = 1/2%
 \eprog
 
@@ -2929,7 +2929,7 @@ see the example below), 3: returns also the character.
 Example:
 
 \bprog%
-bnf = bnfinit(x\pow 2-229);
+bnf = bnfinit(x^2 - 229);
 bnr = bnrinit(bnf,1,1);
 bnrL1(bnr)%
 \eprog\noindent
@@ -3113,7 +3113,7 @@ The generators of the ray class group are needed, and you can set $\fl=1$ if
 the character is known to be primitive. Example:
 
 \bprog%
-bnf = bnfinit(x\pow 2-145);
+bnf = bnfinit(x^2 - 145);
 bnr = bnrinit(bnf,7,1);
 bnrrootnumber(bnr, [5])%
 \eprog\noindent
@@ -3137,7 +3137,7 @@ irreducible relative polynomial of the Stark unit, 0 being default.
 Example:
 
 \bprog%
-bnf = bnfinit(y\pow 2-3);
+bnf = bnfinit(y^2 - 3);
 bnr = bnrinit(bnf,5,1);
 bnrstark(bnr,0)%
 \eprog\noindent
@@ -3167,9 +3167,12 @@ variable number of $t$ must be \var{greater} than that of $x$). However if
 the coefficients of the number field occur explicitly (as polmods) as
 coefficients of $x$, the variable of these polmods \var{must} be the same as
 the main variable of $t$. For example
-\kbd{factornf(x\pow 2 + Mod(y,y\pow 2+1), y\pow 2+1)} and
-\kbd{factornf(x\pow 2+1, y\pow 2+1)} are legal but
-\kbd{factornf(x\pow 2 + Mod(z,z\pow 2+1), y\pow 2+1)} is not.
+\bprog%
+? factornf(x^2 + Mod(y, y^2+1), y^2+1);
+? factornf(x^2 + 1, y^2+1); \bs\bs\text{ these two are OK}
+? factornf(x^2 + Mod(z,z^2+1), y^2+1)
+\ \ \***\ \ \ incorrect type in gmulsg
+\eprog
 
 \syn{polfnf}{x,t}.
 
@@ -3774,11 +3777,13 @@ priority than that of $x$ (in other words, the variable number of $\var{nf}$
 must be \var{greater} than that of $x$). However if the polynomial defining
 the number field occurs explicitly  in the coefficients of $x$ (as modulus of
 a \typ{POLMOD}), its main variable must be \var{the same} as the main
-variable of $x$. For example, if $\var{nf}=\hbox{\kbd{nfinit(y\pow 2+1)}}$
-then
-\hbox{\kbd{nffactor(\var{nf},x\pow 2+Mod(y,y\pow 2+1))}} and
-\hbox{\kbd{nffactor(\var{nf},x\pow 2+1)}} are both legal but
-\hbox{\kbd{nffactor(\var{nf},x\pow 2+Mod(z,z\pow 2+1))}} is not.
+variable of $x$. For example,
+\bprog
+? nf = nfinit(y^2 + 1);
+? nffactor(nf, x^2 + y); \bs\bs\text{ OK}
+? nffactor(nf, x^2 + Mod(y, y^2+1)); \bs\bs\text{ OK}
+? nffactor(nf, x^2 + Mod(z, z^2+1)); \bs\bs\text{ illegal}
+\eprog
 
 \syn{nf{}factor}{\var{nf},x}.
 
@@ -4075,12 +4080,12 @@ in $\Z_K/\var{pr}$, where $a$ is a matrix and $b$ a column vector, and where
 \syn{nfsolvemodpr}{\var{nf},a,b,\var{pr}}.
 
 \subsecidx{polcompositum}$(x,y,\{\fl=0\})$: $x$ and $y$ being polynomials
-in $\Z[x]$ in the same variable, outputs a vector giving the list of all
+in $\Z[X]$ in the same variable, outputs a vector giving the list of all
 possible composita of the number fields defined by $x$ and $y$, if $x$ and
 $y$ are irreducible, or of the corresponding \'etale algebras, if they are
 only squarefree. Returns an error if one of the polynomials is not
-squarefree. When one of the polynomials is irreducible (say \kbd{x}), it is
-often \var{much} faster to use \kbd{nffactor(nfinit(x), y)} then
+squarefree. When one of the polynomials is irreducible (say $x$), it is
+often \var{much} faster to use \kbd{nffactor(nfinit($x$), $y$)} then
 \tet{rnfequation}.
 
 If $\fl=1$, outputs a vector of 4-component vectors $[z,a,b,k]$, where $z$
@@ -4088,6 +4093,25 @@ ranges through the list of all possible compositums as above, and $a$
 (resp. $b$) expresses the root of $x$ (resp. $y$) as a polmod in a root of
 $z$, and $k$ is a small integer k such that $a+kb$ is the chosen root of
 $z$.
+
+The compositum will quite often be defined by a complicated polynomial,
+which it is advisable to reduce before further work. Here is a simple
+example involving the field $\Q(\zeta_5, 5^{1/5})$:
+\bprog%
+? z = polcompositum(x^5 - 5, polcyclo(5), 1)[1];
+? pol = z[1] \q\q\bs\bs\text{ \kbd{pol} defines the compositum}
+\%2 = x^20 + 5*x^19 + 15*x^18 + 35*x^17 + 70*x^16 + 141*x^15 + 260*x^14 \bs
+\q + 355*x^13 + 95*x^12 - 1460*x^11 - 3279*x^10 - 3660*x^9 - 2005*x^8 \bs
+\q + 705*x^7 + 9210*x^6 + 13506*x^5 + 7145*x^4 - 2740*x^3 + 1040*x^2 \bs
+\q - 320*x + 256
+? a = z[2]; a^5 - 5 \q\q\bs\bs\text{ \kbd{a} is a fifth root of $5$.}
+\%3 = 0
+? z = polredabs(pol, 1); \q\q\bs\bs\text{ look for a simpler polynomial}
+? pol = z[1]
+\%5 = x^20 + 25*x^10 + 5
+? a = subst(a.pol, x, z[2]) \q\q\bs\bs\text{ \kbd{a} in the new coordinates}
+\%6 = Mod(-5/22*x^19 + 1/22*x^14 - 123/22*x^9 + 9/11*x^4, x^20 + 25*x^10 + 5)
+\eprog
 
 \syn{polcompositum0}{x,y,\fl}.
 
@@ -5644,7 +5668,7 @@ is as explained above.
 \%3 = [b, c, d]
 ? vecextract(v, "-1..-3")  \bs\bs~interval + reverse order
 \%4 = [e, d, c]
-? vecextract([1,2,3], "\pow2") \bs\bs~complement
+? vecextract([1,2,3], "^2") \bs\bs~complement
 \%5 = [1, 3]
 ? vecextract(matid(3), "2..", "..")
 \%6 =
@@ -5775,16 +5799,16 @@ are the three most common initializations.
 \noindent As an extreme example, compare
 
 \bprog%
-? prod(i=1, 100, 1-X\pow i);  \bs\bs\ this has degree $5050$~!!
+? prod(i=1, 100, 1 - X^i);  \bs\bs\ this has degree $5050$~!!
 \smallskip%
 time = 3,335 ms.
 \smallskip%
-? prod(i=1, 100, 1-X\pow i, 1+O(X\pow 101))
+? prod(i=1, 100, 1 - X^i, 1 + O(X^101))
 \smallskip%
 time = 43 ms.
 \smallskip%
-\%2 = 1 - X - X\pow 2 + X\pow 5 + X\pow 7 - X\pow 12 - X\pow 15 + X\pow 22 + X\pow 26 - X\pow 35 - X\pow 40 + X\pow 51
-+ X\pow 57 - X\pow 70 - X\pow 77 + X\pow 92 + X\pow 100 + O(X\pow 101)%
+\%2 = 1 - X - X^2 + X^5 + X^7 - X^12 - X^15 + X^22 + X^26 - X^35 - X^40 + X^51
++ X^57 - X^70 - X^77 + X^92 + X^100 + O(X^101)%
 \eprog
 
 \synt{produit}{entree *ep, GEN a, GEN b, char *expr, GEN x}.
@@ -5838,12 +5862,12 @@ time = 158 ms.
 used as follows: \kbd{ep} represents the dummy variable used in the
 expression \kbd{expr}
 \bprog%
-/* compute a\pow 2 + \dots + b\pow 2 */
+/* compute a^2 + \dots + b^2 */
 \obr
 \q /* define the dummy variable "i" */
-\q entree *ep = gp\_variable("i");
+\q entree *ep = is\_entry("i");
 \q /* sum for a <= i <= b */
-\q return somme(ep, a, b, "i\pow2", gzero);
+\q return somme(ep, a, b, "i^2", gzero);
 \cbr
 \eprog
 
@@ -6542,7 +6566,7 @@ example:
 \%1 = 1
 ? f(x) = 0
 \ \ ***\ \ \ unused characters:~f(x)=0
-\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \pow----
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ^----
 ? kill(f)
 ? f(x) = 0
 ? f()
@@ -6555,11 +6579,11 @@ funny way (following the same convention as used by the library function
 \kbd{fetch\_var}, see~\secref{se:vars}). For example:
 
 \bprog%
-? a\pow 2 + 1
-\%1 = a\pow2 + 1
+? a^2 + 1
+\%1 = a^2 + 1
 ? kill(a)
 ? \%1
-\%2 = \#<1>\pow2 + 1%
+\%2 = \#<1>^2 + 1%
 \eprog
 
 If you simply want to restore a variable to its original value (monomial of

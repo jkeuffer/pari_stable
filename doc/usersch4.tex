@@ -1732,7 +1732,7 @@ main()
 \q long d, prec = 3;
 \q GEN x;
 \h
-\q /* take a stack of a 10\pow 6 bytes, no prime table */
+\q /* take a stack of a 10^6 bytes, no prime table */
 \q pari\_init(1000000,2);
 \q printf("precision of the computation in decimal digits:\bs n");
 \q d = itos(lisGEN(stdin));
@@ -2033,8 +2033,8 @@ input arguments they describe:
 functions)\cr
 \+& \kbd{n} & variable, expects a \idx{variable number} (a \kbd{long}, not an
 \kbd{*entree})\cr
-\+& \kbd{I} & string containing a sequence of GP statements (a \var{seq}), to be processed by %
-\kbd{lisseq}\cr
+\+& \kbd{I} & string containing a sequence of GP statements (a \var{seq}), %
+to be processed by \kbd{lisseq}\cr
 \+&&(useful for control statements)\cr
 \+& \kbd{E} & string containing a {\it single} GP statement (an %
 \var{expr}), to be processed by \kbd{lisexpr}\cr

@@ -265,16 +265,19 @@ undefined\on@line}}
 \def\C{\Bbb C}
 \def\dotfill{\leaders\hbox to 3truemm{\hfil.\hfil}\hfill}
 
-\def\bprog{\par\begingroup%
+{\catcode`\^=13
+\gdef\bprog{\par\begingroup%
+  \catcode`\^=13\def^{\pow}%
   \def\q{\quad}\def\h{\hbox{}}%
   \tt\obeylines\leavevmode\parskip=0pt plus 1pt%
   \interlinepenalty2000\clubpenalty9000\widowpenalty9000%
   \h}
 % variant of same, for use with tabbing.  Tabbing doesn't build paragraphs,
 % the lines go directly into the vlist -- so we must add our own \parskip. [GN]
-\def\bprogtabs{\par\vskip\parskip\begingroup%
+\gdef\bprogtabs{\par\vskip\parskip\begingroup%
+  \catcode`\^=13\def^{\pow}
   \def\q{\quad}\def\h{\hbox{}}%
-  \tt\settabs}
+  \tt\settabs}}
 % both to be ended with:
 \def\eprog{\endgroup\par}
 \catcode`\@=12
