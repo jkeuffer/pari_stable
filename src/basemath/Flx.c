@@ -338,8 +338,7 @@ Flx_negspec(GEN x, ulong p, long l)
 {
   long i;
   GEN z = cgetg(l+2, t_VECSMALL) + 2;
-  for (i=0; i<l; i++) 
-    z[i] = x[i]? (long)p - x[i]: 0;
+  for (i=0; i<l; i++) z[i] = Fl_neg(x[i], p);
   return z-2;
 }
 
@@ -911,8 +910,8 @@ Flx_invmontgomery_basecase(GEN T, ulong p)
 
 /*Use newton style inversion.
  * Use log2(n) sqr +log2(n) mul*/
-static GEN 
-Flx_invmontgomery_newton(GEN T, ulong p)
+GEN 
+Flx_invmontgomery_newton_old(GEN T, ulong p)
 {
   long i, l=lgpol(T), ll=l+2;
   GEN x, q, z;
@@ -942,25 +941,85 @@ Flx_invmontgomery_newton(GEN T, ulong p)
   return q;
 }
 
-/* x/polrecip(P)+O(x^n) */
+/* Return new lgpol */
+static long
+Flx_lgrenormalizespec(GEN x, long lx)
+{
+  long i;
+  for (i = lx-1; i>=0; i--)
+    if (x[i]) break;
+  return i+1;
+}
+static GEN
+Flx_invmontgomery_newton(GEN T, ulong p)
+{
+  long i, lx, lz, lq, e, l = degpol(T);
+  GEN E, q, y, z, x = vecsmall_const(l+1, 0) + 2;
+  pari_sp av;
+
+  y = T+2;
+  q = Flx_recipspec(y,l,l+1) + 2;
+  E = Newton_exponents(l-2); /* assume l > 3 */
+  av = avma;
+  /* We work on _spec_ Flx's, all the l[xzq12] below are lgpol's */
+
+  q[0] = y[l];
+  /* initialize */
+  x[0] = Fl_inv(q[0], p);
+  if (q[1])
+  {
+    ulong u = q[1];
+    if (x[0] != 1) u = Fl_mul(u, Fl_sqr(x[0],p), p);
+    x[1] = p - u; lx = 2;
+  }
+  else
+    lx = 1;
+  for (e = lg(E)-1; e > 1; e--, avma = av)
+  { /* set x -= x(x*q - 1) + O(t^l2), knowing x*q = 1 + O(t^l1) */
+    long l2 = E[e-1] + 1, l1 = E[e] + 1;
+
+    lq = Flx_lgrenormalizespec(q, l2);
+    z = Flx_mulspec(x, q, p, lx, lq); /* FIXME: high product */
+    lz = lgpol(z); if (lz > l2) lz = l2;
+    z += 2;
+    /* subtract 1 [=>first l1-1 words are 0]: renormalize so that z(0) != 0 */
+    for (i = l1-1; i < lz; i++) if (z[i]) break;
+    if (i >= lz) continue; /* z-1 = 0(t^l2) */
+
+    /* z + i represents (x*q - 1) / t^i */
+    z = Flx_mulspec(x, z+i, p, lx, lz-i); /* FIXME: low product */
+    lz = lgpol(z); z += 2;
+    if (lz > l2-i) lz = Flx_lgrenormalizespec(z, l2-i);
+
+    lx = lz+ i;
+    y  = x + i; /* x -= z * t^i, in place */
+    for (i = 0; i < lz; i++) y[i] = Fl_neg(z[i], p);
+  }
+  x -= 2; setlg(x, lx + 2); x[1] = T[1];
+  return Flx_shift(x,1);
+}
+
+/* x/polrecip(T)+O(x^deg(T)) */
 GEN
 Flx_invmontgomery(GEN T, ulong p)
 {
   pari_sp ltop=avma;
   long l=lg(T);
   GEN r;
-  ulong c=T[l-1], ci=1;
   if (l<5) return zero_Flx(T[1]);
-  if (c!=1)
-  {
-    ci=Fl_inv(c,p);
-    T=Flx_Fl_mul(T, ci, p);
-  }
   if (l<Flx_INVMONTGOMERY_LIMIT)
+  {
+    ulong c=T[l-1], ci=1;
+    if (c!=1)
+    {
+      ci=Fl_inv(c,p);
+      T=Flx_Fl_mul(T, ci, p);
+    }
     r=Flx_invmontgomery_basecase(T,p);
+    if (c!=1) r=Flx_Fl_mul(r,ci,p);
+  }
   else
     r=Flx_invmontgomery_newton(T,p);
-  if (c!=1)  r=Flx_Fl_mul(r,ci,p);
   return gerepileuptoleaf(ltop, r);
 }
 
