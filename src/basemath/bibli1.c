@@ -2827,11 +2827,16 @@ fincke_pohst(GEN a,GEN bound,GEN stockmax,long flag, long prec,
   B = gcoeff(gram,n-1,n-1);
   if (gexpo(B) >= bit_accuracy(lg(B)-2)) goto PRECPB;
 
+  { /* catch precision problems (truncation error) */
+    jmp_buf env;
+    if (setjmp(env)) goto PRECPB;
+    err_catch(truer2, env, NULL);
+  }
+
   if (nf) basis = init_chk(nf,uperm,NULL);
   if (!bound)
   { /* polred */
     GEN x = cgetg(n,t_COL);
-   
     if (nf) bound = get_Bnf(nf);
     for (j=1; j<n; j++) x[j]=zero;
     for (j=2; j<n; j++)
@@ -2854,6 +2859,7 @@ fincke_pohst(GEN a,GEN bound,GEN stockmax,long flag, long prec,
     if (!check || lg(res[2]) > 1) break;
     if (DEBUGLEVEL>2) fprintferr("  i = %ld failed\n",i);
   }
+  (void)err_leave(truer2);
   if (check)
   {
     GEN p1 = (GEN)res[2];
@@ -2867,6 +2873,7 @@ fincke_pohst(GEN a,GEN bound,GEN stockmax,long flag, long prec,
   z[2]=pr? lcopy((GEN)res[2]) : lround((GEN)res[2]);
   z[3]=lmul(uperm, (GEN)res[3]); return gerepileupto(av,z);
 PRECPB:
+  (void)err_leave(truer2);
   if (!(flag & 1))
     err(talker,"not a positive definite form in fincke_pohst");
   avma = av; return NULL;
