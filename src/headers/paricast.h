@@ -185,6 +185,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define lpile   (long)gerepile
 #define lpilecopy (long)gerepilecopy
 #define lpileupto (long)gerepileupto
+#define lpileuptoint (long)gerepileuptoint
 #define lpoleval (long)poleval
 #define lpolgcd (long)polgcd
 #define lpowgs  (long)gpowgs
