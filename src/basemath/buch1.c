@@ -1495,8 +1495,11 @@ CYCLE:
         if (DEBUGLEVEL>1) fprintferr(".");
         goto CYCLE;
       }
-      if (!form1) form1 = initrealform5(ex);
-      if (!first) form1 = comprealform(form1, realpf5(Disc, FB[current]));
+      if (!form1)
+      {
+        form1 = initrealform5(ex);
+        if (!first) form1 = comprealform(form1, realpf5(Disc, FB[current]));
+      }
       form1 = rhoreal_pow(form1, rho);
       rho = 0;
 
@@ -1535,8 +1538,11 @@ CYCLE:
     }
     else
     { /* standard relation */
-      if (!form1) form1 = initrealform5(ex);
-      if (!first) form1 = comprealform(form1, realpf5(Disc, FB[current]));
+      if (!form1)
+      {
+        form1 = initrealform5(ex);
+        if (!first) form1 = comprealform(form1, realpf5(Disc, FB[current]));
+      }
       form1 = rhoreal_pow(form1,rho);
       rho = 0;
 
