@@ -2475,10 +2475,14 @@ _polcoeff(GEN x, long n, long v)
 static GEN
 _sercoeff(GEN x, long n, long v)
 {
-  long w, dx, ex, N;
+  long w, dx, ex = valp(x), N = n - ex;
   GEN z;
-  if (!signe(x)) return gzero;
-  dx = lg(x)-3; ex = valp(x); N = n - ex;
+  if (!signe(x))
+  {
+    if (N >= 0) err(talker,"non existent component in truecoeff");
+    return gzero;
+  }
+  dx = lg(x)-3;
   if (v < 0 || v == (w=varn(x)))
   {
     if (N > dx) err(talker,"non existent component in truecoeff");
