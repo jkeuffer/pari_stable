@@ -264,9 +264,9 @@ test-kernel:: kerntest
 tune.o: $src/test/tune.c
 	\$(CC) \$(CFLAGS) \$(CPPFLAGS) -o \$@ \$< -c
 
-tune-dyn: tune.o
+tune-dyn: tune.o lib-dyn
 	\$(CC) \$(LDFLAGS) \$(RUNPTH) -o \$@ \$< $GMPOBJS -L. \$(LDDYN) \$(LIBS)
-tune-sta: tune.o
+tune-sta: tune.o lib-sta
 	\$(CC) \$(LDFLAGS) -o \$@ \$< $GMPOBJS ./\$(LIBPARI_STA) \$(LIBS)
 EOT
 
