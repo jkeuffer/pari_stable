@@ -236,9 +236,7 @@ low-level functions.
 Please note that in the present version \vers{} the names of the functions
 are not always consistent. This will be changed. Hence anyone programming in
 PARI must be aware that the names of almost all functions that he uses might
-be subject to change. If the need arises (i.e.~if there really are people out
-there who delve into the innards of PARI), updated versions with no name
-changes will be released.
+be subject to change.
 
 \subsec{Portability: 32-bit / 64-bit architectures}.
 
@@ -329,8 +327,8 @@ chunk which it will in the end return.  If the stack has been used up, a
 message to the effect that ``the PARI stack overflows'' will be printed,
 and an error raised. Otherwise, it sets the type and length of the PARI object.
 In effect, it fills correctly and completely its first codeword (\kbd{z[0]} or
-\kbd{*z}).  Many PARI objects also have a second codeword (types \typ{INT},
-\typ{REAL},  \typ{PADIC}, \typ{POL}, and \typ{SER}). In case you want to
+\kbd{*z}). Many PARI objects also have a second codeword (types \typ{INT},
+\typ{REAL}, \typ{PADIC}, \typ{POL}, and \typ{SER}). In case you want to
 produce one of those from scratch (this should be exceedingly rare), \emph{it
 is your responsibility to fill this second codeword}, either explicitly (using
 the macros described in \secref{se:impl}), or implicitly using an assignment
@@ -1127,11 +1125,10 @@ $\kbd{z} < 0$ respectively.
 
 the \emph{effective length} of \kbd{z}, i.e.~the total number of significant
 longwords. This means the following: apart from the integer 0, every integer
-is ``normalized'', meaning that the first mantissa longword (i.e.~\kbd{z[2]})
-is non-zero. However, the integer may have been created with a longer length.
+is ``normalized'', meaning that the most significant mantissa longword is
+non-zero. However, the integer may have been created with a longer length.
 Hence the ``length'' which is in \kbd{z[0]} can be larger than the
-``effective length'' which is in \kbd{z[1]}. Accessing \kbd{z[i]} for \kbd{i}
-larger than or equal to the effective length will yield random results.
+``effective length'' which is in \kbd{z[1]}.
 
 \noindent This information is handled using the following macros:
 
@@ -1145,11 +1142,66 @@ larger than or equal to the effective length will yield random results.
 of \kbd{z} to \kbd{l}.
 
 The integer 0 can be recognized either by its sign being~0, or by its
-effective length being equal to~2. When $\kbd{z} \ne 0$, the word
-\kbd{z[2]} exists and is non-zero, and the absolute value of \kbd{z}
-is (\kbd{z[2]},\kbd{z[3]},\dots,\kbd{z[lgefint(z)-1]}) in base
-\kbd{2\pow BITS\_IN\_LONG}, where as usual in this notation \kbd{z[2]} is
-the highest order longword.
+effective length being equal to~2. Now assume that $\kbd{z} \ne 0$, and let
+$$ |z| = \sum_{i = 0}^n z_i B^i,
+  \quad\text{where}~z_n\ne 0~\text{and}~B = 2^{\kbd{BITS\_IN\_LONG}}.
+$$
+With these notations, $n$ is \kbd{lgefint(z) - 3}, and the mantissa of
+$\kbd{z}$ may be manipulated via the following interface:
+
+\fun{GEN}{int_MSW}{GEN z} returns a pointer to the most significant word of
+\kbd{z}, $z_n$.
+
+\fun{GEN}{int_LSW}{GEN z} returns a pointer to the least significant word of
+\kbd{z}, $z_0$.
+
+\fun{GEN}{int_W}{GEN z, long i} returns the $i$-th significant word of
+\kbd{z}, $z_i$. Accessing the $i$-th significant word for $i > n$
+will yield unpredictable results.
+
+\fun{GEN}{int_precW}{GEN z} returns the previous (less significant) word of
+\kbd{z}, $z_{i-1}$ assuming \kbd{z} points to $z_i$.
+
+\fun{GEN}{int_nextW}{GEN z} returns the next (more significant) word of \kbd{z},
+$z_{i+1}$ assuming \kbd{z} points to $z_i$.
+
+Unnormalized integers, such that $z_n$ is possibly $0$, are explicitly
+forbidden. To enforce this, one may write an arbitrary mantissa then call
+
+\fun{void}{int_normalize}{GEN z, long known0} normalizes in place a
+non-negative integer (such that $z_n$ is possibly $0$), assuming at least the
+first \kbd{known0} words are zero.
+
+\noindent For instance a binary \kbd{and} could be implemented in the 
+following way:
+\bprog
+GEN AND(GEN x, GEN y) {
+  long i, lx, ly, lout;
+  long *xp, *yp, *outp; /* mantissa pointers */
+  GEN out;
+
+  if (!signe(x) || !signe(y)) return gzero;
+  lx = lgefint(x); xp = int_LSW(x);
+  ly = lgefint(y); yp = int_LSW(y); lout = min(lx,ly); /* > 2 */
+  
+  out = cgeti(lout); out[1] = evalsigne(1) | evallgefint(lout);
+  outp = int_LSW(out);
+  for (i=2; i < lout; i++)
+  {
+    *outp = (*xp) & (*yp);
+    outp  = int_nextW(outp);
+    xp    = int_nextW(xp);
+    yp    = int_nextW(yp);
+  }
+  if ( !*int_MSW(out) ) out = int_normalize(out, 1);
+  return out;
+}
+@eprog
+
+\noindent This low-level interface is mandatory in order to write portable
+code since PARI can be compiled using various multiprecision kernels, for
+instance the native one or GNU MP, with incompatible internal structures
+(for one thing, the mantissa is oriented in different directions).
 
 \noindent The following further macros are available:
 
