@@ -3231,7 +3231,7 @@ bnrL1(GEN bnr, GEN sbgrp, long flag, long prec)
     sbgrp = Mcyc;
   else
   {
-    if (lg(sbgrp) != N+1) 
+    if (lg(sbgrp) != ncc+1) 
       err(talker, "incorrect subgroup in bnrL1");
     p1 = gauss(sbgrp, Mcyc);
     if (!gcmp1(denom(p1)))
@@ -3288,6 +3288,9 @@ bnrL1(GEN bnr, GEN sbgrp, long flag, long prec)
 
     allCR[i] = lcopy(lchi);
   }
+
+  /* the trivial character has to be a row vector too! */
+  allCR[cl] = ltrans((GEN)allCR[cl]);
 
   setlg(listCR, nc + 1);
   if (nc == 0) err(talker, "no non-trivial character in bnrL1");
