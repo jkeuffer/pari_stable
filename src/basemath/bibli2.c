@@ -982,47 +982,51 @@ gettime(void) { return timer(); }
 /***********************************************************************/
 
 GEN
-permute(long n, GEN x)
+numtoperm(long n, GEN x)
 {
-  long av=avma,i,a,r;
-  GEN v,w,y;
+  ulong av;
+  long i,a,r;
+  GEN v,w;
 
   if (n < 1) err(talker,"n too small (%ld) in numtoperm",n);
-  v=(GEN)gpmalloc((n+1)*sizeof(long)); v[1]=1;
+  if (typ(x) != t_INT) err(arither1);
+  v = cgetg(n+1, t_VEC);
+  v[1]=1; av = avma;
+  if (signe(x) <= 0) x = modii(x, mpfact(n));
   for (r=2; r<=n; r++)
   {
-    x=dvmdis(x,r,&w); a=itos(w);
-    for (i=r; i>=a+2; i--) v[i]=v[i-1];
+    x = dvmdis(x,r,&w); a = itos(w);
+    for (i=r; i>=a+2; i--) v[i] = v[i-1];
     v[i]=r;
   }
-  avma=av; y=cgetg(n+1,t_VEC);
-  for (i=1; i<=n; i++) y[i]=lstoi(v[i]);
-  free(v); return y;
+  avma = av;
+  for (i=1; i<=n; i++) v[i] = lstoi(v[i]);
+  return v;
 }
 
 GEN
-permuteInv(GEN x)
+permtonum(GEN x)
 {
-  long av=avma, lx=lg(x)-1, ini=lx, last, ind, tx = typ(x);
+  long av=avma, lx=lg(x)-1, n=lx, last, ind, tx = typ(x);
   GEN ary,res;
 
-  if (!is_vec_t(tx)) err(talker,"not a vector in permuteInv");
-  ary=cgetg(lx+1,t_VECSMALL);
+  if (!is_vec_t(tx)) err(talker,"not a vector in permtonum");
+  ary = cgetg(lx+1,t_VECSMALL);
   for (ind=1; ind<=lx; ind++)
   {
     res = (GEN)*++x;
-    if (typ(res) != t_INT) err(typeer,"permuteInv");
+    if (typ(res) != t_INT) err(typeer,"permtonum");
     ary[ind] = itos(res);
   }
   ary++; res = gzero;
   for (last=lx; last>0; last--)
   {
-    lx--; ind=lx;
+    lx--; ind = lx;
     while (ind>0 && ary[ind] != last) ind--;
     res = addis(mulis(res,last), ind);
     while (ind++<lx) ary[ind-1] = ary[ind];
   }
-  if (!signe(res)) res=mpfact(ini);
+  if (!signe(res)) res = mpfact(n);
   return gerepileuptoint(av, res);
 }
 

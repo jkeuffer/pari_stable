@@ -660,7 +660,7 @@ are forbidden.
 row vector of length $n$) of the numbers $1$ to $n$. The number $k$ is taken
 modulo $n!\,$, i.e.~inverse function of \tet{permtonum}.
 
-\syn{permute}{n,k}, where $n$ is a \kbd{long}.
+\syn{numtoperm}{n,k}, where $n$ is a \kbd{long}.
 
 \subsecidx{padicprec}$(x,p)$: absolute $p$-adic precision of the object $x$.
 This is the minimum precision of the components of $x$. The result is
@@ -674,7 +674,7 @@ integer.
 gives the number $k$ such that $x=\kbd{numtoperm(n,k)}$, i.e.~inverse
 function of \tet{numtoperm}.
 
-\syn{permuteInv}{x}.
+\syn{permtonum}{x}.
 
 \subsecidx{precision}$(x,\{n\})$: gives the precision in decimal digits of the
 PARI object $x$. If $x$ is an exact object, the largest single precision

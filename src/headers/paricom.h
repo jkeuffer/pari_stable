@@ -31,6 +31,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define gpuigs gpowgs
 #define classno3 hclassno
 #define strtoGEN flisexpr
+#define permute numtoperm
+#define permuteInv permtonum
 
 #define rcopy mpcopy
 #define absr  mpabs
