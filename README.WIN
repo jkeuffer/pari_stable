@@ -1,0 +1,119 @@
+This file describes the various ways you can run PARI/GP in a (relatively
+recent) Windows environment (95 or higher). For earlier versions of Windows,
+see README.DOS.
+
+The only way to have a fully functionnal GP is to install GNU/Linux. It's
+a one hour job to install a minimal Linux system from current Linux
+distributions, without any technical background. The LILO boot system
+enables you to have Windows and Linux coexisting peacefully on your hard drive.
+
+The other solutions all stick to the Windows environment. It is advised, but
+not mandatory to get the Documentation and Examples archive
+
+  ftp://megrez.math.u-bordeaux.fr/pub/pari/dos/GPDxxx.ZIP
+
+which contains the following directories:
+
+  + DOC, containing
+     - user's manual, tutorial and reference card in TeX format You will
+       need TeX to compile them (see www.CTAN.org for how to get TeX) The
+       same documents are available in PDF and PostScript format from
+
+         ftp://megrez.math.u-bordeaux.fr/pub/pari/manuals/
+
+     - the script GPHELP (translates Pari documentation to plain text and
+       handles "apropos help"), which requires PERL (see www.CPAN.org for how
+       to get it). You may have to fix paths in the first lines of the script.
+       Set your GPRC file so that the 'help' default points to the place where
+       you deposit GPHELP (see MISC/GPRC.DOS).
+
+  + MISC, containing
+      - a sample GPRC file (GPRC.DOS). Copy it to C:\_GPRC (or \etc\GPRC) and
+        adapt it to your needs
+      - a sample alias file (GPALIAS).
+
+  + EXAMPLES, containing sample GP scripts
+
+NOTE: all .gz and .ZIP files are compressed files (or archives). You can
+process them with Winzip (see www.winzip.com) for instance.
+
+%%%%%%%%%%%%%  Solution 1: The CYGWIN library  %%%%%%%%%%%%%%%%%%%%%%%%
+
+Fetch the cygwin library (CYGWIN1.DLL) from Cygnus Solutions (now a
+subsidiary of Red Hat) from http://sources.redhat.com/cygwin/. Then fetch the
+GP binary
+
+  ftp://megrez.math.u-bordeaux.fr/pub/pari/windows/cygwin/gp-xxx.exe.gz
+
+You can also download a full Cygwin distribution which includes many useful
+tools (including PERL for instance). Then you will be able to build GP from
+the general (unix) sources.
+
+PROBLEMS:
+  * no hi-res plots, most graphics commands disabled (you can still output to
+    a PostScript file)
+
+%%%%%%%%%%%%%  Solution 2: The native (mingw) binary %%%%%%%%%%%%%%%%%
+
+Fetch the GP binary (cross-compiled using the gcc-mingw compiler):
+
+  ftp://megrez.math.u-bordeaux.fr/pub/pari/windows/gp-xxx.exe.gz
+
+PROBLEMS:
+  * no hi-res plots, most graphics commands disabled (you can still output to
+    a PostScript file)
+
+  * doesn't work well when started in a console from a MS-DOS shell:
+      - on ^C gp quits
+      - redirecting standard input as in 'gp < file' crashes gp
+    None of these things occur if you start gp by double-clicking on its
+    icon, as is customary for Windows application.
+
+  * colors don't work (escape sequences printed "as is").
+ 
+  * no extended on-line help
+
+%%%%%%%%%%%%%  Solution 3: The RSX runtime package %%%%%%%%%%%%%%%%%%%
+
+You can use the GP binary from the archive
+
+  ftp://megrez.math.u-bordeaux.fr/pub/pari/dos/GPBxxx.ZIP
+
+PROBLEMS:
+  * no hi-res plots, most graphics commands disabled (you can still output to
+    a PostScript file).
+
+  * more than twice SLOWER than all the other binaries described here.
+
+%%%%%%%%%%%%%  Solution 4: Build GP from sources   %%%%%%%%%%%%%%%%%%%
+
+That is, the generic Unix sources
+
+  ftp://megrez.math.u-bordeaux.fr/pub/pari/pari.tgz
+
+It is quite easy to build GP (and readline) from the unix sources using
+mingw, but if you have installed mingw you probably also have Cygwin, in
+which case, it's even easier to use the generic build process as under Unix,
+as mentioned in Solution 1.
+
+So I'm assuming from now on that you're stuck with something which is not
+gcc. If you have MSVC, then check Odos/README.MSVC in the main archive which
+explains in detail all steps involved. If you have some other compiler, and
+succeed in compiling GP, we'd be quite happy to hear from you.
+
+PROBLEMS:
+  * no hi-res plots, most graphics commands disabled (you can still output to
+    a PostScript file).
+
+  * slower than all gcc-compiled binaries (faster than RSX version though).
+
+  * no extended on-line help
+
+  * no line-editing facilities (GP not linked with readline).
+
+%%%%%%%%%%%%%  What about library programming ? %%%%%%%%%%%%%%%%%%%%%%
+
+Building a libpari.a library should be straightforward. It is possible but
+painful to build a LIBPARI.DLL and .def file using gcc-mingw + dlltool and
+some header magic.  For the time being, we won't provide prebuilt libraries,
+so for this one, you're on your own. Sorry.

@@ -17,7 +17,8 @@ See the files NEW and COMPAT for new features and incompatible changes
 respectively between 2.0 and older versions. See Changelog for (a terse
 description of) subsequent patches.
 
-The file README.DOS is specific to DOS, OS/2 and Windows users.
+The file README.DOS is specific to DOS, OS/2 and Windows 3.1 users.
+The file README.WIN is specific to Windows 3.2 (95/98/2000/NT) users.
 
 For the adventurous:
 * If you want to check up-to-date, but possibly unstable, development
