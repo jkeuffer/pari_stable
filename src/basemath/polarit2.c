@@ -2857,8 +2857,8 @@ GEN
 content(GEN x)
 {
   long lx,i,tx=typ(x);
-  pari_sp av, tetpil;
-  GEN p1,p2;
+  pari_sp av;
+  GEN p1;
 
   if (is_scalar_t(tx))
   {
@@ -2875,9 +2875,13 @@ content(GEN x)
   switch(tx)
   {
     case t_RFRAC: case t_RFRACN:
-      p1=content((GEN)x[1]);
-      p2=content((GEN)x[2]); tetpil=avma;
-      return gerepile(av,tetpil,gdiv(p1,p2));
+    {
+      GEN n = (GEN)x[1], d = (GEN)x[2];
+      long vn = gvar9(n), vd = gvar9(d);
+      if (vn < vd) return ginv(d);
+      if (vn > vd) return gcopy(n);
+      return gerepileupto(av, gdiv(content(n), content(d)));
+    }
 
     case t_VEC: case t_COL: case t_MAT:
       lx = lg(x); if (lx==1) return gun;
