@@ -632,13 +632,13 @@ long
 idealval(GEN nf, GEN ix, GEN vp)
 {
   long N,v,vd,w,av=avma,av1,lim,i,j,k, tx = typ(ix);
-  GEN mul,mat,a,x,y,r,bp,p,denx;
+  GEN mul,mat,a,x,y,r,bp,p,cx;
 
   nf=checknf(nf); checkprimeid(vp);
   if (is_extscalar_t(tx) || tx==t_COL) return element_val(nf,ix,vp);
   p=(GEN)vp[1]; N=lgef(nf[1])-3;
   tx = idealtyp(&ix,&a);
-  denx=denom(ix); if (!gcmp1(denx)) ix=gmul(denx,ix);
+  cx = content(ix); if (!gcmp1(cx)) ix = gdiv(ix,cx);
   if (tx != id_MAT)
     ix = idealhermite_aux(nf,ix);
   else
@@ -647,8 +647,8 @@ idealval(GEN nf, GEN ix, GEN vp)
     if (lg(ix) != N+1) ix=idealmat_to_hnf(nf,ix);
   }
   v = ggval(dethnf_i(ix), p);
-  vd = ggval(denx,p) * itos((GEN)vp[3]); /* v_p * e */
-  if (!v) return -vd;
+  vd = ggval(cx,p) * itos((GEN)vp[3]); /* v_p * e */
+  if (!v) return vd;
 
   mul = cgetg(N+1,t_MAT); bp=(GEN)vp[5]; 
   mat = cgetg(N+1,t_MAT);
@@ -663,7 +663,7 @@ idealval(GEN nf, GEN ix, GEN vp)
       for (k=2; k<=j; k++) a = addii(a, mulii((GEN)x[k], gcoeff(mul,i,k)));
       /* is it divisible by p ? */
       y[i] = ldvmdii(a,p,&r);
-      if (signe(r)) { avma=av; return -vd; }
+      if (signe(r)) { avma=av; return vd; }
     }
   }
   av1 = avma; lim=stack_lim(av1,3);
@@ -678,7 +678,7 @@ idealval(GEN nf, GEN ix, GEN vp)
         for (k=2; k<=N; k++) a = addii(a, mulii((GEN)x[k], gcoeff(mul,i,k)));
         /* is it divisible by p ? */
         y[i] = ldvmdii(a,p,&r);
-        if (signe(r)) { avma=av; return w - vd; }
+        if (signe(r)) { avma=av; return w + vd; }
       }
       r=x; mat[j]=(long)y; y=r;
       if (low_stack(lim,stack_lim(av1,3)))
@@ -688,7 +688,7 @@ idealval(GEN nf, GEN ix, GEN vp)
         gerepilemany(av1,gptr,2);
       }
     }
-  avma=av; return w - vd;
+  avma=av; return w + vd;
 }
 
 /* gcd and generalized Bezout */
