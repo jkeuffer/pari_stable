@@ -82,7 +82,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define bit_accuracy_mul(x,y) (((x)-2) * (BITS_IN_LONG*(y)))
 #define GSTR(x) ((char*) (((GEN) (x)) + 1 ))
 
-#include <pariold.h>
+#include "pariold.h"
 
 /* Common global variables: */
 extern ulong DEBUGFILES, DEBUGLEVEL, DEBUGMEM, precdl;
