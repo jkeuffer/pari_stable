@@ -3332,7 +3332,10 @@ galoissubcyclo(long n, GEN H, GEN Z, long v)
   else
   {
     H=vectosmall(H);
-    /*Should check H[i] are >0*/
+    for (i=1;i<lg(H);i++)
+      if (H[i]<0)
+	H[i]=mulssmod(-H[i],n-1,n);
+    /*Should check components are prime to n, but it is costly*/
   }
   V = cgetg(n, t_VECSMALL);
   if (DEBUGLEVEL >= 1)
