@@ -1276,7 +1276,7 @@ static GEN
 cxlngamma(GEN x, long prec)
 {
   GEN y,p1,p2,p3,p4,p5,p6,p7,p71,pitemp;
-  long l,l1,l2,u,i,k,e,s,n,p,av,av1;
+  long l,l1,l2,flag,i,k,e,s,n,p,av,av1;
   double alpha,beta,dk;
 
   l = precision(x); if (!l) l = prec;
@@ -1284,9 +1284,11 @@ cxlngamma(GEN x, long prec)
   y[1]=lgetr(l); y[2]=lgetr(l); av=avma;
 
   p1=cgetg(3,t_COMPLEX); p1[1]=lgetr(l2); p1[2]=lgetr(l2);
-  u = (typ(x[1])!=t_REAL && gsigne((GEN)x[1])<=0)? 1: (gexpo((GEN)x[1]) < -1);
-  if (u && (gcmp0((GEN)x[2]) || gexpo((GEN)x[2])>16)) u = 0;
-  p2 = u? gsub(gun,x): x;
+
+  flag = (typ(x[1]) != t_REAL || gsigne((GEN)x[1]) <= 0);
+  if (!flag) flag = (gexpo((GEN)x[1]) < -1);
+  if (flag && (gcmp0((GEN)x[2]) || gexpo((GEN)x[2]) > 16)) flag = 0;
+  p2 = flag? gsub(gun,x): x;
   gaffect(p2,p1);
 
   p2=gabs(p1,DEFAULTPREC);
@@ -1364,7 +1366,7 @@ cxlngamma(GEN x, long prec)
     }
     gsubz(p4,glog(p7,l+1), p4);
   }
-  if (u)
+  if (flag)
   {
     setlg(pitemp,l+1); p1 = gmul(pitemp,x);
     p1 = gdiv(pitemp,gsin(p1,l+1));

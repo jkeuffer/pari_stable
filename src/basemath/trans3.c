@@ -223,6 +223,7 @@ incgam(GEN a, GEN x, long prec)
   GEN p1,z = cgetr(prec);
   long av = avma;
 
+  if (gcmp0(x)) return ggamma(a,prec);
   if (typ(x)!=t_REAL) { gaffect(x,z); x=z; }
   if (gcmp(subrs(x,1),a) > 0 || gsigne(greal(a)) <= 0)
     p1 = incgam2(a,x,prec);
@@ -269,6 +270,7 @@ incgam1(GEN a, GEN x, long prec)
   avma = av; return z;
 }
 
+/* assume x != 0 */
 GEN
 incgam2(GEN a, GEN x, long prec)
 {
@@ -607,7 +609,7 @@ czeta(GEN s, long prec)
     }
   }
   if (n < 46340) { flag2=1; n1=n*n; } else flag2=0;
-  y=gun; ms=gneg_i(s); p1=cgetr(prec+1);
+  y=gun; ms=gneg_i(s); p1=cgetr(prec+1); p2=gun;
   for (i=2; i<=n; i++)
   {
     affsr(i,p1); p2 = gexp(gmul(ms,mplog(p1)), prec+1);
@@ -993,7 +995,9 @@ gpolylog(long m, GEN x, long prec)
     case t_COMPLEX: case t_QUAD:
       return polylog(m,x,prec);
 
-    case t_INTMOD: case t_PADIC: case t_POLMOD:
+    case t_INTMOD: case t_PADIC:
+      err(impl, "padic polylogarithm");
+    case t_POLMOD:
       p1=roots((GEN)x[1],prec); lx=lg(p1); p2=cgetg(lx,t_COL);
       for (i=1; i<lx; i++) p2[i]=lpoleval((GEN)x[2],(GEN)p1[i]);
       tetpil=avma; y=cgetg(lx,t_COL);
