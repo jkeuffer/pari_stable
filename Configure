@@ -59,7 +59,8 @@ optimization=full
 prefix=/usr/local
 share_prefix=
 target_host=
-which_graphic_lib=none
+which_graphic_lib=gnuplot-dynamic
+graphic_lib_dll=NULL
 test -n "$GP_INSTALL_PREFIX" && prefix=$GP_INSTALL_PREFIX
 while test $# -gt 0; do
   case "$1" in
@@ -930,14 +931,14 @@ if test "$optimization" != profiling; then
 
 # ========  GRAPHICS environment search  ==============
 
-# At this moment $which_graphic_lib is either none, or the argument to
+# At this moment $which_graphic_lib is either gnuplot-dynamic, or the argument to
 # --graphic option; $graph_cmd is "" unless --graphic option was specified.
 
 #   LIB: X11
   pth=$x11pth
   lib=X11; . ./locatelib
   if test -f $Xincroot/X11/Xos.h -a -z "$graph_cmd"; then
-    which_graphic_lib=X11
+    which_graphic_lib=builtin.X11-gnuplot-dynamic
     test -n "$extralib" && echo ..."Extra Libraries are $extralib"
     echo ..."Found X11 header files in $Xincroot/X11"
   fi
@@ -962,16 +963,18 @@ if test "$optimization" != profiling; then
 	      /*|[c-z]:/*) gnuplot_libs="$gnuplot_libs -l$lib";;
 	    esac
 	done
-	if test "$which_graphic_lib" = gnuplot; then
+	case "$which_graphic_lib" in
+	*gnuplot)
 	    if test -z "$gnuplot_libs"; then
 		echo "...I expect that no libraries are needed for gnuplot"
 	    else
 		echo "...I expect that libraries $gnuplot_libs are needed for gnuplot"
-	    fi
-	fi
+	    fi ;;
+	esac
 	;;
     *)
-	if test "$which_graphic_lib" = gnuplot; then
+	case "$which_graphic_lib" in
+	*gnuplot)
             pth=`echo $pth | sed -e "s,$TOP,.,g"`
 	    echo "###"
 	    echo "### Could not find gnuplot library in $pth"
@@ -986,7 +989,8 @@ if test "$optimization" != profiling; then
 	    echo "### $tlib to ./gnuplot-$osname-$arch or ./gnuplot subdirs"
 	    echo "### or to similarly-named directories up the directory tree." 
 	    echo "###"
-	fi
+	    ;;
+	esac
 	;;
   esac
 
@@ -1162,11 +1166,18 @@ EOM
 ==========================================================================
 GP contains high resolution plotting functions. Choose among
        none       $addX11         $addgnuplot	gnuplot-dynamic
+The `*-dynamic' version may be trailed by `,dll_base_name'.
 EOT
     echo $n ..."Use which graphic library (\"none\" means no hi-res plot) ? $c"
     rep="none $addX11 $addgnuplot gnuplot-dynamic";
     dflt=$which_graphic_lib; . ./myread
     which_graphic_lib=$ans
+    case "$which_graphic_lib" in
+    *,*)
+	graphic_lib_dll=`echo "$which_graphic_lib" | sed -e 's/[-a-z]*,//'`
+	which_graphic_lib=`echo "$which_graphic_lib" | sed -e 's/,.*//'`
+	;;
+    esac
 
   case "$which_graphic_lib" in
     *X11*)
@@ -1223,6 +1234,12 @@ EOT
     *)gnuplot=;;
   esac
   else # fastread = yes
+    case "$which_graphic_lib" in
+    *,*)
+	graphic_lib_dll=`echo "$which_graphic_lib" | sed -e 's/[-a-z]*,//'`
+	which_graphic_lib=`echo "$which_graphic_lib" | sed -e 's/,.*//'`
+	;;
+    esac
     # TEST: --graphic was not given, X11 not found, and gnuplot library found
     if test "$which_graphic_lib" = none -a -z "$graph_cmd" -a -n "$gnuplot"; then
       which_graphic_lib=gnuplot
@@ -1379,7 +1396,7 @@ for variable in\
   rl_completion_matches rl_completion_func_t\
   RLINCLUDE RLLIBS\
   sizeof_long doubleformat\
-  gnuplot extralib X11 Xincroot which_graphic_lib gnuplot_libs\
+  gnuplot extralib X11 Xincroot which_graphic_lib gnuplot_libs graphic_lib_dll\
   $_has_list; do
   eval "echo $variable=\'"'$'"$variable\'" \>\> $dflt_conf_file
 done

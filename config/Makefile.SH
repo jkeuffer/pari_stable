@@ -67,6 +67,11 @@ done
 # We don't want to recompile everything when only changing a prototype
 hlist="$hlist paridecl"
 
+case "$graphic_lib_dll" in
+  NULL)	_graphic_lib_dll="$graphic_lib_dll" ;;
+  *)	_graphic_lib_dll="\\\"$graphic_lib_dll\\\"" ;;
+esac
+
 case "$which_graphic_lib" in
 none)
   PLOTCFLAGS=
@@ -86,7 +91,7 @@ gnuplot)
   graph="$graph plotgnuplot"
   ;;
 gnuplot-dynamic)
-  PLOTCFLAGS="-DDYNAMIC_PLOTTING -DDYNAMIC_PLOTTING_RUNTIME_LINK=NULL"
+  PLOTCFLAGS="-DDYNAMIC_PLOTTING -DDYNAMIC_PLOTTING_RUNTIME_LINK=$_graphic_lib_dll"
   PLOTLIBS=
   plotrunpath=
   graph="$graph plotgnuplot"
@@ -109,7 +114,7 @@ builtin.X11-gnuplot)
   ;;
 builtin.X11-gnuplot-dynamic)
   cflags="$cflags -DBOTH_GNUPLOT_AND_X11"
-  PLOTCFLAGS="-I$Xincroot -DDYNAMIC_PLOTTING -DDYNAMIC_PLOTTING_RUNTIME_LINK=NULL"
+  PLOTCFLAGS="-I$Xincroot -DDYNAMIC_PLOTTING -DDYNAMIC_PLOTTING_RUNTIME_LINK=$_graphic_lib_dll"
   if test "$osname" = concentrix; then
     PLOTLIBS="-lX11"
   else
