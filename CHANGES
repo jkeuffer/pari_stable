@@ -85,6 +85,7 @@ IZ 41- CLK_TCK may reside in time.h
 XR 47- factorpadic(, not a prime, ) --> SEGV
    48- matrix(2,2,i,i, ...) allowed, with weird result
 BA 49- better arguments checking for galoisfixedfield
+   50- psi(I) --> incorrect type in rtodbl
 
   Changed
     1- removed useless parameter prec in many bnr* and rnf* functions
