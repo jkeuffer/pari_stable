@@ -2025,7 +2025,7 @@ gdiv(GEN x, GEN y)
       case t_REAL: return divir(x,y);
       case t_INTMOD:
         z = cgetg(3, t_INTMOD);
-        return div_intmod_same(z, (GEN)y[1], (GEN)y[2], modii(x, (GEN)y[1]));
+        return div_intmod_same(z, (GEN)y[1], modii(x, (GEN)y[1]), (GEN)y[2]);
       case t_FRAC:
         z = cgetg(3,t_FRAC); p1 = gcdii(x,(GEN)y[1]);
         if (is_pm1(p1))
