@@ -199,7 +199,8 @@ TBOOLEAN screen_ok;
 
 void map3d_xy (double x, double y, double z, unsigned int *xt, unsigned int *yt)
 {
-    croak("Unsupported function map3d_xy called");
+  (void)x; (void)y; (void)z; (void)xt; (void)yt;
+  croak("Unsupported function map3d_xy called");
 }
 
 /* End of 3.7.0-devel additions */
@@ -209,10 +210,10 @@ void map3d_xy (double x, double y, double z, unsigned int *xt, unsigned int *yt)
 struct value*
 const_express(struct value*v)
 {
-    if (token[c_token].is_token)
-	croak("Expect a number, got a string");
-    *v = token[c_token++].l_val;
-    return v;
+  if (token[c_token].is_token)
+      croak("Expect a number, got a string");
+  *v = token[c_token++].l_val;
+  return v;
 }
 
 void*
@@ -431,18 +432,21 @@ myterm_table_not_loaded_v(void)
 static void
 myterm_table_not_loaded(char *s)
 {
+  (void)s;
   myterm_table_not_loaded_v();
 }
 
 static void
 myterm_table_not_loaded_vdd(double x, double y)
 {
+  (void)x; (void)y;
   myterm_table_not_loaded_v();
 }
 
 static double
 myterm_table_not_loaded_di(int flag)
 {
+  (void)flag;
   myterm_table_not_loaded_v();
   return 0;			/* NOT REACHED */
 }
@@ -459,6 +463,8 @@ void myterm_table_not_loaded_v4i4d(int term_xmin, int term_xmax,
 			     double plot_xmin, double plot_xmax,
 			     double plot_ymin, double plot_ymax)
 {
+  (void)term_xmin; (void)term_xmax; (void)term_ymin; (void)term_ymax;
+  (void)plot_xmin; (void)plot_xmax; (void)plot_ymin; (void)plot_ymax;
   myterm_table_not_loaded_v();
 }
 
@@ -528,6 +534,7 @@ set_term_funcp2(FUNC_PTR change_p, TSET_FP tchange)
 void
 set_term_funcp3(FUNC_PTR change_p, void *term_p, TSET_FP tchange)
 {
+  (void)term_p;
   set_term_funcp2(change_p, tchange);
 }
 

@@ -334,7 +334,7 @@ static GEN
 _rpowsi_mul(void *data, GEN x, GEN y/*unused*/)
 {
   sr_muldata *D = (sr_muldata *)data;
-  return D->mulsg(D->a, x);
+  (void)y; return D->mulsg(D->a, x);
 }
 
 static GEN

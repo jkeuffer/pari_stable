@@ -638,6 +638,7 @@ ifac_break_limit(GEN n, GEN pairs/*unused*/, GEN here, GEN state)
 {
   pari_sp ltop = avma;
   int res;
+  (void)pairs;
   if (!here) /* initial call */
    /* Small prime have been removed since start, n is the new unfactored part.
     * Result is affect()ed to state[1] to preserve stack. */

@@ -1536,6 +1536,7 @@ FqXQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
 static GEN
 Fq_neg(GEN x, GEN T/*unused*/, GEN p)
 {
+  (void)T;
   switch(typ(x)==t_POL)
   {
     case 0: return signe(x)?subii(p,x):gzero;

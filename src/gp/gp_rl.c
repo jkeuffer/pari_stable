@@ -149,6 +149,7 @@ static int
 pari_rl_matched_insert_suspend(int count, int key)
 {
   ulong o_readline_state = readline_state;
+  (void)count; (void)key;
 
   did_matched_insert = (readline_state & DO_MATCHED_INSERT);
   readline_state &= ~DO_MATCHED_INSERT;
@@ -160,6 +161,7 @@ pari_rl_matched_insert_suspend(int count, int key)
 static int
 pari_rl_matched_insert_restore(int count, int key)
 {
+  (void)count; (void)key;
   if (did_matched_insert)
     readline_state |= DO_MATCHED_INSERT;
   return 1;
@@ -626,6 +628,7 @@ rl_short_help(int count, int key)
   int flag = (count < 0 || rl_last_func == rl_short_help)? h_RL|h_LONG: h_RL;
   int off = rl_point;
 
+  (void)key;
   /* func() with cursor on ')' following completion */
   if (off && rl_line_buffer[off-1] == '('
           && !is_keyword_char(rl_line_buffer[off])) off--;

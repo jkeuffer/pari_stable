@@ -2838,6 +2838,7 @@ FpM_invimage(GEN m, GEN v, GEN p)
 static GEN
 Fq_add(GEN x, GEN y, GEN T/*unused*/, GEN p)
 {
+  (void)T;
   switch((typ(x)==t_POL)|((typ(y)==t_POL)<<1))
   {
     case 0: return modii(addii(x,y),p);
