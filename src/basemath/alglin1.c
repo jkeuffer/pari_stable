@@ -928,7 +928,12 @@ check_b(GEN b, long nbli, int *iscol)
   *iscol = (b && typ(b) == t_COL);
   if (!b) return idmat(nbli);
   b = dummycopy(b);
-  if (*iscol) { col = b; b = col_to_mat(b); } else col = (GEN)b[1];
+  if (*iscol) { col = b; b = col_to_mat(b); }
+  else
+  {
+    if (lg(b) == 1) err(consister,"gauss");
+    col = (GEN)b[1];
+  }
   if (nbli != lg(col)-1) err(talker,"incompatible matrix dimensions in gauss");
   return b;
 }
