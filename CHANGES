@@ -160,9 +160,11 @@ BA 15- error messages now mention the GP function when the error occured.
        "seriesprecision" and "format" on startup. One can query them
        individually, or ask for all defaults ]
 BA 17- macro varncmp(vx,vy) should now be used to compare variable numbers.
+BA 18- split substpol from subst ( reverse [ 2.2.1 C24 ] ). Use substpol
+       for non-trivial algebraic substitution.
 
   Added
-    1- make test-all [ all test suite (SLOW !)]
+    1- make test-all [ all available test suites (SLOW !)]
 BA  2- add support for GNU/Hurd.
     3- conversion routines zv_ZC, zv_ZV, zm_ZM, and matrix multiplication:
        RM_zm_mul, ZM_zm_mul
