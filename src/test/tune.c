@@ -387,7 +387,7 @@ one(tune_param *param)
   DEFAULT (fun2, param->fun1);
   DEFAULT (step_factor, 0.01);  /* small steps by default */
   DEFAULT (stop_since_change, 80);
-  DEFAULT (stop_factor, 1.4); /* gmp has 1.2, PARI timings are too unstable */
+  DEFAULT (stop_factor, 1.2);
   DEFAULT (type, t_INT);
 
   s.type = param->type;
