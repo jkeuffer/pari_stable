@@ -62,9 +62,6 @@ extern int  whatnow(char *s, int flag);
 
 static char *DFT_PRETTYPRINTER = "tex2mail -TeX -noindent -ragged -by_par";
 
-#define SIZE  128
-#define SIZE2 256
-
 #define MAX_PROMPT_LEN 128
 #define DFT_PROMPT "? "
 #define BREAK_LOOP_PROMPT "break> "
@@ -590,7 +587,7 @@ sd_colors(char *v, int flag)
   }
   if (flag == d_ACKNOWLEDGE || flag == d_RETURN)
   {
-    char s[SIZE], *t = s;
+    char s[128], *t = s;
     int col[3], n;
     for (*t=0,c=c_ERR; c < c_LAST; c++)
     {
@@ -1738,7 +1735,7 @@ what_readline(char **buf)
             extra);
 #else
   s = stackmalloc(32);
-  (void)sprintf(s, SIZE, "not compiled in");
+  (void)sprintf(s, "not compiled in");
 #endif
   *buf = s;
 }
@@ -1795,8 +1792,6 @@ print_version(void)
                 has_ext_help()? "": " not");
   center(buf); avma = av;
 }
-#undef SIZE
-#undef SIZE2
 
 static void
 gp_head(void)
