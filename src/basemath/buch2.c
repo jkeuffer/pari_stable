@@ -7,7 +7,7 @@
 /* $Id$ */
 #include "pari.h"
 #include "parinf.h"
-int addcolumntomatrix(GEN Ai, GEN invp, long *L);
+int addcolumntomatrix(GEN V, GEN invp, GEN L);
 double check_bach(double cbach, double B);
 GEN gmul_mat_smallvec(GEN x, GEN y);
 GEN get_arch_real(GEN nf,GEN x,GEN *emb,long prec);
@@ -1775,23 +1775,20 @@ compute_matt2(long RU,GEN nf)
   return matt2;
 }
 
-/* Input: a matrix in M_{ n,r }(Q), of maximal rank r < n, a n-dimensional
- * column vector V, the matrix INVP and the row vector *L as given by
- * relationrank()
+/* cf. relationrank()
  *
  * If V depends linearly from the columns of the matrix, return 0.
- * Otherwise, update INVP and L and return 1.
- * no GC. Destroys Ai (column of A)
+ * Otherwise, update INVP and L and return 1. No GC.
  */
 int
-addcolumntomatrix(GEN Ai, GEN invp, long *L)
+addcolumntomatrix(GEN V, GEN invp, GEN L)
 {
-  GEN a = gmul_mat_smallvec(invp,Ai);
+  GEN a = gmul_mat_smallvec(invp,V);
   long i,j,k, n = lg(invp);
 
   if (DEBUGLEVEL>6)
   {
-    fprintferr("adding vector = %Z\n",Ai);
+    fprintferr("adding vector = %Z\n",V);
     fprintferr("vector in new basis = %Z\n",a);
     fprintferr("list = %Z\n",L);
     fprintferr("base change matrix =\n"); outerr(invp);
@@ -1822,7 +1819,7 @@ addcolumntomatrix(GEN Ai, GEN invp, long *L)
  * of P[i] = e_i, and 1 if P[i] = A_i (i-th column of A)
  */
 static GEN
-relationrank(long **A,long r,long *L)
+relationrank(long **A, long r, GEN L)
 {
   long i, n = lg(L)-1, av = avma, lim = stack_lim(av,1);
   GEN invp = idmat(n);
@@ -2372,6 +2369,7 @@ col_0(long n)
    GEN c = (GEN) gpmalloc(sizeof(long)*(n+1));
    long i;
    for (i=1; i<=n; i++) c[i]=0;
+   c[0] = evaltyp(t_VECSMALL) | evallg(n);
    return c;
 }
 

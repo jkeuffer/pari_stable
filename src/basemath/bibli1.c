@@ -2403,7 +2403,7 @@ rnfpolredabs(GEN nf, GEN relpol, long flag, long prec)
 /**                              MINIM                             **/
 /**                                                                **/
 /********************************************************************/
-int addcolumntomatrix(long *V,GEN INVP,GEN L);
+int addcolumntomatrix(GEN V,GEN INVP,GEN L);
 
 /* x is a non-empty matrix, y is a compatible VECSMALL (dimension > 0). */
 GEN
