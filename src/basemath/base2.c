@@ -1409,11 +1409,12 @@ fastnu(GEN p, GEN f, GEN beta, GEN pdr)
   G = hnfmodidpart(G, d);
   if (DEBUGLEVEL >= 6) fprintferr("  fastnu: HNF(G) is computed\n");
 
+  setlg(G, n+2);
+  G = rowextract_i(G, 1, n+1);
   h = gtopoly((GEN)G[n+1], v);
   for (j = 1; j <= n; j++)
     h = FpX_gcd(h, gtopoly((GEN)G[j], v), p);
 
-  h = gdiv(h, gpowgs(polx[v], n));
   if (gcmp1(h)) { avma = av; return NULL; }
   nu = (GEN)factmod0(h, p)[1];
   if (lg(nu) > 2) { avma = av; return NULL; }
