@@ -39,6 +39,9 @@ IS  5- C++ compilation problem (compl is a C++ operator + casts)
     7- factor(x^2 - 16810110*x + 62994937599000) --> division by 0
 BA  8- Pocklington-Lehmer didn't stop factorisation after sqrt(N)
     9- factorff needed a prime field F_p where p was single precision
+   10- more digits than were significant could be printed (ex: precision(Pi,1))
+   11- rnfisnorm didn't accept vectors on Zk basis as argument
+   12- [cygwin] fixed timer (always returned 0)
 
   Changed
 BA  1- more efficient quadratic Hensel lift
