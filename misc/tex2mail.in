@@ -1497,7 +1497,11 @@ sub endmatrix {
 }
 
 sub endmatrixArg {
-  &endmatrix(join(";",($_[0],split("",pop(@argStack)))));
+  my $aspec = pop(@argStack);
+  # Replace *{20}{c} by "c" x 20; same for omited {}.
+  $aspec =~ s/\*(?:\{(\d+)\}|([^{]))(?:\{(.*?)\}|([^{]))/
+	(defined($1) ? $1 : $2) x (defined($3) ? $3 : $4) /eg;
+  &endmatrix(join(";",($_[0],split("", $aspec))));
 }
 
 # Takes a matrix in the following form: chunks on the last level
@@ -2145,7 +2149,7 @@ for ("text","operatorname","operatornamewithlimits","relax","-",
      "endroster","endkey","endRefs","enddocument","displaystyle",
      "twelverm","tenrm","twelvefm","tenfm","hbox","mbox", "url",
      "tableofcontents", "bigl", "bigr", "biggl", "biggr", "footnotesize",
-     "nonumber", "tiny", "sc", "huge",
+     "nonumber", "tiny", "sc", "huge", "limits",
     ) {
   $type{"\\$_"}="nothing";
 }
@@ -2648,3 +2652,6 @@ __END__
 	    pieces (disabled when "").
 	  New option noflush (rarily useful optimization).
 	  Flush the output by default.
+	  \limits ignored.
+	  Allow one-level-deep *{NUMBER}{PRE} in array specifier (in addition
+		to c,r,l).
