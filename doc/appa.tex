@@ -351,7 +351,7 @@ compute Galois groups of polynomials of degree less or equal to 7. If you
 want to handle polynomials of degree bigger than 7 (and less than 11), you
 need to fetch a separate archive: \kbd{galdata.tgz} which can probably be
 found at the same place where you got the main PARI archive, and on the
-\kbd{megrez} ftp server in any case. Untar the archive in the \kbd{datadir}
+\kbd{pari} ftp server in any case. Untar the archive in the \kbd{datadir}
 directory which was chosen at \kbd{Configure} time (it's one of the last
 messages on the screen if you did not run \kbd{Configure -a}). You can then
 test the \kbd{polgalois} function with your favourite polynomials.
@@ -395,7 +395,10 @@ online browsing (the manual is complete with hyperlinks); type
 \kbd{make docpdf}
 
 \noindent All these documents are available online from PARI home page and on
-the \kbd{megrez} ftp server.
+
+\kbd{ftp://pari.math.u-bordeaux.fr/pub/pari}
+
+\noindent in any case.
 
 \subsec{C programming:} Once all libraries and include files are installed,
 you can link your C programs to the PARI library. A sample makefile

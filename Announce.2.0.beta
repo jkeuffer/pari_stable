@@ -17,7 +17,7 @@ In addition this package is free. It can be used in an interactive shell (GP)
 or as a C/C++ library (PARI). The source code (including documentation) can
 be found at
 
-  ftp://megrez.math.u-bordeaux.fr/pub/pari/pari.tar.gz
+  ftp://pari.math.u-bordeaux.fr/pub/pari/pari.tar.gz
 
 It should compile on most UNIX systems. In any case, we provide GP binaries
 for some major architectures/operating systems, including various brands of
@@ -25,7 +25,7 @@ UNIXes, DOS, OS/2, Windows 3.1, Windows 95/NT both native (if you have to)
 and using Cygnus user tools (preferred), 680x0 and PowerPC Macintosh (*)...
 They can be found in the subdirectories of
 
-  ftp://megrez.math.u-bordeaux.fr/pub/pari
+  ftp://pari.math.u-bordeaux.fr/pub/pari
 
 If you have more questions about PARI, you can visit
 

@@ -3121,7 +3121,7 @@ smallvectors(GEN q, GEN BORNE, long stockmax, FP_chk_fun *CHECK)
         }
         s = j; avma = av2;
         if (s)  norme1 = (GEN)norms[ per[i-1] ];
-        if (stockall && stockmax < 100000L) 
+        if (stockall && stockmax < 10000L) 
         {
           GEN Sold = S;
           stockmax <<= 1;

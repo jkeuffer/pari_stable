@@ -4,7 +4,7 @@
   This message is to announce the alpha release of version 2.0 of the
 PARI/GP system. It can be found at:
 
-  ftp://megrez.math.u-bordeaux.fr/pub/pari/unix/pari-2.0.alpha.tar.gz
+  ftp://pari.math.u-bordeaux.fr/pub/pari/unix/pari-2.0.alpha.tar.gz
 
   For those who do not yet know, PARI/GP is a package which is aimed at
 efficient computations in number theory, but also contains a large number
