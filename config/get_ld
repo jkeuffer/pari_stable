@@ -1,18 +1,13 @@
 # Which Executable Linker ?
 #
-_ld_list='LD LDFLAGS LIBS runpathprexix LDused GNULDused'
+_ld_list='LD LDFLAGS LIBS runpathprexix LDisGCC LDused GNULDused'
 case "$osname" in
   darwin) LIBS= ;;
-  osf1)   LIBS='-lm -lots -lc';; # FIXME: why add -lc here ?
+  osf1)   LIBS='-lm -lots';;
   *)      LIBS=-lm;;
 esac
 
-if test -z "$LD"; then
-  case "$osname" in
-    osf1)LD=$ld ;; # FIXME: Why not $CC ?
-    *)   LD=$CC ;;
-  esac
-fi
+if test -z "$LD"; then LD=$CC; fi
 
 if test "$fastread" != yes; then
   echo $n ..."Which linker for building executables ? $c"
@@ -20,20 +15,32 @@ if test "$fastread" != yes; then
   LD=$ans
 fi
 
+LDisGCC=
+GNULDused=
+LDused=$LD
+if test $LD=$CC -a -n "$__gnuc__"; then
+  LDused=`$CC -print-prog-name=ld`
+  LDisGCC=yes
+fi
+if ($LDused -v 2>&1 | grep GNU > /dev/null); then GNULDused=yes; fi
+
 # Which Flags for Executable Linker?
+ldflags=
+if test $LD=$CC; then ldflags=$cflags; fi
 case "$osname-$arch" in
-  osf1-*) # only case where $LD != $CC
-      ldflags='-std0 -call_shared /usr/lib/cmplrs/cc/crt0.o'
-      case "$optimization" in
-        full|profiling) ldflags="-g0 -O4 $ldflags";;
-      esac ;;
-  linux-*|cygwin*|freebsd-*) ldflags="$cflags -Wl,-export-dynamic" ;;
-  solaris-*) ldflags=$cflags ;;
-  os2-*)     ldflags="$cflags -Zexe"
+  osf1-*) case "$optimization" in
+            full|profiling) ldflags="$ldflags -g0 -O4";;
+          esac ;;
+  linux-*|cygwin*|freebsd-*)
+    if test -n "$LDisGCC"; then
+      ldflags="$ldflags -Wl,-export-dynamic"
+    else
+      ldflags="$ldflags -export-dynamic"
+    fi ;;
+  os2-*)     ldflags="$ldlags -Zexe"
              case "$optimization" in
                full) ldflags="$ldflags -s";;
              esac;;
-  *)         ldflags=$cflags ;;
 esac
 LDFLAGS="$LDFLAGS $ldflags"
 
@@ -45,15 +52,7 @@ fi
 
 echo "Executable linker is   $LD  $LDFLAGS"
 
-LDused=$LD
-GNULDused=
-if test $LD=$CC -a -n "$__gnuc__"; then
-  LDused=`$CC -print-prog-name=ld`
-fi
-if ($LDused -v 2>&1 | grep GNU > /dev/null); then GNULDused=yes; fi
-
 case "$osname" in
-  osf1) runpathprefix='-rpath ';;
-  linux|cygwin*|freebsd) runpathprefix='-Wl,-rpath,';;
-  solaris) runpathprefix='-R ';;
+  osf1|linux|cygwin*|freebsd) runpathprefix='-rpath' ;;
+  solaris) runpathprefix='-R' ;;
 esac

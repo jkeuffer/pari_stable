@@ -12,6 +12,11 @@ case "$static" in
   y) dft=sta ;;
 esac
 
+RUNPTH="$runpathprefix $runpath"
+if test -n "$LDisGCC"; then
+  RUNPTH=-Wl,`echo $RUNPTH | sed -e 's/  */,/g'`
+fi
+
 # remove soname imformation
 MYDLLDFLAGS=`echo $DLLDFLAGS | sed -e 's/-[hsoname]* \\$(LIBPARI.*)//'`
 
@@ -59,7 +64,7 @@ DLLDFLAGS  = $MYDLLDFLAGS
 EXTRADLLDFLAGS = $EXTRADLLDFLAGS
 EXTRALIBS  =
 
-RUNPTH     = $runpathprefix$runpath
+RUNPTH     = $RUNPTH
 LIBDIR     = -L$libdir
 DLCFLAGS   = $DLCFLAGS
 LIBS       = $LIBS -lpari

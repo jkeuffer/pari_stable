@@ -83,10 +83,11 @@ fi
 . ./get_static  # static
 echo "Hi-Res Graphics: $which_graphic_lib"
 # For dynamic linking, before and after installing
+runpath="$libdir" 
 case "$osname" in
-  *cygwin*) LDDYN="-L$libdir -lpari_dll" ; runpath="$libdir" ;
+  *cygwin*) LDDYN="-L$libdir -lpari_dll"
 	    DYNLIBS=-lpari_dll ; DYNFLAGS=-Dlibpari_USE_DLL ;;
-  *)        LDDYN="-L$libdir -l$libpari_base" ; runpath="$libdir" ;;
+  *)        LDDYN="-L$libdir -l$libpari_base" ;;
 esac
 # Which copy, SHELL ?
 case "$osname" in
