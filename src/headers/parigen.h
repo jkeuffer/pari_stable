@@ -56,7 +56,7 @@ typedef int (*QSCOMP)(const void *, const void *);
  *  SIGNnumBITS + EXPOnumBITS     <= BITS_IN_LONG
  *  SIGNnumBITS + LGnumBITS       <= BITS_IN_LONG
  *  SIGNnumBITS + LGEFnumBITS + 2 <= BITS_IN_LONG
- *  VALPnumbits               + 1 <= BITS_IN_LONG */
+ *  VALPnumBITS               + 1 <= BITS_IN_LONG */
 #define TYPnumBITS   7
 #define SIGNnumBITS  2
 
