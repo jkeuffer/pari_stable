@@ -15,7 +15,7 @@ case "$arch" in
     *) list='getrusage times ftime';;
     esac;;
 esac; . ./look
-list='sigrelse sigsetmask'; . ./look
+list='sigsetmask sigrelse'; . ./look
 list=TIOCGWINSZ; . ./look
 list=getrlimit; . ./look
 list=opendir; . ./look
