@@ -243,8 +243,6 @@ char *errmessage[]=
 
 /* elliper1 */
   "bad argument for an elliptic curve related function",
-/* heller1 */
-  "point not on elliptic curve",
 
   /*  GEN.C */
 

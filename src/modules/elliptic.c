@@ -807,7 +807,6 @@ zell(GEN e, GEN z, long prec)
   GEN t,u,p1,p2,a,b,x1,u2,D = (GEN)e[12];
 
   checkbell(e);
-  if (!oncurve(e,z)) err(heller1);
   ty = typ(D);
   if (ty==t_INTMOD) err(typeer,"zell");
   if (lg(z)<3) return (ty==t_PADIC)? gun: gzero;
@@ -2266,7 +2265,7 @@ ghell0(GEN e, GEN a, long flag, long prec)
     return z;
   }
   if (lg(a) < 3) return gzero;
-  if (!oncurve(e,a)) err(heller1);
+  if (!oncurve(e,a)) err(talker, "point not on elliptic curve");
 
   psi2 = numer(d_ellLHS(e,a));
   if (!signe(psi2)) { avma = av; return gzero; }
