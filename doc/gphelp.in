@@ -165,14 +165,16 @@ sub choose_chap
   }
 }
 
+use POSIX 'setsid';
+
 sub open_dvi_then_quit
 {
-  local($dvifile)= $_[0];
-  local($viewer) = $_[1];
+  local($dvifile, $viewer)= @_;
   $dvifile = "$docdir/$dvifile" if (! -f "$dvifile");
   die "could not find $dvifile" if (! -f "$dvifile");
   (!$ENV{DISPLAY} && !$ENV{GPXDVI}) && die "xdvi needs X-Windows";
   print "displaying \'$docdir/$dvifile\'.";
+  setsid; # detach from terminal (^C will not kill xdvi)
   system("$viewer $dvifile 2>/dev/null >/dev/null&");
   cleanexit();
 }
@@ -366,20 +368,13 @@ sub posttex
   chdir($tmpdir);
   system("tex $texfile.tex 2>/dev/null > /dev/null < /dev/null") == 0
     || die "could not process $texfile.dvi" if (! -f "$texfile.dvi");
+  setsid; # detach from terminal (^C will not kill xdvi)
   system("($xdvi $texfile.dvi 2>/dev/null >/dev/null; rm -f $texfile.tex $texfile.dvi $texfile.log)&");
-  &handler(1);
 }
 
 sub clean
 {
   unlink("$texfile.tex","$texfile.dvi","$texfile.log");
-}
-
-sub handler
-{
-  &clean if (!$_[0]);
-  $SIG{'INT'} = 'DEFAULT';
-  $SIG{'QUIT'} = 'DEFAULT';
 }
 
 #
