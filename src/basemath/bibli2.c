@@ -352,24 +352,21 @@ laplace(GEN x)
 GEN
 convol(GEN x, GEN y)
 {
-  long i, j, lx, ly, e, ex, ey, vx = varn(x);
+  long j, lx, ly, ex, ey, vx = varn(x);
   GEN z;
 
   if (typ(x) != t_SER || typ(y) != t_SER) err(talker,"not a series in convol");
   if (varn(y) != vx) err(talker,"different variables in convol");
   ex = valp(x); lx = lg(x) + ex; x -= ex;
   ey = valp(y); ly = lg(y) + ey; y -= ey;
-  if (ly < lx) lx = ly;
+  /* inputs shifted: x[i] and y[i] now correspond to monomials of same degree */
+  if (ly < lx) lx = ly; /* min length */
+  if (ex < ey) ex = ey; /* max valuation */
 
-  e = ex; if (ey > e) e = ey;
-  for (i = e+2; i < lx; i++)
-    if (!gcmp0((GEN)x[i]) && !gcmp0((GEN)y[i])) { i++; break; }
-  if (i >= lx) return zeroser(vx, lx-2);
-
-  i -= 3; z = cgetg(lx-i, t_SER);
-  z[1] = evalsigne(1) | evalvalp(i) | evalvarn(vx);
-  for (j = i+2; j<lx; j++) z[j-i] = lmul((GEN)x[j],(GEN)y[j]);
-  return z;
+  z = cgetg(lx - ex, t_SER);
+  z[1] = evalsigne(1) | evalvalp(ex) | evalvarn(vx);
+  for (j = ex+2; j<lx; j++) z[j-ex] = lmul((GEN)x[j],(GEN)y[j]);
+  return normalize(z);
 }
 
 /******************************************************************/
