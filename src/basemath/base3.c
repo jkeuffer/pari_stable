@@ -702,6 +702,9 @@ zsigne(GEN nf,GEN x,GEN arch)
   long av, i,j,l,e,B;
 
   if (!arch) return cgetg(1,t_COL);
+  l = lg(arch); vecsign = cgetg(l,t_COL);
+  _0 = gmodulss(0,2);
+  _1 = gmodulss(1,2); av = avma;
   switch(typ(x))
   {
     case t_COL: x = gmul((GEN)nf[7],x); break;
@@ -709,9 +712,6 @@ zsigne(GEN nf,GEN x,GEN arch)
   }
   if (gcmp0(x)) err(talker,"zero element in zsigne");
 
-  l = lg(arch); vecsign = cgetg(l,t_COL);
-  _0 = gmodulss(0,2);
-  _1 = gmodulss(1,2); av = avma;
   B = bit_accuracy(precision((GEN)rac[1]));
   e = gexpo(x);
   for (j=1,i=1; i<l; i++)
@@ -723,23 +723,6 @@ zsigne(GEN nf,GEN x,GEN arch)
       vecsign[j++] = (gsigne(y) > 0)? (long)_0: (long)_1;
     }
   avma = av; setlg(vecsign,j); return vecsign;
-}
-
-/* For internal use. Reduce x modulo ideal. We want a non-zero result */
-GEN
-nfreducemodideal(GEN nf,GEN x,GEN ideal)
-{
-  long N = lg(x)-1, do_copy = 1, i;
-  GEN p1,q;
-
-  ideal=idealhermite(nf,ideal);
-  for (i=N; i>=1; i--)
-  {
-    p1=gcoeff(ideal,i,i); q=gdivround((GEN)x[i],p1);
-    if (signe(q)) { x=gsub(x,gmul(q,(GEN)ideal[i])); do_copy=0; }
-  }
-  if (gcmp0(x)) return (GEN) ideal[1];
-  return do_copy? gcopy(x) : x;
 }
 
 /* a usage interne...Reduction de la colonne x modulo la matrice y inversible
@@ -758,7 +741,7 @@ lllreducemodmatrix(GEN x,GEN y)
 static GEN
 colreducemodmat(GEN x, GEN y, GEN *Q)
 {
-  long i, l = lg(x), av = avma;
+  long i, l = lg(x);
   GEN q;
 
   if (Q) *Q = cgetg(l,t_COL);
@@ -769,18 +752,13 @@ colreducemodmat(GEN x, GEN y, GEN *Q)
     if (Q) (*Q)[i] = (long)q;
     if (signe(q)) x = gadd(x, gmul(q, (GEN)y[i]));
   }
-  return Q? x: gerepileupto(av,x);
+  return x;
 }
 
 /* for internal use...Reduce matrix x modulo matrix y */
 GEN
 reducemodmatrix(GEN x, GEN y)
 {
-  if (DEBUGLEVEL>=8)
-  {
-    fprintferr("entering reducemodmatrix; avma-bot = %ld\n",avma-bot);
-    flusherr();
-  }
   return reducemodHNF(x, hnfmod(y,detint(y)), NULL);
 }
 
@@ -796,8 +774,22 @@ reducemodHNF(GEN x, GEN y, GEN *Q)
     for (i=1; i<lx; i++) R[i] = (long)colreducemodmat((GEN)x[i],y,(GEN*)(q+i));
   }
   else
-    for (i=1; i<lx; i++) R[i] = (long)colreducemodmat((GEN)x[i],y,NULL);
+    for (i=1; i<lx; i++)
+    {
+      long av = avma;
+      R[i] = lpileupto(av, colreducemodmat((GEN)x[i],y,NULL));
+    }
   return R;
+}
+
+/* For internal use. Reduce x modulo ideal. We want a non-zero result */
+GEN
+nfreducemodideal(GEN nf,GEN x0,GEN ideal)
+{
+  GEN y = idealhermite(nf,ideal);
+  GEN x = colreducemodmat(x0, y, NULL);
+  if (gcmp0(x)) return (GEN) ideal[1];
+  return x == x0? gcopy(x) : x;
 }
 
 /* compute elt = x mod idele, with sign(elt) = sign(x) at arch */
@@ -846,53 +838,55 @@ element_powmodidele(GEN nf,GEN x,GEN k,GEN idele,GEN sarch)
   }
 }
 
-/* given 2 integral ideals x, y in HNF s.t x|y|x^2, compute the quotient
+/* R relation matrix among row of generators g.  Let URV = D its SNF, newU R
+ * newV = newD its clean SNF (no 1 in Dnew). Return the diagonal of newD,
+ * newU and newUi such that  1/U = (newUi, ?).
+ * Rationale: let (G,0) = g Ui be the new generators then
+ * 0 = G U R --> G D = 0,  g = G newU  and  G = g newUi */
+GEN
+smithrel(GEN R, int is_HNF, GEN *newU, GEN *newUi)
+{ 
+  GEN z,H,U,Ui,D,p1;
+  long l,c;
+
+  H = is_HNF? R: hnf(R); /* assume R is small, i.e hnfmod not worth it */
+  z = smith2(H);
+  U = (GEN)z[1];
+  D = (GEN)z[3]; l = lg(D);
+  for (c=1; c<l; c++)
+  {
+    p1 = gcoeff(D,c,c);
+    if (is_pm1(p1)) break;
+  }
+  if (newU) *newU = rowextract_i(U, 1, c-1);
+  if (newUi) {
+    Ui = ginv(U); setlg(Ui, c);
+    *newUi = reducemodHNF(Ui, H, NULL);
+  }
+  setlg(D, c); return mattodiagonal_i(D);
+}
+
+/* given 2 integral ideals x, y in HNF s.t x | y | x^2, compute the quotient
    (1+x)/(1+y) in the form [[cyc],[gen],ux^-1]. */
 static GEN
 zidealij(GEN x, GEN y)
 {
-  GEN p1,p2,p3,p4,d,z,x1;
-  long j,N,c;
+  GEN U,R,G,p1,cyc,z,xi;
+  long j,N;
 
-  if(DEBUGLEVEL>5)
-    {fprintferr("entering zidealij; avma = %ld\n",avma); flusherr();}
-  x1 = ginv(x);
-  p1 = gmul(x1,y);
-  p2 = smith2(p1);
-  p3 = ginv((GEN)p2[1]);
-  p3 = reducemodmatrix(p3,p1);
-  p3 = gmul(x,p3); N=lg(p3)-1;
-  for (j=1; j<=N; j++) coeff(p3,1,j)=laddsi(1,gcoeff(p3,1,j));
-  p4 = smithclean(p2); d=(GEN)p4[3];
-  if(DEBUGLEVEL>5) {fprintferr("done; avma = %ld\n",avma); flusherr();}
-
-  z=cgetg(4,t_VEC); c=lg(d); p1=cgetg(c,t_VEC);
-  /* transform p3 into a vector */
-  p3[0] = evaltyp(t_VEC) | evallg(c);
-  for (j=1; j<c; j++) p1[j] = coeff(d,j,j);
-  z[1]=(long)p1;
-  z[2]=(long)p3;
-  z[3] = lmul((GEN)p4[1],x1); return z;
+  xi = ginv(x); R = gmul(xi, y); /* relations between the 1 + x_i (HNF) */
+  cyc = smithrel(R, 1, &U, &G);
+  N = lg(cyc); G = gmul(x,G); settyp(G, t_VEC); /* new generators */
+  for (j=1; j<N; j++)
+  {
+    p1 = (GEN)G[j];
+    p1[1] = laddsi(1, (GEN)p1[1]); /* 1 + g_j */
+  }
+  z = cgetg(4,t_VEC);
+  z[1] = (long)cyc;
+  z[2] = (long)G;
+  z[3] = lmul(U,xi); return z;
 }
-
-#if 0
-/* un element g generateur d'un p^k divisant x etant donne, calcule
-   un element congru a g modulo p^k et a 1 modulo x/p^k et de plus
-   positif aux places de arch */
-GEN
-zconvert(GEN nf,GEN uv,GEN x,GEN arch,GEN structarch,GEN g)
-{
-  long i,nba;
-  GEN p1,p2,generator;
-
-  p1=nfreducemodideal(nf,gadd((GEN)uv[1],element_mul(nf,g,(GEN)uv[2])),x);
-  nba=lg(structarch[1])-1; generator=(GEN)structarch[2];
-  p2 = zsigne(nf,p1,arch);
-  for (i=1; i<=nba; i++)
-    if (signe(p2[i])) p1 = element_mul(nf,p1,(GEN)generator[i]);
-  return p1;
-}
-#endif
 
 static GEN
 get_multab(GEN nf, GEN x)
@@ -1093,6 +1087,20 @@ dethnf_i(GEN mat)
   return gerepileuptoint(av,s);
 }
 
+/* as above with cyc = diagonal(mat) */
+GEN
+detcyc(GEN cyc)
+{
+  long av,i,l = lg(cyc);
+  GEN s;
+
+  if (l<3) return l<2? gun: icopy((GEN)cyc[1]);
+  av = avma; s = (GEN)cyc[1];
+  for (i=2; i<l; i++) s = mulii(s,(GEN)cyc[i]);
+  return gerepileuptoint(av,s);
+}
+
+/* Result is = x mod U, = 1 mod V (uv: u + v = 1, u in U, v in V) */
 static GEN
 makeprimetoideal(GEN nf,GEN id,GEN uv,GEN x)
 {
@@ -1101,13 +1109,13 @@ makeprimetoideal(GEN nf,GEN id,GEN uv,GEN x)
 }
 
 static GEN
-makeprimetoidealvec(GEN nf,GEN ideal,GEN uv,GEN listgen)
+makeprimetoidealvec(GEN nf,GEN ideal,GEN uv,GEN gen)
 {
-  long i, lx = lg(listgen);
+  long i, lx = lg(gen);
   GEN y = cgetg(lx,t_VEC);
 
   for (i=1; i<lx; i++)
-    y[i] = (long)makeprimetoideal(nf,ideal,uv,(GEN)listgen[i]);
+    y[i] = (long)makeprimetoideal(nf,ideal,uv,(GEN)gen[i]);
   return y;
 }
 
@@ -1377,10 +1385,10 @@ zinternallog(GEN nf,GEN list_set,long nbgen,GEN arch,GEN fa,GEN a,long index)
   return y;
 }
 
-GEN
-compute_gen(GEN nf, GEN u1, GEN met, GEN gen, GEN module, long nbp, GEN sarch)
+static GEN
+compute_gen(GEN nf, GEN u1, GEN gen, GEN module, long nbp, GEN sarch)
 {
-  long i,j,s,nba, c = lg(met), lgen = lg(gen);
+  long i,j,s,nba, c = lg(u1), lgen = lg(gen);
   GEN basecl=cgetg(c,t_VEC), unnf = gscalcol_i(gun, lgef(nf[1])-3);
   GEN arch,x,p1,p2,p3,p4,p5,generator;
 
@@ -1437,8 +1445,8 @@ compute_gen(GEN nf, GEN u1, GEN met, GEN gen, GEN module, long nbp, GEN sarch)
 GEN
 zidealstarinitall(GEN nf, GEN ideal,long add_gen)
 {
-  long av=avma,tetpil,i,j,k,nba,nbp,R1,nbgen,cp;
-  GEN p1,p2,p3,p4,y,h,met,u1,u1u2,u1u2clean,fa,fa2,ep,x,arch,gen,list,sarch;
+  long av = avma,i,j,k,nba,nbp,R1,nbgen,cp;
+  GEN p1,p2,p3,p4,y,h,cyc,U,u1,fa,fa2,ep,x,arch,gen,list,sarch;
 
   nf = checknf(nf); R1=itos(gmael(nf,2,1));
   if (typ(ideal)==t_VEC && lg(ideal)==3)
@@ -1499,24 +1507,24 @@ zidealstarinitall(GEN nf, GEN ideal,long add_gen)
   for (j=1; j<=nba; j++)
     { h[++cp]=(long)zerocol(nbgen); coeff(h,cp,cp)=deux; }
   if (cp!=nbgen) err(talker,"bug in zidealstarinit");
-  u1u2 = smith2(h); u1u2clean = smithclean(u1u2);
-  met=(GEN)u1u2clean[3];
+
+  /* TODO: h necessarily HNF? To be checked: 0 --> 1 */
+  cyc = smithrel(h, 0, &U, add_gen? &u1: NULL);
   if (add_gen)
   {
-    u1 = reducemodmatrix(ginv((GEN)u1u2[1]),h);
     p1 = cgetg(4,t_VEC);
-    p1[3] = (long)compute_gen(nf,u1,met,gen,ideal, nbp,sarch);
+    p1[3] = (long)compute_gen(nf,u1,gen,ideal, nbp,sarch);
   }
   else p1 = cgetg(3,t_VEC);
+  p1[1] = (long)detcyc(cyc);
+  p1[2] = (long)cyc;
+
   y = cgetg(6,t_VEC);
-  y[1]=(long)ideal;
-  y[2]=(long)p1;
-    p1[1]=(long)dethnf(met);
-    p1[2]=(long)mattodiagonal(met);
-  y[3]=(long)fa;
-  y[4]=(long)fa2;
-  y[5] = u1u2clean[1];
-  tetpil=avma; return gerepile(av,tetpil,gcopy(y));
+  y[1] = (long)ideal;
+  y[2] = (long)p1;
+  y[3] = (long)fa;
+  y[4] = (long)fa2;
+  y[5] = (long)U; return gerepileupto(av, gcopy(y));
 }
 
 GEN
@@ -1655,74 +1663,55 @@ zideallog(GEN nf, GEN x, GEN bid)
   return y;
 }
 
-/* Etant donnes bid1, bid2 resultats de zidealstarinit pour deux modules m1
- * et m2 premiers entre eux sans partie archimedienne, calcule le
- * zidealstarinit [[ideal,arch],[h,[cyc],[gen]],idealfact,[liste],U] du
- * produit
- */
-static GEN
-zidealstarinitjoinall(GEN nf, GEN bid1, GEN bid2, long add_gen)
+/* bid1, bid2: output from 'zidealstarinit' for coprime modules m1 and m2
+ * (without arch. part).
+ * Output: zidealstarinit [[ideal,arch],[h,[cyc],[gen]],idealfact,[liste],U]
+ * associated to m1 m2 */
+GEN
+zidealstarinitjoin(GEN nf, GEN bid1, GEN bid2, long add_gen)
 {
-  long av=avma,i,j,nbp,nbgen,lx1,lx2,llx1,llx2,lx,llx;
-  GEN module1,module2,struct1,struct2,fact1,fact2,liste1,liste2,U1,U2;
-  GEN module,liste,fact,U,cyc,ex1,ex2,uv;
-  GEN p1,p2,y,met,u1;
-  GEN fa1,fa2,gen,u1u2,u1u2clean;
+  long av=avma,i,nbp,nbgen,lx1,lx2,l1,l2,lx;
+  GEN module1,module2,struct1,struct2,fact1,fact2,liste1,liste2;
+  GEN module,liste,fact,U,U1,U2,cyc,cyc1,cyc2,uv;
+  GEN p1,p2,y,u1,x,fa1,fa2,gen;
 
-  nf=checknf(nf); checkbid(bid1); checkbid(bid2);
-  module1=(GEN)bid1[1]; struct1=(GEN)bid1[2]; fact1=(GEN)bid1[3];
-  module2=(GEN)bid2[1]; struct2=(GEN)bid2[2]; fact2=(GEN)bid2[3];
-  module=cgetg(3,t_VEC);
-  module[1]=(long)idealmul(nf,(GEN)module1[1],(GEN)module2[1]);
-  module[2]=ladd((GEN)module1[2],(GEN)module2[2]);
-  if (gcmpgs(vecmax((GEN)module[2]),1)>=0)
-    err(talker,"nontrivial Archimedian components in zidealstarinitjoin");
+  nf = checknf(nf); checkbid(bid1); checkbid(bid2);
+  module1 = (GEN)bid1[1]; struct1 = (GEN)bid1[2]; fact1 = (GEN)bid1[3];
+  module2 = (GEN)bid2[1]; struct2 = (GEN)bid2[2]; fact2 = (GEN)bid2[3];
+  x = idealmul(nf,(GEN)module1[1],(GEN)module2[1]);
+  module = cgetg(3,t_VEC);
+  module[1] = (long)x;
+  module[2] = module1[2];
+  if (!gcmp0((GEN)module1[2]) || !gcmp0((GEN)module2[2]))
+    err(talker,"non-0 Archimedian components in zidealstarinitjoin");
 
-  fa1=(GEN)fact1[1]; ex1=(GEN)fact1[2];
-  fa2=(GEN)fact2[1]; ex2=(GEN)fact2[2];
-  fact=cgetg(3,t_MAT);
-  fact[1]=lconcat(fa1,fa2); lx1=lg(fa1);
-  fact[2]=lconcat(ex1,ex2); lx2=lg(fa2);
-  nbp=lx1+lx2-2;
+  fa1 = (GEN)fact1[1]; lx1 = lg(fa1);
+  fa2 = (GEN)fact2[1]; lx2 = lg(fa2);
+  fact = cgetg(3,t_MAT);
+  fact[1] = (long)concatsp(fa1,fa2);
+  fact[2] = (long)concatsp((GEN)fact1[2],(GEN)fact2[2]);
   for (i=1; i<lx1; i++)
     if (isinvector(fa2,(GEN)fa1[i],lx2-1))
       err(talker,"noncoprime ideals in zidealstarinitjoin");
 
-  liste1=(GEN)bid1[4]; lx1=lg(liste1);
-  liste2=(GEN)bid2[4]; lx2=lg(liste2);
-  lx=lx1+lx2-2; liste = cgetg(lx,t_VEC);
-  for (i=1; i<lx1-1; i++) liste[i]=liste1[i];
-  for (   ; i<lx; i++)    liste[i]=liste2[i-lx1+2];
-  U1=(GEN)bid1[5]; lx1=lg(U1);
-  U2=(GEN)bid2[5]; lx2=lg(U2);
-  lx=lx1+lx2-1; U = cgetg(lx,t_MAT);
+  liste1 = (GEN)bid1[4]; lx1 = lg(liste1);
+  liste2 = (GEN)bid2[4]; lx2 = lg(liste2);
+  /* concat (liste1 - last elt [zarchstar]) + liste2 */
+  lx = lx1+lx2-2; liste = cgetg(lx,t_VEC);
+  for (i=1; i<lx1-1; i++) liste[i] = liste1[i];
+  for (   ; i<lx; i++)    liste[i] = liste2[i-lx1+2];
 
-  llx1=lg(struct1[2]);
-  llx2=lg(struct2[2]);
-  llx=llx1+llx2-1; nbgen=llx-1;
-  cyc = diagonal(concatsp((GEN)struct1[2],(GEN)struct2[2]));
-  u1u2=smith2(cyc); u1u2clean=smithclean(u1u2);
-  met=(GEN)u1u2clean[3];
+  U1 = (GEN)bid1[5]; cyc1 = (GEN)struct1[2]; l1 = lg(cyc1);
+  U2 = (GEN)bid2[5]; cyc2 = (GEN)struct2[2]; l2 = lg(cyc2);
+  nbgen = l1+l2-2;
+  cyc = diagonal(concatsp(cyc1,cyc2));
+  cyc = smithrel(cyc, 1, &U, add_gen? &u1: NULL);
+
   if (nbgen)
-  {
-    for (j=1; j<lx1; j++)
-    {
-      p1=cgetg(llx,t_COL); U[j]=(long)p1;
-      p2=(GEN)U1[j];
-      for (i=1; i<llx1; i++) p1[i]=p2[i];
-      for (   ; i<llx; i++) p1[i]=zero;
-    }
-    for (  ; j<lx; j++)
-    {
-      p1=cgetg(llx,t_COL); U[j]=(long)p1;
-      p2=((GEN)U2[j-(lx1-1)]) + 1-llx1;
-      for (i=1; i<llx1; i++) p1[i]=zero;
-      for (   ; i<llx; i++) p1[i]=p2[i];
-    }
-    U = gmul((GEN)u1u2clean[1],U);
-  }
-  else
-    for (j=1; j<lx; j++) U[j]=lgetg(1,t_COL);
+    U = concatsp(
+      gmul(vecextract_i(U, 1,   l1-1), U1) ,
+      gmul(vecextract_i(U, l1, nbgen), U2)
+    );
 
   if (add_gen)
   {
@@ -1730,103 +1719,77 @@ zidealstarinitjoinall(GEN nf, GEN bid1, GEN bid2, long add_gen)
       err(talker,"please apply idealstar(,,2) and not idealstar(,,1)");
 
     uv = idealaddtoone(nf,(GEN)module1[1],(GEN)module2[1]);
-    p1 = makeprimetoidealvec(nf,(GEN)module[1],uv,(GEN)struct1[3]);
-    p2=(GEN)uv[1]; uv[1]=uv[2]; uv[2]=(long)p2;
-    p2 = makeprimetoidealvec(nf,(GEN)module[1],uv,(GEN)struct2[3]);
-    gen=concatsp(p1,p2);
+    p1 = makeprimetoidealvec(nf,x,uv,(GEN)struct1[3]);
+    p2 = (GEN)uv[1]; uv[1] = uv[2]; uv[2] = (long)p2;
+    p2 = makeprimetoidealvec(nf,x,uv,(GEN)struct2[3]);
+    gen = concatsp(p1,p2);
+    nbp = lg((GEN)fact[1])-1;
 
-    u1 = reducemodmatrix(ginv((GEN)u1u2[1]),cyc);
     p1 = cgetg(4,t_VEC);
-    p1[3] = (long)compute_gen(nf,u1,met,gen,module, nbp,NULL);
+    p1[3] = (long)compute_gen(nf,u1,gen,module, nbp,NULL);
   }
   else p1 = cgetg(3,t_VEC);
+  p1[1] = (long)detcyc(cyc);
+  p1[2] = (long)cyc;
 
-  y=cgetg(6,t_VEC);
-  y[1]=(long)module;
-  y[2]=(long)p1;
-    p1[1]=(long)dethnf(met);
-    p1[2]=(long)mattodiagonal(met);
-  y[3]=(long)fact;
-  y[4]=(long)liste;
-  y[5]=(long)U;
-  return gerepileupto(av,gcopy(y));
+  y = cgetg(6,t_VEC);
+  y[1] = (long)module;
+  y[2] = (long)p1;
+  y[3] = (long)fact;
+  y[4] = (long)liste;
+  y[5] = (long)U; return gerepileupto(av,gcopy(y));
 }
 
+/* bid1: output from 'zidealstarinit' for module m1 (without arch. part)
+ * arch: archimedean part.
+ * Output: zidealstarinit [[ideal,arch],[h,[cyc],[gen]],idealfact,[liste],U]
+ * associated to m1.arch */
 GEN
-zidealstarinitjoin(GEN nf, GEN bid1, GEN bid2)
+zidealstarinitjoinarch(GEN nf, GEN bid1, GEN arch, long nba, long add_gen)
 {
-  return zidealstarinitjoinall(nf,bid1,bid2,0);
-}
+  long av=avma,i,nbp,lx1;
+  GEN module1,struct1,fact1,liste1,U1,U;
+  GEN module,liste,cyc,p1,y,u1,x,gen,sarch;
 
-GEN
-zidealstarinitjoingen(GEN nf, GEN bid1, GEN bid2)
-{
-  return zidealstarinitjoinall(nf,bid1,bid2,1);
-}
+  nf = checknf(nf); checkbid(bid1);
+  module1 = (GEN)bid1[1]; struct1 = (GEN)bid1[2]; fact1 = (GEN)bid1[3];
+  x = (GEN)module1[1];
+  module = cgetg(3,t_VEC);
+  module[1] = (long)x;
+  module[2] = (long)arch;
+  if (!gcmp0((GEN)module1[2]))
+    err(talker,"non-0 Archimedian components in zidealstarinitjoinarch");
 
-/* Etant donnes bid1 resultat de zidealstarinit pour un module m1 sans partie
- * archimedienne et une partie archimedienne arch, calcule le zidealstarinit
- * [[ideal,arch],[h,[cyc],[gen]],idealfact,[liste],U] du produit
- */
-static GEN
-zidealstarinitjoinarchall(GEN nf, GEN bid1, GEN arch, long nba, long add_gen)
-{
-  long av=avma,i,nbp,lx1,lx;
-  GEN module1,struct1,fact1,liste1,U1;
-  GEN module,liste,h,p1,y,met,u1,x,gen,sarch,u1u2,u1u2clean;
-
-  nf=checknf(nf); checkbid(bid1);
-  module1=(GEN)bid1[1]; struct1=(GEN)bid1[2]; fact1=(GEN)bid1[3];
-  nbp=lg((GEN)fact1[1])-1;
-  x=(GEN)module1[1];
   sarch = zarchstar(nf,x,arch,nba);
-  module=cgetg(3,t_VEC);
-  module[1]=(long)x;
-  module[2]=(long)arch;
-  if (gcmpgs(vecmax((GEN)module1[2]),1)>=0)
-    err(talker,"nontrivial Archimedian components in zidealstarinitjoinarchall");
-  liste1=(GEN)bid1[4]; lx=lg(liste1);
-  liste=cgetg(lx,t_VEC); for (i=1; i<lx-1; i++) liste[i]=liste1[i];
-  liste[lx-1]=(long)sarch;
-  U1=(GEN)bid1[5]; lx1=lg(U1);
-  lx=lx1+nba;
-  h = diagonal(concatsp((GEN)struct1[2],(GEN)sarch[1]));
-  u1u2 = smith2(h); u1u2clean = smithclean(u1u2);
-  met=(GEN)u1u2clean[3];
+  liste1 = (GEN)bid1[4]; lx1 = lg(liste1);
+  liste = cgetg(lx1,t_VEC);
+  for (i=1; i<lx1-1; i++) liste[i]=liste1[i];
+  liste[i] = (long)sarch;
+
+  U1 = (GEN)bid1[5]; lx1 = lg(U1);
+  cyc = diagonal(concatsp((GEN)struct1[2],(GEN)sarch[1]));
+  cyc = smithrel(cyc, 1, &U, add_gen? &u1: NULL);
 
   if (add_gen)
   {
     if (lg(struct1)<=3)
       err(talker,"please apply idealstar(,,2) and not idealstar(,,1)");
-    gen=concatsp((GEN)struct1[3],(GEN)sarch[2]);
+    gen = concatsp((GEN)struct1[3],(GEN)sarch[2]);
+    nbp = lg((GEN)fact1[1])-1;
 
-    u1 = reducemodmatrix(ginv((GEN)u1u2[1]),h);
     p1 = cgetg(4,t_VEC);
-    p1[3] = (long)compute_gen(nf,u1,met,gen,module, nbp,sarch);
+    p1[3] = (long)compute_gen(nf,u1,gen,module, nbp,sarch);
   }
   else p1 = cgetg(3,t_VEC);
+  p1[1] = (long)detcyc(cyc);
+  p1[2] = (long)cyc;
 
-  y=cgetg(6,t_VEC);
-  y[1]=(long)module;
-  y[2]=(long)p1;
-    p1[1]=(long)dethnf(met);
-    p1[2]=(long)mattodiagonal(met);
-  y[3]=(long)fact1;
-  y[4]=(long)liste;
-  y[5] = u1u2clean[1];
-  return gerepileupto(av,gcopy(y));
-}
-
-GEN
-zidealstarinitjoinarch(GEN nf, GEN bid1, GEN arch, long nba)
-{
-  return zidealstarinitjoinarchall(nf,bid1,arch,nba,0);
-}
-
-GEN
-zidealstarinitjoinarchgen(GEN nf, GEN bid1, GEN arch, long nba)
-{
-  return zidealstarinitjoinarchall(nf,bid1,arch,nba,1);
+  y = cgetg(6,t_VEC);
+  y[1] = (long)module;
+  y[2] = (long)p1;
+  y[3] = (long)fact1;
+  y[4] = (long)liste;
+  y[5] = (long)U; return gerepileupto(av,gcopy(y));
 }
 
 /* calcule la matrice des zinternallog des unites */
@@ -1954,7 +1917,7 @@ ideallistzstarall(GEN bnf,long bound,long flag)
           p2 = cgetg(lp1,t_VEC);
           for (k=1; k<lp1; k++)
             if (big_id)
-              p2[k] = (long)zidealstarinitjoinall(nf,(GEN)p1[k],ideal,do_gen);
+              p2[k] = (long)zidealstarinitjoin(nf,(GEN)p1[k],ideal,do_gen);
             else
               p2[k] = (long)idealmul(nf,(GEN)p1[k],ideal);
           z2[i] = (long)concatsp((GEN)z2[i],p2);
@@ -2042,7 +2005,7 @@ ideallist_arch(GEN nf,GEN list,GEN arch,long flun)
     p2=(GEN)list[i]; checkbid(p2); ly=lg(p2);
     p1=cgetg(ly,t_VEC); z[i]=(long)p1;
     for (j=1; j<ly; j++)
-      p1[j]=(long)zidealstarinitjoinarchall(nf,(GEN)p2[j],arch,nba,flun);
+      p1[j]=(long)zidealstarinitjoinarch(nf,(GEN)p2[j],arch,nba,flun);
   }
   return z;
 }

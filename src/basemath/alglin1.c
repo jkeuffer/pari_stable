@@ -701,7 +701,17 @@ matmultodiagonal(GEN m, GEN n)
   return y;
 }
 
-/* [m[1,1], ..., m[l,l]] */
+/* [m[1,1], ..., m[l,l]], internal */
+GEN
+mattodiagonal_i(GEN m)
+{
+  long i, lx = lg(m);
+  GEN y = cgetg(lx,t_VEC);
+  for (i=1; i<lx; i++) y[i] = coeff(m,i,i);
+  return y;
+}
+
+/* same, public function */
 GEN
 mattodiagonal(GEN m)
 {
@@ -709,7 +719,6 @@ mattodiagonal(GEN m)
   GEN y = cgetg(lx,t_VEC);
 
   if (typ(m)!=t_MAT) err(typeer,"mattodiagonal");
-  if (lx == 1) return y;
   for (i=1; i<lx; i++) y[i] = lcopy(gcoeff(m,i,i));
   return y;
 }

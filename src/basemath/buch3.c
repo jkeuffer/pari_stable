@@ -2033,15 +2033,15 @@ static GEN
 zsimpjoin(GEN bidsimp, GEN bidp, GEN faussefa, GEN matunit)
 {
   long i,l1,l2,nbgen,c, av = avma;
-  GEN U,U1,U2,cyclic1,cyclic2,cyc,u1u2,met, y = cgetg(5,t_VEC);
+  GEN U,U1,U2,cyc1,cyc2,cyc,u1u2,met, y = cgetg(5,t_VEC);
 
   y[1] = (long)vconcat((GEN)bidsimp[1],faussefa);
-  U1 = (GEN)bidsimp[3]; cyclic1 = (GEN)bidsimp[2]; l1 = lg(cyclic1);
-  U2 = (GEN)bidp[5];    cyclic2 = gmael(bidp,2,2); l2 = lg(cyclic2);
+  U1 = (GEN)bidsimp[3]; cyc1 = (GEN)bidsimp[2]; l1 = lg(cyc1);
+  U2 = (GEN)bidp[5];    cyc2 = gmael(bidp,2,2); l2 = lg(cyc2);
   nbgen = l1+l2-2;
   if (nbgen)
   {
-    cyc = diagonal(concatsp(cyclic1,cyclic2));
+    cyc = diagonal(concatsp(cyc1,cyc2));
     u1u2 = matsnf0(cyc, 1 | 4); /* all && clean */
     U = (GEN)u1u2[1];
     met=(GEN)u1u2[3];
