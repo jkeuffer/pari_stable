@@ -3278,7 +3278,7 @@ galoissubcyclo(long n, GEN H, GEN Z, long v)
   if ( typ(H)==t_MAT )
   {
     GEN zn2, zn3, gen, ord;
-    if (lg(H) != lg(H[1]))
+    if (lg(H) == 1 || lg(H) != lg(H[1]))
       err(talker,"not a HNF matrix in galoissubcyclo");
     if (!Z)
       Z=znstar(stoi(n));
