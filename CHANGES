@@ -105,7 +105,7 @@ BA 33- qfbprimeform(-3, 1) --> data corruption [ gzero's signe set to 1 ]
        due to fixed buffer size for the small vectors. Made that dynamic.
    43- in certain situations (when using Allombert's algo.), subfields did
        not output subfields sorted by degree
-
+   44- [Windows installer:] online help did not work on most installations
 
   Changed
     1- bnfinit: [small_norm phase] speed up norm computations.
@@ -133,6 +133,7 @@ MSo 8- allow numtoperm(0,k)  [ --> [] ]
 BA  2- support for FLTK graphical library [ hi-res plot ]
 BA  3- galoisidentify for order 96 to 127.
     4- default 'datadir' [ to allow relocating 'galdata' for polgalois ]
+    5- hi-res plotting under Windows
 
   Removed
     1- bruteall [ useless, undocumented variant of 'brute' ]
