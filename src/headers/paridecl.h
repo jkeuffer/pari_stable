@@ -83,6 +83,8 @@ GEN     zerovec(long n);
 
 /* alglin2.c */
 
+GEN     QuickNormL1(GEN x,long prec);
+GEN     QuickNormL2(GEN x,long prec);
 GEN     adj(GEN x);
 GEN     assmat(GEN x);
 GEN     caract(GEN x, int v);
@@ -92,9 +94,9 @@ GEN     caradj0(GEN x, long v);
 GEN     carhess(GEN x, long v);
 GEN     charpoly0(GEN x, int v,long flag);
 GEN     conjvec(GEN x,long prec);
-GEN     fastnorml2(GEN x,long prec);
 GEN     gconj(GEN x);
 GEN     gnorm(GEN x);
+GEN     gnorml1(GEN x,long prec);
 GEN     gnorml2(GEN x);
 GEN     gtrace(GEN x);
 GEN     hess(GEN x);
@@ -1014,6 +1016,7 @@ GEN     mulrr(GEN x, GEN y);
 GEN     mulsi(long x, GEN y);
 GEN     mulsr(long x, GEN y);
 GEN     mulss(long x, long y);
+GEN     mului(ulong x, GEN y);
 int     ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax);
 GEN     resss(long x, long y);
 double  rtodbl(GEN x);
