@@ -302,7 +302,7 @@ concat(GEN x, GEN y)
   {
     pari_sp av = avma;
     if (tx == t_LIST)
-      { lx = lgef(x); i = 2; }
+      { lx = lgeflist(x); i = 2; }
     else if (tx == t_VEC)
       { lx = lg(x); i = 1; }
     else

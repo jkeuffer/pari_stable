@@ -131,6 +131,7 @@ BA 31- uninitialized memory read in divrr(x,y), when lg(y) < lg(x), leading
        integers Mod(x, y)  [ ZX_caract(): old would replace x by its integral
        part and correct at the end; new is fully modular ]
    15- separated mpadd functions from [none|gmp]/mp.c --> kernel/add.c
+   16- use 'lgeflist' for t_LIST: remove the 65536 limit on list size
 
   Added
     1- member function rnf.pol (polynomial generating absolute extension)

@@ -1043,14 +1043,18 @@ voir2(GEN x, long nb, long bl)
   if (tx == t_PADIC)
     pariputsf("(precp=%ld,valp=%ld):", precp(x), valp(x));
   else if (tx == t_POL)
-    pariputsf("(%c,varn=%ld,lgef=%ld):", vsigne(x), varn(x), lgef(x));
+  {
+    lx = lgef(x);
+    pariputsf("(%c,varn=%ld,lgef=%ld):", vsigne(x), varn(x), lx);
+  }
   else if (tx == t_SER)
     pariputsf("(%c,varn=%ld,prec=%ld,valp=%ld):",
                vsigne(x), varn(x),lg(x)-2, valp(x));
   else if (tx == t_LIST)
-    pariputsf("(lgef=%ld):", lgef(x));
-  
-  if (tx == t_POL || tx == t_LIST) lx = lgef(x);
+  {
+    lx = lgeflist(x);
+    pariputsf("(lgef=%ld):", lx);
+  }
   for (i=1; i<lx; i++) sorstring(VOIR_STRING2,x[i]);
   bl+=2; pariputc('\n');
   switch(tx)
@@ -1632,7 +1636,7 @@ bruti(GEN g, pariout_t *T, int nosign)
     case t_VECSMALL: wr_vecsmall(T,g); break;
 
     case t_LIST:
-      pariputs("List(["); l = lgef(g);
+      pariputs("List(["); l = lgeflist(g);
       for (i=2; i<l; i++)
       {
         bruti((GEN)g[i],T,0);
@@ -1741,10 +1745,10 @@ sori(GEN g, pariout_t *T)
     case t_STR:
       pariputc('"'); pariputs(GSTR(g)); pariputc('"'); return;
     case t_LIST:
-      pariputs("List(");
-      for (i=2; i<lgef(g); i++)
+      pariputs("List("); l = lgeflist(g);
+      for (i=2; i<l; i++)
       {
-	sori((GEN)g[i], T); if (i<lgef(g)-1) pariputs(", ");
+	sori((GEN)g[i], T); if (i < l-1) pariputs(", ");
       }
       pariputs(")\n"); return;
   }
@@ -2013,10 +2017,10 @@ texi(GEN g, pariout_t *T, int nosign)
       pariputs("\\cr}\n"); break;
 
     case t_LIST:
-      pariputs("\\pmatrix{ "); l = lgef(g);
+      pariputs("\\pmatrix{ "); l = lgeflist(g);
       for (i=2; i<l; i++)
       {
-	texi((GEN)g[i],T,0); if (i<lgef(g)-1) pariputc('&');
+	texi((GEN)g[i],T,0); if (i < l-1) pariputc('&');
       }
       pariputs("\\cr}\n"); break;
 

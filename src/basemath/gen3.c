@@ -2452,7 +2452,7 @@ gtovec(GEN x)
   }
   if (tx==t_LIST)
   {
-    lx=lgef(x); y=cgetg(lx-1,t_VEC); x++;
+    lx=lgeflist(x); y=cgetg(lx-1,t_VEC); x++;
     for (i=1; i<=lx-2; i++) y[i]=lcopy((GEN)x[i]);
     return y;
   }

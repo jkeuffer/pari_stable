@@ -647,7 +647,7 @@ gtoset(GEN x)
   {
     if (tx != t_LIST)
       { y=cgetg(2,t_VEC); y[1]=(long)gtostr(x); return y; }
-    lx = lgef(x)-1; x++;
+    lx = lgeflist(x)-1; x++;
   }
   if (lx==1) return cgetg(1,t_VEC);
   av=avma; y=cgetg(lx,t_VEC);
@@ -681,7 +681,7 @@ gen_search(GEN x, GEN y, int flag, int (*cmp)(GEN,GEN))
   else
   {
     if (tx!=t_LIST) err(talker,"not a set in setsearch");
-    lx=lgef(x)-1; x++;
+    lx=lgeflist(x)-1; x++;
   }
   if (lx==1) return flag? 1: 0;
 

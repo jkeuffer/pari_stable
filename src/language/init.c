@@ -177,7 +177,7 @@ killsubblocs(GEN x)
       for (i=1;i<lx;i++) killsubblocs((GEN)x[i]);
       break;
     case t_LIST:
-      lx = lgef(x);
+      lx = lgeflist(x);
       for (i=2;i<lx;i++) killsubblocs((GEN)x[i]);
       break;
   }
@@ -1276,7 +1276,7 @@ gcopy(GEN x)
   else
   {
     lx = lg(x); y = new_chunk(lx);
-    if (tx==t_POL || tx==t_LIST) lx = lgef(x);
+    if (tx==t_POL) lx = lgef(x); else if (tx==t_LIST) lx = lgeflist(x);
     for (i=0; i<lontyp[tx];  i++) y[i]=x[i];
     for (   ; i<lontyp2[tx]; i++) copyifstack(x[i],y[i]);
     for (   ; i<lx;          i++) y[i]=lcopy((GEN)x[i]);
@@ -1319,7 +1319,7 @@ forcecopy(GEN x)
   else
   {
     lx = lg(x); y = new_chunk(lx);
-    if (tx==t_POL || tx==t_LIST) lx = lgef(x);
+    if (tx==t_POL) lx = lgef(x); else if (tx==t_LIST) lx = lgeflist(x);
     for (i=0; i<lontyp[tx]; i++) y[i]=x[i];
     for (   ; i<lx;         i++) y[i]=(long)forcecopy((GEN)x[i]);
   }
@@ -1371,7 +1371,7 @@ gcopy_av(GEN x, GEN *AVMA)
   else
   {
     lx = lg(x); *AVMA = y = *AVMA - lx;
-    if (tx==t_POL || tx==t_LIST) lx = lgef(x);
+    if (tx==t_POL) lx = lgef(x); else if (tx==t_LIST) lx = lgeflist(x);
     for (i=0; i<lontyp[tx]; i++) y[i] = x[i];
     for (   ; i<lx; i++)         y[i] = (long)gcopy_av((GEN)x[i], AVMA);
   }
@@ -1404,7 +1404,7 @@ gcopy_av0(GEN x, GEN *AVMA)
   else
   {
     lx = lg(x); *AVMA = y = *AVMA - lx;
-    if (tx==t_POL || tx==t_LIST) lx = lgef(x);
+    if (tx==t_POL) lx = lgef(x); else if (tx==t_LIST) lx = lgeflist(x);
     for (i=0; i<lontyp[tx]; i++) y[i] = x[i];
     for (   ; i<lx; i++)         y[i] = (long)gcopy_av0((GEN)x[i], AVMA);
   }
@@ -1424,7 +1424,9 @@ taille0(GEN x)
   else
   {
     n = lg(x);
-    lx = (tx==t_POL || tx==t_LIST)? lgef(x): n;
+    if (tx==t_POL) lx = lgef(x);
+    else if (tx==t_LIST) lx = lgeflist(x);
+    else lx = n;
     for (i=lontyp[tx]; i<lx; i++) n += taille0((GEN)x[i]);
   }
   return n;
@@ -1442,7 +1444,9 @@ taille(GEN x)
   else
   {
     n = lg(x);
-    lx = (tx==t_POL || tx==t_LIST)? lgef(x): n;
+    if (tx==t_POL) lx = lgef(x);
+    else if (tx==t_LIST) lx = lgeflist(x);
+    else lx = n;
     for (i=lontyp[tx]; i<lx; i++) n += taille((GEN)x[i]);
   }
   return n;
@@ -1464,7 +1468,9 @@ gclone(GEN x)
   else
   {
     GEN AVMA = y+t;
-    lx = (tx==t_POL || tx==t_LIST)? lgef(x): lg(x);
+    if (tx==t_POL) lx = lgef(x);
+    else if (tx==t_LIST) lx = lgeflist(x);
+    else lx = lg(x);
     for (i=0; i<lontyp[tx]; i++) y[i] = x[i];
     for (   ; i<lx; i++)         y[i] = (long)gcopy_av((GEN)x[i], &AVMA);
   }
@@ -1479,7 +1485,9 @@ shiftaddress(GEN x, long dec)
   tx = typ(x);
   if (is_recursive_t(tx))
   {
-    lx = (tx==t_POL || tx==t_LIST)? lgef(x): lg(x);
+    if (tx==t_POL) lx = lgef(x);
+    else if (tx==t_LIST) lx = lgeflist(x);
+    else lx = lg(x);
     for (i=lontyp[tx]; i<lx; i++) {
       if (!x[i]) x[i] = zero;
       else
@@ -1679,7 +1687,9 @@ _ok_gerepileupto(GEN av, GEN x)
   tx = typ(x);
   if (! is_recursive_t(tx)) return 1;
 
-  lx = (tx==t_POL || tx==t_LIST)? lgef(x): lg(x);
+  if (tx==t_POL) lx = lgef(x);
+  else if (tx==t_LIST) lx = lgeflist(x);
+  else lx = lg(x);
   for (i=lontyp[tx]; i<lx; i++)
     if (!_ok_gerepileupto(av, (GEN)x[i]))
     {

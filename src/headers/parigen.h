@@ -99,7 +99,8 @@ typedef int (*QSCOMP)(const void *, const void *);
 #define evalprecp(x)   (((long)(x)) << PRECPSHIFT)
 #define _evalexpo(x)  (HIGHEXPOBIT + (x))
 #define _evalvalp(x)  (HIGHVALPBIT + (x))
-#define evallgefint(x) (x)
+#define evallgefint(x)  (x)
+#define evallgeflist(x) (x)
 #define _evallg(x)    (x)
 #define _evallgef(x)  (x)
 
@@ -123,6 +124,9 @@ typedef int (*QSCOMP)(const void *, const void *);
 #define lgef(x)       ((long)(((GEN) (x))[1] & LGEFBITS))
 #define setlgef(x,s)  (((GEN)(x))[1]=\
                         (((GEN)(x))[1]&(~LGEFBITS)) | evallgef(s))
+
+#define lgeflist(x)      ((long)(((GEN) (x))[1]))
+#define setlgeflist(x,l) (((GEN) (x))[1]=(l))
 
 #define lgefint(x)      ((long)(((GEN) (x))[1] & LGEFINTBITS))
 #define setlgefint(x,s) (((GEN)(x))[1]=\

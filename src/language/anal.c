@@ -1105,7 +1105,7 @@ matcell(GEN p, matcomp *C)
     switch(tx)
     {
       case t_LIST:
-        c = check_array_index(lgef(p)-1) + 1;
+        c = check_array_index(lgeflist(p)-1) + 1;
         pt = (GEN*)(p + c); match(']'); break;
 
       case t_VEC: case t_COL:
