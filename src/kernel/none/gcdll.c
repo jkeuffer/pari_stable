@@ -1061,6 +1061,7 @@ Fl_inv(ulong x, ulong p)
   return xv;
 }
 
+#if 0
 /* assume m > 0 */
 long
 Fl_inv_signed(long a, long m)
@@ -1076,3 +1077,4 @@ Fl_inv_signed(long a, long m)
   }
   return (long)Fl_inv((ulong)a, (ulong)m);
 }
+#endif

@@ -531,12 +531,6 @@ representative of $x y$ modulo $m$.
 positive representative of $x^{-1}$ modulo $m$. If $x$ is not invertible
 mod~$m$, return $0$.
 
-\fun{long}{Fl_inv_signed}{long x, ulong m} returns the smallest
-positive representative of $x^{-1}$ modulo $m$. If $x$ is not invertible
-mod $m$, return $0$. In this routine no specific assumptions are made about
-the size or sign of $x$ ($m$ is still assumed to be positive). Consequently,
-it is a little slower than \kbd{Fl\_inv}.
-
 \fun{ulong}{Fl_div}{ulong x, ulong y, ulong m} returns the smallest
 positive representative of $x y^{-1}$ modulo $m$. If $y$ is not invertible
 mod $m$, return $0$.
