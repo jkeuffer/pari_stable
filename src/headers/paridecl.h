@@ -1565,8 +1565,6 @@ GEN     ZX_s_add(GEN y,long x);
 long    brent_kung_optpow(long d, long n);
 GEN     ffsqrtnmod(GEN a, GEN n, GEN T, GEN p, GEN *zetan);
 GEN     modulargcd(GEN a,GEN b);
-GEN     quickmul(GEN a, GEN b, long na, long nb);
-GEN     quicksqr(GEN a, long na);
 ulong   powuumod(ulong x, ulong n, ulong p);
 ulong   powusmod(ulong x, long n, ulong p);
 GEN     powgumod(GEN x, ulong n0, GEN p);
