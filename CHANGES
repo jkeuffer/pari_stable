@@ -39,6 +39,7 @@ Done for version 2.2.2 (released ??/??/2001):
   Changes
     1- allow compressing *.dvi files for the online help system
     2- index bound was restricted to MAXLONG in subgrouplist. Made it a GEN
+    3- try to guess correct precision earlier in polgalois/polroots
 
   Added
 BA  1- New function 'vectorsmall'.
