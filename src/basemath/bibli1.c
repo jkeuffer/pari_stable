@@ -113,7 +113,11 @@ FindApplyQ(GEN x, GEN mu, GEN B, long k, GEN Q, long prec)
     for (i=2; i<=lv; i++) v[i] = xd[i];
     if (gcmp0(x2)) return 0;
 
-    beta = ginv(mpadd(x2, mpmul(Nx,x1)));
+    if (gcmp0(x1))
+      beta = mpmul(x2, realun(prec)); /* make sure typ(beta) != t_INT */
+    else
+      beta = mpadd(x2, mpmul(Nx,x1));
+    beta = ginv(beta);
     p1 = cgetg(3,t_VEC); Q[k] = (long)p1;
     p1[1] = (long)beta;
     p1[2] = (long)v;
@@ -235,6 +239,37 @@ incrementalGS(GEN x, GEN mu, GEN B, long k)
   }
   B[k] = A[k]; return (signe((GEN)B[k]) > 0);
 }
+
+#if 0
+/* return Gram-Schmidt orthogonal basis (f) associated to (e), B is the
+ * vector of the (f_i . f_i)*/
+GEN
+gram_schmidt(GEN e, GEN *ptB)
+{
+  long i,j,lx = lg(e);
+  GEN f = dummycopy(e), B, iB;
+
+  B = cgetg(lx, t_VEC);
+  iB= cgetg(lx, t_VEC);
+
+  for (i=1;i<lx;i++)
+  {
+    GEN p1 = NULL;
+    gpmem_t av;
+    B[i] = (long)sqscal((GEN)f[i]);
+    iB[i]= linv((GEN)B[i]); av = avma;
+    for (j=1; j<i; j++)
+    {
+      GEN mu = gmul(gscal((GEN)e[i],(GEN)f[j]), (GEN)iB[j]);
+      GEN p2 = gmul(mu, (GEN)f[j]);
+      p1 = p1? gadd(p1,p2): p2;
+    }
+    p1 = p1? gerepileupto(av, gsub((GEN)e[i], p1)): (GEN)e[i];
+    f[i] = (long)p1;
+  }
+  *ptB = B; return f;
+}
+#endif
 
 /********************************************************************/
 /**                                                                **/
@@ -1163,7 +1198,6 @@ PRECPB:
       if (DEBUGLEVEL > 3) fprintferr("\n");
       if (DEBUGLEVEL) err(warner,"lllfp giving up");
       if (flag) { avma=av; return NULL; }
-      if (DEBUGLEVEL) outerr(xinit);
       err(lllger3);
   }
 
@@ -1224,7 +1258,16 @@ PRECPB:
             gerepileall(av,5,&B,&L,&h,&x,&Q);
           }
         }
-      if (++k > n) break;
+      if (++k > n)
+      {
+        if (!gram && Q[n-1] == zero)
+        {
+          if (DEBUGLEVEL>3) fprintferr("\nChecking LLL basis\n");
+          Householder_get_mu(gmul(xinit,h), L, B, n, Q, prec);
+          k = 2; continue;
+        }
+        break;
+      }
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
@@ -3175,26 +3218,15 @@ fincke_pohst(GEN a,GEN B0,long stockmax,long flag, long PREC, FP_chk_fun *CHECK)
   }
   /* now r~ * r = a in LLL basis */
   rinvtrans = gtrans(invmat(r));
-  v = NULL;
-  for (i=1; i<6; i++) /* try to get an LLL basis for r~^(-1) */
-  {
-    GEN p1;
-    if (DEBUGLEVEL>2)
-      fprintferr("final LLLs: prec = %ld\n", gprecision(rinvtrans));
-    p1 = lllintern(rinvtrans, 100, flag&1, 0);
-    if (!p1) goto PRECPB;
-    if (ishnfall(p1)) break; /* upper triangular */
-    if (v) v = gmul(v,p1); else v = p1;
-    rinvtrans = gmul(rinvtrans,p1);
-  }
-  if (i == 6) goto PRECPB; /* diverges... */
+  if (DEBUGLEVEL>2)
+      fprintferr("final LLL: prec = %ld\n", gprecision(rinvtrans));
+  v = lllintern(rinvtrans, 100, flag&1, 0);
+  if (!v) goto PRECPB;
+  rinvtrans = gmul(rinvtrans, v);
 
-  if (v)
-  {
-    GEN u2 = ZM_inv(gtrans_i(v),gun);
-    r = gmul(r,u2);
-    u = gmul(u,u2);
-  }
+  v = ZM_inv(gtrans_i(v),gun);
+  r = gmul(r,v);
+  u = gmul(u,v);
 
   vnorm = cgetg(l,t_VEC);
   for (j=1; j<l; j++) vnorm[j] = lnorml2((GEN)rinvtrans[j]);
