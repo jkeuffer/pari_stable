@@ -3,6 +3,5 @@ Class: member_functions
 C-Name: member_t2
 Prototype: G
 Description: 
- (nf):gen:copy:long	  	mael($1,5,3)
- (gen):gen                      member_t2($1)
+ (gen):vec                      member_t2($1)
 
