@@ -762,11 +762,12 @@ gtodouble(GEN x)
   gaffect(x,(GEN)reel4); return rtodbl((GEN)reel4);
 }
 
-INLINE long
-addssmod(long a, long b, long p)
+/* same as adduumod, assume p <= 2^(BIL - 1), so that overflow can't occur */
+INLINE ulong
+adduumod_noofl(ulong a, ulong b, ulong p)
 {
   ulong res = a + b;
-  return (res >= (ulong)p) ? res - p : res;
+  return (res >= p) ? res - p : res;
 }
 INLINE ulong
 adduumod(ulong a, ulong b, ulong p)
@@ -778,8 +779,8 @@ adduumod(ulong a, ulong b, ulong p)
 INLINE ulong
 subuumod(ulong a, ulong b, ulong p)
 {
-  long res = (long)(a - b);
-  return (res >= 0) ? res : (ulong)res + p;
+  ulong res = a - b;
+  return (res > a) ? res + p: res;
 }
 
 INLINE ulong
