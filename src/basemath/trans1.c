@@ -916,6 +916,16 @@ GEN padic_sqrtn(GEN x, GEN n, GEN *zetan)
   GEN q;
   long e;
   GEN *gptr[2];
+  if (gcmp0(x))
+  {
+    GEN y;
+    long m = itos(n);
+    e=valp(x); y=cgetg(5,t_PADIC); copyifstack(x[2],y[2]);
+    y[4] = zero; e = (e+m-1)/m;
+    y[3] = un;
+    y[1] = evalvalp(e) | evalprecp(precp(x));
+    return y;
+  }
   /*First treat the ramified part using logarithms*/
   e=pvaluation(n,p,&q);
   tetpil=avma;
@@ -963,6 +973,7 @@ GEN
 gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
 {
   long av,tetpil,i,lx,tx;
+  long e,m;
   GEN y,z;
   if (zetan) *zetan=gzero;
   if (typ(n)!=t_INT) err(talker,"second arg must be integer in gsqrtn");
@@ -983,15 +994,22 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
   }
   switch(tx)
   {
-  case t_SER: 
-    if (valp(x))
-      err(talker,"not invertible serie in gsqrtn");
-    if (lg(x) == 2) return gcopy(x); /* O(1) */
-    av=avma;
-    z=ginv(n);
-    z=ser_pui(x,z,prec);
-    return gerepileupto(av,z);
-    
+  case t_POL: case t_RFRAC: case t_RFRACN:
+    av = avma;
+    y=tayl(x,gvar(x),precdl); tetpil=avma;
+    return gerepile(av,tetpil,gsqrtn(y,n,zetan,prec));
+  case t_SER:   
+    e=valp(x);m=itos(n);
+    if (gcmp0(x)) return zeroser(varn(x), (e+m-1)/m);
+    if (e % m) err(talker,"incorrect valuation in gsqrt");
+    av = avma;
+    /* trick: ser_pui assumes valp(x) = 0 */
+    y = ser_pui(x,ginv(n),prec);
+    if (typ(y) == t_SER) /* generic case */
+      y[1] = evalsigne(1) | evalvalp(e/m) | evalvarn(varn(x));
+    else /* e.g coeffs are POLMODs */
+      y = gerepileupto(av, gmul(y, gpowgs(polx[varn(x)], e/m)));
+    return y;
   case t_INTMOD:
     z=gzero;
     /*This is not great, but else it will generate too much trouble*/
