@@ -74,7 +74,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
   }}
 
 /*=====================================================================*/
-#define nchar2nlong(x) (((x)+BYTES_IN_LONG) >> TWOPOTBYTES_IN_LONG)
+#define nchar2nlong(x) (((x)+BYTES_IN_LONG-1) >> TWOPOTBYTES_IN_LONG)
 #define bit_accuracy(x) (((x)-2) << TWOPOTBITS_IN_LONG)
 
 #define GSTR(x) ((char*) (((GEN) (x)) + 1 ))

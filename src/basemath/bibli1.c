@@ -1909,7 +1909,7 @@ dalloc(size_t n)
 void *
 stackmalloc(size_t N)
 {
-  size_t n = (N >> TWOPOTBITS_IN_LONG) + 1;
+  size_t n = nchar2nlong(N);
   if (avma - bot < n) err(errpile);
   avma -= n; return (double*)avma;
 }
