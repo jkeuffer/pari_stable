@@ -3148,45 +3148,6 @@ qf_base_change(GEN q, GEN M, int flag)
   return res;
 }
 
-/* compute M'.M */
-GEN
-gram_matrix(GEN M)
-{
-  long n=lg(M), i, j, k;
-  gpmem_t av;
-  GEN res = cgetg(n,t_MAT),p1;
-
-  if (n==1)
-  {
-    if (typ(M) != t_MAT)
-      err(talker,"invalid data in gram_matrix");
-    return res;
-  }
-  if (typ(M) != t_MAT || lg(M[1]) != n)
-    err(talker,"not a square matrix in gram_matrix");
-
-  for (i=1;i<n;i++) res[i]=lgetg(n,t_COL);
-  av=avma;
-  for (i=1;i<n;i++)
-  {
-    p1 = gzero;
-    for (k=1;k<n;k++)
-      p1 = gadd(p1, gsqr(gcoeff(M,k,i)));
-    coeff(res,i,i) = (long) gerepileupto(av,p1);
-    av=avma;
-  }
-  for (i=2;i<n;i++)
-    for (j=1;j<i;j++)
-    {
-      p1=gzero;
-      for (k=1;k<n;k++)
-	p1 = gadd(p1, gmul(gcoeff(M,k,i),gcoeff(M,k,j)));
-      coeff(res,i,j)=coeff(res,j,i) = lpileupto(av,p1);
-      av=avma;
-    }
-  return res;
-}
-
 /* return Re(x * y), x and y scalars */
 GEN
 mul_real(GEN x, GEN y)
