@@ -1797,16 +1797,10 @@ myidealpow(GEN x, GEN n) { return idealpow(static_nf, x, n); }
 GEN
 factorback_i(GEN fa, GEN nf, int red)
 {
-  long av=avma,k,l,lx;
+  long av=avma,k,l,lx,t=typ(fa);
   GEN ex, x;
   GEN (*_mul)(GEN,GEN);
   GEN (*_pow)(GEN,GEN);
-
-  if (typ(fa)!=t_MAT || lg(fa)!=3)
-    err(talker,"not a factorisation in factorback");
-  ex=(GEN)fa[2]; fa=(GEN)fa[1];
-  lx = lg(fa); if (lx == 1) return gun;
-  x = cgetg(lx,t_VEC);
   if (nf)
   {
     static_nf = nf;
@@ -1826,6 +1820,13 @@ factorback_i(GEN fa, GEN nf, int red)
     _mul = &gmul;
     _pow = &powgi;
   }
+  if ( t == t_VEC || t == t_COL)
+    return gerepileupto(av, divide_conquer_prod(fa, _mul));
+  if (t!=t_MAT || lg(fa)!=3)
+    err(talker,"not a factorisation in factorback");
+  ex=(GEN)fa[2]; fa=(GEN)fa[1];
+  lx = lg(fa); if (lx == 1) return gun;
+  x = cgetg(lx,t_VEC);
   for (l=1,k=1; k<lx; k++)
     if (signe(ex[k]))
       x[l++] = (long)_pow((GEN)fa[k],(GEN)ex[k]);
