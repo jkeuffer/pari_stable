@@ -397,12 +397,12 @@ gadd(GEN x, GEN y)
             }
             else
             { p2 = mppgcd(p1,p2); z[1] = (long)p2; }
-	    av=avma; (void)new_chunk((lgefint(p2)<<1) + 1);
+	    av=avma; (void)new_chunk((lgefint(p1)<<1) + lgefint(x[1]));
             p1=addii((GEN)x[2],(GEN)y[2]); avma=av;
 	    z[2]=lmodii(p1,p2); return z;
 	
 	  case t_FRAC: case t_FRACN: z=cgetg(3,t_INTMOD); p2=(GEN)x[1];
-	    (void)new_chunk((lgefint(p2)<<1) + 1);
+	    (void)new_chunk(lgefint(p2)<<2);
             p1 = mulii((GEN)y[1], mpinvmod((GEN)y[2],p2));
             p1 = addii(modii(p1,p2), (GEN)x[2]); avma=(long)z;
             z[2]=lmodii(p1,p2); icopyifstack(p2,z[1]); return z;
@@ -982,7 +982,8 @@ gmul(GEN x, GEN y)
             }
             else
             { p2 = mppgcd(p1,p2); z[1] = (long)p2; }
-            av=avma; (void)new_chunk(lgefint(p2)<<2);
+            av=avma;
+            (void)new_chunk(lgefint(x[1]) + (lgefint(p1)<<1));
 	    p1=mulii((GEN)x[2],(GEN)y[2]); avma=av;
 	    z[2]=lmodii(p1,p2); return z;
 	
@@ -1544,7 +1545,7 @@ gdiv(GEN x, GEN y)
             { icopyifstack(p2,z[1]); }
             else
             { p2 = mppgcd(p1,p2); z[1] = (long)p2; }
-            av=avma; (void)new_chunk(lgefint(p2) << 2);
+            av=avma; (void)new_chunk(lgefint(x[1]) + (lgefint(p1) << 1));
 	    p1=mulii((GEN)x[2], mpinvmod((GEN)y[2],p2)); avma=av;
             z[2]=lmodii(p1,p2); return z;
 
