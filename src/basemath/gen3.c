@@ -270,6 +270,7 @@ isinexactreal(GEN x)
     case t_RFRAC: case t_RFRACN:
       return isinexactreal((GEN)x[1]) || isinexactreal((GEN)x[2]);
   }
+  if (is_noncalc_t(tx)) return 0;
   lx = (tx==t_POL)? lgef(x): lg(x);
   for (i=lontyp[tx]; i<lx; i++)
     if (isinexactreal((GEN)x[i])) return 1;
