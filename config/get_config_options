@@ -30,7 +30,7 @@ test -n "$GP_INSTALL_PREFIX" && prefix=$GP_INSTALL_PREFIX
 
 while test $# -gt 0; do
   case "$1" in
-  -l|-load) shift; initfile=$1;
+  -l|--load) shift; initfile=$1;
      cd $TOP
      PATH=.:$PATH; export PATH
      if test -z "$1";then
@@ -39,6 +39,9 @@ while test $# -gt 0; do
        osname=`echo "$tmp_host" | sed -e 's/.*-\(.*\)/\1/'`
        objdir=O$osname-$arch;
        initfile=$objdir/$dflt_conf_file;
+     fi
+     if test -d "$initfile"; then
+       initfile="$initfile/pari.cfg"
      fi
      if test -r "$initfile"; then
        . $initfile
@@ -68,7 +71,6 @@ while test $# -gt 0; do
   -a|-ask|--ask)     fastread=no;;
   -g)          optimization=debugging;;
   -pg)         optimization=profiling;;
-  -rdll)       DYNRELOC=yes;;
   -h|-help|--help|-\?)error=true;;
   -v|-verbhelp|--verbhelp)error=verb;;
   -s|--static) static=y;;
@@ -112,7 +114,7 @@ done
 
 case "$error" in
 true) cat >&2 <<EOT
-Usage: Configure [-ask|-help|-g|-pg] [ -load <filename> ] [ --prefix=<dir> ]
+Usage: Configure [-ask|-help|-g|-pg] [ --load <filename> ] [ --prefix=<dir> ]
 
 Options: some names can be abbreviated to one character (e.g -h = -help)
 -a, --ask        interactive configuration
@@ -129,7 +131,6 @@ Build Options:
 Additional developer options:
   -g              creates debugging version (in Oxxx.dbg)
   -pg             creates profiling version (in Oxxx.prf)
-  -rdll           creates relocatable DLL (Cygwin32 only)
 
 Installation directories:
   --prefix=<dir>        install files in <dir> (default $prefix)
@@ -188,7 +189,7 @@ there is currently no easy way out if you make one. Your best bet is to press
 Ctrl-C, then start again.  Another possibility is to wait till the questions
 end, edit the file "Oxxx/$dflt_conf_file", then run
 
-      Configure -load Oxxx/$dflt_conf_file
+      Configure --load Oxxx/$dflt_conf_file
 
 (which can be abbreviated to simply "Configure -l", provided your architecture
 is correctly detected)
