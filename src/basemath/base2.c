@@ -1197,10 +1197,11 @@ manage_cache(GEN chi, GEN pp, GEN ns)
   return ns;
 }
 
-/* compute the Newton sums modulo pp of the characteristic
-   polynomial of a(x) mod chi(x), a in Z[X] */
+
+/* compute the c first Newton sums modulo pp of the 
+   characteristic polynomial of a(x) mod g(x) */
 static GEN
-newtonsums(GEN a, GEN chi, GEN pp, GEN ns)
+newtonsums(GEN a, GEN chi, GEN pp, GEN ns, long c)
 {
   GEN va, pa, s, ns2;
   long j, k, n = degpol(chi);
@@ -1212,9 +1213,9 @@ newtonsums(GEN a, GEN chi, GEN pp, GEN ns)
   lim = stack_lim(av2, 1);
 
   pa = polun[varn(a)];
-  va = zerovec(n);
+  va = zerovec(c);
 
-  for (j = 1; j <= n; j++)
+  for (j = 1; j <= c; j++)
   {
     pa = FpX_rem(FpX_mul(pa, a, pp), chi, pp);
     s  = gzero;
@@ -1242,7 +1243,7 @@ newtoncharpoly(GEN a, GEN chi, GEN pp, GEN ns)
   long n = degpol(chi), j, k, vn = varn(chi);
   pari_sp av = avma, av2, lim;
 
-  v = newtonsums(a, chi, pp, ns);
+  v = newtonsums(a, chi, pp, ns, n);
   av2 = avma;
   lim = stack_lim(av2, 1);
   c = cgetg(n + 2, t_VEC);
@@ -1273,6 +1274,27 @@ newtoncharpoly(GEN a, GEN chi, GEN pp, GEN ns)
     c[k] = lneg((GEN)c[k]);
 
   return gerepileupto(av, gtopoly(c, vn));
+}
+
+/* guess if a mod chi has positive valuation 
+   by looking at the newton sums */
+static long
+fastvalpos(GEN a, GEN chi, GEN p, GEN ns, long E)
+{
+  GEN v, p1;
+  long m, n = degpol(chi), j, c;
+
+  if (gegal(p, gdeux))
+    c = 2*n/3;
+  else
+    c = (n > 2*E)? 2*E: n;
+  if (c < 2) c = 2;
+  a = Q_primitive_part(a,&p1);
+  m = ggval(p1, p);
+  v = newtonsums(a, chi, mulii(p, gpowgs(p, -(m-1)*c)), ns, c);
+  for (j = 1; j <= c; j++)
+    if (E*ggval((GEN)v[j], p) + j*(E*m-1) < 0) return 0;
+  return 1;
 }
 
 /* return v_p(n!) */
@@ -1330,6 +1352,91 @@ factcp(GEN p, GEN f, GEN beta, GEN pp, GEN ns)
   b[3] = lstoi(l); return b;
 }
 
+/* compute the polynomial nu_beta. If something 
+   unexpected happens, it returns NULL */
+static GEN
+fastnu(GEN p, GEN f, GEN beta, GEN pdr)
+{
+  long n, j, k = 0, v = varn(f), av = avma;
+  GEN p1, p2, p3, p4, G, V, nu, h, ump;
+
+  n   = degree(f);
+  G   = cgetg(2*n+2, t_MAT);
+  V   = zerovec(2*n+1);
+  p3  = gzero;
+  p4  = mulii(pdr, sqri(p));
+
+  beta = gmul(pdr, beta);
+  p1   = beta;
+  for (k = 1; k <= n; k++)
+  {
+    V[n+1-k] = un;
+    for (j = n+1; j <= 2*n+1; j++) 
+    {
+      p2 = polcoeff0(p1, 2*n+1-j, -1); 
+      if (signe(p2)) p3 = ggcd(p3, p2);
+      V[j] = (long)p2;
+    }
+    G[2*n+1-k] = lcopy(V);
+    V[n+1-k] = zero;
+    if (k < n) 
+    {
+      p1 = gdiv(gmul(p1, beta), pdr);
+      p1 = gmod(p1, f);
+      p2 = ggcd(Q_denom(p1), p); 
+      if (!gcmp1(p2)) { avma = av; return NULL; }
+      p1 = redelt(p1, p4, gun);
+    }
+  }
+  
+  if (DEBUGLEVEL >= 6) 
+    fprintferr(" content in fastnu is %Z\n", p3);
+
+  for (k = 1; k <= n; k++)
+  {
+    p1 = (GEN)G[2*n+1-k];
+    for (j = n+1; j <= 2*n+1; j++) 
+    {
+      p2 = (GEN)p1[j];
+      if (signe(p2)) { p2 = divii(p2, p3); p1[j] = (long)p2; }
+    }
+  }
+  pdr = divii(pdr, p3);
+  p4  = divii(p4, p3);
+  
+  for (j = n+1; j <= 2*n+1; j++) V[j] = zero;
+  V[2*n+1] = (long)pdr;
+  V[n+1]   = un;
+  G[2*n+1] = lcopy(V);
+  V[2*n+1] = zero;
+  V[n+1]   = zero;
+
+  p1 = mulii(pdr, p);
+  for (k = 1; k <= n; k++)
+  {
+    V[n+k+1] = (long)p1;
+    G[k] = lcopy(V);
+    V[n+k+1] = zero;
+  }
+  
+  if (DEBUGLEVEL >= 6) fprintferr("  fastnu: G is computed\n");
+
+  G = hnfmodid(G, p4);
+
+  if (DEBUGLEVEL >= 6) fprintferr("  fastnu: HNF(G) is computed\n");
+  
+  ump = gmodulcp(gun, p);
+  h = gmul(ump, gtopoly((GEN)G[n+1], v));
+  for (j = 1; j <= n; j++)
+    h = ggcd(h, gmul(ump, gtopoly((GEN)G[j], v)));
+
+  h = gdiv(h, gpowgs(polx[v], n));
+  if (gcmp1(h)) { avma = av; return NULL; }
+  nu = (GEN)factmod0(lift(h),p)[1];
+  if (lg(nu) > 2) { avma = av; return NULL; }
+  return gerepileupto(av, gcopy((GEN)nu[1]));
+}
+ 
 /* return the prime element in Zp[phi] */
 static GEN
 getprime(GEN p, GEN chi, GEN phi, GEN chip, GEN nup, long *Lp, long *Ep)
@@ -1422,10 +1529,12 @@ update_alpha(GEN p, GEN fx, GEN alph, GEN chi, GEN pmr, GEN pmf, long mf,
 GEN
 nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 {
-  long L, E, Fa, La, Ea, oE, Fg, eq, er, v = varn(fx), i, nv, Le, Ee, N, l, vn;
+  long L, E, Fa, La, Ea, oE, Fg, eq = 0, er = 0, v = varn(fx), i, nv;
+  long fm = 0, go_fm = 2, Le, Ee, N, l, vn;
   pari_sp av = avma, av2, limit;
-  GEN p1, alph, chi, nu, w, phi, pmf, pdr, pmr, kapp, pie, chib, ns;
-  GEN gamm, chig, nug, delt, beta, eta, chie, nue, pia, opa;
+  GEN p1, alph, chi, nu, w, phi, pmf, pdr, pmr, kapp, pie, chib = NULL;
+  GEN ns, gamm, chig = NULL, nug, delt = NULL, beta, eta = NULL;
+  GEN chie = NULL, nue = NULL, pia, opa;
 
   if (DEBUGLEVEL>2)
   {
@@ -1453,8 +1562,8 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
   /* used to cache the newton sums of chi */
   ns = cgetg(N + 2, t_COL);
   p1 = powgi(p, gceil(gdivsg(N, mulii(p, subis(p, 1))))); /* p^(N/(p(p-1))) */
-  p1 = mulii(p1, mulii(pmf, gpowgs(pmr, N)));
-  l  = lgefint(p1); /* enough in general... */
+  p1 = sqri(mulii(p1, mulii(pmf, gpowgs(pmr, N))));
+  l  = lgefint(p1); /* should be more than enough in general... */
   for (i = 1; i <= N + 1; i++) ns[i] = lgeti(l);
   ns[N+1] = (long)p1;
   affii(gzero, (GEN)ns[1]); /* zero means: need to be computed */
@@ -1514,22 +1623,50 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
       if (DEBUGLEVEL >= 5)
 	fprintferr("  beta = %Z\n", beta);
 
-      /* if pmf divides norm(beta) then it's useless */
-      p1 = gmod(gnorm(gmodulcp(beta, chi)), pmf);
-      if (signe(p1))
+      if (fm == -1 || (!fm && eq > go_fm && !er))
       {
-	chib = NULL;
-	vn = ggval(p1, p);
-	eq = (long)(vn / N);
-	er = (long)(vn*Ea/N - eq*Ea);
+	if (fm == 0) 
+	{
+	  if (DEBUGLEVEL >= 0)
+	    fprintferr("  ** switching to fast mode\n");
+	  fm = 1;
+	}
+	else 
+	{
+	  if (DEBUGLEVEL >= 0)
+	    fprintferr("  ** something's wrong\n  ** switching back to normal mode\n");
+	  fm = 0;
+	  go_fm = eq+2;
+	} 
       }
-      else
+
+      if (fm) 
       {
-	chib = mycaract(chi, beta, NULL, NULL, ns);
-	vstar(p, chib, &L, &E);
-	eq = (long)(L / E);
-	er = (long)(L*Ea / E - eq*Ea);
+	er++;
+	if (!(er%Ea))  { er = 0; eq++; }
       }
+      else 
+      {
+	/* if pmf divides norm(beta) then it's useless */
+	p1 = gmod(gnorm(gmodulcp(beta, chi)), pmf);
+	if (signe(p1))
+	{
+	  chib = NULL;
+	  vn = ggval(p1, p);
+	  eq = (long)(vn / N);
+	  er = (long)(vn*Ea/N - eq*Ea);
+	}
+	else
+	{
+	  chib = mycaract(chi, beta, NULL, NULL, ns);
+	  vstar(p, chib, &L, &E);
+	  eq = (long)(L / E);
+	  er = (long)(L*Ea / E - eq*Ea);
+	}
+      }
+
+      if (DEBUGLEVEL >= 5)
+      fprintferr("  eq = %ld and er = %ld\n", eq, er);
 
       /* eq and er are such that gamma = beta.p^-eq.nu^-er is a unit */
       if (eq) gamm = gdiv(beta, gpowgs(p, eq)); else gamm = beta;
@@ -1549,63 +1686,75 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
       if (DEBUGLEVEL >= 6)
 	fprintferr("  gamma = %Z\n", gamm);
 
-      if (er || !chib)
-	chig = mycaract(chi, gamm, p, pmf, ns);
-      else
+      if (!fm)
       {
-	chig = poleval(chib, gmul(polx[v], gpowgs(p, eq)));
-	chig = gdiv(chig, gpowgs(p, N*eq));
-	chig = polmodi(chig, pmf);
-      }
-
-      if (!chig || !gcmp1(Q_denom(chig)))
-      {
-	/* Valuation of beta was wrong. This means that
-	   gamma fails the v*-test */
-	chib = mycaract(chi, beta, p, NULL, ns);
-	vstar(p, chib, &L, &E);
-	eq = (long)(-L / E);
-	er = (long)(-L*Ea / E - eq*Ea);
-
-	if (eq) gamm = gmul(beta, gpowgs(p, eq)); else gamm = beta;
-	if (er)
+	if (er || !chib)
 	{
-	  gamm = gmul(gamm, gpowgs(nu, er));
-	  gamm = gmod(gamm, chi);
-	  gamm = redelt(gamm, p, pmr);
+	  chig = mycaract(chi, gamm, p, pmf, ns);
+	  /* FIXME: should not it be? 
+	     chig = mycaract(chi, gamm, p, p, ns); */
 	}
-	chig = mycaract(chi, gamm, p, pmf, ns);
-      }
-
-      nug  = (GEN)factmod0(chig, p)[1];
-      l    = lg(nug) - 1;
-      nug  = (GEN)nug[l];
-
-      if (l > 1)
-      {
-	/* there are at least 2 factors mod. p => chi can be split */
-	phi  = RX_RXQ_compo(gamm, alph, fx);
-	phi  = redelt(phi, p, pmf);
-	if (flag) mf += 3;
-        return Decomp(p, fx, mf, phi, chig, nug, flag);
-      }
-
-      Fg = degpol(nug);
-      if (Fa%Fg)
-      {
-	if (DEBUGLEVEL >= 5)
-	  fprintferr("  Increasing Fa\n");
-	/* we compute a new element such F = lcm(Fa, Fg) */
-	w = testb2(p, chi, Fa, gamm, pmf, Fg, ns);
-	if (gcmp1((GEN)w[1]))
+	else
+	{
+	  chig = poleval(chib, gmul(polx[v], gpowgs(p, eq)));
+	  chig = gdiv(chig, gpowgs(p, N*eq));
+	  chig = polmodi(chig, pmf);
+	}
+	
+	if (!chig || !gcmp1(Q_denom(chig)))
+	{
+	  /* Valuation of beta was wrong. This means that
+	     gamma fails the v*-test */
+	  chib = mycaract(chi, beta, p, NULL, ns);
+	  vstar(p, chib, &L, &E);
+	  eq = (long)(-L / E);
+	  er = (long)(-L*Ea / E - eq*Ea);
+	  
+	  if (eq) gamm = gmul(beta, gpowgs(p, eq)); else gamm = beta;
+	  if (er)
+	  {
+	    gamm = gmul(gamm, gpowgs(nu, er));
+	    gamm = gmod(gamm, chi);
+	    gamm = redelt(gamm, p, pmr);
+	  }
+	  chig = mycaract(chi, gamm, p, pmf, ns);
+	}
+	
+	nug  = (GEN)factmod0(chig, p)[1];
+	l    = lg(nug) - 1;
+	nug  = (GEN)nug[l];
+	
+	if (l > 1)
 	{
 	  /* there are at least 2 factors mod. p => chi can be split */
-	  phi = RX_RXQ_compo((GEN)w[2], alph, fx);
-	  phi = redelt(phi, p, pmf);
-          if (flag) mf += 3;
-          return Decomp(p, fx, mf, phi, (GEN)w[3], (GEN)w[4], flag);
+	  phi  = RX_RXQ_compo(gamm, alph, fx);
+	  phi  = redelt(phi, p, pmf);
+	  if (flag) mf += 3;
+	  return Decomp(p, fx, mf, phi, chig, nug, flag);
 	}
-	break;
+
+	Fg = degpol(nug);
+	if (Fa%Fg)
+	{
+	  if (DEBUGLEVEL >= 5)
+	    fprintferr("  Increasing Fa\n");
+	  /* we compute a new element such F = lcm(Fa, Fg) */
+	  w = testb2(p, chi, Fa, gamm, pmf, Fg, ns);
+	  if (gcmp1((GEN)w[1]))
+	  {
+	    /* there are at least 2 factors mod. p => chi can be split */
+	    phi = RX_RXQ_compo((GEN)w[2], alph, fx);
+	    phi = redelt(phi, p, pmf);
+	    if (flag) mf += 3;
+	    return Decomp(p, fx, mf, phi, (GEN)w[3], (GEN)w[4], flag);
+	  }
+	  break;
+	}
+      } 
+      else 
+      {
+	nug = fastnu(p, chi, gamm, pdr);
+	if (!nug) { fm = -1; continue; }
       }
 
       /* we look for a root delta of nug in Fp[alpha] such that
@@ -1614,15 +1763,25 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
       nv = fetch_var();
       w = Fp_factor_irred(nug, p, gsubst(nu, varn(nu), polx[nv]));
       if (degpol(w[1]) != 1)
-        err(talker,"bug in nilord (no root). Is p = %Z a prime ?", p);
+      {
+	if (!fm)
+	  err(talker, "bug in nilord (no root). Is p = %Z a prime?", p);
+	else
+          { fm = -1; continue; }  
+      }
 
       for (i = 1;; i++)
       {
 	if (i >= lg(w))
-          err(talker, "bug in nilord (no root), is p = %Z a prime?", p);
+	{	
+	  if (!fm)
+	    err(talker, "bug in nilord (no root). Is p = %Z a prime?", p);
+	  else
+	  { fm = -1; break; }  
+	}
         delt = gneg_i(gsubst(gcoeff(w, 2, i), nv, polx[v]));
         eta  = gsub(gamm, delt);	
-        if (typ(delt) == t_INT)
+        if (!fm && typ(delt) == t_INT)
         {
           chie = poleval(chig, gadd(polx[v], delt));
           nue  = (GEN)factmod0(chie, p)[1];
@@ -1631,11 +1790,27 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
         }
         else
         {
-          p1   = factcp(p, chi, eta, pmf, ns);
-          chie = (GEN)p1[1];
-          nue  = (GEN)p1[2];
-          l    = itos((GEN)p1[3]);
-        }
+	  if (fm)
+	  {
+	    if (fastvalpos(eta, chi, p, ns, Ea)) break;
+	    continue;
+	  }
+	  else 
+	  {
+	    GEN p2 = ggcd(Q_denom(eta), pdr);
+	    p1 = gmodulcp(gmul(p2, eta), 
+			  redelt(chi, mulii(p, gpowgs(p2, N)), pmf));
+	    p1 = gmod(divii(gnorm(p1), gpowgs(p2, N)), p);
+	    if (signe(p1)) continue; 
+	    if (fm) break;
+	    
+	    p1   = factcp(p, chi, eta, pmf, ns);
+	    chie = (GEN)p1[1];
+	    nue  = (GEN)p1[2];
+	    l    = itos((GEN)p1[3]);
+	  }
+	}
+	
         if (l > 1)
         {
           /* there are at least 2 factors mod. p => chi can be split */
@@ -1650,27 +1825,32 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
         if (gegal(nue, polx[v])) break;
       }
       (void)delete_var();
+      
+      if (fm == -1) continue;
 
-      if (!signe(modii(constant_term(chie), pmr)))
-	chie = mycaract(chi, eta, p, pmf, ns);
-	
-      pie = getprime(p, chi, eta, chie, nue, &Le, &Ee);
-      if (Ea%Ee)
+      if (!fm) 
       {
-	if (DEBUGLEVEL >= 5)
-	  fprintferr("  Increasing Ea\n");
-	pie = redelt(pie, p, pmf);
-	/* we compute a new element such E = lcm(Ea, Ee) */	
-	w = testc2(p, chi, pmr, pmf, nu, Ea, pie, Ee, ns);
-	if (gcmp1((GEN)w[1]))
+	if (!signe(modii(constant_term(chie), pmr)))
+	  chie = mycaract(chi, eta, p, pmf, ns);
+	
+	pie = getprime(p, chi, eta, chie, nue, &Le, &Ee);
+	if (Ea%Ee)
 	{
-	  /* there are at least 2 factors mod. p => chi can be split */
-	  phi = RX_RXQ_compo((GEN)w[2], alph, fx);
-	  phi = redelt(phi, p, pmf);
-          if (flag) mf += 3;
-          return Decomp(p, fx, mf, phi, (GEN)w[3], (GEN)w[4], flag);
+	  if (DEBUGLEVEL >= 5)
+	    fprintferr("  Increasing Ea\n");
+	  pie = redelt(pie, p, pmf);
+	  /* we compute a new element such E = lcm(Ea, Ee) */	
+	  w = testc2(p, chi, pmr, pmf, nu, Ea, pie, Ee, ns);
+	  if (gcmp1((GEN)w[1]))
+	  {
+	    /* there are at least 2 factors mod. p => chi can be split */
+	    phi = RX_RXQ_compo((GEN)w[2], alph, fx);
+	    phi = redelt(phi, p, pmf);
+	    if (flag) mf += 3;
+	    return Decomp(p, fx, mf, phi, (GEN)w[3], (GEN)w[4], flag);
+	  }
+	  break;
 	}
-	break;
       }
 
       if (eq) delt = gmul(delt, gpowgs(p, eq));
