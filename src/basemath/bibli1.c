@@ -2179,7 +2179,7 @@ chk_gen_init(FP_chk_fun *chk, GEN nf, GEN gram, GEN mat, long *ptprec)
 {
   GEN P,bound,prev,x,B, M = gmael(nf,5,1);
   long N = lg(nf[7]), n = N-1,i,prec,prec2;
-  int skipfirst = 1; /* [1,0...0] --> x rational */
+  int skipfirst = 0;
   CG_data *d = (CG_data*)new_chunk(sizeof(CG_data));
 
   d->r1 = itos(gmael(nf,2,1)); 
@@ -2187,10 +2187,9 @@ chk_gen_init(FP_chk_fun *chk, GEN nf, GEN gram, GEN mat, long *ptprec)
   d->ZKLLL   = gmul((GEN)nf[7],mat);
   chk->data = (void*)d;
 
-  x = cgetg(N,t_COL);
   bound = get_Bnf(nf); prev = NULL;
-  for (i=1; i<N; i++) x[i]=zero;
-  for (i=2; i<N; i++)
+  x = zerocol(N-1);
+  for (i=1; i<N; i++)
   {
     x[i] = un;
     P = get_polmin(d,x);
