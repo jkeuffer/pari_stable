@@ -1590,6 +1590,7 @@ get_gamma(decomp_t *S, GEN x, long eq, long er)
   {
     if (!S->invnu)
     {
+      while (gdvd(S->chi, S->nu)) S->nu = gadd(S->nu, S->p);
       S->invnu = QX_invmod(S->nu, S->chi);
       S->invnu = redelt_i(S->invnu, S->pmr, S->p, &(S->Dinvnu));
     }
