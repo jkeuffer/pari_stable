@@ -66,7 +66,7 @@ MicroSPARC2  110MHz  SunOS-4.1.4     gcc X11 dl2   31476   32123  2.0.9     LG
 MicroSPARC2  110MHz  Solaris-2.5     gcc X11 dl2   26048   26727  2.0.17
 SPARCv7(SS2)  40MHz  SunOS-4.1.3     gcc X11 dl   115212  115364  2.0.9     LG
 SPARCv7(ELC)  33MHz  SunOS-4.1.1     gcc X11   -  139406       -  2.0.8     GN
-SPARCv7(SS400)  ???  SunOS-4.1.4     gcc   - dl2  107988  108016  2.0.14    DE
+SPARCv7(SS400)  ???  SunOS-4.1.4     gcc   - dl2  107074  106494  2.0.16(21)DE
 SPARCv7(HWS210) ???  Linux-2.2.5     gcc   -   -   98488       -  2.0.16(15)DE
 ------------------------------------------------------------------------------
 Intel/x86
@@ -201,6 +201,7 @@ hppa kernel. Remove +z from compiler flags
 (18) 256kb L2 Cache - Ultra U5
 (19) 2  MB L2 Cache - Ultra U10
 (20) gcc-2.8.1 also works and produces a faster binary [sta=3097, dyn=3387]
+(21) replace err by pari_err in src/kernel/sparcv7/level0.S [in 2.0.16 or 17]
 
 =============================================================================
 Contributors:

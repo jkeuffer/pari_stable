@@ -24,7 +24,22 @@ XR = Xavier Roblot
 YU = Yoshiaki Uchikawa
 
 ===========================================================================
-Done for version 2.0.17.beta (released ??/??/99):
+Done for version ???? (released ??/??/99):
+  Fixed
+    1- wrong method chosen in isinexactfield for 0 polynomials
+    2- stack corruption in sylvestermatrix(0,...): Mod(x,x)^-1 --> SEGV
+    3- garbage left on stack in ginv(1 / n)
+    4- typo: carreparfait --> gcarreparfait in nfiso0()
+    5- for (A=1, 2, A = -A) --> SEGV
+IZ  6- [gnuplot] couldn't set terminal as the first graphing operation
+DE  7- typo in kernel/sparcv7/level0.S: err --> pari_err
+
+  Added
+IZ  1- [gnuplot] look up directory tree for gnuplot related files
+
+===========================================================================
+Done for version 2.0.17.beta (released 24/09/99):
+
   Fixed
 XR  1- typo in zarchstar (result possibly incorrect when more than two places)
     2- check_unit not severe enough ([;] --> session could die !)
