@@ -649,7 +649,7 @@ polint(GEN xa, GEN ya, GEN x, GEN *ptdy)
 {
   long tx=typ(xa), ty, lx=lg(xa);
   
-  if (!ya) { ya = xa; ty = tx; xa = NULL; }
+  if (ya) ty = typ(ya); else { ya = xa; ty = tx; xa = NULL; }
 
   if (! is_vec_t(tx) || ! is_vec_t(ty))
     err(talker,"not vectors in polinterpolate");
