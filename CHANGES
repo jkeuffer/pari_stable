@@ -40,6 +40,8 @@ BA  1- gpflog could print some lines twice
     7- compatible = 3 not taken into account when reading a file
     8- cbezout(0,0) = 1 (should be 0)
     9- when lines > 0, output driver didn't reset properly after user output
+   10- nfdisc(x^5+2*x^4+3*x^3-3*x^2+122*x-1) --> impossible inverse
+   11- bug in gcc-2.95 -O3 -fomit-frame-pointer [Linux]: SEGV in quicksqri
 
   Changed
     1- DOS distribution archives (GPM removed)
