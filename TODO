@@ -110,7 +110,12 @@ is wrong [second one is principal]. Group structure and regulator are correct!
 
 Kernel:
 =======
+5  ensure consistent rounding in floating point operations. At least document
+   it. Currently most routines truncate instead of rounding, most of the time.
+
 5  check NaN in dbltor and related routines
+
+4  support standard rounding modes in floating point operations
 
 4  benchmark / profile basic functions and see what needs to be done
 
@@ -121,6 +126,8 @@ Kernel:
 4  use divide & conquer approach in string / integer conversions
 
 3  FFT for basic types and polynomials (say in A[X], for A = Z, F_q, ...)
+
+3  interval arithmetic
 
 2  add support for different multiprecision kernels (a la LiDIA)
 
