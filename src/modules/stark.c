@@ -2188,12 +2188,6 @@ chk_reccoeff(void *data, GEN x)
   return NULL;
 }
 
-static GEN
-chk_reccoeff_post(void *data/*unused*/, GEN res)
-{
-  (void)data; return res;
-}
-
 /* Using Cohen's method */
 static GEN
 RecCoeff3(GEN nf, RC_data *d, long prec)
@@ -2251,7 +2245,7 @@ RecCoeff3(GEN nf, RC_data *d, long prec)
   chk = (FP_chk_fun*)new_chunk(sizeof(FP_chk_fun));
   chk->f         = &chk_reccoeff;
   chk->f_init    = &chk_reccoeff_init;
-  chk->f_post    = &chk_reccoeff_post;
+  chk->f_post    = NULL;
   chk->data      = (void*)d;
   chk->skipfirst = 0;
 
