@@ -84,7 +84,7 @@ static GEN br_res = NULL;
  *     lexemes in the sequel.
  *
  *  Definitions: The sequence
- *  { a }* means any number (possibly 0) of object a.
+ *    { a }* means any number (possibly 0) of object a.
  *
  *  seq: only this one can be empty.
  *    expr { [:;] expr }* { [:;] }
@@ -105,23 +105,22 @@ static GEN br_res = NULL;
  *        ~, ', !
  *  or    ^ facteur
  *  or    matrix_index { matrix_index }*
- *  or    .member      (see gp_member_list)
+ *  or    .entry
  *
  *  truc:
- *  or  ! truc
+ *      ! truc
  *  or  ' entry
  *  or  identifier
  *  or  constante
  *  or  string {string}*
  *  or  matrix
- *  or  (expr)
+ *  or  ( expr )
  *  or  % { ` }*  or %number
  *
  *  identifier:
- *    entry followed by
+ *    entry  followed by optional
  *
- *      {}
- *  or  matrix_assignment_block
+ *      matrix_assignment_block
  *  or  .entry { = seq }
  *  or  {'} ( arg_list )
  *  or  ( arg_list ) = seq
@@ -154,10 +153,14 @@ static GEN br_res = NULL;
  *      " any succession of characters [^\]"
  *     
  *  constante:
- *      number { . } { number } { [eE] } {[+-]} { number }.
+ *      number { . [0-9]* }  { expo }
+ *   or .{number} { expo }
+ *
+ *  expo:
+ *      [eE] {[+-]} { number }
  *
  *  number:
- *      [0-9][0-9]*
+ *      [0-9]+
  */
 char*
 _analyseur(void)
@@ -1805,31 +1808,33 @@ number(long *nb)
   return m;
 }
 
+extern GEN addsmulsi(long a, long b, GEN Y);
+
 static GEN
 constante()
 {
   static long pw10[] = { 1, 10, 100, 1000, 10000, 100000, 1000000,
                         10000000, 100000000, 1000000000 };
-  long l,m,n = 0,nb, av = avma, limite = stack_lim(av,1);
+  long i,l,m,n = 0,nb, av = avma;
   GEN z,y;
 
-  y = stoi(number(&nb));
+  y = stoi(number(&nb)); i = 0;
   while (isdigit((int)*analyseur))
   {
+    if (++i == 4) { avma = av; i = 0; } /* HACK gerepile */
     m = number(&nb);
-    y = addsi(m, mulsi(pw10[nb],y));
-    if (low_stack(limite, stack_lim(av,1))) y = gerepileuptoint(av,y);
+    y = addsmulsi(m, pw10[nb], y);
   }
   switch(*analyseur)
   {
     default: return y; /* integer */
     case '.':
-      analyseur++;
+      analyseur++; i = 0;
       while (isdigit((int)*analyseur))
       {
+        if (++i == 4) { avma = av; i = 0; } /* HACK gerepile */
         m = number(&nb); n -= nb;
-        y = addsi(m, mulsi(pw10[nb],y));
-        if (low_stack(limite, stack_lim(av,1))) y = gerepileuptoint(av,y);
+        y = addsmulsi(m, pw10[nb], y);
       }
       if (*analyseur != 'E' && *analyseur != 'e') 
       {
