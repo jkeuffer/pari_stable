@@ -649,12 +649,11 @@ pari_init(size_t parisize, ulong maxprime)
 
   (void)manage_var(manage_var_init,NULL); /* init nvar */
   var_not_changed = 1; (void)fetch_named_var("x", 0);
-  try_to_recover=1;
-  if (!pari_datadir) /* GP may set it */
-  {
-    pari_datadir = os_getenv("GP_DATA_DIR");
-    if (!pari_datadir) pari_datadir = GPDATADIR;
-  }
+  try_to_recover = 1;
+
+  pari_datadir = os_getenv("GP_DATA_DIR");
+  if (!pari_datadir) pari_datadir = GPDATADIR;
+  if (pari_datadir) pari_datadir = pari_strdup(pari_datadir);
 }
 
 static void
@@ -715,7 +714,7 @@ freeall(void)
   free((void *)diffptr);
   free(current_logfile);
   free(current_psfile);
-
+  if (pari_datadir) free(pari_datadir);
   free_gp_data(GP_DATA);
 }
 

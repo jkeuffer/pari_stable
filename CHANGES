@@ -116,6 +116,7 @@ GH 36- lngamma was not even continuous : its argument was reduced mod 2Pi
    39- Y=Mod(y,y+1);Mod(Y*x,x-1)^2 --> bug in FpX_divrem, p == NULL
    40- return type for nffactormod was not a factorization (had become t_VEC)
    41- Pol(Ser(1+x)) != 1+x  [ bitmask not cleared properly in gconvsp() ]
+   42- default(datadir,"...") --> SEGV [ attempt to free a static string ]
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.
