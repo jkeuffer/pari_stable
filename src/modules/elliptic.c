@@ -2879,6 +2879,14 @@ DONE:
   return gerepileuptoint(av, icopy(a));
 }
 
+/* for ellsea() */
+GEN
+CM_CardEFp(GEN E, GEN p)
+{
+  GEN ap = CM_ellap(E, p);
+  return ap? subii(addis(p,1), ap): gen_0;
+}
+
 GEN
 apell(GEN e, GEN p)
 {
