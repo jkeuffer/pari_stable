@@ -1816,7 +1816,7 @@ entree functions_basic[]={
 {"ellsigma",99,(void*)ellsigma,5,"GGD0,L,p"},
 {"ellsub",99,(void*)subell,5,"GGGp"},
 {"elltaniyama",1,(void*)taniyama,5,"Gp"},
-{"elltors",99,(void*)elltors0,5,"GD0,L,p"},
+{"elltors",99,(void*)elltors0,5,"GD0,L,"},
 {"ellwp",99,(void*)ellwp0,5,"GDGD0,L,pP"},
 {"ellzeta",99,(void*)ellzeta,5,"GGp"},
 {"ellztopoint",29,(void*)pointell,5,"GGp"},
