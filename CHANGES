@@ -59,6 +59,7 @@ IS 13- function prototypes (missing 'extern')
    22- default(prettyprinter,"non-existent-file") ---> SIGPIPE and GP crash
    24- gamma(1+O(3^2)+x) --> SIGFPE
    25- typo in cxgamma (gamma(-4.1+Pi*I/2) --> exponent overflow)
+   26- Odos/paricfg.h defined PARIINFO incorrectly
 
   Changed
 BA  1- more efficient quadratic Hensel lift
