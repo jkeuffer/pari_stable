@@ -1,6 +1,6 @@
 !include "MUI.nsh"
 !define MUI_PRODUCT "PARI"
-!define MUI_VERSION "2.2.7"
+!define MUI_VERSION "2.2.8"
 
 ;--------------------------------
 AutoCloseWindow false
@@ -61,6 +61,17 @@ Section "documentation" SecDOC
   File "..\doc\*.pdf"
 SectionEnd
 
+Section "examples" SecEX
+  SetOutPath "$INSTDIR"
+  File "..\doc\gphelp"
+  SetOutPath $INSTDIR\examples
+  File "..\examples\EXPLAIN"
+  File "..\examples\Inputrc"
+  File "..\examples\*.gp"
+  File "..\examples\*.c"
+  File "..\examples\Makefile"
+SectionEnd
+
 Function .onInstSuccess
   MessageBox MB_OK "Thank you for using PARI/GP! Double-click on 'gp' to start the calculator.$\r$\nTweak $INSTDIR\.gprc to customize GP (colors, script search path, etc.)."
   ExecShell "open" "$INSTDIR"
@@ -72,6 +83,7 @@ Section "shortcuts" SecSM
   CreateDirectory "${short}"
   CreateShortCut "${short}\gp.lnk" "$INSTDIR\gp.exe" "" "$INSTDIR\gp.exe" 0
   CreateShortCut "${short}\users.lnk" "$INSTDIR\doc\users.pdf" "" "$INSTDIR\doc\users.pdf" 0
+  CreateShortCut "${short}\libpari.lnk" "$INSTDIR\doc\libpari.pdf" "" "$INSTDIR\doc\libpari.pdf" 0
   CreateShortCut "${short}\tutorial.lnk" "$INSTDIR\doc\tutorial.pdf" "" "$INSTDIR\doc\tutorial.pdf" 0
   CreateShortCut "${short}\refcard.lnk" "$INSTDIR\doc\refcard.pdf" "" "$INSTDIR\doc\refcard.pdf" 0
   WriteINIStr "${short}\PARI pages.url" "InternetShortcut" "URL" "http://pari.math.u-bordeaux.fr"
@@ -86,6 +98,7 @@ SectionEnd
 
 LangString DESC_SecCopy ${LANG_ENGLISH} "Copy pari files to application folder."
 LangString DESC_DOC ${LANG_ENGLISH} "Install documentation and online help."
+LangString DESC_EX ${LANG_ENGLISH} "Install sample GP scripts."
 LangString DESC_GAL ${LANG_ENGLISH} "Install Galois data files (degree > 7)."
 LangString DESC_SM ${LANG_ENGLISH} "Add PARI shortcuts to Start Menu and desktop."
 
@@ -94,6 +107,7 @@ LangString DESC_SM ${LANG_ENGLISH} "Add PARI shortcuts to Start Menu and desktop
   !insertmacro MUI_DESCRIPTION_TEXT ${SecGAL} $(DESC_GAL)
   !insertmacro MUI_DESCRIPTION_TEXT ${SecSM} $(DESC_SM)
   !insertmacro MUI_DESCRIPTION_TEXT ${SecDOC} $(DESC_DOC)
+  !insertmacro MUI_DESCRIPTION_TEXT ${SecEX} $(DESC_EX)
 !insertmacro MUI_FUNCTIONS_DESCRIPTION_END
  
 ;--------------------------------
