@@ -708,8 +708,8 @@ GEN
 rnfisnorminit(GEN T, GEN relpol, int galois)
 {
   gpmem_t av = avma;
-  long i, l, drel, k;
-  GEN prod, S1, S2, gen, cyc, bnf, nf, nfrel, rnfeq, rel, res;
+  long i, l, drel;
+  GEN prod, S1, S2, gen, cyc, bnf, nf, nfrel, rnfeq, rel, res, k;
   GEN y = cgetg(9, t_VEC);
 
   T = get_bnfpol(T, &bnf, &nf);
@@ -723,15 +723,19 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
     { /* needs reltoabs */
       rnfeq = rnfequation2(bnf, relpol);
       polabs = (GEN)rnfeq[1];
-      k = itos((GEN)rnfeq[3]);
+      k =      (GEN)rnfeq[3];
     }
     else
-      polabs = _rnfequation(bnf, relpol, &k, NULL);
+    {
+      long sk;
+      polabs = _rnfequation(bnf, relpol, &sk, NULL);
+      k = stoi(sk);
+    }
     rel = bnfinit0(polabs, 1, NULL, nfgetprec(nf));
   }
   else
   { /* over Q */
-    rel = bnf; k = 0;
+    rel = bnf; k = gzero;
     relpol = T; T = polx[MAXVARN];
     bnf = bnfinit0(T, 2, NULL, 0);
   }
@@ -762,7 +766,7 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
   y[1] = (long)bnf;
   y[2] = (long)rel;
   y[3] = (long)relpol;
-  y[4] = (long)get_theta_abstorel(T, relpol, stoi(-k));
+  y[4] = (long)get_theta_abstorel(T, relpol, k);
   y[5] = (long)prod;
   y[6] = (long)S1;
   y[7] = (long)S2;

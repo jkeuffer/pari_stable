@@ -3500,8 +3500,7 @@ _rnfequation(GEN A, GEN B, long *pk, GEN *pLPRS)
 
   *pk = 0; C = ZY_ZXY_resultant_all(A, B, pk, pLPRS);
   if (gsigne(leadingcoeff(C)) < 0) C = gneg_i(C);
-  C = primpart(C);
-  return C;
+  *pk = -*pk; return primpart(C);
 }
 
 GEN
@@ -3515,7 +3514,7 @@ rnfequation0(GEN A, GEN B, long flall)
   C = _rnfequation(A, B, &k, flall? &LPRS: NULL);
   if (flall)
   {
-    GEN w,a,b; /* a,b,c root of A,B,C = compositum, c = b - k a */
+    GEN w,a,b; /* a,b,c root of A,B,C = compositum, c = b + k a */
     /* invmod possibly very costly */
     a = gmul((GEN)LPRS[1], QX_invmod((GEN)LPRS[2], C));
     a = gneg_i(gmod(a, C));
@@ -3523,7 +3522,7 @@ rnfequation0(GEN A, GEN B, long flall)
     w = cgetg(4,t_VEC); /* [C, a, n ] */
     w[1] = (long)C;
     w[2] = (long)to_polmod(a, (GEN)w[1]);
-    w[3] = lstoi(-k); C = w;
+    w[3] = lstoi(k); C = w;
   }
   return gerepilecopy(av, C);
 }
@@ -3948,7 +3947,7 @@ makebasis(GEN nf, GEN pol, GEN rnfeq)
 GEN
 rnfpolredabs(GEN nf, GEN relpol, long flag)
 {
-  GEN red, bas, eq, z, elt, POL, pol, T, a;
+  GEN red, bas, z, elt, POL, pol, T, a;
   long v, fl;
   gpmem_t av = avma;
 
@@ -3956,25 +3955,26 @@ rnfpolredabs(GEN nf, GEN relpol, long flag)
   nf = checknf(nf); v = varn(relpol);
   if (DEBUGLEVEL>1) (void)timer2();
   relpol = unifpol(nf,relpol,1);
-  eq = rnfequation2(nf,relpol);
-  a = (GEN)eq[3];
   T = (GEN)nf[1];
-  if (signe(a))
-    relpol = poleval(relpol, gsub(polx[v],
-                             gmul(a, gmodulcp(polx[varn(T)],T))));
   if ((flag & nf_ADDZK) && (flag != (nf_ADDZK|nf_ABSOLUTE)))
     err(impl,"this combination of flags in rnfpolredabs");
   fl = (flag & nf_ADDZK)? nf_ORIG: nf_RAW;
-  POL = (GEN)eq[1];
   if (flag & nf_PARTIALFACT)
   {
-    fl |= nf_PARTIALFACT;
+    long sa;
     bas = NULL; /* -Wall */
-    red = polredabs0(POL, fl);
+    POL = _rnfequation(nf, relpol, &sa, NULL);
+    red = polredabs0(POL, fl | nf_PARTIALFACT);
+    a = stoi(sa);
   }
   else
   {
-    bas = makebasis(nf, relpol, eq);
+    GEN rel, eq = rnfequation2(nf,relpol);
+    POL = (GEN)eq[1];
+    a   = (GEN)eq[3];
+    rel = poleval(relpol, gsub(polx[v],
+                               gmul(a, gmodulcp(polx[varn(T)],T))));
+    bas = makebasis(nf, rel, eq);
     if (DEBUGLEVEL>1)
     {
       msgtimer("absolute basis");
@@ -4000,13 +4000,10 @@ rnfpolredabs(GEN nf, GEN relpol, long flag)
 
   elt = eltabstorel((GEN)red[2], T, relpol, a);
 
-  z = cgetg(3,t_VEC);
   pol = rnfcharpoly(nf,relpol,elt,v);
-  if (!(flag & nf_ORIG)) z = pol;
-  else
-  {
-    z[1] = (long)pol;
-    z[2] = (long)polymodrecip(elt);
-  }
-  return gerepileupto(av, z);
+  if (!(flag & nf_ORIG)) return gerepileupto(av, pol);
+  z = cgetg(3,t_VEC);
+  z[1] = (long)pol;
+  z[2] = (long)to_polmod(modreverse_i((GEN)elt[2],(GEN)elt[1]), pol);
+  return gerepilecopy(av, z);
 }
