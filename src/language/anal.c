@@ -1227,6 +1227,12 @@ check_pointer(unsigned int ptrs, entree *pointer[])
 
 #define match_comma() if (matchcomma) match(','); else matchcomma = 1
 
+static void
+skipdecl(void)
+{
+  if (*analyseur == ':') { analyseur++; skipexpr(); }
+}
+
 static long
 check_args()
 {
@@ -1253,6 +1259,7 @@ check_args()
       err(paramer1, old, mark.start);
     }
     cell[0] = varn(initial_value(ep));
+    skipdecl();
     if (*analyseur == '=')
     {
       char *old = ++analyseur;
@@ -2566,7 +2573,7 @@ skipidentifier(void)
 	err(paramer1, mark.identifier, mark.start);
       }
       check_new_fun = NOT_CREATED_YET; match('(');
-      while (*analyseur != ')') { match_comma(); skipexpr(); };
+      while (*analyseur != ')') { match_comma(); skipexpr(); skipdecl(); };
       match(')');
       if (*analyseur == '=' && analyseur[1] != '=')
       {
