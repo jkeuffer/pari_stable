@@ -391,7 +391,7 @@ forvec_next_lt(GEN gd, GEN v0)
 }
 
 GEN
-forvec_start(GEN *gd, GEN x, long flag, GEN (**next)(GEN,GEN))
+forvec_start(GEN x, long flag, GEN *gd, GEN (**next)(GEN,GEN))
 {
   long i, tx = typ(x), l = lg(x), t = t_INT;
   forvec_data *d;
@@ -448,7 +448,7 @@ forvec(entree *ep, GEN x, char *c, long flag)
   pari_sp av = avma;
   GEN D;
   GEN (*next)(GEN,GEN);
-  GEN v = forvec_start(&D, x, flag, &next);
+  GEN v = forvec_start(x, flag, &D, &next);
   push_val(ep, v);
   while (v) {
     pari_sp av2 = avma; lisseq_void(c); avma = av2;

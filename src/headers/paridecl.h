@@ -1674,7 +1674,7 @@ void    forpari(entree *ep, GEN a, GEN b, char *ch);
 void    forprime(entree *ep, GEN a, GEN b, char *ch);
 void    forstep(entree *ep, GEN a, GEN b, GEN s, char *ch);
 void    forvec(entree *ep, GEN x, char *ch, long flag);
-GEN     forvec_start(GEN *d, GEN x, long flag, GEN (**next)(GEN,GEN));
+GEN     forvec_start(GEN x, long flag, GEN *d, GEN (**next)(GEN,GEN));
 GEN     intnum0(entree *ep, GEN a, GEN b, char *ch,long flag,long prec);
 GEN     matrice(GEN nlig, GEN ncol,entree *ep1, entree *ep2, char *ch);
 GEN     polzag(long n, long m);

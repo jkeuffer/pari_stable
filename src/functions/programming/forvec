@@ -7,3 +7,9 @@ Help: forvec(x=v,seq,{flag=0}): v being a vector of two-component vectors of
  for i=n,..,1 if flag is zero or omitted. If flag = 1 (resp. flag = 2),
  restrict to increasing (resp. strictly increasing) sequences
 
+Function: _forvec_start
+Class: gp2c_internal
+Help: Initializes parameters for forvec_start.
+Description:
+ (gen, small, &gen, &func_GG):vec         forvec_start($1, $2, &$3, &$4)
+
