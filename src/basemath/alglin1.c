@@ -1407,7 +1407,7 @@ Flm_gauss_sp(GEN a, GEN b, ulong p)
   return iscol? (GEN)u[1]: u;
 }
 
-static GEN
+GEN
 u_idmat(long n)
 {
   GEN y = cgetg(n+1,t_MAT);

@@ -22,7 +22,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "parinf.h"
 extern GEN extendedgcd(GEN A);
 extern GEN ZV_lincomb(GEN u, GEN v, GEN X, GEN Y);
-extern int addcolumntomatrix(GEN V,GEN INVP,GEN L);
 extern long expodb(double x);
 
 /* default quality ratio for LLL: 99/100 */
@@ -2778,6 +2777,40 @@ minim_alloc(long n, double ***q, GEN *x, double **y,  double **z, double **v)
   *z = dalloc(s);
   *v = dalloc(s);
   for (i=1; i<n; i++) (*q)[i] = dalloc(s);
+}
+
+/* If V depends linearly from the columns of the matrix, return 0.
+ * Otherwise, update INVP and L and return 1. No GC. */
+static int
+addcolumntomatrix(GEN V, GEN invp, GEN L)
+{
+  GEN a = RM_zc_mul(invp,V);
+  long i,j,k, n = lg(invp);
+
+  if (DEBUGLEVEL>6)
+  {
+    fprintferr("adding vector = %Z\n",V);
+    fprintferr("vector in new basis = %Z\n",a);
+    fprintferr("list = %Z\n",L);
+    fprintferr("base change matrix =\n"); outerr(invp);
+  }
+  k = 1; while (k<n && (L[k] || gcmp0((GEN)a[k]))) k++;
+  if (k == n) return 0;
+  L[k] = 1;
+  for (i=k+1; i<n; i++) a[i] = ldiv(gneg_i((GEN)a[i]),(GEN)a[k]);
+  for (j=1; j<=k; j++)
+  {
+    GEN c = (GEN)invp[j], ck = (GEN)c[k];
+    if (gcmp0(ck)) continue;
+    c[k] = ldiv(ck, (GEN)a[k]);
+    if (j==k)
+      for (i=k+1; i<n; i++)
+	c[i] = lmul((GEN)a[i], ck);
+    else
+      for (i=k+1; i<n; i++)
+	c[i] = ladd((GEN)c[i], gmul((GEN)a[i], ck));
+  }
+  return 1;
 }
 
 /* Minimal vectors for the integral definite quadratic form: a.

@@ -73,6 +73,7 @@ GEN     ZXX_Flxy(GEN B, ulong p, long vs);
 
  /* alglin1.c */
 
+GEN     Flm_Flv_mul(GEN x, GEN y, ulong p);
 GEN     Flm_deplin(GEN x, ulong p);
 GEN     Flm_inv(GEN x, ulong p);
 GEN     Flm_ker(GEN x, ulong p);

@@ -66,6 +66,7 @@ check_and_build_obj(GEN S, int tag, GEN (*build)(GEN))
 /*                    GENERAL NUMBER FIELDS                        */
 /*                                                                 */
 /*******************************************************************/
+extern GEN u_idmat(long n);
 extern GEN lllint_fp_ip(GEN x, long D);
 extern GEN R_from_QR(GEN x, long prec);
 extern GEN hnf_invimage(GEN A, GEN b);
@@ -77,7 +78,6 @@ extern GEN computeGtwist(GEN nf, GEN vdir);
 extern GEN famat_mul(GEN f, GEN g);
 extern GEN famat_to_arch(GEN nf, GEN fa, long prec);
 extern GEN to_famat_all(GEN x, GEN y);
-extern int addcolumntomatrix(GEN V, GEN invp, GEN L);
 extern double check_bach(double cbach, double B);
 extern GEN get_arch(GEN nf,GEN x,long prec);
 extern GEN get_arch_real(GEN nf,GEN x,GEN *emb,long prec);
@@ -1764,41 +1764,42 @@ set_fact(REL_t *rel, FB_t *F)
   for (i=1; i<=primfact[0]; i++) c[primfact[i]] = exprimfact[i];
 }
 
-/* cf. relationrank()
- *
- * If V depends linearly from the columns of the matrix, return 0.
- * Otherwise, update INVP and L and return 1. No GC.
- */
-int
-addcolumntomatrix(GEN V, GEN invp, GEN L)
+/* If V depends linearly from the columns of the matrix, return 0.
+ * Otherwise, update INVP and L and return 1. Compute mod p (much faster)
+ * so some kernel vector might not be genuine. */
+static int
+addcolumn_mod(GEN V, GEN invp, GEN L, ulong p)
 {
-  GEN a = RM_zc_mul(invp,V);
+  pari_sp av = avma;
+  GEN a = Flm_Flv_mul(invp, V, p);
   long i,j,k, n = lg(invp);
+  ulong invak;
 
   if (DEBUGLEVEL>6)
   {
     fprintferr("adding vector = %Z\n",V);
     fprintferr("vector in new basis = %Z\n",a);
     fprintferr("list = %Z\n",L);
-    fprintferr("base change matrix =\n"); outerr(invp);
+    fprintferr("base change =\n"); outerr(invp);
   }
-  k = 1; while (k<n && (L[k] || gcmp0((GEN)a[k]))) k++;
-  if (k == n) return 0;
+  k = 1; while (k<n && (L[k] || !a[k])) k++;
+  if (k == n) { avma = av; return 0; }
+  invak = invumod((ulong)a[k], p);
   L[k] = 1;
-  for (i=k+1; i<n; i++) a[i] = ldiv(gneg_i((GEN)a[i]),(GEN)a[k]);
+  for (i=k+1; i<n; i++) 
+    if (a[i]) a[i] = p - ((a[i] * invak) % p);
   for (j=1; j<=k; j++)
   {
-    GEN c = (GEN)invp[j], ck = (GEN)c[k];
-    if (gcmp0(ck)) continue;
-    c[k] = ldiv(ck, (GEN)a[k]);
+    GEN c = (GEN)invp[j];
+    ulong ck = (ulong)c[k];
+    if (!ck) continue;
+    c[k] = (ck * invak) % p;
     if (j==k)
-      for (i=k+1; i<n; i++)
-	c[i] = lmul((GEN)a[i], ck);
+      for (i=k+1; i<n; i++) c[i] = (a[i] * ck) % p;
     else
-      for (i=k+1; i<n; i++)
-	c[i] = ladd((GEN)c[i], gmul((GEN)a[i], ck));
+      for (i=k+1; i<n; i++) c[i] = (c[i] + a[i] * ck) % p;
   }
-  return 1;
+  avma = av; return 1;
 }
 
 /* compute the rank of A in M_n,r(Z) (C long), where rank(A) = r <= n.
@@ -1808,22 +1809,11 @@ addcolumntomatrix(GEN V, GEN invp, GEN L)
  * if P[i] = e_i, and 1 if P[i] = A_i (i-th column of A)
  */
 static GEN
-relationrank(RELCACHE_t *cache, GEN L)
+relationrank(RELCACHE_t *cache, GEN L, ulong p)
 {
-  pari_sp av = avma, lim = stack_lim(av, 1);
-  GEN invp = idmat(lg(L) - 1);
+  GEN invp = u_idmat(lg(L) - 1);
   REL_t *rel = cache->base + 1;
-
-  for (; rel <= cache->last; rel++)
-  {
-    (void)addcolumntomatrix(rel->R, invp, L);
-    if (low_stack(lim, stack_lim(av,1)))
-    {
-      if(DEBUGMEM>1) err(warnmem,"relationrank");
-      invp = gerepilecopy(av, invp);
-    }
-  }
-  if (avma != av) invp = gerepilecopy(av, invp);
+  for (; rel <= cache->last; rel++) (void)addcolumn_mod(rel->R, invp, L, p);
   return invp;
 }
 
@@ -1831,16 +1821,15 @@ static void
 small_norm(RELCACHE_t *cache, FB_t *F, GEN G0, double LOGD, GEN nf,
            long nbrelpid, double LIMC2)
 {
-  const int BMULT = 8;
-  const int maxtry_DEP  = 20;
-  const int maxtry_FACT = 500;
+  const ulong mod_p = 27449;
+  const int BMULT = 8, maxtry_DEP  = 20, maxtry_FACT = 500;
   const double eps = 0.000001;
   double *y,*z,**q,*v, BOUND;
-  pari_sp av, av2, limpile;
+  pari_sp av;
   long nbsmallnorm, nbfact, j, k, noideal, precbound;
   long N = degpol(nf[1]), R1 = nf_get_r1(nf), prec = nfgetprec(nf);
   GEN x, gx, Mlow, M, G, r;
-  GEN L = vecsmall_const(F->KC, 0), invp = relationrank(cache, L);
+  GEN L = vecsmall_const(F->KC, 0), invp = relationrank(cache, L, mod_p);
   REL_t *rel = cache->last;
 
   if (DEBUGLEVEL)
@@ -1857,18 +1846,14 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN G0, double LOGD, GEN nf,
   precbound = 3 + (long)ceil(
     (N/2. * ((N-1)/2.* log(4./3) + log(BMULT/(double)N)) + log(LIMC2) + LOGD/2)
       / (BITS_IN_LONG * log(2.))); /* enough to compute norms */
-  if (precbound < prec)
-    Mlow = gprec_w(M, precbound);
-  else
-    Mlow = M;
+  Mlow = (precbound < prec)? gprec_w(M, precbound): M;
+
   minim_alloc(N+1, &q, &x, &y, &z, &v);
-  av = avma;
-  for (noideal=F->KC; noideal; noideal--)
+  for (av = avma, noideal = F->KC; noideal; noideal--, avma = av)
   {
-    pari_sp av0 = avma;
     long nbrelideal = 0, dependent = 0, try_factor = 0;
     GEN IDEAL, ideal = (GEN)F->LP[noideal];
-    REL_t *oldrel = rel;
+    pari_sp av2;
 
     if (DEBUGLEVEL>1) fprintferr("\n*** Ideal no %ld: %Z\n", noideal, ideal);
     IDEAL = prime_to_ideal(nf,ideal);
@@ -1890,11 +1875,10 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN G0, double LOGD, GEN nf,
       if (DEBUGLEVEL>3) fprintferr("\n");
       fprintferr("BOUND = %.4g\n",BOUND); flusherr();
     }
-    BOUND *= 1 + eps; av2=avma; limpile = stack_lim(av2,1);
+    BOUND *= 1 + eps;
     k = N; y[N] = z[N] = 0; x[N] = (long)sqrt(BOUND/v[N]);
-    for(;; x[1]--)
+    for (av2 = avma;; x[1]--, avma = av2)
     {
-      pari_sp av3 = avma;
       for(;;) /* look for primitive element of small norm, cf minim00 */
       {
         double p;
@@ -1914,37 +1898,35 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN G0, double LOGD, GEN nf,
 	  if (y[k] + p*p*v[k] <= BOUND) break;
 	  k++; x[k]--;
 	}
-	if (k==1) /* element complete */
-	{
-	  if (y[1]<=eps) goto ENDIDEAL; /* skip all scalars: [*,0...0] */
-	  if (ccontent(x)==1) /* primitive */
-	  {
-            gx = ZM_zc_mul(IDEAL,x);
-            if (!isnfscalar(gx))
-            {
-              pari_sp av4 = avma;
-              GEN Nx, xembed = gmul(Mlow, gx); 
-              nbsmallnorm++;
-              if (++try_factor > maxtry_FACT) goto ENDIDEAL;
-              Nx = ground( norm_by_embed(R1,xembed) );
-              setsigne(Nx, 1);
-              if (can_factor(F, nf, NULL, gx, Nx)) { avma = av4; break; }
-              if (DEBUGLEVEL > 1) { fprintferr("."); flusherr(); }
-            }
-	    avma = av3;
-	  }
-	  x[1]--;
-	}
+        if (k != 1) continue;
+
+	/* element complete */
+        if (y[1]<=eps) goto ENDIDEAL; /* skip all scalars: [*,0...0] */
+        if (ccontent(x)==1) /* primitive */
+        {
+          gx = ZM_zc_mul(IDEAL,x);
+          if (!isnfscalar(gx))
+          {
+            GEN Nx, xembed = gmul(Mlow, gx); 
+            nbsmallnorm++;
+            if (++try_factor > maxtry_FACT) goto ENDIDEAL;
+            Nx = ground( norm_by_embed(R1,xembed) );
+            setsigne(Nx, 1);
+            if (can_factor(F, nf, NULL, gx, Nx)) break;
+            if (DEBUGLEVEL > 1) { fprintferr("."); flusherr(); }
+          }
+        }
+        x[1]--;
       }
       set_fact(++rel, F);
       /* make sure we get maximal rank first, then allow all relations */
       if (rel - cache->base > 1 && rel - cache->base <= F->KC
-                                && ! addcolumntomatrix(rel->R,invp,L))
+                                && ! addcolumn_mod(rel->R,invp,L, mod_p))
       { /* Q-dependent from previous ones: forget it */
         free((void*)rel->R); rel--;
         if (DEBUGLEVEL>1) fprintferr("*");
         if (++dependent > maxtry_DEP) break;
-        avma = av3; continue;
+        continue;
       }
       rel->m = gclone(gx);
       rel->ex= NULL;
@@ -1953,15 +1935,8 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN G0, double LOGD, GEN nf,
       if (DEBUGLEVEL) { nbfact++; dbg_rel(rel - cache->base, rel->R); }
       if (rel >= cache->end) goto END; /* we have enough */
       if (++nbrelideal == nbrelpid) break;
-
-      if (low_stack(limpile, stack_lim(av2,1)))
-      {
-	if(DEBUGMEM>1) err(warnmem,"small_norm");
-        invp = gerepilecopy(av2, invp);
-      }
     }
 ENDIDEAL:
-    if (rel == oldrel) avma = av0; else invp = gerepilecopy(av, invp);
     if (DEBUGLEVEL>1) msgtimer("for this ideal");
   }
 END:
@@ -2948,8 +2923,9 @@ init_rel(RELCACHE_t *cache, FB_t *F, long RU)
     rel++;
   }
   cache->last = rel - 1;
-  if (DEBUGLEVEL) fprintferr("After trivial relations, cglob = %ld\n",
-               cache->last - cache->base);
+  if (DEBUGLEVEL)
+    for (i = 1, rel = cache->base + 1; rel <= cache->last; rel++, i++)
+      dbg_rel(i, rel->R);
 }
 
 static void
