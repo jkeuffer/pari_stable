@@ -2563,7 +2563,17 @@ hnflll_i(GEN A, GEN *ptB, int remove)
     }
     else
     {
-      for (i=k-2; i>=nzcol; i--) reduce2(A,B,k,i,row,lambda,D);
+      for (i=k-2; i>=nzcol; i--)
+      {
+        reduce2(A,B,k,i,row,lambda,D);
+        if (low_stack(lim, stack_lim(av,3)))
+        {
+          GEN a = (GEN)lambda, b = (GEN)(D-1); /* gcc -Wall */
+          gptr[0]=&A; gptr[1]=&a; gptr[2]=&b; gptr[3]=&B; 
+          if (DEBUGMEM) err(warnmem,"hnflll (reducing), i = %ld",i);
+          gerepilemany(av,gptr,B? 4: 3); lambda = (GEN**)a; D = (GEN*)(b+1);
+        }
+      }
       k++;
     }
     if (low_stack(lim, stack_lim(av,3)))
