@@ -1693,7 +1693,7 @@ be_honest(GEN nf,GEN subfb,long RU,long PRECREGINT)
           idealpro = ideallllredpart1(nf,ideal,p2,N,PRECREGINT);
           if (idealpro &&
 	      factorisegen(nf,idealpro,iz-1,factorbase[iz-1])) break;
-	  nbtest++; if (nbtest==20) return 0;
+	  nbtest++; if (nbtest==200) return 0;
 	}
 	avma=av; if (k <= RU) break;
       }
