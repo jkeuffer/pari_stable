@@ -173,7 +173,7 @@ extern ulong hiremainder;
 ({ ulong __value, __arg1 = (a), __arg2 = (b); \
    __asm__ ("divl %4" \
         : "=a" /* %eax */ (__value), "=d" /* %edx */ (hiremainder) \
-        : "0" /* %eax */ (__arg1), "1" /* %edx */ (hiremainder), "g" (__arg2)); \
+        : "0" /* %eax */ (__arg1), "1" /* %edx */ (hiremainder), "mr" (__arg2)); \
    __value; \
 })
 
