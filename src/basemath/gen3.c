@@ -1827,7 +1827,7 @@ scalarpol(GEN x, long v)
                  : evallgef(3) | evalvarn(v) | evalsigne(1);
   y[2]=lcopy(x); return y;
 }
-/*FIXME:suppress poldeg1 in polarith2.c*/
+/*FIXME:suppress poldeg1 in polarit2.c*/
 /* deg1pol(a,b,x)=a*x+b*/
 GEN
 deg1pol(GEN x1, GEN x0,long v)
