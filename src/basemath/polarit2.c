@@ -4514,10 +4514,9 @@ polratlift(GEN P, GEN mod, GEN amax, GEN bmax, GEN denom)
  *  2:reconstruct the result via matratlift, stoping as soon as we get weird
  *    denominators.
  *  3:if matratlift succeeds, try the full division.
- * Suppose we does not have sufficient accuracy to get the result right:
- * it is extremly rare that matratlift will succeed, and even if it does, the
- * polynomial we get has sensible coefficients, so the full division will
- * not be too costly.
+ * Suppose accuracy is insufficient to get the result right: matratlift will
+ * rarely succeed, and even if it does the polynomial we get has sensible
+ * coefficients, so the full division will not be too costly.
  *
  * FIXME: Handle rational coefficient for P and Q.
  * If not NULL, den must a a multiple of the denominator of the gcd,
