@@ -1134,11 +1134,12 @@ community()
   long len = strlen(GPMISCDIR) + 1024;
   char *s = gpmalloc(len);
   
-  sprintf(s, "The standard distribution of GP/PARI includes a reference manual,\
-a tutorial, a reference card and quite a few examples. They should have been \
-installed in the following directory: %s. If not you should ask the person who \
-installed PARI on your system where they can be found. You can also download \
-them from the PARI WWW site http://www.parigp-home.de/", GPMISCDIR);
+  sprintf(s, "The standard distribution of GP/PARI includes a reference \
+manual, a tutorial, a reference card and quite a few examples. They should \
+have been installed in the directory '%s'. If not you should ask the person \
+who installed PARI on your system where they can be found. You can also \
+download them from the PARI WWW site 'http://www.parigp-home.de/'",
+GPMISCDIR);
   print_text(s); free(s);
 
   pariputs("\nThree mailing lists are devoted to PARI:\n\
@@ -1149,9 +1150,8 @@ them from the PARI WWW site http://www.parigp-home.de/", GPMISCDIR);
   print_text("\
 To subscribe, send an empty message to <listname>-subscribe@list.cr.yp.to. You \
 can only send messages to the lists you have subscribed to! An archive is kept \
-at the WWW site mentioned above. In case you don't want to subscribe, you can \
-reach the authors directly by email: pari@math.u-bordeaux.fr (answer not \
-guaranteed)."); }
+at the WWW site mentioned above. You can also reach the authors directly by \
+email: pari@math.u-bordeaux.fr (answer not guaranteed)."); }
 
 static void
 gentypes(void)
