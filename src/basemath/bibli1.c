@@ -1814,7 +1814,7 @@ canon_pol(GEN z)
 GEN caractducos(GEN p, GEN x, int v);
 
 static GEN
-pols_for_polred0(GEN x, GEN base, GEN LLLbase, GEN *pta, 
+pols_for_polred(GEN x, GEN base, GEN LLLbase, GEN *pta, 
 		int (*check)(GEN, GEN), GEN arg)
 {
   long i,j, v = varn(x), n = lg(base);
@@ -1844,12 +1844,6 @@ pols_for_polred0(GEN x, GEN base, GEN LLLbase, GEN *pta,
   (void)remove_duplicates(y,a);
   if (pta) *pta = a;
   return y;
-}
-
-static GEN
-pols_for_polred(GEN x, GEN base, GEN LLLbase, GEN *pta)
-{
-  return pols_for_polred0(x,base,LLLbase,pta,NULL,NULL);
 }
 
 GEN
@@ -1973,13 +1967,11 @@ allpolred0(GEN x, GEN *pta, long code, long prec,
     }
   }
   p1 = LLL_nfbasis(&x,polr,base,prec);
-  y = pols_for_polred0(x,base,p1,pta,check,arg);
+  y = pols_for_polred(x,base,p1,pta,check,arg);
   if (check)
   {
-    if(!y) 
-    { avma = av; return NULL; }
-    else
-    { return gerepileupto(av, y); }  
+    if (y) return gerepileupto(av, y);
+    avma = av; return NULL;
   }
 
   if (pta)
@@ -2015,27 +2007,20 @@ polred0(GEN x,long flag, GEN p, long prec)
 GEN
 ordred(GEN x, long prec)
 {
-  GEN p1,p2,p3,base;
-  long n=lgef(x)-3,i,j,av=avma,v = varn(x),tetpil;
+  GEN base,y;
+  long n=lgef(x)-3,i,av=avma,v = varn(x);
 
   if (typ(x) != t_POL) err(typeer,"ordred");
   if (!signe(x)) return gcopy(x);
   if (!gcmp1((GEN)x[n+2])) err(impl,"ordred for nonmonic polynomials");
 
-  p2=roots(x,prec); p3=cgetg(n+1,t_MAT);
-
-  base=cgetg(n+1,t_VEC); /* power basis */
+  base = cgetg(n+1,t_VEC); /* power basis */
   for (i=1; i<=n; i++)
-  {
-    base[i]=lpowgs(polx[v],i-1);
-    p1=cgetg(n+1,t_COL); p3[i]=(long)p1;
-    for (j=1; j<=n; j++)
-      p1[j]=lpuigs((GEN)p2[j],i-1);
-  }
-  p2 = mulmat_real(gconj(gtrans(p3)),p3);
-  p1 = pols_for_polred(x,base,lllgram(p2,prec), NULL);
-
-  tetpil=avma; return gerepile(av,tetpil, gcopy(p1));
+    base[i] = lpowgs(polx[v],i-1);
+  y = cgetg(3,t_VEC);
+  y[1] = (long)x;
+  y[2] = (long)base;
+  return gerepileupto(av, allpolred(y,NULL,0,prec));
 }
 
 GEN roots_to_pol_r1r2(GEN a, long r1, long v);
