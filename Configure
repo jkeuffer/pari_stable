@@ -36,8 +36,7 @@ extract_dir_list="$doc_dir $emacs_dir $misc_dir"
 # Version number and patch level.
 #
 . $config_dir/version
-rcsrevision="$version"
-if test "0$patch" != 0; then rcsrevision="$version.$patch"; fi
+version=$VersionMajor.$VersionMinor
 
 cd $config_dir
 
@@ -914,7 +913,10 @@ case "$osname" in
   nextstep) cppfl="-traditional-cpp" ;;
   freebsd)
     if test $PORTOBJFORMAT = "elf"; then
-            cppfl="-DUSE_ELF"    
+      cppfl="-DUSE_ELF"    
+      FREEBSD_ELF=1
+    else
+      FREEBSD_ELF=0
     fi ;;
 esac
 CPP="$CC $cppfl -E -I."
@@ -959,6 +961,7 @@ echo "Executable linker is   $LD  $LDFLAGS"
 
 if test "$optimization" = profiling; then DLLD=; else
   DLLD=${DLLD-ld}
+  DLSUFFIX=so
 # Which suffix for Dynamic Lib?
 # Some linkers (SunOS 4) need minor and major lib version numbers.
 # Some others (SunOS 5) need a link from a .so
@@ -967,20 +970,14 @@ if test "$optimization" = profiling; then DLLD=; else
   case "$osname-$arch" in
 #    aix-*)  DLSUFFIX=a  ;; dynamic linking does not work!
     hpux-*)  DLSUFFIX=sl ;;
-    irix-*)  DLSUFFIX=so ;;
-    sunos-*) DLSUFFIX=so; somake=.`echo $version| sed 's/\.//g'`.$patch ;;
-    linux-*|solaris-*|*-alpha)
-               DLSUFFIX=so; somake=.$version; sodest=.$patch ;;
-    freebsd-*)
-               if test $PORTOBJFORMAT = "elf"; then
-                       somake=.`echo $version | sed 's/\..*//g'`
-                       DLSUFFIX=so; sodest=.`echo $version | sed 's/.*\.//'`.$patch
-                       FREEBSD_ELF=1
-               else
-                       DLSUFFIX=so; somake=.$version; sodest=.$patch 
-                       FREEBSD_ELF=0
-
-               fi ;;
+    irix-*)  ;;
+    sunos-*) somake=.$VersionMajor$VersionMinor.$patch ;;
+    solaris-*|*-alpha)
+             somake=.$version
+             sodest=.$patch ;;
+    linux-*|freebsd-*)
+             somake=.$VersionMajor
+             sodest=.$VersionMinor.$patch ;;
     cygwin*) DLSUFFIX=dll; somake= ; sodest= ;;
     *) DLLD=;;
   esac
@@ -1058,7 +1055,7 @@ if test -n "$readline"; then
   exe=$osname-$arch-rlv$$
   $CC $extraflag $RLINCLUDE -o $exe rl_version.c $RLLIBS 2>/dev/null
   if test -r $exe; then readline=`$exe`; else readline=1.0; fi
-  rm -f $exe
+#  rm -f $exe
 fi
 
 ####################### CONFIGURE - LIBC ####################################
