@@ -2136,12 +2136,13 @@ skiptruc(void)
   long n=0;
   char *old;
 
-  if (*analyseur == '"') { skipstring(); return 0; }
-  if (*analyseur == '!') { analyseur++; skiptruc(); return 0; }
-  if (*analyseur == '\'')
+  switch(*analyseur)
   {
-    analyseur++; check_var_name();
-    skipentry(); return 0;
+    case '"': skipstring(); return 0;
+    case '!': analyseur++; skiptruc(); return 0;
+    case '&': case '\'':
+      analyseur++; check_var_name();
+      skipentry(); return 0;
   }
   if (isalpha((int)*analyseur))
     { skipidentifier(); return 0; }
