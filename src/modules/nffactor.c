@@ -40,7 +40,7 @@ extern GEN vandermondeinverse(GEN L, GEN T, GEN den, GEN prep);
 extern GEN vconcat(GEN A, GEN B);
 extern int cmbf_precs(GEN q, GEN A, GEN B, long *a, long *b, GEN *qa, GEN *qb);
 extern int isrational(GEN x);
-extern long LLL_check_progress(GEN Bnorm, long n0, GEN m, GEN *CM_L, long *BPF, pari_timer *T, long *ti_LLL);
+extern GEN LLL_check_progress(GEN Bnorm, long n0, GEN m, int final, pari_timer *T, long *ti_LLL);
 extern void remake_GM(GEN nf, nffp_t *F, long prec);
 #define RXQX_div(x,y,T) RXQX_divrem((x),(y),(T),NULL)
 #define RXQX_rem(x,y,T) RXQX_divrem((x),(y),(T),ONLY_REM)
@@ -619,7 +619,7 @@ nfcmbf(nfcmbf_t *T, GEN p, long a, long maxK, long klim)
   lcpol = lc? gmul(lc,pol): pol;
 
   {
-    GEN T1,T2, q, goodq, lc2 = lc? sqri(lc): NULL;
+    GEN T1,T2, q, qgood, lc2 = lc? sqri(lc): NULL;
     long e, e1, e2;
 
     q = ceil_safe(mpsqrt(T->BS_2));
@@ -647,8 +647,8 @@ nfcmbf(nfcmbf_t *T, GEN p, long a, long maxK, long klim)
       trace1 = trace2 = NULL;
     else
     {
-      goodq = shifti(gun, e2 - 32); /* single precision check */
-      if (cmpii(goodq, q) > 0) q = goodq;
+      qgood = shifti(gun, e2 - 32); /* single precision check */
+      if (cmpii(qgood, q) > 0) q = qgood;
       T1 = trace1;
       T2 = trace2;
       trace1 = gdivround(T1, q); if (gcmp0(trace1)) trace1 = NULL;
@@ -692,10 +692,10 @@ nextK:
           t = gadd(t, (GEN)trace1[ind[i]]);
           s = gadd(s, (GEN)hS1[ind[i]]);
           for (j=1; j<=dnf; j++)
-            if (absi_cmp((GEN)s[i], deno2) > 0)
+            if (absi_cmp((GEN)s[j], deno2) > 0)
             {
-              t = gsub(t, (GEN)h1[i]);
-              s[i] = lsubii((GEN)s[i], den);
+              t = gsub(t, (GEN)h1[j]);
+              s[j] = lsubii((GEN)s[j], den);
             }
         }
         if (rtodbl(QuickNormL2(t,DEFAULTPREC)) > Blow)
@@ -714,10 +714,10 @@ nextK:
           t = gadd(t, (GEN)trace2[ind[i]]);
           s = gadd(s, (GEN)hS2[ind[i]]);
           for (j=1; j<=dnf; j++)
-            if (absi_cmp((GEN)s[i], deno2) > 0)
+            if (absi_cmp((GEN)s[j], deno2) > 0)
             {
-              t = gsub(t, (GEN)h1[i]);
-              s[i] = lsubii((GEN)s[i], den);
+              t = gsub(t, (GEN)h1[j]);
+              s[j] = lsubii((GEN)s[j], den);
             }
         }
         if (rtodbl(QuickNormL2(t,DEFAULTPREC)) > Blow)
@@ -946,7 +946,7 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long a, long rec)
   GEN Btra;
   long dnf = degpol(nfT), dP = degpol(P);
 
-  long BitPerFactor = 3; /* nb bits / modular factor */
+  double BitPerFactor = 1.; /* nb bits / modular factor */
   long i, C, tmax, n0;
   GEN lP, Bnorm, Tra, T2, TT, CM_L, m, list, ZERO;
   double Blow;
@@ -976,15 +976,17 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long a, long rec)
   /* tmax = current number of traces used (and computed so far) */
   for(tmax = 0;; tmax++)
   {
-    long tnew = tmax + 1, r = lg(CM_L)-1;
-    GEN M_L, q, qmin, goodq;
-
-    if (DEBUGLEVEL>2)
-      fprintferr("nf_LLL_cmbf: %ld potential factors (tmax = %ld)\n", r, tmax);
+    long b, bmin, bgood, delta, tnew = tmax + 1, r = lg(CM_L)-1;
+    GEN M_L, q;
+    pari_timer ti2;
 
     /* bound for f . S_k(genuine factor) = ZC * bound for T_2(S_tnew) */
     Btra = mulrr(ZC, mulsr(dP*dP, normlp(Br, 2*tnew, dnf)));
-    qmin = ceil_safe(mpsqrt(Btra));
+    bmin = logint(ceil_safe(mpsqrt(Btra)), gdeux, NULL);
+    if (DEBUGLEVEL>2)
+      fprintferr("LLL_cmbf: %ld potential factors (tmax = %ld, bmin = %ld)\n",
+                 r, tmax, bmin);
+
 
     /* compute Newton sums (possibly relifting first) */
     if (gcmp(GSmin, Btra) < 0)
@@ -1021,43 +1023,57 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long a, long rec)
     }
 
     /* compute truncation parameter */
+    if (DEBUGLEVEL>2) TIMERstart(&ti2);
     av2 = avma;
-    M_L = (C == 1)? CM_L : gdivexact(CM_L, stoi(C));
+    delta = 0;
+    b = 0; /* -Wall */
+AGAIN:
+    M_L = gdivexact(CM_L, stoi(C));
     T2 = centermod( gmul(Tra, M_L), pa );
     T2 = gsub(T2, gmul(PRK, gdivround(gmul(PRKinv, T2), pa)));
 
-    goodq = shifti(gun, gexpo(T2) - BitPerFactor * r);
-    q = gmax(qmin, goodq);
-
-    /* build and reduce lattice */
-    m = concatsp( vconcat( CM_L, gdivround(T2, q) ),
-                  vconcat( ZERO, gdivround(PRK,q) ) );
-    /*     [ C M_L   0  ]
-     * m = [            ]   square matrix
-     *     [  T2'   PRK ]   T2' = Tra * M_L  truncated
-     */
-    i = LLL_check_progress(Bnorm, n0, m, &CM_L, &BitPerFactor,
-                           /*dbg:*/ &ti, &ti_LLL);
-    if (i == 1) { list = _col(P); break; }
-    if (i > r) { avma = av2; continue; } /* no progress */
-
-    if (rec && i*rec >= n0)
+    if (!delta)
+    { /* initialize lattice, using few p-adic digits for traces */
+      bgood = (long)(gexpo(T2) - BitPerFactor * r);
+      b = max(bmin, bgood);
+      delta = a - b;
+      q = shifti(gun, b);
+      m = concatsp( vconcat( CM_L, gdivround(T2, q) ),
+                    vconcat( ZERO, gdivround(PRK,q) ) );
+      /*     [ C M_L   0  ]
+       * m = [            ]   square matrix
+       *     [  T2'   PRK ]   T2' = Tra * M_L  truncated
+       */
+    }
+    else
+    { /* add more p-adic digits and continue reduction */
+      long b0 = gexpo(T2);
+      if (b0 < b) b = b0;
+      b = max(b-delta, bmin);
+      if (b - delta/2 < bmin) b = bmin; /* near there. Go all the way */
+      q = shifti(gun, b);
+      m = vconcat( CM_L, gdivround(T2, q) );
+    }
+    if (DEBUGLEVEL>2)
+      fprintferr("LLL_cmbf: b = %ld, r = %ld\n", b,lg(m)-1);
+    CM_L = LLL_check_progress(Bnorm, n0, m, b == bmin, /*dbg:*/ &ti, &ti_LLL);
+    if (!CM_L) { list = _col(P); break; }
+    i = lg(CM_L) - 1;
+    if (b > bmin) 
     {
       CM_L = gerepilecopy(av2, CM_L);
-      if (low_stack(lim, stack_lim(av,1)))
-      {
-        if(DEBUGMEM>1) err(warnmem,"nf_LLL_cmbf");
-        gerepileall(av, 8, &CM_L,&TT,&Tra,&famod,&pa,&GSmin,&PRK,&PRKinv);
-      }
-      continue;
+      goto AGAIN;
     }
+    if (DEBUGLEVEL>2) msgTIMER(&ti2, "this trace");
 
-    if (DEBUGLEVEL>2) (void)TIMER(&ti);
-    list = nf_check_factors(T, P, M_L, famod, pa);
-    if (DEBUGLEVEL>2) ti_CF += TIMER(&ti);
-    if (list) break;
-
-    CM_L = gerepilecopy(av2, CM_L);
+    if (i <= r && i*rec < n0)
+    {
+      if (DEBUGLEVEL>2) (void)TIMER(&ti);
+      list = nf_check_factors(T, P, M_L, famod, pa);
+      if (DEBUGLEVEL>2) ti_CF += TIMER(&ti);
+      if (list) break;
+      CM_L = gerepilecopy(av2, CM_L);
+    }
     if (low_stack(lim, stack_lim(av,1)))
     {
       if(DEBUGMEM>1) err(warnmem,"nf_LLL_cmbf");
@@ -1170,7 +1186,7 @@ nfsqff(GEN nf, GEN pol, long fl)
   N2 = mulsr(dpol*dpol, normlp(T.Br, 4, n)); /* bound for T_2(lt * S_2) */
   T.BS_2 = mulrr(T.ZC, N2); /* bound for |S_2|^2 on chosen Z-basis */
 
-  if (DEBUGLEVEL>3) {
+  if (DEBUGLEVEL>2) {
     msgtimer("bound computation");
     fprintferr("  1) T_2 bound for %s: %Z\n", fl?"root":"factor", C0);
     fprintferr("  2) Conversion from T_2 --> | |^2 bound : %Z\n", T.ZC);
