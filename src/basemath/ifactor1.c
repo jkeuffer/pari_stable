@@ -221,10 +221,12 @@ plisprime(GEN N, long flag)
 {
   ulong ltop=avma;
   long i;
+  int eps;
   GEN C,F;
   if ( typ(N) != t_INT ) err(arither1);
   N=absi(N);
-  if ( gegal(N,gdeux) ) { avma=ltop; return gun; }
+  eps=cmpis(N,2);
+  if (eps<=0) { avma=ltop; return eps?gzero:gun; }
   /* Use Jaeschke results. See above */
   if (miller(N,7)) /* miller returns 0 for 2 ! */
   {
