@@ -447,7 +447,7 @@ install-examples:
 	-\$(INSTALL_DATA) $ex/classno.gp  \$(EXDIR)
 	-\$(INSTALL_DATA) $ex/contfrac.gp \$(EXDIR)
 	-\$(INSTALL_DATA) $ex/lucas.gp    \$(EXDIR)
-	-\$(INSTALL_DATA) $ex/matexp.c    \$(EXDIR)
+	-\$(INSTALL_DATA) $ex/extgcd.c    \$(EXDIR)
 	-\$(INSTALL_DATA) $ex/rho.gp      \$(EXDIR)
 	-\$(INSTALL_DATA) $ex/squfof.gp   \$(EXDIR)
 	-\$(INSTALL_DATA) $ex/taylor.gp   \$(EXDIR)
