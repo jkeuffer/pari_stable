@@ -1340,7 +1340,7 @@ compute_radius(GEN* radii, GEN p, long k, double aux, double *delta)
   p1 = radii[k];
   for (i=k-1; i>=1; i--)
   {
-    if (!signe(radii[i]))
+    if (!signe(radii[i]) || cmprr(radii[i], p1) > 0)
       affrr(p1, radii[i]);
     else
       p1 = radii[i];
@@ -1348,7 +1348,7 @@ compute_radius(GEN* radii, GEN p, long k, double aux, double *delta)
   p1 = radii[k+1];
   for (i=k+1; i<=n; i++)
   {
-    if (!signe(radii[i]))
+    if (!signe(radii[i]) || cmprr(radii[i], p1) < 0)
       affrr(p1, radii[i]);
     else      
       p1 = radii[i];
