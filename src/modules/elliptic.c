@@ -2854,14 +2854,15 @@ torsellnagelllutz(GEN e)
 
 /* Using Doud's algorithm */
 
-/* Input e and n, finds a bound for #Tor */
+/* finds a bound for #E_tor */
 static long
-torsbound(GEN e, long n)
+torsbound(GEN e)
 {
   long av = avma, m, b, c, d, prime = 2;
   byteptr p = diffptr;
   GEN D = (GEN)e[12];
 
+  n = lgefint(D); /* number of primes to try */
   b = c = m = 0; p++;
   while (m<n)
   {
@@ -2989,7 +2990,7 @@ torselldoud(GEN e)
   if (prec < b) err(precer, "torselldoud");
   b = max(b, DEFAULTPREC);
   if (b < prec) { prec = b; e = gprec_w(e, b); }
-  b = torsbound(e,3);
+  b = torsbound(e);
   if (b==1) { avma=av; return tors(e,1,NULL,NULL, v); }
   w22 = gmul2n((GEN)e[16],-1);
   w1 = (GEN)e[15];
