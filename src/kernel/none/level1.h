@@ -54,10 +54,10 @@ GEN    dvmdsi(long x, GEN y, GEN *z);
 void   dvmdsiz(long x, GEN y, GEN z, GEN t);
 GEN    dvmdss(long x, long y, GEN *z);
 void   dvmdssz(long x, long y, GEN z, GEN t);
-ulong  evallg(ulong x);
-ulong  evallgef(ulong x);
-ulong  evalvalp(ulong x);
-ulong  evalexpo(ulong x);
+long   evallg(long x);
+long   evallgef(long x);
+long   evalvalp(long x);
+long   evalexpo(long x);
 #ifndef __M68K__
 long   expi(GEN x);
 #endif
@@ -97,30 +97,30 @@ GEN    utoi(ulong x);
 long   vali(GEN x);
 
 #else /* defined(INLINE) */
-INLINE ulong
-evallg(ulong x)
+INLINE long
+evallg(long x)
 {
   if (x & ~LGBITS) err(errlg);
   return m_evallg(x);
 }
 
-INLINE ulong
-evallgef(ulong x)
+INLINE long
+evallgef(long x)
 {
   if (x & ~LGEFBITS) err(errlgef);
   return m_evallgef(x);
 }
 
-INLINE ulong
-evalvalp(ulong x)
+INLINE long
+evalvalp(long x)
 {
   const long v = m_evalvalp(x);
   if (v & ~VALPBITS) err(errvalp);
   return v;
 }
 
-INLINE ulong
-evalexpo(ulong x)
+INLINE long
+evalexpo(long x)
 {
   const long v = m_evalexpo(x);
   if (v & ~EXPOBITS) err(errexpo);
