@@ -64,11 +64,11 @@ fi
 if test -n "$gmp"; then
   case "$pretty" in
     *GMP*)
-      pretty=`echo $pretty | sed "s/GMP/GMP-$gmp/"` ;;
+      pretty=`echo $pretty | sed "s,GMP,GMP-$gmp,"` ;;
     /$kernlvl1)
-      pretty=`echo $pretty | sed "s/$kernlvl1/GMP-$gmp/"` ;;
+      pretty=`echo $pretty | sed "s,$kernlvl1,GMP-$gmp,"` ;;
     *)
-      pretty=`echo $pretty | sed "s/ *kernel/\/GMP-$gmp kernel/"` ;;
+      pretty=`echo $pretty | sed "s, *kernel,/GMP-$gmp kernel,"` ;;
   esac
   kernlvl1=gmp
 fi
