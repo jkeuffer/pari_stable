@@ -1850,12 +1850,12 @@ trunc_error(GEN x)
 
 /* xarch = complex logarithmic embeddings of units (u_j) found so far */
 static GEN
-compute_multiple_of_R(GEN xarch,long RU,long N,GEN *ptsublambda)
+compute_multiple_of_R(GEN xarch,long RU,long N,GEN *ptlambda)
 {
-  GEN T,v,mdet,mdet_t,Im_mdet,kR,sublambda,xreal, *gptr[2];
+  GEN T,v,mdet,mdet_t,Im_mdet,kR,lambda,xreal, *gptr[2];
   long av = avma, i,j, zc = lg(xarch)-1, R1 = 2*RU - N;
 
-  if (DEBUGLEVEL) { fprintferr("\n#### Computing regulator\n"); flusherr(); }
+  if (DEBUGLEVEL) fprintferr("\n#### Computing regulator multiple\n");
   xreal = greal(xarch); /* = (log |sigma_i(u_j)|) */
   T = cgetg(RU+1,t_COL);
   for (i=1; i<=R1; i++) T[i] = un;
@@ -1876,49 +1876,51 @@ compute_multiple_of_R(GEN xarch,long RU,long N,GEN *ptsublambda)
   if (gexpo(kR) < -3) { avma=av; return NULL; }
 
   kR = mpabs(kR);
-  sublambda = gauss(Im_mdet,xreal); /* approximate rational entries */
+  lambda = gauss(Im_mdet,xreal); /* approximate rational entries */
   for (i=1; i<=zc; i++)
   {
-    GEN p1 = (GEN)sublambda[i]; setlg(p1, RU);
+    GEN p1 = (GEN)lambda[i]; setlg(p1, RU);
     for (j=1; j<RU; j++)
-      if (trunc_error((GEN)p1[j])) { *ptsublambda = NULL; return gzero; }
+      if (trunc_error((GEN)p1[j])) { *ptlambda = NULL; return gzero; }
   }
-  *ptsublambda = sublambda;
-  gptr[0]=ptsublambda; gptr[1]=&kR;
+  *ptlambda = lambda;
+  gptr[0]=ptlambda; gptr[1]=&kR;
   gerepilemany(av,gptr,2); return kR;
 }
 
 extern GEN hnflll_i(GEN A, GEN *ptB, int remove);
 
 /* c = Rz = 2n, according to Dirichlet's formula. Compute a tentative
- * regulator (not a multiple this time) */
+ * regulator (not a multiple this time). *ptkR = multiple of regulator */
 static int
-compute_R(GEN sublambda, GEN z, GEN *pU, GEN *reg)
+compute_R(GEN lambda, GEN z, GEN *pU, GEN *ptkR)
 {
   ulong av = avma;
-  GEN H,p1,gc,den, R = *reg; /* multiple of regulator */
+  GEN L,H,gc,den,R;
   double c;
 
   if (DEBUGLEVEL) { fprintferr("\n#### Computing check\n"); flusherr(); }
-  gc = gmul(R,z);
-  sublambda = bestappr(sublambda,gc); den = denom(sublambda);
+  gc = gmul(*ptkR,z);
+  lambda = bestappr(lambda,gc); den = denom(lambda);
   if (gcmp(den,gc) > 0)
   {
     if (DEBUGLEVEL) fprintferr("c = %Z\nden = %Z\n",gc,den);
     return PRECI;
   }
-
-  p1 = gmul(sublambda,den);
-  H = hnflll_i(p1, pU, 1);
-  p1 = gdiv(dethnf_i(H), gpowgs(den, lg(H)-1));
-  R = mpabs(gmul(R,p1));
-  if (DEBUGLEVEL) msgtimer("bestappr/regulator");
-  /* xarch (*pU) = arch. components of fundamental units */
+  L = gmul(lambda,den); H = hnf(L);
+  R = gdiv(dethnf_i(H), gpowgs(den, lg(H)-1));
+  R = mpabs(gmul(*ptkR,R)); /* tentative regulator */
   c = gtodouble(gmul(R,z)); /* should be 2n (= 2 if we are done) */
-  if (DEBUGLEVEL) fprintferr("\n ***** check = %f\n",c/2);
+  if (DEBUGLEVEL)
+  {
+    msgtimer("bestappr/regulator");
+    fprintferr("\n ***** check = %f\n",c/2);
+  }
   if (c < 1.5) return PRECI;
   if (c > 3.) { avma = av; return RELAT; }
-  *reg = R; return LARGE;
+  /* *pU = coords. of fundamental units on sublambda */
+  H = hnflll_i(L,pU,0); /* try hard to get a SMALL base change */
+  *ptkR = R; return LARGE;
 }
 
 /* find the smallest (wrt norm) among I, I^-1 and red(I^-1) */
@@ -2764,7 +2766,7 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
   long first=1, sfb_increase=0, sfb_trials=0, precdouble=0, precadd=0;
   double cbach,cbach2,drc,LOGD2;
   GEN p1,vecT2,fu,zu,nf,LLLnf,D,xarch,W,R,Res,z,h,vperm,subFB;
-  GEN resc,B,C,c1,sublambda,pdep,parch,liste,invp,clg1,clg2, *mat;
+  GEN resc,B,C,c1,lambda,pdep,parch,liste,invp,clg1,clg2, *mat;
   GEN CHANGE=NULL, extramat=NULL, extraC=NULL, list_jideal=NULL;
   char *precpb = NULL;
 
@@ -3005,7 +3007,7 @@ MORE:
   zc = (lg(mat)-1) - (lg(B)-1) - (lg(W)-1);
   xarch = cgetg(zc+1,t_MAT); /* cols corresponding to units */
   for (j=1; j<=zc; j++) xarch[j] = C[j];
-  R = compute_multiple_of_R(xarch,RU,N,&sublambda);
+  R = compute_multiple_of_R(xarch,RU,N,&lambda);
   if (!R)
   { /* not full rank for units */
     if (DEBUGLEVEL) fprintferr("regulator is zero.\n");
@@ -3013,7 +3015,7 @@ MORE:
     nlze = MIN_EXTRA; goto MORE;
   }
   /* anticipate precision problems */
-  if (!sublambda) { precpb = "bestappr"; goto START; }
+  if (!lambda) { precpb = "bestappr"; goto START; }
 
   /* class number */
   h = dethnf_i(W);
@@ -3022,7 +3024,7 @@ MORE:
   /* z ~ h R if enough relations, a multiple otherwise */
   z = mulrr(Res,resc);
   p1 = gmul2n(divir(h,z), 1);
-  i = compute_R(sublambda,p1,&parch,&R);
+  i = compute_R(lambda,p1,&parch,&R);
   switch(i)
   {
     case PRECI: /* precision problem unless we cheat on Bach constant */
