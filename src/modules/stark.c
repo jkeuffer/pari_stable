@@ -146,6 +146,7 @@ static int
 NextElt(GROUP_t *G)
 {
   long i = 1;
+  if (G->r == 0) return 0; /* no more elt */
   while (++G->j[i] == G->cyc[i]) /* from 0 to cyc[i]-1 */
   {
     G->j[i] = 0;
