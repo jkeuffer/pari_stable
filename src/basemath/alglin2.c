@@ -625,6 +625,7 @@ assmat(GEN x)
   if (gcmp0(x)) err(zeropoler,"assmat");
 
   lx=lg(x)-2; y=cgetg(lx,t_MAT);
+  if (lx == 1) return y;
   for (i=1; i<lx-1; i++)
   {
     p1=cgetg(lx,t_COL); y[i]=(long)p1;
