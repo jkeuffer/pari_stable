@@ -555,7 +555,7 @@ pariinl.h: parilvl0.h parilvl1.h
 	cat parilvl0.h parilvl1.h > pariinl.h
 
 $src/funclist::
-	@-cksum $src/functions/*/* | grep -v CVS > $src/funclist.tmp
+	@-cksum \`ls -d $src/functions/*/* | grep -v CVS\` > $src/funclist.tmp
 	@-sh $cfg/mv-if-diff $src/funclist.tmp $src/funclist
 	@cd $desc && \$(MAKE) 
 
