@@ -7,8 +7,6 @@
 #   compiled with gcc or with cc. We should try to find a workaround.
 # For NextStep or Linux
 #   We don't accept "asm inline" since it does not work (Ptitboul)
-if test "$gnuas" = "yes"; then do_cpp=yes; fi
-
 ker=$src/kernel/sparcv8
 kernel1=$ker/level0_$kernlvl0.S
 kernel2=$ker/level0.S
@@ -20,16 +18,16 @@ else
   level0=$ker/level0.h
 fi
 
-if test "$osname" = "nextstep" -o "$osname" = "linux" -o "$do_cpp" = "yes"
+if test "$osname" = "nextstep" -o "$osname" = "linux" -o "$gnuas" = "yes"
 then
-cat >> $file << EOT
+  cat >> $file << EOT
 kernel1.s: $kernel1
 	\$(CPP) $KERNELCPPFLAGS $kernel1 > \$@
 kernel2.s: $kernel2
 	\$(CPP) $KERNELCPPFLAGS $kernel2 > \$@
 EOT
-kernel1=kernel1.s
-kernel2=kernel2.s
+  kernel1=kernel1.s
+  kernel2=kernel2.s
 fi
 
 cat >> $file << EOT
