@@ -1235,7 +1235,7 @@ get_red_G(nfbasic_t *T, GEN *pro)
   long i, prec, extraprec, n = degpol(T->x), MARKED = 1;
   nffp_t F;
 
-  extraprec = (long) (0.25 * n * (sizeof(long) / 4));
+  extraprec = (long) (0.25 * n / (sizeof(long) / 4));
   prec = DEFAULTPREC + extraprec;
   nffp_init(&F, T, *pro, prec);
   av = avma;
