@@ -636,7 +636,7 @@ padic_sqrt(GEN x)
   if (gcmp0(x))
   {
     y[4] = zero; e = (e+1)>>1;
-    y[3] = lpuigs((GEN)x[2],e);
+    y[3] = un;
     y[1] = evalvalp(e) | evalprecp(precp(x));
     return y;
   }
