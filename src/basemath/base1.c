@@ -783,6 +783,17 @@ extern int canon_pol(GEN z);
 extern GEN mat_to_vecpol(GEN x, long v);
 extern GEN vecpol_to_mat(GEN v, long n);
 
+GEN
+get_roots(GEN x,long r1,long prec)
+{
+  GEN roo = (typ(x)==t_VEC)? dummycopy(x): roots(x,prec);
+  long i, ru = (lg(roo)-1 + r1) >> 1;
+
+  for (i=1; i<=r1; i++) roo[i]=lreal((GEN)roo[i]);
+  for (   ; i<=ru; i++) roo[i]=roo[(i<<1)-r1];
+  roo[0]=evaltyp(t_VEC)|evallg(ru+1); return roo;
+}
+
 /* For internal use. compute trace(x mod pol), sym=polsym(pol,deg(pol)-1) */
 GEN
 quicktrace(GEN x, GEN sym)
@@ -824,27 +835,20 @@ trace_col(GEN x, GEN T)
 static void
 nfinit_reduce(long flag, GEN *px, GEN *pdx, GEN *prev, GEN *pbase, long prec)
 {
-  GEN chbas,a,phimax,dxn,s,sn,p1,p2,polmax,rev,polr;
+  GEN chbas,a,phimax,dxn,p1,p2,polmax,rev;
   GEN x = *px, dx = *pdx, base = *pbase;
-  long i,j,nmax,numb,flc,v=varn(x), n=lg(base)-1;
+  long i,nmax,numb,flc,v=varn(x), n=lg(base)-1;
 
   if (n == 1)
   {
     *px = gsub(polx[v],gun); *pdx = gun;
     *prev = polymodrecip(gmodulcp(gun, x)); return;
   }
-  polr = prec? roots(x, prec): NULL;
-  if (polr)
-    for (s=gzero,i=1; i<=n; i++) s = gadd(s,gnorm((GEN)polr[i]));
-  else
-    s = subii(sqri((GEN)x[n+1]), shifti((GEN)x[n],1));
-    
-  chbas = LLL_nfbasis(x,polr,base,prec);
+  chbas = LLL_nfbasis(x,NULL,base,prec);
   if (DEBUGLEVEL) msgtimer("LLL basis");
 
-  phimax=polx[v]; polmax=dummycopy(x);
-  nmax=(flag & nf_PARTIAL)?min(n,3):n;
-
+  nmax = (flag & nf_PARTIAL)? min(n,3): n;
+  phimax = polx[v]; polmax = dummycopy(x);
   for (numb=0,i=2; i<=nmax || (!numb && i<=n); i++)
   { /* cf pols_for_polred */
     if (DEBUGLEVEL>2) { fprintferr("i = %ld\n",i); flusherr(); }
@@ -856,21 +860,12 @@ nfinit_reduce(long flag, GEN *px, GEN *pdx, GEN *prev, GEN *pbase, long prec)
     dxn = ZX_disc(p1); flc = absi_cmp(dxn,dx); numb++;
     if (flc > 0) continue;
 
-    if (polr)
-      for (sn=gzero,j=1; j<=n; j++)
-        sn = gadd(sn,gnorm(poleval(a,(GEN)polr[j])));
-    else
-      sn = subii(sqri((GEN)p1[n+1]), shifti((GEN)p1[n],1));
-    if (flc == 0)
-    {
-      flc = gcmp(sn,s);
-      if (flc > 0 || (!flc && gpolcomp(p1,polmax) >= 0)) continue;
-    }
-    dx = dxn; s = sn; polmax = p1; phimax = a;
+    if (!flc && gpolcomp(p1, polmax) >= 0) continue;
+    dx = dxn; polmax = p1; phimax = a;
   }
   if (!numb) 
   {
-    if (gisirreducible(x)!=gun) err(redpoler,"nfinit_reduce");
+    if (gisirreducible(x) != gun) err(redpoler,"nfinit_reduce");
     err(talker,"you have found a counter-example to a conjecture, "
                "please send us\nthe polynomial as soon as possible");
   }
@@ -967,17 +962,6 @@ make_MC(long r1,GEN M)
   }
   if (DEBUGLEVEL>4) msgtimer("matrix MC");
   return MC;
-}
-
-GEN
-get_roots(GEN x,long r1,long ru,long prec)
-{
-  GEN roo = (typ(x)==t_VEC)? dummycopy(x): roots(x,prec);
-  long i;
-
-  for (i=1; i<=r1; i++) roo[i]=lreal((GEN)roo[i]);
-  for (   ; i<=ru; i++) roo[i]=roo[(i<<1)-r1];
-  roo[0]=evaltyp(t_VEC)|evallg(ru+1); return roo;
 }
 
 /* assume lg(nf) > 3 && typ(nf) = container [hopefully a genuine nf] */
@@ -1198,6 +1182,40 @@ make_T2(GEN bas, GEN ro, long r1)
   return mulmat_real(MC,M);
 }
 
+/* return G real such that G~ * G = T_2 */
+GEN
+make_Cholevsky_T2(GEN bas, GEN ro, long r1)
+{
+  GEN sqrt2, M, G, m, g, r, basden = get_bas_den(bas);
+  long i, j, k, l;
+
+  sqrt2 = gsqrt(gdeux, gprecision((GEN)ro[1]));
+  M = make_M(basden,ro);
+  l = lg(M);
+  G = cgetg(l, t_MAT);
+  for (j=1; j<l; j++)
+  {
+    g = cgetg(l, t_COL);
+    G[j] = (long)g; m = (GEN)M[j];
+    for (k=i=1; i<=r1; i++) g[k++] = m[i];
+    for (   ; k < l; i++)
+    {
+      r = (GEN)m[i];
+      if (typ(r) == t_COMPLEX)
+      {
+        g[k++] = lmul(sqrt2, (GEN)r[1]);
+        g[k++] = lmul(sqrt2, (GEN)r[2]);
+      }
+      else
+      {
+        g[k++] = lmul(sqrt2, r);
+        g[k++] = zero;
+      }
+    }
+  }
+  return G;
+}
+
 /* as get_T, mul_table not precomputed */
 GEN
 make_T(GEN x, GEN w)
@@ -1303,13 +1321,13 @@ initalgall0(GEN x, long flag, long prec)
   rev = NULL;
   if (flag & nf_REDUCE)
   {
-    nfinit_reduce(flag, &x, &dx, &rev, &bas, r1==n? 0: prec);
+    nfinit_reduce(flag, &x, &dx, &rev, &bas, prec);
     if (DEBUGLEVEL) msgtimer("polred");
   }
   if (!carrecomplet(divii(dx,dK),&index))
     err(bugparier,"nfinit (incorrect discriminant)");
 
-  ro=get_roots(x,r1,ru,PRECREG);
+  ro=get_roots(x,r1,PRECREG);
   if (DEBUGLEVEL) msgtimer("roots");
   bas = gmul(bas, LLL_nfbasis(x,ro,bas,prec));
 
@@ -1393,7 +1411,7 @@ nfnewprec(GEN nf, long prec)
   r1 = nf_get_r1(nf);
   r2 = (n - r1) >> 1; ru = r1+r2;
   mat=dummycopy((GEN)nf[5]);
-  ro=get_roots(pol,r1,ru,prec);
+  ro=get_roots(pol,r1,prec);
   y[5]=(long)mat;
   y[6]=(long)ro;
   basden = get_bas_den((GEN)nf[7]);

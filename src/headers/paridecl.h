@@ -531,6 +531,7 @@ GEN     rnfinitalg(GEN nf,GEN pol,long prec);
 
 /* bibli1.c */
 
+GEN     T2_from_embed(GEN x, long r1);
 GEN     algdep(GEN x, long n, long prec);
 GEN     algdep0(GEN x, long n, long bit,long prec);
 GEN     algdep2(GEN x, long n, long bit);

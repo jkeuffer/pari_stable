@@ -28,7 +28,7 @@ extern double check_bach(double cbach, double B);
 extern GEN gmul_mat_smallvec(GEN x, GEN y);
 extern GEN gmul_mati_smallvec(GEN x, GEN y);
 extern GEN get_arch_real(GEN nf,GEN x,GEN *emb,long prec);
-extern GEN get_roots(GEN x,long r1,long ru,long prec);
+extern GEN get_roots(GEN x,long r1,long prec);
 extern void get_nf_matrices(GEN nf, long small);
 extern long int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *t);
 extern GEN init_idele(GEN nf);
@@ -2412,7 +2412,7 @@ log_poleval(GEN P, GEN *ro, long i, GEN nf, long prec0)
   {
     prec = (prec-2)<<1;
     if (DEBUGLEVEL) err(warnprec,"log_poleval",prec);
-    *ro = get_roots((GEN)nf[1], itos(gmael(nf,2,1)),lg(*ro)-1,prec);
+    *ro = get_roots((GEN)nf[1], itos(gmael(nf,2,1)),prec);
     x = poleval(P, (GEN)(*ro)[i]);
   }
   if (k > prec0) x = gprec_w(x,prec0);
@@ -2536,7 +2536,7 @@ bnfmake(GEN sbnf, long prec)
   x=(GEN)sbnf[1]; bas=(GEN)sbnf[4]; n=lg(bas)-1;
   r1=itos((GEN)sbnf[2]); r2=(n-r1)>>1; ru=r1+r2;
   ro=(GEN)sbnf[5];
-  if (prec > gprecision(ro)) ro=get_roots(x,r1,ru,prec);
+  if (prec > gprecision(ro)) ro=get_roots(x,r1,prec);
   index = gun;
   for (j=2; j<=n; j++) index = mulii(index, denom(leading_term(bas[j])));
 
