@@ -2062,7 +2062,7 @@ gp_sighandler(int sig)
 static void
 brace_color(char *s, int c, int force)
 {
-  if (gp_colors[c] == c_NONE && !force) return;
+  if (disable_color || (gp_colors[c] == c_NONE && !force)) return;
 #ifdef RL_PROMPT_START_IGNORE
   *s++ = RL_PROMPT_START_IGNORE;
 #endif
