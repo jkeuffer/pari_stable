@@ -1210,7 +1210,7 @@ famat_to_nf(GEN nf, GEN f)
   x = (GEN*)f[1];
   e = (GEN*)f[2];
   t = element_pow(nf, x[1], e[1]);
-  for (i=lg(x)-1; i>1; i++)
+  for (i=lg(x)-1; i>1; i--)
     t = element_mul(nf, t, element_pow(nf, x[i], e[i]));
   return t;
 }
