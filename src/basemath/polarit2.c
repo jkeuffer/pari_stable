@@ -1643,7 +1643,7 @@ gdeflate(GEN x, long v, long d)
         err(talker, "can't deflate this power series (d = %ld): %Z", d, x);
       y = poldeflate_i(y, d);
       settyp(y, t_SER);
-      y[1] = evalsigne(1) | evalvalp(V/d) | evalprecp(lg(y) - 2) | evalvarn(v);
+      y[1] = evalsigne(1) | evalvalp(V / d) | evalvarn(v);
       return gerepilecopy(av, y);
     }
     if (checkdeflate(x) % d != 0) err(cant_deflate);
