@@ -1066,7 +1066,7 @@ check_factors(GEN P, GEN BL, GEN bound, GEN famod, GEN pa)
   pas2 = shifti(pa,-1);
   r  = lg(piv)-1;
   n0 = lg(piv[1])-1;
-  list = cgetg(r+1, t_VEC);
+  list = cgetg(r+1, t_COL);
   lc = absi(leading_term(target));
   lctarget = gmul(lc, target);
   for (i=1; i<r; i++)
@@ -1203,7 +1203,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
     if (r <= 1)
     {
       if (r == 0) err(bugparier,"LLL_cmbf [no factor]");
-      return _vec(P);
+      return _col(P);
     }
 
     setlg(u, r+1);
