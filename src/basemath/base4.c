@@ -979,7 +979,7 @@ idealaddmultoone(GEN nf, GEN list)
   GEN z, H, U, perm, L;
 
   nf = checknf(nf); N = degpol(nf[1]);
-  if (!is_vec_t(tx)) err(talker,"not a list in idealaddmultoone");
+  if (!is_vec_t(tx)) err(talker,"not a vector of ideals in idealaddmultoone");
   l = lg(list); z = cgetg(1,t_MAT);
   L = cgetg(l, tx);
   if (l == 1) err(talker,"ideals don't sum to Z_K in idealaddmultoone");
@@ -990,7 +990,7 @@ idealaddmultoone(GEN nf, GEN list)
     L[i] = (long)I; z = concatsp(z, I);
   }
   H = hnfperm_i(z, &U, &perm);
-  if (!gcmp1(gcoeff(H,1,1)))
+  if (lg(H) == 1 || !gcmp1(gcoeff(H,1,1)))
     err(talker,"ideals don't sum to Z_K in idealaddmultoone");
   for (i=1; i<=N; i++)
     if (perm[i] == 1) break;

@@ -69,6 +69,7 @@ RS 21- gcc-3.4 breaks on compatibility code to support old readline versions
        (approximate) support for g++ + old readlines in gp_rl.c
    22- \p 8000
        E=ellinit([0,0,0,0,1296]); P=[-8,28]; ellpointtoz(E,P) --> oo loop
+   23- idealaddtoone(nfinit(y),[0]) --> SEGV [ BIB ]
 
   Added
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu
