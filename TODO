@@ -172,6 +172,9 @@ add a flag to substitute in succession or in parallel (e.g if a involves y)
 3  a type t_FILE [current: stream re-opened/flushed/closed after every single
 write(): disaster when one wants to write often to the same file]
 
+3  add a possibility to increase the maximal recursion depth (need to 
+increase the GP process stack: use setrlimit(RLIMIT_STACK,) + fork)
+
 ***************************   TOOLS           ****************************
 
 4  a script converting prototype to parser code (e.g GEN f(GEN,GEN) --> "GG")
