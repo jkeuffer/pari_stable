@@ -92,6 +92,7 @@ BA 23- cos(2^2^22) --> precision too low [ idem sin, tan ]
        was defined ]. Could cause compilation failure when compiling with
        different flags.
     9- upgrade pariemacs, see pariemacs.txt
+   10- faster divll for portable kernel [ inspired by GMP ]
 
   Added
     1- member function rnf.pol (polynomial generating absolute extension)
