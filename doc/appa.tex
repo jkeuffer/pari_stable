@@ -190,6 +190,12 @@ disable this variable in any case if anything {\it very} wrong occurs with
 the \kbd{gp-dyn} binary (e.g Illegal Instruction on startup). It doesn't
 affect \kbd{gp-sta}.
 
+\misctitle{Note2:} there's a known minor problem on Pentium processors
+(unrelated to the infamous \kbd{fdiv} bug) which results in a discrepancy in 
+bench \kbd{elliptic}: the last few decimals of the components of an \kbd{ell}
+structure may be slightly off (with respect to the bench: both results are
+correct given the requested precision).
+
 \subsubsec{Some more testing} [{\sl Optional\/}]
 
 You can test GP in compatibility mode with \kbd{make test-compat}. If you
