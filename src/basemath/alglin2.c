@@ -2034,7 +2034,6 @@ ZV_elem(GEN aj, GEN ak, GEN A, GEN U, long j, long k)
   }
 
   if (!is_pm1(d)) { aj = divii(aj,d); ak = divii(ak,d); }
-  if (DEBUGLEVEL>5) { fprintferr("(u,v) = (%Z, %Z); ",u,v); flusherr(); }
   p1 = (GEN)A[k]; aj = negi(aj);
   A[k] = (long)ZV_lincomb(u,v, (GEN)A[j],p1);
   A[j] = (long)ZV_lincomb(aj,ak, p1,(GEN)A[j]);
@@ -2141,7 +2140,6 @@ allhnfmod(GEN x,GEN dm,int flag)
   if (typ(dm)!=t_INT) err(typeer,"allhnfmod");
   if (!signe(dm)) return hnf(x);
   if (typ(x)!=t_MAT) err(typeer,"allhnfmod");
-  if (DEBUGLEVEL>6) fprintferr("Enter hnfmod");
 
   co=lg(x); if (co==1) return cgetg(1,t_MAT);
   li=lg(x[1]);
@@ -2217,7 +2215,6 @@ allhnfmod(GEN x,GEN dm,int flag)
       }
     }
   }
-  if (DEBUGLEVEL>6) { fprintferr("\nEnd hnfmod\n"); flusherr(); }
   tetpil=avma; return gerepile(av,tetpil,ZM_copy(w));
 }
 

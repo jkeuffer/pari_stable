@@ -595,11 +595,11 @@ choose_prime(GEN pol,GEN dpol,long d,GEN *ptff,GEN *ptlistpotbl, long *ptnn)
     if (DEBUGLEVEL)
     {
       if (llist >= maxl)
-        fprintferr("p = %ld,\tr = %ld,\tnn = %ld,\t#pbs > %ld [aborted]\n",
-                   p[2],r,nn,maxl);
+        msgtimer("p = %ld,\tr = %ld,\tnn = %ld,\t#pbs > %ld [aborted]",
+                  p[2],r,nn,maxl);
       else
-        fprintferr("Time: %ldms,\tp = %ld,\tr = %ld,\tnn = %ld,\t#pbs = %ld\n",
-                   timer2(),p[2],r,nn,llist);
+        msgtimer("p = %ld,\tr = %ld,\tnn = %ld,\t#pbs = %ld",
+                  p[2],r,nn,llist);
       flusherr();
     }
     if (llist < maxl && nn * llist < maxl)
@@ -707,6 +707,14 @@ roots_from_deg1(GEN x)
   return r;
 }
 
+struct poldata
+{
+  GEN pol;
+  GEN dis; /* |disc(pol)| */
+  GEN roo; /* roots(pol) */
+  GEN den; /* multiple of index(pol) */
+};
+
 /* ff = factmod(nf[1], p), d = requested degree for subfield. Return DATA,
  * valid for given nf, p and d 
  * 1: polynomial nf[1],
@@ -717,7 +725,7 @@ roots_from_deg1(GEN x)
  * 6: roots of nf[1] in F_(p^nn),
  * 7: Hadamard bound for coefficients of h(x) such that g o h = 0 mod nf[1].
  * 8: bound M for polynomials defining subfields x DATA[9]
- * 9: index of nf
+ * 9: multiple of index of nf
  *10: *[i] = interpolation polynomial for ff[i] [= 1 on the first root
       firstroot[i], 0 on the others]
  *11: Trk used to compute traces (cf poltrace)
@@ -725,14 +733,15 @@ roots_from_deg1(GEN x)
  *13: *[i] = index of first root of ff[i] (in DATA[6])
  *14: number of polynomial changes (translations) */
 static GEN
-compute_data(GEN DATA, long d, GEN nf, GEN ind, GEN dpol, GEN ff, GEN T,GEN p)
+compute_data(GEN DATA, struct poldata PD, long d, GEN ff, GEN T,GEN p)
 {
   long i,j,l,e,N;
-  GEN roo,pe,p1,p2,fk,fhk,MM,maxroot,pol,interp,bezoutC;
+  GEN den,roo,pe,p1,p2,fk,fhk,MM,maxroot,pol,interp,bezoutC;
 
   if (DEBUGLEVEL>1) { fprintferr("Entering compute_data()\n\n"); flusherr(); }
-  pol = (GEN)nf[1]; N = deg(pol);
-  roo = (GEN)nf[6];
+  pol = PD.pol; N = deg(pol);
+  roo = PD.roo;
+  den = PD.den;
   if (DATA) /* update (translate) an existing DATA */
   {
     GEN Xm1 = gsub(polx[varn(pol)], gun);
@@ -779,7 +788,7 @@ compute_data(GEN DATA, long d, GEN nf, GEN ind, GEN dpol, GEN ff, GEN T,GEN p)
       firstroot[j] = l;
       for (i=1; i<lg(p1); i++,l++) fk[l] = p1[i];
     }
-    DATA[9] = (long)ind;
+    DATA[9] = (long)PD.den;
     DATA[10]= (long)interp;
     DATA[11]= (long)init_traces(ff, T,p);
     DATA[12]= (long)get_bezout(pol,ff,p);
@@ -798,9 +807,9 @@ compute_data(GEN DATA, long d, GEN nf, GEN ind, GEN dpol, GEN ff, GEN T,GEN p)
 
   p1 = gmul(stoi(N), gsqrt(gpuigs(stoi(N-1),N-1),DEFAULTPREC));
   p2 = gpuigs(maxroot, N/d + N*(N-1)/2);
-  p1 = gdiv(gmul(p1,p2), gsqrt(absi(dpol),DEFAULTPREC));
+  p1 = gdiv(gmul(p1,p2), gsqrt(PD.dis,DEFAULTPREC));
   p1 = shifti(ceil_safe(p1), 1);
-  DATA[7] = lmulii(p1,ind);
+  DATA[7] = lmulii(p1, PD.den);
 
   if (DEBUGLEVEL>1) {
     fprintferr("f = %Z\n",DATA[1]);
@@ -821,14 +830,14 @@ _subfield(GEN g, GEN h)
   x[2] = (long)h; return _vec(x);
 }
 
-/* subfields of degree d. dpol = poldisc(nf[1]) */
+/* subfields of degree d */
 static GEN
-subfields_of_given_degree(GEN nf,GEN dpol,long d)
+subfields_of_given_degree(struct poldata PD,long d)
 {
   ulong av,av2;
   long llist,i,nn;
   GEN listpotbl,ff,A,CSF,ESF,LSB,p,T,DATA,listdelta;
-  GEN pol = (GEN)nf[1], ind = (GEN)nf[4];
+  GEN pol = PD.pol, dpol = PD.dis;
 
   if (DEBUGLEVEL) fprintferr("\n*** Look for subfields of degree %ld\n\n", d);
   av = avma;
@@ -838,7 +847,7 @@ subfields_of_given_degree(GEN nf,GEN dpol,long d)
   DATA = NULL; LSB = cgetg(1,t_VEC); 
   i = 1; llist = lg(listpotbl);
 CHANGE: 
-  DATA = compute_data(DATA,d,nf,ind,dpol,ff,T,p);
+  DATA = compute_data(DATA,PD,d, ff,T,p);
   for (; i<llist; i++)
   {
     av2 = avma; A = (GEN)listpotbl[i];
@@ -873,15 +882,6 @@ CHANGE:
 }
 
 static GEN
-init_var(GEN nf, long v)
-{
-  if (!v) return nf;
-  nf = dummycopy(nf);
-  nf[1] = (long)dummycopy((GEN)nf[1]);
-  setvarn(nf[1], 0); return nf;
-}
-
-static GEN
 fix_var(GEN x, long v)
 {
   long i, l = lg(x);
@@ -890,22 +890,81 @@ fix_var(GEN x, long v)
   return x;
 }
 
+extern GEN get_nfpol(GEN x, GEN *nf);
+extern GEN vandermondeinverseprep(GEN T, GEN L);
+extern GEN ZX_disc_all(GEN x, ulong bound);
+extern GEN indexpartial(GEN P, GEN DP);
+
+void
+subfields_poldata(GEN T, struct poldata *PD)
+{
+  int     i, n;
+  GEN     L, z, prep, den;
+  long    prec;
+
+  GEN nf, dis;
+  T = get_nfpol(T, &nf);
+  PD->pol = dummycopy(T); /* may change variable number later */
+  if (nf)
+  {
+    PD->den = (GEN)nf[4];
+    PD->roo = (GEN)nf[6];
+    PD->dis = mulii(absi((GEN)nf[3]), sqri((GEN)nf[4]));
+    return;
+  }
+
+  /* copy-paste from galconj.c:galoisborne. Merge as soon as possible */
+  /* start of copy-paste */
+  n = lgef(T) - 3;
+  prec = 1;
+  for (i = 2; i < lgef(T); i++)
+    if (lg(T[i]) > prec)
+      prec = lg(T[i]);
+  /*prec++;*/
+  if (DEBUGLEVEL>=4) gentimer(3);
+  L = roots(T, prec);
+  if (DEBUGLEVEL>=4) genmsgtimer(3,"roots");
+  for (i = 1; i <= n; i++)
+  {
+    z = (GEN) L[i];
+    if (signe(z[2]))
+      break;
+    L[i] = z[1];
+  }
+  if (DEBUGLEVEL>=4) gentimer(3);
+  prep=vandermondeinverseprep(T, L);
+  /* end of copy-paste */
+  {
+    GEN res = divide_conquer_prod(gabs(prep,prec), mpmul);
+    disable_dbg(0);
+    dis = ZX_disc_all(T, 1+logint(res,gdeux,NULL));
+    disable_dbg(-1);
+    den = indexpartial(T,dis);
+  }
+
+  PD->den = den;
+  PD->roo = L;
+  PD->dis = absi(dis);
+}
+
 GEN
 subfields(GEN nf,GEN d)
 {
   ulong av = avma;
   long di,N,v0;
-  GEN dpol,LSB,pol;
+  GEN LSB,pol;
+  struct poldata PD;
 
-  nf = checknf(nf); pol = (GEN)nf[1];
+  pol = get_nfpol(nf, &nf); /* in order to treat trivial cases */
   v0=varn(pol); N=deg(pol); di=itos(d);
   if (di==N) return gerepileupto(av, gcopy(_subfield(pol, polx[v0])));
   if (di==1) return gerepileupto(av, gcopy(_subfield(polx[v0], pol)));
   if (di < 1 || di > N || N % di) return cgetg(1,t_VEC);
 
-  nf = init_var(nf,v0);
-  dpol = mulii((GEN)nf[3],sqri((GEN)nf[4]));
-  LSB = subfields_of_given_degree(nf,dpol,di);
+  subfields_poldata(nf, &PD);
+  pol = PD.pol;
+  setvarn(pol, 0);
+  LSB = subfields_of_given_degree(PD, di);
   return gerepileupto(av, fix_var(LSB,v0));
 }
 
@@ -914,9 +973,12 @@ subfieldsall(GEN nf)
 {
   ulong av = avma;
   long N,ld,i,v0;
-  GEN pol,dpol,dg,LSB,NLSB;
+  GEN pol,dg,LSB,NLSB;
+  struct poldata PD;
 
-  nf = checknf(nf); pol = (GEN)nf[1];
+  subfields_poldata(nf, &PD);
+  pol = PD.pol;
+
   v0 = varn(pol); N = deg(pol);
   dg = divisors(stoi(N)); ld = lg(dg)-1;
   if (DEBUGLEVEL) fprintferr("\n***** Entering subfields\n\npol = %Z\n",pol);
@@ -924,12 +986,11 @@ subfieldsall(GEN nf)
   LSB = _subfield(pol,polx[0]);
   if (ld > 2)
   {
-    nf = init_var(nf,v0);
-    dpol = mulii(sqri((GEN)nf[4]),(GEN)nf[3]);
+    setvarn(pol, 0);
     for (i=2; i<ld; i++)
     {
       ulong av1 = avma;
-      NLSB = subfields_of_given_degree(nf,dpol, N / itos((GEN)dg[i]));
+      NLSB = subfields_of_given_degree(PD, N / itos((GEN)dg[i]));
       if (lg(NLSB) > 1) LSB = concatsp(LSB,NLSB); else avma = av1;
     }
   }

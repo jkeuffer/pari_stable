@@ -1750,7 +1750,7 @@ indexpartial(GEN P, GEN DP)
   GEN fa, p1, res = gun, dP;
   dP = derivpol(P);
   if(DEBUGLEVEL>=5) gentimer(3);
-  if(!DP) DP=ZX_disc(P);
+  if(!DP) DP = ZX_disc(P);
   DP = mpabs(DP);
   if(DEBUGLEVEL>=5) genmsgtimer(3,"IndexPartial: discriminant");
   fa = auxdecomp(DP, 0);
@@ -1760,26 +1760,20 @@ indexpartial(GEN P, GEN DP)
   {
     GEN p=gmael(fa,1,i);
     GEN e=gmael(fa,2,i);
-    if (DEBUGLEVEL>=5) gentimer(3);
     p1 = powgi(p,shifti(e,-1));
     if ( i==nb-1 )
     {
       if ( mod2(e) && !isprime(p) )
 	p1 = mulii(p1,p);
     }
-    else
+    else if ( cmpis(e,4)>=0 )
     {
-      if ( cmpis(e,4)>=0 )
+      if(DEBUGLEVEL>=5) fprintferr("IndexPartial: factor %Z ",p1);
+      p1 = mppgcd(p1, respm(P,dP,p1));
+      if(DEBUGLEVEL>=5) 
       {
-	if(DEBUGLEVEL>=5) fprintferr("IndexPartial: factor %Z ",p1);
-	disable_dbg(0);
-	p1=mppgcd(p1,respm(P,dP,p1));
-	disable_dbg(-1);
-	if(DEBUGLEVEL>=5) 
-	{
-	  fprintferr("--> %Z : ",p1);
-	  genmsgtimer(3,"");
-	}
+        fprintferr("--> %Z : ",p1);
+        genmsgtimer(3,"");
       }
     }
     res=mulii(res,p1);

@@ -712,7 +712,7 @@ galoisapply(GEN nf, GEN aut, GEN x)
 GEN pol_to_monic(GEN pol, GEN *lead);
 int cmp_pol(GEN x, GEN y);
 
-static GEN
+GEN
 get_nfpol(GEN x, GEN *nf)
 {
   if (typ(x) == t_POL) { *nf = NULL; return x; }
