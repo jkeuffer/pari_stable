@@ -2554,7 +2554,7 @@ numroots2(int a, int b, int c, int p, int *mult)
 
 /* p = 2 or 3 */
 static GEN
-localred_carac_23(GEN e, long p, int minim)
+localred_carac_23(GEN e, long p)
 {
   long c, nu, nudelta;
   int a21, a42, a63, a32, a64, theroot, al, be, ga, p2, p3, p4;
@@ -2696,7 +2696,7 @@ localred(GEN e, GEN p, int minim)
     return localred_carac_p(e,p, minim);
   else
   {
-    GEN z = localred_carac_23(e,itos(p), minim);
+    GEN z = localred_carac_23(e,itos(p));
     return minim? (GEN)z[3]: z;
   }
 }

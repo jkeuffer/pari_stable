@@ -2401,7 +2401,7 @@ applybar(pslq_M *M, pslqL2_M *Mbar, GEN Abargen, GEN Bbargen)
 }
 
 static GEN
-checkend(pslq_M *M, long prec)
+checkend(pslq_M *M)
 {
   long i, m, n = M->n;
 
@@ -2512,7 +2512,7 @@ RESTART:
       {
 	if (applybar(&M, &Mbar, Abargen,Bbargen))
 	{
-	  if ( (p1 = checkend(&M,prec)) ) return gerepilecopy(av0, p1);
+	  if ( (p1 = checkend(&M)) ) return gerepilecopy(av0, p1);
 	  goto RESTART;
 	}
 	else
@@ -2520,7 +2520,7 @@ RESTART:
           if (ctpro == 1) goto DOGEN;
           storeprecdoubles(&Mbar, &Mbarst); /* restore */
           if (! applybar(&M, &Mbar, Abargen,Bbargen)) err(bugparier,"pslqL2");
-	  if ( (p1 = checkend(&M, prec)) ) return gerepilecopy(av0, p1);
+	  if ( (p1 = checkend(&M)) ) return gerepilecopy(av0, p1);
           goto RESTART;
         }
       }

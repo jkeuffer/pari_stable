@@ -2614,7 +2614,7 @@ makescind(GEN nf, GEN polrel, long cl)
 /* compute the Hilbert class field using genus class field theory when
    the exponent of the class group is 2 */
 static GEN
-GenusField(GEN bnf, long prec)
+GenusField(GEN bnf)
 {
   long hk, c, l;
   pari_sp av = avma;
@@ -2869,7 +2869,7 @@ START:
 
   /* if the exponent of the class group is 2, use rather Genus Field Theory */
   exp = gmael4(bnf, 8, 1, 2, 1);
-  if (gegal(exp, gdeux)) { (void)delete_var(); return GenusField(bnf, prec); }
+  if (gegal(exp, gdeux)) { (void)delete_var(); return GenusField(bnf); }
 
   CATCH(precer) {
     prec += EXTRA_PREC; pol = NULL;

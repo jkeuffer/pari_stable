@@ -562,7 +562,7 @@ gauss_realimag(GEN x, GEN y)
 }
 
 GEN
-getfu(GEN nf,GEN *ptA,GEN reg,long fl,long *pte,long prec)
+getfu(GEN nf,GEN *ptA,long fl,long *pte,long prec)
 {
   long e, i, j, R1, RU, N=degpol(nf[1]);
   pari_sp av = avma;
@@ -628,16 +628,16 @@ buchfu(GEN bnf)
 {
   long c;
   pari_sp av = avma;
-  GEN nf,A,reg,res, y = cgetg(3,t_VEC);
+  GEN nf,A,res, y = cgetg(3,t_VEC);
 
   bnf = checkbnf(bnf); A = (GEN)bnf[3]; nf = (GEN)bnf[7];
-  res = (GEN)bnf[8]; reg = (GEN)res[2];
+  res = (GEN)bnf[8];
   if (lg(res)==7 && lg(res[5])==lg(nf[6])-1)
   {
     y[1] = lcopy((GEN)res[5]);
     y[2] = lcopy((GEN)res[6]); return y;
   }
-  y[1] = (long)getfu(nf, &A, reg, nf_UNITS, &c, 0);
+  y[1] = (long)getfu(nf, &A, nf_UNITS, &c, 0);
   y[2] = lstoi(c); return gerepilecopy(av, y);
 }
 
@@ -1547,7 +1547,7 @@ small_to_mat_i(GEN z, long d)
 /* return -1 in case of precision problems. t = current # of relations */
 static long
 small_norm_for_buchall(long cglob,GEN *mat,GEN first_nz, GEN matarch,
-                       long LIMC, long PRECREG, FB_t *F,
+                       long PRECREG, FB_t *F,
                        GEN nf,long nbrelpid,GEN invp,GEN L)
 {
   const int maxtry_DEP  = 20;
@@ -1777,7 +1777,7 @@ remove_content(GEN I)
 
 /* if phase != 1 re-initialize static variables. If <0 return immediately */
 static long
-random_relation(long phase,long cglob,long LIMC,long PRECREG,long MAXRELSUP,
+random_relation(long phase,long cglob,long PRECREG,long MAXRELSUP,
                 GEN nf,GEN vecG,GEN *mat,GEN first_nz,GEN matarch,
                 GEN list_jideal, FB_t *F)
 {
@@ -2177,7 +2177,7 @@ class_group_gen(GEN nf,GEN W,GEN C,GEN Vbase,long prec, GEN nf0,
 }
 
 static void
-shift_embed(GEN G, GEN Gtw, long a, long r1, long r2)
+shift_embed(GEN G, GEN Gtw, long a, long r1)
 {
   long j, k, l = lg(G);
   if (a <= r1)
@@ -2195,20 +2195,20 @@ shift_embed(GEN G, GEN Gtw, long a, long r1, long r2)
 
 /* G where embeddings a and b are multiplied by 2^10 */
 static GEN
-shift_G(GEN G, GEN Gtw, long a, long b, long r1, long r2)
+shift_G(GEN G, GEN Gtw, long a, long b, long r1)
 {
   GEN g = dummycopy(G);
-  shift_embed(g,Gtw,a,r1,r2);
-  shift_embed(g,Gtw,b,r1,r2); return g;
+  shift_embed(g,Gtw,a,r1);
+  shift_embed(g,Gtw,b,r1); return g;
 }
 
 static GEN
 compute_vecG(GEN nf,long prec)
 {
   GEN vecG, Gtw, M = gmael(nf,5,1), G = gmael(nf,5,2);
-  long r1,r2,i,j,ind, n = min(lg(M[1])-1, 9);
+  long r1, i, j, ind, n = min(lg(M[1])-1, 9);
 
-  nf_get_sign(nf,&r1,&r2);
+  r1 = nf_get_r1(nf);
   vecG=cgetg(1 + n*(n+1)/2,t_VEC);
   if (nfgetprec(nf) > prec)
   {
@@ -2217,7 +2217,7 @@ compute_vecG(GEN nf,long prec)
   }
   Gtw = gmul2n(G, 10);
   for (ind=j=1; j<=n; j++)
-    for (i=1; i<=j; i++) vecG[ind++] = (long)shift_G(G,Gtw,i,j,r1,r2);
+    for (i=1; i<=j; i++) vecG[ind++] = (long)shift_G(G,Gtw,i,j,r1);
   if (DEBUGLEVEL) msgtimer("weighted G matrices");
   return vecG;
 }
@@ -3042,7 +3042,7 @@ START:
 
   /* relations through elements of small norm */
   if (gsigne(gborne) > 0)
-    cglob = small_norm_for_buchall(cglob,mat,first_nz,C,(long)LIMC,PRECREG,&F,
+    cglob = small_norm_for_buchall(cglob,mat,first_nz,C,PRECREG,&F,
                                    nf,nbrelpid,invp,liste);
   if (cglob < 0) { precpb = "small_norm"; goto START; }
   avma = av1; limpile = stack_lim(av1,1);
@@ -3100,7 +3100,7 @@ MORE:
       powsubFBgen(&F, nf, CBUCHG+1, PRECREG);
       av1 = avma;
     }
-    ss = random_relation(phase,cglob,(long)LIMC,PRECREG,MAXRELSUP,
+    ss = random_relation(phase,cglob,PRECREG,MAXRELSUP,
                          nf,vecG,mat,first_nz,matarch,list_jideal,&F);
     if (ss < 0)
     { /* could not find relations */
@@ -3200,7 +3200,7 @@ MORE:
   }
   if (flun & nf_UNITS)
   {
-    fu = getfu(nf,&A,R,flun,&k,PRECREG);
+    fu = getfu(nf,&A,flun,&k,PRECREG);
     if (k <= 0 && flun & nf_FORCE)
     {
       if (k < 0) precadd = (DEFAULTPREC-2) + ((-k) >> TWOPOTBITS_IN_LONG);
