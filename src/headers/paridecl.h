@@ -1254,6 +1254,7 @@ GEN     small_to_pol(GEN z, long v);
 GEN     small_to_vec(GEN z);
 GEN     pol_to_small(GEN x);
 GEN     rescale_pol(GEN P, GEN h);
+GEN     unscale_pol(GEN P, GEN h);
 GEN     stopoly(long m, long p, long v);
 GEN     stopoly_gen(GEN m, GEN p, long v);
 GEN     u_FpXQ_pow(GEN x, GEN n, GEN pol, ulong p);

@@ -1168,17 +1168,20 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
 
 extern GEN primitive_pol_to_monic(GEN pol, GEN *ptlead);
 
-/* P(hx), in place. Assume P in Z[X], h in Z */
-void
-unscale_pol_i(GEN P, GEN h)
+/* Return P(h * x). Assume P in Z[X], h in Z */
+GEN
+unscale_pol(GEN P, GEN h)
 {
-  GEN hi = gun;
   long i, l = lgef(P);
+  GEN hi = gun, Q = cgetg(l, t_POL);
+  Q[1] = P[1];
+  Q[2] = licopy((GEN)P[2]);
   for (i=3; i<l; i++)
   {
     hi = mulii(hi,h);
-    P[i] = lmulii((GEN)P[i], hi);
+    Q[i] = lmulii((GEN)P[i], hi);
   }
+  return Q;
 }
 
 /* Return h^degpol(P) P(x / h) */
@@ -1260,10 +1263,7 @@ combine_factors(GEN a, GEN famod, GEN p, long klim, long hint)
     L = LLL_cmbf(a, famod, p, pe, B, e, maxK);
     if (lt)
       for (i=1; i<lg(L); i++)
-      {
-        unscale_pol_i((GEN)L[i], lt);
-        L[i] = (long)primitive_part((GEN)L[i], &p1);
-      }
+        L[i] = (long)primpart( unscale_pol((GEN)L[i], lt) );
     res = concatsp(res, L);
   }
   return res;
@@ -1519,7 +1519,8 @@ ZX_squff(GEN f, GEN *ex)
     V = W;
   }
   if (val) { P[i] = lpolx[varn(f)]; e[i] = val; i++;}
-  setlg(P,i); *ex=e; return P;
+  setlg(P,i);
+  setlg(e,i); *ex=e; return P;
 }
 
 GEN
