@@ -112,6 +112,7 @@ BA 31- uninitialized memory read in divrr(x,y), when lg(y) < lg(x), leading
    47- rare SEGV in Round 4 when using non-primes in addprimes()
    48- overflow when computing Euler's constant to 20000+ decimal digits
 MS 49- error message for unrecognized GP metacommand: off-by-1 error
+GN 50- Configure breaks if CFLAGS contains '/'  (invoke sed with '!' separator)
 
   Changed
     1- rnf structure (removed useless components)
