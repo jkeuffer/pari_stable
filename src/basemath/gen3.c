@@ -2241,7 +2241,7 @@ gtovec(GEN x)
     for (i=1; i<=lx-2; i++) y[i]=lcopy((GEN)x[i]);
     return y;
   }
-  if (tx == t_VECSMALL) return zv_ZV(x);
+  if (tx == t_VECSMALL) return vecsmall_to_vec(x);
   if (!signe(x)) { y=cgetg(2,t_VEC); y[1]=zero; return y; }
   lx=lg(x); y=cgetg(lx-1,t_VEC); x++;
   for (i=1; i<=lx-2; i++) y[i]=lcopy((GEN)x[i]);

@@ -2212,7 +2212,7 @@ dirzetak(GEN nf, GEN b)
   nf = checknf(nf);
   n = itos_or_0(b); if (!n) err(talker,"too many terms in dirzetak");
   c = dirzetak0(nf, n);
-  z = zv_ZV(c); free(c); return z;
+  z = vecsmall_to_vec(c); free(c); return z;
 }
 
 /* N_0 = floor( C_K / limx ) */

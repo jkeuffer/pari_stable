@@ -88,8 +88,7 @@ Flm_to_ZM(GEN z)
   return x;
 }
 
-/* Flx_to_ZX_inplace=zx_to_ZX_inplace*/
-/* same. In place */
+/* same as Flx_to_ZX, in place */
 GEN
 Flx_to_ZX_inplace(GEN z)
 {
@@ -162,7 +161,6 @@ polx_Flx(long sv)
 /* Take an integer and return a scalar polynomial mod p,
  * with evalvarn=vs */
 
-/*Fl_to_Flx=z_to_zx*/
 GEN
 Fl_to_Flx(ulong x, long sv)
 {
@@ -691,7 +689,7 @@ Flx_rem(GEN x, GEN y, ulong p)
 
   dy = degpol(y); if (!dy) return zero_Flx(x[1]);
   dx = degpol(x);
-  dz = dx-dy; if (dz < 0) return Flx_copy(x);
+  dz = dx-dy; if (dz < 0) return vecsmall_copy(x);
   x += 2; y += 2;
   inv = y[dy];
   if (inv != 1UL) inv = Fl_inv(inv,p);
@@ -762,7 +760,7 @@ Flx_divrem(GEN x, GEN y, ulong p, GEN *pr)
   if (!dy)
   {
     if (y[2] == 1UL)
-      q = Flx_copy(x);
+      q = vecsmall_copy(x);
     else
       q = Flx_Fl_mul(x, Fl_inv(y[2], p), p);
     if (pr) *pr = zero_Flx(sv);
@@ -773,7 +771,7 @@ Flx_divrem(GEN x, GEN y, ulong p, GEN *pr)
   if (dz < 0)
   {
     q = zero_Flx(sv);
-    if (pr) *pr = Flx_copy(x);
+    if (pr) *pr = vecsmall_copy(x);
     return q;
   }
   x += 2;
@@ -900,7 +898,7 @@ Flx_invmontgomery_newton(GEN T, ulong p)
   x = Flx_recipspec(T+2,l-1,l);
   x[1] = v;
   x = Flx_neg(x,p);
-  q = Flx_copy(x); q[2]=1;
+  q = vecsmall_copy(x); q[2]=1;
   i = Flx_valuation(x);
   av=avma;
   new_chunk(ll<<1);
@@ -913,8 +911,8 @@ Flx_invmontgomery_newton(GEN T, ulong p)
     z=Flx_renormalize(z,min(lg(z),ll));
     q=Flx_add(q,z,p);
     avma=av;
-    q=Flx_copy(q);
-    x=Flx_copy(x);
+    q=vecsmall_copy(q);
+    x=vecsmall_copy(x);
     avma=av2;
   }
   q=Flx_shift(q,1,p);
@@ -957,7 +955,7 @@ Flx_rem_montgomery(GEN x, GEN mg, GEN T, ulong p)
   long ld=l-lt+1;
   long lm=min(ld,lgpol(mg));
   if (l<=lt)
-    return Flx_copy(x);
+    return vecsmall_copy(x);
   new_chunk(lt);
   z=Flx_recipspec(x+2+lead,ld,ld);              /* z = rec(x)*/
   z=Flx_mulspec(z+2,mg+2,p,min(ld,lgpol(z)),lm);/* z = rec(x) * mg */
@@ -1381,7 +1379,7 @@ Flxq_powers(GEN x, long l, GEN T, ulong p)
   long v=T[1];
   V[1] = (long) Fl_to_Flx(1, v);
   if (l==0) return V;
-  V[2] = (long) Flx_copy(x);
+  V[2] = (long) vecsmall_copy(x);
   if (l==1) return V;
   V[3] = (long) Flxq_sqr(x,T,p);
   for(i=4;i<l+2;i++)

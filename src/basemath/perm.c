@@ -22,7 +22,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*************************************************************************/
 
 GEN
-vecsmall_vec(GEN z)
+vec_to_vecsmall(GEN z)
+{
+  long i, l = lg(z);
+  GEN x = cgetg(l, t_VECSMALL);
+  for (i=1; i<l; i++) x[i] = itos((GEN)z[i]);
+  return x;
+}
+
+GEN
+vecsmall_to_vec(GEN z)
 {
   long i, l = lg(z);
   GEN x = cgetg(l,t_VEC);
@@ -31,7 +40,7 @@ vecsmall_vec(GEN z)
 }
 
 GEN
-vecsmall_col(GEN z)
+vecsmall_to_col(GEN z)
 {
   long i, l = lg(z);
   GEN x = cgetg(l,t_COL);
@@ -1147,7 +1156,7 @@ group_export_MAGMA(GEN G)
   for (i = 1; i < l; ++i)
   {
     if (i > 1) s = concatsp(s, strtoGENstr(", "));
-    s = concatsp(s, zv_ZV(gmael(G,1,i)));
+    s = concatsp(s, vecsmall_to_vec(gmael(G,1,i)));
   }
   s = concat(s, strtoGENstr(">"));
   return gerepileupto(ltop,s);

@@ -1653,7 +1653,7 @@ p_mat(long **mat, GEN perm, long k)
   perm = vecextract_i(perm, k+1, lg(perm)-1);
   fprintferr("Permutation: %Z\n",perm);
   if (DEBUGLEVEL > 6)
-    fprintferr("matgen = %Z\n", zm_ZM( rowextract_p((GEN)mat, perm) ));
+    fprintferr("matgen = %Z\n", zm_to_ZM( rowextract_p((GEN)mat, perm) ));
   avma = av;
 }
 
@@ -2053,53 +2053,31 @@ TOOLARGE:
   return rowextract_i(x, lx-ly+1, k); /* H */
 }
 
-/* same as Flv_ZV, Flv_ZC, Flm_ZM but do not assume positivity */
+/* same as Flv_to_ZV, Flv_to_ZC, Flm_to_ZM but do not assume positivity */
 GEN
-zx_ZX(GEN z)
+zx_to_ZX(GEN z)
 {
   long i, l = lg(z);
   GEN x = cgetg(l,t_POL);
   for (i=2; i<l; i++) x[i] = lstoi(z[i]);
   x[1] = evalsigne(l-2!=0)| z[1]; return x;
 }
+
 GEN
-zv_ZV(GEN z)
-{
-  long i, l = lg(z);
-  GEN x = cgetg(l, t_VEC);
-  for (i=1; i<l; i++) x[i] = lstoi(z[i]);
-  return x;
-}
-GEN
-zv_ZC(GEN z)
-{
-  long i, l = lg(z);
-  GEN x = cgetg(l,t_COL);
-  for (i=1; i<l; i++) x[i] = lstoi(z[i]);
-  return x;
-}
-GEN
-zm_ZM(GEN z)
+zm_to_ZM(GEN z)
 {
   long i, l = lg(z);
   GEN x = cgetg(l,t_MAT);
-  for (i=1; i<l; i++) x[i] = (long)zv_ZC((GEN)z[i]);
+  for (i=1; i<l; i++) x[i] = (long)zv_to_ZC((GEN)z[i]);
   return x;
 }
+
 GEN
-ZV_zv(GEN z)
-{
-  long i, l = lg(z);
-  GEN x = cgetg(l, t_VECSMALL);
-  for (i=1; i<l; i++) x[i] = itos((GEN)z[i]);
-  return x;
-}
-GEN
-ZM_zm(GEN z)
+ZM_to_zm(GEN z)
 {
   long i, l = lg(z);
   GEN x = cgetg(l,t_MAT);
-  for (i=1; i<l; i++) x[i] = (long)ZV_zv((GEN)z[i]);
+  for (i=1; i<l; i++) x[i] = (long)ZV_to_zv((GEN)z[i]);
   return x;
 }
 
@@ -2123,7 +2101,7 @@ hnfadd_i(GEN H, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, /* cf hnfspec */
   *       [--------|-----] lig
   *       [   0    | Id  ]
   *       [        |     ] li */
-  extratop = zm_ZM( rowextract_ip(extramat, perm, 1, lig) );
+  extratop = zm_to_ZM( rowextract_ip(extramat, perm, 1, lig) );
   if (li != lig)
   { /* zero out bottom part, using the Id block */
     GEN A = vecextract_i(C, col+1, co);
@@ -2159,7 +2137,7 @@ hnfadd(GEN H, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, /* cf hnfspec */
        GEN extramat,GEN extraC)
 {
   pari_sp av = avma;
-  H = hnfadd_i(H, perm, ptdep, ptB, ptC, ZM_zm(extramat), extraC);
+  H = hnfadd_i(H, perm, ptdep, ptB, ptC, ZM_to_zm(extramat), extraC);
   gerepileall(av, 4, ptC, ptdep, ptB, &H); return H;
 }
 
@@ -2960,7 +2938,7 @@ hnfperm(GEN A)
   GEN U, perm, y = cgetg(4, t_VEC);
   y[1] = (long)hnfperm_i(A, &U, &perm);
   y[2] = (long)U;
-  y[3] = (long)zv_ZV(perm); return y;
+  y[3] = (long)vecsmall_to_vec(perm); return y;
 }
 
 /* Hermite Normal Form */

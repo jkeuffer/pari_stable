@@ -339,8 +339,16 @@ enum manage_var_t {
 #define FpX_div(x,y,p) (FpX_divrem((x),(y),(p), NULL))
 #define FpX_rem(x,y,p) (FpX_divrem((x),(y),(p), ONLY_REM))
 
-#define Flx_copy(x) (vecsmall_copy((x)))
 #define Flx_div(x,y,p) (Flx_divrem((x),(y),(p), NULL))
+
+#define zv_to_ZV(x)    (vecsmall_to_vec((x)))
+#define zv_to_ZC(x)    (vecsmall_to_col((x)))
+#define ZV_to_zv(x)    (vec_to_vecsmall((x)))
+#define zx_to_zv(x,y)  (Flx_to_Flv((x),(y)))
+#define zv_to_zx(x,y)  (Flv_to_Flx((x),(y)))
+#define zm_to_zxV(x,y) (Flm_to_FlxV((x),(y)))
+#define zero_zx(x)     (zero_Flx((x)))
+#define polx_zx(x)     (polx_Flx((x)))
 
 #define matpascal(n) matqpascal((n),NULL)
 #define sturm(x) (sturmpart((x),NULL,NULL))

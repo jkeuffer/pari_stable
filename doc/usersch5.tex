@@ -1743,9 +1743,9 @@ called on the polynomial's coefficients.
 \fun{GEN}{ZM_to_Flm}{GEN x, ulong p} reduce \kbd{ZM}~\kbd{x} modulo \kbd{p}
 (yielding an \kbd{Flm}).
 
-\fun{GEN}{ZV_zv}{GEN z}, converts coefficients using \kbd{itos}
+\fun{GEN}{ZV_to_zv}{GEN z}, converts coefficients using \kbd{itos}
 
-\fun{GEN}{ZM_zm}{GEN z}, converts coefficients using \kbd{itos}
+\fun{GEN}{ZM_to_zm}{GEN z}, converts coefficients using \kbd{itos}
 
 \subsubsec{From single precision}
 
@@ -1758,8 +1758,7 @@ destroyed).
 \fun{GEN}{FlxX_to_ZXX}{GEN B}, converts an \kbd{FlxX} to a polynomial with
 \kbd{ZX} or \typ{INT} coefficients (repeated calls to \kbd{Flx\_to\_ZX}).
 
-\fun{GEN}{zx_ZX}{GEN z}, as \kbd{Flx\_to\_ZX}, without assuming coefficients are
-non-negative.
+\fun{GEN}{zx_to_ZX}{GEN z}, as \kbd{Flx\_to\_ZX}, without assuming coefficients are non-negative.
 
 \fun{GEN}{Flv_to_ZC}{GEN z}, converts to \kbd{ZC} (\typ{COL} of non-negative
 \typ{INT}s in this case)

@@ -187,6 +187,7 @@ GEN     vecextract_p(GEN A, GEN p);
 
 GEN     QuickNormL1(GEN x,long prec);
 GEN     QuickNormL2(GEN x,long prec);
+GEN     ZM_to_zm(GEN z);
 GEN     adj(GEN x);
 GEN     assmat(GEN x);
 GEN     caract(GEN x, int v);
@@ -225,12 +226,8 @@ GEN     sqred(GEN a);
 GEN     sqred1(GEN a);
 GEN     sqred1intern(GEN a);
 GEN     sqred3(GEN a);
-GEN     ZM_zm(GEN z);
-GEN     ZV_zv(GEN z);
-GEN     zm_ZM(GEN z);
-GEN     zv_ZC(GEN z);
-GEN     zv_ZV(GEN z);
-GEN     zx_ZX(GEN z);
+GEN     zm_to_ZM(GEN z);
+GEN     zx_to_ZX(GEN z);
 
 /* anal.c */
 
@@ -1369,9 +1366,9 @@ long    perm_order(GEN perm);
 GEN     perm_pow(GEN perm, long exp);
 GEN     quotient_group(GEN C, GEN G);
 GEN     quotient_perm(GEN C, GEN p);
+GEN     vec_to_vecsmall(GEN z);
 GEN     vecperm_orbits(GEN v, long n);
 GEN     vecsmall_append(GEN V, long s);
-GEN     vecsmall_col(GEN z);
 long    vecsmall_coincidence(GEN u, GEN v);
 GEN     vecsmall_concat(GEN u, GEN v);
 GEN     vecsmall_const(long n, long c);
@@ -1382,8 +1379,9 @@ int     vecsmall_prefixcmp(GEN x, GEN y);
 GEN     vecsmall_prepend(GEN V, long s);
 GEN     vecsmall_shorten(GEN v, long n);
 void    vecsmall_sort(GEN V);
+GEN     vecsmall_to_col(GEN z);
+GEN     vecsmall_to_vec(GEN z);
 GEN     vecsmall_uniq(GEN V);
-GEN     vecsmall_vec(GEN z);
 GEN     vecvecsmall_indexsort(GEN x);
 GEN     vecvecsmall_sort(GEN x);
 long    vecvecsmall_search(GEN x, GEN y, long flag);
