@@ -159,16 +159,22 @@ non-negative.
 
 \syn{gdiventres}{x,y}.
 
-\subseckbd{\pow}: The expression $x\hbox{\kbd{\pow}}y$ is \idx{powering}. If
-the exponent is an integer, then exact operations are performed using binary
-(left-shift) powering techniques. In particular, in this case the first
-argument cannot be a vector or matrix unless it is a square matrix (and
-moreover invertible if the exponent is negative). If the exponent is not of
-type integer, this is treated as a transcendental function (see
-\secref{se:trans}), and in particular has the effect of componentwise
-powering on vector or matrices.
+\subseckbd{\pow}: The expression $x\hbox{\kbd{\pow}}n$ is \idx{powering}.
+If the exponent is an integer, then exact operations are performed using
+binary (left-shift) powering techniques. In particular, in this case $x$
+cannot be a vector or matrix unless it is a square matrix (and moreover
+invertible if the exponent is negative). If $x$ is a $p$-adic number, its
+precision will increase if $v_p(n) > 0$. PARI is able to rewrite the
+multiplication $x * x$ of two {\it identical} objects as $x^2$, or
+$\kbd{sqr}(x)$ (here, identical means the operands are two different labels
+referencing the same chunk of memory; no equality test is performed). This
+is no longer true when more than two arguments are involved.
 
-\syn{gpow}{x,y,\var{prec}} for $x\hbox{\kbd{\pow}}y$.
+If the exponent is not of type integer, this is treated as a transcendental
+function (see \secref{se:trans}), and in particular has the effect of
+componentwise powering on vector or matrices.
+
+\syn{gpow}{x,n,\var{prec}} for $x\hbox{\kbd{\pow}}n$.
 
 \subsecidx{shift}$(x,n)$ or $x$ \kbd{<<} $n$ (= $x$ \kbd{>>} $(-n)$): shifts
 $x$ componentwise left by $n$ bits if $n\ge0$ and right by $|n|$ bits if
@@ -736,16 +742,22 @@ $\text{acosh}(0.0)$). Note also that the principal branch is always chosen.
 $\bullet$ If the argument is an integermod or a $p$-adic, at present only a
 few functions like \kbd{sqrt} (square root), \kbd{sqr} (square), \kbd{log},
 \kbd{exp}, powering, \kbd{teichmuller} (Teichm\"uller character) and
-\kbd{agm} (arithmetic-geometric mean) are implemented. Note that in the case
-of a $2$-adic number, $\kbd{sqr}(x)$ is not identical to $x*x$: for example
-if $x = 1+O(2^5)$ then $x*x = 1+O(2^5)$ while $\kbd{sqr}(x) = 1+O(2^6)$.
-(Remark: note that if we wanted to be strictly consistent with the PARI
-philosophy, we should have $x*y= (4 \mod 8)$ when both $x$ and $y$ are
-congruent to $2$ modulo $4$, or $\kbd{sqr}(x)=(4\mod 32)$ when $x$ is
-congruent to $2$ modulo $4$. However, since an integermod is an exact object,
-PARI assumes that the modulus must not change, and the result is hence $0\,
-\mod\, 4$ in both cases. On the other hand, $p$-adics are not exact objects,
-hence are treated differently.)
+\kbd{agm} (arithmetic-geometric mean) are implemented.
+
+Note that in the case of a $2$-adic number, $\kbd{sqr}(x)$ may not be
+identical to $x*x$: for example if $x = 1+O(2^5)$ and $y = 1+O(2^5)$ then
+$x*y = 1+O(2^5)$ while $\kbd{sqr}(x) = 1+O(2^6)$. Here, $x * x$ yields the
+same result as $\kbd{sqr}(x)$ since the two operands are known to be {\it
+identical}. The same statement holds true for $p$-adics raised to the power
+$n$, where $v_p(n) > 0$.
+
+\misctitle{Remark:} note that if we wanted to be strictly consistent with
+the PARI philosophy, we should have $x*y = (4 \mod 8)$ and $\kbd{sqr}(x) =
+(4 \mod 32)$ when both $x$ and $y$ are congruent to $2$ modulo $4$.
+However, since integermod is an exact object, PARI assumes that the modulus
+must not change, and the result is hence $(0\, \mod\, 4)$ in both cases. On
+the other hand, $p$-adics are not exact objects, hence are treated
+differently.
 
 $\bullet$ If the argument is a polynomial, power series or rational function,
 it is, if necessary, first converted to a power series using the current
@@ -864,8 +876,7 @@ $B_x$, as \kbd{bernfrac}, but $B_x$ is returned as a real number
 the \idx{Bernoulli numbers} $B_0$, $B_2$,\dots, $B_{2x}$. These Bernoulli
 numbers can then be used as follows. Assume that this vector has been put
 into a variable, say \kbd{bernint}. Then you can define under GP:
-
-\bprog
+\bprog%
 bern(x) =
 \obr
 \q if (x==1, return(-1/2));
@@ -1049,8 +1060,29 @@ logarithmic derivative $\Gamma'(x)/\Gamma(x)$.
 
 \syn{gsh}{x,\var{prec}}.
 
-\subsecidx{sqr}$(x)$: square of $x$. Not identical to $x*x$ in
-the case of $2$-adics, where it returns a more precise result.
+\subsecidx{sqr}$(x)$: square of $x$. This operation is not completely
+straightforward, i.e.~identical to $x * x$, since it can usually be
+computed more efficiently (roughly one-half of the elementary
+multiplications can be saved). Also, squaring a $2$-adic number increases
+its precision. For example,
+\bprog%
+? (1 + O(2\pow 4))\pow 2
+\%1 = 1 + O(2\pow 5)
+? (1 + O(2\pow 4)) * (1 + O(2\pow 4))
+\%2 = 1 + O(2\pow 4)
+\eprog\noindent
+Note that this function is also called whenever one multiplies two objects
+which are known to be {\it identical}, e.g.~they are the value of the same
+variable, or we are computing a power.
+\bprog%
+? x = (1 + O(2\pow 4)); x * x
+\%3 = 1 + O(2\pow 5)
+? (1 + O(2\pow 4))\pow 4
+\%4 = 1 + O(2\pow 6)
+\eprog
+\noindent(note the difference between \kbd{\%2} and \kbd{\%3} above). No
+higher powers receive a special treatment. Raising a $3$-adic to the third
+power does not increase its precision for instance.
 
 \syn{gsqr}{x}.
 

@@ -18,7 +18,7 @@ Priority classification (first column): [subjective and debatable!]
 5  silent overflows in codeword-handling macros: O(2^50000) --> O(2^-15535)
 
 5  gegal should return 0, not raise an error when its arguments can't be
-   substracted
+   subtracted
 
 4  gcmp/gegal not transitive: [] == 0, [0] == 0, but [0] != []
 

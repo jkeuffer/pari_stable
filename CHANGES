@@ -24,7 +24,7 @@ XR = Xavier Roblot
 YU = Yoshiaki Uchikawa
 
 ===========================================================================
-Done for version ???? (released ??/??/99):
+Done for version 2.0.18.beta (released ??/??/99):
   Fixed
     1- wrong method chosen in isinexactfield for 0 polynomials
     2- stack corruption in sylvestermatrix(0,...): Mod(x,x)^-1 --> SEGV
@@ -85,6 +85,10 @@ HC 46- no GC in dirmul
 BA 53- bugs involving rarely used type combinations in generic operations
    54- check x >= 0 in lllgramint(x)
    55- in rnfdedekind: use rnfhermitemod, not rnfhermite (slooow)
+XR 56- updated factorpadic to use new Round 4
+BA 57- nfgaloisconj: discrepancies between 32/64 bits architectures
+   58- random(1 << 32) could have 32 bits
+   59- missing newline in error messages on startup (reading .gprc)
 
   Added
 IZ  1- [gnuplot] look up directory tree for gnuplot related files
@@ -92,6 +96,7 @@ IZ  1- [gnuplot] look up directory tree for gnuplot related files
        (? default/some_default, ? some_default)
     3- library functions gentimer, genmsgtimer, get_timer
 HC  4- optional argument to direuler (length of result)
+    5- low-level kernel function for integer squarings (twice faster)
 
   Changed
     1- default binary produced by Configure -g is now static
