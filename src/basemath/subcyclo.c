@@ -339,8 +339,10 @@ galoiscyclo(long n, long v)
   return gerepileupto(ltop,grp);
 }
 
-/*Convert a bnrinit(Q,n) to a znstar(n)*/
-GEN bnrtozn(GEN bnr)
+/* Convert a bnrinit(Q,n) to a znstar(n)
+ * Not stack clean 
+ */
+GEN bnrtozn(GEN bnr, long *complex)
 {
   GEN zk;
   GEN gen;
@@ -352,7 +354,10 @@ GEN bnrtozn(GEN bnr)
   checkbnrgen(bnr);
   zk = (GEN) bnr[5];
   gen = (GEN) zk[3];
+  /*cond is the finite part of the conductor
+   * complex is the infinite part*/
   cond = gcoeff(gmael3(bnr,2,1,1), 1, 1);
+  *complex = signe(gmael4(bnr,2,1,2,1));
   l2 = lg(gen);
   res= cgetg(4,t_VEC); 
   res[1]=zk[1];
@@ -382,7 +387,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
   GEN Z=NULL;
   GEN zl,L,T,le,powz;
   long val,l;
-  long n;
+  long n, complex=1;
   if (flag<0 || flag>2) err(flagerr,"galoisubcyclo");
   if ( v==-1 ) v=0;
   if (!sg) sg=gun;
@@ -394,7 +399,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
       break;
     case t_VEC:
       if (lg(N)==7)
-        N=bnrtozn(N);
+        N=bnrtozn(N,&complex);
       if (lg(N)==4)
       {
         Z=N;
@@ -458,6 +463,10 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
   V = cgetg(n, t_VECSMALL);
   if (DEBUGLEVEL >= 1)
     timer2();
+  if (DEBUGLEVEL >= 6)
+    fprintferr("Subcyclo: complex=%ld\n",complex);
+  if (!complex) /*Add complex conjugation*/
+    H=vecsmall_append(H,n-1);
   n = znconductor(n,H,V);
   if (flag==1)  {avma=ltop; return stoi(n);}
   if (DEBUGLEVEL >= 1)
