@@ -10,7 +10,7 @@ patch='4'
 # Status: alpha, beta, released, development
 status='development'
 
-if test -d CVS -a status = "development"; then
+if test -d CVS -a $status = development; then
   status="$status CHANGES-"`grep CHANGES CVS/Entries | awk -F/ '{print $3}'`
 fi
 
