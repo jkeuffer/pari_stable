@@ -109,6 +109,7 @@ BA 31- uninitialized memory read in divrr(x,y), when lg(y) < lg(x), leading
    10- faster divll for portable kernel [ inspired by GMP ]
    11- allow system() under Windows (95 and higher)
    12- use cmprr() in gegal(t_REAL, t_REAL)
+   13- have Configure check explicitly that the C compiler is ANSI
 
   Added
     1- member function rnf.pol (polynomial generating absolute extension)
