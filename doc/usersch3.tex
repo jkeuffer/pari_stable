@@ -292,18 +292,12 @@ Beware that
 
 \syn{gpow}{x,n,\var{prec}} for $x\hbox{\kbd{\pow}}n$.
 
-\subsecidx{shift}$(x,n,\{\fl=0\})$ or $x$ \kbd{<<} $n$ (= $x$ \kbd{>>} $(-n)$):
-shifts $x$ componentwise left by $n$ bits if $n\ge0$ and right by $|n|$ bits
-if $n<0$. A left shift by $n$ corresponds to multiplication by $2^n$. A right
-shift of an integer $x$ by $|n|$ corresponds to a Euclidean division of $x$
-by $2^{|n|}$ with a remainder of the same sign as $x$, hence is not the same
-(when $x < 0$) as $x \kbd{\bs} 2^{|n|}$. If $\fl$ is non-zero, this behaviour
-is modified and right shift of a negative $x$ \emph{is} the same as $x
-\kbd{\bs} 2^{|n|}$ (which is consistent with $2$-complement semantic of
-negative numbers).
+\subsecidx{bittest}$(x,n)$: outputs the $n^{\text{th}}$ bit of $|x|$ starting
+from the right (i.e.~the coefficient of $2^n$ in the binary expansion of $x$).
+The result is 0 or 1. To extract several bits at once as a vector, pass a
+vector for $n$.
 
-\syn{gshift3}{x,n,\fl} where $n$ is a \kbd{long}. Also available is
-$\teb{gshift}(x,n)$ for the case $\fl=0$.
+\syn{bittest}{x,n}, where $n$ and the result are \kbd{long}s.
 
 \subsecidx{shiftmul}$(x,n)$: multiplies $x$ by $2^n$. The difference with
 \kbd{shift} is that when $n<0$, ordinary division takes place, hence for
@@ -620,20 +614,12 @@ Negative numbers behave as if modulo a huge power of $2$.
 
 \syn{gbitor}{x,y}.
 
-\subsecidx{bittest}$(x,n,\{c=1\})$: extracts $|c|$ bits starting from
-number $n$ from the right in the development of $|x|$ (i.e.~the coefficient
-of $2^n$ in the binary expansion of $x$), returning the bits as an integer
-bitmap. That is, if $x = \sum x_i 2^i$ with the $x_i$ in $\{0,1\}$, this
-routine returns the integer
-$$ \sum_{0\leq i < |c|} x_{n + i} 2^i $$
-Bits at negative offsets are 0. A negative value of $c$ means that negative
-values of $x$ are treated in the spirit of $2$-complement arithmetic (i.e
-modulo a big power of $2$). To extract several bits (or groups of bits if
-$|c|>1$) separately at once as a vector, pass a vector for $n$.
+\subsecidx{bittest}$(x,n)$: outputs the $n^{\text{th}}$ bit of $|x|$ starting
+from the right (i.e.~the coefficient of $2^n$ in the binary expansion of $x$).
+The result is 0 or 1. To extract several bits at once as a vector, pass a
+vector for $n$.
 
-\syn{gbittest3}{x,n,c}. Also available are $\teb{gbittest}(x,n)$
-(default case $c=1$) and for simple cases $\teb{bittest}(x,n)$, where $n$
-and the result are \kbd{long}s.
+\syn{bittest}{x,n}, where $n$ and the result are \kbd{long}s.
 
 \subsecidx{bitxor}$(x,y)$: bitwise (exclusive) \tet{or}\sidx{bitwise
 exclusive or} of two integers $x$ and $y$, that is the integer
@@ -7693,17 +7679,19 @@ the keywords to \kbd{gp}, and there are currently far too many useless ones):
 
 \kbd{accurer}: accuracy problem
 
+\kbd{archer}: not available on this architecture or operating system
+
 \kbd{gdiver}: division by 0
 
 \kbd{invmoder}: impossible inverse modulo
-
-\kbd{archer}: not available on this architecture or operating system
 
 \kbd{siginter}: SIGINT received (usually from Control-C)
 
 \kbd{talker}: miscellaneous error
 
 \kbd{typeer}: wrong type
+
+\kbd{user}: user error (from the \kbd{error} function)
 
 \kbd{errpile}: the PARI stack overflows
 
