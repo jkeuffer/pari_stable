@@ -37,6 +37,7 @@ config/gnu.c
 config/has_TIOCGWINSZ.c
 config/has_dlopen.c
 config/has_exp2.c
+config/has_getrlimit.c
 config/has_getrusage.c
 config/has_opendir.c
 config/has_sigrelse.c
@@ -155,6 +156,8 @@ src/headers/parisys.h
 src/headers/paritype.h
 src/kernel/README
 src/kernel/alpha/Makefile.SH
+src/kernel/alpha/asm0.h
+src/kernel/alpha/asm1.h
 src/kernel/alpha/level0.s
 src/kernel/hppa/Makefile.SH
 src/kernel/hppa/README
