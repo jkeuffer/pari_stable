@@ -471,6 +471,7 @@ extern GEN isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag);
 extern GEN vconcat(GEN Q1, GEN Q2);
 extern GEN mathnfspec(GEN x, GEN *ptperm, GEN *ptdep, GEN *ptB, GEN *ptC);
 extern GEN factorback_i(GEN fa, GEN e, GEN nf, int red);
+extern GEN detcyc(GEN cyc);
 /* S a list of prime ideal in primedec format. Return res:
  * res[1] = generators of (S-units / units), as polynomials
  * res[2] = [perm, HB, den], for bnfissunit
@@ -520,12 +521,12 @@ bnfsunit(GEN bnf,GEN S,long prec)
     GEN D,U, ClS = cgetg(4,t_VEC);
 
     D = smithall(H, &U, NULL);
-    card = dethnf_i(D);
-    ClS[1] = (long)card; /* h */
     for(i=1; i<lg(D); i++)
       if (gcmp1((GEN)D[i])) break;
-    setlg(D,i);
-    ClS[2]=(long)D; /* cyc */
+    setlg(D,i); D = mattodiagonal_i(D); /* cf smithrel */
+    card = detcyc(D);
+    ClS[1] = (long)card; /* h */
+    ClS[2] = (long)D; /* cyc */
 
     p1=cgetg(i,t_VEC); pow=ZM_inv(U,gun);
     for(i--; i; i--)
