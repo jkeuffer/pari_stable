@@ -2469,6 +2469,7 @@ fix_relative_pol(GEN nf, GEN x)
       check_pol((GEN)x[i], vnf);
       x[i] = lmodulcp((GEN)x[i], xnf);
     }
+  if (!gcmp1(leading_term(x))) err(impl,"non-monic relative polynomials");
   return x;
 }
 

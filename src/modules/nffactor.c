@@ -7,9 +7,8 @@
 /* $Id$ */
 #include "pari.h"
 
-extern GEN fix_relative_pol(GEN nf, GEN T);
-GEN hensel_lift(GEN pol,GEN fk,GEN fkk,GEN p,long e);
-GEN hensel_lift_fact(GEN pol, GEN fact, GEN p, GEN pev, long e);
+extern GEN hensel_lift(GEN pol,GEN fk,GEN fkk,GEN p,long e);
+extern GEN hensel_lift_fact(GEN pol, GEN fact, GEN p, GEN pev, long e);
 extern GEN nf_get_T2(GEN base, GEN polr);
 extern GEN nfreducemodpr_i(GEN x, GEN prh);
 extern GEN sort_factor(GEN y, int (*cmp)(GEN,GEN));

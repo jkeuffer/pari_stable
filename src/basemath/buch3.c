@@ -1419,6 +1419,8 @@ rnfnormgroup(GEN bnr, GEN polrel)
   byteptr d = diffptr;
 
   checkbnr(bnr); bnf=(GEN)bnr[1]; raycl=(GEN)bnr[5];
+  nf=(GEN)bnf[7];
+  polrel = fix_relative_pol(nf,polrel);
   if (typ(polrel)!=t_POL) err(typeer,"rnfnormgroup");
   reldeg=lgef(polrel)-3; detgroup=(GEN)raycl[1];
   group = diagonal((GEN)raycl[2]);
@@ -1426,7 +1428,7 @@ rnfnormgroup(GEN bnr, GEN polrel)
   if (k<0) err(talker,"not an Abelian extension in rnfnormgroup?");
   if (!k) return group;
 
-  polreldisc=discsr(polrel); nf=(GEN)bnf[7];
+  polreldisc=discsr(polrel);
   sizemat=lg(group)-1; prime = *d++;
   /* tant que nffactormod est bugge pour p=2 on commence a prime = 3 */
   for(;;)
