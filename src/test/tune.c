@@ -36,7 +36,7 @@ typedef double (*speed_function_t)(ANYARG);
 
 #define MAX_SIZE 1000
 typedef struct {
-  int               gmp;
+  int               kernel;
   const char        *name;
   int               type; /* t_INT or t_REAL */
   long              min_size;
@@ -392,14 +392,16 @@ void error(int argc/* ignored */, char **argv)
   err(talker, "usage: %s [-t] [-t] [-u unittime]", argv[0]);
 }
 
+enum { PARI = 1, GMP = 2 };
+
 static tune_param param[] = {
-  {0, "KARATSUBA_MULI_LIMIT",t_INT, 4, speed_mulii,speed_karamulii},
-  {0, "KARATSUBA_SQRI_LIMIT",t_INT, 4, speed_sqri,speed_karasqri},
-  {1, "KARATSUBA_MULR_LIMIT",t_REAL,4, speed_mulrr,speed_karamulrr},
-  {1, "MONTGOMERY_LIMIT",    t_INT, 1, speed_redc,speed_modii},
-  {1, "RESIIMUL_LIMIT",      t_INT, 1, speed_modii,speed_remiimul},
-  {1, "DIVRR_GMP_LIMIT",    t_REAL, 4, speed_divrr,speed_divrrgmp},
-  {1, "INVMOD_GMP_LIMIT",    t_INT, 3, speed_invmod,speed_invmodgmp}
+  {PARI, "KARATSUBA_MULI_LIMIT",t_INT, 4, speed_mulii,speed_karamulii},
+  {PARI, "KARATSUBA_SQRI_LIMIT",t_INT, 4, speed_sqri,speed_karasqri},
+  {0, "KARATSUBA_MULR_LIMIT",   t_REAL,4, speed_mulrr,speed_karamulrr},
+  {0, "MONTGOMERY_LIMIT",       t_INT, 1, speed_redc,speed_modii},
+  {0, "RESIIMUL_LIMIT",         t_INT, 1, speed_modii,speed_remiimul},
+  {GMP, "DIVRR_GMP_LIMIT",      t_REAL,4, speed_divrr,speed_divrrgmp},
+  {GMP, "INVMOD_GMP_LIMIT",     t_INT, 3, speed_invmod,speed_invmodgmp}
 #if 0
   {"Flx_SQR_LIMIT",       t_INT, 0,speed_Flx_mul,speed_Flx_karamul}
 #endif
@@ -437,8 +439,10 @@ main(int argc, char **argv)
 
   for (i = 2; i < numberof(param); i++)
   {
-#ifdef PARI_KERNEL_GMP
-    if (!param[i].gmp) continue;
+#ifdef PARI_KERNEL_GMP /* GMP kernel */
+    if (param[i].kernel == PARI) continue;
+#else /* native PARI kernel */
+    if (param[i].kernel == GMP) continue;
 #endif
     (void)one(&param[i]);
   }
