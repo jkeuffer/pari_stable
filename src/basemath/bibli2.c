@@ -92,7 +92,7 @@ tchebi(long n, long v) /* Assume 4*n < VERYBIGINT */
   q = cgetg(n+3, t_POL); r = q + n+2;
   a = int2n(n-1);
   *r-- = (long)a;
-  *r-- = zero;
+  *r-- = (long)gen_0;
   if (n < SQRTVERYBIGINT)
     for (k=1,l=n; l>1; k++,l-=2)
     {
@@ -100,7 +100,7 @@ tchebi(long n, long v) /* Assume 4*n < VERYBIGINT */
       a = divis(mulis(a, l*(l-1)), 4*k*(n-k));
       a = gerepileuptoint(av, negi(a));
       *r-- = (long)a;
-      *r-- = zero;
+      *r-- = (long)gen_0;
     }
   else
     for (k=1,l=n; l>1; k++,l-=2)
@@ -110,7 +110,7 @@ tchebi(long n, long v) /* Assume 4*n < VERYBIGINT */
       a = divis(divis(a, 4*k), n-k);
       a = gerepileuptoint(av, negi(a));
       *r-- = (long)a;
-      *r-- = zero;
+      *r-- = (long)gen_0;
     }
   q[1] = evalsigne(1) | evalvarn(v);
   return q;
@@ -212,7 +212,7 @@ roots_to_pol_intern(GEN L, GEN a, long v, int plus)
 GEN
 roots_to_pol(GEN a, long v)
 {
-  return roots_to_pol_intern(gone,a,v,0);
+  return roots_to_pol_intern(gen_1,a,v,0);
 }
 
 /* prod_{i=1..r1} (x - a[i]) prod_{i=1..r2} (x - a[i])(x - conj(a[i]))*/
@@ -229,7 +229,7 @@ roots_to_pol_r1r2(GEN a, long r1, long v)
     GEN p2 = cgetg(5,t_POL); p1[k++] = (long)p2;
     p2[2] = lmul((GEN)a[i],(GEN)a[i+1]);
     p2[3] = lneg(gadd((GEN)a[i],(GEN)a[i+1]));
-    p2[4] = one; p2[1] = code;
+    p2[4] = (long)gen_1; p2[1] = code;
   }
   if (i < r1+1)
     p1[k++] = ladd(polx[v], gneg((GEN)a[i]));
@@ -238,7 +238,7 @@ roots_to_pol_r1r2(GEN a, long r1, long v)
     GEN p2 = cgetg(5,t_POL); p1[k++] = (long)p2;
     p2[2] = lnorm((GEN)a[i]);
     p2[3] = lneg(gtrace((GEN)a[i]));
-    p2[4] = one; p2[1] = code;
+    p2[4] = (long)gen_1; p2[1] = code;
   }
   setlg(p1, k); return divide_conquer_prod(p1, gmul);
 }
@@ -260,9 +260,9 @@ mathilbert(long n) /* Hilbert matrix of order n */
   {
     p[j] = lgetg(n+1,t_COL);
     for (i=1+(j==1); i<=n; i++)
-      coeff(p,i,j) = (long)mkfrac(gone, utoipos(i+j-1));
+      coeff(p,i,j) = (long)mkfrac(gen_1, utoipos(i+j-1));
   }
-  if (n) coeff(p,1,1) = one;
+  if (n) coeff(p,1,1) = (long)gen_1;
   return p;
 }
 
@@ -285,7 +285,7 @@ matqpascal(long n, GEN q)
   }
   for (i=1; i<=n; i++)
   {
-    I = (i+1)/2; coeff(m,i,1)=one;
+    I = (i+1)/2; coeff(m,i,1)= (long)gen_1;
     if (q)
     {
       for (j=2; j<=I; j++)
@@ -297,7 +297,7 @@ matqpascal(long n, GEN q)
         coeff(m,i,j) = laddii(gcoeff(m,i-1,j), gcoeff(m,i-1,j-1));
     }
     for (   ; j<=i; j++) coeff(m,i,j) = coeff(m,i,i+1-j);
-    for (   ; j<=n; j++) coeff(m,i,j) = zero;
+    for (   ; j<=n; j++) coeff(m,i,j) = (long)gen_0;
   }
   return gerepilecopy(av, m);
 }
@@ -388,7 +388,7 @@ gprec(GEN x, long l)
       y=cgetg(l+2,t_SER); y[1]=x[1]; l++; i=l;
       lx = lg(x);
       if (l>=lx)
-	for ( ; i>=lx; i--) y[i]=zero;
+	for ( ; i>=lx; i--) y[i]= (long)gen_0;
       for ( ; i>=2; i--) y[i]=lcopy((GEN)x[i]);
       break;
 
@@ -488,8 +488,8 @@ binome(GEN n, long k)
   if (k <= 1)
   {
     if (is_noncalc_t(typ(n))) err(typeer,"binomial");
-    if (k < 0) return gzero;
-    if (k == 0) return gone;
+    if (k < 0) return gen_0;
+    if (k == 0) return gen_1;
     return gcopy(n);
   }
   av = avma;
@@ -503,8 +503,8 @@ binome(GEN n, long k)
         k = itos(z); avma = av;
         if (k <= 1)
         {
-          if (k < 0) return gzero;
-          if (k == 0) return gone;
+          if (k < 0) return gen_0;
+          if (k == 0) return gen_1;
           return icopy(n);
         }
       }
@@ -540,7 +540,7 @@ vecbinome(long n)
   long d = (n + 1)/2, k;
   GEN bin = cgetg(n+2, t_VEC), *C;
   C = (GEN*)(bin + 1); /* C[k] = binomial(n, k) */
-  C[0] = gone;
+  C[0] = gen_1;
   for (k=1; k <= d; k++)
   {
     pari_sp av = avma;
@@ -797,7 +797,7 @@ dirmul(GEN x, GEN y)
   dx=dirval(x); dy=dirval(y); lx=lg(x); ly=lg(y);
   if (ly-dy<lx-dx) { z=y; y=x; x=z; lz=ly; ly=lx; lx=lz; lz=dy; dy=dx; dx=lz; }
   lz=min(lx*dy,ly*dx);
-  z=cgetg(lz,t_VEC); for (i=1; i<lz; i++) z[i]=zero;
+  z=cgetg(lz,t_VEC); for (i=1; i<lz; i++) z[i]= (long)gen_0;
   for (j=dx; j<lx; j++)
   {
     p1=(GEN)x[j];
@@ -835,7 +835,7 @@ dirdiv(GEN x, GEN y)
   lz=min(lx,ly*dx); p1=(GEN)y[1];
   if (!gcmp1(p1)) { y=gdiv(y,p1); x=gdiv(x,p1); }
   else x=gcopy(x);
-  z=cgetg(lz,t_VEC); for (i=1; i<dx; i++) z[i]=zero;
+  z=cgetg(lz,t_VEC); for (i=1; i<dx; i++) z[i]= (long)gen_0;
   for (j=dx; j<lz; j++)
   {
     p1=(GEN)x[j]; z[j]=(long)p1;
@@ -920,7 +920,7 @@ permtonum(GEN x)
     if (typ(res) != t_INT) err(typeer,"permtonum");
     ary[ind] = itos(res);
   }
-  ary++; res = gzero;
+  ary++; res = gen_0;
   for (last=lx; last>0; last--)
   {
     lx--; ind = lx;
@@ -1030,7 +1030,7 @@ gen_sort(GEN x, int flag, int (*cmp)(GEN,GEN))
   if (lx==2)
   {
     if      (flag & cmp_C)   y[1] = 1;
-    else if (flag & cmp_IND) y[1] = one;
+    else if (flag & cmp_IND) y[1] = (long)gen_1;
     else if (tx == t_VECSMALL) y[1] = x[1];
     else y[1] = lcopy((GEN)x[1]); 
     return y;

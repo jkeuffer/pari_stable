@@ -36,7 +36,7 @@ forpari(entree *ep, GEN a, GEN b, char *ch)
   {
     pari_sp av1=avma; lisseq_void(ch); avma=av1;
     if (loop_break()) break;
-    a = (GEN) ep->value; a = typ(a) == t_INT? addis(a, 1): gadd(a,gone);
+    a = (GEN) ep->value; a = typ(a) == t_INT? addis(a, 1): gadd(a,gen_1);
     if (low_stack(lim, stack_lim(av,1)))
     {
       if (DEBUGMEM>1) err(warnmem,"forpari");
@@ -61,7 +61,7 @@ forstep(entree *ep, GEN a, GEN b, GEN s, char *ch)
   push_val(ep, a);
   if (is_vec_t(typ(s)))
   {
-    v = s; s = gzero;
+    v = s; s = gen_0;
     for (i=lg(v)-1; i; i--) s = gadd(s,(GEN)v[i]);
   }
   ss = gsigne(s);
@@ -132,7 +132,7 @@ prime_loop_init(GEN ga, GEN gb, ulong *a, ulong *b, ulong *p)
   if (typ(ga) != t_INT || typ(gb) != t_INT)
     err(typeer,"prime_loop_init");
   if (signe(gb) < 0) return NULL;
-  if (signe(ga) < 0) ga = gone;
+  if (signe(ga) < 0) ga = gen_1;
   if (lgefint(ga)>3 || lgefint(gb)>3)
   {
     if (cmpii(ga, gb) > 0) return NULL;
@@ -464,7 +464,7 @@ somme(entree *ep, GEN a, GEN b, char *ch, GEN x)
   GEN p1;
 
   if (typ(a) != t_INT) err(talker,"non integral index in sum");
-  if (!x) x = gzero;
+  if (!x) x = gen_0;
   if (gcmp(b,a) < 0) return gcopy(x);
 
   b = gfloor(b);
@@ -520,7 +520,7 @@ GEN
 divsum(GEN num, entree *ep, char *ch)
 {
   pari_sp av = avma;
-  GEN y = gzero, t = divisors(num);
+  GEN y = gen_0, t = divisors(num);
   long i, l = lg(t);
 
   push_val(ep, NULL);
@@ -545,7 +545,7 @@ produit(entree *ep, GEN a, GEN b, char *ch, GEN x)
   GEN p1;
 
   if (typ(a) != t_INT) err(talker,"non integral index in sum");
-  if (!x) x = gone;
+  if (!x) x = gen_1;
   if (gcmp(b,a) < 0) return gcopy(x);
 
   b = gfloor(b);
@@ -670,11 +670,11 @@ direuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, GEN c)
 
   d = prime_loop_init(ga,gb, &a,&b, (ulong*)&prime[2]);
   n = c? itou(c): b;
-  if (!d || b < 2 || (c && signe(c) < 0)) return mkvec(gone);
+  if (!d || b < 2 || (c && signe(c) < 0)) return mkvec(gen_1);
   if (n < b) b = n;
 
   y = cgetg(n+1,t_VEC); av = avma;
-  x = zerovec(n); x[1] = one; p = prime[2];
+  x = zerovec(n); x[1] = (long)gen_1; p = prime[2];
   while (p <= b)
   {
     s = eval(prime, E);
@@ -727,7 +727,7 @@ direuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, GEN c)
       lx = degpol(polden);
       for (i=p; i<=n; i+=p)
       {
-	s = gzero; k = i;
+	s = gen_0; k = i;
 	for (j = 1; !(k%p) && j<=lx; j++)
 	{
 	  c = (GEN)polden[j+2]; k /= p;
@@ -865,8 +865,8 @@ sumalt(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
   N = (long)(0.4*(bit_accuracy(prec) + 7));
   d = gpowgs(e1,N);
   d = shiftr(addrr(d, ginv(d)),-1);
-  az = gminusone; c = d;
-  s = gzero;
+  az = gen_m1; c = d;
+  s = gen_0;
   for (k=0; ; k++)
   {
     c = gadd(az,c); s = gadd(s, gmul(c, eval(a, E)));
@@ -887,9 +887,9 @@ sumalt2(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
   if (typ(a) != t_INT) err(talker,"non integral index in sumalt");
   N = (long)(0.31*(bit_accuracy(prec) + 5));
   pol = polzagreel(N,N>>1,prec+1);
-  pol = RgX_div_by_X_x(pol, gone, &dn);
+  pol = RgX_div_by_X_x(pol, gen_1, &dn);
   N = degpol(pol);
-  s = gzero;
+  s = gen_0;
   for (k=0; k<=N; k++)
   {
     s = gadd(s, gmul((GEN)pol[k+2], eval(a, E)));
@@ -924,7 +924,7 @@ sumpos(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
   e1 = addsr(3,gsqrt(stoi(8),prec));
   N = (long)(0.4*(bit_accuracy(prec) + 7));
   d = gpowgs(e1,N); d = shiftr(addrr(d, ginv(d)),-1);
-  az = gminusone; c = d; s = gzero;
+  az = gen_m1; c = d; s = gen_0;
 
   G = -bit_accuracy(prec) - 5;
   stock = (GEN*)new_chunk(N+1); for (k=1; k<=N; k++) stock[k] = NULL;
@@ -934,7 +934,7 @@ sumpos(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
     else
     {
       pari_sp av2 = avma;
-      x = gzero; r = stoi(2*k+2);
+      x = gen_0; r = stoi(2*k+2);
       for(kk=0;;kk++)
       {
         
@@ -974,7 +974,7 @@ sumpos2(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
     if (odd(k) || !stock[k])
     {
       pari_sp av2 = avma;
-      x = gzero; r = stoi(2*k);
+      x = gen_0; r = stoi(2*k);
       for(kk=0;;kk++)
       {
         long ex;
@@ -988,9 +988,9 @@ sumpos2(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
       gaffect(eval(addsi(k,a), E), reel);
       stock[k] = gadd(reel, gmul2n(x,1));
     }
-  s = gzero;
+  s = gen_0;
   pol = polzagreel(N,N>>1,prec+1);
-  pol = RgX_div_by_X_x(pol, gone, &dn);
+  pol = RgX_div_by_X_x(pol, gen_1, &dn);
   for (k=1; k<=lg(pol)-2; k++)
   {
     GEN p1 = gmul((GEN)pol[k+1],stock[k]);
@@ -1019,9 +1019,9 @@ polzag(long n, long m)
   long k, d = n - m;
   GEN A, Bx, g, s;
 
-  if (d <= 0 || m < 0) return gzero;
-  A  = coefs_to_pol(2, stoi(-2), gone); /* 1 - 2x */
-  Bx = coefs_to_pol(3, stoi(-2), gtwo, gzero); /* 2x - 2x^2 */
+  if (d <= 0 || m < 0) return gen_0;
+  A  = coefs_to_pol(2, stoi(-2), gen_1); /* 1 - 2x */
+  Bx = coefs_to_pol(3, stoi(-2), gen_2, gen_0); /* 2x - 2x^2 */
   g = gmul(poleval(derivpol(tchebi(d,0)), A), gpowgs(Bx, (m+1)>>1));
   for (k = m; k >= 0; k--)
     g = (k&1)? derivpol(g): gadd(gmul(A,g), gmul(Bx,derivpol(g)));
@@ -1040,15 +1040,15 @@ polzagreel(long n, long m, long prec)
   pari_sp av = avma;
   GEN Bx, g, h, v, b, s;
 
-  if (d <= 0 || m < 0) return gzero;
-  Bx = coefs_to_pol(3, gone, gone, gzero); /* x + x^2 */
+  if (d <= 0 || m < 0) return gen_0;
+  Bx = coefs_to_pol(3, gen_1, gen_1, gen_0); /* x + x^2 */
   v = cgetg(d+1,t_VEC);
   g = cgetg(d+1,t_VEC);
-  v[d] = one; b = stor(d2, prec);
+  v[d] = (long)gen_1; b = stor(d2, prec);
   g[d] = (long)b;
   for (k = 1; k < d; k++)
   {
-    v[d-k] = one;
+    v[d-k] = (long)gen_1;
     for (j=1; j<k; j++)
       v[d-k+j] = laddii((GEN)v[d-k+j], (GEN)v[d-k+j+1]);
     /* v[d-k+j] = binom(k, j), j = 0..k */

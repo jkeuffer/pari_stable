@@ -92,7 +92,7 @@ eltreltoabs(GEN rnfeq, GEN x)
   if (varncmp(gvar(x), va) > 0) x = scalarpol(x,va);
   /* Mod(X + k alpha, polabs(X)), alpha root of the polynomial defining base */
   teta = gmodulcp(gsub(polx[va], gmulsg(k,lift_intern(alpha))), polabs);
-  s = gzero;
+  s = gen_0;
   for (i=lg(x)-1; i>1; i--)
   {
     GEN c = (GEN)x[i];
@@ -306,7 +306,7 @@ rnfinitalg(GEN nf, GEN pol, long prec)
   rnf[9] = lgetg(1,t_VEC); /* dummy */
   rnf[10]= (long)nf;
   rnf[11] = (long)rnfequation2(nf,pol);
-  rnf[12] = zero;
+  rnf[12] = (long)gen_0;
   rnf[5] = (long)rnfmakematrices(rnf);
   return gerepilecopy(av, rnf);
 }
@@ -487,13 +487,13 @@ rnfelementdown(GEN rnf,GEN x)
 
     case t_POLMOD: x = (GEN)x[2]; /* fall through */
     case t_POL:
-      if (gcmp0(x)) return gzero;
+      if (gcmp0(x)) return gen_0;
       av = avma; z = rnfelementabstorel(rnf,x);
       if (typ(z)==t_POLMOD && varn(z[1])==varn(rnf[1])) z = (GEN)z[2];
       if (varncmp(gvar(z), varn(rnf[1])) <= 0)
       {
         lx = lg(z);
-        if (lx == 2) { avma = av; return gzero; }
+        if (lx == 2) { avma = av; return gen_0; }
         if (lx > 3)
           err(talker,"element is not in the base field in rnfelementdown");
         z = (GEN)z[2];
@@ -507,7 +507,7 @@ rnfelementdown(GEN rnf,GEN x)
 static GEN
 rnfid(long n, long m)
 {
-  return idmat_intern(n, gscalcol_i(gone,m), zerocol(m));
+  return idmat_intern(n, gscalcol_i(gen_1,m), zerocol(m));
 }
 
 /* x est exprime sur la base relative */
@@ -563,7 +563,7 @@ prodidnorm(GEN I)
 {
   long i, l = lg(I);
   GEN z;
-  if (l == 1) return gone;
+  if (l == 1) return gen_1;
   z = dethnf((GEN)I[1]);
   for (i=2; i<l; i++) z = gmul(z, dethnf((GEN)I[i]));
   return z;
@@ -573,7 +573,7 @@ static GEN
 makenorms(GEN rnf)
 {
   GEN f = (GEN)rnf[4];
-  return typ(f) == t_INT? gone: dethnf(f);
+  return typ(f) == t_INT? gen_1: dethnf(f);
 }
 
 GEN
@@ -596,7 +596,7 @@ rnfidealnormabs(GEN rnf, GEN id)
   GEN z;
 
   checkrnf(rnf);
-  if (degpol(rnf[1]) == 1) return gone;
+  if (degpol(rnf[1]) == 1) return gen_1;
 
   z = prodidnorm( (GEN)rnfidealhermite(rnf,id)[2] );
   return gerepileupto(av, gmul(z, check_and_build_norms(rnf)));

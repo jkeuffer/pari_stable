@@ -128,7 +128,7 @@ plot(entree *ep, GEN a, GEN b, char *ch,GEN ysmlu,GEN ybigu, long prec)
   x = gtofp(a, prec); push_val(ep, x);
   for (i=1; i<=ISCR; i++) y[i]=cgetr(3);
   dx = gtofp(gdivgs(gsub(b,a), ISCR-1), prec);
-  ysml=gzero; ybig=gzero;
+  ysml=gen_0; ybig=gen_0;
   for (j=1; j<=JSCR; j++) scr[1][j]=scr[ISCR][j]=YY;
   for (i=2; i<ISCR; i++)
   {
@@ -153,7 +153,7 @@ plot(entree *ep, GEN a, GEN b, char *ch,GEN ysmlu,GEN ybigu, long prec)
   if (ysmlu) ysml=ysmlu;
   if (ybigu) ybig=ybigu;
   avma=av2; diff=gsub(ybig,ysml);
-  if (gcmp0(diff)) { ybig=gaddsg(1,ybig); diff=gone; }
+  if (gcmp0(diff)) { ybig=gaddsg(1,ybig); diff=gen_1; }
   dyj = gdivsg((JSCR-1)*3+2,diff);
   jz = 3-gtolong(gmul(ysml,dyj));
   av2=avma; z = PICTZERO(jz); jz = jz/3;
@@ -1553,7 +1553,7 @@ rectsplines(long ne, double *x, double *y, long lx, long flag)
 
 /*
  * Plot a dblPointList. Complete with axes, bounding box, etc.
- * We use two drawing rectangles: one for strings, another
+ * We use two drawing rectangles: (long)gen_1 for strings, another
  * for graphs.
  *
  * data is an array of structs. Its meaning depends on flags :

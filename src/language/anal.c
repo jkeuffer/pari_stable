@@ -877,18 +877,18 @@ L1:
 
 /* L0: */
   if (e1 == UNDEF) goto L1;
-  e = F0? (gcmp0(e1)? gzero: gone): e1;
+  e = F0? (gcmp0(e1)? gen_0: gen_1): e1;
   e1 = UNDEF;
   switch(*analyseur)
   {
     case '&':
       if (*++analyseur == '&') analyseur++;
-      if (gcmp0(e)) { skipexpr(); return gzero; }
+      if (gcmp0(e)) { skipexpr(); return gen_0; }
       F0=1; goto L1;
 
     case '|':
       if (*++analyseur == '|') analyseur++;
-      if (!gcmp0(e)) { skipexpr(); return gone; }
+      if (!gcmp0(e)) { skipexpr(); return gen_1; }
       F0=1; goto L1;
   }
   return e;
@@ -1336,7 +1336,7 @@ truc(void)
     case '!': /* NOT */
       analyseur++; old = analyseur;
       z = facteur(); NO_BREAK("after !", old);
-      return gcmp0(z)? gone: gzero;
+      return gcmp0(z)? gen_1: gen_0;
 
     case ('\''): { /* QUOTE */
       entree *ep;
@@ -1431,7 +1431,7 @@ double_op()
   if (c && c == analyseur[1])
     switch(c)
     {
-      case '+': analyseur+=2; return gone; /* ++ */
+      case '+': analyseur+=2; return gen_1; /* ++ */
       case '-': analyseur+=2; return mun; /* -- */
     }
   return NULL;
@@ -1558,10 +1558,10 @@ matrix_block(GEN p)
 #endif
 }
 
-/* x = gzero: no default value, otherwise a t_STR, formal expression for
+/* x = gen_0: no default value, otherwise a t_STR, formal expression for
  * default argument. Evaluate and return. */
 static GEN
-make_arg(GEN x) { return (x==gzero)? x: flisseq(GSTR(x)); }
+make_arg(GEN x) { return (x==gen_0)? x: flisseq(GSTR(x)); }
 
 static GEN
 fun_seq(char *p)
@@ -1701,7 +1701,7 @@ check_args()
       cell[1] = lclone(_strtoGENstr(old, analyseur-old));
       avma = av;
     }
-    else cell[1] = zero;
+    else cell[1] = (long)gen_0;
   }
   analyseur++; /* match(')') */
   return nparam;
@@ -2532,15 +2532,15 @@ manage_var(long n, entree *ep)
   /* create polx[var] */
   p[0] = evaltyp(t_POL) | evallg(4);
   p[1] = evalsigne(1) | evalvarn(var);
-  p[2] = zero;
-  p[3] = one;
+  p[2] = (long)gen_0;
+  p[3] = (long)gen_1;
   polx[var] = p;
 
   /* create polun[nvar] */
   p += 4;
   p[0] = evaltyp(t_POL) | evallg(3);
   p[1] = evalsigne(1) | evalvarn(var);
-  p[2] = one;
+  p[2] = (long)gen_1;
   polun[var] = p;
 
   varentries[var] = ep;
@@ -2616,7 +2616,7 @@ name_var(long n, char *s)
   u = (char *)initial_value(ep);
   ep->valence = EpVAR;
   ep->name = u; strcpy(u,s);
-  ep->value = gzero; /* in case geval would be called */
+  ep->value = gen_0; /* in case geval would be called */
   if (varentries[n]) free(varentries[n]);
   varentries[n] = ep;
 }

@@ -258,7 +258,7 @@ nffactor(GEN nf,GEN pol)
   if (d == 1)
   {
     rep[1] = (long)mkcol( gcopy(pol) );
-    rep[2] = (long)mkcol( gone );
+    rep[2] = (long)mkcol( gen_1 );
     return rep;
   }
 
@@ -303,7 +303,7 @@ nffactor(GEN nf,GEN pol)
   {
     y = gerepileupto(av, nfsqff(nf,A,0));
     l = lg(y);
-    p1 = cgetg(l, t_COL); for (j=l-1; j>=1; j--) p1[j] = one;
+    p1 = cgetg(l, t_COL); for (j=l-1; j>=1; j--) p1[j] = (long)gen_1;
   }
   if (DEBUGLEVEL>3)
     fprintferr("number of factor(s) found: %ld\n", lg(y)-1);
@@ -373,7 +373,7 @@ PRECPB:
   p1 = gnorml2(N2); if (gcmp(C, p1) < 0) C = p1;
   for (i = 1; i < d; i++)
   {
-    GEN s = gzero;
+    GEN s = gen_0;
     for (j = 1; j <= n; j++)
     {
       p1 = mpadd( mpmul((GEN)bin[i], (GEN)N2[j]), (GEN)binlS[i+1] );
@@ -536,7 +536,7 @@ L2_bound(GEN T, GEN tozk, GEN *ptden)
 
   T = get_nfpol(T, &nf);
   prec = ZX_get_prec(T) + ZM_get_prec(tozk);
-  den = nf? gone: NULL;
+  den = nf? gen_1: NULL;
   den = initgaloisborne(T, den, prec, &L, &prep, NULL);
   M = vandermondeinverse(L, gmul(T, realun(prec)), den, prep);
   if (nf) M = gmul(tozk, M);
@@ -554,7 +554,7 @@ normlp(GEN L, long p, long n)
 
   if (!is_vec_t(t)) return gmulsg(n, gpowgs(L, p));
 
-  l = lg(L); z = gzero;
+  l = lg(L); z = gen_0;
   /* assert(n == l-1); */
   for (i=1; i<l; i++)
     z = gadd(z, gpowgs((GEN)L[i], p));
@@ -607,7 +607,7 @@ get_trace(GEN ind, trace_data *T)
     r = floor(t + 0.5);
     if (fabs(t + 0.5 - r) < 0.0001)
     { /* dubious, compute exactly */
-      z = gzero;
+      z = gen_0;
       for (j=1; j<=K; j++) z = addii(z, ((GEN**)T->dPinvS)[ ind[j] ][i]);
       v[i] = - itos( diviiround(z, T->d) );
     }
@@ -1004,7 +1004,7 @@ get_R(GEN M)
     prec = (prec-1)<<1;
   }
   l = lg(R);
-  for (i=1; i<l; i++) coeff(R,i,i) = one;
+  for (i=1; i<l; i++) coeff(R,i,i) = (long)gen_1;
   return R;
 }
 
@@ -1058,11 +1058,11 @@ bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *L)
     {
       pari_sp av2 = avma;
       GEN S = invmat( get_R(PRK) ), BB = GS_norms(B, DEFAULTPREC);
-      GEN smax = gzero;
+      GEN smax = gen_0;
       long i, j;
       for (i=1; i<=d; i++)
       {
-        GEN s = gzero;
+        GEN s = gen_0;
         for (j=1; j<=d; j++)
           s = gadd(s, gdiv( gsqr(gcoeff(S,i,j)), (GEN)BB[j]));
         if (gcmp(s, smax) > 0) smax = s;
@@ -1154,7 +1154,7 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long k, long rec)
 
     /* bound for f . S_k(genuine factor) = ZC * bound for T_2(S_tnew) */
     Btra = mulrr(ZC, mulsr(dP*dP, normlp(Br, 2*tnew, dnf)));
-    bmin = logint(ceil_safe(sqrtr(Btra)), gtwo, NULL);
+    bmin = logint(ceil_safe(sqrtr(Btra)), gen_2, NULL);
     if (DEBUGLEVEL>2)
       fprintferr("\nLLL_cmbf: %ld potential factors (tmax = %ld, bmin = %ld)\n",
                  r, tmax, bmin);
@@ -1317,7 +1317,7 @@ nf_DDF_roots(GEN pol, GEN polred, GEN nfpol, GEN lt, GEN init_fa, long nbf,
   else
     z = rootpadicfast(polred, L->p, L->k);
   Cltx_r[1] = evalsigne(1) | evalvarn(varn(pol));
-  Cltx_r[3] = Clt? (long)Clt: one;
+  Cltx_r[3] = Clt? (long)Clt: (long)gen_1;
   C2ltpol  = C2lt? gmul(C2lt, pol): pol;
   for (m=1,i=1; i<lg(z); i++)
   {
@@ -1434,7 +1434,7 @@ nfsqff(GEN nf, GEN pol, long fl)
       }
       avma = av2;
     }
-    apr = primedec_apply_kummer(nf,r,gone,ap);
+    apr = primedec_apply_kummer(nf,r,gen_1,ap);
 
     modpr = zk_to_ff_init(nf,&apr,&aT,&ap);
     red = modprX(polbase, nf, modpr);

@@ -1,7 +1,7 @@
 #include "pari.h"
 #include "anal.h"
 
-GEN   gzero, gone, gtwo;
+GEN   gen_0, gen_1, gen_2;
 pari_sp top, bot, avma;
 size_t memused = 0;
 ulong  DEBUGLEVEL,DEBUGMEM = 0;
@@ -11,11 +11,11 @@ void specinit()
   long size = 100000L;
   bot = (pari_sp)malloc(size);
   top = avma = bot + size;
-  gzero = malloc(2);
-  gzero[0] = evaltyp(t_INT)|evallg(2);
-  gzero[1] = evallgefint(2);
-  gone   = utoipos(1);
-  gtwo = utoipos(2);
+  gen_0 = malloc(2);
+  gen_0[0] = evaltyp(t_INT)|evallg(2);
+  gen_0[1] = evallgefint(2);
+  gen_1   = utoipos(1);
+  gen_2 = utoipos(2);
 }
 
 void gerepileall(pari_sp av, int n, ...){}

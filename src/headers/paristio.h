@@ -78,7 +78,7 @@ extern byteptr diffptr;
 extern entree  **varentries;
 extern char    *errmessage[], *current_psfile, *pari_datadir;
 
-#define is_universal_constant(x) ((GEN)(x) >= gzero && (GEN)(x) <= gi)
+#define is_universal_constant(x) ((GEN)(x) >= gen_0 && (GEN)(x) <= gi)
 
 #define gcopyifstack(x,y)  STMT_START {pari_sp _t=(pari_sp)(x); \
   (y)=(_t>=bot &&_t<top)? gcopy((GEN)_t): (GEN)_t;} STMT_END

@@ -1,8 +1,10 @@
 /* For compatibility with 1.x.x */
-#define un   one
-#define deux two
-#define gun   gone
-#define gdeux gtwo
+#define zero  (long)gen_0
+#define un    (long)gen_1
+#define deux  (long)gen_2
+#define gzero gen_0
+#define gun   gen_1
+#define gdeux gen_2
 #define err pari_err /* move to e.g paritr.h ? */
 #define init pari_init
 #define gen2str GENtostr

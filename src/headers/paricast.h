@@ -225,9 +225,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #endif
 #define ldiv    (long)gdiv
 
-#define zero    (long)gzero
-#define one     (long)gone
-#define two     (long)gtwo
 #define lhalf   (long)ghalf
 #define lpolx   (long)polx
 #define lpolun  (long)polun

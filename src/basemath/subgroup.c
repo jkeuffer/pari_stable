@@ -314,7 +314,7 @@ dopsub(subgp_iter *T, GEN p, GEN indexsubq)
     setlen(M, j-1); w = weight(M);
     if (w >= wmin && w <= wmax)
     {
-      GEN p1 = gone;
+      GEN p1 = gen_1;
 
       if (T->subq && T->bound) /* G not a p-group */
       {
@@ -406,7 +406,7 @@ expand_sub(GEN x, long n)
   {
     q = (GEN)p[i]; c = (GEN)x[i];
     for (j=1; j<m; j++) q[j] = c[j];
-    for (   ; j<n; j++) q[j] = zero;
+    for (   ; j<n; j++) q[j] = (long)gen_0;
   }
   return p;
 }
@@ -562,7 +562,7 @@ forsubgroup(entree *ep, GEN cyc, GEN bound, char *ch)
   T.cyc = cyc;
   E.s = ch;
   E.ep= ep; T.fundata = (void*)&E;
-  push_val(ep, gzero);
+  push_val(ep, gen_0);
 
   subgroup_engine(&T);
 
@@ -607,12 +607,12 @@ subgrouplist_i(GEN cyc, GEN bound, GEN expoI, GEN gen)
     {
       H[j] = lgetg(N+1, t_COL);
       for (i=1; i<=j; i++) coeff(H,i,j) = lstoi(sublist->data[k++]);
-      for (   ; i<=N; i++) coeff(H,i,j) = zero;
+      for (   ; i<=N; i++) coeff(H,i,j) = (long)gen_0;
     }
     for (   ; j<=N; j++)
     {
       H[j] = lgetg(N+1, t_COL);
-      for (i=1; i<=N; i++) coeff(H,i,j) = (i==j)? one: zero;
+      for (i=1; i<=N; i++) coeff(H,i,j) = (i==j)? (long)gen_1: (long)gen_0;
     }
   }
   free(sublist); return z;

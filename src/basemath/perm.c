@@ -945,7 +945,7 @@ group_abelianHNF(GEN G, GEN S)
       j = q;
     }  
     C[k] = lstoi(o[i]);
-    for (k++; k<n; k++) C[k] = zero;
+    for (k++; k<n; k++) C[k] = (long)gen_0;
   }
   return M;
 }

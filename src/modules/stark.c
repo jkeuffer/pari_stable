@@ -53,7 +53,7 @@ GEN
 InitRU(GEN den, long prec)
 {
   GEN c, s;
-  if (egalii(den, gtwo)) return gminusone;
+  if (egalii(den, gen_2)) return gen_m1;
   gsincos(divri(Pi2n(1, prec), den), &s, &c, prec);
   return mkcomplex(c, s);
 }
@@ -122,7 +122,7 @@ ConjChar(GEN chi, GEN cyc)
 
   for (i = 1; i < l; i++)
     if (!signe((GEN)chi[i]))
-      p1[i] = zero;
+      p1[i] = (long)gen_0;
     else
       p1[i] = lsubii((GEN)cyc[i], (GEN)chi[i]);
 
@@ -213,7 +213,7 @@ get_Char(GEN chic, long prec)
 {
   GEN d, C;
   C = cgetg(4, t_VEC);
-  C[1] = (long)Q_remove_denom(chic, &d); if (!d) d = gone;
+  C[1] = (long)Q_remove_denom(chic, &d); if (!d) d = gen_1;
   C[2] = (long)InitRU(d, prec);
   C[3] = (long)d; return C;
 }
@@ -248,7 +248,7 @@ GetPrimChar(GEN chi, GEN bnr, GEN bnrc, long prec)
   for (i = 1; i < l; i++)
   {
     GEN u = (GEN)U[i + nbg];
-    s  = gzero;
+    s  = gen_0;
     for (j = 1; j <= nbg; j++)
       s  = gadd(s, gdiv(mulii((GEN)u[j], (GEN)chi[j]), (GEN)cyc[j]));
     chic[i] = (long)s;
@@ -357,7 +357,7 @@ ComputeIndex2Subgroup(GEN bnr, GEN C)
   Mr = diagonal(gmael(bnr, 5, 2));
   D = smithall(hnf_gauss(C, Mr), &U, NULL);
   T = gmul(C,ginv(U));
-  subgrp  = subgrouplist(D, mkvec(gtwo));
+  subgrp  = subgrouplist(D, mkvec(gen_2));
   nb = lg(subgrp);
   for (i = 1; i < nb; i++)
     subgrp[i] = (long)hnf(concatsp(gmul(T, (GEN)subgrp[i]), Mr));
@@ -371,7 +371,7 @@ Order(GEN cyc, GEN x)
 {
   pari_sp av = avma;
   long i, l = lg(cyc);
-  GEN c,o,f = gone;
+  GEN c,o,f = gen_1;
   for (i = 1; i < l; i++)
   {
     o = (GEN)cyc[i];
@@ -507,7 +507,7 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec, long prec)
 
   /* Initialization of the possible infinite part */
   arch = cgetg(N+1, t_VEC);
-  for (i = 1; i <= N; i++) arch[i] = one;
+  for (i = 1; i <= N; i++) arch[i] = (long)gen_1;
 
   /* narch = (N == 2)? 1: N; -- if N=2, only one case is necessary */
   narch = N;
@@ -543,14 +543,14 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec, long prec)
 
 	for (s = 1; s <= narch; s++)
 	{ /* infinite part */
-	  arch[N+1-s] = zero;
+	  arch[N+1-s] = (long)gen_0;
 
           /* compute Clk(m), check if m is a conductor */
 	  disable_dbg(0);
 	  bnrm = buchrayinitgen(bnf, m);
 	  p1   = conductor(bnrm, NULL, -1);
 	  disable_dbg(-1);
-          arch[N+1-s] = one;
+          arch[N+1-s] = (long)gen_1;
 	  if (!signe(p1)) continue;
 
           /* compute Im(C) in Clk(m)... */
@@ -636,7 +636,7 @@ ComputeArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
   for (ic = 0, i = 1; i <= nChar; i++)
   {
     CHI = (GEN)LCHI[i];
-    if (cmpsi(2, (GEN)CHI[3]) >= 0) { W[i] = one; continue; } /* trivial case */
+    if (cmpsi(2, (GEN)CHI[3]) >= 0) { W[i] = (long)gen_1; continue; } /* trivial case */
     ic++; indW[ic] = i;
     lC[ic] = (CHI_t*)new_chunk(sizeof(CHI_t));
     init_CHI_C(lC[ic], CHI);
@@ -683,7 +683,7 @@ ComputeArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
   }
   else
   {
-    mu  = gone;
+    mu  = gen_1;
     idh = idg;
   }
 
@@ -723,7 +723,7 @@ ComputeArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
 
   av2 = avma; lim = stack_lim(av2, 1);
   vB = (GEN*)cgetg(nz+1, t_VEC);
-  for (i=1; i<=nz; i++) vB[i] = gone;
+  for (i=1; i<=nz; i++) vB[i] = gen_1;
 
   tr = gmod(gmul(vt, muslambda), den); /* for beta = 1 */
   s0 = powgi(z, tr);
@@ -858,7 +858,7 @@ LiftChar(GEN cyc, GEN Mat, GEN chi)
   for (i = 1; i <= lm; i++)
   {
     av = avma;
-    s  = gzero;
+    s  = gen_0;
 
     for (j = 1; j <= l; j++)
       s = gadd(s, gmul((GEN)chi[j], gcoeff(Mat, j, i)));
@@ -883,7 +883,7 @@ ComputeAChi(GEN dtcr, long flag, long prec)
   chi  = (GEN)dtcr[8];
   l    = lg(diff) - 1;
 
-  A = gone;
+  A = gen_1;
   r = 0;
 
   for (i = 1; i <= l; i++)
@@ -893,14 +893,14 @@ ComputeAChi(GEN dtcr, long flag, long prec)
     p1  = ComputeImagebyChar(chi, ray);
 
     if (flag)
-      B = gsub(gone, gdiv(p1, idealnorm(nf, (GEN)diff[i])));
+      B = gsub(gen_1, gdiv(p1, idealnorm(nf, (GEN)diff[i])));
     else if (gcmp1(p1))
     {
       B = glog(idealnorm(nf, (GEN)diff[i]), prec);
       r++;
     }
     else
-      B = gsub(gone, p1);
+      B = gsub(gen_1, p1);
     A = gmul(A, B);
   }
   return flag? A: mkvec2(stoi(r), A);
@@ -1057,7 +1057,7 @@ get_listCR(GEN bnr, GEN dtQ)
 
     /* if chi is not real, add its conjugate character to allCR */
     d = Order(Mr, lchi);
-    if (!egalii(d, gtwo))
+    if (!egalii(d, gen_2))
       allCR[tnc++] = (long)ConjChar(lchi, Mr);
   }
   disable_dbg(-1);
@@ -1253,7 +1253,7 @@ EvalCoeff(GEN z, int* c, long deg)
   long i,j;
   GEN e, r;
 
-  if (!c) return gzero;
+  if (!c) return gen_0;
 #if 0
   /* standard Horner */
   e = stoi(c[deg - 1]);
@@ -1469,7 +1469,7 @@ InitPrimesQuad(GEN bnr, long N0, LISTray *R)
   /* precompute isprincipalray(x), x in Z */
   R->rayZ = (GEN*)cgetg(condZ, t_VEC);
   for (i=1; i<condZ; i++)
-    R->rayZ[i] = (cgcd(i,condZ) == 1)? isprincipalray(bnr, utoipos(i)): gzero;
+    R->rayZ[i] = (cgcd(i,condZ) == 1)? isprincipalray(bnr, utoipos(i)): gen_0;
 
   gptr[0] = &(R->L0);
   gptr[1] = &(R->L2);  gptr[2] = (GEN*)&(R->rayZ);
@@ -1524,14 +1524,14 @@ static GEN /* cf polcoeff */
 _sercoeff(GEN x, long n)
 {
   long i = n - valp(x);
-  return (i < 0)? gzero: (GEN)x[i+2];
+  return (i < 0)? gen_0: (GEN)x[i+2];
 }
 
 static void
 affect_coeff(GEN q, long n, GEN y)
 {
   GEN x = _sercoeff(q,-n);
-  if (x == gzero) y[n] = zero; else gaffect(x, (GEN)y[n]);
+  if (x == gen_0) y[n] = (long)gen_0; else gaffect(x, (GEN)y[n]);
 }
 
 typedef struct {
@@ -1571,7 +1571,7 @@ ppgamma(ST_t *T, long prec)
   /* expansion of log(Gamma(u)) at u = 1 */
   gamun = cgetg(r+3, t_SER);
   gamun[1] = evalsigne(1) | evalvalp(0) | evalvarn(0);
-  gamun[2] = zero;
+  gamun[2] = (long)gen_0;
   gamun[3] = lneg(eul);
   for (i = 2; i <= r; i++)
     gamun[i+2] = ldivrs(szeta(i,prec), odd(i)? -i: i);
@@ -1581,7 +1581,7 @@ ppgamma(ST_t *T, long prec)
   /* expansion of log(Gamma(u) / Gamma(1/2)) at u = 1/2 */
   gamdm = cgetg(r+3, t_SER);
   gamdm[1] = evalsigne(1) | evalvalp(0) | evalvarn(0);
-  gamdm[2] = zero;
+  gamdm[2] = (long)gen_0;
   gamdm[3] = lneg(gadd(gmul2n(mplog2(prec), 1), eul));
   for (i = 2; i <= r; i++)
     gamdm[i+2] = lmulri((GEN)gamun[i+2], subis(int2n(i), 1));
@@ -1603,7 +1603,7 @@ ppgamma(ST_t *T, long prec)
     p2 = gsubst(gam,0,x2);
   }
   cf = gpowgs(sqpi, t);
-  an = gpowgs(gpow(gtwo, gsubsg(1,x), prec), t); /* 2^{t-tx} */
+  an = gpowgs(gpow(gen_2, gsubsg(1,x), prec), t); /* 2^{t-tx} */
   bn = gpowgs(gam, t+c); /* Gamma(x)^{t+c} */
   cn_evn = gpowgs(p1, s-t); /* Gamma(X)^{s-t} */
   cn_odd = gpowgs(p2, s-t); /* Gamma(Y)^{s-t} */
@@ -1817,7 +1817,7 @@ RecCoeff3(GEN nf, RC_data *d, long prec)
 
   d->G = min(-10, -bit_accuracy(prec) >> 4);
   eps = gpowgs(utoipos(10), min(-8, (d->G >> 1)));
-  tB  = gpow(gmul2n(eps, N), gdivgs(gone, 1-N), DEFAULTPREC);
+  tB  = gpow(gmul2n(eps, N), gdivgs(gen_1, 1-N), DEFAULTPREC);
 
   Bd    = gceil(gmin(B, tB));
   prec2 = BIGDEFAULTPREC + (expi(Bd)>>TWOPOTBITS_IN_LONG);
@@ -1845,7 +1845,7 @@ RecCoeff3(GEN nf, RC_data *d, long prec)
   for (i = 2; i <= N+1; i++)
     for (j = 2; j <= N+1; j++)
     {
-      p1 = gzero;
+      p1 = gen_0;
       for (k = 1; k <= N; k++)
       {
         GEN p2 = gmul(gcoeff(M, k, j-1), gcoeff(M, k, i-1));
@@ -1950,7 +1950,7 @@ RecCoeff(GEN nf,  GEN pol,  long v, long prec)
     if (! (p1 = RecCoeff2(nf, &d, prec)) ) return NULL;
     pol[cf+2] = (long)p1;
   }
-  pol[cl+2] = one;
+  pol[cl+2] = (long)gen_1;
   return gerepilecopy(av, pol);
 }
 
@@ -2135,7 +2135,7 @@ QuadGetST(GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
     {
       const long t = LChar[k], d = degs[t];
       const GEN z = gmael3(dataCR, t, 5, 2);
-      GEN p1 = gzero, p2 = gzero;
+      GEN p1 = gen_0, p2 = gen_0;
       int **matan;
       long c = 0;
 
@@ -2293,7 +2293,7 @@ GetST(GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
   prec2 = ((prec-2) << 1) + EXTRA_PREC;
   racpi = sqrtr(mppi(prec2));
   powracpi = (GEN*)cgetg(r1+2,t_VEC);
-  powracpi++; powracpi[0] = gone; powracpi[1] = racpi;
+  powracpi++; powracpi[0] = gen_1; powracpi[1] = racpi;
   for (j=2; j<=r1; j++) powracpi[j] = mulrr(powracpi[j-1], racpi);
   cScT.powracpi = powracpi;
 
@@ -2319,7 +2319,7 @@ GetST(GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
     {
       const long t = LChar[k], d = degs[t];
       const GEN z = gmael3(dataCR, t, 5, 2);
-      GEN p1 = gzero, p2 = gzero;
+      GEN p1 = gen_0, p2 = gen_0;
       long c = 0;
       int **matan;
 
@@ -2436,7 +2436,7 @@ GenusField(GEN bnf)
   l = 0;
   pol = NULL;
 
-  for (c = 2; l < hk; c++) /* skip c = 1 : div[1] = gone */
+  for (c = 2; l < hk; c++) /* skip c = 1 : div[1] = gen_1 */
   {
     d = (GEN)div[c];
     if (mod4(d) == 1)
@@ -2535,7 +2535,7 @@ LABDOUB:
   veczeta = cgetg(h + 1, t_VEC);
   for (i = 1; i <= h; i++)
   {
-    GEN z = gzero;
+    GEN z = gen_0;
 
     sig = (GEN)p1[i];
     for (j = 1; j <= cl; j++)
@@ -2649,7 +2649,7 @@ makescind(GEN nf, GEN P, long cl)
     GEN c = (GEN)pol[i];
     if (typ(c) != t_POL) continue;
     c = RgX_rem(c, nfpol); /* degree <= 0 polynomial [t_INT coeff] */
-    c = signe(c)? (GEN)c[2] : gzero;
+    c = signe(c)? (GEN)c[2] : gen_0;
     pol[i] = (long)c;
   }
   /* pol = rnfequation(nf, P); */
@@ -2707,14 +2707,14 @@ START:
 
   /* if the exponent of the class group is 2, use Genus Theory */
   exp = gmael4(bnf, 8, 1, 2, 1);
-  if (egalii(exp, gtwo)) return gerepileupto(av, GenusField(bnf));
+  if (egalii(exp, gen_2)) return gerepileupto(av, GenusField(bnf));
 
   CATCH(precer) {
     prec += EXTRA_PREC; pol = NULL;
     err (warnprec, "quadhilbertreal", prec);
   } TRY {
     /* find the modulus defining N */
-    bnr  = buchrayinitgen(bnf, gone);
+    bnr  = buchrayinitgen(bnf, gen_1);
     M = diagonal(gmael(bnr,5,2));
     dtQ  = InitQuotient(M);
     bnrh = FindModulus(bnr, dtQ, &newprec, prec);
@@ -2727,7 +2727,7 @@ START:
       for (i = 1; i < l; i++)
 	{
           GEN t = gcoeff(M,i,i);
-	  coeff(M,i,i) = one;
+	  coeff(M,i,i) = (long)gen_1;
 	  vec[i] = (long)bnrstark(bnr, M, prec);
 	  coeff(M,i,i) = (long)t;
 	}
@@ -2882,7 +2882,7 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
     lchi = cgetg(ncc + 1, t_VEC);
     for (j = 1; j <= ncc; j++)
     {
-      p1 = gzero;
+      p1 = gen_0;
       for (k = 1; k <= lq; k++)
 	p1 = gadd(p1, gdiv(mulii(gmael3(Qt, 3, j, k), (GEN)chi[k]),
 			   gmael(Qt, 2, k)));

@@ -52,8 +52,8 @@ GEN
 ishiftr(GEN x, long s)
 {
   long ex,lx,n;
-  if (!signe(x)) return gzero;
-  ex = expo(x) + s; if (ex < 0) return gzero;
+  if (!signe(x)) return gen_0;
+  ex = expo(x) + s; if (ex < 0) return gen_0;
   lx = lg(x);
   n=ex - bit_accuracy(lx) + 1;
   return ishiftr_lg(x, lx, n);
@@ -64,7 +64,7 @@ icopy_spec(GEN x, long nx)
 {
   GEN z;
   long i;
-  if (!nx) return gzero;
+  if (!nx) return gen_0;
   z = cgeti(nx+2); z[1] = evalsigne(1)|evallgefint(nx+2);
   for (i=0; i<nx; i++) z[i+2] = x[i];
   return z;
@@ -76,7 +76,7 @@ mului(ulong x, GEN y)
   long s = signe(y);
   GEN z;
 
-  if (!s || !x) return gzero;
+  if (!s || !x) return gen_0;
   z = muluispec(x, y+2, lgefint(y)-2);
   setsigne(z,s); return z;
 }
@@ -87,7 +87,7 @@ mulsi(long x, GEN y)
   long s = signe(y);
   GEN z;
 
-  if (!s || !x) return gzero;
+  if (!s || !x) return gen_0;
   if (x<0) { s = -s; x = -x; }
   z = muluispec((ulong)x, y+2, lgefint(y)-2);
   setsigne(z,s); return z;
@@ -116,7 +116,7 @@ mulsr(long x, GEN y)
 {
   long s, e;
 
-  if (!x) return gzero;
+  if (!x) return gen_0;
   s = signe(y);
   if (!s)
   {
@@ -137,7 +137,7 @@ mulur(ulong x, GEN y)
 {
   long s, e;
 
-  if (!x) return gzero;
+  if (!x) return gen_0;
   s = signe(y);
   if (!s)
   {
@@ -319,7 +319,7 @@ mulir(GEN x, GEN y)
   long sx = signe(x), sy, lz;
   GEN z;
 
-  if (!sx) return gzero;
+  if (!sx) return gen_0;
   if (!is_bigint(x)) return mulsr(itos(x), y);
   sy = signe(y);
   if (!sy) return realzero_bit(expi(x) + expo(y));
@@ -360,7 +360,7 @@ divsi(long x, GEN y)
   LOCAL_HIREMAINDER;
 
   if (!s) err(gdiver);
-  if (!x || lgefint(y)>3 || ((long)y[2])<0) return gzero;
+  if (!x || lgefint(y)>3 || ((long)y[2])<0) return gen_0;
   hiremainder=0; p1=divll(labs(x),y[2]);
   if (x<0) { hiremainder = -((long)hiremainder); p1 = -p1; }
   if (s<0) p1 = -p1;
@@ -375,7 +375,7 @@ divir(GEN x, GEN y)
   pari_sp av;
 
   if (!signe(y)) err(gdiver);
-  if (!signe(x)) return gzero;
+  if (!signe(x)) return gen_0;
   ly = lg(y); z = cgetr(ly); av = avma; 
   affrr(divrr(itor(x, ly+1), y), z);
   avma = av; return z;
@@ -421,7 +421,7 @@ divsr(long x, GEN y)
   GEN z;
 
   if (!signe(y)) err(gdiver);
-  if (!x) return gzero;
+  if (!x) return gen_0;
   ly = lg(y); z = cgetr(ly); av = avma;
   affrr(divrr(stor(x,ly+1), y), z);
   avma = av; return z;
@@ -432,14 +432,14 @@ modii(GEN x, GEN y)
 {
   switch(signe(x))
   {
-    case 0: return gzero;
+    case 0: return gen_0;
     case 1: return remii(x,y);
     default:
     {
       pari_sp av = avma;
       (void)new_chunk(lgefint(y));
       x = remii(x,y); avma=av;
-      if (x==gzero) return x;
+      if (x==gen_0) return x;
       return subiispec(y+2,x+2,lgefint(y)-2,lgefint(x)-2);
     }
   }
@@ -509,8 +509,8 @@ mulii(GEN a,GEN b)
   long sa,sb;
   GEN z;
 
-  sa=signe(a); if (!sa) return gzero;
-  sb=signe(b); if (!sb) return gzero;
+  sa=signe(a); if (!sa) return gen_0;
+  sb=signe(b); if (!sb) return gen_0;
   if (sb<0) sa = -sa;
   z = muliispec(a+2,b+2, lgefint(a)-2,lgefint(b)-2);
   setsigne(z,sa); return z;
@@ -524,7 +524,7 @@ remiimul(GEN x, GEN sy)
   pari_sp av = avma;
 
   k = cmpii(x, y);
-  if (k <= 0) return k? icopy(x): gzero;
+  if (k <= 0) return k? icopy(x): gen_0;
   invy = (GEN)sy[2];
   q = mulir(x,invy);
   q = mptrunc(q); /* <= divii(x, y) (at most 1 less) */
@@ -533,7 +533,7 @@ remiimul(GEN x, GEN sy)
   k = cmpii(r, y);
   if (k >= 0)
   {
-    if (k == 0) { avma = av; return gzero; }
+    if (k == 0) { avma = av; return gen_0; }
     r = subiispec(r+2, y+2, lgefint(r)-2, lgefint(y)-2);
   }
 #if 0

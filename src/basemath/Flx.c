@@ -1537,7 +1537,7 @@ FlxX_to_ZXX(GEN B)
     if (lgpol(B[i]))
       b[i] = (long) Flx_to_ZX((GEN)B[i]);
     else
-      b[i] = zero;
+      b[i] = (long)gen_0;
   b[1] = B[1]; return b;
 }
 

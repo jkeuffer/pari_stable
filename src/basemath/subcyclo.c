@@ -361,7 +361,7 @@ subcyclo_cyclic(long n, long d, long m ,long z, long g, GEN powz, GEN le)
   {
     pari_sp av = avma;
     long ex = base;
-    GEN s = gzero;
+    GEN s = gen_0;
     for (k=0; k<m; k++, ex = Fl_mul(ex,g,n)) s = gadd(s,(GEN)powz[ex]);
     if (le) s = modii(s, le);
     V[i] = lpileupto(av, s);
@@ -401,7 +401,7 @@ subcyclo_orbits(long n, GEN H, GEN O, GEN powz, GEN le)
   data.powz = powz;
   for(i=1; i<d; i++)
   {
-    GEN s = gzero;
+    GEN s = gen_0;
     pari_sp av = avma;
     (void)new_chunk(lle);
     data.count = 0;
@@ -443,7 +443,7 @@ subcyclo_start(long n, long d, long o, GEN borne, long *ptr_val,long *ptr_l)
     fprintferr("Subcyclo: val=%ld\n",val);
   le=gpowgs(l,val);
   z=lift(gpowgs(gener(l),e));
-  z=padicsqrtnlift(gone,utoipos(n),z,l,val);
+  z=padicsqrtnlift(gen_1,utoipos(n),z,l,val);
   if (DEBUGLEVEL >= 1)
     msgtimer("padicsqrtnlift.");
   *ptr_val=val;
@@ -525,8 +525,8 @@ galoiscyclo(long n, long v)
   mael(grp,2,2) = lstoi(val);
   mael(grp,2,3) = licopy(le);
   grp[3] = lcopy(L);
-  grp[4] = (long) vandermondeinversemod(L, (GEN) grp[1], gone, le);
-  grp[5] = one;
+  grp[4] = (long) vandermondeinversemod(L, (GEN) grp[1], gen_1, le);
+  grp[5] = (long)gen_1;
   grp[6] = lcopy(elts);
   grp[7] = lcopy((GEN)G[1]);
   grp[8] = lcopy((GEN)G[2]);
@@ -578,7 +578,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
   long card, phi_n;
   if (flag<0 || flag>2) err(flagerr,"galoissubcyclo");
   if ( v==-1 ) v=0;
-  if (!sg) sg=gone;
+  if (!sg) sg=gen_1;
   switch(typ(N))
   {
     case t_INT:
@@ -729,7 +729,7 @@ subcyclo(long n, long d, long v)
   o /= d;
   if (p==2)
   {
-    GEN pol = powgi(polx[v],gtwo); pol[2]=one; /* replace gzero */
+    GEN pol = powgi(polx[v],gen_2); pol[2]= (long)gen_1; /* replace gen_0 */
     return pol; /* = x^2 + 1 */
   }
   G=gener(utoipos(n));

@@ -1051,10 +1051,10 @@ setdefault(char *s,char *v, int flag)
   for (dft=gp_default_list; dft->fun; dft++)
     if (!strcmp(s,dft->name))
     {
-      if (flag == d_EXISTS) return gone;
+      if (flag == d_EXISTS) return gen_1;
       return ((GEN (*)(char*,int)) dft->fun)(v,flag);
     }
-  if (flag == d_EXISTS) return gzero;
+  if (flag == d_EXISTS) return gen_0;
   err(talker,"unknown default: %s",s);
   return NULL; /* not reached */
 }
@@ -1152,7 +1152,7 @@ commands(int n)
 static void
 print_def_arg(GEN x)
 {
-  if (x == gzero) return;
+  if (x == gen_0) return;
   pariputc('=');
   if (typ(x)==t_STR)
     pariputs(GSTR(x)); /* otherwise it's surrounded by "" */

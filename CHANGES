@@ -39,7 +39,7 @@ TP = Thomas Papanikolaou
 XR = Xavier Roblot
 YU = Yoshiaki Uchikawa
 
-Done for version 2.2.9 (released ??/??/2004):
+Done for version 2.2.9 (released 23/12/2004):
   Fixed
     1- ploth(,256). splines had stopped working
     2- gamma(-1.), psi(-1.) [ non-positive integers masquerading as t_REALs ]:
@@ -56,7 +56,7 @@ GN  6- [ix86 + Sun cc] build fails [ unsatisfied symbol reference to 'mulll' ]
    10- [hi-res plot: fltk] fix compilation with g++-3.4
 BA 11- [hi-res plot: fltk] line plotting was broken
    12- oo loops in prodinf [ e.g prodinf(x=2, zeta(x)) ]
-   13- [compatible=3] wrong proto. for isoncurve, lex, sign, thetanullk
+   13- [compatible=3] wrong prototype for isoncurve, lex, sign, thetanullk
    14- quadhilbert(D > 0) spent an unreasonable time to find a relative
        equation defined over Q [ use Galois theory instead of naive search ]
    15- typo in resmod2n [ missing (ulong) typecast ] -> issquare((2^64+1)^2)=0
@@ -74,15 +74,15 @@ BA 16- galoisinit() could fail to find a polynomial defining the fixed field.
     1- increased maximum binary exponent for t_REAL, and maximum GEN length
        on 64 bit machines. Bumped BINARY_VERSION for writebin --> objects
        saved in writebin format between 2.2.1 and 2.2.8 are incompatible.
-    2- use more readable colors for hi-res plots [ replace "sienna" by
-       "violetred" and "cornsilk" by "green" ]
+    2- use easier to differentiate colors for hi-res plots [ replace "sienna"
+       by "violetred" and "cornsilk" by "green" ]
     3- GP interface of function intnum [ old flags not recognized, much more
        elaborate interface ]
     4- library interface of functions intnum, prodeuler, suminf, sumalt,
-       sumalt2, sumpos, sumpos2, prodinf, prodinf1  [ use GEN
-       (*eval)(GEN,void*) everywhere instead of entree * ]
+       sumalt2, sumpos, sumpos2, prodinf, prodinf1  [ GEN (*eval)(GEN,void*)
+       everywhere instead of entree * ]
 BA  5- allow Configure -l <directory>  [ in addition to <directory>/pari.cfg ]
-    6- renamed gun --> gone, gdeux --> gtwo.
+    6- renamed gzero --> gen_0, gun --> gen_1, gdeux --> gen_2.
     7- replaced kludgy matexp.c example by straightforward extgcd
 
   Added

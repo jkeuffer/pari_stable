@@ -1106,7 +1106,7 @@ voir2(GEN x, long nb, long bl)
 
   if (!x) { pariputs("NULL\n"); return; }
   tx = typ(x);
-  if (tx == t_INT && x == gzero) { pariputs("gzero\n"); return; }
+  if (tx == t_INT && x == gen_0) { pariputs("gen_0\n"); return; }
   sorstring(VOIR_STRING1,(ulong)x);
   
   lx = lg(x);
@@ -3144,7 +3144,7 @@ rdGEN(FILE *f)
   size_t L = (size_t)rd_long(f);
   GENbin *p;
 
-  if (!L) return gzero;
+  if (!L) return gen_0;
   p = (GENbin*)gpmalloc(sizeof(GENbin) + L*sizeof(long));
   p->len  = L;
   p->x    = (GEN)rd_long(f);

@@ -1200,7 +1200,7 @@ static GEN
 mpqs_factorback(long *FB, char *relations, GEN kN)
 {
   char *s, *t = pari_strdup(relations);
-  GEN p_e, prod = gone;
+  GEN p_e, prod = gen_1;
   long e;
 
   s = strtok(t, " \n");
@@ -1570,7 +1570,7 @@ mpqs_combine_large_primes(FILE *COMB, FILE *FNEW, long size_of_FB,
       s = strchr(ejk, ':') + 2;
       s = strtok(s, " \n");
 
-      prod_pi_ei = gone;
+      prod_pi_ei = gen_1;
       while (s != NULL)
       {
 	exi = atol(s); if (!exi) break;
@@ -1861,11 +1861,11 @@ split(GEN N, long *e, long *res)
   ulong mask;
   long flag;
   GEN base;
-  if (isprobableprime(N)) { *e = one; return 1; }
+  if (isprobableprime(N)) { *e = (long)gen_1; return 1; }
   if (carrecomplet(N, &base))
   { /* squares could cost us a lot of time */
     if (res) *res = (long)base; else affii(base, N); 
-    *e = two;
+    *e = (long)gen_2;
     if (DEBUGLEVEL >= 5) fprintferr("MPQS: decomposed a square\n");
     return 1;
   }
@@ -1882,7 +1882,7 @@ split(GEN N, long *e, long *res)
                   (flag == 5 ? "5th power" : "7th power")));
     return 1;
   }
-  *e = zero; return 0; /* known composite */
+  *e = (long)gen_0; return 0; /* known composite */
 }
 
 static GEN
@@ -1964,7 +1964,7 @@ mpqs_solve_linear_system(GEN kN, GEN N, long rel, long *FB, long size_of_FB)
 
   for (i = 0; i < H_cols; i++)
   { /* loop over kernel basis */
-    X = Y_prod = gone;
+    X = Y_prod = gen_1;
     memset(ei, 0, (size_of_FB + 2) * sizeof(long));
 
     av3 = avma; lim3 = stack_lim(av3,1);
@@ -2039,7 +2039,7 @@ mpqs_solve_linear_system(GEN kN, GEN N, long rel, long *FB, long size_of_FB)
       GEN X_minus_Y = subii(X, Y_prod);
       for (j=1; j < res_next; j++)
       {	/* loop over known-composite factors */
-	if (res[res_size+j] && res[res_size+j] != zero)
+	if (res[res_size+j] && res[res_size+j] != (long)gen_0)
 	{
 	  done++; continue; /* skip probable primes etc */
 	}
@@ -2132,17 +2132,17 @@ mpqs_solve_linear_system(GEN kN, GEN N, long rel, long *FB, long size_of_FB)
     flag = res[res_size+i];
     new_res[j++] =		/* exponent */
       flag ?			/* flag was zero or one or ... */
-	(flag == zero ? one :
+	(flag == (long)gen_0 ? (long)gen_1 :
 	 (isonstack((GEN)flag) ? licopy((GEN)flag) : flag)
 	 ) :
-	   one;			/* flag was (long)NULL */
+	   (long)gen_1;			/* flag was (long)NULL */
     new_res[j++] =		/* class */
-      flag == zero ? zero :	/* known composite */		
+      flag == (long)gen_0 ? (long)gen_0 :	/* known composite */		
 	(long)NULL;		/* base of power or suspected prime --
 				   mark as `unknown' */
     if (DEBUGLEVEL >= 6)
       fprintferr("\tpackaging %ld: %Z ^%ld (%s)\n", i, res[i],
-		 itos((GEN)new_res[j-2]), (flag == zero ? "comp." : "unknown"));
+		 itos((GEN)new_res[j-2]), (flag == (long)gen_0 ? "comp." : "unknown"));
   }
   return gerepileupto(av, new_res);
 }

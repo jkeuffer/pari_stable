@@ -300,7 +300,7 @@ primitive_pol_to_monic(GEN pol, GEN *ptlead)
   a = POL + 2; lead = (GEN)a[n];
   if (signe(lead) < 0) { POL = gneg_i(POL); a = POL+2; lead = negi(lead); }
   if (is_pm1(lead)) { if (ptlead) *ptlead = NULL; return POL; }
-  fa = auxdecomp(lead,0); lead = gone;
+  fa = auxdecomp(lead,0); lead = gen_1;
   e = (GEN)fa[2]; fa = (GEN)fa[1];
   for (i=lg(e)-1; i>0;i--) e[i] = itos((GEN)e[i]);
   for (i=lg(fa)-1; i>0; i--)
@@ -378,7 +378,7 @@ galois(GEN x, long prec)
   if (n>11) err(impl,"galois of degree higher than 11");
   x = primpart(x);
   check_pol_int(x, "galois");
-  if (gisirreducible(x) != gone)
+  if (gisirreducible(x) != gen_1)
     err(impl,"galois of reducible polynomial");
 
   if (n<4)
@@ -442,7 +442,7 @@ galois(GEN x, long prec)
 	    for (l=1; l<=6; l++)
 	    {
 	      p2=(l==1)?p1: ((l<6)?transroot(p1,1,l): transroot(p1,2,5));
-	      p3=gzero;
+	      p3=gen_0;
               for (k=0,i=1; i<=5; i++,k+=4)
 	      {
 		p5 = gadd(gmul((GEN)p2[ind5[k]],(GEN)p2[ind5[k+1]]),
@@ -471,7 +471,7 @@ galois(GEN x, long prec)
 	    if (ee[l] <= pr && gcmp0(poleval(p5,(GEN)w[l]))) break;
 	  if (l>6) err(bugparier,"galois (bug4)");
 	  p2=(l==6)? transroot(p1,2,5):transroot(p1,1,l);
-	  p3=gzero;
+	  p3=gen_0;
 	  for (i=1; i<=5; i++)
 	  {
 	    j = i+1; if (j>5) j -= 5;
@@ -499,7 +499,7 @@ galois(GEN x, long prec)
 	    for (l=1; l<=6; l++)
 	    {
 	      p2=(l==1)?p1:transroot(p1,1,l);
-	      p3=gzero; k=0;
+	      p3=gen_0; k=0;
               for (i=1; i<=5; i++) for (j=i+1; j<=6; j++)
 	      {
 		p5=gadd(gmul((GEN)p2[ind6[k]],(GEN)p2[ind6[k+1]]),
@@ -707,9 +707,9 @@ nfiso0(GEN a, GEN b, long fliso)
   m=degpol(a);
   n=degpol(b); if (m<=0 || n<=0) err(constpoler,"nfiso or nfincl");
   if (fliso)
-    { if (n!=m) return gzero; }
+    { if (n!=m) return gen_0; }
   else
-    { if (n%m) return gzero; }
+    { if (n%m) return gen_0; }
 
   if (nfb) lb = NULL; else b = pol_to_monic(b,&lb);
   if (nfa) la = NULL; else a = pol_to_monic(a,&la);
@@ -718,10 +718,10 @@ nfiso0(GEN a, GEN b, long fliso)
     if (fliso)
     {
       if (!gegal((GEN)nfa[2],(GEN)nfb[2])
-       || !gegal((GEN)nfa[3],(GEN)nfb[3])) return gzero;
+       || !gegal((GEN)nfa[3],(GEN)nfb[3])) return gen_0;
     }
     else
-      if (!dvdii((GEN)nfb[3], gpowgs((GEN)nfa[3],n/m))) return gzero;
+      if (!dvdii((GEN)nfb[3], gpowgs((GEN)nfa[3],n/m))) return gen_0;
   }
   else
   {
@@ -731,7 +731,7 @@ nfiso0(GEN a, GEN b, long fliso)
     {
       p1=gdiv(da,db);
       if (typ(p1)==t_FRAC) p1=mulii((GEN)p1[1],(GEN)p1[2]);
-      if (!gcarreparfait(p1)) { avma=av; return gzero; }
+      if (!gcarreparfait(p1)) { avma=av; return gen_0; }
     }
     else
     {
@@ -740,7 +740,7 @@ nfiso0(GEN a, GEN b, long fliso)
       fa=(GEN)fa[1]; lx=lg(fa);
       for (i=1; i<lx; i++)
         if (mod2((GEN)ex[i]) && !dvdii(db,gpowgs((GEN)fa[i],q)))
-          { avma=av; return gzero; }
+          { avma=av; return gen_0; }
     }
   }
   a = dummycopy(a); setvarn(a,0);
@@ -763,7 +763,7 @@ nfiso0(GEN a, GEN b, long fliso)
     settyp(y, t_VEC);
     if (vb == 0) (void)delete_var();
   }
-  lx = lg(y); if (lx==1) { avma=av; return gzero; }
+  lx = lg(y); if (lx==1) { avma=av; return gen_0; }
   for (i=1; i<lx; i++)
   {
     p1 = (GEN)y[i];
@@ -801,7 +801,7 @@ get_roots(GEN x,long r1,long prec)
 GEN
 quicktrace(GEN x, GEN sym)
 {
-  GEN p1 = gzero;
+  GEN p1 = gen_0;
   long i;
 
   if (typ(x) != t_POL) return gmul(x, (GEN)sym[1]);
@@ -819,7 +819,7 @@ static GEN
 trace_col(GEN x, GEN T)
 {
   pari_sp av = avma;
-  GEN t = gzero;
+  GEN t = gen_0;
   long i, l = lg(x);
 
   t = mulii((GEN)x[1],(GEN)T[1]);
@@ -1012,7 +1012,7 @@ make_M(nffp_t *F, int trunc)
   long i, j, l = lg(ro), n = lg(bas);
   M = cgetg(n,t_MAT);
     m = cgetg(l, t_COL); M[1] = (long)m;
-    for (i=1; i<l; i++) m[i] = one; /* bas[1] = 1 */
+    for (i=1; i<l; i++) m[i] = (long)gen_1; /* bas[1] = 1 */
   for (j=2; j<n; j++)
   {
     m = cgetg(l,t_COL); M[j] = (long)m;
@@ -1131,7 +1131,7 @@ nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec)
   mat[1] = (long)F.M;
   mat[2] = (long)F.G;
 
-  invbas = QM_inv(RgXV_to_RgM(T->bas, lg(T->bas)-1), gone);
+  invbas = QM_inv(RgXV_to_RgM(T->bas, lg(T->bas)-1), gen_1);
   nf[8] = (long)invbas;
   nf[9] = (long)get_mul_table(x, F.basden, invbas);
   if (DEBUGLEVEL) msgtimer("mult. table");
@@ -1149,7 +1149,7 @@ nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec)
     D = idealhermite_aux(nf, derivpol(x));
   else
     D = gmul(dA, idealinv(nf, A));
-  mat[3] = zero; /* FIXME: was gram matrix of current mat[2]. Useless */
+  mat[3] = (long)gen_0; /* FIXME: was gram matrix of current mat[2]. Useless */
   mat[4] = (long)Tr;
   mat[5] = (long)D;
   if (DEBUGLEVEL) msgtimer("matrices");
@@ -1213,7 +1213,7 @@ nftohnfbasis(GEN nf, GEN x)
   GEN u;
   if (!is_vec_t(tx)) return gcopy(x);
   nf = checknf(nf);
-  u = ZM_inv(hnffromLLL(nf), gone);
+  u = ZM_inv(hnffromLLL(nf), gen_1);
   return gerepilecopy(av, nfbasechange(u, x));
 }
 
@@ -1347,7 +1347,7 @@ nfpolred(int part, nfbasic_t *T)
   ok_pol_t O;
   FP_chk_fun chk;
 
-  if (degpol(x) == 1) { T->x = gsub(polx[v],gone); return gone; }
+  if (degpol(x) == 1) { T->x = gsub(polx[v],gen_1); return gen_1; }
 
   if (!dx) dx = mulii(T->dK, sqri(T->index));
 
@@ -1382,7 +1382,7 @@ get_nfindex(GEN bas)
   pari_sp av = avma;
   long n = lg(bas)-1;
   GEN d, mat = RgXV_to_RgM(Q_remove_denom(bas, &d), n);
-  if (!d) { avma = av; return gone; }
+  if (!d) { avma = av; return gen_1; }
   return gerepileuptoint(av, diviiexact(gpowgs(d, n), det(mat)));
 }
 
@@ -1398,7 +1398,7 @@ nfbasic_init(GEN x, long flag, GEN fa, nfbasic_t *T)
   if (typ(x) == t_POL)
   {
     check_pol_int(x, "nfinit");
-    if (gisirreducible(x) == gzero) err(redpoler, "nfinit");
+    if (gisirreducible(x) == gen_0) err(redpoler, "nfinit");
     x = pol_to_monic(x, &(T->lead));
     bas = allbase(x, flag, &dx, &dK, &index, &fa);
     if (DEBUGLEVEL) msgtimer("round4");
@@ -1681,7 +1681,7 @@ T2_from_embed_norm(GEN x, long r1)
 {
   GEN p = sum(x, 1, r1);
   GEN q = sum(x, r1+1, lg(x)-1);
-  if (q != gzero) p = gadd(p, gmul2n(q,1));
+  if (q != gen_0) p = gadd(p, gmul2n(q,1));
   return p;
 }
 
@@ -2062,8 +2062,8 @@ is_primitive_root(GEN nf, GEN fa, GEN x, long w)
 static GEN
 trivroots(GEN nf) {
   GEN y = cgetg(3, t_VEC);
-  y[1] = (long)gtwo;
-  y[2] = (long)gscalcol_i(gminusone, degpol(nf[1]));
+  y[1] = (long)gen_2;
+  y[2] = (long)gscalcol_i(gen_m1, degpol(nf[1]));
   return y;
 }
 
@@ -2274,7 +2274,7 @@ initzeta(GEN pol, long prec)
   tabcstn  = (GEN*) cgetg(N0+1,t_VEC);
   tabcstni = (GEN*) cgetg(N0+1,t_VEC);
   p1 = ginv(cst);
-  for (i=1; i<=N0; i++) { tabcstni[i] = gone; tabcstn[i] = mulsr(i,p1); }
+  for (i=1; i<=N0; i++) { tabcstni[i] = gen_1; tabcstn[i] = mulsr(i,p1); }
   (void)switch_stack(zone,0);
 
   /********** compute a(i,j) **********/
@@ -2317,7 +2317,7 @@ initzeta(GEN pol, long prec)
     serie_exp = gmul(c_odd, gexp(serie_odd,0));
     p1 = (GEN)aij[2*i+2];
     for (j=1; j<=r2+1; j++) p1[j] = serie_exp[r2+3-j];
-    for (   ; j<R; j++) p1[j] = zero;
+    for (   ; j<R; j++) p1[j] = (long)gen_0;
     i++;
 
     c_even = gdiv(c_even,gmul(gpowgs(utoipos(i),r),gpowgs(utoipos(2*i-1),r2)));
@@ -2373,14 +2373,14 @@ initzeta(GEN pol, long prec)
       tabj[i] = (long)colzero;
   if (DEBUGLEVEL>1) msgtimer("a(n)");
 
-  coeflog=cgetg(N0+1,t_VEC); coeflog[1]=zero;
+  coeflog=cgetg(N0+1,t_VEC); coeflog[1]= (long)gen_0;
   for (i=2; i<=N0; i++)
     if (coef[i])
     {
       court[2] = i; p1 = glog(court,prec);
       setsigne(p1, -1); coeflog[i] = (long)p1;
     }
-    else coeflog[i] = zero;
+    else coeflog[i] = (long)gen_0;
   if (DEBUGLEVEL>1) msgtimer("log(n)");
 
   nfz[3] = (long)tabj;
@@ -2404,7 +2404,7 @@ initzeta(GEN pol, long prec)
             p2 = gmul(tabcstni[n], gmul(gmael(aij,i,j+k), gmael(tabj,n,j)));
             p1 = p1? gadd(p1,p2): p2;
           }
-      coeff(C,i,k) = p1? (long)gerepileupto(av2,p1): zero;
+      coeff(C,i,k) = p1? (long)gerepileupto(av2,p1): (long)gen_0;
       av2 = avma;
     }
     /* use a parallel stack */
@@ -2452,11 +2452,11 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
       avma = av;
       if (flag) err(talker,"s = 0 is a pole (gzetakall)");
       if (ru == 1) return gneg(r1? ghalf: resi);
-      return gzero;
+      return gen_0;
     }
     if (sl<0 && (r2 || !odd(sl)))
     {
-      if (!flag) return gzero;
+      if (!flag) return gen_0;
       s = subsi(1,s); sl = 1-sl;
     }
     unmoins=subsi(1,s);
@@ -2468,7 +2468,7 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
     if (sl < 0) /* r2 = 0 && odd(sl) */
     {
       gammaunmoins2 = ggamma(gmul2n(unmoins,-1),prec);
-      var1=var2=gone;
+      var1=var2=gen_1;
       for (i=2; i<=N0; i++)
 	if (coef[i])
 	{
@@ -2498,7 +2498,7 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
       GEN tabj=(GEN)nfz[3], aij=(GEN)nfz[7];
 
       gar = gmul(gar,gpowgs(ggamma(s,prec),r2));
-      var1=var2=gzero;
+      var1=var2=gen_0;
       for (i=1; i<=N0; i++)
 	if (coef[i])
 	{
@@ -2506,7 +2506,7 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
 	  var1 = gadd(var1,gmulsg(coef[i],gexpro));
           if (sl <= i0)
           {
-            p1=gzero;
+            p1=gen_0;
             for (j=1; j<=ru+1; j++)
               p1 = gadd(p1, gmul(gmael(aij,sl,j), gmael(tabj,i,j)));
             var2=gadd(var2,gdiv(p1,gmulsg(i,gexpro)));
@@ -2544,18 +2544,18 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
     else
       s = gprec_w(s, bigprec);
 
-    unmoins = gsub(gone,s);
-    lambd = gdiv(resi,gmul(s,gsub(s,gone)));
+    unmoins = gsub(gen_1,s);
+    lambd = gdiv(resi,gmul(s,gsub(s,gen_1)));
     gammas = ggamma(s,prec);
     gammas2= ggamma(gmul2n(s,-1),prec);
     gar = gmul(gpowgs(gammas,r2),gpowgs(gammas2,r1));
     cs = gexp(gmul(cstlog,s),prec);
     var1 = gmul(Pi,s);
     gammaunmoins = gdiv(Pi, gmul(gsin(var1,prec),gammas));
-    gammaunmoins2= gdiv(gmul(gmul(sqrtr(Pi),gpui(gtwo,gsub(s,gone),prec)),
+    gammaunmoins2= gdiv(gmul(gmul(sqrtr(Pi),gpui(gen_2,gsub(s,gen_1),prec)),
                              gammas2),
                         gmul(gcos(gmul2n(var1,-1),prec),gammas));
-    var1 = var2 = gone;
+    var1 = var2 = gen_1;
     for (i=2; i<=N0; i++)
       if (coef[i])
       {
@@ -2581,13 +2581,13 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
       }
       if (r2)
       {
-	val  = gadd(val, gone);
-        valm = gadd(valm,gone);
+	val  = gadd(val, gen_1);
+        valm = gadd(valm,gen_1);
       }
       else
       {
-	val  = gadd(val, gtwo);
-        valm = gadd(valm,gtwo); i++;
+	val  = gadd(val, gen_2);
+        valm = gadd(valm,gen_2); i++;
       }
     }
   }

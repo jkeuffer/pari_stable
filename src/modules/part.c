@@ -68,7 +68,7 @@ g(ulong q, ulong h)
   ulong k, kh;
   GEN i2;
 
-  if (q < 3)  return gzero;
+  if (q < 3)  return gen_0;
   if (h == 1) return gdivgs(mulss(q-1,q-2), 12);
   if (h == 2) return gdivgs(mulss(q-1,q-5), 24); /* q odd since (h,q)=1 */
 
@@ -93,7 +93,7 @@ g(ulong q, ulong h)
   else
   {
     pari_sp av = avma;
-    i2 = gzero;
+    i2 = gen_0;
     for (k = 1; k < q; k++)
     {
       addiiz(mulss(k, (kh << 1) - q), i2, i2);
@@ -166,8 +166,8 @@ numbpart(GEN n)
   ulong q, max, prec;
 
   if (typ(n) != t_INT) err(typeer, "partition function");
-  if (signe(n) < 0) return gzero;
-  if (cmpii(n, gtwo) < 0) return gone;
+  if (signe(n) < 0) return gen_0;
+  if (cmpii(n, gen_2) < 0) return gen_1;
   if (cmpii(n, u2toi(0x38d7e, 0xa4c68000)) >= 0)
     err(talker, "arg to partition function must be < 10^15");
   est = estim(n);

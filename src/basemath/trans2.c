@@ -45,7 +45,7 @@ mpatan(GEN x)
   if (l > AGM_ATAN_LIMIT)
   {
     av = avma;
-    return gerepileuptoleaf(av, (GEN)logagmcx(mkcomplex(gone, x), l)[2]);
+    return gerepileuptoleaf(av, (GEN)logagmcx(mkcomplex(gen_1, x), l)[2]);
   }
 
   e = expo(x); inv = (e >= 0); /* = (|x| > 1 ) */
@@ -252,7 +252,7 @@ gacos(GEN x, long prec)
       y = cgetg(3,t_COMPLEX); p1 = mpach(x, 1);
       if (sx < 0) y[1] = lmppi(lg(x));
       else {
-	y[1] = zero;
+	y[1] = (long)gen_0;
         setsigne(p1,-signe(p1));
       }
       y[2] = (long)p1; return y;
@@ -739,7 +739,7 @@ bernreal(long n, long prec)
   GEN B;
 
   if (n==1) { B = stor(-1, prec); setexpo(B,-1); return B; }
-  if (n<0 || n&1) return gzero;
+  if (n<0 || n&1) return gen_0;
   n >>= 1; mpbern(n+1,prec); B=cgetr(prec);
   affrr(bern(n),B); return B;
 }
@@ -753,7 +753,7 @@ bernfracspec(long k)
   pari_sp av, lim;
   GEN s, c, N, b;
 
-  c = N = utoipos(K); s = gone; b = gzero;
+  c = N = utoipos(K); s = gen_1; b = gen_0;
   av = avma; lim = stack_lim(av,2);
   for (n=2; ; n++) /* n <= k+1 */
   {
@@ -776,21 +776,21 @@ bernfracspec(long k)
 
 static GEN
 B2(void){ GEN z = cgetg(3, t_FRAC);
-  z[1] = one;
+  z[1] = (long)gen_1;
   z[2] = (long)utoipos(6); return z;
 }
 static GEN
 B4(void) { GEN z = cgetg(3, t_FRAC);
-  z[1] = (long)gminusone;
+  z[1] = (long)gen_m1;
   z[2] = (long)utoipos(30); return z;
 }
 
 GEN
 bernfrac(long k)
 {
-  if (!k) return gone;
+  if (!k) return gen_1;
   if (k == 1) return gneg(ghalf);
-  if (k < 0 || k & 1) return gzero;
+  if (k < 0 || k & 1) return gen_0;
   if (k == 2) return B2();
   if (k == 4) return B4();
   return bernfrac_using_zeta(k);
@@ -806,12 +806,12 @@ bernvec_old(long nb)
   if (nb < 0) return cgetg(1, t_VEC);
   if (nb > 46340 && BITS_IN_LONG == 32) err(impl, "bernvec for n > 46340");
 
-  y = cgetg(nb+2, t_VEC); y[1] = one;
+  y = cgetg(nb+2, t_VEC); y[1] = (long)gen_1;
   for (n = 1; n <= nb; n++)
   { /* compute y[n+1] = B_{2n} */
     pari_sp av = avma;
     GEN b = gmul2n(utoineg(2*n - 1), -1); /* 1 + (2n+1)B_1 = -(2n-1) /2 */
-    GEN c = gone;
+    GEN c = gen_1;
     ulong u1 = 2*n + 1, u2 = n, d1 = 1, d2 = 1;
 
     for (i = 1; i < n; i++)
@@ -833,7 +833,7 @@ bernvec(long nb)
   for (i = nb; i > 2; i--) z[i] = (long)bernfrac_using_zeta(i << 1);
   y[3] = (long)B4();
   y[2] = (long)B2();
-  y[1] = one; return y;
+  y[1] = (long)gen_1; return y;
 }
 
 /********************************************************************/
@@ -957,7 +957,7 @@ cxgamma(GEN s0, int dolog, long prec)
   if ((signe(sig) <= 0 || expo(sig) < -1)
     && (typ(s) == t_REAL || gexpo((GEN)s[2]) <= 16))
   { /* s <--> 1-s */
-    funeq = 1; s = gsub(gone, s); sig = real_i(s);
+    funeq = 1; s = gsub(gen_1, s); sig = real_i(s);
   }
 
   { /* find "optimal" parameters [lim, nn] */
@@ -1206,7 +1206,7 @@ ggamma(GEN x, long prec)
       return cxgamma(x, 0, prec);
 
     case t_FRAC:
-      if (!egalii((GEN)x[2], gtwo)) break;
+      if (!egalii((GEN)x[2], gen_2)) break;
       z = (GEN)x[1]; /* true argument is z/2 */
       if (is_bigint(z) || labs(m = itos(z)) > 962354)
       {
@@ -1289,7 +1289,7 @@ cxpsi(GEN s0, long prec)
 
   if (DEBUGLEVEL>2) (void)timer2();
   s = trans_fix_arg(&prec,&s0,&sig,&av,&res);
-  if (signe(sig) <= 0) { funeq = 1; s = gsub(gone, s); sig = real_i(s); }
+  if (signe(sig) <= 0) { funeq = 1; s = gsub(gen_1, s); sig = real_i(s); }
   if (typ(s0) == t_INT && signe(s0) <= 0)
     err(talker,"non-positive integer argument in cxpsi");
 

@@ -56,7 +56,7 @@ addsi_sign(long x, GEN y, long sy)
   if (ly==3)
   {
     const long d = y[2] - x;
-    if (!d) return gzero;
+    if (!d) return gen_0;
     z=cgeti(3);
     if (y[2] < 0 || d > 0) {
       z[1] = evalsigne(sy) | evallgefint(3);
@@ -78,7 +78,7 @@ addii_sign(GEN x, long sx, GEN y, long sy)
   long lx,ly;
   GEN z;
 
-  if (!sx) return sy? icopy_sign(y, sy): gzero;
+  if (!sx) return sy? icopy_sign(y, sy): gen_0;
   if (!sy) return icopy_sign(x, sx);
   lx=lgefint(x); ly=lgefint(y);
 
@@ -90,7 +90,7 @@ addii_sign(GEN x, long sx, GEN y, long sy)
     if (i==0) /* lx == ly */
     {
       i = absi_cmp_lg(x,y,lx);
-      if (!i) return gzero;
+      if (!i) return gen_0;
     }
     if (i<0) { sx=sy; swapspec(x,y, lx,ly); } /* ensure |x| >= |y| */
     z = subiispec(x+2,y+2,lx-2,ly-2);

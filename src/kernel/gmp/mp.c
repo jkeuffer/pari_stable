@@ -300,7 +300,7 @@ shifti(GEN x, long n)
   long lz,lx,m;
   GEN z;
 
-  if (!s) return gzero;
+  if (!s) return gen_0;
   if (!n) return icopy(x);
   lx = lgefint(x);
   if (n > 0)
@@ -328,7 +328,7 @@ shifti(GEN x, long n)
 
     n = -n;
     lz = lx - d;
-    if (lz<3) return gzero;
+    if (lz<3) return gen_0;
     z = cgeti(lz);
     m = n & (BITS_IN_LONG-1);
 
@@ -338,7 +338,7 @@ shifti(GEN x, long n)
       mpn_rshift(LIMBS(z), LIMBS(x) + d, NLIMBS(x) - d, m); 
       if (z[lz - 1] == 0)
       {
-        if (lz == 3) { avma = (pari_sp)(z+3); return gzero; }
+        if (lz == 3) { avma = (pari_sp)(z+3); return gen_0; }
         lz--; 
       }
     }
@@ -352,7 +352,7 @@ ishiftr_lg(GEN x, long lx, long n)
 {
   long ly, i, m, s = signe(x);
   GEN y;
-  if (!s) return gzero;
+  if (!s) return gen_0;
   if (!n) 
   {
     y = cgeti(lx);
@@ -382,14 +382,14 @@ ishiftr_lg(GEN x, long lx, long n)
   {
     n = -n;
     ly = lx - (n>>TWOPOTBITS_IN_LONG);
-    if (ly<3) return gzero;
+    if (ly<3) return gen_0;
     y = new_chunk(ly);
     m = n & (BITS_IN_LONG-1);
     if (m) {
       shift_right(y,x, 2,ly, 0,m);
       if (y[2] == 0)
       {
-        if (ly==3) { avma = (pari_sp)(y+3); return gzero; }
+        if (ly==3) { avma = (pari_sp)(y+3); return gen_0; }
         ly--; avma = (pari_sp)(++y);
       }
     } else {
@@ -406,7 +406,7 @@ truncr(GEN x)
 {
   long s, e, d, m, i;
   GEN y;
-  if ((s=signe(x)) == 0 || (e=expo(x)) < 0) return gzero;
+  if ((s=signe(x)) == 0 || (e=expo(x)) < 0) return gen_0;
   d = (e>>TWOPOTBITS_IN_LONG) + 3;
   m = e & (BITS_IN_LONG-1);
   if (d > lg(x)) err(precer, "truncr (precision loss in truncation)");
@@ -431,7 +431,7 @@ floorr(GEN x)
   long e, d, m, i, lx;
   GEN y;
   if (signe(x) >= 0) return truncr(x);
-  if ((e=expo(x)) < 0) return gminusone;
+  if ((e=expo(x)) < 0) return gen_m1;
   d = (e>>TWOPOTBITS_IN_LONG) + 3;
   m = e & (BITS_IN_LONG-1);
   lx=lg(x); if (d>lx) err(precer, "floorr (precision loss in truncation)");
@@ -484,7 +484,7 @@ mulss(long x, long y)
   GEN z;
   LOCAL_HIREMAINDER;
 
-  if (!x || !y) return gzero;
+  if (!x || !y) return gen_0;
   if (x<0) { s = -1; x = -x; } else s=1;
   if (y<0) { s = -s; y = -y; }
   p1 = mulll(x,y);
@@ -504,7 +504,7 @@ muluu(ulong x, ulong y)
   GEN z;
   LOCAL_HIREMAINDER;
 
-  if (!x || !y) return gzero;
+  if (!x || !y) return gen_0;
   p1 = mulll(x,y);
   if (hiremainder)
   {
@@ -597,10 +597,10 @@ diviu_rem(GEN y, ulong x, ulong *rem)
   GEN z;
 
   if (!x) err(gdiver);
-  if (!signe(y)) { *rem = 0; return gzero; }
+  if (!signe(y)) { *rem = 0; return gen_0; }
 
   ly = lgefint(y);
-  if (ly == 3 && (ulong)x > (ulong)y[2]) { *rem = (ulong)y[2]; return gzero; }
+  if (ly == 3 && (ulong)x > (ulong)y[2]) { *rem = (ulong)y[2]; return gen_0; }
 
   z = cgeti(ly); 
   *rem = mpn_divrem_1(LIMBS(z), 0, LIMBS(y), NLIMBS(y), x);
@@ -616,11 +616,11 @@ divis_rem(GEN y, long x, long *rem)
   GEN z;
 
   if (!x) err(gdiver);
-  if (!sy) { *rem = 0; return gzero; }
+  if (!sy) { *rem = 0; return gen_0; }
   if (x<0) { s = -sy; x = -x; } else s = sy;
 
   ly = lgefint(y);
-  if (ly == 3 && (ulong)x > (ulong)y[2]) { *rem = itos(y); return gzero; }
+  if (ly == 3 && (ulong)x > (ulong)y[2]) { *rem = itos(y); return gen_0; }
 
   z = cgeti(ly); 
   *rem = mpn_divrem_1(LIMBS(z), 0, LIMBS(y), NLIMBS(y), x);
@@ -637,11 +637,11 @@ divis(GEN y, long x)
   GEN z;
 
   if (!x) err(gdiver);
-  if (!sy) return gzero;
+  if (!sy) return gen_0;
   if (x<0) { s = -sy; x = -x; } else s=sy;
 
   ly = lgefint(y);
-  if (ly == 3 && (ulong)x > (ulong)y[2]) return gzero;
+  if (ly == 3 && (ulong)x > (ulong)y[2]) return gen_0;
 
   z = cgeti(ly); 
   (void)mpn_divrem_1(LIMBS(z), 0, LIMBS(y), NLIMBS(y), x);
@@ -802,7 +802,7 @@ divrr(GEN x, GEN y)
  *   if z != NULL set *z to remainder
  *   *z is the last object on stack (and thus can be disposed of with cgiv
  *   instead of gerepile)
- * If *z is zero, we put gzero here and no copy.
+ * If *z is zero, we put gen_0 here and no copy.
  * space needed: lx + ly
  */
 GEN
@@ -813,11 +813,11 @@ dvmdii(GEN x, GEN y, GEN *z)
   pari_sp av;
   GEN r,q;
 
-  if (!sy) { if (z == ONLY_REM && !sx) return gzero; err(gdiver); }
+  if (!sy) { if (z == ONLY_REM && !sx) return gen_0; err(gdiver); }
   if (!sx)
   {
-    if (!z || z == ONLY_REM) return gzero;
-    *z=gzero; return gzero;
+    if (!z || z == ONLY_REM) return gen_0;
+    *z=gen_0; return gen_0;
   }
   lx=lgefint(x);
   ly=lgefint(y); lq=lx-ly;
@@ -829,15 +829,15 @@ dvmdii(GEN x, GEN y, GEN *z)
       if (s>0) goto DIVIDE;
       if (s==0) 
       {
-        if (z == ONLY_REM) return gzero;
-        if (z) *z = gzero;
+        if (z == ONLY_REM) return gen_0;
+        if (z) *z = gen_0;
         if (sx < 0) sy = -sy;
         return stoi(sy);
       }
     }
     if (z == ONLY_REM) return icopy(x);
     if (z) *z = icopy(x);
-    return gzero;
+    return gen_0;
   }
 DIVIDE: /* quotient is non-zero */
   av=avma; if (sx<0) sy = -sy;
@@ -850,14 +850,14 @@ DIVIDE: /* quotient is non-zero */
     if (q[lq - 1] == 0) lq--;
     if (z == ONLY_REM)
     {
-      avma=av; if (!si) return gzero;
+      avma=av; if (!si) return gen_0;
       r=cgeti(3);
       r[1] = evalsigne(sx) | evallgefint(3);
       r[2] = si; return r;
     }
     q[1] = evalsigne(sy) | evallgefint(lq);
     if (!z) return q;
-    if (!si) { *z=gzero; return q; }
+    if (!si) { *z=gen_0; return q; }
     r=cgeti(3);
     r[1] = evalsigne(sx) | evallgefint(3);
     r[2] = si; *z=r; return q;
@@ -872,7 +872,7 @@ DIVIDE: /* quotient is non-zero */
     if (!r[lr - 1])
     {
       while(lr>2 && !r[lr - 1]) lr--;
-      if (lr == 2) {avma=av; return gzero;} /* exact division */
+      if (lr == 2) {avma=av; return gen_0;} /* exact division */
     }
     r[1] = evalsigne(sx) | evallgefint(lr);
     avma = (pari_sp) r; return r; 
@@ -890,7 +890,7 @@ DIVIDE: /* quotient is non-zero */
     if (!r[lr - 1])
     {
       while(lr>2 && !r[lr - 1]) lr--;
-      if (lr == 2) {avma=(pari_sp) q; *z=gzero; return q;} /* exact division */
+      if (lr == 2) {avma=(pari_sp) q; *z=gen_0; return q;} /* exact division */
     }
     r[1] = evalsigne(sx) | evallgefint(lr);
     avma = (pari_sp) r; *z = r; return q; 
@@ -919,7 +919,7 @@ red_montgomery(GEN T, GEN N, ulong inv)
   LOCAL_HIREMAINDER;
   LOCAL_OVERFLOW;
 
-  if (k == 0) return gzero;
+  if (k == 0) return gen_0;
   d = lgefint(T)-2; /* <= 2*k */
 #ifdef DEBUG
   if (d > 2*k) err(bugparier,"red_montgomery");
@@ -1032,7 +1032,7 @@ muliispec(GEN x, GEN y, long nx, long ny)
   ulong hi;
 
   if (nx < ny) swapspec(x,y, nx,ny);
-  if (!ny) return gzero;
+  if (!ny) return gen_0;
   if (ny == 1) return muluispec((ulong)*y, x, nx);
     
   lz = nx+ny+2;
@@ -1051,7 +1051,7 @@ sqrispec(GEN x, long nx)
   GEN zd;
   long lz;
 
-  if (!nx) return gzero;
+  if (!nx) return gen_0;
   if (nx==1) return muluu(*x,*x);
     
   lz = (nx<<1)+2;
@@ -1071,7 +1071,7 @@ resmod2n(GEN x, long n)
   long l,k,lx,ly;
   GEN z, xd, zd;
 
-  if (!signe(x) || !n) return gzero;
+  if (!signe(x) || !n) return gen_0;
 
   l = n & (BITS_IN_LONG-1);    /* n % BITS_IN_LONG */
   k = n >> TWOPOTBITS_IN_LONG; /* n / BITS_IN_LONG */
@@ -1085,7 +1085,7 @@ resmod2n(GEN x, long n)
   if (!hi)
   { /* strip leading zeroes from result */
     xd--; while (k && !*xd) { k--; xd--; }
-    if (!k) return gzero;
+    if (!k) return gen_0;
     ly = k+2; xd++;
   }
   else
@@ -1105,7 +1105,7 @@ resmod2n(GEN x, long n)
 /********************************************************************/
 
 /* Return S (and set R) s.t S^2 + R = N, 0 <= R <= 2S.
- * As for dvmdii, R is last on stack and guaranteed to be gzero in case the 
+ * As for dvmdii, R is last on stack and guaranteed to be gen_0 in case the 
  * remainder is 0. R = NULL is allowed. */
 GEN
 sqrtremi(GEN a, GEN *r)
@@ -1114,8 +1114,8 @@ sqrtremi(GEN a, GEN *r)
   mp_size_t nr;
   GEN S;
   if (!na) {
-    if (r) *r = gzero;
-    return gzero;
+    if (r) *r = gen_0;
+    return gen_0;
   }
   l = (na + 5) >> 1; /* 2 + ceil(na/2) */
   S = cgeti(l); S[1] = evalsigne(1) | evallgefint(l);
@@ -1123,7 +1123,7 @@ sqrtremi(GEN a, GEN *r)
     GEN R = cgeti(2 + na);
     nr = mpn_sqrtrem(LIMBS(S), LIMBS(R), LIMBS(a), na);
     if (nr) R[1] = evalsigne(1) | evallgefint(nr+2);
-    else    { avma = (pari_sp)S; R = gzero; }
+    else    { avma = (pari_sp)S; R = gen_0; }
     *r = R;
   }
   else

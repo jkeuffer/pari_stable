@@ -33,7 +33,7 @@ const int     functions_tblsz = 135; /* size of functions_hash          */
 FILE    *pari_outfile, *errfile, *logfile, *infile;
 ulong   logstyle = logstyle_none;
 GEN     *polun, *polx;
-GEN     gnil, gzero, gone, gminusone, gtwo, ghalf, polvar, gi;
+GEN     gnil, gen_0, gen_1, gen_m1, gen_2, ghalf, polvar, gi;
 GEN     gpi=NULL, geuler=NULL, bernzone=NULL;
 GEN     primetab; /* private primetable */
 byteptr diffptr;
@@ -543,30 +543,30 @@ reset_traps()
 static void
 init_universal_constants(void)
 {
-  /* 2 (gnil) + 2 (gzero) + 3 (gone) + 3 (gminusone) + 3 (gtwo) + 3 (half) + 3 (gi) */
+  /* 2 (gnil) + 2 (gen_0) + 3 (gen_1) + 3 (gen_m1) + 3 (gen_2) + 3 (half) + 3 (gi) */
   GEN p = universal_constants = (long*) gpmalloc(19*sizeof(long));
-  gzero = p; p+=2; gnil = p; p+=2;
-  gzero[0] = gnil[0] = evaltyp(t_INT) | evallg(2);
-  gzero[1] = gnil[1] = evallgefint(2);
+  gen_0 = p; p+=2; gnil = p; p+=2;
+  gen_0[0] = gnil[0] = evaltyp(t_INT) | evallg(2);
+  gen_0[1] = gnil[1] = evallgefint(2);
 
-  gone = p; p+=3;
-  gtwo = p; p+=3;
-  gone[0] = gtwo[0] = evaltyp(t_INT) | evallg(3);
-  gone[1] = gtwo[1] = evalsigne(1) | evallgefint(3);
-  gone[2] = 1; gtwo[2]= 2;
+  gen_1 = p; p+=3;
+  gen_2 = p; p+=3;
+  gen_1[0] = gen_2[0] = evaltyp(t_INT) | evallg(3);
+  gen_1[1] = gen_2[1] = evalsigne(1) | evallgefint(3);
+  gen_1[2] = 1; gen_2[2]= 2;
 
-  gminusone = p; p+=3;
-  gminusone[0] = evaltyp(t_INT) | evallg(3);
-  gminusone[1] = evalsigne(-1) | evallgefint(3);
-  gminusone[2] = 1;
+  gen_m1 = p; p+=3;
+  gen_m1[0] = evaltyp(t_INT) | evallg(3);
+  gen_m1[1] = evalsigne(-1) | evallgefint(3);
+  gen_m1[2] = 1;
 
   ghalf = p; p+=3; gi = p; p+=3;
   ghalf[0] = evaltyp(t_FRAC) | evallg(3);
-  ghalf[1] = one;
-  ghalf[2] = two;
+  ghalf[1] = (long)gen_1;
+  ghalf[2] = (long)gen_2;
   gi[0] = evaltyp(t_COMPLEX) | evallg(3);
-  gi[1] = zero;
-  gi[2] = one;
+  gi[1] = (long)gen_0;
+  gi[2] = (long)gen_1;
 }
 
 static size_t
@@ -1277,7 +1277,7 @@ static int    nocp[] = { 0,0,0,1,0,0,0,1,1,1, 0,0,0,0,0,0,0,0,0,0, 0,0,0 };
 #define is_0INT(x) \
     (((x)[0] & (TYPBITS|LGBITS)) == (evaltyp(t_INT)|_evallg(2)))
 
-/* assume x is non-recursive. For efficiency return gzero instead of a copy
+/* assume x is non-recursive. For efficiency return gen_0 instead of a copy
  * for a 0 t_INT */
 INLINE GEN
 copy_leaf(GEN x)
@@ -1285,7 +1285,7 @@ copy_leaf(GEN x)
   long i, lx;
   GEN y;
 
-  if (is_0INT(x)) return gzero; /* very common */
+  if (is_0INT(x)) return gen_0; /* very common */
   lx = lg(x); y = cgetg_copy(lx, x);
   for (i=1; i<lx; i++) y[i] = x[i]; /* no memcpy: avma and x may overlap */
   return y;
@@ -1531,7 +1531,7 @@ shiftaddress(GEN x, long dec)
   {
     lx = LG(x, tx);
     for (i=lontyp[tx]; i<lx; i++) {
-      if (!x[i]) x[i] = zero;
+      if (!x[i]) x[i] = (long)gen_0;
       else
       {
         x[i] += dec;
@@ -1564,7 +1564,7 @@ shiftaddress_canon(GEN x, long dec)
   {
     lx = LG(x, tx);
     for (i=lontyp[tx]; i<lx; i++) {
-      if (!x[i]) x[i] = zero;
+      if (!x[i]) x[i] = (long)gen_0;
       else
       {
         x[i] += dec;
@@ -1607,7 +1607,7 @@ bin_copy(GENbin *p)
   GEN x, y, base;
   long dx, len;
 
-  x   = p->x; if (!x) { free(p); return gzero; }
+  x   = p->x; if (!x) { free(p); return gen_0; }
   len = p->len;
   base= p->base; dx = x - base;
   y = (GEN)memcpy((void*)new_chunk(len), (void*)GENbase(p), len*sizeof(long));

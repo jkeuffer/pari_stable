@@ -186,7 +186,7 @@ evalexpo(long x)
 }
 
 INLINE GEN
-constant_term(GEN x) { return signe(x)? (GEN)x[2]: gzero; }
+constant_term(GEN x) { return signe(x)? (GEN)x[2]: gen_0; }
 INLINE GEN
 leading_term(GEN x) { return (GEN)x[lg(x)-1]; }
 
@@ -372,11 +372,11 @@ utoipos(ulong x)
   y[1] = evalsigne(1)| evallgefint(3); y[2] = x; return y;
 }
 INLINE GEN
-utoi(ulong x) { return x? utoipos(x): gzero; }
+utoi(ulong x) { return x? utoipos(x): gen_0; }
 INLINE GEN
 stoi(long x)
 {
-  if (!x) return gzero;
+  if (!x) return gen_0;
   return x > 0? utoipos((ulong)x): utoineg((ulong)-x);
 }
 INLINE GEN
@@ -567,7 +567,7 @@ minss(long x, long y) { return x<y?x:y; }
 INLINE GEN
 subii(GEN x, GEN y)
 {
-  if (x==y) return gzero; /* frequent with x = y = gzero */
+  if (x==y) return gen_0; /* frequent with x = y = gen_0 */
   return addii_sign(x, signe(x), y, -signe(y));
 }
 INLINE GEN
@@ -805,7 +805,7 @@ dvdii(GEN x, GEN y)
 {
   const pari_sp av=avma;
   const GEN p1=remii(x,y);
-  avma=av; return p1 == gzero;
+  avma=av; return p1 == gen_0;
 }
 
 INLINE int

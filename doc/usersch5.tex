@@ -268,7 +268,7 @@ and otherwise of the \kbd{n}-th component of~\kbd{x}.
 
 \fun{GEN}{constant_term}{GEN x} returns the address the constant term of
 \typ{POL}~\kbd{x}. By convention, a $0$ polynomial (whose \kbd{sign} is $0$)
-has \kbd{gzero} constant term.
+has \kbd{gen\_0} constant term.
 
 \fun{GEN}{leading_term}{GEN x} returns the address the leading term of
 \typ{POL}~\kbd{x}. This may be an inexact $0$.
@@ -1022,7 +1022,7 @@ created, and if \kbd{r} is equal to  \kbd{ONLY\_REM}, only the remainder is
 created and returned. In the generic case, the remainder is created after the
 quotient and can be disposed of individually with a \kbd{cgiv(r)}. The
 remainder is always of the sign of the dividend~\kbd{x}. If the remainder
-is $0$ set \kbd{r = gzero}.
+is $0$ set \kbd{r = gen\_0}.
 
 \fun{void}{dvmdiiz}{GEN x, GEN y, GEN z, GEN t} assigns the Euclidean
 quotient of the \typ{INT}s \kbd{x} and \kbd{y} into the \typ{INT} or
@@ -1068,7 +1068,7 @@ the non-negative \typ{INT}~\kbd{N} (rounded towards 0) and puts the remainder
 $R$ into~\kbd{*r}. Precisely, $N = S^2 + R$ with $0\leq R \leq 2S$. If
 \kbd{r} is equal to \kbd{NULL}, the remainder is not created. In the generic
 case, the remainder is created after the quotient and can be disposed of
-individually with \kbd{cgiv(R)}. If the remainder is $0$ set \kbd{R = gzero}.
+individually with \kbd{cgiv(R)}. If the remainder is $0$ set \kbd{R = gen\_0}.
 
 Uses a divide and conquer algorithm (discrete variant of Newton iteration)
 due to Paul Zimmermann (``Karatsuba Square Root'', INRIA Research Report 3805
@@ -2157,17 +2157,17 @@ Assumes that \kbd{x} is non-zero.
 
 
 \fun{GEN}{zerocol}{long n} creates a \typ{COL} with \kbd{n} components set to
-\kbd{gzero}.
+\kbd{gen\_0}.
 
 \fun{GEN}{zerovec}{long n} creates a \typ{VEC} with \kbd{n} components set to
-\kbd{gzero}.
+\kbd{gen\_0}.
 
 \fun{GEN}{vec_ei}{long n, long i} creates a \typ{VEC} with \kbd{n} components
-set to \kbd{gzero}, but the \kbd{i}-th one which us set to \kbd{gone}
+set to \kbd{gen\_0}, but the \kbd{i}-th one which us set to \kbd{gone}
 (\kbd{i}-th vector in the canonical basis).
 
 \fun{GEN}{zeromat}{long m, long n} creates a \typ{MAT} with \kbd{m} x \kbd{n}
-components set to \kbd{gzero}.
+components set to \kbd{gen\_0}.
 \smallskip
 See also next section for analogs of the following functions:
 
@@ -2201,7 +2201,7 @@ Contrary to the policy of general PARI functions, the functions in this
 subsection do \emph{not} copy their arguments, nor do they produce an object
 a priori suitable for \tet{gerepileupto}. In particular, they are
 faster than their clean equivalent (which may not exist). \emph{If} you
-restrict their arguments to universal objects (e.g \kbd{gone}, \kbd{gzero}),
+restrict their arguments to universal objects (e.g \kbd{gen\_0}),
 then the above warning does not apply.
 
 \fun{GEN}{mkcomplex}{GEN x, GEN y} creates the \typ{COMPLEX} $x + iy$.
@@ -2210,7 +2210,7 @@ then the above warning does not apply.
 $y > 1$ and $(x,y) = 1$.
 
 \fun{GEN}{vec_Cei}{long n, long i} creates a \typ{VEC} with \kbd{n}
-components set to \kbd{gzero}, but the \kbd{i}-th one which us set to
+components set to \kbd{gen\_0}, but the \kbd{i}-th one which us set to
 \kbd{C}.
 
 \fun{GEN}{mkcol}{GEN x} creates a 1-dimensional \typ{COL} containing \kbd{x}.
@@ -2243,7 +2243,7 @@ as above on $64$-bit machines).
 \fun{GEN}{coefs_to_pol}{long n, ...} Returns the \typ{POL} whose $n$
 coefficients (\kbd{GEN}) follow, in order of decreasing degree.
 \bprog
-  coefs_to_pol(3, gone, gtwo, gzero);
+  coefs_to_pol(3, gen_1, gen_2, gen_0);
 @eprog
 \noindent returns the polynomial $X^2 + 2X$ (in variable $0$, use
 \tet{setvarn} if you want other variable numbers). Beware that $n$ is the
@@ -2315,9 +2315,9 @@ but use \kbd{isexactzero} instead of \kbd{gcmp0}.
 
 \fun{int}{isexactzero}{GEN x} returns 1 (true) if \kbd{x} is exactly equal
 to~0, 0~(false) otherwise. Note that many PARI functions will return a
-pointer to \key{gzero} when they are aware that the result they return is an
+pointer to \kbd{gen\_0} when they are aware that the result they return is an
 exact zero, so it is almost always faster to test for pointer equality first,
-and call \key{isexactzero} (or \key{gcmp0}) only when the first test fails.
+and call \kbd{isexactzero} (or \kbd{gcmp0}) only when the first test fails.
 
 \fun{int}{gcmp0}{GEN x} returns 1 (true) if \kbd{x} is equal to~0, 0~(false)
 otherwise.
@@ -2346,10 +2346,10 @@ to~\kbd{y}, 0~otherwise. A priori, this makes sense only if \kbd{x} and
 means that \kbd{x - y} was successfully computed and found equal to $0$
 (by \kbd{gcmp0}). In particular
 \bprog
-  gegal(cgetg(1, t_VEC), gzero)
+  gegal(cgetg(1, t_VEC), gen_0)
 @eprog\noindent is true, and the relation is not transitive. E.g.~an empty
 \typ{COL} and an empty \typ{VEC} are not equal but are both equal to
-\kbd{gzero}.
+\kbd{gen\_0}.
 
 \fun{long}{gegalsg}{long s, GEN x} returns 1 (true) if the \kbd{long}~\kbd{s}
 is equal to~\kbd{x}, 0~otherwise.

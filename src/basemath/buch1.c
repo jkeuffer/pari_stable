@@ -97,7 +97,7 @@ getallforms(GEN D, long *pth, GEN *ptz)
 {
   long d = itos(D), dabs = labs(d),  dover3 = dabs/3, t, b2, a, b, c, h;
   GEN z, L = cgetg((long)(sqrt(dabs) * log2(dabs)), t_VEC);
-  b2 = b = (d&1); h = 0; z=gone;
+  b2 = b = (d&1); h = 0; z=gen_1;
   while (b2 <= dover3)
   {
     t = (b2-d)/4;
@@ -122,7 +122,7 @@ getallforms(GEN D, long *pth, GEN *ptz)
 static void
 get_pq(GEN D, GEN z, GEN pq, GEN *ptp, GEN *ptq)
 {
-  GEN wp = cgetg(MAXL,t_VECSMALL), wlf = cgetg(MAXL,t_VEC), court = icopy(gone);
+  GEN wp = cgetg(MAXL,t_VECSMALL), wlf = cgetg(MAXL,t_VEC), court = icopy(gen_1);
   GEN form;
   long i, ell, p, l = 1, d = itos(D);
   byteptr diffell = diffptr + 2;
@@ -255,14 +255,14 @@ quadhilbertimag(GEN D, GEN pq)
     }
     if (DEBUGLEVEL>1) msgtimer("roots");
     /* to avoid integer overflow (1 + 0.) */
-    lead = (exmax < bit_accuracy(prec))? gone: realun(prec);
+    lead = (exmax < bit_accuracy(prec))? gen_1: realun(prec);
 
     P = real_i( roots_to_pol_intern(lead,P,0,0) );
     P = grndtoi(P,&exmax);
     if (DEBUGLEVEL>1) msgtimer("product, error bits = %ld",exmax);
     if (exmax <= -10)
     {
-      if (pq && !issquarefree(P)) { avma=av; return gzero; }
+      if (pq && !issquarefree(P)) { avma=av; return gen_0; }
       break;
     }
     avma = av0; prec += (DEFAULTPREC-2) + (1 + (exmax >> TWOPOTBITS_IN_LONG));
@@ -315,7 +315,7 @@ getallelts(GEN bnr)
   list = (GEN*) cgetg(no+1,t_VEC);
   if (!lc)
   {
-    list[1] = idealhermite(nf,gone);
+    list[1] = idealhermite(nf,gen_1);
     return (GEN)list;
   }
   pows = (GEN**)cgetg(lc+1,t_VEC);
@@ -345,7 +345,7 @@ getallelts(GEN bnr)
     if (p1) p2 = idealmodidele(bnr, idealmul(nf,p2,p1));
     list[j + 1] = p2;
   }
-  list[1] = idealhermite(nf,gone);
+  list[1] = idealhermite(nf,gen_1);
   return (GEN)list;
 }
 
@@ -383,8 +383,8 @@ form_to_ideal(GEN x)
   if ((is_vec_t(tx) || lg(x) != 4)
        && tx != t_QFR && tx != t_QFI) err(typeer,"form_to_ideal");
   b = negi((GEN)x[2]); if (mpodd(b)) b = addis(b,1);
-  y[1] = (long)mkcol2((GEN)x[1], gzero);
-  y[2] = (long)mkcol2((GEN)shifti(b,-1), gone);
+  y[1] = (long)mkcol2((GEN)x[1], gen_0);
+  y[2] = (long)mkcol2((GEN)shifti(b,-1), gen_1);
   return y;
 }
 
@@ -448,7 +448,7 @@ computeth2(GEN om, GEN la, long prec)
 {
   GEN p1,p2,res = ellphistinit(om,prec);
 
-  p1 = gsub(ellphist(om,res,la,prec), ellphist(om,res,gone,prec));
+  p1 = gsub(ellphist(om,res,la,prec), ellphist(om,res,gen_1,prec));
   p2 = imag_i(p1);
   if (gexpo(real_i(p1))>20 || gexpo(p2)> bit_accuracy(min(prec,lg(p2)))-10)
     return NULL;
@@ -551,7 +551,7 @@ compocyclo(GEN nf, long m, long d)
   GEN sb,a,b,s,p1,p2,p3,res,polL,polLK,nfL, D = (GEN)nf[3];
   long ell,vx;
 
-  p1 = quadhilbertimag(D, gzero);
+  p1 = quadhilbertimag(D, gen_0);
   p2 = cyclo(m,0);
   if (d==1) return do_compo(p1,p2);
 
@@ -626,7 +626,7 @@ treatspecialsigma(GEN nf, GEN gf)
   p2 = gcoeff(gf,2,2);
   if (gcmp1(p2)) { fl = 0; tryf = p1; }
   else {
-    if (Ds % 16 != 8 || !egalii(content(gf),gtwo)) return NULL;
+    if (Ds % 16 != 8 || !egalii(content(gf),gen_2)) return NULL;
     fl = 1; tryf = shifti(p1,-1);
   }
   /* tryf integer > 0 */
@@ -946,7 +946,7 @@ is_bad(GEN D, ulong p)
     if (r && signe(D) < 0) r = 8-r;
     return (r < 4);
   }
-  r = (remii(D, muluu(p,p)) == gzero); /* p^2 | D ? */
+  r = (remii(D, muluu(p,p)) == gen_0); /* p^2 | D ? */
   avma = av; return r;
 }
 
@@ -1556,7 +1556,7 @@ gcdreal(GEN a,GEN b)
 static int
 get_R(GEN C, long sreg, GEN z, GEN *ptR)
 {
-  GEN R = gone;
+  GEN R = gen_1;
   double c;
   long i;
 
@@ -1621,7 +1621,7 @@ buchquad(GEN D, double cbach, double cbach2, long RELSUP0, long flag, long prec)
     if (cmpis(Disc,-4) >= 0)
     {
       GEN z = cgetg(6,t_VEC);
-      z[1] = z[4] = z[5] = one;
+      z[1] = z[4] = z[5] = (long)gen_1;
       z[2] = z[3]= lgetg(1,t_VEC); return z;
     }
     PRECREG = 0;
@@ -1640,7 +1640,7 @@ buchquad(GEN D, double cbach, double cbach2, long RELSUP0, long flag, long prec)
   if (PRECREG) resc = dbltor(lim / 2.);
   else         resc = dbltor(lim / PI);
   if (!PRECREG) lim /= sqrt(3.);
-  R = gone;
+  R = gen_1;
   cp = (long)exp(sqrt(LOGD*log(LOGD)/8.0));
   if (cp < 20) cp = 20;
   av = avma; cbach /= 2;

@@ -179,7 +179,7 @@ idealsqrtn(GEN nf, GEN x, GEN gn, int strict)
     if (q) q = idealmulpowprime(nf, q, (GEN)Pr[i], e);
     else   q = idealpow(nf, (GEN)Pr[i], e);
   }
-  return q? q: gone;
+  return q? q: gen_1;
 }
 
 static GEN
@@ -433,7 +433,7 @@ get_u(GEN cyc, long rc, GEN gell)
 {
   long i, l = lg(cyc);
   GEN u = cgetg(l,t_VEC);
-  for (i=1; i<=rc; i++) u[i] = zero;
+  for (i=1; i<=rc; i++) u[i] = (long)gen_0;
   for (   ; i<  l; i++) u[i] = (long)Fp_inv((GEN)cyc[i], gell);
   return u;
 }
@@ -502,7 +502,7 @@ lift_if_rational(GEN x)
       {
         long d = degpol(y);
         if (d > 0) return x;
-        return (d < 0)? gzero: (GEN)y[2];
+        return (d < 0)? gen_0: (GEN)y[2];
       }
       return y;
   
@@ -616,7 +616,7 @@ rnfkummersimple(GEN bnr, GEN subgroup, GEN gell, long all)
     y[dK--] = 0;
   }
   if (all) return res;
-  return gzero;
+  return gen_0;
 }
 
 /* alg. 5.3.11 (return only discrete log mod ell) */
@@ -707,7 +707,7 @@ pol_from_Newton(GEN S)
 {
   long i, k, l = lg(S);
   GEN C = cgetg(l+1, t_VEC), c = C + 1;
-  c[0] = one;
+  c[0] = (long)gen_1;
   c[1] = S[1];
   for (k = 2; k < l; k++)
   {
@@ -792,7 +792,7 @@ compute_polrel(GEN nfz, toK_s *T, GEN be, long g, long ell)
 
   root = cgetg(ell + 2, t_POL);
   root[1] = evalsigne(1) | evalvarn(0);
-  for (i = 0; i < ell; i++) root[2+i] = zero;
+  for (i = 0; i < ell; i++) root[2+i] = (long)gen_0;
   for (i = 0; i < m; i++)
   { /* compute (1/be) ^ (-mu) instead of be^mu [mu << 0].
      * 1/be = C_invbe * prim_invbe */
@@ -815,7 +815,7 @@ compute_polrel(GEN nfz, toK_s *T, GEN be, long g, long ell)
   nfzpol = dummycopy((GEN)nfz[1]);
   setvarn(nfzpol, MAXVARN);
   S = cgetg(ell+1, t_VEC); /* Newton sums */
-  S[1] = zero;
+  S[1] = (long)gen_0;
   for (k = 2; k <= ell; k++)
   { /* compute the k-th Newton sum */
     pari_sp av = avma;
@@ -1100,7 +1100,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
     y[dK--] = 0;
   }
   if (all) return res;
-  return gzero; /* FAIL */
+  return gen_0; /* FAIL */
 }
 
 GEN

@@ -317,7 +317,7 @@ good_arena_size(ulong slow2_size, ulong total, ulong fixed_to_cache,
       /* DO NOTHING */;                 /* Keep both candidates */
   else if (V <= 0 && (Xmax*Xmax + 2*C1*Xmax + C2) <= 0) /* slowdown decreasing */
       Xmin = cut_off;                   /* Only one candidate */
-  else /* Now we know: two root, the largest is in CUT_OFF..Xmax */
+  else /* Now we know: (long)gen_2 root, the largest is in CUT_OFF..Xmax */
       Xmax = sqrt(D) - C1;
   if (Xmax != Xmin) {   /* Xmin == CUT_OFF; Check which one is better */
       double v1 = (cut_off + A)/(cut_off + B);
@@ -807,7 +807,7 @@ ifac_break_limit(GEN n, GEN pairs/*unused*/, GEN here, GEN state)
 static GEN
 auxdecomp0(GEN n, ulong all, long hint)
 {
-  return auxdecomp1(n, NULL, gzero, all, hint);
+  return auxdecomp1(n, NULL, gen_0, all, hint);
 }
 
 GEN
@@ -1122,10 +1122,10 @@ phi(GEN n)
   long v;
 
   chk_arith(n);
-  if (is_pm1(n)) return gone;
+  if (is_pm1(n)) return gen_1;
   v = vali(n);
   n = absi(shifti(n,-v));
-  m = v > 1 ? int2n(v-1) : gone;
+  m = v > 1 ? int2n(v-1) : gen_1;
   if (is_pm1(n)) return gerepileuptoint(av,m);
 
   lim = tridiv_bound(n,1);
@@ -1165,7 +1165,7 @@ numbdiv(GEN n)
   pari_sp av = avma;
 
   chk_arith(n);
-  if (is_pm1(n)) return gone;
+  if (is_pm1(n)) return gen_1;
   v = vali(n);
   n = absi(shifti(n,-v));
   m = utoipos(v+1);
@@ -1201,10 +1201,10 @@ sumdiv(GEN n)
   long v;
 
   chk_arith(n);
-  if (is_pm1(n)) return gone;
+  if (is_pm1(n)) return gen_1;
   v = vali(n);
   n = absi(shifti(n,-v));
-  m = v ? addsi(-1,int2n(v+1)) : gone;
+  m = v ? addsi(-1,int2n(v+1)) : gen_1;
   if (is_pm1(n)) return gerepileuptoint(av,m);
 
   lim = tridiv_bound(n,1);
@@ -1243,13 +1243,13 @@ sumdivk(GEN n, long k)
   if (!k) return numbdiv(n);
   if (k==1) return sumdiv(n);
   chk_arith(n);
-  if (is_pm1(n)) return gone;
+  if (is_pm1(n)) return gen_1;
   k1 = k; n1 = n;
   if (k==-1) { m=sumdiv(n); k = 1; goto fin; }
   if (k<0)  k = -k;
   v=vali(n);
   n=absi(shifti(n,-v));
-  m = gone;
+  m = gen_1;
   while (v--)  m = addsi(1,shifti(m,k));
   if (is_pm1(n)) goto fin;
 
@@ -1306,7 +1306,7 @@ divisors(GEN n)
   if (!nbdiv || nbdiv & ~LGBITS)
     err(talker, "too many divisors (more than %ld)", LGBITS - 1);
   d = t = (GEN*) cgetg(nbdiv+1,t_VEC);
-  *++d = gone;
+  *++d = gen_1;
   for (i=1; i<l; i++)
     for (t1=t,j=e[i]; j; j--,t1=t2)
       for (t2=d, t3=t1; t3<t2; ) *++d = mulii(*++t3, (GEN)P[i]);
@@ -1318,7 +1318,7 @@ corepartial(GEN n, long all)
 {
   pari_sp av = avma;
   long i;
-  GEN fa,p1,p2,c = gone;
+  GEN fa,p1,p2,c = gen_1;
 
   fa = auxdecomp(n,all);
   p1 = (GEN)fa[1];
@@ -1333,7 +1333,7 @@ core2partial(GEN n, long all)
 {
   pari_sp av = avma;
   long i;
-  GEN fa,p1,p2,e,c=gone,f=gone;
+  GEN fa,p1,p2,e,c=gen_1,f=gen_1;
 
   fa = auxdecomp(n,all);
   p1 = (GEN)fa[1];
@@ -1404,15 +1404,15 @@ binaire(GEN x)
     {
       GEN xp=int_MSW(x);
       lx=lgefint(x);
-      if (lx==2) return mkvec(gzero);
+      if (lx==2) return mkvec(gen_0);
       ly = BITS_IN_LONG+1; m=HIGHBIT; u=*xp;
       while (!(m & u)) { m>>=1; ly--; }
       y = cgetg(ly+((lx-3)<<TWOPOTBITS_IN_LONG),t_VEC); ly=1;
-      do { y[ly] = m & u ? one : zero; ly++; } while (m>>=1);
+      do { y[ly] = m & u ? (long)gen_1 : (long)gen_0; ly++; } while (m>>=1);
       for (i=3; i<lx; i++)
       {
         m=HIGHBIT; xp=int_precW(xp); u=*xp;
-        do { y[ly] = m & u ? one : zero; ly++; } while (m>>=1);
+        do { y[ly] = m & u ? (long)gen_1 : (long)gen_0; ly++; } while (m>>=1);
       }
       break;
     }
@@ -1421,7 +1421,7 @@ binaire(GEN x)
       if (!signe(x))
       {
         lx=1+max(-ex,0); y=cgetg(lx,t_VEC);
-        for (i=1; i<lx; i++) y[i]=zero;
+        for (i=1; i<lx; i++) y[i]= (long)gen_0;
         return y;
       }
 
@@ -1433,7 +1433,7 @@ binaire(GEN x)
       ly = -ex; ex++; m = HIGHBIT;
       if (ex<=0)
       {
-        p1[1]=zero; for (i=1; i <= -ex; i++) p2[i]=zero;
+        p1[1]= (long)gen_0; for (i=1; i <= -ex; i++) p2[i]= (long)gen_0;
         i=2;
       }
       else
@@ -1443,7 +1443,7 @@ binaire(GEN x)
         {
           m=HIGHBIT; u=x[i];
           do
-            { p1[ly] = (m & u) ? one : zero; ly++; }
+            { p1[ly] = (m & u) ? (long)gen_1 : (long)gen_0; ly++; }
           while ((m>>=1) && ly<=ex);
         }
         ly=1;
@@ -1452,7 +1452,7 @@ binaire(GEN x)
       for (; i<lx; i++)
       {
         u=x[i];
-        do { p2[ly] = m & u ? one : zero; ly++; } while (m>>=1);
+        do { p2[ly] = m & u ? (long)gen_1 : (long)gen_0; ly++; } while (m>>=1);
         m=HIGHBIT;
       }
       break;
@@ -1538,7 +1538,7 @@ gbitneg(GEN x, long bits)
   if (bits < -1)
       err(talker, "negative exponent in bitwise negation");
   if (bits == -1) return inegate(x);
-  if (bits == 0) return gzero;
+  if (bits == 0) return gen_0;
   if (signe(x) < 0) { /* Consider as if mod big power of 2 */
     pari_sp ltop = avma;
     return gerepileuptoint(ltop, ibittrunc(inegate(x), bits));
@@ -1579,7 +1579,7 @@ ibitand(GEN x, GEN y)
   GEN out;
   long i;
 
-  if (!signe(x) || !signe(y)) return gzero;
+  if (!signe(x) || !signe(y)) return gen_0;
   lx=lgefint(x); ly=lgefint(y);
   lout = min(lx,ly); /* > 2 */
   xp = int_LSW(x);
@@ -1675,7 +1675,7 @@ ibitnegimply(GEN x, GEN y)
   long *xp, *yp, *outp;
   GEN out;
   long i;
-  if (!signe(x)) return gzero;
+  if (!signe(x)) return gen_0;
   if (!signe(y)) return absi(x);
 
   lx = lgefint(x); xp = int_LSW(x);

@@ -32,7 +32,7 @@ psquare(GEN a,GEN p)
   if (!signe(a) || gcmp1(a)) return 1;
   v = Z_pvalrem(a, p, &ap);
   if (v&1) return 0;
-  return egalii(p, gtwo)? umodiu(ap, 8) == 1
+  return egalii(p, gen_2)? umodiu(ap, 8) == 1
                          : kronecker(ap,p) == 1;
 }
 
@@ -68,7 +68,7 @@ lemma7(GEN pol,long nu,GEN x)
 
   for (i=lgpol(pol), gx=(GEN)pol[i+1]; i>1; i--)
     gx = addii(mulii(gx,x), (GEN)pol[i]);
-  if (psquare(gx,gtwo)) return 1;
+  if (psquare(gx,gen_2)) return 1;
 
   for (i=lgpol(pol),gpx=mulis((GEN)pol[i+1],i-1); i>2; i--)
     gpx = gadd(gmul(gpx,x), mulis((GEN)pol[i],i-2));
@@ -118,7 +118,7 @@ zpsoluble(GEN pol,GEN p)
 {
   if ((typ(pol)!=t_POL && typ(pol)!=t_INT) || typ(p)!=t_INT )
     err(typeer,"zpsoluble");
-  return zpsol(pol,p,0,gone,gzero);
+  return zpsol(pol,p,0,gen_1,gen_0);
 }
 
 /* vaut 1 si l'equation y^2=Pol(x) a une solution p-adique rationnelle
@@ -129,8 +129,8 @@ qpsoluble(GEN pol,GEN p)
 {
   if ((typ(pol)!=t_POL && typ(pol)!=t_INT) || typ(p)!=t_INT )
     err(typeer,"qpsoluble");
-  if (zpsol(pol,p,0,gone,gzero)) return 1;
-  return (zpsol(polrecip(pol),p,1,p,gzero));
+  if (zpsol(pol,p,0,gen_1,gen_0)) return 1;
+  return (zpsol(polrecip(pol),p,1,p,gen_0));
 }
 
 /* (pr,2) = 1. return 1 if a square in (ZK / pr), 0 otherwise */
@@ -284,7 +284,7 @@ repres(GEN nf,GEN p)
   pp=itos((GEN) p[1]);
   for (i=1,ppf=1; i<=f; i++) ppf*=pp;
   rep=cgetg(ppf+1,t_VEC);
-  rep[1]=zero; ppi=1;
+  rep[1]= (long)gen_0; ppi=1;
   for (i=0; i<f; i++,ppi*=pp)
     for (j=1; j<pp; j++)
       for (k=1; k<=ppi; k++)
@@ -308,9 +308,9 @@ qpsolublenf(GEN nf,GEN pol,GEN pr)
   if (typ(pol)!=t_POL) err(notpoler,"qpsolublenf");
   checkprimeid(pr);
 
-  if (egalii((GEN) pr[1], gtwo))
+  if (egalii((GEN) pr[1], gen_2))
   { /* tough case */
-    zinit = zidealstarinit(nf, idealpows(nf,pr,1+2*idealval(nf,gtwo,pr)));
+    zinit = zidealstarinit(nf, idealpows(nf,pr,1+2*idealval(nf,gen_2,pr)));
     if (psquare2nf(nf,(GEN) pol[2],pr,zinit)) return 1;
     if (psquare2nf(nf, leading_term(pol),pr,zinit)) return 1;
   }
@@ -318,12 +318,12 @@ qpsolublenf(GEN nf,GEN pol,GEN pr)
   {
     if (psquarenf(nf,(GEN) pol[2],pr)) return 1;
     if (psquarenf(nf, leading_term(pol),pr)) return 1;
-    zinit = gzero;
+    zinit = gen_0;
   }
   repr = repres(nf,pr);
-  if (zpsolnf(nf,pol,pr,0,gone,gzero,repr,zinit)) { avma=ltop; return 1; }
+  if (zpsolnf(nf,pol,pr,0,gen_1,gen_0,repr,zinit)) { avma=ltop; return 1; }
   p1 = gmodulcp(gmul((GEN) nf[7],(GEN) pr[2]),(GEN) nf[1]);
-  if (zpsolnf(nf,polrecip(pol),pr,1,p1,gzero,repr,zinit))
+  if (zpsolnf(nf,polrecip(pol),pr,1,p1,gen_0,repr,zinit))
     { avma=ltop; return 1; }
 
   avma=ltop; return 0;
@@ -349,15 +349,15 @@ zpsolublenf(GEN nf,GEN pol,GEN p)
   if (cmpis((GEN)p[1],2))
   {
     if (psquarenf(nf,(GEN) pol[2],p)) return 1;
-    zinit=gzero;
+    zinit=gen_0;
   }
   else
   {
-    zinit=zidealstarinit(nf,idealpows(nf,p,1+2*idealval(nf,gtwo,p)));
+    zinit=zidealstarinit(nf,idealpows(nf,p,1+2*idealval(nf,gen_2,p)));
     if (psquare2nf(nf,(GEN) pol[2],p,zinit)) return 1;
   }
   repr=repres(nf,p);
-  if (zpsolnf(nf,pol,p,0,gone,gzero,repr,zinit)) { avma=ltop; return 1; }
+  if (zpsolnf(nf,pol,p,0,gen_1,gen_0,repr,zinit)) { avma=ltop; return 1; }
   avma=ltop; return 0;
 }
 
@@ -390,7 +390,7 @@ nfhilbertp(GEN nf,GEN a,GEN b,GEN pr)
   checkprimeid(pr); nf = checknf(nf);
   p = (GEN)pr[1];
 
-  if (egalii(p,gtwo)) return hilb2nf(nf,a,b,pr);
+  if (egalii(p,gen_2)) return hilb2nf(nf,a,b,pr);
 
   /* pr not above 2, compute t = tame symbol */
   va = idealval(nf,a,pr);
@@ -513,7 +513,7 @@ bnfsunit(GEN bnf,GEN S,long prec)
 
   /* S class group */
   H = hnfall(M); U = (GEN)H[2]; H= (GEN)H[1];
-  card = gone;
+  card = gen_1;
   if (lg(H) > 1)
   { /* non trivial (rare!) */
     GEN U, D = smithall(H, &U, NULL);
@@ -521,7 +521,7 @@ bnfsunit(GEN bnf,GEN S,long prec)
       if (gcmp1((GEN)D[i])) break;
     setlg(D,i); D = mattodiagonal_i(D); /* cf smithrel */
     card = detcyc(D);
-    p1=cgetg(i,t_VEC); pow=ZM_inv(U,gone);
+    p1=cgetg(i,t_VEC); pow=ZM_inv(U,gen_1);
     for(i--; i; i--)
       p1[i] = (long)factorback_i(gen, (GEN)pow[i], nf, 1);
     res[5] = (long)mkvec3(card,D,p1);
@@ -598,7 +598,7 @@ make_unit(GEN bnf, GEN suni, GEN *px)
   for (i=1; i<ls; i++)
   {
     GEN P = (GEN)S[i];
-    v[i] = (remii(N, (GEN)P[1]) == gzero)? element_val(bnf,xb,P): 0;
+    v[i] = (remii(N, (GEN)P[1]) == gen_0)? element_val(bnf,xb,P): 0;
   }
   /* here, x = S v */
   p1 = cgetg(ls, t_COL);
@@ -614,7 +614,7 @@ make_unit(GEN bnf, GEN suni, GEN *px)
   p1[0] = evaltyp(t_COL) | evallg(lB);
   v = concatsp(v, p1); /* append bottom of p1 (= [0 Id] part) */
 
-  xp = gone; xm = gone; gen = (GEN)suni[1];
+  xp = gen_1; xm = gen_1; gen = (GEN)suni[1];
   for (i=1; i<ls; i++)
   {
     k = -itos((GEN)v[i]); if (!k) continue;
@@ -622,8 +622,8 @@ make_unit(GEN bnf, GEN suni, GEN *px)
     if (k > 0) xp = gmul(xp, gpowgs(p1, k));
     else       xm = gmul(xm, gpowgs(p1,-k));
   }
-  if (xp != gone) *px = gmul(*px,xp);
-  if (xm != gone) *px = gdiv(*px,xm);
+  if (xp != gen_1) *px = gmul(*px,xp);
+  if (xm != gen_1) *px = gdiv(*px,xm);
   return v;
 }
 
@@ -705,7 +705,7 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
   if (degpol(nf[1]) == 1)
   { /* over Q */
     polabs = lift(relpol);
-    k = gzero;
+    k = gen_0;
   }
   else
   {
@@ -732,7 +732,7 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
     galois = nfisgalois(gsubst(nfrel, varn(P), polx[varn(T)]), P);
   }
 
-  prod = gone; S1 = S2 = cgetg(1, t_VEC);
+  prod = gen_1; S1 = S2 = cgetg(1, t_VEC);
   res = gmael(rel,8,1);
   cyc = (GEN)res[2];
   gen = (GEN)res[3]; l = lg(cyc);
@@ -784,7 +784,7 @@ rnfisnorm(GEN T, GEN x, long flag)
   {
     GEN res = cgetg(3, t_VEC);
     res[1] = (long)simplify((GEN)x[2]);
-    res[2] = one; return res;
+    res[2] = (long)gen_1; return res;
   }
 
   /* build set T of ideals involved in the solutions */

@@ -33,7 +33,7 @@ sqscal(GEN x)
   pari_sp av;
   GEN z;
   lx = lg(x);
-  if (lx == 1) return gzero;
+  if (lx == 1) return gen_0;
   av = avma;
   z = gsqr((GEN)x[1]);
   for (i=2; i<lx; i++)
@@ -50,7 +50,7 @@ gscal(GEN x,GEN y)
   GEN z;
   if (x == y) return sqscal(x);
   lx = lg(x);
-  if (lx == 1) return gzero;
+  if (lx == 1) return gen_0;
   av = avma;
   z = gmul((GEN)x[1],(GEN)y[1]);
   for (i=2; i<lx; i++)
@@ -65,7 +65,7 @@ sqscali(GEN x)
   pari_sp av;
   GEN z;
   lx = lg(x);
-  if (lx == 1) return gzero;
+  if (lx == 1) return gen_0;
   av = avma;
   z = sqri((GEN)x[1]);
   for (i=2; i<lx; i++)
@@ -81,7 +81,7 @@ gscali(GEN x,GEN y)
   GEN z;
   if (x == y) return sqscali(x);
   lx = lg(x);
-  if (lx == 1) return gzero;
+  if (lx == 1) return gen_0;
   av = avma;
   z = mulii((GEN)x[1],(GEN)y[1]);
   for (i=2; i<lx; i++)
@@ -184,7 +184,7 @@ Householder_get_mu(GEN x, GEN L, GEN B, long k, GEN Q, long prec)
     if (! incrementalQ(x, L, B, Q, j, prec)) return 0;
   for (j=1; j<k; j++)
   {
-    m = (GEN)L[j]; Nx = (GEN)m[j]; /* should set m[j] = one; but need it later */
+    m = (GEN)L[j]; Nx = (GEN)m[j]; /* should set m[j] = (long)gen_1; but need it later */
     invNx = ginv(Nx);
     for (i=max(j0, j+1); i<=k; i++) m[i] = lmpmul(invNx, (GEN)m[i]);
   }
@@ -429,7 +429,7 @@ ZRED(long k, long l, GEN x, GEN h, GEN L, GEN B, long K)
   q = negi(q);
   Zupdate_row(k,l,q,L,B);
   Zupdate_col(k,l,q,K,h);
-  x[k] = (long)ZV_lincomb(gone, q, (GEN)x[k], (GEN)x[l]);
+  x[k] = (long)ZV_lincomb(gen_1, q, (GEN)x[k], (GEN)x[l]);
 }
 
 static GEN
@@ -578,7 +578,7 @@ do_ZSWAP(GEN x, GEN h, GEN L, GEN B, long kmax, long k, long D, GEN fl,
     for (i=k+1; i<=kmax; i++)
     {
       coeff(L,i,k) = coeff(L,i,k-1);
-      coeff(L,i,k-1) = zero;
+      coeff(L,i,k-1) = (long)gen_0;
     }
     B[k] = B[k-1]; fl[k] = 1; fl[k-1] = 0;
   }
@@ -645,7 +645,7 @@ ZincrementalGS(GEN x, GEN L, GEN B, long k, GEN fl, int gram)
   else
   {
     if (s < 0) err(lllger3);
-    B[k+1] = coeff(L,k,k); coeff(L,k,k) = one; fl[k] = 1;
+    B[k+1] = coeff(L,k,k); coeff(L,k,k) = (long)gen_1; fl[k] = 1;
   }
 }
 
@@ -667,7 +667,7 @@ lllint_marked(long *pMARKED, GEN x, long D, int gram,
   if (gram && hx != lx) err(mattype1,"lllint");
 
   av = avma; lim = stack_lim(av,1); x = dummycopy(x);
-  B = gscalcol(gone, lx);
+  B = gscalcol(gen_1, lx);
   L = cgetg(lx,t_MAT);
   for (j=1; j<lx; j++)
   {
@@ -774,7 +774,7 @@ pslg(GEN x)
 
 static GEN
 to_MP(GEN x, long prec)
-{ return (typ(x) == t_INT && !signe(x))? gzero: gtofp(x, prec); }
+{ return (typ(x) == t_INT && !signe(x))? gen_0: gtofp(x, prec); }
 static GEN
 col_to_MP(GEN x, long prec)
 {
@@ -874,11 +874,11 @@ do_SWAPgen(GEN h, GEN L, GEN B, long k, GEN fl, int *flc)
   }
   else
   {
-    coeff(L,k,k-1) = zero;
+    coeff(L,k,k-1) = (long)gen_0;
     for (i=k+1; i<lx; i++)
     {
       coeff(L,i,k) = coeff(L,i,k-1);
-      coeff(L,i,k-1) = zero;
+      coeff(L,i,k-1) = (long)gen_0;
     }
     B[k] = B[k-1]; fl[k] = 1; fl[k-1] = 0;
   }
@@ -906,7 +906,7 @@ incrementalGSgen(GEN x, GEN L, GEN B, long k, GEN fl)
   if (gcmp0(u)) B[k+1] = B[k];
   else
   {
-    B[k+1] = coeff(L,k,k); coeff(L,k,k) = one; fl[k] = 1;
+    B[k+1] = coeff(L,k,k); coeff(L,k,k) = (long)gen_1; fl[k] = 1;
   }
 }
 
@@ -925,7 +925,7 @@ lllgramallgen(GEN x, long flag)
   fl = cgetg(lx, t_VECSMALL);
 
   av = avma; lim = stack_lim(av,1);
-  B = gscalcol(gone, lx);
+  B = gscalcol(gen_1, lx);
   L = cgetg(lx,t_MAT);
   for (j=1; j<lx; j++) { L[j] = (long)zerocol(n); fl[j] = 0; }
 
@@ -1018,7 +1018,7 @@ UP:
 
   rounds = 0;
   /* rescale Xs[k] ? */
-  tau2 = signe(rk[k])? gsqr((GEN)rk[k]): gzero;
+  tau2 = signe(rk[k])? gsqr((GEN)rk[k]): gen_0;
   for (i = k+1; i < N; i++)
     if (signe(rk[i])) tau2 = mpadd(tau2, gsqr((GEN)rk[i]));
   q = mpdiv(gsqr(gcoeff(R,1,1)), tau2);
@@ -1249,7 +1249,7 @@ PRECPB:
   Q = zerovec(n);
   L = cgetg(lx,t_MAT);
   B = cgetg(lx,t_COL);
-  for (j=1; j<lx; j++) { L[j] = (long)zerocol(n); B[j] = zero; }
+  for (j=1; j<lx; j++) { L[j] = (long)zerocol(n); B[j] = (long)gen_0; }
   if (gram && !incrementalGS(x, L, B, 1))
   {
     if (flag) return NULL;
@@ -1301,7 +1301,7 @@ PRECPB:
       if      (MARKED == k)   MARKED = k-1;
       else if (MARKED == k-1) MARKED = k;
       if (!B[k]) goto PRECPB;
-      Q[k] = Q[k-1] = zero;
+      Q[k] = Q[k-1] = (long)gen_0;
       exact_can_leave = 0;
       if (k>2) k--;
     }
@@ -1336,7 +1336,7 @@ PRECPB:
           exact_can_leave = 1;
           k = 2; kmax = 1; continue;
         }
-        else if (!gram && Q[n-1] == zero)
+        else if (!gram && Q[n-1] == (long)gen_0)
         {
           if (DEBUGLEVEL>3) fprintferr("\nChecking LLL basis\n");
           j = Householder_get_mu(gmul(xinit,h), L, B, n, Q, prec);
@@ -1509,7 +1509,7 @@ lllintpartialall(GEN m, long flag)
         dot12new = addii(dot12, mulii(q, dot22));
         dot11 = addii(dot11, mulii(q, addii(dot12, dot12new)));
         dot12 = dot12new;
-        tm[1] = (long)ZV_lincomb(gone,q, (GEN)tm[1],(GEN)tm[2]);
+        tm[1] = (long)ZV_lincomb(gen_1,q, (GEN)tm[1],(GEN)tm[2]);
       }
 
       /* Interchange the output vectors v1 and v2.  */
@@ -1601,13 +1601,13 @@ lllintpartialall(GEN m, long flag)
 		    gcoeff(dot,j,j)) > 0) { k1 = i; k2 = j; }
           else                            { k1 = j; k2 = i; }
 	  codi = gcoeff(dot,k2,k2);
-          q = signe(codi)? diviiround(gcoeff(dot,k1,k2), codi): gzero;
+          q = signe(codi)? diviiround(gcoeff(dot,k1,k2), codi): gen_0;
           if (!signe(q)) continue;
 
 	  /* Try to subtract a multiple of column k2 from column k1.  */
           reductions++; q = negi(q);
-          tm2[k1] = (long)ZV_lincomb(gone,q, (GEN)tm2[k1], (GEN)tm2[k2]);
-          dot[k1] = (long)ZV_lincomb(gone,q, (GEN)dot[k1], (GEN)dot[k2]);
+          tm2[k1] = (long)ZV_lincomb(gen_1,q, (GEN)tm2[k1], (GEN)tm2[k2]);
+          dot[k1] = (long)ZV_lincomb(gen_1,q, (GEN)dot[k1], (GEN)dot[k2]);
           coeff(dot, k1, k1) = laddii(gcoeff(dot,k1,k1),
                                       mulii(q, gcoeff(dot,k2,k1)));
           for (d = 1; d <= ncol; d++) coeff(dot,k1,d) = coeff(dot,d,k1);
@@ -1775,7 +1775,7 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
 
     /* TODO: In case of failure do not recompute the full vector */
     Xpowers = (GEN*)new_chunk(dim + 1);
-    Xpowers[0] = gone;
+    Xpowers[0] = gen_1;
     for (j = 1; j <= dim; j++) Xpowers[j] = gmul(Xpowers[j-1], X);
 
     /* TODO: in case of failure, use the part of the matrix
@@ -1827,7 +1827,7 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
 
     sh = lllint_fp_ip(M, 4);
     short_pol = (GEN)sh[1];
-    nsp = gzero;
+    nsp = gen_0;
     for (j = 1; j <= dim; j++) nsp = addii(nsp, absi((GEN)short_pol[j]));
 
     if (DEBUGLEVEL >= 2)
@@ -1925,7 +1925,7 @@ lindep2(GEN x, long bit)
   for (i=1; i<lx; i++)
   {
     p1 = cgetg(ly,t_COL); p2[i] = (long)p1;
-    for (j=1; j<lx; j++) p1[j] = (i==j)? one: zero;
+    for (j=1; j<lx; j++) p1[j] = (i==j)? (long)gen_1: (long)gen_0;
     p1[lx]           = lcvtoi(gshift((GEN)re[i],bit),&e);
     if (im) p1[lx+1] = lcvtoi(gshift((GEN)im[i],bit),&e);
   }
@@ -2015,7 +2015,7 @@ lindep(GEN x, long prec)
     avma = av1; r = grndtoi(m[k][i], &e);
     if (e >= 0) err(precer,"lindep");
     r  = negi(r);
-    p1 = ZV_lincomb(gone,r, b[k],b[i]);
+    p1 = ZV_lincomb(gen_1,r, b[k],b[i]);
     b[k] = b[i];
     b[i]  = p1;
     av1 = avma;
@@ -2054,7 +2054,7 @@ lindep(GEN x, long prec)
       av1 = avma;
     }
   }
-  p1 = cgetg(lx,t_COL); p1[n] = one; for (i=1; i<n; i++) p1[i] = zero;
+  p1 = cgetg(lx,t_COL); p1[n] = (long)gen_1; for (i=1; i<n; i++) p1[i] = (long)gen_0;
   return gerepileupto(av, gauss(gtrans_i((GEN)b),p1));
 }
 
@@ -2203,11 +2203,11 @@ static GEN
 maxnorml2(pslq_M *M)
 {
   long n = M->n, i, j;
-  GEN ma = gzero, s;
+  GEN ma = gen_0, s;
 
   for (i=1; i<=n; i++)
   {
-    s = gzero;
+    s = gen_0;
     for (j=1; j<n; j++) s = gadd(s, gnorm(gcoeff(M->H,i,j)));
     ma = gmax(ma, s);
   }
@@ -2294,7 +2294,7 @@ init_pslq(pslq_M *M, GEN x, long *PREC)
     GEN d, c = cgetg(lx,t_COL);
 
     M->H[j] = (long)c;
-    for (i=1; i<j; i++) c[i] = zero;
+    for (i=1; i<j; i++) c[i] = (long)gen_0;
     c[j] = ldiv((GEN)s[j+1],(GEN)s[j]);
     d = gneg( gdiv((GEN)M->y[j], gmul((GEN)s[j],(GEN)s[j+1]) ));
     for (i=j+1; i<=n; i++) c[i] = lmul(gconj((GEN)M->y[i]), d);
@@ -2753,7 +2753,7 @@ plindep(GEN x)
   if (!p) err(talker,"not a p-adic vector in plindep");
   v = ggval(x,p); pn = gpowgs(p,prec);
   if (v != 0) x = gmul(x, gpowgs(p, -v));
-  x = lift_intern(gmul(x, gmodulcp(gone, pn)));
+  x = lift_intern(gmul(x, gmodulcp(gen_1, pn)));
 
   ly = 2*lx - 1;
   m = cgetg(ly+1,t_MAT);
@@ -2781,12 +2781,12 @@ algdep0(GEN x, long n, long bit, long prec)
   if (gcmp0(x)) return polx[0];
   if (n <= 0)
   {
-    if (!n) return gone;
+    if (!n) return gen_1;
     err(talker,"negative polynomial degree in algdep");
   }
 
   av = avma; p1 = cgetg(n+2,t_COL);
-  p1[1] = one;
+  p1[1] = (long)gen_1;
   p1[2] = (long)x; /* n >= 1 */
   for (i=3; i<=n+1; i++) p1[i] = lmul((GEN)p1[i-1],x);
   if (typ(x) == t_PADIC)
@@ -2948,7 +2948,7 @@ addcolumntomatrix(GEN V, GEN invp, GEN L)
  *   u[2]= maximum norm found
  *   u[3]= list of vectors found (at most STOCKMAX)
  *
- *  If BORNE = gzero: Minimal non-zero vectors.
+ *  If BORNE = gen_0: Minimal non-zero vectors.
  *  flag = min_ALL,   as above
  *  flag = min_FIRST, exits when first suitable vector is found.
  *  flag = min_PERF,  only compute rank of the family of v.v~ (v min.)
@@ -2987,9 +2987,9 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
       case min_FIRST: avma=av0; return cgetg(1,t_VEC);
       case min_VECSMALL:
       case min_VECSMALL2: return res;
-      case min_PERF:  avma=av0; return gzero;
+      case min_PERF:  avma=av0; return gen_0;
     }
-    res[1]=res[2]=zero;
+    res[1]=res[2]= (long)gen_0;
     res[3]=lgetg(1,t_MAT); return res;
   }
 
@@ -3169,7 +3169,7 @@ GEN
 qfrep0(GEN a, GEN borne, long flag)
 {
   pari_sp av = avma;
-  GEN g = minim00(a, borne, gzero, (flag & 1)? min_VECSMALL2: min_VECSMALL);
+  GEN g = minim00(a, borne, gen_0, (flag & 1)? min_VECSMALL2: min_VECSMALL);
   if ((flag & 2) == 0) g = gerepileupto(av, gtovec(g));
   return g;
 }
@@ -3180,7 +3180,7 @@ qfminim0(GEN a, GEN borne, GEN stockmax, long flag, long prec)
   switch(flag)
   {
     case 0: return minim00(a,borne,stockmax,min_ALL);
-    case 1: return minim00(a,borne,gzero   ,min_FIRST);
+    case 1: return minim00(a,borne,gen_0   ,min_FIRST);
     case 2:
     {
       GEN x = fincke_pohst(a,borne,itos(stockmax),prec,NULL);
@@ -3207,7 +3207,7 @@ minim2(GEN a, GEN borne, GEN stockmax)
 GEN
 perf(GEN a)
 {
-  return minim00(a,gzero,gzero,min_PERF);
+  return minim00(a,gen_0,gen_0,min_PERF);
 }
 
 static GEN
@@ -3256,7 +3256,7 @@ smallvectors(GEN q, GEN BORNE, long stockmax, FP_chk_fun *CHECK)
   epsbit = bit_accuracy(prec) >> 1;
   eps = real2n(-epsbit, 3);
   alpha = dbltor(0.95);
-  normax1 = gzero;
+  normax1 = gen_0;
   borne1 = gadd(BORNE,eps);
   borne2 = mpmul(borne1,alpha);
   v = cgetg(N,t_VEC);
@@ -3269,9 +3269,9 @@ smallvectors(GEN q, GEN BORNE, long stockmax, FP_chk_fun *CHECK)
   x = cgetg(N,t_COL);
   y = cgetg(N,t_COL);
   z = cgetg(N,t_COL);
-  for (i=1; i<N; i++) { v[i] = coeff(q,i,i); x[i]=y[i]=z[i] = zero; }
+  for (i=1; i<N; i++) { v[i] = coeff(q,i,i); x[i]=y[i]=z[i] = (long)gen_0; }
 
-  x[n] = zero; s = 0; k = n;
+  x[n] = (long)gen_0; s = 0; k = n;
   for(;; step(x,y,inc,k)) /* main */
   {
     do
@@ -3457,7 +3457,7 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
     {
       if (CHECK) err(talker, "dimension 0 in fincke_pohst");
       z = cgetg(4,t_VEC);
-      z[1] = z[2] = zero;
+      z[1] = z[2] = (long)gen_0;
       z[3] = lgetg(1,t_MAT); return z;
     }
     i = gprecision(a); if (i) prec = i;
@@ -3482,7 +3482,7 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
   if (!v) return NULL;
 
   rinvtrans = gmul(rinvtrans, v);
-  v = ZM_inv(gtrans_i(v),gone);
+  v = ZM_inv(gtrans_i(v),gen_1);
   r = gmul(r,v);
   u = u? gmul(u,v): v;
 

@@ -161,21 +161,21 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
   sa = signe(a); sb = signe(b);
   if (!sb)
   {
-    if (pv) *pv = gzero;
+    if (pv) *pv = gen_0;
     switch(sa)
     {
-    case  0: if (pu) *pu = gone; return gzero;
-    case  1: if (pu) *pu = gone; return icopy(a);
-    case -1: if (pu) *pu = gminusone; return(negi(a));
+    case  0: if (pu) *pu = gen_1; return gen_0;
+    case  1: if (pu) *pu = gen_1; return icopy(a);
+    case -1: if (pu) *pu = gen_m1; return(negi(a));
     }
   }
   if (s == 0)			/* |a| == |b| != 0 */
   {
-    if (pu) *pu = gzero;
+    if (pu) *pu = gen_0;
     if (sb > 0)
-    { if (pv) *pv = gone; return icopy(b); }
+    { if (pv) *pv = gen_1; return icopy(b); }
     else
-    { if (pv) *pv = gminusone; return(negi(b)); }
+    { if (pv) *pv = gen_m1; return(negi(b)); }
   }
   /* now |a| > |b| > 0 */
 
@@ -186,9 +186,9 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
     sb = s > 0 ? -sb : sb;
     if (pu)
     {
-      if (xu == 0) *pu = gzero; /* can happen when b divides a */
-      else if (xu == 1) *pu = sa < 0 ? gminusone : gone;
-      else if (xu == 2) *pu = sa < 0 ? negi(gtwo) : gtwo;
+      if (xu == 0) *pu = gen_0; /* can happen when b divides a */
+      else if (xu == 1) *pu = sa < 0 ? gen_m1 : gen_1;
+      else if (xu == 2) *pu = sa < 0 ? negi(gen_2) : gen_2;
       else
       {
 	*pu = cgeti(3);
@@ -198,8 +198,8 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
     }
     if (pv)
     {
-      if (xv == 1) *pv = sb < 0 ? gminusone : gone;
-      else if (xv == 2) *pv = sb < 0 ? negi(gtwo) : gtwo;
+      if (xv == 1) *pv = sb < 0 ? gen_m1 : gen_1;
+      else if (xv == 2) *pv = sb < 0 ? negi(gen_2) : gen_2;
       else
       {
 	*pv = cgeti(3);
@@ -207,8 +207,8 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
 	(*pv)[2] = xv;
       }
     }
-    if      (g == 1) return gone;
-    else if (g == 2) return gtwo;
+    if      (g == 1) return gen_1;
+    else if (g == 2) return gen_2;
     else
     {
       r = cgeti(3);
@@ -230,14 +230,14 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
     if (!signe(d1))		/* a == qb */
     {
       avma = av;
-      if (pu) *pu = gzero;
-      if (pv) *pv = sb < 0 ? gminusone : gone;
+      if (pu) *pu = gen_0;
+      if (pv) *pv = sb < 0 ? gen_m1 : gen_1;
       return (icopy(d));
     }
     else
     {
-      u = gzero;
-      u1 = v = gone;
+      u = gen_0;
+      u1 = v = gen_1;
       v1 = negi(q);
     }
     /* if this results in lgefint(d) == 3, will fall past main loop */
@@ -245,7 +245,7 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
   else
   {
     d = absi(a); d1 = absi(b);
-    u = v1 = gone; u1 = v = gzero;
+    u = v1 = gen_1; u1 = v = gen_0;
   }
   av1 = avma; lim = stack_lim(av, 1);
 
@@ -327,8 +327,8 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
     avma = av;
     if (pu) *pu = sa < 0 ? negi(u) : icopy(u);
     if (pv) *pv = sb < 0 ? negi(v) : icopy(v);
-    if (g == 1) return gone;
-    else if (g == 2) return gtwo;
+    if (g == 1) return gen_1;
+    else if (g == 2) return gen_2;
     else
     {
       r = cgeti(3);

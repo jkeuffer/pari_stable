@@ -289,7 +289,7 @@ shifti_spec(GEN x, long lx, long n)
 {
   long ly, i, m, s = signe(x);
   GEN y;
-  if (!s) return gzero;
+  if (!s) return gen_0;
   if (!n)
   {
     y = cgeti(lx);
@@ -319,14 +319,14 @@ shifti_spec(GEN x, long lx, long n)
   {
     n = -n;
     ly = lx - (n>>TWOPOTBITS_IN_LONG);
-    if (ly<3) return gzero;
+    if (ly<3) return gen_0;
     y = new_chunk(ly);
     m = n & (BITS_IN_LONG-1);
     if (m) {
       shift_right(y,x, 2,ly, 0,m);
       if (y[2] == 0)
       {
-        if (ly==3) { avma = (pari_sp)(y+3); return gzero; }
+        if (ly==3) { avma = (pari_sp)(y+3); return gen_0; }
         ly--; avma = (pari_sp)(++y);
       }
     } else {
@@ -355,7 +355,7 @@ truncr(GEN x)
   long d,e,i,s,m;
   GEN y;
 
-  if ((s=signe(x)) == 0 || (e=expo(x)) < 0) return gzero;
+  if ((s=signe(x)) == 0 || (e=expo(x)) < 0) return gen_0;
   d = (e>>TWOPOTBITS_IN_LONG) + 3;
   m = e & (BITS_IN_LONG-1);
   if (d > lg(x)) err(precer, "truncr (precision loss in truncation)");
@@ -379,7 +379,7 @@ floorr(GEN x)
   GEN y;
 
   if (signe(x) >= 0) return truncr(x);
-  if ((e=expo(x)) < 0) return gminusone;
+  if ((e=expo(x)) < 0) return gen_m1;
   d = (e>>TWOPOTBITS_IN_LONG) + 3;
   m = e & (BITS_IN_LONG-1);
   lx=lg(x); if (d>lx) err(precer, "floorr (precision loss in truncation)");
@@ -436,7 +436,7 @@ mulss(long x, long y)
   GEN z;
   LOCAL_HIREMAINDER;
 
-  if (!x || !y) return gzero;
+  if (!x || !y) return gen_0;
   if (x<0) { s = -1; x = -x; } else s=1;
   if (y<0) { s = -s; y = -y; }
   p1 = mulll(x,y);
@@ -456,7 +456,7 @@ muluu(ulong x, ulong y)
   GEN z;
   LOCAL_HIREMAINDER;
 
-  if (!x || !y) return gzero;
+  if (!x || !y) return gen_0;
   p1 = mulll(x,y);
   if (hiremainder)
   {
@@ -548,13 +548,13 @@ diviu_rem(GEN y, ulong x, ulong *rem)
   LOCAL_HIREMAINDER;
 
   if (!x) err(gdiver);
-  if (!signe(y)) { *rem = 0; return gzero; }
+  if (!signe(y)) { *rem = 0; return gen_0; }
 
   ly = lgefint(y);
   if (x <= (ulong)y[2]) hiremainder=0;
   else
   {
-    if (ly==3) { *rem = (ulong)y[2]; return gzero; }
+    if (ly==3) { *rem = (ulong)y[2]; return gen_0; }
     hiremainder=y[2]; ly--; y++;
   }
   z = cgeti(ly); z[1] = evallgefint(ly) | evalsigne(1);
@@ -570,14 +570,14 @@ divis_rem(GEN y, long x, long *rem)
   LOCAL_HIREMAINDER;
 
   if (!x) err(gdiver);
-  if (!sy) { *rem=0; return gzero; }
+  if (!sy) { *rem=0; return gen_0; }
   if (x<0) { s = -sy; x = -x; } else s = sy;
 
   ly = lgefint(y);
   if ((ulong)x <= (ulong)y[2]) hiremainder=0;
   else
   {
-    if (ly==3) { *rem = itos(y); return gzero; }
+    if (ly==3) { *rem = itos(y); return gen_0; }
     hiremainder=y[2]; ly--; y++;
   }
   z = cgeti(ly); z[1] = evallgefint(ly) | evalsigne(s);
@@ -594,14 +594,14 @@ divis(GEN y, long x)
   LOCAL_HIREMAINDER;
 
   if (!x) err(gdiver);
-  if (!sy) return gzero;
+  if (!sy) return gen_0;
   if (x<0) { s = -sy; x = -x; } else s = sy;
 
   ly = lgefint(y);
   if ((ulong)x <= (ulong)y[2]) hiremainder=0;
   else
   {
-    if (ly==3) return gzero;
+    if (ly==3) return gen_0;
     hiremainder=y[2]; ly--; y++;
   }
   z = cgeti(ly); z[1] = evallgefint(ly) | evalsigne(s);
@@ -720,7 +720,7 @@ divrr(GEN x, GEN y)
  *   if z != NULL set *z to remainder
  *   *z is the last object on stack (and thus can be disposed of with cgiv
  *   instead of gerepile)
- * If *z is zero, we put gzero here and no copy.
+ * If *z is zero, we put gen_0 here and no copy.
  * space needed: lx + ly */
 GEN
 dvmdii(GEN x, GEN y, GEN *z)
@@ -731,11 +731,11 @@ dvmdii(GEN x, GEN y, GEN *z)
   ulong y0,y1, *xd,*rd,*qd;
   GEN q, r, r1;
 
-  if (!sy) { if (z == ONLY_REM && !sx) return gzero; err(gdiver); }
+  if (!sy) { if (z == ONLY_REM && !sx) return gen_0; err(gdiver); }
   if (!sx)
   {
-    if (!z || z == ONLY_REM) return gzero;
-    *z=gzero; return gzero;
+    if (!z || z == ONLY_REM) return gen_0;
+    *z=gen_0; return gen_0;
   }
   lx=lgefint(x);
   ly=lgefint(y); lz=lx-ly;
@@ -749,15 +749,15 @@ dvmdii(GEN x, GEN y, GEN *z)
           if ((ulong)x[i] > (ulong)y[i]) goto DIVIDE;
           goto TRIVIAL;
         }
-      if (z == ONLY_REM) return gzero;
-      if (z) *z = gzero;
+      if (z == ONLY_REM) return gen_0;
+      if (z) *z = gen_0;
       if (sx < 0) sy = -sy;
       return stoi(sy);
     }
 TRIVIAL:
     if (z == ONLY_REM) return icopy(x);
     if (z) *z = icopy(x);
-    return gzero;
+    return gen_0;
   }
 DIVIDE: /* quotient is non-zero */
   av=avma; if (sx<0) sy = -sy;
@@ -773,7 +773,7 @@ DIVIDE: /* quotient is non-zero */
     q = new_chunk(lx); for (i=2; i<lx; i++) q[i]=divll(x[i],y0);
     if (z == ONLY_REM)
     {
-      avma=av; if (!hiremainder) return gzero;
+      avma=av; if (!hiremainder) return gen_0;
       r=cgeti(3);
       r[1] = evalsigne(sx) | evallgefint(3);
       r[2]=hiremainder; return r;
@@ -781,7 +781,7 @@ DIVIDE: /* quotient is non-zero */
     q[1] = evalsigne(sy) | evallgefint(lx);
     q[0] = evaltyp(t_INT) | evallg(lx);
     if (!z) return q;
-    if (!hiremainder) { *z=gzero; return q; }
+    if (!hiremainder) { *z=gen_0; return q; }
     r=cgeti(3);
     r[1] = evalsigne(sx) | evallgefint(3);
     r[2] = hiremainder; *z=r; return q;
@@ -854,7 +854,7 @@ DIVIDE: /* quotient is non-zero */
   lz = lx-j;
   if (z == ONLY_REM)
   {
-    if (lz==0) { avma = av; return gzero; }
+    if (lz==0) { avma = av; return gen_0; }
     rd = (ulong*)av; lr = lz+2;
     xd = (ulong*)(x + lx);
     if (!sh) while (lz--) *--rd = *--xd;
@@ -911,7 +911,7 @@ DIVIDE: /* quotient is non-zero */
   *--qd = evalsigne(sy) | evallgefint(lq);
   *--qd = evaltyp(t_INT) | evallg(lq);
   q = (GEN)qd;
-  if (lr==2) *z = gzero;
+  if (lr==2) *z = gen_0;
   else
   { /* rd has been properly initialized: we had lz > 0 */
     while (lr--) *--qd = *--rd;
@@ -934,7 +934,7 @@ red_montgomery(GEN T, GEN N, ulong inv)
   LOCAL_HIREMAINDER;
   LOCAL_OVERFLOW;
 
-  if (k == 0) return gzero;
+  if (k == 0) return gen_0;
   d = lgefint(T)-2; /* <= 2*k */
 #ifdef DEBUG
   if (d > 2*k) err(bugparier,"red_montgomery");
@@ -1074,7 +1074,7 @@ diviiexact(GEN x, GEN y)
   GEN z;
 
   if (!sy) err(gdiver);
-  if (!sx) return gzero;
+  if (!sx) return gen_0;
   vy = vali(y); av = avma;
   (void)new_chunk(lgefint(x)); /* enough room for z */
   if (vy)
@@ -1158,7 +1158,7 @@ muliispec_basecase(GEN x, GEN y, long nx, long ny)
   long p1,lz;
   LOCAL_HIREMAINDER;
 
-  if (!ny) return gzero;
+  if (!ny) return gen_0;
   zd = (GEN)avma; lz = nx+ny+2;
   (void)new_chunk(lz);
   xd = x + nx;
@@ -1197,7 +1197,7 @@ sqrispec_basecase(GEN x, long nx)
   LOCAL_HIREMAINDER;
   LOCAL_OVERFLOW;
 
-  if (!nx) return gzero;
+  if (!nx) return gen_0;
   zd = (GEN)avma; lz = (nx+1) << 1;
   z0 = new_chunk(lz);
   if (nx == 1)
@@ -1292,7 +1292,7 @@ muliispec(GEN a, GEN b, long na, long nb)
 
   if (na < nb) swapspec(a,b, na,nb);
   if (nb == 1) return muluispec((ulong)*b, a, na);
-  if (nb == 0) return gzero;
+  if (nb == 0) return gen_0;
   if (nb < KARATSUBA_MULI_LIMIT) return muliispec_basecase(a,b,na,nb);
   i=(na>>1); n0=na-i; na=i;
   av=avma; a0=a+na; n0a=n0;
@@ -1320,7 +1320,7 @@ muliispec(GEN a, GEN b, long na, long nb)
     }
     else
     {
-      c0 = gzero;
+      c0 = gen_0;
       c1 = muliispec(a0,b, n0a,nb);
     }
     c = addshiftw(c,c1, n0);
@@ -1340,7 +1340,7 @@ resmod2n(GEN x, long n)
   long hi,l,k,lx,ly;
   GEN z, xd, zd;
 
-  if (!signe(x) || !n) return gzero;
+  if (!signe(x) || !n) return gen_0;
 
   l = n & (BITS_IN_LONG-1);    /* n % BITS_IN_LONG */
   k = n >> TWOPOTBITS_IN_LONG; /* n / BITS_IN_LONG */
@@ -1354,7 +1354,7 @@ resmod2n(GEN x, long n)
   if (!hi)
   { /* strip leading zeroes from result */
     xd++; while (k && !*xd) { k--; xd++; }
-    if (!k) return gzero;
+    if (!k) return gen_0;
     ly = k+2; xd--;
   }
   else
@@ -1394,7 +1394,7 @@ sqrispec(GEN a, long na)
     c = addshiftw(c,c0, n0);
   }
   else
-    c = addshiftw(c,gzero,n0<<1);
+    c = addshiftw(c,gen_0,n0<<1);
   return gerepileuptoint(av, c);
 }
 
@@ -1668,7 +1668,7 @@ sqrtispec(GEN N, long n, GEN *r)
 }
 
 /* Return S (and set R) s.t S^2 + R = N, 0 <= R <= 2S.
- * As for dvmdii, R is last on stack and guaranteed to be gzero in case the
+ * As for dvmdii, R is last on stack and guaranteed to be gen_0 in case the
  * remainder is 0. R = NULL is allowed. */
 GEN
 sqrtremi(GEN N, GEN *r)
@@ -1682,7 +1682,7 @@ sqrtremi(GEN N, GEN *r)
   {
     if (ln == 2) return sqrtispec2_sh(n, r);
     if (ln == 1) return sqrtispec1_sh(n, r);
-    *r = gzero; return gzero;
+    *r = gen_0; return gen_0;
   }
   av = avma;
   sh = bfffo(n[0]) >> 1;

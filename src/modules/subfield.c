@@ -377,7 +377,7 @@ trace(GEN x, GEN Trq, GEN p)
   long i, l;
   GEN s;
   if (typ(x) == t_INT) return modii(mulii(x, (GEN)Trq[1]), p);
-  l = lg(x)-1; if (l == 1) return gzero;
+  l = lg(x)-1; if (l == 1) return gen_0;
   x++; s = mulii((GEN)x[1], (GEN)Trq[1]);
   for (i=2; i<l; i++)
     s = addii(s, mulii((GEN)x[i], (GEN)Trq[i]));
@@ -523,8 +523,8 @@ init_traces(GEN ff, GEN T, GEN p)
     pow1[i] = (long)p1; p2 = (GEN)pow[i];
     for (j=1; j<=N; j++) p1[j] = coeff(p2,1,j);
   }
-  p1 = cgetg(N+1,t_VEC); p1[1] = one;
-  for (i=2; i<=N; i++) p1[i] = zero;
+  p1 = cgetg(N+1,t_VEC); p1[1] = (long)gen_1;
+  for (i=2; i<=N; i++) p1[i] = (long)gen_0;
   /* Trk[i] = line 1 of x -> x + x^p + ... + x^{p^(i-1)} */
   Trk = pow; /* re-use (destroy) pow */
   Trk[1] = (long)p1;
@@ -543,7 +543,7 @@ interpol(GEN H, GEN T, GEN p)
   long i, m = lg(H);
   GEN X = polx[0],d,p1,p2,a;
 
-  p1=polun[0]; p2=gone; a = gneg(constant_term((GEN)H[1])); /* = D[1] */
+  p1=polun[0]; p2=gen_1; a = gneg(constant_term((GEN)H[1])); /* = D[1] */
   for (i=2; i<m; i++)
   {
     d = constant_term((GEN)H[i]); /* -D[i] */
@@ -642,11 +642,11 @@ bound_for_coeff(long m, GEN rr, GEN *maxroot)
 
   rr = gabs(rr,0); *maxroot = vecmax(rr);
   for (i=1; i<lrr; i++)
-    if (gcmp((GEN)rr[i], gone) < 0) rr[i] = one;
-  for (b1=gone,i=1; i<=r1; i++) b1 = gmul(b1, (GEN)rr[i]);
-  for (b2=gone    ; i<lrr; i++) b2 = gmul(b2, (GEN)rr[i]);
+    if (gcmp((GEN)rr[i], gen_1) < 0) rr[i] = (long)gen_1;
+  for (b1=gen_1,i=1; i<=r1; i++) b1 = gmul(b1, (GEN)rr[i]);
+  for (b2=gen_1    ; i<lrr; i++) b2 = gmul(b2, (GEN)rr[i]);
   B = gmul(b1, gsqr(b2)); /* Mahler measure */
-  M = cgetg(m+2, t_VEC); M[1]=M[2]=zero; /* unused */
+  M = cgetg(m+2, t_VEC); M[1]=M[2]= (long)gen_0; /* unused */
   for (i=1; i<m; i++)
   {
     p1 = gadd(gmul(gcoeff(C, m, i+1), B),/* binom(m-1, i)   */
@@ -681,12 +681,12 @@ compute_data(blockdata *B)
   roo = B->PD->roo;
   if (DATA) /* update (translate) an existing DATA */
   {
-    GEN Xm1 = gsub(polx[varn(pol)], gone);
+    GEN Xm1 = gsub(polx[varn(pol)], gen_1);
     GEN TR = addis((GEN)DATA[5], 1);
     GEN mTR = negi(TR), interp, bezoutC;
 
     DATA[5] = (long)TR;
-    pol = TR_pol((GEN)DATA[1], gminusone);
+    pol = TR_pol((GEN)DATA[1], gen_m1);
     l = lg(roo); p1 = cgetg(l, t_VEC);
     for (i=1; i<l; i++) p1[i] = ladd(TR, (GEN)roo[i]);
     roo = p1;
@@ -698,14 +698,14 @@ compute_data(blockdata *B)
     interp  = (GEN)DATA[9];
     for (i=1; i<l; i++)
     {
-      if (degpol(interp[i]) > 0) /* do not turn polun[0] into gone */
+      if (degpol(interp[i]) > 0) /* do not turn polun[0] into gen_1 */
       {
-        p1 = TR_pol((GEN)interp[i], gminusone);
+        p1 = TR_pol((GEN)interp[i], gen_m1);
         interp[i] = (long)FpXX_red(p1, p);
       }
       if (degpol(bezoutC[i]) > 0)
       {
-        p1 = TR_pol((GEN)bezoutC[i], gminusone);
+        p1 = TR_pol((GEN)bezoutC[i], gen_m1);
         bezoutC[i] = (long)FpXX_red(p1, p);
       }
     }
@@ -717,7 +717,7 @@ compute_data(blockdata *B)
   {
     DATA = cgetg(10,t_VEC);
     fk = S->fk;
-    DATA[5]= zero;
+    DATA[5]= (long)gen_0;
     DATA[6]= (long)dummycopy(S->bezoutC);
     DATA[9]= (long)dummycopy(S->interp);
   }
@@ -765,7 +765,7 @@ compute_data(blockdata *B)
 static GEN
 _subfield(GEN g, GEN h) { return mkvec(mkvec2(g,h)); }
 
-/* Return a subfield, gzero [ change p ] or NULL [ not a subfield ] */
+/* Return a subfield, gen_0 [ change p ] or NULL [ not a subfield ] */
 static GEN
 subfield(GEN A, blockdata *B)
 {
@@ -780,7 +780,7 @@ subfield(GEN A, blockdata *B)
 
   delta = cgetg(m+1,t_VEC);
   whichdelta = cgetg(N+1, t_VECSMALL);
-  d_1_term = gzero;
+  d_1_term = gen_0;
   for (i=1; i<=m; i++)
   {
     GEN Ai = (GEN)A[i], p1 = (GEN)fhk[Ai[1]];

@@ -66,7 +66,7 @@ interp(GEN h, GEN s, long j, long lim, long KLOC)
 {
   pari_sp av = avma;
   long e1,e2;
-  GEN dss, ss = polint_i(h+j-KLOC,s+j-KLOC,gzero,KLOC+1,&dss);
+  GEN dss, ss = polint_i(h+j-KLOC,s+j-KLOC,gen_0,KLOC+1,&dss);
 
   e1 = gexpo(ss);
   e2 = gexpo(dss);
@@ -85,7 +85,7 @@ qrom3(void *dat, GEN (*eval)(GEN,void *), GEN a, GEN b, long prec)
   a = gtofp(a,prec);
   b = gtofp(b,prec);
   qlint = subrr(b,a); sig = signe(qlint);
-  if (!sig)  return gzero;
+  if (!sig)  return gen_0;
   if (sig < 0) { setsigne(qlint,1); swap(a,b); }
 
   s = new_chunk(JMAX+KLOC-1);
@@ -102,7 +102,7 @@ qrom3(void *dat, GEN (*eval)(GEN,void *), GEN a, GEN b, long prec)
     av = avma; del = divrs(qlint,it);
     x = addrr(a, shiftr(del,-1));
     av2 = avma;
-    for (sum = gzero, j1 = 1; j1 <= it; j1++, x = addrr(x,del))
+    for (sum = gen_0, j1 = 1; j1 <= it; j1++, x = addrr(x,del))
     {
       sum = gadd(sum, eval(x, dat));
       if ((j1 & 0x1ff) == 0) gerepileall(av2, 2, &sum,&x);
@@ -127,7 +127,7 @@ qrom2(void *dat, GEN (*eval)(GEN,void *), GEN a, GEN b, long prec)
   a = gtofp(a, prec);
   b = gtofp(b, prec);
   qlint = subrr(b,a); sig = signe(qlint);
-  if (!sig)  return gzero;
+  if (!sig)  return gen_0;
   if (sig < 0) { setsigne(qlint,1); swap(a,b); }
 
   s = new_chunk(JMAX+KLOC-1);
@@ -143,7 +143,7 @@ qrom2(void *dat, GEN (*eval)(GEN,void *), GEN a, GEN b, long prec)
     av = avma; del = divrs(qlint,3*it); ddel = shiftr(del,1);
     x = addrr(a, shiftr(del,-1));
     av2 = avma;
-    for (sum = gzero, j1 = 1; j1 <= it; j1++)
+    for (sum = gen_0, j1 = 1; j1 <= it; j1++)
     {
       sum = gadd(sum, eval(x, dat)); x = addrr(x,ddel);
       sum = gadd(sum, eval(x, dat)); x = addrr(x,del);
@@ -174,9 +174,9 @@ static GEN
 rom_bsmall(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, long prec)
 {
   if (gcmpgs(a,-100) >= 0) return qrom2(E,eval,a,b,prec);
-  if (b == gone || gcmpgs(b, -1) >= 0) /* a < -100, b >= -1 */
-    return gadd(qromi(E,eval,a,gminusone,prec), /* split at -1 */
-                qrom2(E,eval,gminusone,b,prec));
+  if (b == gen_1 || gcmpgs(b, -1) >= 0) /* a < -100, b >= -1 */
+    return gadd(qromi(E,eval,a,gen_m1,prec), /* split at -1 */
+                qrom2(E,eval,gen_m1,b,prec));
   /* a < -100, b < -1 */
   return qromi(E,eval,a,b,prec);
 }
@@ -187,14 +187,14 @@ rombint(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, long prec)
   long l = gcmp(b,a);
   GEN z;
 
-  if (!l) return gzero;
+  if (!l) return gen_0;
   if (l < 0) swap(a,b);
   if (gcmpgs(b,100) >= 0)
   {
     if (gcmpgs(a,1) >= 0)
       z = qromi(E,eval,a,b,prec);
     else /* split at 1 */
-      z = gadd(rom_bsmall(E,eval,a,gone,prec), qromi(E,eval,gone,b,prec));
+      z = gadd(rom_bsmall(E,eval,a,gen_1,prec), qromi(E,eval,gen_1,b,prec));
   }
   else
     z = rom_bsmall(E,eval,a,b,prec);
@@ -551,10 +551,10 @@ suminit_start(GEN sig)
     sig2 = (GEN)sig[2];
     sig  = (GEN)sig[1];
   }
-  else sig2 = gzero;
+  else sig2 = gen_0;
   if (!isinR(sig) || !isinR(sig2)) err(talker, "incorrect abscissa in sumnum");
   if (gsigne(sig2) > 0) sig2 = mulcxmI(sig2);
-  return mkvec2(mkvec(gone), sig2);
+  return mkvec2(mkvec(gen_1), sig2);
 }
 
 /* phi(t) depending on sig[2] as in intnum, with weights phi'(t)tanh(Pi*phi(t))
@@ -571,9 +571,9 @@ sumnuminit(GEN sig, long m, long sgn, long prec)
   b = suminit_start(sig);
   flii = gcmp0((GEN)b[2]);
   if (flii)
-    tab = intnuminit(mkvec(gminusone), mkvec(gone), m, prec);
+    tab = intnuminit(mkvec(gen_m1), mkvec(gen_1), m, prec);
   else
-    tab = intnuminit(gzero, b, m, prec);
+    tab = intnuminit(gen_0, b, m, prec);
   eps = bit_accuracy(prec);
   t = gmul(pi, TABx0(tab));
   if (sgn < 0) TABw0(tab) = gdiv(TABw0(tab), gch(t, prec));
@@ -672,7 +672,7 @@ intnsing(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
   tabxp = TABxp(tab); tabwp = TABwp(tab); L = lg(tabxp);
   tra = (GEN)a[1];
   ea = ginv(gaddsg(1, (GEN)a[2]));
-  ba = gdiv(gsub(b, tra), gpow(gtwo, ea, prec));
+  ba = gdiv(gsub(b, tra), gpow(gen_2, ea, prec));
   av = avma;
   S = gmul(gmul(tabw0, ba), eval(gadd(gmul(ba, gaddsg(1, tabx0)), tra), E));
   for (k = 1; k <= m; k++)
@@ -812,7 +812,7 @@ f_getycplx(GEN a, long prec)
   long s;
   GEN tmp, a2R, a2I;
 
-  if (lg(a) == 2 || gcmp0((GEN)a[2])) return gone;
+  if (lg(a) == 2 || gcmp0((GEN)a[2])) return gen_1;
   a2R = real_i((GEN)a[2]);
   a2I = imag_i((GEN)a[2]);
   s = gsigne(a2I); if (s < 0) a2I = gneg(a2I);
@@ -865,7 +865,7 @@ static GEN
 homtab(GEN tab, GEN k)
 {
   GEN z;
-  if (gcmp0(k) || gegal(k, gone)) return tab;
+  if (gcmp0(k) || gegal(k, gen_1)) return tab;
   if (gsigne(k) < 0) k = gneg(k);
   z = cgetg(8, t_VEC);
   TABm(z)  = icopy(TABm(tab));
@@ -966,7 +966,7 @@ intnuminit(GEN a, GEN b, long m, long prec)
     }
     return T;
   }
-  if (codea * codeb > 0) return gzero;
+  if (codea * codeb > 0) return gen_0;
   kma = f_getycplx(a, l);
   kmb = f_getycplx(b, l);
   codea = labs(codea);
@@ -1016,7 +1016,7 @@ intnuminit(GEN a, GEN b, long m, long prec)
       else T[2] = (long)homtab(tmp, kmb);
       return T;
   }
-  return gzero; /* not reached */
+  return gen_0; /* not reached */
 }
 
 GEN
@@ -1120,7 +1120,7 @@ intnuminitgen(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, long m,
               long flext, long prec)
 {
   pari_sp ltop = avma;
-  GEN hpr, hnpr, eps, pisurh = gzero, tmpxw, tmpxwmodp, tmpxwmodm = gzero, ab;
+  GEN hpr, hnpr, eps, pisurh = gen_0, tmpxw, tmpxwmodp, tmpxwmodm = gen_0, ab;
   long k, h, newprec, nt, lim, ntn, precl = prec + 1;
   long flag = f_SEMI, codea = transcode(a, 1), codeb = transcode(b, 1);
   intdata D; intinit_start(&D, m, flext, precl);
@@ -1142,7 +1142,7 @@ intnuminitgen(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, long m,
   h = bit_accuracy(precl)/2;
   eps = real2n(-h, newprec);
 
-  if (not_osc(flag) || !gcmp1(eval(gzero, E)))
+  if (not_osc(flag) || !gcmp1(eval(gen_0, E)))
   {
     ab = realzero(precl);
     tmpxw = ffprime(E, eval, ab, realzero(newprec), eps, h, precl);
@@ -1258,7 +1258,7 @@ intfuncinit(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, long m, long flag, l
 static GEN
 intnum_i(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
 {
-  GEN tmp, S = gzero, res1, res2, tm, pi2, pi2p, pis2, pis2p, kma, kmb;
+  GEN tmp, S = gen_0, res1, res2, tm, pi2, pi2p, pis2, pis2p, kma, kmb;
   GEN SP, SN;
   long tmpi, sgns = 1, codea = transcode(a, 0), codeb = transcode(b, 0);
 
@@ -1314,7 +1314,7 @@ intnum_i(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
   if (codea * codeb > 0)
   {
     err(warner, "integral from infty to infty or from -infty to -infty");
-    return gzero;
+    return gen_0;
   }
   if (codea > 0) { lswap(codea, codeb); swap(a, b); sgns = -sgns; }
   /* now codea < 0 < codeb */
@@ -1326,8 +1326,8 @@ intnum_i(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
     S = intninfinf(E, eval, tab, prec);
   else
   {
-    GEN coupea = (codea == f_YOSCC)? gmul(pis2, kma): gzero;
-    GEN coupeb = (codeb == f_YOSCC)? gmul(pis2, kmb): gzero;
+    GEN coupea = (codea == f_YOSCC)? gmul(pis2, kma): gen_0;
+    GEN coupeb = (codeb == f_YOSCC)? gmul(pis2, kmb): gen_0;
     GEN coupe = codea == f_YOSCC ? coupea : coupeb;
     SN = intninfpm(E, eval, coupe, -1, (GEN)tab[1], prec);
     if (codea != f_YOSCC)
@@ -1395,7 +1395,7 @@ intcirc(void *E, GEN (*eval)(GEN, void*), GEN a, GEN R, GEN tab, long prec)
 }
 
 static GEN
-gettmpP(GEN x) { return mkvec2(mkvec(gone), x); }
+gettmpP(GEN x) { return mkvec2(mkvec(gen_1), x); }
 
 static GEN
 gettmpN(GEN tmpP) { return mkvec2(gneg((GEN)tmpP[1]), (GEN)tmpP[2]); }
@@ -1492,7 +1492,7 @@ intmellininvshort(GEN sig, GEN x, GEN tab, long prec)
   auxmel_t D;
   GEN z, tmpP, LX = gneg(glog(x, prec));
 
-  if (typ(sig) != t_VEC) sig = mkvec2(sig, gone);
+  if (typ(sig) != t_VEC) sig = mkvec2(sig, gen_1);
   if (lg(sig) != 3 || !isinR((GEN)sig[1]) || !isinR((GEN)sig[2]))
     err(typeer,"intmellininvshort");
   if (gsigne((GEN)sig[2]) <= 0)
@@ -1519,7 +1519,7 @@ mytra(GEN a, GEN x, long flag)
       if (!s) err(talker,"x = 0 in Fourier");
       if (s < 0) xa = gneg(xa);
       b = cgetg(3, t_VEC);
-      b[1] = (long)mkvec( codea > 0 ? gone : gminusone );
+      b[1] = (long)mkvec( codea > 0 ? gen_1 : gen_m1 );
       b[2] = (long)(flag? mulcxI(xa): mulcxmI(xa));
       return b;
     case f_YOSCS: case f_YOSCC:
@@ -1688,7 +1688,7 @@ intnumdoub(void *Ef, GEN (*evalf)(GEN, GEN, void*), void *Ec, GEN (*evalc)(GEN, 
   if (typ(tabint) == t_INT)
   {
     GEN C = evalc(a, Ec), D = evald(a, Ed);
-    if (typ(C) != t_VEC && typ(D) != t_VEC) { C = gzero; D = gone; }
+    if (typ(C) != t_VEC && typ(D) != t_VEC) { C = gen_0; D = gen_1; }
     E.tabintern = intnuminit0(C, D, tabint, prec);
   }
   else E.tabintern = tabint;
@@ -1777,14 +1777,14 @@ sumnumall(void *E, GEN (*eval)(GEN, void*), GEN a, GEN sig, GEN tab, long flag, 
     a = addsi(1, a); if (sgn < 0) si = -si;
   }
   D.a = gadd(nsig, ghalf);
-  D.R = gzero;
+  D.R = gen_0;
   D.f = eval;
   D.E = E;
   D.prec = prec;
   if (!flii)
     S = intnum_i(&D, sgn > 0? (flag ? &auxsum1 : &auxsum0)
                              : (flag ? &auxsumalt1 : &auxsumalt0),
-                      gzero, b, tab, prec);
+                      gen_0, b, tab, prec);
   else
   {
     if (flag)

@@ -65,8 +65,8 @@ when) you should use them.
 
 $\bullet$ the following \emph{universal objects} (by definition, objects
 which do not belong to the stack): the integers $0$, $1$, $-1$ and $2$
-(respectively called \teb{gzero}, \teb{gone}, \teb{gminusone} and
-\teb{gtwo}), the fraction $\dfrac{1}{2}$ (\teb{ghalf}), the complex number
+(respectively called \teb{gen_0}, \teb{gen_1}, \teb{gen_m1} and
+\teb{gen_2}), the fraction $\dfrac{1}{2}$ (\teb{ghalf}), the complex number
 $i$ (\teb{gi}). All of these are of type \kbd{GEN}.
 
 In addition, space is reserved for the polynomials $x_v$
@@ -791,7 +791,7 @@ irrelevant, the behaviour is also as above on $64$-bit machines).
 Returns the \typ{POL} whose $n$ coefficients (\kbd{GEN}) follow, in order of
 decreasing degree.
 \bprog
-  coefs_to_pol(3, gone, gtwo, gzero);
+  coefs_to_pol(3, gen_1, gen_2, gen_0);
 @eprog
 \noindent returns the polynomial $X^2 + 2X$ (in variable $0$, use
 \tet{setvarn} if you want other variable numbers). Beware that $n$ is the
@@ -808,14 +808,14 @@ latter three functions do \emph{not} copy their arguments, nor do they produce
 an object a priori suitable for \tet{gerepileupto}. For instance
 \bprog
   /*@Ccom gerepile-safe: components are universal objects */
-  z = coefs_to_vec(3, gone, gzero, gtwo);
+  z = coefs_to_vec(3, gen_1, gen_0, gen_2);
 
   /*@Ccom not OK for gerepileupto: stoi(3) creates component before root */
-  z = coefs_to_vec(3, stoi(3), gzero, gtwo);
+  z = coefs_to_vec(3, stoi(3), gen_0, gen_2);
 
   /*@Ccom NO! First vector component \kbd{x} is destroyed */
-  x = gclone(gone);
-  z = coefs_to_vec(3, x, gzero, gtwo);
+  x = gclone(gen_1);
+  z = coefs_to_vec(3, x, gen_0, gen_2);
   gunclone(x);
 @eprog
 
@@ -1077,7 +1077,7 @@ GEN AND(GEN x, GEN y) {
   long *xp, *yp, *outp; /* mantissa pointers */
   GEN out;
 
-  if (!signe(x) || !signe(y)) return gzero;
+  if (!signe(x) || !signe(y)) return gen_0;
   lx = lgefint(x); xp = int_LSW(x);
   ly = lgefint(y); yp = int_LSW(y); lout = min(lx,ly); /* > 2 */
 
@@ -1437,7 +1437,7 @@ used under \kbd{gp}. It would read the value of \kbd{y}, as currently known
 by the \kbd{gp} interpreter (possibly creating it in the process). But if
 \kbd{y} has been modified by previous \kbd{gp} commands (e.g \kbd {y = 1}),
 then the value of \kbd{gy} is not what you expected it to be and corresponds
-instead to the current value of the \kbd{gp} variable (e.g \kbd{gone}).
+instead to the current value of the \kbd{gp} variable (e.g \kbd{gen\_1}).
 
 \subsubsec{Temporary variables}\sidx{variable (temporary)}:
 \kbd{MAXVARN} is available, but is better left to pari internal functions

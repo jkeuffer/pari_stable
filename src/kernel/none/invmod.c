@@ -49,7 +49,7 @@ invmod(GEN a, GEN b, GEN *res)
     if (d1 == 0)
     {
       if (b[2] == 1L)
-        { *res = gzero; return 1; }
+        { *res = gen_0; return 1; }
       else
         { *res = absi(b); return 0; }
     }
@@ -67,7 +67,7 @@ invmod(GEN a, GEN b, GEN *res)
   (void)new_chunk(lgefint(b));
   d = absi(b); d1 = modii(a,d);
 
-  v=gzero; v1=gone;	/* general case */
+  v=gen_0; v1=gen_1;	/* general case */
 #ifdef DEBUG_LEHMER
   fprintferr("INVERT: -------------------------\n");
   output(d1);
@@ -174,7 +174,7 @@ invmod(GEN a, GEN b, GEN *res)
   }
   /* get here when the final sprint was skipped (d1 was zero already) */
   avma = av;
-  if (!egalii(d,gone)) { *res = icopy(d); return 0; }
+  if (!egalii(d,gen_1)) { *res = icopy(d); return 0; }
   *res = modii(v,b);
 #ifdef DEBUG_LEHMER
   output(*res); fprintferr("============================Done.\n");

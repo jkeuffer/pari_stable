@@ -92,7 +92,7 @@ easychar(GEN x, long v, GEN *py)
     case t_FRAC: case t_PADIC:
       p1=cgetg(4,t_POL);
       p1[1]=evalsigne(1) | evalvarn(v);
-      p1[2]=lneg(x); p1[3]=one;
+      p1[2]=lneg(x); p1[3]= (long)gen_1;
       if (py) *py = mkmat(mkcolcopy(x));
       return p1;
 
@@ -102,7 +102,7 @@ easychar(GEN x, long v, GEN *py)
       p1[1] = evalsigne(1) | evalvarn(v);
       p1[2] = lnorm(x); av = avma;
       p1[3] = lpileupto(av, gneg(gtrace(x)));
-      p1[4] = one; return p1;
+      p1[4] = (long)gen_1; return p1;
 
     case t_POLMOD:
       if (py) err(typeer,"easychar");
@@ -131,7 +131,7 @@ caract(GEN x, int v)
 
   if ((p1 = easychar(x,v,NULL))) return p1;
 
-  p1 = gzero; Q = p2 = gone; n = lg(x)-1;
+  p1 = gen_0; Q = p2 = gen_1; n = lg(x)-1;
   x_k = dummycopy(polx[v]);
   for (k=0; k<=n; k++)
   {
@@ -160,7 +160,7 @@ mattrace(GEN x)
   pari_sp av;
   long i, lx = lg(x);
   GEN t;
-  if (lx < 3) return lx == 1? gzero: gcopy(gcoeff(x,1,1));
+  if (lx < 3) return lx == 1? gen_0: gcopy(gcoeff(x,1,1));
   av = avma; t = gcoeff(x,1,1);
   for (i = 2; i < lx; i++) t = gadd(t, gcoeff(x,i,i));
   return gerepileupto(av, t);
@@ -179,7 +179,7 @@ caradj(GEN x, long v, GEN *py)
 
   l = lg(x); av0 = avma;
   p = cgetg(l+2,t_POL); p[1] = evalsigne(1) | evalvarn(v);
-  p[l+1] = one;
+  p[l+1] = (long)gen_1;
   if (l == 1) { if (py) *py = cgetg(1,t_MAT); return p; }
   av = avma; t = gerepileupto(av, gneg(mattrace(x)));
   p[l] = (long)t;
@@ -211,7 +211,7 @@ caradj(GEN x, long v, GEN *py)
     p[l-k+1] = lpileupto(av, forcecopy(t)); av = avma;
     if (k > 2) gunclone(y0);
   }
-  t = gzero;
+  t = gen_0;
   for (i=1; i<l; i++) t = gadd(t, gmul(gcoeff(x,1,i),gcoeff(y,i,1)));
   p[2] = lpileupto(av, forcecopy(gneg(t)));
   i = gvar2(p);
@@ -259,7 +259,7 @@ hess(GEN x)
         if (gcmp0(p1)) continue;
 
         p1 = gmul(p1,p); p2 = gneg_i(p1);
-        coeff(x,i,m-1) = zero;
+        coeff(x,i,m-1) = (long)gen_0;
         for (j=m; j<lx; j++)
           coeff(x,i,j) = ladd(gcoeff(x,i,j), gmul(p2,gcoeff(x,m,j)));
         for (j=1; j<lx; j++)
@@ -289,7 +289,7 @@ carhess(GEN x, long v)
   X_h = dummycopy(polx[v]);
   for (r = 1; r < lx; r++)
   {
-    GEN p3 = gone, p4 = gzero;
+    GEN p3 = gen_1, p4 = gen_0;
     for (i = r-1; i; i--)
     {
       p3 = gmul(p3, gcoeff(H,i+1,i));
@@ -363,7 +363,7 @@ gnorml2(GEN x)
   long i,tx=typ(x),lx;
 
   if (! is_matvec_t(tx)) return gnorm(x);
-  lx=lg(x); if (lx==1) return gzero;
+  lx=lg(x); if (lx==1) return gen_0;
 
   av=avma; lim = stack_lim(av,1); y = gnorml2((GEN) x[1]);
   for (i=2; i<lx; i++)
@@ -399,12 +399,12 @@ gnorml1(GEN x,long prec)
       return gabs(x,prec);
 
     case t_POL:
-      lx = lg(x); s = gzero;
+      lx = lg(x); s = gen_0;
       for (i=2; i<lx; i++) s = gadd(s, gabs((GEN)x[i],prec));
       break;
 
     case t_VEC: case t_COL: case t_MAT:
-      lx = lg(x); s = gzero;
+      lx = lg(x); s = gen_0;
       for (i=1; i<lx; i++) s = gadd(s, gabs((GEN)x[i],prec));
       break;
 
@@ -437,12 +437,12 @@ QuickNormL1(GEN x,long prec)
       return gerepileupto(av, gadd(p1,p2));
 
     case t_POL:
-      lx=lg(x); s=gzero;
+      lx=lg(x); s=gen_0;
       for (i=2; i<lx; i++) s=gadd(s,QuickNormL1((GEN)x[i],prec));
       return gerepileupto(av, s);
 
     case t_VEC: case t_COL: case t_MAT:
-      lx=lg(x); s=gzero;
+      lx=lg(x); s=gen_0;
       for (i=1; i<lx; i++) s=gadd(s,QuickNormL1((GEN)x[i],prec));
       return gerepileupto(av, s);
   }
@@ -617,7 +617,7 @@ assmat(GEN x)
   {
     p1=cgetg(lx,t_COL); y[i]=(long)p1;
     for (j=1; j<lx; j++)
-      p1[j] = (j==(i+1))? one: zero;
+      p1[j] = (j==(i+1))? (long)gen_1: (long)gen_0;
   }
   p1=cgetg(lx,t_COL); y[i]=(long)p1;
   if (gcmp1((GEN)x[lx+1]))
@@ -677,7 +677,7 @@ gtrace(GEN x)
       return y;
 
     case t_MAT:
-      lx = lg(x); if (lx == 1) return gzero;
+      lx = lg(x); if (lx == 1) return gen_0;
       /*now lx >= 2*/
       if (lx != lg(x[1])) err(mattype1,"gtrace");
       return mattrace(x);
@@ -707,7 +707,7 @@ sqred1intern(GEN a)
 
     b[j]=(long)p1;
     for (i=1; i<=j; i++) p1[i] = p2[i];
-    for (   ; i<n ; i++) p1[i] = zero;
+    for (   ; i<n ; i++) p1[i] = (long)gen_0;
   }
   for (k=1; k<n; k++)
   {
@@ -750,18 +750,18 @@ sqred3(GEN a)
   for (j=1; j<n; j++)
   {
     p1=cgetg(n,t_COL); b[j]=(long)p1;
-    for (i=1; i<n; i++) p1[i]=zero;
+    for (i=1; i<n; i++) p1[i]= (long)gen_0;
   }
   for (i=1; i<n; i++)
   {
     for (k=1; k<i; k++)
     {
-      p1=gzero;
+      p1=gen_0;
       for (l=1; l<k; l++)
 	p1=gadd(p1, gmul(gmul(gcoeff(b,l,l),gcoeff(b,k,l)), gcoeff(b,i,l)));
       coeff(b,i,k)=ldiv(gsub(gcoeff(a,i,k),p1),gcoeff(b,k,k));
     }
-    p1=gzero;
+    p1=gen_0;
     for (l=1; l<i; l++)
       p1=gadd(p1, gmul(gcoeff(b,l,l), gsqr(gcoeff(b,i,l))));
     coeff(b,i,k)=lsub(gcoeff(a,i,i),p1);
@@ -804,13 +804,13 @@ sqred2(GEN a, long signature)
       }
       r[k] = 0; t--;
       for (j=1; j<=n; j++)
-	coeff(a,k,j) = r[j] ? ldiv(gcoeff(a,k,j),p) : zero;
+	coeff(a,k,j) = r[j] ? ldiv(gcoeff(a,k,j),p) : (long)gen_0;
 	
       for (i=1; i<=n; i++) if (r[i])
 	for (j=1; j<=n; j++)
 	  coeff(a,i,j) = r[j] ? lsub(gcoeff(a,i,j),
 	                             gmul(gmul(gcoeff(a,k,i),gcoeff(a,k,j)),p))
-			      : zero;
+			      : (long)gen_0;
       coeff(a,k,k) = (long)p;
     }
     else
@@ -829,15 +829,15 @@ sqred2(GEN a, long signature)
 			   gdiv(gadd(gmul(gcoeff(a,k,i),gcoeff(a,l,j)),
 				     gmul(gcoeff(a,k,j),gcoeff(a,l,i))),
 				p))
-		    : zero;
+		    : (long)gen_0;
 	  for (i=1; i<=n; i++) if (r[i])
           {
             GEN u = gcoeff(a,k,i);
 	    coeff(a,k,i) = ldiv(gadd(u, gcoeff(a,l,i)), p);
 	    coeff(a,l,i) = ldiv(gsub(u, gcoeff(a,l,i)), p);
           }
-	  coeff(a,k,l) = one;
-          coeff(a,l,k) = (long)gminusone;
+	  coeff(a,k,l) = (long)gen_1;
+          coeff(a,l,k) = (long)gen_m1;
 	  coeff(a,k,k) = lmul2n(p,-1);
           coeff(a,l,l) = lneg(gcoeff(a,k,k));
 	  if (low_stack(lim, stack_lim(av1,1)))
@@ -1071,13 +1071,13 @@ QV_elem(GEN aj, GEN ak, GEN A, long j, long k)
   if (!signe(u))
   { /* ak | aj */
     p1 = negi(diviiexact(aj,ak));
-    A[j]   = (long)QV_lincomb(gone, p1, (GEN)A[j], (GEN)A[k]);
+    A[j]   = (long)QV_lincomb(gen_1, p1, (GEN)A[j], (GEN)A[k]);
     return;
   }
   if (!signe(v))
   { /* aj | ak */
     p1 = negi(diviiexact(ak,aj));
-    A[k]   = (long)QV_lincomb(gone, p1, (GEN)A[k], (GEN)A[j]);
+    A[k]   = (long)QV_lincomb(gen_1, p1, (GEN)A[k], (GEN)A[j]);
     lswap(A[j], A[k]);
     return;
   }
@@ -1194,8 +1194,8 @@ mynegi(GEN x)
 {
   long s = signe(x);
 
-  if (!s) return gzero;
-  if (is_pm1(x)) return (s > 0)? gminusone: gone;
+  if (!s) return gen_0;
+  if (is_pm1(x)) return (s > 0)? gen_m1: gen_1;
   setsigne(x,-s); return x;
 }
 void
@@ -1237,7 +1237,7 @@ ZV_copy(GEN x)
 {
   long i, lx = lg(x);
   GEN y = cgetg(lx, t_COL);
-  for (i=1; i<lx; i++) y[i] = signe(x[i])? licopy((GEN)x[i]): zero;
+  for (i=1; i<lx; i++) y[i] = signe(x[i])? licopy((GEN)x[i]): (long)gen_0;
   return y;
 }
 
@@ -1451,7 +1451,7 @@ hnf_special(GEN x, long remove)
       for (j=def+1; j<co; j++)
       {
 	b = negi(gdivent(gcoeff(x,i,j),p1));
-	x[j] = (long)ZV_lincomb(gone,b, (GEN)x[j], (GEN)x[def]);
+	x[j] = (long)ZV_lincomb(gen_1,b, (GEN)x[j], (GEN)x[def]);
         x2[j]= ladd((GEN)x2[j], gmul(b, (GEN)x2[def]));
       }
       def--;
@@ -1874,7 +1874,7 @@ END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
       GEN Bj = (GEN)matb[j], v = (GEN)Bj[i0];
       s = signe(v); if (!s) continue;
 
-      Bj[i0] = zero;
+      Bj[i0] = (long)gen_0;
       if (is_pm1(v))
       {
         if (s > 0) /* v = 1 */
@@ -1945,7 +1945,7 @@ END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
     GEN z = (GEN)extramat[j];
     p1 = cgetg(nlze+nr+1,t_COL); dep[j]=(long)p1;
     p2 = cgetg(lnz-nr,t_COL); matbnew[j]=(long)p2;
-    for (i=1; i<=nlze; i++) p1[i]=zero;
+    for (i=1; i<=nlze; i++) p1[i]= (long)gen_0;
     p1 += nlze; for (i=1; i<=nr; i++) p1[i] = z[permpro[i]];
     p2 -= nr;   for (   ; i<lnz; i++) p2[i] = z[permpro[i]];
   }
@@ -2163,18 +2163,18 @@ ZV_elem(GEN aj, GEN ak, GEN A, GEN U, long j, long k)
   if (!signe(u))
   { /* ak | aj */
     p1 = negi(diviiexact(aj,ak));
-    A[j]   = (long)ZV_lincomb(gone, p1, (GEN)A[j], (GEN)A[k]);
+    A[j]   = (long)ZV_lincomb(gen_1, p1, (GEN)A[j], (GEN)A[k]);
     if (U)
-      U[j] = (long)ZV_lincomb(gone, p1, (GEN)U[j], (GEN)U[k]);
+      U[j] = (long)ZV_lincomb(gen_1, p1, (GEN)U[j], (GEN)U[k]);
     return;
   }
   if (!signe(v))
   { /* aj | ak */
     p1 = negi(diviiexact(ak,aj));
-    A[k]   = (long)ZV_lincomb(gone, p1, (GEN)A[k], (GEN)A[j]);
+    A[k]   = (long)ZV_lincomb(gen_1, p1, (GEN)A[k], (GEN)A[j]);
     lswap(A[j], A[k]);
     if (U) {
-      U[k] = (long)ZV_lincomb(gone, p1, (GEN)U[k], (GEN)U[j]);
+      U[k] = (long)ZV_lincomb(gen_1, p1, (GEN)U[k], (GEN)U[j]);
       lswap(U[j], U[k]);
     }
     return;
@@ -2210,9 +2210,9 @@ ZM_reduce(GEN A, GEN U, long i, long j0)
     if (!signe(q)) continue;
 
     q = negi(q);
-    A[j]   = (long)ZV_lincomb(gone,q, (GEN)A[j], (GEN)A[j0]);
+    A[j]   = (long)ZV_lincomb(gen_1,q, (GEN)A[j], (GEN)A[j0]);
     if (U)
-      U[j] = (long)ZV_lincomb(gone,q, (GEN)U[j], (GEN)U[j0]);
+      U[j] = (long)ZV_lincomb(gen_1,q, (GEN)U[j], (GEN)U[j0]);
   }
 }
 
@@ -2228,7 +2228,7 @@ hnfmerge_get_1(GEN A, GEN B)
   t = NULL; /* -Wall */
   b = gcoeff(B,1,1); lb = lgefint(b);
   if (!signe(b)) {
-    if (gcmp1(gcoeff(A,1,1))) return gscalcol(gone, l-1);
+    if (gcmp1(gcoeff(A,1,1))) return gscalcol(gen_1, l-1);
     l = 0; /* trigger error */
   }
   for (j = 1; j < l; j++)
@@ -2437,7 +2437,7 @@ allhnfmod(GEN x, GEN dm, int flag)
       }
       c = cgetg(li, t_COL);
       for (j = 1; j < i; j++) c[j] = lremii(gcoeff(x,j,i),d);
-      for (     ; j <li; j++) c[j] = zero;
+      for (     ; j <li; j++) c[j] = (long)gen_0;
       if (!egalii(dm, d)) c = gmul(c, diviiexact(dm, d));
       x[li] = (long)c;
       FpV_Fp_mul_part_ip((GEN)x[i], u, dm, i-1);
@@ -2487,7 +2487,7 @@ allhnfmod(GEN x, GEN dm, int flag)
     for (j = i+1; j < li; j++)
     {
       b = negi(truedvmdii(gcoeff(x,i,j), diag, NULL));
-      p1 = ZV_lincomb(gone,b, (GEN)x[j], (GEN)x[i]);
+      p1 = ZV_lincomb(gen_1,b, (GEN)x[j], (GEN)x[i]);
       x[j] = (long)p1;
       for (k=1; k<i; k++)
         if (lgefint(p1[k]) > ldm) p1[k] = lremii((GEN)p1[k], (GEN)dm[i]);
@@ -2645,7 +2645,7 @@ hnflll_i(GEN A, GEN *ptB, int remove)
   B = ptB? idmat(n-1): NULL;
   D = (GEN*)cgetg(n+1,t_VEC); lambda = (GEN**) cgetg(n,t_MAT);
   D++;
-  for (i=0; i<n; i++) D[i] = gone;
+  for (i=0; i<n; i++) D[i] = gen_1;
   for (i=1; i<n; i++) lambda[i] = (GEN*)zerocol(n-1);
   k = 2;
   while (k < n)
@@ -2756,7 +2756,7 @@ extendedgcd(GEN A)
   A = dummycopy(A);
   B = idmat(n-1);
   D = (GEN*)new_chunk(n); lambda = (GEN**) cgetg(n,t_MAT);
-  for (i=0; i<n; i++) D[i] = gone;
+  for (i=0; i<n; i++) D[i] = gen_1;
   for (i=1; i<n; i++) lambda[i] = (GEN*)zerocol(n-1);
   k = 2;
   while (k < n)
@@ -2838,8 +2838,8 @@ hnfperm_i(GEN A, GEN *ptU, GEN *ptperm)
         if (!signe(q)) continue;
 
         q = negi(q);
-        A[j1] = (long)ZV_lincomb(gone,q,(GEN)A[j1],(GEN)A[j]);
-        if (U) U[j1] = (long)ZV_lincomb(gone,q,(GEN)U[j1],(GEN)U[j]);
+        A[j1] = (long)ZV_lincomb(gen_1,q,(GEN)A[j1],(GEN)A[j]);
+        if (U) U[j1] = (long)ZV_lincomb(gen_1,q,(GEN)U[j1],(GEN)U[j]);
       }
     }
     t = m; while (t && (c[t] || !signe(gcoeff(A,t,k)))) t--;
@@ -2866,8 +2866,8 @@ hnfperm_i(GEN A, GEN *ptU, GEN *ptperm)
 	if (!signe(q)) continue;
 
         q = negi(q);
-        A[j] = (long)ZV_lincomb(gone,q,(GEN)A[j],(GEN)A[k]);
-        if (U) U[j] = (long)ZV_lincomb(gone,q,(GEN)U[j],(GEN)U[k]);
+        A[j] = (long)ZV_lincomb(gen_1,q,(GEN)A[j],(GEN)A[k]);
+        if (U) U[j] = (long)ZV_lincomb(gen_1,q,(GEN)U[j],(GEN)U[k]);
       }
     }
     if (low_stack(lim, stack_lim(av1,1)))
@@ -3045,7 +3045,7 @@ static void
 do_zero(GEN x)
 {
   long i, lx = lg(x);
-  for (i=1; i<lx; i++) x[i] = zero;
+  for (i=1; i<lx; i++) x[i] = (long)gen_0;
 }
 
 /* c1 <-- u.c1 + v.c2; c2 <-- a.c2 - b.c1 */
@@ -3096,13 +3096,13 @@ bezout_step(GEN *pa, GEN *pb, GEN *pu, GEN *pv)
   if (absi_equal(a,b))
   { 
     long sa = signe(a), sb = signe(b);
-    *pv = gzero;
+    *pv = gen_0;
     if (sb == sa) { 
-      *pa = *pb = gone;
-      if (sa > 0) {*pu=gone; return a;} else {*pu=gminusone; return absi(a);} 
+      *pa = *pb = gen_1;
+      if (sa > 0) {*pu=gen_1; return a;} else {*pu=gen_m1; return absi(a);} 
     } 
-    if (sa > 0) { *pa = *pu = gone; *pb = gminusone; return a; } 
-    *pa = *pu = gminusone; *pb = gone; return b;
+    if (sa > 0) { *pa = *pu = gen_1; *pb = gen_m1; return a; } 
+    *pa = *pu = gen_m1; *pb = gen_1; return b;
   } 
   d = bezout(a,b, pu,pv);
   *pa = diviiexact(a, d);
@@ -3135,8 +3135,8 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
       if (typ(coeff(x,i,j)) != t_INT)
         err(talker,"non integral matrix in smithall");
 
-  U = ptU? gone: NULL; /* TRANSPOSE of row transform matrix [so act on columns]*/
-  V = ptV? gone: NULL;
+  U = ptU? gen_1: NULL; /* TRANSPOSE of row transform matrix [so act on columns]*/
+  V = ptV? gen_1: NULL;
   V0 = NULL;
   x = dummycopy(x);
   if (m == n && Z_ishnfall(x))
@@ -3243,7 +3243,7 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
                                 mulii(b,gcoeff(x,i,k)));
           coeff(x,i,k) = (long)t;
         }
-        coeff(x,j,i) = zero;
+        coeff(x,j,i) = (long)gen_0;
         coeff(x,i,i) = (long)d;
         if (U) update(u,v,a,b,(GEN*)(U+i),(GEN*)(U+j));
         if (low_stack(lim, stack_lim(av,1)))
@@ -3348,7 +3348,7 @@ smithclean(GEN z)
   for (i=1; i<c; i++)
   {
     GEN p2 = cgetg(c,t_COL); p1[i] = (long)p2;
-    for (j=1; j<c; j++) p2[j] = i==j? lcopy(gcoeff(d,i,i)): zero;
+    for (j=1; j<c; j++) p2[j] = i==j? lcopy(gcoeff(d,i,i)): (long)gen_0;
   }
   return y;
 }
@@ -3359,8 +3359,8 @@ gbezout_step(GEN *pa, GEN *pb, GEN *pu, GEN *pv)
   GEN a = *pa, b = *pb, d;
   if (!signe(a))
   {
-    *pa = gzero; *pu = gzero;
-    *pb = gone;   *pv = gone; return b;
+    *pa = gen_0; *pu = gen_0;
+    *pb = gen_1;   *pv = gen_1; return b;
   }
   d = RgX_extgcd(a,b, pu,pv);
   *pa = gdiv(a, d);
@@ -3415,7 +3415,7 @@ gsmithall(GEN x,long all)
           coeff(x,k,j) = lsub(gmul(a,gcoeff(x,k,j)),gmul(b,gcoeff(x,k,i)));
           coeff(x,k,i) = (long)t;
         }
-        coeff(x,i,j) = zero;
+        coeff(x,i,j) = (long)gen_0;
         coeff(x,i,i) = (long)d;
         if (all) update(u,v,a,b,(GEN*)(V+i),(GEN*)(V+j));
       }
@@ -3430,7 +3430,7 @@ gsmithall(GEN x,long all)
           coeff(x,j,k) = lsub(gmul(a,gcoeff(x,j,k)),gmul(b,gcoeff(x,i,k)));
           coeff(x,i,k) = (long)t;
         }
-        coeff(x,j,i) = zero;
+        coeff(x,j,i) = (long)gen_0;
         coeff(x,i,i) = (long)d;
         if (all) update(u,v,a,b,(GEN*)(U+i),(GEN*)(U+j));
         c = 1;
@@ -3519,7 +3519,7 @@ smithrel(GEN H, GEN *newU, GEN *newUi)
   if (newUi) { /* UHV = D --> U^-1 mod H = H(VD^-1 mod 1) mod H */
     if (c == 1) *newUi = cgetg(1, t_MAT);
     else
-    { /* Ui = ZM_inv(U, gone); setlg(Ui, c); */
+    { /* Ui = ZM_inv(U, gen_1); setlg(Ui, c); */
       setlg(V, c);
       V = FpM_red(V, (GEN)D[1]);
       Ui = gmul(H, V);
@@ -3551,7 +3551,7 @@ Frobeniusform(GEN V, long n)
     if (k+d-2 > n)
       err(talker, "accuracy lost in matfrobenius");
     for (j=0; j<d-1; j++, k++)
-      coeff(M,k+1,k) = one;
+      coeff(M,k+1,k) = (long)gen_1;
     for (j=0; j<d; j++)
       coeff(M,k-j,k) = lneg((GEN)P[1+d-j]);
   }
@@ -3575,11 +3575,11 @@ build_frobeniusbc(GEN V, long n)
     if (d <= 0) continue;
     if (l+d-2 > n)
       err(talker, "accuracy lost in matfrobenius");
-    coeff(M,k,i) = one;
+    coeff(M,k,i) = (long)gen_1;
     for (j=1; j<d; j++,k++,l++)
     {
       coeff(M,k,l)   = (long) z;
-      coeff(M,k+1,l) = one;
+      coeff(M,k+1,l) = (long)gen_1;
     }
   }
   return M;
@@ -3594,7 +3594,7 @@ build_basischange(GEN N, GEN U)
   for (j = 1; j < n; ++j)
   {
     pari_sp btop=avma;
-    GEN p3 = gzero;
+    GEN p3 = gen_0;
     for (i = 1; i < n; ++i)
       p3 = gadd(p3, (GEN) gsubst(gcoeff(U, i, j), 0, N)[i]);
     p2[j] = lpileupto(btop, p3);

@@ -103,7 +103,7 @@ mysquare(GEN p)
   nn=n<<1; s=cgetg(nn+3,t_POL); s[1] = p[1];
   for (i=0; i<=n; i++)
   {
-    aux1=gzero; ltop=avma;
+    aux1=gen_0; ltop=avma;
     for (j=0; j<(i+1)>>1; j++)
     {
       aux2=quickmulcc((GEN) p[j+2],(GEN)p[i-j+2]);
@@ -119,7 +119,7 @@ mysquare(GEN p)
   }
   for (i=n+1; i<=nn; i++)
   {
-    aux1=gzero; ltop=avma;
+    aux1=gen_0; ltop=avma;
     for (j=i-n; j<(i+1)>>1; j++)
     {
       aux2=quickmulcc((GEN)p[j+2],(GEN)p[i-j+2]);
@@ -157,11 +157,11 @@ karasquare(GEN p)
   aux=cgetg((n<<1)+3,t_POL); aux[1]=p[1];
   var=lg(s0);
   for (i=2; i<var; i++) aux[i]=s0[i];
-  for (   ; i<=nn0+2; i++) aux[i]=zero;
+  for (   ; i<=nn0+2; i++) aux[i]= (long)gen_0;
   var=lg(s2);
   for (i=2; i<var; i++) aux[2+i+nn0]=s2[i];
-  for (i=var-2; i<=(n1<<1); i++) aux[4+i+nn0]=zero;
-  aux[3+nn0]=zero;
+  for (i=var-2; i<=(n1<<1); i++) aux[4+i+nn0]= (long)gen_0;
+  aux[3+nn0]= (long)gen_0;
   for (i=3; i<=lg(s1); i++)
     aux[i+n0]=ladd((GEN) aux[i+n0],(GEN) s1[i-1]);
   setlg(p, n+3); /* recover all the polynomial p */
@@ -237,7 +237,7 @@ cook_square(GEN p)
 		   gadd(gmulgs((GEN)plus[2],-6),(GEN)plus[3])),
 	      720);
   q = cgetg(2*n+3,t_POL); q[1] = p[1];
-  for (i=0; i<=2*n; i++) q[i+2]=zero;
+  for (i=0; i<=2*n; i++) q[i+2]= (long)gen_0;
   for (i=0; i<=6; i++)
   {
     aux=(GEN) r[i];
@@ -265,7 +265,7 @@ graeffe(GEN p)
   s1=cook_square(p1); ns1 = degpol(s1);
   ss1 = cgetg(ns1+4, t_POL);
   ss1[1] = auxi;
-  ss1[2] = zero;
+  ss1[2] = (long)gen_0;
   for (i=0; i<=ns1; i++) ss1[3+i]=lneg((GEN)s1[2+i]);
   /* now ss1 contains -x * s1 */
   return gadd(s0,ss1);
@@ -382,11 +382,11 @@ myshiftic(GEN z, long e)
 {
   if (typ(z)==t_COMPLEX)
   {
-    z[1]=signe(z[1])? lmpshift((GEN) z[1],e): zero;
+    z[1]=signe(z[1])? lmpshift((GEN) z[1],e): (long)gen_0;
     z[2]=lmpshift((GEN) z[2],e);
     return z;
   }
-  return signe(z)? mpshift(z,e): gzero;
+  return signe(z)? mpshift(z,e): gen_0;
 }
 
 /* as realun with precision in bits, not in words */
@@ -457,7 +457,7 @@ eval_rel_pol(GEN p,long bitprec)
 {
   long i;
   for (i = 2; i < lg(p); i++) 
-    if (gcmp0((GEN)p[i])) p[i] = zero; /* bad behaviour of gexpo */
+    if (gcmp0((GEN)p[i])) p[i] = (long)gen_0; /* bad behaviour of gexpo */
   return pol_to_gaussint(p, bitprec-gexpo(p)+1);
 }
 
@@ -817,7 +817,7 @@ initRUgen(long N, long bitprec)
 {
   GEN *RU = (GEN*)cgetg(N+1,t_VEC), z = RUgen(N,bitprec);
   long i, k = (N+3)>>1;
-  RU[0] = gone;
+  RU[0] = gen_1;
   RU[1] = z;
   for (i=2; i<k; i++) RU[i] = gmul(z, RU[i-1]);
   for (   ; i<N; i++) RU[i] = gconj(RU[N-i]);
@@ -856,11 +856,11 @@ parameters(GEN p, double *mu, double *gamma,
 
   q=mygprec(p,bitprec);
   pc=cgetg(Lmax+1,t_VEC); pc++;
-  for (i=n+1; i<Lmax; i++) pc[i]=zero;
+  for (i=n+1; i<Lmax; i++) pc[i]= (long)gen_0;
 
   coef=cgetg(Lmax+1,t_VEC); coef++;
   *mu=(double)pariINFINITY; *gamma=0.;
-  ggamma = gzero;
+  ggamma = gen_0;
   aux0 = myrealun(bitprec);
   if (polreal) K=K/2+1;
   av2=avma;
@@ -881,7 +881,7 @@ parameters(GEN p, double *mu, double *gamma,
       lx = gtodouble(mplog(gx));
       if (lx < *mu) *mu = lx;
       if (polreal && (i>0 && i<K-1))
-	ggamma = gadd(ggamma, gdiv(gtwo,gx));
+	ggamma = gadd(ggamma, gdiv(gen_2,gx));
       else
 	ggamma = gadd(ggamma, ginv(gx));
     }
@@ -917,9 +917,9 @@ dft(GEN p, long k, long NN, long bitprec, GEN F, GEN H, long polreal)
   qd=derivpol(q);
 
   pc=cgetg(Lmax+1,t_VEC); pc++;
-  for (i=n+1; i<Lmax; i++) pc[i]=zero;
+  for (i=n+1; i<Lmax; i++) pc[i]= (long)gen_0;
   pdc=cgetg(Lmax+1,t_VEC); pdc++;
-  for (i=n; i<Lmax; i++) pdc[i]=zero;
+  for (i=n; i<Lmax; i++) pdc[i]= (long)gen_0;
 
   alpha=cgetg(Lmax+1,t_VEC); alpha++;
   beta=cgetg(Lmax+1,t_VEC); beta++;
@@ -929,11 +929,11 @@ dft(GEN p, long k, long NN, long bitprec, GEN F, GEN H, long polreal)
 
   ltop=avma;
   W=cgetg(k+1,t_VEC); U=cgetg(k+1,t_VEC);
-  for (i=1; i<=k; i++) W[i]=U[i]=zero;
+  for (i=1; i<=k; i++) W[i]=U[i]= (long)gen_0;
 
   for (i=0; i<K; i++)
   {
-    RU[0]=(long) gone;
+    RU[0]=(long) gen_1;
     for (j=1; j<=n; j++) RU[j]=lmul((GEN)RU[j-1],prim2);
     /* RU[j]=prim^{ ij }=prim2^j */
 
@@ -1002,7 +1002,7 @@ refine_H(GEN F, GEN G, GEN HH, long bitprec, long shiftbitprec)
   pari_sp ltop=avma, limite=stack_lim(ltop, 1);
   long error=0,i,bitprec1,bitprec2;
 
-  D=gsub(gone,grem(gmul(HH,G),F)); error=gexpo(D);
+  D=gsub(gen_1,grem(gmul(HH,G),F)); error=gexpo(D);
   bitprec2=bitprec+shiftbitprec;
 
   for (i=0; (error>-bitprec && i<NEWTON_MAX) && error<=0; i++)
@@ -1020,7 +1020,7 @@ refine_H(GEN F, GEN G, GEN HH, long bitprec, long shiftbitprec)
     bitprec1=-error*2+shiftbitprec;
     if (bitprec1>bitprec2) bitprec1=bitprec2;
     H=gadd(mygprec(H,bitprec1),aux);
-    D=gsub(gone,grem(gmul(H,G),F));
+    D=gsub(gen_1,grem(gmul(H,G),F));
     error=gexpo(D); if (error<-bitprec1) error=-bitprec1;
   }
   if (error>-bitprec/2) return NULL; /* FAIL */
@@ -1100,7 +1100,7 @@ split_fromU(GEN p, long k, double delta, long bitprec,
 
   H =cgetg(k+2,t_POL); H[1] = p[1];
   FF=cgetg(k+3,t_POL); FF[1]= p[1];
-  FF[k+2]=one;
+  FF[k+2]= (long)gen_1;
 
   NN=(long) (0.5/delta); NN+=(NN%2); if (NN<2) NN=2;
   NN=NN*Lmax; ltop=avma;
@@ -1298,7 +1298,7 @@ conformal_mapping(GEN *radii, GEN ctr, GEN p, long k, long bitprec,
   FF = conformal_pol(FF,a,bitprec2);
   GG = conformal_pol(GG,a,bitprec2);
 
-  a = mplog( ginv(gsub(gone, gnorm(a))) );
+  a = mplog( ginv(gsub(gen_1, gnorm(a))) );
   FF = gmul(FF, mpexp(mulrs(a,k)));
   GG = gmul(GG, mpexp(mulrs(a,n-k)));
 
@@ -1463,7 +1463,7 @@ split_0_2(GEN p, long bitprec, GEN *F, GEN *G)
     if (k>n/2) k=n/2;
     bitprec2+=(k<<1);
     FF = cgetg(k+3,t_POL); FF[1] = p[1];
-    for (i=0; i<k; i++) FF[i+2]=zero;
+    for (i=0; i<k; i++) FF[i+2]= (long)gen_0;
     FF[k+2]=(long) myrealun(bitprec2);
     GG = cgetg(n-k+3,t_POL); GG[1] = p[1];
     for (i=0; i<=n-k; i++) GG[i+2]=q[i+k+2];
@@ -1512,7 +1512,7 @@ split_0(GEN p, long bitprec, GEN *F, GEN *G)
   {
     if (k>n/2) k=n/2;
     FF = cgetg(k+3,t_POL); FF[1] = p[1];
-    for (i=0; i<k; i++) FF[i+2] = zero;
+    for (i=0; i<k; i++) FF[i+2] = (long)gen_0;
     FF[k+2]=(long) myrealun(bitprec);
     GG=cgetg(n-k+3,t_POL); GG[1] = p[1];
     for (i=0; i<=n-k; i++) GG[i+2]=p[i+k+2];
@@ -1559,13 +1559,13 @@ root_error(long n, long k, GEN roots_pol, GEN sigma, GEN shatzle)
     }
   }
   rho=gabs(mygprec((GEN)roots_pol[k],31),DEFAULTPREC);
-  if (gcmp(rho,dbltor(1.))==-1) rho=gone;
+  if (gcmp(rho,dbltor(1.))==-1) rho=gen_1;
   eps=gmul(rho,shatzle);
   aux=gmul(gpowgs(rho,n),sigma);
 
   for (j=1; j<=2 || (j<=5 && gcmp(rap,dbltor(1.2))==1); j++)
   {
-    m=n; prod=gone;
+    m=n; prod=gen_1;
     epsbis=gdivgs(gmulgs(eps,5),4);
     for (i=1; i<=n; i++)
     {
@@ -1682,7 +1682,7 @@ GEN
 cauchy_bound(GEN p)
 {
   long i, n = degpol(p), prec = DEFAULTPREC;
-  GEN lc, y, q = gmul(p, realun(prec)), x = gzero;
+  GEN lc, y, q = gmul(p, realun(prec)), x = gen_0;
 
   if (n <= 0) err(constpoler,"cauchy_bound");
 
@@ -1857,7 +1857,7 @@ solve_exact_pol(GEN p, long bitprec)
   n=degpol(p);
 
   iroots=0;
-  roots_pol=cgetg(n+1,t_VEC); for (i=1; i<=n; i++) roots_pol[i]=zero;
+  roots_pol=cgetg(n+1,t_VEC); for (i=1; i<=n; i++) roots_pol[i]= (long)gen_0;
 
   factors = ZX_squff(Q_primpart(p), &ex);
   for (i=1; i<lg(factors); i++)

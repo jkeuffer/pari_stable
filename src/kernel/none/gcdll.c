@@ -702,7 +702,7 @@ lgcdii(ulong* d, ulong* d1,
   fprintferr("  q = %ld, %lx, %lx\n", xv1, dd1, dd);
 #endif
   if (xv1 > vmax)
-  {				/* gone past the bound already */
+  {				/* gen_1 past the bound already */
     *u = 0UL; *u1 = 1UL; *v = 1UL; *v1 = xv1;
     return res;
   }
@@ -865,7 +865,7 @@ lgcdii(ulong* d, ulong* d1,
    * precise conditions:  The original dd1 had its topmost bit set, so the 1st
    * q was 1, and after subtraction, dd had its topmost bit unset.  If now
    * dd==0, we'd have taken the return exit already, so we couldn't have got
-   * here.  If not, then it must have been the second division which has gone
+   * here.  If not, then it must have been the second division which has gen_1
    * amiss  (because dd1 was very close to an exact multiple of the remainder
    * dd value, so this will be very rare).  At this point, we'd have a fairly
    * slim chance of fixing things by re-examining dd1:dd1lo vs. dd:ddlo, but

@@ -68,7 +68,7 @@ static GEN
 RgV_zc_mul_i(GEN x, GEN y, long l)
 {
   long i;
-  GEN z = gzero;
+  GEN z = gen_0;
   pari_sp av = avma;
   for (i = 1; i < l; i++) z = gadd(z, gmulgs((GEN)x[i], y[i]));
   return gerepileupto(av, z);
@@ -124,7 +124,7 @@ RgX_powers(GEN a, GEN T, long l)
   if (typ(a) != t_POL) err(typeer,"RgX_powers");
   l += 2;
   v = cgetg(l,t_VEC);
-  v[1] = one; if (l == 2) return v;
+  v[1] = (long)gen_1; if (l == 2) return v;
 
   if (degpol(a) >= degpol(T)) a = grem(a, T);
   v[2] = (long)a;
@@ -162,12 +162,12 @@ RgX_to_RgV(GEN x, long N)
   if (typ(x) != t_POL)
   {
     z[1] = (long)x;
-    for (i=2; i<=N; i++) z[i]=zero;
+    for (i=2; i<=N; i++) z[i]= (long)gen_0;
     return z;
   }
   l = lg(x)-1; x++;
   for (i=1; i<l ; i++) z[i]=x[i];
-  for (   ; i<=N; i++) z[i]=zero;
+  for (   ; i<=N; i++) z[i]= (long)gen_0;
   return z;
 }
 
@@ -233,7 +233,7 @@ RgXY_swap(GEN x, long n, long w)
       if( j<lg(x[k]))
         p1[k] = mael(x,k,j);
       else
-        p1[k] = zero;
+        p1[k] = (long)gen_0;
     y[j] = (long)normalizepol_i(p1,lx);
   }
   return normalizepol_i(y,ly);
@@ -247,7 +247,7 @@ RgX_shift(GEN a, long n)
   if (!signe(a)) return a;
   b = cgetg(l+n, t_POL);
   b[1] = a[1];
-  for (i=0; i<n; i++) b[2+i] = zero;
+  for (i=0; i<n; i++) b[2+i] = (long)gen_0;
   for (i=2; i<l; i++) b[i+n] = a[i];
   return b;
 }
@@ -334,7 +334,7 @@ mulpol_limb(GEN x, GEN y, char *ynonzero, long a, long b)
       GEN p2 = gmul((GEN)y[i],(GEN)x[-i]);
       p1 = p1 ? gadd(p1, p2): p2;
     }
-  return p1 ? gerepileupto(av, p1): gzero;
+  return p1 ? gerepileupto(av, p1): gen_0;
 }
 
 /* assume nx >= ny > 0 */
@@ -376,7 +376,7 @@ addmulXn(GEN x, GEN y, long d)
     (void)new_chunk(lz); xd = x+nx; yd = y+ny;
     while (xd > x) *--zd = *--xd;
     x = zd + a;
-    while (zd > x) *--zd = zero;
+    while (zd > x) *--zd = (long)gen_0;
   }
   else
   {
@@ -401,7 +401,7 @@ gmulXn(GEN x, long d)
   z = cgetg(l + d, t_POL);
   z[1] = x[1];
   for (i = 2; i < l; i++) z[d + i] = x[i];
-  for (i = 2; i < 2+d; i++) z[i] = zero;
+  for (i = 2; i < 2+d; i++) z[i] = (long)gen_0;
   return z;
 }
 
@@ -431,7 +431,7 @@ addmulXncopy(GEN x, GEN y, long d)
     (void)new_chunk(lz); xd = x+nx; yd = y+ny;
     while (xd > x) *--zd = lcopy((GEN)*--xd);
     x = zd + a;
-    while (zd > x) *--zd = zero;
+    while (zd > x) *--zd = (long)gen_0;
   }
   else
   {
@@ -458,7 +458,7 @@ shiftpol_ip(GEN x, long v)
   /* stackdummy from normalizepol: move it up */
   if (lg(z) != v) x[lx + v] = z[0];
   for (i = lx-1; i >= 2; i--) y[i] = x[i];
-  for (i = v+1;  i >= 2; i--) x[i] = zero;
+  for (i = v+1;  i >= 2; i--) x[i] = (long)gen_0;
   x[1] = evalsigne(1);
   x[0] = evaltyp(t_POL) | evallg(lx+v); return x;
 }
@@ -527,7 +527,7 @@ sqrpol(GEN x, long nx)
   for (i=0; i<nx; i++)
   {
     p2[i] = !isexactzero((GEN)x[i]);
-    p1=gzero; av=avma; l=(i+1)>>1;
+    p1=gen_0; av=avma; l=(i+1)>>1;
     for (j=0; j<l; j++)
       if (p2[j] && p2[i-j])
         p1 = gadd(p1, gmul((GEN)x[j],(GEN)x[i-j]));
@@ -538,7 +538,7 @@ sqrpol(GEN x, long nx)
   }
   for (  ; i<nz; i++)
   {
-    p1=gzero; av=avma; l=(i+1)>>1;
+    p1=gen_0; av=avma; l=(i+1)>>1;
     for (j=i-nx+1; j<l; j++)
       if (p2[j] && p2[i-j])
         p1 = gadd(p1, gmul((GEN)x[j],(GEN)x[i-j]));
@@ -607,7 +607,7 @@ RgXQX_divrem(GEN x, GEN y, GEN T, GEN *pr)
     if (pr)
     {
       av0 = avma; x = RgXQX_red(x, T);
-      if (pr == ONLY_DIVIDES) { avma=av0; return signe(x)? NULL: gzero; }
+      if (pr == ONLY_DIVIDES) { avma=av0; return signe(x)? NULL: gen_0; }
       if (pr == ONLY_REM) return x;
       *pr = x;
     }

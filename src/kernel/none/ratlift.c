@@ -77,8 +77,8 @@ ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
   /* special cases x=0 and/or amax=0 */
   if (s == 0)
   {
-    if (a != NULL) *a = gzero;
-    if (b != NULL) *b = gone;
+    if (a != NULL) *a = gen_0;
+    if (b != NULL) *b = gen_1;
     return 1;
   }
   else if (signe(amax)==0)
@@ -89,7 +89,7 @@ ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
   if (cmpii(x,amax) <= 0)
   {
     if (a != NULL) *a = icopy(x);
-    if (b != NULL) *b = gone;
+    if (b != NULL) *b = gen_1;
     return 1;
   }
 
@@ -98,7 +98,7 @@ ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
    */
   (void)new_chunk(lgefint(bmax) + lgefint(amax)); /* room for a,b */
   d = m; d1 = x;
-  v = gzero; v1 = gone;
+  v = gen_0; v1 = gen_1;
   /* assert d1 > amax, v1 <= bmax here */
   lb = lgefint(bmax);
   lbb = bfffo(*int_MSW(bmax));
@@ -239,7 +239,7 @@ ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
 	    setsigne(*a,s);	/* same sign as s */
 	  }
 	  else
-	    *a = gzero;
+	    *a = gen_0;
 	}
 	if (b != NULL) *b = icopy(v1);
 	return 1;
@@ -276,7 +276,7 @@ ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
 	    setsigne(*a,s);	/* same sign as s */
 	  }
 	  else
-	    *a = gzero;
+	    *a = gen_0;
 	}
 	if (b != NULL) *b = icopy(v1);
 	return 1;
@@ -400,7 +400,7 @@ ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
 	  setsigne(*a,s);	/* same sign as s */
 	}
 	else
-	  *a = gzero;
+	  *a = gen_0;
       }
       if (b != NULL) *b = icopy(v1);
       return 1;
