@@ -28,7 +28,9 @@ Unless specified otherwise, examples assume 32bit machine and default precision
    ? rnfpolred(nfinit(quadpoly(904,y)),quadray(904,1))
      ***   division by zero in gdiv, gdivgs or ginv
 
-4  qfbhclassno(x < 0) may give a wrong result [e.g x = -2878367]
+4  qfbclassno(x < 0) may give a wrong result [e.g x = -2878367]
+
+4  zeta(599065705248735808.) --> exponent to large in exp.
 
 3  many functions assume MAXVARN is a free variable, yielding bogus
    results if the input involve it (only affect library programming).
@@ -49,10 +51,6 @@ Unless specified otherwise, examples assume 32bit machine and default precision
 
 ***************************   BUGS (GP specific) ****************************
 
--  sum(i=1,3000, exp(-i^2)) --> overflow in R*R
-   The "negligible" terms should be neglegted, not overflow because of the
-   way the computation is done. [ Tough to correct! ]
-
 4  changing primelimit from within forprime loop yields unpredictable results
 
 3  after allocatemem() / default(parisize, ...), the rest of the command is
@@ -65,6 +63,10 @@ discarded (ends by a longjmp).
    Individual components of lists/vectors/matrices are left alone if the
    GLOBAL object wasn't modified during the last cycle (i.e only v[x] = ... 
    occured)
+
+1  sum(i=1,3000, exp(-i^2)) --> overflow in R*R
+   The "negligible" terms should be neglegted, not overflow because of the
+   way the computation is done. [ Tough to correct! ]
 
 ***************************  DOCUMENTATION    ****************************
 

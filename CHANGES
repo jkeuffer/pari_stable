@@ -41,6 +41,7 @@ Done for version ??? (released ??/??/2000):
 XR 11- bnrstark initializations (incorrect when field not totally real)
    12- member functions not very robust [e.g. ellinit(e,1).roots --> SEGV]
    13- compiler warnings (gcc -O -Wall)
+   14- trap() not robust enough in library mode (nested handlers)
   
   Changed
     1- renamed .DOC files to .txt (explorer getting confused...)
