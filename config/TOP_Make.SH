@@ -66,7 +66,7 @@ setdir::
 	rm -r \$\$dir
 
 tar:
-	rm -f $tarfile.gz
+	rm -f $ztarfile
 	$tar cf $tarfile $tarinc
 
 distrib: tar setdir
