@@ -209,9 +209,10 @@ GEN  plisprime(GEN N, long flag)
   if ( typ(N) != t_INT ) err(arither1);
   N=absi(N);
   if ( gegal(N,gdeux) ) { avma=ltop; return gun; }
-  if (miller(N,16)) /*miller return 0 for 2 !*/
+  /*Use Jaeschke results. See above*/
+  if (miller(N,7)) /*miller return 0 for 2 !*/
   {
-    if (gcmp(N,gpowgs(stoi(10),12))<=0) { avma=ltop; return gun; }
+    if (gcmp(N,mulss(10670053,32010157))<0) { avma=ltop; return gun; }
   }
   else { avma=ltop; return gzero; }
   F=(GEN)factor(addis(N,-1))[1];
