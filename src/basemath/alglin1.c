@@ -2687,7 +2687,7 @@ FqM_gauss_pivot(GEN x, GEN T, GEN p, GEN *dd, long *rr)
     {
       c[j]=k; d[k]=j; piv = gneg(FpXQ_inv(gcoeff(x,j,k), T,p));
       for (i=k+1; i<=n; i++)
-	coeff(x,j,i) = (long)FpXQ_mul(piv,gcoeff(x,j,i), T, p);
+	coeff(x,j,i) = (long)Fq_mul(piv,gcoeff(x,j,i), T, p);
       for (t=1; t<=m; t++)
         if (!c[t]) /* no pivot on that line yet */
         {
