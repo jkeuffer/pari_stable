@@ -13,6 +13,7 @@ Check the License for details. You should have received a copy of it, along
 with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
+#include "pari.h"
 extern GEN bezout_lift_fact(GEN T, GEN Tmod, GEN p, long e);
 extern GEN respm(GEN x,GEN y,GEN pm);
 extern GEN ZX_disc_all(GEN,long);
@@ -23,7 +24,7 @@ extern GEN polratlift(GEN P, GEN mod, GEN amax, GEN bmax, GEN denom);
 /**                           GALOIS CONJUGATES        		        **/
 /**									**/
 /*************************************************************************/
-#include "pari.h"
+
 GEN
 galoisconj(GEN nf)
 {
