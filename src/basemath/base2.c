@@ -1031,6 +1031,7 @@ dbasis(GEN p, GEN f, long mf, GEN alpha, GEN U)
       ha = Q_remove_denom(ha, &d);
       mod = d? mulii(pdp,d): pdp;
       ha = FpX_res(ha, f, mod);
+      if (d) ha = gdivexact(ha,d);
     }
     b[i] = (long)pol_to_vec(ha,n);
   }
