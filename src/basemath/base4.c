@@ -1391,6 +1391,7 @@ idealpowred(GEN nf, GEN x, GEN n, long prec)
   GEN y, p1;
 
   if (typ(n) != t_INT) err(talker,"non-integral exponent in idealpowred");
+  if (signe(n) == 0) return idealpow(nf,x,n);
   p1 = n+2; m = *p1;
   y = x; j=1+bfffo(m); m<<=j; j = BITS_IN_LONG-j;
   for (i=lgefint(n)-2;;)
