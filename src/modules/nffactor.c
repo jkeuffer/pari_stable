@@ -586,9 +586,10 @@ static GEN
 nf_bestlift(GEN elt, nfcmbf_t *T)
 {
   GEN u;
-  long i,l = lg(T->h);
-  if (typ(elt) != t_INT)
+  long i,l = lg(T->h), t = typ(elt);
+  if (t != t_INT)
   {
+    if (t == t_POL) elt = algtobasis_intern(T->nf,elt);
     u = gmul(T->hinv,elt);
     for (i=1; i<l; i++) u[i] = (long)gdivround((GEN)u[i], T->den);
   }
@@ -805,20 +806,24 @@ nf_factor_bound(GEN nf, GEN polbase)
   return gdiv(gmul(C, p1), gmulsg(d, mppi(DEFAULTPREC)));
 }
 
+/* psf = product of modular factors, test all products with psf * P, with
+ * P = product of modular factors of index >= fxn, deg(P) <= dlim, 
+ * Number of mod. factors in P <= nlim 
+ * */
 static int
-nfcmbf(nfcmbf_t *T,long fxn,GEN psf,long dlim)
+nfcmbf(nfcmbf_t *T,long fxn,GEN psf,long dlim, long nlim)
 {
   int val = 0; /* assume failure */
   GEN newf, newpsf = NULL;
   long newd;
   gpmem_t av, ltop;
 
-  /* Assertion: fxn <= T->nfactmod && dlim > 0 */
+  /* Assertion: fxn <= T->nfactmod && dlim > 0 && nlim > 0 */
 
   /* first, try deeper factors without considering the current one */
   if (fxn != T->nfactmod)
   {
-    val = nfcmbf(T,fxn+1,psf,dlim);
+    val = nfcmbf(T,fxn+1,psf,dlim,nlim);
     if (val && psf) return 1;
   }
 
@@ -834,7 +839,7 @@ nfcmbf(nfcmbf_t *T,long fxn,GEN psf,long dlim)
     GEN quo,rem, nf = T->nf, nfpol = (GEN)nf[1];
 
     newpsf = RXQX_mul(psf? psf: T->lt, newf, nfpol);
-    newpsf = nf_pol_lift(simplify(newpsf), T);
+    newpsf = nf_pol_lift(simplify_i(newpsf), T);
     /* try out the new combination */
     ltop = avma;
     quo = RXQX_divrem(T->pol,newpsf, nfpol, &rem);
@@ -851,8 +856,8 @@ nfcmbf(nfcmbf_t *T,long fxn,GEN psf,long dlim)
 
   /* If room in degree limit + more modular factors to try, add more factors to
    * newpsf */
-  if (newd < dlim && fxn < T->nfactmod
-                  && nfcmbf(T,fxn+1,newpsf,dlim-newd))
+  if (nlim > 0 && newd < dlim && fxn < T->nfactmod
+                              && nfcmbf(T,fxn+1,newpsf,dlim-newd,nlim-1))
   {
     T->fact[fxn] = 0; /* remove used modular factor */
     return 1;
@@ -977,10 +982,10 @@ nfsqff(GEN nf,GEN pol, long fl)
   T.pr       = pr;
   T.hint     = 1;
 #if 0
-  nfcmbf(&T, 1,NULL,degpol(pol));
+  nfcmbf(&T, 1,NULL,degpol(pol),2);
   m = T.nfact + 1;
   if (degpol(T.pol))
-    T.res[m++] = (long)RXQX_div(T.pol,T.lt,nfpol);
+    T.res[m++] = (long)QXQ_normalize(T.pol,nfpol);
 #else
   T.res = nf_LLL_cmbf(&T,k,p, 0);
   m = lg(T.res);
@@ -1344,16 +1349,15 @@ normlp(GEN L, long p)
 GEN
 nf_LLL_cmbf(nfcmbf_t *T, long a, GEN p, long rec)
 {
-  GEN dn, pb, pa = T->den, famod = T->fact, nfT = (GEN)(T->nf[1]);
+  GEN dn, q, goodq, pa = T->den, famod = T->fact, nfT = (GEN)(T->nf[1]);
   GEN P = simplify(T->pol);
   GEN ZC = L2_bound(nfT, &dn);
   GEN Br = nf_root_bounds(P, nfT);
   GEN B, Btra, PRK = T->h, PRK_GSmin;
   long dnf = degpol(nfT), dP = degpol(P);
 
-  long BitPerFactor = 3; /* nb bits in p^(a-b) / modular factor */
+  long BitPerFactor = 3; /* nb bits / modular factor */
   long i,j,C,r,tmax,tnew,n0,n;
-  double logp = log(gtodouble(p)), LOGp2 = LOG2/logp;
   GEN y, Tra, T2, TT, BL, m, u, norm, target, M, piv, list;
   gpmem_t av, av2, lim;
   int did_recompute_famod = 0;
@@ -1373,20 +1377,19 @@ nf_LLL_cmbf(nfcmbf_t *T, long a, GEN p, long rec)
   /* tmax = current number of traces used (and computed so far) */
   for(tmax = 0;; tmax++)
   {
-    long b, goodb;
     double BvS, Blow;
     if (DEBUGLEVEL>2)
       fprintferr("nf_LLL_cmbf: %ld potential factors (tmax = %ld)\n", r, tmax);
 
     /* Lattice: (S PRK), small vector (vS vP). Find a bound for the image 
-     * write S = S1 p^b + S0, P = P1 p^b + P0 */
+     * write S = S1 q + S0, P = P1 q + P0 */
     BvS = bound_vS(tmax, &BL);
     r = lg(BL)-1;
     tnew = tmax+1;
     { /* bound for f . S_k(genuine factor) */
       GEN N2 = mulsr(dP*dP, normlp(Br, tnew)); /* bound for T_2(S_tnew) */
       Btra = mulrr(ZC, N2);
-      /* assume p^b  > sqrt(Btra) */
+      /* assume q > sqrt(Btra) */
       Blow = 1. + 0.25*(3*sqrt(BvS) + sqrt((double)dnf));
 
       Blow *= Blow;
@@ -1396,13 +1399,12 @@ nf_LLL_cmbf(nfcmbf_t *T, long a, GEN p, long rec)
       M = dbltor( BvS * C * C + Blow );
     }
 
-    b = (long)ceil( 0.5 * gtodouble(mplog(Btra)) / logp ) + 1;
-    if (a <= b || gcmp(PRK_GSmin, Btra) < 0)
+    q = ceil_safe(mpsqrt(Btra));
+    if (gcmp(PRK_GSmin, Btra) < 0)
     {
       GEN prk, polred;
       av2 = avma;
-      if (a <= b) a = b + 5;
-      for (;; avma = av2, a<<=1)
+      for (a<<=1;; avma = av2, a<<=1)
       {
         prk = idealpows(T->nf, T->pr, a);
         pa = gcoeff(prk,1,1);
@@ -1442,12 +1444,11 @@ nf_LLL_cmbf(nfcmbf_t *T, long a, GEN p, long rec)
     m = concatsp( vconcat( gscalmat(C, r), T2 ),
                   vconcat(zeromat(r, dnf), PRK));
 #else
-    goodb = init_padic_prec(gexpo(T2), BitPerFactor, r, LOGp2);
-    if (goodb > b) b = goodb;
+    goodq = shifti(gun, gexpo(T2) - BitPerFactor * r);
+    if (cmpii(goodq, q) > 0) q = goodq;
 
-    pb = gpowgs(p, b);
-    m = concatsp( vconcat( gscalsmat(C, r), gdivround(T2, pb) ),
-                  vconcat(zeromat(r, dnf),  gdivround(PRK,pb)));
+    m = concatsp( vconcat( gscalsmat(C, r), gdivround(T2, q) ),
+                  vconcat(zeromat(r, dnf),  gdivround(PRK,q)));
 #endif
     /*     [  C     0  ]
      * m = [           ]   square matrix
