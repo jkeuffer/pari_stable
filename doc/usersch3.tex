@@ -5750,10 +5750,11 @@ incur numerical instability, but is extremely slow. This function is
 essentially superseded by case 1, so will soon disappear.
 
 If $\fl=4$, $x$ is assumed to have integral entries, but needs not be of
-maximal rank. The result is a two-component vector of matrices, the columns
-of the first matrix representing a basis of the integer kernel of $x$ (not
-necessarily LLL-reduced) and the columns of the second matrix being an
-LLL-reduced $\Z$-basis of the image of the matrix $x$.
+maximal rank. The result is a two-component vector of matrices~: the
+columns of the first matrix represent a basis of the integer kernel of $x$
+(not necessarily LLL-reduced) and the second matrix is the transformation
+matrix $T$ such that $x\cdot T$ is an LLL-reduced $\Z$-basis of the image
+of the matrix $x$.
 
 If $\fl=5$, case as case $4$, but $x$ may have polynomial coefficients.
 
