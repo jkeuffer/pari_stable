@@ -2261,6 +2261,30 @@ dim1proj(GEN prh)
   return ffproj;
 }
 
+/* p not necessarily prime, but coprime to denom(basis) */
+GEN
+get_proj_modT(GEN basis, GEN T, GEN p)
+{
+  long i, l = lg(basis), f = degpol(T);
+  GEN z = cgetg(l, t_MAT);
+  for (i = 1; i < l; i++)
+  {
+    GEN cx, w = (GEN)basis[i];
+    if (typ(w) != t_INT)
+    {
+      w = Q_primitive_part(w, &cx);
+      w = FpX_rem(w, T, p);
+      if (cx)
+      {
+        cx = gmod(cx, p);
+        w = FpX_Fp_mul(w, cx, p);
+      }
+    }
+    z[i] = (long)pol_to_vec(w, f); /* w_i mod (T,p) */
+  }
+  return z;
+}
+
 static GEN
 modprinit(GEN nf, GEN pr, int zk)
 {
@@ -2296,25 +2320,14 @@ modprinit(GEN nf, GEN pr, int zk)
   ffproj = rowextract_p(ffproj, c);
   if (! divise((GEN)nf[4], p))
   {
-    GEN basis, proj_modT;
+    GEN basis = (GEN)nf[7];
     if (N == f) T = (GEN)nf[1]; /* pr inert */
     else
-      T = primpart(gmul((GEN)nf[7], (GEN)pr[2]));
-
-    basis = (GEN)nf[7];
-    proj_modT = cgetg(f+1, t_MAT);
-    for (i=1; i<=f; i++)
     {
-      GEN cx, w = Q_primitive_part((GEN)basis[c[i]], &cx);
-      w = FpX_rem(w, T, p);
-      if (cx)
-      {
-        cx = gmod(cx, p);
-        w = FpX_Fp_mul(w, cx, p);
-      }
-      proj_modT[i] = (long)pol_to_vec(w, f); /* w_i mod (T,p) */
+      T = Q_primpart(gmul(basis, (GEN)pr[2]));
+      basis = vecextract_p(basis, c);
     }
-    ffproj = FpM_mul(proj_modT,ffproj,p);
+    ffproj = FpM_mul(get_proj_modT(basis, T, p), ffproj, p);
 
     res = cgetg(SMALLMODPR+1, t_COL);
     res[mpr_TAU] = (long)tau;
