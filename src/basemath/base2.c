@@ -1045,11 +1045,11 @@ update_den(GEN *e, GEN *de)
 typedef struct __decomp {
 /* constants */
   GEN p, f; /* goal: factor f p-adically */
-  long df; /* p^df = reduced discirminant of f */
+  long df; /* p^df = reduced discriminant of f */
 /* these are updated along the way */
-  GEN phi; /* a p-integer */
-  GEN chi; /* characteristic polynomial of phi (mod p)*/
-  GEN nu; /* irreducible divisor of chi */
+  GEN phi; /* a p-integer, in Q[X] */
+  GEN chi; /* characteristic polynomial of phi (mod p^*), in Z[X] */
+  GEN nu; /* irreducible divisor of chi mod p, in Z[X] */
 } decomp_t;
 
 /* if flag = 0, maximal order, else factorization to precision r = flag */
@@ -1448,7 +1448,7 @@ fastnu(GEN p, GEN f, GEN beta, GEN pdr)
   return gerepilecopy(av, nu);
 }
 
-/* return the prime element in Zp[phi] */
+/* return the prime element in Zp[phi], nup, chip in Z[X] */
 static GEN
 getprime(decomp_t *S, GEN phi, GEN chip, GEN nup, long *Lp, long *Ep)
 {
@@ -1461,7 +1461,7 @@ getprime(decomp_t *S, GEN phi, GEN chip, GEN nup, long *Lp, long *Ep)
     chin = signe(c)? TR_pol(chip, negi(c)): chip;
   }
   else
-    chin = mycaract(chip, nup, NULL, NULL, NULL);
+    chin = ZX_caract(chip, nup, varn(chip));
 
   vstar(S->p, chin, &L, &E);
   (void)cbezout(L, -E, &r, &s);
@@ -1638,15 +1638,13 @@ loop(decomp_t *S, long nv, GEN pdr, GEN pmr, GEN pmf, long Ea, long Fa, GEN ns)
       }
       else
       { /* pmf | norm(beta) ==> useless */
-        chib = mycaract(S->chi, beta, NULL, NULL, NULL);
+        chib = ZX_caract(S->chi, beta, v);
         vstar(S->p, chib, &L, &E);
       }
       eq = (long)(L / E);
       er = (long)(L*Ea / E - eq*Ea);
     }
-
-    if (DEBUGLEVEL>4)
-      fprintferr("  (eq,er) = (%ld,%ld), fm = %ld\n", eq, er, fm);
+    if (DEBUGLEVEL>4) fprintferr("  (eq,er) = (%ld,%ld), fm = %ld\n", eq,er,fm);
 
     /* gamma := beta . p^-eq . nu^-er is a unit */
     gamm = beta;
@@ -1662,7 +1660,6 @@ loop(decomp_t *S, long nv, GEN pdr, GEN pmr, GEN pmf, long Ea, long Fa, GEN ns)
       gamm = lift(gmul(gamm, gpowgs(kapp, er)));
       gamm = redelt(gamm, S->p, S->p);
     }
-
     if (DEBUGLEVEL>5) fprintferr("  gamma = %Z\n", gamm);
 
     if (fm) {
@@ -1677,15 +1674,15 @@ loop(decomp_t *S, long nv, GEN pdr, GEN pmr, GEN pmf, long Ea, long Fa, GEN ns)
         chig = mycaract(S->chi, gamm, S->p, pmr, ns);
       else
       {
-        chig = poleval(chib, gmul(polx[v], gpowgs(S->p, eq)));
-        chig = gdiv(chig, gpowgs(S->p, N*eq));
+        GEN h = gpowgs(S->p, eq);
+        chig = gdiv(unscale_pol(chib, h), gpowgs(h, N));
         chig = polmodi(chig, pmf);
       }
 
       if (!chig || !gcmp1(Q_denom(chig)))
       { /* Valuation of beta was wrong ==> gamma fails the v*-test */
         long L, E;
-        chib = mycaract(S->chi, beta, NULL, NULL, NULL);
+        chib = ZX_caract(S->chi, beta, v);
         vstar(S->p, chib, &L, &E);
         eq = (long)(-L / E);
         er = (long)(-L*Ea / E - eq*Ea);
@@ -1697,7 +1694,7 @@ loop(decomp_t *S, long nv, GEN pdr, GEN pmr, GEN pmf, long Ea, long Fa, GEN ns)
           gamm = gmod(gmul(gamm, gpowgs(S->nu, er)), S->chi);
           gamm = redelt(gamm, S->p, S->p);
         }
-        /* gamm might not be an integer, in this case, chig = NULL */
+        /* gamm is an integer */
         chig = mycaract(S->chi, gamm, S->p, pmf, ns);
       }
       
@@ -1747,7 +1744,7 @@ loop(decomp_t *S, long nv, GEN pdr, GEN pmr, GEN pmf, long Ea, long Fa, GEN ns)
       }
 
       if (gegal(nue, polx[v]))
-      { /* chie is Eisenstein, vp(eta) = vp(gamma - delta) > 0 */
+      { /* vp(eta) = vp(gamma - delta) > 0 */
         long Le, Ee;
         GEN pie;
         if (divise(constant_term(chie), pmr))
@@ -1816,7 +1813,7 @@ nilord(decomp_t *S, GEN dred, long mf, long flag)
       if (!update_phi(S, &pdr, &pmr, pmf, ns)) break;
       pia  = getprime(S, polx[v], S->chi, S->nu, &La, &Ea);
     }
-    pia  = redelt(pia, pmr, p); /* FIXME: should be mod p, not pmr ? */
+    pia  = redelt(pia, pmr, p);
     oE = Ea; opa = RX_RXQ_compo(pia, S->phi, S->f);
     if (La > 1)
     { /* change phi such that nu = pia */
