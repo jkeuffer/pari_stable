@@ -2588,12 +2588,15 @@ typedef struct {
 
 /* return 1 if the absolute polynomial pol (over Q) defines the
    Hilbert class field of the real quadratic field bnf */
-static int
+static GEN
 define_hilbert(void *S, GEN pol)
 {
   DH_t *T = (DH_t*)S;
-  return (degpol(pol) == T->cl
-      && (T->cl & 1 || !egalii(discf(pol), T->dkpow)));
+  GEN d = modulargcd(derivpol(pol), pol);
+
+  if (degpol(pol) != T->cl * degpol(d)) return NULL;
+  pol = gdivexact(pol, d);
+  return (T->cl & 1 || !egalii(discf(pol), T->dkpow))? pol: NULL;
 }
 
 /* let polrel define Hk/k,  find L/Q such that Hk=Lk and L and k are
@@ -2605,6 +2608,7 @@ makescind(GEN nf, GEN polrel, long cl, long prec)
   gpmem_t av = avma;
   GEN pol, polabs, p1, nf2, dabs, dk, bas;
   DH_t T;
+  FP_chk_fun CHECK;
 
   p1 = rnfpolredabs(nf, polrel, 6, prec);
   polabs = (GEN)p1[1];
@@ -2617,10 +2621,14 @@ makescind(GEN nf, GEN polrel, long cl, long prec)
     err(bugparier, "quadhilbert");
 
   /* attempt to find the subfields using polred */
-  p1 = cgetg(3,t_VEC); p1[1]=(long)polabs; p1[2]=(long)bas;
+  p1 = cgetg(3,t_VEC);
+  p1[1] = (long)polabs;
+  p1[2] = (long)bas;
   T.cl = cl;
   T.dkpow = (cl & 1) ? NULL: gpowgs(dk, cl>>1);
-  pol = polredfirstpol(p1, (prec<<1) - 2, &define_hilbert, &T);
+  CHECK.f = &define_hilbert;
+  CHECK.data = (void*)&T;
+  pol = polredfirstpol(p1, prec, &CHECK);
   if (DEBUGLEVEL) msgtimer("polred");
 
   if (!pol)

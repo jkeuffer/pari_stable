@@ -414,7 +414,7 @@ entree oldfonctions[]={
 {"polredabs2",1,(void *)polredabs2,6,"Gp"},
 {"polredabsall",1,(void *)polredabsall,6,"Gp"},
 {"polredabsfast",0,(void *)suppressed,6,""},
-{"polredabsnored",1,(void *)polredabsnored,6,"Gp"},
+{"polredabsnored",1,(void *)polredabs,6,"Gp"},
 {"polsym",21,(void *)polsym,7,"GL"},
 {"polvar",1,(void *)gpolvar,2,"G"},
 {"poly",14,(void *)gtopoly,2,"Gn"},

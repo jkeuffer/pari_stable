@@ -60,26 +60,18 @@ extern int isrational(GEN x);
 extern long int_elt_val(GEN nf, GEN x, GEN p, GEN bp, GEN *t);
 
 static void
-allbase_check_args(GEN f, long code, GEN *y, GEN *ptw1, GEN *ptw2)
+allbase_check_args(GEN f, long flag, GEN *dx, GEN *ptw)
 {
-  GEN w;
+  GEN w = *ptw;
+
+  if (DEBUGLEVEL) (void)timer2();
   if (typ(f)!=t_POL) err(notpoler,"allbase");
   if (degpol(f) <= 0) err(constpoler,"allbase");
-  if (DEBUGLEVEL) (void)timer2();
-  switch(code)
-  {
-    case 0: case 1:
-      *y = ZX_disc(f);
-      if (!signe(*y)) err(talker,"reducible polynomial in allbase");
-      w = auxdecomp(absi(*y),1-code);
-      break;
-    default:
-      w = (GEN)code;
-      *y = factorback(w, NULL);
-  }
+
+  *dx = w? factorback(w, NULL): ZX_disc(f);
+  if (!signe(*dx)) err(talker,"reducible polynomial in allbase");
+  if (!w) *ptw = auxdecomp(absi(*dx), flag & ba_PARTIAL? 0: 1);
   if (DEBUGLEVEL) msgtimer("disc. factorisation");
-  *ptw1 = (GEN)w[1];
-  *ptw2 = (GEN)w[2];
 }
 
 /*******************************************************************/
@@ -484,13 +476,16 @@ ordmax(GEN *cf, GEN p, long epsilon, GEN *ptdelta)
  *  2) discriminant of K (in *y).
  */
 static GEN
-allbase(GEN f, long code, GEN *y)
+allbase2(GEN f, int flag, GEN *dx, GEN *dK, GEN *ptw)
 {
-  GEN w1,w2,a,pro,at,bt,b,da,db,q, *cf,*gptr[2];
+  GEN w,w1,w2,a,pro,at,bt,b,da,db,q, *cf,*gptr[2];
   gpmem_t av=avma,tetpil;
   long n,h,j,i,k,r,s,t,v,mf;
 
-  allbase_check_args(f,code,y, &w1,&w2);
+  w = ptw? *ptw: NULL;
+  allbase_check_args(f,flag,dx, &w);
+  w1 = (GEN)w[1];
+  w2 = (GEN)w[2];
   v = varn(f); n = degpol(f); h = lg(w1)-1;
   cf = (GEN*)cgetg(n+1,t_VEC);
   cf[2]=companion(f);
@@ -552,36 +547,27 @@ allbase(GEN f, long code, GEN *y)
       gerepilemanysp(av1,tetpil,gptr,2);
     }
   }
+  *dK = *dx;
   for (j=1; j<=n; j++)
-    *y = divii(mulii(*y,sqri(gcoeff(a,j,j))), sqri(da));
-  tetpil=avma; *y=icopy(*y);
+    *dK = diviiexact(mulii(*dK,sqri(gcoeff(a,j,j))), sqri(da));
+  tetpil=avma; *dK = icopy(*dK);
   at=cgetg(n+1,t_VEC); v=varn(f);
   for (k=1; k<=n; k++)
   {
     q=cgetg(k+2,t_POL); at[k]=(long)q;
     q[1] = evalsigne(1) | evallgef(2+k) | evalvarn(v);
-    for (j=1; j<=k; j++) q[j+1]=ldiv(gcoeff(a,k,j),da);
+    for (j=1; j<=k; j++) q[j+1] = ldiv(gcoeff(a,k,j),da);
   }
-  gptr[0]=&at; gptr[1]=y;
+  gptr[0] = &at; gptr[1] = dK;
   gerepilemanysp(av,tetpil,gptr,2);
   return at;
 }
 
 GEN
-base2(GEN x, GEN *y)
-{
-  return allbase(x,0,y);
-}
+base2(GEN x, GEN *dK) { return nfbasis0(x, ba_ROUND2, NULL); }
 
 GEN
-discf2(GEN x)
-{
-  GEN y;
-  gpmem_t av=avma,tetpil;
-
-  (void)allbase(x,0,&y); tetpil=avma;
-  return gerepile(av,tetpil,icopy(y));
-}
+discf2(GEN x) { return nfdiscf0(x, ba_ROUND2, NULL); }
 
 /*******************************************************************/
 /*                                                                 */
@@ -606,20 +592,25 @@ fnz(GEN x,long j)
   return 1;
 }
 
-/* retourne la base, dans y le discf et dans ptw la factorisation (peut
- etre partielle) de discf */
+/* return integer basis. Set dK = disc(K), dx = disc(f), w (possibly partial)
+ * factorization of dK. *ptw can be set by the caller, in which case it is
+ * taken to be the factorization of disc(f), then overwritten
+ * [no consistency check] */
 GEN
-allbase4(GEN f,long code, GEN *y, GEN *ptw)
+allbase(GEN f, int flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
 {
-  GEN w,w1,w2,a,da,b,db,bas,q,p1,*gptr[3];
-  long v,n,mf,h,lfa,i,j,k,l;
-  gpmem_t tetpil,av = avma;
+  GEN w, w1, w2, a, da, b, db, p1;
+  long n, mf, lw, i, j, k, l;
 
-  allbase_check_args(f,code,y, &w1,&w2);
-  v = varn(f); n = degpol(f); h = lg(w1)-1;
+  if (flag & ba_ROUND2) return allbase2(f,flag,dx,dK,ptw);
+  w = ptw? *ptw: NULL;
+  allbase_check_args(f, flag, dx, &w);
+  w1 = (GEN)w[1];
+  w2 = (GEN)w[2];
+  n = degpol(f); lw = lg(w1);
   a = NULL; /* gcc -Wall */
-  da= NULL;
-  for (i=1; i<=h; i++)
+  da = NULL;
+  for (i=1; i<lw; i++)
   {
     mf=itos((GEN)w2[i]); if (mf == 1) continue;
     if (DEBUGLEVEL) fprintferr("Treating p^k = %Z^%ld\n",w1[i],mf);
@@ -652,58 +643,46 @@ allbase4(GEN f,long code, GEN *y, GEN *ptw)
     if (DEBUGLEVEL>5)
       fprintferr("Result for prime %Z is:\n%Z\n",w1[i],b);
   }
+  *dK = *dx;
   if (da)
   {
-    for (j=1; j<=n; j++)
-      *y = mulii(divii(*y,sqri(da)),sqri(gcoeff(a,j,j)));
+    *index = diviiexact(da, gcoeff(a,1,1));
+    for (j=2; j<=n; j++) *index = mulii(*index, diviiexact(da, gcoeff(a,j,j)));
+    *dK = diviiexact(*dK, sqri(*index));
     for (j=n-1; j; j--)
       if (cmpis(gcoeff(a,j,j),2) > 0)
       {
-        p1=shifti(gcoeff(a,j,j),-1);
+        p1 = shifti(gcoeff(a,j,j),-1);
         for (k=j+1; k<=n; k++)
           if (cmpii(gcoeff(a,j,k),p1) > 0)
             for (l=1; l<=j; l++)
-              coeff(a,l,k)=lsubii(gcoeff(a,l,k),gcoeff(a,l,j));
+              coeff(a,l,k) = lsubii(gcoeff(a,l,k),gcoeff(a,l,j));
       }
+    a = gdiv(a, da);
   }
-  lfa = 0;
+  else
+  {
+    *index = gun;
+    a = idmat(n);
+  }
+
   if (ptw)
   {
-    for (j=1; j<=h; j++)
+    long lfa = 1;
+    GEN W1, W2, D = *dK;
+
+    w = cgetg(3,t_MAT);
+    W1 = cgetg(lw, t_COL); w[1] = (long)W1;
+    W2 = cgetg(lw, t_COL); w[2] = (long)W2;
+    for (j=1; j<lw; j++)
     {
-      k=ggval(*y,(GEN)w1[j]);
-      if (k) { lfa++; w1[lfa]=w1[j]; w2[lfa]=k; }
+      k = pvaluation(D, (GEN)w1[j], &D);
+      if (k) { W1[lfa] = w1[j]; W2[lfa] = lstoi(k); lfa++; }
     }
+    setlg(W1, lfa);
+    setlg(W2, lfa); *ptw = w;
   }
-  tetpil=avma; *y=icopy(*y);
-  bas=cgetg(n+1,t_VEC); v=varn(f);
-  for (k=1; k<=n; k++)
-  {
-    q=cgetg(k+2,t_POL); bas[k]=(long)q;
-    q[1] = evalsigne(1) | evallgef(k+2) | evalvarn(v);
-    if (da)
-      for (j=1; j<=k; j++) q[j+1]=ldiv(gcoeff(a,j,k),da);
-    else
-    {
-      for (j=2; j<=k; j++) q[j]=zero;
-      q[j]=un;
-    }
-  }
-  if (ptw)
-  {
-    *ptw=w=cgetg(3,t_MAT);
-    w[1]=lgetg(lfa+1,t_COL);
-    w[2]=lgetg(lfa+1,t_COL);
-    for (j=1; j<=lfa; j++)
-    {
-      coeff(w,j,1)=(long)icopy((GEN)w1[j]);
-      coeff(w,j,2)=lstoi(w2[j]);
-    }
-    gptr[2]=ptw;
-  }
-  gptr[0]=&bas; gptr[1]=y;
-  gerepilemanysp(av,tetpil,gptr, ptw?3:2);
-  return bas;
+  return mat_to_vecpol(a, varn(f));
 }
 
 static GEN
@@ -725,122 +704,76 @@ update_fact(GEN x, GEN f)
   return merge_factor_i(decomp(d), g);
 }
 
-/* if y is non-NULL, it receives the discriminant
- * return basis if (ret_basis != 0), discriminant otherwise
- */
 static GEN
-nfbasis00(GEN x0, long flag, GEN p, long ret_basis, GEN *y)
+unscale_vecpol(GEN v, GEN h)
 {
-  GEN x, disc, basis, lead;
-  GEN *gptr[2];
-  gpmem_t tetpil, av = avma;
-  long l = lgef(x0), smll,k;
+  long i, l;
+  GEN w;
+  if (!h) return v;
+  l = lg(v); w = cgetg(l, typ(v));
+  for (i=1; i<l; i++) w[i] = (long)unscale_pol((GEN)v[i], h);
+  return w;
+}
 
-  if (typ(x0)!=t_POL) err(typeer,"nfbasis00");
-  if (l<=3) err(zeropoler,"nfbasis00");
-  for (k=2; k<l; k++)
-    if (typ(x0[k])!=t_INT) err(talker,"polynomial not in Z[X] in nfbasis");
+static void
+_nfbasis(GEN x0, long flag, GEN fa, GEN *pbas, GEN *pdK)
+{
+  GEN x, dx, dK, basis, lead, index;
 
-  x = pol_to_monic(x0,&lead);
+  if (typ(x0)!=t_POL) err(typeer,"nfbasis");
+  if (!degpol(x0)) err(zeropoler,"nfbasis");
+  check_pol_int(x0, "nfbasis");
 
-  if (!p || gcmp0(p))
-    smll = (flag & 1); /* small basis */
-  else
-  {
-    if (lead) p = update_fact(x,p);
-    smll = (long) p;   /* factored basis */
-  }
-
-  if (flag & 2)
-    basis = allbase(x,smll,&disc); /* round 2 */
-  else
-    basis = allbase4(x,smll,&disc,NULL); /* round 4 */
-
-  if (!ret_basis) return gerepilecopy(av,disc);
-
-  tetpil=avma;
-  if (!lead) basis = gcopy(basis);
-  else
-  {
-    long v = varn(x);
-    GEN pol = gmul(polx[v],lead);
-
-    tetpil = avma; basis = gsubst(basis,v,pol);
-  }
-  if (!y)
-    return gerepile(av,tetpil,basis);
-
-  *y = gcopy(disc);
-  gptr[0]=&basis; gptr[1]=y;
-  gerepilemanysp(av,tetpil,gptr,2);
-  return basis;
+  x = pol_to_monic(x0, &lead);
+  if (fa && gcmp0(fa)) fa = NULL; /* compatibility. NULL is the proper arg */
+  if (fa && lead) fa = update_fact(x, fa);
+  basis = allbase(x, flag, &dx, &dK, &index, &fa);
+  if (pbas) *pbas = unscale_vecpol(basis, lead);
+  if (pdK)  *pdK = dK;
 }
 
 GEN
-nfbasis(GEN x, GEN *y, long flag, GEN p)
+nfbasis(GEN x, GEN *pdK, long flag, GEN fa)
 {
-  return nfbasis00(x,flag,p,1,y);
+  gpmem_t av = avma;
+  GEN bas; _nfbasis(x, flag, fa, &bas, pdK);
+  gerepileall(av, 2, &bas, pdK); return bas;
 }
 
 GEN
-nfbasis0(GEN x, long flag, GEN p)
+nfbasis0(GEN x, long flag, GEN fa)
 {
-  return nfbasis00(x,flag,p,1,NULL);
+  gpmem_t av = avma;
+  GEN bas; _nfbasis(x, flag, fa, &bas, NULL);
+  return gerepilecopy(av, bas);
 }
 
 GEN
-nfdiscf0(GEN x, long flag, GEN p)
+nfdiscf0(GEN x, long flag, GEN fa)
 {
-  return nfbasis00(x,flag,p,0,&p);
+  gpmem_t av = avma;
+  GEN dK; _nfbasis(x, flag, fa, NULL, &dK);
+  return gerepilecopy(av, dK);
 }
 
 GEN
-base(GEN x, GEN *y)
-{
-  return allbase4(x,0,y,NULL);
-}
+base(GEN x, GEN *pdK) { return nfbasis(x, pdK, 0, NULL); }
 
 GEN
-smallbase(GEN x, GEN *y)
-{
-  return allbase4(x,1,y,NULL);
-}
+smallbase(GEN x, GEN *pdK) { return nfbasis(x, pdK, ba_PARTIAL, NULL); }
 
 GEN
-factoredbase(GEN x, GEN p, GEN *y)
-{
-  return allbase4(x,(long)p,y,NULL);
-}
+factoredbase(GEN x, GEN fa, GEN *pdK) { return nfbasis(x, pdK, 0, fa); }
 
 GEN
-discf(GEN x)
-{
-  GEN y;
-  gpmem_t av=avma,tetpil;
-
-  (void)allbase4(x,0,&y,NULL); tetpil=avma;
-  return gerepile(av,tetpil,icopy(y));
-}
+discf(GEN x) { return nfdiscf0(x, 0, NULL); }
 
 GEN
-smalldiscf(GEN x)
-{
-  GEN y;
-  gpmem_t av=avma,tetpil;
-
-  (void)allbase4(x,1,&y,NULL); tetpil=avma;
-  return gerepile(av,tetpil,icopy(y));
-}
+smalldiscf(GEN x) { return nfdiscf0(x, ba_PARTIAL, NULL); }
 
 GEN
-factoreddiscf(GEN x, GEN p)
-{
-  GEN y;
-  gpmem_t av=avma,tetpil;
+factoreddiscf(GEN x, GEN fa) { return nfdiscf0(x, 0, fa); }
 
-  (void)allbase4(x,(long)p,&y,NULL); tetpil=avma;
-  return gerepile(av,tetpil,icopy(y));
-}
 
 /* return U if Z[alpha] is not maximal or 2*dU < m-1; else return NULL */
 static GEN
@@ -4019,7 +3952,7 @@ rnfpolredabs(GEN nf, GEN relpol, long flag, long prec)
     msgtimer("absolute basis");
     fprintferr("original absolute generator: %Z\n", POL);
   }
-  red = polredabs0(bas, (flag==6)? nf_ORIG: nf_RAW | nf_NORED, prec);
+  red = polredabs0(bas, (flag==6)? nf_ORIG: nf_RAW, prec);
   pol = (GEN)red[1];
   if (DEBUGLEVEL>1) fprintferr("reduced absolute generator: %Z\n",pol);
   if (flag == 2) return gerepileupto(av,pol);

@@ -13,20 +13,17 @@ Check the License for details. You should have received a copy of it, along
 with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
-GEN initalgall0(GEN x, long flag, long prec);
-
 #define id_PRINCIPAL 0
 #define id_PRIME     1
 #define id_MAT       2
 
-/* for initalgredall */
+/* for nfinit_reduce / _initalg */
+#define nf_NOROOTS     32
+#define nf_PARTIALFACT 16
 #define nf_REDUCE       8
-#define nf_SMALL        4 /* for both */
+#define nf_SMALL        4
 #define nf_PARTIAL      2
 #define nf_ORIG         1
-
-/* for initalgall0 */
-#define nf_REGULAR      0 /* for both */
 
 /* for isprincipal */
 #define nf_GEN   1 /* for polredabs also */
@@ -42,9 +39,12 @@ GEN initalgall0(GEN x, long flag, long prec);
 #define nf_COND 2
 
 /* for polredabs */
-#define nf_NORED 2
 #define nf_ALL   4
 #define nf_RAW   8
+
+/* for polred (FIXME: unify with polredabs)*/
+#define red_PARTIAL 1
+#define red_ORIG    2
 
 /* for lllgramall[gen] */
 #define lll_ALL 0
@@ -57,6 +57,10 @@ GEN initalgall0(GEN x, long flag, long prec);
 #define min_FIRST 1
 #define min_PERF  2
 
+/* for allbase */
+#define ba_PARTIAL 1
+#define ba_ROUND2  2
+
 /* for fincke_pohst() */
 typedef struct FP_chk_fun {
   GEN (*f)(void *,GEN);
@@ -66,4 +70,6 @@ typedef struct FP_chk_fun {
   int skipfirst;
 } FP_chk_fun;
 
-GEN fincke_pohst(GEN a,GEN BOUND,long stockmax,long flag, long PREC, FP_chk_fun *CHECK);
+extern GEN _initalg(GEN x, long flag, long prec);
+extern GEN fincke_pohst(GEN a,GEN BOUND,long stockmax,long flag, long PREC, FP_chk_fun *CHECK);
+extern GEN polredfirstpol(GEN x, long flag, FP_chk_fun *CHECK);

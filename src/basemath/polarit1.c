@@ -1866,17 +1866,21 @@ padicff2(GEN nf,GEN p,long pr)
 static GEN
 padicff(GEN x,GEN p,long pr)
 {
-  GEN q,basden,bas,invbas,mul,dx,nf,mat;
+  GEN q,basden,bas,invbas,mul,dx,dK,nf,fa,g,e;
   long n=degpol(x);
   gpmem_t av=avma;
 
-  nf=cgetg(10,t_VEC); nf[1]=(long)x; dx=discsr(x);
-  mat=cgetg(3,t_MAT); mat[1]=lgetg(3,t_COL); mat[2]=lgetg(3,t_COL);
-  coeff(mat,1,1)=(long)p; coeff(mat,1,2)=lstoi(pvaluation(dx,p,&q));
-  coeff(mat,2,1)=(long)q; coeff(mat,2,2)=un;
-  bas=allbase4(x,(long)mat,(GEN*)(nf+3),NULL);
-  if (!carrecomplet(divii(dx,(GEN)nf[3]),(GEN*)(nf+4)))
-    err(bugparier,"factorpadic2 (incorrect discriminant)");
+  nf=cgetg(10,t_VEC); nf[1]=(long)x;
+  fa = cgetg(3,t_MAT);
+  g = cgetg(3,t_COL); fa[1] = (long)g;
+  e = cgetg(3,t_COL); fa[2] = (long)e;
+  dx = discsr(x);
+  g[1] = (long)p; e[1] = lstoi(pvaluation(dx,p,&q));
+  g[2] = (long)q; e[2] = un;
+
+  bas = nfbasis(x, &dK, 0, fa);
+  nf[3] = (long)dK;
+  nf[4] = divise( diviiexact(dx, dK), p )? (long)p: un;
   basden = get_bas_den(bas);
   invbas = QM_inv(vecpol_to_mat(bas,n), gun);
   mul = get_mul_table(x,basden,invbas,NULL);

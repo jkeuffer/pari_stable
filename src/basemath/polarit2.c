@@ -1243,8 +1243,6 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
   }
 }
 
-extern GEN primitive_pol_to_monic(GEN pol, GEN *ptlead);
-
 /* Return P(h * x) */
 GEN
 unscale_pol(GEN P, GEN h)

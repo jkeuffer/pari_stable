@@ -1207,7 +1207,7 @@ isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag)
 GEN
 isprincipal(GEN bnf,GEN x)
 {
-  return isprincipalall(bnf,x,nf_REGULAR);
+  return isprincipalall(bnf,x,0);
 }
 
 GEN
@@ -2800,7 +2800,7 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
   PRECLLLadd = DEFAULTPREC;
   if (!nf)
   {
-    nf = initalgall0(P, nf_REGULAR, PRECREG);
+    nf = initalg(P, PRECREG);
     /* P was non-monic and nfinit changed it ? */
     if (lg(nf)==3) { CHANGE = (GEN)nf[2]; nf = (GEN)nf[1]; }
   }

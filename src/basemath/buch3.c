@@ -656,7 +656,7 @@ isprincipalrayall(GEN bnr, GEN x, long flag)
 GEN
 isprincipalray(GEN bnr, GEN x)
 {
-  return isprincipalrayall(bnr,x,nf_REGULAR);
+  return isprincipalrayall(bnr,x,0);
 }
 
 GEN
@@ -1631,7 +1631,7 @@ rnfnormgroup0(GEN bnr, GEN polrel, GEN rnf)
       if (oldf && i == lfa && !smodis(discnf, p)) pr = stoi(p);
 
       /* pr^f = N P, P | pr, hence is in norm group */
-      col = gmulsg(f, isprincipalrayall(bnr,pr,nf_REGULAR));
+      col = gmulsg(f, isprincipalrayall(bnr,pr,0));
       group = hnf(concatsp(group, col));
       detgroup = dethnf_i(group);
       k = cmpis(detgroup,reldeg);
@@ -1812,7 +1812,7 @@ discrayrelcond(GEN bnr, GEN H)
 GEN
 discrayabs(GEN bnr, GEN H)
 {
-  return discrayabsall(bnr,H,nf_REGULAR);
+  return discrayabsall(bnr,H,0);
 }
 
 GEN

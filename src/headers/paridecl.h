@@ -342,7 +342,7 @@ GEN     tschirnhaus(GEN x);
 
 /* base2.c */
 
-GEN     allbase4(GEN f, long code, GEN *y, GEN *ptw);
+GEN     allbase(GEN f, int flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw);
 GEN     base(GEN x, GEN *y);
 GEN     base2(GEN x, GEN *y);
 void    checkmodpr(GEN modpr);
@@ -566,14 +566,12 @@ GEN     minim2(GEN a, GEN borne, GEN stockmax);
 GEN     ordred(GEN x, long prec);
 GEN     perf(GEN a);
 GEN     polred(GEN x, long prec);
-GEN     polredfirstpol(GEN x, long prec, int (*check)(void *,GEN), void *arg);
 GEN     polred0(GEN x, long flag, GEN p, long prec);
 GEN     polred2(GEN x, long prec);
 GEN     polredabs(GEN x, long prec);
 GEN     polredabs0(GEN x, long flag, long prec);
 GEN     polredabs2(GEN x, long prec);
 GEN     polredabsall(GEN x, long flun, long prec);
-GEN     polredabsnored(GEN x, long prec);
 GEN     qflll0(GEN x, long flag, long prec);
 GEN     qflllgram0(GEN x, long flag, long prec);
 GEN     smallpolred(GEN x, long prec);
