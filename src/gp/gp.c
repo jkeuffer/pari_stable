@@ -213,15 +213,14 @@ get_sep0(char *t, int colon)
 static char*
 get_sep(char *t)
 {
-    return get_sep0(t,1);
+  return get_sep0(t,1);
 }
 
 static char*
 get_sep_colon_ok(char *t)
 {
-    return get_sep0(t,0);
+  return get_sep0(t,0);
 }
-
 
 /* as above, t must be writeable, return 1 if we modified t */
 static int
@@ -1748,6 +1747,7 @@ escape(char *tch)
 {
   char *s, c;
 
+  _set_analyseur(tch); /* for error messages */
   if (compatible != NONE)
   {
     s = tch;
