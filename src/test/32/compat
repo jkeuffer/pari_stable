@@ -1380,7 +1380,7 @@ x^12 + 1/87178291200*x^14 - 1/20922789888000*x^16 + O(x^18)
 ? isprincipalgen(bnf,[5,2;0,1])
 [[1]~, [7/3, 1/3]~, 157]
 ? isprincipalraygen(bnr,primedec(bnf,7)[1])
-[[9]~, [112595/19683, 13958/19683]~, 160]
+[[9]~, [112595/19683, 13958/19683]~, 192]
 ? ispsp(73!+1)
 1
 ? isqrt(10!^2+1)
@@ -2681,5 +2681,5 @@ d(391, 3120), mod(2081, 3120)]]
 ? getheap()
 [621, 118541]
 ? print("Total time spent: ",gettime());
-Total time spent: 1330
+Total time spent: 1360
 ? \q
