@@ -818,7 +818,7 @@ hermiteconstant(long n)
     case 8: return stoi(256);
   }
   av = avma;
-  h  = gpuigs(divsr(2,mppi(DEFAULTPREC)), n);
+  h  = gpowgs(divsr(2,mppi(DEFAULTPREC)), n);
   h1 = gsqr(ggamma(gdivgs(stoi(n+4),2),DEFAULTPREC));
   return gerepileupto(av, gmul(h,h1));
 }
@@ -855,33 +855,31 @@ isprimitive(GEN nf)
 }
 
 static GEN
+dft_bound()
+{
+  if (DEBUGLEVEL>1) fprintferr("Default bound for regulator: 0.2\n");
+  return dbltor(0.2);
+}
+
+static GEN
 regulatorbound(GEN bnf)
 {
-  long N,R1,R2,R;
-  GEN nf,dKa,bound,p1,c1;
+  long N, R1, R2, R;
+  GEN nf, dKa, p1, c1;
 
   nf = (GEN)bnf[7]; N = degpol(nf[1]);
-  bound = dbltor(0.2);
-  if (!isprimitive(nf))
-  {
-    if (DEBUGLEVEL>1) fprintferr("Default bound for regulator: 0.2\n");
-    return bound;
-  }
+  if (!isprimitive(nf)) return dft_bound();
+
   dKa = absi((GEN)nf[3]);
-  R1 = itos(gmael(nf,2,1));
-  R2 = itos(gmael(nf,2,2)); R = R1+R2-1;
-  if (!R2 && N<12) c1 = gpuigs(stoi(4),N>>1); else c1 = gpuigs(stoi(N),N);
-  if (cmpii(dKa,c1) <= 0)
-  {
-    if (DEBUGLEVEL>1) fprintferr("Default bound for regulator: 0.2\n");
-    return bound;
-  }
+  nf_get_sign(nf, &R1, &R2); R = R1+R2-1;
+  if (!R2 && N<12) c1 = gpowgs(stoi(4),N>>1); else c1 = gpowgs(stoi(N),N);
+  if (cmpii(dKa,c1) <= 0) return dft_bound();
+
   p1 = gsqr(glog(gdiv(dKa,c1),DEFAULTPREC));
-  p1 = gdivgs(gmul2n(gpuigs(gdivgs(gmulgs(p1,3),N*(N*N-1)-6*R2),R),R2),N);
-  p1 = gsqrt(gdiv(p1, hermiteconstant(R)), DEFAULTPREC);
-  if (gcmp(p1,bound) > 0) bound = p1;
+  p1 = divrs(gmul2n(gpowgs(divrs(mulrs(p1,3),N*(N*N-1)-6*R2),R),R2), N);
+  p1 = mpsqrt(gdiv(p1, hermiteconstant(R)));
   if (DEBUGLEVEL>1) fprintferr("Mahler bound for regulator: %Z\n",p1);
-  return bound;
+  return gmax(p1, dbltor(0.2));
 }
 
 /* x given by its embeddings */
@@ -915,7 +913,7 @@ static GEN
 minimforunits(GEN nf, long BORNE, GEN w)
 {
   const long prec = MEDDEFAULTPREC;
-  long n, i, j, k, s, *x, r1;
+  long n, i, j, k, s, *x, r1, cnt = 0;
   gpmem_t av = avma;
   GEN u,r,a,M;
   double p, norme, normin, normax;
@@ -967,6 +965,8 @@ minimforunits(GEN nf, long BORNE, GEN w)
     if (!x[1] && y[1]<=eps) break;
 
     if (DEBUGLEVEL>8){ fprintferr("."); flusherr(); }
+    if (++cnt == 5000) return NULL; /* too expensive */
+
     p = x[1]+z[1]; norme = y[1] + p*p*v[1] + eps;
     if (norme > normax) normax = norme;
     if (is_unit(M,r1, x)
@@ -1037,8 +1037,8 @@ compute_M0(GEN M_star,long N)
       { /* n3 > N/3 >= n1 */
 	k = n2; kk = N-2*k;
 	p2=gsub(M_star,gmulgs(X,k));
-	p3=gmul(gpuigs(stoi(kk),kk),gpuigs(gsubgs(gmul(M_star,p2),kk*kk),k));
-	pol=gsub(p3,gmul(gmul(gpuigs(stoi(k),k),gpuigs(X,k)),gpuigs(p2,N-k)));
+	p3=gmul(gpowgs(stoi(kk),kk),gpowgs(gsubgs(gmul(M_star,p2),kk*kk),k));
+	pol=gsub(p3,gmul(gmul(gpowgs(stoi(k),k),gpowgs(X,k)),gpowgs(p2,N-k)));
 	prec=gprecision(pol); if (!prec) prec = MEDDEFAULTPREC;
 	r=roots(pol,prec); lr = lg(r);
 	for (i=1; i<lr; i++)
@@ -1056,7 +1056,7 @@ compute_M0(GEN M_star,long N)
           if (gsigne(v) <= 0) continue;
 
           u=gmul2n(gadd(S,p6),-1);
-          w=gpui(P,gdivgs(stoi(-k),kk),prec);
+          w=gpow(P,gdivgs(stoi(-k),kk),prec);
           p6=gmulsg(k,gadd(gsqr(glog(u,prec)),gsqr(glog(v,prec))));
           M0_pro=gmul2n(gadd(p6,gmulsg(kk,gsqr(glog(w,prec)))),-2);
           if (DEBUGLEVEL>2)
@@ -1074,7 +1074,7 @@ compute_M0(GEN M_star,long N)
 	f2 = gadd(f2,gmulsg(n2,gmul(X,Z)));
 	f2 = gadd(f2,gmulsg(n3,gmul(X,Y)));
 	f2 = gsub(f2,gmul(M,gmul(X,gmul(Y,Z))));
-	f3 = gsub(gmul(gpuigs(X,n1),gmul(gpuigs(Y,n2),gpuigs(Z,n3))), gun);
+	f3 = gsub(gmul(gpowgs(X,n1),gmul(gpowgs(Y,n2),gpowgs(Z,n3))), gun);
         /* f1 = n1 X + n2 Y + n3 Z - M */
         /* f2 = n1 YZ + n2 XZ + n3 XY */
         /* f3 = X^n1 Y^n2 Z^n3 - 1*/
@@ -1159,6 +1159,7 @@ lowerboundforregulator_i(GEN bnf)
   if (gexpo(minunit) > 30) return NULL;
 
   vecminim = minimforunits(nf, itos(gceil(minunit)), gmael3(bnf,8,4,1));
+  if (!vecminim) return NULL;
   bound = (GEN)vecminim[3];
   i = gexpo(gsub(bound,minunit));
   if (i > -5) err(bugparier,"lowerboundforregulator");
@@ -1168,7 +1169,7 @@ lowerboundforregulator_i(GEN bnf)
     fprintferr("M* = %Z\n", bound);
     if (DEBUGLEVEL>2)
     {
-      p1=polx[0]; pol=gaddgs(gsub(gpuigs(p1,N),gmul(bound,p1)),N-1);
+      p1=polx[0]; pol=gaddgs(gsub(gpowgs(p1,N),gmul(bound,p1)),N-1);
       p1 = roots(pol,DEFAULTPREC);
       if (N&1) y=greal((GEN)p1[3]); else y=greal((GEN)p1[2]);
       M0 = gmul2n(gmulsg(N*(N-1),gsqr(glog(y,DEFAULTPREC))),-2);
@@ -1178,7 +1179,7 @@ lowerboundforregulator_i(GEN bnf)
   }
   M0 = compute_M0(bound,N);
   if (DEBUGLEVEL>1) { fprintferr("M0 = %Z\n",gprec_w(M0,3)); flusherr(); }
-  M = gmul2n(gdivgs(gdiv(gpuigs(M0,RU),hermiteconstant(RU)),N),R2);
+  M = gmul2n(gdivgs(gdiv(gpowgs(M0,RU),hermiteconstant(RU)),N),R2);
   if (gcmp(M, dbltor(0.04)) < 0) return NULL;
   M = gsqrt(M,DEFAULTPREC);
   if (DEBUGLEVEL>1)
@@ -1282,7 +1283,7 @@ certifybuchall(GEN bnf)
 
   bnf = checkbnf(bnf); nf = (GEN)bnf[7];
   N=degpol(nf[1]); if (N==1) return 1;
-  R1=itos(gmael(nf,2,1)); R2=itos(gmael(nf,2,2)); R=R1+R2-1;
+  nf_get_sign(nf, &R1, &R2); R = R1+R2-1;
   funits = check_units(bnf,"bnfcertify");
   testprime(bnf, zimmertbound(N,R2,absi((GEN)nf[3])));
   reg = gmael(bnf,8,2);
@@ -2454,7 +2455,7 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
             ideal = idealmulpowprime(nf,ideal,p1,(GEN)ex[k]);
           }
           S=0; clhss=0;
-          normi = ii; normps= itos(gpuigs(gprime,resp));
+          normi = ii; normps= itos(gpowgs(gprime,resp));
           for (j=1; j<=ep; j++)
           {
             GEN fad, fad1, fad2;

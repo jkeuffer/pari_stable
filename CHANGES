@@ -67,6 +67,8 @@ IZ 12- [gnuplot + dynamic link:] allow building even when dlopen() not available
    23- memory leak in gp when handling '&' arguments 
    24- removed hack in gcopy [ did not reset the isclone() flag because
        gunclone checks isonstack(). But other routines may want to use it ].
+   25- apparent oo loop in bnfcertify [when computing lower bound for
+       regulator]
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).
