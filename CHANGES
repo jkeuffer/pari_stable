@@ -290,8 +290,8 @@ GH 56- more robust thue(): faster enumeration of small solution, don't assume
   Added
     1- make test-all [ all available test suites (SLOW !)]
 BA  2- add support for GNU/Hurd.
-    3- conversion routines zv_ZC, zv_ZV, zm_ZM, and matrix multiplication:
-       RM_zm_mul, ZM_zm_mul
+    3- conversion routines zv_to_ZC, zv_to_ZV, zm_to_ZM, and matrix
+    multiplication: RgM_zm_mul, ZM_zm_mul.
     4- output support for zm / Flm matrices (t_MAT with t_VECSMALLs instead
        of t_COLs)
     5- FpM_rank
