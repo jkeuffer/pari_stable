@@ -29,7 +29,7 @@ TP = Thomas Papanikolaou
 XR = Xavier Roblot
 YU = Yoshiaki Uchikawa
 
-Done for version 2.2.0 (released ??/??/2001):
+Done for version 2.2.0 (released 30/04/2001):
 
   Fixed
 BA  1- gpflog could print some lines twice
