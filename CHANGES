@@ -60,6 +60,9 @@ IZ 12- [gnuplot + dynamic link:] allow building even when dlopen() not available
    19- idealmul(nf, principal ideal, prime ideal) returned wrong result
        [introduced sometime in 2.2]
    20- elltors(ellinit([...], 1)) --> SEGV
+   21- try to make sure life of GP variables is not too short. Was:
+         v = [0,0]; v + [v=0,v=0] --> SEGV
+         u = Mod(x*Mod(1,2),polcyclo(25)*Mod(1,2)); sum(i=1,4,u=u^32) --> SEGV
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).
