@@ -142,6 +142,7 @@ BA 60- add "const" keyword to allow building with g++
    81- [default:] realprecision was allowed to be 0, and then treated as 9.
    82- Precision loss in inputs of large exponent: 1e100000 -->9.99999824 E99999
    83- quadgen / quadpoly accepted square inputs --> weird bugs later.
+   84- poldegree(x^2 / y^4, y) --> -1
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available
@@ -215,6 +216,7 @@ BA 46- --disable-kernel Configure option replaced by --kernel=none
    49- faster trueeta(), faster quadhilbert(D < 0)
    50- faster isprime (trial divide by small primes, recognize 1-word moduli)
    51- ellheight: use Mestre's AGM to compute Archimedean height
+   52- poldegree(0) is now VERYBIGINT
 
   Added:
     1- [TeXmacs:] contextual completion (<TAB>)

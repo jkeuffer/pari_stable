@@ -199,22 +199,24 @@ padicprec(GEN x, GEN p)
   return 0; /* not reached */
 }
 
+#define DEGREE0 -VERYBIGINT
 /* Degree of x (scalar, t_POL, t_RFRAC) wrt variable v if v >= 0,
- * wrt to main variable if v < 0.  Convention: deg(0) = -1.
+ * wrt to main variable if v < 0.
  */
 long
 poldegree(GEN x, long v)
 {
   long tx = typ(x), lx,w,i,d;
 
-  if (is_scalar_t(tx)) return gcmp0(x)? -1: 0;
+  if (is_scalar_t(tx)) return gcmp0(x)? DEGREE0: 0;
   switch(tx)
   {
     case t_POL:
+      if (!signe(x)) return DEGREE0;
       w = varn(x);
       if (v < 0 || v == w) return degpol(x);
-      if (v < w) return signe(x)? 0: -1;
-      lx = lgef(x); d = -1;
+      if (v < w) return 0;
+      lx = lgef(x); d = DEGREE0;
       for (i=2; i<lx; i++)
       {
         long e = poldegree((GEN)x[i], v);
@@ -223,7 +225,7 @@ poldegree(GEN x, long v)
       return d;
 
     case t_RFRAC: case t_RFRACN:
-      if (gcmp0((GEN)x[1])) return -1;
+      if (gcmp0((GEN)x[1])) return DEGREE0;
       return poldegree((GEN)x[1],v) - poldegree((GEN)x[2],v);
   }
   err(typeer,"degree");
