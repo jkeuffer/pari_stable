@@ -58,7 +58,8 @@ IS 13- gp-dyn build on AIX
    14- subst(y*x,y^2,x) --> 0
    15- rnfisnorminit(x,x^3-2) --> SEGV [ bad input. Missing argument checks ]
    16- Conpiling with g++ + gmp, missing gmp version number [missing stdio.h]
-   17- [AIX:] various compilation problems
+IS 17- [AIX:] various compilation problems + select better CFLAGS
+       (-qtune=auto -qmaxmem=8192)
 
   Changed
     1- rnf structure (removed useless components)
