@@ -1075,14 +1075,9 @@ gdivmod(GEN x, GEN y, GEN *pr)
 /*******************************************************************/
 
 /* Shift tronque si n<0 (multiplication tronquee par 2^n)  */
-GEN
-gshift(GEN x, long n)
-{
-  return gshift3(x, n, 0);
-}
 
 GEN
-gshift3(GEN x, long n, long flag)
+gshift(GEN x, long n)
 {
   long i,l,lx, tx = typ(x);
   GEN y;
@@ -1090,7 +1085,7 @@ gshift3(GEN x, long n, long flag)
   switch(tx)
   {
     case t_INT:
-      return shifti3(x,n,flag);
+      return shifti(x,n);
     case t_REAL:
       return shiftr(x,n);
 

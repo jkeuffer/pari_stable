@@ -1298,7 +1298,6 @@ GEN     resss(long x, long y);
 double  rtodbl(GEN x);
 GEN     setloop(GEN a);
 GEN     shifti(GEN x, long n);
-void	shift_r(ulong *target, ulong *source, ulong *source_end, ulong prepend, ulong sh);
 GEN     shifti3(GEN x, long n, long flag);
 long    smodsi(long x, GEN y);
 GEN     sqri(GEN x);

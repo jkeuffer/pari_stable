@@ -415,38 +415,6 @@ shifti(GEN x, long n)
 }
 
 GEN
-shifti3(GEN x, long n, long flag)
-{
-  long s, lyorig, ly, i, m, lx = lgefint(x);
-  GEN y = shifti(x, n);
-
-  if (!flag || n >= 0 || (s = signe(x)) >= 0) return y;
-  if (y == gzero) return stoi(-1);
-  err(impl,"GMP shifti3");
-  n = -n;
-  /* With FLAG: round up instead of rounding down */
-  ly = lgefint(y);
-  lyorig = lx - (n>>TWOPOTBITS_IN_LONG);
-  m = n & (BITS_IN_LONG-1);
-  /* Check low bits of x */
-  i = lx; flag = 0;
-  while (--i >= lyorig)
-    if (x[lx-i]) { flag = 1; break; }  /* Need to increment y by 1 */
-  if (!flag && m)
-    flag = x[lyorig - 1] & ((1<<m) - 1);
-  if (flag) { /* Increment y */
-    for (i = ly;;)
-    { /* Extend y on the left? */
-      if (--i < 2) { ly++; y = new_chunk(1); y[2] = 1; break; }
-      if (++y[i]) break;
-      /* Now propagate the bit into the next longword */
-    }
-  }
-  y[1] = evalsigne(s)|evallgefint(ly);
-  y[0] = evaltyp(t_INT)|evallg(ly); return y;
-}
-
-GEN
 ishiftr_spec(GEN x, long lx, long n)
 {
   long ly, i, m, s = signe(x);
@@ -1916,44 +1884,6 @@ isqrti(GEN a)
   res[1] = evalsigne(1) | evallgefint(l);
   mpn_sqrtrem(LIMBS(res),NULL,LIMBS(a),NLIMBS(a));
   return res;
-}
-
-/********************************************************************/
-/**                                                                **/
-/**                             SHIFT                              **/
-/**                                                                **/
-/********************************************************************/
-
-/* target should point to a buffer of source_end - source + 1 ulongs.
-
-   fills this buffer by bits of ulongs in source..source_end-1 shifted
-   right sh units; the "most significant" sh bits of the result are
-   set to be the least significant sh bits of prepend.
-
-   The ordering of bits in this bitmap is the same as for t_INT.
-
-   sh should not exceed BITS_IN_LONG.
- */
-void
-shift_r(ulong *target, ulong *source, ulong *source_end, ulong prepend, ulong sh)
-{
-  err(warner,"GMP: shift_r is not tested");
-  if (sh)
-  {
-    register ulong sh_complement = BITS_IN_LONG - sh;
-    register ulong _k,_l = *source--;
-    *target-- = (_l>>(ulong)sh) | ((ulong)prepend<<(ulong)sh_complement);
-    while (source > source_end)
-    {
-      _k = _l<<(ulong)sh_complement; _l = *source--;
-      *target-- = (_l>>(ulong)sh) | _k;
-    }
-  } else {
-    int i;
-
-    for (i=0; i < source_end - source; i++)
-      target[i] = source[i];
-  }
 }
 
 /* Normalize a non-negative integer.  */

@@ -381,37 +381,6 @@ shifti(GEN x, long n)
   return shifti_spec(x, lgefint(x), n);
 }
 
-GEN
-shifti3(GEN x, long n, long flag)
-{
-  long s, lyorig, ly, i, m, lx = lgefint(x);
-  GEN y = shifti_spec(x, lx, n);
-
-  if (!flag || n >= 0 || (s = signe(x)) >= 0) return y;
-  if (y == gzero) return stoi(-1);
-  n = -n;
-  /* With FLAG: round up instead of rounding down */
-  ly = lgefint(y);
-  lyorig = lx - (n>>TWOPOTBITS_IN_LONG);
-  m = n & (BITS_IN_LONG-1);
-  /* Check low bits of x */
-  i = lx; flag = 0;
-  while (--i >= lyorig)
-    if (x[i]) { flag = 1; break; }  /* Need to increment y by 1 */
-  if (!flag && m)
-    flag = x[lyorig - 1] & ((1<<m) - 1);
-  if (flag) { /* Increment y */
-    for (i = ly;;)
-    { /* Extend y on the left? */
-      if (--i < 2) { ly++; y = new_chunk(1); y[2] = 1; break; }
-      if (++y[i]) break;
-      /* Now propagate the bit into the next longword */
-    }
-  }
-  y[1] = evalsigne(s)|evallgefint(ly);
-  y[0] = evaltyp(t_INT)|evallg(ly); return y;
-}
-
 GEN ishiftr_spec(GEN x, long lx, long n)
 {
   /*This is a kludge since x is not an integer*/
@@ -2231,31 +2200,6 @@ racine_r(GEN a, long l)
 
 /* Return trunc(sqrt(a))). a must be an non-negative integer*/
 GEN isqrti(GEN a) {return racine_r(a,lgefint(a));}
-
-/* target should point to a buffer of source_end - source + 1 ulongs.
-
-   fills this buffer by bits of ulongs in source..source_end-1 shifted
-   right sh units; the "most significant" sh bits of the result are
-   set to be the least significant sh bits of prepend.
-
-   The ordering of bits in this bitmap is the same as for t_INT.
-
-   sh should not exceed BITS_IN_LONG.
- */
-void
-shift_r(ulong *target, ulong *source, ulong *source_end, ulong prepend, ulong sh)
-{
-  if (sh) {				/* shift_words_r() works */
-    register ulong sh_complement = BITS_IN_LONG - sh;
-
-    shift_words_r(target, source, source_end, prepend, sh, sh_complement);
-  } else {
-    int i;
-
-    for (i=0; i < source_end - source; i++)
-      target[i] = source[i];
-  }
-}
 
 /* Normalize a non-negative integer.  */
 GEN
