@@ -837,10 +837,9 @@ Flx_extresultant(GEN a, GEN b, ulong p, GEN *ptU, GEN *ptV)
   GEN z,q,u,v, x = a, y = b;
   ulong lb, res = 1UL;
   pari_sp av = avma;
-  long dx,dy,dz;
+  long dx, dy, dz;
   long vs=a[1];
 
-  if (!signe(x) || !signe(y)) return 0;
   dx = degpol(x);
   dy = degpol(y);
   if (dy > dx)
@@ -849,6 +848,9 @@ Flx_extresultant(GEN a, GEN b, ulong p, GEN *ptU, GEN *ptV)
     a = x; b = y;
     if (both_odd(dx,dy)) res = p-res;
   }
+  /* dx <= dy */
+  if (dx < 0) return 0;
+
   u = Flx_zero(vs);
   v = Fl_Flx(1,vs); /* v = 1 */
   while (dy)
