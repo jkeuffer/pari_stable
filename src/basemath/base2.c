@@ -3503,7 +3503,7 @@ nf_all_roots(GEN nf, GEN x, long prec)
   long i, j, l = lgef(x), ru = lg(nf[6]);
   GEN y = cgetg(l, t_POL), v, z;
 
-  x = unifpol(nf, x, 0);
+  x = unifpol(nf, x, t_COL);
   y[1] = x[1];
   for (i=2; i<l; i++) y[i] = (long) nftocomplex(nf, (GEN)x[i]);
   i = gprecision(y); if (i && i <= 3) return NULL;
@@ -3905,7 +3905,7 @@ rnfpolredabs(GEN nf, GEN relpol, long flag)
   if (typ(relpol)!=t_POL) err(typeer,"rnfpolredabs");
   nf = checknf(nf); v = varn(relpol);
   if (DEBUGLEVEL>1) (void)timer2();
-  relpol = unifpol(nf,relpol,1);
+  relpol = unifpol(nf, relpol, t_POLMOD);
   T = (GEN)nf[1];
   if ((flag & nf_ADDZK) && !(flag & nf_ABSOLUTE))
     err(impl,"this combination of flags in rnfpolredabs");

@@ -99,59 +99,41 @@ RXQX_mul(GEN x, GEN y, GEN T)
 }
 
 static GEN
-unifpol0(GEN nf,GEN pol,long flag)
+unifpol0(GEN nf,GEN x,long flag)
 {
-  static long n = 0;
-  static GEN vun = NULL;
-  GEN f = (GEN) nf[1];
-  long i = degpol(f);
-  pari_sp av;
-
-  if (i != n)
+  switch(typ(x))
   {
-    n=i; if (vun) free(vun);
-    vun = (GEN) gpmalloc((n+1)*sizeof(long));
-    vun[0] = evaltyp(t_COL) | evallg(n+1); vun[1]=un;
-    for ( ; i>=2; i--) vun[i]=zero;
-  }
+    case t_INT: case t_FRAC: case t_FRACN:
+      return gcopy(x);
 
-  av = avma;
-  switch(typ(pol))
-  {
-    case t_INT: case t_FRAC: case t_RFRAC:
-      if (flag) return gcopy(pol);
-      pol = gmul(pol,vun); break;
-
-    case t_POL:
-      if (flag && !degpol(pol)) return gcopy(constant_term(pol));
-      pol = gmodulcp(pol,f); /* fall through */
     case t_POLMOD:
-      pol = algtobasis(nf,pol);
+      x = (GEN)x[2]; /* fall through */
+      if (typ(x) != t_POL) return gcopy(x); /* scalar */
+    case t_POL:
+      if (!degpol(x)) return gcopy(constant_term(x));
+      return (flag == t_COL)? algtobasis_i(nf, x): gmodulcp(x, (GEN)nf[1]);
+
+    default: /* t_COL */
+      return (flag == t_COL)? gcopy(x): basistoalg(nf, x);
   }
-  if (flag) pol = basistoalg(nf, lift(pol));
-  return gerepileupto(av,pol);
 }
 
-/* Let pol be a polynomial with coefficients in Z or nf (vectors or polymods)
+/* Let x be a polynomial with coefficients in Z or nf (vectors or polymods)
  * return the same polynomial with coefficients expressed:
  *  if flag=0: as vectors (on the integral basis).
  *  if flag=1: as polymods.
  */
 GEN
-unifpol(GEN nf,GEN pol,long flag)
+unifpol(GEN nf, GEN x, long flag)
 {
-  if (typ(pol)==t_POL && varn(pol) < varn(nf[1]))
+  if (typ(x)==t_POL && varn(x) < varn(nf[1]))
   {
-    long i, d = lgef(pol);
-    GEN p1 = pol;
-
-    pol=cgetg(d,t_POL); pol[1]=p1[1];
-    for (i=2; i<d; i++)
-      pol[i] = (long) unifpol0(nf,(GEN) p1[i],flag);
-
-    return pol;
+    long i, d = lgef(x);
+    GEN y = cgetg(d,t_POL); y[1] = x[1];
+    for (i=2; i<d; i++) y[i] = (long)unifpol0(nf, (GEN)x[i], flag);
+    return y;
   }
-  return unifpol0(nf,(GEN) pol, flag);
+  return unifpol0(nf, (GEN)x, flag);
 }
 
 /* factorization of x modulo (T,p). Assume x already reduced */
@@ -386,6 +368,13 @@ nffactor(GEN nf,GEN pol)
   rep[2] = (long)p1; return sort_factor(rep, cmp_pol);
 }
 
+/* assume x scalar or t_COL */
+static GEN
+arch_for_T2(GEN G, GEN x)
+{
+  return (typ(x) == t_COL)? gmul(G,x): gmul((GEN)G[1],x);
+}
+
 /* return a bound for T_2(P), P | polbase in C[X]
  * NB: Mignotte bound: A | S ==>
  *  |a_i| <= binom(d-1, i-1) || S ||_2 + binom(d-1, i) lc(S)
@@ -400,7 +389,6 @@ nf_Mignotte_bound(GEN nf, GEN polbase)
   GEN p1, C, N2, matGS, binlS, bin;
   long prec, i, j, d = degpol(polbase), n = degpol(nf[1]), r1 = nf_get_r1(nf);
 
-  if (typ(lS) == t_COL) lS = (GEN)lS[1];
   binlS = bin = vecbinome(d-1);
   if (!gcmp1(lS)) binlS = gmul(lS, bin);
 
@@ -411,7 +399,7 @@ nf_Mignotte_bound(GEN nf, GEN polbase)
     nffp_t F;
 
     matGS = cgetg(d+2, t_MAT);
-    for (j=0; j<=d; j++) matGS[j+1] = lmul(G, (GEN)polbase[j+2]);
+    for (j=0; j<=d; j++) matGS[j+1] = (long)arch_for_T2(G, (GEN)polbase[j+2]);
     matGS = gtrans_i(matGS);
     for (j=1; j <= r1; j++) /* N2[j] = || sigma_j(S) ||_2 */
     {
@@ -475,7 +463,7 @@ nf_Beauzamy_bound(GEN nf, GEN polbase)
     s = realzero(prec);
     for (i=0; i<=d; i++)
     {
-      GEN p1 = gnorml2(gmul(G, gmul(run, (GEN)POL[i]))); /* T2(POL[i]) */
+      GEN p1 = gnorml2(arch_for_T2(G, gmul(run, (GEN)POL[i]))); /* T2(POL[i]) */
       if (!signe(p1)) continue;
       if (lg(p1) == 3) break;
       /* s += T2(POL[i]) / binomial(d,i) */
@@ -490,7 +478,7 @@ nf_Beauzamy_bound(GEN nf, GEN polbase)
       if (DEBUGLEVEL>1) err(warnprec, "nf_factor_bound", prec);
     }
   }
-  lt = (GEN)leading_term(polbase)[1];
+  lt = leading_term(polbase);
   s = gmul(s, mulis(sqri(lt), n));
   C = gpow(stoi(3), dbltor(1.5 + d), DEFAULTPREC); /* 3^{3/2 + d} */
   return gdiv(gmul(C, s), gmulsg(d, mppi(DEFAULTPREC)));
@@ -1014,13 +1002,15 @@ nf_check_factors(nfcmbf_t *T, GEN P, GEN M_L, GEN famod, GEN pk)
 static GEN
 nf_to_Zq(GEN x, GEN T, GEN pk, GEN pks2, GEN proj)
 {
-  GEN y = gmul(proj, x);
+  GEN y;
+  if (typ(x) != t_COL) return centermodii(x, pk, pks2);
+  y = gmul(proj, x);
   if (!T) return centermodii(y, pk, pks2);
   y = vec_to_pol(y, varn(T));
   return centermod_i(FpX_rem(y, T, pk), pk, pks2);
 }
 
-/* Assume P in nfX form [ unifpol(,0) ], lc(P) != 0 mod p.
+/* Assume P in nfX form [ unifpol(,t_COL) ], lc(P) != 0 mod p.
  * Reduce P to Zp[X]/(T) mod p^a */
 static GEN
 ZqX(GEN P, GEN pk, GEN T, GEN proj)
@@ -1318,14 +1308,14 @@ nf_combine_factors(nfcmbf_t *T, GEN polred, GEN p, long a, long klim)
   famod = (GEN)listmod[l];
   if (maxK >= 0 && lg(famod)-1 > 2*maxK)
   {
-    if (l > 1) T->polbase = unifpol(nf, (GEN)res[l], 0);
+    if (l > 1) T->polbase = unifpol(nf, (GEN)res[l], t_COL);
     L = nf_LLL_cmbf(T, p, a, maxK);
     /* remove last elt, possibly unfactored. Add all new ones. */
     setlg(res, l); res = concatsp(res, L);
   }
 
   m = lg(res); z = cgetg(m, t_VEC);
-  for (i=1;i<m; i++) z[i] = (long)unifpol(nf,(GEN)res[i],1);
+  for (i=1;i<m; i++) z[i] = (long)unifpol(nf,(GEN)res[i], t_POLMOD);
   return z;
 }
 
@@ -1382,7 +1372,7 @@ nfsqff(GEN nf, GEN pol, long fl)
   long i, n, nbf, ct, maxf, dpol = degpol(pol);
   ulong pp;
   pari_sp av = avma;
-  GEN pr, C0, C, dk, bad, polbase, init_fa = NULL;
+  GEN pr, C0, dk, bad, polbase, init_fa = NULL;
   GEN N2, rep, polmod, polred, lt, nfpol;
   byteptr pt = diffptr;
   nfcmbf_t T;
@@ -1391,9 +1381,9 @@ nfsqff(GEN nf, GEN pol, long fl)
 
   if (DEBUGLEVEL>2) { TIMERstart(&ti); TIMERstart(&ti_tot); }
   nfpol = (GEN)nf[1]; n = degpol(nfpol);
-  polbase = unifpol(nf,pol,0);
+  polbase = unifpol(nf, pol, t_COL);
   if (typ(polbase) != t_POL) err(typeer, "nfsqff");
-  polmod  = unifpol(nf,pol,1);
+  polmod  = unifpol(nf, pol, t_POLMOD);
   /* heuristic */
   if (dpol*3 < n) 
   {
@@ -1413,7 +1403,7 @@ nfsqff(GEN nf, GEN pol, long fl)
   }
 
   pol = simplify_i(lift(polmod));
-  lt  = (GEN)leading_term(polbase)[1]; /* t_INT */
+  lt  = leading_term(polbase); /* t_INT */
   if (gcmp1(lt)) lt = NULL;
 
   dk = absi((GEN)nf[3]);
@@ -1515,8 +1505,7 @@ nfsqff(GEN nf, GEN pol, long fl)
 
   if (fl) C0 = normlp(T.Br, 2, n);
   else    C0 = nf_factor_bound(nf, polbase); /* bound for T_2(Q_i), Q | P */
-  C = mulrr(T.ZC, C0); /* bound for |Q_i|^2 in Z^n on chosen Z-basis */
-  T.bound = C;
+  T.bound = mulrr(T.ZC, C0); /* bound for |Q_i|^2 in Z^n on chosen Z-basis */
 
   N2 = mulsr(dpol*dpol, normlp(T.Br, 4, n)); /* bound for T_2(lt * S_2) */
   T.BS_2 = mulrr(T.ZC, N2); /* bound for |S_2|^2 on chosen Z-basis */
@@ -1525,12 +1514,12 @@ nfsqff(GEN nf, GEN pol, long fl)
     msgTIMER(&ti, "bound computation");
     fprintferr("  1) T_2 bound for %s: %Z\n", fl?"root":"factor", C0);
     fprintferr("  2) Conversion from T_2 --> | |^2 bound : %Z\n", T.ZC);
-    fprintferr("  3) Final bound: %Z\n", C);
+    fprintferr("  3) Final bound: %Z\n", T.bound);
   }
 
   L.p = (GEN)pr[1];
   if (L.Tp && degpol(L.Tp) == 1) L.Tp = NULL;
-  bestlift_init(0, nf, pr, C, &L);
+  bestlift_init(0, nf, pr, T.bound, &L);
   if (DEBUGLEVEL>2) TIMERstart(&ti);
   polred = ZqX_normalize(polbase, lt, &L); /* monic */
 
@@ -1583,6 +1572,6 @@ rnfcharpoly(GEN nf,GEN T,GEN alpha,int v)
   if (lgef(alpha) >= lT) alpha = gmod(alpha,T);
   if (lT <= 4)
     return gerepileupto(av, gsub(polx[v], alpha));
-  p1 = caract2(unifpol(nf,T,1), unifpol(nf,alpha,1), v);
-  return gerepileupto(av, unifpol(nf,p1,1));
+  p1 = caract2(T, unifpol(nf,alpha, t_POLMOD), v);
+  return gerepileupto(av, unifpol(nf, p1, t_POLMOD));
 }
