@@ -89,6 +89,7 @@ XR 46- forgotten case in Round4 [ nfdisc(x^12-10*x^11-57*x^10+740*x^9+353*x^8-16
    47- sin(1e-100) ---> 9.999999999999999999735998397 E-101 [ precision loss ]
    48- idealpow(nf,x, n < 0, 1) did not reduce the result
    49- gcd(0, -1) --> -1, content([0, Pi]) --> 3.14, content([0,Pi,Pi]) --> 1
+BA 50- compilation problem on OSF (RTLD_GLOBAL undefined)
 
   Changed
 BA  1- improved Fp_isom
