@@ -1435,7 +1435,7 @@ GEN Fp_factor_irred(GEN P,GEN l, GEN Q)
   MQ = matrixpow(nq,d,SQ,Q,l);
   M = FpM_mul(MQ,M,l);
   M = FpM_mul(M,E,l);
-  /*M = gerepileupto(av,M);*/
+  M = gerepileupto(av,M);
   V = cgetg(d+1,t_VEC);
   V[1]=(long)M;
   for(i=2;i<=d;i++)
