@@ -21,6 +21,15 @@ Unless specified otherwise, examples assume 32bit machine and default precision
    ? O(y^5)/(1+x+O(x^3))
    %2 = O(y^5) + O(y^5)*x + O(y^5)*x^2 + O(x^3)
 
+-  factorff(ffinit(211,223),211,ffinit(211,223,a))
+   ***   degree overflow
+   to_Kronecker(x,y) returns a polynomial whose degree is roughly 2deg(x)deg(y),
+   unfortunately, PARI does not support polynomials of large degree.
+
+   Solution: alias lgef to lg, and use exclusively lg for polynomials [ the
+   lgef mechanism is useful for t_INT, the gmp kernel relies on it. It is
+   quite useless for t_POL. ]
+
 5  bnfinit sometimes gives wrong answers because we cheat on the value of
 Bach's bound, using B := 0.3 log^2 D by default, where 0.3 should really be 12
 (under GRH), or some suitably optimized bound following Bach's article. If
