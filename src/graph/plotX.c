@@ -135,7 +135,7 @@ rectdraw0(long *w, long *x, long *y, long lw, long do_free)
   long *numpoints[MAX_COLORS],*numtexts[MAX_COLORS];
   long *xtexts[MAX_COLORS],*ytexts[MAX_COLORS];
   long rcolcnt[MAX_COLORS][ROt_MAX];
-  long col,i,j,x0,y0,a,b,oldwidth,oldheight,force;
+  long col,i,j,x0,y0,a,b,oldwidth,oldheight;
   long rcnt[ROt_MAX+1], hjust, vjust, hgap, vgap, hgapsize, vgapsize;
   char **texts[MAX_COLORS];
   PariRect *e;
@@ -248,9 +248,10 @@ rectdraw0(long *w, long *x, long *y, long lw, long do_free)
   gc = XCreateGC(display, win, 0, NULL);
   XSetFont(display, gc, font_info->fid);
 
+  XClearWindow(display, win);
   XMapWindow(display, win);
   oldwidth  = w_width;
-  oldheight = w_height; force = 1;
+  oldheight = w_height;
 
   for(;;)
   {
@@ -281,13 +282,12 @@ rectdraw0(long *w, long *x, long *y, long lw, long do_free)
 
         if (width == oldwidth && height == oldheight) break;
         oldwidth  = width;
-        oldheight = height; force = 1;
+        oldheight = height; 
 
         /* recompute scale */
 	xs = ((double)width)/w_width; ys=((double)height)/w_height;
       }
-      case Expose: if (!force) break;
-        force = 0;
+      case Expose: 
 	for(i=0; i<lw; i++)
 	{
 	  e=rectgraph[w[i]];p1=RHead(e);x0=x[i];y0=y[i];
