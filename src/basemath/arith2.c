@@ -1670,11 +1670,11 @@ GEN
 codeform5(GEN x, long prec)
 {
   GEN y = cgetg(6,t_VEC);
-  y[1]=x[1];
-  y[2]=x[2];
-  y[3]=x[3];
-  y[4]=zero;
-  y[5]=(long)realun(prec); return y;
+  y[1] = x[1];
+  y[2] = x[2];
+  y[3] = x[3];
+  y[4] = zero;
+  y[5] = (long)realun(prec); return y;
 }
 
 static GEN
