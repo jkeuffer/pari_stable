@@ -118,34 +118,10 @@ for suf in $SUF; do
       wrln "	$f"
       case "$f" in
         *program*)  bugp="$suf$bugp";;
-        *elliptic*) buge="$suf$buge";;
       esac
     done
   fi
 done
-
-case "x$buge" in
-  x)  file_diff=;;
-  xsta|xdyn)
-      end=" (gp-$buge only)"
-      file_diff=elliptic-$buge.dif;;
-  xexe)
-      end=" (gp-$buge)"
-      file_diff=elliptic.dif;;
-  x*) end=""
-      file_diff=elliptic-sta.dif;;
-esac
-if test -n "$file_diff"; then
-len=`wc -l $file_diff | sed -e 's/ *\([0-9]*\).*/\1/'`
-pat=`${head}4 $file_diff|${tail}1|grep "141,154"`
-if test $len -eq 50  -a  -n "$pat"; then
-cat << EOT
-NOTE: the problem noted in 'elliptic' boils down to different FPU and
-compiler optimizations than on our test machine. It can safely be ignored,
-the difference being insignificant given the requested precision.
-EOT
-fi
-fi
 
 case "x$bugp" in
   x)  file_diff=;;
@@ -174,3 +150,4 @@ can safely ignore the above warning.
 EOT
 fi
 fi
+exit 1
