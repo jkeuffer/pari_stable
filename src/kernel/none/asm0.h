@@ -20,8 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define LOCAL_HIREMAINDER
 
 BEGINEXTERN
-extern  ulong overflow;
-extern  ulong hiremainder;
+extern  ulong hiremainder, overflow;
 extern long addll(ulong x, ulong y);
 extern long addllx(ulong x, ulong y);
 extern long subll(ulong x, ulong y);

@@ -20,11 +20,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /***********************************************************************/
 #include "pari.h"
 
-#ifndef REGISTER_MP_OPERANDS
-ulong overflow;
-ulong hiremainder;
-#endif
-
 int pari_kernel_init(void)
 {
   /*nothing to do*/
