@@ -2214,6 +2214,7 @@ trap0(char *e, char *r, char *f)
   else if (!strcmp(e,"typeer")) numerr = typeer;
   else if (!strcmp(e,"gdiver2")) numerr = gdiver2;
   else if (!strcmp(e,"accurer")) numerr = accurer;
+  else if (!strcmp(e,"archer")) numerr = archer;
   else if (*e) err(impl,"this trap keyword");
   /* TO BE CONTINUED */
 
@@ -2257,16 +2258,17 @@ trap0(char *e, char *r, char *f)
 void errcontext(char *msg, char *s, char *entry);
 
 void
-break_loop()
+break_loop(long numerr)
 {
   Buffer *oldb = current_buffer, *b = new_buffer();
   push_stack(&bufstack, (void*)b);
 
   term_color(c_ERR);
   fprintferr("\n");
-  errcontext("Starting break loop ('break' or ^D to exit)",
+  errcontext("Starting break loop (type 'break' to go back to GP prompt)",
               _analyseur(), oldb->buf);
   term_color(c_NONE);
+  if (numerr == siginter) fprintferr("['next' will continue]\n");
   infile = stdin;
   for(;;)
   {
@@ -2274,7 +2276,7 @@ break_loop()
     if (!check_meta(b->buf))
     {
       GEN x = lisseq(b->buf);
-      if (loop_break()) break;
+      if (did_break()) break;
       if (x == gnil) continue;
 
       term_color(c_OUTPUT);
@@ -2294,8 +2296,12 @@ gp_exception_handler(long numerr)
   else
   {
     if (numerr == errpile) avma = top;
-    break_loop();
-    if (numerr == siginter) return 1;
+    break_loop(numerr);
+    if (numerr == siginter && did_break() == br_NEXT)
+    {
+      (void)loop_break(); /* clear status flag */
+      return 1;
+    }
   }
   return 0;
 }
