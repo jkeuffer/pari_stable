@@ -1,3 +1,4 @@
+pdf=wantpdfoutput
 cat > doc/Makefile << EOT
 #  This file was created by Configure. Any change made to it will be lost
 #  next time configure is run.
@@ -6,6 +7,7 @@ SHELL = $make_sh
 
 doc all: manual refcard tutorial
 docps: refcard.ps tutorial.ps users.ps
+docpdf: users.pdf tutorial.pdf
 manual: users.dvi
 tutorial: tutorial.dvi
 
@@ -18,11 +20,18 @@ paricfg.tex: paricfg.tex.in
 	    -e 's!@miscdir@!/usr/local/lib/pari!' paricfg.tex.in > \$@
 
 tutorial.dvi: tutorial.tex paricfg.tex
+	-rm -f $pdf
 	tex tutorial.tex
+
+tutorial.pdf: tutorial.tex paricfg.tex
+	-touch $pdf
+	pdftex tutorial.tex
+	-rm -f $pdf
 
 refcard: refcard.ps
 
 refcard.dvi: refcard.tex paricfg.tex
+	-rm -f $pdf
 	tex refcard.tex
 
 refcard.ps: refcard.dvi
@@ -37,19 +46,31 @@ tutorial.ps: tutorial.dvi
 users.dvi: users.tex appa.tex appb.tex appc.tex\\
  usersch1.tex usersch2.tex usersch3.tex usersch4.tex usersch5.tex\\
  paricfg.tex parimacro.tex
+	-rm -f $pdf
 	rm -f users.std; tex users;
-	sed -e 's/!\([1-9]\)\$\$/!00\1/'\\
-	    -e 's/!\([1-9][0-9]\)\$\$/!0\1/'\\
+	sed -e 's/!\([1-9]\)!/!00\1!/'\\
+	    -e 's/!\([1-9][0-9]\)!/!0\1!/'\\
 	    -e 's/\\\\EFF {}/f/g'\\
 	  users.idx | sort -f |\\
-	sed -e 's/!00*\([0-9]*\)\$\$/!\1/' > users.std;
+	sed -e 's/!00*\([0-9]*\)!/!\1!/' > users.std;
 	tex users; rm -f users.idx
+
+users.pdf: users.tex appa.tex appb.tex appc.tex\\
+ usersch1.tex usersch2.tex usersch3.tex usersch4.tex usersch5.tex\\
+ paricfg.tex parimacro.tex
+	rm -f users.std; touch $pdf; pdftex users;
+	sed -e 's/!\([1-9]\)!/!00\1!/'\\
+	    -e 's/!\([1-9][0-9]\)!/!0\1!/'\\
+	    -e 's/\\\\EFF {}/f/g'\\
+	  users.idx | sort -f |\\
+	sed -e 's/!00*\([0-9]*\)!/!\1!/' > users.std;
+	pdftex users; rm -f users.idx $pdf
 
 gpman: gp.1
 	nroff -man gp.1 | unix2dos -ascii > gp.man
 
 halfclean:	
-	rm -f *.log *.dvi *.idx *.ps tutorial.aux
+	rm -f *.log *.dvi *.idx *.ps *.pdf tutorial.aux $pdf
 
 clean: halfclean	
 	rm -f users.aux users.std users.toc

@@ -58,6 +58,7 @@ doc/gphelp.1
 doc/gphelp.in
 doc/paricfg.tex.in
 doc/parimacro.tex
+doc/pdfmacs.tex
 doc/refcard.tex
 doc/translations
 doc/tutorial.tex

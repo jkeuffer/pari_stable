@@ -2,6 +2,7 @@ AW = Aleksander Wittlin
 BA = Bill Allombert
 BD = Bill Dally
 BH = Bruno Haible
+CB = Cliff Bergman
 DB = Dominique Bernardi
 DC = Dan Christensen
 DE = Denis Excoffier
@@ -32,10 +33,12 @@ IS+BA 3- various fixes necessary for g++
     4- prototype inconsistency in level1.h (evalexpo/evalvalp)
     5- trouble with pgcc -mk6 + variable k6 in elliptic.c
 HC  6- nfnewprec(bnf) could contain objects of low accuracy
+XR  7- check subgroup argument in bnrL1
 
   Changed
 XR  1- bnrL1 now takes a congruence subgroup as second argument
     2- allow some functions to modify bnf/bnr structures (matal + cycgen)
+CB  3- modified TeX macros for pdftex
 
 ===========================================================================
 Done for version 2.0.18.beta (released 20/12/1999):
