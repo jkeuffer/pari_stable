@@ -2135,6 +2135,7 @@ ellrootno(GEN e, GEN p)
   pari_sp av = avma;
   long s;
   GEN gr, N;
+  checkell(e);
   e = ell_to_small(e); gr = globalreduction(e);
   e = _coordch(e,(GEN)gr[2]); N = (GEN)gr[1];
   if (!p || gcmp1(p))
