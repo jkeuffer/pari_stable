@@ -76,7 +76,8 @@ SPARCv7(SS400)  ???  SunOS-4.1.4     gcc          107074  106494  2.0.16(19)DE
 SPARCv7(HWS210) ???  Linux-2.2.5     gcc           98488!      -  2.0.16(14)DE
 ------------------------------------------------------------------------------
 Intel/x86
-AMS Athlon  1100MHz  Linux-2.4.2-2   gcc            1078    1076  2.1.1     DP
+AMD Athlon  1200MHz  Linux-2.4.7     gcc-2.96       1002     992  2.1.2     CL
+AMD Athlon  1100MHz  Linux-2.4.2-2   gcc            1078    1076  2.1.1     DP
 AMD Duron   1000MHz  Linux-2.4.0    egcs            1364    1428  2.0.20    QL
 AMD Athlon   850MHz  Linux-2.2.17    gcc            1364    1342  2.1.0     JC
 AMD Duron    700MHz  Linux-2.4.0    egcs            2066    2138  2.0.20    QL
