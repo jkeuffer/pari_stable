@@ -1454,7 +1454,7 @@ nfsqff(GEN nf, GEN pol, long fl)
       NEXT_PRIME_VIADIFF_CHECK(pp, pt);
       if (! umodiu(bad,pp)) continue;
       ap = utoi(pp);
-      list = (GEN)FpX_factor(nfpol, ap)[1];
+      list = (GEN)FpX_factor(FpX_red(nfpol,ap), ap)[1];
       if (maxf == 1)
       { /* deg.1 factors are best */
         r = (GEN)list[1];

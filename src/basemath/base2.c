@@ -849,13 +849,13 @@ static GEN
 maxord(GEN p,GEN f,long mf)
 {
   const pari_sp av = avma;
-  GEN w = NULL, g, res;
+  GEN w = NULL, g, res, fp = FpX_red(f, p);
 
   if (cmpsi(degpol(f),p) < 0)
-    g = FpX_div(f, FpX_gcd(f,derivpol(f), p), p);
+    g = FpX_div(fp, FpX_gcd(fp,derivpol(fp), p), p);
   else
   {
-    w = (GEN)FpX_factor(f,p)[1];
+    w = (GEN)FpX_factor(fp,p)[1];
     g = FpXV_prod(w, p);
   }
   res = dedek(f, mf, p, g);
@@ -863,7 +863,7 @@ maxord(GEN p,GEN f,long mf)
     res = dbasis(p, f, mf, polx[varn(f)], res);
   else
   {
-    if (!w) w = (GEN)FpX_factor(f,p)[1];
+    if (!w) w = (GEN)FpX_factor(fp,p)[1];
     res = maxord_i(p, f, mf, w, 0);
   }
   return gerepileupto(av,res);

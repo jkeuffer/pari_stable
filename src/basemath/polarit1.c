@@ -2144,7 +2144,7 @@ factorpadic4(GEN f,GEN p,long prec)
   for (j=i=1; i<n; i++)
   {
     pari_sp av1 = avma;
-    GEN fx = (GEN)poly[i], fa = FpX_factor(fx,p);
+    GEN fx = (GEN)poly[i], fa = FpX_factor(FpX_red(fx,p),p);
     w = (GEN)fa[1];
     if (expo_is_squarefree((GEN)fa[2]))
     { /* no repeated factors: Hensel lift */

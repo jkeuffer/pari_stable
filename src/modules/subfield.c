@@ -638,7 +638,7 @@ choose_prime(GEN pol,GEN dpol,long d,GEN *ptff,GEN *ptlistpotbl, long *ptlcm)
     while (!smodis(dpol,p[2]))
       NEXT_PRIME_VIADIFF(p[2], di);
     if (k > 50) err(talker,"sorry, too many block systems in nfsubfields");
-    ff=(GEN)FpX_factor(pol,p)[1]; r=lg(ff)-1;
+    ff=(GEN)FpX_factor(FpX_red(pol,p),p)[1]; r=lg(ff)-1;
     if (r == 1 || r == N) goto repeat;
 
     n = cgetg(r+1, t_VECSMALL);
