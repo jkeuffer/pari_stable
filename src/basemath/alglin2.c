@@ -660,11 +660,10 @@ gtrace(GEN x)
   return NULL; /* not reached */
 }
 
-/* Gauss reduction for positive definite matrix a
+/* Cholesky Decomposition for positive definite matrix a
  * If a is not positive definite:
  *   if flag is zero: raise an error
- *   else: return NULL.
- */
+ *   else: return NULL. */
 GEN
 sqred1intern(GEN a,long flag)
 {
