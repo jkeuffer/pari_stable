@@ -7,6 +7,7 @@
 /* $Id$ */
 #include "pari.h"
 #include "anal.h"
+void changevalue_p(entree *ep, GEN x);
 
 /********************************************************************/
 /**                                                                **/
@@ -34,7 +35,7 @@ forpari(entree *ep, GEN a, GEN b, char *ch)
       if (DEBUGMEM>1) err(warnmem,"forpari");
       a = gerepileupto(av,a);
     }
-    ep->value = (void*)a;
+    changevalue_p(ep,a);
   }
   pop_val(ep); avma = av0;
 }
@@ -71,7 +72,7 @@ forstep(entree *ep, GEN a, GEN b, GEN s, char *ch)
       if (DEBUGMEM>1) err(warnmem,"forstep");
       a = gerepileupto(av,a);
     }
-    ep->value = (void*)a;
+    changevalue_p(ep,a);
   }
   pop_val(ep); avma = av0;
 }

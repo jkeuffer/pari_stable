@@ -290,6 +290,16 @@ pop_val(entree *ep)
   free((void*)v);
 }
 
+void
+changevalue_p(entree *ep, GEN x)
+{
+  var_cell *v = (var_cell*) ep->args;
+
+  if (!v) err(talker,"initial value in change_pushed_value");
+  if (v->flag == COPY_VAL) { killbloc((GEN)ep->value); v->flag = PUSH_VAL; }
+  ep->value = (void*)x;
+}
+
 int
 pop_val_if_newer(entree *ep, long loc)
 {
