@@ -1709,8 +1709,9 @@ timing in a reentrant way, PARI defines a dedicated datatype,
   \fun{long}{msgTIMER}{pari\_timer *T, char *format,...}
 
 \noindent are equivalent to \kbd{timer} and \kbd{msgtimer} respectively,
-except they use a unique timer containing all the information needed, so
-that no other function can mess with your timings. They are used as follows:
+except they use a unique timer \kbd{T} containing all the information needed,
+so that no other function can mess with your timings. They are used as
+follows:
 \bprog
   pari_timer T;
 
