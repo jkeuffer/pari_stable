@@ -358,11 +358,13 @@ mylog2(GEN z)
   return x+0.5*log2( 1 + exp2(2*(y-x)));
 }
 
-long
+/* find s such that  A_h <= 2^s <= 2 A_i  for one h and all i < n = deg(p),
+ * with  A_i := (binom(n,i) lc(p) / p_i) ^ 1/(n-i), and  p = sum p_i X^i */
+static long
 findpower(GEN p)
 {
-  double x, logbinomial,pente, pentemax = -pariINFINITY;
-  long n=degpol(p),i;
+  double x, logbinomial, mins = pariINFINITY;
+  long n = degpol(p),i;
 
   logbinomial = mylog2((GEN)p[n+2]); /* log2(lc * binom(n,i)) */
   for (i=n-1; i>=0; i--)
@@ -371,11 +373,11 @@ findpower(GEN p)
     x = mylog2((GEN)p[i+2]);
     if (x != -pariINFINITY)
     {
-      pente = (x - logbinomial) / (double) (n-i);
-      if (pente > pentemax) pentemax = pente;
+      double s = (logbinomial - x) / (double) (n-i);
+      if (s < mins) mins = s;
     }
   }
-  return (long) -floor(pentemax);
+  return (long)ceil(mins);
 }
 
 /* returns the exponent for the procedure modulus, from the newton diagram */
@@ -542,7 +544,7 @@ homothetie(GEN p, GEN R, long bitprec)
   return r;
 }
 
-/* change q in 2^(n*e) p(x*2^(-e)), n=deg(q) */
+/* change q in 2^(n*e) p(x*2^(-e)), n=deg(q)  [ ~as above with R = 2^-e ]*/
 static void
 homothetie2n(GEN p, long e)
 {
@@ -633,7 +635,8 @@ max_modulus(GEN p, double tau)
     if (rho > exp2(-(double) e)) e = (long) -floor(log2(rho));
     r -= e / exp2((double)i);
     if (++i == imax) {
-      avma=ltop; 
+      avma = ltop; 
+      if (fabs(r) * exp2(i) < 1) return realun(DEFAULTPREC); /* r = 0 */
       return gpui(dbltor(2.),dbltor(r),DEFAULTPREC);
     }
 
