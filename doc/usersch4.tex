@@ -24,14 +24,14 @@ we will set \B\ to be equal to 32 (resp.~64), an abbreviation of
 
 \noindent
 To be able to use PARI in \idx{library mode}, you must write a C program and
-link it to the PARI library. See the installation guide (in Appendix~A)
-on how to create and install the library and include files. A sample Makefile
-is presented in Appendix~B, and a more elaborate one in
-\kbd{examples/Makefile}.
+link it to the PARI library. See the installation guide or the Appendix to
+the \emph{User's Guide to Pari/GP} on how to create and install the library
+and include files. A sample Makefile is presented in Appendix~A, and a more
+elaborate one in \kbd{examples/Makefile}.
 
 Probably the best way to understand how programming is done is to work
-through a complete example. We will write such a program in
-\secref{se:prog}. Before doing this, a few explanations are in order.
+through a complete example. We will write such a program in \secref{se:prog}.
+Before doing this, a few explanations are in order.
 
 First, one must explain to the outside world what kind of objects and
 routines we are going to use. This is done simply with the statement
@@ -252,35 +252,23 @@ be subject to change.
 
 \noindent
 PARI supports both 32-bit and 64-bit based machines, but not simultaneously!
-The library will have been compiled assuming a given architecture (a~priori
-following a guess by the \kbd{Configure} program, see Appendix~A), and some
-of the header files you include (through \kbd{pari.h}) will have been modified
-to match the library.
+The library will have been compiled assuming a given architecture, and some
+of the header files you include (through \kbd{pari.h}) will have been
+modified to match the library.
 
-Portable macros are defined to bypass most machine dependencies. If you
-want your programs to run identically on 32-bit and 64-bit machines, you
-have to use these, and not the corresponding numeric values, whenever the
-precise size of your \kbd{long} integers might matter. Here are the most
-important ones:
+Portable macros are defined to bypass most machine dependencies. If you want
+your programs to run identically on 32-bit and 64-bit machines, you have to
+use these, and not the corresponding numeric values, whenever the precise
+size of your \kbd{long} integers might matter. Here are the most important
+ones:
 
-\settabs\+
------------------------------&---------------&------------&\cr
-\+
-                    & 64-bit  & 32-bit
-\cr\+
-\tet{BITS_IN_LONG}  & 64      & 32
-\cr\+
-\tet{LONG_IS_64BIT} & defined & undefined
-\cr\+
-\tet{DEFAULTPREC}   & 3       & 4 & ($\approx$ 19 decimal digits, %
- see formula below)
-\cr\+
-\tet{MEDDEFAULTPREC}& 4       & 6 & ($\approx$ 38 decimal digits)
-\cr\+
-\tet{BIGDEFAULTPREC}& 5       & 8 & ($\approx$ 57 decimal digits)
-\cr
-\noindent
-For instance, suppose you call a transcendental function, such as
+\settabs\+ -----------------------------&---------------&------------&\cr \+
+& 64-bit  & 32-bit \cr\+ \tet{BITS_IN_LONG}  & 64      & 32 \cr\+
+\tet{LONG_IS_64BIT} & defined & undefined \cr\+ \tet{DEFAULTPREC}   & 3
+& 4 & ($\approx$ 19 decimal digits, % see formula below) \cr\+
+\tet{MEDDEFAULTPREC}& 4       & 6 & ($\approx$ 38 decimal digits) \cr\+
+\tet{BIGDEFAULTPREC}& 5       & 8 & ($\approx$ 57 decimal digits) \cr
+\noindent For instance, suppose you call a transcendental function, such as
 
 \kbd{GEN \key{gexp}(GEN x, long prec)}.
 
@@ -290,10 +278,9 @@ of~\kbd{x}. But since \kbd{prec} sets the size of the inexact result counted
 in (\kbd{long}) \emph{words} (including codewords), the same value of
 \kbd{prec} will yield different results on 32-bit and 64-bit machines. Real
 numbers have two codewords (see~\secref{se:impl}), so the formula for
-computing the bit accuracy is
-$$ \tet{bit_accuracy}(\kbd{prec}) = (\kbd{prec} - 2) * \tet{BITS_IN_LONG}$$
-(this is actually the definition of a macro). The corresponding accuracy
-expressed in decimal digits would be
+computing the bit accuracy is $$ \tet{bit_accuracy}(\kbd{prec}) = (\kbd{prec}
+- 2) * \tet{BITS_IN_LONG}$$ (this is actually the definition of a macro). The
+  corresponding accuracy expressed in decimal digits would be
 %
 $$ \kbd{bit\_accuracy(prec)} * \log(2) / \log(10).$$
 %
@@ -1831,7 +1818,7 @@ or
 Now that the preliminaries are out of the way, the best way to learn how to
 use the library mode is to work through a detailed example. We will write a
 program which computes the exponential of a square matrix~$x$.  The complete
-listing is given in Appendix~B, but each part of the program will be produced
+listing is given in Appendix~A, but each part of the program will be produced
 and explained here. We will use an algorithm which is not optimal but is not
 far from the one used for the PARI function \teb{gexp} (in fact embodied in
 the function \kbd{mpexp1}). This consists in calculating the sum of the
@@ -2087,7 +2074,7 @@ have used a number of more specialized library routines. An evident
 improvement would be the use of \kbd{gerepileupto} mentioned above. Another
 improvement is to multiply the matrix x by the real number 1 right at the
 beginning, speeding up the computation of the $L^2$-norm in many cases. These
-improvements are included in the version given in Appendix~B. Still another
+improvements are included in the version given in Appendix~A. Still another
 improvement would come from a better choice of~\kbd{n}. If the reader takes a
 look at the implementation of the function \kbd{mpexp1} in the file
 \kbd{basemath/trans1.c}, he can make the necessary changes himself. Finally,

@@ -1105,19 +1105,18 @@ of terms of the argument and the function being computed.
 $\bullet$ If the argument is a vector or a matrix, the result is the
 componentwise evaluation of the function. In particular, transcendental
 functions on square matrices, which are not implemented in the present
-version \vers\ (see Appendix~B however), will have a slightly different name
-if they are implemented some day.
+version \vers, will have a different name if they are implemented some day.
 
 \subseckbd{\pow}: If $y$ is not of type integer, \kbd{x\pow y} has the same
-effect as \kbd{exp(y*ln(x))}. It can be applied to $p$-adic numbers as
-well as to the more usual types.\sidx{powering}
+effect as \kbd{exp(y*ln(x))}. It can be applied to $p$-adic numbers as well
+as to the more usual types.\sidx{powering}
 
 \syn{gpow}{x,y,\var{prec}}.
 
-\subsecidx{Euler}: Euler's constant $\gamma=0.57721\cdots$. Note that \kbd{Euler}
-is one of the few special reserved names which cannot be used for variables
-(the others are \kbd{I} and \kbd{Pi}, as well as all function names).
-\label{se:euler}
+\subsecidx{Euler}: Euler's constant $\gamma=0.57721\cdots$. Note that
+\kbd{Euler} is one of the few special reserved names which cannot be used for
+variables (the others are \kbd{I} and \kbd{Pi}, as well as all function
+names). \label{se:euler}
 
 \syn{mpeuler}{\var{prec}} where $\var{prec}$ \emph{must} be given. Note that
 this creates $\gamma$ on the PARI stack, but a copy is also created on the
@@ -1129,9 +1128,9 @@ The library syntax is the global variable \kbd{gi} (of type \kbd{GEN}).
 
 \subsecidx{Pi}: the constant $\pi$ ($3.14159\cdots$).\label{se:pi}
 
-\syn{mppi}{\var{prec}} where $\var{prec}$ \emph{must} be given. Note that this
-creates $\pi$ on the PARI stack, but a copy is also created on the heap for
-quicker computations next time the function is called.
+\syn{mppi}{\var{prec}} where $\var{prec}$ \emph{must} be given. Note that
+this creates $\pi$ on the PARI stack, but a copy is also created on the heap
+for quicker computations next time the function is called.
 
 \subsecidx{abs}$(x)$: absolute value of $x$ (modulus if $x$ is complex).
 Power series and rational functions are not allowed. Contrary to most
