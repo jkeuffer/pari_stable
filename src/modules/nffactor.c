@@ -633,15 +633,16 @@ static int
 is_sqf(GEN nf, GEN polbase)
 {
   GEN lt, pr, prh, p2, p;
-  long i, d = lgef(polbase), ct = 3;
+  long i, d = lgef(polbase), ct = 5;
 
   lt = (GEN)leading_term(polbase)[1];
+  p  = stoi(101);
 
   while (ct > 0)
   {
     /* small primes tend to divide discriminants more often 
        than large ones so we look at primes >= 101 */
-    pr = choose_prime(nf,lt,stoi(101),30); 
+    pr = choose_prime(nf,lt,p,30); 
     if (!pr) break;
 
     p=(GEN)pr[1];
@@ -658,6 +659,7 @@ is_sqf(GEN nf, GEN polbase)
     if (!gcmp0(p2) && !divise(discsr(p2),p))  { return 1; }
     
     ct--; 
+    p=addis(p,1);
   }
   
   return 0;
@@ -954,7 +956,7 @@ T2_matrix_pow(GEN nf, GEN pre, GEN p, GEN C, long *kmax, long prec)
 static GEN
 nfsqff(GEN nf,GEN pol, long fl)
 {
-  long d=lgef(pol),i,k,m,n,av=avma,tetpil,newprec,prec,nbf=BIGINT,anbf,ct=3;
+  long d=lgef(pol),i,k,m,n,av=avma,tetpil,newprec,prec,nbf=BIGINT,anbf,ct=5;
   GEN p1,pr,p2,rep,k2,C,h,dk,dki,p,prh,p3,T2,polbase,fact,pk,ap,apr;
   GEN polmod,polred,hinv,lt,minp,den,maxp=shifti(gun,32),run,aprh;
 
