@@ -276,20 +276,8 @@ RgXQV_red(GEN P, GEN T)
 /*                  KARATSUBA (for polynomials)                    */
 /*                                                                 */
 /*******************************************************************/
-
-#if 1 /* for tunings */
-long SQR_LIMIT = 6;
-long MUL_LIMIT = 10;
-long u_SQR_LIMIT = 6;
-long u_MUL_LIMIT = 10;
-
-void
-setsqpol(long a) { SQR_LIMIT=a; u_SQR_LIMIT=a; }
-void
-setmulpol(long a) { MUL_LIMIT=a; u_MUL_LIMIT=a; }
-
 GEN
-u_specpol(GEN x, long nx)
+zx_copy_spec(GEN x, long nx)
 {
   GEN z = cgetg(nx+2,t_POL);
   long i;
@@ -298,17 +286,13 @@ u_specpol(GEN x, long nx)
 }
 
 GEN
-specpol(GEN x, long nx)
+RgX_copy_spec(GEN x, long nx)
 {
   GEN z = cgetg(nx+2,t_POL);
   long i;
   for (i=0; i<nx; i++) z[i+2] = x[i];
   z[1] = evalsigne(1); return z;
 }
-#else
-#  define SQR_LIMIT 6
-#  define MUL_LIMIT 10
-#endif
 
 /* generic multiplication */
 
@@ -496,7 +480,7 @@ RgX_mulspec(GEN a, GEN b, long na, long nb)
   if (!nb) return zeropol(0);
 
   if (v) (void)cgetg(v,t_VECSMALL); /* v gerepile-safe cells for shiftpol_ip */
-  if (nb < MUL_LIMIT)
+  if (nb < RgX_MUL_LIMIT)
     return shiftpol_ip(mulpol(a,b,na,nb), v);
   i = (na>>1); n0 = na-i; na = i;
   av = avma; a0 = a+n0; n0a = n0;
@@ -575,7 +559,7 @@ RgX_sqrspec(GEN a, long na)
 
   while (na && isexactzero((GEN)a[0])) { a++; na--; v += 2; }
   if (v) (void)cgetg(v, t_VECSMALL);
-  if (na<SQR_LIMIT) return shiftpol_ip(sqrpol(a,na), v);
+  if (na<RgX_SQR_LIMIT) return shiftpol_ip(sqrpol(a,na), v);
   i = (na>>1); n0 = na-i; na = i;
   av = avma; a0 = a+n0; n0a = n0;
   while (n0a && isexactzero((GEN)a[n0a-1])) n0a--;

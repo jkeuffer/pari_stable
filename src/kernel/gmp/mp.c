@@ -39,6 +39,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #include "pari.h"
 #include "paripriv.h"
+#include "../src/kernel/none/tune-gen.h"
 #include <gmp.h>
 
 /*We need PARI invmod renamed to invmod_pari*/
@@ -46,11 +47,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 int pari_kernel_init(void)
 {
-  /*Montgomery mult is not supported*/
-  setmontgomerylimit(0);
-  setremiilimit(608);
-  Flx_INVMONTGOMERY_LIMIT  = 600;
-  Flx_POW_MONTGOMERY_LIMIT = 100;
   /* Use gpmalloc instead of malloc */
   mp_set_memory_functions((void *(*)(size_t)) gpmalloc
 		  	,(void *(*)(void *, size_t, size_t)) gprealloc
@@ -481,33 +477,6 @@ absi_equal_lg(GEN x, GEN y, long l)
 /**		          MULTIPLICATION                 	      **/
 /**                                                                   **/
 /***********************************************************************/
-
-#define _sqri_l -1
-#define _muli_l -1
-#define _mulr_l  8
-#define _divr_l  4
-#define _invmod_gmp_l 46
-
-#if 1 /* for tunings */
-
-long KARATSUBA_SQRI_LIMIT = _sqri_l;
-long KARATSUBA_MULI_LIMIT = _muli_l;
-long KARATSUBA_MULR_LIMIT = _mulr_l;
-long DIVRR_GMP_LIMIT = _divr_l;
-long INVMOD_GMP_LIMIT= _invmod_gmp_l;
-
-void setsqri(long a) {} /*NOOP*/ 
-void setmuli(long a) {} /*NOOP*/
-void setmulr(long a) { KARATSUBA_MULR_LIMIT = a; }
-void setdivr(long a) { DIVRR_GMP_LIMIT   = a; }
-void setinvmod(long a) { INVMOD_GMP_LIMIT= a; }
-#else
-#  define KARATSUBA_SQRI_LIMIT _sqri_l
-#  define KARATSUBA_MULI_LIMIT _muli_l
-#  define KARATSUBA_MULR_LIMIT _mulr_l
-#  define DIVRR_GMP_LIMIT      _divr_l
-#endif
-
 GEN
 mulss(long x, long y)
 {

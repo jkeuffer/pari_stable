@@ -21,12 +21,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /***********************************************************************/
 #include "pari.h"
 #include "paripriv.h"
+#include "../src/kernel/none/tune-gen.h"
 
-int pari_kernel_init(void)
-{
-  /*nothing to do*/
-  return 0;
-}
+int pari_kernel_init(void) { return 0; } /*nothing to do*/
 
 /* NOTE: arguments of "spec" routines (muliispec, addiispec, etc.) aren't
  * GENs but pairs (long *a, long na) representing a list of digits (in basis
@@ -433,24 +430,6 @@ absi_equal_lg(GEN x, GEN y, long l)
 /**		          MULTIPLICATION                 	      **/
 /**                                                                   **/
 /***********************************************************************/
-#define _sqri_l 62
-#define _muli_l 32
-#define _mulr_l 294
-
-#if 1 /* for tunings */
-long KARATSUBA_SQRI_LIMIT = _sqri_l;
-long KARATSUBA_MULI_LIMIT = _muli_l;
-long KARATSUBA_MULR_LIMIT = _mulr_l;
-
-void setsqri(long a) { KARATSUBA_SQRI_LIMIT = a; }
-void setmuli(long a) { KARATSUBA_MULI_LIMIT = a; }
-void setmulr(long a) { KARATSUBA_MULR_LIMIT = a; }
-#else
-#  define KARATSUBA_SQRI_LIMIT _sqri_l
-#  define KARATSUBA_MULI_LIMIT _muli_l
-#  define KARATSUBA_MULR_LIMIT _mulr_l
-#endif
-
 GEN
 mulss(long x, long y)
 {

@@ -72,7 +72,7 @@ sub geterrs
 }
 
 sub filter_c {
-  return unless /\.[chs]\Z/;
-  return unless -f;
+  return unless /\.[chs]\Z/ || -f;
+  return if (/(tune|kerntest).c/);
   push @files, "$File::Find::name";
 }

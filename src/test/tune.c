@@ -17,39 +17,35 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  * (T. Granlund et al.)
  * 
  * (GMU MP Library is Copyright Free Software Foundation, Inc.) */
+#define PARI_TUNE
 #include <pari.h>
 #include <paripriv.h>
 
-/* you might wish to tweak the Makefile so as to use GMP cycle counting
- * functions (look for GMP in Oxxx/Makefile) */
-
 #define numberof(x) (sizeof(x) / sizeof((x)[0]))
-
-static int option_trace = 0;
 
 typedef struct {
   ulong reps, size, type;
+  long *var;
   GEN x, y;
 } speed_param;
 
 typedef double (*speed_function_t)(ANYARG);
 
-#define MAX_SIZE 1000
 typedef struct {
   int               kernel;
   const char        *name;
+  long              *var;
   int               type; /* t_INT or t_REAL */
   long              min_size;
   speed_function_t  fun1;
   speed_function_t  fun2;
   double            step_factor;    /* how much to step sizes (rounded down) */
-  double            function_fudge; /* multiplier for "function" speeds */
   int               stop_since_change;
   double            stop_factor;
-  long              max_size;
 } tune_param;
 
 /* ========================================================== */
+/* To use GMP cycle counting functions, look for GMP in Oxxx/Makefile */
 #ifdef GMP_TIMER
 /* needed to link with gmp-4.0/tune/{time,freq}.o */
 int speed_option_verbose = 0;
@@ -61,43 +57,61 @@ double speed_endtime(void);
 static pari_timer __T;
 static double speed_unittime = 1e-4;
 static int    speed_precision= 1000;
-static void speed_starttime() { (void)TIMER(&__T); }
+static void speed_starttime() { TIMERstart(&__T); }
 static double speed_endtime() { return (double)TIMER(&__T)/1000.; }
 #endif
 
 /* ========================================================== */
+const ulong DFLT_l = 46337UL; /* default modulus for Flx */
 
-/* random int, n words */
+/* int, n words */
 static GEN
 rand_INT(long n)
 {
   pari_sp av = avma;
   GEN x, N = shifti(gun, n*BITS_IN_LONG);
-  if (n <= 0) err(talker,"n too small in rand_INT (%ld)", n);
-  do
-    x = genrand(N);
-  while (lgefint(x) != n+2);
+  do x = genrand(N); while (lgefint(x) != n+2);
   return gerepileuptoint(av, x);
 }
-
+/* real, n words */
 static GEN
-rand_REAL(long n)
+rand_REAL(long n) { return itor(rand_INT(n), n+2); }
+
+/* Flx, degree n */
+static GEN
+rand_Flx(long n)
 {
-  GEN r = cgetr(n+2);
   pari_sp av = avma;
-  GEN x = rand_INT(n);
-  affir(x,r); avma = av; return r;
+  GEN x;
+  do x = FpX_rand(n+1, 0, utoi(DFLT_l)); while (degpol(x) < n);
+  return gerepileuptoleaf(av, ZX_to_Flx(x, DFLT_l));
 }
+
+/* normalized Flx, degree n */
+static GEN
+rand_NFlx(long n)
+{
+  pari_sp av = avma;
+  GEN x = gadd(gpowgs(polx[0], n), FpX_rand(n, 0, utoi(DFLT_l)));
+  return gerepileuptoleaf(av, ZX_to_Flx(x, DFLT_l));
+}
+
+#define t_Flx  100
+#define t_NFlx 101
 
 static GEN
 rand_g(long n, long type)
-{
-  return (type == t_INT)? rand_INT(n): rand_REAL(n);
+{ 
+  switch (type) {
+    case t_INT:  return rand_INT(n);
+    case t_REAL: return rand_REAL(n);
+    case t_Flx:  return rand_Flx(n);
+    case t_NFlx: return rand_NFlx(n);
+  }
+  return NULL;
 }
 
 /* ========================================================== */
-static double dummy(speed_param *s) { return 0.; }
-
 #define TIME_FUN(call) {\
   {                                            \
     pari_sp av = avma;                         \
@@ -109,47 +123,50 @@ static double dummy(speed_param *s) { return 0.; }
   return speed_endtime();                      \
 }
 
-#define enable(set,s) (set(lg(s->x)-2)) /* enable  asymptotically fastest */
-#define disable(set,s) (set(lg(s->x)+1))/* disable asymptotically fastest */
+#define  enable(s) (*(s->var)=lg(s->x)-2)/* enable  asymptotically fastest */
+#define disable(s) (*(s->var)=lg(s->x)+1)/* disable asymptotically fastest */
 
 static double speed_mulrr(speed_param *s)
-{ disable(setmulr,s); TIME_FUN(mulrr(s->x, s->y)); }
+{ disable(s); TIME_FUN(mulrr(s->x, s->y)); }
 static double speed_karamulrr(speed_param *s)
-{ enable(setmulr,s);  TIME_FUN(mulrr(s->x, s->y)); }
+{ enable(s);  TIME_FUN(mulrr(s->x, s->y)); }
 
 static double speed_mulii(speed_param *s)
-{ disable(setmuli,s); TIME_FUN(mulii(s->x, s->y)); }
+{ disable(s); TIME_FUN(mulii(s->x, s->y)); }
 static double speed_karamulii(speed_param *s)
-{ enable(setmuli,s); TIME_FUN(mulii(s->x, s->y)); }
+{ enable(s); TIME_FUN(mulii(s->x, s->y)); }
 
 static double speed_sqri (speed_param *s)
-{ disable(setsqri,s); TIME_FUN(sqri(s->x)); }
+{ disable(s); TIME_FUN(sqri(s->x)); }
 static double speed_karasqri (speed_param *s)
-{ enable(setsqri,s);  TIME_FUN(sqri(s->x)); }
+{ enable(s);  TIME_FUN(sqri(s->x)); }
 
-#ifdef PARI_KERNEL_GMP
 static double speed_divrr(speed_param *s)
-{ disable(setdivr,s); TIME_FUN(divrr(s->x, s->y)); }
+{ disable(s); TIME_FUN(divrr(s->x, s->y)); }
 static double speed_divrrgmp(speed_param *s)
-{ enable(setdivr,s); TIME_FUN(divrr(s->x, s->y)); }
+{ enable(s); TIME_FUN(divrr(s->x, s->y)); }
 
 static double speed_invmod(speed_param *s)
-{ GEN T; disable(setinvmod,s); TIME_FUN(invmod(s->x, s->y, &T)); }
+{ GEN T; disable(s); TIME_FUN(invmod(s->x, s->y, &T)); }
 static double speed_invmodgmp(speed_param *s)
-{ GEN T; enable(setinvmod,s); TIME_FUN(invmod(s->x, s->y, &T)); }
-#else
-#define speed_divrr dummy
-#define speed_divrrgmp dummy
-#define speed_invmod dummy
-#define speed_invmodgmp dummy
-#endif
+{ GEN T; enable(s); TIME_FUN(invmod(s->x, s->y, &T)); }
 
-#if 0
+static double speed_Flx_sqr(speed_param *s)
+{ ulong p = DFLT_l; disable(s); TIME_FUN(Flx_sqr(s->x, p)); }
+static double speed_Flx_karasqr(speed_param *s)
+{ ulong p = DFLT_l; enable(s); TIME_FUN(Flx_sqr(s->x, p)); }
+
+static double speed_Flx_inv(speed_param *s)
+{ ulong p = DFLT_l; disable(s);
+  TIME_FUN(Flx_invmontgomery(s->x, p)); }
+static double speed_Flx_invnewton(speed_param *s)
+{ ulong p = DFLT_l; enable(s);
+  TIME_FUN(Flx_invmontgomery(s->x, p)); }
+
 static double speed_Flx_mul(speed_param *s)
-{ ulong p = 46337; disable(setinvmod,s); TIME_FUN(Flx_mul(s->x, s->y, p)); }
+{ ulong p = DFLT_l; disable(s); TIME_FUN(Flx_mul(s->x, s->y, p)); }
 static double speed_Flx_karamul(speed_param *s)
-{ ulong p = 46337; enable(setinvmod,s); TIME_FUN(Flx_mul(s->x, s->y, p)); }
-#endif
+{ ulong p = DFLT_l; enable(s); TIME_FUN(Flx_mul(s->x, s->y, p)); }
  
 #define INIT_RED(s, op)                                 \
   long i, lx = lg(s->x);                                \
@@ -176,8 +193,51 @@ static double speed_remiimul(speed_param *s) {
   INIT_RED(s, op); sM = init_remiimul(s->y);
   TIME_FUN( remiimul(op, sM) );
 }
+static double speed_Flxq_pow_redc(speed_param *s) {
+  ulong p = DFLT_l;
+  GEN op;
+  INIT_RED(s, op); op = Flx_red(op, p); enable(s);
+  TIME_FUN( Flxq_pow(polx_Flx(0), utoi(p), s->y, p) );
+}
+static double speed_Flxq_pow_mod(speed_param *s) {
+  ulong p = DFLT_l;
+  GEN op;
+  INIT_RED(s, op); op = Flx_red(op, p); disable(s);
+  TIME_FUN( Flxq_pow(polx_Flx(0), utoi(p), s->y, p) );
+}
+
+enum { PARI = 1, GMP = 2 };
+#ifdef PARI_KERNEL_GMP
+#  define AVOID PARI
+#else
+#  define AVOID GMP
+#endif
+
+/* Thresholds are set in this order. If f() depends on g(), g() should
+ * occur first */
+#define var(a) # a, &a
+static tune_param param[] = {
+{PARI, var(KARATSUBA_MULI_LIMIT),   t_INT, 4, speed_mulii,speed_karamulii},
+{PARI, var(KARATSUBA_SQRI_LIMIT),   t_INT, 4, speed_sqri,speed_karasqri},
+{0,    var(KARATSUBA_MULR_LIMIT),   t_REAL,4, speed_mulrr,speed_karamulrr},
+{PARI, var(MONTGOMERY_LIMIT),       t_INT, 3, speed_redc,speed_modii},
+{0,    var(REMIIMUL_LIMIT),         t_INT, 3, speed_modii,speed_remiimul},
+{GMP,  var(DIVRR_GMP_LIMIT),        t_REAL,4, speed_divrr,speed_divrrgmp},
+{GMP,  var(INVMOD_GMP_LIMIT),       t_INT, 3, speed_invmod,speed_invmodgmp},
+{0,    var(Flx_MUL_LIMIT),          t_Flx, 1, speed_Flx_mul,speed_Flx_karamul},
+{0,    var(Flx_SQR_LIMIT),          t_Flx, 1, speed_Flx_sqr,speed_Flx_karasqr},
+{0,    var(Flx_INVMONTGOMERY_LIMIT),t_NFlx,1, speed_Flx_inv,speed_Flx_invnewton},
+{0,   var(Flx_POW_MONTGOMERY_LIMIT),t_NFlx,1, speed_Flxq_pow_redc,speed_Flxq_pow_mod}
+};
 
 /* ========================================================== */
+int option_trace = 0;
+
+int ndat = 0, allocdat = 0;
+struct dat_t {
+  long size;
+  double d;
+} *dat = NULL;
 
 int
 double_cmp_ptr(double *x, double *y) { return *x - *y; }
@@ -185,26 +245,21 @@ double_cmp_ptr(double *x, double *y) { return *x - *y; }
 double
 time_fun(speed_function_t fun, speed_param *s)
 {
-#define TOLERANCE 1.005 /* 0.5% */
+  const double TOLERANCE = 1.005; /* 0.5% */
   pari_sp av = avma;
   double t[30];
   long i,j,e;
 
-
   s->x = rand_g(s->size, s->type);
-  s->y = rand_g(s->size, s->type);
-  s->reps = 1;
+  s->y = rand_g(s->size, s->type); s->reps = 1;
   for (i = 0; i < numberof(t); i++)
   {
     for (;;)
     {
       double reps_d;
       t[i] = fun(s);
-      
       if (!t[i]) { s->reps *= 10; continue; }
-
       if (t[i] >= speed_unittime * speed_precision) break;
-
 
       /* go to a value of reps to make t[i] >= precision */
       reps_d = ceil (1.1 * s->reps
@@ -215,7 +270,6 @@ time_fun(speed_function_t fun, speed_param *s)
 
       s->reps = (ulong)reps_d;
     }
-    
     t[i] /= s->reps;
 
     /* require 3 values within TOLERANCE when >= 2 secs, 4 when below */
@@ -234,13 +288,6 @@ time_fun(speed_function_t fun, speed_param *s)
   return -1.0; /* not reached */
 }
 
-struct dat_t {
-  long size;
-  double d;
-} *dat = NULL;
-int ndat = 0;
-int allocdat = 0;
-
 void
 add_dat(long size, double d)
 {
@@ -250,8 +297,7 @@ add_dat(long size, double d)
     dat = (struct dat_t*) gprealloc((void*)dat, allocdat * sizeof(dat[0]));
   }
   dat[ndat].size = size;
-  dat[ndat].d    = d;
-  ndat++;
+  dat[ndat].d    = d; ndat++;
 }
 
 long
@@ -287,47 +333,42 @@ analyze_dat(int final)
     if (x < min_x) { min_x = x; min_j = j; }
     x -= dat[j].d;
   }
-   
   return min_j;
 }
 
 void
 print_define(const char *name, long value) {
-  printf("#define %-25s  %5ld\n\n", name, value);
+  printf("#define __%-25s  %5ld\n\n", name, value);
 }
 
-int
+void
 one(tune_param *param)
 {
   int  since_positive, since_thresh_change;
   int  thresh_idx, new_thresh_idx;
   speed_param s;
 
+  if (param->kernel == AVOID) { print_define(param->name, -1); return; }
+
 #define DEFAULT(x,n)  if (! (param->x))  param->x = (n);
-  DEFAULT (fun2, param->fun1);
-  DEFAULT (function_fudge, 1.0);
-  DEFAULT (step_factor, 0.01);  /* small steps by default */
-  DEFAULT (stop_since_change, 80);
-  DEFAULT (stop_factor, 1.2);
-  DEFAULT (type, t_INT);
+  DEFAULT(fun2, param->fun1);
+  DEFAULT(step_factor, 0.01);  /* small steps by default */
+  DEFAULT(stop_since_change, 80);
+  DEFAULT(stop_factor, 1.2);
+  DEFAULT(type, t_INT);
 
   s.type = param->type;
   s.size = param->min_size;
-  ndat = 0;
-  since_positive = 0;
-  since_thresh_change = 0;
-  thresh_idx = 0;
-  if (option_trace >= 1) 
-    printf("Setting %s...\n", param->name);
+  s.var  = param->var;
+  ndat = since_positive = since_thresh_change = thresh_idx = 0;
+  if (option_trace >= 1) printf("Setting %s...\n", param->name);
   if (option_trace >= 2)
   {
     printf("             algorithm-A  algorithm-B   ratio  possible\n");
     printf("              (seconds)    (seconds)    diff    thresh\n");
   }
 
-  for (;
-        s.size < MAX_SIZE;
-        s.size += max((long)floor(s.size * param->step_factor), 1))
+  for(;;)
   {
     double t1,t2,d;
     t1 = time_fun(param->fun1, &s);
@@ -341,11 +382,9 @@ one(tune_param *param)
     new_thresh_idx = analyze_dat(0);
 
     if (option_trace >= 2)
-    {
       printf ("size =%3ld    %.9f  %.9f  % .4f %c  %ld\n",
                s.size, t1, t2, d,
                t1 > t2 ? '#' : ' ', dat[new_thresh_idx].size);
-    }
 
     /* Stop if the last time method 1 was faster was more than a
         certain number of measurements ago.  */
@@ -356,16 +395,14 @@ one(tune_param *param)
       if (++since_positive > STOP_SINCE_POSITIVE)
       {
         if (option_trace >= 1)
-          printf ("stopped due to since_positive (%d)\n",
-                  STOP_SINCE_POSITIVE);
+          printf ("Stop: since_positive (%d)\n", STOP_SINCE_POSITIVE);
         break;
       }
     /* Stop if method 1 has become slower by a certain factor. */
     if (t1 >= t2 * param->stop_factor)
     {
       if (option_trace >= 1)
-        printf ("stopped due to t1 >= t2 * factor (%.1f)\n",
-                param->stop_factor);
+        printf ("Stop: t1 >= t2 * factor (%.1f)\n", param->stop_factor);
       break;
     }
     /* Stop if the threshold implied hasn't changed in a certain
@@ -376,76 +413,55 @@ one(tune_param *param)
       if (++since_thresh_change > param->stop_since_change)
       {
         if (option_trace >= 1)
-          printf ("stopped due to since_thresh_change (%d)\n",
-                  param->stop_since_change);
+          printf ("Stop: since_thresh_change (%d)\n", param->stop_since_change);
         break;
       }
+    s.size += max((long)floor(s.size * param->step_factor), 1);
+#define MAX_SIZE 1000
+    if (s.size >= MAX_SIZE)
+    {
+      if (option_trace >= 1)
+        printf ("Stop: max_size (%d). Disable Algorithm B?\n", MAX_SIZE);
+      break;
+    }
   }
   thresh_idx = dat[analyze_dat(1)].size;
   print_define(param->name, thresh_idx);
-  return thresh_idx;
+  *(param->var) = thresh_idx; /* reset to optimal value for next tests */
 }
 
-void error(int argc/* ignored */, char **argv)
-{
-  (void)argv;
-  err(talker, "usage: %s [-t] [-t] [-u unittime]", argv[0]);
+void error(char **argv) {
+  long i;
+  printf("usage: %s [-t] [-t] [-u unittime] [-variable index]\n", argv[0]);
+  printf("Tunable variables: (omitting index tunes everybody)\n");
+  for (i = 0; i < numberof(param); i++)
+    printf("  %2ld: %-25s (default %3ld)\n", i, param[i].name, *(param[i].var));
+  exit(1);
 }
-
-enum { PARI = 1, GMP = 2 };
-
-static tune_param param[] = {
-  {PARI, "KARATSUBA_MULI_LIMIT",t_INT, 4, speed_mulii,speed_karamulii},
-  {PARI, "KARATSUBA_SQRI_LIMIT",t_INT, 4, speed_sqri,speed_karasqri},
-  {0, "KARATSUBA_MULR_LIMIT",   t_REAL,4, speed_mulrr,speed_karamulrr},
-  {0, "MONTGOMERY_LIMIT",       t_INT, 1, speed_redc,speed_modii},
-  {0, "RESIIMUL_LIMIT",         t_INT, 1, speed_modii,speed_remiimul},
-  {GMP, "DIVRR_GMP_LIMIT",      t_REAL,4, speed_divrr,speed_divrrgmp},
-  {GMP, "INVMOD_GMP_LIMIT",     t_INT, 3, speed_invmod,speed_invmodgmp}
-#if 0
-  {"Flx_SQR_LIMIT",       t_INT, 0,speed_Flx_mul,speed_Flx_karamul}
-#endif
-};
 
 int
 main(int argc, char **argv)
 {
-  int i, KARATSUBA_MULI_LIMIT = 0;
-
+  int i;
   pari_init(4000000, 2);
   for (i = 1; i < argc; i++)
   {
     char *s = argv[i];
-    if (*s++ != '-') error(argc,argv);
+    if (*s++ != '-') error(argv);
     switch(*s) {
-      case 't': option_trace++; continue;
+      case 't': option_trace++; break;
       case 'u': s++;
         if (!*s)
         {
-          if (++i == argc) error(argc,argv);
+          if (++i == argc) error(argv);
           s = argv[i];
         }
-        speed_unittime = atof(s);
-        break;
-      default: error(argc,argv);
+        speed_unittime = atof(s); break;
+      default: if (!isdigit(*s)) error(argv);
+        i = atol(s); if (i >= numberof(param) || i < 0) error(argv);
+        one(&param[i]); return 0;
     }
   }
-  
-#ifndef PARI_KERNEL_GMP
-  KARATSUBA_MULI_LIMIT = one(&param[0]);
-  setmuli(KARATSUBA_MULI_LIMIT);
-  (void)one(&param[1]);
-#endif
-
-  for (i = 2; i < numberof(param); i++)
-  {
-#ifdef PARI_KERNEL_GMP /* GMP kernel */
-    if (param[i].kernel == PARI) continue;
-#else /* native PARI kernel */
-    if (param[i].kernel == GMP) continue;
-#endif
-    (void)one(&param[i]);
-  }
-  if (dat) free((void*)dat);
-  return 1;
+  for (i = 0; i < numberof(param); i++) one(&param[i]);
+  return 0;
 }

@@ -305,6 +305,8 @@ GH 56- more robust thue(): faster enumeration of small solution, don't assume
    59- renamed svaluation --> u_lvalrem, pvaluation --> Z_pvalrem
    60- change semantics of sqrtn to catch easily non-residues from the
        user's side
+   61- rewrote the 'tune' utility, add one tune.h file for each kernel,
+       support for user override still needs to be rethought (or documented).
 
   Added
     1- make test-all [ all available test suites (SLOW !)]

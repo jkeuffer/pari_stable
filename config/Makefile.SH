@@ -315,9 +315,9 @@ tune: tune-sta
 	-\$(LN) tune-sta tune
 	-\$(LN) $ln_objdir/tune ../tune
 
-tune-dyn: tune.o lib-dyn
+tune-dyn: tune.o \$(LIBPARI_DYN)
 	\$(LD) \$(LDFLAGS) \$(RUNPTH) -o \$@ \$< \$(GMPOBJS) -L. \$(LDDYN) \$(LIBS)
-tune-sta: tune.o lib-sta
+tune-sta: tune.o \$(LIBPARI_STA)
 	\$(LD) \$(LDFLAGS) -o \$@ \$< \$(GMPOBJS) ./\$(LIBPARI_STA) \$(LIBS)
 
 gp-sta: $add_funclist \$(OBJS) \$(OBJSGP) \$(GNUPLOT_OBJS)

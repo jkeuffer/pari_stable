@@ -72,6 +72,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "parierr.h"
 BEGINEXTERN
 #include "paridecl.h"
+#include "paritune.h"
 ENDEXTERN
 
 #if defined(__MWERKS__)

@@ -33,11 +33,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
    signe(x) is not valid. Use degpol(x)>=0 instead.
 */
 
-long Flx_SQR_LIMIT = 200;
-long Flx_MUL_LIMIT = 100;
-long Flx_INVMONTGOMERY_LIMIT = 6000;
-long Flx_POW_MONTGOMERY_LIMIT = 1000;
-
 #define both_odd(x,y) ((x)&(y)&1)
 
 /***********************************************************************/

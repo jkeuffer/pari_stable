@@ -1338,9 +1338,6 @@ gexp(GEN x, long prec)
 /**                      FONCTION LOGARITHME                       **/
 /**                                                                **/
 /********************************************************************/
-
-long LOGAGM_LIMIT  = 24 ;
-
 /* 2 * atanh(1/3) */
 GEN
 constlog2(long prec)

@@ -1649,14 +1649,6 @@ init_remiimul(GEN M)
   return sM;
 }
 
-static long RESIIMUL_LIMIT   = 139;
-static long MONTGOMERY_LIMIT = 70;
-
-void
-setremiilimit(long n) { RESIIMUL_LIMIT = n; }
-void
-setmontgomerylimit(long n) { MONTGOMERY_LIMIT = n; }
-
 typedef struct {
   GEN N;
   GEN (*res)(GEN,GEN);
@@ -1764,7 +1756,7 @@ Fp_powu(GEN A, ulong k, GEN N)
     D.res = &montred;
     D.N = (GEN)&S;
   }
-  else if (lN > RESIIMUL_LIMIT && ((double)k)*expi(A) > 2 + expi(N))
+  else if (lN > REMIIMUL_LIMIT && ((double)k)*expi(A) > 2 + expi(N))
   {
     D.mulred = base_is_2? &_muli2invred: &_muliiinvred;
     D.res = &remiimul;
@@ -1867,7 +1859,7 @@ Fp_pow(GEN A, GEN k, GEN N)
     D.res = &montred;
     D.N = (GEN)&S;
   }
-  else if (lN > RESIIMUL_LIMIT)
+  else if (lN > REMIIMUL_LIMIT)
   {
     D.mulred = base_is_2? &_muli2invred: &_muliiinvred;
     D.res = &remiimul;
