@@ -1017,6 +1017,7 @@ padic_sqrtn(GEN x, GEN n, GEN *zetan)
   if (!signe(x[4]))
   {
     long m = itos(n);
+    if (zetan) *zetan = gun;
     return zeropadic(p, (valp(x)+m-1)/m);
   }
   /* treat the ramified part using logarithms */
