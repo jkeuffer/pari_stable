@@ -44,6 +44,38 @@ extern ulong u_invmod(ulong x, ulong p);
 /*                                                                 */
 /*******************************************************************/
 
+/* No copy*/
+GEN
+gtrans_i(GEN x)
+{
+  long i,j,lx,dx, tx=typ(x);
+  GEN y,p1;
+
+  if (! is_matvec_t(tx)) err(typeer,"gtrans_i");
+  switch(tx)
+  {
+    case t_VEC:
+      y=dummycopy(x); settyp(y,t_COL); break;
+
+    case t_COL:
+      y=dummycopy(x); settyp(y,t_VEC); break;
+
+    case t_MAT:
+      lx=lg(x); if (lx==1) return cgetg(1,t_MAT);
+      dx=lg(x[1]); y=cgetg(dx,tx);
+      for (i=1; i<dx; i++)
+      {
+	p1=cgetg(lx,t_COL); y[i]=(long)p1;
+	for (j=1; j<lx; j++) p1[j]=coeff(x,i,j);
+      }
+      break;
+
+    default: y=x; break;
+  }
+  return y;
+}
+
+
 GEN
 gtrans(GEN x)
 {
@@ -2090,6 +2122,8 @@ FpM_sindexrank(GEN x, GEN p) { return indexrank0(x,p,1); }
 /*                    LINEAR ALGEBRA MODULO P                      */
 /*                                                                 */
 /*******************************************************************/
+  
+/*If p is NULL no reduction is performed.*/
 GEN
 FpM_mul(GEN x, GEN y, GEN p)
 {
@@ -2120,6 +2154,32 @@ FpM_mul(GEN x, GEN y, GEN p)
       }
       coeff(z,i,j)=lpileupto(av,p?modii(p1,p):p1);
     }
+  }
+  return z;
+}
+
+/*If p is NULL no reduction is performed.*/
+GEN
+FpM_FpV_mul(GEN x, GEN y, GEN p)
+{
+  long i,l,lx=lg(x), ly=lg(y);
+  GEN z;
+  if (lx != ly) err(operi,"* [mod p]",t_MAT,t_COL);
+  z=cgetg(ly,t_COL);
+  if (lx==1) return cgetg(1,t_COL);
+  l=lg(x[1]);
+  for (i=1; i<l; i++)
+  { 
+    ulong av;
+    GEN p1,p2;
+    int k;
+    p1=gzero; av=avma;
+    for (k=1; k<lx; k++)
+    {
+      p2=mulii(gcoeff(x,i,k),(GEN)y[k]);
+      p1=addii(p1,p2);
+    }
+    z[i]=lpileupto(av,p?modii(p1,p):p1);
   }
   return z;
 }
