@@ -867,20 +867,6 @@ fft(GEN Omega, GEN p, GEN f, long Step, long l)
   for (i=0; i<l; i++) f[i]=ff[i+1];
 }
 
-extern void mpsincos(GEN x, GEN *s, GEN *c);
-
-/* return exp(ix), x a t_REAL */
-static GEN
-exp_i(GEN x)
-{
-  GEN v;
-
-  if (!signe(x)) return realun(lg(x)); /* should not happen */
-  v = cgetg(3,t_COMPLEX);
-  mpsincos(x, (GEN*)(v+2), (GEN*)(v+1));
-  return v;
-}
-
 /* e(1/N) */
 static GEN
 RUgen(long N, long bitprec)
@@ -889,7 +875,7 @@ RUgen(long N, long bitprec)
   if (N == 2) return mpneg(realun(bitprec));
   if (N == 4) return gi;
   pi2 = gmul2n(mppi(bitprec/BITS_IN_LONG+3), 1);
-  return exp_i(gdivgs(pi2,N));
+  return exp_Ir(gdivgs(pi2,N));
 }
 
 /* N=2^k. returns a vector RU which contains exp(2*i*k*Pi/N), k=0..N-1 */
@@ -952,7 +938,7 @@ parameters(GEN p, double *mu, double *gamma,
   K=NN/Lmax; if (K%2==1) K++; NN=Lmax*K;
   mygpi=mppi(bitprec/BITS_IN_LONG+3);
   aux = gdivgs(mygpi,NN/2); /* 2 Pi/NN */
-  prim = exp_i(aux);
+  prim = exp_Ir(aux);
   aux = gmulbyi(aux);
   RU = myrealun(bitprec);
 
@@ -1015,7 +1001,7 @@ dft(GEN p, long k, long NN, long bitprec, GEN F, GEN H, long polreal)
 
   mygpi=mppi(bitprec/BITS_IN_LONG+3);
   aux = gdivgs(mygpi,NN/2); /* 2 Pi/NN */
-  prim = exp_i(aux);
+  prim = exp_Ir(aux);
   aux = gmulbyi(aux);
   prim2 = myrealun(bitprec);
   RU=cgetg(n+2,t_VEC); RU++;

@@ -1401,6 +1401,7 @@ GEN     PiI2(long prec);
 GEN     PiI2n(long prec, long n);
 void    consteuler(long prec);
 void    constpi(long prec);
+GEN     exp_Ir(GEN x);
 GEN     gcos(GEN x, long prec);
 void    gcosz(GEN x, GEN y);
 GEN     gcotan(GEN x, long prec);

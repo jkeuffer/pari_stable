@@ -1952,6 +1952,17 @@ mpsincos(GEN x, GEN *s, GEN *c)
   gerepilemanysp(av,tetpil,gptr,2);
 }
 
+/* return exp(ix), x a t_REAL */
+GEN
+exp_Ir(GEN x)
+{
+  gpmem_t av = avma;
+  GEN v = cgetg(3,t_COMPLEX);
+  mpsincos(x, (GEN*)(v+2), (GEN*)(v+1));
+  if (!signe(x)) return gerepilecopy(av, (GEN)v[1]);
+  return v;
+}
+
 void
 gsincos(GEN x, GEN *s, GEN *c, long prec)
 {
