@@ -223,6 +223,15 @@ get_Char(GEN chic, long prec)
   C[3] = (long)d; return C;
 }
 
+/* prime divisors of conductor */
+static GEN
+divcond(GEN bnr)
+{ 
+  GEN bid = (GEN)bnr[2];
+  GEN fa = (GEN)bid[3];
+  return (GEN)fa[1];
+}
+
 /* Let chi a character defined over bnr and primitive over bnrc,
    compute the corresponding primitive character and the vectors of
    prime ideals dividing bnr but not bnrc. Returns NULL if bnr = bnrc */
@@ -257,11 +266,8 @@ GetPrimChar(GEN chi, GEN bnr, GEN bnrc, long prec)
     chic[i] = (long)s;
   }
 
-  cond  = (GEN)cond[1];
   condc = (GEN)condc[1];
-  p2 = (GEN)idealfactor(nf, cond)[1];
-  l  = lg(p2);
-
+  p2 = divcond(bnr); l  = lg(p2);
   prdiff = cgetg(l, t_COL);
   for (nd=1, i=1; i < l; i++)
     if (!idealval(nf, condc, (GEN)p2[i])) prdiff[nd++] = p2[i];
@@ -550,7 +556,7 @@ FindModulus(GEN dataC, long fl, long *newprec, long prec, long bnd)
   /* if cpl < rb, it is not necessary to try another modulus */
   rb = powgi(gmul((GEN)nf[3], det(f)), gmul2n(gmael(bnr, 5, 1), 3));
 
-  bpr = (GEN)idealfactor(nf, f)[1];
+  bpr = divcond(bnr);
   nbp = lg(bpr) - 1;
 
   indpr = cgetg(nbp + 1,t_VECSMALL);
@@ -715,7 +721,7 @@ ComputeArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
   nf    = gmael(bnr, 1, 7);
   diff  = gmael(nf, 5, 5);
   T     = gmael(nf,5,4);
-  cond  =  gmael(bnr, 2, 1);
+  cond  = gmael(bnr, 2, 1);
   cond0 = (GEN)cond[1]; condZ = gcoeff(cond0,1,1);
   cond1 = arch_to_perm((GEN)cond[2]);
   N     = degpol(nf[1]);
@@ -740,7 +746,7 @@ ComputeArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
   if (!gcmp1(gcoeff(idg, 1, 1)))
   {
     GEN p1 = idealfactor(nf, idg);
-    GEN p2 = idealfactor(nf, cond0);
+    GEN p2 = divcond(bnr);
     p2[2] = (long)zerocol(lg(p2[1])-1);
     p1 = concat_factor(p1,p2);
 
@@ -2107,7 +2113,7 @@ static GEN
 GetValue1(GEN bnr, long flag, long prec)
 {
   GEN bnf = checkbnf(bnr), nf = checknf(bnf);
-  GEN hk, Rk, wk, c, rep, mod0, diff;
+  GEN hk, Rk, wk, c, rep, diff;
   long i, l, r, r1, r2;
   pari_sp av = avma;
 
@@ -2122,9 +2128,7 @@ GetValue1(GEN bnr, long flag, long prec)
 
   if (flag)
   {
-    mod0 = gmael3(bnr, 2, 1, 1);
-    diff = (GEN)idealfactor(nf, mod0)[1];
-
+    diff = divcond(bnr);
     l = lg(diff) - 1; r += l;
     for (i = 1; i <= l; i++)
       c = gmul(c, glog(idealnorm(nf, (GEN)diff[i]), prec));
