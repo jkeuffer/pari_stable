@@ -40,7 +40,6 @@ BA  1- gpflog could print some lines twice
     7- compatible = 3 not taken into account when reading a file
     8- cbezout(0,0) = 1 (should be 0)
     9- when lines > 0, output driver didn't reset properly after user output
-   10- default(lines,) did apply to user output (e.g print) [contrary to doc].
 
   Changed
     1- DOS distribution archives (GPM removed)
