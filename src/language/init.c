@@ -2170,7 +2170,7 @@ entree functions_basic[]={
 {"listput",25,(void*)listput,8,"GGD0,L,"},
 {"listsort",99,(void*)listsort,8,"GD0,L,"},
 {"lngamma",1,(void*)glngamma,3,"Gp"},
-{"log",99,(void*)log0,3,"GD0,L,p"},
+{"log",99,(void*)log0,99,"GD0,M,p\nAGM==1"},
 {"matadjoint",18,(void*)adj,8,"G"},
 {"matalgtobasis",2,(void*)matalgtobasis,6,"GG"},
 {"matbasistoalg",2,(void*)matbasistoalg,6,"GG"},

@@ -1225,8 +1225,8 @@ $\ln(p)=0$. Hence in particular $\exp(\ln(x))/x$ will not in general be
 equal to 1 but to a $(p-1)$-th root of unity (or $\pm1$ if $p=2$)
 times a power of $p$.
 
-If $\fl$ is equal to 1, use an agm formula suggested by Mestre, when $x$ is
-real, otherwise identical to \kbd{log}.
+If $\fl$ is equal to $1 = \kbd{AGM}$, use an agm formula suggested by Mestre,
+when $x$ is real, otherwise identical to \kbd{log}.
 
 \syn{glog}{x,\var{prec}} or $\teb{glogagm}(x,\var{prec})$.
 
@@ -6777,9 +6777,10 @@ the same window.
 
 \noindent The binary digits of $\fl$ mean:
 
-$\bullet$ 1: \tev{parametric plot}. Here \var{expr} must be a vector with
-an even number of components. Successive pairs are then understood as the
-parametric coordinates of a plane curve. Each of these are then drawn.
+$\bullet$ $1 = \kbd{Parametric}$: \tev{parametric plot}. Here \var{expr} must
+be a vector with an even number of components. Successive pairs are then
+understood as the parametric coordinates of a plane curve. Each of these are
+then drawn.
 
 For instance:
 
@@ -6792,14 +6793,14 @@ curves.
 $y=x$.
 
 
-$\bullet$ 2: \tev{recursive plot}. If this flag is set, only \var{one}
-curve can be drawn at time, i.e.~\var{expr} must be either a two-component
-vector (for a single parametric curve, and the parametric flag \var{has} to
-be set), or a scalar function. The idea is to choose pairs of successive
-reference points, and if their middle point is not too far away from the
-segment joining them, draw this as a local approximation to the curve.
-Otherwise, add the middle point to the reference points. This is very fast,
-and usually more precise than usual plot. Compare the results of
+$\bullet$ $2 = \kbd{Recursive}$: \tev{recursive plot}. If this flag is set,
+only \var{one} curve can be drawn at time, i.e.~\var{expr} must be either a
+two-component vector (for a single parametric curve, and the parametric flag
+\var{has} to be set), or a scalar function. The idea is to choose pairs of
+successive reference points, and if their middle point is not too far away
+from the segment joining them, draw this as a local approximation to the
+curve. Otherwise, add the middle point to the reference points. This is very
+fast, and usually more precise than usual plot. Compare the results of
 $$\kbd{ploth(X=-1,1,sin(1/X),2)}\quad
  \text{and}\quad\kbd{ploth(X=-1,1,sin(1/X))}$$
 for instance. But beware that if you are extremely unlucky, or choose too few
@@ -6814,25 +6815,28 @@ curve with slightly different parameters.
 
 The other values toggle various display options:
 
-$\bullet$ 4: do not rescale plot according to the computed extrema. This is
-meant to be used when graphing multiple functions on a rectwindow (as a
-\tet{plotrecth} call), in conjunction with \tet{plotscale}.
+$\bullet$ $4 = \kbd{no\_Rescale}$: do not rescale plot according to the
+computed extrema. This is meant to be used when graphing multiple functions
+on a rectwindow (as a \tet{plotrecth} call), in conjunction with
+\tet{plotscale}.
 
-$\bullet$ 8: do not print the $x$-axis.
+$\bullet$ $8 = \kbd{no\_X\_axis}$: do not print the $x$-axis.
 
-$\bullet$ 16: do not print the $y$-axis.
+$\bullet$ $16 = \kbd{no\_Y\_axis}$: do not print the $y$-axis.
 
-$\bullet$ 32: do not print frame.
+$\bullet$ $32 = \kbd{no\_Frame}$: do not print frame.
 
-$\bullet$ 64: only plot reference points, do not join them.
+$\bullet$ $64 = \kbd{no\_Lines}$: only plot reference points, do not join them.
 
-$\bullet$ 256: use splines to interpolate the points.
+$\bullet$ $128 = \kbd{Points_too}$: plot both lines and points.
 
-$\bullet$ 512: plot no $x$-ticks.
+$\bullet$ $256 = \kbd{Splines}$: use splines to interpolate the points.
 
-$\bullet$ 1024: plot no $y$-ticks.
+$\bullet$ $512 = \kbd{no\_X\_ticks}$: plot no $x$-ticks.
 
-$\bullet$ 2048: plot all ticks with the same length.
+$\bullet$ $1024 = \kbd{no\_Y\_ticks}$: plot no $y$-ticks.
+
+$\bullet$ $2048 = \kbd{Same\_ticks}$: plot all ticks with the same length.
 
 \subsecidx{plothraw}$(\var{listx},\var{listy},\{\fl=0\})$: given
 \var{listx} and \var{listy} two vectors of equal length, plots (in high
