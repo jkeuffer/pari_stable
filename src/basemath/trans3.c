@@ -20,7 +20,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                                                                **/
 /********************************************************************/
 #include "pari.h"
-extern GEN PiI2(long prec);
 extern GEN rpowsi(ulong a, GEN n, long prec);
 extern GEN divrs2_safe(GEN x, long i);
 extern void dcxlog(double s, double t, double *a, double *b);
@@ -1985,8 +1984,7 @@ trueeta(GEN x, long prec)
   if (tx != t_COMPLEX || gsigne((GEN)x[2])<=0)
     err(talker,"argument must belong to upper half-plane");
   l=precision(x); if (l) prec=l;
-  p1=mppi(prec); setexpo(p1,2);
-  p2=cgetg(3,t_COMPLEX); p2[1]=zero; p2[2]=(long)p1; /* 2*I*Pi */
+  p2 = PiI2(prec);
   z=gexp(gdivgs(p2,24),prec); /* exp(2*I*Pi/24) */
   unapprox=gsub(gun,gpuigs(stoi(10),-8));
   m=gun;
@@ -2228,6 +2226,9 @@ theta(GEN q, GEN z, long prec)
   long l, n;
   gpmem_t av=avma, tetpil;
   GEN ps,qn,qnold,y,zy,lq,ps2,p1,k,zold;
+
+  if (!is_scalar_t(typ(q)) || !is_scalar_t(typ(z)))
+    err(impl,"theta for non-scalar types");
 
   l=precision(q); if (l) prec=l;
   p1=realun(prec); z=gmul(p1,z);

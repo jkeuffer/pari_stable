@@ -424,14 +424,6 @@ get_prec(GEN P, long prec)
 }
 
 /* AUXILLIARY ROUTINES FOR QUADRAYSIGMA */
-GEN
-PiI2(long prec)
-{
-  GEN z = cgetg(3,t_COMPLEX);
-  GEN x = mppi(prec); setexpo(x,2);
-  z[1] = zero;
-  z[2] = (long)x; return z; /* = 2I Pi */
-}
 
 /* Compute data for ellphist */
 static GEN

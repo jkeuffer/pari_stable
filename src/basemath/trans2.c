@@ -722,6 +722,7 @@ gach(GEN x, long prec)
 {
   gpmem_t av, tetpil;
   GEN y,p1;
+  long v;
 
   switch(typ(x))
   {
@@ -740,24 +741,31 @@ gach(GEN x, long prec)
       return y;
 
     case t_COMPLEX:
-      av=avma; p1=gaddsg(-1,gsqr(x));
-      p1=gadd(x,gsqrt(p1,prec)); tetpil=avma;
+      av = avma; p1=gaddsg(-1,gsqr(x));
+      p1=gadd(x,gsqrt(p1,prec));
       y=glog(p1,prec);
-      if (signe(y[2])<0) { tetpil=avma; y=gneg(y); }
-      return gerepile(av,tetpil,y);
+      if (signe(y[2])<0) y = gneg(y);
+      return gerepileupto(av, y);
 
     case t_SER:
-      av=avma; if (valp(x)<0) err(negexper,"gach");
-      p1=gdiv(derivser(x),gsqrt(gsubgs(gsqr(x),1),prec));
-      y=integ(p1,varn(x));
-      if (!valp(x) && gcmp1((GEN)x[2])) return gerepileupto(av,y);
-      if (valp(x))
+      av = avma; v = valp(x);
+      if (v < 0) err(negexper,"gach");
+      if (gcmp0(x))
       {
-	p1=cgetg(3,t_COMPLEX); p1[1]=zero; p1[2]=lmppi(prec);
-	setexpo(p1[2],0);
+        if (!v) return gcopy(x);
+        return gerepileupto(av, gadd(x, PiI2n(prec,-1)));
       }
-      else p1=gach((GEN)x[2],prec);
-      tetpil=avma; return gerepile(av,tetpil,gadd(p1,y));
+      p1 = gdiv(derivser(x), gsqrt(gsubgs(gsqr(x),1),prec));
+      y = integ(p1, varn(x));
+      if (v)
+        p1 = PiI2n(prec, -1); /* I Pi/2 */
+      else
+      {
+        p1 = (GEN)x[2];
+        if (gcmp1(p1)) return gerepileupto(av,y);
+        p1 = gach(p1, prec);
+      }
+      return gerepileupto(av, gadd(p1,y));
 
     case t_INTMOD: case t_PADIC:
       err(typeer,"gach");

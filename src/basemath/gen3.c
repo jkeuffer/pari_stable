@@ -1570,7 +1570,7 @@ derivser(GEN x)
 {
   long i,j,vx = varn(x), e = valp(x), lx = lg(x);
   GEN y;
-  if (gcmp0(x)) return zeroser(vx,e-1);
+  if (gcmp0(x)) return zeroser(vx,e? e-1: 0);
   if (e)
   {
     y=cgetg(lx,t_SER); y[1] = evalsigne(1) | evalvalp(e-1) | evalvarn(vx);

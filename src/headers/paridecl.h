@@ -1386,6 +1386,9 @@ GEN     thueinit(GEN poly, long flag, long prec);
 
 /* trans1.c */
 
+GEN     Pi2n(long prec, long n);
+GEN     PiI2(long prec);
+GEN     PiI2n(long prec, long n);
 void    consteuler(long prec);
 void    constpi(long prec);
 GEN     gcos(GEN x, long prec);

@@ -97,6 +97,27 @@ mppi(long prec)
   constpi(prec); affrr(gpi,x); return x;
 }
 
+/* Pi * 2^n */
+GEN
+Pi2n(long prec, long n)
+{
+  GEN x = mppi(prec); setexpo(x, 1+n);
+  return x;
+}
+
+/* I * Pi * 2^n */
+GEN
+PiI2n(long prec, long n)
+{
+  GEN z = cgetg(3,t_COMPLEX);
+  z[1] = zero;
+  z[2] = (long)Pi2n(prec, n); return z;
+}
+
+/* 2I * Pi */
+GEN
+PiI2(long prec) { return PiI2n(prec, 1); }
+
 /********************************************************************/
 /**                                                                **/
 /**                      FONCTION EULER                            **/
@@ -2106,8 +2127,8 @@ gcotan(GEN x, long prec)
       return mpcotan(x);
 
     case t_SER: 
-      if (gcmp0(x)) err(diver9);
-      if (valp(x)<0) err(negexper,"gcotan"); /* fall through */
+      if (gcmp0(x)) err(talker,"0 argument in cotan");
+      if (valp(x) < 0) err(negexper,"cotan"); /* fall through */
     case t_COMPLEX:
       av=avma; gsincos(x,&s,&c,prec); tetpil=avma;
       return gerepile(av,tetpil,gdiv(c,s));
