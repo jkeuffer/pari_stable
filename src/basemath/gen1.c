@@ -1406,7 +1406,7 @@ gmul(GEN x, GEN y)
       switch(ty)
       {
         case t_COMPLEX: return mulRc(x, y);
-        case t_PADIC: return signe(x)? mulTp(x, y): gzero;
+        case t_PADIC: return signe(x[1])? mulTp(x, y): gzero;
         case t_QUAD: return mulRq(x, y);
       }
 
