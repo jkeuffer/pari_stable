@@ -1345,7 +1345,7 @@ PRECPB:
           xinit = gram? qf_base_change(xinit, h, 1): gmul(xinit, h);
 
           prec = good_prec(xinit, kmax);
-#if 0 /* slower
+#if 0 /* slower */
           if (prec == DEFAULTPREC) {
             if (DEBUGLEVEL>3) fprintferr("switch to integral algorithm\n");
             h = gram? lllgramint(xinit): lllint(xinit);
