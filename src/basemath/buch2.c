@@ -178,7 +178,7 @@ desallocate(RELCACHE_t *M)
     }
   }
   free((void*)M->base);
-  M->chk = M->last = M->base = NULL;
+  M->end = M->chk = M->last = M->base = NULL;
 }
 
 INLINE GEN
@@ -2270,7 +2270,7 @@ compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR)
   H = hnfall_i(L, NULL, 1); r = lg(H)-1;
 
   /* tentative regulator */
-  R = mpabs( gmul(*ptkR, gdiv(dethnf_i(H), gpowgs(den, r))) );
+  R = gmul(*ptkR, gdiv(dethnf_i(H), gpowgs(den, r)));
   c = gtodouble(gmul(R,z)); /* should be n (= 1 if we are done) */
   if (DEBUGLEVEL)
   {
@@ -2278,6 +2278,7 @@ compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR)
     fprintferr("\n#### Tentative regulator : %Z\n", gprec_w(R,3));
     fprintferr("\n ***** check = %f\n",c);
   }
+//  if (c < 0.75 || c > 1.3) { avma = av; return fupb_RELAT; }
   if (c < 0.8 || c > 1.3) { avma = av; return fupb_RELAT; }
   *ptkR = R; *ptL = L; return fupb_NONE;
 }
@@ -3037,7 +3038,7 @@ buch(GEN *pnf, double cbach, double cbach2, long nbrelpid, long flun,
   resc = gdiv(mulri(gsqrt(absi(D),DEFAULTPREC), (GEN)zu[1]),
               gmul2n(gpowgs(Pi2n(1,DEFAULTPREC), R2), R1));
   if (DEBUGLEVEL) fprintferr("R1 = %ld, R2 = %ld\nD = %Z\n",R1,R2, D);
-  av = avma; cache.chk = cache.last = cache.base = NULL;
+  av = avma; cache.end = cache.chk = cache.last = cache.base = NULL;
 
 START:
   avma = av; desallocate(&cache);
