@@ -304,14 +304,12 @@ FBgen(GEN nf,long n2,long n)
   return Res;
 }
 
-/* can we factor I / m ? (m pseudo minimum, computed in ideallllredpart1) */
+/* can we factor I / m ? (m pseudo minimum, computed in pseudomin) */
 static long
-factorgen(GEN nf,GEN idealvec,long kcz,long limp)
+factorgen(GEN nf,GEN I,GEN m,long kcz,long limp)
 {
   long i,j,n1,ip,v,p,k,lo,ifinal;
   GEN x,q,r,P,p1,listexpo;
-  GEN I = (GEN)idealvec[1];
-  GEN m = (GEN)idealvec[2];
   GEN Nm= absi( subres(gmul((GEN)nf[7],m), (GEN)nf[1]) ); /* |Nm| */
 
   x = divii(Nm, dethnf_i(I)); /* m in I, so NI | Nm */
@@ -1565,24 +1563,18 @@ END:
 }
 #undef MAXTRY
 
-/* I assumed to be integral HNF, T2 a weighted T2 matrix */
+/* I assumed to be integral HNF, T2 a weighted T2 matrix. Return an
+ * irrational m in I with T2(m) small */
 static GEN
-ideallllredpart1(GEN I, GEN T2)
+pseudomin(GEN I, GEN T2)
 {
-  GEN y,m,idealpro;
-
-  y = lllgramintern(qf_base_change(T2,I,1),100,1, 0);
+  GEN m, y = lllgramintern(qf_base_change(T2,I,1),100,1, 0);
   if (!y) return NULL;
 
-  /* I, m, y integral */
   m = gmul(I,(GEN)y[1]);
   if (isnfscalar(m)) m = gmul(I,(GEN)y[2]);
-
-  idealpro = cgetg(3,t_VEC);
-  idealpro[1] = (long)I;
-  idealpro[2] = (long)m; /* irrational element of small T2 norm in I */
-  if (DEBUGLEVEL>5) fprintferr("\nidealpro = %Z\n",idealpro);
-  return idealpro;
+  if (DEBUGLEVEL>5) fprintferr("\nm = %Z\n",m);
+  return m;
 }
 
 static void
@@ -1674,7 +1666,7 @@ static GEN
 remove_content(GEN I)
 {
   long N = lg(I)-1;
-  if (!gcmp1(gcoeff(I,N,N))) { GEN y=content(I); if (!gcmp1(y)) I=gdiv(I,y); }
+  if (!gcmp1(gcoeff(I,N,N))) I = primpart(I);
   return I;
 }
 
@@ -1685,7 +1677,7 @@ random_relation(long phase,long cglob,long LIMC,long PRECREG,
 {
   static long jideal, jdir;
   long lim,i,av,av1,cptzer,nbT2,lgsub,r1, jlist = 1;
-  GEN arch,col,colarch,ideal,idealpro,P,ex;
+  GEN arch,col,colarch,ideal,m,P,ex;
 
   if (phase != 1) { jideal=jdir=1; if (phase<0) return 0; }
 
@@ -1723,9 +1715,9 @@ random_relation(long phase,long cglob,long LIMC,long PRECREG,
       if (DEBUGLEVEL>2)
         fprintferr("phase=%ld,jideal=%ld,jdir=%ld,rand=%ld\n",
                    phase,jideal,jdir,getrand());
-      idealpro = ideallllredpart1(ideal,(GEN)vecT2[jdir]);
-      if (!idealpro) return -2;
-      if (!factorgen(nf,idealpro,KCZ,LIMC))
+      m = pseudomin(ideal,(GEN)vecT2[jdir]);
+      if (!m) return -2;
+      if (!factorgen(nf,ideal,m,KCZ,LIMC))
       {
         if (DEBUGLEVEL>1) { fprintferr("."); flusherr(); }
         continue;
@@ -1758,7 +1750,7 @@ random_relation(long phase,long cglob,long LIMC,long PRECREG,
         }
       colarch = (GEN)matarch[cglob];
       /* arch = archimedean component (MULTIPLICATIVE form) of ideal */
-      arch = vecdiv(arch, gmul(gmael(nf,5,1), (GEN)idealpro[2]));
+      arch = vecdiv(arch, gmul(gmael(nf,5,1), m));
       set_log_embed(colarch, arch, r1, PRECREG);
       if (DEBUGLEVEL) dbg_newrel(jideal,jdir,phase,cglob,col,colarch,lim);
 
@@ -1788,7 +1780,7 @@ be_honest(GEN nf,GEN subFB,long PRECLLL)
   ulong av;
   GEN MC = gmael(nf,5,2), M = gmael(nf,5,1), D = (GEN)nf[3];
   long ex,i,j,J,k,iz,nbtest, lgsub = lg(subFB), ru = lg(MC);
-  GEN P,ideal,idealpro, exu = cgetg(ru, t_VECSMALL), MCtw= cgetg(ru, t_MAT);
+  GEN P,ideal,m, exu = cgetg(ru, t_VECSMALL), MCtw= cgetg(ru, t_MAT);
 
   if (DEBUGLEVEL)
   {
@@ -1828,8 +1820,8 @@ be_honest(GEN nf,GEN subFB,long PRECLLL)
 	  }
           for (i=1; i<ru; i++)
             MCtw[i] = exu[i]? lmul2n((GEN)MC[i],exu[i]<<1): MC[i];
-          idealpro = ideallllredpart1(ideal, mulmat_real(MCtw,M));
-          if (idealpro && factorgen(nf,idealpro,iz-1,FB[iz-1])) break;
+          m = pseudomin(ideal, mulmat_real(MCtw,M));
+          if (m && factorgen(nf,ideal,m,iz-1,FB[iz-1])) break;
 	  nbtest++; if (nbtest==200) return 0;
 	}
 	avma = av2; if (k < ru) break;
@@ -2096,10 +2088,10 @@ shift_t2(GEN T2, GEN M, GEN MC, long a, long b)
 }
 
 static GEN
-compute_vecT2(GEN nf,long RU,long prec)
+compute_vecT2(GEN nf,long prec)
 {
   GEN vecT2, M = gmael(nf,5,1), MC = gmael(nf,5,2), T2 = gmael(nf,5,3);
-  long i,j,ind, n = min(RU,9);
+  long i,j,ind, n = min(lg(T2),9);
 
   vecT2=cgetg(1 + n*(n+1)/2,t_VEC);
   if (nfgetprec(nf) > prec)
@@ -2972,7 +2964,7 @@ MORE:
     }
     if (!vecT2)
     {
-      vecT2 = compute_vecT2(nf,RU,PRECLLL);
+      vecT2 = compute_vecT2(nf,PRECLLL);
       av1 = avma;
     }
     if (!powsubFB)
