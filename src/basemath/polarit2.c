@@ -235,7 +235,7 @@ record_factors(long N, long d, long jmax, ulong *tabkbit, ulong *tmp)
  *
  * link[i] = -j if V[i] = a[j]
  *            j if V[i] = V[j] * V[j+1]
- * Arrays link, V, W have 2k - 2 elements */
+ * Arrays (link, V, W) pre-allocated for 2k - 2 elements */
 static void
 BuildTree(GEN link, GEN V, GEN W, GEN a, GEN p)
 {
