@@ -5883,9 +5883,6 @@ If $\fl=0$, uses a modified integer LLL algorithm.
 If $\fl=1$, uses $\kbd{matrixqz}(x,-2)$. If LLL reduction of the final result
 is not desired, you can save time using \kbd{matrixqz(matker(x),-2)} instead.
 
-If $\fl=2$, uses another modified LLL. In the present version \vers, only
-independent rows are allowed in this case.
-
 \syn{matkerint0}{x,\fl}. Also available is
 $\teb{kerint}(x)$ ($\fl=0$).
 
@@ -6061,8 +6058,6 @@ of the matrix $x$.
 
 If $\fl=5$, case as case $4$, but $x$ may have polynomial coefficients.
 
-If $\fl=7$, uses an older version of case $0$ above.
-
 If $\fl=8$, same as case $0$, where $x$ may have polynomial coefficients.
 
 If $\fl=9$, variation on case $1$, using content.
@@ -6085,8 +6080,6 @@ $\fl=1$: $x$ has integer entries, the computations are all done in integers.
 $\fl=4$: $x$ has integer entries, gives the kernel and reduced image.
 
 $\fl=5$: same as $4$ for generic $x$.
-
-$\fl=7$: an older version of case $0$.
 
 \syn{qflllgram0}{x,\fl,\var{prec}}. Also available are
 $\teb{lllgram}(x,\var{prec})$ ($\fl=0$), $\teb{lllgramint}(x)$ ($\fl=1$), and
