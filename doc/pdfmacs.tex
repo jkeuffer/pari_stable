@@ -134,7 +134,7 @@
   {\edef\@temp{\csname r@#1\endcsname}%
     \def\lbl{\@ref}\def\chp{\@cref}%
     \pdfjumpref{#1}{\ifx\chp{\the\chapno}\lbl\else\chp.\lbl\fi}}}
-\def\pdfjumpref#1#2{\pdfannotlink attr {/Border [ 0 0 0 ] /H /O}
+\def\pdfjumpref#1#2{\pdfstartlink attr {/Border [ 0 0 0 ] /H /O}
   goto name {pdf@lab#1}\pushcolor{\linkcolor}#2\popcolor\pdfendlink}
 
 \catcode`\@=12

@@ -107,7 +107,7 @@
 \ifPDF
 %% This puts the hyperlink command in the index, linked to the page
 %% number. #1 is the usual page number, #2 the pdfcounter.  CHB
-  \def\indxjump#1#2{\pdfannotlink attr {/Border [ 0 0 0 ] /H /O}
+  \def\indxjump#1#2{\pdfstartlink attr {/Border [ 0 0 0 ] /H /O}
     goto name {pdf@#2}\pushcolor{\linkcolor}#1\popcolor\pdfendlink}
 \else
   \def\indxjump#1#2{#1}
