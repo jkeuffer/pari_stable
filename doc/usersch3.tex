@@ -6629,6 +6629,78 @@ a system command. This command is executed, its output written to the
 standard output (this won't get into your logfile), and control returns
 to the PARI system. This simply calls the C \kbd{system} command.
 
+\subsubsecidx{trap}$(\{e\}, \{\var{sec}\}, \{\var{rec}\})$: tries to execute
+\var{seq}, trapping error $e$,
+that is effectively preventing it from aborting computations in the usual
+way; the recovery sequence \var{rec} is executed if the error occurs and the
+evaluation of \var{rec} becomes the result of the command. If $e$ is omitted,
+all exceptions are trapped. Note in particular that hitting \kbd{\pow C}
+(Control-C) raises an exception.
+
+\bprog%
+? \bs\bs {\rm trap division by 0}
+? inv(x) = trap (gdiver2, INFINITY, 1/x)
+? inv(2)
+\%1 = 1/2
+? inv(0)
+\%2 = INFINITY
+\eprog
+
+If \var{seq} is omitted, defines \var{rec} as a default action when
+encountering exception $e$. The error message is printed, as well as the
+result of the evaluation of \var{rec}, and the control is given back to the
+GP prompt. In particular, current computation is then lost.
+
+The following error handler prints the list of all user variables, then
+stores in a file their name and their values:
+\bprog%
+? \obr
+\q  trap( ,
+\q\q print(reorder);
+\q\q write("crash", reorder);
+\q\q write("crash", eval(reorder))
+) \cbr
+\eprog
+
+If no recovery code is given (\var{rec} is omitted) a so-called {\it
+\idx{break loop}} will be started. During a break loop, all commands are read
+and evaluated as during the main GP loop (except that no history of results is
+kept).
+
+To get out of the break loop, you can use \tet{next}, \tet{break} or
+\tet{return}; reading in a file by \b{r} will also terminate the loop once
+the file has been read (\kbd{read} will remain in the break loop). If the
+error is not fatal (\kbd{\pow C} is the only non-fatal error), \kbd{next}
+will continue the computation as if nothing had happened (except of course,
+you may have changed GP state during the break loop); otherwise control will
+come back to the GP prompt.
+
+Break loops are useful as a debugging tool to inspect the values of GP
+variables to understand why a problem occurred, or to change GP behaviour
+(increase debugging level, start storing results in a logfile, modify
+parameters\dots) in the middle of a long computation (hit \kbd{\pow C}, type
+in your modifications, then type \kbd{next}).
+
+If \var{rec} is the empty string \kbd{""} the last default handler is popped
+out, and replaced by the previous one for that error.
+
+\misctitle{Note:} The interface is currently not adequate for trapping
+individual exceptions. In the current version \vers, the following keywords
+are recognized, but this will be expanded and names changed in the future
+(all library mode errors can be trapped: it's a matter of defining the
+keywords to GP, and there are currently far too many useless ones):
+
+\kbd{accurer}: accuracy problem
+
+\kbd{gdiver2}: division by 0
+
+\kbd{archer}: not available on this architecture and operation system
+
+\kbd{typeer}: wrong type
+
+\kbd{errpile}: the PARI stack overflows
+
+
 \subsubsecidx{type}$(x,\{t\})$: this is useful only under GP. If $t$ is
 not present, returns the internal type number of the PARI object $x$.
 Otherwise, makes a copy of $x$ and sets its type equal to type $t$, which

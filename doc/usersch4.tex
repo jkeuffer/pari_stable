@@ -1376,8 +1376,10 @@ then the value of \kbd{gy} is not what you expected it to be and corresponds
 instead to the current value of the GP variable (e.g \kbd{gun}).
 
 \subsubsec{Temporary variables}\sidx{variable (temporary)}: 
-\kbd{MAXVARN} should be enough for most cases, but you can create more
-temporary variables using
+\kbd{MAXVARN} is available, but is better left to pari internal functions
+(some of which don't check that \kbd{MAXVARN} is free for them to use,
+which can be considered a bug). You can create more temporary variables
+using
 
 \kbd{long \key{fetch\_var}()}\sidx{fetch\string\_var}\label{se:fetch_var}
 
