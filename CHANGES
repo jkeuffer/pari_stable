@@ -84,6 +84,7 @@ IZ 39- TeX quasi-parsing in gphelp
 BA 47- incorrect quoting in src/make_vi_tags (make ctags)
    48- 1/[;] --> error, whereas [;]^-1 --> [;]  [ now, allow 1/[;] ]
    49- ??real  only gave the help on t_REALs, not on real()
+   50- eigen: "missing eigenspace" [roundoff pb in ker() compared to exact 0]
 
   Changed
     1- DOS distribution archives (GPM removed)
@@ -117,6 +118,7 @@ GN  2- Jebelean extended gcd + rational number reconstruction
 XR  3- new flag to rnfconductor (check extension is abelian)
 IZ  4- set of default colors (boldfg)
     5- modular univariate and bivariate resultant.
+    6- Pohlig-Hellman discrete log over Fp and nf.zk / pr
 
   Removed
     1- obsolete undocumented functions oldidealinv, idealinv0
