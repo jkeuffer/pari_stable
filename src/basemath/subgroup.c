@@ -403,6 +403,8 @@ parse_bound(subgp_iter *T)
     break;
   default: err(typeer,"subgroup");
   }
+  if (signe(T->bound) <= 0)
+    err(talker,"subgroup: index bound must be positive");
 }
 
 static GEN
