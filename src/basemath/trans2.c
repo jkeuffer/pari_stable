@@ -1178,6 +1178,52 @@ divrs2_safe(GEN x, long i)
     return divrs(divrs(x, i), i+1);
 }
 
+/* arg(s+it) */
+double
+darg(double s, double t)
+{
+  double x;
+  if (!t) return (s>0)? 0.: PI;
+  if (!s) return (t>0)? PI/2: -PI/2;
+  x = atan(t/s);
+  return (s>0)? x
+              : ((t>0)? x+PI : x-PI);
+}
+
+void
+dcxlog(double s, double t, double *a, double *b)
+{
+  *a = log(s*s + t*t) / 2; /* log |s| = Re(log(s)) */
+  *b = darg(s,t);          /* Im(log(s)) */
+}
+
+double
+dnorm(double s, double t) { return s*s + t*t; }
+
+GEN 
+trans_fix_arg(long *prec, GEN *s0, GEN *sig, long *av, GEN *res)
+{
+  GEN s, p1;
+  long l;
+  if (typ(*s0)==t_COMPLEX && gcmp0((GEN)(*s0)[2])) *s0 = (GEN)(*s0)[1];
+  s = *s0;
+  l = precision(s); if (!l) l = *prec;
+
+  if (typ(s) == t_COMPLEX)
+  { /* s = sig + i t */
+    *res = cgetc(l); *av = avma;
+    p1 = cgetc(l+1); gaffect(s,p1);
+    s = p1; *sig = (GEN)s[1];
+  }
+  else /* real number */
+  {
+    *res = cgetr(l); *av = avma;
+    p1 = cgetr(l+1); gaffect(s,p1);
+    *sig = s = p1;
+  }
+  *prec = l; return s;
+}
+
 GEN
 gammanew(GEN s0, long la, long prec)
 {
@@ -1185,22 +1231,8 @@ gammanew(GEN s0, long la, long prec)
   long i, nn, lim, av, av2, avlim;
   int funeq = 0;
 
-  if (typ(s0)==t_COMPLEX && gcmp0((GEN)s0[2])) s0 = (GEN)s0[1];
-  s = s0;
-  i = precision(s); if (i) prec = i;
-
-  if (typ(s) == t_COMPLEX)
-  { /* s = sig + i t */
-    res = cgetc(prec); av = avma;
-    p1 = cgetc(prec+1); gaffect(s,p1);
-    s = p1; sig = (GEN)s[1];
-  }
-  else /* t_INT or t_REAL */
-  {
-    res = cgetr(prec); av = avma;
-    p1 = cgetr(prec+1); gaffect(s,p1);
-    s = sig = p1;
-  }
+  if (DEBUGLEVEL) timer2();
+  s = trans_fix_arg(&prec,&s0,&sig,&av,&res);
 
   if (signe(sig) <= 0 || expo(sig) < -1)
   { /* s <--> 1-s */
@@ -1210,15 +1242,18 @@ gammanew(GEN s0, long la, long prec)
   if (la < 1) la = 1;
   
   { /* find "optimal" parameters [lim, nn] */
-    GEN sapprox = gmul(s, realun(3));
     double ssig = rtodbl(sig);
     double st = rtodbl(gimag(s));
-    double l,l2,u,v;
-  
-    p1 = gmul(gsub(sapprox,ghalf), glog(sapprox, 3));
+    double l,l2,u,v, rlogs, ilogs;
+
+    dcxlog(ssig,st, &rlogs,&ilogs);
+    /* Re (s - 1/2) log(s) */
+    u = (ssig - 0.5)*rlogs - st * ilogs;
+    /* Im (s - 1/2) log(s) */
+    v = (ssig - 0.5)*ilogs + st * ilogs;
     /* l2 = | (s - 1/2) log(s) - s + log(2Pi)/2 |^2 */
-    u = rtodbl(greal(p1)) - ssig + log(2.*PI)/2;
-    v = rtodbl(gimag(p1)) - st;
+    u = u - ssig + log(2.*PI)/2;
+    v = v - st;
     l2 = u*u + v*v;
 
     if (l2 < 0.000001) l2 = 0.000001;
@@ -1230,9 +1265,13 @@ gammanew(GEN s0, long la, long prec)
 
     u = (lim-0.5) * la / PI;
     l2 = u*u - st*st;
-    if (l2 < 0) l2 = 0.;
-    nn = (long)ceil(sqrt(l2) - ssig);
-    if (nn < 1) nn = 1;
+    if (l2 > 0)
+    {
+      nn = (long)ceil(sqrt(l2) - ssig);
+      if (nn < 1) nn = 1;
+    }
+    else 
+      nn = 1;
 
     if (DEBUGLEVEL) fprintferr("lim, nn: [%ld, %ld]\n",lim,nn);
     if (nn >= maxprime()) err(primer1);
@@ -1240,13 +1279,13 @@ gammanew(GEN s0, long la, long prec)
   prec++; unr = realun(prec);
 
   av2 = avma; avlim = stack_lim(av2,3);
-  y = unr;
+  y = s;
   if (typ(s0) == t_INT)
   {
     long ss;
     if (expi(s0) > 20) err(talker, "exponent too large in gamma");
     ss = itos(s0);
-    for (i=0; i < nn; i++)
+    for (i=1; i < nn; i++)
     {
       y = mulrs(y, ss + i);
       if (low_stack(avlim,stack_lim(av2,3)))
@@ -1257,7 +1296,7 @@ gammanew(GEN s0, long la, long prec)
     }
   }
   else
-    for (i=0; i < nn; i++)
+    for (i=1; i < nn; i++)
     {
       y = gmul(y, gaddgs(s,i));
       if (low_stack(avlim,stack_lim(av2,3)))
@@ -1266,7 +1305,7 @@ gammanew(GEN s0, long la, long prec)
         y = gerepileupto(av2, y);
       }
     }
-  nnx = gaddgs(s0, nn);
+  nnx = gaddgs(s, nn);
   if (DEBUGLEVEL) msgtimer("product from 0 to N-1");
 
   a = gdiv(unr, nnx);

@@ -797,8 +797,11 @@ n_s(long n, GEN *tab)
   return x;
 }
 
-GEN rpowsi(ulong a, GEN n, long prec);
-GEN divrs2_safe(GEN x, long i);
+extern GEN rpowsi(ulong a, GEN n, long prec);
+extern GEN divrs2_safe(GEN x, long i);
+extern void dcxlog(double s, double t, double *a, double *b);
+extern double dnorm(double s, double t);
+extern GEN trans_fix_arg(long *prec, GEN *s0, GEN *sig, long *av, GEN *res);
 
 /* s0 a t_INT, t_REAL or t_COMPLEX.
  * If a t_INT, assume it's not a trivial case (i.e we have s0 > 1, odd)
@@ -812,23 +815,8 @@ czeta(GEN s0, long prec)
   int funeq = 0;
   byteptr d;
 
-  if (typ(s0)==t_COMPLEX && gcmp0((GEN)s0[2])) s0 = (GEN)s0[1];
-  s = s0;
-  i = precision(s); if (i) prec = i;
-
-  if (typ(s) == t_COMPLEX)
-  { /* s = sig + i t */
-    res = cgetc(prec); av = avma;
-    p1 = cgetc(prec+1); gaffect(s,p1);
-    s = p1; sig = (GEN)s[1];
-  }
-  else /* t_INT or t_REAL */
-  {
-    res = cgetr(prec); av = avma;
-    p1 = cgetr(prec+1); gaffect(s,p1);
-    s = sig = p1;
-  }
-
+  if (DEBUGLEVEL) timer2();
+  s = trans_fix_arg(&prec,&s0,&sig,&av,&res);
   if (gcmp0(s)) { y = gneg(ghalf); goto END; }
   if (signe(sig) <= 0 || expo(sig) < -1)
   { /* s <--> 1-s */
@@ -837,10 +825,9 @@ czeta(GEN s0, long prec)
   if (gcmp(sig, stoi(bit_accuracy(prec) + 1)) > 0) { y = gun; goto END; }
 
   { /* find "optimal" parameters [lim, nn] */
-    GEN sapprox = gmul(s, realun(3));
     double ssig = rtodbl(sig);
     double st = rtodbl(gimag(s));
-    double ns = ssig * ssig + st * st, l,l2;
+    double ns = dnorm(ssig,st), l,l2;
     long la = 1;
 
     if (typ(s0) == t_INT)
@@ -852,12 +839,13 @@ czeta(GEN s0, long prec)
         default: la = 3; break;
       }
     }
-    if ((ssig-1)*(ssig-1) + st*st < 0.1) /* |s - 1| < 0.1 */
+    if (dnorm(ssig-1,st) < 0.1) /* |s - 1| < 0.1 */
       l2 = -(ssig - 0.5);
     else
     { /* l2 = Re( (s - 1/2) log (s-1) ) */
-      p1 = glog( gsub(sapprox, gun), 3 );
-      l2 = (ssig - 0.5) * rtodbl(greal(p1)) - st * rtodbl(gimag(p1));
+      double rlog, ilog; /* log(s-1) */
+      dcxlog(ssig-1,st, &rlog,&ilog);
+      l2 = (ssig - 0.5)*rlog - st*ilog;
     }
     l = (pariC2*(prec-2) - l2 + ssig*2*pariC1) / (2. * (1.+ log((double)la)));
     l2 = sqrt(ns)/2;
