@@ -59,6 +59,7 @@ XR 21- bug in ideal bound computation in rnfnormgroup
        syntax error (sometimes with a delay!)
    24- bnfisnorm result would include pols in MAXVARN: e.g. Mod(1, #)
 BA 25- pbs in Fp_factor_irred (factoring over Fq a pol. defined over Fp)
+   26- missing macros for gphelp (tex-mode) in chapter 5
 
   Changed
     1- DOS distribution archives (GPM removed)
