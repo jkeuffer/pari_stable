@@ -1724,20 +1724,15 @@ nilord(GEN p, GEN fx, GEN dred, long mf, GEN gx, long flag)
       if (!fm)
       {
 	if (er || !chib)
-	{
-	  /* reducing modulo pdr is too much in some cases */
+	  /* reducing modulo pdr is too much in some cases.
+	     gamm might not be an integer, in this case, 
+	     it should return chig = NULL */
 	  chig = mycaract(chi, gamm, p, pmr, ns);
-	  if (fm && !chig) { fm = -1; continue; }
-	}
 	else
 	{
 	  chig = poleval(chib, gmul(polx[v], gpowgs(p, eq)));
 	  chig = gdiv(chig, gpowgs(p, N*eq));
-	  if (gcmp1(chig))
-	  {
-	    if (fm) { fm = -1; continue; }
-	    chig = polmodi(chig, pmf);
-	  }
+	  chig = polmodi(chig, pmf);
 	}
 
 	if (!chig || !gcmp1(Q_denom(chig)))
@@ -1755,8 +1750,9 @@ nilord(GEN p, GEN fx, GEN dred, long mf, GEN gx, long flag)
 	    gamm = gmod(gmul(gamm, gpowgs(nu, er)), chi);
 	    gamm = redelt(gamm, p, p);
 	  }
+	  /* gamm might not be an integer, in this case, 
+	     it should return chig = NULL */
 	  chig = mycaract(chi, gamm, p, pmf, ns);
-	  if (fm && !gcmp1(Q_denom(chig))) { fm = -1; continue; }
 	}
 	
 	nug  = (GEN)factmod0(chig, p)[1];
