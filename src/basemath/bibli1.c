@@ -2818,12 +2818,12 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
       avma=av0; return stoi(s);
   }
   k = min(s,maxrank);
+  r = (maxnorm >= 0) ? ground(dbltor(maxnorm)): BORNE;
 
   tetpil = avma; p1=cgetg(k+1,t_MAT);
   for (j=1; j<=k; j++)
     p1[j] = (long) gmul_mati_smallvec(u,(GEN)liste[j]);
   liste = p1;
-  r = (maxnorm >= 0) ? ground(dbltor(maxnorm)): BORNE;
 
   r=icopy(r); gptr[0]=&r; gptr[1]=&liste;
   gerepilemanysp(av,tetpil,gptr,2);
