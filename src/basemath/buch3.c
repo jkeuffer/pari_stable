@@ -208,14 +208,14 @@ idealmulmodidele(GEN nf,GEN x,GEN y, GEN ideal,GEN sarch,GEN arch)
   return idealmodidele(nf,idealmul(nf,x,y),ideal,sarch,arch);
 }
 
-struct muldata {
+typedef struct {
   GEN nf, ideal, sarch, arch;
-};
+} modidele_muldata;
 
 static GEN
 _mul(void *data, GEN x, GEN y)
 {
-  struct muldata *D = (struct muldata *)data;
+  modidele_muldata *D = (modidele_muldata *)data;
   GEN t = idealmul(D->nf,x,y);
   return idealmodidele(D->nf, t, D->ideal, D->sarch, D->arch);
 }
@@ -230,7 +230,7 @@ static GEN
 idealpowmodidele(GEN nf,GEN x,GEN n, GEN ideal,GEN sarch,GEN arch)
 {
   ulong av = avma;
-  struct muldata D;
+  modidele_muldata D;
   GEN y;
 
   if (!signe(n)) return idealpow(nf,x,n);

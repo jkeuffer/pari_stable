@@ -1919,15 +1919,15 @@ to_fq(GEN x, GEN a, GEN p)
   z[2] = (long)pol; return z;
 }
 
-struct muldata {
+typedef struct {
   GEN pol, p, mod;
   long v;
-};
+} kronecker_muldata;
 
 static GEN
 _red(void *data, GEN x)
 {
-  struct muldata *D = (struct muldata*)data;
+  kronecker_muldata *D = (kronecker_muldata*)data;
   GEN t = from_Kronecker(FpX(x,D->p), D->pol);
   setvarn(t, D->v);
   t = gres(t, D->mod);
@@ -1949,7 +1949,7 @@ Kronecker_powmod(GEN x, GEN mod, GEN n)
   ulong av0 = avma;
   long i,v = varn(x);
   GEN y, p1, p = NULL, pol = NULL;
-  struct muldata D;
+  kronecker_muldata D;
 
   for (i=lgef(mod)-1; i>1; i--)
   {

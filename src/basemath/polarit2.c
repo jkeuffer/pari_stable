@@ -1218,7 +1218,7 @@ FpX_rescale(GEN P, GEN h, GEN p)
 static GEN
 combine_factors(GEN a, GEN famod, GEN p, long klim, long hint)
 {
-  GEN B = uniform_Mignotte_bound(a), res,lt,L,pe,pE,listmod,p1;
+  GEN B = uniform_Mignotte_bound(a), res,lt,L,pe,pE,listmod;
   long i,E,e,l, maxK = 3, nft = lg(famod)-1;
 
   e = logint(B, p, &pe);

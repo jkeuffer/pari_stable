@@ -1110,36 +1110,36 @@ FpX_chinese_coprime(GEN x,GEN y,GEN Tx,GEN Ty,GEN Tz,GEN p)
   return gerepileupto(av,p1);
 }
 
-struct muldata {
+typedef struct {
   GEN pol, p;
-};
-struct umuldata {
+} FpX_muldata;
+typedef struct {
   GEN pol;
   ulong p;
-};
+} u_FpX_muldata;
 
 static GEN
 _u_sqr(void *data, GEN x)
 {
-  struct umuldata *D = (struct umuldata*)data;
+  u_FpX_muldata *D = (u_FpX_muldata*)data;
   return u_FpXQ_sqr(x, D->pol, D->p);
 }
 static GEN
 _u_mul(void *data, GEN x, GEN y)
 {
-  struct umuldata *D = (struct umuldata*)data;
+  u_FpX_muldata *D = (u_FpX_muldata*)data;
   return u_FpXQ_mul(x,y, D->pol, D->p);
 }
 static GEN
 _sqr(void *data, GEN x)
 {
-  struct muldata *D = (struct muldata*)data;
+  FpX_muldata *D = (FpX_muldata*)data;
   return FpXQ_sqr(x, D->pol, D->p);
 }
 static GEN
 _mul(void *data, GEN x, GEN y)
 {
-  struct muldata *D = (struct muldata*)data;
+  FpX_muldata *D = (FpX_muldata*)data;
   return FpXQ_mul(x,y, D->pol, D->p);
 }
 
@@ -1148,7 +1148,7 @@ GEN
 u_FpXQ_pow(GEN x, GEN n, GEN pol, ulong p)
 {
   ulong av = avma;
-  struct umuldata D;
+  u_FpX_muldata D;
   GEN y;
   D.pol = pol;
   D.p   = p;
@@ -1161,7 +1161,7 @@ GEN
 FpXQ_pow(GEN x, GEN n, GEN pol, GEN p)
 {
   ulong av = avma;
-  struct muldata D;
+  FpX_muldata D;
   long vx = varn(x);
   GEN y;
   if (!signe(n)) return polun[vx];
@@ -1373,12 +1373,9 @@ FpXQX_safegcd(GEN P, GEN Q, GEN T, GEN p)
 /*******************************************************************/
 
 /*Preliminary implementation to speed up Fp_isom*/
-struct FpXQYQ_muldata
-{
-  GEN S;
-  GEN T;
-  GEN p;
-};
+typedef struct {
+  GEN S, T, p;
+} FpXQYQ_muldata;
 
 static GEN
 _FpXQYQ_redswap(GEN x, GEN S, GEN T, GEN p)
@@ -1397,14 +1394,14 @@ _FpXQYQ_redswap(GEN x, GEN S, GEN T, GEN p)
 static GEN
 _FpXQYQ_sqr(void *data, GEN x)
 {
-  struct FpXQYQ_muldata *D = (struct FpXQYQ_muldata*)data;
+  FpXQYQ_muldata *D = (FpXQYQ_muldata*)data;
   return _FpXQYQ_redswap(FpXQX_sqr(x, D->S, D->p),D->S,D->T,D->p);
   
 }
 static GEN
 _FpXQYQ_mul(void *data, GEN x, GEN y)
 {
-  struct FpXQYQ_muldata *D = (struct FpXQYQ_muldata*)data;
+  FpXQYQ_muldata *D = (FpXQYQ_muldata*)data;
   return _FpXQYQ_redswap(FpXQX_mul(x,y, D->S, D->p),D->S,D->T,D->p);
 }
 
@@ -1413,7 +1410,7 @@ GEN
 FpXQYQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
 {
   ulong av = avma;
-  struct FpXQYQ_muldata D;
+  FpXQYQ_muldata D;
   GEN y;
   D.S = S;
   D.T = T;

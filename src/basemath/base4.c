@@ -1797,15 +1797,15 @@ _idealmulred(GEN nf, GEN x, GEN y, long prec)
   return ideallllred(nf,idealmul(nf,x,y), NULL, prec);
 }
 
-struct muldata {
+typedef struct {
   GEN nf;
   long prec;
-};
+} idealred_muldata;
 
 static GEN
 _mul(void *data, GEN x, GEN y)
 {
-  struct muldata *D = (struct muldata *)data;
+  idealred_muldata *D = (idealred_muldata *)data;
   return _idealmulred(D->nf,x,y,D->prec);
 }
 static GEN
@@ -1819,7 +1819,7 @@ GEN
 idealpowred(GEN nf, GEN x, GEN n, long prec)
 {
   long av=avma, s = signe(n);
-  struct muldata D;
+  idealred_muldata D;
   GEN y;
 
   if (typ(n) != t_INT) err(talker,"non-integral exponent in idealpowred");

@@ -305,24 +305,24 @@ puissii(GEN a, GEN n, long s)
   setsigne(y,s); return gerepileuptoint(av,y);
 }
 
-struct muldata {
+typedef struct {
   long prec, a;
   GEN (*sqr)(GEN);
   GEN (*mulsg)(long,GEN);
   GEN unr;
-};
+} sr_muldata;
 
 static GEN
 _rpowsi_mul(void *data, GEN x, GEN y/* base; ignored */)
 {
-  struct muldata *D = (struct muldata *)data;
+  sr_muldata *D = (sr_muldata *)data;
   return D->mulsg(D->a, x);
 }
 
 static GEN
 _rpowsi_sqr(void *data, GEN x)
 {
-  struct muldata *D = (struct muldata *)data;
+  sr_muldata *D = (sr_muldata *)data;
   if (lgefint(x) >= D->prec && typ(x) == t_INT)
   { /* switch to t_REAL */
     D->sqr   = &gsqr;
@@ -339,7 +339,7 @@ rpowsi(ulong a, GEN n, long prec)
 {
   ulong av = avma;
   GEN y, unr = realun(prec);
-  struct muldata D;
+  sr_muldata D;
 
   if (a == 1) return unr;
   if (a == 2) { setexpo(unr, itos(n)); return unr; }

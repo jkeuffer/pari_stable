@@ -384,28 +384,28 @@ element_pow(GEN nf, GEN x, GEN n)
   return av==avma? gcopy(y): gerepileupto(av,y);
 }
 
-struct muldata {
+typedef struct {
   GEN nf, p;
   long I;
-};
+} eltmod_muldata;
 
 static GEN
 _mulidmod(void *data, GEN x, GEN y)
 {
-  struct muldata *D = (struct muldata*)data;
+  eltmod_muldata *D = (eltmod_muldata*)data;
   (void)y; /* ignored */
   return FpV_red(element_mulid(D->nf, x, D->I), D->p);
 }
 static GEN
 _mulmod(void *data, GEN x, GEN y)
 {
-  struct muldata *D = (struct muldata*)data;
+  eltmod_muldata *D = (eltmod_muldata*)data;
   return FpV_red(element_muli(D->nf, x, y), D->p);
 }
 static GEN
 _sqrmod(void *data, GEN x)
 {
-  struct muldata *D = (struct muldata*)data;
+  eltmod_muldata *D = (eltmod_muldata*)data;
   return FpV_red(element_sqri(D->nf, x), D->p);
 }
 
@@ -414,7 +414,7 @@ GEN
 element_pow_mod_p(GEN nf, GEN x, GEN n, GEN p)
 {
   ulong av = avma;
-  struct muldata D;
+  eltmod_muldata D;
   long s,N;
   GEN y;
 
@@ -440,7 +440,7 @@ GEN
 element_powid_mod_p(GEN nf, long I, GEN n, GEN p)
 {
   ulong av = avma;
-  struct muldata D;
+  eltmod_muldata D;
   long s,N;
   GEN y;
 

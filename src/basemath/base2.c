@@ -2444,22 +2444,22 @@ rnfelement_sqrmod(GEN nf, GEN multab, GEN unnf, GEN x, GEN prhall)
   return z;
 }
 
-struct muldata {
+typedef struct {
   GEN nf, multab, unnf, prhall;
   long h;
-};
+} rnfeltmod_muldata;
 
 static GEN
 _mul(void *data, GEN x, GEN y/* base; ignored */)
 {
-  struct muldata *D = (struct muldata *) data;
+  rnfeltmod_muldata *D = (rnfeltmod_muldata *) data;
   (void)y;
   return rnfelement_mulidmod(D->nf,D->multab,D->unnf,x,D->h,D->prhall);
 }
 static GEN
 _sqr(void *data, GEN x)
 {
-  struct muldata *D = (struct muldata *) data;
+  rnfeltmod_muldata *D = (rnfeltmod_muldata *) data;
   return rnfelement_sqrmod(D->nf,D->multab,D->unnf,x,D->prhall);
 }
 
@@ -2469,7 +2469,7 @@ rnfelementid_powmod(GEN nf, GEN multab, GEN matId, long h, GEN n, GEN prhall)
 {
   ulong av = avma;
   GEN y, unrnf = (GEN)matId[1];
-  struct muldata D;
+  rnfeltmod_muldata D;
 
   if (!signe(n)) return unrnf;
   y = (GEN)matId[h];
