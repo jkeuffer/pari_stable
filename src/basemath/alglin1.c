@@ -1617,6 +1617,7 @@ ZM_inv(GEN M, GEN dM)
 GEN
 QM_inv(GEN M, GEN dM)
 {
+  gpmem_t av = avma;
   GEN cM, pM = Q_primitive_part(M, &cM);
   if (!cM) return ZM_inv(pM,dM);
   return gerepileupto(av, ZM_inv(pM, gdiv(dM,cM)));
