@@ -279,7 +279,6 @@ typedef struct {
   int sp;      /* 0 = suppress whitespace from output */
   int prettyp; /* output style: raw, prettyprint, etc */
   int TeXstyle;
-  int initial; /* private */
 } pariout_t;
 
 extern void gen_output(GEN x, pariout_t *T);

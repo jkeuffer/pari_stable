@@ -251,7 +251,6 @@ _initout(pariout_t *T, char f, long sigd, long sp, long fieldw, int prettyp)
   T->sigd = sigd;
   T->sp = sp;
   T->fieldw = fieldw;
-  T->initial = 1;
   T->prettyp = prettyp;
 }
 
@@ -1867,11 +1866,11 @@ sori(GEN g, pariout_t *T)
       }
       pariputs(")\n"); return;
   }
-  close_paren=0;
+  close_paren = 0;
   if (!is_graphicvec_t(tg))
   {
     if (is_frac_t(tg) && gsigne(g) < 0) pariputc('-');
-    if (! is_rfrac_t(tg)) { pariputc('('); close_paren=1; }
+    close_paren = 1;
   }
   switch(tg)
   {
@@ -1942,35 +1941,8 @@ sori(GEN g, pariout_t *T)
       pariputc(')'); break;
 
     case t_RFRAC: case t_RFRACN:
-    if (T->initial)
-    {
-      char *v1, *v2;
-      long sd = 0, sn = 0, d,n;
-      long wd = term_width();
-
-      T->initial = 0;
-      v1 = GENtostr0((GEN)g[1], T, &sori); n = strlen(v1);
-      v2 = GENtostr0((GEN)g[2], T, &sori); d = strlen(v2);
-
-      pariputc('\n');
-      i = max(n,d)+2;
-      if (i > wd)
-      {
-        pariputs(v1); pariputs("\n\n");
-        for (j=0; j<wd; j++) pariputc('-');
-        pariputs("\n\n");
-        pariputs(v2);
-        pariputc('\n'); return;
-      }
-      if (n < d) sn = (d-n) >> 1; else sd = (n-d) >> 1;
-      blancs(sn+1); pariputs(v1);
-      pariputs("\n\n"); for (j=0; j<i; j++) pariputc('-');
-      pariputs("\n\n");
-      blancs(sd+1); pariputs(v2);
-      pariputc('\n'); return;
-    }
-    pariputc('('); sori((GEN)g[1],T); pariputs(" / "); sori((GEN)g[2],T);
-    pariputc(')'); return;
+      sori((GEN)g[1],T); pariputs(" / "); sori((GEN)g[2],T);
+      break;
 	
     case t_QFR: case t_QFI: pariputc('{');
       sori((GEN)g[1],T); pariputs(", ");
@@ -2391,7 +2363,6 @@ gen_output(GEN x, pariout_t *T)
   pari_sp av = avma;
   GEN y = changevar(x, polvar);
   if (!T) T = &DFLT_OUTPUT;
-  T->initial = 1;
   switch(T->prettyp)
   {
     case f_PRETTYMAT: matbruti(y, T); break;
