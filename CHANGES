@@ -117,6 +117,7 @@ BA 58- [GP internals:] trap() had an invalid prototype [DI,DI]
    60- [GP:] newline in multiline comments /* */ was not ignored
    61- [GP:] when using default 'colors' for input at \gn>1, first debugging
        msg could be colored
+   62- [GP:] in break loop, trailing ; was ignored (all results were printed)
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).
