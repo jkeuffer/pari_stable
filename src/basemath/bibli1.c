@@ -548,7 +548,7 @@ do_SWAP(GEN x, GEN h, GEN L, GEN B, long kmax, long k, GEN QR)
     fprintferr(" (%ld)", gexpo(q) - gexpo((GEN)B[k])); flusherr();
   }
   BB = gadd((GEN)B[k], gmul((GEN)B[k-1],la2));
-  if (gcmp0(BB)) { B[k] = NULL; return 1; } /* precision pb */
+  if (gcmp0(BB)) { B[k] = 0; return 1; } /* precision pb */
 
   coeff(L,k,k-1) = ldiv(gmul(la,(GEN)B[k-1]), BB);
   BK = gdiv((GEN)B[k], BB);
