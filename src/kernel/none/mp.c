@@ -1693,7 +1693,7 @@ red_montgomery(GEN T, GEN N, ulong inv)
   ulong av;
   GEN Te,Td,Ne,Nd, scratch;
   ulong m,t,d,k = lgefint(N)-2;
-  int carry;
+  unsigned int carry;
   long i,j;
   LOCAL_HIREMAINDER;
   LOCAL_OVERFLOW;
@@ -1745,12 +1745,8 @@ red_montgomery(GEN T, GEN N, ulong inv)
       t = addll(addmul(m, *--Nd), *--Td); *Td = t;
     }
     overflow += hiremainder;
-    if (overflow)
-    {
-      if (Td == scratch) { carry = 1; break; }
-      t = addll(overflow, *--Td); *Td = t + carry;
-      carry = (overflow || (carry && *Td == 0));
-    }
+    t = addll(overflow, *--Td); *Td = t + carry;
+    carry = (overflow || (carry && *Td == 0));
   }
   if (carry)
   { /* Td > N overflows (k+1 words), set Td := Td - N */
