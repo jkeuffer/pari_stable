@@ -1125,18 +1125,26 @@ cxgamma(GEN x, long prec)
 
 /* x / (i*(i+1)) */
 GEN
-divrs2_safe(GEN x, long i)
+divrsns(GEN x, long i)
 {
+#ifdef LONG_IS_64BIT
+  if (i < 3037000500) /* i(i+1) < 2^63 */
+#else
   if (i < 46341) /* i(i+1) < 2^31 */
+#endif
     return divrs(x, i*(i+1));
   else
     return divrs(divrs(x, i), i+1);
 }
 /* x / (i*(i+1)) */
 GEN
-divgs2_safe(GEN x, long i)
+divgsns(GEN x, long i)
 {
+#ifdef LONG_IS_64BIT
+  if (i < 3037000500) /* i(i+1) < 2^63 */
+#else
   if (i < 46341) /* i(i+1) < 2^31 */
+#endif
     return gdivgs(x, i*(i+1));
   else
     return gdivgs(gdivgs(x, i), i+1);
@@ -1161,6 +1169,8 @@ dcxlog(double s, double t, double *a, double *b)
   *b = darg(s,t);          /* Im(log(s)) */
 }
 
+double
+dabs(double s, double t) { return sqrt( s*s + t*t ); }
 double
 dnorm(double s, double t) { return s*s + t*t; }
 
@@ -1239,14 +1249,13 @@ gammanew(GEN s0, int dolog, long prec)
     l = (pariC2*(prec-2) - log(l2)/2) / 2.;
     if (l < 0) l = 0.;
     
-    if (l > 0)
+    la = 3.; /* FIXME: heuristic... */
+    if (st > 1 && l > 0)
     {
       double t = st * PI / l;
       la = t * log(t);
-      if (la < 3) la = 3.; /* FIXME: heuristic... */
+      if (la < 3) la = 3.;
     }
-    else la = 3.; /* FIXME: heuristic... */
-
     lim = (long)ceil(l / (1.+ log(la)));
     if (lim == 0) lim = 1;
 
@@ -1324,11 +1333,11 @@ gammanew(GEN s0, int dolog, long prec)
   if (DEBUGLEVEL) msgtimer("product from 0 to N-1");
 
   a = ginv(nnx); invn2 = gsqr(a);
-  tes = divrs2_safe(bernreal(2*lim,prec), 2*lim-1); /* B2l / (2l-1) 2l*/
+  tes = divrsns(bernreal(2*lim,prec), 2*lim-1); /* B2l / (2l-1) 2l*/
   if (DEBUGLEVEL) msgtimer("Bernoullis");
   for (i = 2*lim-2; i > 1; i -= 2)
   {
-    u = divrs2_safe(bernreal(i,prec), i-1); /* Bi / i(i-1) */
+    u = divrsns(bernreal(i,prec), i-1); /* Bi / i(i-1) */
     tes = gadd(u, gmul(invn2,tes));
   }
   if (DEBUGLEVEL) msgtimer("Bernoulli sum");

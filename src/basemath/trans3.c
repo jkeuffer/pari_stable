@@ -21,9 +21,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /********************************************************************/
 #include "pari.h"
 extern GEN rpowsi(ulong a, GEN n, long prec);
-extern GEN divrs2_safe(GEN x, long i);
+extern GEN divrsns(GEN x, long i);
+extern GEN divgsns(GEN x, long i);
 extern void dcxlog(double s, double t, double *a, double *b);
 extern double dnorm(double s, double t);
+extern double dabs(double s, double t);
 extern GEN trans_fix_arg(long *prec, GEN *s0, GEN *sig, pari_sp *av, GEN *res);
 
 GEN
@@ -1066,98 +1068,110 @@ gerfc(GEN x, long prec)
 /**								      **/
 /***********************************************************************/
 
+static double
+get_xinf(double beta)
+{
+  const double eps = 0.0087, maxbeta = 0.06415003; /* 3^(-2.5) */
+  double x0, y0, x1;
+
+  if (beta < maxbeta) return beta + pow(3*beta, 1.0/3.0);
+  x0 = beta + PI/2.0;
+  for(;;)
+  {
+    y0 = x0*x0;
+    x1 = (beta+atan(x0)) * (1+y0) / y0 - 1/x0;
+    if (x0 - x1 < eps) return x1;
+    x0 = x1;
+  }
+}
+/* optimize for zeta( s + it, prec ) */
+static void
+optim_zeta(GEN S, long prec, long *pp, long *pn)
+{
+  double s, t, sn, alpha, beta, p, n;
+  if (typ(S) == t_REAL) {
+    s = rtodbl(S); 
+    t = 0.;
+  } else {
+    s = rtodbl((GEN)S[1]);
+    t = fabs( rtodbl((GEN)S[2]) );
+  }
+  if (t)
+  {
+    sn = dabs(s, t);
+    alpha = pariC2*(prec-2) - 0.39 + log(sn/s) + s*(2*pariC1 - log(sn));
+    beta = (alpha+s)/t - atan(s/t);
+    if (beta <= 0)
+    {
+      if (s >= 1.0)
+      {
+	p = 0.;
+	n = exp(pariC2*(prec-2)/s) * pow(sn/(2*s),1.0/s);
+      }
+      else
+      {
+	p = 1.;
+        n = dabs(s + 1, t) / (2*PI);
+      }
+    }
+    else
+    { 
+      beta = 1.0 - s + t * get_xinf(beta);
+      if (beta > 0)
+      {
+	p = beta / 2.0;
+	n = dabs(s + 2*p-1, t) / (2*PI);
+      }
+      else
+      {
+	p = 0.;
+	n = exp(pariC2*(prec-2)/s)*pow(sn/(2*s),1.0/s);
+      }
+    }
+  }
+  else
+  {
+    sn = fabs(s);
+    beta = pariC2*(prec-2) + 0.61 + s*(2*pariC1 - log(s));
+    if (beta > 0)
+    {
+      p = beta / 2.0;
+      n = fabs(s + 2*p-1)/(2*PI);
+    }
+    else
+    {
+      p = 0.;
+      n = exp(pariC2*(prec-2)/s)*pow(sn/(2*s),1.0/s);
+    }
+  }
+  *pp = (long)ceil(p);
+  *pn = (long)ceil(n);
+  if (DEBUGLEVEL) fprintferr("lim, nn: [%ld, %ld]\n", *pp, *pn);
+}
+
 #if 0
 static GEN
-czeta(GEN s, long prec)
+czeta(GEN s0, long prec)
 {
-  long n, p, n1, funeq, i, i2;
+  int funeq = 0;
+  long n, p, n1, i, i2;
   pari_sp av;
-  double st,sp,sn,ssig,ns,alpha,beta,maxbeta,xinf;
-  GEN y,z,res,sig,ms,p1,p2,p3,p31,pitemp;
+  GEN s, y, z, res, sig, ms, p1, p2, p3, p31, pitemp;
 
-  i=precision(s); if (i) prec = i;
-  if (typ(s)==t_COMPLEX)
-  {
-    res = cgetc(prec); av=avma;
-    p1 = cgetc(prec+1);
-    gaffect(s,p1); s=p1; sig=(GEN)s[1];
-  }
-  else
-  {
-    res = cgetr(prec); av=avma;
-    p1 = cgetr(prec+1); affrr(s,p1); sig = s = p1;
-  }
+  s = trans_fix_arg(&prec,&s0,&sig,&av,&res);
 
-  if (signe(sig)>0 && expo(sig)>-2) funeq = 0;
-  else
+  if (signe(sig) <= 0 || expo(sig) <= -2)
   {
-    if (gcmp0(gimag(s)) && gcmp0(gfrac(gmul2n(sig,-1))))
+    if (typ(s0) == t_INT)
     {
-      if (gcmp0(sig)) gaffect(gneg_i(ghalf),res); else gaffsg(0,res);
-      avma=av; return res;
+      gaffect(szeta(itos(s0), prec), res);
+      avma = av; return res;
     }
-    funeq = 1; s = gsub(gun,s); sig = greal(s);
+    funeq = 1; s = gsub(gun,s);
   }
-  ssig=rtodbl(sig); st=fabs(rtodbl(gimag(s))); maxbeta = pow(3.0,-2.5);
-  if (st)
-  {
-    ns = ssig*ssig + st*st;
-    alpha=pariC2*(prec-2)-0.39-0.5*(ssig-1.0)*log(ns)-log(ssig)+ssig*2*pariC1;
-    beta=(alpha+ssig)/st-atan(ssig/st);
-    if (beta<=0)
-    {
-      if (ssig>=1.0)
-      {
-	p=0; sn=sqrt(ns);
-	n=(long)(ceil(exp(pariC2*(prec-2)/ssig)*pow(sn/(2*ssig),1.0/ssig)));
-      }
-      else
-      {
-	p=1; sn=ssig+1; n=(long)ceil(sqrt(sn*sn+st*st)/(2*PI));
-      }
-    }
-    else
-    {
-      if (beta<maxbeta) xinf=beta+pow(3*beta,1.0/3.0);
-      else
-      {
-	double eps=0.0087, x00 = beta+PI/2.0, y00,x11;
-        for(;;)
-	{
-	  y00=x00*x00; x11=(beta+atan(x00))*(1+y00)/y00-1/x00;
-	  if (x00-x11 < eps) break;
-	  x00 = x11;
-	}
-	xinf=x11;
-      }
-      sp=1.0-ssig+st*xinf;
-      if (sp>0)
-      {
-	p=(long)ceil(sp/2.0); sn=ssig+2*p-1;
-	n=(long)ceil(sqrt(sn*sn+st*st)/(2*PI));
-      }
-      else
-      {
-	p=0; sn=sqrt(ns);
-	n=(long)ceil(exp(pariC2*(prec-2)/ssig)*pow(sn/(2*ssig),1.0/ssig));
-      }
-    }
-  }
-  else
-  {
-    beta=pariC2*(prec-2)+0.61+ssig*2*pariC1-ssig*log(ssig);
-    if (beta>0)
-    {
-      p=(long)ceil(beta/2.0); sn=ssig+2*p-1;
-      n=(long)ceil(sqrt(sn*sn+st*st)/(2*PI));
-    }
-    else
-    {
-      p=0; sn=sqrt(ssig*ssig+st*st);
-      n=(long)ceil(exp(pariC2*(prec-2)/ssig)*pow(sn/(2*ssig),1.0/ssig));
-    }
-  }
-  if (n < 46340) n1=n*n; else n1=0;
+  optim_zeta(s, prec, &p, &n);
+
+  n1 = (n < 46340)? n*n: 0;
   y=gun; ms=gneg_i(s); p1=cgetr(prec+1); p2=gun;
   for (i=2; i<=n; i++)
   {
@@ -1167,26 +1181,27 @@ czeta(GEN s, long prec)
   mpbern(p,prec); p31=cgetr(prec+1); z=gzero;
   for (i=p; i>=1; i--)
   {
-    i2=i<<1;
-    p1=gmul(gaddsg(i2-1,s),gaddsg(i2,s));
-    p1= divgs2_safe(p1, i2);
-    p1= n1? gdivgs(p1,n1): gdivgs(gdivgs(p1,n),n);
+    i2 = i<<1;
+    p1 = gmul(gaddsg(i2-1,s),gaddsg(i2,s));
+    p1 = divgsns(p1, i2);
+    p1 = n1? gdivgs(p1,n1): gdivgs(gdivgs(p1,n),n);
     p3 = bern(i);
     if (bernzone[2]>prec+1) { affrr(p3,p31); p3=p31; }
-    z=gadd(divrs(p3,i),gmul(p1,z));
+    z = gadd(divrs(p3,i),gmul(p1,z));
   }
-  p1=gsub(gdivsg(n,gsubgs(s,1)),ghalf);
-  z=gmul(gadd(p1,gmul(s,gdivgs(z,n<<1))),p2);
+  p1 = gsub(gdivsg(n,gsubgs(s,1)),ghalf);
+  z = gmul(gadd(p1,gmul(s,gdivgs(z,n<<1))),p2);
   y = gadd(y,z);
   if (funeq)
   {
     pitemp=mppi(prec+1); setexpo(pitemp,2);
-    y=gmul(gmul(y,ggamma(s,prec+1)),gpow(pitemp,ms,prec+1));
-    setexpo(pitemp,0);
-    y=gmul2n(gmul(y,gcos(gmul(pitemp,s),prec+1)),1);
+    y = gmul(gmul(y,ggamma(s,prec+1)), gpow(pitemp,ms,prec+1));
+    setexpo(pitemp, 0);
+    y = gmul2n(gmul(y, gcos(gmul(pitemp,s),prec+1)),1);
   }
   gaffect(y,res); avma = av; return res;
 }
+#endif
 
 /* y = binomial(n,k-2). Return binomial(n,k) */
 static GEN
@@ -1196,33 +1211,15 @@ next_bin(GEN y, long n, long k)
   return divrs(mulrs(y, n-k+1), k);
 }
 
-GEN
-szeta(long k, long prec)
+/* assume k > 1 odd */
+static GEN
+szeta_odd(long k, long prec)
 {
-  long kk, n, li;
-  pari_sp av=avma, av2, limit;
-  GEN y,p1,pi2,qn,z,q,binom;
+  long kk, n, li = -(1+bit_accuracy(prec));
+  pari_sp av = avma, av2, limit;
+  GEN y, p1, qn, z, q, pi2 = Pi2n(1, prec), binom= realun(prec+1);
 
-  /* treat trivial cases */
-  if (!k) return gneg(ghalf);
-  if (k < 0)
-  {
-    if ((k&1) == 0) return gzero;
-    y = bernreal(1-k,prec);
-    return gerepileuptoleaf(av, divrs(y,k-1));
-  }
-  if (k > bit_accuracy(prec)+1) return realun(prec);
-  pi2 = Pi2n(1, prec);
-  if ((k&1) == 0)
-  {
-    p1 = mulrr(gpowgs(pi2,k),absr(bernreal(k,prec)));
-    y = divrr(p1, mpfactr(k,prec)); setexpo(y,expo(y)-1);
-    return gerepileuptoleaf(av, y);
-  }
-  /* k > 1 odd */
-  binom = realun(prec+1);
   q = mpexp(pi2); kk = k+1; /* >= 4 */
-  li = -(1+bit_accuracy(prec));
   y = NULL; /* gcc -Wall */
   if ((k&3)==3)
   {
@@ -1251,7 +1248,7 @@ szeta(long k, long prec)
         gerepileall(av2,2, &z, &qn);
       }
     }
-    setexpo(z,expo(z)+1);
+    setexpo(z, expo(z)+1);
     y = addrr(y,z); setsigne(y,-signe(y));
   }
   else
@@ -1283,12 +1280,11 @@ szeta(long k, long prec)
         gerepileall(av2,2, &z, &qn);
       }
     }
-    setexpo(z,expo(z)+1);
+    setexpo(z, expo(z)+1);
     y = subrr(y,z);
   }
   return gerepileuptoleaf(av, y);
 }
-#else
 
 /* return x^n, assume n > 0 */
 static long
@@ -1350,7 +1346,7 @@ szeta(long k, long prec)
     return gerepileuptoleaf(av, y);
   }
   /* k > 1 odd */
-  return czeta(stoi(k), prec);
+  return szeta_odd(k, prec);
 }
 
 /* s0 a t_INT, t_REAL or t_COMPLEX.
@@ -1381,6 +1377,7 @@ czeta(GEN s0, long prec)
   }
   if (gcmp(sig, stoi(bit_accuracy(prec) + 1)) > 0) { y = gun; goto END; }
 
+#if 0
   { /* find "optimal" parameters [lim, nn] */
     double ssig = rtodbl(sig);
     double st = rtodbl(gimag(s));
@@ -1411,9 +1408,12 @@ czeta(GEN s0, long prec)
     lim = (long) ceil(l); if (lim < 2) lim = 2;
     l2 = (lim+ssig/2.-.25);
     nn = 1 + (long)ceil( sqrt(l2*l2 + st*st/4) * la / PI );
-    if (DEBUGLEVEL>2) fprintferr("lim, nn: [%ld, %ld]\n",lim,nn);
-    maxprime_check((ulong)nn);
+    if (DEBUGLEVEL) fprintferr("lim, nn: [%ld, %ld]\n",lim,nn);
   }
+#else
+  optim_zeta(s, prec, &lim, &nn);
+#endif
+  maxprime_check((ulong)nn);
   prec++; unr = realun(prec); /* one extra word of precision */
 
   tab = (GEN*)cgetg(nn, t_VEC); /* table of q^(-s), q = p^e */
@@ -1471,7 +1471,7 @@ czeta(GEN s0, long prec)
     for (i=lim2-2; i>=2; i-=2)
     { /* using single prec (when (s0 + i) < 2^31) not faster (even at \p28) */
       u = mulri(mulrr(tes,invn2), mulii(addsi(i,s0), addsi(i-1,s0)));
-      tes = addrr(bernreal(i,prec), divrs2_safe(u, i+1)); /* u / (i+1)(i+2) */
+      tes = addrr(bernreal(i,prec), divrsns(u, i+1)); /* u / (i+1)(i+2) */
       if (low_stack(avlim,stack_lim(av2,3)))
       {
         if(DEBUGMEM>1) err(warnmem,"czeta");
@@ -1517,7 +1517,6 @@ END:
   }
   gaffect(y,res); avma = av; return res;
 }
-#endif
 
 GEN
 gzeta(GEN x, long prec)
