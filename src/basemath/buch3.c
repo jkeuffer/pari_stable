@@ -791,14 +791,14 @@ is_unit(GEN M, long r1, GEN x)
 #define NBMAX 5000
 /* should use smallvectors */
 static GEN
-minimforunits(GEN nf, long BOUND, long stockmax)
+minimforunits(GEN nf, long BORNE, long stockmax)
 {
   const long prec = MEDDEFAULTPREC;
   long av = avma,n,i,j,k,s,norme,normax,*x,cmpt,r1;
   GEN u,r,S,a,M,p1;
   double p;
   double **q,*v,*y,*z;
-  double eps=0.000001;
+  double eps=0.000001, BOUND = BORNE + eps;
 
   if (DEBUGLEVEL>=2)
   {
@@ -809,7 +809,7 @@ minimforunits(GEN nf, long BOUND, long stockmax)
   r1 = itos(gmael(nf,2,1));
   a = gmael(nf,5,3); n = lg(a);
   minim_alloc(n, &q, &x, &y, &z, &v);
-  n--; BOUND += (long)eps;
+  n--;
   u = lllgram(a,prec);
   M = gmul(gmael(nf,5,1), u); /* embeddings of T2-reduced basis */
   M = gprec_w(M, prec);
@@ -1122,19 +1122,19 @@ primecertify(GEN bnf,GEN beta,long pp,GEN big)
 
       qrhall = nfmodprinit(nf,Q); nbcol++;
       newcol = cgetg(sizeofmat+1,t_COL);
-      if (DEBUGLEVEL>1)
+      if (DEBUGLEVEL>3)
         fprintferr("       prime ideal Q: %Z\n",Q);
       eltgen = gscalcol_i(lift(gener(qgen)), N);
       for (j=1; j<=sizeofmat; j++)
         newcol[j] = (long)nfshanks(nf,(GEN)beta[j],eltgen,Q,qrhall);
-      if (DEBUGLEVEL>1)
+      if (DEBUGLEVEL>3)
       {
         fprintferr("       generator of (Zk/Q)^*: %Z\n",eltgen);
         fprintferr("       column #%ld of the matrix log(b_j/Q): %Z\n",
                    nbcol, newcol);
       }
       mat1 = concatsp(mat,newcol); ra = rank(mat1);
-      if (DEBUGLEVEL>1)
+      if (DEBUGLEVEL>2)
        {fprintferr("       new rank of the matrix: %ld\n\n",ra); flusherr();}
       if (ra!=nbcol) nbcol--;
       else
@@ -1157,7 +1157,7 @@ check_prime(long p, GEN bnf, GEN h, GEN cyc, long R, GEN alpha,
   if (smodis(h,p)) nbpro=0;
   else
   {
-    if (DEBUGLEVEL>1) fprintferr("     p divides cl(k)\n");
+    if (DEBUGLEVEL>2) fprintferr("     p divides cl(k)\n");
     for (nbpro=nbgen; nbpro; nbpro--)
       if (!smodis((GEN)cyc[nbpro],p)) break;
   }
@@ -1165,10 +1165,10 @@ check_prime(long p, GEN bnf, GEN h, GEN cyc, long R, GEN alpha,
   if (smodis(nbrootsofone,p)) p1 = (GEN)alpha[nbpro];
   else
   {
-    if (DEBUGLEVEL>1) fprintferr("     p divides w(k)\n");
+    if (DEBUGLEVEL>2) fprintferr("     p divides w(k)\n");
     nbalpha++; nbpro++; p1 = (GEN)rootsofone[2];
   }
-  if (DEBUGLEVEL>1) {fprintferr("     t+r+e = %ld\n",nbalpha); flusherr();}
+  if (DEBUGLEVEL>2) {fprintferr("     t+r+e = %ld\n",nbalpha); flusherr();}
   beta = cgetg(nbalpha+1,t_VEC);
   if (nbpro)
   {
@@ -1176,7 +1176,7 @@ check_prime(long p, GEN bnf, GEN h, GEN cyc, long R, GEN alpha,
     beta[nbpro] = (long)p1;
   }
   for (i=1; i<=R; i++) beta[i+nbpro] = funits[i];
-  if (DEBUGLEVEL>2) {fprintferr("     Beta list = %Z\n",beta); flusherr();}
+  if (DEBUGLEVEL>3) {fprintferr("     Beta list = %Z\n",beta); flusherr();}
   primecertify(bnf,beta,p,big); avma = av;
 }
 
@@ -1197,15 +1197,6 @@ certifybuchall(GEN bnf)
   h=(GEN)p1[1];
   cyc=(GEN)p1[2]; nbgen=lg(cyc)-1;
   gen=(GEN)p1[3]; rootsofone=gmael(bnf,8,4);
-  if (DEBUGLEVEL>1)
-  {
-    fprintferr("Class number = %Z\n",h);
-    fprintferr("Cyclic components = %Z\n",cyc);
-    fprintferr("Generators = %Z\n",gen);
-    fprintferr("Regulator = %Z\n",gprec_w(reg,3));
-    fprintferr("Roots of one = %Z\n",rootsofone);
-    fprintferr("Fundamental units = %Z\n",funits);
-  }
   cycgen = check_and_build_cycgen(bnf);
   gbound = ground(gdiv(reg,lowerboundforregulator(bnf)));
   if (is_bigint(gbound))
