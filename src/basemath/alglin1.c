@@ -29,9 +29,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #  define MASK (0xffff0000UL)
 #endif
 
-extern GEN ZM_init_CRT(GEN Hp, ulong p);
-extern int ZM_incremental_CRT(GEN H, GEN Hp, GEN q, GEN qp, ulong p);
-
 /*******************************************************************/
 /*                                                                 */
 /*                         TRANSPOSE                               */

@@ -21,9 +21,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /********************************************************************/
 #include "pari.h"
 #include "paripriv.h"
-extern GEN imagecomplspec(GEN x, long *nlze);
-extern void ZV_neg_ip(GEN M);
-
 /*******************************************************************/
 /*                                                                 */
 /*                   CHARACTERISTIC POLYNOMIAL                     */
@@ -1202,6 +1199,25 @@ intersect(GEN x, GEN y)
 /**		   HERMITE NORMAL FORM REDUCTION	     **/
 /**							     **/
 /**************************************************************/
+/* negate in place, except universal constants */
+static GEN
+mynegi(GEN x)
+{
+  static long mun[]={evaltyp(t_INT)|_evallg(3),evalsigne(-1)|evallgefint(3),1};
+  long s = signe(x);
+
+  if (!s) return gzero;
+  if (is_pm1(x))
+    return (s>0)? mun: gun;
+  setsigne(x,-s); return x;
+}
+void
+ZV_neg_ip(GEN M)
+{
+  long i;
+  for (i = lg(M)-1; i; i--)
+    M[i] = (long)mynegi((GEN)M[i]);
+}
 
 GEN
 mathnf0(GEN x, long flag)
@@ -2508,19 +2524,6 @@ hnfmodidpart(GEN x, GEN p) { return allhnfmod(x, p, hnf_MODID|hnf_PART); }
 /*                                                                     */
 /***********************************************************************/
 
-/* negate in place, except universal constants */
-static GEN
-mynegi(GEN x)
-{
-  static long mun[]={evaltyp(t_INT)|_evallg(3),evalsigne(-1)|evallgefint(3),1};
-  long s = signe(x);
-
-  if (!s) return gzero;
-  if (is_pm1(x))
-    return (s>0)? mun: gun;
-  setsigne(x,-s); return x;
-}
-
 static void
 Minus(long j, GEN **lambda)
 {
@@ -2528,14 +2531,6 @@ Minus(long j, GEN **lambda)
 
   for (k=1  ; k<j; k++) lambda[j][k] = mynegi(lambda[j][k]);
   for (k=j+1; k<n; k++) lambda[k][j] = mynegi(lambda[k][j]);
-}
-
-void
-ZV_neg_ip(GEN M)
-{
-  long i;
-  for (i = lg(M)-1; i; i--)
-    M[i] = (long)mynegi((GEN)M[i]);
 }
 
 /* index of first non-zero entry */
