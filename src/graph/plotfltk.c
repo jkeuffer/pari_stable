@@ -248,16 +248,17 @@ void Plotter::draw()
 void Plotter::alloc() {
     long *c;
     plot_count(my_w, my_lw, rcolcnt);
-    for (int col = 1; col<MAX_COLORS; col++) {
-	c = rcolcnt[col];
-	points[col]=new Point[c[ROt_PT]];
-	seg[col] = new Segment[c[ROt_LN]];
-	rec[col] = new Rectangle[c[ROt_BX]];
-        lines[col] = new Point*[c[ROt_ML]];
-	textPos[col] = new Point[c[ROt_ST]];
-	texts[col] = new String[c[ROt_ST]];
-        numpoints[col] = new long[c[ROt_ST]];
-        numtexts [col] = new long[c[ROt_ST]];
+    for (int col = 1; col<MAX_COLORS; col++)
+    {
+      c = rcolcnt[col];
+      points[col]=new Point[c[ROt_PT]];
+      seg[col] = new Segment[c[ROt_LN]];
+      rec[col] = new Rectangle[c[ROt_BX]];
+      lines[col] = new Point*[c[ROt_ML]];
+      textPos[col] = new Point[c[ROt_ST]];
+      texts[col] = new String[c[ROt_ST]];
+      numpoints[col] = new long[c[ROt_ST]];
+      numtexts [col] = new long[c[ROt_ST]];
     }
 }
 
