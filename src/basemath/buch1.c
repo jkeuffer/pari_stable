@@ -887,7 +887,7 @@ quadray(GEN D, GEN f, GEN flag, long prec)
     if (!isfundamental(D))
       err(talker,"quadray needs a fundamental discriminant");
     pol=quadpoly(D); setvarn(pol, fetch_user_var("y"));
-    bnf=bnfinit0(pol,0,NULL,prec);
+    bnf=bnfinit0(pol,signe(D)>1?1:0,NULL,prec);
   }
   bnr=bnrinit0(bnf,f,1,prec);
   if (gcmp1(gmael(bnr,5,1)))
