@@ -1312,7 +1312,7 @@ mycaract(GEN f, GEN beta, GEN p, GEN pp, GEN ns)
   else
   {
     npp = pp;
-    if (lgefint(p) > 3) npp = mulii(npp, gpowgs(p, val_fact(n, itou(p))));
+    if (lgefint(p) == 3) npp = mulii(npp, gpowgs(p, val_fact(n, itou(p))));
     if (p1) npp = mulii(npp, gpowgs(denom(p1), n));
 
     chi = newtoncharpoly(beta, f, npp, ns);
