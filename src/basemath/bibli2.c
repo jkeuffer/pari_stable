@@ -346,8 +346,6 @@ subcyclo(GEN nn, GEN dd, int v)
 /**                  HILBERT & PASCAL MATRICES                     **/
 /**                                                                **/
 /********************************************************************/
-GEN addshiftpol(GEN x, GEN y, long d);
-
 GEN
 mathilbert(long n) /* Hilbert matrix of order n */
 {
