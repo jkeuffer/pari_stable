@@ -1779,7 +1779,7 @@ sori(GEN g, pariout_t *T)
 	}
       }
       pariputs("O(");
-      if (!i) pariputs(" 1)"); else padic_nome(v,i);
+      if (!i) pariputs(" 1)"); else padic_nome(ev,i);
       pariputc(')'); free(ev); break;
     }
 
