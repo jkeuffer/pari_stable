@@ -576,7 +576,7 @@ gadd(GEN x, GEN y)
         /* fall through */
       case t_QFR: case t_QFI: err(gadderf,tx,ty);
     }
-    err(typeer,"addition");
+    err(gadderf,tx,ty);
   }
 
   /* here !isscalar(x) && isscalar(y) && (vx=vy || ismatvec(x and y)) */
@@ -610,9 +610,7 @@ gadd(GEN x, GEN y)
           z[1]=lpile(av,tetpil, gadd(p1,(GEN)y[1]));
           z[2]=lcopy((GEN)y[2]); return z;
 
-	case t_QFR: case t_QFI:
-	case t_VEC: case t_COL: case t_MAT: err(gadderf,tx,ty);
-	default: err(typeer,"addition");
+	default: err(gadderf,tx,ty);
       }
 
     case t_SER:
@@ -670,10 +668,7 @@ gadd(GEN x, GEN y)
           p1 = gdiv((GEN)y[1], p1); tetpil=avma;
           return gerepile(av,tetpil,gadd(p1,x));
 
-	case t_QFR: case t_QFI: case t_VEC: case t_COL: case t_MAT:
-	  err(gadderf,tx,ty);
-	
-	default: err(typeer,"addition");
+	default: err(gadderf,tx,ty);
       }
 
     case t_RFRAC:
@@ -694,10 +689,8 @@ gadd(GEN x, GEN y)
       for (i=1; i<ly; i++)
 	z[i]=ladd((GEN)x[i],(GEN)y[i]);
       return z;
-
-    case t_QFR: case t_QFI: err(gadderf,tx,ty);
   }
-  err(typeer,"addition");
+  err(gadderf,tx,ty);
   return NULL; /* not reached */
 }
 
@@ -966,7 +959,7 @@ gmul(GEN x, GEN y)
 	    l=avma; p1=co8(y,lg(x)); tetpil=avma;
 	    return gerepile(l,tetpil,gmul(p1,x));
 	
-	  case t_PADIC: case t_INTMOD: err(gmulerf,tx,ty);
+	  default: err(gmulerf,tx,ty);
 	}
 	
       case t_INTMOD:
@@ -1134,6 +1127,7 @@ gmul(GEN x, GEN y)
     }
     err(bugparier,"multiplication");
   }
+  if (is_noncalc_t(tx) || is_noncalc_t(tx)) err(gmulerf,tx,ty);
 
   /* here !isscalar(y) */
   if (is_matvec_t(ty))
@@ -1179,8 +1173,7 @@ gmul(GEN x, GEN y)
             }
             return z;
 
-          case t_VEC: err(gmulerf,tx,ty);
-          default: err(typeer,"multiplication");
+          default: err(gmulerf,tx,ty);
         }
 
       case t_COL:
@@ -1203,8 +1196,7 @@ gmul(GEN x, GEN y)
             for (i=1; i<ly; i++) z[i]=lmul(gcoeff(y,1,i),x);
             return z;
 
-          case t_COL: err(gmulerf,tx,ty);
-          default: err(typeer,"multiplication");
+          default: err(gmulerf,tx,ty);
         }
 
       case t_MAT:
@@ -1268,8 +1260,8 @@ gmul(GEN x, GEN y)
   {
     if (isexactzero(x)) 
     {
-      if (vy == BIGINT) return gzero;/*What else? Bill.*/
-      else return zeropol(vy);
+      if (vy == BIGINT) err(gmulerf,tx,ty);
+      return zeropol(vy);
     }
     if (tx == t_INT && is_pm1(x))
       return (signe(x)>0) ? gcopy(y): gneg(y);
@@ -1296,8 +1288,8 @@ gmul(GEN x, GEN y)
       case t_RFRACN: av=avma; z=cgetg(3,t_RFRACN);
         z[1]=lmul(x,(GEN)y[1]);
         z[2]=lcopy((GEN)y[2]); return z;
+      default: err(gmulerf,tx,ty);
     }
-    err(typeer,"multiplication");
   }
 
   if (tx>ty) { p1=x; x=y; y=p1; i=tx; tx=ty; ty=i; }
@@ -1338,7 +1330,7 @@ gmul(GEN x, GEN y)
           z[1]=lmul(x,(GEN)y[1]);
           z[2]=lcopy((GEN)y[2]); return z;
 	
-	default: err(typeer,"multiplication");
+	default: err(gmulerf,tx,ty);
       }
 	
     case t_SER:
@@ -1370,13 +1362,13 @@ gmul(GEN x, GEN y)
 	  l=avma; p1=gmul((GEN)y[1],x); tetpil=avma;
           return gerepile(l,tetpil,gdiv(p1,(GEN)y[2]));
 	
-	default: err(typeer,"multiplication");
+	default: err(gmulerf,tx,ty);
       }
 	
     /* (tx,ty) == t_RFRAC <==> ty == t_RFRAC */
     case t_RFRAC: return mulrfrac(x,y);
     case t_RFRACN:
-      if (!is_rfrac_t(ty)) err(typeer,"multiplication");
+      if (!is_rfrac_t(ty)) err(gmulerf,tx,ty);
       av=avma; z=cgetg(3,ty);
       z[1]=lmul((GEN)x[1],(GEN)y[1]);
       z[2]=lmul((GEN)x[2],(GEN)y[2]); return z;
@@ -1387,7 +1379,7 @@ gmul(GEN x, GEN y)
       case t_QFI: return compimag(x,y);
       case t_QFR: return compreal(x,y);
     }
-  err(typeer,"multiplication");
+  err(gmulerf,tx,ty);
   return NULL; /* not reached */
 }
 
@@ -1817,8 +1809,7 @@ gdiv(GEN x, GEN y)
     if (ty == t_POLMOD)
       return gerepileupto(av, gdiv(to_polmod(x,(GEN)y[1]), y));
   }
-  if (is_noncalc_t(tx) || is_noncalc_t(ty))
-    err(typeer,"division");
+  if (is_noncalc_t(tx) || is_noncalc_t(ty)) err(gdiverf,tx, ty);
   /* now x and y are not both is_scalar_t */
 
   lx = lg(x);
@@ -1847,7 +1838,7 @@ gdiv(GEN x, GEN y)
           for (i=lontyp[tx]; i<lx; i++) z[i]=ldiv((GEN)x[i],y);
         return z;
     }
-    err(typeer,"division");
+    err(gdiverf,tx,ty);
   }
 
   ly=lg(y); 
@@ -1885,7 +1876,7 @@ gdiv(GEN x, GEN y)
 
       case t_VEC: case t_COL: err(gdiverf,tx,ty);
     }
-    err(typeer,"division");
+    err(gdiverf,tx,ty);
   }
 
   /* ici vx=vy et tx>=10 et ty>=10*/
@@ -1910,8 +1901,7 @@ gdiv(GEN x, GEN y)
 	  z[1]=lmul(x,(GEN)y[2]);
 	  z[2]=lcopy((GEN)y[1]); return z;
 
-	case t_VEC: case t_COL: case t_MAT: err(gdiverf,tx,ty);
-	default: err(typeer,"division");
+	default: err(gdiverf,tx,ty);
       }
 
     case t_SER:
@@ -1973,8 +1963,7 @@ gdiv(GEN x, GEN y)
 	  l=avma; p2=gmul(x,(GEN)y[2]); tetpil=avma;
 	  return gerepile(l,tetpil,gdiv(p2,(GEN)y[1]));
 
-	case t_VEC: case t_COL: case t_MAT: err(gdiverf,tx,ty);
-	default: err(typeer,"division");
+	default: err(gdiverf,tx,ty);
       }
 
     case t_RFRAC: case t_RFRACN:
@@ -1997,8 +1986,7 @@ gdiv(GEN x, GEN y)
 	  z[1]=lmul((GEN)x[1],(GEN)y[2]);
           z[2]=lmul((GEN)x[2],(GEN)y[1]); return z;
 
-	case t_VEC: case t_COL: case t_MAT: err(gdiverf,tx,ty);
-	default: err(typeer,"division");
+	default: err(gdiverf,tx,ty);
       }
 
     case t_VEC: case t_COL: case t_MAT:
@@ -2013,8 +2001,7 @@ gdiv(GEN x, GEN y)
       return gerepile(l,tetpil,gmul(x,p1));
      case t_QFI:case t_QFR:
        break;
-     default:
-       err(typeer,"division");
+     default: err(gdiverf,tx,ty);
   }
   /*Here tx==t_QFI || tx==t_QFR*/
   if (tx==ty)
@@ -2029,6 +2016,6 @@ gdiv(GEN x, GEN y)
         setsigne(y[2],l); setsigne(y[4],k); return z;
     }
   }
-  err(typeer,"division");
+  err(gdiverf,tx,ty);
   return NULL; /* not reached */
 }
