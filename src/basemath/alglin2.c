@@ -2416,7 +2416,7 @@ allhnfmod(GEN x, GEN dm, int flag)
   }
   if (modid)
   { /* w[li] is an accumulator, discarded at the end */
-    GEN w = cgetg(li+1, t_MAT); setlg(w, li);
+    GEN w = cgetg(li+1, t_MAT);
     x += co - li;
     for (i = li-1; i > ldef; i--) w[i] = x[i];
     for (        ; i > 0;    i--) w[i] = (long)vec_Cei(li-1, i, dm);
@@ -2445,8 +2445,14 @@ allhnfmod(GEN x, GEN dm, int flag)
         ZV_elem(a, gcoeff(x,j,j), x, NULL, li,j);
         FpV_red_part_ip((GEN)x[li], dm, j-1);
         FpV_red_part_ip((GEN)x[j],  dm, j-1);
+        if (low_stack(lim, stack_lim(av,1)))
+        {
+          if (DEBUGMEM>1) err(warnmem,"allhnfmod[2]. i=%ld", i);
+          x = gerepilecopy(av, x);
+        }
       }
     }
+    setlg(w, li); /* discard accumulator */
   }
   else
   {
