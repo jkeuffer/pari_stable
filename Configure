@@ -37,6 +37,7 @@ extract_dir_list="$doc_dir $emacs_dir $misc_dir"
 # Version number and patch level.
 . $config_dir/version
 version=$VersionMajor.$VersionMinor
+pari_release="$VersionMajor.$VersionMinor.$patch"
 if test `expr $VersionMinor % 2` = 1; then
   echo "Configuring pari-$version.$patch (STABLE)"
   libpari_base=pari
@@ -1336,6 +1337,7 @@ case "$osname" in
 esac
 
 for variable in\
+  pari_release\
   libpari_base version TOP config_dir src_dir emacs_dir doc_dir\
   bindir includedir mandir miscdir libdir datadir\
   optimization objdir static suffix\
