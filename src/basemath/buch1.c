@@ -399,6 +399,11 @@ getallelts(GEN nf, GEN G)
   c = (GEN)G[2];
   g = (GEN)G[3]; lc = lg(c)-1;
   list = (GEN*) cgetg(no+1,t_VEC);
+  if (!lc)
+  {
+    list[1] = idealhermite(nf,gun);
+    return (GEN)list;
+  }
   pows = (GEN**)cgetg(lc+1,t_VEC);
   c = dummycopy(c); settyp(c, t_VECSMALL);
   for (i=1; i<=lc; i++)
@@ -477,6 +482,18 @@ convert_to_id(GEN P)
     GEN p1 = (GEN)P[i];
     p1[1] = (long)form_to_ideal((GEN)p1[1]);
   }
+}
+
+/* P approximation computed at initial precision prec. Compute needed prec
+ * to know P with 1 word worth of trailing decimals */
+static long
+get_prec(GEN P, long prec)
+{
+  long k = gprecision(P);
+  if (k == 3) return (prec<<1)-2; /* approximation not trustworthy */
+  k = prec - k; /* lost precision when computing P */
+  if (k < 0) k = 0;
+  return MEDDEFAULTPREC + k + (gexpo(P) >> TWOPOTBITS_IN_LONG);
 }
 
 /*  returns an equation for the ray class field of modulus f of the imaginary
@@ -583,12 +600,7 @@ PRECPB:
   {
     P0 = roots_to_pol(P, 0);
     P = findbezk_pol(nf, P0);
-    if (!P)
-    {
-      i = 2 + (prec - gprecision(P0)) + (gexpo(P0) >> TWOPOTBITS_IN_LONG);
-      if (i < prec) i = prec;
-      prec += (i-2); goto PRECPB;
-    }
+    if (!P) { prec = get_prec(P0, prec); goto PRECPB; }
     P = gsubst(P,0,gmul(gdiv(pi,pial),polx[0]));
     P = gmul(P,gpuigs(gdiv(pial,pi),clrayno));
   }
@@ -651,7 +663,6 @@ computeth2(GEN nf, GEN gf, GEN gc, GEN la, long prec)
 
 /* Computes P_2(X)=polynomial in Z_K[X] closest to prod_gc(X-th2(gc)) where
    the product is over the ray class group bnr.*/
-
 static GEN
 computeP2(GEN bnr, GEN la, int raw, long prec)
 {
@@ -686,12 +697,7 @@ PRECPB:
   {
     P0 = roots_to_pol(P, 0);
     P = findbezk_pol(nf, P0);
-    if (!P)
-    {
-      i = 2 + (prec - gprecision(P0)) + (gexpo(P0) >> TWOPOTBITS_IN_LONG);
-      if (i < prec) i = prec;
-      prec += (i-2); goto PRECPB;
-    }
+    if (!P) { prec = get_prec(P0, prec); goto PRECPB; }
   }
   return gerepileupto(av, gcopy(P));
 }
