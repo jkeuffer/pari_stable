@@ -437,7 +437,7 @@ static void
 subgroup_engine(subgp_iter *T)
 {
   pari_sp av = avma;
-  GEN B,L,fa,junk,primlist,p,listL,indexsubq = NULL;
+  GEN B,L,fa,primlist,p,listL,indexsubq = NULL;
   GEN cyc = T->cyc;
   long i,j,k,imax,nbprim, n = lg(cyc);
 
@@ -461,7 +461,7 @@ subgroup_engine(subgp_iter *T)
     L = new_chunk(n); p = (GEN)primlist[i];
     for (j=1; j<n; j++)
     {
-      L[j] = pvaluation((GEN)cyc[j], p, &junk);
+      L[j] = pvaluation((GEN)cyc[j], p, NULL);
       if (!L[j]) break;
     }
     j--; setlen(L, j);
