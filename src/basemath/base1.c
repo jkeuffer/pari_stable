@@ -1754,7 +1754,7 @@ chk_gen_init(FP_chk_fun *chk, GEN r, GEN mat)
 {
   CG_data *d = (CG_data*)chk->data;
   GEN P,bound,prev,x,B;
-  long l = lg(r), N = l-1,i,prec,prec2;
+  long l = lg(r), N = l-1,i,prec;
   int skipfirst = 0;
 
   d->u = mat;
