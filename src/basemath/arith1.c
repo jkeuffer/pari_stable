@@ -341,7 +341,7 @@ racine_i(GEN a, int roundup)
   GEN x = racine_r(a, l);
   if (roundup && signe(x))
   {
-    m = x[lgefint(x)-1];
+    m = modBIL(x);
     k = (m * m != a[l-1] || !egalii(sqri(x),a));
     avma = (long)x;
     if (k) x = gerepileuptoint(av, addis(x,1));
@@ -573,7 +573,9 @@ gcarreparfait(GEN x)
 /**                        KRONECKER SYMBOL                         **/
 /**                                                                 **/
 /*********************************************************************/
-#define ome(t) (labs(mod8(t)-4) == 1)
+/* u = 3,5 mod 8 ?  (= 2 not a square mod u) */
+#define  ome(t) (labs(((t)&7)-4) == 1)
+#define gome(t) (ome(modBIL(t)))
 
 GEN
 gkronecker(GEN x, GEN y)
@@ -598,7 +600,7 @@ kronecker(GEN x, GEN y)
   {
     if (mpodd(x))
     {
-      if (odd(r) && ome(x)) s= -s;
+      if (odd(r) && gome(x)) s= -s;
       y=shifti(y,-r);
     }
     else { avma=av; return 0; }
@@ -609,11 +611,11 @@ kronecker(GEN x, GEN y)
     r=vali(x);
     if (r)
     {
-      if (odd(r) && ome(y)) s= -s;
+      if (odd(r) && gome(y)) s= -s;
       x=shifti(x,-r);
     }
     /* x=3 mod 4 && y=3 mod 4 ? (both are odd here) */
-    if (y[lgefint(y)-1]&2 && x[lgefint(x)-1]&2) s = -s;
+    if (modBIL(x) & modBIL(y) & 2) s = -s;
     z=resii(y,x); y=x; x=z;
   }
   avma=av; return is_pm1(y)? s: 0;
@@ -641,24 +643,24 @@ krogs(GEN x, long y)
   {
     if (mpodd(x))
     {
-      if (odd(r) && ome(x)) s= -s;
+      if (odd(r) && gome(x)) s= -s;
       y>>=r;
     }
     else return 0;
   }
-  x1=smodis(x,y);
+  x1=smodis(x,y); avma = av;
   while (x1)
   {
     r=vals(x1);
     if (r)
     {
-      if (odd(r) && (labs((y&7)-4)==1)) s= -s;
+      if (odd(r) && ome(y)) s= -s;
       x1>>=r;
     }
-    if (y&2 && x1&2) s= -s;
+    if (x1 & y & 2) s= -s;
     z=y%x1; y=x1; x1=z;
   }
-  avma=av; return (y==1)? s: 0;
+  return (y==1)? s: 0;
 }
 
 long
@@ -683,7 +685,7 @@ kross(long x, long y)
   {
     if (odd(x))
     {
-      if (odd(r) && labs((x&7)-4) == 1) s = -s;
+      if (odd(r) && ome(x)) s = -s;
       y>>=r;
     }
     else return 0;
@@ -694,10 +696,10 @@ kross(long x, long y)
     r=vals(x1);
     if (r)
     {
-      if (odd(r) && labs((y&7)-4) == 1) s= -s;
+      if (odd(r) && ome(y)) s = -s;
       x1>>=r;
     }
-    if (y&2 && x1&2) s= -s;
+    if (x1 & y & 2) s = -s;
     z=y%x1; y=x1; x1=z;
   }
   return (y==1)? s: 0;
@@ -706,10 +708,10 @@ kross(long x, long y)
 long
 hil0(GEN x, GEN y, GEN p)
 {
-  return p? hil(x,y,p): hil(x,y,gzero);
+  return hil(x,y, p? p: gzero);
 }
 
-#define eps(t) (((signe(t)*(t[lgefint(t)-1]))&3)==3)
+#define eps(t) (((signe(t)*(modBIL(t)))&3)==3)
 long
 hil(GEN x, GEN y, GEN p)
 {
@@ -732,8 +734,8 @@ hil(GEN x, GEN y, GEN p)
 	  if (egalii(p,gdeux))
           {
 	    z = (eps(u) && eps(v))? -1: 1;
-	    if (a && ome(v)) z= -z;
-	    if (b && ome(u)) z= -z;
+	    if (a && gome(v)) z= -z;
+	    if (b && gome(u)) z= -z;
           }
           else
 	  {
@@ -800,6 +802,7 @@ hil(GEN x, GEN y, GEN p)
 }
 #undef eps
 #undef ome
+#undef gome
 
 /*******************************************************************/
 /*                                                                 */
@@ -2130,7 +2133,7 @@ two_rank(GEN x)
 }
 
 #define MAXFORM 11
-#define _low(x) (__x=(GEN)x, __x[lgefint(__x)-1])
+#define _low(x) (__x=(GEN)x, modBIL(__x))
 
 /* h(x) for x<0 using Baby Step/Giant Step.
  * Assumes G is not too far from being cyclic.

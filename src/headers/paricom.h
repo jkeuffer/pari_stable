@@ -241,12 +241,7 @@ extern void* global_err_data;
 
 #define leading_term(x) ((GEN)(((GEN)(x))[lgef(x)-1]))
 
-#ifdef __cplusplus
-   inline int odd(long x) {return x&1;}
-#else
-#  define odd(x) ((x) & 1)
-#endif
-
+#define odd(x) ((x) & 1)
 #define mpodd(x) (signe(x) && mod2(x))
 
 #define ONLY_REM ((GEN*)0x1L)
