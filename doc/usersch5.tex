@@ -1360,6 +1360,10 @@ of \kbd{x} by \kbd{y}, and sets \kbd{pr} to the remainder.
 \fun{GEN}{FpX_div}{GEN x, GEN y, GEN p} returns the quotient of \kbd{x} by
 \kbd{y}.
 
+\fun{GEN}{FpX_div_by_X_x}{GEN A, GEN a, GEN p, GEN *r} returns the
+quotient of the \kbd{FpX}~\kbd{A} by $(X - \kbd{a})$, and sets \kbd{r} to the
+remainder $\kbd{A}(\kbd{a})$.
+
 \fun{GEN}{FpX_rem}{GEN x, GEN y, GEN p} returns the remainder \kbd{x} mod
 \kbd{y}
 
@@ -1791,9 +1795,9 @@ multiplicity of the $0$ root.
 \kbd{FpXQYQ\_pow}.
 
 
-\fun{GEN}{Flx_div_by_X_x}{GEN a, ulong x, ulong p, ulong *rem}, divides
-\kbd{Flx}~\kbd{a} by $X - \kbd{x}$, and sets \kbd{rem} to the remainder ($ =
-\kbd{a}(\kbd{x})$).
+\fun{GEN}{Flx_div_by_X_x}{GEN A, ulong a, ulong p, ulong *rem}, returns the
+quotient of the \kbd{Flx}~\kbd{A} by $X - \kbd{a}$, and sets \kbd{rem} to the
+remainder $ \kbd{A}(\kbd{a})$.
 
 \fun{ulong}{Flx_eval}{GEN x, ulong y, ulong p}, as \kbd{FpX\_eval}.
 
@@ -1891,6 +1895,10 @@ $\sum_{i = 0}^{\kbd{na}} \kbd{a}[i] X^i$. Return its square (as a true
 
 \fun{GEN}{RgX_div}{GEN x, GEN y, GEN *r}
 
+\fun{GEN}{RgX_div_by_X_x}{GEN A, GEN a, GEN *r} returns the
+quotient of the \kbd{RgX}~\kbd{A} by $(X - \kbd{a})$, and sets \kbd{r} to the
+remainder $\kbd{A}(\kbd{a})$.
+
 \fun{GEN}{RgX_rem}{GEN x, GEN y, GEN *r}
 
 \fun{GEN}{RgX_extgcd}{GEN x, GEN y, GEN *u, GEN *v} returns
@@ -1920,6 +1928,15 @@ by the scalar \kbd{x}.
 \fun{GEN}{RgXQX_div}{GEN x, GEN y, GEN T, GEN *r}
 
 \fun{GEN}{RgXQX_rem}{GEN x, GEN y, GEN T, GEN *r}
+
+\fun{GEN}{RgX_rescale}{GEN P, GEN h} returns $h^{\deg(P)} P(x/h)$.
+\kbd{P} is an \kbd{RgX} and \kbd{h} is non-zero. (Leaves small objects on the
+stack. Suitable but inefficient for \kbd{gerepileupto}.)
+
+\fun{GEN}{RgX_unscale}{GEN P, GEN h} returns $P(h x)$. (Leaves small objects
+on the stack. Suitable but inefficient for \kbd{gerepileupto}.)
+
+\fun{GEN}{RgXV_unscale}{GEN v, GEN h}
 
 \subsec{Conversions involving single precision objects}
 
