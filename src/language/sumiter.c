@@ -262,7 +262,7 @@ forvec_next_le_i(fvdat *d)
         } 
         if (i > 1) {
           GEN t = d->a[i-1]; if (cmpii(t, d->m[i]) < 0) t = d->m[i];
-          d->a[i] = resetloop2(d->a[i], d->m[i], t);/*a[i]:=min(a[i-1],m[i])*/
+          d->a[i] = resetloop(d->a[i], t);/*a[i]:=min(a[i-1],m[i])*/
         }
       }
       return (GEN)d->a;
@@ -328,7 +328,7 @@ forvec_next_lt_i(fvdat *d)
         } 
         if (i > 1) {
           GEN t = addis(d->a[i-1],1); if (cmpii(t, d->m[i]) < 0) t = d->m[i];
-          d->a[i] = resetloop2(d->a[i], d->m[i], t);/*a[i]:=min(a[i-1],m[i])*/
+          d->a[i] = resetloop(d->a[i], t);/*a[i]:=min(a[i-1],m[i])*/
         }
       }
       return (GEN)d->a;
