@@ -158,6 +158,7 @@ sub open_dvi_then_quit
 
 sub treat
 {
+  local($help);
   $_ = $_[0];
   s/_QUOTE/'/g;
   s/_BACKQUOTE/`/g;
