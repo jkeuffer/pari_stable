@@ -1926,12 +1926,11 @@ FpXQX_normalize(GEN z, GEN T, GEN p)
   return FpXQX_FpXQ_mul(z, Fq_inv(p1,T,p), T,p);
 }
 
-/* z in Z[X,Y] representing an elt in F_p[X,Y] mod T(Y) i.e F_q[X])
- * in Kronecker form. Recover the "real" z, normalized
- * If p = NULL, use generic functions and the coeff. ring implied by the
- * coefficients of z */
+/* z in R[X,Y] representing an elt in R[X,Y] mod T(Y) in Kronecker form,
+ * i.e subst(lift(z), x, y^(2deg(z)-1)). Recover the "real" z, with
+ * normalized coefficients */
 GEN
-FqX_from_Kronecker(GEN z, GEN T, GEN p)
+from_Kronecker(GEN z, GEN T)
 {
   long i,j,lx,l = lg(z), N = (degpol(T)<<1) + 1;
   GEN a,x, t = cgetg(N,t_POL);
@@ -1944,50 +1943,14 @@ FqX_from_Kronecker(GEN z, GEN T, GEN p)
     a[1] = (long)T;
     for (j=2; j<N; j++) t[j] = z[j];
     z += (N-2);
-    a[2] = (long)FpX_rem(normalizepol_i(t,N), T,p);
+    a[2] = lres(normalizepol_i(t,N), T);
   }
   a = cgetg(3,t_POLMOD); x[i] = (long)a;
   a[1] = (long)T;
   N = (l-2) % (N-2) + 2;
   for (j=2; j<N; j++) t[j] = z[j];
-  a[2] = (long)FpX_rem(normalizepol_i(t,N), T,p);
+  a[2] = lres(normalizepol_i(t,N), T);
   return normalizepol_i(x, i+1);
-}
-
-#if 0
-/* z in Kronecker form representing a polynomial in FqX. Reduce mod (p,T) */
-GEN
-FqX_Kronecker_red(GEN z, GEN T, GEN p)
-{
-  long i,j,lx,l = lg(z), lT = lg(T), N = ((dT-3)<<1) + 1;
-  GEN a,x,y, t = cgetg(N,t_POL);
-  t[1] = T[1] & VARNBITS;
-  lx = (l-2) / (N-2); x = cgetg(lx+3,t_POL);
-  x = y = z = FpX_red(z, p);
-  for (i=2; i<lx+2; i++)
-  {
-    for (j=2; j<N; j++) t[j] = z[j];
-    a = FpX_rem(normalizepol_i(t,N), T,p);
-    for (j=2; j<lT; j++) y[j] = a[j];
-    for (   ; j<N;  j++) y[j] = zero;
-    z += (N-2);
-    y += (N-2);
-  }
-  N = (l-2) % (N-2) + 2;
-  for (j=2; j<N; j++) t[j] = z[j];
-  a = FpX_rem(normalizepol_i(t,N), T,p);
-  for (j=2; j<lT; j++) y[j] = a[j];
-  for (   ; j<N;  j++) y[j] = zero;
-  return normalizepol_i(x, l);
-}
-#endif
-
-/* z in ?[X,Y] mod Q(Y) in Kronecker form ((subst(lift(z), x, y^(2deg(z)-1)))
- * Recover the "real" z, normalized */
-GEN
-from_Kronecker(GEN z, GEN pol)
-{
-  return FqX_from_Kronecker(z,pol,NULL);
 }
 
 /*******************************************************************/

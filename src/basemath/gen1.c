@@ -1703,14 +1703,8 @@ gsqr(GEN x)
       if (ff_poltype(&x,&p,&pol))
       {
         z = quicksqr(x+2, lgpol(x));
-        if (p)
-        {
-          z = FpX(z,p);
-          if (pol) z = FpXQX_from_Kronecker(z,pol,p);
-        }
-        else
-          z = from_Kronecker(z,pol);
-        z = gerepileupto(av, z);
+        if (p) z = FpX(z,p);
+        z = gerepileupto(av, from_Kronecker(z,pol));
       }
       else
       {
