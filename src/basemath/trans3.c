@@ -543,6 +543,7 @@ gerfc(GEN x, long prec)
 /**								      **/
 /***********************************************************************/
 
+#if 0
 static GEN
 czeta(GEN s, long prec)
 {
@@ -554,13 +555,13 @@ czeta(GEN s, long prec)
   if (typ(s)==t_COMPLEX)
   {
     res = cgetc(prec); av=avma;
-    p1=cgetc(prec+1);
+    p1 = cgetc(prec+1);
     gaffect(s,p1); s=p1; sig=(GEN)s[1];
   }
   else
   {
     res = cgetr(prec); av=avma;
-    p1=cgetr(prec+1); affrr(s,p1); sig=s=p1;
+    p1 = cgetr(prec+1); affrr(s,p1); sig = s = p1;
   }
 
   if (signe(sig)>0 && expo(sig)>-2) flag1 = 0;
@@ -571,7 +572,7 @@ czeta(GEN s, long prec)
       if (gcmp0(sig)) gaffect(gneg_i(ghalf),res); else gaffsg(0,res);
       avma=av; return res;
     }
-    flag1=1; s=gsub(gun,s); sig=greal(s);
+    flag1 = 1; s = gsub(gun,s); sig = greal(s);
   }
   ssig=rtodbl(sig); st=fabs(rtodbl(gimag(s))); maxbeta = pow(3.0,-2.5);
   if (st)
@@ -661,7 +662,7 @@ czeta(GEN s, long prec)
     setexpo(pitemp,0);
     y=gmul2n(gmul(y,gcos(gmul(pitemp,s),prec+1)),1);
   }
-  gaffect(y,res); avma=av; return res;
+  gaffect(y,res); avma = av; return res;
 }
 
 /* y = binomial(n,k-2). Return binomial(n,k) */
@@ -672,31 +673,31 @@ next_bin(GEN y, long n, long k)
   return divrs(mulrs(y, n-k+1), k);
 }
 
-/* assume k != 1 */
 static GEN
 izeta(long k, long prec)
 {
-  long av=avma,av2,tetpil,kk,n,li, limit;
-  GEN y,p1,pitemp,qn,z,q,binom;
+  long av=avma,av2,kk,n,li, limit;
+  GEN y,p1,pi2,qn,z,q,binom;
 
+  /* treat trivial cases */
   if (!k) return gneg(ghalf);
-  if (k<0)
+  if (k < 0)
   {
     if ((k&1) == 0) return gzero;
-    y=bernreal(1-k,prec); tetpil=avma;
-    return gerepile(av,tetpil,divrs(y,k-1));
+    y = bernreal(1-k,prec);
+    return gerepileuptoleaf(av, divrs(y,k-1));
   }
   if (k > bit_accuracy(prec)+1) return realun(prec);
-  pitemp=mppi(prec); setexpo(pitemp,2);
+  pi2 = mppi(prec); setexpo(pi2,2); /* 2Pi */
   if ((k&1) == 0)
   {
-    p1 = mulrr(gpuigs(pitemp,k),absr(bernreal(k,prec)));
-    y = mpfactr(k,prec); tetpil=avma;
-    y=divrr(p1,y); setexpo(y,expo(y)-1);
-    return gerepile(av,tetpil,y);
+    p1 = mulrr(gpuigs(pi2,k),absr(bernreal(k,prec)));
+    y = divrr(p1, mpfactr(k,prec)); setexpo(y,expo(y)-1);
+    return gerepileuptoleaf(av, y);
   }
+  /* k > 1 odd */
   binom = realun(prec+1);
-  q = mpexp(pitemp); kk = k+1; /* >= 4 */
+  q = mpexp(pi2); kk = k+1; /* >= 4 */
   li = -(1+bit_accuracy(prec));
   y = NULL; /* gcc -Wall */
   if ((k&3)==3)
@@ -710,16 +711,16 @@ izeta(long k, long prec)
       if ((n>>1)&1) setsigne(p1,-signe(p1));
       y = n? addrr(y,p1): p1;
     }
-    y=mulrr(divrr(gpuigs(pitemp,k),mpfactr(kk,prec)),y);
+    y = mulrr(divrr(gpuigs(pi2,k),mpfactr(kk,prec)),y);
 
     av2 = avma; limit = stack_lim(av2,1);
-    qn=gsqr(q); z=divsr(1,addrs(q,-1));
+    qn = gsqr(q); z = divsr(1,addrs(q,-1));
     for (n=2; ; n++)
     {
-      p1=divsr(1,mulir(gpuigs(stoi(n),k),addrs(qn,-1)));
+      p1 = divsr(1,mulir(gpuigs(stoi(n),k),addrs(qn,-1)));
 
-      z=addrr(z,p1); if (expo(p1)< li) break;
-      qn=mulrr(qn,q);
+      z = addrr(z,p1); if (expo(p1)< li) break;
+      qn = mulrr(qn,q);
       if (low_stack(limit,stack_lim(av2,1)))
       {
         GEN *gptr[2]; gptr[0]=&z; gptr[1]=&qn;
@@ -727,12 +728,12 @@ izeta(long k, long prec)
         gerepilemany(av2,gptr,2);
       }
     }
-    setexpo(z,expo(z)+1); tetpil = avma;
+    setexpo(z,expo(z)+1);
     y = addrr(y,z); setsigne(y,-signe(y));
   }
   else
   {
-    GEN p2 = divrs(pitemp, k-1);
+    GEN p2 = divrs(pi2, k-1);
     for (n=0; n <= k>>1; n+=2)
     {
       p1 = mulrr(bernreal(kk-n,prec),bernreal(n,prec));
@@ -742,7 +743,7 @@ izeta(long k, long prec)
       if ((n>>1)&1) setsigne(p1,-signe(p1));
       y = n? addrr(y,p1): p1;
     }
-    y = mulrr(divrr(gpuigs(pitemp,k),mpfactr(kk,prec)),y);
+    y = mulrr(divrr(gpuigs(pi2,k),mpfactr(kk,prec)),y);
     y = divrs(y,k-1);
     av2 = avma; limit = stack_lim(av2,1);
     qn = q; z=gzero;
@@ -760,10 +761,194 @@ izeta(long k, long prec)
         gerepilemany(av2,gptr,2);
       }
     }
-    setexpo(z,expo(z)+1); tetpil = avma;
+    setexpo(z,expo(z)+1);
     y = subrr(y,z);
   }
-  return gerepile(av,tetpil,y);
+  return gerepileuptoleaf(av, y);
+}
+#endif
+
+/* s0 a t_INT, t_REAL or t_COMPLEX.
+ * If a t_INT, assume it's not a trivial case (i.e we have s0 > 1, odd and
+ * "small")
+ * */
+GEN
+czeta(GEN s0, long prec)
+{
+  GEN s = s0, u, a, y, res, tes, sig, in2, p1, unr;
+  GEN ms, s1, s2, s3, s4, s5, *tab, tabn, ta, sim;
+  long sqn, i, nn, lim, lim2, kk, ct, av;
+  ulong p;
+  int funeq = 0;
+  byteptr d;
+
+  i = precision(s); if (i) prec = i;
+  if (typ(s)==t_COMPLEX)
+  { /* s = sig + it */
+    res = cgetc(prec); av = avma;
+    p1 = cgetc(prec+1);
+    gaffect(s,p1); s = p1; sig = (GEN)s[1];
+  }
+  else /* t_INT or t_REAL */
+  {
+    res = cgetr(prec); av = avma;
+    p1 = cgetr(prec+1); mpaff(s,p1); sig = s = p1;
+  }
+
+  /* s <--> 1-s */
+  if (signe(sig) < 0) { funeq = 1; s = gsub(gun, s); sig = greal(s); }
+
+  {
+    double ssig = rtodbl(sig);
+    double st = rtodbl(gimag(s));
+    double ns = ssig * ssig + st * st;
+    double l,l2;
+    long la = 1;
+    GEN sapprox = gmul(s, realun(3));
+
+    if (typ(s0) == t_INT)
+    {
+      long ss = itos(s0);
+      switch(ss)
+      { /* should depend on prec */
+        case 3:  la = 6; break;
+        case 5:  la = 3; break;
+        case 7:  la = 3; break;
+        default: la = 2; break;
+      }
+    }
+
+    /* l2 = Re( (s - 1/2) log (s-1) ) */
+    l2 = rtodbl(greal(gmul(gsub(sapprox,ghalf), glog(gsub(sapprox,gun),3))));
+    l = (pariC2*(prec-2) - l2 + ssig*2*pariC1) / (2. * (1.+ log((double)la)));
+    l2 = sqrt(ns)/2;
+    if (l < l2) l = l2;
+    lim = (long) ceil(l); if (lim < 2) lim = 2;
+    l2 = (lim+ssig/2.-.25);
+    nn = (long) 1 + ceil( sqrt(l2*l2 + st*st/4) / PI * la );
+    if (DEBUGLEVEL) fprintferr("lim, nn: [%ld, %ld]\n",lim,nn);
+  }
+  prec++; /* compute with one extra word of precision */
+
+  tab = (GEN*)cgetg(nn, t_VEC); /* table of q^(-s), q = p^e */
+  if (nn >= maxprime()) err(primer1);
+  d = diffptr + 1;
+
+  unr = realun(prec);
+  if (typ(s0) == t_INT)
+  {
+    a = divri(unr, powgi(stoi(nn), s0));
+    for (p=2; p < nn; p += *d++)
+      tab[p] = divri(unr, powgi(stoi(p), s0));
+  }
+  else
+  {
+    ms = gneg(s); p1 = cgetr(prec);
+    affsr(nn,p1); /* otherwise precision increase */
+    a = gexp(gmul(ms, mplog(p1)), prec);
+    for (p=2; p < nn; p += *d++)
+    {
+      affsr(p, p1);
+      tab[p] = gexp(gmul(ms, mplog(p1)), prec);
+    }
+  }
+  sqn = (long)sqrt(nn-1.);
+  d = diffptr + 2;
+  for (p=3; p <= sqn; p += *d++)
+  {
+    ulong oldq = p, q = p*p;
+    while (q<nn) { tab[q] = gmul(tab[p], tab[oldq]); oldq = q; q *= p; }
+  }
+  if (DEBUGLEVEL) msgtimer("tabpn^-s from 1 to N-1"); 
+  tabn = cgetg(nn, t_VECSMALL); kk = nn-1; ct = 0;
+  while (kk) { tabn[++ct] = (kk-1)>>1; kk>>=1; }
+  ta = tab[2];
+  sim = y = unr;
+  for (i=ct; i > 1; i--)
+  {
+    long j;
+    for (j=tabn[i]+1; j<=tabn[i-1]; j++)
+    {
+      GEN fa = factor(stoi(2*j+1)), p = (GEN)fa[1], e = (GEN)fa[2];
+      GEN pro = tab[ itos(powgi((GEN)p[1], (GEN)e[1])) ];
+      long k;
+      for (k=2; k<lg(p); k++)
+        pro = gmul(pro, tab[ itos(powgi((GEN)p[k], (GEN)e[k])) ]);
+      sim = gadd(sim, pro);
+    }
+    y = gadd(sim, gmul(ta,y));
+  }
+  y = gadd(y, gmul2n(a,-1));
+  if (DEBUGLEVEL) msgtimer("sum from 1 to N-1");
+
+  in2 = divrs(realun(prec), nn*nn); lim2 = lim<<1;
+  tes = bernreal(lim2, prec);
+  if (DEBUGLEVEL) msgtimer("Bernoullis");
+  if (typ(s0) != t_INT)
+  {
+    s1 = gsub(gmul2n(s,1), gun);
+    s2 = gmul(s, gsub(s,gun));
+    s3 = gmul2n(in2,3);
+    s4 = gmul(in2, gmul2n(gaddsg(4*lim-2,s1),1));
+    s5 = gmul(in2, gadd(s2, gmulsg(lim2, gaddgs(s1, lim2))));
+    for (i = lim2-2; i>=2; i -= 2)
+    {
+      s5 = gsub(s5, s4);
+      s4 = gsub(s4, s3);
+      tes = gadd(bernreal(i,prec), gdivgs(gmul(s5,tes), (i+1)*(i+2)));
+    }
+    u = gmul(gmul(tes,in2), gmul2n(s2, -1));
+    tes = gmulsg(nn, gaddsg(1, u));
+  }
+  else
+  {
+    for (i=lim2-2; i>=2; i-=2)
+    {
+      u = gmul(gmul(tes,in2), mulii(addsi(i,s0), addsi(i-1,s0)));
+      tes = gadd(bernreal(i,prec), gdivgs(u, (i+1)*(i+2)));
+    }
+    u = gmul(gmul(tes,in2), gmul2n(mulii(s0, addsi(-1,s0)), -1));
+    tes = gmulsg(nn, gaddsg(1, u));
+  }
+  if (DEBUGLEVEL) msgtimer("Bernoulli sum");
+  /* y += tes a / (s-1) */
+  y = gadd(y, gmul(tes, gdiv(a, gsub(s, gun))));
+
+  if (funeq)
+  {
+    GEN pitemp = mppi(prec); setexpo(pitemp,2); /* 2Pi */
+    y = gmul(gmul(y, ggamma(s,prec)), gpui(pitemp,gneg(s),prec));
+    setexpo(pitemp,0); /* Pi/2 */
+    y = gmul2n(gmul(y, gcos(gmul(pitemp,s),prec)), 1);
+  }
+  gaffect(y,res); avma = av; return res;
+}
+
+/* assume k != 1 */
+static GEN
+izeta(long k, long prec)
+{
+  long av = avma;
+  GEN y,p1,pi2;
+
+  /* treat trivial cases */
+  if (!k) return gneg(ghalf);
+  if (k < 0)
+  {
+    if ((k&1) == 0) return gzero;
+    y = bernreal(1-k,prec);
+    return gerepileuptoleaf(av, divrs(y,k-1));
+  }
+  if (k > bit_accuracy(prec)+1) return realun(prec);
+  if ((k&1) == 0)
+  {
+    pi2 = mppi(prec); setexpo(pi2,2); /* 2Pi */
+    p1 = mulrr(gpuigs(pi2,k),absr(bernreal(k,prec)));
+    y = divrr(p1, mpfactr(k,prec)); setexpo(y,expo(y)-1);
+    return gerepileuptoleaf(av, y);
+  }
+  /* k > 1 odd */
+  return czeta(stoi(k), prec);
 }
 
 GEN
@@ -773,6 +958,7 @@ gzeta(GEN x, long prec)
   switch(typ(x))
   {
     case t_INT:
+      if (is_bigint(x)) return realun(prec);
       return izeta(itos(x),prec);
 
     case t_REAL: case t_COMPLEX:
