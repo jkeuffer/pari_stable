@@ -518,7 +518,7 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
       x = gtodouble(gabs(z,prec));
 /* Experimentally optimal on a PIII 500 Mhz. Your optimum may vary. */
       if ((x > (8*(prec-2)+norml1(n,prec)-3)) && !flag) return kbessel(n,z,prec);
-      precnew  = prec;
+      precnew = prec;
       if (x >= 1.0)
       {
 	rab = x/(LOG2*BITS_IN_LONG); if (fl) rab *= 2;
@@ -533,7 +533,9 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
 	if (fl) B += 0.367879;
 	N = 1 + B;
 /* 3 Newton iterations are enough except in pathological cases */
-	N = (N + B)/(log(N)+1);	N = (N + B)/(log(N)+1);	N = (N + B)/(log(N)+1);
+	N = (N + B)/(log(N)+1);
+        N = (N + B)/(log(N)+1);
+        N = (N + B)/(log(N)+1);
 	lim = max((long)(L*N),2);
 	p1 = _kbessel(k,znew,flag,lim,precnew);
 	p1 = gmul(gpowgs(gmul2n(znew,-1),k),p1);
@@ -596,8 +598,7 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
 	p1 = _kbessel(k,y,flag+2,lg(y)-2,prec);
 	return gerepilecopy(av,p1);
       }
-      fl2 = isint(setlgcx2(gmul2n(n,1),prec),&ki);
-      if (!fl2)
+      if (!isint(setlgcx2(gmul2n(n,1),prec),&ki))
         err(talker,"cannot give a power series result in k/n bessel function");
       k = labs(ki); n = gmul2n(stoi(k),-1);
       fl2 = (k&3)==1;
@@ -639,21 +640,15 @@ nbessel(GEN n, GEN z, long prec)
 GEN
 hbessel1(GEN n, GEN z, long prec)
 {
-  pari_sp av=avma, tetpil;
-  GEN p1,p2;
-
-  p1 = jbessel(n,z,prec); p2 = gmul(gi,nbessel(n,z,prec));
-  tetpil = avma; return gerepile(av,tetpil,gadd(p1,p2));
+  pari_sp av = avma;
+  return gerepileupto(av, gadd(jbessel(n,z,prec), gmul(gi,nbessel(n,z,prec))));
 }
 
 GEN
 hbessel2(GEN n, GEN z, long prec)
 {
-  pari_sp av=avma, tetpil;
-  GEN p1,p2;
-
-  p1 = jbessel(n,z,prec); p2 = gmul(gi,nbessel(n,z,prec));
-  tetpil = avma; return gerepile(av,tetpil,gsub(p1,p2));
+  pari_sp av = avma;
+  return gerepileupto(av, gsub(jbessel(n,z,prec), gmul(gi,nbessel(n,z,prec))));
 }
 
 GEN kbessel2(GEN nu, GEN x, long prec);
@@ -764,17 +759,16 @@ hyperu(GEN a, GEN b, GEN gx, long prec)
 GEN
 kbessel2(GEN nu, GEN x, long prec)
 {
-  pari_sp av = avma, tetpil;
-  GEN p1,p2,x2,a,pitemp;
+  pari_sp av = avma;
+  GEN p1, x2, a;
 
   if (typ(x)==t_REAL) prec = lg(x);
-  x2=gshift(x,1); pitemp=mppi(prec);
-  if (gcmp0(gimag(nu))) a=cgetr(prec); else a=cgetc(prec);
-  gaddz(gun,gshift(nu,1),a);
-  p1=hyperu(gshift(a,-1),a,x2,prec);
-  p1=gmul(gmul(p1,gpow(x2,nu,prec)),mpsqrt(pitemp));
-  p2=gexp(x,prec); tetpil=avma;
-  return gerepile(av,tetpil,gdiv(p1,p2));
+  x2 = gshift(x,1); 
+  a = gcmp0(gimag(nu))? cgetr(prec): cgetc(prec);
+  gaddz(gun,gshift(nu,1), a);
+  p1 = hyperu(gshift(a,-1),a,x2,prec);
+  p1 = gmul(gmul(p1,gpow(x2,nu,prec)), mpsqrt(mppi(prec)));
+  return gerepileupto(av, gdiv(p1,gexp(x,prec)));
 }
 
 GEN
