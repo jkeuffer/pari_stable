@@ -35,10 +35,11 @@ static void (*sp)();
 void
 hit_return()
 {
-  char tmp[16];
+  int c;
   if (under_texmacs || under_emacs) return;
-  pariputs("---- (type return to continue) ----");
-  do fgets(tmp,16,stdin); while (tmp[strlen(tmp)-1] != '\n');
+  pariputs("---- (type RETURN to continue) ----");
+  /* if called from a readline callback, may be in a funny TTY mode,  */
+  do c = fgetc(stdin); while (c >= 0 && c != '\n' && c != '\r' && c != ' ');
   pariputc('\n');
 }
 
