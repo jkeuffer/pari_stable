@@ -1501,13 +1501,13 @@ Qfb0(GEN x, GEN y, GEN z, GEN d, long prec)
 static void
 sq_gen(GEN z, GEN x)
 {
-  GEN d1,x2,y2,v1,v2,c3,m,p1,r;
+  GEN d1, x2, y2, v1, v2, c3, m, p1, r;
 
   d1 = bezout((GEN)x[2],(GEN)x[1],&x2,&y2);
   if (gcmp1(d1)) v1 = v2 = (GEN)x[1];
   else
   {
-    v1 = divii((GEN)x[1],d1);
+    v1 = diviiexact((GEN)x[1],d1);
     v2 = mulii(v1,mppgcd(d1,(GEN)x[3]));
   }
   m = mulii((GEN)x[3],x2);
@@ -1522,7 +1522,7 @@ sq_gen(GEN z, GEN x)
 void
 comp_gen(GEN z,GEN x,GEN y)
 {
-  GEN s,n,d,d1,x1,x2,y1,y2,v1,v2,c3,m,p1,r;
+  GEN s, n, d, d1, x1, x2, y1, y2, v1, v2, c3, m, p1, r;
 
   if (x == y) { sq_gen(z,x); return; }
   s = shifti(addii((GEN)x[2],(GEN)y[2]),-1);
@@ -1536,8 +1536,8 @@ comp_gen(GEN z,GEN x,GEN y)
   }
   else
   {
-    v1 = divii((GEN)x[1],d1);
-    v2 = divii((GEN)y[1],d1);
+    v1 = diviiexact((GEN)x[1],d1);
+    v2 = diviiexact((GEN)y[1],d1);
     v1 = mulii(v1, mppgcd(d1,mppgcd((GEN)x[3],mppgcd((GEN)y[3],n))));
   }
   m = addii(mulii(mulii(y1,y2),n), mulii((GEN)y[3],x2));
@@ -1557,8 +1557,8 @@ compimag0(GEN x, GEN y, int raw)
   GEN z;
 
   if (typ(y) != tx || tx!=t_QFI) err(typeer,"composition");
-  if (cmpii((GEN)x[1],(GEN)y[1]) > 0) { z=x; x=y; y=z; }
-  z=cgetg(4,t_QFI); comp_gen(z,x,y);
+  if (absi_cmp((GEN)x[1], (GEN)y[1]) > 0) { z=x; x=y; y=z; }
+  z = cgetg(4,t_QFI); comp_gen(z,x,y);
   if (raw) return gerepilecopy(av,z);
   return gerepileupto(av, redimag(z));
 }
@@ -1774,107 +1774,121 @@ powraw(GEN x, long n)
 GEN
 nucomp(GEN x, GEN y, GEN l)
 {
-  pari_sp av=avma,tetpil;
+  pari_sp av = avma;
   long cz;
-  GEN a,a1,a2,b,b2,d,d1,e,g,n,p1,p2,p3,q1,q2,q3,q4,s,t2,t3,u,u1,v,v1,v2,v3,z;
+  GEN a, a1, a2, b2, b, d, d1, g, n, p1, q1, q2, s, u, u1, v, v1, v2, v3, z;
 
   if (x==y) return nudupl(x,l);
   if (typ(x) != t_QFI || typ(y) != t_QFI)
     err(talker,"not an imaginary quadratic form in nucomp");
 
   if (cmpii((GEN)x[1],(GEN)y[1]) < 0) { s=x; x=y; y=s; }
-  s=shifti(addii((GEN)x[2],(GEN)y[2]),-1); n=subii((GEN)y[2],s);
-  a1=(GEN)x[1]; a2=(GEN)y[1]; d=bezout(a2,a1,&u,&v);
-  if (gcmp1(d)) { a=negi(gmul(u,n)); d1=d; }
+  s = shifti(addii((GEN)x[2],(GEN)y[2]),-1); n = subii((GEN)y[2],s);
+  a1 = (GEN)x[1];
+  a2 = (GEN)y[1]; d = bezout(a2,a1,&u,&v);
+  if (gcmp1(d)) { a = negi(gmul(u,n)); d1 = d; }
   else
-    if (divise(s,d))
+    if (divise(s,d)) /* d | s */
     {
-      a=negi(gmul(u,n)); d1=d; a1=divii(a1,d1);
-      a2=divii(a2,d1); s=divii(s,d1);
+      a = negi(mulii(u,n)); d1 = d;
+      a1 = diviiexact(a1,d1);
+      a2 = diviiexact(a2,d1);
+      s = diviiexact(s,d1);
     }
     else
     {
-      d1=bezout(s,d,&u1,&v1);
+      GEN p2, p3;
+      d1 = bezout(s,d,&u1,&v1);
       if (!gcmp1(d1))
       {
-        a1=divii(a1,d1); a2=divii(a2,d1);
-        s=divii(s,d1); d=divii(d,d1);
+        a1 = diviiexact(a1,d1);
+        a2 = diviiexact(a2,d1);
+        s = diviiexact(s,d1);
+        d = diviiexact(d,d1);
       }
-      p1=resii((GEN)x[3],d); p2=resii((GEN)y[3],d);
-      p3=modii(negi(mulii(u1,addii(mulii(u,p1),mulii(v,p2)))),d);
-      a=subii(mulii(p3,divii(a1,d)),mulii(u,divii(n,d)));
+      p1 = resii((GEN)x[3],d);
+      p2 = resii((GEN)y[3],d);
+      p3 = modii(negi(mulii(u1,addii(mulii(u,p1),mulii(v,p2)))), d);
+      a = subii(mulii(p3,divii(a1,d)), mulii(u,divii(n,d)));
     }
-  a=modii(a,a1); p1=subii(a1,a); if (cmpii(a,p1)>0) a=negi(p1);
+  a = modii(a,a1); p1 = subii(a1,a); if (cmpii(a,p1) > 0) a = negi(p1);
   v=gzero; d=a1; v2=gun; v3=a;
   for (cz=0; absi_cmp(v3,l) > 0; cz++)
   {
-    p1=dvmdii(d,v3,&t3); t2=subii(v,mulii(p1,v2));
+    GEN t2, t3;
+    p1 = dvmdii(d,v3,&t3); t2 = subii(v,mulii(p1,v2));
     v=v2; d=v3; v2=t2; v3=t3;
   }
-  z=cgetg(4,t_QFI);
+  z = cgetg(4,t_QFI);
   if (!cz)
   {
-    q1=mulii(a2,v3); q2=addii(q1,n);
-    g=divii(addii(mulii(v3,s),(GEN)y[3]),d);
-    z[1]=lmulii(d,a2);
-    z[2]=laddii(shifti(q1,1),(GEN)y[2]);
-    z[3]=laddii(mulii(v3,divii(q2,d)), mulii(g,d1));
+    g = divii(addii(mulii(v3,s),(GEN)y[3]), d);
+    b = a2;
+    b2 = (GEN)y[2];
+    v2 = d1;
+    z[1] = lmulii(d,b);
   }
   else
   {
-    if (cz&1) { v3=negi(v3); v2=negi(v2); }
-    b=divii(addii(mulii(a2,d),mulii(n,v)),a1);
-    q1=mulii(b,v3); q2=addii(q1,n);
-    e=divii(addii(mulii(s,d),mulii((GEN)y[3],v)),a1);
-    q3=mulii(e,v2); q4=subii(q3,s);
-    g=divii(q4,v); b2=addii(q3,q4);
-    if (!gcmp1(d1)) { v2=mulii(d1,v2); v=mulii(d1,v); b2=mulii(d1,b2); }
-    z[1]=laddii(mulii(d,b),mulii(e,v));
-    z[2]=laddii(b2,addii(q1,q2));
-    z[3]=laddii(mulii(v3,divii(q2,d)), mulii(g,v2));
+    GEN e, q3, q4;
+    if (cz&1) { v3 = negi(v3); v2 = negi(v2); }
+    b = divii(addii(mulii(a2,d), mulii(n,v)),a1);
+    e = divii(addii(mulii(s,d),mulii((GEN)y[3],v)),a1);
+    q3 = mulii(e,v2);
+    q4 = subii(q3,s);
+    g = divii(q4,v);
+    b2 = addii(q3,q4);
+    if (!gcmp1(d1)) { v2 = mulii(d1,v2); v = mulii(d1,v); b2 = mulii(d1,b2); }
+    z[1] = laddii(mulii(d,b), mulii(e,v));
   }
-  tetpil=avma; return gerepile(av,tetpil,redimag(z));
+  q1 = mulii(b, v3);
+  q2 = addii(q1,n);
+  z[2] = laddii(b2, cz? addii(q1,q2): shifti(q1, 1));
+  z[3] = laddii(mulii(v3,divii(q2,d)), mulii(g,v2));
+  return gerepileupto(av, redimag(z));
 }
 
 GEN
 nudupl(GEN x, GEN l)
 {
-  pari_sp av=avma,tetpil;
+  pari_sp av = avma;
   long cz;
-  GEN u,v,d,d1,p1,a,b,c,b2,z,v2,v3,t2,t3,e,g;
+  GEN u, v, d, d1, p1, a, b, c, b2, z, v2, v3, t2, t3, e, g;
 
   if (typ(x) != t_QFI)
     err(talker,"not an imaginary quadratic form in nudupl");
-  d1=bezout((GEN)x[2],(GEN)x[1],&u,&v);
-  a=divii((GEN)x[1],d1); b=divii((GEN)x[2],d1);
-  c=modii(negi(mulii(u,(GEN)x[3])),a); p1=subii(a,c);
-  if (cmpii(c,p1)>0) c=negi(p1);
+  d1 = bezout((GEN)x[2],(GEN)x[1],&u,&v);
+  a = diviiexact((GEN)x[1],d1);
+  b = diviiexact((GEN)x[2],d1);
+  c = modii(negi(mulii(u,(GEN)x[3])),a);
+  p1 = subii(a,c);
+  if (cmpii(c,p1)>0) c = negi(p1);
   v=gzero; d=a; v2=gun; v3=c;
   for (cz=0; absi_cmp(v3,l) > 0; cz++)
   {
-    p1=dvmdii(d,v3,&t3); t2=subii(v,mulii(p1,v2));
+    p1 = dvmdii(d,v3,&t3); t2 = subii(v,mulii(p1,v2));
     v=v2; d=v3; v2=t2; v3=t3;
   }
-  z=cgetg(4,t_QFI);
+  z = cgetg(4,t_QFI);
   if (!cz)
   {
-    g=divii(addii(mulii(v3,b),(GEN)x[3]),d);
-    z[1]=(long)sqri(d);
-    z[2]=laddii((GEN)x[2],shifti(mulii(d,v3),1));
-    z[3]=laddii(sqri(v3),mulii(g,d1));
+    g = divii(addii(mulii(v3,b),(GEN)x[3]), d);
+    b2 = (GEN)x[2];
+    v2 = d1;
+    z[1] = (long)sqri(d);
   }
   else
   {
-    if (cz&1) { v=negi(v); d=negi(d); }
-    e=divii(addii(mulii((GEN)x[3],v),mulii(b,d)),a);
-    g=divii(subii(mulii(e,v2),b),v);
-    b2=addii(mulii(e,v2),mulii(v,g));
-    if (!gcmp1(d1)) { v2=mulii(d1,v2); v=mulii(d1,v); b2=mulii(d1,b2); }
-    z[1]=laddii(sqri(d),mulii(e,v));
-    z[2]=laddii(b2,shifti(mulii(d,v3),1));
-    z[3]=laddii(sqri(v3),mulii(g,v2));
+    if (cz&1) { v = negi(v); d = negi(d); }
+    e = divii(addii(mulii((GEN)x[3],v),mulii(b,d)),a);
+    g = divii(subii(mulii(e,v2),b),v);
+    b2 = addii(mulii(e,v2),mulii(v,g));
+    if (!gcmp1(d1)) { v2 = mulii(d1,v2); v = mulii(d1,v); b2 = mulii(d1,b2); }
+    z[1] = laddii(sqri(d), mulii(e,v));
   }
-  tetpil=avma; return gerepile(av,tetpil,redimag(z));
+  z[2] = laddii(b2, shifti(mulii(d,v3),1));
+  z[3] = laddii(sqri(v3), mulii(g,v2));
+  return gerepileupto(av, redimag(z));
 }
 
 static GEN
