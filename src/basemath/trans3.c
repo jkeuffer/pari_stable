@@ -1854,7 +1854,7 @@ polylog(long m, GEN x, long prec)
 {
   long l, e, i, G, sx;
   pari_sp av, av1, limpile;
-  GEN X, Xn, z, p1, p2, n, y, logx;
+  GEN X, Xn, z, p1, p2, n, y;
 
   if (m<0) err(talker,"negative index in polylog");
   if (!m) return gneg(ghalf);
@@ -1891,28 +1891,29 @@ polylog(long m, GEN x, long prec)
     if (m&1) sx = gsigne(gsub(gun, real_i(x)));
     else     sx = - gsigne(real_i(x));
   }
-  z = cgetg(3,t_COMPLEX);
-  z[1] = zero;
-  z[2] = ldivri(mppi(l), mpfact(m-1));
-  if (sx < 0) z[2] = lnegr((GEN)z[2]);
-  logx = glog(x,l);
+  z = pureimag( divri(mppi(l), mpfact(m-1)) );
+  setsigne(z[2], sx);
 
   if (m == 2)
   { /* same formula as below, written more efficiently */
     y = gneg_i(y);
-    p1 = gmul2n(gsqr(gsub(logx, z)), -1); /* = (log(-x))^2 / 2 */
-    if (typ(x) == t_REAL) p1 = real_i(p1);
+    if (typ(x) == t_REAL && signe(x) < 0)
+      p1 = logr_abs(x);
+    else
+      p1 = gsub(glog(x,l), z);
+    p1 = gmul2n(gsqr(p1), -1); /* = (log(-x))^2 / 2 */
+    
     p1 = gadd(p1, divrs(gsqr(mppi(l)), 6));
     p1 = gneg_i(p1);
   }
   else
   {
-    GEN logx2 = gsqr(logx); p1 = gneg_i(ghalf);
+    GEN logx = glog(x,l), logx2 = gsqr(logx); p1 = gneg_i(ghalf);
     for (i=m-2; i>=0; i-=2)
       p1 = gadd(szeta(m-i,l), gmul(p1,gdivgs(logx2,(i+1)*(i+2))));
     if (m&1) p1 = gmul(logx,p1); else y = gneg_i(y);
     p1 = gadd(gmul2n(p1,1), gmul(z,gpowgs(logx,m-1)));
-    if (typ(x) == t_REAL) p1 = real_i(p1);
+    if (typ(x) == t_REAL && signe(x) < 0) p1 = real_i(p1);
   }
   return gerepileupto(av, gadd(y,p1));
 }

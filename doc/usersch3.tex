@@ -1398,34 +1398,29 @@ itself. The $p$-adic \kbd{lngamma} function is not implemented.
 depending on \fl:
 
 If $\fl=0$ or is omitted: $m^\text{th}$ polylogarithm of $x$, i.e.~analytic
-continuation of the power series $\text{Li}_m(x)=\sum_{n\ge1}x^n/n^m$. The
-program uses the power series when $|x|^2\le1/2$, and the power series
-expansion in $\log(x)$ otherwise. It is valid in a large domain (at least
-$|x|<230$), but should not be used too far away from the unit circle since it
-is then better to use the functional equation linking the value at $x$ to the
-value at $1/x$, which takes a trivial form for the variant below. Power
-series, polynomial, rational and vector/matrix arguments are allowed.
+continuation of the power series $\text{Li}_m(x)=\sum_{n\ge1}x^n/n^m$
+($x < 1$). Uses the functional equation linking the values at $x$ and $1/x$
+to restrict to the case $|x|\leq 1$, then the power series when
+$|x|^2\le1/2$, and the power series expansion in $\log(x)$ otherwise.
 
-For the variants to follow we need a notation: let $\Re_m$ denotes $\Re$ or
-$\Im$ depending whether $m$ is odd or even.
+Using $\fl$, computes a modified $m^\text{th}$ polylogarithm of $x$.
+We use Zagier's notations; let $\Re_m$ denotes $\Re$ or $\Im$ depending
+whether $m$ is odd or even:
 
-If $\fl=1$: modified $m^\text{th}$ polylogarithm of $x$, called
-$\tilde D_m(x)$ in Zagier, defined for $|x|\le1$ by
+If $\fl=1$: compute $\tilde D_m(x)$, defined for $|x|\le1$ by
 $$\Re_m\left(\sum_{k=0}^{m-1} \dfrac{(-\log|x|)^k}{k!}\text{Li}_{m-k}(x)
 +\dfrac{(-\log|x|)^{m-1}}{m!}\log|1-x|\right).$$
 
-If $\fl=2$: modified $m^\text{th}$ polylogarithm of $x$,
-called $D_m(x)$ in Zagier, defined for $|x|\le1$ by
+If $\fl=2$: compute $D_m(x)$, defined for $|x|\le1$ by
 $$\Re_m\left(\sum_{k=0}^{m-1}\dfrac{(-\log|x|)^k}{k!}\text{Li}_{m-k}(x)
 -\dfrac{1}{2}\dfrac{(-\log|x|)^m}{m!}\right).$$
 
-If $\fl=3$: another modified $m^\text{th}$
-polylogarithm of $x$, called $P_m(x)$ in Zagier, defined for $|x|\le1$ by
+If $\fl=3$: compute $P_m(x)$, defined for $|x|\le1$ by
 $$\Re_m\left(\sum_{k=0}^{m-1}\dfrac{2^kB_k}{k!}(\log|x|)^k\text{Li}_{m-k}(x)
 -\dfrac{2^{m-1}B_m}{m!}(\log|x|)^m\right).$$
 
 These three functions satisfy the functional equation
-$f_m(1/x)=(-1)^{m-1}f_m(x)$.
+$f_m(1/x) = (-1)^{m-1}f_m(x)$.
 
 \syn{polylog0}{m,x,\fl,\var{prec}}.
 
