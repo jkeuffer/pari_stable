@@ -1957,7 +1957,7 @@ random_rel(long phase, RELCACHE_t *cache, FB_t *F, long MAXRELSUP, GEN nf,
   pari_sp av, av1;
   GEN ideal, IDEAL, m, P, ex;
 
-  if (phase != 1) { jideal=jdir=1; if (phase < 0) return 0; }
+  if (phase != 1) { jideal=0; jdir=1; if (phase < 0) return 0; }
   if (!F->pow) powFBgen(F, cache, nf, CBUCHG+1);
   nbG = lg(vecG)-1;
   lgsub = lg(F->subFB); ex = cgetg(lgsub, t_VECSMALL);
@@ -3078,7 +3078,7 @@ START:
 
   /* Random relations */
   if (cache.last == cache.end)
-    ((void(*)(long))random_rel)(-1); /* enough rels. Init nevertheless */
+    random_rel(-1, NULL,NULL,0,NULL,NULL,NULL); /* enough rels. Init anyway. */
   else
   {
     if (DEBUGLEVEL) fprintferr("\n#### Looking for random relations\n");
