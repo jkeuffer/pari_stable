@@ -1215,7 +1215,8 @@ resp.~\typ{POL}) with \typ{INT} coefficients.
 %GEN     QM_inv(GEN M, GEN dM);
 
 \subsec{\kbd{FpX}}. Let \kbd{p} an understood \typ{INT}, to be given in
-the function arguments; an \kbd{Fp} object is a \typ{INT} belonging to $[0,
+the function arguments; in practice \kbd{p} is not assumed to be prime, but
+be wary. An \kbd{Fp} object is a \typ{INT} belonging to $[0,
 \kbd{p}-1]$, an \kbd{FpX} is a \typ{POL} in a fixed variable whose
 coefficients are \kbd{Fp} objects. Unless mentionned otherwise, all outputs
 in this section are \kbd{FpX}s. All operations are understood to take place
@@ -1597,14 +1598,13 @@ or \kbd{NULL} if none exist.
 
 \fun{GEN}{FqM_suppl}{GEN x, GEN T, GEN p} as \kbd{suppl}
 
-
-\subsec{\kbd{Flx}} Let \kbd{p} an understood \kbd{ulong}, to be given the 
-the function arguments; an \kbd{Fl} is an \kbd{ulong} belonging to
-$[0,\kbd{p}-1]$, an \kbd{Flx}~\kbd{z} is a \typ{VECSMALL} representing a
-polynomial with small integer coefficients. Specifically \kbd{z[0]}
-is the usual codeword, \kbd{z[1] = evalvarn($v$)} for some variable $v$,
-then the coefficients by increasing degree. An \kbd{FlxX} is a \typ{POL}
-whose coefficients are \kbd{Flx}s.
+\subsec{\kbd{Flx}} Let \kbd{p} an understood \kbd{ulong}, assumed to be
+prime, to be given the the function arguments; an \kbd{Fl} is an \kbd{ulong}
+belonging to $[0,\kbd{p}-1]$, an \kbd{Flx}~\kbd{z} is a \typ{VECSMALL}
+representing a polynomial with small integer coefficients. Specifically
+\kbd{z[0]} is the usual codeword, \kbd{z[1] = evalvarn($v$)} for some
+variable $v$, then the coefficients by increasing degree. An \kbd{FlxX} is a
+\typ{POL} whose coefficients are \kbd{Flx}s.
 
 \noindent In the following, an argument called \kbd{sv} is of the form
 \kbd{evalvarn}$(v)$ for some variable number~$v$.
