@@ -2870,7 +2870,7 @@ t2(GEN x) /* T2 matrix */
 {
   int t; x = nfmats(get_nf(x,&t));
   if (!x) err(member,"t2",mark.member,mark.start);
-  return (GEN)x[3];
+  return gram_matrix((GEN)x[2]);
 }
 
 static GEN

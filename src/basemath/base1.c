@@ -1036,7 +1036,7 @@ make_T(GEN x, GEN w)
 
 /* return G real such that G~ * G = T_2 */
 static GEN
-make_Cholevsky_T2(GEN M, GEN ro, long r1, long prec)
+make_Cholevsky_T2(GEN M, long r1, long prec)
 {
   GEN G, m, g, r, sqrt2 = gsqrt(gdeux, prec);
   long i, j, k, l = lg(M);
@@ -1070,7 +1070,7 @@ make_G(GEN x, GEN bas, long r1, long prec)
 {
   GEN M, basden = get_bas_den(bas), ro = roots(x, prec);
   M = make_M(basden,ro);
-  return make_Cholevsky_T2(M, ro, r1, prec);
+  return make_Cholevsky_T2(M, r1, prec);
 }
 
 /* fill mat = nf[5], as well as nf[8] and nf[9]
@@ -1085,8 +1085,12 @@ get_nf_matrices(GEN nf, long prec, long small)
   mat = cgetg(small? 3: 8,t_VEC); nf[5] = (long)mat;
   basden = get_bas_den(bas);
   M = make_M(basden,ro);
-  if (gprecision(M) > prec) M = gprec_w(M, prec);
-  G = make_Cholevsky_T2(M, ro, r1, prec);
+  if (gprecision(M) > prec)
+  {
+    M = gprec_w(M, prec);
+    nf[6] = (long)gprec_w(ro,prec);
+  }
+  G = make_Cholevsky_T2(M, r1, prec);
   mat[1]=(long)M;
   mat[2]=(long)G;
   if (small) { nf[8]=nf[9]=zero; return; }
@@ -1187,7 +1191,7 @@ get_red_T2(GEN x, GEN *polr, GEN base, long r1, long prec)
   for (i=1; ; i++)
   {
     M = make_M(basden, *polr);
-    G2 = make_Cholevsky_T2(M, *polr, r1, prec);
+    G2 = make_Cholevsky_T2(M, r1, prec);
     if (u0) G2 = gmul(G2, u0);
     if ((u = lllfp_marked(1, G2, 100, 2, prec, 0)))
     {
@@ -1437,7 +1441,7 @@ nfnewprec(GEN nf, long prec)
 {
   const gpmem_t av=avma;
   long r1,r2,ru,n;
-  GEN y,pol,ro,basden,mat,M,G;
+  GEN y,pol,ro,basden,mat;
 
   if (typ(nf) != t_VEC) err(talker,"incorrect nf in nfnewprec");
   if (lg(nf) == 11) return bnfnewprec(nf,prec);
@@ -1452,11 +1456,9 @@ nfnewprec(GEN nf, long prec)
   y[5]=(long)mat;
   y[6]=(long)ro;
   basden = get_bas_den((GEN)nf[7]);
-  M = make_M(basden,ro);
-  G = make_Cholevsky_T2(M, ro, r1, prec);
-  mat[1]=(long)M;
-  if (typ(nf[8]) != t_INT) mat[2]=(long)G; /* not a small nf */
-  mat[3]=(long)gram_matrix(G); /* FIXME: useless */
+  mat[1]=(long)make_M(basden,ro);
+  mat[2]=(long)make_Cholevsky_T2((GEN)mat[1], r1, prec);
+  mat[3]=zero; /* FIXME: useless */
   return gerepilecopy(av, y);
 }
 
