@@ -208,8 +208,8 @@ Default is font-lock-keywords.")
           nil))
     nil))
 
-(defun gp-find-global-var (limit)
-  "A parser to find global variables. Called on a gp-program outside
+(defun gp-find-global-var (limit) 
+ "A parser to find global variables. Called on a gp-program outside
 a function-definition, gives position via (cons start end) of
 next global-variable-definition not surrounded by {} and set the
 point at the end of the line. Answer nil if no global-variable is found.
@@ -219,20 +219,23 @@ The end delimiter of a function definition surrounded by {} is
 LIMIT is not used."
   (let ((answer nil))
     (while (looking-at (concat comment-start-skip
-                               "\\|[ \\|\t\\|\n]\\|{\\([^}]\\|}[^\n]\\)*}\n\\|\\<[a-zA-Z]\\w*([^)]*) *={\\([^}]\\|}[^\n]\\)*}\n\\|\\<[a-zA-Z]\\w*([^)]*) *=\\([^=\\\\\"]\\|\\\\[ \t]*\\(\\\\\\\\.*$\\|/\\*\\([^\\*]\\|\\*[^/]\\)*\\*/\\)?\n\\|\"\\([^\"]*\\|\\\\\"\\)*\"\\)\\([^\\\\\n\"]\\|\"\\([^\"]*\\|\\\\\"\\)*\"\\|\\\\[ \t]*\\(\\\\\\\\.*$\\|/\\*\\([^\\*]\\|\\*[^/]\\)*\\*/\\)?\n\\)*\n\\|\\<[a-zA-Z]\\w*([^)]*)[;\n]"))
+                               "\\|[ \\|\t\\|\n]+\\|{\\([^}]\\|}[^\n]\\)*}\n\\|\\<[a-zA-Z]\\w*([^)]*) *={\\([^}]\\|}[^\n]\\)*}\n\\|\\<[a-zA-Z]\\w*([^)]*) *=\\([^=\\\\\"]\\|\\\\[ \t]*\\(\\\\\\\\.*$\\|/\\*\\([^\\*]\\|\\*[^/]\\)*\\*/\\)?\n\\|\"\\([^\"]*\\|\\\\\"\\)*\"\\)\\([^\\\\\n\"]\\|\"\\([^\"]*\\|\\\\\"\\)*\"\\|\\\\[ \t]*\\(\\\\\\\\.*$\\|/\\*\\([^\\*]\\|\\*[^/]\\)*\\*/\\)?\n\\)*\n\\|\\<[a-zA-Z]\\w*([^)]*)[;\n]"))
   ;; We look at a single line comment, or a long comment,
   ;; or a space/tab/newline character, or a function definition between {},
   ;; or a function definition of the type fun(var)={foo},
   ;; or a function definition not between {}, or a function call,
   ;; or any line without an equality sign.
   ;; And skip them.
-      (goto-char (match-end 0)))
+      (goto-char (match-end 0)));(prin1 (point))(prin1 " "));(print "GPGLOBAL") ;(sit-for 10)
   ;; We look whether there is a global-variable being defined here:
-    (if (looking-at "\\<\\([a-zA-Z]\\w*\\)=[^=].*$")
+    (if (looking-at "^\\<\\([a-zA-Z]\\w*\\)=[^=].*$")
         (progn
           (setq answer (cons (match-beginning 1) (match-end 1)))
           (goto-char (match-end 0))))
+    (unless answer (goto-char limit))
     answer))
+
+(defun gp-find-global-var (limit) (goto-char limit) nil)
 
 (defsubst gp-search-forward-string-delimiter (lim)
   "Give the position of next \" preceded by an even number
