@@ -1190,6 +1190,8 @@ hnf_special(GEN x, long remove)
   return res;
 }
 
+#define swap(x,y) { long _t=x; x=y; y=_t; }
+
 GEN
 hnf0(GEN x, long remove)       /* remove: throw away lin.dep.columns, GN */
 {
@@ -1210,7 +1212,8 @@ hnf0(GEN x, long remove)       /* remove: throw away lin.dep.columns, GN */
       if (!j) break;
       k = (j==1)? def: j-1;
       a = gcoeff(x,i,j);
-      b = gcoeff(x,i,k); d = bezout(a,b,&u,&v);
+      b = gcoeff(x,i,k); if (!signe(b)) { swap(x[j],x[k]); continue; }
+      d = bezout(a,b,&u,&v);
       if (!is_pm1(d)) { a = divii(a,d); b = divii(b,d); }
       if (DEBUGLEVEL>5) { outerr(u); outerr(v); }
       p1 = (GEN)x[j];
@@ -1299,7 +1302,8 @@ allhnfmod(GEN x,GEN dm,long flag)
       if (DEBUGLEVEL>8) { fprintferr(" %ld",j); flusherr(); }
       k = (j==1)? def: j-1;
       a = gcoeff(x,i,j);
-      b = gcoeff(x,i,k); d = bezout(a,b,&u,&v);
+      b = gcoeff(x,i,k); if (!signe(b)) { swap(x[j], x[k]); continue; }
+      d = bezout(a,b,&u,&v);
       if (!is_pm1(d)) { a = divii(a,d); b = divii(b,d); }
       p1 = lincomb_integral(u,v, (GEN)x[j], (GEN)x[k]);
       p2 = lincomb_integral(a, negi(b), (GEN)x[k], (GEN)x[j]);
