@@ -836,20 +836,15 @@ mat_to_mp(GEN x, long prec)
 static int
 REDgen(long k, long l, GEN h, GEN L, GEN B)
 {
-  GEN u, q, cq;
+  GEN q, u = gcoeff(L,k,l);
   long i;
 
-  u = gcoeff(L,k,l);
-  if (pslg(u) < pslg((GEN)B[l+1])) return 0;
+  if (pslg(u) < pslg(B)) return 0;
 
-  q = gdeuc(u,(GEN)B[l+1]);
-  cq = ginv(content(q));
-  q = gneg(gmul(q,cq));
-  h[k] = ladd(gmul(cq,(GEN)h[k]), gmul(q,(GEN)h[l]));
-  coeff(L,k,l) = ladd(gmul(cq,gcoeff(L,k,l)), gmul(q,(GEN)B[l+1]));
-  for (i=1; i<l; i++)
-    coeff(L,k,i) = ladd(gmul(cq,gcoeff(L,k,i)), gmul(q,gcoeff(L,l,i)));
-  return 1;
+  q = gneg(gdeuc(u,B));
+  h[k] = ladd((GEN)h[k], gmul(q,(GEN)h[l]));
+  for (i=1; i<l; i++) coeff(L,k,i) = ladd(gcoeff(L,k,i), gmul(q,gcoeff(L,l,i)));
+  coeff(L,k,l) = ladd(gcoeff(L,k,l), gmul(q,B)); return 1;
 }
 
 static int
@@ -873,7 +868,7 @@ do_SWAPgen(GEN h, GEN L, GEN B, long k, GEN fl, int *flc)
   }
 
   swap(h[k-1], h[k]); lx = lg(L);
-  for (j=1; j<=k-2; j++) swap(coeff(L,k-1,j), coeff(L,k,j));
+  for (j=1; j<k-1; j++) swap(coeff(L,k-1,j), coeff(L,k,j));
   if (fl[k])
   {
     for (i=k+1; i<lx; i++)
@@ -918,7 +913,7 @@ incrementalGSgen(GEN x, GEN L, GEN B, long k, GEN fl)
     if (j==k || fl[j])
     {
       u = gcoeff(x,k,j); tu = typ(u);
-      if (! is_scalar_t(tu) && tu != t_POL) err(lllger4);
+      if (! is_extscalar_t(tu)) err(lllger4);
       for (i=1; i<j; i++)
         if (fl[i])
         {
@@ -959,12 +954,12 @@ lllgramallgen(GEN x, long flag)
   flc = 0;
   for(k=2;;)
   {
-    if (REDgen(k, k-1, h, L, B)) flc = 1;
+    if (REDgen(k, k-1, h, L, (GEN)B[k])) flc = 1;
     if (do_SWAPgen(h, L, B, k, fl, &flc)) { if (k > 2) k--; }
     else
     {
       for (l=k-2; l>=1; l--)
-        if (REDgen(k, l, h, L, B)) flc = 1;
+        if (REDgen(k, l, h, L, (GEN)B[l+1])) flc = 1;
       if (++k > n) break;
     }
     if (low_stack(lim, stack_lim(av,1)))
@@ -1492,8 +1487,7 @@ lllgramkerimgen(GEN x) { return lllgramallgen(x,lll_ALL); }
  *  		Peter Montgomery (July, 1994)
  *
  *  If flag = 1 complete the reduction using lllint, otherwise return
- *  partially reduced basis.
- */
+ *  partially reduced basis. */
 GEN
 lllintpartialall(GEN m, long flag)
 {
@@ -1519,8 +1513,7 @@ lllintpartialall(GEN m, long flag)
  *
  * Initially tm = 2 x 2 identity matrix.
  * The inner products of the reduced matrix are in
- * dot11, dot12, dot22.
- */
+ * dot11, dot12, dot22. */
     while (npass2 < 2 || progress)
     {
       GEN dot12new, q = diviiround(dot12, dot22);
@@ -1536,8 +1529,7 @@ lllintpartialall(GEN m, long flag)
         *
         * An improved algorithm would look only at the leading
         * digits of dot11, dot12, dot22.  It would use
-        * single-precision calculations as much as possible.
-        */
+        * single-precision calculations as much as possible. */
         q = negi(q);
         dot12new = addii(dot12, mulii(q, dot22));
         dot11 = addii(dot11, mulii(q, addii(dot12, dot12new)));
@@ -1579,8 +1571,7 @@ lllintpartialall(GEN m, long flag)
         * Round -q1 and -q2 to the nearest integer.
         * Then compute curcol - q1*mid[1] - q2*mid[2].
         * This will be approximately orthogonal to the
-        * first two vectors in the new basis.
-        */
+        * first two vectors in the new basis. */
 	GEN q1neg = subii(mulii(dot12, dot2i), mulii(dot22, dot1i));
         GEN q2neg = subii(mulii(dot12, dot1i), mulii(dot11, dot2i));
 
@@ -1604,8 +1595,7 @@ lllintpartialall(GEN m, long flag)
   {
    /* For each pair of column vectors v and w in mid * tm2,
     * try to replace (v, w) by (v, v - q*w) for some q.
-    * We compute all inner products and check them repeatedly.
-    */
+    * We compute all inner products and check them repeatedly. */
     const pari_sp ltop3 = avma; /* Excludes region with tm1 and mid */
     const pari_sp lim = stack_lim(ltop3,1);
     long icol, reductions, npass = 0;
@@ -1672,8 +1662,7 @@ lllintpartialall(GEN m, long flag)
     } /* for(;;)*/
 
    /* Sort columns so smallest comes first in m * tm1 * tm2.
-    * Use insertion sort.
-    */
+    * Use insertion sort. */
     for (icol = 1; icol < ncol; icol++)
     {
       long jcol, s = icol;

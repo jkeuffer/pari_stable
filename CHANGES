@@ -146,6 +146,7 @@ BA 60- add "const" keyword to allow building with g++
    85- [introduced 2.2.4:] setrand(178);quadclassunit(82421) --> 2 instead of 1
    86- polroots( Pol(subst([1,0,4*x,0,2*x^2+24,0,16*x,0,16],x,10^2589) )
        --> division by zero [ double overflow ]
+   87- LLL-reduction over polynomial rings (almost always failed)
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available
