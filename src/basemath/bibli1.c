@@ -785,7 +785,9 @@ pslg(GEN x)
 static GEN
 to_MP(GEN x, long prec)
 {
-  GEN y = cgetr(prec); gaffect(x, y); return y;
+  GEN y;
+  if (typ(x) == t_INT && !signe(x)) return gzero;
+  y = cgetr(prec); gaffect(x, y); return y;
 }
 static GEN
 col_to_MP(GEN x, long prec)
