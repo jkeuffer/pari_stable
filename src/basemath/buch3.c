@@ -1396,7 +1396,11 @@ conductor(GEN bnr, GEN H0, long all)
   mod = mkvec2(ideal, perm_to_arch(nf, archp));
   if (!all) return gerepilecopy(av, mod);
 
-  if (iscond) bnr2 = bnr;
+  if (iscond)
+  {
+    bnr2 = bnr;
+    if (!H) H = diagonal(gmael(bnr,5,2));
+  }
   else
   {
     bnr2 = buchrayall(bnf, mod, nf_INIT | nf_GEN);
