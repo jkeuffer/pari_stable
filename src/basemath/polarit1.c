@@ -1260,17 +1260,6 @@ FpX_split_Berlekamp(GEN *t, GEN p)
   return d;
 }
 
-static GEN
-RX_deriv(GEN x)
-{
-  long i,lx = lg(x)-1;
-  GEN y;
-
-  if (lx<3) return zeropol(varn(x));
-  y = cgetg(lx,t_POL);
-  for (i=2; i<lx ; i++) y[i] = lmulsg(i-1,(GEN)x[i+1]);
-  y[1] = x[1]; return y;
-}
 GEN
 ZX_deriv(GEN x)
 {
@@ -1292,7 +1281,7 @@ FpX_deriv(GEN f, GEN p)
 GEN
 FqX_deriv(GEN f, GEN T, GEN p)
 {
-  return FqX_red(RX_deriv(f), T, p);
+  return FqX_red(derivpol(f), T, p);
 }
 
 GEN
