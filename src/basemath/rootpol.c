@@ -1137,9 +1137,9 @@ refine_H(GEN F, GEN G, GEN HH, long bitprec, long shiftbitprec)
   {
     if (low_stack(limite, stack_lim(ltop,1)))
     {
-      GEN *gptr[2];
+      GEN *gptr[2]; gptr[0]=&D; gptr[1]=&H;
       if(DEBUGMEM>1) err(warnmem,"refine_H");
-      gptr[0]=&D; gptr[1]=&H; gerepilemany(ltop,gptr,2);
+      gerepilemany(ltop,gptr,2);
     }
     bitprec1=-error+shiftbitprec;
     aux=gmul(mygprec(H,bitprec1),mygprec(D,bitprec1));
@@ -1152,8 +1152,8 @@ refine_H(GEN F, GEN G, GEN HH, long bitprec, long shiftbitprec)
     D=gsub(gun,gres(gmul(H,G),F));
     error=gexpo(D); if (error<-bitprec1) error=-bitprec1;
   }
-  if (error<=-bitprec/2) return gerepilecopy(ltop,H);
-  avma=ltop; return gzero; /* procedure failed */
+  if (error>-bitprec/2) return NULL; /* FAIL */
+  return gerepilecopy(ltop,H);
 }
 
 /* return 0 if fails, 1 else */
@@ -1182,16 +1182,15 @@ refine_F(GEN p, GEN *F, GEN *G, GEN H, long bitprec, double gamma)
     }
     if (low_stack(limite, stack_lim(ltop,1)))
     {
-      GEN *gptr[4];
+      GEN *gptr[4]; gptr[0]=&FF; gptr[1]=&GG; gptr[2]=&r; gptr[3]=&HH;
       if(DEBUGMEM>1) err(warnmem,"refine_F");
-      gptr[0]=&FF; gptr[1]=&GG; gptr[2]=&r; gptr[3]=&HH;
       gerepilemany(ltop,gptr,4);
     }
 
     bitprec1=-error+shiftbitprec2;
     HH=refine_H(mygprec(FF,bitprec1),mygprec(GG,bitprec1),
 		mygprec(HH,bitprec1),1-error,shiftbitprec2);
-    if (HH==gzero) return 0; /* procedure failed */
+    if (!HH) return 0; /* procedure failed */
 
     bitprec1=-error+shiftbitprec;
     r=gmul(mygprec(HH,bitprec1),mygprec(r,bitprec1));
@@ -1208,12 +1207,8 @@ refine_F(GEN p, GEN *F, GEN *G, GEN H, long bitprec, double gamma)
     GG=poldivres(pp,mygprec(FF,bitprec1),&r);
     error=gexpo(r); if (error<-bitprec1) error=-bitprec1;
   }
-  if (error<=-bitprec)
-  {
-    *F=FF; *G=GG;
-    return 1; /* procedure succeeds */
-  }
-  return 0; /* procedure failed */
+  if (error>-bitprec) return 0; /* FAIL */
+  *F=FF; *G=GG; return 1;
 }
 
 /* returns F and G from the unit circle U such that |p-FG|<2^(-bitprec) |cd|,
@@ -1242,7 +1237,7 @@ split_fromU(GEN p, long k, double delta, long bitprec,
     bitprec2=(long) (((double) NN*delta-mu)/log(2.))+gexpo(pp)+8;
     dft(pp,k,NN,bitprec2,FF,H,polreal);
     if (refine_F(pp,&FF,&GG,H,bitprec,gamma)) break;
-    NN=(NN<<1); avma=ltop;
+    NN <<= 1; avma=ltop;
   }
   *G=gmul(GG,(GEN)p[2+n]); *F=FF;
 }
