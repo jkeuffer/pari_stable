@@ -1355,11 +1355,11 @@ the present implementation requires $x$ to be positive.
 
 \syn{hyperu}{a,b,x,\var{prec}}.
 
-\subsecidx{incgam}$(s,x,{y})$: incomplete gamma function.
-The argument $x$ must be positive and $s$ is any complex number. The result
-returned is $\int_x^\infty e^{-t}t^{s-1}\,dt$. When $y$ is given, assume (of
-course without checking!) that $y=\Gamma(s)$. For small $x$, this will speed
-up the computation.
+\subsecidx{incgam}$(s,x,{y})$: incomplete gamma function. The argument $x$
+and $s$ are complex numbers ($x$ must be a positive real number if $s = 0$).
+The result returned is $\int_x^\infty e^{-t}t^{s-1}\,dt$. When $y$ is given,
+assume (of course without checking!) that $y=\Gamma(s)$. For small $x$, this
+will speed up the computation.
 
 \syn{incgam}{s,x,\var{prec}} and $\teb{incgam0}(s,x,y,\var{prec})$,
 respectively (an omitted $y$ is coded as \kbd{NULL}).
@@ -2743,11 +2743,10 @@ Finally, the last component $c$ is the local \idx{Tamagawa number} $c_p$.
 
 \subsecidx{elllseries}$(E,s,\{A=1\})$: $E$ being a medium or long vector
 given by \kbd{ellinit}, this computes the value of the L-series of $E$ at
-$s$. In the present version \vers, $s$ must be a real number. It is assumed
-that $E$ is a minimal model over $\Z$. The optional parameter $A$ is a cutoff
-point for the integral, which must be chosen close to 1 for best speed. The
-result must be independent of $A$, so this allows some internal checking of
-the function.
+$s$. It is assumed that $E$ is defined over $\Q$, not necessarily minimal.
+The optional parameter $A$ is a cutoff point for the integral, which must be
+chosen close to 1 for best speed. The result must be independent of $A$, so
+this allows some internal checking of the function.
 
 Note that if the conductor of the curve is large, say greater than $10^{12}$,
 this function will take an unreasonable amount of time since it uses an
