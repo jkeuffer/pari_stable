@@ -2082,7 +2082,7 @@ init_pslq(pslq_M *M, GEN x, long *PREC)
     if (gcmp0((GEN)x[k])) return vec_ei(n, k);
   prec = gprecision(x)-1; if (prec < DEFAULTPREC) prec = DEFAULTPREC;
   *PREC = prec;
-  M->EXP = - bit_accuracy(prec) + max(2*n, BITS_IN_HALFULONG);
+  M->EXP = - bit_accuracy(prec) + max(2*n, (long)BITS_IN_HALFULONG);
   M->flreal = is_zero(gimag(x), M->EXP);
   if (!M->flreal)
     return lindep(x,prec); /* FIXME */
