@@ -1346,34 +1346,81 @@ gexpz(GEN x, GEN y)
 /**                      FONCTION LOGARITHME                       **/
 /**                                                                **/
 /********************************************************************/
+/* 2 * atanh(1/3) */
+GEN
+constlog2(long prec)
+{
+  static GEN glog2 = NULL;
+  const long _3 = 3, _9 = _3*_3;
+  ulong av0, av;
+  long k, l, G;
+  GEN s, u, S, U, tmplog2;
+
+  if (glog2 && lg(glog2) >= prec) return glog2;
+
+  tmplog2 = newbloc(prec);
+  *tmplog2 = evaltyp(t_REAL) | evallg(prec);
+  av0 = avma;
+  l = prec+1; G = bit_accuracy(l+1);
+
+  s = S = divrs(realun(l), _3);
+  u = U = mpcopy(s);
+  av = avma;
+  for (k = 3; ; k += 2)
+  {
+    u = divrs(u, _9);
+    if (bit_accuracy(l) - expo(u) > G) {
+      l--; if (l <= 2) break;
+      setlg(U,l);
+      affrr(s,S); s = S;
+      affrr(u,U); u = U; avma = av;
+    }
+    s = addrr(s, divrs(u,k));
+  }
+  setexpo(s, -1); affrr(s, tmplog2);
+  gunclone(glog2); glog2 = tmplog2;
+  avma = av0; return glog2;
+} 
+
+GEN
+mplog2(long prec)
+{
+  GEN x = cgetr(prec);
+  affrr(constlog2(prec), x); return x;
+} 
 
 GEN
 mplog(GEN x)
 {
   ulong av, ltop;
-  long l,l1,l2,m,m1,n,i,ex,s,sgn;
+  long EX,l,l1,l2,m,n,i,ex,s;
   double alpha,a,b;
   GEN y,p1,p2,p3,p4,p5,unr;
 
   if (typ(x)!=t_REAL) err(typeer,"mplog");
   if (signe(x)<=0) err(talker,"non positive argument in mplog");
-  l=lg(x); sgn = cmpsr(1,x); if (!sgn) return realzero(l);
-  y=cgetr(l); ltop=avma;
+
+  av = avma;
+  l = lg(x); EX = expo(x);
+  y = cgetr(l); ltop = avma;
 
   l2 = l+1; p2=p1=cgetr(l2); affrr(x,p1);
-  av=avma;
-  if (sgn > 0) p2 = divsr(1,p1); /* x<1 change x to 1/x */
-  for (m1=1; expo(p2)>0; m1++) p2 = mpsqrt(p2);
-  if (m1 > 1 || sgn > 0) { affrr(p2,p1); avma=av; }
-
+  setexpo(p1, 0);
+  if (gcmp1(p1)) {
+    if (!EX) { avma = av; return realzero(l); }
+    affrr(mulsr(EX, mplog2(l)), y);
+    avma = ltop; return y;
+  }
+  /* 1 < p1 < 2 */
+  av = avma;
   alpha = 1+p1[2]/C31; if (!alpha) alpha = 0.00000001;
   l -= 2; alpha = -log(alpha);
   a = alpha/LOG2;
-  b = sqrt((BITS_IN_LONG/2)*l/3.0);
+  b = sqrt(BITS_IN_HALFULONG*l/3.0);
   if (a<=b)
   {
-    n = (long)(1+sqrt((BITS_IN_LONG/2)*3.0*l));
-    m = (long)(1+b-a);
+    n = 1 + (long)sqrt(BITS_IN_HALFULONG*3.0*l);
+    m = 1 + (long)(b-a);
     l2 += m>>TWOPOTBITS_IN_LONG;
     p4 = cgetr(l2); affrr(p1,p4);
     p1 = p4; av = avma;
@@ -1382,8 +1429,7 @@ mplog(GEN x)
   }
   else
   {
-    double beta = (BITS_IN_LONG/2)*l*LOG2;
-    n = (long)(1+beta/alpha);
+    n = 1 + (long)(BITS_IN_HALFULONG*l * LOG2/alpha);
     m = 0; p4 = p1;
   }
   unr = realun(l2);
@@ -1410,10 +1456,10 @@ mplog(GEN x)
     setlg(p4, l1);
     setlg(p5, l1); affrr(addrr(p1,p5), p4); avma=av;
   }
-  setlg(p4, l2); affrr(mulrr(p2,p4), y);
-  setexpo(y, expo(y)+m+m1);
-  if (sgn > 0) setsigne(y, -1);
-  avma = ltop; return y;
+  setlg(p4, l2);
+  p2 = mulrr(p2,p4); setexpo(p2, expo(p2)+m+1);
+  if (EX) p2 = addrr(p2, mulsr(EX, mplog2(l2)));
+  affrr(p2, y); avma = ltop; return y;
 }
 
 GEN
