@@ -532,8 +532,8 @@ else
   DBGFLAGS=${DBGFLAGS:-'-g'}
   PRFFLAGS='-pg'
   case "$osname-$arch" in
-    hpux-*) # -Aa is for ANSI C, +z for PIC code (for commercial HPUX compilers)
-                  OPTFLAGS=-O; cflags=-Aa; DLCFLAGS=+z;;
+    hpux-*) # -Ae is for ANSI C + defines HPUX_SOURCE, +z for PIC code (HPUX cc)
+                  OPTFLAGS=-O; cflags=-Ae; DLCFLAGS=+z;;
     # best tuning option, even for PPC604:
     aix-*)        OPTFLAGS=-O2; cflags='-qlanglvl=ansi -qtune=601';;
     cygwin*|linux-i?86|freebsd-i?86)
