@@ -1480,7 +1480,6 @@ static GEN
 matrix_block(GEN p)
 {
   matcomp c;
-  char *ini = analyseur;
   GEN cpt = matcell(p, &c);
 
   if (*analyseur != ',' && *analyseur != ')') /* fast shortcut */
@@ -1489,10 +1488,6 @@ matrix_block(GEN p)
     F2GEN fun = affect_block(&res);
     if (res)
     {
-      char *end = analyseur;
-      analyseur = ini;
-      cpt = matcell(p, &c); /* recompute in case affect_block modified lvalue */
-      analyseur = end;
       if (fun) res = fun(cpt, res);
       return change_compo(&c,res);
     }

@@ -130,6 +130,9 @@ IZ 52- [tex2mail:] \over wasn't allowed within \left( \right)
    60- bnfisintnorm(bnfinit(y^4+y+1), -1) --> SEGV [ could occur for any unit ]
    61- stack corruption in matsnf() [ when GC occurs ]
    62- vecsort(t_VECSMALL) --> SEGV
+   63-  v = vector(2); j = 0; v[j++] = 1 --> j = 2 [ side effect of
+        2.2.4-F21: LHS for matrix assignment was evaluated twice ]
+        Rem: v = vector(2); v[j++] = v = 0 --> SEGV. Don't cry.
 
   Changed
     1- rnf structure (removed useless components)
