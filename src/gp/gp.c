@@ -107,12 +107,9 @@ typedef struct Buffer {
 #define current_buffer (bufstack?((Buffer*)(bufstack->value)):NULL)
 static stack *bufstack = NULL;
 
-#define LBRACE '{'
-#define RBRACE '}'
 #define pariputs_opt(s) if (!quiet_mode) pariputs(s)
 #define skip_space(s) while (isspace((int)*s)) s++
 #define skip_alpha(s) while (isalpha((int)*s)) s++
-#define ask_filtre(t) filtre("",NULL,t)
 
 static void
 usage(char *s)
@@ -558,6 +555,7 @@ sd_colors(char *v, int flag)
   long c,l;
   if (*v && !under_emacs && !under_texmacs)
   {
+    char *v0;
     disable_color=1;
     l = strlen(v);
     if (l <= 2 && strncmp(v, "no", l) == 0)
@@ -568,9 +566,10 @@ sd_colors(char *v, int flag)
       v = "1, 6, 3, 4, 5, 2, 3";	/* Assume recent ReadLine. */
     if (l <= 6 && strncmp(v, "boldfg", l) == 0)	/* Good for darkbg consoles */
       v = "[1,,1], [5,,1], [3,,1], [7,,1], [6,,1], [2,,1], [3,,1]";
-    v = filtre(v,NULL, f_INIT|f_REG);
+    v0 = v = filtre(v, f_REG);
     for (c=c_ERR; c < c_LAST; c++)
       gp_colors[c] = gp_get_color(&v);
+    free(v0);
   }
   if (flag == d_ACKNOWLEDGE || flag == d_RETURN)
   {
@@ -1446,9 +1445,9 @@ aide0(char *s, int flag)
   s = get_sep(s);
   if (isdigit((int)*s))
   {
-    n=atoi(s);
+    n = atoi(s);
     if (n == 12) { community(); return; }
-    if (n<0 || n > 12)
+    if (n < 0 || n > 12)
       err(talker2,"no such section in help: ?",s,s);
     if (long_help) external_help(s,3); else commands(n);
     return;
@@ -2018,7 +2017,7 @@ gprc_get(void)
   return f;
 }
 
-static int get_line_from_file(char *prompt, Buffer *b, FILE *file);
+static int get_line_from_file(char *prompt, filtre_t *F, FILE *file);
 #define err_gprc(s,t,u) { fprintferr("\n"); err(talker2,s,t,u); }
 
 static char **
@@ -2028,13 +2027,16 @@ gp_initrc(void)
   FILE *file = gprc_get();
   long fnum = 4, find = 0;
   Buffer *b;
+  filtre_t F;
 
   if (!file) return NULL;
   flist = (char **) gpmalloc(fnum * sizeof(char*));
   b = new_buffer();
+  F.data = (void*)b;
+  F.in_comment = 0;
   for(;;)
   {
-    if (!get_line_from_file(NULL,b,file))
+    if (!get_line_from_file(NULL,&F,file))
     {
       del_buffer(b);
       if (!quiet_mode) fprintferr("Done.\n\n");
@@ -2212,7 +2214,7 @@ brace_color(char *s, int c, int force)
 }
 
 static char *
-do_prompt(char *p)
+do_prompt(int in_comment, char *p)
 {
   static char buf[MAX_PROMPT_LEN + 24]; /* + room for color codes */
   char *s;
@@ -2222,7 +2224,7 @@ do_prompt(char *p)
   /* escape sequences bug readline, so use special bracing (if available) */
   brace_color(s, c_PROMPT, 0);
   s += strlen(s);
-  if (filtre(s,NULL, f_COMMENT)) 
+  if (in_comment) 
     strcpy(s, COMMENTPROMPT);
   else
     do_strftime(p,s);
@@ -2271,8 +2273,7 @@ file_input(Buffer *b, char **s0, FILE *file, int TeXmacs)
 
 #ifdef READLINE
 /* Read line; returns a malloc()ed string of the user input or NULL on EOF.
-   Increments the buffer size appropriately if needed; fix *endp if so.
- */
+   Increments the buffer size appropriately if needed; fix *endp if so. */
 static char *
 gprl_input(Buffer *b, char **endp, char *prompt)
 {
@@ -2296,69 +2297,49 @@ gprl_input(Buffer *b, char **endp, char *prompt)
 
 /* True if more than one line read */
 static int
-input_loop(Buffer *b, char *already_read, FILE *file, char *prompt)
+input_loop(filtre_t *F, char *to_read, FILE *file, char *prompt)
 {
   const int TeXmacs = (under_texmacs && file == stdin);
   const int f_flag = prompt? f_REG: f_REG | f_KEEPCASE;
-  char *end, *s = b->buf;
-  int wait_for_brace = 0;
-  int wait_for_input = 0;
+  Buffer *b = (Buffer*)F->data;
+  char *s = b->buf;
   int read = 0;
 
   /* buffer is not empty, init filter */
-  (void)ask_filtre(f_INIT);
+  F->in_string = 0;
+  F->more_input= 0;
+  F->wait_for_brace = 0;
   for(;;)
   {
-    char *t = already_read;
-    if (!ask_filtre(f_COMMENT))
-    { /* not in comment */
-      while (isspace((int)*t)) t++; /* Skip space */
-      if (*t == LBRACE) { t++; wait_for_input = wait_for_brace = 1; }
-    }
-    end = filtre(t,s, f_flag);
+    F->s = to_read;
+    F->t = s;
+    (void)filtre0(F, f_flag);
+    if (! F->more_input) break;
 
-    if (!*s) { if (!wait_for_input) break; }
-    else
-    {
-      if (*(b->buf) == '?') break;
-
-      s = end-1; /* *s = last input char */
-      if (*s == '\\')
-      {
-      }
-      else if (*s == '=')
-      {
-        wait_for_input = 1; s++;
-      }
-      else
-      {
-	if (!wait_for_brace) break;
-	if (*s == RBRACE) { *s=0; break; }
-	s++;
-      }
-    }
     /* read continuation line */
+    s = F->end;
 #ifdef READLINE
     if (!file) {
-      free(already_read);
-      already_read = gprl_input(b, &s, do_prompt(prompt_cont));
-      gp_add_history(already_read);	/* Makes a copy */
+      free(to_read);
+      to_read = gprl_input(b, &s, do_prompt(F->in_comment, prompt_cont));
+      if (to_read) gp_add_history(to_read);	/* Makes a copy */
     } else
 #endif
-      already_read = file_input(b,&s,file,TeXmacs);
-    if (!already_read) break;
+      to_read = file_input(b, &s, file,TeXmacs);
+    if (!to_read) break;
     read++;
   }
-  if (!file && already_read) free(already_read);
+  if (!file && to_read) free(to_read);
   return read;
 }
 
 /* prompt = NULL --> from gprc. Return 1 if new input, and 0 if EOF */
 static int
-get_line_from_file(char *prompt, Buffer *b, FILE *file)
+get_line_from_file(char *prompt, filtre_t *F, FILE *file)
 {
   const int TeXmacs = (under_texmacs && file == stdin);
-  char *buf, *s =  b->buf;
+  Buffer *b = (Buffer*)F->data;
+  char *buf, *s = b->buf;
 
   handle_C_C = 0;
   while (! (buf = file_input(b,&s,file,TeXmacs)) )
@@ -2366,11 +2347,12 @@ get_line_from_file(char *prompt, Buffer *b, FILE *file)
     if (!handle_C_C)
     {
       if (TeXmacs) tm_start_output();
+      check_filtre(F);
       return 0;
     }
     /* received ^C  in fgets, retry (as is "\n" were input) */
   }
-  input_loop(b,buf,file,prompt);
+  input_loop(F,buf,file,prompt);
 
   if (*s && prompt) /* don't echo if from gprc */
   {
@@ -2389,10 +2371,10 @@ get_line_from_file(char *prompt, Buffer *b, FILE *file)
  *        1: got one line from readline or infile */
 #ifndef READLINE
 static int
-get_line_from_user(char *prompt, Buffer *b)
+get_line_from_user(char *prompt, filtre_t *F)
 {
   pariputs(prompt);
-  return get_line_from_file(prompt,b,infile);
+  return get_line_from_file(prompt,F,infile);
 }
 #else	/* READLINE */
 static int
@@ -2409,22 +2391,25 @@ gp_add_history(char *s)
 }
 
 static int
-get_line_from_user(char *prompt, Buffer *b)
+get_line_from_user(char *prompt, filtre_t *F)
 {
   if (use_readline)
   {
+    Buffer *b = (Buffer*)F->data;
     char *buf, *s = b->buf;
     int index, added;
 
-    if (! (buf = gprl_input(b,&s, prompt)) )
+    if (! (buf = gprl_input(b, &s, prompt)) )
     { /* EOF */
-      pariputs("\n"); return 0;
+      pariputs("\n");
+      check_filtre(F);
+      return 0;
     }
     /* Put the original read line into history */
     index = history_length;
     gp_add_history(buf);	/* Copies the entry */
 
-    added = input_loop(b,buf,NULL,prompt); /* free()s buf */
+    added = input_loop(F,buf,NULL,prompt); /* free()s buf */
     unblock_SIGINT(); /* bug in readline 2.0: need to unblock ^C */
 
     if (*s)
@@ -2447,7 +2432,7 @@ get_line_from_user(char *prompt, Buffer *b)
   else
   {
     pariputs(prompt);
-    return get_line_from_file(prompt,b,infile);
+    return get_line_from_file(prompt,F,infile);
   }
 }
 #endif
@@ -2465,12 +2450,12 @@ is_interactive(void)
 
 /* return 0 if no line could be read (EOF) */
 static int
-read_line(char *promptbuf, Buffer *b)
+read_line(char *promptbuf, filtre_t *F)
 {
   if (is_interactive())
-    return get_line_from_user(promptbuf, b);
+    return get_line_from_user(promptbuf, F);
   else
-    return get_line_from_file(DFT_PROMPT,b,infile);
+    return get_line_from_file(DFT_PROMPT,F,infile);
 }
 
 static int
@@ -2486,6 +2471,9 @@ chron(char *s)
   return 1;
 }
 
+/* return 0: can't interpret *buf as a metacommand
+ *        1: did interpret *bug as a metacommand
+ *        2: empty input */
 static int
 check_meta(char *buf)
 {
@@ -2508,12 +2496,17 @@ gp_main_loop(int ismain)
   long av, i,j;
   VOLATILE GEN z = gnil;
   Buffer *b = new_buffer();
+  filtre_t F;
+
   if (!setjmp(b->env))
   {
     b->flenv = 1;
     push_stack(&bufstack, (void*)b);
   }
-  for(; ; setjmp(b->env))
+
+  F.data = (void*)b;
+  F.in_comment = 0;
+  for (;; setjmp(b->env))
   {
     if (ismain)
     {
@@ -2540,8 +2533,8 @@ gp_main_loop(int ismain)
 
     for(;;)
     {
-      int r;
-      r = read_line(do_prompt(prompt), b);
+      int r = read_line(do_prompt(F.in_comment,prompt), &F);
+
       if (!disable_color) term_color(c_NONE);
       if (!r)
       {
@@ -2626,10 +2619,13 @@ GEN
 input0(void)
 {
   Buffer *b = new_buffer();
+  filtre_t F;
   GEN x;
 
+  F.data = (void*)b;
+  F.in_comment = 0;
   push_stack(&bufstack, (void*)b);
-  while (! get_line_from_file(DFT_INPROMPT,b,infile))
+  while (! get_line_from_file(DFT_INPROMPT,&F,infile))
     if (popinfile()) { fprintferr("no input ???"); gp_quit(); }
   x = lisseq(b->buf);
   pop_buffer(); return x;
@@ -2666,6 +2662,7 @@ break_loop(long numerr)
   static Buffer *b = NULL;
   VOLATILE int go_on = 0;
   char *s, *t, *msg;
+  filtre_t F;
 
   if (b) jump_to_given_buffer(b);
   push_stack(&bufstack, (void*)new_buffer());
@@ -2685,6 +2682,8 @@ break_loop(long numerr)
     if (!s || !s[-1] || s < t || s >= t + oldb->len) s = NULL;
     b->flenv = 1; oldinfile = infile;
   }
+  F.data = (void*)b;
+  F.in_comment = 0;
 
   term_color(c_ERR); pariputc('\n');
   errcontext(msg, s, t); if (s) pariputc('\n');
@@ -2694,7 +2693,7 @@ break_loop(long numerr)
   for(;;)
   {
     int flag;
-    if (! read_line("> ", b)) break;
+    if (! read_line("> ", &F)) break;
     if (!(flag = check_meta(b->buf)))
     {
       GEN x = lisseq(b->buf);

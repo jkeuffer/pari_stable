@@ -200,3 +200,16 @@ enum { c_ERR, c_HIST, c_PROMPT, c_INPUT, c_OUTPUT, c_HELP, c_TIME, c_LAST };
 #define f_KEEPCASE 2
 #define f_REG      4
 #define f_ENDFILE  8
+
+typedef struct {
+  char *s, *t, *end; /* source, target, last char read */
+  int in_string, in_comment, more_input, wait_for_brace;
+  void *data;
+} filtre_t;
+
+#define LBRACE '{'
+#define RBRACE '}'
+
+extern char *filtre0(filtre_t *F, int flag);
+extern char *filtre(char *s, int flag);
+extern void check_filtre(filtre_t *F);

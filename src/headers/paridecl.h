@@ -734,7 +734,6 @@ void    ecrire(GEN x, char format, long dec, long chmp);
 void    etatpile(unsigned int n);
 char*   expand_tilde(char *s);
 int     file_is_binary(FILE *f);
-char*   filtre(char *s,char *t,int status);
 void    flusherr(void);
 void    fprintferr(char* pat, ...);
 void    killallfiles(int check);

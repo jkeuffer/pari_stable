@@ -48,7 +48,6 @@ hit_return(void)
 /**                        INPUT FILTER                            **/
 /**                                                                **/
 /********************************************************************/
-
 #define ONE_LINE_COMMENT   2
 #define MULTI_LINE_COMMENT 1
 /* Filter s into t. If flag is a query, return s (yes) / NULL (no)
@@ -56,41 +55,41 @@ hit_return(void)
  *            if not return pointer to ending '\0' in t.
  */
 char *
-filtre(char *s0, char *t0, int flag)
+filtre0(filtre_t *F, int flag)
 {
-  static int in_string, in_comment = 0;
-  char c, *s, *t;
-  int downcase, return_end;
+  const int downcase = ((flag & f_KEEPCASE) == 0 && compatible == OLDALL);
+  char c, *s = F->s, *t;
 
-  if (flag & f_INIT) in_string = 0;
-  switch(flag)
+  if (!F->t) F->t = gpmalloc(strlen(s)+1);
+  t = F->t;
+
+  if (F->more_input == 1) F->more_input = 0;
+
+  if (! F->in_comment)
   {
-    case f_ENDFILE:
-      if (in_string)
-      {
-        err(warner,"run-away string. Closing it");
-        in_string = 0;
-      }
-      if (in_comment)
-      {
-        err(warner,"run-away comment. Closing it");
-        in_comment = 0;
-      } /* fall through */
-    case f_INIT: case f_COMMENT:
-      return in_comment? s0: NULL;
+    while (isspace((int)*s)) s++; /* Skip space */
+    if (*s == LBRACE) { s++; F->more_input = 2; F->wait_for_brace = 1; }
   }
-
-  downcase = ((flag & f_KEEPCASE) == 0 && compatible == OLDALL);
-  s = s0; return_end = (t0 != NULL);
-  if (!t0) t0 = gpmalloc(strlen(s)+1);
-  t = t0;
 
   while ((c = *s++))
   {
-    if (in_string) *t++ = c; /* copy verbatim */
-    else if (in_comment)
+    if (F->in_string)
     {
-      if (in_comment == MULTI_LINE_COMMENT)
+      *t++ = c; /* copy verbatim */
+      switch(c)
+      {
+        case '\\': /* in strings, \ is the escape character */
+          if (*s) *t++ = *s++;
+          break;
+
+        case '"': F->in_string = 0;
+      }
+      continue;
+    }
+
+    if (F->in_comment)
+    { /* look for comment's end */
+      if (F->in_comment == MULTI_LINE_COMMENT)
       {
         while (c != '*' || *s != '/')
         {
@@ -100,41 +99,66 @@ filtre(char *s0, char *t0, int flag)
         s++;
       }
       else
-        while (c != '\n')
-        {
-          if (!*s) { in_comment=0; goto END; }
-          c = *s++;
-        }
-      in_comment=0; continue;
+        while (c != '\n' && *s) c = *s++;
+      F->in_comment = 0;
+      continue;
     }
-    else
-    { /* weed out comments and spaces */
-      if (c=='\\' && *s=='\\') { in_comment = ONE_LINE_COMMENT; continue; }
-      if (isspace((int)c)) continue;
-      *t++ = downcase? tolower(c): c;
-    }
+
+    /* weed out comments and spaces */
+    if (c=='\\' && *s=='\\') { F->in_comment = ONE_LINE_COMMENT; continue; }
+    if (isspace((int)c)) continue;
+    *t++ = downcase? tolower(c): c;
+
     switch(c)
     {
       case '/':
-        if (*s != '*' || in_string) break;
-        /* start multi-line comment */
-        t--; in_comment = MULTI_LINE_COMMENT; break;
+        if (*s == '*') { t--; F->in_comment = MULTI_LINE_COMMENT; }
+        break;
 
       case '\\':
-        if (!in_string) break;
-        if (!*s) goto END;     /* this will result in an error */
-        *t++ = *s++; break; /* in strings, \ is the escape character */
-        /*  \" does not end a string. But \\" does */
+        if (!*s) {
+          if (t[-2] == '?') break; /* '?\' */
+          t--;
+          if (!F->more_input) F->more_input = 1;
+          goto END;
+        }
+        if (*s == '\n') {
+          if (t[-2] == '?') break; /* '?\' */
+          t--; s++;
+          if (!*s)
+          {
+            if (!F->more_input) F->more_input = 1;
+            goto END;
+          }
+        } /* skip \<CR> */
+        break;
 
-      case '"':
-        in_string = !in_string;
+      case '"': F->in_string = 1;
     }
   }
+
+  if (t != F->t) /* non empty input */
+  {
+    c = t[-1]; /* = last input char */
+    if (c == '=')                 F->more_input = 2;
+    else if (! F->wait_for_brace) F->more_input = 0;
+    else if (c == RBRACE)       { F->more_input = 0; t--; }
+  }
+
 END:
-  *t = 0; return return_end? t: t0;
+  F->end = t; *t = 0; return F->t;
 }
 #undef ONE_LINE_COMMENT
 #undef MULTI_LINE_COMMENT
+
+char *
+filtre(char *s, int flag)
+{
+  filtre_t T;
+  T.s = s;    T.in_string = 0; T.more_input = 0;
+  T.t = NULL; T.in_comment= 0; T.wait_for_brace = 0;
+  return filtre0(&T, flag);
+}
 
 GEN
 lisGEN(FILE *fi)
@@ -2126,16 +2150,29 @@ pari_unlink(char *s)
     fprintferr("I/O: removed file %s\n", s);
 }
 
+void
+check_filtre(filtre_t *T)
+{
+  if (T && T->in_string)
+  {
+    err(warner,"run-away string. Closing it");
+    T->in_string = 0;
+  }
+  if (T && T->in_comment)
+  {
+    err(warner,"run-away comment. Closing it");
+    T->in_comment = 0;
+  }
+}
+
 /* Remove one INFILE from the stack. Reset infile (to the most recent infile)
  * Return -1, if we're trying to pop out stdin itself; 0 otherwise
  * Check for leaked file handlers (temporary files)
  */
 int
-popinfile(void)
+popinfile()
 {
   pariFILE *f;
-
-  filtre(NULL,NULL, f_ENDFILE);
   for (f = last_tmp_file; f; f = f->prev)
   {
     if (f->type & mf_IN) break;

@@ -212,7 +212,7 @@ lisseq0(char *t, GEN (*f)(void))
 static GEN
 flisseq0(char *s, GEN (*f)(void))
 {
-  char *t = filtre(s,NULL, f_INIT | f_REG);
+  char *t = filtre(s, f_REG);
   GEN x = lisseq0(t, f);
   free(t); return x;
 }
