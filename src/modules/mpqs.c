@@ -1152,7 +1152,7 @@ mpqs_self_init(GEN A, GEN B, GEN N, GEN kN, long *FB, long *sqrt_mod_p_kN,
     if (*bin_index >= (1ul << total_no_of_primes_for_A)) /* wraparound */
     {
       if (DEBUGLEVEL >= 2)
-	fprintf(stderr, "MPQS: bin_index wraparound\n");
+	fprintferr("MPQS: bin_index wraparound\n");
       /* complain:  caller should increase some parameters... */
       return;
       /* caller should repeat the above test; if we simply increase the
@@ -2078,11 +2078,9 @@ mpqs_combine_large_primes(FILE *COMB, FILE *FNEW, long size_of_FB,
     mpqs_combine_exponents(ei, ei_size, e[1-i].ep, e[i].ep);
     if (DEBUGLEVEL >= 6)
     {
-      fprintf(stderr, "MPQS: combining\n");
-      fprintf(stderr, "    {%ld @ %s : %s}\n",
-	      old_q, e[1-i].Y, e[1-i].ep);
-      fprintf(stderr, "  * {%ld @ %s : %s}\n",
-	      e[i].q, e[i].Y, e[i].ep);
+      fprintferr("MPQS: combining\n");
+      fprintferr("    {%ld @ %s : %s}\n", old_q, e[1-i].Y, e[1-i].ep);
+      fprintferr("  * {%ld @ %s : %s}\n", e[i].q, e[i].Y, e[i].ep);
     }
     Y2 = lisexpr(e[i].Y);
     new_Y = modii(mulii(mulii(Y1, Y2), inv_q), kN);
@@ -2103,8 +2101,7 @@ mpqs_combine_large_primes(FILE *COMB, FILE *FNEW, long size_of_FB,
       }
     }
     strcat(new_relation, " 0");
-    if (DEBUGLEVEL >= 6)
-      fprintf(stderr, " == {%s}\n", new_relation);
+    if (DEBUGLEVEL >= 6) fprintferr(" == {%s}\n", new_relation);
     strcat(new_relation, "\n");
 
 #ifdef MPQS_DEBUG
