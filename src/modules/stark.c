@@ -38,7 +38,7 @@ static GEN
 ConjChar(GEN chi, GEN cyc)
 {
   long i, l = lg(chi);
-  GEN p1 = cgetg(l, t_COL);
+  GEN p1 = cgetg(l, t_VEC);
 
   for (i = 1; i < l; i++)
     if (!signe((GEN)chi[i]))
@@ -3212,7 +3212,7 @@ bnrL1(GEN bnr, GEN sbgrp, long flag, long prec)
   N    = degree((GEN)nf[1]);
 
   if (N == 1)
-    err(talker, "the ground field must distinct from Q");
+    err(talker, "the ground field must be distinct from Q");
 
   if ((flag < 0) || (flag > 8))
     err(flagerr,"bnrL1");
@@ -3268,13 +3268,13 @@ bnrL1(GEN bnr, GEN sbgrp, long flag, long prec)
       for (k = 1; k <= lq; k++)
 	p1 = gadd(p1, gdiv(mulii(gmael3(Qt, 3, j, k), (GEN)chi[k]), 
 			   gmael(Qt, 2, k)));
-      lchi[j] = lmul(p1, (GEN)cyc[j]);
+      lchi[j] = lmodii(gmul(p1, (GEN)cyc[j]), (GEN)cyc[j]);
     }
     clchi = ConjChar(lchi, cyc);
 
     a = i;
     for (j = 1; j <= nc; j++)
-      if (gegal(gmael(listCR, j, 1), clchi)) a = -j;
+      if (gegal(gmael(listCR, j, 1), clchi)) { a = -j; break; }
 
     if (a > 0)
     {
