@@ -312,7 +312,7 @@ factorisegen(GEN nf,GEN idealvec,long kcz,long limp)
   GEN x,q,r,P,p1,listexpo;
   GEN I = (GEN)idealvec[1];
   GEN m = (GEN)idealvec[2];
-  GEN Nm= (GEN)idealvec[3];
+  GEN Nm= absi( subres(gmul((GEN)nf[7],m), (GEN)nf[1]) ); /* |Nm| */
 
   x = divii(Nm, dethnf_i(I)); /* m in I, so NI | Nm */
   if (is_pm1(x)) { primfact[0]=0; return 1; }
@@ -608,26 +608,58 @@ buchfu(GEN bnf)
   return gerepile(av,tetpil,y);
 }
 
+/* try to split ideal / (some integer) on factorbase */
 static long
 factorgensimple(GEN nf,GEN ideal)
 {
-  long i,v,av1 = avma,lo;
+  long i,v,av1 = avma,lo, L = lg(vectbase), N = lg(ideal)-1;
   GEN x = dethnf_i(ideal);
 
   if (gcmp1(x)) { avma=av1; primfact[0]=0; return 1; }
-  for (lo=0, i=1; i<lg(vectbase); i++)
+  for (lo=0, i=1; i<L; i++)
   {
-    GEN P=(GEN)vectbase[i], p=(GEN)P[1];
-    if (!smodis(x,itos(p))) /* <==> p | x = Nideal */
+    GEN q,y, P=(GEN)vectbase[i], p=(GEN)P[1];
+    long vx0, vx, sum_ef, e,f,lo0,i0;
+
+    vx = pvaluation(x,p,&y);
+    if (!vx) continue;
+    /* p | x = Nideal */
+    vx0 = vx; sum_ef = 0; lo0 =lo; i0 = i;
+    for(;;)
     {
+      e = itos((GEN)P[3]);
+      f = itos((GEN)P[4]); sum_ef += e * f;
       v = idealval(nf,ideal,P);
       if (v)
       {
-	lo++; primfact[lo]=i; expoprimfact[lo]=v;
-	x = divii(x, gpuigs(p, v * itos((GEN)P[4])));
-	if (gcmp1(x)) { avma=av1; primfact[0]=lo; return 1; }
+        lo++; primfact[lo]=i; expoprimfact[lo]=v;
+        vx -= v * f; if (!vx) break;
+      }
+      i++; if (i == L) break;
+      P = (GEN)vectbase[i]; q = (GEN)P[1];
+      if (!egalii(p,q)) break;
+    }
+    if (vx)
+    { /* divisible by P | p not in factorbase */
+      long k,l,n;
+      k = N - sum_ef;
+      if (vx % k) break;
+      k = vx / k; /* x / p^k factors on factorbase */
+      for (l = lo0+1; l <= lo; l++)
+      {
+        P = (GEN)vectbase[primfact[l]];
+        expoprimfact[l] -= k * itos((GEN)P[3]); /* may become 0 */
+      }
+      n = lo0+1;
+      for (l = i0; l < i; l++) /* update exponents for other P | p */
+      {
+        if (n <= lo && primfact[n] == l) { n++; continue; }
+        lo++; primfact[lo] = l; P = (GEN)vectbase[l];
+        expoprimfact[lo] = - k * itos((GEN)P[3]);
       }
     }
+    if (gcmp1(y)) { avma=av1; primfact[0]=lo; return 1; }
+    x = y;
   }
   avma=av1; return 0;
 }
@@ -845,10 +877,10 @@ isprincipalall0(GEN bnf, GEN x, long *ptprec, long flall)
     p1 = idealinv(nf,p2);
     p1[1]=(long)numer((GEN)p1[1]);
 
-    d=dethnf((GEN)p1[1]);
+    d=dethnf_i((GEN)p1[1]);
     if (mpcmp(d,dmin) < 0) { pmin=p1; dmin=d; }
     p1 = ideallllred(nf,p1,NULL,prec);
-    d = dethnf((GEN)p1[1]);
+    d = dethnf_i((GEN)p1[1]);
     if (mpcmp(d,dmin) < 0) pmin = p1;
 
     if (!gegal((GEN)pmin[1], (GEN)gen[j]))
@@ -869,6 +901,7 @@ isprincipalall0(GEN bnf, GEN x, long *ptprec, long flall)
   for (j=1; j<=c; j++)
     if (signe(ex[j]))
       s2 = mulii(s2, powgi(dethnf_i((GEN)gen[j]), (GEN)ex[j]));
+  /* s2 = Norm \prod g[j]^e[j] */
   s = gdivgs(glog(gdiv(dethnf_i(x),s2),prec), N);
   p4 = cgetg(N+1,t_COL);
   for (i=1; i<=R1; i++) p4[i]=lexp(gadd(s,(GEN)col[i]),prec);
@@ -1410,10 +1443,9 @@ ideallllredpart1(GEN nf, GEN I, GEN matt2, long N, long PRECREGINT)
   m = gmul(I,(GEN)y[1]);
   if (isnfscalar(m)) m = gmul(I,(GEN)y[2]);
 
-  idealpro = cgetg(4,t_VEC);
+  idealpro = cgetg(3,t_VEC);
   idealpro[1] = (long)I;
   idealpro[2] = (long)m; /* elt of small (weighted) T2 norm in I */
-  idealpro[3] = labsi( subres(gmul((GEN)nf[7],m), (GEN)nf[1]) ); /* |Nm| */
   if (DEBUGLEVEL>5) fprintferr("\nidealpro = %Z\n",idealpro);
   return idealpro;
 }
