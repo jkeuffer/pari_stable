@@ -794,10 +794,13 @@ static GEN liftsubgroup(GEN C, GEN H, GEN S)
 long
 group_isA4S4(GEN G)
 {
+  GEN elt=(GEN)G[1];
   GEN ord=(GEN)G[2];
   long n = lg(ord);
   if (n!=4 && n!=5) return 0;
   if (ord[1]!=2 || ord[2]!=2 || ord[3]!=3)
+    return 0;
+  if (perm_commute((GEN)elt[1],(GEN)elt[3]))
     return 0;
   if (n==4) return 1;
   if (ord[4]==2) return 2;
