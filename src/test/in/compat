@@ -193,7 +193,6 @@ frac(-2.7)
 \\ G
 galois(x^6-3*x^2-1)
 nf3=initalg(x^6+108);galoisconj(nf3)
-galoisconjforce(nf3)
 aut=%[2];galoisapply(nf3,aut,mod(x^5,x^6+108))
 gamh(10)
 gamma(10.5)

@@ -120,6 +120,8 @@ BA 77- typo in isinexactfield
    87- check arguments in incgamc
    88- non-rectangular matrices could trigger a SEGV (in error msg!)
    89- qfminim(,,2) didn't like mixed t_REAL/ t_FRAC entries (typo)
+   90- inconsistant spacing after GP error messages
+   91- regrouped code between idealred and idealmin
 
   Added
 IZ  1- [gnuplot] look up directory tree for gnuplot related files
@@ -131,6 +133,8 @@ HC  4- optional argument to direuler (length of result)
     6- error trapping in library mode and under GP
     7- break loop to investigate errors under GP
     8- "sprintf-rounding" under GP
+IZ  9- string justification in high-res plot
+IZ 10- bit operations ( bit[ and | or | neg | negimply | xor ] )
 
   Changed
     1- default binary produced by Configure -g is now static

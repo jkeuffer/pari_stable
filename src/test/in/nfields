@@ -91,7 +91,7 @@ idealhnf(nf,vp[2],3)
 ideallist(bnf,20)
 \\ ideallistarch
 ideallog(nf2,w,bid)
-idealmin(nf,idx,[1,2,3,4,5])
+idealmin(nf,idx,[1,2,3])
 idealnorm(nf,idt)
 idp=idealpow(nf,idx,7)
 idealpow(nf,idx,7,1)

@@ -149,7 +149,7 @@ idealhermite_aux(GEN nf, GEN x)
   GEN z;
 
   tx = idealtyp(&x,&z);
-  if (tx == id_PRIME) return prime_to_ideal(nf,x);
+  if (tx == id_PRIME) return prime_to_ideal_aux(nf,x);
   if (tx == id_PRINCIPAL)
   {
     x = principalideal(nf,x);
@@ -1478,35 +1478,35 @@ computet2twist(GEN nf, GEN vdir)
   return mulmat_real(p1,(GEN)mat[1]);
 }
 
+static GEN
+chk_vdir(GEN nf, GEN vdir)
+{
+  if (!vdir || gcmp0(vdir)) return NULL;
+  if (typ(vdir)!=t_VEC || lg(vdir) != lg(nf[6])) err(idealer5);
+  return vdir;
+}
+
 GEN
 ideallllredall(GEN nf, GEN x, GEN vdir, long prec, long precint)
 {
   long tx,N,av,tetpil,i,j;
   GEN iax,ix,res,ax,p1,p2,y,alpha,beta,pol;
 
-  nf=checknf(nf);
-  if (vdir)
-  {
-    if (gcmp0(vdir)) vdir = NULL;
-    else if (typ(vdir)!=t_VEC || lg(vdir) != lg(nf[6])) err(idealer5);
-  }
-  pol = (GEN)nf[1]; N=lgef(pol)-3;
+  nf = checknf(nf);
+  vdir = chk_vdir(nf,vdir);
+  pol = (GEN)nf[1]; N = lgef(pol)-3;
   tx = idealtyp(&x,&ax); ix=x; iax=ax;
   if (ax) res = cgetg(3,t_VEC);
-  av = avma;
   if (tx == id_PRINCIPAL)
   {
-    if (ax)
-    {
-      res = cgetg(3,t_VEC);
-      ax = get_arch(nf,x,prec); av=avma;
-    }
-    x = idealhermite_aux(nf,x);
+    y = idmat(N);
+    if (!ax) return y;
+    res[1] = (long)y; av = avma;
+    res[2] = lpileupto(av, gneg(get_arch(nf,x,prec)));
+    return res;
   }
-  else if (tx == id_PRIME)
-    x = prime_to_ideal_aux(nf,x);
-  else if (lg(x) != N+1) /* id_MAT */
-    x = idealhermite_aux(nf,x);
+  av = avma;
+  if (tx != id_MAT || lg(x) != N+1) x = idealhermite_aux(nf,x);
 
   if (DEBUGLEVEL>=6) msgtimer("entering idealllred");
   p1=content(x); if (!gcmp1(p1)) x=gdiv(x,p1);
@@ -1567,23 +1567,20 @@ ideallllred(GEN nf, GEN ix, GEN vdir, long prec)
 GEN
 minideal(GEN nf, GEN x, GEN vdir, long prec)
 {
-  long N,av=avma,tetpil,j,RU,tx;
-  GEN p1,p2,p3,y;
+  long av = avma, N, tx;
+  GEN p1,y;
 
-  if (!gcmp0(vdir) && typ(vdir)!=t_VEC) err(idealer5);
-  nf=checknf(nf); N=lgef(nf[1])-3;
-  tx = idealtyp(&x,&y); if (tx!=id_MAT) x = idealhermite_aux(nf,x);
-  RU = N - itos(gmael(nf,2,2)); p1=(GEN)nf[5];
-  if (gcmp0(vdir)) p1=(GEN)p1[3];
-  else
-  {
-    p3=(GEN)p1[2]; p2=cgetg(RU+1,t_MAT);
-    for (j=1; j<=RU; j++)
-      p2[j] = lmul2n((GEN)p3[j], itos((GEN)vdir[j])<<1);
-    p1=greal(gmul(p2,(GEN)p1[1]));
-  }
-  y = gmul(x,(GEN)lllgram(qf_base_change(p1,x,0),prec)[1]);
-  tetpil = avma; return gerepile(av,tetpil,principalidele(nf,y,prec));
+  nf = checknf(nf);
+  vdir = chk_vdir(nf,vdir);
+  N = lgef(nf[1])-3;
+  tx = idealtyp(&x,&y);
+  if (tx == id_PRINCIPAL) return gcopy(x);
+  if (tx != id_MAT || lg(x) != N+1) x = idealhermite_aux(nf,x);
+
+  p1 = computet2twist(nf,vdir);
+  y = qf_base_change(p1,x,0);
+  y = gmul(x, (GEN)lllgram(y,prec)[1]);
+  return gerepileupto(av, principalidele(nf,y,prec));
 }
 static GEN
 appr_reduce(GEN s, GEN y, long N)

@@ -93,7 +93,7 @@ Kernel:
 
 Misc:
 =====
-5  (easy) modify invmod to get Jebelean extended gcd
+5  modify invmod to get Jebelean extended gcd
 
 4  decent finite field package (remove all the nfxxxmodpr functions)
 
@@ -106,6 +106,8 @@ far too much memory)
 
 4  rethink the element_mul type of functions: multiplication table is O(n^3),
 polynomial multiplication + remainder is O(n^2) [+ can use Karatsuba/FFT]
+
+3  zetak is very inefficient and unable to handle most fields of degree > 6
 
 3  have quadclassunit return bnf structure
 
@@ -123,7 +125,7 @@ easily define new ones)
 4  remove all dependences on types ordering [if (typ(x) < t_POL) ...]
 
 3  integrate Ilya's code for yet bigger prime tables. Unify functions using
-diffptr
+diffptr (if possible correcting the forprime bug above)
 
 3  remove global variables gpi, geuler: their precision is unpredictable
 (at least as much as requested in last const[pi|euler](), possibly much more).

@@ -2539,7 +2539,7 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
 }
 
 GEN
-minim0(GEN a, GEN borne, GEN stockmax, long flag, long prec)
+qfminim0(GEN a, GEN borne, GEN stockmax, long flag, long prec)
 {
   switch(flag)
   {
