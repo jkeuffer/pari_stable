@@ -1861,7 +1861,7 @@ random_unif_loop_pol(GEN nf, GEN P, GEN D, GEN Dp, GEN beta, GEN pol,
     if (DEBUGLEVEL && (++c & 0x3f) == 0) fprintferr("%d ", c);
     a = random_elt_in_P(beta, small);
     if (!a) continue;
-    if (small) a = small_to_pol(a, varn(pol));
+    if (small) a = vec_to_pol(small_to_vec(a), varn(pol));
     a = centermod(a, Dp);
     if ((a = prime_check_elt(D,Dp,a,pol,q,ramif)))
     {
