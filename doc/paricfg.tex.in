@@ -2,4 +2,4 @@
 \def\miscdir{@miscdir@}
 \def\includedir{@includedir@}
 \def\libdir{@libdir@}
-\def\wwwsite{\kbd{http://www.parigp-home.de/}}
+\def\wwwsite{\kbd{http://pari.math.u-bordeaux.fr/}}
