@@ -1871,10 +1871,10 @@ get_LV(GEN nf, GEN L, GEN p, long N)
 }
 
 /* P = Fp-basis (over O_K/p) for pr.
- * V = Z-basis for I_p/pr.
+ * V = Z-basis for I_p/pr. ramif != 0 iff some pr|p is ramified.
  * Return a p-uniformizer for pr. */
 static GEN
-uniformizer(GEN nf, norm_S *S, GEN P, GEN V, GEN p)
+uniformizer(GEN nf, norm_S *S, GEN P, GEN V, GEN p, int ramif)
 {
   long i, l, f, m = lg(P)-1, N = degpol(nf[1]);
   GEN u, Mv, x, q;
@@ -1888,8 +1888,11 @@ uniformizer(GEN nf, norm_S *S, GEN P, GEN V, GEN p)
   setlg(u, lg(P));
   u = centermod(gmul(P, u), p);
   if (is_uniformizer(u, q, S)) return u;
-  u[1] = laddii((GEN)u[1], p); /* try p + u */
-  if (is_uniformizer(u, q, S)) return u;
+  if (signe(u[1]) <= 0) /* make sure u[1] in ]-p,p] */
+    u[1] = laddii((GEN)u[1], p); /* try u + p */
+  else
+    u[1] = lsubii((GEN)u[1], p); /* try u - p */
+  if (!ramif || is_uniformizer(u, q, S)) return u;
 
   /* P/p ramified, u in P^2, not in Q for all other Q|p */
   Mv = eltmul_get_table(nf, unnf_minus_x(u));
@@ -2042,7 +2045,7 @@ get_pr(GEN nf, norm_S *S, GEN p, GEN P, GEN V, int ramif)
   if (typ(P) == t_VEC) return P; /* already done (Kummer) */
 
   av = avma;
-  u = gerepilecopy(av, uniformizer(nf, S, P, V, p));
+  u = gerepilecopy(av, uniformizer(nf, S, P, V, p, ramif));
   t = anti_uniformizer(nf,p,u);
   av = avma;
   e = ramif? 1 + int_elt_val(nf,t,p,t,NULL): 1;
