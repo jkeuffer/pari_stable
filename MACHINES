@@ -94,6 +94,8 @@ AMD K6       233Mhz  Linux-2.2.14    gcc            6968    7158  2.0.18    QL
 IBM/Cyrix    200MHz  Linux-2.0.35    gcc           13190   13729  2.0.15    AP
 PentiumIV   1600MHz  Linux-2.4.18-3  gcc-2.96        938     960  2.2.4
 PentiumIV   1400MHz  Linux-2.4.4-4   gcc-2.95.3     1318    1354  2.1.3     HG
+PentiumIII  1400MHz  FreeBSD-4.6.2   gcc-2.95.3      752     757  2.2.4(35) IS
+PentiumIII  1133MHz  Linux-2.4.18    gcc-2.96       1028    1055  2.2.4(36) IS
 PentiumIII  1000MHz  Linux-2.4.7-10  gcc-2.96       1128    1180  2.2.4
 PentiumIII   933MHz  Linux-2.2.15   egcs            1450    1485  2.0.20    IS
 PentiumIII   800MHz  Linux-2.2.14   egcs            1900    1882  2.0.20    CL
@@ -292,6 +294,10 @@ CFLAGS= -fbranch-probabilities  -O3 -DGCC_INLINE -Wall -Wno-implicit
      DASD: Shark 2105-F20 (2.1 terabytes)
 
 (34) 64-bit executable
+
+(35) SMP, 512KB L2 cache
+
+(36) UP, 256KB L2 cache
 =============================================================================
 Contributors:
   AW = Aleksander Wittlin
