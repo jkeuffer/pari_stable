@@ -63,6 +63,11 @@ BA 31- member functions for galoisinit
    32- allowed power series in Mod(). Fixed cryptic error messages.
    33- precision problems in zsigne
    34- value of 'gzip' found by Configure overwritten in TOP_Make.SH
+XR 35- precision loss in Round 4
+XR 36- ensure that fundamental unit is computed in quadray (if D > 0)
+XR 37- precision fixes in stark.c (inconsistencies 32/64 bit + early abort)
+   38- bug in P*Q for polynomials over (non prime) finite fields if Q is
+       defined over the prime field
 
   Added
 IZ  1- [gnuplot] look up directory tree for gnuplot related files

@@ -822,7 +822,7 @@ ff_poltype(GEN *x, GEN *p, GEN *pol)
   lx = lgef(P); Q = *pol;
   for (i=2; i<lx; i++)
   {
-    p1 = (GEN)P[i]; if (typ(p1) != t_POLMOD) { Q = NULL; break; }
+    p1 = (GEN)P[i]; if (typ(p1) != t_POLMOD) break;
     p2 = (GEN)p1[1];
     if (Q==NULL) Q = p2;
     else if (p2 != Q)
