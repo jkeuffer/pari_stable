@@ -2023,9 +2023,8 @@ qfbred0(GEN x, long flag, GEN D, GEN isqrtD, GEN sqrtD)
       return redreal0(x,flag,D,isqrtD,sqrtD);
 
     case -1:
-      if (!flag) return  redimag(x);
-      if (flag !=1) err(flagerr,"qfbred");
-      av=avma; x = rhoimag0(x,&fl);
+      if (!(flag & qf_STEP)) return redimag(x);
+      av = avma; x = rhoimag0(x,&fl);
       x = gerepilecopy(av,x);
       if (fl == 2) setsigne(x[2], -signe(x[2]));
       return x;

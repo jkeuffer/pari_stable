@@ -132,6 +132,8 @@ BA 60- add "const" keyword to allow building with g++
    73- matmultodiagonal([;],matrix(0,1)); --> SEGV [bad input]
    74- [GP, trap:] prevent infinite recursion if default exception handler
        itself raises an exception
+   75- allow qfbred(,2) [don't update Shanks's distance] also for definite
+       forms [ignore flag].
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available
