@@ -766,14 +766,22 @@ FpXQ_invsafe(GEN x, GEN T, GEN p)
   return FpX_Fp_mul(U, z, p);
 }
 
-/* Product of y and x in Z/pZ[X]/(pol)
- * return lift(lift(Mod(x*y*Mod(1,p),pol*Mod(1,p)))) */
+/* Product of y and x in Z/pZ[X]/(T)
+ * return lift(lift(Mod(x*y*Mod(1,p),T*Mod(1,p)))) */
 GEN
-FpXQ_mul(GEN y,GEN x,GEN pol,GEN p)
+FpXQ_mul(GEN y,GEN x,GEN T,GEN p)
 {
-  GEN z = quickmul(y+2, x+2, lgef(y)-2, lgef(x)-2); setvarn(z,varn(y)); 
-  z = FpX_red(z, p); return FpX_res(z,pol, p);
+  GEN z;
+  if (typ(x) == t_INT)
+  {
+    if (typ(y) == t_INT) return modii(mulii(x,y), p);
+    return FpX_Fp_mul(y, x, p);
+  }
+  if (typ(y) == t_INT) return FpX_Fp_mul(x, y, p);
+  z = quickmul(y+2, x+2, lgef(y)-2, lgef(x)-2); setvarn(z,varn(y));
+  z = FpX_red(z, p); return FpX_res(z,T, p);
 }
+
 /* Square of y in Z/pZ[X]/(pol)
  * return lift(lift(Mod(y^2*Mod(1,p),pol*Mod(1,p)))) */
 GEN
@@ -1069,22 +1077,8 @@ FpXQX_FpXQ_mul(GEN P, GEN U, GEN T, GEN p)
   int i, lP = lgef(P);
   GEN res = cgetg(lP,t_POL);
   res[1] = evalsigne(1) | evalvarn(varn(P)) | evallgef(lP);
-  if (typ(U) == t_INT)
-  {
-    for(i=2; i<lP; i++)
-      if (typ(P[i]) != t_INT)
-        res[i] = (long)FpX_Fp_mul((GEN)P[i],U, p);
-      else
-        res[i] = lmodii(mulii(U,(GEN)P[i]), p);
-  }
-  else
-  {
-    for(i=2; i<lP; i++)
-      if (typ(P[i]) != t_INT)
-        res[i] = (long)FpXQ_mul(U,(GEN)P[i], T,p);
-      else
-        res[i] = (long)FpX_Fp_mul(U,(GEN)P[i], p);
-  }
+  for(i=2; i<lP; i++)
+    res[i] = (long)FpXQ_mul(U,(GEN)P[i], T,p);
   return normalizepol_i(res,lgef(res));
 }
 
@@ -1100,48 +1094,49 @@ monomial(GEN a, int deg, int v)
   return P;
 }
 
-/* safe mean that if T is not irreducible and some
- * division fail it return NULL*/
+/* return NULL if Euclidean remainder sequence fails (==> T reducible mod p)
+ * last non-zero remainder otherwise */
 GEN
 FpXQX_safegcd(GEN P, GEN Q, GEN T, GEN p)
 {
-  ulong ltop = avma;
-  long dg, vx=varn(P);
-  GEN U, lP;
-  T = FpX_red(T, p);
+  ulong ltop = avma, btop, st_lim;
+  long dg, vx = varn(P);
+  GEN U, q;
   P = FpXX_red(P, p);
   Q = FpXX_red(Q, p);
-  if (!signe(P) || !signe(Q)) { avma=ltop; return zeropol(vx); }
+  if (!signe(P)) return gerepileupto(ltop, Q);
+  if (!signe(Q)) { avma = (ulong)P; return P; }
+  T = FpX_red(T, p);
+
+  btop = avma; st_lim = stack_lim(btop, 1);
+  dg = lgef(P)-lgef(Q);
+  if (dg < 0) { swap(P, Q); dg = -dg; }
+  for(;;)
   {
-    ulong btop = avma, st_lim = stack_lim(btop, 1);
-    dg = lgef(P)-lgef(Q);
-    if (dg < 0) { swap(P, Q); dg = -dg; }
-    for(;;)
+    U = FpXQ_invsafe(leading_term(Q), T, p);
+    if (!U) { avma = ltop; return NULL; }
+    do
     {
-      U = FpXQ_invsafe(leading_term(Q), T, p);
-      if (!U) { avma = ltop; return NULL; }
-      Q = FpXQX_FpXQ_mul(Q, U, T, p);
-      do
-      {
-	lP = gneg(leading_term(P));
-	P = gadd(P, FpXQX_mul(monomial(lP, dg, vx), Q, T, p));
-	P = FpXQX_red(P, T, p);
-	dg = lgef(P)-lgef(Q);
-      } while (dg >= 0);
-      if (!signe(P)) break;
-
-      if (low_stack(st_lim, stack_lim(btop, 1)))
-      {
-    	GEN *bptr[2]; bptr[0]=&P; bptr[1]=&Q;
-	if (DEBUGLEVEL>1) err(warnmem,"FpXQX_safegcd");
-	gerepilemany(btop, bptr, 2);
-      }
-      swap(P, Q); dg = -dg;
+      q = FpXQ_mul(U, gneg(leading_term(P)), T, p);
+      P = gadd(P, FpXQX_mul(monomial(q, dg, vx), Q, T, p));
+      P = FpXQX_red(P, T, p); /* wasteful, but negligible */
+      dg = lgef(P)-lgef(Q);
+    } while (dg >= 0);
+    if (!signe(P))
+    {
+      Q = FpXQX_FpXQ_mul(Q, U, T, p); /* normalize GCD */
+      return gerepileupto(ltop, Q);
     }
-  }
-  return gerepileupto(ltop, Q);
-}
 
+    if (low_stack(st_lim, stack_lim(btop, 1)))
+    {
+      GEN *bptr[2]; bptr[0]=&P; bptr[1]=&Q;
+      if (DEBUGLEVEL>1) err(warnmem,"FpXQX_safegcd");
+      gerepilemany(btop, bptr, 2);
+    }
+    swap(P, Q); dg = -dg;
+  }
+}
 
 /*******************************************************************/
 /*                                                                 */
@@ -2834,7 +2829,7 @@ ZY_ZXY_resultant(GEN A, GEN B0, long *lambda)
     else /* could make it probabilistic ??? [e.g if stable twice, etc] */
       (void)incremental_CRT(H, Hp, &q, p);
     if (DEBUGLEVEL>5) msgtimer("resultant mod %ld (bound 2^%ld)", p,expi(q));
-    if (expi(q) >= bound) break; /* DONE */
+    if ((ulong)expi(q) >= bound) break; /* DONE */
     if (low_stack(lim, stack_lim(av,2)))
     {
       GEN *gptr[3]; gptr[0] = &H; gptr[1] = &q; gptr[2] = &B;
@@ -2848,7 +2843,7 @@ ZY_ZXY_resultant(GEN A, GEN B0, long *lambda)
 }
 
 /* If lambda = NULL, return caract(Mod(B, A)), A,B in Z[X].
- * Otherwise find a small lambda such that caract (Mod(B + lambda Y, A)) is
+ * Otherwise find a small lambda such that caract (Mod(B + lambda X, A)) is
  * squarefree */
 GEN
 ZX_caract_sqf(GEN A, GEN B, long *lambda, long v)
@@ -2914,7 +2909,7 @@ ZX_resultant(GEN A, GEN B)
     else /* could make it probabilistic ??? [e.g if stable twice, etc] */
       (void)incremental_CRT_i(&H, Hp, &q, p);
     if (DEBUGLEVEL>5) msgtimer("resultant mod %ld (bound 2^%ld)", p,expi(q));
-    if (expi(q) >= bound) break; /* DONE */
+    if ((ulong)expi(q) >= bound) break; /* DONE */
     if (low_stack(lim, stack_lim(av,2)))
     {
       GEN *gptr[2]; gptr[0] = &H; gptr[1] = &q;
