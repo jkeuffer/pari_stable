@@ -102,28 +102,14 @@ static GEN
 red_cyclo2n_ip(GEN x, int n)
 {
   long i, pow2 = 1<<(n-1);
-
   for (i = lgef(x)-1; i>pow2+1; i--)
     if (signe(x[i])) x[i-pow2] = lsubii((GEN)x[i-pow2], (GEN)x[i]);
   for (; i>1; i--)
     if (signe(x[i])) break;
-  i += 1; setlgef(x,i);
-  return x;
+  setlgef(x,i+1); return x;
 }
-/* x t_POL, n > 0. Return x mod polcyclo(2^n) = (x^(2^(n-1)) + 1) */
 static GEN
-red_cyclo2n(GEN x, int n)
-{
-  long i, pow2 = 1<<(n-1);
-
-  x = dummycopy(x);
-  for (i = lgef(x)-1; i>pow2+1; i--)
-    if (signe(x[i])) x[i-pow2] = lsubii((GEN)x[i-pow2], (GEN)x[i]);
-  for (; i>1; i--)
-    if (signe(x[i])) break;
-  i += 1; setlgef(x,i);
-  return x;
-}
+red_cyclo2n(GEN x, int n) { return red_cyclo2n_ip(dummycopy(x), n); }
 
 /* x a non-zero VECSMALL */
 static GEN
