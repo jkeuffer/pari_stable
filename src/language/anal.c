@@ -811,7 +811,7 @@ L:
       { char *old = analyseur; /* act(shift_l) + error checks */
         aux = facteur(); if (br_status) return NULL;
         if (typ(aux) != t_INT) err(talker2,"not an integer",old,mark.start);
-        if (is_bigint(aux)) err(talker2,"integer too big",old,mark.start);
+        if (is_bigint(aux)) err(talker2,"shift operand too big",old,mark.start);
         e3 = gshift(e3, itos(aux)); goto L;
       }
     case '>':
@@ -820,7 +820,7 @@ L:
       { char *old = analyseur; /* act(shift_r) + error checks */
         aux = facteur(); if (br_status) return NULL;
         if (typ(aux) != t_INT) err(talker2,"not an integer",old,mark.start);
-        if (is_bigint(aux)) err(talker2,"integer too big",old,mark.start);
+        if (is_bigint(aux)) err(talker2,"shift operand too big",old,mark.start);
         e3 = gshift(e3,-itos(aux)); goto L;
       }
   }
