@@ -515,14 +515,10 @@ The available commands are
 ;;--------------------
 
 (defun gp-call-gphelp (win-size word output-buffer opt)
-  "Explicit. Distinguishes bash/sh and [t]csh."
-  (if (member (file-name-nondirectory shell-file-name) '("bash" "sh"))
-    (shell-command
-      (concat "(export COLUMNS=" (number-to-string win-size) ";"
-                gp-gphelp-dir "gphelp " opt " \"" word "\";)") output-buffer); "*Messages*")
-    (shell-command
-      (concat "setenv COLUMNS " (number-to-string win-size) ";"
-                gp-gphelp-dir "gphelp " opt " \"" word "\"") output-buffer)))
+  "Explicit."
+  (shell-command
+    (concat "env COLUMNS=" (number-to-string win-size) " "
+            gp-gphelp-dir "gphelp " opt " \"" word "\"") output-buffer))
 
 (defun gp-replace (a b)
   "Replace the regexp a by the string b everywhere in the current buffer"
