@@ -2091,7 +2091,7 @@ static GEN
 compute_vecT2(GEN nf,long prec)
 {
   GEN vecT2, M = gmael(nf,5,1), MC = gmael(nf,5,2), T2 = gmael(nf,5,3);
-  long i,j,ind, n = min(lg(T2),9);
+  long i,j,ind, n = min(lg(T2)-1,9);
 
   vecT2=cgetg(1 + n*(n+1)/2,t_VEC);
   if (nfgetprec(nf) > prec)
