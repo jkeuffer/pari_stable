@@ -1432,7 +1432,7 @@ small_norm_for_buchall(long cglob,GEN *mat,GEN matarch,long LIMC, long PRECREG,
   double *y,*z,**q,*v, MINKOVSKI_BOUND,BOUND;
   gpmem_t av = avma, av1, av2, limpile;
   long j,k,noideal, nbrel = lg(mat)-1;
-  long alldep = 0, nbsmallnorm,nbfact,R1, N = degpol(nf[1]);
+  long nbsmallnorm,nbfact,R1, N = degpol(nf[1]);
   GEN x,xembed,M,T2,r,cbase,invcbase,T2vec,prvec;
 
   if (gsigne(gborne)<=0) return cglob;
@@ -1440,18 +1440,13 @@ small_norm_for_buchall(long cglob,GEN *mat,GEN matarch,long LIMC, long PRECREG,
     fprintferr("\n#### Looking for %ld relations (small norms)\n",nbrel);
   xembed = NULL; /* gcc -Wall */
   nbsmallnorm = nbfact = 0;
-  R1 = itos(gmael(nf,2,1));
-  T2 = (GEN)LLLnf[1];
-  M  = (GEN)LLLnf[2];
-  cbase   =(GEN)LLLnf[3];
-  invcbase=(GEN)LLLnf[4];
+  R1 = nf_get_r1(nf);
+  T2 = (GEN)LLLnf[1]; cbase   =(GEN)LLLnf[3];
+  M  = (GEN)LLLnf[2]; invcbase=(GEN)LLLnf[4];
 
-  prvec = cgetg(3,t_VECSMALL);
-  prvec[1] = MEDDEFAULTPREC;
-  prvec[2] = PRECREG;
-  T2vec = cgetg(3,t_VEC);
-  T2vec[1] = (long)gprec_w(T2,prvec[1]);
-  T2vec[2] = (long)T2;
+  prvec = cgetg(3,t_VECSMALL); T2vec = cgetg(3,t_VEC);
+  prvec[1] = MEDDEFAULTPREC;   T2vec[1] = (long)gprec_w(T2,prvec[1]);
+  prvec[2] = PRECREG;          T2vec[2] = (long)T2;
   minim_alloc(N+1, &q, &x, &y, &z, &v);
   av1 = avma;
   MINKOVSKI_BOUND = get_minkovski(N,R1,(GEN)nf[3],gborne);
@@ -1461,8 +1456,6 @@ small_norm_for_buchall(long cglob,GEN *mat,GEN matarch,long LIMC, long PRECREG,
     long nbrelideal=0, dependent = 0, try_factor = 0, oldcglob = cglob;
     GEN IDEAL, ideal = (GEN)vectbase[noideal];
     GEN normideal = idealnorm(nf,ideal);
-
-    if (alldep > 2*N) break;
 
     if (DEBUGLEVEL>1) fprintferr("\n*** Ideal no %ld: %Z\n", noideal, ideal);
     ideal = prime_to_ideal(nf,ideal);
@@ -1542,12 +1535,12 @@ small_norm_for_buchall(long cglob,GEN *mat,GEN matarch,long LIMC, long PRECREG,
       { /* Q-dependent from previous ones: forget it */
         cglob--; unset_fact(col);
         if (DEBUGLEVEL>1) { fprintferr("*"); flusherr(); }
-        if (++dependent > maxtry_DEP) { alldep++; break; }
+        if (++dependent > maxtry_DEP) break;
         avma = av3; continue;
       }
       /* record archimedean part */
       set_log_embed((GEN)matarch[cglob], xembed, R1, PRECREG);
-      alldep = dependent = 0;
+      dependent = 0;
 
       if (DEBUGLEVEL)
       {
