@@ -350,13 +350,18 @@ element_sqr(GEN nf, GEN x)
   return v;
 }
 
+static GEN
+_mul(void *data, GEN x, GEN y) { return element_mul((GEN)data,x,y); }
+static GEN
+_sqr(void *data, GEN x) { return element_sqr((GEN)data,x); }
+
 /* Compute x^n in nf, left-shift binary powering */
 GEN
 element_pow(GEN nf, GEN x, GEN n)
 {
   ulong av = avma;
-  long s,N,i,j,m;
-  GEN y,p1,cx;
+  long s,N;
+  GEN y, cx;
 
   if (typ(n)!=t_INT) err(talker,"not an integer exponent in nfpow");
   nf=checknf(nf); N=degpol(nf[1]);
@@ -372,23 +377,36 @@ element_pow(GEN nf, GEN x, GEN n)
     y = gscalcol_i(gun,N);
     y[1] = (long)powgi((GEN)x[1],n); return y;
   }
-  cx = content(x);
-  if (gcmp1(cx)) cx = NULL; else x = gdiv(x,cx);
-  p1 = n+2; m = *p1;
-  y=x; j=1+bfffo((ulong)m); m<<=j; j = BITS_IN_LONG-j;
-  for (i=lgefint(n)-2;;)
-  {
-    for (; j; m<<=1,j--)
-    {
-      y = element_sqr(nf, y);
-      if (m<0) y=element_mul(nf, y, x);
-    }
-    if (--i == 0) break;
-    m = *++p1; j = BITS_IN_LONG;
-  }
+  x = primitive_part(x, &cx);
+  y = leftright_pow(x, n, (void*)nf, _sqr, _mul);
   if (s<0) y = element_inv(nf, y);
   if (cx) y = gmul(y, powgi(cx, n));
   return av==avma? gcopy(y): gerepileupto(av,y);
+}
+
+struct muldata {
+  GEN nf, p;
+  long I;
+};
+
+static GEN
+_mulidmod(void *data, GEN x, GEN y)
+{
+  struct muldata *D = (struct muldata*)data;
+  (void)y; /* ignored */
+  return FpV_red(element_mulid(D->nf, x, D->I), D->p);
+}
+static GEN
+_mulmod(void *data, GEN x, GEN y)
+{
+  struct muldata *D = (struct muldata*)data;
+  return FpV_red(element_muli(D->nf, x, y), D->p);
+}
+static GEN
+_sqrmod(void *data, GEN x)
+{
+  struct muldata *D = (struct muldata*)data;
+  return FpV_red(element_sqri(D->nf, x), D->p);
 }
 
 /* x in Z^n, compute lift(x^n mod p) */
@@ -396,8 +414,9 @@ GEN
 element_pow_mod_p(GEN nf, GEN x, GEN n, GEN p)
 {
   ulong av = avma;
-  long s,N,i,j,m;
-  GEN y,p1;
+  struct muldata D;
+  long s,N;
+  GEN y;
 
   if (typ(n)!=t_INT) err(talker,"not an integer exponent in nfpow");
   nf=checknf(nf); N=degpol(nf[1]);
@@ -409,20 +428,10 @@ element_pow_mod_p(GEN nf, GEN x, GEN n, GEN p)
     y = gscalcol_i(gun,N);
     y[1] = (long)powmodulo((GEN)x[1],n,p); return y;
   }
-  p1 = n+2; m = *p1;
-  y=x; j=1+bfffo((ulong)m); m<<=j; j = BITS_IN_LONG-j;
-  for (i=lgefint(n)-2;;)
-  {
-    for (; j; m<<=1,j--)
-    {
-      y = element_sqri(nf, y);
-      if (m<0) y=element_muli(nf, y, x);
-      y = FpV_red(y, p);
-    }
-    if (--i == 0) break;
-    m = *++p1; j = BITS_IN_LONG;
-  }
-  if (s<0)  y = FpV_red(element_inv(nf,y), p);
+  D.nf = nf;
+  D.p = p;
+  y = leftright_pow(x,n, (void*)&D, &_sqrmod, &_mulmod);
+  if (s < 0)  y = FpV_red(element_inv(nf,y), p);
   return av==avma? gcopy(y): gerepileupto(av,y);
 }
 
@@ -431,28 +440,20 @@ GEN
 element_powid_mod_p(GEN nf, long I, GEN n, GEN p)
 {
   ulong av = avma;
-  long s,N,i,j,m;
-  GEN y,p1;
+  struct muldata D;
+  long s,N;
+  GEN y;
 
   if (typ(n)!=t_INT) err(talker,"not an integer exponent in nfpow");
   nf=checknf(nf); N=degpol(nf[1]);
   s=signe(n);
   if (!s || I == 1) return gscalcol_i(gun,N);
-  p1 = n+2; m = *p1;
   y = zerocol(N); y[I] = un;
-  j=1+bfffo((ulong)m); m<<=j; j = BITS_IN_LONG-j;
-  for (i=lgefint(n)-2;;)
-  {
-    for (; j; m<<=1,j--)
-    {
-      y = element_sqri(nf, y);
-      if (m<0) y=element_mulid(nf, y, I);
-      y = FpV_red(y, p);
-    }
-    if (--i == 0) break;
-    m = *++p1; j = BITS_IN_LONG;
-  }
-  if (s<0)  y = FpV_red(element_inv(nf,y), p);
+  D.nf = nf;
+  D.p = p;
+  D.I = I;
+  y = leftright_pow(y,n, (void*)&D, &_sqrmod, &_mulidmod);
+  if (s < 0) y = FpV_red(element_inv(nf,y), p);
   return av==avma? gcopy(y): gerepileupto(av,y);
 }
 

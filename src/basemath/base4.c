@@ -1730,28 +1730,43 @@ init_idele(GEN nf)
   x[2] = (long)zerovec(RU); return x;
 }
 
+static GEN
+_idealmulred(GEN nf, GEN x, GEN y, long prec)
+{
+  return ideallllred(nf,idealmul(nf,x,y), NULL, prec);
+}
+
+struct muldata {
+  GEN nf;
+  long prec;
+};
+
+static GEN
+_mul(void *data, GEN x, GEN y)
+{
+  struct muldata *D = (struct muldata *)data;
+  return _idealmulred(D->nf,x,y,D->prec);
+}
+static GEN
+_sqr(void *data, GEN x)
+{
+  return _mul(data,x,x);
+}
+
 /* compute x^n (x ideal, n integer), reducing along the way */
 GEN
 idealpowred(GEN nf, GEN x, GEN n, long prec)
 {
-  long i,j,m,av=avma, s = signe(n);
-  GEN y, p1;
+  long av=avma, s = signe(n);
+  struct muldata D;
+  GEN y;
 
   if (typ(n) != t_INT) err(talker,"non-integral exponent in idealpowred");
-  if (signe(n) == 0) return idealpow(nf,x,n);
-  p1 = n+2; m = *p1;
-  y = x; j=1+bfffo((ulong)m); m<<=j; j = BITS_IN_LONG-j;
-  for (i=lgefint(n)-2;;)
-  {
-    for (; j; m<<=1,j--)
-    {
-      y = idealmul(nf,y,y);
-      if (m < 0) y = idealmul(nf,y,x);
-      y = ideallllred(nf,y,NULL,prec);
-    }
-    if (--i == 0) break;
-    m = *++p1; j = BITS_IN_LONG;
-  }
+  if (!s == 0) return idealpow(nf,x,n);
+  D.nf  = nf;
+  D.prec= prec;
+  y = leftright_pow(x, n, (void*)&D, &_sqr, &_mul);
+ 
   if (s < 0) y = idealinv(nf,y);
   if (y == x) y = ideallllred(nf,x,NULL,prec);
   return gerepileupto(av,y);
@@ -1760,9 +1775,8 @@ idealpowred(GEN nf, GEN x, GEN n, long prec)
 GEN
 idealmulred(GEN nf, GEN x, GEN y, long prec)
 {
-  long av=avma;
-  x = idealmul(nf,x,y);
-  return gerepileupto(av, ideallllred(nf,x,NULL,prec));
+  ulong av = avma;
+  return gerepileupto(av, _idealmulred(nf,x,y,prec));
 }
 
 long

@@ -1890,6 +1890,35 @@ factor(GEN x)
 #undef typs
 #undef tsh
 
+/* assume n > 0, t_INT. Compute x^n using left-right binary powering */
+GEN
+leftright_pow(GEN x, GEN n, void *data,
+             GEN (*sqr)(void*,GEN), GEN (*mul)(void*,GEN,GEN))
+{
+  GEN nd = n+2, y = x;
+  long i, m = *nd, j = 1+bfffo((ulong)m);
+  ulong av = avma, lim = stack_lim(av,1);
+ 
+  /* normalize, i.e set highest bit to 1 (we know m != 0) */
+  m<<=j; j = BITS_IN_LONG-j;
+  /* first bit is now implicit */
+  for (i=lgefint(n)-2;;)
+  {
+    for (; j; m<<=1,j--)
+    {
+      y = sqr(data,y);
+      if (m < 0) y = mul(data,y,x); /* first bit set: multiply by base */
+      if (low_stack(lim, stack_lim(av,1)))
+      {
+        if (DEBUGMEM>1) err(warnmem,"leftright_pow");
+        y = gerepileupto(av, y);
+      }
+    }
+    if (--i == 0) return avma==av? gcopy(y): y;
+    m = *++nd; j = BITS_IN_LONG;
+  }
+}
+
 GEN
 divide_conquer_prod(GEN x, GEN (*mul)(GEN,GEN))
 {

@@ -1892,12 +1892,37 @@ to_fq(GEN x, GEN a, GEN p)
   z[2] = (long)pol; return z;
 }
 
+struct muldata {
+  GEN pol, p, mod;
+  long v;
+};
+
+static GEN
+_red(void *data, GEN x)
+{
+  struct muldata *D = (struct muldata*)data;
+  GEN t = from_Kronecker(FpX(t,D->p), D->pol);
+  setvarn(t, D->v);
+  t = gres(t, D->mod);
+  return lift_intern(to_Kronecker(t,D->pol));
+}
+static GEN
+_mul(void *data, GEN x, GEN y) {
+  return _red(data, gmul(x,y));
+}
+static GEN
+_sqr(void *data, GEN x) {
+  return _red(data, gsqr(x));
+}
+
 /* x POLMOD over Fq, return lift(x^n) */
 static GEN
 Kronecker_powmod(GEN x, GEN mod, GEN n)
 {
-  long lim,av,av0 = avma, i,j,m,v = varn(x);
+  ulong av0 = avma;
+  long i,v = varn(x);
   GEN y, p1, p = NULL, pol = NULL;
+  struct muldata D;
 
   for (i=lgef(mod)-1; i>1; i--)
   {
@@ -1913,38 +1938,11 @@ Kronecker_powmod(GEN x, GEN mod, GEN n)
   if (!p) err(talker,"need Fq coeffs in Kronecker_powmod");
   x = lift_intern(to_Kronecker(x,pol));
 
-  /* adapted from powgi */
-  av=avma; lim=stack_lim(av,1);
-  p1 = n+2; m = *p1;
-
-  y=x; j=1+bfffo((ulong)m); m<<=j; j = BITS_IN_LONG-j;
-  for (i=lgefint(n)-2;;)
-  {
-    for (; j; m<<=1,j--)
-    {
-      y = gsqr(y);
-      y = from_Kronecker(FpX(y,p), pol);
-      setvarn(y, v);
-      y = gres(y, mod);
-      y = lift_intern(to_Kronecker(y,pol));
-
-      if (m<0)
-      {
-        y = gmul(y,x);
-        y = from_Kronecker(FpX(y,p), pol);
-        setvarn(y, v);
-        y = gres(y, mod);
-        y = lift_intern(to_Kronecker(y,pol));
-      }
-      if (low_stack(lim, stack_lim(av,1)))
-      {
-        if(DEBUGMEM>1) err(warnmem,"Kronecker_powmod");
-        y = gerepilecopy(av, y);
-      }
-    }
-    if (--i == 0) break;
-    m = *++p1; j = BITS_IN_LONG;
-  }
+  D.mod = mod;
+  D.pol = pol;
+  D.p = p;
+  D.v = v;
+  y = leftright_pow(x, n, (void*)&D, &_sqr, &_mul);
   y = from_Kronecker(FpX(y,p),pol);
   setvarn(y, v); return gerepileupto(av0, y);
 }

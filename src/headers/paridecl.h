@@ -1114,6 +1114,7 @@ GEN     centermod(GEN x, GEN p);
 GEN     content(GEN x);
 GEN     discsr(GEN x);
 GEN     divide_conquer_prod(GEN x, GEN (*mul)(GEN,GEN));
+GEN     leftright_pow(GEN,GEN,void*,GEN (*sqr)(void*,GEN),GEN (*mul)(void*,GEN,GEN));
 GEN     factor(GEN x);
 GEN     factor0(GEN x,long flag);
 GEN     factorback(GEN fa,GEN nf);

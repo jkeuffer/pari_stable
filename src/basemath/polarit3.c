@@ -1109,26 +1109,49 @@ FpX_chinese_coprime(GEN x,GEN y,GEN Tx,GEN Ty,GEN Tz,GEN p)
   return gerepileupto(av,p1);
 }
 
+struct muldata {
+  GEN pol, p;
+};
+struct umuldata {
+  GEN pol;
+  ulong p;
+};
+
+static GEN
+_u_sqr(void *data, GEN x)
+{
+  struct umuldata *D = (struct umuldata*)data;
+  return u_FpXQ_sqr(x, D->pol, D->p);
+}
+static GEN
+_u_mul(void *data, GEN x, GEN y)
+{
+  struct umuldata *D = (struct umuldata*)data;
+  return u_FpXQ_mul(x,y, D->pol, D->p);
+}
+static GEN
+_sqr(void *data, GEN x)
+{
+  struct muldata *D = (struct muldata*)data;
+  return FpXQ_sqr(x, D->pol, D->p);
+}
+static GEN
+_mul(void *data, GEN x, GEN y)
+{
+  struct muldata *D = (struct muldata*)data;
+  return FpXQ_mul(x,y, D->pol, D->p);
+}
+
 /* assume n > 0 */
 GEN
 u_FpXQ_pow(GEN x, GEN n, GEN pol, ulong p)
 {
   ulong av = avma;
-  GEN p1 = n+2, y = x;
-  long m,i,j;
-  m = *p1;
-  j = 1+bfffo((ulong)m); m <<= j; j = BITS_IN_LONG-j;
-  for (i=lgefint(n)-2;;)
-  {
-    for (; j; m<<=1,j--)
-    {
-      y = u_FpXQ_sqr(y,pol,p);
-      if (m<0)
-        y = u_FpXQ_mul(y,x,pol,p);
-    }
-    if (--i == 0) break;
-    m = *++p1; j = BITS_IN_LONG;
-  }
+  struct umuldata D;
+  GEN y;
+  D.pol = pol;
+  D.p   = p;
+  y = leftright_pow(x, n, (void*)&D, &_u_sqr, &_u_mul);
   return gerepileupto(av, y);
 }
 
@@ -1136,9 +1159,10 @@ u_FpXQ_pow(GEN x, GEN n, GEN pol, ulong p)
 GEN
 FpXQ_pow(GEN x, GEN n, GEN pol, GEN p)
 {
-  ulong av, ltop = avma, lim=stack_lim(avma,1);
-  long m,i,j, vx = varn(x);
-  GEN p1 = n+2, y;
+  ulong av = avma;
+  struct muldata D;
+  long vx = varn(x);
+  GEN y;
   if (!signe(n)) return polun[vx];
   if (signe(n) < 0)
   {
@@ -1151,38 +1175,18 @@ FpXQ_pow(GEN x, GEN n, GEN pol, GEN p)
   {
     ulong pp = p[2];
     pol = u_Fp_FpX(pol,0, pp);
-    x = u_Fp_FpX(x,0, pp);
+    x   = u_Fp_FpX(x,  0, pp);
     y = u_FpXQ_pow(x, n, pol, pp);
     y = small_to_pol(y,vx);
   }
   else
   {
     av = avma;
-    m = *p1; y = x;
-    j = 1+bfffo((ulong)m); m <<= j; j = BITS_IN_LONG-j;
-    for (i=lgefint(n)-2;;)
-    {
-      for (; j; m<<=1,j--)
-      {
-        y = FpXQ_sqr(y,pol,p);
-        if (low_stack(lim, stack_lim(av,1)))
-        {
-          if(DEBUGMEM>1) err(warnmem,"[1]: FpXQ_pow");
-          y = gerepileupto(av, y);
-        }
-        if (m<0)
-          y = FpXQ_mul(y,x,pol,p);
-        if (low_stack(lim, stack_lim(av,1)))
-        {
-          if(DEBUGMEM>1) err(warnmem,"[2]: FpXQ_pow");
-          y = gerepileupto(av, y);
-        }
-      }
-      if (--i == 0) break;
-      m = *++p1; j = BITS_IN_LONG;
-    }
+    D.pol = pol;
+    D.p   = p;
+    y = leftright_pow(x, n, (void*)&D, &_sqr, &_mul);
   }
-  return gerepileupto(ltop,y);
+  return gerepileupto(av, y);
 }
 
 /*******************************************************************/

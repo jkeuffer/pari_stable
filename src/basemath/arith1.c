@@ -1393,7 +1393,7 @@ mpinvmod(GEN a, GEN m)
 /*********************************************************************/
 GEN resiimul(GEN x, GEN y);
 GEN resmod2n(GEN x, long y);
-GEN _resii(GEN x, GEN y) { return resii(x,y); }
+static GEN _resii(GEN x, GEN y) { return resii(x,y); }
 
 GEN
 init_remainder(GEN M)
@@ -1412,13 +1412,37 @@ static long RESIIMUL_LIMIT = 150;
 void
 setresiilimit(long n) { RESIIMUL_LIMIT = n; }
 
+struct muldata {
+  GEN M;
+  GEN (*res)(GEN,GEN);
+  GEN (*mul)(GEN,GEN);
+};
+
+static GEN
+_muli2(GEN x, GEN y/* ignored */)
+{
+  (void)y; return shifti(x,1);
+}
+
+static GEN
+_mul(void *data, GEN x, GEN y)
+{
+  struct muldata *D = (struct muldata *)data;
+  return D->res(D->mul(x,y), D->M);
+}
+static GEN
+_sqr(void *data, GEN x)
+{
+  struct muldata *D = (struct muldata *)data;
+  return D->res(sqri(x), D->M);
+}
 GEN
 powmodulo(GEN A, GEN N, GEN M)
 {
+  ulong av = avma;
+  long k,s;
   GEN y;
-  long av = avma,av1,lim,man,k,nb,s, *p;
-  GEN (*mul)(GEN,GEN) = mulii;
-  GEN (*res)(GEN,GEN) = _resii;
+  struct muldata D;
 
   if (typ(A) != t_INT || typ(N) != t_INT || typ(M) != t_INT) err(arither1);
   s = signe(N);
@@ -1436,42 +1460,28 @@ powmodulo(GEN A, GEN N, GEN M)
   y = A;
   if (lgefint(y)==3) switch(y[2])
   {
-    case 1: /* y = 1 */
-      avma=av; return gun;
-    case 2: /* y = 2, use shifti not mulii */
-    mul = (GEN (*)(GEN,GEN))shifti; A = (GEN)1L;
+    case 1: avma = av; return gun; /* y = 1 */
+    case 2: D.mul = &_muli2; break;/* y = 2 */
+    default: D.mul = &mulii;
   }
+  else
+    D.mul = &mulii;
 
   /* TODO: Move this out of here and use for general modular computations */
   if ((k = vali(M)) && k == expi(M))
   { /* M is a power of 2 */
     M = (GEN)k;
-    res = (GEN(*)(GEN,GEN))resmod2n;
+    D.res = (GEN(*)(GEN,GEN))&resmod2n;
   }
   else if (lgefint(M) > RESIIMUL_LIMIT && (lgefint(N) > 3 || N[2] > 4))
   { /* compute x % M using multiplication by 1./M */
     M = init_remainder(M);
-    res = (GEN(*)(GEN,GEN))resiimul;
+    D.res = &resiimul;
   }
-
-  p = N+2; man = *p; /* see puissii */
-  k = 1+bfffo((ulong)man); man<<=k; k = BITS_IN_LONG-k;
-  av1=avma; lim=stack_lim(av1,1);
-  for (nb=lgefint(N)-2;;)
-  {
-    for (; k; man<<=1,k--)
-    {
-      y = res(sqri(y), M);
-      if (man < 0) y = res(mul(y,A), M);
-      if (low_stack(lim, stack_lim(av1,1)))
-      {
-        if (DEBUGMEM>1) err(warnmem,"powmodulo");
-        y = gerepileuptoint(av1,y);
-      }
-    }
-    if (--nb == 0) break;
-    man = *++p, k = BITS_IN_LONG;
-  }
+  else
+    D.res = &_resii;
+  D.M   = M;
+  y = leftright_pow(y, N, (void*)&D, &_sqr, &_mul);
   return gerepileupto(av,y);
 }
 

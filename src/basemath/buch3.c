@@ -205,29 +205,37 @@ idealmulmodidele(GEN nf,GEN x,GEN y, GEN ideal,GEN sarch,GEN arch)
   return idealmodidele(nf,idealmul(nf,x,y),ideal,sarch,arch);
 }
 
+struct muldata {
+  GEN nf, ideal, sarch, arch;
+};
+
+static GEN
+_mul(void *data, GEN x, GEN y)
+{
+  struct muldata *D = (struct muldata *)data;
+  GEN t = idealmul(D->nf,x,y);
+  return idealmodidele(D->nf, t, D->ideal, D->sarch, D->arch);
+}
+static GEN
+_sqr(void *data, GEN x) {
+  return _mul(data,x,x);
+}
+
 /* assume n > 0 */
 /* FIXME: should compute x^n = a I using idealred, then reduce a mod idele */
 static GEN
 idealpowmodidele(GEN nf,GEN x,GEN n, GEN ideal,GEN sarch,GEN arch)
 {
-  long i,m,av=avma;
-  GEN y, p1;
-  ulong j;
+  ulong av = avma;
+  struct muldata D;
+  GEN y;
 
   if (gcmp1(n)) return x;
-  p1 = n+2; m = *p1;
-  y=x; j=1+bfffo((ulong)m); m<<=j; j = BITS_IN_LONG-j;
-  for (i=lgefint(n)-2;;)
-  {
-    for (; j; m<<=1,j--)
-    {
-      y = idealmul(nf,y,y);
-      if (m<0) y = idealmul(nf,y,x);
-      y = idealmodidele(nf,y,ideal,sarch,arch);
-    }
-    if (--i == 0) break;
-    m = *++p1; j = BITS_IN_LONG;
-  }
+  D.nf = nf;
+  D.ideal= ideal;
+  D.arch = arch;
+  D.sarch= sarch;
+  y = leftright_pow(x, n, (void*)&D, &_sqr, &_mul);
   return gerepileupto(av,y);
 }
 

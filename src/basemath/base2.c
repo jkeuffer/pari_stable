@@ -137,17 +137,19 @@ mulmati(GEN x, GEN y)
 }
 
 static GEN
-powmati(GEN x, long m)
-{
-  long av=avma,j;
-  GEN y = x;
+_mulmati(void *data /*ignored*/, GEN x, GEN y) {
+  (void)data; return mulmati(x,y);
+}
+static GEN
+_sqrmati(void *data /*ignored*/, GEN x) {
+  (void)data; return mulmati(x,x);
+}
 
-  j=1+bfffo((ulong)m); m<<=j; j = BITS_IN_LONG-j;
-  for (; j; m<<=1,j--)
-  {
-    y=mulmati(y,y);
-    if (m<0) y=mulmati(y,x);
-  }
+static GEN
+powmati(GEN x, GEN n)
+{
+  ulong av = avma;
+  GEN y = leftright_pow(x, n, NULL, &_sqrmati, &_mulmati);
   return gerepileupto(av,y);
 }
 
@@ -297,14 +299,14 @@ matinv(GEN x, GEN d, long n)
 static GEN
 ordmax(GEN *cf, GEN p, long epsilon, GEN *ptdelta)
 {
-  long sp,hard_case_exponent,i,n=lg(cf)-1,av=avma, av2,limit;
-  GEN T,T2,Tn,m,v,delta, *w;
+  long sp,i,n=lg(cf)-1,av=avma, av2,limit;
+  GEN T,T2,Tn,m,v,delta,hard_case_exponent, *w;
   const GEN pp = sqri(p);
   const long pps = (2*expi(pp)+2<BITS_IN_LONG)? pp[2]: 0;
 
   if (cmpis(p,n) > 0)
   {
-    hard_case_exponent = 0;
+    hard_case_exponent = NULL;
     sp = 0; /* gcc -Wall */
   }
   else
@@ -312,7 +314,7 @@ ordmax(GEN *cf, GEN p, long epsilon, GEN *ptdelta)
     long k;
     k = sp = itos(p);
     i=1; while (k < n) { k *= sp; i++; }
-    hard_case_exponent = i;
+    hard_case_exponent = stoi(i);
   }
   T=cgetg(n+1,t_MAT); for (i=1; i<=n; i++) T[i]=lgetg(n+1,t_COL);
   T2=cgetg(2*n+1,t_MAT); for (i=1; i<=2*n; i++) T2[i]=lgetg(n+1,t_COL);
@@ -2442,27 +2444,42 @@ rnfelement_sqrmod(GEN nf, GEN multab, GEN unnf, GEN x, GEN prhall)
   return z;
 }
 
+struct muldata {
+  GEN nf, multab, unnf, prhall;
+  long h;
+};
+
+static GEN
+_mul(void *data, GEN x, GEN y/* base; ignored */)
+{
+  struct muldata *D = (struct muldata *) data;
+  (void)y;
+  return rnfelement_mulidmod(D->nf,D->multab,D->unnf,x,D->h,D->prhall);
+}
+static GEN
+_sqr(void *data, GEN x)
+{
+  struct muldata *D = (struct muldata *) data;
+  return rnfelement_sqrmod(D->nf,D->multab,D->unnf,x,D->prhall);
+}
+
 /* Compute x^n mod pr in the extension, assume n >= 0 [cf puissii()]*/
 static GEN
 rnfelementid_powmod(GEN nf, GEN multab, GEN matId, long h, GEN n, GEN prhall)
 {
   ulong av = avma;
-  long i,k,m;
-  GEN y,p1, unrnf=(GEN)matId[1], unnf=(GEN)unrnf[1];
+  GEN y, unrnf = (GEN)matId[1];
+  struct muldata D;
 
   if (!signe(n)) return unrnf;
-  y = (GEN)matId[h]; p1 = n+2; m = *p1;
-  k = 1+bfffo((ulong)m); m<<=k; k = BITS_IN_LONG-k;
-  for (i=lgefint(n)-2;;)
-  {
-    for (; k; m<<=1,k--)
-    {
-      y = rnfelement_sqrmod(nf,multab,unnf,y,prhall);
-      if (m < 0) y = rnfelement_mulidmod(nf,multab,unnf,y,h,prhall);
-    }
-    if (--i == 0) break;
-    m = *++p1; k = BITS_IN_LONG;
-  }
+  y = (GEN)matId[h];
+ 
+  D.h = h;
+  D.nf    = nf;
+  D.multab= multab;
+  D.prhall= prhall;
+  D.unnf  = (GEN)unrnf[1];
+  y = leftright_pow(y, n, (void*)&D, &_sqr, &_mul);
   return gerepilecopy(av, y);
 }
 

@@ -254,6 +254,23 @@ puiss0(GEN x)
   return y;
 }
 
+static GEN
+_sqr(void *data /* ignored */, GEN x) {
+  (void)data; return gsqr(x);
+}
+static GEN
+_mul(void *data /* ignored */, GEN x, GEN y) {
+  (void)data; return gmul(x,y);
+}
+static GEN
+_sqri(void *data /* ignored */, GEN x) {
+  (void)data; return sqri(x);
+}
+static GEN
+_muli(void *data /* ignored */, GEN x, GEN y) {
+  (void)data; return mulii(x,y);
+}
+
 /* INTEGER POWERING (a^|n| for integer a and integer |n| > 1)
  *
  * Nonpositive powers and exponent one should be handled by gpow() and
@@ -269,7 +286,7 @@ puiss0(GEN x)
 static GEN
 puissii(GEN a, GEN n, long s)
 {
-  long av,*p,m,k,i,lim;
+  ulong av;
   GEN y;
 
   if (!signe(a)) return gzero; /* a==0 */
@@ -283,28 +300,36 @@ puissii(GEN a, GEN n, long s)
     if (n[2] == 1) { a = icopy(a); setsigne(a,s); return a; }
     if (n[2] == 2) return sqri(a);
   }
-  /* be paranoid about memory consumption */
-  av=avma; lim=stack_lim(av,1);
-  y = a; p = n+2; m = *p;
-  /* normalize, i.e set highest bit to 1 (we know m != 0) */
-  k = 1+bfffo((ulong)m); m<<=k; k = BITS_IN_LONG-k;
-  /* first bit is now implicit */
-  for (i=lgefint(n)-2;;)
-  {
-    for (; k; m<<=1,k--)
-    {
-      y = sqri(y);
-      if (m < 0) y = mulii(y,a); /* first bit is set: multiply by base */
-      if (low_stack(lim, stack_lim(av,1)))
-      {
-        if (DEBUGMEM>1) err(warnmem,"puissii");
-        y = gerepileuptoint(av,y);
-      }
-    }
-    if (--i == 0) break;
-    m = *++p; k = BITS_IN_LONG;
-  }
+  av = avma;
+  y = leftright_pow(a, n, NULL, &_sqri, &_muli);
   setsigne(y,s); return gerepileuptoint(av,y);
+}
+
+struct muldata {
+  long prec, a;
+  GEN (*sqr)(GEN);
+  GEN (*mulsg)(long,GEN);
+  GEN unr;
+};
+
+static GEN
+_rpowsi_mul(void *data, GEN x, GEN y/* base; ignored */)
+{
+  struct muldata *D = (struct muldata *)data;
+  return D->mulsg(D->a, x);
+}
+
+static GEN
+_rpowsi_sqr(void *data, GEN x)
+{
+  struct muldata *D = (struct muldata *)data;
+  if (lgefint(x) >= D->prec && typ(x) == t_INT)
+  { /* switch to t_REAL */
+    D->sqr   = &gsqr;
+    D->mulsg = &mulsr;
+    affir(x, D->unr); x = D->unr;
+  }
+  return D->sqr(x);
 }
 
 /* return a^n as a t_REAL of precision prec. Adapted from puissii().
@@ -312,42 +337,19 @@ puissii(GEN a, GEN n, long s)
 GEN
 rpowsi(ulong a, GEN n, long prec)
 {
-  long av,*p,m,k,i,lim;
+  ulong av = avma;
   GEN y, unr = realun(prec);
-  GEN (*sq)(GEN);
-  GEN (*mulsg)(long,GEN);
+  struct muldata D;
 
   if (a == 1) return unr;
   if (a == 2) { setexpo(unr, itos(n)); return unr; }
   if (is_pm1(n)) { affsr(a, unr); return unr; }
-  /* be paranoid about memory consumption */
-  av=avma; lim=stack_lim(av,1);
-  y = stoi(a); p = n+2; m = *p;
-  /* normalize, i.e set highest bit to 1 (we know m != 0) */
-  k = 1+bfffo((ulong)m); m<<=k; k = BITS_IN_LONG-k;
-  /* first bit is now implicit */
-  sq = &sqri; mulsg = &mulsi;
-  for (i=lgefint(n)-2;;)
-  {
-    for (; k; m<<=1,k--)
-    {
-      y = sq(y);
-      if (m < 0) y = mulsg(a,y);
-      if (lgefint(y) >= prec && typ(y) == t_INT) /* switch to t_REAL */
-      { 
-        sq = &gsqr; mulsg = &mulsr;
-        affir(y, unr); y = unr;
-      }
-
-      if (low_stack(lim, stack_lim(av,1)))
-      {
-        if (DEBUGMEM>1) err(warnmem,"rpuisssi");
-        y = gerepileuptoleaf(av,y);
-      }
-    }
-    if (--i == 0) break;
-    m = *++p, k = BITS_IN_LONG;
-  }
+  D.sqr   = &sqri; 
+  D.mulsg = &mulsi;
+  D.prec = prec;
+  D.unr = unr;
+  D.a = a;
+  y = leftright_pow(stoi(a), n, (void*)&D, &_rpowsi_sqr, &_rpowsi_mul);
   if (typ(y) == t_INT) { affir(y, unr); y = unr ; }
   return gerepileuptoleaf(av,y);
 }
@@ -462,9 +464,8 @@ extern GEN powrealform(GEN x, GEN n);
 GEN
 powgi(GEN x, GEN n)
 {
-  long i,j,m,tx, sn=signe(n);
-  ulong lim,av;
-  GEN y, p1;
+  long tx, sn = signe(n);
+  GEN y;
 
   if (typ(n) != t_INT) err(talker,"not an integral exponent in powgi");
   if (!sn) return puiss0(x);
@@ -511,7 +512,7 @@ powgi(GEN x, GEN n)
     }
     case t_PADIC:
     {
-      long e = itos(n)*valp(x);
+      long e = itos(n)*valp(x), v;
       GEN mod, p = (GEN)x[2];
       
       if (!signe(x[4]))
@@ -520,14 +521,14 @@ powgi(GEN x, GEN n)
         return padiczero(p, e);
       }
       y = cgetg(5,t_PADIC);
-      mod = (GEN)x[3]; i = ggval(n, p);
-      if (i == 0) mod = icopy(mod);
+      mod = (GEN)x[3]; v = ggval(n, p);
+      if (v == 0) mod = icopy(mod);
       else
       {
-        mod = mulii(mod, gpowgs(p,i));
+        mod = mulii(mod, gpowgs(p,v));
         mod = gerepileuptoint((long)y, mod);
       }
-      y[1] = evalprecp(precp(x)+i) | evalvalp(e);
+      y[1] = evalprecp(precp(x)+v) | evalvalp(e);
       icopyifstack(p, y[2]);
       y[3] = (long)mod;
       y[4] = (long)powmodulo((GEN)x[4], n, mod);
@@ -538,31 +539,12 @@ powgi(GEN x, GEN n)
     case t_POL:
       if (ismonome(x)) return pow_monome(x,n);
     default:
-      av=avma; lim=stack_lim(av,1);
-      p1 = n+2; m = *p1;
-      y=x; j=1+bfffo((ulong)m); m<<=j; j = BITS_IN_LONG-j;
-      for (i=lgefint(n)-2;;)
-      {
-        for (; j; m<<=1,j--)
-        {
-          y=gsqr(y);
-          if (low_stack(lim, stack_lim(av,1)))
-          {
-            if(DEBUGMEM>1) err(warnmem,"[1]: powgi");
-            y = gerepileupto(av, y);
-          }
-          if (m<0) y=gmul(y,x);
-          if (low_stack(lim, stack_lim(av,1)))
-          {
-            if(DEBUGMEM>1) err(warnmem,"[2]: powgi");
-            y = gerepileupto(av, y);
-          }
-        }
-        if (--i == 0) break;
-        m = *++p1; j = BITS_IN_LONG;
-      }
+    {
+      ulong av = avma;
+      y = leftright_pow(x, n, NULL, &_sqr, &_mul);
       if (sn < 0) y = ginv(y);
       return av==avma? gcopy(y): gerepileupto(av,y);
+    }
   }
 }
 
