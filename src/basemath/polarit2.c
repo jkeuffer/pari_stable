@@ -2425,17 +2425,16 @@ _factorback(GEN fa, GEN e, GEN (*_mul)(GEN,GEN), GEN (*_pow)(GEN,GEN))
 GEN
 factorback_i(GEN fa, GEN e, GEN OBJ, int red)
 {
-  if (!OBJ && e && lg(e) > 1 && typ(e[1]) != t_INT) {
-    OBJ = e;
-    e = NULL;
+  if (!OBJ)
+  {
+    if (e) {
+      OBJ = _checknf(e); if (OBJ) e = NULL;
+    }
+    if (!OBJ) return _factorback(fa, e, &gmul, &powgi);
   }
-  if (!OBJ) return _factorback(fa, e, &gmul, &powgi);
-
-  static_OBJ = checknf(OBJ);
-  if (red)
-    return _factorback(fa, e, &idmulred, &idpowred);
-  else
-    return _factorback(fa, e, &idmul, &idpow);
+  static_OBJ = OBJ;
+  if (red) return _factorback(fa, e, &idmulred, &idpowred);
+  else     return _factorback(fa, e, &idmul,    &idpow);
 }
 
 GEN

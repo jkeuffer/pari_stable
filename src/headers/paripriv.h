@@ -32,5 +32,8 @@ GEN resetloop(GEN a, GEN b);
 GEN resetloop2(GEN a, GEN b, GEN c);
 GEN setloop(GEN a);
 
+GEN _checkbnf(GEN bnf);
+GEN _checknf(GEN nf);
+
 #define both_odd(x,y) ((x)&(y)&1)
 
