@@ -2852,7 +2852,7 @@ ifac_crack(GEN *partial, GEN *where)
   } /* while carrecomplet */
 
   /* check whether our composite hasn't become prime */
-  if (exp1 > 1 && isprime((GEN)(**where)))
+  if (exp1 > 1 && hint != 15 && isprime((GEN)(**where)))
   {
     (*where)[2] = un;
     if (DEBUGLEVEL >= 4)
@@ -2891,21 +2891,15 @@ ifac_crack(GEN *partial, GEN *where)
       if (moebius_mode) return 0; /* no need to carry on... */
     } /* while is_odd_power */
 
-    if (exp2 > 1)
-    {				/* Something nice has happened */
-      /* check whether our composite hasn't become prime */
-      if (isprime((GEN)(**where)))
+    if (exp2 > 1 && hint != 15 && isprime((GEN)(**where)))
+    { /* Something nice has happened and our composite has become prime */
+      (*where)[2] = un;
+      if (DEBUGLEVEL >= 4)
       {
-        (*where)[2] = un;
-	if (DEBUGLEVEL >= 4)
-	{
-	  fprintferr("IFAC: factor %Z\n\tis prime\n", **where);
-	  flusherr();
-	}
-	return 0;		/* bypass subsequent ifac_whoiswho() call */
+        fprintferr("IFAC: factor %Z\n\tis prime\n", **where);
+        flusherr();
       }
-      /* base of power is still composite  (an exceedingly rare case),
-	 fall through */
+      return 0;		/* bypass subsequent ifac_whoiswho() call */
     }
   } /* odd power stage */
 

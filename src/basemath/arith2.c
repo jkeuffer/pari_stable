@@ -472,8 +472,8 @@ auxdecomp0(GEN n, long all, long hint)
       if (is_pm1(n)) return aux_end(n,nb);
     }
 
-  /* test primality */
-  if ((k && cmpii(pp,n) > 0) || pseudoprime(n))
+  /* test primality (unless all != 1 (i.e smallfact))*/
+  if ((k && cmpii(pp,n) > 0) || (all==1 && pseudoprime(n)))
   {
     nb++;
     icopy(n); stoi(1); return aux_end(n,nb);
