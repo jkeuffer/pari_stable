@@ -1695,17 +1695,14 @@ static int
 check_condition(double beta, double tau, double rho, int d, int delta, int t)
 {
   int dim = d*delta + t;
+  double cond = d*delta*(delta+1)/2 - beta*delta*dim
+    + rho*delta*(delta - 1) / 2
+    + rho * t * delta + tau*dim*(dim - 1)/2;
 
   if (DEBUGLEVEL >= 4) 
-    {
-      fprintferr("delta = %d t = %d cond = %lf\n", delta, t, 
-		 d*delta*(delta+1)/2 - beta*delta*dim + 
-		 rho*delta*(delta - 1) / 2
-		 + rho * t * delta + tau*dim*(dim - 1)/2); 
-    }
+    fprintferr("delta = %d, t = %d, cond = %lf\n", delta, t, cond); 
 
-  return (d*delta*(delta+1)/2 - beta*delta*dim + rho*delta*(delta - 1) / 2
-	  + rho * t * delta + tau*dim*(dim - 1)/2 <= 0);
+  return (cond <= 0);
 }
 
 static void
