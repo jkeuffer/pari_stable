@@ -3855,10 +3855,15 @@ $\var{pol}$ (monic irreducible polynomial in $\Z[X]$ or
 a number field as output by \tet{nfinit}). The extension $K/\Q$ must be
 Galois with Galois group ``weakly'' super-solvable (see \tet{nfgaloisconj})
 
-%\misctitle{Warning:} The interface of this function is experimental,
-%so the described output can be subject to important changes in the
-%near future. However the function itself should work as described. For any
-%remarks about this interface, please mail \kbd{allomber@math.u-bordeaux.fr}.
+This is a prerequisite for most of the \kbd{galois}$xxx$ routines. For
+instance:
+\bprog
+  P = x^6 + 108;
+  G = galoisinit(P);
+  L = galoissubgroups(G);
+  vector(#L, i, galoisisabelian(L[i],1))
+  vector(#L, i, galoisidentify(L[i]))
+@eprog
 
 The output is an 8-component vector \var{gal}.
 
