@@ -776,7 +776,7 @@ sqrtr_abs(GEN x, long s)
     beta = beta * (1UL << BITS_IN_HALFULONG);
 #ifdef LONG_IS_64BIT
     if (a[2] >= -(1 << 11))
-    { t[1] = evalexpo(1) | evalsigne(1); t[2] = (long)HIGHTBIT; }
+    { t[1] = evalexpo(1) | evalsigne(1); t[2] = (long)HIGHBIT; }
     else
 #endif
     { t[1] = evalexpo(0) | evalsigne(1); t[2] = (long)(ulong)beta; }
