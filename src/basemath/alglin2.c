@@ -46,7 +46,7 @@ caract2_i(GEN p, GEN x, int v, GEN (subres_f)(GEN,GEN,GEN*))
   long av = avma, d;
   GEN p1, p2 = leading_term(p);
 
-  if (!signe(x)) return gpowgs(polx[v], lgef(p)-3);
+  if (!signe(x)) return gpowgs(polx[v], degpol(p));
   if (typ(x) != t_POL) x = scalarpol(x,v);
   x = gneg_i(x); x[2] = ladd((GEN)x[2], polx[MAXVARN]);
   p1=subres_f(p, x, NULL);
@@ -55,7 +55,7 @@ caract2_i(GEN p, GEN x, int v, GEN (subres_f)(GEN,GEN,GEN*))
   else
     p1 = gsubst(p1,MAXVARN,polx[v]);
 
-  if (!gcmp1(p2) && (d=lgef(x)-3) > 0) p1 = gdiv(p1, gpuigs(p2,d));
+  if (!gcmp1(p2) && (d=degpol(x)) > 0) p1 = gdiv(p1, gpuigs(p2,d));
   return gerepileupto(av,p1);
 }
 
@@ -330,7 +330,7 @@ gnorm(GEN x)
     case t_POLMOD:
       p1=(GEN)x[1]; p2=leading_term(p1);
       if (gcmp1(p2) || gcmp0((GEN) x[2])) return subres(p1,(GEN) x[2]);
-      l=avma; y=subres(p1,(GEN)x[2]); p1=gpuigs(p2,lgef(x[2])-3);
+      l=avma; y=subres(p1,(GEN)x[2]); p1=gpuigs(p2,degpol(x[2]));
       tetpil=avma; return gerepile(l,tetpil,gdiv(y,p1));
 
     case t_VEC: case t_COL: case t_MAT:

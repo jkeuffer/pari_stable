@@ -599,7 +599,7 @@ direulerall(entree *ep, GEN ga, GEN gb, char *ch, GEN c)
         polden = gneg(polden);
       }
       for (i=1; i<=n; i++) y[i]=x[i];
-      lx=lgef(polnum)-3;
+      lx=degpol(polnum);
       q=p; qlim = n/p; j=1;
       while (q<=(ulong)n && j<=lx)
       {
@@ -622,7 +622,7 @@ direulerall(entree *ep, GEN ga, GEN gb, char *ch, GEN c)
       if (tx != t_POL) err(typeer,"direuler");
       c = truecoeff(polden,0);
       if (!gcmp1(c)) err(talker,"constant term not equal to 1 in direuler");
-      lx=lgef(polden)-3;
+      lx=degpol(polden);
       for (i=p; i<=n; i+=p)
       {
 	s=gzero; k=i; j=1;

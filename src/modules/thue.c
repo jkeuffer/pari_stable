@@ -36,7 +36,7 @@ checktnf(GEN tnf)
   if (typ(tnf[1])!=t_POL) return 0;
   if (lg(tnf) != 8) return 1; /* s=0 */
 
-  deg=lgef(tnf[1])-3;
+  deg=degpol(tnf[1]);
   if (deg<=2) err(talker,"invalid polynomial in thue (need deg>2)");
   s=sturm((GEN)tnf[1]); t=(deg-s)>>1; r=s+t-1;
   (void)checkbnf((GEN)tnf[2]);
@@ -91,7 +91,7 @@ inithue(GEN poly, long flag)
   GEN roo2, tmp, gpmin, de;
   int k,j;
 
-  x0=gzero; x1=gzero; deg=lgef(poly)-3; gdeg=stoi(deg);
+  x0=gzero; x1=gzero; deg=degpol(poly); gdeg=stoi(deg);
 
   if (!uftot)
   {
@@ -633,7 +633,7 @@ thueinit(GEN poly, long flag, long prec)
   if (st)
   {
     dr=(double)((st+lgef(poly)-5)>>1);
-    d=(double)lgef(poly)-3; d=d*(d-1)*(d-2);
+    d=(double)degpol(poly); d=d*(d-1)*(d-2);
     /* Try to guess the precision by approximating Baker's bound.
      * Note that the guess is most of the time pretty generous,
      * ie 10 to 30 decimal digits above what is *really* necessary.
@@ -693,7 +693,7 @@ thue(GEN thueres, GEN rhs, GEN ne)
 
   if (lg(thueres)==8)
   {
-    poly=(GEN)thueres[1]; deg=lgef(poly)-3; gdeg=stoi(deg);
+    poly=(GEN)thueres[1]; deg=degpol(poly); gdeg=stoi(deg);
     uftot=(GEN)thueres[2];
     roo=gcopy((GEN)thueres[3]);
     ALH=(GEN)thueres[4];
@@ -821,7 +821,7 @@ thue(GEN thueres, GEN rhs, GEN ne)
   }
 
   /* Case s=0. All the solutions are "small". */
-  Prec=DEFAULTPREC; poly=(GEN)thueres[1]; deg=lgef(poly)-3;
+  Prec=DEFAULTPREC; poly=(GEN)thueres[1]; deg=degpol(poly);
   gdeg=stoi(deg); c0=(GEN)thueres[2];
   roo=roots(poly,Prec);
   Check_Small(gtolong(ground(gpui(gmul((GEN)poly[2],gdiv(gabs(rhs,Prec),c0)),

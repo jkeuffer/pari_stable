@@ -53,7 +53,7 @@ static GEN
 get_full_rank(GEN nf, GEN v, GEN _0, GEN _1, GEN gen, long ngen, long rankmax)
 {
   GEN vecsign,v1,p1,alpha, bas=(GEN)nf[7], rac=(GEN)nf[6];
-  long rankinit = lg(v)-1, N = lgef(nf[1])-3, va = varn(nf[1]);
+  long rankinit = lg(v)-1, N = degpol(nf[1]), va = varn(nf[1]);
   long limr,i,k,kk,r,rr;
   vecsign = cgetg(rankmax+1,t_COL);
   for (r=1,rr=3; ; r++,rr+=2)
@@ -347,7 +347,7 @@ buchrayall(GEN bnf,GEN module,long flag)
 
   if (flag & nf_GEN)
   {
-    GEN Id = idmat(lgef(nf[1])-3), arch = (GEN)module[2];
+    GEN Id = idmat(degpol(nf[1])), arch = (GEN)module[2];
     u1 = reducemodmatrix(u1,h);
     genray = cgetg(c,t_VEC);
     for (j=1; j<c; j++)
@@ -707,7 +707,7 @@ isprimitive(GEN nf)
   long N,p,i,l,ep;
   GEN d,fa;
 
-  N = lgef(nf[1])-3; fa = (GEN)factor(stoi(N))[1]; /* primes | N */
+  N = degpol(nf[1]); fa = (GEN)factor(stoi(N))[1]; /* primes | N */
   p = itos((GEN)fa[1]); if (p == N) return 1; /* prime degree */
 
   /* N = [L:Q] = product of primes >= p, same is true for [L:K]
@@ -736,7 +736,7 @@ regulatorbound(GEN bnf)
   long N,R1,R2,R;
   GEN nf,dKa,bound,p1,c1;
 
-  nf = (GEN)bnf[7]; N = lgef(nf[1])-3;
+  nf = (GEN)bnf[7]; N = degpol(nf[1]);
   bound = dbltor(0.2);
   if (!isprimitive(nf))
   {
@@ -1032,7 +1032,7 @@ lowerboundforregulator_i(GEN bnf)
   GEN units = check_units(bnf,"bnfcertify");
 
   rootsofone=gmael(bnf,8,4); nbrootsofone=itos((GEN)rootsofone[1]);
-  nf=(GEN)bnf[7]; T2=gmael(nf,5,3); N=lgef(nf[1])-3;
+  nf=(GEN)bnf[7]; T2=gmael(nf,5,3); N=degpol(nf[1]);
   R1=itos(gmael(nf,2,1)); R2=itos(gmael(nf,2,2)); RU=R1+R2-1;
   if (RU==0) return gun;
 
@@ -1108,7 +1108,7 @@ primecertify(GEN bnf,GEN beta,long pp,GEN big)
   GEN nf,mat,mat1,qgen,decqq,newcol,Qh,Q,g,ord;
 
   ord = NULL; /* gcc -Wall */
-  nbcol = 0; nf = (GEN)bnf[7]; N = lgef(nf[1])-3;
+  nbcol = 0; nf = (GEN)bnf[7]; N = degpol(nf[1]);
   lb = lg(beta)-1; mat = cgetg(1,t_MAT); qq = 1;
   for(;;)
   {
@@ -1184,7 +1184,7 @@ certifybuchall(GEN bnf)
   byteptr delta = diffptr;
 
   bnf = checkbnf(bnf); nf = (GEN)bnf[7];
-  N=lgef(nf[1])-3; if (N==1) return 1;
+  N=degpol(nf[1]); if (N==1) return 1;
   R1=itos(gmael(nf,2,1)); R2=itos(gmael(nf,2,2)); R=R1+R2-1;
   funits = check_units(bnf,"bnfcertify");
   testprime(bnf, zimmertbound(N,R2,absi((GEN)nf[3])));
@@ -1429,7 +1429,7 @@ rnfnormgroup0(GEN bnr, GEN polrel, GEN rnf)
   nf=(GEN)bnf[7];
   polrel = fix_relative_pol(nf,polrel,1);
   if (typ(polrel)!=t_POL) err(typeer,"rnfnormgroup");
-  reldeg=lgef(polrel)-3;
+  reldeg=degpol(polrel);
   /* reldeg-th powers are in norm group */
   greldeg = stoi(reldeg);
   group = diagonal(gmod((GEN)raycl[2], greldeg));
@@ -1518,11 +1518,11 @@ rnfnormgroup0(GEN bnr, GEN polrel, GEN rnf)
         ep=(GEN)famo[2];
         fac=(GEN)famo[1];
         nfac=lg(ep)-1;
-        f = lgef((GEN)fac[1])-3;
+        f = degpol((GEN)fac[1]);
         for (j=1; j<=nfac; j++)
         {
           if (!gcmp1((GEN)ep[j])) err(bugparier,"rnfnormgroup");
-          if (lgef(fac[j])-3 != f)
+          if (degpol(fac[j]) != f)
           {
             if (rnf) return NULL;
             err(talker,"non Galois extension in rnfnormgroup");
@@ -1631,7 +1631,7 @@ discrayrelall(GEN bnr, GEN H, long flag)
   ex = (GEN)fa[2];
   mod = cgetg(3,t_VEC); mod[2] = (long)arch;
 
-  idealrel = flrel? idmat(lgef(nf[1])-3): gun;
+  idealrel = flrel? idmat(degpol(nf[1])): gun;
   for (k=1; k<lg(P); k++)
   {
     GEN pr = (GEN)P[k], S = gzero;
@@ -1682,7 +1682,7 @@ discrayabsall(GEN bnr, GEN subgroup,long flag)
   if (D == gzero) { avma = av; return gzero; }
 
   bnf = (GEN)bnr[1]; nf = (GEN)bnf[7];
-  degk = lgef(nf[1])-3;
+  degk = degpol(nf[1]);
   dkabs = absi((GEN)nf[3]);
   dk = (GEN)D[3];
   clhray = itos((GEN)D[1]); p1 = gpowgs(dkabs, clhray);
@@ -1885,7 +1885,7 @@ discrayabslist(GEN bnf,GEN lists)
   blist = (GEN)lists[1];
   lx = lg(hlist); dlist = cgetg(lx,t_VEC);
   nf = (GEN)bnf[7]; r1 = nf_get_r1(nf);
-  degk = lgef(nf[1])-3; dkabs = absi((GEN)nf[3]);
+  degk = degpol(nf[1]); dkabs = absi((GEN)nf[3]);
   nz = 0; dlk = NULL; /* gcc -Wall */
   for (ii=1; ii<lx; ii++)
   {
@@ -2119,7 +2119,7 @@ decodemodule(GEN nf, GEN fa)
   nf = checknf(nf);
   if (typ(fa)!=t_MAT || lg(fa)!=3)
     err(talker,"incorrect factorisation in decodemodule");
-  n = lgef(nf[1])-3; id = idmat(n);
+  n = degpol(nf[1]); id = idmat(n);
   g = (GEN)fa[1];
   e = (GEN)fa[2];
   for (k=1; k<lg(g); k++)
@@ -2173,7 +2173,7 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
   if (DEBUGLEVEL>2) timer2();
   bnf = checkbnf(bnf); flbou=0;
   nf = (GEN)bnf[7]; r1 = nf_get_r1(nf);
-  degk = lgef((GEN)nf[1])-3;
+  degk = degpol(nf[1]);
   fadkabs = factor(absi((GEN)nf[3]));
   clh = gmael3(bnf,8,1,1);
   racunit = gmael3(bnf,8,4,2);

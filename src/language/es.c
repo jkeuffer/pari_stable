@@ -1400,7 +1400,7 @@ bruti(GEN g, long nosign)
 
     case t_POL: v = get_var(ordvar[varn(g)], buf);
       /* hack: we want g[i] = coeff of degree i. */
-      i = lgef(g)-3; g += 2; while (isnull((GEN)g[i])) i--;
+      i = degpol(g); g += 2; while (isnull((GEN)g[i])) i--;
       wr_lead_monome((GEN)g[i],v,i,nosign);
       while (i--)
       {
@@ -1630,7 +1630,7 @@ sori(GEN g)
     case t_POL:
       if (!signe(g)) { pariputc('0'); break; }
       v = get_var(ordvar[varn(g)],buf);
-      i = lgef(g)-3; g += 2; while (isnull((GEN)g[i])) i--;
+      i = degpol(g); g += 2; while (isnull((GEN)g[i])) i--;
       sor_lead_monome((GEN)g[i],v,i);
       while (i--)
       {
@@ -1781,7 +1781,7 @@ texi(GEN g, long nosign)
 
     case t_POL: v = get_texvar(ordvar[varn(g)],buf);
       /* hack: we want g[i] = coeff of degree i. */
-      i = lgef(g)-3; g += 2; while (isnull((GEN)g[i])) i--;
+      i = degpol(g); g += 2; while (isnull((GEN)g[i])) i--;
       wr_lead_texnome((GEN)g[i],v,i,nosign);
       while (i--)
       {

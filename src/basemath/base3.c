@@ -125,7 +125,7 @@ element_inv(GEN nf, GEN x)
   long av=avma,i,N,tx=typ(x);
   GEN p1,p;
 
-  nf=checknf(nf); N=lgef(nf[1])-3;
+  nf=checknf(nf); N=degpol(nf[1]);
   if (is_extscalar_t(tx))
   {
     if (tx==t_POLMOD) checknfelt_mod(nf,x,"element_inv");
@@ -159,7 +159,7 @@ element_div(GEN nf, GEN x, GEN y)
   long av=avma,i,N,tx=typ(x),ty=typ(y);
   GEN p1,p;
 
-  nf=checknf(nf); N=lgef(nf[1])-3;
+  nf=checknf(nf); N=degpol(nf[1]);
   if (tx==t_POLMOD) checknfelt_mod(nf,x,"element_div");
   else if (tx==t_POL) x=gmodulcp(x,(GEN)nf[1]);
 
@@ -354,7 +354,7 @@ element_pow(GEN nf, GEN x, GEN n)
   GEN y,p1,cx;
 
   if (typ(n)!=t_INT) err(talker,"not an integer exponent in nfpow");
-  nf=checknf(nf); N=lgef(nf[1])-3;
+  nf=checknf(nf); N=degpol(nf[1]);
   s=signe(n); if (!s) return gscalcol_i(gun,N);
   if (typ(x)!=t_COL) x=algtobasis(nf,x);
 
@@ -391,7 +391,7 @@ element_pow_mod_p(GEN nf, GEN x, GEN n, GEN p)
   GEN y,p1;
 
   if (typ(n)!=t_INT) err(talker,"not an integer exponent in nfpow");
-  nf=checknf(nf); N=lgef(nf[1])-3;
+  nf=checknf(nf); N=degpol(nf[1]);
   s=signe(n); if (!s) return gscalcol_i(gun,N);
   if (typ(x)!=t_COL) x=algtobasis(nf,x);
 
@@ -426,7 +426,7 @@ element_powid_mod_p(GEN nf, long I, GEN n, GEN p)
   GEN y,p1;
 
   if (typ(n)!=t_INT) err(talker,"not an integer exponent in nfpow");
-  nf=checknf(nf); N=lgef(nf[1])-3;
+  nf=checknf(nf); N=degpol(nf[1]);
   s=signe(n);
   if (!s || I == 1) return gscalcol_i(gun,N);
   p1 = n+2; m = *p1;
@@ -480,7 +480,7 @@ element_mulid(GEN nf, GEN x, long i)
 long
 int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *newx, long v)
 {
-  long i,k,w, N = lgef(nf[1])-3;
+  long i,k,w, N = degpol(nf[1]);
   GEN r,a,y,mul;
   
   if (typ(b) == t_MAT) mul = b;
@@ -515,7 +515,7 @@ element_val(GEN nf, GEN x, GEN vp)
   GEN cx,p;
 
   if (gcmp0(x)) return VERYBIGINT;
-  nf=checknf(nf); N=lgef(nf[1])-3;
+  nf=checknf(nf); N=degpol(nf[1]);
   checkprimeid(vp); p=(GEN)vp[1]; e=itos((GEN)vp[3]);
   switch(typ(x))
   {
@@ -637,14 +637,14 @@ GEN
 algtobasis_intern(GEN nf, GEN x)
 {
   GEN P = (GEN)nf[1];
-  long tx = typ(x), N = lgef(P)-3;
+  long tx = typ(x), N = degpol(P);
 
   if (tx==t_POLMOD) { x=(GEN)x[2]; tx=typ(x); }
   if (tx==t_POL)
   {
     if (varn(x) != varn(P))
       err(talker,"incompatible variables in algtobasis");
-    if (lgef(x)-3 >= N) x = gres(x,P);
+    if (degpol(x) >= N) x = gres(x,P);
     return mulmat_pol((GEN)nf[8], x);
   }
   return gscalcol(x,N);
@@ -670,7 +670,7 @@ algtobasis(GEN nf, GEN x)
     case t_POL:
       return gerepileupto(av,algtobasis_intern(nf,x));
 
-    default: N=lgef(nf[1])-3; return gscalcol(x,N);
+    default: N=degpol(nf[1]); return gscalcol(x,N);
   }
 }
 
@@ -874,7 +874,7 @@ nfreducemodidele(GEN nf,GEN x,GEN idele,GEN sarch)
 GEN
 element_powmodideal(GEN nf,GEN x,GEN k,GEN ideal)
 {
-  GEN y = gscalcol_i(gun,lgef(nf[1])-3);
+  GEN y = gscalcol_i(gun,degpol(nf[1]));
   for(;;)
   {
     if (mpodd(k)) y=element_mulmodideal(nf,x,y,ideal);
@@ -1389,7 +1389,7 @@ zarchstar(GEN nf,GEN x,GEN arch,long nba)
     y[2]=lgetg(1,t_VEC);
     y[3]=lgetg(1,t_MAT); return y;
   }
-  N = lgef(nf[1])-3;
+  N = degpol(nf[1]);
   p1 = cgetg(nba+1,t_VEC); for (i=1; i<=nba; i++) p1[i] = deux;
   y[1] = (long)p1; av = avma;
   if (N == 1)
@@ -1700,7 +1700,7 @@ zideallog(GEN nf, GEN x, GEN bid)
   nf=checknf(nf); checkbid(bid);
   cyc=gmael(bid,2,2); c=lg(cyc);
   y=cgetg(c,t_COL); av=avma;
-  N = lgef(nf[1])-3; ideal = (GEN) bid[1];
+  N = degpol(nf[1]); ideal = (GEN) bid[1];
   if (typ(ideal)==t_VEC && lg(ideal)==3)
     arch = (GEN)ideal[2];
   else
@@ -1930,7 +1930,7 @@ ideallistzstarall(GEN bnf,long bound,long flag)
   z = cgetg(bound+1,t_VEC);
   for (i=2; i<=bound; i++) z[i] = lgetg(1,t_VEC);
 
-  ideal = idmat(lgef(nf[1])-3);
+  ideal = idmat(degpol(nf[1]));
   if (big_id) ideal = zidealstarinitall(nf,ideal,do_gen);
   z[1] = (long)_vec(ideal);
   if (do_units)

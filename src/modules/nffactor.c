@@ -53,7 +53,7 @@ unifpol0(GEN nf,GEN pol,long flag)
   static long n = 0;
   static GEN vun = NULL;
   GEN f = (GEN) nf[1];
-  long i = lgef(f)-3, av;
+  long i = degpol(f), av;
 
   if (i != n)
   {
@@ -105,7 +105,7 @@ unifpol(GEN nf,GEN pol,long flag)
 static GEN
 random_pol(GEN nf,long d)
 {
-  long i,j, n = lgef(nf[1])-3;
+  long i,j, n = degpol(nf[1]);
   GEN pl,p;
 
   pl=cgetg(d+3,t_POL);
@@ -218,7 +218,7 @@ nfmod_pol_divres(GEN nf,GEN prhall,GEN x,GEN y, GEN *pr)
 
   tetpil=avma;
   px=nfmod_pol_reduce(nf,prhall,x);
-  dx=lgef(px)-3; dy=lgef(py)-3; dz=dx-dy;
+  dx=degpol(px); dy=degpol(py); dz=dx-dy;
   if (dx<dy)
   {
     GEN vzero;
@@ -226,9 +226,9 @@ nfmod_pol_divres(GEN nf,GEN prhall,GEN x,GEN y, GEN *pr)
     if (pr) *pr = gerepile(av,tetpil,px);
     else avma = av;
 
-    n=lgef(nf[1])-3;
+    n=degpol(nf[1]);
     vzero = cgetg(n+1,t_COL);
-    n=lgef(nf[1])-3;
+    n=degpol(nf[1]);
     for (i=1; i<=n; i++) vzero[i]=zero;
 
     z=cgetg(3,t_POL); z[2]=(long)vzero;
@@ -317,7 +317,7 @@ nfmod_pol_gcd(GEN nf,GEN prhall,GEN x,GEN y)
 static GEN
 nfmod_pol_pow(GEN nf,GEN prhall,GEN pmod,GEN pol,GEN e)
 {
-  long i, av = avma, n = lgef(nf[1])-3;
+  long i, av = avma, n = degpol(nf[1]);
   GEN p1,p2,vun;
 
   vun=cgetg(n+1,t_COL); vun[1]=un; for (i=2; i<=n; i++) vun[i]=zero;
@@ -437,14 +437,14 @@ nffactormod2(GEN nf,GEN pol,GEN pr)
   if (varn(pol) >= varn(nf[1]))
     err(talker,"polynomial variable must have highest priority in nffactormod");
 
-  prhall=nfmodprinit(nf,pr); n=lgef(nf[1])-3;
+  prhall=nfmodprinit(nf,pr); n=degpol(nf[1]);
   vun = gscalcol_i(gun, n);
   vzero = gscalcol_i(gzero, n);
   q = vker = NULL; /* gcc -Wall */
 
   f=unifpol(nf,pol,0); f=nfmod_pol_reduce(nf,prhall,f);
   if (!signe(f)) err(zeropoler,"nffactormod");
-  d=lgef(f)-3; vf=varn(f);
+  d=degpol(f); vf=varn(f);
   if (d == 0) return trivfact();
   t  = (GEN*)new_chunk(d+1); ex = cgetg(d+1, t_VECSMALL);
   x=gcopy(polx[vf]); x[3]=(long)vun; x[2]=(long)vzero;
@@ -475,7 +475,7 @@ nffactormod2(GEN nf,GEN pol,GEN pr)
 	g1=f3;
 	if (lgef(u)>3)
 	{
-	  N=lgef(u)-3; Q=cgetg(N+1,t_MAT);
+	  N=degpol(u); Q=cgetg(N+1,t_MAT);
 	  v3=cgetg(N+1,t_COL); Q[1]=(long)v3;
 	  v3[1]=(long)vun; for (i=2; i<=N; i++) v3[i]=(long)vzero;
 	
@@ -541,7 +541,7 @@ nffactormod2(GEN nf,GEN pol,GEN pr)
 	  nbfact+=r;
 	}
       }
-      e*=psim; j=(lgef(f2)-3)/psim+3; f1=cgetg(j,t_POL);
+      e*=psim; j=(degpol(f2))/psim+3; f1=cgetg(j,t_POL);
       f1[1] = evalsigne(1) | evallgef(j) | evalvarn(vf);
       for (i=2; i<j; i++)
 	f1[i]=(long)element_powmodpr(nf,(GEN)f2[psim*(i-2)+2],
@@ -897,7 +897,7 @@ test_mat(GEN M, GEN p, GEN C2, long k)
 static GEN
 T2_matrix_pow(GEN nf, GEN pre, GEN p, GEN C, long *kmax, long prec)
 {
-  long av=avma,av1,lim, k = *kmax, N = lgef((GEN)nf[1])-3;
+  long av=avma,av1,lim, k = *kmax, N = degpol((GEN)nf[1]);
   int tot_real = !signe(gmael(nf,2,2));
   GEN p1,p2,p3,u,C2,T2, x = (GEN)nf[1];
 
@@ -964,7 +964,7 @@ nfsqff(GEN nf,GEN pol, long fl)
 
   dk=absi((GEN)nf[3]);
   dki=mulii(dk,(GEN)nf[4]);
-  n=lgef(nf[1])-3;
+  n=degpol(nf[1]);
 
   polbase = unifpol(nf,pol,0);
   polmod  = unifpol(nf,pol,1);
@@ -1178,7 +1178,7 @@ nf_combine_factors(GEN nf,long fxn,GEN psf,long dlim,long hint)
   /* second, try including the current modular factor in the product */
   newf = (GEN)nfcmbf.fact[fxn];
   if (!newf) return val; /* modular factor already used */
-  newd = lgef(newf)-3;
+  newd = degpol(newf);
   if (newd > dlim) return val; /* degree of new factor is too large */
 
   av = avma;
@@ -1284,7 +1284,7 @@ rnfdedekind(GEN nf,GEN T,GEN pr)
   else
     prhall=nfmodprinit(nf,pr);
   p=(GEN)pr[1]; tau=gdiv((GEN)pr[5],p);
-  n=lgef(nf[1])-3; m=lgef(T)-3;
+  n=degpol(nf[1]); m=degpol(T);
 
   vecun = gscalcol_i(gun,n);
   veczero = zerocol(n);
@@ -1299,7 +1299,7 @@ rnfdedekind(GEN nf,GEN T,GEN pr)
   p2=nfmod_pol_gcd(nf,prhall,g,h);
   k= nfmod_pol_gcd(nf,prhall,p2,k);
 
-  d=lgef(k)-3;  /* <= m */
+  d=degpol(k);  /* <= m */
   vt = idealval(nf,discsr(T),pr) - 2*d;
   res[3]=lstoi(vt);
   if (!d || vt<=1) res[1]=un; else res[1]=zero;
@@ -1326,7 +1326,7 @@ rnfdedekind(GEN nf,GEN T,GEN pr)
     for (   ; j<=m+d; j++)
     {
       p1[j]=lgetg(m+1,t_COL);
-      da=lgef(pal)-3;
+      da=degpol(pal);
       for (i=1; i<=da+1; i++) coeff(p1,i,j)=pal[i+1];
       for (   ; i<=m; i++) coeff(p1,i,j)=(long)veczero;
       p2[j]=(long)prinvp;

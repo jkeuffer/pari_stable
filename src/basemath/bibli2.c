@@ -1044,7 +1044,7 @@ polymodrecip(GEN x)
 
   if (typ(x)!=t_POLMOD) err(talker,"not a polymod in polymodrecip");
   p=(GEN)x[1]; phi=(GEN)x[2];
-  v=varn(p); n=lgef(p)-3; if (n<=0) return gcopy(x);
+  v=varn(p); n=degpol(p); if (n<=0) return gcopy(x);
   if (n==1)
   {
     y=cgetg(3,t_POLMOD);

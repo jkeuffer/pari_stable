@@ -24,7 +24,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define swap(a,b) { GEN _x = a; a = b; b = _x; }
 #define lswap(a,b) { long _x = a; a = b; b = _x; }
 #define pswap(a,b) { GEN *_x = a; a = b; b = _x; }
-#define deg(a) (lgef(a)-3)
 #define both_even(a,b) ((((a)|(b))&1) == 0)
 
 GEN gassoc_proto(GEN f(GEN,GEN),GEN,GEN);
@@ -32,7 +31,7 @@ GEN gassoc_proto(GEN f(GEN,GEN),GEN,GEN);
 GEN
 polsym(GEN x, long n)
 {
-  long av1,av2,dx=deg(x),i,k;
+  long av1,av2,dx=degpol(x),i,k;
   GEN s,y,x_lead;
 
   if (n<0) err(impl,"polsym of a negative n");
@@ -145,8 +144,8 @@ polidivis(GEN x, GEN y, GEN bound)
   long dx,dy,dz,i,j,av, vx = varn(x);
   GEN z,p1,y_lead;
 
-  dy=deg(y);
-  dx=deg(x);
+  dy=degpol(y);
+  dx=degpol(x);
   dz=dx-dy; if (dz<0) return NULL;
   z=cgetg(dz+3,t_POL);
   x += 2; y += 2; z += 2;
@@ -251,17 +250,17 @@ BuildTree(GEN link, GEN V, GEN W, GEN a, GEN p)
   for (j=1; j <= 2*k-5; j+=2,i++)
   {
     minp = j;
-    mind = deg(V[j]);
+    mind = degpol(V[j]);
     for (s=j+1; s<i; s++)
-      if (deg(V[s]) < mind) { minp = s; mind = deg(V[s]); }
+      if (degpol(V[s]) < mind) { minp = s; mind = degpol(V[s]); }
 
     lswap(V[j], V[minp]);
     lswap(link[j], link[minp]);
 
     minp = j+1;
-    mind = deg(V[j+1]);
+    mind = degpol(V[j+1]);
     for (s=j+2; s<i; s++)
-      if (deg(V[s]) < mind) { minp = s; mind = deg(V[s]); }
+      if (degpol(V[s]) < mind) { minp = s; mind = degpol(V[s]); }
 
     lswap(V[j+1], V[minp]);
     lswap(link[j+1], link[minp]);
@@ -274,7 +273,7 @@ BuildTree(GEN link, GEN V, GEN W, GEN a, GEN p)
   {
     GEN d, u, v;
     d = FpX_extgcd((GEN)V[j], (GEN)V[j+1], p, &u, &v);
-    if (deg(d) > 0) err(talker, "relatively prime polynomials expected");
+    if (degpol(d) > 0) err(talker, "relatively prime polynomials expected");
     d = (GEN)d[2];
     if (!gcmp1(d))
     {
@@ -300,17 +299,17 @@ BuildTree(GEN link, GEN V, GEN W, GEN a, GEN T, GEN p)
   for (j=1; j <= 2*k-5; j+=2,i++)
   {
     minp = j;
-    mind = deg(V[j]);
+    mind = degpol(V[j]);
     for (s=j+1; s<i; s++)
-      if (deg(V[s]) < mind) { minp = s; mind = deg(V[s]); }
+      if (degpol(V[s]) < mind) { minp = s; mind = degpol(V[s]); }
 
     lswap(V[j], V[minp]);
     lswap(link[j], link[minp]);
 
     minp = j+1;
-    mind = deg(V[j+1]);
+    mind = degpol(V[j+1]);
     for (s=j+2; s<i; s++)
-      if (deg(V[s]) < mind) { minp = s; mind = deg(V[s]); }
+      if (degpol(V[s]) < mind) { minp = s; mind = degpol(V[s]); }
 
     lswap(V[j+1], V[minp]);
     lswap(link[j+1], link[minp]);
@@ -323,7 +322,7 @@ BuildTree(GEN link, GEN V, GEN W, GEN a, GEN T, GEN p)
   {
     GEN d, u, v;
     d = FpXQX_extgcd((GEN)V[j], (GEN)V[j+1], T, p, &u, &v);
-    if (deg(d) > 0) err(talker, "relatively prime polynomials expected");
+    if (degpol(d) > 0) err(talker, "relatively prime polynomials expected");
     d = (GEN)d[2];
     if (!gcmp1(d))
     {
@@ -609,7 +608,7 @@ two_factor_bound(GEN x)
 static GEN
 uniform_Mignotte_bound(GEN x)
 {
-  long e, n = deg(x);
+  long e, n = degpol(x);
   GEN p1, N2 = mpsqrt(QuickNormL2(x,DEFAULTPREC));
 
   p1 = grndtoi(gmul2n(N2, n), &e);
@@ -656,7 +655,7 @@ cmbf(GEN target, GEN famod, GEN p, long b, long a,
   GEN lc, lctarget, pa = gpowgs(p,a), pas2 = shifti(pa,-1);
   GEN trace    = cgetg(lfamod+1, t_VECSMALL);
   GEN ind      = cgetg(lfamod+1, t_VECSMALL);
-  GEN deg      = cgetg(lfamod+1, t_VECSMALL);
+  GEN degpol      = cgetg(lfamod+1, t_VECSMALL);
   GEN degsofar = cgetg(lfamod+1, t_VECSMALL);
   GEN listmod  = cgetg(lfamod+1, t_COL);
   GEN fa       = cgetg(lfamod+1, t_COL);
@@ -677,11 +676,11 @@ cmbf(GEN target, GEN famod, GEN p, long b, long a,
     for (i=1; i <= lfamod; i++)
     {
       GEN T, p1 = (GEN)famod[i];
-      deg[i] = deg(p1);
+      degpol[i] = degpol(p1);
       if (!gcmp1(lc))
-        T = modii(mulii(lc, (GEN)p1[deg[i]+1]), pa);
+        T = modii(mulii(lc, (GEN)p1[degpol[i]+1]), pa);
       else
-        T = (GEN)p1[deg[i]+1]; /* d-1 term */
+        T = (GEN)p1[degpol[i]+1]; /* d-1 term */
       trace[i] = itos( TruncTrace(T, pb,pa_b,NULL,pbs2) );
     }
     spa_b   =   pa_b[2]; /* < 2^(BIL-1) */
@@ -696,13 +695,13 @@ nextK:
   if (DEBUGLEVEL > 4)
     fprintferr("\n### K = %d, %Z combinations\n", K,binome(stoi(lfamod), K));
   setlg(ind, K+1); ind[1] = 1;
-  i = 1; curdeg = deg[ind[1]];
+  i = 1; curdeg = degpol[ind[1]];
   for(;;)
   { /* try all combinations of K factors */
     for (j = i; j < K; j++)
     {
       degsofar[j] = curdeg;
-      ind[j+1] = ind[j]+1; curdeg += deg[ind[j+1]];
+      ind[j+1] = ind[j]+1; curdeg += degpol[ind[j+1]];
     }
     if (curdeg <= klim && curdeg % hint == 0) /* trial divide */
     {
@@ -759,12 +758,12 @@ nextK:
         {
           famod[k] = famod[i];
           trace[k] = trace[i];
-          deg[k] = deg[i]; k++;
+          degpol[k] = degpol[i]; k++;
         }
       }
       lfamod -= K;
       if (lfamod < 2*K) goto END;
-      i = 1; curdeg = deg[ind[1]];
+      i = 1; curdeg = degpol[ind[1]];
       bound = all_factor_bound(target);
       lc = absi(leading_term(target));
       lctarget = gmul(lc,target);
@@ -782,13 +781,13 @@ NEXT:
       if (--i == 0) { K++; goto nextK; }
       if (++ind[i] <= lfamod - K + i)
       {
-        curdeg = degsofar[i-1] + deg[ind[i]];
+        curdeg = degsofar[i-1] + degpol[ind[i]];
         if (curdeg <= klim) break;
       }
     }
   }
 END:
-  if (deg(target) > 0)
+  if (degpol(target) > 0)
   { /* leftover factor */
     if (signe(leading_term(target)) < 0) target = gneg_i(target);
 
@@ -869,7 +868,7 @@ END:
 GEN
 polsym_gen(GEN P, GEN y0, long n, GEN N)
 {
-  long av1,av2,dP=deg(P),i,k,m;
+  long av1,av2,dP=degpol(P),i,k,m;
   GEN s,y,P_lead;
 
   if (n<0) err(impl,"polsym of a negative n");
@@ -915,7 +914,7 @@ static GEN
 root_bound(GEN P)
 {
   GEN P0 = dummycopy(P), lP = absi(leading_term(P)), x,y,z;
-  long k,d = deg(P);
+  long k,d = degpol(P);
 
   setlgef(P0, d+2); /* P = lP x^d + P0 */
   P = P0+2; /* strip codewords */
@@ -1049,7 +1048,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
 {
   long s = 2; /* # of traces added at each step */
   long BitPerFactor = 3; /* nb bits in p^(a-b) / modular factor */
-  long i,j,C,r,S,tmax,n0,n,dP = deg(P);
+  long i,j,C,r,S,tmax,n0,n,dP = degpol(P);
   double logp = log(gtodouble(p)), LOGp2 = LOG2/logp;
   double b0 = log((double)dP*2) / logp;
   double k = gtodouble(glog(root_bound(P), DEFAULTPREC)) / logp;
@@ -1293,7 +1292,7 @@ combine_factors(GEN a, GEN famod, GEN p, long klim, long hint)
       for (i = 1; i<lg(famod); i++)
       { /* renormalize modular factors */
         p1 = (GEN)famod[i]; FpX_rescale_i(p1, invlt, p);
-        invLT = powmodulo(lt, stoi(deg(p1)), p);
+        invLT = powmodulo(lt, stoi(degpol(p1)), p);
         famod[i] = (long)FpX_Fp_mul(p1, invLT, p);
       }
       famod = hensel_lift_fact(a,famod,NULL,p,pe,e);
@@ -1321,7 +1320,7 @@ static GEN
 squff(GEN a, long hint)
 {
   GEN PolX,lead,res,prime,primes2,famod,y,g,z,w,*tabd,*tabdnew;
-  long da = deg(a), va = varn(a);
+  long da = degpol(a), va = varn(a);
   long klim,chosenp,p,nfacp,lbit,j,d,e,np,nmax,nf,nft;
   ulong *tabbit, *tabkbit, *tmp, av = avma;
   byteptr pt=diffptr;
@@ -1355,11 +1354,11 @@ squff(GEN a, long hint)
       long lgg;
       d++; w = u_FpXQ_pow(w, prime, z, p);
       g = u_FpX_gcd(z, u_FpX_sub(w, PolX, p), p);
-      lgg = deg(g);
+      lgg = degpol(g);
       if (lgg == 0) g = NULL;
       else
       {
-	z = u_FpX_div(z, g, p); e = deg(z);
+	z = u_FpX_div(z, g, p); e = degpol(z);
         w = u_FpX_rem(w, z, p);
         lgg /= d; nfacp += lgg;
         if (DEBUGLEVEL>5)
@@ -1400,7 +1399,7 @@ squff(GEN a, long hint)
     g = tabd[d]; 
     if (g)
     {
-      long n = deg(g)/d;
+      long n = degpol(g)/d;
       famod[nft] = (long)small_to_pol(u_FpX_normalize(g, chosenp),va);
       if (n > 1 && n != split_berlekamp((GEN*)(famod+nft),prime,primes2))
         err(bugparier,"squff: wrong numbers of factors");
@@ -1518,7 +1517,7 @@ factpol(GEN x, long hint)
   {
     ex++; w=gadd(w, gneg_i(derivpol(x))); k=signe(w);
     if (k) { t=modulargcd(x,w); x=gdeuc(x,t); w=gdeuc(w,t); } else t=x;
-    if (deg(t) > 0)
+    if (degpol(t) > 0)
     {
       fa[ex] = (long)squff2(t,hint);
       nbfac += lg(fa[ex])-1;
@@ -2405,7 +2404,7 @@ isinexactfield(GEN x)
 static GEN
 gcdmonome(GEN x, GEN y)
 {
-  long tetpil,av=avma, dx=deg(x), v=varn(x), e=gval(y,v);
+  long tetpil,av=avma, dx=degpol(x), v=varn(x), e=gval(y,v);
   GEN p1,p2;
 
   if (dx < e) e = dx;
@@ -2422,7 +2421,7 @@ gcdmonome(GEN x, GEN y)
 static GEN
 polinvinexact(GEN x, GEN y)
 {
-  long i,dx=deg(x),dy=deg(y),lz=dx+dy, av=avma, tetpil;
+  long i,dx=degpol(x),dy=degpol(y),lz=dx+dy, av=avma, tetpil;
   GEN v,z;
 
   if (dx < 0 || dy < 0) err(talker,"non-invertible polynomial in polinvmod");
@@ -2617,20 +2616,20 @@ init_resultant(GEN x, GEN y)
   tx = typ(x); ty = typ(y);
   if (is_scalar_t(tx) || is_scalar_t(ty))
   {
-    if (tx==t_POL) return gpuigs(y,deg(x));
-    if (ty==t_POL) return gpuigs(x,deg(y));
+    if (tx==t_POL) return gpuigs(y,degpol(x));
+    if (ty==t_POL) return gpuigs(x,degpol(y));
     return gun;
   }
   if (tx!=t_POL || ty!=t_POL) err(typeer,"subresall");
   if (varn(x)==varn(y)) return NULL;
-  return (varn(x)<varn(y))? gpuigs(y,deg(x)): gpuigs(x,deg(y));
+  return (varn(x)<varn(y))? gpuigs(y,degpol(x)): gpuigs(x,degpol(y));
 }
 
 /* return coefficients s.t x = x_0 X^n + ... + x_n */
 static GEN
 revpol(GEN x)
 {
-  long i,n = deg(x);
+  long i,n = degpol(x);
   GEN y = cgetg(n+3,t_POL);
   y[1] = x[1]; x += 2; y += 2;
   for (i=0; i<=n; i++) y[i] = x[n-i];
@@ -2645,8 +2644,8 @@ pseudorem(GEN x, GEN y)
 
   if (!signe(y)) err(talker,"euclidean division by zero (pseudorem)");
   (void)new_chunk(2);
-  dx=deg(x); x = revpol(x);
-  dy=deg(y); y = revpol(y); dz=dx-dy; p = dz+1;
+  dx=degpol(x); x = revpol(x);
+  dy=degpol(y); y = revpol(y); dz=dx-dy; p = dz+1;
   av2 = avma; lim = stack_lim(av2,1);
   for (;;)
   {
@@ -2683,8 +2682,8 @@ pseudodiv(GEN x, GEN y, GEN *ptr)
 
   if (!signe(y)) err(talker,"euclidean division by zero (pseudorem)");
   (void)new_chunk(2);
-  dx=deg(x); x = revpol(x);
-  dy=deg(y); y = revpol(y); dz=dx-dy; p = dz+1;
+  dx=degpol(x); x = revpol(x);
+  dy=degpol(y); y = revpol(y); dz=dx-dy; p = dz+1;
   lz = dz+3; z = cgetg(lz, t_POL) + 2;
   ypow = new_chunk(dz+1);
   ypow[0] = un;
@@ -3091,7 +3090,7 @@ resultantducos(GEN P, GEN Q)
       if (low_stack(lim,stack_lim(av,1)))
       {
         GEN *gptr[2]; gptr[0]=&P; gptr[1]=&Q;
-        if(DEBUGMEM>1) err(warnmem,"resultantducos, deg Q = %ld",degree(Q));
+        if(DEBUGMEM>1) err(warnmem,"resultantducos, degpol Q = %ld",degree(Q));
         gerepilemany(av2,gptr,2); s = leading_term(P);
       }
       delta = degree(P) - degree(Q);
@@ -3139,8 +3138,8 @@ sylvestermatrix_i(GEN x, GEN y)
   long j,d,dx,dy;
   GEN M;
 
-  dx = deg(x); if (dx < 0) { dx = 0; x = _zeropol(); }
-  dy = deg(y); if (dy < 0) { dy = 0; y = _zeropol(); }
+  dx = degpol(x); if (dx < 0) { dx = 0; x = _zeropol(); }
+  dy = degpol(y); if (dy < 0) { dy = 0; y = _zeropol(); }
   d = dx+dy; M = cgetg(d+1,t_MAT);
   for (j=1; j<=dy; j++) M[j]    = (long)sylvester_col(x,j,d,j+dx);
   for (j=1; j<=dx; j++) M[j+dy] = (long)sylvester_col(y,j,d,j+dy);
@@ -3332,7 +3331,7 @@ poldisc0(GEN x, long v)
       if (v >= 0 && v != varn(x)) x = fix_pol(x,v, &i);
       p1 = subres(x, derivpol(x));
       p2 = leading_term(x); if (!gcmp1(p2)) p1 = gdiv(p1,p2);
-      if (deg(x) & 2) p1 = gneg(p1);
+      if (degpol(x) & 2) p1 = gneg(p1);
       if (i) p1 = gsubst(p1, MAXVARN, polx[0]);
       return gerepileupto(av,p1);
 
@@ -3367,7 +3366,7 @@ reduceddiscsmith(GEN pol)
   GEN polp,alpha,p1,m;
 
   if (typ(pol)!=t_POL) err(typeer,"reduceddiscsmith");
-  n=deg(pol);
+  n=degpol(pol);
   if (n<=0) err(constpoler,"reduceddiscsmith");
   check_pol_int(pol,"poldiscreduced");
   if (!gcmp1((GEN)pol[n+2]))
@@ -3560,7 +3559,7 @@ newtonpoly(GEN x, GEN p)
   long *vval, num[] = {evaltyp(t_INT) | m_evallg(3), 0, 0};
 
   if (typ(x)!=t_POL) err(typeer,"newtonpoly");
-  n=deg(x); if (n<=0) { y=cgetg(1,t_VEC); return y; }
+  n=degpol(x); if (n<=0) { y=cgetg(1,t_VEC); return y; }
   y = cgetg(n+1,t_VEC); x += 2; /* now x[i] = term of degree i */
   vval = (long *) gpmalloc(sizeof(long)*(n+1));
   for (a=0; a<=n; a++) vval[a] = ggval((GEN)x[a],p);
@@ -3624,7 +3623,7 @@ polfnf(GEN a, GEN t)
     GEN b, F = lift_intern(poleval((GEN)fa[i], x0));
     if (!tmonic) F = gdiv(F, content(F));
     F = nfgcd(u, F, t, dent);
-    if (typ(F) != t_POL || deg(F) == 0)
+    if (typ(F) != t_POL || degpol(F) == 0)
       err(talker,"reducible modulus in factornf");
     F = gmul(unt, F);
     F = gdiv(F, leading_term(F));
@@ -3634,7 +3633,7 @@ polfnf(GEN a, GEN t)
     else
     {
       e = 0; while (poldivis(a,F, &b)) { a = b; e++; }
-      if (deg(a) == deg(u)) sqfree = 1;
+      if (degpol(a) == degpol(u)) sqfree = 1;
     }
     p1[i] = (long)F;
     p2[i] = lstoi(e);
@@ -3642,7 +3641,7 @@ polfnf(GEN a, GEN t)
   u = gmul(unt, u);
   u = gdiv(u, leading_term(u));
   p1[1] = (long)u;
-  e = sqfree? 1: deg(a)/deg(u);
+  e = sqfree? 1: degpol(a)/degpol(u);
   p2[1] = lstoi(e);
   (void)sort_factor(y, cmp_pol);
   return gerepileupto(av, gcopy(y));
@@ -3752,7 +3751,7 @@ nfgcd(GEN P, GEN Q, GEN nf, GEN den)
   GEN sol, mod = NULL;
   long x = varn(P);
   long y = varn(nf);
-  long d = deg(nf);
+  long d = degpol(nf);
   GEN lP, lQ;
   if (!signe(P) || !signe(Q))
     return zeropol(x);
@@ -3779,7 +3778,7 @@ nfgcd(GEN P, GEN Q, GEN nf, GEN den)
       if (DEBUGLEVEL>=5) fprintferr("nfgcd: p=%d\n",p);
       if ((R = FpXQX_safegcd(P, Q, nf, stoi(p))) == NULL)
         continue;/*Discard primes when modular gcd does not exist*/
-      dR = deg(R);
+      dR = degpol(R);
       if (dR == 0) return scalarpol(gun, x);
       if (mod && dR > dM) continue; /* p divides Res(P/gcd, Q/gcd). Discard. */
 

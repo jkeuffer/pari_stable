@@ -1941,7 +1941,7 @@ nf_get_T2(GEN base, GEN polr)
 static GEN
 nf_get_T(GEN x, GEN w)
 {
-  long i,j,k, n = lgef(x)-3;
+  long i,j,k, n = degpol(x);
   GEN p1,p2,p3;
   GEN ptrace = cgetg(n+2,t_VEC);
   GEN den = cgetg(n+1,t_VEC);
@@ -1992,13 +1992,13 @@ LLL_nfbasis(GEN *ptx, GEN polr, GEN base, long prec)
   if (typ(x) != t_POL)
   {
     p1=checknf(x); *ptx=x=(GEN)p1[1];
-    base=(GEN)p1[7]; n=lgef(x)-3;
+    base=(GEN)p1[7]; n=degpol(x);
     totally_real = !signe(gmael(p1,2,2));
     T2=gmael(p1,5,3); if (totally_real) T2 = ground(T2);
   }
   else
   {
-    n=lgef(x)-3; totally_real = (!prec || sturm(x)==n);
+    n=degpol(x); totally_real = (!prec || sturm(x)==n);
     if (typ(base) != t_VEC || lg(base)-1 != n)
       err(talker,"incorrect Zk basis in LLL_nfbasis");
     if (!totally_real)
@@ -2091,7 +2091,7 @@ GEN
 ordred(GEN x, long prec)
 {
   GEN base,y;
-  long n=lgef(x)-3,i,av=avma,v = varn(x);
+  long n=degpol(x),i,av=avma,v = varn(x);
 
   if (typ(x) != t_POL) err(typeer,"ordred");
   if (!signe(x)) return gcopy(x);
@@ -2194,7 +2194,7 @@ chk_gen_init(FP_chk_fun *chk, GEN nf, GEN gram, GEN mat, long *ptprec)
     x[i] = un;
     P = get_polmin(data,x);
     x[i] = zero;
-    if (lgef(P)-3 == n)
+    if (degpol(P) == n)
     {
       B = gcoeff(gram,i,i);
       if (gcmp(B,bound) < 0) bound = B ;
@@ -2208,7 +2208,7 @@ chk_gen_init(FP_chk_fun *chk, GEN nf, GEN gram, GEN mat, long *ptprec)
         {
           if (degree(prev) * degree(P) > 32) continue; /* too expensive */
           P = (GEN)compositum(prev,P)[1];
-          if (lgef(P)-3 == n) continue;
+          if (degpol(P) == n) continue;
           if (DEBUGLEVEL>2 && lgef(P)>lgef(prev))
             fprintferr("chk_gen_init: subfield %Z\n",P);
         }

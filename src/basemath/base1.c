@@ -288,7 +288,7 @@ gpolcomp(GEN p1, GEN p2)
 GEN
 primitive_pol_to_monic(GEN pol, GEN *ptlead)
 {
-  long i,j,n = lgef(pol)-3;
+  long i,j,n = degpol(pol);
   GEN lead,fa,e,a, POL = dummycopy(pol);
 
   a = POL + 2; lead = (GEN)a[n];
@@ -355,7 +355,7 @@ galois(GEN x, long prec)
                        1,4,5,6, 1,5,3,6, 1,6,3,4, 1,3,4,5, 1,6,2,5,
                        1,2,4,6, 1,5,2,4, 1,3,2,6, 1,2,3,5, 1,4,2,3};
   if (typ(x)!=t_POL) err(notpoler,"galois");
-  n=lgef(x)-3; if (n<=0) err(constpoler,"galois");
+  n=degpol(x); if (n<=0) err(constpoler,"galois");
   if (n>11) err(impl,"galois of degree higher than 11");
   x = gdiv(x,content(x));
   check_pol_int(x, "galois");
@@ -554,7 +554,7 @@ galois(GEN x, long prec)
 	      }
 	      prec=(prec<<1)-2; break;
 		
-	    case 2: l2=lgef(p2[1])-3; if (l2>3) l2=6-l2;
+	    case 2: l2=degpol(p2[1]); if (l2>3) l2=6-l2;
 	      switch(l2)
 	      {
 		case 1: f=carreparfait(discsr(x));
@@ -630,7 +630,7 @@ galois(GEN x, long prec)
 	    if (f) { y[2]=un; y[1]=lstoi(2520); }
 	    else { y[2]=lneg(gun); y[1]=lstoi(5040); }
 	    return y;
-	  case 2: f=lgef(p2[1])-3; avma=av; y=cgetg(4,t_VEC); y[3]=un;
+	  case 2: f=degpol(p2[1]); avma=av; y=cgetg(4,t_VEC); y[3]=un;
 	    if (f==7 || f==28) { y[2]=un; y[1]=lstoi(168); }
 	    else { y[2]=lneg(gun); y[1]=lstoi(42); }
 	    return y;
@@ -691,14 +691,14 @@ galoisapply(GEN nf, GEN aut, GEN x)
       tetpil=avma; return gerepile(av,tetpil,gcopy(y));
 
     case t_COL:
-      N=lgef(pol)-3;
+      N=degpol(pol);
       if (lg(x)!=N+1) err(typeer,"galoisapply");
       p1=galoisapply(nf,aut,gmul((GEN)nf[7],x)); tetpil=avma;
       return gerepile(av,tetpil,algtobasis(nf,p1));
 
     case t_MAT:
       lx=lg(x); if (lx==1) return cgetg(1,t_MAT);
-      N=lgef(pol)-3;
+      N=degpol(pol);
       if (lg(x[1])!=N+1) err(typeer,"galoisapply");
       p1=cgetg(lx,t_MAT);
       for (j=1; j<lx; j++) p1[j]=(long)galoisapply(nf,aut,(GEN)x[j]);
@@ -729,8 +729,8 @@ nfiso0(GEN a, GEN b, long fliso)
   a = get_nfpol(a, &nfa);
   b = get_nfpol(b, &nfb);
   if (fliso && nfa && !nfb) { p1=a; a=b; b=p1; p1=nfa; nfa=nfb; nfb=p1; }
-  m=lgef(a)-3;
-  n=lgef(b)-3; if (m<=0 || n<=0) err(constpoler,"nfiso or nfincl");
+  m=degpol(a);
+  n=degpol(b); if (m<=0 || n<=0) err(constpoler,"nfiso or nfincl");
   if (fliso)
     { if (n!=m) return gzero; }
   else
@@ -1102,7 +1102,7 @@ _mulii(GEN x, GEN y)
 GEN
 get_mul_table(GEN x,GEN basden,GEN invbas,GEN *T)
 {
-  long i,j, n = lgef(x)-3;
+  long i,j, n = degpol(x);
   GEN z,d, mul = cgetg(n*n+1,t_MAT), bas=(GEN)basden[1], den=(GEN)basden[2];
   
   for (j=1; j<=n*n; j++) mul[j]=lgetg(n+1,t_COL);
@@ -1186,7 +1186,7 @@ initalgall0(GEN x, long flag, long prec)
   if (DEBUGLEVEL) timer2();
   if (typ(x)==t_POL)
   {
-    n=lgef(x)-3; if (n<=0) err(constpoler,"initalgall0");
+    n=degpol(x); if (n<=0) err(constpoler,"initalgall0");
     check_pol_int(x,"initalg");
     if (gisirreducible(x) == gzero) err(redpoler,"nfinit");
     if (!gcmp1((GEN)x[n+2]))
@@ -1208,7 +1208,7 @@ initalgall0(GEN x, long flag, long prec)
     i = lg(x);
     if (typ(x) == t_VEC && i<=4 && i>=3 && typ(x[1])==t_POL)
     { /* polynomial + integer basis */
-      bas=(GEN)x[2]; x=(GEN)x[1]; n=lgef(x)-3;
+      bas=(GEN)x[2]; x=(GEN)x[1]; n=degpol(x);
       if (typ(bas) == t_MAT) { mat = bas; bas = mat_to_vecpol(mat,varn(x)); }
       else mat = vecpol_to_mat(bas,n);
       dx = discsr(x); r1 = sturm(x);
@@ -1217,7 +1217,7 @@ initalgall0(GEN x, long flag, long prec)
     else
     {
       nf=checknf(x);
-      bas=(GEN)nf[7]; x=(GEN)nf[1]; n=lgef(x)-3;
+      bas=(GEN)nf[7]; x=(GEN)nf[1]; n=degpol(x);
       dK=(GEN)nf[3]; dx=mulii(dK, sqri((GEN)nf[4]));
       r1 = nf_get_r1(nf);
     }
@@ -1374,7 +1374,7 @@ rootsof1(GEN nf)
     y[1]=deux;
     y[2]=lneg(algun); return y;
   }
-  N=lgef(nf[1])-3; prec=gprecision((GEN)nf[6]);
+  N=degpol(nf[1]); prec=gprecision((GEN)nf[6]);
 #ifdef LONG_IS_32BIT
   if (prec < 10) prec = 10;
 #else
@@ -1505,7 +1505,7 @@ initzeta(GEN pol, long prec)
   Pi = mppi(prec); racpi=gsqrt(Pi,prec);
 
   /* Nb de classes et regulateur */
-  nf=(GEN)bnf[7]; N=lgef(nf[1])-3;
+  nf=(GEN)bnf[7]; N=degpol(nf[1]);
   r1 = nf_get_r1(nf); r2 = (N-r1)>>1;
   gr1=gmael(nf,2,1); gr2=gmael(nf,2,2);
   ru=r1+r2; R=ru+2;

@@ -226,7 +226,7 @@ static GEN
 FBgen(GEN nf,long n2,long n)
 {
   byteptr delta=diffptr;
-  long KC2,i,j,k,p,lon,ip,nor, N = lgef(nf[1])-3;
+  long KC2,i,j,k,p,lon,ip,nor, N = degpol(nf[1]);
   GEN p2,p1,NormP,lfun;
   long prim[] = { evaltyp(t_INT)|m_evallg(3), evalsigne(1)|evallgefint(3),0 };
 
@@ -530,7 +530,7 @@ gauss_realimag(GEN x, GEN y)
 static GEN
 getfu(GEN nf,GEN *ptxarch,GEN reg,long flun,long *pte,long prec)
 {
-  long av = avma,e,i,j,R1,RU,N=lgef(nf[1])-3;
+  long av = avma,e,i,j,R1,RU,N=degpol(nf[1]);
   GEN p1,p2,u,y,matep,s,xarch,vec;
   GEN *gptr[2];
 
@@ -978,7 +978,7 @@ isprincipalarch(GEN bnf, GEN col, GEN kNx, GEN e, GEN dx, long *pe)
   bnf = checkbnf(bnf); nf = checknf(bnf);
   if (!prec) prec = prec_arch(bnf);
   matunit = (GEN)bnf[3];
-  N = lgef(nf[1]) - 3;
+  N = degpol(nf[1]);
   R1 = itos(gmael(nf,2,1));
   RU = (N + R1)>>1;
   col = cleancol(col,N,prec); settyp(col, t_COL);
@@ -1410,7 +1410,7 @@ small_norm_for_buchall(long cglob,GEN *mat,GEN matarch,long LIMC, long PRECREG,
   double *y,*z,**q,*v, MINKOVSKI_BOUND,BOUND;
   ulong av = avma, av1,av2,limpile;
   long i,j,k,noideal, nbrel = lg(mat)-1;
-  long alldep = 0, nbsmallnorm,nbfact,R1, N = lgef(nf[1])-3;
+  long alldep = 0, nbsmallnorm,nbfact,R1, N = degpol(nf[1]);
   GEN x,xembed,M,T2,r,cbase,invcbase,T2vec,prvec;
 
   if (gsigne(gborne)<=0) return cglob;
@@ -2416,7 +2416,7 @@ get_arch2_i(GEN nf, GEN a, long prec, int units)
     GEN pol = (GEN)nf[1];
     N = cgetg(la,t_VEC);
     for (k=1; k<la; k++) N[k] = (long)gabs(subres(pol,(GEN)a[k]),0);
-    N = gdivgs(glog(N,prec), - (lgef(pol)-3)); /* - log(|norm|) / [K:Q] */
+    N = gdivgs(glog(N,prec), - (degpol(pol))); /* - log(|norm|) / [K:Q] */
   }
   for (k=1; k<la; k++)
   {
@@ -2782,7 +2782,7 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
 
   /* Initializations */
   fu = NULL; /* gcc -Wall */
-  N = lgef(P)-3; PRECREG = max(BIGDEFAULTPREC,prec);
+  N = degpol(P); PRECREG = max(BIGDEFAULTPREC,prec);
   if (!nf)
   {
     nf = initalgall0(P, nf_REGULAR, PRECREG);

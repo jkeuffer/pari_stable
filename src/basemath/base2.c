@@ -20,7 +20,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*******************************************************************/
 #include "pari.h"
 
-#define deg(x) (lgef(x)-3)
 extern GEN caractducos(GEN p, GEN x, int v);
 extern GEN element_muli(GEN nf, GEN x, GEN y);
 extern GEN element_mulid(GEN nf, GEN x, long i);
@@ -40,7 +39,7 @@ allbase_check_args(GEN f, long code, GEN *y, GEN *ptw1, GEN *ptw2)
 {
   GEN w;
   if (typ(f)!=t_POL) err(notpoler,"allbase");
-  if (deg(f) <= 0) err(constpoler,"allbase");
+  if (degpol(f) <= 0) err(constpoler,"allbase");
   if (DEBUGLEVEL) timer2();
   switch(code)
   {
@@ -103,7 +102,7 @@ companion(GEN x) /* cf assmat */
   long i,j,l;
   GEN y;
 
-  l=deg(x)+1; y=cgetg(l,t_MAT);
+  l=degpol(x)+1; y=cgetg(l,t_MAT);
   for (j=1; j<l; j++)
   {
     y[j] = lgetg(l,t_COL);
@@ -494,7 +493,7 @@ allbase(GEN f, long code, GEN *y)
   long av=avma,tetpil,n,h,j,i,k,r,s,t,v,mf;
 
   allbase_check_args(f,code,y, &w1,&w2);
-  v = varn(f); n = deg(f); h = lg(w1)-1;
+  v = varn(f); n = degpol(f); h = lg(w1)-1;
   cf = (GEN*)cgetg(n+1,t_VEC);
   cf[2]=companion(f);
   for (i=3; i<=n; i++) cf[i]=mulmati(cf[2],cf[i-1]);
@@ -619,7 +618,7 @@ allbase4(GEN f,long code, GEN *y, GEN *ptw)
   long v,n,mf,h,lfa,i,j,k,l,tetpil,av = avma;
 
   allbase_check_args(f,code,y, &w1,&w2);
-  v = varn(f); n = deg(f); h = lg(w1)-1;
+  v = varn(f); n = degpol(f); h = lg(w1)-1;
   a = NULL; /* gcc -Wall */
   da= NULL;
   for (i=1; i<=h; i++)
@@ -865,7 +864,7 @@ dedek(GEN f, long mf, GEN p,GEN g)
   k = gdivexact(gadd(f, gneg_i(gmul(g,h))), p);
   k = FpX_gcd(k, FpX_gcd(g,h, p), p);
 
-  dk = deg(k);
+  dk = degpol(k);
   if (DEBUGLEVEL>=3) fprintferr("  gcd has degree %ld\n", dk);
   if (2*dk >= mf-1) return FpX_div(f,k,p);
   return dk? (GEN)NULL: f;
@@ -875,7 +874,7 @@ dedek(GEN f, long mf, GEN p,GEN g)
 static GEN
 maxord(GEN p,GEN f,long mf)
 {
-  long j,r, av = avma, flw = (cmpsi(deg(f),p) < 0);
+  long j,r, av = avma, flw = (cmpsi(degpol(f),p) < 0);
   GEN w,g,h,res;
 
   if (flw)
@@ -935,7 +934,7 @@ polmodi_keep(GEN x, GEN y)
 static GEN
 dbasis(GEN p, GEN f, long mf, GEN alpha, GEN U)
 {
-  long n=deg(f),dU,c;
+  long n=degpol(f),dU,c;
   GEN b,ha,pd,pdp;
 
   if (n == 1) return gscalmat(gun, 1);
@@ -950,7 +949,7 @@ dbasis(GEN p, GEN f, long mf, GEN alpha, GEN U)
     fprintferr("\n");
   }
   ha = pd = gpuigs(p,mf/2); pdp = mulii(pd,p);
-  dU = typ(U)==t_POL? deg(U): 0;
+  dU = typ(U)==t_POL? degpol(U): 0;
   b = cgetg(n,t_MAT); /* Z[a] + U/p Z[a] is maximal */
   /* skip first column = gscalcol(pd,n) */
   for (c=1; c<n; c++)
@@ -987,7 +986,7 @@ dbasis(GEN p, GEN f, long mf, GEN alpha, GEN U)
 static GEN
 get_partial_order_as_pols(GEN p, GEN f)
 {
-  long i,j, n = deg(f), vf = varn(f);
+  long i,j, n = degpol(f), vf = varn(f);
   GEN b,ib,h,col;
 
   b = maxord(p,f, ggval(ZX_disc(f),p));
@@ -1022,7 +1021,7 @@ Decomp(GEN p,GEN f,long mf,GEN theta,GEN chi,GEN nu,long flag)
   b1=lift_intern(gmul(chi,unmodp));
   a1=gun; b2=gun;
   b3=lift_intern(gmul(nu,unmodp));
-  while (deg(b3) > 0)
+  while (degpol(b3) > 0)
   {
     GEN p1;
     b1 = FpX_div(b1,b3, p);
@@ -1091,7 +1090,7 @@ vstar(GEN p,GEN h)
   static long res[2];
   long m,first,j,k,v,w;
 
-  m=deg(h); first=1; k=1; v=0;
+  m=degpol(h); first=1; k=1; v=0;
   for (j=1; j<=m; j++)
     if (! gcmp0((GEN)h[m-j+2]))
     {
@@ -1715,7 +1714,7 @@ testb2(GEN p, GEN fa, long Fa, GEN theta, GEN pmf, long Ft, GEN ns)
   Dat = clcm(Fa, Ft) + 3; 
   b = cgetg(5, t_VEC);
   m = p[2]; 
-  if (deg(p) > 0 || m < 0) m = 0;
+  if (degpol(p) > 0 || m < 0) m = 0;
 
   for (t = 1;; t++)
   {
@@ -1799,7 +1798,7 @@ sylpm(GEN f1,GEN f2,GEN pm)
   long n,j,v=varn(f1);
   GEN a,h;
 
-  n=deg(f1); a=cgetg(n+1,t_MAT);
+  n=degpol(f1); a=cgetg(n+1,t_MAT);
   h = FpX_res(f2,f1,pm);
   for (j=1;; j++)
   {
@@ -1817,7 +1816,7 @@ gcdpm(GEN f1,GEN f2,GEN pm)
   long n,c,v=varn(f1),av=avma,tetpil;
   GEN a,col;
 
-  n=deg(f1); a=sylpm(f1,f2,pm);
+  n=degpol(f1); a=sylpm(f1,f2,pm);
   for (c=1; c<=n; c++)
     if (signe(resii(gcoeff(a,c,c),pm))) break;
   if (c > n) { avma=av; return zeropol(v); }
@@ -1860,7 +1859,7 @@ GEN element_powid_mod_p(GEN nf, long I, GEN n, GEN p);
 static GEN
 pradical(GEN nf, GEN p, GEN *modfrob)
 {
-  long i,N = deg(nf[1]);
+  long i,N = degpol(nf[1]);
   GEN p1,m,frob,rad;
 
   frob = cgetg(N+1,t_MAT);
@@ -1914,7 +1913,7 @@ pol_min(GEN alpha,GEN nf,GEN algebre,long kbar,GEN p)
 static GEN
 eval_pol(GEN nf,GEN pol,GEN alpha,GEN algebre,GEN algebre1)
 {
-  long av=avma,tetpil,i,kbar,k, lx = lgef(pol)-1, N = deg(nf[1]);
+  long av=avma,tetpil,i,kbar,k, lx = lgef(pol)-1, N = degpol(nf[1]);
   GEN res;
 
   kbar = lg(algebre1)-1; k = N-kbar;
@@ -2016,7 +2015,7 @@ vecteur sur la base d'entiers */
 static GEN
 lens(GEN nf, GEN p, GEN a)
 {
-  long av=avma,tetpil,N=deg(nf[1]),j;
+  long av=avma,tetpil,N=degpol(nf[1]),j;
   GEN mat=cgetg(N+1,t_MAT);
   for (j=1; j<=N; j++) mat[j]=(long)element_mulid(nf,a,j);
   tetpil=avma; return gerepile(av,tetpil,kerlens(mat,p));
@@ -2035,7 +2034,7 @@ prime_check_elt(GEN a, GEN pol, GEN p, GEN pf)
   GEN M,mod,x, c = denom(content(a));
   long v = pvaluation(c, p, &x); /* x is junk */
 
-  mod = mulii(pf, gpowgs(p, deg(pol)*v + 1));
+  mod = mulii(pf, gpowgs(p, degpol(pol)*v + 1));
 
   x = FpX_red(gmul(a,c), mod);
   M = sylvestermatrix_i(pol,x);
@@ -2141,7 +2140,7 @@ static GEN
 prime_two_elt(GEN nf, GEN p, GEN ideal)
 {
   GEN beta,a,pf, pol = (GEN)nf[1];
-  long av,tetpil,f, N=deg(pol), m=lg(ideal)-1;
+  long av,tetpil,f, N=degpol(pol), m=lg(ideal)-1;
 
   if (!m) return gscalcol_i(p,N);
 
@@ -2169,7 +2168,7 @@ static GEN
 apply_kummer(GEN nf,GEN pol,GEN e,GEN p,long N,GEN *beta)
 {
   GEN T,p1, res = cgetg(6,t_VEC);
-  long f = deg(pol);
+  long f = degpol(pol);
 
   res[1]=(long)p;
   res[3]=(long)e;
@@ -2205,7 +2204,7 @@ primedec(GEN nf, GEN p)
   GEN alpha,beta,p1,p2,unmodp,zmodp,idmodp;
 
   if (DEBUGLEVEL>=3) timer2();
-  nf=checknf(nf); T=(GEN)nf[1]; N=deg(T);
+  nf=checknf(nf); T=(GEN)nf[1]; N=degpol(T);
   f=factmod(T,p); ex=(GEN)f[2];
   f=centerlift((GEN)f[1]); np=lg(f);
   if (DEBUGLEVEL>=6) msgtimer("factmod");
@@ -2521,7 +2520,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, GEN unnf, GEN id, GEN matId)
   A=gmael(p1,2,1);
   I=gmael(p1,2,2);
 
-  n=deg(pol); vpol=varn(pol);
+  n=degpol(pol); vpol=varn(pol);
   p=(GEN)pr[1]; q=powgi(p,(GEN)pr[4]); pip=(GEN)pr[2];
   q1=q; while (cmpis(q1,n)<0) q1=mulii(q1,q);
 
@@ -2709,7 +2708,7 @@ rnfround2all(GEN nf, GEN pol, long all)
 
   nf=checknf(nf); polnf=(GEN)nf[1]; vpol=varn(pol);
   pol = fix_relative_pol(nf,pol,1);
-  N=deg(polnf); n=deg(pol); discpol=discsr(pol);
+  N=degpol(polnf); n=degpol(pol); discpol=discsr(pol);
   list=idealfactor(nf,discpol); ep=(long*)list[2]; list=(GEN)list[1];
   nbidp=lg(list)-1; for(i=1;i<=nbidp;i++) ep[i]=itos((GEN)ep[i]);
   if (DEBUGLEVEL>1)
@@ -2794,7 +2793,7 @@ rnfsimplifybasis(GEN bnf, GEN order)
   if (typ(order)!=t_VEC || lg(order)<3)
     err(talker,"not a pseudo-basis in nfsimplifybasis");
   A=(GEN)order[1]; I=(GEN)order[2]; n=lg(A)-1; nf=(GEN)bnf[7];
-  N=deg(nf[1]); id=idmat(N); Iz=cgetg(n+1,t_VEC); Az=cgetg(n+1,t_MAT);
+  N=degpol(nf[1]); id=idmat(N); Iz=cgetg(n+1,t_VEC); Az=cgetg(n+1,t_MAT);
   for (j=1; j<=n; j++)
   {
     if (gegal((GEN)I[j],id)) { Iz[j]=(long)id; Az[j]=A[j]; }
@@ -2860,7 +2859,7 @@ rnfsteinitz(GEN nf, GEN order)
   GEN Id,A,I,p1,a,b;
 
   nf = checknf(nf);
-  Id = idmat(deg(nf[1]));
+  Id = idmat(degpol(nf[1]));
   if (typ(order)==t_POL) order=rnfpseudobasis(nf,order);
   if (typ(order)!=t_VEC || lg(order)<3)
     err(talker,"not a pseudo-matrix in rnfsteinitz");
@@ -2917,7 +2916,7 @@ rnfbasis(GEN bnf, GEN order)
   GEN nf,A,I,classe,p1,p2,id;
 
   bnf = checkbnf(bnf);
-  nf=(GEN)bnf[7]; N=deg(nf[1]); id=idmat(N);
+  nf=(GEN)bnf[7]; N=degpol(nf[1]); id=idmat(N);
   if (typ(order)==t_POL) order=rnfpseudobasis(nf,order);
   if (typ(order)!=t_VEC || lg(order)<3)
     err(talker,"not a pseudo-matrix in rnfbasis");
@@ -2953,7 +2952,7 @@ rnfhermitebasis(GEN bnf, GEN order)
   GEN nf,A,I,p1,id;
 
   bnf = checkbnf(bnf); nf=(GEN)bnf[7];
-  N=deg(nf[1]); id=idmat(N);
+  N=degpol(nf[1]); id=idmat(N);
   if (typ(order)==t_POL)
   {
     order=rnfpseudobasis(nf,order);
@@ -2988,7 +2987,7 @@ rnfisfree(GEN bnf, GEN order)
   bnf = checkbnf(bnf);
   if (gcmp1(gmael3(bnf,8,1,1))) return 1;
 
-  nf=(GEN)bnf[7]; N=deg(nf[1]); id=idmat(N);
+  nf=(GEN)bnf[7]; N=degpol(nf[1]); id=idmat(N);
   if (typ(order)==t_POL) order=rnfpseudobasis(nf,order);
   if (typ(order)!=t_VEC || lg(order)<3)
     err(talker,"not a pseudo-matrix in rnfisfree");
@@ -3022,7 +3021,7 @@ polcompositum0(GEN A, GEN B, long flall)
   GEN C, LPRS;
 
   if (typ(A)!=t_POL || typ(B)!=t_POL) err(typeer,"polcompositum0");
-  if (deg(A)<=0 || deg(B)<=0) err(constpoler,"compositum");
+  if (degpol(A)<=0 || degpol(B)<=0) err(constpoler,"compositum");
   v = varn(A);
   if (varn(B) != v) err(talker,"not the same variable in compositum");
   C = content(A); if (!gcmp1(C)) A = gdiv(A, C);
@@ -3077,7 +3076,7 @@ nfissquarefree(GEN nf, GEN x)
     g = modulargcd(x, y);
   else
     g = nfgcd(x, y, nf, NULL);
-  avma = av; return (deg(g) == 0);
+  avma = av; return (degpol(g) == 0);
 }
 
 GEN
@@ -3270,7 +3269,7 @@ rnflllgram(GEN nf, GEN pol, GEN order,long prec)
     err(talker,"not a pseudo-matrix in rnflllgram");
   M=(GEN)order[1]; I=(GEN)order[2]; lx=lg(I);
   if (lx < 3) return gcopy(order);
-  if (lx-1 != deg(pol)) err(consister,"rnflllgram");
+  if (lx-1 != degpol(pol)) err(consister,"rnflllgram");
   U=idmat(lx-1); I = dummycopy(I);
 
 /* Compute the relative T2 matrix of powers of theta */
@@ -3443,12 +3442,12 @@ rnfpolred(GEN nf, GEN pol, long prec)
     default: err(idealer1);
       return NULL; /* not reached */
   }
-  if (deg(pol) <= 1) 
+  if (degpol(pol) <= 1) 
   {
     w=cgetg(2,t_VEC);
     w[1]=lpolx[vpol]; return w;
   }
-  id=rnfpseudobasis(nf,pol); N=deg(nf[1]);
+  id=rnfpseudobasis(nf,pol); N=degpol(nf[1]);
   if (bnf && gcmp1(gmael3(bnf,8,1,1))) /* if bnf is principal */
   {
     ideals=(GEN)id[2]; n=lg(ideals)-1; order=(GEN)id[1];
@@ -3513,7 +3512,7 @@ makebasis(GEN nf,GEN pol)
   elts= (GEN)p1[1];
   ids = (GEN)p1[2];
   if (DEBUGLEVEL>1) { fprintferr("relative basis computed\n"); flusherr(); }
-  N=deg(pol); n=deg((GEN)nf[1]); m=n*N;
+  N=degpol(pol); n=degpol((GEN)nf[1]); m=n*N;
   den = denom(content(lift(plg)));
   vbs = cgetg(n+1,t_VEC);
   vbs[1] = un; 

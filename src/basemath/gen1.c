@@ -952,7 +952,7 @@ GEN
 to_Kronecker(GEN P, GEN Q)
 {
   /* P(X) = sum Mod(.,Q(Y)) * X^i, lift then set X := Y^(2n-1) */
-  long i,j,k,l, lx = lgef(P), N = ((lgef(Q)-3)<<1) + 1, vQ = varn(Q);
+  long i,j,k,l, lx = lgef(P), N = (degpol(Q)<<1) + 1, vQ = varn(Q);
   GEN p1, y = cgetg((N-2)*(lx-2) + 2, t_POL);
   for (k=i=2; i<lx; i++)
   {

@@ -97,7 +97,7 @@ static GEN
 mysquare(GEN p)
 {
   GEN s,aux1,aux2;
-  long i,j,n=lgef(p)-3,nn,ltop,lbot;
+  long i,j,n=degpol(p),nn,ltop,lbot;
 
   if (n==-1) return gcopy(p);
   nn=n<<1; s=cgetg(nn+3,t_POL);
@@ -141,7 +141,7 @@ static GEN
 karasquare(GEN p)
 {
   GEN p1,s0,s1,s2,aux;
-  long n=lgef(p)-3,n0,n1,i,var,nn0,ltop,lbot;
+  long n=degpol(p),n0,n1,i,var,nn0,ltop,lbot;
 
   if (n<=KARASQUARE_LIMIT) return mysquare(p);
   ltop=avma;
@@ -172,7 +172,7 @@ static GEN
 cook_square(GEN p)
 {
   GEN p0,p1,p2,p3,q,aux0,aux1,r,aux,plus,moins;
-  long n=lgef(p)-3,n0,n3,i,j,ltop=avma,lbot,var;
+  long n=degpol(p),n0,n3,i,j,ltop=avma,lbot,var;
 
   if (n<=COOK_SQUARE_LIMIT) return karasquare(p);
 
@@ -241,7 +241,7 @@ cook_square(GEN p)
   for (i=0; i<=6; i++)
   {
     aux=(GEN) r[i];
-    for (j=0; j<=lgef(aux)-3; j++)
+    for (j=0; j<=degpol(aux); j++)
       q[n0*i+j+2]=ladd((GEN)q[n0*i+j+2],(GEN)aux[j+2]);
   }
   lbot=avma; return gerepile(ltop,lbot,gcopy(q));
@@ -251,7 +251,7 @@ static GEN
 graeffe(GEN p)
 {
   GEN p0,p1,s0,s1,ss1;
-  long n=lgef(p)-3,n0,n1,i,auxi,ns1;
+  long n=degpol(p),n0,n1,i,auxi,ns1;
 
   if (n==0) return gcopy(p);
   n0=n>>1; n1=(n-1)>>1;
@@ -262,7 +262,7 @@ graeffe(GEN p)
   for (i=0; i<=n1; i++) p1[i+2]=p[3+(i<<1)];
 
   s0=cook_square(p0);
-  s1=cook_square(p1); ns1 = lgef(s1)-3;
+  s1=cook_square(p1); ns1 = degpol(s1);
   ss1 = cgetg(ns1+4, t_POL);
   ss1[1] = auxi | evallgef(ns1+4);
   ss1[2]=zero;
@@ -289,7 +289,7 @@ square_free_factorization(GEN pol)
   GEN p1,x,t1,v1,t,v,A;
 
   if (typ(pol)!=t_POL) err(typeer,"square_free_factorization");
-  deg=lgef(pol)-3; if (deg<1) return cgetg(1,t_MAT);
+  deg=degpol(pol); if (deg<1) return cgetg(1,t_MAT);
   p1 = content(pol); if (!gcmp1(p1)) pol = gdiv(pol,p1);
 
   x=cgetg(3,t_MAT);
@@ -362,7 +362,7 @@ static long
 findpower(GEN p)
 {
   double x, logbinomial,pente,pentemax=-pariINFINITY;
-  long n=lgef(p)-3,i;
+  long n=degpol(p),i;
 
   logbinomial = mylog2((GEN) p[n+2]);
   for (i=n-1; i>=0; i--)
@@ -383,7 +383,7 @@ static long
 polygone_newton(GEN p, long k)
 {
   double *logcoef,pente;
-  long n=lgef(p)-3,i,j,h,l,*sommet,pentelong;
+  long n=degpol(p),i,j,h,l,*sommet,pentelong;
 
   logcoef=(double*) gpmalloc((n+1)*sizeof(double));
   sommet=(long*) gpmalloc((n+1)*sizeof(long));
@@ -531,7 +531,7 @@ static GEN
 homothetie(GEN p, GEN R, long bitprec)
 {
   GEN q,r,gR,aux;
-  long n=lgef(p)-3,i;
+  long n=degpol(p),i;
 
   gR=mygprec(ginv(R),bitprec);
   q=mygprec(p,bitprec);
@@ -570,7 +570,7 @@ homothetie_gauss(GEN p, long e,long f)
 static long
 valuation(GEN p)
 {
-  long j=0,n=lgef(p)-3;
+  long j=0,n=degpol(p);
 
   while ((j<=n) && isexactzero((GEN)p[j+2])) j++;
   return j;
@@ -582,7 +582,7 @@ at a distance eps */
 static double
 lower_bound(GEN p, long *k, double eps)
 {
-  long n=lgef(p)-3,i,j,ltop=avma;
+  long n=degpol(p),i,j,ltop=avma;
   GEN a,s,icd;
   double r,*rho;
 
@@ -617,7 +617,7 @@ static GEN
 max_modulus(GEN p, double tau)
 {
   GEN q,aux,gunr;
-  long i,j,k,valuat,n=lgef(p)-3,nn,ltop=avma,bitprec,imax,e;
+  long i,j,k,valuat,n=degpol(p),nn,ltop=avma,bitprec,imax,e;
   double r,rho,eps, tau2 = (tau > 3.0)? 0.5: tau/6.;
 
   eps = - 1/log(1.5*tau2); /* > 0 */
@@ -666,7 +666,7 @@ static GEN
 modulus(GEN p, long k, double tau)
 {
   GEN q,gunr;
-  long i,j,kk=k,imax,n=lgef(p)-3,nn,nnn,valuat,av,ltop=avma,bitprec,decprec,e;
+  long i,j,kk=k,imax,n=degpol(p),nn,nnn,valuat,av,ltop=avma,bitprec,decprec,e;
   double tau2,r;
 
   tau2=tau/6; nn=n;
@@ -684,7 +684,7 @@ modulus(GEN p, long k, double tau)
   {
     q=eval_rel_pol(q,bitprec);
 
-    nnn=lgef(q)-3; valuat=valuation(q);
+    nnn=degpol(q); valuat=valuation(q);
     if (valuat>0)
     {
       kk-=valuat;
@@ -713,7 +713,7 @@ static GEN
 pre_modulus(GEN p, long k, double tau, GEN rmin, GEN rmax)
 {
   GEN R, q, aux;
-  long n=lgef(p)-3,i,imax,imax2,bitprec,ltop=avma, av;
+  long n=degpol(p),i,imax,imax2,bitprec,ltop=avma, av;
   double tau2, aux2;
 
   tau2=tau/6.;
@@ -762,7 +762,7 @@ static long
 dual_modulus(GEN p, GEN R, double tau, long l)
 {
   GEN q;
-  long i,j,imax,k,delta_k=0,n=lgef(p)-3,nn,nnn,valuat,ltop=avma,bitprec,ll=l;
+  long i,j,imax,k,delta_k=0,n=degpol(p),nn,nnn,valuat,ltop=avma,bitprec,ll=l;
   double logmax,aux,tau2;
 
   tau2=7.*tau/8.;
@@ -776,7 +776,7 @@ dual_modulus(GEN p, GEN R, double tau, long l)
     bitprec=6*nn-5*ll+(long) ((double) nn*(log2(1/tau2)+8.*tau2/7.));
 
     q=eval_rel_pol(q,bitprec);
-    nnn=lgef(q)-3; valuat=valuation(q);
+    nnn=degpol(q); valuat=valuation(q);
     if (valuat>0)
     {
       delta_k+=valuat;
@@ -794,7 +794,7 @@ dual_modulus(GEN p, GEN R, double tau, long l)
     tau2=tau2*7./4.;
   }
   k=-1; logmax=- (double) pariINFINITY;
-  for (i=0; i<=lgef(q)-3; i++)
+  for (i=0; i<=degpol(q); i++)
   {
     aux=mylog2((GEN)q[2+i]);
     if (aux>logmax) { logmax=aux; k=i; }
@@ -947,7 +947,7 @@ initRUgen(long N, long bitprec)
 static long
 isreal(GEN p)
 {
-  long n=lgef(p)-3,i=0;
+  long n=degpol(p),i=0;
 
   while (i<=n && typ(p[i+2])!=t_COMPLEX) i++;
   return (i>n);
@@ -958,7 +958,7 @@ parameters(GEN p, double *mu, double *gamma,
            long polreal, double param, double param2)
 {
   GEN q,pc,Omega,coef,RU,prim,aux,aux0,ggamma,gx,mygpi;
-  long ltop=avma,limite=stack_lim(ltop,1),n=lgef(p)-3,bitprec,NN,K,i,j,ltop2;
+  long ltop=avma,limite=stack_lim(ltop,1),n=degpol(p),bitprec,NN,K,i,j,ltop2;
   double lx;
 
   bitprec=gexpo(p)+(long)param2+8;
@@ -1024,7 +1024,7 @@ static void
 dft(GEN p, long k, long NN, long bitprec, GEN F, GEN H, long polreal)
 {
   GEN Omega,q,qd,pc,pdc,alpha,beta,gamma,RU,aux,U,W,mygpi,prim,prim2;
-  long limite,n=lgef(p)-3,i,j,K,ltop;
+  long limite,n=degpol(p),i,j,K,ltop;
 
   mygpi=mppi(bitprec/BITS_IN_LONG+3);
   aux = gdivgs(mygpi,NN/2); /* 2 Pi/NN */
@@ -1160,7 +1160,7 @@ refine_F(GEN p, GEN *F, GEN *G, GEN H, long bitprec, double gamma)
 {
   GEN pp,FF,GG,r,HH,f0;
   long error,i,bitprec1=0,bitprec2,ltop=avma,shiftbitprec;
-  long shiftbitprec2,n=lgef(p)-3,enh,normF,normG,limite=stack_lim(ltop,1);
+  long shiftbitprec2,n=degpol(p),enh,normF,normG,limite=stack_lim(ltop,1);
 
   FF=*F; HH=H;
   GG=poldivres(p,*F,&r);
@@ -1221,7 +1221,7 @@ split_fromU(GEN p, long k, double delta, long bitprec,
             GEN *F, GEN *G, double param, double param2)
 {
   GEN pp,FF,GG,H;
-  long n=lgef(p)-3,NN,bitprec2,
+  long n=degpol(p),NN,bitprec2,
   ltop=avma,polreal=isreal(p);
   double mu,gamma;
 
@@ -1249,7 +1249,7 @@ static void
 optimize_split(GEN p, long k, double delta, long bitprec,
             GEN *F, GEN *G, double param, double param2)
 {
-  long n=lgef(p)-3;
+  long n=degpol(p);
   GEN FF,GG;
 
   if (k<=n/2)
@@ -1321,7 +1321,7 @@ static GEN
 conformal_pol(GEN p, GEN a, long bitprec)
 {
   GEN r,pui,num,aux, unr = myrealun(bitprec);
-  long n=lgef(p)-3, i;
+  long n=degpol(p), i;
   ulong av, limit;
 
   aux = pui = cgetg(4,t_POL);
@@ -1351,7 +1351,7 @@ conformal_pol(GEN p, GEN a, long bitprec)
 static GEN
 compute_radius(GEN* radii, GEN p, long k, double aux, double *delta)
 {
-  long i, n = lgef(p)-3;
+  long i, n = degpol(p);
   GEN rmin,rmax,p1;
   if (k>1)
   {
@@ -1413,7 +1413,7 @@ static void
 conformal_mapping(GEN *radii, GEN ctr, GEN p, long k, long bitprec,
                   double aux, GEN *F,GEN *G)
 {
-  long bitprec2,n=lgef(p)-3,decprec,i,ltop = avma, av;
+  long bitprec2,n=degpol(p),decprec,i,ltop = avma, av;
   GEN q,FF,GG,a,R, *gptr[2];
   GEN rho,invrho;
   double delta,param,param2;
@@ -1473,7 +1473,7 @@ split_2(GEN p, long bitprec, GEN ctr, double thickness, GEN *F, GEN *G)
 {
   GEN rmin,rmax,rho,invrho;
   double kappa,aux,delta,param,param2;
-  long n=lgef(p)-3,i,j,k,bitprec2;
+  long n=degpol(p),i,j,k,bitprec2;
   GEN q,FF,GG,R;
   GEN *radii = (GEN*) cgetg(n+1, t_VEC);
   for (i=2; i<n; i++) radii[i]=realzero(3);
@@ -1547,7 +1547,7 @@ is zero */
 static void
 split_1(GEN p, long bitprec, GEN *F, GEN *G)
 {
-  long bitprec2,i,imax,n=lgef(p)-3, polreal = isreal(p), ep = gexpo(p);
+  long bitprec2,i,imax,n=degpol(p), polreal = isreal(p), ep = gexpo(p);
   GEN rmax,rmin,thickness,quo;
   GEN ctr,q,qq,FF,GG,v,gr,r, newq = NULL; /* gcc -Wall */
 
@@ -1594,7 +1594,7 @@ static int
 split_0_2(GEN p, long bitprec, GEN *F, GEN *G)
 {
   GEN q,b,FF,GG;
-  long n=lgef(p)-3,k,bitprec2,i, eq;
+  long n=degpol(p),k,bitprec2,i, eq;
   double aux = mylog2((GEN)p[n+1]) - mylog2((GEN)p[n+2]);
 
   /* beware double overflow */
@@ -1639,7 +1639,7 @@ static void
 split_0_1(GEN p, long bitprec, GEN *F, GEN *G)
 {
   GEN q,FF,GG;
-  long n=lgef(p)-3,bitprec2,normp;
+  long n=degpol(p),bitprec2,normp;
 
   if  (split_0_2(p,bitprec,F,G)) return;
 
@@ -1658,7 +1658,7 @@ static void
 split_0(GEN p, long bitprec, GEN *F, GEN *G)
 {
   GEN FF,GG,q,R;
-  long n=lgef(p)-3,k=0,i;
+  long n=degpol(p),k=0,i;
 
   while (gexpo((GEN)p[k+2]) < -bitprec && k <= n/2) k++;
   if (k>0)
@@ -1771,7 +1771,7 @@ static long
 a_posteriori_errors(GEN p, GEN roots_pol, long err)
 {
   GEN sigma,overn,shatzle,x;
-  long i,n=lgef(p)-3,e,e_max;
+  long i,n=degpol(p),e,e_max;
 
   sigma = realun(3);
   setexpo(sigma, err + (long)log2((double)n) + 1);
@@ -1806,7 +1806,7 @@ append_root(GEN roots_pol, GEN a)
 static GEN
 split_complete(GEN p, long bitprec, GEN roots_pol)
 {
-  long n=lgef(p)-3,decprec,ltop;
+  long n=degpol(p),decprec,ltop;
   GEN p1,F,G,a,b,m1,m2,m;
 
   if (n==1)
@@ -1839,7 +1839,7 @@ split_complete(GEN p, long bitprec, GEN roots_pol)
 static GEN
 cauchy_bound(GEN p)
 {
-  long i,n=lgef(p)-3;
+  long i,n=degpol(p);
   GEN x=gzero,y,lc;
 
   lc=gabs((GEN)p[n+2],DEFAULTPREC); /* leading coefficient */
@@ -1922,7 +1922,7 @@ static GEN
 all_roots(GEN p, long bitprec)
 {
   GEN pd,q,roots_pol,m;
-  long bitprec0, bitprec2,n=lgef(p)-3,i,e,h;
+  long bitprec0, bitprec2,n=degpol(p),i,e,h;
   ulong av;
 
 #if 0
@@ -1964,7 +1964,7 @@ isexactscalar(GEN x)
 static int
 isexactpol(GEN p)
 {
-  long i,n=lgef(p)-3;
+  long i,n=degpol(p);
 
   for (i=0; i<=n; i++)
     if (isexactscalar((GEN)p[i+2])==0) return 0;
@@ -2000,7 +2000,7 @@ solve_exact_pol(GEN p, long bitprec)
   GEN S,ex,factors,roots_pol,roots_fact;
   long i,j,k,m,n,iroots;
 
-  n=lgef(p)-3;
+  n=degpol(p);
 
   iroots=0;
   roots_pol=cgetg(n+1,t_VEC); for (i=1; i<=n; i++) roots_pol[i]=zero;
@@ -2010,7 +2010,7 @@ solve_exact_pol(GEN p, long bitprec)
   for (i=1; i<lg(factors); i++)
   {
     roots_fact=all_roots((GEN)factors[i],bitprec);
-    n=lgef(factors[i])-3; m=itos((GEN)ex[i]);
+    n=degpol(factors[i]); m=itos((GEN)ex[i]);
     for (j=1; j<=n; j++)
       for (k=1; k<=m; k++) roots_pol[++iroots] = roots_fact[j];
   }

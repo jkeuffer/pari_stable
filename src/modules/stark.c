@@ -234,7 +234,7 @@ GetDeg(GEN dataCR)
   GEN degs = cgetg(l, t_VECSMALL);
 
   for (i = 1; i < l; i++)
-    degs[i] = lgef(gmael4(dataCR, i, 5, 4, 1)) - 3;
+    degs[i] = degpol(gmael4(dataCR, i, 5, 4, 1));
   return degs;
 }
 
@@ -1210,7 +1210,7 @@ static void
 Polmod2Coeff(int *rep, GEN polmod, long dg)
 {
   GEN pol = (GEN)polmod[2];
-  long i,d = lgef(pol)-3;
+  long i,d = degpol(pol);
 
   pol += 2;
   for (i=0; i<=d; i++) rep[i] = itos((GEN)pol[i]);
@@ -2352,7 +2352,7 @@ RecCoeff3(GEN nf, GEN beta, GEN B, long v, long prec)
 GEN
 RecCoeff(GEN nf,  GEN pol,  long v, long prec)
 {
-  long av = avma, j, G, cl = lgef(pol)-3;
+  long av = avma, j, G, cl = degpol(pol);
   GEN p1, beta;
 
   /* if precision(pol) is too low, abort */

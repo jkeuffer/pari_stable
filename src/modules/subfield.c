@@ -25,7 +25,6 @@ extern GEN Fp_factor_irred(GEN P,GEN l, GEN Q);
 extern GEN FpX_rand(long d1, long v, GEN p);
 extern GEN hensel_lift_fact(GEN pol, GEN Q, GEN T, GEN p, GEN pe, long e);
 
-#define deg(a) (lgef(a)-3)
 static GEN print_block_system(long N,GEN Y,long d,GEN vbs,long maxl);
 
 /* Computation of potential block systems of given size d associated to a
@@ -384,7 +383,7 @@ cand_for_subfields(GEN A,GEN DATA,GEN *ptlistdelta)
   pe= (GEN)DATA[3];
   T = (GEN)DATA[4];
   fhk=(GEN)DATA[5];
-  M = (GEN)DATA[8]; N=deg(pol); m=lg(A)-1; d=N/m; /* m | M */
+  M = (GEN)DATA[8]; N=degpol(pol); m=lg(A)-1; d=N/m; /* m | M */
   firstroot = (GEN)DATA[13];
 
   delta = cgetg(m+1,t_VEC);
@@ -433,7 +432,7 @@ get_bezout(GEN pol, GEN fk, GEN p)
     A = (GEN)fk[i];
     B = FpX_div(pol, A, p);
     d = FpX_extgcd(A,B,p, &u, &v);
-    if (deg(d) > 0) err(talker, "relatively prime polynomials expected");
+    if (degpol(d) > 0) err(talker, "relatively prime polynomials expected");
     d = constant_term(d);
     if (!gcmp1(d))
     {
@@ -509,7 +508,7 @@ embedding_of_potential_subfields(GEN g,GEN DATA,GEN listdelta)
   long rt;
   ulong av;
 
-  T = (GEN)DATA[1]; rt = brent_kung_optpow(deg(T), 2);
+  T = (GEN)DATA[1]; rt = brent_kung_optpow(degpol(T), 2);
   p = (GEN)DATA[2];
   maxp = (GEN)DATA[7];
   ind = (GEN)DATA[9];
@@ -574,7 +573,7 @@ choose_prime(GEN pol,GEN dpol,long d,GEN *ptff,GEN *ptlistpotbl, long *ptlcm)
   byteptr di=diffptr;
 
   if (DEBUGLEVEL) timer2();
-  di++; p = stoi(2); N = deg(pol);
+  di++; p = stoi(2); N = degpol(pol);
   while (p[2]<=N) p[2] += *di++;
   oldllist = 100000;
   oldlcm = 0;
@@ -588,8 +587,8 @@ choose_prime(GEN pol,GEN dpol,long d,GEN *ptff,GEN *ptlistpotbl, long *ptlcm)
     if (r == 1 || r == N) continue;
 
     n = cgetg(r+1, t_VECSMALL);
-    lcm = n[1] = deg(ff[1]);
-    for (j=2; j<=r; j++) { n[j] = deg(ff[j]); lcm = clcm(lcm,n[j]); }
+    lcm = n[1] = degpol(ff[1]);
+    for (j=2; j<=r; j++) { n[j] = degpol(ff[j]); lcm = clcm(lcm,n[j]); }
     if (lcm < oldlcm) continue; /* false when oldlcm = 0 */
     if (r >= BIL) { err(warner,"subfields: overflow in calc_block"); continue; }
     if (DEBUGLEVEL) fprintferr("p = %ld,\tlcm = %ld,\torbits: %Z\n",p[2],lcm,n);
@@ -647,11 +646,11 @@ bound_for_coeff(long m,GEN rr, GEN *maxroot)
 static GEN
 init_traces(GEN ff, GEN T, GEN p)
 {
-  long N = deg(T),i,j,k, r = lg(ff);
+  long N = degpol(T),i,j,k, r = lg(ff);
   GEN Frob = matrixpow(N,N, FpXQ_pow(polx[varn(T)],p, T,p), T,p);
   GEN y,p1,p2,Trk,pow,pow1;
 
-  k = deg(ff[r-1]); /* largest degree in modular factorization */
+  k = degpol(ff[r-1]); /* largest degree in modular factorization */
   pow = cgetg(k+1, t_VEC);
   pow[1] = (long)zero; /* dummy */
   pow[2] = (long)Frob;
@@ -673,7 +672,7 @@ init_traces(GEN ff, GEN T, GEN p)
   for (i=2; i<=k; i++)
     Trk[i] = ladd((GEN)Trk[i-1], (GEN)pow1[i]);
   y = cgetg(r, t_VEC);
-  for (i=1; i<r; i++) y[i] = Trk[deg(ff[i])];
+  for (i=1; i<r; i++) y[i] = Trk[degpol(ff[i])];
   return y;
 }
 
@@ -737,7 +736,7 @@ compute_data(GEN DATA, struct poldata PD, long d, GEN ff, GEN T,GEN p)
   GEN den,roo,pe,p1,p2,fk,fhk,MM,maxroot,pol,interp,bezoutC;
 
   if (DEBUGLEVEL>1) { fprintferr("Entering compute_data()\n\n"); flusherr(); }
-  pol = PD.pol; N = deg(pol);
+  pol = PD.pol; N = degpol(pol);
   roo = PD.roo;
   den = PD.den;
   if (DATA) /* update (translate) an existing DATA */
@@ -757,12 +756,12 @@ compute_data(GEN DATA, struct poldata PD, long d, GEN ff, GEN T,GEN p)
     bezoutC = (GEN)DATA[12]; l = lg(interp);
     for (i=1; i<l; i++)
     {
-      if (deg(interp[i]) > 0) /* do not turn polun[0] into gun */
+      if (degpol(interp[i]) > 0) /* do not turn polun[0] into gun */
       {
         p1 = poleval((GEN)interp[i], Xm1);
         interp[i] = (long)FpXQX_red(p1, NULL,p);
       }
-      if (deg(bezoutC[i]) > 0)
+      if (degpol(bezoutC[i]) > 0)
       {
         p1 = poleval((GEN)bezoutC[i], Xm1);
         bezoutC[i] = (long)FpXQX_red(p1, NULL,p);
@@ -839,7 +838,7 @@ subfields_of_given_degree(struct poldata PD,long d)
 
   if (DEBUGLEVEL) fprintferr("\n*** Look for subfields of degree %ld\n\n", d);
   av = avma;
-  p = choose_prime(pol,dpol,deg(pol)/d,&ff,&listpotbl,&nn);
+  p = choose_prime(pol,dpol,degpol(pol)/d,&ff,&listpotbl,&nn);
   if (!listpotbl) { avma=av; return cgetg(1,t_VEC); }
   T = lift_intern(ffinit(p,nn, fetch_var()));
   DATA = NULL; LSB = cgetg(1,t_VEC); 
@@ -913,7 +912,7 @@ subfields_poldata(GEN T, struct poldata *PD)
 
   /* copy-paste from galconj.c:galoisborne. Merge as soon as possible */
   /* start of copy-paste */
-  n = lgef(T) - 3;
+  n = degpol(T);
   prec = 1;
   for (i = 2; i < lgef(T); i++)
     if (lg(T[i]) > prec)
@@ -954,7 +953,7 @@ subfields(GEN nf,GEN d)
   struct poldata PD;
 
   pol = get_nfpol(nf, &nf); /* in order to treat trivial cases */
-  v0=varn(pol); N=deg(pol); di=itos(d);
+  v0=varn(pol); N=degpol(pol); di=itos(d);
   if (di==N) return gerepileupto(av, gcopy(_subfield(pol, polx[v0])));
   if (di==1) return gerepileupto(av, gcopy(_subfield(polx[v0], pol)));
   if (di < 1 || di > N || N % di) return cgetg(1,t_VEC);
@@ -977,7 +976,7 @@ subfieldsall(GEN nf)
   subfields_poldata(nf, &PD);
   pol = PD.pol;
 
-  v0 = varn(pol); N = deg(pol);
+  v0 = varn(pol); N = degpol(pol);
   dg = divisors(stoi(N)); ld = lg(dg)-1;
   if (DEBUGLEVEL) fprintferr("\n***** Entering subfields\n\npol = %Z\n",pol);
 

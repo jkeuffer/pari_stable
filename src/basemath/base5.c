@@ -68,7 +68,7 @@ rnfmakematrices(GEN rnf)
   GEN M,p2,p3,MC,sigk,T2,T,p1,MD,TI,MDI;
 
   nf=(GEN)rnf[10]; racnf=(GEN)nf[6]; pol=(GEN)rnf[1];
-  n=lgef(pol)-3;
+  n=degpol(pol);
   base=(GEN)rnf[7]; base1=(GEN)base[1]; rac=(GEN)rnf[6]; sig=(GEN)rnf[2];
   r1 = nf_get_r1(nf);
   r2 = nf_get_r2(nf); ru = r1+r2;
@@ -116,7 +116,7 @@ rnfinitalg(GEN nf,GEN pol,long prec)
   GEN f,f2,fac,fac1,fac2,id,p4,p5;
 
   if (typ(pol)!=t_POL) err(notpoler,"rnfinitalg");
-  nf=checknf(nf); n=lgef(pol)-3; vpol=varn(pol);
+  nf=checknf(nf); n=degpol(pol); vpol=varn(pol);
   vnf=0;
   for (i=0; i<=n; i++)
   {
@@ -141,7 +141,7 @@ rnfinitalg(GEN nf,GEN pol,long prec)
     err(talker,"main variable must be of higher priority in rnfinitalg");
   RES=cgetg(12,t_VEC);
   RES[1]=(long)pol;
-  m=lgef(nf[1])-3; degabs=n*m;
+  m=degpol(nf[1]); degabs=n*m;
   r1 = nf_get_r1(nf); r2 = (m-r1) >> 1;
   sig=cgetg(r1+r2+1,t_VEC); RES[2]=(long)sig;
   rac=(GEN)nf[6]; liftpol=lift(pol);
@@ -301,12 +301,12 @@ rnfalgtobasis(GEN rnf,GEN x)
     case t_POL:
     { /* cf algtobasis_intern */
       GEN P = (GEN)rnf[1];
-      long N = lgef(P)-3;
-      if (lgef(x)-3 >= N) x = gres(x,P);
+      long N = degpol(P);
+      if (degpol(x) >= N) x = gres(x,P);
       return gerepileupto(av, mulmat_pol((GEN)rnf[8], x));
     }
   }
-  return gscalcol(x, lgef(rnf[1])-3);
+  return gscalcol(x, degpol(rnf[1]));
 }
 
 /* x doit etre un polymod ou un polynome ou un vecteur de tels objets... */
@@ -471,12 +471,12 @@ rnfidealhermite(GEN rnf,GEN x)
   GEN z,p1,p2,x1,x2,x1j,nf,bas,unnf,zeronf;
 
   checkrnf(rnf);
-  n=lgef(rnf[1])-3; nf=(GEN)rnf[10]; bas=(GEN)rnf[7];
+  n=degpol(rnf[1]); nf=(GEN)rnf[10]; bas=(GEN)rnf[7];
 
   switch(tx)
   {
     case t_INT: case t_FRAC: case t_FRACN: z=cgetg(3,t_VEC);
-      m=lgef(nf[1])-3; zeronf=gscalcol_i(gzero,m); unnf=gscalcol_i(gun,m);
+      m=degpol(nf[1]); zeronf=gscalcol_i(gzero,m); unnf=gscalcol_i(gun,m);
       p1=cgetg(n+1,t_MAT); z[1]=(long)p1;
       for (j=1; j<=n; j++)
       {
@@ -549,8 +549,8 @@ rnfidealnormrel(GEN rnf,GEN id)
 
   checkrnf(rnf);
   id=rnfidealhermite(rnf,id); id2=(GEN)id[2];
-  n=lgef(rnf[1])-3; nf=(GEN)rnf[10];
-  if (n==1) { avma=av; return idmat(lgef(nf[1])-3); }
+  n=degpol(rnf[1]); nf=(GEN)rnf[10];
+  if (n==1) { avma=av; return idmat(degpol(nf[1])); }
   z=(GEN)id2[1]; for (i=2; i<=n; i++) z=idealmul(nf,z,(GEN)id2[i]);
   return gerepileupto(av,z);
 }
@@ -563,7 +563,7 @@ rnfidealnormabs(GEN rnf,GEN id)
 
   checkrnf(rnf);
   id=rnfidealhermite(rnf,id); id2=(GEN)id[2];
-  n=lgef(rnf[1])-3;
+  n=degpol(rnf[1]);
   z=gun; for (i=1; i<=n; i++) z=gmul(z,dethnf((GEN)id2[i]));
   return gerepileupto(av,z);
 }
@@ -576,7 +576,7 @@ rnfidealreltoabs(GEN rnf,GEN x)
 
   checkrnf(rnf);
   x = rnfidealhermite(rnf,x);
-  n=lgef(rnf[1])-3; nf=(GEN)rnf[10]; m=lgef(nf[1])-3;
+  n=degpol(rnf[1]); nf=(GEN)rnf[10]; m=degpol(nf[1]);
   basinv = gmael(rnf,11,5);
   p3=cgetg(n*m+1,t_MAT); p2=gmael(rnf,11,2);
   for (i=1; i<=n; i++)
@@ -606,7 +606,7 @@ rnfidealabstorel(GEN rnf,GEN x)
   long av=avma,tetpil,n,m,j,k;
   GEN nf,basabs,ma,xj,p1,p2,id;
 
-  checkrnf(rnf); n=lgef(rnf[1])-3; nf=(GEN)rnf[10]; m=lgef(nf[1])-3;
+  checkrnf(rnf); n=degpol(rnf[1]); nf=(GEN)rnf[10]; m=degpol(nf[1]);
   if (typ(x)!=t_MAT || lg(x)!=(n*m+1) || lg(x[1])!=(n*m+1))
     err(impl,"rnfidealabstorel for an ideal not in HNF");
   basabs=gmael(rnf,11,4); ma=cgetg(n*m+1,t_MAT);
@@ -644,7 +644,7 @@ rnfidealup(GEN rnf,GEN x)
 
   checkrnf(rnf);
   bas=(GEN)rnf[7]; bas2=(GEN)bas[2];
-  n=lg(bas2)-1; nf=(GEN)rnf[10]; m=lgef((GEN)nf[1])-3;
+  n=lg(bas2)-1; nf=(GEN)rnf[10]; m=degpol((GEN)nf[1]);
   zeronf=zerocol(m); unnf=gscalcol_i(gun,m);
   p2=cgetg(3,t_VEC); p1=cgetg(n+1,t_VEC);
   p2[1]=(long)idmat_intern(n,unnf,zeronf);
@@ -680,7 +680,7 @@ rnfidealmul(GEN rnf,GEN x,GEN y) /* x et y sous HNF relative uniquement */
   GEN z,nf,x1,x2,p1,p2,p3,p4,p5,res;
 
   z=rnfidealtwoelement(rnf,y);
-  nf=(GEN)rnf[10]; n=lgef(rnf[1])-3;
+  nf=(GEN)rnf[10]; n=degpol(rnf[1]);
   x=rnfidealhermite(rnf,x);
   x1=gmodulcp(gmul(gmael(rnf,7,1),matbasistoalg(nf,(GEN)x[1])),(GEN) rnf[1]);
   x2=(GEN)x[2]; p1=gmul((GEN)z[1],(GEN)x[1]);
@@ -738,8 +738,8 @@ polnfmul(GEN nf, GEN x, GEN y)
     z=cgetg(2,t_POL); z[1]=evallgef(2) | evalvarn(varn(x));
     return z;
   }
-  m=lgef(nf[1])-3; av=avma;
-  lx=lgef(x)-3; ly=lgef(y)-3; lz=lx+ly;
+  m=degpol(nf[1]); av=avma;
+  lx=degpol(x); ly=degpol(y); lz=lx+ly;
   zeronf=gscalcol_i(gzero,m);
   z=cgetg(lz+3,t_POL);
   z[1] = evallgef(lz+3) | evalvarn(x) | evalsigne(1);
@@ -765,7 +765,7 @@ polnfdeuc(GEN nf, GEN x, GEN y, GEN *ptr)
   lx=lgef(x); ly=lgef(y); lz=lx-ly;
   if (gcmp0(x) || lz<0) { *ptr=gcopy(x); return zeropol(varn(x)); }
 
-  m=lgef(nf[1])-3; unnf=gscalcol_i(gun,m);
+  m=degpol(nf[1]); unnf=gscalcol_i(gun,m);
   x=dummycopy(x); y=dummycopy(y);
   for (i=2; i<lx; i++)
   {
@@ -818,7 +818,7 @@ polnfpow(GEN nf,GEN x,GEN k)
   long s,av=avma,m;
   GEN y,z;
 
-  m=lgef(nf[1])-3;
+  m=degpol(nf[1]);
   if (typ(k)!=t_INT) err(talker,"not an integer exponent in nfpow");
   s=signe(k); if (s<0) err(impl,"polnfpow for negative exponents");
 

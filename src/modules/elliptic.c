@@ -633,8 +633,8 @@ CM_powell(GEN e, GEN z, GEN n)
     if (!signe(z2)) break;
     z2=ginv(z2);
   }
-  while (lgef(p1)-3 < vn);
-  if (lgef(p1)-3 > vn || signe(z2))
+  while (degpol(p1) < vn);
+  if (degpol(p1) > vn || signe(z2))
     err(talker,"not a complex multiplication in powell");
   x=gdiv(p1,q1); y=gdiv(deriv(x,0),n);
   x=gsub(poleval(x,grdx), gdivgs((GEN)e[6],12));

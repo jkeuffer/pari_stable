@@ -53,7 +53,7 @@ galoisconj2pol(GEN x, long nbmax, long prec)
 {
   long    av = avma, i, n, v, nbauto;
   GEN     y, w, polr, p1, p2;
-  n = lgef(x) - 3;
+  n = degpol(x);
   if (n <= 0)
     return cgetg(1, t_VEC);
   if (gisirreducible(x) == gzero)
@@ -98,7 +98,7 @@ galoisconj2(GEN nf, long nbmax, long prec)
     return galoisconj2pol(nf, nbmax, prec);
   nf = checknf(nf);
   x = (GEN) nf[1];
-  n = lgef(x) - 3;
+  n = degpol(x);
   if (n <= 0)
     return cgetg(1, t_VEC);
   r1 = nf_get_r1(nf);
@@ -266,7 +266,7 @@ galoisborne(GEN T, GEN dn, struct galois_borne *gb, long ppp)
   int     n;
   GEN     L, M, z, prep, den;
   long    prec;
-  n = lgef(T) - 3;
+  n = degpol(T);
   prec = 1;
   for (i = 2; i < lgef(T); i++)
     if (lg(T[i]) > prec)
@@ -557,7 +557,7 @@ monomorphismratlift(GEN P, GEN S, struct galois_lift *gl, GEN frob)
   if (DEBUGLEVEL == 1)
     timer2();
   x = varn(P);
-  rt = brent_kung_optpow(lgef(Q)-3,2);
+  rt = brent_kung_optpow(degpol(Q),2);
   q = p; qm1 = gun; /*during the run, we have p*qm1=q*/
   nb=hensel_lift_accel(e, &mask);
   Pr = FpX_red(P,q);
@@ -3258,7 +3258,7 @@ galoisconj4(GEN T, GEN den, long flag, long karma)
       den = gcoeff((GEN) T[8], degree((GEN) T[1]), degree((GEN) T[1]));
     T = (GEN) T[1];
   }
-  n = lgef(T) - 3;
+  n = degpol(T);
   if (n <= 0)
     err(constpoler, "galoisconj4");
   for (k = 2; k <= n + 2; k++)

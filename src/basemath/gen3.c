@@ -197,10 +197,10 @@ poldegree(GEN x, long v)
   {
     case t_POL:
       w = varn(x);
-      if (v < 0 || v == w) return lgef(x)-3;
+      if (v < 0 || v == w) return degpol(x);
       if (v < w) return signe(x)? 0: -1;
       av = avma; x = gsubst(gsubst(x,w,polx[MAXVARN]),v,polx[0]);
-      if (gvar(x)) { d = gcmp0(x)? -1: 0; } else d = lgef(x)-3;
+      if (gvar(x)) { d = gcmp0(x)? -1: 0; } else d = degpol(x);
       avma = av; return d;
 
     case t_RFRAC: case t_RFRACN:
@@ -1526,8 +1526,8 @@ integ(GEN x, long v)
 	return gerepile(av,tetpil,changevar(y,p1));
       }
 
-      tx = typ(x[1]); i = is_scalar_t(tx)? 0: lgef(x[1])-3;
-      tx = typ(x[2]); j = is_scalar_t(tx)? 0: lgef(x[2])-3;
+      tx = typ(x[1]); i = is_scalar_t(tx)? 0: degpol(x[1]);
+      tx = typ(x[2]); j = is_scalar_t(tx)? 0: degpol(x[2]);
       n = i+j + 2;
       y = gdiv(gtrunc(gmul((GEN)x[2], integ(tayl(x,v,n),v))), (GEN)x[2]);
       if (!gegal(deriv(y,v),x)) err(inter2);
