@@ -3562,7 +3562,10 @@ RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V)
   long degq,tx,ty,dx,dy,du,dv,dr;
   GEN q,z,g,h,r,p1,cu,cv,u,v,um1,uze,vze,xprim,yprim, *gptr[3];
 
-  if (gcmp0(x)) return zero_bezout(y,U,V);
+  if (gcmp0(x)) {
+    if (gcmp0(y)) { *U = *V = gen_0; return gen_0; }
+    return zero_bezout(y,U,V);
+  }
   if (gcmp0(y)) return zero_bezout(x,V,U);
   tx=typ(x); ty=typ(y); av=avma;
   if (is_scalar_t(tx) || is_scalar_t(ty))

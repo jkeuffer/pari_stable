@@ -100,6 +100,7 @@ LGr39- very rare SEGV in idealprimedec() [ typo in init_norm(), using FpX_red
    41- rare memory corruption in thue() [ SmallSols ]
    42- gamma(z) for tiny z suffered from catastrophic cancellation
    43- ??? sometimes output extra entries [ e.g. ???eigen output matfrobenius ]
+   44- bezout(0., 0.) --> division by 0
 
   Added
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu
