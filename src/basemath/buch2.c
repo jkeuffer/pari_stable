@@ -90,7 +90,6 @@ extern void wr_rel(GEN col);
 extern void dbg_rel(long s, GEN col);
 
 #define SFB_MAX 4
-#define MIN_EXTRA 1
 
 #define RANDOM_BITS 4
 static const int CBUCHG = (1<<RANDOM_BITS) - 1;
@@ -136,6 +135,7 @@ typedef struct {
 } REL_t;
 
 typedef struct {
+  REL_t *chk; /* last checkpoint */
   REL_t *base; /* first rel found */
   REL_t *last; /* last rel found so far */
   REL_t *end; /* target for last relation. base <= last <= end */
@@ -175,7 +175,7 @@ desallocate(RELCACHE_t *M)
     }
   }
   free((void*)M->base);
-  M->last = M->base = NULL;
+  M->chk = M->last = M->base = NULL;
 }
 
 INLINE GEN
@@ -195,12 +195,13 @@ cgetalloc(GEN x, size_t l, long t)
 }
 
 static void
-reallocate(RELCACHE_t *M, long max)
+reallocate(RELCACHE_t *M, long len)
 {
-  size_t l = max+1, gap = M->last - M->base;
-  M->base = (REL_t*)gprealloc((void*)M->base, l * sizeof(REL_t));
-  M->last = M->base + gap;
-  M->len = max;
+  size_t last = M->last-M->base, chk = M->chk-M->base, end = M->end-M->base;
+  M->base = (REL_t*)gprealloc((void*)M->base, (len+1) * sizeof(REL_t));
+  M->last = M->base + last;
+  M->chk  = M->base + chk;
+  M->end  = M->base + end; M->len  = len;
 }
 
 /* don't take P|p if P ramified, or all other Q|p already there */
@@ -325,6 +326,14 @@ red(GEN nf, GEN I, GEN *pm)
   return is_pm1(gcoeff(y,1,1))? NULL: ideal_two_elt(nf,y);
 }
 
+/* make sure enough room to store n more relations */
+static void
+pre_allocate(RELCACHE_t *cache, size_t n)
+{
+  size_t len = (cache->last - cache->base) + n;
+  if (len > cache->len) reallocate(cache, len << 1);
+}
+
 /* Compute powers of prime ideals (P^0,...,P^a) in subFB (a > 1) */
 static int
 powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf, long a)
@@ -339,11 +348,7 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf, long a)
   Alg = cgetg(n, t_VEC);
   Ord = cgetg(n, t_VECSMALL);
   F->pow->arc = NULL;
-  if (cache)
-  { /* make sure enough room to store relations we may stumble upon */
-    size_t slim = (cache->last - cache->base) + n;
-    if (slim > cache->len) reallocate(cache, slim << 1);
-  }
+  if (cache) pre_allocate(cache, n);
   for (i=1; i<n; i++)
   {
     GEN m, alg, id2, vp = (GEN)F->LP[ F->subFB[i] ];
@@ -2956,14 +2961,14 @@ buch(GEN *pnf, double cbach, double cbach2, long nbrelpid, long flun,
 {
   pari_sp av, av2;
   long N, R1, R2, RU, KCCO, LIMC, LIMC2, lim, zc, i, j, k, jid, MAXRELSUP;
-  long nreldep, sfb_change, sfb_trials, nlze = 0, precdouble = 0, precadd = 0;
+  long nreldep, sfb_change, sfb_trials, nlze, precdouble = 0, precadd = 0;
   double drc, LOGD, LOGD2;
   GEN vecG, fu, zu, nf, D, A, W, R, Res, z, h, L_jid, PERM;
   GEN M, res, L, resc, B, C, lambda, dep, clg1, clg2, Vbase;
   char *precpb = NULL;
   const int RELSUP = 5, minsFB = 3;
-  REL_t *rel, *oldrel;
   RELCACHE_t cache;
+  REL_t *rel;
   FB_t F;
 
   nf = *pnf; *pnf = NULL;
@@ -2987,7 +2992,7 @@ buch(GEN *pnf, double cbach, double cbach2, long nbrelpid, long flun,
   resc = gdiv(mulri(gsqrt(absi(D),DEFAULTPREC), (GEN)zu[1]),
               gmul2n(gpowgs(Pi2n(1,DEFAULTPREC), R2), R1));
   if (DEBUGLEVEL) fprintferr("R1 = %ld, R2 = %ld\nD = %Z\n",R1,R2, D);
-  av = avma; cache.last = cache.base = NULL;
+  av = avma; cache.chk = cache.last = cache.base = NULL;
 
 START:
   avma = av; desallocate(&cache);
@@ -3007,8 +3012,7 @@ START:
                              F.KCZ, F.KC, KCCO);
   MAXRELSUP = min(50, 4*F.KC);
   reallocate(&cache, 10*KCCO + MAXRELSUP); /* make room for lots of relations */
-  oldrel = cache.last;
-  rel = oldrel + 1;
+  rel = cache.base + 1;
   for (i=1; i<=F.KCZ; i++)
   { /* trivial relations (p) = prod P^e */
     long p = F.FB[i];
@@ -3038,7 +3042,8 @@ START:
   /* Random relations */
   W = vecG = L_jid = NULL;
   jid = sfb_trials = sfb_change = nreldep = 0;
-  if (cache.last < cache.end)
+  nlze = cache.end - cache.last;
+  if (nlze > 0)
   {
     if (DEBUGLEVEL) fprintferr("\n#### Looking for random relations\n");
 MORE:
@@ -3051,22 +3056,11 @@ MORE:
       if (!subFB_increase(&F, nf, sfb_change-1, L_jid)) goto START;
       jid = sfb_change = nreldep = 0;
     }
-    if (W)
-    { /* reduced relation matrix at least once */
-      long lgex = max(nlze, MIN_EXTRA); /* # of new relations sought */
-      size_t slim = (cache.last - cache.base) + lgex;
-      if (slim > cache.len) reallocate(&cache, slim << 1);
-      cache.end = cache.base + slim;
-      oldrel = cache.last;
-      if (DEBUGLEVEL)
-	fprintferr("\n(need %ld more relation%s)\n", lgex, (lgex==1)?"":"s");
-    }
-    if (!vecG)
-    {
-      vecG = compute_vecG(nf);
-      av2 = avma;
-    }
+    if (!vecG) { vecG = compute_vecG(nf); av2 = avma; }
+    pre_allocate(&cache, nlze);
     if (!F.pow && !powFBgen(&F, &cache, nf, CBUCHG+1)) sfb_change = 1;
+    if (DEBUGLEVEL)
+	fprintferr("\n(need %ld more relation%s)\n", nlze, (nlze==1)?"":"s");
     if (!sfb_change)
     {
       if (!rnd_rel(&cache,&F, MAXRELSUP,nf,vecG,L_jid,&jid)) goto START;
@@ -3089,16 +3083,16 @@ PRECPB:
     nf = nf_cloneprec(nf, PRECREG, pnf);
     if (F.pow && F.pow->arc) { gunclone(F.pow->arc); F.pow->arc = NULL; }
     for (i = 1; i < lg(PERM); i++) F.perm[i] = PERM[i];
-    oldrel = cache.base; /* recompute all arch component */
+    cache.chk = cache.base; /* recompute all arch component */
     precpb = NULL; W = NULL;
   }
   /* Reduce relation matrices */
   M = gmael(nf, 5, 1); 
   if (F.pow && !F.pow->arc) powFB_fill(&cache, M);
   {
-    long l = cache.last - oldrel, j;
+    long l = cache.last - cache.chk, j;
     GEN mat = cgetg(l+1, t_VEC), emb = cgetg(l+1, t_MAT);
-    for (j=1,rel = oldrel + 1; rel <= cache.last; rel++,j++)
+    for (j=1,rel = cache.chk + 1; rel <= cache.last; rel++,j++)
     {
       mat[j] = (long)rel->R;
       emb[j] = (long)get_log_embed(rel, M, RU, R1, PRECREG);
@@ -3111,6 +3105,7 @@ PRECPB:
       W = hnfadd_i(W, F.perm, &dep, &B, &C, mat, emb);
   }
   gerepileall(av2, 4, &W,&C,&B,&dep);
+  cache.chk = cache.last;
   nlze = lg(dep)>1? lg(dep[1])-1: lg(B[1])-1;
   if (nlze)
   { /* dependent rows */
