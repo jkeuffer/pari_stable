@@ -834,7 +834,7 @@ errcontext(char *msg, char *s, char *entry)
   {
     t += strlen(t);
     if (past > MAX_PAST) { past=MAX_PAST; strcpy(t, "..."); t += 3; }
-    strcpy(t, term_get_color(c_INPUT));
+    strcpy(t, term_get_color(c_OUTPUT));
     t += strlen(t);
     strncpy(t, s - past, past); t[past] = 0;
   }
