@@ -58,7 +58,7 @@ if test -n "$DLLD"; then
     DLLDFLAGS="-shared -soname=\$(LIBPARI_SONAME)"
   else # DLLD != GNU ld
     case "$osname" in
-      aix)     DLLDFLAGS="-r" ;;
+      aix)     DLLDFLAGS="-brtl -r" ;;
       hpux)    DLLDFLAGS="-b -E" ;;
       freebsd) DLLDFLAGS="-Bshareable -x" ;;
       irix)    DLLDFLAGS="-shared -elf -no_unresolved -all" ;;
