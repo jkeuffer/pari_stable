@@ -38,26 +38,26 @@ To make the following descriptions valid both for 32-bit and 64-bit
 machines, we will set \B\ to be equal to 32 (resp.~64), an abbreviation of
 \kbd{BITS\_IN\_LONG}, which is what is actually used in the source code.
 
-\fun{int}{addll}{int x, int y} adds the ulongs \kbd{x} and \kbd{y},
+\fun{ulong}{addll}{ulong x, ulong y} adds the ulongs \kbd{x} and \kbd{y},
 returns the lower \B\ bits and puts the carry bit into \kbd{overflow}.
 
-\fun{int}{addllx}{int x, int y} adds \kbd{overflow} to the sum of the
+\fun{ulong}{addllx}{int x, ulong y} adds \kbd{overflow} to the sum of the
 ulongs \kbd{x} and \kbd{y}, returns the lower \B\ bits and puts the
 carry bit into \kbd{overflow}.
 
-\fun{int}{subll}{int x, int y} subtracts the ulongs \kbd{x} and \kbd{y},
+\fun{ulong}{subll}{ulong x, ulong y} subtracts the ulongs \kbd{x} and \kbd{y},
 returns the lower \B\ bits and put the carry (borrow) bit into \kbd{overflow}.
 
-\fun{int}{subllx}{int x, int y} subtracts \kbd{overflow} from the
+\fun{ulong}{subllx}{ulong x, ulong y} subtracts \kbd{overflow} from the
 difference of the ulongs \kbd{x} and \kbd{y}, returns the lower \B\ bits
 and puts the carry (borrow) bit into \kbd{overflow}.
 
-\fun{int}{shiftl}{ulong x, ulong y} shifts the ulong \kbd{x} left by \kbd{y}
+\fun{ulong}{shiftl}{ulong x, ulong y} shifts the ulong \kbd{x} left by \kbd{y}
 bits, returns the lower \B\ bits and stores the high-order \B\ bits into
 \kbd{hiremainder}. We must have $1\le\kbd{y}\le\B$. In particular, \kbd{y}
 must be non-zero; the caller is responsible for testing this.
 
-\fun{int}{shiftlr}{ulong x, ulong y} shifts the ulong \kbd{x << \B} right
+\fun{ulong}{shiftlr}{ulong x, ulong y} shifts the ulong \kbd{x << \B} right
 by \kbd{y} bits, returns the higher \B\ bits and stores the low-order
 \B\ bits into \kbd{hiremainder}. We must have $1\le\kbd{y}\le\B$. In
 particular, \kbd{y} must be non-zero.
@@ -67,15 +67,15 @@ ulong \kbd{x} (i.e. the number of bit positions by which it would have to be
 shifted left until its leftmost bit first becomes equal to~1, which can be
 between 0 and $\B-1$ for nonzero \kbd{x}). When \kbd{x} is~0, \B\ is returned.
 
-\fun{int}{mulll}{ulong x, ulong y} multiplies the ulong \kbd{x} by the ulong
+\fun{ulong}{mulll}{ulong x, ulong y} multiplies the ulong \kbd{x} by the ulong
 \kbd{y}, returns the lower \B\ bits and stores the high-order \B\ bits into
 \kbd{hiremainder}.
 
-\fun{int}{addmul}{ulong x, ulong y} adds \kbd{hiremainder} to the product
+\fun{ulong}{addmul}{ulong x, ulong y} adds \kbd{hiremainder} to the product
 of the ulongs \kbd{x} and \kbd{y}, returns the lower \B\ bits and stores the
 high-order \B\ bits into \kbd{hiremainder}.
 
-\fun{int}{divll}{ulong x, ulong y} returns the Euclidean quotient of
+\fun{ulong}{divll}{ulong x, ulong y} returns the Euclidean quotient of
 (\kbd{hiremainder << \B})${}+{}$\kbd{x} and the ulong divisor \kbd{y} and
 stores the remainder into \kbd{hiremainder}. An error occurs if the quotient
 cannot be represented by a ulong, i.e.~if $\kbd{hiremainder}\ge\kbd{y}$
@@ -84,8 +84,8 @@ initially.
 
 The following routines are not part of the level 0 kernel per se, but
 implement modular operations on words in terms of the above. They are written
-so that no overflow may occur. All operands representing classes modulo $m$
-are assumed to belong to $[0,m-1[$.
+so that no overflow may occur. Let $m \geq 1$ be the modulus; all operands
+representing classes modulo $m$ are assumed to belong to $[0,m-1[$.
 
 \fun{ulong}{adduumod}{ulong x, ulong y, ulong m} returns the smallest
 positive representative of $x + y$ modulo $m$.
@@ -107,7 +107,8 @@ mod $m$, return $0$.
 positive representative of $x^n$ modulo $m$.
 
 \fun{ulong}{powusmod}{ulong x, long n, ulong m} as \kbd{powuumod}, but $n$
-is allowed to be negative.
+is allowed to be negative, in which case it is assumed that $x$ is invertible
+modulo $m$ (otherwise, $0$ is returned).
 
 \section{Level 1 kernel (operations on longs, integers and reals)}
 
