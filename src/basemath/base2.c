@@ -1388,9 +1388,9 @@ update_alpha(GEN p, GEN fx, GEN alph, GEN chi, GEN pmr, GEN pmf, long mf,
     nalph = alph;
   }
 
-  pdr = respm(nchi, derivpol(nchi), pmr);
   for (;;)
   {
+    pdr = respm(nchi, derivpol(nchi), pmr);
     if (signe(pdr)) break;
     if (!nalph) nalph = gadd(alph, gmul(p, polx[v]));
     /* nchi was too reduced at this point; try a larger precision */
@@ -1407,7 +1407,6 @@ update_alpha(GEN p, GEN fx, GEN alph, GEN chi, GEN pmr, GEN pmf, long mf,
     nnu  = (GEN)w[2];
     l    = itos((GEN)w[3]);
     if (l > 1) return Decomp(p, fx, mf, nalph, nchi, nnu, 0);
-    pdr = respm(nchi, derivpol(nchi), pmr);
   }
 
   if (is_pm1(pdr))
