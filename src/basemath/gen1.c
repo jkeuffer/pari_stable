@@ -1497,9 +1497,8 @@ gmul(GEN x, GEN y)
             z = quickmul(a+2, b+2, lgpol(a), lgpol(b));
           }
 #else
-          z = quickmul(x+2, y+2, lgpol(x), lgpol(y));
+          return FpX_mul(x, y, NULL);
 #endif
-          setvarn(z,vx); return z;
         }
 	case t_SER:
 	  if (gcmp0(x)) return zeropol(vx);
@@ -1642,7 +1641,7 @@ gsqr(GEN x)
       av = avma;
       if (ff_poltype(&x,&p,&pol))
       {
-        z = quicksqr(x+2, lgpol(x));
+        z = FpX_sqr(x, p);
         if (p) z = FpX(z,p);
         if (pol) z = from_Kronecker(z,pol);
         z = gerepileupto(av, z);
@@ -1650,7 +1649,7 @@ gsqr(GEN x)
       else
       {
         avma = av;
-        z = quicksqr(a+2, lgpol(a));
+        z = FpX_sqr(a, NULL);
       }
       setvarn(z, vx); return z;
     }
