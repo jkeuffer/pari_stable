@@ -1077,7 +1077,7 @@ ulong
 umodiu(GEN y, ulong x)
 {
   long sy=signe(y);
-  long hi;
+  ulong hi;
   if (!x) err(diver4);
   if (!sy) return 0;
   hi = mpn_mod_1(LIMBS(y),NLIMBS(y),x);
