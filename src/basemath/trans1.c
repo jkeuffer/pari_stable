@@ -647,40 +647,47 @@ gpow(GEN x, GEN n, long prec)
 GEN
 mpsqrt(GEN x)
 {
-  long l,l0,l1,l2,s,eps,n,i,ex,av;
+  ulong av, av0;
+  long l,l0,l1,l2,s,eps,n,i,ex;
   double beta;
   GEN y,p1,p2,p3;
 
-  if (typ(x)!=t_REAL) err(typeer,"mpsqrt");
-  s=signe(x); if (s<0) err(talker,"negative argument in mpsqrt");
+  if (typ(x) != t_REAL) err(typeer,"mpsqrt");
+  s = signe(x); if (s < 0) err(talker,"negative argument in mpsqrt");
   if (!s) return realzero_bit(expo(x) >> 1);
-  l=lg(x); y=cgetr(l); av=avma;
+ 
+  l = lg(x); y = cgetr(l); av0 = avma;
 
-  p1=cgetr(l+1); affrr(x,p1);
-  ex=expo(x); eps = ex & 1; ex >>= 1; 
-  setexpo(p1,eps); setlg(p1,3);
+  p1 = cgetr(l+1); affrr(x,p1);
+  ex = expo(x); eps = ex & 1; ex >>= 1;
+  setexpo(p1,eps); /* x = 2^(2 ex) p1 */
 
-  n=(long)(2+log((double) (l-2))/LOG2);
-  p2=cgetr(l+1); p2[1]=evalexpo(0) | evalsigne(1);
-  beta=sqrt((eps+1) * (2 + p1[2]/C31));
-  p2[2]=(long)((beta-2)*C31);
-  if (!p2[2]) { p2[2]=(long)HIGHBIT; setexpo(p2,1); }
-  for (i=3; i<=l; i++) p2[i]=0;
-  setlg(p2,3);
+  n = (long)(2 + log((double) (l-2))/LOG2);
+  beta = sqrt((eps+1) * (2 + p1[2]/C31));
+  p2 = cgetr(l+1);
+  p2[1] = evalexpo(0) | evalsigne(1);
+  p2[2] = (long)((beta-2)*C31);
+  if (!p2[2]) { p2[2] = (long)HIGHBIT; setexpo(p2,1); }
+  for (i=3; i<=l; i++) p2[i] = 0;
 
-  p3=cgetr(l+1); l-=2; l1=1; l2=3;
+  p3 = cgetr(l+1); l -= 2; l1 = 1; l2 = 3;
+  av = avma;
   for (i=1; i<=n; i++)
-  {
+  { /* execute p2 := (p2 + p1/p2)/2 */
     l0 = l1<<1;
-    if (l0<=l)
+    if (l0 <= l)
       { l2 += l1; l1=l0; }
     else
       { l2 += l+1-l1; l1=l+1; }
-    setlg(p3,l1+2); setlg(p1,l1+2); setlg(p2,l2);
-    divrrz(p1,p2,p3); addrrz(p2,p3,p2); setexpo(p2,expo(p2)-1);
+    setlg(p1, l1+2);
+    setlg(p3, l1+2);
+    setlg(p2, l2);
+    affrr(divrr(p1,p2), p3);
+    affrr(addrr(p2,p3), p2); setexpo(p2, expo(p2)-1);
+    avma = av;
   }
-  affrr(p2,y); setexpo(y,expo(y)+ex);
-  avma=av; return y;
+  affrr(p2,y); setexpo(y, expo(y)+ex);
+  avma = av0; return y;
 }
 
 /* O(p^e) */
@@ -1343,8 +1350,9 @@ gexpz(GEN x, GEN y)
 GEN
 mplog(GEN x)
 {
-  long l,l1,l2,m,m1,n,i,ex,s,sgn,ltop,av;
-  double alpha,beta,a,b;
+  ulong av, ltop;
+  long l,l1,l2,m,m1,n,i,ex,s,sgn;
+  double alpha,a,b;
   GEN y,p1,p2,p3,p4,p5,unr;
 
   if (typ(x)!=t_REAL) err(typeer,"mplog");
@@ -1354,32 +1362,33 @@ mplog(GEN x)
 
   l2 = l+1; p2=p1=cgetr(l2); affrr(x,p1);
   av=avma;
-  if (sgn > 0) p2 = divsr(1,p1); /* x<1 changer x en 1/x */
+  if (sgn > 0) p2 = divsr(1,p1); /* x<1 change x to 1/x */
   for (m1=1; expo(p2)>0; m1++) p2 = mpsqrt(p2);
   if (m1 > 1 || sgn > 0) { affrr(p2,p1); avma=av; }
 
   alpha = 1+p1[2]/C31; if (!alpha) alpha = 0.00000001;
   l -= 2; alpha = -log(alpha);
-  beta = (BITS_IN_LONG/2)*l*LOG2;
   a = alpha/LOG2;
   b = sqrt((BITS_IN_LONG/2)*l/3.0);
   if (a<=b)
   {
-    n=(long)(1+sqrt((BITS_IN_LONG/2)*3.0*l));
-    m=(long)(1+b-a);
+    n = (long)(1+sqrt((BITS_IN_LONG/2)*3.0*l));
+    m = (long)(1+b-a);
     l2 += m>>TWOPOTBITS_IN_LONG;
-    p4=cgetr(l2); affrr(p1,p4);
-    p1 = p4; av=avma;
-    for (i=1; i<=m; i++)  p1 = mpsqrt(p1);
-    affrr(p1,p4); avma=av;
+    p4 = cgetr(l2); affrr(p1,p4);
+    p1 = p4; av = avma;
+    for (i=1; i<=m; i++) p1 = mpsqrt(p1);
+    affrr(p1,p4); avma = av;
   }
   else
   {
-    n=(long)(1+beta/alpha);
-    m=0; p4 = p1;
+    double beta = (BITS_IN_LONG/2)*l*LOG2;
+    n = (long)(1+beta/alpha);
+    m = 0; p4 = p1;
   }
-  unr=realun(l2);
-  p2=cgetr(l2); p3=cgetr(l2); av=avma;
+  unr = realun(l2);
+  p2 = cgetr(l2);
+  p3 = cgetr(l2); av = avma;
 
   /* affrr needed here instead of setlg since prec may DECREASE */
   p1 = cgetr(l2); affrr(subrr(p4,unr), p1);
@@ -1387,23 +1396,24 @@ mplog(GEN x)
   p5 = addrr(p4,unr); setlg(p5,l2);
   affrr(divrr(p1,p5), p2);
   affrr(mulrr(p2,p2), p3);
-  affrr(divrs(unr,2*n+1), p4); setlg(p4,4); avma=av;
+  affrr(divrs(unr,2*n+1), p4); setlg(p4,4); avma = av;
 
-  s=0; ex=expo(p3); l1 = 4;
+  s = 0; ex = expo(p3); l1 = 4;
   for (i=n; i>=1; i--)
   {
-    setlg(p3,l1); p5 = mulrr(p4,p3);
+    setlg(p3, l1); p5 = mulrr(p4,p3);
     setlg(unr,l1); p1 = divrs(unr,2*i-1);
     s -= ex;
     l1 += s>>TWOPOTBITS_IN_LONG; if (l1>l2) l1=l2;
-    s %= BITS_IN_LONG;
-    setlg(p1,l1); setlg(p4,l1); setlg(p5,l1);
-    p1 = addrr(p1,p5); affrr(p1,p4); avma=av;
+    s &= (BITS_IN_LONG-1);
+    setlg(p1, l1);
+    setlg(p4, l1);
+    setlg(p5, l1); affrr(addrr(p1,p5), p4); avma=av;
   }
-  setlg(p4,l2); affrr(mulrr(p2,p4), y);
+  setlg(p4, l2); affrr(mulrr(p2,p4), y);
   setexpo(y, expo(y)+m+m1);
   if (sgn > 0) setsigne(y, -1);
-  avma=ltop; return y;
+  avma = ltop; return y;
 }
 
 GEN
