@@ -1283,7 +1283,6 @@ gammanew(GEN s0, long la, long prec)
       nn = 1;
 
     if (DEBUGLEVEL) fprintferr("lim, nn: [%ld, %ld]\n",lim,nn);
-    if ((ulong)nn >= maxprime()) err(primer1);
   }
   prec++; unr = realun(prec);
 
