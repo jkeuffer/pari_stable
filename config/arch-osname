@@ -14,7 +14,8 @@ if test -n "$myuname"; then
   freebsd|os2)  arch=ix86;;
   ultrix)   arch=mips;;
   nextstep) arch=`file /bin/sh | sed 's/.*(for architecture \(.*\))/\1/'`;;
-  darwin*)  arch=`uname -p`;;
+  darwin*)  arch=`uname -p`
+            if test "$arch" = powerpc; then arch=ppc; fi ;;
   osf1)     case "$5" in alpha) arch=alpha;; esac;;
   cygwin*)  arch=$HOSTTYPE; osname=cygwin;;
   linux)    arch=`uname -m`
