@@ -14,58 +14,107 @@ with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /* This file is a slight adaptation of source code extracted from gmp-3.1.1
-  (from T. Granlund), files longlong.h and gmp-impl.h 
+  (from T. Granlund), files longlong.h and gmp-impl.h
 
   Copyright (C) 2000 Free Software Foundation, Inc. */
 
-extern const unsigned char __clz_tab[]; 
-extern ulong invert_word(ulong); 
+extern const unsigned char __clz_tab[];
+extern ulong invert_word(ulong);
 
-#define bfffo(x)                           \
-  ({                                       \
-    ulong __xr = (x);                      \
-    ulong __a;                             \
-                                           \
-        for (__a = 56; __a > 0; __a -= 8)  \
-          if (((__xr >> __a) & 0xff) != 0) \
-            break;                         \
-    64 - (__clz_tab[__xr >> __a] + __a);   \
-  })
-
-#define sub_ddmmss(sh, sl, ah, al, bh, bl)                              \
-  do {                                                                  \
-    ulong __x;                                                          \
-    __x = (al) - (bl);                                                  \
-    (sh) = (ah) - (bh) - (__x > (al));                                  \
-    (sl) = __x;                                                         \
+#define sub_ddmmss(sh, sl, ah, al, bh, bl) \
+  do {                                     \
+    ulong __x;                             \
+    __x = (al) - (bl);                     \
+    (sh) = (ah) - (bh) - (__x > (al));     \
+    (sl) = __x;                            \
   } while (0)
 
-#define divll(x, y)                                                     \
-({                                                                      \
-  register ulong _di, _x = (x), _y = (y), _q, _ql, _r;                  \
-  register ulong _xh, _xl, _k, __hire;                                  \
-                                                                        \
-  if (_y & 0x8000000000000000UL)                                        \
-      { _k = 0; __hire = hiremainder; }                                 \
-  else                                                                  \
-  {                                                                     \
-    _k = bfffo(_y);                                                     \
-    __hire = (hiremainder << _k) | (_x >> (64 - _k));                   \
-    _x <<= _k; _y <<=  _k;                                              \
-  }                                                                     \
-  _di = invert_word(_y);                                                \
-  _ql = mulll (__hire, _di);                                            \
-  _q = __hire + hiremainder;                                            \
-  _xl = mulll(_q, _y); _xh = hiremainder;                               \
-  sub_ddmmss (_xh, _r, __hire, _x, _xh, _xl);                           \
-  if (_xh != 0)                                                         \
-    {                                                                   \
-      sub_ddmmss (_xh, _r, _xh, _r, 0, _y); _q += 1;                    \
-      if (_xh != 0)                                                     \
-        { sub_ddmmss (_xh, _r, _xh, _r, 0, _y); _q += 1; }              \
-    }                                                                   \
-  if (_r >= _y)                                                         \
-    { _r -= _y; _q += 1; }                                              \
-  hiremainder = _r >> _k;                                               \
-  _q;                                                                   \
+#ifdef __GNUC__
+
+#define bfffo(x)                         \
+({                                       \
+  ulong __xr = (x);                      \
+  ulong __a;                             \
+                                         \
+      for (__a = 56; __a > 0; __a -= 8)  \
+        if (((__xr >> __a) & 0xff) != 0) \
+          break;                         \
+  64 - (__clz_tab[__xr >> __a] + __a);   \
 })
+
+#define divll(x, y)                                      \
+({                                                       \
+  register ulong _di, _x = (x), _y = (y), _q, _ql, _r;   \
+  register ulong _xh, _xl, _k, __hire;                   \
+                                                         \
+  if (_y & 0x8000000000000000UL)                         \
+      { _k = 0; __hire = hiremainder; }                  \
+  else                                                   \
+  {                                                      \
+    _k = bfffo(_y);                                      \
+    __hire = (hiremainder << _k) | (_x >> (64 - _k));    \
+    _x <<= _k; _y <<=  _k;                               \
+  }                                                      \
+  _di = invert_word(_y);                                 \
+  _ql = mulll (__hire, _di);                             \
+  _q = __hire + hiremainder;                             \
+  _xl = mulll(_q, _y); _xh = hiremainder;                \
+  sub_ddmmss (_xh, _r, __hire, _x, _xh, _xl);            \
+  if (_xh != 0)                                          \
+  {                                                      \
+    sub_ddmmss (_xh, _r, _xh, _r, 0, _y); _q += 1;       \
+    if (_xh != 0)                                        \
+      { sub_ddmmss (_xh, _r, _xh, _r, 0, _y); _q += 1; } \
+  }                                                      \
+  if (_r >= _y)                                          \
+    { _r -= _y; _q += 1; }                               \
+  hiremainder = _r >> _k;                                \
+  _q;                                                    \
+})
+
+#else /* __GNUC__ */
+
+static int
+bfffo(ulong x)
+{
+  ulong __xr = (x);
+  ulong __a;
+
+      for (__a = 56; __a > 0; __a -= 8)
+        if (((__xr >> __a) & 0xff) != 0)
+          break;
+  return 64 - (__clz_tab[__xr >> __a] + __a);
+}
+
+static ulong
+divll(ulong x, ulong y)
+{
+  register ulong _di, _x = (x), _y = (y), _q, _ql, _r;
+  register ulong _xh, _xl, _k, __hire;
+
+  if (_y & 0x8000000000000000UL)
+      { _k = 0; __hire = hiremainder; }
+  else
+  {
+    _k = bfffo(_y);
+    __hire = (hiremainder << _k) | (_x >> (64 - _k));
+    _x <<= _k; _y <<=  _k;
+  }
+  _di = invert_word(_y);
+  _ql = mulll (__hire, _di);
+  _q = __hire + hiremainder;
+  _xl = mulll(_q, _y); _xh = hiremainder;
+  sub_ddmmss (_xh, _r, __hire, _x, _xh, _xl);
+  if (_xh != 0)
+  {
+    sub_ddmmss (_xh, _r, _xh, _r, 0, _y); _q += 1;
+    if (_xh != 0)
+      { sub_ddmmss (_xh, _r, _xh, _r, 0, _y); _q += 1; }
+  }
+  if (_r >= _y)
+    { _r -= _y; _q += 1; }
+  hiremainder = _r >> _k;
+  return _q;
+}
+
+#endif /* __GNUC__ */
