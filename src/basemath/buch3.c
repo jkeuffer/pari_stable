@@ -153,6 +153,7 @@ buchnarrow(GEN bnf)
 }
 
 extern GEN idealaddtoone_i(GEN nf, GEN x, GEN y);
+extern GEN ideallllred_elt(GEN nf, GEN I);
 
 /* given two coprime ideals x (integral) and id, compute alpha in x,
  * alpha = 1 mod (id), with x/alpha nearly reduced.
@@ -164,11 +165,10 @@ findalpha(GEN nf,GEN x,GEN id,long prec)
   GEN alp = idealaddtoone_i(nf,x,id);
 
   idprod = idealmullll(nf,x,id);
-  y = lllgram(qf_base_change(gmael(nf,5,3),idprod,1), 2*prec-2);
-  y = gmul(idprod, (GEN)y[1]); /* small vector in idprod */
+  y = ideallllred_elt(nf, idprod);
 
   p1 = ground(element_div(nf,alp,y));
-  alp = gsub(alp,element_mul(nf,p1,y));
+  alp = gsub(alp, element_mul(nf,p1,y));
   return gcmp0(alp)? y: alp;
 }
 

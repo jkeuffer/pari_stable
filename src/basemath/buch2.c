@@ -166,14 +166,14 @@ subFBgen(long N,long m,long minsFB,GEN vperm, long *ptss)
 }
 
 static GEN
-mulred(GEN nf,GEN x, GEN I, long prec,long precint)
+mulred(GEN nf,GEN x, GEN I, long prec)
 {
   long av = avma;
   GEN y = cgetg(3,t_VEC);
 
   y[1] = (long)idealmulh(nf,I,(GEN)x[1]);
   y[2] = x[2];
-  y = ideallllredall(nf,y,NULL,prec,precint);
+  y = ideallllred(nf,y,NULL,prec);
   y[1] = (long)ideal_two_elt(nf,(GEN)y[1]);
   return gerepileupto(av,gcopy(y));
 }
@@ -182,7 +182,7 @@ mulred(GEN nf,GEN x, GEN I, long prec,long precint)
  * powsubFB[j][i] contains P_i^j in LLL form + archimedean part
  */
 static void
-powsubFBgen(GEN nf,GEN subFB,long a,long prec,long precint)
+powsubFBgen(GEN nf,GEN subFB,long a,long prec)
 {
   long i,j, n = lg(subFB);
   GEN *pow, arch0 = (GEN)init_idele(nf)[2];
@@ -200,7 +200,7 @@ powsubFBgen(GEN nf,GEN subFB,long a,long prec,long precint)
     vp = prime_to_ideal(nf,vp);
     for (j=2; j<=a; j++)
     {
-      pow[j] = mulred(nf,pow[j-1],vp,prec,precint);
+      pow[j] = mulred(nf,pow[j-1],vp,prec);
       if (DEBUGLEVEL>1) fprintferr(" %ld",j);
     }
     if (DEBUGLEVEL>1) { fprintferr("\n"); flusherr(); }
@@ -2957,7 +2957,7 @@ INCREASEGEN:
     }
     if (!powsubFB)
     {
-      powsubFBgen(nf,subFB,CBUCHG+1,PRECREG,PRECREGINT);
+      powsubFBgen(nf,subFB,CBUCHG+1,PRECREG);
       av1 = avma;
     }
     ss = random_relation(phase,cglob,slim,(long)LIMC,PRECREG,PRECREGINT,
@@ -3090,7 +3090,7 @@ INCREASEGEN:
   if (KCZ2 > KCZ)
   { /* "be honest" */
     if (!powsubFB)
-      powsubFBgen(nf,subFB,CBUCHG+1,PRECREG,PRECREGINT);
+      powsubFBgen(nf,subFB,CBUCHG+1,PRECREG);
     if (!be_honest(nf,subFB,RU,PRECREGINT)) goto INCREASEGEN;
   }
 

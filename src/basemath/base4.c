@@ -1557,13 +1557,46 @@ chk_vdir(GEN nf, GEN vdir)
   return vdir;
 }
 
-GEN
-ideallllredall(GEN nf, GEN I, GEN vdir, long prec, long precint)
+/* assume I in NxN matrix form (not necessarily HNF) */
+static GEN
+ideallllred_elt_i(GEN *ptnf, GEN I, GEN vdir, long *ptprec)
 {
-  long tx,N,av,i,j, nfprec = nfgetprec(nf);
+  GEN T2, u, y, nf = *ptnf;
+  long i, e, prec = *ptprec;
+
+  for (i=1; ; i++)
+  {
+    T2 = computet2twist(nf,vdir);
+    y = qf_base_change(T2,I,1);
+    e = 1 + (gexpo(y)>>TWOPOTBITS_IN_LONG);
+    if (e < 0) e = 0;
+    u = lllgramintern(y,100,1, e + prec);
+    if (u) break;
+
+    if (i == MAXITERPOL) err(accurer,"ideallllred");
+    prec = (prec<<1)-2;
+    if (DEBUGLEVEL) err(warnprec,"ideallllred",prec);
+    nf = nfnewprec(nf, (e>>1)+prec);
+  }
+  *ptprec = prec;
+  *ptnf = nf;
+  return gmul(I, (GEN)u[1]); /* small elt in I */
+}
+
+GEN 
+ideallllred_elt(GEN nf, GEN I)
+{
+  long prec = DEFAULTPREC;
+  return ideallllred_elt_i(&nf, I, NULL, &prec);
+}
+
+GEN
+ideallllred(GEN nf, GEN I, GEN vdir, long prec)
+{
+  long tx,N,av,i, nfprec = nfgetprec(nf);
   GEN Ired,I0,res,aI,p1,y,x,Nx,b,c1,c,pol;
 
-  if (prec <= 0) precint = prec = nfprec;
+  if (prec <= 0) prec = nfprec;
   nf = checknf(nf);
   vdir = chk_vdir(nf,vdir);
   pol = (GEN)nf[1]; N = lgef(pol)-3;
@@ -1587,31 +1620,15 @@ ideallllredall(GEN nf, GEN I, GEN vdir, long prec, long precint)
     res[1] = (long)y; return res;
   }
   av = avma;
-  if (tx != id_MAT || lg(I) != N+1) I = idealhermite_aux(nf,I);
-
   if (DEBUGLEVEL>=6) msgtimer("entering idealllred");
+  if (typ(I) != id_MAT || lg(I) != N+1) I = idealhermite_aux(nf,I);
   c1 = content(I); if (gcmp1(c1)) c1 = NULL; else I = gdiv(I,c1);
   if (2 * expi(gcoeff(I,1,1)) >= bit_accuracy(nfprec))
     Ired = gmul(I, lllintpartial(I));
   else 
     Ired = I;
+  y = ideallllred_elt_i(&nf, Ired, vdir, &prec);
 
-  for (i=1; ; i++)
-  {
-    p1 = computet2twist(nf,vdir);
-    if (DEBUGLEVEL>=6) msgtimer("twisted T2");
-    y = qf_base_change(p1,Ired,1);
-    j = 1 + (gexpo(y)>>TWOPOTBITS_IN_LONG);
-    if (j<0) j=0;
-    p1 = lllgramintern(y,100,1,j+precint);
-    if (p1) break;
-
-    if (i == MAXITERPOL) err(accurer,"ideallllredall");
-    precint=(precint<<1)-2; prec=max(prec,precint);
-    if (DEBUGLEVEL) err(warnprec,"ideallllredall",precint);
-    nf=nfnewprec(nf,(j>>1)+precint);
-  }
-  y = gmul(Ired,(GEN)p1[1]); /* small elt in I */
   if (DEBUGLEVEL>=6) msgtimer("lllgram");
   if (isnfscalar(y))
   { /* already reduced */
@@ -1676,12 +1693,6 @@ ideallllredall(GEN nf, GEN I, GEN vdir, long prec, long precint)
   aI = (typ(aI)==t_POLMOD)? gmul(aI,y): gadd(aI,y);
   res[2]=(long)aI;
   gunclone(y); return res;
-}
-
-GEN
-ideallllred(GEN nf, GEN ix, GEN vdir, long prec)
-{
-  return ideallllredall(nf,ix,vdir,prec,prec);
 }
 
 GEN
