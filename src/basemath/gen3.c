@@ -101,25 +101,60 @@ gpolvar(GEN x)
 /*                    PRECISION OF SCALAR OBJECTS                  */
 /*                                                                 */
 /*******************************************************************/
-
+static long
+prec0(long e) { return (e < 0)? 2 - (e >> TWOPOTBITS_IN_LONG): 2; }
+static long
+precreal(GEN x) { return signe(x) ? lg(x): prec0(expo(x)); }
+/* t t_REAL, s an exact non-complex type. Return precision(|t| + |s|) */
+static long
+precrealexact(GEN t, GEN s) {
+  long l, e = gexpo(s);
+  if (e == -(long)HIGHEXPOBIT) return precreal(t);
+  if (e < 0) e = 0;
+  e -= expo(t);
+  if (!signe(t)) return prec0(e);
+  l = lg(t);
+  return (e > 0)? l + (e >> TWOPOTBITS_IN_LONG): l;
+}
 long
-precision(GEN x)
+precision(GEN z)
 {
-  long tx=typ(x),k,l;
+  long tx = typ(z), e, ex, ey, lz, lx, ly;
 
-  if (tx==t_REAL)
-  {
-    if (!signe(x)) {
-      long e = expo(x);
-      return (e < 0)? 2 - (e >> TWOPOTBITS_IN_LONG): 2;
+  if (tx == t_REAL) return precreal(z);
+  if (tx == t_COMPLEX)
+  { /* ~ precision(|x| + |y|) */
+    GEN x = gel(z,1), y = gel(z,2);
+    if (typ(x) != t_REAL) {
+      if (typ(y) != t_REAL) return 0;
+      return precrealexact(y, x);
     }
-    return lg(x);
-  }
-  if (tx==t_COMPLEX)
-  {
-    k=precision((GEN)x[1]);
-    l=precision((GEN)x[2]); if (l && (!k || l<k)) k=l;
-    return k;
+    if (typ(y) != t_REAL) return precrealexact(x, y);
+    /* x, y are t_REALs, cf addrr_sign */
+    ex = expo(x);
+    ey = expo(y);
+    e = ey - ex;
+    if (!signe(x)) {
+      if (!signe(y)) return prec0( min(ex,ey) );
+      if (e < 0) return prec0(ex);
+      lz = 3 + (e >> TWOPOTBITS_IN_LONG);
+      ly = lg(y); if (lz > ly) lz = ly;
+      return lz;
+    }
+    if (!signe(y)) {
+      if (e > 0) return prec0(ey);
+      lz = 3 + ((-e)>>TWOPOTBITS_IN_LONG);
+      lx = lg(x); if (lz > lx) lz = lx;
+      return lz;
+    }
+    if (e < 0) { swap(x, y); e = -e; }
+    lx = lg(x);
+    ly = lg(y);
+    if (e) {
+      long d = e >> TWOPOTBITS_IN_LONG, l = ly-d;
+      return (l > lx)? lx + d: ly;
+    }
+    return min(lx, ly);
   }
   return 0;
 }
