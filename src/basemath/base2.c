@@ -2617,7 +2617,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr)
       R[j] = (long) rnfelementid_powmod(multabmod,j,q1,T,p);
     R = modprM(lift(R), nf, modpr);
     baseIp = FqM_ker(R,T,p);
-    baseOp = FqM_suppl(baseIp,T,p);
+    baseOp = lg(baseIp)==1? rnfId: FqM_suppl(baseIp,T,p);
     alpha = cgetg(n+1,t_MAT);
     for (j=1; j<lg(baseIp); j++) alpha[j] = baseOp[j];
     for (   ; j<=n; j++)
