@@ -107,7 +107,7 @@ entree functions_oldgp[] = {
 {"line",35,(void *)rectline,10,"vLGG"},
 {"lines",35,(void *)rectlines,10,"vLGG"},
 {"move",35,(void*)rectmove,10,"vLGG"},
-{"plot",37,(void *)plot,10,"vV=GGIp"},
+{"plot",37,(void *)plot,10,"vV=GGIDGDGp"},
 {"ploth",37,(void *)ploth,10,"V=GGIp"},
 {"ploth2",37,(void *)ploth2,10,"V=GGIp"},
 {"plothmult",37,(void *)plothmult,10,"V=GGIp"},
