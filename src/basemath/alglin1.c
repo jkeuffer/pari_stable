@@ -1020,14 +1020,34 @@ u_Fp_gauss_get_col(GEN a, GEN b, long piv, long li, long p)
   GEN u=cgetg(li+1,t_VECSMALL);
   long i,j, m;
 
-  u[li] = (b[li] *  u_Fp_inv(piv,p)) % p;
-  if (u[li] < 0) u[li] += p;
-  for (i=li-1; i>0; i--)
+  if (u_OK_ULONG(p))
   {
-    m = b[i];
-    for (j=i+1; j<=li; j++) { m -= coeff(a,i,j) * u[j]; if (m & MASK) m %= p; }
-    u[i] = ((m%p) * u_Fp_inv(coeff(a,i,i), p)) % p;
-    if (u[i] < 0) u[i] += p;
+    u[li] = (b[li] *  u_Fp_inv(piv,p)) % p;
+    if (u[li] < 0) u[li] += p;
+    for (i=li-1; i>0; i--)
+    {
+      m = b[i];
+      for (j=i+1; j<=li; j++) {
+        m -= coeff(a,i,j) * u[j];
+        if (m & MASK) m %= p;
+      }
+      u[i] = ((m%p) * u_Fp_inv(coeff(a,i,i), p)) % p;
+      if (u[i] < 0) u[i] += p;
+    }
+  }
+  else
+  {
+    m = b[li] %= p; if (m < 0) m += p;
+    u[li] = mulssmod(m, u_Fp_inv(piv,p), p);
+    for (i=li-1; i>0; i--)
+    {
+      m = b[i] % p; if (m < 0) m += p;
+      for (j=i+1; j<=li; j++) {
+        m -= mulssmod(coeff(a,i,j), u[j], p);
+        if (m < 0) m += p;
+      }
+      u[i] = mulssmod(m, u_Fp_inv(coeff(a,i,i), p), p);
+    }
   }
   return u;
 }
@@ -1051,10 +1071,20 @@ static void
 _u_Fp_addmul(GEN b, long k, long i, long m, long p)
 {
   long a;
-  if (b[i] & MASK) b[i] %= p;
-  a = b[k] + m * b[i];
-  if (a & MASK) a %= p;
-  b[k] = a;
+  if (u_OK_ULONG(p))
+  {
+    if (b[i] & MASK) b[i] %= p;
+    a = b[k] + m * b[i];
+    if (a & MASK) a %= p;
+    b[k] = a;
+  }
+  else
+  {
+    b[i] %= p; if (b[i] < 0) b[i] += p;
+    a = b[k] + mulssmod(m, b[i], p);
+    if (a > p) a -= p;
+    b[k] = a;
+  }
 }
 
 /* Gaussan Elimination. Compute a^(-1)*b
