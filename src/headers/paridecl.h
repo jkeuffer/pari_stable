@@ -895,6 +895,7 @@ GEN     gopsg2(GEN (*f)(GEN, GEN), long s, GEN y);
 void    gopsg2z(GEN (*f)(GEN, GEN), long s, GEN y, GEN z);
 long    opgs2(int (*f)(GEN, GEN), GEN y, long s);
 
+long    ZX_valuation(GEN x, GEN *Z);
 GEN     cgetp(GEN x);
 GEN     cvtop(GEN x, GEN p, long l);
 GEN     from_Kronecker(GEN z, GEN pol);
@@ -1305,11 +1306,12 @@ long    FpX_is_squarefree(GEN f, GEN p);
 long    FpX_is_totally_split(GEN f, GEN p);
 long    FpX_nbfact(GEN f, GEN p);
 long    FpX_nbroots(GEN f, GEN p);
-GEN     FpX_rand(long d1, long v, GEN p);
 GEN     FqX_gcd(GEN P, GEN Q, GEN T, GEN p);
 long    FqX_is_squarefree(GEN P, GEN T, GEN p);
 long    FqX_nbfact(GEN u, GEN T, GEN p);
 long    FqX_nbroots(GEN f, GEN T, GEN p);
+GEN     FpX_rand(long d1, long v, GEN p);
+GEN     FpX_roots(GEN f, GEN p);
 GEN     apprgen(GEN f, GEN a);
 GEN     apprgen9(GEN f, GEN a);
 GEN     factcantor(GEN x, GEN p);
@@ -1570,8 +1572,12 @@ GEN     thueinit(GEN poly, long flag, long prec);
 
 /* smalpol1.c */
 
+GEN     FpX_Flx(GEN x);
 GEN     Fl_Flx(ulong x, long sv);
 GEN     Flm_FlxV(GEN x, long sv);
+GEN     Flm_ZM(GEN z);
+GEN     Flv_ZC(GEN z);
+GEN     Flv_ZV(GEN z);
 GEN     Flv_polint(GEN xa, GEN ya, ulong p, long vs);
 GEN     Flv_roots_to_pol(GEN a, ulong p, long vs);
 GEN     Flx_Fl_mul(GEN y, ulong x, ulong p);
@@ -1581,7 +1587,7 @@ GEN     Flx_add(GEN x, GEN y, ulong p);
 GEN     Flx_addshift(GEN x, GEN y, ulong p, long d);
 GEN     Flx_addspec(GEN x, GEN y, ulong p, long lx, long ly);
 GEN     Flx_deriv(GEN z, ulong p);
-GEN     Flx_div_by_X_x(GEN a, ulong x, ulong p);
+GEN     Flx_div_by_X_x(GEN a, ulong x, ulong p, ulong *rem);
 GEN     Flx_divrem(GEN x, GEN y, ulong p, GEN *pr);
 ulong   Flx_eval(GEN x, ulong y, ulong p);
 GEN     Flx_extgcd(GEN a, GEN b, ulong p, GEN *ptu, GEN *ptv);

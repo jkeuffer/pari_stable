@@ -2134,13 +2134,13 @@ _primedec(GEN nf, GEN p)
     dim = lg(mat1)-1; /* A2 product of 'dim' fields */
     if (dim > 1)
     { /* phi2 v = 0 <==> a = M2 v in Ker phi */
-      GEN I,R,r,a,mula,mul2, v = (GEN)mat1[2];
+      GEN I, R, r, a, mula, mul2, v = (GEN)mat1[2];
       long n;
 
       a = FpM_FpV_mul(M2,v, p);
       mula = FpM_red(eltmul_get_table(nf, a), p);
       mul2 = FpM_mul(Mi2, FpM_mul(mula,M2, p), p);
-      R = rootmod(pol_min(mul2,p), p); /* totally split mod p */
+      R = FpX_roots(pol_min(mul2,p), p); /* totally split mod p */
 
       n = lg(R)-1;
       for (i=1; i<=n; i++)

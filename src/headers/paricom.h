@@ -331,9 +331,6 @@ enum manage_var_t {
 #define FpX_div(x,y,p) (FpX_divrem((x),(y),(p), NULL))
 #define FpX_rem(x,y,p) (FpX_divrem((x),(y),(p), ONLY_REM))
 
-#define Flv_ZC(x)  (vecsmall_col((x)))
-#define Flv_ZV(x)  (vecsmall_vec((x)))
-#define Flm_ZM(x)  (matsmall_mat((x)))
 #define Flx_copy(x) (vecsmall_copy((x)))
 #define Flx_div(x,y,p) (Flx_divrem((x),(y),(p), NULL))
 

@@ -1459,7 +1459,7 @@ DDF_roots(GEN pol, GEN polp, GEN p)
   if (DEBUGLEVEL>2) msgTIMER(&T, "Root bound");
 
   av = avma; lim = stack_lim(av,2);
-  z = lift_intern( rootmod(polp, p) );
+  z = FpX_roots(polp, p);
   lz = lg(z)-1;
   if (lz > (degpol(pol) >> 2))
   { /* many roots */
@@ -1708,7 +1708,7 @@ ZX_squff(GEN f, GEN *ex)
   GEN T,V,W,P,e,cf;
   long i,k,dW,n,val;
 
-  val = polvaluation(f, &f);
+  val = ZX_valuation(f, &f);
   n = 1 + degpol(f); if (val) n++;
   e = cgetg(n,t_VECSMALL);
   P = cgetg(n,t_COL);
@@ -1783,7 +1783,8 @@ nfrootsQ(GEN x)
   
   if (typ(x)!=t_POL) err(notpoler,"nfrootsQ");
   if (!signe(x)) err(zeropoler,"nfrootsQ");
-  val = polvaluation(x, &x);
+  x = primitive_part(x, NULL);
+  val = ZX_valuation(x, &x);
   d = modulargcd(derivpol(x), x);
   z = DDF(gdeuc(x, d), 1, 1);
   if (val) z = concatsp(z, gzero);

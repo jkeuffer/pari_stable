@@ -1619,7 +1619,7 @@ Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
        dubious to treat cases apart...)*/
     {
       GEN L,An,Bn,ipg,z;
-      z=rootmod(cyclo(pg,-1),l);
+      z=FpX_roots(cyclo(pg,-1),l);
       if (lg(z)<2) err(talker,"%Z is not a prime in Fp_intersect",l);
       z=negi(lift((GEN)z[1]));
       ipg=stoi(pg);
@@ -2893,7 +2893,7 @@ u_FpV_polint_all(GEN xa, GEN ya, GEN C0, GEN C1, ulong p)
   ulong inv;
   for (i=1; i<n; i++)
   {
-    T = Flx_div_by_X_x(Q, xa[i], p);
+    T = Flx_div_by_X_x(Q, xa[i], p, NULL);
     inv = invumod(Flx_eval(T,xa[i], p), p);
 
     if (ya[i])

@@ -248,7 +248,6 @@ factmod_init(GEN *F, GEN pp, ulong *P)
   return d-3;
 }
 
-#define mods(x,y) mod(stoi(x),y)
 static GEN
 root_mod_2(GEN f)
 {
@@ -260,8 +259,8 @@ root_mod_2(GEN f)
     if (signe(f[i])) n++;
   z1 = n & 1;
   y = cgetg(z0+z1+1, t_COL); i = 1;
-  if (z0) y[i++] = (long)mods(0,gdeux);
-  if (z1) y[i]   = (long)mods(1,gdeux);
+  if (z0) y[i++] = zero;
+  if (z1) y[i]   = un;
   return y;
 }
 
@@ -283,10 +282,10 @@ root_mod_4(GEN f)
   z3 = (no == ne);
   z1 = (no == ((4-ne)&3));
   y=cgetg(1+z0+z1+z2+z3,t_COL); i = 1; p = stoi(4);
-  if (z0) y[i++] = (long)mods(0,p);
-  if (z1) y[i++] = (long)mods(1,p);
-  if (z2) y[i++] = (long)mods(2,p);
-  if (z3) y[i]   = (long)mods(3,p);
+  if (z0) y[i++] = zero;
+  if (z1) y[i++] = un;
+  if (z2) y[i++] = deux;
+  if (z3) y[i]   = lutoi(3UL);
   return y;
 }
 #undef i_mod4
@@ -305,46 +304,57 @@ root_mod_even(GEN f, ulong p)
 }
 
 /* by checking f(0..p-1) */
-GEN
-rootmod2(GEN f, GEN pp)
+static GEN
+Flx_roots(GEN f, ulong p)
 {
-  GEN g, y, q, r, x_minus_s;
-  long d, i, nbrac;
-  ulong p, s;
-  pari_sp av = avma, av1;
+  long d = degpol(f), n = 0;
+  ulong s = 1UL, r;
+  GEN q, y = cgetg(d + 1, t_VECSMALL);
+  pari_sp av = avma;
 
-  if (!(d = factmod_init(&f, pp, &p))) { avma=av; return cgetg(1,t_COL); }
-  if (!p) err(talker,"prime too big in rootmod2");
-  if ((p & 1) == 0) { avma = av; return root_mod_even(f,p); }
-  x_minus_s = gadd(polx[varn(f)], stoi(-1));
-
-  nbrac = 1;
-  y=(GEN)gpmalloc((d+1)*sizeof(long));
-  if (gcmp0(constant_term(f))) y[nbrac++] = 0;
-  s = 1UL; av1 = avma;
+  if (!f[2]) y[++n] = 0;
   do
   {
-    mael(x_minus_s,2,2) = (long)s;
-    /* one might do a FFT-type evaluation */
-    q = FpX_divrem(f, x_minus_s, pp, &r);
-    if (signe(r)) avma = av1;
+    q = Flx_div_by_X_x(f, s, p, &r); /* TODO: FFT-type multi-evaluation */
+    if (r) avma = av;
     else
     {
-      y[nbrac++] = (long)s; f = q; av1 = avma;
+      y[++n] = (long)s;
+      f = q; av = avma;
     }
     s++;
   }
-  while (nbrac < d && p > s);
-  if (nbrac == 1) { avma=av; return cgetg(1,t_COL); }
-  if (nbrac == d && p != s)
+  while (n < d-1 && p > s);
+  if (n == d-1 && p != s)
   {
-    g = mpinvmod((GEN)f[3], pp); setsigne(g,-1);
-    y[nbrac++] = (long)umodiu( mulii(g, (GEN)f[2]), p );
+    ulong g = p - invumod((ulong)f[3], p);
+    y[++n] = muluumod(g, (ulong)f[2], p);
   }
-  avma=av; g=cgetg(nbrac,t_COL);
-  if (isonstack(pp)) pp = icopy(pp);
-  for (i=1; i<nbrac; i++) g[i]=(long)mods(y[i],pp);
-  free(y); return g;
+  setlg(y, n+1); return y;
+}
+
+static GEN
+vec_to_mod(GEN x, GEN p)
+{
+  long i, l;
+  if (isonstack(p)) p = icopy(p);
+  l = lg(x);
+  for (i=1; i<l; i++) x[i] = (long)mod((GEN)x[i], p);
+  return x;
+}
+
+GEN
+rootmod2(GEN f, GEN pp)
+{
+  pari_sp av = avma;
+  ulong p;
+  GEN y;
+
+  if (!factmod_init(&f, pp, &p)) { avma = av; return cgetg(1,t_COL); }
+  if (!p) err(talker,"prime too big in rootmod2");
+  if (p & 1) y = gerepileupto(av, Flv_ZV( Flx_roots(FpX_Flx(f), p) ));
+  else { avma = av; y = root_mod_even(f,p); }
+  return vec_to_mod(y, pp);
 }
 
 /* assume x reduced mod p, monic, squarefree. Return one root, or NULL if
@@ -378,33 +388,17 @@ otherroot(GEN x, GEN r, GEN p)
   return s;
 }
 
-/* by splitting */
-GEN
-rootmod(GEN f, GEN p)
+/* by splitting, assume p > 2 prime */
+static GEN
+FpX_roots_i(GEN f, GEN p)
 {
-  long n, i, j, la, lb;
-  pari_sp av = avma, tetpil;
-  GEN y,pol,a,b,q,pol0;
+  long n, j, la, lb;
+  GEN y, pol, pol0, a, b, q = shifti(p,-1);
 
-  if (!factmod_init(&f, p, NULL)) { avma=av; return cgetg(1,t_COL); }
-  i = modBIL(p);
-  if ((i & 1) == 0) { avma = av; return root_mod_even(f,i); }
-  i=2; while (!signe(f[i])) i++;
-  if (i == 2) j = 1;
-  else
-  {
-    j = lg(f) - (i-2);
-    if (j==3) /* f = x^n */
-    {
-      avma = av; y = cgetg(2,t_COL);
-      y[1] = (long)gmodulsg(0,p);
-      return y;
-    }
-    a = cgetg(j, t_POL); a[1] =  f[1]; /* a = f / x^{v_x(f)} */
-    f += i-2; for (i=2; i<j; i++) a[i]=f[i];
-    j = 2; f = a;
-  }
-  q = shifti(p,-1);
+  y = cgetg(lg(f), t_COL);
+  j = 1;
+  if (ZX_valuation(f, &f)) { y[j++] = zero; n = 1; } else n = 0;
+
   /* take gcd(x^(p-1) - 1, f) by splitting (x^q-1) * (x^q+1) */
   b = FpXQ_pow(polx[varn(f)],q, f,p);
   if (lg(b) < 3) err(talker,"not a prime in rootmod");
@@ -413,23 +407,15 @@ rootmod(GEN f, GEN p)
   b = ZX_s_add(b, 2); /* b = x^((p-1)/2) + 1 mod f */
   b = FpX_gcd(f,b, p);
   la = degpol(a);
-  lb = degpol(b); n = la + lb;
-  if (!n)
-  {
-    avma = av; y = cgetg(n+j,t_COL);
-    if (j>1) y[1] = (long)gmodulsg(0,p);
-    return y;
-  }
-  y = cgetg(n+j,t_COL);
-  if (j>1) { y[1] = zero; n++; }
-  y[j] = (long)FpX_normalize(b,p);
+  lb = degpol(b); n += la + lb; setlg(y, n+1);
+  if (lb) y[j]    = (long)FpX_normalize(b,p);
   if (la) y[j+lb] = (long)FpX_normalize(a,p);
   pol = gadd(polx[varn(f)], gun); pol0 = constant_term(pol);
-  while (j<=n)
-  { /* cf FpX_split_berlekamp */
+  while (j <= n)
+  { /* cf FpX_split_Berlekamp */
     a = (GEN)y[j]; la = degpol(a);
     if (la==1)
-      y[j++] = lsubii(p, constant_term(a));
+      y[j++] = lsubii(p, (GEN)a[2]);
     else if (la==2)
     {
       GEN r = quadsolvemod(a, p, 0);
@@ -450,10 +436,29 @@ rootmod(GEN f, GEN p)
         err(talker, "not a prime in polrootsmod");
     }
   }
-  tetpil = avma; y = gerepile(av,tetpil,sort(y));
-  if (isonstack(p)) p = icopy(p);
-  for (i=1; i<=n; i++) y[i] = (long)mod((GEN)y[i], p);
-  return y;
+  return sort(y);
+}
+
+GEN
+FpX_roots(GEN f, GEN p) {
+  pari_sp av = avma;
+  long q = modBIL(p);
+  if ((q & 1) == 0) return root_mod_even(f,q);
+  return gerepileupto(av, FpX_roots_i(f, p));
+}
+
+GEN
+rootmod(GEN f, GEN p)
+{
+  long q;
+  pari_sp av = avma;
+  GEN y;
+
+  if (!factmod_init(&f, p, NULL)) { avma=av; return cgetg(1,t_COL); }
+  q = modBIL(p);
+  if (q & 1) y = gerepileupto(av, FpX_roots_i(f, p));
+  else { avma = av; y = root_mod_even(f,q); }
+  return vec_to_mod(y, p);
 }
 
 GEN
@@ -1342,7 +1347,7 @@ factmod0(GEN f, GEN pp)
   if (!(d = factmod_init(&f, pp, &p))) { avma=av; return trivfact(); }
   /* to hold factors and exponents */
   t = (GEN*)cgetg(d+1,t_VEC); ex = cgetg(d+1,t_VECSMALL);
-  val = polvaluation(f, &f);
+  val = ZX_valuation(f, &f);
   e = nbfact = 1;
   if (val) { t[1] = polx[varn(f)]; ex[1] = val; nbfact++; }
   pps2 = shifti(pp,-1);
@@ -1545,19 +1550,15 @@ Fp_to_Zp(GEN x, GEN p, GEN q, long e)
 static GEN
 apprgen_i(GEN f, GEN a)
 {
-  GEN fp,u,p,q,P,res,a0,rac;
-  long prec,i,j,k;
+  GEN fp, u, p, q, P, res, a0, rac;
+  long i, j, k, prec = gcmp0(a)? valp(a): precp(a);
 
-  prec = gcmp0(a)? valp(a): precp(a);
   if (prec <= 1) return _vec(a);
-  fp = derivpol(f); u = ggcd(f,fp);
+  fp = derivpol(f); u = modulargcd(f,fp);
   if (degpol(u) > 0) { f = gdeuc(f,u); fp = derivpol(f); }
   p = (GEN)a[2];
   P = egalii(p,gdeux)? stoi(4): p;
   a0= gmod(a, P);
-#if 0 /* assumption */
-  if (!gcmp0(FpX_eval(f,a0,P))) err(rootper2);
-#endif
   if (!gcmp0(FpX_eval(fp,a0,p))) /* simple zero */
   {
     res = rootpadiclift(f, a0, p, prec);
@@ -1571,7 +1572,7 @@ apprgen_i(GEN f, GEN a)
 
   res = cgetg(degpol(f)+1,t_VEC);
   q = gpowgs(p,prec);
-  rac = lift_intern(rootmod(f, P));
+  rac = FpX_roots(f, P);
   for (j=i=1; i<lg(rac); i++)
   {
     u = apprgen_i(f, Fp_to_Zp((GEN)rac[i], p,q,prec));
@@ -1596,13 +1597,13 @@ apprgen(GEN f, GEN a)
 static GEN
 rootpadic_i(GEN f, GEN p, long prec)
 {
-  GEN fp,y,z,q,rac;
-  long lx,i,j,k;
+  GEN y, z, q, rac;
+  long lx, i, j, k;
 
-  fp = derivpol(f); z = ggcd(f,fp);
-  if (degpol(z) > 0) { f = gdeuc(f,z); fp = derivpol(f); }
-  rac = rootmod(f, (egalii(p,gdeux) && prec>=2)? stoi(4): p);
-  rac = lift_intern(rac); lx = lg(rac);
+  z = modulargcd(f, derivpol(f));
+  if (degpol(z) > 0) f = gdeuc(f,z);
+  rac = FpX_roots(f, (egalii(p,gdeux) && prec>=2)? stoi(4): p);
+  lx = lg(rac);
   if (prec==1)
   {
     y = cgetg(lx,t_COL);

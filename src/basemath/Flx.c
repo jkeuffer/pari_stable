@@ -54,12 +54,34 @@ long Flx_MUL_LIMIT = 100;
 GEN
 Flx_ZX(GEN z)
 {
-  long i;
-  long l=lg(z);
+  long i, l = lg(z);
   GEN x = cgetg(l,t_POL);
-  if (typ(z) != t_VECSMALL) err(bugparier,"Flx_ZX, not a VECSMALL");
   for (i=2; i<l; i++) x[i] = lutoi((ulong)z[i]);
   x[1] = evalsigne(l-2!=0)| z[1]; return x;
+}
+GEN
+Flv_ZV(GEN z)
+{
+  long i, l = lg(z);
+  GEN x = cgetg(l, t_VEC);
+  for (i=1; i<l; i++) x[i] = lutoi((ulong)z[i]);
+  return x;
+}
+GEN
+Flv_ZC(GEN z)
+{
+  long i, l = lg(z);
+  GEN x = cgetg(l,t_COL);
+  for (i=1; i<l; i++) x[i] = lutoi((ulong)z[i]);
+  return x;
+}
+GEN
+Flm_ZM(GEN z)
+{
+  long i, l = lg(z);
+  GEN x = cgetg(l,t_MAT);
+  for (i=1; i<l; i++) x[i] = (long)Flv_ZC((GEN)z[i]);
+  return x;
 }
 
 /* Flx_ZX_inplace=zx_ZX_inplace*/
@@ -171,6 +193,18 @@ ZX_Flx(GEN x, ulong p)
   a[1]=((ulong)x[1])&VARNBITS;
   for (i=2; i<lx; i++) a[i] = (long)umodiu((GEN)x[i], p);
   return Flx_renormalize(a,lx);
+}
+
+/* return x[0 .. dx] as t_VECSMALL. Assume x an FpX */
+GEN
+FpX_Flx(GEN x)
+{
+  long i;
+  long lx = lg(x); 
+  GEN a = cgetg(lx, t_VECSMALL);
+  a[1]=((ulong)x[1])&VARNBITS;
+  for (i=2; i<lx; i++) a[i] = (long)itou((GEN)x[i]);
+  return a;
 }
 
 GEN
@@ -1002,12 +1036,12 @@ Flv_roots_to_pol(GEN a, ulong p, long vs)
 }
 
 GEN
-Flx_div_by_X_x(GEN a, ulong x, ulong p)
+Flx_div_by_X_x(GEN a, ulong x, ulong p, ulong *rem)
 {
   long l = lg(a), i;
   GEN a0, z0;
-  GEN z = cgetg(l-1,t_POL);
-  z[1]=a[1];
+  GEN z = cgetg(l-1,t_VECSMALL);
+  z[1] = a[1];
   a0 = a + l-1;
   z0 = z + l-2; *z0 = *a0--;
   if (u_OK_ULONG(p))
@@ -1015,8 +1049,9 @@ Flx_div_by_X_x(GEN a, ulong x, ulong p)
     for (i=l-3; i>1; i--) /* z[i] = (a[i+1] + x*z[i+1]) % p */
     {
       ulong t = (*a0-- + x *  *z0--) % p;
-      *z0 = t;
+      *z0 = (long)t;
     }
+    if (rem) *rem = (*a0 + x *  *z0) % p;
   }
   else
   {
@@ -1025,6 +1060,7 @@ Flx_div_by_X_x(GEN a, ulong x, ulong p)
       ulong t = adduumod((ulong)*a0--, muluumod(x, *z0--, p), p);
       *z0 = (long)t;
     }
+    if (rem) *rem = adduumod((ulong)*a0, muluumod(x, *z0, p), p);
   }
   return z;
 }
@@ -1057,7 +1093,7 @@ Flv_polint(GEN xa, GEN ya, ulong p, long vs)
   for (i=1; i<n; i++)
   {
     if (!ya[i]) continue;
-    T = Flx_div_by_X_x(Q, xa[i], p);
+    T = Flx_div_by_X_x(Q, xa[i], p, NULL);
     inv = invumod(Flx_eval(T,xa[i], p), p);
     if (i < n-1 && (ulong)(xa[i] + xa[i+1]) == p)
     {

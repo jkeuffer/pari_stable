@@ -629,6 +629,16 @@ polvaluation(GEN x, GEN *Z)
   if (Z) *Z = shiftpol(x, v);
   return v;
 }
+long
+ZX_valuation(GEN x, GEN *Z)
+{
+  long v;
+  if (!signe(x)) { if (Z) *Z = zeropol(varn(x)); return VERYBIGINT; }
+  for (v = 0;; v++)
+    if (signe((GEN)x[2+v])) break;
+  if (Z) *Z = shiftpol(x, v);
+  return v;
+}
 long 
 polvaluation_inexact(GEN x, GEN *Z)
 {
