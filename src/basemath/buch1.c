@@ -493,7 +493,9 @@ get_prec(GEN P, long prec)
   if (k == 3) return (prec<<1)-2; /* approximation not trustworthy */
   k = prec - k; /* lost precision when computing P */
   if (k < 0) k = 0;
-  return MEDDEFAULTPREC + k + (gexpo(P) >> TWOPOTBITS_IN_LONG);
+  k += MEDDEFAULTPREC + (gexpo(P) >> TWOPOTBITS_IN_LONG);
+  if (k <= prec) k = (prec<<1)-2; /* dubious: old prec should have worked */
+  return k;
 }
 
 /*  returns an equation for the ray class field of modulus f of the imaginary
@@ -608,12 +610,20 @@ PRECPB:
 }
 
 /* AUXILLIARY ROUTINES FOR QUADRAYSIGMA */
+GEN
+PiI2(long prec)
+{
+  GEN z = cgetg(3,t_COMPLEX);
+  GEN x = mppi(prec); setexpo(x,2);
+  z[1] = zero;
+  z[2] = (long)x; return z; /* = 2I Pi */
+}
 
-/* Compute 2*I*Pi, om1_*om2-om1*om2_, om1_*eta2-om2_*eta1 for ellphist */
+/* Compute data for ellphist */
 static GEN
 ellphistinit(GEN om, long prec)
 {
-  GEN p1,et,res,om1b,om2b,I2, om1 = (GEN)om[1], om2 = (GEN)om[2];
+  GEN p1,res,om1b,om2b, om1 = (GEN)om[1], om2 = (GEN)om[2];
 
   if (gsigne(gimag(gdiv(om1,om2))) < 0)
   {
@@ -621,24 +631,19 @@ ellphistinit(GEN om, long prec)
     p1=cgetg(3,t_VEC); p1[1]=(long)om1; p1[2]=(long)om2;
     om = p1;
   }
-  et = elleta(om,prec);
   om1b = gconj(om1);
-  om2b = gconj(om2); I2 = gmul2n(gi, 1);
-  res = cgetg(4,t_VEC);
-  res[1] = lmul(I2, mppi(prec));
-  res[2] = lmul(I2, gimag(gmul(om1b,om2)));
-  res[3] = lsub(gmul(om1b,(GEN)et[2]), gmul(om2b,(GEN)et[1]));
-  return res;
+  om2b = gconj(om2); res = cgetg(4,t_VEC);
+  res[1] = ldivgs(elleisnum(om,2,0,prec),12);
+  res[2] = ldiv(PiI2(prec), gmul(om2, gimag(gmul(om1b,om2))));
+  res[3] = (long)om2b; return res;
 }
 
 /* Computes log(phi^*(z,om)), using res computed by ellphistinit */
-
 static GEN
 ellphist(GEN om, GEN res, GEN z, long prec)
 {
-  GEN zst;
-
-  zst=gdiv(gsub(gmul(z,(GEN)res[3]), gmul(gconj(z),(GEN)res[1])), (GEN)res[2]);
+  GEN u = gimag(gmul(z, (GEN)res[3]));
+  GEN zst = gsub(gmul(u, (GEN)res[2]), gmul(z,(GEN)res[1]));
   return gsub(ellsigma(om,z,1,prec),gmul2n(gmul(z,zst),-1));
 }
 
