@@ -597,7 +597,7 @@ static GEN
 choose_prime(GEN pol,GEN dpol,long d,GEN *ptff,GEN *ptlistpotbl, long *ptlcm)
 {
   ulong av;
-  long j,k,oldllist,llist,r,lcm,oldlcm,pp, N = degpol(pol), minp = N*(d-1);
+  long j,k,oldllist,llist,r,lcm,oldlcm,pp, N = degpol(pol), minp = N*(N/d-1)/2;
   GEN p,listpotbl,oldlistpotbl,ff,oldff,n,oldn;
   byteptr di=diffptr;
 
