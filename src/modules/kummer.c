@@ -23,20 +23,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 extern GEN gmul_mati_smallvec(GEN x, GEN y);
 extern GEN check_and_build_cycgen(GEN bnf);
 extern GEN get_arch_real(GEN nf,GEN x,GEN *emb,long prec);
-extern GEN vecmul(GEN x, GEN y);
-extern GEN vecinv(GEN x);
 extern GEN T2_from_embed_norm(GEN x, long r1);
-extern GEN pol_to_vec(GEN x, long N);
-extern GEN famat_to_nf(GEN nf, GEN f);
 extern GEN vconcat(GEN A, GEN B);
 extern long int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *newx);
 
+extern GEN famat_inv(GEN f);
 extern GEN famat_pow(GEN f, GEN n);
 extern GEN famat_mul(GEN f, GEN g);
 extern GEN famat_reduce(GEN fa);
 extern GEN famat_ideallog(GEN nf, GEN g, GEN e, GEN bid);
 extern GEN to_famat(GEN g, GEN e);
-extern GEN to_famat_all(GEN x, GEN y);
 
 typedef struct {
   GEN x;  /* tau ( Mod(x, nf.pol) ) */
@@ -487,10 +483,10 @@ static GEN
 isprincipalell(GEN bnfz, GEN id, GEN cycgen, GEN u, GEN gell, long rc)
 {
   long i, l = lg(cycgen);
-  GEN logdisc, b, y = isprincipalgenforce(bnfz,id);
+  GEN logdisc, b, y = quick_isprincipalgen(bnfz, id);
 
   logdisc = gmod((GEN)y[1], gell);
-  b = to_famat_all((GEN)y[2], gun);
+  b = (GEN)y[2];
   for (i=rc+1; i<l; i++)
   {
     GEN e = modii(mulii((GEN)logdisc[i],(GEN)u[i]), gell);
@@ -634,7 +630,7 @@ isvirtualunit(GEN bnf, GEN v, GEN cycgen, GEN cyc, GEN gell, long rc)
   GEN L, b, eps, y, q, nf = checknf(bnf);
   long i, l = lg(cycgen);
 
-  L = isprincipalgenforce(bnf, idealsqrtn(nf, v, gell, 1));
+  L = quick_isprincipalgen(bnf, idealsqrtn(nf, v, gell, 1));
   q = (GEN)L[1];
   if (gcmp0(q)) { eps = v; y = q; }
   else
@@ -643,8 +639,8 @@ isvirtualunit(GEN bnf, GEN v, GEN cycgen, GEN cyc, GEN gell, long rc)
     y = cgetg(l,t_COL);
     for (i=1; i<l; i++)
       y[i] = (long)diviiexact(mulii(gell,(GEN)q[i]), (GEN)cyc[i]);
-    eps = famat_mul(famat_factorback(cycgen, y), to_famat_all(b, gell));
-    eps = element_div(nf, v, factorbackelt(eps, nf, NULL));
+    eps = famat_mul(famat_factorback(cycgen, y), famat_pow(b, gell));
+    eps = famat_mul(famat_inv(eps), v);
   }
   setlg(y, rc+1);
   return concatsp(lift_intern(isunit(bnf,eps)), y);
@@ -797,7 +793,7 @@ mulpoltau(GEN poltau, GEN list)
 static GEN
 compute_polrel(toK_s *T, GEN be, long g, long ell)
 {
-  long i, a, b, j, m, vnf;
+  long i, a, b, j, vnf, m = T->m;
   GEN e,u,u1,u2,u3,p1,p2,zet,be1,be2,listr,s,veczi,vecci,powtaubet;
   GEN X = polx[0];
 
@@ -807,7 +803,7 @@ compute_polrel(toK_s *T, GEN be, long g, long ell)
     case 3: e = normtoK(T,be); u = tracetoK(T,be);
       return gsub(gmul(X,gsub(gsqr(X),gmulsg(3,e))), gmul(e,u));
     case 5: e = normtoK(T,be);
-      if (ell-1 == 2*T->m) /* d == 2 */
+      if (ell-1 == 2*m) /* d == 2 */
       {
 	u = tracetoK(T,gpowgs(be,3));
 	p1=gadd(gmulsg(5,gsqr(e)), gmul(gsqr(X), gsub(gsqr(X),gmulsg(5,e))));
@@ -827,7 +823,6 @@ compute_polrel(toK_s *T, GEN be, long g, long ell)
     default: p2 = cgetg(3,t_VEC);
       p2[1] = (long)_vec(gzero);
       p2[2] = (long)_vec(gun); p1 = _vec(p2);
-      m = T->m;
       vnf = varn(T->polnf);
       zet = gmodulcp(polx[vnf], cyclo(ell,vnf));
       listr = cgetg(m+1,t_VECSMALL);

@@ -511,6 +511,10 @@ GEN     oldidealinv(GEN nf, GEN ix);
 GEN     prime_to_ideal(GEN nf, GEN vp);
 GEN     principalideal(GEN nf, GEN a);
 GEN     principalidele(GEN nf, GEN a, long prec);
+GEN     vecdiv(GEN x, GEN y);
+GEN     vecinv(GEN x);
+GEN     vecmul(GEN x, GEN y);
+GEN     vecpow(GEN x, GEN n);
 
 /* base5.c */
 
@@ -654,6 +658,7 @@ GEN     quadray(GEN bnf, GEN f, GEN flag, long prec);
 
 GEN     bnfclassunit0(GEN P,long flag,GEN data,long prec);
 GEN     bnfinit0(GEN P,long flag,GEN data,long prec);
+GEN     bnfmake(GEN sbnf,long prec);
 GEN     buchall(GEN P, GEN gcbach, GEN gcbach2, GEN gRELSUP, GEN gborne, long nbrelpid, long minsfb, long flun, long prec);
 GEN     buchfu(GEN bignf);
 GEN     classgrouponly(GEN P,GEN data,long prec);
@@ -664,7 +669,7 @@ GEN     isprincipalforce(GEN bignf,GEN x);
 GEN     isprincipalgen(GEN bignf, GEN x);
 GEN     isprincipalgenforce(GEN bignf,GEN x);
 GEN     isunit(GEN bignf, GEN x);
-GEN     bnfmake(GEN sbnf,long prec);
+GEN     quick_isprincipalgen(GEN bnf, GEN x);
 GEN     regulator(GEN P,GEN data,long prec);
 GEN     signunits(GEN bignf);
 GEN     smallbuchinit(GEN pol,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,long minsfb,long prec);

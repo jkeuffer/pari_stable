@@ -21,6 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*******************************************************************/
 #include "pari.h"
 #include "parinf.h"
+extern GEN gscal(GEN x,GEN y);
 extern GEN nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec);
 extern GEN get_nfindex(GEN bas);
 extern GEN sqred1_from_QR(GEN x, long prec);
@@ -39,8 +40,6 @@ extern GEN init_idele(GEN nf);
 extern GEN norm_by_embed(long r1, GEN x);
 extern void minim_alloc(long n,double ***q,long **x,double **y,double **z,double **v);
 extern GEN arch_mul(GEN x, GEN y);
-extern GEN vecdiv(GEN x, GEN y);
-extern GEN vecmul(GEN x, GEN y);
 
 #define SFB_MAX 2
 #define SFB_STEP 2
@@ -1014,7 +1013,7 @@ fact_ok(GEN nf, GEN y, GEN C, GEN g, GEN e)
 
 /* assume x in HNF. cf class_group_gen for notations */
 static GEN
-isprincipalall0(GEN bnf, GEN x, long *ptprec, long flag)
+_isprincipal(GEN bnf, GEN x, long *ptprec, long flag)
 {
   long i,lW,lB,e,c, prec = *ptprec;
   GEN Q,xar,Wex,Bex,U,y,p1,gen,cyc,xc,ex,d,col,A;
@@ -1145,10 +1144,10 @@ isprincipalall(GEN bnf,GEN x,long flag)
   for (;;)
   {
     gpmem_t av1 = avma;
-    GEN y = isprincipalall0(bnf,x,&pr,flag);
+    GEN y = _isprincipal(bnf,x,&pr,flag);
     if (y) return gerepileupto(av,y);
 
-    if (DEBUGLEVEL) err(warnprec,"isprincipalall0",pr);
+    if (DEBUGLEVEL) err(warnprec,"isprincipal",pr);
     avma = av1; bnf = bnfnewprec(bnf,pr); (void)setrand(c);
   }
 }
@@ -1186,7 +1185,7 @@ isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag)
   for (;;)
   {
     gpmem_t av1 = avma;
-    GEN y = isprincipalall0(bnf, gen? (GEN)id[1]: id,&prec,flag);
+    GEN y = _isprincipal(bnf, gen? (GEN)id[1]: id,&prec,flag);
     if (y)
     {
       if (gen && typ(y) == t_VEC)
@@ -1207,7 +1206,7 @@ isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag)
         err(warner,"insufficient precision for generators, not given");
       avma = av; return stoi(prec);
     }
-    if (DEBUGLEVEL) err(warnprec,"isprincipalall0",prec);
+    if (DEBUGLEVEL) err(warnprec,"isprincipal",prec);
     avma = av1; bnf = bnfnewprec(bnf,prec); (void)setrand(c);
   }
 }
@@ -1236,15 +1235,16 @@ isprincipalgenforce(GEN bnf,GEN x)
   return isprincipalall(bnf,x,nf_GEN | nf_FORCE);
 }
 
+/* if x a famat, assume it is an algebraic integer (very costly to check) */
 GEN
 isunit(GEN bnf,GEN x)
 {
-  long tx = typ(x), i, R1, RU, n;
-  gpmem_t av=avma, tetpil;
-  GEN p1,logunit,y,ex,nf,z,pi2_sur_w,gn,emb;
+  long tx = typ(x), i, R1, RU, n, prec;
+  gpmem_t av = avma, tetpil;
+  GEN p1, v, rlog, logunit, y, ex, nf, z, pi2_sur_w, gn, emb;
 
   bnf = checkbnf(bnf); nf=(GEN)bnf[7];
-  logunit=(GEN)bnf[3]; RU=lg(logunit);
+  logunit = (GEN)bnf[3]; RU = lg(logunit);
   p1 = gmael(bnf,8,4); /* roots of 1 */
   gn = (GEN)p1[1]; n = itos(gn);
   z  = (GEN)p1[2];
@@ -1255,50 +1255,57 @@ isunit(GEN bnf,GEN x)
       y = zerocol(RU); i = (gsigne(x) > 0)? 0: n>>1;
       y[RU] = (long)gmodulss(i, n); return y;
 
-    case t_POLMOD:
-      if (!gegal((GEN)nf[1],(GEN)x[1]))
-        err(talker,"not the same number field in isunit");
-      x = (GEN)x[2]; /* fall through */
-    case t_POL:
-      p1 = x; x = algtobasis(bnf,x); break;
+    case t_MAT: /* famat */
+      if (lg(x) != 3 || lg(x[1]) != lg(x[2]))
+        err(talker, "not a factorization matrix in isunit");
+      break;
 
     case t_COL:
-      if (lgef(nf[1])-2 == lg(x)) { p1 = basistoalg(nf,x); break; }
+      if (degpol(nf[1]) != lg(x)-1)
+        err(talker,"not an algebraic number in isunit");
+      break;
 
-    default:
-      err(talker,"not an algebraic number in isunit");
+    default: x = algtobasis(nf, x);
+      break;
   }
-  if (!gcmp1(denom(x))) { avma = av; return cgetg(1,t_COL); }
-  if (typ(p1) != t_POLMOD) p1 = gmodulcp(p1,(GEN)nf[1]);
-  p1 = gnorm(p1);
-  if (!is_pm1(p1)) { avma = av; return cgetg(1,t_COL); }
+  /* assume a famat is integral */
+  if (tx != t_MAT && !gcmp1(denom(x))) { avma = av; return cgetg(1,t_COL); }
 
-  R1 = itos(gmael(nf,2,1)); p1 = cgetg(RU+1,t_COL);
-  for (i=1; i<=R1; i++) p1[i] = un;
-  for (   ; i<=RU; i++) p1[i] = deux;
-  logunit = concatsp(logunit,p1);
+  R1 = nf_get_r1(nf); v = cgetg(RU+1,t_COL);
+  for (i=1; i<=R1; i++) v[i] = un;
+  for (   ; i<=RU; i++) v[i] = deux;
+  logunit = concatsp(logunit, v);
   /* ex = fundamental units exponents */
+  rlog = greal(logunit);
+  prec = nfgetprec(nf);
+  for (i=1;;)
   {
-    GEN rx, rlog = greal(logunit);
-    long e, prec = nfgetprec(nf);
-    for (i=1;;)
+    GEN logN, rx = get_arch_real(nf,x,&emb, MEDDEFAULTPREC);
+    long e;
+    if (rx)
     {
-      rx = get_arch_real(nf,x,&emb, MEDDEFAULTPREC);
-      if (rx)
+      logN = gscal(rx, v); /* log(Nx), should be ~ 0 */
+      if (gexpo(logN) > -20)
       {
-        ex = grndtoi(gauss(rlog, rx), &e);
-        if (gcmp0((GEN)ex[RU]) && e < -4) break;
+        long p = 2 + max(1, (nfgetprec(nf)-2) / 2);
+        if (typ(logN) != t_REAL || gprecision(rx) > p)
+          { avma = av; return cgetg(1,t_COL); } /* not a precision problem */
+        rx = NULL;
       }
-
-      if (++i > 4) err(precer,"isunit");
-      prec = (prec-1)<<1;
-      if (DEBUGLEVEL) err(warnprec,"isunit",prec);
-      nf = nfnewprec(nf, prec);
     }
+    if (rx)
+    {
+      ex = grndtoi(gauss(rlog, rx), &e);
+      if (gcmp0((GEN)ex[RU]) && e < -4) break;
+    }
+
+    if (++i > 4) err(precer,"isunit");
+    prec = (prec-1)<<1;
+    if (DEBUGLEVEL) err(warnprec,"isunit",prec);
+    nf = nfnewprec(nf, prec);
   }
 
-  setlg(ex, RU);
-  setlg(p1, RU); settyp(p1, t_VEC);
+  setlg(ex, RU); p1 = cgetg(RU, t_VEC);
   for (i=1; i<RU; i++) p1[i] = coeff(logunit, 1, i);
   p1 = gneg(gimag(gmul(p1,ex))); if (!R1) p1 = gmul2n(p1, -1);
   p1 = gadd(garg((GEN)emb[1],DEFAULTPREC), p1);
