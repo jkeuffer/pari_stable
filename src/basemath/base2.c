@@ -1867,6 +1867,7 @@ nilord(decomp_t *S, GEN dred, long mf, long flag)
       if (!flag) S->phi = redelt(S->phi, sqri(p), p);
       S->chi = NULL; l = 1; break;
     }
+    l = 2;
     if (loop(S, nv, pdr, pmr, pmf, Ea, Fa, ns)) break;
     if (!update_phi(S, &pdr, &pmr, ns, &l, flag)) break;
   }
