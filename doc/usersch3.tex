@@ -3671,32 +3671,19 @@ If $fl=2$, output $[pol, N]$, where $pol$ is the polynomial as output when
 $fl=0$ and $N$ the conductor as output when $fl=1$.
 
 The following function can be used to compute all subfields of
-$\Q(\zeta_n)$ (of degree less than \kbd{d}, if \kbd{d} is set):
+$\Q(\zeta_n)$ (of exact degree \kbd{d}, if \kbd{d} is set):
 \bprog
 subcyclo(n, d = -1)=
 {
-  local(Z,G, S = []);
-  if (d < 0, d = n);
-  Z = znstar(n);
-  G = matdiagonal(Z[2]);
-  forsubgroup(H = G, d,
-    S = concat(S, galoissubcyclo(Z, mathnf(concat(G,H))));
-  );
-  S
-}
-@eprog\noindent
-Alternatively this one computes subfields of exact degree $d$
-\bprog
-subcyclo(n, d)=
-{
-  local(bnr,L);
+  local(bnr,L,IndexBound);
+  IndexBound = if (d < 0, n, [d]);
   bnr = bnrinit(bnfinit(y), [n,[1]], 1);
-  L = subgrouplist(bnr, [d], 1);
+  L = subgrouplist(bnr, IndexBound, 1);
   vector(#L,i, galoissubcyclo(bnr,L[i]));
 }
 @eprog\noindent
-In the latter example, setting \kbd{L = subgrouplist(bnr, [d])} would produce
-subfields of exact conductor $n\infty$.
+Setting \kbd{L = subgrouplist(bnr, [d])} would produce subfields of exact
+conductor $n\infty$.
 
 \syn{galoissubcyclo}{N,H,fl,v} where \var{fl} is a C long integer, and
 \var{v} a variable number.
