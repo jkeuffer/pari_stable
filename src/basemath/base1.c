@@ -924,10 +924,10 @@ nf_get_sign(GEN nf, long *r1, long *r2)
 }
 
 static GEN
-get_T(GEN mul, GEN x, GEN bas, GEN den)
+get_T(GEN mul, GEN x, GEN basden)
 {
+  GEN tr,T,T1,sym, bas = (GEN)basden[1], den = (GEN)basden[2];
   long i,j,n = lg(bas)-1;
-  GEN tr,T,T1,sym;
   T = cgetg(n+1,t_MAT);
   T1 = cgetg(n+1,t_COL);
   sym = polsym(x, n-1);
@@ -979,7 +979,7 @@ _mulii(GEN x, GEN y)
 }
 
 GEN
-get_mul_table(GEN x,GEN basden,GEN invbas,GEN *T)
+get_mul_table(GEN x,GEN basden,GEN invbas)
 {
   long i,j, n = degpol(x);
   GEN z,d, mul = cgetg(n*n+1,t_MAT), bas=(GEN)basden[1], den=(GEN)basden[2];
@@ -998,7 +998,6 @@ get_mul_table(GEN x,GEN basden,GEN invbas,GEN *T)
       }
       mul[j+(i-1)*n] = mul[i+(j-1)*n] = lpileupto(av,z);
     }
-  if (T) *T = get_T(mul,x,bas,den);
   return mul;
 }
 
@@ -1076,22 +1075,20 @@ remake_GM(GEN nf, long prec, GEN *G, GEN *M)
   *G = make_G(*M, nf_get_r1(nf), prec);
 }
 
-/* fill mat = nf[5], as well as nf[8] and nf[9]
- * If (small) only compute a subset (use dummy 0s for the rest) */
+/* compute inexact components of nf to precision prec. In place */
 void
-get_nf_matrices(GEN nf, long prec, long small)
+set_nf_fp_compo(GEN nf, GEN basden, long prec)
 {
-  GEN x=(GEN)nf[1],dK=(GEN)nf[3],index=(GEN)nf[4],ro=(GEN)nf[6],bas=(GEN)nf[7];
-  GEN G,basden,invbas,M,T,D,TI,A,dA,mat;
-  long PREC, r1 = nf_get_r1(nf);
+  GEN ro = (GEN)nf[6];
+  GEN G, M, mat = (GEN)nf[5];
+  long PREC;
 
-  mat = cgetg(small? 3: 8,t_VEC); nf[5] = (long)mat;
-  basden = get_bas_den(bas);
+  if (!basden) basden = get_bas_den((GEN)nf[7]);
 
   PREC = prec + (gexpo((GEN)basden[1]) >> TWOPOTBITS_IN_LONG);
   if (!ro || gprecision((GEN)ro[1]) < PREC) 
   {
-    ro = get_roots(x, r1, PREC);
+    ro = get_roots((GEN)nf[1], nf_get_r1(nf), PREC);
     nf[6] = (long)ro;
   }
   M = make_M(basden,ro);
@@ -1103,13 +1100,28 @@ get_nf_matrices(GEN nf, long prec, long small)
   G = make_G(M, nf_get_r1(nf), prec);
   mat[1] = (long)M;
   mat[2] = (long)G;
+}
+
+/* fill mat = nf[5], as well as nf[8] and nf[9]
+ * If (small) only compute a subset (use dummy 0s for the rest) */
+void
+get_nf_matrices(GEN nf, long prec, long small)
+{
+  GEN x=(GEN)nf[1],dK=(GEN)nf[3],index=(GEN)nf[4],bas=(GEN)nf[7];
+  GEN basden,invbas,T,D,TI,A,dA,mat;
+
+  mat = cgetg(small? 3: 8,t_VEC);
+  nf[5] = (long)mat;
+  basden = get_bas_den(bas);
+  set_nf_fp_compo(nf, basden, prec);
   if (small) { nf[8] = nf[9] = zero; return; }
 
   invbas = QM_inv(vecpol_to_mat(bas, lg(bas)-1), gun);
   nf[8] = (long)invbas;
-  nf[9] = (long)get_mul_table(x,basden,invbas,&T);
+  nf[9] = (long)get_mul_table(x,basden,invbas);
   if (DEBUGLEVEL) msgtimer("mult. table");
 
+  T = get_T((GEN)nf[9], x, basden);
   TI = ZM_inv(T, dK); /* dK T^-1 */
   mat[6] = (long)TI;
   mat[7] = (long)make_MDI(nf,TI, &A, &dA); /* needed in idealinv below */
@@ -1370,8 +1382,8 @@ GEN
 _initalg(GEN x, long flag, long prec)
 {
   const gpmem_t av = avma;
-  GEN u,lead,nf,ro,bas,rev,dK;
-  long n, r1, PRECREG;
+  GEN lead,nf,ro,bas,rev,dK;
+  long n, r1;
   int partial = (flag & nf_PARTIALFACT)? ba_PARTIAL: 0;
   basicnf_t T;
 
@@ -1426,12 +1438,8 @@ _initalg(GEN x, long flag, long prec)
     if (DEBUGLEVEL) msgtimer("polred");
   } else rev = NULL;
 
-  u = LLL_nfbasis(&T, &ro);
-  bas = gmul(bas, u);
+  bas = gmul(bas, LLL_nfbasis(&T, &ro));
   if (DEBUGLEVEL) msgtimer("LLL basis");
-
-  PRECREG = prec + (expi(dK)>>(TWOPOTBITS_IN_LONG+1))
-                 + (long)((sqrt((double)n)+3) / sizeof(long) * 4);
 
   nf = cgetg(10,t_VEC);
   nf[1] = (long)x;
@@ -1442,7 +1450,7 @@ _initalg(GEN x, long flag, long prec)
   nf[4] = (long)T.index;
   nf[6] = (long)ro;
   nf[7] = (long)bas;
-  get_nf_matrices(nf, PRECREG, flag & nf_SMALL);
+  get_nf_matrices(nf, prec, flag & nf_SMALL);
 
   if (rev)
   {
@@ -1481,29 +1489,22 @@ long
 nfgetprec(GEN x)
 {
   GEN nf = checknf(x), ro = (GEN)nf[6];
-  return (typ(ro)==t_VEC)?precision((GEN)ro[1]): DEFAULTPREC;
+  return (typ(ro)==t_VEC)? precision((GEN)ro[1]): DEFAULTPREC;
 }
 
 GEN
 nfnewprec(GEN nf, long prec)
 {
-  const gpmem_t av = avma;
-  long r1;
-  GEN y, ro, basden, mat;
+  gpmem_t av = avma;
+  GEN y;
 
   if (typ(nf) != t_VEC) err(talker,"incorrect nf in nfnewprec");
   if (lg(nf) == 11) return bnfnewprec(nf,prec);
   if (lg(nf) ==  7) return bnrnewprec(nf,prec);
   (void)checknf(nf);
   y = dummycopy(nf);
-  r1 = nf_get_r1(nf);
-  mat=dummycopy((GEN)nf[5]);
-  ro=get_roots((GEN)nf[1], r1, prec);
-  y[5]=(long)mat;
-  y[6]=(long)ro;
-  basden = get_bas_den((GEN)nf[7]);
-  mat[1]=(long)make_M(basden, ro);
-  mat[2]=(long)make_G((GEN)mat[1], r1, prec);
+  y[5] = (long)dummycopy((GEN)nf[5]);
+  y[6] = 0; set_nf_fp_compo(y, NULL, prec);
   return gerepilecopy(av, y);
 }
 
@@ -1671,7 +1672,7 @@ get_Bnf(GEN nf)
 
 typedef struct {
   GEN nf;
-  long r1;
+  long r1, v;
   GEN ZKembed; /* embeddings of LLL-reduced Zk basis */
   GEN ZKLLL; /* LLL reduced Zk basis (in M_n(Z)) */
 } CG_data;
@@ -1682,7 +1683,7 @@ get_polchar(CG_data *d, GEN x)
 {
   GEN g = gmul(d->ZKembed,x);
   long e;
-  g = grndtoi(roots_to_pol_r1r2(g, d->r1, 0), &e);
+  g = grndtoi(roots_to_pol_r1r2(g, d->r1, d->v), &e);
   if (e > -5) err(precer, "get_polchar");
   return g;
 }
@@ -1719,6 +1720,7 @@ chk_gen_init(FP_chk_fun *chk, GEN gram, GEN mat)
   int skipfirst = 0;
 
   M = gmael(nf,5,1);
+  d->v  = varn(nf[1]);
   d->r1 = nf_get_r1(nf);
   d->ZKembed = gmul(M, mat);
   d->ZKLLL   = gmul((GEN)nf[7], mat);

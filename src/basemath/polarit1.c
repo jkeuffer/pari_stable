@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /***********************************************************************/
 #include "pari.h"
 extern GEN get_bas_den(GEN bas);
-extern GEN get_mul_table(GEN x,GEN bas,GEN invbas,GEN *T);
+extern GEN get_mul_table(GEN x,GEN bas,GEN invbas);
 extern GEN pol_to_monic(GEN pol, GEN *lead);
 
 #define lswap(x,y) { long _t=x; x=y; y=_t; }
@@ -974,9 +974,7 @@ mat_to_vecpol(GEN x, long v)
 {
   long j, lx = lg(x);
   GEN y = cgetg(lx, t_VEC);
-
-  for (j=1; j<lx; j++)
-    y[j] = (long)vec_to_pol((GEN)x[j], v);
+  for (j=1; j<lx; j++) y[j] = (long)vec_to_pol((GEN)x[j], v);
   return y;
 }
 
@@ -1883,7 +1881,7 @@ padicff(GEN x,GEN p,long pr)
   nf[4] = divise( diviiexact(dx, dK), p )? (long)p: un;
   basden = get_bas_den(bas);
   invbas = QM_inv(vecpol_to_mat(bas,n), gun);
-  mul = get_mul_table(x,basden,invbas,NULL);
+  mul = get_mul_table(x,basden,invbas);
   nf[7]=(long)bas;
   nf[8]=(long)invbas;
   nf[9]=(long)mul; nf[2]=nf[5]=nf[6]=zero;
