@@ -147,6 +147,8 @@ BA 11- improve binomial (use divide_conquer_prod)
    14- allow zetakinit() to use a bnf argument [ would be recomputed before,
        making it impossible to certify the result since bnfcertify could not be
        applied ]
+BA 15- Add POSIX-style long options --fast, --quiet, --primelimit and 
+       --stacksize.
 
   Added
     1- make test-all [ all test suite (SLOW !)]
