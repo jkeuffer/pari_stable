@@ -1383,7 +1383,7 @@ hnf0(GEN A, long remove)       /* remove: throw away lin.dep.columns, GN */
       def--;
     }
     else
-      if (ldef && i==ldef+1) ldef--;
+      if (ldef) ldef--;
     if (low_stack(lim, stack_lim(av,1)))
     {
       if (DEBUGMEM>1) err(warnmem,"hnf[2]. i=%ld",i);
