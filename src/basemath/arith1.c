@@ -2712,7 +2712,7 @@ classno(GEN x)
     _low(tabla[i], p1[1]);
     _low(tablb[i], p1[2]); count[tabla[i]&255]++;
   }
-  /* follow the idea of counting sort to avoid maintaining linked listﬂ in
+  /* follow the idea of counting sort to avoid maintaining linked lists in
    * hashtable */
   index[0]=0; for (i=0; i< 255; i++) index[i+1] = index[i]+count[i];
   /* index[i] = # of forms hashing to <= i */
