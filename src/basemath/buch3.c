@@ -2146,7 +2146,7 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
   long ffs,fs,resp,flbou,nba, k2,karch,kka,nbarch,jjj,jj,square;
   long ii2,ii,ly,clhray,lP,ep,S,clhss,normps,normi,nz,r1,R1,n,c;
   pari_sp av0 = avma, av, av1, lim;
-  GEN nf,p,z,p1,p2,p3,fa,pr,normp,ideal,bidp,z2,matarchunit;
+  GEN nf,p,z,p1,p2,p3,fa,normp,ideal,bidp,z2,matarchunit;
   GEN embunit,sous,clh,sousray,raylist;
   GEN clhrayall,discall,faall,Id,idealrel,idealrelinit;
   GEN sousdisc,mod,P,ex,fac,fadkabs,pz;
@@ -2226,13 +2226,13 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
     fa = primedec(nf,p); lfa = lg(fa)-1;
     for (j=1; j<=lfa; j++)
     {
-      long q0, q;
-      pr = (GEN)fa[j]; q = itos_or_0( powgi(p,(GEN)pr[4]) );
+      GEN pr = (GEN)fa[j];
+      long q0, f = itos((GEN)pr[4]), q = itos_or_0(gpowgs(p,f));
       if (DEBUGLEVEL>1) fprintferr("%Z ",p);
       if (!q || q > bound) continue;
 
       /* p, f-1, j-1 as a single integer in "base degk" (f,j <= degk)*/
-      fauxpr = stoi( (p[2]*degk + itos((GEN)pr[4])-1)*degk + j-1 );
+      fauxpr = stoi( (p[2]*degk + f-1)*degk + j-1 );
       q0 = q; ideal = pr; cex = 0;
       for (;;) /* q <= bound */
       {
