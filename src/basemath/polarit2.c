@@ -884,7 +884,7 @@ END:
 
 /* recombination of modular factors: van Hoeij's algorithm */
 
-/* return integer y such that all roots of P are less than y */
+/* return integer y such that all |a| <= y if P(a) = 0 */
 static GEN
 root_bound(GEN P)
 {
@@ -1274,33 +1274,42 @@ FpX_rescale(GEN P, GEN h, GEN p)
   Q[1] = P[1]; return Q;
 }
 
+/* Find a,b minimal such that A < p^a, B < p^b, 1 << p^(a-b) < 2^31 */
+void
+cmbf_precs(GEN p, GEN A, GEN B, long *pta, long *ptb, GEN *pa, GEN *pb)
+{
+  long a,b,amin,d = (long)(31 * LOG2/log((double)itou(p))); /* a - b */
+
+  b = logint(B, p, pb);
+  amin = b + d;
+  if (gcmp(gpowgs(p, amin), A) <= 0)
+    a = logint(A, p, pa);
+  else
+  { /* not enough room */
+    a = amin; *pa = gpowgs(p, a);
+  }
+  if (DEBUGLEVEL > 3) {
+    fprintferr("S_2 bound: %Z^%ld\n", p,b);
+    fprintferr("coeff bound: %Z^%ld\n", p,a);
+  }
+  *pta = a;
+  *ptb = b;
+}
+
 /* use van Hoeij's knapsack algorithm */
 static GEN
 combine_factors(GEN target, GEN famod, GEN p, long klim, long hint)
 {
-  GEN la, B2, B, res, L, pa, pb, listmod, N2;
-  long a,b,goodb,l, maxK = 3, nft = lg(famod)-1, n = degpol(target);
-  double logp = log((double)itos(p));
+  GEN la, B, A, res, L, pa, pb, listmod, N2;
+  long a,b, l, maxK = 3, nft = lg(famod)-1, n = degpol(target);
 
   N2 = mpsqrt(QuickNormL2(target,DEFAULTPREC));
-  B = uniform_Mignotte_bound(target, N2);
-  a = logint(B, p, &pa);
-  if (DEBUGLEVEL > 4) fprintferr("Mignotte bound: %Z^%ld\n", p,a);
+  A = uniform_Mignotte_bound(target, N2);
 
   la = absi(leading_term(target));
-  B2 = mulsi(n, sqri(gmul(la, root_bound(target)))); /* = bound for S_2 */
-  b = logint(B2,p, &pb);
+  B = mulsi(n, sqri(gmul(la, root_bound(target)))); /* = bound for S_2 */
 
-  /* b >= goodb implies p^(a-b) < 2^31 */
-  goodb = (long)ceil(a - 31*LOG2/logp + 1e-5);
-  if (b > goodb)
-  { /* overlift for d-1 && d-2 tests. Rare! */
-    a += (b - goodb);
-    pa = mulii(pa, gpowgs(p, b - goodb));
-    goodb = b;
-  }
-  else
-    b = goodb;
+  cmbf_precs(p, A, B, &a, &b, &pa, &pb);
 
   famod = hensel_lift_fact(target,famod,NULL,p,pa,a);
   if (nft < 11) maxK = -1; /* few modular factors: try all posibilities */
@@ -1311,9 +1320,9 @@ combine_factors(GEN target, GEN famod, GEN p, long klim, long hint)
   famod = (GEN)listmod[l];
   if (maxK >= 0 && lg(famod)-1 > 2*maxK)
   {
-    if (l!=1) B = uniform_Mignotte_bound((GEN)res[l], NULL);
+    if (l!=1) A = uniform_Mignotte_bound((GEN)res[l], NULL);
     if (DEBUGLEVEL > 4) fprintferr("last factor still to be checked\n");
-    L = LLL_cmbf((GEN)res[l], famod, p, pa, B, a, maxK);
+    L = LLL_cmbf((GEN)res[l], famod, p, pa, A, a, maxK);
     /* remove last elt, possibly unfactored. Add all new ones. */
     setlg(res, l); res = concatsp(res, L);
   }
