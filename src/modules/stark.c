@@ -171,7 +171,7 @@ EltsOfGroup(long order, GEN cyc)
   return rep;
 }
 
-/* Let dataC as given by InitQuotient0, compute a system of
+/* Let dataC as given by InitQuotient, compute a system of
    representatives of the quotient */
 static GEN
 ComputeLift(GEN dataC)
@@ -284,34 +284,22 @@ GetDeg(GEN dataCR)
 /********************************************************************/
 static GEN AllStark(GEN data,  GEN nf,  long flag,  long prec);
 
-/* Let A be a finite abelian group given by its relation and let C
-   define a subgroup of A, compute the order of A / C, its structure and
-   the matrix expressing the generators of A on those of A / C */
+/* The columns of C give the generators of a subgroup of the finite abelian
+ * group A [ in terms of implicit generators ], compute data to work in A/C:
+ * 1) order
+ * 2) structure
+ * 3) the matrix A ->> A/C
+ * 4) the group C */
 static GEN
-InitQuotient0(GEN cyc, GEN C)
+InitQuotient(GEN C)
 {
-  GEN z, D, H, U;
-
-  H = gcmp0(C)? diagonal(cyc): hnf(C);
-  D = smithall(H, &U, NULL);
-
+  GEN z, U, D = smithall(hnf(C), &U, NULL);
   z = cgetg(5, t_VEC);
   z[1] = (long)dethnf_i(D);
   z[2] = (long)mattodiagonal_i(D);
   z[3] = (long)U;
   z[4] = (long)C; return z;
 }
-
-/* Let m be a modulus et C a subgroup of Clk(m), compute all the data
- * needed to work with the quotient Clk(m) / C namely
- * 1) bnr(m)
- * 2.1) its order
- * 2.2) its structure
- * 2.3) the matrix Clk(m) ->> Clk(m)/C
- * 2.4) the group C */
-static GEN
-InitQuotient(GEN bnr, GEN C)
-{ return mkvec2(bnr, InitQuotient0(gmael(bnr, 5, 2), C)); }
 
 /* Let s: A -> B given by P, and let DA, DB be resp. the matrix of the
    relations of A and B, compute the kernel of s. If DA = 0 then A is free */
@@ -336,18 +324,17 @@ ComputeKernel0(GEN P, GEN DA, GEN DB)
    group modulo n, compute the corresponding congruence group modulo m
    ie the kernel of the map Clk(m) ->> Clk(n)/C */
 static GEN
-ComputeKernel(GEN bnrm, GEN dataC)
+ComputeKernel(GEN bnrm, GEN bnrn, GEN dtQ)
 {
   long i, nbm;
   pari_sp av = avma;
-  GEN bnrn, Mrm, genm, Mrq, mgq, P;
+  GEN Mrm, genm, Mrq, mgq, P;
 
-  bnrn = (GEN)dataC[1];
   Mrm  = diagonal(gmael(bnrm, 5, 2));
-  Mrq  = diagonal(gmael(dataC, 2, 2));
+  Mrq  = diagonal((GEN)dtQ[2]);
   genm = gmael(bnrm, 5, 3);
   nbm  = lg(genm) - 1;
-  mgq  = gmael(dataC, 2, 3);
+  mgq  = (GEN)dtQ[3];
 
   P = cgetg(nbm + 1, t_MAT);
   for (i = 1; i <= nbm; i++)
@@ -431,7 +418,7 @@ GetIndex(GEN pr, GEN bnr, GEN subgroup)
   }
 
   /* f = order of [pr] in bnrpr/subpr */
-  dtQ  = InitQuotient0(bnrpr, subpr);
+  dtQ  = InitQuotient(subpr);
   p1   = gmul((GEN)dtQ[3], isprincipalray(bnrpr, pr));
   cycQ = (GEN)dtQ[2];
   f  = itos( Order(cycQ, p1) );
@@ -441,7 +428,7 @@ GetIndex(GEN pr, GEN bnr, GEN subgroup)
   rep[2] = (long)f; return rep;
 }
 
-static GEN get_listCR(GEN dataD);
+static GEN get_listCR(GEN bnr, GEN dtQ);
 static GEN InitChar(GEN bnr, GEN listCR, long prec);
 
 /* Given a conductor and a subgroups, return the corresponding
@@ -458,7 +445,7 @@ CplxModulus(GEN data, long *newprec, long prec)
     fprintferr("\nTrying modulus = %Z and subgroup = %Z\n",
 	       mael(bnr, 2, 1), (GEN)data[2]);
 
-  listCR = get_listCR((GEN)data[3]);
+  listCR = get_listCR(bnr, (GEN)data[3]);
   for (av = avma;; avma = av)
   {
     data[5] = (long)InitChar(bnr, listCR, dprec);
@@ -488,17 +475,16 @@ CplxModulus(GEN data, long *newprec, long prec)
    corresponding quadratic extension and m is of minimal norm. Return
    bnr(m), D, quotient Ck(m) / D and Clk(m) / C */
 static GEN
-FindModulus(GEN dataC, long *newprec, long prec)
+FindModulus(GEN bnr, GEN dtQ, long *newprec, long prec)
 {
   const long limnorm = 400;
   long n, i, narch, nbp, maxnorm, minnorm, N, nbidnn, s, c, j, nbcand;
   long first = 1, pr, rb, oldcpl = -1;
   pari_sp av = avma, av1;
-  GEN bnr, rep, bnf, nf, f, arch, m, listid, idnormn, bnrm, ImC;
+  GEN rep, bnf, nf, f, arch, m, listid, idnormn, bnrm, ImC;
   GEN candD, bpr, indpr, sgp, p1, p2;
 
-  bnr = (GEN)dataC[1];
-  sgp = gmael(dataC, 2, 4);
+  sgp = (GEN)dtQ[4];
   bnf = (GEN)bnr[1];
   nf  = (GEN)bnf[7];
   N   = degpol(nf[1]);
@@ -571,7 +557,7 @@ FindModulus(GEN dataC, long *newprec, long prec)
 	  if (!signe(p1)) continue;
 
           /* compute Im(C) in Clk(m)... */
-          ImC = ComputeKernel(bnrm, dataC);
+          ImC = ComputeKernel(bnrm, bnr, dtQ);
 
           /* ... and its subgroups of index 2 */
           candD  = ComputeIndex2Subgroup(bnrm, ImC);
@@ -596,8 +582,8 @@ FindModulus(GEN dataC, long *newprec, long prec)
             p2 = cgetg(6, t_VEC); /* p2[5] filled in CplxModulus */
             p2[1] = (long)bnrm;
             p2[2] = (long)D;
-            p2[3] = (long)InitQuotient(bnrm, D);
-            p2[4] = (long)InitQuotient(bnrm, ImC);
+            p2[3] = (long)InitQuotient(D);
+            p2[4] = (long)InitQuotient(ImC);
             cpl = CplxModulus(p2, &pr, prec);
             if (oldcpl < 0 || cpl < oldcpl)
             {
@@ -1033,16 +1019,15 @@ InitChar(GEN bnr, GEN listCR, long prec)
 /* compute the list of characters to consider for AllStark and
    initialize precision-independent data to compute with them */
 static GEN
-get_listCR(GEN dataD)
+get_listCR(GEN bnr, GEN dtQ)
 {
-  GEN MrD, listCR, vecchi, chi, lchi, Surj, cond, bnr, Mr, d, allCR;
+  GEN MrD, listCR, vecchi, chi, lchi, Surj, cond, Mr, d, allCR;
   long hD, h, nc, i, j, lD, tnc;
 
-  Surj = gmael(dataD, 2, 3);
-  MrD  = gmael(dataD, 2, 2);
-  bnr  = (GEN)dataD[1];
+  Surj = (GEN)dtQ[3];
+  MrD  = (GEN)dtQ[2];
   Mr   = gmael(bnr, 5, 2);
-  hD   = itos(gmael(dataD, 2, 1));
+  hD   = itos((GEN)dtQ[1]);
   h    = hD >> 1;
   lD   = lg(MrD)-1;
 
@@ -2547,7 +2532,7 @@ LABDOUB:
     }
   }
 
-  p1 = ComputeLift(gmael(data, 4, 2));
+  p1 = ComputeLift((GEN)data[4]);
 
   den = flag ? h: 2*h;
   veczeta = cgetg(h + 1, t_VEC);
@@ -2706,7 +2691,7 @@ quadhilbertreal(GEN D, long prec)
   pari_sp av = avma;
   long newprec;
   VOLATILE long cl;
-  VOLATILE GEN pol, bnf, bnr, dataC, bnrh, nf, exp;
+  VOLATILE GEN pol, bnf, bnr, dtQ, bnrh, nf, exp, M;
 
   (void)&prec; /* prevent longjmp clobbering it */
   if (DEBUGLEVEL) (void)timer2();
@@ -2732,14 +2717,14 @@ START:
     err (warnprec, "quadhilbertreal", prec);
   } TRY {
     /* find the modulus defining N */
-    bnr   = buchrayinitgen(bnf, gone);
-    dataC = InitQuotient(bnr, gzero);
-    bnrh  = FindModulus(dataC, &newprec, prec);
+    bnr  = buchrayinitgen(bnf, gone);
+    M = diagonal(gmael(bnr,5,2));
+    dtQ  = InitQuotient(M);
+    bnrh = FindModulus(bnr, dtQ, &newprec, prec);
     if (DEBUGLEVEL) msgtimer("FindModulus");
 
     if (!bnrh)
     {
-      GEN M = diagonal(gmael(bnr, 5, 2));
       long i, l = lg(M);
       GEN vec = cgetg(l, t_VEC);
       for (i = 1; i < l; i++)
@@ -2777,7 +2762,7 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
 {
   long N, newprec;
   pari_sp av = avma;
-  GEN bnf, dataS, p1, Mcyc, nf, data;
+  GEN bnf, p1, Mcyc, nf, data;
 
   /* check the bnr */
   checkbnrgen(bnr);
@@ -2809,8 +2794,7 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
   if (DEBUGLEVEL) (void)timer2();
 
   /* find a suitable extension N */
-  dataS = InitQuotient(bnr, subgrp);
-  data  = FindModulus(dataS, &newprec, prec);
+  data  = FindModulus(bnr, InitQuotient(subgrp), &newprec, prec);
 
   if (!data)
   {
@@ -2875,7 +2859,7 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
     err(talker, "incorrect subgroup in bnrL1");
 
   cl = itou( dethnf_i(subgp) );
-  Qt = InitQuotient0(cyc, subgp);
+  Qt = InitQuotient(subgp);
   lq = lg((GEN)Qt[2]) - 1;
 
   /* compute all characters */
