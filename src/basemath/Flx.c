@@ -37,8 +37,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define swap(x,y)  {GEN  _z=x; x=y; y=_z;}
 #define swapspec(x,y, nx,ny) {swap(x,y); lswap(nx,ny);}
 
-long Flx_SQR_LIMIT = 6;
-long Flx_MUL_LIMIT = 10;
+long Flx_SQR_LIMIT = 200;
+long Flx_MUL_LIMIT = 100;
 
 #define both_odd(x,y) ((x)&(y)&1)
 
@@ -540,7 +540,14 @@ Flx_sqrspec(GEN a, ulong p, long na)
   if (p == 2) n0 *= 2;
   else
   {
+#if 0
     c1 = Flx_2_mul(Flx_mulspec(a0,a,p, na,n0a), p);
+#else
+    GEN  t = Flx_addspec(a0,a,p,na,n0a);
+    t = Flx_sqr(t,p);
+    c1= Flx_add(c0,c, p);
+    c1= Flx_sub(t, c1, p);
+#endif
     c0 = Flx_addshift(c0,c1,p,n0);
   }
   c0 = Flx_addshift(c0,c,p,n0);
