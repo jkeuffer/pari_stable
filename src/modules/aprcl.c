@@ -553,15 +553,15 @@ finda(Cache *Cp, GEN N, int pk, int p)
   }
   else
   {
-    GEN gp = utoipos(p), ph, b, N1;
+    GEN gp = utoipos(p), ph, b, q;
     ulong u = 2;
-    int v = Z_pvalrem(addis(N,-1), gp, &N1);
+    int v = Z_pvalrem(addis(N,-1), gp, &q);
     ph = gpowgs(gp, v-1); pv = mulis(ph, p); /* N - 1 = p^v q */ 
     if (p > 2)
     {
       for (;;u++)
       {
-	a = Fp_pow(utoipos(u), N1, N);
+	a = Fp_pow(utoipos(u), q, N);
 	b = Fp_pow(a, ph, N);
 	if (!gcmp1(b)) break;
       }
@@ -569,7 +569,7 @@ finda(Cache *Cp, GEN N, int pk, int p)
     else
     {
       while (krosi(u,N) >= 0) u++;
-      a = Fp_pow(utoipos(u), N1, N);
+      a = Fp_pow(utoipos(u), q, N);
       b = Fp_pow(a, ph, N);
     }
     /* checking b^p = 1 mod N done economically in caller */
