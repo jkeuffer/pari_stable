@@ -70,7 +70,8 @@ tips can be found on PARI's (fledgling) home page:
 \secref{se:start} if you're not interested in hardware technicalities. You
 won't miss anything that would be mentioned here.)
 
-The PARI package contains essentially three variants.
+The PARI package contains essentially three variants. See Appendix~A for how
+to set up one of these on your system.
 
 In a first version, some time-critical parts of the multiprecision kernel are
 written in assembler, a few hundred lines at most. At present there exists
@@ -80,9 +81,11 @@ SuperSparc processors (e.g.~SparcStation 10 and 20) and one for Sparc version
 8 with MicroSparc I or II processors (e.g.~SparcClassic or SparcStation 4 and
 5). No specific version is written for the UltraSparc since it can use the
 MicroSparc II version. In addition, versions exist for the DEC Alpha 64-bit
-processors, the HP-PA architecture, for the PowerPC architecture (only for
-the 601), and finally the whole ix86 family (Intel, AMD, Cyrix) starting at
-the 386 (up to the Xbox gaming console!).
+processors, and finally the whole ix86 family (Intel, AMD, Cyrix) starting at
+the 386 (up to the Xbox gaming console!). Finally, there are unmaintained,
+much less optimized and not really usable anymore, micro-kernels for the
+HP-PA architecture (only for HPUX 9, does not work with HPUX 10), and for the
+PowerPC architecture (only for the 601, does not compile anymore).
 
 A second version uses the GNU MP library to implement its multiprecision
 kernel, and should run on any platform where GMP could be installed. The GMP
@@ -92,10 +95,10 @@ for huge ones (say, about twice faster around 10000 decimal digits).
 A third version is written entirely in ANSI C, with a C++-compatible syntax,
 and should be portable without much trouble to any 32 or 64-bit computer
 having no real memory constraints. It is about 2 times slower than versions
-with a small assembly kernel. This version has been tested for example on
+including an assembly kernel. This version has been tested for example on
 MIPS based DECstations 3100 and 5000 and SGI computers, on various Macs
-(based on 68k chips or more recent PowerPC, like the G3 or G4), new Intel
-chips like ARM (handheld devices) or ia64 (Itanium), In addition, PARI has
+(based on 680x0 chips or more recent PowerPCs, like the G3 or G4), new Intel
+chips like ARM (handheld devices) or ia64 (Itanium). In addition, PARI has
 been ported to a considerable number of smaller and larger machines, for
 example the VAX, 68000-based machines like the Atari, Mac Classic or Amiga
 500, 68020 machines such as the Amiga 2500 or 3000, or mainframes like the
@@ -105,7 +108,7 @@ An historical version of the PARI/GP kernel, written in 1985, was specific to
 680x0 based computers, and was entirely writen in MC68020 assembly language
 (around 6000 lines). It ran on SUN-3/xx, Sony News, NeXT cubes and on 680x0
 based Macs. Since 1997, this version was unmaintained; it has been removed
-from the PARI distribution in version 2.2.5. To run PARI with 68k assembler
+from the PARI distribution in version 2.2.5. To run PARI with a 68k assembler
 micro-kernel, one now uses the GMP version.
 
 \section{The PARI types}
