@@ -112,7 +112,7 @@ smallinitell0(GEN x, GEN y)
   b2 = gadd(a11, gmul2n((GEN)y[2],2));
   y[6] = (long)b2;
 
-  a13 = gmul((GEN)y[1],(GEN)y[3])
+  a13 = gmul((GEN)y[1],(GEN)y[3]);
   b4 = gadd(a13, gmul2n((GEN)y[4],1));
   y[7] = (long)b4;
 
