@@ -2098,7 +2098,7 @@ entree functions_basic[]={
 {"taylor",12,(void*)tayl,7,"GnP"},
 {"teichmuller",1,(void*)teich,3,"Gp"},
 {"theta",29,(void*)theta,3,"GGp"},
-{"thetanullk",99,(void*)thetanullk,3,"GL"},
+{"thetanullk",99,(void*)thetanullk,3,"GLp"},
 {"thue",99,(void*)thue,7,"GGDG"},
 {"thueinit",99,(void*)thueinit,7,"GD0,L,p"},
 {"trace",1,(void*)gtrace,8,"Gp"},
