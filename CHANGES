@@ -61,11 +61,13 @@ IZ  2- remove all dependance on __OPTIMIZE__ for inlining [cf 2.0.14 F-24]
     7- rewrote time-critical parts of bnrstark
     8- all 'input filter' code removed from GP. es.c:filtre() now handles the
        full filtering [and has become reentrant]
+    9- isprime() now guarantees primality.
 
   Added
     1- mplog2() function --> faster mplog()
     2- gcd for Gaussian integers
-HC  3- APRCL primality test [not yet available under GP]
+HC  3- APRCL primality test
+    4- (strong) Lucas primality test
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.2 (released 10/01/2002):
