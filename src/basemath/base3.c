@@ -1629,7 +1629,7 @@ zlog_add_sign(GEN y0, GEN sgn, GEN lists)
   for (i = lg(s)-1; i > 0; i--) *--y = s[i];
 }
 
-GEN
+static GEN
 famat_zlog(GEN nf, GEN g, GEN e, GEN bid)
 {
   GEN vp = gmael(bid, 3,1), ep = gmael(bid, 3,2), arch = gmael(bid,1,2);
@@ -1637,7 +1637,6 @@ famat_zlog(GEN nf, GEN g, GEN e, GEN bid)
   GEN y0, x, y, psigne, EX = (GEN)cyc[1];
   long i, l;
 
-  if (lg(cyc) == 1) return cgetg(1,t_COL);
   y0 = y = cgetg(lg(U), t_COL);
   psigne = zsigne(nf, to_famat(g,e), arch);
   l = lg(vp);
@@ -1949,11 +1948,12 @@ GEN
 zideallog(GEN nf, GEN x, GEN bid)
 {
   pari_sp av;
-  long N;
+  long N, lcyc;
   GEN den, cyc, y;
 
   nf = checknf(nf); checkbid(bid);
   cyc = gmael(bid,2,2);
+  lcyc = lg(cyc); if (lcyc == 1) return cgetg(1, t_COL);
   av = avma;
   N = degpol(nf[1]);
   switch(typ(x))
@@ -1964,7 +1964,7 @@ zideallog(GEN nf, GEN x, GEN bid)
       x = algtobasis(nf,x); break;
     case t_COL: break;
     case t_MAT:
-      if (lg(x) == 1) return zerocol(lg(cyc)-1);
+      if (lg(x) == 1) return zerocol(lcyc-1);
       y = famat_zlog(nf, (GEN)x[1], (GEN)x[2], bid);
       goto END;
 
