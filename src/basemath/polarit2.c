@@ -2930,37 +2930,13 @@ issimplefield(GEN x)
 }
 
 static int
-can_use_modular_gcd(GEN x, GEN *mod, long *v)
+can_use_modular_gcd(GEN x)
 {
-  GEN p1, p2;
   long i;
-  for (i=lg(x)-1; i>1; i--)
+  for (i = lg(x)-1; i > 1; i--)
   {
-    p1 = (GEN)x[i];
-    switch(typ(p1))
-    {
-      case t_INT: case t_FRAC: break;
-      case t_POLMOD:
-        p2 = (GEN)p1[1];
-        if (*mod)
-        {
-          if (!isrational((GEN)p1[2])) return 0;
-          if (!gegal(*mod,p2)) return 0;
-        } else
-        {
-          if (!isrational(p2)) return 0;
-          *mod = p2; *v = varn(p2);
-        }
-        break;
-      case t_POL:
-        if (!isrational(p1)) return 0;
-        if (*v >= 0)
-        {
-          if (*v != varn(p1)) return 0;
-        } else *v = varn(p1);
-        break;
-      default: return 0;
-    }
+    long t = typ((GEN)x[i]);
+    if (!is_rational_t(t)) return 0;
   }
   return 1;
 }
@@ -4050,9 +4026,9 @@ polresultant0(GEN x, GEN y, long v, long flag)
 GEN
 srgcd(GEN x, GEN y)
 {
-  long tx=typ(x), ty=typ(y), dx, dy, vx, vmod;
+  long tx = typ(x), ty = typ(y), dx, dy, vx;
   pari_sp av, av1, tetpil, lim;
-  GEN d,g,h,p1,p2,u,v,mod,cx,cy;
+  GEN d, g, h, p1, p2, u, v;
 
   if (!signe(y)) return gcopy(x);
   if (!signe(x)) return gcopy(y);
@@ -4062,23 +4038,8 @@ srgcd(GEN x, GEN y)
   if (ismonome(x)) return gcdmonome(x,y);
   if (ismonome(y)) return gcdmonome(y,x);
   av = avma;
-  mod = NULL; vmod = -1;
-  if (can_use_modular_gcd(x, &mod, &vmod) &&
-      can_use_modular_gcd(y, &mod, &vmod))
-  {
-    if (mod)
-    { /* (Q[Y]/mod)[X]*/
-      x = primitive_part(lift(x), &cx);
-      y = primitive_part(lift(y), &cy);
-      if (cx)
-        { if (cy) cx = ggcd(cx,cy); }
-      else
-        cx = cy;
-      d = nfgcd(x,y,mod,NULL); if (cx) d = gmul(d,cx);
-      return gerepileupto(av, gmul(d, to_polmod(gun,mod)));
-    }
-    if (vmod < 0) return modulargcd(x,y); /* Q[X] */
-  }
+  if (can_use_modular_gcd(x) &&
+      can_use_modular_gcd(y)) return modulargcd(x,y); /* Q[X] */
 
   if (issimplepol(x) || issimplepol(y)) x = polgcdnun(x,y);
   else
@@ -4515,8 +4476,7 @@ nfgcd(GEN P, GEN Q, GEN nf, GEN den)
   long y = varn(nf);
   long d = degpol(nf);
   GEN lP, lQ;
-  if (!signe(P) || !signe(Q))
-    return zeropol(x);
+  if (!signe(P) || !signe(Q)) return zeropol(x);
   /*Compute denominators*/
   if (!den) den = ZX_disc(nf);
   lP = leading_term(P);
