@@ -1,7 +1,7 @@
    echo = 1 (on)
-? default(realprecision,9)
+? \p9
    realprecision = 9 significant digits
-? t=plothsizes();
+? gettime;t=plothsizes();
 ? plotinit(0,t[1]-11,t[2]-11)
 ? plotscale(0,0,1000,0,1000);
 ? plotbox(0,500,500)
@@ -70,5 +70,5 @@
 ? plotdraw([0,10,10])
 ? psdraw([0,10,10])
 ? print("Total time spent: ",gettime);
-Total time spent: 110
+Total time spent: 120
 ? \q
