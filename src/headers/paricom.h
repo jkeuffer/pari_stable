@@ -85,10 +85,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define negrz(x,z)  mpnegz((x),(z))
 
 /* Common global variables: */
-
-extern PariOUT *pariOut, *pariErr;
-extern FILE    *pari_outfile, *logfile, *infile, *errfile;
-
 extern ulong DEBUGFILES, DEBUGLEVEL, DEBUGMEM, precdl;
 extern long  *ordvar;
 extern GEN   bernzone,gpi,geuler;
