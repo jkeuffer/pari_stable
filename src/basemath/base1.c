@@ -810,7 +810,7 @@ nfisincl(GEN a, GEN b) { return nfiso0(a,b,0); }
 GEN
 get_roots(GEN x,long r1,long prec)
 {
-  GEN roo = (typ(x)==t_VEC)? dummycopy(x): roots(x,prec);
+  GEN roo = (typ(x)!=t_POL)? dummycopy(x): roots(x,prec);
   long i, ru = (lg(roo)-1 + r1) >> 1;
 
   for (i=1; i<=r1; i++) roo[i]=lreal((GEN)roo[i]);

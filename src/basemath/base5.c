@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 extern GEN mul_content(GEN cx, GEN cy);
 extern long polegal_spec(GEN x, GEN y);
 extern GEN mulmat_pol(GEN A, GEN x);
+extern GEN idealsqrtn(GEN nf, GEN x, GEN gn, int strict);
 
 GEN
 matbasistoalg(GEN nf,GEN x)
@@ -56,233 +57,6 @@ matalgtobasis(GEN nf,GEN x)
     for (i=1; i<li; i++) c[i] = (long)_algtobasis_cp(nf, gcoeff(x,i,j));
   }
   return z;
-}
-
-static GEN
-rnfmakematrices(GEN rnf)
-{
-  long i,j,k,n,r1,r2,ru,ruk,r1rel,r2rel;
-  GEN nf,pol,rac,base,base1,racnf,sig,vecmat,vecM,vecMC,vecT2,rack;
-  GEN M,p2,p3,MC,sigk,T2,T,p1,MD,TI,MDI;
-
-  nf=(GEN)rnf[10]; racnf=(GEN)nf[6]; pol=(GEN)rnf[1];
-  n=degpol(pol);
-  base=(GEN)rnf[7]; base1=(GEN)base[1]; rac=(GEN)rnf[6]; sig=(GEN)rnf[2];
-  r1 = nf_get_r1(nf);
-  r2 = nf_get_r2(nf); ru = r1+r2;
-  vecmat=cgetg(8,t_VEC);
-  vecM=cgetg(ru+1,t_VEC); vecmat[1]=(long)vecM;
-  vecMC=cgetg(ru+1,t_VEC); vecmat[2]=(long)vecMC;
-  vecT2=cgetg(ru+1,t_VEC); vecmat[3]=(long)vecT2;
-  for (k=1; k<=ru; k++)
-  {
-    rack=(GEN)rac[k]; ruk=lg(rack)-1;
-    M=cgetg(n+1,t_MAT); vecM[k]=(long)M;
-    for (j=1; j<=n; j++)
-    {
-      p2=cgetg(ruk+1,t_COL); M[j]=(long)p2; p3=lift((GEN)base1[j]);
-      p3=gsubst(p3,varn(nf[1]),(GEN)racnf[k]);
-      for (i=1; i<=ruk; i++) p2[i]=lsubst(p3,varn(rnf[1]),(GEN)rack[i]);
-    }
-    MC=gconj(gtrans(M)); vecMC[k]=(long)MC;
-    if (k<=r1)
-    {
-      sigk=(GEN)sig[k]; r1rel=itos((GEN)sigk[1]); r2rel=itos((GEN)sigk[2]);
-      if (r1rel+r2rel != lg(MC)-1) err(talker,"bug in rnfmakematrices");
-      for (j=r1rel+1; j<=r1rel+r2rel; j++) MC[j]=lmul2n((GEN)MC[j],1);
-    }
-    T2=gmul(MC,M); vecT2[k]=(long)T2;
-  }
-  T=cgetg(n+1,t_MAT); vecmat[4]=(long)T;
-  for (j=1; j<=n; j++)
-  {
-    p1=cgetg(n+1,t_COL); T[j]=(long)p1;
-    for (i=1; i<=n; i++)
-      p1[i]=ltrace(gmodulcp(gmul((GEN)base1[i],(GEN)base1[j]),pol));
-  }
-  MD=cgetg(1,t_MAT); vecmat[5]=(long)MD; /* matrice de la differente */
-  TI=cgetg(1,t_MAT); vecmat[6]=(long)TI; /* matrice .... ? */
-  MDI=cgetg(1,t_MAT); vecmat[7]=(long)MDI; /* matrice .... ? */
-  return vecmat;
-}
-
-GEN
-rnfinitalg(GEN nf,GEN pol,long prec)
-{
-  gpmem_t av = avma;
-  long m,n,r1,r2,vnf,i,j,k,vpol,r1j,r2j,lfac,degabs;
-  GEN RES,sig,rac,p1,p2,liftpol,delta,RAC,ro,p3,bas;
-  GEN f,f2,fac,fac1,fac2,id,p4;
-
-  if (typ(pol)!=t_POL) err(notpoler,"rnfinitalg");
-  nf=checknf(nf); n=degpol(pol); vpol=varn(pol);
-  pol = fix_relative_pol(nf,pol,0);
-  vnf = varn(nf[1]);
-
-  if (vpol >= vnf)
-    err(talker,"main variable must be of higher priority in rnfinitalg");
-  RES=cgetg(12,t_VEC);
-  RES[1]=(long)pol;
-  m = degpol(nf[1]); degabs=n*m;
-  r1 = nf_get_r1(nf); r2 = (m-r1) >> 1;
-  sig=cgetg(r1+r2+1,t_VEC); RES[2]=(long)sig;
-  rac=(GEN)nf[6]; liftpol=lift(pol);
-  RAC=cgetg(r1+r2+1,t_VEC); RES[6]=(long)RAC;
-  for (j=1; j<=r1; j++)
-  {
-    p1=gsubst(liftpol,vnf,(GEN)rac[j]);
-    ro=roots(p1,prec);
-    r1j=0;
-    while (r1j<n && gcmp0(gimag((GEN)ro[r1j+1]))) r1j++;
-    p2=cgetg(3,t_VEC); p2[1]=lstoi(r1j); p2[2]=lstoi(r2j=((n-r1j)>>1));
-    sig[j]=(long)p2;
-    p3=cgetg(r1j+r2j+1,t_VEC);
-    for (i=1; i<=r1j; i++) p3[i]=lreal((GEN)ro[i]);
-    for (; i<=r1j+r2j; i++) p3[i]=(long)ro[(i<<1)-r1j];
-    RAC[j]=(long)p3;
-  }
-  for (; j<=r1+r2; j++)
-  {
-    p2=cgetg(3,t_VEC); p2[1]=zero; p2[2]=lstoi(n); sig[j]=(long)p2;
-    p1=gsubst(liftpol,vnf,(GEN)rac[j]);
-    RAC[j]=(long)roots(p1,prec);
-  }
-  p1 = rnfpseudobasis(nf,pol);
-
-  delta = cgetg(3,t_VEC);
-    delta[1]=p1[3];
-    delta[2]=p1[4];
-  RES[3]=(long)delta;
-  p2 = matbasistoalg(nf,(GEN)p1[1]);
-  bas = cgetg(3,t_VEC);
-    bas[1]=(long)mat_to_vecpol(p2,vpol);
-    bas[2]=(long)p1[2];
-  RES[7]=(long)bas;
-  RES[8]=linvmat(p2);
-
-  f2 = idealdiv(nf, discsr(pol), (GEN)p1[3]);
-  fac = idealfactor(nf,f2);
-  fac1 = (GEN)fac[1];
-  fac2 = (GEN)fac[2]; lfac = lg(fac1)-1;
-  f = idmat(m);
-  for (i=1; i<=lfac; i++)
-  {
-    if (mpodd((GEN)fac2[i])) err(bugparier,"rnfinitalg (odd exponent)");
-    f=idealmul(nf,f,idealpow(nf,(GEN)fac1[i],gmul2n((GEN)fac2[i],-1)));
-  }
-  RES[4]=(long)f;
-  RES[10]=(long)nf;
-  RES[5]=(long)rnfmakematrices(RES);
-  if (DEBUGLEVEL>1) msgtimer("matrices");
-  RES[9]=lgetg(1,t_VEC); /* table de multiplication */
-  p2=cgetg(6,t_VEC); RES[11]=(long)p2;
-  p1=rnfequation2(nf,pol); for (i=1; i<=3; i++) p2[i]=p1[i];
-  p4=cgetg(degabs+1,t_MAT);
-  for (i=1; i<=n; i++)
-  { /* removing denominators speeds up multiplication */
-    GEN c, cop3,com, om = rnfelementreltoabs(RES,gmael(bas,1,i));
-
-    if (DEBUGLEVEL>1) msgtimer("i = %ld",i);
-    om = primitive_part(om, &com);
-    id=gmael(bas,2,i);
-    for (j=1; j<=m; j++)
-    {
-      p1 = gmul((GEN)nf[7],(GEN)id[j]);
-      p3 = gsubst(p1, vnf, (GEN)p2[2]);
-      p3 = primitive_part(p3, &cop3);
-      c = mul_content(cop3, com);
-
-      p3 = lift_intern(gmul(om,p3));
-      if (c) p3 = gmul(c,p3);
-      p4[(i-1)*m+j] = (long)pol_to_vec(p3, degabs);
-    }
-  }
-  if (DEBUGLEVEL>1) msgtimer("p4");
-  p4 = Q_remove_denom(p4, &p3);
-  if (p3) p4 = hnfmodid(p4, p3); else p4 = idmat(degabs);
-  if (DEBUGLEVEL>1) msgtimer("hnfmod");
-  for (j=degabs-1; j>0; j--)
-    if (cmpis(gcoeff(p4,j,j),2) > 0)
-    {
-      p1=shifti(gcoeff(p4,j,j),-1);
-      for (k=j+1; k<=degabs; k++)
-        if (cmpii(gcoeff(p4,j,k),p1) > 0)
-          for (i=1; i<=j; i++)
-            coeff(p4,i,k)=lsubii(gcoeff(p4,i,k),gcoeff(p4,i,j));
-    }
-  if (p3) p4 = gdiv(p4,p3);
-  p2[4]=(long)mat_to_vecpol(p4,vpol);
-  p2[5]=linvmat(p4);
-  return gerepilecopy(av,RES);
-}
-
-GEN
-rnfbasistoalg(GEN rnf,GEN x)
-{
-  long tx=typ(x), lx=lg(x), i;
-  gpmem_t av=avma, tetpil;
-  GEN p1,z,nf;
-
-  checkrnf(rnf); nf=(GEN)rnf[10];
-  switch(tx)
-  {
-    case t_VEC:
-    case t_COL:
-      p1 = cgetg(lx,t_COL);
-      for (i=1; i<lx; i++) p1[i] = (long)_basistoalg(nf, (GEN)x[i]);
-      p1 = gmul(gmael(rnf,7,1),p1); tetpil = avma;
-      return gerepile(av,tetpil, gmodulcp(p1,(GEN)rnf[1]));
-
-    case t_MAT:
-      z = cgetg(lx,tx);
-      for (i=1; i<lx; i++) z[i] = (long)rnfbasistoalg(rnf,(GEN)x[i]);
-      return z;
-
-    case t_POLMOD:
-      return gcopy(x);
-
-    default:
-      z=cgetg(3,t_POLMOD); z[1]=lcopy((GEN)rnf[1]);
-      z[2]=lmul(x,polun[varn(rnf[1])]); return z;
-  }
-}
-
-/* assume x is a t_POLMOD */
-GEN
-lift_to_pol(GEN x)
-{
-  GEN y = (GEN)x[2]; 
-  return (typ(y) != t_POL)? gtopoly(y,varn(x[1])): y;
-}
-
-GEN
-rnfalgtobasis(GEN rnf,GEN x)
-{
-  long tx=typ(x), i, lx;
-  gpmem_t av=avma;
-  GEN z;
-
-  checkrnf(rnf);
-  switch(tx)
-  {
-    case t_VEC: case t_COL: case t_MAT:
-      lx = lg(x); z = cgetg(lx,tx);
-      for (i=1; i<lx; i++) z[i]=(long)rnfalgtobasis(rnf,(GEN)x[i]);
-      return z;
-
-    case t_POLMOD:
-      if (!polegal_spec((GEN)rnf[1],(GEN)x[1]))
-	err(talker,"not the same number field in rnfalgtobasis");
-      x = lift_to_pol(x); /* fall through */
-    case t_POL:
-    { /* cf algtobasis_i */
-      GEN P = (GEN)rnf[1];
-      long N = degpol(P);
-      if (degpol(x) >= N) x = gres(x,P);
-      return gerepileupto(av, mulmat_pol((GEN)rnf[8], x));
-    }
-  }
-  return gscalcol(x, degpol(rnf[1]));
 }
 
 GEN
@@ -339,6 +113,237 @@ eltreltoabs(GEN rnfeq, GEN x)
   return gerepileupto(av,s);
 }
 
+static GEN
+rnfmakematrices(GEN rnf)
+{
+  long i,j,k,n,r1,r2,ru,ruk,r1rel,r2rel;
+  GEN nf,pol,rac,base,base1,racnf,sig,vecmat,vecM,vecMC,vecT2,rack;
+  GEN M,p2,p3,MC,sigk,T2,T,p1,MD,TI,MDI;
+
+  nf=(GEN)rnf[10]; racnf=(GEN)nf[6]; pol=(GEN)rnf[1];
+  n=degpol(pol);
+  base=(GEN)rnf[7]; base1=(GEN)base[1]; rac=(GEN)rnf[6]; sig=(GEN)rnf[2];
+  r1 = nf_get_r1(nf);
+  r2 = nf_get_r2(nf); ru = r1+r2;
+  vecmat=cgetg(8,t_VEC);
+  vecM=cgetg(ru+1,t_VEC); vecmat[1]=(long)vecM;
+  vecMC=cgetg(ru+1,t_VEC); vecmat[2]=(long)vecMC;
+  vecT2=cgetg(ru+1,t_VEC); vecmat[3]=(long)vecT2;
+  for (k=1; k<=ru; k++)
+  {
+    rack=(GEN)rac[k]; ruk=lg(rack)-1;
+    M=cgetg(n+1,t_MAT); vecM[k]=(long)M;
+    for (j=1; j<=n; j++)
+    {
+      p2=cgetg(ruk+1,t_COL); M[j]=(long)p2; p3=lift((GEN)base1[j]);
+      p3=gsubst(p3,varn(nf[1]),(GEN)racnf[k]);
+      for (i=1; i<=ruk; i++) p2[i]=lsubst(p3,varn(rnf[1]),(GEN)rack[i]);
+    }
+    MC=gconj(gtrans(M)); vecMC[k]=(long)MC;
+    if (k<=r1)
+    {
+      sigk=(GEN)sig[k]; r1rel=itos((GEN)sigk[1]); r2rel=itos((GEN)sigk[2]);
+      if (r1rel+r2rel != lg(MC)-1) err(talker,"bug in rnfmakematrices");
+      for (j=r1rel+1; j<=r1rel+r2rel; j++) MC[j]=lmul2n((GEN)MC[j],1);
+    }
+    T2=gmul(MC,M); vecT2[k]=(long)T2;
+  }
+  T=cgetg(n+1,t_MAT); vecmat[4]=(long)T;
+  for (j=1; j<=n; j++)
+  {
+    p1=cgetg(n+1,t_COL); T[j]=(long)p1;
+    for (i=1; i<=n; i++)
+      p1[i]=ltrace(gmodulcp(gmul((GEN)base1[i],(GEN)base1[j]),pol));
+  }
+  MD=cgetg(1,t_MAT); vecmat[5]=(long)MD; /* matrice de la differente */
+  TI=cgetg(1,t_MAT); vecmat[6]=(long)TI; /* matrice .... ? */
+  MDI=cgetg(1,t_MAT); vecmat[7]=(long)MDI; /* matrice .... ? */
+  return vecmat;
+}
+
+static GEN
+modulereltoabs(GEN nf, GEN rnfeq, GEN x)
+{
+  GEN oms = (GEN)x[1], ids = (GEN)x[2], T = (GEN)nf[1];
+  GEN p1, M, basnf, cobasnf;
+  long i,j, n = lg(oms)-1, m = degpol(T), degabs = n*m;
+
+  M = cgetg(degabs+1,t_MAT);
+  basnf = gsubst((GEN)nf[7], varn(T), (GEN)rnfeq[2]);
+  /* removing denominators speeds up multiplication */
+  basnf = primitive_part(basnf, &cobasnf);
+  for (i=1; i<=n; i++)
+  {
+    GEN c,c0,c1, om = (GEN)oms[i], id = (GEN)ids[i];
+
+    om = primitive_part(eltreltoabs(rnfeq, om), &c0);
+    c0 = mul_content(c0, cobasnf);
+    for (j=1; j<=m; j++)
+    {
+      p1 = primitive_part(gmul(basnf,(GEN)id[j]), &c1);
+      p1 = lift_intern(gmul(om,p1));
+      c = mul_content(c1, c0);
+      if (c) p1 = gmul(c,p1);
+      M[(i-1)*m+j] = (long)pol_to_vec(p1, degabs);
+    }
+  }
+  return M;
+}
+
+GEN
+rnfinitalg(GEN nf,GEN pol,long prec)
+{
+  gpmem_t av = avma;
+  long m,n,r1,r2,vnf,i,j,k,vpol,degabs;
+  GEN RES,sig,rac,liftpol,delta,RAC,ro,bas,f2,rnfeq,M, p1,p2,p3;
+
+  if (typ(pol)!=t_POL) err(notpoler,"rnfinitalg");
+  nf=checknf(nf); n=degpol(pol); vpol=varn(pol);
+  pol = fix_relative_pol(nf,pol,0);
+  vnf = varn(nf[1]);
+
+  if (vpol >= vnf)
+    err(talker,"main variable must be of higher priority in rnfinitalg");
+  RES = cgetg(12,t_VEC);
+  RES[1] = (long)pol;
+  m = degpol(nf[1]); degabs = n*m;
+  nf_get_sign(nf, &r1, &r2);
+  sig = cgetg(r1+r2+1,t_VEC); RES[2] = (long)sig;
+  RAC = cgetg(r1+r2+1,t_VEC); RES[6] = (long)RAC;
+  rac = (GEN)nf[6]; liftpol = lift(pol);
+  for (j=1; j<=r1; j++)
+  {
+    long r1j = 0;
+    ro = roots(gsubst(liftpol,vnf,(GEN)rac[j]), prec);
+    while (r1j<n && gcmp0(gimag((GEN)ro[r1j+1]))) r1j++;
+    p1 = cgetg(3,t_VEC);
+    p1[1] = lstoi(r1j);
+    p1[2] = lstoi((n-r1j)>>1);
+    sig[j] = (long)p1;
+    RAC[j] = (long)get_roots(ro, r1j, 0);
+  }
+  for (; j<=r1+r2; j++)
+  {
+    ro = roots(gsubst(liftpol,vnf,(GEN)rac[j]), prec);
+    p1 = cgetg(3,t_VEC);
+    p1[1] = zero;
+    p1[2] = lstoi(n);
+    sig[j] = (long)p1;
+    RAC[j] = (long)ro;
+  }
+
+  p1 = rnfpseudobasis(nf,pol);
+  delta = cgetg(3,t_VEC);
+    delta[1] = p1[3];
+    delta[2] = p1[4];
+  RES[3] = (long)delta;
+  p2 = matbasistoalg(nf,(GEN)p1[1]);
+  bas = cgetg(3,t_VEC);
+    bas[1] = (long)mat_to_vecpol(p2,vpol);
+    bas[2] = (long)p1[2];
+  RES[7] = (long)bas;
+  RES[8] = linvmat(p2);
+
+  f2 = idealdiv(nf, discsr(pol), (GEN)p1[3]);
+  RES[4] = (long)idealsqrtn(nf, f2, gdeux, 1);
+  RES[5] = (long)rnfmakematrices(RES);
+  RES[9] = lgetg(1,t_VEC); /* multiplication table: dummy */
+  RES[10] = (long)nf;
+  if (DEBUGLEVEL>1) msgtimer("matrices");
+
+  rnfeq = rnfequation2(nf,pol);
+  M = modulereltoabs(nf, rnfeq, bas);
+  if (DEBUGLEVEL>1) msgtimer("M");
+  M = Q_remove_denom(M, &p3);
+  if (p3) M = hnfmodid(M, p3); else M = idmat(degabs);
+  for (j=degabs-1; j>0; j--)
+    if (cmpis(gcoeff(M,j,j),2) > 0)
+    {
+      p1 = shifti(gcoeff(M,j,j),-1);
+      for (k=j+1; k<=degabs; k++)
+        if (cmpii(gcoeff(M,j,k),p1) > 0)
+          for (i=1; i<=j; i++)
+            coeff(M,i,k) = lsubii(gcoeff(M,i,k),gcoeff(M,i,j));
+    }
+  if (p3) M = gdiv(M,p3);
+  if (DEBUGLEVEL>1) msgtimer("hnfmod");
+
+  p1 = cgetg(6,t_VEC); RES[11] = (long)p1;
+  for (i=1; i<=3; i++) p1[i] = rnfeq[i];
+  p1[4] = (long)mat_to_vecpol(M,vpol);
+  p1[5] = linvmat(M);
+  return gerepilecopy(av, RES);
+}
+
+GEN
+rnfbasistoalg(GEN rnf,GEN x)
+{
+  long tx=typ(x), lx=lg(x), i;
+  gpmem_t av=avma, tetpil;
+  GEN p1,z,nf;
+
+  checkrnf(rnf); nf=(GEN)rnf[10];
+  switch(tx)
+  {
+    case t_VEC:
+    case t_COL:
+      p1 = cgetg(lx,t_COL);
+      for (i=1; i<lx; i++) p1[i] = (long)_basistoalg(nf, (GEN)x[i]);
+      p1 = gmul(gmael(rnf,7,1),p1); tetpil = avma;
+      return gerepile(av,tetpil, gmodulcp(p1,(GEN)rnf[1]));
+
+    case t_MAT:
+      z = cgetg(lx,tx);
+      for (i=1; i<lx; i++) z[i] = (long)rnfbasistoalg(rnf,(GEN)x[i]);
+      return z;
+
+    case t_POLMOD:
+      return gcopy(x);
+
+    default:
+      z=cgetg(3,t_POLMOD); z[1]=lcopy((GEN)rnf[1]);
+      z[2]=lmul(x,polun[varn(rnf[1])]); return z;
+  }
+}
+
+/* assume x is a t_POLMOD */
+GEN
+lift_to_pol(GEN x)
+{
+  GEN y = (GEN)x[2];
+  return (typ(y) != t_POL)? gtopoly(y,varn(x[1])): y;
+}
+
+GEN
+rnfalgtobasis(GEN rnf,GEN x)
+{
+  long tx=typ(x), i, lx;
+  gpmem_t av=avma;
+  GEN z;
+
+  checkrnf(rnf);
+  switch(tx)
+  {
+    case t_VEC: case t_COL: case t_MAT:
+      lx = lg(x); z = cgetg(lx,tx);
+      for (i=1; i<lx; i++) z[i]=(long)rnfalgtobasis(rnf,(GEN)x[i]);
+      return z;
+
+    case t_POLMOD:
+      if (!polegal_spec((GEN)rnf[1],(GEN)x[1]))
+	err(talker,"not the same number field in rnfalgtobasis");
+      x = lift_to_pol(x); /* fall through */
+    case t_POL:
+    { /* cf algtobasis_i */
+      GEN P = (GEN)rnf[1];
+      long N = degpol(P);
+      if (degpol(x) >= N) x = gres(x,P);
+      return gerepileupto(av, mulmat_pol((GEN)rnf[8], x));
+    }
+  }
+  return gscalcol(x, degpol(rnf[1]));
+}
+
 /* x doit etre un polymod ou un polynome ou un vecteur de tels objets... */
 GEN
 rnfelementreltoabs(GEN rnf,GEN x)
@@ -367,7 +372,7 @@ get_theta_abstorel(GEN T, GEN pol, GEN k)
   return gmodulcp(gadd(polx[varn(pol)],
                        gmul(k, gmodulcp(polx[varn(T)],T))), pol);
 }
-GEN 
+GEN
 eltabstorel(GEN x, GEN T, GEN pol, GEN k)
 {
   return poleval(x, get_theta_abstorel(T,pol,k));
@@ -497,7 +502,7 @@ rnfidealhermite(GEN rnf,GEN x)
       z[2] = lmul(x, (GEN)bas[2]); return z;
 
     case t_POLMOD: case t_POL:
-      p1 = rnfalgtobasis(rnf,x); 
+      p1 = rnfalgtobasis(rnf,x);
       return gerepileupto(av, rnfprincipaltohermite(rnf,p1));
 
     case t_VEC:
@@ -613,34 +618,20 @@ rnfidealnormabs(GEN rnf,GEN id)
 GEN
 rnfidealreltoabs(GEN rnf,GEN x)
 {
-  long i, j, n, m;
+  long i, l;
   gpmem_t av = avma;
-  GEN nf,basinv,oms,om,ids,id,t,M,p1,p2,c;
+  GEN nf,basinv,oms,M,p1,d;
 
   nf = (GEN)rnf[10];
   x = rnfidealhermite(rnf,x);
-  oms = (GEN)x[1];
-  ids = (GEN)x[2];
-  n = degpol(rnf[1]);
-  m = degpol(nf[1]);
+  oms = (GEN)x[1]; l = lg(oms);
+  for (i=1; i<l; i++)
+    oms[i] = (long)lift_intern( rnfbasistoalg(rnf, (GEN)oms[i]) );
   basinv = gmael(rnf,11,5);
-  t = gmael(rnf,11,2);
-  M = cgetg(n*m+1,t_MAT);
-  for (i=1; i<=n; i++)
-  {
-    om = rnfbasistoalg(rnf, (GEN)oms[i]);
-    om = rnfelementreltoabs(rnf,om);
-    id = (GEN)ids[i];
-    for (j=1; j<=m; j++)
-    {
-      p1 = gmul((GEN)nf[7],(GEN)id[j]);
-      p2 = lift_intern(gmul(om, poleval(p1, t)));
-      M[(i-1)*m+j] = (long)pol_to_vec(p2, n*m);
-    }
-  }
-  p1 = primitive_part(gmul(basinv,M), &c);
+  M = modulereltoabs(nf, (GEN)rnf[11], x);
+  p1 = Q_remove_denom(gmul(basinv,M), &d);
   p1 = hnfmodid(p1, gmael(p1,1,1)); /* mod x \cap Z */
-  if (c) p1 = gmul(p1, c);
+  if (d) p1 = gdiv(p1, d);
   return gerepileupto(av, p1);
 }
 
@@ -693,11 +684,11 @@ rnfidealup(GEN rnf,GEN x)
   n = degpol(rnf[1]);
   m = degpol((GEN)nf[1]);
   bas = (GEN)rnf[7]; bas2 = (GEN)bas[2];
-  
+
   p2 = cgetg(3,t_VEC); p1 = cgetg(n+1,t_VEC);
   p2[1] = (long)rnfid(n, m);
   p2[2] = (long)p1;
-  for (i=1; i<=n; i++) p1[i]=(long)idealmul(nf,x,(GEN)bas2[i]);
+  for (i=1; i<=n; i++) p1[i] = (long)idealmul(nf,x,(GEN)bas2[i]);
   return gerepileupto(av, rnfidealreltoabs(rnf,p2));
 }
 
