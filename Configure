@@ -432,11 +432,14 @@ if test "$optimization" != profiling; then
      ";;
      esac
 
+  tdir=$osname-$arch-X11$$
+  mkdir $tdir; cp Imakefile $tdir; cd $tdir
   if (xmkmf) >/dev/null 2>&1 && test -f Makefile; then
     eval `make gp-X11 2> /dev/null | grep -v make`
     rm -f Makefile Makefile.bak
     x11pth="$usrlibdir $libdir";
   fi
+  cd ..; rm -rf $tdir
 
 # We want these libraries:
 #
