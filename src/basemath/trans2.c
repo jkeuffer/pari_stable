@@ -1008,6 +1008,7 @@ bernvec(long nb)
 /**                      FONCTION GAMMA                            **/
 /**                                                                **/
 /********************************************************************/
+extern GEN cgetc(long l);
 
 static GEN
 mpgamma(GEN x)
@@ -1165,6 +1166,131 @@ cxgamma(GEN x, long prec)
     p4 = gmul(gsin(p1,l+1), p4); p4 = gdiv(pitemp,p4);
   }
   gaffect(p4,y); avma=av; return y;
+}
+
+/* x / (i*(i+1)) */
+GEN
+divrs2_safe(GEN x, long i)
+{
+  if (i < 46341) /* i(i+1) < 2^31 */
+    return divrs(x, i*(i+1));
+  else
+    return divrs(divrs(x, i), i+1);
+}
+
+GEN
+gammanew(GEN s0, long la, long prec)
+{
+  GEN s, u, a, y, res, tes, sig, invn2, p1, unr, nnx, pitemp;
+  long i, nn, lim, av, av2, avlim;
+  int funeq = 0;
+
+  if (typ(s0)==t_COMPLEX && gcmp0((GEN)s0[2])) s0 = (GEN)s0[1];
+  s = s0;
+  i = precision(s); if (i) prec = i;
+
+  if (typ(s) == t_COMPLEX)
+  { /* s = sig + i t */
+    res = cgetc(prec); av = avma;
+    p1 = cgetc(prec+1); gaffect(s,p1);
+    s = p1; sig = (GEN)s[1];
+  }
+  else /* t_INT or t_REAL */
+  {
+    res = cgetr(prec); av = avma;
+    p1 = cgetr(prec+1); gaffect(s,p1);
+    s = sig = p1;
+  }
+
+  if (signe(sig) <= 0 || expo(sig) < -1)
+  { /* s <--> 1-s */
+    funeq = 1; s = gsub(gun, s); sig = greal(s);
+  }
+
+  if (la < 1) la = 1;
+  
+  { /* find "optimal" parameters [lim, nn] */
+    GEN sapprox = gmul(s, realun(3));
+    double ssig = rtodbl(sig);
+    double st = rtodbl(gimag(s));
+    double l,l2,u,v;
+    long la = 1;
+  
+    p1 = gmul(gsub(sapprox,ghalf), glog(sapprox, 3));
+    /* l2 = | (s - 1/2) log(s) - s + log(2Pi)/2 |^2 */
+    u = rtodbl(greal(p1)) - ssig + log(2.*PI)/2;
+    v = rtodbl(gimag(p1)) - st;
+    l2 = u*u + v*v;
+
+    if (l2 < 0.000001) l2 = 0.000001;
+    l2 = log(l2) / 2;
+
+    l = (pariC2*(prec-2) - l2) / (2. * (1.+ log((double)la)));
+    if (l < 0) l = 0.;
+    lim = (long) 1 + ceil(l);
+
+    u = (lim-0.5) * la / PI;
+    l2 = u*u - st*st;
+    if (l2 < 0) l2 = 0.;
+    nn = (long)ceil(sqrt(l2) - ssig);
+    if (nn < 1) nn = 1;
+
+    if (DEBUGLEVEL) fprintferr("lim, nn: [%ld, %ld]\n",lim,nn);
+    if (nn >= maxprime()) err(primer1);
+  }
+  prec++; unr = realun(prec);
+
+  av2 = avma; avlim = stack_lim(av2,3);
+  y = unr;
+  if (typ(s0) == t_INT)
+  {
+    long ss;
+    if (expi(s0) > 20) err(talker, "exponent too large in gamma");
+    ss = itos(s0);
+    for (i=0; i < nn; i++)
+    {
+      y = mulrs(y, ss + i);
+      if (low_stack(avlim,stack_lim(av2,3)))
+      {
+        if(DEBUGMEM>1) err(warnmem,"gamma");
+        y = gerepileuptoleaf(av2, y);
+      }
+    }
+  }
+  else
+    for (i=0; i < nn; i++)
+    {
+      y = gmul(y, gaddgs(s,i));
+      if (low_stack(avlim,stack_lim(av2,3)))
+      {
+        if(DEBUGMEM>1) err(warnmem,"gamma");
+        y = gerepileupto(av2, y);
+      }
+    }
+  nnx = gaddgs(s0, nn);
+  if (DEBUGLEVEL) msgtimer("product from 0 to N-1");
+
+  a = gdiv(unr, nnx);
+  invn2 = gsqr(a);
+  tes = divrs2_safe(bernreal(2*lim,prec), 2*lim-1); /* B2l / (2l-1) 2l*/
+  if (DEBUGLEVEL) msgtimer("Bernoullis");
+  for (i = 2*lim-2; i > 1; i -= 2)
+  {
+    u = divrs2_safe(bernreal(i,prec), i-1); /* Bi / i(i-1) */
+    tes = gadd(u, gmul(invn2,tes));
+  }
+  if (DEBUGLEVEL) msgtimer("Bernoulli sum");
+
+  p1 = gsub(gmul(gsub(nnx, ghalf), glog(nnx,prec)), nnx);
+  p1 = gadd(p1, gmul(tes, a));
+  pitemp = mppi(prec); setexpo(pitemp,2); /* 2Pi */
+  y = gdiv( gmul(mpsqrt(pitemp), gexp(p1,prec)), y );
+  if (funeq)
+  { /* y --> Pi / (sin(Pi s) y) */
+    setexpo(pitemp,1); /* Pi */
+    y = gdiv(pitemp, gmul(y, gsin(gmul(s,pitemp), prec)));
+  }
+  gaffect(y,res); avma = av; return res;
 }
 
 GEN

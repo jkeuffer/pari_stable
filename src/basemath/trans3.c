@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /********************************************************************/
 #include "pari.h"
 
-static GEN
+GEN
 cgetc(long l)
 {
   GEN u = cgetg(3,t_COMPLEX); u[1]=lgetr(l); u[2]=lgetr(l);
@@ -798,6 +798,7 @@ n_s(long n, GEN *tab)
 }
 
 GEN rpowsi(ulong a, GEN n, long prec);
+GEN divrs2_safe(GEN x, long i);
 
 /* s0 a t_INT, t_REAL or t_COMPLEX.
  * If a t_INT, assume it's not a trivial case (i.e we have s0 > 1, odd)
@@ -805,27 +806,31 @@ GEN rpowsi(ulong a, GEN n, long prec);
 GEN
 czeta(GEN s0, long prec)
 {
-  GEN s = s0, u, a, y, res, tes, sig, invn2, p1, unr;
+  GEN s, u, a, y, res, tes, sig, invn2, p1, unr;
   GEN sim, ms, s1, s2, s3, s4, s5, *tab, tabn;
   long p, i, sqn, nn, lim, lim2, ct, av, av2, avlim;
   int funeq = 0;
   byteptr d;
 
+  if (typ(s0)==t_COMPLEX && gcmp0((GEN)s0[2])) s0 = (GEN)s0[1];
+  s = s0;
   i = precision(s); if (i) prec = i;
-  if (typ(s)==t_COMPLEX)
-  { /* s = sig + it */
+
+  if (typ(s) == t_COMPLEX)
+  { /* s = sig + i t */
     res = cgetc(prec); av = avma;
-    p1 = cgetc(prec+1);
-    gaffect(s,p1); s = p1; sig = (GEN)s[1];
+    p1 = cgetc(prec+1); gaffect(s,p1);
+    s = p1; sig = (GEN)s[1];
   }
   else /* t_INT or t_REAL */
   {
     res = cgetr(prec); av = avma;
-    p1 = cgetr(prec+1); mpaff(s,p1); sig = s = p1;
+    p1 = cgetr(prec+1); gaffect(s,p1);
+    s = sig = p1;
   }
 
   if (gcmp0(s)) { y = gneg(ghalf); goto END; }
-  if (signe(sig) < 0 || expo(sig) < -1)
+  if (signe(sig) <= 0 || expo(sig) < -1)
   { /* s <--> 1-s */
     funeq = 1; s = gsub(gun, s); sig = greal(s);
   }
@@ -859,7 +864,7 @@ czeta(GEN s0, long prec)
     if (l < l2) l = l2;
     lim = (long) ceil(l); if (lim < 2) lim = 2;
     l2 = (lim+ssig/2.-.25);
-    nn = (long) 1 + ceil( sqrt(l2*l2 + st*st/4) / PI * la );
+    nn = (long) 1 + ceil( sqrt(l2*l2 + st*st/4) * la / PI );
     if (DEBUGLEVEL) fprintferr("lim, nn: [%ld, %ld]\n",lim,nn);
     if (nn >= maxprime()) err(primer1);
   }
@@ -915,10 +920,7 @@ czeta(GEN s0, long prec)
     for (i=lim2-2; i>=2; i-=2)
     { /* using single prec (when (s0 + i) < 2^31) not faster (even at \p28) */
       u = mulri(mulrr(tes,invn2), mulii(addsi(i,s0), addsi(i-1,s0)));
-      if (i < 46340) /* (i+1)(i+2) < 2^31 */
-        tes = addrr(bernreal(i,prec), divrs(u, (i+1)*(i+2)));
-      else
-        tes = addrr(bernreal(i,prec), divrs(divrs(u, i+1), i+2));
+      tes = addrr(bernreal(i,prec), divrs2_safe(u, i+1)); /* u / (i+1)(i+2) */
       if (low_stack(avlim,stack_lim(av2,3)))
       {
         if(DEBUGMEM>1) err(warnmem,"czeta");
