@@ -503,11 +503,10 @@ numerator by the denominator.
 
 \subsecidx{centerlift}$(x,\{v\})$: lifts an element $x=a \bmod n$ of $\Z/n\Z$
 to $a$ in $\Z$, and similarly lifts a polmod to a polynomial. This is the
-same as \kbd{lift} except that in the particular case of elements of
+same as \tet{lift} except that in the particular case of elements of
 $\Z/n\Z$, the lift $y$ is such that $-n/2<y\le n/2$. If $x$ is of type
 fraction, complex, quadratic, polynomial, power series, rational function,
-vector or matrix, the lift is done for each coefficient. Real and $p$-adics
-are forbidden.
+vector or matrix, the lift is done for each coefficient. Reals are forbidden.
 
 \syn{centerlift0}{x,v}, where $v$ is a \kbd{long} and an omitted $v$ is coded
 as $-1$. Also available is \teb{centerlift}$(x)$ = \kbd{centerlift0($x$,-1)}.
@@ -630,7 +629,8 @@ $a$ in $\Z$, and similarly lifts a polmod to a polynomial if $v$ is omitted.
 Otherwise, lifts only polmods with main variable $v$ (if $v$ does not occur
 in $x$, lifts only intmods). If $x$ is of type fraction, complex, quadratic,
 polynomial, power series, rational function, vector or matrix, the lift is
-done for each coefficient. Forbidden types for $x$ are reals and $p$-adics.
+done for each coefficient. For $p$-adics, this routine acts as
+\tet{truncate}. It is not allowed to have $x$ of type \typ{REAL}.
 
 \syn{lift0}{x,v}, where $v$ is a \kbd{long} and an omitted $v$ is coded as
 $-1$. Also available is \teb{lift}$(x)$ = \kbd{lift0($x$,-1)}.
@@ -4978,7 +4978,8 @@ derivative of a vector or matrix is done componentwise. One can use $x'$ as a
 shortcut if the derivative is with respect to the main variable of $x$.
 
 \syn{deriv}{x,v}, where $v$ is a \kbd{long}, and an omitted $v$ is coded as
-$-1$.
+$-1$. When $x$ is a \typ{POL}, $\tet{derivpol}(x)$ is a shortcut for 
+$\kbd{deriv}(x, -1)$.
 
 \subsecidx{eval}$(x)$: replaces in $x$ the formal variables by the values that
 have been assigned to them after the creation of $x$. This is mainly useful

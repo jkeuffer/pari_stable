@@ -707,6 +707,18 @@ have been created {\it before\/} all its components, otherwise they would
 belong to the garbage zone! Documented PARI functions guarantee this. If you
 stumble upon one that does not, consider it a bug worth reporting.
 
+\noindent$\bullet$ Another variant (a special case of \tet{gerepilemany}
+below, where $n=1$) is
+
+\fun{GEN}{gerepilecopy}{ulong ltop, GEN x)}
+
+\noindent which is functionnally equivalent to \kbd{gerepileupto(ltop,
+gcopy(x))} but more efficient. In this case, the \kbd{GEN} parameter \kbd{x}
+need not satisfy any property before the garbage collection (it may be
+disconnected, components created before the root and so on). Of course, this
+is less efficient than either \tet{gerepileupto} or \tet{gerepile}, because
+\kbd{x} has to be copied to a clean stack zone first.
+
 \noindent$\bullet$
 To cope with complicated cases where many objects have to be
 preserved, you can use
@@ -717,10 +729,11 @@ preserved, you can use
 \kbd{ltop} and \kbd{avma}). All the \kbd{GEN}s pointed at by the elements of
 the array \kbd{gptr} (of length \kbd{n}) are updated. A copy is done just
 before the cleaning to preserve them, so they don't need to be connected
-before the call. This is the most robust of the gerepile functions (the less
-prone to user error), but also the slowest.
+before the call. With \kbd{gerepilecopy}, this is the most robust of the
+\kbd{gerepile} functions (the less prone to user error), but also the
+slowest.
 
-\noindent$\bullet$ More efficient, but trickier to use is
+\noindent$\bullet$ More efficient, but tricky to use is
 
 \fun{void}{gerepilemanysp}{ulong ltop, ulong lbot, GEN *gptr[], long n}
 
@@ -856,7 +869,7 @@ z = gerepile(ltop,lbot,z);
 
 Let us now look at a less trivial example where more than one \kbd{gerepile}
 is needed in practice (at the expense of efficiency, one can always use only
-one using \kbd{gcopy}; see below). Suppose that we want to write a function
+one using \kbd{gerepilecopy}). Suppose that we want to write a function
 which multiplies a line vector by a matrix (such a function is of course
 already part of \kbd{gmul}, but let's ignore this for a moment). Then the
 most natural way is to do a \kbd{cgetg} of the result immediately, and then a
@@ -866,7 +879,7 @@ We leave the details to the reader, who can look at the answer in the file
 \kbd{basemath/gen1.c}, in the function \kbd{gmul}, case \typ{VEC} times case
 \typ{MAT}. It would theoretically be possible to have a single connected
 piece of garbage, but it would be a much less natural and unnecessarily
-complicated program.
+complicated program, which would in fact be slower.
 
 Let us now take an example which is probably the least trivial way of using
 \kbd{gerepile}, but is unfortunately sometimes necessary. Although it is not
@@ -923,9 +936,9 @@ PARI library source code, we once needed to preserve up to 10 objects at a
 time (in a variant of the LLL algorithm)!
 
 \misctitle{Technical note:} the statement \kbd{limit = (avma+bot)/2} is
-dangerous since the addition can overflow, which would result in
-\kbd{limit} being negative. This will prevent garbage collection in the
-loop. To avoid this problem, we provide a robust macro
+dangerous since the addition can overflow, which would result in \kbd{limit}
+being always smaller than \kbd{avma}. This will prevent garbage collection in
+the loop. To avoid this problem, we provide a robust macro
 \tet{stack_lim}\kbd{(avma,$n$)}, which denotes an address where $2^{n-1} /
 (2^{n-1}+1)$ of the total stack space is exhausted ($1/2$ for $n=1$, $2/3$
 for $n=2$). Hence, the above snippet should be written as
@@ -942,8 +955,8 @@ First, although it looks complicated, \kbd{gerepile} has turned out to be a
 very flexible and fast garbage collector, which compares very favorably
 with much more sophisticated methods used in other systems. A few tests that
 we have done indicate that the price paid for using \kbd{gerepile}, when
-properly used, is usually around 1 or 2 percents of the total time, which is
-quite acceptable.
+properly used, is usually around 1 or 2 percents of the total running time,
+which is quite acceptable.
 
 Secondly, in many cases, in particular when the tree structure and the size of
 the PARI objects which will appear in a computation are under control, one
@@ -970,18 +983,8 @@ of the garbage zone would have been lost. Of course you can always use
 \kbd{gerepileupto}, but you will have to assume that the object was created
 {\it before\/} its components.
 
-Finally, if everything seems hopeless, at the expense of speed you can do the
-following: after saving the value of \kbd{avma} in \kbd{ltop}, perform your
-computation as you wish, in any order, leaving a messy stack. Let \kbd{z} be
-your result. Then write the following:
-
-\kbd{z = gerepileupto(ltop, gcopy(z));}
-
-\noindent
-The trick is to force a copy of \kbd{z} to be created at the bottom of the
-stack, hence all the rest including the initial \kbd{z} becomes connected
-garbage. If you need to keep more than one result, use \kbd{gerepilemany}
-(of which the above is just a special case).
+Lastly, if all seems lost, just use \tet{gerepilecopy} (or
+\tet{gerepilemany}) to fix up the stack for you.
 
 \smallskip If you followed us this far, congratulations, and rejoice: the
 rest is much easier.
