@@ -3206,16 +3206,19 @@ computation. If the precision becomes insufficient, GP outputs a warning
 (\kbd{fundamental units too large, not given}) and does not strive to
 compute the units by default ($\fl=0$).
 
-   When $\fl=1$, GP insists on finding the fundamental units exactly, the
-internal precision being doubled and the computation redone, until the exact
-results are obtained. The user should be warned that this can take a very
-long time when the coefficients of the fundamental units on the integral
-basis are very large.
+   When $\fl=1$, GP insists on finding the fundamental units exactly. The
+user should be warned that this can take a very long time when the
+coefficients of the fundamental units on the integral basis are very large.
+If the fundamental units are simply too large to be represented in this form,
+an error message is issued. They could be obtained using the so-called
+compact representation of algebraic numbers as a formal product of algebraic
+integers. The latter is implemented internally but not publicly accessible
+yet.
 
    When $\fl=2$, on the contrary, it is initially agreed that GP
 will not compute units. Note that the resulting \var{bnf} will not be
 suitable for \kbd{bnrinit}, and that this flag provides negligible time
-savings. In short, do not use it without a very good reason.
+savings. In short, it is deprecated.
 
    When $\fl=3$, computes a very small version of \kbd{bnfinit}, a ``small
 big number field'' (or \var{sbnf} for short) which contains enough
