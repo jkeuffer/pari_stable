@@ -2517,7 +2517,7 @@ factmod9(GEN f, GEN p, GEN T)
   long v;
   GEN z, unfp, unfq;
 
-  if (typ(T)!=t_POL || typ(f)!=t_POL || gcmp0(T)) err(typeer,"factmod9");
+  if (typ(T)!=t_POL || typ(f)!=t_POL || typ(p)!=t_INT) err(typeer,"factmod9");
   v = varn(T);
   if (varncmp(v, varn(f)) <= 0)
     err(talker,"polynomial variable must have higher priority in factorff");
