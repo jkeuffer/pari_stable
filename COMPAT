@@ -92,6 +92,7 @@ This file lists the incompatible changes between Version 2.x and older versions
   - nfreducemodpr2() removed, use an nfmodpr structure from nfmodprinit() or
     zkmodprinit() instead
   - permute() renamed to numtoperm(), permuteInv() renamed to pertonum()
+  - smodsi() removed [ not well defined ]. Use either modsi() or umodui()
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

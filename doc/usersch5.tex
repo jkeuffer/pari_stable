@@ -531,6 +531,11 @@ remainder of the integer~\kbd{|x|} by the unsigned long~\kbd{y}.
 \fun{ulong}{umodui}{ulong x, GEN y} computes the true Euclidean
 remainder of the unsigned long~\kbd{x} by the integer~\kbd{|y|}.
 
+The routine \tet{smodsi} does not exist, since it would not always be
+defined: for a \emph{signed} \kbd{x}, its result \kbd{x + |y|} would
+in general not fit into a C \kbd{long}. Use either \kbd{umodui} or
+\kbd{modsi}.
+
 \subsec{Miscellaneous functions}
 
 \fun{long}{divise}{GEN x, GEN y} if the integer \kbd{y} divides the

@@ -213,6 +213,7 @@ BA  4- cornacchia, in favour of qfbsolve.
     6- routines gred [useless] / gredz [ useless did not work ]. Define
        gred --> gcopy for backward compatibility
     7- many obsolete error codes [ for err(...) ]
+    8- smodsi()  [ useless, not well defined ]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.7 (released 18/12/2003):
