@@ -3965,7 +3965,7 @@ ifac_primary_factor(GEN *partial, long *exponent)
  */
 
 long
-ifac_decomp_break(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
+ifac_decomp_break(GEN n, long (*ifac_break)(GEN n,GEN pairs,GEN here,GEN state),
 		  GEN state, long hint)
 {
   long tf=lgefint(n), av=avma, lim=stack_lim(av,1);

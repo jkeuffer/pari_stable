@@ -73,6 +73,7 @@ int    mpcmp(GEN x, GEN y);
 GEN    mpcopy(GEN x);
 GEN    mpdiv(GEN x, GEN y);
 int    mpdivis(GEN x, GEN y, GEN z);
+int    mpdivisis(GEN x, long y, GEN z)
 GEN    mpmul(GEN x, GEN y);
 GEN    mpneg(GEN x);
 GEN    mpsub(GEN x, GEN y);
@@ -673,6 +674,18 @@ mpdivis(GEN x, GEN y, GEN z)
 
 /* THE FOLLOWING ONES ARE NOT IN mp.s */
 #  endif /* !defined(__M68K__) */
+
+INLINE int
+mpdivisis(GEN x, long y, GEN z)
+{
+  const ulong av = avma;
+  GEN p1;
+  LOCAL_HIREMAINDER;
+  
+  p1 = divis(x,y);
+  if (hiremainder) { avma = av; return 0; }
+  affii(p1,z); avma = av; return 1;
+}
 
 INLINE double
 gtodouble(GEN x)

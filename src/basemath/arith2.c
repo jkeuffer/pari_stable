@@ -25,7 +25,8 @@ extern GEN arith_proto(long f(GEN), GEN x, int do_error);
 extern GEN arith_proto2(long f(GEN,GEN), GEN x, GEN n);
 extern GEN garith_proto(GEN f(GEN), GEN x, int do_error);
 extern GEN garith_proto2gs(GEN f(GEN,long), GEN x, long y);
-static long court_p[]={evaltyp(t_INT)|m_evallg(3),evalsigne(1)|evallgefint(3),0};
+
+#define sqru(i) (muluu((i),(i)))
 
 /***********************************************************************/
 /**                                                                   **/
@@ -377,49 +378,10 @@ tridiv_bound(GEN n, long all)
   return 1L<<19;		/* Rho will generally be faster above this */
 }
 
-/********** about to become obsolete --GN **********/
-#if 0
-/* If flag != 1, use the new MPQS code: Try to factor N using ECM if flag = 2
- * and N is not too small, followed by MPQS, or just MPQS otherwise.
- */
-static GEN
-find_fact(GEN N, long *flag)
-{
-  GEN f;
-
-  if (*flag == 2)
-  {
-    if ((f = pollardbrent(N)))	/* assignment */
-      return f;
-    f = ellfacteur(N, 0);
-    if (!f)
-    {
-      /* *flag = 0; */
-      f = mpqs(N);
-    }
-  }
-  else if (*flag == 1)
-  {
-    if ((f = pollardbrent(N)))	/* assignment */
-      return f;
-    f = ellfacteur(N, 1);
-  }
-  else
-    f = mpqs(N);		/* may bail out and call ellfacteur(_,1) */
-				/* (this is to be changed) */
-
-  return f;
-}
-#endif
-/***************************************************/
-
 /* function imported from ifactor1.c */
-long
-ifac_decomp(GEN n, long hint);
-long
-ifac_decomp_break(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
+extern long ifac_decomp(GEN n, long hint);
+extern long ifac_decomp_break(GEN n, long (*ifac_break)(GEN,GEN,GEN,GEN),
 		  GEN state, long hint);
-
 static GEN
 aux_end(GEN n, long nb)
 {
@@ -514,38 +476,29 @@ auxdecomp1(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
 
   return aux_end(n, nb);
 }
-/* state is an array with 2 elements:
- * state[1]: current unfactored part.
- * state[2]: limit.
- */
-static long ifac_break_limit(GEN n, GEN pairs, GEN here, GEN state)
+
+/* state[1]: current unfactored part.
+ * state[2]: limit. */
+static long
+ifac_break_limit(GEN n, GEN pairs/*unused*/, GEN here, GEN state)
 {
-  ulong ltop=avma;
+  ulong ltop = avma;
   int res;
-  if (!here)
-    /* Initial call.
-     * Small prime have been removed since start, 
-     * and n is the new unfactored part.
-     * Note: the result is affect()ed to state[1] to preserve stack.
-     */
-    affii(n,(GEN)state[1]);
+  if (!here) /* initial call */
+   /* Small prime have been removed since start, n is the new unfactored part.
+    * Result is affect()ed to state[1] to preserve stack. */
+    affii(n, (GEN)state[1]);
   else
   {
-    /*Compute the primary factor found.*/
-    GEN p=powgi((GEN)here[0],(GEN)here[1]); 
-    if (DEBUGLEVEL>=3)
-      fprintferr("IFAC: Stop: Primary factor: %Z\n",p);
-    /*divide the unfactored part by the primary factor and assign the
-      result to state[1]*/
-    diviiz((GEN)state[1],p,(GEN)state[1]);
+    GEN q = powgi((GEN)here[0],(GEN)here[1]); /* primary factor found.*/
+    if (DEBUGLEVEL>2) fprintferr("IFAC: Stop: Primary factor: %Z\n",q);
+    /* divide unfactored part by q and assign the result to state[1] */
+    diviiz((GEN)state[1],q, (GEN)state[1]);
   }
-  if (DEBUGLEVEL>=3)
-    fprintferr("IFAC: Stop: remaining %Z\n",state[1]);
-  /*check the stopping criterion*/ 
-  res=cmpii((GEN)state[1],(GEN)state[2])<=0;
-  /*restore the stack.*/
-  avma=ltop;
-  return res;
+  if (DEBUGLEVEL>=3) fprintferr("IFAC: Stop: remaining %Z\n",state[1]);
+  /* check the stopping criterion, then restore stack */ 
+  res = cmpii((GEN)state[1],(GEN)state[2]) <= 0;
+  avma = ltop; return res;
 }
 
 static GEN
@@ -574,20 +527,15 @@ decomp(GEN n)
   return auxdecomp0(n,1,decomp_default_hint);
 }
 
-/* Factor until the unfactored part is smaller than limit.
- */
+/* Factor until the unfactored part is smaller than limit. */
 GEN
 decomp_limit(GEN n, GEN limit)
 {
-  GEN state;
-  /*Initialise state.*/
-  state=cgetg(3,t_VEC);
-  /* In fact this is mainly done to allocate memory for
-   * affect(). Currently state[1] value is discarded in the initial call
-   * of ifac_break_limit 
-   */
-  state[1]=licopy(n);
-  state[2]=lcopy(limit);
+  GEN state = cgetg(3,t_VEC);
+ /* icopy is mainly done to allocate memory for affect().
+  * Currently state[1] value is discarded in initial call to ifac_break_limit */
+  state[1] = licopy(n);
+  state[2] = lcopy(limit);
   return auxdecomp1(n, &ifac_break_limit, state, 1, decomp_default_hint);
 }
 
@@ -673,8 +621,8 @@ long
 mu(GEN n)
 {
   byteptr d = diffptr+1;	/* point at 3 - 2 */
-  GEN p;
-  long av = avma, lim1, s, v;
+  ulong p,lim1, av = avma;
+  long s, v;
 
   if (typ(n) != t_INT) err(arither1);
   if (!signe(n)) err(arither2);
@@ -682,23 +630,23 @@ mu(GEN n)
   v = vali(n);
   if (v>1) return 0;
   s = v ? -1 : 1;
-  n=absi(shifti(n,-v)); p=court_p; p[2]=2;
+  n=absi(shifti(n,-v)); p = 2;
   if (is_pm1(n)) return s;
   lim1 = tridiv_bound(n,1);
 
-  while (*d && p[2] < lim1)
+  while (*d && p < lim1)
   {
-    p[2] += *d++;
-    if (mpdivis(n,p,n))
+    p += *d++;
+    if (mpdivisis(n,p,n))
     {
-      if (divise(n,p)) { avma=av; return 0; }
+      if (smodis(n,p) == 0) { avma=av; return 0; }
       s = -s; if (is_pm1(n)) { avma=av; return s; }
     }
   }
   /* we normally get here with p==nextprime(PRE_TUNE), which will already
      have been tested against n, so p^2 >= n  (instead of p^2 > n)  is
      enough to guarantee n is prime */
-  if (cmpii(sqri(p),n) >= 0 || pseudoprime(n)) { avma=av; return -s; }
+  if (cmpii(sqru(p),n) >= 0 || pseudoprime(n)) { avma=av; return -s; }
   /* large composite without small factors */
   v = ifac_moebius(n, decomp_default_hint);
   avma=av;
@@ -714,38 +662,39 @@ gissquarefree(GEN x)
 long
 issquarefree(GEN x)
 {
-  long av=avma,lim1,tx;
-  GEN p;
+  ulong av = avma,lim1,p;
+  long tx;
+  GEN d;
 
   if (gcmp0(x)) return 0;
-  tx=typ(x);
+  tx = typ(x);
   if (tx == t_INT)
   {
     long v;
     byteptr d=diffptr+1;
     if (is_pm1(x)) return 1;
     if((v = vali(x)) > 1) return 0;
-    x=absi(shifti(x,-v)); p=court_p; p[2]=2;
+    x = absi(shifti(x,-v));
     if (is_pm1(x)) return 1;
     lim1 = tridiv_bound(x,1);
 
-    while (*d && p[2] < lim1)
+    p = 2;
+    while (*d && p < lim1)
     {
-      p[2] += *d++;
-      if (mpdivis(x,p,x))
+      p += *d++;
+      if (mpdivisis(x,p,x))
       {
-	if (divise(x,p)) { avma=av; return 0; }
-	if (is_pm1(x)) { avma=av; return 1; }
+	if (smodis(x,p) == 0) { avma = av; return 0; }
+	if (is_pm1(x)) { avma = av; return 1; }
       }
     }
-    if (cmpii(sqri(p),x) >= 0 || pseudoprime(x)) { avma=av; return 1; }
+    if (cmpii(sqru(p),x) >= 0 || pseudoprime(x)) { avma = av; return 1; }
     v = ifac_issquarefree(x, decomp_default_hint);
-    avma=av;
-    return v;
+    avma = av; return v;
   }
   if (tx != t_POL) err(typeer,"issquarefree");
-  p = ggcd(x, derivpol(x));
-  avma=av; return (lgef(p)==3);
+  d = ggcd(x, derivpol(x));
+  avma = av; return (lgef(d) == 3);
 }
 
 GEN
@@ -758,28 +707,28 @@ long
 omega(GEN n)
 {
   byteptr d=diffptr+1;
-  GEN p;
-  long nb,av=avma,lim1,v;
+  ulong p, lim1, av = avma;
+  long nb,v;
 
   if (typ(n) != t_INT) err(arither1);
   if (!signe(n)) err(arither2);
   if (is_pm1(n)) return 0;
   v=vali(n);
   nb = v ? 1 : 0;
-  n=absi(shifti(n,-v)); p=court_p; p[2]=2;
+  n = absi(shifti(n,-v)); p = 2;
   if (is_pm1(n)) return nb;
   lim1 = tridiv_bound(n,1);
 
-  while (*d && p[2] < lim1)
+  while (*d && p < lim1)
   {
-    p[2] += *d++;
-    if (mpdivis(n,p,n))
+    p += *d++;
+    if (mpdivisis(n,p,n))
     {
-      nb++; while (mpdivis(n,p,n)); /* empty */
+      nb++; while (mpdivisis(n,p,n)); /* empty */
       if (is_pm1(n)) { avma = av; return nb; }
     }
   }
-  if (cmpii(sqri(p),n) >= 0 || pseudoprime(n)) { avma = av; return nb+1; }
+  if (cmpii(sqru(p),n) >= 0 || pseudoprime(n)) { avma = av; return nb+1; }
   /* large composite without small factors */
   nb += ifac_omega(n, decomp_default_hint);
   avma=av; return nb;
@@ -795,27 +744,27 @@ long
 bigomega(GEN n)
 {
   byteptr d=diffptr+1;
-  GEN p;
-  long nb,av=avma,lim1,v;
+  ulong av = avma, p,lim1; 
+  long nb,v;
 
   if (typ(n) != t_INT) err(arither1);
   if (!signe(n)) err(arither2);
   if (is_pm1(n)) return 0;
   nb=v=vali(n);
-  n=absi(shifti(n,-v)); p=court_p; p[2]=2;
+  n=absi(shifti(n,-v)); p = 2;
   if (is_pm1(n)) { avma = av; return nb; }
   lim1 = tridiv_bound(n,1);
 
-  while (*d && p[2] < lim1)
+  while (*d && p < lim1)
   {
-    p[2] += *d++;
-    if (mpdivis(n,p,n))
+    p += *d++;
+    if (mpdivisis(n,p,n))
     {
-      do nb++; while (mpdivis(n,p,n));
+      do nb++; while (mpdivisis(n,p,n));
       if (is_pm1(n)) { avma = av; return nb; }
     }
   }
-  if (cmpii(sqri(p),n) >= 0 || pseudoprime(n)) { avma = av; return nb+1; }
+  if (cmpii(sqru(p),n) >= 0 || pseudoprime(n)) { avma = av; return nb+1; }
   nb += ifac_bigomega(n, decomp_default_hint);
   avma=av; return nb;
 }
@@ -830,29 +779,30 @@ GEN
 phi(GEN n)
 {
   byteptr d = diffptr+1;
-  GEN p,m;
-  long av = avma, lim1, v;
+  GEN m;
+  ulong av = avma, lim1, p;
+  long v;
 
   if (typ(n) != t_INT) err(arither1);
   if (!signe(n)) err(arither2);
   if (is_pm1(n)) return gun;
-  v=vali(n);
-  n=absi(shifti(n,-v)); p=court_p; p[2]=2;
+  v = vali(n);
+  n = absi(shifti(n,-v)); p = 2;
   m = (v > 1 ? shifti(gun,v-1) : stoi(1));
   if (is_pm1(n)) { return gerepileupto(av,m); }
   lim1 = tridiv_bound(n,1);
 
-  while (*d && p[2] < lim1)
+  while (*d && p < lim1)
   {
-    court_p[2] += *d++;
-    if (mpdivis(n,p,n))
+    p += *d++;
+    if (mpdivisis(n,p,n))
     {
-      m = mulii(m,addsi(-1,p));
-      while (mpdivis(n,p,n)) m = mulii(m,p);
+      m = mulis(m, p-1);
+      while (mpdivisis(n,p,n)) m = mulis(m,p);
       if (is_pm1(n)) { return gerepileupto(av,m); }
     }
   }
-  if (cmpii(sqri(p),n) >= 0 || pseudoprime(n))
+  if (cmpii(sqru(p),n) >= 0 || pseudoprime(n))
   {
     m = mulii(m,addsi(-1,n));
     return gerepileupto(av,m);
@@ -871,25 +821,26 @@ GEN
 numbdiv(GEN n)
 {
   byteptr d=diffptr+1;
-  GEN p,m;
-  long l, av=avma, lim1, v;
+  GEN m;
+  long l, v;
+  ulong av = avma, p,lim1;
 
   if (typ(n) != t_INT) err(arither1);
   if (!signe(n)) err(arither2);
   if (is_pm1(n)) return gun;
-  v=vali(n);
-  n=absi(shifti(n,-v)); p=court_p; p[2]=2;
+  v = vali(n);
+  n = absi(shifti(n,-v)); p = 2;
   m = stoi(v+1);
-  if (is_pm1(n)) { return gerepileupto(av,m); }
+  if (is_pm1(n)) return gerepileupto(av,m);
   lim1 = tridiv_bound(n,1);
 
-  while (*d && p[2] < lim1)
+  while (*d && p < lim1)
   {
-    p[2] += *d++;
-    l=1; while (mpdivis(n,p,n)) l++;
+    p += *d++;
+    l=1; while (mpdivisis(n,p,n)) l++;
     m = mulsi(l,m); if (is_pm1(n)) { return gerepileupto(av,m); }
   }
-  if(cmpii(sqri(p),n) >= 0 || pseudoprime(n))
+  if(cmpii(sqru(p),n) >= 0 || pseudoprime(n))
   {
     m = shifti(m,1);
     return gerepileupto(av,m);
@@ -908,29 +859,30 @@ GEN
 sumdiv(GEN n)
 {
   byteptr d=diffptr+1;
-  GEN p,m,m1;
-  long av=avma,lim1,v;
+  GEN m,m1;
+  ulong av=avma,lim1,p;
+  long v;
 
   if (typ(n) != t_INT) err(arither1);
   if (!signe(n)) err(arither2);
   if (is_pm1(n)) return gun;
-  v=vali(n);
-  n=absi(shifti(n,-v)); p=court_p; p[2]=2;
+  v = vali(n);
+  n = absi(shifti(n,-v)); p = 2;
   m = (v ? addsi(-1,shifti(gun,v+1)) : stoi(1));
   if (is_pm1(n)) { return gerepileupto(av,m); }
   lim1 = tridiv_bound(n,1);
 
-  while (*d && p[2] < lim1)
+  while (*d && p < lim1)
   {
-    p[2] += *d++;
-    if (mpdivis(n,p,n))
+    p += *d++;
+    if (mpdivisis(n,p,n))
     {
-      m1=addsi(1,p);
-      while (mpdivis(n,p,n)) m1=addsi(1,mulii(p,m1));
+      m1 = utoi(p+1);
+      while (mpdivisis(n,p,n)) m1 = addsi(1, mului(p,m1));
       m = mulii(m1,m); if (is_pm1(n)) { return gerepileupto(av,m); }
     }
   }
-  if(cmpii(sqri(p),n) >= 0 || pseudoprime(n))
+  if(cmpii(sqru(p),n) >= 0 || pseudoprime(n))
   {
     m = mulii(m,addsi(1,n));
     return gerepileupto(av,m);
@@ -949,8 +901,9 @@ GEN
 sumdivk(GEN n, long k)
 {
   byteptr d=diffptr+1;
-  GEN n1,p,m,m1,pk;
-  long av=avma,k1,lim1,v;
+  GEN n1,m,m1,pk;
+  ulong av = avma, p, lim1;
+  long k1,v;
 
   if (!k) return numbdiv(n);
   if (k==1) return sumdiv(n);
@@ -962,24 +915,24 @@ sumdivk(GEN n, long k)
   if (k<0)  k = -k;
   v=vali(n);
   n=absi(shifti(n,-v));
-  p = court_p; p[2]=2; m=stoi(1);
-  while (v--) { m=addsi(1,shifti(m,k)); }
+  p = 2; m = stoi(1);
+  while (v--)  m = addsi(1,shifti(m,k));
   if (is_pm1(n)) goto fin;
   lim1 = tridiv_bound(n,1);
 
-  while (*d && p[2] < lim1)
+  while (*d && p < lim1)
   {
-    p[2] += *d++;
-    if (mpdivis(n,p,n))
+    p += *d++;
+    if (mpdivisis(n,p,n))
     {
-      pk=gpuigs(p,k); m1=addsi(1,pk);
-      while (mpdivis(n,p,n)) m1=addsi(1,mulii(pk,m1));
+      pk = gpowgs(utoi(p),k); m1 = addsi(1,pk);
+      while (mpdivisis(n,p,n)) m1 = addsi(1, mulii(pk,m1));
       m = mulii(m1,m); if (is_pm1(n)) goto fin;
     }
   }
-  if(cmpii(sqri(p),n) >= 0 || pseudoprime(n))
+  if(cmpii(sqru(p),n) >= 0 || pseudoprime(n))
   {
-    pk=gpuigs(n,k);
+    pk = gpuigs(n,k);
     m = mulii(m,addsi(1,pk));
     goto fin;
   }

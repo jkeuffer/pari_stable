@@ -1018,6 +1018,7 @@ GEN     mulrr(GEN x, GEN y);
 GEN     mulsi(long x, GEN y);
 GEN     mulsr(long x, GEN y);
 GEN     mulss(long x, long y);
+GEN     muluu(ulong x, ulong y);
 GEN     mului(ulong x, GEN y);
 int     ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax);
 GEN     resss(long x, long y);
