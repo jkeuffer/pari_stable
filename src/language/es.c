@@ -2191,14 +2191,12 @@ _expand_tilde(char *s)
 }
 
 /* expand environment variables in str, return a malloc'ed buffer
- * assume no \ remain */
+ * assume no \ remain and str can be freed */
 static char *
 _expand_env(char *str)
 {
-#ifdef WINCE
-	return str;
-#elif defined(macintosh)
-  return s;
+#if defined(WINCE) || defined(macintosh)
+  return str;
 #else
   long i, l, len = 0, xlen = 16, xnum = 0;
   char *s = str, *s0 = s, *env;
