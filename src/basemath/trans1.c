@@ -1827,6 +1827,12 @@ gcos(GEN x, long prec)
       gerepilemanyvec(av,tetpil,y+1,2);
       return y;
 
+    case t_INT: case t_FRAC: case t_FRACN:
+      p1=cgetr(prec); av=avma;
+      p2=gadd(x,realzero(prec)); 
+      affrr(mpcos(p2),p1); avma=av;
+      return p1;
+    
     case t_INTMOD: case t_PADIC: err(typeer,"gcos");
 
     default:
@@ -1900,6 +1906,12 @@ gsin(GEN x, long prec)
       y[2]=lmul(p1,v);
       gerepilemanyvec(av,tetpil,y+1,2);
       return y;
+    
+    case t_INT: case t_FRAC: case t_FRACN:
+      p1=cgetr(prec); av=avma;
+      p2=gadd(x,realzero(prec)); 
+      affrr(mpsin(p2),p1); avma=av;
+      return p1;
 
     case t_INTMOD: case t_PADIC: err(typeer,"gsin");
 
@@ -1979,9 +1991,11 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
   switch(typ(x))
   {
     case t_INT: case t_FRAC: case t_FRACN:
-      av=avma; p1=cgetr(prec); gaffect(x,p1); tetpil=avma;
-      mpsincos(p1,s,c); gptr[0]=s; gptr[1]=c;
-      gerepilemanysp(av,tetpil,gptr,2);
+      *s=cgetr(prec); *c=cgetr(prec); av=avma; 
+      p1=gadd(x,realzero(prec)); 
+      mpsincos(p1,&ps,&pc); 
+      affrr(ps,*s); affrr(pc,*c);
+      avma=av;
       return;
 
     case t_REAL:
@@ -2098,6 +2112,12 @@ gtan(GEN x, long prec)
       av = avma; gsincos(x,&s,&c,prec);
       return gerepileupto(av, gdiv(s,c));
 
+    case t_INT: case t_FRAC: case t_FRACN:
+      s=cgetr(prec); av=avma; 
+      c=gadd(x,realzero(prec)); 
+      affrr(mptan(c),s); avma=av;
+      return s;
+
     case t_INTMOD: case t_PADIC: err(typeer,"gtan");
     
     default:
@@ -2144,6 +2164,12 @@ gcotan(GEN x, long prec)
     case t_COMPLEX:
       av = avma; gsincos(x,&s,&c,prec);
       return gerepileupto(av, gdiv(c,s));
+
+    case t_INT: case t_FRAC: case t_FRACN:
+      s=cgetr(prec); av=avma; 
+      c=gadd(x,realzero(prec)); 
+      affrr(mpcotan(c),s); avma=av;
+      return s;
 
     case t_INTMOD: case t_PADIC: err(typeer,"gcotan");
 

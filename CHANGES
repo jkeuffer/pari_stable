@@ -68,6 +68,7 @@ IS 18- [HPUX:] remove -E from DLCFLAGS
        overflow, which was dangerous, inefficient, and complicated. Now none
        of the inline kernels use any global variable. The non-inline
        assembler kernels do define and access globals hiremainder and overflow.
+BA 23- cos(2^2^22) --> precision too low [ idem sin, tan ]
 
   Changed
     1- rnf structure (removed useless components)
