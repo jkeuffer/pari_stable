@@ -4518,15 +4518,16 @@ vector.
 
 \subsecidx{rnfequation}$(\var{nf},\var{pol},\{\fl=0\})$: given a number field
 $\var{nf}$ as output by \kbd{nfinit} (or simply a polynomial) and a
-polynomial \var{pol} with
-coefficients in $\var{nf}$ defining a relative extension $L$ of $\var{nf}$,
-computes the absolute equation of $L$ over $\Q$.
+polynomial \var{pol} with coefficients in $\var{nf}$ defining a relative
+extension $L$ of $\var{nf}$, computes the absolute equation of $L$ over
+$\Q$.
 
-  If $\fl$ is non-zero, outputs a 3-component row vector $[z,a,k]$, where $z$
-is the absolute equation of $L$ over $\Q$, as in the default behaviour,
-$a$ expresses as a polmod a root $\beta$ of $pol$ in terms of a root $\theta$
-of $z$, and $k$ is a small integer such that $\theta=\beta+k\alpha$ where
-$\alpha$ is a root of the polynomial defining the base field $\var{nf}$.
+  If $\fl$ is non-zero, outputs a 3-component row vector $[z,a,k]$, where
+$z$ is the absolute equation of $L$ over $\Q$, as in the default behaviour,
+$a$ expresses as an element of $L$ a root $\alpha$ of the polynomial
+defining the base field $\var{nf}$, and $k$ is a small integer such that
+$\theta = \beta+k\alpha$ where $\theta$ is a root of $z$ and $\beta$ a root
+of $\var{pol}$.
 
   The main variable of $\var{nf}$ \var{must} be of lower priority than that
 of \var{pol}. Note that for efficiency, this does not check whether the
