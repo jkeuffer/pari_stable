@@ -114,7 +114,7 @@ calc_block(long N,GEN Z,long d,GEN Y,GEN vbs,ulong maxl)
 	    if (!non[j]) Zpp[u++] = Z[j];
           setlg(Zpp, u);
 	  vbs = calc_block(N,Zpp,d,Yp,vbs,maxl);
-          if (lg(vbs) > maxl) return vbs;
+          if (vbs && lg(vbs) > maxl) return vbs;
 	}
         avma=av;
       }
@@ -286,7 +286,7 @@ print_block_system(long N,GEN Y,long d, GEN vbs)
     for (j=1; j<=ki; j++) De[j]=(long)empty;
     for (j=1; j<=si; j++)
     {
-      cy = (GEN)Yi[j]; a = (GEN)cy[1];
+      cy = (GEN)Yi[j]; a = cy[1];
       for (l=1,lp=0; l<=n[j]; l++)
       {
         lp++; if (lp>ki) lp = 1;
@@ -945,7 +945,7 @@ subfields(GEN nf,GEN d)
 static GEN
 subfieldsall(GEN nf)
 {
-  ulong av = avma,
+  ulong av = avma;
   long N,ld,i,v0;
   GEN pol,dpol,dg,LSB,NLSB;
 
