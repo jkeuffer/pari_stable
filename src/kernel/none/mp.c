@@ -1218,7 +1218,6 @@ divrr(GEN x, GEN y)
   e = expo(x) - expo(y);
   if (!sx) return realzero_bit(e);
   if (sy<0) sx = -sx;
-  e = evalsigne(sx) | evalexpo(e);
   lx=lg(x); ly=lg(y);
   if (ly==3)
   {
@@ -1230,12 +1229,12 @@ divrr(GEN x, GEN y)
       l >>= 1; if (k&1) l |= HIGHBIT;
       k >>= 1;
     }
-    z=cgetr(3); z[1]=e;
+    z = cgetr(3); z[1] = evalsigne(sx) | evalexpo(e);
     hiremainder=k; z[2]=divll(l,y[2]); return z;
   }
 
-  lz = (lx<=ly)? lx: ly;
-  x1 = (z=new_chunk(lz))-1;
+  lz = min(lx,ly); z = new_chunk(lz);
+  x1 = z-1;
   x1[1]=0; for (i=2; i<lz; i++) x1[i]=x[i];
   x1[lz] = (lx>lz)? x[lz]: 0;
   x=z; si=y[2]; saux=y[3];
@@ -1295,10 +1294,12 @@ divrr(GEN x, GEN y)
   }
   x1 = x-1; for (j=lz-1; j>=2; j--) x[j]=x1[j];
   if (*x) { shift_right(x,x, 2,lz, 1,1); } else e--;
-  x[0]=evaltyp(t_REAL)|evallg(lz);
-  x[1]=e; return x;
+  x[0] = evaltyp(t_REAL)|evallg(lz);
+  x[1] = evalsigne(sx) | evalexpo(e);
+  return x;
 }
 #endif /* !defined(__M68K__) */
+
 /* The following ones are not in mp.s (mulii is, with a different algorithm) */
 
 /* Integer division x / y:
