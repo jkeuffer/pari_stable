@@ -1187,7 +1187,8 @@ strtoGENstr(char *s, long flag)
 static GEN
 make_arg(GEN x)
 {
-  return (x==gzero)? x : geval(x);
+  return (x==gzero)? x
+                   : (typ(x) == t_STR)? geval(x): x;
 }
 
 /* p = NULL + array of variable numbers (longs) + function text */
