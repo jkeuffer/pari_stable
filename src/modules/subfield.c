@@ -506,7 +506,7 @@ static GEN
 init_traces(GEN ff, GEN T, GEN p)
 {
   long N = degpol(T),i,j,k, r = lg(ff);
-  GEN Frob = FpXQ_matrix_pow(N,N, FpXQ_pow(polx[varn(T)],p, T,p), T,p);
+  GEN Frob = FpXQ_matrix_pow(FpXQ_pow(polx[varn(T)],p, T,p), N,N, T,p);
   GEN y,p1,p2,Trk,pow,pow1;
 
   k = degpol(ff[r-1]); /* largest degree in modular factorization */
