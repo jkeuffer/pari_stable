@@ -1090,7 +1090,7 @@ err(long numerr, ...)
   }
   else if (numerr == user)
   {
-    GEN *g = va_arg(ap, GEN*);
+    GEN g = va_arg(ap, GEN);
     pariputsf("  ###   user error: ");
     print0(g, f_RAW);
   }

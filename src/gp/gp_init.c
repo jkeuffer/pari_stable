@@ -25,7 +25,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 extern void  allocatemem0(size_t newsize);
 extern GEN   default0(char *a, char *b, long flag);
-extern void  error0(GEN *g);
 extern GEN   extern0(char *cmd);
 extern void  gp_quit(void);
 extern GEN   input0(void);

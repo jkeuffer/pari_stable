@@ -1015,8 +1015,8 @@ readstring_i(char *s, char **ptbuf, char **ptlim)
 static GEN
 any_string()
 {
-  long n = 0, len = 16;
-  GEN res = new_chunk(len + 1);
+  long n = 1, len = 16;
+  GEN res = cget1(len + 1, t_VEC);
 
   while (*analyseur)
   {
@@ -1031,13 +1031,12 @@ any_string()
     if (n == len)
     {
       long newlen = len << 1;
-      GEN p1 = new_chunk(newlen + 1);
-      for (n = 0; n < len; n++) p1[n] = res[n];
+      GEN p1 = cget1(newlen + 1, t_VEC);
+      for (n = 1; n < len; n++) p1[n] = res[n];
       res = p1; len = newlen;
     }
   }
-  res[n] = 0; /* end the sequence with NULL */
-  return res;
+  setlg(res, n); return res;
 }
 
 /*  Read a "string" from src. Format then copy it, starting at s. Return

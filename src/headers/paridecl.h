@@ -811,7 +811,7 @@ void    pariflush(void);
 void    pariputc(char c);
 void    pariputs(const char *s);
 void    pariputsf(const char *format, ...);
-char*   pGENtostr(GEN *g, long flag);
+char*   pGENtostr(GEN g, long flag);
 int     popinfile(void);
 GEN     readbin(char *name, FILE *f);
 void    sor(GEN g, char fo, long dd, long chmp);

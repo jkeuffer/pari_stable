@@ -1782,11 +1782,8 @@ escape0(char *tch)
 	case 'b': sor(x, GP_DATA->fmt->format, -1, GP_DATA->fmt->fieldw); break;
 	case 'x': voir(x, get_int(s, -1)); break;
         case 'w':
-	{
-	  GEN g[2]; g[0] = x; g[1] = NULL;
 	  s = get_sep_colon_ok(s); if (!*s) s = current_logfile;
-	  write0(s, g); return;
-	}
+	  write0(s, _vec(x)); return;
       }
       pariputc('\n'); return;
     }

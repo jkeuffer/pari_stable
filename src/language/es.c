@@ -680,31 +680,44 @@ GENtoTeXstr(GEN x) {
 
 /* see print0(). Returns gpmalloc()ed string */
 char *
-pGENtostr(GEN *g, long flag) {
+pGENtostr(GEN g, long flag) {
   pariout_t T = DFLT_OUTPUT;
-  char *t = pari_strdup("");
-  long tlen = 0;
+  pari_sp av = avma;
+  char *t, *t2;
+  long i, tlen = 0, l = lg(g);
+  GEN Ls, Ll;
 
   T.prettyp = flag;
-  for( ; *g; g++)
+  /* frequent special case */
+  if (l == 2) return GENtostr0((GEN)g[1], &T, &gen_output);
+
+  Ls = cgetg(l, t_VEC);
+  Ll = cgetg(l, t_VECSMALL);
+  for (i = 1; i < l; i++)
   {
-    char *t2, *s = GENtostr0(*g, &T, &gen_output);
-    tlen += strlen(s);
-    t2 = gpmalloc(tlen + 1);
-    (void)sprintf(t2, "%s%s", t, s);
-    free(s); free(t); t = t2;
+    char *s = GENtostr0((GEN)g[i], &T, &gen_output);
+    Ls[i] = (long)s;
+    Ll[i] = strlen(s);
+    tlen += Ll[i];
   }
-  return t;
+  t2 = t = gpmalloc(tlen + 1);
+  for (i = 1; i < l; i++)
+  {
+    strcpy(t2, (char*)Ls[i]);
+    t2 += Ll[i];
+    free((void*)Ls[i]);
+  }
+  avma = av; return t;
 }
-GEN Str0(GEN *g, long flag) {
+GEN Str0(GEN g, long flag) {
   char *t = pGENtostr(g, flag);
   GEN z = strtoGENstr(t);
   free(t); return z;
 }
-GEN Str(GEN *g)    { return Str0(g, f_RAW); }
-GEN Strtex(GEN *g) { return Str0(g, f_TEX); }
+GEN Str(GEN g)    { return Str0(g, f_RAW); }
+GEN Strtex(GEN g) { return Str0(g, f_TEX); }
 GEN
-Strexpand(GEN *g) {
+Strexpand(GEN g) {
   char *s = pGENtostr(g, f_RAW), *t = expand_tilde(s);
   GEN z = strtoGENstr(t);
   free(t); free(s); return z;
@@ -3106,28 +3119,29 @@ readbin(char *name, FILE *f)
 /**                             GP I/O                            **/
 /**                                                               **/
 /*******************************************************************/
-/* print a sequence of (NULL terminated) GEN */
+/* print a vector of GENs */
 void
-print0(GEN *g, long flag)
+print0(GEN g, long flag)
 {
   pariout_t T = GP_DATA? *(GP_DATA->fmt): DFLT_OUTPUT; /* copy */
+  long i, l = lg(g);
   T.prettyp = flag;
-  for( ; *g; g++)
-    if (flag != f_TEX && typ(*g)==t_STR)
-      pariputs(GSTR(*g)); /* text surrounded by "" otherwise */
+  for (i = 1; i < l; i++)
+    if (flag != f_TEX && typ(g[i])==t_STR)
+      pariputs(GSTR(g[i])); /* text surrounded by "" otherwise */
     else
-      gen_output(*g, &T);
+      gen_output((GEN)g[i], &T);
 }
 
 #define PR_NL() {added_newline = 1; pariputc('\n'); pariflush(); }
 #define PR_NO() {added_newline = 0; pariflush(); }
-void print   (GEN *g) { print0(g, f_RAW);       PR_NL(); }
-void printp  (GEN *g) { print0(g, f_PRETTYOLD); PR_NL(); }
-void printtex(GEN *g) { print0(g, f_TEX);       PR_NL(); }
-void print1  (GEN *g) { print0(g, f_RAW);       PR_NO(); }
-void printp1 (GEN *g) { print0(g, f_PRETTYOLD); PR_NO(); }
+void print   (GEN g) { print0(g, f_RAW);       PR_NL(); }
+void printp  (GEN g) { print0(g, f_PRETTYOLD); PR_NL(); }
+void printtex(GEN g) { print0(g, f_TEX);       PR_NL(); }
+void print1  (GEN g) { print0(g, f_RAW);       PR_NO(); }
+void printp1 (GEN g) { print0(g, f_PRETTYOLD); PR_NO(); }
 
-void error0(GEN *g) { err(user, g); }
+void error0(GEN g) { err(user, g); }
 
 static char *
 wr_check(char *s) {
@@ -3145,9 +3159,9 @@ void gpwritebin(char *s, GEN x) { char *t=wr_check(s); writebin(t, x); free(t);}
 
 #define WR_NL() {pariputc('\n'); pariflush(); switchout(NULL); }
 #define WR_NO() {pariflush(); switchout(NULL); }
-void write0  (char *s, GEN *g) { wr_init(s); print0(g, f_RAW); WR_NL(); }
-void writetex(char *s, GEN *g) { wr_init(s); print0(g, f_TEX); WR_NL(); }
-void write1  (char *s, GEN *g) { wr_init(s); print0(g, f_RAW); WR_NO(); }
+void write0  (char *s, GEN g) { wr_init(s); print0(g, f_RAW); WR_NL(); }
+void writetex(char *s, GEN g) { wr_init(s); print0(g, f_TEX); WR_NL(); }
+void write1  (char *s, GEN g) { wr_init(s); print0(g, f_RAW); WR_NO(); }
 
 /*******************************************************************/
 /**                                                               **/
