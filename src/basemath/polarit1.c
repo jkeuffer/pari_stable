@@ -799,6 +799,7 @@ spec_FpXQ_pow(GEN x, GEN p, GEN S)
   long av = avma, lim = stack_lim(av,1), i,dx = lgef(x)-3;
   GEN x0 = x+2, z;
   z = (GEN)x0[0];
+  if (dx < 0) err(talker, "zero polynomial in FpXQ_pow. %Z not prime", p);
   for (i = 1; i <= dx; i++)
   {
     GEN d, c = (GEN)x0[i]; /* assume coeffs in [0, p-1] */
