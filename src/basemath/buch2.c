@@ -273,8 +273,7 @@ FBgen(GEN nf,long n2,long n)
         { setlg(p1,k); p1 = gerepilecopy(av,p1); }
       idealbase[i] = p1;
     }
-    if (!*delta) err(primer1);
-    p += *delta++;
+    NEXT_PRIME_VIADIFF_CHECK(p, delta);
     if (KC == 0 && p>n) { KCZ=i; KC=ip; }
   }
   if (!KC) return NULL;

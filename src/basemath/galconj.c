@@ -1653,13 +1653,10 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l, long karma_type
          && (nbtest < 3 * nbmax || !(group&ga_non_wss)) ;)
   {
     gpmem_t av;
-    long    prime_incr;
     GEN     ip,FS,p1;
     long o,norm_o=1;
-    prime_incr = *primepointer++;
-    if (!prime_incr)
-      err(primer1);
-    p += prime_incr;
+
+    NEXT_PRIME_VIADIFF_CHECK(p,primepointer);
     /*discard small primes*/
     if (p <= min_prime)
       continue;
@@ -1745,17 +1742,14 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l, long karma_type
   if (calcul_l && O[1]<=linf)
   {
     gpmem_t av;
-    long    prime_incr;
     long    l=0;
     /*we need a totally splited prime l*/
     av = avma;
     while (l == 0)
     {
       long nb;
-      prime_incr = *primepointer++;
-      if (!prime_incr)
-	err(primer1);
-      p += prime_incr;
+
+      NEXT_PRIME_VIADIFF_CHECK(p,primepointer);
       if (p<=linf) continue;
       nb=FpX_nbroots(T,stoi(p));
       if (nb == n)
@@ -2628,7 +2622,7 @@ galoisfindfrobenius(GEN T, GEN L, GEN den, struct galois_frobenius *gf,
   {
     gpmem_t av = avma;
     long    isram;
-    long    i,c;
+    long    i;
     GEN     ip,Tmod;
     ip = stoi(gf->p);
     Tmod = lift((GEN) factmod(T, ip));
@@ -2673,10 +2667,7 @@ galoisfindfrobenius(GEN T, GEN L, GEN den, struct galois_frobenius *gf,
 	  err(warner, "galoisconj _may_ hang up for this polynomial");
       }
     }
-    c = *primepointer++;
-    if (!c)
-      err(primer1);
-    gf->p += c;
+    NEXT_PRIME_VIADIFF_CHECK(gf->p, primepointer);
     if (DEBUGLEVEL >= 4)
       fprintferr("GaloisConj:next p=%ld\n", gf->p);
     avma = av;
@@ -3057,13 +3048,11 @@ numberofconjugates(GEN T, long pdepart)
   ltop2 = avma;
   for (p = 0, primepointer = diffptr; nbtest < nbmax && card > 1;)
   {
-    long    s, c;
+    long    s;
     long    isram;
     GEN     S;
-    c = *primepointer++;
-    if (!c)
-      err(primer1);
-    p += c;
+
+    NEXT_PRIME_VIADIFF_CHECK(p,primepointer);
     if (p < pdepart)
       continue;
     S = (GEN) simplefactmod(T, stoi(p));

@@ -610,25 +610,27 @@ choose_prime(GEN pol,GEN dpol,long d,GEN *ptff,GEN *ptlistpotbl, long *ptlcm)
   minp = N*(m-1)/2;
   if (DEBUGLEVEL) (void)timer2();
   di++; p = stoi(2);
-  while (p[2]<=minp) p[2] += *di++;
+  while (p[2]<=minp)
+      NEXT_PRIME_VIADIFF(p[2], di);
   oldllist = 100000;
   oldlcm = 0;
   oldlistpotbl = oldff = oldn = NULL; pp = 0; /* gcc -Wall */
   av = avma;
-  for(k=1; k<11 || !oldn; k++,p[2]+= *di++,avma = av)
+  for(k=1; k<11 || !oldn; k++,avma = av)
   {
-    while (!smodis(dpol,p[2])) p[2] += *di++;
+    while (!smodis(dpol,p[2]))
+      NEXT_PRIME_VIADIFF(p[2], di);
     if (k > 50) err(talker,"sorry, too many block systems in nfsubfields");
     ff=(GEN)factmod0(pol,p)[1]; r=lg(ff)-1;
-    if (r == 1 || r == N) continue;
+    if (r == 1 || r == N) goto repeat;
 
     n = cgetg(r+1, t_VECSMALL);
     lcm = n[1] = degpol(ff[1]);
     for (j=2; j<=r; j++) { n[j] = degpol(ff[j]); lcm = clcm(lcm,n[j]); }
-    if (lcm < oldlcm) continue; /* false when oldlcm = 0 */
-    if (r >= BIL) { err(warner,"subfields: overflow in calc_block"); continue; }
+    if (lcm < oldlcm) goto repeat; /* false when oldlcm = 0 */
+    if (r >= BIL) { err(warner,"subfields: overflow in calc_block"); goto repeat; }
     if (DEBUGLEVEL) fprintferr("p = %ld,\tlcm = %ld,\torbits: %Z\n",p[2],lcm,n);
-    if (oldn && gegal(n,oldn)) continue;
+    if (oldn && gegal(n,oldn)) goto repeat;
 
     listpotbl = potential_block_systems(N,d,n, oldllist);
     if (!listpotbl) { oldlistpotbl = NULL; pp = p[2]; break; }
@@ -637,12 +639,14 @@ choose_prime(GEN pol,GEN dpol,long d,GEN *ptff,GEN *ptlistpotbl, long *ptlcm)
     {
       if (DEBUGLEVEL) msgtimer("#pbs >= %ld [aborted]",oldllist);
       for (j=1; j<llist; j++) free((void*)listpotbl[j]);
-      free((void*)(listpotbl-1)); continue;
+      free((void*)(listpotbl-1)); goto repeat;
     }
     oldllist = llist; oldlistpotbl = listpotbl;
     pp = p[2]; oldff = ff; oldlcm = lcm; oldn = n;
     if (DEBUGLEVEL) msgtimer("#pbs = %ld",llist);
     av = avma;
+   repeat:
+    NEXT_PRIME_VIADIFF(p[2], di);
   }
   if (DEBUGLEVEL) fprintferr("Chosen prime: p = %ld\n",pp);
   *ptlistpotbl=oldlistpotbl; *ptff=oldff; *ptlcm=oldlcm; return stoi(pp);

@@ -2082,7 +2082,7 @@ dirzetak0(GEN nf, long N0)
 
   while (court[2]<=N0)
   {
-    court[2] += *d++; if (! *d) err(primer1);
+    NEXT_PRIME_VIADIFF_CHECK(court[2], d);
     if (smodis(disc,court[2])) /* court does not divide index */
       { vect = (GEN) simplefactmod(pol,court)[1]; lx=lg(vect); }
     else

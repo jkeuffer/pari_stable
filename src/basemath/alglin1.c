@@ -1529,11 +1529,10 @@ ZM_inv(GEN M, GEN dM)
   av2 = avma;
   H = NULL;
   d += 3000; /* 27449 = prime(3000) */
-  for(p = 27449; ; p+= *d++)
+  for(p = 27449; ; )
   {
-    if (!*d) err(primer1);
     dMp = umodiu(dM,p);
-    if (!dMp) continue;
+    if (!dMp) goto repeat;
     Hp = u_FpM_inv_sp(u_Fp_FpM(M,p), p);
     if (dMp != 1) Hp = u_FpM_Fp_mul_ip(Hp, dMp, p);
 
@@ -1557,6 +1556,8 @@ ZM_inv(GEN M, GEN dM)
       if (DEBUGMEM>1) err(warnmem,"ZM_inv");
       gerepilemany(av2,gptr, 2);
     }
+   repeat:
+    NEXT_PRIME_VIADIFF_CHECK(p,d);
   }
   if (DEBUGLEVEL>5) msgtimer("ZM_inv done");
   return gerepilecopy(av, H);

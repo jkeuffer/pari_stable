@@ -226,9 +226,9 @@ galmodp(GEN pol, GEN dpol, GEN TYP, long *gr, long **GR)
 
   dtyp = new_chunk(NMAX+1);
   k = gr[0]; for (i=1; i<k; i++) gr[i]=1;
-  for (k=1; k<15; k++, d++)
+  for (k=1; k<15; k++)
   {
-    p += *d; if (!*d) err(primer1);
+    NEXT_PRIME_VIADIFF_CHECK(p,d);
     if (!smodis(dpol,p)) continue; /* p divides dpol */
 
     p1 = simplefactmod(pol,stoi(p));

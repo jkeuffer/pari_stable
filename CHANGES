@@ -76,6 +76,7 @@ IZ  5- [gphelp:] allow uninstalled operation from $TOPDIR or $TOPDIR/Oarch
 IZ  6- [gphelp:] better error messages in case TeX compilation fails
     7- [development version:] add version number for this file to the gp
        header when using CVS
+IZ  8- [library:] unified access to diffptr (NEXT_PRIME_VIADIFF macro)
 
   Added
  BA 1- Add PARI_VERSION and PARI_VERSION_CODE to paricfg.h

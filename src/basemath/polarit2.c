@@ -1403,7 +1403,7 @@ DDF(GEN a, long hint)
   {
     gpmem_t av0 = avma;
 
-    p += *pt++; if (!*pt) err(primer1);
+    NEXT_PRIME_VIADIFF_CHECK(p,pt);
     if (lead && !smodis(lead,p)) continue;
     z = u_Fp_FpX(a,0, p);
     if (!u_FpX_is_squarefree(z, p)) { avma = av0; continue ; }
@@ -4236,21 +4236,21 @@ nfgcd(GEN P, GEN Q, GEN nf, GEN den)
     GEN M, dsol;
     GEN R, ax, bo;
     byteptr primepointer;
-    for (p = 27449, primepointer = diffptr + 3000; ; p += *(primepointer++))
+    for (p = 27449, primepointer = diffptr + 3000; ; )
     {
       if (!*primepointer) err(primer1);
       if (!smodis(den, p))
-        continue;/*Discard primes dividing disc(T) or leadingcoeff(PQ) */
+        goto repeat;/*Discard primes dividing disc(T) or leadingcoeff(PQ) */
       if (DEBUGLEVEL>5) fprintferr("nfgcd: p=%d\n",p);
       if ((R = FpXQX_safegcd(P, Q, nf, stoi(p))) == NULL)
-        continue;/*Discard primes when modular gcd does not exist*/
+        goto repeat;/*Discard primes when modular gcd does not exist*/
       dR = degpol(R);
       if (dR == 0) return scalarpol(gun, x);
-      if (mod && dR > dM) continue; /* p divides Res(P/gcd, Q/gcd). Discard. */
+      if (mod && dR > dM) goto repeat; /* p divides Res(P/gcd, Q/gcd). Discard. */
 
       R = polpol_to_mat(R, d);
       /* previous primes divided Res(P/gcd, Q/gcd)? Discard them. */
-      if (!mod || dR < dM) { M = R; mod = stoi(p); dM = dR; continue; }
+      if (!mod || dR < dM) { M = R; mod = stoi(p); dM = dR; goto repeat; }
       if (low_stack(st_lim, stack_lim(btop, 1)))
       {
 	if (DEBUGMEM>1) err(warnmem,"nfgcd");
@@ -4264,11 +4264,13 @@ nfgcd(GEN P, GEN Q, GEN nf, GEN den)
       /* I suspect it must be better to take amax > bmax*/
       bo = racine(shifti(mod, -1));
       if ((sol = matratlift(M, mod, bo, bo, den)) == NULL)
-        continue;
+        goto repeat;
       sol = mat_to_polpol(sol,x,y);
       dsol = primpart(sol);
       if (gcmp0(pseudorem_i(P, dsol, nf))
        && gcmp0(pseudorem_i(Q, dsol, nf))) break;
+    repeat:
+      NEXT_PRIME_VIADIFF_CHECK(p, primepointer);
     }
   }
   return gerepilecopy(ltop, sol);

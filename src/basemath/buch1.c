@@ -148,7 +148,7 @@ get_pq(GEN D, GEN z, GEN flag, GEN *ptp, GEN *ptq)
   ell = 3;
   while (l < 3 || ell<=MAXL)
   {
-    ell += *diffell++; if (!*diffell) err(primer1);
+    NEXT_PRIME_VIADIFF_CHECK(ell, diffell);
     if (smodis(z,ell) && kross(d,ell) > 0)
     {
       court[2]=ell; form = redimag(primeform(D,court,0));
@@ -979,7 +979,7 @@ factorbasequad(GEN Disc, long n2, long n)
       default:  /* split */
         i++; numfactorbase[p]=i; factorbase[i] = p;
     }
-    p += *d++; if (!*d) err(primer1);
+    NEXT_PRIME_VIADIFF_CHECK(p, d);
     if (KC == 0 && p>n) KC = i;
   }
   if (!KC) { free(factorbase); free(numfactorbase); return; }

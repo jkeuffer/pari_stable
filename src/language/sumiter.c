@@ -105,7 +105,8 @@ sinitp(long a, long c, byteptr *ptr)
   byteptr p = *ptr;
   if (a <= 0) a = 2;
   if (maxprime() < (ulong)a) err(primer1);
-  while (a > c) c += *p++;
+  while (a > c)
+     NEXT_PRIME_VIADIFF(c,p);
   *ptr = p; return c;
 }
 

@@ -1362,7 +1362,7 @@ n_s(ulong n, GEN *tab)
   GEN x = NULL;
   long p, e;
 
-  for (p = 3; n > 1; p += *d++)
+  for (p = 3; n > 1; )
   {
     e = svaluation(n, p, &n);
     if (e)
@@ -1370,6 +1370,7 @@ n_s(ulong n, GEN *tab)
       GEN y = tab[pows(p,e)];
       if (!x) x = y; else x = gmul(x,y);
     }
+    NEXT_PRIME_VIADIFF_CHECK(p,d);
   }
   return x;
 }
@@ -1468,27 +1469,31 @@ czeta(GEN s0, long prec)
   d = diffptr + 1;
   if (typ(s0) == t_INT)
   { /* no explog for 1/p^s */
-    for (p=2; p < nn; p += *d++)
+    for (p=2; p < nn;) {
       tab[p] = divrr(unr, rpowsi(p, s0, prec));
+      NEXT_PRIME_VIADIFF_CHECK(p,d);
+    }    
     a = divrr(unr, rpowsi(nn, s0, prec));
   }
   else
   { /* general case */
     ms = gneg(s); p1 = cgetr(prec);
-    for (p=2; p < nn; p += *d++)
+    for (p=2; p < nn;)
     {
       affsr(p, p1);
       tab[p] = gexp(gmul(ms, mplog(p1)), prec);
+      NEXT_PRIME_VIADIFF_CHECK(p,d);
     }
     affsr(nn,p1);
     a = gexp(gmul(ms, mplog(p1)), prec);
   }
   sqn = (long)sqrt(nn-1.);
   d = diffptr + 2; /* fill in odd prime powers */
-  for (p=3; p <= sqn; p += *d++)
+  for (p=3; p <= sqn; )
   {
     ulong oldq = p, q = p*p;
     while (q<(ulong)nn) { tab[q] = gmul(tab[p], tab[oldq]); oldq = q; q *= p; }
+    NEXT_PRIME_VIADIFF_CHECK(p,d);
   }
   if (DEBUGLEVEL>2) msgtimer("tab[q^-s] from 1 to N-1"); 
 

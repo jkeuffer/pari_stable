@@ -2003,7 +2003,7 @@ ideallistzstarall(GEN bnf,long bound,long flag)
   if (bound > (long)maxprime()) err(primer1);
   for (p[2]=0; p[2]<=bound; )
   {
-    p[2] += *ptdif++;
+    NEXT_PRIME_VIADIFF(p[2], ptdif);
     if (DEBUGLEVEL>1) { fprintferr("%ld ",p[2]); flusherr(); }
     fa = primedec(nf,p);
     for (j=1; j<lg(fa); j++)

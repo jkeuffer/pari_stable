@@ -49,40 +49,57 @@ reason. You should always use \tet{mpeuler} and \tet{mppi} (note that only
 the first call will actually compute the constant, unless a higher precision
 is required).
 
+In addition, some single or double-precision real numbers (like \kbd{PI}) are
+predefined, and their list is in the file \kbd{paricom.h}.
+
 Finally, one has access to a table of (differences of) primes through the
 pointer \tet{diffptr}. This is used as follows: when
 
-\fun{void}{pari_init}{long size, long maxprime}
+\fun{void}{pari_init}{long size, ulong maxprime}
 
 \noindent is called, this table is initialized with the successive
 differences of primes up to (just a little beyond) \kbd{maxprime}
-(see \secref{se:intro4}). \tet{maxprime} has to be less than $436272744$,
-whatever memory is available. A difference of $0$ means we have reached the
-end of the table. The largest prime computable using this table is
-available as the output of
+(see \secref{se:intro4}). The prime table will occupy roughly
+$\kbd{maxprime}/\log(\kbd{maxprime})$ bytes in memory, so be sensible when
+choosing \kbd{maxprime} (it is $500000$ by default under \kbd{gp}). In any case,
+the implementation requires that $\tet{maxprime} < 4294965248$
+(resp.~$18446744073709549568$) on 32-bit (resp.~64-bit) machines, whatever memory
+is available.
+
+The largest prime computable using this table is available as the output of
 
 \fun{ulong}{maxprime}{}
 
-\noindent Here's a small example:
+After the following initializations (the names $p$ and \var{ptr} are arbitrary of
+course)
+\bprog
+byteptr ptr = diffptr;
+ulong p = 0;
+@eprog
+\noindent calling the macro \tet{NEXT_PRIME_VIADIFF_CHECK(p, ptr)} repeatedly will
+assign the successive prime numbers to $p$. Overrunning the prime table boundary
+will raise the error \tet{primer1}, which will just print the error message:
+
+\kbd{*** not enough precomputed primes}
+
+\noindent and then abort the computations. The alternative macro
+\tet{NEXT_PRIME_VIADIFF} operates in the same way, but will omit that check, and
+is slightly faster. It should be used in the following way:
 %
 \bprog
-byteptr d = diffptr;
+byteptr ptr = diffptr;
 ulong p = 0;
 
 if (maxprime() < goal) err(primer1); /*@Ccom not enough primes */
 while (p <= goal) /*@Ccom run through all primes up to \kbd{goal} */
 {
-  p += *d++;
+  NEXT_PRIME_VIADIFF(p, ptr);
   ...
 }
 @eprog\noindent
 Here, we use the general error handling function \kbd{err} (see
-\secref{se:err}), with the codeword \kbd{primer1}. This will just print
-the error message:
-
-\kbd{*** not enough precomputed primes}
-
-\noindent and then abort the computations.
+\secref{se:err}), with the codeword \kbd{primer1}, raising the ``not enough
+primes'' error.
 
 You can use the function \kbd{initprimes} from the file \kbd{arith2.c} to
 compute a new table on the fly and assign it to \kbd{diffptr} or to a
@@ -92,7 +109,4 @@ all pointers into the old table will become invalid.
 
 PARI currently guarantees that the first 6547 primes, up to and including
 65557, will be present in the table, even if you set \kbd{maxnum} to zero.
-
-In addition, some single or double-precision real numbers are predefined,
-and their list is in the file \kbd{paricom.h}.
 \vfill\eject

@@ -914,9 +914,9 @@ step5(GEN N, int p, GEN et)
   const ulong ltab = (NBITSN/kglob)+2;
 
   av = avma;
-  for (q = 3; *d; q += *d++)
+  for (q = 3; *d; )
   {
-    if (q%p != 1 || smodis(et,q) == 0) continue;
+    if (q%p != 1 || smodis(et,q) == 0) goto repeat;
 
     if (smodis(N,q) == 0) return -1;
     k = u_val(q-1, p);
@@ -931,6 +931,8 @@ step5(GEN N, int p, GEN et)
     if (fl == 1) {ctglob = max(ctglob,ct); return 1;}
     ct++;
     avma = av;
+   repeat:
+    NEXT_PRIME_VIADIFF(q,d);
   }
   return 0;
 }

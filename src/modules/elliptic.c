@@ -3055,7 +3055,7 @@ torsellnagelllutz(GEN e)
 static long
 torsbound(GEN e)
 {
-  long m, b, c, d, prime = 2;
+  long m, b, c, prime = 2;
   gpmem_t av = avma;
   byteptr p = diffptr;
   GEN D = (GEN)e[12];
@@ -3064,8 +3064,7 @@ torsbound(GEN e)
   b = c = m = 0; p++;
   while (m<n)
   {
-    d = *p++; if (!d) err(primer1);
-    prime += d;
+    NEXT_PRIME_VIADIFF_CHECK(prime,p);
     if (smodis(D, prime))
     {
       b = cgcd(b, prime+1 - itos(apell0(e,prime)));

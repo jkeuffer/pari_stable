@@ -769,7 +769,7 @@ testprime(GEN bnf, long minkowski)
   if ((ulong)minkowski > maxprime()) err(primer1);
   while (pp < minkowski)
   {
-    pp += *delta++;
+    NEXT_PRIME_VIADIFF(pp, delta);
     if (DEBUGLEVEL>1) fprintferr("*** p = %ld\n",pp);
     vectpp=primedec(bnf,stoi(pp)); nbideal=lg(vectpp)-1;
     /* loop through all P | p if ramified, all but one otherwise */
@@ -1321,8 +1321,10 @@ certifybuchall(GEN bnf)
   rootsofone = dummycopy(rootsofone);
   rootsofone[2] = (long)algtobasis(nf, (GEN)rootsofone[2]);
 
-  for (p = *delta++; p <= bound; p += *delta++)
+  for (p = *delta++; p <= bound; ) {  
     check_prime(p,bnf,cyc,cycgen,funits,rootsofone,big);
+    NEXT_PRIME_VIADIFF(p, delta);
+  }
 
   if (nbgen)
   {
@@ -1551,7 +1553,7 @@ rnfnormgroup(GEN bnr, GEN polrel)
      * and including last pr^f or p^f is the same, but the last isprincipal
      * is much easier! oldf is used to track this */
 
-    p += *d++; if (!*d) err(primer1);
+    NEXT_PRIME_VIADIFF_CHECK(p,d);
     if (!smodis(index, p)) continue; /* can't be treated efficiently */
 
     fa = primedec(nf, stoi(p)); lfa = lg(fa)-1;
@@ -2281,7 +2283,7 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
   if (bound > (long)maxprime()) err(primer1);
   for (p[2]=0; p[2]<=bound; )
   {
-    p[2] += *ptdif++;
+    NEXT_PRIME_VIADIFF(p[2], ptdif);
     if (!flbou && p[2]>sqbou)
     {
       if (DEBUGLEVEL>1) fprintferr("\nStarting rayclassno computations\n");

@@ -279,6 +279,24 @@ get_int(char *s, long dflt)
   return dflt;
 }
 
+static ulong
+get_uint(char *s)
+{
+  ulong n = 0;
+
+  s=get_sep(s);
+  if (*s == '-') 
+      err(talker,"arguments must be positive integers");
+  while(isdigit((int)*s)) { n = 10*n + (*s++ - '0'); }
+  switch(*s)
+  {
+    case 'k': case 'K': n *= 1000;    s++; break;
+    case 'm': case 'M': n *= 1000000; s++; break;
+  }
+  if (*s) err(talker2,"I was expecting an integer here");
+  return n;
+}
+
 /* tell TeXmacs GP will start outputing data */
 static void
 tm_start_output(void)
@@ -2635,7 +2653,8 @@ read_opt(long argc, char **argv)
 
   /* override the values from gprc */
   testint(b, (long*)&paribufsize); if (paribufsize < 10) paribufsize = 10;
-  testint(p, (long*)&primelimit);
+  if (p)
+      primelimit = get_uint(p);		/* There is no atou()... */
   testint(s, (long*)&top);
   if (GP_DATA->flags & (EMACS|TEXMACS)) disable_color = 1;
   pari_outfile=stdout; return pre;

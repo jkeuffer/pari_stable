@@ -46,7 +46,7 @@ statement of a main program should be to initialize the PARI system, and in
 particular the PARI stack which will be both a scratchboard and a repository
 for computed objects. This is done with a call to the function
 
-\fun{void}{pari_init}{long size, long maxprime)}
+\fun{void}{pari_init}{long size, ulong maxprime)}
 
 \noindent The first argument is the number of bytes given to PARI to work
 with (it should not reasonably be taken below 500000), and the second is the
@@ -105,7 +105,7 @@ $\bullet$ access to all the built-in functions of the PARI library.
 These are declared to the outside world when you include \kbd{pari.h}, but
 need the above things to function properly. So if you forget the call to
 \tet{pari_init}, you will immediately get a fatal error when running your
-program (usually a segmentation fault).
+program.
 
 \section{Important technical notes}
 
@@ -149,9 +149,9 @@ abbreviate:
 \kbdsidx{un}%
 \kbdsidx{lpolx}
 In general, replacing a leading \kbd{g} by an \kbd{l} in the name of a PARI
-function will typecast the result to \kbd{long}. Note that \kbd{ldiv} is an
-ANSI C function which is is hidden in PARI by a macro of the same name
-representing \kbd{(long)gdiv}.
+function will typecast the result to \kbd{long}. Note that \kbd{ldiv} is an ANSI C
+function which is hidden in PARI by a macro of the same name representing
+\kbd{(long)gdiv}.
 
 The macro $\teb{coeff}(x,m,n)$ exists with exactly the meaning of \kbd{x[m,n]}
 under GP when \kbd{x} is a matrix. This is a purely syntactical trick

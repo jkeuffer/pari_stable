@@ -653,8 +653,9 @@ static byteptr
 mpqs_iterate_primes(long *p, byteptr primes_ptr)
 {
   long prime = *p;
-  if (*primes_ptr)
-    prime += *primes_ptr++;
+  if (*primes_ptr) {
+    NEXT_PRIME_VIADIFF(prime,primes_ptr)      
+  }
   else
   {
     gpmem_t av = avma;
@@ -749,9 +750,12 @@ static long
 mpqs_count_primes(void)
 {
   byteptr p = mpqs_diffptr;
+  long gaps = 0;
 
-  for ( ; *p; p++) /* empty */;
-  return (p - mpqs_diffptr);
+  for ( ; *p; p++)
+      if (*p == DIFFPTR_SKIP)
+	  gaps++;
+  return (p - mpqs_diffptr - gaps);
 }
 
 /**

@@ -39,13 +39,12 @@ GEN
 prime(long n)
 {
   byteptr p = diffptr;
-  long c, prime = 0;
+  long prime = 0;
 
   if (n <= 0) err(talker, "n-th prime meaningless if n = %ld",n);
   while (n--)
   {
-    c = *p++; if (!c) err(primer1);
-    prime += c;
+    NEXT_PRIME_VIADIFF_CHECK(prime,p);
   }
   return stoi(prime);
 }
@@ -58,7 +57,10 @@ pith(long n)
 
   if (n <= 0) err(talker, "pith meaningless if n = %ld",n);
   if (maxprime() <= (ulong)n) err(primer1);
-  while (prime<=(ulong)n) { prime += *p++; res++; }
+  while (prime<=(ulong)n) {
+      NEXT_PRIME_VIADIFF(prime,p);
+      res++;
+  }
   return stoi(res-1);
 }
 
@@ -66,15 +68,15 @@ GEN
 primes(long n)
 {
   byteptr p = diffptr;
-  long c, prime = 0;
+  long prime = 0;
   GEN y,z;
 
   if (n < 0) n = 0;
   z = y = cgetg(n+1,t_VEC);
   while (n--)
   {
-    c = *p++; if (!c) err(primer1);
-    prime += c; *++z = lstoi(prime);
+    NEXT_PRIME_VIADIFF_CHECK(prime,p);
+    *++z = lstoi(prime);
   }
   return y;
 }
@@ -120,10 +122,11 @@ initprimes1(long size, long *lenp, long *lastp)
    recursive call will bottom out and invoke initprimes1() at once.
    (Not static;  might conceivably be useful to someone in library mode) */
 byteptr
-initprimes0(ulong maxnum, long *lenp, long *lastp)
+initprimes0(ulong maxnum, long *lenp, ulong *lastp)
 {
-  long k, size, alloced, asize, psize, rootnum, curlow, last, remains;
+  long k, size, alloced, asize, psize, rootnum;
   byteptr q,r,s,fin, p, p1, fin1, plast, curdiff;
+  ulong last, remains, curlow;
 
 #if 0
   fprintferr("initprimes0: called for maxnum = %lu\n", maxnum);
@@ -183,6 +186,7 @@ initprimes0(ulong maxnum, long *lenp, long *lastp)
     }
     memset(p, 0, asize);
     /* p corresponds to curlow.  q runs over primediffs.  */
+    /* Don't care about DIFFPTR_SKIP: false positives provide no problem */
     for (q = p1+2, k = 3; q <= fin1; k += *q++)
     {
       /* The first odd number which is >= curlow and divisible by p
@@ -208,9 +212,14 @@ initprimes0(ulong maxnum, long *lenp, long *lastp)
     /* now q runs over addresses corresponding to primes */
     for (q = p; ; plast = q++)
     {
+      long d;
+
       while (*q) q++;		/* use 0-sentinel at end */
       if (q >= fin) break;
-      *curdiff++ = (q - plast) << 1;
+      d = (q - plast) << 1;
+      while (d >= DIFFPTR_SKIP)
+	*curdiff++ = DIFFPTR_SKIP, d -= DIFFPTR_SKIP;
+      *curdiff++ = d;
     }
     plast -= asize - 1;
     remains -= asize - 1;
@@ -239,17 +248,17 @@ ulong
 maxprime(void) { return _maxprime; }
 
 byteptr
-initprimes(long maxnum)
+initprimes(ulong maxnum)
 {
-  long len, last;
+  long len;
+  ulong last;
   byteptr p;
-  /* The algorithm must see the next prime beyond maxnum, whence the +257. */
-  /* switch to unsigned: adding the 257 _could_ wrap to a negative number. */
-  ulong maxnum1 = ((maxnum<65302?65302:maxnum)+257ul);
+  /* The algorithm must see the next prime beyond maxnum, whence the +512. */
+  /* switch to unsigned: adding the 512 _could_ wrap to a negative number. */
+  ulong maxnum1 = ((maxnum<65302?65302:maxnum)+512ul);
 
-  if (maxnum1 > 436273000)
-    err(talker,"impossible to have prestored primes > 436273009");
-
+  if ((maxnum>>1) > VERYBIGINT - 1024)
+      err(talker, "Too large primelimit");
   p = initprimes0(maxnum1, &len, &last);
 #if 0 /* not yet... GN */
   static int build_the_tables = 1;
@@ -438,7 +447,7 @@ auxdecomp1(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
   p = 2;
   while (*d && p <= lim1)
   {
-    p += *d++;
+    NEXT_PRIME_VIADIFF(p,d);
     if (mpdivisis(n,p,n))
     {
       nb++; k=1; while (mpdivisis(n,p,n)) k++;
@@ -693,7 +702,7 @@ mu(GEN n)
 
   while (*d && p < lim1)
   {
-    p += *d++;
+    NEXT_PRIME_VIADIFF(p,d);
     if (mpdivisis(n,p,n))
     {
       if (smodis(n,p) == 0) { avma=av; return 0; }
@@ -739,7 +748,7 @@ issquarefree(GEN x)
     p = 2;
     while (*d && p < lim1)
     {
-      p += *d++;
+      NEXT_PRIME_VIADIFF(p,d);
       if (mpdivisis(x,p,x))
       {
 	if (smodis(x,p) == 0) { avma = av; return 0; }
@@ -779,7 +788,7 @@ omega(GEN n)
 
   while (*d && p < lim1)
   {
-    p += *d++;
+    NEXT_PRIME_VIADIFF(p,d);
     if (mpdivisis(n,p,n))
     {
       nb++; while (mpdivisis(n,p,n)); /* empty */
@@ -816,7 +825,7 @@ bigomega(GEN n)
 
   while (*d && p < lim1)
   {
-    p += *d++;
+    NEXT_PRIME_VIADIFF(p,d);
     if (mpdivisis(n,p,n))
     {
       do nb++; while (mpdivisis(n,p,n));
@@ -854,7 +863,7 @@ phi(GEN n)
 
   while (*d && p < lim1)
   {
-    p += *d++;
+    NEXT_PRIME_VIADIFF(p,d);
     if (mpdivisis(n,p,n))
     {
       m = mulis(m, p-1);
@@ -897,7 +906,7 @@ numbdiv(GEN n)
 
   while (*d && p < lim1)
   {
-    p += *d++;
+    NEXT_PRIME_VIADIFF(p,d);
     l=1; while (mpdivisis(n,p,n)) l++;
     m = mulsi(l,m); if (is_pm1(n)) { return gerepileupto(av,m); }
   }
@@ -936,7 +945,7 @@ sumdiv(GEN n)
 
   while (*d && p < lim1)
   {
-    p += *d++;
+    NEXT_PRIME_VIADIFF(p,d);
     if (mpdivisis(n,p,n))
     {
       m1 = utoi(p+1);
@@ -985,7 +994,7 @@ sumdivk(GEN n, long k)
 
   while (*d && p < lim1)
   {
-    p += *d++;
+    NEXT_PRIME_VIADIFF(p,d);
     if (mpdivisis(n,p,n))
     {
       pk = gpowgs(utoi(p),k); m1 = addsi(1,pk);

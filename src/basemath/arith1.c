@@ -2618,7 +2618,8 @@ classno(GEN x)
   c=lforms=0;
   while (c <= s && *p)
   {
-    c += *p++; k = krogs(D,c);
+    NEXT_PRIME_VIADIFF(c,p);
+    k = krogs(D,c);
     if (!k) continue;
 
     av2 = avma;

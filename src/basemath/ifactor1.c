@@ -513,10 +513,14 @@ snextpr(ulong p, byteptr *d, long *rcn, long *q, long k)
     { evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0 };
   static ulong *pp2 = pp + 2;
   static GEN gp = (GEN)pp;
-  long d1 = **d, rcn0;
+  long rcn0;
 
-  if (d1)
+  if (**d)
   {
+    byteptr dd = *d;
+    long d1 = 0;
+
+    NEXT_PRIME_VIADIFF(d1,dd);
     if (*rcn != NPRC)
     {
       rcn0 = *rcn;
@@ -532,7 +536,8 @@ snextpr(ulong p, byteptr *d, long *rcn, long *q, long k)
 	err(bugparier, "[caller of] snextpr");
       }
     }
-    return p + *(*d)++;
+    NEXT_PRIME_VIADIFF(p,*d);
+    return p;
   }
   /* we are beyond the diffptr table */
   if (*rcn == NPRC)		/* we need to initialize this now */
@@ -1318,7 +1323,8 @@ ellfacteur(GEN n, int insist)
       fprintferr("\tB2 = %6lu,\tgss = %4ld*420\n", B2, gss);
       flusherr();
     }
-    p = *d++;
+    p = 0;
+    NEXT_PRIME_VIADIFF(p,d);
 
     /* ---B1 PHASE--- */
     /* treat p=2 separately */

@@ -1541,7 +1541,7 @@ InitPrimesQuad(GEN bnr, long nmax, LISTray *R)
   R->L1 = _alloc(l, t_VECSMALL); R->L1ray = (GEN*)_alloc(l, t_VEC);
   R->L11 = _alloc(l, t_VECSMALL); R->L11ray = (GEN*)_alloc(l, t_VEC);
   prime = stoi(2);
-  for (p = 2; p <= nmax; p += *d++, prime[2] = p)
+  for (p = 2; p <= nmax; prime[2] = p) {
     switch (krogs(dk, p))
     {
     case -1: /* inert */
@@ -1566,6 +1566,8 @@ InitPrimesQuad(GEN bnr, long nmax, LISTray *R)
       }
       break;
     }
+    NEXT_PRIME_VIADIFF(p,d);
+  }  
   /* precompute isprincipalray(x), x in Z */
   R->rayZ = (GEN*)cgetg(condZ, t_VEC);
   for (i=1; i<condZ; i++)
@@ -1592,7 +1594,7 @@ InitPrimes(GEN bnr, long nmax, LISTray *R)
   R->L1 = _alloc(nmax, t_VECSMALL);
   R->L1ray = (GEN*)_alloc(nmax, t_VEC);
   prime = stoi(2);
-  for (p = 2; p <= nmax; p += *d++, prime[2] = p)
+  for (p = 2; p <= nmax; prime[2] = p)
   {
     tabpr = primedec(nf, prime);
     for (j = 1; j < lg(tabpr); j++)
@@ -1605,7 +1607,7 @@ InitPrimes(GEN bnr, long nmax, LISTray *R)
       _append(R->L1, (GEN)np);
       _append((GEN)R->L1ray, isprincipalray(bnr, pr));
     }
-
+    NEXT_PRIME_VIADIFF(p,d);
   }
   gptr[0] = &(R->L1);  gptr[1] = (GEN*)&(R->L1ray);
   gerepilemany(av,gptr,2);

@@ -4224,7 +4224,7 @@ INIT:
   }
 
   /* make sure p large enough */
-  while (p < (dres<<1)) p += *d++;
+  while (p < (dres<<1)) NEXT_PRIME_VIADIFF(p,d);
 
   H = H0 = H1 = NULL;
   lb = lgef(B); b = u_allocpol(degpol(B), 0);
@@ -4234,7 +4234,7 @@ INIT:
 
   for(;;)
   {
-    p += *d++; if (!*d) err(primer1);
+    NEXT_PRIME_VIADIFF_CHECK(p,d);
 
     a = u_Fp_FpX(A, 0, p);
     for (i=2; i<lb; i++)
@@ -4455,7 +4455,7 @@ ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound)
   dp = 0; /* gcc -Wall */
   for(;;)
   {
-    p += *d++; if (!*d) err(primer1);
+    NEXT_PRIME_VIADIFF_CHECK(p,d);
     if (dB) { dp = smodis(dB, p); if (!dp) continue; }
 
     a = u_Fp_FpX(A, 0, p);
@@ -4556,16 +4556,16 @@ modulargcd(GEN A0, GEN B0)
 
   av2 = avma; H = NULL;
   d += 3000; /* 27449 = prime(3000) */
-  for(p = 27449; ; p+= *d++)
+  for(p = 27449; ;)
   {
     if (!*d) err(primer1);
-    if (!umodiu(g,p)) continue;
+    if (!umodiu(g,p)) goto repeat;
 
     a = u_Fp_FpX(A, 0, p);
     b = u_Fp_FpX(B, 0, p); Hp = u_FpX_gcd_i(a,b, p);
     m = degpol(Hp);
     if (m == 0) { H = polun[varn(A0)]; break; } /* coprime. DONE */
-    if (m > n) continue; /* p | Res(A/G, B/G). Discard */
+    if (m > n) goto repeat; /* p | Res(A/G, B/G). Discard */
 
     if (is_pm1(g)) /* make sure lead(H) = g mod p */
       Hp = u_FpX_normalize(Hp, p);
@@ -4577,7 +4577,7 @@ modulargcd(GEN A0, GEN B0)
     if (m < n)
     { /* First time or degree drop [all previous p were as above; restart]. */
       H = ZX_init_CRT(Hp,p,varn(A0));
-      q = utoi(p); n = m; continue;
+      q = utoi(p); n = m; goto repeat;
     }
 
     qp = muliu(q,p);
@@ -4595,6 +4595,8 @@ modulargcd(GEN A0, GEN B0)
       if (DEBUGMEM>1) err(warnmem,"modulargcd");
       gerepilemany(av2,gptr,2);
     }
+   repeat:
+    NEXT_PRIME_VIADIFF_CHECK(p,d);
   }
   return gerepileupto(av, gmul(D,H));
 }
@@ -4621,19 +4623,19 @@ QX_invmod(GEN A0, GEN B0)
   /* A, B in Z[X] */
   av2 = avma; U = NULL;
   d += 3000; /* 27449 = prime(3000) */
-  for(p = 27449; ; p+= *d++)
+  for(p = 27449; ; )
   {
     if (!*d) err(primer1);
     a = u_Fp_FpX(A, 0, p);
     b = u_Fp_FpX(B, 0, p);
     /* if p | Res(A/G, B/G), discard */
-    if (!u_FpX_extresultant(b,a,p, &Vp,&Up)) continue;
+    if (!u_FpX_extresultant(b,a,p, &Vp,&Up)) goto repeat;
 
     if (!U)
     { /* First time */
       U = ZX_init_CRT(Up,p,varn(A0));
       V = ZX_init_CRT(Vp,p,varn(A0));
-      q = utoi(p); continue;
+      q = utoi(p); goto repeat;
     }
     if (DEBUGLEVEL>5) msgtimer("QX_invmod: mod %ld (bound 2^%ld)", p,expi(q));
     qp = muliu(q,p);
@@ -4652,6 +4654,8 @@ QX_invmod(GEN A0, GEN B0)
       if (DEBUGMEM>1) err(warnmem,"QX_invmod");
       gerepilemany(av2,gptr,3);
     }
+   repeat:
+    NEXT_PRIME_VIADIFF_CHECK(p,d);
   }
   D = D? gmul(D,res): res;
   return gerepileupto(av, gdiv(U,D));

@@ -182,7 +182,7 @@ choose_prime(GEN nf, GEN bad, GEN *p, byteptr *PT)
   gpmem_t av = avma;
   for (;;)
   {
-    pp += *pt++; if (!*pt) err(primer1);
+    NEXT_PRIME_VIADIFF_CHECK(pp, pt);
     if (! smodis(bad,pp)) continue;
     affui(pp, q);
     r = rootmod(x, q); if (lg(r) > 1) break;
