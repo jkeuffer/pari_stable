@@ -500,8 +500,15 @@ GEN
 zerocol(long n)
 {
   GEN y = cgetg(n+1,t_COL);
-  long i;
-  for (i=1; i<=n; i++) y[i]=zero;
+  long i; for (i=1; i<=n; i++) y[i]=zero;
+  return y;
+}
+
+GEN
+zerovec(long n)
+{
+  GEN y = cgetg(n+1,t_VEC);
+  long i; for (i=1; i<=n; i++) y[i]=zero;
   return y;
 }
 
