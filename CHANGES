@@ -56,6 +56,7 @@ Done for version 2.2.2 (released ??/??/2001):
    21- cd Oxxx; make -j4 bench ran things in the wrong order
    22- poltchebi, pollegendre gave bogus output for negative degrees
    23- possible SEGV or oo loop in polrootsmod when p not a prime
+   24- nfnewprec(bnf) could change bnf.gen (due to round-off errors)
 
   Changes
     1- allow compressing *.dvi files for the online help system
