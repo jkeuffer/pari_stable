@@ -1248,7 +1248,6 @@ FqX_rem(GEN x, GEN y, GEN T, GEN p)
 GEN
 FqX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *z)
 {
-  if (!T) err(bugparier,"FqX_divrem, T==NULL");
   return T? FpXQX_divrem(x,y,T,p,z): FpX_divrem(x,y,p,z);
 }
 
