@@ -1134,6 +1134,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
   double b0 = log((double)dP*2) / logp, logBr;
   GEN lP, Br, B, Bnorm, T, T2, TT, BL, m, u, norm, list;
   gpmem_t av, av2, lim;
+  long id = get_timer(0), ti_LLL = 0, ti_CF  = 0;
 
   lP = absi(leading_term(P));
   if (is_pm1(lP)) lP = NULL;
@@ -1209,7 +1210,9 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
      * m = [                  ]   square matrix
      *     [ T2   p^(a-b) I_s ]   T2 = T * BL  truncated
      */
+    if (DEBUGLEVEL>2) (void)gentimer(id);
     u = lllint_i(m, 4, 0, NULL, NULL, &B);
+    if (DEBUGLEVEL>2) ti_LLL += gentimer(id);
     norm = GS_norms(B, DEFAULTPREC);
     for (i=r+s; i>0; i--)
       if (cmprr((GEN)norm[i], Bnorm) < 0) break;
@@ -1220,13 +1223,13 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
         fprintferr("LLL_cmbf: increasing BitPerFactor = %ld\n", BitPerFactor);
       continue;
     }
+    if (i < r) BitPerFactor = 3;
 
-if (DEBUGLEVEL>2) genmsgtimer(3,"LLL reductions");
     n = r; r = i;
     if (r <= 1)
     {
       if (r == 0) err(bugparier,"LLL_cmbf [no factor]");
-      return _col(P);
+      list = _col(P); break;
     }
 
     setlg(u, r+1);
@@ -1241,11 +1244,15 @@ if (DEBUGLEVEL>2) genmsgtimer(3,"LLL reductions");
     if (r*rec >= n0) continue;
 
     av2 = avma;
+    if (DEBUGLEVEL>2) (void)gentimer(id);
     list = check_factors(P, BL, bound, famod, pa);
-if (DEBUGLEVEL>2) genmsgtimer(3,"checking factors");
-    if (list) return list;
+    if (DEBUGLEVEL>2) ti_CF += gentimer(id);
+    if (list) break;
     avma = av2;
   }
+  if (DEBUGLEVEL>2)
+    fprintferr("* Time LLL: %ld\n* Time Check Factor: %ld\n",ti_LLL,ti_CF);
+  get_timer(id); return list;
 }
 
 /* Return P(h * x) */
@@ -1327,6 +1334,7 @@ combine_factors(GEN target, GEN famod, GEN p, long klim, long hint)
 {
   GEN la, B, A, res, L, pa, pb, listmod, N2;
   long a,b, l, maxK = 3, nft = lg(famod)-1, n = degpol(target);
+  long id = get_timer(0);
 
   N2 = mpsqrt(QuickNormL2(target,DEFAULTPREC));
   A = uniform_Mignotte_bound(target, N2);
@@ -1336,11 +1344,12 @@ combine_factors(GEN target, GEN famod, GEN p, long klim, long hint)
 
   (void)cmbf_precs(p, A, B, &a, &b, &pa, &pb);
 
+  if (DEBUGLEVEL>2) (void)gentimer(id);
   famod = hensel_lift_fact(target,famod,NULL,p,pa,a);
   if (nft < 11) maxK = -1; /* few modular factors: try all posibilities */
-if (DEBUGLEVEL>2) genmsgtimer(3, "Hensel lift");
+  if (DEBUGLEVEL>2) genmsgtimer(id, "Hensel lift");
   L = cmbf(target, famod, p, a, b, maxK, klim, hint);
-if (DEBUGLEVEL>2) genmsgtimer(3, "Naive recombination");
+  if (DEBUGLEVEL>2) genmsgtimer(id, "Naive recombination");
 
   res     = (GEN)L[1];
   listmod = (GEN)L[2]; l = lg(listmod)-1;
@@ -1350,10 +1359,11 @@ if (DEBUGLEVEL>2) genmsgtimer(3, "Naive recombination");
     if (l!=1) A = uniform_Mignotte_bound((GEN)res[l], NULL);
     if (DEBUGLEVEL > 4) fprintferr("last factor still to be checked\n");
     L = LLL_cmbf((GEN)res[l], famod, p, pa, A, a, maxK);
+    if (DEBUGLEVEL>2) genmsgtimer(id,"Knapsack");
     /* remove last elt, possibly unfactored. Add all new ones. */
     setlg(res, l); res = concatsp(res, L);
   }
-  return res;
+  get_timer(id); return res;
 }
 
 extern long FpX_split_berlekamp(GEN *t, GEN pp);
@@ -1370,8 +1380,9 @@ DDF(GEN a, long hint)
   gpmem_t av = avma;
   byteptr pt=diffptr;
   const int MAXNP = max(5, (long)sqrt((double)da));
+  long id = get_timer(0), ti = 0;
 
-if (DEBUGLEVEL>2) (void)gentimer(3);
+  if (DEBUGLEVEL>2) ti = gentimer(0);
   if (hint <= 0) hint = 1;
   if (DEBUGLEVEL > 2) (void)timer2();
   lbit = (da>>4)+1; nmax = da+1; klim = da>>1;
@@ -1453,8 +1464,16 @@ if (DEBUGLEVEL>2) (void)gentimer(3);
     }
   }
   if (DEBUGLEVEL > 4) msgtimer("splitting mod p = %ld",chosenp);
-if (DEBUGLEVEL>2) genmsgtimer(3,"setup");
+  if (DEBUGLEVEL>2)
+  {
+    long t = gentimer(id);
+    fprintferr("Time setup: %ld\n",t);
+    ti += t;
+  }
   res = combine_factors(a, famod, prime, da-1, hint);
+  if (DEBUGLEVEL>2)
+    fprintferr("Total Time: %ld\n===========\n", ti + gentimer(id));
+  get_timer(id);
   return gerepilecopy(av, res);
 }
 
