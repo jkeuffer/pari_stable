@@ -2798,7 +2798,7 @@ GEN
 ellminimalmodel(GEN E, GEN *ptv)
 {
   pari_sp av = avma;
-  GEN c4, c6, e, v, prims;
+  GEN c4, c6, e, v, P;
   long l, k;
 
   v = ellintegralmodel(E);
@@ -2806,11 +2806,11 @@ ellminimalmodel(GEN E, GEN *ptv)
   if (v) e = coordch(e, v); else v = init_ch();
   c4 = (GEN)e[10];
   c6 = (GEN)e[11];
-  prims = (GEN)decomp(mppgcd(c4,c6))[1];
-  l = lg(prims);
+  P = (GEN)decomp(mppgcd(c4,c6))[1];
+  l = lg(P);
   for (k = 1; k < l; k++)
   {
-    GEN w = localred(e, (GEN)prims[k], 1);
+    GEN w = localred(e, (GEN)P[k], 1);
     if (!gcmp1((GEN)w[1]))
       cumule(&v, &e, (GEN)w[1], (GEN)w[2], (GEN)w[3], (GEN)w[4]);
   }
@@ -2834,17 +2834,23 @@ globalreduction(GEN E)
 {
   long k, l;
   pari_sp av = avma;
-  GEN c, prims, result, N, v, e;
+  GEN c, P, result, N, v, e, c4, c6, D;
 
   v = ellintegralmodel(E);
   e = ell_to_small(E);
   if (v) e = coordch(e, v); else v = init_ch();
 
-  prims = (GEN)decomp(absi((GEN)e[12]))[1];
-  l = lg(prims); c = N = gun;
+  c4 = (GEN)e[10];
+  c6 = (GEN)e[11];
+  D  = (GEN)e[12];
+  P = (GEN)decomp(mppgcd(c4,c6))[1];
+  l = lg(P);
+  for (k = 1; k < l; k++) (long)pvaluation(D, (GEN)P[k], &D);
+  if (!is_pm1(D)) P = concatsp(P, (GEN)decomp(absi(D))[1]);
+  l = lg(P); c = N = gun;
   for (k = 1; k < l; k++)
   {
-    GEN p = (GEN)prims[k];
+    GEN p = (GEN)P[k];
     GEN q = localreduction(e, p);
     GEN w = (GEN)q[3];
     N = mulii(N, powgi(p, (GEN)q[1]));

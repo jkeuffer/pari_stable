@@ -143,6 +143,7 @@ MSo 8- allow numtoperm(0,k)  [ --> [] ]
    16- exp(-10^10) --> 0.E2525223  [ was 'underflow' ]
    17- polredabs: improve the search for subfields (no polynomial
        factorization required now, only linear algebra)
+   18- ellglobalred(): use gcd(e.c4, e.c6) to help factor e.disc
 
   Added
     1- [Configure:] flag --with-ncurses-lib=*
