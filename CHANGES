@@ -75,6 +75,7 @@ MD 31- oo loop in ellap [uninitialized array length in apell1]
    37- polredabs() could use a basis which was not LLL reduced
 BA 38- pariformats (e.g %Z) incorrect on 64bit machines
    39- polhensellift(x,[x,1],2,2) --> "bug in multiplication"
+   40- glitches in readline completion (random() * ne<TAB) --> inserted args)
 
   Changed
     1- removed useless parameter prec in many bnr* and rnf* functions
@@ -95,6 +96,8 @@ BA  8- factorback, chinese, lcm and gcd now accept a single vector
    16- improved nfsubfields [better Hensel lift]
    17- merged all "integer logarithms" + "safe ceil" functions (mylogint,
        get_e, floor_bound, myceil)
+   18- readline: TAB on empty parentheses following a function name has the
+       same effect as M-h (used to insert args).
 
   Added
 BA  1- function pith() [= pi(x), naïve implementation]
