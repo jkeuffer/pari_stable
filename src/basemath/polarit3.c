@@ -2974,8 +2974,7 @@ ZY_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LERS)
   ulong av = avma, av2, lim, bound;
   long i,n, lb, dres = deg(A)*deg(B0), nmax = (dres+1)>>1;
   long vX = varn(B0), vY = varn(A); /* assume vX < vY */
-  GEN x = cgetg(dres+2, t_VECSMALL), dglist;
-  GEN y = cgetg(dres+2, t_VECSMALL), cB,B,q,a,b,ev,H,H0,H1,Hp,H0p,H1p,C0,C1;
+  GEN dglist,cB,B,q,a,b,ev,H,H0,H1,Hp,H0p,H1p,C0,C1;
   byteptr d = diffptr + 3000;
   ulong p = 27449; /* p = prime(3000) */
 
@@ -2987,6 +2986,8 @@ ZY_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LERS)
     C1 = cgetg(dres+2, t_VECSMALL);
     dglist = cgetg(dres+1, t_VECSMALL);
   }
+  x = cgetg(dres+2, t_VECSMALL);
+  y = cgetg(dres+2, t_VECSMALL);
   if (vY == MAXVARN)
   {
     vY = fetch_var(); delete = 1;
@@ -3040,7 +3041,8 @@ INIT:
         /* last pol in ERS has degree > 1 ? */
         goal = lg(dglist)-1;
         if (dglist[goal] != 0 || dglist[goal-1] != 1) goto INIT;
-        if (DEBUGLEVEL) fprintferr("Degree list for ERS: %Z\n",dglist);
+        if (DEBUGLEVEL>4)
+          fprintferr("Degree list for ERS (trials: %ld) = %Z\n",n+1,dglist);
       }
 
       for (i=0,n = 0; i <= dres; n++)
