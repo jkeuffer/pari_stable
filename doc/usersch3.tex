@@ -1370,15 +1370,20 @@ Here $y$ must be an integer, but $x$ can be any PARI object.
 
 \syn{binome}{x,y}, where $y$ must be a \kbd{long}.
 
-\subsecidx{chinese}$(x,y)$: if $x$ and $y$ are both integermods or both
+\subsecidx{chinese}$(x,\{y\})$: if $x$ and $y$ are both integermods or both
 polmods, creates (with the same type) a $z$ in the same residue class
 as $x$ and in the same residue class as $y$, if it is possible.
 
 This function also allows vector and matrix arguments, in which case the
 operation is recursively applied to each component of the vector or matrix.
-For polynomial arguments, it is applied to each coefficient. Finally
-$\kbd{chinese}(x,x) = x$ regardless of the type of $x$; this allows vector
-arguments to contain other data, so long as they are identical in both
+For polynomial arguments, it is applied to each coefficient.
+
+If $y$ is omitted, and $x$ is a vector, \kbd{chinese} is applied recursively
+to the components of $x$, yielding a residue belonging to the same class as all
+components of $x$.
+
+Finally $\kbd{chinese}(x,x) = x$ regardless of the type of $x$; this allows
+vector arguments to contain other data, so long as they are identical in both
 vectors.
 
 \syn{chinois}{x,y}.
@@ -1527,6 +1532,10 @@ the factored object. If a second argument $\var{nf}$ is supplied, $f$ is
 assumed to be a prime ideal factorization in the number field $\var{nf}$.
 The resulting ideal is given in HNF\sidx{Hermite normal form} form.
 
+If $f$ is a vector instead of a factorization, return the product of all
+elements of $f$ (i.e assumes it is a factorization, all of whose exponents
+are equal to $1$).
+
 \syn{factorback}{f,\var{nf}}, where an omitted
 $\var{nf}$ is entered as \kbd{NULL}.
 
@@ -1611,11 +1620,14 @@ modulo \kbd{P}.
 
 \syn{ffinit}{p,n,v}, where $v$ is a variable number.
 
-\subsecidx{gcd}$(x,y,\{\fl=0\})$: creates the greatest common divisor of $x$
+\subsecidx{gcd}$(x,\{y\},\{\fl=0\})$: creates the greatest common divisor of $x$
 and $y$. $x$ and $y$ can be of quite general types, for instance both
 rational numbers. Vector/matrix types are also accepted, in which case
 the GCD is taken recursively on each component. Note that for these
 types, \kbd{gcd} is not commutative.
+
+If $y$ is omitted and $x$ is a vector, return the $\text{gcd}$ of all
+components of $x$.
 
 If $\fl=0$, use \idx{Euclid}'s algorithm.
 
@@ -1700,8 +1712,11 @@ must be of type integer.
 
 \syn{kronecker}{x,y}, the result ($0$ or $\pm 1$) is a \kbd{long}.
 
-\subsecidx{lcm}$(x,y)$: least common multiple of $x$ and $y$, i.e.~such
+\subsecidx{lcm}$(x,\{y\})$: least common multiple of $x$ and $y$, i.e.~such
 that $\text{lcm}(x,y)*\text{gcd}(x,y)=\text{abs}(x*y)$.
+
+If $y$ is omitted and $x$ is a vector, return the $\text{lcm}$ of all
+components of $x$.
 
 \syn{glcm}{x,y}.
 
