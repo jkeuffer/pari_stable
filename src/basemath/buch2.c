@@ -176,14 +176,15 @@ delete_cache(RELCACHE_t *M)
 static void
 delete_FB(FB_t *F)
 {
-  powFB_t *S = F->pow, *T = S;
-  while (T)
+  powFB_t *S = F->pow;
+  while (S)
   {
+    powFB_t *T = S;
     gunclone(S->id2);
     gunclone(S->alg);
     gunclone(S->ord);
     if (S->arc) gunclone(S->arc);
-    T = S->prev; free((void*)S);
+    S = S->prev; free((void*)T);
   }
   gunclone(F->subFB);
 }
