@@ -622,15 +622,15 @@ isprincipalrayall(GEN bnr, GEN x, long flag)
   GEN bnf, nf, bid, U, El, ep, p1, beta, idep, ex, rayclass, divray, genray;
   GEN alpha;
 
-  checkbnr(bnr);
+  checkbnr(bnr); rayclass = (GEN)bnr[5];
+  divray = (GEN)rayclass[2]; c = lg(divray);
+  ex = cgetg(c,t_COL);
+  if (c == 1 && !(flag & nf_GEN)) return ex;
+
   bnf = (GEN)bnr[1]; nf = (GEN)bnf[7];
   bid = (GEN)bnr[2];
   El  = (GEN)bnr[3];
   U   = (GEN)bnr[4];
-  rayclass=(GEN)bnr[5];
-  divray = (GEN)rayclass[2]; c = lg(divray)-1;
-  ex = cgetg(c+1,t_COL);
-  if (c == 0 && !(flag & nf_GEN)) return ex;
 
   if (typ(x) == t_VEC && lg(x) == 3)
   { idep = (GEN)x[2]; x = (GEN)x[1]; }  /* precomputed */
