@@ -1183,6 +1183,20 @@ RXY_swap(GEN x, long n, long w)
   return normalizepol_i(y,ly);
 }
 
+GEN
+RX_shift(GEN a, long n)
+{
+  long i, l = lg(a);
+  GEN  b;
+  if (!signe(a)) return a;
+  b = cgetg(l+n, t_POL);
+  b[1] = a[1];
+  for (i=0; i<n; i++) b[2+i] = zero;
+  for (i=2; i<l; i++) b[i+n] = a[i];
+  return b;
+}
+
+
 /* set x <-- x + c*y mod p */
 /* x is not required to be normalized.*/
 static void

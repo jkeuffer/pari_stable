@@ -359,10 +359,12 @@ Flx_Fl_mul(GEN y, ulong x, ulong p)
  */
 
 GEN
-Flx_shift(GEN a, long n, ulong p)
+Flx_shift(GEN a, long n)
 {
   long i, l = lg(a);
-  GEN  b = cgetg_copy(l+n, a);
+  GEN  b;
+  if (l==2) return vecsmall_copy(a);
+  b = cgetg(l+n, t_VECSMALL);
   b[1] = a[1];
   for (i=0; i<n; i++) b[2+i] = 0;
   for (i=2; i<l; i++) b[i+n] = a[i];
@@ -915,7 +917,7 @@ Flx_invmontgomery_newton(GEN T, ulong p)
     x=vecsmall_copy(x);
     avma=av2;
   }
-  q=Flx_shift(q,1,p);
+  q=Flx_shift(q,1);
   return q;
 }
 

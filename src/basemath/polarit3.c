@@ -969,7 +969,7 @@ GEN
 FpXQX_safegcd(GEN P, GEN Q, GEN T, GEN p)
 {
   pari_sp btop, ltop = avma, st_lim;
-  long dg, vx = varn(P);
+  long dg;
   GEN U, q;
   P = FpXX_red(P, p); btop = avma;
   Q = FpXX_red(Q, p);
@@ -987,7 +987,7 @@ FpXQX_safegcd(GEN P, GEN Q, GEN T, GEN p)
     do /* set P := P % Q */
     {
       q = Fq_mul(U, Fq_neg(leading_term(P), T, p), T, p);
-      P = gadd(P, FpXQX_mul(monomial(q, dg, vx), Q, T, p));
+      P = gadd(P, FqX_Fq_mul(RX_shift(Q, dg), q, T, p));
       P = FpXQX_red(P, T, p); /* wasteful, but negligible */
       dg = lg(P)-lg(Q);
     } while (dg >= 0);
