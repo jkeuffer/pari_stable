@@ -2293,6 +2293,9 @@ lift0(GEN x, long v)
       for (i=2; i<lx; i++) y[i]=(long)lift0((GEN)x[i],v);
       return y;
 
+    case t_PADIC:
+      return gtrunc(x);
+
     case t_FRAC: case t_FRACN: case t_COMPLEX: case t_RFRAC:
     case t_RFRACN: case t_VEC: case t_COL: case t_MAT:
       lx=lg(x); y=cgetg(lx,tx);
