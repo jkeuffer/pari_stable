@@ -1735,18 +1735,82 @@ set_fact(REL_t *rel, FB_t *F)
   for (i=1; i<=primfact[0]; i++) c[primfact[i]] = exprimfact[i];
 }
 
+/* cf. relationrank()
+ *
+ * If V depends linearly from the columns of the matrix, return 0.
+ * Otherwise, update INVP and L and return 1. No GC.
+ */
+int
+addcolumntomatrix(GEN V, GEN invp, GEN L)
+{
+  GEN a = RM_zc_mul(invp,V);
+  long i,j,k, n = lg(invp);
+
+  if (DEBUGLEVEL>6)
+  {
+    fprintferr("adding vector = %Z\n",V);
+    fprintferr("vector in new basis = %Z\n",a);
+    fprintferr("list = %Z\n",L);
+    fprintferr("base change matrix =\n"); outerr(invp);
+  }
+  k = 1; while (k<n && (L[k] || gcmp0((GEN)a[k]))) k++;
+  if (k == n) return 0;
+  L[k] = 1;
+  for (i=k+1; i<n; i++) a[i] = ldiv(gneg_i((GEN)a[i]),(GEN)a[k]);
+  for (j=1; j<=k; j++)
+  {
+    GEN c = (GEN)invp[j], ck = (GEN)c[k];
+    if (gcmp0(ck)) continue;
+    c[k] = ldiv(ck, (GEN)a[k]);
+    if (j==k)
+      for (i=k+1; i<n; i++)
+	c[i] = lmul((GEN)a[i], ck);
+    else
+      for (i=k+1; i<n; i++)
+	c[i] = ladd((GEN)c[i], gmul((GEN)a[i], ck));
+  }
+  return 1;
+}
+
+/* compute the rank of A in M_n,r(Z) (C long), where rank(A) = r <= n.
+ * Starting from the identity (canonical basis of Q^n), we obtain a base
+ * change matrix P by taking the independent columns of A and vectors from
+ * the canonical basis. Update invp = 1/P, and L in {0,1}^n, with L[i] = 0
+ * if P[i] = e_i, and 1 if P[i] = A_i (i-th column of A)
+ */
+static GEN
+relationrank(RELCACHE_t *cache, GEN L)
+{
+  pari_sp av = avma, lim = stack_lim(av, 1);
+  GEN invp = idmat(lg(L) - 1);
+  REL_t *rel = cache->base + 1;
+
+  for (; rel <= cache->last; rel++)
+  {
+    (void)addcolumntomatrix(rel->R, invp, L);
+    if (low_stack(lim, stack_lim(av,1)))
+    {
+      if(DEBUGMEM>1) err(warnmem,"relationrank");
+      invp = gerepilecopy(av, invp);
+    }
+  }
+  if (avma != av) invp = gerepilecopy(av, invp);
+  return invp;
+}
+
 static void
 small_norm(RELCACHE_t *cache, FB_t *F, double LOGD, GEN nf,long nbrelpid,
-           GEN invp,GEN L,double LIMC2)
+           double LIMC2)
 {
   const int maxtry_DEP  = 20;
   const int maxtry_FACT = 500;
   const double eps = 0.000001;
   double *y,*z,**q,*v, BOUND;
-  pari_sp av = avma, av1, av2, limpile;
+  pari_sp av, av2, limpile;
   long nbsmallnorm, nbfact, j, k, noideal, precbound;
   long N = degpol(nf[1]), R1 = nf_get_r1(nf), prec = nfgetprec(nf);
   GEN x, gx, Mlow, M, G, r, Gvec, prvec;
+  GEN L = vecsmall_const(F->KC, 0), invp = relationrank(cache, L);
   REL_t *rel = cache->last;
 
   if (DEBUGLEVEL)
@@ -1772,7 +1836,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, double LOGD, GEN nf,long nbrelpid,
   prvec[1] = MEDDEFAULTPREC;   Gvec[1] = (long)gprec_w(G,prvec[1]);
   prvec[2] = prec;             Gvec[2] = (long)G;
   minim_alloc(N+1, &q, &x, &y, &z, &v);
-  av1 = avma;
+  av = avma;
   for (noideal=F->KC; noideal; noideal--)
   {
     pari_sp av0 = avma;
@@ -1872,11 +1936,11 @@ small_norm(RELCACHE_t *cache, FB_t *F, double LOGD, GEN nf,long nbrelpid,
       }
     }
 ENDIDEAL:
-    if (rel == oldrel) avma = av0; else invp = gerepilecopy(av1, invp);
+    if (rel == oldrel) avma = av0; else invp = gerepilecopy(av, invp);
     if (DEBUGLEVEL>1) msgtimer("for this ideal");
   }
 END:
-  cache->last = rel; avma = av;
+  cache->last = rel;
   if (DEBUGLEVEL)
   {
     fprintferr("\n"); msgtimer("small norm relations");
@@ -2387,69 +2451,6 @@ compute_vecG(GEN nf)
     for (i=1; i<=j; i++) vecG[ind++] = (long)shift_G(R,Rtw,i,j,r1);
   if (DEBUGLEVEL) msgtimer("weighted G matrices");
   return vecG;
-}
-
-/* cf. relationrank()
- *
- * If V depends linearly from the columns of the matrix, return 0.
- * Otherwise, update INVP and L and return 1. No GC.
- */
-int
-addcolumntomatrix(GEN V, GEN invp, GEN L)
-{
-  GEN a = RM_zc_mul(invp,V);
-  long i,j,k, n = lg(invp);
-
-  if (DEBUGLEVEL>6)
-  {
-    fprintferr("adding vector = %Z\n",V);
-    fprintferr("vector in new basis = %Z\n",a);
-    fprintferr("list = %Z\n",L);
-    fprintferr("base change matrix =\n"); outerr(invp);
-  }
-  k = 1; while (k<n && (L[k] || gcmp0((GEN)a[k]))) k++;
-  if (k == n) return 0;
-  L[k] = 1;
-  for (i=k+1; i<n; i++) a[i] = ldiv(gneg_i((GEN)a[i]),(GEN)a[k]);
-  for (j=1; j<=k; j++)
-  {
-    GEN c = (GEN)invp[j], ck = (GEN)c[k];
-    if (gcmp0(ck)) continue;
-    c[k] = ldiv(ck, (GEN)a[k]);
-    if (j==k)
-      for (i=k+1; i<n; i++)
-	c[i] = lmul((GEN)a[i], ck);
-    else
-      for (i=k+1; i<n; i++)
-	c[i] = ladd((GEN)c[i], gmul((GEN)a[i], ck));
-  }
-  return 1;
-}
-
-/* compute the rank of A in M_n,r(Z) (C long), where rank(A) = r <= n.
- * Starting from the identity (canonical basis of Q^n), we obtain a base
- * change matrix P by taking the independent columns of A and vectors from
- * the canonical basis. Update invp = 1/P, and L in {0,1}^n, with L[i] = 0
- * if P[i] = e_i, and 1 if P[i] = A_i (i-th column of A)
- */
-static GEN
-relationrank(RELCACHE_t *cache, GEN L)
-{
-  pari_sp av = avma, lim = stack_lim(av, 1);
-  GEN invp = idmat(lg(L) - 1);
-  REL_t *rel = cache->base + 1;
-
-  for (; rel <= cache->last; rel++)
-  {
-    (void)addcolumntomatrix(rel->R, invp, L);
-    if (low_stack(lim, stack_lim(av,1)))
-    {
-      if(DEBUGMEM>1) err(warnmem,"relationrank");
-      invp = gerepilecopy(av, invp);
-    }
-  }
-  if (avma != av) invp = gerepilecopy(av, invp);
-  return invp;
 }
 
 /* SMALLBUCHINIT */
@@ -2978,10 +2979,10 @@ buch(GEN *pnf, double cbach, double cbach2, long nbrelpid, long flun,
 {
   pari_sp av, av2;
   long N, R1, R2, RU, KCCO, LIMC, LIMC2, lim, zc, i, j, k, jid, MAXRELSUP;
-  long nlze, nreldep, sfb_change, sfb_trials, precdouble = 0, precadd = 0;
+  long nreldep, sfb_change, sfb_trials, nlze = 0, precdouble = 0, precadd = 0;
   double drc, LOGD, LOGD2;
   GEN vecG, fu, zu, nf, D, A, W, R, Res, z, h, L_jid, PERM;
-  GEN M, res, L, resc, B, C, lambda, dep, liste, invp, clg1, clg2, Vbase;
+  GEN M, res, L, resc, B, C, lambda, dep, clg1, clg2, Vbase;
   char *precpb = NULL;
   const int RELSUP = 5, minsFB = 3;
   REL_t *rel, *oldrel;
@@ -3023,6 +3024,7 @@ START:
   Res = FBgen(&F, nf, LIMC2, LIMC);
   if (!Res || !subFBgen(&F, nf, min(lim,LIMC2) + 0.5, minsFB)) goto START;
   PERM = dummycopy(F.perm); /* to be restored in case of precision increase */
+  av2 = avma;
   KCCO = F.KC+RU-1 + RELSUP; /* expected # of needed relations */
   if (DEBUGLEVEL) fprintferr("KCZ = %ld, KC = %ld, KCCO = %ld\n",
                              F.KCZ, F.KC, KCCO);
@@ -3052,21 +3054,13 @@ START:
                cache.last - cache.base);
   /* initialize for other relations */
   cache.end = cache.base + KCCO;
-  sfb_trials = sfb_change = nreldep = 0;
 
-  M = gmael(nf, 5, 1);
-  av2 = avma; liste = vecsmall_const(F.KC, 0);
-  invp = relationrank(&cache, liste);
-
-  /* relations through elements of small norm */
-  if (nbrelpid > 0) small_norm(&cache,&F,LOGD,nf,nbrelpid,invp,liste,LIMC2);
-  avma = av2;
-
-  nlze = 0; /* for lint */
-  W = vecG = L_jid = NULL;
+  /* Relations through elements of small norm */
+  if (nbrelpid > 0) {small_norm(&cache,&F,LOGD,nf,nbrelpid,LIMC2); avma = av2;}
 
   /* Random relations */
-  jid = 0;
+  W = vecG = L_jid = NULL;
+  jid = sfb_trials = sfb_change = nreldep = 0;
   if (cache.last < cache.end)
   {
     if (DEBUGLEVEL) fprintferr("\n#### Looking for random relations\n");
