@@ -3421,6 +3421,18 @@ to_frac(GEN a, GEN b)
   f[2] = (long)b; return f;
 }
 
+static GEN
+lift_to_frac(GEN t, GEN mod, GEN amax, GEN bmax, GEN denom)
+{
+  GEN a, b;
+  if (signe(t) < 0) t = addii(t, mod); /* in case t is a centerlift */
+  if (!ratlift(t, mod, &a, &b, amax, bmax)
+     || (denom && !divise(denom,b))
+     || !gcmp1(mppgcd(a,b))) return NULL;
+  if (!is_pm1(b)) a = to_frac(a, b);
+  return a;
+}
+
 /* compute rational lifting for all the components of M modulo mod.
  * If one components fails, return NULL.
  * See ratlift.
@@ -3434,21 +3446,19 @@ GEN
 matratlift(GEN M, GEN mod, GEN amax, GEN bmax, GEN denom)
 {
   ulong ltop = avma;
-  GEN N, a, b;
+  GEN N, a;
   long l2, l3;
   long i, j;
   if (typ(M)!=t_MAT) err(typeer,"matratlift");
-  l2 = lg(M)-1; l3 = lg((GEN)M[1])-1;
-  N = cgetg(l2 + 1, t_MAT);
-  for (j = 1; j <= l2; ++j)
+  l2 = lg(M); l3 = lg((GEN)M[1]);
+  N = cgetg(l2, t_MAT);
+  for (j = 1; j < l2; ++j)
   {
-    N[j] = lgetg(l3 + 1, t_COL);
-    for (i = 1; i <= l3; ++i)
+    N[j] = lgetg(l3, t_COL);
+    for (i = 1; i < l3; ++i)
     {
-      if (!ratlift(gcoeff(M,i,j), mod, &a, &b, amax, bmax)
-	 || (denom && !divise(denom,b))
-         || !gcmp1(mppgcd(a,b))) { avma = ltop; return NULL; }
-      if (!is_pm1(b)) a = to_frac(a, b);
+      a = lift_to_frac(gcoeff(M,i,j), mod, amax,bmax,denom);
+      if (!a) { avma = ltop; return NULL; }
       coeff(N, i, j) = (long)a;
     }
   }
@@ -3459,19 +3469,15 @@ GEN
 polratlift(GEN P, GEN mod, GEN amax, GEN bmax, GEN denom)
 {
   ulong ltop = avma;
-  GEN Q,a,b,t;
+  GEN Q,a;
   long l2, j;
   if (typ(P)!=t_POL) err(typeer,"polratlift");
   l2 = lg(P);
   Q = cgetg(l2, t_POL); Q[1] = P[1];
   for (j = 2; j < l2; ++j)
   {
-    t = (GEN)P[j];
-    if (signe(t) < 0) t = addii(t, mod);
-    if (!ratlift(t, mod, &a, &b, amax, bmax)
-        || (denom && !divise(denom,b))
-        || !gcmp1(mppgcd(a,b))) { avma=ltop; return NULL; }
-    if (!is_pm1(b)) a = to_frac(a, b);
+    a = lift_to_frac((GEN)P[j], mod, amax,bmax,denom);
+    if (!a) { avma = ltop; return NULL; }
     Q[j] = (long)a;
   }
   return Q;
