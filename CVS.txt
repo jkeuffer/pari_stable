@@ -71,11 +71,14 @@ containing lines of the form:
 sources they were based on, not with the current state of the repository.
 Use 'cvs diff -D now' for that.
 
-* All project files have an individual version number, independant of the
+* All project files have an individual version number, independent of the
 release numbering scheme. Official releases (starting from version 2.0.17)
 are 'tagged' so that all files pertaining to a given release can be
 simultaneously accessed without tracking version numbers. Tag names are
 'release-VERSION', e.g 'release-2-0-20'.
+
+The tag release-2-1-patches denotes the stable branch 2.1 as a whole, and can
+be used to checkout up to date sources from that branch in between releases.
 
 * On Windows 95/98/2000 + Cygwin, you may have to explicitly set HOME (e.g
 in your .bashrc) to some existing directory otherwise CVS will abort on
