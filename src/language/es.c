@@ -2778,7 +2778,7 @@ writebin(char *name, GEN x)
     {
       entree *ep = varentries[v];
       if (!ep) continue;
-      writenamedGEN(ep->value,ep->name,f);
+      writenamedGEN((GEN)ep->value,ep->name,f);
     }
   }
   fclose(f);

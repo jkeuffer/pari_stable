@@ -2354,6 +2354,8 @@ is_interactive(void)
 #endif
 }
 
+extern int get_line_from_readline(char *prompt, filtre_t *F);
+
 /* return 0 if no line could be read (EOF) */
 static int
 read_line(char *promptbuf, filtre_t *F)
