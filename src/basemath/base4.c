@@ -1529,32 +1529,30 @@ idealnorm(GEN nf, GEN x)
 }
 
 /* inverse */
-extern GEN gauss_triangle_i(GEN A, GEN B);
+extern GEN gauss_triangle_i(GEN A, GEN B,GEN t);
 
 /* rewritten from original code by P.M & M.H.
  *
  * I^(-1) = { x \in K, Tr(x D^(-1) I) \in Z }, D different of K/Q
  *
  * nf[5][6] = d_K * D^(-1) is integral = d_K T^(-1), T = (Tr(wi wj))
- * nf[5][7] = same in suitable form for ideal multiplication */
+ * nf[5][7] = same in 2-elt form */
 static GEN
 hnfideal_inv(GEN nf, GEN I)
 {
-  GEN dI = denom(I), NI,a,dual;
+  GEN dI = denom(I), IZ,dual;
 
   if (gcmp1(dI)) dI = NULL; else I = gmul(I,dI);
-  NI = dethnf_i(I);
-  if (gcmp0(NI) || lg(I)==1) err(talker, "cannot invert zero ideal");
+  if (lg(I)==1) err(talker, "cannot invert zero ideal");
+  IZ = gcoeff(I,1,1); /* I \cap Z */
+  if (!signe(IZ)) err(talker, "cannot invert zero ideal");
   I = idealmulh(nf,I, gmael(nf,5,7));
- /* I in HNF, hence easily inverted. Multiply by NI to get integer coeffs
+ /* I in HNF, hence easily inverted; multiply by IZ to get integer coeffs
   * d_K cancels while solving the linear equations. */
-  dual = gtrans( gauss_triangle_i(I, gmul(NI, gmael(nf,5,6))) );
-  a = content(dual);
-  if (!is_pm1(a)) { dual = gdivexact(dual,a); NI = divii(NI,a); }
-
-  dual = hnfmodid(dual, NI);
-  if (dI) NI = gdiv(NI,dI);
-  return gdiv(dual,NI);
+  dual = gtrans( gauss_triangle_i(I, gmael(nf,5,6), IZ) );
+  dual = hnfmodid(dual, IZ);
+  if (dI) IZ = gdiv(IZ,dI);
+  return gdiv(dual,IZ);
 }
 
 /* return p * P^(-1)  [integral] */

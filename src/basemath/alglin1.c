@@ -844,24 +844,23 @@ check_b(GEN b, long nbli)
   return dummycopy(b);
 }
 
-/* C = A^(-1)B where A, B, C are integral and A is upper triangular */
+/* C = A^(-1)(tB) where A, B, C are integral, A is upper triangular, t t_INT */
 GEN
-gauss_triangle_i(GEN A, GEN B)
+gauss_triangle_i(GEN A, GEN B, GEN t)
 {
   long n = lg(A)-1, i,j,k;
-  GEN p, m, c = cgetg(n+1,t_MAT);
+  GEN m, c = cgetg(n+1,t_MAT);
 
   if (!n) return c;
-  p = gcoeff(A,n,n);
   for (k=1; k<=n; k++)
   {
     GEN u = cgetg(n+1, t_COL), b = (GEN)B[k];
-    c[k] = (long)u;
-    u[n] = ldivii((GEN) b[n],p);
+    ulong av = avma;
+    c[k] = (long)u; m = mulii((GEN)b[n],t);
+    u[n] = (long)gerepileuptoint(av, divii(m, gcoeff(A,n,n)));
     for (i=n-1; i>0; i--)
     {
-      long av = avma;
-      m = negi((GEN)b[i]);
+      av = avma; m = mulii(negi((GEN)b[i]),t);
       for (j=i+1; j<=n; j++)
         m = addii(m, mulii(gcoeff(A,i,j),(GEN) u[j]));
       u[i] = (long)gerepileuptoint(av, divii(negi(m), gcoeff(A,i,i)));
