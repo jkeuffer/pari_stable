@@ -136,24 +136,23 @@ caract(GEN x, int v)
 {
   long k, n;
   pari_sp av=avma;
-  GEN  p1,p2,p3,p4,x_k;
+  GEN  p1, p2, p3, x_k, Q;
 
   if ((p1 = easychar(x,v,NULL))) return p1;
 
-  p1 = gzero; p2 = gun;
-  n = lg(x)-1; if (n&1) p2 = negi(p2);
+  p1 = gzero; Q = p2 = gun; n = lg(x)-1;
   x_k = dummycopy(polx[v]);
-  p4 = cgetg(3,t_RFRAC); p4[2] = (long)x_k;
   for (k=0; k<=n; k++)
   {
-    p3 = det(gsub(gscalmat(stoi(k),n), x));
-    p4[1] = lmul(p3,p2); x_k[2] = lstoi(-k);
-    p1 = gadd(p4,p1);
+    x_k[2] = lstoi(-k);
+    p3 = det( gaddmat_i(stoi(-k), x) );
+    p1 = gadd(gmul(p1, x_k), gmul(gmul(p2, p3), Q));
     if (k == n) break;
 
-    p2 = gdivgs(gmulsg(k-n,p2),k+1);
+    Q = gmul(Q, x_k);
+    p2 = divis(mulsi(k-n,p2), k+1); /* (-1)^{k} binomial(n,k) */
   }
-  return gerepileupto(av, gdiv((GEN)p1[1], mpfact(n)));
+  return gerepileupto(av, gdiv(p1, mpfact(n)));
 }
 
 GEN
