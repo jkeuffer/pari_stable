@@ -1095,7 +1095,6 @@ nf_LLL_cmbf(nfcmbf_t *T, long a, GEN p, long rec)
         for (i=1; i<=n0; i++)
         {
           GEN p2 = polsym_gen((GEN)famod[i], NULL, tmax, NULL, pa);
-          if (!gcmp1(dn)) { p2 = gmul(p2,dn); p2 = FpV_red(p2, pa); }
           TT[i] = (long)p2;
         }
     }
@@ -1103,9 +1102,10 @@ nf_LLL_cmbf(nfcmbf_t *T, long a, GEN p, long rec)
     for (i=1; i<=n0; i++)
     {
       GEN p2 = polsym_gen((GEN)famod[i], (GEN)TT[i], tnew, NULL, pa);
-      if (!gcmp1(dn)) { p2 = gmul(p2,dn); p2 = FpV_red(p2, pa); }
+      GEN p3 = (GEN)p2[tnew+1];
+      if (!gcmp1(dn)) p3 = modii(mulii(p3,dn), pa);
       TT[i] = (long)p2;
-      Tra[i] = (long)gscalcol((GEN)p2[tnew+1], dnf); /* S_tnew(famod) */
+      Tra[i] = (long)gscalcol(p3, dnf); /* S_tnew(famod) */
     }
 
     av2 = avma;
