@@ -3108,26 +3108,21 @@ snf_pile(pari_sp av, GEN *x, GEN *U, GEN *V)
   gerepilemany(av,gptr,c);
 }
 
-static void
+static GEN
 bezout_step(GEN *pa, GEN *pb, GEN *pu, GEN *pv, GEN mun)
 {
-  GEN b = *pb, a = *pa;
+  GEN a = *pa, b = *pb, d;
   if (absi_equal(a,b))
   {
     long sa = signe(a), sb = signe(b);
-    if (sb == sa) { *pa = *pu = gun; *pb = gun; }
-    else
-    {
-      if (sa > 0) { *pa = *pu = gun; *pb = mun; }
-      else        { *pa = *pu = mun; *pb = gun; }
-    }
     *pv = gzero;
+    if (sb == sa) { *pa = *pu = gun; *pb = gun; return sa > 0? a: absi(a); }
+    if (sa > 0) { *pa = *pu = gun; *pb = mun; return a; }
+    *pa = *pu = mun; *pb = gun; return b;
   }
-  else {
-    GEN d = bezout(a,b, pu,pv);
-    *pa = diviiexact(a, d);
-    *pb = diviiexact(b, d);
-  }
+  d = bezout(a,b, pu,pv);
+  *pa = diviiexact(a, d);
+  *pb = diviiexact(b, d); return d;
 }
 
 static int
@@ -3253,16 +3248,19 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
       if (DEBUGLEVEL>7) fprintferr("; ");
       for (j=i-1; j>=1; j--)
       {
+        GEN d;
 	b = gcoeff(x,j,i); if (!signe(b)) continue;
         a = gcoeff(x,i,i);
-        bezout_step(&a, &b, &u, &v, mun);
-        for (k=1; k<=i; k++)
+        d = bezout_step(&a, &b, &u, &v, mun);
+        for (k = 1; k < i; k++)
         {
           GEN t = addii(mulii(u,gcoeff(x,i,k)),mulii(v,gcoeff(x,j,k)));
           coeff(x,j,k) = lsubii(mulii(a,gcoeff(x,j,k)),
                                 mulii(b,gcoeff(x,i,k)));
           coeff(x,i,k) = (long)t;
         }
+        coeff(x,j,i) = zero;
+        coeff(x,i,i) = (long)d;
         if (U) update(u,v,a,b,(GEN*)(U+i),(GEN*)(U+j));
         if (low_stack(lim, stack_lim(av,1)))
         {
@@ -3371,34 +3369,18 @@ smithclean(GEN z)
   return y;
 }
 
-static void
+static GEN
 gbezout_step(GEN *pa, GEN *pb, GEN *pu, GEN *pv)
 {
-  GEN a = *pa, b = *pb;
+  GEN a = *pa, b = *pb, d;
   if (!signe(a))
   {
-    *pa = gzero;
-    *pb = gun;
-    *pu = gzero;
-    *pv = gun;
+    *pa = gzero; *pu = gzero;
+    *pb = gun;   *pv = gun; return b;
   }
-  else
-  {
-    *pv = gdiventres(b, a);
-    if (gcmp0((GEN)(*pv)[2]))
-    {
-      *pa = gun;
-      *pb = (GEN)(*pv)[1];
-      *pu = gun;
-      *pv = gzero;
-    }
-    else
-    {
-      GEN d = gbezout(a,b, pu,pv);
-      *pa = gdiv(a, d);
-      *pb = gdiv(b, d);
-    }
-  }
+  d = RgX_extgcd(a,b, pu,pv);
+  *pa = gdiv(a, d);
+  *pb = gdiv(b, d); return d;
 }
 
 /* return x or -x such that leading term is > 0 if meaningful */
@@ -3436,32 +3418,36 @@ gsmithall(GEN x,long all)
   {
     for(;;)
     {
-      GEN a, b;
+      GEN a, b, d;
       int c = 0;
       for (j=i-1; j>=1; j--)
       {
 	b = gcoeff(x,i,j); if (!signe(b)) continue;
         a = gcoeff(x,i,i);
-        gbezout_step(&a, &b, &u, &v);
-        for (k=1; k<=i; k++)
+        d = gbezout_step(&b, &a, &v, &u);
+        for (k = 1; k < i; k++)
         {
           GEN t = gadd(gmul(u,gcoeff(x,k,i)),gmul(v,gcoeff(x,k,j)));
           coeff(x,k,j) = lsub(gmul(a,gcoeff(x,k,j)),gmul(b,gcoeff(x,k,i)));
           coeff(x,k,i) = (long)t;
         }
+        coeff(x,i,j) = zero;
+        coeff(x,i,i) = (long)d;
         if (all) update(u,v,a,b,(GEN*)(V+i),(GEN*)(V+j));
       }
       for (j=i-1; j>=1; j--)
       {
 	b = gcoeff(x,j,i); if (!signe(b)) continue;
         a = gcoeff(x,i,i);
-        gbezout_step(&a, &b, &u, &v);
-        for (k=1; k<=i; k++)
+        d = gbezout_step(&b, &a, &v, &u);
+        for (k = 1; k < i; k++)
         {
           GEN t = gadd(gmul(u,gcoeff(x,i,k)),gmul(v,gcoeff(x,j,k)));
           coeff(x,j,k) = lsub(gmul(a,gcoeff(x,j,k)),gmul(b,gcoeff(x,i,k)));
           coeff(x,i,k) = (long)t;
         }
+        coeff(x,j,i) = zero;
+        coeff(x,i,i) = (long)d;
         if (all) update(u,v,a,b,(GEN*)(U+i),(GEN*)(U+j));
         c = 1;
       }

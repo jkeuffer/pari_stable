@@ -1765,6 +1765,10 @@ $\sum_{i = 0}^{\kbd{na}} \kbd{a}[i] X^i$. Return its square (as a true
 
 \fun{GEN}{RgX_rem}{GEN x, GEN y, GEN *r}
 
+\fun{GEN}{RgX_extgcd}{GEN x, GEN y, GEN *u, GEN *v} returns
+$d = \text{GCD}(\kbd{x},\kbd{y})$, and sets \kbd{*u}, \kbd{*v} to the Bezout
+coefficients such that $\kbd{*ux} + \kbd{*vy} = d$.
+
 \fun{GEN}{RgXQX_red}{GEN z, GEN T} \kbd{z} a \typ{POL} whose
 coefficients are \kbd{RgX}s (arbitrary \kbd{GEN}s in fact), reduce them to
 \kbd{RgXQ}s (applying \kbd{grem} coefficientwise).

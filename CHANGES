@@ -180,6 +180,8 @@ JD 74- [Configure:] detection of times()
    84- ellap(e defined over F2, 2) gave wrong results [ assumed e defined
        over Q and reduced relevant data modulo 8 ]
    85- matcompanion(degree 0 polynomial) --> stack corruption
+   86- incorrect handling of inexact polynomials in matsnf(,2)  [ inexact
+       leading 0 coefficients ]
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.

@@ -3613,7 +3613,7 @@ zero_bezout(GEN y, GEN *U, GEN *V)
 
 /* compute U, V s.t Ux + Vy = GCD(x,y) using subresultant */
 GEN
-bezoutpol(GEN x, GEN y, GEN *U, GEN *V)
+RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V)
 {
   pari_sp av, av2, tetpil, lim;
   long degq,tx,ty,dx,dy,du,dv,dr;
@@ -3628,7 +3628,7 @@ bezoutpol(GEN x, GEN y, GEN *U, GEN *V)
     if (ty==t_POL) return scalar_bezout(y,x,V,U);
     *U = ginv(x); *V = gzero; return polun[0];
   }
-  if (tx!=t_POL || ty!=t_POL) err(typeer,"bezoutpol");
+  if (tx!=t_POL || ty!=t_POL) err(typeer,"RgX_extgcd");
   if (varn(x)!=varn(y))
     return (varn(x)<varn(y))? scalar_bezout(x,y,U,V)
                             : scalar_bezout(y,x,V,U);
@@ -3666,13 +3666,13 @@ bezoutpol(GEN x, GEN y, GEN *U, GEN *V)
     if (dr==3) break;
     if (low_stack(lim,stack_lim(av2,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"bezoutpol, dr = %ld",dr);
+      if(DEBUGMEM>1) err(warnmem,"RgX_extgcd, dr = %ld",dr);
       gerepileall(av2,6,&u,&v,&g,&h,&uze,&um1);
     }
   }
   p1 = gsub(v,gmul(uze,xprim));
   vze = poldivrem(p1, yprim, &r);
-  if (!gcmp0(r)) err(warner,"inexact computation in bezoutpol");
+  if (!gcmp0(r)) err(warner,"inexact computation in RgX_extgcd");
   if (cu) uze = gdiv(uze,cu);
   if (cv) vze = gdiv(vze,cv);
   p1 = ginv(content(v));
@@ -4212,7 +4212,7 @@ gbezout(GEN x, GEN y, GEN *u, GEN *v)
 
   if (tx==t_INT && ty==t_INT) return bezout(x,y,u,v);
   if (!is_extscalar_t(tx) || !is_extscalar_t(ty)) err(typeer,"gbezout");
-  return bezoutpol(x,y,u,v);
+  return RgX_extgcd(x,y,u,v);
 }
 
 GEN
