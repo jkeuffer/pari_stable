@@ -752,16 +752,27 @@ by~$2^{-\kbd{n}}$.
 
 \fun{GEN}{shiftr}{GEN x, long n} shifts the \typ{REAL}~\kbd{x} by~\kbd{n}.
 
-\fun{long}{pvaluation}{GEN x, GEN p, GEN *r} applied to non-zero \typ{INT}s
-\kbd{x} and~\kbd{p}, returns the highest exponent $e$ such that $\kbd{p}^{e}$
-divides~\kbd{x}. If \kbd{r} is non-\kbd{NULL}, creates the quotient
-$\kbd{x}/\kbd{p}^{e}$ and returns its address in~\kbd{*r}. In particular, if
-\kbd{p} is a prime, this returns the valuation at \kbd{p} of~\kbd{x}, and
-\kbd{*r} yields the prime-to-\kbd{p} part of~\kbd{x}.
+\fun{long}{Z_pvalrem}{GEN x, GEN p, GEN *r} applied to \typ{INT}s
+$\kbd{x}\neq 0$ and~\kbd{p}, $\abs{\kbd{p}} > 1$, returns the highest
+exponent $e$ such that $\kbd{p}^{e}$ divides~\kbd{x}. The quotient
+$\kbd{x}/\kbd{p}^{e}$ is returned in~\kbd{*r}. In particular, if \kbd{p} is a
+prime, this returns the valuation at \kbd{p} of~\kbd{x}, and \kbd{*r} is
+the prime-to-\kbd{p} part of~\kbd{x}.
 
-\fun{long}{svaluation}{ulong x, ulong p, ulong *r} as \kbd{pvaluation},
-except the inputs/outputs are now \kbd{ulong}, and $\kbd{r} = \kbd{NULL}$ is
-not allowed.
+\fun{long}{Z_pval}{GEN x, GEN p} as \kbd{Z\_pvalrem} but only returns the
+``valuation''.
+
+\fun{long}{Z_lvalrem}{GEN x, ulong p, GEN *r} as \kbd{Z\_pvalrem}, except
+that \kbd{p} is an \kbd{ulong} ($\kbd{p} > 1$).
+
+\fun{long}{Z_lval}{GEN x, ulong p} as \kbd{Z\_pval}, except
+that \kbd{p} is an \kbd{ulong} ($\kbd{p} > 1$).
+
+\fun{long}{u_lvalrem}{ulong x, ulong p, ulong *r} as \kbd{Z\_pvalrem},
+except the inputs/outputs are now \kbd{ulong}s.
+
+\fun{long}{u_lval}{ulong x, ulong p} as \kbd{Z\_pval},
+except the inputs/outputs are now \kbd{ulong}s.
 
 \subsec{Generic unary operators}. Let ``\op'' be a unary operation among
 

@@ -332,7 +332,7 @@ e(ulong t)
     }
     /* d runs through the divisors of t */
     if (BSW_psp(utoi(++d)))
-      s = muliu(s, (ulong)u_pow(d, 1 + u_val(t,d)));
+      s = muliu(s, (ulong)u_pow(d, 1 + u_lval(t,d)));
   }
   return s;
 }
@@ -549,7 +549,7 @@ finda(Cache *Cp, GEN N, int pk, int p)
   {
     GEN gp = utoi(p), ph, b, N1;
     ulong u = 2;
-    int v = pvaluation(addis(N,-1), gp, &N1);
+    int v = Z_pvalrem(addis(N,-1), gp, &N1);
     ph = gpowgs(gp, v-1); pv = mulis(ph, p); /* N - 1 = p^v q */ 
     if (p > 2)
     {
@@ -892,7 +892,7 @@ step5(Cache **pC, Red *R, int p, GEN et, ulong ltab)
     if (q%p != 1 || smodis(et,q) == 0) goto repeat;
 
     if (smodis(R->N,q) == 0) return -1;
-    k = u_val(q-1, p);
+    k = u_lval(q-1, p);
     pk = u_pow(p,k);
     if (pk < lg(pC) && pC[pk]) { C = pC[pk]; Cp = pC[p]; }
     else {

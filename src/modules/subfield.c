@@ -444,7 +444,7 @@ embedding(GEN g, GEN DATA, primedata *S, GEN den, GEN listdelta)
     * [w1,h1] satisfying the same conditions mod p^2, [w1,h1] = [w0,h0] (mod p)
     * (cf. Dixon: J. Austral. Math. Soc., Series A, vol.49, 1990, p.445) */
     if (DEBUGLEVEL>1)
-      fprintferr("lifting embedding mod p^k = %Z^%ld\n",p,ggval(q,p));
+      fprintferr("lifting embedding mod p^k = %Z^%ld\n",p, Z_pval(q,p));
 
     /* w1 := w0 - h0 g(w0) mod (T,q) */
     if (wpow)

@@ -1026,13 +1026,18 @@ GEN     normalizepol_i(GEN x, long lx);
 long    polvaluation(GEN x, GEN *z);
 long    polvaluation_inexact(GEN x, GEN *Z);
 GEN     pureimag(GEN x);
-long    pvaluation(GEN x, GEN p, GEN *py);
 GEN     quadtoc(GEN x, long l);
 long    sizedigit(GEN x);
-long    svaluation(ulong x, ulong p, ulong *py);
+long    u_lval(ulong x, ulong p);
+long    u_lvalrem(ulong x, ulong p, ulong *py);
 GEN     to_Kronecker(GEN P, GEN Q);
 GEN     vecmax(GEN x);
 GEN     vecmin(GEN x);
+long    Z_lval(GEN n, ulong p);
+long    Z_lvalrem(GEN n, ulong p, GEN *py);
+long    z_pval(long n, GEN p);
+long    Z_pval(GEN n, GEN p);
+long    Z_pvalrem(GEN x, GEN p, GEN *py);
 
 /* gen3.c */
 
@@ -1042,9 +1047,9 @@ GEN     ceil_safe(GEN x);
 GEN     ceilr(GEN x);
 GEN     centerlift(GEN x);
 GEN     centerlift0(GEN x,long v);
+GEN     coefs_to_col(long n, ...);
 GEN     coefs_to_int(long n, ...);
 GEN     coefs_to_pol(long n, ...);
-GEN     coefs_to_col(long n, ...);
 GEN     coefs_to_vec(long n, ...);
 GEN     compo(GEN x, long n);
 GEN     deg1pol(GEN x1, GEN x0,long v);
@@ -1603,7 +1608,7 @@ GEN     unscale_pol(GEN P, GEN h);
 GEN     stopoly(ulong m, ulong p, long v);
 GEN     stopoly_gen(GEN m, GEN p, long v);
 int     u_pow(int p, int k);
-int     u_val(ulong n, ulong p);
+long    u_val(ulong n, ulong p);
 
 /* RgX.c */
 

@@ -1082,7 +1082,7 @@ GEN FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zetan)
     {
       l = gcoeff(m,i,1);
       j = itos(gcoeff(m,i,2));
-      e = pvaluation(q,l,&r);
+      e = Z_pvalrem(q,l,&r);
       if(DEBUGLEVEL>=6) (void)timer2();
       y = fflgen(l,e,r,T,p,&zeta);
       if(DEBUGLEVEL>=6) msgtimer("fflgen");
@@ -1337,7 +1337,7 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
   np=degpol(P);nq=degpol(Q);
   if (np<=0 || nq<=0 || n<=0 || np%n!=0 || nq%n!=0)
     err(talker,"bad degrees in FpX_ffintersect: %d,%d,%d",n,degpol(P),degpol(Q));
-  e=pvaluation(stoi(n),l,&q);
+  e = Z_pvalrem(stoi(n),l,&q);
   pg=itos(q);
   avma=ltop;
   if(!MA) MA=FpXQ_matrix_pow(np,np,FpXQ_pow(polx[vp],l,P,l),P,l);
@@ -1730,13 +1730,6 @@ to_Kronecker(GEN P, GEN Q)
 /*                          MODULAR GCD                            */
 /*                                                                 */
 /*******************************************************************/
-int
-u_val(ulong n, ulong p)
-{
-  ulong dummy;
-  return svaluation(n,p,&dummy);
-}
-
 /* assume p^k is SMALL */
 int
 u_pow(int p, int k)
@@ -2304,8 +2297,8 @@ FpX_resultant(GEN a, GEN b, GEN p)
 
 /* assuming the PRS finishes on a degree 1 polynomial C0 + C1X, with "generic"
  * degree sequence as given by dglist, set *Ci and return resultant(a,b) */
-ulong
-u_FpX_resultant_all(GEN a, GEN b, long *C0, long *C1, GEN dglist, ulong p)
+static ulong
+Flx_resultant_all(GEN a, GEN b, long *C0, long *C1, GEN dglist, ulong p)
 {
   long da,db,dc,cnt,ind;
   ulong lb, cx = 1, res = 1UL;
@@ -2462,7 +2455,7 @@ FpV_polint(GEN xa, GEN ya, GEN p)
 }
 
 static void
-u_FpV_polint_all(GEN xa, GEN ya, GEN C0, GEN C1, ulong p)
+FlV_polint_all(GEN xa, GEN ya, GEN C0, GEN C1, ulong p)
 {
   GEN T,Q = Flv_roots_to_pol(xa, p, 0);
   GEN dP  = NULL,  P = NULL;
@@ -2499,7 +2492,7 @@ u_FpV_polint_all(GEN xa, GEN ya, GEN C0, GEN C1, ulong p)
 /* b a vector of polynomials representing B in Fp[X][Y], evaluate at X = x,
  * Return 0 in case of degree drop. */
 static GEN
-u_vec_FpX_eval(GEN b, ulong x, ulong p)
+FlxV_eval(GEN b, ulong x, ulong p)
 {
   GEN z;
   long i, lb = lg(b);
@@ -2514,7 +2507,7 @@ u_vec_FpX_eval(GEN b, ulong x, ulong p)
 
 /* as above, but don't care about degree drop */
 static GEN
-u_vec_FpX_eval_gen(GEN b, ulong x, ulong p, int *drop)
+FlxV_eval_gen(GEN b, ulong x, ulong p, int *drop)
 {
   GEN z;
   long i, lb = lg(b);
@@ -2566,10 +2559,10 @@ ZY_ZXY_ResBound(GEN A, GEN B, GEN dB)
 
 /* return Res(a(Y), b(n,Y)) over Fp. la = leading_term(a) [for efficiency] */
 static ulong
-u_FpX_eval_resultant(GEN a, GEN b, ulong n, ulong p, ulong la)
+FlX_eval_resultant(GEN a, GEN b, ulong n, ulong p, ulong la)
 {
   int drop;
-  GEN ev = u_vec_FpX_eval_gen(b, n, p, &drop);
+  GEN ev = FlxV_eval_gen(b, n, p, &drop);
   ulong r = Flx_resultant(a, ev, p);
   if (drop && la != 1) r = Fl_mul(r, Fl_pow(la, drop,p),p);
   return r;
@@ -2595,18 +2588,18 @@ Fly_Flxy_resultant_polint(GEN a, GEN b, ulong p, ulong dres)
   * P_{-n}(-X), where P_i is Lagrange polynomial: P_i(j) = delta_{i,j} */
   for (i=0,n = 1; i < dres; n++)
   {
-    x[++i] = n;   y[i] = u_FpX_eval_resultant(a,b, x[i], p,la);
-    x[++i] = p-n; y[i] = u_FpX_eval_resultant(a,b, x[i], p,la);
+    x[++i] = n;   y[i] = FlX_eval_resultant(a,b, x[i], p,la);
+    x[++i] = p-n; y[i] = FlX_eval_resultant(a,b, x[i], p,la);
   }
   if (i == dres)
   {
-    x[++i] = 0;   y[i] = u_FpX_eval_resultant(a,b, x[i], p,la);
+    x[++i] = 0;   y[i] = FlX_eval_resultant(a,b, x[i], p,la);
   }
   return Flv_polint(x,y, p, evalvarn(varn(b)));
 }
 
 static GEN
-u_FpXX_pseudorem(GEN x, GEN y, ulong p)
+FlxX_pseudorem(GEN x, GEN y, ulong p)
 {
   long vx = varn(x), dx, dy, dz, i, lx, dp;
   pari_sp av = avma, av2, lim;
@@ -2647,7 +2640,7 @@ u_FpXX_pseudorem(GEN x, GEN y, ulong p)
 }
 
 static GEN
-u_FpX_divexact(GEN x, GEN y, ulong p)
+FlxX_Flx_div(GEN x, GEN y, ulong p)
 {
   long i, l;
   GEN z;
@@ -2668,7 +2661,7 @@ u_FpX_divexact(GEN x, GEN y, ulong p)
 }
 
 static GEN
-Flyx_subres(GEN u, GEN v, ulong p)
+FlxX_subres(GEN u, GEN v, ulong p)
 {
   pari_sp av = avma, av2, lim;
   long degq,dx,dy,du,dv,dr,signh;
@@ -2686,7 +2679,7 @@ Flyx_subres(GEN u, GEN v, ulong p)
   g = h = Fl_to_Flx(1,0); av2 = avma; lim = stack_lim(av2,1);
   for(;;)
   {
-    r = u_FpXX_pseudorem(u,v,p); dr = lg(r);
+    r = FlxX_pseudorem(u,v,p); dr = lg(r);
     if (dr == 2) { avma = av; return gzero; }
     du = degpol(u); dv = degpol(v); degq = du-dv;
     u = v; p1 = g; g = leading_term(u);
@@ -2700,7 +2693,7 @@ Flyx_subres(GEN u, GEN v, ulong p)
         h = Flx_div(Flx_pow(g,degq,p), Flx_pow(h,degq-1,p), p);
     }
     if (both_odd(du,dv)) signh = -signh;
-    v = u_FpX_divexact(r, p1, p);
+    v = FlxX_Flx_div(r, p1, p);
     if (dr==3) break;
     if (low_stack(lim,stack_lim(av2,1)))
     {
@@ -2745,7 +2738,7 @@ FpY_FpXY_resultant(GEN a, GEN b0, GEN p)
     if ((ulong)dres >= pp)
     {
       a = ZXX_to_FlxX(a, pp, vX);
-      x = Flyx_subres(a, b, pp);
+      x = FlxX_subres(a, b, pp);
     }
     else
     {
@@ -2880,8 +2873,8 @@ INIT:
         setlg(dglist, 1);
         for (n=0; n <= dres; n++)
         {
-          ev = u_vec_FpX_eval(b, n, p);
-          (void)u_FpX_resultant_all(a, ev, NULL, NULL, dglist, p);
+          ev = FlxV_eval(b, n, p);
+          (void)Flx_resultant_all(a, ev, NULL, NULL, dglist, p);
           if (lg(dglist)-1 == goal) break;
         }
         /* last pol in ERS has degree > 1 ? */
@@ -2898,11 +2891,11 @@ INIT:
 
       for (i=0,n = 0; i <= dres; n++)
       {
-        ev = u_vec_FpX_eval(b, n, p);
-        x[++i] = n; y[i] = u_FpX_resultant_all(a, ev, C0+i, C1+i, dglist, p);
+        ev = FlxV_eval(b, n, p);
+        x[++i] = n; y[i] = Flx_resultant_all(a, ev, C0+i, C1+i, dglist, p);
         if (!C1[i]) i--; /* C1(i) = 0. No way to recover C0(i) */
       }
-      u_FpV_polint_all(x,y,C0,C1, p);
+      FlV_polint_all(x,y,C0,C1, p);
       Hp = (GEN)y[1];
       H0p= (GEN)C0[1];
       H1p= (GEN)C1[1];
@@ -3444,7 +3437,7 @@ ffinit_nofact(GEN p, long n)
   if (lgefint(p)==3)
   {
     ulong lp = p[2], q;
-    long v = svaluation(n,lp,&q);
+    long v = u_lvalrem(n,lp,&q);
     if (v>0)
     {
       if (lp==2) Q = f2init(v);

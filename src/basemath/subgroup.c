@@ -291,7 +291,7 @@ dopsub(subgp_iter *T, GEN p, GEN indexsubq)
     if (cmpii(gpowgs(p, wG - wmin), T->bound) > 0) wmin++;
     break;
   case b_EXACT: /* exact value */
-    wmin = wmax = wG - ggval(T->bound, p);
+    wmin = wmax = wG - Z_pval(T->bound, p);
     break;
   }
   T->M = M = new_chunk(n+1);
@@ -459,7 +459,7 @@ subgroup_engine(subgp_iter *T)
     L = new_chunk(n); p = (GEN)primlist[i];
     for (j=1; j<n; j++)
     {
-      L[j] = pvaluation((GEN)cyc[j], p, NULL);
+      L[j] = Z_pval((GEN)cyc[j], p);
       if (!L[j]) break;
     }
     j--; setlen(L, j);
@@ -478,7 +478,7 @@ subgroup_engine(subgp_iter *T)
     T->subq = NULL;
     if (T->boundtype == b_EXACT)
     {
-      (void)pvaluation(T->bound,p,&B);
+      (void)Z_pvalrem(T->bound,p,&B);
       if (!gcmp1(B)) { avma = av; return; }
     }
   }
@@ -494,7 +494,7 @@ subgroup_engine(subgp_iter *T)
     setlg(cycI, i); /* cyclic factors of I */
     if (T->boundtype == b_EXACT)
     {
-      (void)pvaluation(T->bound,p,&B);
+      (void)Z_pvalrem(T->bound,p,&B);
       B = _vec(B);
     }
     T->expoI = (GEN)cycI[1];

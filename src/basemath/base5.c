@@ -501,7 +501,9 @@ rnfelementdown(GEN rnf,GEN x)
       if (typ(z)==t_POLMOD && varn(z[1])==varn(rnf[1])) z = (GEN)z[2];
       if (varncmp(gvar(z), varn(rnf[1])) <= 0)
       {
-        if (lg(z) > 3)
+        lx = lg(z);
+        if (lx == 2) { avma = av; return gzero; }
+        if (lx > 3)
           err(talker,"element is not in the base field in rnfelementdown");
         z = (GEN)z[2];
       }

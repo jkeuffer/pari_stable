@@ -37,7 +37,7 @@ psquare(GEN a,GEN p)
     return (smodis(shifti(a,-v),8)==1);
   }
 
-  ap=stoi(1); v=pvaluation(a,p,&ap);
+  ap=stoi(1); v=Z_pvalrem(a,p,&ap);
   if (v&1) return 0;
   return (kronecker(ap,p)==1);
 }
@@ -56,8 +56,8 @@ lemma6(GEN pol,GEN p,long nu,GEN x)
   for (i=lgpol(pol),gpx=mulis((GEN) pol[i+1],i-1); i>2; i--)
     gpx=addii(mulii(gpx,x),mulis((GEN) pol[i],i-2));
 
-  lambda=pvaluation(gx,p,&gx);
-  if (gcmp0(gpx)) mu=BIGINT; else mu=pvaluation(gpx,p,&gpx);
+  lambda = Z_pval(gx, p);
+  if (gcmp0(gpx)) mu = BIGINT; else mu = Z_pval(gpx,p);
   avma=ltop;
 
   if (lambda>(mu<<1)) return 1;

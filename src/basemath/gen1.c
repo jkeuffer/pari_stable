@@ -387,7 +387,7 @@ addpp(GEN x, GEN y)
   {
     if (ry < rx) { r=ry; mod = (GEN)x[3]; } else { r=rx; mod = (GEN)y[3]; }
     u = addii((GEN)x[4], (GEN)y[4]);
-    if (!signe(u) || (c = pvaluation(u,p,&u)) >= r)
+    if (!signe(u) || (c = Z_pvalrem(u,p,&u)) >= r)
     {
       avma = av; return zeropadic(p, e+r);
     }
@@ -417,9 +417,9 @@ addQp(GEN x, GEN y)
   if (gcmp0(x)) return gcopy(y);
 
   av = avma; p = (GEN)y[2]; tx = typ(x);
-  e = (tx == t_INT)? pvaluation(x,p,&p1)
-                   : pvaluation((GEN)x[1],p,&p1) -
-                     pvaluation((GEN)x[2],p,&p2);
+  e = (tx == t_INT)? Z_pvalrem(x,p,&p1)
+                   : Z_pvalrem((GEN)x[1],p,&p1) -
+                     Z_pvalrem((GEN)x[2],p,&p2);
   vy = valp(y); d = vy - e; py = precp(y); r = d + py;
   if (r <= 0) { avma = av; return gcopy(y); }
   mod = (GEN)y[3];
@@ -447,7 +447,7 @@ addQp(GEN x, GEN y)
     long c;
     if (tx != t_INT && !is_pm1(p2)) p1 = mulii(p1, Fp_inv(p2,mod));
     u = addii(u, p1);
-    if (!signe(u) || (c = pvaluation(u,p,&u)) >= r)
+    if (!signe(u) || (c = Z_pvalrem(u,p,&u)) >= r)
     {
       avma = av; return zeropadic(p,e+r);
     }

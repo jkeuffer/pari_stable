@@ -54,6 +54,9 @@ This file lists the incompatible changes between Version 2.x and older versions
   - log(x, {flag}): optional flag removed. Decide alone whether to use AGM
     (unless precision is very low).
 
+  - valuation(x, 1) used to return 1, valuation(x, -1) returned 0 if (x >= 0)
+    and 1 otherwise. Not anymore: error message.
+
 * Specific to the PARI library:
 ===============================
 Incompatible changes:

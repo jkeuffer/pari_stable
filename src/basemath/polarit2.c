@@ -2090,7 +2090,7 @@ gauss_factor(GEN x)
       swap(w, w2); exp += 3 * e;
     }
     P[i] = (long)w;
-    v = pvaluation(n, p, &n);
+    v = Z_pvalrem(n, p, &n);
     if (v) {
       exp += 3*v;
       if (is2) v <<= 1; /* 2 = w^2 I^3 */
@@ -2100,7 +2100,7 @@ gauss_factor(GEN x)
       }
       E[i] = lstoi(e + v);
     }
-    v = pvaluation(d, p, &d);
+    v = Z_pvalrem(d, p, &d);
     if (v) {
       exp -= 3*v;
       if (is2) v <<= 1; /* 2 is ramified */

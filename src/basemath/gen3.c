@@ -177,7 +177,7 @@ padicprec(GEN x, GEN p)
       return VERYBIGINT;
 
     case t_INTMOD:
-      return ggval((GEN)x[1],p);
+      return Z_pval((GEN)x[1],p);
 
     case t_PADIC:
       if (!gegal((GEN)x[2],p))

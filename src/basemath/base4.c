@@ -612,10 +612,9 @@ long
 val_norm(GEN x, GEN p, long *vz)
 {
   long i,l = lg(x), v;
-  *vz = v = pvaluation(gcoeff(x,1,1), p, NULL);
+  *vz = v = Z_pval(gcoeff(x,1,1), p);
   if (!v) return 0;
-  for (i=2; i<l; i++)
-    v += pvaluation(gcoeff(x,i,i), p, NULL);
+  for (i=2; i<l; i++) v += Z_pval(gcoeff(x,i,i), p);
   return v;
 }
 
@@ -1411,7 +1410,7 @@ famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX)
     x = Q_remove_denom(x, &cx);
     if (cx)
     {
-      long k = pvaluation(cx, p, &u);
+      long k = Z_pvalrem(cx, p, &u);
       if (!gcmp1(u)) /* could avoid the inversion, but prkZ is small--> cheap */
         x = gmul(x, Fp_inv(u, prkZ));
       if (k)
@@ -2243,7 +2242,7 @@ nf_coprime_part(GEN nf, GEN x, GEN *listpr)
   for (j=1; j<lp; j++)
   {
     pr = listpr[j]; p = (GEN)pr[1];
-    v = ggval(x, p); if (!v) continue;
+    v = Z_pval(x, p); if (!v) continue;
 
     ex = mulsi(v, (GEN)pr[3]); /* = v_pr(x) > 0 */
     x1 = x1? idealmulpowprime(nf, x1, pr, ex)

@@ -289,7 +289,7 @@ gpolcomp(GEN p1, GEN p2)
   return 0;
 }
 
-/* assume pol in Z[X]. Find C, L in Z such that POL = C pol(x / L) monic in Z[X].
+/* assume pol in Z[X]. Find C, L in Z such that POL = C pol(x/L) monic in Z[X].
  * Return POL and set *ptlead = L */
 GEN
 primitive_pol_to_monic(GEN pol, GEN *ptlead)
@@ -305,14 +305,14 @@ primitive_pol_to_monic(GEN pol, GEN *ptlead)
   for (i=lg(e)-1; i>0;i--) e[i] = itos((GEN)e[i]);
   for (i=lg(fa)-1; i>0; i--)
   {
-    GEN p = (GEN)fa[i], p1,pk,pku;
+    GEN p = (GEN)fa[i], pk, pku;
     long k = (long)ceil((double)e[i] / n);
     long d = k * n - e[i], v, j0;
     /* find d, k such that  p^d pol(x / p^k) monic */
     for (j=n-1; j>0; j--)
     {
       if (!signe(a[j])) continue;
-      v = pvaluation((GEN)a[j], p, &p1);
+      v = Z_pval((GEN)a[j], p);
       while (v + d < k * j) { k++; d += n; }
     }
     pk = gpowgs(p,k); j0 = d/k;
@@ -650,9 +650,9 @@ galoisapply(GEN nf, GEN aut, GEN x)
       p = (GEN)x[1];
       p1=centermod(galoisapply(nf,aut,(GEN)x[2]), p);
       if (is_pm1(x[3]))
-	if (ggval(subres(gmul((GEN)nf[7],p1),pol), p) > itos((GEN)x[4]))
-	  p1[1] =  (signe(p1[1]) > 0)? lsub((GEN)p1[1], p)
-	                             : ladd((GEN)p1[1], p);
+	if (Z_pval(subres(gmul((GEN)nf[7],p1),pol), p) > itos((GEN)x[4]))
+	  p1[1] =  (signe(p1[1]) > 0)? lsubii((GEN)p1[1], p)
+	                             : laddii((GEN)p1[1], p);
       y[2]=(long)p1;
       y[5]=(long)centermod(galoisapply(nf,aut,(GEN)x[5]), p);
       return gerepilecopy(av,y);

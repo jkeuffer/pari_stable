@@ -97,6 +97,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define poldivres poldivrem
 #define nfdivres nfdivrem
 #define gred gcopy
+#define pvaluation Z_pvalrem
+#define svaluation u_lvalrem
 
 #define glogagm glog
 #define logagm  mplog

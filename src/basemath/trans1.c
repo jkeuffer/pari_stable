@@ -421,16 +421,7 @@ pow_monome(GEN x, long n)
   A[d] = (long)b; return y;
 }
 
-static long
-z_Z_val(long n, GEN p)
-{
-  ulong junk;
-  if (lgefint(p) > 3) return 0;
-  return svaluation((ulong)labs(n), (ulong)p[2], &junk);
-}
-static long
-Z_val(GEN n, GEN p) { return pvaluation(n, p, NULL); }
-
+/* x t_PADIC */
 static GEN
 powps(GEN x, long n)
 {
@@ -442,7 +433,7 @@ powps(GEN x, long n)
     if (n < 0) err(gdiver);
     return zeropadic(p, e);
   }
-  v = z_Z_val(n, p);
+  v = z_pval(n, p);
 
   y = cgetg(5,t_PADIC);
   mod = (GEN)x[3];
@@ -462,6 +453,7 @@ powps(GEN x, long n)
   y[4] = lpileuptoint(av, t);
   return y;
 }
+/* x t_PADIC */
 static GEN
 powp(GEN x, GEN n)
 {
@@ -474,7 +466,7 @@ powp(GEN x, GEN n)
     if (signe(n) < 0) err(gdiver);
     return zeropadic(p, 0);
   }
-  v = Z_val(n, p);
+  v = Z_pval(n, p);
 
   y = cgetg(5,t_PADIC);
   mod = (GEN)x[3];
@@ -1028,7 +1020,7 @@ padic_sqrtn(GEN x, GEN n, GEN *zetan)
     return zeropadic(p, (valp(x)+m-1)/m);
   }
   /*First treat the ramified part using logarithms*/
-  e = pvaluation(n, p, &q);
+  e = Z_pvalrem(n, p, &q);
   if (e) x = padic_sqrtn_ram(x,e);
   /*finished ?*/
   if (is_pm1(q))

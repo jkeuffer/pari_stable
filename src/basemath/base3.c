@@ -589,8 +589,10 @@ element_val(GEN nf, GEN x, GEN vp)
   e = itos((GEN)vp[3]);
   switch(typ(x))
   {
-    case t_INT: case t_FRAC:
-      return ggval(x,p)*e;
+    case t_INT:
+      return Z_pval(x,p)*e;
+    case t_FRAC:
+      return Z_pval((GEN)x[1],p) - Z_pval((GEN)x[2],p);
     case t_POLMOD: x = (GEN)x[2]; /* fall through */
     case t_POL:
       x = algtobasis_i(nf,x); break;

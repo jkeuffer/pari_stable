@@ -411,7 +411,7 @@ ordmax(GEN *cf, GEN p, long epsilon, GEN *ptdelta)
       m = gdiv(m,hh);
       delta = diviiexact(delta,hh);
     }
-    epsilon -= 2 * ggval(index,p);
+    epsilon -= 2 * Z_pval(index,p);
     if (epsilon < 2) break;
     if (low_stack(limit,stack_lim(av2,1)))
     {
@@ -614,10 +614,10 @@ allbase(GEN f, int flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
       w1[i] = u[1];
       w1 = concatsp(w1, vecextract_i(u, 2, l-1));
       N = *dx;
-      w2[i] = lstoi(pvaluation(N, (GEN)w1[i], &N));
+      w2[i] = lstoi(Z_pvalrem(N, (GEN)w1[i], &N));
       k  = lw;
       lw = lg(w1);
-      for ( ; k < lw; k++) w2[k] = lstoi(pvaluation(N, (GEN)w1[k], &N));
+      for ( ; k < lw; k++) w2[k] = lstoi(Z_pvalrem(N, (GEN)w1[k], &N));
     } RETRY {
       if (DEBUGLEVEL) fprintferr("Treating p^k = %Z^%ld\n",w1[i],mf);
       ordmax = concatsp(ordmax, _vec( maxord((GEN)w1[i],f,mf) ));
@@ -691,7 +691,7 @@ allbase(GEN f, int flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
     W2 = cgetg(lw, t_COL); w[2] = (long)W2;
     for (j=1; j<lw; j++)
     {
-      k = pvaluation(D, (GEN)w1[j], &D);
+      k = Z_pvalrem(D, (GEN)w1[j], &D);
       if (k) { W1[lfa] = w1[j]; W2[lfa] = lstoi(k); lfa++; }
     }
     setlg(W1, lfa);
@@ -712,7 +712,7 @@ update_fact(GEN x, GEN f)
   e = cgetg(l,t_COL); g[2]=(long)e; iq = 1;
   for (i=1; i<l; i++)
   {
-    k = pvaluation(d, (GEN)p[i], &d);
+    k = Z_pvalrem(d, (GEN)p[i], &d);
     if (k) { q[iq] = p[i]; e[iq] = lstoi(k); iq++; }
   }
   setlg(q,iq); setlg(e,iq);
@@ -957,7 +957,7 @@ dbasis(GEN p, GEN f, long mf, GEN a, GEN U)
 static GEN
 get_partial_order_as_pols(GEN p, GEN f, GEN *d)
 {
-  GEN b = maxord(p,f, ggval(ZX_disc(f),p));
+  GEN b = maxord(p,f, Z_pval(ZX_disc(f),p));
   GEN z = Q_remove_denom( RgM_to_RgXV(b, varn(f)), d );
   if (!*d) *d = gun;
   return z;
@@ -1036,7 +1036,7 @@ Decomp(decomp_t *S, long flag)
 
   pk = p; k = 1;
   /* E, (1 - E) tend to orthogonal idempotents in Zp[X]/(f) */
-  while (k < r + ggval(de, p))
+  while (k < r + Z_pval(de, p))
   { /* E <-- E^2(3-2E) mod p^2k, with E = e/de */
     GEN D;
     pk = sqri(pk); k <<= 1;
@@ -1104,7 +1104,7 @@ vstar(GEN p,GEN h, long *L, long *E)
   for (j=1; j<=m; j++)
     if (! gcmp0((GEN)h[m-j+2]))
     {
-      w = ggval((GEN)h[m-j+2],p);
+      w = Z_pval((GEN)h[m-j+2],p);
       if (first || w*k < v*j) { v = w; k = j; }
       first = 0;
     }
@@ -1120,7 +1120,7 @@ redelt_i(GEN a, GEN N, GEN p, GEN *pda)
   a = Q_remove_denom(a, pda);
   if (*pda)
   {
-    long v = pvaluation(*pda, p, &z);
+    long v = Z_pvalrem(*pda, p, &z);
     if (v) {
       *pda = gpowgs(p, v);
       N  = mulii(*pda, N);
@@ -1236,7 +1236,7 @@ newtoncharpoly(GEN pp, GEN p, GEN NS)
   {
     pari_sp av2 = avma;
     GEN z,  s = gzero;
-    long v = pvaluation(stoi(k - 1), p, &z);
+    long v = Z_pvalrem(stoi(k - 1), p, &z);
     for (j = 1; j < k; j++)
     {
       GEN t = mulii((GEN)NS[j], (GEN)c[k-j]);
@@ -1265,13 +1265,13 @@ fastvalpos(GEN a, GEN chi, GEN p, GEN ns, long E)
   c = egalii(p, gdeux)? 2*n/3 : min(2*E, n);
   if (c < 2) c = 2;
   a = Q_remove_denom(a, &d);
-  m = d? ggval(d, p): 0; /* >= 0 */
+  m = d? Z_pval(d, p): 0; /* >= 0 */
   pp = gpowgs(p, (m+1)*c+1);
   ns = manage_cache(chi, pp, ns);
   v = newtonsums(a, d, chi, c, pp, ns);
   if (!v) return 0;
   for (j = 1; j <= c; j++)
-    if (signe((GEN)v[j]) && E*ggval((GEN)v[j], p) - j*(E*m+1) < 0) return 0;
+    if (signe((GEN)v[j]) && E*Z_pval((GEN)v[j], p) - j*(E*m+1) < 0) return 0;
   return 1;
 }
 
@@ -1616,7 +1616,7 @@ loop(decomp_t *S, long nv, long Ea, long Fa, GEN ns)
       if (signe(R))
       {
         chib = NULL;
-        L = ggval(R, S->p);
+        L = Z_pval(R, S->p);
         E = N;
       }
       else
@@ -1817,7 +1817,7 @@ maxord_i(GEN p, GEN f, long mf, GEN w, long flag)
   S.f = f;
   S.p = p;
   S.nu = h;
-  S.df = ggval(D, p);
+  S.df = Z_pval(D, p);
   S.phi = polx[varn(f)];
   if (l == 1) return nilord(&S, D, mf, flag);
   if (flag && flag <= mf) flag = mf + 1;
@@ -1997,11 +1997,11 @@ init_norm(norm_S *S, GEN nf, GEN p)
   }
   if (!S->M)
   {
-    GEN a, D, Dp, w = Q_remove_denom((GEN)nf[7], &D), q = sqri(p);
+    GEN D, Dp, w = Q_remove_denom((GEN)nf[7], &D), q = sqri(p);
     long i;
     if (D)
     {
-      long v = pvaluation(D, p, &a);
+      long v = Z_pval(D, p);
       D = gpowgs(p, v);
       Dp = mulii(D, q);
     } else {
@@ -2522,7 +2522,7 @@ kill_denom(GEN x, GEN nf, GEN p, GEN modpr)
   long v;
   if (gcmp1(den)) return x;
 
-  v = ggval(den,p);
+  v = Z_pval(den,p);
   if (v)
   {
     GEN tau = modpr_TAU(modpr);

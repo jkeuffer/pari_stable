@@ -1416,7 +1416,7 @@ int_to_padic(GEN x, GEN p, GEN pr, long r, GEN invlead)
     if (tx != t_INT) err(typeer, "int_to_padic");
     sx = signe(x);
     if (!sx) return gzero;
-    v = pvaluation(x,p,&p1);
+    v = Z_pvalrem(x,p,&p1);
   }
   y = cgetg(5,t_PADIC);
   if (sx && v < r)
@@ -1936,7 +1936,7 @@ padicff(GEN x,GEN p,long pr)
   fa = cgetg(3,t_MAT);
   g = cgetg(3,t_COL); fa[1] = (long)g;
   e = cgetg(3,t_COL); fa[2] = (long)e;
-  g[1] = (long)p; e[1] = lstoi(pvaluation(dx,p,&q));
+  g[1] = (long)p; e[1] = lstoi(Z_pvalrem(dx,p,&q));
   g[2] = (long)q; e[2] = un;
 
   bas = nfbasis(x, &dK, 0, fa);
@@ -2032,7 +2032,7 @@ factorpadic4(GEN f,GEN p,long prec)
       continue;
     }
     /* use Round 4 */
-    p2 = maxord_i(p, fx, ggval(ZX_disc(fx),p), w, pr);
+    p2 = maxord_i(p, fx, Z_pval(ZX_disc(fx),p), w, pr);
     if (p2)
     {
       p2 = gerepilecopy(av1,p2);

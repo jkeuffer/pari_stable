@@ -556,8 +556,8 @@ gcarreparfait(GEN x)
         p = (GEN)factor(d)[1]; l = lg(p);
         for (i=1; i<l; i++)
         {
-          v = pvaluation(a,(GEN)p[i],&p1);
-          w = pvaluation(q,(GEN)p[i], &q);
+          v = Z_pvalrem(a,(GEN)p[i],&p1);
+          w = Z_pvalrem(q,(GEN)p[i], &q);
           if (v < w && (v&1 || kronecker(p1,(GEN)p[i]) == -1))
             { avma = av; return gzero; }
         }
@@ -874,8 +874,8 @@ hilii(GEN x, GEN y, GEN p)
   if (signe(p)<=0)
     return (signe(x)<0 && signe(y)<0)? -1: 1;
   av = avma;
-  a = odd(pvaluation(x,p,&u));
-  b = odd(pvaluation(y,p,&v));
+  a = odd(Z_pvalrem(x,p,&u));
+  b = odd(Z_pvalrem(y,p,&v));
   if (egalii(p,gdeux))
   {
     z = (eps(u) && eps(v))? -1: 1;
@@ -1323,7 +1323,7 @@ Fp_sqrtn(GEN a, GEN n, GEN p, GEN *zetan)
     {
       l = gcoeff(F,i,1);
       j = itos(gcoeff(F,i,2));
-      e = pvaluation(q,l,&r);
+      e = Z_pvalrem(q,l,&r);
       y = mplgenmod(l,e,r,p,&zeta);
       if (zetan) z = modii(mulii(z, Fp_pow(y,gpowgs(l,e-j),p)), p);
       do

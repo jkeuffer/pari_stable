@@ -1431,7 +1431,7 @@ n_s(ulong n, GEN *tab)
 
   for (p = 3; n > 1; )
   {
-    e = svaluation(n, p, &n);
+    e = u_lvalrem(n, p, &n);
     if (e)
     {
       GEN y = tab[pows(p,e)];

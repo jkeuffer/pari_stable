@@ -2308,17 +2308,17 @@ ellheight0(GEN e, GEN a, long flag, long prec)
     long u, v, n, n2;
     if (signe(remii((GEN)e[10],p)))
     { /* p \nmid c4 */
-      long N = ggval((GEN)e[12],p);
+      long N = Z_pval((GEN)e[12],p);
       if (!N) continue;
-      n2 = ggval(psi2,p); n = n2<<1;
+      n2 = Z_pval(psi2,p); n = n2<<1;
       if (n > N) n = N;
       u = n * ((N<<1) - n);
       v = N << 3;
     }
     else
     {
-      n2 = ggval(psi2, p);
-      n  = ggval(psi3, p);
+      n2 = Z_pval(psi2, p);
+      n  = Z_pval(psi3, p);
       if (n >= 3*n2) { u = n2; v = 3; } else { u = n; v = 8; }
     }
     /* z -= u log(p) / v */
@@ -2434,7 +2434,7 @@ localred_carac_p(GEN e, GEN p, int minim)
   c6    = (GEN)e[11];
   delta = (GEN)e[12];
   nuj   = gcmp0((GEN)e[13])? 0: - ggval((GEN)e[13], p);
-  nudelta = ggval(delta, p);
+  nudelta = Z_pval(delta, p);
   k = (nuj > 0 ? nudelta - nuj : nudelta) / 12;
   if (k <= 0)
   {
@@ -2572,8 +2572,7 @@ localred_carac_23(GEN e, long p)
   GEN pk, p2k, pk1;
   GEN v;
 
-
-  nudelta = ggval((GEN)e[12], stoi(p));
+  nudelta = Z_lval((GEN)e[12], (ulong)p);
   v = init_ch();
 
   for (;;)
@@ -2839,7 +2838,7 @@ globalreduction(GEN E)
   D  = (GEN)e[12];
   P = (GEN)decomp(gcdii(c4,c6))[1];
   l = lg(P);
-  for (k = 1; k < l; k++) (long)pvaluation(D, (GEN)P[k], &D);
+  for (k = 1; k < l; k++) (long)Z_pvalrem(D, (GEN)P[k], &D);
   if (!is_pm1(D)) P = concatsp(P, (GEN)decomp(absi(D))[1]);
   l = lg(P); c = N = gun;
   for (k = 1; k < l; k++)
@@ -3484,10 +3483,10 @@ ellrootno_2(GEN e)
 
   n2=neron(e,p,&kod); c4=(GEN)e[10]; c6=(GEN)e[11]; p6=stoi(64);
   if (gcmp0(c4)) {v4=12; u=0;}
-  else {v4=pvaluation(c4,p,&tmp); u=itos(modii(tmp,p6));}
+  else {v4=Z_pvalrem(c4,p,&tmp); u=itos(modii(tmp,p6));}
   if (gcmp0(c6)) {v6=12; v=0;}
-  else {v6=pvaluation(c6,p,&tmp); v=itos(modii(tmp,p6));}
-  (void)pvaluation((GEN)e[12],p,&tmp); d1=itos(modii(tmp,p6));
+  else {v6=Z_pvalrem(c6,p,&tmp); v=itos(modii(tmp,p6));}
+  (void)Z_pvalrem((GEN)e[12],p,&tmp); d1=itos(modii(tmp,p6));
   avma=av; x1=u+v+v;
   if (kod>=5)
     {w2=mpodd(addii((GEN)e[2],(GEN)e[3])) ? 1 : -1; avma=av; return w2;}
@@ -3572,10 +3571,10 @@ ellrootno_3(GEN e)
 
   n2=neron(e,p,&kod); c4=(GEN)e[10]; c6=(GEN)e[11]; p4=stoi(81);
   if (gcmp0(c4)) { v4=12; u=0; }
-  else { v4=pvaluation(c4,p,&tmp); u=itos(modii(tmp,p4)); }
+  else { v4=Z_pvalrem(c4,p,&tmp); u=itos(modii(tmp,p4)); }
   if (gcmp0(c6)) v=0;
-  else {(void)pvaluation(c6,p,&tmp); v=itos(modii(tmp,p4));}
-  (void)pvaluation((GEN)e[12],p,&tmp); d1=itos(modii(tmp,p4));
+  else {(void)Z_pvalrem(c6,p,&tmp); v=itos(modii(tmp,p4));}
+  (void)Z_pvalrem((GEN)e[12],p,&tmp); d1=itos(modii(tmp,p4));
   avma=av;
   r6=v%9; K4=kross(u,3); K6=kross(v,3);
   if (kod>4) return K6;

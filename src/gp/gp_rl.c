@@ -527,7 +527,7 @@ add_space(int start)
   rl_attempted_completion_over = 1;
 #  endif
   return NULL;
-#else /* better: fake an empty completion, but donc append ' ' after it! */
+#else /* better: fake an empty completion, but don't append ' ' after it! */
 #  ifdef HAS_COMPLETION_APPEND_CHAR
   rl_completion_append_character = '\0';
 #  endif
