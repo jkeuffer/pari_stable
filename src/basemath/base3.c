@@ -511,6 +511,7 @@ eltmul_get_table(GEN nf, GEN x)
 {
   long i, N = degpol(nf[1]);
   GEN mul = cgetg(N+1,t_MAT);
+  if (typ(x) != t_COL) x = algtobasis(nf,x);
   mul[1] = (long)x; /* assume w_1 = 1 */
   for (i=2; i<=N; i++) mul[i] = (long)element_mulid(nf,x,i);
   return mul;

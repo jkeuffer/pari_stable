@@ -22,8 +22,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "parinf.h"
 
-#define principalideal_aux(nf,x) (principalideal0((nf),(x),0))
-
 extern GEN makeprimetoideal(GEN nf,GEN UV,GEN uv,GEN x);
 extern GEN gauss_triangle_i(GEN A, GEN B,GEN t);
 extern GEN hnf_invimage(GEN A, GEN b);
@@ -165,7 +163,7 @@ idealhermite_aux(GEN nf, GEN x)
   if (tx == id_PRIME) return prime_to_ideal_aux(nf,x);
   if (tx == id_PRINCIPAL)
   {
-    x = principalideal(nf,x);
+    x = eltmul_get_table(nf, x);
     return idealmat_to_hnf(nf,x);
   }
   N=degpol(nf[1]); lx = lg(x);
@@ -188,41 +186,30 @@ idealhermite(GEN nf, GEN x)
   return gerepileupto(av,p1);
 }
 
-static GEN
-principalideal0(GEN nf, GEN x, long copy)
+GEN
+principalideal(GEN nf, GEN x)
 {
   GEN z = cgetg(2,t_MAT);
   switch(typ(x))
   {
     case t_INT: case t_FRAC: case t_FRACN:
-      if (copy) x = gcopy(x);
-      x = gscalcol_i(x, degpol(nf[1])); break;
+      x = gscalcol(x, degpol(nf[1])); break;
 
     case t_POLMOD:
       x = checknfelt_mod(nf,x,"principalideal");
       /* fall through */
     case t_POL:
-      x = copy? algtobasis(nf,x): algtobasis_i(nf,x);
+      x = algtobasis(nf,x);
       break;
 
     case t_MAT:
       if (lg(x)!=2) err(typeer,"principalideal");
       x = (GEN)x[1];
     case t_COL:
-      if (lg(x)==lgef(nf[1])-2)
-      {
-        if (copy) x = gcopy(x);
-        break;
-      }
+      if (lg(x)-1==degpol(nf[1])) { x = gcopy(x); break; }
     default: err(typeer,"principalideal");
   }
   z[1]=(long)x; return z;
-}
-
-GEN
-principalideal(GEN nf, GEN x)
-{
-  nf = checknf(nf); return principalideal0(nf,x,1);
 }
 
 static GEN
@@ -304,8 +291,7 @@ principalidele(GEN nf, GEN x, long prec)
   GEN p1,y = cgetg(3,t_VEC);
   gpmem_t av;
 
-  nf = checknf(nf);
-  p1 = principalideal0(nf,x,1);
+  p1 = principalideal(nf,x);
   y[1] = (long)p1;
   av =avma; p1 = get_arch(nf,(GEN)p1[1],prec);
   y[2] = lpileupto(av,p1); return y;
@@ -353,26 +339,17 @@ idealaddtoone0(GEN nf, GEN arg1, GEN arg2)
   return idealaddtoone(nf,arg1,arg2);
 }
 
-static GEN
-two_to_hnf(GEN nf, GEN a, GEN b)
-{
-  a = principalideal_aux(nf,a);
-  b = principalideal_aux(nf,b);
-  a = concatsp(a,b);
-  if (lgef(nf[1])==5) /* quadratic field: a has to be turned into idealmat */
-    a = idealmul(nf,idmat(2),a);
-  return idealmat_to_hnf(nf, a);
-}
-
 GEN
 idealhnf0(GEN nf, GEN a, GEN b)
 {
   gpmem_t av;
+  GEN x;
   if (!b) return idealhermite(nf,a);
 
   /* HNF of aZ_K+bZ_K */
-  av = avma; nf=checknf(nf);
-  return gerepileupto(av, two_to_hnf(nf,a,b));
+  av = avma; nf = checknf(nf);
+  x = concatsp(eltmul_get_table(nf,a), eltmul_get_table(nf,b));
+  return gerepileupto(av, idealmat_to_hnf(nf, x));
 }
 
 GEN
@@ -568,10 +545,12 @@ idealfactor(GEN nf, GEN x)
     y[1]=(long)_col(gcopy(x));
     y[2]=(long)_col(gun); return y;
   }
-  nf=checknf(nf); av=avma;
-  if (tx == id_PRINCIPAL) x = principalideal_aux(nf,x);
-
-  N=degpol(nf[1]); if (lg(x) != N+1) x = idealmat_to_hnf(nf,x);
+  av = avma;
+  nf = checknf(nf);
+  N = degpol(nf[1]);
+  if (tx == id_PRINCIPAL) x = idealhermite_aux(nf, x);
+  else
+    if (lg(x) != N+1) x = idealmat_to_hnf(nf,x);
   if (lg(x)==1) err(talker,"zero ideal in idealfactor");
   x = Q_primitive_part(x, &cx);
   if (!cx)
@@ -1510,11 +1489,12 @@ idealmul(GEN nf, GEN x, GEN y)
           p1 = idealhermite_aux(nf, element_mul(nf,x,y));
           break;
         case id_PRIME:
-          p1 = gmul((GEN)y[1],x);
-          p1 = two_to_hnf(nf,p1, element_mul(nf,(GEN)y[2],x));
+          p1 = eltmul_get_table(nf, x);
+          p1 = concatsp(gmul(p1,(GEN)y[1]), gmul(p1,(GEN)y[2]));
+          p1 = idealmat_to_hnf(nf, p1);
           break;
         default: /* id_MAT */
-          p1 = idealmat_mul(nf,y, principalideal_aux(nf,x));
+          p1 = idealmat_to_hnf(nf, gmul(eltmul_get_table(nf,x), y));
       }break;
 
     case id_PRIME:
