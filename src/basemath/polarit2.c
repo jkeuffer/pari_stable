@@ -3022,8 +3022,8 @@ Q_content(GEN x)
 
   switch(typ(x))
   {
-    case t_INT:
-    case t_FRAC: return x;
+    case t_INT:  return absi(x);
+    case t_FRAC: return gabs(x,0);
 
     case t_VEC: case t_COL: case t_MAT:
       l = lg(x); if (l == 1) return gun;
