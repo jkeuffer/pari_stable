@@ -182,6 +182,7 @@ JD 74- [Configure:] detection of times()
    85- matcompanion(degree 0 polynomial) --> stack corruption
    86- incorrect handling of inexact polynomials in matsnf(,2)  [ inexact
        leading 0 coefficients ]
+   87- writebin(file, 0) saved a "corrupted" object (0 couldn't be read back)
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.

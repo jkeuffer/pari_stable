@@ -3098,9 +3098,12 @@ wrGEN(GEN x, FILE *f)
   size_t L = p->len;
 
   wr_long(L,f);
-  wr_long((long)p->x,f);
-  wr_long((long)p->base,f);
-  _lfwrite(GENbase(p), L,f);
+  if (L)
+  {
+    wr_long((long)p->x,f);
+    wr_long((long)p->base,f);
+    _lfwrite(GENbase(p), L,f);
+  }
   free((void*)p);
 }
 
@@ -3144,7 +3147,7 @@ rdGEN(FILE *f)
   size_t L = (size_t)rd_long(f);
   GENbin *p;
 
-  if (!L) return NULL;
+  if (!L) return gzero;
   p = (GENbin*)gpmalloc(sizeof(GENbin) + L*sizeof(long));
   p->len  = L;
   p->x    = (GEN)rd_long(f);
@@ -3163,14 +3166,12 @@ readobj(FILE *f, int *ptc)
   {
     case BIN_GEN:
       x = rdGEN(f);
-      if (!x) err(talker,"malformed binary file (no GEN)");
       break;
     case NAM_GEN:
     {
       char *s = rdstr(f);
       if (!s) err(talker,"malformed binary file (no name)");
       x = rdGEN(f);
-      if (!x) err(talker,"malformed binary file (no GEN)");
       fprintferr("setting %s\n",s);
       changevalue(fetch_named_var(s,0), x);
       break;
