@@ -386,10 +386,10 @@ addrfrac(GEN x, GEN y)
   x2 = gdeuc(x2,delta);
   y2 = gdeuc(y2,delta);
   n = gadd(gmul(x1,y2), gmul(y1,x2));
-  if (!signe(n)) return gerepileupto((long)(z+3), n);
+  if (gcmp0(n)) return gerepileupto((long)(z+3), n);
   tetpil = avma; d = gmul(x2, y2);
   p1 = poldivres(n, delta, &p2); /* we want gcd(n,delta) */
-  if (!signe(p2))
+  if (gcmp0(p2))
   {
     if (lgef(d) == 3) /* "constant" denominator */
     {
