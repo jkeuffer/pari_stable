@@ -1813,14 +1813,14 @@ fin:
 
 #define SQUFOF_BLACKLIST_SZ 64
 
-long
+static long
 squfof_ambig(long a, long B, long C, long dd, GEN D, long *cntamb);
 /* see below */
 
 #ifdef INLINE
- INLINE
+INLINE
 #endif
-static long
+long
 squfof_issquare(long A)
 {
   /* emulate carrecomplet on single-word positive integers */
@@ -1857,7 +1857,7 @@ squfof(GEN n, long quiet)
   long tf = lgefint(n), nm4, cnt = 0, cntamb;
   long a1, b1, c1, d1, dd1, L1, a2, b2, c2, d2, dd2, L2, a, q, c, qc, qcb;
   GEN D1, D2, Q, res;
-  long av = avma, av1;
+  long av = avma;
   static long blacklist1[SQUFOF_BLACKLIST_SZ], blacklist2[SQUFOF_BLACKLIST_SZ];
   long blp1 = 0, blp2 = 0;
   long mydebug = DEBUGLEVEL - quiet;
