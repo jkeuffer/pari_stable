@@ -69,7 +69,7 @@ FILE *outfile = NULL;
 extern  FILE *gpoutfile;
 FILE *gpoutfile = NULL;
 
-static outfile_set;
+static int outfile_set;
 static void
 set_gpoutfile(void)
 {
