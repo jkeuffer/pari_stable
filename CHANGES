@@ -40,6 +40,7 @@ Done for version 2.2.1 (released ??/??/2001):
     5- factor(x^2 + I*1.) --> stack corruption
     6- \r directory was silently accepted
     7- check arguments in polcompositum()
+TH  8- [Cygwin:] fixed paths for readline on cygwin 1.*
 
   Changed
     1- removed useless parameter prec in many bnr* and rnf* functions
