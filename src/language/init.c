@@ -830,8 +830,6 @@ errcontext(char *msg, char *s, char *entry)
   print_prefixed_text(buf, prefix, str); free(buf);
 }
 
-void break_loop();
-
 #if 0
 static void
 reset_exception(long numer)

@@ -6765,8 +6765,10 @@ To get out of the break loop, you can use \tet{next}, \tet{break} or
 the file has been read (\kbd{read} will remain in the break loop). If the
 error is not fatal (\kbd{\pow C} is the only non-fatal error), \kbd{next}
 will continue the computation as if nothing had happened (except of course,
-you may have changed GP state during the break loop); otherwise control will
-come back to the GP prompt.
+you may have changed GP state during the break loop); otherwise control
+will come back to the GP prompt. After a user interrupt (\kbd{\pow C}),
+entering an empty input line (i.e hitting the return key) has the same
+effect as \kbd{next}.
 
 Break loops are useful as a debugging tool to inspect the values of GP
 variables to understand why a problem occurred, or to change GP behaviour

@@ -2031,7 +2031,7 @@ check_meta(char *buf)
     case '?': aide(buf, h_REGULAR); break;
     case '#': chron(buf); break;
     case '\\': escape(buf); break;
-    case '\0': break;
+    case '\0': return 2;
     default: return 0;
   }
   return 1;
@@ -2200,11 +2200,12 @@ error0(GEN *g)
 
 void errcontext(char *msg, char *s, char *entry);
 
-void
+int
 break_loop(long numerr)
 {
   Buffer *oldb = current_buffer, *b = new_buffer();
   char *s, *t, *msg;
+  int go_on = 0;
   push_stack(&bufstack, (void*)b);
 
   term_color(c_ERR);
@@ -2219,12 +2220,13 @@ break_loop(long numerr)
   else
     errcontext(msg, s, t);
   term_color(c_NONE);
-  if (numerr == siginter) pariputs("['next' will continue]\n");
+  if (numerr == siginter) pariputs("['' or 'next' will continue]\n");
   infile = stdin;
   for(;;)
   {
+    int flag;
     if (! read_line("> ", b)) break;
-    if (!check_meta(b->buf))
+    if (!(flag = check_meta(b->buf)))
     {
       GEN x = lisseq(b->buf);
       if (did_break()) break;
@@ -2235,8 +2237,14 @@ break_loop(long numerr)
       term_color(c_NONE);
       pariputc('\n');
     }
+    if (numerr == siginter && flag == 2) { go_on = 1; break; }
   }
-  pop_buffer();
+  if (numerr == siginter && did_break() == br_NEXT)
+  {
+    (void)loop_break(); /* clear status flag */
+    go_on = 1;
+  }
+  pop_buffer(); return go_on;
 }
 
 int
@@ -2247,12 +2255,7 @@ gp_exception_handler(long numerr)
   else
   {
     if (numerr == errpile) avma = top;
-    break_loop(numerr);
-    if (numerr == siginter && did_break() == br_NEXT)
-    {
-      (void)loop_break(); /* clear status flag */
-      return 1;
-    }
+    if (break_loop(numerr)) return 1;
   }
   return 0;
 }
