@@ -98,6 +98,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define nfdivres nfdivrem
 #define gred gcopy
 
+#define mpsqrtz  gopgz(absr,(x),(y))
 #define adduumod Fl_add
 #define subuumod Fl_sub
 #define muluumod Fl_mul
@@ -235,7 +236,6 @@ enum manage_var_t {
 #define mulri(x,s)  (mulir((s),(x)))
 #define mulrs(x,s)  (mulsr((s),(x)))
 
-#define mpsqrtz(x,y)   gopgz(mpsqrt,(x),(y))
 #define mpexpz(x,y)    gopgz(mpexp,(x),(y))
 #define mplogz(x,y)    gopgz(mplog,(x),(y))
 #define mpcosz(x,y)    gopgz(mpcos,(x),(y))
