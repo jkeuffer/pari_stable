@@ -1968,6 +1968,7 @@ gdiv(GEN x, GEN y)
         if (varncmp(vx, vy) < 0) return div_pol_scal(x, y);
                             else return div_scal_pol(x, y);
       }
+      if (!signe(y)) err(gdiver);
       if (lg(y) == 3) return gdiv(x,(GEN)y[2]);
       if (isexactzero(x)) return zeropol(vy);
       return gred_rfrac2(x,y);
@@ -1979,6 +1980,7 @@ gdiv(GEN x, GEN y)
         if (varncmp(vx, vy) < 0) return div_ser_scal(x, y);
                             else return div_scal_ser(x, y);
       }
+      if (!signe(y)) err(gdiver);
       return div_ser(x, y, vx);
     case t_RFRAC:
       vx = gvar(x);

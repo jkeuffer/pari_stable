@@ -1097,7 +1097,9 @@ gaffsg(long s, GEN x)
 GEN
 ptolift(GEN x, GEN Y) {
   GEN z;
-  long vy = pvaluation(Y,(GEN)x[2], &z), vx = valp(x);
+  long vy, vx = valp(x);
+  if (!signe(Y)) err(gdiver);
+  vy = pvaluation(Y,(GEN)x[2], &z);
   if (vx < 0 || !gcmp1(z)) err(operi,"",x, gmodulsg(1,Y));
   if (vx >= vy) return gzero;
   z = (GEN)x[4];

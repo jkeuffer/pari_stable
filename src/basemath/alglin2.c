@@ -478,13 +478,12 @@ quad_polmod_conj(GEN x, GEN y)
   GEN z, u, v, a, b;
   pari_sp av;
   long d;
-  if (typ(x) != t_POL || !(d = degpol(x))) return gcopy(x);
+  if (typ(x) != t_POL || (d = degpol(x)) <= 0) return gcopy(x);
   a = (GEN)y[4]; u = (GEN)x[3]; /*Mod(ux + v, ax^2 + bx + c)*/ 
   b = (GEN)y[3]; v = (GEN)x[2];
   z = cgetg(4, t_POL); z[1] = x[1]; av = avma;
   z[2] = lpileupto(av, gadd(v, gdiv(gmul(u,gneg(b)), a)));
-  z[3] = lneg(u);
-  return z;
+  z[3] = lneg(u); return z;
 }
 GEN
 quad_polmod_norm(GEN x, GEN y)
@@ -492,7 +491,7 @@ quad_polmod_norm(GEN x, GEN y)
   GEN z, u, v, a, b, c;
   pari_sp av;
   long d;
-  if (typ(x) != t_POL || !(d = degpol(x))) return gsqr(x);
+  if (typ(x) != t_POL || (d = degpol(x)) <= 0) return gsqr(x);
   a = (GEN)y[4]; u = (GEN)x[3]; /*Mod(ux + v, ax^2 + bx + c)*/
   b = (GEN)y[3]; v = (GEN)x[2];  
   c = (GEN)y[2]; av = avma;
