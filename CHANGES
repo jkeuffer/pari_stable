@@ -126,6 +126,7 @@ BA 77- typo in isinexactfield
    92- prevent 'install' in secure mode
 DS 93- typo in bnfisnorm(,,flag > 1) [extraneous gtrans]
    94- don't reset pariErr in err_recover()
+   95- highlevel.c had becom dependant from gp.c
 
   Added
 IZ  1- [gnuplot] look up directory tree for gnuplot related files
