@@ -168,9 +168,9 @@ int dlclose(void *handle)
     error(0, "Can't remove dynamic libraries on darwin");
     return 0;
   }
-  if (!NSUnLinkModule(handle, 0))
+  if (!NSUnLinkModule((NSModule)handle, 0))
   {
-    error(0, "unable to unlink module %s", NSNameOfModule(handle));
+    error(0, "unable to unlink module %s", NSNameOfModule((NSModule)handle));
     return 1;
   }
   return 0;
