@@ -366,12 +366,12 @@ affsr(long x, GEN y)
   }
   if (x < 0) {
     x = -x; sh = bfffo(x);
-    y[1] = evalsigne(-1) | evalexpo((BITS_IN_LONG-1)-sh);
+    y[1] = evalsigne(-1) | _evalexpo((BITS_IN_LONG-1)-sh);
   }
   else
   {
     sh = bfffo(x);
-    y[1] = evalsigne(1) | evalexpo((BITS_IN_LONG-1)-sh);
+    y[1] = evalsigne(1) | _evalexpo((BITS_IN_LONG-1)-sh);
   }
   y[2] = x<<sh; for (i=3; i<ly; i++) y[i]=0;
 }
