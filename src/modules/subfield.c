@@ -832,7 +832,7 @@ GEN
 ffinit(GEN p,long n,long v)
 {
   long av,av1,tetpil,i,*a,j,l,pp;
-  GEN pol,fpol;
+  GEN pol;
 
   if (n<=0) err(talker,"non positive degree in ffinit");
   if (typ(p) != t_INT) err(typeer,"ffinit");
@@ -852,8 +852,7 @@ ffinit(GEN p,long n,long v)
       if (j>=2) { a[j]++; for (l=j+1; l<=n+1; l++) a[l]=0; }
     }
     for (i=2; i<=n+1; i++) pol[i]=lstoi(a[n+3-i]);
-    fpol=simplefactmod(pol,p);
-    if (lg(fpol[1])==2 && gcmp1(gmael(fpol,2,1))) break;
+    if (is_irred_mod_p(pol, p)) break;
     avma=av1;
   }
   tetpil=avma; return gerepile(av,tetpil,Fp_pol(pol,p));

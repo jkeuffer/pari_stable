@@ -1002,6 +1002,7 @@ int     gdivise(GEN x, GEN y);
 GEN     gred(GEN x);
 GEN     gred_rfrac(GEN x);
 GEN     incloop(GEN a);
+GEN     is_irred_mod_p(GEN f, GEN p);
 int     poldivis(GEN x, GEN y, GEN *z);
 GEN     poldivres(GEN x, GEN y, GEN *pr);
 GEN     rootmod(GEN f, GEN p);

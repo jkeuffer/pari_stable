@@ -452,7 +452,7 @@ lllupdate(GEN x, GEN h, GEN L, long K, long k, long l)
 GEN
 lllgramall(GEN x, long alpha, long flag)
 {
-  long av0=avma,av,tetpil,lim,lx=lg(x),i,j,k,l,n,kmax;
+  long av0=avma,av,tetpil,lim,lx=lg(x),i,j,k,l,n,s,kmax;
   GEN u,B,L,h,la,p1,p2,p3,p4,fl, *gptr[6];
 
   if (typ(x) != t_MAT) err(typeer,"lllgramall");
@@ -470,8 +470,13 @@ lllgramall(GEN x, long alpha, long flag)
     fl[j] = 0; L[j] = (long)zerocol(n);
   }
   k=2; h=idmat(n); kmax=1;
-  u=gcoeff(x,1,1);
-  if (signe(u)) { B[2]=(long)u; coeff(L,1,1)=un; fl[1]=1; } else B[2]=un;
+  u=gcoeff(x,1,1); s= signe(u);
+  if (s == 0) B[2]=un;
+  else
+  {
+    if (s < 0) err(lllger3);
+    B[2]=(long)u; coeff(L,1,1)=un; fl[1]=1;
+  }
   if (DEBUGLEVEL>5) fprintferr("k =");
   for(;;)
   {
@@ -492,7 +497,7 @@ lllgramall(GEN x, long alpha, long flag)
 	  if (j<k) coeff(L,k,j)=(long)u;
 	  else
 	  {
-            long s = signe(u);
+            s = signe(u);
             if (s < 0) err(lllger3);
 	    if (s)
               { B[k+1]=(long)u; coeff(L,k,k)=un; fl[k]=1; }

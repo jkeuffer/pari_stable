@@ -573,7 +573,7 @@ discf2(GEN x)
 /*                                                                 */
 /*******************************************************************/
 
-GEN nilord2(GEN p,GEN fx,long mf,GEN gx,long flag);
+GEN nilord(GEN p,GEN fx,long mf,GEN gx,long flag);
 GEN Decomp(GEN p,GEN f,long mf,GEN theta,GEN chi,GEN nu,long r);
 static GEN dbasis(GEN p, GEN f, long mf, GEN alpha, GEN U);
 static GEN maxord(GEN p,GEN f,long mf);
@@ -840,7 +840,7 @@ maxord(GEN p,GEN f,long mf)
   else
   {
     if (flw) { w=(GEN)factmod(f,p)[1]; r=lg(w)-1; h=lift_intern((GEN)w[r]); }
-    res = (r==1)? nilord2(p,f,mf,h,0): Decomp(p,f,mf,polx[varn(f)],f,h,0);
+    res = (r==1)? nilord(p,f,mf,h,0): Decomp(p,f,mf,polx[varn(f)],f,h,0);
   }
   return gerepileupto(av,res);
 }
@@ -1183,7 +1183,7 @@ update_alpha(GEN p, GEN fx, GEN alph, GEN chi, GEN pmr, GEN pmf, long mf)
 /* flag != 0 iff we're looking for the p-adic factorization, 
    in which case it is the p-adic precision we want */
 GEN
-nilord2(GEN p, GEN fx, long mf, GEN gx, long flag)
+nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 {
   long Fa, La, Ea, oE, Fg, eq, er, v = varn(fx), i, nv, Le, Ee, N, l, vn;
   GEN p1, alph, chi, nu, w, phi, pmf, pdr, pmr, kapp, pie, chib;
@@ -1347,7 +1347,7 @@ nilord2(GEN p, GEN fx, long mf, GEN gx, long flag)
 	/* there are at least 2 factors mod. p => chi can be split */
 	phi  = eleval(fx, gamm, alph);
 	phi  = redelt(phi, p, pmf);
-	if (flag) mf = ggval(pmf, p);
+	if (flag) mf += 3;
         return Decomp(p, fx, mf, phi, chig, nug, flag);
       }
 
@@ -1363,7 +1363,7 @@ nilord2(GEN p, GEN fx, long mf, GEN gx, long flag)
 	  /* there are at least 2 factors mod. p => chi can be split */
 	  phi = eleval(fx, (GEN)w[2], alph);
 	  phi = redelt(phi, p, pmf);
-	  if (flag) mf = ggval(pmf, p);
+          if (flag) mf += 3;
           return Decomp(p, fx, mf, phi, (GEN)w[3], (GEN)w[4], flag);
 	}
 	break;
@@ -1401,7 +1401,7 @@ nilord2(GEN p, GEN fx, long mf, GEN gx, long flag)
 	    delete_var();      
 	    phi = eleval(fx, eta, alph);
 	    phi = redelt(phi, p, pmf);
-	    if (flag) mf = ggval(pmf, p);
+            if (flag) mf += 3;
             return Decomp(p, fx, mf, phi, chie, nue, flag);
 	  }
 	  
@@ -1425,7 +1425,7 @@ nilord2(GEN p, GEN fx, long mf, GEN gx, long flag)
 	  /* there are at least 2 factors mod. p => chi can be split */
 	  phi = eleval(fx, (GEN)w[2], alph);
 	  phi = redelt(phi, p, pmf);
-	  if (flag) mf = ggval(pmf, p);
+          if (flag) mf += 3;
           return Decomp(p, fx, mf, phi, (GEN)w[3], (GEN)w[4], flag);
 	}
 	break;

@@ -126,7 +126,7 @@ BA 77- typo in isinexactfield
    92- prevent 'install' in secure mode
 DS 93- typo in bnfisnorm(,,flag > 1) [extraneous gtrans]
    94- don't reset pariErr in err_recover()
-   95- highlevel.c had becom dependant from gp.c
+   95- highlevel.c had become dependant from gp.c
 XR 96- incorrect output of quadray(D,,1) when D>0 and rayclass is trivial
    97- typo in lllall_trivial --> matkerint([0;0]) didn't work
 BA 98- incorrect object for gerepileupto in gscalcol
@@ -147,7 +147,6 @@ IZ  9- string justification in high-res plot
 IZ 10- bit operations ( bit[ and | or | neg | negimply | xor ] )
 XR 11- add new flag value in bnrstark/quadray: try to find a better modulus
 
-
   Changed
     1- default binary produced by Configure -g is now static
     2- improved the heuristics in ellisoncurve
@@ -157,6 +156,8 @@ HC  3- extend the range of direuler (maxp was 2^16)
     6- disable ff_poltype correction (for lack of decent finite fields) in gmul
     7- slight optimization to hnf / hnfmod (skip zeroes)
 XR  8- nfsqff: choose a prime ideal with few factors + better heuristic bound
+IS  9- default CFLAGS on linux-alpha
+   10- improved factorcantor / factorff
 
   Removed
     1- sunview "support" (didn't work, hard to test, X11 is a better standard)
