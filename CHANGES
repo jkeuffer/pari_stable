@@ -91,6 +91,7 @@ XR 51- increase precision automatically when needed in quadhilbertreal
    53- default(format,"g0.4"); 3./10 --> 0.300004577  [now: 0.3000]
    54- subst() didn't check its arguments (e.g SEGV on t_STR)
    55- qfbclassno(x < 0): wrong algo when x non fundamental 
+   56- obscure bugs with types FRACN/RFRACN [when simplifies to INT/POL]
 
   Changed
     1- removed useless parameter prec in many bnr* and rnf* functions
