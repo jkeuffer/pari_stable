@@ -152,9 +152,6 @@ new_chunk(long x)
   avma = (pari_sp)z; return z;
 }
 
-/* THE FOLLOWING ONES ARE IN mp.s */
-#  ifndef __M68K__
-
 INLINE GEN
 cgetg(long x, long y)
 {
@@ -178,7 +175,6 @@ cgetr(long x)
   z[0] = evaltyp(t_REAL) | evallg(x);
   return z;
 }
-#  endif /* __M68K__ */
 
 /* cannot do memcpy because sometimes x and y overlap */
 INLINE GEN
@@ -256,7 +252,6 @@ stosmall(long x)
   return (GEN) (1 | (x<<1));
 }
 
-#  ifndef __M68K__
 INLINE GEN
 stoi(long x)
 {
@@ -702,9 +697,6 @@ mpdivis(GEN x, GEN y, GEN z)
   if (signe(p2)) { avma=av; return 0; }
   affii(p1,z); avma=av; return 1;
 }
-
-/* THE FOLLOWING ONES ARE NOT IN mp.s */
-#  endif /* !defined(__M68K__) */
 
 /* assume 0 <= k < 32. Return random 0 <= x < (1<<k) */
 INLINE long

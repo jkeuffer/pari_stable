@@ -29,7 +29,6 @@ if test -n "$myuname"; then
 	    esac;;
   sunos)    case "$3" in 5*) osname=solaris;; esac
 	    case "$5" in
-	    sun3*)    arch=m68k;;
 	    sun4|sun4[ce]) arch=sparcv7;;
 	    sun4[dm]) cpu="TI,|FMI,|Cypress,|Ross,"
 	      case "`(prtconf||devinfo)2>&- |egrep $cpu`" in
@@ -44,7 +43,6 @@ if test -n "$myuname"; then
 	      esac;;
 	    sun4u)    arch=sparcv9;;
             i*pc) arch=ix86;;
-            *) case "$4" in sun)  arch=m68k;; esac;;
 	    esac;;
   esac
 fi

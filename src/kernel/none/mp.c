@@ -18,8 +18,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**		         MULTIPRECISION KERNEL           	      **/
 /**                                                                   **/
 /***********************************************************************/
-/* most of the routines in this file are commented out in 68k */
-/* version (#ifdef __M68K__) since they are defined in mp.s   */
 #include "pari.h"
 
 #ifndef REGISTER_MP_OPERANDS
@@ -202,8 +200,6 @@ subiispec(GEN x, GEN y, long nx, long ny)
   *--zd = evaltyp(t_INT) | evallg(lz);
   avma=(pari_sp)zd; return zd;
 }
-
-#ifndef __M68K__
 
 /* prototype of positive small ints */
 static long pos_s[] = {
@@ -774,7 +770,6 @@ addrr(GEN x, GEN y)
   z[0] = evaltyp(t_REAL) | evallg(lz);
   avma = (pari_sp)z; return z;
 }
-#endif 
 
 /***********************************************************************/
 /**								      **/
@@ -810,7 +805,6 @@ speci(GEN x, long nx)
 #  define KARATSUBA_MULR_LIMIT _mulr_l
 #endif
 
-#ifndef __M68K__
 GEN
 mulss(long x, long y)
 {
@@ -830,7 +824,6 @@ mulss(long x, long y)
   z=cgeti(3); z[1] = evalsigne(s) | evallgefint(3);
   z[2]=p1; return z;
 }
-#endif
 
 GEN
 muluu(ulong x, ulong y)
@@ -902,8 +895,6 @@ addsmulsi(long a, long b, GEN Y)
   *--z = evaltyp(t_INT) | evallg(lz);
   avma=(pari_sp)z; return z;
 }
-
-#ifndef __M68K__
 
 GEN
 mulsi(long x, GEN y)
@@ -1177,7 +1168,6 @@ divsi(long x, GEN y)
   if (s<0) p1 = -p1;
   SAVE_HIREMAINDER; return stoi(p1);
 }
-#endif
 
 GEN
 modui(ulong x, GEN y)
@@ -1238,8 +1228,6 @@ dvmdiu(GEN y, ulong x, ulong *rem)
   for (i=2; i<ly; i++) z[i]=divll(y[i],x);
   *rem = hiremainder; return z;
 }
-
-#ifndef __M68K__
 
 GEN
 modsi(long x, GEN y)
@@ -1522,9 +1510,6 @@ divrr(GEN x, GEN y)
   x[1] = evalsigne(sx) | evalexpo(e);
   return x;
 }
-#endif /* !defined(__M68K__) */
-
-/* The following ones are not in mp.s (mulii is, with a different algorithm) */
 
 /* Integer division x / y: such that sign(r) = sign(x)
  *   if z = ONLY_REM return remainder, otherwise return quotient
@@ -1532,8 +1517,7 @@ divrr(GEN x, GEN y)
  *   *z is the last object on stack (and thus can be disposed of with cgiv
  *   instead of gerepile)
  * If *z is zero, we put gzero here and no copy.
- * space needed: lx + ly
- */
+ * space needed: lx + ly */
 GEN
 dvmdii(GEN x, GEN y, GEN *z)
 {

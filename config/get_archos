@@ -12,7 +12,7 @@ if test "$fastread" != yes; then
 Currently supported architectures:
 EOM
   rep='none sparcv7 sparcv8_super sparcv8_micro sparcv9
-       m68k ix86 i386 i486 i586 i686 alpha arm fx2800 hppa ia64 mips 
+       ix86 i386 i486 i586 i686 alpha arm fx2800 hppa ia64 mips 
        ppc s390'
   . ./display
   echo $n ..."Which of these apply, if any ? $c"
@@ -44,7 +44,6 @@ case "$arch" in
   sparcv8_micro) asmarch=$arch;         pretty=MicroSparc ;;
   sparcv8_super) asmarch=$arch;         pretty=SuperSparc ;;
   sparcv9)       asmarch=sparcv8_micro; pretty=UltraSparc ;;
-  m68k)          asmarch=$arch;         pretty="MC680x0, x>=2" ;;
   i?86)          asmarch=ix86 ;         pretty=$arch ;;
   ia64)          asmarch=none ;         pretty=ia64 ;;
   hppa)          asmarch=none ;         pretty="HP Precision"
@@ -66,9 +65,7 @@ esac
 #   Modifications for pretty name and asm file
 #
 case "$osname" in
-  nextstep|cygwin*|linux|freebsd|os2)
-       pretty="$pretty running $osname";
-        if test "$arch" = m68k; then asmarch=none; fi ;;
+  nextstep|cygwin*|linux|freebsd|os2) pretty="$pretty running $osname";;
 esac
 
 if test  -n "$kernel"; then
@@ -81,11 +78,10 @@ else
 ==========================================================================
 An optimized Pari kernel is available for these architectures
 ("none" means that we will use the portable C version of GP/PARI)
-("-gmp" means we will use the GMP library (that need to be installed))
+("-gmp" means we will use the GMP library (that needs to be installed))
 EOM
-  rep='none sparcv7 sparcv8_super sparcv8_micro m68k ix86 alpha hppa
+  rep='none sparcv7 sparcv8_super sparcv8_micro ix86 alpha hppa
   none-gmp sparcv7-gmp sparcv8_super-gmp sparcv8_micro-gmp ix86-gmp alpha-gmp hppa-gmp'
-  #Note: m68k GMP do not exists, use none-gmp
   . ./display
   echo $n ..."Which of these apply, if any ? $c"
   dflt=$asmarch; . ./myread; 
@@ -108,7 +104,6 @@ case "$kernlvl0" in
   sparcv7)       prettyk=SparcV7;;
   sparcv8_super) prettyk=SuperSparc;;
   sparcv8_micro) prettyk=MicroSparc;;
-  m68k)          prettyk="MC680x0, x>=2";;
   ix86)          prettyk=ix86;;
   hppa)          prettyk=HPPA;;
   alpha)         prettyk=Alpha;;

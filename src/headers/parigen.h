@@ -22,10 +22,6 @@ typedef int (*QSCOMP)(const void *, const void *);
   typedef unsigned long ulong;
 #endif
 
-#ifdef __M68K__
-#  define OLD_CODES
-#endif
-
 #ifdef LONG_IS_64BIT
 #  define TWOPOTBYTES_IN_LONG  3
 #else
@@ -58,13 +54,8 @@ typedef int (*QSCOMP)(const void *, const void *);
  *  SIGNnumBITS + LGnumBITS       <= BITS_IN_LONG
  *  SIGNnumBITS + LGEFnumBITS + 2 <= BITS_IN_LONG
  *  VALPnumbits               + 1 <= BITS_IN_LONG */
-#ifdef OLD_CODES
-#  define TYPnumBITS   8 /* obsolete (for hard-coded assembler in mp.s) */
-#  define SIGNnumBITS  8
-#else
-#  define TYPnumBITS   7
-#  define SIGNnumBITS  2
-#endif
+#define TYPnumBITS   7
+#define SIGNnumBITS  2
 
 #ifdef LONG_IS_64BIT
 #  define   LGnumBITS 32
@@ -72,11 +63,7 @@ typedef int (*QSCOMP)(const void *, const void *);
 #  define LGEFnumBITS 46 /* otherwise MAXVARN too large */
 #  define VALPnumBITS 32
 #else
-# ifdef OLD_CODES
-#   define  LGnumBITS 16 /* obsolete */
-# else
-#   define  LGnumBITS 24
-# endif
+#  define   LGnumBITS 24
 #  define EXPOnumBITS 24
 #  define LGEFnumBITS 16
 #  define VALPnumBITS 16 

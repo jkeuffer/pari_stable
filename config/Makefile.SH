@@ -51,14 +51,8 @@ if test -s $src_dir/kernel/$dirlvl0/MakeVar.SH; then
   . $src_dir/kernel/$dirlvl0/MakeVar.SH
 fi
 
-case "$kernlvl0" in
-  m68k) hlist=pari68k
-  kerntest=kernel.old;; # OLD_CODES should be defined
-  *) hlist=pariport
-  kerntest=kernel;;
-esac
-hlist="pari paritype paricast paricom parierr parigen paristio parisys $hlist"
-
+kerntest=kernel
+hlist='pari paritype paricast paricom parierr parigen paristio parisys pariport'
 HEADERS=''
 for f in $khlist; do
   HEADERS="$HEADERS $f.h";

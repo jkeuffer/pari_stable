@@ -17,8 +17,4 @@ if [ "$kernlvl0" = "auto" ]; then
   kernlvl0="$arch";
 fi
 
-case "$kernlvl0" in
-  m68k)	kernlvl1="m68k";;
-esac
-
 echo "$kernlvl0-$kernlvl1"

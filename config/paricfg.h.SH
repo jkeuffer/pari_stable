@@ -51,7 +51,6 @@ EOT
 case $asmarch in
   none) echo '#define __HAS_NO_ASM__' >> $file;;
   hppa) echo '#define __HPPA__' >> $file;;
-  m68k) echo '#define __M68K__' >> $file;;
 esac
 
 if test -n "$ASMINLINE"; then

@@ -21,9 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #  include <Types.h>
 #  include <StdLib.h>
 #else
-#  if defined(__cplusplus) || !defined(__M68K__)
-#    include <stdlib.h>   /* malloc, free, atoi */
-#  endif
+#  include <stdlib.h>   /* malloc, free, atoi */
 #  ifdef UNIX
 #    define _INCLUDE_POSIX_SOURCE /* for HPUX */
 #    include <sys/types.h> /* size_t */
@@ -85,11 +83,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #  pragma pointers_in_A0
 #endif
 
-#if defined(__M68K__) || ( defined(macintosh) && !defined(powerc) )
-#  include "pari68k.h"
-#else
-#  include "pariport.h"
-#endif
-
+#include "pariport.h"
 #include "pariinl.h"
 #endif
