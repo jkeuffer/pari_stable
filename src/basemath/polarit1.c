@@ -409,7 +409,9 @@ quadsolvemod(GEN x, GEN p, int unknown)
   D = resii(D,p);
   if (unknown && kronecker(D,p) == -1) return NULL;
  
-  s = mpsqrtmod(D,p); u = addis(shifti(p,-1), 1); /* = 1/2 */
+  s = mpsqrtmod(D,p);
+  if (!s) err(talker,"not a prime in quadsolvemod");
+  u = addis(shifti(p,-1), 1); /* = 1/2 */
   return modii(mulii(u, subii(s,b)), p);
 }
 
@@ -489,6 +491,8 @@ rootmod(GEN f, GEN p)
         y[j+lb] = (long)FpX_div(a,b, p);
         y[j]    = (long)b; break;
       }
+      if (pol0[2] == 100 && !isprime(p))
+        err(talker, "not a prime in polrootsmod");
     }
   }
   tetpil = avma; y = gerepile(av,tetpil,sort(y));
