@@ -2011,12 +2011,19 @@ gp_sighandler(int sig)
       msg="GP (Bus Error)";
       break;
 #endif
+
+#ifdef SIGPIPE
+    case SIGPIPE:
+      msg="GP (Broken Pipe)";
+      break;
+#endif
     default:
       msg="signal handling";
   }
   err(bugparier,msg);
 }
 #endif
+
 static void
 brace_color(char *s, int c)
 {

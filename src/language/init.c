@@ -344,6 +344,9 @@ pari_sig_init(void (*f)(int))
 #ifdef SIGBREAK
   signal(SIGBREAK,f);
 #endif
+#ifdef SIGPIPE
+  signal(SIGPIPE,f);
+#endif
   signal(SIGSEGV,f);
 #endif
 }
