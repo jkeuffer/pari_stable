@@ -2025,27 +2025,103 @@ ordred(GEN x, long prec)
 
 GEN roots_to_pol_r1r2(GEN a, long r1, long v);
 
-/* data[0] = r1
- * data[1] = embeddings of Zk basis
- * data[2] = embeddings of final LLL reduced Zk basis */
-static GEN
-chk_gen_init(GEN data, GEN nf, GEN mat, GEN bound)
+/* return T2 norm of the polynomial defining nf */
+static GEN 
+get_Bnf(GEN nf)
 {
-  GEN M = gmael(nf,5,1);
-  long n = lg(nf[7])-1, prec,prec2;
-
-  if (!bound)
+  GEN p = gzero, r = (GEN)nf[6];
+  long i, r1 = itos(gmael(nf,2,1)), ru = lg(r)-1;
+  for (i=ru; i>0; i--)
   {
-    data = new_chunk(3);
-    data[0] = itos(gmael(nf,2,1));
-    data[1] = lmul(M, mat);
-    data[2] = lmul((GEN)nf[7],mat);
-    return data;
+    if (i == r1) p = gmul2n(p, 1);
+    p = gadd(p, gnorm((GEN)r[i]));
   }
+  if (i == r1) p = gmul2n(p, 1);
+  return p;
+}
 
-  /* should be [max_k C^n_k (B/k) ^ k] ^ (1/2) */
-  bound = gsqrt(gpowgs(bound, n), 3);
-  prec2 = (1 + (gexpo(bound) >> TWOPOTBITS_IN_LONG));
+/* characteristic pol of x */
+static GEN
+get_polchar(GEN data, GEN x)
+{
+  GEN basis_embed = (GEN)data[1];
+  GEN g = gmul(basis_embed,x);
+  return ground(roots_to_pol_r1r2(g, data[0], 0));
+}
+
+/* return a defining polynomial for Q(x) */
+static GEN
+get_polmin(GEN data, GEN x)
+{
+  GEN g = get_polchar(data,x);
+  GEN h = modulargcd(g,derivpol(g));
+  if (lgef(h) > 3) g = gdivexact(g,h);
+  return g;
+}
+
+/* does x generate the correct field ? */
+static GEN
+chk_gen(GEN data, GEN x)
+{
+  long av = avma;
+  GEN g = get_polchar(data,x);
+  if (lgef(modulargcd(g,derivpol(g))) > 3) { avma=av; return NULL; }
+  if (DEBUGLEVEL>3) fprintferr("  generator: %Z\n",g);
+  return g;
+}
+
+/* mat = base change matrix, gram = LLL-reduced T2 matrix */
+static GEN
+chk_gen_init(FP_chk_fun *chk, GEN nf, GEN gram, GEN mat, long *ptprec)
+{
+  GEN bound,prev,x,B,data, M = gmael(nf,5,1);
+  long N = lg(nf[7]), n = N-1,i,prec,prec2;
+  int skipfirst = 1; /* [1,0...0] --> x rational */
+
+/* data[0] = r1
+ * data[1] = embeddings of LLL-reduced Zk basis
+ * data[2] = LLL reduced Zk basis (in M_n(Z)) */
+  data = new_chunk(3);
+  data[0] = itos(gmael(nf,2,1));
+  data[1] = lmul(M, mat);
+  data[2] = lmul((GEN)nf[7],mat);
+  chk->data = data;
+
+  x = cgetg(N,t_COL);
+  bound = get_Bnf(nf); prev = NULL;
+  for (i=1; i<N; i++) x[i]=zero;
+  for (i=2; i<N; i++)
+  {
+    x[i] = un; B = gcoeff(gram,i,i);
+    if (mpcmp(B,bound) < 0)
+    {
+      GEN p1 = get_polmin(data,x);
+      if (lgef(p1)-3 == n) bound = B;
+      else
+      {
+        if (DEBUGLEVEL>2) fprintferr("chk_gen_init: subfield %Z\n",p1);
+        if (skipfirst == i-1)
+        {
+          if (prev && !gegal(prev,p1))
+          {
+            p1 = (GEN)compositum(prev,p1)[1];
+            if (lgef(p1)-3 == n) continue;
+            if (DEBUGLEVEL>2 && lgef(p1)>lgef(prev))
+              fprintferr("chk_gen_init: subfield %Z\n",p1);
+          }
+          skipfirst++; prev = p1;
+        }
+      }
+    }
+    x[i] = zero;
+  }
+  /* x_1,...,x_skipfirst generate a strict subfield [unless n=skipfirst=1] */
+  chk->skipfirst = skipfirst;
+  if (DEBUGLEVEL>2) fprintferr("chk_gen_init: skipfirst = %ld\n",skipfirst);
+
+  /* should be [max_k C^n_k (bound/k) ^ k] ^ (1/2) */
+  B = gsqrt(gpowgs(bound, n), 3);
+  prec2 = (1 + (gexpo(B) >> TWOPOTBITS_IN_LONG));
   if (prec2 < 0) prec2 = 0;
   prec = 3 + prec2;
   prec2= (long)nfnewprec(nf,-1);
@@ -2054,7 +2130,7 @@ chk_gen_init(GEN data, GEN nf, GEN mat, GEN bound)
                 prec, prec2);
   if (prec > prec2) return NULL;
   if (prec < prec2) data[1] = (long)gprec_w((GEN)data[1], prec);
-  return (GEN)prec;
+  *ptprec = prec; return bound;
 }
 
 static GEN
@@ -2065,21 +2141,6 @@ chk_gen_post(GEN data, GEN res)
   long i, l = lg(p1);
   for (i=1; i<l; i++) p1[i] = lmul(basis, (GEN)p1[i]);
   return res;
-}
-
-/* does x generate the correct field ? */
-static GEN
-chk_gen(GEN data, GEN x)
-{
-  long av = avma;
-  GEN basis_embed = (GEN)data[1];
-  GEN g = gmul(basis_embed,x);
-  
-  g = roots_to_pol_r1r2(g, data[0], 0);
-  g = ground(g);
-  if (lgef(modulargcd(g,derivpol(g))) > 3) { avma=av; return NULL; }
-  if (DEBUGLEVEL>3) fprintferr("  generator: %Z\n",g);
-  return g;
 }
 
 /* no garbage collecting, done in polredabs0 */
@@ -2163,7 +2224,6 @@ polredabs0(GEN x, long flun, long prec)
   chk->f         = &chk_gen;
   chk->f_init    = &chk_gen_init;
   chk->f_post    = &chk_gen_post;
-  chk->skipfirst = 1;
 
   if ((ulong)flun >= 16) err(flagerr,"polredabs");
   nf = initalgall0(x,nf_SMALL|nf_REGULAR,prec);
@@ -2765,21 +2825,6 @@ END:
   u[3] = (long)S; return u;
 }
 
-/* return T2 norm of the polynomial defining nf */
-static GEN 
-get_Bnf(GEN nf)
-{
-  GEN p = gzero, r = (GEN)nf[6];
-  long i, r1 = itos(gmael(nf,2,1)), ru = lg(r)-1;
-  for (i=ru; i>0; i--)
-  {
-    if (i == r1) p = gmul2n(p, 1);
-    p = gadd(p, gnorm((GEN)r[i]));
-  }
-  if (i == r1) p = gmul2n(p, 1);
-  return p;
-}
-
 /* solve x~.a.x <= bound, a > 0. If check is non-NULL keep x only if check(x).
  * flag & 1, return NULL in case of precision problems (sqred1 or lllgram)
  *   raise an error otherwise.
@@ -2790,10 +2835,10 @@ GEN
 fincke_pohst(GEN a,GEN bound,long stockmax,long flag, long PREC,
              FP_chk_fun *CHECK)
 {
-  VOLATILE long pr,av=avma,i,j,n, prec = PREC;
+  VOLATILE long pr,av=avma,i,j,n;
   VOLATILE GEN B,nf,r,rinvtrans,v,v1,u,s,res,z,vnorm,sperm,perm,uperm,gram;
   void *catcherr = NULL;
-  int skipfirst = CHECK? CHECK->skipfirst: 0;
+  long prec = PREC;
 
   if (DEBUGLEVEL>2) { fprintferr("entering fincke_pohst\n"); flusherr(); }
   if (typ(a) == t_VEC) { nf = checknf(a); a = gmael(nf,5,3); } else nf = NULL;
@@ -2855,37 +2900,23 @@ fincke_pohst(GEN a,GEN bound,long stockmax,long flag, long PREC,
     if (setjmp(env)) goto PRECPB;
     catcherr = err_catch(truer2, env, NULL);
   }
-
   if (CHECK && CHECK->f_init) 
-    CHECK->data = CHECK->f_init(CHECK->data,nf,uperm,NULL);
+  {
+    bound = CHECK->f_init(CHECK,nf,gram,uperm, &prec);
+    if (!bound) goto PRECPB;
+  }
   if (!bound)
   { /* set bound */
     GEN x = cgetg(n,t_COL);
     if (nf) bound = get_Bnf(nf);
-    for (j=1; j<n; j++) x[j]=zero;
-    for (j=2; j<n; j++)
+    for (i=2; i<n; i++) x[i]=zero;
+    for (i=1; i<n; i++)
     {
-      x[j] = un; B = gcoeff(gram,j,j);
-      if (!bound || mpcmp(B,bound) < 0)
-      {
-        if (!CHECK) bound = B;
-        else 
-        {
-          if (CHECK->f(CHECK->data,x)) bound = B;
-          else if (skipfirst == j-1) skipfirst++;
-        }
-      }
-      x[j] = zero;
-    }
-    if (CHECK) 
-    {
-      CHECK->skipfirst = skipfirst;
-      if (DEBUGLEVEL>2) fprintferr("skipfirst = %ld\n",skipfirst);
+      x[i] = un; B = gcoeff(gram,i,i);
+      if (!bound || mpcmp(B,bound) < 0) bound = B;
+      x[i] = zero;
     }
   }
-  /* update precision if needed */
-  if (CHECK && CHECK->f_init) 
-    if (!(prec = (long)CHECK->f_init(CHECK->data,nf,uperm,bound))) goto PRECPB;
 
   if (DEBUGLEVEL>2) {fprintferr("entering smallvectors\n"); flusherr();}
   for (i=1; i<n; i++)
