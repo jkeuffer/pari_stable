@@ -90,7 +90,7 @@ tchebi(long n, long v) /* Assume 4*n < VERYBIGINT */
   if (n==1) return polx[v];
 
   q = cgetg(n+3, t_POL); r = q + n+2;
-  a = shifti(gone, n-1);
+  a = int2n(n-1);
   *r-- = (long)a;
   *r-- = zero;
   if (n < SQRTVERYBIGINT)

@@ -71,7 +71,7 @@ static GEN
 rand_INT(long n)
 {
   pari_sp av = avma;
-  GEN x, N = shifti(gone, n*BITS_IN_LONG);
+  GEN x, N = int2n(n*BITS_IN_LONG);
   do x = genrand(N); while (lgefint(x) != n+2);
   return gerepileuptoint(av, x);
 }

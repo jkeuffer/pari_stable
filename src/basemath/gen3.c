@@ -1845,7 +1845,7 @@ ceil_safe(GEN x)
   long e;
   GEN y = gcvtoi(x,&e);
   if (e < 0) e = 0;
-  y = addii(y, shifti(gone,e));
+  y = addii(y, int2n(e));
   return gerepileuptoint(av, y);
 }
 

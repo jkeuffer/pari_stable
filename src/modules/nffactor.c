@@ -625,7 +625,7 @@ init_trace(trace_data *T, GEN S, nflift_t *L, GEN q)
 
   if (e < 0) return NULL; /* S = 0 */
 
-  qgood = shifti(gone, e - 32); /* single precision check */
+  qgood = int2n(e - 32); /* single precision check */
   if (cmpii(qgood, q) > 0) q = qgood;
 
   S1 = gdivround(S, q);
@@ -1210,7 +1210,7 @@ AGAIN:
     }
 
     /* restart with truncated entries */
-    q = shifti(gone, b);
+    q = int2n(b);
     P1 = gdivround(PRK, q);
     S1 = gdivround(Tra, q);
     T2 = gsub(gmul(S1, M_L), gmul(P1, VV));

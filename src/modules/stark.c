@@ -171,7 +171,7 @@ EltsOfGroup(long order, GEN cyc)
   return rep;
 }
 
-/* Let dataC as given by InitQuotient0, compute a system of
+/* Let dataC as given by InitQuotient, compute a system of
    representatives of the quotient */
 static GEN
 ComputeLift(GEN dataC)
@@ -288,23 +288,21 @@ static GEN AllStark(GEN data,  GEN nf,  long flag,  long prec);
    define a subgroup of A, compute the order of A / C, its structure and
    the matrix expressing the generators of A on those of A / C */
 static GEN
-InitQuotient0(GEN DA, GEN C)
+InitQuotient0(GEN cyc, GEN C)
 {
-  GEN D, MQ, MrC, H, U, rep;
+  GEN rep, D, MQ, MrC, H, U, DA = diagonal(cyc);
 
   H = gcmp0(C)? DA: C;
-  MrC  = gauss(H, DA);
+  MrC  = hnf_gauss(H, DA);
   (void)smithall(hnf(MrC), &U, NULL);
   MQ   = concatsp(gmul(H, U), DA);
   D = smithall(hnf(MQ), &U, NULL);
 
   rep = cgetg(5, t_VEC);
   rep[1] = (long)dethnf_i(D);
-  rep[2] = (long)mattodiagonal(D);
-  rep[3] = lcopy(U);
-  rep[4] = lcopy(C);
-
-  return rep;
+  rep[2] = (long)mattodiagonal_i(D);
+  rep[3] = (long)U;
+  rep[4] = (long)C; return rep;
 }
 
 /* Let m be a modulus et C a subgroup of Clk(m), compute all the data
@@ -316,16 +314,7 @@ InitQuotient0(GEN DA, GEN C)
  * 2.4) the group C */
 static GEN
 InitQuotient(GEN bnr, GEN C)
-{
-  GEN Mrm, dataquo = cgetg(3, t_VEC);
-  pari_sp av;
-
-  dataquo[1] = lcopy(bnr);
-  av = avma; Mrm = diagonal(gmael(bnr, 5, 2));
-  dataquo[2] = lpileupto(av, InitQuotient0(Mrm, C));
-
-  return dataquo;
-}
+{ return mkvec2(bnr, InitQuotient0(gmael(bnr, 5, 2), C)); }
 
 /* Let s: A -> B given by P, and let DA, DB be resp. the matrix of the
    relations of A and B, compute the kernel of s. If DA = 0 then A is free */
@@ -382,7 +371,7 @@ ComputeIndex2Subgroup(GEN bnr, GEN C)
   disable_dbg(0);
 
   Mr = diagonal(gmael(bnr, 5, 2));
-  D = smithall(gauss(C, Mr), &U, NULL);
+  D = smithall(hnf_gauss(C, Mr), &U, NULL);
   T = gmul(C,ginv(U));
   subgrp  = subgrouplist(D, mkvec(gtwo));
   nb = lg(subgrp);
@@ -958,7 +947,7 @@ _data9(GEN arch, long r1, long r2)
 /* Given a list [chi, cond(chi)] of characters over Cl(bnr), compute a
    vector dataCR containing for each character:
    1: chi
-   2: the constant C(chi)
+   2: the constant C(chi) [t_REAL]
    3: bnr(cond(chi))
    4: bnr(m)
    5: [(c_i), z, d, pm] in bnr(m)
@@ -973,7 +962,7 @@ InitChar(GEN bnr, GEN listCR, long prec)
 {
   GEN bnf = checkbnf(bnr), nf = checknf(bnf);
   GEN modul, dk, C, dataCR, chi, cond, Mr, z1, p1;
-  long N, r1, r2, prec2, h, i, j;
+  long N, r1, r2, prec2, i, j, l;
   pari_sp av = avma;
 
   modul = gmael(bnr, 2, 1);
@@ -982,20 +971,17 @@ InitChar(GEN bnr, GEN listCR, long prec)
   N     = degpol(nf[1]);
   nf_get_sign(nf, &r1,&r2);
   prec2 = ((prec-2) << 1) + EXTRA_PREC;
-  C     = gmul2n(gsqrt(gdiv(absi(dk), gpowgs(mppi(prec2),N)), prec2), -r2);
+  C     = gmul2n(sqrtr_abs(divir(dk, gpowgs(mppi(prec2),N))), -r2);
 
   disable_dbg(0);
 
-  h = lg(listCR) - 1;
-  dataCR = cgetg(h + 1, t_VEC);
-  for (i = 1; i <= h ;i++)
-    dataCR[i] = lgetg(10, t_VEC);
-
   z1 = _data9((GEN)modul[2],r1,r2);
 
-  for (i = 1; i <= h; i++)
+  l = lg(listCR); dataCR = cgetg(l, t_VEC);
+  for (i = 1; i < l; i++)
   {
-    GEN olddata, data = (GEN)dataCR[i];
+    GEN olddata, data = cgetg(10, t_VEC);
+    dataCR[i] = (long)data;
 
     chi  = gmael(listCR, i, 1);
     cond = gmael(listCR, i, 2);
@@ -1003,8 +989,7 @@ InitChar(GEN bnr, GEN listCR, long prec)
     /* do we already know about the invariants of chi? */
     olddata = NULL;
     for (j = 1; j < i; j++)
-      if (gegal(cond, gmael(listCR, j, 2)))
-       { olddata = (GEN)dataCR[j]; break; }
+      if (gegal(cond, gmael(listCR,j,2))) { olddata = (GEN)dataCR[j]; break; }
 
     /* if cond(chi) = cond(bnr) */
     if (!olddata && gegal(cond, modul))
@@ -1606,7 +1591,7 @@ ppgamma(ST_t *T, long prec)
   x   = polx[0];
   x2  = gmul2n(x, -1); /* x/2 */
   eul = mpeuler(prec);
-  sqpi= sqrtr(mppi(prec)); /* Gamma(1/2) */
+  sqpi= sqrtr_abs(mppi(prec)); /* Gamma(1/2) */
 
   /* expansion of log(Gamma(u)) at u = 1 */
   gamun = cgetg(r+3, t_SER);
@@ -1614,11 +1599,7 @@ ppgamma(ST_t *T, long prec)
   gamun[2] = zero;
   gamun[3] = lneg(eul);
   for (i = 2; i <= r; i++)
-  {
-    p1 = gdivgs(szeta(i,prec), i);
-    if (odd(i)) p1 = gneg(p1);
-    gamun[i+2] = (long)p1;
-  }
+    gamun[i+2] = ldivrs(szeta(i,prec), odd(i)? -i: i);
   gamun = gexp(gamun, prec); /* Gamma(1 + x) */
   gam = gdiv(gamun,x); /* Gamma(x) */
 
@@ -1628,7 +1609,7 @@ ppgamma(ST_t *T, long prec)
   gamdm[2] = zero;
   gamdm[3] = lneg(gadd(gmul2n(mplog2(prec), 1), eul));
   for (i = 2; i <= r; i++)
-    gamdm[i+2] = lmul((GEN)gamun[i+2], subis(shifti(gone,i), 1));
+    gamdm[i+2] = lmulri((GEN)gamun[i+2], subis(int2n(i), 1));
   gamdm = gmul(sqpi, gexp(gamdm, prec)); /* Gamma(1/2 + x) */
 
  /* We simplify to get one of the following two expressions
@@ -2219,46 +2200,48 @@ get_cS_cT(ST_t *T, long n)
   aij = T->aij; i0= T->i0;
   bij = T->bij; r = T->r;
   Z = cgetg(r+1, t_VEC);
-  Z[1] = one;
+  Z[1] = 0; /* unused */
 
-  csurn = gdivgs(T->c1, n);
+  csurn = divrs(T->c1, n);
   nsurc = ginv(csurn);
-  lncsurn = mplog(csurn);
+  lncsurn = logr_abs(csurn);
 
   Z[2] = (long)lncsurn; /* r >= 2 */
   for (i = 3; i <= r; i++)
-  {
-    s = gmul((GEN)Z[i-1], lncsurn);
-    Z[i] = ldivgs(s, i-1); /* Z[i] = ln^(i-1)(c1/n) / (i-1)! */
-  }
+    Z[i] = ldivrs(mulrr((GEN)Z[i-1], lncsurn), i-1);
+  /* Z[i] = ln^(i-1)(c1/n) / (i-1)! */
 
   /* i = i0 */
     A = aij[i0]; t = (GEN)A[1];
     B = bij[i0]; s = (GEN)B[1];
     for (j = 2; j <= r; j++)
     {
-      s = gadd(s, gmul((GEN)Z[j], (GEN)B[j]));
-      t = gadd(t, gmul((GEN)Z[j], (GEN)A[j]));
+      if (signe(B[j])) s = mpadd(s, mulrr((GEN)Z[j], (GEN)B[j]));
+      if (signe(A[j])) t = mpadd(t, mulrr((GEN)Z[j], (GEN)A[j]));
     }
   for (i = i0 - 1; i > 1; i--)
   {
-    A = aij[i]; t = gmul(t, nsurc);
-    B = bij[i]; s = gmul(s, nsurc);
-    for (j = odd(i)? T->rc2: T->rc1; j; j--)
+    A = aij[i]; t = mulrr(t, nsurc);
+    B = bij[i]; s = mulrr(s, nsurc);
+    for (j = odd(i)? T->rc2: T->rc1; j > 1; j--)
     {
-      s = gadd(s, gmul((GEN)Z[j], (GEN)B[j]));
-      t = gadd(t, gmul((GEN)Z[j], (GEN)A[j]));
+      if (signe(B[j])) s = addrr(s, mulrr((GEN)Z[j], (GEN)B[j]));
+      if (signe(A[j])) t = addrr(t, mulrr((GEN)Z[j], (GEN)A[j]));
     }
+    if (signe(B[1])) s = addrr(s, (GEN)B[1]);
+    if (signe(A[1])) t = addrr(t, (GEN)A[1]);
   }
   /* i = 1 */
-    A = aij[1]; t = gmul(t, nsurc);
-    B = bij[1]; s = gmul(s, nsurc);
-    for (j = 1; j <= r; j++)
+    A = aij[1]; t = mulrr(t, nsurc);
+    B = bij[1]; s = mulrr(s, nsurc);
+    if (signe(B[1])) s = addrr(s, (GEN)B[1]);
+    if (signe(A[1])) t = addrr(t, (GEN)A[1]);
+    for (j = 2; j <= r; j++)
     {
-      s = gadd(s, gmul((GEN)Z[j], (GEN)B[j]));
-      t = gadd(t, gmul((GEN)Z[j], (GEN)A[j]));
+      if (signe(B[j])) s = addrr(s, mulrr((GEN)Z[j], (GEN)B[j]));
+      if (signe(A[j])) t = addrr(t, mulrr((GEN)Z[j], (GEN)A[j]));
     }
-  s = gadd(s, gmul(csurn, T->powracpi[T->b]));
+  s = addrr(s, mulrr(csurn, T->powracpi[T->b]));
   T->cS[n] = gclone(s);
   T->cT[n] = gclone(t); avma = av;
 }
@@ -2813,11 +2796,8 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
   Mcyc = diagonal(gmael(bnr, 5, 2));
 
   /* check the bnf */
-  if (!varn(nf[1]))
-    err(talker, "main variable in bnrstark must not be x");
-
-  if (nf_get_r2(nf))
-    err(talker, "not a totally real ground base field in bnrstark");
+  if (!varn(nf[1])) err(talker, "main variable in bnrstark must not be x");
+  if (nf_get_r2(nf)) err(talker, "base field not totally real in bnrstark");
 
   /* check the subgrp */
   if (! (subgrp = get_subgroup(subgrp,Mcyc)) )
@@ -2831,7 +2811,7 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
 
   /* check the class field */
   if (!gcmp0(gmael3(bnr, 2, 1, 2)))
-    err(talker, "not a totally real class field in bnrstark");
+    err(talker, "class field not totally real in bnrstark");
 
   if (DEBUGLEVEL) (void)timer2();
 
@@ -2849,7 +2829,7 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
       coeff(M,i,i) = one;
       vec[i] = (long)bnrstark(bnr, M, prec);
     }
-    return (vec);
+    return vec;
   }
 
   if (newprec > prec)
@@ -2882,9 +2862,6 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
   checkbnrgen(bnr);
   bnf  = (GEN)bnr[1];
   nf   = (GEN)bnf[7];
-  cyc  = gmael(bnr, 5, 2);
-  Mcyc = diagonal(cyc);
-  ncc  = lg(cyc) - 1;
   N    = degpol(nf[1]);
 
   if (N == 1) err(talker, "the ground field must be distinct from Q");
@@ -2893,18 +2870,19 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
   /* compute bnr(conductor) */
   if (!(flag & 2))
   {
-    p1   = conductor(bnr, NULL, 2);
-    bnr  = (GEN)p1[2];
-    cyc  = gmael(bnr, 5, 2);
-    Mcyc = diagonal(cyc);
+    p1  = conductor(bnr, NULL, 2);
+    bnr = (GEN)p1[2];
   }
+  cyc  = gmael(bnr, 5, 2);
+  ncc  = lg(cyc) - 1;
+  Mcyc = diagonal(cyc);
 
   /* check the subgroup */
   if (! (subgp = get_subgroup(subgp,Mcyc)) )
     err(talker, "incorrect subgroup in bnrL1");
 
   cl = itou( dethnf_i(subgp) );
-  Qt = InitQuotient0(Mcyc, subgp);
+  Qt = InitQuotient0(cyc, subgp);
   lq = lg((GEN)Qt[2]) - 1;
 
   /* compute all characters */
@@ -2940,10 +2918,7 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
     if (a > 0)
     {
       nc++;
-      listCR[nc] = lgetg(3, t_VEC);
-      mael(listCR, nc, 1) = (long)lchi;
-      mael(listCR, nc, 2) = (long)bnrconductorofchar(bnr, lchi);
-
+      listCR[nc] = (long)mkvec2(lchi, bnrconductorofchar(bnr, lchi));
       indCR[i]  = nc;
       invCR[nc] = i;
     }
@@ -2977,12 +2952,10 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
       L1[i] = (long)GetValue((GEN)dataCR[a], NULL, (GEN)S[a], (GEN)T[a],
                              flag & 1, flag & 2, prec);
   }
-
   for (i = 1; i < cl; i++)
   {
     a = indCR[i];
-    if (a < 0)
-      L1[i] = lconj((GEN)L1[-a]);
+    if (a < 0) L1[i] = lconj((GEN)L1[-a]);
   }
 
   if (!(flag & 1))

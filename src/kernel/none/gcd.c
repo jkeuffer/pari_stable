@@ -97,7 +97,7 @@ gcdii(GEN a, GEN b)
     case  0: avma=av; a=shifti(a,v); return a;
     case -1: p1=b; b=a; a=p1;
   }
-  if (is_pm1(b)) { avma=av; return shifti(gone,v); }
+  if (is_pm1(b)) { avma=av; return int2n(v); }
 
   /* we have three consecutive memory locations: a,b,t.
    * All computations are done in place */
@@ -108,7 +108,7 @@ gcdii(GEN a, GEN b)
     /* if a=b mod 4 set t=a-b, otherwise t=a+b, then strip powers of 2 */
     /* so that t <= (a+b)/4 < a/2 */
     gcd_plus_minus(a,b, t);
-    if (is_pm1(t)) { avma=av; return shifti(gone,v); }
+    if (is_pm1(t)) { avma=av; return int2n(v); }
     switch(absi_cmp(t,b))
     {
       case -1: p1 = a; a = b; b = t; t = p1; break;

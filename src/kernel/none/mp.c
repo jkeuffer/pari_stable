@@ -1002,7 +1002,7 @@ red_montgomery(GEN T, GEN N, ulong inv)
 #ifdef DEBUG
 {
   long l = lgefint(N)-2, s = BITS_IN_LONG*l;
-  GEN R = shifti(gone, s);
+  GEN R = int2n(s);
   GEN res = remii(mulii(T, Fp_inv(R, N)), N);
   if (k > lgefint(N)
     || !egalii(remii(Td,N),res)

@@ -1125,7 +1125,7 @@ phi(GEN n)
   if (is_pm1(n)) return gone;
   v = vali(n);
   n = absi(shifti(n,-v));
-  m = v > 1 ? shifti(gone,v-1) : gone;
+  m = v > 1 ? int2n(v-1) : gone;
   if (is_pm1(n)) return gerepileuptoint(av,m);
 
   lim = tridiv_bound(n,1);
@@ -1204,7 +1204,7 @@ sumdiv(GEN n)
   if (is_pm1(n)) return gone;
   v = vali(n);
   n = absi(shifti(n,-v));
-  m = v ? addsi(-1,shifti(gone,v+1)) : gone;
+  m = v ? addsi(-1,int2n(v+1)) : gone;
   if (is_pm1(n)) return gerepileuptoint(av,m);
 
   lim = tridiv_bound(n,1);

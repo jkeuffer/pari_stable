@@ -50,7 +50,7 @@ gcdii(GEN a, GEN b)
     case  0: avma=av; a=shifti(a,v); return a;
     case -1: p1=b; b=a; a=p1;
   }
-  if (is_pm1(b)) { avma=av; return shifti(gone,v); }
+  if (is_pm1(b)) { avma=av; return int2n(v); }
  {
   /* general case */
   /*This serve two purposes: 1) mpn_gcd destroy its input and need an extra

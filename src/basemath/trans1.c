@@ -794,7 +794,7 @@ sqrt_2adic(GEN x, long pp)
     GEN mod;
     zp = (zp<<1) - 1;
     if (zp > pp) zp = pp;
-    mod = shifti(gone, zp);
+    mod = int2n(zp);
     z = addii(z, resmod2n(mulii(x, Fp_inv(z,mod)), zp));
     z = shifti(z, -1); /* (z + x/z) / 2 */
     if (pp == zp) return z;
@@ -878,7 +878,7 @@ padic_sqrt(GEN x)
       z = gerepileuptoint(av, z);
       pp--;
     }
-    mod = shifti(gone, pp);
+    mod = int2n(pp);
   }
   else /* p != 2 */
   {

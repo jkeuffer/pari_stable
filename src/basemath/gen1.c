@@ -2517,7 +2517,7 @@ gmul2n(GEN x, long n)
       if (n<=l) return shifti(x,-n);
       z = cgetg(3,t_FRAC);
       z[1] = lshifti(x,-l);
-      z[2] = lshifti(gone,n-l); return z;
+      z[2] = (long)int2n(n-l); return z;
 	
     case t_REAL:
       return shiftr(x,n);
@@ -2531,7 +2531,7 @@ gmul2n(GEN x, long n)
         icopyifstack(p2,z[1]); return z;
       }
       return div_intmod_same(z, (GEN)x[1], (GEN)x[2],
-                                           modii(shifti(gone,-n), (GEN)x[1]));
+                                           modii(int2n(-n), (GEN)x[1]));
     case t_FRAC:
       l = vali((GEN)x[1]);
       k = vali((GEN)x[2]);

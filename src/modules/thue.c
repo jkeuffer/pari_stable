@@ -223,7 +223,7 @@ inithue(GEN P, GEN bnf, long flag, long prec)
     tmp = gabs(poleval(dP,(GEN)ro[k]),prec);
     if (!c1 || gcmp(tmp,c1) < 0) c1 = tmp;
   }
-  c1 = gdiv(shifti(gone,n-1), c1);
+  c1 = gdiv(int2n(n-1), c1);
   c1 = gprec_w(myround(c1, 1), DEFAULTPREC);
 
   c2 = NULL; /* max |r_i - r_j|, i!=j */
@@ -248,7 +248,7 @@ inithue(GEN P, GEN bnf, long flag, long prec)
 
     /* Compute x0. See paper, Prop. 2.2.1 */
     x0 = gmul(gpmin, Vecmax(gabs(imag_i(ro), prec)));
-    x0 = sqrtnr(gdiv(shifti(gone,n-1), x0), n);
+    x0 = sqrtnr(gdiv(int2n(n-1), x0), n);
   }
   if (DEBUGLEVEL>1) 
     fprintferr("c1 = %Z\nc2 = %Z\nIndice <= %Z\n", c1, c2, Ind);

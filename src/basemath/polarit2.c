@@ -998,8 +998,8 @@ root_bound(GEN P0)
     avma = av;
   }
   if (k < 0) k = 0;
-  x = shifti(gone, k);
-  y = shifti(gone, k+1);
+  x = int2n(k);
+  y = int2n(k+1);
   for(k=0; ; k++)
   {
     z = shifti(addii(x,y), -1);
