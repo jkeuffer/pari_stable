@@ -1893,12 +1893,13 @@ extern GEN hnflll_i(GEN A, GEN *ptB, int remove);
 /* c = Rz = 2n, according to Dirichlet's formula. Compute a tentative
  * regulator (not a multiple this time). *ptkR = multiple of regulator */
 static int
-compute_R(GEN lambda, GEN z, GEN *pU, GEN *ptkR)
-{
+compute_R(GEN lambda, GEN z, GEN *ptU, GEN *ptkR)
+{ 
   ulong av = avma;
-  GEN L,H,gc,den,R;
+  long r;
+  GEN U,L,H,gc,den,R;
   double c;
-
+    
   if (DEBUGLEVEL) { fprintferr("\n#### Computing check\n"); flusherr(); }
   gc = gmul(*ptkR,z);
   lambda = bestappr(lambda,gc); den = denom(lambda);
@@ -1906,21 +1907,23 @@ compute_R(GEN lambda, GEN z, GEN *pU, GEN *ptkR)
   {
     if (DEBUGLEVEL) fprintferr("c = %Z\nden = %Z\n",gc,den);
     return PRECI;
-  }
-  L = gmul(lambda,den); H = hnf(L);
-  R = gdiv(dethnf_i(H), gpowgs(den, lg(H)-1));
+  } 
+  L = gmul(lambda,den);
+  H = hnf(L); r = lg(H)-1;
+  R = gdiv(dethnf_i(H), gpowgs(den, r));
   R = mpabs(gmul(*ptkR,R)); /* tentative regulator */
   c = gtodouble(gmul(R,z)); /* should be 2n (= 2 if we are done) */
   if (DEBUGLEVEL)
-  {
+  { 
     msgtimer("bestappr/regulator");
     fprintferr("\n ***** check = %f\n",c/2);
-  }
+  } 
   if (c < 1.5) return PRECI;
   if (c > 3.) { avma = av; return RELAT; }
   /* *pU = coords. of fundamental units on sublambda */
-  H = hnflll_i(L,pU,0); /* try hard to get a SMALL base change */
-  *ptkR = R; return LARGE;
+  H = hnflll_i(L,&U,0); /* try hard to get a SMALL base change */
+  U += (lg(U)-1 - r); U[0] = evaltyp(t_MAT)|evallg(r+1);
+  *ptkR = R; *ptU = U; return LARGE;
 }
 
 /* find the smallest (wrt norm) among I, I^-1 and red(I^-1) */
