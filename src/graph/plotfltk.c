@@ -280,7 +280,7 @@ int Plotter::handle(int event)
     {
     case 1:
 #ifdef BROKEN_FORK
-     longjmp(fltk_env);
+     longjmp(fltk_env, 1);
 #else
      exit(0);
 #endif
