@@ -133,24 +133,25 @@ qpsoluble(GEN pol,GEN p)
   return (zpsol(polrecip(pol),p,1,p,gzero));
 }
 
-/* p premier a 2. renvoie 1 si a est un carre dans ZK_p, 0 sinon */
+/* (pr,2) = 1. return 1 if a square in (ZK / pr), 0 otherwise */
 static long
-psquarenf(GEN nf,GEN a,GEN p)
+psquarenf(GEN nf,GEN a,GEN pr)
 {
-  long v,ltop=avma;
-  GEN norm,ap;
+  ulong av = avma;
+  long v;
+  GEN norm;
 
   if (gcmp0(a)) return 1;
-  v=idealval(nf,a,p); if (v&1) return 0;
-  ap=gdiv(a,gpuigs(basistoalg(nf,(GEN)p[2]),v));
+  v = idealval(nf,a,pr); if (v&1) return 0;
+  if (v) a = gdiv(a, gpowgs(basistoalg(nf, (GEN)pr[2]), v));
 
-  norm=gshift(idealnorm(nf,p),-1);
-  ap=gmul(ap,gmodulsg(1,(GEN)p[1]));
-  ap=gaddgs(gpui(ap,norm,0),-1);
-  if (gcmp0(ap)) { avma=ltop; return 1; }
-  ap=lift(lift(ap));
-  v = idealval(nf,ap,p); avma=ltop;
-  return (v>0);
+  norm = gshift(idealnorm(nf,pr), -1);
+  a = gmul(a, gmodulsg(1,(GEN)pr[1]));
+  a = gaddgs(powgi(a,norm), -1);
+  if (gcmp0(a)) { avma = av; return 1; }
+  a = lift(lift(a));
+  v = idealval(nf,a,pr);
+  avma = av; return (v>0);
 }
 
 static long
@@ -164,19 +165,20 @@ check2(GEN nf, GEN a, GEN zinit)
   return 1;
 }
 
-/* p divise 2. renvoie 1 si a est un carre dans ZK_p, 0 sinon */
+/* pr | 2. Return 1 if a square in (ZK / pr), 0 otherwise */
 static long
-psquare2nf(GEN nf,GEN a,GEN p,GEN zinit)
+psquare2nf(GEN nf,GEN a,GEN pr,GEN zinit)
 {
-  long v, ltop=avma;
+  long v, ltop = avma;
 
   if (gcmp0(a)) return 1;
-  v=idealval(nf,a,p); if (v&1) return 0;
-  a = gdiv(a,gmodulcp(gpuigs(gmul((GEN)nf[7],(GEN)p[2]),v),(GEN)nf[1]));
+  v = idealval(nf,a,pr); if (v&1) return 0;
+  if (v) a = gdiv(a, gpowgs(basistoalg(nf, (GEN)pr[2]), v));
+  /* now (a,pr) = 1 */
   v = check2(nf,a,zinit); avma = ltop; return v;
 }
 
-/* p divise 2, (a,p)=1. renvoie 1 si a est un carre de (ZK / p^q)*, 0 sinon. */
+/* pr | 2. Return 1 if a square in (ZK / pr^q)^*, and 0 otherwise */
 static long
 psquare2qnf(GEN nf,GEN a,GEN p,long q)
 {
@@ -253,7 +255,7 @@ zpsolnf(GEN nf,GEN pol,GEN p,long nu,GEN pnu,GEN x0,GEN repr,GEN zinit)
     result=lemma7nf(nf,pol,p,nu,x0,zinit);
   if (result== 1) return 1;
   if (result==-1) return 0;
-  pnup=gmul(pnu,gmodulcp(gmul((GEN) nf[7],(GEN) p[2]),(GEN) nf[1]));
+  pnup = gmul(pnu, basistoalg(nf,(GEN)p[2]));
   nu++;
   for (i=1; i<lg(repr); i++)
     if (zpsolnf(nf,pol,p,nu,pnup,gadd(x0,gmul(pnu,(GEN)repr[i])),repr,zinit))
@@ -292,33 +294,31 @@ repres(GEN nf,GEN p)
  * p est un ideal premier sous forme primedec.
  */
 long
-qpsolublenf(GEN nf,GEN pol,GEN p)
+qpsolublenf(GEN nf,GEN pol,GEN pr)
 {
   GEN repr,zinit,p1;
   long ltop=avma;
 
   if (gcmp0(pol)) return 1;
   if (typ(pol)!=t_POL) err(notpoler,"qpsolublenf");
-  if (typ(p)!=t_VEC  || lg(p)!=6)
-    err(talker,"not a prime ideal in qpsolublenf");
-  nf=checknf(nf);
+  checkprimeid(pr);
 
-  if (cmpis((GEN) p[1],2))
-  {
-    if (psquarenf(nf,(GEN) pol[2],p)) return 1;
-    if (psquarenf(nf, leading_term(pol),p)) return 1;
-    zinit=gzero;
+  if (egalii((GEN) pr[1], gdeux))
+  { /* tough case */
+    zinit = zidealstarinit(nf, idealpows(nf,pr,1+2*idealval(nf,gdeux,pr)));
+    if (psquare2nf(nf,(GEN) pol[2],pr,zinit)) return 1;
+    if (psquare2nf(nf, leading_term(pol),pr,zinit)) return 1;
   }
   else
   {
-    zinit=zidealstarinit(nf,idealpows(nf,p,1+2*idealval(nf,gdeux,p)));
-    if (psquare2nf(nf,(GEN) pol[2],p,zinit)) return 1;
-    if (psquare2nf(nf, leading_term(pol),p,zinit)) return 1;
+    if (psquarenf(nf,(GEN) pol[2],pr)) return 1;
+    if (psquarenf(nf, leading_term(pol),pr)) return 1;
+    zinit = gzero;
   }
-  repr=repres(nf,p);
-  if (zpsolnf(nf,pol,p,0,gun,gzero,repr,zinit)) { avma=ltop; return 1; }
-  p1 = gmodulcp(gmul((GEN) nf[7],(GEN) p[2]),(GEN) nf[1]);
-  if (zpsolnf(nf,polrecip(pol),p,1,p1,gzero,repr,zinit))
+  repr = repres(nf,pr);
+  if (zpsolnf(nf,pol,pr,0,gun,gzero,repr,zinit)) { avma=ltop; return 1; }
+  p1 = gmodulcp(gmul((GEN) nf[7],(GEN) pr[2]),(GEN) nf[1]);
+  if (zpsolnf(nf,polrecip(pol),pr,1,p1,gzero,repr,zinit))
     { avma=ltop; return 1; }
 
   avma=ltop; return 0;
@@ -359,108 +359,92 @@ zpsolublenf(GEN nf,GEN pol,GEN p)
 static long
 hilb2nf(GEN nf,GEN a,GEN b,GEN p)
 {
-  GEN pol;
-  long ltop=avma;
+  ulong av = avma;
+  long rep;
+  GEN pol = coefs_to_pol(3, lift(a), zero, lift(b));
+  /* varn(nf.pol) = 0, pol is not a valid GEN  [as in Pol([x,x], x)].
+   * But it is only used as a placeholder, hence it is not a problem */
 
-  a=lift(a); b=lift(b);
-  pol=polx[0]; pol=gadd(gmul(a,gsqr(pol)),b);
-  if (qpsolublenf(nf,pol,p)) { avma=ltop; return 1; }
-  avma=ltop; return -1;
+  rep = qpsolublenf(nf,pol,p)? 1: -1;
+  avma = av; return rep;
 }
 
-/* pr doit etre sous la forme primedec */
-static GEN
-nfmodid2(GEN nf,GEN x,GEN pr)
-{
-  x=lift(x);
-  x=gmod(x,lift(basistoalg(nf,(GEN)pr[2])));
-  return gmul(x,gmodulsg(1,(GEN)pr[1]));
-}
-
+/* local quadratic Hilbert symbol (a,b)_pr, for a,b (non-zero) in nf */
 long
-nfhilbertp(GEN nf,GEN a,GEN b,GEN p)
-/* calcule le symbole de Hilbert quadratique local (a,b)_p
- * en l'ideal premier p du corps nf,
- * a et b sont des elements non nuls de nf, sous la forme
- * de polymods ou de polynomes, et p renvoye par primedec.
- */
+nfhilbertp(GEN nf,GEN a,GEN b,GEN pr)
 {
-  GEN aux,aux2;
-  long ta=typ(a),tb=typ(b),alpha,beta,sign,rep,ltop=avma;
+  GEN ord, ordp, p, prhall,t;
+  long va, vb, rep;
+  ulong av = avma;
 
-  if ((ta!=t_INT && ta!=t_POLMOD && ta!=t_POL)
-   || (tb!=t_INT && tb!=t_POLMOD && tb!=t_POL))
-    err (typeer,"nfhilbertp");
-  if (gcmp0(a) || gcmp0(b))
-    err (talker,"0 argument in nfhilbertp");
-  checkprimeid(p); nf=checknf(nf);
+  if (gcmp0(a) || gcmp0(b)) err (talker,"0 argument in nfhilbertp");
+  checkprimeid(pr); nf = checknf(nf);
+  p = (GEN)pr[1];
 
-  if (!cmpis((GEN) p[1],2)) return hilb2nf(nf,a,b,p);
+  if (egalii(p,gdeux)) return hilb2nf(nf,a,b,pr);
 
-  if (ta != t_POLMOD) a=gmodulcp(a,(GEN)nf[1]);
-  if (tb != t_POLMOD) b=gmodulcp(b,(GEN)nf[1]);
+  /* pr not above 2, compute t = tame symbol */
+  va = idealval(nf,a,pr);
+  vb = idealval(nf,b,pr);
+  if (!odd(va) && !odd(vb)) { avma = av; return 1; }
+  t = element_div(nf, element_pow(nf,a,stoi(vb)),
+                      element_pow(nf,b,stoi(va)));
+  if (odd(va) && odd(vb)) t = gneg_i(t); /* t mod pr = tame_pr(a,b) */
 
-  alpha=idealval(nf,a,p); beta=idealval(nf,b,p);
-  if ((alpha&1) == 0 && (beta&1) == 0) { avma=ltop; return 1; }
-  aux2=shifti(idealnorm(nf,p),-1);
-  if (alpha&1 && beta&1 && mpodd(aux2)) sign=1; else sign=-1;
-  aux=nfmodid2(nf,gdiv(gpuigs(a,beta),gpuigs(b,alpha)),p); /* ?????? */
-  aux=gaddgs(powgi(aux,aux2),sign);
-  aux=lift(lift(aux));
-  if (gcmp0(aux)) rep=1; else rep=(idealval(nf,aux,p)>=1);
-  avma=ltop; return rep? 1: -1;
+  /* quad. symbol is image of t by the quadratic character  */
+  ord = subis( idealnorm(nf,pr), 1 ); /* |(O_K / pr)^*| */
+  ordp= subis( p, 1);                 /* |F_p^*|        */
+  prhall = nfmodprinit(nf, pr);
+  t = element_powmodpr(nf, t, divii(ord, ordp), prhall); /* in F_p^* */
+  t = lift_intern((GEN)t[1]);
+  rep = kronecker(t, p);
+  avma = av; return rep;
 }
 
-/* calcule le symbole de Hilbert quadratique global (a,b):
- * = 1 si l'equation X^2-aY^2-bZ^2=0 a une solution non triviale,
- * =-1 sinon,
- * a et b doivent etre non nuls.
+/* global quadratic Hilbert symbol (a,b):
+ *  =  1 if X^2 - aY^2 - bZ^2 has a point in projective plane
+ *  = -1 otherwise
+ * a, b should be non-zero
  */
 long
 nfhilbert(GEN nf,GEN a,GEN b)
 {
-  long ta=typ(a),tb=typ(b),r1,i,ltop=avma;
-  GEN S,al,bl;
+  ulong av = avma;
+  long r1, i;
+  GEN S, al, bl, ro;
 
-  nf=checknf(nf);
-  if ((ta!=t_INT && ta!=t_POLMOD && ta!=t_POL)
-   || (tb!=t_INT && tb!=t_POLMOD && tb!=t_POL))
-    err (typeer,"nfhilbert");
-  if (gcmp0(a) || gcmp0(b))
-    err (talker,"0 argument in nfhilbert");
+  if (gcmp0(a) || gcmp0(b)) err (talker,"0 argument in nfhilbert");
+  nf = checknf(nf);
 
-  al=lift(a); bl=lift(b);
- /* solutions locales aux places infinies reelles */
-  r1 = nf_get_r1(nf);
+  if (typ(a) != t_POLMOD) a = basistoalg(nf, a);
+  if (typ(b) != t_POLMOD) b = basistoalg(nf, b);
+
+  al = lift(a);
+  bl = lift(b);
+ /* local solutions in real completions ? */
+  r1 = nf_get_r1(nf); ro = (GEN)nf[6];
   for (i=1; i<=r1; i++)
-    if (signe(poleval(al,gmael(nf,6,i))) < 0 &&
-        signe(poleval(bl,gmael(nf,6,i))) < 0)
+    if (signe(poleval(al,(GEN)ro[i])) < 0 &&
+        signe(poleval(bl,(GEN)ro[i])) < 0)
     {
       if (DEBUGLEVEL>=4)
-      {
-        fprintferr("nfhilbert not soluble at a real place\n");
-        flusherr();
-      }
-      avma=ltop; return -1;
+        fprintferr("nfhilbert not soluble at real place %ld\n",i);
+      avma = av; return -1;
     }
-  if (ta!=t_POLMOD) a=gmodulcp(a,(GEN)nf[1]);
-  if (tb!=t_POLMOD) b=gmodulcp(b,(GEN)nf[1]);
 
-  /* solutions locales aux places finies (celles qui divisent 2ab)*/
+  /* local solutions in finite completions ? (pr | 2ab)
+   * primes above 2 are toughest. Try the others first */
 
-  S=(GEN) idealfactor(nf,gmul(gmulsg(2,a),b))[1];
-  /* formule du produit ==> on peut eviter un premier */
+  S = (GEN) idealfactor(nf,gmul(gmulsg(2,a),b))[1];
+  /* product of all hilbertp is 1 ==> remove one prime (above 2!) */
   for (i=lg(S)-1; i>1; i--)
-    if (nfhilbertp(nf,a,b,(GEN) S[i])==-1)
+    if (nfhilbertp(nf,a,b,(GEN) S[i]) < 0)
     {
       if (DEBUGLEVEL >=4)
-      {
-	fprintferr("nfhilbert not soluble at finite place: ");
-	outerr((GEN)S[i]); flusherr();
-      }
-      avma=ltop; return -1;
+	fprintferr("nfhilbert not soluble at finite place: %Z\n",S[i]);
+      avma = av; return -1;
     }
-  avma=ltop; return 1;
+  avma = av; return 1;
 }
 
 long
