@@ -158,19 +158,16 @@ static GEN
 mulred(GEN nf,GEN x, GEN I, long prec,long precint)
 {
   long av = avma;
-  GEN p1, y = cgetg(3,t_VEC), z = cgetg(4,t_VEC);
+  GEN y = cgetg(3,t_VEC);
 
   y[1] = (long)idealmulh(nf,I,(GEN)x[1]);
   y[2] = x[2];
   y = ideallllredall(nf,y,NULL,prec,precint);
-  z[3]=(long)dethnf((GEN)y[1]);
-  p1 = ideal_two_elt(nf,(GEN)y[1]);
-  z[1]=p1[1];
-  z[2]=p1[2]; y[1] = (long)z;
+  y[1] = (long)ideal_two_elt(nf,(GEN)y[1]);
   return gerepileupto(av,gcopy(y));
 }
 
-/* Compute powers of prime ideals (P^0,...,P^a) in subfactorbase (assume a > 1)
+/* Compute powers of prime ideals (P^0,...,P^a) in subfactorbase (a > 1)
  * powsubfb[j][i] contains P_i^j in LLL form + archimedean part
  */
 static void
@@ -190,12 +187,11 @@ powsubfbgen(GEN nf,GEN subfb,long a,long prec,long precint)
   for (i=1; i<n; i++)
   {
     GEN vp = (GEN)vectbase[subfb[i]];
-    GEN z = cgetg(4,t_VEC);
+    GEN z = cgetg(3,t_VEC); z[1]=vp[1]; z[2]=vp[2];
     pow = (GEN*)cgetg(a+1,t_VEC);
     powsubfb[i] = (long)pow; pow[0]=id;
     pow[1]=cgetg(3,t_VEC);
     pow[1][1] = (long)z;
-    z[1]=vp[1]; z[2]=vp[2]; z[3]=(long)powgi((GEN)vp[1], (GEN)vp[4]);
     pow[1][2] = id[2];
     vp = prime_to_ideal(nf,vp);
     for (j=2; j<=a; j++)

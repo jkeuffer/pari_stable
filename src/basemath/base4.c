@@ -995,7 +995,7 @@ idealmulprime(GEN nf, GEN x, GEN vp)
 }
 
 /* Assume ix and iy are integral in HNF form (or ideles of the same form).
- * Ideal in iy can be of the form [a,b,N], with iy = (a,b) and N = norm y
+ * HACK: ideal in iy can be of the form [a,b], a in Z, b in Z_K
  * For internal use. */
 GEN
 idealmulh(GEN nf, GEN ix, GEN iy)
@@ -1004,7 +1004,7 @@ idealmulh(GEN nf, GEN ix, GEN iy)
   GEN res,x,y;
 
   if (typ(ix)==t_VEC) {f=1;  x=(GEN)ix[1];} else x=ix;
-  if (typ(iy)==t_VEC && lg(iy)==3) {f+=2; y=(GEN)iy[1];} else y=iy;
+  if (typ(iy)==t_VEC && typ(iy[1]) != t_INT) {f+=2; y=(GEN)iy[1];} else y=iy;
   if (f) res = cgetg(3,t_VEC);
 
   if (typ(y) != t_VEC) y = ideal_two_elt(nf,y);

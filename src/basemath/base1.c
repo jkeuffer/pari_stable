@@ -885,15 +885,11 @@ GEN
 make_MDI(GEN nf, GEN TI, GEN *ideal, GEN *dideal)
 {
   GEN c = content(TI);
-  GEN z, p1, d = (GEN)nf[3];
-  long n = lg(TI)-1;
+  GEN p1;
 
-  *dideal = divii(d,c);
+  *dideal = divii((GEN)nf[3], c);
   *ideal = p1 = hnfmodid(gdiv(TI,c), *dideal);
-  d = mulii(dethnf_i(p1), gpowgs(c, n));
-  p1 = ideal_two_elt(nf, p1); p1 = gmul(p1,c);
-  z = cgetg(4,t_VEC);
-  z[1]=p1[1]; z[2]=p1[2]; z[3]=(long)d; return z;
+  return gmul(c, ideal_two_elt(nf, p1));
 }
 
 /* basis = integer basis. roo = real part of the roots */
@@ -1104,7 +1100,7 @@ initalgall0(GEN x, long flag, long prec)
 
     av2 = avma;
     MDI = make_MDI(nf,TI, &A, &dA);
-    mat[7] = (long)MDI; /* needed in idealinv */
+    mat[7] = (long)MDI; /* needed in idealinv below */
     if (gcmp1((GEN)nf[4]))
       D = idealhermite_aux(nf, derivpol(x));
     else

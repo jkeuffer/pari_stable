@@ -2813,7 +2813,7 @@ fincke_pohst(GEN a,GEN bound,GEN stockmax,long flag, long prec,
     GEN p1 = gsqrt(gcoeff(r,i,i), prec);
     coeff(r,i,i)=(long)p1;
     for (j=i+1; j<n; j++)
-      coeff(r,i,j) = lmpmul(p1, gcoeff(r,i,j));
+      coeff(r,i,j) = lmul(p1, gcoeff(r,i,j));
   }
   /* now r~ * r = a in LLL basis */
   rinvtrans = gtrans(invmat(r));

@@ -3927,12 +3927,13 @@ $\det(T)$ is equal to the discriminant of the field $K$.
 of the different of $K$ on the integral basis.
 
 \quad$\bullet$ $TI$ is equal to $d(K)T^{-1}$, which has integral
-coefficients.
+coefficients. Note that, understood as as ideal, the matrix $T^{-1}$
+generates the codifferent ideal.
 
-\quad$\bullet$ Finally, $MDI$ has the form $[x,y,n]$, where $(x,y)$
-expresses a $\Z_K$-basis of $d(K)$ times the codifferent ideal
-(\kbd{\var{nf}.disc$*$\var{nf}.codiff}, which is an integral ideal) and $n$
-is its norm (this ideal is only used in \tet{idealinv}).
+\quad$\bullet$ Finally, $MDI$ is a two-element representation (for faster
+ideal product) of $d(K)$ times the codifferent ideal
+(\kbd{\var{nf}.disc$*$\var{nf}.codiff}, which is an integral ideal). $MDI$
+is only used in \tet{idealinv}.
 
  $\var{nf}[6]$ is the vector containing the $r1+r2$ roots
 (\kbd{\var{nf}.roots}) of $\var{nf}[1]$ corresponding to the $r1+r2$
