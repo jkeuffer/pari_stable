@@ -596,7 +596,7 @@ static GEN
 get_coprimes(GEN a, GEN b)
 {
   long i, k = 1;
-  GEN u = cgetg(3, t_VEC);
+  GEN u = cgetg(3, t_COL);
   u[1] = (long)a;
   u[2] = (long)b;
   /* u1,..., uk 2 by 2 coprime */

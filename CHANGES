@@ -104,7 +104,8 @@ BA 31- uninitialized memory read in divrr(x,y), when lg(y) < lg(x), leading
    41- overflow in some GP interface routines: e.g default(realprecision,10^125)
    42- polhensellift((x^2+1)*Mod(1,5),...) --> SEGV [ bad input ]
    43-  lindep([x,y]) --> SEGV [ bad input ]
-
+   44-  polredabs(x^4+9670527181567158504671*x^2+4840282594390812607599424249,16);
+        --> impossible concatenation in concat [ from 2.2.5 ]
   
   Changed
     1- rnf structure (removed useless components)
