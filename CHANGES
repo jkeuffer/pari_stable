@@ -42,6 +42,7 @@ Done for version 2.2.3 (released ??/??/2002):
        squarefree mod p)
     8- [Vecsmall([1, 2])][1][2][1] --> SEGV
     9- typo in t_FRAC + t_PADIC  [only numerator of t_FRAC used]
+   10- factorback(t,nfinit(x)) --> SEGV
 
   Changed
 BA  1- improved Fp_isom
