@@ -1038,6 +1038,9 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
       a = ceil(b + 3*s*k) + 1;
       pa = gpowgs(p,a);
       famod = hensel_lift_fact(P,famod,p,pa,a);
+      /* recompute old Newton sums to new precision ! */
+      for (i=1; i<=n0; i++)
+        TT[i] = (long)polsym_gen((GEN)famod[i], NULL, tmax, pa);
     }
     goodb = (long) a - 0.12 * n0 * n0 / logp;
     if ((a - goodb)*logp < 64*LOG2) goodb = (long) a - 64*LOG2/logp;
