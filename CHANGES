@@ -101,6 +101,8 @@ BA 33- qfbprimeform(-3, 1) --> data corruption [ gzero's signe set to 1 ]
    41- typo in polredabs: polynomial of minimal T_2 norm might be missed
        [ actually found, then deleted due to a typo when "Sorting" small
        vectors, which would assess them the norm of a larger element ]
+   42- in certain situations (when using Allombert's algo.), subfields did
+       not output subfields sorted by degree
 
   Changed
     1- bnfinit: [small_norm phase] speed up norm computations.

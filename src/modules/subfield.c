@@ -1026,8 +1026,16 @@ subfieldsall(GEN nf)
   G = galoisconj4(nf, NULL, 1, 0);
   if (typ(G) != t_INT)
   {
+    GEN L, S, p;
+    long l;
+
     pol = get_nfpol(nf, &nf);
-    return gerepilecopy(av, lift_intern( galoissubfields(G, 0, varn(pol)) ));
+    L = lift_intern( galoissubfields(G, 0, varn(pol)));
+    l = lg(L);
+    S = cgetg(l, t_VECSMALL);
+    for (i=1; i<l; i++) S[i] = lgef(gmael(L,i,1));
+    p = gen_sort(S, cmp_IND | cmp_C, NULL);
+    return gerepilecopy(av,  vecextract_p(L, p));
   }
 
   subfields_poldata(nf, &PD);
