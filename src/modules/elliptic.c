@@ -2967,24 +2967,28 @@ taniyama(GEN e)
 /**                                                                **/
 /********************************************************************/
 /* assume e is defined over Q (use Mazur's theorem) */
+static long
+_orderell(GEN e, GEN p)
+{
+  pari_sp av = avma;
+  GEN p1 = p;
+  long k;
+  for (k = 1; k < 16; k++)
+  {
+    if (lg(p1) < 3) { avma = av; return k; }
+    p1 = addell(e, p1, p);
+  }
+  avma = av; return 0;
+}
 GEN
 orderell(GEN e, GEN p)
 {
-  GEN p1;
-  long k;
-  pari_sp av=avma;
-
+  long t;
   checkell(e); checkpt(p);
-  k=typ(e[13]);
-  if (k!=t_INT && !is_frac_t(k))
+  t = typ(e[13]);
+  if (t != t_INT && !is_frac_t(t))
     err(impl,"orderell for nonrational elliptic curves");
-  p1=p; k=1;
-  for (k=1; k<16; k++)
-  {
-    if (lg(p1)<3) { avma=av; return stoi(k); }
-    p1 = addell(e,p1,p);
-  }
-  avma=av; return gzero;
+  return stoi( _orderell(e, p) );
 }
 
 /* Using Lutz-Nagell */
@@ -3091,7 +3095,7 @@ torsellnagelllutz(GEN e)
   {
     w2 = _vec( stoi(t) );
     for (k=2; k<=t; k++)
-      if (itos(orderell(e,(GEN)r[k])) == t) break;
+      if (_orderell(e,(GEN)r[k]) == t) break;
     if (k>t) err(bugparier,"torsell (bug1)");
 
     w3 = _vec( (GEN)r[k] );
@@ -3102,7 +3106,7 @@ torsellnagelllutz(GEN e)
     t2 = t>>1;
     w2=cgetg(3,t_VEC); w2[1]=lstoi(t2); w2[2]=(long)gdeux;
     for (k=2; k<=t; k++)
-      if (itos(orderell(e,(GEN)r[k])) == t2) break;
+      if (_orderell(e,(GEN)r[k]) == t2) break;
     if (k>t) err(bugparier,"torsell (bug3)");
 
     p1 = powell(e,(GEN)r[k],stoi(t>>2));
@@ -3166,12 +3170,12 @@ torspnt(GEN E, GEN w, long n, long prec)
   GEN p = cgetg(3,t_VEC), q = pointell(E, w, prec);
   long e;
   p[1] = lmul2n(_round(gmul2n((GEN)q[1],2), &e),-2);
-  if (e > -5) return NULL;
+  if (e > -5 || typ(p[1]) == t_COMPLEX) return NULL;
   p[2] = lmul2n(_round(gmul2n((GEN)q[2],3), &e),-3);
-  if (e > -5) return NULL;
-  return (gcmp0(gimag(p)) && oncurve(E,p)
+  if (e > -5 || typ(p[2]) == t_COMPLEX) return NULL;
+  return (oncurve(E,p)
       && lg(powell(E,p,stoi(n))) == 2
-      && itos(orderell(E,p)) == n)? greal(p): NULL;
+      && _orderell(E,p) == n)? p: NULL;
 }
 
 static int
