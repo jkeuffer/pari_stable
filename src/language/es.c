@@ -914,8 +914,10 @@ vsigne(GEN x)
 static void
 voir2(GEN x, long nb, long bl)
 {
-  long tx=typ(x),i,j,e,dx,lx=lg(x);
+  long tx,i,j,e,dx,lx;
 
+  if (!x) { pariputs("NULL\n"); return; }
+  tx = typ(x);
   if (tx == t_INT && x == gzero) { pariputs("gzero\n"); return; }
   if (tx == t_SMALL) {
     pariputs("[SMALL ");
@@ -924,6 +926,7 @@ voir2(GEN x, long nb, long bl)
   }
   sorstring(VOIR_STRING1,(ulong)x);
   
+  lx = lg(x);
   pariputsf("%s(lg=%ld%s):",type_name(tx)+2,lx,isclone(x)? ",CLONE" : "");
   sorstring(VOIR_STRING2,x[0]);
   if (! is_recursive_t(tx)) /* t_SMALL, t_INT, t_REAL, t_STR, t_VECSMALL */

@@ -1257,6 +1257,26 @@ forcecopy(GEN x)
   unsetisclone(y); return y;
 }
 
+GEN
+dummycopy(GEN x)
+{
+  long tx=typ(x), lx=lg(x),i;
+  GEN y=new_chunk(lx);
+
+  switch(tx)
+  {
+    case t_POLMOD:
+      y[1]=x[1]; y[2]=(long)dummycopy((GEN)x[2]);
+      break;
+    case t_MAT:
+      for (i=lx-1;i;i--) y[i]=(long)dummycopy((GEN)x[i]);
+      break;
+    default:
+      for (i=lx-1;i;i--) y[i]=x[i];
+  }
+  y[0]=x[0]; return y;
+}
+
 /* copy x as if avma = *AVMA, update *AVMA */
 GEN
 gcopy_av(GEN x, GEN *AVMA)
@@ -1279,25 +1299,64 @@ gcopy_av(GEN x, GEN *AVMA)
   unsetisclone(y); return y;
 }
 
-GEN
-dummycopy(GEN x)
+/* same but use NULL to code an exact 0 */
+static GEN
+gcopy_av0(GEN x, GEN *AVMA)
 {
-  long tx=typ(x), lx=lg(x),i;
-  GEN y=new_chunk(lx);
+  long i,lx,tx=typ(x);
+  GEN y;
 
-  switch(tx)
+  if (! is_recursive_t(tx))
   {
-    case t_POLMOD:
-      y[1]=x[1]; y[2]=(long)dummycopy((GEN)x[2]);
-      break;
-    case t_MAT:
-      for (i=lx-1;i;i--) y[i]=(long)dummycopy((GEN)x[i]);
-      break;
-    default:
-      for (i=lx-1;i;i--) y[i]=x[i];
+    if (tx == t_INT && !signe(x)) return NULL; /* special marker */
+    if (tx == t_SMALL) return (*--AVMA = x);
+    lx = lg(x); *AVMA = y = *AVMA - lx;
+    for (i=0; i<lx; i++) y[i] = x[i];
   }
-  y[0]=x[0]; return y;
+  else
+  {
+    lx = lg(x); *AVMA = y = *AVMA - lx;
+    if (tx==t_POL || tx==t_LIST) lx = lgef(x);
+    for (i=0; i<lontyp[tx]; i++) y[i] = x[i];
+    for (   ; i<lx; i++)         y[i] = (long)gcopy_av0((GEN)x[i], AVMA);
+  }
+  unsetisclone(y); return y;
 }
+
+/* size of a gcopy_av0 */
+static long
+taille0(GEN x)
+{
+  long i,n,lx, tx = typ(x);
+  if (!is_recursive_t(tx))
+  {
+    if (tx == t_INT && !signe(x)) return 0;
+    n = lg(x);
+  }
+  else
+  {
+    n = lg(x);
+    lx = (tx==t_POL || tx==t_LIST)? lgef(x): n;
+    for (i=lontyp[tx]; i<lx; i++) n += taille0((GEN)x[i]);
+  }
+  return n;
+}
+
+long
+taille(GEN x)
+{
+  long i,n,lx, tx = typ(x);
+  n = lg(x);
+  if (is_recursive_t(tx))
+  {
+    lx = (tx==t_POL || tx==t_LIST)? lgef(x): n;
+    for (i=lontyp[tx]; i<lx; i++) n += taille((GEN)x[i]);
+  }
+  return n;
+}
+
+long
+taille2(GEN x) { return taille(x)<<TWOPOTBYTES_IN_LONG; }
 
 GEN
 gclone(GEN x)
@@ -1322,13 +1381,19 @@ gclone(GEN x)
 void
 shiftaddress(GEN x, long dec)
 {
-  long i,lx, tx = typ(x);
+  long i,lx,tx;
+  
+  tx = typ(x);
   if (is_recursive_t(tx))
   {
     lx = (tx==t_POL || tx==t_LIST)? lgef(x): lg(x);
     for (i=lontyp[tx]; i<lx; i++) {
-      x[i] += dec;
-      shiftaddress((GEN)x[i], dec);
+      if (!x[i]) x[i] = zero;
+      else
+      {
+        x[i] += dec;
+        shiftaddress((GEN)x[i], dec);
+      }
     }
   }
 }
@@ -1337,11 +1402,11 @@ shiftaddress(GEN x, long dec)
 GENbin*
 copy_bin(GEN x)
 {
-  long t = taille(x);
+  long t = taille0(x);
   GENbin *p = (GENbin*)gpmalloc(sizeof(GENbin) + t*sizeof(long));
   GEN AVMA = GENbase(p) + t;
   p->len = t;
-  p->x   = gcopy_av(x, &AVMA);
+  p->x   = gcopy_av0(x, &AVMA);
   p->base= AVMA; return p;
 }
 
@@ -1352,11 +1417,11 @@ bin_copy(GENbin *p)
   GEN x,y,base;
   long dx,len;
 
+  x   = p->x; if (!x) return gzero;
   len = p->len;
-  x   = p->x;
   base= p->base; dx = x - base;
   y = (GEN)memcpy((void*)new_chunk(len), (void*)GENbase(p), len*sizeof(long));
-  if (dx) { y += dx; shiftaddress(y, (y-x)*sizeof(long)); }
+  y += dx; shiftaddress(y, (y-x)*sizeof(long));
   free(p); return y;
 }
 

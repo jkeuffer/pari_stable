@@ -170,22 +170,6 @@ matsize(GEN x)
   return y;
 }
 
-long
-taille(GEN x)
-{
-  long i,n,lx, tx = typ(x);
-  n = lg(x);
-  if (is_recursive_t(tx))
-  {
-    lx = (tx==t_POL || tx==t_LIST)? lgef(x): n;
-    for (i=lontyp[tx]; i<lx; i++) n += taille((GEN)x[i]);
-  }
-  return n;
-}
-
-long
-taille2(GEN x) { return taille(x)<<TWOPOTBYTES_IN_LONG; }
-
 /*******************************************************************/
 /*                                                                 */
 /*                            GREFFE                               */
