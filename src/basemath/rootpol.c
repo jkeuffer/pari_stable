@@ -377,7 +377,9 @@ findpower(GEN p)
       if (s < mins) mins = s;
     }
   }
-  return (long)ceil(mins);
+  i = (long)ceil(mins);
+  if (i - mins > 1 - 1e-12) i--;
+  return i;
 }
 
 /* returns the exponent for the procedure modulus, from the newton diagram */
