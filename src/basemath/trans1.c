@@ -1688,33 +1688,41 @@ mpsc1(GEN x0, long *ptmod8)
   const long mmax = 23169; /* largest m such that (2m+2)(2m+1) < 2^31 */
  /* on a 64-bit machine with true 128 bit/64 bit division, one could
   * take mmax=1518500248; on the alpha it does not seem worthwhile */
-  long l, l0, l1, l2, l4, i, n, m, s, t;
+  long e, l, l0, l1, l2, l4, i, n, m, s, t;
   pari_sp av;
   double alpha,beta,a,b,c,d;
-  GEN y,p1,p2,p3,x2,pitemp, x = x0;
+  GEN y, p1, p2, x2, x = x0;
 
   if (typ(x) != t_REAL) err(typeer,"mpsc1");
   l = lg(x); y = cgetr(l); av = avma;
 
-  l++; pitemp = mppi(l);
-  setexpo(pitemp,-1);
-  p1 = addrr(x,pitemp); /* = x + Pi/4 */
-  l0 = min(l, lg(p1));
-  if (expo(p1) >= bit_accuracy(l0) + 3) err(precer,"mpsc1");
-
-  setexpo(pitemp, 0);
-  p1 = mpent( divrr(p1,pitemp) ); /* round ( x / (Pi/2) ) */
-  if (signe(p1)) x = subrr(x, mulir(p1,pitemp)); /* x mod Pi/2  */
-  p2 = cgetr(l); affrr(x, p2); x = p2;
-
-  *ptmod8 = (signe(x) < 0)? 4: 0;
-  if (signe(p1))
+  e = expo(x);
+  n = 0;
+  if (e > 0)
   {
-    long k = mod4(p1);
-    if (signe(p1) < 0 && k) k = 4-k;
-    /* x = x0 - k*Pi/2  (mod 2Pi) */
-    *ptmod8 += k;
+    GEN q, z, pitemp = mppi(DEFAULTPREC + (e >> TWOPOTBITS_IN_LONG));
+    setexpo(pitemp,-1);
+    z = addrr(x,pitemp); /* = x + Pi/4 */
+    if (expo(z) >= bit_accuracy(min(l, lg(z))) + 3) err(precer,"mpsc1");
+    setexpo(pitemp, 0);
+    q = mpent( divrr(z,pitemp) ); /* round ( x / (Pi/2) ) */
+    if (signe(q))
+    {
+      x = subrr(x, mulir(q, Pi2n(-1, l+1))); /* x mod Pi/2  */
+      n = mod4(q);
+      if (n && signe(q) < 0) n = 4 - n;
+    }
   }
+  *ptmod8 = (signe(x) < 0)? 4 + n: n;
+
+  l1 = lg(x);
+  p1 = cgetr(l1+1); affrr(x, p1); x = p1;
+  if (l1 < l) { /* shorten y */
+    pari_sp av1 = avma;
+    avma = av; y = cgetr(l1); avma = av1;
+    l = l1;
+  }
+  l++; 
 
   if (gcmp0(x)) alpha = 1000000.0;
   else
@@ -1735,43 +1743,43 @@ mpsc1(GEN x0, long *ptmod8)
   }
   else { m = 0; n = (long)((2+beta/alpha) / 2.0); }
   l2=l+1+(m>>TWOPOTBITS_IN_LONG);
-  p2 = realun(l2);
+  p1 = realun(l2);
   x2 = cgetr(l2); av = avma;
   affrr(gsqr(x), x2);
   
   setlg(x2, 3);
   if (n > mmax)
-    p3 = divrs(divrs(x2, 2*n+2), 2*n+1);
+    p2 = divrs(divrs(x2, 2*n+2), 2*n+1);
   else
-    p3 = divrs(x2, (2*n+2)*(2*n+1));
-  s = -expo(p3);
+    p2 = divrs(x2, (2*n+2)*(2*n+1));
+  s = -expo(p2);
   l4 = l1 = 3 + (s>>TWOPOTBITS_IN_LONG);
-  if (l4<=l2) { setlg(p2,l4); setlg(x2,l4); }
+  if (l4<=l2) { setlg(p1,l4); setlg(x2,l4); }
   s = 0;
   for (i=n; i>=2; i--)
   {
     if (i > mmax)
-      p3 = divrs(divrs(x2, 2*i), 2*i-1);
+      p2 = divrs(divrs(x2, 2*i), 2*i-1);
     else
-      p3 = divrs(x2, 2*i*(2*i-1));
-    s -= expo(p3);
+      p2 = divrs(x2, 2*i*(2*i-1));
+    s -= expo(p2);
     t = s & (BITS_IN_LONG-1); l0 = (s>>TWOPOTBITS_IN_LONG);
     if (t) l0++;
     l1 += l0; if (l1>l2) { l0 += l2-l1; l1=l2; }
     l4 += l0;
-    p3 = mulrr(p3,p2);
-    if (l4<=l2) { setlg(p2,l4); setlg(x2,l4); }
-    subsrz(1,p3, p2); avma = av;
+    p2 = mulrr(p2,p1);
+    if (l4<=l2) { setlg(p1,l4); setlg(x2,l4); }
+    subsrz(1,p2, p1); avma = av;
   }
-  setlg(p2,l2); setlg(x2,l2);
-  setexpo(p2, expo(p2)-1); setsigne(p2, -signe(p2));
-  p2 = mulrr(x2,p2);
-  /* Now p2 = sum {1<= i <=n} (-1)^i x^(2i) / (2i)! ~ cos(x) - 1 */
+  setlg(p1,l2); setlg(x2,l2);
+  setexpo(p1, expo(p1)-1); setsigne(p1, -signe(p1));
+  p1 = mulrr(x2,p1);
+  /* Now p1 = sum {1<= i <=n} (-1)^i x^(2i) / (2i)! ~ cos(x) - 1 */
   for (i=1; i<=m; i++)
-  { /* p2 = cos(x)-1 --> cos(2x)-1 */
-    p2 = mulrr(p2, addsr(2,p2)); setexpo(p2, expo(p2)+1);
+  { /* p1 = cos(x)-1 --> cos(2x)-1 */
+    p1 = mulrr(p1, addsr(2,p1)); setexpo(p1, expo(p1)+1);
   }
-  affrr(p2,y); avma=av; return y;
+  affrr(p1,y); avma=av; return y;
 }
 
 /* sqrt (1 - (1+x)^2) = sqrt(-x*(x+2)). Sends cos(x)-1 to |sin(x)| */
