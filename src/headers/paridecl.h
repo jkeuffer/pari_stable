@@ -216,6 +216,7 @@ GEN     hnfmodidpart(GEN x, GEN p);
 GEN     hnfperm(GEN x);
 GEN     intersect(GEN x, GEN y);
 GEN     jacobi(GEN a, long prec);
+GEN     matfrobenius(GEN M, long flag);
 GEN     matrixqz(GEN x, GEN pp);
 GEN     matrixqz0(GEN x, GEN pp);
 GEN     matrixqz2(GEN x);
