@@ -1078,23 +1078,23 @@ resmod2n(GEN x, long n)
   lx = lgefint(x);
   if (lx < k+3) return icopy(x);
 
-  xd = x + (lx-k-1);
-  /* x = |_|...|#|1|...|k| : copy the last l bits of # and the last k words
-   *            ^--- initial xd  */
+  xd = x + (2 + k);
+  /* x = |k|...|1|#|... : copy the last l bits of # and the first k words
+   *              ^--- initial xd  */
   hi = *xd & ((1<<l) - 1); /* last l bits of # = top bits of result */
   if (!hi)
   { /* strip leading zeroes from result */
-    xd++; while (k && !*xd) { k--; xd++; }
+    xd--; while (k && !*xd) { k--; xd--; }
     if (!k) return gzero;
-    ly = k+2; xd--;
+    ly = k+2; xd++;
   }
   else
     ly = k+3;
 
   zd = z = cgeti(ly);
   *++zd = evalsigne(1) | evallgefint(ly);
-  if (hi) *++zd = hi;
   for ( ;k; k--) *++zd = *++xd;
+  if (hi) *++zd = hi;
   return z;
 }
 

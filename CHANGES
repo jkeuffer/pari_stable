@@ -52,6 +52,7 @@ GN  6- [ix86 + Sun cc] build fails [ unsatisfied symbol reference to 'mulll' ]
     7- [libpari] gprec_w didn't behave well for real zero
     8- gp -p 51234567890 --> internal overflow and primelimit set to smaller
        integer
+    9- [ GMP kernel ] incorrect resmod2n --> wrong 2-adic sqrt
 
   Changed
     1- increased maximum binary exponent for t_REAL, and maximum GEN length
