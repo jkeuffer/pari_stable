@@ -60,7 +60,9 @@ GN  6- [Solaris + cc:] fix linker warnings (missing object types in
          factorff(x^2+y+2, 3, y^3+y^2+2)
 MSo 9- bug in print_version() --> SEGV on startup if cc version number too long
    10- subst(O(x),x,x+O(x^2)) --> SEGV [ substituting in 0 t_SER ]
-
+MSo11- various bugs in anal.c: uninitialized reads in get_op_fun(), double_op()
+       memory possibly freed twice because ep->args was not reset to NULL
+       after being freed
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.
