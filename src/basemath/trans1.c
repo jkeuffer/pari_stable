@@ -1649,7 +1649,7 @@ gcotan(GEN x, long prec)
     case t_REAL:
       return mpcotan(x);
 
-    case t_SER: err(negexper,"gcotan"); /* fall through */
+    case t_SER: err(negexper,"gcotan");
     case t_COMPLEX:
       av=avma; gsincos(x,&s,&c,prec); tetpil=avma;
       return gerepile(av,tetpil,gdiv(c,s));
