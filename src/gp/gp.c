@@ -2315,6 +2315,7 @@ gp_main_loop(int ismain)
         prettyp = f_PRETTY;
         pari_outfile = o_out;
       }
+      else init_lim_lines("",lim_lines);
 
       term_color(c_NONE);
       if (!prettyprint) pariputc('\n');
