@@ -44,6 +44,8 @@ Done for version 2.2.4 (released 10/07/2002) [hopefully]:
     7- (a.x = [a]); 1.x ---> error \\ should be [1]
     8- wrong rnfidealnorm[rel | abs] (wrong result if O_L not free O_K-module)
     9- gcd(x + 1, x + 1/2) --> 1 \\ should be 1/2  [introduced in 2.2.1]
+   10- gcd for multivariate polynomials over finite fields slower than
+       in characteristic 0
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).
