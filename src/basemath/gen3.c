@@ -2423,21 +2423,23 @@ _gtoser(GEN x, long v, long prec)
     else y = gcopy(x);
     return y;
   }
-  if (isexactzero(x)) return zeroser(v,prec);
   if (is_scalar_t(tx)) return scalarser(x,v,prec);
   switch(tx)
   {
     case t_POL:
+      if (isexactzero(x)) return zeroser(v,prec);
       y = poltoser(x, v, prec); l = lg(y);
       for (i=2; i<l; i++)
         if (y[i] != zero) y[i] = lcopy((GEN)y[i]);
       break;
 
     case t_RFRAC: case t_RFRACN:
+      if (isexactzero(x)) return zeroser(v,prec);
       av = avma;
       return gerepileupto(av, rfractoser(x, v, prec));
 
-    case t_QFR: case t_QFI: case t_VEC: case t_COL: case t_MAT:
+    case t_QFR: case t_QFI: case t_VEC: case t_COL:
+      if (isexactzero(x)) return zeroser(v, lg(x)-1);
       lx = lg(x); i=1; while (i<lx && isexactzero((GEN)x[i])) i++;
       y = cgetg(lx-i+2,t_SER);
       y[1] = evalsigne(1) | evalvalp(i-1) | evalvarn(v);

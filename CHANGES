@@ -92,6 +92,7 @@ BA 33- qfbprimeform(-3, 1) --> data corruption [ gzero's signe set to 1 ]
    34- qfbpowraw(x, n < 0) reduced its output
    35- stack corruption when adding huge p-adics
    36- idealintersect did not allow fractional ideals
+   37- Ser([1,2]) --> 1 + 2*x + O(x^2) [ OK ], but Ser([0,0]) --> O(x^16)
 
   Changed
     1- bnfinit: [small_norm phase] speed up norm computations.
@@ -108,6 +109,7 @@ MSo 8- allow numtoperm(0,k)  [ --> [] ]
        e.g. I*I --> -1 as t_INT  (was t_COMPLEX)
    10- embedings of number fields: use x + iy --> (x + y, x - y) instead of
        (sqrt(2)x, sqrt(2)y) to map complex embeddings to R^2.
+   11- disallow Ser( t_MAT )  [ resulted in a series with t_COL coefficients ]
 
   Added
     1- [Configure:] flag --with-ncurses-lib=*
