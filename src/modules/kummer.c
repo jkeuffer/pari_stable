@@ -514,7 +514,12 @@ lift_if_rational(GEN x)
 
     case t_POLMOD:
       y = (GEN)x[2];
-      if (typ(y) == t_POL && degpol(y) > 0) return x;
+      if (typ(y) == t_POL)
+      {
+        long d = degpol(y);
+        if (d > 0) return x;
+        return (d < 0)? gzero: (GEN)y[2];
+      }
       return y;
   
     case t_POL: lx = lg(x);

@@ -1548,10 +1548,12 @@ rnfnormgroup(GEN bnr, GEN polrel)
     fa = primedec(nf, stoi(p)); lfa = lg(fa)-1;
     for (i=1; i<=lfa; i++)
     {
-      GEN pr = (GEN)fa[i], pp, T, polr;
-      GEN modpr = nf_to_ff_init(nf, &pr, &T, &pp);
+      GEN pr = (GEN)fa[i], pp, T, polr, modpr;
       long f;
 
+      if (itos((GEN)pr[4]) > 1) break;
+
+      modpr = nf_to_ff_init(nf, &pr, &T, &pp);
       polr = modprX(polrel, nf, modpr);
       /* if pr (probably) ramified, we have to use all (non-ram) P | pr */
       if (!FqX_is_squarefree(polr, T,pp)) { oldf = 0; continue; }
@@ -1560,12 +1562,9 @@ rnfnormgroup(GEN bnr, GEN polrel)
       fac = (GEN)famo[1]; f = degpol((GEN)fac[1]);
       ep  = (GEN)famo[2]; nfac = lg(ep)-1;
       /* check decomposition of pr has Galois type */
-      for (j=1; j<=nfac; j++)
-      {
-        if (!gcmp1((GEN)ep[j])) err(bugparier,"rnfnormgroup");
+      for (j=2; j<=nfac; j++)
         if (degpol(fac[j]) != f)
           err(talker,"non Galois extension in rnfnormgroup");
-      }
       if (oldf < 0) oldf = f; else if (oldf != f) oldf = 0;
       if (f == reldeg) continue; /* reldeg-th powers already included */
 
@@ -1576,13 +1575,11 @@ rnfnormgroup(GEN bnr, GEN polrel)
       group = hnf(concatsp(group, col));
       detgroup = dethnf_i(group);
       k = cmpis(detgroup,reldeg);
-      if (k < 0)
-        err(talker,"not an Abelian extension in rnfnormgroup");
+      if (k < 0) err(talker,"not an Abelian extension in rnfnormgroup");
       if (!k) { cgiv(detgroup); return gerepileupto(av,group); }
     }
   }
-  if (k>0) err(bugparier,"rnfnormgroup");
-  cgiv(detgroup); return gerepileupto(av,group);
+  return NULL; /* not reached */
 }
 
 static GEN
