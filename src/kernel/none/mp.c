@@ -208,6 +208,17 @@ static long pos_s[] = {
 static long neg_s[] = {
   evaltyp(t_INT) | _evallg(3), evalsigne(-1) | evallgefint(3), 0 };
 
+static void
+roundr_up_ip(GEN x, long l)
+{
+  long i = l;
+  for(;;)
+  {
+    if (x[--i]++) break;
+    if (i == 2) { x[2] = HIGHBIT; setexpo(x, expo(x)+1); break; }
+  }
+}
+
 void
 affir(GEN x, GEN y)
 {
@@ -223,23 +234,25 @@ affir(GEN x, GEN y)
   lx = lgefint(x); sh = bfffo(x[2]);
   y[1] = evalsigne(s) | evalexpo(bit_accuracy(lx)-sh-1);
   if (sh) {
-    if (lx>ly)
-    { shift_left(y,x,2,ly-1, x[ly],sh); }
-    else
+    if (lx <= ly)
     {
       for (i=lx; i<ly; i++) y[i]=0;
       shift_left(y,x,2,lx-1, 0,sh);
+      return;
     }
+    shift_left(y,x,2,ly-1, x[ly],sh);
   }
   else {
-    if (lx>=ly)
-      for (i=2; i<ly; i++) y[i]=x[i];
-    else
+    if (lx <= ly)
     {
       for (i=2; i<lx; i++) y[i]=x[i];
       for (   ; i<ly; i++) y[i]=0;
+      return;
     }
+    for (i=2; i<ly; i++) y[i]=x[i];
   }
+  /* lx > ly: round properly */
+  if (x[ly] & HIGHBIT) roundr_up_ip(y, ly);
 }
 
 void
@@ -250,13 +263,15 @@ affrr(GEN x, GEN y)
   y[1] = x[1]; if (!signe(x)) return;
 
   lx=lg(x); ly=lg(y);
-  if (lx>=ly)
-    for (i=2; i<ly; i++) y[i]=x[i];
-  else
+  if (lx <= ly)
   {
     for (i=2; i<lx; i++) y[i]=x[i];
     for (   ; i<ly; i++) y[i]=0;
+    return;
   }
+  for (i=2; i<ly; i++) y[i]=x[i];
+  /* lx > ly: round properly */
+  if (x[ly] & HIGHBIT) roundr_up_ip(y, ly);
 }
 
 GEN
@@ -958,7 +973,7 @@ mulir(GEN x, GEN y)
 
   if (sy<0) sx = -sx;
   lz=lg(y); z=cgetr(lz);
-  y1 = itor(x, lz+1); x = y; y = y1;
+  y1 = itor(x, lz); x = y; y = y1;
   e = expo(y)+ey;
   if (lz==3)
   {
@@ -1400,6 +1415,11 @@ divrr(GEN x, GEN y)
       }
     }
     x1[1]=qp; x1++;
+  }
+  /* round correctly */
+  if (x1[1] > si>>1)
+  {
+    j=i; do x[--j]++; while (j && !x[j]);
   }
   x1 = x-1; for (j=lz-1; j>=2; j--) x[j]=x1[j];
   if (*x) { shift_right(x,x, 2,lz, 1,1); } else e--;
