@@ -1382,8 +1382,8 @@ zarchstar(GEN nf,GEN x,GEN arch,long nba)
   y[1] = (long)p1; av = avma;
   if (N == 1)
   {
-    p1 = scalarpol(subsi(1, shifti(gcoeff(x,1,1),1)), varn(nf[1]));
-    y[2] = (long)_vec(gerepileupto(av, p1));
+    p1 = gerepileuptoint(av, subsi(1, shifti(gcoeff(x,1,1),1)));
+    y[2] = (long)_vec(_col(p1));
     y[3] = (long)gscalmat(gun,1); return y;
   }
   zk = ideal_is_zk(x,N);
