@@ -136,7 +136,8 @@ GEN
 concatsp3(GEN x, GEN y, GEN z)
 {
   long i, lx = lg(x), ly = lg(y), lz = lg(z);
-  GEN r = cgetg(lx+ly+lz-2, t_MAT), t = r;
+  GEN t, r = cgetg(lx+ly+lz-2, t_MAT);
+  t = r;
   for (i=1; i<lx; i++) *++t = *++x;
   for (i=1; i<ly; i++) *++t = *++y;
   for (i=1; i<lz; i++) *++t = *++z;
@@ -286,7 +287,7 @@ concat(GEN x, GEN y)
 
   if (!y)
   {
-    ulong av = avma;
+    gpmem_t av = avma;
     if (tx == t_LIST)
       { lx = lgef(x); i = 2; }
     else if (tx == t_VEC)
@@ -502,7 +503,8 @@ rowselect_p(GEN A, GEN B, GEN p, long init)
 GEN
 extract(GEN x, GEN l)
 {
-  long av,i,j, tl = typ(l), tx = typ(x), lx = lg(x);
+  gpmem_t av;
+  long i,j, tl = typ(l), tx = typ(x), lx = lg(x);
   GEN y;
 
   if (! is_matvec_t(tx)) err(typeer,"extract");
@@ -588,7 +590,7 @@ extract(GEN x, GEN l)
 GEN
 matextract(GEN x, GEN l1, GEN l2)
 {
-  long av = avma, tetpil;
+  gpmem_t av = avma, tetpil;
 
   if (typ(x)!=t_MAT) err(typeer,"matextract");
   x = extract(gtrans(extract(x,l2)),l1); tetpil=avma;
@@ -929,7 +931,7 @@ gauss_triangle_i(GEN A, GEN B, GEN t)
   for (k=1; k<=n; k++)
   {
     GEN u = cgetg(n+1, t_COL), b = (GEN)B[k];
-    ulong av = avma;
+    gpmem_t av = avma;
     c[k] = (long)u; m = mulii((GEN)b[n],t);
     u[n] = (long)gerepileuptoint(av, divii(m, gcoeff(A,n,n)));
     for (i=n-1; i>0; i--)
@@ -947,7 +949,7 @@ gauss_triangle_i(GEN A, GEN B, GEN t)
 int
 hnfdivide(GEN A, GEN B)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   long n = lg(A)-1, i,j,k;
   GEN u, b, m, r;
 
@@ -1068,7 +1070,8 @@ _u_Fp_addmul(GEN b, long k, long i, long m, long p)
 GEN
 gauss_intern(GEN a, GEN b)
 {
-  long inexact,iscol,i,j,k,av,lim,li,bco, aco = lg(a)-1;
+  gpmem_t av, lim;
+  long inexact,iscol,i,j,k,li,bco, aco = lg(a)-1;
   GEN p,m,u;
 
   if (typ(a)!=t_MAT) err(mattype1,"gauss");
@@ -1145,7 +1148,7 @@ gauss_intern(GEN a, GEN b)
   if (iscol) u = gauss_get_col(a,b,p,aco);
   else
   {
-    long av1 = avma;
+    gpmem_t av1 = avma;
     lim = stack_lim(av1,1); u=cgetg(bco+1,t_MAT);
     for (j=2; j<=bco; j++) u[j] = zero; /* dummy */
     for (j=1; j<=bco; j++)
@@ -1233,7 +1236,8 @@ u_FpM_gauss(GEN a, GEN b, long p)
 GEN
 FpM_gauss(GEN a, GEN b, GEN p)
 {
-  long iscol,i,j,k,av,lim,li,bco, aco = lg(a)-1;
+  gpmem_t av,lim;
+  long iscol,i,j,k,li,bco, aco = lg(a)-1;
   GEN piv,m,u;
 
   if (typ(a)!=t_MAT) err(mattype1,"gauss");
@@ -1312,7 +1316,7 @@ FpM_gauss(GEN a, GEN b, GEN p)
   if (iscol) u = Fp_gauss_get_col(a,b,piv,aco,p);
   else
   {
-    long av1 = avma;
+    gpmem_t av1 = avma;
     lim = stack_lim(av1,1); u=cgetg(bco+1,t_MAT);
     for (j=2; j<=bco; j++) u[j] = zero; /* dummy */
     for (j=1; j<=bco; j++)
@@ -1366,8 +1370,9 @@ u_FpM_Fp_mul_ip(GEN y, long x, long p)
 GEN 
 ZM_inv(GEN M, GEN dM)
 {
+  gpmem_t av2, av = avma, lim = stack_lim(av,1);
   GEN  ID,Hp,q,H;
-  ulong p,dMp, av2, av = avma, lim = stack_lim(av,1);
+  ulong p,dMp;
   byteptr d = diffptr;
   long lM = lg(M), stable = 0;
 
@@ -1416,7 +1421,7 @@ ZM_inv(GEN M, GEN dM)
 GEN 
 QM_inv(GEN M, GEN dM)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   GEN cM = content(M);
   if (is_pm1(cM)) { avma = av; return ZM_inv(M,dM); }
   return gerepileupto(av, ZM_inv(gdiv(M,cM), gdiv(dM,cM)));
@@ -1428,8 +1433,9 @@ QM_inv(GEN M, GEN dM)
 GEN
 detint(GEN x)
 {
+  gpmem_t av = avma, av1, lim;
   GEN pass,c,v,det1,piv,pivprec,vi,p1;
-  long i,j,k,rg,n,m,m1,av=avma,av1,lim;
+  long i,j,k,rg,n,m,m1;
 
   if (typ(x)!=t_MAT) err(typeer,"detint");
   n=lg(x)-1; if (!n) return gun;
@@ -1495,7 +1501,7 @@ detint(GEN x)
 static void
 gerepile_gauss_ker(GEN x, long m, long n, long k, long t, ulong av)
 {
-  ulong tetpil = avma,A;
+  gpmem_t tetpil = avma, A;
   long dec,u,i;
 
   if (DEBUGMEM > 1) err(warnmem,"gauss_pivot_ker. k=%ld, n=%ld",k,n);
@@ -1520,7 +1526,7 @@ gerepile_gauss_ker(GEN x, long m, long n, long k, long t, ulong av)
 static void
 gerepile_gauss_FpM_ker(GEN x, GEN p, long m, long n, long k, long t, ulong av)
 {
-  ulong tetpil = avma,A;
+  gpmem_t tetpil = avma, A;
   long dec,u,i;
 
   if (DEBUGMEM > 1) err(warnmem,"gauss_pivot_ker. k=%ld, n=%ld",k,n);
@@ -1549,7 +1555,7 @@ gerepile_gauss_FpM_ker(GEN x, GEN p, long m, long n, long k, long t, ulong av)
 static void
 gerepile_gauss(GEN x,long m,long n,long k,long t,ulong av, long j, GEN c)
 {
-  ulong tetpil = avma,A;
+  gpmem_t tetpil = avma, A;
   long dec,u,i;
 
   if (DEBUGMEM > 1) err(warnmem,"gauss_pivot. k=%ld, n=%ld",k,n);
@@ -1586,8 +1592,9 @@ gerepile_gauss(GEN x,long m,long n,long k,long t,ulong av, long j, GEN c)
 GEN
 keri(GEN x)
 {
+  gpmem_t av, av0, tetpil, lim;
   GEN c,d,y,p,pp;
-  long i,j,k,r,t,n,m,av,av0,tetpil,lim;
+  long i,j,k,r,t,n,m;
 
   if (typ(x)!=t_MAT) err(typeer,"keri");
   n=lg(x)-1; if (!n) return cgetg(1,t_MAT);
@@ -1661,7 +1668,7 @@ keri(GEN x)
 GEN
 deplin(GEN x)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   long i,j,k,t,nc,nl;
   GEN y,q,c,l,*d;
 
@@ -1791,7 +1798,8 @@ static GEN
 gauss_pivot_ker(GEN x0, GEN a, GEN *dd, long *rr)
 {
   GEN x,c,d,p,mun;
-  long i,j,k,r,t,n,m,av,lim;
+  gpmem_t av, lim;
+  long i,j,k,r,t,n,m;
   long (*get_pivot)(GEN,GEN,GEN,long);
 
   if (typ(x0)!=t_MAT) err(typeer,"gauss_pivot");
@@ -1898,8 +1906,9 @@ gauss_pivot(GEN x0, GEN *dd, long *rr)
 static GEN
 ker0(GEN x, GEN a)
 {
+  gpmem_t av = avma, tetpil;
   GEN d,y;
-  long i,j,k,r,n, av = avma, tetpil;
+  long i,j,k,r,n;
 
   x = gauss_pivot_ker(x,a,&d,&r);
   if (!r) { avma=av; return cgetg(1,t_MAT); }
@@ -1937,8 +1946,9 @@ matker0(GEN x,long flag)
 GEN
 image(GEN x)
 {
+  gpmem_t av = avma;
   GEN d,y;
-  long j,k,r, av = avma;
+  long j,k,r;
 
   gauss_pivot(x,&d,&r);
 
@@ -1956,8 +1966,9 @@ image(GEN x)
 GEN
 imagecompl(GEN x)
 {
+  gpmem_t av = avma;
   GEN d,y;
-  long j,i,r,av = avma;
+  long j,i,r;
 
   gauss_pivot(x,&d,&r);
   avma=av; y=cgetg(r+1,t_VEC);
@@ -1970,8 +1981,9 @@ imagecompl(GEN x)
 GEN
 imagecomplspec(GEN x, long *nlze)
 {
+  gpmem_t av = avma;
   GEN d,y;
-  long i,j,k,l,r,av = avma;
+  long i,j,k,l,r;
 
   x = gtrans(x); l = lg(x);
   gauss_pivot(x,&d,&r);
@@ -1985,7 +1997,8 @@ imagecomplspec(GEN x, long *nlze)
 static GEN
 sinverseimage(GEN mat, GEN y)
 {
-  long av=avma,tetpil,i, nbcol = lg(mat);
+  gpmem_t av=avma,tetpil;
+  long i, nbcol = lg(mat);
   GEN col,p1 = cgetg(nbcol+1,t_MAT);
 
   if (nbcol==1) return NULL;
@@ -2007,7 +2020,8 @@ sinverseimage(GEN mat, GEN y)
 GEN
 inverseimage(GEN m,GEN v)
 {
-  long av=avma,j,lv,tv=typ(v);
+  gpmem_t av=avma;
+  long j,lv,tv=typ(v);
   GEN y,p1;
 
   if (typ(m)!=t_MAT) err(typeer,"inverseimage");
@@ -2035,7 +2049,8 @@ inverseimage(GEN m,GEN v)
 GEN
 suppl_intern(GEN x, GEN myid)
 {
-  long av = avma, lx = lg(x), n,i,j;
+  gpmem_t av = avma;
+  long lx = lg(x), n,i,j;
   GEN y,p1;
   stackzone *zone;
 
@@ -2069,7 +2084,8 @@ suppl(GEN x)
 GEN
 image2(GEN x)
 {
-  long av=avma,tetpil,k,n,i;
+  gpmem_t av=avma,tetpil;
+  long k,n,i;
   GEN p1,p2;
 
   if (typ(x)!=t_MAT) err(typeer,"image2");
@@ -2098,7 +2114,8 @@ matimage0(GEN x,long flag)
 long
 rank(GEN x)
 {
-  long av = avma, r;
+  gpmem_t av = avma;
+  long r;
   GEN d;
 
   gauss_pivot(x,&d,&r);
@@ -2114,7 +2131,8 @@ static void FpM_gauss_pivot(GEN x, GEN p, GEN *dd, long *rr);
 static GEN
 indexrank0(GEN x, GEN p, int small)
 {
-  long av = avma, i,j,n,r;
+  gpmem_t av = avma;
+  long i,j,n,r;
   GEN res,d,p1,p2;
 
   /* yield r = dim ker(x) */
@@ -2173,7 +2191,7 @@ FpM_mul(GEN x, GEN y, GEN p)
     z[j] = lgetg(l,t_COL);
     for (i=1; i<l; i++)
     { 
-      ulong av;
+      gpmem_t av;
       GEN p1,p2;
       int k;
       p1=gzero; av=avma;
@@ -2200,7 +2218,7 @@ FpM_FpV_mul(GEN x, GEN y, GEN p)
   l=lg(x[1]);
   for (i=1; i<l; i++)
   { 
-    ulong av;
+    gpmem_t av;
     GEN p1,p2;
     int k;
     p1=gzero; av=avma;
@@ -2217,11 +2235,12 @@ FpM_FpV_mul(GEN x, GEN y, GEN p)
 static GEN
 u_FpM_ker(GEN x, GEN pp, long nontriv)
 {
+  gpmem_t av0 = avma, tetpil;
   GEN y,c,d;
-  long a,i,j,k,r,t,n,m,av0,tetpil, p = pp[2], piv;
+  long a,i,j,k,r,t,n,m,p = pp[2], piv;
 
   n = lg(x)-1;
-  m=lg(x[1])-1; r=0; av0 = avma;
+  m=lg(x[1])-1; r=0;
   x = dummycopy(x);
   for (i=1; i<=n; i++)
   {
@@ -2287,8 +2306,9 @@ u_FpM_ker(GEN x, GEN pp, long nontriv)
 static GEN
 FpM_ker_i(GEN x, GEN p, long nontriv)
 {
+  gpmem_t av0,av,lim,tetpil;
   GEN y,c,d,piv,mun;
-  long i,j,k,r,t,n,m,av0,av,lim,tetpil;
+  long i,j,k,r,t,n,m;
 
   if (typ(x)!=t_MAT) err(typeer,"FpM_ker");
   n=lg(x)-1; if (!n) return cgetg(1,t_MAT);
@@ -2358,8 +2378,9 @@ FpM_ker_i(GEN x, GEN p, long nontriv)
 static void
 FpM_gauss_pivot(GEN x, GEN p, GEN *dd, long *rr)
 {
+  gpmem_t av,lim;
   GEN c,d,piv;
-  long i,j,k,r,t,n,m,av,lim;
+  long i,j,k,r,t,n,m;
 
   if (!p) { gauss_pivot(x,dd,rr); return; }
   if (typ(x)!=t_MAT) err(typeer,"FpM_gauss_pivot");
@@ -2417,8 +2438,9 @@ ker_trivial_mod_p(GEN x, GEN p)
 GEN
 FpM_image(GEN x, GEN p)
 {
+  gpmem_t av = avma;
   GEN d,y;
-  long j,k,r, av = avma;
+  long j,k,r;
 
   FpM_gauss_pivot(x,p,&d,&r);
 
@@ -2436,7 +2458,8 @@ FpM_image(GEN x, GEN p)
 static GEN
 sFpM_invimage(GEN mat, GEN y, GEN p)
 {
-  long av=avma,i, nbcol = lg(mat);
+  gpmem_t av=avma;
+  long i, nbcol = lg(mat);
   GEN col,p1 = cgetg(nbcol+1,t_MAT),res;
 
   if (nbcol==1) return NULL;
@@ -2464,7 +2487,8 @@ sFpM_invimage(GEN mat, GEN y, GEN p)
 GEN
 FpM_invimage(GEN m, GEN v, GEN p)
 {
-  long av=avma,j,lv,tv=typ(v);
+  gpmem_t av=avma;
+  long j,lv,tv=typ(v);
   GEN y,p1;
 
   if (typ(m)!=t_MAT) err(typeer,"inverseimage");
@@ -2544,7 +2568,7 @@ Fq_neg_inv(GEN x, GEN T, GEN p)
 static GEN
 Fq_res(GEN x, GEN T, GEN p)
 {
-  ulong ltop=avma;
+  gpmem_t ltop=avma;
   switch(typ(x)==t_POL)
   {
     case 0: return modii(x,p);
@@ -2557,7 +2581,7 @@ static void
 Fq_gerepile_gauss_ker(GEN x, GEN T, GEN p, long m, long n, long k, long t,
                       ulong av)
 {
-  ulong tetpil = avma,A;
+  gpmem_t tetpil = avma,A;
   long dec,u,i;
 
   if (DEBUGMEM > 1) err(warnmem,"gauss_pivot_ker. k=%ld, n=%ld",k,n);
@@ -2584,8 +2608,9 @@ Fq_gerepile_gauss_ker(GEN x, GEN T, GEN p, long m, long n, long k, long t,
 static GEN
 FqM_ker_i(GEN x, GEN T, GEN p, long nontriv)
 {
+  gpmem_t av0,av,lim,tetpil;
   GEN y,c,d,piv,mun;
-  long i,j,k,r,t,n,m,av0,av,lim,tetpil;
+  long i,j,k,r,t,n,m;
 
   if (typ(x)!=t_MAT) err(typeer,"FpM_ker");
   n=lg(x)-1; if (!n) return cgetg(1,t_MAT);
@@ -2668,7 +2693,7 @@ eigen(GEN x, long prec)
 {
   GEN y,rr,p,ssesp,r1,r2,r3;
   long e,i,k,l,ly,ex, n = lg(x);
-  ulong av = avma;
+  gpmem_t av = avma;
 
   if (typ(x)!=t_MAT) err(typeer,"eigen");
   if (n != 1 && n != lg(x[1])) err(mattype1,"eigen");
@@ -2728,7 +2753,8 @@ det0(GEN a,long flag)
 static GEN
 det_simple_gauss(GEN a, long inexact)
 {
-  long i,j,k,av,av1,s, nbco = lg(a)-1;
+  gpmem_t av, av1;
+  long i,j,k,s, nbco = lg(a)-1;
   GEN x,p;
 
   av=avma; s=1; x=gun; a=dummycopy(a);
@@ -2779,7 +2805,8 @@ det_simple_gauss(GEN a, long inexact)
 GEN
 det_mod_P_n(GEN a, GEN N, GEN P)
 {
-  long va,i,j,k,s, av = avma, nbco = lg(a)-1;
+  gpmem_t av = avma;
+  long va,i,j,k,s, nbco = lg(a)-1;
   GEN x,p;
 
   s=1; va=0; x=gun; a=dummycopy(a);
@@ -2848,7 +2875,7 @@ mydiv(GEN x, GEN y)
 GEN
 det(GEN a)
 {
-  ulong av, lim;
+  gpmem_t av, lim;
   long nbco = lg(a)-1,i,j,k,s;
   GEN p,pprec;
 
@@ -2922,7 +2949,8 @@ det(GEN a)
 static GEN
 gaussmoduloall(GEN M, GEN D, GEN Y, GEN *ptu1)
 {
-  long n,m,i,j,lM,av=avma,tetpil;
+  gpmem_t av = avma, tetpil;
+  long n,m,i,j,lM;
   GEN p1,delta,H,U,u1,u2,x;
 
   if (typ(M)!=t_MAT) err(typeer,"gaussmodulo");
@@ -2980,7 +3008,7 @@ gaussmoduloall(GEN M, GEN D, GEN Y, GEN *ptu1)
 GEN
 matsolvemod0(GEN M, GEN D, GEN Y, long flag)
 {
-  long av;
+  gpmem_t av;
   GEN p1,y;
 
   if (!flag) return gaussmoduloall(M,D,Y,NULL);

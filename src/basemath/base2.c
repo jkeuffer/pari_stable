@@ -65,7 +65,7 @@ allbase_check_args(GEN f, long code, GEN *y, GEN *ptw1, GEN *ptw2)
 static GEN
 rquot(GEN x, GEN y)
 {
-  long av=avma,av1;
+  gpmem_t av=avma,av1;
   GEN u,v,w,p;
 
   u=absi(y); v=shifti(x,1); w=shifti(y,1);
@@ -78,7 +78,8 @@ rquot(GEN x, GEN y)
 static GEN
 rrmdr(GEN x, GEN y)
 {
-  long av=avma,tetpil,k;
+  gpmem_t av=avma,tetpil;
+  long k;
   GEN r,ys2;
 
   if (!signe(x)) return gzero;
@@ -116,7 +117,8 @@ companion(GEN x) /* cf assmat */
 static GEN
 mulmati(GEN x, GEN y)
 {
-  long n = lg(x),i,j,k,av;
+  gpmem_t av;
+  long n = lg(x),i,j,k;
   GEN z = cgetg(n,t_MAT),p1,p2;
 
   for (j=1; j<n; j++)
@@ -148,7 +150,7 @@ _sqrmati(void *data /*ignored*/, GEN x) {
 static GEN
 powmati(GEN x, GEN n)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   GEN y = leftright_pow(x, n, NULL, &_sqrmati, &_mulmati);
   return gerepileupto(av,y);
 }
@@ -156,7 +158,7 @@ powmati(GEN x, GEN n)
 static GEN
 rtran(GEN v, GEN w, GEN q)
 {
-  long av,tetpil;
+  gpmem_t av,tetpil;
   GEN p1;
 
   if (signe(q))
@@ -180,7 +182,7 @@ mtran(GEN v, GEN w, GEN q, GEN m, long k0)
     l = lgefint(m) << 2;
     for (k=lg(v)-1; k>= k0; k--)
     {
-      long av = avma; (void)new_chunk(l);
+      gpmem_t av = avma; (void)new_chunk(l);
       p1 = subii((GEN)v[k], mulii(q,(GEN)w[k]));
       avma = av; v[k]=(long)rrmdr(p1, m);
     }
@@ -237,7 +239,7 @@ static void
 rowred(GEN a, GEN rmod)
 {
   long j,k,pro, c = lg(a), r = lg(a[1]);
-  long av=avma, lim=stack_lim(av,1);
+  gpmem_t av=avma, lim=stack_lim(av,1);
   GEN q;
 
   for (j=1; j<r; j++)
@@ -274,7 +276,8 @@ rowred(GEN a, GEN rmod)
 static GEN
 matinv(GEN x, GEN d, long n)
 {
-  long i,j,k,av,av1;
+  gpmem_t av,av1;
+  long i,j,k;
   GEN y,h;
 
   y=idmat(n);
@@ -299,7 +302,8 @@ matinv(GEN x, GEN d, long n)
 static GEN
 ordmax(GEN *cf, GEN p, long epsilon, GEN *ptdelta)
 {
-  long sp,i,n=lg(cf)-1,av=avma, av2,limit;
+  long sp,i,n=lg(cf)-1;
+  gpmem_t av=avma, av2,limit;
   GEN T,T2,Tn,m,v,delta,hard_case_exponent, *w;
   const GEN pp = sqri(p);
   const long pps = (2*expi(pp)+2<BITS_IN_LONG)? pp[2]: 0;
@@ -382,7 +386,7 @@ ordmax(GEN *cf, GEN p, long epsilon, GEN *ptdelta)
       for (i=1; i<=n; i++)
 	for (j=1; j<=n; j++)
 	{
-          long av1 = avma;
+          gpmem_t av1 = avma;
           p1 = gzero;
 	  for (k=1; k<=n; k++)
 	    for (h=1; h<=n; h++)
@@ -423,7 +427,7 @@ ordmax(GEN *cf, GEN p, long epsilon, GEN *ptdelta)
     {
       for (k=1; k<=n; k++)
       {
-        long av1=avma;
+        gpmem_t av1=avma;
         t = mulmati(mulmati(jp,w[k]), T2);
         for (h=i=1; i<=n; i++)
           for (j=1; j<=n; j++)
@@ -491,7 +495,8 @@ GEN
 allbase(GEN f, long code, GEN *y)
 {
   GEN w1,w2,a,pro,at,bt,b,da,db,q, *cf,*gptr[2];
-  long av=avma,tetpil,n,h,j,i,k,r,s,t,v,mf;
+  gpmem_t av=avma,tetpil;
+  long n,h,j,i,k,r,s,t,v,mf;
 
   allbase_check_args(f,code,y, &w1,&w2);
   v = varn(f); n = degpol(f); h = lg(w1)-1;
@@ -502,7 +507,7 @@ allbase(GEN f, long code, GEN *y)
   a=idmat(n); da=gun;
   for (i=1; i<=h; i++)
   {
-    long av1 = avma;
+    gpmem_t av1 = avma;
     mf=itos((GEN)w2[i]); if (mf==1) continue;
     if (DEBUGLEVEL) fprintferr("Treating p^k = %Z^%ld\n",w1[i],mf);
 
@@ -580,7 +585,7 @@ GEN
 discf2(GEN x)
 {
   GEN y;
-  long av=avma,tetpil;
+  gpmem_t av=avma,tetpil;
 
   allbase(x,0,&y); tetpil=avma;
   return gerepile(av,tetpil,icopy(y));
@@ -616,7 +621,8 @@ GEN
 allbase4(GEN f,long code, GEN *y, GEN *ptw)
 {
   GEN w,w1,w2,a,da,b,db,bas,q,p1,*gptr[3];
-  long v,n,mf,h,lfa,i,j,k,l,tetpil,av = avma;
+  long v,n,mf,h,lfa,i,j,k,l;
+  gpmem_t tetpil,av = avma;
 
   allbase_check_args(f,code,y, &w1,&w2);
   v = varn(f); n = degpol(f); h = lg(w1)-1;
@@ -738,7 +744,8 @@ nfbasis00(GEN x0, long flag, GEN p, long ret_basis, GEN *y)
 {
   GEN x, disc, basis, lead;
   GEN *gptr[2];
-  long k, tetpil, av = avma, l = lgef(x0), smll;
+  gpmem_t tetpil, av = avma;
+  long l = lgef(x0), smll,k;
 
   if (typ(x0)!=t_POL) err(typeer,"nfbasis00");
   if (l<=3) err(zeropoler,"nfbasis00");
@@ -820,7 +827,7 @@ GEN
 discf(GEN x)
 {
   GEN y;
-  long av=avma,tetpil;
+  gpmem_t av=avma,tetpil;
 
   allbase4(x,0,&y,NULL); tetpil=avma;
   return gerepile(av,tetpil,icopy(y));
@@ -830,7 +837,7 @@ GEN
 smalldiscf(GEN x)
 {
   GEN y;
-  long av=avma,tetpil;
+  gpmem_t av=avma,tetpil;
 
   allbase4(x,1,&y,NULL); tetpil=avma;
   return gerepile(av,tetpil,icopy(y));
@@ -840,7 +847,7 @@ GEN
 factoreddiscf(GEN x, GEN p)
 {
   GEN y;
-  long av=avma,tetpil;
+  gpmem_t av=avma,tetpil;
 
   allbase4(x,(long)p,&y,NULL); tetpil=avma;
   return gerepile(av,tetpil,icopy(y));
@@ -874,7 +881,8 @@ dedek(GEN f, long mf, GEN p,GEN g)
 static GEN
 maxord(GEN p,GEN f,long mf)
 {
-  long j,r, av = avma, flw = (cmpsi(degpol(f),p) < 0);
+  const gpmem_t av = avma;
+  long j,r, flw = (cmpsi(degpol(f),p) < 0);
   GEN w,g,h,res;
 
   if (flw)
@@ -1124,7 +1132,8 @@ redelt(GEN elt, GEN rd, GEN pd)
 GEN
 polsymmodpp(GEN g, GEN pp)
 {
-  long av1, av2, d = degpol(g), i, k;
+  gpmem_t av1, av2;
+  long d = degpol(g), i, k;
   GEN s , y;
 
   y = cgetg(d + 1, t_COL); 
@@ -1172,7 +1181,8 @@ static GEN
 newtonsums(GEN a, GEN chi, GEN pp, GEN ns)
 {
   GEN va, pa, s, ns2;
-  long j, k, n = degpol(chi), av2, lim;
+  long j, k, n = degpol(chi);
+  gpmem_t av2, lim;
 
   ns2 = manage_cache(chi, pp, ns);
 
@@ -1214,7 +1224,8 @@ static GEN
 newtoncharpoly(GEN a, GEN chi, GEN pp, GEN ns)
 {
   GEN v, c, s, t;
-  long n = degpol(chi), j, k, vn = varn(chi), av = avma, av2, lim;
+  long n = degpol(chi), j, k, vn = varn(chi);
+  gpmem_t av = avma, av2, lim;
 
   v = newtonsums(a, chi, pp, ns);
   av2 = avma;
@@ -1285,8 +1296,9 @@ mycaract(GEN f, GEN beta, GEN p, GEN pp, GEN ns)
 static GEN
 factcp(GEN p, GEN f, GEN beta, GEN pp, GEN ns)
 {
-  long av,l;
+  gpmem_t av;
   GEN chi,nu, b = cgetg(4,t_VEC);
+  long l;
 
   chi=mycaract(f,beta,p,pp,ns);
   av=avma; nu=(GEN)factmod(chi,p)[1]; l=lg(nu)-1;
@@ -1754,7 +1766,8 @@ testc2(GEN p, GEN fa, GEN pmr, GEN pmf, GEN alph2, long Ea, GEN thet2,
 GEN
 eleval(GEN f,GEN h,GEN a)
 {
-  long n,av,tetpil;
+  gpmem_t av,tetpil;
+  long n;
   GEN y;
 
   if (typ(h) != t_POL) return gcopy(h);
@@ -1799,7 +1812,8 @@ sylpm(GEN f1,GEN f2,GEN pm)
 GEN
 gcdpm(GEN f1,GEN f2,GEN pm)
 {
-  long n,c,v=varn(f1),av=avma,tetpil;
+  gpmem_t av=avma,tetpil;
+  long n,c,v=varn(f1);
   GEN a,col;
 
   n=degpol(f1); a=sylpm(f1,f2,pm);
@@ -1815,7 +1829,7 @@ gcdpm(GEN f1,GEN f2,GEN pm)
 GEN
 respm(GEN x,GEN y,GEN pm)
 {
-  long av = avma;
+  gpmem_t av = avma;
   GEN p1 = sylpm(x,y,pm);
 
   p1 = gcoeff(p1,1,1);
@@ -1879,7 +1893,8 @@ project(GEN algebre, GEN x, long k, long kbar)
 static GEN
 pol_min(GEN alpha,GEN nf,GEN algebre,long kbar,GEN p)
 {
-  long av=avma,tetpil,i,N,k;
+  gpmem_t av=avma,tetpil;
+  long i,N,k;
   GEN p1,puiss;
 
   N = lg(nf[1])-3; puiss=cgetg(N+2,t_MAT);
@@ -1899,7 +1914,8 @@ pol_min(GEN alpha,GEN nf,GEN algebre,long kbar,GEN p)
 static GEN
 eval_pol(GEN nf,GEN pol,GEN alpha,GEN algebre,GEN algebre1)
 {
-  long av=avma,tetpil,i,kbar,k, lx = lgef(pol)-1, N = degpol(nf[1]);
+  gpmem_t av=avma,tetpil;
+  long i,kbar,k, lx = lgef(pol)-1, N = degpol(nf[1]);
   GEN res;
 
   kbar = lg(algebre1)-1; k = N-kbar;
@@ -1916,10 +1932,11 @@ eval_pol(GEN nf,GEN pol,GEN alpha,GEN algebre,GEN algebre1)
 static GEN
 kerlens2(GEN x, GEN p)
 {
-  long i,j,k,t,nbc,nbl,av,av1;
+  gpmem_t av1, av = avma;
+  long i,j,k,t,nbc,nbl;
   GEN a,c,l,d,y,q;
 
-  av=avma; a=gmul(x,gmodulsg(1,p));
+  a=gmul(x,gmodulsg(1,p));
   nbl=nbc=lg(x)-1;
   c=new_chunk(nbl+1); for (i=1; i<=nbl; i++) c[i]=0;
   l=new_chunk(nbc+1);
@@ -1951,7 +1968,8 @@ kerlens2(GEN x, GEN p)
 static GEN
 kerlens(GEN x, GEN pgen)
 {
-  long av = avma, i,j,k,t,nbc,nbl,p,q,*c,*l,*d,**a;
+  gpmem_t av = avma;
+  long i,j,k,t,nbc,nbl,p,q,*c,*l,*d,**a;
   GEN y;
 
   if (cmpis(pgen, MAXHALFULONG>>1) > 0)
@@ -2001,7 +2019,8 @@ vecteur sur la base d'entiers */
 static GEN
 lens(GEN nf, GEN p, GEN a)
 {
-  long av=avma,tetpil,N=degpol(nf[1]),j;
+  gpmem_t av=avma,tetpil;
+  long N=degpol(nf[1]),j;
   GEN mat=cgetg(N+1,t_MAT);
   for (j=1; j<=N; j++) mat[j]=(long)element_mulid(nf,a,j);
   tetpil=avma; return gerepile(av,tetpil,kerlens(mat,p));
@@ -2093,7 +2112,8 @@ nextK:
 static GEN
 random_prime_two_elt_loop(GEN beta, GEN pol, GEN p, GEN pf)
 {
-  long av = avma, z,i, m = lg(beta)-1;
+  gpmem_t av = avma;
+  long z,i, m = lg(beta)-1;
   long keep = getrand();
   int c = 0;
   GEN a;
@@ -2127,7 +2147,7 @@ prime_two_elt(GEN nf, GEN p, GEN ideal)
 {
   GEN beta,a,pf, pol = (GEN)nf[1];
   long f, N=degpol(pol), m=lg(ideal)-1;
-  ulong av;
+  gpmem_t av;
 
   if (!m) return gscalcol_i(p,N);
 
@@ -2185,7 +2205,8 @@ apply_kummer(GEN nf,GEN pol,GEN e,GEN p,long N,GEN *beta)
 GEN
 primedec(GEN nf, GEN p)
 {
-  long av=avma,tetpil,i,j,k,kbar,np,c,indice,N,lp;
+  gpmem_t av=avma,tetpil;
+  long i,j,k,kbar,np,c,indice,N,lp;
   GEN ex,f,list,ip,elth,h;
   GEN modfrob,algebre,algebre1,b,mat1,T;
   GEN alpha,beta,p1,p2,unmodp,zmodp,idmodp;
@@ -2269,7 +2290,7 @@ primedec(GEN nf, GEN p)
     }
     else
     {
-      long av1; p1 = cgetg(6,t_VEC);
+      gpmem_t av1; p1 = cgetg(6,t_VEC);
       list[indice++] = (long)p1;
       p1[1]=(long)p; p1[4]=lstoi(kbar);
       p1[2]=(long)prime_two_elt(nf,p,elth);
@@ -2333,7 +2354,7 @@ nfreducemodpr(GEN nf, GEN x, GEN prhall)
 GEN
 nfreducemodpr2(GEN nf, GEN x, GEN prhall)
 {
-  long av = avma; checkprhall(prhall);
+  gpmem_t av = avma; checkprhall(prhall);
   if (typ(x) != t_COL) x = algtobasis(nf,x);
   return gerepileupto(av, nfreducemodpr(nf,x,prhall));
 }
@@ -2467,7 +2488,7 @@ _sqr(void *data, GEN x)
 static GEN
 rnfelementid_powmod(GEN nf, GEN multab, GEN matId, long h, GEN n, GEN prhall)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   GEN y, unrnf = (GEN)matId[1];
   rnfeltmod_muldata D;
 
@@ -2506,7 +2527,8 @@ mymod(GEN x, GEN p)
 static GEN
 rnfordmax(GEN nf, GEN pol, GEN pr, GEN unnf, GEN id, GEN matId)
 {
-  long av=avma,tetpil,av1,lim,i,j,k,n,v1,v2,vpol,m,cmpt,sep;
+  gpmem_t av=avma,tetpil,av1,lim;
+  long i,j,k,n,v1,v2,vpol,m,cmpt,sep;
   GEN p,q,q1,prhall,A,Aa,Aaa,A1,I,R,p1,p2,p3,multab,multabmod,Aainv;
   GEN pip,baseIp,baseOp,alpha,matprod,alphainv,matC,matG,vecpro,matH;
   GEN neworder,H,Hid,alphalistinv,alphalist,prhinv;
@@ -2704,7 +2726,8 @@ fix_relative_pol(GEN nf, GEN x, int chk_lead)
 static GEN
 rnfround2all(GEN nf, GEN pol, long all)
 {
-  long av=avma,tetpil,i,j,n,N,nbidp,vpol,*ep;
+  gpmem_t av=avma,tetpil;
+  long i,j,n,N,nbidp,vpol,*ep;
   GEN p1,p2,p3,p4,polnf,list,unnf,id,matId,I,W,pseudo,y,discpol,d,D,sym;
 
   nf=checknf(nf); polnf=(GEN)nf[1]; vpol=varn(pol);
@@ -2787,7 +2810,8 @@ rnfdiscf(GEN nf, GEN pol)
 GEN
 rnfsimplifybasis(GEN bnf, GEN order)
 {
-  long av=avma,tetpil,j,N,n;
+  gpmem_t av=avma,tetpil;
+  long j,N,n;
   GEN p1,id,Az,Iz,nf,A,I;
 
   bnf = checkbnf(bnf);
@@ -2825,7 +2849,8 @@ rnfsimplifybasis(GEN bnf, GEN order)
 GEN
 rnfdet2(GEN nf, GEN A, GEN I)
 {
-  long av,tetpil,i;
+  gpmem_t av,tetpil;
+  long i;
   GEN p1;
 
   nf=checknf(nf); av = tetpil = avma;
@@ -2856,7 +2881,8 @@ rnfdet0(GEN nf, GEN x, GEN y)
 GEN
 rnfsteinitz(GEN nf, GEN order)
 {
-  long av=avma,tetpil,i,n;
+  gpmem_t av=avma,tetpil;
+  long i,n;
   GEN Id,A,I,p1,a,b;
 
   nf = checknf(nf);
@@ -2913,7 +2939,7 @@ rnfsteinitz(GEN nf, GEN order)
 GEN
 rnfbasis(GEN bnf, GEN order)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   long j,N,n;
   GEN nf,A,I,classe,p1,p2,id;
 
@@ -2950,7 +2976,7 @@ rnfbasis(GEN bnf, GEN order)
 GEN
 rnfhermitebasis(GEN bnf, GEN order)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   long j,N,n;
   GEN nf,A,I,p1,id;
 
@@ -2984,7 +3010,8 @@ rnfhermitebasis(GEN bnf, GEN order)
 long
 rnfisfree(GEN bnf, GEN order)
 {
-  long av=avma,n,N,j;
+  gpmem_t av=avma;
+  long n,N,j;
   GEN nf,p1,id,I;
 
   bnf = checkbnf(bnf);
@@ -3019,7 +3046,7 @@ extern GEN to_polmod(GEN x, GEN mod);
 GEN
 polcompositum0(GEN A, GEN B, long flall)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   long v,k;
   GEN C, LPRS;
 
@@ -3073,7 +3100,7 @@ extern GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den);
 int
 nfissquarefree(GEN nf, GEN x)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   GEN g, y = derivpol(x);
   if (isrational(x))
     g = modulargcd(x, y);
@@ -3085,7 +3112,7 @@ nfissquarefree(GEN nf, GEN x)
 GEN
 rnfequation0(GEN nf, GEN B, long flall)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   long v,vpol,k,lA,lB;
   GEN A,C,LPRS;
 
@@ -3232,7 +3259,8 @@ allonge(GEN v, long N)
 static GEN
 findmin(GEN nf, GEN ideal, GEN muf,long prec)
 {
-  long av=avma,N,tetpil,i;
+  gpmem_t av=avma,tetpil;
+  long N,i;
   GEN m,y;
 
   m = qf_base_change(gmael(nf,5,3), ideal, 0); /* nf[5][3] = T2 */
@@ -3261,7 +3289,8 @@ findmin(GEN nf, GEN ideal, GEN muf,long prec)
 GEN
 rnflllgram(GEN nf, GEN pol, GEN order,long prec)
 {
-  long av=avma,tetpil,i,j,k,l,kk,kmax,r1,ru,lx,vnf;
+  gpmem_t av=avma,tetpil;
+  long i,j,k,l,kk,kmax,r1,ru,lx,vnf;
   GEN p1,p2,M,I,U,ronf,poll,unro,roorder,powreorder,mth,s,MC,MPOL,MCS;
   GEN B,mu,Bf,temp,ideal,x,xc,xpol,muf,mufc,muno,y,z,Ikk_inv;
 
@@ -3432,7 +3461,7 @@ rnflllgram(GEN nf, GEN pol, GEN order,long prec)
 GEN
 rnfpolred(GEN nf, GEN pol, long prec)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   long i,j,k,n,N, vpol = varn(pol);
   GEN id,id2,newid,newor,p1,p2,al,newpol,w,z;
   GEN bnf,zk,newideals,ideals,order,neworder;
@@ -3498,7 +3527,8 @@ GEN
 makebasis(GEN nf,GEN pol)
 {
   GEN elts,ids,polabs,plg,B,bs,p1,p2,a,den,vbs,vbspro,vpro,rnf;
-  long av=avma,n,N,m,i,j, v = varn(pol);
+  gpmem_t av=avma;
+  long n,N,m,i,j, v = varn(pol);
 
   p1 = rnfequation2(nf,pol);
   polabs= (GEN)p1[1];

@@ -248,7 +248,8 @@ transroot(GEN x, int i, int j)
 GEN
 tschirnhaus(GEN x)
 {
-  long a, v = varn(x), av = avma;
+  const gpmem_t av = avma;
+  long a, v = varn(x);
   GEN u, p1 = cgetg(5,t_POL);
 
   if (typ(x)!=t_POL) err(notpoler,"tschirnhaus");
@@ -359,7 +360,8 @@ roots_to_ZX(GEN z, long v, long *e)
 GEN
 galois(GEN x, long prec)
 {
-  long av=avma,av1,i,j,k,n,f,l,l2,e,e1,pr,ind;
+  gpmem_t av = avma, av1;
+  long i,j,k,n,f,l,l2,e,e1,pr,ind;
   GEN x1,p1,p2,p3,p4,p5,w,y,z,ee;
   static int ind5[20]={2,5,3,4, 1,3,4,5, 1,5,2,4, 1,2,3,5, 1,4,2,3};
   static int ind6[60]={3,5,4,6, 2,6,4,5, 2,3,5,6, 2,4,3,6, 2,5,3,4,
@@ -652,7 +654,8 @@ galois(GEN x, long prec)
 GEN
 galoisapply(GEN nf, GEN aut, GEN x)
 {
-  long av=avma,tetpil,lx,j,N;
+  gpmem_t av=avma,tetpil;
+  long lx,j,N;
   GEN p,p1,y,pol;
 
   nf=checknf(nf); pol=(GEN)nf[1];
@@ -725,7 +728,7 @@ get_nfpol(GEN x, GEN *nf)
 static GEN
 nfiso0(GEN a, GEN b, long fliso)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   long n,m,i,vb,lx;
   GEN nfa,nfb,p1,y,la,lb;
 
@@ -845,7 +848,7 @@ quicktrace(GEN x, GEN sym)
 static GEN
 trace_col(GEN x, GEN T)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   GEN t = gzero;
   long i, l = lg(x);
 
@@ -1000,7 +1003,8 @@ make_M(GEN basden,GEN roo)
 GEN
 make_MC(long r1,GEN M)
 {
-  long i,j,av,tetpil, n = lg(M), ru = lg(M[1]);
+  gpmem_t av,tetpil;
+  long i,j,n = lg(M), ru = lg(M[1]);
   GEN p1,p2,MC=cgetg(ru,t_MAT);
 
   for (j=1; j<ru; j++)
@@ -1121,7 +1125,7 @@ get_mul_table(GEN x,GEN basden,GEN invbas,GEN *T)
   for (i=1; i<=n; i++)
     for (j=i; j<=n; j++)
     {
-      ulong av = avma;
+      gpmem_t av = avma;
       z = gres(gmul((GEN)bas[j],(GEN)bas[i]), x);
       z = mulmat_pol(invbas, z); /* integral column */
       if (den)
@@ -1192,8 +1196,9 @@ get_nf_matrices(GEN nf, long small)
 GEN
 initalgall0(GEN x, long flag, long prec)
 {
+  const gpmem_t av=avma;
   GEN lead = NULL,nf,ro,bas,mat,rev,dK,dx,index,res;
-  long av=avma,n,i,r1,r2,ru,PRECREG;
+  long n,i,r1,r2,ru,PRECREG;
 
   if (DEBUGLEVEL) timer2();
   if (typ(x)==t_POL)
@@ -1317,7 +1322,8 @@ nfgetprec(GEN x)
 GEN
 nfnewprec(GEN nf, long prec)
 {
-  long av=avma,r1,r2,ru,n;
+  const gpmem_t av=avma;
+  long r1,r2,ru,n;
   GEN y,pol,ro,basden,MC,mat,M;
 
   if (typ(nf) != t_VEC) err(talker,"incorrect nf in nfnewprec");
@@ -1376,7 +1382,7 @@ is_primitive_root(GEN nf, GEN fa, GEN x, long w)
 GEN
 rootsof1(GEN nf)
 {
-  ulong av;
+  gpmem_t av;
   long N,k,i,ws,prec;
   GEN algun,p1,y,R1,d,list,w;
 
@@ -1437,7 +1443,8 @@ static GEN
 dirzetak0(GEN nf, long N0)
 {
   GEN vect,p1,pol,disc,c,c2;
-  long av=avma,i,j,k,limk,lx;
+  gpmem_t av=avma;
+  long i,j,k,limk,lx;
   ulong q,p,rem;
   byteptr d=diffptr;
   long court[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3),0};
@@ -1505,7 +1512,8 @@ initzeta(GEN pol, long prec)
   GEN nfz,nf,alpha,beta,mu,gr1,gr2,gru,p1,p2,cst,A0,c0,c1,c2,eps,coef;
   GEN limx,bnf,resi,zet,C,coeflog,racpi,aij,tabj,colzero, *tabcstn, *tabcstni;
   GEN c_even,ck_even,c_odd,ck_odd,serie_even,serie_odd,serie_exp,Pi;
-  long N0,imin,imax,r1,r2,ru,R,N,i,j,k,n, av,av2,tetpil;
+  long N0,imin,imax,r1,r2,ru,R,N,i,j,k,n;
+  gpmem_t av,av2,tetpil;
   long court[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3),0};
   stackzone *zone, *zone0, *zone1;
 
@@ -1735,7 +1743,8 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
   GEN resi,C,cst,cstlog,coeflog,cs,coef;
   GEN lambd,gammas,gammaunmoins,gammas2,gammaunmoins2,var1,var2;
   GEN p1,unmoins,gexpro,gar,val,valm,valk,valkm;
-  long ts = typ(s), r1,r2,ru,imax,i,j,k,N0,sl,prec,bigprec, av = avma;
+  long ts = typ(s), r1,r2,ru,imax,i,j,k,N0,sl,prec,bigprec;
+  gpmem_t av = avma;
 
   if (typ(nfz)!=t_VEC || lg(nfz)!=10 || typ(nfz[1]) != t_VEC)
     err(talker,"not a zeta number field in zetakall");

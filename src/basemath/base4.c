@@ -117,7 +117,7 @@ prime_to_ideal_aux(GEN nf, GEN vp)
 GEN
 prime_to_ideal(GEN nf, GEN vp)
 {
-  long av=avma;
+  gpmem_t av=avma;
   if (typ(vp) == t_INT) return gscalmat(vp, degpol(nf[1]));
   return gerepileupto(av, prime_to_ideal_aux(nf,vp));
 }
@@ -184,7 +184,7 @@ idealhermite_aux(GEN nf, GEN x)
 GEN
 idealhermite(GEN nf, GEN x)
 {
-  long av=avma;
+  gpmem_t av=avma;
   GEN p1;
   nf = checknf(nf); p1 = idealhermite_aux(nf,x);
   if (p1==x || p1==(GEN)x[1]) return gcopy(p1);
@@ -305,7 +305,7 @@ GEN
 principalidele(GEN nf, GEN x, long prec)
 {
   GEN p1,y = cgetg(3,t_VEC);
-  long av;
+  gpmem_t av;
 
   nf = checknf(nf);
   p1 = principalideal0(nf,x,1);
@@ -370,7 +370,7 @@ two_to_hnf(GEN nf, GEN a, GEN b)
 GEN
 idealhnf0(GEN nf, GEN a, GEN b)
 {
-  long av;
+  gpmem_t av;
   if (!b) return idealhermite(nf,a);
 
   /* HNF of aZ_K+bZ_K */
@@ -387,7 +387,7 @@ idealhermite2(GEN nf, GEN a, GEN b)
 static int
 ok_elt(GEN x, GEN xZ, GEN y)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   int r = gegal(x, hnfmodid(y, xZ));
   avma = av; return r;
 }
@@ -471,7 +471,7 @@ mat_ideal_two_elt(GEN nf, GEN x)
 {
   GEN y,a,beta,cx,xZ,mul, pol = (GEN)nf[1];
   long i,j,lm, N = degpol(pol);
-  ulong av,tetpil;
+  gpmem_t av,tetpil;
 
   y=cgetg(3,t_VEC); av=avma;
   if (lg(x[1])!=N+1) err(typeer,"ideal_two_elt");
@@ -508,7 +508,8 @@ mat_ideal_two_elt(GEN nf, GEN x)
   if (i>N)
   {
     GEN z = cgetg(lm, t_VECSMALL);
-    ulong av1, c = 0;
+    gpmem_t av1;
+    ulong c = 0;
 
     setlg(mul, lm);
     setlg(beta,lm);
@@ -605,7 +606,8 @@ factor_norm(GEN x)
 GEN
 idealfactor(GEN nf, GEN x)
 {
-  long av,tx, tetpil,i,j,k,lf,lc,N,l,v,vc,e;
+  gpmem_t av,tetpil;
+  long tx,i,j,k,lf,lc,N,l,v,vc,e;
   GEN f,f1,f2,c1,c2,y1,y2,y,p1,p2,cx,P;
 
   tx = idealtyp(&x,&y);
@@ -686,7 +688,8 @@ idealfactor(GEN nf, GEN x)
 long
 idealval(GEN nf, GEN ix, GEN P)
 {
-  long N,v,vd,w,av=avma,av1,lim,e,f,i,j,k, tx = typ(ix);
+  gpmem_t av=avma,av1,lim;
+  long N,v,vd,w,e,f,i,j,k, tx = typ(ix);
   GEN mul,mat,a,x,y,r,bp,p,pk,cx;
 
   nf=checknf(nf); checkprimeid(P);
@@ -763,7 +766,8 @@ idealval(GEN nf, GEN ix, GEN P)
 GEN
 idealadd(GEN nf, GEN x, GEN y)
 {
-  long av=avma,N,tx,ty;
+  gpmem_t av=avma;
+  long N,tx,ty;
   GEN z,p1,dx,dy,dz;
   int modid;
 
@@ -925,7 +929,7 @@ static GEN
 addone(GEN f(GEN,GEN,GEN), GEN nf, GEN x, GEN y)
 {
   GEN z = cgetg(3,t_VEC);
-  long av=avma;
+  gpmem_t av=avma;
 
   nf=checknf(nf); x = gerepileupto(av, f(nf,x,y));
   z[1]=(long)x; z[2]=(long)unnf_minus_x(x); return z;
@@ -955,7 +959,7 @@ special_anti_uniformizer(GEN nf, GEN pr)
 GEN
 nfmodprinit(GEN nf, GEN pr)
 {
-  long av;
+  gpmem_t av;
   GEN p,p1,prhall;
 
   nf = checknf(nf); checkprimeid(pr);
@@ -977,7 +981,8 @@ nfmodprinit(GEN nf, GEN pr)
 GEN
 element_invmodideal(GEN nf, GEN x, GEN y)
 {
-  long av=avma,N,i, fl = 1;
+  gpmem_t av=avma;
+  long N,i, fl = 1;
   GEN v,p1,xh,yh;
 
   nf=checknf(nf); N=degpol(nf[1]);
@@ -1010,7 +1015,8 @@ element_invmodideal(GEN nf, GEN x, GEN y)
 GEN
 idealaddmultoone(GEN nf, GEN list)
 {
-  long av=avma,tetpil,N,i,i1,j,k;
+  gpmem_t av=avma,tetpil;
+  long N,i,i1,j,k;
   GEN z,v,v1,v2,v3,p1;
 
   nf=checknf(nf); N=degpol(nf[1]);
@@ -1154,7 +1160,8 @@ idealmat_mul(GEN nf, GEN x, GEN y)
 static GEN
 add_arch(GEN nf, GEN ax, GEN y)
 {
-  long tetpil, av=avma, prec=precision(ax);
+  gpmem_t tetpil, av=avma;
+  long prec=precision(ax);
 
   y = get_arch(nf,y,prec); tetpil=avma;
   return gerepile(av,tetpil,gadd(ax,y));
@@ -1363,7 +1370,7 @@ famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prn, GEN EX)
 GEN
 famat_ideallog(GEN nf, GEN g, GEN e, GEN bid)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   GEN vp = gmael(bid, 3,1), ep = gmael(bid, 3,2), arch = gmael(bid,1,2);
   GEN cyc = gmael(bid,2,2), list_set = (GEN)bid[4], U = (GEN)bid[5];
   GEN p1,y0,x,y, psigne;
@@ -1506,7 +1513,8 @@ arch_pow(GEN x, GEN n) {
 GEN
 idealmul(GEN nf, GEN x, GEN y)
 {
-  long tx,ty,av,f;
+  gpmem_t av;
+  long tx,ty,f;
   GEN res,ax,ay,p1;
 
   tx = idealtyp(&x,&ax);
@@ -1556,7 +1564,7 @@ idealmul(GEN nf, GEN x, GEN y)
 GEN
 idealnorm(GEN nf, GEN x)
 {
-  long av = avma,tetpil;
+  gpmem_t av = avma,tetpil;
   GEN y;
 
   nf = checknf(nf);
@@ -1614,7 +1622,8 @@ GEN
 idealinv(GEN nf, GEN x)
 {
   GEN res,ax;
-  long av=avma, tx = idealtyp(&x,&ax);
+  gpmem_t av=avma;
+  long tx = idealtyp(&x,&ax);
 
   res = ax? cgetg(3,t_VEC): NULL;
   nf=checknf(nf); av=avma;
@@ -1731,7 +1740,8 @@ idealdivpowprime(GEN nf, GEN x, GEN vp, GEN n)
 GEN
 idealpow(GEN nf, GEN x, GEN n)
 {
-  long tx,N,av,s,i;
+  gpmem_t av;
+  long tx,N,s,i;
   GEN res,ax,m,cx,n1,a,alpha;
 
   if (typ(n) != t_INT) err(talker,"non-integral exponent in idealpow");
@@ -1818,7 +1828,8 @@ _sqr(void *data, GEN x)
 GEN
 idealpowred(GEN nf, GEN x, GEN n, long prec)
 {
-  long av=avma, s = signe(n);
+  gpmem_t av=avma;
+  long s = signe(n);
   idealred_muldata D;
   GEN y;
 
@@ -1836,14 +1847,15 @@ idealpowred(GEN nf, GEN x, GEN n, long prec)
 GEN
 idealmulred(GEN nf, GEN x, GEN y, long prec)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   return gerepileupto(av, _idealmulred(nf,x,y,prec));
 }
 
 long
 isideal(GEN nf,GEN x)
 {
-  long N,av,i,j,k,tx=typ(x),lx;
+  gpmem_t av;
+  long N,i,j,k,tx=typ(x),lx;
   GEN p1,minv;
 
   nf=checknf(nf); lx=lg(x);
@@ -1873,7 +1885,7 @@ isideal(GEN nf,GEN x)
 GEN
 idealdiv(GEN nf, GEN x, GEN y)
 {
-  long av=avma,tetpil;
+  gpmem_t av=avma,tetpil;
   GEN z=idealinv(nf,y);
 
   tetpil=avma; return gerepile(av,tetpil,idealmul(nf,x,z));
@@ -1901,7 +1913,7 @@ idealdiv(GEN nf, GEN x, GEN y)
 GEN
 idealdivexact(GEN nf, GEN x0, GEN y0)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   GEN x,y,Nx,Ny,Nz, cy = content(y0);
 
   nf = checknf(nf);
@@ -1935,7 +1947,8 @@ idealdivexact(GEN nf, GEN x0, GEN y0)
 GEN
 idealintersect(GEN nf, GEN x, GEN y)
 {
-  long av=avma,lz,i,N;
+  gpmem_t av=avma;
+  long lz,i,N;
   GEN z,dx,dy;
 
   nf=checknf(nf); N=degpol(nf[1]);
@@ -2017,7 +2030,7 @@ ideallllred_elt(GEN nf, GEN I)
 GEN
 ideallllred(GEN nf, GEN I, GEN vdir, long prec)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   long N,i,nfprec;
   GEN J,I0,Ired,res,aI,y,x,Nx,b,c1,c,pol;
 
@@ -2095,7 +2108,8 @@ END:
 GEN
 minideal(GEN nf, GEN x, GEN vdir, long prec)
 {
-  long av = avma, N, tx;
+  gpmem_t av = avma;
+  long N, tx;
   GEN p1,y;
 
   nf = checknf(nf);
@@ -2162,7 +2176,8 @@ appr_pos(GEN nf, GEN y, GEN list, GEN ep)
 GEN
 idealappr0(GEN nf, GEN x, long fl)
 {
-  long av=avma,i,j,k,l,N,r,r2;
+  gpmem_t av=avma;
+  long i,j,k,l,N,r,r2;
   GEN fact,fact2,list,ep,ep1,ep2,y,z,p1,p3,alpha,beta,den;
 
   if (DEBUGLEVEL>4)
@@ -2251,7 +2266,8 @@ idealappr0(GEN nf, GEN x, long fl)
 GEN
 idealchinese(GEN nf, GEN x, GEN w)
 {
-  long ty=typ(w),av=avma,i,j,k,l,N,r,r2;
+  gpmem_t av = avma;
+  long ty=typ(w),i,j,k,l,N,r,r2;
   GEN fact,fact2,list,ep,ep1,ep2,z,t,y,v,p1,p3,s,den;
 
   if (DEBUGLEVEL>4)
@@ -2319,8 +2335,9 @@ idealapprfact(GEN nf, GEN x) { return idealappr0(nf,x,1); }
  */
 GEN
 ideal_two_elt2(GEN nf, GEN x, GEN a)
-{
-  long ta=typ(a), av=avma,tetpil,i,r;
+{ 
+  gpmem_t av=avma,tetpil;
+  long ta=typ(a),i,r;
   GEN con,ep,b,list,fact;
 
   nf = checknf(nf);
@@ -2352,7 +2369,8 @@ ideal_two_elt2(GEN nf, GEN x, GEN a)
 GEN
 idealcoprime(GEN nf, GEN x, GEN y)
 {
-  long av=avma,tetpil,i,r;
+  gpmem_t av=avma,tetpil;
+  long i,r;
   GEN fact,list,p2,ep;
 
   if (DEBUGLEVEL>4)
@@ -2397,7 +2415,8 @@ elt_mul_get_table(GEN nf, GEN x)
 GEN
 elt_mul_table(GEN mul, GEN z)
 {
-  long av = avma, i, lx = lg(mul);
+  gpmem_t av = avma;
+  long i, lx = lg(mul);
   GEN p1 = gmul((GEN)z[1], (GEN)mul[1]);
 
   for (i=2; i<lx; i++)

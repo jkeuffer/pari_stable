@@ -144,7 +144,7 @@ gassoc_proto(GEN f(GEN,GEN), GEN x, GEN y)
   int tx=typ(x);
   if (!y)
   {
-    ulong av=avma;
+    gpmem_t av = avma;
     if (tx!=t_VEC && tx!=t_COL)
       err(typeer,"association");
     return gerepileupto(av,divide_conquer_prod(x,f));
@@ -161,7 +161,8 @@ gassoc_proto(GEN f(GEN,GEN), GEN x, GEN y)
 GEN
 order(GEN x)
 {
-  long av=avma,av1,i,e;
+  gpmem_t av = avma,av1;
+  long i,e;
   GEN o,m,p;
 
   if (typ(x) != t_INTMOD || !gcmp1(mppgcd((GEN) x[1],(GEN) x[2])))
@@ -196,7 +197,8 @@ ggener(GEN m)
 GEN
 gener(GEN m)
 {
-  long av=avma,av1,k,i,e;
+  gpmem_t av=avma,av1;
+  long k,i,e;
   GEN x,t,q,p;
 
   if (typ(m) != t_INT) err(arither1);
@@ -245,7 +247,7 @@ gener(GEN m)
 ulong
 u_gener(ulong p)
 {
-  const ulong av = avma;
+  const gpmem_t av = avma;
   const long q = p - 1;
   const GEN L = (GEN)decomp(stoi(q))[1];
   const int k = lg(L) - 1;
@@ -266,7 +268,7 @@ znstar(GEN n)
 {
   GEN p1,z,q,u,v,d,list,ep,h,gen,moduli,p,a;
   long i,j,nbp,sizeh;
-  ulong av;
+  gpmem_t av;
 
   if (typ(n) != t_INT) err(arither1);
   if (!signe(n))
@@ -359,7 +361,8 @@ gracine(GEN a)
 static GEN
 racine_r(GEN a, long l)
 {
-  long av,s;
+  gpmem_t av;
+  long s;
   GEN x,y,z;
 
   if (l <= 4) return utoi(mpsqrtl(a));
@@ -382,13 +385,14 @@ racine_r(GEN a, long l)
 GEN
 racine_i(GEN a, int roundup)
 {
-  long k,m,l = lgefint(a), av = avma;
+  gpmem_t av = avma;
+  long k,m,l = lgefint(a);
   GEN x = racine_r(a, l);
   if (roundup && signe(x))
   {
     m = modBIL(x);
     k = (m * m != a[l-1] || !egalii(sqri(x),a));
-    avma = (long)x;
+    avma = (gpmem_t)x;
     if (k) x = gerepileuptoint(av, addis(x,1));
   }
   return x;
@@ -453,7 +457,7 @@ ucarrecomplet(ulong A)
 long
 carrecomplet(GEN x, GEN *pt)
 {
-  long av;
+  gpmem_t av;
   GEN y;
 
   switch(signe(x))
@@ -471,14 +475,15 @@ carrecomplet(GEN x, GEN *pt)
   if (!carremod((ulong)smodis(x, 64*63*65*11))) return 0;
   av=avma; y = racine(x);
   if (!egalii(sqri(y),x)) { avma=av; return 0; }
-  if (pt) { *pt = y; avma=(long)y; } else avma=av; 
+  if (pt) { *pt = y; avma=(gpmem_t)y; } else avma=av; 
   return 1;
 }
 
 static GEN
 polcarrecomplet(GEN x, GEN *pt)
 {
-  long i,l,av,av2;
+  gpmem_t av,av2;
+  long i,l;
   GEN y,a,b;
 
   if (!signe(x)) return gun;
@@ -537,8 +542,9 @@ gcarrecomplet(GEN x, GEN *pt)
 GEN
 gcarreparfait(GEN x)
 {
+  gpmem_t av;
   GEN p1,a,p;
-  long tx=typ(x),l,i,av,v;
+  long tx=typ(x),l,i,v;
 
   switch(tx)
   {
@@ -657,10 +663,10 @@ gkronecker(GEN x, GEN y)
 long
 kronecker(GEN x, GEN y)
 {
+  const gpmem_t av = avma;
   GEN z;
-  long av,r,s=1;
+  long r,s=1;
 
-  av=avma;
   switch (signe(y))
   {
     case -1: y=negi(y); if (signe(x)<0) s= -1; break;
@@ -701,9 +707,9 @@ gkrogs(GEN x, long y)
 long
 krogs(GEN x, long y)
 {
-  long av,r,s=1,x1,z;
+  const gpmem_t av = avma;
+  long r,s=1,x1,z;
 
-  av=avma;
   if (y<=0)
   {
     if (y) { y = -y; if (signe(x)<0) s = -1; }
@@ -737,7 +743,8 @@ krogs(GEN x, long y)
 long
 krosg(long s, GEN x)
 {
-  long av = avma, y = kronecker(stoi(s),x);
+  gpmem_t av = avma;
+  long y = kronecker(stoi(s),x);
   avma = av; return y;
 }
 
@@ -786,7 +793,8 @@ hil0(GEN x, GEN y, GEN p)
 long
 hil(GEN x, GEN y, GEN p)
 {
-  long a,b,av,tx,ty,z;
+  gpmem_t av;
+  long a,b,tx,ty,z;
   GEN p1,p2,u,v;
 
   if (gcmp0(x) || gcmp0(y)) return 0;
@@ -887,7 +895,8 @@ hil(GEN x, GEN y, GEN p)
 GEN
 mpsqrtmod(GEN a, GEN p)
 {
-  long av = avma, av1,lim,i,k,e;
+  gpmem_t av = avma, av1,lim;
+  long i,k,e;
   GEN p1,q,v,y,w,m;
 
   if (typ(a) != t_INT || typ(p) != t_INT) err(arither1);
@@ -969,10 +978,9 @@ mpsqrtmod(GEN a, GEN p)
 static GEN
 mplgenmod(GEN l, long e, GEN r,GEN p,GEN *zeta)
 {
-  ulong av1;
+  const gpmem_t av1 = avma;
   GEN m,m1;
   long k,i; 
-  av1 = avma;
   for (k=1; ; k++)
   {
     m1 = m = powmodulo(stoi(k+1),r,p);
@@ -999,7 +1007,7 @@ GEN Fp_shanks(GEN x,GEN g0,GEN p, GEN q);
 static GEN
 mpsqrtlmod(GEN a, GEN l, GEN p, GEN q,long e, GEN r, GEN y, GEN m)
 {
-  ulong av = avma, tetpil,lim;
+  gpmem_t av = avma, tetpil,lim;
   long k;
   GEN p1,u1,u2,v,w,z,dl;
   /* y contient un generateur de (Z/pZ)^* eleve a la puis (p-1)/(l^e) */
@@ -1054,7 +1062,7 @@ If a=0 ,return 0 and if zetan is not NULL zetan is set to gun
 GEN 
 mpsqrtnmod(GEN a, GEN n, GEN p, GEN *zetan)
 {
-  ulong ltop=avma,lbot=0,av1,lim;
+  gpmem_t ltop=avma,lbot=0,av1,lim;
   GEN m,u1,u2;
   GEN q,z;
   GEN *gptr[2];
@@ -1285,7 +1293,7 @@ mppgcd(GEN a, GEN b)
 GEN
 mpppcm(GEN x, GEN y)
 {
-  ulong av;
+  gpmem_t av;
   GEN p1,p2;
   if (typ(x) != t_INT || typ(y) != t_INT) err(arither1);
   if (!signe(x)) return gzero;
@@ -1331,8 +1339,8 @@ GEN chinese(GEN x, GEN y)
 GEN
 chinois(GEN x, GEN y)
 {
-  ulong av,tetpil, tx = typ(x);
-  long i,lx,vx;
+  gpmem_t av,tetpil;
+  long i,lx,vx, tx = typ(x);
   GEN z,p1,p2,d,u,v;
 
   if (gegal(x,y)) return gcopy(x);
@@ -1378,7 +1386,7 @@ chinois(GEN x, GEN y)
 GEN
 chinois_int_coprime(GEN x2, GEN y2, GEN x1, GEN y1, GEN z1)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   GEN ax,p1;
   (void)new_chunk((lgefint(z1)<<1)+lgefint(x1)+lgefint(y1)); /* HACK */
   ax = mulii(mpinvmod(x1,y1), x1);
@@ -1506,7 +1514,7 @@ _sqr(void *data, GEN x)
 GEN
 powmodulo(GEN A, GEN k, GEN N)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   long t,s, lN;
   int base_is_2, use_montgomery;
   GEN y;
@@ -1637,14 +1645,15 @@ gisfundamental(GEN x) { return arith_proto(isfundamental,x,1); }
 long
 isfundamental(GEN x)
 {
-  long av,r;
+  long r;
   GEN p1;
 
   if (gcmp0(x)) return 0;
   r=mod4(x);
   if (!r)
   {
-    av=avma; p1=shifti(x,-2);
+    const gpmem_t av = avma;
+    p1=shifti(x,-2);
     r=mod4(p1); if (!r) return 0;
     if (signe(x)<0) r=4-r;
     r = (r==1)? 0: issquarefree(p1);
@@ -1657,17 +1666,18 @@ isfundamental(GEN x)
 GEN
 quaddisc(GEN x)
 {
-  long av=avma,tetpil=avma,i,r,tx=typ(x);
+  const gpmem_t av = avma;
+  long i,r,tx=typ(x);
   GEN p1,p2,f,s;
 
   if (tx != t_INT && ! is_frac_t(tx)) err(arither1);
   f=factor(x); p1=(GEN)f[1]; p2=(GEN)f[2];
-  s=gun;
+  s = gun;
   for (i=1; i<lg(p1); i++)
-    if ( odd(mael(p2,i,2)) ) { tetpil=avma; s=gmul(s,(GEN)p1[i]); }
+    if (odd(mael(p2,i,2))) s = gmul(s,(GEN)p1[i]);
   r=mod4(s); if (gsigne(x)<0) r=4-r;
-  if (r>1) { tetpil=avma; s=shifti(s,2); }
-  return gerepile(av,tetpil,s);
+  if (r>1) s = shifti(s,2);
+  return gerepileuptoint(av, s);
 }
 
 /*********************************************************************/
@@ -1678,7 +1688,8 @@ quaddisc(GEN x)
 GEN
 mpfact(long n)
 {
-  long lx,k,l, av = avma;
+  const gpmem_t av = avma;
+  long lx,k,l;
   GEN x;
 
   if (n<2)
@@ -1706,7 +1717,8 @@ mpfact(long n)
 GEN
 mpfactr(long n, long prec)
 {
-  long av = avma, lim,k;
+  const gpmem_t av = avma;
+  long lim,k;
   GEN f = cgetr(prec);
 
   affsr(1,f);
@@ -1737,7 +1749,7 @@ mpfactr(long n, long prec)
 void
 lucas(long n, GEN *ln, GEN *ln1)
 {
-  ulong av;
+  gpmem_t av;
   long taille;
   GEN z,t;
 
@@ -1767,7 +1779,7 @@ lucas(long n, GEN *ln, GEN *ln1)
 GEN
 fibo(long n)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   GEN ln,ln1;
 
   lucas(n-1,&ln,&ln1);
@@ -1821,7 +1833,8 @@ contfrac0(GEN x, GEN b, long flag)
 GEN
 sfcont(GEN x, GEN x1, long k)
 {
-  long av,lx,tx=typ(x),e,i,l,lx1,f;
+  gpmem_t av;
+  long lx,tx=typ(x),e,i,l,lx1,f;
   GEN  y,p1,p2,p3;
 
   if (is_scalar_t(tx))
@@ -1917,7 +1930,7 @@ sfcont(GEN x, GEN x1, long k)
 static GEN
 sfcont2(GEN b, GEN x, long k)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   long l1 = lg(b), tx = typ(x), i;
   GEN y,p1;
 
@@ -1954,7 +1967,8 @@ sfcont2(GEN b, GEN x, long k)
 GEN
 pnqn(GEN x)
 {
-  long av=avma,tetpil,lx,ly,tx=typ(x),i;
+  gpmem_t av=avma,tetpil;
+  long lx,ly,tx=typ(x),i;
   GEN y,p0,p1,q0,q1,a,b,p2,q2;
 
   if (! is_matvec_t(tx)) err(typeer,"pnqn");
@@ -2004,7 +2018,7 @@ bestappr_mod(GEN x, GEN A, GEN B)
   {
     case t_INTMOD:
     {
-      ulong av = avma;
+      gpmem_t av = avma;
       GEN a,b,d, t = cgetg(3, t_FRAC);
       if (! ratlift((GEN)x[2], (GEN)x[1], &a,&b,A,B)) return NULL;
       if (is_pm1(b)) return icopy_av(a, (GEN)av);
@@ -2033,7 +2047,7 @@ bestappr_mod(GEN x, GEN A, GEN B)
 GEN
 bestappr(GEN x, GEN k)
 {
-  ulong av = avma, tetpil;
+  gpmem_t av = avma, tetpil;
   long tx,tk=typ(k),lx,i,e;
   GEN p0,p1,p,q0,q1,q,a,y;
 
@@ -2085,7 +2099,7 @@ bestappr(GEN x, GEN k)
 GEN
 bestappr0(GEN x, GEN a, GEN b)
 {
-  ulong av;
+  gpmem_t av;
   GEN t;
   if (!b) return bestappr(x,a);
   av = avma;
@@ -2132,7 +2146,8 @@ update_f(GEN f, GEN a)
 GEN
 fundunit(GEN x)
 {
-  long av = avma, av2,tetpil,lim,r,flp,flq;
+  gpmem_t av = avma, av2, lim;
+  long r,flp,flq;
   GEN pol,y,a,u,v,u1,v1,sqd,f;
 
   if (typ(x) != t_INT) err(arither1);
@@ -2161,9 +2176,9 @@ fundunit(GEN x)
   pol = quadpoly(x); y = get_quad(f,pol,r);
   if (!flq) v1 = y; else { update_f(f,a); v1 = get_quad(f,pol,r); }
 
-  u1=gconj(y); tetpil=avma; y=gdiv(v1,u1);
-  if (signe(y[3]) < 0) { tetpil=avma; y=gneg(y); }
-  return gerepile(av,tetpil,y);
+  u1=gconj(y); y=gdiv(v1,u1);
+  if (signe(y[3]) < 0) y = gneg(y);
+  return gerepileupto(av, y);
 }
 
 GEN
@@ -2175,7 +2190,8 @@ gregula(GEN x, long prec)
 GEN
 regula(GEN x, long prec)
 {
-  long av = avma,av2,lim,r,fl,rexp;
+  gpmem_t av = avma,av2,lim;
+  long r,fl,rexp;
   GEN reg,rsqd,y,u,v,u1,v1, sqd = racine(x);
 
   if (signe(x)<=0) err(arither2);
@@ -2279,7 +2295,7 @@ end_classno(GEN h, GEN hin, GEN forms, long lform)
   q = ground(gdiv(hin,h)); /* approximate order of G/H */
   for (i=1; i < lform; i++)
   {
-    long av = avma; 
+    gpmem_t av = avma; 
     fg = powgi((GEN)forms[i], h);
     fh = powgi(fg, q);
     a = (GEN)fh[1];
@@ -2384,8 +2400,8 @@ two_rank(GEN x)
 GEN
 classno(GEN x)
 {
-  long av = avma, av2,c,lforms,k,l,i,j,j1,j2,lim,com,s, forms[MAXFORM];
-  long r2;
+  gpmem_t av = avma, av2;
+  long r2,c,lforms,k,l,i,j,j1,j2,lim,com,s, forms[MAXFORM];
   GEN a,b,count,index,tabla,tablb,hash,p1,p2,hin,h,f,fh,fg,ftest;
   GEN Hf,D,fa;
   byteptr p = diffptr;
@@ -2481,7 +2497,7 @@ classno(GEN x)
 GEN
 classno2(GEN x)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   long n,i,k,s = signe(x);
   GEN p1,p2,p3,p4,p5,p7,Hf,Pi,reg,logd,d,D;
 

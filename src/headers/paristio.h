@@ -16,10 +16,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /* This file contains memory and I/O management definitions       */
 
 typedef unsigned char *byteptr;
+typedef unsigned long gpmem_t;
 
 typedef struct stackzone
 {
-  long zonetop, bot, top, avma, memused;
+  gpmem_t zonetop, bot, top, avma;
+  size_t memused;
 } stackzone;
 
 typedef struct entree {
@@ -53,7 +55,8 @@ typedef struct pariFILE {
 extern PariOUT *pariOut, *pariErr;
 extern FILE    *pari_outfile, *logfile, *infile, *errfile;
 
-extern ulong avma,bot,top,memused;
+extern gpmem_t avma,bot,top;
+extern size_t memused;
 extern byteptr diffptr;
 extern entree  **varentries;
 extern char    *errmessage[], *current_psfile;
