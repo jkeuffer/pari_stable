@@ -135,7 +135,7 @@ Misc:
 =====
 4  decent finite field package (remove all the nfxxxmodpr functions)
 
-4  rnfkummer (very slow)
+4  rnfkummer (non-prime degree)
 
 4  nfsubfields [use known subfields to discard blocs right away] (current uses
    far too much memory)
