@@ -3776,6 +3776,8 @@ polmods \emph{must} be the same as the main variable of $t$. For example
 export the underlying permutation group as a string suitable
 for (no flags or $\fl=0$) GAP or ($\fl=1$) Magma.
 
+This command also accepts subgroups returned by \kbd{galoissubgroups}.
+
 The following example compute the index of the underlying abstract
 group in the GAP library:
 
@@ -3825,6 +3827,8 @@ output the isomorphism class of the underlying abstract group as a
 two-components vector $[o,i]$, where $o$ is the group order, and $i$ is the
 group index in the GAP4 Small Group library, by Hans Ulrich Besche, Bettina
 Eick and Eamonn O'Brien.
+
+This command also accepts subgroups returned by \kbd{galoissubgroups}.
 
 The current implementation is limited to degree less or equal to $127$.
 Some larger ``easy'' orders are also supported. 
@@ -3911,6 +3915,8 @@ If present $den$ must be a suitable value for $\var{gal}[5]$.
  \var{gal} is not an abelian group, and the HNF matrix of \var{gal} over \kbd{gal.gen} if $fl=0$, $1$ if
  $fl=1$.
 
+This command also accepts subgroups returned by \kbd{galoissubgroups}.
+
 \syn{galoisisabelian}{\var{gal},\var{fl}} where \var{fl} is a C long integer.
 
 \subsecidx{galoispermtopol}$(\var{gal},\var{perm})$: \var{gal} being a
@@ -3981,22 +3987,28 @@ conductor $n\infty$.
 \syn{galoissubcyclo}{N,H,fl,v} where \var{fl} is a C long integer, and
 \var{v} a variable number.
 
-\subsecidx{galoissubfields}$(G,\{fl=0\},\{v\})$: Output all the subfields of the Galois group \var{G},
-as a vector.
-This works by applying \kbd{galoisfixedfield} to all subgroups. The meaning of the flag \var{fl} is
-the same as for \kbd{galoisfixedfield}.
+\subsecidx{galoissubfields}$(G,\{fl=0\},\{v\})$: Output all the subfields of
+the Galois group \var{G}, as a vector.
+This works by applying \kbd{galoisfixedfield} to all subgroups. The meaning of
+the flag \var{fl} is the same as for \kbd{galoisfixedfield}.
 
 \syn{galoissubfields}{\var{G},fl,v}, where \var{fl} is a long and \var{v} a
 variable number.
 
-\subsecidx{galoissubgroups}$(G)$: Output all the subgroups of the Galois
-group \kbd{G}. A subgroup is a vector $[gen, orders]$, with the same meaning
+\subsecidx{galoissubgroups}$(gal)$: Output all the subgroups of the Galois
+group \kbd{gal}. A subgroup is a vector [\var{gen}, \var{orders}], with the same meaning
 as for $\var{gal}.gen$ and $\var{gal}.orders$. Hence \var{gen} is a vector of
 permutations generating the subgroup, and \var{orders} is the relatives
 orders of the generators. The cardinal of a subgroup is the product of the
-relative orders.
+relative orders. Such subgroup can be used instead of a Galois group in the 
+following command: \kbd{galoisisabelian}, \kbd{galoissubgroups}, \kbd{galoisexport} and \kbd{galoisidentify}.
 
-\syn{galoissubgroups}{\var{G}}.
+To get the subfield fixed by a subgroup \var{sub} of \var{gal}, use
+\bprog
+galoisfixedfield(gal,sub[1])
+@eprog
+
+\syn{galoissubgroups}{\var{gal}}.
 
 \subsecidx{idealadd}$(\var{nf},x,y)$: sum of the two ideals $x$ and $y$ in the
 number field $\var{nf}$. When $x$ and $y$ are given by $\Z$-bases, this does

@@ -1,4 +1,5 @@
-   = Karim Belabas (maintainer) AW = Aleksander Wittlin
+   = Karim Belabas (maintainer)
+AW = Aleksander Wittlin
 BA = Bill Allombert
 BD = Bill Daly
 BG = Brian Gladman
@@ -230,6 +231,8 @@ BA 10- add POSIX-style long options --fast, --quiet, --primelimit and
    12- new member function .index
    13- rdivii, rdivis, rdivsi, rdivss to replace diviiz & co.
    14- new routine mpround
+BA 15- galoisisabelian, galoisexport, galoisidentify and galoissubgroups now 
+       also accept subgroups returned by galoissubgroups.
 
   Removed
     1- obsolete macro leadingcoeff [kept for backward compatibility but

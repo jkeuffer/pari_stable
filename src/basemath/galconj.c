@@ -3328,29 +3328,40 @@ galoisfixedfield(GEN gal, GEN perm, long flag, long y)
 GEN
 galois_group(GEN gal)
 {
-  GEN G;
-  gal  = checkgal(gal);
-  G    = cgetg(3,t_VEC);
+  GEN G= cgetg(3,t_VEC);
   G[1] = gal[7];
   G[2] = gal[8];
   return G;
 }
 
+GEN
+checkgroup(GEN g, GEN *S)
+{
+  if (typ(g)==t_VEC && lg(g)==3 && typ(g[1])==t_VEC && typ(g[2])==t_VECSMALL) 
+  {
+    *S = NULL;
+    return g;
+  }
+  g  = checkgal(g); 
+  *S = (GEN) g[6];
+  return galois_group(g); 
+}
+
 GEN galoisisabelian(GEN gal, long flag)
 {
   pari_sp ltop=avma;
-  GEN G=galois_group(gal);
+  GEN S, G=checkgroup(gal,&S);
   if (!group_isabelian(G)) {avma=ltop;return gzero;}
   if (flag==1) {avma=ltop;return gun;}
-  if (flag==2) return gerepileupto(ltop,group_abelianSNF(G,(GEN)gal[6]));
+  if (flag==2) return gerepileupto(ltop,group_abelianSNF(G,S));
   if (flag) err(flagerr,"galoisisabelian");
-  return gerepileupto(ltop,group_abelianHNF(G,(GEN)gal[6]));
+  return gerepileupto(ltop,group_abelianHNF(G,S));
 }
 
 GEN galoissubgroups(GEN gal)
 {
   pari_sp ltop=avma;
-  GEN G=galois_group(gal);
+  GEN S, G=checkgroup(gal,&S);
   return gerepileupto(ltop,group_subgroups(G));
 }
 
@@ -3370,7 +3381,7 @@ GEN
 galoisexport(GEN gal, long format)
 {
   pari_sp ltop=avma;
-  GEN G=galois_group(gal);
+  GEN S, G=checkgroup(gal,&S);
   return gerepileupto(ltop,group_export(G,format));
 }
 
@@ -3378,8 +3389,8 @@ GEN
 galoisidentify(GEN gal)
 {
   pari_sp ltop=avma;
-  GEN G=galois_group(gal);
-  long idx=group_ident(G,(GEN)gal[6]);
+  GEN S, G=checkgroup(gal,&S);
+  long idx=group_ident(G,S);
   long card=group_order(G);
   GEN V;
   avma=ltop;
