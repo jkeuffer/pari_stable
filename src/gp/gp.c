@@ -1723,7 +1723,7 @@ tex2mail_output(GEN z, long n)
     {
       char col1[80];
       strcpy(col1, term_get_color(c_HIST));
-      sprintf(thestring, "\\LITERALnoLENGTH{%s}\\%%%ld = \\LITERALnoLENGTH{%s}",
+      sprintf(thestring, "\\LITERALnoLENGTH{%s}\\%%%ld =\\LITERALnoLENGTH{%s} ",
               col1, n, term_get_color(c_OUTPUT));
     }
     else
