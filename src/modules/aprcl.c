@@ -517,7 +517,7 @@ get_jac2(GEN N, ulong q, int k, GEN *j2q, GEN *j3q)
 }
 
 static void
-calcjac(GEN N, GEN et)
+calcjac(GEN et)
 {
   gpmem_t av;
   ulong q, l;
@@ -1044,7 +1044,7 @@ aprcl(GEN N)
     p = itos((GEN)fat[i]); q = p*p;
     flaglp[p] = (powuumod(smodis(N,q),p-1,q) != 1);
   }
-  calcjac(N, et);
+  calcjac(et);
   if (dotime)
   {
     sgtjac = timer2();

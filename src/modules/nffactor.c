@@ -1025,7 +1025,7 @@ nf_combine_factors(nfcmbf_t *T, GEN polred, GEN p, long a, long klim)
   /* FIXME: neither nfcmbf nor LLL_cmbf can handle the non-nf case */
 
   T->res      = cgetg(nft+1,t_VEC);
-  L = nfcmbf(T, p, a, maxK, degpol(pol)-1);
+  L = nfcmbf(T, p, a, maxK, klim);
 
   res     = (GEN)L[1];
   listmod = (GEN)L[2]; l = lg(listmod)-1;

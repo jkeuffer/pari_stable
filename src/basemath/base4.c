@@ -2125,12 +2125,13 @@ coprime_part(GEN x, GEN f)
 
 /* x t_INT, f ideal. Write x = x1 x2, sqf(x1) | f, (x2,f) = 1. Return x2 */
 static GEN
-nf_coprime_part(GEN nf, GEN x, GEN f, GEN *listpr)
+nf_coprime_part(GEN nf, GEN x, GEN *listpr)
 {
   long v, j, lp = lg(listpr), N = degpol(nf[1]);
   GEN x1, x2, ex, p, pr;
 
 #if 0 /*1) via many gcds. Expensive ! */
+  GEN f = idealprodprime(nf, (GEN)listpr);
   f = hnfmodid(f, x); /* first gcd is less expensive since x in Z */
   x = gscalmat(x, N);
   for (;;)
@@ -2273,7 +2274,7 @@ make_integral(GEN nf, GEN L0, GEN f, GEN *listpr, GEN *ptd1)
   d1 = diviiexact(d, d2);
   /* L0 = (L / d1) mod f. d1 not coprime to f
    * write (d1) = D1 D2, D2 minimal, (D2,f) = 1. */
-  D2 = nf_coprime_part(nf, d1, f, listpr);
+  D2 = nf_coprime_part(nf, d1, listpr);
   t = idealaddtoone_i(nf, D2, f); /* in D2, 1 mod f */
   L = element_muli(nf,t,L);
 
@@ -2882,8 +2883,9 @@ nfsolvemodpr(GEN nf, GEN a, GEN b, GEN pr)
   return gerepilecopy(av, modprM_lift(FqM_gauss(a,b,T,p), modpr));
 }
 
+#if 0
 GEN
-nfsuppl(GEN nf, GEN x, long n, GEN pr)
+nfsuppl(GEN nf, GEN x, GEN pr)
 {
   gpmem_t av = avma;
   GEN T,p,modpr;
@@ -2894,6 +2896,7 @@ nfsuppl(GEN nf, GEN x, long n, GEN pr)
   x = modprM(lift(x), nf, modpr);
   return gerepilecopy(av, modprM_lift(FqM_suppl(x,T,p), modpr));
 }
+#endif
 
 /* Given a pseudo-basis pseudo, outputs a multiple of its ideal determinant */
 GEN
