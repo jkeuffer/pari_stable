@@ -2,28 +2,21 @@ file=Makefile
 echo "Extracting $file"
 rm -f $file
 
-case "$status" in
-  alpha|beta|kernel) suf_status=".$status";;
-  development*) suf_status=".alpha";;
-  *) suf_status=;;
-esac
-
-filename=pari-$version.$patch$suf_status
-tarfile=$filename.tar
-ztarfile=$filename.tgz
-
 dbgobjdir=`echo "$objdir" | sed -e 's/\.[dbgprf]*$//'`
 dbgobjdir=$dbgobjdir.dbg
 
 dosversion=`echo $version|sed -e 's/\.//g'`
 dosversion="_$dosversion$patch"
+case "$status" in
+  development*) status='development';;
+esac
 
 cat > $file << EOT
 # This file was created by Configure. All changes made will be lost
 # next time Configure is run.
 #
 SHELL = $make_sh
-RM = /bin/rm -f
+VERS = pari-$version.$patch $status
 
 dft target::
 	@echo "Possible targets are:"
@@ -37,8 +30,7 @@ dft target::
 	@echo "For pari maintainers..."
 	@echo "	dbg	                Compile gp binary suitable for debugging"
 	@echo "	prf	                Compile gp binary suitable for profiling"
-	@echo "	distrib			Create a new distribution"
-	@echo "	bzdist			Create a new bzip2'ed distribution"
+	@echo "	distrib,alpha,beta,release  Create a new distribution"
 	@echo "	ctags			Generate VI/VIM tags file in ./src"
 	@echo "	etags			Generate Emacs  tags file in ./src"
 	@echo "	tune	                Generate tuning utility"
@@ -68,25 +60,16 @@ doc docps docpdf gpman cleandoc::
 
 clean:: cleandoc cleanobj
 
-setdir::
-	@dir=pari-$version.$patch$suf_status; if test -d \$\$dir; then \\
-	   echo "Remove \$\$dir before building a new release"; exit 1;\\
-	fi;\\
-	mkdir \$\$dir; mv $tarfile \$\$dir; \\
-	cd \$\$dir; tar xf $tarfile; \$(RM) $tarfile; cd ..; \\
-	tar cf $tarfile \$\$dir; \\
-	\$(RM) -r \$\$dir
-
-tar:
-	\$(RM) $ztarfile
-	tar cf $tarfile \`$config_dir/get_MANIFEST\`
-
-distrib: tar setdir
-	gzip $tarfile
-	mv $tarfile.gz $ztarfile
-
-bzdist: tar setdir
-	bzip2 $tarfile
+distrib:
+	$config_dir/settar \$(VERS) $status
+tag:
+	@echo cvs tag release-$VersionMajor-$VersionMinor-$patch
+alpha: tag
+	$config_dir/settar \$(VERS) alpha
+beta: tag
+	$config_dir/settar \$(VERS) beta
+release: tag
+	$config_dir/settar \$(VERS) released
 
 dosdistrib: gpman
 	-zip -kr GPB${dosversion}.ZIP GP.EXE README README.DOS ../EMX/README.DOC ../RSX/README.TXT
