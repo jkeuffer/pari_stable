@@ -3014,7 +3014,7 @@ due to Hafner-McCurley, \idx{Buchmann} and Cohen-Diaz-Olivier. The general
 call to the functions concerning class groups of general number fields
 (i.e.~excluding \kbd{quadclassunit}) involves a polynomial $P$ and a
 technical vector
-$$\var{tech} = [c,c2,\var{nrel},\var{small\_norm},\var{nrpid},\var{minsfb}],$$
+$$\var{tech} = [c, c2, \var{nrpid} ],$$
 where the parameters are to be understood as follows:
 
 $P$ is the defining polynomial for the number field, which must be in
@@ -3031,23 +3031,10 @@ quadratic case, but then you should use the much faster function
 \kbd{quadclassunit}). Reasonable values for $c$ are between $0.1$ and
 $2$. (The defaults are $c=c2 = 0.3$.)
 
-$\var{nrel}$ is the number of initial extra relations requested in computing
-the relation matrix. Reasonable values are between 5 and 20. (The default is
-5).
-
-$\var{small\_norm}$ is a toggle used to disable the search for small norm
-relations. If this parameter is set equal to $0$, the program does not search
-for small norm relations (default value is $1$). \emph{This is obsolete and
-should not be used. Set $\var{nrpid} = 0$ instead}.
-
 $\var{nrpid}$ is the maximal number of small norm relations associated to each
-ideal in the factor base. Irrelevant when $\var{small\_norm}=0$. Otherwise,
-reasonable values are between 4 and 20. (The default is 4).
-
-$\var{minsfb}$ is the minimal number of elements in the ``sub-factorbase''.
-If the program does not seem to succeed in finding a full rank matrix (which
-you can see in GP by typing \kbd{\bs g 2}), increase this number. Reasonable
-values are between 2 and 5. (The default is 3).
+ideal in the factor base. Set it to $0$ to disable the search for small norm
+relations. Otherwise, reasonable values are between 4 and 20. (The default is
+4).
 
 \misctitle{Remarks.}
 

@@ -2553,7 +2553,7 @@ check_and_build_matal(GEN bnf) {
 }
 
 GEN
-smallbuchinit(GEN pol,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,long minsFB,long prec)
+smallbuchinit(GEN pol, double bach, double bach2, long nbrelpid, long prec)
 {
   GEN y, bnf, nf, res, p1;
   pari_sp av = avma;
@@ -2562,7 +2562,7 @@ smallbuchinit(GEN pol,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpi
   else
   {
     const long fl = nf_INIT | nf_UNITS | nf_FORCE;
-    bnf = buchall(pol,gcbach,gcbach2,gRELSUP,gborne,nbrelpid,minsFB,fl,prec);
+    bnf = buchall(pol, bach, bach2, nbrelpid, fl, prec);
     bnf = checkbnf_discard(bnf);
   }
   nf  = (GEN)bnf[7];
@@ -2773,43 +2773,35 @@ bnfmake(GEN sbnf, long prec)
 static GEN
 classgroupall(GEN P, GEN data, long flag, long prec)
 {
-  long court[3],doubl[4];
-  long fl, lx, minsFB=3, nbrelpid=4;
-  pari_sp av=avma;
-  GEN bach=doubl,bach2=doubl,RELSUP=court,borne=gun;
+  double bach = 0.3, bach2 = 0.3;
+  long fl, lx, nbrelpid = 4;
 
-  if (!data) lx=1;
+  if (!data) lx = 1;
   else
   {
     lx = lg(data);
-    if (typ(data)!=t_VEC || lx > 7)
+    if (typ(data)!=t_VEC || lx > 5)
       err(talker,"incorrect parameters in classgroup");
   }
-  court[0]=evaltyp(t_INT) | evallg(3); affsi(5,court);
-  doubl[0]=evaltyp(t_REAL)| evallg(4); affrr(dbltor(0.3),doubl);
-  avma=av;
   switch(lx)
   {
-    case 7: minsFB  = itos((GEN)data[6]);
-    case 6: nbrelpid= itos((GEN)data[5]);
-    case 5: borne  = (GEN)data[4];
-    case 4: RELSUP = (GEN)data[3];
-    case 3: bach2 = (GEN)data[2];
-    case 2: bach  = (GEN)data[1];
+    case 4: nbrelpid = itos((GEN)data[3]);
+    case 3: bach2 = gtodouble( (GEN)data[2]);
+    case 2: bach  = gtodouble( (GEN)data[1]);
   }
   switch(flag)
   {
     case 0: fl = nf_INIT | nf_UNITS; break;
     case 1: fl = nf_INIT | nf_UNITS | nf_FORCE; break;
     case 2: fl = nf_INIT | nf_ROOT1; break;
-    case 3: return smallbuchinit(P,bach,bach2,RELSUP,borne,nbrelpid,minsFB,prec);
+    case 3: return smallbuchinit(P, bach, bach2, nbrelpid, prec);
     case 4: fl = nf_UNITS; break;
     case 5: fl = nf_UNITS | nf_FORCE; break;
     case 6: fl = 0; break;
     default: err(flagerr,"classgroupall");
       return NULL; /* not reached */
   }
-  return buchall(P,bach,bach2,RELSUP,borne,nbrelpid,minsFB,fl,prec);
+  return buchall(P, bach, bach2, nbrelpid, fl, prec);
 }
 
 GEN
@@ -2952,19 +2944,19 @@ nf_cloneprec(GEN nf, long prec, int *nfclone)
 }
 
 GEN
-buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
-        long minsFB,long flun,long prec)
+buchall(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long prec)
 {
   pari_sp av = avma, av0, av2;
-  long PRECREG = prec, PRECLLL, N, R1, R2, RU, KCCO, RELSUP, LIMC, LIMC2, lim;
+  long PRECREG = prec, PRECLLL, N, R1, R2, RU, KCCO, LIMC, LIMC2, lim;
   long nlze, zc, nreldep, phase, i, j, k, MAXRELSUP;
   long sfb_change, sfb_trials, precdouble = 0, precadd = 0;
-  double cbach, cbach2, drc, LOGD, LOGD2;
+  double drc, LOGD, LOGD2;
   GEN vecG, fu, zu, nf, D, A, W, R, Res, z, h, L_jideal, PERM;
   GEN M, res, L, resc, B, C, lambda, pdep, liste, invp, clg1, clg2, Vbase;
   GEN CHANGE = NULL;
   char *precpb = NULL;
   int nfclone = 0;
+  const int RELSUP = 5, minsFB = 3;
   REL_t *rel, *oldrel;
   RELCACHE_t cache;
   FB_t F;
@@ -2972,9 +2964,6 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
   if (DEBUGLEVEL) (void)timer2();
 
   P = get_nfpol(P, &nf);
-  if (typ(gRELSUP) != t_INT) gRELSUP = gtrunc(gRELSUP);
-  RELSUP = itos(gRELSUP);
-  if (RELSUP <= 0) err(talker,"not enough relations in bnfxxx");
 
   /* Initializations */
   fu = NULL; /* gcc -Wall */
@@ -2995,11 +2984,11 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
   LOGD = log(drc); LOGD2 = LOGD*LOGD;
   lim = (long) (exp(-(double)N) * sqrt(2*PI*N*drc) * pow(4/PI,(double)R2));
   if (lim < 3) lim = 3;
-  cbach = min(12., gtodouble(gcbach)); cbach /= 2;
+  if (cbach > 12.) cbach = 12.;
+  
+  cbach /= 2;
   if (cbach == 0.) err(talker,"Bach constant = 0 in bnfxxx");
-  if (nbrelpid <= 0) gborne = gzero;
 
-  cbach2 = gtodouble(gcbach2);
   /* resc ~ sqrt(D) w / 2^r1 (2pi)^r2 = hR / Res(zeta_K, s=1) */
   resc = gdiv(mulri(gsqrt(absi(D),DEFAULTPREC), (GEN)zu[1]),
               gmul2n(gpowgs(Pi2n(1,DEFAULTPREC), R2), R1));
@@ -3063,7 +3052,7 @@ START:
   invp = relationrank(&cache, liste);
 
   /* relations through elements of small norm */
-  if (gsigne(gborne) > 0)
+  if (nbrelpid > 0)
     small_norm(&cache,&F,LOGD,nf,nbrelpid,invp,liste,LIMC2);
   avma = av2;
 

@@ -33,6 +33,9 @@ This file lists the incompatible changes between Version 2.x and older versions
     (bnfisprincipal), units (bnfunit), and some of the bnf structures has
     been removed.
 
+  - the "technical parameter" to bnfinit() has been shortened to 3 components
+    (the others were deprecated / useless): [c, c2, nrpid].
+
 
 * The library PARI:
 ===================
@@ -56,6 +59,7 @@ This file lists the incompatible changes between Version 2.x and older versions
   - (undocumented) macros buch[gen | genfu | init | iniftu]
   - rnfisnorm() prototype has changed [ + need to call rnfisnorminit first ]
   - incgam4 renamed to incgam0, incgam3 renamed to incgamc
+  - prototypes of buchall and smallbuchinit have changed (much simpler)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

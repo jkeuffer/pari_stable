@@ -679,7 +679,7 @@ GEN     quadray(GEN bnf, GEN f, GEN flag, long prec);
 GEN     bnfclassunit0(GEN P,long flag,GEN data,long prec);
 GEN     bnfinit0(GEN P,long flag,GEN data,long prec);
 GEN     bnfmake(GEN sbnf,long prec);
-GEN     buchall(GEN P, GEN gcbach, GEN gcbach2, GEN gRELSUP, GEN gborne, long nbrelpid, long minsfb, long flun, long prec);
+GEN     buchall(GEN P, double bach, double bach2, long nbrelpid, long flun, long prec);
 GEN     buchfu(GEN bignf);
 GEN     check_and_build_obj(GEN S, int tag, GEN (*build)(GEN));
 GEN     classgrouponly(GEN P,GEN data,long prec);
@@ -693,7 +693,7 @@ GEN     isunit(GEN bignf, GEN x);
 GEN     quick_isprincipalgen(GEN bnf, GEN x);
 GEN     regulator(GEN P,GEN data,long prec);
 GEN     signunits(GEN bignf);
-GEN     smallbuchinit(GEN pol,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,long minsfb,long prec);
+GEN     smallbuchinit(GEN pol,double bach,double bach2,long nbrelpid,long prec);
 GEN     zsignunits(GEN bnf, GEN archp, int add_zu);
 
 /* buch3.c */
