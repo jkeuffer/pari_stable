@@ -117,37 +117,20 @@ GEN
 rnfinitalg(GEN nf,GEN pol,long prec)
 {
   gpmem_t av = avma;
-  long m,n,r1,r2,vnf,i,j,k,vpol,v1,r1j,r2j,lfac,degabs;
+  long m,n,r1,r2,vnf,i,j,k,vpol,r1j,r2j,lfac,degabs;
   GEN RES,sig,rac,p1,p2,liftpol,delta,RAC,ro,p3,bas;
   GEN f,f2,fac,fac1,fac2,id,p4,p5;
 
   if (typ(pol)!=t_POL) err(notpoler,"rnfinitalg");
   nf=checknf(nf); n=degpol(pol); vpol=varn(pol);
-  vnf=0;
-  for (i=0; i<=n; i++)
-  {
-    long tp1;
+  pol = fix_relative_pol(nf,pol,0);
+  vnf = varn(nf[1]);
 
-    p1=(GEN)pol[i+2];
-    tp1=typ(p1);
-    if (! is_const_t(tp1))
-    {
-      if (tp1!=t_POLMOD) err(typeer,"rnfinitalg");
-      p1 = checknfelt_mod(nf, p1, "rnfinitalg");
-      if (! is_const_t(typ(p1)))
-      {
-	v1=varn(p1);
-	if (vnf && vnf!=v1) err(talker,"different variables in rnfinitalg");
-	if (!vnf) vnf=v1;
-      }
-    }
-  }
-  if (!vnf) vnf=varn(nf[1]);
-  if (vpol>=vnf)
+  if (vpol >= vnf)
     err(talker,"main variable must be of higher priority in rnfinitalg");
   RES=cgetg(12,t_VEC);
   RES[1]=(long)pol;
-  m=degpol(nf[1]); degabs=n*m;
+  m = degpol(nf[1]); degabs=n*m;
   r1 = nf_get_r1(nf); r2 = (m-r1) >> 1;
   sig=cgetg(r1+r2+1,t_VEC); RES[2]=(long)sig;
   rac=(GEN)nf[6]; liftpol=lift(pol);
@@ -212,7 +195,7 @@ rnfinitalg(GEN nf,GEN pol,long prec)
     {
       p5=cgetg(degabs+1,t_COL); p4[(i-1)*m+j]=(long)p5;
       p1=gmul((GEN)nf[7],(GEN)id[j]);
-      p3 = gsubst(p1,varn(nf[1]), (GEN)p2[2]);
+      p3 = gsubst(p1, vnf, (GEN)p2[2]);
       cop3 = content(p3); p3 = gdiv(p3,cop3);
       p3 = gmul(gmul(com,cop3), lift_intern(gmul(om,p3)));
 
@@ -713,139 +696,4 @@ rnfidealmul(GEN rnf,GEN x,GEN y) /* x et y sous HNF relative uniquement */
   res[1]=(long)concatsp(p1,p3);
   res[2]=(long)concatsp(x2,x2);
   tetpil=avma; return gerepile(av,tetpil,nfhermite(nf,res));
-}
-
-/*********************************************************************/
-/**                                                                 **/
-/**         LIBRARY FOR POLYNOMIALS WITH COEFFS. IN Z_K/P	    **/
-/**  An element in Z_K/P is a t_COL with degree(nf[1]) components.  **/
-/**  These are integers modulo the prime p under prime ideal P      **/
-/**  (only f(P/p) elements are non zero). These components are      **/
-/**  given on the integer basis of K.                               **/
-/**                                                                 **/
-/*********************************************************************/
-
-/* K.B: What follows is not meant to work (yet?) */
-
-GEN
-polnfmulscal(GEN nf,GEN s,GEN x)
-{
-  long i,lx=lgef(x);
-  GEN z;
-
-  if (lx<3) return gcopy(x);
-  if (gcmp0(s))
-  {
-    z=cgetg(2,t_POL); z[1]=evallgef(2) | evalvarn(varn(x));
-    return z;
-  }
-  z=cgetg(lx,t_POL); z[1]=x[1];
-  for (i=2; i<lx; i++) z[i]=(long)element_mul(nf,s,(GEN)x[i]);
-  return z;
-}
-
-GEN
-polnfmul(GEN nf, GEN x, GEN y)
-{
-  gpmem_t av;
-  long m,i,d,imin,imax,lx,ly,lz;
-  GEN p1,z,zeronf;
-
-  if (gcmp0(x) || gcmp0(y)) return zeropol(varn(x));
-  m=degpol(nf[1]); av=avma;
-  lx=degpol(x); ly=degpol(y); lz=lx+ly;
-  zeronf=gscalcol_i(gzero,m);
-  z=cgetg(lz+3,t_POL);
-  z[1] = evallgef(lz+3) | evalvarn(x) | evalsigne(1);
-  for (d=0; d<=lz; d++)
-  {
-    p1=zeronf; imin=max(0,d-ly); imax=min(d,lx);
-    for (i=imin; i<=imax; i++)
-      p1=gadd(p1,element_mul(nf,(GEN)x[i+2],(GEN)y[d-i+2]));
-    z[d+2]=(long)p1;
-  }
-  return gerepilecopy(av,z);
-}
-
-/* division euclidienne */
-GEN
-polnfdeuc(GEN nf, GEN x, GEN y, GEN *ptr)
-{
-  long m, i, d, tx, lx, ly, lz, fl;
-  gpmem_t av=avma;
-  GEN z,unnf,lcy,r;
-  GEN *gptr[2];
-
-  if (gcmp0(y)) err(talker,"division by zero in polnfdiv");
-  lx=lgef(x); ly=lgef(y); lz=lx-ly;
-  if (gcmp0(x) || lz<0) { *ptr=gcopy(x); return zeropol(varn(x)); }
-
-  m=degpol(nf[1]); unnf=gscalcol_i(gun,m);
-  x=dummycopy(x); y=dummycopy(y);
-  for (i=2; i<lx; i++)
-  {
-    tx=typ(x[i]);
-    if (is_intreal_t(tx) || tx == t_INTMOD || is_frac_t(tx))
-      x[i]=lmul((GEN)x[i],unnf);
-  }
-  for (i=2; i<ly; i++)
-  {
-    tx=typ(y[i]);
-    if (is_intreal_t(tx) || tx == t_INTMOD || is_frac_t(tx))
-      y[i]=lmul((GEN)y[i],unnf);
-  }
-
-  lz += 3;
-  z=cgetg(lz,t_POL); z[1]=evallgef(lz) | evalvarn(x) | evalsigne(1);
-  lcy=(GEN)y[ly-1];
-  if (gegal(lift(lcy),unnf)) fl=0;
-  else
-  {
-    fl=1; y=polnfmulscal(nf,element_inv(nf,lcy),y);
-  }
-  for (d=lz-1; d>=2; d--)
-  {
-    z[d]=x[d+ly-3];
-    for (i=d; i<d+ly-3; i++)
-      x[i]=lsub((GEN)x[i],element_mul(nf,(GEN)z[d],(GEN)y[i-d-2]));
-  }
-  if (fl) z=polnfmulscal(nf,lcy,z);
-
-  for(;;)
-  {
-    if (!gcmp0((GEN)x[d]))
-    {
-      r=cgetg(d,t_POL);
-      r[1] = evallgef(d) | evalvarn(varn(x)) | evalsigne(1);
-      for (i=2; i<d; i++) r[i]=x[i];
-      break;
-    }
-    if (d==2) { r = zeropol(varn(x)); break; }
-    d--;
-  }
-  *ptr=r; gptr[0]=ptr; gptr[1]=&z;
-  gerepilemany(av,gptr,2); return z;
-}
-
-GEN
-polnfpow(GEN nf,GEN x,GEN k)
-{
-  long s, m;
-  gpmem_t av=avma;
-  GEN y,z;
-
-  m=degpol(nf[1]);
-  if (typ(k)!=t_INT) err(talker,"not an integer exponent in nfpow");
-  s=signe(k); if (s<0) err(impl,"polnfpow for negative exponents");
-
-  z=x; y=cgetg(3,t_POL);
-  y[1] = evallgef(3) | evalvarn(varn(x)) | evalsigne(1);
-  y[2] = (long)gscalcol_i(gun,m);
-  for(;;)
-  {
-    if (mpodd(k)) y=polnfmul(nf,z,y);
-    k=shifti(k,-1);
-    if (!signe(k)) { cgiv(k); return gerepileupto(av,y); }
-    z=polnfmul(nf,z,z);
-  }
 }
