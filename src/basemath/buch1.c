@@ -325,13 +325,12 @@ GEN
 form_to_ideal(GEN x)
 {
   long tx = typ(x);
-  GEN b, y = cgetg(3, t_MAT);
+  GEN b;
   if ((is_vec_t(tx) || lg(x) != 4)
        && tx != t_QFR && tx != t_QFI) err(typeer,"form_to_ideal");
   b = negi((GEN)x[2]); if (mpodd(b)) b = addis(b,1);
-  y[1] = (long)mkcol2((GEN)x[1], gen_0);
-  y[2] = (long)mkcol2((GEN)shifti(b,-1), gen_1);
-  return y;
+  return mkmat2( mkcol2((GEN)x[1], gen_0),
+                 mkcol2((GEN)shifti(b,-1), gen_1) );
 }
 
 /* P approximation computed at initial precision prec. Compute needed prec

@@ -281,18 +281,13 @@ powtau(GEN x, long m, tau_s *tau)
 static GEN
 tauoffamat(GEN x, tau_s *tau)
 {
-  GEN y = cgetg(3, t_MAT);
-  y[1] = (long)tauofvec((GEN)x[1], tau);
-  y[2] = x[2]; return y;
+  return mkmat2(tauofvec(gel(x,1), tau), gel(x,2));
 }
 
-/* TODO: wasteful to reduce to 2-elt form. Compute image directly */
 static GEN
 tauofideal(GEN nfz, GEN id, tau_s *tau)
 {
-  GEN I = ideal_two_elt(nfz,id);
-  I[2] = (long)tauofelt((GEN)I[2], tau);
-  return prime_to_ideal(nfz,I);
+  return hnfmodid(gmul(tau->zk, id), gcoeff(id, 1,1));
 }
 
 static int

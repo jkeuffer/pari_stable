@@ -634,13 +634,13 @@ idealfactor(GEN nf, GEN x)
 {
   pari_sp av;
   long tx, i, j, k, lf, lc, N, v, vc, e;
-  GEN X, f, f1, f2, c1, c2, y1, y2, y, p1, p2, cx, P;
+  GEN X, f, f1, f2, c1, c2, y1, y2, y, p1, cx, P;
 
   tx = idealtyp(&x,&y);
   if (tx == id_PRIME)
   {
     y = cgetg(3,t_MAT);
-    y[1] = (long)mkcol(gcopy(x));
+    y[1] = (long)mkcolcopy(x);
     y[2] = (long)mkcol(gen_1); return y;
   }
   av = avma;
@@ -732,11 +732,10 @@ idealfactor(GEN nf, GEN x)
       y2[k] = vc*e; k++;
     }
   }
-  y = cgetg(3,t_MAT);
-  p1 = cgetg(k,t_COL); y[1] = (long)p1;
-  p2 = cgetg(k,t_COL); y[2] = (long)p2;
-  for (i=1; i<k; i++) { p1[i] = lcopy((GEN)y1[i]); p2[i] = lstoi(y2[i]); }
-  y = gerepileupto(av, y);
+  setlg(y1, k);
+  setlg(y2, k); y = gerepilecopy(av, mkmat2(y1,y2));
+  y2 = gel(y,2); for (i=1; i<k; i++) y2[i] = lstoi(y2[i]);
+  settyp(y2, t_COL);
   return sort_factor_gen(y, cmp_prime_ideal);
 }
 
@@ -1129,11 +1128,9 @@ idealmat_mul(GEN nf, GEN x, GEN y)
 GEN
 to_famat(GEN g, GEN e)
 {
-  GEN h = cgetg(3,t_MAT);
   if (typ(g) != t_COL) { g = dummycopy(g); settyp(g, t_COL); }
   if (typ(e) != t_COL) { e = dummycopy(e); settyp(e, t_COL); }
-  h[1] = (long)g;
-  h[2] = (long)e; return h;
+  return mkmat2(g, e);
 }
 
 GEN
@@ -1247,7 +1244,7 @@ elt_egal(GEN x, GEN y)
 GEN
 famat_reduce(GEN fa)
 {
-  GEN E, F, G, L, g, e;
+  GEN E, G, L, g, e;
   long i, k, l;
 
   if (lg(fa) == 1) return fa;
@@ -1275,9 +1272,8 @@ famat_reduce(GEN fa)
       G[k] = G[i];
       E[k] = E[i]; k++;
     }
-  F = cgetg(3, t_MAT);
-  setlg(G, k); F[1] = (long)G;
-  setlg(E, k); F[2] = (long)E; return F;
+  setlg(G, k);
+  setlg(E, k); return mkmat2(G,E);
 }
 
 /* assume pr has degree 1 and coprime to numerator(x) */
@@ -1463,7 +1459,7 @@ GEN
 arch_mul(GEN x, GEN y) {
   switch (typ(x)) {
     case t_POLMOD: return gmul(x, y);
-    case t_COL: return vecmul(x, y);
+    case t_COL:    return vecmul(x, y);
     case t_MAT:    return (x == y)? famat_sqr(x): famat_mul(x,y);
     default:       return (x == y)? gmul2n(x,1): gadd(x,y); /* t_VEC */
   }
@@ -2494,15 +2490,12 @@ ideal_two_elt2(GEN nf, GEN x, GEN a)
 GEN
 idealcoprime_fact(GEN nf, GEN x, GEN fy)
 {
-  long i, r;
-  GEN L, e, f = cgetg(3, t_MAT);
+  GEN L = (GEN)fy[1], e;
+  long i, r = lg(L);
 
-  L = (GEN)fy[1]; r = lg(L);
   e = cgetg(r, t_COL);
-  f[1] = fy[1];
-  f[2] = (long)e;
   for (i=1; i<r; i++) e[i] = lstoi( -idealval(nf,x,(GEN)L[i]) );
-  return idealapprfact_i(nf, f, 0);
+  return idealapprfact_i(nf, mkmat2(L,e), 0);
 }
 GEN
 idealcoprime(GEN nf, GEN x, GEN y)

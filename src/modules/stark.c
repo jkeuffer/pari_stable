@@ -655,14 +655,11 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
      mu >> 0 at cond1 */
   if (!gcmp1(gcoeff(idg, 1, 1)))
   {
-    GEN p1 = idealfactor(nf, idg);
-    GEN p2 = cgetg(3, t_MAT);
-    p2[1] = (long)divcond(bnr);
-    p2[2] = (long)zerocol(lg(p2[1])-1);
-    p1 = concat_factor(p1,p2);
+    GEN P = divcond(bnr);
+    GEN f = concat_factor(idealfactor(nf, idg),
+                          mkmat2(P, zerocol(lg(P)-1)));
 
-    mu = idealapprfact(nf, p1);
-    mu = set_sign_mod_idele(nf, NULL,mu, cond,sarch);
+    mu = set_sign_mod_idele(nf, NULL, idealapprfact(nf, f), cond,sarch);
     idh = idealdivexact(nf, mu, idg);
   }
   else
