@@ -417,7 +417,7 @@ one(tune_param *param)
 
 void error(char **argv) {
   long i;
-  printf("usage: %s [-t] [-t] [-u unittime] var1 var2 ...\n", argv[0]);
+  printf("usage: tune [-t] [-s step_factor] [-p mod] [-u unittime] var1 var2 ...\n");
   printf("Tunable variables: (omitting variable indices tunes everybody)\n");
   for (i = 0; i < numberof(param); i++)
     printf("  %2ld: %-25s (default %4ld)\n", i, param[i].name, *(param[i].var));
