@@ -1640,7 +1640,7 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l, long karma_type
       break;
   }
   /*Now, we study the orders of the Frobenius elements*/
-  min_prime=n*max((long)BITS_IN_LONG-bfffo(n)-4,2);
+  min_prime=n*max((long)(BITS_IN_LONG-bfffo(n)-4),2);
   plift = 0;
   nbmax = 8+(n>>1);
   nbtest = 0; karma = k_amoeba;
