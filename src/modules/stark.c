@@ -1523,10 +1523,10 @@ InitPrimesQuad(GEN bnr, long nmax, LISTray *R)
   GEN *gptr[7];
 
   l = 1 + PiBound(nmax);
-  R->L0  = cget1(l, t_VECSMALL);
-  R->L2  = cget1(l, t_VECSMALL); R->condZ = condZ;
+  R->L0 = cget1(l, t_VECSMALL);
+  R->L2 = cget1(l, t_VECSMALL); R->condZ = condZ;
   R->L1 = cget1(l, t_VECSMALL); R->L1ray = (GEN*)cget1(l, t_VEC);
-  R->L11 = cget1(l, t_VECSMALL); R->L11ray = (GEN*)cget1(l, t_VEC);
+  R->L11= cget1(l, t_VECSMALL); R->L11ray= (GEN*)cget1(l, t_VEC);
   prime = stoi(2);
   for (p = 2; p <= nmax; prime[2] = p) {
     switch (krogs(dk, p))
@@ -1570,39 +1570,43 @@ InitPrimesQuad(GEN bnr, long nmax, LISTray *R)
 static void
 InitPrimes(GEN bnr, long nmax, LISTray *R)
 {
-  pari_sp av = avma;
   GEN bnf = (GEN)bnr[1], cond = gmael3(bnr,2,1,1);
-  long np,p,j,l, condZ = itos(gcoeff(cond,1,1));
-  GEN Npr, tabpr, prime, pr, nf = checknf(bnf);
+  long np,p,j,k,l, condZ = itos(gcoeff(cond,1,1)), N = lg(cond)-1;
+  GEN *tmpray, Npr, tabpr, prime, pr, nf = checknf(bnf);
   byteptr d = diffptr + 1;
-  GEN *gptr[7];
 
-  R->condZ = condZ; l = PiBound(nmax) * (lg(cond)-1);
+  R->condZ = condZ; l = PiBound(nmax) * N;
+  tmpray = (GEN*)cgetg(N+1, t_VEC);
   R->L1 = cget1(l, t_VECSMALL);
   R->L1ray = (GEN*)cget1(l, t_VEC);
   prime = stoi(2);
   for (p = 2; p <= nmax; prime[2] = p)
   {
-    pari_sp av2 = avma;
-    if (DEBUGLEVEL > 1 && (p & 63) == 1) fprintferr("%ld ", p);
+    pari_sp av = avma;
+    if (DEBUGLEVEL > 1 && (p & 2047) == 1) fprintferr("%ld ", p);
     tabpr = primedec(nf, prime);
     for (j = 1; j < lg(tabpr); j++)
     {
-      pari_sp av3 = avma;
       pr  = (GEN)tabpr[j];
       Npr = powgi((GEN)pr[1], (GEN)pr[4]);
-      avma = av3;
       if (is_bigint(Npr) || (np = Npr[2]) > nmax) break;
-      if (condZ % p == 0 && idealval(nf, cond, pr)) continue;
+      if (condZ % p == 0 && idealval(nf, cond, pr))
+      {
+        tmpray[j] = NULL; continue;
+      }
 
       appendL(R->L1, (GEN)np);
-      appendL((GEN)R->L1ray, isprincipalray(bnr, pr));
+      tmpray[j] = gclone( isprincipalray(bnr, pr) );
     }
-    if (j == 1) avma = av2;
+    avma = av;
+    for (k = 1; k < j; k++)
+    {
+      if (!tmpray[k]) continue;
+      appendL((GEN)R->L1ray, gcopy(tmpray[k]));
+      gunclone(tmpray[k]);
+    }
     NEXT_PRIME_VIADIFF(p,d);
   }
-  gptr[0] = &(R->L1);  gptr[1] = (GEN*)&(R->L1ray);
-  gerepilemany(av,gptr,2);
 }
 
 static GEN

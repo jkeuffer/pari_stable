@@ -76,6 +76,7 @@ GH 15- polsturm(1, 0, 1) ---> error  [ return 0! ]
    31- type 'gphelp' from command line: carriage return is missing
    32- typo in LLL_cmbf() [ rare infinite loop in factor() over Z[X] ]
 IS 33- [HPUX:] should compile with cc -Ae, not -Aa
+   34- excessive memory usage in bnrstark() [ InitPrimes ]
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available
