@@ -814,6 +814,7 @@ quicktrace(GEN x, GEN sym)
   GEN p1 = gzero;
   long i;
 
+  if (typ(x) != t_POL) return gmul(x, (GEN)sym[1]);
   if (signe(x))
   {
     sym--;

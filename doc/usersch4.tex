@@ -404,7 +404,7 @@ priori not a basic type), but it has been given a special type number so that
 operations with matrices become possible.
 
 Finally, to facilitate input of constant objects when speed is not paramount,
-there are three \tet{varargs} functions:
+there are four \tet{varargs} functions:
 
 \fun{GEN}{coefs_to_int}{long n, ...}
 returns the non-negative \typ{INT} whose development in base $2^{32}$
@@ -427,11 +427,13 @@ decreasing degree.
 number of coefficients, \emph{not} the degree.
 
 \fun{GEN}{coefs_to_vec}{long n, ...}
-returns the \typ{VEC} whose $n$ coefficients (\kbd{GEN}) follow. If you
-would rather have a \typ{COL}, use \kbd{settyp}.
+returns the \typ{VEC} whose $n$ coefficients (\kbd{GEN}) follow.
+
+\fun{GEN}{coefs_to_col}{long n, ...}
+returns the \typ{COL} whose $n$ coefficients (\kbd{GEN}) follow.
 
 \misctitle{Warning} Contrary to the policy of general PARI functions, the
-latter two functions do \emph{not} copy of its arguments, nor do they produce
+latter three functions do \emph{not} copy of its arguments, nor do they produce
 an object a priori suitable for \tet{gerepileupto}. For instance
 \bprog
   /* gerepile-safe: components are universal objects */
@@ -454,7 +456,6 @@ an object a priori suitable for \tet{gerepileupto}. For instance
 Returns the \kbd{GEN} equal to $2^{32} a + b$, \emph{assuming} that
 $a,b < 2^{32}$. This does not depend on \kbd{sizeof(long)}: the behaviour is
 as above on both $32$ and $64$-bit machines.
-
 
 \subsec{Assignments}.
 Firstly, if \kbd{x} and \kbd{y} are both declared as \kbd{GEN} (i.e.~pointers

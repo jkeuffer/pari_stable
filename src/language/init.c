@@ -1326,6 +1326,35 @@ forcecopy(GEN x)
   unsetisclone(y); return y;
 }
 
+/* Replace heap components in INTMOD / POLMOD by stack copies, in place.
+ * Useful after x = gneg(y), y a clone. stackify(x) less wasteful than
+ * x = gerepileupto(av, forcecopy(x))   [ 1 partial copy instead of 2 full
+ * ones ] */
+GEN
+stackify(GEN x)
+{
+  long tx=typ(x),lx,i;
+
+  if (tx == t_SMALL) return x;
+  if (isclone(x)) return forcecopy(x);
+  if (is_recursive_t(tx))
+  {
+    if (tx == t_POLMOD || tx == t_INTMOD)
+    {
+      if (!isonstack(x[1])) x[1] = (long)forcecopy((GEN)x[1]);
+      x[2] = (long)stackify((GEN)x[2]);
+    }
+    else
+    {
+      if (tx==t_POL) lx = lgef(x);
+      else if (tx==t_LIST) lx = lgeflist(x);
+      else lx = lg(x);
+      for (i=lontyp[tx]; i<lx; i++) x[i] = (long)stackify((GEN)x[i]);
+    }
+  }
+  return x;
+}
+
 GEN
 dummycopy(GEN x)
 {

@@ -2216,6 +2216,18 @@ coefs_to_vec(long n, ...)
 }
 
 GEN
+coefs_to_col(long n, ...)
+{
+  va_list ap;
+  GEN x;
+  long i;
+  va_start(ap,n);
+  x = cgetg(n+1, t_COL);
+  for (i=1; i <= n; i++) x[i] = (long) va_arg(ap, GEN);
+  va_end(ap); return x;
+}
+
+GEN
 zeropol(long v)
 {
   GEN x = cgetg(2,t_POL);

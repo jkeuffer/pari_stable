@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                                                                **/
 /********************************************************************/
 #include "pari.h"
+extern GEN quicktrace(GEN x, GEN sym);
 extern GEN imagecomplspec(GEN x, long *nlze);
 extern void ZV_neg_ip(GEN M);
 
@@ -161,69 +162,69 @@ caradj0(GEN x, long v)
   return caradj(x,v,NULL);
 }
 
+/* assume x square matrice */
+static GEN
+mattrace(GEN x)
+{
+  pari_sp av;
+  long i, lx = lg(x);
+  GEN t;
+  if (lx < 3) return lx == 1? gzero: gcopy(gcoeff(x,1,1));
+  av = avma; t = gcoeff(x,1,1);
+  for (i = 2; i < lx; i++) t = gadd(t, gcoeff(x,i,i));
+  return gerepileupto(av, t);
+}
+
 /* Using traces: return the characteristic polynomial of x (in variable v).
- * If py != NULL, the adjoint matrix is put there.
- */
+ * If py != NULL, the adjoint matrix is put there. */
 GEN
 caradj(GEN x, long v, GEN *py)
 {
-  pari_sp av,tetpil;
-  long i,j,k,l;
-  GEN p,y,t,*gptr[2];
+  pari_sp av, av0;
+  long i, k, l;
+  GEN p, y, t;
 
-  if ((p = easychar(x,v,py))) return p;
+  if ((p = easychar(x, v, py))) return p;
 
-  l=lg(x);
-  if (l==1) { p=polun[v]; if (py) *py=gcopy(x); return p; }
-  if (l==2) { p=gsub(polx[v],gtrace(x)); if (py) *py=idmat(1); return p; }
-
-  p=cgetg(l+2,t_POL); p[1]=evalsigne(1) | evallgef(l+2) | evalvarn(v);
-  av=avma; t=gtrace(x); tetpil=avma;
-  t=gerepile(av,tetpil,gneg(t));
-  p[l]=(long)t; p[l+1]=un;
-
-  av=avma; y=cgetg(l,t_MAT);
-  for (j=1; j<l; j++)
-  {
-    y[j]=lgetg(l,t_COL);
-    for (i=1; i<l; i++)
-      coeff(y,i,j) = (i==j) ? ladd(gcoeff(x,i,j),t) : coeff(x,i,j);
-  }
-
-  for (k=2; k<l-1; k++)
-  {
-    GEN z=gmul(x,y);
-
-    t=gtrace(z); tetpil=avma;
-    t=gdivgs(t,-k); y=cgetg(l,t_MAT);
-    for (j=1; j<l; j++)
-    {
-      y[j]=lgetg(l,t_COL);
-      for (i=1;i<l;i++)
-	coeff(y,i,j) = (i==j)? ladd(gcoeff(z,i,i),t): lcopy(gcoeff(z,i,j));
+  l = lg(x); av0 = avma;
+  p = cgetg(l+2,t_POL); p[1] = evalsigne(1) | evallgef(l+2) | evalvarn(v);
+  p[l+1] = un;
+  if (l == 1) { if (py) *py = cgetg(1,t_MAT); return p; }
+  av = avma; t = gerepileupto(av, gneg(mattrace(x)));
+  p[l] = (long)t;
+  if (l == 2) { if (py) *py = idmat(1); return p; }
+  if (l == 3) {
+    GEN a = gcoeff(x,1,1), b = gcoeff(x,1,2);
+    GEN c = gcoeff(x,2,1), d = gcoeff(x,2,2);
+    if (py) { 
+      y = cgetg(3, t_MAT);
+      y[1] = (long)coefs_to_col(2, gcopy(d), gneg(c));
+      y[2] = (long)coefs_to_col(2, gneg(b), gcopy(a));
+      *py = y;
     }
-    gptr[0]=&y; gptr[1]=&t;
-    gerepilemanysp(av,tetpil,gptr,2);
-    p[l-k+1]=(long)t; av=avma;
+    av = avma;
+    p[2] = lpileupto(av, gadd(gmul(a,d), gneg(gmul(b,c))));
+    return p;
   }
-
-  t=gzero;
-  for (i=1; i<l; i++)
-    t=gadd(t,gmul(gcoeff(x,1,i),gcoeff(y,i,1)));
-  tetpil=avma; t=gneg(t);
-
-  if (py)
+  av = avma; y = dummycopy(x);
+  for (i = 1; i < l; i++) coeff(y,i,i) = ladd(gcoeff(y,i,i), t);
+  for (k = 2; k < l-1; k++)
   {
-    *py = (l&1) ? gneg(y) : gcopy(y);
-    gptr[0] = &t; gptr[1] = py;
-    gerepilemanysp(av,tetpil,gptr,2);
-    p[2]=(long)t;
+    GEN y0 = y;
+    y = gmul(x, y);
+    t = gdivgs(mattrace(y), -k);
+    for (i = 1; i < l; i++) coeff(y,i,i) = ladd(gcoeff(y,i,i), t);
+    y = gclone(y); if (k > 2) gunclone(y0);
+    p[l-k+1] = lpileupto(av, t); av = avma;
   }
-  else p[2]=lpile(av,tetpil,t);
+  t = gzero;
+  for (i=1; i<l; i++) t = gadd(t, gmul(gcoeff(x,1,i),gcoeff(y,i,1)));
+  p[2] = lpileupto(av, gneg(t));
   i = gvar2(p);
   if (i == v) err(talker,"incorrect variable in caradj");
-  if (i < v) p = poleval(p, polx[v]); 
-  return p;
+  if (i < v) p = gerepileupto(av0, poleval(p, polx[v]));
+  if (py) *py = (l & 1)? forcecopy(y): stackify(gneg(y));
+  gunclone(y); return p;
 }
 
 GEN
@@ -612,9 +613,9 @@ assmat(GEN x)
 GEN
 gtrace(GEN x)
 {
-  pari_sp av, tetpil;
-  long i,n,tx=typ(x),lx;
-  GEN y,p1,p2;
+  pari_sp av;
+  long i, lx, tx = typ(x);
+  GEN y;
 
   switch(tx)
   {
@@ -625,47 +626,41 @@ gtrace(GEN x)
       return gmul2n((GEN)x[1],1);
 
     case t_QUAD:
-      p1=(GEN)x[1];
-      if (!gcmp0((GEN) p1[3]))
-      {
-	av=avma; p2=gmul2n((GEN)x[2],1);
-	tetpil=avma; return gerepile(av,tetpil,gadd((GEN)x[3],p2));
+      y = (GEN)x[1];
+      if (!gcmp0((GEN)y[3]))
+      { /* assume quad. polynomial is either x^2 + d or x^2 - x + d */
+	av = avma;
+	return gerepileupto(av, gadd((GEN)x[3], gmul2n((GEN)x[2],1)));
       }
       return gmul2n((GEN)x[2],1);
 
     case t_POL:
-      lx=lgef(x); y=cgetg(lx,tx); y[1]=x[1];
-      for (i=2; i<lx; i++) y[i]=ltrace((GEN)x[i]);
+      lx = lgef(x); y = cgetg(lx,tx); y[1] = x[1];
+      for (i=2; i<lx; i++) y[i] = ltrace((GEN)x[i]);
       return y;
 
     case t_SER:
-      lx=lg(x); y=cgetg(lx,tx); y[1]=x[1];
-      for (i=2; i<lx; i++) y[i]=ltrace((GEN)x[i]);
+      lx = lg(x); y = cgetg(lx,tx); y[1] = x[1];
+      for (i=2; i<lx; i++) y[i] = ltrace((GEN)x[i]);
       return y;
 
     case t_POLMOD:
-      av=avma; n=(lgef(x[1])-4);
-      p1=polsym((GEN)x[1],n); p2=gzero;
-      for (i=0; i<=n; i++)
-        p2=gadd(p2,gmul(truecoeff((GEN)x[2],i),(GEN)p1[i+1]));
-      return gerepileupto(av,p2);
+      av = avma; y = (GEN)x[1];
+      return gerepileupto(av, quicktrace((GEN)x[2], polsym(y, degpol(y)-1)));
 
     case t_RFRAC: case t_RFRACN:
-      return gadd(x,gconj(x));
+      return gadd(x, gconj(x));
 
     case t_VEC: case t_COL:
-      lx=lg(x); y=cgetg(lx,tx);
-      for (i=1; i<lx; i++) y[i]=ltrace((GEN)x[i]);
+      lx = lg(x); y = cgetg(lx,tx);
+      for (i=1; i<lx; i++) y[i] = ltrace((GEN)x[i]);
       return y;
 
     case t_MAT:
-      lx=lg(x); if (lx==1) return gzero;/*now lx>=2*/
-      if (lx!=lg(x[1])) err(mattype1,"gtrace");
-      av=avma; p1=gcoeff(x,1,1); if (lx==2) return gcopy(p1);
-      for (i=2; i<lx-1; i++)
-	p1=gadd(p1,gcoeff(x,i,i));
-      tetpil=avma; return gerepile(av,tetpil,gadd(p1,gcoeff(x,i,i)));
-
+      lx = lg(x); if (lx == 1) return gzero;
+      /*now lx >= 2*/
+      if (lx != lg(x[1])) err(mattype1,"gtrace");
+      return mattrace(x);
   }
   err(typeer,"gtrace");
   return NULL; /* not reached */
