@@ -728,6 +728,18 @@ mingvar(GEN x, GEN y)
   return min(i,j);
 }
 
+static GEN
+to_primitive(GEN x, GEN *cx)
+{
+  if (typ(x) != t_POL)
+    { *cx = x; x = gun; }
+  else if (lgef(x) == 3)
+    { *cx = (GEN)x[2]; x = gun; }
+  else
+    { *cx = content(x); if (!gcmp1(*cx)) x = gdiv(x,*cx); }
+  return x;
+}
+
 GEN
 mulscalrfrac(GEN x, GEN y)
 {
@@ -743,10 +755,10 @@ mulscalrfrac(GEN x, GEN y)
   else
   {
     p1 = ggcd(x,y2); if (isnonscalar(p1)) { x=gdeuc(x,p1); y2=gdeuc(y2,p1); }
-    cx = content(x); if (!gcmp1(cx)) x = gdiv(x,cx);
+    x = to_primitive(x, &cx);
   }
-  cy1 = content(y1); if (!gcmp1(cy1)) y1 = gdiv(y1,cy1);
-  cy2 = content(y2); if (!gcmp1(cy2)) y2 = gdiv(y2,cy2);
+  y1 = to_primitive(y1, &cy1);
+  y2 = to_primitive(y2, &cy2);
   if (x != gun) y1 = gmul(y1,x);
   x = gdiv(gmul(cx,cy1), cy2);
   cy1 = numer(x);
