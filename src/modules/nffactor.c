@@ -252,7 +252,9 @@ int
 nfissplit(GEN nf, GEN x)
 {
   pari_sp av = avma;
-  long l = lg(nfsqff(checknf(nf), x, 2));
+  long l;
+  if (typ(x) != t_POL) err(typeer, "nfissplit");
+  l = lg(nfsqff(checknf(nf), x, 2));
   avma = av; return l != 1;
 }
 
@@ -260,6 +262,7 @@ nfissplit(GEN nf, GEN x)
 int
 nfisgalois(GEN nf, GEN P)
 {
+  if (typ(P) != t_POL) err(typeer, "nfissplit");
   return degpol(P) <= 2 || nfissplit(nf, P);
 }
 
@@ -1310,6 +1313,7 @@ nfsqff(GEN nf, GEN pol, long fl)
   if (DEBUGLEVEL>2) { TIMERstart(&ti); TIMERstart(&ti_tot); }
   nfpol = (GEN)nf[1]; n = degpol(nfpol);
   polbase = unifpol(nf,pol,0);
+  if (typ(polbase) != t_POL) err(typeer, "nfsqff");
   polmod  = unifpol(nf,pol,1);
   /* heuristic */
   if (dpol*3 < n) 
