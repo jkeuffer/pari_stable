@@ -2334,7 +2334,7 @@ FpM_gauss_pivot(GEN x, GEN p, GEN *dd, long *rr)
   GEN c,d,piv;
   long i,j,k,r,t,n,m,av,lim;
 
-  if (!p) return gauss_pivot(x,dd,rr);
+  if (!p) { gauss_pivot(x,dd,rr); return; }
   if (typ(x)!=t_MAT) err(typeer,"FpM_gauss_pivot");
   n=lg(x)-1; if (!n) { *dd=NULL; *rr=0; return; }
 
