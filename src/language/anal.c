@@ -3115,7 +3115,7 @@ trap0(char *e, char *r, char *f)
   * environnement */
   if (f)
   {
-    if (!*f) /* unset previous handler */
+    if (!*f || (*f == '"' && f[1] == '"')) /* unset previous handler */
     {/* TODO: find a better interface
       * TODO: no leaked handler from the library should have survived
       */
