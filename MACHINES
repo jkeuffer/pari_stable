@@ -81,6 +81,7 @@ SPARCv7(SS400)  ???  SunOS-4.1.4     gcc          107074  106494  2.0.16(19)DE
 SPARCv7(HWS210) ???  Linux-2.2.5     gcc           98488!      -  2.0.16(14)DE
 ------------------------------------------------------------------------------
 Intel/x86
+AMD Athlon  XP2400+  Linux-2.4.21    gcc-3.2         428     398  2.2.5 (41)MH
 AMD Athlon  XP1800+  Linux-2.4.17    gcc-3.0.4       616     616  2.2.3 (30)PE
 AMD Athlon  MP1800+  Linux-2.4.9     gcc-2.96        696     688  2.2.3 (29)HC
 AMD Athlon  1200MHz  Linux-2.4.7     gcc-2.96       1002     992  2.1.2     CL
@@ -96,7 +97,9 @@ AMD K6-2     350Mhz  Linux-2.0.36    gcc            5154    4850  2.0.17
 AMD K6       266MHz  Linux-2.2.5    pgcc            5861    6001  2.0.16(16)IS
 AMD K6       233Mhz  Linux-2.2.14    gcc            6968    7158  2.0.18    QL
 IBM/Cyrix    200MHz  Linux-2.0.35    gcc           13190   13729  2.0.15    AP
+
 PentiumIV   2800MHz  Linux-2.4.18    gcc-3.2	     507     580  2.2.6	    IS	
+PentiumIV   2000MHz  Linux-2.4.18    gcc-3.2	     849     835  2.1.5 (25)FU
 PentiumIV   1800MHz  WinXP + Cygwin  gcc-3.2        1384!      -  2.2.5 (38)DC
 PentiumIV   1695MHz  FreeBSD 4.6.2   gcc-2.95.3      904     918  2.2.5     MW
 PentiumIV   1600MHz  Linux-2.4.18-3  gcc-2.96        930     926  2.2.5
@@ -108,6 +111,7 @@ PentiumIII   933MHz  Linux-2.2.15   egcs            1450    1485  2.0.20    IS
 PentiumIII   800MHz  Linux-2.2.14   egcs            1900    1882  2.0.20    CL
 PentiumIII   800MHz  Linux-2.2.19    gcc-2.96       1638    1624  2.1.2     OT
 PentiumIII   733MHz  Linux-2.2.14   egcs            2080    2090  2.0.19    IS
+PentiumIII   550MHz  Linux-2.5.56    gcc.3.2.1      1918    1984  2.2.5     MH
 PentiumIII   533MHz  Linux-2.2.14    gcc            2710    2730  2.0.19    IS
 PentiumIII   500MHz  Linux-2.2.12   egcs            3154    3176  2.0.18    HC
 PentiumII    450MHz  Linux-2.4.18    gcc-3.0.4      2348    2426  2.2.3 (31)PE
@@ -319,6 +323,19 @@ CFLAGS= -fbranch-probabilities  -O3 -DGCC_INLINE -Wall -Wno-implicit
 (39) http://db.debian.org/machines.cgi?host=raptor
 
 (40) http://db.debian.org/machines.cgi?host=merkel
+
+(41) 1 GB RAM, NForce2 chipset, 2.4.21pre7 kernel (Red Hat 8.0)
+CFLAGS = -O2 -s -DGCC_INLINE -Wall -fbranch-probabilities -mmmx -msse -m3dnow
+-ffast-math -fno-unsafe-math-optimizations -D__USE_ISOC99
+-D__USE_EXTERN_INLINES -fomit-frame-pointer -DBOTH_GNUPLOT_AND_X11
+
+-fno-unsafe-math-optimizations is mandatory with -ffast-math, in order to avoid
+bugs in nfields test.
+
+Used -fprofile-arcs for the first compilation parse, then -fbranch-probabilities
+to generate optimized executables. For this machine, many benchmarks are too
+short to provide accurate results (TIME=0 or 10).
+
 =============================================================================
 Contributors:
   AW = Aleksander Wittlin
@@ -331,6 +348,7 @@ Contributors:
   DE = Denis Excoffier
   DP = David Purdy
   EK = Emmanuel Kowalski
+  FU = Frederic Udina
   GH = Guillaume Hanrot
   GN = Gerhard Niklasch
   HC = Henri Cohen
@@ -342,6 +360,7 @@ Contributors:
   KK = Kimitoshi Kono
   LG = Louis Granboulan
   MB = Marco Bucci
+  MH = Mohammad Bahathir Hashim
   MS = Michael Stoll
   MW = Mariusz Wodzicki
   NI = Nathaniel Irons
