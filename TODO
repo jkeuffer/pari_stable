@@ -49,6 +49,9 @@ Unless specified otherwise, examples assume 32bit machine and default precision
 
 ***************************   BUGS (GP specific) ****************************
 
+5  life of GP variables too short in pathological cases:
+   v = concat(v, [v=1,v=2]); concat(v, [v=1,v=2]) --> SEGV
+
 4  changing primelimit from within forprime loop yields unpredictable results
 
 3  after allocatemem() / default(parisize, ...), the rest of the command is
