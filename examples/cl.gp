@@ -1,77 +1,75 @@
 rgcd(a,b)=
-{
-  local(r);
+{ local(r);
 
-  a=abs(a); b=abs(b);
-  while(b > 0.01,
-    r = a - b*truncate(a/b);
-    a=b; b=r
-  );
+  a = abs(a);
+  b = abs(b);
+  while (b > 0.01, r=a%b; a=b; b=r);
   a
 }
 
 f(a,b)=
-{
-  local(j,s,n,l,mv,vreg,cp);
+{ local(j,n,l,mv,u,vreg,cp,p);
 
-  s=a+b*t; n=abs(norm(s));
-  mv=vectorv(li);
-  forprime(k=2,plim,
-    l=0; while (!(n%k), l++; n/=k);
-    if (l,
-      j=ind[k];cp=v[j][2];
-      while((a+b*cp)%k,
-	j++; cp=v[j][2]
+  n = abs( norm(a + b*t) );
+  mv = vectorv(li);
+  forprime (p=2, plim,
+    if ((l = valuation(n,p)),
+      n /= p^l;
+      j = ind[p]; cp = v[j][2];
+      while((a+b*cp)%p,
+	j++; cp = v[j][2]
       );
       mv[j]=l
     )
   );
   if (n!=1, return);
 
-  vreg=vectorv(lireg,j,
-    if (j<=r1,
-      log(abs(a+b*re[j]))
-    ,
-      log(norm(a+b*re[j]))
-    )
+  /* found a relation */
+  vreg = vectorv(lireg,j,
+    u = a+b*re[j];
+    if (j<=r1, abs(u), norm(u))
   );
-  mreg=concat(mreg,vreg); m=concat(m,mv);
-  areg=concat(areg,a+b*t);
+  mreg = concat(mreg, log(vreg));
+  m = concat(m,mv);
+  areg = concat(areg, a+b*t);
   print1("(" res++ ": " a "," b ")")
 }
 
-clareg(p, plim=19, lima=50, extra=5)=
-{
-  vi=nfinit(p); p=vi.pol;
-  t=Mod(x,p,1);
-  r=vi.roots; r1=vi.sign[1];
-  findex=vi[4]; /* index: power basis <==> findex = 1 */
-  if (findex>1,
+global(km,clh,R,nf,areg);
+
+clareg(pol, plim=19, lima=50, extra=5)=
+{ local(e,t,r,coreg,lireg,r1,ind,fa,li,co,res,a,b,m,mh,ms,mhs,mreg,mregh);
+
+  nf=nfinit(pol); pol=nf.pol;
+  t=Mod(x,pol,1);
+  r=nf.roots; r1=nf.sign[1];
+  if (nf[4] > 1, /* index: power basis <==> nf[4] = 1 */
     error("sorry, the case f>1 is not implemented")
   );
 
-  print("discriminant = " vi.disc ", signature = " vi.sign);
-  dep=length(p)-1;
-  lireg=(dep+r1)/2;
+  print("discriminant = " nf.disc ", signature = " nf.sign);
+ 
+  lireg = (poldegree(pol) + r1) / 2; /* r1 + r2 */
   re=vector(lireg,j,
     if (j<=r1, real(r[j]) , r[j])
   );
   ind=vector(plim); v=[];
-  forprime(k=2,plim,
-    w=lift(factormod(p,k));
+  forprime(p=2,plim,
+    w = factormod(pol,p);
+    e = w[,2];
     find=0;
-    for(l=1,length(w[,1]),
-      fa=w[l,1];
-      if (length(fa)==2,
+    for(l=1,#e,
+      fa = lift(w[l,1]);
+      if (poldegree(fa) == 1,
 	if (!find,
-	  find=1; ind[k]=length(v)+1
+	  find=1; ind[p]=#v+1
 	);
-	v=concat(v,[[k,-polcoeff(fa,0),w[l,2]]])
+	v = concat(v, [[p,-polcoeff(fa,0),e[l]]])
       )
     )
   );
-  li=length(v); co=li+extra;
-  res=0; print("need " co);
+  li=#v; co=li+extra;
+  res=0; print("need " co " relations");
   areg=[]~; mreg = m = [;];
   a=1; b=1; f(0,1);
   while (res<co,
@@ -88,45 +86,41 @@ clareg(p, plim=19, lima=50, extra=5)=
     return
   );
 
-  mhs=matsnf(mh); clh=mhs[1]; mh1=[clh];
-  j=1;
-  while (j<length(mhs),
-    j++;
-    if (mhs[j]>1,
-      mh1=concat(mh1,mhs[j]);
-      clh *= mhs[j]
-    )
-  );
-  print("class number = " clh ", class group = " mh1);
+  mhs = matsnf(mh,4);
+  clh = prod(i=1,#mhs, mhs[i]);
+  print("class number = " clh ", class group = " mhs);
   areg=Mat(areg); km=matkerint(m); mregh=mreg*km;
   if (lireg==1,
-    a1=1
+    R = 1
   ,
-    coreg=length(mregh);
-    if (coreg<lireg-1,
+    coreg = #mregh;
+    if (coreg < lireg-1,
       print("not enough relations for regulator: matsize = " matsize(mregh));
-      a1 = "(not given)";
+      R = "(not given)";
     ,
-      mreg1=vecextract(mregh, Str(1 ".." lireg-1), "..");
-      a1 = 0;
+      mreg1 = vecextract(mregh, Str(".." lireg-1), "..");
+      R = 0;
       for(j=lireg-1,coreg,
         a = matdet(vecextract(mreg1, Str(j-lireg+2 ".." j)));
-	a1 = if (a1, a, rgcd(a1,a))
-      );
+	R = rgcd(a,R)
+      )
     )
   );
-  print("regulator = " a1)
+  print("regulator = " R)
 }
 
 check(lim=200) =
-{
-  r1=vi.sign[1]; r2=vi.sign[2]; pol=vi.pol;
-  z = 2^(-r1) * (2*Pi)^(-r2) * sqrt(abs(vi.disc));
+{ local(r1,r2,pol,z,Res,fa);
+
+  r1=nf.sign[1];
+  r2=nf.sign[2]; pol=nf.pol;
+  z = 2^r1 * (2*Pi)^r2 / sqrt(abs(nf.disc)) / nfrootsof1(nf)[1];
+  Res = 1.; \\ Res (Zeta_K,s=1) ~ z * h * R
   forprime (q=2,lim,
-    z *= (q-1)/q; fa=factormod(pol,q,1)[,1];
-    z /= prod(i=1, length(fa), 1 - 1/q^fa[i])
+    fa = factormod(pol,q,1)[,1];
+    Res *= (q-1)/q / prod(i=1, #fa, 1 - q^(-fa[i]))
   );
-  clh*a1/nfrootsof1(vi)[1]/z
+  z * clh * R / Res 
 }
 
-fu() = vector(length(km), k, factorback(concat(areg, km[,k])))
+fu() = vector(#km, k, factorback(concat(areg, km[,k])))

@@ -13,7 +13,7 @@ by the command \r file.
 -- bench.gp: This program computes the first 1000 terms of the Fibonacci
 sequence, the product p of successive terms, and the lowest common multiple
 q. It outputs the ratio log(p)/log(q) every 50 terms (this ratio tends to
-pi^2/6 as k tends to infinity). The name bench.gp comes from the fact that
+Pi^2/6 as k tends to infinity). The name bench.gp comes from the fact that
 this program is one (among many) examples where GP/PARI performs orders of
 magnitude faster than systems such as Maple or Mathematica (try it!).
 
@@ -21,24 +21,32 @@ magnitude faster than systems such as Maple or Mathematica (try it!).
 programs included in this file allows you in many cases to compute the class
 number, the structure of the class group and a system of fundamental units of
 a general number field (they sometimes fail to give an answer). It can work
-only if nfinit finds a power basis. Evidently it is much less powerful and
-much slower than bnfinit, but it is given as an example of a sophisticated
-use of GP.  The first thing to do is to call the function clareg(pol,
-{limp},{lima},{extra}) where pol is the monic irreducible polynomial defining
-the number field, limp is the prime factor base limit (try values between 19
-and 113), lima is another search limit (try 50 or 100) and extra is the
-number of desired extra relations (try 2 to 10). Default values are provided,
-so that you need only supply pol.
+only if nfinit finds a power basis. Evidently it is much less powerful, less
+reliable and much slower than bnfinit, but it is given as an example of a
+sophisticated use of GP.  The first thing to do is to call
+
+   clareg(pol, {limp=19},{lima=50},{extra=5})
+
+where pol is the monic irreducible polynomial defining the number field, limp
+is the prime factor base limit (try values between 19 and 113), lima is
+another search limit (try 50 or 100) and extra is the number of desired extra
+relations (try 2 to 10). Default values are provided, so that you need only
+supply pol.
 
   The program prints the number of relations that it needs, and tries to find
-them. If you see that clearly it slows down too much before succeeding, abort
-and try other values. If it succeeds, it will print the class number, class
-group, regulator. These are tentative values. Then use the function
-check(lim) (lim=200 is the default value) to check if the value is consistent
-with the value of the L-series (the value returned by check should be close
-to 1). Finally, the function fu() (no parameters) returns a family of units
-which generates the unit group (you must extract a system of fundamental
-units yourself).
+them. If you see that it slows down too much before succeeding, abort and try
+other values. If it succeeds, it will print the class number, class group,
+regulator. These are tentative values. Then use
+
+   check({lim = 100})
+
+to check if the value is consistent with the value of the L-series (the value
+returned should be close to 1). Finally, 
+
+   fu() (no parameters)
+
+returns a family of units which generates the unit group (you must extract a
+system of fundamental units yourself).
 
 -- classno.gp: A very simple function to compute analytically the class
 number of imaginary quadratic fields (written by Fernando Rodriguez Villegas)
@@ -63,8 +71,11 @@ some intermediate information as it goes along. The final result is some
 factor of the number to be factored.
 
 -- taylor.gp: Given a user function f (e.g defined by f(x) = sin(x)), defines
-a function plot_taylor(xmin,xmax, ordlim, first,step) plots f together with
-its Taylor polynomials T_i (truncated series expansion of order i) in the
-interval [xmin,xmax]; i goes from first to ordlim in increments of steps.
-Sensible default values are provided for all arguments (written by Ilya
-Zakharevich)
+a function
+
+   plot_taylor(xmin,xmax, ordlim, first,step)
+
+which plots f together with its Taylor polynomials T_i (truncated series
+expansion of order i) in the interval [xmin,xmax]; i goes from first to
+ordlim in increments of steps. Sensible default values are provided for all
+arguments (written by Ilya Zakharevich)
