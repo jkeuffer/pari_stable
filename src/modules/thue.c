@@ -606,7 +606,7 @@ thueinit(GEN pol, long flag, long prec)
 		     (dr+3)*log(d) + log(log(2*d*(dr+2))) + (dr+1))
                      / ((BYTES_IN_LONG/4)* 10.));
 
-    if (flag == 0) PREC = 2.5 * PREC; /* Lazy, to be improved */
+    if (flag == 0) PREC = (long) 2.5 * PREC; /* Lazy, to be improved */
     if (PREC < prec) PREC = prec;
     
 
