@@ -1128,6 +1128,67 @@ get_nf_matrices(GEN nf, long small)
   if (DEBUGLEVEL) msgtimer("matrices");
 }
 
+static GEN
+hnffromLLL(GEN nf)
+{
+  GEN d, x;
+  x = vecpol_to_mat((GEN)nf[7], degpol(nf[1]));
+  d = denom(x); x = Q_remove_denom(x, d);
+  
+  return gauss(hnfmodid(x, d), x);
+}
+
+static GEN
+nfbasechange(GEN u, GEN x)
+{
+  long i,lx;
+  GEN y;
+  switch(typ(x))
+  {
+    case t_COL: /* nfelt */
+      return gmul(u, x);
+
+    case t_MAT: /* ideal */
+      y = dummycopy(x);
+      lx = lg(x);
+      for (i=1; i<lx; i++) y[i] = lmul(u, (GEN)y[i]);
+      break;
+
+    case t_VEC: /* pr */
+      checkprimeid(x);
+      y = dummycopy(x);
+      y[2] = lmul(u, (GEN)y[2]);
+      y[5] = lmul(u, (GEN)y[5]);
+      break;
+    default: y = x;
+  }
+  return y;
+}
+
+GEN
+nffromhnfbasis(GEN nf, GEN x)
+{
+  long tx = typ(x);
+  gpmem_t av = avma;
+  GEN u;
+  if (!is_vec_t(tx)) return gcopy(x);
+  nf = checknf(nf);
+  u = hnffromLLL(nf);
+  return gerepilecopy(av, nfbasechange(u, x));
+}
+
+GEN
+nftohnfbasis(GEN nf, GEN x)
+{
+  long tx = typ(x);
+  gpmem_t av = avma;
+  GEN u;
+  if (!is_vec_t(tx)) return gcopy(x);
+  nf = checknf(nf);
+  u = ZM_inv(hnffromLLL(nf), gun);
+  return gerepilecopy(av, nfbasechange(u, x));
+}
+
 GEN
 make_T2(GEN bas, GEN ro, long r1)
 {
