@@ -279,16 +279,19 @@ element_sqri(GEN nf, GEN x)
 GEN
 element_sqr(GEN nf, GEN x)
 {
-  long av,i,j,k,N=lgef(nf[1])-3;
+  long av = avma,i,j,k,N=lgef(nf[1])-3, tx = typ(x);
   GEN p1,s,v,c, tab = (GEN)nf[9];
 
+  if (tx==t_POLMOD) x=checknfelt_mod(nf,x);
+  if (is_extscalar_t(tx))
+    return gerepileupto(av, algtobasis(nf, gsqr(x)));
   if (isnfscalar(x))
   {
     s=cgetg(N+1,t_COL); s[1]=lsqr((GEN)x[1]);
     for (i=2; i<=N; i++) s[i]=lcopy((GEN)x[i]);
     return s;
   }
-  v=cgetg(N+1,t_COL); av=avma;
+  v=cgetg(N+1,t_COL);
   for (k=1; k<=N; k++)
   {
     if (k == 1)

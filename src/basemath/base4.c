@@ -783,13 +783,28 @@ idealaddtoone_i(GEN nf, GEN x, GEN y)
     fprintferr(" y = %Z\n",y);
   }
   t = idealtyp(&x,&p1);
-  if (t != id_MAT || lg(x) != lg(x[1])) xh = idealhermite_aux(nf,x);
+  if (t != id_MAT || lg(x) > 1 || lg(x) != lg(x[1]))
+    xh = idealhermite_aux(nf,x);
   else
     { xh=x; fl = isnfscalar((GEN)x[1]); }
   t = idealtyp(&y,&p1);
-  if (t != id_MAT || lg(y) != lg(y[1])) yh = idealhermite_aux(nf,y);
+  if (t != id_MAT || lg(y) == 1 || lg(y) != lg(y[1]))
+    yh = idealhermite_aux(nf,y);
   else
     { yh=y; if (fl) fl = isnfscalar((GEN)y[1]); }
+  if (lg(xh) == 1)
+  {
+    if (lg(yh) == 1 || !gcmp1(gabs(gcoeff(yh,1,1),0)))
+      err(talker,"ideals don't sum to Z_K in idealaddtoone");
+    return algtobasis(nf, gzero);
+  }
+  if (lg(yh) == 1)
+  {
+    p1 = gcoeff(xh,1,1);
+    if (!gcmp1(gabs(p1,0)))
+      err(talker,"ideals don't sum to Z_K in idealaddtoone");
+    return algtobasis(nf, gneg(p1));
+  }
 
   p1 = get_p1(nf,xh,yh,fl);
   p1 = element_reduce(nf,p1, idealmullll(nf,x,y));
@@ -1500,11 +1515,20 @@ ideallllredall(GEN nf, GEN x, GEN vdir, long prec, long precint)
   if (ax) res = cgetg(3,t_VEC);
   if (tx == id_PRINCIPAL)
   {
-    y = idmat(N);
-    if (!ax) return y;
-    res[1] = (long)y; av = avma;
-    res[2] = lpileupto(av, gneg(get_arch(nf,x,prec)));
-    return res;
+    if (gcmp0(x))
+    {
+      y = cgetg(1, t_MAT);
+      if (!ax) return y;
+      res[2] = lcopy(ax);
+    }
+    else
+    {
+      y = idmat(N);
+      if (!ax) return y;
+      av = avma;
+      res[2] = lpileupto(av, gsub(ax, get_arch(nf,x,prec)));
+    }
+    res[1] = (long)y; return res;
   }
   av = avma;
   if (tx != id_MAT || lg(x) != N+1) x = idealhermite_aux(nf,x);
