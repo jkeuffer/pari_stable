@@ -1723,8 +1723,9 @@ gp-previous-cmd and gp-next-cmd and reciprocally"
   (interactive)
   (save-excursion
     (goto-char (point-max))
-    (if (re-search-backward gp-prompt-pattern nil t)
-        (delete-region gp-input-end (point-max)))))
+    (when (re-search-backward gp-prompt-pattern nil t)
+       (let ((inhibit-read-only t))
+         (delete-region gp-input-end (point-max))))))
 
 (defun gp-remove-last-action nil
   (interactive)
@@ -1732,8 +1733,9 @@ gp-previous-cmd and gp-next-cmd and reciprocally"
     (goto-char (point-max))
     (if (re-search-backward gp-prompt-pattern nil t)
         (let ((where (1- (point))))
-             (if (re-search-backward gp-prompt-pattern nil t)
-                 (delete-region (1- (point)) where))))))
+          (when (re-search-backward gp-prompt-pattern nil t)
+            (let ((inhibit-read-only t))
+              (delete-region (1- (point)) where)))))))
 
 (defun gp-electric-behavior (choice)
   "Selects RET/M-RET from `sli-electric-terminate-line'
