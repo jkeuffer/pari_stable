@@ -601,16 +601,16 @@ lower_bound(GEN p, long *k, double eps)
 static GEN
 max_modulus(GEN p, double tau)
 {
-  GEN q,aux,new_gunr;
+  GEN q,aux,gunr;
   long i,j,k,valuat,n=lgef(p)-3,nn,ltop=avma,bitprec,imax,e;
   double r=0.,rho,tau2,eps;
 
   if (tau>3.0) tau=3.0; /* fix PZ 7.2.98: ensures eps is positive */
   eps=1/log(4./tau); tau2=tau/6.;
   bitprec=(long) ((double) n*log2(1./tau2)+3*log2((double) n))+1;
-  new_gunr=myrealun(bitprec+2*n);
-  aux=gdiv(new_gunr,(GEN) p[2+n]);
-  q=gmul(aux,p); q[2+n]=lcopy(new_gunr);
+  gunr=myrealun(bitprec+2*n);
+  aux=gdiv(gunr,(GEN) p[2+n]);
+  q=gmul(aux,p); q[2+n]=lcopy(gunr);
   k=nn=n;
   e=findpower(q); homothetie2n(q,e); r=-(double) e;
   q=mygprec(q,bitprec+(n<<1));
@@ -620,12 +620,8 @@ max_modulus(GEN p, double tau)
   {
     rho=lower_bound(q,&k,eps);
     if (rho>exp2(-(double) e)) e = (long) -floor(log2(rho));
-    r = r-(double) e/ exp2( (double) i);
-    if (++i == imax)
-    {
-      avma=ltop;
-      return gpui(dbltor(2.),dbltor(r),DEFAULTPREC);
-    }
+    r -= e / exp2((double)i);
+    if (++i == imax) { avma=ltop; return dbltor(exp2(r)); }
 
     if (k<nn)
       bitprec=(long) ((double) k* log2(1./tau2)+
@@ -652,17 +648,17 @@ max_modulus(GEN p, double tau)
 static GEN
 modulus(GEN p, long k, double tau)
 {
-  GEN q,new_gunr;
+  GEN q,gunr;
   long i,j,kk=k,imax,n=lgef(p)-3,nn,nnn,valuat,av,ltop=avma,bitprec,decprec,e;
   double tau2,r;
 
   tau2=tau/6; nn=n;
   bitprec= (long) ((double) n*(2.+log2(3.*(double) n)+log2(1./tau2)));
   decprec=(long) ((double) bitprec * L2SL10)+1;
-  new_gunr=myrealun(bitprec);
+  gunr=myrealun(bitprec);
   av = avma;
   q=gprec(p,decprec);
-  q=gmul(new_gunr,q);
+  q=gmul(gunr,q);
   e=polygone_newton(q,k);
   homothetie2n(q,e);
   r=(double) e;
@@ -683,8 +679,8 @@ modulus(GEN p, long k, double tau)
     set_karasquare_limit(bitprec);
     q = gerepileupto(av, graeffe(q));
     e=polygone_newton(q,kk);
-    r=r+e/exp2((double)i);
-    q=gmul(new_gunr,q);
+    r += e / exp2((double)i);
+    q=gmul(gunr,q);
     homothetie2n(q,e);
 
     tau2=1.5*tau2; if (tau2>1.) tau2=1.;
