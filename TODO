@@ -16,7 +16,7 @@ Priority classification (first column): [subjective and debatable!]
 ***************************   BUGS (general)     ****************************
 Unless specified otherwise, examples assume 32bit machine and default precision 
 
-5  setrand(5);thueinit(polsubcyclo(precprime(2^17),3))
+5  setrand(5);thueinit(x^3 + x^2 - 43690*x - 3529208)
    ***   non positive argument in mplog. \\ precision problem
 
 4  gcmp/gegal not transitive: [] == 0, [0] == 0, but [0] != []
@@ -30,6 +30,9 @@ Unless specified otherwise, examples assume 32bit machine and default precision
 4  qfbclassno(x < 0) may give a wrong result [e.g x = -2878367]
 
 4  zeta(599065705248735808.) --> exponent to large in exp.
+
+4  t_SER computations much too slow when number of terms increase, even
+   when applying a trivial formula, e.g cos(x) at \ps 10000
 
 3  many functions assume MAXVARN is a free variable, yielding bogus
    results if the input involve it (only affect library programming).

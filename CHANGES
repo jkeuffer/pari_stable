@@ -43,6 +43,13 @@ BA  8- Pocklington-Lehmer didn't stop factorisation after sqrt(N)
    11- rnfisnorm didn't accept vectors on Zk basis as argument
    12- [cygwin] fixed timer (always returned 0)
 IS 13- function prototypes (missing 'extern')
+   14- quadray(bnf, ...) didn't work when bnf.disc < 0. Could also return
+       a relative equation over an intermediate field
+   15- deficient argument checks: asinh(2*x-1), agm(1,1-x), zetakinit(2*x-1),
+       nfnewprec([2*x-1]), thueinit(non-monic or degree 1), lcm(x, 0)
+       rnfidealmul(2*x-1,0), galoisfixedfield(2*x-1), qfbnupow(2*x-1, 0),
+       polred([x,x]), bezout(Mod(x,x^2+1),0) : SEGV
+   16- check variable numbers in algtobasis: nfalgtobasis(nfinit(P(y), x))
 
   Changed
 BA  1- more efficient quadratic Hensel lift
