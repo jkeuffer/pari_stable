@@ -123,7 +123,7 @@ case "$kernlvl1" in
 esac
 
 # 'i386 (running ix86 kernel)'  looks ugly
-if test "$arch" != "$kernlvl0" -a \( "$arch" != "i386" -o "$prettyk" != "ix86" \)
+if test "$pretty" != "$prettyk" -a \( "$pretty" != "i386" -o "$prettyk" != "ix86" \)
 then
   pretty="$pretty ($prettyk kernel)"
 fi
