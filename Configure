@@ -437,6 +437,7 @@ if test "$optimization" != profiling; then
   pth="$TOP/gnuplot-$osname-$arch $TOP/gnuplot $TOP/../gnuplot-$osname-$arch $TOP/../gnuplot $TOP/../../gnuplot-$osname-$arch $TOP/../../gnuplot $pth"
   gpth="$pth"
   lib=gnuplot; . ./locatelib
+  gnuplot_fullpath="$try"
   pth="$opth"
   gnuplot_libs=
   case $gnuplot in
@@ -727,6 +728,32 @@ if test -z "$CC"; then
   # Choosing the compiler
   if test -n "$__gnuc__"; then CC=$gcc; else CC=$cc; fi
 fi
+
+if test "$which_graphic_lib" = gnuplot -a -z "$gcc"; then
+    if nm $gnuplot_fullpath | grep -c _eprintf 2>&1 > /dev/null ; then
+	echo "...Looks like gcc-compiled gnuplot.  I add -lgcc to graphic libraries"
+	_ogcc="$gcc"
+	opth="$pth"
+	pth="$pth /opt/local/gnu/lib /usr/local/gnu/lib"
+	gcclibspec="`gcc -v 2>&1 | grep specs | sed 's/.*specs from //'`"
+	if test -n "$gcclibspec"; then
+	    pth="`dirname $gcclibspec` $pth"
+	fi
+	lib=gcc; . ./locatelib
+	if test -n "$gcc"; then
+	    gnuplot_libs="$gnuplot_libs -L$gcc"
+	else
+	    echo "...### I did not find -lgcc library in $pth."
+	    echo "...### You may need to manually add something like -L/opt/gnu/lib to the "
+	    echo "...###   PLOTLIBS = ..."
+	    echo "...### line in your architecture-Makefile."
+	fi
+	pth="$opth"
+	gcc="$_ogcc"
+	gnuplot_libs="$gnuplot_libs -lgcc"
+    fi
+fi
+
 
 if test "$fastread" != yes; then
   cat << EOT
