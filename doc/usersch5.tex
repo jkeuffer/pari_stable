@@ -753,7 +753,7 @@ by~$2^{-\kbd{n}}$.
 \fun{GEN}{shiftr}{GEN x, long n} shifts the \typ{REAL}~\kbd{x} by~\kbd{n}.
 
 \fun{long}{Z_pvalrem}{GEN x, GEN p, GEN *r} applied to \typ{INT}s
-$\kbd{x}\neq 0$ and~\kbd{p}, $\abs{\kbd{p}} > 1$, returns the highest
+$\kbd{x}\neq 0$ and~\kbd{p}, $|\kbd{p}| > 1$, returns the highest
 exponent $e$ such that $\kbd{p}^{e}$ divides~\kbd{x}. The quotient
 $\kbd{x}/\kbd{p}^{e}$ is returned in~\kbd{*r}. In particular, if \kbd{p} is a
 prime, this returns the valuation at \kbd{p} of~\kbd{x}, and \kbd{*r} is
