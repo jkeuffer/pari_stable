@@ -1236,7 +1236,7 @@ famat_to_nf_modideal_coprime(GEN nf, GEN g, GEN e, GEN id)
     z = element_powmodideal(nf, (GEN)g[i], n, id);
     t = (t == NULL)? z: element_mulmodideal(nf, t, z, id);
   }
-  return t;
+  return t? t: gscalcol(gun, lg(id)-1);
 }
 
 extern GEN zinternallog_pk(GEN nf,GEN a0,GEN y,GEN pr,GEN prk,GEN list,GEN *psigne);

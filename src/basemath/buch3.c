@@ -328,10 +328,6 @@ buchrayall(GEN bnf,GEN module,long flag)
     /* cycgen[j] is not necessarily coprime to bid, but it is made coprime
      * in zideallog using canonical uniformizers [from bid data]: no need to
      * correct it here. The same ones will be used in isprincipalrayall. */
-#if 0
-    p2 = element_mul(nf, (GEN)cycgen[j],
-                         element_pow(nf,(GEN)vecel[j],(GEN)cyc[j]));
-#endif
     p2 = zideallog(nf,(GEN)cycgen[j],bid);
     for (i=1; i<=ngen;  i++) p1[i] = (i==j)? cyc[j]: zero;
     for (   ; i<=lh; i++) p1[i] = lnegi((GEN)p2[i-ngen]);
