@@ -199,20 +199,10 @@ void
 init_tinyprimes_tridiv(byteptr p);	/* in ifactor2.c */
 #endif
 
-ulong
-maxprime()
-{
-  static ulong _maxprime = 0;
+static ulong _maxprime = 0;
 
-  if (!_maxprime)
-  {
-    byteptr bp = diffptr;
-    ulong p = 0;
-    while (*bp) p += *bp++;
-    _maxprime = p;
-  }
-  return _maxprime;
-}
+ulong
+maxprime() { return _maxprime; }
 
 byteptr
 initprimes(long maxnum)
@@ -231,7 +221,7 @@ initprimes(long maxnum)
   static int build_the_tables = 1;
   if (build_the_tables) { init_tinyprimes_tridiv(p); build_the_tables=0; }
 #endif
-  return p;
+  _maxprime = last; return p;
 }
 
 static void
