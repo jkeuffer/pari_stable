@@ -1016,7 +1016,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   T.m = m;
  
   idealz = lifttoKz(nfz, nf, ideal, &COMPO);
-  if (smodis(idealnorm(nf,ideal), ell)) gothf = idealz;
+  if (smodis(gcoeff(ideal,1,1), ell)) gothf = idealz;
   else
   { /* ell | N(ideal) */
     GEN bnrz = buchrayinitgen(bnfz, idealz);
