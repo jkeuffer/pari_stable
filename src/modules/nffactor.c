@@ -1230,7 +1230,7 @@ rnfcharpoly(GEN nf,GEN T,GEN alpha,int v)
 
   nf=checknf(nf); vnf = varn(nf[1]);
   if (v<0) v = 0;
-  T = fix_relative_pol(nf,T);
+  T = fix_relative_pol(nf,T,1);
   if (typ(alpha) == t_POLMOD) alpha = lift_to_pol(alpha);
   lT = lgef(T);
   if (typ(alpha) != t_POL || varn(alpha) == vnf)
