@@ -3002,7 +3002,7 @@ GEN
 fincke_pohst(GEN a,GEN B0,long stockmax,long flag, long PREC, FP_chk_fun *CHECK)
 {
   VOLATILE long pr,av=avma,i,j,n;
-  VOLATILE GEN B,nf,r,rinvtrans,v,v1,u,s,res,z,vnorm,sperm,perm,uperm,gram;
+  VOLATILE GEN B,nf,r,rinvtrans,v,v1,u,res,z,vnorm,sperm,perm,uperm,gram;
   VOLATILE GEN bound = B0;
   void *catcherr = NULL;
   long prec = PREC;
@@ -3047,23 +3047,33 @@ fincke_pohst(GEN a,GEN B0,long stockmax,long flag, long PREC, FP_chk_fun *CHECK)
     for (j=i+1; j<n; j++)
       coeff(r,i,j) = lmul(p1, gcoeff(r,i,j));
   }
-  /* now r~ * r = a in LLL basis */
+  /* now r~ * r = a in approximate LLL basis */
   rinvtrans = gtrans(invmat(r));
-  if (DEBUGLEVEL>2)
-    fprintferr("final LLL: prec = %ld, precision(rinvtrans) = %ld\n",
-                prec,gprecision(rinvtrans));
-  v = lllintern(rinvtrans,flag&1, (gprecision(rinvtrans)<<1)-2);
-  if (!v) goto PRECPB;
-  rinvtrans = gmul(rinvtrans,v);
 
-  u = invmat(gtrans(v)); s = gmul(r,u);
-  u = gmul(v1, u);
-  vnorm=cgetg(n,t_VEC);
+  v = NULL;
+  for (i=1; i<6; i++) /* try to get close to a genuine LLL basis */
+  {
+    GEN p1;
+    if (DEBUGLEVEL>2)
+      fprintferr("final LLLs: prec = %ld, precision(rinvtrans) = %ld\n",
+                  prec,gprecision(rinvtrans));
+    p1 = lllintern(rinvtrans,flag&1, (gprecision(rinvtrans)<<1)-2);
+    if (!p1) goto PRECPB;
+    if (isdiagonal(p1)) break; /* Id */
+    if (v) v = gmul(v,p1); else v = p1;
+    rinvtrans = gmul(rinvtrans,p1);
+  }
+  if (i == 6) goto PRECPB; /* diverges... */
+
+  u = invmat(gtrans(v));
+  r = gmul(r, u); /* r = LLL basis now */
+  u = gmul(v1,u);
+
+  vnorm = cgetg(n,t_VEC);
   for (j=1; j<n; j++) vnorm[j] = lnorml2((GEN)rinvtrans[j]);
-  perm = sindexsort(vnorm);
   sperm = cgetg(n,t_MAT);
-  uperm = cgetg(n,t_MAT);
-  for (i=1; i<n; i++) { uperm[n-i] = u[perm[i]]; sperm[n-i] = s[perm[i]]; }
+  uperm = cgetg(n,t_MAT); perm = sindexsort(vnorm);
+  for (i=1; i<n; i++) { uperm[n-i] = u[perm[i]]; sperm[n-i] = r[perm[i]]; }
 
   gram = gram_matrix(sperm);
   B = gcoeff(gram,n-1,n-1);
