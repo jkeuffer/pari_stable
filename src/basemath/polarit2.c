@@ -2681,6 +2681,12 @@ primitive_part(GEN x, GEN *ptc)
   return x;
 }
 
+GEN
+primpart(GEN x)
+{
+  return primitive_part(x, NULL);
+}
+
 /*******************************************************************/
 /*                                                                 */
 /*                           SUBRESULTANT                          */

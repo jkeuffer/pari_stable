@@ -940,63 +940,63 @@ matrixqz0(GEN x,GEN p)
   err(flagerr,"matrixqz"); return NULL; /* not reached */
 }
 
+static int
+ZV_isin(GEN x)
+{
+  long i,l = lg(x);
+  for (i=1; i<l; i++)
+    if (typ(x[i]) != t_INT) return 0;
+  return 1;
+}
+
 GEN
 matrixqz(GEN x, GEN p)
 {
   ulong av = avma, av1, lim;
   long i,j,j1,m,n,t,nfact;
-  GEN p1,p2,p3,unmodp;
+  GEN p1,p2,p3;
 
-  if (typ(x)!=t_MAT) err(typeer,"matrixqz");
-  n=lg(x)-1; if (!n) return gcopy(x);
-  m=lg(x[1])-1;
+  if (typ(x) != t_MAT) err(typeer,"matrixqz");
+  n = lg(x)-1; if (!n) return gcopy(x);
+  m = lg(x[1])-1;
   if (n > m) err(talker,"more rows than columns in matrixqz");
   if (n==m)
   {
-    p1=det(x);
+    p1 = det(x);
     if (gcmp0(p1)) err(talker,"matrix of non-maximal rank in matrixqz");
-    avma=av; return idmat(n);
+    avma = av; return idmat(n);
   }
-  p1=cgetg(n+1,t_MAT);
+  /* m > n */
+  p1 = x; x = cgetg(n+1,t_MAT);
   for (j=1; j<=n; j++)
   {
-    p2=gun; p3=(GEN)x[j];
-    for (i=1; i<=m; i++)
-    {
-      t=typ(p3[i]);
-      if (t != t_INT && !is_frac_t(t))
-        err(talker,"not a rational or integral matrix in matrixqz");
-      p2=ggcd(p2,(GEN)p3[i]);
-    }
-    p1[j]=ldiv(p3,p2);
+    x[j] = primpart((GEN)p1[j]);
+    if (!ZV_isin((GEN)p1[j])) err(talker, "not a rational matrix in matrixqz");
   }
-  x=p1; unmodp=cgetg(3,t_INTMOD); unmodp[2]=un;
+  /* x integral */
 
   if (gcmp0(p))
   {
-    p1=cgetg(n+1,t_MAT); p2=gtrans(x);
-    for (j=1; j<=n; j++) p1[j]=p2[j];
-    p3=det(p1); p1[n]=p2[n+1]; p3=ggcd(p3,det(p1));
-    if (!signe(p3))
+    p1 = gtrans(x); setlg(p1,n+1);
+    p2 = det(p1); p1[n] = p1[n+1]; p2 = ggcd(p2,det(p1));
+    if (!signe(p2))
       err(impl,"matrixqz when the first 2 dets are zero");
-    if (gcmp1(p3)) return gerepilecopy(av,x);
+    if (gcmp1(p2)) return gerepilecopy(av,x);
 
-    p3=factor(p3); p1=(GEN)p3[1]; nfact=lg(p1)-1;
+    p1 = (GEN)factor(p2)[1];
   }
-  else
-  {
-    p1=cgetg(2,t_VEC); p1[1]=(long)p; nfact=1;
-  }
-  av1=avma; lim=stack_lim(av1,1);
+  else p1 = _vec(p);
+  nfact = lg(p1)-1;
+  av1 = avma; lim = stack_lim(av1,1);
   for (i=1; i<=nfact; i++)
   {
-    p=(GEN)p1[i]; unmodp[1]=(long)p;
+    p = (GEN)p1[i];
     for(;;)
     {
-      p2=ker(gmul(unmodp,x));
+      p2 = FpM_ker(x, p);
       if (lg(p2)==1) break;
 
-      p2=centerlift(p2); p3=gdiv(gmul(x,p2),p);
+      p2 = centermod(p2,p); p3 = gdiv(gmul(x,p2), p);
       for (j=1; j<lg(p2); j++)
       {
 	j1=n; while (gcmp0(gcoeff(p2,j1,j))) j1--;
@@ -1005,14 +1005,14 @@ matrixqz(GEN x, GEN p)
       if (low_stack(lim, stack_lim(av1,1)))
       {
 	if (DEBUGMEM>1) err(warnmem,"matrixqz");
-	x=gerepilecopy(av1,x);
+	x = gerepilecopy(av1,x);
       }
     }
   }
   return gerepilecopy(av,x);
 }
 
-GEN
+static GEN
 Z_V_mul(GEN u, GEN A)
 {
   if (gcmp1(u)) return A;
