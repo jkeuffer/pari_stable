@@ -4038,6 +4038,12 @@ polfnf(GEN a, GEN t)
   y = cgetg(3,t_MAT);
   p1 = cgetg(lx,t_COL); y[1] = (long)p1;
   p2 = cgetg(lx,t_COL); y[2] = (long)p2;
+  if (lx == 2)
+  { /* P^k, k irreducible */
+    p1[1] = (long)u;
+    p2[1] = lstoi(degpol(a) / degpol(u));
+    return gerepilecopy(av, y);
+  }
   x0 = gadd(polx[varn(a)], gmulsg(-k, gmodulcp(polx[varn(t)], t)));
   for (i=lx-1; i>0; i--)
   {
