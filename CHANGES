@@ -82,6 +82,7 @@ HC 12- gamma function for integral/rational arguments
    13- faster factornf / nfgcd
    14- removed readline-specific code from gp.c
    15- allow bnrstark over Q
+   16- 'subgroup' argument made optional in bnrL1, bnrstark, rnfkummer
 
   Added
     1- mplog2() function --> faster mplog()
