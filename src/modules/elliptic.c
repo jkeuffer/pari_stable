@@ -1809,7 +1809,7 @@ ellminimalmodel(GEN E, GEN *ptv)
   if (v0) { gcumulev(&v0, v); v = v0; }
   e = _coordch(E, v);
   if (ptv) { gerepileall(av, 2, &e, &v); *ptv = v; }
-  else e = gerepileupto(av, e);
+  else e = gerepilecopy(av, e);
   return e;
 }
 

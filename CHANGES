@@ -115,6 +115,7 @@ LGr39- very rare SEGV in idealprimedec() [ typo in init_norm(), using FpX_red
    51- padicappr(f, t_POLMOD) didn't work
    52- rnfidealnormabs(rnfinit(nfinit(y),x^2+1),1) --> SEGV
    53- no argument check in primepi()
+   54- ellminimalmodel(ellinit([1,2,3,4,5])) --> gerepile error
 
   Added
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu
