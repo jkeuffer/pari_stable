@@ -1547,13 +1547,14 @@ apell1(GEN e, GEN p)
     fh = powsell(cp4,f,h,p);
     s = itos(gceil(gsqrt(gdiv(pordmin,bcon),DEFAULTPREC))) >> 1;
     nb = min(128, s >> 1);
+    /* look for h s.t f^h = 0 */
     if (bcon == gun)
     { /* first time: initialize */
       tx = newbloc(s+1); *tx = evaltyp(t_VECSMALL) | evallg(s+1);
       ty = newbloc(s+1);
       ti = newbloc(s+1);
     }
-    else f = powsell(cp4,f,bcon,p);
+    else f = powsell(cp4,f,bcon,p); /* F */
     if (!fh) goto FOUND;
 
     p1 = gcopy(fh);
@@ -1561,36 +1562,36 @@ apell1(GEN e, GEN p)
     j = lgefint(p);
     for (i=1; i<=nb; i++)
     { /* baby steps */
-      pts[i] = (long)p1;
+      pts[i] = (long)p1; /* h.f + (i-1).F */
       _fix(p1+1, j); tx[i] = _low((GEN)p1[1]);
       _fix(p1+2, j); ty[i] = _low((GEN)p1[2]);
-      p1 = addsell(cp4,p1,f,p); /* f^h * F^nb */
+      p1 = addsell(cp4,p1,f,p); /* h.f + i.F */
       if (!p1) { h = addii(h, mulsi(i,bcon)); goto FOUND; }
     }
     mfh = dummycopy(fh);
     mfh[2] = lnegi((GEN)mfh[2]);
-    fg = addsell(cp4,p1,mfh,p); /* F^nb */
-    if (!fg) { h = addii(h, mulsi(nb,bcon)); goto FOUND; }
+    fg = addsell(cp4,p1,mfh,p); /* nb.F */
+    if (!fg) { h = mulsi(nb,bcon); goto FOUND; }
     u = cgetg(nb+1, t_VEC);
     av2 = avma; /* more baby steps, nb points at a time */
     while (i <= s)
     {
       long maxj;
-      for (j=1; j<=nb; j++)
+      for (j=1; j<=nb; j++) /* adding nb.F (part 1) */
       {
-        p1 = (GEN)pts[j];
+        p1 = (GEN)pts[j]; /* h.f + (i-nb-1+j-1).F */
         u[j] = lsubii((GEN)fg[1], (GEN)p1[1]);
-        if (u[j] == zero)
+        if (u[j] == zero) /* sum = 0 or doubling */
         {
-          if (!signe(p1[2]) || !egalii((GEN)p1[2],(GEN)fg[2]))
-            { h = addii(h, mulsi(i+j-1,bcon)); goto FOUND; }
-          /* doubling never occurs */
-          err(bugparier, "apell1: doubling?");
+          long k = i+j-2;
+          if (egalii((GEN)p1[2],(GEN)fg[2])) k -= 2*nb; /* fg = p1 */
+          h = addii(h, mulsi(k,bcon));
+          goto FOUND;
         }
       }
       v = multi_invmod(u, p);
       maxj = (i-1 + nb <= s)? nb: s % nb;
-      for (j=1; j<=maxj; j++,i++)
+      for (j=1; j<=maxj; j++,i++) /* adding nb.F (part 2) */
       {
         p1 = (GEN)pts[j];
         addsell_part2(cp4,p1,fg,p, (GEN)v[j]);
@@ -1617,7 +1618,7 @@ apell1(GEN e, GEN p)
     gaffect(fg, (GEN)pts[1]);
     for (j=2; j<=nb; j++) /* pts = first nb multiples of fg */
       gaffect(addsell(cp4,(GEN)pts[j-1],fg,p), (GEN)pts[j]);
-    /* replace fg by fg^nb since we do nb points at a time */
+    /* replace fg by nb.fg since we do nb points at a time */
     avma = av2;
     fg = gcopy((GEN)pts[nb]);
     av2 = avma;
@@ -1647,9 +1648,8 @@ apell1(GEN e, GEN p)
             p1 = addsell(cp4, powsell(cp4,f,stoi(j2),p),fh,p);
             if (egalii((GEN)p1[1], (GEN)ftest[1]))
             {
-              h  = addii(h, mulsi(j2,bcon));
               if (egalii((GEN)p1[2], (GEN)ftest[2])) i = -i;
-              h = addii(h, mulsi(s, mulsi(i, bcon)));
+              h = addii(h, mulii(addis(mulss(s,i), j2), bcon));
               goto FOUND;
             }
           }
