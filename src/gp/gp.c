@@ -420,9 +420,9 @@ do_strftime(char *s, char *buf, long max)
 }
 
 static GEN
-sd_toggle(char *v, int flag, char *s, ulong FLAG)
+sd_toggle(char *v, int flag, char *s, int *ptn)
 {
-  int state = (GP_DATA->flags & FLAG)? 1: 0;
+  int state = *ptn;
   if (*v)
   {
     int n = (int)get_int(v,0);
@@ -433,9 +433,7 @@ sd_toggle(char *v, int flag, char *s, ulong FLAG)
       sprintf(s, "default: incorrect value for %s [0:off / 1:on]", s);
       err(talker2, s, v,v);
     }
-    if (n) GP_DATA->flags |=  FLAG;
-    else   GP_DATA->flags &= ~FLAG;
-    state = n;
+    state = *ptn = n;
   }
   switch(flag)
   {
@@ -446,6 +444,19 @@ sd_toggle(char *v, int flag, char *s, ulong FLAG)
       break;
   }
   return gnil;
+}
+
+static GEN
+sd_gptoggle(char *v, int flag, char *s, ulong FLAG)
+{
+  int n = (GP_DATA->flags & FLAG)? 1: 0, old = n;
+  GEN z = sd_toggle(v, flag, s, &n);
+  if (n != old)
+  {
+    if (n) GP_DATA->flags |=  FLAG;
+    else   GP_DATA->flags &= ~FLAG;
+  }
+  return z;
 }
 
 static GEN
@@ -659,7 +670,7 @@ sd_secure(char *v, int flag)
     fprintferr("[secure mode]: Do you want to modify the 'secure' flag? (^C if not)\n");
     hit_return();
   }
-  return sd_toggle(v,flag,"secure", SECURE);
+  return sd_gptoggle(v,flag,"secure", SECURE);
 }
 
 static GEN
@@ -679,7 +690,7 @@ sd_rl(char *v, int flag)
     readline_init = 1;
   }
 #endif
-  return sd_toggle(v,flag,"readline", USE_READLINE);
+  return sd_gptoggle(v,flag,"readline", USE_READLINE);
 }
 
 static GEN
@@ -692,7 +703,7 @@ sd_debugmem(char *v, int flag)
 
 static GEN
 sd_echo(char *v, int flag)
-{ return sd_toggle(v,flag,"echo", ECHO); }
+{ return sd_gptoggle(v,flag,"echo", ECHO); }
 
 static GEN
 sd_lines(char *v, int flag)
@@ -743,7 +754,7 @@ static GEN
 sd_log(char *v, int flag)
 {
   int old = GP_DATA->flags;
-  GEN r = sd_toggle(v,flag,"log",LOG);
+  GEN r = sd_gptoggle(v,flag,"log",LOG);
   if (GP_DATA->flags != old)
   { /* toggled LOG */
     if (old & LOG)
@@ -812,15 +823,15 @@ sd_primelimit(char *v, int flag)
 
 static GEN
 sd_simplify(char *v, int flag)
-{ return sd_toggle(v,flag,"simplify", SIMPLIFY); }
+{ return sd_gptoggle(v,flag,"simplify", SIMPLIFY); }
 
 static GEN
 sd_strictmatch(char *v, int flag)
-{ return sd_toggle(v,flag,"strictmatch", STRICTMATCH); }
+{ return sd_gptoggle(v,flag,"strictmatch", STRICTMATCH); }
 
 static GEN
 sd_timer(char *v, int flag)
-{ return sd_toggle(v,flag,"timer", CHRONO); }
+{ return sd_gptoggle(v,flag,"timer", CHRONO); }
 
 static GEN
 sd_filename(char *v, int flag, char *s, char **f)
@@ -855,6 +866,10 @@ sd_logfile(char *v, int flag)
   }
   return r;
 }
+
+static GEN
+sd_newgaloisformat(char *v, int flag)
+{ return sd_toggle(v,flag,"newgaloisformat", &new_galois_format); }
 
 static GEN
 sd_psfile(char *v, int flag)
@@ -978,6 +993,7 @@ default_type gp_default_list[] =
   {"lines",(void*)sd_lines},
   {"log",(void*)sd_log},
   {"logfile",(void*)sd_logfile},
+  {"newgaloisformat",(void*)sd_newgaloisformat},
   {"output",(void*)sd_output},
   {"parisize",(void*)sd_parisize},
   {"path",(void*)sd_path},
