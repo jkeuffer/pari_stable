@@ -842,7 +842,7 @@ reducebetanaive(GEN be, GEN b)
     if (!B) break;
     b = B; c[besti] = laddis((GEN)c[besti], bestk);
   }
-  if (DEBUGLEVEL) fprintferr("unit exponents = %Z",c);
+  if (DEBUGLEVEL) fprintferr("unit exponents = %Z\n",c);
   return fix_be(be,c);
 }
 
