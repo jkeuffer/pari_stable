@@ -1751,8 +1751,6 @@ log0(GEN x, long flag,long prec)
   return NULL; /* not reached */
 }
 
-#define LOGAGMCX_LIMIT 90
-
 GEN
 glog(GEN x, long prec)
 {

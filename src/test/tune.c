@@ -143,6 +143,18 @@ static double speed_log(speed_param *s)
 static double speed_logagm(speed_param *s)
 { enable(s);  TIME_FUN(mplog(s->x)); }
 
+static double speed_logcx(speed_param *s)
+{ GEN z; setexpo(s->x,0); z = gadd(gun, gmul(gi, s->x));
+  disable(s); TIME_FUN(glog(z,0)); }
+static double speed_logcxagm(speed_param *s)
+{ GEN z; setexpo(s->x,0); z = gadd(gun, gmul(gi, s->x));
+  enable(s); TIME_FUN(glog(z,0)); }
+
+static double speed_atan(speed_param *s)
+{ setexpo(s->x, 0); disable(s); TIME_FUN(gatan(s->x, 0)); }
+static double speed_atanagm(speed_param *s)
+{ setexpo(s->x, 0); enable(s);  TIME_FUN(gatan(s->x, 0)); }
+
 static double speed_sqri (speed_param *s)
 { disable(s); TIME_FUN(sqri(s->x)); }
 static double speed_karasqri (speed_param *s)
@@ -221,6 +233,8 @@ static tune_param param[] = {
 {0,   var(REMIIMUL_LIMIT),         t_INT, 3,0, speed_modii,speed_remiimul},
 {GMP, var(DIVRR_GMP_LIMIT),        t_REAL,4,0, speed_divrr,speed_divrrgmp},
 {0,   var(LOGAGM_LIMIT),           t_REAL,4,0, speed_log,speed_logagm},
+{0,   var(LOGAGMCX_LIMIT),         t_REAL,20,0, speed_logcx,speed_logcxagm,0.1},
+{0,   var(AGM_ATAN_LIMIT),         t_REAL,20,0, speed_atan,speed_atanagm,0.1},
 {GMP, var(INVMOD_GMP_LIMIT),       t_INT, 3,0, speed_invmod,speed_invmodgmp},
 {0,   var(Flx_MUL_LIMIT),          t_Flx, 4,0, speed_Flx_mul,speed_Flx_karamul},
 {0,   var(Flx_SQR_LIMIT),          t_Flx, 4,0, speed_Flx_sqr,speed_Flx_karasqr},
