@@ -19,20 +19,31 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                                                            */
 /**************************************************************/
 #include "pari.h"
+#include "parinf.h"
+extern GEN small_to_pol_i(GEN z, long l);
+extern GEN ZX_caract_sqf(GEN A, GEN B, long *lambda, long v);
 
 #define NMAX 11 /* maximum degree */
 
-typedef char *OBJ;
-typedef OBJ *POBJ;
-typedef OBJ PERM;
-typedef POBJ GROUP;
-typedef POBJ RESOLVANTE;
+typedef char INT;
+typedef INT *PERM;
+typedef PERM *GROUP;
+typedef struct {
+  PERM *a;
+  long nm, nv;
+} resolv; /* resolvent */
 
-static long isin_G_H(GEN po, GEN *r, long n1, long n2);
+typedef struct {
+  long pr, prmax, tschmax;
+  GEN p, r;
+} buildroot;
 
-static long N,EVEN,PREC,PRMAX,TSCHMAX,coeff[9][10];
-static char ID[] = { 0,1,2,3,4,5,6,7,8,9,10,11 };
-static char* str_base = GPDATADIR;
+static long isin_G_H(buildroot *BR, long n1, long n2);
+
+static INT ID_data[] = { 0,1,2,3,4,5,6,7,8,9,10,11 };
+static PERM ID = ID_data;
+static long N, EVEN, coeff[9][10];
+static char *str_base = GPDATADIR;
 
 static long *par_vec;
 
@@ -81,7 +92,7 @@ partitions(long n)
 
 /* affect to the permutation x the N arguments that follow */
 static void
-_aff(char *x,...)
+_aff(PERM x,...)
 {
   va_list args; long i;
   va_start(args,x); for (i=1; i<=N; i++) x[i] = va_arg(args,int);
@@ -116,9 +127,9 @@ _typ(long l,...)
 
 /* create a permutation with the N arguments of the function */
 static PERM
-_cr(char a,...)
+_cr(INT a,...)
 {
-  static char x[NMAX+1];
+  static INT x[NMAX+1];
   va_list args;
   long i;
 
@@ -131,8 +142,8 @@ static PERM
 permmul(PERM s1, PERM s2)
 {
   long i, n1 = s1[0];
-  PERM s3 = gpmalloc(n1+1);
-  for (i=1; i<=n1; i++) s3[i]=s1[(int)s2[i]];
+  PERM s3 = (PERM)gpmalloc((n1+1) * sizeof(INT));
+  for (i=1; i<=n1; i++) s3[i] = s1[(int)s2[i]];
   s3[0]=n1; return s3;
 }
 
@@ -233,8 +244,8 @@ galmodp(GEN pol, GEN dpol, GEN TYP, long *gr, long **GR)
 
     p1 = simplefactmod(pol,stoi(p));
     p1 = (GEN)p1[1]; l = lg(p1);
-    for (i=1; i<l ; i++) dtyp[i] = itos((GEN)(p1[l-i]));
     dtyp[0] = evaltyp(t_VECSMALL)|evallg(l);
+    for (i=1; i<l; i++) dtyp[i] = itos((GEN)p1[l-i]);
     n = numerotyp(TYP,dtyp);
     if (!n) return 1; /* only for N=11 */
     nbremain -= rayergroup(GR,n,gr);
@@ -246,115 +257,79 @@ galmodp(GEN pol, GEN dpol, GEN TYP, long *gr, long **GR)
 static long
 _aux(GEN z)
 {
-  return signe(z)? ((expo(z)+165) >> TWOPOTBITS_IN_LONG) - lg(z)
-                 :  (expo(z)+101) >> TWOPOTBITS_IN_LONG;
+  long bit = expo(z) + (signe(z)? 165-bit_accuracy(lg(z)): 101);
+  return bit >> TWOPOTBITS_IN_LONG;
 }
 
 static long
 suffprec(GEN z)
 {
-  long s,t;
-
   if (typ(z)==t_COMPLEX)
   {
-    s=_aux((GEN)z[1]);
-    t=_aux((GEN)z[2]); return (t>s)? t: s;
+    long s = _aux((GEN)z[1]);
+    long t = _aux((GEN)z[2]); return max(t, s);
   }
   return _aux(z);
 }
 
-static void
-preci(GEN *r, long p)
+static int
+is_zero(GEN g) { return !signe(g) || (lg(g) <= DEFAULTPREC && expo(g) < -100); }
+
+static GEN
+is_int(GEN g)
 {
-  GEN x;
+  GEN gint;
+  pari_sp av;
+
+  if (typ(g) == t_COMPLEX)
+  {
+    if (!is_zero((GEN)g[2])) return NULL;
+    g = (GEN)g[1];
+  }
+  gint = ground(g); av = avma;
+  if (!is_zero(subri(g, gint))) return NULL;
+  avma = av; return gint;
+}
+
+static void
+preci(buildroot *BR, long p)
+{
+  GEN r = BR->r;
   long d,i;
 
-  if (p>PRMAX) err(talker,"too large precision in preci()");
-  for (d=0; d<TSCHMAX; d++) for (i=1; i<=N; i++)
+  if (p > BR->prmax) err(talker,"too large precision in preci()");
+  for (d=0; d < BR->tschmax; d++)
   {
-    x = (GEN) r[d][i];
-    if (typ(x)==t_COMPLEX) { setlg(x[1],p); setlg(x[2],p); } else setlg(x,p);
+    GEN x, o = (GEN)r[d];
+    for (i=1; i<=N; i++)
+    {
+      x = (GEN)o[i];
+      if (typ(x)==t_COMPLEX) { setlg(x[1],p); setlg(x[2],p); } else setlg(x,p);
+    }
   }
 }
 
 static long
-getpreci(GEN *r)
+getpreci(GEN r)
 {
-  GEN x = (GEN)r[0][1];
+  GEN x = gmael(r,0,1);
   return (typ(x)==t_COMPLEX)? lg(x[1]): lg(x);
 }
 
-static void
-new_pol(GEN *r, long *a, long d)
-{
-  long i, j;
-  pari_sp av;
-  GEN x, p1;
-  for (i=1; i<=N; i++)
-  {
-    av =avma; p1 = (GEN)r[0][i]; x = gaddsg(a[0], p1);
-    for (j=1; j<=d; j++) x = gaddsg(a[j], gmul(p1,x));
-    r[d][i] = (long) gerepileupto(av,x);
-  }
-}
-
-static void
-rangeroots(GEN newr, GEN oldr)
-{
-  long i, j, k, z[NMAX+1], t[NMAX+1];
-  pari_sp av = avma;
-  GEN diff,diff0;
-
-  k = 0; /* gcc -Wall */
-  for (i=1; i<=N; i++) t[i]=1;
-  for (i=1; i<=N; i++)
-  {
-    diff0 = gun;
-    for (j=1; j<=N; j++)
-      if (t[j])
-      {
-        diff = gabs(gsub((GEN)oldr[i], (GEN)newr[j]), PREC);
-        if (gcmp(diff,diff0) < 0) { diff0=diff; k=j; }
-      }
-    z[i]=newr[k]; t[k]=0;
-  }
-  avma=av; for (i=1; i<=N; i++) newr[i]=z[i];
-}
-
-/* increase the roots accuracy */
-static void
-moreprec(GEN po, GEN *r, long pr)
-{
-  if (DEBUGLEVEL) { fprintferr("$$$$$ New prec = %ld\n",pr); flusherr(); }
-  if (pr > PRMAX)
-  { /* recompute roots */
-    GEN p1;
-    long d = PRMAX + 5;
-
-    PRMAX = (pr < d)? d: pr;
-    p1 = cleanroots(po,PRMAX); rangeroots(p1,*r); *r=p1;
-    for (d=1; d<TSCHMAX; d++) new_pol(r,coeff[d],d);
-  }
-  preci(r,pr);
-}
-
-#define setcard_obj(x,n) ((x)[0] = (char*)(n))
+#define setcard_obj(x,n) ((x)[0] = (PERM)(n))
 #define getcard_obj(x)   ((long)((x)[0]))
 
 /* allocate a list of m arrays of length n (index 0 is codeword) */
-static POBJ
+static PERM *
 alloc_pobj(long n, long m)
 {
-  long i, sz = (m+1)*sizeof(OBJ) + (n+1)*m;
-  POBJ g = (POBJ) gpmalloc(sz);
-  OBJ gpt = (OBJ) (g + (m+1));
+  long i;
+  PERM *g = (PERM*) gpmalloc( (m+1)*sizeof(PERM) + (n+1)*m * sizeof(INT) );
+  PERM gpt = (PERM) (g + (m+1));
 
   for (i=1; i<=m; i++) { g[i] = gpt; gpt += (n+1); }
   setcard_obj(g, m); return g;
 }
-
-/* swap args ! Return an empty RESOLVANTE */
-#define allocresolv(n,m) alloc_pobj(m, n)
 
 static GROUP
 allocgroup(long n, long card)
@@ -413,7 +388,7 @@ bin(char c)
 #define BUFFS 512
 /* fill in g[i][j] (i<=n, j<=m) with (buffered) data from fd */
 static void
-read_obj(POBJ g, long fd, long n, long m)
+read_obj(PERM *g, long fd, long n, long m)
 {
   char ch[BUFFS];
   long i,j, k = BUFFS;
@@ -422,8 +397,8 @@ read_obj(POBJ g, long fd, long n, long m)
   for(;;)
   {
     if (k==BUFFS) { os_read(fd,ch,BUFFS); k=0; }
-    g[i][j++] = bin(ch[k++]);
-    if (j>m) { j=1; i++; if (i>n) break; }
+    g[i][j] = bin(ch[k++]);
+    if (++j>m) { j=1; if (++i>n) break; }
   }
   os_close(fd); if (DEBUGLEVEL > 3) msgtimer("read_object");
 }
@@ -440,7 +415,8 @@ lirecoset(long n1, long n2, long n)
   if (n<11 || n1<8)
   {
     fd = galopen(name("COS", n, n1, n2, 0));
-    os_read(fd,&c,1); m=bin(c); os_read(fd,&c,1);
+    os_read(fd,&c,1); m=bin(c);
+    os_read(fd,&c,1);
     os_read(fd,ch,6); cardgr=atol(ch); gr=allocgroup(m,cardgr);
     read_obj(gr, fd,cardgr,m); return gr;
   }
@@ -454,18 +430,19 @@ lirecoset(long n1, long n2, long n)
   return gr;
 }
 
-static RESOLVANTE
-lireresolv(long n1, long n2, long n, long *nv, long *nm)
+static void
+lireresolv(long n1, long n2, long n, resolv *R)
 {
-  RESOLVANTE b;
   char ch[5];
-  long fd;
+  long fd, nm, nv;
 
   fd = galopen(name("RES", n, n1, n2, 0));
-  os_read(fd,ch,5); *nm=atol(ch);
-  os_read(fd,ch,3); *nv=atol(ch);
-  b = allocresolv(*nm,*nv);
-  read_obj(b, fd,*nm,*nv); return b;
+  os_read(fd,ch,5); nm = atol(ch);
+  os_read(fd,ch,3); nv = atol(ch);
+  R->a = alloc_pobj(nv,nm);
+  read_obj(R->a, fd,nm,nv); 
+  R->nm = nm;
+  R->nv = nv;
 }
 
 static GEN
@@ -478,11 +455,12 @@ monomial(GEN r, PERM bb, long nbv)
 }
 
 static GEN
-gpolynomial(GEN r, RESOLVANTE aa, long nbm, long nbv)
+gpolynomial(GEN r, resolv *R)
 {
-  long i; GEN p1 = monomial(r,aa[1],nbv);
+  long i;
+  GEN p1 = monomial(r,R->a[1], R->nv);
 
-  for (i=2; i<=nbm; i++) p1 = gadd(p1, monomial(r,aa[i],nbv));
+  for (i=2; i<=R->nm; i++) p1 = gadd(p1, monomial(r,R->a[i], R->nv));
   return p1;
 }
 
@@ -729,46 +707,105 @@ gpoly(GEN rr, long n1, long n2)
   return NULL; /* not reached */
 }
 
-extern GEN small_to_pol_i(GEN z, long l);
-extern GEN ZX_caract_sqf(GEN A, GEN B, long *lambda, long v);
+static void
+new_pol(GEN r, long *a, long d)
+{
+  long i, j;
+  GEN x, p1, o = (GEN)r[0], z = cgetg(N+1, t_VEC);
+  for (i=1; i<=N; i++)
+  {
+    p1 = (GEN)o[i]; x = gaddsg(a[0], p1);
+    for (j=1; j<=d; j++) x = gaddsg(a[j], gmul(p1,x));
+    z[i] = (long)x;
+  }
+  r[d] = lclone(z);
+}
 
 static void
-tschirn(GEN po, GEN *r, long pr)
+tschirn(buildroot *BR)
 {
-  long i,k, v = varn(po), d = TSCHMAX + 1;
+  long i,k, v = varn(BR->p), d = BR->tschmax;
   GEN a,h,u;
 
-  if (d >= N) err(talker,"degree too large in tschirn");
+  if (d+1 >= N) err(bugparier,"degree too large in tschirn");
   if (DEBUGLEVEL)
-    fprintferr("\n$$$$$ Tschirnhaus transformation of degree %ld: $$$$$\n",d);
+    fprintferr("\n$$$$$ Tschirnhaus transformation of degree %ld: $$$$$\n", d);
 
-  a = new_chunk(d);
+  a = coeff[d];
   do
   {
-    for (i=0; i<d; i++) a[i] = random_bits(3) + 1;
-    h = small_to_pol_i(a-2, d+2);
-    (void)normalizepol_i(h, d+2); setvarn(h,0);
+    for (i=0; i<=d; i++) a[i] = random_bits(3) + 1;
+    h = small_to_pol_i(a-2, d+3);
+    (void)normalizepol_i(h, d+3); setvarn(h,0);
   } while (lgef(h) <= 3 || !ZX_is_squarefree(h));
-  setvarn(h, v);
-  k = 0; u = ZX_caract_sqf(h, po, &k, v);
-  a[1] += k; /* a may have been modified */
-  if (DEBUGLEVEL>2) outerr(u);
+  setvarn(h, v); k = 0;
+  u = ZX_caract_sqf(h, BR->p, &k, v);
+  a[1] += k;
 
-  d = TSCHMAX;
-  for (i=0; i<=d; i++) coeff[d][i] = a[i];
-  preci(r,PRMAX); r[d] = cgetg(N+1,t_VEC);
-  new_pol(r,a,d); preci(r,pr); TSCHMAX++;
+  preci(BR, BR->prmax);
+  new_pol(BR->r, a, d); preci(BR, BR->pr);
+  BR->tschmax++;
+}
+
+static GEN 
+sortroots(GEN newr, GEN oldr)
+{
+  long e, e0, i, j, k, l = lg(newr);
+  GEN r = cgetg(l, t_VEC), z = cgetg(l, t_VEC), t = cgetg(l, t_VEC);
+  k = 0; /* gcc -Wall */
+  for (i=1; i<l; i++) t[i]=1;
+  for (i=1; i<l; i++)
+  {
+    e0 = 0;
+    for (j=1; j<l; j++)
+      if (t[j])
+      {
+        e = gexpo(gsub((GEN)oldr[i], (GEN)newr[j]));
+        if (e < e0) { e0 = e; k = j; }
+      }
+    z[i] = newr[k]; t[k] = 0;
+  }
+  for (i=1; i<l; i++) r[i] = z[i];
+  return r;
+}
+
+/* increase the roots accuracy */
+static void
+moreprec(buildroot *BR)
+{
+  if (DEBUGLEVEL) { fprintferr("$$$$$ New prec = %ld\n",BR->pr); flusherr(); }
+  if (BR->pr > BR->prmax)
+  { /* recompute roots */
+    pari_sp av = avma;
+    long d = BR->prmax + BIGDEFAULTPREC - 2;
+    GEN o = (GEN)BR->r[0];
+
+    BR->prmax = (BR->pr < d)? d: BR->pr;
+    BR->r[0] = lclone( sortroots(cleanroots(BR->p,BR->prmax), o) );
+    gunclone(o);
+    for (d=1; d < BR->tschmax; d++)
+    {
+      gunclone((GEN)BR->r[d]);
+      new_pol(BR->r,coeff[d], d);
+    }
+    avma = av;
+  }
+  preci(BR, BR->pr);
 }
 
 static GEN
-get_pol_perm(PERM S1, PERM S2, GEN rr, RESOLVANTE a,
-             long nbm, long nbv)
+get_ro_perm(PERM S1, PERM S2, long d, resolv *R, buildroot *BR)
 {
-  static long r[NMAX+1];
-  long i;
-
-  for (i=1; i<=N; i++) r[i] = rr[(int)S1[(int)S2[i]]];
-  return a? gpolynomial(r,a,nbm,nbv): gpoly(r,nbm,nbv);
+  GEN ro, r = cgetg(N+1, t_VEC);
+  long i, sp;
+  for (;;)
+  {
+    GEN rr = (GEN)BR->r[d];
+    for (i=1; i<=N; i++) r[i] = rr[ (int)S1[(int)S2[i] ] ];
+    ro = R->a? gpolynomial(r, R): gpoly(r,R->nm,R->nv);
+    sp = suffprec(ro); if (sp <= 0) return ro;
+    BR->pr += sp; moreprec(BR);
+  }
 }
 
 static void
@@ -782,523 +819,468 @@ dbg_rac(long nri,long nbracint,long numi[],GEN racint[],long multi[])
   else
     fprintferr("        there is no rational integer root.\n");
   for (k=nri+1; k<=nbracint; k++)
-  {
-    fprintferr("          number%2ld: ",numi[k]);
-    bruterr(racint[k],'g',-1); fprintferr(", order %ld.\n",multi[k]);
-  }
+    fprintferr("          number%3ld: %Z, order %ld\n",
+               numi[k], racint[k], multi[k]);
   flusherr();
-}
-
-static GEN
-is_int(GEN g)
-{
-  GEN gint,p1;
-  pari_sp av;
-
-  if (typ(g) == t_COMPLEX)
-  {
-    p1 = (GEN)g[2];
-    if (signe(p1) && expo(p1) >= - (bit_accuracy(lg(p1))>>1)) return NULL;
-    g = (GEN)g[1];
-  }
-  gint = ground(g); av=avma; p1 = subri(g,gint);
-  if (signe(p1) && expo(p1) >= - (bit_accuracy(lg(p1))>>1)) return NULL;
-  avma=av; return gint;
-}
-
-static PERM
-isin_end(PERM S, PERM uu, PERM s0, GEN gpol, pari_sp av1)
-{
-  PERM vv = permmul(S,uu), ww = permmul(vv,s0);
-
-  if (DEBUGLEVEL)
-  {
-    fprintferr("      testing roots reordering: ");
-    bruterr(gpol,'g',-1); flusherr();
-  }
-  free(vv); avma = av1; return ww;
 }
 
 #define M 2521
 /* return NULL if not included, the permutation of the roots otherwise */
 static PERM
-check_isin(GEN po,GEN *r,long nbm,long nbv, POBJ a, POBJ tau, POBJ ss, PERM s0)
+check_isin(buildroot *BR, resolv *R, GROUP tau, GROUP ss)
 {
-  long pr = PREC, nogr, nocos, init, i, j, k, l, d, nrm, nri, sp;
+  long nogr, nocos, init, i, j, k, l, d, sp;
   pari_sp av1 = avma, av2;
   long nbgr,nbcos,nbracint,nbrac,lastnbri,lastnbrm;
   static long numi[M],numj[M],lastnum[M],multi[M],norac[M],lastnor[M];
-  GEN rr,ro,roint,racint[M];
+  GEN  racint[M], roint;
   PERM uu;
 
+  if (getpreci(BR->r) != BR->pr) preci(BR, BR->pr);
   nbcos = getcard_obj(ss);
   nbgr  = getcard_obj(tau);
   lastnbri = lastnbrm = -1; sp = nbracint = nbrac = 0; /* gcc -Wall*/
   for (nogr=1; nogr<=nbgr; nogr++)
   {
-    if (DEBUGLEVEL)
-      { fprintferr("    ----> Group # %ld/%ld:\n",nogr,nbgr); flusherr(); }
-    init = 0;
-    for (d=1; ; d++)
+    PERM T = tau[nogr];
+    if (DEBUGLEVEL) fprintferr("    ----> Group # %ld/%ld:\n",nogr,nbgr);
+    init = 0; d = 0;
+    for (;;)
     {
-      if (d > 1)
-      {
-        if (DEBUGLEVEL)
-        {
-          fprintferr("        all integer roots are double roots\n");
-          fprintferr("      Working with polynomial #%ld:\n", d); flusherr();
-        }
-        if (d > TSCHMAX) { tschirn(po,r,pr); av1 = avma; }
-      }
       if (!init)
       {
-        init = 1;
-        for(;;)
+        av2 = avma; nbrac = nbracint = 0;
+        for (nocos=1; nocos<=nbcos; nocos++, avma = av2)
         {
-          av2=avma; rr = r[d-1]; nbrac = nbracint = 0;
-          for (nocos=1; nocos<=nbcos; nocos++)
-          {
-            ro = get_pol_perm(tau[nogr], ss[nocos], rr,a,nbm,nbv);
-            sp = suffprec(ro); if (sp > 0) break;
-            roint = is_int(ro);
-            if (roint)
-            {
-              nbrac++;
-              if (nbrac >= M)
-              {
-                err(warner, "more than %ld rational integer roots\n", M);
-                avma = av1; init = 0; break;
-              }
-              for (j=1; j<=nbracint; j++)
-                if (gegal(roint,racint[j])) { multi[j]++; break; }
-              if (j > nbracint)
-              {
-                nbracint = j; multi[j]=1; numi[j]=nocos;
-                racint[j] = gerepileupto(av2,roint); av2=avma;
-              }
-              numj[nbrac]=nocos; norac[nbrac]=j;
-            }
-            avma=av2;
-          }
-          if (sp <= 0) break;
-          avma = av1; pr+=sp; moreprec(po,r,pr); av1 = avma;
-        }
-        if (!init) continue;
+          roint = is_int( get_ro_perm(T, ss[nocos], d, R, BR) );
+          if (!roint) continue;
 
+          nbrac++;
+          if (nbrac >= M)
+          {
+            err(warner, "more than %ld rational integer roots\n", M);
+            avma = av1; goto NEXT;
+          }
+          for (j=1; j<=nbracint; j++)
+            if (gegal(roint,racint[j])) { multi[j]++; break; }
+          if (j > nbracint)
+          {
+            nbracint = j; multi[j] = 1; numi[j] = nocos;
+            racint[j] = gerepileupto(av2,roint); av2 = avma;
+          }
+          numj[nbrac] = nocos; norac[nbrac] = j;
+        }
         if (DEBUGLEVEL) dbg_rac(0,nbracint,numi,racint,multi);
         for (i=1; i<=nbracint; i++)
           if (multi[i]==1)
           {
             uu = ss[numi[i]];
-            ro = DEBUGLEVEL? get_pol_perm(ID,uu,rr,a,nbm,nbv): (GEN)NULL;
-            return isin_end(tau[nogr], uu, s0, ro, av1);
+            if (DEBUGLEVEL) fprintferr("      test roots reordering: %Z",
+                                       get_ro_perm(ID, uu, d, R, BR));
+            avma = av1; return permmul(T, uu);
           }
+        init = 1;
       }
       else
       {
-        nrm = nri = 0;
-        for (l=1; l<=lastnbri; l++)
+        nbrac = nbracint = 0;
+        for (l=1; l<=lastnbri; l++, avma = av1)
         {
-          for(;;)
-          {
-            av2=avma; rr = r[d-1]; nbrac=nrm; nbracint=nri;
-            for (k=1; k<=lastnbrm; k++)
-              if (lastnor[k]==l)
+          long nri = nbracint;
+          av2 = avma;
+          for (k=1; k<=lastnbrm; k++)
+            if (lastnor[k]==l)
+            {
+              nocos = lastnum[k];
+              roint = is_int( get_ro_perm(T, ss[nocos], d, R, BR) );
+              if (!roint) { avma = av2; continue; }
+
+              nbrac++;
+              for (j=nri+1; j<=nbracint; j++)
+                if (gegal(roint,racint[j])) { multi[j]++; break; }
+              if (j > nbracint)
               {
-                nocos = lastnum[k];
-                ro = get_pol_perm(tau[nogr], ss[nocos], rr,a,nbm,nbv);
-                sp = suffprec(ro); if (sp > 0) break;
-                roint = is_int(ro);
-                if (roint)
-                {
-                  nbrac++;
-                  for (j=nri+1; j<=nbracint; j++)
-                    if (gegal(roint,racint[j])) { multi[j]++; break; }
-                  if (j > nbracint)
-                  {
-                    nbracint = j; multi[j]=1; numi[j]=nocos;
-                    racint[j] = gerepileupto(av2,roint); av2=avma;
-                  }
-                  numj[nbrac]=nocos; norac[nbrac]=j;
-                }
-                avma=av2;
+                nbracint = j; multi[j] = 1; numi[j] = nocos;
+                racint[j] = gerepileupto(av2,roint); av2=avma;
               }
-            if (sp <= 0) break;
-            avma = av1; pr+=sp; moreprec(po,r,pr); av1 = avma;
-          }
+              numj[nbrac] = nocos; norac[nbrac] = j;
+            }
           if (DEBUGLEVEL) dbg_rac(nri,nbracint,numi,racint,multi);
           for (i=nri+1; i<=nbracint; i++)
             if (multi[i]==1)
             {
               uu = ss[numi[i]];
-              ro = DEBUGLEVEL? get_pol_perm(ID,uu,rr,a,nbm,nbv): (GEN)NULL;
-              return isin_end(tau[nogr], uu, s0, ro, av1);
+              if (DEBUGLEVEL) fprintferr("      test roots reordering: %Z",
+                                         get_ro_perm(ID, uu, d, R, BR));
+              avma = av1; return permmul(T, uu);
             }
-          avma = av1; nri=nbracint; nrm=nbrac;
         }
       }
       avma = av1; if (!nbracint) break;
 
-      lastnbri=nbracint; lastnbrm=nbrac;
-      for (j=1; j<=nbrac; j++)
-        { lastnum[j]=numj[j]; lastnor[j]=norac[j]; }
+      lastnbri = nbracint; lastnbrm = nbrac;
+      for (j=1; j<=nbrac; j++) { lastnum[j] = numj[j]; lastnor[j] = norac[j]; }
+
+NEXT: if (DEBUGLEVEL)
+      {
+        fprintferr("        all integer roots are double roots\n");
+        fprintferr("      Working with polynomial #%ld:\n", d+2); flusherr();
+      }
+      if (++d >= BR->tschmax) tschirn(BR);
     }
   }
   return NULL;
 }
 #undef M
 
-/* BIBLIOTHEQUE POUR LE DEGRE 8 */
-
+/* DEGREE 8 */
 static long
-galoisprim8(GEN po, GEN *r)
+galoisprim8(buildroot *BR)
 {
   long rep;
 
 /* PRIM_8_1: */
-  rep=isin_G_H(po,r,50,43);
+  rep=isin_G_H(BR,50,43);
   if (rep) return EVEN? 37: 43;
 /* PRIM_8_2: */
   if (!EVEN) return 50;
 /* PRIM_8_3: */
-  rep=isin_G_H(po,r,49,48);
+  rep=isin_G_H(BR,49,48);
   if (!rep) return 49;
 /* PRIM_8_4: */
-  rep=isin_G_H(po,r,48,36);
+  rep=isin_G_H(BR,48,36);
   if (!rep) return 48;
 /* PRIM_8_5: */
-  rep=isin_G_H(po,r,36,25);
+  rep=isin_G_H(BR,36,25);
   return rep? 25: 36;
 }
 
 static long
-galoisimpodd8(GEN po, GEN *r, long nh)
+galoisimpodd8(buildroot *BR, long nh)
 {
   long rep;
 /* IMPODD_8_1: */
   if (nh!=47) goto IMPODD_8_6;
 /* IMPODD_8_2: */
-  rep=isin_G_H(po,r,47,46);
+  rep=isin_G_H(BR,47,46);
   if (!rep) goto IMPODD_8_5;
 /* IMPODD_8_4: */
-  rep=isin_G_H(po,r,46,28);
+  rep=isin_G_H(BR,46,28);
   if (rep) goto IMPODD_8_7; else return 46;
 
 IMPODD_8_5:
-  rep=isin_G_H(po,r,47,35);
+  rep=isin_G_H(BR,47,35);
   if (rep) goto IMPODD_8_9; else return 47;
 
 IMPODD_8_6:
-  rep=isin_G_H(po,r,44,40);
+  rep=isin_G_H(BR,44,40);
   if (rep) goto IMPODD_8_10; else goto IMPODD_8_11;
 
 IMPODD_8_7:
-  rep=isin_G_H(po,r,28,21);
+  rep=isin_G_H(BR,28,21);
   if (rep) return 21; else goto IMPODD_8_33;
 
 IMPODD_8_9:
-  rep=isin_G_H(po,r,35,31);
+  rep=isin_G_H(BR,35,31);
   if (rep) goto IMPODD_8_13; else goto IMPODD_8_14;
 
 IMPODD_8_10:
-  rep=isin_G_H(po,r,40,26);
+  rep=isin_G_H(BR,40,26);
   if (rep) goto IMPODD_8_15; else goto IMPODD_8_16;
 
 IMPODD_8_11:
-  rep=isin_G_H(po,r,44,38);
+  rep=isin_G_H(BR,44,38);
   if (rep) goto IMPODD_8_17; else goto IMPODD_8_18;
 
 IMPODD_8_12:
-  rep=isin_G_H(po,r,16,7);
+  rep=isin_G_H(BR,16,7);
   if (rep) goto IMPODD_8_19; else return 16;
 
 IMPODD_8_13:
-  rep=isin_G_H(po,r,31,21);
+  rep=isin_G_H(BR,31,21);
   return rep? 21: 31;
 
 IMPODD_8_14:
-  rep=isin_G_H(po,r,35,30);
+  rep=isin_G_H(BR,35,30);
   if (rep) goto IMPODD_8_34; else goto IMPODD_8_20;
 
 IMPODD_8_15:
-  rep=isin_G_H(po,r,26,16);
+  rep=isin_G_H(BR,26,16);
   if (rep) goto IMPODD_8_12; else goto IMPODD_8_21;
 
 IMPODD_8_16:
-  rep=isin_G_H(po,r,40,23);
+  rep=isin_G_H(BR,40,23);
   if (rep) goto IMPODD_8_22; else return 40;
 
 IMPODD_8_17:
-  rep=isin_G_H(po,r,38,31);
+  rep=isin_G_H(BR,38,31);
   if (rep) goto IMPODD_8_13; else return 38;
 
 IMPODD_8_18:
-  rep=isin_G_H(po,r,44,35);
+  rep=isin_G_H(BR,44,35);
   if (rep) goto IMPODD_8_9; else return 44;
 
 IMPODD_8_19:
-  rep=isin_G_H(po,r,7,1);
+  rep=isin_G_H(BR,7,1);
   return rep? 1: 7;
 
 IMPODD_8_20:
-  rep=isin_G_H(po,r,35,28);
+  rep=isin_G_H(BR,35,28);
   if (rep) goto IMPODD_8_7; else goto IMPODD_8_23;
 
 IMPODD_8_21:
-  rep=isin_G_H(po,r,26,17);
+  rep=isin_G_H(BR,26,17);
   if (rep) goto IMPODD_8_24; else goto IMPODD_8_25;
 
 IMPODD_8_22:
-  rep=isin_G_H(po,r,23,8);
+  rep=isin_G_H(BR,23,8);
   if (rep) goto IMPODD_8_26; else return 23;
 
 IMPODD_8_23:
-  rep=isin_G_H(po,r,35,27);
+  rep=isin_G_H(BR,35,27);
   if (rep) goto IMPODD_8_27; else goto IMPODD_8_28;
 
 IMPODD_8_24:
-  rep=isin_G_H(po,r,17,7);
+  rep=isin_G_H(BR,17,7);
   if (rep) goto IMPODD_8_19; else return 17;
 
 IMPODD_8_25:
-  rep=isin_G_H(po,r,26,15);
+  rep=isin_G_H(BR,26,15);
   if (rep) goto IMPODD_8_29; else return 26;
 
 IMPODD_8_26:
-  rep=isin_G_H(po,r,8,1);
+  rep=isin_G_H(BR,8,1);
   return rep? 1: 8;
 
 IMPODD_8_27:
-  rep=isin_G_H(po,r,27,16);
+  rep=isin_G_H(BR,27,16);
   if (rep) goto IMPODD_8_12; else return 27;
 
 IMPODD_8_28:
-  rep=isin_G_H(po,r,35,26);
+  rep=isin_G_H(BR,35,26);
   if (rep) goto IMPODD_8_15; else return 35;
 
 IMPODD_8_29:
-  rep=isin_G_H(po,r,15,7);
+  rep=isin_G_H(BR,15,7);
   if (rep) goto IMPODD_8_19;
 /* IMPODD_8_30: */
-  rep=isin_G_H(po,r,15,6);
+  rep=isin_G_H(BR,15,6);
   if (!rep) goto IMPODD_8_32;
 /* IMPODD_8_31: */
-  rep=isin_G_H(po,r,6,1);
+  rep=isin_G_H(BR,6,1);
   return rep? 1: 6;
 
 IMPODD_8_32:
-  rep=isin_G_H(po,r,15,8);
+  rep=isin_G_H(BR,15,8);
   if (rep) goto IMPODD_8_26; else return 15;
 
 IMPODD_8_33:
-  rep=isin_G_H(po,r,28,16);
+  rep=isin_G_H(BR,28,16);
   if (rep) goto IMPODD_8_12; else return 28;
 
 IMPODD_8_34:
-  rep=isin_G_H(po,r,30,21);
+  rep=isin_G_H(BR,30,21);
   return rep? 21: 30;
 }
 
 static long
-galoisimpeven8(GEN po, GEN *r, long nh)
+galoisimpeven8(buildroot *BR, long nh)
 {
    long rep;
 /* IMPEVEN_8_1: */
    if (nh!=45) goto IMPEVEN_8_6;
 /* IMPEVEN_8_2: */
-   rep=isin_G_H(po,r,45,42);
+   rep=isin_G_H(BR,45,42);
    if (!rep) goto IMPEVEN_8_5;
 /* IMPEVEN_8_4: */
-  rep=isin_G_H(po,r,42,34);
+  rep=isin_G_H(BR,42,34);
   if (rep) goto IMPEVEN_8_7; else goto IMPEVEN_8_8;
 
 IMPEVEN_8_5:
-  rep=isin_G_H(po,r,45,41);
+  rep=isin_G_H(BR,45,41);
   if (rep) goto IMPEVEN_8_9; else return 45;
 
 IMPEVEN_8_6:
-  rep=isin_G_H(po,r,39,32);
+  rep=isin_G_H(BR,39,32);
   if (rep) goto IMPEVEN_8_10; else goto IMPEVEN_8_11;
 
 IMPEVEN_8_7:
-  rep=isin_G_H(po,r,34,18);
+  rep=isin_G_H(BR,34,18);
   if (rep) goto IMPEVEN_8_21; else goto IMPEVEN_8_45;
 
 IMPEVEN_8_8:
-  rep=isin_G_H(po,r,42,33);
+  rep=isin_G_H(BR,42,33);
   if (rep) goto IMPEVEN_8_14; else return 42;
 
 IMPEVEN_8_9:
-  rep=isin_G_H(po,r,41,34);
+  rep=isin_G_H(BR,41,34);
   if (rep) goto IMPEVEN_8_7; else goto IMPEVEN_8_15;
 
 IMPEVEN_8_10:
-  rep=isin_G_H(po,r,32,22);
+  rep=isin_G_H(BR,32,22);
   if (rep) goto IMPEVEN_8_16; else goto IMPEVEN_8_17;
 
 IMPEVEN_8_11:
-  rep=isin_G_H(po,r,39,29);
+  rep=isin_G_H(BR,39,29);
   if (rep) goto IMPEVEN_8_18; else goto IMPEVEN_8_19;
 
 IMPEVEN_8_12:
-  rep=isin_G_H(po,r,14,4);
+  rep=isin_G_H(BR,14,4);
   return rep? 4: 14;
 
 IMPEVEN_8_14:
-  rep=isin_G_H(po,r,33,18);
+  rep=isin_G_H(BR,33,18);
   if (rep) goto IMPEVEN_8_21; else goto IMPEVEN_8_22;
 
 IMPEVEN_8_15:
-  rep=isin_G_H(po,r,41,33);
+  rep=isin_G_H(BR,41,33);
   if (rep) goto IMPEVEN_8_14; else goto IMPEVEN_8_23;
 
 IMPEVEN_8_16:
-  rep=isin_G_H(po,r,22,11);
+  rep=isin_G_H(BR,22,11);
   if (rep) goto IMPEVEN_8_24; else goto IMPEVEN_8_25;
 
 IMPEVEN_8_17:
-  rep=isin_G_H(po,r,32,13);
+  rep=isin_G_H(BR,32,13);
   if (rep) goto IMPEVEN_8_26; else goto IMPEVEN_8_27;
 
 IMPEVEN_8_18:
-  rep=isin_G_H(po,r,29,22);
+  rep=isin_G_H(BR,29,22);
   if (rep) goto IMPEVEN_8_16; else goto IMPEVEN_8_28;
 
 IMPEVEN_8_19:
-  rep=isin_G_H(po,r,39,24);
+  rep=isin_G_H(BR,39,24);
   if (rep) goto IMPEVEN_8_29; else return 39;
 
 IMPEVEN_8_20:
-  rep=isin_G_H(po,r,9,4);
+  rep=isin_G_H(BR,9,4);
   if (rep) return 4; else goto IMPEVEN_8_30;
 
 IMPEVEN_8_21:
-  rep=isin_G_H(po,r,18,10);
+  rep=isin_G_H(BR,18,10);
   if (rep) goto IMPEVEN_8_31; else goto IMPEVEN_8_32;
 
 IMPEVEN_8_22:
-  rep=isin_G_H(po,r,33,13);
+  rep=isin_G_H(BR,33,13);
   if (rep) goto IMPEVEN_8_26; else return 33;
 
 IMPEVEN_8_23:
-  rep=isin_G_H(po,r,41,29);
+  rep=isin_G_H(BR,41,29);
   if (rep) goto IMPEVEN_8_18; else goto IMPEVEN_8_33;
 
 IMPEVEN_8_24:
-  rep=isin_G_H(po,r,11,5);
+  rep=isin_G_H(BR,11,5);
   if (rep) return 5; else goto IMPEVEN_8_34;
 
 IMPEVEN_8_25:
-  rep=isin_G_H(po,r,22,9);
+  rep=isin_G_H(BR,22,9);
   if (rep) goto IMPEVEN_8_20; else return 22;
 
 IMPEVEN_8_26:
-  rep=isin_G_H(po,r,13,3);
+  rep=isin_G_H(BR,13,3);
   return rep? 3: 13;
 
 IMPEVEN_8_27:
-  rep=isin_G_H(po,r,32,12);
+  rep=isin_G_H(BR,32,12);
   if (rep) goto IMPEVEN_8_35; else return 32;
 
 IMPEVEN_8_28:
-  rep=isin_G_H(po,r,29,20);
+  rep=isin_G_H(BR,29,20);
   if (rep) goto IMPEVEN_8_36; else goto IMPEVEN_8_37;
 
 IMPEVEN_8_29:
-  rep=isin_G_H(po,r,24,14);
+  rep=isin_G_H(BR,24,14);
   if (rep) goto IMPEVEN_8_12; else goto IMPEVEN_8_38;
 
 IMPEVEN_8_30:
-  rep=isin_G_H(po,r,9,3);
+  rep=isin_G_H(BR,9,3);
   if (rep) return 3; else goto IMPEVEN_8_39;
 
 IMPEVEN_8_31:
-  rep=isin_G_H(po,r,10,2);
+  rep=isin_G_H(BR,10,2);
   return rep? 2: 10;
 
 IMPEVEN_8_32:
-  rep=isin_G_H(po,r,18,9);
+  rep=isin_G_H(BR,18,9);
   if (rep) goto IMPEVEN_8_20; else return 18;
 
 IMPEVEN_8_33:
-  rep=isin_G_H(po,r,41,24);
+  rep=isin_G_H(BR,41,24);
   if (rep) goto IMPEVEN_8_29; else return 41;
 
 IMPEVEN_8_34:
-  rep=isin_G_H(po,r,11,4);
+  rep=isin_G_H(BR,11,4);
   if (rep) return 4; else goto IMPEVEN_8_44;
 
 IMPEVEN_8_35:
-  rep=isin_G_H(po,r,12,5);
+  rep=isin_G_H(BR,12,5);
   return rep? 5: 12;
 
 IMPEVEN_8_36:
-  rep=isin_G_H(po,r,20,10);
+  rep=isin_G_H(BR,20,10);
   if (rep) goto IMPEVEN_8_31; else return 20;
 
 IMPEVEN_8_37:
-  rep=isin_G_H(po,r,29,19);
+  rep=isin_G_H(BR,29,19);
   if (rep) goto IMPEVEN_8_40; else goto IMPEVEN_8_41;
 
 IMPEVEN_8_38:
-  rep=isin_G_H(po,r,24,13);
+  rep=isin_G_H(BR,24,13);
   if (rep) goto IMPEVEN_8_26; else goto IMPEVEN_8_42;
 
 IMPEVEN_8_39:
-  rep=isin_G_H(po,r,9,2);
+  rep=isin_G_H(BR,9,2);
   return rep? 2: 9;
 
 IMPEVEN_8_40:
-  rep=isin_G_H(po,r,19,10);
+  rep=isin_G_H(BR,19,10);
   if (rep) goto IMPEVEN_8_31; else goto IMPEVEN_8_43;
 
 IMPEVEN_8_41:
-  rep=isin_G_H(po,r,29,18);
+  rep=isin_G_H(BR,29,18);
   if (rep) goto IMPEVEN_8_21; else return 29;
 
 IMPEVEN_8_42:
-  rep=isin_G_H(po,r,24,9);
+  rep=isin_G_H(BR,24,9);
   if (rep) goto IMPEVEN_8_20; else return 24;
 
 IMPEVEN_8_43:
-  rep=isin_G_H(po,r,19,9);
+  rep=isin_G_H(BR,19,9);
   if (rep) goto IMPEVEN_8_20; else return 19;
 
 IMPEVEN_8_44:
-  rep=isin_G_H(po,r,11,2);
+  rep=isin_G_H(BR,11,2);
   return rep? 2: 11;
 
 IMPEVEN_8_45:
-  rep=isin_G_H(po,r,34,14);
+  rep=isin_G_H(BR,34,14);
   if (rep) goto IMPEVEN_8_12; else return 34;
 }
 
 static long
-closure8(GEN po)
+closure8(buildroot *BR)
 {
   long rep;
-  GEN r[NMAX];
 
-  r[0] = cleanroots(po,PRMAX); preci(r,PREC);
   if (!EVEN)
   {
   /* CLOS_8_1: */
-    rep=isin_G_H(po,r,50,47);
-    if (rep) return galoisimpodd8(po,r,47);
+    rep=isin_G_H(BR,50,47);
+    if (rep) return galoisimpodd8(BR,47);
   /* CLOS_8_2: */
-    rep=isin_G_H(po,r,50,44);
-    if (rep) return galoisimpodd8(po,r,44);
+    rep=isin_G_H(BR,50,44);
+    if (rep) return galoisimpodd8(BR,44);
   }
   else
   {
   /* CLOS_8_3: */
-    rep=isin_G_H(po,r,49,45);
-    if (rep) return galoisimpeven8(po,r,45);
+    rep=isin_G_H(BR,49,45);
+    if (rep) return galoisimpeven8(BR,45);
   /* CLOS_8_4: */
-    rep=isin_G_H(po,r,49,39);
-    if (rep) return galoisimpeven8(po,r,39);
+    rep=isin_G_H(BR,49,39);
+    if (rep) return galoisimpeven8(BR,39);
   }
-  return galoisprim8(po,r);
+  return galoisprim8(BR);
 }
 
 static GROUP
@@ -1529,180 +1511,177 @@ galoismodulo8(GEN pol, GEN dpol)
   return EVEN? 49: 50;
 }
 
-/* BIBLIOTHEQUE POUR LE DEGRE 9 */
+/* DEGREE 9 */
 static long
-galoisprim9(GEN po, GEN *r)
+galoisprim9(buildroot *BR)
 {
   long rep;
 
   if (!EVEN)
   {
   /* PRIM_9_1: */
-    rep=isin_G_H(po,r,34,26);
+    rep=isin_G_H(BR,34,26);
     if (!rep) return 34;
   /* PRIM_9_2: */
-    rep=isin_G_H(po,r,26,19);
+    rep=isin_G_H(BR,26,19);
     if (!rep) return 26;
   /* PRIM_9_3: */
-    rep=isin_G_H(po,r,19,16);
+    rep=isin_G_H(BR,19,16);
     if (rep) return 16;
   /* PRIM_9_4: */
-    rep=isin_G_H(po,r,19,15);
+    rep=isin_G_H(BR,19,15);
     return rep? 15: 19;
   }
 /* PRIM_9_5: */
-  rep=isin_G_H(po,r,33,32);
+  rep=isin_G_H(BR,33,32);
   if (!rep) goto PRIM_9_7;
 /* PRIM_9_6: */
-  rep=isin_G_H(po,r,32,27);
+  rep=isin_G_H(BR,32,27);
   return rep? 27: 32;
 
 PRIM_9_7:
-  rep=isin_G_H(po,r,33,23);
+  rep=isin_G_H(BR,33,23);
   if (!rep) return 33;
 /* PRIM_9_8: */
-  rep=isin_G_H(po,r,23,14);
+  rep=isin_G_H(BR,23,14);
   if (!rep) return 23;
 /* PRIM_9_9: */
-  rep=isin_G_H(po,r,14,9);
+  rep=isin_G_H(BR,14,9);
   return rep? 9: 14;
 }
 
 static long
-galoisimpodd9(GEN po, GEN *r)
+galoisimpodd9(buildroot *BR)
 {
   long rep;
 
 /* IMPODD_9_1: */
-  rep=isin_G_H(po,r,31,29);
+  rep=isin_G_H(BR,31,29);
   if (!rep) goto IMPODD_9_5;
 /* IMPODD_9_2: */
-  rep=isin_G_H(po,r,29,20);
+  rep=isin_G_H(BR,29,20);
   if (!rep) return 29;
 IMPODD_9_3:
-  rep=isin_G_H(po,r,20,12);
+  rep=isin_G_H(BR,20,12);
   if (!rep) return 20;
 IMPODD_9_4:
-  rep=isin_G_H(po,r,12,4);
+  rep=isin_G_H(BR,12,4);
   return rep? 4: 12;
 
 IMPODD_9_5:
-  rep=isin_G_H(po,r,31,28);
+  rep=isin_G_H(BR,31,28);
   if (!rep) goto IMPODD_9_9;
 /* IMPODD_9_6: */
-  rep=isin_G_H(po,r,28,22);
+  rep=isin_G_H(BR,28,22);
   if (!rep) return 28;
 IMPODD_9_7:
-  rep=isin_G_H(po,r,22,13);
+  rep=isin_G_H(BR,22,13);
   if (!rep) return 22;
 IMPODD_9_8:
-  rep=isin_G_H(po,r,13,4);
+  rep=isin_G_H(BR,13,4);
   return rep? 4: 13;
 
 IMPODD_9_9:
-  rep=isin_G_H(po,r,31,24);
+  rep=isin_G_H(BR,31,24);
   if (!rep) return 31;
 /* IMPODD_9_10: */
-  rep=isin_G_H(po,r,24,22);
+  rep=isin_G_H(BR,24,22);
   if (rep) goto IMPODD_9_7;
 /* IMPODD_9_11: */
-  rep=isin_G_H(po,r,24,20);
+  rep=isin_G_H(BR,24,20);
   if (rep) goto IMPODD_9_3;
 /* IMPODD_9_12: */
-  rep=isin_G_H(po,r,24,18);
+  rep=isin_G_H(BR,24,18);
   if (!rep) return 24;
 /* IMPODD_9_13: */
-  rep=isin_G_H(po,r,18,13);
+  rep=isin_G_H(BR,18,13);
   if (rep) goto IMPODD_9_8;
 /* IMPODD_9_14: */
-  rep=isin_G_H(po,r,18,12);
+  rep=isin_G_H(BR,18,12);
   if (rep) goto IMPODD_9_4;
 /* IMPODD_9_15: */
-  rep=isin_G_H(po,r,18,8);
+  rep=isin_G_H(BR,18,8);
   if (!rep) return 18;
 /* IMPODD_9_16: */
-  rep=isin_G_H(po,r,8,4);
+  rep=isin_G_H(BR,8,4);
   return rep? 4: 8;
 }
 
 static long
-galoisimpeven9(GEN po, GEN *r)
+galoisimpeven9(buildroot *BR)
 {
   long rep;
 
 /* IMPEVEN_9_1: */
-  rep=isin_G_H(po,r,30,25);
+  rep=isin_G_H(BR,30,25);
   if (!rep) goto IMPEVEN_9_7;
 /* IMPEVEN_9_2: */
-  rep=isin_G_H(po,r,25,17);
+  rep=isin_G_H(BR,25,17);
   if (!rep) return 25;
 IMPEVEN_9_3:
-  rep=isin_G_H(po,r,17,7);
+  rep=isin_G_H(BR,17,7);
   if (!rep) goto IMPEVEN_9_5;
 IMPEVEN_9_4:
-  rep=isin_G_H(po,r,7,2);
+  rep=isin_G_H(BR,7,2);
   return rep? 2: 7;
 
 IMPEVEN_9_5:
-  rep=isin_G_H(po,r,17,6);
+  rep=isin_G_H(BR,17,6);
   if (!rep) return 17;
 IMPEVEN_9_6:
-  rep=isin_G_H(po,r,6,1);
+  rep=isin_G_H(BR,6,1);
   return rep? 1: 6;
 
 IMPEVEN_9_7:
-  rep=isin_G_H(po,r,30,21);
+  rep=isin_G_H(BR,30,21);
   if (!rep) return 30;
 /* IMPEVEN_9_8: */
-  rep=isin_G_H(po,r,21,17);
+  rep=isin_G_H(BR,21,17);
   if (rep) goto IMPEVEN_9_3;
 /* IMPEVEN_9_9: */
-  rep=isin_G_H(po,r,21,11);
+  rep=isin_G_H(BR,21,11);
   if (!rep) goto IMPEVEN_9_13;
 /* IMPEVEN_9_10: */
-  rep=isin_G_H(po,r,11,7);
+  rep=isin_G_H(BR,11,7);
   if (rep) goto IMPEVEN_9_4;
 /* IMPEVEN_9_11: */
-  rep=isin_G_H(po,r,11,5);
+  rep=isin_G_H(BR,11,5);
   if (!rep) return 11;
 /* IMPEVEN_9_12: */
-  rep=isin_G_H(po,r,5,2);
+  rep=isin_G_H(BR,5,2);
   return rep? 2: 5;
 
 IMPEVEN_9_13:
-  rep=isin_G_H(po,r,21,10);
+  rep=isin_G_H(BR,21,10);
   if (!rep) return 21;
 /* IMPEVEN_9_14: */
-  rep=isin_G_H(po,r,10,6);
+  rep=isin_G_H(BR,10,6);
   if (rep) goto IMPEVEN_9_6;
 /* IMPEVEN_9_15: */
-  rep=isin_G_H(po,r,10,3);
+  rep=isin_G_H(BR,10,3);
   if (!rep) return 10;
 /* IMPEVEN_9_16: */
-  rep=isin_G_H(po,r,3,1);
+  rep=isin_G_H(BR,3,1);
   return rep? 1: 3;
 }
 
 static long
-closure9(GEN po)
+closure9(buildroot *BR)
 {
   long rep;
-  GEN r[NMAX];
-
-  r[0] = cleanroots(po,PRMAX); preci(r,PREC);
   if (!EVEN)
   {
   /* CLOS_9_1: */
-    rep=isin_G_H(po,r,34,31);
-    if (rep) return galoisimpodd9(po,r);
+    rep=isin_G_H(BR,34,31);
+    if (rep) return galoisimpodd9(BR);
   }
   else
   {
   /* CLOS_9_2: */
-    rep=isin_G_H(po,r,33,30);
-    if (rep) return galoisimpeven9(po,r);
+    rep=isin_G_H(BR,33,30);
+    if (rep) return galoisimpeven9(BR);
   }
-  return galoisprim9(po,r);
+  return galoisprim9(BR);
 }
 
 static PERM
@@ -1801,340 +1780,337 @@ galoismodulo9(GEN pol, GEN dpol)
   return EVEN? 33: 34;
 }
 
-/* BIBLIOTHEQUE POUR LE DEGRE 10 */
+/* DEGREE 10 */
 static long
-galoisprim10(GEN po, GEN *r)
+galoisprim10(buildroot *BR)
 {
   long rep;
   if (EVEN)
   {
   /* PRIM_10_1: */
-    rep=isin_G_H(po,r,44,31);
+    rep=isin_G_H(BR,44,31);
     if (!rep) return 44;
   /* PRIM_10_2: */
-    rep=isin_G_H(po,r,31,26);
+    rep=isin_G_H(BR,31,26);
     if (!rep) return 31;
   /* PRIM_10_3: */
-    rep=isin_G_H(po,r,26,7);
+    rep=isin_G_H(BR,26,7);
     return rep? 7: 26;
   }
   else
   {
   /* PRIM_10_4: */
-    rep=isin_G_H(po,r,45,35);
+    rep=isin_G_H(BR,45,35);
     if (!rep) return 45;
   /* PRIM_10_5: */
-    rep=isin_G_H(po,r,35,32);
+    rep=isin_G_H(BR,35,32);
     if (!rep) goto PRIM_10_7;
   /* PRIM_10_6: */
-    rep=isin_G_H(po,r,32,13);
+    rep=isin_G_H(BR,32,13);
     return rep? 13: 32;
 
    PRIM_10_7:
-    rep=isin_G_H(po,r,35,30);
+    rep=isin_G_H(BR,35,30);
     return rep? 30: 35;
   }
 }
 
 static long
-galoisimpeven10(GEN po, GEN *r, long nogr)
+galoisimpeven10(buildroot *BR, long nogr)
 {
   long rep;
   if (nogr==42)
   {
  /* IMPEVEN_10_1: */
-    rep=isin_G_H(po,r,42,28);
+    rep=isin_G_H(BR,42,28);
     if (!rep) return 42;
  /* IMPEVEN_10_2: */
-    rep=isin_G_H(po,r,28,18);
+    rep=isin_G_H(BR,28,18);
     return rep? 18: 28;
   }
   else
   {
  /* IMPEVEN_10_3: */
-    rep=isin_G_H(po,r,37,34);
+    rep=isin_G_H(BR,37,34);
     if (!rep) goto IMPEVEN_10_5;
  /* IMPEVEN_10_4: */
-    rep=isin_G_H(po,r,34,15);
+    rep=isin_G_H(BR,34,15);
     if (rep) goto IMPEVEN_10_7; else return 34;
 
   IMPEVEN_10_5:
-    rep=isin_G_H(po,r,37,24);
+    rep=isin_G_H(BR,37,24);
     if (!rep) return 37;
  /* IMPEVEN_10_6: */
-    rep=isin_G_H(po,r,24,15);
+    rep=isin_G_H(BR,24,15);
     if (!rep) return 24;
   IMPEVEN_10_7:
-    rep=isin_G_H(po,r,15,8);
+    rep=isin_G_H(BR,15,8);
     return rep? 8: 15;
   }
 }
 
 static long
-galoisimpodd10(GEN po, GEN *r, long nogr)
+galoisimpodd10(buildroot *BR, long nogr)
 {
   long rep;
   if (nogr==43)
   {
  /*  IMPODD_10_1: */
-    rep=isin_G_H(po,r,43,41);
+    rep=isin_G_H(BR,43,41);
     if (!rep) goto IMPODD_10_3;
  /* IMPODD_10_2: */
-    rep=isin_G_H(po,r,41,40);
+    rep=isin_G_H(BR,41,40);
     if (rep) goto IMPODD_10_4; else goto IMPODD_10_5;
 
    IMPODD_10_3:
-    rep=isin_G_H(po,r,43,33);
+    rep=isin_G_H(BR,43,33);
     if (rep) goto IMPODD_10_6; else return 43;
 
    IMPODD_10_4:
-    rep=isin_G_H(po,r,40,21);
+    rep=isin_G_H(BR,40,21);
     if (rep) goto IMPODD_10_7; else goto IMPODD_10_8;
 
    IMPODD_10_5:
-    rep=isin_G_H(po,r,41,27);
+    rep=isin_G_H(BR,41,27);
     if (rep) goto IMPODD_10_9; else goto IMPODD_10_10;
 
    IMPODD_10_6:
-    rep=isin_G_H(po,r,33,27);
+    rep=isin_G_H(BR,33,27);
     if (rep) goto IMPODD_10_9; else return 33;
 
    IMPODD_10_7:
-    rep=isin_G_H(po,r,21,10);
+    rep=isin_G_H(BR,21,10);
     if (rep) goto IMPODD_10_12; else goto IMPODD_10_13;
 
    IMPODD_10_8:
-    rep=isin_G_H(po,r,40,12);
+    rep=isin_G_H(BR,40,12);
     if (rep) goto IMPODD_10_14; else goto IMPODD_10_15;
 
    IMPODD_10_9:
-    rep=isin_G_H(po,r,27,21);
+    rep=isin_G_H(BR,27,21);
     if (rep) goto IMPODD_10_7; else goto IMPODD_10_16;
 
    IMPODD_10_10:
-    rep=isin_G_H(po,r,41,22);
+    rep=isin_G_H(BR,41,22);
     if (!rep) return 41;
  /* IMPODD_10_11: */
-    rep=isin_G_H(po,r,22,12);
+    rep=isin_G_H(BR,22,12);
     if (rep) goto IMPODD_10_14; else goto IMPODD_10_18;
 
    IMPODD_10_12:
-    rep=isin_G_H(po,r,10,4);
+    rep=isin_G_H(BR,10,4);
     return rep? 4: 10;
 
    IMPODD_10_13:
-    rep=isin_G_H(po,r,21,9);
+    rep=isin_G_H(BR,21,9);
     if (rep) goto IMPODD_10_19; else return 21;
    IMPODD_10_14:
-    rep=isin_G_H(po,r,12,4);
+    rep=isin_G_H(BR,12,4);
     return rep? 4: 12;
 
    IMPODD_10_15:
-    rep=isin_G_H(po,r,40,11);
+    rep=isin_G_H(BR,40,11);
     if (rep) goto IMPODD_10_20; else return 40;
    IMPODD_10_16:
-    rep=isin_G_H(po,r,27,20);
+    rep=isin_G_H(BR,27,20);
     if (!rep) goto IMPODD_10_21;
  /* IMPODD_10_17: */
-    rep=isin_G_H(po,r,20,10);
+    rep=isin_G_H(BR,20,10);
     if (rep) goto IMPODD_10_12; return 20;
 
    IMPODD_10_18:
-    rep=isin_G_H(po,r,22,11);
+    rep=isin_G_H(BR,22,11);
     if (rep) goto IMPODD_10_20; else goto IMPODD_10_23;
 
    IMPODD_10_19:
-    rep=isin_G_H(po,r,9,6);
+    rep=isin_G_H(BR,9,6);
     if (rep) goto IMPODD_10_24; else goto IMPODD_10_25;
 
    IMPODD_10_20:
-    rep=isin_G_H(po,r,11,3);
+    rep=isin_G_H(BR,11,3);
     if (rep) goto IMPODD_10_26; else return 11;
 
    IMPODD_10_21:
-    rep=isin_G_H(po,r,27,19);
+    rep=isin_G_H(BR,27,19);
     if (rep) goto IMPODD_10_27;
  /* IMPODD_10_22: */
-    rep=isin_G_H(po,r,27,17);
+    rep=isin_G_H(BR,27,17);
     if (rep) goto IMPODD_10_28; else return 27;
 
    IMPODD_10_23:
-    rep=isin_G_H(po,r,22,5);
+    rep=isin_G_H(BR,22,5);
     if (rep) goto IMPODD_10_29; else return 22;
 
    IMPODD_10_24:
-    rep=isin_G_H(po,r,6,2);
+    rep=isin_G_H(BR,6,2);
     if (rep) return 2; else goto IMPODD_10_30;
 
    IMPODD_10_25:
-    rep=isin_G_H(po,r,9,3);
+    rep=isin_G_H(BR,9,3);
     if (!rep) return 9;
    IMPODD_10_26:
-    rep=isin_G_H(po,r,3,2);
+    rep=isin_G_H(BR,3,2);
     if (rep) return 2; else goto IMPODD_10_31;
 
    IMPODD_10_27:
-    rep=isin_G_H(po,r,19,9);
+    rep=isin_G_H(BR,19,9);
     if (rep) goto IMPODD_10_19; else return 19;
 
    IMPODD_10_28:
-    rep=isin_G_H(po,r,17,10);
+    rep=isin_G_H(BR,17,10);
     if (rep) goto IMPODD_10_12; else goto IMPODD_10_32;
 
    IMPODD_10_29:
-    rep=isin_G_H(po,r,5,4);
+    rep=isin_G_H(BR,5,4);
     if (rep) return 4; else goto IMPODD_10_33;
 
    IMPODD_10_30:
-    rep=isin_G_H(po,r,6,1);
+    rep=isin_G_H(BR,6,1);
     return rep? 1: 6;
 
    IMPODD_10_31:
-    rep=isin_G_H(po,r,3,1);
+    rep=isin_G_H(BR,3,1);
     return rep? 1: 3;
 
    IMPODD_10_32:
-    rep=isin_G_H(po,r,17,9);
+    rep=isin_G_H(BR,17,9);
     if (rep) goto IMPODD_10_19; else goto IMPODD_10_60;
 
    IMPODD_10_33:
-    rep=isin_G_H(po,r,5,3);
+    rep=isin_G_H(BR,5,3);
     if (rep) goto IMPODD_10_26; else return 5;
 
    IMPODD_10_60:
-    rep=isin_G_H(po,r,17,5);
+    rep=isin_G_H(BR,17,5);
     if (rep) goto IMPODD_10_29; else return 17;
   }
   else
   {
   /* IMPODD_10_34: */
-    rep=isin_G_H(po,r,39,38);
+    rep=isin_G_H(BR,39,38);
     if (!rep) goto IMPODD_10_36;
   /* IMPODD_10_35: */
-    rep=isin_G_H(po,r,38,25);
+    rep=isin_G_H(BR,38,25);
     if (rep) goto IMPODD_10_37; else goto IMPODD_10_38;
 
    IMPODD_10_36:
-    rep=isin_G_H(po,r,39,36);
+    rep=isin_G_H(BR,39,36);
     if (rep) goto IMPODD_10_39; else goto IMPODD_10_40;
 
    IMPODD_10_37:
-    rep=isin_G_H(po,r,25,4);
+    rep=isin_G_H(BR,25,4);
     return rep? 4: 25;
 
    IMPODD_10_38:
-    rep=isin_G_H(po,r,38,12);
+    rep=isin_G_H(BR,38,12);
     if (rep) goto IMPODD_10_41; else return 38;
 
    IMPODD_10_39:
-    rep=isin_G_H(po,r,36,23);
+    rep=isin_G_H(BR,36,23);
     if (rep) goto IMPODD_10_42; else goto IMPODD_10_43;
 
    IMPODD_10_40:
-    rep=isin_G_H(po,r,39,29);
+    rep=isin_G_H(BR,39,29);
     if (rep) goto IMPODD_10_44; else goto IMPODD_10_45;
 
    IMPODD_10_41:
-    rep=isin_G_H(po,r,12,4);
+    rep=isin_G_H(BR,12,4);
     return rep? 4: 12;
 
    IMPODD_10_42:
-    rep=isin_G_H(po,r,23,16);
+    rep=isin_G_H(BR,23,16);
     if (rep) goto IMPODD_10_46; else goto IMPODD_10_47;
 
    IMPODD_10_43:
-    rep=isin_G_H(po,r,36,11);
+    rep=isin_G_H(BR,36,11);
     if (rep) goto IMPODD_10_48; else return 36;
 
    IMPODD_10_44:
-    rep=isin_G_H(po,r,29,25);
+    rep=isin_G_H(BR,29,25);
     if (rep) goto IMPODD_10_37; else goto IMPODD_10_49;
 
    IMPODD_10_45:
-    rep=isin_G_H(po,r,39,22);
+    rep=isin_G_H(BR,39,22);
     if (rep) goto IMPODD_10_50; else return 39;
 
    IMPODD_10_46:
-    rep=isin_G_H(po,r,16,2);
+    rep=isin_G_H(BR,16,2);
     return rep? 2: 16;
 
    IMPODD_10_47:
-    rep=isin_G_H(po,r,23,14);
+    rep=isin_G_H(BR,23,14);
     if (rep) goto IMPODD_10_51; else goto IMPODD_10_52;
 
    IMPODD_10_48:
-    rep=isin_G_H(po,r,11,3);
+    rep=isin_G_H(BR,11,3);
     if (rep) goto IMPODD_10_53; else return 11;
 
    IMPODD_10_49:
-    rep=isin_G_H(po,r,29,23);
+    rep=isin_G_H(BR,29,23);
     if (rep) goto IMPODD_10_42; else goto IMPODD_10_54;
 
    IMPODD_10_50:
-    rep=isin_G_H(po,r,22,12);
+    rep=isin_G_H(BR,22,12);
     if (rep) goto IMPODD_10_41; else goto IMPODD_10_55;
 
    IMPODD_10_51:
-    rep=isin_G_H(po,r,14,1);
+    rep=isin_G_H(BR,14,1);
     return rep? 1: 14;
 
    IMPODD_10_52:
-    rep=isin_G_H(po,r,23,3);
+    rep=isin_G_H(BR,23,3);
     if (!rep) return 23;
    IMPODD_10_53:
-    rep=isin_G_H(po,r,3,2);
+    rep=isin_G_H(BR,3,2);
     if (rep) return 2; else goto IMPODD_10_57;
 
    IMPODD_10_54:
-    rep=isin_G_H(po,r,29,5);
+    rep=isin_G_H(BR,29,5);
     if (rep) goto IMPODD_10_58; else return 29;
 
    IMPODD_10_55:
-    rep=isin_G_H(po,r,22,11);
+    rep=isin_G_H(BR,22,11);
     if (rep) goto IMPODD_10_48;
  /* IMPODD_10_56: */
-    rep=isin_G_H(po,r,22,5);
+    rep=isin_G_H(BR,22,5);
     if (rep) goto IMPODD_10_58; else return 22;
 
    IMPODD_10_57:
-    rep=isin_G_H(po,r,3,1);
+    rep=isin_G_H(BR,3,1);
     return rep? 1: 3;
 
    IMPODD_10_58:
-    rep=isin_G_H(po,r,5,4);
+    rep=isin_G_H(BR,5,4);
     if (rep) return 4;
  /* IMPODD_10_59: */
-    rep=isin_G_H(po,r,5,3);
+    rep=isin_G_H(BR,5,3);
     if (rep) goto IMPODD_10_53; else return 5;
   }
 }
 
 static long
-closure10(GEN po)
+closure10(buildroot *BR)
 {
   long rep;
-  GEN r[NMAX];
-
-  r[0] = cleanroots(po,PRMAX); preci(r,PREC);
   if (EVEN)
   {
   /* CLOS_10_1: */
-    rep=isin_G_H(po,r,44,42);
-    if (rep) return galoisimpeven10(po,r,42);
+    rep=isin_G_H(BR,44,42);
+    if (rep) return galoisimpeven10(BR,42);
   /* CLOS_10_2: */
-    rep=isin_G_H(po,r,44,37);
-    if (rep) return galoisimpeven10(po,r,37);
+    rep=isin_G_H(BR,44,37);
+    if (rep) return galoisimpeven10(BR,37);
   }
   else
   {
   /* CLOS_10_3: */
-    rep=isin_G_H(po,r,45,43);
-    if (rep) return galoisimpodd10(po,r,43);
+    rep=isin_G_H(BR,45,43);
+    if (rep) return galoisimpodd10(BR,43);
   /* CLOS_10_4: */
-    rep=isin_G_H(po,r,45,39);
-    if (rep) return galoisimpodd10(po,r,39);
+    rep=isin_G_H(BR,45,39);
+    if (rep) return galoisimpodd10(BR,39);
   }
-  return galoisprim10(po,r);
+  return galoisprim10(BR);
 }
 
 static PERM
@@ -2263,38 +2239,44 @@ galoismodulo10(GEN pol, GEN dpol)
   return EVEN? 44: 45;
 }
 
-/* BIBLIOTHEQUE POUR LE DEGRE 11 */
-
+/* DEGREE 11 */
 static long
-closure11(GEN po)
+closure11(buildroot *BR)
 {
   long rep;
-  GEN r[NMAX];
-
-  r[0] = cleanroots(po,PRMAX); preci(r,PREC);
   if (EVEN)
   {
   /* EVEN_11_1: */
-    rep=isin_G_H(po,r,7,6);
+    rep=isin_G_H(BR,7,6);
     if (!rep) return 7;
   /* EVEN_11_2: */
-    rep=isin_G_H(po,r,6,5);
+    rep=isin_G_H(BR,6,5);
     if (!rep) return 6;
   /* EVEN_11_3: */
-    rep=isin_G_H(po,r,5,3);
+    rep=isin_G_H(BR,5,3);
     if (!rep) return 5;
   /* EVEN_11_4: */
-    rep=isin_G_H(po,r,3,1);
+    rep=isin_G_H(BR,3,1);
     return rep? 1: 3;
   }
   else
   {
   /* ODD_11_1: */
-    rep=isin_G_H(po,r,8,4);
+    GEN h = BR->p, r = compositum(h, h);
+    r = (GEN)r[lg(r)-1];
+    if (degpol(r) == 22) return 2; /* D11 */
+    h = dummycopy(h); setvarn(h, MAXVARN);
+    setvarn(r, 0);
+    r = nffactor(_initalg(h, nf_PARTIALFACT, DEFAULTPREC), r);
+    /* S11 of F_110[11] */
+    if (lg(r[1]) == 3) return 8; else return 4;
+#if 0
+    rep=isin_G_H(BR,8,4);
     if (!rep) return 8;
   /* ODD_11_2: */
-    rep=isin_G_H(po,r,4,2);
+    rep=isin_G_H(BR,4,2);
     return rep? 2: 4;
+#endif
   }
 }
 
@@ -2345,10 +2327,10 @@ galoismodulo11(GEN pol, GEN dpol)
 }
 
 /* return 1 iff we need to read a resolvent */
-static long
-init_isin(long n1, long n2, GROUP *tau, GROUP *ss, PERM *s0)
+static void
+init_isin(long n1, long n2, GROUP *tau, GROUP *ss, PERM *s0, resolv *R)
 {
-  long fl = 1;
+  int fl = 1;
   if (DEBUGLEVEL) {
     fprintferr("\n*** Entering isin_%ld_G_H_(%ld,%ld)\n",N,n1,n2); flusherr();
   }
@@ -2394,41 +2376,37 @@ init_isin(long n1, long n2, GROUP *tau, GROUP *ss, PERM *s0)
     case 11:
       *s0=data11(n1,tau); break;
   }
-  *ss = lirecoset(n1,n2,N); return fl;
+  *ss = lirecoset(n1,n2,N);
+  if (fl) lireresolv(n1,n2,N,R); else { R->a = NULL; R->nm = n1; R->nv = n2; }
 }
 
 static long
-isin_G_H(GEN po, GEN *r, long n1, long n2)
+isin_G_H(buildroot *BR, long n1, long n2)
 {
-  long nbv,nbm,i,j;
   PERM s0, ww;
-  RESOLVANTE a;
   GROUP ss,tau;
+  resolv R;
 
-  if (init_isin(n1,n2, &tau, &ss, &s0))
-    a = lireresolv(n1,n2,N,&nbv,&nbm);
-  else
-    { a = NULL; nbm=n1; nbv=n2; }
-  ww = check_isin(po,r,nbm,nbv,a,tau,ss,s0);
-  if (getpreci(r) != PREC) preci(r,PREC);
-  free(ss); free(tau); if (a) free(a);
+  init_isin(n1,n2, &tau, &ss, &s0, &R);
+  ww = check_isin(BR, &R, tau, ss);
+  free(ss); free(tau); if (R.a) free(R.a);
   if (ww)
   {
-    long z[NMAX+1];
-
+    long z[NMAX+1], i , j;
+    s0 = permmul(ww, s0); free(ww);
     if (DEBUGLEVEL)
     {
       fprintferr("\n    Output of isin_%ld_G_H(%ld,%ld): %ld",N,n1,n2,n2);
-      fprintferr("\n    Reordering of the roots: "); printperm(ww);
+      fprintferr("\n    Reordering of the roots: "); printperm(s0);
       flusherr();
     }
-    for (i=0; i<TSCHMAX; i++)
+    for (i=0; i<BR->tschmax; i++)
     {
-      GEN p1 = r[i];
-      for (j=1; j<=N; j++) z[j]=p1[(int)ww[j]];
-      for (j=1; j<=N; j++) p1[j]=z[j];
+      GEN p1 = (GEN)BR->r[i];
+      for (j=1; j<=N; j++) z[j] = p1[(int)s0[j]];
+      for (j=1; j<=N; j++) p1[j] = z[j];
     }
-    free(ww); return n2;
+    free(s0); return n2;
   }
   if (DEBUGLEVEL)
   {
@@ -2442,7 +2420,7 @@ GEN
 galoisbig(GEN pol, long prec)
 {
   GEN dpol, res = cgetg(4,t_VEC);
-  long *tab, t;
+  long *tab, t = 0;
   pari_sp av = avma;
   long tab8[]={0,
     8,8,8,8,8,16,16,16,16,16, 16,24,24,24,32,32,32,32,32,32,
@@ -2458,35 +2436,42 @@ galoisbig(GEN pol, long prec)
   long tab11[]={0, 11,22,55,110,660,7920,19958400,39916800};
 
   N = degpol(pol); dpol = ZX_disc(pol); EVEN = carreparfait(dpol);
-  prec += 2 * (MEDDEFAULTPREC-2);
-  PREC = prec;
+  ID[0] = N;
+  
   if (DEBUGLEVEL)
   {
-    fprintferr("Galoisbig (prec=%ld): reduced polynomial #1 = %Z\n",prec,pol);
+    fprintferr("Galoisbig: reduced polynomial #1 = %Z\n", pol);
     fprintferr("discriminant = %Z\n", dpol);
     fprintferr("%s group\n", EVEN? "EVEN": "ODD"); flusherr();
   }
-  PRMAX = prec+5; TSCHMAX = 1; ID[0] = N;
   switch(N)
   {
-    case 8: t = galoismodulo8(pol,dpol);
-      if (!t) t = closure8(pol);
-      tab=tab8; break;
-
-    case 9: t = galoismodulo9(pol,dpol);
-      if (!t) t = closure9(pol);
-      tab=tab9; break;
-
-    case 10: t = galoismodulo10(pol,dpol);
-      if (!t) t = closure10(pol);
-      tab=tab10; break;
-
-    case 11: t = galoismodulo11(pol,dpol);
-      if (!t) t = closure11(pol);
-      tab=tab11; break;
-
+    case 8: t = galoismodulo8(pol,dpol);  tab=tab8; break;
+    case 9: t = galoismodulo9(pol,dpol);  tab=tab9; break;
+    case 10:t = galoismodulo10(pol,dpol); tab=tab10; break;
+    case 11:t = galoismodulo11(pol,dpol); tab=tab11; break;
     default: err(impl,"galois in degree > 11");
       return NULL; /* not reached */
+  }
+  if (!t) 
+  {
+    buildroot BR;
+    long i;
+    BR.p = pol;
+    BR.pr = prec + 2 * (MEDDEFAULTPREC-2);
+    BR.prmax = BR.pr + BIGDEFAULTPREC-2; 
+    BR.tschmax = 1;
+    BR.r = cgetg(N+1, t_VEC);
+    BR.r[0] = lclone ( cleanroots(BR.p, BR.prmax) );
+    preci(&BR, BR.pr);
+    switch(N)
+    {
+      case  8: t = closure8(&BR); break;
+      case  9: t = closure9(&BR); break;
+      case 10: t = closure10(&BR); break;
+      case 11: t = closure11(&BR); break;
+    }
+    for (i = 0; i < BR.tschmax; i++) gunclone((GEN)BR.r[i]);
   }
   avma = av;
   res[1]=lstoi(tab[t]);
