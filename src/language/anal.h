@@ -49,6 +49,7 @@ extern GEN gnil;
 extern char *current_function;
 extern GEN  (*gp_history_fun)(long, long, char *, char *);
 extern int  (*whatnow_fun)(char *, int);
+extern void (*output_fun)(GEN);
 extern void *foreignHandler;
 extern GEN  (*foreignExprHandler)(char*);
 extern char foreignExprSwitch;

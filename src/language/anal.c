@@ -45,6 +45,7 @@ static entree *installep(void *f,char *name,int l,int v,int add,entree **table);
 static entree *skipentry(void);
 
 void killbloc0(GEN x, int inspect);
+char *GENtostr0(GEN x, void(*do_out)(GEN));
 
 /* last time we began parsing an object of specified type */
 static struct
@@ -993,7 +994,7 @@ expand_string(char *bp, char **ptbuf, char **ptlimit)
     long av = avma;
     GEN p1 = expr();
     if (br_status) err(breaker,"here (expanding string)");
-    tmp = GENtostr(p1);
+    tmp = GENtostr0(p1, output_fun);
     len = strlen(tmp); avma = av;
   }
   if (ptlimit && bp + len > *ptlimit)
@@ -1311,7 +1312,9 @@ identifier(void)
           has_pointer |= (1 << i);
 	  argvec[i++] = (GEN) &(e->value); break;
         }
-	case  'I': /* Input position */
+        /* Input position */
+        case 'E': /* expr */
+	case  'I': /* seq */
 	  match_comma();
 	  argvec[i++] = (GEN) analyseur;
 	  skipseq(); break;
@@ -2228,6 +2231,8 @@ skipidentifier(void)
         match_comma();
         if (*analyseur == ',' || *analyseur == ')') break;
         skipexpr(); break;
+      case 'E':
+        match_comma(); skipexpr(); break;
       case 'I':
         match_comma(); skipseq(); break;
       case 'r':
@@ -2560,9 +2565,12 @@ diff(GEN x) /* different */
 static GEN
 codiff(GEN x) /* codifferent */
 {
+  GEN z;
   int t; x = get_nf(x,&t);
   if (!x) err(member,"codiff",mark.member,mark.start);
-  return gdiv(gmael(x,5,7), absi((GEN) x[3]));
+  z = gmael(x,5,7);
+  z = idealhnf0(x,(GEN)z[1],(GEN)z[2]);
+  return gdiv(z, absi((GEN) x[3]));
 }
 
 static GEN

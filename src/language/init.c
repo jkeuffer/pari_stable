@@ -44,6 +44,7 @@ void (*foreignFuncFree)(entree *);    /* How to free external entree.    */
 int  (*default_exception_handler)(long);
 GEN  (*gp_history_fun)(long, long, char *, char *);
 int  (*whatnow_fun)(char *, int);
+void (*output_fun)(GEN);
 
 void  initout(void);
 int   term_width(void);
@@ -433,6 +434,7 @@ pari_init(long parisize, long maxprime)
 
   gp_history_fun = NULL;
   whatnow_fun = NULL;
+  output_fun = &outbrute;
   err_catch_stack = (stack**) gpmalloc((noer + 1) *sizeof(stack*));
   for (i = 0; i <= noer; i++) err_catch_stack[i] = NULL;
   default_exception_handler = NULL;
@@ -956,6 +958,7 @@ err(long numerr, ...)
              if (*op == '+') f = "addition";
         else if (*op == '*') f = "multiplication";
         else if (*op == '/' || *op == '%') f = "division";
+        else if (*op == 'g') { op = ","; f = "gcd"; }
         else { op = "-->"; f = "assignment"; }
         pariputsf(" %s %s %s %s.",f,type_name(x),op,type_name(y));
         break;
@@ -1654,7 +1657,7 @@ entree functions_basic[]={
 {"deriv",14,(void*)deriv,7,"GDn"},
 {"dilog",1,(void*)dilog,3,"Gp"},
 {"dirdiv",2,(void*)dirdiv,7,"GG"},
-{"direuler",99,(void*)direulerall,7,"V=GGIDG"},
+{"direuler",99,(void*)direulerall,7,"V=GGEDG"},
 {"dirmul",2,(void*)dirmul,7,"GG"},
 {"dirzetak",2,(void*)dirzetak,6,"GG"},
 {"divisors",18,(void*)divisors,4,"G"},
@@ -1754,7 +1757,7 @@ entree functions_basic[]={
 {"incgam",99,(void*)incgam0,3,"GGDGp"},
 {"incgamc",29,(void*)incgam3,3,"GGp"},
 {"intformal",14,(void*)integ,7,"GDn"},
-{"intnum",99,(void*)intnum0,9,"V=GGID0,L,p"},
+{"intnum",99,(void*)intnum0,9,"V=GGED0,L,p"},
 {"isfundamental",18,(void*)gisfundamental,4,"G"},
 {"isprime",18,(void*)gisprime,4,"G"},
 {"ispseudoprime",18,(void*)gispsp,4,"G"},
@@ -1890,9 +1893,9 @@ entree functions_basic[]={
 {"precprime",18,(void*)gprecprime,4,"G"},
 {"prime",11,(void*)prime,4,"L"},
 {"primes",11,(void*)primes,4,"L"},
-{"prod",47,(void*)produit,9,"V=GGIDG"},
-{"prodeuler",37,(void*)prodeuler,9,"V=GGIp"},
-{"prodinf",99,(void*)prodinf0,9,"V=GID0,L,p"},
+{"prod",47,(void*)produit,9,"V=GGEDG"},
+{"prodeuler",37,(void*)prodeuler,9,"V=GGEp"},
+{"prodinf",99,(void*)prodinf0,9,"V=GED0,L,p"},
 {"psi",1,(void*)gpsi,3,"Gp"},
 {"qfbclassno",99,(void*)qfbclassno0,4,"GD0,L,"},
 {"qfbcompraw",2,(void*)compraw,4,"GG"},
@@ -1974,17 +1977,17 @@ entree functions_basic[]={
 {"sinh",1,(void*)gsh,3,"Gp"},
 {"sizebyte",10,(void*)taille2,2,"lG"},
 {"sizedigit",10,(void*)gsize,2,"lG"},
-{"solve",37,(void*)zbrent,9,"V=GGIp"},
+{"solve",37,(void*)zbrent,9,"V=GGEp"},
 {"sqr",18,(void*)gsqr,3,"G"},
 {"sqrt",1,(void*)gsqrt,3,"Gp"},
 {"sqrtint",1,(void*)racine,4,"Gp"},
 {"subgrouplist",99,(void*)subgrouplist0,6,"GD0,L,D0,L,p"},
 {"subst",26,(void*)gsubst,7,"GnG"},
-{"sum",48,(void*)somme,9,"V=GGIDG"},
-{"sumalt",99,(void*)sumalt0,9,"V=GID0,L,p"},
-{"sumdiv",22,(void*)divsum,9,"GVI"},
-{"suminf",27,(void*)suminf,9,"V=GIp"},
-{"sumpos",99,(void*)sumpos0,9,"V=GID0,L,p"},
+{"sum",48,(void*)somme,9,"V=GGEDG"},
+{"sumalt",99,(void*)sumalt0,9,"V=GED0,L,p"},
+{"sumdiv",22,(void*)divsum,9,"GVE"},
+{"suminf",27,(void*)suminf,9,"V=GEp"},
+{"sumpos",99,(void*)sumpos0,9,"V=GED0,L,p"},
 {"tan",1,(void*)gtan,3,"Gp"},
 {"tanh",1,(void*)gth,3,"Gp"},
 {"taylor",12,(void*)tayl,7,"GnP"},
