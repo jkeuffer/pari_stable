@@ -463,7 +463,7 @@ static GEN
 computeP2(GEN bnr, GEN la, int raw, long prec)
 {
   long av=avma, av2, clrayno,i, first = 1;
-  GEN listray,P0,P,f, nf = checknf(bnr);
+  GEN listray,P0,P,f,lanum, nf = checknf(bnr);
   
   f = gmael3(bnr,2,1,1);
   if (typ(la) != t_COL) la = algtobasis(nf,la);
@@ -475,11 +475,11 @@ PRECPB:
     if (DEBUGLEVEL) err(warnprec,"computeP2",prec);
     nf = gerepileupto(av2, nfnewprec(checknf(bnr),prec));
   }
-  first = 0; la = to_approx(nf,la);
+  first = 0; lanum = to_approx(nf,la);
   P = cgetg(clrayno+1,t_VEC);
   for (i=1; i<=clrayno; i++)
   {
-    GEN v, s = computeth2(nf,f, (GEN)listray[i],la,prec);
+    GEN v, s = computeth2(nf,f, (GEN)listray[i],lanum,prec);
     if (!s) { prec = (prec<<1)-2; goto PRECPB; }
     if (raw)
     {
