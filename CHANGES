@@ -73,10 +73,11 @@ BA 15- polsubcyclo() used too much memory for large conductors.
     2- improve trial division in all basic arithmetic functions [ e.g try
        for(i=1,10^5, factor(1009)), or moebius, or ... ]. Old logic was
        broken for small inputs (tried far too many primes)
-    3- improve quadclassunit(D >> 1), about 5 to 7 times faster in the 40
+    3- improve quadclassunit(D >> 1), about 10 times faster in the 40
        digits range [forbid long reduction cycles (too costly to update arch.
        info when a relation is found + streamline factorquad() ]. See
-       Z_lvalrem_stop()
+       Z_lvalrem_stop() + remove extra_relations() and use large prime
+       variation all the way [almost all relations are found this way]
     4- streamline/clean-up polroots [ complete rewrite, much faster for
        small degrees ].
     5- improved zetakinit() [save some multiplications, about half of them

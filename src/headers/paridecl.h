@@ -765,7 +765,6 @@ GEN     vecsort0(GEN x, GEN k, long flag);
 
 GEN     buchimag(GEN D, GEN gcbach, GEN gcbach2, GEN gCO);
 GEN     buchreal(GEN D, GEN gsens, GEN gcbach, GEN gcbach2, GEN gRELSUP, long prec);
-GEN     cgetalloc(long t, size_t l);
 GEN     quadclassunit0(GEN x, long flag,GEN data, long prec);
 GEN     quadhilbert(GEN D, GEN flag, long prec);
 GEN     quadray(GEN bnf, GEN f, GEN flag, long prec);
@@ -1174,6 +1173,7 @@ GEN     precprime(GEN n);
 long    TIMER(pari_timer *T);
 void    TIMERstart(pari_timer *T);
 long    allocatemoremem(size_t newsize);
+GEN     cgetalloc(long t, size_t l);
 GEN     changevar(GEN x, GEN y);
 void    disable_dbg(long val);
 GEN     dummycopy(GEN x);

@@ -281,6 +281,13 @@ gprealloc(void *pointer, size_t size)
   return tmp;
 }
 
+GEN
+cgetalloc(long t, size_t l)
+{
+  GEN x = (GEN)gpmalloc(l * sizeof(long));
+  x[0] = evaltyp(t) | evallg(l); return x;
+}
+
 static void
 pari_handle_SIGINT(void)
 {
