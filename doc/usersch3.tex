@@ -1356,10 +1356,10 @@ the present implementation requires $x$ to be positive.
 \syn{hyperu}{a,b,x,\var{prec}}.
 
 \subsecidx{incgam}$(s,x,{y})$: incomplete gamma function.
-
-$x$ must be positive and $s$ real. The result returned is $\int_x^\infty
-e^{-t}t^{s-1}\,dt$. When $y$ is given, assume (of course without checking!)
-that $y=\Gamma(s)$. For small $x$, this will speed up the computation.
+The argument $x$ must be positive and $s$ is any complex number. The result
+returned is $\int_x^\infty e^{-t}t^{s-1}\,dt$. When $y$ is given, assume (of
+course without checking!) that $y=\Gamma(s)$. For small $x$, this will speed
+up the computation.
 
 \syn{incgam}{s,x,\var{prec}} and $\teb{incgam0}(s,x,y,\var{prec})$,
 respectively (an omitted $y$ is coded as \kbd{NULL}). There exist also the
@@ -1367,9 +1367,8 @@ functions \teb{incgam1} and \teb{incgam2} which are used for internal
 purposes.
 
 \subsecidx{incgamc}$(s,x)$: complementary incomplete gamma function.
-
-The arguments $s$ and $x$ must be positive. The result returned is
-$\int_0^x e^{-t}t^{s-1}\,dt$, when $x$ is not too large.
+The argument $x$ must be positive and not too large, $s$ is not a pole of
+$\Gamma$. The result returned is $\int_0^x e^{-t}t^{s-1}\,dt$.
 
 \syn{incgamc}{s,x,\var{prec}}.
 
