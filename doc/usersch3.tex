@@ -229,7 +229,7 @@ integer the result is still an integer.
 \subsec{Comparison and boolean operators}.\sidx{boolean operators}
 The six standard \idx{comparison operators} \kbd{<=}, \kbd{<}, \kbd{>=},
 \kbd{>}, \kbd{==}, \kbd{!=} are available in GP, and in library mode under
-the names \teb{gle}, \teb{glt}, \teb{gge}, \teb{ggt}, \teb{geq}, \teb{gne}
+the names \tet{gle}, \tet{glt}, \tet{gge}, \tet{ggt}, \tet{geq}, \tet{gne}
 respectively. The library syntax is $\var{co}(x,y)$, where \var{co} is the
 comparison operator. The result is 1 (as a \kbd{GEN}) if the comparison is
 true, 0 (as a \kbd{GEN}) if it is false.
@@ -250,7 +250,7 @@ $\teb{gcmp_1}(x)$ ($x==-1$ ?).
 
 Note that $\teb{gcmp0}(x)$ tests whether $x$ is equal to zero, even if $x$ is
 not an exact object. To test whether $x$ is an exact object which is equal to
-zero, one must use $\teb{isexactzero}$.
+zero, one must use $\tet{isexactzero}$.
 
 Also note that the \kbd{gcmp} and \kbd{gegal} functions return a C-integer,
 and \var{not} a \kbd{GEN} like \kbd{gle} etc.
@@ -1483,7 +1483,7 @@ $0$ is factored as $0^1$.
 added, meaning that we look only for factors up to \var{lim}, or to
 \kbd{primelimit}, whichever is lowest (except when $\var{lim}=0$ where the
 effect is identical to setting $\var{lim}=\kbd{primelimit}$). Hence in this
-case, the remaining part is not necessarily prime. See \teb{factorint} for
+case, the remaining part is not necessarily prime. See \tet{factorint} for
 more information about the algorithms used.
 
    The polynomials or rational functions to be factored must have scalar
@@ -1508,7 +1508,7 @@ you need it, you can always ask for the content explicitly:
 %2 = 1/2
 @eprog
 
-\noindent See also \teb{factornf}.
+\noindent See also \tet{factornf}.
 
 \syn{factor0}{x,\var{lim}}, where \var{lim} is a C integer.
 Also available are
@@ -3440,7 +3440,7 @@ If present $den$ must be a suitable value for $\var{gal}[5]$.
 \syn{galoisinit}{\var{gal},\var{den}}.
 
 \subsecidx{galoispermtopol}$(\var{gal},\var{perm})$: \var{gal} being a
-galois field as output by \kbd{galoisinit} and \var{perm} a element of
+Galois field as output by \kbd{galoisinit} and \var{perm} a element of
 $\var{gal}.group$, return the polynomial defining the Galois
 automorphism, as output by \kbd{nfgaloisconj}, associated with the
 permutation \var{perm} of the roots $\var{gal}.roots$. \var{perm} can
@@ -3486,7 +3486,8 @@ subcyclo(n, d = -1)=
 }
 @eprog
 
-\misctitle{Note:} The interface to this function need to be cleaned up, and so is subject to change.
+\misctitle{Note:} The interface to this function needs to be cleaned up, and
+so is subject to change.
 
 \syn{galoissubcyclo}{n,H,Z,v} where n is a C long integer.
 
@@ -4158,7 +4159,7 @@ of the integral basis.
 
 If a non monic polynomial is input, \kbd{nfinit} will transform it into a
 monic one, then reduce it (see $\fl=3$). It is allowed, though not very
-useful given the existence of \teb{nfnewprec}, to input a \kbd{nf} or a
+useful given the existence of \tet{nfnewprec}, to input a \kbd{nf} or a
 \kbd{bnf} instead of a polynomial.
 
 The special input format $[x,B]$ is also accepted where $x$ is a polynomial
@@ -4235,12 +4236,38 @@ is the absolute ramification index.\label{se:nfmodprinit}
 
 \syn{nfmodprinit}{\var{nf},\var{pr}}.
 
-\subsecidx{nfsubfields}$(\var{nf},\{d=0\})$: finds all subfields of degree $d$
-of the number field $\var{nf}$ (all subfields if $d$ is null or omitted).
-The result is a vector of subfields, each being given by $[g,h]$, where $g$ is an
-absolute equation and $h$ expresses one of the roots of $g$ in terms of the
-root $x$ of the polynomial defining $\var{nf}$. This is a crude
-implementation by M.~Olivier of an algorithm due to J.~Kl\"uners.
+\subsecidx{nfsubfields}$(\var{nf},\{d=0\})$: finds all subfields of degree
+$d$ of the number field $\var{nf}$ (all subfields if $d$ is null or omitted).
+The result is a vector of subfields, each being given by $[g,h]$, where $g$
+is an absolute equation and $h$ expresses one of the roots of $g$ in terms of
+the root $x$ of the polynomial defining $\var{nf}$. This uses J.~Kl\"uners
+algorithm, and is very slow when no sufficiently inert primes can be found,
+e.g.~when \var{nf} is a compositum of many quadratic fields.
+\sidx{Galois}\sidx{subfield}
+
+It may also be quite difficult to compute an \var{nf} in the first place, in
+particular when the discriminant of the defining polynomial is hard to factor.
+In the case of abelian fields such as above, we can solve both problems by
+using \tet{galoisinit} and \tet{galoisfixedfield}, as in
+\bprog
+  subf(pol) = 
+  { 
+    local(gal,G,H,h,l,gen, L = []);
+    gl = galoisinit(pol);
+    G = matdiagonal(Vec(g.orders));
+    l = length(G); gen = Mat(vectorv(l,i, g.gen[i]));
+    forsubgroup(H = G,, 
+      h = mathnf(concat(H,G));
+      perm = vector(l,i, factorback(concat(gen, h[,i])));
+      L = concat(L, [galoisfixedfield(g, perm)])
+    ); L
+  }
+@eprog
+which returns the same output as \kbd{nfsubfields(nfinit(pol))}. For
+non-abelian Galois fields, you can still use \tet{galoisinit} and
+\teb{galoisfixedfield}, but you will have to use another package than PARI to
+compute the subgroup lattice, since \tet{forsubgroup} is restricted to the
+abelian case.
 
 \syn{subfields}{\var{nf},d}.
 
@@ -5628,7 +5655,7 @@ up to $x$). If $q$ is given, compute the $q$-Pascal triangle (i.e.~using
 $q$-binomial coefficients).
 
 \syn{matqpascal}{x,q}, where $x$ is a \kbd{long} and $q=\kbd{NULL}$ is used
-to omit $q$. Also available is \teb{matpascal}{x}.
+to omit $q$. Also available is $\teb{matpascal}(x)$.
 
 \subsecidx{matrank}$(x)$: rank of the matrix $x$.
 
@@ -5994,7 +6021,7 @@ last two arguments is omitted, fill the vector with zeroes.
 
 \synt{vecteur}{GEN nmax, entree *ep, char *expr}.
 
-\subsecidx{vectorv}$(n,X,\var{expr})$: as \teb{vector}, but returns a
+\subsecidx{vectorv}$(n,X,\var{expr})$: as \tet{vector}, but returns a
 column vector (type \typ{COL}).
 
 \synt{vvecteur}{GEN nmax, entree *ep, char *expr}.
@@ -6168,7 +6195,7 @@ writing the $(-1)^X$ which may occur in the expression as
 \subsecidx{sumdiv}$(n,X,\var{expr})$: sum of expression \var{expr} over
 the positive divisors of $n$.
 
-Arithmetic functions like \teb{sigma} use the multiplicativity of the
+Arithmetic functions like \tet{sigma} use the multiplicativity of the
 underlying expression to speed up the computation. In the present version
 \vers, there is no way to indicate that \var{expr} is multiplicative in
 $n$, hence specialized functions should be prefered whenever possible.
@@ -6640,7 +6667,7 @@ example, the following prints all subgroups of index less than 2 in $G =
 [1, 0; 1, 1]
 @eprog
 The last one, for instance is generated by $(g_1, g_1 + g_2)$. This
-routine is intended to treat huge groups, when \teb{subgrouplist} is not an
+routine is intended to treat huge groups, when \tet{subgrouplist} is not an
 option due to the sheer size of the output. 
 
 For maximal speed the subgroups have been left as produced by the algorithm.
@@ -6654,7 +6681,8 @@ HNF\sidx{Hermite normal form} form), one can for instance use
 [1, 0; 0, 1]
 @eprog
 Note that in this last representation, the index $[G:H]$ is given by the
-determinant.
+determinant. See \tet{galoissubcyclo} and \tet{galoisfixedfield} for
+\tet{nfsubfields} applications to \idx{Galois} theory.
 
 \subsubsecidx{forvec}$(X=v,\var{seq},\{\fl=0\})$: $v$ being an $n$-component
 vector (where $n$ is arbitrary) of two-component vectors $[a_i,b_i]$

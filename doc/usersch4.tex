@@ -145,9 +145,9 @@ abbreviate:
 (long) polx[v]   ----->  lpolx[v]
 (long) gadd(x,y) ----->  ladd(x,y)
 @eprog\noindent%
-\sidx{zero}%
-\sidx{un}%
-\sidx{lpolx}
+\kbdsidx{zero}%
+\kbdsidx{un}%
+\kbdsidx{lpolx}
 In general, replacing a leading \kbd{g} by an \kbd{l} in the name of a PARI
 function will typecast the result to \kbd{long}. Note that \kbd{ldiv} is an
 ANSI C function which is is hidden in PARI by a macro of the same name
@@ -1587,7 +1587,7 @@ structs of pointer to functions. If you really intend to use these, this
 probably means you are rewriting GP. In that case, have a look at the code in
 \kbd{language/es.c} (\kbd{init80()} or \kbd{GENtostr()} for instance).
 
-\subsec{Errors}.\sidx{error}\sidx{talker}
+\subsec{Errors}.\sidx{error}\kbdsidx{talker}
 
 \noindent
 If you want your functions to issue error messages, you can use the general

@@ -153,11 +153,11 @@
 \li{SomeWord is a generic index entry.}
 
 \checkfile{users.std}
-\newif\ifencore
+\newif\ifmore
 \loop
   \read\std to\theline
-  \ifx\theline\theend\encorefalse\else\encoretrue\fi
-\ifencore
+  \ifx\theline\theend\morefalse\else\moretrue\fi
+\ifmore
   \expandafter\parse\theline
   \ifx \theletter \theoldletter \else \endgraf
     \vskip 10pt plus 10pt\centerline{\bf\theletter}

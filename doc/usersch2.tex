@@ -43,11 +43,11 @@ install \idx{Linux} or \idx{FreeBSD} on your machine.
 \misctitle{Note (added in version 2.0.12):} Most UNIX goodies are now
 available for DOS, OS/2 and Windows, thanks to the \tet{EMX}/\tet{RSX}
 runtime package (\kbd{install} excluded under DOS, since DLLs are not
-supported by the OS). For Windows 95/98 and NT, you can also use the
+supported by the OS). For Windows 95 and higher, you can also use the
 \tet{Cygwin} compatibility library to run GP almost as if running a genuine
-Unix system. Note that a native \tet{Linux} binary will be much faster than
-one using any of these compatibility packages (see the \tet{MACHINES}
-benchmark file, included in the distribution).
+Unix system. Note that a native \key{Linux} binary will be faster than one
+using any of these compatibility packages (see the \tet{MACHINES} benchmark
+file, included in the distribution).
 
 \emacs If you have GNU Emacs, you can work in a special Emacs shell (see
 \secref{se:emacs}), which is started by typing \kbd{M-x gp} (where as
@@ -535,8 +535,8 @@ is not there, it is assumed to be~$0$. Whitespace (or spaces) between the
 metacommand and its arguments and within arguments is optional. (This can
 cause problems only with \b{w}, when you insist on having a filename whose
 first character is a digit, and with \b{r} or \b{w}, if the filename itself
-contains a space. In such cases, just use the underlying \kbd{read} or
-\kbd{write} function; see~\secref{se:write}).
+contains a space. In such cases, just use the underlying \tet{read} or
+\tet{write} function; see~\secref{se:write}).
 
 \subseckbd{?} $\{\var{command}\}$: GP on-line help interface.
 As already mentioned, if you type \kbd{?$n$} where $n$ is a number from 1
@@ -711,11 +711,11 @@ mode, you can use instead the two character strings \kbd{PARIVERSION} and
 \kbd{PARIINFO}, which correspond to the first two lines printed by GP just
 before the Copyright message.
 
-\subsec{\b{w}} $\{n\}$ $\{$\var{filename}$\}$: \idx{write}s the object number
+\subsec{\b{w}} $\{n\}$ $\{$\var{filename}$\}$: writes the object number
 $n$ ( $\%n$ ) into the named file, in raw format. If the number $n$ is
 omitted, writes the latest computed object ( $\%$ ). If \var{filename} is
-omitted, appends to \kbd{logfile} (the GP function \kbd{write} is a trifle more
-powerful, as you can have filenames whose first character is a digit).
+omitted, appends to \kbd{logfile} (the GP function \tet{write} is a trifle more
+powerful, as you can have arbitrary filenames).
 
 \subsec{\b{x}}: prints the complete tree with addresses and contents (in
 hexadecimal) of the \idx{internal representation} of the latest computed
