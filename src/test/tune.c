@@ -36,6 +36,7 @@ typedef double (*speed_function_t)(ANYARG);
 
 #define MAX_SIZE 1000
 typedef struct {
+  int               gmp;
   const char        *name;
   int               type; /* t_INT or t_REAL */
   long              min_size;
@@ -95,6 +96,7 @@ rand_g(long n, long type)
 }
 
 /* ========================================================== */
+static double dummy(speed_param *s) {}
 
 #define TIME_FUN(call) {\
   {                                            \
@@ -135,6 +137,11 @@ static double speed_invmod(speed_param *s)
 { GEN T; disable(setinvmod,s); TIME_FUN(invmod(s->x, s->y, &T)); }
 static double speed_invmodgmp(speed_param *s)
 { GEN T; enable(setinvmod,s); TIME_FUN(invmod(s->x, s->y, &T)); }
+#else
+#define speed_divrr dummy
+#define speed_divrrgmp dummy
+#define speed_invmod dummy
+#define speed_invmodgmp dummy
 #endif
 
 #if 0
@@ -351,6 +358,7 @@ one(tune_param *param)
         if (option_trace >= 1)
           printf ("stopped due to since_positive (%d)\n",
                   STOP_SINCE_POSITIVE);
+        break;
       }
     /* Stop if method 1 has become slower by a certain factor. */
     if (t1 >= t2 * param->stop_factor)
@@ -385,22 +393,17 @@ void error(int argc/* ignored */, char **argv)
 }
 
 static tune_param param[] = {
-  {"KARATSUBA_MULI_LIMIT",t_INT, 4,speed_mulii,speed_karamulii},
-  {"KARATSUBA_SQRI_LIMIT",t_INT, 4,speed_sqri,speed_karasqri},
-  {"KARATSUBA_MULR_LIMIT",t_REAL,4,speed_mulrr,speed_karamulrr},
-  {"MONTGOMERY_LIMIT",    t_INT, 1,speed_redc,speed_modii},
-  {"RESIIMUL_LIMIT",      t_INT, 1,speed_modii,speed_remiimul},
+  {0, "KARATSUBA_MULI_LIMIT",t_INT, 4, speed_mulii,speed_karamulii},
+  {0, "KARATSUBA_SQRI_LIMIT",t_INT, 4, speed_sqri,speed_karasqri},
+  {1, "KARATSUBA_MULR_LIMIT",t_REAL,4, speed_mulrr,speed_karamulrr},
+  {1, "MONTGOMERY_LIMIT",    t_INT, 1, speed_redc,speed_modii},
+  {1, "RESIIMUL_LIMIT",      t_INT, 1, speed_modii,speed_remiimul},
+  {1, "DIVRR_GMP_LIMIT",    t_REAL, 4, speed_divrr,speed_divrrgmp},
+  {1, "INVMOD_GMP_LIMIT",    t_INT, 3, speed_invmod,speed_invmodgmp}
 #if 0
   {"Flx_SQR_LIMIT",       t_INT, 0,speed_Flx_mul,speed_Flx_karamul}
 #endif
 };
-
-#ifdef PARI_KERNEL_GMP
-static tune_param param_gmp[] = {
-  {"DIVRR_GMP_LIMIT",    t_REAL, 4,speed_divrr,speed_divrrgmp},
-  {"INVMOD_GMP_LIMIT",   t_INT,  3,speed_invmod,speed_invmodgmp}
-};
-#endif
 
 int
 main(int argc, char **argv)
@@ -431,16 +434,14 @@ main(int argc, char **argv)
   setmuli(KARATSUBA_MULI_LIMIT);
   (void)one(&param[1]);
 #endif
-  (void)one(&param[2]);
-  (void)one(&param[3]);
-  (void)one(&param[4]);
-  (void)one(&param[5]);
 
+  for (i = 2; i < numberof(param); i++)
+  {
 #ifdef PARI_KERNEL_GMP
-  (void)one(&param_gmp[0]);
-  (void)one(&param_gmp[1]);
+    if (!param[i].gmp) next;
 #endif
-
+    (void)one(&param[i]);
+  }
   if (dat) free((void*)dat);
   return 1;
 }
