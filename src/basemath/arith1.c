@@ -1223,7 +1223,7 @@ sqrt_Cipolla(GEN a, GEN p)
 
   /* Compute u+vX := (t+X)^q */
   av1 = avma; lim = stack_lim(av1, 1);
-  qptr = q+2; man = *qptr;
+  qptr = int_MSW(q); man = *qptr;
   k = 1+bfffo(man); man<<=k; k=BITS_IN_LONG-k;
   for (nb=lgefint(q)-2;nb; nb--)
   {
@@ -1253,7 +1253,8 @@ sqrt_Cipolla(GEN a, GEN p)
        gerepilemany(av1,gptr,2);
     }
 
-    man = *++qptr; k = BITS_IN_LONG;
+    qptr= int_precW(qptr);
+    man = *qptr; k = BITS_IN_LONG;
   }
 
   while (--e)
