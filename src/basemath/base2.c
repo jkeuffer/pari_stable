@@ -1988,18 +1988,15 @@ init_norm(norm_S *S, GEN nf, GEN p)
   }
   if (!S->M)
   {
-    GEN D, Dp, w = Q_remove_denom((GEN)nf[7], &D), q = sqri(p);
+    GEN D, w = Q_remove_denom((GEN)nf[7], &D), Dp = sqri(p);
     long i;
-    if (D)
-    {
+    if (!D) w = dummycopy(w);
+    else {
       GEN w1 = D;
       long v = Z_pval(D, p);
       D = gpowgs(p, v);
-      Dp = mulii(D, q);
+      Dp = mulii(D, Dp);
       gel(w, 1) = resii(w1, Dp);
-    } else {
-      w = dummycopy(w);
-      Dp = q;
     }
     for (i=2; i<=N; i++) w[i] = (long)FpX_red((GEN)w[i], Dp);
     S->D = D;
