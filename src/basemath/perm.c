@@ -76,8 +76,7 @@ void vecsmall_sort(GEN V)
 	if (V[i]>V[k])
 	{
 	  long z=V[k];
-	  for (m=k;m>i;m--)
-	    V[m]=V[m-1];
+	  for (m=k;m>i;m--) V[m] = V[m-1];
 	  V[i]=z;
 	  k++;
 	}
@@ -94,8 +93,7 @@ GEN vecsmall_uniq(GEN V)
   W=cgetg(lg(V),t_VECSMALL);
   W[1]=V[1];
   for(i=2,j=1;i<lg(V);i++)
-    if (V[i]!=W[j])
-      W[++j]=V[i];
+    if (V[i] != W[j]) W[++j] = V[i];
   setlg(W,j+1);
   return gerepileupto(ltop,W);
 }
@@ -107,8 +105,7 @@ vecsmall_lexcmp(GEN x, GEN y)
   lx = lg(x);
   ly = lg(y); l = min(lx,ly);
   for (i=1; i<l; i++)
-    if (x[i]!=y[i])
-      return x[i]<y[i]?-1:1;
+    if (x[i] != y[i]) return x[i]<y[i]? -1: 1;
   if (lx == ly) return 0;
   return (lx < ly)? -1 : 1;
 }
@@ -120,8 +117,7 @@ vecsmall_prefixcmp(GEN x, GEN y)
   lx = lg(x);
   ly = lg(y); l = min(lx,ly);
   for (i=1; i<l; i++)
-    if (x[i]!=y[i])
-      return x[i]<y[i]?-1:1;
+    if (x[i] != y[i]) return x[i]<y[i]? -1: 1;
   return 0;
 }
 
@@ -133,8 +129,7 @@ GEN vecsmall_prepend(GEN V, long s)
   long i;
   res = cgetg(l2+1, typ(V));
   res[1]=s;
-  for (i = 2; i <= l2; ++i)
-    res[i] = V[i - 1];
+  for (i = 2; i <= l2; ++i) res[i] = V[i - 1];
   return res;
 }
 
@@ -145,8 +140,7 @@ GEN vecsmall_append(GEN V, long s)
   long l2 = lg(V);
   long i;
   res = cgetg(l2+1, typ(V));
-  for (i = 1; i < l2; ++i)
-    res[i] = V[i];
+  for (i = 1; i < l2; ++i) res[i] = V[i];
   res[l2]=s;
   return res;
 }
@@ -158,10 +152,8 @@ GEN vecsmall_concat(GEN u, GEN v)
   long l2 = lg(v)-1;
   long i;
   res = cgetg(l1+l2+1, t_VECSMALL);
-  for (i = 1; i <= l1; ++i)
-    res[i] = u[i];
-  for (i = 1; i <= l2; ++i)
-    res[i+l1] = v[i];
+  for (i = 1; i <= l1; ++i) res[i] = u[i];
+  for (i = 1; i <= l2; ++i) res[i+l1] = v[i];
   return res;
 }
 /* return the number of indices where u and v are equal.
@@ -173,8 +165,7 @@ vecsmall_coincidence(GEN u, GEN v)
   long l=min(lg(u),lg(v));
   long i,s=0;
   for(i=1;i<l;i++)
-    if(u[i]==v[i])
-      s++;
+    if(u[i] == v[i]) s++;
   return s;
 }
 
@@ -182,11 +173,9 @@ long
 vecsmall_pack(GEN V, long base, long mod)
 {
   long i,s=0;
-  for(i=1;i<lg(V);i++)
-    s=(base*s+V[i])%mod;
+  for(i=1;i<lg(V);i++) s = (base*s+V[i])%mod;
   return s;
 }
-
 
 /*************************************************************************/
 /**                                                                     **/
@@ -277,8 +266,7 @@ perm_identity(long l)
   GEN     perm;
   int     i;
   perm = cgetg(l + 1, t_VECSMALL);
-  for (i = 1; i <= l; i++)
-    perm[i] = i;
+  for (i = 1; i <= l; i++) perm[i] = i;
   return perm;
 } 
 
@@ -288,10 +276,8 @@ cyclicperm(long l, long d)
   GEN     perm;
   int     i;
   perm = cgetg(l + 1, t_VECSMALL);
-  for (i = 1; i <= l-d; i++)
-    perm[i] = i+d;
-  for (i = l-d+1; i <= l; i++)
-    perm[i] = i-l+d;
+  for (i = 1; i <= l-d; i++) perm[i] = i+d;
+  for (i = l-d+1; i <= l; i++) perm[i] = i-l+d;
   return perm;
 }
 
@@ -307,8 +293,7 @@ perm_mul(GEN s, GEN t)
   if (lg(s) < lg(t))
     err(talker, "First permutation shorter than second in perm_mul");
   u = cgetg(lg(s), typ(s));
-  for (i = 1; i < lg(s); i++)
-    u[i] = s[t[i]];
+  for (i = 1; i < lg(s); i++) u[i] = s[t[i]];
   return u;
 }
 /* Compute the inverse (reciprocal) of a permutation.
@@ -346,7 +331,7 @@ vecperm_orbits(GEN v, long n)
       flag = 0;
       for (o = 1; o < lg(v); o++)
       {
-	for (p = 1; p < m; p++)	/* m varie! */
+	for (p = 1; p < m; p++)	/* m changes! */
 	{
 	  j = mael(v,o,cy[p]);
 	  if (!bitvec_test(bit,j))
@@ -389,11 +374,9 @@ perm_order(GEN v)
   GEN c;
   long i,d;
   u[1] = (long) v;
-  c=vecperm_orbits(u, lg(v)-1);
-  for(i=1, d=1; i<lg(c); i++)
-    d=clcm(d,lg(c[i])-1);
-  avma=ltop;
-  return d;
+  c = vecperm_orbits(u, lg(v)-1);
+  for(i=1, d=1; i<lg(c); i++) d = clcm(d, lg(c[i])-1);
+  avma = ltop; return d;
 }
 
 /* Compute the power of a permutation given by product of cycles
@@ -474,10 +457,9 @@ perm_to_GAP(GEN p)
 int
 perm_commute(GEN p, GEN q)
 {
-  pari_sp ltop=avma;
-  int test=gegal(perm_mul(p,q),perm_mul(q,p));
-  avma=ltop;
-  return test;
+  pari_sp ltop = avma;
+  int test = gegal(perm_mul(p,q),perm_mul(q,p));
+  avma = ltop; return test;
 }
 
 /*************************************************************************/
@@ -503,8 +485,7 @@ trivialsubgroups(void)
   return p2;
 }
 
-/* Compute the orders of p modulo the group S given by a set.
- */
+/* Compute the orders of p modulo the group S given by a set */
 long
 perm_relorder(GEN p, GEN S)
 {
@@ -535,11 +516,9 @@ GEN perm_generate(GEN S, GEN H, long o)
 
 long group_order(GEN G)
 {
-  GEN ord=(GEN) G[2];
-  long i;
-  long card=1;
-  for (i = 1; i < lg(ord); i++) 
-    card *= ord[i];
+  GEN ord = (GEN)G[2];
+  long i, card = 1;
+  for (i = 1; i < lg(ord); i++) card *= ord[i];
   return card;
 }
 
@@ -547,13 +526,11 @@ long group_order(GEN G)
  */
 long group_domain(GEN G)
 {
-  if ( lg(G[1]) < 2 )
-    err(talker,"empty group in group_domain");
+  if ( lg(G[1]) < 2 ) err(talker,"empty group in group_domain");
   return lg(mael(G,1,1))-1;
 }
 
 /*Compute the left coset of g mod G: gG*/
-
 GEN group_leftcoset(GEN G, GEN g)
 {
   GEN res;
@@ -566,15 +543,14 @@ GEN group_leftcoset(GEN G, GEN g)
   k = 1;
   for (i = 1; i < lg(gen); i++)
   {
-    int     c = k * (ord[i] - 1);
-    for (j = 1; j <= c; j++)	/* I like it */
+    int c = k * (ord[i] - 1);
+    for (j = 1; j <= c; j++)
       res[++k] = (long) perm_mul((GEN) res[j], (GEN) gen[i]);
   }
   return res;
 }
 
 /*Compute the right coset of g mod G: Gg*/
-
 GEN group_rightcoset(GEN G, GEN g)
 {
   GEN res;
@@ -587,8 +563,8 @@ GEN group_rightcoset(GEN G, GEN g)
   k = 1;
   for (i = 1; i < lg(gen); i++)
   {
-    int     c = k * (ord[i] - 1);
-    for (j = 1; j <= c; j++)	/* I like it */
+    int c = k * (ord[i] - 1);
+    for (j = 1; j <= c; j++)
       res[++k] = (long) perm_mul((GEN) gen[i], (GEN) res[j]);
   }
   return res;
@@ -906,8 +882,7 @@ group_isabelian(GEN G)
   long i,j;
   for(i=2;i<lg(G[1]);i++)
     for(j=1;j<i;j++)
-      if (!perm_commute(gmael(G,1,i),gmael(G,1,j)))
-        return 0;
+      if (!perm_commute(gmael(G,1,i),gmael(G,1,j))) return 0;
   return 1;  
 }
 
@@ -931,19 +906,17 @@ GEN group_abelianHNF(GEN G, GEN S)
     btop=avma;
     P=perm_pow(gmael(G,1,i),mael(G,2,i));
     for(j=1;j<lg(S);j++)
-      if (gegal(P,(GEN) S[j]))
-	  break;
+      if (gegal(P,(GEN) S[j])) break;
     avma=btop;
     if (j==lg(S)) err(talker,"wrong argument in galoisisabelian");
     j--;
     for(k=1;k<i;k++)
     {
-      mael(M,i,k)=lstoi(j%mael(G,2,k));
-      j/=mael(G,2,k);
+      mael(M,i,k) = lstoi(j%mael(G,2,k));
+      j /= mael(G,2,k);
     }  
-    mael(M,i,k++)=lstoi(mael(G,2,i));
-    for(  ;k<n;k++)
-      mael(M,i,k)=zero;
+    mael(M,i,k++) = lstoi(mael(G,2,i));
+    for(  ;k<n;k++) mael(M,i,k) = zero;
   }
   return M;
 }
@@ -953,11 +926,10 @@ GEN group_abelianHNF(GEN G, GEN S)
 GEN
 group_abelianSNF(GEN G, GEN L)
 {
-  pari_sp ltop=avma;
-  GEN S,H=group_abelianHNF(G,L);
+  pari_sp ltop = avma;
+  GEN H = group_abelianHNF(G,L);
   if (!H) return NULL;
-  S=smithclean(smith(H));
-  return gerepileupto(ltop,S);
+  return gerepileupto(ltop, smithclean( smith(H) ));
 }
 
 GEN
@@ -976,18 +948,16 @@ abelian_group(GEN v)
     long o=v[i],u=d*(o-1);
     long j,k,l;
     mael(G,1,i) = (long) p;
-    /*The following loop is a bit over-optimised. Oh well.
+    /*The following loop is a bit over-optimised.
      *Remember that I wrote the loop in testpermutation. 
-     *Something have survived... BA*/
+     *Something has survived... BA*/
     for(j=1;j<=card;)
     {
       for(k=1;k<o;k++)
-        for(l=1;l<=d;l++,j++)
-          p[j]=j+d;
-      for(l=1;l<=d;l++,j++)
-        p[j]=j-u;
+        for(l=1;l<=d; l++,j++) p[j] = j+d;
+      for (l=1; l<=d; l++,j++) p[j] = j-u;
     }
-    d+=u;
+    d += u;
   }
   return G;
 }
@@ -1054,14 +1024,12 @@ group_export_GAP(GEN G)
   GEN s;
   long i;
   long l = lg(G[1]);
-  if (l == 1)
-    return STRtoGENstr("Group(())");
+  if (l == 1) return STRtoGENstr("Group(())");
   s = STRtoGENstr("Group(");
   for (i = 1; i < l; ++i)
   {
-    if (i > 1)
-      s = concat(s, STRtoGENstr(", "));
-    s = concat(s, perm_to_GAP(gmael(G,1,i)));
+    if (i > 1) s = concatsp(s, STRtoGENstr(", "));
+    s = concatsp(s, perm_to_GAP(gmael(G,1,i)));
   }
   s = concat(s, STRtoGENstr(")"));
   return gerepileupto(ltop,s);
@@ -1074,16 +1042,14 @@ group_export_MAGMA(GEN G)
   GEN s;
   long i;
   long l = lg(G[1]);
-  if (l == 1)
-    return STRtoGENstr("PermutationGroup<1|>");
+  if (l == 1) return STRtoGENstr("PermutationGroup<1|>");
   s = STRtoGENstr("PermutationGroup<");
-  s = concat(s,stoi(group_domain(G)));
-  s = concat(s,STRtoGENstr("|"));
+  s = concatsp(s,stoi(group_domain(G)));
+  s = concatsp(s,STRtoGENstr("|"));
   for (i = 1; i < l; ++i)
   {
-    if (i > 1)
-      s = concat(s, STRtoGENstr(", "));
-    s = concat(s, vecsmall_vec(gmael(G,1,i)));
+    if (i > 1) s = concatsp(s, STRtoGENstr(", "));
+    s = concatsp(s, zv_ZV(gmael(G,1,i)));
   }
   s = concat(s, STRtoGENstr(">"));
   return gerepileupto(ltop,s);
@@ -1094,10 +1060,8 @@ group_export(GEN G, long format)
 {
   switch(format)
   {
-  case 0:
-    return group_export_GAP(G);
-  case 1:
-    return group_export_MAGMA(G);
+  case 0: return group_export_GAP(G);
+  case 1: return group_export_MAGMA(G);
   }
   err(flagerr,"galoisexport");
   return NULL; /*-Wall*/
