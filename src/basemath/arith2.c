@@ -565,7 +565,10 @@ boundfact(GEN n, long lim)
     case t_INT:
       return auxdecomp(n,lim);
     case t_FRACN:
-      n=gred(n); /* fall through */
+      n=gred(n);
+      if (typ(n) == t_INT)
+        return gerepileupto(av, boundfact(n,lim));
+      /* fall through */
     case t_FRAC:
       p1=auxdecomp((GEN)n[1],lim);
       p2=auxdecomp((GEN)n[2],lim);

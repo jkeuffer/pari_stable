@@ -612,8 +612,11 @@ gmod(GEN x, GEN y)
           z[1]=lmppgcd((GEN)x[1],y);
 	  z[2]=lmodii((GEN)x[2],(GEN)z[1]); return z;
 
-	case t_FRAC: case t_FRACN:
-	  av=avma; if (tx==t_FRACN) x=gred(x);
+        case t_FRACN:
+	  av=avma; x = gred(x);
+          return gerepileupto(av, gmod(x,y));
+	case t_FRAC:
+	  av=avma;
 	  p1=mulii((GEN)x[1],mpinvmod((GEN)x[2],y));
 	  tetpil=avma; return gerepile(av,tetpil,modii(p1,y));
 

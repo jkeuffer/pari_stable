@@ -1939,7 +1939,7 @@ bestappr(GEN x, GEN k)
     k = gcvtoi(k,&e);
   }
   if (signe(k) <= 0) k=gun;
-  tx=typ(x); if (tx == t_FRACN) x = gred(x);
+  tx=typ(x); if (tx == t_FRACN) { x = gred(x); tx = typ(x); }
   switch(tx)
   {
     case t_INT:
