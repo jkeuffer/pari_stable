@@ -15,8 +15,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /*******************************************************************/
 /*                                                                 */
-/*                  COMPUTATION OF STARK UNITS                     */
-/*                    OF TOTALLY REAL FIELDS                       */
+/*        COMPUTATION OF STARK UNITS OF TOTALLY REAL FIELDS        */
 /*                                                                 */
 /*******************************************************************/
 #include "pari.h"
@@ -99,9 +98,7 @@ init_CHI(CHI_t *c, GEN CHI, GEN z)
   GEN *v = (GEN*)new_chunk(d);
   v[1] = z;
   for (i=2; i<d; i++)
-  {
     v[i] = gmul(v[i-1], z);
-  }
   v[0] = gmul(v[i-1], z);
   c->chi = (GEN)CHI[1];
   c->ord = d; 
@@ -237,7 +234,7 @@ GetPrimChar(GEN chi, GEN bnr, GEN bnrc, long prec)
   GEN s, chic, cyc, U, M, p1, cond, condc, p2, nf;
   GEN prdiff, Mrc;
 
-  cond  = gmael(bnr, 2, 1);
+  cond  = gmael(bnr,  2, 1);
   condc = gmael(bnrc, 2, 1);
   if (gegal(cond, condc)) return NULL;
 
@@ -294,6 +291,7 @@ GetDeg(GEN dataCR)
 
 static GEN AllStark(GEN data,  GEN nf,  long flag,  long prec);
 static GEN InitChar0(GEN dataD, long prec);
+static GEN QuadGetST(GEN dataCR, GEN vChar, long prec);
 
 /* Let A be a finite abelian group given by its relation and let C
    define a subgroup of A, compute the order of A / C, its structure and
@@ -654,11 +652,8 @@ FindModulus(GEN dataC, long fl, long *newprec, long prec, long bnd)
               rep[5] = (long)p1;
             }
 
-            if (!fl || gcmp(p1, rb) < 0)
-            {
-              rep[5] = (long)InitChar0((GEN)rep[3], *newprec);
-              return gerepilecopy(av, rep);
-            }
+            if (!fl || gcmp(p1, rb) < 0) goto END; /* OK */
+
             if (DEBUGLEVEL>1) fprintferr("Trying to find another modulus...");
             first--;
           }
@@ -668,8 +663,7 @@ FindModulus(GEN dataC, long fl, long *newprec, long prec, long bnd)
 	  if (DEBUGLEVEL>1)
 	    fprintferr("No, we're done!\nModulus = %Z and subgroup = %Z\n",
 		       gmael3(rep, 1, 2, 1), rep[2]);
-	  rep[5] = (long)InitChar0((GEN)rep[3], *newprec);
-	  return gerepilecopy(av, rep);
+          goto END; /* OK */
 	}
       }
     }
@@ -681,31 +675,43 @@ FindModulus(GEN dataC, long fl, long *newprec, long prec, long bnd)
     if (maxnorm > limnorm)
       err(talker, "Cannot find a suitable modulus in FindModulus");
   }
+END:
+  rep[5] = (long)InitChar0((GEN)rep[3], *newprec);
+  return gerepilecopy(av, rep);
 }
 
 /********************************************************************/
 /*                      2nd part: compute W(X)                      */
 /********************************************************************/
 
-/* compute W(chi) such that Ld(s,chi) = W(chi) Ld(1 - s, chi*),
-   if flag != 0 do not check the result */
+/* compute the list of W(chi) such that Ld(s,chi) = W(chi) Ld(1 - s, chi*),
+ * for all chi in LCHI. All chi have the same conductor (= cond(bnr)).
+ * if check == 0 do not check the result */
 static GEN
-ComputeArtinNumber(GEN dtcr, long flag, long prec)
+ComputeArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
 {
-  long i, j, nz, q, N;
+  long ic, i, j, nz, q, N, nChar = lg(LCHI)-1;
   gpmem_t av = avma, av2, lim;
-  GEN CHI, nc, dc, cond, condZ, cond0, cond1, lambda, nf, T;
-  GEN cyc, vN, *vB, diff, vt, idg, mu, idh, zid, *gen, z, nchi;
-  GEN classe, bnr, s, tr, den, muslambda, beta2, sarch;
-  CHI_t C;
+  GEN sqrtnc, dc, cond, condZ, cond0, cond1, lambda, nf, T;
+  GEN cyc, *vN, *vB, diff, vt, idg, mu, idh, zid, *gen, z, *nchi;
+  GEN indW, W, CHI, classe, s0, *s, tr, den, muslambda, beta2, sarch;
+  CHI_t **lC;
   GROUP_t G;
 
-  CHI   = (GEN)dtcr[8];
-  /* trivial case */
-  if (cmpsi(2, (GEN)CHI[3]) >= 0) return gun;
-  init_CHI_C(&C, CHI);
+  lC = (CHI_t**)new_chunk(nChar + 1);
+  indW = cgetg(nChar + 1, t_VECSMALL);
+  W = cgetg(nChar + 1, t_VEC);
+  for (ic = 0, i = 1; i <= nChar; i++)
+  {
+    CHI = (GEN)LCHI[i];
+    if (cmpsi(2, (GEN)CHI[3]) >= 0) { W[i] = un; continue; } /* trivial case */
+    ic++; indW[ic] = i;
+    lC[ic] = (CHI_t*)new_chunk(sizeof(CHI_t));
+    init_CHI_C(lC[ic], CHI);
+  }
+  if (!ic) return W;
+  nChar = ic;
 
-  bnr   = (GEN)dtcr[3];
   nf    = gmael(bnr, 1, 7);
   diff  = gmael(nf, 5, 5);
   T     = gmael(nf,5,4);
@@ -714,7 +720,7 @@ ComputeArtinNumber(GEN dtcr, long flag, long prec)
   cond1 = (GEN)cond[2];
   N     = degpol(nf[1]);
 
-  nc  = idealnorm(nf, cond0);
+  sqrtnc  = gsqrt(idealnorm(nf, cond0), prec);
   dc  = idealmul(nf, diff, cond0);
   den = idealnorm(nf, dc);
   z   = InitRU(den, prec);
@@ -760,15 +766,18 @@ ComputeArtinNumber(GEN dtcr, long flag, long prec)
   gen = (GEN*)gmael(zid, 2, 3);
   nz = lg(gen) - 1;
 
-  nchi = cgetg(nz + 1, t_VECSMALL);
+  nchi = (GEN*)cgetg(nChar+1, t_VEC);
+  for (ic = 1; ic <= nChar; ic++) nchi[ic] = cgetg(nz + 1, t_VECSMALL);
+
   for (i = 1; i <= nz; i++)
   {
     gen[i] = set_sign_mod_idele(nf, NULL,gen[i], cond,sarch);
     classe = isprincipalray(bnr, gen[i]);
-    nchi[i] = (long)EvalChar_n(&C, classe);
+    for (ic = 1; ic <= nChar; ic++)
+      nchi[ic][i] = (long)EvalChar_n(lC[ic], classe);
   }
 
-  /* Sum CHI(beta) * exp(2i * Pi * Tr(beta * mu / lambda) where beta
+  /* Sum chi(beta) * exp(2i * Pi * Tr(beta * mu / lambda) where beta
      runs through the classes of (Ok/cond0)^* and beta cond1-positive */
 
   vt = cgetg(N + 1, t_VEC); /* Tr(w_i) */
@@ -778,45 +787,87 @@ ComputeArtinNumber(GEN dtcr, long flag, long prec)
   G.r = nz;
   G.j = vecsmall_const(nz, 0);
 
-  vN = vecsmall_const(nz, 0);
+  vN = (GEN*)cgetg(nChar+1, t_VEC);
+  for (ic = 1; ic <= nChar; ic++) vN[ic] = vecsmall_const(nz, 0);
 
   av2 = avma; lim = stack_lim(av2, 1);
   vB = (GEN*)cgetg(nz+1, t_VEC);
   for (i=1; i<=nz; i++) vB[i] = gun;
 
   tr = gmod(gmul(vt, muslambda), den); /* for beta = 1 */
-  s = powgi(z, tr);
+  s0 = powgi(z, tr);
+  s = (GEN*)cgetg(nChar+1, t_VEC);
+  for (ic = 1; ic <= nChar; ic++) s[ic] = s0;
 
   for (;;)
   {
     if (! (i = NextElt(&G)) ) break;
 
     vB[i] = FpV_red(element_mul(nf, vB[i], gen[i]), condZ);
-    vN[i] = addssmod(vN[i], nchi[i], C.ord);
-    for (j=1; j<i; j++) { vN[j] = vN[i]; vB[j] = vB[i]; }
+    for (j=1; j<i; j++) vB[j] = vB[i];
+
+    for (ic = 1; ic <= nChar; ic++)
+    {
+      vN[ic][i] = addssmod(vN[ic][i], nchi[ic][i], lC[ic]->ord);
+      for (j=1; j<i; j++) vN[ic][j] = vN[ic][i];
+    }
     
     vB[i]= set_sign_mod_idele(nf, NULL,vB[i], cond,sarch);
     beta2 = element_mul(nf, vB[i], muslambda);
     tr = gmod(gmul(vt, beta2), den);
 
-    s = gadd(s, gmul((GEN)C.val[vN[i]], powgi(z,tr)));
+    for (ic = 1; ic <= nChar; ic++)
+    {
+      long ind = vN[ic][i]; 
+      GEN val = (GEN)lC[ic]->val[ind];
+      s[ic] = gadd(s[ic], gmul(val, powgi(z,tr)));
+    }
 
     if (low_stack(lim, stack_lim(av2, 1)))
     {
-      GEN *gptr[2]; gptr[0] = &s; gptr[1] = (GEN*)&vB;
+      GEN *gptr[2]; gptr[0] = (GEN*)&s; gptr[1] = (GEN*)&vB;
       if (DEBUGMEM > 1) err(warnmem,"ComputeArtinNumber");
       gerepilemany(av2, gptr, 2);
     }
   }
 
   classe = isprincipalray(bnr, idh);
-  s = gmul(s, EvalChar(&C, classe));
-  s = gdiv(s, gsqrt(nc, prec));
+  z = gpowgs(gneg_i(gi),q);
+  for (ic = 1; ic <= nChar; ic++)
+  {
+    s0 = gmul(s[ic], EvalChar(lC[ic], classe));
+    s0 = gdiv(s0, sqrtnc);
+    if (check && - expo(subrs(gnorm(s0), 1)) < bit_accuracy(prec) >> 1)
+      err(bugparier, "ComputeArtinNumber");
+    W[indW[ic]] = lmul(s0, z);
+  }
+  return gerepilecopy(av, W);
+}
 
-  if (!flag &&  - expo(subrs(gnorm(s), 1)) < bit_accuracy(prec) >> 1)
-    err(bugparier, "ComputeArtinNumber");
+static GEN
+ComputeAllArtinNumbers(GEN dataCR, GEN vChar, int check, long prec)
+{
+  const long cl = lg(dataCR) - 1;
+  long ncond = lg(vChar)-1;
+  long jc, k;
+  GEN W = cgetg(cl+1,t_VEC), WbyCond, LCHI;
 
-  return gerepileupto(av, gmul(s, gpowgs(gneg_i(gi),q)));
+  for (jc = 1; jc <= ncond; jc++)
+  {
+    const GEN LChar = (GEN)vChar[jc];
+    const long nChar = lg(LChar)-1;
+    GEN *ldata = (GEN*)vecextract_p(dataCR, LChar);
+    GEN dtcr = ldata[1], bnr = (GEN)dtcr[3];
+
+    if (DEBUGLEVEL>1)
+      fprintferr("* Root Number: cond. no %ld/%ld (%ld chars)\n",
+                 jc,ncond,nChar);
+    LCHI = cgetg(nChar + 1, t_VEC);
+    for (k = 1; k <= nChar; k++) LCHI[k] = ldata[k][8];
+    WbyCond = ComputeArtinNumber(bnr, LCHI, check, prec);
+    for (k = 1; k <= nChar; k++) W[LChar[k]] = WbyCond[k];
+  }
+  return W;
 }
 
 /* compute the constant W of the functional equation of
@@ -826,50 +877,36 @@ bnrrootnumber(GEN bnr, GEN chi, long flag, long prec)
 {
   long l;
   gpmem_t av = avma;
-  GEN cond, condc, bnrc, cyc, p1, p2, dtcr;
+  GEN cond, condc, bnrc, CHI;
 
   if (flag < 0 || flag > 1) err(flagerr,"bnrrootnumber");
 
   checkbnr(bnr);
-
   cond = gmael(bnr, 2, 1);
   l    = lg(gmael(bnr, 5, 2));
 
-  if ((typ(chi) != t_VEC) || (lg(chi) != l))
+  if (typ(chi) != t_VEC || lg(chi) != l)
     err(talker, "incorrect character in bnrrootnumber");
 
-  if (!flag)
+  if (flag) condc = cond;
+  else
   {
     condc = bnrconductorofchar(bnr, chi);
     if (gegal(cond, condc)) flag = 1;
   }
-  else condc = cond;
 
   if (flag)
+  {
     bnrc = bnr;
+    CHI = (GEN)GetPrimChar(chi, bnr, bnrc, prec)[1];
+  }
   else
+  {
+    GEN cyc  = gmael(bnr, 5, 2);
     bnrc = buchrayinitgen((GEN)bnr[1], condc);
-
-  cyc  = gmael(bnr, 5, 2);
-  p2 = get_Char(get_chic(chi,cyc), prec);
-
-  dtcr = cgetg(9, t_VEC);
-  dtcr[1] = (long)chi;
-  dtcr[2] = zero;
-  dtcr[3] = (long)bnrc;
-  dtcr[4] = (long)bnr;
-  dtcr[5] = (long)p2;
-  dtcr[6] = zero;
-  dtcr[7] = (long)condc;
-
-  p1 = GetPrimChar(chi, bnr, bnrc, prec);
-
-  if (!p1)
-    dtcr[8] = (long)p2;
-  else
-    dtcr[8] = p1[1];
-
-  return gerepileupto(av, ComputeArtinNumber(dtcr, 0, prec));
+    CHI = get_Char(get_chic(chi,cyc), prec);
+  }
+  return gerepilecopy(av, (GEN)ComputeArtinNumber(bnrc, _vec(CHI), 1, prec)[1]);
 }
 
 /********************************************************************/
@@ -941,7 +978,6 @@ ComputeAChi(GEN dtcr, long flag, long prec)
   rep = cgetg(3, t_VEC);
   rep[1] = lstoi(r);
   rep[2] = (long)A;
-
   return rep;
 }
 
@@ -1902,15 +1938,20 @@ init_cScT(ST_t *T, GEN CHI, long N, long prec)
 }
 
 static GEN
-GetST(GEN dataCR, long prec)
+GetST(GEN dataCR, GEN vChar, long prec)
 {
   const long cl = lg(dataCR) - 1;
   gpmem_t av, av1, av2;
   long ncond, n, j, k, jc, nmax, prec2, i0, r1, r2;
   GEN bnr, nf, racpi, *powracpi;
-  GEN rep, vChar, N0, C, T, S, an, degs;
+  GEN rep, N0, C, T, S, an, degs;
   LISTray LIST;
   ST_t cScT;
+
+  bnr = gmael(dataCR,1,4);
+  nf  = checknf(bnr);
+  /* compute S,T differently if nf is quadratic */
+  if (degpol(nf[1]) == 2) return QuadGetST(dataCR, vChar, prec);
 
   if (DEBUGLEVEL) timer2();
   /* allocate memory for answer */
@@ -1926,10 +1967,8 @@ GetST(GEN dataCR, long prec)
 
   /* initializations */
   degs = GetDeg(dataCR);
-  vChar= sortChars(dataCR,0); ncond = lg(vChar)-1;
-
-  bnr = gmael(dataCR,1,4);
-  nf  = checknf(bnr); nf_get_sign(nf,&r1,&r2);
+  ncond = lg(vChar)-1;
+  nf_get_sign(nf,&r1,&r2);
  
   C  = cgetg(ncond+1, t_VEC);
   N0 = cgetg(ncond+1, t_VECSMALL);
@@ -2006,20 +2045,21 @@ GetST(GEN dataCR, long prec)
   avma = av; return rep;
 }
 
-/* Given dtcr, S(chi) and T(chi), return L(1, chi) if fl = 1,
+/* Given W(chi) [possibly NULL], S(chi) and T(chi), return L(1, chi) if fl = 1,
    or [r(chi), c(chi)] where r(chi) is the rank of chi and c(chi)
    is given by L(s, chi) = c(chi).s^r(chi) at s = 0 if fl = 0.
    if fl2 = 1, adjust the value to get L_S(s, chi). */
 static GEN
-GetValue(GEN dtcr, GEN S, GEN T, long fl, long fl2, long prec)
+GetValue(GEN dtcr, GEN W, GEN S, GEN T, long fl, long fl2, long prec)
 {
   gpmem_t av = avma;
-  GEN W, A, cf, VL, rep, racpi, p1;
+  GEN A, cf, VL, rep, racpi, p1;
   long q, b, c;
   int isreal;
 
   racpi = mpsqrt(mppi(prec));
-  W = ComputeArtinNumber(dtcr, 0, prec);
+  if (!W)
+    W = (GEN)ComputeArtinNumber((GEN)dtcr[3], _vec((GEN)dtcr[8]), 1, prec)[1];
 
   isreal = (itos(gmael(dtcr, 8, 3)) <= 2);
 
@@ -2098,7 +2138,6 @@ GetValue1(GEN bnr, long flag, long prec)
   rep = cgetg(3, t_VEC);
   rep[1] = lstoi(r);
   rep[2] = (long)c;
-
   return gerepilecopy(av, rep);
 }
 
@@ -2334,8 +2373,7 @@ RecCoeff(GEN nf,  GEN pol,  long v, long prec)
 
 /*******************************************************************/
 /*                                                                 */
-/*                   Computation of class fields of                */
-/*	          real quadratic fields using Stark units          */
+/*     Class fields of real quadratic fields using Stark units     */
 /*                                                                 */
 /*******************************************************************/
 
@@ -2454,12 +2492,12 @@ computean(GEN dtcr, LISTray *R, long n, long deg)
 
 /* compute S and T for the quadratic case */
 static GEN
-QuadGetST(GEN dataCR, long prec)
+QuadGetST(GEN dataCR, GEN vChar, long prec)
 {
   const long cl  = lg(dataCR) - 1;
   gpmem_t av, av1, av2;
   long ncond, n, j, k, nmax;
-  GEN rep, vChar, N0, C, T, S, cf, cfh, an, degs;
+  GEN rep, N0, C, T, S, cf, cfh, an, degs;
   LISTray LIST;
 
   /* allocate memory for answer */
@@ -2475,7 +2513,7 @@ QuadGetST(GEN dataCR, long prec)
 
   /* initializations */
   degs = GetDeg(dataCR);
-  vChar= sortChars(dataCR,1); ncond = lg(vChar)-1;
+  ncond = lg(vChar)-1;
   C    = cgetg(ncond+1, t_VEC);
   N0   = cgetg(ncond+1, t_VECSMALL);
   nmax = 0;
@@ -2653,7 +2691,7 @@ AllStark(GEN data,  GEN nf,  long flag,  long newprec)
   gpmem_t av, av2;
   int **matan;
   GEN p0, p1, p2, S, T, polrelnum, polrel, Lp, W, A, veczeta, sig;
-  GEN degs, ro, C, Cmax, dataCR, cond1, L1, *gptr[2], an, Pi;
+  GEN vChar, degs, ro, C, Cmax, dataCR, cond1, L1, *gptr[2], an, Pi;
   LISTray LIST;
 
   N     = degpol(nf[1]);
@@ -2673,20 +2711,17 @@ AllStark(GEN data,  GEN nf,  long flag,  long newprec)
 LABDOUB:
 
   av = avma;
-
+  vChar = sortChars(dataCR, N==2);
+  W = ComputeAllArtinNumbers(dataCR, vChar, (flag >= 0), newprec);
   if (flag >= 0)
   {
-    if (N == 2) /* compute S,T differently if nf is quadratic */
-      p1 = QuadGetST(dataCR, newprec);
-    else
-      p1 = GetST(dataCR, newprec);
-
+    p1 = GetST(dataCR, vChar, newprec);
     S = (GEN)p1[1];
     T = (GEN)p1[2];
-
     Lp = cgetg(cl + 1, t_VEC);
     for (i = 1; i <= cl; i++)
-      Lp[i] = GetValue((GEN)dataCR[i], (GEN)S[i], (GEN)T[i], 0, 1, newprec)[2];
+      Lp[i] = GetValue((GEN)dataCR[i], (GEN)W[i], (GEN)S[i], (GEN)T[i],
+                       0, 1, newprec)[2];
 
     if (DEBUGLEVEL) msgtimer("Compute W");
   }
@@ -2724,11 +2759,11 @@ LABDOUB:
     Lp = cgetg(cl+1, t_VEC);
     for (i = 1; i <= cl; i++)
     {
-      W = ComputeArtinNumber((GEN)dataCR[i], 1, newprec);
-      A = (GEN)ComputeAChi((GEN)dataCR[i], 0, newprec)[2];
-      W = gmul((GEN)C[i], gmul(A, W));
+      GEN dtcr = (GEN)dataCR[i], WW;
+      A = (GEN)ComputeAChi(dtcr, 0, newprec)[2];
+      WW= gmul((GEN)C[i], gmul(A, (GEN)W[i]));
 
-      Lp[i] = ldiv(gmul(W, gconj((GEN)L1[i])), p1);
+      Lp[i] = ldiv(gmul(WW, gconj((GEN)L1[i])), p1);
     }
   }
 
@@ -2986,11 +3021,11 @@ GEN
 bnrL1(GEN bnr, GEN subgp, long flag, long prec)
 {
   GEN bnf, nf, cyc, Mcyc, p1, L1, chi, lchi, clchi, allCR, listCR, dataCR;
-  GEN S, T, rep, indCR, invCR, Qt;
+  GEN S, T, rep, indCR, invCR, Qt, vChar;
   long N, cl, i, j, k, nc, lq, a, ncc;
   gpmem_t av = avma;
 
-  checkbnr(bnr);
+  checkbnrgen(bnr);
   bnf  = (GEN)bnr[1];
   nf   = (GEN)bnf[7];
   cyc  = gmael(bnr, 5, 2);
@@ -2998,14 +3033,8 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
   ncc  = lg(cyc) - 1;
   N    = degpol(nf[1]);
 
-  if (N == 1)
-    err(talker, "the ground field must be distinct from Q");
-
-  if (flag < 0 || flag > 8)
-    err(flagerr,"bnrL1");
-
-  /* check the bnr */
-  checkbnrgen(bnr);
+  if (N == 1) err(talker, "the ground field must be distinct from Q");
+  if (flag < 0 || flag > 8) err(flagerr,"bnrL1");
 
   /* compute bnr(conductor) */
   if (!(flag & 2))
@@ -3024,7 +3053,7 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
   Qt = InitQuotient0(Mcyc, subgp);
   lq = lg((GEN)Qt[2]) - 1;
 
-  /* compute all the characters */
+  /* compute all characters */
   allCR = EltsOfGroup(cl, (GEN)Qt[2]);
 
   /* make a list of all non-trivial characters modulo conjugation */
@@ -3079,8 +3108,8 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
   /* compute the data for these characters */
   dataCR = InitChar(bnr, listCR, prec);
 
-  p1 = GetST(dataCR, prec);
-
+  vChar= sortChars(dataCR,0);
+  p1 = GetST(dataCR, vChar, prec);
   S = (GEN)p1[1];
   T = (GEN)p1[2];
 
@@ -3093,8 +3122,8 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
   {
     a = indCR[i];
     if (a > 0)
-      L1[i] = (long)GetValue((GEN)dataCR[a], (GEN)S[a], (GEN)T[a], flag & 1,
-			     flag & 2, prec);
+      L1[i] = (long)GetValue((GEN)dataCR[a], NULL, (GEN)S[a], (GEN)T[a],
+                             flag & 1, flag & 2, prec);
   }
 
   for (i = 1; i < cl; i++)
