@@ -3140,11 +3140,12 @@ $$\var{tech} = [c, c2, \var{nrpid} ],$$
 where the parameters are to be understood as follows:
 
 $P$ is the defining polynomial for the number field, which must be in
-$\Z[X]$, irreducible and, preferably, monic. In fact, if you supply a
-non-monic polynomial at this point, \kbd{gp} will issue a warning, then
-\emph{transform your polynomial} so that it becomes monic. Instead of the
-normal result, say \kbd{res}, you then get a vector \kbd{[res,Mod(a,Q)]},
-where \kbd{Mod(a,Q) = Mod(X,P)} gives the change of variables.
+$\Z[X]$, irreducible and monic. In fact, if you supply a non-monic polynomial
+at this point, \kbd{gp} will issue a warning, then \emph{transform your
+polynomial} so that it becomes monic. The \kbd{nfinit} routine
+will return a different result in this case: instead of \kbd{res}, you get a
+vector \kbd{[res,Mod(a,Q)]}, where \kbd{Mod(a,Q) = Mod(X,P)} gives the change
+of variables. In all other routines, the variable change is simply lost.
 
 The numbers $c$ and $c2$ are positive real numbers which control the
 execution time and the stack size. To get maximum speed, set $c2=c$. To get a

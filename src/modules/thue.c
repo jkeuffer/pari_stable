@@ -195,11 +195,8 @@ inithue(GEN P, GEN bnf, long flag, long prec)
 
   if (!bnf)
   {
+    if (!gcmp1(leading_term(P))) err(talker,"non-monic polynomial in thue");
     bnf = bnfinit0(P,1,NULL,DEFAULTPREC);
-
-    if (bnf != checkbnf_discard(bnf)) 
-      err(talker,"non-monic polynomial in thue");
-
     if (flag) (void)certifybuchall(bnf);
     else 
       Ind = gfloor(mulrs(gmael(bnf, 8, 2), 5)); 

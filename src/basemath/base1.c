@@ -73,15 +73,6 @@ checkbnf(GEN x)
 }
 
 GEN
-checkbnf_discard(GEN bnf)
-{
-  GEN x = checkbnf(bnf);
-  if (x != bnf && lg(bnf) == 3)
-    err(warner,"non-monic polynomial. Change of variables discarded");
-  return x;
-}
-
-GEN
 checknf(GEN x)
 {
   GEN nf = _checknf(x);
@@ -2261,8 +2252,6 @@ initzeta(GEN pol, long prec)
   /*************** residue & constants ***************/
   nfz = cgetg(10,t_VEC);
   if (!bnf || nfgetprec(bnf) < prec ) bnf = bnfinit0(pol, 2, NULL, prec);
-  else bnf = gcopy(bnf);
-  bnf = checkbnf_discard(bnf);
   prec = (prec<<1) - 2;
   Pi = mppi(prec); racpi = sqrtr(Pi);
 

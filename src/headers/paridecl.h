@@ -420,7 +420,6 @@ void    check_ZXY(GEN x, char *s);
 GEN     check_units(GEN x, char *f);
 void    checkbid(GEN bid);
 GEN     checkbnf(GEN bnf);
-GEN     checkbnf_discard(GEN bnf);
 void    checkbnr(GEN bnr);
 void    checkbnrgen(GEN bnr);
 void    checkid(GEN x, long N);

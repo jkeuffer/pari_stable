@@ -2470,7 +2470,6 @@ smallbuchinit(GEN pol, double bach, double bach2, long nbrelpid, long prec)
   {
     const long fl = nf_INIT | nf_UNITS | nf_FORCE;
     bnf = buchall(pol, bach, bach2, nbrelpid, fl, prec);
-    bnf = checkbnf_discard(bnf);
   }
   nf  = (GEN)bnf[7];
   res = (GEN)bnf[8];
@@ -3108,17 +3107,19 @@ buchall(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long prec)
 {
   pari_sp av = avma;
   long PRECREG = max(prec, MEDDEFAULTPREC);
-  GEN z, nf, CHANGE = NULL;
+  GEN z, nf;
 
   if (DEBUGLEVEL) (void)timer2();
   P = get_nfpol(P, &nf);
   if (!nf)
   {
     nf = initalg(P, PRECREG); /* P non-monic and nfinit CHANGEd it ? */
-    if (lg(nf)==3) { CHANGE = (GEN)nf[2]; nf = (GEN)nf[1]; }
+    if (lg(nf)==3) {
+      err(warner,"non-monic polynomial. Change of variables discarded");
+      nf = (GEN)nf[1]; 
+    }
   }
   z = buch(&nf, cbach, cbach2, nbrelpid, flun, PRECREG);
-  if (CHANGE) z = mkvec2(z, CHANGE);
   z = gerepilecopy(av, z); if (nf) gunclone(nf);
   return z;
 }
