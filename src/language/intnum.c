@@ -890,7 +890,7 @@ expvec(GEN v, GEN ea, long prec)
 {
   long lv = lg(v), i;
   GEN z = cgetg(lv, t_VEC);
-  for (i = 1; i < lv; i++) z[i] = lpow((GEN)v[i],ea,prec);
+  for (i = 1; i < lv; i++) z[i] = (long)gpow((GEN)v[i],ea,prec);
   return z;
 }
 
