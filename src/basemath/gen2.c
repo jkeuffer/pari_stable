@@ -139,12 +139,17 @@ gcopy(GEN x)
   GEN y;
 
   if (tx == t_SMALL) return x;
-  lx = lg(x); y=new_chunk(lx);
   if (! is_recursive_t(tx))
+  {
+    if (tx == t_INT && !signe(x)) return gzero; /* very common case */
+    lx = lg(x); 
+    y = new_chunk(lx);
     for (i=lx-1; i>=0; i--) y[i]=x[i];
+  }
   else
   {
-    if (tx==t_POL || tx==t_LIST) lx=lgef(x);
+    lx = (tx==t_POL || tx==t_LIST)? lgef(x): lg(x); 
+    y = new_chunk(lx);
     for (i=0; i<lontyp[tx];  i++) y[i]=x[i];
     for (   ; i<lontyp2[tx]; i++) copyifstack(x[i],y[i]);
     for (   ; i<lx;          i++) y[i]=lcopy((GEN)x[i]);
@@ -179,12 +184,17 @@ forcecopy(GEN x)
   GEN y;
 
   if (tx == t_SMALL) return x;
-  lx=lg(x); y=new_chunk(lx);
+  lx=lg(x);
   if (! is_recursive_t(tx))
+  {
+    if (tx == t_INT && !signe(x)) return gzero; /* very common case */
+    y = new_chunk(lx);
     for (i=lx-1; i>=0; i--) y[i]=x[i];
+  }
   else
   {
-    if (tx==t_POL || tx==t_LIST) lx=lgef(x);
+    lx = (tx==t_POL || tx==t_LIST)? lgef(x): lg(x); 
+    y = new_chunk(lx);
     for (i=0; i<lontyp[tx]; i++) y[i]=x[i];
     for (   ; i<lx;         i++) y[i]=(long)forcecopy((GEN)x[i]);
   }
