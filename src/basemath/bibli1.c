@@ -2403,7 +2403,7 @@ rnfpolredabs(GEN nf, GEN relpol, long flag, long prec)
 /**                              MINIM                             **/
 /**                                                                **/
 /********************************************************************/
-long addcolumntomatrix(long *V,GEN INVP,long *L);
+int addcolumntomatrix(long *V,GEN INVP,GEN L);
 
 /* x is a non-empty matrix, y is a compatible VECSMALL (dimension > 0). */
 GEN
@@ -2475,7 +2475,7 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
 {
   GEN x,res,p1,u,r,liste,gnorme,gnorme_max,invp,V, *gptr[2];
   long n = lg(a), av0 = avma, av1,av,tetpil,lim, i,j,k,s,maxrank;
-  double p,borne,*v,*y,*z,**q, eps = 0.000001;
+  double p,BOUND,*v,*y,*z,**q, eps = 0.000001;
 
   maxrank = 0; res = V = NULL; /* gcc -Wall */
   switch(flag)
@@ -2509,14 +2509,14 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
 
     for (i=2; i<=n; i++)
       { c=rtodbl(gcoeff(a,i,i)); if (c<b) b=c; }
-    borne = b+eps;
-    BORNE = ground(dbltor(borne));
+    BOUND = b+eps;
+    BORNE = ground(dbltor(BOUND));
     gnorme_max = NULL;
   }
   else
   {
     BORNE = gfloor(BORNE);
-    borne = gtodouble(BORNE)+eps;
+    BOUND = gtodouble(BORNE)+eps;
     gnorme_max = gzero;
   }
 
@@ -2536,7 +2536,7 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
 
   s=0; av1=avma; lim = stack_lim(av1,1);
   k = n; y[n] = z[n] = 0;
-  x[n] = (long) sqrt(borne/v[n]+eps);
+  x[n] = (long) sqrt(BOUND/v[n]);
   if (flag == min_PERF) invp = idmat(maxrank);
   for(;;x[1]--)
   {
@@ -2544,29 +2544,31 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
     {
       if (k>1)
       {
-	k--; z[k]=0;
-	for (j=k+1; j<=n; j++) z[k] += q[k][j]*x[j];
-	p = x[k+1]+z[k+1];
-	y[k] = y[k+1] + p*p*v[k+1];
-	x[k] = (long) floor(sqrt((borne-y[k]+eps)/v[k])-z[k]);
+        long l = k-1;
+	z[l]=0;
+	for (j=k; j<=n; j++) z[l] += q[l][j]*x[j];
+	p = x[k]+z[k];
+	y[l] = y[k] + p*p*v[k];
+	x[l] = (long) floor(sqrt((BOUND-y[l])/v[l])-z[l]);
+        k = l;
       }
       for(;;)
       {
-	p=x[k]+z[k];
-	if (y[k] + p*p*v[k] <= borne+eps) break;
+	p = x[k]+z[k];
+	if (y[k] + p*p*v[k] <= BOUND) break;
 	k++; x[k]--;
       }
     }
     while (k>1);
     if (! x[1] && y[1]<=eps) break;
-    p = x[1]+z[1]; gnorme = ground( dbltor(y[1]+ p*p*v[1]) );
+    p = x[1]+z[1]; gnorme = ground( dbltor(y[1] + p*p*v[1]) );
     if (gnorme_max)
       { if (gcmp(gnorme,gnorme_max) > 0) gnorme_max=gnorme; }
     else
     {
       if (gcmp(gnorme,BORNE) < 0)
       {
-	borne=gtodouble(gnorme); s=0;
+	BOUND=gtodouble(gnorme)+eps; s=0;
         affii(gnorme,BORNE); avma=av1;
 	if (flag == min_PERF) invp = idmat(maxrank);
       }
