@@ -502,8 +502,13 @@ do_SWAPI(GEN x, GEN h, GEN L, GEN B, long kmax, long k, long alpha, GEN fl)
 
   /* SWAPI(k-1,k) */
   if (DEBUGLEVEL>3 && k==kmax)
-    fprintferr(" (%ld)", expi(mulsi(alpha-1,sqri(Bk)))
-                       - expi(mulsi(alpha,p2)));
+  { /* output diagnostics associated to re-normalized rationnal quantities */
+    gpmem_t av1 = avma;
+    GEN d = mulii((GEN)B[k-1],(GEN)B[k+1]);
+    p1 = subii(mulsi(alpha-1, sqri(Bk)), mulsi(alpha, la2));
+    fprintferr(" (%ld)", expi(p1) - expi(mulsi(alpha, d)));
+    avma = av1;
+  }
   swap(h[k-1], h[k]);
   swap(x[k-1], x[k]);
   for (j=1; j< lx; j++) swap(coeff(x,k-1,j), coeff(x,k,j));
