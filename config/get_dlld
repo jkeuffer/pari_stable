@@ -9,7 +9,7 @@ DLSUFFIX=so
 soname=.$soname_num
 do_dll=yes
 case "$osname-$arch" in
-  osf1-*|solaris-*|linux-*|freebsd-*)
+  aix-*|osf1-*|solaris-*|linux-*|freebsd-*)
     case $libpari_base in
       pari) sodest=.$version.$patch;; # released version
       *)    sodest=.$patch.0.0;;      # unstable version
@@ -21,7 +21,6 @@ case "$osname-$arch" in
   os2-*)  soname= ; sodest= ; DLSUFFIX=dll
           libpari_base=`echo "$libpari_base" | sed 's/\./_/g'` # 8.3 DLL name
        ;;
-#  aix-*)  DLSUFFIX=a ;; FIXME: dynamic linking does not work
 # cygwin-*)soname= ; sodest= ; DLSUFFIX=dll ;; FIXME: gp-dyn.exe crashes
   *) do_dll=no ;;
 esac
