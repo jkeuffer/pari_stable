@@ -7,3 +7,5 @@ echo src/language/members.h
 echo src/gp/gp_init.h
 echo src/gp/highlvl.h
 echo src/desc/pari.desc
+echo src/desc/pari.desc
+echo src/funclist
