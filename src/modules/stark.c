@@ -26,7 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define ADD_PREC   (DEFAULTPREC-2)*3
 
 extern GEN roots_to_pol_intern(GEN L, GEN a, long v, int plus);
-extern GEN bnrGetSurjMat(GEN bnr1, GEN bnr2);
+extern GEN bnrGetSurj(GEN bnr1, GEN bnr2);
 
 /* ComputeCoeff */
 typedef struct {
@@ -208,7 +208,7 @@ GetPrimChar(GEN chi, GEN bnr, GEN bnrc, long prec)
   cond  = (GEN)cond[1];
   condc = (GEN)condc[1];
 
-  M = bnrGetSurjMat(bnr, bnrc);
+  M = bnrGetSurj(bnr, bnrc);
   U = (GEN)hnfall(concatsp(M, Mrc))[2];
 
   l = lg((GEN)M[1]);
@@ -408,7 +408,7 @@ GetIndex(GEN pr, GEN bnr, GEN subgroup)
   {
     bnrpr = buchrayinitgen(bnf, mpr);
     cycpr = gmael(bnrpr, 5, 2);
-    M = bnrGetSurjMat(bnr, bnrpr);
+    M = bnrGetSurj(bnr, bnrpr);
     M = gmul(M, subgroup);
     subpr = hnf(concatsp(M, diagonal(cycpr)));
   }
