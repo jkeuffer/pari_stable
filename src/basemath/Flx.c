@@ -987,12 +987,12 @@ Flx_rem_montgomery(GEN x, GEN mg, GEN T, ulong p)
   if (l<=lt)
     return vecsmall_copy(x);
   new_chunk(lt);
-  z=Flx_recipspec(x+2+lead,ld,ld);              /* z = rec(x)*/
-  z=Flx_mulspec(z+2,mg+2,p,min(ld,lgpol(z)),lm);/* z = rec(x) * mg */
-  z=Flx_recipspec(z+2,lgpol(z),ld);             /* z = rec (rec(x) * mg) */
-  z=Flx_mulspec(z+2,T+2,p,min(ld,lgpol(z)),lt); /* z *= pol */
+  z=Flx_recipspec(x+2+lead,ld,ld);             /* z = rec(x)      lz<=ld*/
+  z=Flx_mulspec(z+2,mg+2,p,lgpol(z),lm);       /* z = rec(x) * mg lz<=ld+lm*/
+  z=Flx_recipspec(z+2,min(ld,lgpol(z)),ld);    /* z = rec (rec(x) * mg) lz<=ld*/
+  z=Flx_mulspec(z+2,T+2,p,lgpol(z),lt);        /* z *= pol        lz<=ld+lt*/
   avma=ltop;
-  z=Flx_subspec(x+2,z+2,p,lt,min(lt,lgpol(z))); /* z = x - z */
+  z=Flx_subspec(x+2,z+2,p,lt,min(lt,lgpol(z)));/* z = x - z       lz<=lt */
   z[1]=T[1];
   return z;
 }
