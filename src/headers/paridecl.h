@@ -1624,7 +1624,6 @@ long    u_val(ulong n, ulong p);
 /* RgX.c */
 
 int     is_rational(GEN x);
-int     RgX_is_rational(GEN x);
 GEN     RgM_to_RgXV(GEN x, long v);
 GEN     RgM_to_RgXX(GEN x, long v,long w);
 GEN     RgM_zc_mul(GEN x, GEN y);
@@ -1633,9 +1632,12 @@ GEN     RgV_to_RgX(GEN x, long v);
 GEN     RgV_zc_mul(GEN x, GEN y);
 GEN     RgV_zm_mul(GEN x, GEN y);
 GEN     RgX_divrem(GEN x,GEN y,GEN *r);
+int     RgX_is_rational(GEN x);
 GEN     RgX_mul(GEN x,GEN y);
 GEN     RgX_mulspec(GEN a, GEN b, long na, long nb);
 GEN     RgX_powers(GEN a, GEN T, long l);
+GEN     RgXQ_mul(GEN x,GEN y,GEN T);
+GEN     RgXQ_sqr(GEN x,GEN T);
 GEN     RgXQX_divrem(GEN x,GEN y,GEN T,GEN *r);
 GEN     RgXQX_mul(GEN x,GEN y,GEN T);
 GEN     RgXQX_red(GEN P, GEN T);
@@ -1645,8 +1647,8 @@ GEN     RgX_RgXQ_compo(GEN f, GEN x, GEN T);
 GEN     RgX_shift(GEN x, long n);
 GEN     RgX_sqr(GEN x);
 GEN     RgX_sqrspec(GEN a, long na);
-GEN     RgXV_to_RgM(GEN v, long n);
 GEN     RgX_to_RgV(GEN x, long N);
+GEN     RgXV_to_RgM(GEN v, long n);
 GEN     RgXX_to_RgM(GEN v, long n);
 GEN     RgXY_swap(GEN x, long n, long w);
 

@@ -733,7 +733,7 @@ autvec_TH(int pk, GEN z, GEN v, GEN C)
   for (i=1; i<lv; i++)
   {
     long y = v[i];
-    if (y) s = RgX_rem(RgX_mul(s, RgXQ_u_pow(aut(pk,z, y), y, C)),C);
+    if (y) s = RgXQ_mul(s, RgXQ_u_pow(aut(pk,z, y), y, C), C);
   }
   return s;
 }
@@ -747,7 +747,7 @@ autvec_AL(int pk, GEN z, GEN v, Red *R)
   for (i=1; i<lv; i++)
   {
     long y = (r*v[i]) / pk;
-    if (y) s = RgX_rem(RgX_mul(s, RgXQ_u_pow(aut(pk,z, v[i]), y, R->C)), R->C);
+    if (y) s = RgXQ_mul(s, RgXQ_u_pow(aut(pk,z, v[i]), y, R->C), R->C);
   }
   return s;
 }
