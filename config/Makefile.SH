@@ -63,7 +63,7 @@ qt)
   ;;
 fltk)
   PLOTCFLAGS="-I\$(FLTKDIR)/include $X11_INC"
-  PLOTLIBS="-L\$(FLTKDIR)/lib -lfltk $FLTK_LIBS
+  PLOTLIBS="-L\$(FLTKDIR)/lib -lfltk $FLTK_LIBS"
   graph="$graph plotfltk"
   ;;
 gnuplot)
