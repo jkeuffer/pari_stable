@@ -865,6 +865,62 @@ FpXQ_inv(GEN x,GEN pol,GEN p)
   if (!U) err(talker,"non invertible polynomial in FpXQ_inv");
   return gerepileupto(ltop, U);
 }
+/* generates the list of powers of x of degree 0,1,2,...,l*/
+GEN
+FpXQ_powers(GEN x, long l, GEN T, GEN p)
+{
+  GEN V=cgetg(l+2,t_VEC);
+  long i;
+  V[1] = (long) scalarpol(gun,varn(T));
+  if (l==0) return V;
+  V[2] = lcopy(x);
+  for(i=3;i<l+2;i++)
+    V[i] = (long) FpXQ_mul((GEN) V[i-1],x,T,p);
+  return V;
+}
+
+static GEN
+spec_compo_powers(GEN P, GEN V, long a, long n)
+{
+  long i;
+  GEN z;
+  z = scalarpol((GEN)P[2+a],varn(P));
+  for(i=1;i<=n;i++)
+    z=FpX_add(z,FpX_Fp_mul((GEN)V[i+1],(GEN)P[2+a+i],NULL),NULL);
+  return z;
+}
+/*Try to implement algorithm in Brent & Kung (Fast algorithms for
+ *manipulating formal power series, JACM 25:581-595, 1978)
+ */
+
+GEN
+FpX_FpXQV_compo(GEN P, GEN V, GEN T, GEN p)
+{
+  ulong ltop=avma;
+  long l=lg(V)-1;
+  GEN z,u;
+  long d=deg(P);
+  if (d==-1) return zeropol(varn(T));
+  if (d<l)
+  {
+    z=spec_compo_powers(P,V,0,d);
+    return gerepileupto(ltop,FpX_red(z,p));
+  }
+  if (l<=1)
+    err(talker,"powers is only [] or [1] in FpX_FpXQV_compo");
+  z=spec_compo_powers(P,V,d-l+1,l-1);
+  d-=l;
+  while(d>=l-1)
+  {
+    u=spec_compo_powers(P,V,d-l+2,l-2);
+    z=FpX_add(u,FpXQ_mul(z,(GEN)V[l],T,p),NULL);
+    d-=l-1;
+  }
+  u=spec_compo_powers(P,V,0,d);
+  z=FpX_add(u,FpXQ_mul(z,(GEN)V[d+2],T,p),NULL);
+  return gerepileupto(ltop,FpX_red(z,p));
+}
+
 /* T in Z[X] and  x in Z/pZ[X]/(pol)
  * return lift(lift(subst(T,variable(T),Mod(x*Mod(1,p),pol*Mod(1,p)))));
  */
@@ -873,18 +929,19 @@ FpX_FpXQ_compo(GEN T,GEN x,GEN pol,GEN p)
 {
   ulong ltop=avma;
   GEN z;
-  long i,d=lgef(T)-1;
+  long d=deg(T),rtd;
   if (!signe(T)) return zeropol(varn(T));
-  z = scalarpol((GEN)T[d],varn(T));
-  for(i=d-1;i>1;i--)
-  {
-    z=FpXQ_mul(z,x,pol,p);
-    z=FpX_Fp_add(z,(GEN) T[i],p);
-  }
-  return gerepileupto(ltop,FpX_red(z, p));
+  rtd = (long) sqrt((double)d);
+  z = FpX_FpXQV_compo(T,FpXQ_powers(x,rtd,pol,p),pol,p);
+  return gerepileupto(ltop,z);
 }
+
 /* Evaluation in Fp
  * x in Z[X] and y in Z return x(y) mod p
+ *
+ * If p is very large (several longs) and x has small coefficients(<<p),
+ * then Brent & Kung algorithm is faster.
+ * 
  */
 GEN
 FpX_eval(GEN x,GEN y,GEN p)
@@ -919,7 +976,7 @@ FpX_eval(GEN x,GEN y,GEN p)
 /* Tz=Tx*Ty where Tx and Ty coprime
  * return lift(chinese(Mod(x*Mod(1,p),Tx*Mod(1,p)),Mod(y*Mod(1,p),Ty*Mod(1,p))))
  * if Tz is NULL it is computed
- * =======>: As we do not return it, and the caller will frequently need it,
+ * As we do not return it, and the caller will frequently need it,
  * it must compute it and pass it.
  */
 GEN
@@ -2284,6 +2341,27 @@ FpX_extgcd(GEN x, GEN y, GEN p, GEN *ptu, GEN *ptv)
   *ptu = u; *ptv = v; return d;
 }
 
+GEN caractducos(GEN p, GEN x, int v);
+
+GEN
+FpXQ_charpoly(GEN x, GEN T, GEN p)
+{
+  ulong ltop=avma;
+  GEN R=lift(caractducos(FpX(T,p),FpX(x,p),varn(T)));
+  return gerepileupto(ltop,R);
+}
+
+GEN 
+FpXQ_minpoly(GEN x, GEN T, GEN p)
+{
+  ulong ltop=avma;
+  GEN R=FpXQ_charpoly(x, T, p);
+  GEN G=FpX_gcd(R,deriv(R,-1),p);
+  G=FpX_Fp_mul(G, mpinvmod((GEN) G[lgef(G) - 1],p),p);
+  G=FpX_div(R,G,p);
+  return gerepileupto(ltop,G);
+}
+
 /* return z = a mod q, b mod p (p,q) = 1. qinv = 1/q mod p */
 static GEN
 u_chrem_coprime(GEN a, ulong b, GEN q, ulong p, ulong qinv, GEN pq)
@@ -2887,7 +2965,7 @@ vec_u_FpX_eval_gen(GEN b, ulong x, ulong p, int *drop)
 /* Interpolate at roots of 1 and use Hadamard bound for univariate resultant:
  *   bound = N_2(A)^deg B N_2(B)^deg(A),  where  N_2(A) = sqrt(sum (N_1(Ai))^2)
  * Return B such that bound < 2^B */
-static ulong
+ulong
 ZY_ZXY_ResBound(GEN A, GEN B)
 {
   ulong av = avma;

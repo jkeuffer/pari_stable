@@ -528,21 +528,46 @@ GEN polratlift(GEN P, GEN mod, GEN amax, GEN bmax, GEN denom);
  * que P(S)=0 [p,Q] Relever S en S_0 tel que P(S_0)=0 [p^e,Q]
  * Unclean stack.
  */
-GEN
+static long monoratlift(GEN S, GEN q, GEN qm1old,struct galois_lift *gl, GEN frob)
+{
+  ulong ltop=avma;
+  GEN tlift = polratlift(S,q,qm1old,qm1old,gl->den);
+  if (tlift)
+  {
+    if(DEBUGLEVEL>=4)
+      fprintferr("MonomorphismLift: trying early solution %Z\n",tlift);
+    /*Rationals coefficients*/
+    tlift=lift(gmul(tlift,gmodulcp(gl->den,gl->gb->ladicsol)));
+    if (poltopermtest(tlift, gl, frob))
+    {
+      if(DEBUGLEVEL>=4)
+	fprintferr("MonomorphismLift: true early solution.\n");
+      avma=ltop;
+      return 1;
+    }
+    if(DEBUGLEVEL>=4)
+      fprintferr("MonomorphismLift: false early solution.\n");
+  }
+  avma=ltop;
+  return 0;
+}
+  GEN
 monomorphismratlift(GEN P, GEN S, struct galois_lift *gl, GEN frob)
 {
   ulong   ltop, lbot;
-  GEN Q=gl->T, p=gl->p;
-  long e=gl->e;
+  long rt;
+  GEN     Q=gl->T, p=gl->p;
+  long    e=gl->e, level=1;
   long    x;
   GEN     q, qold, qm1, qm1old;
   GEN     W, Pr, Qr, Sr, Wr = gzero, Prold, Qrold, Spow;
   long    i,nb,mask;
   GEN    *gptr[2];
-  if (DEBUGLEVEL >= 1)
+  if (DEBUGLEVEL == 1)
     timer2();
   x = varn(P);
-  q = p; qm1=gun; /*during the run, we have p*qm1=q*/
+  rt = (long) sqrt((double) ((lgef(Q)-3)<<1)-1);
+  q = p; qm1 = gun; /*during the run, we have p*qm1=q*/
   nb=hensel_lift_accel(e, &mask);
   Pr = FpX_red(P,q);
   Qr = (P==Q)?Pr:FpX_red(Q, q);/*A little speed up for automorphismlift*/
@@ -555,55 +580,43 @@ monomorphismratlift(GEN P, GEN S, struct galois_lift *gl, GEN frob)
   gptr[1] = &Wr;
   for (i=0; i<nb;i++)
   {
+    if (DEBUGLEVEL>=2)
+    {
+      level=(level<<1)-((mask>>i)&1);
+      timer2();
+    }
     qm1 = (mask&(1<<i))?sqri(qm1):mulii(qm1, q);
     q   =  mulii(qm1, p);
     Pr = FpX_red(P, q);
     Qr = (P==Q)?Pr:FpX_red(Q, q);/*A little speed up for automorphismlift*/
     ltop = avma;
     Sr = S;
-    Spow = compoTS(Pr, Sr, Qr, q);
+    /*Spow = compoTS(Pr, Sr, Qr, q);*/
+    Spow = FpXQ_powers(Sr, rt, Qr, q);
+
     if (i)
     {
-      W = FpXQ_mul(Wr, calcderivTS(Spow, Prold,qold), Qrold, qold);
+      /*W = FpXQ_mul(Wr, calcderivTS(Spow, Prold,qold), Qrold, qold);*/
+      W = FpXQ_mul(Wr, FpX_FpXQV_compo(deriv(Pr,-1),Spow,Qrold,qold), Qrold, qold);
       W = FpX_neg(W, qold);
       W = FpX_Fp_add(W, gdeux, qold);
       W = FpXQ_mul(Wr, W, Qrold, qold);
     }
     Wr = W;
-    S = FpXQ_mul(Wr, calcTS(Spow, Pr, Sr, Qr, q),Qr,q);
+    /*S = FpXQ_mul(Wr, calcTS(Spow, Pr, Sr, Qr, q),Qr,q);*/
+    S = FpXQ_mul(Wr, FpX_FpXQV_compo(Pr, Spow, Qr, q),Qr,q);
     S = FpX_sub(Sr, S, NULL);
     lbot = avma;
     Wr = gcopy(Wr);
     S = FpX_red(S, q);
     gerepilemanysp(ltop, lbot, gptr, 2);
-    if (i && i<nb-1 && frob)
-    {
-      ulong btop=avma;
-      GEN tlift = polratlift(S,q,qm1old,qm1old,gl->den);
-      if (tlift)
-      {
-	if(DEBUGLEVEL>=4)
-	  fprintferr("MonomorphismLift: trying early solution %Z\n",tlift);
-	/*Rationals coefficients*/
-	tlift=lift(gmul(tlift,gmodulcp(gl->den,gl->gb->ladicsol)));
-	if (poltopermtest(tlift, gl, frob))
-	{
-	  if(DEBUGLEVEL>=4)
-	    fprintferr("MonomorphismLift: true early solution.\n");
-	  avma=ltop;
-	  return NULL;
-	}
-	if(DEBUGLEVEL>=4)
-	  fprintferr("MonomorphismLift: false early solution.\n");
-      }
-      avma=btop;
-    }
-    qold = q;
-    qm1old=qm1;
-    Prold = Pr;
-    Qrold = Qr;
+    if (i && i<nb-1 && frob && monoratlift(S,q,qm1old,gl,frob))
+      return NULL;
+    qold = q; qm1old=qm1; Prold = Pr; Qrold = Qr;
+    if (DEBUGLEVEL >= 2)
+      msgtimer("MonomorphismLift: lift to prec %d",level);
   }
-  if (DEBUGLEVEL >= 1)
+  if (DEBUGLEVEL == 1)
     msgtimer("monomorphismlift()");
   return S;
 }
@@ -653,8 +666,6 @@ static void
 inittestlift( GEN plift, GEN Tmod, struct galois_lift *gl, 
     struct galois_testlift *gt)
 {
-  int     i, j;
-  GEN     autpow;
   long v = varn(gl->T);
   gt->n = lg(gl->L) - 1;
   gt->g = lg(Tmod) - 1;
@@ -666,31 +677,13 @@ inittestlift( GEN plift, GEN Tmod, struct galois_lift *gl,
   if (gt->f > 2)
   {
     ulong ltop=avma;
+    int i;
+    long nautpow=(long) sqrt((double) (gt->f-2)*(gt->n-1));
+    GEN autpow;
     if (DEBUGLEVEL >= 1) timer2();
-    autpow = cgetg(gt->n, t_VEC);
-    autpow[1] = (long) plift;
-    for (i = 2; i < gt->n; i++)
-      autpow[i] = (long) FpXQ_mul((GEN) autpow[i - 1],plift,gl->TQ,gl->Q);
+    autpow = FpXQ_powers(plift,nautpow,gl->TQ,gl->Q);
     for (i = 3; i <= gt->f; i++)
-    {
-      GEN     s, P;
-      int     n;
-      P = (GEN) gt->pauto[i - 1];
-      n = lgef(P) - 3;
-      if (n == 0)
-	gt->pauto[i] = (long) scalarpol((GEN)P[2],v);
-      else
-      {
-	ulong   ltop = avma;
-	GEN     p1;
-	s = scalarpol((GEN) P[2],v);
-	for (j = 1; j < n; j++)
-	  s = FpX_add(s, FpX_Fp_mul((GEN) autpow[j], (GEN) P[j + 2],NULL),NULL);
-	p1 = FpX_Fp_mul((GEN) autpow[n], (GEN) P[n + 2],NULL);
-	s = FpX_add(s, p1,gl->Q);
-	gt->pauto[i] = (long) gerepileupto(ltop,s);
-      }
-    }
+      gt->pauto[i] = (long) FpX_FpXQV_compo((GEN)gt->pauto[i-1],autpow,gl->TQ,gl->Q);
     /*Somewhat paranoid with memory, but this function use a lot of stack.*/
     gt->pauto=gerepileupto(ltop, gt->pauto);
     if (DEBUGLEVEL >= 1) msgtimer("frobenius power");
@@ -833,12 +826,12 @@ frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
  * Propre si s est un VECSMALL
  */
 static GEN
-applyperm(GEN s, GEN t)
+permapply(GEN s, GEN t)
 {
   GEN     u;
   int     i;
   if (lg(s) < lg(t))
-    err(talker, "First permutation shorter than second in applyperm");
+    err(talker, "First permutation shorter than second in permapply");
   u = cgetg(lg(s), typ(s));
   for (i = 1; i < lg(s); i++)
     u[i] = s[t[i]];
@@ -973,7 +966,7 @@ verifietest(GEN pf, struct galois_test *td)
   int     n = lg(td->L) - 1;
   if (DEBUGLEVEL >= 8)
     fprintferr("GaloisConj:Entree Verifie Test\n");
-  P = applyperm(td->L, pf);
+  P = permapply(td->L, pf);
   for (i = 1; i < n; i++)
   {
     long    ord;
@@ -1408,8 +1401,8 @@ GEN
 fixedfieldpolsigma(GEN sigma, GEN p, GEN Tp, GEN sym, GEN deg, long g)
 {
   ulong ltop=avma;
-  long i, j;
-  GEN  s, f;
+  long i, j, npows;
+  GEN  s, f, pows;
   sigma=lift(gmul(sigma,gmodulsg(1,p)));
   f=polx[varn(sigma)];
   s=zeropol(varn(sigma));
@@ -1418,9 +1411,11 @@ fixedfieldpolsigma(GEN sigma, GEN p, GEN Tp, GEN sym, GEN deg, long g)
     {
       s=FpX_add(s,FpX_Fp_mul(FpXQ_pow(f,stoi(deg[j]),Tp,p),stoi(sym[j]),p),p);
     }
+  npows = (long)sqrt((double)(g-1)*(lgef(Tp)-4));
+  pows  = FpXQ_powers(sigma,npows,Tp,p);
   for(i=2; i<=g;i++)
   {
-    f=FpX_FpXQ_compo(f,sigma,Tp,p);
+    f=FpX_FpXQV_compo(f,pows,Tp,p);
     for(j=1;j<lg(sym);j++)
       if(sym[j])
       {
@@ -1431,43 +1426,38 @@ fixedfieldpolsigma(GEN sigma, GEN p, GEN Tp, GEN sym, GEN deg, long g)
 }
 GEN caractducos(GEN p, GEN x, int v);
 
-static GEN 
-fixedfieldminpoly(GEN S, GEN T, GEN p)
-{
-  GEN R=lift(caractducos(FpX(T,p),FpX(S,p),varn(S)));
-  GEN G=FpX_gcd(R,deriv(R,-1),p);
-  G=FpX_Fp_mul(G, mpinvmod((GEN) G[lgef(G) - 1],p),p);
-  return FpX_div(R,G,p);
-}
-
-  GEN
+GEN
 fixedfieldfactmod(GEN Sp, GEN p, GEN Tmod)
 {
   long i;
   long l=lg(Tmod);
   GEN F=cgetg(l,t_VEC);
   for(i=1;i<l;i++)
-    F[i]=(long)fixedfieldminpoly(Sp, (GEN) Tmod[i],p);
+    F[i]=(long)FpXQ_minpoly(Sp, (GEN) Tmod[i],p);
   return F;
 }
 
-  GEN
+GEN
 fixedfieldnewtonsumaut(GEN sigma, GEN p, GEN Tp, GEN e, long g)
 {
   ulong ltop=avma;
   long i;
-  GEN s,f;
+  GEN s,f,V;
+  long rt;
   sigma=lift(gmul(sigma,gmodulsg(1,p)));
   f=polx[varn(sigma)];
+  rt=(long)sqrt((double)(g-1)*(lgef(Tp)-4));
+  V=FpXQ_powers(sigma,rt,Tp,p);
   s=FpXQ_pow(f,e,Tp,p);
   for(i=2; i<=g;i++)
   {
-    f=FpX_FpXQ_compo(f,sigma,Tp,p);
+    f=FpX_FpXQV_compo(f,V,Tp,p);
     s=FpX_add(s,FpXQ_pow(f,e,Tp,p),p);
   }
   return gerepileupto(ltop, s);
 }
-  GEN
+
+GEN
 fixedfieldnewtonsum(GEN O, GEN L, GEN mod, GEN e)
 {
   long f,g;
@@ -1487,7 +1477,7 @@ fixedfieldnewtonsum(GEN O, GEN L, GEN mod, GEN e)
   return PL;
 }
 
-static GEN
+GEN
 fixedfieldpol(GEN O, GEN L, GEN mod, GEN sym, GEN deg)
 {
   ulong ltop=avma;
@@ -1614,7 +1604,7 @@ fixedfieldsympol(GEN O, GEN L, GEN mod, GEN l, GEN p, GEN S, GEN deg, long v)
  * Calcule l'inclusion de R dans T i.e. S telque T|R\compo S
  * Ne recopie pas PL.
  */
-static GEN
+GEN
 fixedfieldinclusion(GEN O, GEN PL)
 {
   GEN     S;
@@ -3320,7 +3310,7 @@ galoisconj4(GEN T, GEN den, long flag)
   {
     int     c = k * (((long **) G)[2][i] - 1);
     for (j = 1; j <= c; j++)	/* I like it */
-      res[++k] = (long) applyperm((GEN) res[j], ((GEN **) G)[1][i]);
+      res[++k] = (long) permapply((GEN) res[j], ((GEN **) G)[1][i]);
   }
   if (flag)
   {
@@ -3655,6 +3645,61 @@ galoisfixedfield(GEN gal, GEN perm, long flag, long y)
 	PM,Pden,mod,x,y);
     return gerepile(ltop, lbot, res);
   }
+}
+
+/*return 1 if gal is abelian, else 0*/
+long 
+galoistestabelian(GEN gal)
+{
+  ulong ltop=avma;
+  long i,j;
+  gal = checkgal(gal);
+  for(i=2;i<lg(gal[7]);i++)
+    for(j=1;j<i;j++)
+    {
+      long test=egal_vecsmall(permapply(gmael(gal,7,i),gmael(gal,7,j)),
+	  permapply(gmael(gal,7,j),gmael(gal,7,i)));
+      avma=ltop;
+      if (!test) return 0;
+    }
+  return 1;  
+}
+
+GEN galoisisabelian(GEN gal, long flag)
+{
+  long i, j;
+  long test, n=lg(gal[7]);
+  GEN M;
+  gal = checkgal(gal);
+  test=galoistestabelian(gal);
+  if (!test) return gzero;
+  if (flag==1)  return gun;
+  if (flag) err(flagerr,"galoisisabelian");
+  M=cgetg(n,t_MAT);
+  for(i=1;i<n;i++)
+  {
+    ulong btop;
+    GEN P;
+    long k;
+    M[i]=lgetg(n,t_COL);
+    btop=avma;
+    P=permcyclepow(permorbite(gmael(gal,7,i)),mael(gal,8,i));
+    for(j=1;j<lg(gal[6]);j++)
+      if (egal_vecsmall(P,gmael(gal,6,j)))
+	  break;
+    avma=btop;
+    if (j==lg(gal[6])) err(talker,"wrong argument in galoisisabelian");
+    j--;
+    for(k=1;k<i;k++)
+    {
+      mael(M,i,k)=lstoi(j%mael(gal,8,k));
+      j/=mael(gal,8,k);
+    }  
+    mael(M,i,k++)=lstoi(mael(gal,8,i));
+    for(  ;k<n;k++)
+      mael(M,i,k)=zero;
+  }
+  return M;
 }
 /* Calcule les orbites d'un sous-groupe de Z/nZ donne par un
  * generateur ou d'un ensemble de generateur donne par un vecteur. 
