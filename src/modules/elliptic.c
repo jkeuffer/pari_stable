@@ -907,7 +907,7 @@ typedef struct {
   GEN x,y; /* z/w2 defined mod <1,tau> --> z + x tau + y reduced mod <1,tau> */
 } SL2_red;
 
-/* compute gamma in SL_2(Z) and t'=gamma(t) so that t' is in the usual
+/* compute gamma in SL_2(Z) gamma(t) is in the usual
    fundamental domain. Internal function no check, no garbage. */
 static void
 set_gamma(SL2_red *T)
@@ -926,7 +926,7 @@ set_gamma(SL2_red *T)
       a = addii(a, mulii(n,c));
       b = addii(b, mulii(n,d));
     }
-    m = gnorm(t); if (gcmp(m,run) >= 0) break;
+    m = gnorm(t); if (gcmp(m,run) > 0) break;
     t = gneg_i(gdiv(gconj(t),m)); /* apply S */
     p1=negi(c); c=a; a=p1;
     p1=negi(d); d=b; b=p1;
