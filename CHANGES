@@ -39,7 +39,7 @@ TP = Thomas Papanikolaou
 XR = Xavier Roblot
 YU = Yoshiaki Uchikawa
 
-Done for version 2.2.8 (released ??/??/2004):
+Done for version 2.2.8 (released 25/11/2004):
   Fixed
     1- gp --version: stack overflow
     2- overflow (in C long multiplication) in zeta(4.45+292532.0*I)
