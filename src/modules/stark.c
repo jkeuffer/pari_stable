@@ -27,6 +27,26 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 extern GEN roots_to_pol_intern(GEN L, GEN a, long v, int plus);
 
+/* ComputeCoeff */
+typedef struct {
+  GEN L0, L1, L11, L2; /* VECSMALL of p */
+  GEN *L1ray, *L11ray; /* precomputed isprincipalray(pr), pr | p */
+  GEN *rayZ; /* recomputed isprincipalray(i), i < condZ */
+  long condZ; /* generates cond(bnr) \cap Z, assumed small */
+} LISTray;
+
+/* Char evaluation */
+typedef struct {
+  long ord; 
+  GEN val, chi;
+} CHI_t;
+
+/* RecCoeff */
+typedef struct {
+  GEN M, beta, B, U, nB;
+  long v, G, N;
+} RC_data;
+
 /********************************************************************/
 /*                    Miscellaneous functions                       */
 /********************************************************************/
@@ -46,11 +66,6 @@ ComputeImagebyChar(GEN chi, GEN logelt, long flag)
   }
   return gpowgs(x, n);
 }
-
-typedef struct {
-  long ord; 
-  GEN val, chi;
-} CHI_t;
 
 static GEN
 EvalChar(CHI_t *C, GEN logelt)
@@ -1448,13 +1463,12 @@ CorrectCoeff(GEN dtcr, int** an, int** reduc, long n, long deg)
 
 /* compute the coefficients an in the general case */
 static int**
-ComputeCoeff(GEN dtcr, long n, long deg)
+ComputeCoeff(GEN dtcr, LISTray *R, long n, long deg)
 {
   ulong av = avma, av2;
-  long j, p, np;
+  long i, l, np;
   int **an, **reduc, **an2;
-  GEN CHI, tabprem, nf, pr, cond, ray, chi, prime, npg, bnr;
-  byteptr dp = diffptr;
+  GEN L, CHI, nf, cond, ray, chi, bnr;
   CHI_t chi_t, *C = &chi_t;
 
   CHI = (GEN)dtcr[5]; init_CHI(C, CHI, deg);
@@ -1464,25 +1478,14 @@ ComputeCoeff(GEN dtcr, long n, long deg)
   an  = InitMatAn(n, deg, 0);
   an2 = InitMatAn(n, deg, 0);
   reduc  = InitReduction(CHI, deg);
-
-  prime = stoi(2); dp++;
   av2 = avma;
-  for (p = 2; p <= n; p += *dp++, avma = av2)
+
+  L = R->L1; l = lg(L);
+  for (i=1; i<l; i++, avma = av2)
   {
-    prime[2] = p;
-    tabprem = primedec(nf, prime);
-    for (j = 1; j < lg(tabprem); j++)
-    {
-      pr  = (GEN)tabprem[j];
-      npg = powgi((GEN)pr[1], (GEN)pr[4]);
-      if (is_bigint(npg) || (np = npg[2]) > n
-                         || idealval(nf, cond, pr)) continue;
-
-      ray = isprincipalray(bnr, pr);
-      chi = EvalChar(C, ray);
-
-      an_AddMul(an,an2,np,n,deg,chi,reduc);
-    }
+    np = L[i]; ray = R->L1ray[i];
+    chi  = EvalChar(C, ray);
+    an_AddMul(an,an2,np,n,deg,chi,reduc);
   }
   FreeMat(an2, n);
 
@@ -1494,6 +1497,135 @@ ComputeCoeff(GEN dtcr, long n, long deg)
 /********************************************************************/
 /*              5th part: compute L-functions at s=1                */
 /********************************************************************/
+static void
+_append(GEN L, GEN z)
+{
+  long l = lg(L);
+  L[l] = (long)z; setlg(L,l+1);
+}
+
+static void
+deg11(LISTray *R, long p, GEN bnr, GEN pr) {
+  GEN z = isprincipalray(bnr, pr); 
+  _append(R->L1, (GEN)p);
+  _append((GEN)R->L1ray, z);
+}
+static void
+deg12(LISTray *R, long p, GEN bnr, GEN Lpr) {
+  GEN z = isprincipalray(bnr, (GEN)Lpr[1]); 
+  _append(R->L11, (GEN)p);
+  _append((GEN)R->L11ray, z);
+}
+static void
+deg0(LISTray *R, long p) {
+  _append(R->L0, (GEN)p);
+}
+static void
+deg2(LISTray *R, long p) {
+  _append(R->L2, (GEN)p);
+}
+
+/* pi(x) <= ?? */
+static long
+PiBound(long x)
+{
+  double lx = log((double)x);
+  return 1 + (long) x/lx * (1 + 3/(2*lx));
+}
+
+static GEN
+_alloc(long n, long t)
+{
+  GEN z = new_chunk(n);
+  z[0] = evaltyp(t) | evallg(1);
+  return z;
+}
+
+static void
+InitPrimesQuad(GEN bnr, long nmax, LISTray *R)
+{
+  ulong av = avma;
+  GEN bnf = (GEN)bnr[1], cond = gmael3(bnr,2,1,1);
+  long p,i,l, condZ = itos(gcoeff(cond,1,1)), contZ = itos(content(cond));
+  GEN prime, pr, nf = checknf(bnf), dk = (GEN)nf[3];
+  byteptr d = diffptr + 1;
+  GEN *gptr[7];
+
+  l = 1 + PiBound(nmax);
+  R->L0  = _alloc(l, t_VECSMALL);
+  R->L2  = _alloc(l, t_VECSMALL); R->condZ = condZ;
+  R->L1 = _alloc(l, t_VECSMALL); R->L1ray = (GEN*)_alloc(l, t_VEC);
+  R->L11 = _alloc(l, t_VECSMALL); R->L11ray = (GEN*)_alloc(l, t_VEC);
+  prime = stoi(2);
+  for (p = 2; p <= nmax; p += *d++, prime[2] = p)
+    switch (krogs(dk, p))
+    {
+    case -1: /* inert */
+      if (condZ % p == 0) deg0(R,p); else deg2(R,p);
+      break;
+    case 1: /* split */
+      pr = primedec(nf, prime);
+      if      (condZ % p != 0) deg12(R, p, bnr, pr);
+      else if (contZ % p == 0) deg0(R,p);
+      else
+      {
+        pr = idealval(nf, cond, (GEN)pr[1])? (GEN)pr[2]: (GEN)pr[1];
+        deg11(R, p, bnr, pr);
+      }
+      break;
+    default: /* ramified */
+      if (condZ % p == 0) deg0(R,p);
+      else
+      {
+        pr = (GEN)primedec(nf, prime)[1];
+        deg11(R, p, bnr, pr);
+      }
+      break;
+    }
+  /* precompute isprincipalray(x), x in Z */
+  R->rayZ = (GEN*)cgetg(condZ, t_VEC);
+  for (i=1; i<condZ; i++)
+    R->rayZ[i] = (cgcd(i,condZ) == 1)? isprincipalray(bnr, stoi(i)): gzero;
+
+  gptr[0] = &(R->L0);
+  gptr[1] = &(R->L2);  gptr[2] = (GEN*)&(R->rayZ);
+  gptr[3] = &(R->L1);  gptr[5] = (GEN*)&(R->L1ray);
+  gptr[4] = &(R->L11); gptr[6] = (GEN*)&(R->L11ray);
+  gerepilemany(av,gptr,7);
+}
+
+static void
+InitPrimes(GEN bnr, long nmax, LISTray *R)
+{
+  ulong av = avma;
+  GEN bnf = (GEN)bnr[1], cond = gmael3(bnr,2,1,1);
+  long np,p,j, condZ = itos(gcoeff(cond,1,1));
+  GEN Npr, tabpr, prime, pr, nf = checknf(bnf);
+  byteptr d = diffptr + 1;
+  GEN *gptr[7];
+
+  R->condZ = condZ;
+  R->L1 = _alloc(nmax, t_VECSMALL);
+  R->L1ray = (GEN*)_alloc(nmax, t_VEC);
+  prime = stoi(2);
+  for (p = 2; p <= nmax; p += *d++, prime[2] = p)
+  {
+    tabpr = primedec(nf, prime);
+    for (j = 1; j < lg(tabpr); j++)
+    {
+      pr  = (GEN)tabpr[j];
+      Npr = powgi((GEN)pr[1], (GEN)pr[4]);
+      if (is_bigint(Npr) || (np = Npr[2]) > nmax) continue;
+      if (condZ % p == 0 && idealval(nf, cond, pr)) continue;
+
+      _append(R->L1, (GEN)p);
+      _append((GEN)R->L1ray, isprincipalray(bnr, pr));
+    }
+
+  }
+  gptr[0] = &(R->L1);  gptr[1] = (GEN*)&(R->L1ray);
+  gerepilemany(av,gptr,2);
+}
 
 static GEN
 get_limx(long r1, long r2, long prec, GEN *pteps)
@@ -1735,6 +1867,7 @@ GetST(GEN dataCR, long prec)
   long ncond, n, j, k, jc, nmax, prec2, i0, r1, r2;
   GEN bnr, nf, racpi, powracpi;
   GEN rep, vChar, N0, C, T, S, an, degs, p1;
+  LISTray LIST;
 
   if (DEBUGLEVEL) timer2();
   /* allocate memory for answer */
@@ -1769,6 +1902,7 @@ GetST(GEN dataCR, long prec)
   i0 = GetBoundi0(r1, r2, prec);
 
   if (DEBUGLEVEL>1) fprintferr("nmax = %ld, i0 = %ld\n", nmax, i0);
+  InitPrimes(gmael(dataCR,1,4), nmax, &LIST);
 
   prec2 = ((prec-2) << 1) + EXTRA_PREC;
   racpi = mpsqrt(mppi(prec2));
@@ -1792,7 +1926,7 @@ GetST(GEN dataCR, long prec)
     if (nChar == 1)
     { /* quadratic or trivial char, precompute for early abort later */
       const long t = LChar[1], d = degs[t];
-      matan = ComputeCoeff((GEN)dataCR[t], NN, d);
+      matan = ComputeCoeff((GEN)dataCR[t], &LIST, NN, d);
     }
     p1 = gmael(dataCR, LChar[1], 9);
     a  = p1[1];
@@ -1867,7 +2001,7 @@ GetST(GEN dataCR, long prec)
       
       if (DEBUGLEVEL>1)
         fprintferr("\tcharacter no: %ld (%ld/%ld)\n", t,k,nChar);
-      if (!matan) matan = ComputeCoeff((GEN)dataCR[t], NN, d);
+      if (!matan) matan = ComputeCoeff((GEN)dataCR[t], &LIST, NN, d);
       for (n = 1; n <= NN; n++)
         if ((an = EvalCoeff(z, matan[n], d)))
         {
@@ -1981,11 +2115,6 @@ GetValue1(GEN bnr, long flag, long prec)
 /********************************************************************/
 /*                6th part: recover the coefficients                */
 /********************************************************************/
-typedef struct {
-  GEN M, beta, B, U, nB;
-  long v, G, N;
-} RC_data;
-
 static long
 TestOne(GEN plg, RC_data *d)
 {
@@ -2258,16 +2387,9 @@ next_pow(long q, long p, long n)
   return (lgefint(x) > 3 || qp > (ulong)n)? 0: qp;
 }
 
-typedef struct {
-  GEN L0, L1, L11, L2; /* VECSMALL of p */
-  GEN *L1ray, *L11ray; /* precomputed isprincipalray(pr), pr | p */
-  GEN *rayZ; /* recomputed isprincipalray(i), i < condZ */
-  long condZ; /* generates cond(bnr) \cap Z, assumed small */
-} LIST_t;
-
 /* compute the coefficients an for the quadratic case */
 static int**
-computean(GEN dtcr, LIST_t *R, long n, long deg)
+computean(GEN dtcr, LISTray *R, long n, long deg)
 {
   ulong av = avma, av2;
   long i, p, q, condZ, l;
@@ -2349,105 +2471,6 @@ computean(GEN dtcr, LIST_t *R, long n, long deg)
   avma = av; return an;
 }
 
-static void
-_append(GEN L, GEN z)
-{
-  long l = lg(L);
-  L[l] = (long)z; setlg(L,l+1);
-}
-
-static void
-deg11(LIST_t *R, long p, GEN bnr, GEN pr) {
-  GEN z = isprincipalray(bnr, pr); 
-  _append(R->L1, (GEN)p);
-  _append((GEN)R->L1ray, z);
-}
-static void
-deg12(LIST_t *R, long p, GEN bnr, GEN Lpr) {
-  GEN z = isprincipalray(bnr, (GEN)Lpr[1]); 
-  _append(R->L11, (GEN)p);
-  _append((GEN)R->L11ray, z);
-}
-static void
-deg0(LIST_t *R, long p) {
-  _append(R->L0, (GEN)p);
-}
-static void
-deg2(LIST_t *R, long p) {
-  _append(R->L2, (GEN)p);
-}
-
-/* pi(x) <= ?? */
-static long
-PiBound(long x)
-{
-  double lx = log((double)x);
-  return 1 + (long) x/lx * (1 + 3/(2*lx));
-}
-
-static GEN
-_alloc(long n, long t)
-{
-  GEN z = new_chunk(n);
-  z[0] = evaltyp(t) | evallg(1);
-  return z;
-}
-
-static void
-init_primes(GEN bnr, long nmax, LIST_t *R)
-{
-  ulong av = avma;
-  GEN bnf = (GEN)bnr[1], cond = gmael3(bnr,2,1,1);
-  long p,i,l, condZ = itos(gcoeff(cond,1,1)), contZ = itos(content(cond));
-  GEN pr, nf = checknf(bnf), dk = (GEN)nf[3];
-  GEN prime = stoi(2);
-  byteptr d = diffptr + 1;
-  GEN *gptr[7];
-
-  l = 1 + PiBound(nmax);
-  R->L0  = _alloc(l, t_VECSMALL);
-  R->L2  = _alloc(l, t_VECSMALL); R->condZ = condZ;
-  R->L1 = _alloc(l, t_VECSMALL); R->L1ray = (GEN*)_alloc(l, t_VEC);
-  R->L11 = _alloc(l, t_VECSMALL); R->L11ray = (GEN*)_alloc(l, t_VEC);
-  for (p = 2; p <= nmax; p += *d++, prime[2] = p)
-  {
-    switch (krogs(dk, p))
-    {
-    case -1: /* inert */
-      if (condZ % p == 0) deg0(R,p); else deg2(R,p);
-      break;
-    case 1: /* split */
-      pr = primedec(nf, prime);
-      if      (condZ % p != 0) deg12(R, p, bnr, pr);
-      else if (contZ % p == 0) deg0(R,p);
-      else
-      {
-        pr = idealval(nf, cond, (GEN)pr[1])? (GEN)pr[2]: (GEN)pr[1];
-        deg11(R, p, bnr, pr);
-      }
-      break;
-    default: /* ramified */
-      if (condZ % p == 0) deg0(R,p);
-      else
-      {
-        pr = (GEN)primedec(nf, prime)[1];
-        deg11(R, p, bnr, pr);
-      }
-      break;
-    }
-  }
-  R->rayZ = (GEN*)cgetg(condZ, t_VEC);
-  /* precompute isprincipalray(x), x in Z */
-  for (i=1; i<condZ; i++)
-    R->rayZ[i] = (cgcd(i,condZ) == 1)? isprincipalray(bnr, stoi(i)): gzero;
-
-  gptr[0] = &(R->L0);
-  gptr[1] = &(R->L2);  gptr[2] = (GEN*)&(R->rayZ);
-  gptr[3] = &(R->L1);  gptr[5] = (GEN*)&(R->L1ray);
-  gptr[4] = &(R->L11); gptr[6] = (GEN*)&(R->L11ray);
-  gerepilemany(av,gptr,7);
-}
-
 /* compute S and T for the quadratic case */
 static GEN
 QuadGetST(GEN dataCR, long prec)
@@ -2456,7 +2479,7 @@ QuadGetST(GEN dataCR, long prec)
   ulong av, av1, av2;
   long ncond, n, j, k, nmax;
   GEN rep, vChar, N0, C, T, S, cf, cfh, an, degs;
-  LIST_t LIST;
+  LISTray LIST;
 
   /* allocate memory for answer */
   rep = cgetg(3, t_VEC);
@@ -2484,11 +2507,10 @@ QuadGetST(GEN dataCR, long prec)
   if ((ulong)nmax > maxprime())
     err(talker, "Not enough precomputed primes (need all p <= %ld)", nmax);
   if (DEBUGLEVEL>1) fprintferr("nmax = %ld\n", nmax);
+  InitPrimesQuad(gmael(dataCR,1,4), nmax, &LIST);
 
   cf  = gmul2n(mpsqrt(mppi(prec)), 1);
   cfh = gmul2n(cf, -1);
-
-  init_primes(gmael(dataCR,1,4), nmax, &LIST);
 
   av1 = avma;
   /* loop over conductors */
@@ -2732,6 +2754,7 @@ AllStark(GEN data,  GEN nf,  long flag,  long newprec)
   int **matan;
   GEN p0, p1, p2, S, T, polrelnum, polrel, Lp, W, A, veczeta, sig, valchi;
   GEN degs, ro, C, Cmax, dataCR, cond1, L1, *gptr[2], an, Pi;
+  LISTray LIST;
 
   N     = degpol(nf[1]);
   r1    = nf_get_r1(nf);
@@ -2753,8 +2776,7 @@ LABDOUB:
 
   if (flag >= 0)
   {
-    /* compute S,T differently if nf is quadratic */
-    if (N == 2)
+    if (N == 2) /* compute S,T differently if nf is quadratic */
       p1 = QuadGetST(dataCR, newprec);
     else
       p1 = GetST(dataCR, newprec);
@@ -2777,6 +2799,7 @@ LABDOUB:
     n = GetBoundN0(Cmax, r1, r2, newprec);
     if (n > bnd) n = bnd;
     if (DEBUGLEVEL) fprintferr("nmax in QuickPol: %ld \n", n);
+    InitPrimes(gmael(dataCR,1,4), n, &LIST);
 
     p0 = cgetg(3, t_COMPLEX);
     p0[1] = lgetr(newprec); affsr(0, (GEN)p0[1]);
@@ -2786,7 +2809,7 @@ LABDOUB:
     /* we use the formulae L(1) = sum (an / n) */
     for (i = 1; i <= cl; i++)
     {
-      matan = ComputeCoeff((GEN)dataCR[i], n, degs[i]);
+      matan = ComputeCoeff((GEN)dataCR[i], &LIST, n, degs[i]);
       av2 = avma;
       p1 = p0; p2 = gmael3(dataCR, i, 5, 2);
       for (j = 1; j <= n; j++)
