@@ -798,8 +798,7 @@ dedek(GEN f, long mf, GEN p,GEN g)
   if (DEBUGLEVEL>2)
   {
     fprintferr("  dedek: gcd has degree %ld\n", dk);
-    if (DEBUGLEVEL>5)
-      fprintferr("initial parameters p=%Z,\n  f=%Z\n",p,f);
+    if (DEBUGLEVEL>5) fprintferr("initial parameters p=%Z,\n  f=%Z\n",p,f);
   }
   if (2*dk >= mf-1) return FpX_div(f,k,p);
   return dk? (GEN)NULL: f;
@@ -925,15 +924,10 @@ dbasis(GEN p, GEN f, long mf, GEN alpha, GEN U)
   GEN b,ha,pd,pdp;
 
   if (n == 1) return gscalmat(gun, 1);
-  if (DEBUGLEVEL>=3)
+  if (DEBUGLEVEL>5)
   {
-    fprintferr("  entering Dedekind Basis ");
-    if (DEBUGLEVEL>5)
-    {
-      fprintferr("with parameters p=%Z\n",p);
-      fprintferr("  f = %Z,\n  alpha = %Z",f,alpha);
-    }
-    fprintferr("\n");
+    fprintferr("  entering Dedekind Basis with parameters p=%Z\n",p);
+    fprintferr("  f = %Z,\n  alpha = %Z\n",f,alpha);
   }
   ha = pd = gpowgs(p,mf/2); pdp = mulii(pd,p);
   dU = typ(U)==t_POL? degpol(U): 0;

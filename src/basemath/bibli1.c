@@ -946,11 +946,11 @@ PRECPB:
   {
     case 2: h = idmat(n); break; /* entry */
     case 1:
+      if (DEBUGLEVEL > 3) fprintferr("\n");
       if (flag == 2) return _vec(h);
       if (gram && kmax > 2)
       { /* some progress but precision loss, try again */
         prec = (prec<<1)-2; kmax = 1;
-        if (DEBUGLEVEL > 3) fprintferr("\n");
         if (DEBUGLEVEL) err(warnprec,"lllfp",prec);
         x = gprec_w(xinit,prec);
         if (gram) x = qf_base_change(x,h,1); else x = gmul(x,h);

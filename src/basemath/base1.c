@@ -1220,7 +1220,7 @@ nftohnfbasis(GEN nf, GEN x)
 }
 
 static GEN
-get_red_T2(nfbasic_t *T, GEN *pro)
+get_red_G(nfbasic_t *T, GEN *pro)
 {
   GEN G, u, u0 = NULL;
   gpmem_t av;
@@ -1233,6 +1233,9 @@ get_red_T2(nfbasic_t *T, GEN *pro)
   {
     F.prec = prec; make_M_G(&F, 0); G = F.G;
     if (u0) G = gmul(G, u0);
+    if (DEBUGLEVEL)
+      fprintferr("get_red_G: starting LLL, prec = %ld (%ld + %ld)\n",
+                  prec + F.extraprec, prec, F.extraprec);
     if ((u = lllfp_marked(1, G, 100, 2, prec, 0)))
     {
       if (typ(u) == t_MAT) break;
@@ -1243,7 +1246,7 @@ get_red_T2(nfbasic_t *T, GEN *pro)
     if (i == MAXITERPOL) err(accurer,"red_T2");
     prec = (prec<<1)-2 + (gexpo(u0) >> TWOPOTBITS_IN_LONG);
     F.ro = NULL;
-    if (DEBUGLEVEL) err(warnprec,"red_T2",prec + F.extraprec);
+    if (DEBUGLEVEL) err(warnprec,"get_red_G", prec);
   }
   *pro = F.ro; return u0? gmul(u0,u): u;
 }
@@ -1255,7 +1258,7 @@ static GEN
 get_LLL_basis(nfbasic_t *T, GEN *pro)
 {
   GEN u;
-  if (T->r1 != degpol(T->x)) u = get_red_T2(T, pro);
+  if (T->r1 != degpol(T->x)) u = get_red_G(T, pro);
   else
   {
     u = lllint_marked(1, make_Tr(T->x, T->bas), 100, 1, &u,NULL,NULL);
