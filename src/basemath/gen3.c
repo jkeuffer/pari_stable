@@ -1966,7 +1966,19 @@ ground(GEN x)
       copyifstack(x[1],y[1]);
       y[2]=lround((GEN)x[2]); return y;
 
-    case t_COMPLEX: case t_POL: case t_SER: case t_RFRAC: case t_RFRACN:
+    case t_COMPLEX:
+      av = avma; y = cgetg(3, t_COMPLEX);
+      y[2] = lround((GEN)x[2]);
+      if (!signe(y[2]))
+      {
+        avma = av;
+        y = ground((GEN)x[1]);
+      }
+      else
+        y[1] = lround((GEN)x[1]);
+      return y;
+
+    case t_POL: case t_SER: case t_RFRAC: case t_RFRACN:
     case t_VEC: case t_COL: case t_MAT:
       lx = (tx==t_POL)? lgef(x): lg(x);
       y=cgetg(lx,tx);
@@ -1984,7 +1996,7 @@ ground(GEN x)
 GEN
 grndtoi(GEN x, long *e)
 {
-  GEN y,p1;
+  GEN y, p1;
   long i, tx=typ(x), lx, ex, e1;
   pari_sp av;
 
@@ -1996,33 +2008,46 @@ grndtoi(GEN x, long *e)
       return ground(x);
 
     case t_REAL:
-      av=avma; p1=gadd(ghalf,x); ex=expo(p1);
-      if (ex<0)
+      av = avma; p1 = gadd(ghalf,x); ex = expo(p1);
+      if (ex < 0)
       {
-	if (signe(p1)>=0) { *e=expo(x); avma=av; return gzero; }
-        *e=expo(addsr(1,x)); avma=av; return negi(gun);
+	if (signe(p1)>=0) { *e = expo(x); avma = av; return gzero; }
+        *e = expo(addsr(1,x)); avma = av; return negi(gun);
       }
-      lx=lg(x); e1 = ex - bit_accuracy(lx) + 1;
+      lx= lg(x); e1 = ex - bit_accuracy(lx) + 1;
       y = ishiftr_spec(p1, lx, e1);
       if (signe(x)<0) y=addsi(-1,y);
       y = gerepileuptoint(av,y);
 
-      if (e1<=0) { av=avma; e1=expo(subri(x,y)); avma=av; }
-      *e=e1; return y;
+      if (e1 <= 0) { av = avma; e1 = expo(subri(x,y)); avma = av; }
+      *e = e1; return y;
 
-    case t_POLMOD: y=cgetg(3,t_POLMOD);
-      copyifstack(x[1],y[1]);
-      y[2]=lrndtoi((GEN)x[2],e); return y;
+    case t_POLMOD: y = cgetg(3,t_POLMOD);
+      copyifstack(x[1], y[1]);
+      y[2] = lrndtoi((GEN)x[2], e); return y;
 
-    case t_COMPLEX: case t_POL: case t_SER: case t_RFRAC: case t_RFRACN:
+    case t_COMPLEX:
+      av = avma; y = cgetg(3, t_COMPLEX);
+      y[2] = lrndtoi((GEN)x[2], e);
+      if (!signe(y[2]))
+      {
+        avma = av;
+        y = grndtoi((GEN)x[1], &e1);
+      }
+      else
+        y[1] = lrndtoi((GEN)x[1], &e1);
+      if (e1 > *e) *e = e1;
+      return y;
+
+    case t_POL: case t_SER: case t_RFRAC: case t_RFRACN:
     case t_VEC: case t_COL: case t_MAT:
-      lx=(tx==t_POL)? lgef(x): lg(x);
-      y=cgetg(lx,tx);
-      for (i=1; i<lontyp[tx]; i++) y[i]=x[i];
+      lx = (tx==t_POL)? lgef(x): lg(x);
+      y = cgetg(lx,tx);
+      for (i=1; i<lontyp[tx]; i++) y[i] = x[i];
       for (   ; i<lx; i++)
       {
-        y[i]=lrndtoi((GEN)x[i],&e1);
-        if (e1>*e) *e=e1;
+        y[i] = lrndtoi((GEN)x[i],&e1);
+        if (e1 > *e) *e = e1;
       }
       return y;
   }
