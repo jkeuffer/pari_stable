@@ -120,6 +120,7 @@ Installation directories:
   --datadir=<dir>       for precomputed data (Galois resolvents for polgalois)
   --includedir=<dir>    for C header files
 
+Optional libraries:
   --disable-readline    do not link with GNU readline
   --with-readline-includes=DIR specify location of readline headers
   --with-readline-lib=DIR  specify location of readline libs
