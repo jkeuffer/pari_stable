@@ -107,7 +107,7 @@ HC 12- gamma function for integral/rational arguments
    14- removed readline-specific code from gp.c
    15- allow bnrstark over Q
    16- 'subgroup' argument made optional in bnrL1, bnrstark, rnfkummer
-   17- use relative van Hoeij algorithm in nffactor [not optimized yet]
+   17- use relative van Hoeij algorithm in nffactor
    18- rewrote factorff() to use new modular functions
    19- rewrote primedec() to use new modular functions
    20- rewrote most *modpr functions
@@ -130,6 +130,7 @@ GTo 9- Implemented Cipolla's algorithm for sqrt(Mod(x, p))
    10- library functions FpM_ker, FpM_deplin, diviiround, centermodii
    11- library function gerepileall
    12- library functions corepartial, core2partial
+   13- library functions affui, itou
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.2 (released 10/01/2002):
