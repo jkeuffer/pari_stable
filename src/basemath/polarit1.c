@@ -1217,7 +1217,7 @@ padic_trivfact(GEN x, GEN p, long r)
 GEN
 apprgen(GEN f, GEN a)
 {
-  GEN fp,p1,p,pro,x,x2,u,ip,quatre;
+  GEN fp,p1,p,pro,x,x2,u,ip;
   long av=avma,tetpil,v,ps,i,j,k,lu,n,fl2;
 
   if (typ(f)!=t_POL) err(notpoler,"apprgen");
@@ -1229,11 +1229,7 @@ apprgen(GEN f, GEN a)
   p=(GEN)a[2]; p1=poleval(f,a);
   v=ggval(p1,p); if (v <= 0) err(rootper2);
   fl2=egalii(p,gdeux);
-  if (fl2)
-  {
-    if (v==1) err(rootper2);
-    quatre=stoi(4);
-  }
+  if (fl2 && v==1) err(rootper2);
   v=ggval(poleval(fp,a),p);
   if (!v) /* simple zero */
   {
@@ -1246,25 +1242,25 @@ apprgen(GEN f, GEN a)
     return gerepile(av,tetpil,pro);
   }
   n=lgef(f)-3; pro=cgetg(n+1,t_VEC);
-  p1=poleval(f,gadd(a,gmul(fl2?quatre:p,polx[varn(f)])));
-  if (!gcmp0(p1)) p1=gdiv(p1,gpuigs(p,ggval(p1,p)));
 
   if (is_bigint(p)) err(impl,"apprgen for p>=2^31");
   x = ggrandocp(p, valp(a) | precp(a));
   if (fl2)
   {
-    ps=4; x2=ggrandocp(p,2); p=quatre;
+    ps=4; x2=ggrandocp(p,2); p=stoi(4);
   }
   else
   {
     ps=itos(p); x2=ggrandocp(p,1);
   }
+  f = poleval(f, gadd(a,gmul(p,polx[varn(f)])));
+  if (!gcmp0(f)) f = gdiv(f,gpuigs(p,ggval(f,p)));
   for (j=0,i=0; i<ps; i++)
   {
     ip=stoi(i);
-    if (gcmp0(poleval(p1,gadd(ip,x2))))
+    if (gcmp0(poleval(f,gadd(ip,x2))))
     {
-      u=apprgen(p1,gadd(x,ip)); lu=lg(u);
+      u=apprgen(f,gadd(x,ip)); lu=lg(u);
       for (k=1; k<lu; k++)
       {
         j++; pro[j]=ladd(a,gmul(p,(GEN)u[k]));
@@ -1481,7 +1477,7 @@ getprec(GEN x, long prec, GEN *p)
 GEN
 apprgen9(GEN f, GEN a)
 {
-  GEN fp,p1,p,pro,x,x2,u,ip,t,vecg,quatre;
+  GEN fp,p1,p,pro,x,x2,u,ip,t,vecg;
   long av=avma,tetpil,v,ps_1,i,j,k,lu,n,prec,d,va,fl2;
 
   if (typ(f)!=t_POL) err(notpoler,"apprgen9");
@@ -1497,11 +1493,7 @@ apprgen9(GEN f, GEN a)
 
   p1=poleval(f,a); v=ggval(lift_intern(p1),p); if (v<=0) err(rootper2);
   fl2=egalii(p,gdeux);
-  if (fl2)
-  {
-    if (v==1) err(rootper2);
-    quatre=stoi(4);
-  }
+  if (fl2 && v==1) err(rootper2);
   v=ggval(lift_intern(poleval(fp,a)), p);
   if (!v)
   {
@@ -1514,19 +1506,19 @@ apprgen9(GEN f, GEN a)
     return gerepile(av,tetpil,pro);
   }
   n=lgef(f)-3; pro=cgetg(n+1,t_COL); j=0;
-  p1=poleval(f,gadd(a,gmul(fl2?quatre:p,polx[varn(f)])));
-  if (!gcmp0(p1)) p1=gdiv(p1,gpuigs(p,ggval(p1,p)));
 
   if (is_bigint(p)) err(impl,"apprgen9 for p>=2^31");
   x=gmodulcp(ggrandocp(p,prec), t);
   if (fl2)
   {
-    ps_1=3; x2=ggrandocp(p,2); p=quatre;
+    ps_1=3; x2=ggrandocp(p,2); p=stoi(4);
   }
   else
   {
     ps_1=itos(p)-1; x2=ggrandocp(p,1);
   }
+  f = poleval(f,gadd(a,gmul(p,polx[varn(f)])));
+  if (!gcmp0(f)) f=gdiv(f,gpuigs(p,ggval(f,p)));
   d=lgef(t)-3; vecg=cgetg(d+1,t_COL);
   for (i=1; i<=d; i++)
     vecg[i] = (long)setloop(gzero);
@@ -1534,9 +1526,9 @@ apprgen9(GEN f, GEN a)
   for(;;) /* loop through F_q */
   {
     ip=gmodulcp(gtopoly(vecg,va),t);
-    if (gcmp0(poleval(p1,gadd(ip,x2))))
+    if (gcmp0(poleval(f,gadd(ip,x2))))
     {
-      u=apprgen9(p1,gadd(ip,x)); lu=lg(u);
+      u=apprgen9(f,gadd(ip,x)); lu=lg(u);
       for (k=1; k<lu; k++)
       {
         j++; pro[j]=ladd(a,gmul(p,(GEN)u[k]));
@@ -1765,12 +1757,14 @@ to_fq(GEN x, GEN a, GEN p)
   long i,lx = lgef(x);
   GEN p1, z = cgetg(3,t_POLMOD), pol = cgetg(lx,t_POL);
   pol[1] = x[1];
-  for (i=2; i<lx; i++)
-  {
-    p1 = cgetg(3,t_INTMOD);
-    p1[1] = (long)p;
-    p1[2] = x[i]; pol[i] = (long)p1;
-  }
+  if (lx == 2) setsigne(pol, 0);
+  else
+    for (i=2; i<lx; i++)
+    {
+      p1 = cgetg(3,t_INTMOD);
+      p1[1] = (long)p;
+      p1[2] = x[i]; pol[i] = (long)p1;
+    }
   /* assume deg(pol) < deg(a) */
   z[1] = (long)a;
   z[2] = (long)pol; return z;
@@ -1821,7 +1815,7 @@ Kronecker_powmod(GEN x, GEN mod, GEN n)
       if (low_stack(lim, stack_lim(av,1)))
       {
         if(DEBUGMEM>1) err(warnmem,"Kronecker_powmod");
-        y = gerepileupto(av, y);
+        y = gerepileupto(av, gcopy(y));
       }
     }
     if (--i == 0) break;
@@ -1868,10 +1862,9 @@ stopoly9(GEN pp, GEN mm, GEN qq, long v, GEN a)
   return y;
 }
 
-/* renvoie un polynome aleatoire de la variable v
-de degre inferieur ou egal a 2*d1-1 */
+/* return a random polynomial in F_q[v], degree < 2*d1 */
 static GEN
-stopoly92(GEN pg, long d1, long v, GEN a, GEN *ptres)
+stopoly92(GEN pg, long d1, long v, GEN a)
 {
   GEN y,p1;
   long m,l1,i,d2,l,va=varn(a),k=lgef(a)-3,nsh;
@@ -1884,20 +1877,20 @@ stopoly92(GEN pg, long d1, long v, GEN a, GEN *ptres)
     l=d2; while (!y[l]) l--;
   }
   while (l<=2);
-  l++; y[1] = mymyrand() >> nsh;
+  l++;
   p1 = cgetg(BITS_IN_LONG+2,t_POL);
   p1[1] = evalsigne(1) | evalvarn(va);
-  for (i=1; i<l; i++)
+  for (i=2; i<l; i++)
   {
     m=y[i]; l1=2;
-    do { p1[l1++] = m&1? un: zero; m>>=1; } while (m);
+    while (m) { p1[l1++] = m&1? un: zero; m>>=1; }
     setlgef(p1,l1); y[i]=(long)to_fq(p1,a,pg);
   }
-  *ptres = (GEN)y[1];
   y[1] = evalsigne(1) | evalvarn(v) | evallgef(l);
   return y;
 }
 
+/* split into r factors of degree d */
 static void
 split9(GEN m, GEN *t, long d, GEN pp, GEN q, GEN munfq, GEN qq, GEN a, GEN S)
 {
@@ -1911,22 +1904,34 @@ split9(GEN m, GEN *t, long d, GEN pp, GEN q, GEN munfq, GEN qq, GEN a, GEN S)
   {
     if (p==2)
     {
-      pol = gres(stopoly92(pp,d,v,a,&res), *t);
-      pol = lift_intern(lift_intern(pol));
+      long e = lgef(a)-3;
+      pol = gres(stopoly92(pp,d,v,a), *t);
       w = pol;
       for (l=1; l<d; l++)
       {
         GEN p1 = spec_Fq_pow_mod_pol(w, pp, a, S);
-        p1 = lift_intern(lift_intern(p1));
         w = gadd(pol, p1); /* += w^q */
       }
-      w = gadd(w, res); /* - res = res ! */
+      pol = w; /* w in (F_q)^r */
+      for (l=1; l<e; l++)
+        w = gadd(pol, gres(gsqr(w), *t));
+      /* w in (F_2)^r */
     }
     else
     {
       pol = gres(stopoly9(pp,m,qq,v,a), *t);
       m = incpos(m);
+#if 0 /* doesn't work, have to check out why... */
+      w = pol;
+      for (l=1; l<d; l++)
+      {
+        GEN p1 = spec_Fq_pow_mod_pol(w, pp, a, S);
+        w = gadd(pol, p1); /* += w^q */
+      }
+      w = Kronecker_powmod(pol, *t, shifti(qq,-1));
+#else
       w = Kronecker_powmod(pol, *t, q);
+#endif
       if (lgef(w) == 3) continue;
       w[2] = ladd((GEN)w[2], munfq);
     }
@@ -2003,20 +2008,14 @@ spec_Fq_pow_mod_pol(GEN x, GEN p, GEN a, GEN S)
   GEN x0 = x+2, z,c;
 
   c = (GEN)x0[0];
-  if (gcmp0(c)) z = gzero;
-  else
-    z = lift_intern(to_Kronecker(lift(c), a));
+  z = lift_intern(lift(c));
   for (i = 1; i <= dx; i++)
   {
     GEN d;
     c = (GEN)x0[i];
     if (gcmp0(c)) continue;
     d = (GEN)S[i];
-    if (!gcmp1(c))
-    {
-      c = lift_intern(to_Kronecker(lift(c), a));
-      d = gmul(c,d);
-    }
+    if (!gcmp1(c)) d = gmul(lift_intern(lift(c)),d);
     z = gadd(z, d);
     if (low_stack(lim, stack_lim(av,1)))
     {
