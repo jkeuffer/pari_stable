@@ -94,9 +94,6 @@ shiftlr(ulong x, ulong y)
   return (x>>y);
 }
 
-#define HIGHWORD(a) ((a) >> BITS_IN_HALFULONG)
-#define LOWWORD(a) ((a) & LOWMASK)
-
 /* Version Peter Montgomery */
 /*
  *      Assume (for presentation) that BITS_IN_LONG = 32.

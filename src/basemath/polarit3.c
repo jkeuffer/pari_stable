@@ -79,10 +79,6 @@ specpol(GEN x, long nx)
 #  define MUL_LIMIT 10
 #endif
 
-#ifndef HIGHWORD
-#  define HIGHWORD(a) ((a) >> BITS_IN_HALFULONG)
-#endif
-
 /* multiplication in Fp[X], p small */
 
 GEN

@@ -1578,7 +1578,6 @@ GEN
 FpM_inv(GEN x, GEN p) { return FpM_gauss(x, NULL, p); }
 
 /* set y = x * y */
-#define HIGHWORD(a) ((a) >> BITS_IN_HALFULONG)
 static GEN
 u_FpM_Fp_mul_ip(GEN y, ulong x, ulong p)
 {

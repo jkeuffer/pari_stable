@@ -42,6 +42,9 @@ typedef int (*QSCOMP)(const void *, const void *);
 #define HIGHMASK (~LOWMASK)
 #define SMALL_MASK (HIGHBIT>>1)
 
+#define HIGHWORD(a) ((a) >> BITS_IN_HALFULONG)
+#define LOWWORD(a) ((a) & LOWMASK)
+
 /* Order of bits in codewords:
  *  x[0]         TYPBITS, CLONEBIT, LGBITS
  *  x[1].real    SIGNBITS, EXPOBITS
