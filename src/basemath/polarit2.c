@@ -351,7 +351,7 @@ HenselLift(GEN V, GEN W, long j, GEN f, GEN T, GEN pd, GEN p0, int noinv)
   (void)new_chunk(space); /* HACK */
   g = gadd(f, gneg_i(gmul(a,b)));
   if (T) g = FpXQX_red(g, T, mulii(p0,pd));
-  g = gdivexact(g, p0); g = FpXQX_red(g, NULL, pd);
+  g = gdivexact(g, p0); if (!T) g = FpXQX_red(g, NULL, pd);
   z = FpXQX_mul(v,g, T,pd);
   t = FpXQX_divres(z,a, T,pd, &s);
   t = gadd(gmul(u,g), gmul(t,b)); t = FpXQX_red(t, T, pd);
@@ -370,7 +370,7 @@ HenselLift(GEN V, GEN W, long j, GEN f, GEN T, GEN pd, GEN p0, int noinv)
   g = gadd(gneg_i(g), gun);
 
   if (T) g = FpXQX_red(g, T, mulii(p0,pd));
-  g = gdivexact(g, p0); g = FpXQX_red(g, NULL, pd);
+  g = gdivexact(g, p0); if (!T) g = FpXQX_red(g, NULL, pd);
   z = FpXQX_mul(v,g, T,pd);
   t = FpXQX_divres(z,a, T,pd, &s);
   t = gadd(gmul(u,g), gmul(t,b)); t = FpXQX_red(t, T, pd);
