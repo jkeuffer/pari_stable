@@ -2779,11 +2779,11 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
   if (RELSUP<=0) err(talker,"not enough relations in bnfxxx");
 
   /* Initializations */
-  fu = NULL; PRECREG = KCCOPRO = extrarel = 0; /* gcc -Wall */
-  N=lgef(P)-3;
+  fu = NULL; KCCOPRO = extrarel = 0; /* gcc -Wall */
+  N=lgef(P)-3; PRECREG = max(BIGDEFAULTPREC,prec);
   if (!nf)
   {
-    nf=initalgall0(P, nf_REGULAR, max(BIGDEFAULTPREC,prec));
+    nf=initalgall0(P, nf_REGULAR, PRECREG);
     if (lg(nf)==3) /* P was a non-monic polynomial, nfinit changed it */
     {
       CHANGE=(GEN)nf[2]; nf=(GEN)nf[1];
@@ -2815,14 +2815,14 @@ INCREASEGEN:
   if (precpb)
   {
     precdouble++;
-    prec=(PRECREG<<1)-2;
+    PRECREG=(PRECREG<<1)-2;
     if (DEBUGLEVEL)
     {
       char str[64]; sprintf(str,"buchall (%s)",precpb);
-      err(warnprec,str,prec);
+      err(warnprec,str,PRECREG);
     }
     precpb = NULL;
-    avma = av0; nf = nfnewprec(nf,prec); av0 = avma;
+    avma = av0; nf = nfnewprec(nf,PRECREG); av0 = avma;
   }
   else
     cbach = check_bach(cbach,12.);
@@ -2850,7 +2850,8 @@ INCREASEGEN:
 
   PRECREGINT = DEFAULTPREC
              + ((expi(D)*(lgsub-2)+((N*N)>>2))>>TWOPOTBITS_IN_LONG);
-  PRECREG = max(prec+1,PRECREGINT);
+  if (!precdouble) PRECREG = max(prec+1, PRECREGINT);
+  else if (PRECREG < PRECREGINT) PRECREG = PRECREGINT;
   KCCO = KC+RU-1 + max(ss,RELSUP);
   if (DEBUGLEVEL)
   {
@@ -3068,7 +3069,7 @@ INCREASEGEN:
   c1 = compute_check(sublambda,p1,&parch,&reg);
   /* precision problems? */
   if (!c1 || gcmpgs(gmul2n(c1,1),3) < 0)
-  { /* has to be a prec. problem unless we cheat on Bach constant */
+  { /* has to be a precision problem unless we cheat on Bach constant */
     if (!precdouble) precpb = "compute_check";
     goto INCREASEGEN;
   }
