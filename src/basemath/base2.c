@@ -3333,6 +3333,7 @@ rnflllgram(GEN nf, GEN pol, GEN order,long prec)
     err(talker,"not a pseudo-matrix in rnflllgram");
   M=(GEN)order[1]; I=(GEN)order[2]; lx=lg(I);
   if (lx < 3) return gcopy(order);
+  if (lx-1 != lgef(nf[1])-3) err(consister,"rnflllgram");
   U=idmat(lx-1); I = dummycopy(I);
 
 /* Compute the relative T2 matrix of powers of theta */
