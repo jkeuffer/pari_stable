@@ -6548,8 +6548,8 @@ is as explained above.
 %3 = [b, c, d]
 ? vecextract(v, "-1..-3")   \\@com interval + reverse order
 %4 = [e, d, c]
-? vecextract([1,2,3], "^2") \\@com complement
-%5 = [1, 3]
+? vecextract(v, "^2")       \\@com complement
+%5 = [a, c, d, e]
 ? vecextract(matid(3), "2..", "..")
 %6 =
 [0 1 0]
