@@ -506,6 +506,7 @@ if test "$optimization" != profiling; then
   lib=readline; . ./locatelib
   rl_fullname=$try
 
+
   if test -n "$readline"; then
 # Readline -- TermCap
     lib=$rl_fullname; sym=tgetent; . ./locatesymbol
@@ -518,6 +519,10 @@ if test "$optimization" != profiling; then
         rl_ncurses=$ncurses
       else
         lib=termcap; . ./locatelib
+        if test -z "$try"; then
+          echo "cannot use readline: please install libncurses or libtermcap."
+          readline=
+        fi
         rl_termcap=$termcap
       fi
     fi
