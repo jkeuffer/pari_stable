@@ -1877,7 +1877,7 @@ gsqr(GEN x)
 	z=cgetg(3,tx);
 	z[1]=lsqri((GEN)x[1]);
 	z[2]=lsqri((GEN)x[2]);
-	return z; /* reduction is useless ! */
+	return z;
 
       case t_COMPLEX:
 	z=cgetg(lg(x),tx); l=avma;
@@ -1890,25 +1890,14 @@ gsqr(GEN x)
 	return z;
 	
       case t_PADIC:
-	z=cgetg(5,t_PADIC);
-	z[2] = lcopy((GEN)x[2]);
-	if (!cmpsi(2,(GEN)x[2]))
-	{
-	  i=precp(x)+1; av=avma;
-	  p1=addii((GEN)x[3],shifti((GEN)x[4],1));
-	  if (!gcmp0(p1)) { j=vali(p1); if (j<i) i=j; }
-	  avma=av;
-          z[3]=lshifti((GEN)x[3],i);
-	  z[1]=evalprecp(precp(x)+i) | evalvalp(2*valp(x));
-	}
-	else
-	{
-	  z[3]=licopy((GEN)x[3]);
-	  z[1]=evalprecp(precp(x)) | evalvalp(2*valp(x));
-	}
-	z[4]=lgeti(lg(z[3])); av=avma;
-	modiiz(sqri((GEN)x[4]),(GEN)z[3],(GEN)z[4]);
-	avma=av; return z;
+	z = cgetg(5,t_PADIC);
+	i = (egalii((GEN)x[2], gdeux) && signe(x[4]))? 1: 0;
+        if (i && precp(x) == 1) i = 2; /* (1 + O(2))^2 = 1 + O(2^3) */
+        z[1] = evalprecp(precp(x)+i) | evalvalp(2*valp(x));
+	icopyifstack(x[2], z[2]);
+        z[3] = lshifti((GEN)x[3], i); av = avma;
+	z[4] = (long)gerepileuptoint(av, modii(sqri((GEN)x[4]), (GEN)z[3]));
+	return z;
 	
       case t_QUAD:
 	p1=(GEN)x[1]; z=cgetg(lg(x),tx); l=avma;

@@ -231,7 +231,7 @@ puiss0(GEN x)
   return y;
 }
 
-/* INTEGER POWERING (a^n for integer a and integer n > 1)
+/* INTEGER POWERING (a^|n| for integer a and integer |n| > 1)
  *
  * Nonpositive powers and exponent one should be handled by gpow() and
  * gpowgs() in trans1.c, which at the time of this writing is the only place
@@ -253,7 +253,7 @@ puissii(GEN a, GEN n, long s)
   if (lgefint(a)==3)
   { /* easy if |a| < 3 */
     if (a[2] == 1) return (s>0)? gun: negi(gun);
-    if (a[2] == 2) { a = shifti(gun, itos(n)); setsigne(a,s); return a; }
+    if (a[2] == 2) { a = shifti(gun, labs(itos(n))); setsigne(a,s); return a; }
   }
   if (lgefint(n)==3)
   { /* or if |n| < 3 */
@@ -302,10 +302,8 @@ gpowgs(GEN x, long n)
   if (n == 0) return puiss0(x);
   if (n == 1) return gcopy(x);
   if (n ==-1) return ginv(x);
-  if (n>0)
-    { gn[1] = evalsigne( 1) | evallgefint(3); gn[2]= n; }
-  else
-    { gn[1] = evalsigne(-1) | evallgefint(3); gn[2]=-n; }
+  if (n>0) { gn[1] = evalsigne( 1) | evallgefint(3); gn[2]= n; }
+  else     { gn[1] = evalsigne(-1) | evallgefint(3); gn[2]=-n; }
  /* If gpowgs were only ever called from gpow, the switch wouldn't be needed.
   * In fact, under current word and bit field sizes, an integer power with
   * multiword exponent will always overflow.  But it seems easier to call
@@ -333,29 +331,23 @@ gpowgs(GEN x, long n)
       return y;
     case t_FRAC: case t_FRACN:
     {
-      long sr = ((n&1) && (signe(x[1])!=signe(x[2])))? -1: 1;
-      if (n<0)
-      {
-        if (!signe((GEN)x[1]))
-          err(talker, "division by zero fraction in gpowgs");
-        setsigne((GEN)gn,1);
-        if (is_pm1((GEN)x[1])) /* +-1/x[2] inverts to an integer */
-          return puissii((GEN)x[2],(GEN)gn,sr);
-        y=cgetg(3,tx);
-        y[1]=(long)puissii((GEN)x[2],(GEN)gn,sr);
-        y[2]=(long)puissii((GEN)x[1],(GEN)gn,1);
-        return y;
+      GEN a = (GEN)x[1], b = (GEN)x[2];
+      long sr = (n&1 && (signe(a)!=signe(b))) ? -1 : 1;
+      if (n > 0) { if (!signe(a)) return gzero; }
+      else
+      { /* n < 0 */
+        if (!signe(a)) err(talker, "division by zero fraction in gpowgs");
+        /* +-1/x[2] inverts to an integer */
+        if (is_pm1(a)) return puissii(b,(GEN)gn,sr);
+        y = b; b = a; a = y;
       }
-      else /* n > 0 */
-      {
-        y=cgetg(3,tx);
-        if (!signe((GEN)x[1])) { y[1]=zero; y[2]=un; return y; }
-        y[1]=(long)puissii((GEN)x[1],(GEN)gn,sr);
-        y[2]=(long)puissii((GEN)x[2],(GEN)gn,1);
-        return y;
-      }
+      /* HACK: puissii disregards the sign of gn */
+      y = cgetg(3,tx);
+      y[1] = (long)puissii(a,(GEN)gn,sr);
+      y[2] = (long)puissii(b,(GEN)gn,1);
+      return y;
     }
-    case t_POL: case t_POLMOD:
+    case t_PADIC: case t_POL: case t_POLMOD:
       return powgi(x,gn);
     case t_RFRAC: case t_RFRACN:
     {
@@ -438,30 +430,44 @@ powgi(GEN x, GEN n)
       return y;
     case t_FRAC: case t_FRACN:
     {
-      long sr = (mod2(n) && (signe(x[1])!=signe(x[2]))) ? -1 : 1;
-      if (sn<0)
-      {
-        if (!signe((GEN)x[1]))
-          err(talker, "division by zero fraction in powgi");
-        setsigne(n,1);
-        if (is_pm1((GEN)x[1])) /* +-1/x[2] inverts to an integer */
-          y=puissii((GEN)x[2],n,sr);
-        else
-        {
-          y=cgetg(3,tx);
-          y[1]=(long)puissii((GEN)x[2],n,sr);
-          y[2]=(long)puissii((GEN)x[1],n,1);
-        }
-        setsigne(n,-1); return y;
+      GEN a = (GEN)x[1], b = (GEN)x[2];
+      long sr = (mod2(n) && (signe(a)!=signe(b))) ? -1 : 1;
+      if (sn > 0) { if (!signe(a)) return gzero; }
+      else
+      { /* n < 0 */
+        if (!signe(a)) err(talker, "division by zero fraction in powgi");
+        /* +-1/b inverts to an integer */
+        if (is_pm1(a)) return puissii(b,n,sr);
+        y = b; b = a; a = y;
       }
-      else /* n > 0 */
+      /* HACK: puissii disregards the sign of n */
+      y = cgetg(3,tx);
+      y[1] = (long)puissii(a,n,sr);
+      y[2] = (long)puissii(b,n,1);
+      return y;
+    }
+    case t_PADIC:
+    {
+      GEN p, pe;
+      if (!signe(x[4]))
       {
-        y=cgetg(3,tx);
-        if (!signe((GEN)x[1])) { y[1]=zero; y[2]=un; return y; }
-        y[1]=(long)puissii((GEN)x[1],n,sr);
-        y[2]=(long)puissii((GEN)x[2],n,1);
-        return y;
+        if (sn < 0) err(talker, "division by 0 p-adic in powgi");
+        y=gcopy(x); setvalp(y, itos(n)*valp(x)); return y;
       }
+      y = cgetg(5,t_PADIC);
+      p = (GEN)x[2];
+      pe= (GEN)x[3]; i = ggval(n, p);
+      if (i == 0) pe = icopy(pe);
+      else
+      {
+        pe = mulii(pe, gpowgs(p,i));
+        pe = gerepileuptoint((long)y, pe);
+      }
+      y[1] = evalprecp(precp(x)+i) | evalvalp(itos(n) * valp(x));
+      icopyifstack(p, y[2]);
+      y[3] = (long)pe;
+      y[4] = (long)powmodulo((GEN)x[4], n, pe);
+      return y;
     }
     case t_POL:
       if (ismonome(x)) return pow_monome(x,n);
@@ -489,7 +495,7 @@ powgi(GEN x, GEN n)
         if (--i == 0) break;
         m = *++p1, j = BITS_IN_LONG;
       }
-      if (sn<0) y = ginv(y);
+      if (sn < 0) y = ginv(y);
       return av==avma? gcopy(y): gerepileupto(av,y);
   }
 }
