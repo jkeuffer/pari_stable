@@ -2429,7 +2429,7 @@ FpM_mul(GEN x, GEN y, GEN p)
 {
   long i,j,l,lx=lg(x), ly=lg(y);
   GEN z;
-  if (ly==1) return cgetg(ly,t_MAT);
+  if (ly==1) return cgetg(1,t_MAT);
   if (lx != lg(y[1])) err(operi,"* [mod p]",x,y);
   z=cgetg(ly,t_MAT);
   if (lx==1)
@@ -2445,7 +2445,7 @@ FpM_mul(GEN x, GEN y, GEN p)
     {
       pari_sp av;
       GEN p1,p2;
-      int k;
+      long k;
       p1=gzero; av=avma;
       for (k=1; k<lx; k++)
       {
@@ -2457,6 +2457,29 @@ FpM_mul(GEN x, GEN y, GEN p)
   }
   return z;
 }
+
+/*If p is NULL no reduction is performed.*/
+/*Multiple a column vector by a line vector to make a matrix*/
+GEN
+FpV_FpL_mul(GEN x, GEN y, GEN p)
+{
+  long i,j, lx=lg(x), ly=lg(y);
+  GEN z;
+  if (ly==1) return cgetg(1,t_MAT);
+  z=cgetg(ly,t_MAT);
+  for (j=1; j<ly; j++)
+  {
+    z[j] = lgetg(lx,t_COL);
+    for (i=1; i<lx; i++)
+    {
+      pari_sp av=avma;
+      GEN p1=mulii((GEN)x[i],(GEN)y[j]);
+      coeff(z,i,j)=p?lpileupto(av,modii(p1,p)):(long)p1;
+    }
+  }
+  return z;
+}
+
 
 /*If p is NULL no reduction is performed.*/
 GEN

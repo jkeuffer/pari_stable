@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*******************************************************************/
 BEGINEXTERN
 /* alglin1.c */
+GEN     FpV_FpL_mul(GEN x, GEN y, GEN p);
 GEN     FpM_FpV_mul(GEN x, GEN y, GEN p);
 GEN     FpM_deplin(GEN x, GEN p);
 GEN     FpM_image(GEN x, GEN p);

@@ -829,16 +829,14 @@ struct galois_test
 static GEN
 Vmatrix(long n, struct galois_test *td)
 {
-  pari_sp lbot, ltop = avma;
+  pari_sp ltop = avma;
   GEN     V;
   long    i;
   V = cgetg(lg(td->L), t_VEC);
   for (i = 1; i < lg(V); i++)
     V[i] = mael(td->M,i,n);
-  V = gmul(td->L, V);
-  lbot = avma;
-  V = gmod(V, td->ladic);
-  return gerepile(ltop, lbot, V);
+  V = FpV_FpL_mul(td->L, V, td->ladic);
+  return gerepileupto(ltop, V);
 }
 
 /*
