@@ -1145,12 +1145,8 @@ Fq_mul(GEN x, GEN y, GEN T, GEN p)
 GEN
 Fq_neg_inv(GEN x, GEN T, GEN p)
 {
-  switch(typ(x)==t_POL)
-  {
-    case 0: return mpinvmod(negi(x),p);
-    case 1: return FpXQ_inv(FpX_neg(x,p),T,p);
-  }
-  return NULL;
+  if (typ(x) == t_INT) return mpinvmod(negi(x),p);
+  return FpXQ_inv(FpX_neg(x,p),T,p);
 }
 
 GEN
@@ -1919,7 +1915,7 @@ FpXQX_normalize(GEN z, GEN T, GEN p)
   GEN p1 = leading_term(z);
   if (lg(z) == 2 || gcmp1(p1)) return z;
   if (!T) return FpX_normalize(z,p);
-  return FpXQX_FpXQ_mul(z, FpXQ_inv(p1,T,p), T,p);
+  return FpXQX_FpXQ_mul(z, Fq_inv(p1,T,p), T,p);
 }
 /*FIXME: misplaced*/
 GEN
@@ -2173,7 +2169,7 @@ FpXQX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *pr)
       *pr = zeropol(vx);
     }
     if (gcmp1(lead)) return gcopy(x);
-    av0 = avma; x = gmul(x, FpXQ_inv(lead,T,p)); tetpil = avma;
+    av0 = avma; x = gmul(x, Fq_inv(lead,T,p)); tetpil = avma;
     return gerepile(av0,tetpil,FpXQX_red(x,T,p));
   }
   av0 = avma; dz = dx-dy;
@@ -2182,7 +2178,7 @@ FpXQX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *pr)
   { /* assume ab != 0 mod p */
   }
 #endif
-  lead = gcmp1(lead)? NULL: gclone(FpXQ_inv(lead,T,p));
+  lead = gcmp1(lead)? NULL: gclone(Fq_inv(lead,T,p));
   avma = av0;
   z = cgetg(dz+3,t_POL); z[1] = x[1];
   x += 2; y += 2; z += 2;

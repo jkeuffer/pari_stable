@@ -1230,7 +1230,7 @@ ffshanks(GEN x, GEN g0, GEN q, GEN T, GEN p)
   p1 = racine(q);
   if (cmpis(p1,LGBITS) >= 0) err(talker,"module too large in ffshanks");
   lbaby = itos(p1)+1; smalltable = cgetg(lbaby+1,t_VEC);
-  g0inv = FpXQ_inv(g0,T,p);
+  g0inv = Fq_inv(g0,T,p);
   p1 = x;
 
   for (i=1;;i++)
@@ -1280,7 +1280,7 @@ ff_PHlog(GEN a, GEN g, GEN T, GEN p)
   ex = (GEN)fa[2];
   fa = (GEN)fa[1];
   l = lg(fa);
-  ginv = FpXQ_inv(g,T,p);
+  ginv = Fq_inv(g,T,p);
   v = cgetg(l, t_VEC);
   for (i=1; i<l; i++)
   {

@@ -1127,7 +1127,7 @@ Fq_gauss_get_col(GEN a, GEN b, GEN invpiv, long li, GEN T, GEN p)
     for (j=i+1; j<=li; j++)
       m = gsub(m, gmul(gcoeff(a,i,j), (GEN)u[j]));
     m = FpX_rem(m, T,p);
-    u[i] = lpileupto(av, FpXQ_mul(m, FpXQ_inv(gcoeff(a,i,i), T,p), T,p));
+    u[i] = lpileupto(av, FpXQ_mul(m, Fq_inv(gcoeff(a,i,i), T,p), T,p));
   }
   return u;
 }
@@ -1523,7 +1523,7 @@ FqM_gauss(GEN a, GEN b, GEN T, GEN p)
       if (signe(piv)) break;
     }
     if (k > li) return NULL;
-    invpiv = FpXQ_inv(piv,T,p);
+    invpiv = Fq_inv(piv,T,p);
 
     /* if (k!=i), exchange the lines s.t. k = i */
     if (k != i)
@@ -2770,7 +2770,7 @@ FqM_gauss_pivot(GEN x, GEN T, GEN p, GEN *dd, long *rr)
     if (j>m) { r++; d[k]=0; }
     else
     {
-      c[j]=k; d[k]=j; piv = gneg(FpXQ_inv(gcoeff(x,j,k), T,p));
+      c[j]=k; d[k]=j; piv = gneg(Fq_inv(gcoeff(x,j,k), T,p));
       for (i=k+1; i<=n; i++)
 	coeff(x,j,i) = (long)Fq_mul(piv,gcoeff(x,j,i), T, p);
       for (t=1; t<=m; t++)

@@ -747,7 +747,7 @@ interpol(GEN H, GEN T, GEN p)
     p1 = FpXQX_mul(p1,gadd(X,d), T,p);
     p2 = Fq_mul(p2, gadd(a,d), T,p);
   }
-  p2 = FpXQ_inv(p2, T,p);
+  p2 = Fq_inv(p2, T,p);
   return FpXQX_FpXQ_mul(p1,p2, T,p);
 }
 

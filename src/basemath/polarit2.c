@@ -77,7 +77,7 @@ polsym_gen(GEN P, GEN y0, long n, GEN T, GEN N)
   P_lead = (GEN)P[dP]; if (gcmp1(P_lead)) P_lead = NULL;
   if (P_lead)
   {
-    if (N) P_lead = FpXQ_inv(P_lead,T,N);
+    if (N) P_lead = Fq_inv(P_lead,T,N);
     else if (T) P_lead = QX_invmod(P_lead,T);
   }
   for (k=m; k<=n; k++)
