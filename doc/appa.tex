@@ -189,6 +189,11 @@ directory that \kbd{Configure} created and doing a parallel make here (for
 instance \kbd{make -j4} with GNU make). It may even work from the toplevel
 directory.
 
+The GP binary built above is optimized. If you have run \kbd{Configure -g} or
+\kbd{-pg} and want to build a special purpose binary, you can \kbd{cd} to the
+\kbd{.dbg} or \kbd{.prf} directory and type \kbd{make gp} there. You can also
+invoke \kbd{make gp.dbg} or \kbd{make gp.prf} directly from the toplevel.
+
 \subsubsec{Testing}
 
 To test the binary, type \kbd{make bench}. This will build a static
