@@ -78,6 +78,7 @@ XR 13- improvements in bnrstark (try harder to find modulus, need less memory)
    14- global(x): ignore if x already global (used to raise a warning)
 BA 15- install: add RTLD_GLOBAL to dlopen flags [so that symbols can be used
        in other .so]
+   16- removed hack in gp_init.c [used "constant default args" to call print0]
 
   Added
 BA  1- New function 'vectorsmall'.
