@@ -490,7 +490,7 @@ gprec(GEN x, long l)
 GEN
 gprec_w(GEN x, long pr)
 {
-  long tx=typ(x),lx=lg(x),i;
+  long tx=typ(x),lx,i;
   GEN y;
 
   switch(tx)
@@ -505,7 +505,7 @@ gprec_w(GEN x, long pr)
 
     case t_COMPLEX: case t_POLMOD: case t_RFRAC: case t_RFRACN:
     case t_VEC: case t_COL: case t_MAT:
-      y=cgetg(lx,tx);
+      lx=lg(x); y=cgetg(lx,tx);
       for (i=1; i<lx; i++) y[i]=(long)gprec_w((GEN)x[i],pr);
       break;
     default: y=gprec(x,pr);
