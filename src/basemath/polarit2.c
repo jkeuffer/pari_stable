@@ -1933,7 +1933,7 @@ ggcd(GEN x, GEN y)
   long l,av,tetpil,i,vx,vy, tx = typ(x), ty = typ(y);
   GEN p1,z;
 
-  if (tx>ty) { p1=x; x=y; y=p1; l=tx; tx=ty; ty=l; }
+  if (tx>ty) { swap(x,y); lswap(tx,ty); }
   if (is_matvec_t(ty))
   {
     l=lg(y); z=cgetg(l,ty);
@@ -1964,17 +1964,13 @@ ggcd(GEN x, GEN y)
         if (egalii((GEN)x[1],(GEN)y[1]))
           { copyifstack(x[1],z[1]); }
         else
-          z[1]=lmppgcd((GEN)x[1],(GEN)y[1]);
-        if (gcmp1((GEN)z[1])) z[2]=zero;
+          z[1] = lmppgcd((GEN)x[1],(GEN)y[1]);
+        if (gcmp1((GEN)z[1])) z[2] = zero;
         else
         {
-          av=avma; p1=mppgcd((GEN)z[1],(GEN)x[2]);
-          if (!gcmp1(p1))
-          {
-            tetpil=avma;
-            p1=gerepile(av,tetpil,mppgcd(p1,(GEN)y[2]));
-          }
-          z[2]=(long)p1;
+          av = avma; p1 = mppgcd((GEN)z[1],(GEN)x[2]);
+          if (!is_pm1(p1)) p1 = gerepileuptoint(av, mppgcd(p1,(GEN)y[2]));
+          z[2] = (long)p1;
         }
         return z;
 
@@ -1987,7 +1983,7 @@ ggcd(GEN x, GEN y)
         av=avma; p1=gdiv(x,y);
         if (gcmp0((GEN)p1[2]))
         {
-          p1=(GEN)p1[1];
+          p1 = (GEN)p1[1];
           switch(typ(p1))
           {
             case t_INT:
@@ -1997,15 +1993,15 @@ ggcd(GEN x, GEN y)
             default: avma=av; return gun;
           }
         }
-        avma=av;
-        if (typ(p1[1])==t_INT && typ(p1[2])==t_INT) return gcopy(y);
-        p1=gdiv(y,x); avma=av;
+        if (typ(p1[1])==t_INT && typ(p1[2])==t_INT) {avma=av; return gcopy(y);}
+        p1 = ginv(p1); avma=av;
         if (typ(p1[1])==t_INT && typ(p1[2])==t_INT) return gcopy(x);
         return triv_cont_gcd(y,x);
 
       case t_PADIC:
         if (!egalii((GEN)x[2],(GEN)y[2])) return gun;
-        return gpuigs((GEN)y[2],min(valp(y),valp(x)));
+        vx = valp(x);
+        vy = valp(y); return gpuigs((GEN)y[2], min(vy,vx));
 
       case t_QUAD:
         av=avma; p1=gdiv(x,y);
@@ -2015,9 +2011,8 @@ ggcd(GEN x, GEN y)
           if (typ(p1)==t_INT) { avma=av; return gcopy(y); }
           tetpil=avma; return gerepile(av,tetpil, gdiv(y,(GEN)p1[2]));
         }
-        avma=av;
-        if (typ(p1[2])==t_INT && typ(p1[3])==t_INT) return gcopy(y);
-        p1=gdiv(y,x); avma=av;
+        if (typ(p1[2])==t_INT && typ(p1[3])==t_INT) {avma=av; return gcopy(y);}
+        p1 = ginv(p1); avma=av;
         if (typ(p1[2])==t_INT && typ(p1[3])==t_INT) return gcopy(x);
         return triv_cont_gcd(y,x);
 
@@ -2028,16 +2023,15 @@ ggcd(GEN x, GEN y)
       case t_INT:
         switch(ty)
         {
-          case t_INTMOD: z=cgetg(3,t_INTMOD);
+          case t_INTMOD: z = cgetg(3,t_INTMOD);
             copyifstack(y[1],z[1]); av=avma;
-            p1=mppgcd((GEN)y[1],(GEN)y[2]);
-            if (!gcmp1(p1))
-              { tetpil=avma; p1=gerepile(av,tetpil,mppgcd(x,p1)); }
-            z[2]=(long)p1; return z;
+            p1 = mppgcd((GEN)y[1],(GEN)y[2]);
+            if (!is_pm1(p1)) p1 = gerepileuptoint(av, mppgcd(x,p1));
+            z[2] = (long)p1; return z;
 
-          case t_FRAC: z=cgetg(3,t_FRAC);
-            z[1]=lmppgcd(x,(GEN)y[1]);
-            z[2]=licopy((GEN)y[2]); return z;
+          case t_FRAC: z = cgetg(3,t_FRAC);
+            z[1] = lmppgcd(x,(GEN)y[1]);
+            z[2] = licopy((GEN)y[2]); return z;
 
           case t_COMPLEX: case t_QUAD:
             return triv_cont_gcd(y,x);
@@ -2045,17 +2039,16 @@ ggcd(GEN x, GEN y)
           case t_PADIC:
             return padic_gcd(x,y);
 
-          default: /* t_REAL */
-            return gun;
+          default: return gun; /* t_REAL */
         }
 
       case t_INTMOD:
         switch(ty)
         {
           case t_FRAC:
-            av=avma; p1=mppgcd((GEN)x[1],(GEN)y[2]); tetpil=avma;
-            if (!gcmp1(p1)) err(operi,"g",tx,ty);
-            return gerepile(av,tetpil, ggcd((GEN)y[1],x));
+            av = avma; p1=mppgcd((GEN)x[1],(GEN)y[2]); avma = av;
+            if (!is_pm1(p1)) err(operi,"g",tx,ty);
+            return ggcd((GEN)y[1], x);
 
           case t_COMPLEX: case t_QUAD:
             return triv_cont_gcd(y,x);
@@ -2080,13 +2073,12 @@ ggcd(GEN x, GEN y)
       case t_PADIC: /* ty = QUAD */
         return triv_cont_gcd(y,x);
 
-      default: /* tx = t_REAL */
-        return gun;
+      default: return gun; /* tx = t_REAL */
     }
     return cont_gcd(y,x);
   }
 
-  vx=gvar9(x); vy=gvar9(y);
+  vx = gvar9(x); vy = gvar9(y);
   if (vy<vx) return cont_gcd(y,x);
   if (vx<vy) return cont_gcd(x,y);
   switch(tx)
@@ -2120,9 +2112,9 @@ ggcd(GEN x, GEN y)
 	  z[2]=(long)p1; return z;
 
 	case t_RFRAC:
-	  av=avma; p1=ggcd((GEN)x[1],(GEN)y[2]); tetpil=avma;
+	  av = avma; p1=ggcd((GEN)x[1],(GEN)y[2]); avma = av;
           if (!gcmp1(p1)) err(operi,"g",tx,ty);
-	  return gerepile(av,tetpil,ggcd((GEN)y[1],x));
+	  return ggcd((GEN)y[1],x);
 
 	case t_RFRACN:
 	  av=avma; p1=gred_rfrac(y); tetpil=avma;
@@ -2262,10 +2254,45 @@ isrational(GEN x)
   for (i=lgef(x)-1; i>1; i--)
     switch(typ(x[i]))
     {
-      case t_INT:
-      case t_FRAC: break;
+      case t_INT: case t_FRAC: break;
       default: return 0;
     }
+  return 1;
+}
+
+static int
+can_use_modular_gcd(GEN x, GEN *mod, long *v)
+{
+  GEN p1, p2;
+  long i;
+  for (i=lgef(x)-1; i>1; i--)
+  {
+    p1 = (GEN)x[i];
+    switch(typ(p1))
+    {
+      case t_INT: case t_FRAC: break;
+      case t_POLMOD:
+        p2 = (GEN)p1[1];
+        if (*mod)
+        {
+          if (!isrational((GEN)p1[2])) return 0;
+          if (!gegal(*mod,p2)) return 0;
+        } else
+        {
+          if (!isrational(p2)) return 0;
+          *mod = p2; *v = varn(p2);
+        }
+        break;
+      case t_POL:
+        if (!isrational(p1)) return 0;
+        if (*v >= 0) 
+        {
+          if (*v != varn(p1)) return 0;
+        } else *v = varn(p1);
+        break;
+      default: return 0;
+    }
+  }
   return 1;
 }
 
@@ -2291,10 +2318,10 @@ isinexactfield(GEN x)
 static GEN
 gcdmonome(GEN x, GEN y)
 {
-  long tetpil,av=avma, lx=lgef(x), v=varn(x), e=gval(y,v);
+  long tetpil,av=avma, dx=deg(x), v=varn(x), e=gval(y,v);
   GEN p1,p2;
 
-  if (lx-3<e) e=lx-3;
+  if (dx < e) e = dx;
   p1=ggcd(leading_term(x),content(y)); p2=gpuigs(polx[v],e);
   tetpil=avma; return gerepile(av,tetpil,gmul(p1,p2));
 }
@@ -3108,12 +3135,14 @@ polresultant0(GEN x, GEN y, long v, long flag)
 /*                  GCD USING SUBRESULTANT                         */
 /*                                                                 */
 /*******************************************************************/
+extern GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den);
+extern GEN to_polmod(GEN x, GEN mod);
 
 GEN
 srgcd(GEN x, GEN y)
 {
-  long av,av1,tetpil,tx=typ(x),ty=typ(y),dx,dy,vx,lim;
-  GEN d,g,h,p1,p2,u,v;
+  long av,av1,tetpil,tx=typ(x),ty=typ(y),dx,dy,vx,vmod,lim;
+  GEN d,g,h,p1,p2,u,v,mod,cx,cy;
 
   if (!signe(y)) return gcopy(x);
   if (!signe(x)) return gcopy(y);
@@ -3122,14 +3151,30 @@ srgcd(GEN x, GEN y)
   vx=varn(x); if (vx!=varn(y)) return gun;
   if (ismonome(x)) return gcdmonome(x,y);
   if (ismonome(y)) return gcdmonome(y,x);
-  if (isrational(x) && isrational(y)) return modulargcd(x,y);
+  av = avma;
+  mod = NULL; vmod = -1;
+  if (can_use_modular_gcd(x, &mod, &vmod) &&
+      can_use_modular_gcd(y, &mod, &vmod))
+  {
+    if (mod)
+    { /* (Q[Y]/mod)[X]*/
+      x = primitive_part(lift(x), &cx);
+      y = primitive_part(lift(y), &cy);
+      if (cx)
+        { if (cy) cx = ggcd(cx,cy); }
+      else
+        cx = cy;
+      d = nfgcd(x,y,mod,NULL); if (cx) d = gmul(d,cx);
+      return gerepileupto(av, gmul(d, to_polmod(gun,mod)));
+    }
+    if (vmod < 0) return modulargcd(x,y); /* Q[X] */
+  }
 
-  av=avma;
   if (issimplefield(x) || issimplefield(y)) x = polgcdnun(x,y);
   else
   {
     dx=lgef(x); dy=lgef(y);
-    if (dx<dy) { p1=x; x=y; y=p1; tx=dx; dx=dy; dy=tx; }
+    if (dx<dy) { swap(x,y); lswap(dx,dy); }
     p1=content(x); p2=content(y); d=ggcd(p1,p2);
 
     tetpil=avma; d=gmul(d,polun[vx]);
@@ -3142,7 +3187,7 @@ srgcd(GEN x, GEN y)
       GEN r = pseudorem(u,v);
       long degq, du, dv, dr=lgef(r);
 
-      if (dr<=3)
+      if (dr <= 3)
       {
         if (gcmp0(r)) break;
         avma=av1; return gerepile(av,tetpil,d);
@@ -3516,10 +3561,10 @@ polfnf(GEN a, GEN t)
   return gerepileupto(av, gcopy(y));
 }
 
-GEN FpXQX_safegcd(GEN P, GEN Q, GEN T, GEN p);
-GEN FpM(GEN z, GEN p);
-GEN polpol_to_mat(GEN v, long n);
-GEN mat_to_polpol(GEN x, long v, long w);
+extern GEN FpXQX_safegcd(GEN P, GEN Q, GEN T, GEN p);
+extern GEN FpM(GEN z, GEN p);
+extern GEN polpol_to_mat(GEN v, long n);
+extern GEN mat_to_polpol(GEN x, long v, long w);
 
 static GEN
 to_frac(GEN a, GEN b)
