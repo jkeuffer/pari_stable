@@ -41,7 +41,6 @@ extern GEN hensel_lift_fact(GEN pol, GEN fact, GEN T, GEN p, GEN pev, long e);
 extern GEN initgaloisborne(GEN T, GEN dn, long prec, GEN *ptL, GEN *ptprep, GEN *ptdis);
 extern GEN max_modulus(GEN p, double tau);
 extern GEN mulmat_pol(GEN A, GEN x);
-extern GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den);
 extern GEN polsym_gen(GEN P, GEN y0, long n, GEN T, GEN N);
 extern GEN special_pivot(GEN x);
 extern GEN trivfact(void);

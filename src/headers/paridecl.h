@@ -1468,6 +1468,7 @@ GEN     glcm0(GEN x, GEN y);
 GEN     leftright_pow(GEN,GEN,void*,GEN (*sqr)(void*,GEN),GEN (*mul)(void*,GEN,GEN));
 long    logint(GEN B, GEN y, GEN *ptq);
 GEN     newtonpoly(GEN x, GEN p);
+GEN     nfgcd(GEN P, GEN Q, GEN nf, GEN den);
 GEN     nfisincl(GEN a, GEN b);
 GEN     nfisisom(GEN a, GEN b);
 GEN     poldeflate(GEN x0, long *m);
