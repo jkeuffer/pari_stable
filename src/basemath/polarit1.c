@@ -541,8 +541,7 @@ static GEN
 FpM_Berlekamp_ker(GEN u, GEN p)
 {
   long j,N = degpol(u);
-  GEN vker,v,w,Q,p1;
-  if (DEBUGLEVEL > 7) (void)timer2();
+  GEN v,w,Q,p1;
   Q = cgetg(N+1,t_MAT); Q[1] = (long)zerocol(N);
   w = v = FpXQ_pow(polx[varn(u)],p,u,p);
   for (j=2; j<=N; j++)
@@ -556,10 +555,7 @@ FpM_Berlekamp_ker(GEN u, GEN p)
       w = gerepileupto(av, FpX_res(gmul(w,v), u, p));
     }
   }
-  if (DEBUGLEVEL > 7) msgtimer("frobenius");
-  vker = FpM_ker(Q,p);
-  if (DEBUGLEVEL > 7) msgtimer("kernel");
-  return vker;
+  return FpM_ker(Q,p);
 }
 
 static GEN
@@ -567,7 +563,6 @@ FqM_Berlekamp_ker(GEN u, GEN T, GEN q, GEN p)
 {
   long j,N = degpol(u);
   GEN vker,v,w,Q,p1;
-  if (DEBUGLEVEL > 7) (void)timer2();
   Q = cgetg(N+1,t_MAT); Q[1] = (long)zerocol(N);
   w = v = FqXQ_pow(polx[varn(u)], q, u, T, p);
   for (j=2; j<=N; j++)
@@ -581,10 +576,7 @@ FqM_Berlekamp_ker(GEN u, GEN T, GEN q, GEN p)
       w = gerepileupto(av, FpXQX_divres(FpXQX_mul(w,v, T,p), u,T,p,ONLY_REM));
     }
   }
-  if (DEBUGLEVEL > 7) msgtimer("frobenius");
-  vker = FqM_ker(Q,T,p);
-  if (DEBUGLEVEL > 7) msgtimer("kernel");
-  return vker;
+  return FqM_ker(Q,T,p);
 }
 
 /* f in ZZ[X] and p a prime number. */
@@ -2445,14 +2437,13 @@ factmod9(GEN f, GEN p, GEN T)
     }
 #else
 {
-    GEN qqd = gun, g;
+    GEN g;
     long dg;
 
     N = degpol(u); v = X;
     if (N > 1) S = init_pow_q_mod_pT(X, q, u, T, p);
     for (d=1; d <= N>>1; d++)
     {
-      qqd = mulii(qqd,q);
       v = spec_Fq_pow_mod_pol(v, S, T, p);
       g = FqX_gcd(gsub(v,X),u, T,p);
       dg = degpol(g);
