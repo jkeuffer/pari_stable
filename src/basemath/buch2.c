@@ -2412,7 +2412,7 @@ log_poleval(GEN P, GEN *ro, long i, GEN nf, long prec0)
   {
     prec = (prec-2)<<1;
     if (DEBUGLEVEL) err(warnprec,"log_poleval",prec);
-    *ro = get_roots((GEN)nf[1], itos(gmael(nf,2,1)),prec);
+    *ro = get_roots((GEN)nf[1], nf_get_r1(nf), prec);
     x = poleval(P, (GEN)(*ro)[i]);
   }
   if (k > prec0) x = gprec_w(x,prec0);
@@ -2435,7 +2435,7 @@ get_arch2_i(GEN nf, GEN a, long prec, int units)
     GEN pol = (GEN)nf[1];
     N = cgetg(la,t_VEC);
     for (k=1; k<la; k++) N[k] = (long)gabs(subres(pol,(GEN)a[k]),0);
-    N = gdivgs(glog(N,prec), - (degpol(pol))); /* - log(|norm|) / [K:Q] */
+    N = gdivgs(glog(N,prec), -degpol(pol)); /* - log(|norm|) / [K:Q] */
   }
   for (k=1; k<la; k++)
   {
@@ -2461,11 +2461,11 @@ static void
 my_class_group_gen(GEN bnf, long prec, GEN nf0, GEN *ptcl, GEN *ptcl2)
 {
   gpmem_t av = avma;
-  GEN W=(GEN)bnf[1], C=(GEN)bnf[4], nf=(GEN)bnf[7], *gptr[2];
+  GEN W=(GEN)bnf[1], C=(GEN)bnf[4], nf=(GEN)bnf[7];
   GEN Vbase = get_Vbase(W, (GEN)bnf[5], (GEN)bnf[6]);
 
   class_group_gen(nf,W,C,Vbase,prec,nf0, ptcl,ptcl2);
-  gptr[0]=ptcl; gptr[1]=ptcl2; gerepilemany(av,gptr,2);
+  gerepileall(av, 2, ptcl, ptcl2);
 }
 
 GEN
