@@ -163,6 +163,7 @@ HC 12- gamma function for integral/rational arguments
    34- allow more types in gdivround
    35- improved root_bound (first step in factor() over Z[X]) for huge pols.
    36- faster bernfrac / bernvec
+   37- INCOMPATIBILITY: removed gentimer() / genmsgtimer(). Use TIMER/msgTIMER
 
   Added
     1- mplog2() function --> faster mplog()
