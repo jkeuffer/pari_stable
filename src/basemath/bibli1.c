@@ -1908,7 +1908,7 @@ dalloc(size_t n)
 
 char *
 stackmalloc(size_t N)
-{ /* make sure of correct alignment */
+{
   size_t n = nchar2nlong(N) * sizeof(long);
   if (avma - bot < n) err(errpile);
   avma -= n; return (char*)avma;
