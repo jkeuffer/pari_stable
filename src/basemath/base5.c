@@ -295,49 +295,76 @@ rnfalgtobasis(GEN rnf,GEN x)
   return gscalcol(x, degpol(rnf[1]));
 }
 
+GEN
+_checkrnfeq(GEN x)
+{
+  if (typ(x) == t_VEC)
+    switch(lg(x))
+    {
+      case 12: /* checkrnf(x); */ return (GEN)x[11];
+      case  6: /* rnf[11]. FIXME: change the rnf struct */
+      case  4: return x;
+    }
+  return NULL;
+}
+
+GEN
+checkrnfeq(GEN x)
+{
+  x = _checkrnfeq(x);
+  if (!x) err(talker,"please apply rnfequation(,,1)");
+  return x;
+}
+
+GEN
+eltreltoabs(GEN rnfeq, GEN x)
+{
+  long i, k, va;
+  gpmem_t av = avma;
+  GEN polabs, teta, alpha, s;
+
+  rnfeq = checkrnfeq(rnfeq);
+  polabs= (GEN)rnfeq[1];
+  alpha = (GEN)rnfeq[2];
+  k     = itos((GEN)rnfeq[3]);
+
+  va = varn(polabs);
+  if (gvar(x) > va) x = scalarpol(x,va);
+  /* Mod(X + k alpha, polabs(X)), alpha root of the polynomial defining base */
+  teta = gmodulcp(gsub(polx[va], gmulsg(k,lift_intern(alpha))), polabs);
+  s = gzero;
+  for (i=lgef(x)-1; i>1; i--)
+  {
+    GEN c = (GEN)x[i];
+    long tc = typ(c);
+    switch(tc)
+    {
+      case t_POLMOD: c = (GEN)c[2]; /* fall through */
+      case t_POL:    c = poleval(c, alpha); break;
+      default:
+        if (!is_const_t(tc)) err(talker, "incorrect data in eltreltoabs");
+    }
+    s = gadd(c, gmul(teta,s));
+  }
+  return gerepileupto(av,s);
+}
+
 /* x doit etre un polymod ou un polynome ou un vecteur de tels objets... */
 GEN
 rnfelementreltoabs(GEN rnf,GEN x)
 {
-  long tx, i, lx, va, tp3;
-  gpmem_t av=avma;
-  GEN z,p1,p2,p3,polabs,teta,alpha,s,k;
+  long i, lx, tx = typ(x);
+  GEN z;
 
-  checkrnf(rnf); tx=typ(x); lx=lg(x); va=varn((GEN)rnf[1]);
   switch(tx)
   {
     case t_VEC: case t_COL: case t_MAT:
-      z=cgetg(lx,tx);
-      for (i=1; i<lx; i++) z[i] = (long)rnfelementreltoabs(rnf,(GEN)x[i]);
+      lx = lg(x); z = cgetg(lx,tx);
+      for (i=1; i<lx; i++) z[i] = (long)rnfelementreltoabs(rnf, (GEN)x[i]);
       return z;
 
-    case t_POLMOD:
-      x=lift_to_pol(x); /* fall through */
-    case t_POL:
-      if (gvar(x) > va) x = scalarpol(x,va);
-      p1=(GEN)rnf[11]; polabs=(GEN)p1[1]; alpha=(GEN)p1[2]; k=(GEN)p1[3];
-      teta = (typ(alpha) == t_INT)? alpha: (GEN)alpha[2];
-      teta = gmodulcp(gsub(polx[va], gmul(k,teta)), polabs);
-      s=gzero;
-      for (i=lgef(x)-1; i>1; i--)
-      {
-	p3=(GEN)x[i]; tp3=typ(p3);
-	if (is_const_t(tp3)) p2 = p3;
-	else
-	  switch(tp3)
-	  {
-	    case t_POLMOD:
-	      p3 = (GEN)p3[2]; /* fall through */
-	    case t_POL:
-	      p2 = poleval(p3,alpha);
-              break;
-            default: err(talker, "incorrect data in rnfelementreltoabs");
-              return NULL; /* not reached */
-	  }
-	s = gadd(p2, gmul(teta,s));
-      }
-      return gerepileupto(av,s);
-
+    case t_POLMOD: x = lift_to_pol(x); /* fall through */
+    case t_POL: return eltreltoabs(rnf, x);
     default: return gcopy(x);
   }
 }
