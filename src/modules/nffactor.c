@@ -1387,7 +1387,7 @@ nf_DDF_roots(GEN pol, GEN polred, GEN nfpol, GEN lt, GEN init_fa, long nbf,
 static GEN
 nfsqff(GEN nf, GEN pol, long fl)
 {
-  long i, n, nbf, ct, maxf, dpol = degpol(pol);
+  long n, nbf, ct, maxf, dpol = degpol(pol);
   ulong pp;
   pari_sp av = avma;
   GEN pr, C0, dk, bad, polbase, init_fa = NULL;
@@ -1406,6 +1406,7 @@ nfsqff(GEN nf, GEN pol, long fl)
   if (dpol*3 < n) 
   {
     GEN z, t;
+    long i;
     if (DEBUGLEVEL>2) fprintferr("Using Trager's method\n");
     z = (GEN)polfnf(polmod, nfpol)[1];
     if (fl) {
