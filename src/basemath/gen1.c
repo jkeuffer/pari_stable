@@ -1147,6 +1147,8 @@ mul_scal(GEN y, GEN x, long ty)
     case t_POL: return mul_pol_scal(y, x);
     case t_SER: return mul_ser_scal(y, x);
     case t_RFRAC: return mul_rfrac_scal((GEN)y[1],(GEN)y[2], x);
+    case t_QFI: case t_QFR:
+      if (typ(x) == t_INT && gcmp1(x)) return gcopy(y); /* fall through */
   }
   err(operf,"*",x,y);
   return NULL; /* not reached */
@@ -1532,8 +1534,6 @@ gmul(GEN x, GEN y)
       av = avma; y = gmod(y, (GEN)x[1]);
       return gerepileupto(av, mul_polmod_same((GEN)x[1], (GEN)x[2], y));
     }
-    if ((ty == t_QFI || ty == t_QFR) && tx == t_INT && gcmp1(x))
-      return gcopy(y);
     return mul_scal(y, x, ty);
   }
 
