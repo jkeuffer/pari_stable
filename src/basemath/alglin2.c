@@ -756,11 +756,10 @@ sqred3(GEN a)
 }
 
 /* Gauss reduction (arbitrary symetric matrix, only the part above the
- * diagonal is considered). If no_signature is zero, return only the
- * signature
- */
+ * diagonal is considered). If signature is zero, return only the
+ * signature, in which case gsigne() should be defined for elements of a. */
 static GEN
-sqred2(GEN a, long no_signature)
+sqred2(GEN a, long signature)
 {
   GEN r,p,mun;
   pari_sp av,av1,lim;
@@ -780,7 +779,10 @@ sqred2(GEN a, long no_signature)
     k=1; while (k<=n && (!r[k] || gcmp0(gcoeff(a,k,k)))) k++;
     if (k<=n)
     {
-      p = gcoeff(a,k,k); if (gsigne(p) > 0) sp++; else sn++;
+      p = gcoeff(a,k,k);
+      if (signature) { /* don't check if signature = 0: gsigne may fail ! */
+        if (gsigne(p) > 0) sp++; else sn++;
+      }
       r[k] = 0; t--;
       for (j=1; j<=n; j++)
 	coeff(a,k,j) = r[j] ? ldiv(gcoeff(a,k,j),p) : zero;
@@ -830,17 +832,17 @@ sqred2(GEN a, long no_signature)
       if (k > n) break;
     }
   }
-  if (no_signature) return gerepilecopy(av, a);
+  if (!signature) return gerepilecopy(av, a);
   avma = av; a = cgetg(3,t_VEC);
   a[1] = lstoi(sp);
   a[2] = lstoi(sn); return a;
 }
 
 GEN
-sqred(GEN a) { return sqred2(a,1); }
+sqred(GEN a) { return sqred2(a,0); }
 
 GEN
-signat(GEN a) { return sqred2(a,0); }
+signat(GEN a) { return sqred2(a,1); }
 
 /* Diagonalization of a REAL symetric matrix. Return a vector [L, r]:
  * L = vector of eigenvalues
