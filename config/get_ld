@@ -34,7 +34,7 @@ case "$osname-$arch" in
   linux-*|cygwin*|freebsd-*)
     tmp=`./ldflags $LDisGCC "-export-dynamic"`
     ldflags="$ldflags $tmp" ;;
-  os2-*)     ldflags="$ldlags -Zexe"
+  os2-*)     ldflags="$ldflags -Zexe"
              case "$optimization" in
                full) ldflags="$ldflags -s";;
              esac;;
