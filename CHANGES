@@ -94,6 +94,8 @@ IS 25- config/get_head would not work only if one invoked $PWD/Configure
    29- negative definite forms allowed by Qfb() while most qfb* routines
        can only cope with positive definite forms. Explicitly disallow
        negative definite forms.
+   30- \p 38
+       ellinit([1,0,0,-19959260,-34323045317]) -> precision too low in initell
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.
