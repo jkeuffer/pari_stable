@@ -86,6 +86,7 @@ AMD K6-2     350Mhz  Linux-2.0.36    gcc X11 dl2    5154    4850  2.0.17
 AMD K6       266MHz  Linux-2.2.5    pgcc X11 dl2    5861    6001  2.0.16(17)IS
 AMD K6       233Mhz  Linux-2.2.14    gcc X11 dl2    6968    7158  2.0.18    QL
 IBM/Cyrix    200MHz  Linux-2.0.35    gcc X11 dl2   13190   13729  2.0.15    AP
+PentiumIII  1000MHz  Linux-2.2.15    gcc X11 dl2    1068    1164  2.2.0     XR
 PentiumIII   933MHz  Linux-2.2.15   egcs X11 dl2    1450    1485  2.0.20    IS
 PentiumIII   800MHz  Linux-2.2.14   egcs X11 dl2    1900    1882  2.0.20    CL
 PentiumIII   733MHz  Linux-2.2.14   egcs X11 dl2    2080    2090  2.0.19    IS
@@ -270,7 +271,8 @@ Contributors:
   KK = Kimitoshi Kono
   LG = Louis Granboulan
   MS = Michael Stoll
+  PE = Philippe Elbaz-Vincent
   QL = Qing Liu
   SH = Steve Harding
   TP = Thomas Papanikolaou
-  PE = Philippe Elbaz-Vincent
+  XR = Xavier Roblot
