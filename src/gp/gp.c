@@ -2030,6 +2030,7 @@ gprc_get(char *path)
         t = gpmalloc(l + 6);
         strncpy(t, path, l);
         strcpy(t+l, s); f = gprc_chk(t);
+        free(t);
       }
     }
     free(str);
