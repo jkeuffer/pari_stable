@@ -94,7 +94,7 @@ BA 51- [X-Windows] hi-res plot: window not redrawn properly (BackingStore pb)
    52- problems with tex2mail output (wrong alignment, wrong colors)
    53- contfrac(sin(Pi/4),,2) --> impossible assignment
    54- infinite recursion in gaffect(t_POL, scalar)
-   55- content([-1]) was -1 (should be 1)
+   55- content([-1]) was -1 [ should be 1 ]
    56- stack corruption in u_FpV_polint (used by modular bivariate resultant)
    57- polroots() used too high a precision when checking errors a posteriori
        (--> slow)
@@ -106,6 +106,9 @@ BA 51- [X-Windows] hi-res plot: window not redrawn properly (BackingStore pb)
    63- sqrt(4*x^2) --> not an integer exponent for non invertible series in gpow
    64- besselj(0,O(1)) [or besseli] --> precision<=0 in gprec.
    65- O(1)' --> O(x^-1)
+   66- gcd(O(2^1), O(2^10)) --> O(2^10)
+   67- polrootspadic(x^2+8*x+4,2,2) -->  "impossible assignment"  [ [] in
+       stable version, which is also wrong: 2 + O(2^2) ]
 
   Changed
 BA  1- improved Fp_isom
