@@ -53,30 +53,30 @@ prank(GEN cyc, long ell)
   return i-1;
 }
 
-/* increment y, which runs through [0,ell-1]^(k-1). Return 0 when done. */
+/* increment y, which runs through [0,d-1]^(k-1). Return 0 when done. */
 static int
-increment(GEN y, long k, long ell)
+increment(GEN y, long k, long d)
 {
   long i = k, j;
   do
   {
     if (--i == 0) return 0;
     y[i]++;
-  } while (y[i] >= ell);
+  } while (y[i] >= d);
   for (j = i+1; j < k; j++) y[j] = 0;
   return 1;
 }
 
 /* as above, y increasing (y[i] <= y[i+1]) */
 static int
-increment_inc(GEN y, long k, long ell)
+increment_inc(GEN y, long k, long d)
 {
   long i = k, j;
   do
   {
     if (--i == 0) return 0;
     y[i]++;
-  } while (y[i] >= ell);
+  } while (y[i] >= d);
   for (j = i+1; j < k; j++) y[j] = y[i];
   return 1;
 }
@@ -831,6 +831,7 @@ compute_polrel(GEN nfz, toK_s *T, GEN be, long g, long ell)
   powtaubet = powtau(be, m, T->tau);
   S = cgetg(ell+1, t_VEC); /* Newton sums */
   S[1] = zero;
+  if (DEBUGLEVEL>1) fprintferr("Computing Newton sums: ");
   for (k = 2; k <= ell; k++)
   {
     GEN z, g = gzero, b = vecsmall_const(k-1, 0);
@@ -842,8 +843,10 @@ compute_polrel(GEN nfz, toK_s *T, GEN be, long g, long ell)
       z = _algtobasis(nfz, z);
       g = gerepileupto(av, gadd(g, gmul(get_multinomial(b), z)));
     } while (increment_inc(b, k, m));
+    if (DEBUGLEVEL>1) { fprintferr("%ld ", k); flusherr(); }
     S[k] = lmul(gmulsg(ell, e), tracetoK(T, basistoalg(nfz,g)));
   }
+  if (DEBUGLEVEL>1) fprintferr("\n");
   return pol_from_Newton(S);
 }
 
