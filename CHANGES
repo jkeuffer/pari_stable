@@ -60,6 +60,7 @@ BA 11- [hi-res plot: fltk] line plotting was broken
    14- quadhilbert(D > 0) spent an unreasonable time to find a relative
        equation defined over Q [ use Galois theory instead of naive search ]
    15- typo in resmod2n [ missing (ulong) typecast ] -> issquare((2^64+1)^2)=0
+BA 16- galoisinit() could fail to find a polynomial defining the fixed field.
 
   Changed
     1- increased maximum binary exponent for t_REAL, and maximum GEN length
