@@ -54,6 +54,7 @@ if test -n "$DLLD"; then
   fi
 
 # Which Flags for Dynamic Lib Linker ?
+  DLLDFLAGS=
   if test -n "$GNUdlld"; then
     DLLDFLAGS="-shared -soname=\$(LIBPARI_SONAME)"
   else # DLLD != GNU ld
@@ -69,7 +70,9 @@ if test -n "$DLLD"; then
       *)         DLLD=;;
     esac
   fi
-  DLLDFLAGS=`./ldflags "$DLLDisGCC" "$DLLDFLAGS"`
+  if test -n "$DLLDFLAGS"; then
+    DLLDFLAGS=`./ldflags "$DLLDisGCC" "$DLLDFLAGS"`
+  fi
   case "$osname" in
     os2) DLLDFLAGS="$CFLAGS -Zdll" ;; # assume DLLD = gcc
   esac

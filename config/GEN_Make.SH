@@ -12,7 +12,10 @@ case "$static" in
   y) dft=sta ;;
 esac
 
-RUNPTH=`config/ldflags "$LDneedsWl" "$runpathprefix $runpath"`
+RUNPTH=
+if test -n "$runpathprefix"; then
+  RUNPTH=`config/ldflags "$LDneedsWl" "$runpathprefix $runpath"`
+fi
 
 # remove soname imformation
 MYDLLDFLAGS=`echo $DLLDFLAGS | sed -e 's/-[hsoname]*[,= \t]*\\$(LIBPARI.*)//'`
