@@ -394,10 +394,9 @@ ishiftr_spec(GEN x, long lx, long n)
   if (!s) return gzero;
   if (!n) 
   {
-    y = cgeti(lx); /* cf icopy. But applies to a t_REAL! */
+    y = cgeti(lx);
     y[1] = evalsigne(s) | evallgefint(lx);
-    while (--lx > 1) y[lx]=x[lx];
-    xmpn_mirror(LIMBS(y),NLIMBS(y));
+    xmpn_mirrorcopy(LIMBS(y),RLIMBS(x),lx-2);
     return y;
   }
   if (n > 0)
