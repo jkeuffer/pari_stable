@@ -1482,31 +1482,24 @@ ComputeCoeff(GEN dtcr, LISTray *R, long n, long deg)
 /*              5th part: compute L-functions at s=1                */
 /********************************************************************/
 static void
-_append(GEN L, GEN z)
-{
-  long l = lg(L);
-  L[l] = (long)z; setlg(L,l+1);
-}
-
-static void
 deg11(LISTray *R, long p, GEN bnr, GEN pr) {
   GEN z = isprincipalray(bnr, pr); 
-  _append(R->L1, (GEN)p);
-  _append((GEN)R->L1ray, z);
+  appendL(R->L1, (GEN)p);
+  appendL((GEN)R->L1ray, z);
 }
 static void
 deg12(LISTray *R, long p, GEN bnr, GEN Lpr) {
   GEN z = isprincipalray(bnr, (GEN)Lpr[1]); 
-  _append(R->L11, (GEN)p);
-  _append((GEN)R->L11ray, z);
+  appendL(R->L11, (GEN)p);
+  appendL((GEN)R->L11ray, z);
 }
 static void
 deg0(LISTray *R, long p) {
-  _append(R->L0, (GEN)p);
+  appendL(R->L0, (GEN)p);
 }
 static void
 deg2(LISTray *R, long p) {
-  _append(R->L2, (GEN)p);
+  appendL(R->L2, (GEN)p);
 }
 
 /* pi(x) <= ?? */
@@ -1515,14 +1508,6 @@ PiBound(long x)
 {
   double lx = log((double)x);
   return 1 + (long) (x/lx * (1 + 3/(2*lx)));
-}
-
-static GEN
-_alloc(long n, long t)
-{
-  GEN z = new_chunk(n);
-  z[0] = evaltyp(t) | evallg(1);
-  return z;
 }
 
 static void
@@ -1536,10 +1521,10 @@ InitPrimesQuad(GEN bnr, long nmax, LISTray *R)
   GEN *gptr[7];
 
   l = 1 + PiBound(nmax);
-  R->L0  = _alloc(l, t_VECSMALL);
-  R->L2  = _alloc(l, t_VECSMALL); R->condZ = condZ;
-  R->L1 = _alloc(l, t_VECSMALL); R->L1ray = (GEN*)_alloc(l, t_VEC);
-  R->L11 = _alloc(l, t_VECSMALL); R->L11ray = (GEN*)_alloc(l, t_VEC);
+  R->L0  = cget1(l, t_VECSMALL);
+  R->L2  = cget1(l, t_VECSMALL); R->condZ = condZ;
+  R->L1 = cget1(l, t_VECSMALL); R->L1ray = (GEN*)cget1(l, t_VEC);
+  R->L11 = cget1(l, t_VECSMALL); R->L11ray = (GEN*)cget1(l, t_VEC);
   prime = stoi(2);
   for (p = 2; p <= nmax; prime[2] = p) {
     switch (krogs(dk, p))
@@ -1591,8 +1576,8 @@ InitPrimes(GEN bnr, long nmax, LISTray *R)
   GEN *gptr[7];
 
   R->condZ = condZ;
-  R->L1 = _alloc(nmax, t_VECSMALL);
-  R->L1ray = (GEN*)_alloc(nmax, t_VEC);
+  R->L1 = cget1(nmax, t_VECSMALL);
+  R->L1ray = (GEN*)cget1(nmax, t_VEC);
   prime = stoi(2);
   for (p = 2; p <= nmax; prime[2] = p)
   {
@@ -1604,8 +1589,8 @@ InitPrimes(GEN bnr, long nmax, LISTray *R)
       if (is_bigint(Npr) || (np = Npr[2]) > nmax) continue;
       if (condZ % p == 0 && idealval(nf, cond, pr)) continue;
 
-      _append(R->L1, (GEN)np);
-      _append((GEN)R->L1ray, isprincipalray(bnr, pr));
+      appendL(R->L1, (GEN)np);
+      appendL((GEN)R->L1ray, isprincipalray(bnr, pr));
     }
     NEXT_PRIME_VIADIFF(p,d);
   }

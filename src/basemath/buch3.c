@@ -21,6 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "parinf.h"
 
+extern void testprimes(GEN bnf, long bound);
 extern GEN Fp_PHlog(GEN a, GEN g, GEN p, GEN ord);
 extern GEN FqX_factor(GEN x, GEN T, GEN p);
 extern GEN anti_unif_mod_f(GEN nf, GEN pr, GEN sqf);
@@ -33,7 +34,6 @@ extern GEN famat_to_nf_modideal_coprime(GEN nf, GEN g, GEN e, GEN id);
 extern GEN famat_to_nf_modidele(GEN nf, GEN g, GEN e, GEN bid);
 extern GEN gmul_mat_smallvec(GEN x, GEN y);
 extern GEN idealaddtoone_i(GEN nf, GEN x, GEN y);
-extern GEN ideallllred_elt(GEN nf, GEN I);
 extern GEN idealprodprime(GEN nf, GEN L);
 extern GEN ideleaddone_aux(GEN nf,GEN x,GEN ideal);
 extern GEN isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag);
@@ -220,10 +220,10 @@ redideal(GEN nf,GEN x,GEN f)
 {
   GEN q, y, b;
 
-  if (gcmp1(gcoeff(f,1,1))) return ideallllred_elt(nf, x); /* f = 1 */
+  if (gcmp1(gcoeff(f,1,1))) return idealred_elt(nf, x); /* f = 1 */
 
   b = idealaddtoone_i(nf,x,f); /* a = b mod (x f) */
-  y = ideallllred_elt(nf, idealmullll(nf,x,f));
+  y = idealred_elt(nf, idealmullll(nf,x,f));
   q = ground(element_div(nf,b,y));
   return gsub(b, element_mul(nf,q,y)); /* != 0 since = 1 mod f */
 }
@@ -751,62 +751,6 @@ zimmertbound(long N,long R2,GEN DK)
   avma = av; return itos(w);
 }
 
-/* all primes up to Minkowski bound factor on factorbase ? */
-static void
-testprime(GEN bnf, long minkowski)
-{
-  gpmem_t av = avma;
-  long pp,i,nbideal,k,pmax;
-  GEN f,p1,vectpp,fb,dK, nf=checknf(bnf);
-  byteptr delta = diffptr;
-
-  if (DEBUGLEVEL>1)
-    fprintferr("PHASE 1: check primes to Zimmert bound = %ld\n\n",minkowski);
-  f=(GEN)nf[4]; dK=(GEN)nf[3];
-  if (!gcmp1(f))
-  {
-    GEN different = gmael(nf,5,5);
-    if (DEBUGLEVEL>1)
-      fprintferr("**** Testing Different = %Z\n",different);
-    p1 = isprincipalall(bnf,different,nf_FORCE);
-    if (DEBUGLEVEL>1) fprintferr("     is %Z\n",p1);
-  }
-  fb=(GEN)bnf[5];
-  p1 = gmael(fb, lg(fb)-1, 1); /* largest p in factorbase */
-  pp = 0; pmax = is_bigint(p1)? VERYBIGINT: itos(p1);
-  if ((ulong)minkowski > maxprime()) err(primer1);
-  while (pp < minkowski)
-  {
-    NEXT_PRIME_VIADIFF(pp, delta);
-    if (DEBUGLEVEL>1) fprintferr("*** p = %ld\n",pp);
-    vectpp=primedec(bnf,stoi(pp)); nbideal=lg(vectpp)-1;
-    /* loop through all P | p if ramified, all but one otherwise */
-    if (!smodis(dK,pp)) nbideal++;
-    for (i=1; i<nbideal; i++)
-    {
-      GEN P = (GEN)vectpp[i];
-      if (DEBUGLEVEL>1)
-        fprintferr("  Testing P = %Z\n",P);
-      if (cmpis(idealnorm(bnf,P), minkowski) < 1)
-      {
-	if (pp <= pmax && (k = tablesearch(fb, P, cmp_prime_ideal)))
-	{
-	  if (DEBUGLEVEL>1) fprintferr("    #%ld in factor base\n",k);
-	}
-	else
-	{
-	  p1 = isprincipal(bnf,P);
-	  if (DEBUGLEVEL>1) fprintferr("    is %Z\n",p1);
-	}
-      }
-      else if (DEBUGLEVEL>1)
-        fprintferr("    Norm(P) > Zimmert bound\n");
-    }
-    avma = av;
-  }
-  if (DEBUGLEVEL>1) { fprintferr("End of PHASE 1.\n\n"); flusherr(); }
-}
-
 /* return \gamma_n^n if known, an upper bound otherwise */
 static GEN
 hermiteconstant(long n)
@@ -1293,7 +1237,7 @@ certifybuchall(GEN bnf)
   N=degpol(nf[1]); if (N==1) return 1;
   nf_get_sign(nf, &R1, &R2); R = R1+R2-1;
   funits = check_units(bnf,"bnfcertify");
-  testprime(bnf, zimmertbound(N,R2,absi((GEN)nf[3])));
+  testprimes(bnf, zimmertbound(N,R2,absi((GEN)nf[3])));
   reg = gmael(bnf,8,2);
   cyc = gmael3(bnf,8,1,2); nbgen = lg(cyc)-1;
   gen = gmael3(bnf,8,1,3); rootsofone = gmael(bnf,8,4);

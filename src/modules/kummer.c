@@ -221,7 +221,7 @@ reducebeta(GEN bnfz, GEN be, GEN ell)
   z = idealsqrtn(nf, be, ell, 0);
   if (typ(z) == t_MAT && !gcmp1(gcoeff(z,1,1)))
   {
-    z = ideallllred_elt(nf, z);
+    z = idealred_elt(nf, z);
     be = element_div(nf, be, element_pow(nf, z, ell));
     /* make be integral */
     be = reduce_mod_Qell(nf, be, ell);
@@ -400,18 +400,6 @@ typedef struct {
   GEN Sm, Sml1, Sml2, Sl, ESml2;
 } primlist;
 
-static void
-_append(GEN x, GEN t)
-{
-  long l = lg(x); x[l] = (long)t; setlg(x, l+1);
-}
-
-static GEN
-cget1(long l, long t)
-{
-  GEN z = cgetg(l, t); setlg(z, 1); return z;
-}
-
 static int
 build_list_Hecke(primlist *L, GEN nfz, GEN fa, GEN gothf, GEN gell, tau_s *tau)
 {
@@ -433,7 +421,7 @@ build_list_Hecke(primlist *L, GEN nfz, GEN fa, GEN gothf, GEN gell, tau_s *tau)
     if (!egalii(p,gell))
     {
       if (vp != 1) return 1;
-      if (!isconjinprimelist(nfz, L->Sm,pr,tau)) _append(L->Sm,pr);
+      if (!isconjinprimelist(nfz, L->Sm,pr,tau)) appendL(L->Sm,pr);
     }
     else
     {
@@ -441,15 +429,15 @@ build_list_Hecke(primlist *L, GEN nfz, GEN fa, GEN gothf, GEN gell, tau_s *tau)
       if (vd > 0) return 4;
       if (vd==0)
       {
-	if (!isconjinprimelist(nfz, L->Sml1,pr,tau)) _append(L->Sml1, pr);
+	if (!isconjinprimelist(nfz, L->Sml1,pr,tau)) appendL(L->Sml1, pr);
       }
       else
       {
 	if (vp==1) return 2;
         if (!isconjinprimelist(nfz, L->Sml2,pr,tau))
         {
-          _append(L->Sml2, pr);
-          _append(L->ESml2,(GEN)vp);
+          appendL(L->Sml2, pr);
+          appendL(L->ESml2,(GEN)vp);
         }
       }
     }
@@ -459,7 +447,7 @@ build_list_Hecke(primlist *L, GEN nfz, GEN fa, GEN gothf, GEN gell, tau_s *tau)
   {
     pr = (GEN)factell[i];
     if (!idealval(nfz,gothf,pr))
-      if (!isconjinprimelist(nfz, L->Sl,pr,tau)) _append(L->Sl, pr);
+      if (!isconjinprimelist(nfz, L->Sl,pr,tau)) appendL(L->Sl, pr);
   }
   return 0; /* OK */
 }
@@ -515,7 +503,7 @@ isprincipalell(GEN bnfz, GEN id, GEN cycgen, GEN u, GEN gell, long rc)
 static GEN
 famat_factorback(GEN v, GEN e)
 {
-  long i, l = lg(v);
+  long i, l = lg(e);
   GEN V = cgetg(1, t_MAT);
   for (i=1; i<l; i++) 
     if (signe(e[i])) V = famat_mul(V, famat_pow((GEN)v[i], (GEN)e[i]));

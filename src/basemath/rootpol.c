@@ -1773,11 +1773,7 @@ a_posteriori_errors(GEN p, GEN roots_pol, long err)
 /**                                                                **/
 /********************************************************************/
 static GEN
-append_root(GEN roots_pol, GEN a)
-{
-  long l = lg(roots_pol);
-  setlg(roots_pol, l+1); return (GEN)(roots_pol[l] = lclone(a));
-}
+append_clone(GEN r, GEN a) { a = gclone(a); appendL(r, a); return a; }
 
 /* put roots in placeholder roots_pol so that |P-L_1...L_n|<2^(-bitprec)|P|
  *  and returns  prod (x-roots_pol[i]) for i=1..degree(p) */
@@ -1791,7 +1787,7 @@ split_complete(GEN p, long bitprec, GEN roots_pol)
   if (n==1)
   {
     a=gneg_i(gdiv((GEN)p[2],(GEN)p[3]));
-    (void)append_root(roots_pol,a); return p;
+    (void)append_clone(roots_pol,a); return p;
   }
   ltop = avma;
   if (n==2)
@@ -1802,8 +1798,8 @@ split_complete(GEN p, long bitprec, GEN roots_pol)
     p1 = gmul2n((GEN)p[4],1);
     a = gneg_i(gdiv(gadd(F,(GEN)p[3]), p1));
     b =        gdiv(gsub(F,(GEN)p[3]), p1);
-    a = append_root(roots_pol,a);
-    b = append_root(roots_pol,b); avma = ltop;
+    a = append_clone(roots_pol,a);
+    b = append_clone(roots_pol,b); avma = ltop;
     m=gmul(gsub(polx[varn(p)],mygprec(a,3*bitprec)),
 	   gsub(polx[varn(p)],mygprec(b,3*bitprec)));
     return gmul(m,(GEN)p[4]);
@@ -1913,7 +1909,7 @@ all_roots(GEN p, long bitprec)
   bitprec2 = bitprec0; e = 0;
   for (av=avma,i=1;; i++,avma=av)
   {
-    roots_pol = cgetg(n+1,t_VEC); setlg(roots_pol,1);
+    roots_pol = cget1(n+1,t_VEC);
     bitprec2 += e + (1<<i)*n;
     q = gmul(myrealun(bitprec2), mygprec(pd,bitprec2));
     m = split_complete(q,bitprec2,roots_pol);

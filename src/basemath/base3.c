@@ -579,20 +579,6 @@ element_val(GEN nf, GEN x, GEN vp)
   avma=av; return w + vcx*e;
 }
 
-/* d = a multiple of norm(x), x integral */
-long
-element_val2(GEN nf, GEN x, GEN d, GEN vp)
-{
-  GEN p = (GEN)vp[1];
-  gpmem_t av;
-  long v = ggval(d,p);
-
-  if (!v) return 0;
-  av=avma;
-  v = int_elt_val(nf,x,p,(GEN)vp[5],NULL);
-  avma=av; return v;
-}
-
 /* polegal without comparing variables */
 long
 polegal_spec(GEN x, GEN y)

@@ -170,6 +170,19 @@ _vec(GEN x) { GEN v = cgetg(2, t_VEC); v[1] = (long)x; return v; }
 GEN
 _col(GEN x) { GEN v = cgetg(2, t_COL); v[1] = (long)x; return v; }
 
+/* routines for naive growarrays */
+GEN
+cget1(long l, long t)
+{
+  GEN z = new_chunk(l);
+  z[0] = evaltyp(t) | evallg(1); return z;
+}
+void
+appendL(GEN x, GEN t)
+{
+  long l = lg(x); x[l] = (long)t; setlg(x, l+1);
+}
+
 GEN
 concatsp(GEN x, GEN y)
 {

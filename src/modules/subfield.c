@@ -261,7 +261,7 @@ print_block_system(long N,GEN Y,long d,GEN vbs,long maxl)
   if (DEBUGLEVEL>5) fprintferr("Y = %Z\n",Y);
   empty = cgetg(1,t_VEC);
   n = new_chunk(N+1);
-  D = cgetg(N+1, t_VEC); setlg(D,1);
+  D = cget1(N+1, t_VEC);
   t=new_chunk(r+1); k=new_chunk(r+1); Z=cgetg(r+1,t_VEC);
   for (ns=0,i=1; i<r; i++)
   {

@@ -1468,6 +1468,7 @@ famat_to_arch(GEN nf, GEN fa, long prec)
   GEN g,e, y = NULL;
   long i,l;
 
+  if (typ(fa) != t_MAT) return get_arch(nf, fa, prec);
   if (lg(fa) == 1) return zerovec(lg(nf[6])-1);
   g = (GEN)fa[1];
   e = (GEN)fa[2]; l = lg(e);
@@ -1844,15 +1845,6 @@ idealpows(GEN nf, GEN ideal, long e)
   affsi(e,court); return idealpow(nf,ideal,court);
 }
 
-GEN
-init_idele(GEN nf)
-{
-  GEN x = cgetg(3,t_VEC);
-  long RU;
-  nf = checknf(nf); RU = lg(nf[6])-1;
-  x[2] = (long)zerovec(RU); return x;
-}
-
 static GEN
 _idealmulred(GEN nf, GEN x, GEN y, long prec)
 {
@@ -2066,7 +2058,7 @@ chk_vdir(GEN nf, GEN vdir)
 
 /* assume I in NxN matrix form (not necessarily HNF) */
 static GEN
-ideallllred_elt_i(GEN *ptnf, GEN I, GEN vdir, long *ptprec)
+idealred_elt_i(GEN *ptnf, GEN I, GEN vdir, long *ptprec)
 {
   GEN G, u, y, nf = *ptnf;
   long i, e, prec = *ptprec;
@@ -2091,10 +2083,15 @@ ideallllred_elt_i(GEN *ptnf, GEN I, GEN vdir, long *ptprec)
 }
 
 GEN
-ideallllred_elt(GEN nf, GEN I)
+ideallllred_elt(GEN nf, GEN I, GEN vdir)
 {
   long prec = DEFAULTPREC;
-  return ideallllred_elt_i(&nf, I, NULL, &prec);
+  return idealred_elt_i(&nf, I, vdir, &prec);
+}
+GEN
+idealred_elt(GEN nf, GEN I)
+{
+  return ideallllred_elt(nf, I, NULL);
 }
 
 GEN
@@ -2122,7 +2119,7 @@ ideallllred(GEN nf, GEN I, GEN vdir, long prec)
     Ired = lllint_ip(I,4);
   else
     Ired = I;
-  y = ideallllred_elt_i(&nf, Ired, chk_vdir(nf,vdir), &prec);
+  y = idealred_elt_i(&nf, Ired, chk_vdir(nf,vdir), &prec);
 
   if (isnfscalar(y))
   { /* already reduced */
