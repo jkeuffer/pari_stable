@@ -2805,6 +2805,7 @@ read_opt(long argc, char **argv)
   /* override the values from gprc */
   testint(b, &paribufsize); if (paribufsize < 10) paribufsize = 10;
   testint(p, &primelimit);
+  TOP = (long)top;
   testint(s, &TOP); top = (ulong)TOP;
   if (under_emacs || under_texmacs) disable_color=1;
   pari_outfile=stdout; return pre;
