@@ -921,7 +921,9 @@ gdiventres(GEN x, GEN y)
           q = quotrem(x,y,&r);
           z[1] = (long)q;
           z[2] = (long)r; return z;
-        case t_POL: return gdiv(x,y);
+        case t_POL:
+          z[1] = ldiv(x,y);
+          z[2] = zero; return z;
       }
       break;
     case t_REAL:
@@ -944,11 +946,12 @@ gdiventres(GEN x, GEN y)
           q = gdiv(x,y);
           r = gzero;
         }
-        return q;
+        z[1] = (long)q;
+        z[2] = (long)r; return z;
       }
       if (tx == t_POL)
       {
-        z[1]=ldivres(x,y,(GEN *)(z+2));
+        z[1] = ldivres(x,y,(GEN *)(z+2));
         return z;
       }
   }
