@@ -19,9 +19,10 @@ LDOBJSGP=$(OBJSGP)
 #    standard headers      in $PREFIX/include
 #    gcc                   in $PREFIXBIN/bin
 PREFIX=/usr/local/cross-tools/i386-mingw32msvc
+PREFIX=/usr/local/i386-pc-cygwin32/i386-pc-cygwin32
 #PREFIX=/usr/local
 PREFIXBIN=/usr/local/cross-tools
-#PREFIXBIN=$(PREFIX)
+PREFIXBIN=$(PREFIX)
 
 CC        = $(PREFIXBIN)/bin/gcc
 LD        = $(CC)
@@ -49,7 +50,7 @@ PLOTFILE   = plotnull.c
 PLOTCFLAGS =
 PLOTLIBS   =
 
-OBJS   =  kernel.o mp.o alglin1.o alglin2.o arith1.o arith2.o base1.o base2.o base3.o base4.o base5.o bibli1.o bibli2.o buch1.o buch2.o buch3.o buch4.o galconj.o gen1.o gen2.o gen3.o ifactor1.o mpqs.o polarit1.o polarit2.o polarit3.o rootpol.o trans1.o trans2.o trans3.o elliptic.o galois.o kummer.o nffactor.o stark.o subfield.o subgroup.o thue.o anal.o compat.o errmsg.o es.o helpmsg.o highlvl.o init.o sumiter.o
+OBJS   =  kernel.o mp.o es.o alglin1.o alglin2.o arith1.o arith2.o base1.o base2.o base3.o base4.o base5.o bibli1.o bibli2.o buch1.o buch2.o buch3.o buch4.o galconj.o gen1.o gen2.o gen3.o ifactor1.o mpqs.o polarit1.o polarit2.o polarit3.o rootpol.o trans1.o trans2.o trans3.o elliptic.o galois.o kummer.o nffactor.o stark.o subfield.o subgroup.o thue.o anal.o compat.o errmsg.o helpmsg.o highlvl.o init.o sumiter.o
 OBJSGP =  gp.o gp_init.o gp_rl.o plot.o plotport.o whatnow.o
 OINLINE = mpinl.o
 
