@@ -18,14 +18,14 @@ LDused=$LD
 
 # Which Flags for Executable Linker?
 ldflags=
-if test "$LD"="$CC"; then
+GNULDused=
+if test "$LD" = "$CC"; then
   ldflags=$CFLAGS
-  GNULDused=
   if test -n "$__gnuc__"; then
     LDused=`$CC -print-prog-name=ld`
     LDneedsWl=yes
   else
-    if test "$osname"=hpux; then LDneedsWl=yes; fi
+    if test "$osname" = hpux; then LDneedsWl=yes; fi
   fi
 fi
 if ($LDused -v 2>&1 | grep GNU > /dev/null); then GNULDused=yes; fi
@@ -50,9 +50,13 @@ fi
 
 echo "Executable linker is   $LD  $LDFLAGS"
 
-case "$osname" in
-  gnu|osf1|linux|cygwin*|freebsd|netbsd) runpathprefix='-rpath ' ;;
-  solaris) runpathprefix='-R ' ;;
-  hpux) runpathprefix='+b ' ;;
-  aix) runpathprefix='-blibpath:' ;;
-esac
+if test "$GNULDused" = yes; then
+  runpathprefix='-rpath '
+else # guess...
+  case "$osname" in
+    gnu|osf1|linux|cygwin*|freebsd|netbsd) runpathprefix='-rpath ' ;;
+    solaris) runpathprefix='-R ' ;;
+    hpux) runpathprefix='+b ' ;;
+    aix) runpathprefix='-blibpath:' ;;
+  esac
+fi

@@ -127,6 +127,9 @@ BA 47- bitneg(1,0) --> SEGV (caused by 2.2.5 A10).
    48- factorback([;]) didn't work [ should be 1 ]
    49- f = factor(n); divisors(f) destroyed the factorization stored in f
    50- add missing GC in hess()
+   51- [Configure:] runpathprefix was computed only in terms of $osname
+       (assuming standard vendor supplied linker). At least check whether
+       it's GNU ld first.
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.
