@@ -1593,13 +1593,13 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l, long karma_type
   else err(warner,"entering black magic computation");
   O = cgetg(n+1,t_VECSMALL);
   for(i=1;i<=n;i++) O[i]=0;
-  F = factor(stoi(n));
-  Fp=gtovecsmall((GEN)F[1]);
-  Fe=gtovecsmall((GEN)F[2]);
+  F = decomp_small(n);
+  Fp=(GEN)F[1];
+  Fe=(GEN)F[2];
   np=lg(Fp)-1;
   Fpe=cgetg(np+1, t_VECSMALL);
   for (i = 1; i < lg(Fpe); i++)
-    Fpe[i] = itos(powgi(gmael(F,1,i), gmael(F,2,i)));
+    Fpe[i] = itos(gpowgs(stoi(Fp[i]), Fe[i]));
   /*In this part, we study the cardinal of the group to have an information
     about the orders, so if we are unlucky we can continue.*/
 
@@ -2516,9 +2516,9 @@ galoisfrobeniuslift(GEN T, GEN den, GEN L,  GEN Lden,
   }
   gt.Cd=gcopy(gt.C);
 
-  F=factor(stoi(gf->fp));
-  Fp=gtovecsmall((GEN)F[1]);
-  Fe=gtovecsmall((GEN)F[2]);
+  F=decomp_small(gf->fp);
+  Fp=(GEN) F[1];
+  Fe=(GEN) F[2];
   frob = cgetg(lg(L), t_VECSMALL);
   for(k=lg(Fp)-1;k>=1;k--)
   {
@@ -2592,7 +2592,7 @@ galoisfrobeniuslift(GEN T, GEN den, GEN L,  GEN Lden,
   else
   {
     /*We need to normalise result so that psi[g]=1*/
-    long im=itos(mpinvmod(stoi(gf->psi[g]),stoi(deg)));
+    long im=invsmod(gf->psi[g],deg);
     GEN cp=perm_pow(res, im);
     for(i=1;i<lg(res);i++) res[i]=cp[i];
     for(i=1;i<lg(gf->psi);i++) gf->psi[i] = (long)muluumod(im,gf->psi[i],deg);
