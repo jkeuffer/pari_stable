@@ -76,6 +76,7 @@ MD 31- oo loop in ellap [uninitialized array length in apell1]
 BA 38- pariformats (e.g %Z) incorrect on 64bit machines
    39- polhensellift(x,[x,1],2,2) --> "bug in multiplication"
    40- glitches in readline completion (random() * ne<TAB) --> inserted args)
+IZ 41- (obsolete, probably unused) CLK_TCK may reside in time.h
 
   Changed
     1- removed useless parameter prec in many bnr* and rnf* functions
@@ -98,6 +99,8 @@ BA  8- factorback, chinese, lcm and gcd now accept a single vector
        get_e, floor_bound, myceil)
    18- readline: TAB on empty parentheses following a function name has the
        same effect as M-h (used to insert args).
+IZ 19- faster computation of prime number table [better cache use]
+IS 20- obscure compiler bug in rootpol.c:max_modulus() [don't modify tau]
 
   Added
 BA  1- function pith() [= pi(x), naïve implementation]
@@ -106,6 +109,8 @@ BA  3- library functions FpX_roots_to_pol, FqX_roots_to_pol
 BA  4- library function FpX_FpXQ_compo (Brent & Kung)
     5- library function FpM_inv and FpM_gauss
     6- library function primitive_part
+IZ  7- readline: allow switching readline editing on/off [for commandtools]
+IZ  8- readline: F1 has same effect as M-h, and F1F1 as M-H (short/long help)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.0 (released 30/04/2001):
