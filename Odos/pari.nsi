@@ -74,7 +74,7 @@ Section "shortcuts" SecSM
   CreateShortCut "${short}\users.lnk" "$INSTDIR\doc\users.pdf" "" "$INSTDIR\doc\users.pdf" 0
   CreateShortCut "${short}\tutorial.lnk" "$INSTDIR\doc\tutorial.pdf" "" "$INSTDIR\doc\tutorial.pdf" 0
   CreateShortCut "${short}\refcard.lnk" "$INSTDIR\doc\refcard.pdf" "" "$INSTDIR\doc\refcard.pdf" 0
-  WriteINIStr "${short}\PARI pages.url" "InternetShortcut" "URL" "http://www.math.u-psud.fr/~belabas/pari.html"
+  WriteINIStr "${short}\PARI pages.url" "InternetShortcut" "URL" "http://pari.math.u-bordeaux.fr"
   CreateShortCut "${short}\Uninstall.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
   CreateShortCut "$DESKTOP\PARI.lnk" "$INSTDIR\gp.exe"
 SectionEnd
