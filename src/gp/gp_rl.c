@@ -480,7 +480,7 @@ pari_completion(char *text, int start, int end)
   switch (rl_line_buffer[first])
   {
     case '\\':
-      if (first == start) text = rl_line_buffer+start+1;
+      if (first == start) text = rl_line_buffer+start+2;
       return get_matches(-1,text,FILE_COMPLETION);
     case '?':
       if (rl_line_buffer[first+1] == '?') add_help_keywords = 1;
