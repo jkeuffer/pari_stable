@@ -892,7 +892,7 @@ random_form(GEN ex, GEN (*comp)(GEN,GEN))
   GEN F;
   for(;;)
   {
-    for (i=1; i<l; i++) ex[i] = mymyrand()>>randshift;
+    for (i=1; i<l; i++) ex[i] = pari_rand30()>>randshift;
     if ((F = init_form(ex, comp))) return F;
     avma = av;
   }
@@ -1198,7 +1198,7 @@ extra_relations(long LIMC, long nlze, GEN *ptextraC)
     form = NULL;
     for (i=1; i<=nlze2; i++)
     {
-      ex[i] = mymyrand()>>randshift;
+      ex[i] = pari_rand30()>>randshift;
       if (ex[i])
       {
         p1 = primeform(Disc,stoi(FB[vperm[i]]),PRECREG);

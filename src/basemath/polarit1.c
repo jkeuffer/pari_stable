@@ -1150,7 +1150,7 @@ u_FpX_addmul(GEN x, GEN y, long c, long p)
 static long
 small_rand(long p)
 {
-  return (p==2)? ((mymyrand() & 0x1000) == 0): mymyrand() % p;
+  return (p==2)? ((pari_rand30() & 0x1000) == 0): pari_rand30() % p;
 }
 
 GEN

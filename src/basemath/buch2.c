@@ -835,7 +835,7 @@ SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase)
     id = x0;
     for (i=1; i<lgsub; i++)
     {
-      ex[i] = mymyrand() >> randshift;
+      ex[i] = pari_rand30() >> randshift;
       if (ex[i])
       { /* avoid prec pb: don't let id become too large as lgsub increases */
         if (id != x0) id = ideallllred(nf,id,NULL,0);
@@ -845,7 +845,7 @@ SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase)
     }
     if (id == x0) continue;
 
-    for (i=1; i<ru; i++) vdir[i] = mymyrand() >> randshift;
+    for (i=1; i<ru; i++) vdir[i] = pari_rand30() >> randshift;
     for (bou=1; bou<ru; bou++)
     {
       y = ideallllred_elt(nf, (GEN)id[1], vdir);
@@ -1817,7 +1817,7 @@ random_relation(long phase,long cglob,long LIMC,long PRECREG,long MAXRELSUP,
     do {
       for (i=1; i<lgsub; i++)
       {
-        ex[i] = mymyrand()>>randshift;
+        ex[i] = pari_rand30()>>randshift;
         if (ex[i]) ideal = idealmulh(nf,ideal, gmael3(F->powsubFB,i,ex[i],1));
       }
     }
@@ -1927,11 +1927,11 @@ be_honest(FB_t *F, GEN nf, long PRECLLL)
 	ideal = ideal0;
 	for (i=1; i<lgsub; i++)
 	{
-	  ex = mymyrand()>>randshift;
+	  ex = pari_rand30()>>randshift;
 	  if (ex) ideal = idealmulh(nf,ideal,gmael3(F->powsubFB,i,ex,1));
 	}
         ideal = remove_content(ideal);
-        for (i=1; i<ru; i++) vdir[i] = mymyrand()>>randshift;
+        for (i=1; i<ru; i++) vdir[i] = pari_rand30()>>randshift;
 	for (k=1; k<ru; k++)
 	{
           m = pseudomin(ideal, computeGtwist(nf, vdir));

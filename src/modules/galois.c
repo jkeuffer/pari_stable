@@ -760,7 +760,7 @@ tschirn(GEN po, GEN *r, long pr)
   a = new_chunk(d);
   do 
   {
-    for (i=0; i<d; i++) a[i] = ((mymyrand()>>4) & 7) + 1;
+    for (i=0; i<d; i++) a[i] = ((pari_rand30()>>4) & 7) + 1;
     h = small_to_pol_i(a-2, d+2);
     (void)normalizepol_i(h, d+2); setvarn(h,0);
   } while (lgef(h) <= 3 || !ZX_is_squarefree(h));

@@ -278,9 +278,9 @@ tschirnhaus(GEN x)
   p1[1] = evalsigne(1)|evalvarn(0)|evallgef(5);
   do
   {
-    a = mymyrand() >> randshift; if (a==0) a =1; p1[4]=lstoi(a);
-    a = mymyrand() >> (randshift-1); if (a>=4) a-=8; p1[3]=lstoi(a);
-    a = mymyrand() >> (randshift-1); if (a>=4) a-=8; p1[2]=lstoi(a);
+    a = pari_rand30() >> randshift; if (a==0) a =1; p1[4]=lstoi(a);
+    a = pari_rand30() >> (randshift-1); if (a>=4) a-=8; p1[3]=lstoi(a);
+    a = pari_rand30() >> (randshift-1); if (a>=4) a-=8; p1[2]=lstoi(a);
     u = caract2(x,p1,v); av2=avma;
   }
   while (lgef(srgcd(u,derivpol(u))) > 3); /* while u not separable */

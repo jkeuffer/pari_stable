@@ -4699,6 +4699,32 @@ f2init(long l)
   return T;
 }
 
+/* return an extension of degree p^l of F_p, assume l > 0 
+ * using Adleman-Lenstra Algorithm, see below.
+ * Not stack clean. */
+GEN
+ffinit_Artin_Shreier(GEN ip, long l)
+{
+  long i;
+  long p=itos(ip);
+  GEN x,xp,yp,y2pm1;
+  GEN P, Q;
+  xp=monomial(gun,p,0);
+  P = FpX_sub(xp,deg1pol(gun,gun,0),NULL);
+  if (l == 1) return P;
+  x=polx[0];
+  yp=monomial(gun,p,MAXVARN);
+  y2pm1=monomial(gun,2*p-1,MAXVARN);
+  Q = gsub(FpX_sub(xp, x, NULL), FpX_sub(y2pm1, yp, NULL));
+  for (i = 2; i <= l; ++i)
+  {
+    setvarn(P,MAXVARN);
+    P = FpY_FpXY_resultant(P, Q, ip);
+  }
+  return P;
+}
+
+
 /*Check if subcyclo(n,l,0) is irreducible modulo p*/
 static long
 fpinit_check(GEN p, long n, long l)

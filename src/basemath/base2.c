@@ -1810,7 +1810,7 @@ random_elt_in_P(GEN beta, long sm)
     if (sm > 7) sm = 0;
     for (i=1; i<lbeta; i++)
     { /* Warning: change definition of 'sm' if you change this */
-      z = mymyrand() >> (BITS_IN_RANDOM-5); /* in [0,15] */
+      z = pari_rand30() >> (BITS_IN_RANDOM-5); /* in [0,15] */
       if (z >= 9) z -= 7;
       if (sm) z %= sm;
       if (!z) continue;
@@ -1826,7 +1826,7 @@ random_elt_in_P(GEN beta, long sm)
   else
     for (i=1; i<lbeta; i++)
     {
-      z = mymyrand() >> (BITS_IN_RANDOM-5);
+      z = pari_rand30() >> (BITS_IN_RANDOM-5);
       if (z >= 9) z -= 7;
       if (!z) continue;
       B = gmulsg(z, (GEN)beta[i]);
