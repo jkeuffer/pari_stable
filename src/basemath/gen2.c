@@ -2004,7 +2004,7 @@ gsqr(GEN x)
       return z;
 
     case t_VEC: case t_COL:
-      err(gmuleri,tx,tx);
+      err(gmulerf,tx,tx);
   }
   err(typeer,"gsqr");
   return NULL; /* not reached */

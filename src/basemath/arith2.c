@@ -903,6 +903,8 @@ divisors(GEN n)
     e[i] = itos((GEN)e[i]);
     nbdiv = mulis(nbdiv,1+e[i]);
   }
+  if (is_bigint(nbdiv) || (itos(nbdiv) & ~LGBITS))
+    err(talker, "too many divisors (more than %ld)", LGBITS - 1);
   d = t = (GEN*) cgetg(itos(nbdiv)+1,t_VEC);
   *++d = gun;
   for (i=1; i<l; i++)
