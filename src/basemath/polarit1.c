@@ -624,7 +624,7 @@ FpX_is_totally_split(GEN f, GEN p)
   return degpol(z) == 1 && gcmp1((GEN)z[3]) && !signe(z[2]); /* x^p = x ? */
 }
 
-/*FIXME: what does that do ? */
+/* Flv_Flx( Flm_Flv_mul(x, Flx_Flv(y), p) ) */
 static GEN
 Flm_Flx_mul(GEN x, GEN y, ulong p)
 {
@@ -635,25 +635,43 @@ Flm_Flx_mul(GEN x, GEN y, ulong p)
   l = lg(x[1]);
   y++;
   z = vecsmall_const(l,0) + 1;
-  for (k=1; k<ly; k++)
+  if (u_OK_ULONG(p))
   {
-    GEN c;
-    if (!y[k]) continue;
-    c = (GEN)x[k];
-    if (y[k] == 1)
-      for (i=1; i<l; i++)
-      {
-        z[i] += c[i];
-        if (z[i] & HIGHBIT) z[i] %= p;
-      }
-    else
-      for (i=1; i<l; i++)
-      {
-        z[i] += c[i] * y[k];
-        if (z[i] & HIGHBIT) z[i] %= p;
-      }
+    for (k=1; k<ly; k++)
+    {
+      GEN c;
+      if (!y[k]) continue;
+      c = (GEN)x[k];
+      if (y[k] == 1)
+        for (i=1; i<l; i++)
+        {
+          z[i] += c[i];
+          if (z[i] & HIGHBIT) z[i] %= p;
+        }
+      else
+        for (i=1; i<l; i++)
+        {
+          z[i] += c[i] * y[k];
+          if (z[i] & HIGHBIT) z[i] %= p;
+        }
+    }
+    for (i=1; i<l; i++) z[i] %= p;
   }
-  for (i=1; i<l; i++) z[i] %= p;
+  else
+  {
+    for (k=1; k<ly; k++)
+    {
+      GEN c;
+      if (!y[k]) continue;
+      c = (GEN)x[k];
+      if (y[k] == 1)
+        for (i=1; i<l; i++)
+          z[i] = adduumod(z[i], c[i], p);
+      else
+        for (i=1; i<l; i++)
+          z[i] = adduumod(z[i], muluumod(c[i],y[k],p), p);
+    }
+  }
   while (--l && !z[l]);
   if (!l) return Flx_zero(0);
   *z-- = vs; return z;
