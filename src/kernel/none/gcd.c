@@ -1,3 +1,4 @@
+#line 1 "../src/kernel/none/gcd.c"
 /* $Id$
 
 Copyright (C) 2000  The PARI group.
