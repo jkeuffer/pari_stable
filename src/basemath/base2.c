@@ -3530,15 +3530,6 @@ rnfmul(GEN x, GEN y)
 }
 
 static GEN
-rnfvecmul(GEN x, GEN v)
-{
-  long i, l = lg(x);
-  GEN z = cgetg(l,t_COL);
-  for (i = 1; i < l; i++) z[i] = lmul((GEN)x[i], (GEN)v[i]);
-  return z;
-}
-
-static GEN
 findmin(GEN nf, GEN x, GEN muf)
 {
   pari_sp av = avma;
@@ -3548,17 +3539,16 @@ findmin(GEN nf, GEN x, GEN muf)
   x = Q_primitive_part(x, &cx);
   if (gcmp1(gcoeff(x,1,1))) y = M;
   else
-  { GEN G = gmael(nf,5,2);
-    m = gmul(G, x);
-    m = lllintern(m,4,1,0);
+  {
+    GEN G = gmael(nf,5,2);
+    m = lllintern(gmul(G, x), 4, 1, 0);
     if (!m)
     {
       x = lllint_ip(x,4);
-      m = gmul(G, x);
-      m = lllintern(m,4,1,0);
+      m = lllintern(gmul(G, x), 4, 1, 0);
       if (!m) err(precer,"rnflllgram");
     }
-    x = gmul(x,m);
+    x = gmul(x, m);
     y = gmul(M, x);
   }
   m = gauss_realimag(y, muf);
@@ -3572,7 +3562,7 @@ findmin(GEN nf, GEN x, GEN muf)
 static int
 RED(long k, long l, GEN U, GEN mu, GEN MC, GEN nf, GEN I, GEN *Ik_inv)
 {
-  GEN x, xc, xpol, ideal;
+  GEN x, xc, ideal;
   long i;
 
   if (!*Ik_inv) *Ik_inv = idealinv(nf, (GEN)I[k]);
@@ -3581,12 +3571,12 @@ RED(long k, long l, GEN U, GEN mu, GEN MC, GEN nf, GEN I, GEN *Ik_inv)
   if (!x) return 0;
   if (gcmp0(x)) return 1;
 
-  xpol = basistoalg(nf,x); xc = nftocomplex(nf,x);
-  MC[k] = lsub((GEN)MC[k], rnfvecmul(xc,(GEN)MC[l]));
-  U[k] = lsub((GEN)U[k], gmul(xpol,(GEN)U[l]));
-  coeff(mu,k,l) = lsub(gcoeff(mu,k,l),xc);
+  xc = nftocomplex(nf,x);
+  MC[k] = lsub((GEN)MC[k], rnfmul(xc,(GEN)MC[l]));
+  U[k] = lsub((GEN)U[k], gmul(basistoalg(nf,x), (GEN)U[l]));
+  coeff(mu,k,l) = lsub(gcoeff(mu,k,l), xc);
   for (i=1; i<l; i++)
-    coeff(mu,k,i) = lsub(gcoeff(mu,k,i),rnfmul(xc,gcoeff(mu,l,i)));
+    coeff(mu,k,i) = lsub(gcoeff(mu,k,i), rnfmul(xc,gcoeff(mu,l,i)));
   return 1;
 }
 
@@ -3607,9 +3597,9 @@ do_SWAP(GEN I, GEN MC, GEN MCS, GEN h, GEN mu, GEN B, long kmax, long k,
   GEN p1, p2, muf, mufc, Bf, temp;
   long i, j;
 
-  p1 = nftau(r1,gadd((GEN) B[k],
-                     gmul(gnorml2(gcoeff(mu,k,k-1)),(GEN)B[k-1])));
-  p2 = nftau(r1,(GEN)B[k-1]);
+  p1 = nftau(r1, gadd((GEN) B[k],
+                      gmul(gnorml2(gcoeff(mu,k,k-1)), (GEN)B[k-1])));
+  p2 = nftau(r1, (GEN)B[k-1]);
   if (gcmp(gmulsg(alpha,p1), gmulsg(alpha-1,p2)) > 0) return 0;
 
   swap(MC[k-1],MC[k]);
@@ -3624,9 +3614,9 @@ do_SWAP(GEN I, GEN MC, GEN MCS, GEN h, GEN mu, GEN B, long kmax, long k,
   p1 = rnfdiv((GEN)B[k-1],Bf);
   coeff(mu,k,k-1) = (long)rnfmul(mufc,p1);
   temp = (GEN)MCS[k-1];
-  MCS[k-1] = ladd((GEN)MCS[k], rnfvecmul(muf,(GEN)MCS[k-1]));
-  MCS[k] = lsub(rnfvecmul(rnfdiv((GEN)B[k],Bf),temp),
-          rnfvecmul(gcoeff(mu,k,k-1),(GEN)MCS[k]));
+  MCS[k-1] = ladd((GEN)MCS[k], rnfmul(muf,(GEN)MCS[k-1]));
+  MCS[k] = lsub(rnfmul(rnfdiv((GEN)B[k],Bf), temp),
+                rnfmul(gcoeff(mu,k,k-1), (GEN)MCS[k]));
   B[k] = (long)rnfmul((GEN)B[k],p1);
   B[k-1] = (long)Bf;
   for (i=k+1; i<=kmax; i++)
@@ -3638,44 +3628,27 @@ do_SWAP(GEN I, GEN MC, GEN MCS, GEN h, GEN mu, GEN B, long kmax, long k,
   return 1;
 }
 
-/* given a base field nf (e.g main variable y), a polynomial pol with
- * coefficients in nf    (e.g main variable x), and an order as output
- * by rnfpseudobasis, outputs a reduced order. */
-GEN
-rnflllgram(GEN nf, GEN pol, GEN order,long prec)
+static GEN
+rel_T2(GEN nf, GEN pol, long lx, long prec)
 {
-  pari_sp av = avma;
-  long i, j, k, l, kmax, r1, ru, lx;
-  GEN p1, m, M, I, h, H, unro, roorder, powreorder, mth, s, MC, MPOL, MCS;
-  GEN B, mu, y, z;
-  const int alpha = 10;
+  long ru, i, j, k, l;
+  GEN T2, m, s, unro, roorder, powreorder;
 
-  nf = checknf(nf); r1 = nf_get_r1(nf);
-  check_ZKmodule(order, "rnflllgram");
-  M = (GEN)order[1];
-  I = (GEN)order[2]; lx = lg(I);
-  if (lx < 3) return gcopy(order);
-  if (lx-1 != degpol(pol)) err(consister,"rnflllgram");
-  I = dummycopy(I);
-  H = h = NULL;
-
-  /* Compute the relative T2 matrix of powers of theta */
   roorder = nf_all_roots(nf, pol, prec); ru = lg(roorder);
   unro = cgetg(lx,t_COL); for (i=1; i<lx; i++) unro[i] = un;
   powreorder = cgetg(lx,t_MAT); powreorder[1] = (long)unro;
-  mth = cgetg(ru, t_VEC);
+  T2 = cgetg(ru, t_VEC);
   m = initmat(lx);
   for (i = 1; i < ru; i++)
   {
     GEN ro = (GEN)roorder[i];
     for (k=2; k<lx; k++)
     {
-      p1 = cgetg(lx, t_COL); powreorder[k] = (long)p1;
+      GEN c = cgetg(lx, t_COL); powreorder[k] = (long)c;
       for (j=1; j < lx; j++)
-	p1[j] = lmul((GEN)ro[j], gmael(powreorder,k-1,j));
+	c[j] = lmul((GEN)ro[j], gmael(powreorder,k-1,j));
     }
     for (l = 1; l < lx; l++)
-    {
       for (k = 1; k <= l; k++)
       {
         s = gzero;
@@ -3690,10 +3663,31 @@ rnflllgram(GEN nf, GEN pol, GEN order,long prec)
           coeff(m, l, k) = lconj(s);
         }
       }
-    }
-    mth[i] = (long)dummycopy(m);
+    T2[i] = (long)dummycopy(m);
   }
-  /* Start LLL algorithm */
+  return T2;
+}
+
+/* given a base field nf (e.g main variable y), a polynomial pol with
+ * coefficients in nf    (e.g main variable x), and an order as output
+ * by rnfpseudobasis, outputs a reduced order. */
+GEN
+rnflllgram(GEN nf, GEN pol, GEN order,long prec)
+{
+  pari_sp av = avma;
+  long j, k, l, kmax, r1, lx;
+  GEN M, I, h, H, mth, MC, MPOL, MCS, B, mu, y, z;
+  const int alpha = 10;
+
+  nf = checknf(nf); r1 = nf_get_r1(nf);
+  check_ZKmodule(order, "rnflllgram");
+  M = (GEN)order[1];
+  I = (GEN)order[2]; lx = lg(I);
+  if (lx < 3) return gcopy(order);
+  if (lx-1 != degpol(pol)) err(consister,"rnflllgram");
+  I = dummycopy(I);
+  H = h = NULL;
+  mth = rel_T2(nf, pol, lx, prec);
   MPOL = matbasistoalg(nf, M);
   MCS = cgetg(lx,t_MAT);
   MC = cgetg(lx,t_MAT);
@@ -3727,7 +3721,7 @@ PRECPB:
       {
 	coeff(mu,k,j) = (long) rnfdiv(rnfscal(mth,(GEN)MCS[j],(GEN)MC[k]),
 	                              (GEN) B[j]);
-	MCS[k] = lsub((GEN)MCS[k], rnfvecmul(gcoeff(mu,k,j),(GEN)MCS[j]));
+	MCS[k] = lsub((GEN)MCS[k], rnfmul(gcoeff(mu,k,j),(GEN)MCS[j]));
       }
       B[k] = lreal(rnfscal(mth,(GEN)MCS[k],(GEN)MCS[k]));
       if (check_0((GEN)B[k])) goto PRECPB;
