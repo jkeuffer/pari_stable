@@ -3046,9 +3046,11 @@ torselldoud(GEN e)
   v = ellintegralmodel(e);
   if (v) e = coordch(e,v);
 
-  b = lgefint((GEN)e[12]) >> 1;
+  b = lgefint((GEN)e[12]) >> 1; /* b = size of sqrt(D) */
   prec = precision((GEN)e[15]);
   if (prec < b) err(talker, "precision too low in torselldoud");
+  b = max(b, DEFAULTPREC);
+  if (b < prec) { prec = b; e = gprec_w(e, b); }
   b = torsbound(e,3);
   if (b==1) { avma=av; return tors(e,1,NULL,NULL, v); }
   w22 = gmul2n((GEN)e[16],-1);
