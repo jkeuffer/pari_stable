@@ -108,6 +108,8 @@ IZ 37- [OS/2:] ^C would only work once
        f(n)=n
        ff(f(n))=n  --> error (OK) + SEGV on Linux (same data freed twice)
    55- qflll(matrix(2,3,x,y,x+y)) --> SEGV
+IZ 56- default(primelimit, 2156858852) --> SEGV and other signed/unsigned
+       conversion problems.
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available
@@ -161,6 +163,7 @@ IZ 29- improve portability of make_vi_tags (cf 'make ctags')
    33- enabled Karatsuba multiplication for t_REAL
    34- broken Configure into many smaller files (config/get_*)
    35- let gphelp write all cross-references as [label:LABELNAME] (was [??])
+IZ 36- cache optimization in initprimes() [ default(primelimit,.) ]
 
   Added:
     1- [TeXmacs:] contextual completion (<TAB>)

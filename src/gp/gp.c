@@ -423,7 +423,7 @@ sd_ulong(char *v, int flag, char *s, ulong *ptn, ulong Min, ulong Max,
   if (*v == 0) n = *ptn;
   else
   {
-    n = (ulong)get_int(v,0);
+    n = get_uint(v);
     if (*ptn == n) return gnil;
     if (n > Max || n < Min)
     {
@@ -778,7 +778,7 @@ static GEN
 sd_primelimit(char *v, int flag)
 {
   ulong n = primelimit;
-  GEN r = sd_ulong(v,flag,"primelimit",&n, 0,VERYBIGINT,NULL);
+  GEN r = sd_ulong(v,flag,"primelimit",&n, 0,2*(ulong)VERYBIGINT,NULL);
   if (n != primelimit)
   {
     if (flag != d_INITRC)

@@ -111,12 +111,148 @@ initprimes1(ulong size, long *lenp, long *lastp)
   *lastp = ((s - p) << 1) + 1;
 #if 0
   fprintferr("initprimes1: q = %ld, len = %ld, last = %ld\n",
-	     q, *lenp, *lastp);
+             q, *lenp, *lastp);
 #endif
   return (byteptr) gprealloc(p,r-p);
 }
 
-#define PRIME_ARENA (200 * 1024) /* No slowdown even with 256K level-2 cache */
+/*  Timing in ms (Athlon/850; reports 512M of secondary cache; looks
+    like there is 64K of quickier cache too).
+
+    The algorithm of allocation starts to work regularly from
+    2pi(sqrt(lim)); we skip or double-quote what is less than this.
+
+     arena| 10m   30m   100m   300m   1000m   2000m    4000m
+     =================================================================
+        1K  360
+       1.5  250  1150
+        2K  210   840
+        3K  180   660   3160
+        4K  160   580   2530  11930  "36680" "84730" "262850"
+       12K  150   460   1730   5590   26010   65500  "184520"
+       20K  150   430   1500   4900   25450   56420   143220
+     ...
+       64K  140   410   1400   4360   22150   32850   122820
+
+    Timing relative to 64K:
+
+     20K    1.071  1.049  1.071  1.124  1.149  1.718  1.166
+     28K    1.071  1.000  1.043  1.067  1.115  1.256  1.326
+     36K    1.000  1.024  1.029  1.034  0.946  1.075  1.087
+     44K    1.000  1.049  1.007  1.016  1.006  1.056  0.974
+     52K    1.000  0.976  1.007  1.009  1.023  1.035  0.910
+     56K    0.929  1.024  1.000  1.002  1.023  1.022  0.893
+     58K    1.143  0.976  1.000  1.002  0.995  1.016  0.888
+     60K    1.000  1.024  1.000  0.998  1.016  1.010  0.865
+     62K    1.000  1.000  1.000  0.995  1.023  1.004  0.922
+     64K    1.000  1.000  1.000  1.000  1.000  1.000  1.000
+     66K    1.071  1.049  1.014  0.993  1.025  0.995  0.938
+     68K    1.071  1.098  1.086  1.050  0.939  0.991  0.926
+     70K    1.214  1.171  1.164  1.124  1.061  1.023  0.860
+     72K    1.214  1.244  1.221  1.181  1.070  1.081  0.852
+     76K    1.357  1.415  1.371  1.305  1.154  1.260  0.841
+     84K    1.643  1.610  1.614  1.546  1.340  1.426  0.954
+     92K    1.857  1.878  1.850  1.773  1.475  1.640  1.063
+     96K    2.000  2.073  2.057  2.016  1.380  1.710  1.127
+    128K    2.214  2.341  2.371  2.328  1.624  2.118  1.429
+    192K    2.500  2.707  2.743  2.729  1.901  2.495  1.626
+    256K    2.786  2.902  2.979  2.977  2.077  2.680  1.791
+    384K    3.143  3.293  3.371  3.392  2.344  3.050  1.906
+    512K    3.286  3.488  3.521  3.537  2.445  3.441  2.130
+    768K    3.857  4.171  4.264  4.319  2.977  4.045  2.490
+   1024K    4.429  4.707  4.879  4.947  3.435  4.900  2.941
+   1536K    5.071  5.659  6.029  6.197  4.393  6.237  3.662
+   2048K    5.357  6.195  6.593  6.995  4.857  6.886  4.039
+   3072K    5.786  6.488  7.029  7.356  5.264  7.425  4.402
+
+    Values after 92K are from different run...  Matters much for 4000m
+    one, when swapping starts; also 1000m run looks not very much
+    reproducible...
+
+    The stats for small arena lead to the value of ARENA_IN_ROOTS for i386.
+
+    Similar data for Sparc leads to 10.
+
+    TODO: need to create macro for (small) OVERHEAD_100_IN_ROOTS where the
+    overhead of subdivision is 100%; likewise one needs to estimate
+    the overhead of having the arena larger than the cache size.  Then
+    one can intelligently optimize the arena size taking both effects
+    into the account...
+*/
+
+#ifndef ARENA_IN_ROOTS
+#  ifdef i386           /* gcc defines this? */
+#    define ARENA_IN_ROOTS      1.5
+#  else
+#    define ARENA_IN_ROOTS      10
+#  endif
+#endif
+#ifndef PRIME_ARENA
+#  ifdef i386           /* gcc defines this? */
+   /* Due to smaller ARENA_IN_ROOTS, smaller arena is OK; fit L1 cache */
+#    define PRIME_ARENA (63 * 1024) /* No slowdown even with 64K L1 cache */
+#  else
+#    define PRIME_ARENA (200 * 1024) /* No slowdown even with 256K L2 cache */
+#  endif
+#endif
+
+static long prime_arena = PRIME_ARENA;
+static double arena_in_roots = ARENA_IN_ROOTS;
+
+long
+good_arena_size(long rootnum, ulong remains, ulong primes)
+{
+  /* ARENA_IN_ROOTS below 12: some slowdown starts to be noticable
+   * when things fit into the cache.
+   * XXX The choice of 10 gives a slowdown of 1-2% on UltraSparcII,
+   * but makes calculations even for (the current) maximum of 436273009
+   * fit into 256K cache (still common for some architectures).
+   *
+   * One may change it when small caches become uncommon, but the gain
+   * is not going to be very noticable... */
+
+  long asize = arena_in_roots * rootnum; /* Make % overhead negligeable. */
+  if (asize < prime_arena) asize = prime_arena - 1;
+  if (asize > remains) asize = remains; /* + room for a sentinel byte */
+  if (2 * primes < asize)               /* XXXX Better substitutes for 2? */
+    asize -= primes;                    /* We access arena AND primes */
+  return asize;
+}
+
+/* Use as in
+    install(set_internal,lLDG)          \\ Through some M too?
+    set_internal(2,100) \\ disable dependence on limit
+
+    { time_primes_arena(ar,limit) =
+        set_internal(1,floor(ar*1024));
+        default(primelimit, 200 000);   \\ 100000 results in *larger* malloc()!
+        gettime;
+        default(primelimit, limit);
+        if(ar >= 1, ar=floor(ar));
+        print("arena "ar"K => "gettime"ms");
+    }
+*/
+long
+set_internal(long what, GEN g)
+{
+  long ret = 0;
+
+  if (what == 1)
+    ret = prime_arena;
+  else if (what == 2)
+    ret = arena_in_roots * 1000;
+  else
+    err(talker, "panic: set_internal");
+  if (g != NULL) {
+    long val = itos(g);
+
+    if (what == 1)
+      prime_arena = val;
+    else if (what == 2)
+      arena_in_roots = val / 1000.;
+  }
+  return ret;
+}
 
 /* Here's the workhorse.  This is recursive, although normally the first
    recursive call will bottom out and invoke initprimes1() at once.
@@ -128,22 +264,16 @@ initprimes0(ulong maxnum, long *lenp, ulong *lastp)
   byteptr q,r,s,fin, p, p1, fin1, plast, curdiff;
   ulong last, remains, curlow;
 
-#if 0
-  fprintferr("initprimes0: called for maxnum = %lu\n", maxnum);
-#endif
-  if (maxnum <= 1ul<<17)	/* Arbitrary. */
+  if (maxnum <= 1ul<<17)        /* Arbitrary. */
     return initprimes1(maxnum>>1, lenp, (long*)lastp);
 
-  maxnum |= 1;			/* make it odd. */
+  maxnum |= 1;                  /* make it odd. */
 
   /* Checked to be enough up to 40e6, attained at 155893 */
   size = (long) (1.09 * maxnum/log((double)maxnum)) + 145;
   p1 = (byteptr) gpmalloc(size);
   rootnum = (long) sqrt((double)maxnum); /* cast it back to a long */
   rootnum |= 1;
-#if 0
-  fprintferr("initprimes0: rootnum = %ld\n", rootnum);
-#endif
   {
     byteptr p2 = initprimes0(rootnum, &psize, &last); /* recursive call */
     memcpy(p1, p2, psize); free(p2);
@@ -151,26 +281,15 @@ initprimes0(ulong maxnum, long *lenp, ulong *lastp)
   fin1 = p1 + psize - 1;
   remains = (maxnum - rootnum) >> 1; /* number of odd numbers to check */
 
-  /* ARENA_IN_ROOTS below 12: some slowdown starts to be noticable
-   * when things fit into the cache.
-   * XXX The choice of 10 gives a slowdown of 1-2% on UltraSparcII,
-   * but makes calculations even for (the current) maximum of 436273009
-   * fit into 256K cache (still common for some architectures).
-   *
-   * One may change it when small caches become uncommon, but the gain
-   * is not going to be very noticable... */
-#define ARENA_IN_ROOTS	10
-
-  asize = ARENA_IN_ROOTS * rootnum;	/* Make % overhead negligeable. */
-  if (asize < PRIME_ARENA) asize = PRIME_ARENA;
-  if (asize > remains) asize = remains + 1;/* + room for a sentinel byte */
-  alloced = (avma - bot < (size_t)asize>>1); /* enough room on the stack ? */
+  asize = good_arena_size(rootnum, remains, psize);
+  /* enough room on the stack ? */
+  alloced = (((byteptr)avma) - ((byteptr)bot) <= (size_t)asize);
   if (alloced)
-    p = (byteptr) gpmalloc(asize);
+    p = (byteptr) gpmalloc(asize + 1);
   else
     p = (byteptr) bot;
-  fin = p + asize - 1;		/* the 0 sentinel goes at fin. */
-  curlow = rootnum + 2;		/* We know all primes up to rootnum (odd). */
+  fin = p + asize;              /* the 0 sentinel goes at fin. */
+  curlow = rootnum + 2; /* First candidate: know primes up to rootnum (odd). */
   curdiff = fin1;
 
   /* During each iteration p..fin-1 represents a range of odd
@@ -181,10 +300,10 @@ initprimes0(ulong maxnum, long *lenp, ulong *lastp)
   {
     if (asize > remains)
     {
-      asize = remains + 1;
-      fin = p + asize - 1;
+      asize = remains;
+      fin = p + asize;
     }
-    memset(p, 0, asize);
+    memset(p, 0, asize + 1);
     /* p corresponds to curlow.  q runs over primediffs.  */
     /* Don't care about DIFFPTR_SKIP: false positives provide no problem */
     for (q = p1+2, k = 3; q <= fin1; k += *q++)
@@ -194,13 +313,30 @@ initprimes0(ulong maxnum, long *lenp, ulong *lastp)
       = p + the last even number which is <= curlow + p - 2 and 0 (mod p)
       = p + curlow + p - 2 - (curlow + p - 2) % 2p. */
       long k2 = k*k - curlow;
-
-      if (k2 > 0)
-      {
-	r = p + (k2 >>= 1);
-	if (k2 > remains) break; /* Guard against address wrap. */
-      } else
-	r = p - (((curlow+k-2) % (2*k)) >> 1) + k - 1;
+  
+#if 0                                   /* XXXX Check which one is quickier! */
+      if (k2 > 0) {                     /* May be due to ulong==>long wrap */
+        k2 >>= 1;
+        if (k2 >= asize) {
+          if (k2 > remains) {
+            /* Can happen due to a conversion wrap only, so . */
+            goto small_k;
+          } else
+            break;                      /* All primes up to sqrt(top) checked */
+        }
+        r = p + k2;
+      } else {
+       small_k:
+        r = p - (((curlow+k-2) % (2*k)) >> 1) + k - 1;
+      }
+#else
+      if (k2 > 0) {
+        r = p + (k2 >>= 1);
+        if (k2 <= remains) goto finish; /* Guard against an address wrap. */
+      }
+      r = p - (((curlow+k-2) % (2*k)) >> 1) + k - 1;
+    finish:
+#endif
       for (s = r; s < fin; s += k) *s = 1;
     }
     /* now q runs over addresses corresponding to primes */
@@ -208,19 +344,19 @@ initprimes0(ulong maxnum, long *lenp, ulong *lastp)
     {
       long d;
 
-      while (*q) q++;		/* use 0-sentinel at end */
+      while (*q) q++;           /* use 0-sentinel at end */
       if (q >= fin) break;
       d = (q - plast) << 1;
       while (d >= DIFFPTR_SKIP)
-	*curdiff++ = DIFFPTR_SKIP, d -= DIFFPTR_SKIP;
+        *curdiff++ = DIFFPTR_SKIP, d -= DIFFPTR_SKIP;
       *curdiff++ = d;
     }
-    plast -= asize - 1;
-    remains -= asize - 1;
-    curlow += ((asize - 1)<<1);
+    plast -= asize;
+    remains -= asize;
+    curlow += (asize<<1);
   } /* while (remains) */
   last = curlow - ((p - plast) << 1);
-  *curdiff++ = 0;		/* sentinel */
+  *curdiff++ = 0;               /* sentinel */
   *lenp = curdiff - p1;
   *lastp = last;
   if (alloced) free(p);
@@ -233,7 +369,7 @@ initprimes0(ulong maxnum, long *lenp, ulong *lastp)
    being in the table, and we might as well go to a multiple of 4 Bytes.--GN */
 
 void
-init_tinyprimes_tridiv(byteptr p);	/* in ifactor2.c */
+init_tinyprimes_tridiv(byteptr p);      /* in ifactor2.c */
 #endif
 
 static ulong _maxprime = 0;
@@ -254,7 +390,6 @@ initprimes(ulong maxnum)
   ulong last;
   byteptr p;
   /* The algorithm must see the next prime beyond maxnum, whence the +512. */
-  /* switch to unsigned: adding the 512 _could_ wrap to a negative number. */
   ulong maxnum1 = ((maxnum<65302?65302:maxnum)+512ul);
 
   if ((maxnum>>1) > VERYBIGINT - 1024)
@@ -383,21 +518,21 @@ static long
 tridiv_bound(GEN n, long all)
 {
   long size = expi(n) + 1;
-  if (all > 1)			/* bounded factoring */
-    return all;			/* use the given limit */
+  if (all > 1)                  /* bounded factoring */
+    return all;                 /* use the given limit */
   if (all == 0)
-    return VERYBIGINT;		/* smallfact() case */
+    return VERYBIGINT;          /* smallfact() case */
   if (size <= 32)
     return 16384;
   else if (size <= 512)
     return (size-16) << 10;
-  return 1L<<19;		/* Rho will generally be faster above this */
+  return 1L<<19;                /* Rho will generally be faster above this */
 }
 
 /* function imported from ifactor1.c */
 extern long ifac_decomp(GEN n, long hint);
 extern long ifac_decomp_break(GEN n, long (*ifac_break)(GEN,GEN,GEN,GEN),
-		  GEN state, long hint);
+                  GEN state, long hint);
 static GEN
 aux_end(GEN n, long nb)
 {
@@ -420,7 +555,7 @@ aux_end(GEN n, long nb)
 
 GEN 
 auxdecomp1(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
-		  GEN state, long all, long hint)
+                  GEN state, long all, long hint)
 {
   pari_sp av;
   long pp[] = { evaltyp(t_INT)|_evallg(4), 0,0,0 };
@@ -685,7 +820,7 @@ gmu(GEN n)
 long
 mu(GEN n)
 {
-  byteptr d = diffptr+1;	/* point at 3 - 2 */
+  byteptr d = diffptr+1;        /* point at 3 - 2 */
   pari_sp av = avma;
   ulong p;
   long s, v, lim1;
@@ -716,7 +851,7 @@ mu(GEN n)
   /* large composite without small factors */
   v = ifac_moebius(n, decomp_default_hint);
   avma=av;
-  return (s<0 ? -v : v);	/* correct also if v==0 */
+  return (s<0 ? -v : v);        /* correct also if v==0 */
 }
 
 GEN
@@ -751,8 +886,8 @@ issquarefree(GEN x)
       NEXT_PRIME_VIADIFF(p,d);
       if (mpdivisis(x,p,x))
       {
-	if (smodis(x,p) == 0) { avma = av; return 0; }
-	if (is_pm1(x)) { avma = av; return 1; }
+        if (smodis(x,p) == 0) { avma = av; return 0; }
+        if (is_pm1(x)) { avma = av; return 1; }
       }
     }
     if (cmpii(sqru(p),x) >= 0 || pseudoprime(x)) { avma = av; return 1; }
@@ -1045,7 +1180,7 @@ divisors(GEN n)
   for (i=1; i<l; i++)
     for (t1=t,j=e[i]; j; j--,t1=t2)
       for (t2=d,t3=t1; t3<t2; )
-	*++d = mulii(*++t3, (GEN)n[i]);
+        *++d = mulii(*++t3, (GEN)n[i]);
   tetpil=avma; return gerepile(av,tetpil,sort((GEN)t));
 }
 
@@ -1465,8 +1600,8 @@ nucomp(GEN x, GEN y, GEN l)
       d1=bezout(s,d,&u1,&v1);
       if (!gcmp1(d1))
       {
-	a1=divii(a1,d1); a2=divii(a2,d1);
-	s=divii(s,d1); d=divii(d,d1);
+        a1=divii(a1,d1); a2=divii(a2,d1);
+        s=divii(s,d1); d=divii(d,d1);
       }
       p1=resii((GEN)x[3],d); p2=resii((GEN)y[3],d);
       p3=modii(negi(mulii(u1,addii(mulii(u,p1),mulii(v,p2)))),d);
@@ -1977,8 +2112,8 @@ binaire(GEN x)
       do { y[ly] = m & u ? un : zero; ly++; } while (m>>=1);
       for (i=3; i<lx; i++)
       {
-	m=HIGHBIT; u=x[i];
-	do { y[ly] = m & u ? un : zero; ly++; } while (m>>=1);
+        m=HIGHBIT; u=x[i];
+        do { y[ly] = m & u ? un : zero; ly++; } while (m>>=1);
       }
       break;
 
@@ -1986,9 +2121,9 @@ binaire(GEN x)
       ex=expo(x);
       if (!signe(x))
       {
-	lx=1+max(-ex,0); y=cgetg(lx,t_VEC);
-	for (i=1; i<lx; i++) y[i]=zero;
-	return y;
+        lx=1+max(-ex,0); y=cgetg(lx,t_VEC);
+        for (i=1; i<lx; i++) y[i]=zero;
+        return y;
       }
 
       lx=lg(x); y=cgetg(3,t_VEC);
@@ -1999,27 +2134,27 @@ binaire(GEN x)
       ly = -ex; ex++; m = HIGHBIT;
       if (ex<=0)
       {
-	p1[1]=zero; for (i=1; i <= -ex; i++) p2[i]=zero;
-	i=2;
+        p1[1]=zero; for (i=1; i <= -ex; i++) p2[i]=zero;
+        i=2;
       }
       else
       {
-	ly=1;
-	for (i=2; i<lx && ly<=ex; i++)
-	{
-	  m=HIGHBIT; u=x[i];
-	  do
-	    { p1[ly] = (m & u) ? un : zero; ly++; }
-	  while ((m>>=1) && ly<=ex);
-	}
-	ly=1;
-	if (m) i--; else m=HIGHBIT;
+        ly=1;
+        for (i=2; i<lx && ly<=ex; i++)
+        {
+          m=HIGHBIT; u=x[i];
+          do
+            { p1[ly] = (m & u) ? un : zero; ly++; }
+          while ((m>>=1) && ly<=ex);
+        }
+        ly=1;
+        if (m) i--; else m=HIGHBIT;
       }
       for (; i<lx; i++)
       {
-	u=x[i];
-	do { p2[ly] = m & u ? un : zero; ly++; } while (m>>=1);
-	m=HIGHBIT;
+        u=x[i];
+        do { p2[ly] = m & u ? un : zero; ly++; } while (m>>=1);
+        m=HIGHBIT;
       }
       break;
 
@@ -2054,21 +2189,21 @@ bittest_many(GEN x, GEN gn, long c)
   long n = itos(gn), extra_words = 0, partial_bits;
   GEN res;
 
-  if (c == 1)				/* Shortcut */
+  if (c == 1)                           /* Shortcut */
       return bittest(x,n) ? gun : gzero;
   /* Negative n with n+c>0 are too hairy to implement... */
   if (!signe(x) || c == 0)
       return gzero;
-  if (c < 0) {				/* Negative x means 2s complemenent */
+  if (c < 0) {                          /* Negative x means 2s complemenent */
       c = -c;
       if (signe(x) < 0)
-	  two_adic = 1;			/* treat x 2-adically... */
+          two_adic = 1;                 /* treat x 2-adically... */
   }
   if (n < 0) {
       pari_sp oa, na;
 
       if (n + c <= 0)
-	  return gzero;
+          return gzero;
       oa = avma;
       res = bittest_many(x, gzero, two_adic? -(n+c) : n+c);
       na = avma;
@@ -2078,52 +2213,52 @@ bittest_many(GEN x, GEN gn, long c)
   partial_bits = (c & (BITS_IN_LONG-1));
   l2 = lx-1 - (n>>TWOPOTBITS_IN_LONG); /* Last=least-significant word */
   l1 = lx-1 - ((n + c - 1)>>TWOPOTBITS_IN_LONG); /* First word */
-  b2 = (n & (BITS_IN_LONG-1));		/* Last bit, skip less-signifant */
+  b2 = (n & (BITS_IN_LONG-1));          /* Last bit, skip less-signifant */
   b1 = ((n + c - 1) & (BITS_IN_LONG-1)); /* First bit, skip more-significant */
-  if (l2 < 2) {				/* always: l1 <= l2 */
+  if (l2 < 2) {                         /* always: l1 <= l2 */
       if (!two_adic)
-	  return gzero;
+          return gzero;
       /* x is non-zero, so it behaves as -1.  */
       return gbitneg(gzero,c);
   }
   if (l1 < 2) {
-      if (two_adic)	/* If b1 < b2, bits are set by prepend in shift_r */
-	  extra_words = 2 - l1 - (b1 < b2);
-      else	  
-	  partial_bits = b2 ? BITS_IN_LONG - b2 : 0;
+      if (two_adic)     /* If b1 < b2, bits are set by prepend in shift_r */
+          extra_words = 2 - l1 - (b1 < b2);
+      else        
+          partial_bits = b2 ? BITS_IN_LONG - b2 : 0;
       l1 = 2;
-      b1 = (BITS_IN_LONG-1);		/* Include all bits in this word */
+      b1 = (BITS_IN_LONG-1);            /* Include all bits in this word */
   }
-  skip = (b1 < b2);			/* Skip the first word of the shift */
-  l_res = l2 - l1 + 1 + 2 - skip + extra_words;	/* A coarse estimate */
+  skip = (b1 < b2);                     /* Skip the first word of the shift */
+  l_res = l2 - l1 + 1 + 2 - skip + extra_words; /* A coarse estimate */
   p = (ulong*) (new_chunk(l_res) + 2 + extra_words);
   shift_r(p - skip, (ulong*)x + l1, (ulong*)x + l2 + 1, 0, b2);
-  if (two_adic) {			/* Check the low bits of x */
-	int i = lx, nonzero = 0;
+  if (two_adic) {                       /* Check the low bits of x */
+        int i = lx, nonzero = 0;
 
-	/* Flip the bits */
-	pnew = p + l_res - 2 - extra_words;
-	while (--pnew >= p)
-	    *pnew = MAXULONG - *pnew;
-	/* Fill the extra words */
-	while (extra_words--)
-	    *--p = MAXULONG;
-	/* The result is one less than 2s-complement if the lower-bits
-	   of x were all 0. */
-	while (--i > l2) {
-	    if (x[i]) {
-		nonzero = 1;
-		break;
-	    }
-	}
-	if (!nonzero && b2)		/* Check the partial word too */
-	    nonzero = x[l2] & ((1<<b2) - 1);
-	if (!nonzero) { /* Increment res.  Do not underflow to before p */
-	    pnew = p + l_res - 2;
-	    while (--pnew >= p)
-		if (++*pnew)
-		    break;
-	}
+        /* Flip the bits */
+        pnew = p + l_res - 2 - extra_words;
+        while (--pnew >= p)
+            *pnew = MAXULONG - *pnew;
+        /* Fill the extra words */
+        while (extra_words--)
+            *--p = MAXULONG;
+        /* The result is one less than 2s-complement if the lower-bits
+           of x were all 0. */
+        while (--i > l2) {
+            if (x[i]) {
+                nonzero = 1;
+                break;
+            }
+        }
+        if (!nonzero && b2)             /* Check the partial word too */
+            nonzero = x[l2] & ((1<<b2) - 1);
+        if (!nonzero) { /* Increment res.  Do not underflow to before p */
+            pnew = p + l_res - 2;
+            while (--pnew >= p)
+                if (++*pnew)
+                    break;
+        }
   }
   if (partial_bits)
       *p &= (1<<partial_bits) - 1;
@@ -2175,17 +2310,17 @@ inormalize(GEN x, long known_zero_words)
     /* Normalize */
     i = 2 + known_zero_words;
     while (i < xl) {
-	if (x[i])
-	    break;
-	i++;
+        if (x[i])
+            break;
+        i++;
     }
     j = 2;
     while (i < xl)
-	x[j++] = x[i++];
+        x[j++] = x[i++];
     xl -= i - j;
     setlgefint(x, xl);
     if (xl == 2)
-	setsigne(x,0);
+        setsigne(x,0);
 }
 
 /* Truncate a non-negative integer to a number of bits.  */
@@ -2197,23 +2332,23 @@ ibittrunc(GEN x, long bits, long normalized)
     int known_zero_words, i = 2 + xl - len_out;
 
     if (xl < len_out && normalized)
-	return;
-	/* Check whether mask is trivial */
+        return;
+        /* Check whether mask is trivial */
     if (!(bits & (BITS_IN_LONG - 1))) {
-	if (xl == len_out && normalized)
-	    return;
+        if (xl == len_out && normalized)
+            return;
     } else if (len_out <= xl) {
-	/* Non-trival mask is given by a formula, if x is not
-	   normalized, this works even in the exceptional case */
-	x[i] = x[i] & ((1 << (bits & (BITS_IN_LONG - 1))) - 1);
-	if (x[i] && xl == len_out)
-	    return;
+        /* Non-trival mask is given by a formula, if x is not
+           normalized, this works even in the exceptional case */
+        x[i] = x[i] & ((1 << (bits & (BITS_IN_LONG - 1))) - 1);
+        if (x[i] && xl == len_out)
+            return;
     }
     /* Normalize */
-    if (xl <= len_out)			/* Not normalized */
-	known_zero_words = 0;
+    if (xl <= len_out)                  /* Not normalized */
+        known_zero_words = 0;
     else
-	known_zero_words = xl - len_out;
+        known_zero_words = xl - len_out;
     inormalize(x, known_zero_words);
 }
 
@@ -2230,23 +2365,23 @@ incdec(GEN x, long incdec)
 
     xl = x + len;
     if (incdec == 1) {
-	while (--xl >= xf) {
-	    if ((ulong)*xl != ~uzero) {
-		(*xl)++;
-		return 0;
-	    }
-	    *xl = 0;
-	}
-	return 1;
+        while (--xl >= xf) {
+            if ((ulong)*xl != ~uzero) {
+                (*xl)++;
+                return 0;
+            }
+            *xl = 0;
+        }
+        return 1;
     } else {
-	while (--xl >= xf) {
-	    if (*xl != 0) {
-		(*xl)--;
-		return 0;
-	    }
-	    *xl = (long)~uzero;
-	}
-	return 0;
+        while (--xl >= xf) {
+            if (*xl != 0) {
+                (*xl)--;
+                return 0;
+            }
+            *xl = (long)~uzero;
+        }
+        return 0;
     }
 }
 
@@ -2257,42 +2392,42 @@ gbitneg(GEN x, long bits)
     const ulong uzero = 0;
     
     if (typ(x) != t_INT)
-	err(typeer, "bitwise negation");
+        err(typeer, "bitwise negation");
     if (bits < -1)
-	err(talker, "negative exponent in bitwise negation");
+        err(talker, "negative exponent in bitwise negation");
     if (bits == -1)
-	return gsub(gneg(gun),x);
+        return gsub(gneg(gun),x);
     if (bits == 0)
-	return gzero;
-    if (signe(x) == -1) {		/* Consider as if mod big power of 2 */
-	x = gcopy(x);
-	setsigne(x, 1);
-	incdec(x, -1);
-	/* Now truncate this! */
-	ibittrunc(x, bits, x[2]);
-	return x;
+        return gzero;
+    if (signe(x) == -1) {               /* Consider as if mod big power of 2 */
+        x = gcopy(x);
+        setsigne(x, 1);
+        incdec(x, -1);
+        /* Now truncate this! */
+        ibittrunc(x, bits, x[2]);
+        return x;
     }
     xl = lgefint(x);
     len_out = ((bits + BITS_IN_LONG - 1) >> TWOPOTBITS_IN_LONG) + 2;
-    if (len_out > xl) {			/* Need to grow */
-	GEN out = cgeti(len_out);
-	int j = 2;
+    if (len_out > xl) {                 /* Need to grow */
+        GEN out = cgeti(len_out);
+        int j = 2;
 
-	if (!(bits & (BITS_IN_LONG - 1)))
-	    out[2] = ~uzero;
-	else
-	    out[2] = (1 << (bits & (BITS_IN_LONG - 1))) - 1;
-	for (i = 3; i < len_out - xl + 2; i++)
-	    out[i] = ~uzero;
-	while (i < len_out)
-	    out[i++] = ~x[j++];
-	setlgefint(out, len_out);
-	setsigne(out,1);
-	return out;
+        if (!(bits & (BITS_IN_LONG - 1)))
+            out[2] = ~uzero;
+        else
+            out[2] = (1 << (bits & (BITS_IN_LONG - 1))) - 1;
+        for (i = 3; i < len_out - xl + 2; i++)
+            out[i] = ~uzero;
+        while (i < len_out)
+            out[i++] = ~x[j++];
+        setlgefint(out, len_out);
+        setsigne(out,1);
+        return out;
     }
     x = gcopy(x);
     for (i = 2; i < xl; i++)
-	x[i] = ~x[i];
+        x[i] = ~x[i];
     ibittrunc(x, bits, x[2]);
     return x;
 }
@@ -2350,14 +2485,14 @@ ibitor(GEN x, GEN y, long exclusive)
   if (lx > ly) {
       xprep = x + 2;
       while (xprep < xp)
-	  *outp++ = *xprep++;
+          *outp++ = *xprep++;
   }
   if (exclusive) {
       while (xp < xlim)
-	  *outp++ = (*xp++) ^ (*yp++);
+          *outp++ = (*xp++) ^ (*yp++);
   } else {
       while (xp < xlim)
-	  *outp++ = (*xp++) | (*yp++);
+          *outp++ = (*xp++) | (*yp++);
   }
   setsigne(out,1);
   setlgefint(out,lout);
@@ -2392,20 +2527,20 @@ ibitnegimply(GEN x, GEN y)
   outp = out + 2;
   if (lx > ly) {
       xprep = x + 2;
-      if (!inverted) {			/* x & ~y */
-	  while (xprep < xp)
-	      *outp++ = *xprep++;
-      } else {				/* ~x & y */
-	  while (xprep++ < xp)
-	      *outp++ = 0;
+      if (!inverted) {                  /* x & ~y */
+          while (xprep < xp)
+              *outp++ = *xprep++;
+      } else {                          /* ~x & y */
+          while (xprep++ < xp)
+              *outp++ = 0;
       }
   }
-  if (inverted) {			/* ~x & y */
+  if (inverted) {                       /* ~x & y */
      while (xp < xlim)
-	*outp++ = ~(*xp++) & (*yp++);
+        *outp++ = ~(*xp++) & (*yp++);
   } else {
      while (xp < xlim)
-	*outp++ = (*xp++) & ~(*yp++);
+        *outp++ = (*xp++) & ~(*yp++);
   }
   setsigne(out,1);
   setlgefint(out,lout);
@@ -2422,13 +2557,13 @@ inegate_inplace(GEN z, pari_sp ltop)
   long o;
 
   /* Negate z */
-  o = incdec(z, 1);			/* Can overflow z... */
+  o = incdec(z, 1);                     /* Can overflow z... */
   setsigne(z, -1);
   if (!o)
       return z;
   else if (lgefint(z) == 2)
       setsigne(z, 0);      
-  incdec(z,-1);			/* Restore a normalized value */
+  incdec(z,-1);                 /* Restore a normalized value */
   return gerepileupto(ltop, subis(z,1));
 }
 
@@ -2445,20 +2580,20 @@ gbitor(GEN x, GEN y)
   sy=signe(y); if (!sy) return icopy(x);
   if (sx == 1) {
       if (sy == 1)
-	  return ibitor(x,y,0);
+          return ibitor(x,y,0);
       goto posneg;
   } else if (sy == -1) {
       ltop = avma;
       incdec(x, -1); incdec(y, -1);
       z = ibitand(x,y);
-      incdec(x, 1); incdec(y, 1);	/* Restore x and y... */
+      incdec(x, 1); incdec(y, 1);       /* Restore x and y... */
   } else {
       z = x; x = y; y = z;
       /* x is positive, y is negative.  The result will be negative. */
     posneg:
       ltop = avma;
       incdec(y, -1);
-      z = ibitnegimply(y,x);		/* ~x & y */
+      z = ibitnegimply(y,x);            /* ~x & y */
       incdec(y, 1);
   }
   return inegate_inplace(z, ltop);
@@ -2477,13 +2612,13 @@ gbitand(GEN x, GEN y)
   sy=signe(y); if (!sy) return gzero;
   if (sx == 1) {
       if (sy == 1)
-	  return ibitand(x,y);
+          return ibitand(x,y);
       goto posneg;
   } else if (sy == -1) {
       ltop = avma;
       incdec(x, -1); incdec(y, -1);
       z = ibitor(x,y,0);
-      incdec(x, 1); incdec(y, 1);	/* Restore x and y... */
+      incdec(x, 1); incdec(y, 1);       /* Restore x and y... */
       return inegate_inplace(z, ltop);
   } else {
       z = x; x = y; y = z;
@@ -2492,7 +2627,7 @@ gbitand(GEN x, GEN y)
       ltop = avma;
       incdec(y, -1);
       /* x & ~y */
-      z = ibitnegimply(x,y);		/* x & ~y */
+      z = ibitnegimply(x,y);            /* x & ~y */
       incdec(y, 1);
       return z;
   }
@@ -2511,12 +2646,12 @@ gbitxor(GEN x, GEN y)
   sy=signe(y); if (!sy) return icopy(x);
   if (sx == 1) {
       if (sy == 1)
-	  return ibitor(x,y,1);
+          return ibitor(x,y,1);
       goto posneg;
   } else if (sy == -1) {
       incdec(x, -1); incdec(y, -1);
       z = ibitor(x,y,1);
-      incdec(x, 1); incdec(y, 1);	/* Restore x and y... */
+      incdec(x, 1); incdec(y, 1);       /* Restore x and y... */
       return z;
   } else {
       z = x; x = y; y = z;
@@ -2532,7 +2667,7 @@ gbitxor(GEN x, GEN y)
 }
 
 GEN
-gbitnegimply(GEN x, GEN y)		/* x & ~y */
+gbitnegimply(GEN x, GEN y)              /* x & ~y */
 {
   pari_sp ltop;
   long sx,sy;
@@ -2544,7 +2679,7 @@ gbitnegimply(GEN x, GEN y)		/* x & ~y */
   sy=signe(y); if (!sy) return icopy(x);
   if (sx == 1) {
       if (sy == 1)
-	  return ibitnegimply(x,y);
+          return ibitnegimply(x,y);
       /* x is positive, y is negative.  The result will be positive. */
       incdec(y, -1);
       z = ibitand(x,y);
@@ -2555,7 +2690,7 @@ gbitnegimply(GEN x, GEN y)		/* x & ~y */
       incdec(x, -1); incdec(y, -1);
       /* ((~x) & ~(~y)) == ~x & y */
       z = ibitnegimply(y,x);
-      incdec(x, 1); incdec(y, 1);	/* Restore x and y... */
+      incdec(x, 1); incdec(y, 1);       /* Restore x and y... */
       return z;
   } else {
       /* x is negative, y is positive.  The result will be negative. */

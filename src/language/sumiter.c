@@ -99,8 +99,8 @@ forstep(entree *ep, GEN a, GEN b, GEN s, char *ch)
 /* assume ptr is the address of a diffptr containing the succesive
  * differences between primes, and c = current prime (up to *p excluded)
  * return smallest prime >= a, update ptr */
-static long
-sinitp(long a, long c, byteptr *ptr)
+static ulong
+sinitp(ulong a, ulong c, byteptr *ptr)
 {
   byteptr p = *ptr;
   if (a <= 0) a = 2;
@@ -113,14 +113,14 @@ sinitp(long a, long c, byteptr *ptr)
 /* value changed during the loop, replace by the first prime whose
    value is strictly larger than new value */
 static void
-update_p(entree *ep, byteptr *ptr, long prime[])
+update_p(entree *ep, byteptr *ptr, ulong prime[])
 {
   GEN z = (GEN)ep->value;
-  long a, c;
+  ulong a, c;
 
   if (typ(z) == t_INT) a = 1; else { z = gceil(z); a = 0; }
-  if (is_bigint(z)) { prime[2] = -1; /* = infinity */ return; }
-  a += itos(z); c = prime[2];
+  if (lgefint(z)>3) { prime[2] = -1; /* = infinity */ return; }
+  a += itou(z); c = prime[2];
   if (c < a)
     prime[2] = sinitp(a, c, ptr); /* increased */
   else if (c > a)
@@ -128,25 +128,27 @@ update_p(entree *ep, byteptr *ptr, long prime[])
     *ptr = diffptr;
     prime[2] = sinitp(a, 0, ptr);
   }
-  changevalue_p(ep, prime);
+  changevalue_p(ep, (GEN)prime);
 }
 
 static byteptr
-prime_loop_init(GEN ga, GEN gb, long *a, long *b, long prime[])
+prime_loop_init(GEN ga, GEN gb, ulong *a, ulong *b, ulong prime[])
 {
   byteptr d = diffptr;
 
   ga = gceil(ga); gb = gfloor(gb);
   if (typ(ga) != t_INT || typ(gb) != t_INT)
     err(typeer,"prime_loop_init");
-  if (is_bigint(ga) || is_bigint(gb))
+  if (signe(gb) < 0) return NULL;
+  if (signe(ga) < 0) ga = gun;
+  if (lgefint(ga)>3 || lgefint(gb)>3)
   {
     if (cmpii(ga, gb) > 0) return NULL;
     err(primer1);
   }
-  *a = itos(ga); if (*a <= 0) *a = 1;
-  *b = itos(gb); if (*a > *b) return NULL;
-  maxprime_check((ulong)*b);
+  *a = itou(ga);
+  *b = itou(gb); if (*a > *b) return NULL;
+  maxprime_check(*b);
   prime[2] = sinitp(*a, 0, &d);
   return d;
 }
@@ -154,8 +156,9 @@ prime_loop_init(GEN ga, GEN gb, long *a, long *b, long prime[])
 void
 forprime(entree *ep, GEN ga, GEN gb, char *ch)
 {
-  long prime[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
-  long a, b;
+  long p[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
+  ulong *prime = (ulong*)p;
+  ulong a, b;
   pari_sp av = avma;
   byteptr d;
 
@@ -163,7 +166,7 @@ forprime(entree *ep, GEN ga, GEN gb, char *ch)
   if (!d) { avma = av; return; }
 
   avma = av; push_val(ep, prime);
-  while ((ulong)prime[2] < (ulong)b)
+  while (prime[2] < b)
   {
     (void)lisseq(ch); if (loop_break()) break;
     if (ep->value == prime)
