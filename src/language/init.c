@@ -1336,7 +1336,7 @@ gcopy_av(GEN x, GEN *AVMA)
   unsetisclone(y); return y;
 }
 
-/* same but use NULL to code an exact 0 */
+/* [copy_bin/bin_copy:] same but use NULL to code an exact 0 */
 static GEN
 gcopy_av0(GEN x, GEN *AVMA)
 {
@@ -1360,7 +1360,7 @@ gcopy_av0(GEN x, GEN *AVMA)
   unsetisclone(y); return y;
 }
 
-/* size of a gcopy_av0 */
+/* [copy_bin/bin_copy:] size (number of words) required for gcopy_av0(x) */
 static long
 taille0(GEN x)
 {
