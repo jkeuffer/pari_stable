@@ -1334,13 +1334,12 @@ ZM_inv(GEN M, GEN dM)
       stable = ZM_incremental_CRT(H, Hp, q,qp, p);
       q = qp;
     }
-    if (DEBUGLEVEL>5)
-      msgtimer("inverse mod %ld (stable=%ld)", p,stable);
+    if (DEBUGLEVEL>5) msgtimer("inverse mod %ld (stable=%ld)", p,stable);
     if (stable && isscalarmat(gmul(M, H), dM)) break; /* DONE */
     
     if (low_stack(lim, stack_lim(av,2)))
     {
-      GEN *gptr[4]; gptr[0] = &H; gptr[1] = &q;
+      GEN *gptr[2]; gptr[0] = &H; gptr[1] = &q;
       if (DEBUGMEM>1) err(warnmem,"ZM_inv");
       gerepilemany(av2,gptr, 2);
     }
@@ -2758,16 +2757,18 @@ mydiv(GEN x, GEN y)
 GEN
 det(GEN a)
 {
-  long nbco = lg(a)-1,i,j,k,av,s;
+  ulong av, lim;
+  long nbco = lg(a)-1,i,j,k,s;
   GEN p,pprec;
 
   if (typ(a)!=t_MAT) err(mattype1,"det");
   if (!nbco) return gun;
   if (nbco != lg(a[1])-1) err(mattype1,"det");
   if (use_maximal_pivot(a)) return det_simple_gauss(a,1);
-
-  av=avma; a=dummycopy(a); s=1;
   if (DEBUGLEVEL > 7) timer2();
+
+  av = avma; lim = stack_lim(av,2); 
+  a = dummycopy(a); s = 1;
   for (pprec=gun,i=1; i<nbco; i++,pprec=p)
   {
     GEN *ci, *ck, m, p1;
@@ -2809,6 +2810,12 @@ det(GEN a)
           if (diveuc) p1 = mydiv(p1,pprec);
           ck[j] = p1;
         }
+      }
+      if (low_stack(lim,stack_lim(av,2)))
+      {
+        GEN *gptr[2]; gptr[0]=&a; gptr[1]=&pprec;
+        if(DEBUGMEM>1) err(warnmem,"det. col = %ld",i);
+        gerepilemany(av,gptr,2); p = gcoeff(a,i,i); ci = (GEN*)a[i];
       }
     }
     if (DEBUGLEVEL > 7) msgtimer("det, col %ld / %ld",i,nbco-1);
