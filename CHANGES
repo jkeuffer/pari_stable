@@ -87,6 +87,7 @@ IS 18- [HPUX:] remove -E from DLCFLAGS
     8- always define checkmemory() in libpari [ was included only if MEMSTEP
        was defined ]. Could cause compilation failure when compiling with
        different flags.
+    9- upgrade pariemacs, see pariemacs.txt
 
   Added
     1- member function rnf.pol (polynomial generating absolute extension)
