@@ -1375,7 +1375,7 @@ double_op()
   static long mun[] = { evaltyp(t_INT) | _evallg(3),
                         evalsigne(-1)|evallgefint(3), 1 };
   char c = *analyseur;
-  if (c == analyseur[1])
+  if (c && c == analyseur[1])
     switch(c)
     {
       case '+': analyseur+=2; return gun; /* ++ */
