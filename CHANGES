@@ -79,6 +79,7 @@ IZ 34- external prettyprinter incompatible with colors
    41- when lines > 0, output driver didn't reset properly after overflow
    42- huge precision losses in bnfinit computations (--> truncation error)
    43- mateigen([1,2;3,4]) wouldn't work at default precision
+   44- leftover debugging statements in gphelp -to_pod
 
   Changed
 BA  1- more efficient quadratic Hensel lift
