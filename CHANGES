@@ -15,6 +15,7 @@ GT = Glenn Thobe
 HC = Henri Cohen
 IS = Igor Schein
 IK = Iwao Kimura
+IS = Ignat Soroko
 IZ = Ilya Zakharevich
 KO = Kiyoshi Ohgishi
 LG = Louis Granboulan
@@ -72,6 +73,7 @@ HC 24- Corrected p-adic initell.
        setrand(5);tnf=thueinit(x^3 + x^2 - 43690*x - 3529208) --> error in mplog
    35- typo in bnfnarrow ("impossible inverse")
    36- subst(x,x^0,x) --> floating point exception
+IS 37- many typos in the documentation
 
   Changed
 BA  1- improved Fp_isom
