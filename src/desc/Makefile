@@ -1,5 +1,5 @@
+SHELL=/bin/sh
 PERL=perl
-SHELL=sh
 
 HEADERS=../language/init.h ../gp/gp_init.h ../gp/highlvl.h ../language/members.h
 HE_DEPS=gen_proto gen_help PARI/822.pm
