@@ -92,8 +92,9 @@ BA  3- more efficient factorff when pol belongs to Fp[X] (based on Fp_isom)
    10- restore \o2 to previous meaning, use \o3 for alternate prettyprinter
    11- normalized output of idealfactor (sort factors)
    12- better TeXization (\left / \right)
-   13- format for bnf[9] (new isprincipal)
-   14- cleaned up isprincipal + bnfinit aftermath (getfu, class_group_gen)
+   13- allow color changes in error messages (when sample input is given)
+   14- format for bnf[9] (new isprincipal)
+   15- cleaned up isprincipal + bnfinit aftermath (getfu, class_group_gen)
 
   Added
     1- new library function zerovec
