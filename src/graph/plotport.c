@@ -222,8 +222,9 @@ static PariRect *
 check_rect(long ne)
 {
   if (!GOODRECT(ne))
-    err(talker,"incorrect rectwindow number in graphic function ([0, %ld])",
-               NUMRECT-1);
+    err(talker,
+        "incorrect rectwindow number in graphic function (%ld not in [0, %ld])",
+        ne, NUMRECT-1);
   return rectgraph[ne];
 }
 
