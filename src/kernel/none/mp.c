@@ -1835,7 +1835,7 @@ diviuexact(GEN x, ulong y)
 
   if (y == 1) return icopy(x);
   lx = lgefint(x);
-  if (lx == 3) return stoi((ulong)x[2] / y);
+  if (lx == 3) return utoi((ulong)x[2] / y);
   yinv = invrev(y);
   lz = (y <= (ulong)x[2]) ? lx : lx-1;
   z = new_chunk(lz);
