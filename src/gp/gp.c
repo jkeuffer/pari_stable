@@ -996,7 +996,7 @@ community()
   pariputs("The standard distribution of GP/PARI includes a reference manual, a tutorial\n\
 and a reference card and you should ask the person who installed PARI on\n\
 your system where they can be found. You can also download them\n\
-from the PARI WWW site http://hasse.mathematik.tu-muenchen.de/ntsw/pari/\n\
+from the PARI WWW site http://www.parigp-home.de/\n\
 \n\
 Three mailing lists are devoted to PARI:\n\
   - pari-announce (moderated) to announce major version changes.\n\
@@ -1005,8 +1005,7 @@ Three mailing lists are devoted to PARI:\n\
   - pari-users for everything else !\n\
 To subscribe, send an empty message to <list name>-subscribe@list.cr.yp.to\n\
 You can only send messages to these lists if you have subscribed !\n\
-An archive is kept at the address\n\
-  http://hasse.mathematik.tu-muenchen.de/ntsw/pari/lists/archive\n\n\
+An archive is kept at the WWW site mentioned above.\n\n\
 In case you don't want to subscribe, you can reach the authors directly by\n\
 email: pari@math.u-bordeaux.fr (answer not guaranteed).");
 }

@@ -38,6 +38,7 @@ XR  7- check subgroup argument in bnrL1
     9- pb with GNU as + preprocessor on Sparc
    10- incorrect result in matdet over Z[1/n] (Gauss-Bareiss) [gdivexact]
    11- solve(x=0,1,deriv(x)) --> SEGV
+   12- ??' --> weird error
 
   Changed
 XR  1- bnrL1 now takes a congruence subgroup as second argument
@@ -47,7 +48,8 @@ CB  3- modified TeX macros for pdftex
 
   Added
 BA  1- function galoissubcyclo()
-    2- optional arguments (vertical range) to plot()
+BA  2- (for now internal) function inverseimage_mod_p()
+    3- optional arguments (vertical range) to plot()
 
 ===========================================================================
 Done for version 2.0.18.beta (released 20/12/1999):

@@ -74,7 +74,7 @@ Intel/x86
 AMD K6-2     350Mhz  Linux-2.0.34   egcs X11 dl2   (4856)  (4756) 2.0.11    SH
 AMD K6-2     350Mhz  Linux-2.0.36    gcc X11 dl2    5154    4850  2.0.17 
 AMD K6       266MHz  Linux-2.2.5    pgcc X11 dl2    5861    6001  2.0.16(17)IS
-AMD K6       233Mhz  Linux-2.0.35    gcc X11 dl2   (6898)  (7152) 2.0.11    QL
+AMD K6       233Mhz  Linux-2.2.14    gcc X11 dl2    6968    7158  2.0.18    QL
 IBM/Cyrix    200MHz  Linux-2.0.35    gcc X11 dl2   13190   13729  2.0.15    AP
 PentiumIII   500MHz  Linux-2.2.12   egcs X11 dl2    3154    3176  2.0.18    HC
 PentiumII    350MHz  Linux-2.2.5     gcc X11 dl2    4312    4488  2.0.16    HS
