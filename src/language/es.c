@@ -1983,11 +1983,16 @@ static pariFILE *last_tmp_file = NULL;
 /* stack of "permanent" (output) files */
 static pariFILE *last_file = NULL;
 #if defined(UNIX) || defined(__EMX__)
+#  include <fcntl.h>
+#  include <sys/stat.h>
 #  include <pwd.h>
 #  ifdef __EMX__
 #    include <process.h>
 #  endif
 #  define HAVE_PIPES
+#endif
+#ifndef O_RDONLY
+#  define O_RDONLY 0
 #endif
 
 pariFILE *
@@ -2048,7 +2053,7 @@ pari_fclose(pariFILE *f)
   pari_kill_file(f);
 }
 
-static
+static pariFILE *
 pari_open_file(FILE *f, char *s, char *mode)
 {
   if (!f) err(talker, "could not open requested file %s", s);
@@ -2063,7 +2068,7 @@ pari_fopen(char *s, char *mode)
   return pari_open_file(fopen(s, mode), s, mode);
 }
 
-#ifdef O_EXCL
+#ifdef UNIX
 /* open tmpfile s (a priori for writing) avoiding symlink attacks */
 pariFILE *
 pari_safefopen(char *s, char *mode)
@@ -2077,7 +2082,7 @@ pari_safefopen(char *s, char *mode)
 pariFILE *
 pari_safeopen(char *s, char *mode)
 {
-  return pari_open(s, mode)
+  return pari_fopen(s, mode);
 }
 #endif
 

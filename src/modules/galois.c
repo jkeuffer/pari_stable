@@ -419,6 +419,13 @@ name(char *pre, long n, long n1, long n2, long no)
   return chn;
 }
 
+#ifdef UNIX
+#  include <fcntl.h>
+#endif
+#ifndef O_RDONLY
+#  define O_RDONLY 0
+#endif
+
 static long
 galopen(char *s)
 {
