@@ -1,46 +1,47 @@
 # Exported variables
 _dlld_list="DLLD DLLDFLAGS EXTRADLLDFLAGS DLSUFFIX soname sodest"
 
-if test "$optimization" = profiling; then DLLD=; else
-  case "$osname" in
-    os2) DLLD=${DLLD-$LD};;
-    *)   DLLD=${DLLD-ld};;
-  esac
-  DLSUFFIX=so
 # Which suffix for Dynamic Lib?
 # Some linkers (SunOS 4) need minor and major lib version numbers.
 # Some others (SunOS 5) need a link from a .so
 # Some others (HPUX 09) do not want version numbers.
-  soname=.$soname_num
-  case "$osname-$arch" in
-#   aix-*)  DLSUFFIX=a  ;; FIXME: dynamic linking does not work
-    sunos-*) sodest=.$VersionMajor$VersionMinor.$patch
-             soname=$sodest;;
-    *-alpha|solaris-*|linux-*|freebsd-*)
-      case $libpari_base in
-        pari) sodest=.$version.$patch;; # released versions
-        *) sodest=.$patch.0.0;; # unstable versions
-      esac ;;
-#   cygwin*)soname= ; sodest= ; DLSUFFIX=dll;; FIXME: gp-dyn.exe crashes
-    hpux-*) soname= ; sodest= ; DLSUFFIX=sl;;
-    irix-*) soname= ; sodest= ;;
-    os2-*)  soname= ; sodest= ; DLSUFFIX=dll
-	    # DLL names better be 8+3
-	    libpari_base=`echo "$libpari_base" | sed 's/\./_/g'`
-	 ;;
-    *) DLLD=;;
+DLSUFFIX=so
+soname=.$soname_num
+do_dll=yes
+case "$osname-$arch" in
+  osf1-*|solaris-*|linux-*|freebsd-*)
+    case $libpari_base in
+      pari) sodest=.$version.$patch;; # released version
+      *)    sodest=.$patch.0.0;;      # unstable version
+    esac ;;
+  sunos-*) sodest=.$VersionMajor$VersionMinor.$patch
+           soname=$sodest;;
+  hpux-*) soname= ; sodest= ; DLSUFFIX=sl;;
+  irix-*) soname= ; sodest= ;;
+  os2-*)  soname= ; sodest= ; DLSUFFIX=dll
+          libpari_base=`echo "$libpari_base" | sed 's/\./_/g'` # 8.3 DLL name
+       ;;
+#  aix-*)  DLSUFFIX=a  ;; FIXME: dynamic linking does not work
+# cygwin-*)soname= ; sodest= ; DLSUFFIX=dll;; FIXME: gp-dyn.exe crashes
+  *) do_dll=no ;;
+esac
+
+# if DLLD is defined at this point, respect it, even if do_dll=no
+if test $do_dll=yes; then
+  case "$osname" in
+    os2) DLLD="${DLLD-$LD}";;
+    *)   DLLD="${DLLD-ld}";;
   esac
 fi
 
 if test -n "$DLLD"; then
 # Which Dynamic Lib Linker?
-#
-  if test $DLLD = ld -a -n "$ld"; then
+  if test "$DLLD" = ld -a -n "$ld"; then
     DLLD=$ld;
   fi
   if test "$fastread" != yes; then
     echo $n ..."Which linker for building dynamic libs? $c"
-    dflt=$DLLD; rep=; . ./myread
+    dflt="$DLLD"; rep=; . ./myread
     DLLD=$ans
   fi
 
@@ -54,27 +55,25 @@ if test -n "$DLLD"; then
   esac
 
 # Which Flags for Dynamic Lib Linker ?
-#
   if test "$GNUld" = yes; then
     DLLDFLAGS="-shared -soname \$(LIBPARI_SONAME)"
-  else
-    # DLLD != GNU ld
+  else # DLLD != GNU ld
     case "$osname-$arch" in
       aix-*)     DLLDFLAGS="-r" ;;
       hpux-*)    DLLDFLAGS="-b -E" ;;
       freebsd-*) DLLDFLAGS="-Bshareable -x" ;;
       linux-*)   DLLDFLAGS="-shared -soname \$(LIBPARI_SONAME)" ;;
       irix-*)    DLLDFLAGS="-shared -elf -no_unresolved -all" ;;
-      osf1-*)    DLLDFLAGS="-shared";
-         case "$optimization" in
-           full) DLLDFLAGS="$DLLDFLAGS -O3" ;;
-         esac;;
+      osf1-*)    case "$optimization" in
+                   full) DLLDFLAGS="-shared -O3" ;;
+                   *)    DLLDFLAGS="-shared" ;;
+                 esac;;
       sunos-*)   DLLDFLAGS="-assert nodefinitions" ;;
       solaris-*) DLLDFLAGS="-G -h \$(LIBPARI_SONAME)" ;;
-      os2-*)     DLLDFLAGS="$cflags -Zdll"
-         case "$optimization" in
-           full) DLLDFLAGS="$DLLDFLAGS -s";;
-         esac;;
+      os2-*)     case "$optimization" in
+                   full) DLLDFLAGS="$cflags -Zdll -s" ;;
+                   *)    DLLDFLAGS="$cflags -Zdll" ;;
+                 esac;;
       *)         DLLD=;;
     esac
   fi

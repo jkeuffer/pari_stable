@@ -1,4 +1,4 @@
-if test -z "$DLLD" -o "$optimization" = debugging; then
+if test -z "$DLLD" -o "$optimization" != full; then
   static=y
 else
   static=${static-n}
