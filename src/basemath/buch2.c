@@ -1309,7 +1309,7 @@ isunit(GEN bnf,GEN x)
     long e;
     if (rx)
     {
-      logN = gscal(rx, v); /* log(Nx), should be ~ 0 */
+      logN = sum(rx, 1, RU); /* log(Nx), should be ~ 0 */
       if (gexpo(logN) > -20)
       {
         long p = 2 + max(1, (nfgetprec(nf)-2) / 2);
