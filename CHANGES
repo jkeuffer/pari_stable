@@ -107,6 +107,9 @@ HC 12- gamma function for integral/rational arguments
    19- rewrote primedec() to use new modular functions
    20- rewrote most *modpr functions
    21- modified diagnostics for integral LLL to match floating point version
+   22- INCOMPATIBILITY: polgalois(); changed 3rd component of result so that
+       it gives the numbering among all transitive subgroups of S_n [ was ad
+       hoc up to 7, then as described above for n >= 8 ]
 
   Added
     1- mplog2() function --> faster mplog()
