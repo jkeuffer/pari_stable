@@ -632,7 +632,7 @@ frobeniusliftall(GEN sg, GEN *psi, struct galois_lift *gl,
   {
     C[i]=lgetg(gt->g+1,t_VECSMALL);
     for(j=1;j<=gt->g;j++)
-      gmael(C,i,j)=NULL;
+      mael(C,i,j)=0;
   }
   v = Fp_mul_mod_pol((GEN)gt->pauto[2], (GEN) gt->bezoutcoeff[m],gl->TQ,gl->Q);
   for (i = 1; i < m; i++)
@@ -1341,7 +1341,7 @@ vandermondeinversemod(GEN L, GEN T, GEN den, GEN mod)
     P = Fp_mul_pol_scal(Fp_deuc(T, deg1pol(gun,negi((GEN) L[i]),x),mod), z, mod); 
     M[i] = lgetg(n, t_COL);
     for (j = 1; j < n; j++)
-      gmael(M,i,j) = gcopy((GEN) P[1 + j]);
+      mael(M,i,j) = lcopy((GEN) P[1 + j]);
     M[i] = lpileupto(av,(GEN)M[i]);
   }
   gunclone(Tp); /*unclone*/
@@ -2100,7 +2100,7 @@ s4test(GEN u, GEN liftpow, struct galois_lift *gl, GEN phi)
 {
   ulong ltop=avma;
   GEN     res;
-  int     bool,i,d = lgef(u)-2;
+  int     bl,i,d = lgef(u)-2;
   if (DEBUGLEVEL >= 6)
     timer2();
   res = (GEN) scalarpol((GEN)u[2],varn(u));
@@ -2113,9 +2113,9 @@ s4test(GEN u, GEN liftpow, struct galois_lift *gl, GEN phi)
   res = Fp_centermod(Fp_mul_pol_scal(res,gl->den,gl->Q), gl->Q);
   if (DEBUGLEVEL >= 6)
     msgtimer("s4test()");
-  bool = poltopermtest(res, gl, phi);
+  bl = poltopermtest(res, gl, phi);
   avma=ltop;
-  return bool;
+  return bl;
 }
 static GEN
 s4releveauto(GEN misom,GEN Tmod,GEN Tp,GEN p,long a1,long a2,long a3,long a4,long a5,long a6)
@@ -2195,8 +2195,8 @@ s4galoisgen(struct galois_lift *gl)
   }
   for (i = 1; i < lg(isom); i++)
     for (j = 1; j < lg(isom); j++)
-      gmael(misom,i,j) = Fp_compo_mod_pol((GEN) isominv[i],(GEN) isom[j],
-					  (GEN) Tmod[j],p);
+      mael(misom,i,j) = (long) Fp_compo_mod_pol((GEN) isominv[i],(GEN) isom[j],
+						(GEN) Tmod[j],p);
   liftpow = cgetg(24, t_VEC);
   av = avma;
   for (i = 0; i < 3; i++)
@@ -2782,9 +2782,9 @@ galoisconj4(GEN T, GEN den, long flag)
     grp = cgetg(9, t_VEC);
     grp[1] = (long) gcopy(T);
     grp[2] = lgetg(4,t_VEC); /*Make K.B. happy(8 components)*/
-    gmael(grp,2,1) = stoi(ga.l);
-    gmael(grp,2,2) = stoi(gb.valabs);
-    gmael(grp,2,3) = icopy(gb.ladicabs);
+    mael(grp,2,1) = lstoi(ga.l);
+    mael(grp,2,2) = lstoi(gb.valabs);
+    mael(grp,2,3) = licopy(gb.ladicabs);
     grp[3] = (long) gcopy(L);
     grp[4] = (long) gcopy(M);
     grp[5] = (long) gcopy(den);
