@@ -602,8 +602,7 @@ choose_prime(primedata *S, GEN pol, GEN dpol)
     if (k > 5 * N) err(talker,"sorry, too many block systems in nfsubfields");
     ff = (GEN)FpX_factor(FpX_red(pol,p), p)[1];
     r = lg(ff)-1;
-    if (r == 1 || r == N) continue;
-    if (r >= BIL) continue;
+    if (r == N || r >= BIL) continue;
 
     n = cgetg(r+1, t_VECSMALL); lcm = n[1] = degpol(ff[1]);
     for (j=2; j<=r; j++) { n[j] = degpol(ff[j]); lcm = clcm(lcm, n[j]); }
@@ -613,7 +612,8 @@ choose_prime(primedata *S, GEN pol, GEN dpol)
     pp = p[2];
     oldn = n;
     oldff = ff;
-    oldlcm = lcm; av = avma;
+    oldlcm = lcm; if (r == 1) break;
+    av = avma;
   }
   if (DEBUGLEVEL) fprintferr("Chosen prime: p = %ld\n", pp);
   S->ff = oldff;
