@@ -344,12 +344,16 @@ rnfelementreltoabs(GEN rnf,GEN x)
 
 /* assume x,T,pol t_POL. T defines base field, pol defines rnf over T.
  * x an absolute element of the extension */
+GEN
+get_theta_abstorel(GEN T, GEN pol, GEN k)
+{
+  return gmodulcp(gadd(polx[varn(pol)],
+                       gmul(k, gmodulcp(polx[varn(T)],T))), pol);
+}
 GEN 
 eltabstorel(GEN x, GEN T, GEN pol, GEN k)
 {
-  GEN theta = gmodulcp(gadd(polx[varn(pol)],
-                            gmul(k, gmodulcp(polx[varn(T)],T))), pol);
-  return poleval(x, theta);
+  return poleval(x, get_theta_abstorel(T,pol,k));
 }
 
 GEN
