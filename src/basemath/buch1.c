@@ -31,6 +31,7 @@ static GEN  **powsubfactorbase,vperm,subfactorbase,Disc,sqrtD,isqrtD;
 
 GEN buchquad(GEN D, double c, double c2, long RELSUP0, long flag, long prec);
 extern GEN roots_to_pol_intern(GEN L, GEN a, long v, int plus);
+extern GEN roots_to_pol(GEN L, long v);
 
 GEN
 quadclassunit0(GEN x, long flag, GEN data, long prec)
@@ -187,7 +188,7 @@ quadhilbertimag(GEN D, GEN flag)
   if (!egalii(p1,p2)) u=lift(chinois(u1,u2));
   else
   {
-    if (!gegal(qf1,qf2)) err(bugparier,"quadhilbertimag (p1=p1, qf1!=qf2)");
+    if (!gegal(qf1,qf2)) err(bugparier,"quadhilbertimag (p1=p2, qf1!=qf2)");
     u=(GEN)compimagraw(qf1,qf2)[2];
   }
   u = gmodulcp(u, shifti(mulii(p1,p2),1));
@@ -254,6 +255,7 @@ GEN quadhilbertreal(GEN D, long prec);
 GEN
 quadhilbert(GEN D, GEN flag, long prec)
 {
+  if (!flag) flag = gzero;
   if (typ(D)!=t_INT)
   {
     D = checkbnf(D);
@@ -263,25 +265,21 @@ quadhilbert(GEN D, GEN flag, long prec)
   }
   else
   {
-  if (!isfundamental(D))
-    err(talker,"quadhilbert needs a fundamental discriminant");
+    if (!isfundamental(D))
+      err(talker,"quadhilbert needs a fundamental discriminant");
   }
-  if (signe(D)>0) return quadhilbertreal(D,prec);
-  if (!flag) flag = gzero;
-  return quadhilbertimag(D,flag);
+  return (signe(D)>0)? quadhilbertreal(D,prec)
+                     : quadhilbertimag(D,flag);
 }
 
 /* AUXILLIARY ROUTINES FOR QUADRAYIMAGWEI */
+#define to_approx(nf,a) ((GEN)gmul(gmael((nf),5,1), (a))[1])
 
 static GEN
-getal(GEN nf, GEN b, GEN a, long prec)
+getal(GEN nf, GEN b, GEN a)
 {
-  GEN p1,D,os;
-
-  p1=idealcoprime(nf,idealdiv(nf,b,a),b);
-  D=(GEN)nf[3];
-  os=mpodd(D) ? gun : gzero; os=gmul2n(gadd(os,gsqrt(D,prec)),-1);
-  return gadd((GEN)p1[1],gmul((GEN)p1[2],os));
+  GEN x = idealcoprime(nf,idealdiv(nf,b,a),b);
+  return to_approx(nf,x);
 }
 
 static GEN
@@ -299,147 +297,154 @@ epseta(GEN D, long p, long q, GEN tau, long prec)
   else return gpuigs(trueeta(tau,prec),4);
 }
 
+/* Z-basis for a (over C) */
 static GEN
-pppfun(GEN D, GEN z, GEN a, GEN den, long prec)
+get_om(GEN nf, GEN a)
 {
-  GEN om, res, y, os;
+  GEN om = cgetg(3,t_VEC);
+  om[1] = (long)to_approx(nf,(GEN)a[2]);
+  om[2] = (long)to_approx(nf,(GEN)a[1]);
+  return om;
+}
 
-  os=mpodd(D) ? gun : gzero; os=gmul2n(gadd(os,gsqrt(D,prec)),-1);
-  om=cgetg(3,t_VEC);
-  om[1]=ladd(gcoeff(a,1,2),gmul(gcoeff(a,2,2),os));
-  om[2]=coeff(a,1,1);
-  res=gdiv(ellwp0(om,z,0,prec,0),den); y=res;
-  if (gcmpgs(D,-4)>=0) y=gmul(y,res);
-  if (gcmpgs(D,-3)==0) y=gmul(y,res);
+static GEN
+pppfun(GEN nf, GEN z, GEN a, GEN den, long prec)
+{
+  GEN y, om = get_om(nf, a), D = (GEN)nf[3];
+
+  y = gdiv(ellwp0(om,z,0,prec,0), den);
+  if (egalii(D, stoi(-4))) y = gpowgs(y,2);
+  if (egalii(D, stoi(-3))) y = gpowgs(y,3);
   return y;
+}
+
+static GEN
+get_c(GEN nf, GEN a, GEN den, long q, long prec)
+{
+  byteptr d = diffptr;
+  long i, r = q-1, p = 0;
+  GEN p1,al, D = (GEN)nf[3];
+  p += *d++; p += *d++;
+  do
+  {
+    p += *d++;
+    if (!*d) err(primer1);
+  }
+  while (p % q != r || krogs(D,p)==1);
+  al = getal(nf,idealhermite(nf,(GEN)(primedec(nf,stoi(p))[1])),a);
+  p1 = gzero;
+  for (i=1; i <= ((p-1)>>1); i++)
+    p1 = gadd(p1,pppfun(nf,gmulsg(i,al),a,den,prec));
+  if (q == 4 && kross(2,p) < 0) p1 = gneg(p1);
+  return gneg(p1);
 }
 
 static GEN
 schertzc(GEN nf, GEN a, GEN den, long prec)
 {
-  GEN D,al,id,p1;
-  long k2,k3,ell,j;
-  byteptr p = diffptr;
+  GEN D,al,id;
+  long k2,k3;
 
   D=(GEN)nf[3];
 
   if (gcmpgs(D,-3)==0)
   {
     id=idealmul(nf,gdeux,(GEN)(primedec(nf,stoi(3))[1]));
-    al=getal(nf,id,a,prec);
-    return pppfun(D,al,a,den,prec);
+    al=getal(nf,id,a);
+    return pppfun(nf,al,a,den,prec);
   }
+
   if (gcmpgs(D,-4)==0)
   {
     id=idealmul(nf,(GEN)(primedec(nf,gdeux)[1]),(GEN)(primedec(nf,stoi(5))[1]));
-    al=getal(nf,id,a,prec);
-    return pppfun(D,al,a,den,prec);
+    al=getal(nf,id,a);
+    return pppfun(nf,al,a,den,prec);
   }
+
   k2=krogs(D,2); k3=krogs(D,3);
-  if (k2==-1)
+  if (k2 < 0)
   {
-    if (k3==-1) return gzero;
-    else
-    {
-      ell=0; ell += *p++; ell += *p++;
-      do
-      {
-	ell += *p++;
-	if (!*p) err(primer1);
-      }
-      while (ell%3!=2 || krogs(D,ell)==1);
-      al=getal(nf,idealhermite(nf,(GEN)(primedec(nf,stoi(ell))[1])),a,prec);
-      p1=gzero;
-      for (j=1; j<=((ell-1)>>1); j++)
-	p1=gadd(p1,pppfun(D,gmulsg(j,al),a,den,prec));
-      return gneg(p1);
-    }
+    if (k3 < 0) return gzero;
+    return get_c(nf,a,den,3,prec);
   }
-  else
+
+  if (k3 >= 0)
   {
-    if (k3!=-1)
-    {
-      id=idealmul(nf,(GEN)(primedec(nf,gdeux)[1]),(GEN)(primedec(nf,stoi(3))[1]));
-      al=getal(nf,id,a,prec);
-      return pppfun(D,al,a,den,prec);
-    }
-    else
-    {
-      if (k2==1)
-      {
-	al=getal(nf,idealhermite(nf,gdeux),a,prec);
-	return pppfun(D,al,a,den,prec);
-      }
-      else
-      {
-	ell=0; ell += *p++; ell += *p++;
-	do
-	{
-	  ell += *p++;
-	  if (!*p) err(primer1);
-	}
-	while (ell%4!=3 || krogs(D,ell)==1);
-	al=getal(nf,idealhermite(nf,(GEN)(primedec(nf,stoi(ell))[1])),a,prec);
-	p1=gzero;
-	for (j=1; j<=((ell-1)>>1); j++)
-	  p1=gadd(p1,pppfun(D,gmulsg(j,al),a,den,prec));
-	return gmulsg(-krogs(gdeux,ell),p1);
-      }
-    }
+    id=idealmul(nf,(GEN)(primedec(nf,gdeux)[1]),(GEN)(primedec(nf,stoi(3))[1]));
+    al=getal(nf,id,a);
+    return pppfun(nf,al,a,den,prec);
   }
+
+  if (k2 == 1)
+  {
+    al=getal(nf,idealhermite(nf,gdeux),a);
+    return pppfun(nf,al,a,den,prec);
+  }
+
+  return get_c(nf,a,den,4,prec);
 }
 
 static GEN
 getallelts(GEN nf, GEN clgp)
 {
-  GEN cyc,gen,listl,res;
+  GEN p1,cyc,gen,listl,listpow;
   long lc,i,j,k,no,k1,pro;
 
-  cyc=(GEN)clgp[2]; gen=(GEN)clgp[3]; lc=lg(cyc)-1;
+  cyc=(GEN)clgp[2];
+  gen=(GEN)clgp[3]; lc=lg(cyc)-1;
   no=itos((GEN)clgp[1]);
-  listl=cgetg(no+1,t_VEC);
+  listl = cgetg(no+1,t_VEC);
+  listpow = cgetg(lc+1,t_VEC);
   listl[1] = (long)idealhermite(nf,gun);
+  cyc = dummycopy(cyc); settyp(cyc, t_VECSMALL);
+  for (i=1; i<=lc; i++)
+  {
+    cyc[i] = k = itos((GEN)cyc[i]);
+    p1 = cgetg(k, t_VEC); p1[1] = gen[i];
+    for (j=2; j<k; j++) p1[j] = (long)idealmul(nf, (GEN)p1[j-1], (GEN)p1[1]);
+    listpow[i] = (long)p1;
+  }
+    
   for (j=1; j<no; j++)
   {
-    k = j; res = gun;
+    k = j; p1 = gun;
     for (i=lc; k; i--)
     {
-      pro=((GEN)cyc[i])[2]; /* attention: 1er et seul mot no code de cyc[i] */
-      k1 = k%pro;
-      if (k1) res=idealmul(nf,res,idealpows(nf,(GEN)gen[i],k1));
-      k /= pro;
+      pro = cyc[i]; k1 = k%pro; k /= pro;
+      if (k1)
+      {
+        GEN p2 = gmael(listpow,i,k1);
+        p1 = (p1==gun)? p2: idealmul(nf,p1,p2);
+      }
     }
-    listl[j+1] = (long)res;
+    listl[j+1] = (long)p1;
   }
   return listl;
 }
 
-/* If error and flag = 0 return error message, otherwise return empty vector */
+/* x quadratic integer (approximate), recognize it. If error return NULL */
 static GEN
-findbezk(GEN nf, GEN be, long flag, long prec)
+findbezk(GEN nf, GEN x)
 {
-  GEN a0,b0,a,b,D,pol,y;
-  GEN eps=gpuigs(stoi(10),-8);
-  long d0,ea,eb;
+  GEN a,b, M = gmael(nf,5,1), y = cgetg(3, t_COL), u = gcoeff(M,1,2);
+  long ea,eb;
 
-  D=(GEN)nf[3]; pol=(GEN)nf[1];
-  a0=gmul2n(greal(be),1); a=grndtoi(a0,&ea);
-  b0=gdiv(gmul2n(gimag(be),1),gsqrt(negi(D),prec)); b=grndtoi(b0,&eb);
-  if (ea>-10 || eb>-10)
-  {
-    if (flag) return cgetg(1,t_VEC);
-    else err(talker,"insufficient precision in findbezk");
-  }
-  if (gcmp(gadd(gabs(gsub(a,a0),prec),gabs(gsub(b,b0),prec)),eps)>0 || mpodd(addii(a,mulii(b,D))))
-  {
-    if (flag) return cgetg(1,t_VEC);
-    else {outerr(be); err(talker," is not in ZK");}
-  }
-  y=cgetg(3,t_POLMOD);
-  y[1]=(long)pol;
-  d0=mpodd(D) ? -1 : 0;
-  y[2]=ladd(gmul(b,polx[varn(pol)]),gmul2n(gadd(a,gmulgs(b,d0)),-1));
-  return y;
+  b = grndtoi(gdiv(gimag(x), gimag(u)), &eb);
+  a = grndtoi(greal(gsub(x, gmul(b,u))),&ea);
+  if (ea>-20 || eb>-20) return NULL;
+  if (!signe(b)) return a;
+  y[1] = (long)a;
+  y[2] = (long)b; return basistoalg(nf,y);
+}
+
+static GEN
+findbezk_pol(GEN nf, GEN x)
+{
+  long i, lx = lgef(x);
+  GEN y = cgetg(lx,t_POL);
+  for (i=2; i<lx; i++)
+    if (! (y[i] = (long)findbezk(nf,(GEN)x[i])) ) return NULL;
+  y[1] = x[1]; return y;
 }
 
 /*  returns an equation for the ray class field of modulus f of the imaginary
@@ -450,11 +455,11 @@ findbezk(GEN nf, GEN be, long flag, long prec)
 static GEN
 quadrayimagwei(GEN bnr, GEN flag, long prec)
 {
-  long av=avma,tetpil,vpol,clno,clrayno,lc,i,j,res,ell,inda,fl;
+  long av=avma,vpol,clno,clrayno,lc,i,j,res,ell,inda,fl;
   byteptr p = diffptr;
-  GEN allf,f,clray,bnf,nf,D,pol,fa,P2,P2new,pp,pi,pial,os,clgp,cyc,gen,listl;
-  GEN listray,lista,listla,pp1,la,z,pr2,listden,listc,p1,pii2,ida,ap2;
-  GEN om1,om2,tau,d,al,s,vpro;
+  GEN allf,f,clray,bnf,nf,D,pol,fa,P,pp,pi,pial,clgp,cyc,gen,listl;
+  GEN listray,lista,listla,pp1,z,pr2,listden,listc,p1,pii2,ida,ap2;
+  GEN om1,om2,tau,d,al,s,v;
 
   allf=conductor(bnr,gzero,1,prec);
   f=gmael(allf,1,1); clray=(GEN)allf[2];
@@ -464,19 +469,20 @@ quadrayimagwei(GEN bnr, GEN flag, long prec)
   fl=itos(flag);
   if (lg(fa)==1)
   {
-    P2=quadhilbertimag(D,flag);
+    P=quadhilbertimag(D,flag);
     if (fl)
     {
 	  /* convertir les formes en ideaux */
     }
-    tetpil=avma; return gerepile(av,tetpil,gcopy(P2));
+    return gerepileupto(av, gcopy(P));
   }
-  os=mpodd(D) ? gun : gzero; os=gmul2n(gadd(os,gsqrt(D,prec)),-1);
   if (lg(fa)==2)
   {
     pp=(GEN)fa[1]; pi=(GEN)pp[1];
-    if (fl) pial=gadd(gmul(gmael(pp,2,2),os),gmael(pp,2,1));
-    else pial=basistoalg(nf,(GEN)pp[2]);
+    if (fl)
+      pial = to_approx(nf,(GEN)pp[2]);
+    else
+      pial = basistoalg(nf,(GEN)pp[2]);
   }
   else { pi=gun; pial=gun; }
   clgp=gmael(bnf,8,1);
@@ -494,24 +500,20 @@ quadrayimagwei(GEN bnr, GEN flag, long prec)
     for (res=0,j=1; j<lc; j++)
       res = res*itos((GEN)cyc[j]) + itos((GEN)pp1[j]);
     lista[i] = res+1;
-    la = gmul((GEN)nf[7],(GEN)pp[2]);
-    listla[i] = lsubst(la,vpol,os);
+    listla[i] = (long)to_approx(nf,(GEN)pp[2]);
   }
   z = dethnf(gmael3(bnr,2,1,1));
   for (i=1; i<=clno; i++) z=mulii(z,dethnf((GEN)listl[i]));
-  if (gcmpgs(D,-4)<0)
+  if (gcmpgs(D,-4) < 0)
   {
-    GEN court=cgeti(3);
-
-    court[1]=evallgefint(3) | evalsigne(1);
     ell=0;
     do
     {
-      ell += *p++; court[2]=ell;
+      ell += *p++;
       if (!*p) err(primer1);
     }
-    while (ell%12!=11 || !gcmp1(ggcd(court,z)) || krogs(D,ell)!=1);
-    pr2=idealpows(nf,(GEN)(primedec(nf,stoi(ell))[1]),2);
+    while (ell%12!=11 || !smodis(z, ell) || krogs(D,ell)!=1);
+    pr2 = idealpows(nf,(GEN)(primedec(nf,stoi(ell))[1]), 2);
   }
   else { pr2=idmat(2); ell=1; }
   listden=cgetg(clno+1,t_VEC); listc=cgetg(clno+1,t_VEC);
@@ -521,73 +523,60 @@ quadrayimagwei(GEN bnr, GEN flag, long prec)
   {
     ida=(GEN)listl[i]; ap2=idealmul(nf,ida,pr2);
     om2=gcoeff(ida,1,1);
-    om1=gadd(gcoeff(ap2,1,2),gmul(gcoeff(ap2,2,2),os));
+    om1=to_approx(nf, (GEN)ap2[2]);
     tau=gdiv(om1,om2);
     d=gmul(gsqr(gdiv(pii2,om2)),epseta(D,ell,ell,tau,prec));
     listden[i]=(long)d;
     listc[i]=(long)schertzc(nf,(GEN)listl[i],d,prec);
   }
-  al = gsubst(gmul((GEN)nf[7],idealcoprime(nf,f,f)),vpol,os);
-  P2 = fl? cgetg(clrayno+1,t_VEC): gun;
+  al = to_approx(nf, idealcoprime(nf,f,f));
+  P = cgetg(clrayno+1,t_VEC);
   for (j=1; j<=clrayno; j++)
   {
     inda=lista[j];
-    s=pppfun(D,gdiv(al,(GEN)listla[j]),(GEN)listl[inda],(GEN)listden[inda],prec);
+    s=pppfun(nf,gdiv(al,(GEN)listla[j]),(GEN)listl[inda],(GEN)listden[inda],prec);
     s=gsub(s,(GEN)listc[inda]);
 
     if (fl)
     {
-      s=gmul(pial,s);
-      vpro=cgetg(3,t_VEC);
-      vpro[1]=(long)listray[j];
-      vpro[2]=(long)s;
-      P2[j]=(long)vpro;
+      v = cgetg(3,t_VEC); P[j]= (long)v;
+      v[1] = (long)listray[j];
+      v[2] = lmul(pial,s);
     }
-    else P2=gmul(P2,gsub(polx[0],gmul(pi,s)));
+    else P[j] = lmul(pi,s);
   }
-  if (DEBUGLEVEL)
-  {
-    fprintferr("P2 = "); outerr(P2);
-  }
+  if (DEBUGLEVEL) fprintferr("P = %Z",P);
   if (!fl)
   {
-    P2new=gzero;
-    for (i=clrayno; i>=0; i--)
-    {
-      p1=findbezk(nf,truecoeff(P2,i),1,prec);
-      if (typ(p1)==t_VEC) {avma=av; return cgetg(1,t_VEC);}
-      else P2new=gadd(p1,gmul(polx[0],P2new));
-    }
-    P2=gsubst(P2new,0,gmul(gdiv(pi,pial),polx[0]));
-    P2=gmul(P2,gpuigs(gdiv(pial,pi),clrayno));
+    P = findbezk_pol(nf, roots_to_pol(P, 0));
+    if (!P) { avma=av; return cgetg(1,t_VEC); }
+    P = gsubst(P,0,gmul(gdiv(pi,pial),polx[0]));
+    P = gmul(P,gpuigs(gdiv(pial,pi),clrayno));
   }
-  tetpil=avma;
-  return gerepile(av,tetpil,gcopy(P2));
+  return gerepileupto(av, gcopy(P));
 }
 
 /* AUXILLIARY ROUTINES FOR QUADRAYSIGMA */
 
-/* Computes values 2*I*Pi, (om1_*om2-om1*om2_)/(2*I) and
-   om1_*eta2-om2_*eta1 necessary for ellphist */
-
+/* Compute 2*I*Pi, om1_*om2-om1*om2_, om1_*eta2-om2_*eta1 for ellphist */
 static GEN
 ellphistinit(GEN om, long prec)
 {
-  GEN p1,p2,et,om1,om2,ar,pii2,res;
+  GEN p1,et,res,om1b,om2b,I2, om1 = (GEN)om[1], om2 = (GEN)om[2];
 
-  p1=mppi(prec); setexpo(p1,2);
-  pii2=cgetg(3,t_COMPLEX); pii2[1]=zero; pii2[2]=(long)p1;
-  om1=(GEN)om[1]; om2=(GEN)om[2];
-  if (gsigne(gimag(gdiv(om1,om2)))<0)
+  if (gsigne(gimag(gdiv(om1,om2))) < 0)
   {
     p1=om1; om1=om2; om2=p1;
     p1=cgetg(3,t_VEC); p1[1]=(long)om1; p1[2]=(long)om2;
+    om = p1;
   }
-  et=elleta(om,prec);
-  ar=gimag(gmul(p2=gconj(om1),om2));
-  p1=gsub(gmul(p2,(GEN)et[2]),gmul(gconj(om2),(GEN)et[1]));
-  res=cgetg(4,t_VEC);
-  res[1]=(long)pii2; res[2]=(long)ar; res[3]=(long)p1;
+  et = elleta(om,prec);
+  om1b = gconj(om1);
+  om2b = gconj(om2); I2 = gmul2n(gi, 1);
+  res = cgetg(4,t_VEC);
+  res[1] = lmul(I2, mppi(prec));
+  res[2] = lmul(I2, gimag(gmul(om1b,om2)));
+  res[3] = lsub(gmul(om1b,(GEN)et[2]), gmul(om2b,(GEN)et[1]));
   return res;
 }
 
@@ -598,7 +587,7 @@ ellphist(GEN om, GEN res, GEN z, long prec)
 {
   GEN zst;
 
-  zst=gdiv(gsub(gmul(z,(GEN)res[3]),gmul(gconj(z),(GEN)res[1])),gmul2n(gmul(gi,(GEN)res[2]),1));
+  zst=gdiv(gsub(gmul(z,(GEN)res[3]), gmul(gconj(z),(GEN)res[1])), (GEN)res[2]);
   return gsub(ellsigma(om,z,1,prec),gmul2n(gmul(z,zst),-1));
 }
 
@@ -608,21 +597,17 @@ ellphist(GEN om, GEN res, GEN z, long prec)
 static GEN
 computeth2(GEN nf, GEN gf, GEN gc, GEN la, long prec)
 {
-  GEN D,os,p1,p2,fdiv,omdiv,lanum,res;
+  GEN p1,p2,fdiv,omdiv,lanum,res;
 
-  D=(GEN)nf[3];
-  os=mpodd(D) ? gun : gzero; os=gmul2n(gadd(os,gsqrt(D,prec)),-1);
-  fdiv=idealdiv(nf,gf,gc);
-  omdiv=cgetg(3,t_VEC); omdiv[2]=coeff(fdiv,1,1);
-  omdiv[1]=ladd(gmul(gcoeff(fdiv,2,2),os),gcoeff(fdiv,1,2));
-  la=lift(la);
-  lanum=gadd(gmul(truecoeff(la,1),os),truecoeff(la,0));
-  res=ellphistinit(omdiv,prec);
-  p1=gsub(ellphist(omdiv,res,lanum,prec),ellphist(omdiv,res,gun,prec));
-  p2=gimag(p1);
+  fdiv = idealdiv(nf,gf,gc);
+  omdiv = get_om(nf,fdiv);
+  lanum = to_approx(nf,la);
+  res = ellphistinit(omdiv,prec);
+  p1 = gsub(ellphist(omdiv,res,lanum,prec), ellphist(omdiv,res,gun,prec));
+  p2 = gimag(p1);
   if (gexpo(greal(p1))>20 || gexpo(p2)> bit_accuracy(min(prec,lg(p2)))-10)
-    return cgetg(1,t_VEC);
-  else return gexp(p1,prec);
+    return NULL;
+  return gexp(p1,prec);
 }
 
 /* Computes P_2(X)=polynomial in Z_K[X] closest to prod_gc(X-th2(gc)) where
@@ -631,46 +616,39 @@ computeth2(GEN nf, GEN gf, GEN gc, GEN la, long prec)
 static GEN
 computeP2(GEN bnr, GEN la, GEN flag, long prec)
 {
-  long av=avma,tetpil,clrayno,j,fl;
-  GEN bnf,listray,nf,P,s,Pnew,gc,vpro,p1,gf;
+  long av=avma, av2, clrayno,i,fl;
+  GEN bnf,listray,nf,P,gf;
 
   bnf=(GEN)bnr[1]; nf=(GEN)bnf[7]; gf=gmael3(bnr,2,1,1);
+  if (typ(la) != t_COL) la = algtobasis(nf,la);
   listray=getallelts(nf,(GEN)bnr[5]);
   clrayno=lg(listray)-1;
-  fl=itos(flag);
-  if (fl) P=cgetg(clrayno+1,t_VEC);
-  else P=gun;
-  for (j=1; j<=clrayno; j++)
+  fl=itos(flag); av2 = avma;
+PRECPB:
+  P = cgetg(clrayno+1,t_VEC);
+  for (i=1; i<=clrayno; i++)
   {
-    gc=(GEN)listray[j];
-    s=computeth2(nf,gf,gc,la,prec);
-    if (typ(s)==t_VEC) {avma=av; return cgetg(1,t_VEC);}
+    GEN v, s = computeth2(nf,gf, (GEN)listray[i],la,prec);
+    if (!s) { avma=av; return cgetg(1,t_VEC); }
     if (fl)
     {
-     vpro=cgetg(3,t_VEC);
-     vpro[1]=(long)listray[j];
-     vpro[2]=(long)s;
-     P[j]=(long)vpro;
+      v = cgetg(3,t_VEC); P[i] = (long)v;
+      v[1] = (long)listray[i];
+      v[2] = (long)s;
     }
-    else P=gmul(P,gsub(polx[0],s));
+    else P[i] = (long)s;
   }
   if (!fl)
   {
-    Pnew=gzero;
-    for (j=clrayno; j>=0; j--)
+    P = findbezk_pol(nf, roots_to_pol(P, 0));
+    if (!P)
     {
-      p1=findbezk(nf,truecoeff(P,j),1,prec);
-      if (typ(p1)==t_VEC)
-      {
-	prec=(prec<<1)-2; avma=av;
-	if (DEBUGLEVEL) err(warnprec,"computeP2",prec);
-	return computeP2(bnr,la,flag,prec);
-      }
-      Pnew=gadd(p1,gmul(polx[0],Pnew));
+      prec=(prec<<1)-2; avma=av2;
+      if (DEBUGLEVEL) err(warnprec,"computeP2",prec);
+      goto PRECPB;
     }
-    P=Pnew;
   }
-  tetpil=avma; return gerepile(av,tetpil,gcopy(P));
+  return gerepileupto(av, gcopy(P));
 }
 
 #define nexta(a) (a>0 ? -a : 1-a)
@@ -684,128 +662,139 @@ do_compo(GEN x, GEN y)
   {
     if (a) x = gsubst(x, 0, gaddsg(a, polx[0]));
     z = subres(x,y);
-    if (lgef(ggcd(z,derivpol(z))) < 4) break;
+    z = gsubst(z, MAXVARN, polx[0]);
+    if (issquarefree(z)) return z;
   }
-  return gsubst(z,MAXVARN,polx[0]);
 }
 #undef nexta
 
+static GEN
+galoisapplypol(GEN nf, GEN s, GEN x)
+{
+  long i, lx = lg(x);
+  GEN y = cgetg(lx,t_POL);
+
+  for (i=2; i<lx; i++) y[i] = (long)galoisapply(nf,s,(GEN)x[i]);
+  y[1] = x[1]; return y;
+}
+
+/* x quadratic, write it as ua + v, u,v rational */
+static GEN
+findquad(GEN a, GEN x, GEN p)
+{
+  long tu,tv, av = avma;
+  GEN u,v;
+  if (typ(x) == t_POLMOD) x = (GEN)x[2];
+  if (typ(a) == t_POLMOD) a = (GEN)a[2];
+  u = poldivres(x, a, &v);
+  u = simplify(u); tu = typ(u);
+  v = simplify(v); tv = typ(v);
+  if (!is_scalar_t(tu) || !is_scalar_t(tv))
+    err(talker, "incorrect data in findquad");
+  x = v;
+  if (!gcmp0(u)) x = gadd(gmul(u, polx[varn(a)]), x);
+  if (typ(x) == t_POL) x = gmodulcp(x,p);
+  return gerepileupto(av, x);
+}
+
+static GEN
+findquad_pol(GEN nf, GEN a, GEN x)
+{
+  long i, lx = lg(x);
+  GEN p = (GEN)nf[1], y = cgetg(lx,t_POL);
+  for (i=2; i<lx; i++) y[i] = (long)findquad(a, (GEN)x[i], p);
+  y[1] = x[1]; return y;
+}
 
 static GEN
 compocyclo(GEN nf, long m, long d, long prec)
 {
-  GEN p1,p2,p3,D,res,pol4,nf4;
+  GEN sb,a,b,s,p1,p2,p3,res,polL,polLK,nfL, D = (GEN)nf[3];
   long ell,vx;
 
-  D=(GEN)nf[3];
-  p1=quadhilbertimag(D, gzero);
-  p2=cyclo(m,0);
+  p1 = quadhilbertimag(D, gzero);
+  p2 = cyclo(m,0);
   if (d==1) return do_compo(p1,p2);
 
-  ell = m%2 ? m : (m>>2);
-  if (!signe(addsi(ell,D)))
+  ell = m&1 ? m : (m>>2);
+  if (!cmpsi(-ell,D)) /* ell = |D| */
   {
-    p2=gcoeff(nffactor(nf,p2),1,1);
+    p2 = gcoeff(nffactor(nf,p2),1,1);
     return do_compo(p1,p2);
   }
-  if (ell%4==3) ell= -ell;
-  p3=cgetg(5,t_POL);
-  p3[1]=evalsigne(1)|evallgef(5)|evalvarn(0);
-  p3[2]=lstoi((1-ell)>>2);
-  p3[3]=p3[4]=un;
-  res=rnfequation2(nf,p3);
-  vx=varn((GEN)nf[1]);
-  pol4=gsubst((GEN)res[1],0,polx[vx]);
-  nf4=initalg(pol4,prec);
-  p1=gcoeff(nffactor(nf4,p1),1,1);
-  p2=gcoeff(nffactor(nf4,p2),1,1);
-  p3=do_compo(p1,p2);
-  p1=gmodulcp(gsubst(lift((GEN)res[2]),0,polx[vx]),pol4);
-  return gsubst(lift0(p3,vx),vx,p1);
+  if (ell%4 == 3) ell = -ell;
+  /* nf = K = Q(a), L = K(b) quadratic extension = Q(t) */
+  polLK = quadpoly(stoi(ell)); /* relative polynomial */
+  res = rnfequation2(nf, polLK);
+  vx = varn(nf[1]);
+  polL = gsubst((GEN)res[1],0,polx[vx]); /* = charpoly(t) */
+  a = gsubst(lift((GEN)res[2]), 0,polx[vx]);
+  b = gsub(polx[vx], gmul((GEN)res[3], a));
+  nfL = initalg(polL,prec);
+  p1 = gcoeff(nffactor(nfL,p1),1,1);
+  p2 = gcoeff(nffactor(nfL,p2),1,1);
+  p3 = do_compo(p1,p2); /* relative equation over L */
+  /* compute non trivial s in Gal(L / K) */
+  sb= gneg(gadd(b, truecoeff(polLK,1))); /* s(b) = Tr(b) - b */
+  s = gadd(polx[vx], gsub(sb, b)); /* s(t) = t + s(b) - b */
+  p3 = gmul(p3, galoisapplypol(nfL, s, p3));
+  return findquad_pol(nf, a, p3);
 }
 
-static GEN
-retflag(GEN x, GEN flag)
+/* I integral ideal in HNF. (x) = I, x small in Z ? */
+static long
+isZ(GEN I)
 {
-  if (itos(flag)) err(impl,"some special cases in quadray (flag=1)");
-      /* to be done */
-  return x;
+  GEN x = gcoeff(I,1,1);
+  if (signe(gcoeff(I,1,2)) || !egalii(x, gcoeff(I,2,2))) return 0;
+  return is_bigint(x)? -1: itos(x);
 }
 
-/* Treat special cases directly. Exit with 0 if not special case. Internal,
-   no stack treatment. */
+/* Treat special cases directly. return NULL if not special case */
 static GEN
 treatspecialsigma(GEN nf, GEN gf, GEN flag, long prec)
 {
-  GEN D,p1,p2,tryf,fa;
-  long Ds,flf,lfa,i;
+  GEN p1,p2,tryf, D = (GEN)nf[3];
+  long Ds,fl,i;
 
-  D=(GEN)nf[3];
+  if (itos(flag)) err(impl,"some special cases in quadray (flag=1)");
+  i = isZ(gf);
   if (cmpis(D,-3)==0)
   {
-    p1=idmat(2); p2=gcoeff(gf,1,1);
-    if (gegal(gf,gmul(p1,p2)) && (cmpis(p2,4)==0 || cmpis(p2,5)==0 || cmpis(p2,7)==0))
-      return retflag(cyclo(itos(p2),0),flag);
-    p1=idealpows(nf,(GEN)primedec(nf,stoi(3))[1],3);
-    if (gegal(gf,p1))
-    {
-      p1=gcoeff(nffactor(nf,cyclo(3,0)),1,1);
-      p1=gneg(polcoeff0(p1,0,0)); /* should be zeta_3 */
-      p2=cgetg(6,t_POL);
-      p2[1]=evalsigne(1)|evallgef(6)|evalvarn(0);
-      p2[2]=(long)p1; p2[3]=p2[4]=zero; p2[5]=un;
-      return retflag(p2,flag);
-    }
-    return gzero;
+    if (i == 4 || i == 5 || i == 7) return cyclo(i,0);
+    if (cmpis(gcoeff(gf,1,1), 9) || cmpis(content(gf),3)) return NULL;
+    p1 = (GEN)nfroots(nf,cyclo(3,0))[1]; /* f = P_3^3 */
+    return gadd(gpowgs(polx[0],3), p1); /* x^3+j */
   }
   if (cmpis(D,-4)==0)
   {
-    p1=idmat(2); p2=gcoeff(gf,1,1);
-    if (gegal(gf,gmul(p1,p2)))
-    {
-      if (cmpis(p2,3)==0 || cmpis(p2,5)==0)
-	return retflag(cyclo(itos(p2),0),flag);
-      if (cmpis(p2,4)==0)
-      {
-	p1=gcoeff(nffactor(nf,cyclo(4,0)),1,1);
-	p1=gneg(polcoeff0(p1,0,0)); /* should be zeta_4=I */
-	p2=cgetg(5,t_POL);
-	p2[1]=evalsigne(1)|evallgef(5)|evalvarn(0);
-	p2[2]=(long)p1; p2[3]=zero; p2[4]=un;
-	return retflag(p2,flag);
-      }
-    }
-    return gzero;
+    if (i == 3 || i == 5) return cyclo(i,0);
+    if (i != 4) return NULL;
+    p1 = (GEN)nfroots(nf,cyclo(4,0))[1];
+    return gadd(gpowgs(polx[0],2), p1); /* x^2+i */
   }
-  p1=idmat(2); p2=gcoeff(gf,1,1); Ds=itos(modis(D,48));
-  if (gegal(gf,gmul(p1,p2)))
+  Ds = smodis(D,48);
+  if (i)
   {
-    if (cmpis(p2,2)==0 && Ds%16==8)
-      return retflag(compocyclo(nf,4,1,prec),flag);
-    if (cmpis(p2,3)==0 && Ds%3==1)
-      return retflag(compocyclo(nf,3,1,prec),flag);
-    if (cmpis(p2,4)==0 && Ds%8==1)
-      return retflag(compocyclo(nf,4,1,prec),flag);
-    if (cmpis(p2,6)==0 && Ds%48==40)
-      return retflag(compocyclo(nf,12,1,prec),flag);
-    return gzero;
+    if (i==2 && Ds%16== 8) return compocyclo(nf, 4,1,prec);
+    if (i==3 && Ds% 3== 1) return compocyclo(nf, 3,1,prec);
+    if (i==4 && Ds% 8== 1) return compocyclo(nf, 4,1,prec);
+    if (i==6 && Ds   ==40) return compocyclo(nf,12,1,prec);
+    return NULL;
   }
-  p1=gcoeff(gf,2,2);
-  if (gcmp1(p1)) {flf=1; tryf=p2;}
-  else
-  {
-    if (cmpis(p1,2) || mpodd(p2) || mpodd(gcoeff(gf,1,2))) return gzero;
-    flf=2; tryf=gmul2n(p2,-1);
+
+  p1 = gcoeff(gf,1,1);
+  p2 = gcoeff(gf,2,2);
+  if (gcmp1(p2)) { fl = 0; tryf = p1; }
+  else {
+    if (Ds % 16 != 8 || !egalii(content(gf),gdeux)) return NULL;
+    fl = 1; tryf = shifti(p1,-1);
   }
-  fa=(GEN)factor(D)[1]; lfa=lg(fa);
-  for (i=1; i<lfa; i++)
-    if (cmpis((GEN)fa[i],3)>0 && gegal((GEN)fa[i],tryf))
-    {
-      if (flf==1) return retflag(compocyclo(nf,itos(tryf),2,prec),flag);
-      if (Ds%16==8) return retflag(compocyclo(nf,4*itos(tryf),2,prec),flag);
-      return gzero;
-    }
-  return gzero;
+  if (cmpis(tryf, 3) <= 0 || !gcmp0(resii(D, tryf)) || !isprime(tryf))
+    return NULL;
+
+  i = itos(tryf); if (fl) i *= 4;
+  return compocyclo(nf,i,2,prec);
 }
 
 /* Compute ray class field polynomial using sigma; if flag=1, pairs
@@ -814,67 +803,72 @@ treatspecialsigma(GEN nf, GEN gf, GEN flag, long prec)
 static GEN
 quadrayimagsigma(GEN bnr, GEN flag, long prec)
 {
-  long av=avma,tetpil,a,b,f2;
-  GEN allf,bnf,nf,pol,w,wbas,gf,la,p1,p2,y,labas,gfi;
+  long av=avma,a,b,f2;
+  GEN allf,bnf,nf,pol,w,gf,la,p1,labas,gfi,Ci,Cj,Cj2,D,nfun;
 
-  allf=conductor(bnr,gzero,2,prec);
-  bnr=(GEN)allf[2]; gf=gmael(allf,1,1);
+  allf = conductor(bnr,gzero,2,prec);
+  bnr = (GEN)allf[2];
+  gf = gmael(allf,1,1);
   if (gcmp1(dethnf(gf)))
   {
-    if (typ(flag)!=t_INT) flag=(GEN)flag[2];
-    p1=quadhilbertimag(gmael3(bnr,1,7,3),flag);
+    if (typ(flag)!=t_INT) flag = (GEN)flag[2];
+    p1 = quadhilbertimag(gmael3(bnr,1,7,3),flag);
     if (itos(flag))
     {
 	  /* convertir les formes en ideaux */
     }
-    tetpil=avma; return gerepile(av,tetpil,gcopy(p1));
+    return gerepileupto(av, gcopy(p1));
   }
-  bnf=(GEN)bnr[1]; nf=(GEN)bnf[7]; pol=(GEN)nf[1];
-  p1=treatspecialsigma(nf,gf,flag,prec);
-  if (!gcmp0(p1)) {tetpil=avma; return gerepile(av,tetpil,gcopy(p1));}
-  w=gmodulcp(polx[varn(pol)],pol);
-  wbas=algtobasis(nf,w);
-  f2=itos(gmul2n(gcoeff(gf,1,1),1));
-  gfi=invmat(gf);
+  bnf = (GEN)bnr[1]; nf = (GEN)bnf[7]; pol = (GEN)nf[1];
+  p1 = treatspecialsigma(nf,gf,flag,prec);
+  if (p1) return gerepileupto(av, p1);
+  w = gmodulcp(polx[varn(pol)],pol);
+  f2 = itos(gmul2n(gcoeff(gf,1,1),1));
+  gfi = invmat(gf);
+  D = (GEN)nf[3];
+  if (cmpis(D,-4)) Ci = NULL;
+  else
+  {
+    p1 = nfroots(nf,cyclo(4,0));
+    Ci = algtobasis(nf, (GEN)p1[1]); /* should be I */
+  }
+  if (cmpis(D,-3)) Cj = Cj2 = NULL;
+  else
+  {
+    p1 = nfroots(nf,cyclo(3,0));
+    Cj = algtobasis(nf, (GEN)p1[1]);
+    Cj2= algtobasis(nf, (GEN)p1[2]); /* should be j, j^2 */
+  }
+  nfun = algtobasis(nf,gun);
   for (a=0; a<f2; a++)
   {
     for (b=0; b<f2; b++)
     {
-      if (DEBUGLEVEL>=2) fprintferr("[%ld,%ld] ",a,b);
-      la=gaddgs(gmulsg(a,w),b);
-      p1=gnorm(la);
-      if (gcmp1(modis(p1,f2)))
+      if (DEBUGLEVEL>1) fprintferr("[%ld,%ld] ",a,b);
+      la = gaddgs(gmulsg(a,w),b);
+      if (smodis(gnorm(la), f2) != 1) continue;
+
+      labas = algtobasis(nf, la);
+      if (gcmp1(denom(gmul(gfi,gadd(labas,nfun))))
+       || gcmp1(denom(gmul(gfi,gsub(labas,nfun))))) continue;
+      if (Ci)
       {
-	labas=gadd(gmulsg(a,wbas),algtobasis(nf,stoi(b)));
-	if (gcmp1(denom(gmul(gfi,gadd(labas,algtobasis(nf,stoi(-1))))))) continue;
-	if (gcmp1(denom(gmul(gfi,gadd(labas,algtobasis(nf,gun)))))) continue;
-	if (!cmpis((GEN)nf[3],-4))
-	{
-	  p1=gcoeff(nffactor(nf,cyclo(4,0)),1,1);
-	  p1=algtobasis(nf,polcoeff0(p1,0,0)); /* should be -I */
-	  if (gcmp1(denom(gmul(gfi,gadd(labas,p1))))) continue;	
-	  if (gcmp1(denom(gmul(gfi,gsub(labas,p1))))) continue;	
-	}
-	if (!cmpis((GEN)nf[3],-3))
-	{
-	  p1=(GEN)nffactor(nf,cyclo(3,0))[1];
-	  p2=algtobasis(nf,polcoeff0((GEN)p1[1],0,0)); /* -zeta_3^2 */
-	  p1=algtobasis(nf,polcoeff0((GEN)p1[2],0,0)); /* should be -zeta_3 */
-	  if (gcmp1(denom(gmul(gfi,gadd(labas,p1))))) continue;	
-	  if (gcmp1(denom(gmul(gfi,gsub(labas,p1))))) continue;	
-	  if (gcmp1(denom(gmul(gfi,gadd(labas,p2))))) continue;	
-	  if (gcmp1(denom(gmul(gfi,gsub(labas,p2))))) continue;	
-	}
-	if (DEBUGLEVEL)
-	{
-	  if (DEBUGLEVEL>=2) fprintferr("\n");
-	  fprintferr("lambda = ");
-	  outerr(la);
-	}
-	tetpil=avma;
-	y=computeP2(bnr,la,flag,prec);
-	return gerepile(av,tetpil,y);
+        if (gcmp1(denom(gmul(gfi,gadd(labas,Ci))))
+         || gcmp1(denom(gmul(gfi,gsub(labas,Ci))))) continue;	
       }
+      else if (Cj)
+      {
+        if (gcmp1(denom(gmul(gfi,gadd(labas,Cj ))))
+         || gcmp1(denom(gmul(gfi,gsub(labas,Cj ))))
+         || gcmp1(denom(gmul(gfi,gadd(labas,Cj2))))
+         || gcmp1(denom(gmul(gfi,gsub(labas,Cj2))))) continue;	
+      }
+      if (DEBUGLEVEL)
+      {
+        if (DEBUGLEVEL>1) fprintferr("\n");
+        fprintferr("lambda = %Z\n",la);
+      }
+      return gerepileupto(av, computeP2(bnr,labas,flag,prec));
     }
   }
   err(talker,"bug in quadrayimagsigma, please report");
@@ -884,8 +878,8 @@ quadrayimagsigma(GEN bnr, GEN flag, long prec)
 GEN
 quadray(GEN D, GEN f, GEN flag, long prec)
 {
-  long av=avma,tetpil;
   GEN bnr,y,p1,pol,bnf,flagnew;
+  long av = avma;
 
   if (typ(D)!=t_INT)
   {
@@ -909,9 +903,8 @@ quadray(GEN D, GEN f, GEN flag, long prec)
     p1[1]=(long)idmat(2); p1[2]=(long)polx[0];
     return y;
   }
-  tetpil=avma;
-  if (signe(D)>0)
-    y=bnrstark(bnr,gzero,flag?5:1,prec);
+  if (signe(D) > 0)
+    y = bnrstark(bnr,gzero,flag?5:1,prec);
   else
   {
     if (!flag) flag = gzero;
@@ -919,13 +912,15 @@ quadray(GEN D, GEN f, GEN flag, long prec)
     if (typ(flagnew)==t_INT)
     {
       flagnew=absi(flagnew);
-      if (cmpis(flagnew,1)<=0) y=quadrayimagsigma(bnr,flagnew,prec);
-      else y=quadrayimagwei(bnr,mpodd(flagnew) ? gun : gzero,prec);
+      if (cmpis(flagnew,1)<=0)
+        y = quadrayimagsigma(bnr,flagnew,prec);
+      else
+        y = quadrayimagwei(bnr,mpodd(flagnew) ? gun : gzero,prec);
     }
     else
     {
       if (typ(flagnew)!=t_VEC || lg(flagnew)<=2) err(flagerr,"quadray");
-      y=computeP2(bnr,(GEN)flagnew[1],(GEN)flagnew[2],prec);
+      y = computeP2(bnr,(GEN)flagnew[1],(GEN)flagnew[2],prec);
     }
     if (typ(y)==t_VEC && lg(y)==1)
     {
@@ -934,7 +929,7 @@ quadray(GEN D, GEN f, GEN flag, long prec)
       return quadray(D,f,flag,prec);
     }
   }
-  return gerepile(av,tetpil,y);
+  return gerepileupto(av, y);
 }
 
 /*******************************************************************/
@@ -983,7 +978,7 @@ fix_signs(GEN x)
 }
 
 static GEN
-redrealprimeform5(GEN x, long p)
+redrealprimeform5(GEN Disc, long p)
 {
   long av = avma;
   GEN y = primeform(Disc,stoi(p),PRECREG);
@@ -992,7 +987,7 @@ redrealprimeform5(GEN x, long p)
 }
 
 static GEN
-redrealprimeform(GEN x, long p)
+redrealprimeform(GEN Disc, long p)
 {
   long av = avma;
   GEN y = primeform(Disc,stoi(p),PRECREG);
@@ -1627,14 +1622,14 @@ real_relations(long lim, long s, long LIMC, long *ex, long **mat, GEN glog2,
         if (!form1) form1 = initrealform5(ex);
         if (!first)
         {
-          p1 = redrealprimeform5(p1, factorbase[current]);
+          p1 = redrealprimeform5(Disc, factorbase[current]);
           form1=comprealform(form1,p1);
         }
         form1 = rhoreal_pow(form1, nbrho); nbrho = 0;
         form2 = initrealform5(fpd);
         if (fpd[-2])
         {
-          p1 = redrealprimeform5(p1, factorbase[fpd[-2]]);
+          p1 = redrealprimeform5(Disc, factorbase[fpd[-2]]);
           form2=comprealform(form2,p1);
         }
         form2 = rhoreal_pow(form2, fpd[-3]);
@@ -1687,7 +1682,7 @@ real_relations(long lim, long s, long LIMC, long *ex, long **mat, GEN glog2,
 	if (!form1) form1 = initrealform5(ex);
         if (!first)
         {
-          p1 = redrealprimeform5(p1, factorbase[current]);
+          p1 = redrealprimeform5(Disc, factorbase[current]);
           form1=comprealform(form1,p1);
         }
         form1 = rhoreal_pow(form1,nbrho); nbrho = 0;
