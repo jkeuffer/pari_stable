@@ -49,13 +49,13 @@ if test -n "$DLLD"; then
 
 # Which Flags for Dynamic Lib Linker ?
   if test -n "$GNUdlld"; then
-    DLLDFLAGS="-shared -soname \$(LIBPARI_SONAME)"
+    DLLDFLAGS="-shared -soname=\$(LIBPARI_SONAME)"
   else # DLLD != GNU ld
     case "$osname" in
       aix)     DLLDFLAGS="-r" ;;
       hpux)    DLLDFLAGS="-b -E" ;;
       freebsd) DLLDFLAGS="-Bshareable -x" ;;
-      linux)   DLLDFLAGS="-shared -soname \$(LIBPARI_SONAME)" ;;
+      linux)   DLLDFLAGS="-shared -soname=\$(LIBPARI_SONAME)" ;;
       irix)    DLLDFLAGS="-shared -elf -no_unresolved -all" ;;
       osf1)    case "$optimization" in
                    full) DLLDFLAGS="-shared -O3" ;;
