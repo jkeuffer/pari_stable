@@ -1890,11 +1890,10 @@ can also be a \kbd{bnf}), using analytic methods.
 
 For $D<0$, uses the $\sigma$ function. $\fl$ has the following meaning: if
 it's an odd integer, outputs instead the vector of $[\var{ideal},
-\var{corresponding root}]$.
-
-\fl\ can also be a two-component vector $[\lambda,\fl]$, where \fl\ is as
-above and $\lambda$ is the technical element of \kbd{bnf} necessary for
-Schertz's method. In that case, returns 0 if $\lambda$ is not suitable.
+\var{corresponding root}]$. It can also be a two-component vector
+$[\lambda,\fl]$, where \fl\ is as above and $\lambda$ is the technical
+element of \kbd{bnf} necessary for Schertz's method. In that case, returns
+0 if $\lambda$ is not suitable.
 
 For $D>0$, uses Stark's conjecture. If $\fl$ is non-zero, try hard to get a
 simple modulus. The function may fail with the following message
