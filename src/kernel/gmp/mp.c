@@ -54,8 +54,8 @@ int pari_kernel_init(void)
   setmontgomerylimit(0);
   /*setresiilimit(50);*/
   /* Use gpmalloc instead of malloc */
-  mp_set_memory_functions((void *(*)(unsigned int)) gpmalloc
-		  	,(void *(*)(void *, unsigned int, unsigned int)) gprealloc
+  mp_set_memory_functions((void *(*)(size_t)) gpmalloc
+		  	,(void *(*)(void *, size_t, size_t)) gprealloc
 		        ,NULL);
 
   return 0;
@@ -1011,12 +1011,12 @@ quickmulii(GEN x, GEN y, long nx, long ny)
 {
   GEN cx=new_chunk(nx),cy;
   GEN z;
-  xmpn_mirrorcopy(cx,x,nx);
+  xmpn_mirrorcopy((mp_limb_t *)cx,(mp_limb_t *)x,nx);
   if (x==y) cy=cx; /*If nx<ny cy will be too short*/
   else
   {
     cy=new_chunk(ny);
-    xmpn_mirrorcopy(cy,y,ny);
+    xmpn_mirrorcopy((mp_limb_t *)cy,(mp_limb_t *)y,ny);
   }
   z=muliispec(cx, cy, nx, ny);
   xmpn_mirror(LIMBS(z), NLIMBS(z));
