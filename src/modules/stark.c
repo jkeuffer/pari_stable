@@ -1668,61 +1668,62 @@ ComputeCoeff(GEN dataCR, long nmax, long prec)
 }
 
 /********************************************************************/
-/*              5th part: compute L functions at s=1                */
+/*              5th part: compute L-functions at s=1                */
 /********************************************************************/
 
 /* if flag != 0, prec means decimal digits */
 static GEN
-get_limx(long N, long prec, GEN *pteps, long flag)
+get_limx(long r1, long r2, long prec, GEN *pteps, long flag)
 {
-  GEN gN, mu, alpha, beta, eps, A0, c1, c0, c2, lneps, limx, Pi = mppi(prec);
+  GEN eps, a, r, c0, A0, limx, Pi = mppi(prec), N, p1;
 
-  gN = stoi(N);
-  mu = gmul2n(gN, -1);
-
-  alpha = gmul2n(stoi(N + 3), -1);
-  beta  = gpui(gdeux, gmul2n(gN, -1), 3);
+  N = addss(r1, 2*r2);
+  a = gmul(gpow(gdeux, gsubgs(gdiv(stoi(r1), N), 1), DEFAULTPREC), N); 
+  r = addss(r1, r2);
 
   if (flag)
     *pteps = eps = gmul2n(gpowgs(dbltor(10.), -prec), -1);
   else
     *pteps = eps = gmul2n(gpowgs(dbltor(10.), (long)(-(prec-2) / pariK1)), -1);
 
-  A0 = gmul2n(gun, N);
-  A0 = gmul(A0, gpowgs(mu, N + 2));
-  A0 = gmul(A0, gpowgs(gmul2n(Pi, 1), 1 - N));
-  A0 = gsqrt(A0, 3);
+  c0 = gpow(gmul2n(Pi, 1), gdiv(subis(r, 1), gdeux), DEFAULTPREC);
+  c0 = gmul(c0, gdiv(gdeux, N));
+  c0 = gmul(c0, gpow(gdeux, gmul(gdiv(stoi(r1), gdeux),
+				 gsubsg(1, gdiv(addis(r, 1), N))), 
+		     DEFAULTPREC));
 
-  c1 = gmul(mu, gpui(beta, ginv(mu), 3));
-  c0 = gdiv(gmul(A0, gpowgs(gmul(gdeux, Pi), N - 1)), mu);
-  c0 = gmul(c0, gpui(c1, gsub(gun, alpha), 3));
-  c2 = gdiv(gsub(alpha, gun), mu);
+  A0 = glog(gdiv(gmul2n(c0, 1), eps), DEFAULTPREC);
 
-  lneps = glog(gdiv(c0, eps), 3);
-  limx  = gdiv(gsub(glog(lneps, 3), glog(c1, 3)), gadd(c2, gdiv(lneps, mu)));
-  limx  = gmul(gpui(gdiv(c1, lneps), mu, 3),
-	       gadd(gun, gmul(c2, gmul(mu, limx))));
+  limx = gpow(gdiv(a, A0), gdiv(N, gdeux), DEFAULTPREC);
+  p1   = gsub(glog(A0, DEFAULTPREC), glog(a, DEFAULTPREC));
+  p1   = gmul(gmul(p1, N), addis(r, 1));
+  p1   = gdiv(p1, gmul2n(gadd(gmul2n(A0, 1), addis(r, 1)), 1));
+  limx = gmul(limx, gaddgs(p1, 1));
+
   return limx;
 }
 
 static long
-GetBoundN0(GEN C,  long N,  long prec, long flag)
+GetBoundN0(GEN C,  long r1, long r2,  long prec, long flag)
 {
   long av = avma, N0;
-  GEN eps, limx = get_limx(N, prec, &eps, flag);
+  GEN eps, limx = get_limx(r1, r2, prec, &eps, flag);
 
   N0 = itos(gfloor(gdiv(C, limx)));
   avma = av; return N0;
 }
 
 static long
-GetBoundi0(long N,  long prec)
+GetBoundi0(long r1, long r2,  long prec)
 {
   long av = avma, imin, i0, itest;
-  GEN ftest, borneps, eps, limx = get_limx(N, prec, &eps, 0);
+  GEN ftest, borneps, eps, limx = get_limx(r1, r2, prec, &eps, 0);
+  GEN Pi = mppi(DEFAULTPREC);
 
-  borneps = gsqrt(gmul(limx, gpowgs(mppi(3),3)), 3);
-  borneps = gdiv(gpowgs(stoi(5), N), gmul(eps, borneps));
+  borneps = gmul(gmul2n(gun, r2), gpow(Pi, gdiv(subss(r2, 3), gdeux), 
+				       DEFAULTPREC));
+  borneps = gdiv(gmul(borneps, gpowgs(stoi(5), r1)), eps);
+  borneps = gdiv(borneps, gsqrt(limx, DEFAULTPREC));
 
   imin = 1;
   i0   = 1400;
@@ -1731,7 +1732,8 @@ GetBoundi0(long N,  long prec)
     itest = (i0 + imin) >> 1;
 
     ftest = gpowgs(limx, itest);
-    ftest = gmul(ftest, gpowgs(mpfactr(itest / 2, 3), N));
+    ftest = gmul(ftest, gpowgs(mpfactr(itest / 2, DEFAULTPREC), r1));
+    ftest = gmul(ftest, gpowgs(mpfactr(itest, DEFAULTPREC), r2));
 
     if(gcmp(ftest, borneps) >= 0)
       i0 = itest;
@@ -1916,13 +1918,15 @@ GetST(GEN dataCR, long prec)
   GEN N0, CC, bnr, bnf, Pi, racpi, C, cond, aij, B, S, T, csurn, lncsurn;
   GEN degs, p1, p2, nsurc, an, rep, powlncn, powracpi;
   long i, j, k, n, av = avma, av1, av2, N, hk, fj, id, prec2, i0, nmax;
-  long a, b, c, rc1, rc2, r;
+  long a, b, c, rc1, rc2, r, r1, r2;
   int ***matan;
 
   if (DEBUGLEVEL) timer2();
   bnr   = gmael(dataCR, 1, 4);
   bnf   = (GEN)bnr[1];
   N     = degree(gmael(bnf, 7, 1));
+  r1    = itos(gmael3(bnf, 7, 2, 1));
+  r2    = itos(gmael3(bnf, 7, 2, 2));
   hk    = lg(dataCR) - 1;
   prec2 = ((prec - 2)<<1) + EXTRA_PREC;
 
@@ -1943,14 +1947,14 @@ GetST(GEN dataCR, long prec)
     p1[2] = mael(dataCR, i, 9);
     cond[i] = (long)p1;
 
-    N0[i] = GetBoundN0((GEN)C[i], N, prec, 0);
+    N0[i] = GetBoundN0((GEN)C[i], r1, r2, prec, 0);
     if (nmax < N0[i]) nmax  = N0[i];
   }
 
   if (nmax > maxprime())
     err(talker, "Not enough precomputed primes (need all primes up to %ld)", nmax);
 
-  i0 = GetBoundi0(N, prec);
+  i0 = GetBoundi0(r1, r2, prec);
 
   if (nmax >= VERYBIGINT)
       err(talker, "Too many coefficients (%ld) in GetST: computation impossible", nmax);
@@ -1998,6 +2002,8 @@ GetST(GEN dataCR, long prec)
 
     for (n = 1; n <= N0[id]; n++)
     {
+      if (DEBUGLEVEL > 1 && n%100 == 0) fprintferr("%ld ", n);
+
       for (k = 1; k <= hk; k++)
         if (CC[k] == id && !IsZero(matan[k][n], degs[k])) break;
       if (k > hk) continue;
@@ -2050,7 +2056,6 @@ GetST(GEN dataCR, long prec)
           gaffect(gadd((GEN)T[j], gmul(p2, gconj(an))), (GEN)T[j]);
         }
       avma = av2;
-      if (DEBUGLEVEL > 1 && n%100 == 0) fprintferr("%ld ", n);
     }
     avma = av1;
   }
@@ -2880,12 +2885,14 @@ GenusField(GEN bnf, long prec)
 static GEN
 AllStark(GEN data,  GEN nf,  long flag,  long newprec)
 {
-  long cl, i, j, cpt = 0, av, av2, N, h, v, n, bnd = 300, sq = 1;
+  long cl, i, j, cpt = 0, av, av2, N, h, v, n, bnd = 300, sq = 1, r1, r2;
   int ***matan;
   GEN p0, p1, p2, S, T, polrelnum, polrel, Lp, W, A, veczeta, sig, valchi;
   GEN degs, ro, C, Cmax, dataCR, cond1, L1, *gptr[2], an, Pi;
 
   N     = degree((GEN)nf[1]);
+  r1    = itos(gmael(nf, 2, 1));
+  r2    = itos(gmael(nf, 2, 2));
   cond1 = gmael4(data, 1, 2, 1, 2);
   Pi    = mppi(newprec);
 
@@ -2925,7 +2932,7 @@ LABDOUB:
     for (i = 1; i <= cl; i++) C[i] = mael(dataCR, i, 2);
     Cmax = vecmax(C);
 
-    n = GetBoundN0(Cmax, N, newprec, 0);
+    n = GetBoundN0(Cmax, r1, r2, newprec, 0);
     if (n > bnd) n = bnd;
     if (DEBUGLEVEL) fprintferr("nmax in QuickPol: %ld \n", n);
 
