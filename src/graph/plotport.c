@@ -1563,8 +1563,8 @@ rectplothrawin(long stringrect, long drawrect, dblPointList *data,
   {
     char c1[16],c2[16],c3[16],c4[16];
 
-    sprintf(c1,"%5.3f",ybig); sprintf(c2,"%5.3f",ysml);
-    sprintf(c3,"%5.3f",xsml); sprintf(c4,"%5.3f",xbig);
+    sprintf(c1,"%.5g",ybig); sprintf(c2,"%.5g",ysml);
+    sprintf(c3,"%.5g",xsml); sprintf(c4,"%.5g",xbig);
 
     rectlinetype(stringrect,-2); /* Frame */
     current_color[stringrect]=BLACK;
