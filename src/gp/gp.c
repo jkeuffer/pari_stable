@@ -302,10 +302,8 @@ print0(GEN *g, long flag)
 {
   int old=prettyp;
 
-  if (flag < NBFORMATS) added_newline=1;
-  else
-    { flag -= NBFORMATS; added_newline=0; }
-  prettyp=flag;
+  added_newline = (flag & f_NOEOL) == 0;
+  prettyp = flag & ~f_NOEOL;
 
   for( ; *g; g++)
     if (typ(*g)==t_STR)

@@ -20,6 +20,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*******************************************************************/
 #include "pari.h"
 #include "../graph/rect.h"
+#include "../language/anal.h"
+#include "gp.h"
 
 extern void  addhelp(entree *ep, char *s);
 extern void  allocatemem0(unsigned long newsize);
@@ -38,8 +40,13 @@ extern GEN   trap0(char *e, char *f, char *r);
 extern int   whatnow(char *s, int silent);
 extern void  write0(char *s, GEN *g, long flag);
 
-static void
-whatnow0(char *s) { whatnow(s,0); }
+static void whatnow0(char *s) { whatnow(s,0); }
+
+static void print   (GEN *g) { print0(g, f_RAW); }
+static void printp  (GEN *g) { print0(g, f_PRETTYOLD); }
+static void printtex(GEN *g) { print0(g, f_TEX); }
+static void print1  (GEN *g) { print0(g, f_NOEOL | f_RAW); }
+static void printp1 (GEN *g) { print0(g, f_NOEOL | f_PRETTYOLD); }
 
 entree functions_gp[]={
 {"allocatemem",0,(void*)allocatemem0,11,"vD0,L,"},
@@ -48,11 +55,11 @@ entree functions_gp[]={
 {"extern",1,(void*)extern0,11,"s"},
 {"input",0,(void*)input0,11,""},
 {"global",88,NULL,11,NULL},
-{"print",0,(void*)print0,11,"vs*D0,L,"},
-{"print1",0,(void*)print0,11,"vs*D5,L,"},
-{"printp",0,(void*)print0,11,"vs*D2,L,"},
-{"printp1",0,(void*)print0,11,"vs*D7,L,"},
-{"printtex",0,(void*)print0,11,"vs*D4,L,"},
+{"print",0,(void*)print,11,"vs*"},
+{"print1",0,(void*)print1,11,"vs*"},
+{"printp",0,(void*)printp,11,"vs*"},
+{"printp1",0,(void*)printp1,11,"vs*"},
+{"printtex",0,(void*)printtex,11,"vs*"},
 {"quit",0,(void*)gp_quit,11,"v"},
 {"read",0,(void*)read0,11,"D\"\",s,"},
 {"system",70,(void*)system0,11,"vs"},
@@ -135,10 +142,10 @@ entree functions_oldgp[] = {
 {"postploth",37,(void *)postploth,10,"V=GGIpD0,L,D0,L,"},
 {"postploth2",37,(void *)postploth2,10,"V=GGIpD0,L,"},
 {"postplothraw",2,(void *)postplothraw,10,"GGD0,L,"},
-{"pprint",0,(void*)print0,11,"vs*D2,L,"},
-{"pprint1",0,(void*)print0,11,"vs*D7,L,"},
-{"print",0,(void*)print0,11,"vs*D0,L,"},
-{"print1",0,(void*)print0,11,"vs*D5,L,"},
+{"pprint",0,(void*)printp,11,"vs*"},
+{"pprint1",0,(void*)printp1,11,"vs*"},
+{"print",0,(void*)print,11,"vs*"},
+{"print1",0,(void*)print1,11,"vs*"},
 {"rbox",35,(void *)rectrbox,10,"vLGG"},
 {"read",0,(void *)input0,11,""},
 {"rline",35,(void *)rectrline,10,"vLGG"},
@@ -152,7 +159,7 @@ entree functions_oldgp[] = {
 {"settype",21,(void *)gsettype,2,"GL"},
 {"string",57,(void*)rectstring,10,"vLs"},
 {"system",70,(void*) system0,11,"vs"},
-{"texprint",0,(void*)print0,11,"vs*D4,L,"},
+{"texprint",0,(void*)printtex,11,"vs*"},
 {"type",1,(void *)gtype,2,"Gp"},
 
 {NULL,0,NULL,0,NULL} /* sentinel */
