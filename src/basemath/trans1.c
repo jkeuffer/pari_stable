@@ -106,7 +106,7 @@ constpi(long prec)
   *tmppi = evaltyp(t_REAL) | evallg(prec);
 
   /* 0.10... ~ log(2) / log( (2*Pi^4) / (Pi - (1+1/sqrt(2))^2) ) */
-  n = ceil( log2( bit_accuracy_mul(prec, 0.10263977) ) );
+  n = (long)ceil( log2( bit_accuracy_mul(prec, 0.10263977) ) );
   if (n < 1) n = 1;
   prec++;
 
