@@ -2394,8 +2394,9 @@ non-negative integer. The result is non-negative and rounded towards zero.
 \syn{racine}{x}.
 
 \subsecidx{zncoppersmith}$(P, N, X, \{B=N\})$: finds all integers $x_0$ with
-$|x0| \leq X$ such that $\text{gcd}(N, P(x_0)) > B$. $X$ must be smaller than
-$\exp(\log^2 B / (\deg(P) \log N))$. 
+$|x0| \leq X$ such that 
+$$\text{gcd}(N, P(x_0)) > B.$$
+$X$ must be smaller than $\exp(\log^2 B / (\deg(P) \log N))$. 
 
 \syn{zncoppersmith}{P, N, X, B}, where an omitted $B$ is coded as \kbd{NULL}.
 
@@ -2880,15 +2881,15 @@ $\bullet$ $\tev{nf}$ denotes a number field, i.e.~a 9-component vector
 in the format output by \tet{nfinit}. This contains the basic arithmetic data
 associated to the number field: signature, maximal order, discriminant, etc.
 
-$\bullet$ $\tev{bnf}$ denotes a big number field, i.e.~a 10-component
-vector in the format output by \tet{bnfinit}. This contains $\var{nf}$ and
-the deeper invariants of the field: units, class groups, as well as a lot of
-technical data necessary for some complex functions like \kbd{bnfisprincipal}.
+$\bullet$ $\tev{bnf}$ denotes a ``Buchmann's number field'', i.e.~a
+10-component vector in the format output by \tet{bnfinit}. This contains
+$\var{nf}$ and the deeper invariants of the field: units, class groups, as
+well as a lot of technical data necessary for some complex functions like
+\kbd{bnfisprincipal}.
 
-$\bullet$ $\tev{bnr}$ denotes a big ``ray number field'', i.e.~some data
-structure output by \kbd{bnrinit}, even more complicated than $\var{bnf}$,
-corresponding to the ray class group structure of the field, for some
-modulus.
+$\bullet$ $\tev{bnr}$ denotes a ``ray number field'', i.e.~some data
+structure output by \kbd{bnrinit}, corresponding to the ray class group
+structure of the field, for some modulus.
 
 $\bullet$ $\tev{rnf}$ denotes a relative number field (see below).
 \smallskip
@@ -2997,16 +2998,16 @@ The corresponding \var{bnr} is then the subfield of the ray class field of the
 ground field for the given modulus, associated to the given subgroup.
 
 All the functions which are specific to relative extensions, number fields,
-big number fields, big number rays, share the prefix \kbd{rnf}, \kbd{nf},
-\kbd{bnf}, \kbd{bnr} respectively. They are meant to take as first argument a
-number field of that precise type, respectively output by \kbd{rnfinit},
-\kbd{nfinit}, \kbd{bnfinit}, and \kbd{bnrinit}.
+Buchmann's number fields, Buchmann's number rays, share the prefix \kbd{rnf},
+\kbd{nf}, \kbd{bnf}, \kbd{bnr} respectively. They are meant to take as first
+argument a number field of that precise type, respectively output by
+\kbd{rnfinit}, \kbd{nfinit}, \kbd{bnfinit}, and \kbd{bnrinit}.
 
 However, and even though it may not be specified in the descriptions of the
 functions below, it is permissible, if the function expects a $\var{nf}$, to
 use a $\var{bnf}$ instead (which contains much more information). The program
 will make the effort of converting to what it needs. On the other hand, if
-the program requires a big number field, the program will \emph{not} launch
+the program requires a \kbd{bnf}, the program will \emph{not} launch
 \kbd{bnfinit} for you, which is a costly operation. Instead, it will give you
 a specific error message.
 
@@ -3020,7 +3021,7 @@ relevant types of number fields are indicated between parentheses:
 \sidx{member functions}
 \settabs\+xxxxxxx&(\var{bnr},x&\var{bnf},x&nf\hskip2pt&)x&: &\cr
 
-\+\tet{bnf}    &(\var{bnr},& \var{bnf}&&)&: & big number field.\cr
+\+\tet{bnf}    &(\var{bnr},& \var{bnf}&&)&: & Buchmann's number field.\cr
 
 \+\tet{clgp}  &(\var{bnr},& \var{bnf}&&)&: & classgroup. This one admits the
 following three subclasses:\cr
@@ -3134,13 +3135,13 @@ Note also that you can use an $\var{nf}$ instead of $P$, which avoids
 recomputing the integral basis and analogous quantities.
 
 \smallskip
-\subsecidx{bnfcertify}$(\var{bnf})$: $\var{bnf}$ being a big number field
-as output by \kbd{bnfinit} or \kbd{bnfclassunit}, checks whether the result
-is correct, i.e.~whether it is possible to remove the assumption of the
-Generalized Riemann Hypothesis\sidx{GRH}. If it is correct, the answer is 1.
-If not, the program may output some error message, but more probably will loop
-indefinitely. In \emph{no} occasion can the program give a wrong answer
-(barring bugs of course): if the program answers 1, the answer is certified.
+\subsecidx{bnfcertify}$(\var{bnf})$: $\var{bnf}$ being as output by
+\kbd{bnfinit}, checks whether the result is correct, i.e.~whether it is
+possible to remove the assumption of the Generalized Riemann
+Hypothesis\sidx{GRH}. If it is correct, the answer is 1. If not, the program
+may output some error message, but more probably will loop indefinitely. In
+\emph{no} occasion can the program give a wrong answer (barring bugs of
+course): if the program answers 1, the answer is certified.
 
 \syn{certifybuchall}{\var{bnf}}, and the result is a C long.
 
@@ -3298,7 +3299,7 @@ computed. Note that the resulting \var{bnf} will not be suitable for
 it is deprecated.
 
    When $\fl=3$, computes a very small version of \kbd{bnfinit}, a ``small
-big number field'' (or \var{sbnf} for short) which contains enough
+Buchmann's number field'' (or \var{sbnf} for short) which contains enough
 information to recover the full $\var{bnf}$ vector very rapidly, but which is
 much smaller and hence easy to store and print. It is supposed to be used in
 conjunction with \kbd{bnfmake}. The output is a 12 component vector $v$, as
@@ -3419,24 +3420,22 @@ have to use \kbd{bnfmake} explicitly first.
 \syn{makebigbnf}{\var{sbnf},\var{prec}}, where $\var{prec}$ is a
 C long integer.
 
-\subsecidx{bnfnarrow}$(\var{bnf})$: $\var{bnf}$ being a big number field as
-output by \kbd{bnfinit}, computes the narrow class group of $\var{bnf}$. The
-output is a 3-component row vector $v$ analogous to the corresponding
-class group component \kbd{\var{bnf}.clgp} (\kbd{\var{bnf}[8][1]}): the
-first component is the narrow class number \kbd{$v$.no}, the second component
-is a vector containing the SNF\sidx{Smith normal form} cyclic components
-\kbd{$v$.cyc} of the narrow
-class group, and the third is a vector giving the generators of the
-corresponding \kbd{$v$.gen} cyclic groups. Note that this function is a
+\subsecidx{bnfnarrow}$(\var{bnf})$: $\var{bnf}$ being as output by
+\kbd{bnfinit}, computes the narrow class group of $\var{bnf}$. The output is
+a 3-component row vector $v$ analogous to the corresponding class group
+component \kbd{\var{bnf}.clgp} (\kbd{\var{bnf}[8][1]}): the first component
+is the narrow class number \kbd{$v$.no}, the second component is a vector
+containing the SNF\sidx{Smith normal form} cyclic components \kbd{$v$.cyc} of
+the narrow class group, and the third is a vector giving the generators of
+the corresponding \kbd{$v$.gen} cyclic groups. Note that this function is a
 special case of \kbd{bnrclass}.
 
 \syn{buchnarrow}{\var{bnf}}.
 
-\subsecidx{bnfsignunit}$(\var{bnf})$: $\var{bnf}$ being a big number field
-output by \kbd{bnfinit}, this computes an $r_1\times(r_1+r_2-1)$ matrix
-having $\pm1$ components, giving the signs of the real embeddings of the
-fundamental units. The following functions compute generators for the totally
-positive units:
+\subsecidx{bnfsignunit}$(\var{bnf})$: $\var{bnf}$ being as output by
+\kbd{bnfinit}, this computes an $r_1\times(r_1+r_2-1)$ matrix having $\pm1$
+components, giving the signs of the real embeddings of the fundamental units.
+The following functions compute generators for the totally positive units:
 
 \bprog
 /* exponents of totally positive units generators on bnf.tufu */
@@ -3461,8 +3460,8 @@ tpu(bnf)=
 
 \syn{signunits}{\var{bnf}}.
 
-\subsecidx{bnfreg}$(\var{bnf})$: $\var{bnf}$ being a big number field
-output by \kbd{bnfinit}, computes its regulator.
+\subsecidx{bnfreg}$(\var{bnf})$: $\var{bnf}$ being as output by
+\kbd{bnfinit}, computes its regulator.
 
 \syn{regulator}{\var{bnf},\var{tech},\var{prec}}, where \var{tech} is as in
 \kbd{bnfclassunit}.
@@ -3492,9 +3491,8 @@ $v[6]$ is a copy of $S$.
 
 \syn{bnfsunit}{\var{bnf},S,\var{prec}}.
 
-\subsecidx{bnfunit}$(\var{bnf})$: $\var{bnf}$ being a big number field as
-output by \kbd{bnfinit}, outputs the vector of fundamental units of the
-number field.
+\subsecidx{bnfunit}$(\var{bnf})$: $\var{bnf}$ being as output by
+\kbd{bnfinit}, outputs the vector of fundamental units of the number field.
 
 This function is mostly useless, since it will only succeed if
 \var{bnf} contains the units, in which case \kbd{bnf.fu} is recommanded
@@ -3551,14 +3549,13 @@ group, so \kbd{bnrL1(bnr2,0)} returns exactly the same answer as
 \var{subgroup} is coded as \kbd{NULL}.
 
 \subsecidx{bnrclass}$(\var{bnf},\var{ideal},\{\fl=0\})$:
-$\var{bnf}$ being a big number field
-as output by \kbd{bnfinit} (the units are mandatory unless the ideal is
-trivial), and \var{ideal} being either an ideal in any form or a two-component
-row vector containing an ideal and an $r_1$-component row vector of flags
-indicating which real Archimedean embeddings to take in the module, computes
-the ray class group of the number field for the module \var{ideal}, as a
-3-component vector as all other finite Abelian groups (cardinality, vector of
-cyclic components, corresponding generators).
+$\var{bnf}$ being as output by \kbd{bnfinit} (the units are mandatory unless
+the ideal is trivial), and \var{ideal} being either an ideal in any form or a
+two-component row vector containing an ideal and an $r_1$-component row
+vector of flags indicating which real Archimedean embeddings to take in the
+module, computes the ray class group of the number field for the module
+\var{ideal}, as a 3-component vector as all other finite Abelian groups
+(cardinality, vector of cyclic components, corresponding generators).
 
 If $\fl=2$, the output is different. It is a 6-component vector $w$. $w[1]$
 is $\var{bnf}$. $w[2]$ is the result of applying
@@ -3571,9 +3568,8 @@ not computed, which saves time.
 
 \syn{bnrclass0}{\var{bnf},\var{ideal},\fl}.
 
-\subsecidx{bnrclassno}$(\var{bnf},I)$: $\var{bnf}$ being a big number field
-as output
-by \kbd{bnfinit} (units are mandatory unless the ideal is trivial), and $I$
+\subsecidx{bnrclassno}$(\var{bnf},I)$: $\var{bnf}$ being as output by
+\kbd{bnfinit} (units are mandatory unless the ideal is trivial), and $I$
 being either an ideal in any form or a two-component row vector containing an
 ideal and an $r_1$-component row vector of flags indicating which real
 Archimedean embeddings to take in the modulus, computes the ray class number
@@ -3582,11 +3578,11 @@ and should be used if only the ray class number is desired.
 
 \syn{rayclassno}{\var{bnf},I}.
 
-\subsecidx{bnrclassnolist}$(\var{bnf},\var{list})$: $\var{bnf}$ being a
-big number field as output by \kbd{bnfinit} (units are mandatory unless
-the ideal is trivial), and \var{list} being a list of modules as output
-by \kbd{ideallist} of \kbd{ideallistarch},
-outputs the list of the class numbers of the corresponding ray class groups.
+\subsecidx{bnrclassnolist}$(\var{bnf},\var{list})$: $\var{bnf}$ being as
+output by \kbd{bnfinit} (units are mandatory unless the ideal is trivial),
+and \var{list} being a list of modules as output by \kbd{ideallist} of
+\kbd{ideallistarch}, outputs the list of the class numbers of the
+corresponding ray class groups.
 
 \syn{rayclassnolist}{\var{bnf},\var{list}}.
 
@@ -5219,12 +5215,11 @@ be the absolute equation of the \'etale algebra defined by \var{pol}. If
 
 \syn{rnfequation0}{\var{nf},\var{pol},\fl}.
 
-\subsecidx{rnfhnfbasis}$(\var{bnf},x)$: given a big number field $\var{bnf}$
-as output by \kbd{bnfinit}, and either a polynomial $x$ with coefficients in
-$\var{bnf}$ defining a relative extension $L$ of $\var{bnf}$, or a
-pseudo-basis $x$ of such an extension, gives either a true $\var{bnf}$-basis
-of $L$ in upper triangular Hermite normal form, if it exists, and returns
-$0$ otherwise.
+\subsecidx{rnfhnfbasis}$(\var{bnf},x)$: given $\var{bnf}$ as output by
+\kbd{bnfinit}, and either a polynomial $x$ with coefficients in $\var{bnf}$
+defining a relative extension $L$ of $\var{bnf}$, or a pseudo-basis $x$ of
+such an extension, gives either a true $\var{bnf}$-basis of $L$ in upper
+triangular Hermite normal form, if it exists, and returns $0$ otherwise.
 
 \syn{rnfhermitebasis}{\var{nf},x}.
 
@@ -5381,11 +5376,11 @@ during the initial \kbd{rnfinit} call).
 
 \syn{rnfinitalg}{\var{nf},\var{pol},\var{prec}}.
 
-\subsecidx{rnfisfree}$(\var{bnf},x)$: given a big number field $\var{bnf}$ as
-output by \kbd{bnfinit}, and either a polynomial $x$ with coefficients in
-$\var{bnf}$ defining a relative extension $L$ of $\var{bnf}$, or a
-pseudo-basis $x$ of such an extension, returns true (1) if $L/\var{bnf}$ is
-free, false (0) if not.
+\subsecidx{rnfisfree}$(\var{bnf},x)$: given $\var{bnf}$ as output by
+\kbd{bnfinit}, and either a polynomial $x$ with coefficients in $\var{bnf}$
+defining a relative extension $L$ of $\var{bnf}$, or a pseudo-basis $x$ of
+such an extension, returns true (1) if $L/\var{bnf}$ is free, false (0) if
+not.
 
 \syn{rnfisfree}{\var{bnf},x}, and the result is a \kbd{long}.
 
