@@ -1452,37 +1452,35 @@ ggcd(GEN x, GEN y)
 GEN
 glcm(GEN x, GEN y)
 {
-  long av=avma,tx,ty=typ(y),i,l;
+  long av,tx,ty,i,l;
   GEN p1,p2,z;
 
+  ty = typ(y);
   if (is_matvec_t(ty))
   {
     l=lg(y); z=cgetg(l,ty);
     for (i=1; i<l; i++) z[i]=(long)glcm(x,(GEN)y[i]);
     return z;
   }
-  tx=typ(x);
+  tx = typ(x);
   if (is_matvec_t(tx))
   {
     l=lg(x); z=cgetg(l,tx);
     for (i=1; i<l; i++) z[i]=(long)glcm((GEN)x[i],y);
     return z;
   }
+  if (tx==t_INT && ty==t_INT) return mpppcm(x,y);
   if (gcmp0(x)) return gzero;
-  if (tx==t_INT && ty==t_INT)
+
+  av = avma;
+  p1 = ggcd(x,y); if (!gcmp1(p1)) y = gdiv(y,p1);
+  p2 = gmul(x,y);
+  switch(typ(p2))
   {
-    p1 = mppgcd(x,y); if (is_pm1(p1)) { avma = av; return mulii(x,y); }
-    p2 = mulii(divii(y,p1), x);
-    if (signe(p2)<0) setsigne(p2,1);
-    return gerepileupto(av, p2);
-  }
-  p1 = ggcd(x,y); if (gcmp1(p1)) {avma = av; return gmul(x,y); }
-  p2 = gmul(gdiv(y,p1), x);
-  if (typ(p2)==t_INT && signe(p2)<0) setsigne(p2,1);
-  if (typ(p2)==t_POL)
-  {
-    p1=leading_term(p2);
-    if (typ(p1)==t_INT && signe(p1)<0) p2=gneg(p2);
+    case t_INT: if (signe(p2)<0) setsigne(p2,1);
+      break;
+    case t_POL: p1=leading_term(p2);
+      if (typ(p1)==t_INT && signe(p1)<0) p2=gneg(p2);
   }
   return gerepileupto(av,p2);
 }

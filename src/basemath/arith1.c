@@ -1121,14 +1121,14 @@ mppgcd(GEN a, GEN b)
 GEN
 mpppcm(GEN x, GEN y)
 {
-  ulong av=avma;
+  ulong av;
   GEN p1,p2;
   if (typ(x) != t_INT || typ(y) != t_INT) err(arither1);
   if (!signe(x)) return gzero;
-  p1 = mppgcd(x,y); 
-  if (is_pm1(p1)) { avma = av; return mulii(x,y); }
-  p2 = mulii(divii(y,p1), x);
-  if (signe(p2)<0) setsigne(p2,1);
+  av = avma;
+  p1 = mppgcd(x,y); if (!is_pm1(p1)) y = divii(y,p1);
+  p2 = mulii(x,y);
+  if (signe(p2) < 0) setsigne(p2,1);
   return gerepileupto(av, p2);
 }
 /* Extended bezout. Return d=pgcd(a,b) and &u,&v */
