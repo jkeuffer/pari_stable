@@ -2252,19 +2252,18 @@ FpX_extgcd(GEN x, GEN y, GEN p, GEN *ptu, GEN *ptv)
   *ptu = u; *ptv = v; return d;
 }
 
-/* return z = a mod q, b mod p (p,q) = 1 */
+/* return z = a mod q, b mod p (p,q) = 1. qinv = 1/q mod p */
 static GEN
-u_chrem_coprime(GEN a, ulong b, GEN q, ulong p, GEN pq)
+u_chrem_coprime(GEN a, ulong b, GEN q, ulong p, ulong qinv, GEN pq)
 {
-  ulong av = avma, d, qmod, amod = umodiu(a,p);
+  ulong av = avma, d, amod = umodiu(a,p);
   GEN ax,z;
   int cmp;
 
   if (b == amod) return NULL;
   d = (b > amod)? b - amod: p - (amod - b); /* (b - a) mod p */
-  qmod = umodiu(q,p);
   (void)new_chunk((lgefint(pq)<<1));
-  ax = mului((d * u_invmod(qmod, p)) % p, q); /* d mod p, 0 mod q */
+  ax = mului((d * qinv) % p, q); /* d mod p, 0 mod q */
   z = addii(a, ax);
   cmp = cmpii(z,pq); avma = av;
   if (!cmp) return gzero;
@@ -2272,33 +2271,31 @@ u_chrem_coprime(GEN a, ulong b, GEN q, ulong p, GEN pq)
   return icopy(z);
 }
 
+/* centerlift(u mod p) */
+GEN 
+u_center(ulong u, ulong p, ulong ps2)
+{
+  return stoi((long) (u > ps2)? u - p: u);
+}
+
 GEN
 init_CRT(GEN Hp, ulong p, long v)
 {
-  long h, i, l = lgef(Hp), lim = (long)(p>>1);
+  long i, l = lgef(Hp), lim = (long)(p>>1);
   GEN H = cgetg(l, t_POL);
   H[1] = evalsigne(1)|evallgef(l)|evalvarn(v);
   for (i=2; i<l; i++)
-  {
-    h = Hp[i]; if (h > lim) h -= (long)p;
-    H[i] = lstoi(h);
-  }
+    H[i] = (long)u_center(Hp[i], p, lim);
   return H;
-}
-
-GEN 
-init_CRT_i(ulong Hp, GEN *ptq, ulong p)
-{
-  *ptq = utoi(p);
-  return stoi((long) (Hp > (p>>1))? Hp - p: Hp);
 }
 
 int
 incremental_CRT_i(GEN *H, ulong Hp, GEN q, GEN qp, ulong p)
 {
   GEN h, lim = shifti(qp,-1);
+  ulong qinv = u_invmod(umodiu(q,p), p);
   int stable = 1;
-  h = u_chrem_coprime(*H,Hp,q,p,qp);
+  h = u_chrem_coprime(*H,Hp,q,p,qinv,qp);
   if (h)
   {
     if (cmpii(h,lim) > 0) h = subii(h,qp);
@@ -2311,11 +2308,21 @@ int
 incremental_CRT(GEN H, GEN Hp, GEN q, GEN qp, ulong p)
 {
   GEN h, lim = shifti(qp,-1);
-  long i, l = lgef(H);
+  ulong qinv = u_invmod(umodiu(q,p), p);
+  long i, l = lgef(H), lp = lgef(Hp);
   int stable = 1;
-  for (i=2; i<l; i++)
+  for (i=2; i<lp; i++)
   {
-    h = u_chrem_coprime((GEN)H[i],Hp[i],q,p,qp);
+    h = u_chrem_coprime((GEN)H[i],Hp[i],q,p,qinv,qp);
+    if (h)
+    {
+      if (cmpii(h,lim) > 0) h = subii(h,qp);
+      H[i] = (long)h; stable = 0;
+    }
+  }
+  for (   ; i<l; i++)
+  {
+    h = u_chrem_coprime((GEN)H[i],   0,q,p,qinv,qp);
     if (h)
     {
       if (cmpii(h,lim) > 0) h = subii(h,qp);
@@ -3110,6 +3117,7 @@ INIT:
       }
       Hp = u_FpV_polint(x,y, p);
     }
+    if (!H && deg(Hp) != dres) continue;
     if (checksqfree) {
       if (!u_FpX_is_squarefree(Hp, p)) goto INIT;
       if (DEBUGLEVEL>4) fprintferr("Final lambda = %ld\n",*lambda);
@@ -3247,8 +3255,8 @@ ZX_resultant_all(GEN A, GEN B, ulong bound)
     Hp= u_FpX_resultant(a, b, p);
     if (!H) 
     {
-      stable = 0;
-      H = init_CRT_i(Hp, &q, p);
+      stable = 0; q = utoi(p);
+      H = u_center(Hp, p, p>>1);
     }
     else /* could make it probabilistic ??? [e.g if stable twice, etc] */
     {
