@@ -1802,7 +1802,7 @@ texi(GEN g, long nosign)
         }
         pariputc('+');
       }
-      pariputs("O("); monome(v,i); pariputc(')'); break;
+      pariputs("O("); texnome(v,i); pariputc(')'); break;
 
     case t_PADIC:
     {
