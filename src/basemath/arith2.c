@@ -2275,6 +2275,105 @@ primeform(GEN x, GEN p, long prec)
   y[1] = licopy(p); return y;
 }
 
+GEN 
+redimagsl2(GEN V)
+{
+  pari_sp ltop = avma;
+  pari_sp st_lim = stack_lim(ltop, 1);
+  GEN a,b,c;
+  GEN z;
+  GEN u1,u2,v1,v2;
+  long skip = 1;
+  GEN p2,p3; 
+  a = (GEN) V[1]; b = (GEN) V[2]; c = (GEN) V[3];
+  u1 = v2 = gun;
+  u2 = v1 = gzero;
+  if (cmpii(negi(a), b) < 0 && cmpii(b, a) <= 0)
+    skip = 0;
+  for(;;)
+  {
+    if (skip)
+    {
+      GEN a2= shifti(a, 1);
+      GEN D = divrem(b, a2, -1);
+      GEN q = (GEN) D[1];
+      GEN r = (GEN) D[2];
+      if (cmpii(r, a) > 0)
+      {
+        q = addis(q, 1);
+        r = subii(r, a2);
+      }
+      c = subii(c, shifti(mulii(q, addii(b, r)), -1));
+      b = r;
+      u2 = subii(u2, mulii(q, u1));
+      v2 = subii(v2, mulii(q, v1));
+    }
+    skip = 1;
+    if (cmpii(a, c) > 0)
+    {
+      b = negi(b);
+      z = a; a = c; c = z;
+      z = u1; u1 = u2; u2 = negi(z);
+      z = v1; v1 = v2; v2 = negi(z);
+    }
+    else
+      break;
+    if (low_stack(st_lim, stack_lim(ltop, 1)))
+    {
+      GEN *bptr[7];
+      bptr[0]=&a; bptr[1]=&b; bptr[2]=&c;
+      bptr[3]=&u1; bptr[4]=&u2;
+      bptr[5]=&v1; bptr[6]=&v2;
+      gerepilemany(ltop, bptr, 7);
+    }
+  }
+  if (egalii(a, c) && (cmpis(b, 0) < 0))
+  {
+    b = negi(b);
+    z = u1; u1 = u2; u2 = negi(z);
+    z = v1; v1 = v2; v2 = negi(z);
+  }
+  p2 = cgetg(3, t_VEC);
+  p2[1] = lgetg(4,t_QFI);
+  mael(p2, 1, 1) = licopy(a);
+  mael(p2, 1, 2) = licopy(b);
+  mael(p2, 1, 3) = licopy(c);
+  p3 = cgetg(3, t_MAT);
+  p3[1] = lgetg(3, t_COL);
+  coeff(p3, 1, 1) = licopy(u1);
+  coeff(p3, 2, 1) = licopy(v1);
+  p3[2] = lgetg(3, t_COL);
+  coeff(p3, 1, 2) = licopy(u2);
+  coeff(p3, 2, 2) = licopy(v2);
+  p2[2] = (long) p3;
+  return gerepileupto(ltop, p2);
+}
+
+GEN qfbimagsolvep(GEN Q,GEN p)
+{
+  pari_sp ltop=avma;
+  GEN N,d;
+  GEN P,M,res; 
+  N=redimagsl2(Q);
+  d=qf_disc(Q, NULL, NULL);
+  if (kronecker(d,p)==-1) 
+    return gzero;
+  P=primeform(d, p, 0);
+  M=redimagsl2(P);
+  if (!gegal((GEN)M[1], (GEN)N[1]))
+    return gzero;
+  res=(GEN)gdiv((GEN)N[2], (GEN)M[2])[1];
+  return gerepilecopy(ltop,res);
+}
+
+GEN qfbsolve(GEN Q,GEN n)
+{
+  pari_sp ltop=avma;
+  if (typ(Q)!=t_QFI || typ(n)!=t_INT)
+    err(typeer,"qfbsolve");
+  return qfbimagsolvep(Q,n);
+}
+
 /*********************************************************************/
 /**                                                                 **/
 /**                       BINARY DECOMPOSITION                      **/
