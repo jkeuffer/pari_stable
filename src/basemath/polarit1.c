@@ -2427,14 +2427,100 @@ isabsolutepol(GEN f)
   return 1;
 }
 
-long
-FqX_sqf_split(GEN *t0, GEN q, GEN T, GEN p, int roots)
+typedef struct {
+  GEN S, L, Xq;
+  GEN q;    /* p^deg(T) */
+  GEN p, T; /* split mod (p, T(X)) */
+} FqX_split_t;
+
+static void
+add(GEN z, GEN g, long d)
 {
-  GEN *t = t0, u = *t, v, S, g, X = polx[varn(u)];
+  GEN L = cgetg(3, t_VEC);
+  L[1] = lstoi(d);
+  L[2] = (long)g; appendL(z, L);
+}
+/* return number of roots */
+long
+FqX_split_deg1(GEN *pz, GEN u, GEN q, GEN T, GEN p)
+{
+  long d, dg, N = degpol(u);
+  GEN v, S, g, X, z = cget1(N+1, t_VEC);
+
+  *pz = z;
+  if (N == 1) return 1;
+  v = X = polx[varn(u)];
+  S = init_pow_q_mod_pT(X, q, u, T, p);
+  appendL(z, S);
+  v = spec_Fq_pow_mod_pol(v, S, T, p);
+  g = FqX_gcd(gsub(v,X),u, T,p);
+  dg = degpol(g);
+  if (dg > 0) add(z, g, dg / d);
+  return dg / d;
+}
+
+/* return number of factors */
+long
+FqX_split_by_degree(GEN *pz, GEN u, GEN q, GEN T, GEN p)
+{
+  long nb = 0, d, dg, N = degpol(u);
+  GEN v, S, g, X, z = cget1(N+1, t_VEC);
+
+  *pz = z;
+  if (N == 1) return 1;
+  v = X = polx[varn(u)];
+  S = init_pow_q_mod_pT(X, q, u, T, p);
+  appendL(z, S);
+  for (d=1; d <= N>>1; d++)
+  {
+    v = spec_Fq_pow_mod_pol(v, S, T, p);
+    g = FqX_gcd(gsub(v,X),u, T,p);
+    dg = degpol(g); if (dg <= 0) continue;
+    /* all factors of g have degree d */
+    add(z, g, dg / d); nb += dg / d;
+    N -= dg;
+    u = FqX_div(u,g, T,p);
+    v = FqX_rem(v,u, T,p);
+  }
+  if (N) { add(z, u, 1); nb++; }
+  return nb;
+}
+
+static GEN
+FqX_split_equal(GEN L, GEN S, GEN T, GEN p)
+{
+  long n = itos((GEN)L[1]);
+  GEN u = (GEN)L[2], z = cgetg(n + 1, t_VEC);
+  z[1] = (long)u;
+  FqX_split((GEN*)(z+1), degpol(u) / n, gpowgs(p, degpol(T)), S, T, p);
+  return z;
+}
+GEN
+FqX_split_roots(GEN z, GEN T, GEN p, GEN pol)
+{
+  GEN S = (GEN)z[1], L = (GEN)z[2], rep = FqX_split_equal(L, S, T, p);
+  if (pol) rep = concatsp(rep, FqX_div(pol, (GEN)L[2], T,p));
+  return rep;
+}
+GEN
+FqX_split_all(GEN z, GEN T, GEN p)
+{
+  GEN S = (GEN)z[1], rep = cgetg(1, t_VEC);
+  long i, l = lg(z);
+  for (i = 2; i < l; i++)
+    rep = concatsp(rep, FqX_split_equal((GEN)z[i], S, T, p));
+  return rep;
+}
+
+static long
+FqX_sqf_split(GEN *t0, GEN q, GEN T, GEN p)
+{
+  GEN *t = t0, u = *t, v, S, g, X;
   long d, dg, N = degpol(u);
 
   if (N == 1) return 1;
-  v = X; S = init_pow_q_mod_pT(X, q, u, T, p);
+  v = X = polx[varn(u)];
+  S = init_pow_q_mod_pT(X, q, u, T, p);
   for (d=1; d <= N>>1; d++)
   {
     v = spec_Fq_pow_mod_pol(v, S, T, p);
@@ -2446,12 +2532,10 @@ FqX_sqf_split(GEN *t0, GEN q, GEN T, GEN p, int roots)
     FqX_split(t, d, q, S, T, p);
     t += dg / d;
     N -= dg;
-    if (roots) break;
-
     u = FqX_div(u,g, T,p);
     v = FqX_rem(v,u, T,p);
   }
-  if (N && !roots) *t++ = u;
+  if (N) *t++ = u;
   return t - t0;
 }
 
@@ -2526,7 +2610,7 @@ factmod9(GEN f, GEN p, GEN T)
       nbfact += (N==1)? 1: FqX_split_berlekamp(t+nbfact, q, T, p);
 #else
       t[nbfact] = u;
-      nbfact += (N==1)? 1: FqX_sqf_split(t+nbfact, q, T, p, 0);
+      nbfact += (N==1)? 1: FqX_sqf_split(t+nbfact, q, T, p);
 #endif
     }
     for (j = nb0; j < nbfact; j++) ex[j] = e;

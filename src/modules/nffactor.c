@@ -21,10 +21,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "parinf.h"
 
+extern long FqX_split_deg1(GEN *pz, GEN u, GEN q, GEN T, GEN p);
+extern GEN FqX_split_roots(GEN z, GEN T, GEN p, GEN pol);
+extern GEN FqX_split_all(GEN z, GEN T, GEN p);
+extern long FqX_split_by_degree(GEN *pz, GEN u, GEN q, GEN T, GEN p);
 extern long FpX_split_berlekamp(GEN *t, GEN p);
-extern GEN FqXV_mul(GEN V, GEN Tp, GEN p);
-extern long FqX_sqf_split(GEN *t0, GEN q, GEN T, GEN p, int roots);
-extern GEN FqX_split_part(GEN f, GEN T, GEN p);
 extern GEN get_proj_modT(GEN basis, GEN T, GEN p);
 extern void init_dalloc();
 extern double *dalloc(size_t n);
@@ -1326,10 +1327,10 @@ nf_combine_factors(nfcmbf_t *T, GEN polred, GEN p, long a, long klim)
 static GEN
 nfsqff(GEN nf, GEN pol, long fl)
 {
-  long i, m, n, nbf, ct, dpol = degpol(pol);
+  long i, m, n, nbf, ct, maxf, dpol = degpol(pol);
   ulong pp;
   pari_sp av = avma;
-  GEN pr, C0, C, dk, bad, polbase, pk, fa;
+  GEN pr, C0, C, dk, bad, polbase, pk, init_fa;
   GEN N2, rep, p, polmod, polred, lt, nfpol;
   byteptr pt = diffptr;
   double bestind = 1.;
@@ -1369,10 +1370,21 @@ nfsqff(GEN nf, GEN pol, long fl)
 
   polred = pr = NULL; /* gcc -Wall */
   nbf = 0; pp = 0;
-  L.Tp = fa = NULL;
+  L.Tp = NULL;
+
+  /* FIXME: slow factorization of large polynomials over large Fq */
+  maxf = 1;
+  if (dpol > 400) {
+    if (n >= 20) maxf = 10;
+  } else if (dpol > 100) {
+    if (n >= 15) maxf = 10;
+  } else {
+    if (n >= 10) maxf = n;
+  }
+
   for (ct = 5;;)
   {
-    GEN afa, aT, apr, ap, modpr, red;
+    GEN aT, apr, ap, modpr, red;
     long anbf;
     double ind;
 
@@ -1384,18 +1396,18 @@ nfsqff(GEN nf, GEN pol, long fl)
       if (! umodiu(bad,pp)) continue;
       ap = utoi(pp);
       list = (GEN)factmod0(nfpol, ap)[1];
-      if (n < 15)
-      { /* deg.1 factors are best if [K:Q] small */
+      if (maxf == 1)
+      { /* deg.1 factors are best */
         r = (GEN)list[1];
         if (degpol(r) == 1) break;
       }
       else
-      { /* otherwise, pick factor of large degree < 6 */
+      { /* otherwise, pick factor of largish degree */
         long i, dr;
         for (i = lg(list)-1; i > 0; i--)
         {
           r = (GEN)list[i]; dr = degpol(r);
-          if (dr < 6) break;
+          if (dr <= maxf) break;
         }
         if (i > 0) break;
       }
@@ -1409,32 +1421,32 @@ nfsqff(GEN nf, GEN pol, long fl)
     { /* degree 1 */
       red = u_Fp_FpX(red, pp);
       if (!u_FpX_is_squarefree(red, pp)) continue;
-      afa = NULL;
       anbf = fl? u_FpX_nbroots(red, pp): u_FpX_nbfact(red, pp);
     }
     else
     {
+      GEN q;
       if (!FqX_is_squarefree(red,aT,ap)) continue;
-      afa = cgetg(dpol + 1, t_VEC); afa[1] = (long)red;
-      anbf = FqX_sqf_split((GEN*)(afa + 1), gpowgs(ap, degpol(aT)), aT, ap, fl);
-      setlg(afa, anbf + 1);
+      q = gpowgs(ap, degpol(aT));
+      anbf = fl? FqX_split_deg1(&init_fa, red, q, aT, ap)
+               : FqX_split_by_degree(&init_fa, red, q, aT, ap);
     }
-    ind = ((double)anbf) / itos((GEN)apr[4]);
-
-    if (!nbf || ind <= bestind)
-    {
-      bestind = ind; nbf = anbf; pr = apr;
-      fa = afa; L.Tp = aT;
-    }
-    if (DEBUGLEVEL>3)
-      fprintferr("%3ld %s at prime %Z\n", nbf, fl?"roots": "factors", ap);
-    if (fl == 2 && nbf < dpol) return cgetg(1,t_VEC);
-    if (nbf <= 1)
+    if (fl == 2 && anbf < dpol) return cgetg(1,t_VEC);
+    if (anbf <= 1)
     {
       if (!fl) /* irreducible */
         return gerepilecopy(av, _vec(QXQ_normalize(polmod, nfpol)));
-      if (!nbf) return cgetg(1,t_VEC); /* no root */
+      if (!anbf) return cgetg(1,t_VEC); /* no root */
     }
+
+    ind = ((double)anbf) / itos((GEN)apr[4]);
+    if (!nbf || ind <= bestind)
+    {
+      bestind = ind; nbf = anbf; pr = apr;
+      L.Tp = aT;
+    }
+    if (DEBUGLEVEL>3)
+      fprintferr("%3ld %s at prime %Z\n", nbf, fl?"roots": "factors", ap);
     if (--ct <= 0) break;
   }
   if (DEBUGLEVEL>2) {
@@ -1483,17 +1495,10 @@ nfsqff(GEN nf, GEN pol, long fl)
 
     if (L.Tpk)
     {
-      GEN C;
-      rep = fa;
-      if (lg(rep) - 1 == dpol)
-        C = NULL; /* cofactor */
-      else
-      {
-        C = FqX_div(polred, FqXV_mul(rep, L.Tp, p), L.Tp, p);
-        rep = concatsp(rep, C);
-      }
+      int cof = (dpol > nbf); /* non trivial cofactor ? */
+      rep = FqX_split_roots(init_fa, L.Tp, p, cof? polred: NULL);
       rep = hensel_lift_fact(polred, rep, L.Tpk, p, pk, L.k);
-      if (C) setlg(rep, lg(rep)-1); /* remove cofactor */
+      if (cof) setlg(rep, lg(rep)-1); /* remove cofactor */
       rep = roots_from_deg1(rep);
     }
     else
@@ -1519,14 +1524,17 @@ nfsqff(GEN nf, GEN pol, long fl)
     return gerepilecopy(av, rep);
   }
 
-  if (!fa)
+  if (L.Tp)
+    rep = FqX_split_all(init_fa, L.Tp, p);
+  else
   {
     long d;
-    fa = cgetg(dpol + 1, t_VEC); fa[1] = (long)polred;
-    d = FpX_split_berlekamp((GEN*)(fa + 1), p);
-    setlg(fa, d + 1);
+    rep = cgetg(dpol + 1, t_VEC);
+    rep[1] = (long)polred;
+    d = FpX_split_berlekamp((GEN*)(rep + 1), p);
+    setlg(rep, d + 1);
   }
-  T.fact  = fa;
+  T.fact  = rep;
   T.polbase = polbase;
   T.pol   = pol;
   T.nf    = nf;
