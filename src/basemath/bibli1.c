@@ -2929,7 +2929,12 @@ qfminim0(GEN a, GEN borne, GEN stockmax, long flag, long prec)
   {
     case 0: return minim00(a,borne,stockmax,min_ALL);
     case 1: return minim00(a,borne,gzero   ,min_FIRST);
-    case 2: return fincke_pohst(a,borne,itos(stockmax),0,prec,NULL);
+    case 2:
+    {
+      GEN x = fincke_pohst(a,borne,itos(stockmax),prec,NULL);
+      if (!x) err(precer,"fincke_pohst");
+      return x;
+    }
     default: err(flagerr,"qfminim");
   }
   return NULL; /* not reached */
@@ -3183,10 +3188,9 @@ END:
 
 /* solve q(x) = x~.a.x <= bound, a > 0.
  * If check is non-NULL keep x only if check(x).
- * If noer, return NULL in case of precision problems, raise an error otherwise.
  * If a is a vector, assume a[1] is the LLL-reduced Cholesky form of q */
-static GEN
-_fincke_pohst(GEN a,GEN B0,long stockmax,long noer, long PREC, FP_chk_fun *CHECK)
+GEN
+fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
 {
   pari_sp av = avma;
   VOLATILE long i,j,l, round = 0;
@@ -3212,10 +3216,10 @@ _fincke_pohst(GEN a,GEN B0,long stockmax,long noer, long PREC, FP_chk_fun *CHECK
     i = gprecision(a);
     if (i) prec = i; else { a = mat_to_MP(a, prec); round = 1; }
     if (DEBUGLEVEL>2) fprintferr("first LLL: prec = %ld\n", prec);
-    u = lllgramintern(a,4,noer, (prec<<1)-2);
+    u = lllgramintern(a, 4, 1, (prec<<1)-2);
     if (!u) return NULL;
     r = qf_base_change(a,u,1);
-    r = sqred1intern(r,noer);
+    r = sqred1intern(r);
     if (!r) return NULL;
     for (i=1; i<l; i++)
     {
@@ -3228,7 +3232,7 @@ _fincke_pohst(GEN a,GEN B0,long stockmax,long noer, long PREC, FP_chk_fun *CHECK
   rinvtrans = gtrans_i( invmat(r) );
   if (DEBUGLEVEL>2)
     fprintferr("final LLL: prec = %ld\n", gprecision(rinvtrans));
-  v = lllintern(rinvtrans, 100, noer, 0);
+  v = lllintern(rinvtrans, 100, 1, 0);
   if (!v) return NULL;
 
   rinvtrans = gmul(rinvtrans, v);
@@ -3263,17 +3267,4 @@ _fincke_pohst(GEN a,GEN B0,long stockmax,long noer, long PREC, FP_chk_fun *CHECK
   z[1] = lcopy((GEN)res[1]);
   z[2] = round? lround((GEN)res[2]): lcopy((GEN)res[2]);
   z[3] = lmul(uperm, (GEN)res[3]); return gerepileupto(av,z);
-}
-
-GEN
-fincke_pohst(GEN a,GEN B0,long stockmax,long flag, long PREC, FP_chk_fun *CHECK)
-{
-  pari_sp av = avma;
-  GEN z = _fincke_pohst(a,B0,stockmax,flag & 1,PREC,CHECK);
-  if (!z)
-  {
-    if (!(flag & 1)) err(precer,"fincke_pohst");
-    avma = av;
-  }
-  return z;
 }

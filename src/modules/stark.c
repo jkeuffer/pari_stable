@@ -2217,7 +2217,7 @@ RecCoeff3(GEN nf, RC_data *d, long prec)
 
   nB = mulsi(N+1, B2);
   d->nB = nB;
-  cand = fincke_pohst(A, nB, 20000, 1, prec2, &chk);
+  cand = fincke_pohst(A, nB, 20000, prec2, &chk);
 
   if (!cand)
   {

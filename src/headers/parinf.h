@@ -97,7 +97,7 @@ typedef struct FP_chk_fun {
 } FP_chk_fun;
 
 extern GEN _initalg(GEN x, long flag, long prec);
-extern GEN fincke_pohst(GEN a,GEN BOUND,long stockmax,long flag, long PREC, FP_chk_fun *CHECK);
+extern GEN fincke_pohst(GEN a,GEN BOUND,long stockmax,long PREC, FP_chk_fun *CHECK);
 extern GEN polredfirstpol(GEN x, long flag, FP_chk_fun *CHECK);
 
 /* for ideallog / zlog */

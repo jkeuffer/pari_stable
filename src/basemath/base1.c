@@ -1969,7 +1969,7 @@ _polredabs(nfbasic_t *T, GEN *u)
     d.M    = F.M;
     if (R)
     {
-      v = fincke_pohst(_vec(R),NULL,-1,1, 0, &chk);
+      v = fincke_pohst(_vec(R),NULL,-1, 0, &chk);
       if (v) break;
     }
     if (i==MAXITERPOL) err(accurer,"polredabs0");
@@ -2102,7 +2102,7 @@ rootsof1(GEN nf)
     GEN R = R_from_QR(gmael(nf,5,2), prec);
     if (R)
     {
-      p1 = fincke_pohst(_vec(R),stoi(N),1000,1, 0, NULL);
+      p1 = fincke_pohst(_vec(R),stoi(N),1000, 0, NULL);
       if (p1) break;
     }
     if (i == MAXITERPOL) err(accurer,"rootsof1");

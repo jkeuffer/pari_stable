@@ -145,7 +145,7 @@ GEN     smithall(GEN x, GEN *ptU, GEN *ptV);
 GEN     smithclean(GEN z);
 GEN     sqred(GEN a);
 GEN     sqred1(GEN a);
-GEN     sqred1intern(GEN a, long flag);
+GEN     sqred1intern(GEN a);
 GEN     sqred3(GEN a);
 
 /* anal.c */

@@ -683,7 +683,7 @@ gtrace(GEN x)
  *   if flag is zero: raise an error
  *   else: return NULL. */
 GEN
-sqred1intern(GEN a,long flag)
+sqred1intern(GEN a)
 {
   pari_sp av = avma, lim=stack_lim(av,1);
   GEN b,p;
@@ -704,11 +704,7 @@ sqred1intern(GEN a,long flag)
   for (k=1; k<n; k++)
   {
     p = gcoeff(b,k,k);
-    if (gsigne(p)<=0) /* not positive definite */
-    {
-      if (flag) { avma=av; return NULL; }
-      err(talker,"not a positive definite matrix in sqred1");
-    }
+    if (gsigne(p)<=0) { avma = av; return NULL; } /* not positive definite */
     p = ginv(p);
     for (i=k+1; i<n; i++)
       for (j=i; j<n; j++)
@@ -728,7 +724,9 @@ sqred1intern(GEN a,long flag)
 GEN
 sqred1(GEN a)
 {
-  return sqred1intern(a,0);
+  GEN x = sqred1intern(a);
+  if (!x) err(talker,"not a positive definite matrix in sqred1");
+  return x;
 }
 
 GEN
