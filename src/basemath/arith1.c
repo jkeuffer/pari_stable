@@ -1265,157 +1265,11 @@ mpsqrtnmod(GEN a, GEN n, GEN p, GEN *zetan)
 /**                                                                 **/
 /*********************************************************************/
 
-/* Ultra-fast private ulong gcd for trial divisions.  Called with y odd;
-   x can be arbitrary (but will most of the time be smaller than y).
-   Will also be used from inside ifactor2.c, so it's `semi-private' really.
-   --GN */
-
-/* Gotos are Harmful, and Programming is a Science.  E.W.Dijkstra. */
-ulong
-ugcd(ulong x, ulong y)         /* assume y&1==1, y > 1 */
-{
-  if (!x) return y;
-  /* fix up x */
-  while (!(x&1)) x>>=1;
-  if (x==1) return 1;
-  if (x==y) return y;
-  else if (x>y) goto xislarger;/* will be rare, given how we'll use this */
-  /* loop invariants: x,y odd and distinct. */
- yislarger:
-  if ((x^y)&2)                 /* ...01, ...11 or vice versa */
-    y=(x>>2)+(y>>2)+1;         /* ==(x+y)>>2 except it can't overflow */
-  else                         /* ...01,...01 or ...11,...11 */
-    y=(y-x)>>2;                /* now y!=0 in either case */
-  while (!(y&1)) y>>=1;        /* kill any windfall-gained powers of 2 */
-  if (y==1) return 1;          /* comparand == return value... */
-  if (x==y) return y;          /* this and the next is just one comparison */
-  else if (x<y) goto yislarger;/* else fall through to xislarger */
-
- xislarger:                    /* same as above, seen through a mirror */
-  if ((x^y)&2)
-    x=(x>>2)+(y>>2)+1;
-  else
-    x=(x-y)>>2;                /* x!=0 */
-  while (!(x&1)) x>>=1;
-  if (x==1) return 1;
-  if (x==y) return y;
-  else if (x>y) goto xislarger;/* again, a decent [g]cc should notice that
-                                  it can re-use the comparison */
-  goto yislarger;
-}
-/* Gotos are useful, and Programming is an Art.  D.E.Knuth. */
-/* PS: Of course written with Dijkstra's lessons firmly in mind... --GN */
-
-/* modified right shift binary algorithm with at most one division */
-long
-cgcd(long a,long b)
-{
-  long v;
-  a=labs(a); if (!b) return a;
-  b=labs(b); if (!a) return b;
-  if (a>b) { a %= b; if (!a) return b; }
-  else { b %= a; if (!b) return a; }
-  v=vals(a|b); a>>=v; b>>=v;
-  if (a==1 || b==1) return 1L<<v;
-  if (b&1)
-    return ((long)ugcd((ulong)a, (ulong)b)) << v;
-  else
-    return ((long)ugcd((ulong)b, (ulong)a)) << v;
-}
-long
-clcm(long a,long b)
-{
-  long d;
-  if(!a) return 0;
-  d=cgcd(a,b);
-  if(d!=1) return a*(b/d);
-  return a*b;
-}
-
-/* assume a>b>0, return gcd(a,b) as a GEN (for mppgcd) */
-static GEN
-mppgcd_cgcd(ulong a, ulong b)
-{
-  GEN r = cgeti(3);
-  long v;
-
-  r[1] = evalsigne(1)|evallgefint(3);
-  a %= b; if (!a) { r[2]=(long)b; return r; }
-  v=vals(a|b); a>>=v; b>>=v;
-  if (a==1 || b==1) { r[2]=(long)(1UL<<v); return r; }
-  if (b&1)
-    r[2] = (long)(ugcd((ulong)a, (ulong)b) << v);
-  else
-    r[2] = (long)(ugcd((ulong)b, (ulong)a) << v);
-  return r;
-}
-
-void mppgcd_plus_minus(GEN x, GEN y, GEN t);
-ulong mppgcd_resiu(GEN y, ulong x);
-
-/* uses modified right-shift binary algorithm now --GN 1998Jul23 */
 GEN
 mppgcd(GEN a, GEN b)
 {
-  long v, w;
-  pari_sp av;
-  GEN t, p1;
-
   if (typ(a) != t_INT || typ(b) != t_INT) err(arither1);
-  switch (absi_cmp(a,b))
-  {
-    case 0: return absi(a);
-    case -1: t=b; b=a; a=t;
-  }
-  if (!signe(b)) return absi(a);
-  /* here |a|>|b|>0. Try single precision first */
-  if (lgefint(a)==3)
-    return mppgcd_cgcd((ulong)a[2], (ulong)b[2]);
-  if (lgefint(b)==3)
-  {
-    ulong u = mppgcd_resiu(a,(ulong)b[2]);
-    if (!u) return absi(b);
-    return mppgcd_cgcd((ulong)b[2], u);
-  }
-
-  /* larger than gcd: "avma=av" gerepile (erasing t) is valid */
-  av = avma; (void)new_chunk(lgefint(b)); /* HACK */
-  t = resii(a,b);
-  if (!signe(t)) { avma=av; return absi(b); }
-
-  a = b; b = t;
-  v = vali(a); a = shifti(a,-v); setsigne(a,1);
-  w = vali(b); b = shifti(b,-w); setsigne(b,1);
-  if (w < v) v = w;
-  switch(absi_cmp(a,b))
-  {
-    case  0: avma=av; a=shifti(a,v); return a;
-    case -1: p1=b; b=a; a=p1;
-  }
-  if (is_pm1(b)) { avma=av; return shifti(gun,v); }
-
-  /* we have three consecutive memory locations: a,b,t.
-   * All computations are done in place */
-
-  /* a and b are odd now, and a>b>1 */
-  while (lgefint(a) > 3)
-  {
-    /* if a=b mod 4 set t=a-b, otherwise t=a+b, then strip powers of 2 */
-    /* so that t <= (a+b)/4 < a/2 */
-    mppgcd_plus_minus(a,b, t);
-    if (is_pm1(t)) { avma=av; return shifti(gun,v); }
-    switch(absi_cmp(t,b))
-    {
-      case -1: p1 = a; a = b; b = t; t = p1; break;
-      case  1: p1 = a; a = t; t = p1; break;
-      case  0: avma = av; b=shifti(b,v); return b;
-    }
-  }
-  {
-    long r[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
-    r[2] = (long) ugcd((ulong)b[2], (ulong)a[2]);
-    avma = av; return shifti(r,v);
-  }
+  return gcdii(a,b);
 }
 
 GEN
@@ -1426,7 +1280,7 @@ mpppcm(GEN x, GEN y)
   if (typ(x) != t_INT || typ(y) != t_INT) err(arither1);
   if (!signe(x)) return gzero;
   av = avma;
-  p1 = mppgcd(x,y); if (!is_pm1(p1)) y = divii(y,p1);
+  p1 = gcdii(x,y); if (!is_pm1(p1)) y = divii(y,p1);
   p2 = mulii(x,y);
   if (signe(p2) < 0) setsigne(p2,1);
   return gerepileuptoint(av, p2);

@@ -1087,6 +1087,7 @@ GEN     divsi(long x, GEN y);
 GEN     divsr(long x, GEN y);
 GEN     dvmdii(GEN x, GEN y, GEN *z);
 int     egalii(GEN x, GEN y);
+GEN     gcdii(GEN x, GEN y);
 int     invmod(GEN a, GEN b, GEN *res);
 GEN     ishiftr(GEN x, long n);
 GEN     modii(GEN x, GEN y);
