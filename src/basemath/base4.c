@@ -1566,7 +1566,7 @@ idealnorm(GEN nf, GEN x)
   switch(idealtyp(&x,&y))
   {
     case id_PRIME:
-      return powgi((GEN)x[1],(GEN)x[4]);
+      return gpowgs((GEN)x[1], itos((GEN)x[4]));
     case id_PRINCIPAL:
       x = gnorm(basistoalg(nf,x)); break;
     default:
