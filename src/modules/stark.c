@@ -2943,7 +2943,7 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
   if (! (subgp = get_subgroup(subgp,Mcyc)) )
     err(talker, "incorrect subgroup in bnrL1");
 
-  cl = labs(itos( dethnf_i(subgp) ));
+  cl = itou( dethnf_i(subgp) );
   Qt = InitQuotient0(Mcyc, subgp);
   lq = lg((GEN)Qt[2]) - 1;
 
