@@ -1693,7 +1693,7 @@ red_montgomery(GEN T, GEN N, ulong inv)
   ulong av;
   GEN Te,Td,Ne,Nd, scratch;
   ulong m,t,d,k = lgefint(N)-2;
-  unsigned int carry;
+  int carry;
   long i,j;
   LOCAL_HIREMAINDER;
   LOCAL_OVERFLOW;
