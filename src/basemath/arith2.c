@@ -39,14 +39,11 @@ GEN
 prime(long n)
 {
   byteptr p = diffptr;
-  long prime = 0;
+  ulong prime = 0;
 
   if (n <= 0) err(talker, "n-th prime meaningless if n = %ld",n);
-  while (n--)
-  {
-    NEXT_PRIME_VIADIFF_CHECK(prime,p);
-  }
-  return stoi(prime);
+  while (n--) NEXT_PRIME_VIADIFF_CHECK(prime,p);
+  return utoi(prime);
 }
 
 long
@@ -57,10 +54,7 @@ pith(long n)
 
   if (n <= 0) err(talker, "pith meaningless if n = %ld",n);
   maxprime_check((ulong)n);
-  while (prime<=(ulong)n) {
-    NEXT_PRIME_VIADIFF(prime,p);
-    res++;
-  }
+  while (prime<=(ulong)n) { res++; NEXT_PRIME_VIADIFF(prime,p); }
   return res-1;
 }
 
@@ -68,7 +62,7 @@ GEN
 primes(long n)
 {
   byteptr p = diffptr;
-  long prime = 0;
+  ulong prime = 0;
   GEN y,z;
 
   if (n < 0) n = 0;
@@ -76,7 +70,7 @@ primes(long n)
   while (n--)
   {
     NEXT_PRIME_VIADIFF_CHECK(prime,p);
-    *++z = lstoi(prime);
+    *++z = lutoi(prime);
   }
   return y;
 }
