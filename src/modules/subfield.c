@@ -496,6 +496,36 @@ chinese_retrieve_pol(GEN DATA, GEN listdelta)
   return FpX_res(FpX_red(S, p), FpX_red((GEN)DATA[1],p), p);
 }
 
+/* return P(X + c) using destructive Horner */
+static GEN
+TR_pol(GEN P, GEN c)
+{
+  GEN Q = dummycopy(P), *R;
+  long i,k,n;
+  
+  if (!signe(P)) return Q;
+  R = (GEN*)(Q+2); n = degpol(P);
+  if (gcmp1(c))
+  {
+    for (i=1; i<=n; i++)
+      for (k=n-i; k<n; k++)
+        R[k] = gadd(R[k], R[k+1]);
+  }
+  else if (gcmp_1(c))
+  {
+    for (i=1; i<=n; i++)
+      for (k=n-i; k<n; k++)
+        R[k] = gsub(R[k], R[k+1]);
+  }
+  else
+  {
+    for (i=1; i<=n; i++)
+      for (k=n-i; k<n; k++)
+        R[k] = gadd(R[k], gmul(c, R[k+1]));
+  }
+  return Q;
+}
+
 /* g in Z[X] potentially defines a subfield of Q[X]/f. It is a subfield iff A
  * (cf cand_for_subfields) was a block system; then there
  * exists h in Q[X] such that f | g o h. listdelta determines h s.t f | g o h
@@ -559,7 +589,7 @@ embedding_of_potential_subfields(GEN g,GEN DATA,GEN listdelta)
     w0 = w1; w0_Q = w1_Q; p = q; q = q2;
   }
   TR = (GEN)DATA[14];
-  if (!gcmp0(TR)) w1_Q = poleval(w1_Q, gadd(polx[0], TR));
+  if (!gcmp0(TR)) w1_Q = TR_pol(w1_Q, TR);
   return gdiv(w1_Q,ind);
 }
 
@@ -743,8 +773,9 @@ compute_data(GEN DATA, struct poldata PD, long d, GEN ff, GEN T,GEN p)
   {
     GEN Xm1 = gsub(polx[varn(pol)], gun);
     GEN TR = addis((GEN)DATA[14],1);
+    GEN mTR = negi(TR), mun = negi(gun);
     DATA[14] = (long)TR;
-    pol = poleval(pol, gsub(polx[varn(pol)], TR));
+    pol = TR_pol(pol, mTR);
     p1 = dummycopy(roo); l = lg(p1);
     for (i=1; i<l; i++) p1[i] = ladd(TR, (GEN)p1[i]);
     roo = p1;
@@ -758,15 +789,19 @@ compute_data(GEN DATA, struct poldata PD, long d, GEN ff, GEN T,GEN p)
     {
       if (degpol(interp[i]) > 0) /* do not turn polun[0] into gun */
       {
-        p1 = poleval((GEN)interp[i], Xm1);
+        p1 = TR_pol((GEN)interp[i], mun);
         interp[i] = (long)FpXQX_red(p1, NULL,p);
       }
       if (degpol(bezoutC[i]) > 0)
       {
-        p1 = poleval((GEN)bezoutC[i], Xm1);
+        p1 = TR_pol((GEN)bezoutC[i], mun);
         bezoutC[i] = (long)FpXQX_red(p1, NULL,p);
       }
     }
+    p1 = cgetg(lff, t_VEC);
+    for (i=1; i<lff; i++)
+      p1[i] = (long)FpX_red(TR_pol((GEN)ff[i], mTR), p);
+    ff = p1;
   }
   else
   {
