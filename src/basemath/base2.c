@@ -2423,7 +2423,8 @@ nf_to_ff(GEN nf, GEN x, GEN modpr)
   {
     case t_INT: return modii(x, p);
     case t_FRAC: return gmod(x, p);
-    case t_POL: x = algtobasis(nf, x);
+    case t_POL: x = algtobasis(nf, x); break;
+    default: err(typeer,"nf_to_ff");
   }
   x = kill_denom(x, nf, p, modpr);
   return gerepilecopy(av, zk_to_ff(x, modpr));
