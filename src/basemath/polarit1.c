@@ -933,14 +933,15 @@ FpX_factcantor_i(GEN f, GEN pp, long flag)
 {
   long j, e, vf, nbfact, d = degpol(f);
   ulong p, k;
-  GEN ex,y,f2,g,g1,u,v,pd,q;
+  GEN E,y,f2,g,g1,u,v,pd,q;
   GEN *t;
 
   if (!d) return flag == 2? NULL: trivfact();
   p = init_p(pp);
 
   /* to hold factors and exponents */
-  t = (GEN*)cgetg(d+1,t_VEC); ex = new_chunk(d+1);
+  t = (GEN*)cgetg(d+1,t_VEC);
+  E = cgetg(d+1, t_VECSMALL);
   vf=varn(f); e = nbfact = 1;
   for(;;)
   {
@@ -979,7 +980,7 @@ FpX_factcantor_i(GEN f, GEN pp, long flag)
         if (flag)
         {
           if (flag > 1) return NULL;
-          for ( ; nbfact<j; nbfact++) { t[nbfact]=(GEN)d; ex[nbfact]=e*k; }
+          for ( ; nbfact<j; nbfact++) { t[nbfact]=(GEN)d; E[nbfact]=e*k; }
         }
         else
         {
@@ -996,7 +997,7 @@ FpX_factcantor_i(GEN f, GEN pp, long flag)
             split(p,t+nbfact,d,pp,q,r,S);
           else
             splitgen(pp,t+nbfact,d,pp,q,r);
-          for (; nbfact<j; nbfact++) ex[nbfact]=e*k;
+          for (; nbfact<j; nbfact++) E[nbfact]=e*k;
         }
         du -= dg;
         u = FpX_div(u,g,pp);
@@ -1005,7 +1006,7 @@ FpX_factcantor_i(GEN f, GEN pp, long flag)
       if (du)
       {
         t[nbfact] = flag? (GEN)du: FpX_normalize(u, pp);
-        ex[nbfact++]=e*k;
+        E[nbfact++]=e*k;
       }
     }
     j = lg(f2); if (j==3) break;
@@ -1014,10 +1015,9 @@ FpX_factcantor_i(GEN f, GEN pp, long flag)
   if (flag > 1) return gun; /* irreducible */
   y = cgetg(3, t_VEC);
   y[1] = (long)t; setlg(t, nbfact);
-  y[2] = (long)ex;setlg(ex,nbfact); 
+  y[2] = (long)E; setlg(E, nbfact); 
   if (!flag) (void)sort_factor(y,cmpii);
   return y;
-
 }
 GEN
 FpX_factcantor(GEN f, GEN pp, long flag)
@@ -1058,7 +1058,12 @@ factcantor0(GEN f, GEN pp, long flag)
 long
 FpX_is_irred(GEN f, GEN p) { return !!FpX_factcantor_i(f,p,2); }
 GEN
-FpX_degfact(GEN f, GEN p) { return FpX_factcantor_i(f,p,1); }
+FpX_degfact(GEN f, GEN p) {
+  pari_sp av = avma;
+  GEN z = FpX_factcantor_i(f,p,1);
+  settyp(z[1], t_VECSMALL);
+  settyp(z, t_MAT); return gerepilecopy(av, z);
+}
 GEN
 factcantor(GEN f, GEN p) { return factcantor0(f,p,0); }
 GEN
