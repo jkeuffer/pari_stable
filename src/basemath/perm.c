@@ -398,30 +398,25 @@ perm_pow(GEN perm, long exp)
 }
 
 GEN 
-perm_to_GAP(GEN p)	  /* genstr */
+perm_to_GAP(GEN p)
 {
   pari_sp ltop=avma;
-  GEN gap;	  /* genstr */
-  GEN x;	  /* vec */
+  GEN gap;
+  GEN x;
   long i;
-  long nb=0,c=0;
+  long nb, c=0;
   char *s;
+  long sz;
+  long lp=lg(p)-1;
   if (typ(p) != t_VECSMALL)  err(typeer, "perm_to_GAP");
   x = perm_cycles(p);
+  sz=(long) (bfffo(lp)+1) * L2SL10 + 1;
   /*Dry run*/
-  for (i = 1; i < lg(x); ++i)
+  for (i = 1, nb = 1; i < lg(x); ++i)
   {
-    long j;
     GEN z = (GEN) x[i];
-    for (j = 1; j < lg(z); ++j)
-    {
-      long n;
-      if (j > 1)
-        nb+=2;
-      for(n=z[j]; n ; n /= 10) 
-        nb++;
-    }
-    nb+=3;
+    long lz = lg(z)-1;
+    nb += 1+lz*(sz+2);
   }
   /*Real run*/
   nb = (nb+2*BYTES_IN_LONG-1) >> TWOPOTBYTES_IN_LONG;
@@ -434,19 +429,19 @@ perm_to_GAP(GEN p)	  /* genstr */
     s[c++] = '(';
     for (j = 1; j < lg(z); ++j)
     {
-      long n;
       if (j > 1)
       {
         s[c++] = ','; s[c++] = ' ';
       }
-      for(n = z[j]; n ; n /= 10) 
-        s[c++] = n%10 + '0';
+      sprintf(s+c,"%ld",z[j]);
+      while(s[c++]); c--;
     }
     s[c++] = ')';
   }
-  s[c++]=0;
+  s[c++] = 0;
   return gerepileupto(ltop,gap);
 }
+
 /*************************************************************************/
 /**                                                                     **/
 /**                   Routine for handling groups                       **/
