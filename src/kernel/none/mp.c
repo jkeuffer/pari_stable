@@ -296,6 +296,8 @@ shifti3(GEN x, long n, long flag)
   {
     long lyorig;
 
+    if (s > 0)
+        flag = 0;
     n = -n;
     ly = lyorig = lx - (n>>TWOPOTBITS_IN_LONG);
     if (ly<3)
