@@ -1572,6 +1572,38 @@ catii(GEN a, long la, GEN b, long lb)
   return int_normalize(z, 0);
 }
 
+#ifdef LONG_IS_64BIT
+/* 64 bits of b = sqrt(a[0] * 2^64 + a[1])  [ up to 1ulp ] */
+static ulong
+sqrtu2(ulong *a)
+{
+  ulong c, b = dblmantissa( sqrt((double)a[0]) );
+  LOCAL_HIREMAINDER;
+  LOCAL_OVERFLOW;
+
+  /* > 32 correct bits, 1 Newton iteration to reach 64 */
+  if (b <= a[0]) return HIGHBIT | (a[0] >> 1);
+  hiremainder = a[0]; c = divll(a[1], b);
+  return (addll(c, b) >> 1) | HIGHBIT;
+}
+/* 64 bits of sqrt(a[0] * 2^63) */
+static ulong
+sqrtu2_1(ulong *a)
+{
+  ulong t[2];
+  t[0] = (a[0] >> 1);
+  t[1] = (a[0] << (BITS_IN_LONG-1)) | (a[1] >> 1);
+  return sqrtu2(t);
+}
+#else
+/* 32 bits of sqrt(a[0] * 2^32) */
+static ulong
+sqrtu2(ulong *a)   { return dblmantissa( sqrt((double)a[0]) ); }
+/* 32 bits of sqrt(a[0] * 2^31) */
+static ulong
+sqrtu2_1(ulong *a) { return dblmantissa( sqrt(2. * a[0]) ); }
+#endif
+
 /* n[0] */
 static GEN
 sqrtispec1(GEN n, GEN *r)
@@ -1583,13 +1615,13 @@ sqrtispec1(GEN n, GEN *r)
 }
 /* n[0..1], assume u0 >= 2^(BIL-2). Return 1 if remainder overflows */
 static int
-p_sqrtu2(ulong u0, ulong u1, ulong *ps, ulong *pr)
+p_sqrtu2(ulong *n, ulong *ps, ulong *pr)
 {
-  ulong hi, r, s, t;
+  ulong hi, r, s, t, u0 = n[0], u1 = n[1];
   LOCAL_HIREMAINDER;
   LOCAL_OVERFLOW;
 
-  s = dblmantissa( sqrt((double)u0) ); /* high bit of s is set */
+  s = sqrtu2(n); /* high bit of s is set */
   t = mulll(s, s);
   hi = u0 - hiremainder;
   if ((long)hi < 0)
@@ -1628,7 +1660,7 @@ static GEN
 sqrtispec2(GEN n, GEN *pr)
 {
   ulong s, r;
-  int hi = p_sqrtu2(n[0], n[1], &s, &r);
+  int hi = p_sqrtu2((ulong*)n, &s, &r);
   GEN S = utoi(s);
   *pr = hi? cat1u(r): utoi(r);
   return S;
@@ -1639,13 +1671,14 @@ static GEN
 sqrtispec2_sh(GEN n, GEN *pr)
 {
   GEN S;
-  ulong r, s, u0 = (ulong)n[0], u1 = (ulong)n[1];
+  ulong *U, r, s, u0 = (ulong)n[0], u1 = (ulong)n[1];
   int hi, sh = bfffo(u0) & ~1UL;
   if (sh) {
     u0 = (u0 << sh) | (u1 >> (BITS_IN_LONG-sh));
     u1 <<= sh;
   }
-  hi = p_sqrtu2(u0, u1, &s, &r);
+  U[0] = u0;
+  U[1] = u1; hi = p_sqrtu2(U, &s, &r);
   /* s^2 + R = u0|u1. Rescale back:
    * 2^(2k) n = S^2 + R
    * so 2^(2k) n = (S - s0)^2 + (2*S*s0 - s0^2 + R), s0 = S mod 2^k. */
@@ -1738,37 +1771,6 @@ sqrtremi(GEN N, GEN *r)
   gerepileall(av, 2, &S, &R); *r = R; return S;
 }
 
-#ifdef LONG_IS_64BIT
-/* 64 bits of b = sqrt(a[0] * 2^64 + a[1])  [ up to 1ulp ] */
-static ulong
-sqrtu2(ulong *a)
-{
-  ulong c, b = dblmantissa( sqrt((double)a[0]) );
-  LOCAL_HIREMAINDER;
-  LOCAL_OVERFLOW;
-
-  /* > 32 correct bits, 1 Newton iteration to reach 64 */
-  if (b <= a[0]) return ~0UL;
-  hiremainder = a[0]; c = divll(a[1], b);
-  return (addll(c, b) >> 1) | HIGHBIT;
-}
-/* 64 bits of sqrt(a[0] * 2^63) */
-static ulong
-sqrtu2_1(ulong *a)
-{
-  ulong t[2];
-  t[0] = (a[0] >> 1);
-  t[1] = (a[0] << (BITS_IN_LONG-1)) | (a[1] >> 1);
-  return sqrtu2(t);
-}
-#else
-/* 32 bits of sqrt(a[0] * 2^32) */
-static ulong
-sqrtu2(ulong *a)   { return dblmantissa( sqrt((double)a[0]) ); }
-/* 32 bits of sqrt(a[0] * 2^31) */
-static ulong
-sqrtu2_1(ulong *a) { return dblmantissa( sqrt(2. * a[0]) ); }
-#endif
 /* compute sqrt(|a|), assuming a != 0 */
 
 GEN
@@ -1823,7 +1825,8 @@ sqrtr_abs(GEN x)
     xmpn_zero(b + l+1,l+1);
     b = sqrtispec(b, l+1, &c);
     xmpn_copy(res+2, b+2, l);
-    if (b[l+2] & HIGHBIT) roundr_up_ip(res, l+2);
+    if ((b[l+2] & HIGHBIT) || (b[l+2] == ~HIGHBIT && cmpii(c,b) > 0))
+      roundr_up_ip(res, l+2);
   }
   avma = (pari_sp)res; return res;
 }
