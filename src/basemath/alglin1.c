@@ -1890,9 +1890,11 @@ keri(GEN x)
 	  }
 	  if (low_stack(lim, stack_lim(av,1)))
           {
-            p1 = gclone(p);
+            GEN _p0 = gclone(p0);
+            GEN _p  = gclone(p);
             gerepile_gauss_ker(x,k,t,av);
-            p = gcopy(p1); gunclone(p1);
+            p = icopy(_p);  gunclone(_p);
+            p0= icopy(_p0); gunclone(_p0);
           }
 	}
     }
