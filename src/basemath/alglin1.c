@@ -315,12 +315,12 @@ str_to_long(char *s, char **pt)
 }
 
 static int
-get_range(char *s, long *a, long *b, long *compl, long lx)
+get_range(char *s, long *a, long *b, long *cmpl, long lx)
 {
   long max = lx - 1;
 
   *a = 1; *b = max;
-  if (*s == '^') { *compl = 1; s++; } else *compl = 0;
+  if (*s == '^') { *cmpl = 1; s++; } else *cmpl = 0;
   if (*s == 0) return 0;
   if (*s != '.')
   {
