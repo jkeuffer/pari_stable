@@ -247,8 +247,8 @@ rowred(GEN a, GEN rmod)
   }
 }
 
-/* Calcule d/x  ou  d est entier et x matrice triangulaire inferieure
- * entiere dont les coeff diagonaux dvdiint d (resultat entier). */
+/* Compute d/x where d is t_INT, x lower triangular t_MAT with t_INT coeffs
+ * whose diagonal coeffs divide d (lower triangular ZM result). */
 static GEN
 matinv(GEN x, GEN d)
 {
