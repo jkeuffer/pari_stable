@@ -7714,29 +7714,14 @@ the keywords to \kbd{gp}, and there are currently far too many useless ones):
 
 \kbd{user}: user error (from the \kbd{error} function)
 
-\subsubsecidx{type}$(x,\{t\})$: this is useful only under \kbd{gp}. If $t$ is
-not present, returns the internal type number of the PARI object $x$.
-Otherwise, makes a copy of $x$ and sets its type equal to type $t$, which
-can be either a number or, preferably since internal codes may eventually
-change, a symbolic name such as \typ{FRACN} (you can skip the \typ{}
-part here, so that \kbd{FRACN} by itself would also be all right). Check out
+\subsubsecidx{type}$(x)$: this is useful only under \kbd{gp}. Returns the 
+internal type name of the PARI object $x$ as a  string.  Check out
 existing type names with the metacommand \b{t}.\label{se:gptype}
+For example \kbd{type(1)} will return "\typ{INT}".
 
-  \kbd{gp} will not let you create meaningless objects in this way where the internal
-structure does not match the type. This function can be useful to create
-reducible rationals (type \typ{FRACN}) or rational functions (type
-\typ{RFRACN}). In fact it's the only way to do so in GP. In this case, the
-created object, as well as the objects created from it, will not be reduced
-automatically, making some operations a bit faster.
-
-There is no equivalent library syntax, since the internal functions \kbd{typ}
-and \kbd{settyp} are available. Note that \kbd{settyp} does \emph{not}
-create a copy of \kbd{x}, contrary to most PARI functions. It also doesn't
-check for consistency. \kbd{settyp} just changes the type in place and
-returns nothing. \kbd{typ} returns a C long integer. Note also the different
-spellings of the internal functions (\kbd{set})\kbd{typ} and of the GP
-function \kbd{type}, which is due to the fact that \kbd{type} is a reserved
-identifier for some C compilers.
+\syn{type0}{\var{x}}, though the macro \kbd{typ} is usually simpler to use
+since it return an integer that can easily be matched with the symbols \typ{*}.
+The name \kbd{type} was avoided due to the fact that \kbd{type} is a reserved identifier for some C(++) compilers.
 
 \subsubsecidx{whatnow}$(\var{key})$: if keyword \var{key} is the name
 of a function that was present in GP version 1.39.15 or lower, outputs

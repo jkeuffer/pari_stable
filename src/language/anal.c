@@ -717,103 +717,12 @@ addhelp(entree *ep, char *s)
   ep->help = pari_strdup(s);
 }
 
-static long
-get_type_num(char *st)
-{
-  if (isdigit((int)*st))
-  {
-    char *s = st;
-    while (*s && isdigit((int)*s)) s++;
-    if (*s) err(talker,"Unknown type: %s",s);
-    return atol(st);
-  }
-  if (!strncmp(st,"t_",2)) st += 2; /* skip initial part */
-
-  switch(strlen(st))
-  {
-    case 3:
-      if (!strcmp(st,"INT")) return t_INT;
-      if (!strcmp(st,"POL")) return t_POL;
-      if (!strcmp(st,"SER")) return t_SER;
-      if (!strcmp(st,"QFR")) return t_QFR;
-      if (!strcmp(st,"QFI")) return t_QFI;
-      if (!strcmp(st,"VEC")) return t_VEC;
-      if (!strcmp(st,"COL")) return t_COL;
-      if (!strcmp(st,"MAT")) return t_MAT;
-      if (!strcmp(st,"STR")) return t_STR;
-      break;
-
-    case 4:
-      if (!strcmp(st,"REAL")) return t_REAL;
-      if (!strcmp(st,"FRAC")) return t_FRAC;
-      if (!strcmp(st,"QUAD")) return t_QUAD;
-      if (!strcmp(st,"LIST")) return t_LIST;
-      break;
-
-    case 5:
-      if (!strcmp(st,"FRACN")) return t_FRACN;
-      if (!strcmp(st,"PADIC")) return t_PADIC;
-      if (!strcmp(st,"RFRAC")) return t_RFRAC;
-      break;
-
-    case 6:
-      if (!strcmp(st,"INTMOD")) return t_INTMOD;
-      if (!strcmp(st,"POLMOD")) return t_POLMOD;
-      if (!strcmp(st,"RFRACN")) return t_RFRACN;
-      break;
-
-    case 7:
-      if (!strcmp(st,"COMPLEX")) return t_COMPLEX;
-      break;
-
-    case 8:
-      if (!strcmp(st,"VECSMALL")) return t_VECSMALL;
-      break;
-  }
-  err(talker,"Unknown type: t_%s",st);
-  return 0; /* not reached */
-}
-
 GEN
-type0(GEN x, char *st)
+type0(GEN x)
 {
-  long t, tx;
-  if (! *st) 
-  {
-    char *s = type_name(typ(x));
-    return STRtoGENstr(s);
-  }
-  tx = typ(x);
-  t = get_type_num(st);
-
-  if (is_frac_t(tx))
-  {
-    if (!is_frac_t(t) && !is_rfrac_t(t))
-      err(typeer, "type");
-    x = gcopy(x);
-  }
-  else if (is_rfrac_t(tx))
-  {
-    if (is_frac_t(t))
-    {
-      x = simplify(gred(x)); tx = typ(x);
-      if (!is_frac_t(tx)) err(typeer, "type");
-    }
-    else
-    {
-      if (!is_rfrac_t(t)) err(typeer, "type");
-      x = gcopy(x);
-    }
-  }
-  else if (is_vec_t(tx))
-  {
-    if (!is_vec_t(t)) err(typeer, "type");
-    x = gcopy(x);
-  }
-  else if (tx != t) err(typeer, "type");
-  settyp(x, t); return x;
+  char *s = type_name(typ(x));
+  return STRtoGENstr(s);
 }
-
 
 /*******************************************************************/
 /*                                                                 */

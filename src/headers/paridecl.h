@@ -241,7 +241,7 @@ void    name_var(long n, char *s);
 GEN     readseq(char *c, int strict);
 GEN     STRtoGENstr(const char *s);
 GEN     strtoGENstr(char *s, long flag); /* FIXME: obsolete */
-GEN     type0(GEN x, char *st);
+GEN     type0(GEN x);
 
 /* arith1.c */
 
