@@ -844,28 +844,24 @@ gathz(GEN x, GEN y)
 /**             FONCTION TABLEAU DES NOMBRES DE BERNOULLI          **/
 /**                                                                **/
 /********************************************************************/
-
+#define BERN(i)       (B + 3 + (i)*B[2])
 /* pour calculer B_0,B_2,...,B_2*nb */
 void
 mpbern(long nb, long prec)
 {
   long n,m,i,j,d,d1,d2,l,av,av2,code0;
-  GEN p1,p2;
+  GEN p1,p2, B;
 
   if (nb<0) nb=0;
-  if (bernzone)
-  {
-    if (bernzone[1]>=nb && bernzone[2]>=prec) return;
-    gunclone(bernzone);
-  }
-  d = 3 + prec*(nb+1); bernzone=newbloc(d);
-  bernzone[0]=evallg(d);
-  bernzone[1]=nb;
-  bernzone[2]=prec;
+  if (bernzone && bernzone[1]>=nb && bernzone[2]>=prec) return;
+  d = 3 + prec*(nb+1); B=newbloc(d);
+  B[0]=evallg(d);
+  B[1]=nb;
+  B[2]=prec;
   av=avma; l = prec+1; p1=realun(l);
 
   code0 = evaltyp(t_REAL) | evallg(prec);
-  *(bern(0)) = code0; affsr(1,bern(0));
+  *(BERN(0)) = code0; affsr(1,BERN(0));
   p2 = p1; av2=avma;
   for (i=1; i<=nb; i++)
   {
@@ -874,7 +870,7 @@ mpbern(long nb, long prec)
       n=8; m=5; d = d1 = i-1; d2 = 2*i-3;
       for (j=d; j>0; j--)
       {
-        p2 = bern(j);
+        p2 = BERN(j);
         if (j<d) p2 = addrr(p2,p1);
         else
         {
@@ -888,10 +884,12 @@ mpbern(long nb, long prec)
     }
     p2 = divrs(p2,2*i+1); p2 = subsr(1,p2);
     setexpo(p2, expo(p2) - 2*i);
-    *(bern(i)) = code0; affrr(p2,bern(i)); avma=av2;
+    *(BERN(i)) = code0; affrr(p2,BERN(i)); avma=av2;
   }
-  avma=av;
+  if (bernzone) gunclone(bernzone);
+  avma = av; bernzone = B;
 }
+#undef BERN
 
 GEN
 bernreal(long n, long prec)
