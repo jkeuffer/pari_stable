@@ -617,6 +617,9 @@ of length~\kbd{n}.
 \fun{GEN}{realun}{long prec} create a \typ{REAL} equal to $1$ to \kbd{prec}
 words of accuracy.
 
+\fun{GEN}{realmun}{long prec} create a \typ{REAL} equal to $-1$ to \kbd{prec}
+words of accuracy.
+
 \fun{GEN}{realzero_bit}{long bit} create a \typ{REAL} equal to $0$ with
 exponent $-\kbd{bit}$.
 
@@ -2197,6 +2200,8 @@ a priori suitable for \tet{gerepileupto}. In particular, they are
 faster than their clean equivalent (which may not exist). \emph{If} you
 restrict their arguments to universal objects (e.g \kbd{gun}, \kbd{gzero}),
 then the above warning does not apply.
+
+\fun{GEN}{mkcomplex}{GEN x, GEN y} creates the \typ{COMPLEX} $x + iy$.
 
 \fun{GEN}{vec_Cei}{long n, long i} creates a \typ{VEC} with \kbd{n}
 components set to \kbd{gzero}, but the \kbd{i}-th one which us set to

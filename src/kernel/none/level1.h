@@ -31,6 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #if !defined(INLINE) || defined(INLINE_IS_STATIC)
 GEN    mkcol(GEN x);
 GEN    mkcolcopy(GEN x);
+GEN    mkcomplex(GEN x, GEN y);
 GEN    mkmat(GEN x);
 GEN    mkmatcopy(GEN x);
 GEN    mkvec(GEN x);
@@ -127,6 +128,7 @@ GEN    rdivis(GEN x, long y, long prec);
 GEN    rdivsi(long x, GEN y, long prec);
 GEN    rdivss(long x, long y, long prec);
 GEN    realun(long prec);
+GEN    realmun(long prec);
 GEN    realzero_bit(long bitprec);
 GEN    realzero(long prec);
 void   remiiz(GEN x, GEN y, GEN z);
@@ -251,6 +253,9 @@ cgetc(long l)
   GEN u = cgetg(3,t_COMPLEX); u[1]=lgetr(l); u[2]=lgetr(l);
   return u;
 }
+INLINE GEN
+mkcomplex(GEN x, GEN y) { GEN v = cgetg(3, t_COMPLEX);
+  v[1] = (long)x; v[2] = (long)y; return v; }
 INLINE GEN
 mkvec(GEN x) { GEN v = cgetg(2, t_VEC); v[1] = (long)x; return v; }
 INLINE GEN
@@ -483,6 +488,14 @@ realun(long prec) {
   GEN x = cgetr(prec);
   long i;
   x[1] = evalsigne(1) | _evalexpo(0);
+  x[2] = HIGHBIT; for (i=3; i<prec; i++) x[i] = 0;
+  return x;
+}
+INLINE GEN
+realmun(long prec) {
+  GEN x = cgetr(prec);
+  long i;
+  x[1] = evalsigne(-1) | _evalexpo(0);
   x[2] = HIGHBIT; for (i=3; i<prec; i++) x[i] = 0;
   return x;
 }
