@@ -1153,6 +1153,8 @@ GEN     Fp_factor_rel0(GEN P, GEN l, GEN Q);
 void    Fp_intersect(long n,GEN P,GEN Q,GEN l,GEN *SP,GEN *SQ,GEN MA,GEN MB);
 GEN     Fp_inv_isom(GEN S,GEN Tp, GEN p);
 GEN     Fp_isom(GEN P,GEN Q,GEN l);
+GEN     ZX_disc(GEN x);
+GEN     ZX_resultant(GEN A, GEN B);
 GEN     ffsqrtnmod(GEN a, GEN n, GEN T, GEN p, GEN *zetan);
 GEN     modulargcd(GEN a,GEN b);
 GEN     quickmul(GEN a, GEN b, long na, long nb);

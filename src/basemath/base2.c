@@ -3096,7 +3096,7 @@ polcompositum0(GEN A, GEN B, long flall)
       if (v == 0) { gsetvarn(a, 0); gsetvarn(c, 0); }
       w = cgetg(5,t_VEC); /* [C, a, b, n ] */
       w[1] = y[i]; 
-      w[2] = lmodulcp(a, (GEN)y[1]);
+      w[2] = lmodulcp(a, (GEN)y[i]);
       w[3] = ladd(c, gmulsg(-k,a));
       w[4] = lstoi(k); y[i] = (long)w;
     }
