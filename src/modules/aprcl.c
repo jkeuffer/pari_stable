@@ -518,9 +518,11 @@ inittabs(int lv)
   tabaall = (GEN*)cgetg(lv,t_VECSMALL);
   tabtall = (GEN*)cgetg(lv,t_VECSMALL);
   tabcyc  = (GEN*)cgetg(lv,t_VEC);
+  for (i=1; i<lv; i++) tabcyc[i] = gzero;
   tabE = cgetg(lv,t_VEC);
   tabTH= cgetg(lv,t_VEC);
   tabeta=cgetg(lv,t_VEC);
+  for (i=1; i<lv; i++) tabE[i] = tabTH[i] = tabeta[i] = zero;
   sgt  = cgetg(lv,t_VECSMALL);
   ctsgt= cgetg(lv,t_VECSMALL);
   for (i=1; i<lv; i++) sgt[i] = ctsgt[i] = 0;
