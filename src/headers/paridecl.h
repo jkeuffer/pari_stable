@@ -690,6 +690,7 @@ GEN     discrayabslistarch(GEN bnf, GEN arch, long bound);
 GEN     discrayabslistlong(GEN bnf, long bound);
 GEN     discrayrel(GEN bnr,GEN subgroup);
 GEN     discrayrelcond(GEN bnr,GEN subgroup);
+GEN     idealmodidele(GEN bnr, GEN x);
 GEN     isprincipalray(GEN bignf, GEN x);
 GEN     isprincipalrayall(GEN bignf, GEN x,long flall);
 GEN     isprincipalraygen(GEN bignf, GEN x);

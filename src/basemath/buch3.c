@@ -243,7 +243,7 @@ too_big(GEN nf, GEN bet)
 
 /* GTM 193: Algo 4.3.4. Reduce x mod idele */
 static GEN
-idealmodidele(GEN nf, GEN x, GEN idele, GEN sarch)
+_idealmodidele(GEN nf, GEN x, GEN idele, GEN sarch)
 {
   gpmem_t av = avma;
   GEN a,A,D,G, f = (GEN)idele[1];
@@ -255,6 +255,15 @@ idealmodidele(GEN nf, GEN x, GEN idele, GEN sarch)
   a = set_sign_mod_idele(nf, NULL, A, idele, sarch);
   if (a != A && too_big(nf,A) > 0) { avma = av; return x; }
   return idealmul(nf, a, x);
+}
+
+GEN
+idealmodidele(GEN bnr, GEN x)
+{
+  GEN bid = (GEN)bnr[2], fa2 = (GEN)bid[4];
+  GEN idele = (GEN)bid[1];
+  GEN sarch = (GEN)fa2[lg(fa2)-1];
+  return _idealmodidele(checknf(bnr), x, idele, sarch);
 }
 
 /* v_pr(L0 * cx). tau = pr[5] or (more efficient) mult. table for pr[5] */
@@ -393,7 +402,7 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
     I = idealmul(nf,I,G);
     if (d) I = Q_div_to_int(I,d);
     /* more or less useless, but cheap at this point */
-    I = idealmodidele(nf,I,module,sarch);
+    I = _idealmodidele(nf,I,module,sarch);
     basecl[i] = (long)I;
   }
   return basecl;
@@ -496,7 +505,6 @@ buchrayall(GEN bnf,GEN module,long flag)
   clg = cgetg(add_gen? 4: 3, t_VEC);
   clg[1] = (long)detcyc(met);
   clg[2] = (long)met;
-  /* met[1] = group exponent */
   if (add_gen) clg[3] = (long)compute_raygen(nf,u1,genplus,bid);
   if (!do_init) return gerepilecopy(av, clg);
 

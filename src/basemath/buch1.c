@@ -315,10 +315,13 @@ get_om(GEN nf, GEN a)
  * Set list[j + 1] = g1^e1...gk^ek where j is the integer
  *   ek + ck [ e(k-1) + c(k-1) [... + c2 [e1]]...] */
 static GEN
-getallelts(GEN nf, GEN G)
+getallelts(GEN bnr)
 {
-  GEN C,c,g, *list, **pows, *gk;
+  GEN nf,G,C,c,g, *list, **pows, *gk;
   long lc,i,j,k,no;
+
+  nf = checknf(bnr);
+  G = (GEN)bnr[5];
 
   no = itos((GEN)G[1]);
   c = (GEN)G[2];
@@ -335,7 +338,8 @@ getallelts(GEN nf, GEN G)
   {
     c[i] = k = itos((GEN)c[i]);
     gk = (GEN*)cgetg(k, t_VEC); gk[1] = (GEN)g[i];
-    for (j=2; j<k; j++) gk[j] = idealmul(nf, gk[j-1], gk[1]);
+    for (j=2; j<k; j++)
+      gk[j] = idealmodidele(bnr, idealmul(nf, gk[j-1], gk[1]));
     pows[i] = gk; /* powers of g[i] */
   }
 
@@ -351,7 +355,8 @@ getallelts(GEN nf, GEN G)
     GEN p1,p2;
     if (j == C[i+1]) i++;
     p2 = pows[lc-i][j/C[i]]; 
-    p1 = list[j%C[i] + 1]; if (p1) p2 = idealmul(nf,p2,p1);
+    p1 = list[j%C[i] + 1];
+    if (p1) p2 = idealmodidele(bnr, idealmul(nf,p2,p1));
     list[j + 1] = p2;
   }
   list[1] = idealhermite(nf,gun);
@@ -433,9 +438,10 @@ ellphistinit(GEN om, long prec)
 
   if (gsigne(gimag(gdiv(om1,om2))) < 0)
   {
-    p1=om1; om1=om2; om2=p1;
-    p1=cgetg(3,t_VEC); p1[1]=(long)om1; p1[2]=(long)om2;
-    om = p1;
+    p1 = om1; om1 = om2; om2 = p1;
+    om = cgetg(3,t_VEC);
+    om[1] = (long)om1;
+    om[2] = (long)om2;
   }
   om1b = gconj(om1);
   om2b = gconj(om2); res = cgetg(4,t_VEC);
@@ -478,7 +484,7 @@ computeP2(GEN bnr, GEN la, int raw, long prec)
   
   f = gmael3(bnr,2,1,1);
   if (typ(la) != t_COL) la = algtobasis(nf,la);
-  listray = getallelts(nf,(GEN)bnr[5]);
+  listray = getallelts(bnr);
   clrayno = lg(listray)-1; av2 = avma;
 PRECPB:
   if (!first)
