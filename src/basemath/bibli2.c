@@ -352,25 +352,23 @@ laplace(GEN x)
 GEN
 convol(GEN x, GEN y)
 {
-  long l,i,j,v, vx=varn(x), lx=lg(x), ly=lg(y), ex=valp(x), ey=valp(y);
+  long i, j, lx, ly, e, ex, ey, vx = varn(x);
   GEN z;
 
-  if (typ(x) != t_SER || typ(y) != t_SER)
-    err(talker,"not a series in convol");
-  if (gcmp0(x) || gcmp0(y))
-    err(talker,"zero series in convol");
-  if (varn(y) != vx)
-    err(talker,"different variables in convol");
-  v=ex; if (ey>v) v=ey;
-  l=ex+lx; i=ey+ly; if (i<l) l=i;
-  l -= v; if (l<3) err(talker,"non significant result in convol");
-  for (i=v+2; i < v+l; i++)
-    if (!gcmp0((GEN)x[i-ex]) && !gcmp0((GEN)y[i-ey])) { i++; break; }
-  if (i == l+v) return zeroser(vx, v+l-2);
+  if (typ(x) != t_SER || typ(y) != t_SER) err(talker,"not a series in convol");
+  if (varn(y) != vx) err(talker,"different variables in convol");
+  ex = valp(x); lx = lg(x) + ex; x -= ex;
+  ey = valp(y); ly = lg(y) + ey; y -= ey;
+  if (ly < lx) lx = ly;
 
-  z = cgetg(l-i+3+v,t_SER);
-  z[1] = evalsigne(1) | evalvalp(i-3) | evalvarn(vx);
-  for (j=i-1; j<l+v; j++) z[j-i+3]=lmul((GEN)x[j-ex],(GEN)y[j-ey]);
+  e = ex; if (ey > e) e = ey;
+  for (i = e+2; i < lx; i++)
+    if (!gcmp0((GEN)x[i]) && !gcmp0((GEN)y[i])) { i++; break; }
+  if (i >= lx) return zeroser(vx, lx-2);
+
+  i -= 3; z = cgetg(lx-i, t_SER);
+  z[1] = evalsigne(1) | evalvalp(i) | evalvarn(vx);
+  for (j = i-1; j<lx; j++) z[j-i] = lmul((GEN)x[j],(GEN)y[j]);
   return z;
 }
 
