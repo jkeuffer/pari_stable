@@ -59,6 +59,7 @@ Done for version 2.2.6 (released ??/04/2003):
        computations ]. Use build_and_check_obj() mechanism already used for
        bnf: cycgen ( bnf.gen[i]^bnf.cyc[i] ) + matal (relations in algebraic
        form)
+    7- rewrote rnfpseudobasis, rnfordmax [+ new routine rnfallbase ]
 
   Added
     1- member function rnf.pol (polynomial generating absolute extension)
