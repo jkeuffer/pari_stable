@@ -606,6 +606,7 @@ rnfkummersimple(GEN bnr, GEN subgroup, GEN gell, long all)
     y[i] = 1; /* y = [0,...,0,1,0,...,0], 1 at dK'th position */
     do
     {
+      pari_sp av = avma;
       GEN be, P, X = FpV_red(gmul_mati_smallvec(K, y), gell);
       if (ok_congruence(X, gell, lW, vecMsup) && ok_sign(X, msign, arch)) 
       {/* be satisfies all congruences, x^ell - be is irreducible, signature
@@ -613,9 +614,14 @@ rnfkummersimple(GEN bnr, GEN subgroup, GEN gell, long all)
         be = compute_beta(X, vecWB, gell, bnf);
         be = lift_if_rational(basistoalg(bnf, be));
         P = gsub(gpowgs(polx[0],ell), be);
-        if (!all && gegal(rnfnormgroup(bnr,P),subgroup)) return P; /*DONE*/
-        res = concatsp(res, P);
+        if (all) res = concatsp(res, gerepileupto(av, P));
+        else
+        {
+          if (gegal(rnfnormgroup(bnr,P),subgroup)) return P; /*DONE*/
+          avma = av;
+        }
       }
+      else avma = av;
     } while (increment(y, dK, ell));
     y[dK--] = 0;
   }
