@@ -1261,10 +1261,10 @@ Mod(x^3 + 5, x^5 - 5*x^3 + 5*x + 25)
 [Mod(1, y^3 - y - 1)*x^2 + Mod(1, y^3 - y - 1) 1]
 
 ? aut=nfgaloisconj(nf3)
-[-x, x, -1/12*x^4 - 1/2*x, -1/12*x^4 + 1/2*x, 1/12*x^4 - 1/2*x, 1/12*x^4 + 1
-/2*x]~
+[x, 1/12*x^4 - 1/2*x, -1/12*x^4 - 1/2*x, 1/12*x^4 + 1/2*x, -1/12*x^4 + 1/2*x
+, -x]~
 ? nfgaloisapply(nf3,aut[5],Mod(x^5,x^6+108))
-Mod(-1/2*x^5 + 9*x^2, x^6 + 108)
+Mod(1/2*x^5 - 9*x^2, x^6 + 108)
 ? nfhilbert(nf,3,5)
 -1
 ? nfhilbert(nf,3,5,idf[1,1])
@@ -1445,5 +1445,5 @@ x^15 - 15*x^11 + 75*x^7 - x^5 - 125*x^3 + 5*x + 1
 ? getheap
 [197, 135005]
 ? print("Total time spent: ",gettime);
-Total time spent: 14824
+Total time spent: 8590
 ? \q

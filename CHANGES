@@ -118,6 +118,7 @@ BA 20- improved algorithms in galconj.c
 YU  3- support for FreeBSD ELF binary format
     4- file CVS.DOC
     5- support for Windows CE (Nigel Smart + coworkers)
+BA  6- functions related to Galois theory: galoisinit ,galoisfixedfield, etc
 
   Removed 
     1- #define HIGHBITM1 (useless)

@@ -721,6 +721,7 @@ GEN     galoisfixedfield(GEN gal, GEN v, GEN p);
 GEN     galoisinit(GEN nf, GEN den);
 GEN     galoispermtopol(GEN gal,GEN perm);
 long    numberofconjugates(GEN T, long pdepart);
+GEN     vandermondeinverse(GEN L, GEN T, GEN den);
 /* gen1.c */
 
 GEN     gadd(GEN x, GEN y);
