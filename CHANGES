@@ -95,6 +95,7 @@ XR 51- increase precision automatically when needed in quadhilbertreal
 IZ 57- readline history: while inputing continuation lines, the partial
        command was not put into history until full command was run
    58- not enough GC in polroots (dft) for huge degrees
+   59- Cygwin: don't try to build gp-dyn.exe [crashes]
 
   Changed
     1- removed useless parameter prec in many bnr* and rnf* functions

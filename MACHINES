@@ -86,7 +86,7 @@ AMD K6-2     350Mhz  Linux-2.0.36    gcc            5154    4850  2.0.17
 AMD K6       266MHz  Linux-2.2.5    pgcc            5861    6001  2.0.16(16)IS
 AMD K6       233Mhz  Linux-2.2.14    gcc            6968    7158  2.0.18    QL
 IBM/Cyrix    200MHz  Linux-2.0.35    gcc           13190   13729  2.0.15    AP
-PentiumIII  1000MHz  Linux-2.2.15    gcc            1068    1164  2.2.0     XR
+PentiumIII  1000MHz  Linux-2.2.15    gcc-2.96       1068    1164  2.2.0     XR
 PentiumIII   933MHz  Linux-2.2.15   egcs            1450    1485  2.0.20    IS
 PentiumIII   800MHz  Linux-2.2.14   egcs            1900    1882  2.0.20    CL
 PentiumIII   733MHz  Linux-2.2.14   egcs            2080    2090  2.0.19    IS
@@ -97,7 +97,7 @@ PentiumII    400MHz  Linux-2.3.99    gcc            3392    3410  2.0.20(25)GH
 PentiumII    400MHz  Linux-2.2.14    gcc            3886    3902  2.0.20    GH
 PentiumII    350MHz  Linux-2.2.16    gcc-2.95.2     3760    3784  2.2.1
 PentiumII    350MHz  Win98         mingw-2.95.2     4412!      -  2.1.0 (22)
-PentiumII    350MHz  Win98 + Cygwin1 gcc-2.95.2-5   4490!      -  2.1.0 (23)
+PentiumII    350MHz  Win98 + Cygwin1 gcc-2.95.2-5   4026!      -  2.2.1
 PentiumII    350MHz  Win98 + RSX     gcc            9436!      -  2.0.20(24)
 PentiumII    350Mhz  Linux 2.0.36   pgcc-2.92.21   (3310)  (3340) 2.0.12(11)PE
 PentiumII    350Mhz  Linux 2.0.36   egcs-2.92.21   (3352)  (3402) 2.0.12(11)PE
@@ -239,9 +239,6 @@ hppa kernel. Remove +z from compiler flags
       * when started from the shell, on ^C GP quits! OK when started from GUI
       * stdin redirection from the shell (gp < file) doesn't work (SEGV in gp).
       * ANSI escape sequences are printed "as is" (so don't enable colors)
-(23) same machine as above, running Win98. Used 'make gp-sta'
-     (gp-dyn is the default, and compilation fails [ld -shared no supported])
-     bench 'elliptic' fails as described in INSTALL, ok otherwise
 (24) same machine as above, using the RSX compatibility package
 (25) Xeon
 (26) RedHat-7.0 + alpha has a broken glibc-2.1.x [issquare(8388609^2) = 0 !]
