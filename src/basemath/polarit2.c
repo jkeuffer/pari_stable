@@ -1129,7 +1129,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
 
     if (a <= b)
     {
-      a = ceil(b + 3*s*k) + 1; /* enough for 3 more rounds */
+      a = (long)ceil(b + 3*s*k) + 1; /* enough for 3 more rounds */
       pa = gpowgs(p,a);
       famod = hensel_lift_fact(P,famod,p,pa,a);
       /* recompute old Newton sums to new precision */

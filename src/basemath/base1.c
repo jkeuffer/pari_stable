@@ -291,7 +291,7 @@ primitive_pol_to_monic(GEN pol, GEN *ptlead)
   for (i=lg(fa)-1; i>0; i--)
   {
     GEN p = (GEN)fa[i], p1,pk,pku;
-    long k = ceil((double)e[i] / n);
+    long k = (long)ceil((double)e[i] / n);
     long d = k * n - e[i], v, j0;
     /* find d, k such that  p^d pol(x / p^k) monic */
     for (j=n-1; j>0; j--)

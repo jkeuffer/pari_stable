@@ -766,7 +766,7 @@ izeta(long k, long prec)
   }
   return gerepileuptoleaf(av, y);
 }
-#endif
+#else
 
 /* return x^n, assume n > 0 */
 static long
@@ -989,6 +989,7 @@ END:
   }
   gaffect(y,res); avma = av; return res;
 }
+#endif
 
 GEN
 gzeta(GEN x, long prec)
