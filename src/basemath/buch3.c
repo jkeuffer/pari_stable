@@ -2480,25 +2480,39 @@ GEN
 discrayabslistarchsquare(GEN bnf, GEN arch, long bound)
 { return discrayabslistarchintern(bnf,arch,bound, -1); }
 
+/* Let bnr1, bnr2 be such that mod(bnr2) | mod(bnr1), compute the
+   matrix of the surjective map Cl(bnr1) ->> Cl(bnr2) */
+GEN
+bnrGetSurjMat(GEN bnr1, GEN bnr2)
+{
+  long nbg, i;
+  GEN gen, M;
+
+  gen = gmael(bnr1, 5, 3);
+  nbg = lg(gen) - 1;
+
+  M = cgetg(nbg + 1, t_MAT);
+  for (i = 1; i <= nbg; i++)
+    M[i] = (long)isprincipalray(bnr2, (GEN)gen[i]);
+
+  return M;
+}
+
 static GEN
 computehuv(GEN bnr,GEN id, GEN arch)
 {
-  long i,nbgen, av = avma;
-  GEN bnf,bnrnew,listgen,P,U,DC;
-  GEN newmod=cgetg(3,t_VEC);
-  newmod[1]=(long)id;
-  newmod[2]=(long)arch;
+  long i,n, av = avma;
+  GEN bnr2,P,U, newmod = cgetg(3,t_VEC);
+  newmod[1] = (long)id;
+  newmod[2] = (long)arch;
 
-  bnf=(GEN)bnr[1];
-  bnrnew=buchrayall(bnf,newmod,nf_INIT);
-  listgen=gmael(bnr,5,3); nbgen=lg(listgen);
-  P=cgetg(nbgen,t_MAT);
-  for (i=1; i<nbgen; i++)
-    P[i] = (long)isprincipalray(bnrnew,(GEN)listgen[i]);
-  DC=diagonal(gmael(bnrnew,5,2));
-  U=(GEN)hnfall(concatsp(P,DC))[2];
-  setlg(U,nbgen); for (i=1; i<nbgen; i++) setlg(U[i], nbgen);
-  return gerepileupto(av, hnf(concatsp(U,diagonal(gmael(bnr,5,2)))));
+  bnr2 = buchrayall(bnr,newmod,nf_INIT);
+  P = bnrGetSurjMat(bnr, bnr2); n = lg(P);
+  P = concatsp(P, diagonal(gmael(bnr2,5,2)));
+  U = (GEN)hnfall(P)[2]; setlg(U,n);
+  for (i=1; i<n; i++) setlg(U[i], n);
+  U = concatsp(U, diagonal(gmael(bnr, 5,2)));
+  return gerepileupto(av, hnf(U));
 }
 
 /* 0 if hinv*list[i] has a denominator for all i, 1 otherwise */

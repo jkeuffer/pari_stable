@@ -26,6 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define ADD_PREC   (DEFAULTPREC-2)*3
 
 extern GEN roots_to_pol_intern(GEN L, GEN a, long v, int plus);
+extern GEN bnrGetSurjMat(GEN bnr1, GEN bnr2);
 
 /* ComputeCoeff */
 typedef struct {
@@ -164,24 +165,6 @@ ComputeLift(GEN dataC)
   return gerepileupto(av, elt);
 }
 
-/* Let bnr1, bnr2 be such that mod(bnr2) | mod(bnr1), compute the
-   matrix of the surjective map Cl(bnr1) ->> Cl(bnr2) */
-static GEN
-GetSurjMat(GEN bnr1, GEN bnr2)
-{
-  long nbg, i;
-  GEN gen, M;
-
-  gen = gmael(bnr1, 5, 3);
-  nbg = lg(gen) - 1;
-
-  M = cgetg(nbg + 1, t_MAT);
-  for (i = 1; i <= nbg; i++)
-    M[i] = (long)isprincipalray(bnr2, (GEN)gen[i]);
-
-  return M;
-}
-
 /* A character is given by a vector [(c_i), z, d, pm] such that
    chi(id) = z ^ sum(c_i * a_i) where
      a_i= log(id) on the generators of bnr
@@ -225,11 +208,10 @@ GetPrimChar(GEN chi, GEN bnr, GEN bnrc, long prec)
   cond  = (GEN)cond[1];
   condc = (GEN)condc[1];
 
-  M  = GetSurjMat(bnr, bnrc);
-  l  = lg((GEN)M[1]);
-  p1 = hnfall(concatsp(M, Mrc));
-  U  = (GEN)p1[2];
+  M = bnrGetSurjMat(bnr, bnrc);
+  U = (GEN)hnfall(concatsp(M, Mrc))[2];
 
+  l = lg((GEN)M[1]);
   chic = cgetg(l, t_VEC);
   for (i = 1; i < l; i++)
   {
@@ -426,7 +408,7 @@ GetIndex(GEN pr, GEN bnr, GEN subgroup)
   {
     bnrpr = buchrayinitgen(bnf, mpr);
     cycpr = gmael(bnrpr, 5, 2);
-    M = GetSurjMat(bnr, bnrpr);
+    M = bnrGetSurjMat(bnr, bnrpr);
     M = gmul(M, subgroup);
     subpr = hnf(concatsp(M, diagonal(cycpr)));
   }
