@@ -67,6 +67,8 @@ GH 15- polsturm(1, 0, 1) ---> error  [ return 0! ]
    23- Ser(a/b) --> 1 + O(x^16) (!!)
    24- (x^2)^(1/2) --> error
    25- idealnorm(nfinit(y),matdiagonal([1+I])) --> SEGV [bad input]
+   26- polylog(10,x^10) --> O(x^6) at \ps16 [ 16 significant terms ?]
+                        --> x^10 + O(x^21) at \ps 21 [missing x^20 term]
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available
