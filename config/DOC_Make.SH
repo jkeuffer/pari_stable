@@ -7,7 +7,7 @@ SHELL = $make_sh
 
 doc all: manual refcard tutorial
 docps: refcard.ps tutorial.ps users.ps
-docpdf: users.pdf tutorial.pdf
+docpdf: users.pdf tutorial.pdf refcard.pdf
 manual: users.dvi
 tutorial: tutorial.dvi
 
@@ -29,6 +29,11 @@ tutorial.pdf: tutorial.tex paricfg.tex
 	-rm -f $pdf
 
 refcard: refcard.ps
+
+refcard.pdf: refcard.tex paricfg.tex
+	-touch $pdf
+	pdftex refcard.tex
+	-rm -f $pdf
 
 refcard.dvi: refcard.tex paricfg.tex
 	-rm -f $pdf

@@ -18,6 +18,13 @@
 %% Thanks to Stephen Gildea for the multicolumn macro package
 %% which I modified from his GNU emacs reference card
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\TITLE{Pari-GP reference card}
+\input parimacro.tex
+\ifPDF
+  \input pdfmacs.tex
+  \pdfpagewidth=11.69in
+  \pdfpageheight=8.26in
+\fi
 
 %**start of header
 \newcount\columnsperpage

@@ -30,6 +30,7 @@ Done for version ??? (released ??/??/2000):
   Fixed
     1- gp -p1e -->SEGV
     2- nfinit([x,1]) --> SEGV
+    3- ensure stack large enough [allocatemem(1) painted user in a corner]
 
 ===========================================================================
 Done for version 2.0.19.beta (released 17/03/2000):
