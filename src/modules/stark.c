@@ -222,16 +222,9 @@ get_Char(GEN chic, long prec)
   C[3] = (long)d; return C;
 }
 
-/* factorization of conductor */
-static GEN
-factorcond(GEN bnr)
-{
-  GEN bid = (GEN)bnr[2];
-  return (GEN)bid[3];
-}
 /* prime divisors of conductor */
 static GEN
-divcond(GEN bnr) { return (GEN)factorcond(bnr)[1]; }
+divcond(GEN bnr) { GEN bid = (GEN)bnr[2]; return gmael(bid,3,1); }
 
 /* Let chi a character defined over bnr and primitive over bnrc,
    compute the corresponding primitive character and the vectors of
@@ -600,7 +593,7 @@ FindModulus(GEN dataC, long fl, long *newprec, long prec, long bnd)
           /* compute Clk(m), check if m is a conductor */
 	  disable_dbg(0);
 	  bnrm = buchrayinitgen(bnf, m);
-	  p1   = conductor(bnrm, gzero, -1);
+	  p1   = conductor(bnrm, NULL, -1);
 	  disable_dbg(-1);
           arch[N+1-s] = un;
 	  if (!signe(p1)) continue;
@@ -2900,7 +2893,7 @@ static GEN
 get_subgroup(GEN subgp, GEN cyc)
 {
   if (!subgp || gcmp0(subgp)) return cyc;
-  return gcmp1(denom(gauss(subgp, cyc)))? subgp: NULL;
+  return hnfdivide(subgp, cyc)? subgp: NULL;
 }
 
 GEN
@@ -2937,7 +2930,7 @@ bnrstark(GEN bnr,  GEN subgrp,  long flag,  long prec)
   p1     = conductor(bnr, subgrp, 2);
   bnr    = (GEN)p1[2];
   subgrp = (GEN)p1[3];
-  if (gcmp1( det(subgrp) )) { avma = av; return polx[0]; }
+  if (gcmp1( dethnf_i(subgrp) )) { avma = av; return polx[0]; }
 
   /* check the class field */
   if (!gcmp0(gmael3(bnr, 2, 1, 2)))
@@ -2990,7 +2983,7 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
   /* compute bnr(conductor) */
   if (!(flag & 2))
   {
-    p1   = conductor(bnr, gzero, 2);
+    p1   = conductor(bnr, NULL, 2);
     bnr  = (GEN)p1[2];
     cyc  = gmael(bnr, 5, 2);
     Mcyc = diagonal(cyc);
@@ -3000,7 +2993,7 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
   if (! (subgp = get_subgroup(subgp,Mcyc)) )
     err(talker, "incorrect subgroup in bnrL1");
 
-  cl = labs(itos(det(subgp)));
+  cl = labs(itos( dethnf_i(subgp) ));
   Qt = InitQuotient0(Mcyc, subgp);
   lq = lg((GEN)Qt[2]) - 1;
 
