@@ -481,6 +481,9 @@ sub format_text
       for (@_)
       {
 	s/\Q$tr{nbrk}/ /g; push(@w, $_);
+        # these codes will be replaced by 1 character
+        s/\@\[(obr|cbr|ouml|uuml|agrav|eacute|ldollar|pm|lt|gt|\{|\})]/\@/g;
+        # the rest will be replaced by zero-width characters
 	s/\@\[\w+\]//g;    push(@l, length($_));
       }
     }
@@ -645,14 +648,10 @@ sub basic_subst
   s/\\(~|tilde)/~/g;
 
   s/\\(equiv)(?![a-zA-Z])/ = /g;
-  s/\\`a/$tr{agrave}/;
-  s/\\`{a}/$tr{agrave}/;
-  s/\\"o/$tr{ouml}/;
-  s/\\"{o}/$tr{ouml}/;
-  s/\\"u/$tr{uuml}/;
-  s/\\"{u}/$tr{uuml}/;
-  s/\\'e/$tr{eacute}/;
-  s/\\'{e}/$tr{eacute}/;
+  s/\\`a/$tr{agrave}/; s/\\`{a}/$tr{agrave}/;
+  s/\\"o/$tr{ouml}/;   s/\\"{o}/$tr{ouml}/;
+  s/\\"u/$tr{uuml}/;   s/\\"{u}/$tr{uuml}/;
+  s/\\'e/$tr{eacute}/; s/\\'{e}/$tr{eacute}/;
 
   s/(^|[^\\])%.*/$1/g;		        # comments
   s/\\vadjust\s*\{\s*\\penalty\s*\d+\s*\}//g;
@@ -1057,6 +1056,8 @@ sub TeXprint
   s/\@\[startit\]/$cu\e[4m/g;
   s/\@\[(dollar|empty|endl?word|endpodcode|startl?word|startpodcode)\]//g;
   s/\@\[pm\]/±/g;
+  s/\@\[lt\]/</g;
+  s/\@\[gt\]/>/g;
   s/\\([\{\}])/$1/g;
   s/\@\[nbrk\]/ /g; print "$_\n";
 }
