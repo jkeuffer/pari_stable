@@ -3361,12 +3361,14 @@ gbezout_step(GEN *pa, GEN *pb, GEN *pu, GEN *pv)
     *pa = gen_0; *pu = gen_0;
     *pb = gen_1; *pv = gen_1; return b;
   }
+  if (typ(a) == t_POL) a = RgX_renormalize(a);
+  if (typ(b) == t_POL) b = RgX_renormalize(b);
   d = RgX_extgcd(a,b, pu,pv);
   if (typ(d) == t_POL)
   {
     if (degpol(d)) { a = RgX_div(a, d); b = RgX_div(b, d); }
     else if (typ(d[2]) == t_REAL && lg(d[2]) == 3)
-  #if 1
+#if 1
     { /* possible accuracy problem */
       GEN D = RgX_gcd_simple(a,b);
       if (degpol(D)) { 
@@ -3376,12 +3378,12 @@ gbezout_step(GEN *pa, GEN *pb, GEN *pu, GEN *pv)
         d = gmul(d, D);
       }
     }
-  #else
+#else
     { /* less stable */
       d = RgX_extgcd_simple(a,b, pu,pv);
       if (degpol(d)) { a = RgX_div(a, d); b = RgX_div(b, d); }
     }
-  #endif
+#endif
   }
   *pa = a;
   *pb = b; return d;

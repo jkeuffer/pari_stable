@@ -1642,6 +1642,7 @@ int     RgX_is_rational(GEN x);
 GEN     RgX_mul(GEN x,GEN y);
 GEN     RgX_mulspec(GEN a, GEN b, long na, long nb);
 GEN     RgX_powers(GEN a, GEN T, long l);
+GEN     RgX_renormalize(GEN x);
 GEN     RgX_rescale(GEN P, GEN h);
 GEN     RgX_unscale(GEN P, GEN h);
 GEN     RgXQ_mul(GEN x,GEN y,GEN T);

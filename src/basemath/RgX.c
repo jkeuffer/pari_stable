@@ -182,6 +182,17 @@ RgX_rescale(GEN P, GEN h)
 /**                       (not memory clean)                       **/
 /**                                                                **/
 /********************************************************************/
+GEN
+RgX_renormalize(GEN x)
+{
+  long i, lx = lg(x);
+  for (i = lx-1; i>1; i--)
+    if (! gcmp0((GEN)x[i])) break; /* _not_ isexactzero */
+  stackdummy(x + (i+1), lg(x) - (i+1));
+  setlg(x, i+1);
+  setsigne(x, (i > 1)? 1: 0);
+  return x;
+}
 
 GEN
 RgV_to_RgX(GEN x, long v)
