@@ -105,14 +105,17 @@ static long primfact[500], exprimfact[500];
  *
  * KCZ = # of rational primes under ideals counted by KC
  * KCZ2= same for KC2 */
-typedef struct {
-  GEN id2;
-  GEN alg;
-  GEN arc;
-  GEN ord;
+
+typedef struct powFB_t {
+  GEN id2; /* id2[1] = P */
+  GEN alg; /* alg[1] = 1, (id2[i],alg[i]) = red( id2[i-1] * P ) */
+  GEN ord; /* ord[i] = known exponent of P in Cl(K) */
+  GEN arc; /* arc[i] = multiplicative arch component of x
+              such that id2[i] = x P^(i-1) */
+  struct powFB_t *prev; /* previously used powFB */
 } powFB_t;
 
-typedef struct {
+typedef struct FB_t {
   GEN FB; /* FB[i] = i-th rational prime used in factor base */
   GEN LP; /* vector of all prime ideals in FB */
   GEN *LV; /* LV[p] = vector of P|p, NP <= n2
@@ -122,6 +125,7 @@ typedef struct {
   long KC, KCZ, KCZ2;
   GEN subFB; /* LP o subFB =  part of FB used to build random relations */
   int sfb_chg; /* need to change subFB ? */
+  int newpow; /* need to compute powFB */
   powFB_t *pow;/* array of [P^0,...,P^{k_P}], P in LP o subFB */
   GEN perm; /* permutation of LP used to represent relations [updated by
                hnfspec/hnfadd: dense rows come first] */
@@ -129,7 +133,7 @@ typedef struct {
 
 enum { sfb_UNSUITABLE = -1, sfb_CHANGE = 1, sfb_INCREASE = 2 };
 
-typedef struct {
+typedef struct REL_t {
   GEN R; /* relation vector as t_VECSMALL */
   int nz; /* index of first non-zero elt in R (hash) */
   GEN m; /* pseudo-minimum yielding the relation */
@@ -137,7 +141,7 @@ typedef struct {
   powFB_t *pow; /* powsubFB associated to ex [ shared between rels ] */
 } REL_t;
 
-typedef struct {
+typedef struct RELCACHE_t {
   REL_t *chk; /* last checkpoint */
   REL_t *base; /* first rel found */
   REL_t *last; /* last rel found so far */
@@ -155,30 +159,33 @@ ccontent(GEN x)
 }
 
 static void
-desallocate(RELCACHE_t *M)
+delete_cache(RELCACHE_t *M)
 {
-  REL_t *rel = M->base;
-  powFB_t *old = NULL;
-  if (!rel) return;
-  for (rel++; rel <= M->last; rel++)
+  REL_t *rel;
+  for (rel = M->base+1; rel <= M->last; rel++)
   {
     free((void*)rel->R);
     if (!rel->m) continue;
     gunclone(rel->m); 
     if (!rel->ex) continue;
     gunclone(rel->ex); 
-    /* powsubFB shared by consecutive rels: unclone it once */
-    if (rel->pow != old)
-    {
-      gunclone(rel->pow->id2);
-      gunclone(rel->pow->alg);
-      gunclone(rel->pow->ord);
-      if (rel->pow->arc) gunclone(rel->pow->arc);
-      old = rel->pow; free((void*)old);
-    }
   }
-  free((void*)M->base);
-  M->end = M->chk = M->last = M->base = NULL;
+  free((void*)M->base); M->base = NULL;
+}
+
+static void
+delete_FB(FB_t *F)
+{
+  powFB_t *S = F->pow, *T = S;
+  while (T)
+  {
+    gunclone(S->id2);
+    gunclone(S->alg);
+    gunclone(S->ord);
+    if (S->arc) gunclone(S->arc);
+    T = S->prev; free((void*)S);
+  }
+  gunclone(F->subFB);
 }
 
 INLINE GEN
@@ -200,11 +207,16 @@ cgetalloc(GEN x, size_t l, long t)
 static void
 reallocate(RELCACHE_t *M, long len)
 {
-  size_t last = M->last-M->base, chk = M->chk-M->base, end = M->end - M->base;
-  M->base = (REL_t*)gprealloc((void*)M->base, (len+1) * sizeof(REL_t));
-  M->last = M->base + last;
-  M->chk  = M->base + chk;
-  M->end  = M->base + end; M->len = len;
+  REL_t *old = M->base;
+  M->len = len;
+  M->base = (REL_t*)gprealloc((void*)old, (len+1) * sizeof(REL_t));
+  if (old)
+  {
+    size_t last = M->last - old, chk = M->chk - old, end = M->end - old;
+    M->last = M->base + last;
+    M->chk  = M->base + chk;
+    M->end  = M->base + end;
+  }
 }
 
 /* don't take P|p if P ramified, or all other Q|p already there */
@@ -264,7 +276,8 @@ subFBgen(FB_t *F, GEN nf, double PROD, long minsFB)
   for (i=1; i<ino; i++, j++) F->perm[j] =  no[i];
   for (   ; j<lv; j++)       F->perm[j] =  perm[j];
   F->subFB = gclone(yes);
-  F->pow = NULL; 
+  F->newpow = 1; 
+  F->pow = NULL;
   if (DEBUGLEVEL)
     msgtimer("sub factorbase (%ld elements)",lg(F->subFB)-1);
   avma = av; return 1;
@@ -318,7 +331,7 @@ subFB_change(FB_t *F, GEN nf, GEN L_jid)
     F->subFB = gclone(yes);
     F->sfb_chg = 0;
   }
-  F->pow = NULL; avma = av; return 1;
+  F->newpow = 1; avma = av; return 1;
 }
 
 static GEN
@@ -349,13 +362,14 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf)
   pari_sp av = avma;
   long i, j, c = 1, n = lg(F->subFB);
   GEN Id2, Alg, Ord;
+  powFB_t *old = F->pow, *new;
 
   if (DEBUGLEVEL) fprintferr("Computing powers for subFB: %Z\n",F->subFB);
-  F->pow = (powFB_t*) gpmalloc(sizeof(powFB_t));
+  F->pow = new = (powFB_t*) gpmalloc(sizeof(powFB_t));
   Id2 = cgetg(n, t_VEC);
   Alg = cgetg(n, t_VEC);
   Ord = cgetg(n, t_VECSMALL);
-  F->pow->arc = NULL;
+  new->arc = NULL;
   if (cache) pre_allocate(cache, n);
   for (i=1; i<n; i++)
   {
@@ -386,6 +400,7 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf)
       for (k = 2; k < j; k++) m = element_mul(nf, m, (GEN)alg[k]);
       rel->m = gclone(m);
       rel->ex= NULL;
+      rel->pow = new;
       cache->last = rel;
     }
     /* trouble with subFB: include ideal even though it's principal */
@@ -394,12 +409,14 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf)
     setlg(alg, j); Ord[i] = j; if (c < 64) c *= j;
     if (DEBUGLEVEL>1) fprintferr("\n");
   }
-  F->pow->id2 = gclone(Id2);
-  F->pow->ord = gclone(Ord);
-  F->pow->alg = gclone(Alg); avma = av;
+  new->prev = old;
+  new->id2 = gclone(Id2);
+  new->ord = gclone(Ord);
+  new->alg = gclone(Alg); avma = av;
   if (DEBUGLEVEL) msgtimer("powFBgen");
   /* if c too small we'd better change the subFB soon */
   F->sfb_chg = (c < 6)? sfb_UNSUITABLE: 0;
+  F->newpow = 0;
 }
 
 /* Compute FB, LV, iLP + KC*. Reset perm
@@ -2975,6 +2992,7 @@ init_rel(RELCACHE_t *cache, FB_t *F, long RU)
 
   if (DEBUGLEVEL) fprintferr("KCZ = %ld, KC = %ld, n = %ld\n", F->KCZ,F->KC,n);
   reallocate(cache, 10*n + 50); /* make room for lots of relations */
+  cache->chk = cache->base;
   cache->end = cache->base + n;
   for (rel = cache->base + 1, i = 1; i <= F->KCZ; i++)
   { /* trivial relations (p) = prod P^e */
@@ -3024,18 +3042,19 @@ buch(GEN *pnf, double cbach, double cbach2, long nbrelpid, long flun,
   lim = (long) (exp(-(double)N) * sqrt(2*PI*N*drc) * pow(4/PI,(double)R2));
   if (lim < 3) lim = 3;
   if (cbach > 12.) cbach = 12.;
-  
-  cbach /= 2;
   if (cbach <= 0.) err(talker,"Bach constant <= 0 in buch");
 
   /* resc ~ sqrt(D) w / 2^r1 (2pi)^r2 = hR / Res(zeta_K, s=1) */
   resc = gdiv(mulri(gsqrt(absi(D),DEFAULTPREC), (GEN)zu[1]),
               gmul2n(gpowgs(Pi2n(1,DEFAULTPREC), R2), R1));
   if (DEBUGLEVEL) fprintferr("R1 = %ld, R2 = %ld\nD = %Z\n",R1,R2, D);
-  av = avma; cache.end = cache.chk = cache.last = cache.base = NULL;
+  av = avma; cache.base = NULL; F.subFB = NULL;
+  cbach /= 2;
 
 START:
-  avma = av; desallocate(&cache);
+  avma = av; 
+  if (cache.base) delete_cache(&cache);
+  if (F.subFB) delete_FB(&F);
   cbach = check_bach(cbach,12.);
   LIMC = (long)(cbach*LOGD2);
   if (LIMC < 20) { LIMC = 20; cbach = (double)LIMC / LOGD2; }
@@ -3068,7 +3087,7 @@ MORE:
       if (!subFB_change(&F, nf, L_jid)) goto START;
       jid = nreldep = 0;
     }
-    if (!F.pow) powFBgen(&F, &cache, nf);
+    if (F.newpow) powFBgen(&F, &cache, nf);
     if (!F.sfb_chg && !rnd_rel(&cache,&F, nf, vecG, L_jid, &jid)) goto START;
     L_jid = NULL;
   }
@@ -3147,7 +3166,7 @@ PRECPB:
   if (F.KCZ2 > F.KCZ)
   {
     if (!vecG) vecG = compute_vecG(nf, min(RU, 9));
-    if (!F.pow) powFBgen(&F, NULL, nf);
+    if (F.newpow) powFBgen(&F, NULL, nf);
     if (F.sfb_chg) {
       if (!subFB_change(&F, nf, L_jid)) goto START;
       powFBgen(&F, NULL, nf);
@@ -3180,8 +3199,7 @@ PRECPB:
       precpb = "getfu"; goto PRECPB;
     }
   }
-  desallocate(&cache);
-  gunclone(F.subFB);
+  delete_cache(&cache); delete_FB(&F);
 
   /* class group generators */
   i = lg(C)-zc; C += zc; C[0] = evaltyp(t_MAT)|evallg(i);
