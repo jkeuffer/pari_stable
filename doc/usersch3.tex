@@ -7493,7 +7493,7 @@ instead.
 ? \p28
 ? suminf(i = 1, -(-1)^i / i)
   *** suminf: user interrupt after 10min, 20,100 ms.
-? sumalt(i = 1, -(-1)^i / i)  - log(2)
+? sumalt(i = 1, -(-1)^i / i) - log(2)
 time = 0 ms.
 %1 = -2.524354897 E-29
 @eprog
@@ -7503,28 +7503,38 @@ time = 0 ms.
 \subsecidx{sumnum}$(X=a,sig,\var{expr},\{\var{tab}\}),\{\fl=0\}$: numerical 
 summation of \var{expr}, the variable $X$ taking integer values from ceiling 
 of $a$ to $+\infty$, where \var{expr} is assumed to be a holomorphic function 
-$f(X)$ for $\Re(X)\ge sig$.
+$f(X)$ for $\Re(X)\ge \sigma$. 
 
-$sig$ is coded as follows: either it is a real number $\sigma$, and then the
-function $f$ is assumed to decrease at least as $1/X^2$ at infinity, but not
-exponentially. Or it is a two-component vector $[\sigma,\alpha]$, where
-$\sigma$ is as before, $\alpha<-1$, and the function $f$ is then assumed to
-decrease like $X^{\alpha}$ (so $\alpha\le-2$ is equivalent to no $\alpha$ at
-all). Or it is a two-component vector $[\sigma,\alpha]$, where $\sigma$ is as
-before, $\alpha>0$, and the function $f$ is then assumed to decrease like
-$\exp(-\alpha X)$. In the latter case it is essential that $\alpha$ be
-exactly the rate of exponential decrease, and it is usually a good idea to
-increase by $1$ the default value of $m$ used for the integration step.
+The free parameter $\sigma\in\R$ is coded in \kbd{sig} is coded as follows:
+it is either 
 
-In practice, if the function is exponentially decreasing the \kbd{sumnum}
-function is slower than \kbd{sumpos} or \kbd{suminf}. Uses the \tet{intnum}
-routines, and \var{tab} is as in intnum, but if used must be initialized with
-\kbd{sumnuminit}. At low precision, if \var{tab} is not initialized, can
-be slower than \kbd{sumpos}, when the latter is applicable. However in
-general faster for slowly decreasing functions. If $\fl$ is nonzero, assumes
-that the function $f$ to be summed is of real type, i.e. satisfies
-$\overline{f(z)}=f(\overline{z})$, and then up to twice faster when \var{tab}
-is precomputed:
+\item a real number $\sigma$, and then the function $f$ is assumed to
+decrease at least as $1/X^2$ at infinity, but not exponentially;
+
+\item a two-component vector $[\sigma,\alpha]$, where $\sigma$ is as
+before, $\alpha < -1$, and the function $f$ is now assumed to decrease like
+$X^{\alpha}$. In particular, $\alpha\le-2$ is equivalent to no $\alpha$ at all.
+
+\item a two-component vector $[\sigma,\alpha]$, where $\sigma$ is as
+before, $\alpha > 0$, and the function $f$ is now assumed to decrease like
+$\exp(-\alpha X)$. In this case it is essential that $\alpha$ be exactly the
+rate of exponential decrease, and it is usually a good idea to increase by
+$1$ the default value of $m$ used for the integration step. In practice, if
+the function is exponentially decreasing \kbd{sumnum} is slower than
+\kbd{sumpos} or \kbd{suminf}.
+
+The function uses the \tet{intnum} routines and integration on the line
+$\Re(s) = \sigma$. The optional argument \var{tab} is as in intnum, except it
+must be initialized with \kbd{sumnuminit} instead of \kbd{intnuminit}.
+
+When \var{tab} is not precomputed, \kbd{sumnum} can be slower than
+\kbd{sumpos}, when the latter is applicable. It is in general faster for
+slowly decreasing functions.
+
+
+Finally, if $\fl$ is nonzero, we assume that the function $f$ to be summed is
+of real type, i.e. satisfies $\overline{f(z)}=f(\overline{z})$, which 
+speeds up the computation.
 
 \bprog
 ? \p 308
