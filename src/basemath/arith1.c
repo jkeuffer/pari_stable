@@ -315,7 +315,7 @@ znstar(GEN n)
   }
   for ( ; j<=nbp; i++,j++)
   {
-    p = (GEN)list[j]; q = gpuigs(p, itos((GEN)ep[j])-1);
+    p = (GEN)list[j]; q = gpowgs(p, itos((GEN)ep[j])-1);
     h[i] = lmulii(addis(p,-1),q); p1 = mulii(p,q);
     gen[i] = gener(p1)[2];
     moduli[i] = (long)p1;
@@ -1636,20 +1636,22 @@ long
 isfundamental(GEN x)
 {
   long r;
-  GEN p1;
 
   if (gcmp0(x)) return 0;
-  r=mod4(x);
-  if (!r)
+  r = mod16(x);
+  if (!r) return 0;
+  if ((r & 3) == 0)
   {
-    const pari_sp av = avma;
-    p1=shifti(x,-2);
-    r=mod4(p1); if (!r) return 0;
-    if (signe(x)<0) r=4-r;
-    r = (r==1)? 0: issquarefree(p1);
-    avma=av; return r;
+    pari_sp av;
+    r >>= 2; /* |x|/4 mod 4 */
+    if (signe(x) < 0) r = 4-r;
+    if (r == 1) return 0;
+    av = avma;
+    r = issquarefree( shifti(x,-2) );
+    avma = av; return r;
   }
-  if (signe(x)<0) r=4-r;
+  r &= 3; /* |x| mod 4 */
+  if (signe(x) < 0) r = 4-r;
   return (r==1) ? issquarefree(x) : 0;
 }
 
@@ -2314,7 +2316,7 @@ end_classno(GEN h, GEN hin, GEN forms, long lform)
   GEN a,b,p1,q,fh,fg, f = (GEN)forms[0];
 
   h = find_order(f,h); /* H = <f> */
-  q = ground(gdiv(hin,h)); /* approximate order of G/H */
+  q = diviiround(hin, h); /* approximate order of G/H */
   for (i=1; i < lform; i++)
   {
     pari_sp av = avma; 
@@ -2323,14 +2325,21 @@ end_classno(GEN h, GEN hin, GEN forms, long lform)
     a = (GEN)fh[1];
     if (is_pm1(a)) continue;
     b = (GEN)fh[2]; p1 = fg;
-    for (com=1; ; com++)
-    {
+    for (com=1; ; com++, p1 = gmul(p1,fg))
       if (egalii((GEN)p1[1], a) && absi_equal((GEN)p1[2], b)) break;
-      p1 = gmul(p1,fg);
-    }
     if (signe(p1[2]) == signe(b)) com = -com;
     /* f_i ^ h(q+com) = 1 */
-    avma = av; q = addsi(com,q);
+    q = addsi(com,q);
+    if (gcmp0(q))
+    { /* f^(ih) != 1 for all 0 < i <= oldq. Happen if the original upper bound
+         for h was wrong */
+      long c;
+      p1 = fh;
+      for (c=1; ; c++, p1 = gmul(p1,fh))
+        if (gcmp1((GEN)p1[1])) break;
+      q = mulsi(-com, find_order(fh, stoi(c)));
+    }
+    q = gerepileuptoint(av, q);
   }
   return mulii(q,h);
 }
@@ -2389,8 +2398,9 @@ conductor_part(GEN x, GEN *ptD, GEN *ptreg, GEN *ptfa)
     if (!egalii(x,D))
       H = divii(H, ground(gdiv(regula(x,DEFAULTPREC), reg)));
   }
-  *ptfa = fa; *ptD = D; if (ptreg) *ptreg = reg;
-  return H;
+  if (ptreg) *ptreg = reg;
+  if (ptfa)  *ptfa = fa;
+  *ptD = D; return H;
 }
 
 
@@ -2411,11 +2421,7 @@ two_rank(GEN x)
 }
 
 #define MAXFORM 11
-#if 0 /* gcc-ism */
-#  define _low(x) ({GEN __x=(GEN)x; modBIL(__x);})
-#else
-#  define _low(x) (__x = (GEN)(x), modBIL(__x))
-#endif
+#define _low(to, x) { GEN __x = (GEN)(x); to = modBIL(__x); }
 
 /* h(x) for x<0 using Baby Step/Giant Step.
  * Assumes G is not too far from being cyclic.
@@ -2425,50 +2431,51 @@ GEN
 classno(GEN x)
 {
   pari_sp av = avma, av2, lim;
-  long r2,c,lforms,k,l,i,j,j1,j2,com,s, forms[MAXFORM];
-  GEN a,b,count,index,tabla,tablb,hash,p1,p2,hin,h,f,fh,fg,ftest;
-  GEN Hf,D,fa;
+  long r2,c,lforms,k,l,i,j,com,s, forms[MAXFORM];
+  GEN count,index,tabla,tablb,hash,p1,p2,hin,h,f,fh,fg,ftest;
+  GEN Hf, D;
   byteptr p = diffptr;
-  GEN __x;
 
   if (typ(x) != t_INT) err(arither1);
-  s=signe(x); if (s>=0) return classno2(x);
+  s = signe(x); if (s>=0) return classno2(x);
 
-  k=mod4(x); if (k==1 || k==2) err(funder2,"classno");
+  k = mod4(x); if (k==1 || k==2) err(funder2,"classno");
   if (cmpis(x,-12) >= 0) return gun;
 
-  Hf = conductor_part(x,&D,NULL,&fa);
+  Hf = conductor_part(x,&D,NULL,NULL);
   if (cmpis(D,-12) >= 0) return gerepilecopy(av, Hf);
 
   p2 = gsqrt(absi(D),DEFAULTPREC);
-  p1 = divrr(p2,mppi(DEFAULTPREC));
-  p2 = gtrunc(shiftr(gsqrt(p2,DEFAULTPREC),1));
-  s = 1000;
-  if (signe(p2))
-  {
-    if (is_bigint(p2)) err(talker,"discriminant too big in classno");
-    s = itos(p2); if (s < 1000) s = 1000;
-  }
-  r2 = two_rank(D);
-  c=lforms=0;
-  while (c <= s && *p)
-  {
-    NEXT_PRIME_VIADIFF(c,p);
-    k = krogs(D,c);
-    if (!k) continue;
+  p1 = mulrr(divrr(p2,mppi(DEFAULTPREC)), dbltor(1.005)); /*overshoot by 0.5%*/
+  p2 = gtrunc(shiftr(mpsqrt(p2),1));
+  if (is_bigint(p2)) err(talker,"discriminant too big in classno");
+  s = itos(p2); 
+  if (s < 10) s = 200;
+  else if (s < 20) s = 1000;
+  else if (s < 5000) s = 5000;
 
-    av2 = avma;
+  c = lforms = 0; maxprime_check(s);
+  while (c <= s)
+  {
+    long d;
+    NEXT_PRIME_VIADIFF(c,p);
+
+    k = krogs(D,c); if (!k) continue;
     if (k > 0)
     {
-      divrsz(mulsr(c,p1),c-1, p1);
-      if (lforms < MAXFORM && c > 2) forms[lforms++] = c; 
+      if (lforms < MAXFORM) forms[lforms++] = c; 
+      d = c - 1;
     }
-    else divrsz(mulsr(c,p1),c+1, p1);
+    else
+      d = c + 1;
+    av2 = avma;
+    divrsz(mulsr(c,p1),d, p1);
     avma = av2; 
   }
-  h = hin = shifti(ground(p1), -r2);
-  s = 2*itos(gceil(gpui(p1,ginv(stoi(4)),DEFAULTPREC)));
-  if (s>=10000) s=10000;
+  r2 = two_rank(D);
+  h = hin = ground(gmul2n(p1, -r2));
+  s = 2*itos(gceil(mpsqrtn(p1, 4)));
+  if (s > 10000) s = 10000;
 
   count = new_chunk(256); for (i=0; i<=255; i++) count[i]=0;
   index = new_chunk(257);
@@ -2477,28 +2484,33 @@ classno(GEN x)
   hash  = new_chunk(10000);
   f = gsqr(to_form(D, forms[0]));
   p1 = fh = powgi(f, h);
-  for (i=0; i<s; i++)
+  for (i=0; i<s; i++, p1 = compimag(p1,f))
   {
-    tabla[i] = _low(p1[1]);
-    tablb[i] = _low(p1[2]);
-    count[tabla[i]&255]++; p1=compimag(p1,f);
+    _low(tabla[i], p1[1]);
+    _low(tablb[i], p1[2]); count[tabla[i]&255]++;
   }
-  index[0]=0; for (i=0; i<=254; i++) index[i+1] = index[i]+count[i];
-  for (i=0; i<s; i++) hash[index[tabla[i]&255]++]=i;
+  /* follow the idea of counting sort to avoid maintaining linked listß in
+   * hashtable */
+  index[0]=0; for (i=0; i< 255; i++) index[i+1] = index[i]+count[i];
+  /* index[i] = # of forms hashing to <= i */
+  for (i=0; i<s; i++) hash[ index[tabla[i]&255]++ ] = i;
   index[0]=0; for (i=0; i<=255; i++) index[i+1] = index[i]+count[i];
+  /* hash[index[i-1]..index[i]-1] = forms hashing to i */
 
-  fg=gpuigs(f,s); av2=avma; lim=stack_lim(av2,2);
-  ftest=gpuigs(p1,0);
+  fg = gpowgs(f,s); av2 = avma; lim = stack_lim(av2,2);
+  ftest = gpowgs(p1,0);
   for (com=0; ; com++)
   {
-    a = (GEN)ftest[1]; k = _low(a);
-    b = (GEN)ftest[2]; l = _low(b); j = k&255;
+    long j1, j2;
+    GEN a, b;
+    a = (GEN)ftest[1]; _low(k, a);
+    b = (GEN)ftest[2]; _low(l, b); j = k&255;
     for (j1=index[j]; j1 < index[j+1]; j1++)
     {
       j2 = hash[j1];
       if (tabla[j2] == k && tablb[j2] == l)
       {
-        p1 = gmul(gpuigs(f,j2),fh);
+        p1 = gmul(gpowgs(f,j2),fh);
         if (egalii((GEN)p1[1], a) && absi_equal((GEN)p1[2], b))
         { /* p1 = ftest or ftest^(-1), we are done */
           if (signe(p1[2]) == signe(b)) com = -com;
@@ -2530,7 +2542,7 @@ classno2(GEN x)
   if (!s) err(arither2);
   if (s < 0 && cmpis(x,-12) >= 0) return gun;
 
-  Hf = conductor_part(x, &D, &reg, &p1);
+  Hf = conductor_part(x, &D, &reg, NULL);
   if (s < 0 && cmpis(D,-12) >= 0)
     return gerepilecopy(av, Hf); /* |D| < 12*/
 
