@@ -129,8 +129,7 @@ IZ 52- [tex2mail:] \over wasn't allowed within \left( \right)
        nf_GEN_IF_PRINCIPAL (was unused).
    60- bnfisintnorm(bnfinit(y^4+y+1), -1) --> SEGV [ could occur for any unit ]
    61- stack corruption in matsnf() [ when GC occurs ]
-   62- SEGV when trying to open invalid logfile [ introduced in A-8 ]
-   63- vecsort(t_VECSMALL) --> SEGV
+   62- vecsort(t_VECSMALL) --> SEGV
 
   Changed
     1- rnf structure (removed useless components)
