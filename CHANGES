@@ -64,6 +64,7 @@ BA 25- pbs in Fp_factor_irred (factoring over Fq a pol. defined over Fp)
    28- argument checks for element_mulid, nf_get_r1 (access to nf.sign)
    29- typo in quadhilbertimag (SEGV for very large discriminants)
    30- wrong precision used in numerical derivation
+BA 31- isprime(n < 2, 2 or 3) gave wrong result
 
   Changed
     1- DOS distribution archives (GPM removed)
@@ -78,7 +79,8 @@ XR  8- added flag in rnfconductor to check extension is abelian (under GRH)
    10- renamed library function gsize() to sizedigit()  [conflict with gtk]
 XR 11- bnrstark: check if N0 is too large (=> computation impossible)
 IK 12- let lisGEN() return NULL when EOF is met (was oo loop)
-HC 13- algorithm for Riemann zeta 
+   13- algorithm for zeta(), gamma() [initial GP code by HC]
+   14- improved rnfnormgroup() [reduce number of calls to isprincipal]
 
   Added
     1- file README.WIN
