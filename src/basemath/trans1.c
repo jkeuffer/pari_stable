@@ -1817,8 +1817,10 @@ gcos(GEN x, long prec)
       affrr(gmul(u1,u), (GEN)y[2]); return y;
 
     case t_INT: case t_FRAC:
-      y = cgetr(prec); gaffect(x, y); av = avma; 
-      affrr(mpcos(y), y); avma = av; return y;
+      y = cgetr(prec); av = avma; 
+      /* _not_ afrr: we want to be able to reduce mod Pi */
+      x = gadd(x, realzero(prec));
+      affrr(mpcos(x), y); avma = av; return y;
     
     case t_INTMOD: case t_PADIC: err(typeer,"gcos");
 
@@ -1883,8 +1885,10 @@ gsin(GEN x, long prec)
       affrr(gmul(u1,v), (GEN)y[2]); return y;
     
     case t_INT: case t_FRAC:
-      y = cgetr(prec); gaffect(x, y); av = avma; 
-      affrr(mpsin(y), y); avma = av; return y;
+      y = cgetr(prec); av = avma; 
+      /* _not_ afrr: we want to be able to reduce mod Pi */
+      x = gadd(x, realzero(prec));
+      affrr(mpsin(x), y); avma = av; return y;
 
     case t_INTMOD: case t_PADIC: err(typeer,"gsin");
 
@@ -2068,8 +2072,10 @@ gtan(GEN x, long prec)
       return gerepileupto(av, gdiv(s,c));
 
     case t_INT: case t_FRAC:
-      y = cgetr(prec); gaffect(x, y); av = avma; 
-      affrr(mptan(y), y); avma = av; return y;
+      y = cgetr(prec); av = avma; 
+      /* _not_ afrr: we want to be able to reduce mod Pi */
+      x = gadd(x, realzero(prec));
+      affrr(mptan(x), y); avma = av; return y;
 
     case t_INTMOD: case t_PADIC: err(typeer,"gtan");
     
@@ -2109,8 +2115,10 @@ gcotan(GEN x, long prec)
       return gerepileupto(av, gdiv(c,s));
 
     case t_INT: case t_FRAC:
-      y = cgetr(prec); gaffect(x, y); av = avma; 
-      affrr(mpcotan(y), y); avma = av; return y;
+      y = cgetr(prec); av = avma; 
+      /* _not_ afrr: we want to be able to reduce mod Pi */
+      x = gadd(x, realzero(prec));
+      affrr(mpcotan(x), y); avma = av; return y;
 
     case t_INTMOD: case t_PADIC: err(typeer,"gcotan");
 
