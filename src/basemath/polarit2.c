@@ -3451,7 +3451,8 @@ matratlift(GEN M, GEN mod, GEN amax, GEN bmax, GEN denom)
       if (!ratlift(gcoeff(M,i,j), mod, &a, &b, amax, bmax)
 	 || (denom && !divise(denom,b))
          || !gcmp1(mppgcd(a,b))) { avma = ltop; return NULL; }
-      coeff(N, i, j) = (long)to_frac(a, b);
+      if (!is_pm1(b)) a = to_frac(a, b);
+      coeff(N, i, j) = (long)a;
     }
   }
   return N;
@@ -3473,7 +3474,8 @@ polratlift(GEN P, GEN mod, GEN amax, GEN bmax, GEN denom)
     if (!ratlift(t, mod, &a, &b, amax, bmax)
         || (denom && !divise(denom,b))
         || !gcmp1(mppgcd(a,b))) { avma=ltop; return NULL; }
-    Q[j] = (long)to_frac(a,b);
+    if (!is_pm1(b)) a = to_frac(a, b);
+    Q[j] = (long)a;
   }
   return Q;
 }
