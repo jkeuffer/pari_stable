@@ -1477,7 +1477,6 @@ rnfnormgroup(GEN bnr, GEN polrel)
       if (!k) { cgiv(detgroup); return gerepileupto(av,group); }
     }
   }
-  return NULL; /* not reached */
 }
 
 static GEN
