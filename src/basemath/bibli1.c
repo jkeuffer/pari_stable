@@ -3012,19 +3012,20 @@ smallvectors(GEN q, GEN BORNE, long stockmax, FP_chk_fun *CHECK)
       int fl = 0;
       if (k > 1)
       {
-        av1=avma; k--; p1 = mpmul(gcoeff(q,k,k+1),(GEN)x[k+1]);
+        k--;
+        av1 = avma; p1 = mpmul(gcoeff(q,k,k+1),(GEN)x[k+1]);
 	for (j=k+2; j<N; j++)
 	  p1 = mpadd(p1, mpmul(gcoeff(q,k,j),(GEN)x[j]));
         z[k] = (long)gerepileuptoleaf(av1,p1);
 
-        av1=avma; p1 = gsqr(mpadd((GEN)x[k+1],(GEN)z[k+1]));
+        av1 = avma; p1 = gsqr(mpadd((GEN)x[k+1],(GEN)z[k+1]));
         p1 = mpadd((GEN)y[k+1], mpmul(p1,(GEN)v[k+1]));
 	y[k] = (long)gerepileuptoleaf(av1, p1);
         /* reject the [x_1,...,x_skipfirst,0,...,0] */
         if (k <= skipfirst && !signe(y[skipfirst])) goto END;
 
-        av1=avma; p1 = mpsub(borne1, (GEN)y[k]);
-	if (signe(p1) < 0) { avma=av1; fl = 1; }
+        av1 = avma; p1 = mpsub(borne1, (GEN)y[k]);
+	if (signe(p1) < 0) { avma = av1; fl = 1; }
         else
         {
           p1 = mpadd(eps,mpsub(mpsqrt(gdiv(p1,(GEN)v[k])), (GEN)z[k]));
@@ -3040,27 +3041,23 @@ smallvectors(GEN q, GEN BORNE, long stockmax, FP_chk_fun *CHECK)
 	  i = mpcmp(mpsub(mpadd(p1,(GEN)y[k]), borne1), gmul2n(p1,-epsbit));
           avma = av1; if (i <= 0) break;
 	}
-        k++; fl=0;
+        k++; fl = 0;
       }
 
       if (low_stack(lim, stack_lim(av,2)))
       {
-        GEN dummy = cgetg(1, t_STR);
-        int cnt = 4;
 	if(DEBUGMEM>1) err(warnmem,"smallvectors");
 	if (stockmax) S = clonefill(S, s, stockmax);
-        if (check)
-        {
-          cnt += 3;
+        if (check) {
+          GEN dummy = cgetg(1, t_STR);
           for (i=s+1; i<=stockmax; i++) norms[i]=(long)dummy;
         }
-	gerepileall(av,cnt,&x,&y,&z,&normax1,&borne1,&borne2,&norms);
+	gerepileall(av,check?7:4,&x,&y,&z,&normax1,&borne1,&borne2,&norms);
       }
       if (DEBUGLEVEL>3)
       {
 	if (DEBUGLEVEL>5) fprintferr("%ld ",k);
 	if (k==n) fprintferr("\nx[%ld] = %Z\n",n,x[n]);
-	flusherr();
       }
     }
     while (k > 1);
