@@ -2,7 +2,7 @@
 version='2.0'
 
 # Patch level
-patch='18'
+patch='19'
 
 # Status: alpha, beta, released, development
-status='beta'
+status='development'
