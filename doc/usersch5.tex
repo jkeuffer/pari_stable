@@ -1024,6 +1024,14 @@ $R$ into~\kbd{*r}. Precisely, $N = S^2 + R$ with $0\leq R \leq 2S$. If
 case, the remainder is created after the quotient and can be disposed of
 individually with \kbd{cgiv(R)}. If the remainder is $0$ set \kbd{R = gzero}.
 
+Uses a divide and conquer algorithm (discrete variant of Newton iteration)
+due to Paul Zimmermann (``Karatsuba Square Root'', INRIA Research Report 3805
+(1999)).
+
+\fun{GEN}{sqrti}{GEN N}, returns the integer square root $S$ of
+the non-negative \typ{INT}~\kbd{N} (rounded towards 0). This is identical
+to \kbd{sqrtremi(N, NULL)}.
+
 \subsec{Pseudo-random integers}
 
 \fun{long}{random_bits}{long k} returns a random $0 \leq x < 2^k$. Assumes

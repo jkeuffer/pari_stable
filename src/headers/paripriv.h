@@ -94,5 +94,5 @@ GEN quicktrace(GEN x, GEN sym);
 
 #define sqrs(b) mulss((b),(b))
 #define sqru(b) muluu((b),(b))
-#define sqrti(x) sqrtremi((x),NULL)
 ulong usqrtsafe(ulong a);
+ulong dblmantissa(double x);

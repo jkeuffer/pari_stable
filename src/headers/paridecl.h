@@ -1308,6 +1308,7 @@ double  rtodbl(GEN x);
 GEN     shifti(GEN x, long n);
 GEN     shifti3(GEN x, long n, long flag);
 GEN     sqri(GEN x);
+#define sqrti(x) sqrtremi((x),NULL)
 GEN     sqrtremi(GEN S, GEN *R);
 GEN     subsr(long x, GEN y);
 GEN     truedvmdii(GEN x, GEN y, GEN *z);

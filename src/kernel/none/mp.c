@@ -1542,6 +1542,11 @@ GEN isqrti(GEN a) {return racine_r(a,lgefint(a));}
 /* Karatsuba square root, adapted from Paul Zimmermann's implementation
  * in GMP (mpn_sqrtrem) */
 static void
+xmpn_zero(GEN x, long n)
+{
+  while (--n >= 0) x[n]=0;
+}
+static void
 xmpn_copy(GEN z, GEN x, long n)
 {
   long k = n;
@@ -1569,84 +1574,110 @@ catii(GEN a, long la, GEN b, long lb)
 
 /* n[0] */
 static GEN
-sqrti_spec_1(GEN n, GEN *r)
+sqrtispec1(GEN n, GEN *r)
 {
   ulong a = usqrtsafe(n[0]);
   GEN S = utoi(a);
   if (r) *r = utoi(n[0] - a*a);
   return S;
 }
-/* n[0..1] */
-static GEN
-sqrti_spec_2(GEN n, GEN *r)
+/* n[0..1], assume u0 >= 2^(BIL-2). Return 1 if remainder overflows */
+static int
+p_sqrtu2(ulong u0, ulong u1, ulong *ps, ulong *pr)
 {
-  GEN S;
-  ulong hi, a, c, d, u1, u0 = (ulong)n[0];
-  int sh;
+  ulong hi, r, s, t;
   LOCAL_HIREMAINDER;
   LOCAL_OVERFLOW;
 
-  if (!u0) return sqrti_spec_1(n + 1, r);
+  s = dblmantissa( sqrt((double)u0) ); /* high bit of s is set */
+  t = mulll(s, s);
+  hi = u0 - hiremainder;
+  if ((long)hi < 0)
+  { /* rare but may occur */
+    s--;
+    t -= (s << 1) | 1; /* t := t - (2s + 1) */
+    *ps = s;
+    *pr = u1 - t; return 0;
+  }
+  if (!hi && t > u1)
+  { /* rare but may occur */
+    s--;
+    t -= (s << 1) | 1; /* t := t - (2s + 1) */
+    *ps = s;
+    *pr = u1 - t; return 1;
+  }
+  r = subll(u1, t); if (overflow) hi--;
+  /* remainder R = hi*2^BIL + r. hi <= 2 */
 
-  u1 = (ulong)n[1];
-  sh = bfffo(u0) & ~1UL;
+  if (hi == 2)
+  { /* correction, r := (2|r) - 2s - 1 */
+    r = subll(r, (s << 1) | 1);
+    *pr = r;
+    *ps = s + 1; return !overflow;
+  }
+  if (hi && (r > (s<<1)))
+  { /* correction, r := (1|r) - 2s - 1 */
+    r -= (s << 1) | 1;
+    s++; hi = 0;
+  }
+  *ps = s;
+  *pr = r; return hi;
+}
+/* sqrt n[0..1], assume n normalized */
+static GEN
+sqrtispec2(GEN n, GEN *pr)
+{
+  ulong s, r;
+  int hi = p_sqrtu2(n[0], n[1], &s, &r);
+  GEN S = utoi(s);
+  *pr = hi? cat1u(r): utoi(r);
+  return S;
+}
+
+/* sqrt n[0..1], _dont_ assume n normalized */
+static GEN
+sqrtispec2_sh(GEN n, GEN *pr)
+{
+  GEN S;
+  ulong r, s, u0 = (ulong)n[0], u1 = (ulong)n[1];
+  int hi, sh = bfffo(u0) & ~1UL;
   if (sh) {
     u0 = (u0 << sh) | (u1 >> (BITS_IN_LONG-sh));
     u1 <<= sh;
   }
-  a = (ulong)( sqrt((double)u0) * (1 << (BITS_IN_HALFULONG-1)) ) << 1;
-  if (a <= u0) c = (u0-1) >> 1;
-  else
-  {
-    hiremainder = u0; c = divll(u1, a);
-    c = addll(c, a) >> 1; if (overflow) c |= HIGHBIT;
-  }
-  d = subll(u1, mulll(c, c));
-  hi = u0 - hiremainder; if (overflow) hi--;
-  /* remainder = hi * 2^BIL + d, hi = 0 or 1 */
-  if (c & HIGHBIT)
-  {
-    if (hi && (d > (c << 1)))
-    {
-      c++; /* (c+1)<<1 doesn't overflow */
-      d -= (c << 1) - 1; hi = 0;
-    }
-  }
-  else if (hi || d > (c << 1))
-  {
-    c++; /* no overflow */
-    d = subll(d, (c<<1) - 1);
-    if (overflow) hi = 0;
-  }
-  /* Rescale back:
+  hi = p_sqrtu2(u0, u1, &s, &r);
+  /* s^2 + R = u0|u1. Rescale back:
    * 2^(2k) n = S^2 + R
    * so 2^(2k) n = (S - s0)^2 + (2*S*s0 - s0^2 + R), s0 = S mod 2^k. */
   if (sh) {
     int k = sh >> 1;
-    ulong s0 = c & ((1<<k) - 1);
-    d = addll(d, mulll(c, (s0<<1)));
+    ulong s0 = s & ((1<<k) - 1);
+    LOCAL_HIREMAINDER;
+    LOCAL_OVERFLOW;
+    r = addll(r, mulll(s, (s0<<1)));
     if (overflow) hiremainder++;
     hiremainder += hi; /* + 0 or 1 */
-    c >>= k;
-    d = (d>>sh) | (hiremainder << (BITS_IN_LONG-sh));
+    s >>= k;
+    r = (r>>sh) | (hiremainder << (BITS_IN_LONG-sh));
     hi = (hiremainder & (1<<sh));
   }
-  S = utoi(c);
-  if (r) *r = hi? cat1u(d): utoi(d);
+  S = utoi(s);
+  if (pr) *pr = hi? cat1u(r): utoi(r);
   return S;
 }
 
-/* Let N = N[0..2n-1]. Return S (and set R) s.t S^2 + R = N, 0 <= R <= 2S */
+/* Let N = N[0..2n-1]. Return S (and set R) s.t S^2 + R = N, 0 <= R <= 2S
+ * Assume N normalized */
 static GEN
-sqrti_spec(GEN N, long n, GEN *r)
+sqrtispec(GEN N, long n, GEN *r)
 {
   GEN S, R, q, z, u;
   long l, h;
 
-  if (n == 1) return sqrti_spec_2(N, r);
+  if (n == 1) return sqrtispec2(N, r);
   l = n >> 1;
   h = n - l; /* N = a3(h) | a2(h) | a1(l) | a0(l words) */
-  S = sqrti_spec(N, h, &R); /* S^2 + R = a3|a2 */
+  S = sqrtispec(N, h, &R); /* S^2 + R = a3|a2 */
 
   z = catii(R+2, lgefint(R)-2, N + 2*h, l); /* = R | a1(l) */
   q = dvmdii(z, shifti(S,1), &u);
@@ -1676,8 +1707,8 @@ sqrtremi(GEN N, GEN *r)
 
   if (ln <= 2)
   {
-    if (ln == 2) return sqrti_spec_2(n, r);
-    if (ln == 1) return sqrti_spec_1(n, r);
+    if (ln == 2) return sqrtispec2_sh(n, r);
+    if (ln == 1) return sqrtispec1(n, r);
     *r = gzero; return gzero;
   }
   av = avma;
@@ -1690,7 +1721,7 @@ sqrtremi(GEN N, GEN *r)
     { shift_left(t, n, 0,ln-1, 0, (sh << 1)); }
     else
       xmpn_copy(t, n, ln);
-    S = sqrti_spec(t, l2, &R); /* t normalized, 2 * l2 words */
+    S = sqrtispec(t, l2, &R); /* t normalized, 2 * l2 words */
     /* Rescale back:
      * 2^(2k) n = S^2 + R, k = sh + (ln & 1)*BIL/2
      * so 2^(2k) n = (S - s0)^2 + (2*S*s0 - s0^2 + R), s0 = S mod 2^k. */
@@ -1701,7 +1732,7 @@ sqrtremi(GEN N, GEN *r)
     S = shifti(S, -k);
   }
   else
-    S = sqrti_spec(n, l2, &R);
+    S = sqrtispec(n, l2, &R);
 
   if (!r) { avma = (pari_sp)S; return gerepileuptoint(av, S); }
   gerepileall(av, 2, &S, &R); *r = R; return S;
@@ -1712,13 +1743,11 @@ sqrtremi(GEN N, GEN *r)
 static ulong
 sqrtu2(ulong *a)
 {
-  double beta = sqrt((double)a[0]); /* 2^31*2^(1/2) <= beta < 2^32 */
-  ulong c, b = ((ulong)(beta*32768)) << 17; /*~ beta * 2^32, no overflow*/
+  ulong c, b = dblmantissa( sqrt((double)a[0]) );
   LOCAL_HIREMAINDER;
   LOCAL_OVERFLOW;
 
   /* > 32 correct bits, 1 Newton iteration to reach 64 */
-  if (!b) b = ~0UL;
   if (b <= a[0]) return ~0UL;
   hiremainder = a[0]; c = divll(a[1], b);
   return (addll(c, b) >> 1) | HIGHBIT;
@@ -1735,23 +1764,15 @@ sqrtu2_1(ulong *a)
 #else
 /* 32 bits of sqrt(a[0] * 2^32) */
 static ulong
-sqrtu2(ulong *a)
-{
-  double beta = sqrt((double)a[0]);
-  return (ulong)(beta * (1UL << BITS_IN_HALFULONG));
-}
+sqrtu2(ulong *a)   { return dblmantissa( sqrt((double)a[0]) ); }
 /* 32 bits of sqrt(a[0] * 2^31) */
 static ulong
-sqrtu2_1(ulong *a)
-{
-  double beta = sqrt((double)a[0]); /* 0.707... ~ 1/sqrt(2) */
-  return (ulong)(beta * ((1UL << BITS_IN_HALFULONG) * 0.707106781186547524));
-}
+sqrtu2_1(ulong *a) { return dblmantissa( sqrt(2. * a[0]) ); }
 #endif
 /* compute sqrt(|a|), assuming a != 0 */
 
 GEN
-sqrtr_abs(GEN x)
+sqrtr_abs_Newton(GEN x)
 {
   long l1, i, l = lg(x), ex = expo(x);
   GEN a, t, y = cgetr(l);
@@ -1780,4 +1801,29 @@ sqrtr_abs(GEN x)
   }
   affrr(t,y); setexpo(y, expo(y) + (ex>>1));
   avma = av0; return y;
+}
+
+GEN
+sqrtr_abs(GEN x)
+{
+  long l = lg(x) - 2, e = expo(x), er = e>>1;
+  GEN b, c, res = cgetr(2 + l);
+  res[1] = evalsigne(1) | evalexpo(er);
+  if (e&1) {
+    b = new_chunk(l << 1);
+    xmpn_copy(b, x+2, l);
+    xmpn_zero(b + l,l);
+    b = sqrtispec(b, l, &c);
+    xmpn_copy(res+2, b+2, l);
+    if (cmpii(c, b) > 0) roundr_up_ip(res, l+2);
+  } else {
+    b = new_chunk(2 + (l << 1));
+    shift_left(b+1, x+2, 0,l-1, 0, BITS_IN_LONG-1);
+    b[0] = ((ulong)x[2])>>1;
+    xmpn_zero(b + l+1,l+1);
+    b = sqrtispec(b, l+1, &c);
+    xmpn_copy(res+2, b+2, l);
+    if (b[l+2] & HIGHBIT) roundr_up_ip(res, l+2);
+  }
+  avma = (pari_sp)res; return res;
 }

@@ -603,6 +603,17 @@ expodb(double x)
   return ((fi.i & (HIGHBIT-1)) >> mant_len) - exp_mid;
 }
 
+ulong
+dblmantissa(double x)
+{
+  union { double f; ulong i; } fi;
+  const int expo_len = 11; /* number of bits of exponent */
+
+  if (x==0.) return 0;
+  fi.f = x;
+  return (fi.i << expo_len) | HIGHBIT;
+}
+
 GEN
 dbltor(double x)
 {
@@ -667,6 +678,21 @@ expodb(double x)
   {
     const ulong a = fi.i[INDEX0];
     return ((a & (HIGHBIT-1)) >> shift) - exp_mid;
+  }
+}
+
+ulong
+dblmantissa(double x)
+{
+  union { double f; ulong i[2]; } fi;
+  const int expo_len = 11; /* number of bits of exponent */
+
+  if (x==0.) return 0;
+  fi.f = x;
+  {
+    const ulong a = fi.i[INDEX0];
+    const ulong b = fi.i[INDEX1];
+    return HIGHBIT | b >> (BITS_IN_LONG-expo_len) | (a << expo_len);
   }
 }
 

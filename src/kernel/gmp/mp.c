@@ -1185,25 +1185,24 @@ resmod2n(GEN x, long n)
 GEN
 sqrtremi(GEN a, GEN *r)
 {
-  long l = NLIMBS(a);
+  long l, na = NLIMBS(a);
+  mp_size_t nr;
   GEN S;
-  if (!l) {
+  if (!na) {
     if (r) *r = gzero;
     return gzero;
   }
-  l = (l + 5) >> 1; /* 2 + ceil(na/2) */
+  l = (na + 5) >> 1; /* 2 + ceil(na/2) */
   S = cgeti(l); S[1] = evalsigne(1) | evallgefint(l);
-  if (r) *r = cgeti(l+1);
-  if (mpn_sqrtrem(LIMBS(S), r? LIMBS(*r): NULL, LIMBS(a), NLIMBS(a)))
-  {
-    if (r) (*r)[1] = evalsigne(1) | evallgefint(l+1);
+  if (r) {
+    GEN R = cgeti(2 + na);
+    nr = mpn_sqrtrem(LIMBS(S), LIMBS(R), LIMBS(a), na);
+    if (nr) R[1] = evalsigne(1) | evallgefint(nr+2);
+    else    { avma = (pari_sp)S; R = gzero; }
+    *r = R;
   }
-  else if (r) {
-    if ((*r)[2])
-      (*r)[1] = evalsigne(1) | evallgefint(l);
-    else
-    { avma = (pari_sp)S; *r = gzero; }
-  }
+  else
+    (void)mpn_sqrtrem(LIMBS(S), NULL, LIMBS(a), na);
   return S;
 }
 
@@ -1225,10 +1224,9 @@ sqrtr_abs(GEN a)
   else
   {
     c = (mp_limb_t *) ishiftr_spec(a,pr+2,-1);
-    b = (mp_limb_t *) new_chunk(pr);
-    /*xmpn_zero below will overwrite the code word of c, yay!*/
     c[1] = ((ulong)a[pr+1])<<(BITS_IN_LONG-1);
-    xmpn_zero(b,pr+1);
+    b = (mp_limb_t *) new_chunk(pr);
+    xmpn_zero(b,pr+1); /* overwrites the code word of c */
   }
   c = (mp_limb_t *) new_chunk(pr+1);
   mpn_sqrtrem(c,NULL,b,(pr<<1)+2);
