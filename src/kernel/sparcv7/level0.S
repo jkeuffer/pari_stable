@@ -234,7 +234,7 @@ C(divll): sethi  %hi(C(hiremainder)),%o4
 	blu	1f
 	addcc	%o1,%o1,%g0
 	mov	0x2f,%o0
-	call	C(err),1
+	call	C(pari_err),1
 	nop
 1:	bcc	Lsmalldiv
 	andcc	%o1,1,%g0
