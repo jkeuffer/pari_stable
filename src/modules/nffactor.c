@@ -7,6 +7,7 @@
 /* $Id$ */
 #include "pari.h"
 
+GEN fix_relative_pol(GEN nf, GEN T);
 GEN hensel_lift(GEN pol,GEN fk,GEN fkk,GEN p,long e);
 GEN hensel_lift_fact(GEN pol, GEN fact, GEN p, GEN pev, long e);
 GEN nf_get_T2(GEN base, GEN polr);
@@ -895,11 +896,7 @@ nfsqff(GEN nf,GEN pol, long fl)
   pr=NULL;
   for (;;)
   {
-    if (pr)
-      apr=choose_prime(nf,dki,minp,30); 
-    else
-      apr=choose_prime(nf,dki,minp,0); 
-
+    apr = choose_prime(nf,dki,minp, pr?30:0); 
     if (!apr) break;
 
     ap=(GEN)apr[1];
@@ -1101,15 +1098,24 @@ nf_combine_factors(GEN nf,long fxn,GEN psf,long dlim,long hint)
 GEN
 rnfcharpoly(GEN nf,GEN T,GEN alpha,int v)
 {
-  long av=avma,tetpil;
+  long av = avma, vnf, vT, lT;
   GEN p1;
 
-  nf=checknf(nf); if (v<0) v = 0;
+  nf=checknf(nf); vnf = varn(nf[1]);
+  if (v<0) v = 0;
+  T = fix_relative_pol(nf,T);
   if (typ(alpha) == t_POLMOD) alpha = lift_to_pol(alpha);
-  if (typ(alpha) != t_POL) alpha = gtopoly(alpha,v);
-  if (typ(T) != t_POL) T = gtopoly(T,v);
+  lT = lgef(T);
+  if (typ(alpha) != t_POL || varn(alpha) == vnf)
+    return gerepileupto(av, gpowgs(gsub(polx[v], alpha), lT - 3));
+  vT = varn(T);
+  if (varn(alpha) != vT || v >= vnf)
+    err(talker,"incorrect variables in rnfcharpoly");
+  if (lgef(alpha) >= lT) alpha = gmod(alpha,T);
+  if (lT <= 4)
+    return gerepileupto(av, gsub(polx[v], alpha));
   p1 = caract2(unifpol(nf,T,1), unifpol(nf,alpha,1), v);
-  tetpil=avma; return gerepile(av,tetpil,unifpol(nf,p1,1));
+  return gerepileupto(av, unifpol(nf,p1,1));
 }
 
 #if 0
