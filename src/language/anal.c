@@ -2164,8 +2164,21 @@ doskipseq(char *c, int strict)
   mark.start = c; analyseur = c; skipseq();
   if (*analyseur)
   {
+    char *s;
+    long L,n;
     if (strict) err(talker2,"unused characters", analyseur, c);
-    err(warner, "unused characters: %s", analyseur);
+    L = term_width();
+    n = 2 * L - (17+19+1); /* Warning + unused... + . */
+    if (strlen(analyseur) > n)
+    {
+      s = gpmalloc(n + 1);
+      n -= 5;
+      (void)strncpy(s,analyseur, n);
+      s[n] = 0; strcat(s,"[+++]");
+    }
+    else s = pari_strdup(analyseur);
+    err(warner, "unused characters: %s", s);
+    free(s);
   }
   analyseur = olds;
 }
