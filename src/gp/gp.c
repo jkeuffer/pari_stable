@@ -45,6 +45,7 @@ void   init80(long n);
 void   init_defaults(int force);
 void   init_graph(void);
 void   init_lim_lines(char *s, long max);
+void   install0(char *name, char *code, char *gpname, char *lib);
 void   pari_sig_init(void (*f)(int));
 int    whatnow(char *s, int flag);
 
@@ -2205,6 +2206,17 @@ error0(GEN *g)
   pariputs("###   User error:\n\n   ");
   print0(g,f_RAW); term_color(c_NONE);
   err_recover(talker);
+}
+
+void 
+gpinstall(char *s, char *code, char *gpname, char *lib)
+{
+  if (secure)
+  {
+    fprintferr("[secure mode]: about to install '%s'. OK ? (^C if not)\n",s);
+    hit_return();
+  }
+  install0(s, code, gpname, lib);
 }
 
 void errcontext(char *msg, char *s, char *entry);

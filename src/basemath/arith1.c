@@ -44,7 +44,7 @@ arith_proto(long f(GEN), GEN x, int do_error)
   return stoi(f(x));
 }
 
-static GEN
+GEN
 arith_proto2(long f(GEN,GEN), GEN x, GEN n)
 {
   long l,i,tx = typ(x);
@@ -98,110 +98,6 @@ garith_proto2gs(GEN f(GEN,long), GEN x, long y)
   }
   if (tx != t_INT) err(arither1);
   return f(x,y);
-}
-
-/*********************************************************************/
-/**                                                                 **/
-/**                       BINARY DECOMPOSITION                      **/
-/**                                                                 **/
-/*********************************************************************/
-
-GEN
-binaire(GEN x)
-{
-  ulong m,u;
-  long i,lx,ex,ly,tx=typ(x);
-  GEN y,p1,p2;
-
-  switch(tx)
-  {
-    case t_INT:
-      lx=lgefint(x);
-      if (lx==2) { y=cgetg(2,t_VEC); y[1]=zero; return y; }
-      ly = BITS_IN_LONG+1; m=HIGHBIT; u=x[2];
-      while (!(m & u)) { m>>=1; ly--; }
-      y = cgetg(ly+((lx-3)<<TWOPOTBITS_IN_LONG),t_VEC); ly=1;
-      do { y[ly] = m & u ? un : zero; ly++; } while (m>>=1);
-      for (i=3; i<lx; i++)
-      {
-	m=HIGHBIT; u=x[i];
-	do { y[ly] = m & u ? un : zero; ly++; } while (m>>=1);
-      }
-      break;
-
-    case t_REAL:
-      ex=expo(x);
-      if (!signe(x))
-      {
-	lx=1+max(-ex,0); y=cgetg(lx,t_VEC);
-	for (i=1; i<lx; i++) y[i]=zero;
-	return y;
-      }
-
-      lx=lg(x); y=cgetg(3,t_VEC);
-      if (ex > bit_accuracy(lx)) err(talker,"loss of precision in binary");
-      p1 = cgetg(max(ex,0)+2,t_VEC);
-      p2 = cgetg(bit_accuracy(lx)-ex,t_VEC);
-      y[1] = (long) p1; y[2] = (long) p2;
-      ly = -ex; ex++;
-      if (ex<=0)
-      {
-	p1[1]=zero; for (i=1; i <= -ex; i++) p2[i]=zero;
-	i=2; m=HIGHBIT;
-      }
-      else
-      {
-	ly=1;
-	for (i=2; i<lx && ly<=ex; i++)
-	{
-	  m=HIGHBIT; u=x[i];
-	  do
-	    { p1[ly] = (m & u) ? un : zero; ly++; }
-	  while ((m>>=1) && ly<=ex);
-	}
-	ly=1;
-	if (m) i--; else m=HIGHBIT;
-      }
-      for (; i<lx; i++)
-      {
-	u=x[i];
-	do { p2[ly] = m & u ? un : zero; ly++; } while (m>>=1);
-	m=HIGHBIT;
-      }
-      break;
-
-    case t_VEC: case t_COL: case t_MAT:
-      lx=lg(x); y=cgetg(lx,tx);
-      for (i=1; i<lx; i++) y[i]=(long)binaire((GEN)x[i]);
-      break;
-    default: err(typeer,"binaire"); return NULL; /* not reached */
-  }
-  return y;
-}
-
-/* Renvoie 0 ou 1 selon que le bit numero n de x est a 0 ou 1 */
-long
-bittest(GEN x, long n)
-{
-  long l;
-
-  if (!signe(x) || n<0) return 0;
-  l = lgefint(x)-1-(n>>TWOPOTBITS_IN_LONG);
-  if (l<=1) return 0;
-  n = (1L << (n & (BITS_IN_LONG-1))) & x[l];
-  return n? 1: 0;
-}
-
-static long
-bittestg(GEN x, GEN n)
-{
-  return bittest(x,itos(n));
-}
-
-GEN
-gbittest(GEN x, GEN n)
-{
-  return arith_proto2(bittestg,x,n);
 }
 
 /*********************************************************************/
