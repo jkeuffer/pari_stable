@@ -1855,7 +1855,12 @@ identifier(void)
       /* checking arguments */
       match('('); ch1 = analyseur;
       narg = check_args(); nloc = 0;
-      match(')'); match('=');
+      match(')'); 
+      /* Dirty, but don't want to define a local() function */
+      if (*analyseur != '=' && strcmp(ep->name, "local") == 0)
+        err(talker2, "local() bloc must appear before any other expression",
+                     mark.identifier,mark.start);
+      match('=');
       while (strncmp(analyseur,"local(",6) == 0)
       {
         analyseur += 6;
