@@ -2160,13 +2160,19 @@ check_quaddisc(GEN x, long *s, long *r, char *f)
   *s = signe(x); if (!*s) err(talker,"zero discriminant in %s", f);
   if (carreparfait(x)) err(talker,"square discriminant in %s", f);
   *r = mod4(x); if (*s < 0 && *r) *r = 4 - *r;
-  if (*r > 1) err(funder2, f);
+  if (*r > 1) err(talker, "discriminant not congruent to 0,1 mod 4 in %s", f);
 }
 void
 check_quaddisc_real(GEN x, long *r, char *f)
 {
   long sx; check_quaddisc(x, &sx, r, f);
   if (sx < 0) err(talker, "negative discriminant in %s", f);
+}
+void
+check_quaddisc_imag(GEN x, long *r, char *f)
+{
+  long sx; check_quaddisc(x, &sx, r, f);
+  if (sx > 0) err(talker, "positive discriminant in %s", f);
 }
 
 GEN
@@ -2408,8 +2414,9 @@ to_form(GEN x, long f)
   return redimag(primeform(x, stoi(f), 0));
 }
 
+/* r = x mod 4 */
 static GEN
-conductor_part(GEN x, GEN *ptD, GEN *ptreg, GEN *ptfa)
+conductor_part(GEN x, long r, GEN *ptD, GEN *ptreg, GEN *ptfa)
 {
   long n,i,k,s=signe(x),fl2;
   GEN e,p,H,d,D,fa,reg;
@@ -2420,13 +2427,7 @@ conductor_part(GEN x, GEN *ptD, GEN *ptreg, GEN *ptfa)
   n = lg(fa); d = gun;
   for (i=1; i<n; i++)
     if (e[i] & 1) d = mulii(d,(GEN)fa[i]);
-  if (mod4(d) == 2-s) fl2 = 0;
-  else
-  {
-    fl2 = (mod4(x)==0);
-    if (!fl2) err(funder2,"classno");
-    d = shifti(d,2);
-  }
+  if (r) fl2 = 0; else { fl2 = 1; d = shifti(d,2); }
   H = gun; D = (s<0)? negi(d): d; /* d = abs(D) */
   /* f \prod_{p|f}  [ 1 - (D/p) p^-1 ] */
   for (i=1; i<n; i++)
@@ -2492,13 +2493,12 @@ classno(GEN x)
   GEN Hf, D;
   byteptr p = diffptr;
 
-  if (typ(x) != t_INT) err(arither1);
-  s = signe(x); if (s>=0) return classno2(x);
+  if (signe(x) >= 0) return classno2(x);
 
-  k = mod4(x); if (k==1 || k==2) err(funder2,"classno");
+  check_quaddisc(x, &s, &k, "classno");
   if (cmpis(x,-12) >= 0) return gun;
 
-  Hf = conductor_part(x,&D,NULL,NULL);
+  Hf = conductor_part(x, k, &D, NULL, NULL);
   if (cmpis(D,-12) >= 0) return gerepilecopy(av, Hf);
 
   p2 = gsqrt(absi(D),DEFAULTPREC);
@@ -2590,16 +2590,14 @@ GEN
 classno2(GEN x)
 {
   pari_sp av = avma;
-  long n,i,k,s = signe(x);
+  long n, i, k, r, s;
   GEN p1,p2,p3,p4,p5,p7,Hf,Pi,reg,logd,d,D;
 
-  if (typ(x) != t_INT) err(arither1);
-  if (!s) err(talker,"zero discriminant in classno2");
+  check_quaddisc(x, &s, &r, "classno2");
   if (s < 0 && cmpis(x,-12) >= 0) return gun;
 
-  Hf = conductor_part(x, &D, &reg, NULL);
-  if (s < 0 && cmpis(D,-12) >= 0)
-    return gerepilecopy(av, Hf); /* |D| < 12*/
+  Hf = conductor_part(x, r, &D, &reg, NULL);
+  if (s < 0 && cmpis(D,-12) >= 0) return gerepilecopy(av, Hf); /* |D| < 12*/
 
   Pi = mppi(DEFAULTPREC);
   d = absi(D); logd = glog(d,DEFAULTPREC);
@@ -2875,16 +2873,11 @@ real_unit_form_by_disc(GEN D, long prec)
 {
   GEN y = cgetg(5,t_QFR), isqrtD;
   pari_sp av = avma;
+  long r;
 
-  if (typ(D) != t_INT || signe(D) <= 0) err(typeer,"real_unit_form_by_disc");
-  switch(mod4(D))
-  {
-    case 2:
-    case 3: err(funder2,"real_unit_form_by_disc");
-  }
-  y[1]=un; isqrtD = racine(D);
-  /* we know that D and isqrtD are non-zero */
-  if (mod2(D) != mod2(isqrtD))
+  check_quaddisc_real(D, /*junk*/&r, "real_unit_form_by_disc");
+  y[1] = un; isqrtD = racine(D);
+  if ((r & 1) != mod2(isqrtD)) /* we know isqrtD > 0 */
     isqrtD = gerepileuptoint(av, addsi(-1,isqrtD));
   y[2] = (long)isqrtD; av = avma;
   y[3] = lpileuptoint(av, shifti(subii(sqri(isqrtD),D),-2));
@@ -2908,21 +2901,14 @@ static GEN
 imag_unit_form_by_disc(GEN D)
 {
   GEN y = cgetg(4,t_QFI);
-  long isodd;
+  long r;
 
-  if (typ(D) != t_INT || signe(D) >= 0) err(typeer,"imag_unit_form_by_disc");
-  switch(mod4(D))
-  {
-    case 0: isodd = 0; break;
-    case 3: isodd = 1; break;
-    default: err(funder2,"imag_unit_form_by_disc");
-             return NULL; /* not reached */
-  }
+  check_quaddisc_imag(D, &r, "imag_unit_form_by_disc");
   y[1] = un;
-  y[2] = isodd? un: zero;
+  y[2] = r? un: zero;
   /* upon return, y[3] = (1-D) / 4 or -D / 4, whichever is an integer */
   y[3] = lshifti(D,-2);
-  if (isodd)
+  if (r)
   {
     pari_sp av = avma;
     y[3] = lpileuptoint(av, addis((GEN)y[3],-1));
@@ -3499,10 +3485,8 @@ primeform(GEN x, GEN p, long prec)
     y = cgetg(5, t_QFR);
     y[4] = (long)realzero(prec);
   }
-  switch(s&3)
-  {
-    case 2: case 3: err(funder2,"primeform");
-  }
+  /* 2 or 3 mod 4 */
+  if (s & 2) err(talker,"discriminant not congruent to 0,1 mod 4 in primeform");
   av = avma;
   if (egalii(p, gdeux))
   {

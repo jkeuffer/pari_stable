@@ -103,8 +103,6 @@ char *errmessage[]=
 
 /* arither1 */
   "not an integer argument in an arithmetic function",
-/* funder2 */
-  "discriminant not congruent to 0 or 1 mod 4",
 /* primer1 */
   "not enough precomputed primes",
 /* primer2 */

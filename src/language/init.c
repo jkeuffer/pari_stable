@@ -1142,7 +1142,7 @@ err(long numerr, ...)
 
       case breaker: case typeer: case mattype1: case overwriter:
       case accurer: case infprecer: case negexper:
-      case funder2: case constpoler: case notpoler: case redpoler:
+      case constpoler: case notpoler: case redpoler:
       case zeropoler: case consister: case flagerr: case precer:
         pariputsf(" in %s.",va_arg(ap, char*)); break;
 
