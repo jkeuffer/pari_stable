@@ -3074,7 +3074,7 @@ fincke_pohst(GEN a,GEN B0,long stockmax,long flag, long PREC, FP_chk_fun *CHECK)
   { /* catch precision problems (truncation error) */
     jmp_buf env;
     if (setjmp(env)) goto PRECPB;
-    catcherr = err_catch(truer2, env, NULL);
+    catcherr = err_catch(precer, env, NULL);
   }
   if (CHECK && CHECK->f_init) 
   {

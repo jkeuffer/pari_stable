@@ -87,8 +87,6 @@ char *errmessage[]=
 /* truer1 */
   "overflow in truncation",
 
-/* truer2 */
-  "precision loss in truncation",
 /* adder1 */
   "overflow in S+I",
 /* adder2 */

@@ -27,7 +27,7 @@ enum {
 /* mp.s ou mp.c */
 
   affer1, affer2, affer3, affer4, affer5,
-  shier1, shier2, truer1, truer2, adder1,
+  shier1, shier2, truer1, adder1,
   
   adder2, adder3, adder4, adder5, muler1,
   muler2, muler3, muler4, muler5, muler6,

@@ -315,7 +315,7 @@ mptrunc(GEN x)
   if ((s=signe(x)) == 0 || (e=expo(x)) < 0) return gzero;
   d = (e>>TWOPOTBITS_IN_LONG) + 3;
   m = e & (BITS_IN_LONG-1);
-  if (d > lg(x)) err(truer2);
+  if (d > lg(x)) err(precer, "mptrunc (precision loss in truncation)");
 
   y=cgeti(d); y[1] = evalsigne(s) | evallgefint(d);
   if (++m == BITS_IN_LONG)
@@ -340,7 +340,7 @@ mpent(GEN x)
   if ((e=expo(x)) < 0) return stoi(-1);
   d = (e>>TWOPOTBITS_IN_LONG) + 3;
   m = e & (BITS_IN_LONG-1);
-  lx=lg(x); if (d>lx) err(truer2);
+  lx=lg(x); if (d>lx) err(precer, "mpent (precision loss in trucation)");
   y = new_chunk(d);
   if (++m == BITS_IN_LONG)
   {
