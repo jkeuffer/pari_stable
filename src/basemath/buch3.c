@@ -1983,7 +1983,7 @@ discrayabslist(GEN bnf,GEN listes)
 }
 
 #define SHLGVINT 15
-#define LGVINT 32768 /* must be 1<<SHLGVINT */
+#define LGVINT (1L << SHLGVINT)
 
 /* Attention: bound est le nombre de vraies composantes voulues. */
 static GEN
@@ -1995,8 +1995,8 @@ bigcgetvec(long bound)
   nbcext = ((bound-1)>>SHLGVINT)+1;
   nbfinal = bound-((nbcext-1)<<SHLGVINT);
   vext = cgetg(nbcext+1,t_VEC);
-  for (i=1; i<nbcext; i++) vext[i]=lgetg(LGVINT+1,t_VEC);
-  vext[nbcext]=lgetg(nbfinal+1,t_VEC); return vext;
+  for (i=1; i<nbcext; i++) vext[i] = lgetg(LGVINT+1,t_VEC);
+  vext[nbcext] = lgetg(nbfinal+1,t_VEC); return vext;
 }
 
 static GEN
@@ -2005,8 +2005,8 @@ getcompobig(GEN vext,long i)
   long cext;
 
   if (i<=LGVINT) return gmael(vext,1,i);
-  cext=((i-1)>>SHLGVINT)+1;
-  return gmael(vext,cext,i-((cext-1)<<SHLGVINT));
+  cext = ((i-1)>>SHLGVINT)+1;
+  return gmael(vext, cext, i-((cext-1)<<SHLGVINT));
 }
 
 static void
@@ -2015,56 +2015,53 @@ putcompobig(GEN vext,long i,GEN x)
   long cext;
 
   if (i<=LGVINT) { mael(vext,1,i)=(long)x; return; }
-  cext=((i-1)>>SHLGVINT)+1; mael(vext,cext,i-((cext-1)<<SHLGVINT))=(long)x;
-  return;
+  cext=((i-1)>>SHLGVINT)+1;
+  mael(vext, cext, i-((cext-1)<<SHLGVINT)) = (long)x;
 }
 
 static GEN
 zsimp(GEN bid, GEN matunit)
 {
-  GEN y=cgetg(5,t_VEC);
-  y[1]=lcopy((GEN)bid[3]); y[2]=lcopy(gmael(bid,2,2));
-  y[3]=lcopy((GEN)bid[5]); y[4]=lcopy(matunit); return y;
+  GEN y = cgetg(5,t_VEC);
+  y[1] = bid[3];
+  y[2] = mael(bid,2,2);
+  y[3] = bid[5];
+  y[4] = (long)matunit; return y;
 }
 
 static GEN
 zsimpjoin(GEN bidsimp, GEN bidp, GEN faussefa, GEN matunit)
 {
-  long i,j,lx,lx1,lx2,llx,llx1,llx2,nbgen,av=avma,tetpil,c;
-  GEN y,U1,U2,cyclic1,cyclic2,U,cyc,u1u2,p1,p2,met;
+  long i,l1,l2,nbgen,c, av = avma;
+  GEN U,U1,U2,cyclic1,cyclic2,cyc,u1u2,met, y = cgetg(5,t_VEC);
 
-  y=cgetg(5,t_VEC); y[1]=(long)vconcat((GEN)bidsimp[1],faussefa);
-  U1=(GEN)bidsimp[3]; U2=(GEN)bidp[5]; cyclic1=(GEN)bidsimp[2];
-  cyclic2=gmael(bidp,2,2); lx1=lg(U1); lx2=lg(U2); lx=lx1+lx2-1;
-  llx1=lg(cyclic1); llx2=lg(cyclic2);
-  llx=llx1+llx2-1; nbgen=llx-1; U=cgetg(lx,t_MAT);
+  y[1] = (long)vconcat((GEN)bidsimp[1],faussefa);
+  U1 = (GEN)bidsimp[3]; cyclic1 = (GEN)bidsimp[2]; l1 = lg(cyclic1);
+  U2 = (GEN)bidp[5];    cyclic2 = gmael(bidp,2,2); l2 = lg(cyclic2);
+  nbgen = l1+l2-2;
   if (nbgen)
   {
-    cyc=diagonal(concatsp(cyclic1,cyclic2));
-    u1u2=smithclean(smith2(cyc)); met=(GEN)u1u2[3]; c=lg(met)-1;
-    for (j=1; j<lx1; j++)
-    {
-      p1=cgetg(llx,t_COL); p2=(GEN)U1[j]; U[j]=(long)p1;
-      for (i=1; i<llx1; i++) p1[i]=p2[i];
-      for (   ; i<llx; i++) p1[i]=zero;
-    }
-    for (  ; j<lx; j++)
-    {
-      p1=cgetg(llx,t_COL); p2=(GEN)U2[j-lx1+1]; U[j]=(long)p1;
-      for (i=1; i<llx1; i++) p1[i]=zero;
-      for (   ; i<llx; i++) p1[i]=p2[i-llx1+1];
-    }
-    y[3]=lmul((GEN)u1u2[1],U);
+    cyc = diagonal(concatsp(cyclic1,cyclic2));
+    u1u2 = matsnf0(cyc, 1 | 4); /* all && clean */
+    U = (GEN)u1u2[1];
+    met=(GEN)u1u2[3];
+    y[3] = (long)concatsp(
+      gmul(vecextract_i(U, 1,   l1-1), U1) ,
+      gmul(vecextract_i(U, l1, nbgen), U2)
+    );
   }
   else
   {
-    met=cgetg(1,t_MAT); for (j=1; j<lx; j++) U[j]=lgetg(1,t_COL);
-    y[3]=(long)U; c=0;
+    c = lg(U1)+lg(U2)-1; U = cgetg(c,t_MAT);
+    for (i=1; i<c; i++) U[i]=lgetg(1,t_COL);
+    met = cgetg(1,t_MAT);
+    y[3] = (long)U;
   }
-  cyc=cgetg(c+1,t_VEC); for (i=1; i<=c; i++) cyc[i]=coeff(met,i,i);
-  y[2]=(long)cyc;
-  y[4]=(long)vconcat((GEN)bidsimp[4],matunit);
-  tetpil=avma; return gerepile(av,tetpil,gcopy(y));
+  c = lg(met); cyc = cgetg(c,t_VEC);
+  for (i=1; i<c; i++) cyc[i] = coeff(met,i,i);
+  y[2] = (long)cyc;
+  y[4] = (long)vconcat((GEN)bidsimp[4],matunit);
+  return gerepileupto(av, gcopy(y));
 }
 
 static GEN
@@ -2247,7 +2244,7 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
   matarchunit = allarch? logunitmatrix(nf,funits,racunit,bidp): (GEN)NULL;
 
   p=cgeti(3); p[1]=evalsigne(1)|evallgef(3);
-  sqbou=itos(racine(stoi(bound)))+1;
+  sqbou=(long)sqrt((double)bound) + 1;
   av=avma; lim=stack_lim(av,1);
   z=bigcgetvec(bound); for (i=2; i<=bound; i++) putcompobig(z,i,cgetg(1,t_VEC));
   if (allarch) bidp=zidealstarinitall(nf,idmat(degk),0);
@@ -2275,69 +2272,63 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
       tetpil=avma; raylist=gerepile(av1,tetpil,gcopy(raylist));
       z2=bigcgetvec(sqbou);
       for (i=1; i<=sqbou; i++)
-        { p1=gcopy(getcompobig(z,i)); putcompobig(z2,i,p1); }
+        putcompobig(z2,i, gcopy(getcompobig(z,i)));
       z = z2;
     }
     fa=primedec(nf,p); lfa=lg(fa)-1;
     for (j=1; j<=lfa; j++)
     {
-      pr=(GEN)fa[j]; normp=powgi(p,(GEN)pr[4]); cex=0;
+      pr = (GEN)fa[j]; p1 = powgi(p,(GEN)pr[4]);
       if (DEBUGLEVEL>=2) { fprintferr("%ld ",p[2]); flusherr(); }
-      if (gcmpgs(normp,bound)<=0)
+      if (is_bigint(p1) || (q = itos(p1)) > bound) continue;
+
+      fauxpr=stoi(p[2]*degk*degk+(itos((GEN)pr[4])-1)*degk+j-1);
+      p2s = q; ideal = pr; cex = 0;
+      while (q <= (ulong)bound)
       {
-	fauxpr=stoi(p[2]*degk*degk+(itos((GEN)pr[4])-1)*degk+j-1);
-	q=p2s=itos(normp); ideal=pr;
-	while (q <= (ulong)bound)
-	{
-	  bidp=zidealstarinitall(nf,ideal,0);
-	  faussefa=cgetg(3,t_MAT); p1=cgetg(2,t_COL);
-	  faussefa[1]=(long)p1; p1[1]=(long)fauxpr;
-	  pex=cgetg(2,t_COL); faussefa[2]=(long)pex;
-	  cex++; pex[1]=lstoi(cex);
-	  embunit=logunitmatrix(nf,funits,racunit,bidp);
-	  for (i=q; i<=bound; i+=q)
-	  {
-	    p1=getcompobig(z,i/q); lp1=lg(p1);
-	    if (lp1>1)
-	    {
-	      p2=cgetg(lp1,t_VEC); c=0;
-	      for (k=1; k<lp1; k++)
-	      {
-		p3=(GEN)p1[k];
-		if (q == (ulong)i ||
-                    ((p4=gmael(p3,1,1)) && !isinvector(p4,fauxpr,lg(p4)-1)))
-		{
-		  c++;
-		  p2[c]=(long)zsimpjoin(p3,bidp,faussefa,embunit);
-		}
-	      }
-	      setlg(p2,c+1);
-	      if (c)
-	      {
-		if (p[2]<=sqbou)
-		{
-		  pz=getcompobig(z,i);
-		  if (lg(pz)>1) putcompobig(z,i,concatsp(pz,p2));
-		  else putcompobig(z,i,p2);
-		}
-		else
-                {
-                  sousray=rayclassnointernarch(p2,clh,matarchunit);
-                  pz=getcompobig(raylist,i);
-                  if (lg(pz)>1) putcompobig(raylist,i,concatsp(pz,sousray));
-                  else putcompobig(raylist,i,sousray);
-                }
-	      }
-	    }
-	  }
-	  if (ramip && ramip % p[2]) q=bound+1;
-	  else
-	  {
-	    pz=mulss(q,p2s);
-	    q=(gcmpgs(pz,bound)>0)?bound+1:pz[2];
-            if (q <= (ulong)bound) ideal=idealmul(nf,ideal,pr);
-	  }
-	}
+        cex++; bidp=zidealstarinitall(nf,ideal,0);
+        faussefa=cgetg(3,t_MAT); p1=cgetg(2,t_COL); p1[1]=(long)fauxpr;
+        faussefa[1]=(long)p1; pex=cgetg(2,t_COL); pex[1]=lstoi(cex);
+        faussefa[2]=(long)pex;
+        embunit=logunitmatrix(nf,funits,racunit,bidp);
+        for (i=q; i<=bound; i+=q)
+        {
+          p1 = getcompobig(z,i/q);
+          if ((lp1 = lg(p1)) == 1) continue;
+
+          p2 = cgetg(lp1,t_VEC); c=0;
+          for (k=1; k<lp1; k++)
+          {
+            p3=(GEN)p1[k];
+            if (q == (ulong)i ||
+                ((p4=gmael(p3,1,1)) && !isinvector(p4,fauxpr,lg(p4)-1)))
+            {
+              c++;
+              p2[c]=(long)zsimpjoin(p3,bidp,faussefa,embunit);
+            }
+          }
+          if (!c) continue;
+
+          setlg(p2,c+1);
+          if (p[2]<=sqbou)
+          {
+            pz = getcompobig(z,i);
+            if (lg(pz)>1) p2 = concatsp(pz,p2);
+            putcompobig(z,i,p2);
+          }
+          else
+          {
+            p2 = rayclassnointernarch(p2,clh,matarchunit);
+            pz = getcompobig(raylist,i);
+            if (lg(pz)>1) p2 = concatsp(pz,p2);
+            putcompobig(raylist,i,p2);
+          }
+        }
+        if (ramip && ramip % p[2]) break;
+        pz = mulss(q,p2s);
+        if (is_bigint(pz) || (q = pz[2]) > bound) break;
+
+        ideal = idealmul(nf,ideal,pr);
       }
     }
     if (low_stack(lim, stack_lim(av,1)))
