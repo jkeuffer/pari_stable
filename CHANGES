@@ -35,6 +35,8 @@ Done for version 2.2.2 (released ??/??/2001):
     2- broken compilation in arith.c when CC != gcc
     3- nfhilbert (local case pr | 2) expected POLMOD argument without check
     4- poldegree(P, t) slow when t != varn(P), and may not work in library mode
+    5- polrootspadic only worked when leading coeff was a unit
+    6- paddicappr was very slow (esp. when p was large)
 
   Changes
     1- allow compressing *.dvi files for the online help system
