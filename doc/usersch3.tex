@@ -5490,10 +5490,14 @@ as $-1$. Also available is \teb{truecoeff}$(x,v)$.
 
 \subsecidx{poldegree}$(x,\{v\})$: degree of the polynomial $x$ in the main
 variable if $v$ is omitted, in the variable $v$ otherwise. This is to be
-understood as follows. When $x$ is a polynomial or a rational function, it
-gives the degree of $x$, the degree of $0$ being $-1$ by convention. When $x$
-is a non-zero scalar, it gives 0, and when $x$ is a zero scalar, it gives
-$-1$. Return an error otherwise.
+understood as follows:
+
+The degree of $0$ is $-\kbd{VERYBIGINT}$ by convention (\kbd{VERYBIGINT} is
+$2^{31}-1$ for 32-bit machines or $2^{63}-1$ for 64-bit machines).
+
+When $x$ is a non-zero scalar, its degree is $0$. When $x$ is non-zero
+polynomial or rational function, it is the ordinary degree of $x$. Return an
+error otherwise.
 
 \syn{poldegree}{x,v}, where $v$ and the result are \kbd{long}s (and an
 omitted $v$ is coded as $-1$). Also available is \teb{degree}$(x)$, which is
