@@ -222,6 +222,7 @@ idealmodidele(GEN bnr, GEN x)
 static long
 fast_val(GEN nf,GEN L0,GEN cx,GEN pr,GEN tau)
 {
+  pari_sp av = avma;
   GEN p = (GEN)pr[1];
   long v = int_elt_val(nf,L0,p,tau,NULL);
   if (cx)
@@ -229,7 +230,7 @@ fast_val(GEN nf,GEN L0,GEN cx,GEN pr,GEN tau)
     long w = ggval(cx, p);
     if (w) v += w * itos((GEN)pr[3]);
   }
-  return v;
+  avma = av; return v;
 }
 
 /* x coprime to fZ, return y = x mod fZ, y integral */
@@ -295,6 +296,7 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
   {
     GEN p, pi, pinvpi, dmulI, mulI, G, I, A, e, L, newL;
     long la, v, k;
+    pari_sp av;
     /* G = [I, A=famat(L,e)] is a generator, I integral */
     G = (GEN)basecl[i];
     I = (GEN)G[1];
@@ -361,6 +363,7 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
       newL[k] = (long)FpV_red(make_integral(nf,LL,f,listpr), fZ);
     }
 
+    av = avma;
     /* G in nf, = L^e mod f */
     G = famat_to_nf_modideal_coprime(nf, newL, e, f, EX);
     if (mulI)
@@ -373,7 +376,7 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
     if (dmulI) I = gdivexact(I, dmulI);
     /* more or less useless, but cheap at this point */
     I = _idealmodidele(nf,I,module,sarch);
-    basecl[i] = (long)I;
+    basecl[i] = (long)gerepilecopy(av, I);
   }
   return basecl;
 }
