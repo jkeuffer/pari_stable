@@ -1680,7 +1680,66 @@ ggamdz(GEN x, GEN y)
 /**                                                                **/
 /********************************************************************/
 
-#if 1
+GEN
+psinew(GEN s0, long prec)
+{
+  ulong av;
+  GEN sum,z,a,res,tes,in2,sig,s,unr;
+  long lim,nn,k;
+  const long la = 3;
+ 
+
+  if (DEBUGLEVEL>2) timer2();
+  s = trans_fix_arg(&prec,&s0,&sig,&av,&res);
+  if (signe(sig) <= 0)
+  {
+    GEN pi = mppi(prec);
+    z = gsub(psinew(gsubsg(1,s), prec), gmul(pi, gcotan(gmul(pi,s), prec)));
+    gaffect(z, res); avma = av; return res;
+  }
+ 
+  {
+    double ssig = rtodbl(sig);
+    double st = rtodbl(gimag(s));
+    double l;
+    {
+      double rlog, ilog; /* log (s-gamma) */
+      dcxlog(ssig - rtodbl(mpeuler(3)), st, &rlog,&ilog);
+      l = dnorm(rlog,ilog);
+    }
+    if (l < 0.000001) l = 0.000001;
+    l = log(l) / 2.;
+    lim = 2 + (long)ceil((pariC2*(prec-2) - l) / (2*(1+log((double)la))));
+    if (lim < 2) lim = 2;
+   
+    l = (2*lim-1)*la / (2.*PI);
+    l = l*l - st*st;
+    if (l < 0.) l = 0.;
+    nn = (long)ceil( sqrt(l) - ssig );
+    if (nn < 1) nn = 1;
+    if (DEBUGLEVEL>2) fprintferr("lim, nn: [%ld, %ld]\n",lim,nn);
+  }
+  prec++; unr = realun(prec); /* one extra word of precision */
+ 
+  a = gdiv(unr, gaddgs(s, nn)); /* 1 / (s+n) */
+  sum = gmul2n(a,-1);
+  for (k = 0; k < nn; k++)
+    sum = gadd(sum, gdiv(unr, gaddgs(s, k)));
+  z = gsub(glog(gaddgs(s, nn), prec), sum);
+  if (DEBUGLEVEL>2) msgtimer("sum from 0 to N-1");
+ 
+  tes = divrs(bernreal(2*lim, prec), 2*lim);
+  in2 = gsqr(a);
+  for (k=2*lim-2; k>=2; k-=2)
+  {
+    tes = gadd(gmul(in2,tes), divrs(bernreal(k, prec), k));
+  }
+  if (DEBUGLEVEL>2) msgtimer("Bernoulli sum");
+  z = gsub(z, gmul(in2,tes));
+  gaffect(z, res); avma = av; return res;
+}
+
+#if 0
 static GEN
 mppsi(GEN z)  /* version p=2 */
 {
@@ -1705,7 +1764,6 @@ mppsi(GEN z)  /* version p=2 */
   }
   tetpil=avma; return gerepile(av,tetpil,divrr(u,v));
 }
-#else
 static GEN /* by Manfred Radimersky */
 mppsi(GEN z)
 {
@@ -1761,9 +1819,6 @@ mppsi(GEN z)
 
   return gerepilecopy(head, s);
 }
-#endif
-
-#if 1
 static GEN
 cxpsi(GEN z, long prec) /* version p=2 */
 {
@@ -1788,7 +1843,6 @@ cxpsi(GEN z, long prec) /* version p=2 */
   }
   tetpil=avma; return gerepile(av,tetpil,gdiv(u,v));
 }
-#else
 GEN
 cxpsi(GEN z, long prec) /* by Manfred Radimersky */
 {
@@ -1855,11 +1909,8 @@ gpsi(GEN x, long prec)
 {
   switch(typ(x))
   {
-    case t_REAL:
-      return mppsi(x);
-
-    case t_COMPLEX:
-      return cxpsi(x,prec);
+    case t_REAL: case t_COMPLEX:
+      return psinew(x,prec);
 
     case t_INTMOD: case t_PADIC:
       err(typeer,"gpsi");
