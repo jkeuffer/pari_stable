@@ -10,7 +10,6 @@ list=log2; . ./look
 extra_flags=
 list=strftime; . ./look
 case "$osname" in
-    osf1) list='times ftime';; # gp-dyn has problems with getrusage
     *cygwin*) list='times ftime';; # getrusage based timer always returns 0
     *) list='getrusage times ftime';;
 esac; . ./look
