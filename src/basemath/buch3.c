@@ -2286,7 +2286,7 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
     {
       pr = (GEN)fa[j]; p1 = powgi(p,(GEN)pr[4]);
       if (DEBUGLEVEL>=2) { fprintferr("%ld ",p[2]); flusherr(); }
-      if (is_bigint(p1) || (q = itos(p1)) > bound) continue;
+      if (is_bigint(p1) || (q = (ulong)itos(p1)) > (ulong)bound) continue;
 
       fauxpr=stoi(p[2]*degk*degk+(itos((GEN)pr[4])-1)*degk+j-1);
       p2s = q; ideal = pr; cex = 0;
@@ -2328,7 +2328,7 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
         }
         if (ramip && ramip % p[2]) break;
         pz = mulss(q,p2s);
-        if (is_bigint(pz) || (q = pz[2]) > bound) break;
+        if (is_bigint(pz) || (q = (ulong)pz[2]) > (ulong)bound) break;
 
         ideal = idealmul(nf,ideal,pr);
       }
