@@ -2964,6 +2964,17 @@ op_ReIm(GEN f(GEN), GEN x)
 }
 
 GEN
+real_i(GEN x)
+{
+  return (typ(x) == t_COMPLEX)? (GEN)x[1]: x;
+}
+GEN
+imag_i(GEN x)
+{
+  return (typ(x) == t_COMPLEX)? (GEN)x[2]: gzero;
+}
+
+GEN
 greal(GEN x)
 {
   switch(typ(x))

@@ -142,6 +142,7 @@ XR 60- Configure/bench: use head -n # instead of head -# (deprecated and
        unsupported by GNU coreutils)
    61- not enough GC in mpbern() [ Bernoulli numbers ] and psi()
    62- \p50000, then polroots(x) --> exponent overflow
+   63- ellj( t_QUAD ) / eta( t_QUAD ) was forbidden.
 
   Changed
     1- bnfinit: [small_norm phase] speed up norm computations.

@@ -1348,12 +1348,12 @@ gaffect(GEN x, GEN y)
 	      gaffect((GEN)x[2],y); break;
 
 	    case t_REAL:
-	      av=avma; p1=co8(x,ly); gaffect(p1,y); avma=av; break;
+	      av=avma; p1=quadtoc(x,ly); gaffect(p1,y); avma=av; break;
 	    case t_COMPLEX:
 	      ly=precision(y);
 	      if (ly)
 	      {
-		av=avma; p1=co8(x,ly); gaffect(p1,y); avma=av;
+		av=avma; p1=quadtoc(x,ly); gaffect(p1,y); avma=av;
 	      }
 	      else
 	      {
@@ -1555,7 +1555,7 @@ gaffect(GEN x, GEN y)
 /*******************************************************************/
 
 GEN
-co8(GEN x, long prec)
+quadtoc(GEN x, long prec)
 {
   pari_sp av=avma, tetpil;
   GEN p1, p = (GEN) x[1];
@@ -1689,7 +1689,7 @@ gexpo(GEN x)
       y = gexpo((GEN)x[2]); return max(e,y);
 
     case t_QUAD:
-      av=avma; e = gexpo(co8(x,3)); avma=av; return e;
+      av=avma; e = gexpo(quadtoc(x,3)); avma=av; return e;
 
     case t_POL: case t_SER: case t_VEC: case t_COL: case t_MAT:
       lx=(tx==t_POL)? lgef(x): lg(x);

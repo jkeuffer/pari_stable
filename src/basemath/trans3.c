@@ -769,7 +769,7 @@ kbessel2(GEN nu, GEN x, long prec)
 
   if (typ(x)==t_REAL) prec = lg(x);
   x2 = gshift(x,1);
-  a = gcmp0(gimag(nu))? cgetr(prec): cgetc(prec);
+  a = gcmp0(imag_i(nu))? cgetr(prec): cgetc(prec);
   gaddz(gun,gshift(nu,1), a);
   p1 = hyperu(gshift(a,-1),a,x2,prec);
   p1 = gmul(gmul(p1,gpow(x2,nu,prec)), mpsqrt(mppi(prec)));
@@ -893,7 +893,7 @@ incgam0(GEN s, GEN x, GEN g, long prec)
   pari_sp av = avma;
 
   if (typ(x) != t_REAL) { gaffect(x,z); x=z; }
-  if (gcmp(subrs(x,1),s) > 0 || gsigne(greal(s)) <= 0)
+  if (gcmp(subrs(x,1),s) > 0 || gsigne(real_i(s)) <= 0)
     p1 = incgam2(s,x,prec);
   else
     p1 = gsub(g? g: ggamma(s,prec), incgamc(s,x,prec));
@@ -1484,7 +1484,7 @@ czeta(GEN s0, long prec)
       p = itos(s0); avma = av2;
       return szeta(p,prec);
     }
-    funeq = 1; s = gsub(gun, s); sig = greal(s);
+    funeq = 1; s = gsub(gun, s); sig = real_i(s);
   }
   if (gcmp(sig, stoi(bit_accuracy(prec) + 1)) > 0) { y = gun; goto END; }
   optim_zeta(s, prec, &lim, &nn);
@@ -1704,11 +1704,11 @@ polylog(long m, GEN x, long prec)
   }
   if (e < 0) return gerepileupto(av, y);
 
-  sx = gsigne(gimag(x));
+  sx = gsigne(imag_i(x));
   if (!sx)
   {
-    if (m&1) sx = gsigne(gsub(gun,greal(x)));
-    else     sx = - gsigne(greal(x));
+    if (m&1) sx = gsigne(gsub(gun, real_i(x)));
+    else     sx = - gsigne(real_i(x));
   }
   z = cgetg(3,t_COMPLEX);
   z[1] = zero;
@@ -1757,11 +1757,11 @@ polylogd0(long m, GEN x, long flag, long prec)
   if (gcmpgs(p1,1)>0) { x=ginv(x); p1=gabs(x,prec); fl=!m2; }
 
   p1=gneg_i(glog(p1,prec)); p2=gun;
-  y=polylog(m,x,prec); y=m2?greal(y):gimag(y);
+  y=polylog(m,x,prec); y = m2? real_i(y): imag_i(y);
   for (k=1; k<m; k++)
   {
     p2=gdivgs(gmul(p2,p1),k);
-    p3=m2?greal(polylog(m-k,x,prec)):gimag(polylog(m-k,x,prec));
+    p3=m2? real_i(polylog(m-k,x,prec)): imag_i(polylog(m-k,x,prec));
     y=gadd(y,gmul(p2,p3));
   }
   if (m2)
@@ -1804,7 +1804,7 @@ polylogp(long m, GEN x, long prec)
   if (gcmpgs(p1,1)>0) { x=ginv(x); p1=gabs(x,prec); fl=!m2; }
 
   p1=gmul2n(glog(p1,prec),1); mpbern(m>>1,prec);
-  y=polylog(m,x,prec); y=m2?greal(y):gimag(y);
+  y=polylog(m,x,prec); y=m2?real_i(y):imag_i(y);
 
   if (m==1)
   {
@@ -1826,7 +1826,7 @@ polylogp(long m, GEN x, long prec)
 	  p4=gmul(p2,p5);
 	}
 	else p4=gneg_i(gmul2n(p2,-1));
-	p3=polylog(m-k,x,prec); p3=m2?greal(p3):gimag(p3);
+	p3=polylog(m-k,x,prec); p3=m2?real_i(p3):imag_i(p3);
 	y=gadd(y,gmul(p4,p3));
       }
     }
@@ -1914,19 +1914,26 @@ polylog0(long m, GEN x, long flag, long prec)
 }
 
 static GEN
+upper_half(GEN x, long *prec)
+{
+  long tx = typ(x), l;
+  if (tx == t_QUAD) { x = quadtoc(x, *prec); tx = typ(x); }
+  if (tx != t_COMPLEX || gsigne((GEN)x[2]) <= 0)
+    err(talker,"argument must belong to upper half-plane");
+  l = precision(x); if (l) *prec = l;
+  return x;
+}
+
+static GEN
 qq(GEN x, long prec)
 {
   long tx = typ(x);
 
-  if (tx==t_PADIC) return x;
   if (is_scalar_t(tx))
   {
-    long l = precision(x);
-    if (!l) l = prec;
-    if (tx != t_COMPLEX || gsigne((GEN)x[2]) <= 0)
-      err(talker,"argument must belong to upper half-plane");
-
-    return gexp(gmul(x, PiI2(l)), l); /* e(x) */
+    if (tx == t_PADIC) return x;
+    x = upper_half(x, &prec);
+    return gexp(gmul(x, PiI2(prec)), prec); /* e(x) */
   }
   if (! ( x = _toser(x)) ) err(talker,"bad argument for modular function");
   return x;
@@ -2024,24 +2031,23 @@ e12(long k, long prec)
   return z;
 }
 
-/* returns the true value of eta(x) for Im(x) > 0, using reduction */
+/* returns the true value of eta(x) for Im(x) > 0, using reduction to
+ * standard fundamental domain */
 GEN
 trueeta(GEN x, long prec)
 {
-  long tx = typ(x), l, Nmod24;
+  long tx = typ(x), Nmod24;
   pari_sp av = avma;
   GEN q, q24, N, n, m, run;
 
   if (!is_scalar_t(tx)) err(typeer,"trueeta");
-  if (tx != t_COMPLEX || gsigne((GEN)x[2])<=0)
-    err(talker,"argument must belong to upper half-plane");
-  l = precision(x); if (l) prec=l;
-  run = gsub(realun(DEFAULTPREC), gpowgs(stoi(10),-8));
+  x = upper_half(x, &prec);
+  run = dbltor(1 - 1e-8);
   m = gun;
   N = gzero;
   for(;;)
   {
-    n = ground( greal(x) );
+    n = ground( real_i(x) );
     if (signe(n)) { x = gsub(x,n); N = addii(N, n); }
     if (gcmp(gnorm(x), run) > 0) break;
     x = gdivsg(-1,x);
@@ -2287,12 +2293,12 @@ theta(GEN q, GEN z, long prec)
   p1=realun(prec); z=gmul(p1,z);
   if (!l) q=gmul(p1,q);
   if (gexpo(q)>=0) err(thetaer1);
-  zy = gimag(z);
+  zy = imag_i(z);
   zold = NULL; /* gcc -Wall */
   if (gcmp0(zy)) k=gzero;
   else
   {
-    lq=glog(q,prec); k=ground(gdiv(zy,greal(lq)));
+    lq=glog(q,prec); k = ground(gdiv(zy, real_i(lq)));
     if (!gcmp0(k)) { zold=z; z=gadd(z,gdiv(gmul(lq,k),gi)); }
   }
   y=gsin(z,prec); n=0; qn=gun;

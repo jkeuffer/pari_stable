@@ -221,8 +221,12 @@ transc(GEN (*f)(GEN,long), GEN x, long prec)
       p1=cgetr(prec); gaffect(x,p1); tetpil=avma;
       return gerepile(av,tetpil,f(p1,prec));
 
-    case t_COMPLEX: case t_QUAD:
-      p1=gmul(x,realun(prec)); tetpil=avma;
+    case t_COMPLEX:
+      p1 = gmul(x,realun(prec)); tetpil=avma;
+      return gerepile(av,tetpil,f(p1,prec));
+
+    case t_QUAD:
+      p1 = quadtoc(x, prec); tetpil = avma;
       return gerepile(av,tetpil,f(p1,prec));
 
     case t_POL: case t_RFRAC: case t_RFRACN:

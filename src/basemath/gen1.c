@@ -549,7 +549,7 @@ gadd(GEN x, GEN y)
 
 	    av=avma; i=gexpo(y)-expo(x);
 	    if (i<=0) i=0; else i >>= TWOPOTBITS_IN_LONG;
-	    p1=co8(y,lg(x)+i); tetpil=avma;
+	    p1=quadtoc(y,lg(x)+i); tetpil=avma;
 	    return gerepile(av,tetpil,gadd(p1,x));
 	
 	  case t_INTMOD: case t_PADIC: err(operf,"+",x,y);
@@ -650,7 +650,7 @@ gadd(GEN x, GEN y)
 
 	    av=avma; i=gexpo(y)-gexpo(x);
 	    if (i<=0) i=0; else i >>= TWOPOTBITS_IN_LONG;
-	    p1=co8(y,lx+i); tetpil=avma;
+	    p1=quadtoc(y,lx+i); tetpil=avma;
 	    return gerepile(av,tetpil,gadd(p1,x));
 	}
 	
@@ -1183,7 +1183,7 @@ gmul(GEN x, GEN y)
 	    z[2]=lmul(x,(GEN)y[2]); return z;
 	
 	  case t_QUAD:
-	    av=avma; p1=co8(y,lg(x)); tetpil=avma;
+	    av=avma; p1=quadtoc(y,lg(x)); tetpil=avma;
 	    return gerepile(av,tetpil,gmul(p1,x));
 	
 	  default: err(operf,"*",x,y);
@@ -1304,7 +1304,7 @@ gmul(GEN x, GEN y)
 	
 	  case t_QUAD:
 	    lx=precision(x); if (!lx) err(operi,"*",x,y);
-	    av=avma; p1=co8(y,lx); tetpil=avma;
+	    av=avma; p1=quadtoc(y,lx); tetpil=avma;
 	    return gerepile(av,tetpil,gmul(p1,x));
 	}
 	
@@ -1858,7 +1858,7 @@ gdiv(GEN x, GEN y)
 	    gerepilemanyvec(av,tetpil,z+1,2); return z;
 
 	  case t_QUAD:
-	    av=avma; p1=co8(y,lg(x)); tetpil=avma;
+	    av=avma; p1=quadtoc(y,lg(x)); tetpil=avma;
 	    return gerepile(av,tetpil,gdiv(x,p1));
 
 	  case t_INTMOD: case t_PADIC: err(operf,"/",x,y);
@@ -2010,7 +2010,7 @@ gdiv(GEN x, GEN y)
 
 	  case t_QUAD:
 	    lx=precision(x); if (!lx) err(operi,"/",x,y);
-	    av=avma; p1=co8(y,lx); tetpil=avma;
+	    av=avma; p1=quadtoc(y,lx); tetpil=avma;
 	    return gerepile(av,tetpil,gdiv(x,p1));
 	}
 
@@ -2061,7 +2061,7 @@ gdiv(GEN x, GEN y)
 	    return z;
 
 	  case t_REAL:
-	    av=avma; p1=co8(x,lg(y)); tetpil=avma;
+	    av=avma; p1=quadtoc(x,lg(y)); tetpil=avma;
 	    return gerepile(av,tetpil,gdiv(p1,y));
 
 	  case t_PADIC:
@@ -2070,7 +2070,7 @@ gdiv(GEN x, GEN y)
 
 	  case t_COMPLEX:
 	    ly=precision(y); if (!ly) err(operi,"/",x,y);
-	    av=avma; p1=co8(x,ly); tetpil=avma;
+	    av=avma; p1=quadtoc(x,ly); tetpil=avma;
 	    return gerepile(av,tetpil,gdiv(p1,y));
 
 	  case t_QUAD:
