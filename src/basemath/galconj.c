@@ -1448,60 +1448,53 @@ permtopol(GEN p, GEN L, GEN M, GEN den, GEN mod, long x)
   gunclone(mod2); /*unclone*/
   return normalizepol_i(z,n+1);
 }
-
 /*
- * factorise partiellement n sous la forme n=d*u*f^2 ou d est sans facteur
- * carre et u n'est pas un carre parfait et retourne u*f
- */
+ * factorise partiellement n sous la forme n=d*u*f^2 ou d est un
+ * discriminant fondamental et u n'est pas un carre parfait et
+ * retourne u*f 
+ * Note: Parfois d n'est pas un discriminant (congru a 3 mod 4).
+ * Cela se produit si u est congrue a 3 mod 4.
+*/
 GEN
 corediscpartial(GEN n)
 {
-  ulong   av = avma, tetpil, r;
-  GEN     y, p1, p2, ret;
+  ulong   av = avma;
+  long i,r,s;
+  GEN fa, p1, p2, p3, res = gun, res2 = gun, res3=gun;
+  /*d=res,f=res2,u=res3*/
+  if (gcmp1(n))
+    return gun;
+  fa = auxdecomp(n, 0);
+  p1 = (GEN) fa[1];
+  p2 = (GEN) fa[2];
+  for (i = 1; i < lg(p1) - 1; i++)
   {
-    long    av = avma, tetpil, i;
-    GEN     fa, p1, p2, p3, res = gun, res2 = gun, y;
-    if (gcmp1(n))
-      return gun;
-    fa = auxdecomp(n, 0);
-    p1 = (GEN) fa[1];
-    p2 = (GEN) fa[2];
-    for (i = 1; i < lg(p1) - 1; i++)
-    {
-      p3 = (GEN) p2[i];
-      if (mod2(p3))
-	res = mulii(res, (GEN) p1[i]);
-      if (!gcmp1(p3))
-	res2 = mulii(res2, gpui((GEN) p1[i], shifti(p3, -1), 0));
-    }
     p3 = (GEN) p2[i];
-    if (mod2(p3))		/* impaire: verifions */
-    {
-      if (!gcmp1(p3))
-	res2 = mulii(res2, gpui((GEN) p1[i], shifti(p3, -1), 0));
-      if (isprime((GEN) p1[i]))
-	res = mulii(res, (GEN) p1[i]);
-      else
-	res2 = mulii(res2, (GEN) p1[i]);
-    }
-    else			/* paire:OK */
-      res2 = mulii(res2, gpui((GEN) p1[i], shifti(p3, -1), 0));
-    tetpil = avma;
-    y = cgetg(3, t_VEC);
-    y[1] = (long) icopy(res);
-    y[2] = (long) icopy(res2);
-    ret = gerepile(av, tetpil, y);
+    if (mod2(p3))
+      res = mulii(res, (GEN) p1[i]);
+    if (!gcmp1(p3))
+      res2 = mulii(res2, gpow((GEN) p1[i], shifti(p3, -1), 0));
   }
-  p2 = ret;
-  p1 = (GEN) p2[1];
-  r = mod4(p1);
-  if (signe(p1) < 0)
+  p3 = (GEN) p2[i];
+  if (mod2(p3))		/* impaire: verifions */
+  {
+    if (!gcmp1(p3))
+      res2 = mulii(res2, gpow((GEN) p1[i], shifti(p3, -1), 0));
+    if (isprime((GEN) p1[i]))
+      res = mulii(res, (GEN) p1[i]);
+    else
+      res3 = (GEN)p1[i];
+  }
+  else			/* paire:OK */
+    res2 = mulii(res2, gpow((GEN) p1[i], shifti(p3, -1), 0));
+  r = mod4(res);
+  if (signe(res) < 0)
     r = 4 - r;
-  if (r == 1 || r == 4)
-    return (GEN) p2[2];
-  tetpil = avma;
-  y = gmul2n((GEN) p2[2], -1);
-  return gerepile(av, tetpil, y);
+  s = mod4(res3);/*res2 est >0*/
+  if (r == 3 && s!=3)
+    /*d est n'est pas un discriminant mais res2 l'est: corrige*/
+    res2 = gmul2n((GEN) res2, -1);
+  return gerepileupto(av,gmul(res2,res3));
 }
 
 /* Calcule la puissance exp d'une permutation decompose en cycle */
