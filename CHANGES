@@ -64,7 +64,10 @@ IS 18- [HPUX:] remove -E from DLCFLAGS
    19- bnrconductor(bnfinit(x)) --> SEGV [ missing check ]
    20- ellpow(E,...,-1) --> stack error [ from 2.2.5 ]
    21- a:b:c; c/a/b == c/b/a --> 0
-
+   22- sparcv8 inline assembler kernel used global registers for hiremainder / 
+       overflow, which was dangerous, inefficient, and complicated. Now none
+       of the inline kernels use any global variable. The non-inline
+       assembler kernels do define and access globals hiremainder and overflow.
 
   Changed
     1- rnf structure (removed useless components)
@@ -91,9 +94,11 @@ IS 18- [HPUX:] remove -E from DLCFLAGS
 
   Added
     1- member function rnf.pol (polynomial generating absolute extension)
+    2- src/kernel/sparcv8_[micro|super]
 
   Remove
     1- remove emacs/compile [ integrated in Makefile ]
+    2- src/kernel/sparcv[89]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.5 (released 11/02/2003):
