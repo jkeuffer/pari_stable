@@ -57,9 +57,9 @@ entree functions_gp[]={
 {"system",70,(void*)system0,11,"vs"},
 {"trap",0,(void*)trap0,11,"D\"\",r,DI,DI"},
 {"whatnow",1,(void*)whatnow0,11,"vr"},
-{"write",0,(void*)write0,11,"vss*D0,L,"},
-{"write1",0,(void*)write0,11,"vss*D5,L,"},
-{"writetex",0,(void*)write0,11,"vss*D4,L,"},
+{"write",99,(void*)write0,11,"vss*D0,L,"},
+{"write1",99,(void*)write0,11,"vss*D5,L,"},
+{"writetex",99,(void*)write0,11,"vss*D4,L,"},
 
 {NULL,0,NULL,0,NULL} /* sentinel */
 };
