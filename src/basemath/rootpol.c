@@ -607,9 +607,13 @@ lower_bound(GEN p, long *k, double eps)
 static GEN
 max_modulus(GEN p, double tau)
 {
-  GEN q,aux,gunr;
-  long i,k,n=degpol(p),nn,ltop=avma,bitprec,imax,e;
-  double r,rho,eps, tau2 = (tau > 3.0)? 0.5: tau/6.;
+  GEN r,q,aux,gunr;
+  ulong av, ltop = avma;
+  long i,k,n=degpol(p),nn,bitprec,M,e;
+  double rho,eps, tau2 = (tau > 3.0)? 0.5: tau/6.;
+
+  r = cgeti(BIGDEFAULTPREC);
+  av = avma;
 
   eps = - 1/log(1.5*tau2); /* > 0 */
   bitprec = (long) ((double) n*log2(1./tau2)+3*log2((double) n))+1;
@@ -618,31 +622,34 @@ max_modulus(GEN p, double tau)
   q = gmul(aux,p); q[2+n] = (long)gunr;
   e = findpower(q);
   homothetie2n(q,e);
-  r = (double) e;
+  affsi(e, r);
   q = mygprec(q,bitprec+(n<<1));
   pol_to_gaussint(q,bitprec);
-  imax = (long) (log2( log(4.*n) / (2*tau2) )) + 2;
+  M = (long) (log2( log(4.*n) / (2*tau2) )) + 2;
   nn = n;
   for (i=0,e=0;;)
   { /* nn = deg(q) */
     rho = lower_bound(q,&k,eps);
     if (rho > exp2(-(double) e)) e = (long) -floor(log2(rho));
-    r += e / exp2((double)i);
-    if (++i == imax) break;
+    affii(shifti(addis(r,e), 1), r);
+    if (++i == M) break;
 
     bitprec = (long) ((double) k* log2(1./tau2) +
                      (double) (nn-k)*log2(1./eps) + 3*log2((double) nn)) + 1;
     homothetie_gauss(q,e,bitprec-(long)floor(mylog2((GEN) q[2+nn])+0.5));
     nn -= polvaluation(q, &q);
     set_karasquare_limit(gexpo(q));
-    q = gerepileupto(ltop, graeffe(q));
+    q = gerepileupto(av, graeffe(q));
     tau2 *= 1.5; eps = -1/log(tau2);
     e = findpower(q);
   }
-  /* r = sum e_i 2^-i */
+  if (!signe(r)) { avma = ltop; return realun(DEFAULTPREC); } 
+  aux = cgetr(DEFAULTPREC);
+  affir(r,aux); r = aux; setexpo(r, expo(r) - M);
+  rho = rtodbl(r);
+  /* rho = sum e_i 2^-i */
   avma = ltop;
-  if (fabs(r) * exp2(i) < 1) return realun(DEFAULTPREC); /* r = 0 */
-  return mpexp(dbltor(-r * LOG2)); /* 2^-r */
+  return mpexp(dbltor(-rho * LOG2)); /* 2^-r */
 }
 
 /* return the k-th modulus (in ascending order) of p, rel. error tau*/
