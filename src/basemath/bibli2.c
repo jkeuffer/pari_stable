@@ -955,7 +955,7 @@ RX_RXQ_compo(GEN f, GEN x, GEN T)
     if (low_stack(limit,stack_lim(av,1)))
     {
       if (DEBUGMEM > 1) err(warnmem, "RX_RXQ_compo");
-      y = gerepilecopy(av,y);
+      y = gerepileupto(av, y);
     }
   }
   return gerepileupto(av, y);
