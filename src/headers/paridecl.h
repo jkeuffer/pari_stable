@@ -1201,6 +1201,7 @@ GEN     resultant2(GEN x, GEN y);
 GEN     resultantducos(GEN x, GEN y);
 GEN     sort_factor(GEN y, int (*cmp)(GEN,GEN));
 GEN     sort_factor_gen(GEN y, int (*cmp)(GEN,GEN));
+GEN     sort_vecpol(GEN a);
 GEN     srgcd(GEN x, GEN y);
 long    sturmpart(GEN x, GEN a, GEN b);
 GEN     subresall(GEN u, GEN v, GEN *sol);

@@ -274,7 +274,7 @@ mathilbert(long n) /* Hilbert matrix of order n */
       coeff(p,i,j)=(long)a;
     }
   }
-  if ( n ) mael(p,1,1)=un; 
+  if ( n ) mael(p,1,1)=un;
   return p;
 }
 
@@ -586,7 +586,7 @@ GEN
 polint(GEN xa, GEN ya, GEN x, GEN *ptdy)
 {
   long tx=typ(xa), ty, lx=lg(xa);
-  
+
   if (ya) ty = typ(ya); else { ya = xa; ty = tx; xa = NULL; }
 
   if (! is_vec_t(tx) || ! is_vec_t(ty))
@@ -686,16 +686,16 @@ setsearch(GEN x, GEN y, long flag)
   long res;
   if (typ(y) != t_STR) y = gtostr(y);
   res=gen_search(x,y,flag,gcmp);
-  avma=av; 
+  avma=av;
   return res;
 }
 
 #if 0
 GEN
-gen_union(GEN x, GEN y, int (*cmp)(GEN,GEN)) 
+gen_union(GEN x, GEN y, int (*cmp)(GEN,GEN))
 {
   if (typ(x) != t_VEC || typ(y) != t_VEC) err(talker,"not a set in setunion");
-  
+
 }
 #endif
 
@@ -893,7 +893,7 @@ genrand(GEN N)
     ulong n = N[i], r;
     if (n == 0) r = 0;
     else
-    {   
+    {
       gpmem_t av = avma;
       if (i < nz) n++; /* allow for equality if we can go down later */
       p1 = muluu(n, gp_rand()); /* < n * 2^32, so 0 <= first word < n */
@@ -1070,7 +1070,6 @@ longcmp(GEN x, GEN y)
 
 /* Sort x = vector of elts, using cmp to compare them.
  *  flag & cmp_IND: indirect sort: return permutation that would sort x
- * For private use:
  *  flag & cmp_C  : as cmp_IND, but return permutation as vector of C-longs
  */
 GEN
@@ -1096,47 +1095,42 @@ gen_sort(GEN x, int flag, int (*cmp)(GEN,GEN))
   }
   if (!cmp) cmp = &longcmp;
   indx = (GEN) gpmalloc(lx*sizeof(long));
-  for (j=1; j<lx; j++) indx[j]=j;
+  for (j=1; j<lx; j++) indx[j] = j;
 
-  ir=lx-1; l=(ir>>1)+1;
+  ir = lx-1; l = (ir>>1)+1;
   for(;;)
   {
-    if (l>1)
-      { l--; indxt = indx[l]; }
+    if (l > 1) indxt = indx[--l];
     else
     {
-      indxt = indx[ir]; indx[ir]=indx[1]; ir--;
-      if (ir == 1)
-      {
-        indx[1] = indxt;
-        if (flag & cmp_C)
-	  for (i=1; i<lx; i++) y[i]=indx[i];
-        else if (flag & cmp_IND)
-	  for (i=1; i<lx; i++) y[i]=lstoi(indx[i]);
-        else
-	  for (i=1; i<lx; i++) y[i]=lcopy((GEN)x[indx[i]]);
-        free(indx); return y;
-      }
+      indxt = indx[ir]; indx[ir] = indx[1];
+      if (--ir == 1) break; /* DONE */
     }
-    q = (GEN)x[indxt]; i=l;
-    if (flag & cmp_REV)
-      for (j=i<<1; j<=ir; j<<=1)
-      {
-        if (j<ir && cmp((GEN)x[indx[j]],(GEN)x[indx[j+1]]) > 0) j++;
-        if (cmp(q,(GEN)x[indx[j]]) <= 0) break;
+    q = (GEN)x[indxt]; i = l;
+    for (j=i<<1; j<=ir; j<<=1)
+    {
+      if (j<ir && cmp((GEN)x[indx[j]],(GEN)x[indx[j+1]]) < 0) j++;
+      if (cmp(q,(GEN)x[indx[j]]) >= 0) break;
 
-        indx[i]=indx[j]; i=j;
-      }
-    else
-      for (j=i<<1; j<=ir; j<<=1)
-      {
-        if (j<ir && cmp((GEN)x[indx[j]],(GEN)x[indx[j+1]]) < 0) j++;
-        if (cmp(q,(GEN)x[indx[j]]) >= 0) break;
-
-        indx[i]=indx[j]; i=j;
-      }
-    indx[i]=indxt;
+      indx[i] = indx[j]; i = j;
+    }
+    indx[i] = indxt;
   }
+  indx[1] = indxt;
+
+  if (flag & cmp_REV)
+  { /* reverse order */
+    GEN indy = (GEN) gpmalloc(lx*sizeof(long));
+    for (j=1; j<lx; j++) indy[j] = indx[lx-j];
+    free(indx); indx = indy;
+  }
+  if (flag & cmp_C)
+    for (i=1; i<lx; i++) y[i] = indx[i];
+  else if (flag & cmp_IND)
+    for (i=1; i<lx; i++) y[i] = lstoi(indx[i]);
+  else
+    for (i=1; i<lx; i++) y[i] = lcopy((GEN)x[indx[i]]);
+  free(indx); return y;
 }
 
 #define sort_fun(flag) ((flag & cmp_LEX)? &lexcmp: &gcmp)

@@ -112,10 +112,6 @@ polcmp(GEN x, GEN y)
 {
   long i, lx = lgef(x), ly = lgef(y);
   int fl;
-#if 0 /* for efficiency */
-  if (typ(x) != t_POL || typ(y) != t_POL)
-    err(talker,"not a polynomial in polcmp");
-#endif
   if (lx > ly) return  1;
   if (lx < ly) return -1;
   for (i=lx-1; i>1; i--)
@@ -130,7 +126,7 @@ sort_factor(GEN y, int (*cmp)(GEN,GEN))
 {
   int (*old)(GEN,GEN) = polcmp_coeff_cmp;
   polcmp_coeff_cmp = cmp;
-  (void)sort_factor_gen(y,polcmp);
+  (void)sort_factor_gen(y,&polcmp);
   polcmp_coeff_cmp = old; return y;
 }
 
@@ -147,6 +143,19 @@ sort_factor_gen(GEN y, int (*cmp)(GEN,GEN))
   for (i=1; i<n; i++) { A[i] = a[w[i]]; B[i] = b[w[i]]; }
   for (i=1; i<n; i++) { a[i] = A[i]; b[i] = B[i]; }
   avma = av; return y;
+}
+
+GEN
+sort_vecpol(GEN a)
+{
+  long n, i;
+  gpmem_t av = avma;
+  GEN A,w;
+  n = lg(a); A = new_chunk(n);
+  w = gen_sort(a, cmp_IND | cmp_C, cmp_pol);
+  for (i=1; i<n; i++) A[i] = a[w[i]];
+  for (i=1; i<n; i++) a[i] = A[i];
+  avma = av; return a;
 }
 
 GEN

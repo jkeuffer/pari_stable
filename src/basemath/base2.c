@@ -23,9 +23,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #define RXQX_rem(x,y,T) RXQX_divrem((x),(y),(T),ONLY_REM)
 #define FpX_rem(x,y,p) FpX_divres((x),(y),(p),ONLY_REM)
+extern GEN DDF2(GEN x, long hint);
 extern GEN eltabstorel(GEN x, GEN T, GEN pol, GEN k);
 extern GEN element_powid_mod_p(GEN nf, long I, GEN n, GEN p);
-extern GEN DDF2(GEN x, long klim, long hint);
 extern GEN FpVQX_red(GEN z, GEN T, GEN p);
 extern GEN Fp_factor_irred(GEN P,GEN l, GEN Q);
 extern GEN RXQX_divrem(GEN x, GEN y, GEN T, GEN *pr);
@@ -3092,7 +3092,8 @@ polcompositum0(GEN A, GEN B, long flall)
   if (!ZX_is_squarefree(B)) err(talker,"compositum: %Z not separable", B);
 
   k = 1; C = ZY_ZXY_resultant_all(A, B, &k, flall? &LPRS: NULL);
-  C = DDF2(C,0,0); /* C = Res_Y (A, B(X + kY)) guaranteed squarefree */
+  C = DDF2(C, 0); /* C = Res_Y (A, B(X + kY)) guaranteed squarefree */
+  C = sort_vecpol(C);
   if (flall)
   {
     long i,l = lg(C);
