@@ -1745,36 +1745,37 @@ mpfactr(long n, long prec)
 void
 lucas(long n, GEN *ln, GEN *ln1)
 {
-  long taille,av;
+  ulong av;
+  long taille;
   GEN z,t;
 
-  if (!n) { *ln=stoi(2); *ln1=stoi(1); return; }
+  if (!n) { *ln = stoi(2); *ln1 = stoi(1); return; }
 
-  taille=(long)(pariC3*(1+labs(n))+3);
-  *ln=cgeti(taille); *ln1=cgeti(taille);
-  av=avma; lucas(n/2,&z,&t);
+  taille = 3 + (long)(pariC3 * (1+labs(n)));
+  *ln = cgeti(taille);
+  *ln1= cgeti(taille);
+  av = avma; lucas(n/2, &z, &t);
   switch(n % 4)
   {
     case -3:
-      addsiz(2,sqri(z),*ln1);
-      subiiz(addsi(1,mulii(z,t)),*ln1,*ln); break;
-    case -2:
-      addsiz(2,sqri(z),*ln); addsiz(1,mulii(z,t),*ln1); break;
+      addsiz(2,sqri(z), *ln1);
+      subiiz(addsi(1,mulii(z,t)),*ln1, *ln); break;
     case -1:
-      subisz(sqri(z),2,*ln1);
-      subiiz(subis(mulii(z,t),1),*ln1,*ln); break;
-    case  0: subisz(sqri(z),2,*ln); subisz(mulii(z,t),1,*ln1); break;
-    case  1: subisz(mulii(z,t),1,*ln); addsiz(2,sqri(t),*ln1); break;
-    case  2: addsiz(2,sqri(z),*ln); addsiz(1,mulii(z,t),*ln1); break;
-    case  3: addsiz(1,mulii(z,t),*ln); subisz(sqri(t),2,*ln1);
+      subisz(sqri(z),2, *ln1);
+      subiiz(subis(mulii(z,t),1),*ln1, *ln); break;
+    case  0: subisz(sqri(z),2,    *ln); subisz(mulii(z,t),1, *ln1); break;
+    case  1: subisz(mulii(z,t),1, *ln); addsiz(2,sqri(t),    *ln1); break;
+    case -2:
+    case  2: addsiz(2,sqri(z),    *ln); addsiz(1,mulii(z,t), *ln1); break;
+    case  3: addsiz(1,mulii(z,t), *ln); subisz(sqri(t),2,    *ln1);
   }
-  avma=av;
+  avma = av;
 }
 
 GEN
 fibo(long n)
 {
-  long av = avma;
+  ulong av = avma;
   GEN ln,ln1;
 
   lucas(n-1,&ln,&ln1);
@@ -1854,7 +1855,7 @@ sfcont(GEN x, GEN x1, long k)
 
       case t_FRAC: case t_FRACN:
         av = avma; lx1 = lgefint(x[2]);
-	l = (long) ((double) BYTES_IN_LONG/4.0*46.093443*(lx1-2)+3);
+	l = 3 + (long) ((lx1-2) / pariC3);
         if (k > 0 && ++k > 0 && l > k) l = k; /* beware overflow */
 	if ((ulong)l > LGBITS) l = LGBITS;
 	if (lgefint(x[1]) >= lx1)       
