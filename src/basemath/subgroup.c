@@ -351,7 +351,7 @@ subgroup_engine(GEN cyc, GEN bound)
   for (i=1; i<n-1; i++)
     if (!divise((GEN)cyc[i], (GEN)cyc[i+1]))
       err(talker,"not a group in forsubgroup");
-  if (n == 1 || gcmp1((GEN)cyc[1])) { treatsub(cyc); return 1; }
+  if (n == 1) { treatsub_fun(cyc); return 1; }
   if (!signe(cyc[1]))
     err(talker,"infinite group in forsubgroup");
   if (DEBUGLEVEL) timer2();
@@ -445,7 +445,7 @@ get_snf(GEN x, long *N)
     default: return NULL;
   }
   *N = lg(cyc)-1;
-  for (n = *N; n > 1; n--) /* take care of trailing 1s */
+  for (n = *N; n > 0; n--) /* take care of trailing 1s */
   {
     GEN c = (GEN)cyc[n];
     if (typ(c) != t_INT) return NULL;
