@@ -310,6 +310,8 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
   GEN *listpr, *vecpi, *vecpinvpi, *vectau;
   long i,j,l,lp;
 
+  if (lg(u1) == 1) return cgetg(1, t_VEC);
+
   /* basecl = generators in factored form */
   basecl = compute_fact(nf,u1,gen);
 
