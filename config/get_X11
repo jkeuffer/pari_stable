@@ -42,4 +42,5 @@ if test -f $Xincroot/X11/Xos.h -a -z "$graph_cmd"; then
   which_graphic_lib=builtin.X11-gnuplot-dynamic
   test -n "$extralib" && echo ..."Extra Libraries are $extralib"
   echo ..."Found X11 header files in $Xincroot/X11"
+  X11_LIBS="-L$X11 -lX11 $extralib"
 fi

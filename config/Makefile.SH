@@ -64,7 +64,7 @@ qt)
   ;;
 fltk)
   PLOTCFLAGS="-I\$(FLTKDIR)/include -I$Xincroot"
-  PLOTLIBS="-L\$(FLTKDIR)/lib -lfltk -L$X11 -lX11 $extralib"
+  PLOTLIBS="-L\$(FLTKDIR)/lib -lfltk $X11_LIBS"
   graph="$graph plotfltk"
   ;;
 gnuplot)
@@ -88,11 +88,7 @@ builtin.X11-gnuplot)
   CFLAGS="$CFLAGS -DBOTH_GNUPLOT_AND_X11"
   PLOTCFLAGS=-I$Xincroot
   GNUPLOT_OBJS="bitmap\$(_O) term\$(_O) util\$(_O) version\$(_O) stdfn\$(_O)"
-  if test "$osname" = concentrix; then
-    PLOTLIBS="$gnuplot_libs -lX11"
-  else
-    PLOTLIBS="$gnuplot_libs -L$X11 -lX11 $extralib"
-  fi
+  PLOTLIBS="$gnuplot_libs $X11_LIBS"
   plotrunpath=$X11
   case "$osname" in
     os2) libgnuplot=$gnuplot/gnuplot.a;;
@@ -103,18 +99,13 @@ builtin.X11-gnuplot)
 builtin.X11-gnuplot-dynamic)
   CFLAGS="$CFLAGS -DBOTH_GNUPLOT_AND_X11"
   PLOTCFLAGS="-I$Xincroot -DDYNAMIC_PLOTTING -DDYNAMIC_PLOTTING_RUNTIME_LINK=$_graphic_lib_dll"
-  if test "$osname" = concentrix; then
-    PLOTLIBS="-lX11"
-  else
-    PLOTLIBS="-L$X11 -lX11 $extralib"
-  fi
+  PLOTLIBS=$X11_LIBS
   plotrunpath=$X11
   graph="$graph plotgnuplot plotX"
   ;;
 X11)
   PLOTCFLAGS=-I$Xincroot
-  PLOTLIBS="-L$X11 -lX11 $extralib"
-  if test "$osname" = concentrix; then PLOTLIBS="-lX11"; fi
+  PLOTLIBS=$X11_LIBS
   plotrunpath=$X11
   graph="$graph plotX"
   ;;
