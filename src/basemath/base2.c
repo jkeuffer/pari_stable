@@ -643,27 +643,27 @@ allbase(GEN f, int flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
       p1 = denom(gcoeff(b,j,j));
       if (cmpii(p1,db) > 0) db = p1;
     }
-    if (db != gun)
-    { /* db = denom(diag(b)), (da,db) = 1 */
-      b = Q_muli_to_int(b,db);
-      if (!da) { da=db; a=b; }
-      else
+    if (db == gun) continue;
+
+    /* db = denom(diag(b)), (da,db) = 1 */
+    b = Q_muli_to_int(b,db);
+    if (!da) { da = db; a = b; }
+    else
+    {
+      j=1; while (j<=n && fnz((GEN)a[j],j) && fnz((GEN)b[j],j)) j++;
+      b = gmul(da,b);
+      a = gmul(db,a); da = mulii(da,db);
+      k = j-1; p1 = cgetg(2*n-k+1,t_MAT);
+      for (j=1; j<=k; j++)
       {
-        j=1; while (j<=n && fnz((GEN)a[j],j) && fnz((GEN)b[j],j)) j++;
-        b = gmul(da,b); a = gmul(db,a);
-        k=j-1; p1=cgetg(2*n-k+1,t_MAT);
-        for (j=1; j<=k; j++)
-        {
-          p1[j] = a[j];
-          coeff(p1,j,j) = lmppgcd(gcoeff(a,j,j),gcoeff(b,j,j));
-        }
-        for (  ; j<=n;     j++) p1[j] = a[j];
-        for (  ; j<=2*n-k; j++) p1[j] = b[j+k-n];
-        da = mulii(da,db); a = hnfmodid(p1, da);
+        p1[j] = a[j];
+        coeff(p1,j,j) = lmppgcd(gcoeff(a,j,j),gcoeff(b,j,j));
       }
+      for (  ; j<=n;     j++) p1[j] = a[j];
+      for (  ; j<=2*n-k; j++) p1[j] = b[j+k-n];
+      a = hnfmodid(p1, da);
     }
-    if (DEBUGLEVEL>5)
-      fprintferr("Result for prime %Z is:\n%Z\n",w1[i],b);
+    if (DEBUGLEVEL>5) fprintferr("Result for prime %Z is:\n%Z\n",w1[i],b);
     err_leave(&catcherr);
   }
   *dK = *dx;
