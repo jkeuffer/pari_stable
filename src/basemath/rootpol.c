@@ -1285,7 +1285,11 @@ shiftpol(GEN p, GEN b)
     if (!signe(q)) { q = scalarpol((GEN)p[i], varn(p)); continue; }
     q = addshiftpol(q, gmul(b,q), 1); /* q = q*(x + b) */
     q[2] = ladd((GEN)q[2], (GEN)p[i]); /* q = q + p[i] */
-    if (low_stack(limit, stack_lim(av,1))) q = gerepileupto(av,q);
+    if (low_stack(limit, stack_lim(av,1)))
+    {
+      if(DEBUGMEM>1) err(warnmem,"rootpol.c:shiftpol()");
+      q = gerepileupto(av, gcopy(q));
+    }
   }
   return gerepileupto(av, gcopy(q));
 }
@@ -1296,6 +1300,7 @@ conformal_pol(GEN p, GEN a, long bitprec)
 {
   GEN r,pui,num,aux, unr = myrealun(bitprec);
   long n=lgef(p)-3, i;
+  ulong av, limit;
 
   aux = pui = cgetg(4,t_POL);
   pui[1] = evalsigne(1) | evalvarn(varn(p)) | evallgef(4);
@@ -1306,11 +1311,18 @@ conformal_pol(GEN p, GEN a, long bitprec)
   num[2] = lneg(a);
   num[3] = (long)unr; /* X - a */
   r = (GEN)p[2+n];
+  av = avma; limit = stack_lim(av,2);
   for (i=n-1; ; i--)
   {
     r = gadd(gmul(r,num), gmul(aux,(GEN) p[2+i]));
     if (i == 0) return r;
     aux = gmul(pui,aux);
+    if (low_stack(limit, stack_lim(av,2)))
+    {
+      GEN *gptr[2]; gptr[0] = &r; gptr[1] = &aux;
+      if(DEBUGMEM>1) err(warnmem,"rootpol.c:conformal_pol()");
+      gerepilemany(av, gptr, 2);
+    }
   }
 }
 
