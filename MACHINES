@@ -34,7 +34,7 @@ alpha21164a  600MHz  Linux-2.2.13   egcs X11 dl2    4270    4350  2.0.19(28)IS
 alpha21164   600MHz  OSF1-V4.0D      cc  X11 dl2    3996    4384  2.0.10    LG
 alpha21164   533Mhz  Linux 2.0.34    gcc X11 dl2   (4294)  (4385) 2.0.12    JC
 alpha21164   500Mhz  Linux-2.2.13   egcs X11 dl2    5167    5217  2.1.1 (13)
-alpha21064   172Mhz  OSF1-3.0        cc  X11 dl2   34501   35670  2.0.21
+alpha21064   172Mhz  OSF1-3.0        cc  X11 dl2   34104   35564  2.1.1
 ------------------------------------------------------------------------------
 Sun/SPARC
 UltraSPARC60 450MHz  Solaris-2.7     gcc X11 dl2    3970    4010  2.0.19    IS
