@@ -1769,14 +1769,14 @@ destroyed).
 \fun{GEN}{Flm_to_ZM}{GEN z}, converts to \kbd{ZM} (\typ{MAT} with non-negative
 \typ{INT}s coefficients in this case)
 
-\fun{GEN}{zv_ZC}{GEN z} as \kbd{Flv\_to\_ZC}, without assuming coefficients are
-non-negative.
+\fun{GEN}{zv_to_ZC}{GEN z} as \kbd{Flv\_to\_ZC}, without assuming
+coefficients are non-negative.
 
-\fun{GEN}{zv_ZV}{GEN z} as \kbd{Flv\_to\_ZV}, without assuming coefficients are
-non-negative.
+\fun{GEN}{zv_to_ZV}{GEN z} as \kbd{Flv\_to\_ZV}, without assuming
+coefficients are non-negative.
 
-\fun{GEN}{zm_ZM}{GEN z} as \kbd{Flm\_to\_ZM}, without assuming coefficients are
-non-negative.
+\fun{GEN}{zm_to_ZM}{GEN z} as \kbd{Flm\_to\_ZM}, without assuming
+coefficients are non-negative.
 
 \subsubsec{Mixed precision linear algebra} Assumes dimensions are compatible.
 Multiply a multiprecision object by a single-precision one.
@@ -1797,7 +1797,11 @@ Multiply a multiprecision object by a single-precision one.
 
 \fun{GEN}{zero_Flx}{long sv} returns a zero \kbd{Flx} in variable $v$.
 
+\fun{GEN}{zero_zx}{long sv} as \kbd{zero\_Flx}
+
 \fun{GEN}{polx_Flx}{long sv} returns the variable $v$ as degree~1~\kbd{Flx}.
+
+\fun{GEN}{polx_zx}{long sv} as \kbd{polx\_Flx}
 
 \fun{GEN}{Fl_to_Flx}{ulong x, long sv} converts from scalar to degree~$1$
 polynomial in variable $v$.
@@ -1806,11 +1810,17 @@ polynomial in variable $v$.
 with \kbd{n} components (assumed larger than the number of coefficients of
 \kbd{x}).
 
+\fun{GEN}{zx_to_zv}{GEN x, long n} as \kbd{Flx\_to\_Flv}.
+
 \fun{GEN}{Flv_to_Flx}{GEN x, long sv} converts from vector (coefficient array)
 to (normalized) polynomial in variable $v$.
 
+\fun{GEN}{zv_to_zx}{GEN x, long n} as \kbd{Flv\_to\_Flx}.
+
 \fun{GEN}{Flm_to_FlxV}{GEN x, long sv} converts the colums of \kbd{Flm}~\kbd{x}
 to an array of \kbd{Flx} (repeated calls to \kbd{Flv\_to\_Flx}).
+
+\fun{GEN}{zm_to_zxV}{GEN x, long n} as \kbd{Flm\_to\_FlxV}.
 
 \fun{GEN}{Flm_to_FlxX}{GEN x, long sv,long w} converts the colums of
 \kbd{Flm}~\kbd{x} to the coefficient of an \kbd{FlxX}, and normalize the
