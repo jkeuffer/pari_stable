@@ -30,7 +30,7 @@ XR = Xavier Roblot
 YU = Yoshiaki Uchikawa
 
 
-Done for version 2.2.1 (released 16/10/2001):
+Done for version 2.2.1 (released 18/10/2001):
 
   Fixed
     1- typo in factornf (factor of degree 3 --> error message)
