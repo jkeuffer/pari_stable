@@ -879,10 +879,10 @@ extern GEN to_Kronecker(GEN P, GEN Q);
 GEN
 FpXQX_from_Kronecker(GEN Z, GEN T, GEN p)
 {
-  long i,j,lx,l = lg(Z), N = (degpol(T)<<1) + 1;
+  long i,j,lx,l, N = (degpol(T)<<1) + 1;
   GEN x, t = cgetg(N,t_POL), z = FpX_red(Z, p);
   t[1] = T[1] & VARNBITS;
-  lx = (l-2) / (N-2);
+  l = lg(z); lx = (l-2) / (N-2);
   x = cgetg(lx+3,t_POL);
   for (i=2; i<lx+2; i++)
   {

@@ -42,7 +42,10 @@ Done for version 2.2.8 (released ??/??/2004):
   Fixed
     1- gp --version: stack overflow
     2- overflow (in C long multiplication) in zeta(4.45+292532.0*I)
-
+    3- setrand(1);
+       bnr = bnrinit(bnfinit(quadpoly(1020,y)), 31,1);
+       rnfkummer(bnr, matdiagonal([5,1,1]));
+       --> SEGV ( typo in FpXQX_from_Kronecker )
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.
        As a result maximal degree jumps to ~ 2^24 on 32bit machines
