@@ -13,6 +13,11 @@ Check the License for details. You should have received a copy of it, along
 with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
+extern GEN bezout_lift_fact(GEN T, GEN Tmod, GEN p, long e);
+extern GEN respm(GEN x,GEN y,GEN pm);
+extern GEN ZX_disc_all(GEN,long);
+extern GEN polratlift(GEN P, GEN mod, GEN amax, GEN bmax, GEN denom);
+
 /*************************************************************************/
 /**									**/
 /**                           GALOIS CONJUGATES        		        **/
@@ -159,7 +164,50 @@ galoisconj2(GEN nf, long nbmax, long prec)
   9: complete detail
 */
 
-GEN vandermondeinverseprep(GEN L)
+/* DP = multiple of disc(P) or NULL
+ * Return a multiple of the denominator of an algebraic integer (in Q[X]/(P))
+ * when expressed in terms of the power basis */
+GEN
+indexpartial(GEN P, GEN DP)
+{
+  gpmem_t av = avma;
+  long i, nb;
+  GEN fa, p1, res = gun, dP;
+  dP = derivpol(P);
+  if(DEBUGLEVEL>=5) (void)gentimer(3);
+  if(!DP) DP = ZX_disc(P);
+  DP = mpabs(DP);
+  if(DEBUGLEVEL>=5) genmsgtimer(3,"IndexPartial: discriminant");
+  fa = auxdecomp(DP, 0);
+  if(DEBUGLEVEL>=5) genmsgtimer(3,"IndexPartial: factorization");
+  nb = lg(fa[1]);
+  for (i = 1; i < nb; i++)
+  {
+    GEN p=gmael(fa,1,i);
+    GEN e=gmael(fa,2,i);
+    p1 = powgi(p,shifti(e,-1));
+    if ( i==nb-1 )
+    {
+      if ( mod2(e) && !isprime(p) )
+	p1 = mulii(p1,p);
+    }
+    else if ( cmpis(e,4)>=0 )
+    {
+      if(DEBUGLEVEL>=5) fprintferr("IndexPartial: factor %Z ",p1);
+      p1 = mppgcd(p1, respm(P,dP,p1));
+      if(DEBUGLEVEL>=5) 
+      {
+        fprintferr("--> %Z : ",p1);
+        genmsgtimer(3,"");
+      }
+    }
+    res=mulii(res,p1);
+  }
+  return gerepileupto(av,res);
+}
+
+GEN
+vandermondeinverseprep(GEN L)
 {
   int     i, j, n = lg(L);
   GEN     V;
@@ -213,9 +261,6 @@ struct galois_borne
   GEN     lbornesol;
 };
 
-
-GEN indexpartial(GEN,GEN);
-extern GEN ZX_disc_all(GEN,long);
 
 GEN
 initgaloisborne(GEN T, GEN dn, GEN *ptL, GEN *ptprep, GEN *ptdis, long *ptprec)
@@ -416,8 +461,6 @@ poltopermtest(GEN f, struct galois_lift *gl, GEN pf)
   return 1;
 }
 
-extern GEN polratlift(GEN P, GEN mod, GEN amax, GEN bmax, GEN denom);
-
 /*
  * Soit P un polynome de \ZZ[X] , p un nombre premier , S\in\FF_p[X]/(Q) tel
  * que P(S)=0 [p,Q] Relever S en S_0 tel que P(S_0)=0 [p^e,Q]
@@ -541,7 +584,6 @@ struct galois_testlift
   GEN     C;
   GEN     Cd;
 };
-extern GEN bezout_lift_fact(GEN T, GEN Tmod, GEN p, long e);
 static GEN
 galoisdolift(struct galois_lift *gl, GEN frob)
 {
@@ -1541,96 +1583,6 @@ galoisgrouptopol( GEN res, GEN L, GEN M, GEN den, GEN mod, long v)
     aut[i] = (long) permtopol((GEN) res[i], L, M, den, mod, v);
   }
   return aut;
-}
-/* No more used and ugly.
- * However adding corepartial to GP seem a good idea.
- * 
- * factorise partiellement n sous la forme n=d*u*f^2 ou d est un
- * discriminant fondamental et u n'est pas un carre parfait et
- * retourne u*f 
- * Note: Parfois d n'est pas un discriminant (congru a 3 mod 4).
- * Cela se produit si u est congrue a 3 mod 4.
- */
-GEN
-corediscpartial(GEN n)
-{
-  gpmem_t av = avma;
-  long i,r,s;
-  GEN fa, p1, p2, p3, res = gun, res2 = gun, res3=gun;
-  /*d=res,f=res2,u=res3*/
-  if (gcmp1(n))
-    return gun;
-  fa = auxdecomp(n, 0);
-  p1 = (GEN) fa[1];
-  p2 = (GEN) fa[2];
-  for (i = 1; i < lg(p1) - 1; i++)
-  {
-    p3 = (GEN) p2[i];
-    if (mod2(p3))
-      res = mulii(res, (GEN) p1[i]);
-    if (!gcmp1(p3))
-      res2 = mulii(res2, gpow((GEN) p1[i], shifti(p3, -1), 0));
-  }
-  p3 = (GEN) p2[i];
-  if (mod2(p3))		/* impaire: verifions */
-  {
-    if (!gcmp1(p3))
-      res2 = mulii(res2, gpow((GEN) p1[i], shifti(p3, -1), 0));
-    if (isprime((GEN) p1[i]))
-      res = mulii(res, (GEN) p1[i]);
-    else
-      res3 = (GEN)p1[i];
-  }
-  else			/* paire:OK */
-    res2 = mulii(res2, gpow((GEN) p1[i], shifti(p3, -1), 0));
-  r = mod4(res);
-  if (signe(res) < 0)
-    r = 4 - r;
-  s = mod4(res3);/*res2 est >0*/
-  if (r == 3 && s!=3)
-    /*d est n'est pas un discriminant mais res2 l'est: corrige*/
-    res2 = gmul2n((GEN) res2, -1);
-  return gerepileupto(av,gmul(res2,res3));
-}
-extern GEN respm(GEN x,GEN y,GEN pm);
-
-GEN
-indexpartial(GEN P, GEN DP)
-{
-  gpmem_t av = avma;
-  long i, nb;
-  GEN fa, p1, res = gun, dP;
-  dP = derivpol(P);
-  if(DEBUGLEVEL>=5) (void)gentimer(3);
-  if(!DP) DP = ZX_disc(P);
-  DP = mpabs(DP);
-  if(DEBUGLEVEL>=5) genmsgtimer(3,"IndexPartial: discriminant");
-  fa = auxdecomp(DP, 0);
-  if(DEBUGLEVEL>=5) genmsgtimer(3,"IndexPartial: factorization");
-  nb = lg(fa[1]);
-  for (i = 1; i < nb; i++)
-  {
-    GEN p=gmael(fa,1,i);
-    GEN e=gmael(fa,2,i);
-    p1 = powgi(p,shifti(e,-1));
-    if ( i==nb-1 )
-    {
-      if ( mod2(e) && !isprime(p) )
-	p1 = mulii(p1,p);
-    }
-    else if ( cmpis(e,4)>=0 )
-    {
-      if(DEBUGLEVEL>=5) fprintferr("IndexPartial: factor %Z ",p1);
-      p1 = mppgcd(p1, respm(P,dP,p1));
-      if(DEBUGLEVEL>=5) 
-      {
-        fprintferr("--> %Z : ",p1);
-        genmsgtimer(3,"");
-      }
-    }
-    res=mulii(res,p1);
-  }
-  return gerepileupto(av,res);
 }
 
 /*
