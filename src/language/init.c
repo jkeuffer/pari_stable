@@ -1190,7 +1190,7 @@ allocatemoremem(ulong newsize)
     newsize = sizeold << 1;
     err(warner,"doubling stack size; new stack = %.1f MBytes",newsize/1E6);
   }
-  else if ((long)newsize < 0)
+  else if ((long)newsize < 1000L)
     err(talker,"required stack memory too small");
   /* can't do bot = malloc directly, in case we lack memory */
   newsize = fix_size(newsize);
