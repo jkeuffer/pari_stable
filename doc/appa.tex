@@ -82,6 +82,22 @@ operating system, thus you can build GP for several different machines from
 the same source tree (the builds are completely independent, so can be done
 simultaneously).
 
+\misctitle{Technical note:} The precise default destinations are as follows:
+the \kbd{gp} binary, the scripts \kbd{gphelp} and \kbd{tex2mail} go to
+\kbd{\$prefix/bin}. The pari library goes to \kbd{\$prefix/lib} and include
+files to \kbd{\$prefix/include/pari}. As for architecture independant files,
+the man pages go into \kbd{\$prefix/man} and the rest in various
+subdirectories of \kbd{\$prefix/lib/pari}.
+
+\noindent You can also supply a \kbd{--share-prefix} argument in which case
+architecture independant files go to different directories than in the above
+scheme: \kbd{\$share/pari} (galdata package), \kbd{\$share/man} (man pages)
+and \kbd{\$share/doc/pari/} (everything else: sample GP scripts and C code,
+documentation, emacs macros). For instance, to build a package for a Linux
+distribution, you will want to use
+
+\kbd{./Configure --prefix=/usr --share-prefix=/usr/share}
+
 \noindent \kbd{Configure} will let the following environment variable
 override the defaults if set:
 
