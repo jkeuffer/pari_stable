@@ -242,7 +242,7 @@ factorbasegen(GEN nf,long n2,long n)
   numideal     = (long*)gpmalloc(sizeof(long)*(n2+1));
   idealbase    = (GEN *)gpmalloc(sizeof(GEN )*(n2+1));
 
-  lfun=cgetr(DEFAULTPREC); affsr(1,lfun);
+  lfun=realun(DEFAULTPREC);
   p=*delta++; i=0; ip=0; KC=0;
   while (p<=n2)
   {
@@ -1046,9 +1046,9 @@ quad_form(GEN *cbase,GEN ideal,GEN T2vec,GEN prvec)
   for (i=1; i<lg(T2vec); i++)
   {
     long prec = prvec[i];
-    GEN p1,T2 = (GEN)T2vec[i], unr=cgetr(prec);
+    GEN p1,T2 = (GEN)T2vec[i];
 
-    affsr(1,unr); p1 = qf_base_change(T2,gmul(ideal,unr),0);
+    p1 = qf_base_change(T2,gmul(ideal,realun(prec)), 0);
     if ((*cbase=lllgramintern(p1,100,1,prec)) == NULL)
     {
       if (DEBUGLEVEL) err(warner, "prec too low in quad_form(1): %ld",prec);
@@ -1674,7 +1674,11 @@ compute_check(GEN sublambda, GEN z, GEN *parch, GEN *reg)
   if (DEBUGLEVEL) { fprintferr("\n#### Computing check\n"); flusherr(); }
   c = gmul(R,z);
   sublambda = bestappr(sublambda,c); den = denom(sublambda);
-  if (gcmp(den,c) > 0) { avma=av; return NULL; }
+  if (gcmp(den,c) > 0)
+  {
+    if (DEBUGLEVEL) fprintferr("c = %Z\nden = %Z\n",c,den);
+    avma=av; return NULL;
+  }
 
   p1 = gmul(sublambda,den); tetpil=avma;
   *parch = lllint(p1);
@@ -2573,6 +2577,10 @@ INCREASEGEN:
     if (!lmatt2)
     {
       lmatt2 = compute_matt2(RU,nf);
+      av1 = avma;
+    }
+    if (!powsubfb)
+    {
       powsubfbgen(nf,subfb,CBUCHG+1,PRECREG,PRECREGINT);
       av1 = avma;
     }
@@ -2686,6 +2694,14 @@ INCREASEGEN:
   /* z = Res (zeta_K, s = 1) * w D^(1/2) / [ 2^r1 (2pi)^r2 ] = h R */
   p1 = gmul2n(divir(clh,z), 1);
   c1 = compute_check(sublambda,p1,&parch,&reg);
+  if (!c1)
+  { /* precision problem */
+    prec=(PRECREG<<1)-2;
+    if (DEBUGLEVEL) err(warnprec,"buchall (compute_check)",prec);
+    avma = av0; nf = nfnewprec(nf,prec);
+    av0 = avma; cbach /= 2;
+    goto INCREASEGEN;
+  }
   /* c1 should be close to 2, and not much smaller */
   if (c1 && gcmpgs(gmul2n(c1,1),3) < 0) { c1=NULL; nrelsup=MAXRELSUP; }
   if (!c1 || gcmpgs(c1,3) > 0)
@@ -2695,15 +2711,15 @@ INCREASEGEN:
       if (DEBUGLEVEL)
       {
         if (c1)
-          fprintferr("\n ***** check = %f\n\n",gtodouble(c1)/2);
+          fprintferr("\n ***** check = %f\n",gtodouble(c1)/2);
         else
-          fprintferr("\n ***** check = NULL\n\n");
+          fprintferr("\n ***** check = NULL\n");
         flusherr();
       }
       nlze=MIN_EXTRA; goto LABELINT;
     }
     if (!c1 || cbach<11.99) { sfb_increase=1; goto LABELINT; }
-    err(warner,"suspicious check. Suggest increasing extra relations.");
+    err(warner,"suspicious check. Try to increase extra relations");
   }
 
   /* Phase "be honest" */
