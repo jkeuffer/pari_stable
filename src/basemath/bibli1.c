@@ -2176,7 +2176,6 @@ polredabs0(GEN x, long flun, long prec)
     phimax = (flun & nf_ORIG)? polx[0]: (GEN)NULL;
   prec = (long)nfnewprec(nf,0);
 
-  nv = lgef(nf[1])==4? 1: 2;
   for (i=1; ; i++)
   {
     v = fincke_pohst(nf,NULL,5000,3,prec, chk);
@@ -2199,9 +2198,9 @@ polredabs0(GEN x, long flun, long prec)
   storepols = (flun & nf_ALL)? storeallpols: findmindisc;
 
   if (DEBUGLEVEL) fprintferr("\n");
+  x = (GEN)nf[1];
   if (nv==1)
   {
-    x=(GEN)nf[1];
     y = cgetg(2,t_VEC); y[1]=(long)x;
     a = cgetg(2,t_VEC); a[1]=(long)polx[varn(x)];
   }
