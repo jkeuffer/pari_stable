@@ -17,7 +17,7 @@ case "$arch" in
   ia64)          asmarch=ia64 ;         pretty=Itanium ;;
   hppa)          asmarch=none ;         pretty='HP Precision'
         case "$osname-`uname -r`" in
-        hpux-?.10.*)  asmarch=$arch ;;
+        hpux-?.1?.*)  asmarch=$arch ;;
         esac ;;
   alpha)         asmarch=$arch;         pretty=Alpha ;;
   ppc)  case "$sizeof_long" in   
