@@ -147,8 +147,8 @@ gcopy(GEN x)
   }
   else
   {
-    lx = (tx==t_POL || tx==t_LIST)? lgef(x): lg(x); 
-    y = new_chunk(lx);
+    lx = lg(x); y = new_chunk(lx);
+    if (tx==t_POL || tx==t_LIST) lx = lgef(x);
     for (i=0; i<lontyp[tx];  i++) y[i]=x[i];
     for (   ; i<lontyp2[tx]; i++) copyifstack(x[i],y[i]);
     for (   ; i<lx;          i++) y[i]=lcopy((GEN)x[i]);
@@ -191,8 +191,8 @@ forcecopy(GEN x)
   }
   else
   {
-    lx = (tx==t_POL || tx==t_LIST)? lgef(x): lg(x); 
-    y = new_chunk(lx);
+    lx = lg(x); y = new_chunk(lx);
+    if (tx==t_POL || tx==t_LIST) lx = lgef(x);
     for (i=0; i<lontyp[tx]; i++) y[i]=x[i];
     for (   ; i<lx;         i++) y[i]=(long)forcecopy((GEN)x[i]);
   }
