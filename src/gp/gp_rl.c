@@ -585,7 +585,7 @@ pari_completion(char *text, int START, int END)
 static int
 rl_short_help(int count, int key)
 {
-  const int flag = (count < 0)? h_RL | h_LONG: h_RL;
+  int flag = (count < 0 || rl_last_func == rl_short_help)? h_RL|h_LONG: h_RL;
   int off = rl_point;
 
   /* func() with cursor on ')' following completion */
@@ -658,6 +658,14 @@ init_readline()
   Bind('H', rl_long_help,  emacs_meta_keymap);
   Bind('h', rl_short_help, vi_movement_keymap);
   Bind('H', rl_long_help,  vi_movement_keymap);
+#  ifdef HAS_RL_GENERIC_BIND
+#define KSbind(s,f,k) rl_generic_bind(ISFUNC, (s), (char*)(f), (k))
+
+  KSbind("OP",   rl_short_help,  emacs_meta_keymap); /* f1, vt100 */
+  KSbind("[11~", rl_short_help,  emacs_meta_keymap); /* f1, xterm */
+  KSbind("OP",   rl_short_help,  vi_movement_keymap); /* f1, vt100 */
+  KSbind("[11~", rl_short_help,  vi_movement_keymap); /* f1, xterm */
+#  endif
   Bind('(', pari_rl_matched_insert, emacs_standard_keymap);
   Bind('[', pari_rl_matched_insert, emacs_standard_keymap);
   Bind(6, pari_rl_forward_sexp,  emacs_meta_keymap); /* M-C-f */

@@ -33,6 +33,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #ifdef READLINE
   extern void init_readline();
+  long use_readline = 1;
+  int readline_init = 1;
 BEGINEXTERN
 #  if defined(__cplusplus) && defined(__SUNPRO_CC)
   /* readline.h gives a bad definition of readline() */
@@ -636,6 +638,25 @@ sd_debug(char *v, int flag)
 { return sd_numeric(v,flag,"debug",&DEBUGLEVEL, 0,20,NULL); }
 
 static GEN
+sd_rl(char *v, int flag)
+{
+#ifdef READLINE
+#  if 0			/* Works - even when init_readline() was called */
+    if (readline_init && *v == '0')
+	err(talker, "Too late to switch off readline mode");
+#  endif
+    if (!readline_init && *v && *v != '0') {
+	init_readline();
+	readline_init = 1;
+    }
+    return sd_numeric(v,flag,"readline",&use_readline, 0,20,NULL);
+#else	/* !( defined READLINE ) */
+    long dummy;
+    return sd_numeric(v,flag,"readline",&dummy, 0,20,NULL);
+#endif
+}
+
+static GEN
 sd_debugfiles(char *v, int flag)
 { return sd_numeric(v,flag,"debugfiles",&DEBUGFILES, 0,20,NULL); }
 
@@ -919,6 +940,7 @@ default_type gp_default_list[] =
   {"prompt",(void*)sd_prompt},
   {"psfile",(void*)sd_psfile},
   {"realprecision",(void*)sd_realprecision},
+  {"readline",(void*)sd_rl},
   {"secure",(void*)sd_secure},
   {"seriesprecision",(void*)sd_seriesprecision},
   {"simplify",(void*)sd_simplify},
@@ -1558,10 +1580,11 @@ static char *
 what_readline()
 {
 #ifdef READLINE
- return "v"READLINE" enabled";
-#else
-  return "disabled";
+  if (use_readline)
+    return "v"READLINE" enabled";
+  else
 #endif
+  return "disabled";
 }
 
 static void
@@ -1861,10 +1884,11 @@ get_preproc_value(char *s)
   if (!strncmp(s,"READL",5))
   {
 #ifdef READLINE
+  if (use_readline)
     return 1;
-#else
-    return 0;
+  else
 #endif
+  return 0;
   }
   return -1;
 }
@@ -2307,28 +2331,36 @@ get_line_from_user(char *prompt, Buffer *b)
 static int
 get_line_from_user(char *prompt, Buffer *b)
 {
-  static char *previous_hist = NULL;
-  char *buf, *s = b->buf;
-
-  if (! (buf = gprl_input(b,&s, prompt)) )
-  { /* EOF */
-    pariputs("\n"); return 0;
-  }
-  input_loop(b,buf,NULL,prompt);
-  unblock_SIGINT(); /* bug in readline 2.0: need to unblock ^C */
-
-  if (*s)
+  if (use_readline)
   {
-    /* update history (don't add the same entry twice) */
-    if (!previous_hist || strcmp(s,previous_hist))
-    {
-      if (previous_hist) free(previous_hist);
-      previous_hist = pari_strdup(s); add_history(s);
+    static char *previous_hist = NULL;
+    char *buf, *s = b->buf;
+
+    if (! (buf = gprl_input(b,&s, prompt)) )
+    { /* EOF */
+      pariputs("\n"); return 0;
     }
-    /* update logfile */
-    if (logfile) fprintf(logfile, "%s%s\n",prompt,s);
+    input_loop(b,buf,NULL,prompt);
+    unblock_SIGINT(); /* bug in readline 2.0: need to unblock ^C */
+
+    if (*s)
+    {
+      /* update history (don't add the same entry twice) */
+      if (!previous_hist || strcmp(s,previous_hist))
+      {
+        if (previous_hist) free(previous_hist);
+        previous_hist = pari_strdup(s); add_history(s);
+      }
+      /* update logfile */
+      if (logfile) fprintf(logfile, "%s%s\n",prompt,s);
+    }
+    return 1;
   }
-  return 1;
+  else
+  {
+    pariputs(prompt);
+    return get_line_from_file(prompt,b,infile);
+  }
 }
 #endif
 
@@ -2717,7 +2749,10 @@ main(int argc, char **argv)
   INIT_SIG_on;
   pari_sig_init(gp_sighandler);
 #ifdef READLINE
-  init_readline();
+  if (use_readline) {
+      init_readline();
+      readline_init = 1;
+  }
 #endif
   gp_history_fun = gp_history;
   whatnow_fun = whatnow;
