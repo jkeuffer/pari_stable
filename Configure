@@ -32,6 +32,7 @@ cd $config_dir
 . ./get_config_options
 ####################### CONFIGURE - SHELL ###################################
 . ./get_nl # how to get echo without \n ? (for config questions)
+. ./get_head # do we need head -n # or head -# ?
 . ./get_PATH
 #  We might need the following :
 echo Looking for some tools first ...
