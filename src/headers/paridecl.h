@@ -1080,6 +1080,7 @@ GEN     unifpol(GEN nf,GEN pol,long flag);
 
 /* perm.c */
 
+GEN     cyclicperm(long l, long d);
 GEN     cyc_powtoperm(GEN cyc, long exp);
 long    group_isabelian(GEN G);
 GEN     group_subgroups(GEN G);
@@ -1278,7 +1279,7 @@ GEN     roots0(GEN x,long flag,long l);
 
 /*subcyclo.c */
 
-GEN     galoissubcyclo(long n, GEN H, GEN Z, long v, long flag);
+GEN     galoissubcyclo(GEN N, GEN sg, long flag, long v);
 GEN     subcyclo(long n, long d, long v);
 
 /* subfields.c */

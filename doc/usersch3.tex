@@ -3603,6 +3603,12 @@ If present $den$ must be a suitable value for $\var{gal}[5]$.
 
 \syn{galoisinit}{\var{gal},\var{den}}.
 
+\subsecidx{galoisisabelian}$(\var{gal},{fl=0})$: \var{gal} being as output by \kbd{galoisinit}, return $0$ if
+ \var{gal} is not an abelian group, and the HNF matrix of \var{gal} over \kbd{gal.gen} if $fl=0$, $1$ if
+ $fl=1$.
+
+\syn{galoisisabelian}{\var{gal},\var{fl}} where \var{fl} is a C long integer.
+
 \subsecidx{galoispermtopol}$(\var{gal},\var{perm})$: \var{gal} being a
 Galois field as output by \kbd{galoisinit} and \var{perm} a element of
 $\var{gal}.group$, return the polynomial defining the Galois
@@ -3621,12 +3627,28 @@ is greater or equal to $2$.
 
 \syn{galoispermtopol}{\var{gal},\var{perm}}.
 
-\subsecidx{galoissubcyclo}$(n,H,\{Z\},\{v\},\{fl=0\})$: If $fl=0$, compute a polynomial
-defining the subfield of $\Q(\zeta_n)$ fixed by the subgroup \var{H} of
-$(\Z/n\Z)^*$. The subgroup \var{H} can be given by a generator, a set of
-generators given by a vector or a HNF matrix. If present \kbd{Z} must be
-\kbd{znstar(n)}, and is currently only used when \var{H} is a HNF matrix. If
-\var{v} is given, the polynomial is given in the variable \var{v}.
+\subsecidx{galoissubcyclo}$(N,H,\{fl=0\},\{v\})$: 
+This function compute the abelian extension of the rational field given by the
+modulus \var{N} and the congruence subgroup \var{H}.
+
+The modulus can be: 
+
+\quad$\bullet$ a integer \var{n}.
+
+\quad$\bullet$ The output of \kbd{znstar(n)}.
+
+\quad$\bullet$ The output of \kbd{bnrinit(bnfinit(y),m,1))} where m is a module which may eventually have an infinite part.
+
+The subgroup \var{H} can be given by:
+
+\quad$\bullet$ a generator, i.e. an integer or an integer modulo \var{n}.
+
+\quad$\bullet$ a vector of generators.
+
+\quad$\bullet$ a matrix, being taken to be a HNF left divisor of \var{N}, or \kbd{znstar(N)} if N is an integer.
+
+If $fl=0$, compute a polynomial (in the variable \var{v}) defining the subfield
+of $\Q(\zeta_n)$ fixed by the subgroup \var{H} of $(\Z/n\Z)^*$. 
 
 If $fl=1$, compute only the (finite part of) conductor of the abelian extension.
 
@@ -3644,16 +3666,26 @@ subcyclo(n, d = -1)=
   G = matdiagonal(Z[2]);
   S = [];
   forsubgroup(H = G, d,
-    S = concat(S, galoissubcyclo(n, mathnf(concat(G,H)),Z));
+    S = concat(S, galoissubcyclo(Z, mathnf(concat(G,H))));
   );
   S
 }
 @eprog
 
-\misctitle{Note:} The interface to this function needs to be cleaned up, and
-so is subject to change.
+Alternatively this one can be used instead
 
-\syn{galoissubcyclo}{n,H,Z,v} where n is a C long integer.
+\bprog
+subcyclo(n, d = -1)=
+{
+  local(bnr,L);
+  if (d < 0, d = n);
+  bnr=bnrinit(bnfinit(y),[n,[1]],1);
+  L = subgrouplist(bnr,d,1);
+  vector(#L,i,galoissubcyclo(bnr,L[i]));
+}
+@eprog
+
+\syn{galoissubcyclo}{N,H,fl,v} where \var{fl} is a C long integer, and \var{v} a variable number.
 
 \subsecidx{galoissubfields}$(G,\{fl=0\},\{v\})$: Output all the subfields of the Galois group \var{G},
 as a vector.

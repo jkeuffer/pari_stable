@@ -165,6 +165,7 @@ vecvecsmall_search(GEN x, GEN y, long flag)
  */
 
 /* indentity permutation */
+/* Not a good name since l is not a perm...*/
 GEN
 perm_identity(long l)
 {
@@ -175,6 +176,19 @@ perm_identity(long l)
     perm[i] = i;
   return perm;
 } 
+
+GEN
+cyclicperm(long l, long d)
+{
+  GEN     perm;
+  int     i;
+  perm = cgetg(l + 1, t_VECSMALL);
+  for (i = 1; i <= l-d; i++)
+    perm[i] = i+d;
+  for (i = l-d+1; i <= l; i++)
+    perm[i] = i-l+d;
+  return perm;
+}
 
 /*
  * Multiply (compose) two permutations.
@@ -446,18 +460,21 @@ GEN group_quotient(GEN G, GEN H)
   gpmem_t ltop=avma;
   GEN p1,p2,p3;
   long i,j,k;
+  long a=1;
   long n=lg(mael(G,1,1))-1;
   long o=group_order(H);
   GEN elt = vecvecsmall_sort(group_elts(G,n));
+  GEN used = vecsmall_const(lg(elt),0);
   long l = (lg(elt)-1)/o;
   p2 = cgetg(l+1, t_VEC);
   p3 = cgetg(lg(elt), t_VEC);
   for (i = 1, k = 1; i <= l; ++i)
   {
-    GEN V = group_leftcoset(H,(GEN)elt[1]);
+    GEN V;
+    while(used[a]) a++;
+    V = group_leftcoset(H,(GEN)elt[a]);
     p2[i] = V[1];
-    V = vecvecsmall_sort(V);
-    elt = gen_setminus(elt, V, vecsmall_lexcmp);
+    for(j=1;j<lg(V);j++) used[vecvecsmall_search(elt,(GEN)V[j],0)] = 1;
     for (j = 1; j <= o; j++)
       p3[k++] = (long) vecsmall_append((GEN) V[j],i);
   }

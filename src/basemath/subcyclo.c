@@ -15,6 +15,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #include "pari.h"
 
+extern GEN hnftogeneratorslist(long n, GEN zn2, GEN zn3, GEN lss, GEN gen, GEN ord);
+
 /* Calcule les orbites d'un sous-groupe de Z/nZ donne par un
  * generateur ou d'un ensemble de generateur donne par un vecteur. 
  */
@@ -171,32 +173,25 @@ static GEN gscycloconductor(GEN g, long n, long flag)
   }
   return g;
 }
-static GEN 
-lift_check_modulus(GEN H, GEN n)
+static long 
+lift_check_modulus(GEN H, long n)
 {
-  long t=typ(H), l=lg(H);
-  long i;
-  GEN V;
+  long t=typ(H);
+  long h;
   switch(t)
   {
     case t_INTMOD:
-      if (cmpii(n,(GEN)H[1]))
+      if (cmpsi(n,(GEN)H[1]))
 	err(talker,"wrong modulus in galoissubcyclo");
       H = (GEN)H[2];
     case t_INT:
-      if (!is_pm1(mppgcd(H,n)))
+      h=smodis(H,n);
+      if (cgcd(h,n)!=1)
 	err(talker,"generators must be prime to conductor in galoissubcyclo");
-      return modii(H,n);
-    case t_VEC: case t_COL:
-      V=cgetg(l,t);
-      for(i=1;i<l;i++)
-	V[i] = (long)lift_check_modulus((GEN)H[i],n);
-      return V;
-    case t_VECSMALL:
-      return H;
+      return h;
   }
   err(talker,"wrong type in galoissubcyclo");
-  return NULL;/*not reached*/
+  return 0;/*not reached*/
 }
 
 GEN subcyclo_cyclic(long n, long d, long m ,long z, long g, GEN powz, GEN le)
@@ -241,22 +236,13 @@ GEN subcyclo_orbits(GEN O, GEN powz, GEN le)
   return V;
 }
 
-/* n must be the exact conductor of the extension.
- * d is the degree of the extension.
- * if g!=0, this is the generator of the galois group and O is not used
- * if g==0, O must be the orbit of the Galois group.
- */
 GEN 
-subcyclo_main(long n, long d, long o, long g, long gd, GEN O, long v)
+subcyclo_start(long n, long d, long o, long *ptr_val,long *ptr_l)
 {
-  gpmem_t ltop=avma, av;
-  GEN l,borne,le,powz,z,V;
-  long lle;
+  gpmem_t av;
+  GEN l,borne,le,z;
   long i;
   long e,val;
-  GEN R;
-  if ( v==-1 ) v=0;
-  V = cgetg(n, t_VECSMALL);
   if (DEBUGLEVEL >= 1)
     timer2();
   l=stoi(n+1);e=1;
@@ -269,7 +255,7 @@ subcyclo_main(long n, long d, long o, long g, long gd, GEN O, long v)
     fprintferr("Subcyclo: prime l=%Z\n",l);
   av=avma;
   /*Borne utilise': 
-    Vecmax(Vec((x+o)^u)=max{binome(u,i)*o^i ;1<=i<=u} 
+    Vecmax(Vec((x+o)^d)=max{binome(d,i)*o^i ;1<=i<=d} 
   */
   i=d-(1+d)/(1+o);
   borne=mulii(binome(stoi(d),i),gpowgs(stoi(o),i));
@@ -284,8 +270,20 @@ subcyclo_main(long n, long d, long o, long g, long gd, GEN O, long v)
   z=padicsqrtnlift(gun,stoi(n),z,l,val);
   if (DEBUGLEVEL >= 1)
     msgtimer("padicsqrtnlift.");
-  powz = cgetg(n,t_VEC); powz[1] = (long)z;
-  lle=lg(le)*3;/*Assume dvmdii use lx+ly space*/
+  *ptr_val=val;
+  *ptr_l=itos(l);
+  return gmodulcp(z,le);
+}
+
+GEN
+subcyclo_roots(long n, GEN zl)
+{
+  GEN le=(GEN) zl[1];
+  GEN z=(GEN) zl[2];
+  long lle=lg(le)*3; /*Assume dvmdii use lx+ly space*/
+  long i;
+  GEN powz = cgetg(n,t_VEC);
+  powz[1] = (long) z;
   for (i=2; i<n; i++)
   {
     gpmem_t av=avma;
@@ -295,68 +293,168 @@ subcyclo_main(long n, long d, long o, long g, long gd, GEN O, long v)
     avma=av;
     powz[i] = lmodii(p1,le);
   }
-  if (DEBUGLEVEL >= 1)
-    msgtimer("computing roots.");  
-  if (g)
-    R=subcyclo_cyclic(n,d,o,g,gd,powz,le);
-  else
-    R=subcyclo_orbits(O,powz,le);
-  if (DEBUGLEVEL >= 1)
-    msgtimer("computing new roots."); 
-  R=FpV_roots_to_pol(R,le,v);
-  if (DEBUGLEVEL >= 1)
-    msgtimer("computing products."); 
-  R=FpX_center(R,le);
-  return gerepileupto(ltop,R);
+  return powz;
 }
 
-extern GEN hnftogeneratorslist(long n, GEN zn2, GEN zn3, GEN lss, GEN gen, GEN ord);
+GEN
+galoiscyclo(long n, long v)
+{
+  ulong ltop=avma;
+  GEN grp;
+  GEN z, y, le;
+  long val,l;
+  GEN L;
+  long i, card;
+  card=itos(phi(stoi(n)));
+  z=subcyclo_start(n,card/2,2,&val,&l);
+  le=(GEN) z[1];
+  z=(GEN) z[2];
+  y=lift(gener(stoi(n)));
+  L = cgetg(1+card,t_VEC);
+  L[1] = (long) z;
+  for (i=2; i<=card; i++)
+    L[i] = (long) powmodulo((GEN)L[i-1],y,le);
+  grp = cgetg(9, t_VEC);
+  grp[1] = (long) cyclo(n,v);
+  grp[2] = lgetg(4,t_VEC); 
+  mael(grp,2,1) = lstoi(l);
+  mael(grp,2,2) = lstoi(val);
+  mael(grp,2,3) = licopy(le);
+  grp[3] = lcopy(L);
+  grp[4] = (long) vandermondeinversemod(L, (GEN) grp[1], gun, le);
+  grp[5] = un;
+    grp[7] = lgetg(2,t_VEC); 
+  mael(grp,7,1) = (long) cyclicperm(card,1);
+  grp[8] = lgetg(2,t_VECSMALL);
+  mael(grp,8,1) = card;
+  grp[6] = lgetg(card+1,t_VEC); 
+  mael(grp,6,1) = (long) perm_identity(card);
+  for(i=2; i<=card; i++)
+    mael(grp,6,i) = (long) perm_mul(gmael(grp,6,i-1),gmael(grp,7,1));
+  return gerepileupto(ltop,grp);
+}
+
+/*Convert a bnrinit(Q,n) to a znstar(n)*/
+GEN bnrtozn(GEN bnr)
+{
+  GEN zk;
+  GEN gen;
+  GEN cond;
+  long l2;
+  long i;
+  GEN p3;         /* vec */
+  GEN res;
+  checkbnrgen(bnr);
+  zk = (GEN) bnr[5];
+  gen = (GEN) zk[3];
+  cond = gcoeff(gmael3(bnr,2,1,1), 1, 1);
+  l2 = lg(gen);
+  res= cgetg(4,t_VEC); 
+  res[1]=zk[1];
+  res[2]=zk[2];
+  p3 = cgetg(l2, t_VEC);
+  for (i = 1; i < l2; ++i)
+  {
+    GEN x=(GEN) gen[i];
+    if (typ(x) == t_MAT)
+      x = gcoeff(x, 1, 1);
+    else if (typ(x) == t_COL)
+      x = (GEN) x[1];
+    p3[i] = (long) gmodulcp(mpabs(x), cond);
+  }
+  res[3] = (long) p3;
+  return res;
+}
 
 GEN 
-galoissubcyclo(long n, GEN H, GEN Z, long v, long flag)
+galoissubcyclo(GEN N, GEN sg, long flag, long v)
 {
   gpmem_t ltop=avma;
-  GEN V;
+  GEN H, V;
   long i;
   long d,o;
-  GEN O,g;
+  GEN O;
+  GEN Z=NULL;
+  GEN zl,L,T,le,powz;
+  long val,l;
+  long n;
   if (flag<0 || flag>2) err(flagerr,"galoisubcyclo");
   if ( v==-1 ) v=0;
-  if ( n<1 ) err(arither2);
-  if ( n>=VERYBIGINT) 
-    err(impl,"galoissubcyclo for huge conductor");    
-  if ( typ(H)==t_MAT )
+  if (!sg) sg=gun;
+  switch(typ(N))
   {
-    GEN zn2, zn3, gen, ord;
-    if (lg(H) == 1 || lg(H) != lg(H[1]))
-      err(talker,"not a HNF matrix in galoissubcyclo");
-    if (!Z)
-      Z=znstar(stoi(n));
-    else if (typ(Z)!=t_VEC || lg(Z)!=4) 
-      err(talker,"Optionnal parameter must be as output by znstar in galoissubcyclo");
-    zn2 = gtovecsmall((GEN)Z[2]);
-    zn3 = lift((GEN)Z[3]);
-    if ( lg(zn2) != lg(H) || lg(zn3) != lg(H))
-      err(talker,"Matrix of wrong dimensions in galoissubcyclo");
-    gen = cgetg(lg(zn3), t_VECSMALL);
-    ord = cgetg(lg(zn3), t_VECSMALL);
-    hnftogeneratorslist(n,zn2,zn3,H,gen,ord);
-    H=gen;
+    case t_INT:
+      n=itos(N);
+      if ( n<1 ) err(arither2);
+      break;
+    case t_VEC:
+      if (lg(N)==7)
+        N=bnrtozn(N);
+      if (lg(N)==4)
+      {
+        Z=N;
+        if (lg(Z[3])==1)
+          n=1;
+        else
+        {
+          if (typ(gmael(Z,3,1))!= t_INTMOD)
+#ifdef NETHACK_MESSAGES
+            err(talker,"You have transgressed!");
+#else
+            err(talker,"Please do not try to break PARI with ridiculously counterfeit data. Thanks!");
+#endif
+          n=itos(gmael3(Z,3,1,1));
+        }
+        break;
+      }
+    default: /*fall through*/
+      err(typeer,"galoisubcyclo");
+      return NULL;/*Not reached*/
   }
-  else
+  if (n==1) {avma=ltop; return polx[v];}
+  switch(typ(sg))
   {
-    H=lift_check_modulus(H,stoi(n));
-    H=gtovecsmall(H);
-    for (i=1;i<lg(H);i++)
-      if (H[i]<0)
-	H[i]=mulssmod(-H[i],n-1,n);
-    /*Should check components are prime to n, but it is costly*/
+     case t_INTMOD: case t_INT: 
+      H=cgetg(2,t_VECSMALL); 
+      H[1]=lift_check_modulus(sg,n);
+      break;
+    case t_VECSMALL:
+      H=gcopy(sg);
+      for (i=1;i<lg(H);i++)
+        if (H[i]<0)
+          H[i]=mulssmod(-H[i],n-1,n);
+      break;
+    case t_VEC:
+    case t_COL:
+      H=cgetg(lg(sg),t_VECSMALL);
+      for(i=1;i<lg(sg);i++)
+        H[i] = (long)lift_check_modulus((GEN)sg[i],n);
+      break;
+    case t_MAT:/*Fall through*/
+      {
+        GEN zn2, zn3, ord;
+        if (lg(sg) == 1 || lg(sg) != lg(sg[1]))
+          err(talker,"not a HNF matrix in galoissubcyclo");
+        if (!Z)
+          Z=znstar(stoi(n));
+        zn2 = gtovecsmall((GEN)Z[2]);
+        zn3 = lift((GEN)Z[3]);
+        if ( lg(zn2) != lg(sg) || lg(zn3) != lg(sg))
+          err(talker,"Matrix of wrong dimensions in galoissubcyclo");
+        H = cgetg(lg(zn3), t_VECSMALL);
+        ord = cgetg(lg(zn3), t_VECSMALL);
+        hnftogeneratorslist(n,zn2,zn3,sg,H,ord);
+      }
+      break;
+    default:
+      err(typeer,"galoisubcyclo");
+      return NULL;/*Not reached*/
   }
   V = cgetg(n, t_VECSMALL);
   if (DEBUGLEVEL >= 1)
     timer2();
   n = znconductor(n,H,V);
-  if (flag==1)  {avma=ltop;return stoi(n);}
+  if (flag==1)  {avma=ltop; return stoi(n);}
   if (DEBUGLEVEL >= 1)
     msgtimer("znconductor.");
   H = V;
@@ -368,21 +466,47 @@ galoissubcyclo(long n, GEN H, GEN Z, long v, long flag)
   if (lg(O)==1 || lg(O[1])==2)
   {
     avma=ltop;
-    return gscycloconductor(cyclo(n,v),n,flag);
+    if (flag==3) return galoiscyclo(n,v);
+    return gscycloconductor(cyclo(n,v),n,flag); 
   }
   d=lg(O)-1;o=lg(O[1])-1;
   if (DEBUGLEVEL >= 4)
     fprintferr("Subcyclo: %ld orbits with %ld elements each\n",d,o);
-  g=subcyclo_main(n,d,o,0,0,O,v);
-  return gerepileupto(ltop,gscycloconductor(g,n,flag));
+  zl=subcyclo_start(n,d,o,&val,&l);
+  powz=subcyclo_roots(n,zl);
+  le=(GEN) zl[1];
+  L=subcyclo_orbits(O,powz,le);
+  T=FpV_roots_to_pol(L,le,v);
+  T=FpX_center(T,le);
+  if(flag<3)
+    return gerepileupto(ltop,gscycloconductor(T,n,flag));
+  else
+  {
+    GEN grp = cgetg(9, t_VEC);
+    grp[1] = (long) gcopy(T);
+    grp[2] = lgetg(4,t_VEC); /*Make K.B. happy(8 components)*/
+    mael(grp,2,1) = lstoi(l);
+    mael(grp,2,2) = lstoi(val);
+    mael(grp,2,3) = licopy(le);
+    grp[3] = (long) gcopy(L);
+    grp[4] = (long) vandermondeinversemod(L, T, gun, le);
+    grp[5] = un;
+    grp[6] = lgetg(1,t_VEC);
+    grp[7] = lgetg(1,t_VEC);
+    grp[8] = lgetg(1,t_VECSMALL);
+    return gerepileupto(ltop,grp);
+  }
 }
 
 GEN
 subcyclo(long n, long d, long v)
 {
-  gpmem_t av=avma;
-  long q,p,al,r,g,gd;
+  gpmem_t ltop=avma;
+  long o,p,al,r,g,gd;
   GEN fa,G;
+  GEN zl,L,T,le;
+  long l,val;
+  GEN powz;
   if (v<0) v = 0;
   if (d==1) return polx[v];
   if (d<=0 || n<=0) err(typeer,"subcyclo");
@@ -393,13 +517,13 @@ subcyclo(long n, long d, long v)
   al= itos(gmael(fa,2,1));
   if (lg((GEN)fa[1]) > 2 || (p==2 && al>2))
     err(talker,"non-cyclic case in polsubcyclo: use galoissubcyclo instead");
-  avma=av;
+  avma=ltop;
   r = cgcd(d,n); /* = p^(v_p(d))*/
   n = r*p;
-  q = n-r; /* = phi(n) */
-  if (q == d) return cyclo(n,v);
-  if (q % d) err(talker,"degree does not divide phi(n) in subcyclo");
-  q /= d;
+  o = n-r; /* = phi(n) */
+  if (o == d) return cyclo(n,v);
+  if (o % d) err(talker,"degree does not divide phi(n) in subcyclo");
+  o /= d;
   if (p==2)
   {
     GEN pol = powgi(polx[v],gdeux); pol[2]=un; /* replace gzero */
@@ -408,7 +532,13 @@ subcyclo(long n, long d, long v)
   G=gener(stoi(n));
   g=itos((GEN)G[2]);
   gd=itos((GEN)gpowgs(G,d)[2]);
-  avma=av;
-  return subcyclo_main(n,d,q,g,gd,NULL,v);
+  avma=ltop;
+  zl=subcyclo_start(n,d,o,&val,&l);
+  le=(GEN)zl[1];
+  powz=subcyclo_roots(n,zl);
+  L=subcyclo_cyclic(n,d,o,g,gd,powz,le);
+  T=FpV_roots_to_pol(L,le,v);
+  T=FpX_center(T,le);
+  return gerepileupto(ltop,T);
 }
 
