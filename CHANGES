@@ -70,6 +70,8 @@ RS 21- gcc-3.4 breaks on compatibility code to support old readline versions
    22- \p 8000
        E=ellinit([0,0,0,0,1296]); P=[-8,28]; ellpointtoz(E,P) --> oo loop
    23- idealaddtoone(nfinit(y),[0]) --> SEGV [ BIB ]
+   24- aprcl would wrongly report composites [ introduced aprcl.c:1.48,
+       before release-2-2-8 ]
 
   Added
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu

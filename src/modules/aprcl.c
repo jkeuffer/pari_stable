@@ -304,10 +304,11 @@ powpolmod(Cache *C, Red *R, int p, int k, GEN jac)
   return _powpolmod(C, jac, R, _sqr);
 }
 
+/* globfa contains the odd prime divisors of e(t) */
 static GEN
-e(ulong t)
+e(ulong t, GEN *globfa)
 {
-  GEN fa, P, E, s;
+  GEN fa, P, E, s, Primes;
   ulong nbd, m, k, d;
   int lfa, i, j;
 
@@ -321,6 +322,7 @@ e(ulong t)
     P[i] = itos((GEN)P[i]);
     nbd *= E[i];
   }
+  Primes = cget1(nbd + 1, t_VECSMALL);
   s = gen_2; /* nbd = number of divisors */
   for (k=0; k<nbd; k++)
   {
@@ -332,8 +334,13 @@ e(ulong t)
     }
     /* d runs through the divisors of t */
     if (BSW_psp(utoipos(++d)))
+    {
+      if (d != 2) appendL(Primes, (GEN)d);
       s = muliu(s, (ulong)u_pow(d, 1 + u_lval(t,d)));
+
+    }
   }
+  if (globfa) { vecsmall_sort(Primes); *globfa = Primes; }
   return s;
 }
 
@@ -411,7 +418,7 @@ compt(GEN N)
   for (t = 8648640+840;; t+=840)
   {
     pari_sp av = avma;
-    if (cmpii(e(t), B) > 0) break;
+    if (cmpii(e(t, NULL), B) > 0) break;
     avma = av;
   }
   avma = av0; return t;
@@ -507,13 +514,12 @@ calcjac(Cache **pC, GEN globfa, GEN *ptabfaq, GEN *ptabj)
   ulong i, q, l;
   pari_sp av;
 
-  l = lg(globfa); settyp(globfa, t_VECSMALL);
+  l = lg(globfa);
   *ptabfaq = tabfaq= cgetg(l,t_VEC);
   *ptabj   = tabj  = cgetg(l,t_VEC);
   for (i=1; i<l; i++)
   {
-    q = itos((GEN)globfa[i]); /* odd prime */
-    globfa[i] = q;
+    q = globfa[i]; /* odd prime */
     faq = decomp( utoipos(q-1) ); tabfaq[i] = (long)faq;
     P = (GEN)faq[1]; settyp(P, t_VECSMALL);
     E = (GEN)faq[2]; settyp(E, t_VECSMALL); lfaq = lg(P);
@@ -613,7 +619,7 @@ filltabs(Cache *C, Cache *Cp, Red *R, int p, int pk, long ltab)
     C->E = E;
   }
 
-  if (pk > 2 && smodis(R->N,pk) == 1)
+  if (pk > 2 && umodiu(R->N,pk) == 1)
   {
     GEN vpa, p1, p2, p3, a2 = NULL, a = finda(Cp, R->N, pk, p);
     int jj, ph = pk - pk/p;
@@ -741,7 +747,7 @@ autvec_TH(int pk, GEN z, GEN v, GEN C)
 static GEN
 autvec_AL(int pk, GEN z, GEN v, Red *R)
 {
-  const int r = smodis(R->N, pk);
+  const int r = umodiu(R->N, pk);
   GEN s = polun[varn(R->C)];
   int i, lv = lg(v);
   for (i=1; i<lv; i++)
@@ -856,9 +862,9 @@ step4c(Cache *C, Red *R, ulong q)
 static int
 step4d(Cache *C, Red *R, ulong q)
 {
-  GEN s1 = Fp_pow(negi(utoipos(q)), R->N2, R->N);
+  GEN s1 = Fp_pow(utoipos(q), R->N2, R->N); 
   if (DEBUGLEVEL>2) C->ctsgt++;
-  if (gcmp1(s1)) return 0;
+  if (is_pm1(s1)) return 0;
   if (is_m1(s1, R->N)) return (mod4(R->N) == 1);
   return -1;
 }
@@ -874,9 +880,9 @@ step5(Cache **pC, Red *R, int p, GEN et, ulong ltab)
 
   for (q = 3; *d; )
   {
-    if (q%p != 1 || smodis(et,q) == 0) goto repeat;
+    if (q%p != 1 || umodiu(et,q) == 0) goto repeat;
 
-    if (smodis(R->N,q) == 0) return -1;
+    if (umodiu(R->N,q) == 0) return -1;
     k = u_lval(q-1, p);
     pk = u_pow(p,k);
     if (pk < lg(pC) && pC[pk]) { C = pC[pk]; Cp = pC[p]; }
@@ -940,7 +946,7 @@ aprcl(GEN N)
     }
   t = compt(N);
   if (DEBUGLEVEL) fprintferr("Choosing t = %ld\n",t);
-  et = e(t);
+  et = e(t, &globfa);
   if (cmpii(sqri(et),N) < 0) err(bugparier,"aprcl: e(t) too small");
   if (!gcmp1(gcdii(N,mulsi(t,et)))) return _res(1,0);
 
@@ -954,9 +960,8 @@ aprcl(GEN N)
   for (i=2; i<lfat; i++)
   {
     p = fat[i]; q = p*p;
-    flaglp[p] = (Fl_pow(smodis(N,q),p-1,q) != 1);
+    flaglp[p] = (Fl_pow(umodiu(N,q),p-1,q) != 1);
   }
-  globfa = (GEN)decomp(shifti(et, -vali(et)))[1];
   calcjac(pC, globfa, &tabfaq, &tabj);
   
   av = avma; l = lg(globfa);
