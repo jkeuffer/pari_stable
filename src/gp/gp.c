@@ -699,10 +699,13 @@ sd_output(char *v, int flag)
   return sd_numeric(v,flag,"output",&prettyp, 0,3,msg);
 }
 
+extern void err_clean();
+
 void
 allocatemem0(unsigned long newsize)
 {
   parisize = allocatemoremem(newsize);
+  err_clean();
   jump_to_buffer();
 }
 
