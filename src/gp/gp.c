@@ -59,6 +59,7 @@ static char *help_prg,*path;
 static char prompt[MAX_PROMPT_LEN];
 static char thestring[256];
 static char *prettyprinter;
+static char *prettyprinter_dft = "tex2mail -TeX -noindent -ragged -by_par";
 static pariFILE *prettyprinter_file;
 static long prettyp, test_mode, quiet_mode, gpsilent, simplifyflag;
 static long chrono, pariecho, primelimit, parisize, strictmatch;
@@ -257,8 +258,9 @@ prettyp_init()
     prettyprinter_file = try_pipe(prettyprinter, mf_OUT | mf_TEST);
     if (!prettyprinter_file)
     {
-      err(warner,"invalid prettyprinter: '%s'",prettyprinter);
-      free(prettyprinter); prettyprinter = NULL; return 0;
+      err(warner,"broken prettyprinter: '%s'",prettyprinter);
+      if (prettyprinter != prettyprinter_dft) free(prettyprinter);
+      prettyprinter = NULL; return 0;
     }
   }
   pariflush();
@@ -814,24 +816,28 @@ sd_prettyprinter(char *v, int flag)
   if (*v)
   {
     char *old = prettyprinter;
+    int cancel = (!strcmp(v,"no"));
 
     if (secure) err_secure("prettyprinter",v);
+    if (!strcmp(v,"yes")) v = prettyprinter_dft;
     if (old && strcmp(old,v) && prettyprinter_file)
     {
-      pariFILE *f = try_pipe(v, mf_OUT | mf_TEST);
-      if (f)
-      {
-        pari_fclose(prettyprinter_file);
-        prettyprinter_file = f;
-      }
+      pariFILE *f;
+      if (cancel) f = NULL;
       else
       {
-        err(warner,"invalid prettyprinter: '%s'",v);
-        return gnil;
+        f = try_pipe(v, mf_OUT | mf_TEST);
+        if (!f)
+        {
+          err(warner,"broken prettyprinter: '%s'",v);
+          return gnil;
+        }
       }
+      pari_fclose(prettyprinter_file);
+      prettyprinter_file = f;
     }
-    prettyprinter = pari_strdup(v);
-    if (old) free(old);
+    prettyprinter = cancel? NULL: pari_strdup(v);
+    if (old && old != prettyprinter_dft) free(old);
     if (flag == d_INITRC) return gnil;
   }
   if (flag == d_RETURN) return strtoGEN(prettyprinter? prettyprinter: "");
@@ -2252,11 +2258,9 @@ gp_main_loop(int ismain)
     { /* save state */
       PariOUT *old = pariOut;
       FILE *o_out = pari_outfile;
-      int o_prettyp = prettyp;
-      int prettyprint = (prettyprinter && prettyp == f_PRETTY);
+      int prettyprint, o_prettyp = prettyp;
 
-      if (prettyprint && !prettyp_init())
-        { prettyprint = 0; o_prettyp = prettyp = f_PRETTYMAT; }
+      prettyprint = (prettyprinter && prettyp == f_PRETTY && prettyp_init());
       if (DEBUGLEVEL > 4) fprintferr("prec = [%ld, %ld]\n", prec,precdl);
 
       /* history number */

@@ -2064,7 +2064,9 @@ pari_kill_file(pariFILE *f)
 void
 pari_fclose(pariFILE *f)
 {
-  if (f->next) (f->next)->prev = f->prev; else last_tmp_file = f->prev;
+  if (f->next) (f->next)->prev = f->prev;
+  else if (f == last_tmp_file) last_tmp_file = f->prev;
+  else if (f == last_file) last_file = f->prev;
   if (f->prev) (f->prev)->next = f->next;
   pari_kill_file(f);
 }
@@ -2169,7 +2171,7 @@ try_pipe(char *cmd, int flag)
     {
       jmp_buf env;
       void *c;
-      if (DEBUGFILES) fprintferr("checking output pipe...\n");
+      if (DEBUGFILES) fprintferr("I/O: checking output pipe...\n");
       if (setjmp(env))
       {
         if (file) pclose(file);
@@ -2180,8 +2182,8 @@ try_pipe(char *cmd, int flag)
         int i;
         c = err_catch(-1, env, NULL);
         fprintf(file,"\n\n"); fflush(file);
-        for (i=1; i<400; i++) fprintf(file,"                         \n");
-        fprintf(file,"\n\n"); fflush(file);
+        for (i=1; i<1000; i++) fprintf(file,"                  \n");
+        fprintf(file,"\n"); fflush(file);
       }
       err_leave(&c);
       if (!file) return NULL;
