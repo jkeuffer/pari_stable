@@ -1272,14 +1272,6 @@ GEN uniqvecsmall(GEN V)
   setlg(W,j+1);
   return gerepileupto(ltop,W);
 }
-int egal_vecsmall(GEN x, GEN y)
-{
-  long i;
-  if (lg(x)!=lg(y)) return 0;
-  for(i=1;i<lg(x);i++)
-    if (x[i]!=y[i]) return 0;
-  return 1;
-}
 int pari_compare_lg(GEN x, GEN y)
 {
   return lg(x)-lg(y);
@@ -2785,7 +2777,7 @@ galoisfindgroups(GEN lo, GEN sg, long f)
       W[k]=mael(lo,i,k)%f;
     sortvecsmall(W); 
     U=uniqvecsmall(W);
-    if (egal_vecsmall(U, sg))
+    if (gegal(U, sg))
     {
       cgiv(U);
       V[j++]=lo[i];
@@ -3701,7 +3693,7 @@ galoistestabelian(GEN gal)
   for(i=2;i<lg(gal[7]);i++)
     for(j=1;j<i;j++)
     {
-      long test=egal_vecsmall(permapply(gmael(gal,7,i),gmael(gal,7,j)),
+      long test=gegal(permapply(gmael(gal,7,i),gmael(gal,7,j)),
 	  permapply(gmael(gal,7,j),gmael(gal,7,i)));
       avma=ltop;
       if (!test) return 0;
@@ -3729,7 +3721,7 @@ GEN galoisisabelian(GEN gal, long flag)
     btop=avma;
     P=permcyclepow(permorbite(gmael(gal,7,i)),mael(gal,8,i));
     for(j=1;j<lg(gal[6]);j++)
-      if (egal_vecsmall(P,gmael(gal,6,j)))
+      if (gegal(P,gmael(gal,6,j)))
 	  break;
     avma=btop;
     if (j==lg(gal[6])) err(talker,"wrong argument in galoisisabelian");
