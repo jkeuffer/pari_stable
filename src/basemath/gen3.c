@@ -2337,14 +2337,16 @@ gtovecsmall(GEN x)
 GEN
 compo(GEN x, long n)
 {
-  long l,tx=typ(x);
+  long tx = typ(x);
+  ulong l, lx = (ulong)lg(x);
 
-  if (tx == t_POL && n+1 >= lg(x)) return gzero;
-  if (tx == t_SER && !signe(x)) return gzero;
   if (!is_recursive_t(tx))
     err(talker, "this object doesn't have components (is a leaf)");
-  l = lontyp[tx]+n-1;
-  if (n < 1 || l >= lg(x)) err(talker,"nonexistent component");
+  if (n < 1) err(talker,"nonexistent component");
+  if (tx == t_POL && (ulong)n+1 >= lx) return gzero;
+  if (tx == t_SER && !signe(x)) return gzero;
+  l = (ulong)lontyp[tx] + (ulong)n-1; /* beware overflow */
+  if (l >= lx) err(talker,"nonexistent component");
   return gcopy((GEN)x[l]);
 }
 
