@@ -129,6 +129,7 @@ sub open_dvi_then_quit
   $dvifile = "$docdir/$dvifile" if (! -f "$dvifile");
   die "could not find $dvifile" if (! -f "$dvifile");
   (!$ENV{DISPLAY} && !$ENV{GPXDVI}) && die "xdvi needs X-Windows";
+  print "displaying \'$docdir/$dvifile\'.";
   system("$xdvi $dvifile 2>/dev/null >/dev/null&");
   exit 0;
 }
