@@ -78,6 +78,7 @@ IZ 12- [gnuplot + dynamic link:] allow building even when dlopen() not available
    32- polredabs fails to reduce
          x^8-2*x^7-34*x^6+78*x^5+265*x^4-628*x^3-389*x^2+1237*x-449
        [typo in chk_gen_init: skipfirst not initialized properly]
+MW 33- (recent) typo in localred (char 2)
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).

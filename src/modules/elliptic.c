@@ -2553,13 +2553,13 @@ localred_carac_23(GEN e, long p, int minim)
     if (smodis((GEN)e[5], p2))
       return localred_result(nudelta, 2, 1, v);
         /* II   */
-    p3 = p * p * p;
+    p3 = p2 * p;
     if (smodis((GEN)e[9], p3))
       return localred_result(nudelta - 1, 3, 2, v);
         /* III  */
     if (smodis((GEN)e[8], p3))
     {
-      if (smodis((GEN)e[8], (p==2)? 8: 27) == p2)
+      if (smodis((GEN)e[8], (p==2)? 32: 27) == p2)
         c = 3;
       else
         c = 1;
@@ -2588,7 +2588,7 @@ localred_carac_23(GEN e, long p, int minim)
             /* p | a1; p^2  | a2, a3; p^3 | a4; p^4 | a6 */
         nu = 1;
         pk  = stoi(p2);
-        p2k = stoi(p * p * p * p);
+        p2k = stoi(p2 * p2);
         for(;;)
         {
           be =  aux2((GEN)e[3], p, pk);
@@ -2629,7 +2629,7 @@ localred_carac_23(GEN e, long p, int minim)
             /* IV*  */
         if (theroot) cumule(&v, &e, gun, gzero, gzero, stoi(theroot*p*p));
             /* p | a1; p^2 | a2; p^3 | a3, a4; p^5 | a6 */
-        p4 = p * p * p * p;
+        p4 = p2 * p2;
         if (smodis((GEN)e[4], p4))
           return localred_result(nudelta - 7, -3, 2, v);
             /* III* */
