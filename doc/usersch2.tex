@@ -1037,6 +1037,8 @@ the complete evaluation of \kbd{x[1]}, and the result is not modifiable).
 \kbd{!} (unary, prefix): logical \var{not}. \kbd{!$x$} return $1$ if $x$ is
 equal to $0$ (specifically, if \kbd{gcmp0($x$)==1}), and $0$ otherwise.
 
+\kbd{\#} (unary, prefix): cardinality; \kbd{\#$x$} returns \kbd{length($x$)}.
+
 \kbd{'} (unary, prefix): quote its argument without evaluating it.
 \bprog
 ? a = x + 1; x = 1;
