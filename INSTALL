@@ -1,0 +1,20 @@
+Assuming you're on a fairly standard Unix system and you are in a hurry, you
+can quickly build/test GP in the following way:
+
+a) look at MACHINES to see if anything funny applies to your configuration
+b) ./Configure (--prefix=/exotic/dir/name if desired. Default is /usr/local)
+c) make all, make bench
+d) make install if desired
+e) copy misc/gprc.dft to /etc/gprc or $HOME/.gprc (personal installation)
+f) the data for polgalois() function (12 > degree > 6) is provided in a
+separate archive galdata.tgz, which you have to fetch separately.
+g) you can find documentation, tutorial and reference card in directory doc.
+
+That's it!
+
+Compile and read doc/INSTALL.tex (e.g cd doc; tex INSTALL; xdvi INSTALL) for
+more detailed information and various hints.
+
+P.S: the same procedure should work on
+  Windows 95/98/NT: with the cygwin package
+  OS/2            : with EMX, GNU tools, and pdksh
