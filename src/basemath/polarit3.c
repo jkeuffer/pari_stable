@@ -1475,7 +1475,7 @@ intersect_ker(GEN P, GEN MA, GEN U, GEN l)
   long i;
   GEN A, R, ib0;
   if (DEBUGLEVEL>=4) (void)timer2();
-  if (OK_ULONG(l))
+  if (lgefint(l)==3)
   {
     ulong p=l[2];
     GEN M, V=Flm_Frobenius(ZM_to_Flm(MA, p), r, p, evalvarn(vu));
@@ -1717,7 +1717,7 @@ FpX_factorff_irred(GEN P, GEN Q, GEN l)
   FpX_ffintersect(P,Q,d,l,&SP,&SQ,FP,FQ);
   av=avma;
   E = FpX_factorgalois(P,l,d,vq,FP);
-  if (OK_ULONG(l))
+  if (lgefint(l)==3)
   {
     ulong p = l[2];
     E = FlxX_to_Flm(ZXX_to_FlxX(E,p,vp),np);
