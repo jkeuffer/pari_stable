@@ -1101,7 +1101,7 @@ rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
       /* step 13 */
   if (DEBUGLEVEL>2) fprintferr("Step 13\n");
   nbcol= lSp+dv;
-  vecWB = concatsp(vecw,vecbetap);
+  vecWB = concatsp(vecw, vecbetap);
   vecWA = concatsp(vecw, vecalphap);
   listprSp = concatsp(Sml2, Sl);
       /* step 14, 15, and 17 */
@@ -1130,6 +1130,7 @@ rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
     GEN QtP = gmul(gtrans_i(Q),matP);
     M = vconcat(M, concatsp(zeromat(dc,dv), QtP));
   }
+  if (!M) M = zeromat(1,nbcol);
       /* step 16 */
   if (DEBUGLEVEL>2) fprintferr("Step 16\n");
   K = FpM_ker(M, gell);
