@@ -2385,7 +2385,6 @@ gsmithall(GEN x,long all)
 	    for (l=1; l<i; l++)
 	      if (signe(gmod(gcoeff(x,k,l),b)))
               {
-                k--;
                 for (l=1; l<=i; l++)
                   coeff(x,i,l) = ladd(gcoeff(x,i,l),gcoeff(x,k,l));
                 if (all) ml[i] = ladd((GEN)ml[i],(GEN)ml[k]);

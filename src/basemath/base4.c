@@ -2530,7 +2530,6 @@ nfsmith(GEN nf, GEN x)
               p4 = idealmul(nf,p3,idealmul(nf,(GEN)J[l],(GEN)I[k]));
 	      if (!gegal(idealadd(nf,b,p4), b))
               {
-                k--; l--;
                 b=idealdiv(nf,(GEN)I[k],(GEN)I[i]);
                 p4=gauss(idealdiv(nf,(GEN)J[i],idealmul(nf,p3,(GEN)J[l])),b);
                 l=1; while (l<=N && gcmp1(denom((GEN)p4[l]))) l++;
