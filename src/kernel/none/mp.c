@@ -2431,7 +2431,7 @@ cgiv(GEN x)
 
 /* GN 1998Oct25, originally developed in January 1998 under 2.0.4.alpha,
  * in the context of trying to improve elliptic curve cryptosystem attacking
- * algorithms.
+ * algorithms.  2001Jan02 -- added bezout() functionality.
  *
  * Two basic ideas - (1) avoid many integer divisions, especially when the
  * quotient is 1 (which happens more than 40% of the time).  (2) Use Lehmer's
@@ -2445,9 +2445,9 @@ cgiv(GEN x)
  * quite right  (the catch-up divisions needed when one partial quotient is
  * larger than a word are missing).
  *
- * The API is mpxgcd() below;  the single-word routines xgcduu and xxgcduu
- * may be called directly if desired;  lgcdii() probably doesn't make much
- * sense out of context.
+ * The API consists of invmod() and bezout() below;  the single-word routines
+ * xgcduu and xxgcduu may be called directly if desired;  lgcdii() probably
+ * doesn't make much sense out of context.
  *
  * The whole lot is a factor 6 .. 8 faster on word-sized operands, and asym-
  * ptotically about a factor 2.5 .. 3, depending on processor architecture,
@@ -2495,8 +2495,8 @@ cgiv(GEN x)
  * Finally, f=0 with xxgcduu() is useful for Bezout computations.
  * [Harrumph.  In the above prescription, the sign turns out to be precisely
  * wrong.]
- * (It is safe for inversemodulo() to call xgcduu() with f=1, because f&1
- * doesn't make a difference when gcd(d,d1)>1.  The speedup is negligible.)
+ * (It is safe for invmod() to call xgcduu() with f=1, because f&1 doesn't
+ * make a difference when gcd(d,d1)>1.  The speedup is negligible.)
  *
  * In principle, when gcd(d,d1) is known to be 1, it is straightforward to
  * recover the final u,u1 given only v,v1 and s.  However, it probably isn't
@@ -3171,11 +3171,10 @@ lgcdii(ulong* d, ulong* d1,
  *==================================
  *    If a is invertible, return 1, and set res  = a^{ -1 }
  *    Otherwise, return 0, and set res = gcd(a,b)
-
- * Temporary - to be replaced with mpxgcd()
- * I think we won't need to change much ... just the parameter-passing and
- * return value conventions, and computing a final u in addition to a final
- * v value before returning (and doing so even when the gcd isn't 1)
+ * 
+ * This is sufficiently different from bezout() to be implemented separately
+ * instead of having a bunch of extra conditionals in a single function body
+ * to meet both purposes.
  */
 
 int
@@ -3193,7 +3192,7 @@ invmod(GEN a, GEN b, GEN *res)
   av = avma;
   if (lgefint(b) == 3) /* single-word affair */
   {
-    d1 = modiu(a, (ulong)b[2]);
+    d1 = modiu(a, (ulong)(b[2]));
     if (d1 == gzero)
     {
       if (b[2] == 1L)
@@ -3201,14 +3200,14 @@ invmod(GEN a, GEN b, GEN *res)
       else
         { *res = absi(b); return 0; }
     }
-    g = xgcduu((ulong)b[2], (ulong)d1[2], 1, &xv, &xv1, &s);
+    g = xgcduu((ulong)(b[2]), (ulong)(d1[2]), 1, &xv, &xv1, &s);
 #ifdef DEBUG_LEHMER
-    fprintferr(" <- %lu,%lu\n", (ulong)b[2], (ulong)d1[2]);
+    fprintferr(" <- %lu,%lu\n", (ulong)(b[2]), (ulong)(d1[2]));
     fprintferr(" -> %lu,%ld,%lu; %lx\n", g,s,xv1,avma);
 #endif
     avma = av;
     if (g != 1UL) { *res = utoi(g); return 0; }
-    xv = xv1 % (ulong)b[2]; if (s < 0) xv = ((ulong)b[2]) - xv;
+    xv = xv1 % (ulong)(b[2]); if (s < 0) xv = ((ulong)(b[2])) - xv;
     *res = utoi(xv); return 1;
   }
 
@@ -3295,10 +3294,10 @@ invmod(GEN a, GEN b, GEN *res)
     /* Assertions: lgefint(d)==lgefint(d1)==3, and
      * gcd(d,d1) is nonzero and fits into one word
      */
-    g = xxgcduu(d[2], d1[2], 1, &xu, &xu1, &xv, &xv1, &s);
+    g = xxgcduu((ulong)(d[2]), (ulong)(d1[2]), 1, &xu, &xu1, &xv, &xv1, &s);
 #ifdef DEBUG_LEHMER
     output(d);output(d1);output(v);output(v1);
-    fprintferr(" <- %lu,%lu\n", (ulong)d[2], (ulong)d1[2]);
+    fprintferr(" <- %lu,%lu\n", (ulong)(d[2]), (ulong)(d1[2]));
     fprintferr(" -> %lu,%ld,%lu; %lx\n", g,s,xv1,avma);
 #endif
     if (g != 1UL) { avma = av; *res = utoi(g); return 0; }
@@ -3329,7 +3328,323 @@ invmod(GEN a, GEN b, GEN *res)
   return 1;
 }
 
-/* SQUARE ROOT */
+/*==================================
+ * bezout(a,b,pu,pv)
+ *==================================
+ *    Return g = gcd(a,b) >= 0, and assign GENs u,v through pointers pu,pv
+ *    such that g = u*a + v*b.
+ * Special cases:
+ *    a == b == 0 ==> pick u=1, v=0
+ *    a != 0 == b ==> keep v=0
+ *    a == 0 != b ==> keep u=0
+ *    |a| == |b| != 0 ==> keep u=0, set v=+-1
+ * Assignments through pu,pv will be suppressed when the corresponding
+ * pointer is NULL  (but the computations will happen nonetheless).
+ */
+
+GEN
+bezout(GEN a, GEN b, GEN *pu, GEN *pv)
+{
+  GEN t,u,u1,v,v1,d,d1,q,r;
+  GEN *pt;
+  long av,av1,lim;
+  long s;
+  int sa, sb;
+  ulong g;
+  ulong xu,xu1,xv,xv1;		/* Lehmer stage recurrence matrix */
+  int lhmres;			/* Lehmer stage return value */
+
+  if (typ(a) != t_INT || typ(b) != t_INT) err(arither1);
+  s = absi_cmp(a,b);
+  if (s < 0)
+  {
+    t=b; b=a; a=t;
+    pt=pu; pu=pv; pv=pt;
+  }
+  /* now |a| >= |b| */
+
+  sa = signe(a); sb = signe(b);
+  if (!sb)
+  {
+    if (pv != NULL) *pv = gzero;
+    switch(sa)
+    {
+    case  0:
+      if (pu != NULL) *pu = gun; return gzero;
+    case  1:
+      if (pu != NULL) *pu = gun; return icopy(a);
+    case -1:
+      if (pu != NULL) *pu = negi(gun); return(negi(a));
+    }
+  }
+  if (s == 0)			/* |a| == |b| != 0 */
+  {
+    if (pu != NULL) *pu = gzero;
+    if (sb > 0)
+    {
+      if (pv != NULL) *pv = gun; return icopy(b);
+    }
+    else
+    {
+      if (pv != NULL) *pv = negi(gun); return(negi(b));
+    }
+  }
+  /* now |a| > |b| > 0 */
+
+  if (lgefint(a) == 3)		/* single-word affair */
+  {
+    g = xxgcduu((ulong)(a[2]), (ulong)(b[2]), 0, &xu, &xu1, &xv, &xv1, &s);
+    sa = s > 0 ? sa : -sa;
+    sb = s > 0 ? -sb : sb;
+    if (pu != NULL)
+    {
+      if (xu == 0) *pu = gzero; /* can happen when b divides a */
+      else if (xu == 1) *pu = sa < 0 ? negi(gun) : gun;
+      else if (xu == 2) *pu = sa < 0 ? negi(gdeux) : gdeux;
+      else
+      {
+	*pu = cgeti(3);
+	(*pu)[1] = evalsigne(sa)|evallgefint(3);
+	(*pu)[2] = xu;
+      }
+    }
+    if (pv != NULL)
+    {
+      if (xv == 1) *pv = sb < 0 ? negi(gun) : gun;
+      else if (xv == 2) *pv = sb < 0 ? negi(gdeux) : gdeux;
+      else
+      {
+	*pv = cgeti(3);
+	(*pv)[1] = evalsigne(sb)|evallgefint(3);
+	(*pv)[2] = xv;
+      }
+    }
+    if (g == 1) return gun;
+    else if (g == 2) return gdeux;
+    else
+    {
+      r = cgeti(3);
+      r[1] = evalsigne(1)|evallgefint(3);
+      r[2] = g;
+      return r;
+    }
+  }
+
+  /* general case */
+  av = avma;
+  (void)new_chunk(lgefint(b) + (lgefint(a)<<1)); /* room for u,v,gcd */
+  /* if a is significantly larger than b, calling lgcdii() is not the best
+   * way to start -- reduce a mod b first
+   */
+  if (lgefint(a) > lgefint(b))
+  {
+    d = absi(b), q = dvmdii(absi(a), d, &d1);
+    if (!signe(d1))		/* a == qb */
+    {
+      avma = av;
+      if (pu != NULL) *pu = gzero;
+      if (pv != NULL) *pv = sb < 0 ? negi(gun) : gun;
+      return (icopy(d));
+    }
+    else
+    {
+      u = gzero;
+      u1 = v = gun;
+      v1 = negi(q);
+    }
+    /* if this results in lgefint(d) == 3, will fall past main loop */
+  }
+  else
+  {
+    d = absi(a); d1 = absi(b);
+    u = v1 = gun; u1 = v = gzero;
+  }
+  av1 = avma; lim = stack_lim(av, 1);
+
+  /* main loop is almost identical to that of invmod() */
+  while (lgefint(d) > 3 && signe(d1))
+  {
+    lhmres = lgcdii((ulong *)d, (ulong *)d1, &xu, &xu1, &xv, &xv1);
+    if (lhmres != 0)		/* check progress */
+    {				/* apply matrix */
+      if ((lhmres == 1) || (lhmres == -1))
+      {
+	if (xv1 == 1)
+	{
+	  r = subii(d,d1); d=d1; d1=r;
+	  a = subii(u,u1); u=u1; u1=a;
+	  a = subii(v,v1); v=v1; v1=a;
+	}
+	else
+	{
+	  r = subii(d, mului(xv1,d1)); d=d1; d1=r;
+	  a = subii(u, mului(xv1,u1)); u=u1; u1=a;
+	  a = subii(v, mului(xv1,v1)); v=v1; v1=a;
+	}
+      }
+      else
+      {
+	r  = subii(muliu(d,xu),  muliu(d1,xv));
+	d1 = subii(muliu(d,xu1), muliu(d1,xv1)); d = r;
+	a  = subii(muliu(u,xu),  muliu(u1,xv));
+	u1 = subii(muliu(u,xu1), muliu(u1,xv1)); u = a;
+	a  = subii(muliu(v,xu),  muliu(v1,xv));
+	v1 = subii(muliu(v,xu1), muliu(v1,xv1)); v = a;
+        if (lhmres&1) {
+          setsigne(d,-signe(d));
+          setsigne(u,-signe(u));
+          setsigne(v,-signe(v));
+        }
+        else {
+          setsigne(d1,-signe(d1));
+          setsigne(u1,-signe(u1));
+          setsigne(v1,-signe(v1));
+        }
+      }
+    }
+    if (lhmres <= 0 && signe(d1))
+    {
+      q = dvmdii(d,d1,&r);
+#ifdef DEBUG_LEHMER
+      fprintferr("Full division:\n");
+      printf("  q = "); output(q); sleep (1);
+#endif
+      a = subii(u,mulii(q,u1));
+      u=u1; u1=a;
+      a = subii(v,mulii(q,v1));
+      v=v1; v1=a;
+      d=d1; d1=r;
+    }
+    if (low_stack(lim, stack_lim(av,1)))
+    {
+      GEN *gptr[6]; gptr[0]=&d; gptr[1]=&d1; gptr[2]=&u; gptr[3]=&u1;
+      gptr[4]=&v; gptr[5]=&v1;
+      if(DEBUGMEM>1) err(warnmem,"bezout");
+      gerepilemany(av1,gptr,4);
+    }
+  } /* end while */
+
+  /* Postprocessing - final sprint */
+  if (signe(d1))
+  {
+    /* Assertions: lgefint(d)==lgefint(d1)==3, and
+     * gcd(d,d1) is nonzero and fits into one word
+     */
+    g = xxgcduu((ulong)(d[2]), (ulong)(d1[2]), 0, &xu, &xu1, &xv, &xv1, &s);
+    u = subii(muliu(u,xu), muliu(u1, xv));
+    v = subii(muliu(v,xu), muliu(v1, xv));
+    if (s < 0) { sa = -sa; sb = -sb; }
+    avma = av;
+    if (pu != NULL) *pu = sa < 0 ? negi(u) : icopy(u);
+    if (pv != NULL) *pv = sb < 0 ? negi(v) : icopy(v);
+    if (g == 1) return gun;
+    else if (g == 2) return gdeux;
+    else
+    {
+      r = cgeti(3);
+      r[1] = evalsigne(1)|evallgefint(3);
+      r[2] = g;
+      return r;
+    }
+  }
+  /* get here when the final sprint was skipped (d1 was zero already).
+   * Now the matrix is final, and d contains the gcd.
+   */
+  avma = av;
+  if (pu != NULL) *pu = sa < 0 ? negi(u) : icopy(u);
+  if (pv != NULL) *pv = sb < 0 ? negi(v) : icopy(v);
+  return icopy(d);
+}
+
+/*==================================
+ * cbezout(a,b,uu,vv)
+ *==================================
+ * Same as bezout() but for C longs.
+ *    Return g = gcd(a,b) >= 0, and assign longs u,v through pointers uu,vv
+ *    such that g = u*a + v*b.
+ * Special cases:
+ *    a == b == 0 ==> pick u=1, v=0 (and return 1, surprisingly)
+ *    a != 0 == b ==> keep v=0
+ *    a == 0 != b ==> keep u=0
+ *    |a| == |b| != 0 ==> keep u=0, set v=+-1
+ * Assignments through uu,vv happen unconditionally;  non-NULL pointers
+ * _must_ be used.
+ */
+long
+cbezout(long a,long b,long *uu,long *vv)
+{
+  long s,*t;
+  ulong d = labs(a), d1 = labs(b);
+  ulong r,u,u1,v,v1;
+
+#ifdef DEBUG_CBEZOUT
+  fprintferr("> cbezout(%ld,%ld,%p,%p)\n", a, b, (void *)uu, (void *)vv);
+#endif
+  if (!b)
+  {
+    *vv=0L;
+    if (!a)
+    {
+      *uu=1L;
+#ifdef DEBUG_CBEZOUT
+      fprintferr("< %ld (%ld, %ld)\n", 1L, *uu, *vv);
+#endif
+      return 0L;
+    }
+    *uu = a < 0 ? -1L : 1L;
+#ifdef DEBUG_CBEZOUT
+    fprintferr("< %ld (%ld, %ld)\n", (long)d, *uu, *vv);
+#endif
+    return (long)d;
+  }
+  else if (!a || (d == d1))
+  {
+    *uu = 0L; *vv = b < 0 ? -1L : 1L;
+#ifdef DEBUG_CBEZOUT
+    fprintferr("< %ld (%ld, %ld)\n", (long)d1, *uu, *vv);
+#endif
+    return (long)d1;
+  }
+  else if (d == 1)		/* frequently used by nfinit */
+  {
+    *uu = a; *vv = 0L;
+#ifdef DEBUG_CBEZOUT
+    fprintferr("< %ld (%ld, %ld)\n", 1L, *uu, *vv);
+#endif
+    return 1L;
+  }
+  else if (d < d1)
+  {
+    r = d; d = d1; d1 = r;
+    s = a; a = b; b = s;	/* in order to keep the right signs */
+    t = uu; uu = vv; vv = t;
+#ifdef DEBUG_CBEZOUT
+    fprintferr("  swapping\n");
+#endif
+  }
+  /* d > d1 > 0 */
+  r = xxgcduu(d, d1, 0, &u, &u1, &v, &v1, &s);
+  if (s < 0)
+  {
+    *uu = a < 0 ? u : -(long)u;
+    *vv = b < 0 ? -(long)v : v;
+  }
+  else
+  {
+    *uu = a < 0 ? -(long)u : u;
+    *vv = b < 0 ? v : -(long)v;
+  }
+#ifdef DEBUG_CBEZOUT
+  fprintferr("< %ld (%ld, %ld)\n", (long)r, *uu, *vv);
+#endif
+  return (long)r;
+}
+
+/********************************************************************/
+/**                                                                **/
+/**                      INTEGER SQUARE ROOT                       **/
+/**                                                                **/
+/********************************************************************/
 
 /* sqrt()'s result may be off by 1 when a is not representable exactly as a
  * double [64bit machine] */

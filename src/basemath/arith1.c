@@ -1195,6 +1195,7 @@ mppgcd(GEN a, GEN b)
     avma = av; return shifti(r,v);
   }
 }
+
 GEN
 mpppcm(GEN x, GEN y)
 {
@@ -1208,6 +1209,9 @@ mpppcm(GEN x, GEN y)
   if (signe(p2) < 0) setsigne(p2,1);
   return gerepileuptoint(av, p2);
 }
+
+/* following have been re-implemented in mp.c --GN2001Jan02 */
+#if 0
 /* Extended bezout. Return d=pgcd(a,b) and &u,&v */
 long
 cbezout(long a,long b,long *uu,long *vv)
@@ -1312,6 +1316,7 @@ bezout(GEN a, GEN b, GEN *ptu, GEN *ptv)
   }
   *ptu = u; *ptv = v; return x;
 }
+#endif
 
 /*********************************************************************/
 /**                                                                 **/

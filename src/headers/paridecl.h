@@ -142,9 +142,7 @@ GEN     strtoGENstr(char *s, long flag);
 /* arith1.c */
 
 GEN     bestappr(GEN x, GEN k);
-GEN     bezout(GEN a, GEN b, GEN *u, GEN *v);
 long    carrecomplet(GEN x, GEN *pt);
-long    cbezout(long a,long b,long *uu,long *vv);
 long    cgcd(long a,long b);
 GEN     chinois(GEN x, GEN y);
 GEN     classno(GEN x);
@@ -976,6 +974,8 @@ GEN     addsr(long x, GEN y);
 GEN     addss(long x, long y);
 void    affir(GEN x, GEN y);
 void    affrr(GEN x, GEN y);
+GEN     bezout(GEN a, GEN b, GEN *u, GEN *v);
+long    cbezout(long a,long b,long *uu,long *vv);
 void    cgiv(GEN x);
 int     cmpii(GEN x, GEN y);
 int     cmprr(GEN x, GEN y);
