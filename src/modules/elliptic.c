@@ -1035,7 +1035,7 @@ GEN
 elleta(GEN om, long prec)
 {
   pari_sp av = avma;
-  GEN p1, y, y1, y2, E2, pi = mppi(prec);
+  GEN y, y1, y2, E2, pi = mppi(prec);
   SL2_red T;
   if (!get_periods(om, &T)) err(typeer,"elleta");
   E2 = trueE(T.Tau, 2, prec); /* E_2(Tau) */
@@ -1046,10 +1046,13 @@ elleta(GEN om, long prec)
     E2 = gadd(gmul(gsqr(u), E2), gmul(gi, gdiv(gmul(mulsi(6,T.c), u), pi)));
   }
   y2 = gdiv(gmul(E2, gsqr(pi)), gmulsg(3, T.w2));
-  p1 = PiI2(prec);
-  if (T.swap) p1 = mpneg(p1);
-  y1 = gsub(gmul(T.tau,y2), gdiv(p1, T.w2));
-  if (T.swap) swap(y1, y2);
+  if (T.swap)
+  {
+    y1 = y2; 
+    y2 = gadd(gmul(T.tau,y1), gdiv(PiI2(prec), T.w2));
+  }
+  else
+    y1 = gsub(gmul(T.tau,y2), gdiv(PiI2(prec), T.w2));
   y = cgetg(3, t_VEC);
   y[1] = (long)y1;
   y[2] = (long)y2; return gerepilecopy(av, y);
