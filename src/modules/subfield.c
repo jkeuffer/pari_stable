@@ -20,11 +20,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                                                                 */
 /*******************************************************************/
 #include "pari.h"
-#ifdef __WIN32
-#  include <io.h> /* for open, read, close */
-#endif
 extern GEN roots_to_pol(GEN a, long v);
 
+#define deg(a) (lgef(a)-3)
 static long TR; /* nombre de changements de polynomes (degre fixe) */
 static GEN FACTORDL; /* factorisation of |disc(L)| */
 
@@ -363,23 +361,6 @@ print_block_system(long N,GEN Y,long d, GEN vbs)
   return vbs;
 }
 
-/* rend le numero du cycle (a1,...,an) dans le support duquel se trouve a */
-/* met dans *pt l'indice i tq ai = a */
-static long
-in_what_cycle(long a,GEN cys,long *pt)
-{
-  long i,k,nk, lcys=lg(cys);
-
-  for (k=1; k<lcys; k++)
-  {
-    GEN c = (GEN)cys[k]; nk = lg(c);
-    for (i=1; i<nk; i++)
-      if (a == c[i]) { *pt = i; return k; }
-  }
-  err(talker,"impossible to find %d in in_what_cycle",a);
-  return 0; /* not reached */
-}
-
 /* Return common factors to A and B + s the prime to A part of B */
 static GEN
 commonfactor(GEN A, GEN B)
@@ -422,16 +403,14 @@ static GEN
 cand_for_subfields(GEN A,GEN DATA,GEN *ptdelta,GEN *ptrootsA)
 {
   long av=avma,N,m,i,j,d,lf;
-  GEN P,pe,p,pol,cys,tabroots,delta,g,dg,unmodpe,tabrA;
-  GEN factcommon,ff1,ff2,p1;
+  GEN P,pe,p,pol,tabroots,delta,g,dg,unmodpe,tabrA,factcommon,ff1,ff2,p1;
   GEN *gptr[3];
 
-  pol=(GEN)DATA[1]; N=lgef(pol)-3; m=lg(A)-1; d=N/m;
+  pol=(GEN)DATA[1]; N=deg(pol); m=lg(A)-1; d=N/m;
   if (N%m) err(talker,"incompatible block system in cand_for_subfields");
   p = (GEN)DATA[2];
-  cys=(GEN)DATA[5];
-  tabroots=(GEN)DATA[10];
-  pe = gclone((GEN)DATA[9]);
+  tabroots=(GEN)DATA[5];
+  pe = gclone((GEN)DATA[3]);
   unmodpe = cgetg(3,t_INTMOD); unmodpe[1]=(long)pe; unmodpe[2]=un;
 
   delta = cgetg(m+1,t_VEC);
@@ -439,22 +418,20 @@ cand_for_subfields(GEN A,GEN DATA,GEN *ptdelta,GEN *ptrootsA)
   for (i=1; i<=m; i++)
   {
     GEN Ai=(GEN)A[i], col = cgetg(d+1,t_VEC);
-    long l,k;
 
     tabrA[i]=(long)col; p1 = unmodpe;
     for (j=1; j<=d; j++)
     {
-      l=in_what_cycle(Ai[j],cys,&k);
-      col[j] = mael(tabroots, l, k);
+      col[j] = tabroots[Ai[j]];
       p1 = gmul(p1, (GEN)col[j]);
     }
     p1 = lift_intern((GEN)p1[2]);
     for (j=1; j<i; j++)
-      if (gegal(p1,(GEN)delta[j])) { avma=av; return gzero; }
+      if (gegal(p1,(GEN)delta[j])) return gzero;
     if (DEBUGLEVEL>2) fprintferr("delta[%ld] = %Z\n",i,p1);
     delta[i] = (long)p1;
   }
-  P = gmael3(tabroots,1,1,1);
+  P = (GEN)DATA[4];
   for (i=1; i<=m; i++)
   {
     p1 = cgetg(3,t_POLMOD); p1[1]=(long)P; p1[2]=delta[i];
@@ -463,7 +440,7 @@ cand_for_subfields(GEN A,GEN DATA,GEN *ptdelta,GEN *ptrootsA)
   g = roots_to_pol(gmul(unmodpe,delta),0); 
   g=centerlift(lift_intern(g)); polsimplify(g);
   if (DEBUGLEVEL>2) fprintferr("pol. found = %Z\n",g);
-  if (!ok_coeffs(g,(GEN)DATA[8])) return gun;
+  if (!ok_coeffs(g,(GEN)DATA[6])) return gun;
   dg=discsr(g);
   if (!signe(dg)) return stoi(3);
   if (!signe(resii(dg,p))) return gdeux;
@@ -484,7 +461,7 @@ cand_for_subfields(GEN A,GEN DATA,GEN *ptdelta,GEN *ptrootsA)
  * on construit un polynome a coefficients dans Q dont les coefficients ont
  * pour approximation p-adique les coefficients de h */
 static GEN
-retrieve_p_adique_polynomial_in_Q(GEN ind,GEN h)
+retrieve_p_adic_polynomial_in_Q(GEN ind,GEN h)
 {
   return gdiv(centerlift(gmul(h,ind)), ind);
 }
@@ -518,29 +495,27 @@ interpolation_polynomial(GEN T, GEN delta)
   return P;
 }
 
-/* nf est le corps de nombres, g un polynome de Z[x] candidat
- * pour definir un sous-corps, p le nombre premier ayant servi a definir le
- * potential block system rootsA donne par les racines avec une approximation
- * convenable, e est la precision p-adique des elements de rootsA et delta la
- * liste des racines de g dans une extension convenable en precision p^e.
- * Renvoie un polynome h de Q[x] tel que f divise g o h et donc tel que le
- * couple (g,h) definisse un sous-corps, ou bien gzero si rootsA n'est pas un
- * block system
- */
+/* nf is a number field defined by f, g in Z[x] potentially defines a
+ * subfield, p the prime number used to define the potential block system,
+ * rootsA gives the roots of f to precision p^e (as a block system), delta
+ * gives the roots of g in the unramified extention of Q_p of the correct
+ * degree to precision p^e Return NULL if rootsA is not a block system, and
+ * otherwise h in Q[x] such that f | g o h, i.e such that (g,h) defines a
+ * subfield. */
 static GEN
 embedding_of_potential_subfields(GEN nf,GEN g,GEN DATA,GEN rootsA,GEN delta)
 {
   GEN w0_inQ,w0,w1,h0,gp,p2,f,unmodp,p,ind, maxp;
-  long av = avma, av1;
+  ulong av;
 
   f=(GEN)nf[1]; ind=(GEN)nf[4]; p=(GEN)DATA[2];
-  maxp=mulii((GEN)DATA[11],ind);
+  maxp=mulii((GEN)DATA[7],ind);
   gp=deriv(g,varn(g)); unmodp=gmodulsg(1,p);
-  av1 = avma;
+  av = avma;
   w0 = interpolation_polynomial(gmul(rootsA,unmodp), delta);
   w0 = lift_intern(w0); /* in Fp[x] */
   polsimplify(w0);
-  w0_inQ = retrieve_p_adique_polynomial_in_Q(ind,w0);
+  w0_inQ = retrieve_p_adic_polynomial_in_Q(ind,w0);
   (void)gbezout(poleval(gp,w0), gmul(unmodp,f), &h0, &p2);
   w0 = lift_intern(w0); /* in Z[x] */
   h0 = lift_intern(lift_intern(h0));
@@ -552,26 +527,22 @@ embedding_of_potential_subfields(GEN nf,GEN g,GEN DATA,GEN rootsA,GEN delta)
     * [w1,h1]  satisfying the same condition mod p^2. Moreover,
     * [w1,h1] = [w0,h0] (mod p)
     * (cf. Dixon: J. Austral. Math. Soc., Series A, vol.49, 1990, p.445) */
-    if (DEBUGLEVEL>2)
-    {
-      fprintferr("w = "); outerr(w0);
-      fprintferr("h = "); outerr(h0);
-    }
+    if (DEBUGLEVEL>2) fprintferr("w = %Z\nh = %Z\n",w0,h0);
     p = sqri(p); unmodp[1] = (long)p;
     p1 = gneg(gmul(h0, poleval(g,w0)));
     w1 = gres(gmul(unmodp,gadd(w0,p1)), f);
-    p2 = retrieve_p_adique_polynomial_in_Q(ind,w1);
+    p2 = retrieve_p_adic_polynomial_in_Q(ind,w1);
     if ((gegal(p2, w0_inQ) || cmpii(p,maxp)) && gdivise(poleval(g,p2), f))
-      return gerepileupto(av, poleval(p2, gadd(polx[0],stoi(TR))));
+      return poleval(p2, gadd(polx[0],stoi(TR)));
     if (DEBUGLEVEL>2)
     {
-      fprintferr("Old Q-polynomial: "); outerr(w0_inQ);
-      fprintferr("New Q-polynomial: "); outerr(p2);
+      fprintferr("Old Q-polynomial: %Z\n",w0_inQ);
+      fprintferr("New Q-polynomial: %Z\n",p2);
     }
     if (cmpii(p, maxp) > 0)
     {
       if (DEBUGLEVEL) fprintferr("coeff too big for embedding\n");
-      avma=av; return gzero;
+      return NULL;
     }
 
     w1 = lift_intern(w1);
@@ -581,7 +552,7 @@ embedding_of_potential_subfields(GEN nf,GEN g,GEN DATA,GEN rootsA,GEN delta)
     w0 = w1; w0_inQ = p2;
     {
       GEN *gptr[4]; gptr[0]=&w0; gptr[1]=&h0; gptr[2]=&w0_inQ; gptr[3]=&p;
-      gerepilemany(av1,gptr,4);
+      gerepilemany(av,gptr,4);
     }
   }
 }
@@ -590,52 +561,46 @@ static long
 choose_prime(GEN pol,GEN dpol,long d,GEN *ptff,GEN *ptlistpotbl, long *ptnn)
 {
   long j,k,oldllist,llist,r,nn,oldnn,*n,N,pp;
-  GEN p,listpotbl,oldlistpotbl,ff,oldff,p3;
+  GEN p,listpotbl,oldlistpotbl,ff,oldff;
   byteptr di=diffptr;
 
   if (DEBUGLEVEL) timer2();
-  di++; p = stoi(2); N = lgef(pol)-3;
+  di++; p = stoi(2); N = deg(pol);
   while (p[2]<=N) p[2] += *di++;
   oldllist = oldnn = BIGINT;
   oldlistpotbl = oldff = NULL; pp = 0; /* gcc -Wall */
   n = new_chunk(N+1);
   for(k=1; k<11 || oldnn == BIGINT; k++,p[2]+= *di++)
   {
-    long av=avma;
+    ulong av = avma;
     while (!smodis(dpol,p[2])) p[2] += *di++;
     ff=(GEN)factmod(pol,p)[1]; r=lg(ff)-1;
-    if (r>1 && r<N)
+    if (r == 1 || r == N) { avma = av; continue; }
+
+    nn = n[1] = deg(ff[1]);
+    for (j=2; j<=r; j++) { n[j] = deg(ff[j]); nn = clcm(nn,n[j]); }
+    if (nn > oldnn)
     {
-      for (j=1; j<=r; j++) n[j]=lgef(ff[j])-3;
-      p3 = stoi(n[1]);
-      for (j=2; j<=r; j++) p3 = glcm(p3,stoi(n[j]));
-      nn=itos(p3);
-      if (nn > oldnn)
-      {
-        if (DEBUGLEVEL)
-        {
-          fprintferr("p = %ld,\tr = %ld,\tnn = %ld,\t#pbs = skipped\n",
-                      p[2],r,nn);
-        }
-        continue;
-      }
-      listpotbl=potential_block_systems(N,d,ff,n);
-      if (!listpotbl) { oldlistpotbl = NULL; pp = p[2]; break; }
-      llist=lg(listpotbl)-1;
       if (DEBUGLEVEL)
-      {
-	fprintferr("Time: %ldms,\tp = %ld,\tr = %ld,\tnn = %ld,\t#pbs = %ld\n",
-                    timer2(),p[2],r,nn,llist);
-	flusherr();
-      }
-      if (nn<oldnn || llist<oldllist)
-      {
-	oldllist=llist; oldlistpotbl=listpotbl;
-	pp=p[2]; oldff=ff; oldnn=nn; continue;
-      }
-      for (j=1; j<llist; j++) free((void*)listpotbl[j]);
-      free((void*)(listpotbl-1));
+        fprintferr("p = %ld,\tr = %ld,\tnn = %ld,\t#pbs = skipped\n",p[2],r,nn);
+      continue;
     }
+    listpotbl = potential_block_systems(N,d,ff,n);
+    if (!listpotbl) { oldlistpotbl = NULL; pp = p[2]; break; }
+    llist = lg(listpotbl)-1;
+    if (DEBUGLEVEL)
+    {
+      fprintferr("Time: %ldms,\tp = %ld,\tr = %ld,\tnn = %ld,\t#pbs = %ld\n",
+                  timer2(),p[2],r,nn,llist);
+      flusherr();
+    }
+    if (nn<oldnn || llist<oldllist)
+    {
+      oldllist=llist; oldlistpotbl=listpotbl;
+      pp=p[2]; oldff=ff; oldnn=nn; continue;
+    }
+    for (j=1; j<llist; j++) free((void*)listpotbl[j]);
+    free((void*)(listpotbl-1));
     avma = av;
   }
   if (DEBUGLEVEL)
@@ -671,17 +636,17 @@ bound_for_coeff(long m,GEN rr,long r1, GEN *maxroot)
   long i, lrr=lg(rr);
   GEN p1,b1,b2,B,M, C = matpascal(m-1);
 
-  rr = gabs(rr,DEFAULTPREC); *maxroot = vecmax(rr);
+  rr = gabs(rr,0); *maxroot = vecmax(rr);
   for (i=1; i<lrr; i++)
     if (gcmp((GEN)rr[i], gun) < 0) rr[i] = un;
   for (b1=gun,i=1; i<=r1; i++) b1 = gmul(b1, (GEN)rr[i]);
   for (b2=gun    ; i<lrr; i++) b2 = gmul(b2, (GEN)rr[i]);
-  B = gmul(b1, gsqr(b2));
+  B = gmul(b1, gsqr(b2)); /* Mahler measure */
   M = cgetg(m+2, t_VEC); M[1]=M[2]=zero; /* unused */
   for (i=1; i<m; i++)
   {
-    p1 = gadd(gmul(gcoeff(C, m, i), B),
-              gcoeff(C, m, i+1));
+    p1 = gadd(gmul(gcoeff(C, m, i+1), B),/* binom(m-1, i)   */
+              gcoeff(C, m, i));          /* binom(m-1, i-1) */
     M[i+2] = lceil(p1);
   }
   return M;
@@ -691,24 +656,24 @@ bound_for_coeff(long m,GEN rr,long r1, GEN *maxroot)
 static GEN
 subfields_of_given_degree(GEN nf,GEN dpol,long d)
 {
-  long av,av1,av2,tetpil,pp,llist,i,nn,N;
-  GEN listpotbl,ff,A,delta,rootsA,CSF,ESF,p1,p2,LSB;
+  long av,av1,av2,tetpil,pp,llist,i,nn,N,vf;
+  GEN listpotbl,ff,A,delta,rootsA,CSF,ESF,p1,LSB;
   GEN DATA, pol = (GEN)nf[1];
 
-  av=avma;
-  N = lgef(pol)-3;
-  pp=choose_prime(pol,dpol,N/d,&ff,&listpotbl,&nn);
+  av = avma; vf = fetch_var();
+  N = deg(pol);
+  pp = choose_prime(pol,dpol,N/d,&ff,&listpotbl,&nn);
   if (!listpotbl) { avma=av; return cgetg(1,t_VEC); }
   llist=lg(listpotbl);
 LAB0:
-  av1=avma; LSB=cgetg(1,t_VEC);
-  DATA=compute_data(nf,ff,stoi(pp),d,nn,fetch_var());
+  av1 = avma; LSB = cgetg(1,t_VEC);
+  DATA = compute_data(nf,ff,stoi(pp),d,nn,vf);
   for (i=1; i<llist; i++)
   {
     av2=avma; A=(GEN)listpotbl[i];
     if (DEBUGLEVEL > 1) 
       fprintferr("\n* Potential block # %ld: %Z\n",i,A);
-    CSF=cand_for_subfields(A,DATA,&delta,&rootsA);
+    CSF = cand_for_subfields(A,DATA,&delta,&rootsA);
     if (typ(CSF)==t_INT)
     {
       if (DEBUGLEVEL > 1) switch(itos(CSF))
@@ -724,24 +689,25 @@ LAB0:
       switch(itos(CSF))
       {
         case 0: case 2:
-          avma=av1; nf = change_pol(nf,ff); pol = (GEN)nf[1];
+          avma = av1; nf = change_pol(nf,ff); pol = (GEN)nf[1];
           if (DEBUGLEVEL) fprintferr("new f = %Z\n",pol);
           goto LAB0;
       }
-      avma=av2;
+      avma = av2;
     }
     else
     {
       if (DEBUGLEVEL) fprintferr("candidate = %Z\n",CSF);
-      ESF=embedding_of_potential_subfields(nf,CSF,DATA,rootsA,delta);
-      if (ESF == gzero) avma=av2;
+      ESF = embedding_of_potential_subfields(nf,CSF,DATA,rootsA,delta);
+      if (!ESF) avma = av2;
       else
       {
         if (DEBUGLEVEL) fprintferr("embedding = %Z\n",ESF);
-	p1=cgetg(3,t_VEC); p2=cgetg(2,t_VEC); p2[1]=(long)p1;
-        p1[1]=(long)CSF;
-        p1[2]=(long)ESF; tetpil=avma;
-        LSB=gerepile(av2,tetpil, concat(LSB,p2));
+	p1 = cgetg(3,t_VEC);
+        p1[1] = (long)CSF;
+        p1[2] = (long)ESF;
+        p1 = _vec(p1); tetpil = avma;
+        LSB = gerepile(av2,tetpil, concat(LSB, p1));
       }
     }
   }
@@ -758,7 +724,7 @@ subfields(GEN nf,GEN d)
   GEN dpol,p1,LSB,p2,pol;
 
   nf=checknf(nf); pol = (GEN)nf[1];
-  v0=varn(pol); N=lgef(pol)-3; di=itos(d);
+  v0=varn(pol); N=deg(pol); di=itos(d);
   if (di==N)
   {
     LSB=cgetg(2,t_VEC); p1=cgetg(3,t_VEC); LSB[1]=(long)p1;
@@ -788,7 +754,7 @@ subfieldsall(GEN nf)
   GEN pol,dpol,dg,LSB,NLSB,p1,p2;
 
   nf=checknf(nf); pol = (GEN)nf[1];
-  v0=varn(pol); N=lgef(pol)-3;
+  v0=varn(pol); N=deg(pol);
   if (isprime(stoi(N)))
   {
     avma=av; LSB=cgetg(3,t_VEC);
@@ -956,95 +922,77 @@ hensel_lift(GEN pol,GEN fk,GEN fkk,GEN p,long e)
   R[r] = (long)C; return gerepileupto(av,R);
 }
 
+/* upper bound for floor(x) [avoid "precision loss in truncation"] */
+static GEN
+floor_bound(GEN x)
+{
+  long e;
+  GEN y = grndtoi(x, &e);
+  if (e>=0) y = addii(y, shifti(gun, e));
+  return y;
+}
+
 /* etant donne nf et p et la factorisation de nf[1] mod p, et le degre m des
  * sous corps cherches, cree un vecteur ligne a 13 composantes:
- * 1 : le polynome nf[1],
- * 2 : le premier p,
- * 3 : la factorisation ff,
- * 4 : la longeur des cycles associes (n_1,...,n_r),
- * 5 : les cycles associes,
- * 6 : le corps F_(p^q),
- * 7 : les racines de f dans F_(p^q) par facteur de ff,
- * 8 : la borne M pour les sous-corps,
- * 9 : l'exposant e telle que la precision des lifts soit p^e>2.M,
- * 10: le lift de Hensel a la precision p^e de la factorisation en facteurs
- *     lineaires de nf[1] dans F_(p^q),
- * 11: la borne de Hadamard pour les coefficients de h(x) tel que g o h = 0
- *     mod nf[1].
- * ces donnees sont valides pour nf, p et m (d) donnes...
+ * 1 : polynomial nf[1],
+ * 2 : prime p,
+ * 3 : exponent e (for Hensel lifts) such that p^e > max(M),
+ * 4 : polynomial defining the field F_(p^nn),
+ * 5: Hensel lift to precision p^e  of the roots of nf[1] in F_(p^q),
+ * 6 : bound M for polynomials defining subfields
+ * 7: Hadamard bound for coefficients of h(x) such that g o h = 0 mod nf[1].
+ * DATA valid for given nf, p and m (subfield degree)
  */
 static GEN
 compute_data(GEN nf, GEN ff, GEN p, long m, long nn, long vf)
 {
-  long i,j,l,r,*n,e,N,pp,d,r1;
-  GEN DATA,p1,p2,cys,fhk,tabroots,MM,fk,dpol,maxroot,maxMM,pol;
+  long i,j,l,r,e,N,pp,d;
+  GEN DATA,p1,p2,fhk,MM,fk,dpol,maxroot,maxMM,pol;
 
   if (DEBUGLEVEL>1) { fprintferr("Entering compute_data()\n\n"); flusherr(); }
-  pol = (GEN)nf[1]; N = lgef(pol)-3;
-  DATA=cgetg(14,t_VEC);
+  pol = (GEN)nf[1]; N = deg(pol);
+  DATA=cgetg(8,t_VEC);
   DATA[1]=(long)pol;
   DATA[2]=(long)p;
-  DATA[3]=(long)ff; r=lg(ff)-1;
-  n = cgetg(r+1, t_VECSMALL);
-  DATA[4]= (long)n;
-  for (j=1; j<=r; j++) n[j]=lgef(ff[j])-3;
-  cys=cgetg(r+1,t_VEC); l=0;
-  for (i=1; i<=r; i++)
-  {
-    p1 = cgetg(n[i]+1, t_VECSMALL);
-    cys[i] = (long)p1; for (j=1; j<=n[i]; j++) p1[j]=++l;
-  }
-  DATA[5]=(long)cys;
-  DATA[6]=(long)ffinit(p,nn,vf);
-  tabroots=cgetg(r+1,t_VEC);
-  for (j=1; j<=r; j++)
-  {
-    p1=(GEN)factmod9((GEN)ff[j],p,(GEN)DATA[6])[1];
-    p2=cgetg(n[j]+1,t_VEC); tabroots[j]=(long)p2;
-    p2[1]=lneg(gmael(p1,1,2));
-    for (i=2; i<=n[j]; i++) p2[i]=(long)powgi((GEN)p2[i-1],p);
-  }
-  DATA[7]=(long)tabroots;
-  r1 = nf_get_r1(nf);
-  MM = bound_for_coeff(m, (GEN)nf[6], r1, &maxroot);
+  DATA[4]=(long)lift_intern(ffinit(p,nn,vf));
+  MM = bound_for_coeff(m, (GEN)nf[6], nf_get_r1(nf), &maxroot);
   MM = gmul2n(MM,1);
-  DATA[8]=(long)MM;
+  DATA[6]=(long)MM;
   pp=itos(p); maxMM = vecmax(MM);
   for (e=1,p1=p; cmpii(p1, maxMM) < 0; ) { p1 = mulis(p1,pp); e++; }
-  DATA[9]=lpuigs(p,e); fk=cgetg(N+1,t_VEC);
-  for (l=1,j=1; j<=r; j++)
-    for (i=1; i<=n[j]; i++)
-      fk[l++] = lsub(polx[0],gmael(tabroots,j,i));
-  fhk = hensel_lift(pol,fk,(GEN)DATA[6],p,e);
-  tabroots=cgetg(r+1,t_VEC);
-  for (l=1,j=1; j<=r; j++)
-  {
-    p1 = cgetg(n[j]+1,t_VEC); tabroots[j]=(long)p1;
-    for (i=1; i<=n[j]; i++,l++) p1[i] = lneg(gmael(fhk,l,2));
-  }
-  DATA[10]=(long)tabroots;
+  DATA[3] = lpowgs(p,e);
 
-  d=N/m; p1=gmul(stoi(N), gsqrt(gpuigs(stoi(N-1),N-1),DEFAULTPREC));
-  p2 = gpuigs(maxroot, d + N*(N-1)/2);
-  dpol=mulii(sqri((GEN)nf[4]),(GEN)nf[3]);
+  fk = cgetg(N+1,t_VEC); r=lg(ff)-1;
+  for (l=1,j=1; j<=r; j++)
+  { /* compute roots and fix ordering (Frobenius cycles) */
+    p1 = (GEN)factmod9((GEN)ff[j],p,(GEN)DATA[4])[1];
+    d = deg(ff[j]);
+    for (i=1; i<=d; i++,l++) 
+    {
+      if (i==1) p2 = gneg(gmael(p1,1,2)); /* a root in F_p^nn */
+      else      p2 = powgi(p2,p); /* images by Frobenius */
+      fk[l] = lsub(polx[0], p2);
+    }
+  }
+  fhk = hensel_lift(pol,fk,(GEN)DATA[4],p,e);
+  p1 = cgetg(N+1,t_VEC);
+  for (l=1; l<=N; l++) p1[l] = lneg(gmael(fhk,l,2));
+  DATA[5] = (long)p1;
+
+  p1 = gmul(stoi(N), gsqrt(gpuigs(stoi(N-1),N-1),DEFAULTPREC));
+  p2 = gpuigs(maxroot, N/m + N*(N-1)/2);
+  dpol = mulii(sqri((GEN)nf[4]),(GEN)nf[3]);
   p1 = gdiv(gmul(p1,p2), gsqrt(absi(dpol),DEFAULTPREC));
-  p1 = grndtoi(p1, &e);
-  if (e>=0) p1 = addii(p1, shifti(gun, e));
-  p1 = shifti(p1, 1);
-  DATA[11]=(long)p1;
+  p1 = shifti(floor_bound(p1), 1);
+  DATA[7] = (long)p1;
 
   if (DEBUGLEVEL>1) {
-    fprintferr("f = %Z",DATA[1]);
-    fprintferr("p = %Z",DATA[2]);
-    fprintferr("ff = %Z",DATA[3]);
-    fprintferr("lcy = %Z",DATA[4]);
-    fprintferr("cys = %Z",DATA[5]);
-    fprintferr("bigfq = %Z",DATA[6]);
-    fprintferr("roots = %Z",DATA[7]);
-    fprintferr("2 * M = %Z",DATA[8]);
-    fprintferr("p^e = %Z",DATA[9]);
-    fprintferr("lifted roots = %Z",DATA[10]);
-    fprintferr("2 * Hadamard bound = %Z",DATA[11]);
+    fprintferr("f = %Z\n",DATA[1]);
+    fprintferr("p = %Z, lift to p^%ld\n",DATA[2], e);
+    fprintferr("Fq defined by %Z\n",DATA[4]);
+    fprintferr("lifted roots = %Z\n",DATA[5]);
+    fprintferr("2 * M = %Z\n",DATA[6]);
+    fprintferr("2 * Hadamard bound = %Z\n",DATA[7]);
   }
   return DATA;
 }
@@ -1066,17 +1014,17 @@ compute_data(GEN nf, GEN ff, GEN p, long m, long nn, long vf)
 static GEN
 frobenius(GEN pol,GEN frobp,GEN p,GEN B,GEN d)
 {
-  long av=avma,v0,deg,i,depas;
+  long av=avma,v0,D,i,depas;
   GEN b0,b1,pold,polp,poldp,w0,w1,g0,g1,unmodp,polpp,v,pp,unmodpp,poldpp,bl0,bl1;
 
   v0=varn(pol); unmodp=gmodulsg(1,p); pold=deriv(pol,v0);
   b0=frobp; polp=gmul(unmodp,pol);
   poldp=gsubst(deriv(polp,v0),v0,frobp);
   w0=ginv(poldp);
-  bl0=lift(b0); deg=lgef(bl0)-3;
-  v=cgetg(deg+2,t_VEC);
-  for (i=1; i<=deg+1; i++)
-    v[i]=ldiv(centerlift(gmul(d,compo(bl0,deg+2-i))),d);
+  bl0=lift(b0); D=deg(bl0);
+  v=cgetg(D+2,t_VEC);
+  for (i=1; i<=D+1; i++)
+    v[i]=ldiv(centerlift(gmul(d,compo(bl0,D+2-i))),d);
   g0=gtopoly(v,v0);
   if (DEBUGLEVEL>2)
   {
@@ -1095,10 +1043,10 @@ frobenius(GEN pol,GEN frobp,GEN p,GEN B,GEN d)
     w0=gmodulcp(gmul(unmodpp,lift_intern(lift_intern(w0))),polpp);
     b1=gsub(b0,gmul(w0,gsubst(polpp,v0,b0)));
     w1=gmul(w0,gsub(gdeux,gmul(w0,gsubst(poldpp,v0,b1))));
-    bl1=lift(b1); deg=lgef(bl1)-3;
-    v=cgetg(deg+2,t_VEC);
-    for (i=1; i<=deg+1; i++)
-      v[i]=ldiv(centerlift(gmul(d,compo(bl1,deg+2-i))),d);
+    bl1=lift(b1); D=deg(bl1);
+    v=cgetg(D+2,t_VEC);
+    for (i=1; i<=D+1; i++)
+      v[i]=ldiv(centerlift(gmul(d,compo(bl1,D+2-i))),d);
     g1=gtopoly(v,v0);
     if (DEBUGLEVEL>2)
     {
@@ -1135,7 +1083,7 @@ compute_bound_for_lift(GEN pol,GEN dpol,GEN d)
   long av=avma,n,i;
   GEN p1,p2,p3;
 
-  n=lgef(pol)-3;
+  n=deg(pol);
   p1=gdiv(gmul(stoi(n),gpui(stoi(n-1),gdivgs(stoi(n-1),2),DEFAULTPREC)),
           gsqrt(dpol,DEFAULTPREC));
   p2=gzero;
@@ -1213,7 +1161,7 @@ conjugates(GEN pol)
 
   if (DEBUGLEVEL>2){ fprintferr("** Entree dans conjugates\n"); flusherr(); }
   if (typ(pol)==t_POL) nf = NULL; else { nf = checknf(pol); pol=(GEN)nf[1]; }
-  av=avma; N=lgef(pol)-3; v0=varn(pol);
+  av=avma; N=deg(pol); v0=varn(pol);
   if (N==1) { S=cgetg(2,t_VEC); S[1]=(long)polx[v0]; return S; }
   if (N==2)
   {
