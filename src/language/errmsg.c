@@ -190,7 +190,7 @@ char *errmessage[]=
 /* facter */
   "negative argument in factorial function",
 /* hiler1 */
-  "insufficient precision for p=2 in hil",
+  "insufficient precision for p=2 in hilbert",
 /* funder2 */
   "discriminant not congruent to 0 or 1 mod 4",
 /* generer */

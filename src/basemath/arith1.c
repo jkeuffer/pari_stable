@@ -827,15 +827,17 @@ hil(GEN x, GEN y, GEN p)
 	case t_REAL:
 	  return (signe(x)<0 && signe(y)<0)? -1: 1;
 	case t_INTMOD:
-	  if (egalii(gdeux,(GEN)y[1])) err(hiler1);
-	  return hil(x,(GEN)y[2],(GEN)y[1]);
+          p = (GEN)y[1];
+	  if (egalii(gdeux,p)) err(hiler1);
+	  return hil(x,(GEN)y[2],p);
 	case t_FRAC: case t_FRACN:
 	  p1=mulii((GEN)y[1],(GEN)y[2]); z=hil(x,p1,p);
 	  avma=av; return z;
 	case t_PADIC:
-	  if (egalii(gdeux,(GEN)y[2]) && precp(y) <= 2) err(hiler1);
-	  p1 = odd(valp(y))? mulii((GEN)y[2],(GEN)y[4]): (GEN)y[4];
-	  z=hil(x,p1,(GEN)y[2]); avma=av; return z;
+          p = (GEN)y[2];
+	  if (egalii(gdeux,p) && precp(y) <= 1) err(hiler1);
+	  p1 = odd(valp(y))? mulii(p,(GEN)y[4]): (GEN)y[4];
+	  z=hil(x,p1,p); avma=av; return z;
       }
       break;
 
@@ -845,17 +847,18 @@ hil(GEN x, GEN y, GEN p)
       return signe(y[1])*signe(y[2]);
 
     case t_INTMOD:
-      if (egalii(gdeux,(GEN)y[1])) err(hiler1);
+      p = (GEN)x[1];
+      if (egalii(gdeux,p)) err(hiler1);
       switch(ty)
       {
         case t_INTMOD:
-          if (!egalii((GEN)x[1],(GEN)y[1])) break;
-          return hil((GEN)x[2],(GEN)y[2],(GEN)x[1]);
+          if (!egalii(p, (GEN)y[1])) break;
+          return hil((GEN)x[2],(GEN)y[2],p);
         case t_FRAC: case t_FRACN:
-	  return hil((GEN)x[2],y,(GEN)x[1]);
+	  return hil((GEN)x[2],y,p);
         case t_PADIC:
-          if (!egalii((GEN)x[1],(GEN)y[2])) break;
-          return hil((GEN)x[2],y,(GEN)x[1]);
+          if (!egalii(p, (GEN)y[2])) break;
+          return hil((GEN)x[2],y,p);
       }
       break;
 
@@ -872,10 +875,12 @@ hil(GEN x, GEN y, GEN p)
       break;
 
     case t_PADIC:
-      if (ty != t_PADIC || !egalii((GEN)x[2],(GEN)y[2])) break;
-      p1 = odd(valp(x))? mulii((GEN)x[2],(GEN)x[4]): (GEN)x[4];
-      p2 = odd(valp(y))? mulii((GEN)y[2],(GEN)y[4]): (GEN)y[4];
-      z=hil(p1,p2,(GEN)x[2]); avma=av; return z;
+      p = (GEN)x[2];
+      if (ty != t_PADIC || !egalii(p,(GEN)y[2])) break;
+      if (egalii(p, gdeux) && (precp(x) <= 1 || precp(y) <= 1)) err(hiler1);
+      p1 = odd(valp(x))? mulii(p,(GEN)x[4]): (GEN)x[4];
+      p2 = odd(valp(y))? mulii(p,(GEN)y[4]): (GEN)y[4];
+      z=hil(p1,p2,p); avma=av; return z;
   }
   err(talker,"forbidden or incompatible types in hil");
   return 0; /* not reached */
