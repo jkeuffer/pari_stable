@@ -342,7 +342,7 @@ install-bin-dyn: gp-dyn
 	-mkdir -p \$(BINDIR)
 	-\$(RM) \$(BINDIR)/gp-$version \$(BINDIR)/gp$exe_suff
 	-\$(LD) -o \$(BINDIR)/gp-$version \$(LDFLAGS) \$(OBJSGP) \$(RUNPTH_FINAL) \$(TOPLDDYN) \$(LDDYN) \$(PLOTLIBS) \$(LIBS)
-	strip \$(BINDIR)/gp-$version
+	-strip \$(BINDIR)/gp-$version
 	-\$(LN) gp-$version$exe_suff \$(BINDIR)/gp$exe_suff
 
 install-bin-sta: gp-sta
@@ -351,7 +351,7 @@ install-bin-sta: gp-sta
 	\$(INSTALL_PROGRAM) gp-sta$exe_suff \$(BINDIR)/gp-$version$exe_suff
 	-\$(LN) gp-$version$exe_suff \$(BINDIR)/gp$exe_suff
 # Can't strip it if we want install() to work on Linux or OSF.
-#	strip \$(BINDIR)/gp-$version
+#	-strip \$(BINDIR)/gp-$version
 
 install-man::
 	-mkdir -p \$(MANDIR)
