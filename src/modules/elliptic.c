@@ -1252,7 +1252,7 @@ ellsigma(GEN w, GEN z, long flag, long prec)
   } else { /* use sum */
     GEN q8, qn2, urn, urninv;
     long n;
-    q8 = expIxy(gmul2n(pi2,-3), T.tau, prec);
+    q8 = expIxy(gmul2n(pi2,-3), T.Tau, prec);
     q = gpowgs(q8,8);
     u = gneg_i(u); uinv = ginv(u);
     y = gen_0;
