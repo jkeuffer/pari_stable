@@ -977,7 +977,8 @@ is equivalent to
 $$ x~\var{op}_1~((y~\var{op}_2~z)~\var{op}_2~ (x~\var{op}_3~y)).$$
 
 GP knows quite a lot of different operators, some of them unary (having
-only one argument), some binary. Unary operators are defined for either
+only one argument), some binary, plus special selection operators. Unary
+ operators are defined for either
 prefix (preceding their single argument: \var{op}~$x$) or postfix (following
 the argument: $x$~\var{op}) position, never both
 (some are syntactically correct in both positions, but with different
@@ -995,14 +996,14 @@ will probably be more legible).
 binary unless mentioned otherwise):
 
 \def\point#1{\noindent $\bullet$ #1\hfill\break\indent\strut}
-\point{Priority 9}
+\point{Priority 10}
 %
 \kbd{++} and \kbd{--} (unary, postfix): \kbd{$x$++} assigns the value $x+1$ to
 $x$, then returns the new value of $x$. This corresponds to the C
 statement \kbd{++$x$} (there is no prefix \kbd{++} operator in GP).
 \kbd{$x$--} does the same with $x-1$.
 
-\point{Priority 8}
+\point{Priority 9}
 %
 \kbd{\var{op}=}, where \var{op} is any simple binary operator
 (i.e.~a binary operator with no side effects, i.e.~one of those defined below)
@@ -1012,12 +1013,24 @@ and returns the new value of~\kbd{x}, \var{not} a reference to the
 \idx{variable}~\kbd{x}. (Thus an assignment cannot occur on the lefthand
 side of another assignment.)
 
-\point{Priority 7}
+\point{Priority 8}
 %
 \kbd{=} is the assignment operator. The result of \kbd{x~=~$y$} is the value
 of the expression~$y$, which is also assigned to the variable~\kbd{x}. This
 is \var{not} the equality test operator. Beware that a statement like
 \kbd{x~=~1} is always true (i.e.~non-zero), and sets \kbd{x} to~1.
+The right hand side of the assignment operator is evaluated before the left
+hand side. If the left hand side cannot be modified, raise an error.
+
+\point{Priority 7}
+\kbd{[ ]} is the selection operator. \kbd{$x$[$i$]} returns the $i$-th
+component of vector $x$; \kbd{$x[$i$,$j$]$}, \kbd{$x[,$j$]$} and
+\kbd{$x$[$i$,]} respectively return the entry of coordinates $(i,j)$, the
+$j$-th column, and the $i$-th row of matrix $x$. If the assignment operator
+(\kbd{=}) immediately follows a sequence of selections, it assigns its
+right hand side to the selected component. E.g \kbd{x[1][1] = 0} is valid;
+but beware that \kbd{(x[1])[1] = 0} is not (because the parentheses force
+the complete evaluation of \kbd{x[1]}, and the result is not modifiable).
 
 \point{Priority 6}
 %
@@ -1048,7 +1061,8 @@ current precision. It behaves as $(f(x))'$ otherwise.
 
 \kbd{!} (unary, postfix): factorial. $x\kbd{!}=x(x-1)\cdots 1$.
 
-\kbd{.}: \kbd{$x$.$b$} extracts member $b$ from structure $x$.
+\kbd{.}\var{member} (unary, postfix): \kbd{$x$.\var{member}} extracts
+\var{member} from structure $x$ (see~\secref{se:member}).
 
 \point{Priority 4}
 %
@@ -1347,7 +1361,7 @@ polynomials, but assumes that the computation takes place in the fraction
 field of the coefficient ring (if it is not an integral domain, the result
 will a priori not make sense). This can be very tricky; for instance
 assume $x$ has highest priority (which is always the case), then
-$y$, then $z$:
+$y$:
 \bprog
 ? x % y
 %1 = 0
@@ -1637,6 +1651,7 @@ introduced in version 2.0.13. The old syntax
 local variables become undistinguishable.
 
 \subsec{Member functions}.\sidx{member functions}
+\label{se:member}
 
 Member functions use the `dot' notation to retrieve information from
 complicated structures (by default: types \tet{ell}, \tet{nf}, \tet{bnf},
