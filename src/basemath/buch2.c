@@ -53,7 +53,6 @@ static const int randshift = BITS_IN_RANDOM-1 - RANDOM_BITS;
 static long KC,KCZ,KCZ2,MAXRELSUP;
 static long primfact[500],expoprimfact[500];
 static GEN *idealbase, vectbase, FB, numFB, powsubFB, numideal;
-static GEN first_non_zero;
 
 /* FB[i]     i-th rational prime used in factor base
  * numFB[i]  index k such that FB[k]=i (0 if i is not prime)
@@ -80,21 +79,37 @@ static GEN first_non_zero;
 static long
 ccontent(GEN x)
 {
-  long i, l = lg(x), s=labs(x[1]);
+  long i, l = lg(x), s = labs(x[1]);
   for (i=2; i<l && s!=1; i++) s = cgcd(x[i],s);
   return s;
 }
 
 static void
-desallocate(GEN **M)
+desallocate(GEN **M, GEN *first_nz)
 {
   GEN *m = *M;
   long i;
   if (m)
   {
     for (i=lg(m)-1; i; i--) free(m[i]);
-    free(m); *M = NULL;
+    free((void*)*M); *M = NULL;
+    free((void*)*first_nz); *first_nz = NULL;
   }
+}
+
+static GEN
+cgetalloc(GEN x, size_t l, long t)
+{
+  x = (GEN)gprealloc((void*)x, l * sizeof(long));
+  x[0] = evaltyp(t) | evallg(l); return x;
+}
+
+static void
+reallocate(long max, GEN *M, GEN *first_nz)
+{
+  size_t l = max+1;
+  *M = cgetalloc(*M, l, t_VEC);
+  *first_nz = cgetalloc(*first_nz, l, t_VECSMALL);
 }
 
 /* Return the list of indexes or the primes chosen for the subFB.
@@ -1391,10 +1406,10 @@ set_log_embed(GEN col, GEN x, long R1, long prec)
 }
 
 static void
-set_fact(GEN c, long cglob)
+set_fact(GEN c, GEN first_nz, long cglob)
 {
   long i;
-  first_non_zero[cglob] = primfact[1]; /* for already_found_relation */
+  first_nz[cglob] = primfact[1];
   for (i=1; i<=primfact[0]; i++) c[primfact[i]] = expoprimfact[i];
 }
 
@@ -1422,7 +1437,8 @@ small_to_mat_i(GEN z, long d)
 
 /* return -1 in case of precision problems. t = current number of relations */
 static long
-small_norm_for_buchall(long cglob,GEN *mat,GEN matarch,long LIMC, long PRECREG,
+small_norm_for_buchall(long cglob,GEN *mat,GEN first_nz, GEN matarch,
+                       long LIMC, long PRECREG,
                        GEN nf,GEN gborne,long nbrelpid,GEN invp,GEN L)
 {
   const int maxtry_DEP  = 20;
@@ -1522,7 +1538,7 @@ small_norm_for_buchall(long cglob,GEN *mat,GEN matarch,long LIMC, long PRECREG,
 	}
       }
       cglob++; col = mat[cglob];
-      set_fact(col, cglob);
+      set_fact(col, first_nz, cglob);
       /* make sure we get maximal rank first, then allow all relations */
       if (cglob > 1 && cglob <= KC && ! addcolumntomatrix(col,invp,L))
       { /* Q-dependent from previous ones: forget it */
@@ -1644,9 +1660,9 @@ dbg_outrel(long phase,long cglob, GEN vperm,GEN *mat,GEN maarch)
 /* Check if we already have a column mat[l] equal to mat[s]
  * General check for colinearity useless since exceedingly rare */
 static long
-already_found_relation(GEN *mat,long s)
+already_found_relation(GEN *mat, long s, GEN first_nz)
 {
-  GEN cols = mat[s], nz = first_non_zero;
+  GEN cols = mat[s], nz = first_nz;
   long l,bs;
 
   bs = 1; while (bs<=KC && !cols[bs]) bs++;
@@ -1676,8 +1692,8 @@ remove_content(GEN I)
 
 /* if phase != 1 re-initialize static variables. If <0 return immediately */
 static long
-random_relation(long phase,long cglob,long LIMC,long PRECREG,
-                GEN nf,GEN subFB,GEN vecG,GEN *mat,GEN matarch,GEN list_jideal)
+random_relation(long phase,long cglob,long LIMC,long PRECREG,GEN nf,GEN subFB,
+                GEN vecG,GEN *mat,GEN first_nz,GEN matarch,GEN list_jideal)
 {
   static long jideal, jdir;
   long i, maxcglob, cptlist, cptzer, nbG, lgsub, r1, jlist = 1;
@@ -1735,9 +1751,9 @@ random_relation(long phase,long cglob,long LIMC,long PRECREG,
       }
       /* can factor ideal, record relation */
       cglob++; col = mat[cglob];
-      set_fact(col, cglob); col[jideal]--;
+      set_fact(col, first_nz, cglob); col[jideal]--;
       for (i=1; i<lgsub; i++) col[subFB[i]] -= ex[i];
-      if (already_found_relation(mat, cglob))
+      if (already_found_relation(mat, cglob, first_nz))
       { /* Already known: forget it */
         if (DEBUGLEVEL>1) dbg_cancelrel(jideal,jdir,phase,col);
         cglob--; unset_fact(col); col[jideal] = 0;
@@ -2803,7 +2819,7 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
   long seed;
   double cbach,cbach2,drc,LOGD2;
   GEN p1,vecG,fu,zu,nf,D,xarch,W,R,Res,z,h,vperm,subFB;
-  GEN L,resc,B,C,c1,lambda,pdep,liste,invp,clg1,clg2,Vbase, *mat;
+  GEN L,resc,B,C,c1,lambda,pdep,liste,invp,clg1,clg2,Vbase,first_nz, *mat;
   GEN CHANGE=NULL, extramat=NULL, extraC=NULL, list_jideal=NULL;
   char *precpb = NULL;
 
@@ -2849,11 +2865,11 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
     fprintferr("N = %ld, R1 = %ld, R2 = %ld, RU = %ld\n",N,R1,R2,RU);
     fprintferr("D = %Z\n",D);
   }
-  av0 = avma; mat = NULL; FB = NULL;
+  av0 = avma; mat = NULL; FB = NULL; first_nz = NULL;
 
 START:
   seed = getrand();
-  avma = av0; desallocate(&mat);
+  avma = av0; desallocate(&mat, &first_nz);
   if (precpb)
   {
     precdouble++;
@@ -2903,8 +2919,7 @@ START:
     fprintferr("relsup = %ld, ss = %ld, KCZ = %ld, KC = %ld, KCCO = %ld\n",
                RELSUP,ss,KCZ,KC,KCCO);
   matmax = 10*KCCO + MAXRELSUP; /* make room for lots of relations */
-  mat = (GEN*)gpmalloc(sizeof(GEN)*(matmax + 1));
-  first_non_zero = cgetg(matmax+1, t_VECSMALL);
+  reallocate(matmax, (GEN*)&mat, &first_nz);
   setlg(mat, KCCO+1);
   C = cgetg(KCCO+1,t_MAT);
   /* trivial relations (p) = prod P^e */
@@ -2918,7 +2933,7 @@ START:
       C[cglob] = (long)z; /* 0 */
       mat[cglob] = p1 = col_0(KC);
       k = numideal[FB[i]];
-      first_non_zero[cglob] = k+1; /* for already_found_relation */
+      first_nz[cglob] = k+1;
       p1 += k;
       for (j=lg(P)-1; j; j--) p1[j] = itos(gmael(P,j,3));
     }
@@ -2935,13 +2950,13 @@ START:
   invp = relationrank(mat,cglob,liste);
 
   /* relations through elements of small norm */
-  cglob = small_norm_for_buchall(cglob,mat,C,(long)LIMC,PRECREG,
+  cglob = small_norm_for_buchall(cglob,mat,first_nz,C,(long)LIMC,PRECREG,
                                  nf,gborne,nbrelpid,invp,liste);
   if (cglob < 0) { precpb = "small_norm"; goto START; }
   avma = av1; limpile = stack_lim(av1,1);
 
   phase = 0;
-  nlze = matmax = 0; /* for lint */
+  nlze = 0; /* for lint */
   vecG = NULL;
   list_jideal = NULL;
 
@@ -2975,7 +2990,7 @@ MORE:
       if (slim > matmax)
       {
         matmax = 2 * slim;
-        mat = (GEN*)gprealloc(mat, (matmax+1) * sizeof(GEN));
+        reallocate(matmax, (GEN*)&mat, &first_nz);
       }
       setlg(mat, slim+1);
       if (DEBUGLEVEL)
@@ -2994,7 +3009,7 @@ MORE:
       av1 = avma;
     }
     ss = random_relation(phase,cglob,(long)LIMC,PRECREG,
-                         nf,subFB,vecG,mat,matarch,list_jideal);
+                         nf,subFB,vecG,mat,first_nz,matarch,list_jideal);
     if (ss < 0)
     { /* could not find relations */
       if (ss != -1)
@@ -3040,10 +3055,8 @@ MORE:
   {
     if (low_stack(limpile, stack_lim(av1,1)))
     {
-      GEN *gptr[6];
       if(DEBUGMEM>1) err(warnmem,"buchall");
-      gptr[0]=&W; gptr[1]=&C; gptr[2]=&B; gptr[3]=&pdep;
-      gptr[4]=&extramat; gptr[5]=&extraC; gerepilemany(av1,gptr,6);
+      gerepileall(av1,7, &W,&C,&B,&pdep,&extramat,&extraC,&first_nz);
     }
     list_jideal = NULL;
     W = hnfadd(W,vperm,&pdep,&B,&C, extramat,extraC);
@@ -3111,7 +3124,7 @@ MORE:
   class_group_gen(nf,W,C,Vbase,PRECREG,NULL, &clg1, &clg2);
 
   c1 = gdiv(gmul(R,h), z);
-  desallocate(&mat);
+  desallocate(&mat, &first_nz);
 
   return gerepilecopy(av, buchall_end(nf,CHANGE,flun,k,fu,clg1,clg2,R,c1,zu,W,B,xarch,C,vectbase,vperm));
 }

@@ -87,6 +87,7 @@ MW 33- (recent) typo in localred (char 2)
        --> weird error
    38- qfsign([;]) --> SEGV
 MW 39- torsion group of [0,0,0,-6648,208633] reported as C2 instead of C6
+   40- bnfinit: very rare stack corruption
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).
