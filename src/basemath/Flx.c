@@ -1738,10 +1738,12 @@ FlxX_shift(GEN a, long n)
 {
   long i, l = lg(a);
   GEN  b;
+  long vs;
   if (!signe(a)) return a;
+  vs = mael(a,2,1);
   b = cgetg(l+n, t_POL);
   b[1] = a[1];
-  for (i=0; i<n; i++) b[2+i] = (long) zero_Flx(a[1]);
+  for (i=0; i<n; i++) b[2+i] = (long) zero_Flx(vs);
   for (i=2; i<l; i++) b[i+n] = a[i];
   return b;
 }
