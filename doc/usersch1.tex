@@ -51,20 +51,12 @@ of need, you can then refer to the complete function description in Chapter 3.
 
 \subsectitle{How to get the latest version?}
 
-\noindent
-This package can be obtained by anonymous ftp from quite a number of sites
-(ask your favourite Web search engine for the site nearest to you). But, if
-you want the very latest version (including development versions), you should
-use the anonymous ftp address
-
-\kbd{ftp://pari.math.u-bordeaux.fr/pub/pari}
-
-\noindent
-where you will find all the different ports and possibly some binaries. A lot
-of version information, mailing list archives, and various tips can be found
-on PARI's home page:
+Everything can be found on PARI's home page:
 
 \kbd{\wwwsite}
+
+From that point you may access all sources, some binaries, version
+informations, the complete mailing list archives, a FAQ and various tips.
 
 \subsectitle{Implementation notes:} (You can skip this section and switch to
 \secref{se:start} if you're not interested in hardware technicalities. You
@@ -111,27 +103,26 @@ based Macs. Since 1997, this version was unmaintained; it has been removed
 from the PARI distribution in version 2.2.5. To run PARI with a 68k assembler
 micro-kernel, one now uses the GMP version.
 
-\section{The PARI types}
-\label{se:start}\sidx{types}
+\section{The PARI types} \label{se:start}\sidx{types}
 
-\noindent
-The crucial word in PARI is \idx{recursiveness}: most of the types it knows
-about are recursive. For example, the basic type {\bf Complex} exists (actually
-called \typ{COMPLEX}). However, the components (i.e.~the real and imaginary
-part) of such a ``complex number'' can be of any type. The only sensible ones
-are integers (we are then in $\Z[i]$), rational numbers ($\Q[i]$), real
-numbers ($\R[i]=\C$), or even elements of $\Z/n\Z$ ($(\Z/n\Z)[i]$ when this
-makes sense), or $p$-adic numbers when $p\equiv 3 \mod 4$ ($\Q_{p}[i]$).
+\noindent The crucial word in PARI is \idx{recursiveness}: most of the types
+it knows about are recursive. For example, the basic type {\bf Complex}
+exists (actually called \typ{COMPLEX}). However, the components (i.e.~the
+real and imaginary part) of such a ``complex number'' can be of any type. The
+only sensible ones are integers (we are then in $\Z[i]$), rational numbers
+($\Q[i]$), real numbers ($\R[i]=\C$), or even elements of $\Z/n\Z$
+($(\Z/n\Z)[i]$ when this makes sense), or $p$-adic numbers when $p\equiv 3
+\mod 4$ ($\Q_{p}[i]$).
 
 This feature must of course not be used too rashly: for example you are in
 principle allowed to create objects which are ``complex numbers of complex
 numbers'', but don't expect PARI to make sensible use of such objects: you
 will mainly get nonsense.
 
-On the other hand, one thing which \emph{is} allowed is to have components
-of different, but compatible, types. For example, taking again complex
-numbers, the real part could be of type integer, and the imaginary part of
-type rational.
+On the other hand, one thing which \emph{is} allowed is to have components of
+different, but compatible, types. For example, taking again complex numbers,
+the real part could be of type integer, and the imaginary part of type
+rational.
 
 By compatible, we mean types which can be freely mixed in operations like $+$
 or $\times$. For example if the real part is of type real, the imaginary part
@@ -143,61 +134,53 @@ type; the symbolic names correspond to the internal representations of the
 types.\medskip
 \settabs\+xxx&typexxxxxxxxxxxx&xxxxxxxxxxxxxxxx&xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\cr
 %
-\+&type \tet{t_INT}& $\Z$& Integers (with
-arbitrary precision)\sidx{integer}\cr
+\+&type \tet{t_INT}& $\Z$& Integers (with arbitrary
+precision)\sidx{integer}\cr
 %
-\+&type \tet{t_REAL}& $\R$& Real numbers
-(with arbitrary precision)\sidx{real number}\cr
+\+&type \tet{t_REAL}& $\R$& Real numbers (with arbitrary precision)\sidx{real
+number}\cr
 %
-\+&type \tet{t_INTMOD}& $\Z/n\Z$&
-Integermods (integers modulo $n$)\sidx{integermod}\cr
+\+&type \tet{t_INTMOD}& $\Z/n\Z$& Integermods (integers modulo
+$n$)\sidx{integermod}\cr
 %
-\+&type \tet{t_FRAC}& $\Q$& Rational numbers
-(in irreducible form)\sidx{rational number}\cr
+\+&type \tet{t_FRAC}& $\Q$& Rational numbers (in irreducible
+form)\sidx{rational number}\cr
 %
-\+&type \tet{t_FRACN}& $\Q$& Rational numbers
-(not necessarily in irreducible form)\cr
+\+&type \tet{t_FRACN}& $\Q$& Rational numbers (not necessarily in irreducible
+form)\cr
 %
-\+&type \tet{t_COMPLEX}& $T[i]$& Complex
-numbers\sidx{complex number}\cr
+\+&type \tet{t_COMPLEX}& $T[i]$& Complex numbers\sidx{complex number}\cr
 %
-\+&type \tet{t_PADIC}& $\Q_p$&
-$p$-adic\sidx{p-adic number} numbers\cr
+\+&type \tet{t_PADIC}& $\Q_p$& $p$-adic\sidx{p-adic number} numbers\cr
 %
-\+&type \tet{t_QUAD}& $\Q[w]$& Quadratic Numbers
-(where $[\Z[w]:\Z]=2$)\sidx{quadratic number}\cr
+\+&type \tet{t_QUAD}& $\Q[w]$& Quadratic Numbers (where
+$[\Z[w]:\Z]=2$)\sidx{quadratic number}\cr
 %
-\+&type \tet{t_POLMOD}& $T[X]/P(X)T[X]$&
-Polmods (polynomials modulo $P$)\sidx{polmod}\cr
+\+&type \tet{t_POLMOD}& $T[X]/P(X)T[X]$& Polmods (polynomials modulo
+$P$)\sidx{polmod}\cr
 %
-\+&type \tet{t_POL}& $T[X]$& Polynomials
-\sidx{polynomial}\cr
+\+&type \tet{t_POL}& $T[X]$& Polynomials \sidx{polynomial}\cr
 %
-\+&type \tet{t_SER}& $T((X))$& Power series
-(finite Laurent series)\sidx{power series}\cr
+\+&type \tet{t_SER}& $T((X))$& Power series (finite Laurent
+series)\sidx{power series}\cr
 %
-\+&type \tet{t_RFRAC}& $T(X)$& Rational
-functions (in irreducible form)\sidx{rational function}\cr
+\+&type \tet{t_RFRAC}& $T(X)$& Rational functions (in irreducible
+form)\sidx{rational function}\cr
 %
-\+&type \tet{t_RFRACN}& $T(X)$& Rational functions
-(not necessarily in irreducible form)\cr
+\+&type \tet{t_RFRACN}& $T(X)$& Rational functions (not necessarily in
+irreducible form)\cr
 %
-\+&type \tet{t_VEC}& $T^n$& Row (i.e.~horizontal)
-vectors\sidx{row vector}\cr
+\+&type \tet{t_VEC}& $T^n$& Row (i.e.~horizontal) vectors\sidx{row vector}\cr
 %
-\+&type \tet{t_COL}& $T^n$& Column (i.e.~vertical)
-vectors\sidx{column vector}\cr
+\+&type \tet{t_COL}& $T^n$& Column (i.e.~vertical) vectors\sidx{column
+vector}\cr
 %
-\+&type \tet{t_MAT}& ${\cal M}_{m,n}(T)$&
-Matrices\sidx{matrix}\cr
+\+&type \tet{t_MAT}& ${\cal M}_{m,n}(T)$& Matrices\sidx{matrix}\cr
 %
-\+&type \tet{t_LIST}& $T^n$&
-Lists\sidx{list}\cr
+\+&type \tet{t_LIST}& $T^n$& Lists\sidx{list}\cr
 %
-\+&type \tet{t_STR}&     &
-Character strings\sidx{string}\cr
-\noindent
-and where the types $T$ in recursive types can be different in each component.
+\+&type \tet{t_STR}&     & Character strings\sidx{string}\cr \noindent and
+where the types $T$ in recursive types can be different in each component.
 
 In addition, there exist types \tet{t_QFR} and \tet{t_QFI} for binary
 quadratic forms of respectively positive and negative
@@ -207,9 +190,9 @@ operations, but which may disappear in future versions.
 Every PARI object (called \tet{GEN} in the sequel) belongs to one of these
 basic types. Let us have a closer look.
 
-\subsec{Integers and reals}:\sidx{integer}\sidx{real number}
-they are of arbitrary and varying length (each number carrying in its
-internal representation its own length or precision) with the following mild
+\subsec{Integers and reals}:\sidx{integer}\sidx{real number} they are of
+arbitrary and varying length (each number carrying in its internal
+representation its own length or precision) with the following mild
 restrictions (given for 32-bit machines, the restrictions for 64-bit machines
 being so weak as to be considered inexistent): integers must be in absolute
 value less than $2^{268435454}$ (i.e.~roughly 80807123 digits).  The
@@ -227,14 +210,14 @@ can be written for such huge numbers.
 Integers and real numbers are completely non-recursive types and are
 sometimes called the \tet{leaves}.
 
-\subsec{Integermods, rational numbers (irreducible or not),
-$p$-adic numbers, polmods, and
-rational functions}:\sidx{integermod}\sidx{rational number}\sidx{p-adic number}
-\sidx{polmod} these are recursive, but in a restricted way.
+\subsec{Integermods, rational numbers (irreducible or not), $p$-adic numbers,
+polmods, and rational functions}:\sidx{integermod}\sidx{rational
+number}\sidx{p-adic number} \sidx{polmod} these are recursive, but in a
+restricted way.
 
-For integermods or polmods, there are two components: the modulus, which
-must be of type integer (resp.\ polynomial), and the representative number
-(resp.\ polynomial).
+For integermods or polmods, there are two components: the modulus, which must
+be of type integer (resp.\ polynomial), and the representative number (resp.\
+polynomial).
 
 For rational numbers or rational functions, there are also only two
 components: the numerator and the denominator, which must both be of type
@@ -244,24 +227,24 @@ integer (resp.\ polynomial).
 
 Finally, $p$-adic numbers have three components: the prime $p$, the
 ``modulus'' $p^k$, and an approximation to the $p$-adic number. Here $\Z_p$
-is considered as $\limproj \Z/p^k\Z$, and $\Q_p$ as its field of
-fractions.  Like real numbers, the codewords contain an exponent (giving
-essentially the $p$-adic valuation of the number) and also the information on
-the precision of the number (which is in fact redundant with $p^k$, but is
-included for the sake of efficiency).
+is considered as $\limproj \Z/p^k\Z$, and $\Q_p$ as its field of fractions.
+Like real numbers, the codewords contain an exponent (giving essentially the
+$p$-adic valuation of the number) and also the information on the precision
+of the number (which is in fact redundant with $p^k$, but is included for the
+sake of efficiency).
 
-\subsec{Complex numbers and quadratic numbers}:
-\sidx{complex number}\sidx{quadratic number}
-quadratic numbers are numbers of the form $a+bw$, where $w$ is such that
-$[\Z[w]:\Z]=2$, and more precisely $w=\sqrt d/2$ when $d\equiv 0 \mod 4$,
-and $w=(1+\sqrt d)/2$ when $d\equiv 1 \mod 4$, where $d$ is the discriminant
-of a quadratic order. Complex numbers correspond to the very important
-special case $w=\sqrt{-1}$.\label{se:compquad}
+\subsec{Complex numbers and quadratic numbers}: \sidx{complex
+number}\sidx{quadratic number} quadratic numbers are numbers of the form
+$a+bw$, where $w$ is such that $[\Z[w]:\Z]=2$, and more precisely $w=\sqrt
+d/2$ when $d\equiv 0 \mod 4$, and $w=(1+\sqrt d)/2$ when $d\equiv 1 \mod 4$,
+where $d$ is the discriminant of a quadratic order. Complex numbers
+correspond to the very important special case
+$w=\sqrt{-1}$.\label{se:compquad}
 
-Complex and quadratic numbers are partially recursive: the two components
-$a$ and $b$ can be of type integer, real, rational, integermod or $p$-adic,
-and can be mixed, subject to the limitations mentioned above. For example,
-$a+bi$ with $a$ and $b$ $p$-adic is in $\Q_p[i]$, but this is equal to
+Complex and quadratic numbers are partially recursive: the two components $a$
+and $b$ can be of type integer, real, rational, integermod or $p$-adic, and
+can be mixed, subject to the limitations mentioned above. For example, $a+bi$
+with $a$ and $b$ $p$-adic is in $\Q_p[i]$, but this is equal to
 $\Q_p$ when $p\equiv 1 \mod 4$, hence we must exclude these $p$ when one
 explicitly uses a complex $p$-adic type.
 
