@@ -744,9 +744,11 @@ idealadd(GEN nf, GEN x, GEN y)
   return gerepileupto(av,z);
 }
 
-/* assume x,y integral non zero */
+/* Assume x,y integral non zero (presumably coprime, which is checked).
+ * Return a in x such that 1-a in y. If (x + y) \cap Z is 1, then addone_aux
+ * is more efficient. */
 GEN
-addone_aux2(GEN nf, GEN x, GEN y)
+addone_aux2(GEN x, GEN y)
 {
   GEN U, H;
   long i, l;
@@ -762,7 +764,7 @@ addone_aux2(GEN nf, GEN x, GEN y)
 
 /* assume x,y integral, non zero in HNF */
 static GEN
-addone_aux(GEN nf, GEN x, GEN y)
+addone_aux(GEN x, GEN y)
 {
   GEN a, b, u, v;
 
@@ -770,9 +772,8 @@ addone_aux(GEN nf, GEN x, GEN y)
   b = gcoeff(y,1,1);
   if (typ(a) != t_INT || typ(b) != t_INT)
     err(talker,"ideals don't sum to Z_K in idealaddtoone");
-  if (gcmp1(bezout(a,b,&u,&v)))
-    return gmul(u,(GEN)x[1]);
-  return addone_aux2(nf, x, y);
+  if (gcmp1(bezout(a,b,&u,&v))) return gmul(u,(GEN)x[1]);
+  return addone_aux2(x, y);
 }
 
 GEN
@@ -811,8 +812,8 @@ idealaddtoone_i(GEN nf, GEN x, GEN y)
     return algtobasis(nf, gneg(p1));
   }
 
-  if (fl) p1 = addone_aux(nf, xh,yh); /* xh[1], yh[1] scalar */
-  else    p1 = addone_aux2(nf,xh,yh);
+  if (fl) p1 = addone_aux (xh,yh); /* xh[1], yh[1] scalar */
+  else    p1 = addone_aux2(xh,yh);
   p1 = element_reduce(nf,p1, idealmullll(nf,x,y));
   if (DEBUGLEVEL>4 && !gcmp0(p1))
     fprintferr(" leaving idealaddtoone: %Z\n",p1);
@@ -863,18 +864,23 @@ unnf_minus_x(GEN x)
 static GEN
 addone(GEN f(GEN,GEN,GEN), GEN nf, GEN x, GEN y)
 {
-  GEN z = cgetg(3,t_VEC);
-  gpmem_t av=avma;
-
-  nf=checknf(nf); x = gerepileupto(av, f(nf,x,y));
-  z[1]=(long)x; z[2]=(long)unnf_minus_x(x); return z;
+  GEN z = cgetg(3,t_VEC), a;
+  gpmem_t av = avma;
+  nf = checknf(nf);
+  a = gerepileupto(av, f(nf,x,y));
+  z[1]=(long)a;
+  z[2]=(long)unnf_minus_x(a); return z;
 }
 
 /* assume x,y HNF, non-zero */
 static GEN
-addone_nored(GEN nf, GEN x, GEN y)
+addone_nored(GEN x, GEN y)
 {
-  return addone(addone_aux, nf,x,y);
+  GEN z = cgetg(3,t_VEC), a;
+  gpmem_t av = avma;
+  a = gerepileupto(av, addone_aux(x,y));
+  z[1] = (long)a;
+  z[2] = (long)unnf_minus_x(a); return z;
 }
 
 GEN
@@ -911,8 +917,8 @@ element_invmodideal(GEN nf, GEN x, GEN y)
     default: err(typeer,"element_invmodideal");
       return NULL; /* not reached */
   }
-  if (fl) p1 = addone_aux(nf, xh,yh);
-  else    p1 = addone_aux2(nf,xh,yh);
+  if (fl) p1 = addone_aux (xh,yh);
+  else    p1 = addone_aux2(xh,yh);
   p1 = element_div(nf,p1,x);
   v = gerepileupto(av, nfreducemodideal(nf,p1,y));
   return v;
@@ -2191,7 +2197,7 @@ anti_unif_mod_f(GEN nf, GEN pr, GEN sqf)
     GEN d,d1,d2, sqfZ = gcoeff(sqf,1,1); /* = (sqf \cap Z) = (V \cap Z) * p */
     U = idealpow(nf,pr,gdeux);
     V = idealdivpowprime(nf,sqf,pr,gun);
-    uv = addone_nored(nf, U, V);
+    uv = addone_nored(U, V);
     UV = idealmul(nf,sqf,pr);
     t = (GEN)pr[2];
     t = makeprimetoideal(nf, UV, uv, t); /* cf unif_mod_f */
@@ -2218,7 +2224,7 @@ unif_mod_f(GEN nf, GEN pr, GEN sqf)
   {
     U = idealpow(nf,pr,gdeux);
     V = idealdivpowprime(nf,sqf,pr,gun);
-    uv = addone_nored(nf, U, V);
+    uv = addone_nored(U, V);
     UV = idealmulprime(nf,sqf,pr);
     return makeprimetoideal(nf, UV, uv, t);
   }

@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #define RXQX_rem(x,y,T) RXQX_divrem((x),(y),(T),ONLY_REM)
 #define FpX_rem(x,y,p) FpX_divres((x),(y),(p),ONLY_REM)
-extern GEN addone_aux2(GEN nf, GEN x, GEN y);
+extern GEN addone_aux2(GEN x, GEN y);
 extern GEN addshiftw(GEN x, GEN y, long d);
 extern GEN gmul_mat_smallvec(GEN x, GEN y);
 extern GEN norm_by_embed(long r1, GEN x);
@@ -1955,7 +1955,7 @@ uniformizer_appr(GEN nf, GEN L, long i, GEN p)
 
   /* inter = prod L[j], j != i */
   P2 = compute_pr2(nf, P, p, &ramif);
-  u = addone_aux2(nf, P2, inter);
+  u = addone_aux2(P2, inter);
   v = unnf_minus_x(u);
   if (!ramif) pi = gmul(p, v);
   else
