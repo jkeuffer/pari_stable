@@ -822,7 +822,7 @@ if test -n "$__gnuc__"; then
   case "$osname-$arch" in hpux-*) DLCFLAGS=-fPIC;; esac
   # Specific optimisations for some architectures
   case "$osname-$arch" in
-    linux-i?86|cygwin*) OPTFLAGS="$OPTFLAGS -fexpensive-optimizations \
+    linux-i?86|cygwin*) OPTFLAGS="$OPTFLAGS \
       -malign-loops=2 -malign-jumps=2 -malign-functions=2";;
   esac
   # omit-frame-pointer incompatible with -pg
