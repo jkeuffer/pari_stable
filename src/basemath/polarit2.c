@@ -2395,7 +2395,7 @@ polgcdnun(GEN x, GEN y)
     if (pol_approx0(r, x, exact))
     {
       avma = av1;
-      if (lgef(y) == 3 && inexact) { avma = av; return gun; }
+      if (lgef(y) == 3 && !exact) { avma = av; return gun; }
       return (y==yorig)? gcopy(y): gerepileupto(av,y);
     }
     x = y; y = r;
