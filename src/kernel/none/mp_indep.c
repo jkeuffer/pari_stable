@@ -60,6 +60,17 @@ ishiftr(GEN x, long s)
 }
 
 GEN
+icopy_spec(GEN x, long nx)
+{
+  GEN z;
+  long i;
+  if (!nx) return gzero;
+  z = cgeti(nx+2); z[1] = evalsigne(1)|evallgefint(nx+2);
+  for (i=0; i<nx; i++) z[i+2] = x[i];
+  return z;
+}
+
+GEN
 mului(ulong x, GEN y)
 {
   long s = signe(y);

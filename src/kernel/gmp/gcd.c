@@ -73,9 +73,6 @@ gcdii(GEN a, GEN b)
  *    If a is invertible, return 1, and set res  = a^{ -1 }
  *    Otherwise, return 0, and set res = gcd(a,b)
  */
-
-static const int INVMOD_GMP_LIMIT=4;
-
 int
 invmod(GEN a, GEN b, GEN *res)
 {

@@ -445,17 +445,6 @@ long KARATSUBA_MULR_LIMIT = _mulr_l;
 void setsqri(long a) { KARATSUBA_SQRI_LIMIT = a; }
 void setmuli(long a) { KARATSUBA_MULI_LIMIT = a; }
 void setmulr(long a) { KARATSUBA_MULR_LIMIT = a; }
-
-GEN
-speci(GEN x, long nx)
-{
-  GEN z;
-  long i;
-  if (!nx) return gzero;
-  z = cgeti(nx+2); z[1] = evalsigne(1)|evallgefint(nx+2);
-  for (i=0; i<nx; i++) z[i+2] = x[i];
-  return z;
-}
 #else
 #  define KARATSUBA_SQRI_LIMIT _sqri_l
 #  define KARATSUBA_MULI_LIMIT _muli_l

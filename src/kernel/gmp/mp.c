@@ -485,30 +485,27 @@ absi_equal_lg(GEN x, GEN y, long l)
 #define _sqri_l -1
 #define _muli_l -1
 #define _mulr_l 72
+#define _divr_l 502
+#define _invmod_gmp_l 4
 
 #if 1 /* for tunings */
+
 long KARATSUBA_SQRI_LIMIT = _sqri_l;
 long KARATSUBA_MULI_LIMIT = _muli_l;
 long KARATSUBA_MULR_LIMIT = _mulr_l;
+long DIVRR_GMP_LIMIT = _divr_l;
+long INVMOD_GMP_LIMIT= _invmod_gmp_l;
 
 void setsqri(long a) {} /*NOOP*/ 
 void setmuli(long a) {} /*NOOP*/
 void setmulr(long a) { KARATSUBA_MULR_LIMIT = a; }
-
-GEN
-speci(GEN x, long nx)
-{
-  GEN z;
-  long i;
-  if (!nx) return gzero;
-  z = cgeti(nx+2); z[1] = evalsigne(1)|evallgefint(nx+2);
-  for (i=0; i<nx; i++) z[i+2] = x[i];
-  return z;
-}
+void setdivr(long a) { DIVRR_GMP_LIMIT   = a; }
+void setinvmod(long a) { INVMOD_GMP_LIMIT= a; }
 #else
 #  define KARATSUBA_SQRI_LIMIT _sqri_l
 #  define KARATSUBA_MULI_LIMIT _muli_l
 #  define KARATSUBA_MULR_LIMIT _mulr_l
+#  define DIVRR_GMP_LIMIT      _divr_l
 #endif
 
 GEN
@@ -723,8 +720,6 @@ divrr_with_gmp(GEN x, GEN y)
   w[1] = evalsigne(sx) | evalexpo(e);
   return w;
 }
-
-static long DIVRR_GMP_LIMIT = 502;
 
 GEN
 divrr(GEN x, GEN y)
