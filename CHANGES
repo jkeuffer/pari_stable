@@ -91,6 +91,9 @@ BA 47- incorrect quoting in src/make_vi_tags (make ctags)
    53- nfhilbert(nf,a,b, pr | 2) would give bogus result if nf in variable 0 (x)
 MD 54- real(1 / (a+quadgen(...)*b)) was a / (a^2 + b^2)  [assumed quadgen(-1) !]
    55- wrong HNF (reduction not finished) when nblines >> nbcol [hnf(,0) only]
+   56- rare problem in isprincipal (large non Galois base field)--> wrong 
+       result (generators not required) or infinite loop.
+   57- compatibility problems with readline-4.2 (build would fail)
 
   Changed
     1- DOS distribution archives (GPM removed)
