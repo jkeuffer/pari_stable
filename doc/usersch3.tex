@@ -4687,7 +4687,7 @@ polynomials, \kbd{nf}, \kbd{bnf}, \kbd{[x,Z\_K\_basis]}).
 
 \misctitle{Warning:} this routine uses an exponential-time algorithm to
 enumerate all potential generators, and may be exceedingly slow when the
-number field has many subfields, hence a lot of elements of small $T2$-norm.
+number field has many subfields, hence a lot of elements of small $T_2$-norm.
 E.g. do not try it on the compositum of many quadratic fields, use
 \tet{polred} instead.
 
@@ -4702,7 +4702,8 @@ $P(x)$ and $P(-x)$, only one is given).
 
 16: possibly use a suborder of the maximal order. The primes dividing the
 index of the order chosen are larger than \tet{primelimit} or divide integers
-stored in the \tet{addprimes} table.
+stored in the \tet{addprimes} table. In that case it may happen that the
+output polynomial does not have minimal $T_2$ norm.
 
 \syn{polredabs0}{x,\fl}.
 
