@@ -152,6 +152,7 @@ BA  3- galoisidentify for order 96 to 127.
     4- default 'datadir' [ to allow relocating 'galdata' for polgalois ]
     5- hi-res plotting under Windows
 GTo 6- routine qfrep()
+BA  7- routine qfbsolve(Q,p) for Q imaginary and p prime
 
   Removed
     1- bruteall [ useless, undocumented variant of 'brute' ]
