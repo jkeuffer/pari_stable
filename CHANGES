@@ -39,6 +39,7 @@ Done for version 2.2.1 (released ??/??/2001):
     4- wrong result in ZY_ZXY_resultant when degree dropped in ERS
     5- factor(x^2 + I*1.) --> stack corruption
     6- \r directory was silently accepted
+    7- check arguments in polcompositum()
 
   Changed
     1- removed useless parameter prec in many bnr* and rnf* functions
@@ -48,6 +49,7 @@ BA  4- Fp_PHlog (Pohlig-Hellman) can use a factorization of the subgroup order
 
   Added
 BA  1- function pith() [= pi(x), naïve implementation]
+    2- new target for Makefile: gp.dbg
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.0 (released 30/04/2001):
