@@ -1,5 +1,3 @@
-For PARI/GP version 2.0.18
-
 This file lists the things that ought to be implemented / fixed. It is
 hopelessly incomplete right now, but it's a start. Most items require major
 work, and may not be that desireable after all. If you intend to work on
