@@ -2503,8 +2503,8 @@ read_arg(int *nread, char *t, long argc, char **argv)
 static char**
 read_opt(long argc, char **argv)
 {
-  char *b=NULL, *p=NULL, *s=NULL, **pre=(char**)1;
-  int i=1;
+  char *b=NULL, *p=NULL, *s=NULL, **pre;
+  int i=1, initrc=1;
 
   pari_outfile=stderr;
   while (i<argc)
@@ -2527,7 +2527,7 @@ read_opt(long argc, char **argv)
 	if (strncmp(t,"est",3)) usage(argv[0]);
         disable_color = 1; test_mode = 1; /* fall through */
       case 'f':
-	pre = NULL; break;
+	initrc = 0; break;
       case '-':
         if (strcmp(t, "version") == 0) {
            print_version();
@@ -2538,7 +2538,7 @@ read_opt(long argc, char **argv)
 	usage(argv[0]);
     }
   }
-  if (pre) pre = gp_initrc();
+  pre = initrc? gp_initrc(): NULL;
 
   /* override the values from gprc */
   testint(b, &paribufsize); if (paribufsize < 10) paribufsize = 10;
