@@ -1058,8 +1058,7 @@ nf_LLL_cmbf(nfcmbf_t *T, long a, GEN p, long rec)
       polred = nf_pol_red(P, prk);
       famod = hensel_lift_fact(polred,famod,NULL,p,pa,a);
       /* recompute old Newton sums to new precision */
-      if (tmax)
-        for (i=1; i<=n0; i++) TT[i] = 0;
+      for (i=1; i<=n0; i++) TT[i] = 0;
     }
 
     for (i=1; i<=n0; i++)
