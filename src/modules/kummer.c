@@ -27,10 +27,11 @@ extern GEN T2_from_embed_norm(GEN x, long r1);
 extern GEN pol_to_vec(GEN x, long N);
 extern GEN famat_to_nf(GEN nf, GEN f);
 extern GEN vconcat(GEN A, GEN B);
+extern long int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *newx, long v);
+    
 
 static long rc,ell,degK,degKz,m,d,vnf,dv;
-static GEN matexpoteta1,nf,raycyc,polnf;
-static GEN bnfz,nfz,U,uu,gell,cyc,gencyc,vecalpha,R;
+static GEN invexpoteta1,nfz,gell;
 
 /* row vector B x matrix T : c_j=prod_i (b_i^T_ij) */
 static GEN
@@ -115,10 +116,10 @@ get_listx(GEN arch,GEN msign,GEN munit,GEN vecmunit2,long ell,long lSp,long nbvu
   }
 }
 
+/* given x in nf -- possibly not integral -- compute an algebraic integer
+ * of the form x * y^gell */
 static GEN
 reducealpha(GEN nf,GEN x,GEN gell)
-/* etant donne un nombre algebrique x du corps nf -- non necessairement
-   entier -- calcule un entier algebrique de la forme x*g^gell */
 {
   long tx=typ(x),i;
   GEN den,fa,fac,ep,p1,y;
@@ -166,7 +167,7 @@ rnfkummersimple(GEN bnr, GEN subgroup, long all)
   long nbgenclK,lSml2,lSl,lSp,rc,nbvunit;
   long lastbid,nbcol,nblig,k,llistx,e,vp,vd;
 
-  GEN bnf,nf,classgroup,cyclic,bid,ideal,arch,cycgen,gell,p1,p2,p3;
+  GEN polnf,bnf,nf,classgroup,cyclic,bid,ideal,arch,cycgen,gell,p1,p2,p3;
   GEN cyclicK,genK,listgamma,listalpha,fa,prm,expom,Sm,Sml1,Sml2,Sl,ESml2;
   GEN p,factell,Sp,vecbeta,matexpo,vunit,id,pr,vsml2,vecalpha0;
   GEN cycpro,munit,vecmunit2,msign,archartif,listx,listal,listg,listgamma0;
@@ -356,125 +357,105 @@ rnfkummersimple(GEN bnr, GEN subgroup, long all)
 }
 
 static GEN
-tauofideal(GEN id)
+tauofelt(GEN nf, GEN x, GEN U)
 {
-  long j;
-  GEN p1,p2;
-
-  p1=gsubst(gmul((GEN)nfz[7],id),vnf,U);
-  p2=cgetg(lg(p1),t_MAT);
-  for (j=1; j<lg(p1); j++) p2[j]=(long)algtobasis(nfz,(GEN)p1[j]);
-  return hnfmodid(p2, gcoeff(id,1,1));
+  return algtobasis(nfz, gsubst(gmul((GEN)nf[7],x),vnf,U));
+}
+static GEN
+tauofalg(GEN x, GEN U)
+{
+  return gsubst(lift(x),vnf,U);
 }
 
 static GEN
-tauofprimeideal(GEN pr)
+lifttoKz(GEN nfz, GEN nf, GEN id, GEN A1)
 {
-  GEN p1 = dummycopy(pr);
-
-  p1[2] = (long)algtobasis(nfz, gsubst(gmul((GEN)nfz[7],(GEN)pr[2]),vnf,U));
-  return gcoeff(idealfactor(nfz,prime_to_ideal(nfz,p1)),1,1);
+  GEN I = ideal_two_elt(nf,id);
+  I[2] = (long)tauofelt(nf,(GEN)I[2],A1);
+  return prime_to_ideal(nfz,I);
 }
 
-static long
-isprimeidealconj(GEN pr1, GEN pr2)
-{
-  GEN pr=pr1;
 
-  do
+static GEN
+tauofideal(GEN id, GEN U)
+{
+  GEN I = ideal_two_elt(nfz,id);
+  I[2] = (long)tauofelt(nfz,(GEN)I[2],U);
+  return prime_to_ideal(nfz,I);
+}
+
+static int
+isprimeidealconj(GEN pr1, GEN pr2, GEN U)
+{
+  GEN p = (GEN)pr1[1];
+  GEN x = (GEN)pr1[2];
+  GEN b1= (GEN)pr1[5];
+  GEN b2= (GEN)pr2[5];
+  if (!egalii(p, (GEN)pr2[1])
+   || !egalii((GEN)pr1[3], (GEN)pr2[3])
+   || !egalii((GEN)pr1[4], (GEN)pr2[4])) return 0;
+  if (gegal(x,(GEN)pr2[2])) return 1;
+  for(;;)
   {
-    if (gegal(pr,pr2)) return 1;
-    pr = tauofprimeideal(pr);
+    if (int_elt_val(nfz,x,p,b2,NULL,0)) return 1;
+    x = FpV_red(tauofelt(nfz,x,U), p);
+    if (int_elt_val(nfz,x,p,b1,NULL,0)) return 0;
   }
-  while (!gegal(pr,pr1));
+}
+
+static int
+isconjinprimelist(GEN S, GEN pr2, GEN U)
+{
+  long lS=lg(S),i;
+
+  for (i=1; i<lS; i++)
+    if (isprimeidealconj((GEN)S[i],pr2,U)) return 1;
   return 0;
 }
 
-static long
-isconjinprimelist(GEN listpr, GEN pr2)
+static GEN
+downtoK(GEN polnf, GEN x)
 {
-  long ll=lg(listpr)-1,i;
-
-  for (i=1; i<=ll; i++)
-    if (isprimeidealconj((GEN)listpr[i],pr2)) return 1;
-  return 0;
-}
-
-static void
-computematexpoteta1(GEN A1, GEN R)
-{
-  long j;
-  GEN Aj = polun[vnf];
-  matexpoteta1 = cgetg(degK+1,t_MAT);
-  for (j=1; j<=degK; j++)
-  {
-    matexpoteta1[j] = (long)pol_to_vec(Aj, degKz);
-    if (j<degK) Aj = gmod(gmul(Aj,A1), R);
-  }
+  GEN y = gmul(invexpoteta1, pol_to_vec(lift(x), degKz));
+  return gmodulcp(gtopolyrev(y,vnf),polnf);
 }
 
 static GEN
-downtoK(GEN x)
+tracetoK(GEN polnf, GEN x, GEN U)
 {
+  GEN p1 = x;
   long i;
-  GEN p2,p3;
-
-  p2 = inverseimage(matexpoteta1, pol_to_vec(lift(x), degKz));
-  if (lg(p2)==1) err(talker,"not an element of K in downtoK");
-  p3 = (GEN)p2[degK];
-  for (i=degK-1; i; i--) p3 = gadd((GEN)p2[i],gmul(polx[vnf],p3));
-  return gmodulcp(p3,polnf);
+  for (i=1; i<m; i++) p1 = gadd(x, tauofalg(p1,U));
+  return downtoK(polnf,p1);
 }
 
 static GEN
-tracetoK(GEN x)
+normtoK(GEN polnf, GEN x, GEN U)
 {
+  GEN p1 = x;
   long i;
-  GEN p1,p2;
-
-  p1=x; p2=x;
-  for (i=1; i<=m-1; i++)
-  {
-    p1=gsubst(lift(p1),vnf,U);
-    p2=gadd(p2,p1);
-  }
-  return downtoK(p2);
+  for (i=1; i<m; i++) p1 = gmul(x, tauofalg(p1,U));
+  return downtoK(polnf,p1);
 }
 
 static GEN
-normtoK(GEN x)
+computepolrel(GEN polnf, GEN be, GEN U)
 {
-  long i;
-  GEN p1,p2;
-
-  p1=x; p2=x;
-  for (i=1; i<=m-1; i++)
-  {
-    p1=gsubst(lift(p1),vnf,U);
-    p2=gmul(p2,p1);
-  }
-  return downtoK(p2);
-}
-
-static GEN
-computepolrel(void)
-{
+  GEN p1 = gun, p2 = be;
   long i,j;
-  GEN p1,p2;
 
-  p1=gun; p2=gmodulcp(polx[vnf],R);
-  for (i=0; i<=m-1; i++)
+  for (i=0; i<m; i++)
   {
-    p1=gmul(p1,gsub(polx[0],p2));
-    if (i<m-1) p2=gsubst(lift(p2),vnf,U);
+    p1 = gmul(p1,gsub(polx[0],p2));
+    if (i<m-1) p2 = tauofalg(p2,U);
   }
-  for (j=2; j<=m+2; j++) p1[j]=(long)downtoK((GEN)p1[j]);
+  for (j=2; j<=m+2; j++) p1[j]=(long)downtoK(polnf,(GEN)p1[j]);
   return p1;
 }
 
 /* alg. 5.2.15. with remark */
 static GEN
-isprincipalell(GEN id)
+isprincipalell(GEN bnfz, GEN id, GEN vecalpha, GEN uu)
 {
   long i, l = lg(vecalpha);
   GEN y,logdisc,be;
@@ -492,7 +473,7 @@ isprincipalell(GEN id)
 
 /* alg. 5.3.11. */
 static GEN
-isvirtualunit(GEN v)
+isvirtualunit(GEN bnfz, GEN v, GEN vecalpha, GEN cyc)
 {
   long llist,i,j,ex, l = lg(vecalpha);
   GEN p1,listex,listpr,q,ga,eps,vecy,logdisc;
@@ -527,16 +508,7 @@ isvirtualunit(GEN v)
 }
 
 static GEN
-lifttoKz(GEN id, GEN A1)
-{
-  GEN I = ideal_two_elt(nf,id);
-  GEN x = gsubst(gmul((GEN)nf[7],(GEN)I[2]),vnf,A1);
-  I[2] = (long)algtobasis(nfz,x);
-  return prime_to_ideal(nfz,I);
-}
-
-static GEN
-steinitzaux(GEN id, GEN polrel)
+steinitzaux(GEN nf, GEN id, GEN polrel)
 {
   long i,j;
   GEN p1,p2,p3,vecid,matid,pseudomat,pid;
@@ -561,27 +533,28 @@ steinitzaux(GEN id, GEN polrel)
 }
 
 static GEN
-normrelz(GEN id, GEN polrel, GEN steinitzZk)
+normrelz(GEN nf, GEN id, GEN polrel, GEN steinitzZk)
 {
-  GEN p1 = steinitzaux(idealhermite(nfz, id), polrel);
+  GEN p1 = steinitzaux(nf,idealhermite(nfz, id), polrel);
   return idealdiv(nf,p1,steinitzZk);
 }
 
 static GEN
-invimsubgroup(GEN bnrz, GEN bnr, GEN subgroup)
+invimsubgroup(GEN bnrz, GEN bnr, GEN subgroup, GEN tau)
 {
   long l,j;
   GEN g,Plog,raycycz,rayclgpz,genraycycz,U,polrel,steinitzZk;
+  GEN nf = checknf(bnr);
 
-  polrel = computepolrel();
-  steinitzZk = steinitzaux(idmat(degKz), polrel); 
+  polrel = computepolrel((GEN)nf[1], tau, polx[vnf]);
+  steinitzZk = steinitzaux(nf,idmat(degKz), polrel); 
   rayclgpz = (GEN)bnrz[5];
   raycycz   = (GEN)rayclgpz[2]; l=lg(raycycz);
   genraycycz= (GEN)rayclgpz[3];
   Plog = cgetg(l,t_MAT);
   for (j=1; j<l; j++)
   {
-    g = normrelz((GEN)genraycycz[j],polrel,steinitzZk);
+    g = normrelz(nf,(GEN)genraycycz[j],polrel,steinitzZk);
     Plog[j] = (long)isprincipalray(bnr, g);
   }
   U = (GEN)hnfall(concatsp(Plog, subgroup))[2];
@@ -676,7 +649,7 @@ mulpoltau(GEN poltau, GEN list)
 
 /* th. 5.3.5. and prop. 5.3.9. */
 static GEN
-computepolrelbeta(GEN be, long g)
+computepolrelbeta(GEN polnf, GEN be, long g, GEN U)
 {
   long i,a,b,j;
   GEN e,u,u1,u2,u3,p1,p2,p3,p4,zet,be1,be2,listr,s,veczi,vecci,powtaubet;
@@ -684,22 +657,22 @@ computepolrelbeta(GEN be, long g)
   switch (ell)
   {
     case 2: err(talker,"you should not be here in rnfkummer !!"); break;
-    case 3: e=normtoK(be); u=tracetoK(be);
+    case 3: e=normtoK(polnf,be,U); u=tracetoK(polnf,be,U);
       return gsub(gmul(polx[0],gsub(gsqr(polx[0]),gmulsg(3,e))),gmul(e,u));
-    case 5: e=normtoK(be);
+    case 5: e=normtoK(polnf,be,U);
       if (d==2)
       {
-	u=tracetoK(gpuigs(be,3));
+	u=tracetoK(polnf,gpuigs(be,3),U);
 	p1=gadd(gmulsg(5,gsqr(e)), gmul(gsqr(polx[0]), gsub(gsqr(polx[0]),gmulsg(5,e))));
 	return gsub(gmul(polx[0],p1),gmul(e,u));
       }
       else
       {
-	be1=gsubst(lift(be),vnf,U);
-        be2=gsubst(lift(be1),vnf,U);
-	u1=tracetoK(gmul(be,be1));
-        u2=tracetoK(gmul(gmul(be,be2),gsqr(be1)));
-	u3=tracetoK(gmul(gmul(gsqr(be),gpuigs(be1,3)),be2));
+	be1=tauofalg(be,U);
+        be2=tauofalg(be1,U);
+	u1=tracetoK(polnf,gmul(be,be1),U);
+        u2=tracetoK(polnf,gmul(gmul(be,be2),gsqr(be1)),U);
+	u3=tracetoK(polnf,gmul(gmul(gsqr(be),gpuigs(be1,3)),be2),U);
 	p1=gsub(gsqr(polx[0]),gmulsg(10,e));
 	p1=gsub(gmul(polx[0],p1),gmulsg(5,gmul(e,u1)));
 	p1=gadd(gmul(polx[0],p1),gmul(gmulsg(5,e),gsub(e,u2)));
@@ -731,14 +704,14 @@ computepolrelbeta(GEN be, long g)
       }
       powtaubet=cgetg(m+1,t_VEC);
       powtaubet[1]=(long)be;
-      for (i=2; i<=m; i++) powtaubet[i]=(long)gsubst(lift((GEN)powtaubet[i-1]),vnf,U);
+      for (i=2; i<=m; i++) powtaubet[i]=(long)tauofalg((GEN)powtaubet[i-1],U);
       err(impl,"difficult Kummer for ell>=7"); return gzero;
   }
   return NULL; /* not reached */
 }
 
 static GEN
-fix_be(GEN be, GEN u)
+fix_be(GEN bnfz, GEN be, GEN u)
 {
   GEN e,g, nf = checknf(bnfz), fu = gmael(bnfz,8,5);
   long i,lu;
@@ -772,7 +745,7 @@ logarch2arch(GEN x, long r1, long prec)
 
 /* multiply be by ell-th powers of units as to find small L2-norm for new be */
 static GEN
-reducebetanaive(GEN be, GEN b)
+reducebetanaive(GEN bnfz, GEN be, GEN b)
 {
   long i,k,n,ru,r1, prec = nfgetprec(bnfz);
   GEN z,p1,p2,nmax,c, nf = checknf(bnfz);
@@ -806,16 +779,16 @@ reducebetanaive(GEN be, GEN b)
     b = B; c[besti] = laddis((GEN)c[besti], bestk);
   }
   if (DEBUGLEVEL) fprintferr("unit exponents = %Z\n",c);
-  return fix_be(be,c);
+  return fix_be(bnfz,be,c);
 }
 
 static GEN
-reducebeta(GEN be)
+reducebeta(GEN bnfz, GEN be)
 {
   long j,ru, prec = nfgetprec(bnfz);
   GEN emb,z,u,matunit, nf = checknf(bnfz);
 
-  if (gcmp1(gnorm(be))) return reducebetanaive(be,NULL);
+  if (gcmp1(gnorm(be))) return reducebetanaive(bnfz,be,NULL);
   matunit = gmulgs(greal((GEN)bnfz[3]), ell); /* log. embeddings of fu^ell */
   for (;;)
   {
@@ -827,22 +800,23 @@ reducebeta(GEN be)
   }
   z = concatsp(matunit, z);
   u = lllintern(z, 1, prec);
-  if (!u) return reducebetanaive(be,emb); /* shouldn't occur */
+  if (!u) return reducebetanaive(bnfz,be,emb); /* shouldn't occur */
   ru = lg(u);
   for (j=1; j<ru; j++)
     if (smodis(gcoeff(u,ru-1,j), ell)) break; /* prime to ell */
   u = (GEN)u[j]; /* coords on (fu^ell, be) of a small generator */
   ru--; setlg(u, ru);
   be = powgi(be, (GEN)u[ru]);
-  return reducebetanaive(fix_be(be, u), NULL);
+  return reducebetanaive(bnfz,fix_be(bnfz,be,u), NULL);
 }
 
 /* cf. algo 5.3.18 */
 static GEN
-testx(GEN bnf, GEN X, GEN module, GEN subgroup, GEN vecMsup, GEN vecWB, long g)
+testx(GEN bnfz, GEN bnf, GEN X, GEN module, GEN subgroup, GEN vecMsup,
+      GEN vecWB, long g, GEN U)
 {
   long i,v,l,lX;
-  GEN be,polrelbe,p1;
+  GEN be,polrelbe,p1,nf;
 
   if (gcmp0(X)) return NULL;
   lX = lg(X);
@@ -855,11 +829,12 @@ testx(GEN bnf, GEN X, GEN module, GEN subgroup, GEN vecMsup, GEN vecWB, long g)
   for (i=1; i<lX; i++)
     be = gmul(be, powgi((GEN)vecWB[i], (GEN)X[i]));
   if (DEBUGLEVEL>1) fprintferr("reducing beta = %Z\n",be);
-  be = reducebeta(be);
+  be = reducebeta(bnfz, be);
   if (DEBUGLEVEL>1) fprintferr("beta reduced = %Z\n",be);
-  polrelbe = computepolrelbeta(be,g);
+  nf = (GEN)bnf[7];
+  polrelbe = computepolrelbeta((GEN)nf[1],be,g,U);
   v = varn(polrelbe);
-  p1 = unifpol((GEN)bnf[7],polrelbe,0);
+  p1 = unifpol(nf,polrelbe,0);
   p1 = denom(gtovec(p1));
   polrelbe = gsubst(polrelbe,v, gdiv(polx[v],p1));
   polrelbe = gmul(polrelbe, gpowgs(p1, degpol(polrelbe)));
@@ -892,13 +867,13 @@ GEN
 rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
 {
   long i,j,l,av=avma,e,vp,vd,dK,lSl,lSp,lSl2,lSml2,dc,ru,rv,nbcol,g,mginv;
-  GEN p1,p2,p3,p4,wk,pr;
-  GEN bnf,rayclgp,bid,ideal,cycgen,vselmer;
+  GEN p1,p2,p3,p4,wk,pr,U,R;
+  GEN polnf,nf,bnf,bnfz,rayclgp,bid,ideal,cycgen,vselmer;
   GEN kk,clgp,fununits,torsunit,vecB,vecC,Tc,Tv,P;
   GEN Q,idealz,gothf,factgothf,factell,p;
   GEN listprSp,listpr,listex,vecw,vecWA,vecWB;
   GEN M,K,X,finalresult,y,module,A1,A2,vecMsup;
-  GEN vecalphap,vecbetap,matP,ESml2,Sp,Sm,Sml1,Sml2,Sl;
+  GEN uu,gencyc,cyc,vecalpha,vecalphap,vecbetap,matP,ESml2,Sp,Sm,Sml1,Sml2,Sl;
 
   checkbnrgen(bnr);
   wk = gmael4(bnr,1,8,4,1);
@@ -924,10 +899,10 @@ rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   bnr = (GEN)p1[2]; 
   subgroup = (GEN)p1[3];
   rayclgp = (GEN)bnr[5];
-  raycyc = (GEN)rayclgp[2];
+  
   bid = (GEN)bnr[2]; module=(GEN)bid[1];
   ideal = (GEN)module[1];
-  if (gcmp0(subgroup)) subgroup = diagonal(raycyc);
+  if (gcmp0(subgroup)) subgroup = diagonal((GEN)rayclgp[2]);
   ell = itos(gell);
       /* step 1 of alg 5.3.5. */
   if (DEBUGLEVEL>2) fprintferr("Step 1\n");
@@ -991,7 +966,7 @@ rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   Tc=cgetg(rc+1,t_MAT);
   for (j=1; j<=rc; j++)
   {
-    p1 = isprincipalell(tauofideal((GEN)gencyc[j]));
+    p1 = isprincipalell(bnfz, tauofideal((GEN)gencyc[j],U), vecalpha,uu);
     Tc[j]  = p1[1];
     vecB[j]= p1[2];
   }
@@ -1003,7 +978,7 @@ rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   p3=vecB;
   for (j=1; j<=m-1; j++)
   {
-    p3 = gsubst(lift(p3),vnf,U);
+    p3 = tauofalg(p3,U);
     p4 = groupproduct(grouppows(p3,(j*d)%ell),(GEN)p1[m-j]);
     for (i=1; i<=rc; i++) p2[i] = lmul((GEN)p2[i],(GEN)p4[i]);
   }
@@ -1013,7 +988,7 @@ rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   Tv = cgetg(rv+1,t_MAT);
   for (j=1; j<=rv; j++)
   {
-    Tv[j] = isvirtualunit(gsubst(lift((GEN)vselmer[j]),vnf,U))[1];
+    Tv[j] = isvirtualunit(bnfz, tauofalg((GEN)vselmer[j],U), vecalpha,cyc)[1];
     if (DEBUGLEVEL>2) fprintferr("   %ld\n",j);
   }
   P = FpM_ker(gsubgs(Tv, g), gell);
@@ -1031,14 +1006,22 @@ rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
       /* step 7 done above */
       /* step 8 */
   if (DEBUGLEVEL>2) fprintferr("Step 7 and 8\n");
-  idealz = lifttoKz(ideal, A1);
-  computematexpoteta1(lift(A1), R);
+  idealz = lifttoKz(nfz, nf, ideal, A1);
+  A1 = lift_intern(A1);
+  p1 = polun[vnf];
+  p2 = cgetg(degK+1,t_MAT);
+  for (j=1; j<=degK; j++)
+  {
+    p2[j] = (long)pol_to_vec(p1, degKz);
+    if (j<degK) p1 = gmod(gmul(p1,A1), R);
+  }
+  invexpoteta1 = invmat(p2); /* left inverse */
+ 
   if (!divise(idealnorm(nf,ideal),gell)) gothf = idealz;
   else
   {
-    GEN bnrz, subgroupz;
-    bnrz = buchrayinitgen(bnfz,idealz);
-    subgroupz = invimsubgroup(bnrz,bnr,subgroup);
+    GEN bnrz = buchrayinitgen(bnfz,idealz);
+    GEN subgroupz = invimsubgroup(bnrz,bnr,subgroup,U);
     gothf = conductor(bnrz,subgroupz,0);
   }
       /* step 9 */
@@ -1060,7 +1043,7 @@ rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
     if (!egalii(p,gell))
     {
       if (vp != 1) { avma = av; return gzero; }
-      if (!isconjinprimelist(Sm,pr)) _append(Sm,pr);
+      if (!isconjinprimelist(Sm,pr,U)) _append(Sm,pr);
     }
     else
     {
@@ -1068,12 +1051,12 @@ rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
       if (vd > 0) { avma = av; return gzero; }
       if (vd==0)
       {
-	if (!isconjinprimelist(Sml1,pr)) _append(Sml1, pr);
+	if (!isconjinprimelist(Sml1,pr,U)) _append(Sml1, pr);
       }
       else
       {
 	if (vp==1) { avma = av; return gzero; }
-        if (!isconjinprimelist(Sml2,pr))
+        if (!isconjinprimelist(Sml2,pr,U))
         {
           _append(Sml2, pr);
           _append(ESml2,(GEN)vp);
@@ -1086,7 +1069,7 @@ rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   {
     pr = (GEN)factell[i];
     if (!idealval(nfz,gothf,pr))
-      if (!isconjinprimelist(Sl,pr)) _append(Sl, pr);
+      if (!isconjinprimelist(Sl,pr,U)) _append(Sl, pr);
   }
   lSml2=lg(Sml2)-1; lSl=lg(Sl)-1; lSl2=lSml2+lSl;
   Sp=concatsp(Sm,Sml1); lSp=lg(Sp)-1;
@@ -1097,9 +1080,9 @@ rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   matP=cgetg(lSp+1,t_MAT);
   for (j=1; j<=lSp; j++)
   {
-    p1=isprincipalell((GEN)Sp[j]);
-    matP[j]=p1[1];
-    p2=gun;
+    p1 = isprincipalell(bnfz, (GEN)Sp[j], vecalpha,uu);
+    matP[j] = p1[1];
+    p2 = gun;
     for (i=1; i<=rc; i++)
       p2 = gmul(p2, powgi((GEN)vecC[i],gmael(p1,1,i)));
     p3=gdiv((GEN)p1[2],p2); vecbetap[j]=(long)p3;
@@ -1107,7 +1090,7 @@ rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
     for (i=0; i<m; i++)
     {
       p2 = gmul(p2, gpowgs(p3, powuumod(g,m-1-i,ell)));
-      if (i<m-1) p3=gsubst(lift(p3),vnf,U);
+      if (i<m-1) p3 = tauofalg(p3,U);
     }
     vecalphap[j]=(long)p2;
   }
@@ -1159,7 +1142,7 @@ rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
       X = (GEN)K[dK];
       for (j=1; j<dK; j++) X = gadd(X, gmulsg(y[j],(GEN)K[j]));
       X = FpV_red(X, gell);
-      finalresult = testx(bnf,X,module,subgroup,vecMsup,vecWB,g);
+      finalresult = testx(bnfz,bnf,X,module,subgroup,vecMsup,vecWB,g,U);
       if (finalresult) return gerepilecopy(av, finalresult);
         /* step 20,21,22 */
       i = dK;
