@@ -51,30 +51,23 @@ static void
 suppressed(void) {err(talker,"this function has been suppressed");}
 
 #define BUCH_PROTO "GD0.3,G,D0.3,G,D5,G,D1,G,D4,L,D3,L,p"
+#define B_ARGS GEN g1,GEN g2,GEN g3,GEN g4,GEN g5,long l1,long l2,long prec
+#define B_ARG1 g1,gtodouble(g2),gtodouble(g3),l1
+#define B_CALL(flag) buchall(B_ARG1,(flag),prec)
 static GEN
-buchgen(GEN g1,GEN g2,GEN g3,GEN g4, GEN g5,long l1,long l2, long prec) {
-  return buchall(g1,gtodouble(g2),gtodouble(g3),l1,0,prec);
-}
+buchgen(B_ARGS) { return B_CALL(0); }
 static GEN
-buchgenfu(GEN g1,GEN g2,GEN g3,GEN g4, GEN g5,long l1,long l2,long prec) {
-  return buchall(g1,gtodouble(g2),gtodouble(g3),l1,nf_UNITS,prec);
-}
+buchgenfu(B_ARGS) { return B_CALL(nf_UNITS); }
 static GEN
-buchgenforcefu(GEN g1,GEN g2,GEN g3,GEN g4, GEN g5,long l1,long l2,long prec) {
-  return buchall(g1,gtodouble(g2),gtodouble(g3),l1,nf_UNITS|nf_FORCE,prec);
-}
+buchgenforcefu(B_ARGS) { return B_CALL(nf_UNITS|nf_FORCE); }
 static GEN
-buchinit(GEN g1,GEN g2,GEN g3,GEN g4, GEN g5,long l1,long l2,long prec) {
-  return buchall(g1,gtodouble(g2),gtodouble(g3),l1,nf_INIT,prec);
-}
+buchinit(B_ARGS) { return B_CALL(nf_INIT); }
 static GEN
-buchinitfu(GEN g1,GEN g2,GEN g3,GEN g4, GEN g5,long l1,long l2,long prec) {
-  return buchall(g1,gtodouble(g2),gtodouble(g3),l1,nf_INIT|nf_UNITS,prec);
-}
+buchinitfu(B_ARGS) { return B_CALL(nf_INIT|nf_UNITS); }
 static GEN
-buchinitforcefu(GEN g1,GEN g2,GEN g3,GEN g4, GEN g5,long l1,long l2,long prec) {
-  return buchall(g1,gtodouble(g2),gtodouble(g3),l1,nf_INIT|nf_UNITS|nf_FORCE,prec);
-}
+buchinitforcefu(B_ARGS) { return B_CALL(nf_INIT|nf_UNITS|nf_FORCE); }
+static GEN
+smallbuchinit_c(B_ARGS) { return smallbuchinit(B_ARG1,prec); }
 
 entree oldfonctions[]={
 {"O",50,NULL,7,NULL},
@@ -527,7 +520,7 @@ entree oldfonctions[]={
 {"sinh",1,(void *)gsh,3,"Gp"},
 {"size",10,(void *)sizedigit,2,"lG"},
 {"smallbasis",13,(void *)smallbase,6,"Gf"},
-{"smallbuchinit",93,(void *)smallbuchinit,6,"GD0.3,G,D0.3,G,D5,G,D1,G,D4,L,D3,L,p"},
+{"smallbuchinit",93,(void *)smallbuchinit_c,6,BUCH_PROTO},
 {"smalldiscf",1,(void *)smalldiscf,6,"G"},
 {"smallfact",1,(void *)smallfact,4,"G"},
 {"smallinitell",1,(void *)smallinitell,5,"Gp"},
