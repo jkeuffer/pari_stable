@@ -121,7 +121,7 @@ IZ 17- allow changing the gnuplot DLL name for gnuplot-dynamic at Configure-time
 BA  2- routines ishiftr, gfloor2n
     3- routine random_bits
 BA  4- [Configure:] --builddir flag
-IZ  5- FIle README.os2
+IZ  5- File README.os2
 
   Removed
     1- macro definition BITS_IN_RANDOM (useless)
