@@ -239,6 +239,7 @@ sub treat
   if (!$detex) { &tex(); return; }
 
   &detex(); print "\n" if (!$fromgp);
+  do {local $/; <DOC>} if $^O eq 'os2' and $pipe; # Avoid broken pipe from zcat
   close(DOC);
 }
 
