@@ -1116,8 +1116,8 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
     (void)gram_schmidt(gmul(run,m), &norm);
     for (i=r+s; i>0; i--)
       if (cmprr((GEN)norm[i], M) < 0) break;
-    if (i > r || (i == r && tmax > 0))
-    { /* no progress */
+    if (i > r)
+    { /* no progress. Note: even if i == r we may have made some progress */
       avma = av2; BitPerFactor += 2;
       if (DEBUGLEVEL>2)
         fprintferr("LLL_cmbf: increasing BitPerFactor = %ld\n", BitPerFactor);
