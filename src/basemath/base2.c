@@ -1760,7 +1760,11 @@ loop(decomp_t *S, long nv, GEN pdr, GEN pmr, GEN pmf, long Ea, long Fa, GEN ns)
       }
     }
     if (i == lg(w))
-      err(talker, "bug in nilord (no root). Is p = %Z a prime?", S->p);
+    {
+      if (fm) { fm = -1; continue; }
+      else
+	err(talker, "bug in nilord (no root). Is p = %Z a prime?", S->p);
+    }
 
     if (eq) delt = gmul(delt, gpowgs(S->p,  eq));
     if (er) delt = gmul(delt, gpowgs(S->nu, er));
