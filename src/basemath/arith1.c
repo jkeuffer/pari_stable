@@ -1701,7 +1701,7 @@ mpfact(long n)
 {
   if (n < 2)
   {
-    if (n < 0) err(facter);
+    if (n < 0) err(talker,"negative argument in factorial function");
     return gun;
   }
   return seq_umul(2UL, (ulong)n);
@@ -2263,7 +2263,7 @@ regula(GEN x, long prec)
     reg = mulrr(reg, divri(addir(u1,rsqd),v));
     rexp += expo(reg); setexpo(reg,0);
     u = u1; v = v1;
-    if (rexp & ~EXPOBITS) err(muler4);
+    if (rexp & ~EXPOBITS) err(talker,"exponent overflow in regula");
     if (low_stack(lim, stack_lim(av2,2)))
     {
       if(DEBUGMEM>1) err(warnmem,"regula");

@@ -21,8 +21,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /* mp.c */
 
-#define affrs(x,s)     (err(affer4))
-#define affri(x,y)     (err(affer5))
 #define cmpis(x,y)     (-cmpsi((y),(x)))
 #define cmprs(x,y)     (-cmpsr((y),(x)))
 #define cmpri(x,y)     (-cmpir((y),(x)))

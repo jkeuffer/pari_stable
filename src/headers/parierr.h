@@ -32,10 +32,8 @@ enum {
 
 /* mp.s ou mp.c */
 
-  affer1, affer2, affer3, affer4, affer5,
-  shier2,
+  affer1, affer2, affer3, shier2,
   
-  muler4,
   diver1, diver2, diver3, diver4, diver5,
   diver6, diver8, diver9,
   divzer1, dvmer1,
@@ -53,7 +51,7 @@ enum {
 
 /* arith.c  */
 
-  arither1, arither2, arither3, facter, hiler1,
+  arither1, arither2, arither3, hiler1,
   funder2, generer, primer1, primer2, invmoder,
 
 /* base.c   */

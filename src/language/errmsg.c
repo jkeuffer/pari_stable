@@ -86,16 +86,8 @@ char *errmessage[]=
   "impossible assignment I-->S",
 /* affer3 */
   "impossible assignment I-->I",
-/* affer4 */
-  "impossible assignment R-->S",
-/* affer5 */
-  "impossible assignment R-->I",
 /* shier2 */
   "overflow in real shift",
-
-/* muler4 */
-  "overflow in R*R",
-
 /* diver1 */
   "division by zero in S/S",
 /* diver2 */
@@ -153,8 +145,6 @@ char *errmessage[]=
   "non-positive argument (<= 0) in an arithmetic function",
 /* arither3 */
   "zero argument in an arithmetic function",
-/* facter */
-  "negative argument in factorial function",
 /* hiler1 */
   "insufficient precision for p=2 in hilbert",
 /* funder2 */

@@ -264,15 +264,11 @@ integer~\kbd{z}.
 \fun{void}{affir}{GEN x, GEN z} assigns the integer \kbd{x} into the
 real~\kbd{z}.
 
-\fun{void}{affrs}{GEN x, long s} assigns the real \kbd{x} into the
-long~\kbd{s}\dots not. This is a forbidden assignment in PARI, so an error
-message is issued.
-
-\fun{void}{affri}{GEN x, GEN z} assigns the real \kbd{x} into the
-integer~\kbd{z}\dots no it doesn't. This is a forbidden assignment in PARI,
-so an error message is issued.
-
 \fun{void}{affrr}{GEN x, GEN z} assigns the real \kbd{x} into the real~\kbd{z}.
+
+\misctitle{Warning} the function \kbd{affrs} and \kbd{affri} do not exist. So
+don't use them.
+
 \smallskip
 
 \fun{GEN}{itor}{GEN x, long prec} assigns the \typ{INT} \kbd{x} into a
