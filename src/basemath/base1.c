@@ -1330,6 +1330,7 @@ initalgall0(GEN x, long flag, long prec)
   ro=get_roots(x,r1,PRECREG);
   if (DEBUGLEVEL) msgtimer("roots");
   bas = gmul(bas, LLL_nfbasis(x,ro,bas,prec));
+  if (DEBUGLEVEL) msgtimer("LLL basis");
 
   nf=cgetg(10,t_VEC);
   nf[1]=(long)x;
