@@ -980,10 +980,10 @@ parameters $a$ and $b$.
 
 \subsecidx{incgam}$(s,x,{y})$: incomplete gamma function.
 
-The arguments $s$ and $x$ must be positive. The result returned is
-$\int_x^\infty e^{-t}t^{s-1}\,dt$. When $y$ is given, assume (of course
-without checking!) that $y=\Gamma(s)$. For small $x$, this will tremendously
-speed up the computation.
+$x$ must be positive and $s$ real. The result returned is $\int_x^\infty
+e^{-t}t^{s-1}\,dt$. When $y$ is given, assume (of course without checking!)
+that $y=\Gamma(s)$. For small $x$, this will tremendously speed up the
+computation.
 
 \syn{incgam}{s,x,\var{prec}} and $\teb{incgam4}(s,x,y,\var{prec})$,
 respectively. There exist also the functions \teb{incgam1} and
