@@ -2098,7 +2098,7 @@ hnfadd_i(GEN H, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, /* cf hnfspec */
   { /* zero out bottom part, using the Id block */
     GEN A = vecextract_i(C, col+1, co);
     GEN c = rowextract_ip(extramat, perm, lig+1, li);
-    extraC   = gsub(extraC,   typ(A)==t_MAT? RM_zm_mul(A, c): RV_zm_mul(A,c));
+    extraC   = gsub(extraC, typ(A)==t_MAT? RM_zm_mul(A, c): RV_zm_mul(A,c));
     extratop = gsub(extratop, ZM_zm_mul(B, c));
   }
 

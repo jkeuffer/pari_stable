@@ -277,18 +277,18 @@ subFBgen(FB_t *F, GEN nf, double PROD, long minsFB)
   avma = av; return 1;
 }
 static int
-subFB_increase(FB_t *F, GEN nf, long step, GEN L_jideal)
+subFB_increase(FB_t *F, GEN nf, long step, GEN L_jid)
 {
   GEN yes, D = (GEN)nf[3];
   long i, iyes, lv = F->KC + 1, minsFB = lg(F->subFB)-1 + step;
   pari_sp av = avma;
 
   yes = cgetg(minsFB+1, t_VECSMALL); iyes = 1;
-  if (L_jideal)
+  if (L_jid)
   {
-    for (i = 1; i < lg(L_jideal); i++)
+    for (i = 1; i < lg(L_jid); i++)
     {
-      long t = L_jideal[i];
+      long t = L_jid[i];
       if (!ok_subFB(F, t, D)) continue;
 
       yes[iyes++] = t;
@@ -314,10 +314,10 @@ subFB_increase(FB_t *F, GEN nf, long step, GEN L_jideal)
 }
 
 static GEN
-mulred(GEN nf, GEN x, GEN I, GEN *pm)
+red(GEN nf, GEN I, GEN *pm)
 {
   GEN m, y = cgetg(3,t_VEC);
-  y[1] = (long)idealmulh(nf, I, x);
+  y[1] = (long)I;
   y[2] = lgetg(1, t_MAT);
   y = ideallllred(nf, y, NULL, 0);
   m = (GEN)y[2];
@@ -353,8 +353,12 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf, long a)
     vp = prime_to_ideal(nf,vp);
     for (j=2; j<=a; j++)
     {
-      GEN J = mulred(nf, (GEN)id2[j-1], vp, &m);
-      if (!J) break;
+      GEN J = red(nf, idealmulh(nf,vp,(GEN)id2[j-1]), &m);
+      if (!J)
+      {
+        if (j == 2 && !red(nf, vp, &m)) j = 1;
+        break;
+      }
       if (gegal(J, (GEN)id2[j-1])) { j = 1; break; }
       id2[j] = (long)J;
       alg[j] = (long)m;
@@ -1904,24 +1908,24 @@ pseudomin(GEN I, GEN G)
 }
 
 static void
-dbg_newrel(RELCACHE_t *cache, long jideal, long jdir)
+dbg_newrel(RELCACHE_t *cache, long jid, long jdir)
 {
   fprintferr("\n++++ cglob = %ld: new relation (need %ld)", 
              cache->last - cache->base, cache->end - cache->base);
   wr_rel(cache->last->R);
   if (DEBUGLEVEL>3)
   {
-    fprintferr("(jideal=%ld,jdir=%ld)", jideal,jdir);
+    fprintferr("(jid=%ld,jdir=%ld)", jid,jdir);
     msgtimer("for this relation");
   }
   flusherr() ;
 }
 
 static void
-dbg_cancelrel(long jideal, long jdir, GEN col)
+dbg_cancelrel(long jid, long jdir, GEN col)
 {
   fprintferr("relation cancelled: ");
-  if (DEBUGLEVEL>3) fprintferr("(jideal=%ld,jdir=%ld)",jideal,jdir);
+  if (DEBUGLEVEL>3) fprintferr("(jid=%ld,jdir=%ld)",jid,jdir);
   wr_rel(col); flusherr();
 }
 
@@ -1967,37 +1971,31 @@ remove_content(GEN I)
   return I;
 }
 
-/* if phase != 1 re-initialize static variables. If <0 return immediately */
 static int
-rnd_rel(long phase, RELCACHE_t *cache, FB_t *F, long MAXRELSUP, GEN nf,
-           GEN vecG, GEN L_jideal)
+rnd_rel(RELCACHE_t *cache, FB_t *F, long MAXRELSUP, GEN nf, GEN vecG,
+        GEN L_jid, long *pjid)
 {
-  static long jideal, jdir;
-  long i, cptlist, cptzer, nbG, lgsub, jlist = 1;
+  long nbG = lg(vecG)-1, lgsub = lg(F->subFB), jlist = 1, jid = *pjid;
+  long i, j, cptlist = 0, cptzer = 0;
   pari_sp av, av1;
-  GEN ideal, IDEAL, m, P, ex;
-
-  if (phase != 1) { jideal=0; jdir=1; if (phase < 0) return 0; }
-  lgsub = lg(F->subFB);
-  nbG = lg(vecG)-1;
-  ex = cgetg(lgsub, t_VECSMALL);
-  cptzer = cptlist = 0;
-  if (DEBUGLEVEL && L_jideal) fprintferr("looking hard for %Z\n",L_jideal);
+  GEN ideal, IDEAL, m, P, ex = cgetg(lgsub, t_VECSMALL);
+ 
+  if (DEBUGLEVEL && L_jid) fprintferr("looking hard for %Z\n",L_jid);
   P = NULL; /* gcc -Wall */
   for (av = avma;;)
   {
     REL_t *rel = cache->last;
-    if (L_jideal && jlist < lg(L_jideal))
+    if (L_jid && jlist < lg(L_jid))
     {
-      if (++cptlist > 3) { jideal = L_jideal[jlist++]; cptlist = 0; }
-      if (!jideal) jideal = 1;
+      if (++cptlist > 3) { jid = L_jid[jlist++]; cptlist = 0; }
+      if (!jid) jid = 1;
     }
     else
     {
-      if (jideal == F->KC) jideal = 1; else jideal++;
+      if (jid == F->KC) jid = 1; else jid++;
     }
     avma = av;
-    P = prime_to_ideal(nf, (GEN)F->LP[jideal]);
+    P = prime_to_ideal(nf, (GEN)F->LP[jid]);
     ideal = P;
     do {
       for (i=1; i<lgsub; i++)
@@ -2011,13 +2009,10 @@ rnd_rel(long phase, RELCACHE_t *cache, FB_t *F, long MAXRELSUP, GEN nf,
     if (gcmp1(gcoeff(ideal,1,1))) continue;
     IDEAL = lllint_fp_ip(ideal, 4);
 
-    if (phase != 1) jdir = 1; else phase = 2;
-    for (av1 = avma; jdir <= nbG; jdir++, avma = av1)
+    if (DEBUGLEVEL>1) fprintferr("(%ld)", jid);
+    for (av1 = avma, j = 1; j <= nbG; j++, avma = av1)
     { /* reduce along various directions */
-      if (DEBUGLEVEL>2)
-        fprintferr("jideal=%ld,jdir=%ld,rand=%ld\n", jideal,jdir,getrand());
-      m = pseudomin(IDEAL, (GEN)vecG[jdir]);
-      if (!m) err(bugparier, "rnd_rel (precision too low)");
+      m = pseudomin(IDEAL, (GEN)vecG[j]);
       if (!factorgen(F,nf,ideal,m))
       {
         if (DEBUGLEVEL>1) { fprintferr("."); flusherr(); }
@@ -2025,38 +2020,29 @@ rnd_rel(long phase, RELCACHE_t *cache, FB_t *F, long MAXRELSUP, GEN nf,
       }
       /* can factor ideal, record relation */
       set_fact(++rel, F);
-      rel->R[jideal]--;
+      rel->R[jid]--;
       for (i=1; i<lgsub; i++) rel->R[ F->subFB[i] ] -= ex[i];
       if (already_known(cache, rel))
       { /* forget it */
-        if (DEBUGLEVEL>1) dbg_cancelrel(jideal,jdir,rel->R);
+        if (DEBUGLEVEL>1) dbg_cancelrel(jid,j,rel->R);
         free((void*)rel->R); rel--;
         if (++cptzer > MAXRELSUP)
         {
-          if (L_jideal) { cptzer -= 10; break; }
-          return 0;
+          if (L_jid) { cptzer -= 10; break; }
+          *pjid = jid; return 0;
         }
         continue;
       }
       rel->m = gclone(m);
       rel->ex = gclone(ex);
       rel->pow = F->pow; cache->last = rel;
-      if (DEBUGLEVEL) dbg_newrel(cache, jideal, jdir);
+      if (DEBUGLEVEL) dbg_newrel(cache, jid, j);
       /* Need more, try next P */
       if (rel < cache->end) { cptzer = 0; break; }
 
       /* We have found enough. Return */
-      if (phase)
-      {
-        jdir = 1;
-        if (jideal == F->KC) jideal=1; else jideal++;
-      }
-      if (DEBUGLEVEL>2)
-      {
-        fprintferr("Upon exit: jideal=%ld,jdir=%ld\n",jideal,jdir);
-        if (DEBUGLEVEL > 3 && phase == 0) dbg_outrel(cache);
-      }
-      avma = av; return 1;
+      if (DEBUGLEVEL>2) fprintferr("Upon exit: jid=%ld\n",jid);
+      avma = av; *pjid = jid; return 1;
     }
   }
 }
@@ -2991,10 +2977,10 @@ buch(GEN *pnf, double cbach, double cbach2, long nbrelpid, long flun,
      long PRECREG)
 {
   pari_sp av, av2;
-  long N, R1, R2, RU, KCCO, LIMC, LIMC2, lim, zc, i, j, k, MAXRELSUP;
+  long N, R1, R2, RU, KCCO, LIMC, LIMC2, lim, zc, i, j, k, jid, MAXRELSUP;
   long nlze, nreldep, sfb_change, sfb_trials, precdouble = 0, precadd = 0;
   double drc, LOGD, LOGD2;
-  GEN vecG, fu, zu, nf, D, A, W, R, Res, z, h, L_jideal, PERM;
+  GEN vecG, fu, zu, nf, D, A, W, R, Res, z, h, L_jid, PERM;
   GEN M, res, L, resc, B, C, lambda, dep, liste, invp, clg1, clg2, Vbase;
   char *precpb = NULL;
   const int RELSUP = 5, minsFB = 3;
@@ -3077,12 +3063,11 @@ START:
   avma = av2;
 
   nlze = 0; /* for lint */
-  W = vecG = L_jideal = NULL;
+  W = vecG = L_jid = NULL;
 
   /* Random relations */
-  if (cache.last == cache.end)
-    rnd_rel(-1, NULL,NULL,0,NULL,NULL,NULL); /* enough rels. Init anyway. */
-  else
+  jid = 0;
+  if (cache.last < cache.end)
   {
     if (DEBUGLEVEL) fprintferr("\n#### Looking for random relations\n");
 MORE:
@@ -3092,8 +3077,8 @@ MORE:
     }
     if (sfb_change) {
       if (DEBUGLEVEL) fprintferr("*** Changing sub factor base\n");
-      if (!subFB_increase(&F, nf, sfb_change-1, L_jideal)) goto START;
-      sfb_change = nreldep = 0;
+      if (!subFB_increase(&F, nf, sfb_change-1, L_jid)) goto START;
+      jid = sfb_change = nreldep = 0;
     }
     if (W)
     { /* reduced relation matrix at least once */
@@ -3111,9 +3096,12 @@ MORE:
       av2 = avma;
     }
     if (!F.pow && !powFBgen(&F, &cache, nf, CBUCHG+1)) sfb_change = 1;
-    if (!sfb_change && 
-        !rnd_rel(W? 1: 0, &cache,&F, MAXRELSUP,nf,vecG,L_jideal)) goto START;
-    L_jideal = NULL;
+    if (!sfb_change)
+    {
+      if (!rnd_rel(&cache,&F, MAXRELSUP,nf,vecG,L_jid,&jid)) goto START;
+      if (W) { if (jid == F.KC) jid = 1; else jid++; }
+    }
+    L_jid = NULL;
   }
 
 PRECPB:
@@ -3133,10 +3121,10 @@ PRECPB:
     oldrel = cache.base; /* recompute all arch component */
     precpb = NULL; W = NULL;
   }
+  /* Reduce relation matrices */
   M = gmael(nf, 5, 1); 
   if (F.pow && !F.pow->arc) powFB_fill(&cache, M);
-
-  { /* Reduce relation matrices */
+  {
     long l = cache.last - oldrel, j;
     GEN mat = cgetg(l+1, t_VEC), emb = cgetg(l+1, t_MAT);
     for (j=1,rel = oldrel + 1; rel <= cache.last; rel++,j++)
@@ -3157,9 +3145,9 @@ PRECPB:
   { /* dependent rows */
     if (nlze > 5)
     {
-      if (nlze > 20) sfb_change = 1;
-      L_jideal = vecextract_i(F.perm, 1, nlze);
-      vecsmall_sort(L_jideal);
+      if (cache.last - cache.base > 600 && nlze > 20) sfb_change = 1;
+      L_jid = vecextract_i(F.perm, 1, nlze);
+      vecsmall_sort(L_jid); jid = 0;
     }
     goto MORE;
   }
