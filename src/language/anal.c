@@ -41,7 +41,6 @@ static GEN    seq();
 static GEN    truc();
 static ulong  number(int *pn, char **ps);
 static void   doskipseq(char *s, int strict);
-static void   skip_matrix_block();
 static void   skipconstante();
 static void   skipexpr();
 static void   skipfacteur();
@@ -1120,31 +1119,31 @@ static GEN
 matcell(GEN p, matcomp *C)
 {
   GEN *pt = &p;
-  long c,r, tx;
-  int full_col, full_row;
-  tx = full_col = full_row = 0;
+  long c, r;
+  C->full_col = C->full_row = 0;
   do {
-    analyseur++; p = *pt; tx = typ(p);
-    switch(tx)
+    analyseur++; p = *pt;
+    switch(typ(p))
     {
-      case t_LIST:
-        c = check_array_index(lgeflist(p)-1) + 1;
-        pt = (GEN*)(p + c); match(']'); break;
-
       case t_VEC: case t_COL:
         c = check_array_index(lg(p));
+        pt = (GEN*)(p + c); match(']'); break;
+
+      case t_LIST:
+        c = check_array_index(lgeflist(p)-1) + 1;
         pt = (GEN*)(p + c); match(']'); break;
 
       case t_VECSMALL:
         c = check_array_index(lg(p));
         pt = (GEN*)(p + c); match(']');
         if (*analyseur == '[') err(caracer1,analyseur,mark.start);
-        break;
+        C->parent = p;
+        C->ptcell = pt; return stoi((long)*pt);
 
       case t_MAT:
         if (lg(p)==1) err(talker2,"a 0x0 matrix has no elements",
                                   analyseur,mark.start);
-        full_col = full_row = 0;
+        C->full_col = C->full_row = 0;
         if (*analyseur==',') /* whole column */
         {
           analyseur++;
@@ -1159,7 +1158,7 @@ matcell(GEN p, matcomp *C)
           }
           else
           {
-            full_col = 1;
+            C->full_col = 1;
             pt = (GEN*)(p + c);
           }
           break;
@@ -1180,7 +1179,7 @@ matcell(GEN p, matcomp *C)
           else
           {
             GEN p2 = cgetg(lg(p),t_VEC);
-            full_row = r; /* record row number */
+            C->full_row = r; /* record row number */
             for (c=1; c<lg(p); c++) p2[c] = coeff(p,r,c);
             pt = &p2;
           }
@@ -1197,10 +1196,8 @@ matcell(GEN p, matcomp *C)
         err(caracer1,analyseur-1,mark.start);
     }
   } while (*analyseur == '[');
-  C->full_row = full_row;
-  C->full_col = full_col;
-  C->parent = p; C->ptcell = pt;
-  return (tx == t_VECSMALL)? stoi((long)*pt): *pt;
+  C->parent = p;
+  C->ptcell = pt; return *pt;
 }
 
 static GEN
@@ -1390,34 +1387,34 @@ double_op()
 static F2GEN
 get_op_fun()
 {
-  if (!*analyseur) return (F2GEN)NULL;
-
-  /* op= constructs ? */
-  if (analyseur[1] == '=')
+  if (*analyseur)
   {
-    switch(*analyseur)
+    if (analyseur[1] == '=')
     {
-      case '+' : analyseur += 2; return &gadd;
-      case '-' : analyseur += 2; return &gsub;
-      case '*' : analyseur += 2; return &gmul;
-      case '/' : analyseur += 2; return &gdiv;
-      case '\\': analyseur += 2; return &gdivent;
-      case '%' : analyseur += 2; return &gmod;
+      switch(*analyseur)
+      {
+        case '+' : analyseur += 2; return &gadd;
+        case '-' : analyseur += 2; return &gsub;
+        case '*' : analyseur += 2; return &gmul;
+        case '/' : analyseur += 2; return &gdiv;
+        case '\\': analyseur += 2; return &gdivent;
+        case '%' : analyseur += 2; return &gmod;
+      }
     }
-  }
-  else if (analyseur[2] == '=')
-  {
-    switch(*analyseur)
+    else if (analyseur[2] == '=')
     {
-      case '>' :
-        if (analyseur[1]=='>') { analyseur += 3; return &gshift_r; }
-        break;
-      case '<' :
-        if (analyseur[1]=='<') { analyseur += 3; return &gshift_l; }
-        break;
-      case '\\':
-        if (analyseur[1]=='/') { analyseur += 3; return &gdivround; }
-        break;
+      switch(*analyseur)
+      {
+        case '>' :
+          if (analyseur[1]=='>') { analyseur += 3; return &gshift_r; }
+          break;
+        case '<' :
+          if (analyseur[1]=='<') { analyseur += 3; return &gshift_l; }
+          break;
+        case '\\':
+          if (analyseur[1]=='/') { analyseur += 3; return &gdivround; }
+          break;
+      }
     }
   }
   return (F2GEN)NULL;
@@ -1452,7 +1449,6 @@ change_compo(matcomp *c, GEN res)
 {
   GEN p = c->parent, *pt = c->ptcell;
   long i;
-  int full_row = c->full_row, full_col = c->full_col;
   char *old = analyseur;
 
   if (typ(p) == t_VECSMALL)
@@ -1461,17 +1457,17 @@ change_compo(matcomp *c, GEN res)
       err(talker2,"not a suitable VECSMALL component",old,mark.start);
     *pt = (GEN)itos(res); return res;
   }
-  if (full_row)
+  if (c->full_row)
   {
     if (typ(res) != t_VEC || lg(res) != lg(p)) err(caseer2,old,mark.start);
     for (i=1; i<lg(p); i++)
     {
-      GEN p1 = gcoeff(p,full_row,i); if (isclone(p1)) killbloc(p1);
-      coeff(p,full_row,i) = lclone((GEN)res[i]);
+      GEN p1 = gcoeff(p,c->full_row,i); if (isclone(p1)) killbloc(p1);
+      coeff(p,c->full_row,i) = lclone((GEN)res[i]);
     }
     return res;
   }
-  if (full_col)
+  if (c->full_col)
     if (typ(res) != t_COL || lg(res) != lg(*pt)) err(caseer2,old,mark.start);
 
   res = gclone(res);
@@ -1479,27 +1475,31 @@ change_compo(matcomp *c, GEN res)
   return *pt = res;
 }
 
-/* extract from p the needed component */
+/* extract from p the needed component, and assign result if needed */
 static GEN
 matrix_block(GEN p)
 {
-  char *end, *ini = analyseur;
-  GEN res, cpt;
   matcomp c;
-  F2GEN fun;
+  char *ini = analyseur;
+  GEN res, cpt = matcell(p, &c);
 
-  skip_matrix_block();
-  fun = affect_block(&res);
-  end = analyseur;
-  analyseur = ini;
-  cpt = matcell(p, &c);
-  if (res)
+  if (*analyseur == ',' || *analyseur == ')') /* fast special case */
+    res = isonstack(cpt)? gcopy(cpt): cpt; /* no assignment */
+  else
   {
-    if (fun) res = fun(cpt, res);
-    res = change_compo(&c,res);
-    analyseur = end;
+    F2GEN fun = affect_block(&res);
+    if (res)
+    {
+      char *end = analyseur;
+      analyseur = ini;
+      cpt = matcell(p, &c); /* recompute in case affect_block modified lvalue */
+      analyseur = end;
+      if (fun) res = fun(cpt, res);
+      res = change_compo(&c,res);
+    }
+    else
+      res = isonstack(cpt)? gcopy(cpt): cpt; /* no assignment */
   }
-  else res = isonstack(cpt)? gcopy(cpt): cpt; /* no assignment */
   return res;
 }
 
