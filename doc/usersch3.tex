@@ -1946,7 +1946,7 @@ $\teb{simplefactmod}(x,p)$ (= $\teb{factormod}(x,p,1)$).
 $n$ which is irreducible over $\F_p$. For instance if
 \kbd{P = ffinit(3,2,y)}, you can represent elements in $\F_{3^2}$ as polmods
 modulo \kbd{P}. Starting with version 2.2.3 this function use a fast variant
-of Adleman--Lenstra algorithm, and is much faster than in earlier versions.
+of Adleman-Lenstra algorithm, and is much faster than in earlier versions.
 
 \syn{ffinit}{p,n,v}, where $v$ is a variable number.
 
@@ -2827,7 +2827,7 @@ If $\fl = 0$, use Doud's algorithm: bound torsion by computing $\#E(\F_p)$
 for small primes of good reduction, then look for torsion points using
 Weierstrass parametrization (and Mazur's classification).
 
-If $\fl = 1$, use Lutz--Nagell (\emph{much} slower), $E$ is allowed to be a
+If $\fl = 1$, use Lutz-Nagell (\emph{much} slower), $E$ is allowed to be a
 medium vector.
 
 \syn{elltors0}{E,flag}.
@@ -2899,7 +2899,7 @@ $\bullet$ $\tev{ideal}$ can mean any of the following:
 is a square matrix.
 
 \quad -- an \tev{idele}, i.e.~a 2-component vector, the first being an
-ideal given as a $\Z$--basis, the second being a $r_1+r_2$-component row
+ideal given as a $\Z$-basis, the second being a $r_1+r_2$-component row
 vector giving the complex logarithmic Archimedean information.
 
 \quad -- a $\Z_K$-generating system for an ideal.
@@ -3885,7 +3885,7 @@ The output is an 8-component vector \var{gal}.
  $\var{gal}[1]$ contains the polynomial \var{pol}
  (\kbd{\var{gal}.pol}).
 
- $\var{gal}[2]$ is a three--components vector $[p,e,q]$ where $p$ is a
+ $\var{gal}[2]$ is a three-components vector $[p,e,q]$ where $p$ is a
  prime number (\kbd{\var{gal}.p}) such that \var{pol} totally split
  modulo $p$ , $e$ is an integer and $q=p^e$ (\kbd{\var{gal}.mod}) is the
  modulus of the roots in \kbd{\var{gal}.roots}.
