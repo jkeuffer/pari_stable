@@ -1624,7 +1624,7 @@ entree functions_basic[]={
 {"bnfsignunit",18,(void*)signunits,6,"G"},
 {"bnfsunit",99,(void*)bnfsunit,6,"GGp"},
 {"bnfunit",1,(void*)buchfu,6,"Gp"},
-{"bnrL1",99,(void*)bnrL1,6,"GD0,L,p"},
+{"bnrL1",99,(void*)bnrL1,6,"GGD0,L,p"},
 {"bnrclass",99,(void*)bnrclass0,6,"GGD0,L,p"},
 {"bnrclassno",2,(void*)rayclassno,6,"GG"},
 {"bnrclassnolist",2,(void*)rayclassnolist,6,"GG"},

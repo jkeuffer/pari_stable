@@ -2948,14 +2948,17 @@ and would like to skip part of a lengthy \kbd{bnfinit} computation.
 
 \syn{buchfu}{\var{bnf}}.
 
-\subsecidx{bnrL1}$(\var{bnr},\{\fl=0\})$:
+\subsecidx{bnrL1}$(\var{bnr},\var{subgroup},\{\fl=0\})$:
 \var{bnr} being the number field data which is output by
-\kbd{bnrinit(,,1)}, returns for each \idx{character} $\chi$ of the
-corresponding ray class group, the value at $s = 1$ (or $s = 0$) of
-the abelian $L$-functions associated to $\chi$. For the value at $s =
-0$, the function returns in fact for each character $\chi$ a vector
-$[r_\chi , c_\chi]$ where $r_\chi$ is the order of $L(s, \chi)$ at $s
-= 0$ and $c_\chi$ the first non-zero term in the expansion of $L(s,
+\kbd{bnrinit(,,1)} and \var{subgroup} being a square matrix defining a
+congruence subgroup of the ray class group corresponding to \var{bnr}
+(or $0$ for the trivial congruence subgroup), returns for each
+\idx{character} $\chi$ of the ray class group which is trivial on this
+subgroup, the value at $s = 1$ (or $s = 0$) of the abelian
+$L$-function associated to $\chi$. For the value at $s = 0$, the
+function returns in fact for each character $\chi$ a vector $[r_\chi ,
+c_\chi]$ where $r_\chi$ is the order of $L(s, \chi)$ at $s = 0$ and
+$c_\chi$ the first non-zero term in the expansion of $L(s,
 \chi)$ at $s = 0$; in other words
 %
 $$L(s, \chi) = c_\chi \cdot s^{r_\chi} + O(s^{r_\chi + 1})$$
@@ -2973,24 +2976,24 @@ Example:
 \bprog
 bnf = bnfinit(x^2 - 229);
 bnr = bnrinit(bnf,1,1);
-bnrL1(bnr)
+bnrL1(bnr, 0)
 @eprog\noindent
 returns the order and the first non-zero term of the abelian
 $L$-functions $L(s, \chi)$ at $s = 0$ where $\chi$ runs through the
 characters of the class group of $\Q(\sqrt{229})$. Then
 \bprog
 bnr2 = bnrinit(bnf,2,1);
-bnrL1(bnr2,2)
+bnrL1(bnr2,0,2)
 @eprog\noindent
 returns the order and the first non-zero terms of the abelian
 $L$-functions $L_S(s, \chi)$ at $s = 0$ where $\chi$ runs through the
 characters of the class group of $\Q(\sqrt{229})$ and $S$ is the set
 of infinite places of $\Q(\sqrt{229})$ together with the finite prime
 $2$ (note that the ray class group modulo $2$ is in fact the class
-group, so \kbd{bnrL1(bnr2)} returns exactly the same answer as
-\kbd{bnrL1(bnr)}!).
+group, so \kbd{bnrL1(bnr2,0)} returns exactly the same answer as
+\kbd{bnrL1(bnr,0)}!).
 
-\syn{bnrL1}{\var{bnr},\fl,\var{prec}}
+\syn{bnrL1}{\var{bnr},\var{subgroup},\fl,\var{prec}}
 
 \subsecidx{bnrclass}$(\var{bnf},\var{ideal},\{\fl=0\})$:
 $\var{bnf}$ being a big number field

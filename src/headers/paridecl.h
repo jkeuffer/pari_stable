@@ -1094,7 +1094,7 @@ GEN     subgrouplist(GEN cyc, long bound);
 
 /* stark.c */
 
-GEN     bnrL1(GEN bnr, long flag, long prec);
+GEN     bnrL1(GEN bnr, GEN sbgrp, long flag, long prec);
 GEN     bnrrootnumber(GEN bnr, GEN chi, long flag, long prec);
 GEN     bnrstark(GEN bnr, GEN subgroup, long flag, long prec);
 

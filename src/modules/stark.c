@@ -3184,8 +3184,8 @@ bnrstark(GEN bnr,  GEN subgroup,  long flag,  long prec)
   return gerepileupto(av, AllStark(data, nf, flag, newprec));
 }
 
-/* For each character of bnr, compute L(1, chi) (or equivalently the
-   first non-zero term c(chi) of the expansion at s = 0). The binary
+/* For each character of Cl(bnr)/sbgrp, compute L(1, chi) (or equivalently 
+   the first non-zero term c(chi) of the expansion at s = 0). The binary
    digits of flag mean 1: if 0 then compute the term c(chi) and return
    [r(chi), c(chi)] where r(chi) is the order of L(s, chi) at s = 0,
    or if 1 then compute the value at s = 1 (and in this case, only for
@@ -3195,16 +3195,17 @@ bnrstark(GEN bnr,  GEN subgroup,  long flag,  long prec)
    the modulus of bnr (and the infinite places), 3: return also the
    character */
 GEN
-bnrL1(GEN bnr, long flag, long prec)
+bnrL1(GEN bnr, GEN sbgrp, long flag, long prec)
 {
-  GEN bnf, nf, cyc, Mcyc, p1, L1, chi, cchi, allCR, listCR, dataCR;
-  GEN S, T, rep, indCR, invCR;
-  long N, cl, i, j, nc, a, av = avma;
+  GEN bnf, nf, cyc, Mcyc, p1, L1, chi, lchi, clchi, allCR, listCR, dataCR;
+  GEN S, T, rep, indCR, invCR, Qt;
+  long N, cl, i, j, k, nc, lq, a, av = avma, ncc;
 
   bnf  = (GEN)bnr[1];
   nf   = (GEN)bnf[7];
   cyc  = gmael(bnr, 5, 2);
   Mcyc = diagonal(cyc);
+  ncc  = lg(cyc) - 1;
   N    = degree((GEN)nf[1]);
 
   if (N == 1)
@@ -3225,10 +3226,23 @@ bnrL1(GEN bnr, long flag, long prec)
     Mcyc = diagonal(cyc);
   }
 
-  cl   = itos(det(Mcyc));
+  /* check the subgroup */
+  if (gcmp0(sbgrp))
+    sbgrp = Mcyc;
+  else
+  {
+    p1 = gauss(sbgrp, Mcyc);
+    if (!gcmp1(denom(p1)))
+      err(talker, "incorrect subgroup in bnrL1");
+  }
+
+  cl = itos(det(sbgrp));
+  Qt = InitQuotient0(Mcyc, sbgrp);
+  lq = lg((GEN)Qt[2]) - 1;
 
   /* compute all the characters */
-  allCR = FindEltofGroup(cl, cyc);
+  allCR = FindEltofGroup(cl, (GEN)Qt[2]);
+  
 
   /* make a list of all non-trivial characters modulo conjugation */
   listCR = cgetg(cl, t_VEC);
@@ -3239,25 +3253,38 @@ bnrL1(GEN bnr, long flag, long prec)
 
   for (i = 1; i < cl; i++)
   {
-    chi  = (GEN)allCR[i];
-    cchi = ConjChar(chi, cyc);
+    chi = (GEN)allCR[i];
+
+    /* lift the character to a character on Cl(bnr) */
+    lchi = cgetg(ncc + 1, t_VEC);
+    for (j = 1; j <= ncc; j++) 
+    {
+      p1 = gzero;
+      for (k = 1; k <= lq; k++)
+	p1 = gadd(p1, gdiv(mulii(gmael3(Qt, 3, j, k), (GEN)chi[k]), 
+			   gmael(Qt, 2, k)));
+      lchi[j] = lmul(p1, (GEN)cyc[j]);
+    }
+    clchi = ConjChar(lchi, cyc);
 
     a = i;
     for (j = 1; j <= nc; j++)
-      if (gegal(gmael(listCR, j, 1), cchi)) a = -j;
+      if (gegal(gmael(listCR, j, 1), clchi)) a = -j;
 
     if (a > 0)
     {
       nc++;
       listCR[nc] = lgetg(3, t_VEC);
-      mael(listCR, nc, 1) = (long)chi;
-      mael(listCR, nc, 2) = (long)bnrconductorofchar(bnr, chi, prec);
+      mael(listCR, nc, 1) = (long)lchi;
+      mael(listCR, nc, 2) = (long)bnrconductorofchar(bnr, lchi, prec);
 
       indCR[i]  = nc;
       invCR[nc] = i;
     }
     else
       indCR[i] = -invCR[-a];
+
+    allCR[i] = lcopy(lchi);
   }
 
   setlg(listCR, nc + 1);
