@@ -29,7 +29,13 @@ TP = Thomas Papanikolaou
 XR = Xavier Roblot
 YU = Yoshiaki Uchikawa
 
-Done for version 2.2.2 (released 10/01/2001):
+Done for version 2.2.3 (released ??/??/2002):
+  Fixed
+    1- bnrinit(bnfinit(subst(polsubcyclo(89,8),x,-x)),4) --> SEGV [make sure
+    isprincipalfact is used in makecygen, even in case of precision problems]
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Done for version 2.2.2 (released 10/01/2002):
   Fixed
     1- qfbred(Qfb(4, 17, 18)) --> SIGFPE
     2- broken compilation in arith.c when CC != gcc
@@ -92,7 +98,7 @@ BA  1- New function 'vectorsmall'.
     5- Montgomery reduction (only used in powmodulo() for now)
     6- [experimental] basic tuning utilities (src/test/tune.c) [make tune]
  
- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.1 (released 18/10/2001):
 
   Fixed
