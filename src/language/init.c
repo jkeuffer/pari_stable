@@ -791,6 +791,7 @@ err_recover(long numerr)
   killallfiles(0);
 
   if (pariErr->die) pariErr->die();    /* Caller wants to catch exceptions? */
+  global_err_data = NULL;
   fprintferr("\n"); flusherr();
   if (!environnement) exit(1);
 

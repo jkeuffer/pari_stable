@@ -288,6 +288,7 @@ new_buffer()
 void
 del_buffer(Buffer *b)
 {
+  if (!b) return;
   free(b->buf); free((void*)b);
 }
 
@@ -312,7 +313,10 @@ jump_to_buffer()
 {
   Buffer *b;
   while ( (b = current_buffer) )
-    if (!b->flenv) pop_buffer();
+  {
+    if (b->flenv) break;
+    pop_buffer();
+  }
   if (!b) longjmp(environnement, 0);
   longjmp(b->env, 0);
 }
@@ -2049,9 +2053,11 @@ gp_main_loop()
   long av, i,j, first = (!bufstack);
   GEN z = gnil;
   Buffer *b = new_buffer();
+  b->flenv = 1;
+  setjmp(b->env);
 
   push_stack(&bufstack, (void*)b);
-  for(;;)
+  for(; ; setjmp(b->env))
   {
     if (first)
     {
@@ -2073,7 +2079,7 @@ gp_main_loop()
         kill_all_buffers(1);
       }
     }
-    setjmp(b->env); added_newline = 1;
+    added_newline = 1;
     if (paribufsize != b->len) fix_buffer(b, paribufsize);
 
     for(;;)
@@ -2170,10 +2176,11 @@ input0()
   Buffer *b = new_buffer();
   GEN x;
 
+  push_stack(&bufstack, (void*)b);
   while (! get_line_from_file(infile, b, DFT_INPROMPT))
     if (popinfile()) { fprintferr("no input ???"); gp_quit(); }
   x = lisseq(b->buf);
-  del_buffer(b); return x;
+  pop_buffer(b); return x;
 }
 
 void
@@ -2252,12 +2259,12 @@ void errcontext(char *msg, char *s, char *entry);
 void
 break_loop()
 {
-  Buffer *b = new_buffer();
+  Buffer *oldb = current_buffer, *b = new_buffer();
+  push_stack(&bufstack, (void*)b);
 
   term_color(c_ERR);
   fprintferr("\n");
-  errcontext("Starting break loop (^D to exit)",
-             _analyseur(), current_buffer->buf);
+  errcontext("Starting break loop (^D to exit)", _analyseur(), oldb->buf);
   term_color(c_NONE);
   infile = stdin;
   for(;;)
@@ -2274,14 +2281,14 @@ break_loop()
       pariputc('\n');
     }
   }
-  del_buffer(b);
+  pop_buffer();
 }
 
 int
 gp_exception_handler(long numerr)
 {
   char *s = (char*)global_err_data;
-  if (s && *s) outerr(lisseq(s));
+  if (s && *s) { fprintferr("\n"); outerr(lisseq(s)); }
   else
   {
     if (numerr == errpile) avma = top;
