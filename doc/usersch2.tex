@@ -199,7 +199,7 @@ file \kbd{misc/color.dft} for an example). Legal values for this default are
 strings \kbd{"$a_1$,\dots,$a_k$"} where $k\le7$ and each $a_i$ is either
 
 \noindent $\bullet$ the keyword \kbd{no} (use the default color, usually
-black)
+black on transparent background)
 
 \noindent $\bullet$ an integer between 0 and 15 corresponding to the
 aforementioned colormap
@@ -219,6 +219,11 @@ default(colors, "9, 5, no, no, 4")
 \noindent
 typesets error messages in color $9$, history numbers in color $5$, output in
 color $4$, and does not affect the rest.
+
+A set of default colors for dark (reverse video or PC console) and light
+backgrounds respectively is activated when \kbd{colors} is set to
+\kbd{darkbg}, resp.~\kbd{lightbg} (or any proper prefix: \kbd{d} is
+recognized as an abbreviation for \kbd{darkbg}).
 
 \emacs{In the present version, this default is incompatible with Emacs.
 Changing it will just fail silently (the alternative would be to display
