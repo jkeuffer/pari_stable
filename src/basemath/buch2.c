@@ -81,48 +81,52 @@ desallocate(long **matcopy)
 static long
 subfactorbasegen(long N,long m,long minsfb,GEN vperm)
 {
-  long av=avma,i,j, k=lg(vectbase)-1,s=0,s1=0,nid=0,ss=0;
-  GEN y1,y2,perm,perm1;
+  long av=avma,i,j, lv=lg(vectbase),s=0,s1=0,n=0,ss=0,z=0;
+  GEN y1,y2,perm,perm1,P,Q;
   double prod;
 
-  y1=cgetg(k+1,t_COL);
-  y2=cgetg(k+1,t_COL);
-  for (i=1; i<=k; i++)
-  {
-    GEN p1=(GEN)vectbase[i];
-    long e,s2;
+  y1 = cgetg(lv,t_COL);
+  y2 = cgetg(lv,t_COL);
+  for (i=1,P=(GEN)vectbase[i];;P=Q)
+  { /* we'll sort ideals by norm (flag excluded ideals with "zero") */
+    long e = itos((GEN)P[3]);
+    long ef= e*itos((GEN)P[4]);
+    
+    s1 += ef;
+    y2[i] = (long)powgi((GEN)P[1],(GEN)P[4]);
+    /* take only unramified ideals */
+    if (e>1) { y1[i]=zero; s=0; z++; } else { y1[i]=y2[i]; s += ef; }
 
-    y2[i]=(long)powgi((GEN)p1[1],(GEN)p1[4]);
-    if (i>1 && !egalii((GEN)p1[1], gmael(vectbase,i-1,1)))
-    {
-      if (s==N) y1[i-1]=zero;
-      if (s1==N) ss++;
+    i++; Q = (GEN)vectbase[i];
+    if (i == lv || !egalii((GEN)P[1], (GEN)Q[1]))
+    { /* don't take all P above a given p (delete the last one) */
+      if (s == N) { y1[i-1]=zero; z++; }
+      if (s1== N) ss++;
+      if (i == lv) break;
       s=0; s1=0;
     }
-    e = itos((GEN)p1[3]); s2 = e*itos((GEN)p1[4]); s1 += s2;
-    if (e>1) { y1[i]=zero; s=0; } else { y1[i]=y2[i]; s += s2; }
   }
-  if (s==N) y1[k]=zero;
-  if (s1==N) ss++;
-  perm = sindexsort(y1);
-  i=1; while (i<=k && y1[perm[i]] == zero) i++;
-  if (i > k+1-minsfb) return -1;
+  if (z+minsfb >= lv) return -1;
 
-  prod=1.0;
-  while ((nid <= k-i && prod < m+0.5) || nid < minsfb)
+  prod = 1.0;
+  perm = sindexsort(y1) + z; /* skip "zeroes" (excluded ideals) */
+  for(;;)
   {
-    nid++;
-    prod *= gtodouble((GEN)y1[perm[nid+i-1]]);
+    if (++n > minsfb && (z+n >= lv || prod > m + 0.5)) break;
+    prod *= gtodouble((GEN)y1[perm[n]]);
   }
-  if (prod<m) return -1;
-  for (j=1; j<=nid; j++) y2[perm[j+i-1]] = zero;
-  perm1=sindexsort(y2);
-  for (j=1; j<=nid; j++) vperm[j] = perm[j+i-1];
-  for (   ; j<= k ; j++) vperm[j] = perm1[j];
+  if (prod < m) return -1;
+  n--;
 
-  avma = av; subfactorbase=cgetg(nid+1,t_COL);
+  /* take the first (wrt norm) n ideals, and put them first */
+  for (j=1; j<=n; j++) y2[perm[j]] = zero;
+  perm1 = sindexsort(y2);
+  for (j=1; j<=n; j++) vperm[j] = perm[j];
+  for (   ; j<lv; j++) vperm[j] = perm1[j];
 
-  for (j=1; j<=nid; j++) subfactorbase[j] = vectbase[vperm[j]];
+  avma = av; subfactorbase=cgetg(n+1,t_COL);
+
+  for (j=1; j<=n; j++) subfactorbase[j] = vectbase[vperm[j]];
   if (DEBUGLEVEL)
   {
     if (DEBUGLEVEL>3)
@@ -134,7 +138,7 @@ subfactorbasegen(long N,long m,long minsfb,GEN vperm)
       fprintferr("\n***** INITIAL PERMUTATION *****\n\n");
       fprintferr("vperm = %Z\n\n",vperm);
     }
-    msgtimer("subfactorbase (%ld elements)",nid);
+    msgtimer("subfactorbase (%ld elements)",n);
   }
   return ss;
 }
