@@ -211,9 +211,9 @@ src/modules/nffactor.c
 src/modules/stark.c
 src/modules/subfield.c
 src/modules/thue.c
-ser/systems/os2.c
-ser/systems/os2/dlfcn.h
-ser/systems/os2/pari.def.base
+src/systems/os2.c
+src/systems/os2/dlfcn.h
+src/systems/os2/pari.def.base
 src/test/32/analyz
 src/test/32/compat
 src/test/32/elliptic
