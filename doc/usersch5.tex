@@ -856,7 +856,8 @@ integer \kbd{x} modulo the long~\kbd{s}.
 polynomial \kbd{x} divided by the polynomial~\kbd{y}.
 
 \fun{GEN}{ginvmod}{GEN x, GEN y} creates the inverse of \kbd{x} modulo \kbd{y}
-when it exists.
+when it exists. \kbd{y} must be of type \typ{INT} (in which case \kbd{x} is of type \typ{INT}) or \typ{POL} (in which case \kbd{x} is either a scalar type or
+of type \typ{POL}).
 
 \fun{GEN}{gpow}{GEN x, GEN y, long l} creates $\kbd{x}^{\kbd{y}}$. The
 precision \kbd{l} is taken into account only if \kbd{y} is not an integer
