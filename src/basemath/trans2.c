@@ -1409,7 +1409,7 @@ ggamma(GEN x, long prec)
 {
   pari_sp av;
   long m;
-  GEN y, p1;
+  GEN y, z, p1;
 
   switch(typ(x))
   {
@@ -1423,15 +1423,14 @@ ggamma(GEN x, long prec)
 
     case t_FRAC:
       if (!egalii((GEN)x[2], gdeux)) break;
-      x = (GEN)x[1]; /* true argument is x/2 */
+      z = (GEN)x[1]; /* true argument is z/2 */
 /* heuristic */
-      if (cmpis(x, 200 + 50*(prec-2)) > 0) break;
+      if (cmpis(z, 200 + 50*(prec-2)) > 0) break;
 
       y = cgetr(prec); av = avma;
-      if (cmpis(mpabs(x), 962354) > 0)
+      if (is_bigint(z) || labs(m = itos(z)-1) > 962353)
         err(talker, "argument too large in ggamma");
       p1 = mpsqrt( mppi(prec) );
-      m = itos(x) - 1;
       if (m)
       {
         long ma = labs(m);

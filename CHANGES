@@ -65,6 +65,7 @@ MSo11- various bugs in anal.c: uninitialized reads in get_op_fun(), double_op()
        after being freed
    12- (10^100 + 0.) / (10^100 + 1.)  --> 0.  [ display bug from 2.2.6 ]
    13- rnfnormgroup(): restrict to primes of degree 1 [ much faster ]
+   14- gamma(351/2) --> 1.235874058265488750143951998 E740  [ = gamma(351) ]
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.
