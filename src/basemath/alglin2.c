@@ -523,7 +523,7 @@ conjvec(GEN x,long prec)
     case t_VEC: case t_COL:
       lx=lg(x); z=cgetg(lx,t_MAT);
       for (i=1; i<lx; i++) z[i]=(long)conjvec((GEN)x[i],prec);
-      s=lg(z[1]);
+      if (lx != 1) s = lg(z[1]);
       for (i=2; i<lx; i++)
 	if (lg(z[i])!=s) err(talker,"incompatible field degrees in conjvec");
       break;
