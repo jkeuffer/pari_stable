@@ -762,9 +762,9 @@ vecteur(GEN nmax, entree *ep, char *ch)
   long i,m;
   long c[]={evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
 
-  if (typ(nmax)!=t_INT || signe(nmax) < 0)
-    err(talker,"bad number of components in vector");
+  if (typ(nmax) != t_INT) err(typeer,"vector");
   m = itos(nmax);
+  if (m < 0)  err(talker,"negative number of components in vector");
   if (!ep || !ch) return zerovec(m);
   y = cgetg(m+1,t_VEC); push_val(ep, c);
   for (i=1; i<=m; i++)
@@ -782,12 +782,11 @@ vecteursmall(GEN nmax, entree *ep, char *ch)
   long i,m;
   long c[]={evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
 
-  if (typ(nmax)!=t_INT || signe(nmax) < 0)
-    err(talker,"bad number of components in vector");
+  if (typ(nmax) != t_INT) err(typeer,"vector");
   m = itos(nmax);
+  if (m < 0)  err(talker,"negative number of components in vector");
   if (!ep || !ch) return vecsmall_const(m, 0);
-  y = cgetg(m+1,t_VECSMALL);
-  push_val(ep, c);
+  y = cgetg(m+1,t_VECSMALL); push_val(ep, c);
   for (i=1; i<=m; i++) { c[2] = i; y[i] = itos(lisseq_nobreak(ch)); }
   pop_val(ep); return y;
 }
@@ -803,27 +802,25 @@ GEN
 matrice(GEN nlig, GEN ncol,entree *ep1, entree *ep2, char *ch)
 {
   GEN y, z, p1;
-  long i, j, m, n, s;
+  long i, j, m, n;
   long c1[]={evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 1};
   long c2[]={evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 1};
 
-  s=signe(ncol);
+  if (typ(ncol) != t_INT || typ(nlig) != t_INT) err(typeer,"matrix");
   if (ep1 == ep2 && ep1) err(talker, "identical index variables in matrix");
-  if (typ(ncol)!=t_INT || s<0) err(talker,"bad number of columns in matrix");
-  if (!s) return cgetg(1,t_MAT);
-
-  s=signe(nlig);
-  if (typ(nlig)!=t_INT || s<0) err(talker,"bad number of rows in matrix");
-  m = itos(ncol)+1;
-  n = itos(nlig)+1;
-  if (!s) return zeromat(1, m-1);
-  if (!ep1 || !ep2 || !ch) return zeromat(n-1, m-1);
+  m = itos(ncol);
+  n = itos(nlig);
+  if (m < 0) err(talker,"negative number of columns in matrix");
+  if (n < 0) err(talker,"negative number of rows in matrix");
+  if (!m) return cgetg(1,t_MAT);
+  if (!n) return zeromat(0, m);
+  if (!ep1 || !ep2 || !ch) return zeromat(n, m);
   push_val(ep1, c1);
-  push_val(ep2, c2); y = cgetg(m,t_MAT);
-  for (i=1; i<m; i++)
+  push_val(ep2, c2); y = cgetg(m+1,t_MAT);
+  for (i=1; i<=m; i++)
   {
-    c2[2] = i; z = cgetg(n,t_COL); y[i] = (long)z;
-    for (j=1; j<n; j++)
+    c2[2] = i; z = cgetg(n+1,t_COL); y[i] = (long)z;
+    for (j=1; j<=n; j++)
     {
       c1[2] = j; p1 = lisseq_nobreak(ch);
       z[j] = isonstack(p1)? (long)p1 : (long)forcecopy(p1);
