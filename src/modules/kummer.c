@@ -863,13 +863,13 @@ lifttoKz(GEN nfz, GEN nf, GEN id, compo_s *C)
 static void
 compositum_red(compo_s *C, GEN P, GEN Q)
 {
-  GEN a, z = (GEN)compositum2(P, Q)[1];
-  C->R = (GEN)z[1];
-  C->p = (GEN)z[2];
-  C->q = (GEN)z[3];
+  GEN p, q, a, z = (GEN)compositum2(P, Q)[1];
+  a = (GEN)z[1];
+  p = (GEN)z[2];
+  q = (GEN)z[3];
   C->k = (GEN)z[4];
   /* reduce R */
-  z = polredabs0(C->R, nf_ORIG|nf_PARTIALFACT);
+  z = polredabs0(a, nf_ORIG|nf_PARTIALFACT);
   C->R = (GEN)z[1];
   if (DEBUGLEVEL>1) fprintferr("polred(compositum) = %Z\n",C->R);
   a    = (GEN)z[2];

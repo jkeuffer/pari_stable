@@ -1067,7 +1067,7 @@ qfbimagsolvep(GEN Q, GEN p)
   d = gcoeff(N,2,2);
   /* return (N * M^(-1))[,1] */
   M = subii(mulii(a,x), mulii(b,y));
-  N = subii(mulii(c,x), mulii(d,x)); return gerepilecopy(av, mkvec2(M,N));
+  N = subii(mulii(c,x), mulii(d,y)); return gerepilecopy(av, mkvec2(M,N));
 }
 
 GEN
