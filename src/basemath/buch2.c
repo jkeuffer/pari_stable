@@ -2061,7 +2061,7 @@ bestappr_noer(GEN x, GEN k)
  * If c := Rz ~ 1, by Dirichlet's formula, then lambda is the full group of
  * units AND the full set of relations for the class group has been computed.
  *
- * In fact z is a very rough approximation and we only expect 0.75 < Rz < 1.5
+ * In fact z is a very rough approximation and we only expect 0.75 < Rz < 1.3
  *
  * Output: *ptkR = R, *ptU = basis of fundamental units (in terms lambda) */
 static int
@@ -2097,7 +2097,7 @@ compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR)
     msgtimer("bestappr/regulator");
     fprintferr("\n ***** check = %f\n",c);
   }
-  if (c < 0.75 || c > 1.5) { avma = av; return RELAT; }
+  if (c < 0.75 || c > 1.3) { avma = av; return RELAT; }
   *ptkR = R; *ptL = L; return LARGE;
 }
 

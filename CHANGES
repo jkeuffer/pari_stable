@@ -69,6 +69,8 @@ IS 18- [HPUX:] remove -E from DLCFLAGS
        of the inline kernels use any global variable. The non-inline
        assembler kernels do define and access globals hiremainder and overflow.
 BA 23- cos(2^2^22) --> precision too low [ idem sin, tan ]
+   24- setrand(1504969109; quadclassunit(-403195) --> incorrect. Check against
+       L-value too liberal; now allow quotient in [ 0.75, 1.3 ], not up to 1.5
 
   Changed
     1- rnf structure (removed useless components)
