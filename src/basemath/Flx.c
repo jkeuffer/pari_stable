@@ -898,11 +898,22 @@ Flx_invmontgomery_basecase(GEN T, ulong p)
   long i, l=lg(T)-1, k;
   GEN r=cgetg(l,t_VECSMALL); r[1]=T[1];
   r[2]=0; r[3]=1;
-  for (i=4;i<l;i++)
-  {
-    r[i] = 0;
-    for (k=3;k<i;k++)
-      r[i]= (long) Fl_sub((ulong)r[i],Fl_mul((ulong)T[l-i+k],(ulong)r[k],p),p);
+  if (u_OK_ULONG(p)) {
+    for (i=4;i<l;i++)
+    {
+      long u = 0;
+      for (k=3;k<i;k++) { u -= T[l-i+k] * r[k]; if (u & HIGHBIT) u %= p; }
+      u %= p;
+      r[i] = (long)Fl_neg((ulong)u, p);
+    }
+  }
+  else {
+    for (i=4;i<l;i++)
+    {
+      ulong u = 0;
+      for (k=3;k<i;k++) u = Fl_sub(u, Fl_mul((ulong)T[l-i+k],(ulong)r[k],p),p);
+      r[i] = (long)u;
+    }
   }
   r = Flx_renormalize(r,l);
   return r;
