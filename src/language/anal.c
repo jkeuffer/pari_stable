@@ -1809,7 +1809,7 @@ identifier(void)
 	  *bp++ = 0; argvec[i++] = (GEN) buf;
 	  break;
 
-	case 'M': /* Mneumonic flag */
+	case 'M': /* Mnemonic flag */
 	  match_comma(); argvec[i] = expr();
           if (br_status) err(breaker,"here (argument reading)");
 	  if (typ(argvec[i]) == t_STR) {
@@ -2820,7 +2820,7 @@ skipidentifier(void)
         match('='); matchcomma = 0; break;
       case ',':
         matchcomma=1; break;
-      case '\n':			/* Before the mneumonic */
+      case '\n':			/* Before the mnemonic */
 	break;
       default:
         err(bugparier,"skipidentifier (unknown code)");
