@@ -3523,12 +3523,15 @@ newtonpoly(GEN x, GEN p)
 
 extern int cmp_pol(GEN x, GEN y);
 extern GEN ZY_ZXY_resultant(GEN A, GEN B0, long *lambda);
+GEN matratlift(GEN M, GEN mod, GEN amax, GEN bmax, GEN denom);
+GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den);
+
 
 /* Factor polynomial a on the number field defined by polynomial t */
 GEN
 polfnf(GEN a, GEN t)
 {
-  GEN x0, y,p1,p2,u,fa,n,unt;
+  GEN x0, y,p1,p2,u,fa,n,unt,dent,alift;
   long av=avma,tetpil,lx,v,i,k,vt;
 
   if (typ(a)!=t_POL || typ(t)!=t_POL) err(typeer,"polfnf");
@@ -3536,21 +3539,23 @@ polfnf(GEN a, GEN t)
   vt=varn(t); v=varn(a);
   if (vt<=v)
     err(talker,"polynomial variable must be of higher priority than number field variable\nin factornf");
-  u = gdiv(a, ggcd(a,derivpol(a)));
-  unt = gmodulsg(1,t); u = gmul(unt,u);
-  n = ZY_ZXY_resultant(t, lift(u), &k);
+  dent=discsr(t); unt = gmodulsg(1,t);
+  a = gmul(a, unt);
+  alift=lift(a);
+  u = lift(gdiv(a, gmul(unt,nfgcd(alift,derivpol(alift), t, dent))));
+  n = ZY_ZXY_resultant(t, u, &k);
   if (DEBUGLEVEL > 4) fprintferr("polfnf: choosing k = %ld\n",k);
 
   fa=factor(n); fa=(GEN)fa[1]; lx=lg(fa);
   y=cgetg(3,t_MAT);
   p1=cgetg(lx,t_COL); y[1]=(long)p1;
   p2=cgetg(lx,t_COL); y[2]=(long)p2;
-  x0 = gadd(polx[v],gmulsg(k,gmodulcp(polx[vt],t)));
+  x0 = gadd(polx[v],gmulsg(k,polx[vt]));
   for (i=1; i<lx; i++)
   {
-    GEN b, pro = ggcd(u, gmul(unt, poleval((GEN)fa[i], x0)));
+    GEN b, pro = nfgcd(u, poleval((GEN)fa[i], x0), t, dent);
     long e;
-
+    pro=gmul(unt,pro);
     p1[i] = (typ(pro)==t_POL)? ldiv(pro,leading_term(pro)): (long)pro;
     if (gcmp1((GEN)p1[i])) err(talker,"reducible modulus in factornf");
     e=0; while (poldivis(a,(GEN)p1[i], &b)) { a = b; e++; }
@@ -3559,3 +3564,124 @@ polfnf(GEN a, GEN t)
   (void)sort_factor(y, cmp_pol);
   tetpil=avma; return gerepile(av,tetpil,gcopy(y));
 }
+
+GEN FpXQX_safegcd(GEN P, GEN Q, GEN T, GEN p);
+GEN FpM(GEN z, GEN p);
+GEN polpol_to_mat(GEN v, long n);
+GEN mat_to_polpol(GEN x, long v, long w);
+
+/* compute rational lifting for all the components of M modulo mod.
+ * If one components fails, return NULL.
+ * See ratlift.
+ * If denom is not NULL, check that the denominators divide denom
+ * 
+ * FIXME: NOT stack clean ! a & b stay on the stack.
+ * If we suppose mod and denome coprime, then a and b are coprime
+ * so we can do a cgetg(t_FRAC).
+ */
+GEN matratlift(GEN M, GEN mod, GEN amax, GEN bmax, GEN denom)
+{
+  ulong ltop = avma;
+  GEN N;
+  GEN a, b;
+  long l2, l3;
+  long i, j;
+  if (typ(M)!=t_MAT) err(typeer,"matratlift");
+  if(DEBUGLEVEL>=8)
+    fprintferr("%Z, %Z\n",M);
+  l2 = lg(M)-1; l3 = lg((GEN)M[1])-1;
+  N = cgetg(l2 + 1, t_MAT);
+  for (j = 1; j <= l2; ++j)
+  {
+    N[j] = lgetg(l3 + 1, t_COL);
+    for (i = 1; i <= l3; ++i)
+    {
+      if (ratlift(gcoeff(M,i,j), mod, &a, &b, amax, bmax)
+	  && (!denom || gcmp0(modii(denom,b))))
+	coeff(N, i, j) = ldiv(a, b);
+      else
+      {
+	avma=ltop;
+	return NULL;
+      }
+    }
+  }
+  return N;
+}
+
+/* P,Q in Z[X,Y], nf in Z[Y] , monic irreducible. compute GCD in Q[Y]/(nf)[X]
+ * 
+ * We procede as follows
+ * We compute the gcd modulo primes discarding bad primes as they are detected.
+ * We try reconstruct the result with matratlift, stopping as soon as we get weird
+ * denominators.
+ * If matratlift succeed, we then try the full division.
+ * Suppose we does not have sufficient accuracy to get the result right:
+ * It is extremly rare that matratlift will succeed, and even if it does, the polynomial
+ * we get has reasonnable coefficients, so the full division will not be to costly.
+ *
+ * FIXME: Handle rational coefficient for P and Q, and non-monic nf.
+ * Add optional disc argument.
+ * If not NULL, den must a a multiple of the denominator of the gcd,
+ * for example the discriminant of nf.
+ * 
+ * NOTE: if nf is not irreducible, nfgcd may loop forever, especially if the
+ * gcd divides nf !
+ */
+GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den)
+{
+  ulong ltop = avma;
+  GEN R, ax, bo;
+  GEN mod = NULL;
+  GEN M, sol, dsol, dens;
+  long dM=0, dR;
+  long x = varn(P);
+  long y = varn(nf);
+  long d = lgef(nf)-3;
+  if (!den)
+  	den = discsr(nf);
+  {
+    ulong btop = avma;
+    ulong st_lim = stack_lim(btop, 1);
+    long p;
+    byteptr primepointer;
+    GEN *bptr[] = { &M, &mod };
+    for (p = 27449, primepointer = diffptr + 3000; ; p += *(primepointer++))
+    {
+      if (!*primepointer) err(primer1);
+      if (gcmp0(modis(den, p)))
+        continue;/*Prime divide the discriminant*/
+      if (DEBUGLEVEL>=5) fprintferr("p=%d\n",p);
+      if ((R = FpXQX_safegcd(P, Q, nf, stoi(p))) == NULL)
+        continue;/*Bad prime first type*/
+      dR = lgef(R)-3;
+      if (mod && dR < dM)
+        continue;/* Bad primes second type*/
+      R = polpol_to_mat(R, d);
+      if ( !mod || dM < dR)
+	/*The opposite : this one is good, but the previous ones were bad.*/
+      {
+        M = R;
+        mod = stoi(p);
+        dM = dR;
+        continue;
+      }
+      ax = gmulgs(mpinvmod(stoi(p), mod), p);
+      M = gadd(R, gmul(ax, gsub(M, R)));
+      mod = mulis(mod, p);
+      M = lift(FpM(M, mod));
+      bo = racine(shifti(mod, -1)); /*I have no better ideas*/
+      if ((sol = matratlift(M, mod, bo, bo, den)) == NULL)
+        continue;
+      dens = denom(sol);
+      sol = mat_to_polpol(sol,x,y);
+      dsol = gmul(sol, gmodulcp(dens, nf));
+      if (gdivise(P, dsol) && gdivise(Q, dsol))
+        break;
+      if (low_stack(st_lim, stack_lim(btop, 1)))
+        gerepilemany(btop, bptr, 2);
+    }
+  }
+  return gerepileupto(ltop, gcopy(sol));
+}
+
