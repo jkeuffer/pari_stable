@@ -968,7 +968,7 @@ primeform_u(GEN x, ulong p)
     }
     c = shifti(subsi(s,x), -3);
   } else {
-    b = Fl_sqrt(umodiu(x,p), p);
+    b = Fl_sqrt(umodiu(x,p), p); if (b == ~0UL) err(sqrter5);
     /* mod(b) != mod2(x) ? */
     if ((b & 1) != (s & 1)) b = p - b;
     c = diviuexact(shifti(subii(sqru(b), x), -2), p);
@@ -983,17 +983,19 @@ GEN
 primeform(GEN x, GEN p, long prec)
 {
   pari_sp av;
-  long s, sx = signe(x);
-  GEN y, b;
+  long s, sx = signe(x), sp = signe(p);
+  GEN y, b, absp;
 
   if (typ(x) != t_INT || !sx) err(arither1);
-  if (typ(p) != t_INT || signe(p) <= 0) err(arither1);
+  if (typ(p) != t_INT || !sp) err(arither1);
   if (is_pm1(p)) return sx<0? qfi_unit_by_disc(x)
                             : qfr_unit_by_disc(x,prec);
+  if (sp < 0 && sx < 0) err(impl,"negative definite t_QFI");
   if (lgefint(p) == 3)
   { 
     y = primeform_u(x, p[2]);
     if (sx < 0) return y;
+    if (sp < 0) { gel(y,1) = negi(gel(y,1)); gel(y,3) = negi(gel(y,3)); }
     return gcopy( qfr3_to_qfr(y, realzero(prec)) );
   }
   s = mod8(x);
@@ -1009,16 +1011,17 @@ primeform(GEN x, GEN p, long prec)
   }
   /* 2 or 3 mod 4 */
   if (s & 2) err(talker,"discriminant not congruent to 0,1 mod 4 in primeform");
-  av = avma;
-  b = Fp_sqrt(x,p); if (!b) err(sqrter5);
+  absp = absi(p); av = avma;
+  b = Fp_sqrt(x, absp); if (!b) err(sqrter5);
   s &= 1; /* s = x mod 2 */
   /* mod(b) != mod2(x) ? [Warning: we may have b == 0] */
-  if ((!signe(b) && s) || mod2(b) != s) b = gerepileuptoint(av, subii(p,b));
+  if ((!signe(b) && s) || mod2(b) != s) b = gerepileuptoint(av, subii(absp,b));
 
   av = avma;
   y[3] = lpileuptoint(av, diviiexact(shifti(subii(sqri(b), x), -2), p));
   y[2] = (long)b;
-  y[1] = licopy(p); return y;
+  y[1] = (long)p;
+  return y;
 }
 
 static GEN

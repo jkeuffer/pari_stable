@@ -77,6 +77,7 @@ RS 21- gcc-3.4 breaks on compatibility code to support old readline versions
    27- issquare(Mat(2), &z); z --> SEGV  [ don't allow matrices as input ]
        issquare(1/x^2) --> SEGV [ typo in polcarrecomplet ]
    28- rnfkummer(over Q) --> type error.
+   29- allow qfbprimeform(d > 0, p < 0)
 
   Added
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu
