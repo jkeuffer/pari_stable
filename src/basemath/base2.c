@@ -1992,9 +1992,11 @@ init_norm(norm_S *S, GEN nf, GEN p)
     long i;
     if (D)
     {
+      GEN w1 = D;
       long v = Z_pval(D, p);
       D = gpowgs(p, v);
       Dp = mulii(D, q);
+      gel(w, 1) = resii(w1, Dp);
     } else {
       w = dummycopy(w);
       Dp = q;
