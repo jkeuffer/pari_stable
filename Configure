@@ -823,6 +823,7 @@ if test -n "$__gnuc__"; then
   case "$osname-$arch" in
     linux-i?86|cygwin*) OPTFLAGS="$OPTFLAGS \
       -malign-loops=2 -malign-jumps=2 -malign-functions=2";;
+    os2-*)        CFLAGS=-Zmt;;
   esac
   # omit-frame-pointer incompatible with -pg
   PRFFLAGS="-pg $OPTFLAGS"
@@ -938,7 +939,10 @@ case "$osname-$arch" in
 	full|profiling) LDFLAGS="-g0 -O4 $LDFLAGS";;
       esac;;
   solaris-*) LD=$CC; LDFLAGS=$cflags; runpathprefix=-R ;;
-  os2-*)     LD=$CC; LDFLAGS="$cflags -Zexe" ;;
+  os2-*)     LD=$CC; LDFLAGS="$cflags -Zexe"
+      case "$optimization" in
+	full) LDFLAGS="$LDFLAGS -s";;
+      esac;;
   *)         LD=$CC; LDFLAGS=$cflags ;;
 esac
 
@@ -1060,7 +1064,7 @@ if test -n "$readline"; then
   exe=$osname-$arch-rlv$$
   $CC $extraflag $RLINCLUDE -o $exe rl_version.c $RLLIBS 2>/dev/null
   if test -r $exe; then readline=`$exe`; else readline=1.0; fi
-  rm -f $exe
+  rm -f $exe $exe$exe_suff
 fi
 
 ####################### CONFIGURE - LIBC ####################################
@@ -1072,7 +1076,7 @@ exe=$osname-$arch-endian$$
 if ($CC $extraflag endian.c -o $exe 2>/dev/null); then
   endian=`$exe`;
 fi
-rm -f $exe
+rm -f $exe $exe$exe_suff
 
 if test "$fastread" != yes; then
 cat << EOT
