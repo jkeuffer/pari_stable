@@ -10,7 +10,6 @@ print <<EOF;
 EOF
 print "entree gp_member_list[] = {\n";
 
-$/="\n;";
 PARI::822::read(\%funcs,$ARGV[0]);
 foreach my $name (sort keys %funcs)
 {

@@ -30,7 +30,6 @@ print "entree functions_${class}[]={\n";
 "until" => 82,
 "global" => 88
 );
-$/="\n;";
 PARI::822::read(\%funcs,$ARGV[1]);
 foreach my $name (sort keys %funcs)
 {
