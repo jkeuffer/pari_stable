@@ -585,7 +585,8 @@ new_val_cell(entree *ep, GEN x, char flag)
 
   /* beware: f(p) = Nv = 0
    *         Nv = p; f(Nv) --> this call would destroy p [ isclone ] */
-  ep->value = (flag == COPY_VAL || (x && isclone(x)))? gclone(x): x;
+  if (x && isclone(x)) x = forcecopy(x);
+  ep->value = (flag == COPY_VAL)? gclone(x): x;
   /* Do this last. In case the clone is <C-C>'ed before completion ! */
   ep->args  = (void*) v;
 }
