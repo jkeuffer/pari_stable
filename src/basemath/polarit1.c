@@ -397,7 +397,12 @@ FpX_roots_i(GEN f, GEN p)
 
   y = cgetg(lg(f), t_COL);
   j = 1;
-  if (ZX_valuation(f, &f)) { y[j++] = zero; n = 1; } else n = 0;
+  if (!ZX_valuation(f, &f)) n = 0;
+  else {
+    y[j++] = zero; 
+    if (lg(f) == 3) { setlg(y, 2); return y; }
+    n = 1;
+  }
 
   /* take gcd(x^(p-1) - 1, f) by splitting (x^q-1) * (x^q+1) */
   b = FpXQ_pow(polx[varn(f)],q, f,p);
