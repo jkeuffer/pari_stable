@@ -23,9 +23,16 @@ PM = Peter Montgomery
 TP = Thomas Papanikolaou
 XR = Xavier Roblot
 YU = Yoshiaki Uchikawa
+===========================================================================
+Done for version 2.0.19.beta (released ??/??/2000):
+  Fixed
+    1- buffer overflow in ploth (when extrema too large)
+
+  Changed
+XR  1- bnrL1 now takes a congruence subgroup as second argument
 
 ===========================================================================
-Done for version 2.0.18.beta (released 20/12/99):
+Done for version 2.0.18.beta (released 20/12/1999):
   Fixed
     1- wrong method chosen in isinexactfield for 0 polynomials
     2- stack corruption in sylvestermatrix(0,...): Mod(x,x)^-1 --> SEGV
@@ -134,6 +141,8 @@ BA 98- incorrect object for gerepileupto in gscalcol
 XR100- typo in nffactor ("keep the value of i")
 IS101- work around an obscure gcc bug (gcc-2.96, alpha-linux) in stark.c
   102- rnfcharpoly(nfinit(y^2+1),1,1) --> SEGV
+BA103- tan(t_COMPLEX) gave bogus result
+BA104- trace([;]) --> SEGV
 
   Added
 IZ  1- [gnuplot] look up directory tree for gnuplot related files
@@ -165,7 +174,7 @@ IS  9- default CFLAGS on linux-alpha
     1- sunview "support" (didn't work, hard to test, X11 is a better standard)
 
 ===========================================================================
-Done for version 2.0.17.beta (released 24/09/99):
+Done for version 2.0.17.beta (released 24/09/1999):
 
   Fixed
 XR  1- typo in zarchstar (result possibly incorrect when more than two places)
@@ -273,7 +282,7 @@ BA  6- functions related to Galois theory: galoisinit, galoisfixedfield, etc
     2- files config/tar_[include | exclude] (obsoleted by MANIFEST)
 
 ===========================================================================
-Done for version 2.0.16.beta (released 29/06/99):
+Done for version 2.0.16.beta (released 29/06/1999):
 
   Fixed
     1- paricfg.tex (needed to compile INSTALL.tex) missing if Configure is 
@@ -387,7 +396,7 @@ OR 15- new pari.el (cf emacs/pariemacs.txt)
     6- Trivia section in the pari/gp man page
 
 ===========================================================================
-Done for version 2.0.15.beta (released 21/05/99):
+Done for version 2.0.15.beta (released 21/05/1999):
 
   Fixed
     1- ?? (TeX mode) didn't work anymore
@@ -529,7 +538,7 @@ IZ 16- new file examples/taylor.gp (nice example for plotclip)
 BA 17- new file galconj.c
 
 ===========================================================================
-Done for version 2.0.14.alpha (released 05/03/99):
+Done for version 2.0.14.alpha (released 05/03/1999):
 
   Fixed
     1- factormod(2*x+1, 2) --> "factor for general pol. not implemented"

@@ -28,7 +28,7 @@ other versions.
 Arch / proc:         OS:             Configure:     sta:    dyn:  GP version:
 ==============================================================================
 DEC/Alpha
-alpha21264   ???MHz  OSF1-V4.0       cc  X11 dl2    3169    3434  2.0.16(20)JC
+alpha21264   ???MHz  OSF1-V4.0       cc  X11 dl2    3218    3614  2.0.18(20)JC
 alpha21164a  600MHz  Linux-2.2.12   gcc  X11 dl2    4440    ????  2.0.17(22)IS
 alpha21164   600MHz  OSF1-V4.0D      cc  X11 dl2    3996    4384  2.0.10    LG
 alpha21164   533Mhz  Linux 2.0.34    gcc X11 dl2   (4294)  (4385) 2.0.12    JC
@@ -102,6 +102,7 @@ MC68030       25MHz  SunOS-4.0.3     gcc X11   -  683736  685248  2.0.9 (4)
 *MC68030      25MHz  SunOS-4.0.3     gcc X11   - 1034136 1038368  2.0.9
 ------------------------------------------------------------------------------
 IBM/POWER,PowerPC
+*PPC750(G3)  266MHz  Linux-2.2.6     gcc   - dl2    6944    6924  2.0.18    DE
 *PPC604e     233MHz  AIX-4.2         cc  X11   -   (8616)      -  2.0.12(3) GN
 *PPC604      133MHz  AIX-4.2         cc  X11   -   21528       -  2.0.4 (3) GN
 *PPC601      100MHz  AIX-4.1         cc  X11   -   21692       -  2.0.4 (3) GN
@@ -202,7 +203,7 @@ hppa kernel. Remove +z from compiler flags
 (17) CFLAGS = -mk6 -march=i586 -O6
 (18) 256kb L2 Cache - Ultra U5
 (19) 2  MB L2 Cache - Ultra U10
-(20) gcc-2.8.1 also works and produces a faster binary [sta=3097, dyn=3387]
+(20) gcc-2.8.1 also works and produces a faster binary [sta=3032, dyn=3293]
 (21) replace err by pari_err in src/kernel/sparcv7/level0.S [in 2.0.16 or 17]
 (22) broken timer in gp-dyn. Ok otherwise.
 

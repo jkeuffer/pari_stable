@@ -107,4 +107,4 @@ typedef struct package_exports_1 {
 }
 #endif
 
-#endif __TEXMACS_H
+#endif /* __TEXMACS_H */
