@@ -932,7 +932,7 @@ err(long numerr, ...)
     {
       case talker: case siginter:
         ch1=va_arg(ap, char*);
-        vpariputs(ch1,ap); pariputs(".\n"); break;
+        vpariputs(ch1,ap); pariputc('.'); break;
 
       case impl:
         ch1=va_arg(ap, char*);
@@ -1131,7 +1131,7 @@ ok_for_gerepileupto(long r, GEN x)
     return !isonstack(x) || x <= (GEN)r;
   if (x > (GEN)r)
   {
-    err(warner,"bad object %Z\n",x);
+    err(warner,"bad object %Z",x);
     return 0;
   }
 
@@ -1140,7 +1140,7 @@ ok_for_gerepileupto(long r, GEN x)
   for (i=lontyp[tx]; i<lx; i++)
     if (!ok_for_gerepileupto(r, (GEN)x[i]))
     {
-      err(warner,"bad component %ld in object %Z\n",i,x);
+      err(warner,"bad component %ld in object %Z",i,x);
       return 0;
     }
   return 1;
