@@ -1601,16 +1601,17 @@ $\teb{smallfact}(x)$ (= $\teb{factor0}(x,0)$).
 \subsecidx{factorback}$(f,\{e\},\{nf\})$: gives back the factored object
 corresponding to a factorization. If the last argument is of number field
 type (e.g.~created by \kbd{nfinit} or \kbd{bnfinit}), assume we are dealing
-with a prime ideal factorization in the number field. The resulting ideal is
+with an ideal factorization in the number field. The resulting ideal product is
 given in HNF\sidx{Hermite normal form} form.
 
 If $e$ is present, $e$ and $f$ must be vectors of the same length ($e$ being
 integral), and the corresponding factorization is the product of the
-$f[i]^e[i]$.
+$f[i]^{e[i]}$.
 
-If not, $f$ can either be a vector (as above with $e$ containing only $1$s)
-or a regular factorization, as produced with any \kbd{factor} command.
-Examples:
+If not, and $f$ is vector, it is understood as in the preceding case with
+$e$ containing only ones (the product of the $f[i]$ is returned). Finally,
+$f$ can be a regular factorization, as produced with any \kbd{factor}
+command. A few examples:
 \bprog
 ? factorback([2,2; 3,1])
 %1 = 12
