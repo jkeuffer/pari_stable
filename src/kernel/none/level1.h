@@ -53,6 +53,7 @@ GEN    cgetr(long x);
 int    cmpir(GEN x, GEN y);
 int    cmpsr(long x, GEN y);
 GEN    constant_term(GEN x);
+GEN    ctofp(GEN x, long prec);
 void   divrrz(GEN x, GEN y, GEN z);
 GEN    divsi_rem(long x, GEN y, long *rem);
 void   divsiz(long x, GEN y, GEN z);
