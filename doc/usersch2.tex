@@ -1794,7 +1794,9 @@ object whose first component can be extracted. On the other hand
 \kbd{print("a", [1])} is correct (two distinct argument, each converted to a
 string), and so is \kbd{print("a" 1)} (since \kbd{"a"1} is not a valid
 expression, only \kbd{"a"} gets expanded, then \kbd{1}, and the result is
-concatenated as explained above).
+concatenated as explained above). In case of doubt, you can surround part of
+your text by parenthesis to force immediate interpretation of a
+subexpression: \kbd{print("a"([1]))} is another solution.
 
 $\bullet$ Since there are cases where expansion is not really desirable, we
 now distinguish between ``Keywords'' and ``Strings''. String is what has been
