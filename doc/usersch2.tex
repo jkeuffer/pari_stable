@@ -1881,8 +1881,10 @@ context:
 \subsec{Errors.}\sidx{error}
 
 There are two kind of errors: syntax errors, and errors produced by functions
-in the PARI library. Both kinds will be fatal to your computation sending you
-back to the GP prompt.
+in the PARI library. Both kinds will be fatal to your computation: GP will
+report the error, perform some cleanup (restore variables modified while
+evaluating the erroneous command, close open files, reclaim unused memory,
+etc.), and will output its usual prompt. 
 
 When reporting a syntax error, GP tries to give meaningful context by copying
 the sentence it was trying to read (whitespace and comments stripped
@@ -1975,27 +1977,33 @@ different modes we now describe.
 A \tev{break loop} is a special debugging mode that you enter whenever an
 error occurs, freezing the GP state, and preventing cleanup until you get out
 of the loop. Any error: syntax error, library error, user error (from
-\tet{error}), even user interrupts like \kbd{C-c} (Control-C). During a break
-loop, a prompt is issued, commands are read and evaluated, and results
+\tet{error}), even user interrupts like \kbd{C-c} (Control-C). When a break
+loop starts, a prompt is issued (\kbd{break>}). You can type in a GP command,
+which is evaluated when you hit the \kbd{<Return>} key, and the result is
 printed as during the main GP loop, except that no history of results is kept
-(history of commands is kept, if you are using readline).
+Then the break loop prompt reappears and you can type further commands as
+long as you do not exit the loop. If you are using readline, the history of
+commands is kept, and line editing is available as usual. If you type in a
+command that results in an error, you are sent back to the break loop prompt
+(errors does \var{not} terminate the loop).
+
+To get out of a break loop, you can use \tet{next}, \tet{break},
+\tet{return}, or \kbd{C-d} (\kbd{EOF}), any of which will let GP perform its
+usual cleanup, and send you back to the GP prompt. If the error is not fatal,
+inputing an empty line, i.e hitting the \kbd{<Return>} key at the
+\kbd{break>} prompt, will continue the temporarily interrupted computation.
+An empty line has no effect in case of a fatal error, to ensure you do not
+get out of the loop prematurely, thus losing most debugging data during the
+cleanup (since user variables will be restored to their former values).
+
+In current version \vers, an error is non-fatal if and only if it was
+initiated by a \kbd{C-c} typed by the user.
 
 Break loops are useful as a debugging tool to inspect the values of GP
-variables to understand why a problem occurred, or to change GP behaviour
-(increase debugging level, start storing results in a logfile, modify
-parameters\dots) in the middle of a long computation (hit \kbd{C-c}, type
-in your modifications, then let the computation go on as explained below).
-
-To get out of the break loop, you can use \tet{next}, \tet{break},
-\tet{return} of \kbd{C-d} (\kbd{EOF}). In general, terminating a break loop will
-send you back to the GP prompt. There is an important exception if the error
-is not fatal (in current version \vers, an error is non-fatal iff it was
-initiated by a \kbd{C-c} typed by the user). In that case, \kbd{next} will
-continue the computation as if nothing had happened, except of course, you
-may have changed GP state during the break loop. After a user interrupt
-(\kbd{C-c}), entering an empty input line (i.e hitting the return key) has
-the same effect as \kbd{next}. An empty line has no effect in case of a fatal
-error, to ensure you do not get out of the loop prematurely.
+variables to understand why an error occurred, or to change GP state in the
+middle of a computation (increase debugging level, start storing results in a
+logfile, set variables to different values\dots): hit \kbd{C-c}, type in your
+modifications, then let the computation go on as explained above.
 
 A break loop looks like this:
 \bprog
@@ -2010,22 +2018,24 @@ break>
 @eprog
 \noindent So the standard error message is printed first, except now we always
 have context, whether the error comes from the library or the parser. The
-\kbd{break>} at the bottow is a prompt, and hitting \kbd{v} then return, we
-see:
+\kbd{break>} at the bottow is a prompt, and hitting \kbd{v} then
+\kbd{<Return>}, we see:
 \bprog
 break> v
 0
 @eprog
-\noindent exhibiting the culprit. We could have typed any command, not only
-the name of a variable, of course.
+\noindent explaining the problem. We could have typed any GP command, not
+only the name of a variable, of course. There is no special set of commands
+becoming available during a break loop, as they would in most debuggers.
 
 \misctitle{Important Note:} upon startup, this mechanism is \emph{off}. Type 
 \kbd{trap()} (or include it in a script) to start trapping errors in this
 way. By default, you will be sent back to the prompt.
 
-\misctitle{Technical Note:} When you enter a break loop, the pari stack is
-reset so that you can run commands, even when the error was a stack overflow,
-but you do not lose the value of any GP variable in the process.
+\misctitle{Technical Note:} When you enter a break loop due to a PARI stack
+overflow, the PARI stack is reset so that you can run commands (otherwise the
+stack would immediately overflow again). Still, as explained above, you do
+not lose the value of any GP variable in the process.
 
 \subsec{Error handlers}
 
@@ -2097,24 +2107,24 @@ specific type should be intercepted, to be chosen among
 
 \kbd{errpile}: the PARI stack overflows
 
-\noindent Omitting the error name means we are trapping all errors. The
-following can be used to check in a safe way whether \tet{install} works in
-the system considered:
+\noindent Omitting the error name means we are trapping all errors. For
+instance, the following can be used to check in a safe way whether
+\tet{install} works correctly in your GP:
 \bprog
-check_install() = 
+broken_install() = 
 {
-  trap(archer, return (1),
+  trap(archer, return ("OS"),
     install(addii,GG)
   );
-  trap(, 2,
-    if (addii(1,1) != 2, 3)
+  trap(, "USE",
+    if (addii(1,1) != 2, "BROKEN")
   )
 }
 @eprog
 \noindent The function returns 0 if everything works (the omitted \var{else}
-clause of the \kbd{if}), 1 if the operating system does not support
-\kbd{install}, 2 if using an installed function triggers an error, and 3 if
-the installed function did not behave as expected.
+clause of the \kbd{if}), \kbd{OS} if the operating system does not support
+\kbd{install}, \kbd{USE} if using an installed function triggers an error,
+and \kbd{BROKEN} if the installed function did not behave as expected.
 
 \section{Interfacing GP with other languages}
 \noindent
@@ -2410,7 +2420,7 @@ any ordinary key inserts text where the cursor stands, the arrow keys
 enabling you to move in the line. There are many more movement commands,
 which will be familiar to the Emacs user, for instance \kbd{C-a}/\kbd{C-e}
 will take you to the start/end of the line, \kbd{M-b}/\kbd{M-f} move the
-cursor backward/forward by a word, etc. Just press the \kbd{Return} key at
+cursor backward/forward by a word, etc. Just press the \kbd{<Return>} key at
 any point to send your command to GP.
 
   All the commands you type in are stored in a history (with multiline
