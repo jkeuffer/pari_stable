@@ -46,6 +46,8 @@ XR 15- typos in bnrL1
 IZ 17- delay rounding in rectplot structures until plotting device
    18- Mod(1,x) / matid(2) --> incorrect object
    19- avoid getrusage on alpha (pb with gp-dyn)
+   20- incorrect file inclusions when using gas on Sparc (-->undefined symbols)
+   21- massive cancellations in zetak(nfz,) when current prec lower than nfz's
 
   Changed
 XR  1- bnrL1 now takes a congruence subgroup as second argument
@@ -59,7 +61,7 @@ IS  5- improved generic gcc compilation flags
   Added
 BA  1- function galoissubcyclo()
 BA  2- (for now internal) function inverseimage_mod_p()
-    3- optional arguments (vertical range) to plot()
+BA  3- optional arguments (vertical range) to plot()
 
 ===========================================================================
 Done for version 2.0.18.beta (released 20/12/1999):

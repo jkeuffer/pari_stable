@@ -46,7 +46,7 @@ UltraSPARC2  296MHz  Solaris-2.5.1   gcc X11 dl2    6098    6277  2.0.16    IS
 UltraSPARC2  296MHz  Solaris-2.5.1    cc X11 dl2    7676    7869  2.0.16    IS
 UltraSPARC2i 270MHz  Solaris-2.7     gcc X11 dl2    9008    7860  2.0.16    IZ
 UltraSPARC2i 270MHz  Solaris-2.6      cc X11 dl2    9200    9970  2.0.10    LG
-UltraSPARC2  248MHz  Solaris-2.7     cc5 X11 dl2    9420    9788  2.0.15(14)GN
+UltraSPARC2  248MHz  Solaris-2.7     cc5 X11 dl2    9420    9692  2.0.18(14)GN
 UltraSPARC2  248MHz  Solaris-2.7    egcs X11 dl2    7218    7262  2.0.16    HS
 UltraSPARC   200MHz  Solaris-2.5.1   gcc X11 dl2    9226    9268  2.0.16    IS
 UltraSPARC   200MHz  Solaris-2.5.1    cc X11 dl2   11226   11755  2.0.16    IS
