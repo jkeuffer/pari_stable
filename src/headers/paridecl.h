@@ -788,6 +788,7 @@ GEN     GENtoGENstr(GEN x);
 char*   GENtoTeXstr(GEN x);
 char*   GENtostr(GEN x);
 GEN     Str(GEN g);
+GEN     Strchr(GEN g);
 GEN     Strexpand(GEN g);
 GEN     Strtex(GEN g);
 void    brute(GEN g, char format, long dec);

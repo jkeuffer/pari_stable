@@ -749,6 +749,41 @@ GENtocanonicalstr(GEN x)
   s = GENtostr0(x, &T, &gen_output);
   z = STRtoGENstr(s); free(s); return z;
 }
+
+static char
+ltoc(long n) {
+  if (n <= 0 || n > 255)
+    err(talker, "out of range in integer -> character conversion (%ld)", n);
+  return (char)n;
+}
+static char
+itoc(GEN x) { return ltoc(itos(x)); }
+
+GEN
+Strchr(GEN g)
+{
+  long i, l, len, t = typ(g);
+  char *s;
+  GEN x;
+  if (is_vec_t(t)) {
+    l = lg(g); len = nchar2nlong(l);
+    x = cgetg(len+1, t_STR); s = GSTR(x);
+    for (i=1; i<l; i++) *s++ = itoc((GEN)g[i]);
+  }
+  else if (t == t_VECSMALL)
+  {
+    l = lg(g); len = nchar2nlong(l);
+    x = cgetg(len+1, t_STR); s = GSTR(x);
+    for (i=1; i<l; i++) *s++ = ltoc(g[i]);
+  }
+  else
+  {
+    x = cgetg(2, t_STR); s = GSTR(x);
+    *s++ = itoc(g);
+  }
+  *s = 0; return x;
+}
+
 /********************************************************************/
 /**                                                                **/
 /**                         WRITE AN INTEGER                       **/

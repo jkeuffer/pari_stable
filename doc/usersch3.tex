@@ -527,6 +527,18 @@ arguments of \kbd{Str} are evaluated in string context, see \secref{se:strings}.
 \tet{strtoGEN}/\tet{GENtostr} to convert between \kbd{GEN} and \kbd{char*}.
 The latter returns a malloced string, which should be freed after usage.
 
+\subsecidx{Strchr}$(x)$: converts $x$ to a string, translating each integer
+into a character.
+
+\bprog
+? Strchr(97)
+%1 = "a"
+? Vecsmall("hello world")
+%2 = Vecsmall([104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100])
+? Strchr(%)
+%3 = "hello world"
+@eprog
+
 \subsecidx{Strexpand}$(\{x\}*)$: converts its argument list into a
 single character string (type \typ{STR}, the empty string if $x$ is omitted).
 Then performe \idx{environment expansion}, see \secref{se:envir}.
@@ -562,7 +574,7 @@ vector of type \typ{VECSMALL}. This acts as \kbd{Vec}, but only on a
 limited set of objects (the result must be representable as a vector of small
 integers). In particular, polynomials and power series are forbidden.
 If $x$ is a character string, a vector of individual characters in ASCII
-encoding is returned.
+encoding is returned (\tet{Strchr} yields back the character string).
 
 \syn{gtovecsmall}{x}.
 
