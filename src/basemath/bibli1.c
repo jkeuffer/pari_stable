@@ -2958,7 +2958,7 @@ smallvectors(GEN a, GEN BORNE, long stockmax, long flag, FP_chk_fun *CHECK)
   if (DEBUGLEVEL>5) fprintferr("q = %Z",q);
   prec = gprecision(q);
   epsbit = bit_accuracy(prec) >> 1;
-  eps = realun(prec); setexpo(eps,-epsbit);
+  eps = real2n(-epsbit, prec);
   alpha = dbltor(0.95);
   normax1 = gzero;
   borne1= gadd(BORNE,eps);

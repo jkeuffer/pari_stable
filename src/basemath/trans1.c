@@ -99,7 +99,7 @@ mppi(long prec)
 
 /* Pi * 2^n */
 GEN
-Pi2n(long prec, long n)
+Pi2n(long n, long prec)
 {
   GEN x = mppi(prec); setexpo(x, 1+n);
   return x;
@@ -107,16 +107,16 @@ Pi2n(long prec, long n)
 
 /* I * Pi * 2^n */
 GEN
-PiI2n(long prec, long n)
+PiI2n(long n, long prec)
 {
   GEN z = cgetg(3,t_COMPLEX);
   z[1] = zero;
-  z[2] = (long)Pi2n(prec, n); return z;
+  z[2] = (long)Pi2n(n, prec); return z;
 }
 
 /* 2I * Pi */
 GEN
-PiI2(long prec) { return PiI2n(prec, 1); }
+PiI2(long prec) { return PiI2n(1, prec); }
 
 /********************************************************************/
 /**                                                                **/
@@ -952,19 +952,12 @@ gsqrtz(GEN x, GEN y)
 GEN
 rootsof1complex(GEN n, long prec)
 {
-  gpmem_t ltop=avma;
-  GEN z,a;
+  gpmem_t ltop = avma;
+  GEN z;
   if (is_pm1(n)) return realun(prec);
-  if (lgefint(n)==3 && n[2]==2)
-  {
-    a=realun(prec);
-    setsigne(a,-1);
-    return a;
-  }
-  a=mppi(prec); setexpo(a,2); /* a=2*pi */
-  a=divri(a,n);
-  z = cgetg(3,t_COMPLEX);
-  gsincos(a,(GEN*)(z+2),(GEN*)(z+1),prec);
+  if (lgefint(n)==3 && n[2]==2) return stor(-1, prec);
+
+  z = exp_Ir( divri(Pi2n(1, prec), n) ); /* exp(2Ipi/n) */
   return gerepileupto(ltop,z);  
 }
 /*Only the O() of y is used*/

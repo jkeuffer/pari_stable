@@ -2614,7 +2614,7 @@ roots2(GEN pol,long PREC)
     p2=gneg_i(gdiv((GEN)pol[2],p1));
     return gerepilecopy(av,p2);
   }
-  EPS=realun(3); setexpo(EPS, 12 - bit_accuracy(PREC));
+  EPS = real2n(12 - bit_accuracy(PREC), 3);
   flagrealpol=1; flagexactpol=1;
   for (i=2; i<=N+2; i++)
   {
@@ -2748,16 +2748,19 @@ laguer(GEN pol,long N,GEN y0,GEN EPS,long PREC)
   gpmem_t av = avma, av1;
   GEN rac,erre,I,x,abx,abp,abm,dx,x1,b,d,f,g,h,sq,gp,gm,g2,*ffrac;
 
-  MAXIT=MR*MT; rac=cgetg(3,t_COMPLEX);
-  rac[1]=lgetr(PREC); rac[2]=lgetr(PREC);
+  MAXIT = MR*MT; rac = cgetc(PREC);
   av1 = avma;
   I=cgetg(3,t_COMPLEX); I[1]=un; I[2]=un;
-  ffrac=(GEN*)new_chunk(MR+1); for (i=0; i<=MR; i++) ffrac[i]=cgetr(PREC);
-  affrr(dbltor(0.0), ffrac[0]); affrr(dbltor(0.5), ffrac[1]);
-  affrr(dbltor(0.25),ffrac[2]); affrr(dbltor(0.75),ffrac[3]);
-  affrr(dbltor(0.13),ffrac[4]); affrr(dbltor(0.38),ffrac[5]);
-  affrr(dbltor(0.62),ffrac[6]); affrr(dbltor(0.88),ffrac[7]);
-  affrr(dbltor(1.0),ffrac[8]);
+  ffrac = (GEN*)new_chunk(MR+1);
+  ffrac[0] = dbltor(0.0);
+  ffrac[1] = dbltor(0.5);
+  ffrac[2] = dbltor(0.25);
+  ffrac[3] = dbltor(0.75);
+  ffrac[4] = dbltor(0.13);
+  ffrac[5] = dbltor(0.38);
+  ffrac[6] = dbltor(0.62);
+  ffrac[7] = dbltor(0.88);
+  ffrac[8] = dbltor(1.0);
   x=y0;
   for (iter=1; iter<=MAXIT; iter++)
   {
@@ -2765,11 +2768,12 @@ laguer(GEN pol,long N,GEN y0,GEN EPS,long PREC)
     d=gzero; f=gzero; abx=QuickNormL1(x,PREC);
     for (j=N-1; j>=0; j--)
     {
-      f=gadd(gmul(x,f),d); d=gadd(gmul(x,d),b);
-      b=gadd(gmul(x,b),(GEN)pol[j+2]);
-      erre=gadd(QuickNormL1(b,PREC),gmul(abx,erre));
+      f = gadd(gmul(x,f),d);
+      d = gadd(gmul(x,d),b);
+      b = gadd(gmul(x,b), (GEN)pol[j+2]);
+      erre = gadd(QuickNormL1(b,PREC), gmul(abx,erre));
     }
-    erre=gmul(erre,EPS);
+    erre = gmul(erre,EPS);
     if (gcmp(QuickNormL1(b,PREC),erre)<=0)
     {
       gaffect(x,rac); avma = av1; return rac;

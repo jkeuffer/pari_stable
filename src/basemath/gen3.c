@@ -1890,8 +1890,8 @@ ground(GEN x)
       long ex, s = signe(x);
       if (s==0 || (ex=expo(x)) < -1) return gzero;
       if (ex < 0) return s>0? gun: negi(gun);
-      av=avma; p1 = realun(3 + (ex>>TWOPOTBITS_IN_LONG));
-      setexpo(p1,-1); /* p1 = 0.5 */
+      av = avma;
+      p1 = real2n(-1, 3 + (ex>>TWOPOTBITS_IN_LONG)); /* = 0.5 */
       p1 = addrr(x,p1);
       return gerepileuptoint(av, mpent(p1));
     }

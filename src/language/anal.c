@@ -1373,7 +1373,7 @@ num_deriv(void *call, GEN argvec[])
   l = 2+pr;
   e = fpr * BITS_IN_HALFULONG; /* 1/2 required prec (in sig. bits) */
 
-  eps = realun(l); setexpo(eps, -e);
+  eps = real2n(-e, l);
   y = fix(gsub(x, eps), l); a = do_call(call, y, argvec);
   y = fix(gadd(x, eps), l); b = do_call(call, y, argvec);
   setexpo(eps, e-1);
@@ -1401,7 +1401,7 @@ num_derivU(GEN p, GEN *arg, GEN *loc, int narg, int nloc)
   l = 2+pr;
   e = fpr * BITS_IN_HALFULONG; /* 1/2 required prec (in sig. bits) */
 
-  eps = realun(l); setexpo(eps, -e);
+  eps = real2n(-e, l);
   *arg = fix(gsub(x, eps), l); a = call_fun(p,arg,loc,narg,nloc);
   *arg = fix(gadd(x, eps), l); b = call_fun(p,arg,loc,narg,nloc);
   setexpo(eps, e-1);

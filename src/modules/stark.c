@@ -1620,7 +1620,7 @@ get_limx(long r1, long r2, long prec, GEN *pteps)
   N = r1 + 2*r2; r = r1 + r2;
   a = gmulgs(gpow(gdeux, gdiv(stoi(-2*r2), stoi(N)), DEFAULTPREC), N);
 
-  eps = realun(DEFAULTPREC); setexpo(eps, -bit_accuracy(prec));
+  eps = real2n(-bit_accuracy(prec), DEFAULTPREC);
   c0 = gpowgs(mpsqrt(Pi2), r-1);
   c0 = gdivgs(gmul2n(c0,1), N);
   c0 = gmul(c0, gpow(gdeux, gdiv(stoi(r1 * (r2-1)), stoi(2*N)),

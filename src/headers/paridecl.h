@@ -970,6 +970,7 @@ long    precision(GEN x);
 GEN     precision0(GEN x,long n);
 GEN     qf_base_change(GEN q, GEN M, int flag);
 GEN     qfeval(GEN q, GEN x);
+GEN     real2n(long n, long prec);
 GEN     recip(GEN x);
 GEN     round0(GEN x, GEN *pte);
 GEN     scalarpol(GEN x, long v);
@@ -1397,9 +1398,9 @@ GEN     thueinit(GEN poly, long flag, long prec);
 
 /* trans1.c */
 
-GEN     Pi2n(long prec, long n);
+GEN     Pi2n(long n, long prec);
 GEN     PiI2(long prec);
-GEN     PiI2n(long prec, long n);
+GEN     PiI2n(long n, long prec);
 void    consteuler(long prec);
 void    constpi(long prec);
 GEN     exp_Ir(GEN x);
