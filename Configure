@@ -927,13 +927,16 @@ echo "C PreProcessor is      $CPP"
 #
 # Which Executable Linker ?
 #
-LIBS=
+LIBS=-lm
+case "$osname" in
+  darwin) LIBS= ;;
+esac
 case "$osname-$arch" in
   linux-*|cygwin*)
       LD=$CC; LDFLAGS="$cflags -Xlinker -export-dynamic"
       runpathprefix='-Xlinker -rpath -Xlinker ';;
   osf1-alpha)
-      LD=$ld; LIBS='-lots -lc'; runpathprefix='-rpath '
+      LD=$ld; LIBS="$LIBS -lots -lc"; runpathprefix='-rpath '
       LDFLAGS='-std0 -call_shared /usr/lib/cmplrs/cc/crt0.o'
       case "$optimization" in
 	full|profiling) LDFLAGS="-g0 -O4 $LDFLAGS";;

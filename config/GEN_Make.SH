@@ -59,12 +59,12 @@ LDFLAGS    = $LDFLAGS
 DLLD       = $DLLD
 DLLDFLAGS  = $DLLDFLAGS
 EXTRADLLDFLAGS  = $EXTRADLLDFLAGS
-EXTRALIBS  = $LIBS
+EXTRALIBS  =
 
 RUNPTH     = $RUNPTH
 LIBDIR     = -L$libdir
 DLCFLAGS   = $DLCFLAGS
-LIBS       = -lpari -lm
+LIBS       = $LIBS -lpari
 
 RM = rm -f
 
