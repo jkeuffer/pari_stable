@@ -32,7 +32,7 @@ extern GEN check_and_build_cycgen(GEN bnf);
 extern GEN colreducemodHNF(GEN x, GEN y, GEN *Q);
 extern GEN detcyc(GEN cyc);
 extern GEN famat_reduce(GEN fa);
-extern GEN famat_to_nf_modideal_coprime(GEN nf, GEN g, GEN e, GEN id);
+extern GEN famat_to_nf_modideal_coprime(GEN nf, GEN g, GEN e, GEN id, GEN EX);
 extern GEN famat_to_nf_modidele(GEN nf, GEN g, GEN e, GEN bid);
 extern GEN gmul_mat_smallvec(GEN x, GEN y);
 extern GEN idealaddtoone_i(GEN nf, GEN x, GEN y);
@@ -401,7 +401,7 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
     }
 
     /* G in nf, = L^e mod f */
-    G = famat_to_nf_modideal_coprime(nf, newL, gmod(e,EX), f);
+    G = famat_to_nf_modideal_coprime(nf, newL, e, f, EX);
     if (mulI)
     {
       G = element_muli(nf, G, mulI);

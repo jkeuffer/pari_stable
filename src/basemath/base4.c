@@ -939,11 +939,10 @@ GEN
 element_invmodideal(GEN nf, GEN x, GEN y)
 {
   pari_sp av = avma;
-  long N;
   GEN a, xh, yh;
 
-  nf = checknf(nf); N = degpol(nf[1]);
-  if (gcmp1(gcoeff(y,1,1))) return zerocol(N);
+  nf = checknf(nf);
+  if (gcmp1(gcoeff(y,1,1))) return zerocol( degpol(nf[1]) );
 
   yh = get_hnfid(nf, y);
   switch (typ(x))
@@ -1266,23 +1265,42 @@ famat_reduce(GEN fa)
   setlg(E, k); F[2] = (long)E; return F;
 }
 
-/* assume (num(g[i]), id) = 1 for all i. Return prod g[i]^e[i] mod id */
+/* assume (num(g[i]), id) = 1 for all i. Return prod g[i]^e[i] mod id.
+ * EX = multiple of exponent of (O_K/id)^* */
 GEN
-famat_to_nf_modideal_coprime(GEN nf, GEN g, GEN e, GEN id)
+famat_to_nf_modideal_coprime(GEN nf, GEN g, GEN e, GEN id, GEN EX)
 {
-  GEN t = NULL, dh,h,n,z,idZ = gcoeff(id,1,1);
+  GEN dh, h, n, z, plus = NULL, minus = NULL, idZ = gcoeff(id,1,1);
   long i, lx = lg(g);
+  GEN EXo2 = (expi(EX) > 10)? shifti(EX,-1): NULL;
+
   if (is_pm1(idZ)) lx = 1; /* id = Z_K */
   for (i=1; i<lx; i++)
   {
-    n = (GEN)e[i]; if (!signe(n)) continue;
+    long sn;
+    n = centermodii((GEN)e[i], EX, EXo2);
+    sn = signe(n); if (!sn) continue;
+
     h = Q_remove_denom((GEN)g[i], &dh);
     if (dh)
       h = FpV_red(gmul(h,mpinvmod(dh,idZ)), idZ);
-    z = element_powmodideal(nf, h, n, id);
-    t = (t == NULL)? z: element_mulmodideal(nf, t, z, id);
+    if (sn > 0)
+    {
+      z = element_powmodideal(nf, h, n, id);
+      plus = (plus == NULL)? z: element_mulmodideal(nf, plus, z, id);
+    }
+    else /* sn < 0 */
+    {
+      z = element_powmodideal(nf, h, negi(n), id);
+      minus = (minus == NULL)? z: element_mulmodideal(nf, minus, z, id);
+    }
   }
-  return t? t: gscalcol(gun, lg(id)-1);
+  if (minus)
+  {
+    minus = element_invmodideal(nf, minus, id);
+    if (plus) plus = element_mulmodideal(nf, minus, plus, id);
+  }
+  return plus? plus: gscalcol(gun, lg(id)-1);
 }
 
 /* assume pr has degree 1 and coprime to numerator(x) */
@@ -1337,8 +1355,8 @@ to_Fp_simple(GEN nf, GEN x, GEN pr)
  * b/p = vp^(-1) times something prime to p; both numerator and denominator
  * are integral and coprime to pr.  Globally, we multiply by (b/p)^v_pr(t) = 1.
  *
- * EX = exponent of (O_K / pr^k)^* used to reduce the product in case the
- * e[i] are large */
+ * EX = multiple of exponent of (O_K / pr^k)^* used to reduce the product in
+ * case the e[i] are large */
 GEN
 famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX)
 {
@@ -1369,8 +1387,7 @@ famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX)
     newg[i] = (long)FpV_red(special_anti_uniformizer(nf, pr), prkZ);
     e = concatsp(e, negi(zpow));
   }
-  e = gmod(e, EX);
-  return famat_to_nf_modideal_coprime(nf, newg, e, prk);
+  return famat_to_nf_modideal_coprime(nf, newg, e, prk, EX);
 }
 
 /* prod g[i]^e[i] mod bid, assume (g[i], id) = 1 */
@@ -1388,7 +1405,7 @@ famat_to_nf_modidele(GEN nf, GEN g, GEN e, GEN bid)
   {
     GEN EX = (GEN)cyc[1]; /* group exponent */
     GEN id = (GEN)module[1];
-    t = famat_to_nf_modideal_coprime(nf,g, gmod(e,EX), id);
+    t = famat_to_nf_modideal_coprime(nf, g, e, id, EX);
   }
   if (!t) t = gun;
   return set_sign_mod_idele(nf, to_famat(g,e), t, module, sarch);

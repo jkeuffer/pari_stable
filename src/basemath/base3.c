@@ -1624,7 +1624,7 @@ famat_zlog(GEN nf, GEN g, GEN e, GEN bid)
 {
   GEN vp = gmael(bid, 3,1), ep = gmael(bid, 3,2), arch = gmael(bid,1,2);
   GEN cyc = gmael(bid,2,2), lists = (GEN)bid[4], U = (GEN)bid[5];
-  GEN y0, x, y, psigne;
+  GEN y0, x, y, psigne, EX = (GEN)cyc[1];
   long i, l;
 
   if (lg(cyc) == 1) return cgetg(1,t_COL);
@@ -1635,8 +1635,8 @@ famat_zlog(GEN nf, GEN g, GEN e, GEN bid)
   {
     GEN pr = (GEN)vp[i], prk;
     prk = (l==2)? gmael(bid,1,1): idealpow(nf, pr, (GEN)ep[i]);
-    /* TODO: FIX group exponent (should be mod prk, not f !) */
-    x = famat_makecoprime(nf, g, e, pr, prk, (GEN)cyc[1]);
+    /* FIXME: FIX group exponent (should be mod prk, not f !) */
+    x = famat_makecoprime(nf, g, e, pr, prk, EX);
     y = zlog_pk(nf, x, y, pr, prk, (GEN)lists[i], &psigne);
   }
   zlog_add_sign(y0, psigne, lists);
