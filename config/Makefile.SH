@@ -323,6 +323,14 @@ lib-dyn: \$(LIBPARI_DYN)
 \$(LIBPARI_STA): \$(OBJS)
 	-\$(RM) \$@
 	\$(AR) r \$@ \$(OBJS)
+EOT
+if test -n "$ranlib"; then
+cat >> $file << EOT
+	$ranlib \$@
+
+EOT
+fi
+cat >> $file << EOT
 
 kerntest\$(_O): ../src/test/kerntest.c
 	\$(CC) -c \$(CFLAGS) -I$src/language \$(CPPFLAGS) -o \$@ \$<
@@ -347,14 +355,6 @@ tune-dyn: tune.o lib-dyn
 	\$(CC) \$(LDFLAGS) \$(RUNPTH) -o \$@ \$< \$(GMPOBJS) -L. \$(LDDYN) \$(LIBS)
 tune-sta: tune.o lib-sta
 	\$(CC) \$(LDFLAGS) -o \$@ \$< \$(GMPOBJS) ./\$(LIBPARI_STA) \$(LIBS)
-EOT
-
-if test -n "$ranlib"; then
-cat >> $file << EOT
-
-EOT
-fi
-cat >> $file << EOT
 
 gp-sta: \$(OBJS) \$(OBJSGP) \$(GNUPLOT_OBJS)
 	\$(RM) \$@
@@ -499,6 +499,14 @@ install-lib-sta: \$(LIBPARI_STA)
 	-\$(RM) \$(LIBDIR)/\$(LIBPARI_STA)
 	\$(INSTALL_DATA) \$(LIBPARI_STA) \$(LIBDIR)/\$(LIBPARI_STA).$version
 	-\$(LN) \$(LIBPARI_STA).$version \$(LIBDIR)/\$(LIBPARI_STA)
+EOT
+if test -n "$ranlib"; then
+cat >> $file << EOT
+	$ranlib \$(LIBDIR)/\$(LIBPARI_STA)
+
+EOT
+fi
+cat >> $file << EOT
 
 install-lib-dyn: \$(LIBPARI_DYN)
 	-mkdir -p \$(LIBDIR)

@@ -150,6 +150,7 @@ DS 21- improvements in elltors() [ faster torsion bound, check bound > 1
        image of H in Cl_f(K) for many f | F.
 IZ 29- improve portability of make_vi_tags (cf 'make ctags')
    30- using install() twice on the same symbol now updates the prototype code
+   31- re-enable ranlib support (disabled in 2.0.13)
 
   Added:
     1- [TeXmacs:] contextual completion (<TAB>)
