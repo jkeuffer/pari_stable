@@ -155,6 +155,8 @@ IZ  8- [library:] unified access to diffptr (NEXT_PRIME_VIADIFF macro)
    21- [GP:] break loop prompt from '>' to 'break>'
    22- [GP:] don't get out of break loop after \r
    23- type f(x=1)=; twice ---> x = 1
+   24- [GP:] the way default error handlers for trap() operate (see section
+       2.7 of manual)
 
   Added
  BA 1- Add PARI_VERSION and PARI_VERSION_CODE to paricfg.h
