@@ -1471,7 +1471,15 @@ vecpow(GEN x, GEN n)
 }
 
 GEN
-vecdiv(GEN x, GEN y) { return vecmul(x, vecinv(y)); }
+vecdiv(GEN x, GEN y)
+{
+  long i,lx, tx = typ(x);
+  GEN z;
+  if (is_scalar_t(tx)) return gdiv(x,y);
+  lx = lg(x); z = cgetg(lx,tx);
+  for (i=1; i<lx; i++) z[i] = (long)vecdiv((GEN)x[i], (GEN)y[i]);
+  return z;
+}
 
 /* x,y assumed to be of the same type, either
  * 	t_VEC: logarithmic distance components

@@ -3518,25 +3518,8 @@ rnfscal(GEN m, GEN x, GEN y)
 {
   long i, l = lg(m);
   GEN z = cgetg(l, t_COL);
-  for (i = 1; i < l; i++) z[i] = lmul(gconj(gtrans_i((GEN)x[i])), gmul((GEN)m[i], (GEN)y[i]));
-  return z;
-}
-
-static GEN
-rnfdiv(GEN x, GEN y)
-{
-  long i, l = lg(x);
-  GEN z = cgetg(l, t_COL);
-  for (i = 1; i < l; i++) z[i] = ldiv((GEN)x[i], (GEN)y[i]);
-  return z;
-}
-
-static GEN
-rnfmul(GEN x, GEN y)
-{
-  long i, l = lg(x);
-  GEN z = cgetg(l, t_COL);
-  for (i = 1; i < l; i++) z[i] = lmul((GEN)x[i], (GEN)y[i]);
+  for (i = 1; i < l; i++)
+    z[i] = lmul(gconj(gtrans_i((GEN)x[i])), gmul((GEN)m[i], (GEN)y[i]));
   return z;
 }
 
@@ -3583,11 +3566,11 @@ RED(long k, long l, GEN U, GEN mu, GEN MC, GEN nf, GEN I, GEN *Ik_inv)
   if (gcmp0(x)) return 1;
 
   xc = nftocomplex(nf,x);
-  MC[k] = lsub((GEN)MC[k], rnfmul(xc,(GEN)MC[l]));
+  MC[k] = lsub((GEN)MC[k], vecmul(xc,(GEN)MC[l]));
   U[k] = lsub((GEN)U[k], gmul(basistoalg(nf,x), (GEN)U[l]));
   coeff(mu,k,l) = lsub(gcoeff(mu,k,l), xc);
   for (i=1; i<l; i++)
-    coeff(mu,k,i) = lsub(gcoeff(mu,k,i), rnfmul(xc,gcoeff(mu,l,i)));
+    coeff(mu,k,i) = lsub(gcoeff(mu,k,i), vecmul(xc,gcoeff(mu,l,i)));
   return 1;
 }
 
@@ -3619,22 +3602,22 @@ do_SWAP(GEN I, GEN MC, GEN MCS, GEN h, GEN mu, GEN B, long kmax, long k,
   for (j=1; j<=k-2; j++) swap(coeff(mu,k-1,j),coeff(mu,k,j));
   muf = gcoeff(mu,k,k-1);
   mufc = gconj(muf); 
-  Bf = gadd((GEN)B[k], rnfmul(greal(rnfmul(muf,mufc)), (GEN)B[k-1]));
+  Bf = gadd((GEN)B[k], vecmul(greal(vecmul(muf,mufc)), (GEN)B[k-1]));
   if (check_0(Bf)) return 1; /* precision problem */
 
-  p1 = rnfdiv((GEN)B[k-1],Bf);
-  coeff(mu,k,k-1) = (long)rnfmul(mufc,p1);
+  p1 = vecdiv((GEN)B[k-1],Bf);
+  coeff(mu,k,k-1) = (long)vecmul(mufc,p1);
   temp = (GEN)MCS[k-1];
-  MCS[k-1] = ladd((GEN)MCS[k], rnfmul(muf,(GEN)MCS[k-1]));
-  MCS[k] = lsub(rnfmul(rnfdiv((GEN)B[k],Bf), temp),
-                rnfmul(gcoeff(mu,k,k-1), (GEN)MCS[k]));
-  B[k] = (long)rnfmul((GEN)B[k],p1);
+  MCS[k-1] = ladd((GEN)MCS[k], vecmul(muf,(GEN)MCS[k-1]));
+  MCS[k] = lsub(vecmul(vecdiv((GEN)B[k],Bf), temp),
+                vecmul(gcoeff(mu,k,k-1), (GEN)MCS[k]));
+  B[k] = (long)vecmul((GEN)B[k],p1);
   B[k-1] = (long)Bf;
   for (i=k+1; i<=kmax; i++)
   {
     temp = gcoeff(mu,i,k);
-    coeff(mu,i,k) = lsub(gcoeff(mu,i,k-1), rnfmul(muf, gcoeff(mu,i,k)));
-    coeff(mu,i,k-1) = ladd(temp, rnfmul(gcoeff(mu,k,k-1),gcoeff(mu,i,k)));
+    coeff(mu,i,k) = lsub(gcoeff(mu,i,k-1), vecmul(muf, gcoeff(mu,i,k)));
+    coeff(mu,i,k-1) = ladd(temp, vecmul(gcoeff(mu,k,k-1),gcoeff(mu,i,k)));
   }
   return 1;
 }
@@ -3643,7 +3626,7 @@ static GEN
 rel_T2(GEN nf, GEN pol, long lx, long prec)
 {
   long ru, i, j, k, l;
-  GEN T2, m, s, unro, roorder, powreorder;
+  GEN T2, s, unro, roorder, powreorder;
 
   roorder = nf_all_roots(nf, pol, prec);
   if (!roorder) return NULL;
@@ -3651,10 +3634,10 @@ rel_T2(GEN nf, GEN pol, long lx, long prec)
   unro = cgetg(lx,t_COL); for (i=1; i<lx; i++) unro[i] = un;
   powreorder = cgetg(lx,t_MAT); powreorder[1] = (long)unro;
   T2 = cgetg(ru, t_VEC);
-  m = initmat(lx);
   for (i = 1; i < ru; i++)
   {
     GEN ro = (GEN)roorder[i];
+    GEN m = initmat(lx);
     for (k=2; k<lx; k++)
     {
       GEN c = cgetg(lx, t_COL); powreorder[k] = (long)c;
@@ -3676,7 +3659,7 @@ rel_T2(GEN nf, GEN pol, long lx, long prec)
           coeff(m, l, k) = lconj(s);
         }
       }
-    T2[i] = (long)dummycopy(m);
+    T2[i] = (long)m;
   }
   return T2;
 }
@@ -3741,9 +3724,9 @@ PRECPB:
       kmax = k; MCS[k] = MC[k];
       for (j=1; j<k; j++)
       {
-	coeff(mu,k,j) = (long) rnfdiv(rnfscal(mth,(GEN)MCS[j],(GEN)MC[k]),
+	coeff(mu,k,j) = (long) vecdiv(rnfscal(mth,(GEN)MCS[j],(GEN)MC[k]),
 	                              (GEN) B[j]);
-	MCS[k] = lsub((GEN)MCS[k], rnfmul(gcoeff(mu,k,j),(GEN)MCS[j]));
+	MCS[k] = lsub((GEN)MCS[k], vecmul(gcoeff(mu,k,j),(GEN)MCS[j]));
       }
       B[k] = lreal(rnfscal(mth,(GEN)MCS[k],(GEN)MCS[k]));
       if (check_0((GEN)B[k])) goto PRECPB;
