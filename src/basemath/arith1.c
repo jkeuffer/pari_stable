@@ -2670,7 +2670,7 @@ classno2(GEN x)
     {
       k = krogs(D,i); if (!k) continue;
       p2 = mulir(mulss(i,i),p4);
-      p5 = subsr(1,mulrr(p7,incgam3(ghalf,p2,DEFAULTPREC)));
+      p5 = subsr(1,mulrr(p7,incgamc(ghalf,p2,DEFAULTPREC)));
       p5 = addrr(divrs(mulrr(p1,p5),i), eint1(p2,DEFAULTPREC));
       p3 = (k>0)? addrr(p3,p5): subrr(p3,p5);
     }
@@ -2683,7 +2683,7 @@ classno2(GEN x)
     {
       k = krogs(D,i); if (!k) continue;
       p2 = mulir(mulss(i,i),p4);
-      p5 = subsr(1,mulrr(p7,incgam3(ghalf,p2,DEFAULTPREC)));
+      p5 = subsr(1,mulrr(p7,incgamc(ghalf,p2,DEFAULTPREC)));
       p5 = addrr(p5, divrr(divrs(p1,i),mpexp(p2)));
       p3 = (k>0)? addrr(p3,p5): subrr(p3,p5);
     }

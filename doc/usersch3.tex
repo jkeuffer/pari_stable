@@ -1280,16 +1280,17 @@ e^{-t}t^{s-1}\,dt$. When $y$ is given, assume (of course without checking!)
 that $y=\Gamma(s)$. For small $x$, this will tremendously speed up the
 computation.
 
-\syn{incgam}{s,x,\var{prec}} and $\teb{incgam4}(s,x,y,\var{prec})$,
-respectively. There exist also the functions \teb{incgam1} and
-\teb{incgam2} which are used for internal purposes.
+\syn{incgam}{s,x,\var{prec}} and $\teb{incgam0}(s,x,y,\var{prec})$,
+respectively (an omitted $y$ is coded as \kbd{NULL}). There exist also the
+functions \teb{incgam1} and \teb{incgam2} which are used for internal
+purposes.
 
 \subsecidx{incgamc}$(s,x)$: complementary incomplete gamma function.
 
 The arguments $s$ and $x$ must be positive. The result returned is
 $\int_0^x e^{-t}t^{s-1}\,dt$, when $x$ is not too large.
 
-\syn{incgam3}{s,x,\var{prec}}.
+\syn{incgamc}{s,x,\var{prec}}.
 
 \subsecidx{log}$(x,\{\fl=0\})$: principal branch of the natural logarithm of
 $x$, i.e.~such that $\text{Im(ln}(x))\in{} ]-\pi,\pi]$. The result is complex

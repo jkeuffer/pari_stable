@@ -1586,7 +1586,7 @@ GEN     incgam0(GEN a, GEN x, GEN z,long prec);
 GEN     incgam1(GEN a, GEN x, long prec);
 GEN     incgam2(GEN a, GEN x, long prec);
 GEN     incgam3(GEN a, GEN x, long prec);
-GEN     incgam4(GEN a, GEN x, GEN z, long prec);
+GEN     incgamc(GEN a, GEN x, long prec);
 GEN     hbessel1(GEN n, GEN z, long prec);
 GEN     hbessel2(GEN n, GEN z, long prec);
 GEN     ibessel(GEN n, GEN z, long prec);

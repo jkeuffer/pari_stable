@@ -662,6 +662,9 @@ ser_powfrac(GEN x, GEN q, long prec)
   return y;
 }
 
+static GEN padic_sqrt(GEN x);
+GEN padic_sqrtn(GEN x, GEN n, GEN *zetan);
+
 GEN
 gpow(GEN x, GEN n, long prec)
 {
@@ -708,16 +711,27 @@ gpow(GEN x, GEN n, long prec)
       err(talker,"gpow: underflow or overflow");
     avma = av; return realzero_bit(itos(x));
   }
-  if (tx==t_INTMOD && typ(n)==t_FRAC)
+  if (typ(n) == t_FRAC)
   {
-    GEN p1;
-    if (!BSW_psp((GEN)x[1])) err(talker,"gpow: modulus %Z is not prime",x[1]);
-    y = cgetg(3,tx); copyifstack(x[1],y[1]);
-    av = avma;
-    p1 = mpsqrtnmod((GEN)x[2],(GEN)n[2],(GEN)x[1],NULL);
-    if (!p1) err(talker,"gpow: n-root does not exists");
-    y[2] = lpileuptoint(av, powmodulo(p1, (GEN)n[1], (GEN)x[1]));
-    return y;
+    GEN z, d = (GEN)n[2], a = (GEN)n[1];
+    if (tx == t_INTMOD)
+    {
+      if (!BSW_psp((GEN)x[1])) err(talker,"gpow: modulus %Z is not prime",x[1]);
+      y = cgetg(3,tx); copyifstack(x[1],y[1]);
+      av = avma;
+      z = mpsqrtnmod((GEN)x[2], d, (GEN)x[1], NULL);
+      if (!z) err(talker,"gpow: n-root does not exists");
+      y[2] = lpileuptoint(av, powmodulo(z, a, (GEN)x[1]));
+      return y;
+    }
+    else if (tx == t_PADIC)
+    {
+      if (egalii(d, gdeux))
+        z = padic_sqrt(x);
+      else
+        z = padic_sqrtn(x, d, NULL);
+      return gerepileupto(av, powgi(z, a));
+    }
   }
   i = (long) precision(n); if (i) prec=i;
   y = gmul(n, glog(x,prec));

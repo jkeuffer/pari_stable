@@ -773,21 +773,6 @@ kbessel2(GEN nu, GEN x, long prec)
   return gerepileupto(av, gdiv(p1,gexp(x,prec)));
 }
 
-GEN
-incgam(GEN s, GEN x, long prec)
-{
-  GEN p1,z = cgetr(prec);
-  pari_sp av = avma;
-
-  if (gcmp0(x)) return ggamma(s,prec);
-  if (typ(x)!=t_REAL) { gaffect(x,z); x=z; }
-  if (gcmp(subrs(x,1),s) > 0 || gsigne(greal(s)) <= 0)
-    p1 = incgam2(s,x,prec);
-  else
-    p1 = gsub(ggamma(s,prec), incgam3(s,x,prec));
-  affrr(p1,z); avma = av; return z;
-}
-
 /* = incgam2(0, x, prec). typ(x) = t_REAL. Optimized for eint1 */
 static GEN
 incgam2_0(GEN x)
@@ -862,7 +847,7 @@ incgam2(GEN a, GEN x, long prec)
 }
 
 GEN
-incgam3(GEN s, GEN x, long prec)
+incgamc(GEN s, GEN x, long prec)
 {
   GEN b,p1,p2,p3,y, z = cgetr(prec);
   long l, n, i;
@@ -897,27 +882,24 @@ incgam3(GEN s, GEN x, long prec)
   avma = av; return z;
 }
 
-/* Assumes that g=gamma(a,prec). Unchecked */
+/* If g != NULL, assume that g=gamma(s,prec). */
 GEN
-incgam4(GEN a, GEN x, GEN g, long prec)
+incgam0(GEN s, GEN x, GEN g, long prec)
 {
   GEN p1, z = cgetr(prec);
   pari_sp av = avma;
 
   if (typ(x) != t_REAL) { gaffect(x,z); x=z; }
-  if (gcmp(subrs(x,1),a) > 0 || gsigne(greal(a)) <= 0)
-    p1 = incgam2(a,x,prec);
+  if (gcmp(subrs(x,1),s) > 0 || gsigne(greal(s)) <= 0)
+    p1 = incgam2(s,x,prec);
   else
-    p1 = gsub(g, incgam3(a,x,prec));
+    p1 = gsub(g? g: ggamma(s,prec), incgamc(s,x,prec));
   affrr(p1, z);
   avma = av; return z;
 }
 
 GEN
-incgam0(GEN a, GEN x, GEN z,long prec)
-{
-  return z? incgam4(a,x,z,prec): incgam(a,x,prec);
-}
+incgam(GEN s, GEN x, long prec) { return incgam0(s, x, NULL, prec); }
 
 GEN
 eint1(GEN x, long prec)

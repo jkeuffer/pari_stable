@@ -2379,7 +2379,7 @@ lseriesell(GEN e, GEN s, GEN A, long prec)
   for (n = 1; n <= l; n++)
   {
     GEN p1, p2;
-    p1 = gdiv(incgam4(s,mulsr(n,cga),gs,prec), gpow(stoi(n),s,prec));
+    p1 = gdiv(incgam0(s,mulsr(n,cga),gs,prec), gpow(stoi(n),s,prec));
     p2 = flun? p1: gdiv(gmul(ns, incgam(s2,mulsr(n,cgb),prec)),
                         gpow(stoi(n), s2,prec));
     if (eps < 0) p2 = gneg_i(p2);

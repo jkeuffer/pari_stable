@@ -53,6 +53,7 @@ ellpointtoz(E,[x1,y1]); -->  impossible addition t_VEC + t_VEC.
   Changed
     1- bnfinit: [small_norm phase] speed up norm computations.
     2- [make etags:] use $ETAGS instead of 'etags' if defined
+    3- [libpari:] renamed incgam4 --> incgam0, incgam3 --> incgamc
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.6 (released 19/06/2003):
