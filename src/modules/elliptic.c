@@ -3349,7 +3349,7 @@ ellrootno_2(GEN e)
 static long
 ellrootno_3(GEN e)
 {
-  long n2,kod,u,v,d1,av=avma,r6,k4,k6,v4;
+  long n2,kod,u,v,d1,av=avma,r6,K4,K6,v4;
   GEN p=stoi(3),c4,c6,tmp,p4;
 
   n2=neron(e,p,&kod); c4=(GEN)e[10]; c6=(GEN)e[11]; p4=stoi(81);
@@ -3359,8 +3359,8 @@ ellrootno_3(GEN e)
   else {(void)pvaluation(c6,p,&tmp); v=itos(modii(tmp,p4));}
   (void)pvaluation((GEN)e[12],p,&tmp); d1=itos(modii(tmp,p4));
   avma=av;
-  r6=v%9; k4=kross(u,3); k6=kross(v,3);
-  if (kod>4) return k6;
+  r6=v%9; K4=kross(u,3); K6=kross(v,3);
+  if (kod>4) return K6;
   switch(kod)
   {
     case 1: case 3: case -3: return 1;
@@ -3368,27 +3368,27 @@ ellrootno_3(GEN e)
       switch(n2)
       {
 	case 1: return (r6==4 || r6>6) ? 1 : -1;
-	case 2: return -k4*k6;
+	case 2: return -K4*K6;
 	case 3: return 1;
-	case 4: return -k6;
+	case 4: return -K6;
       }
     case 4:
       switch(n2)
       {
-	case 1: return k6*kross(d1,3);
-	case 2: return -k4;
-	case 3: return -k6;
+	case 1: return K6*kross(d1,3);
+	case 2: return -K4;
+	case 3: return -K6;
       }
-    case -2: return n2==2 ? 1 : k6;
+    case -2: return n2==2 ? 1 : K6;
     case -4:
       switch(n2)
       {
 	case 1:
 	  if (v4==4) return (r6==4 || r6==8) ? 1 : -1;
 	  else return (r6==1 || r6==2) ? 1 : -1;
-	case 2: return -k6;
+	case 2: return -K6;
 	case 3: return (r6==2 || r6==7) ? 1 : -1;
-	case 4: return k6;
+	case 4: return K6;
       }
     default: return -1;
   }
