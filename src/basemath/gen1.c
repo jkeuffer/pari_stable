@@ -904,6 +904,7 @@ gmul(GEN x, GEN y)
   GEN z,p1,p2,p3,p4;
 
   if (x == y) return gsqr(x);
+  if (y == gun) return gcopy(x);
 
   tx = typ(x); ty = typ(y);
   if (is_const_t(tx) && is_const_t(ty))
