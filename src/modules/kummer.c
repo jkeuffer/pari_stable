@@ -26,6 +26,8 @@ extern GEN get_arch_real(GEN nf,GEN x,GEN *emb,long prec);
 extern GEN T2_from_embed_norm(GEN x, long r1);
 extern GEN vconcat(GEN A, GEN B);
 extern long int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *newx);
+extern GEN mul_content(GEN cx, GEN cy);
+extern GEN RXQX_red(GEN P, GEN T);
 
 extern GEN famat_inv(GEN f);
 extern GEN famat_pow(GEN f, GEN n);
@@ -64,20 +66,6 @@ increment(GEN y, long k, long d)
     y[i]++;
   } while (y[i] >= d);
   for (j = i+1; j < k; j++) y[j] = 0;
-  return 1;
-}
-
-/* as above, y increasing (y[i] <= y[i+1]) */
-static int
-increment_inc(GEN y, long k, long d)
-{
-  long i = k, j;
-  do
-  {
-    if (--i == 0) return 0;
-    y[i]++;
-  } while (y[i] >= d);
-  for (j = i+1; j < k; j++) y[j] = y[i];
   return 1;
 }
 
@@ -351,30 +339,13 @@ isconjinprimelist(GEN nfz, GEN S, GEN pr, tau_s *tau)
   return 0;
 }
 
+/* assume x in basistoalg form */
 static GEN
 downtoK(toK_s *T, GEN x)
 {
   long degKz = lg(T->invexpoteta1) - 1;
   GEN y = gmul(T->invexpoteta1, pol_to_vec(lift(x), degKz));
   return gmodulcp(gtopolyrev(y,varn(T->polnf)), T->polnf);
-}
-
-static GEN
-tracetoK(toK_s *T, GEN x)
-{
-  GEN p1 = x;
-  long i;
-  for (i=1; i < T->m; i++) p1 = gadd(x, tauofelt(p1,T->tau));
-  return downtoK(T, p1);
-}
-
-static GEN
-normtoK(toK_s *T, GEN x)
-{
-  GEN p1 = x;
-  long i;
-  for (i=1; i < T->m; i++) p1 = gmul(x, tauofelt(p1,T->tau));
-  return downtoK(T, p1);
 }
 
 static GEN
@@ -518,7 +489,7 @@ compute_beta(GEN X, GEN vecWB, GEN ell, GEN bnfz)
   be = factorbackelt(BE, bnfz, NULL);
   be = reducebeta(bnfz, be, ell);
   if (DEBUGLEVEL>1) fprintferr("beta reduced = %Z\n",be);
-  return basistoalg(bnfz, be); /* FIXME */
+  return be;
 }
 
 static GEN
@@ -631,7 +602,7 @@ rnfkummersimple(GEN bnr, GEN subgroup, GEN gell, long all)
       {/* be satisfies all congruences, x^ell - be is irreducible, signature
         * and relative discriminant are correct */
         be = compute_beta(X, vecWB, gell, bnf);
-        be = lift_if_rational(be);
+        be = lift_if_rational(basistoalg(bnf, be));
         P = gsub(gpowgs(polx[0],ell), be);
         if (!all && gegal(rnfnormgroup(bnr,P),subgroup)) return P; /*DONE*/
         res = concatsp(res, P);
@@ -726,53 +697,6 @@ invimsubgroup(GEN bnrz, GEN bnr, GEN subgroup, toK_s *T)
   return hnfmod(concatsp(U, diagonal(raycycz)), (GEN)raycycz[1]);
 }
 
-/* t(b1,...,b_{k-1}) [prop 5.3.9] */
-static GEN
-compute_t(GEN b, GEN r, long m, long ell)
-{
-  long z, s, a, i, k = lg(b);
-  GEN t = cgetg(m+1, t_COL);
-
-  for (a = 0; a < m; a++)
-  {
-    z = m-1 - a; s = r[1 + z] - ell;
-    for (i=1; i < k; i++) s += r[1 + ((z + b[i]) % m)];
-    t[1 + a] = lstoi(s / ell);
-  }
-  return t;
-}
-
-/* Return multinomial(k-1; m1,...,m_{k-1}) where the mi are the
- * multiplicities of the bi [ assume b1 <= ... <= b_{k-1} ] */
-static GEN
-get_multinomial(GEN b)
-{
-  long i, k = lg(b), a, m;
-  GEN z = mpfact(k - 1);
-
-  a = b[1]; m = 1;
-  for (i = 2; i < k; i++)
-  {
-    if (b[i] == a) m++;
-    else
-    {
-      if (m > 1) z = diviiexact(z, mpfact(m));
-      a = b[i]; m = 1; 
-    }
-  }
-  if (m > 1) z = diviiexact(z, mpfact(m));
-  return z;
-}
-
-/* r[b[1]] + ... + r[b[k-1]] + 1 = 0 mod ell ?*/
-static int
-b_suitable(GEN b, GEN r, long k, long ell)
-{
-  long i, s = 1;
-  for (i = 1; i < k; i++) s += r[ 1 + b[i] ];
-  return (s % ell) == 0;
-}
-
 static GEN
 pol_from_Newton(GEN S)
 {
@@ -789,65 +713,130 @@ pol_from_Newton(GEN S)
   return gtopoly(C, 0);
 }
 
+/* - mu_b = sum_{0 <= i < m} floor(r_b r_{d-1-i} / ell) tau^i */
+static GEN
+get_m_mu(long b, GEN r, long ell)
+{
+  long i, m = lg(r)-1;
+  GEN M = cgetg(m+1, t_VEC);
+  for (i = 0; i < m; i++) M[i+1] = lstoi((r[b + 1] * r[m - i]) / ell);
+  return M;
+}
+/* theta^ell = be ^ ( sum tau^a r_{d-1-a} ) */
+static GEN
+get_reverse(GEN r)
+{
+  long i, m = lg(r)-1;
+  GEN M = cgetg(m+1, t_VEC);
+  for (i = 0; i < m; i++) M[i+1] = lstoi(r[m - i]);
+  return M;
+}
+
+/* coeffs(x, a..b) in variable v >= varn(x) */
+static GEN
+split_pol(GEN x, long v, long a, long b)
+{
+  long i, l = degpol(x);
+  GEN y = x + a, z;
+
+  if (l < b) b = l;
+  if (a > b || varn(x) != v) return zeropol(v);
+  l = b-a + 3;
+  z = cgetg(l, t_POL); z[1] = x[1];
+  for (i = 2; i < l; i++) z[i] = y[i];
+  return normalizepol_i(z, l);
+}
+
+/* return (den_a * z) mod (v^ell - num_a/den_a), assuming deg(z) < 2*ell
+ * allow either num/den to be NULL (= 1) */
+static GEN
+mod_Xell_a(GEN z, long v, long ell, GEN num_a, GEN den_a)
+{
+  GEN z1 = split_pol(z, v, ell, degpol(z));
+  GEN z0 = split_pol(z, v, 0,   ell-1); /* z = v^ell z1 + z0*/
+  if (den_a) z0 = gmul(den_a, z0);
+  if (num_a) z1 = gmul(num_a, z1);
+  return gadd(z0, z1);
+}
+static GEN
+to_alg(GEN nfz, GEN v)
+{
+  GEN z;
+  if (typ(v) != t_COL) return v;
+  z = gmul((GEN)nfz[7], v);
+  if (typ(z) == t_POL) setvarn(z, MAXVARN);
+  return z;
+}
+
 /* th. 5.3.5. and prop. 5.3.9. */
 static GEN
 compute_polrel(GEN nfz, toK_s *T, GEN be, long g, long ell)
 {
-  long i, k, m = T->m;
-  GEN r, powtaubet, S, X = polx[0], e = normtoK(T,be);
+  long i, k, m = T->m, vT = fetch_var();
+  GEN r, powtaubet, S, p1, root, num_t, den_t, nfzpol, powtau_prim_invbe;
+  GEN prim_Rk, C_Rk, prim_root, C_root, prim_invbe, C_invbe;
+  pari_timer ti;
     
-  switch (ell)
-  { /* special-cased for efficiency */
-    GEN p1, u;
-    case 2: err(bugparier,"rnfkummer (-1 not in nf?)"); break;
-    case 3: u = tracetoK(T,be);
-      p1 = gsub(gsqr(X), gmulsg(3,e));
-      return gsub(gmul(X,p1), gmul(e,u));
-    case 5:
-      if (m == 2)
-      {
-	u = tracetoK(T, gpowgs(be,3));
-	p1 = gadd(gmulsg(5,gsqr(e)), gmul(gsqr(X), gsub(gsqr(X),gmulsg(5,e))));
-	return gsub(gmul(X,p1), gmul(e,u));
-      }
-      else
-      { /* m = 4 */
-        GEN be1, be2, u1, u2, u3;
-        be1 = tauofelt(be, T->tau);
-        be2 = tauofelt(be1,T->tau);
-        u1 = tracetoK(T, gmul(be,be1));
-        u2 = tracetoK(T, gmul(gmul(be,be2),gsqr(be1)));
-        u3 = tracetoK(T, gmul(gmul(gsqr(be),gpowgs(be1,3)),be2));
-        p1 = gsub(gsqr(X), gmulsg(10,e));
-        p1 = gsub(gmul(X,p1), gmulsg(5,gmul(e,u1)));
-        p1 = gadd(gmul(X,p1), gmul(gmulsg(5,e),gsub(e,u2)));
-        return gsub(gmul(X,p1), gmul(e,u3));
-      }
-  }
-  /* general case */
   r = cgetg(m+1,t_VECSMALL); /* r[i+1] = g^i mod ell */
   r[1] = 1;
   for (i=2; i<=m; i++) r[i] = (r[i-1] * g) % ell;
   powtaubet = powtau(be, m, T->tau);
+  if (DEBUGLEVEL>1) { fprintferr("Computing Newton sums: "); TIMERstart(&ti); }
+  prim_invbe = Q_primitive_part(element_inv(nfz, be), &C_invbe);
+  powtau_prim_invbe = powtau(prim_invbe, m, T->tau);
+
+  root = cgetg(ell + 2, t_POL);
+  root[1] = evalsigne(1) | evalvarn(0) | evallgef(ell + 2);
+  root[2] = zero;
+  for (i = 0; i < m; i++)
+  { /* compute (1/be) ^ (-mu) instead of be^mu [mu << 0].
+     * 1/be = C_invbe * prim_invbe */
+    GEN m_mu = get_m_mu(i, r, ell);
+    /* p1 = prim_invbe ^ -mu */
+    p1 = to_alg(nfz, factorbackelt(powtau_prim_invbe, m_mu, nfz));
+    if (C_invbe) p1 = gmul(p1, powgi(C_invbe, sum(m_mu,1,m)));
+    /* root += zeta_ell^{r_i} T^{r_i} be^mu_i */
+    root[ 2 + r[i+1] ] = lmul(gpowgs(polx[vT], r[i+1]), p1);
+  }
+  /* Other roots are as above with z_ell --> z_ell^j. 
+   * Treat all contents (C_*) and principal parts (prim_*) separately */
+  prim_Rk = prim_root = Q_primitive_part(root, &C_root);
+  C_Rk = C_root;
+
+  /* Compute modulo X^ell - 1, T^ell - t, nfzpol(MAXVARN) */
+  p1 = to_alg(nfz, factorbackelt(powtaubet, get_reverse(r), nfz));
+  num_t = Q_remove_denom(p1, &den_t);
+
+  nfzpol = dummycopy((GEN)nfz[1]);
+  setvarn(nfzpol, MAXVARN);
   S = cgetg(ell+1, t_VEC); /* Newton sums */
   S[1] = zero;
-  if (DEBUGLEVEL>1) fprintferr("Computing Newton sums: ");
   for (k = 2; k <= ell; k++)
-  {
-    GEN z, g = gzero, b = vecsmall_const(k-1, 0);
+  { /* compute the k-th Newton sum */
     pari_sp av = avma;
-    do
+    GEN z, D, Rk = gmul(prim_Rk, prim_root);
+    C_Rk = mul_content(C_Rk, C_root);
+    Rk = mod_Xell_a(Rk, 0, ell, NULL, NULL); /* mod X^ell - 1 */
+    for (i = 2; i < lgef(Rk); i++)
     {
-      if (! b_suitable(b, r, k, ell)) continue;
-      z = factorbackelt(powtaubet, compute_t(b, r, m, ell), nfz);
-      z = _algtobasis(nfz, z);
-      g = gerepileupto(av, gadd(g, gmul(get_multinomial(b), z)));
-    } while (increment_inc(b, k, m));
-    if (DEBUGLEVEL>1) { fprintferr("%ld ", k); flusherr(); }
-    S[k] = lmul(gmulsg(ell, e), tracetoK(T, basistoalg(nfz,g)));
+      z = mod_Xell_a((GEN)Rk[i], vT, ell, num_t,den_t); /* mod T^ell - t */
+      Rk[i] = (long)RXQX_red(z, nfzpol); /* mod nfz.pol */
+    }
+    if (den_t) C_Rk = mul_content(C_Rk, ginv(den_t));
+    prim_Rk = Q_primitive_part(Rk, &D);
+    C_Rk = mul_content(C_Rk, D); /* root^k = prim_Rk * C_Rk */
+
+    /* Newton sum is ell * constant coeff (in X), which has degree 0 in T */
+    z = polcoeff_i(prim_Rk, 0, 0);
+    z = polcoeff_i(z      , 0,vT);
+    z = downtoK(T, gmulgs(z, ell));
+    if (C_Rk) z = gmul(z, C_Rk);
+    gerepileall(av, C_Rk? 3: 2, &z, &prim_Rk, &C_Rk);
+    if (DEBUGLEVEL>1) { fprintferr("%ld(%ld) ", k, TIMER(&ti)); flusherr(); }
+    S[k] = (long)z;
   }
   if (DEBUGLEVEL>1) fprintferr("\n");
-  return pol_from_Newton(S);
+  delete_var(); return pol_from_Newton(S);
 }
 
 typedef struct {
