@@ -1362,11 +1362,11 @@ get_nu(GEN chi, GEN p, long *ptl)
   return (GEN)P[*ptl];
 }
 
-/* Factor characteristic polynomial of S->phi mod (p, f) */
+/* Factor characteristic polynomial of S->phi mod (p, S->chi) */
 static long
-factcp(decomp_t *S, GEN f, GEN pp, GEN ns)
+factcp(decomp_t *S, GEN pp, GEN ns)
 {
-  GEN chi = mycaract(f, S->phi, S->p, pp, -1, ns);
+  GEN chi = mycaract(S->chi, S->phi, S->p, pp, -1, ns);
   long l;
   S->chi= chi;
   S->nu = get_nu(chi, S->p, &l); return l;
@@ -1555,7 +1555,7 @@ testb2(decomp_t *S, long D, GEN theta, GEN pmf, GEN ns)
     GEN h = m? stopoly(t, m, v): scalarpol(utoi(t), v);
     S->phi = gadd(theta, gmod(h, S->chi));
     /* phi non-primary ? */
-    if (factcp(S, S->chi, pmf, ns) > 1) { composemod(S, S->phi, T0); return 1; }
+    if (factcp(S, pmf, ns) > 1) { composemod(S, S->phi, T0); return 1; }
     if (degpol(S->nu) == D) break;
   }
   /* F_phi = lcm(F_alpha, F_theta) = D and E_phi = E_alpha */
@@ -1579,7 +1579,7 @@ testc2(decomp_t *S, GEN pmr, GEN pmf, GEN A, long Ea, GEN T, long Et, GEN ns)
   c2 = lift_intern(gpowgs(gmodulcp(T, S->chi), r));
   c3 = gdiv(gmod(gmul(c1, c2), S->chi), gpowgs(S->p, t));
   S->phi = gadd( polx[ varn(S->chi) ], redelt(c3, pmr, S->p) );
-  if (factcp(S, S->chi, pmf, ns) > 1) { composemod(S, S->phi, T0); return 1; }
+  if (factcp(S, pmf, ns) > 1) { composemod(S, S->phi, T0); return 1; }
   compose(S, S->phi, T0); return 0; /* E_phi = lcm(E_alpha, E_theta) */
 }
 
