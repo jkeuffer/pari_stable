@@ -732,7 +732,7 @@ FindApplyH(GEN x, GEN mu, GEN B, long k, GEN P, long prec)
     if (gcmp0(x2)) return 0;
 
     Nx = gsqrt(x2, prec);
-    if (gsigne(x1) < 0) Nx = gneg(Nx);
+    if (gsigne(x1) < 0) setsigne(Nx, -1);
     v[1] = ladd(x1, Nx);
     for (i=2; i<=lv; i++) v[i] = xd[i];
 
@@ -767,9 +767,11 @@ ApplyH(GEN P, GEN r)
 static int
 incrementalH(GEN x, GEN L, GEN B, long k, GEN P, long prec)
 {
+  gpmem_t av = avma;
   GEN r = dummycopy((GEN)x[k]);
   long j;
   for (j=1; j<k; j++) ApplyH((GEN)P[j], r);
+  r = gerepilecopy(av, r);
   return FindApplyH(r, L, B, k, P, prec);
 }
 
