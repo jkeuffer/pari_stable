@@ -729,11 +729,11 @@ static GEN
 autvec_TH(int pk, GEN z, GEN v, GEN C)
 {
   int i, lv = lg(v);
-  GEN s = gen_1;
+  GEN s = polun[varn(C)];
   for (i=1; i<lv; i++)
   {
     long y = v[i];
-    if (y) s = gmul(s, RgXQ_u_pow(aut(pk,z, y), y, C));
+    if (y) s = RgX_rem(RgX_mul(s, RgXQ_u_pow(aut(pk,z, y), y, C)),C);
   }
   return s;
 }
@@ -742,12 +742,12 @@ static GEN
 autvec_AL(int pk, GEN z, GEN v, Red *R)
 {
   const int r = smodis(R->N, pk);
-  GEN s = gen_1;
+  GEN s = polun[varn(R->C)];
   int i, lv = lg(v);
   for (i=1; i<lv; i++)
   {
     long y = (r*v[i]) / pk;
-    if (y) s = gmul(s, RgXQ_u_pow(aut(pk,z, v[i]), y, R->C));
+    if (y) s = RgX_rem(RgX_mul(s, RgXQ_u_pow(aut(pk,z, v[i]), y, R->C)), R->C);
   }
   return s;
 }
