@@ -1752,7 +1752,7 @@ nilord(GEN p, GEN fx, GEN dred, long mf, GEN gx, long flag)
 	  if (eq) gamm = gmul(gamm, gpowgs(p, eq));
 	  if (er)
 	  {
-	    gamm = fmod(gmul(gamm, gpowgs(nu, er)), chi);
+	    gamm = gmod(gmul(gamm, gpowgs(nu, er)), chi);
 	    gamm = redelt(gamm, p, p);
 	  }
 	  chig = mycaract(chi, gamm, p, pmf, ns);
