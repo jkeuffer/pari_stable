@@ -2067,12 +2067,13 @@ sfcont(GEN x, long k)
       y = cgetg(l,t_VEC);
       p1 = (GEN)x[1];
       p2 = (GEN)x[2];
-      for (i=1; i<l && !gcmp0(p2); i++)
+      for (i=1; i<l; i++)
       {
 	y[i] = ldivres(p1,p2,&p3);
+        if (gcmp0(p3)) { i++; break; }
 	p1 = p2; p2 = p3;
       }
-      return gerepilecopy(av, y);
+      setlg(y, i); return gerepilecopy(av, y);
   }
   err(typeer,"sfcont");
   return NULL; /* not reached */
