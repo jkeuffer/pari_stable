@@ -1461,7 +1461,7 @@ czeta(GEN s0, long prec)
     l2 = (lim+ssig/2.-.25);
     nn = 1 + (long)ceil( sqrt(l2*l2 + st*st/4) * la / PI );
     if (DEBUGLEVEL>2) fprintferr("lim, nn: [%ld, %ld]\n",lim,nn);
-    if ((ulong)nn >= maxprime()) err(primer1);
+    maxprime_check((ulong)nn);
   }
   prec++; unr = realun(prec); /* one extra word of precision */
   
@@ -1471,7 +1471,7 @@ czeta(GEN s0, long prec)
   { /* no explog for 1/p^s */
     for (p=2; p < nn;) {
       tab[p] = divrr(unr, rpowsi(p, s0, prec));
-      NEXT_PRIME_VIADIFF_CHECK(p,d);
+      NEXT_PRIME_VIADIFF(p,d);
     }    
     a = divrr(unr, rpowsi(nn, s0, prec));
   }
@@ -1482,18 +1482,19 @@ czeta(GEN s0, long prec)
     {
       affsr(p, p1);
       tab[p] = gexp(gmul(ms, mplog(p1)), prec);
-      NEXT_PRIME_VIADIFF_CHECK(p,d);
+      NEXT_PRIME_VIADIFF(p,d);
     }
     affsr(nn,p1);
     a = gexp(gmul(ms, mplog(p1)), prec);
   }
   sqn = (long)sqrt(nn-1.);
   d = diffptr + 2; /* fill in odd prime powers */
+  maxprime_check(sqn);
   for (p=3; p <= sqn; )
   {
     ulong oldq = p, q = p*p;
     while (q<(ulong)nn) { tab[q] = gmul(tab[p], tab[oldq]); oldq = q; q *= p; }
-    NEXT_PRIME_VIADIFF_CHECK(p,d);
+    NEXT_PRIME_VIADIFF(p,d);
   }
   if (DEBUGLEVEL>2) msgtimer("tab[q^-s] from 1 to N-1"); 
 

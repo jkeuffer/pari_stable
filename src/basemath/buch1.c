@@ -1017,7 +1017,7 @@ FBquad(GEN Disc, long n2, long n)
   FB    = cgetg(n2+1, t_VECSMALL);
   av = avma;
   KC = 0; bad = 0; i = 0;
-  if (maxprime() < n2) err(primer1);
+  maxprime_check((ulong)n2);
   for (p = 0;;) /* p <= n2 */
   {
     NEXT_PRIME_VIADIFF(p, d);

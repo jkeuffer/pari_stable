@@ -104,7 +104,7 @@ sinitp(long a, long c, byteptr *ptr)
 {
   byteptr p = *ptr;
   if (a <= 0) a = 2;
-  if (maxprime() < (ulong)a) err(primer1);
+  maxprime_check((ulong)a);
   while (a > c)
      NEXT_PRIME_VIADIFF(c,p);
   *ptr = p; return c;
@@ -134,8 +134,7 @@ update_p(entree *ep, byteptr *ptr, long prime[])
 static byteptr
 prime_loop_init(GEN ga, GEN gb, long *a, long *b, long prime[])
 {
-  byteptr p = diffptr;
-  ulong P;
+  byteptr d = diffptr;
 
   ga = gceil(ga); gb = gfloor(gb);
   if (typ(ga) != t_INT || typ(gb) != t_INT)
@@ -145,12 +144,11 @@ prime_loop_init(GEN ga, GEN gb, long *a, long *b, long prime[])
     if (cmpii(ga, gb) > 0) return NULL;
     err(primer1);
   }
-  P = maxprime();
   *a = itos(ga); if (*a <= 0) *a = 1;
   *b = itos(gb); if (*a > *b) return NULL;
-  if ((ulong)*a <= P) prime[2] = sinitp(*a, 0, &p);
-  if ((ulong)*b > P) err(primer1);
-  return p;
+  maxprime_check((ulong)*b);
+  prime[2] = sinitp(*a, 0, &d);
+  return d;
 }
 
 void
@@ -159,22 +157,22 @@ forprime(entree *ep, GEN ga, GEN gb, char *ch)
   long prime[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
   long a, b;
   gpmem_t av = avma;
-  byteptr p;
+  byteptr d;
 
-  p = prime_loop_init(ga,gb, &a,&b, prime);
-  if (!p) { avma = av; return; }
+  d = prime_loop_init(ga,gb, &a,&b, prime);
+  if (!d) { avma = av; return; }
 
   avma = av; push_val(ep, prime);
   while ((ulong)prime[2] < (ulong)b)
   {
     (void)lisseq(ch); if (loop_break()) break;
     if (ep->value == prime)
-      prime[2] += *p++;
+      NEXT_PRIME_VIADIFF(prime[2], d);
     else
-      update_p(ep, &p, prime);
+      update_p(ep, &d, prime);
     avma = av;
   }
-  /* if b = P --> *p = 0 now and the loop wouldn't end if it read 'while
+  /* if b = P --> *d = 0 now and the loop wouldn't end if it read 'while
    * (prime[2] <= b)' */
   if (prime[2] == b) { (void)lisseq(ch); (void)loop_break(); avma = av; }
   pop_val(ep);
@@ -498,11 +496,11 @@ prodeuler(entree *ep, GEN ga, GEN gb, char *ch, long prec)
   long a,b;
   gpmem_t av, av0 = avma, lim;
   GEN p1,x = realun(prec);
-  byteptr p;
+  byteptr d;
 
   av = avma;
-  p = prime_loop_init(ga,gb, &a,&b, prime);
-  if (!p) { avma = av; return x; }
+  d = prime_loop_init(ga,gb, &a,&b, prime);
+  if (!d) { avma = av; return x; }
 
   av = avma; push_val(ep, prime);
   lim = stack_lim(avma,1);
@@ -516,9 +514,9 @@ prodeuler(entree *ep, GEN ga, GEN gb, char *ch, long prec)
       x = gerepilecopy(av, x);
     }
     if (ep->value == prime)
-      prime[2] += *p++;
+      NEXT_PRIME_VIADIFF(prime[2], d);
     else
-      update_p(ep, &p, prime);
+      update_p(ep, &d, prime);
   }
   /* cf forprime */
   if (prime[2] == b)
@@ -615,7 +613,7 @@ direulerall(entree *ep, GEN ga, GEN gb, char *ch, GEN c)
       if (DEBUGMEM>1) err(warnmem,"direuler");
       x = gerepilecopy(av, x);
     }
-    p += *d++; if (!*d) err(primer1);
+    NEXT_PRIME_VIADIFF(p, d);
     prime[2] = p;
   }
   pop_val(ep); return gerepilecopy(av0,x);

@@ -2092,9 +2092,10 @@ dirzetak0(GEN nf, long N0)
   c2[1]=c[1]=1; for (i=2; i<=N0; i++) c[i]=0;
   court[2] = 0;
 
+  maxprime_check((ulong)N0);
   while (court[2]<=N0)
   {
-    NEXT_PRIME_VIADIFF_CHECK(court[2], d);
+    NEXT_PRIME_VIADIFF(court[2], d);
     if (smodis(disc,court[2])) /* court does not divide index */
       { vect = (GEN) simplefactmod(pol,court)[1]; lx=lg(vect); }
     else

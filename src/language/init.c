@@ -1122,6 +1122,10 @@ err(long numerr, ...)
         break;
       }
 
+      case primer2:
+        pariputsf("%lu.", va_arg(ap, ulong));
+        break;
+
       /* the following 4 are only warnings (they return) */
       case warnmem: case warner:
         pariputc(' '); ch1=va_arg(ap, char*);

@@ -341,7 +341,7 @@ extern int new_galois_format;
 #define cmp_C   8
 
 #define DIFFPTR_SKIP	255		/* Skip these entries */
-#define NEXT_PRIME_VIADIFF(p,d)	\
-  { while (*(d) == DIFFPTR_SKIP) (p) += *(d)++; (p) += *(d)++; }
-#define NEXT_PRIME_VIADIFF_CHECK(p,d) \
-  { if (!*(d)) err(primer1); NEXT_PRIME_VIADIFF(p,d) }
+#define NEXT_PRIME_VIADIFF(p,d)	 STMT_START \
+  { while (*(d) == DIFFPTR_SKIP) (p) += *(d)++; (p) += *(d)++; } STMT_END
+#define NEXT_PRIME_VIADIFF_CHECK(p,d)  STMT_START \
+  { if (!*(d)) err(primer1); NEXT_PRIME_VIADIFF(p,d); } STMT_END

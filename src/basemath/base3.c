@@ -2003,7 +2003,7 @@ ideallistzstarall(GEN bnf,long bound,long flag)
   p=cgeti(3); p[1]=evalsigne(1) | evallgefint(3);
   av=avma; lim=stack_lim(av,1);
   lu2 = embunit = NULL; /* gcc -Wall */
-  if (bound > (long)maxprime()) err(primer1);
+  maxprime_check((ulong)bound);
   for (p[2]=0; p[2]<=bound; )
   {
     NEXT_PRIME_VIADIFF(p[2], ptdif);

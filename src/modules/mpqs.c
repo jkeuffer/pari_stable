@@ -25,9 +25,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #  define SEEK_SET 0
 #endif
 
-#ifdef __CYGWIN32__ 
+#ifdef __CYGWIN32__
 /* otherwise fseek() goes crazy due to silent \n <--> LF translations */
-#  define WRITE "wb" 
+#  define WRITE "wb"
 #  define READ "rb"
 #else
 #  define WRITE "w"
@@ -653,9 +653,8 @@ static byteptr
 mpqs_iterate_primes(long *p, byteptr primes_ptr)
 {
   long prime = *p;
-  if (*primes_ptr) {
-    NEXT_PRIME_VIADIFF(prime,primes_ptr)      
-  }
+  if (*primes_ptr)
+    NEXT_PRIME_VIADIFF(prime,primes_ptr);
   else
   {
     gpmem_t av = avma;

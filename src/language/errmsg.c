@@ -197,6 +197,8 @@ char *errmessage[]=
   "primitive root does not exist in gener",
 /* primer1 */
   "not enough precalculated primes",
+/* primer2 */
+  "not enough precalculated primes, need primelimit ~ ",
 /* invmoder*/
   "impossible inverse modulo: ",
   /*  BASE.C  */

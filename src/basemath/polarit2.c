@@ -4219,8 +4219,7 @@ nfgcd(GEN P, GEN Q, GEN nf, GEN den)
   lQ = leading_term(Q);
   if ( !((typ(lP)==t_INT && is_pm1(lP)) || (typ(lQ)==t_INT && is_pm1(lQ))) )
     den = mulii(den, mppgcd(ZX_resultant(lP, nf), ZX_resultant(lQ, nf)));
-  /*Modular GCD*/
-  {
+  { /*Modular GCD*/
     gpmem_t btop = avma, st_lim = stack_lim(btop, 1);
     long p;
     long dM=0, dR;
@@ -4229,19 +4228,19 @@ nfgcd(GEN P, GEN Q, GEN nf, GEN den)
     byteptr primepointer;
     for (p = 27449, primepointer = diffptr + 3000; ; )
     {
-      if (!*primepointer) err(primer1);
-      if (!smodis(den, p))
-        goto repeat;/*Discard primes dividing disc(T) or leadingcoeff(PQ) */
+      NEXT_PRIME_VIADIFF_CHECK(p, primepointer);
+      /*Discard primes dividing disc(T) or leadingcoeff(PQ) */
+      if (!smodis(den, p)) continue;
       if (DEBUGLEVEL>5) fprintferr("nfgcd: p=%d\n",p);
-      if ((R = FpXQX_safegcd(P, Q, nf, stoi(p))) == NULL)
-        goto repeat;/*Discard primes when modular gcd does not exist*/
+      /*Discard primes when modular gcd does not exist*/
+      if ((R = FpXQX_safegcd(P, Q, nf, stoi(p))) == NULL) continue;
       dR = degpol(R);
       if (dR == 0) return scalarpol(gun, x);
-      if (mod && dR > dM) goto repeat; /* p divides Res(P/gcd, Q/gcd). Discard. */
+      if (mod && dR > dM) continue; /* p divides Res(P/gcd, Q/gcd). Discard. */
 
       R = polpol_to_mat(R, d);
       /* previous primes divided Res(P/gcd, Q/gcd)? Discard them. */
-      if (!mod || dR < dM) { M = R; mod = stoi(p); dM = dR; goto repeat; }
+      if (!mod || dR < dM) { M = R; mod = stoi(p); dM = dR; continue; }
       if (low_stack(st_lim, stack_lim(btop, 1)))
       {
 	if (DEBUGMEM>1) err(warnmem,"nfgcd");
@@ -4254,14 +4253,11 @@ nfgcd(GEN P, GEN Q, GEN nf, GEN den)
       M = lift(FpM(M, mod));
       /* I suspect it must be better to take amax > bmax*/
       bo = racine(shifti(mod, -1));
-      if ((sol = matratlift(M, mod, bo, bo, den)) == NULL)
-        goto repeat;
+      if ((sol = matratlift(M, mod, bo, bo, den)) == NULL) continue;
       sol = mat_to_polpol(sol,x,y);
       dsol = primpart(sol);
       if (gcmp0(pseudorem_i(P, dsol, nf))
        && gcmp0(pseudorem_i(Q, dsol, nf))) break;
-    repeat:
-      NEXT_PRIME_VIADIFF_CHECK(p, primepointer);
     }
   }
   return gerepilecopy(ltop, sol);

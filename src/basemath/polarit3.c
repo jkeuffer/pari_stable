@@ -4115,8 +4115,7 @@ static void
 check_theta(ulong bound)
 {
   ulong c = (ulong)ceil((bound * LOG2 + 27225.388) / 0.98);
-  if (maxprime() < c)
-    err(talker,"not enough precalculated primes: need primelimit ~ %lu", c);
+  maxprime_check(c);
 }
 
 /* 0, 1, -1, 2, -2, ... */
@@ -4528,14 +4527,14 @@ modulargcd(GEN A0, GEN B0)
   d += 3000; /* 27449 = prime(3000) */
   for(p = 27449; ;)
   {
-    if (!*d) err(primer1);
-    if (!umodiu(g,p)) goto repeat;
+    NEXT_PRIME_VIADIFF_CHECK(p,d);
+    if (!umodiu(g,p)) continue;
 
     a = u_Fp_FpX(A, p);
     b = u_Fp_FpX(B, p); Hp = u_FpX_gcd_i(a,b, p);
     m = degpol(Hp);
     if (m == 0) { H = polun[varn(A0)]; break; } /* coprime. DONE */
-    if (m > n) goto repeat; /* p | Res(A/G, B/G). Discard */
+    if (m > n) continue; /* p | Res(A/G, B/G). Discard */
 
     if (is_pm1(g)) /* make sure lead(H) = g mod p */
       Hp = u_FpX_normalize(Hp, p);
@@ -4547,7 +4546,7 @@ modulargcd(GEN A0, GEN B0)
     if (m < n)
     { /* First time or degree drop [all previous p were as above; restart]. */
       H = ZX_init_CRT(Hp,p,varn(A0));
-      q = utoi(p); n = m; goto repeat;
+      q = utoi(p); n = m; continue;
     }
 
     qp = muliu(q,p);
@@ -4565,8 +4564,6 @@ modulargcd(GEN A0, GEN B0)
       if (DEBUGMEM>1) err(warnmem,"modulargcd");
       gerepilemany(av2,gptr,2);
     }
-   repeat:
-    NEXT_PRIME_VIADIFF_CHECK(p,d);
   }
   return gerepileupto(av, gmul(D,H));
 }
@@ -4595,17 +4592,17 @@ QX_invmod(GEN A0, GEN B0)
   d += 3000; /* 27449 = prime(3000) */
   for(p = 27449; ; )
   {
-    if (!*d) err(primer1);
+    NEXT_PRIME_VIADIFF_CHECK(p,d);
     a = u_Fp_FpX(A, p);
     b = u_Fp_FpX(B, p);
     /* if p | Res(A/G, B/G), discard */
-    if (!u_FpX_extresultant(b,a,p, &Vp,&Up)) goto repeat;
+    if (!u_FpX_extresultant(b,a,p, &Vp,&Up)) continue;
 
     if (!U)
     { /* First time */
       U = ZX_init_CRT(Up,p,varn(A0));
       V = ZX_init_CRT(Vp,p,varn(A0));
-      q = utoi(p); goto repeat;
+      q = utoi(p); continue;
     }
     if (DEBUGLEVEL>5) msgtimer("QX_invmod: mod %ld (bound 2^%ld)", p,expi(q));
     qp = muliu(q,p);
@@ -4624,8 +4621,6 @@ QX_invmod(GEN A0, GEN B0)
       if (DEBUGMEM>1) err(warnmem,"QX_invmod");
       gerepilemany(av2,gptr,3);
     }
-   repeat:
-    NEXT_PRIME_VIADIFF_CHECK(p,d);
   }
   D = D? gmul(D,res): res;
   return gerepileupto(av, gdiv(U,D));

@@ -1381,13 +1381,12 @@ any_string()
 }
 
 /*  Read a "string" from src. Format then copy it, starting at s. Return
- *  pointer to the \0 which terminates the string.
- */
+ *  pointer to char following the end of the input string */
 char *
 readstring(char *src, char *s)
 {
   match2(src, '"'); src++; s = translate(&src, s, NULL,NULL);
-  match2(src, '"'); return s;
+  match2(src, '"'); return src+1;
 }
 
 static GEN

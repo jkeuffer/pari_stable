@@ -817,7 +817,7 @@ rnfisnorm(GEN T, GEN x, long flag)
   {
     byteptr d = diffptr;
     long p = 0;
-    if (maxprime() < flag) err(primer1);
+    maxprime_check((ulong)flag);
     for(;;)
     {
       NEXT_PRIME_VIADIFF(p, d);

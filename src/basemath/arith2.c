@@ -56,10 +56,10 @@ pith(long n)
   ulong prime = 0, res = 0;
 
   if (n <= 0) err(talker, "pith meaningless if n = %ld",n);
-  if (maxprime() <= (ulong)n) err(primer1);
+  maxprime_check((ulong)n);
   while (prime<=(ulong)n) {
-      NEXT_PRIME_VIADIFF(prime,p);
-      res++;
+    NEXT_PRIME_VIADIFF(prime,p);
+    res++;
   }
   return stoi(res-1);
 }
@@ -246,6 +246,12 @@ static ulong _maxprime = 0;
 
 ulong
 maxprime(void) { return _maxprime; }
+
+void
+maxprime_check(ulong c)
+{
+  if (_maxprime < c) err(primer2, c);
+}
 
 byteptr
 initprimes(ulong maxnum)

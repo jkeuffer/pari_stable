@@ -1113,9 +1113,6 @@ lowerboundforregulator_i(GEN bnf)
   vecminim = minimforunits(nf, itos(gceil(minunit)), gmael3(bnf,8,4,1));
   if (!vecminim) return NULL;
   bound = (GEN)vecminim[3];
-  i = gexpo(gsub(bound,minunit));
-  if (i > -5) err(bugparier,"lowerboundforregulator");
-
   if (DEBUGLEVEL>1)
   {
     fprintferr("M* = %Z\n", bound);
@@ -1245,7 +1242,8 @@ certifybuchall(GEN bnf)
   if (is_bigint(gbound))
     err(talker,"sorry, too many primes to check");
 
-  bound = itos(gbound); if ((ulong)bound > maxprime()) err(primer1);
+  bound = itos(gbound);
+  maxprime_check((ulong)bound);
   if (DEBUGLEVEL>1)
   {
     fprintferr("\nPHASE 2: are all primes good ?\n\n");
@@ -2233,7 +2231,7 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
   embunit = logunitmatrix(nf,funits,racunit,bidp);
   putcompobig(z,1, _vec(zsimp(bidp,embunit))); 
   if (DEBUGLEVEL>1) fprintferr("Starting zidealstarunits computations\n");
-  if (bound > (long)maxprime()) err(primer1);
+  maxprime_check((ulong)bound);
   for (p[2]=0; p[2]<=bound; )
   {
     NEXT_PRIME_VIADIFF(p[2], ptdif);

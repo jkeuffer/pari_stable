@@ -261,7 +261,7 @@ FBgen(FB_t *F, GEN nf,long n2,long n)
   long i, p, ip;
   GEN prim, Res;
 
-  if (maxprime() < n2) err(primer1);
+  maxprime_check((ulong)n2);
   F->FB  = cgetg(n2+1, t_VECSMALL);
   F->iLP = cgetg(n2+1, t_VECSMALL);
   F->LV = (GEN*)new_chunk(n2+1);
@@ -937,7 +937,7 @@ testprimes(GEN bnf, long bound)
   fb = gen_sort((GEN)bnf[5], 0, &cmp_prime_ideal);
   p1 = gmael(fb, lg(fb)-1, 1); /* largest p in factorbase */
   pmax = is_bigint(p1)? VERYBIGINT: itos(p1);
-  if ((ulong)bound > maxprime()) err(primer1);
+  maxprime_check((ulong)bound);
   Vbase = get_Vbase(bnf);
   (void)recover_partFB(&F, Vbase, degpol(nf[1]));
   for (av=avma, p=0; p < bound; avma=av)
