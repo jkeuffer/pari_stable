@@ -3015,7 +3015,7 @@ buch(GEN *pnf, double cbach, double cbach2, long nbrelpid, long flun,
   long nreldep, sfb_trials, need, precdouble = 0, precadd = 0;
   double drc, LOGD, LOGD2;
   GEN vecG, fu, zu, nf, D, A, W, R, Res, z, h, L_jid, PERM;
-  GEN M, res, L, resc, B, C, lambda, dep, clg1, clg2, Vbase;
+  GEN res, L, resc, B, C, lambda, dep, clg1, clg2, Vbase;
   char *precpb = NULL;
   const int minsFB = 3;
   RELCACHE_t cache;
@@ -3098,36 +3098,37 @@ PRECPB:
     for (i = 1; i < lg(PERM); i++) F.perm[i] = PERM[i];
     cache.chk = cache.base; W = NULL; /* recompute arch components + reduce */
   }
-  M = gmael(nf, 5, 1); 
-  if (F.pow && !F.pow->arc) powFB_fill(&cache, M);
   { /* Reduce relation matrices */
     long l = cache.last - cache.chk + 1, j;
-    GEN mat = cgetg(l, t_VEC), emb = cgetg(l, t_MAT);
+    GEN M = gmael(nf, 5, 1), mat = cgetg(l, t_VEC), emb = cgetg(l, t_MAT);
+    int first = (W == NULL); /* never reduced before */
     REL_t *rel;
+    
+    if (F.pow && !F.pow->arc) powFB_fill(&cache, M);
     for (j=1,rel = cache.chk + 1; rel <= cache.last; rel++,j++)
     {
       mat[j] = (long)rel->R;
       emb[j] = (long)get_log_embed(rel, M, RU, R1, PRECREG);
     }
-    if (!W) { /* never reduced before */
+    if (first) {
       C = emb;
       W = hnfspec_i((long**)mat, F.perm, &dep, &B, &C, lg(F.subFB)-1);
     }
-    else /* update */
+    else
       W = hnfadd_i(W, F.perm, &dep, &B, &C, mat, emb);
-  }
-  gerepileall(av2, 4, &W,&C,&B,&dep);
-  cache.chk = cache.last;
-  need = lg(dep)>1? lg(dep[1])-1: lg(B[1])-1;
-  if (need)
-  { /* dependent rows */
-    if (need > 5)
-    {
-      if (need > 20) F.sfb_chg = sfb_CHANGE;
-      L_jid = vecextract_i(F.perm, 1, need);
-      vecsmall_sort(L_jid); jid = 0; 
+    gerepileall(av2, 4, &W,&C,&B,&dep);
+    cache.chk = cache.last;
+    need = lg(dep)>1? lg(dep[1])-1: lg(B[1])-1;
+    if (need)
+    { /* dependent rows */
+      if (need > 5)
+      {
+        if (need > 20 && !first) F.sfb_chg = sfb_CHANGE;
+        L_jid = vecextract_i(F.perm, 1, need);
+        vecsmall_sort(L_jid); jid = 0; 
+      }
+      goto MORE;
     }
-    goto MORE;
   }
 
   zc = (cache.last - cache.base) - (lg(B)-1) - (lg(W)-1);
