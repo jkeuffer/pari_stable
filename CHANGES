@@ -112,6 +112,7 @@ BA  7- support for real forms for qfbsolve.
     8- routines RgX_gcd_simple, RgX_extgcd_simple [ when no coeff explosion
        in base field ]
 BA  9- new algorithm for exp(t_REAL) [ Newton ]
+   10- new macro ndec2prec()
 
   Changed
     1- renamed gegal --> gequal, gegalgs --> gequalgs, gegalsg --> gequalsg,

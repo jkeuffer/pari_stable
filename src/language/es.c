@@ -961,7 +961,7 @@ wr_float(pariout_t *T, GEN x, int f_format)
   
   if (dec > 0)
   { /* reduce precision if possible */
-    l = 2 + ndec2nlong(dec);
+    l = ndec2prec(dec);
     if (lx > l) lx = l;
   }
   dif =  bit_accuracy(lx) - expo(x);

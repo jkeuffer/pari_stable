@@ -38,8 +38,11 @@ meaningless.
 
 \subsec{Conversions}
 
-\fun{long}{ndec2nlong}{long x} convert a number of decimal digits to a number
+\fun{long}{ndec2nlong}{long x} converts a number of decimal digits to a number
 of words. Returns $ 1 + \kbd{floor}(x \times \B \log_2 10)$.
+
+\fun{long}{ndec2prec}{long x} converts a number of decimal digits to a number
+of codewords. This is equal to 2 + \kbd{ndec2nlong(x)}.
 
 \fun{long}{nbits2nlong}{long x} converts a number of bits to a number of
 words. Returns the smallest word count containing $x$ bits, i.e $

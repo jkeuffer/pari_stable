@@ -449,7 +449,7 @@ sd_realprecision(const char *v, int flag)
   if (*v)
   {
     long newnb = get_int(v, fmt->sigd);
-    ulong newprec = (ulong)ndec2nlong(newnb) + 2;
+    ulong newprec = (ulong)ndec2prec(newnb);
 
     if (fmt->sigd == newnb && prec == newprec) return gnil;
     if (newnb <= 0) err(talker,"default: realprecision must be positive");

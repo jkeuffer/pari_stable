@@ -373,7 +373,7 @@ gprec(GEN x, long l)
   switch(tx)
   {
     case t_REAL:
-      return rtor(x, 2 + ndec2nlong(l));
+      return rtor(x, ndec2prec(l));
 
     case t_PADIC:
       if (!signe(x[4])) return zeropadic((GEN)x[2], l+precp(x));
