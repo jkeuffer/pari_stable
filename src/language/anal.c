@@ -514,11 +514,9 @@ L2:
   e3 = UNDEF;
   if (low_stack(lim, stack_lim(av,2)))
   {
-    GEN *gptr[2];
-    int n = 1; gptr[0]=&e2;
-    if (e1) gptr[n++]=&e1;
+    GEN *gptr[2]; gptr[0]=&e2; gptr[1]=&e1;
     if(DEBUGMEM>1) err(warnmem,"expr");
-    gerepilemany(av,gptr,n);
+    gerepilemany(av,gptr,(e1==UNDEF)?1: 2);
   }
 
   switch(*analyseur)
