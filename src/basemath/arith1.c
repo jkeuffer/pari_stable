@@ -241,6 +241,26 @@ gener(GEN m)
   av1=avma; return gerepile(av,av1,gmodulcp(x,m));
 }
 
+/* assume p odd SMALL prime */
+ulong
+u_gener(ulong p)
+{
+  const ulong av = avma;
+  const long q = p - 1;
+  const GEN L = (GEN)decomp(stoi(q))[1];
+  const int k = lg(L) - 1;
+  int i,x;
+
+  for (x=2;;x++)
+    if (x % p)
+    {
+      for (i=k; i; i--)
+	if (powuumod(x, q/itos((GEN)L[i]), p) == 1) break;
+      if (!i) break;
+    }
+  avma = av; return x;
+}
+
 GEN
 znstar(GEN n)
 {
