@@ -984,6 +984,7 @@ mplgenmod(GEN l, long e, GEN r,GEN p,GEN *zeta)
   for (k=1; ; k++)
   {
     m1 = m = powmodulo(stoi(k+1),r,p);
+    if (gcmp1(m)) {avma=av1; continue;}
     for (i=1; i<e; i++)
       if (gcmp1(m=powmodulo(m,l,p))) break;
     if (i==e) break;
