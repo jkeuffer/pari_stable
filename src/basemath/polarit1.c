@@ -1696,6 +1696,18 @@ apprgen9(GEN f, GEN a)
 /*****************************************/
 /*  Factorisation p-adique d'un polynome */
 /*****************************************/
+int
+cmp_padic(GEN x, GEN y)
+{
+  long vx, vy;
+  if (x == gzero) return -1;
+  if (y == gzero) return  1;
+  vx = valp(x);
+  vy = valp(y);
+  if (vx < vy) return  1;
+  if (vx > vy) return -1;
+  return cmpii((GEN)x[4], (GEN)y[4]);
+}
 
 /* factorise le polynome T=nf[1] dans Zp avec la precision pr */
 static GEN
@@ -1785,7 +1797,8 @@ factorpadic2(GEN x, GEN p, long r)
     {
       p1[++k]=lcopy((GEN)fa[i][i1]); p2[k]=lstoi(i);
     }
-  return gerepile(av,av2,y);
+  y = gerepile(av,av2,y);
+  sort_factor(y, cmp_padic); return y;
 }
 
 /*******************************************************************/
@@ -1922,7 +1935,8 @@ factorpadic4(GEN f,GEN p,long prec)
     p1[i] = (long)pol_to_padic((GEN)pols[i],ppow,p,prec);
   }
   y[1]=(long)p1; setlg(exps,j);
-  y[2]=lcopy(exps); return gerepile(av,tetpil,y);
+  y[2]=lcopy(exps); y = gerepile(av,tetpil,y);
+  sort_factor(y, cmp_padic); return y;
 }
 
 GEN
