@@ -1035,11 +1035,11 @@ wr_real(pariout_t *T, GEN x, int addsign)
   {
     if (T->format == 'f')
     {
-      long dec = T->sigd;
+      long d, dec = T->sigd;
       if (dec < 0)
       {
-        long d = 1 + ((-ex)>>TWOPOTBITS_IN_LONG);
-        dec = (d <= 0)? 0: (long)(pariK*d);
+        d = (long)(-ex * L2SL10);
+        dec = (d <= 0)? 0: d;
       }
       pariputs("0."); zeros(dec);
     }
