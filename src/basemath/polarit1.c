@@ -585,11 +585,11 @@ FpX_nbroots(GEN f, GEN p)
 long
 FpX_is_totally_split(GEN f, GEN p)
 {
-  long n=lgef(f);
+  long n=degpol(f);
   gpmem_t av = avma;
   GEN z;
-  if (n <= 4) return 1;
-  if (!is_bigint(p) && n-3 > p[2]) return 0;
+  if (n <= 1) return 1;
+  if (!is_bigint(p) && n > p[2]) return 0;
   f = FpX_red(f, p);
   z = FpXQ_pow(polx[varn(f)], p, f, p);
   avma = av; return lgef(z)==4 && gcmp1((GEN)z[3]) && !signe(z[2]);
