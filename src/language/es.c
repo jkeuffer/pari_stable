@@ -2382,6 +2382,13 @@ brute(GEN g, char f, long d)
 }
 
 void
+bruteall(GEN g, char f, long d, long sp)
+{
+  pariout_t T; _initout(&T,f,d,sp,0, f_RAW);
+  gen_output(g, &T);
+}
+
+void
 matbrute(GEN g, char f, long d)
 {
   pariout_t T; _initout(&T,f,d,1,0, f_PRETTYMAT);

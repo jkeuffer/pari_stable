@@ -81,8 +81,6 @@ This file lists the incompatible changes between Version 2.x and older versions
       x[1] = evalsigne(1) | evalvarn(0) | evallgef( 10 )  /* 10, not 20 */
       ...
       setlgef(x, 20); /* now create/use further coefficients */
-  - bruteall [ useless, undocumented variant of 'brute' ] has been removed.
-    Use gen_output
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

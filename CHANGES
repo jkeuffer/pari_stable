@@ -133,6 +133,7 @@ BA  2- Add support for GNU/Hurd.
        of t_COLs)
     5- FpM_rank
     6- declare cornacchia, cornacchia2 + allow factor( an elt in Z[i] )
+    7- put back bruteall [ used by Math::Pari ]
 
   Removed
     1- obsolete macro leadingcoeff [kept for backward compatibility but
