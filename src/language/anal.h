@@ -62,13 +62,13 @@ int    is_identifier(char *s);
 entree *is_entry_intern(char *s, entree **table, long *hash);
 long   is_keyword_char(char c);
 char   *readstring(char *src, char *s);
-long   loop_break();
-long   did_break();
+long   loop_break(void);
+long   did_break(void);
 void   print_prefixed_text(char *s, char *prefix, char *str);
 
 void term_color(int c);
 char *term_get_color(int c);
-void hit_return();
+void hit_return(void);
 
 void push_val(entree *ep, GEN a);
 void pop_val(entree *ep);

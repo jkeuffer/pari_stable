@@ -1457,7 +1457,7 @@ conformal_mapping(GEN *radii, GEN ctr, GEN p, long k, long bitprec,
 }
 
 static GEN
-myrealzero()
+myrealzero(void)
 {
   GEN x = cgetr(3);
   x[1] = evalexpo(-bit_accuracy(3));

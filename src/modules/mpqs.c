@@ -745,7 +745,7 @@ mpqs_find_maxprime(long size)
  **/
 
 static long
-mpqs_count_primes()
+mpqs_count_primes(void)
 {
   byteptr p = mpqs_diffptr;
 
