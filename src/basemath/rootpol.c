@@ -640,7 +640,8 @@ max_modulus(GEN p, double tau)
     nn -= polvaluation(q, &q);
     set_karasquare_limit(gexpo(q));
     q = gerepileupto(av, graeffe(q));
-    tau2 *= 1.5; eps = -1/log(tau2);
+    tau2 *= 1.5; if (tau2 > 0.9) tau2 = 0.5;
+    eps = -1/log(tau2); /* > 0 */
     e = findpower(q);
   }
   if (!signe(r)) { avma = ltop; return realun(DEFAULTPREC); } 
