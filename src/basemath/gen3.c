@@ -1331,7 +1331,7 @@ gsubst_expr(GEN pol, GEN from, GEN to)
 
   if (v <= gvar(from))
       err(talker, "subst: unexpected variable precedence");
-  tmp = gmodulcp(pol, tmp);
+  tmp = gmul(pol, gmodulcp(gun, tmp));
   if (typ(tmp) == t_POLMOD)
     tmp = (GEN)tmp[2];			/* optimize lift */
   else					/* Vector? */
