@@ -50,6 +50,12 @@ Done for version 2.2.6 (released ??/04/2003):
        rnfidealabstorel(rnf, nf.zk * A), if A is a strandard ideal in HNF
        form. Used to require matrices in HNF form, which was confusing since
        ideals such as A gave wrong results [ HNF wrt different implicit bases ].
+    4- idealadd(x,y): multiply by lcm(denom(x), denom(y)), not their product
+    5- rewrote nfhnf/nfhnfmod/nfbezout [ many small improvements ]
+    6- rnf structure now filled incrementally [ absolute nf, data for norm
+       computations ]. Use build_and_check_obj() mechanism already used for
+       bnf: cycgen ( bnf.gen[i]^bnf.cyc[i] ) + matal (relations in algebraic
+       form)
 
   Added
     1- member function rnf.pol (polynomial generating absolute extension)

@@ -827,7 +827,7 @@ idealadd(GEN nf, GEN x, GEN y)
   if (lg(x) == 1) return gerepileupto(av,y);
   if (lg(y) == 1) return gerepileupto(av,x); /* check for 0 ideal */
   dx = Q_denom(x);
-  dy = Q_denom(y); dz = mulii(dx,dy);
+  dy = Q_denom(y); dz = mpppcm(dx,dy);
   if (gcmp1(dz)) dz = NULL; else {
     x = Q_muli_to_int(x, dz);
     y = Q_muli_to_int(y, dz);
@@ -1509,6 +1509,7 @@ idealmulelt(GEN nf, GEN x, GEN v)
   long t = typ(x);
   if (t == t_POL || t == t_POLMOD) x = algtobasis(nf,x);
   if (isnfscalar(x)) x = (GEN)x[1];
+  if (typ(x) != t_COL) return gmul(gabs(x,0), v);
   return idealmat_to_hnf(nf, element_mulvec(nf, x, v));
 }
 
@@ -1886,10 +1887,9 @@ isideal(GEN nf,GEN x)
 GEN
 idealdiv(GEN nf, GEN x, GEN y)
 {
-  pari_sp av=avma,tetpil;
-  GEN z=idealinv(nf,y);
-
-  tetpil=avma; return gerepile(av,tetpil,idealmul(nf,x,z));
+  pari_sp av = avma, tetpil;
+  GEN z = idealinv(nf,y);
+  tetpil = avma; return gerepile(av,tetpil, idealmul(nf,x,z));
 }
 
 /* This routine computes the quotient x/y of two ideals in the number field nf.
@@ -2527,6 +2527,14 @@ idealcoprime(GEN nf, GEN x, GEN y)
 /*                  LINEAR ALGEBRA OVER Z_K  (HNF,SNF)             */
 /*                                                                 */
 /*******************************************************************/
+static void
+check_module(GEN x, char *s)
+{
+  if (typ(x) != t_VEC || lg(x) != 3) err(talker,"not a module in %s", s);
+  if (typ(x[1]) != t_MAT) err(talker,"not a matrix in %s", s);
+  if (typ(x[2]) != t_VEC || lg(x[2]) != lg(x[1]))
+    err(talker,"not a correct ideal list in %s", s);
+}
 
 /* returns the first index i<=n such that x=v[i] if it exits, 0 otherwise */
 long
@@ -2586,6 +2594,17 @@ element_reduce(GEN nf, GEN x, GEN ideal)
   if (is_extscalar_t(tx)) x = algtobasis_i(checknf(nf), x);
   return gerepileupto(av, reducemodinvertible(x, ideal));
 }
+extern GEN close_modinvertible(GEN x, GEN y);
+/* Given an element x and an ideal in matrix form (not necessarily HNF),
+ * gives an a in ideal such that x-a is small. No checks */
+static GEN 
+element_close(GEN nf, GEN x, GEN ideal)
+{
+  pari_sp av = avma;
+  long tx = typ(x);
+  if (is_extscalar_t(tx)) x = algtobasis_i(checknf(nf), x);
+  return gerepileupto(av, close_modinvertible(x, ideal));
+}
 
 /* A torsion-free module M over Z_K will be given by a row vector [A,I] with
  * two components. I=[\a_1,...,\a_k] is a row vector of k fractional ideals
@@ -2603,7 +2622,7 @@ colcomb(GEN nf, GEN u, GEN v, GEN A, GEN B)
     z = element_mulvec(nf,v,B);
   else
   {
-    z = element_mulvec(nf,u,A);
+    z = u==gun? A: element_mulvec(nf,u,A);
     if (!gcmp0(v)) z = gadd(z, element_mulvec(nf,v,B));
   }
   return z;
@@ -2624,92 +2643,15 @@ rowcomb(GEN nf, GEN u, GEN v, long s, long t, GEN Z, long lim)
   return z;
 }
 
-/* Given a torsion-free module x as above outputs a pseudo-basis for x in HNF */
-GEN
-nfhermite(GEN nf, GEN x)
-{
-  long i, j, def, k, m;
-  pari_sp av0 = avma, av, lim;
-  GEN p1,p2,y,A,I,J;
-
-  nf = checknf(nf);
-  if (typ(x)!=t_VEC || lg(x)!=3) err(talker,"not a module in nfhermite");
-  A = (GEN)x[1];
-  I = (GEN)x[2]; k = lg(A)-1;
-  if (typ(A)!=t_MAT) err(talker,"not a matrix in nfhermite");
-  if (typ(I)!=t_VEC || lg(I)!=k+1)
-    err(talker,"not a correct ideal list in nfhermite");
-  if (!k) err(talker,"not a matrix of maximal rank in nfhermite");
-  m = lg(A[1])-1;
-  if (k < m) err(talker,"not a matrix of maximal rank in nfhermite");
-
-  av = avma; lim = stack_lim(av, 1);
-  A = matalgtobasis(nf,A);
-  I = dummycopy(I);
-  J = zerovec(k); def = k+1;
-  for (i=m; i>=1; i--)
-  {
-    GEN den, p4, p5, p6, u, v, d, di = NULL;
-
-    def--; j=def; while (j>=1 && gcmp0(gcoeff(A,i,j))) j--;
-    if (!j) err(talker,"not a matrix of maximal rank in nfhermite");
-    if (j==def) j--; else { swap(A[j], A[def]); swap(I[j], I[def]); }
-    p1 = gcoeff(A,i,def);
-    p2 = element_inv(nf, p1);
-    A[def] = (long)element_mulvec(nf,p2,(GEN)A[def]);
-    I[def] = (long)idealmulelt(nf,p1,(GEN)I[def]);
-    for (  ; j; j--)
-    {
-      p1 = gcoeff(A,i,j);
-      if (gcmp0(p1)) continue;
-
-      p2 = idealmulelt(nf,p1,(GEN)I[j]);
-      d = idealadd(nf,p2,(GEN)I[def]);
-      di = hnfideal_inv(nf,d);
-      p4 = idealmul(nf, p2,         di);
-      p5 = idealmul(nf,(GEN)I[def], di);
-      y = idealaddtoone(nf,p4,p5);
-      u = (GEN)y[1]; u = element_div(nf, u, p1);
-      v = (GEN)y[2];
-      p6 = gsub((GEN)A[j], element_mulvec(nf, p1,(GEN)A[def]));
-      A[def] = ladd(element_mulvec(nf, u, (GEN)A[j]),
-                    element_mulvec(nf, v, (GEN)A[def]));
-      A[j] = (long)p6;
-      I[j] = (long)idealmul(nf,idealmul(nf,(GEN)I[j],(GEN)I[def]), di);
-      I[def] = (long)d;
-      I[j] = (long)Q_remove_denom((GEN)I[j], &den);
-      if (den) A[j] = ldiv((GEN)A[j], den);
-    }
-    if (!di) di = hnfideal_inv(nf,(GEN)I[def]);
-    J[def] = (long)di;
-    p1 = (GEN)I[def];
-    for (j=def+1; j<=k; j++)
-    {
-      GEN c = gcoeff(A,i,j);
-      p2 = gsub(element_reduce(nf,c, idealmul(nf,p1,(GEN)J[j])), c);
-      A[j] = ladd((GEN)A[j], element_mulvec(nf, p2,(GEN)A[def]));
-    }
-    if (low_stack(lim, stack_lim(av1,1)))
-    {
-      if(DEBUGMEM>1) err(warnmem,"nfhermite, i = %ld", i);
-      gerepileall(av,3, &A,&I,&J);
-    }
-  }
-  y = cgetg(3,t_VEC);
-  A += k-m; A[0] = evaltyp(t_MAT)|evallg(m+1); y[1] = (long)A;
-  I += k-m; I[0] = evaltyp(t_VEC)|evallg(m+1); y[2] = (long)I;
-  return gerepilecopy(av0, y);
-}
-
 static GEN
 zero_nfbezout(GEN nf,GEN b, GEN A,GEN B,GEN *u,GEN *v,GEN *w,GEN *di)
 {
-  pari_sp av, tetpil;
-  GEN AB, d = idealmulelt(nf,b,B);
+  GEN d = idealmulelt(nf,b,B);
+  pari_sp av;
 
   *di = idealinv(nf,d);
-  av = avma; AB = idealmul(nf,A,B); tetpil = avma;
-  *w = gerepile(av,tetpil, idealmul(nf,AB,*di));
+  av = avma; 
+  *w = gerepileupto(av, idealmul(nf, idealmul(nf,A,B), *di));
   *v = element_inv(nf,b);
   *u = gzero; return d;
 }
@@ -2720,25 +2662,122 @@ zero_nfbezout(GEN nf,GEN b, GEN A,GEN B,GEN *u,GEN *v,GEN *w,GEN *di)
 static GEN
 nfbezout(GEN nf,GEN a,GEN b, GEN A,GEN B, GEN *pu,GEN *pv,GEN *pw,GEN *pdi)
 {
-  GEN AB, uv, d, di, aA, bB, *gptr[5];
-  pari_sp av, tetpil;
+  GEN w, u,v, d, di, aA, bB;
 
   if (gcmp0(a)) return zero_nfbezout(nf,b,A,B,pu,pv,pw,pdi);
   if (gcmp0(b)) return zero_nfbezout(nf,a,B,A,pv,pu,pw,pdi);
 
-  av = avma;
-  aA = idealmulelt(nf,a,A);
-  bB = idealmulelt(nf,b,B); d = idealadd(nf,aA,bB);
-  di = hnfideal_inv(nf,d);
-  uv = idealaddtoone(nf, idealmul(nf,aA,di),idealmul(nf,bB,di));
-  AB = idealmul(nf,A,B); tetpil = avma;
+  if (a != gun) /* frequently called with a = gun */
+  {
+    if (isnfscalar(a)) a = (GEN)a[1];
+    if (gcmp1(a)) a = gun;
+  }
 
-  gptr[0]=pu;  *pu = element_div(nf,(GEN)uv[1],a);
-  gptr[1]=pv;  *pv = element_div(nf,(GEN)uv[2],b);
-  gptr[2]=pw;  *pw = idealmul(nf,AB,di);
-  gptr[3]=pdi; *pdi = gcopy(di);
-  gptr[4]=&d;  d = gcopy(d);
-  gerepilemanysp(av,tetpil,gptr,5); return d;
+  aA = (a == gun)? A: idealmulelt(nf,a,A);
+  bB = idealmulelt(nf,b,B);
+  d = idealadd(nf,aA,bB);
+  di = hnfideal_inv(nf,d);
+  if (gegal(aA, d))
+  { /* aA | bB  (frequent) */
+    w = B;
+    v = gzero;
+    if (a == gun)
+      u = vec_ei(lg(B)-1, 1);
+    else
+    {
+      u =  element_inv(nf, a);
+      w = idealmulelt(nf, u, w); /* AB/d */
+    }
+  }
+  else if (gegal(bB, d))
+  { /* bB | aA  (slightly less frequent) */
+    w = A;
+    u = gzero;
+    v = element_inv(nf, b);
+    w = idealmulelt(nf, v, w); /* AB/d */
+  }
+  else
+  { /* general case. Slow */
+    GEN uv;
+    w = idealmul(nf,aA,di); /* integral */
+    uv = idealaddtoone(nf, w, idealmul(nf,bB,di));
+    w = idealmul(nf,w,B);
+    u = (GEN)uv[1];
+    v = element_div(nf,(GEN)uv[2],b);
+    if (a != gun)
+    {
+      GEN inva = element_inv(nf, a);
+      u =  element_mul(nf,u,inva);
+      w = idealmulelt(nf, inva, w); /* AB/d */
+    }
+  }
+  *pu = u;
+  *pv = v;
+  *pw = w;
+  *pdi = di; return d;
+}
+
+/* Given a torsion-free module x as above outputs a pseudo-basis for x in HNF */
+GEN
+nfhermite(GEN nf, GEN x)
+{
+  long i, j, def, k, m;
+  pari_sp av0 = avma, av, lim;
+  GEN y, A, I, J;
+
+  nf = checknf(nf);
+  check_module(x, "nfhermite");
+  A = (GEN)x[1];
+  I = (GEN)x[2]; k = lg(A)-1;
+  if (!k) err(talker,"not a matrix of maximal rank in nfhermite");
+  m = lg(A[1])-1;
+  if (k < m) err(talker,"not a matrix of maximal rank in nfhermite");
+
+  av = avma; lim = stack_lim(av, 2);
+  A = matalgtobasis(nf,A);
+  I = dummycopy(I);
+  J = zerovec(k); def = k+1;
+  for (i=m; i>=1; i--)
+  {
+    GEN d, di = NULL;
+
+    def--; j=def; while (j>=1 && gcmp0(gcoeff(A,i,j))) j--;
+    if (!j) err(talker,"not a matrix of maximal rank in nfhermite");
+    if (j==def) j--; else { swap(A[j], A[def]); swap(I[j], I[def]); }
+
+    y = gcoeff(A,i,def);
+    A[def] = (long)element_mulvec(nf, element_inv(nf,y), (GEN)A[def]);
+    I[def] = (long)idealmulelt(nf, y, (GEN)I[def]);
+    for (  ; j; j--)
+    {
+      GEN b, u,v,w, S, T, S0, T0 = (GEN)A[j];
+      b = (GEN)T0[i]; if (gcmp0(b)) continue;
+
+      S0 = (GEN)A[def];
+      d = nfbezout(nf, gun,b, (GEN)I[def],(GEN)I[j], &u,&v,&w,&di);
+      S = colcomb(nf, u,v, S0,T0);
+      T = colcomb(nf, gun,gneg(b), T0,S0);
+      A[def] = (long)S; A[j] = (long)T;
+      I[def] = (long)d; I[j] = (long)w;
+    }
+    d = (GEN)I[def];
+    if (!di) di = hnfideal_inv(nf,d);
+    J[def] = (long)di;
+    for (j=def+1; j<=k; j++)
+    {
+      GEN c = element_close(nf,gcoeff(A,i,j), idealmul(nf,d,(GEN)J[j]));
+      A[j] = (long)colcomb(nf, gun,gneg(c), (GEN)A[j],(GEN)A[def]);
+    }
+    if (low_stack(lim, stack_lim(av1,2)))
+    {
+      if(DEBUGMEM>1) err(warnmem,"nfhermite, i = %ld", i);
+      gerepileall(av,3, &A,&I,&J);
+    }
+  }
+  y = cgetg(3,t_VEC);
+  A += k-m; A[0] = evaltyp(t_MAT)|evallg(m+1); y[1] = (long)A;
+  I += k-m; I[0] = evaltyp(t_VEC)|evallg(m+1); y[2] = (long)I;
+  return gerepilecopy(av0, y);
 }
 
 /* A torsion module M over Z_K will be given by a row vector [A,I,J] with
@@ -2768,10 +2807,10 @@ nfsmith(GEN nf, GEN x)
     err(talker,"not a correct ideal list in nfsmith");
   if (!n) err(talker,"not a matrix of maximal rank in nfsmith");
   m = lg(A[1])-1;
-  if (n<m) err(talker,"not a matrix of maximal rank in nfsmith");
-  if (n>m) err(impl,"nfsmith for non square matrices");
+  if (n < m) err(talker,"not a matrix of maximal rank in nfsmith");
+  if (n > m) err(impl,"nfsmith for non square matrices");
 
-  av=avma; lim=stack_lim(av,1);
+  av = avma; lim = stack_lim(av,1);
   A = dummycopy(A);
   I = dummycopy(I);
   J = dummycopy(J);
@@ -2835,9 +2874,8 @@ nfsmith(GEN nf, GEN x)
         }
       if (low_stack(lim, stack_lim(av,1)))
       {
-        GEN *gptr[3]; gptr[0]=&A; gptr[1]=&I; gptr[2]=&J;
 	if(DEBUGMEM>1) err(warnmem,"nfsmith");
-        gerepilemany(av,gptr,3);
+        gerepileall(av,3, &A,&I,&J);
       }
     }
     while (c);
@@ -2938,37 +2976,33 @@ nfsuppl(GEN nf, GEN x, GEN pr)
 }
 #endif
 
-/* Given a pseudo-basis pseudo, outputs a multiple of its ideal determinant */
+/* Given a pseudo-basis x, outputs a multiple of its ideal determinant */
 GEN
-nfdetint(GEN nf,GEN pseudo)
+nfdetint(GEN nf, GEN x)
 {
-  GEN pass,c,v,det1,piv,pivprec,vi,p1,x,I,unnf,zeronf,id,idprod;
-  long i, j, k, rg, n, n1, m, m1, cm=0, N;
+  GEN pass,c,v,det1,piv,pivprec,vi,p1,A,I,id,idprod;
+  long i, j, k, rg, n, m, m1, cm=0, N;
   pari_sp av = avma, av1, lim;
 
-  nf=checknf(nf); N=degpol(nf[1]);
-  if (typ(pseudo)!=t_VEC || lg(pseudo)!=3)
-    err(talker,"not a module in nfdetint");
-  x=(GEN)pseudo[1]; I=(GEN)pseudo[2];
-  if (typ(x)!=t_MAT) err(talker,"not a matrix in nfdetint");
-  n1=lg(x); n=n1-1; if (!n) return gun;
+  nf = checknf(nf); N = degpol(nf[1]);
+  check_module(x, "nfdetint");
+  A = (GEN)x[1];
+  I = (GEN)x[2];
+  n = lg(A)-1; if (!n) return gun;
 
-  m1=lg(x[1]); m=m1-1;
-  if (typ(I)!=t_VEC || lg(I)!=n1)
-    err(talker,"not a correct ideal list in nfdetint");
+  m1 = lg(A[1]); m = m1-1;
+  id = idmat(N);
+  c = new_chunk(m1); for (k=1; k<=m; k++) c[k] = 0;
+  piv = pivprec = gscalcol_i(gun,N);
 
-  unnf=gscalcol_i(gun,N); zeronf=zerocol(N);
-  id=idmat(N); c=new_chunk(m1); for (k=1; k<=m; k++) c[k]=0;
-  piv = pivprec = unnf;
-
-  av1=avma; lim=stack_lim(av1,1);
-  det1=idprod=gzero; /* dummy for gerepilemany */
-  pass=cgetg(m1,t_MAT); v=cgetg(m1,t_COL);
+  av1 = avma; lim = stack_lim(av1,1);
+  det1 = idprod = gzero; /* dummy for gerepilemany */
+  pass = cgetg(m1,t_MAT);
+  v = cgetg(m1,t_COL);
   for (j=1; j<=m; j++)
   {
+    pass[j] = (long)zerocol(m);
     v[j] = zero; /* dummy */
-    p1=cgetg(m1,t_COL); pass[j]=(long)p1;
-    for (i=1; i<=m; i++) p1[i]=(long)zeronf;
   }
   for (rg=0,k=1; k<=n; k++)
   {
@@ -2976,9 +3010,9 @@ nfdetint(GEN nf,GEN pseudo)
     for (i=1; i<=m; i++)
       if (!c[i])
       {
-	vi=element_mul(nf,piv,gcoeff(x,i,k));
+	vi=element_mul(nf,piv,gcoeff(A,i,k));
 	for (j=1; j<=m; j++)
-	  if (c[j]) vi=gadd(vi,element_mul(nf,gcoeff(pass,i,j),gcoeff(x,j,k)));
+	  if (c[j]) vi=gadd(vi,element_mul(nf,gcoeff(pass,i,j),gcoeff(A,j,k)));
 	v[i]=(long)vi; if (!t && !gcmp0(vi)) t=i;
       }
     if (t)
@@ -3029,11 +3063,10 @@ nfdetint(GEN nf,GEN pseudo)
 static void
 nfcleanmod(GEN nf, GEN x, long lim, GEN D)
 {
-  long lx = lg(x), i;
-  GEN d;
-  if (lim<=0 || lim>=lx) lim = lx-1;
-  D = lllint_ip(Q_remove_denom(D, &d), 4);
-  if (d) D = gdiv(D,d);
+  long i;
+  GEN c;
+  D = lllint_ip(Q_primitive_part(D, &c), 4);
+  if (c) D = gmul(D,c);
   for (i=1; i<=lim; i++) x[i] = (long)element_reduce(nf, (GEN)x[i], D);
 }
 
@@ -3042,48 +3075,44 @@ nfhermitemod(GEN nf, GEN x, GEN detmat)
 {
   long li, co, i, j, def, ldef, N;
   pari_sp av0=avma, av, lim;
-  GEN d0, q, w, p1, d, u, v, A, I, J, dinv, unnf;
+  GEN d0, w, p1, d, u, v, A, I, J, di, unnf;
 
   nf = checknf(nf); N = degpol(nf[1]);
-  if (typ(x)!=t_VEC || lg(x)!=3) err(talker,"not a module in nfhermitemod");
+  check_module(x, "nfhermitemod");
   A = (GEN)x[1];
   I = (GEN)x[2];
-  if (typ(A) != t_MAT) err(talker,"not a matrix in nfhermitemod");
-  co = lg(A);
-  if (typ(I) != t_VEC || lg(I) != co)
-    err(talker,"not a correct ideal list in nfhermitemod");
-  if (co==1) return cgetg(1,t_MAT);
+  co = lg(A); if (co==1) return cgetg(1,t_MAT);
 
   li = lg(A[1]);
   unnf = gscalcol(gun,N);
   detmat = lllint_ip(Q_remove_denom(detmat, NULL), 100);
 
-  av = avma; lim = stack_lim(av,1);
+  av = avma; lim = stack_lim(av,2);
   A = matalgtobasis(nf, A);
   I = dummycopy(I);
   def = co; ldef = (li>co)? li-co+1: 1;
   for (i=li-1; i>=ldef; i--)
   {
-    def--; j=def-1; while (j && gcmp0(gcoeff(A,i,j))) j--;
-    while (j)
+    def--; j=def; while (j>=1 && gcmp0(gcoeff(A,i,j))) j--;
+    if (j==def) j--; else { swap(A[j], A[def]); swap(I[j], I[def]); }
+    for (  ; j; j--)
     {
-      long jm1 = j==1? def: j-1;
-      GEN a, b, S, T, S0 = (GEN)A[jm1], T0 = (GEN)A[j];
+      GEN a, b, S, T, S0, T0 = (GEN)A[j];
+      b = (GEN)T0[i]; if (gcmp0(b)) continue;
 
-      a = (GEN)S0[i];
-      b = (GEN)T0[i];
-      d = nfbezout(nf, b,a, (GEN)I[j],(GEN)I[jm1], &u,&v,&w,&dinv);
-      S = colcomb(nf, u,v, T0,S0);
-      T = colcomb(nf, b,gneg(a), S0,T0);
+      S0 = (GEN)A[def]; a = (GEN)S0[i];
+      d = nfbezout(nf, a,b, (GEN)I[def],(GEN)I[j], &u,&v,&w,&di);
+      S = colcomb(nf, u,v, S0,T0);
+      T = colcomb(nf, a,gneg(b), T0,S0);
+      if (u != gzero && v != gzero) /* already reduced otherwise */
+        nfcleanmod(nf, S, i, idealmul(nf,detmat,di));
       nfcleanmod(nf, T, i, idealdiv(nf,detmat,w));
-      nfcleanmod(nf, S, i, idealmul(nf,detmat,dinv));
-      A[jm1] = (long)S; A[j] = (long)T;
-      I[jm1] = (long)d; I[j] = (long)w;
-      j--; while (j && gcmp0(gcoeff(A,i,j))) j--;
+      A[def] = (long)S; A[j] = (long)T;
+      I[def] = (long)d; I[j] = (long)w;
     }
-    if (low_stack(lim, stack_lim(av,1)))
+    if (low_stack(lim, stack_lim(av,2)))
     {
-      if(DEBUGMEM>1) err(warnmem,"[1]: nfhermitemod");
+      if(DEBUGMEM>1) err(warnmem,"[1]: nfhermitemod, i = %ld", i);
       gerepileall(av,2, &A,&I);
     }
   }
@@ -3092,11 +3121,11 @@ nfhermitemod(GEN nf, GEN x, GEN detmat)
   I += def; I[0] = evaltyp(t_VEC)|evallg(li);
   for (i=li-1; i>=1; i--)
   {
-    d = nfbezout(nf, gcoeff(A,i,i),unnf, (GEN)I[i],d0, &u,&v,&w,&dinv);
-    p1 = element_mulvec(nf,u,(GEN)A[i]);
+    d = nfbezout(nf, gun,gcoeff(A,i,i), d0,(GEN)I[i], &u,&v,&w,&di);
+    p1 = element_mulvec(nf,v,(GEN)A[i]);
     if (i > 1)
     {
-      d0 = idealmul(nf,d0,dinv);
+      d0 = idealmul(nf,d0,di);
       nfcleanmod(nf, p1, i, d0);
     }
     A[i] = (long)p1; p1[i] = (long)unnf;
@@ -3106,15 +3135,15 @@ nfhermitemod(GEN nf, GEN x, GEN detmat)
   for (j=2; j<li; j++) J[j] = (long)idealinv(nf,(GEN)I[j]);
   for (i=li-2; i>=1; i--)
   {
+    d = (GEN)I[i];
     for (j=i+1; j<li; j++)
     {
-      q = idealmul(nf,(GEN)I[i],(GEN)J[j]);
-      p1 = gsub(element_reduce(nf,gcoeff(A,i,j),q), gcoeff(A,i,j));
-      A[j] = ladd((GEN)A[j], element_mulvec(nf,p1,(GEN)A[i]));
+      GEN c = element_close(nf, gcoeff(A,i,j), idealmul(nf,d,(GEN)J[j]));
+      A[j] = (long)colcomb(nf, gun,gneg(c), (GEN)A[j],(GEN)A[i]);
     }
-    if (low_stack(lim, stack_lim(av,1)))
+    if (low_stack(lim, stack_lim(av,2)))
     {
-      if(DEBUGMEM>1) err(warnmem,"[2]: nfhermitemod");
+      if(DEBUGMEM>1) err(warnmem,"[2]: nfhermitemod, i = %ld", i);
       gerepileall(av,3, &A,&I,&J);
     }
   }

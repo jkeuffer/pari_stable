@@ -25,6 +25,7 @@ extern long polegal_spec(GEN x, GEN y);
 extern GEN mulmat_pol(GEN A, GEN x);
 extern GEN idealsqrtn(GEN nf, GEN x, GEN gn, int strict);
 extern GEN lift_if_rational(GEN x);
+extern GEN get_mul_table(GEN x,GEN basden,GEN invbas);
 
 GEN
 matbasistoalg(GEN nf,GEN x)
@@ -66,7 +67,7 @@ _checkrnfeq(GEN x)
   if (typ(x) == t_VEC)
     switch(lg(x))
     {
-      case 14: /* checkrnf(x); */ return (GEN)x[11];
+      case 13: /* checkrnf(x); */ return (GEN)x[11];
       case  4: return x;
     }
   return NULL;
@@ -253,49 +254,79 @@ hnfcenter_ip(GEN M)
   return M;
 }
 
+static GEN
+makenfabs(GEN rnf)
+{
+  GEN M, d, rnfeq, pol, nf, NF = zerovec(9);
+  long n;
+
+  rnfeq = (GEN)rnf[11]; pol = (GEN)rnfeq[1];
+  nf = (GEN)rnf[10];
+
+  M = modulereltoabs(rnf, (GEN)rnf[7]);
+  n = lg(M)-1;
+  M = vecpol_to_mat(Q_remove_denom(M, &d), n);
+  if (d) M = gdiv(hnfcenter_ip(hnfmodid(M, d)), d);
+  else   M = idmat(n);
+
+  NF[1] = (long)pol;
+  NF[3] = (long)mulii(gpowgs((GEN)nf[3], degpol(rnf[1])),
+                      idealnorm(nf, (GEN)rnf[3]));
+  NF[7] = (long)lift_intern( mat_to_vecpol(M,varn(pol)) );
+  NF[8] = (long)linvmat(M);
+  NF[9] = (long)get_mul_table(pol, (GEN)NF[7], (GEN)NF[8]);
+  /* possibly wrong, but correct prime divisors [for primedec] */
+  NF[4] = (long)Q_denom((GEN)NF[7]);
+  return NF;
+}
+
+#define NFABS 1
+#define NORMS 2
+GEN
+check_and_build_nfabs(GEN rnf) {
+  return check_and_build_obj(rnf, NFABS, &makenfabs);
+}
+static GEN makenorms(GEN rnf);
+GEN
+check_and_build_norms(GEN rnf) {
+  return check_and_build_obj(rnf, NORMS, &makenorms);
+}
+
 GEN
 rnfinitalg(GEN nf, GEN pol, long prec)
 {
   pari_sp av = avma;
   long vpol;
-  GEN rnf, delta, bas, f2, M, p1, z;
+  GEN rnf, delta, bas, f2, B, z;
 
   if (typ(pol)!=t_POL) err(notpoler,"rnfinitalg");
-  nf=checknf(nf); vpol=varn(pol);
+  nf = checknf(nf); vpol = varn(pol);
   pol = fix_relative_pol(nf,pol,0);
   if (vpol >= varn(nf[1]))
     err(talker,"main variable must be of higher priority in rnfinitalg");
-  rnf = cgetg(14, t_VEC);
-  rnf[1] = (long)pol;
-  rnf[6] = (long)rnf_roots(nf, lift(pol), prec, (GEN*)rnf+2);
 
   z = rnfpseudobasis(nf,pol);
   delta = cgetg(3,t_VEC);
     delta[1] = z[3];
     delta[2] = z[4];
-  rnf[3] = (long)delta;
-  p1 = matbasistoalg(nf,(GEN)z[1]);
+  B = matbasistoalg(nf,(GEN)z[1]);
   bas = cgetg(3,t_VEC);
-    bas[1] = (long)lift_if_rational( mat_to_vecpol(p1,vpol) );
+    bas[1] = (long)lift_if_rational( mat_to_vecpol(B,vpol) );
     bas[2] = (long)z[2];
-  rnf[7] = (long)bas;
-  rnf[8] = (long)lift_if_rational( invmat(p1) );
-
   f2 = idealdiv(nf, discsr(pol), (GEN)z[3]);
+
+  rnf = cgetg(13, t_VEC);
+  rnf[1] = (long)pol;
+  rnf[3] = (long)delta;
   rnf[4] = (long)idealsqrtn(nf, f2, gdeux, 1);
+  rnf[6] = (long)rnf_roots(nf, lift(pol), prec, (GEN*)rnf+2);
+  rnf[7] = (long)bas;
+  rnf[8] = (long)lift_if_rational( invmat(B) );
   rnf[9] = lgetg(1,t_VEC); /* multiplication table: dummy */
   rnf[10]= (long)nf;
-  rnf[5] = (long)rnfmakematrices(rnf);
-  if (DEBUGLEVEL>1) msgtimer("matrices");
   rnf[11] = (long)rnfequation2(nf,pol);
-  if (DEBUGLEVEL>1) msgtimer("rnfequation");
-  M = modulereltoabs(rnf, bas);
-  M = vecpol_to_mat(Q_remove_denom(M, &p1), lg(M)-1);
-  if (p1) M = gdiv(hnfcenter_ip(hnfmodid(M, p1)), p1);
-  else    M = idmat(lg(M)-1);
-  rnf[12] = (long)mat_to_vecpol(M,vpol);
-  rnf[13] = (long)linvmat(M);
-  if (DEBUGLEVEL>1) msgtimer("basabs");
+  rnf[12] = zero;
+  rnf[5] = (long)rnfmakematrices(rnf);
   return gerepilecopy(av, rnf);
 }
 
@@ -515,26 +546,20 @@ GEN
 rnfidealhermite(GEN rnf, GEN x)
 {
   GEN z, nf, bas;
-  long n;
 
-  checkrnf(rnf); n = degpol(rnf[1]);
-  nf = (GEN)rnf[10];
+  checkrnf(rnf); nf = (GEN)rnf[10];
   switch(typ(x))
   {
     case t_INT: case t_FRAC: case t_FRACN:
       bas = (GEN)rnf[7]; z = cgetg(3,t_VEC);
-      z[1] = (long)rnfid(n, degpol(nf[1]));
+      z[1] = (long)rnfid(degpol(rnf[1]), degpol(nf[1]));
       z[2] = lmul(x, (GEN)bas[2]); return z;
-
-    case t_POLMOD: case t_POL:
-      return rnfprincipaltohermite(rnf,x);
 
     case t_VEC:
       if (lg(x) == 3 && typ(x[1]) == t_MAT) return nfhermite(nf, x);
       return rnfidealabstorel(rnf, x);
 
-    case t_COL:
-      if (lg(x)-1 != n) err(typeer,"rnfidealhermite");
+    case t_POLMOD: case t_POL: case t_COL:
       return rnfprincipaltohermite(rnf,x);
   }
   err(typeer,"rnfidealhermite");
@@ -563,33 +588,42 @@ prodidnorm(GEN I)
   return z;
 }
 
-GEN
-rnfidealnormrel(GEN rnf,GEN id)
+static GEN
+makenorms(GEN rnf)
 {
-  pari_sp av = avma;
-  GEN z, t, nf;
-
-  checkrnf(rnf); nf = (GEN)rnf[10];
-  if (degpol(rnf[1]) == 1) return idmat(degpol(nf[1]));
-  
-  t = prodid(nf, gmael(rnf,7,2));
-  z = prodid(nf, (GEN)rnfidealhermite(rnf,id)[2]);
-  return gerepileupto(av, idealdiv(nf,z,t));
+  GEN nf = (GEN)rnf[10], t = prodid(nf, gmael(rnf,7,2));
+  GEN z = cgetg(3, t_VEC);
+  z[1] = (long)idealinv(nf, t);
+  z[2] = (long)dethnf(t); return z;
 }
 
 GEN
-rnfidealnormabs(GEN rnf,GEN id)
+rnfidealnormrel(GEN rnf, GEN id)
 {
   pari_sp av = avma;
-  GEN z, t;
+  GEN z, Ninit, nf = (GEN)rnf[10];
+
+  checkrnf(rnf);
+  if (degpol(rnf[1]) == 1) return idmat(degpol(nf[1]));
+
+  Ninit = check_and_build_norms(rnf);
+  z = prodid(nf, (GEN)rnfidealhermite(rnf,id)[2]);
+  return gerepileupto(av, idealmul(nf,z, (GEN)Ninit[1]));
+}
+
+GEN
+rnfidealnormabs(GEN rnf, GEN id)
+{
+  pari_sp av = avma;
+  GEN z, Ninit;
 
   checkrnf(rnf);
   if (degpol(rnf[1]) == 1) return gun;
 
+  Ninit = check_and_build_norms(rnf);
   id = rnfidealhermite(rnf,id);
   z = prodidnorm((GEN)id[2]);
-  t = prodidnorm(gmael(rnf,7,2));
-  return gerepileupto(av, gdiv(z, t));
+  return gerepileupto(av, gdiv(z, (GEN)Ninit[2]));
 }
 
 GEN
@@ -655,31 +689,22 @@ rnfidealup(GEN rnf,GEN x)
   return gerepilecopy(av, modulereltoabs(rnf, z));
 }
 
-extern GEN get_mul_table(GEN x,GEN basden,GEN invbas);
 /* x a relative HNF ---> vector of 2 generators (relative polymods) */
 GEN
 rnfidealtwoelement(GEN rnf, GEN x)
 {
   pari_sp av = avma;
-  GEN p1, p2, rnfeq, polabs, nf, nfabs, basabs, z;
+  GEN y, z, nf, NF;
 
   checkrnf(rnf);
-  rnfeq = (GEN)rnf[11]; polabs = (GEN)rnfeq[1];
   nf = (GEN)rnf[10];
-  basabs = (GEN)rnf[12];
-  nfabs = zerovec(9);
-  nfabs[1] = (long)polabs;
-  nfabs[3] = (long)mulii((GEN)nf[3], idealnorm(nf, (GEN)rnf[3]));
-  nfabs[7] = (long)lift(basabs);
-  nfabs[8] = rnf[13];
-  nfabs[9] = (long)get_mul_table(polabs, (GEN)nfabs[7], (GEN)nfabs[8]);
-  p1 = rnfidealreltoabs(rnf,x);
-  p1 = algtobasis(nfabs, p1); settyp(p1, t_MAT);
-  p1 = ideal_two_elt(nfabs, hnf(p1));
-  p2 = rnfelementabstorel(rnf, gmul(basabs, (GEN)p1[2]));
+  NF = check_and_build_nfabs(rnf);
+  y = rnfidealreltoabs(rnf,x);
+  y = algtobasis(NF, y); settyp(y, t_MAT);
+  y = ideal_two_elt(NF, hnf(y));
   z = cgetg(3,t_VEC);
-  z[1] = p1[1];
-  z[2] = (long)p2;
+  z[1] = y[1];
+  z[2] = (long)rnfelementabstorel(rnf, gmul((GEN)NF[7], (GEN)y[2]));
   return gerepilecopy(av, z);
 }
 

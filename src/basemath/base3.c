@@ -899,9 +899,14 @@ zsigns(GEN nf, GEN x)
 
 /* For internal use. Reduce x modulo (invertible) y */
 GEN
+close_modinvertible(GEN x, GEN y)
+{
+  return gmul(y, ground(gauss(y,x)));
+}
+GEN
 reducemodinvertible(GEN x, GEN y)
 {
-  return gadd(x, gneg(gmul(y, ground(gauss(y,x)))));
+  return gadd(x, gneg(close_modinvertible(x,y)));
 }
 GEN
 lllreducemodmatrix(GEN x,GEN y)
