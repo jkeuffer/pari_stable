@@ -33,6 +33,11 @@ Done for version 2.2.3 (released ??/??/2002):
   Fixed
     1- bnrinit(bnfinit(subst(polsubcyclo(89,8),x,-x)),4) --> SEGV [make sure
     isprincipalfact is used in makecygen, even in case of precision problems]
+    2- bnrisprincipal --> warning + "not an element in ..." [missing nf_FORCE]
+
+  Changed
+BA  1- improved Fp_isom
+IZ  2- remove all dependance on __OPTIMIZE__ for inlining [cf 2.0.14 F-24]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.2 (released 10/01/2002):
