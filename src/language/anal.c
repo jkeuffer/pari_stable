@@ -3131,6 +3131,8 @@ alias0(char *s, char *old)
   installep(x, s, strlen(s), EpALIAS, 0, functions_hash + hash);
 }
 
+void err_leave_default(long n);
+
 /* Try f (trapping error e), recover using r (break_loop, if NULL) */
 GEN
 trap0(char *e, char *r, char *f)
@@ -3151,20 +3153,21 @@ trap0(char *e, char *r, char *f)
     long *NUMERR = &numerr; /* prevent longjmp from clobbering av + numerr */
     long *AV = &av;         /* volatile would be cleaner, but not portable */
     char *a = analyseur;    /* pointers are never clobbered ! */
+    void *catch;
     jmp_buf env;
 
     if (setjmp(env)) 
     {
       avma = *AV;
-      (void)err_leave(*NUMERR);
+      err_leave(&catch);
       x = lisseq(r);
       skipseq();
     }
     else
     {
-      err_catch(numerr, env, NULL);
+      catch = err_catch(numerr, env, NULL);
       x = lisseq(f);
-      (void)err_leave(numerr);
+      err_leave(&catch);
     }
     analyseur = a;
     return x;
@@ -3179,13 +3182,12 @@ trap0(char *e, char *r, char *f)
     {/* TODO: find a better interface
       * TODO: no leaked handler from the library should have survived
       */
-      void *a = err_leave(numerr);
-      if (a) free(a);
+      err_leave_default(numerr);
       return x;
     }
     F = pari_strdup(F);
   }
-  err_catch(numerr, NULL, F);
+  (void)err_catch(numerr, NULL, F);
   return x;
 }
 

@@ -52,9 +52,11 @@ int   term_width(void);
 typedef struct cell {
   void *env;
   void *data;
+  long flag;
 } cell;
 
-static stack **err_catch_stack = NULL;
+static stack *err_catch_stack = NULL;
+static long *err_catch_array;
 
 void
 push_stack(stack **pts, void *a)
@@ -346,6 +348,14 @@ pari_sig_init(void (*f)(int))
 #endif
 }
 
+static void
+reset_traps(int warn)
+{
+  long i;
+  if (warn) err(warner,"missing cell in err_catch_stack. Resetting all traps");
+  for (i=0; i <= noer; i++) err_catch_array[i] = 0;
+}
+
 /* initialise les donnees de la bibliotheque PARI. Peut être précédée d'un
  * appel à pari_addfunctions si on ajoute d'autres fonctions au pool de base.
  */
@@ -436,8 +446,8 @@ pari_init(long parisize, long maxprime)
   gp_history_fun = NULL;
   whatnow_fun = NULL;
   output_fun = &outbrute;
-  err_catch_stack = (stack**) gpmalloc((noer + 1) *sizeof(stack*));
-  for (i = 0; i <= noer; i++) err_catch_stack[i] = NULL;
+  err_catch_array = (long *) gpmalloc((noer + 1) *sizeof(long));
+  reset_traps(0);
   default_exception_handler = NULL;
 
   (void)manage_var(2,NULL); /* init nvar */
@@ -832,24 +842,109 @@ errcontext(char *msg, char *s, char *entry)
   print_prefixed_text(buf, prefix, str); free(buf);
 }
 
-void
+void *
 err_catch(long errnum, jmp_buf env, void *data)
 {
   cell *v = (cell*)gpmalloc(sizeof(cell));
   if (errnum < 0) errnum = noer;
   v->data = data;
   v->env  = env;
-  push_stack(err_catch_stack + errnum, (void*)v);
+  v->flag = errnum;
+  err_catch_array[errnum]++;
+  push_stack(&err_catch_stack, (void*)v);
+  return (void*)v;
 }
 
-void *
-err_leave(long errnum)
+/* reset traps younger than V (included) and return the data associated to V */
+void
+err_leave(void **V)
 {
-  cell *v;
-  void *a;
-  if (errnum < 0) errnum = noer;
-  v = (cell*)pop_stack(err_catch_stack + errnum);
-  a = v->data; free(v); return a;
+  cell *t, *v = (cell*)*V;
+
+  for (;;)
+  {
+    t = (cell*)pop_stack(&err_catch_stack);
+    if (t == v || !t) break;
+    err_catch_array[t->flag]--;
+    free(t);
+  }
+  if (!t) reset_traps(1);
+  err_catch_array[v->flag]--;
+  free(v);
+}
+
+static cell *
+err_seek(long errnum)
+{
+  stack *s = err_catch_stack;
+  cell *t = NULL;
+
+  for (;s; s = s->prev)
+  {
+    t = (cell*)s->value;
+    if (!t || t->flag == errnum) break;
+    err_catch_array[t->flag]--;
+    free(t);
+  }
+  if (!t) reset_traps(1);
+  return t;
+}
+
+/* kill last handler for error number n */
+void 
+err_leave_default(long n)
+{
+  stack *s = err_catch_stack, *lasts = NULL;
+  cell *c;
+
+  if (!s) return;
+  while (s)
+  {
+    c = (cell*)s->value;
+    if (c->flag == n)
+    { /* kill */
+      stack *v = s->prev;
+      free((void*)s); s = v;
+      if (lasts) lasts->prev = s;
+      break;
+    }
+    else lasts = s;
+  }
+  if (!lasts)
+  {
+    err_catch_stack = s;
+    if (!s) reset_traps(0);
+  }
+}
+
+/* untrapped error: remove all traps depending from a longjmp */
+static void
+err_clean()
+{
+  stack *s = err_catch_stack, *lasts = NULL;
+  cell *c;
+
+  if (!s) return;
+  while (s)
+  {
+    c = (cell*)s->value;
+    if (c->env)
+    { /* kill */
+      stack *v = s->prev;
+      free((void*)s); s = v;
+      if (lasts) lasts->prev = s;
+    }
+    else
+    { /* preserve */
+      if (lasts) lasts->prev = s; else err_catch_stack = s;
+      lasts = s;
+    }
+  }
+  if (!lasts)
+  {
+    err_catch_stack = NULL;
+    reset_traps(0);
+  }
 }
 
 static int
@@ -862,32 +957,31 @@ void
 err(long numerr, ...)
 {
   char s[128], *ch1;
-  int ret = 0, trap = 0;
+  int ret = 0;
   PariOUT *out = pariOut;
   va_list ap;
+  cell *trapped = NULL;
 
   va_start(ap,numerr);
 
   if (err_catch_stack && !is_warn(numerr))
   {
-    if (err_catch_stack[numerr]) trap = numerr;
-    else if (err_catch_stack[noer]) trap = noer;
-  }
-  if (trap)
-  { /* all errors (noer), or numerr individually trapped */
-    cell *a = (cell*) err_catch_stack[trap]->value;
-    void *e = a->env;
-    global_err_data = a->data;
-    /* disable trap to avoid infinite recursion if we need a temp buffer */
-    if (numerr == memer)
-    {
-      err(warner,"not enough memory: trap disabled");
-      (void)err_leave(trap);
+    int trap = 0;
+    if (numerr != memer)
+    { /* for fear of infinite recursion don't trap memory errors */
+      if (err_catch_array[numerr]) trap = numerr;
+      else if (err_catch_array[noer]) trap = noer;
     }
+    if (trap) trapped = err_seek(trap); else err_clean();
+  }
+  if (trapped)
+  { /* all errors (noer), or numerr individually trapped */
+    void *e = trapped->env;
+    global_err_data = trapped->data;
     if (e) longjmp(e, numerr);
   }
   else
-  global_err_data = NULL;
+    global_err_data = NULL;
 
   if (!added_newline) { pariputc('\n'); added_newline=1; }
   pariflush(); pariOut = pariErr;
@@ -983,7 +1077,7 @@ err(long numerr, ...)
     fprintferr("  [hint] you can increase GP stack with allocatemem()\n");
   }
   pariOut = out;
-  if (ret || (trap && default_exception_handler &&
+  if (ret || (trapped && default_exception_handler &&
               default_exception_handler(numerr))) { flusherr(); return; }
   err_recover(numerr); exit(1); /* not reached */
 }

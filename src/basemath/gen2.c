@@ -693,13 +693,14 @@ gegal(GEN x, GEN y)
   {
     jmp_buf env;
     long *AV = &avma;
+    void *c;
     if (setjmp(env)) i = 0;
     else
     {
-      err_catch(-1, env, NULL);
+      c = err_catch(-1, env, NULL);
       i = gcmp0(gadd(x, gneg_i(y)));
     }
-    (void)err_leave(-1);
+    err_leave(&c);
     avma = *AV;
   }
   return i;

@@ -2363,10 +2363,13 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   long n = lg(a), av0 = avma, av1,av,tetpil,lim, i,j,k,s,maxrank,*x;
   double p,borne,*v,*y,*z,**q, eps = 0.000001;
 
+  maxrank = 0; res = V = NULL; /* gcc -Wall */
   switch(flag)
   {
     case min_FIRST: res = cgetg(3,t_VEC); break;
-    case min_ALL: res = cgetg(4,t_VEC);
+    case min_ALL: res = cgetg(4,t_VEC); break;
+    case min_PERF: break;
+    default: err(talker, "incorrect flag in minim00");
   }
   av=avma;
 
@@ -2771,9 +2774,9 @@ GEN
 fincke_pohst(GEN a,GEN bound,GEN stockmax,long flag, long prec,
              GEN (*check)(GEN))
 {
-  int reset_err = 0;
   long pr,av=avma,i,j,n;
   GEN B,nf,r,rinvtrans,v,v1,u,s,res,z,vnorm,sperm,perm,uperm,basis,gram;
+  void *catch = NULL;
 
   if (DEBUGLEVEL>2) { fprintferr("entering fincke_pohst\n"); flusherr(); }
   if (typ(a) == t_VEC) { nf = a; a = gmael(nf,5,3); } else nf = NULL;
@@ -2831,8 +2834,7 @@ fincke_pohst(GEN a,GEN bound,GEN stockmax,long flag, long prec,
   { /* catch precision problems (truncation error) */
     jmp_buf env;
     if (setjmp(env)) goto PRECPB;
-    err_catch(truer2, env, NULL);
-    reset_err = 1;
+    catch = err_catch(truer2, env, NULL);
   }
 
   if (nf) basis = init_chk(nf,uperm,NULL);
@@ -2861,7 +2863,7 @@ fincke_pohst(GEN a,GEN bound,GEN stockmax,long flag, long prec,
     if (!check || lg(res[2]) > 1) break;
     if (DEBUGLEVEL>2) fprintferr("  i = %ld failed\n",i);
   }
-  (void)err_leave(truer2);
+  err_leave(&catch); catch = NULL;
   if (check)
   {
     GEN p1 = (GEN)res[2];
@@ -2875,7 +2877,7 @@ fincke_pohst(GEN a,GEN bound,GEN stockmax,long flag, long prec,
   z[2]=pr? lcopy((GEN)res[2]) : lround((GEN)res[2]);
   z[3]=lmul(uperm, (GEN)res[3]); return gerepileupto(av,z);
 PRECPB:
-  if (reset_err) (void)err_leave(truer2);
+  if (catch) err_leave(&catch);
   if (!(flag & 1))
     err(talker,"not a positive definite form in fincke_pohst");
   avma = av; return NULL;
