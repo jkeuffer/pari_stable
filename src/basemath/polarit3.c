@@ -251,15 +251,19 @@ quickmul(GEN a, GEN b, long na, long nb)
     c1 = addpol(b0,b, nb,n0b);
 
     c1 = quickmul(c1+2,c2+2, lgpol(c1),lgpol(c2));
-    c2 = gneg_i(gadd(c0,c));
-    c0 = addmulXn(c0, gadd(c1,c2), n0);
+    c2 = gadd(c1, gneg_i(gadd(c0,c)));
+    if (signe(c0)) {
+      c0 = addmulXn(c0, c2, n0);
+      c0 = addmulXncopy(c0,c,n0);
+    }
   }
   else
   {
     c = quickmul(a,b,n0a,nb);
     c0 = quickmul(a0,b,na,nb);
+    if (signe(c0))
+      c0 = addmulXncopy(c0,c,n0);
   }
-  c0 = addmulXncopy(c0,c,n0);
   return shiftpol_ip(gerepileupto(av,c0), v);
 }
 
