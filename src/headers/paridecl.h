@@ -47,7 +47,6 @@ GEN     Flx_mul(GEN x, GEN y, ulong p);
 GEN     Flx_neg(GEN x, ulong p);
 GEN     Flx_neg_inplace(GEN x, ulong p);
 GEN     Flx_normalize(GEN z, ulong p);
-GEN     Flx_polx(long sv);
 GEN     Flx_pow(GEN x, long n, ulong p);
 GEN     Flx_recip(GEN x);
 GEN     Flx_red(GEN z, ulong p);
@@ -55,6 +54,7 @@ GEN     Flx_rem_montgomery(GEN x, GEN mg, GEN T, ulong p);
 GEN     Flx_rem(GEN x, GEN y, ulong p);
 GEN     Flx_renormalize(GEN x, long l);
 ulong   Flx_resultant(GEN a, GEN b, ulong p);
+GEN     Flx_shift(GEN a, ulong n, ulong p);
 GEN     Flx_sqr(GEN x, ulong p);
 GEN     Flx_sub(GEN x, GEN y, ulong p);
 long    Flx_valuation(GEN x);
@@ -81,7 +81,8 @@ GEN     ZV_Flv(GEN x, ulong p);
 GEN     ZX_Flx(GEN x, ulong p);
 GEN     ZXV_FlxV(GEN v, ulong p);
 GEN     ZXX_FlxX(GEN B, ulong p, long v);
-GEN     zero_Flx(long v);
+GEN     polx_Flx(long sv);
+GEN     zero_Flx(long sv);
 
  /* alglin1.c */
 

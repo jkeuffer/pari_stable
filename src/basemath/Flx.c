@@ -144,13 +144,10 @@ zero_Flx(long sv)
   x[1] = sv; return x;
 }
 
-/* FIXME: should be polx_zx or something
- * since it does not take a Flx as input.
- *
- * Flx_polx=zx_polx*/
+/* polx_Flx=polx_zx*/
 
 GEN
-Flx_polx(long sv)
+polx_Flx(long sv)
 {
   GEN z = cgetg(4, t_VECSMALL);
   z[1] = sv;
@@ -354,6 +351,21 @@ Flx_Fl_mul(GEN y, ulong x, ulong p)
   else
     for(i=2; i<l; i++) z[i] = (y[i] * x) % p;
   return z;
+}
+
+/*
+ * Return a*x^n
+ */
+
+GEN
+Flx_shift(GEN a, ulong n, ulong p)
+{
+  long i, l = lg(a);
+  GEN  b = cgetg_copy(l+n, a);
+  b[1] = a[1];
+  for (i=0; i<n; i++) b[2+i] = 0;
+  for (i=2; i<l; i++) b[i+n] = a[i];
+  return b;
 }
 
 GEN
@@ -902,7 +914,7 @@ Flx_invmontgomery_newton(GEN T, ulong p)
     x=Flx_copy(x);
     avma=av2;
   }
-  q=Flx_mul(q,Flx_polx(v),p);
+  q=Flx_shift(q,1,p);
   return q;
 }
 

@@ -558,7 +558,7 @@ Flx_Berlekamp_ker(GEN u, ulong p)
   pari_timer T;
   TIMER(&T);
   Q = cgetg(N+1,t_VEC); Q[1] = (long) vecsmall_const(N,0);
-  w = v = Flxq_pow(Flx_polx(u[1]),stoi(p),u,p);
+  w = v = Flxq_pow(polx_Flx(u[1]),stoi(p),u,p);
   for (j=2; j<=N; j++)
   {
     p1 = Flx_Flv_lg(w, N);
@@ -709,7 +709,7 @@ Flx_Frobenius(GEN u, ulong p)
   Q = cgetg(N+1,t_MAT); 
   Q[1] = (long)vecsmall_const(N, 0);
   coeff(Q,1,1) = 1;
-  w = v = Flxq_pow(Flx_polx(u[1]), utoi(p), u, p);
+  w = v = Flxq_pow(polx_Flx(u[1]), utoi(p), u, p);
   for (j=2; j<=N; j++)
   {
     Q[j] = (long)Flx_Flv_lg(w, N);
@@ -728,7 +728,7 @@ long
 Flx_nbfact(GEN z, ulong p)
 {
   long lgg, nfacp = 0, d = 0, e = degpol(z);
-  GEN g, w, MP = Flx_Frobenius(z, p), PolX = Flx_polx(0);
+  GEN g, w, MP = Flx_Frobenius(z, p), PolX = polx_Flx(0);
 
   w = PolX;
   while (d < (e>>1))
@@ -762,7 +762,7 @@ Flx_nbroots(GEN f, ulong p)
   pari_sp av = avma;
   GEN z, X;
   if (n <= 1) return n;
-  X = Flx_polx(f[1]);
+  X = polx_Flx(f[1]);
   z = Flxq_pow(X, utoi(p), f, p);
   z = Flx_sub(z, X, p);
   z = Flx_gcd(z, f, p);

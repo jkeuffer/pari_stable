@@ -1484,7 +1484,7 @@ Flm_Frobenius(GEN M, long r, ulong p, long v)
 {
   GEN W, V = cgetg(r+2,t_VEC);
   long i;
-  V[1] = (long) Flx_polx(v); if (!r) return V;
+  V[1] = (long) polx_Flx(v); if (!r) return V;
   V[2] = (long) Flv_Flx((GEN)M[2],v);
   W = (GEN)M[2];
   for (i = 3; i <= r+1; ++i)
