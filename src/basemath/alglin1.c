@@ -1739,7 +1739,7 @@ gauss_get_prec(GEN x, long prec)
 }
 
 static long
-gauss_get_pivot_NZ(GEN x, GEN x0/* unused */, GEN c, long i0)
+gauss_get_pivot_NZ(GEN x, GEN x0/*@unused@*/, GEN c, long i0)
 {
   long i,lx = lg(x);
   if (c)
@@ -2513,7 +2513,7 @@ FpM_invimage(GEN m, GEN v, GEN p)
  Rather stupid implementation of linear algebra in finite fields
  **************************************************************/
 static GEN
-Fq_add(GEN x, GEN y, GEN T/*unused*/, GEN p)
+Fq_add(GEN x, GEN y, GEN T/*@unused@*/, GEN p)
 {
   switch((typ(x)==t_POL)|((typ(y)==t_POL)<<1))
   {

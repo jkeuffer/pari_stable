@@ -485,7 +485,7 @@ auxdecomp1(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
 /* state[1]: current unfactored part.
  * state[2]: limit. */
 static long
-ifac_break_limit(GEN n, GEN pairs/*unused*/, GEN here, GEN state)
+ifac_break_limit(GEN n, GEN pairs/*@unused@*/, GEN here, GEN state)
 {
   gpmem_t ltop = avma;
   int res;
