@@ -96,7 +96,7 @@ g(ulong q, ulong h)
     i2 = gen_0;
     for (k = 1; k < q; k++)
     {
-      addiiz(mulss(k, (kh << 1) - q), i2, i2);
+      i2 = addii(mulss(k, (kh << 1) - q), i2);
       if ((k & 31) == 0) i2 = gerepileuptoint(av, i2);
       kh += h; if (kh >= q) kh -= q;
     }

@@ -256,7 +256,7 @@ ordmax(GEN *cf, GEN p, long epsilon, GEN *ptdelta)
   const GEN ppo2 = shifti(pp,-1);
   const long pps = (2*expi(pp)+2 < (long)BITS_IN_LONG)? pp[2]: 0;
 
-  if (cmpis(p,n) > 0)
+  if (cmpiu(p,n) > 0)
   {
     hard_case_exponent = NULL;
     sp = 0; /* gcc -Wall */
@@ -496,7 +496,7 @@ allbase2(GEN f, int flag, GEN *dx, GEN *dK, GEN *ptw)
       }
     }
     for (j=2; j<=n; j++)
-      if (egalii(gcoeff(at,j,j), gcoeff(at,j-1,j-1)))
+      if (equalii(gcoeff(at,j,j), gcoeff(at,j-1,j-1)))
       {
         coeff(at,1,j)= (long)gen_0;
         for (k=2; k<=j; k++) coeff(at,k,j)=coeff(at,k-1,j-1);
@@ -672,7 +672,7 @@ allbase(GEN f, int flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
     for (j=2; j<=n; j++) *index = mulii(*index, diviiexact(da, gcoeff(a,j,j)));
     *dK = diviiexact(*dK, sqri(*index));
     for (j=n-1; j; j--)
-      if (cmpis(gcoeff(a,j,j),2) > 0)
+      if (cmpiu(gcoeff(a,j,j),2) > 0)
       {
         p1 = shifti(gcoeff(a,j,j),-1);
         for (k=j+1; k<=n; k++)
@@ -829,7 +829,7 @@ maxord(GEN p,GEN f,long mf)
   const pari_sp av = avma;
   GEN w = NULL, g, res, fp = FpX_red(f, p);
 
-  if (cmpsi(degpol(f),p) < 0)
+  if (cmpui(degpol(f),p) < 0)
     g = FpX_div(fp, FpX_gcd(fp,derivpol(fp), p), p);
   else
   {
@@ -878,7 +878,7 @@ gcdpm(GEN f1, GEN f2, GEN pm)
   long c, n = degpol(f1), v = varn(f1);
   GEN col, a = sylpm(f1,f2,pm);
   for (c = 1; c <= n; c++)
-    if (!egalii(gcoeff(a,c,c), pm))
+    if (!equalii(gcoeff(a,c,c), pm))
     {
       col = gdiv((GEN)a[c], gcoeff(a,c,c));
       return gerepilecopy(av, RgV_to_RgX(col,v));
@@ -893,7 +893,7 @@ respm(GEN x, GEN y, GEN pm)
   pari_sp av = avma;
   GEN z = sylpm(x,y,pm);
   z = gcoeff(z,1,1);
-  if (egalii(z,pm)) { avma = av; return gen_0; }
+  if (equalii(z,pm)) { avma = av; return gen_0; }
   return gerepileuptoint(av, icopy(z));
 }
 
@@ -1270,7 +1270,7 @@ fastvalpos(GEN a, GEN chi, GEN p, GEN ns, long E)
   GEN v, d, pp;
   long m, n = degpol(chi), j, c;
 
-  c = egalii(p, gen_2)? 2*n/3 : min(2*E, n);
+  c = equalii(p, gen_2)? 2*n/3 : min(2*E, n);
   if (c < 2) c = 2;
   a = Q_remove_denom(a, &d);
   m = d? Z_pval(d, p): 0; /* >= 0 */
@@ -1702,7 +1702,7 @@ loop(decomp_t *S, long nv, long Ea, long Fa, GEN ns)
         S->chi= chie; composemod(S, eta, S->phi); return 1;
       }
 
-      if (gegal(nue, polx[v]))
+      if (gequal(nue, polx[v]))
       { /* vp(eta) = vp(gamma - delta) > 0 */
         long Le, Ee;
         GEN pie;
@@ -2081,7 +2081,7 @@ pradical(GEN nf, GEN p, GEN *phi)
     frob[i] = (long)element_powid_mod_p(nf,i,p, p);
 
   m = frob; q = p;
-  while (cmpis(q,N) < 0) { q = mulii(q,p); m = FpM_mul(m, frob, p); }
+  while (cmpiu(q,N) < 0) { q = mulii(q,p); m = FpM_mul(m, frob, p); }
   rad = FpM_ker(m, p); /* m = Frob^k, s.t p^k >= N */
   for (i=1; i<=N; i++)
     coeff(frob,i,i) = lsubis(gcoeff(frob,i,i), 1);
@@ -2274,7 +2274,7 @@ ffdegree(GEN x, GEN frob, GEN p)
   for (d=1; d < f; d++)
   {
     y = FpM_FpV_mul(frob, y, p);
-    if (gegal(y, x)) break;
+    if (gequal(y, x)) break;
   }
   avma = av; return d;
 }
@@ -2887,7 +2887,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
   nfT = (GEN)nf[1];
   n = degpol(pol); vpol = varn(pol);
   q = T? gpowgs(p,degpol(T)): p;
-  q1 = q; while (cmpis(q1,n) < 0) q1 = mulii(q1,q);
+  q1 = q; while (cmpiu(q1,n) < 0) q1 = mulii(q1,q);
   rnfId = idmat(n);
   id    = idmat(degpol(nfT));
 
@@ -2909,7 +2909,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
     {
       GEN tau, tauinv;
       long v1, v2;
-      if (gegal((GEN)I[j],id)) { Tau[j] = Tauinv[j] = (long)gen_1; continue; }
+      if (gequal((GEN)I[j],id)) { Tau[j] = Tauinv[j] = (long)gen_1; continue; }
 
       p1 = ideal_two_elt(nf,(GEN)I[j]);
       v1 = element_val(nf,(GEN)p1[1],pr);
@@ -2990,7 +2990,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
         I[j] = (long)idealmul(nf,       (GEN)Tau[j],    (GEN)I[j] );
       }
     if (DEBUGLEVEL>3) fprintferr(" new order:\n%Z\n%Z\n", W, I);
-    if (sep <= 3 || gegal(I,I0)) break;
+    if (sep <= 3 || gequal(I,I0)) break;
 
     if (low_stack(lim, stack_lim(av1,1)) || (cmpt & 3) == 0)
     {
@@ -3031,7 +3031,7 @@ fix_relative_pol(GEN nf, GEN x, int chk_lead)
         check_pol((GEN)x[i], vnf);
         x[i] = lmodulcp((GEN)x[i], xnf); break;
       case t_POLMOD:
-        if (!gegal(gmael(x,i,1), xnf)) err(consister,"rnf function");
+        if (!gequal(gmael(x,i,1), xnf)) err(consister,"rnf function");
         break;
       default: err(typeer, "rnf function");
     }
@@ -3100,7 +3100,7 @@ rnfallbase(GEN nf, GEN pol, GEN *pD, GEN *pd, GEN *pf)
   I = (GEN)z[2];
   d = get_d(nf, pol, A);
 
-  i=1; while (i<=n && gegal((GEN)I[i], id)) i++;
+  i=1; while (i<=n && gequal((GEN)I[i], id)) i++;
   if (i > n) { D = gen_1; if (pf) *pf = gen_1; }
   else
   {
@@ -3165,11 +3165,11 @@ rnfsimplifybasis(GEN bnf, GEN x)
   Iz = cgetg(l, t_VEC); x[2] = (long)Iz;
   for (i = 1; i < l; i++)
   {
-    if (gegal((GEN)I[i],id)) { Iz[i] = (long)id; Az[i] = A[i]; continue; }
+    if (gequal((GEN)I[i],id)) { Iz[i] = (long)id; Az[i] = A[i]; continue; }
 
     Iz[i] = (long)Q_primitive_part((GEN)I[i], &p1);
     Az[i] = p1? lmul((GEN)A[i],p1): A[i];
-    if (p1 && gegal((GEN)Iz[i], id)) continue;
+    if (p1 && gequal((GEN)Iz[i], id)) continue;
 
     p1 = gen_if_principal(bnf, (GEN)Iz[i]);
     if (p1)
@@ -3260,12 +3260,12 @@ rnfsteinitz(GEN nf, GEN order)
   for (i=1; i<n; i++)
   {
     GEN c1,c2;
-    a = (GEN)I[i]; if (gegal(a,Id)) continue;
+    a = (GEN)I[i]; if (gequal(a,Id)) continue;
 
     c1 = (GEN)A[i];
     c2 = (GEN)A[i+1];
     b = (GEN)I[i+1];
-    if (gegal(b,Id))
+    if (gequal(b,Id))
     {
       A[i]  = (long)c2;
       A[i+1]= lneg(c1);
@@ -3304,7 +3304,7 @@ rnfbasis(GEN bnf, GEN order)
   id = idmat(degpol(nf[1]));
   order = get_order(nf, order, "rnfbasis");
   I = (GEN)order[2]; n = lg(I)-1;
-  j=1; while (j<n && gegal((GEN)I[j],id)) j++;
+  j=1; while (j<n && gequal((GEN)I[j],id)) j++;
   if (j<n)
   {
     order = rnfsteinitz(nf,order);
@@ -3342,7 +3342,7 @@ rnfhermitebasis(GEN bnf, GEN order)
   I = (GEN)order[2]; n = lg(A)-1;
   for (j=1; j<=n; j++)
   {
-    if (gegal((GEN)I[j],id)) continue;
+    if (gequal((GEN)I[j],id)) continue;
 
     a = gen_if_principal(bnf, (GEN)I[j]);
     if (!a) { avma = av; return gen_0; }
@@ -3363,12 +3363,12 @@ _rnfisfree(GEN bnf, GEN order)
   nf = (GEN)bnf[7]; id = idmat(degpol(nf[1]));
   order = get_order(nf, order, "rnfisfree");
   I = (GEN)order[2]; n = lg(I)-1;
-  j=1; while (j<=n && gegal((GEN)I[j],id)) j++;
+  j=1; while (j<=n && gequal((GEN)I[j],id)) j++;
   if (j>n) return 1;
 
   p1 = (GEN)I[j];
   for (j++; j<=n; j++)
-    if (!gegal((GEN)I[j],id)) p1 = idealmul(nf,p1,(GEN)I[j]);
+    if (!gequal((GEN)I[j],id)) p1 = idealmul(nf,p1,(GEN)I[j]);
   return gcmp0( isprincipal(bnf,p1) );
 }
 
@@ -3390,7 +3390,7 @@ GEN
 polcompositum0(GEN A, GEN B, long flall)
 {
   pari_sp av = avma;
-  int same = (A == B || gegal(A,B));
+  int same = (A == B || gequal(A,B));
   long v, k;
   GEN C, D, LPRS;
 

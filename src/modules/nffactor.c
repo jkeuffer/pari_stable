@@ -489,12 +489,6 @@ ZX_get_prec(GEN x)
   return k;
 }
 
-static GEN
-complex_bound(GEN P)
-{
-  return gmul(max_modulus(P, 0.01), dbltor(1.0101)); /* exp(0.01) = 1.0100 */
-}
-
 /* return Bs: if r a root of sigma_i(P), |r| < Bs[i] */
 static GEN
 nf_root_bounds(GEN P, GEN T)
@@ -502,7 +496,7 @@ nf_root_bounds(GEN P, GEN T)
   long lR, i, j, l, prec;
   GEN Ps, R, V, nf;
 
-  if (RgX_is_rational(P)) return complex_bound(P);
+  if (RgX_is_rational(P)) return logmax_modulus_bound(P);
   T = get_nfpol(T, &nf);
 
   prec = ZXY_get_prec(P);
@@ -519,7 +513,7 @@ nf_root_bounds(GEN P, GEN T)
   {
     GEN r = (GEN)R[j];
     for (i=2; i<l; i++) Ps[i] = (long)poleval((GEN)P[i], r);
-    V[j] = (long)complex_bound(Ps);
+    V[j] = (long)logmax_modulus_bound(Ps);
   }
   return V;
 }
@@ -1237,7 +1231,7 @@ AGAIN:
     if (DEBUGLEVEL>2) msgTIMER(&ti2, "for this trace");
 
     i = lg(CM_L) - 1;
-    if (i == r && gegal(CM_L, oldCM_L))
+    if (i == r && gequal(CM_L, oldCM_L))
     {
       CM_L = oldCM_L;
       avma = av2; continue;

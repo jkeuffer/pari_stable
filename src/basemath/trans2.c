@@ -1196,14 +1196,14 @@ ggamma(GEN x, long prec)
   {
     case t_INT:
       if (signe(x) <= 0) err(talker,"non-positive integer argument in ggamma");
-      if (cmpis(x,481177) > 0) err(talker,"argument too large in ggamma");
+      if (cmpiu(x,481177) > 0) err(talker,"argument too large in ggamma");
       return mpfactr(itos(x) - 1, prec);
 
     case t_REAL: case t_COMPLEX:
       return cxgamma(x, 0, prec);
 
     case t_FRAC:
-      if (!egalii((GEN)x[2], gen_2)) break;
+      if (!equalii((GEN)x[2], gen_2)) break;
       z = (GEN)x[1]; /* true argument is z/2 */
       if (is_bigint(z) || labs(m = itos(z)) > 962354)
       {
@@ -1245,7 +1245,7 @@ glngamma(GEN x, long prec)
   {
     case t_INT:
       if (signe(x) <= 0) err(talker,"non-positive integer in glngamma");
-      if (cmpis(x,200 + 50*(prec-2)) > 0) /* heuristic */
+      if (cmpiu(x,200 + 50*(prec-2)) > 0) /* heuristic */
 	return cxgamma(x, 1, prec);
       av = avma;
       return gerepileuptoleaf(av, logr_abs( itor(mpfact(itos(x) - 1), prec) ));

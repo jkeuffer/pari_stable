@@ -498,7 +498,7 @@ int
 perm_commute(GEN p, GEN q)
 {
   pari_sp ltop = avma;
-  int r = gegal(perm_mul(p,q), perm_mul(q,p));
+  int r = gequal(perm_mul(p,q), perm_mul(q,p));
   avma = ltop; return r;
 }
 
@@ -741,7 +741,7 @@ long
 group_perm_normalize(GEN N, GEN g)
 {
   pari_sp ltop = avma;
-  long r = gegal(vecvecsmall_sort(group_leftcoset(N, g)),
+  long r = gequal(vecvecsmall_sort(group_leftcoset(N, g)),
                 vecvecsmall_sort(group_rightcoset(N, g)));
   avma = ltop; return r;
 }
@@ -831,7 +831,7 @@ group_subgroups(GEN G)
       GEN t = (GEN)gen[2]; /*t=(1,3)(2,4)*/
       GEN u = (GEN)gen[3];
       GEN v = (GEN)gen[4], st = perm_mul(s,t), w, u2;
-      if (gegal(perm_conj(u,s), t)) /*u=(2,3,4)*/
+      if (gequal(perm_conj(u,s), t)) /*u=(2,3,4)*/
         u2 = perm_mul(u,u); 
       else 
       { 
@@ -850,10 +850,10 @@ group_subgroups(GEN G)
       else
       {
         w = v;
-        if (!gegal(perm_mul(w,w), s)) /*w=(1,4,2,3)*/
+        if (!gequal(perm_mul(w,w), s)) /*w=(1,4,2,3)*/
         {
           w = perm_conj(u,w);
-          if (!gegal(perm_mul(w,w), s)) w = perm_conj(u,w);
+          if (!gequal(perm_mul(w,w), s)) w = perm_conj(u,w);
         }
         v = perm_mul(w,t); /*v=(1,2)*/
       }
@@ -934,7 +934,7 @@ group_abelianHNF(GEN G, GEN S)
     M[i] = (long)C;
     P = perm_pow((GEN)g[i], o[i]);
     for(j=1; j<lg(S); j++)
-      if (gegal(P, (GEN)S[j])) break;
+      if (gequal(P, (GEN)S[j])) break;
     avma = av;
     if (j==lg(S)) err(talker,"wrong argument in galoisisabelian");
     j--;

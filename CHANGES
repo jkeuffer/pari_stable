@@ -44,6 +44,26 @@ Done for version 2.2.10 (released ??/??/2005):
 BA  1- gp2c description of == operator was broken.
     2- asin(I) --> SEGV
 
+  Added
+    1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu
+    2- exported FFTinit() / FFT() wrappers to rootpol.c:fft() [not under GP yet]
+
+  Changed
+    1- renamed gegal --> gequal, gegalgs --> gequalgs, gegalsg --> gequalsg,
+       egalii --> equalii
+    2- improve trial division in all basic arithmetic functions [ e.g try
+       for(i=1,10^5, factor(1009)), or moebius, or ... ]. Old logic was
+       broken for small inputs (tried far too many primes)
+    3- improve quadclassunit(D >> 1), about 5 to 7 times faster in the 40
+       digits range [forbid long reduction cycles (too costly to update arch.
+       info when a relation is found + streamline factorquad() ]. See
+       Z_lvalrem_stop()
+    4- streamline/clean-up polroots [ complete rewrite, much faster for
+       small degrees ].
+    5- improved zetakinit() [save some multiplications, about half of them
+       for quadratic fields. Less so as the degree increases. ]
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.9 (released 23/12/2004):
   Fixed

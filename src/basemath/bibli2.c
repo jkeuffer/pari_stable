@@ -416,7 +416,7 @@ gprec_w(GEN x, long pr)
     case t_COMPLEX: case t_POLMOD: case t_POL: case t_RFRAC:
     case t_VEC: case t_COL: case t_MAT:
       y = init_gen_op(x, tx, &lx, &i);
-      for (; i<lx; i++) y[i]=(long)gprec_w((GEN)x[i],pr);
+      for (; i<lx; i++) y[i] = (long)gprec_w((GEN)x[i],pr);
       break;
     default: return x;
   }
@@ -653,7 +653,7 @@ gtoset(GEN x)
   y = sort(y);
   c=1;
   for (i=2; i<lx; i++)
-    if (!gegal((GEN)y[i], (GEN)y[c])) y[++c] = y[i];
+    if (!gequal((GEN)y[i], (GEN)y[c])) y[++c] = y[i];
   setlg(y,c+1); return gerepilecopy(av,y);
 }
 

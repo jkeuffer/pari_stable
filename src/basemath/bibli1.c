@@ -1756,7 +1756,7 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
     return gerepileupto(av, do_exhaustive(P0, N, itos(X), B)); 
 
   /* bnd-hack is only for the case B = N */
-  if (!egalii(B,N)) bnd = 1;
+  if (!equalii(B,N)) bnd = 1;
 
   P = dummycopy(P0); d = degpol(P);
   if (!gcmp1((GEN)P[d+2]))
@@ -1865,7 +1865,7 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
     
       if (cmpii(tst, B) >= 0) /* We have found a factor of N >= B */
       {
-        for (l = 1; l < lg(sol) && !egalii(z, (GEN)sol[l]); l++) /*empty*/;
+        for (l = 1; l < lg(sol) && !equalii(z, (GEN)sol[l]); l++) /*empty*/;
         if (l == lg(sol)) sol = concatsp(sol, z);
       }
     }
@@ -2747,7 +2747,7 @@ plindep(GEN x)
 
     j = precp(p1); if (j < prec) prec = j;
     if (!p) p = (GEN)p1[2];
-    else if (!egalii(p, (GEN)p1[2]))
+    else if (!equalii(p, (GEN)p1[2]))
       err(talker,"inconsistent primes in plindep");
   }
   if (!p) err(talker,"not a p-adic vector in plindep");

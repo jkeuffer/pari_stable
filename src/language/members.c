@@ -289,10 +289,10 @@ member_tu(GEN x)
     {
       case typ_Q:
         y = discsr((GEN)x[1]);
-        if (signe(y)<0 && cmpis(y,-4)>=0)
+        if (signe(y)<0 && cmpiu(y,4)<=0) /* |y| <= 4 */
           y = stoi((itos(y) == -4)? 4: 6);
         else
-        { y = gen_2; x=gen_m1; }
+        { y = gen_2; x = gen_m1; }
         res[1] = (long)y;
         res[2] = (long)x; return res;
       case typ_CLA:

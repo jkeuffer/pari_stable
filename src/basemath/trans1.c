@@ -747,7 +747,7 @@ gpow(GEN x, GEN n, long prec)
     }
     else if (tx == t_PADIC)
     {
-      if (egalii(d, gen_2))
+      if (equalii(d, gen_2))
         z = padic_sqrt(x);
       else
         z = padic_sqrtn(x, d, NULL);
@@ -857,7 +857,7 @@ padic_sqrt(GEN x)
   mod = (GEN)x[3];
   x   = (GEN)x[4]; /* lift to int */
   e >>= 1; av = avma;
-  if (egalii(gen_2, p))
+  if (equalii(gen_2, p))
   {
     long r = mod8(x);
     if (pp <= 3)
@@ -1250,7 +1250,7 @@ paexp(GEN x)
   long k, e = valp(x), pp = precp(x), n = e + pp;
   pari_sp av;
   GEN y, r, p = (GEN)x[2];
-  int is2 = egalii(gen_2, p);
+  int is2 = equalii(gen_2, p);
 
   if (gcmp0(x)) return gaddgs(x,1);
   if (e <= 0 || (e == 1 && is2)) return NULL;
@@ -1664,7 +1664,7 @@ teich(GEN x)
   p = (GEN)x[2];
   q = (GEN)x[3];
   z = (GEN)x[4]; y = cgetp(x); av = avma;
-  if (egalii(p, gen_2))
+  if (equalii(p, gen_2))
     z = (mod4(z) & 2)? addsi(-1,q): gen_1;
   else
   {
@@ -1686,20 +1686,20 @@ palogaux(GEN x)
   long k,e,pp;
   GEN y,s,y2, p = (GEN)x[2];
 
-  if (egalii(gen_1, (GEN)x[4]))
+  if (equalii(gen_1, (GEN)x[4]))
   {
     long v = valp(x)+precp(x);
-    if (egalii(gen_2,p)) v--;
+    if (equalii(gen_2,p)) v--;
     return zeropadic(p, v);
   }
   y = gdiv(gaddgs(x,-1), gaddgs(x,1));
   e = valp(y); /* > 0 */
   pp = e+precp(y);
-  if (egalii(gen_2,p)) pp--;
+  if (equalii(gen_2,p)) pp--;
   else
   {
     GEN p1;
-    for (p1=utoipos(e); cmpsi(pp,p1)>0; pp++) p1 = mulii(p1, p);
+    for (p1=utoipos(e); cmpui(pp,p1) > 0; pp++) p1 = mulii(p1, p);
     pp -= 2;
   }
   k = pp/e; if (!odd(k)) k--;
@@ -1718,7 +1718,7 @@ palog(GEN x)
   GEN y, p = (GEN)x[2];
 
   if (!signe(x[4])) err(talker,"zero argument in palog");
-  if (egalii(p, gen_2))
+  if (equalii(p, gen_2))
   {
     y = gsqr(x); setvalp(y,0);
     y = palogaux(y);

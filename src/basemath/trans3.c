@@ -2043,7 +2043,7 @@ inteta(GEN q)
     {
       p1=gneg_i(gmul(ps,gmul(q,gsqr(qn))));
       y=gadd(y,p1); qn=gmul(qn,q); ps=gmul(p1,qn);
-      p1=y; y=gadd(y,ps); if (gegal(p1,y)) return y;
+      p1=y; y=gadd(y,ps); if (gequal(p1,y)) return y;
     }
   }
   else

@@ -228,7 +228,7 @@ hnfcenter_ip(GEN M)
   for (j=N-1; j>0; j--)
   {
     Mj = (GEN)M[j]; a = (GEN)Mj[j];
-    if (cmpis(a, 2) <= 0) continue;
+    if (cmpiu(a, 2) <= 0) continue;
     a = shifti(a, -1);
     for (k = j+1; k <= N; k++)
     {

@@ -866,8 +866,19 @@ $\kbd{x}-\kbd{y}$.
 \fun{int}{cmprs}{GEN x, long s} compares the \typ{REAL}~\kbd{x} to the
 \kbd{long}~\kbd{s}.
 
-\fun{int}{egalii}{GEN x, GEN y} compares the \typ{INT}s \kbd{x} and~\kbd{y}.
+\fun{int}{equalii}{GEN x, GEN y} compares the \typ{INT}s \kbd{x} and~\kbd{y}.
 The result is $1$ if $\kbd{x} = \kbd{y}$, $0$ otherwise.
+
+\fun{int}{equalsi}{long s, GEN x}
+
+\fun{int}{equalis}{GEN x, long s} compare the \typ{INT} \kbd{x} and 
+the \kbd{long}~\kbd{s}. The result is $1$ if $\kbd{x} = \kbd{y}$, $0$ otherwise.
+
+\fun{int}{equalui}{ulong s, GEN x}
+
+\fun{int}{equaliu}{GEN x, ulong s} compare the \typ{INT} \kbd{x} and 
+the \kbd{ulong}~\kbd{s}. The result is $1$ if $|\kbd{x}| = \kbd{y}$, $0$
+otherwise.
 
 \fun{int}{absi_cmp}{GEN x, GEN y} compares the \typ{INT}s \kbd{x} and~\kbd{y}.
 The result is the sign of $|\kbd{x}| - |\kbd{y}|$.
@@ -1002,9 +1013,13 @@ $\kbd{x}$ and $\kbd{y}$ is \emph{odd}.
 \typ{INT}~\kbd{x}, assigns the quotient to the \typ{INT}~\kbd{z} and returns 1
 (true), otherwise returns 0 (false).
 
-\fun{int}{dvdisz}{GEN x, GEN y, GEN z} if the \typ{long}~\kbd{y} divides the
+\fun{int}{dvdisz}{GEN x, long y, GEN z} if the \typ{long}~\kbd{y} divides the
 \typ{INT}~\kbd{x}, assigns the quotient to the \typ{INT}~\kbd{z} and returns 1
 (true), otherwise returns 0 (false).
+
+\fun{int}{dvdiuz}{GEN x, ulong y, GEN z} if the \typ{ulong}~\kbd{y} divides
+the \typ{INT}~\kbd{x}, assigns the quotient $|\kbd{x}|/\kbd{y}$ to the
+\typ{INT}~\kbd{z} and returns 1 (true), otherwise returns 0 (false).
 
 \subsec{Division with remainder}. The following functions return two objects,
 unless specifically asked for only one of them~--- a quotient and a remainder.
@@ -2340,21 +2355,21 @@ with~\kbd{x}.
 \fun{long}{lexcmp}{GEN x, GEN y} comparison of \kbd{x} with \kbd{y} for the
 lexicographic ordering.
 
-\fun{long}{gegal}{GEN x, GEN y} returns 1 (true) if \kbd{x} is equal
+\fun{long}{gequal}{GEN x, GEN y} returns 1 (true) if \kbd{x} is equal
 to~\kbd{y}, 0~otherwise. A priori, this makes sense only if \kbd{x} and
 \kbd{y} have the same type. When the types are different, a \kbd{true} result
 means that \kbd{x - y} was successfully computed and found equal to $0$
 (by \kbd{gcmp0}). In particular
 \bprog
-  gegal(cgetg(1, t_VEC), gen_0)
+  gequal(cgetg(1, t_VEC), gen_0)
 @eprog\noindent is true, and the relation is not transitive. E.g.~an empty
 \typ{COL} and an empty \typ{VEC} are not equal but are both equal to
 \kbd{gen\_0}.
 
-\fun{long}{gegalsg}{long s, GEN x} returns 1 (true) if the \kbd{long}~\kbd{s}
+\fun{long}{gequalsg}{long s, GEN x} returns 1 (true) if the \kbd{long}~\kbd{s}
 is equal to~\kbd{x}, 0~otherwise.
 
-\fun{long}{gegalgs}{GEN x, long s} returns 1 (true) if \kbd{x} is equal to
+\fun{long}{gequalgs}{GEN x, long s} returns 1 (true) if \kbd{x} is equal to
 the \kbd{long}~\kbd{s}, 0~otherwise.
 
 \fun{long}{iscomplex}{GEN x} returns 1 (true) if \kbd{x} is a complex number

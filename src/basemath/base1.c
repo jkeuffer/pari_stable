@@ -150,7 +150,7 @@ check_pol_int(GEN x, char *s)
 GEN
 checknfelt_mod(GEN nf, GEN x, char *s)
 {
-  if (!gegal((GEN)x[1],(GEN)nf[1]))
+  if (!gequal((GEN)x[1],(GEN)nf[1]))
     err(talker,"incompatible modulus in %s:\n  mod = %Z,\n  nf  = %Z",
         s, x[1], nf[1]);
   return (GEN)x[2];
@@ -398,11 +398,11 @@ galois(GEN x, long prec)
   if (n > 7) return galoisbig(x, prec);
   for(;;)
   {
-    GEN cb = cauchy_bound(x);
+    double cb = cauchy_bound(x);
     switch(n)
     {
       case 4: z = cgetg(7,t_VEC);
-        prec = DEFAULTPREC + (long)((gexpo(cb)*18. / BITS_IN_LONG));
+        prec = DEFAULTPREC + (long)(cb*(18./ LOG2 / BITS_IN_LONG));
         for(;;)
 	{
 	  p1=cleanroots(x,prec);
@@ -433,7 +433,7 @@ galois(GEN x, long prec)
       case 5: z = cgetg(7,t_VEC);
         ee= cgetg(7,t_VECSMALL);
         w = cgetg(7,t_VECSMALL);
-        prec = DEFAULTPREC + (long)((gexpo(cb)*21. / BITS_IN_LONG));
+        prec = DEFAULTPREC + (long)(cb*(21. / LOG2/ BITS_IN_LONG));
         for(;;)
 	{
           for(;;)
@@ -490,7 +490,7 @@ galois(GEN x, long prec)
 	}
 
       case 6: z = cgetg(7, t_VEC);
-        prec = DEFAULTPREC + (long)((gexpo(cb)*42. / BITS_IN_LONG));
+        prec = DEFAULTPREC + (long)(cb * (42. / LOG2 / BITS_IN_LONG));
         for(;;)
 	{
           for(;;)
@@ -579,7 +579,7 @@ galois(GEN x, long prec)
 	}
 	
       case 7: z = cgetg(36,t_VEC);
-        prec = DEFAULTPREC + (long)((gexpo(cb)*7. / BITS_IN_LONG));
+        prec = DEFAULTPREC + (long)(cb*(7. / LOG2 / BITS_IN_LONG));
         for(;;)
 	{
 	  ind = 0; p1=cleanroots(x,prec);
@@ -621,7 +621,7 @@ galoisapply(GEN nf, GEN aut, GEN x)
   if (typ(aut)==t_POL) aut = gmodulcp(aut,pol);
   else
   {
-    if (typ(aut)!=t_POLMOD || !gegal((GEN)aut[1],pol))
+    if (typ(aut)!=t_POLMOD || !gequal((GEN)aut[1],pol))
       err(talker,"incorrect galois automorphism in galoisapply");
   }
   switch(typ(x))
@@ -632,7 +632,7 @@ galoisapply(GEN nf, GEN aut, GEN x)
     case t_POLMOD: x = (GEN) x[2]; /* fall through */
     case t_POL:
       p1 = gsubst(x,varn(pol),aut);
-      if (typ(p1)!=t_POLMOD || !gegal((GEN)p1[1],pol)) p1 = gmodulcp(p1,pol);
+      if (typ(p1)!=t_POLMOD || !gequal((GEN)p1[1],pol)) p1 = gmodulcp(p1,pol);
       return gerepileupto(av,p1);
 
     case t_VEC:
@@ -717,8 +717,8 @@ nfiso0(GEN a, GEN b, long fliso)
   {
     if (fliso)
     {
-      if (!gegal((GEN)nfa[2],(GEN)nfb[2])
-       || !gegal((GEN)nfa[3],(GEN)nfb[3])) return gen_0;
+      if (!gequal((GEN)nfa[2],(GEN)nfb[2])
+       || !gequal((GEN)nfa[3],(GEN)nfb[3])) return gen_0;
     }
     else
       if (!dvdii((GEN)nfb[3], gpowgs((GEN)nfa[3],n/m))) return gen_0;
@@ -987,15 +987,16 @@ make_Tr(GEN x, GEN w)
 static void
 get_roots_for_M(nffp_t *F)
 {
-  long n, eBD, er, PREC;
+  long n, eBD, PREC;
 
   if (F->extraprec < 0)
   { /* not initialized yet */
+    double er;
     n = degpol(F->x);
     eBD = 1 + gexpo((GEN)F->basden[1]);
-    er  = 1 + gexpo(F->ro? F->ro: cauchy_bound(F->x));
+    er  = F->ro? (1+gexpo(F->ro)): cauchy_bound(F->x)/LOG2;
     if (er < 0) er = 0;
-    F->extraprec = ((n*er + eBD + (long)log2(n)) >> TWOPOTBITS_IN_LONG);
+    F->extraprec = (long)((n*er + eBD + log2(n)) / BITS_IN_LONG);
   }
 
   PREC = F->prec + F->extraprec;
@@ -1566,7 +1567,7 @@ remove_duplicates(GEN y, GEN a)
   z[1] = (long)y;
   z[2] = (long)a; (void)sort_factor(z, gcmp);
   for  (k=1, i=2; i<l; i++)
-    if (!gegal((GEN)y[i], (GEN)y[k]))
+    if (!gequal((GEN)y[i], (GEN)y[k]))
     {
       k++;
       a[k] = a[i];
@@ -1882,7 +1883,7 @@ findmindisc(GEN *py, GEN *pa)
   for (i=2; i<l; i++)
   {
     k = v[i];
-    if (!egalii((GEN)discs[k], dmin)) break;
+    if (!equalii((GEN)discs[k], dmin)) break;
     if (gpolcomp((GEN)y[k],z) < 0) { z = (GEN)y[k]; b = (GEN)a[k]; }
   }
   *py = z; *pa = b;
@@ -1937,7 +1938,7 @@ _polredabs(nfbasic_t *T, GEN *u)
   set_LLL_basis(T, &ro);
 
   /* || polchar ||_oo < 2^e */
-  e = n * (gexpo(gmulsg(n, cauchy_bound(T->x))) + 1);
+  e = n * (long)(cauchy_bound(T->x) / LOG2 + log2((double)n)) + 1;
   prec = DEFAULTPREC + (e >> TWOPOTBITS_IN_LONG);
 
   get_nf_fp_compo(T, &F, ro, prec);
@@ -2129,7 +2130,7 @@ dirzetak0(GEN nf, long N0)
   while (court[2] <= N0)
   {
     NEXT_PRIME_VIADIFF(court[2], d);
-    if (smodis(index, court[2])) /* court does not divide index */
+    if (umodiu(index, court[2])) /* court does not divide index */
       { vect = (GEN) FpX_degfact(pol,court)[1]; lx = lg(vect); }
     else
     {
@@ -2139,7 +2140,7 @@ dirzetak0(GEN nf, long N0)
     for (j=1; j<lx; j++)
     {
       GEN N = gpowgs(court, vect[j]); /* N = court^f */
-      if (cmpis(N, N0) > 0) continue;
+      if (cmpiu(N, N0) > 0) break;
 
       q = p = (ulong)N[2]; limk = N0/q;
       for (k=2; k <= N0; k++) c2[k] = c[k];
@@ -2185,8 +2186,8 @@ zeta_get_limx(long r1, long r2, long bit)
   p2 = gmul2n(mpmul(gpowgs(utoipos(N),r), p1), -r2);
   c0 = sqrtr( mpdiv(p2, gpowgs(c1, r+1)) );
 
-  A0 = mplog( gmul2n(c0, bit) ); p2 = gdiv(A0, c1);
-  p1 = divrr(mulsr(N*(r+1), mplog(p2)), addsr(2*(r+1), gmul2n(A0,2)));
+  A0 = logr_abs( gmul2n(c0, bit) ); p2 = gdiv(A0, c1);
+  p1 = divrr(mulsr(N*(r+1), logr_abs(p2)), addsr(2*(r+1), gmul2n(A0,2)));
   return gerepileuptoleaf(av, divrr(addrs(p1, 1), powrshalf(p2, N)));
 }
 /* N_0 = floor( C_K / limx ) */
@@ -2244,7 +2245,7 @@ initzeta(GEN pol, long prec)
   if (!bnf || nfgetprec(bnf) < prec ) bnf = bnfinit0(pol, 2, NULL, prec);
   else bnf = gcopy(bnf);
   bnf = checkbnf_discard(bnf);
-  prec = (prec<<1) - 1;
+  prec = (prec<<1) - 2;
   Pi = mppi(prec); racpi = sqrtr(Pi);
 
   /* class number & regulator */
@@ -2256,7 +2257,7 @@ initzeta(GEN pol, long prec)
   resi = gerepileupto(av, gdiv(p2, gmael(p1,4,1)));
 
   av = avma;
-  p1 = gsqrt(absi((GEN)nf[3]), prec);
+  p1 = sqrtr_abs(itor((GEN)nf[3], prec));
   p2 = gmul2n(gpowgs(racpi,N), r2);
   cst = gerepileuptoleaf(av, divrr(p1,p2));
 
@@ -2274,7 +2275,7 @@ initzeta(GEN pol, long prec)
   tabcstn  = (GEN*) cgetg(N0+1,t_VEC);
   tabcstni = (GEN*) cgetg(N0+1,t_VEC);
   p1 = ginv(cst);
-  for (i=1; i<=N0; i++) { tabcstni[i] = gen_1; tabcstn[i] = mulsr(i,p1); }
+  for (i=1; i<=N0; i++) tabcstni[i] = tabcstn[i] = mulsr(i,p1);
   (void)switch_stack(zone,0);
 
   /********** compute a(i,j) **********/
@@ -2359,13 +2360,13 @@ initzeta(GEN pol, long prec)
     if (coef[i])
     {
       GEN t = cgetg(r+2,t_COL);
-      p1 = mplog((GEN)tabcstn[i]); setsigne(p1, -signe(p1));
-      t[1] = lstoi(coef[i]);
-      t[2] = lmul((GEN)t[1], p1);
+      p1 = logr_abs((GEN)tabcstn[i]); setsigne(p1, -signe(p1));
+      t[1] = lutoi(coef[i]);
+      t[2] = (long)mulur(coef[i], p1);
       for (j=2; j<=r; j++)
       {
         pari_sp av2 = avma;
-        t[j+1] = (long)gerepileuptoleaf(av2, divrs(gmul((GEN)t[j], p1), j));
+        t[j+1] = (long)gerepileuptoleaf(av2, divrs(mulrr((GEN)t[j], p1), j));
       }
       tabj[i] = (long)t; /* tabj[n,j] = coef(n)*ln(c/n)^(j-1)/(j-1)! */
     }
@@ -2393,27 +2394,32 @@ initzeta(GEN pol, long prec)
   av2 = avma;
   for (i=1; i<=i0; i++)
   {
+    GEN aiji = (GEN)aij[i];
     stackzone *z;
     for (k=1; k<=r; k++)
     {
       p1 = NULL;
       for (n=1; n<=N0; n++)
         if (coef[n])
-          for (j=1; j<=r-k+1; j++)
-          {
-            p2 = gmul(tabcstni[n], gmul(gmael(aij,i,j+k), gmael(tabj,n,j)));
-            p1 = p1? gadd(p1,p2): p2;
-          }
-      coeff(C,i,k) = p1? (long)gerepileupto(av2,p1): (long)gen_0;
+        {
+          GEN tabjn = (GEN)tabj[n], p2 = mpmul((GEN)aiji[1+k], (GEN)tabjn[1]);
+          for (j=2; j<=r-k+1; j++)
+            p2 = mpadd(p2, mpmul((GEN)aiji[j+k], (GEN)tabjn[j]));
+          if (i > 1) p2 = mpmul(p2, tabcstni[n]);
+          p1 = p1? mpadd(p1,p2): p2;
+        }
+      coeff(C,i,k) = (long)gerepileuptoleaf(av2,p1);
       av2 = avma;
     }
-    /* use a parallel stack */
-    z = i&1? zone1: zone0;
-    (void)switch_stack(z, 1);
-    for (n=1; n<=N0; n++)
-      if (coef[n]) tabcstni[n] = mpmul(tabcstni[n],tabcstn[n]);
-    /* come back */
-    (void)switch_stack(z, 0);
+    if (i > 1 && i < i0) {
+      /* use a parallel stack */
+      z = i&1? zone1: zone0;
+      (void)switch_stack(z, 1);
+      for (n=1; n<=N0; n++)
+        if (coef[n]) tabcstni[n] = mpmul(tabcstni[n],tabcstn[n]);
+      /* come back */
+      (void)switch_stack(z, 0);
+    }
   }
   nfz[4] = (long) C;
   if (DEBUGLEVEL>1) msgtimer("Cik");

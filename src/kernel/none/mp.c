@@ -1005,7 +1005,7 @@ red_montgomery(GEN T, GEN N, ulong inv)
   GEN R = int2n(s);
   GEN res = remii(mulii(T, Fp_inv(R, N)), N);
   if (k > lgefint(N)
-    || !egalii(remii(Td,N),res)
+    || !equalii(remii(Td,N),res)
     || cmpii(Td, addii(shifti(T, -s), N)) >= 0) err(bugparier,"red_montgomery");
 }
 #endif
@@ -1384,7 +1384,7 @@ sqrispec(GEN a, long na)
     GEN t, c1, c0 = sqrispec(a0,n0a);
 #if 0
     c1 = shifti(muliispec(a0,a, n0a,na),1);
-#else /* slower !!! */
+#else /* faster */
     t = addiispec(a0,a,n0a,na);
     t = sqrispec(t+2,lgefint(t)-2);
     c1= addiispec(c0+2,c+2, lgefint(c0)-2, lgefint(c)-2);

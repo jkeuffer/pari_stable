@@ -58,6 +58,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /* mp.c */
 
+#define equaliu(x,y)    (equalui((y),(x)))
+#define equalis(x,y)    (equalsi((y),(x)))
 #define cmpiu(x,y)     (-cmpui((y),(x)))
 #define cmpis(x,y)     (-cmpsi((y),(x)))
 #define cmprs(x,y)     (-cmpsr((y),(x)))

@@ -456,7 +456,7 @@ static int
 ok_elt(GEN x, GEN xZ, GEN y)
 {
   pari_sp av = avma;
-  int r = gegal(x, hnfmodid(y, xZ));
+  int r = gequal(x, hnfmodid(y, xZ));
   avma = av; return r;
 }
 
@@ -755,8 +755,8 @@ idealval(GEN nf, GEN ix, GEN P)
   checkprimeid(P);
   p = (GEN)P[1];
   if (tx == id_PRIME) {
-    if (!egalii(p, (GEN)ix[1])) return 0;
-    return (gegal((GEN)P[2], (GEN)ix[2])
+    if (!equalii(p, (GEN)ix[1])) return 0;
+    return (gequal((GEN)P[2], (GEN)ix[2])
          || element_val(nf, (GEN)ix[2], P))? 1: 0;
   }
   nf = checknf(nf);
@@ -1240,7 +1240,7 @@ elt_cmp(GEN x, GEN y)
 static int
 elt_egal(GEN x, GEN y)
 {
-  if (typ(x) == typ(y)) return gegal(x,y);
+  if (typ(x) == typ(y)) return gequal(x,y);
   return 0;
 }
 
@@ -1857,7 +1857,7 @@ isideal(GEN nf,GEN x)
   if (tx==t_VEC && lx==3) { x=(GEN)x[1]; tx=typ(x); lx=lg(x); }
   if (is_scalar_t(tx))
     return (tx==t_INT || tx==t_FRAC || tx==t_POL ||
-                     (tx==t_POLMOD && gegal((GEN)nf[1],(GEN)x[1])));
+                     (tx==t_POLMOD && gequal((GEN)nf[1],(GEN)x[1])));
   if (typ(x)==t_VEC) return (lx==6);
   if (typ(x)!=t_MAT) return 0;
   if (lx == 1) return 1;
@@ -2205,7 +2205,7 @@ make_integral(GEN nf, GEN L0, GEN f, GEN *listpr)
   /* Kill denom part coprime to fZ */
   d2 = coprime_part(d, fZ);
   t = Fp_inv(d2, fZ); if (!is_pm1(t)) L = gmul(L,t);
-  if (egalii(d, d2)) return L;
+  if (equalii(d, d2)) return L;
 
   d1 = diviiexact(d, d2);
   /* L0 = (L / d1) mod f. d1 not coprime to f
@@ -2250,7 +2250,7 @@ GEN
 unif_mod_fZ(GEN pr, GEN F)
 {
   GEN p = (GEN)pr[1], t = (GEN)pr[2];
-  if (!egalii(F, p))
+  if (!equalii(F, p))
   {
     GEN u, v, q, e = (GEN)pr[3], a = diviiexact(F,p);
     q = is_pm1(e)? sqri(p): p;
@@ -2379,7 +2379,7 @@ merge_factor(GEN *pa, GEN *pe, GEN b, GEN f)
   {
     A[i] = a[i];
     E[i] = e[i];
-    if (k < lb && gegal((GEN)A[i], (GEN)b[k]))
+    if (k < lb && gequal((GEN)A[i], (GEN)b[k]))
     {
       E[i] = laddii((GEN)E[i], (GEN)f[k]);
       k++;
@@ -2529,7 +2529,7 @@ isinvector(GEN v, GEN x, long n)
   long i;
 
   for (i=1; i<=n; i++)
-    if (gegal((GEN)v[i],x)) return i;
+    if (gequal((GEN)v[i],x)) return i;
   return 0;
 }
 
@@ -2659,7 +2659,7 @@ nfbezout(GEN nf,GEN a,GEN b, GEN A,GEN B, GEN *pu,GEN *pv,GEN *pw,GEN *pdi)
   bB = idealmulelt(nf,b,B);
   d = idealadd(nf,aA,bB);
   di = hnfideal_inv(nf,d);
-  if (gegal(aA, d))
+  if (gequal(aA, d))
   { /* aA | bB  (frequent) */
     w = B;
     v = gen_0;
@@ -2671,7 +2671,7 @@ nfbezout(GEN nf,GEN a,GEN b, GEN A,GEN B, GEN *pu,GEN *pv,GEN *pw,GEN *pdi)
       w = idealmulelt(nf, u, w); /* AB/d */
     }
   }
-  else if (gegal(bB, d))
+  else if (gequal(bB, d))
   { /* bB | aA  (slightly less frequent) */
     w = A;
     u = gen_0;

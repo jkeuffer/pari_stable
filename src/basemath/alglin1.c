@@ -784,7 +784,7 @@ isscalarmat(GEN x, GEN s)
     for (i=1; i<=nco; i++)
       if (i == j)
       {
-        if (!gegal(col[i],s)) return 0;
+        if (!gequal(col[i],s)) return 0;
       }
       else if (!gcmp0(col[i])) return 0;
   }

@@ -398,7 +398,7 @@ poltopermtest(GEN f, struct galois_lift *gl, GEN pf)
     fx = FpX_eval(f, (GEN) gl->L[i],gl->gb->ladicsol);
     for (j = 1; j < ll; j++)
     {
-      if (fp[j] && egalii(fx, (GEN) gl->Lden[j]))
+      if (fp[j] && equalii(fx, (GEN) gl->Lden[j]))
       {
 	pf[i] = j;
 	fp[j] = 0;
@@ -628,12 +628,12 @@ frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
   pf = cgetg(m, t_VECSMALL);
   *psi = pf;
   ltop2 = avma;
-  NN = gdiv(mpfact(m), mulsi(c, gpowgs(mpfact(d), c)));
+  NN = diviiexact(mpfact(m), mulsi(c, gpowgs(mpfact(d), c)));
   if (DEBUGLEVEL >= 4)
     fprintferr("GaloisConj:I will try %Z permutations\n", NN);
   N1=10000000;
   NQ=divis_rem(NN,N1,&R1);
-  if (cmpis(NQ,1000000000)>0)
+  if (cmpiu(NQ,1000000000)>0)
   {
     err(warner,"Combinatorics too hard : would need %Z tests!\n"
 	"I will skip it, but it may induce an infinite loop",NN);
@@ -738,23 +738,17 @@ frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
   }
   if (DEBUGLEVEL>=4)
     fprintferr("GaloisConj: not found, %d hops \n",hop);
-  avma = ltop;
   *psi = NULL;
-  return 0;
+  avma = ltop; return 0;
 }
 
-/*
- * alloue une ardoise pour n entiers de longueurs pour les test de
- * permutation
- */
+/* allocate a scratchboard for n t_INTs of length s, for permutation tests */
 GEN
 alloue_ardoise(long n, long s)
 {
-  GEN     ar;
-  long    i;
-  ar = cgetg(n + 1, t_VEC);
-  for (i = 1; i <= n; i++)
-    ar[i] = lgetg(s, t_INT);
+  GEN ar = cgetg(n+1, t_VEC);
+  long i;
+  for (i = 1; i <= n; i++) ar[i] = lgeti(s);
   return ar;
 }
 
@@ -962,7 +956,7 @@ testpermutation(GEN F, GEN B, GEN x, long s, long e, long cut,
     fprintferr("GaloisConj:I will try %Z permutations\n", NN);
   N1=1000000;
   NQ=divis_rem(NN,N1,&R1);
-  if (cmpis(NQ,100000000)>0)
+  if (cmpiu(NQ,100000000)>0)
   {
     avma=avm;
     err(warner,"Combinatorics too hard : would need %Z tests!\n I'll skip it but you will get a partial result...",NN);
@@ -1216,7 +1210,7 @@ fixedfieldtests(GEN LN, long n)
     for(j=i+1;j<lg(LN[1]);j++)
     {
       for(k=1;k<=n;k++)
-	if (!egalii(gmael(LN,k,j),gmael(LN,k,i)))
+	if (!equalii(gmael(LN,k,j),gmael(LN,k,i)))
 	  break;
       if (k>n)
 	return 0;
@@ -1692,7 +1686,7 @@ a4galoisgen(GEN T, struct galois_test *td)
     int     a, x, y;
     if (i == 0)
     {
-      gaffect(gen_0, ar[(n - 2) >> 1]);
+      affsi(0, ar[(n - 2) >> 1]);
       for (k = n - 2; k > 2; k -= 2)
 	addiiz(ar[k >> 1], addii(mt[k + 1][k + 2], mt[k + 2][k + 1]),
 	      ar[(k >> 1) - 1]);
@@ -2314,7 +2308,7 @@ galoisfindgroups(GEN lo, GEN sg, long f)
       W[k]=mael(lo,i,k)%f;
     vecsmall_sort(W); 
     U=vecsmall_uniq(W);
-    if (gegal(U, sg))
+    if (gequal(U, sg))
     {
       cgiv(U);
       V[j++]=lo[i];
@@ -2569,7 +2563,7 @@ galoisgenfixedfield(GEN Tp, GEN Pmod, GEN V, GEN ip, struct galois_borne *gb, GE
     tau = FpX_gcd(Pp, tau,ip);
     tau = FpX_normalize(tau, ip);
     for (g = 1; g <= gp; g++)
-      if (gegal(tau, (GEN) Pmod[g]))
+      if (gequal(tau, (GEN) Pmod[g]))
 	break;
     if (g == lg(Pmod))
       return NULL;
@@ -2605,7 +2599,7 @@ galoisgenfixedfield(GEN Tp, GEN Pmod, GEN V, GEN ip, struct galois_borne *gb, GE
       tau = FpX_gcd(Pp, tau,ip);
       tau = FpX_normalize(tau, ip);
       for (g = 1; g < lg(Pmod); g++)
-	if (gegal(tau, (GEN) Pmod[g]))
+	if (gequal(tau, (GEN) Pmod[g]))
 	  break;
       if (g == lg(Pmod))
 	return NULL;

@@ -456,7 +456,7 @@ embedding(GEN g, GEN DATA, primedata *S, GEN den, GEN listdelta)
     w1 = gadd(w0, gmul(p, FpX_rem(a, T,p)));
 
     w1_Q = centermod(gmul(w1, remii(den,q)), q);
-    if (gegal(w1_Q, w0_Q) || cmpii(q,maxp) > 0)
+    if (gequal(w1_Q, w0_Q) || cmpii(q,maxp) > 0)
     {
       GEN G = gcmp1(den)? g: rescale_pol(g,den);
       if (gcmp0(poleval(G, gmodulcp(w1_Q,T)))) break;

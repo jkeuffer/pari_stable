@@ -990,7 +990,7 @@ red_montgomery(GEN T, GEN N, ulong inv)
     GEN R = int2n(s);
     GEN res = remii(mulii(T, Fp_inv(R, N)), N);
     if (k > lgefint(N)
-        || !egalii(remii(Td,N),res)
+        || !equalii(remii(Td,N),res)
         || cmpii(Td, addii(shifti(T, -s), N)) >= 0) err(bugparier,"red_montgomery");
   }
 #endif

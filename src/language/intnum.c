@@ -865,7 +865,7 @@ static GEN
 homtab(GEN tab, GEN k)
 {
   GEN z;
-  if (gcmp0(k) || gegal(k, gen_1)) return tab;
+  if (gcmp0(k) || gequal(k, gen_1)) return tab;
   if (gsigne(k) < 0) k = gneg(k);
   z = cgetg(8, t_VEC);
   TABm(z)  = icopy(TABm(tab));
@@ -972,7 +972,7 @@ intnuminit(GEN a, GEN b, long m, long prec)
   codea = labs(codea);
   codeb = labs(codeb);
   if (codea == f_YSLOW && codeb == f_YSLOW) return initsinhsinh(m, l);
-  if (codea == f_YFAST && codeb == f_YFAST && gegal(kma, kmb))
+  if (codea == f_YFAST && codeb == f_YFAST && gequal(kma, kmb))
     return homtab(initsinh(m, l), kmb);
   T = cgetg(3, t_VEC);
   switch (codea)
@@ -1006,7 +1006,7 @@ intnuminit(GEN a, GEN b, long m, long prec)
       }
     case f_YOSCS: case f_YOSCC: tmp = initnumsine(m, l);
       T[1] = (long)homtab(tmp, kma);
-      if (codea == f_YOSCC && codeb == f_YOSCC && !gegal(kma, kmb))
+      if (codea == f_YOSCC && codeb == f_YOSCC && !gequal(kma, kmb))
       {
 	U = cgetg(3, t_VEC);
 	U[1] = (long)inittanhsinh(m, l);
@@ -1322,7 +1322,7 @@ intnum_i(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
   kma = f_getycplx(a, prec);
   kmb = f_getycplx(b, prec);
   if ((codea == f_YSLOW && codeb == f_YSLOW)
-   || (codea == f_YFAST && codeb == f_YFAST && gegal(kma, kmb)))
+   || (codea == f_YFAST && codeb == f_YFAST && gequal(kma, kmb)))
     S = intninfinf(E, eval, tab, prec);
   else
   {
@@ -1335,7 +1335,7 @@ intnum_i(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
     else
     {
       if (codeb != f_YOSCC) err(bugparier, "code error in intnum");
-      if (gegal(kma, kmb))
+      if (gequal(kma, kmb))
 	SP = intninfpm(E, eval, coupeb, 1, (GEN)tab[2], prec);
       else
       {

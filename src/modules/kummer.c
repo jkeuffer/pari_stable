@@ -74,7 +74,7 @@ static int
 ok_sign(GEN X, GEN msign, GEN arch)
 {
   GEN p1 = F2V_red_ip( gmul(msign, X) );
-  settyp(p1,t_VEC); return gegal(p1, arch);
+  settyp(p1,t_VEC); return gequal(p1, arch);
 }
 
 /* REDUCTION MOD ell-TH POWERS */
@@ -302,10 +302,10 @@ isprimeidealconj(GEN nfz, GEN pr1, GEN pr2, tau_s *tau)
   GEN x = (GEN)pr1[2];
   GEN b1= (GEN)pr1[5];
   GEN b2= (GEN)pr2[5];
-  if (!egalii(p, (GEN)pr2[1])
-   || !egalii((GEN)pr1[3], (GEN)pr2[3])
-   || !egalii((GEN)pr1[4], (GEN)pr2[4])) return 0;
-  if (gegal(x,(GEN)pr2[2])) return 1;
+  if (!equalii(p, (GEN)pr2[1])
+   || !equalii((GEN)pr1[3], (GEN)pr2[3])
+   || !equalii((GEN)pr1[4], (GEN)pr2[4])) return 0;
+  if (gequal(x,(GEN)pr2[2])) return 1;
   for(;;)
   {
     if (int_elt_val(nfz,x,p,b2,NULL)) return 1;
@@ -375,7 +375,7 @@ build_list_Hecke(primlist *L, GEN nfz, GEN fa, GEN gothf, GEN gell, tau_s *tau)
   {
     pr = (GEN)listpr[i]; p = (GEN)pr[1]; e = itos((GEN)pr[3]);
     vp = itos((GEN)listex[i]);
-    if (!egalii(p,gell))
+    if (!equalii(p,gell))
     {
       if (vp != 1) return 1;
       if (!isconjinprimelist(nfz, L->Sm,pr,tau)) appendL(L->Sm,pr);
@@ -607,7 +607,7 @@ rnfkummersimple(GEN bnr, GEN subgroup, GEN gell, long all)
         if (all) res = concatsp(res, gerepileupto(av, P));
         else
         {
-          if (gegal(rnfnormgroup(bnr,P),subgroup)) return P; /*DONE*/
+          if (gequal(rnfnormgroup(bnr,P),subgroup)) return P; /*DONE*/
           avma = av;
         }
       }
@@ -1093,7 +1093,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
         P = compute_polrel(nfz, &T, be, g, ell);
         P = lift_if_rational(P);
         if (DEBUGLEVEL>1) fprintferr("polrel(beta) = %Z\n", P);
-        if (!all && gegal(subgroup, rnfnormgroup(bnr, P))) return P; /* DONE */
+        if (!all && gequal(subgroup, rnfnormgroup(bnr, P))) return P; /* DONE */
         res = concatsp(res, P);
       }
     } while (increment(y, dK, ell));

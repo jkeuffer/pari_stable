@@ -215,7 +215,7 @@ GEN U;
 KARATSUBA_MULR_LIMIT = 100000;
 U = mulrr(x, y);
 KARATSUBA_MULR_LIMIT = 4;
-if (!gegal(U, z)) err(talker,"toto");
+if (!gequal(U, z)) err(talker,"toto");
 }
 #endif
     avma = av; return;

@@ -337,10 +337,10 @@ respectively.
 
 In library mode, it is in fact usually preferable to use the two basic
 functions which are $\teb{gcmp}(x,y)$ which gives the sign (1, 0, or -1) of
-$x-y$, where $x$ and $y$ must be in $\R$, and $\teb{gegal}(x,y)$ which can be
+$x-y$, where $x$ and $y$ must be in $\R$, and $\teb{gequal}(x,y)$ which can be
 applied to any two PARI objects $x$ and $y$ and gives 1 (i.e.~true) if they are
 equal (but not necessarily identical), 0 (i.e.~false) otherwise. Particular
-cases of \teb{gegal} which should be used are $\teb{gcmp0}(x)$ ($x==0$ ?),
+cases of \teb{gequal} which should be used are $\teb{gcmp0}(x)$ ($x==0$ ?),
 $\teb{gcmp1}(x)$ ($x==1$ ?), and
 $\teb{gcmp_1}(x)$ ($x==-1$ ?).
 
@@ -348,7 +348,7 @@ Note that $\teb{gcmp0}(x)$ tests whether $x$ is equal to zero, even if $x$ is
 not an exact object. To test whether $x$ is an exact object which is equal to
 zero, one must use $\tet{isexactzero}$.
 
-Also note that the \kbd{gcmp} and \kbd{gegal} functions return a C-integer,
+Also note that the \kbd{gcmp} and \kbd{gequal} functions return a C-integer,
 and \emph{not} a \kbd{GEN} like \kbd{gle} etc.
 
 \smallskip

@@ -1290,7 +1290,7 @@ mpqs_eval_cand(GEN A, GEN inv_A4, GEN B, GEN kN, long k, double sqrt_kN,
 	  err(talker, "MPQS: 4*A*Q(x) = %Z\nis not a square (mod kN)", Qx);
       }
 #  ifdef MPQS_DEBUG_VERBOSE
-      else if (cmpis(g,k) /* != 0 */ )
+      else if (!equalis(g,k))
       {
 	sprintf(complaint, "\nMPQS: gcd(4*A*Q(x), kN) = %s\n", i2str(g));
 	if (strcmp(complaint, complaint0))
@@ -1366,7 +1366,7 @@ mpqs_eval_cand(GEN A, GEN inv_A4, GEN B, GEN kN, long k, double sqrt_kN,
         pari_sp av1 = avma;
 	GEN rhs = mpqs_factorback(FB, relations, kN);
 	GEN Qx_2 = remii(sqri(Y), kN);
-	if (!egalii(Qx_2, rhs))
+	if (!equalii(Qx_2, rhs))
 	{
 	  PRINT_IF_VERBOSE("\b(!)\n");
 	  fprintferr("MPQS: %Z @ %Z :%s\n", Y, Qx, relations);
@@ -1380,7 +1380,7 @@ mpqs_eval_cand(GEN A, GEN inv_A4, GEN B, GEN kN, long k, double sqrt_kN,
       }
 #endif
     }
-    else if (cmpis(Qx, lp_bound) > 0)
+    else if (cmpiu(Qx, lp_bound) > 0)
     { /* TODO: check for double large prime */
       PRINT_IF_VERBOSE("\b.");
     }
@@ -1395,7 +1395,7 @@ mpqs_eval_cand(GEN A, GEN inv_A4, GEN B, GEN kN, long k, double sqrt_kN,
 	GEN Qx_2 = remii(sqri(Y), kN);
 
         rhs = modii(mulii(rhs, Qx), kN);
-	if (!egalii(Qx_2, rhs))
+	if (!equalii(Qx_2, rhs))
 	{
 	  PRINT_IF_VERBOSE("\b(!)\n");
 	  fprintferr("MPQS: %Z @ %Z :%s\n", Y, Qx, relations);
@@ -1485,7 +1485,7 @@ mpqs_combine_large_primes(FILE *COMB, FILE *FNEW, long size_of_FB,
   while (!invmod(utoipos(old_q), kN, &inv_q)) /* can happen */
   {
     inv_q = gcdii(inv_q, N);
-    if (is_pm1(inv_q) || egalii(inv_q, N)) /* pity */
+    if (is_pm1(inv_q) || equalii(inv_q, N)) /* pity */
     {
 #ifdef MPQS_DEBUG
       fprintferr("MPQS: skipping relation with non-invertible q\n");
@@ -1512,7 +1512,7 @@ mpqs_combine_large_primes(FILE *COMB, FILE *FNEW, long size_of_FB,
       if (!invmod(utoipos(old_q), kN, &inv_q)) /* can happen --GN */
       {
 	inv_q = gcdii(inv_q, N);
-	if (is_pm1(inv_q) || egalii(inv_q, N)) /* pity */
+	if (is_pm1(inv_q) || equalii(inv_q, N)) /* pity */
 	{
 #ifdef MPQS_DEBUG
 	  fprintferr("MPQS: skipping relation with non-invertible q\n");
@@ -1582,7 +1582,7 @@ mpqs_combine_large_primes(FILE *COMB, FILE *FNEW, long size_of_FB,
       }
       avma = av1;
 
-      if (!egalii(Qx_2, prod_pi_ei))
+      if (!equalii(Qx_2, prod_pi_ei))
 	err(talker, "MPQS: combined large prime relation is false");
     }
 #endif
@@ -2014,9 +2014,9 @@ mpqs_solve_linear_system(GEN kN, GEN N, long rel, long *FB, long size_of_FB)
        * gcd(X-Y_prod,N)==N, we can skip X-Y_prod in such cases */
       D1 = gcdii(X_plus_Y, N);
       if (is_pm1(D1)) { avma = av3; continue; }
-      if ( (flag = egalii(D1, N)) ) /* this one's useless, try the other */
+      if ( (flag = equalii(D1, N)) ) /* this one's useless, try the other */
         D1 = gcdii(subii(X,Y_prod),N);
-      if (!flag || (!is_pm1(D1) && !egalii(D1,N)))
+      if (!flag || (!is_pm1(D1) && !equalii(D1,N)))
       { /* got something that works */
         if (DEBUGLEVEL >= 5)
           fprintferr("MPQS: splitting N after %ld kernel vector%s\n",
@@ -2048,12 +2048,12 @@ mpqs_solve_linear_system(GEN kN, GEN N, long rel, long *FB, long size_of_FB)
 	av3 = avma;
 	D1 = gcdii(X_plus_Y, (GEN)res[j]);
 	if (is_pm1(D1)) continue; /* this one doesn't help us */
-	if ( (flag = egalii(D1, (GEN)res[j])) )
+	if ( (flag = equalii(D1, (GEN)res[j])) )
 	{ /* bad one, try the other */
           avma = av3;
 	  D1 = gcdii(X_minus_Y, (GEN)res[j]);
 	}
-	if (!flag || (!is_pm1(D1) && !egalii(D1, (GEN)res[j])))
+	if (!flag || (!is_pm1(D1) && !equalii(D1, (GEN)res[j])))
 	{ /* got one which splits this factor */
           if (DEBUGLEVEL >= 5)
             fprintferr("MPQS: resplitting a factor after %ld kernel vectors\n",

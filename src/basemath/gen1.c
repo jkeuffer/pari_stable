@@ -707,7 +707,7 @@ gadd(GEN x, GEN y)
     case t_REAL: return addrr(x,y);
     case t_INTMOD:  { GEN X = (GEN)x[1], Y = (GEN)y[1];
       z = cgetg(3,t_INTMOD);
-      if (X==Y || egalii(X,Y))
+      if (X==Y || equalii(X,Y))
         return add_intmod_same(z, X, (GEN)x[2], (GEN)y[2]);
       z[1] = (long)gcdii(X,Y);
       av = avma; p1 = addii((GEN)x[2],(GEN)y[2]);
@@ -724,15 +724,15 @@ gadd(GEN x, GEN y)
       z[1] = ladd((GEN)x[1],(GEN)y[1]);
       return z;
     case t_PADIC:
-      if (!egalii((GEN)x[2],(GEN)y[2])) err(operi,"+",x,y);
+      if (!equalii((GEN)x[2],(GEN)y[2])) err(operi,"+",x,y);
       return addpp(x,y);
     case t_QUAD: z = cgetg(4,t_QUAD);
-      if (!gegal((GEN)x[1],(GEN)y[1])) err(operi,"+",x,y);
+      if (!gequal((GEN)x[1],(GEN)y[1])) err(operi,"+",x,y);
       copyifstack(x[1], z[1]);
       z[2] = ladd((GEN)x[2],(GEN)y[2]);
       z[3] = ladd((GEN)x[3],(GEN)y[3]); return z;
     case t_POLMOD:
-      if (gegal((GEN)x[1], (GEN)y[1]))
+      if (gequal((GEN)x[1], (GEN)y[1]))
         return add_polmod_same((GEN)x[1], (GEN)x[2], (GEN)y[2]);
       return add_polmod((GEN)x[1], (GEN)y[1], (GEN)x[2], (GEN)y[2]);
     case t_POL:
@@ -1195,13 +1195,13 @@ mulpp(GEN x, GEN y) {
   long l = valp(x) + valp(y);
   pari_sp av;
   GEN z, t;
-  if (!egalii((GEN)x[2],(GEN)y[2])) err(operi,"*",x,y);
+  if (!equalii((GEN)x[2],(GEN)y[2])) err(operi,"*",x,y);
   if (!signe(x[4])) return zeropadic((GEN)x[2], l);
   if (!signe(y[4])) return zeropadic((GEN)x[2], l);
 
   t = (precp(x) > precp(y))? y: x;
   z = cgetp(t); setvalp(z,l); av = avma;
-  remiiz(mulii((GEN)x[4],(GEN)y[4]), (GEN)t[3], (GEN)z[4]);
+  affii(remii(mulii((GEN)x[4],(GEN)y[4]), (GEN)t[3]), (GEN)z[4]);
   avma = av; return z;
 }
 /* x,y QUAD */
@@ -1210,7 +1210,7 @@ mulqq(GEN x, GEN y) {
   GEN p1,p2,p3,p4, z = cgetg(4,t_QUAD);
   pari_sp av, tetpil;
   p1 = (GEN)x[1];
-  if (!gegal(p1, (GEN)y[1])) err(operi,"*",x,y);
+  if (!gequal(p1, (GEN)y[1])) err(operi,"*",x,y);
 
   copyifstack(p1, z[1]); av = avma;
   p2 = gmul((GEN)x[2],(GEN)y[2]);
@@ -1288,7 +1288,7 @@ gmul(GEN x, GEN y)
     case t_REAL: return mulrr(x,y);
     case t_INTMOD: { GEN X = (GEN)x[1], Y = (GEN)y[1];
       z = cgetg(3,t_INTMOD); 
-      if (X==Y || egalii(X,Y))
+      if (X==Y || equalii(X,Y))
         return mul_intmod_same(z, X, (GEN)x[2], (GEN)y[2]);
       z[1] = (long)gcdii(X,Y); av = avma; p1 = mulii((GEN)x[2],(GEN)y[2]);
       z[2] = (long)gerepileuptoint(av, remii(p1, (GEN)z[1])); return z;
@@ -1311,7 +1311,7 @@ gmul(GEN x, GEN y)
     case t_PADIC: return mulpp(x, y);
     case t_QUAD: return mulqq(x, y);
     case t_POLMOD:
-      if (gegal((GEN)x[1], (GEN)y[1]))
+      if (gequal((GEN)x[1], (GEN)y[1]))
         return mul_polmod_same((GEN)x[1], (GEN)x[2], (GEN)y[2]);
       return mul_polmod((GEN)x[1], (GEN)y[1], (GEN)x[2], (GEN)y[2]);
     case t_POL:
@@ -1619,7 +1619,7 @@ ff_poltype(GEN *x, GEN *p, GEN *pol)
     if (Q==NULL) { Q = p2; if (degpol(Q) <= 0) return 0; }
     else if (p2 != Q)
     {
-      if (!gegal(p2, Q))
+      if (!gequal(p2, Q))
       {
         if (DEBUGMEM) err(warner,"different modulus in ff_poltype");
         return 0;
@@ -1648,7 +1648,7 @@ ff_poltype(GEN *x, GEN *p, GEN *pol)
     if (pr==NULL) pr = p2;
     else if (p2 != pr)
     {
-      if (!egalii(p2, pr))
+      if (!equalii(p2, pr))
       {
         if (DEBUGMEM) err(warner,"different modulus in ff_poltype");
         return 0;
@@ -1697,7 +1697,7 @@ gsqr(GEN x)
 	
       case t_PADIC:
 	z = cgetg(5,t_PADIC);
-	i = (egalii((GEN)x[2], gen_2) && signe(x[4]))? 1: 0;
+	i = (equalii((GEN)x[2], gen_2) && signe(x[4]))? 1: 0;
         if (i && precp(x) == 1) i = 2; /* (1 + O(2))^2 = 1 + O(2^3) */
         z[1] = evalprecp(precp(x)+i) | evalvalp(valp(x) << 1);
 	icopyifstack(x[2], z[2]);
@@ -1959,7 +1959,7 @@ gdiv(GEN x, GEN y)
     case t_REAL: return divrr(x,y);
     case t_INTMOD: { GEN X = (GEN)x[1], Y = (GEN)y[1];
       z = cgetg(3,t_INTMOD);
-      if (X==Y || egalii(X,Y))
+      if (X==Y || equalii(X,Y))
         return div_intmod_same(z, X, (GEN)x[2], (GEN)y[2]);
       z[1] = (long)gcdii(X,Y); av = avma;
       p1 = mulii((GEN)x[2], Fp_inv((GEN)y[2], (GEN)z[1]));
@@ -1985,16 +1985,16 @@ gdiv(GEN x, GEN y)
       return gerepile(av, tetpil, gdiv(p2,p1));
 
     case t_PADIC:
-      if (!egalii((GEN)x[2],(GEN)y[2])) err(operi,"/",x,y);
+      if (!equalii((GEN)x[2],(GEN)y[2])) err(operi,"/",x,y);
       return divpp(x, y);
 
     case t_QUAD:
-      if (!gegal((GEN)x[1],(GEN)y[1])) err(operi,"/",x,y);
+      if (!gequal((GEN)x[1],(GEN)y[1])) err(operi,"/",x,y);
       av = avma; p1 = quadnorm(y); p2 = mulqq(x, gconj(y)); tetpil = avma;
       return gerepile(av, tetpil, gdiv(p2,p1));
 
     case t_POLMOD: av = avma;
-      if (gegal((GEN)x[1], (GEN)y[1]))
+      if (gequal((GEN)x[1], (GEN)y[1]))
       {
         GEN X = (GEN)x[1];
         x = (GEN)x[2];

@@ -224,7 +224,7 @@ element_div(GEN nf, GEN x, GEN y)
     if (typ(y[i])==t_INTMOD)
     {
       p1 = gmael(y,i,1);
-      if (p && !egalii(p,p1))
+      if (p && !equalii(p,p1))
         err(talker,"inconsistant prime moduli in element_inv");
       y = lift(y); break;
     }
@@ -616,7 +616,7 @@ polegal_spec(GEN x, GEN y)
 
   if (i != lg(y)) return 0;
   for (i--; i > 1; i--)
-    if (!gegal((GEN)x[i],(GEN)y[i])) return 0;
+    if (!gequal((GEN)x[i],(GEN)y[i])) return 0;
   return 1;
 }
 
@@ -1131,11 +1131,11 @@ Fp_shanks(GEN x,GEN g0,GEN p, GEN q)
   GEN p1,smalltable,giant,perm,v,g0inv;
 
   x = modii(x,p);
-  if (is_pm1(x) || egalii(p,gen_2)) { avma = av; return gen_0; }
+  if (is_pm1(x) || equalii(p,gen_2)) { avma = av; return gen_0; }
   p1 = addsi(-1, p); if (!q) q = p1;
-  if (egalii(p1,x)) { avma = av; return shifti(q,-1); }
+  if (equalii(p1,x)) { avma = av; return shifti(q,-1); }
   p1 = sqrti(q);
-  if (cmpis(p1,LGBITS) >= 0) err(talker,"module too large in Fp_shanks");
+  if (cmpiu(p1,LGBITS) >= 0) err(talker,"module too large in Fp_shanks");
   lbaby = itos(p1)+1; smalltable = cgetg(lbaby+1,t_VEC);
   g0inv = Fp_inv(g0, p); p1 = x;
 
@@ -1227,13 +1227,13 @@ ff_PHlog_Fp(GEN a, GEN g, GEN T, GEN p)
   GEN q,n_q,ord,ordp;
 
   if (gcmp1(a)) { avma = av; return gen_0; }
-  if (egalii(p, gen_2)) {
+  if (equalii(p, gen_2)) {
     if (!signe(a)) err(talker,"a not invertible in ff_PHlog_Fp");
     avma = av; return gen_0;
   }
   ordp = subis(p, 1);
   ord = T? subis(gpowgs(p,degpol(T)), 1): p;
-  if (egalii(a, ordp)) /* -1 */
+  if (equalii(a, ordp)) /* -1 */
     return gerepileuptoint(av, shifti(ord,-1));
 
   if (!T) q = NULL;
@@ -1267,7 +1267,7 @@ ffshanks(GEN x, GEN g0, GEN q, GEN T, GEN p)
   }
 
   p1 = sqrti(q);
-  if (cmpis(p1,LGBITS) >= 0) err(talker,"module too large in ffshanks");
+  if (cmpiu(p1,LGBITS) >= 0) err(talker,"module too large in ffshanks");
   lbaby = itos(p1)+1; smalltable = cgetg(lbaby+1,t_VEC);
   g0inv = Fq_inv(g0,T,p);
   p1 = x;
@@ -1399,18 +1399,22 @@ dethnf_i(GEN mat)
   return gerepileuptoint(av,s);
 }
 
-/* as above with cyc = diagonal(mat) */
+/* as above with cyc = diagonal(Smith Normal Form) */
 GEN
-detcyc(GEN cyc)
+detcyc(GEN cyc, long *L)
 {
-  pari_sp av;
-  long i,l = lg(cyc);
-  GEN s;
+  pari_sp av = avma;
+  long i, l = lg(cyc);
+  GEN s = (GEN)cyc[1];
 
-  if (l<3) return l<2? gen_1: icopy((GEN)cyc[1]);
-  av = avma; s = (GEN)cyc[1];
-  for (i=2; i<l; i++) s = mulii(s,(GEN)cyc[i]);
-  return gerepileuptoint(av,s);
+  if (l == 1) { *L = 1; return gen_1; }
+  for (i=2; i<l; i++) 
+  {
+    GEN t = (GEN)cyc[i];
+    if (is_pm1(t)) break;
+    s = mulii(s, t);
+  }
+  *L = i; return i <= 2? icopy(s): gerepileuptoint(av,s);
 }
 
 /* (U,V) = 1. Return y = x mod U, = 1 mod V (uv: u + v = 1, u in U, v in V) */
@@ -1836,8 +1840,9 @@ static void
 add_clgp(GEN nf, GEN u1, GEN cyc, GEN gen, GEN bid)
 {
   GEN c = cgetg(u1? 4: 3, t_VEC); 
+  long L;
   bid[2] = (long)c;
-  c[1] = (long)detcyc(cyc);
+  c[1] = (long)detcyc(cyc, &L);
   c[2] = (long)cyc;
   if (u1) c[3] = (long)(u1 == gen_1? gen: compute_gen(nf, u1, gen, bid));
 }

@@ -773,7 +773,7 @@ look_eta(GEN eta, int pk, GEN z)
 {
   long i;
   for (i=1; i<=pk; i++)
-    if (gegal(z, (GEN)eta[i])) return i-1;
+    if (gequal(z, (GEN)eta[i])) return i-1;
   return -1;
 }
 /* same pk = 2^k */
@@ -820,7 +820,7 @@ step4a(Cache *C, Red *R, ulong q, int p, int k, GEN jpq)
 static int
 is_m1(GEN x, GEN N)
 {
-  return egalii(addis(x,1), N);
+  return equalii(addis(x,1), N);
 }
 
 /* p=2, k>=3 */
@@ -928,7 +928,7 @@ step6(GEN N, ulong t, GEN et)
   {
     r = remii(mulii(r,N1), et);
     if (gcmp1(r)) break;
-    if (!signe(remii(N,r)) && !egalii(r,N)) return mkvec2(r, gen_0);
+    if (!signe(remii(N,r)) && !equalii(r,N)) return mkvec2(r, gen_0);
     if ((i & 0x1f) == 0) r = gerepileuptoint(av, r);
   }
   return gen_1;

@@ -329,7 +329,7 @@ lift_check_modulus(GEN H, long n)
   switch(t)
   {
     case t_INTMOD:
-      if (cmpsi(n,(GEN)H[1]))
+      if (!equalsi(n, (GEN)H[1]))
 	err(talker,"wrong modulus in galoissubcyclo");
       H = (GEN)H[2];
     case t_INT:
@@ -442,7 +442,7 @@ subcyclo_start(long n, long d, long o, GEN borne, long *ptr_val,long *ptr_l)
   if (DEBUGLEVEL >= 4)
     fprintferr("Subcyclo: val=%ld\n",val);
   le=gpowgs(l,val);
-  z=lift(gpowgs(gener(l),e));
+  z = Fp_pow(Fp_gener(l), utoipos(e), l);
   z=padicsqrtnlift(gen_1,utoipos(n),z,l,val);
   if (DEBUGLEVEL >= 1)
     msgtimer("padicsqrtnlift.");
@@ -727,10 +727,9 @@ subcyclo(long n, long d, long v)
   if (o == d) return cyclo(n,v);
   if (o % d) err(talker,"degree does not divide phi(n) in subcyclo");
   o /= d;
-  if (p==2)
-  {
-    GEN pol = powgi(polx[v],gen_2); pol[2]= (long)gen_1; /* replace gen_0 */
-    return pol; /* = x^2 + 1 */
+  if (p==2) {
+    GEN z = coefs_to_pol(3, gen_1,gen_0,gen_1); /* x^2 + 1 */
+    setvarn(z,v); return z;
   }
   G=gener(utoipos(n));
   g=itos((GEN)G[2]);
@@ -742,14 +741,11 @@ subcyclo(long n, long d, long v)
   zl=subcyclo_start(n,d,o,B,&val,&l);
   le=(GEN)zl[1];
   powz=subcyclo_roots(n,zl);
-  if (DEBUGLEVEL >= 6)
-    msgtimer("subcyclo_roots"); 
+  if (DEBUGLEVEL >= 6) msgtimer("subcyclo_roots"); 
   L=subcyclo_cyclic(n,d,o,g,gd,powz,le);
-  if (DEBUGLEVEL >= 6)
-    msgtimer("subcyclo_cyclic"); 
+  if (DEBUGLEVEL >= 6) msgtimer("subcyclo_cyclic"); 
   T=FpV_roots_to_pol(L,le,v);
-  if (DEBUGLEVEL >= 6)
-    msgtimer("roots_to_pol"); 
+  if (DEBUGLEVEL >= 6) msgtimer("roots_to_pol"); 
   T=FpX_center(T,le);
   return gerepileupto(ltop,T);
 }

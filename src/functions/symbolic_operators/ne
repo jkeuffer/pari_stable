@@ -7,7 +7,7 @@ Description:
  (lg, lg):bool:parens			$(1) != $(2)
  (small, int):bool:parens		cmpsi($1, $2) != 0
  (int, small):bool:parens		cmpis($1, $2) != 0
- (int, int):negbool			egalii($1, $2)
+ (int, int):negbool			equalii($1, $2)
  (real,real):bool                       cmprr($1, $2) != 0
  (mp, mp):bool:parens			mpcmp($1, $2) != 0
  (typ, typ):bool:parens			$(1) != $(2)
@@ -15,7 +15,7 @@ Description:
  (#str, typ):bool:parens	 	$(typ:1) != $(2)
  (str, str):bool                        strcmp($1, $2)
  (typ, typ):bool:parens	                $(1) != $(2)
- (small, gen):negbool                   gegalsg($1, $2)
- (gen, small):negbool                   gegalgs($1, $2)
- (gen, gen):negbool                     gegal($1, $2)
+ (small, gen):negbool                   gequalsg($1, $2)
+ (gen, small):negbool                   gequalgs($1, $2)
+ (gen, gen):negbool                     gequal($1, $2)
 

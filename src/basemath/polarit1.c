@@ -372,7 +372,7 @@ FpX_quad_root(GEN x, GEN p, int unknown)
   GEN b = (GEN)x[3], c = (GEN)x[2];
   GEN s,u,D;
 
-  if (egalii(p, gen_2))
+  if (equalii(p, gen_2))
   {
     if (signe(c)) return NULL;
     return gen_1;
@@ -636,7 +636,7 @@ FpX_is_totally_split(GEN f, GEN p)
   pari_sp av = avma;
   GEN z;
   if (n <= 1) return 1;
-  if (cmpsi(n, p) > 0) return 0;
+  if (cmpui(n, p) > 0) return 0;
   f = FpX_red(f, p);
   z = FpXQ_pow(polx[varn(f)], p, f, p);
   avma = av;
@@ -1477,7 +1477,7 @@ GEN
 Fp_to_Zp(GEN x, GEN p, GEN q, long e)
 {
   GEN y = cgetg(5, t_PADIC);
-  if (egalii(p, x)) /* implies p = x = 2 */
+  if (equalii(p, x)) /* implies p = x = 2 */
   {
     x = gen_1; q = shifti(q, -1);
     y[1] = evalprecp(e-1) | evalvalp(1);
@@ -1500,7 +1500,7 @@ apprgen_i(GEN f, GEN a)
   fp = derivpol(f); u = modulargcd(f,fp);
   if (degpol(u) > 0) { f = gdeuc(f,u); fp = derivpol(f); }
   p = (GEN)a[2];
-  P = egalii(p,gen_2)? utoipos(4): p;
+  P = equalii(p,gen_2)? utoipos(4): p;
   a0= gmod(a, P);
   if (!gcmp0(FpX_eval(fp,a0,p))) /* simple zero */
   {
@@ -1545,7 +1545,7 @@ rootpadic_i(GEN f, GEN p, long prec)
 
   z = modulargcd(f, derivpol(f));
   if (degpol(z) > 0) f = gdeuc(f,z);
-  q = (egalii(p,gen_2) && prec>=2)? utoipos(4): p;
+  q = (equalii(p,gen_2) && prec>=2)? utoipos(4): p;
   rac = FpX_roots(FpX_red(f,q), q);
   lx = lg(rac); if (lx == 1) return rac;
   if (prec==1)
@@ -1781,7 +1781,7 @@ scalar_getprec(GEN x, long *pprec, GEN *pp)
   {
     long e = valp(x); if (signe(x[4])) e += precp(x);
     if (e < *pprec) *pprec = e;
-    if (*pp && !egalii(*pp, (GEN)x[2])) err(consister,"apprpadic");
+    if (*pp && !equalii(*pp, (GEN)x[2])) err(consister,"apprpadic");
     *pp = (GEN)x[2];
   }
 }
@@ -1820,7 +1820,7 @@ apprgen9(GEN f, GEN a)
   if (!p) err(typeer,"apprgen9");
 
   p1 = poleval(f,a); v = ggval(lift_intern(p1),p);
-  fl2 = egalii(p,gen_2);
+  fl2 = equalii(p,gen_2);
   if (v <= 0 || (fl2 && v==1)) err(talker,"root does not exist in apprgen9");
   v = ggval(lift_intern(poleval(fp,a)), p);
   if (!v)
@@ -2161,7 +2161,7 @@ FqX_split(GEN *t, long d, GEN q, GEN S, GEN T, GEN p)
   if (dt == d) return;
   v = varn(*t);
   if (DEBUGLEVEL > 6) (void)timer2();
-  av = avma; is2 = egalii(p, gen_2);
+  av = avma; is2 = equalii(p, gen_2);
   for(cnt = 1;;cnt++, avma = av)
   { /* splits *t with probability ~ 1 - 2^(1-r) */
     w = w0 = FqX_rand(dt,v, T,p);
@@ -2493,7 +2493,7 @@ FqX_factor_i(GEN f, GEN T, GEN p)
   {
     t[j] = FqX_normalize((GEN)t[j], T,p);
     for (k=1; k<j; k++)
-      if (gegal(t[j],t[k]))
+      if (gequal(t[j],t[k]))
       {
         E[k] += E[j]; nbfact--;
         E[j] = E[nbfact];
@@ -2543,96 +2543,93 @@ GEN zrhqr(GEN a,long PREC);
 GEN
 rootsold(GEN x, long prec)
 {
-  long i, j, f, g, gg, fr, deg, ln;
+  long i, j, f, real, exact, fr, deg, ln;
   pari_sp av=avma, av0, av1, av2, av3;
   long exc,expmin,m,deg0,k,ti,h,ii,e;
   GEN y,xc,xd0,xd,xdabs,p1,p2,p3,p4,p5,p6,p7;
   GEN p11,p12,p1r,p1i,pa,pax,pb,pp,pq,ps, pi;
 
   if (typ(x)!=t_POL) err(typeer,"rootsold");
-  deg0=degpol(x); expmin=12 - bit_accuracy(prec);
+  deg0 = degpol(x); expmin = 12 - bit_accuracy(prec);
   if (!signe(x)) err(zeropoler,"rootsold");
-  y=cgetg(deg0+1,t_COL); if (!deg0) return y;
+  y = cgetg(deg0+1,t_COL); if (!deg0) return y;
   for (i=1; i<=deg0; i++)
   {
     p1 = cgetc(prec); y[i] = (long)p1;
     for (j=3; j<prec; j++) ((GEN)p1[2])[j] = ((GEN)p1[1])[j] = 0;
   }
-  g=1; gg=1;
+  real=1; exact=1;
   for (i=2; i<=deg0+2; i++)
   {
-    ti=typ(x[i]);
-    if (ti==t_REAL) gg=0;
+    ti = typ(x[i]);
+    if (ti==t_REAL) exact = 0;
     else if (ti==t_QUAD)
     {
       p2 = gmael3(x,i,1,2);
-      if (gsigne(p2) > 0) g = 0;
-    } else if (ti != t_INT && ti != t_INTMOD && ti != t_FRAC) g = 0;
+      if (gsigne(p2) > 0) real = 0;
+    } else if (ti != t_INT && ti != t_FRAC) real = 0;
   }
   av1 = avma;
-  for (i=2; i<=deg0+2 && gcmp0((GEN)x[i]); i++) gaffsg(0,(GEN)y[i-1]);
-  k = i-2;
-  if (k==deg0) return y;
+  k = polvaluation_inexact(x, &pax);
+  for (i = 1; i <= k; i++) gaffsg(0,(GEN)y[i]);
+  if (k == deg0) return y;
 
   pi = mppi(DEFAULTPREC);
   p2 = mkcomplex(pi, divrs(pi,10)); /* Pi * (1+I/10) */
-  p11=cgetg(4,t_POL); p11[1]=x[1];
-  p11[3]= (long)gen_1;
+  p11 = cgetg(4,t_POL); p11[1] = x[1];
+  p11[3] = (long)gen_1;
 
-  p12=cgetg(5,t_POL); p12[1]=x[1];
-  p12[4]= (long)gen_1;
-  if (k)
-  {
-    j=deg0+3-k; pax=cgetg(j,t_POL);
-    pax[1] = x[1];
-    for (i=2; i<j; i++) pax[i]=x[i+k];
-  }
-  else pax = x;
+  p12 = cgetg(5,t_POL); p12[1] = x[1];
+  p12[4] = (long)gen_1;
+
   xd0 = derivpol(pax); pa = pax;
   pq = NULL; /* for lint */
-  if (gg) { pp = ggcd(pax,xd0); h = degpol(pp); if (h) pq=gdeuc(pax,pp); }
-  else{ pp=gen_1; h=0; }
+  if (exact) { pp = ggcd(pax,xd0); h = degpol(pp); if (h) pq = gdeuc(pax,pp); }
+  else{ pp = gen_1; h = 0; }
   m = 0;
   while (k != deg0)
   {
     m++;
     if (h)
     {
-      pa=pp; pb=pq; pp = ggcd(pa,derivpol(pa)); h = degpol(pp);
-      if (h) pq=gdeuc(pa,pp); else pq=pa; ps=gdeuc(pb,pq);
+      pa = pp; pb = pq; pp = ggcd(pa,derivpol(pa)); h = degpol(pp);
+      pq = h? gdeuc(pa,pp): pa;
+      ps = gdeuc(pb,pq);
     }
     else ps = pa;
     deg = degpol(ps); if (!deg) continue;
 
     /* roots of exact order m */
-    av3 = avma;
     e = gexpo(ps) - gexpo(leading_term(ps));
     if (e < 0) e = 0; if (ps!=pax) xd0 = derivpol(ps);
-    xdabs=cgetg(deg+2,t_POL); xdabs[1]=xd0[1];
+    xdabs = cgetg(deg+2,t_POL); xdabs[1] = xd0[1];
     for (i=2; i<deg+2; i++)
     {
-      av3=avma; p3=(GEN)xd0[i];
-      p4 = gabs(real_i(p3),prec);
-      p5 = gabs(imag_i(p3),prec);
-      xdabs[i]=lpileupto(av3, gadd(p4,p5));
+      av3 = avma; p3 = (GEN)xd0[i];
+      xdabs[i] = lpileupto(av3, gadd(gabs(real_i(p3),prec),
+                                     gabs(imag_i(p3),prec)));
     }
-    av0=avma; xc=gcopy(ps); xd=gcopy(xd0); av2=avma;
+    av0 = avma; xc = gcopy(ps); xd = gcopy(xd0); av2 = avma;
     for (i=1; i<=deg; i++)
     {
-      if (i==deg)
+      if (i == deg)
       {
-        p1=(GEN)y[k+m*i]; gdivz(gneg_i((GEN)xc[2]),(GEN)xc[3],p1);
-        p1r=(GEN)p1[1]; p1i=(GEN)p1[2];
+        p1 = (GEN)y[k+m*i];
+        gdivz(gneg_i((GEN)xc[2]),(GEN)xc[3], p1);
+        p1r = (GEN)p1[1];
+        p1i = (GEN)p1[2];
       }
       else
       {
-        p3=gshift(p2,e); p4 = poleval(xc,p3); p5 = gnorm(p4); exc=0;
+        p3 = gshift(p2,e);
+        p4 = poleval(xc,p3);
+        p5 = gnorm(p4);
+        exc = 0;
         while (exc >= -20)
         {
           p7 = gneg_i(gdiv(p4, poleval(xd,p3)));
           av3 = avma;
-          if (gcmp0(p5)) exc = -32;
-          else exc = expo(gnorm(p7))-expo(gnorm(p3));
+          exc = gcmp0(p5)? -32: expo(gnorm(p7))-expo(gnorm(p3));
           avma = av3;
           for (j=1; j<=10; j++)
           {
@@ -2648,7 +2645,7 @@ rootsold(GEN x, long prec)
               gerepilemanysp(av2,av3,gptr,3);
               break;
             }
-            gshiftz(p7,-2,p7); avma=av3;
+            gshiftz(p7,-2,p7); avma = av3;
           }
           if (j > 10)
           {
@@ -2666,8 +2663,7 @@ rootsold(GEN x, long prec)
           setlg(p1i,ln); if (gcmp0(p1i)) p1[2] = (long)gen_0;
           p6 = gadd(p1, gneg_i(gdiv(poleval(xc,p1), poleval(xd,p1))));
           p1[1] = (long)p1r;
-          p1[2] = (long)p1i;
-          gaffect(p6, p1); avma = av2;
+          p1[2] = (long)p1i; gaffect(p6, p1); avma = av2;
         }
       }
       setlg(p1r,prec);
@@ -2687,12 +2683,11 @@ rootsold(GEN x, long prec)
       p6 = gdiv(poleval(ps,p7), poleval(xdabs,gabs(p7,prec)));
       if (gexpo(p6) >= expmin)
       {
-        avma = av;
         if (DEBUGLEVEL) err(warner,"error in rootsold(): using roots2()");
-        return roots2(x,prec);
+        avma = av; return roots2(x,prec);
       }
       avma = av2;
-      if (expo(p1[2]) < expmin && g)
+      if (expo(p1[2]) < expmin && real)
       {
         gaffect(gen_0, (GEN)p1[2]);
         for (j=1; j<m; j++) gaffect(p1, (GEN)y[k+(i-1)*m+j]);
@@ -2701,8 +2696,8 @@ rootsold(GEN x, long prec)
       }
       else
       {
-        for (j=1; j<m; j++) gaffect(p1,(GEN)y[k+(i-1)*m+j]);
-        if (g)
+        for (j=1; j<m; j++) gaffect(p1, (GEN)y[k+(i-1)*m+j]);
+        if (real)
         {
           p1 = gconj(p1);
           for (j=1; j<=m; j++) gaffect(p1, (GEN)y[k+i*m+j]);
@@ -2725,12 +2720,12 @@ rootsold(GEN x, long prec)
   for (j=2; j<=deg0; j++)
   {
     p1 = (GEN)y[j];
-    if (gcmp0((GEN)p1[2])) fr=0; else fr=1;
+    fr = !gcmp0((GEN)p1[2]);
     for (k=j-1; k>=1; k--)
     {
       p2 = (GEN)y[k];
-      if (gcmp0((GEN)p2[2])) f=0; else f=1;
-      if (f < fr) break;
+      f = !gcmp0((GEN)p2[2]);
+      if (!f && fr) break;
       if (f == fr && gcmp((GEN)p2[1],(GEN)p1[1]) <= 0) break;
       y[k+1] = y[k];
     }
@@ -2953,8 +2948,7 @@ laguer(GEN pol,long N,GEN y0,long EPS,long PREC)
 #define RADIX 1L
 #define COF 0.95
 
-/* ONLY FOR REAL COEFFICIENTS MATRIX : replace the matrix x with
-   a symmetric matrix a with the same eigenvalues */
+/* x t_MAT in M_n(R) : compute a symmetric matrix with the same eigenvalues */
 static GEN
 balanc(GEN x)
 {
@@ -2995,153 +2989,145 @@ balanc(GEN x)
 }
 
 #define SIGN(a,b) ((b)>=0.0 ? fabs(a) : -fabs(a))
+/* find the eigenvalues of the symmetric matrix mat */
 static GEN
-hqr(GEN mat) /* find all the eigenvalues of the matrix mat */
+hqr(GEN mat)
 {
-  long nn,n,m,l,k,j,its,i,mmin,flj,flk;
-  double **a,p,q,r,s,t,u,v,w,x,y,z,anorm,*wr,*wi;
+  long n = lg(mat)-1, N, m, l, k, j, i, mmin, flj, flk;
+  double **a, p, q, r, s, t, u, v, w, x, y, z, anorm, *wr, *wi;
   const double eps = 0.000001;
   GEN eig;
 
-  n=lg(mat)-1; a=(double**)gpmalloc(sizeof(double*)*(n+1));
-  for (i=1; i<=n; i++) a[i]=(double*)gpmalloc(sizeof(double)*(n+1));
+  init_dalloc();
+  a = (double**)stackmalloc(sizeof(double*)*(n+1));
+  for (i=1; i<=n; i++) a[i] = (double*)stackmalloc(sizeof(double)*(n+1));
   for (j=1; j<=n; j++)
-    for (i=1; i<=n; i++) a[i][j]=gtodouble((GEN)((GEN)mat[j])[i]);
-  wr=(double*)gpmalloc(sizeof(double)*(n+1));
-  wi=(double*)gpmalloc(sizeof(double)*(n+1));
+    for (i=1; i<=n; i++) a[i][j] = gtodouble((GEN)((GEN)mat[j])[i]);
+  wr = (double*)stackmalloc(sizeof(double)*(n+1));
+  wi = (double*)stackmalloc(sizeof(double)*(n+1));
 
-  anorm=fabs(a[1][1]);
-  for (i=2; i<=n; i++) for (j=(i-1); j<=n; j++) anorm+=fabs(a[i][j]);
-  nn=n; t=0.;
+  anorm = fabs(a[1][1]);
+  for (i=2; i<=n; i++) for (j=(i-1); j<=n; j++) anorm += fabs(a[i][j]);
+  N = n; t = 0.;
+  p = q = r = 0.; /* -Wall */
   if (DEBUGLEVEL>3) { fprintferr("* Finding eigenvalues\n"); flusherr(); }
-  while (nn>=1)
+  while (N>=1)
   {
-    its=0;
-    do
+    long its = 0;
+    for(;;)
     {
-      for (l=nn; l>=2; l--)
+      for (l=N; l>=2; l--)
       {
-        s=fabs(a[l-1][l-1])+fabs(a[l][l]); if (s==0.) s=anorm;
-        if ((double)(fabs(a[l][l-1])+s)==s) break;
+        s = fabs(a[l-1][l-1])+fabs(a[l][l]); if (s==0.) s = anorm;
+        if (fabs(a[l][l-1])+s == s) break;
       }
-      x=a[nn][nn];
-      if (l==nn){ wr[nn]=x+t; wi[nn--]=0.; }
-      else
-      {
-        y=a[nn-1][nn-1];
-        w=a[nn][nn-1]*a[nn-1][nn];
-        if (l == nn-1)
-        {
-          p=0.5*(y-x); q=p*p+w; z=sqrt(fabs(q)); x+=t;
-          if (q>=0. || fabs(q)<=eps)
-          {
-            z=p+SIGN(z,p); wr[nn-1]=wr[nn]=x+z;
-            if (fabs(z)>eps) wr[nn]=x-w/z;
-            wi[nn-1]=wi[nn]=0.;
-          }
-          else{ wr[nn-1]=wr[nn]=x+p; wi[nn-1]=-(wi[nn]=z); }
-          nn-=2;
-        }
-        else
-        {
-          p = q = r = 0.; /* for lint */
-          if (its==30) err(talker,"too many iterations in hqr");
-          if (its==10 || its==20)
-          {
-            t+=x; for (i=1; i<=nn; i++) a[i][i]-=x;
-            s = fabs(a[nn][nn-1]) + fabs(a[nn-1][nn-2]);
-            y=x=0.75*s; w=-0.4375*s*s;
-          }
-          its++;
-          for (m=nn-2; m>=l; m--)
-          {
-            z=a[m][m]; r=x-z; s=y-z;
-            p=(r*s-w)/a[m+1][m]+a[m][m+1];
-            q=a[m+1][m+1]-z-r-s;
-            r=a[m+2][m+1]; s=fabs(p)+fabs(q)+fabs(r); p/=s; q/=s; r/=s;
-            if (m==l) break;
-            u=fabs(a[m][m-1])*(fabs(q)+fabs(r));
-            v=fabs(p)*(fabs(a[m-1][m-1])+fabs(z)+fabs(a[m+1][m+1]));
-            if ((double)(u+v)==v) break;
-          }
-          for (i=m+2; i<=nn; i++){ a[i][i-2]=0.; if (i!=(m+2)) a[i][i-3]=0.; }
-          for (k=m; k<=nn-1; k++)
-          {
-            if (k!=m)
-            {
-              p=a[k][k-1]; q=a[k+1][k-1];
-              r = (k != nn-1)? a[k+2][k-1]: 0.;
-              x = fabs(p)+fabs(q)+fabs(r);
-              if (x != 0.) { p/=x; q/=x; r/=x; }
-            }
-            s = SIGN(sqrt(p*p+q*q+r*r),p);
-            if (s == 0.) continue;
+      x = a[N][N];
+      if (l == N){ wr[N] = x+t; wi[N] = 0.; N--; break; } /* OK */
 
-            if (k==m)
-              { if (l!=m) a[k][k-1] = -a[k][k-1]; }
-            else
-              a[k][k-1] = -s*x;
-            p+=s; x=p/s; y=q/s; z=r/s; q/=p; r/=p;
-            for (j=k; j<=nn; j++)
-            {
-              p = a[k][j]+q*a[k+1][j];
-              if (k != nn-1) { p+=r*a[k+2][j]; a[k+2][j]-=p*z; }
-              a[k+1][j] -= p*y; a[k][j] -= p*x;
-            }
-            mmin = (nn < k+3)? nn: k+3;
-            for (i=l; i<=mmin; i++)
-            {
-              p = x*a[i][k]+y*a[i][k+1];
-              if (k != nn-1) { p+=z*a[i][k+2]; a[i][k+2]-=p*r; }
-              a[i][k+1] -= p*q; a[i][k] -= p;
-            }
-          }
+      y = a[N-1][N-1];
+      w = a[N][N-1]*a[N-1][N];
+      if (l == N-1)
+      {
+        p = 0.5*(y-x); q = p*p+w; z = sqrt(fabs(q)); x += t;
+        if (q >= 0. || fabs(q) <= eps)
+        {
+          z = p + SIGN(z,p);
+          wr[N-1] = wr[N] = x+z;
+          if (fabs(z)>eps) wr[N] = x-w/z;
+          wi[N-1] = wi[N] = 0.;
+        }
+        else { wr[N-1] = wr[N]= x+p; wi[N-1] = -z; wi[N] = z; }
+        N -= 2; break; /* OK */
+      }
+
+      if (its==30) err(talker,"too many iterations in hqr");
+      if (its==10 || its==20)
+      {
+        t += x; for (i=1; i<=N; i++) a[i][i] -= x;
+        s = fabs(a[N][N-1]) + fabs(a[N-1][N-2]);
+        y = x = 0.75*s;
+        w = -0.4375*s*s;
+      }
+      its++;
+      for (m=N-2; m>=l; m--)
+      {
+        z = a[m][m]; r = x-z; s = y-z;
+        p = (r*s-w)/a[m+1][m]+a[m][m+1];
+        q = a[m+1][m+1]-z-r-s;
+        r = a[m+2][m+1];
+        s = fabs(p)+fabs(q)+fabs(r); p/=s; q/=s; r/=s;
+        if (m==l) break;
+        u = fabs(a[m][m-1])*(fabs(q)+fabs(r));
+        v = fabs(p) * (fabs(a[m-1][m-1])+fabs(z)+fabs(a[m+1][m+1]));
+        if (u+v==v) break;
+      }
+      for (i=m+2; i<=N; i++){ a[i][i-2]=0.; if (i!=m+2) a[i][i-3]=0.; }
+      for (k=m; k<=N-1; k++)
+      {
+        if (k!=m)
+        {
+          p = a[k][k-1]; q = a[k+1][k-1];
+          r = (k != N-1)? a[k+2][k-1]: 0.;
+          x = fabs(p)+fabs(q)+fabs(r);
+          if (x != 0.) { p/=x; q/=x; r/=x; }
+        }
+        s = SIGN(sqrt(p*p+q*q+r*r),p);
+        if (s == 0.) continue;
+
+        if (k==m)
+          { if (l!=m) a[k][k-1] = -a[k][k-1]; }
+        else
+          a[k][k-1] = -s*x;
+        p+=s; x=p/s; y=q/s; z=r/s; q/=p; r/=p;
+        for (j=k; j<=N; j++)
+        {
+          p = a[k][j]+q*a[k+1][j];
+          if (k != N-1) { p+=r*a[k+2][j]; a[k+2][j]-=p*z; }
+          a[k+1][j] -= p*y; a[k][j] -= p*x;
+        }
+        mmin = (N < k+3)? N: k+3;
+        for (i=l; i<=mmin; i++)
+        {
+          p = x*a[i][k]+y*a[i][k+1];
+          if (k != N-1) { p+=z*a[i][k+2]; a[i][k+2]-=p*r; }
+          a[i][k+1] -= p*q; a[i][k] -= p;
         }
       }
     }
-    while (l<nn-1);
   }
   for (j=2; j<=n; j++) /* ordering the roots */
   {
-    x=wr[j]; y=wi[j]; if (y != 0.) flj=1; else flj=0;
+    x = wr[j];
+    y = wi[j]; flj = (y != 0.);
     for (k=j-1; k>=1; k--)
     {
-      if (wi[k] != 0.) flk=1; else flk=0;
-      if (flk<flj) break;
-      if (!flk && !flj && wr[k]<=x) break;
-      if (flk&&flj&& wr[k]<x) break;
-      if (flk&&flj&& wr[k]==x && wi[k]>0) break;
-      wr[k+1]=wr[k]; wi[k+1]=wi[k];
+      flk = (wi[k] != 0.);
+      if (!flk && flj) break;
+      if (flk == flj && wr[k] <= x) break;
+      wr[k+1] = wr[k];
+      wi[k+1] = wi[k];
     }
-    wr[k+1]=x; wi[k+1]=y;
+    wr[k+1] = x;
+    wi[k+1] = y;
   }
   if (DEBUGLEVEL>3) { fprintferr("* Eigenvalues computed\n"); flusherr(); }
-  for (i=1; i<=n; i++) free(a[i]); free(a); eig=cgetg(n+1,t_COL);
+  eig = cgetg(n+1,t_COL);
   for (i=1; i<=n; i++)
     eig[i] = (wi[i] == 0.)? (long)dbltor(wr[i])
                           : (long)mkcomplex(dbltor(wr[i]), dbltor(wi[i]));
-  free(wr); free(wi); return eig;
+  return eig;
 }
 
-/* ONLY FOR POLYNOMIAL WITH REAL COEFFICIENTS : give the roots of the
- * polynomial a (first, the real roots, then the non real roots) in
- * increasing order of their real parts MULTIPLE ROOTS ARE FORBIDDEN.
- */
+/* a t_POL in R[X], squarefree: give the roots of the polynomial a (real roots
+ * first) in increasing order of their real parts. */
 GEN
-zrhqr(GEN a,long prec)
+zrhqr(GEN a, long prec)
 {
   pari_sp av = avma;
-  long i,j,prec2, n = degpol(a), ex = -bit_accuracy(prec);
-  GEN aa,b,p1,rt,rr,hess,x,dx,y,newval,oldval;
+  long i, prec2, n = degpol(a), ex = -bit_accuracy(prec);
+  GEN aa, b, rt, rr, x, dx, y, newval, oldval;
 
-  hess = cgetg(n+1,t_MAT);
-  for (j=1; j<=n; j++)
-  {
-    p1 = cgetg(n+1,t_COL); hess[j] = (long)p1;
-    p1[1] = lneg(gdiv((GEN)a[n-j+2],(GEN)a[n+2]));
-    for (i=2; i<=n; i++) p1[i] = (i==(j+1))? (long)gen_1: (long)gen_0;
-  }
-  rt = hqr(balanc(hess));
+  rt = hqr(balanc(assmat(a)));
   prec2 = 2*prec; /* polishing the roots */
   aa = gprec_w(a, prec2);
   b = derivpol(aa); rr = cgetg(n+1,t_COL);
@@ -3158,7 +3144,7 @@ zrhqr(GEN a,long prec)
       if (gexpo(newval) < ex || (oldval && gcmp(newval,oldval) > 0)) break;
     }
     if (DEBUGLEVEL>3) fprintferr("%ld ",i);
-    rr[i] = (long)ctofp(y, prec);
+    rr[i] = (long)gtofp(y, prec);
   }
   if (DEBUGLEVEL>3) { fprintferr("\npolished roots = %Z",rr); flusherr(); }
   return gerepilecopy(av, rr);

@@ -140,7 +140,7 @@ GEN  vecconst(GEN v, GEN x);
   
 GEN  GS_norms(GEN B, long prec);
 GEN  dim1proj(GEN prh);
-GEN  detcyc(GEN cyc);
+GEN  detcyc(GEN cyc, long *L);
 GEN  close_modinvertible(GEN x, GEN y);
 GEN  colreducemodHNF(GEN x, GEN y, GEN *Q);
 GEN  col_to_ff(GEN x, long v);
@@ -176,6 +176,8 @@ int   miller(GEN n, long k);
 GEN   mpqs(GEN N);
 ulong ucarrecomplet(ulong A);
 ulong ugcd(ulong x, ulong y);
+long  Z_lvalrem_stop(GEN n, ulong p, int *stop);
+long  Z_issquarefree(GEN x);
 
 /* quadratic forms, quadratic numbers */
 GEN  qf_disc(GEN x, GEN y, GEN z);
@@ -236,13 +238,13 @@ GEN ZM_init_CRT(GEN Hp, ulong p);
 int ZM_incremental_CRT(GEN H, GEN Hp, GEN q, GEN qp, ulong p);
 
 /* c) factorization */
-GEN cauchy_bound(GEN p);
+double cauchy_bound(GEN p);
 GEN chk_factors_get(GEN lt, GEN famod, GEN c, GEN T, GEN N);
 int cmbf_precs(GEN q, GEN A, GEN B, long *a, long *b, GEN *qa, GEN *qb);
 GEN DDF2(GEN x, long hint);
 GEN fact_from_DDF(GEN fa, GEN e, long n);
 GEN initgaloisborne(GEN T, GEN dn, long prec, GEN *pL, GEN *pprep, GEN *pdis);
-GEN max_modulus(GEN p, double tau);
+GEN logmax_modulus_bound(GEN p);
 GEN polint_i(GEN xa, GEN ya, GEN x, long n, GEN *ptdy);
 GEN quicktrace(GEN x, GEN sym);
 GEN roots_to_pol_intern(GEN L, GEN a, long v, int plus);

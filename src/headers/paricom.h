@@ -212,7 +212,7 @@ enum manage_var_t {
 #define gdiventgs(y,s)  (gopgs2(gdivent,(y),(s)))
 #define gdiventsg(s,y)  (gopsg2(gdivent,(s),(y)))
 #define gdivsg(s,y)     (gopsg2(gdiv,(s),(y)))
-#define gegalgs(s,y)    (gegalsg((y),(s)))
+#define gequalgs(s,y)    (gequalsg((y),(s)))
 #define gmaxgs(y,s)     (gopgs2(gmax,(y),(s)))
 #define gmaxsg(s,y)     (gmaxgs((y),(s)))
 #define gmings(y,s)     (gopgs2(gmin,(y),(s)))

@@ -358,7 +358,7 @@ dopsub(subgp_iter *T, GEN p, GEN indexsubq)
         if (T->fun != list_fun || !((sublist_t*)(T->fundata))->gen)
         {
           if (T->subq) p1 = mulis(p1,lg(T->subqpart)-1);
-          if (cmpis(p1,T->countsub))
+          if (!equaliu(p1,T->countsub))
           {
             fprintferr("  alpha = %Z\n",p1);
             err(bugparier,"forsubgroup (alpha != countsub)");

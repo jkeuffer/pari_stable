@@ -78,7 +78,7 @@ cgetp(GEN x)
 GEN
 cgetimag() { GEN y = cgetg(3,t_COMPLEX); y[1] = (long)gen_0; return y; }
 GEN
-pureimag(GEN x) { GEN y = cgetimag(); y[2] = (long)x; return y; }
+pureimag(GEN x) { return mkcomplex(gen_0, x); }
 
 /*******************************************************************/
 /*                                                                 */
@@ -300,7 +300,7 @@ gcmp_1(GEN x)
       return signe(x) < 0 ? absrnz_egal1(x): 0;
 
     case t_INTMOD:
-      av=avma; y=egalii(addsi(1,(GEN)x[2]), (GEN)x[1]); avma=av; return y;
+      av=avma; y=equalii(addsi(1,(GEN)x[2]), (GEN)x[1]); avma=av; return y;
 
     case t_FRAC:
       l = signe(x[1]);
@@ -313,11 +313,11 @@ gcmp_1(GEN x)
       return gcmp_1((GEN)x[2]) && gcmp0((GEN)x[3]);
 
     case t_PADIC:
-      av=avma; y=gegal(addsi(1,(GEN)x[4]), (GEN)x[3]); avma=av; return y;
+      av=avma; y=gequal(addsi(1,(GEN)x[4]), (GEN)x[3]); avma=av; return y;
 
     case t_POLMOD:
       av=avma; p1=gadd(gen_1,(GEN)x[2]);
-      y = signe(p1) && !gegal(p1,(GEN)x[1]); avma=av; return !y;
+      y = signe(p1) && !gequal(p1,(GEN)x[1]); avma=av; return !y;
 
     case t_POL:
       return lg(x)==3 && gcmp_1((GEN)x[2]);
@@ -442,14 +442,14 @@ polegal(GEN x, GEN y)
   while (lg(x) == 3) { x = (GEN)x[2]; if (typ(x) != t_POL) break; }
   while (lg(y) == 3) { y = (GEN)y[2]; if (typ(y) != t_POL) break; }
   if (MASK(x[0]) != MASK(y[0]))
-    return (typ(x) == t_POL || typ(y) == t_POL)? 0: gegal(x, y);
+    return (typ(x) == t_POL || typ(y) == t_POL)? 0: gequal(x, y);
   /* same typ, lg */
-  if (typ(x) != t_POL) return gegal(x, y);
+  if (typ(x) != t_POL) return gequal(x, y);
   /* typ = t_POL, non-constant or 0 */
   lx = lg(x); if (lx == 2) return 1; /* 0 in two different vars are = */
   if (x[1] != y[1]) return 0;
   for (i = 2; i < lx; i++)
-    if (!gegal((GEN)x[i],(GEN)y[i])) return 0;
+    if (!gequal((GEN)x[i],(GEN)y[i])) return 0;
   return 1;
 }
 
@@ -465,7 +465,7 @@ vecegal(GEN x, GEN y)
   if (typ(x) != t_MAT)
   {
     for ( ; i; i--)
-      if (! gegal((GEN)x[i],(GEN)y[i]) ) return 0;
+      if (! gequal((GEN)x[i],(GEN)y[i]) ) return 0;
     return 1;
   }
   for ( ; i; i--)
@@ -486,7 +486,7 @@ gegal_try(GEN x, GEN y)
 }
 
 int
-gegal(GEN x, GEN y)
+gequal(GEN x, GEN y)
 {
   pari_sp av;
   long tx;
@@ -498,7 +498,7 @@ gegal(GEN x, GEN y)
     switch(tx)
     {
       case t_INT:
-        return egalii(x,y);
+        return equalii(x,y);
 
       case t_REAL:
         return cmprr(x,y) == 0;
@@ -507,25 +507,25 @@ gegal(GEN x, GEN y)
         return polegal(x,y);
 
       case t_COMPLEX:
-	return gegal((GEN)x[1],(GEN)y[1]) && gegal((GEN)x[2],(GEN)y[2]);
+	return gequal((GEN)x[1],(GEN)y[1]) && gequal((GEN)x[2],(GEN)y[2]);
 
       case t_INTMOD: case t_POLMOD:
-	return gegal((GEN)x[2],(GEN)y[2])
-            && (x[1]==y[1] || gegal((GEN)x[1],(GEN)y[1]));
+	return gequal((GEN)x[2],(GEN)y[2])
+            && (x[1]==y[1] || gequal((GEN)x[1],(GEN)y[1]));
 
       case t_QFR:
-	    if (!gegal((GEN)x[4],(GEN)y[4])) return 0; /* fall through */
+	    if (!gequal((GEN)x[4],(GEN)y[4])) return 0; /* fall through */
       case t_QUAD: case t_QFI:
-	return gegal((GEN)x[1],(GEN)y[1])
-	    && gegal((GEN)x[2],(GEN)y[2])
-	    && gegal((GEN)x[3],(GEN)y[3]);
+	return gequal((GEN)x[1],(GEN)y[1])
+	    && gequal((GEN)x[2],(GEN)y[2])
+	    && gequal((GEN)x[3],(GEN)y[3]);
 
       case t_FRAC:
-	return gegal((GEN)x[1], (GEN)y[1])
-            && gegal((GEN)x[2], (GEN)y[2]);
+	return gequal((GEN)x[1], (GEN)y[1])
+            && gequal((GEN)x[2], (GEN)y[2]);
 
       case t_RFRAC:
-	av=avma; i=gegal(gmul((GEN)x[1],(GEN)y[2]),gmul((GEN)x[2],(GEN)y[1]));
+	av=avma; i=gequal(gmul((GEN)x[1],(GEN)y[2]),gmul((GEN)x[2],(GEN)y[1]));
 	avma=av; return i;
 
       case t_STR:
@@ -546,10 +546,10 @@ gegal(GEN x, GEN y)
 #undef MASK
 
 int
-gegalsg(long s, GEN x)
+gequalsg(long s, GEN x)
 {
   pari_sp av = avma;
-  int f = gegal(stoi(s), x);
+  int f = gequal(stoi(s), x);
   avma = av; return f;
 }
 /*******************************************************************/
@@ -618,13 +618,19 @@ polvaluation_inexact(GEN x, GEN *Z)
   if (Z) *Z = shiftpol_i(x, vx);
   return vx;
 }
+static int
+intdvd(GEN x, GEN y, GEN *z) {
+  GEN r, q = dvmdii(x,y,&r);
+  if (r != gen_0) return 0; 
+  *z = q; return 1;
+}
 
 long
 ggval(GEN x, GEN p)
 {
   long tx = typ(x), tp = typ(p), vx, vp, i, val;
   pari_sp av, limit;
-  GEN p1,p2;
+  GEN p1, p2;
 
   if (isexactzero(x)) return VERYBIGINT;
   if (is_const_t(tx) && tp==t_POL) return 0;
@@ -637,20 +643,19 @@ ggval(GEN x, GEN p)
       return Z_pval(x,p);
 
     case t_INTMOD:
-      av=avma;
-      p1=cgeti(lgefint(x[1]));
-      p2=cgeti(lgefint(x[2]));
-      if (tp!=t_INT || !dvdiiz((GEN)x[1],p,p1)) break;
-      if (!dvdiiz((GEN)x[2],p,p2)) { avma=av; return 0; }
-      val=1; while (dvdiiz(p1,p,p1) && dvdiiz(p2,p,p2)) val++;
-      avma=av; return val;
+      if (tp != t_INT) break;
+      av = avma;
+      if (!intdvd((GEN)x[1],p, &p1)) break;
+      if (!intdvd((GEN)x[2],p, &p2)) { avma = av; return 0; }
+      val = 1; while (intdvd(p1,p,&p1) && intdvd(p2,p,&p2)) val++;
+      avma = av; return val;
 
     case t_FRAC:
       if (tp != t_INT) break;
       return Z_pval((GEN)x[1],p) - Z_pval((GEN)x[2],p);
 
     case t_PADIC:
-      if (!gegal(p,(GEN)x[2])) break;
+      if (!gequal(p,(GEN)x[2])) break;
       return valp(x);
 
     case t_POLMOD:
@@ -659,8 +664,8 @@ ggval(GEN x, GEN p)
       if (varn(x[1]) != varn(p)) return 0;
       av = avma;
       if (!poldvd((GEN)x[1],p,&p1)) break;
-      if (!poldvd((GEN)x[2],p,&p2)) { avma=av; return 0; }
-      val=1; while (poldvd(p1,p,&p1)&&poldvd(p2,p,&p2)) val++;
+      if (!poldvd((GEN)x[2],p,&p2)) { avma = av; return 0; }
+      val = 1; while (poldvd(p1,p,&p1) && poldvd(p2,p,&p2)) val++;
       avma = av; return val;
 
     case t_POL:
@@ -788,6 +793,44 @@ Z_lvalrem(GEN x, ulong p, GEN *py)
   }
 }
 
+/* Is |q| <= p ? */
+static int
+isless_iu(GEN q, ulong p) {
+  long l = lgefint(q);
+  return l==2 || (l == 3 && (ulong)q[2] <= p);
+}
+
+/* Assume n > 0. Return v_p(n), assign n := n/p^v_p(n). Set 'stop' if now
+ * n < p^2 [implies n prime if no prime < p divides n] */
+long
+Z_lvalrem_stop(GEN n, ulong p, int *stop)
+{
+  long v = 0;
+  if (lgefint(n) == 3)
+  {
+    ulong N = (ulong)n[2], q = N / p, r = N % p; /* gcc makes a single div */
+    if (!r)
+    {
+      do { v++; N = q; q = N / p; r = N % p; } while (!r);
+      affui(N, n);
+    }
+    *stop = q <= p;
+  }
+  else
+  {
+    pari_sp av = avma;
+    ulong r;
+    GEN N, q = diviu_rem(n, p, &r);
+    if (!r)
+    {
+      do { v++; N = q; q = diviu_rem(N, p, &r); } while (!r);
+      affii(N, n);
+    }
+    *stop = isless_iu(q,p); avma = av;
+  }
+  return v;
+}
+
 /* x is a non-zero integer, |p| > 1 */
 long
 Z_pvalrem(GEN x, GEN p, GEN *py)
@@ -795,9 +838,6 @@ Z_pvalrem(GEN x, GEN p, GEN *py)
   long vx;
   pari_sp av, av2;
 
-#if 0
-  if (!py) return Z_pval(x, p);
-#endif
   if (lgefint(p) == 3) return Z_lvalrem(x, (ulong)p[2], py);
   if (lgefint(x) == 3) { *py = icopy(x); return 0; }
   av = avma; vx = 0; (void)new_chunk(lgefint(x));
@@ -1202,11 +1242,11 @@ gaffect(GEN x, GEN y)
       gaffect((GEN)x[1],(GEN)y[1]);
       gaffect((GEN)x[2],(GEN)y[2]); return;
     case t_PADIC:
-      if (!egalii((GEN)x[2],(GEN)y[2])) err(operi,"",x,y);
+      if (!equalii((GEN)x[2],(GEN)y[2])) err(operi,"",x,y);
       modiiz((GEN)x[4],(GEN)y[3],(GEN)y[4]);
       setvalp(y,valp(x)); return;
     case t_QUAD:
-      if (! gegal((GEN)x[1],(GEN)y[1])) err(operi,"",x,y);
+      if (! gequal((GEN)x[1],(GEN)y[1])) err(operi,"",x,y);
       affii((GEN)x[2],(GEN)y[2]);
       affii((GEN)x[3],(GEN)y[3]); return;
     case t_POLMOD:
@@ -1276,10 +1316,10 @@ gaffect(GEN x, GEN y)
 
 	    case t_PADIC:
               if (!signe(x)) { padicaff0(y); break; }
-	      av=avma;
+	      av = avma;
 	      setvalp(y, Z_pvalrem(x,(GEN)y[2],&p1));
-	      modiiz(p1,(GEN)y[3],(GEN)y[4]);
-	      avma=av; break;
+	      affii(modii(p1,(GEN)y[3]), (GEN)y[4]);
+	      avma = av; break;
 
 	    case t_QUAD: gaffect(x,(GEN)y[2]); gaffsg(0,(GEN)y[3]); break;
 	    case t_POLMOD: gaffect(x,(GEN)y[2]); break;
@@ -1310,7 +1350,7 @@ gaffect(GEN x, GEN y)
 	    case t_REAL: rdiviiz((GEN)x[1],(GEN)x[2], y); break;
 	    case t_INTMOD: av = avma;
               p1 = Fp_inv((GEN)x[2],(GEN)y[1]);
-	      modiiz(mulii((GEN)x[1],p1),(GEN)y[1],(GEN)y[2]);
+	      affii(modii(mulii((GEN)x[1],p1),(GEN)y[1]), (GEN)y[2]);
 	      avma = av; break;
 	    case t_COMPLEX: gaffect(x,(GEN)y[1]); gaffsg(0,(GEN)y[2]); break;
 	    case t_PADIC:
@@ -1321,7 +1361,7 @@ gaffect(GEN x, GEN y)
 	      if (!vx) vx = -Z_pvalrem(den,(GEN)y[2],&den);
 	      setvalp(y,vx);
 	      p1 = mulii(num,Fp_inv(den,(GEN)y[3]));
-	      modiiz(p1,(GEN)y[3],(GEN)y[4]); avma = av; break;
+	      affii(modii(p1,(GEN)y[3]), (GEN)y[4]); avma = av; break;
 	    case t_QUAD: gaffect(x,(GEN)y[2]); gaffsg(0,(GEN)y[3]); break;
 	    case t_POLMOD: gaffect(x,(GEN)y[2]); break;
 	    default: err(operf,"",x,y);
@@ -1513,7 +1553,7 @@ qtop(GEN x, GEN p, long d)
   P = (GEN)x[1];
   b = (GEN)P[3];
   c = (GEN)P[2]; av = avma;
-  z = gsqrt(cvtop(subii(b, shifti(c,2)), p, egalii(p,gen_2)? d+2: d), 0);
+  z = gsqrt(cvtop(subii(b, shifti(c,2)), p, equalii(p,gen_2)? d+2: d), 0);
   z = gmul2n(gsub(z, b), -1);
   return gerepileupto(av, gadd(u, gmul(v, z)));
 }
@@ -1870,7 +1910,7 @@ listsort(GEN L, long flag)
   {
     c=1; vec[1] = l[1];
     for (i=2; i<lx; i++)
-      if (!gegal((GEN)l[i], (GEN)vec[c]))
+      if (!gequal((GEN)l[i], (GEN)vec[c]))
         vec[++c] = l[i];
       else
         if (isclone(l[i])) gunclone((GEN)l[i]);

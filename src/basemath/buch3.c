@@ -441,7 +441,7 @@ buchrayall(GEN bnf,GEN module,long flag)
   );
   met = smithrel(hnf(h), &U, add_gen? &u1: NULL);
   clg = cgetg(add_gen? 4: 3, t_VEC);
-  clg[1] = (long)detcyc(met);
+  clg[1] = (long)detcyc(met, &j);
   clg[2] = (long)met;
   if (add_gen) clg[3] = (long)compute_raygen(nf,u1,Gen,bid);
   if (!do_init) return gerepilecopy(av, clg);
@@ -1293,7 +1293,7 @@ check_subgroup(GEN bnr, GEN H, GEN *clhray, int triv_is_NULL, char *s)
     H = hnf(H);
     if (!hnfdivide(H, D)) err(talker,"incorrect subgroup in %s", s);
     h = dethnf_i(H);
-    if (egalii(h, *clhray)) H = NULL; else *clhray = h;
+    if (equalii(h, *clhray)) H = NULL; else *clhray = h;
   }
   if (!H && !triv_is_NULL) H = D? D: diagonal(gmael(bnr,5,2));
   return H;
@@ -1387,7 +1387,7 @@ conductor(GEN bnr, GEN H0, long all)
     archp[k] = 0;
   }
   if (all < 0) { avma = av; return gen_1; }
-  ideal = gegal(e2, e)? gmael(bid,1,1): factorbackprime(nf, S.P, e2);
+  ideal = gequal(e2, e)? gmael(bid,1,1): factorbackprime(nf, S.P, e2);
   for (j = k = 1; k < l; k++)
     if (archp[k]) archp[j++] = archp[k];
   setlg(archp, j);
@@ -1425,7 +1425,7 @@ rnfnormgroup(GEN bnr, GEN polrel)
   for (i=1; i<lg(group); i++)
     if (!signe(gcoeff(group,i,i))) coeff(group,i,i) = (long)greldeg;
   detgroup = dethnf_i(group);
-  k = cmpis(detgroup,reldeg);
+  k = cmpiu(detgroup,reldeg);
   if (k < 0)
     err(talker,"not an Abelian extension in rnfnormgroup?");
   if (!k) return gerepilecopy(av, group);
@@ -1471,7 +1471,7 @@ rnfnormgroup(GEN bnr, GEN polrel)
       col = gmulsg(f, isprincipalrayall(bnr,pr,0));
       group = hnf(concatsp(group, col));
       detgroup = dethnf_i(group);
-      k = cmpis(detgroup,reldeg);
+      k = cmpiu(detgroup,reldeg);
       if (k < 0) err(talker,"not an Abelian extension in rnfnormgroup");
       if (!k) { cgiv(detgroup); return gerepileupto(av,group); }
     }
@@ -1522,7 +1522,7 @@ rnf_is_abelian(GEN nf, GEN pol)
       GEN a = RgX_RgX_compo((GEN)rores[j], (GEN)ro[i], mod);
       GEN b = RgX_RgX_compo((GEN)rores[i], (GEN)ro[j], mod);
       if (d) a = gmul(a, gpowgs(d, degpol(ro[i]) - degpol(ro[j])));
-      if (!gegal(a, b)) return 0;
+      if (!gequal(a, b)) return 0;
     }
   return 1;
 }
@@ -1589,7 +1589,7 @@ discrayrelall(GEN bnr, GEN H0, long flag)
       GEN z = bnr_log_gen_pr(bnr, &S, nf, j, k);
       H = hnf(concatsp(H, z));
       clhss = dethnf_i(H);
-      if (flcond && j==ep && egalii(clhss,clhray)) { avma = av; return gen_0; }
+      if (flcond && j==ep && equalii(clhss,clhray)) { avma = av; return gen_0; }
       if (is_pm1(clhss)) { sum = addis(sum, j); break; }
       sum = addii(sum, clhss);
     }
@@ -1727,7 +1727,7 @@ rayclassnolists(GEN sous, GEN sousclass, GEN fac)
 {
   long i;
   for (i=1; i<lg(sous); i++)
-    if (gegal(gmael(sous,i,3),fac)) return itos((GEN)sousclass[i]);
+    if (gequal(gmael(sous,i,3),fac)) return itos((GEN)sousclass[i]);
   err(bugparier,"discrayabslist");
   return 0; /* not reached */
 }
@@ -1737,7 +1737,7 @@ rayclassnolistessimp(GEN sous, GEN fac)
 {
   long i;
   for (i=1; i<lg(sous); i++)
-    if (gegal(gmael(sous,i,1),fac)) return gmael(sous,i,2);
+    if (gequal(gmael(sous,i,1),fac)) return gmael(sous,i,2);
   err(bugparier,"discrayabslistlong");
   return NULL; /* not reached */
 }
@@ -1756,7 +1756,7 @@ factormul(GEN fa1,GEN fa2)
   P = gen_0; c = 0;
   for (i=1; i<lx; i++)
   {
-    if (gegal((GEN)pnew[i],P))
+    if (gequal((GEN)pnew[i],P))
       e[c] = laddii((GEN)e[c],(GEN)enew[i]);
     else
     {

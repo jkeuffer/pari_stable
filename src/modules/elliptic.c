@@ -249,7 +249,7 @@ do_padic_agm(GEN *ptx, GEN a1, GEN b1, GEN p)
     GEN d;
     a = a1; b = b1;
     b1 = gprec(gsqrt(gmul(a,b),0),mi); bmod1 = modii((GEN)b1[4],p);
-    if (!egalii(bmod1,bmod)) b1 = gneg_i(b1);
+    if (!equalii(bmod1,bmod)) b1 = gneg_i(b1);
     a1 = gprec(gmul2n(gadd(gadd(a,b),gmul2n(b1,1)),-2),mi);
     d = gsub(a1,b1);
     if (gcmp0(d)) break;
@@ -270,7 +270,7 @@ padic_initell(GEN y, GEN p, long prec)
   for (i=1; i<=13; i++) y[i] = lmul(q,(GEN)y[i]);
   if (gcmp0((GEN)y[13]) || valp((GEN)y[13]) >= 0) /* p | j */
     err(talker,"valuation of j must be negative in p-adic ellinit");
-  if (egalii(p,gen_2))
+  if (equalii(p,gen_2))
   {
     pv = utoipos(4); 
     err(impl,"initell for 2-adic numbers");
@@ -294,7 +294,7 @@ padic_initell(GEN y, GEN p, long prec)
     e0 = e1;
     e1 = gdiv(gadd(gmul2n(gmul(e0,e2),1),c6), gsub(gmulsg(3,e2),c4));
   }
-  while (!gegal(e0,e1));
+  while (!gequal(e0,e1));
   setvalp(e1, valp(e1)+alpha);
 
   e1 = gsub(e1, gdivgs(b2,12));
@@ -342,7 +342,7 @@ initell0(GEN x, long prec)
       long e2 = signe(q[4])? precp(q)+valp(q): valp(q);
       if (e2 < e) e = e2;
       if (!p) p = (GEN)q[2];
-      else if (!egalii(p,(GEN)q[2]))
+      else if (!equalii(p,(GEN)q[2]))
         err(talker,"incompatible p-adic numbers in initell");
     }
   }
@@ -557,7 +557,7 @@ addell(GEN e, GEN z1, GEN z2)
 
   x1=(GEN)z1[1]; y1=(GEN)z1[2];
   x2=(GEN)z2[1]; y2=(GEN)z2[2];
-  if (x1 == x2 || gegal(x1,x2))
+  if (x1 == x2 || gequal(x1,x2))
   { /* y1 = y2 or -LHS0-y2 */
     if (y1 != y2)
     {
@@ -565,7 +565,7 @@ addell(GEN e, GEN z1, GEN z2)
       if (precision(y1) || precision(y2))
         eq = (gexpo(gadd(ellLHS0(e,x1),gadd(y1,y2))) >= gexpo(y1));
       else
-        eq = gegal(y1,y2);
+        eq = gequal(y1,y2);
       if (!eq) { avma=av; return mkvec(gen_0); }
     }
     p2 = d_ellLHS(e,z1);
@@ -624,7 +624,7 @@ ordell(GEN e, GEN x, long prec)
   {
     b = gneg_i(b);
     y = cgetg(2,t_VEC);
-    if (td == t_INTMOD && egalii((GEN)D[1], gen_2))
+    if (td == t_INTMOD && equalii((GEN)D[1], gen_2))
       y[1] = (long)gmodulss(gcmp0(a)?0:1, 2);
     else
       y[1] = lmul2n(b,-1);
@@ -642,7 +642,7 @@ ordell(GEN e, GEN x, long prec)
   {
     if (td==t_INTMOD)
     {
-      if (egalii((GEN)D[1],gen_2))
+      if (equalii((GEN)D[1],gen_2))
       {
         avma=av;
         if (!gcmp0(a)) return cgetg(1,t_VEC);
@@ -1476,9 +1476,9 @@ addsell(GEN e, GEN z1, GEN z2, GEN p)
   x1 = (GEN)z1[1]; y1 = (GEN)z1[2];
   x2 = (GEN)z2[1]; y2 = (GEN)z2[2];
   z = cgetg(3, t_VEC); av = avma;
-  if (x1 == x2 || egalii(x1, x2))
+  if (x1 == x2 || equalii(x1, x2))
   {
-    if (!signe(y1) || !egalii(y1,y2)) return NULL;
+    if (!signe(y1) || !equalii(y1,y2)) return NULL;
     p2 = shifti(y1,1);
     p1 = addii(e, mulii(x1,mulsi(3,x1)));
     p1 = remii(p1, p);
@@ -1684,7 +1684,7 @@ apell1(GEN e, GEN p)
         if (u[j] == (long)gen_0) /* sum = 0 or doubling */
         {
           long k = i+j-2;
-          if (egalii((GEN)p1[2],(GEN)fg[2])) k -= 2*nb; /* fg == p1 */
+          if (equalii((GEN)p1[2],(GEN)fg[2])) k -= 2*nb; /* fg == p1 */
           h = addii(h, mulsi(k,B)); goto FOUND;
         }
       }
@@ -1750,9 +1750,9 @@ apell1(GEN e, GEN p)
             j2 = ti[r] - 1;
             if (DEBUGLEVEL) msgtimer("[apell1] giant steps, i = %ld",i);
             p1 = addsell(cp4, powsell(cp4,F,stoi(j2),p),fh,p);
-            if (egalii((GEN)p1[1], (GEN)ftest[1]))
+            if (equalii((GEN)p1[1], (GEN)ftest[1]))
             {
-              if (egalii((GEN)p1[2], (GEN)ftest[2])) i = -i;
+              if (equalii((GEN)p1[2], (GEN)ftest[2])) i = -i;
               h = addii(h, mulii(addis(mulss(s,i), j2), B));
               goto FOUND;
             }
@@ -1995,8 +1995,8 @@ GEN
 apell(GEN e, GEN p)
 {
   checkell(e);
-  if (typ(p)!=t_INT || signe(p)<0) err(talker,"not a prime in apell");
-  if (egalii(p, gen_2)) return _a_2(e);
+  if (typ(p)!=t_INT || signe(p) <= 0) err(talker,"not a prime in apell");
+  if (equalii(p, gen_2)) return _a_2(e);
   if (gdvd((GEN)e[12],p)) /* D may be an intmod */
   {
     pari_sp av = avma;
@@ -2005,7 +2005,7 @@ apell(GEN e, GEN p)
     if (mod4(p) == 3) s = -s;
     avma = av; return stoi(s);
   }
-  if (cmpis(p, 0x3fffffff) > 0) return apell1(e, p);
+  if (cmpiu(p, 0x3fffffff) > 0) return apell1(e, p);
   return apell0(e, itou(p));
 }
 
@@ -2707,7 +2707,7 @@ localred_carac_23(GEN e, long p)
 static GEN
 localred(GEN e, GEN p, int minim)
 {
-  if (cmpis(p, 3) > 0) /* p != 2,3 */
+  if (cmpiu(p, 3) > 0) /* p != 2,3 */
     return localred_carac_p(e,p, minim);
   else
   {
@@ -2762,7 +2762,7 @@ ellintegralmodel(GEN e)
   if (l == 1) return NULL;
   L = sort(L);
   for (k = i = 2; i < l; i++)
-    if (!egalii((GEN)L[i], (GEN)L[i-1])) L[k++] = L[i];
+    if (!equalii((GEN)L[i], (GEN)L[i-1])) L[k++] = L[i];
 
   l = k; u = gen_1;
   for (k = 1; k < l; k++)
@@ -3031,10 +3031,10 @@ is_new_torsion(GEN e, GEN v, GEN p, long t2) {
     if (lg(pk)==2) return 1;
 
     for (l=2; l<=t2; l++)
-      if (gegal((GEN)pk[1],gmael(v,l,1))) return 1;
+      if (gequal((GEN)pk[1],gmael(v,l,1))) return 1;
 
     if (pkprec && k<=5)
-      if (gegal((GEN)pk[1],(GEN)pkprec[1])) return 1;
+      if (gequal((GEN)pk[1],(GEN)pkprec[1])) return 1;
     pkprec=pk;
   }
   return 0;
@@ -3110,7 +3110,7 @@ torsellnagelllutz(GEN e)
     if (k>t) err(bugparier,"torsell (bug3)");
 
     p1 = powell(e,(GEN)r[k],utoipos(t>>2));
-    k2 = (lg(p1)==3 && gegal((GEN)r[2],p1))? 3: 2;
+    k2 = (lg(p1)==3 && gequal((GEN)r[2],p1))? 3: 2;
     w3 = mkvec2((GEN)r[k], (GEN)r[k2]);
   }
   if (v)
@@ -3623,7 +3623,7 @@ ellrootno_p(GEN e, GEN p, GEN ex)
 static long
 ellrootno_intern(GEN e, GEN p, GEN ex)
 {
-  if (cmpis(p,3) > 0) return ellrootno_p(e,p,ex);
+  if (cmpiu(p,3) > 0) return ellrootno_p(e,p,ex);
   switch(itos(p))
   {
     case 3: return ellrootno_3(e);
@@ -3645,12 +3645,12 @@ ellrootno_all(GEN e, GEN p, GEN* ptcond)
   e = coordch(e,(GEN)gr[2]);
   cond = (GEN)gr[1]; if(ptcond) *ptcond = cond;
   if (typ(e[12]) != t_INT) err(talker,"not an integral curve in ellrootno");
-  if (typ(p) != t_INT || signe(p) < 0) err(typeer,"ellrootno");
-  if (cmpis(p,2) >= 0)
+  if (typ(p) != t_INT || signe(p) <= 0) err(typeer,"ellrootno");
+  if (cmpiu(p,2) >= 0)
   {
     long exs = ggval(cond,p);
     if (!exs) return 1;
-    if (cmpis(p,3) > 0) return ellrootno_p(e,p, utoipos(exs));
+    if (cmpiu(p,3) > 0) return ellrootno_p(e,p, utoipos(exs));
   }
   switch(itos(p))
   {

@@ -176,7 +176,7 @@ padicprec(GEN x, GEN p)
       return Z_pval((GEN)x[1],p);
 
     case t_PADIC:
-      if (!gegal((GEN)x[2],p))
+      if (!gequal((GEN)x[2],p))
 	err(talker,"not the same prime in padicprec");
       return precp(x)+valp(x);
 
@@ -393,7 +393,7 @@ static GEN
 _quot(GEN x, GEN y)
 {
   GEN q = gdiv(x,y), f = gfloor(q);
-  if (gsigne(y) < 0 && !gegal(f,q)) f = gadd(f,gen_1);
+  if (gsigne(y) < 0 && !gequal(f,q)) f = gadd(f,gen_1);
   return f;
 }
 static GEN
@@ -517,7 +517,7 @@ gmodulss(long x, long y)
 {
   GEN z=cgetg(3,t_INTMOD);
 
-  y=labs(y); z[1]=lstoi(y); z[2]=lstoi(x % y); return z;
+  y=labs(y); z[1]=lstoi(y); z[2]=(long)modss(x, y); return z;
 }
 
 static GEN 
@@ -1011,7 +1011,7 @@ ginv(GEN x)
     }
     case t_QFI:
       y=gcopy(x);
-      if (!egalii((GEN)x[1],(GEN)x[2]) && !egalii((GEN)x[1],(GEN)x[3]))
+      if (!equalii((GEN)x[1],(GEN)x[2]) && !equalii((GEN)x[1],(GEN)x[3]))
 	setsigne(y[2],-signe(y[2]));
       return y;
     case t_MAT:
@@ -1559,7 +1559,7 @@ integ(GEN x, long v)
       tx = typ(x[2]); n = is_scalar_t(tx)? 0: degpol(x[2]);
       n = i+n + 2;
       y = gdiv(gtrunc(gmul((GEN)x[2], integ(tayl(x,v,n),v))), (GEN)x[2]);
-      if (!gegal(deriv(y,v),x)) err(talker,"a log/atan appears in intformal");
+      if (!gequal(deriv(y,v),x)) err(talker,"a log/atan appears in intformal");
       if (typ(y)==t_RFRAC && lg(y[1]) == lg(y[2]))
       {
         GEN p2;
@@ -1995,7 +1995,7 @@ coefs_to_int(long n, ...)
 #ifdef LONG_IS_64BIT
   n >>= 1;
 #endif
-  x = cgetg(n+2, t_INT); 
+  x = cgeti(n+2); 
   x[1] = evallgefint(n+2) | evalsigne(1);
   y = int_MSW(x);
   for (i=0; i <n; i++)
@@ -2022,11 +2022,11 @@ u2toi(ulong a, ulong b)
   GEN x;
   if (!a && !b) return gen_0;
 #ifdef LONG_IS_64BIT
-  x = cgetg(3, t_INT);
+  x = cgeti(3);
   x[1] = evallgefint(3)|evalsigne(1);
   x[2] = (long) ((a << 32) | b);
 #else
-  x = cgetg(4, t_INT);
+  x = cgeti(4);
   x[1] = evallgefint(4)|evalsigne(1);
   *(int_MSW(x)) = (long)a;
   *(int_LSW(x)) = (long)b;
@@ -2823,7 +2823,7 @@ static long
 _egal(GEN x, GEN y)
 {
   pari_sp av = avma;
-  long r = gegal(simplify_i(x), simplify_i(y));
+  long r = gequal(simplify_i(x), simplify_i(y));
   avma = av; return r;
 }
 
@@ -2893,7 +2893,7 @@ geval(GEN x)
         entree *ep = varentries[varn(x)];
         if (!ep) return gcopy(x);
         z = (GEN)ep->value;
-        if (gegal(x, initial_value(ep))) return gcopy(z);
+        if (gequal(x, initial_value(ep))) return gcopy(z);
 #undef initial_value
       }
       y=gen_0; av=avma;

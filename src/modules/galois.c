@@ -161,7 +161,7 @@ numerotyp(GEN TYP, GEN galtyp)
 {
   long i, nb = lg(TYP);
   for (i=1; i<nb; i++)
-    if (gegal(galtyp,(GEN)TYP[i])) return i;
+    if (gequal(galtyp,(GEN)TYP[i])) return i;
   return 0;
 }
 
@@ -897,7 +897,7 @@ check_isin(buildroot *BR, resolv *R, GROUP tau, GROUP ss)
             avma = av1; goto NEXT;
           }
           for (j=1; j<=nbracint; j++)
-            if (gegal(roint,racint[j])) { multi[j]++; break; }
+            if (gequal(roint,racint[j])) { multi[j]++; break; }
           if (j > nbracint)
           {
             nbracint = j; multi[j] = 1; numi[j] = nocos;
@@ -926,7 +926,7 @@ check_isin(buildroot *BR, resolv *R, GROUP tau, GROUP ss)
 
               nbrac++;
               for (j=nri+1; j<=nbracint; j++)
-                if (gegal(roint,racint[j])) { multi[j]++; break; }
+                if (gequal(roint,racint[j])) { multi[j]++; break; }
               if (j > nbracint)
               {
                 nbracint = j; multi[j] = 1; numi[j] = nocos;
@@ -2487,7 +2487,7 @@ galoisbig(GEN pol, long prec)
     }
     BR.coef = z;
     BR.p = pol;
-    BR.pr = (gexpo( cauchy_bound(pol) ) >> TWOPOTBITS_IN_LONG) + prec;
+    BR.pr = (long)(cauchy_bound(pol) / (LOG2 * BITS_IN_LONG)) + prec;
     BR.prmax = BR.pr + BIGDEFAULTPREC-2; 
     BR.r = cget1(N+1, t_VEC);
     appendL(BR.r, gclone ( cleanroots(BR.p, BR.prmax) ));

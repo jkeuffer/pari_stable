@@ -36,10 +36,7 @@ hash(long q) { return (q & ((1 << (HASHBITS+1)) - 1)) >> 1; }
 #undef HASHBITS
 
 /* See buch2.c:
- * precision en digits decimaux=2*(#digits decimaux de Disc)+50
  * on prendra les p decomposes tels que prod(p)>lim dans la subFB
- * LIMC=Max(c.(log(Disc))^2,exp((1/8).sqrt(log(Disc).loglog(Disc))))
- * LIMC2=Max(6.(log(Disc))^2,exp((1/8).sqrt(log(Disc).loglog(Disc))))
  * subFB contient les indices des p decomposes tels que prod(p) > sqrt(Disc)
  * powsubFB est la table des puissances des formes dans subFB
  */
@@ -49,9 +46,9 @@ static const int CBUCH = (1<<RANDOM_BITS)-1;
 
 static ulong limhash;
 static long KC,KC2,RELSUP,PRECREG;
-static long *primfact,*exprimfact,*badprim;
+static long *primfact,*exprimfact;
 static long *FB,*numFB, **hashtab;
-static GEN  powsubFB,vperm,subFB,Disc,sqrtD,isqrtD;
+static GEN  powsubFB,vperm,subFB,Disc,sqrtD,isqrtD,badprim;
 
 GEN buchquad(GEN D, double c, double c2, long RELSUP0, long flag, long prec);
 
@@ -89,34 +86,63 @@ int
 isoforder2(GEN form)
 {
   GEN a=(GEN)form[1],b=(GEN)form[2],c=(GEN)form[3];
-  return !signe(b) || absi_equal(a,b) || egalii(a,c);
+  return !signe(b) || absi_equal(a,b) || equalii(a,c);
 }
 
 GEN
 getallforms(GEN D, long *pth, GEN *ptz)
 {
-  long d = itos(D), dabs = labs(d),  dover3 = dabs/3, t, b2, a, b, c, h;
-  GEN z, L = cgetg((long)(sqrt(dabs) * log2(dabs)), t_VEC);
-  b2 = b = (d&1); h = 0; z=gen_1;
-  while (b2 <= dover3)
+  ulong d = itou(D), dover3 = d/3, t, b2, a, b, c, h;
+  GEN z, L = cgetg((long)(sqrt(d) * log2(d)), t_VEC);
+  b2 = b = (d&1); h = 0; z = gen_1;
+  if (!b) /* b = 0 treated separately to avoid special cases */
   {
-    t = (b2-d)/4;
-    for (a=b?b:1; a*a<=t; a++)
-      if (t%a == 0)
+    t = d >> 2; /* (b^2 - D) / 4*/
+    for (a=1; a*a<=t; a++)
+      if (c = t/a, t == c*a)
       {
-	c = t/a; z = mulsi(a,z);
+	z = mului(a,z);
         L[++h] = (long)mkvecsmall3(a,b,c);
-	if (b && a != b && a*a != t) L[++h] = (long)mkvecsmall3(a,-b,c);
       }
-    b+=2; b2=b*b;
+    b = 2; b2 = 4;
+  }
+  /* now b > 0 */
+  for ( ; b2 <= dover3; b += 2, b2 = b*b)
+  {
+    t = (b2 + d) >> 2; /* (b^2 - D) / 4*/
+    /* b = a */
+    if (c = t/b, t == c*b)
+    {
+      z = mului(b,z);
+      L[++h] = (long)mkvecsmall3(b,b,c);
+    }
+    /* b < a < c */
+    for (a = b+1; a*a < t; a++)
+      if (c = t/a, t == c*a)
+      {
+	z = mului(a,z);
+        L[++h] = (long)mkvecsmall3(a, b,c);
+	L[++h] = (long)mkvecsmall3(a,-b,c);
+      }
+    /* a = c */
+    if (a * a == t) { z = mului(a,z); L[++h] = (long)mkvecsmall3(a,b,c); }
   }
   *pth = h; *ptz = z; setlg(L,h+1); return L;
 }
 
+
+static void
+check_pq(GEN p, GEN z, long d, GEN D)
+{
+  long ell = itos(p);
+  if (!umodiu(z,ell) || kross(d,ell) <= 0 || 
+    gcmp1((GEN)redimag(primeform(D,p,0))[1]));
+      err(talker,"[quadhilbert] incorrect values in pq: %Z", p);
+}
 #define MOD4(x) ((x)&3)
 #define MAXL 50
 /* find P and Q two non principal prime ideals (above p,q) such that
- *   (pq, z) = 1  [coprime to all class group representatives]
+ *   (pq, 2z) = 1  [coprime to all class group representatives]
  *   cl(P) = cl(Q) if P has order 2 in Cl(K)
  * Try to have e = 24 / gcd(24, (p-1)(q-1)) as small as possible */
 static void
@@ -128,29 +154,17 @@ get_pq(GEN D, GEN z, GEN pq, GEN *ptp, GEN *ptq)
   byteptr diffell = diffptr + 2;
 
   if (pq && typ(pq)==t_VEC)
-  { /* assume pq = [p,q]. Check nevertheless */
-    for (i=1; i<lg(pq); i++)
-    {
-      ell = itos((GEN)pq[i]);
-      if (smodis(z,ell) && kross(d,ell) > 0)
-      {
-	form = redimag(primeform(D,(GEN)pq[i],0));
-	if (!gcmp1((GEN)form[1])) {
-	  wp[l]  = pq[i];
-          l++; if (l == 3) break;
-	}
-      }
-    }
-    if (l<3) err(talker,"[quadhilbert] incorrect values in pq: %Z", pq);
-    *ptp = (GEN)wp[1];
-    *ptq = (GEN)wp[2]; return;
+  {
+    if (lg(pq) != 3) err(typeer, "quadhilbert (pq)");
+    *ptp = (GEN)pq[1]; check_pq(*ptp,z,d,D);
+    *ptq = (GEN)pq[2]; check_pq(*ptq,z,d,D); return;
   }
 
   ell = 3;
   while (l < MAXL)
   {
     NEXT_PRIME_VIADIFF_CHECK(ell, diffell);
-    if (smodis(z,ell) && kross(d,ell) > 0)
+    if (umodiu(z,ell) && kross(d,ell) > 0)
     {
       court[2] = ell; form = redimag(primeform(D,court,0));
       if (gcmp1((GEN)form[1])) continue;
@@ -169,7 +183,7 @@ get_pq(GEN D, GEN z, GEN pq, GEN *ptp, GEN *ptq)
   {
     long oki = 0;
     for (i=1; i<l; i++)
-      if (gegal((GEN)wlf[i],form))
+      if (gequal((GEN)wlf[i],form))
       {
         if (MOD4(p) == 1 || MOD4(wp[i]) == 1) break;
         if (!oki) oki = i; /* not too bad, still e = 2 */
@@ -194,10 +208,10 @@ get_pq(GEN D, GEN z, GEN pq, GEN *ptp, GEN *ptq)
 static GEN
 gpq(GEN form, GEN p, GEN q, long e, GEN sqd, GEN u, long prec)
 {
-  GEN a2 = utoipos(form[1] << 1);
+  long a = form[1], a2 = a << 1; /* gcd(a2, u) = 2 */
   GEN p1,p2,p3,p4;
-  GEN w = lift(chinois(gmodulsg(-form[2],a2), u));
-  GEN al = mkcomplex(gneg(gdiv(w,a2)), gdiv(sqd,a2));
+  GEN w = lift(chinois(gmodulss(-form[2], a2), u));
+  GEN al = mkcomplex(gdivgs(w, -a2), gdivgs(sqd, a2));
   p1 = trueeta(gdiv(al,p),prec);
   p2 = p == q? p1: trueeta(gdiv(al,q),prec);
   p3 = trueeta(gdiv(al,mulii(p,q)),prec);
@@ -218,7 +232,7 @@ quadhilbertimag(GEN D, GEN pq)
   GEN z,L,P,p,q,qfp,u;
 
   if (DEBUGLEVEL>1) (void)timer2();
-  if (cmpis(D,-11) >= 0) return polx[0];
+  if (cmpiu(D,11) <= 0) return polx[0];
   L = getallforms(D,&h,&z);
   if (DEBUGLEVEL>1) msgtimer("class number = %ld",h);
   if (h == 1) { avma=av; return polx[0]; }
@@ -227,7 +241,7 @@ quadhilbertimag(GEN D, GEN pq)
   e = 24 / cgcd((smodis(p,24)-1) * (smodis(q,24)-1), 24);
   if(DEBUGLEVEL>1) fprintferr("p = %Z, q = %Z, e = %ld\n",p,q,e);
   qfp = primeform(D,p,0);
-  if (egalii(p,q))
+  if (equalii(p,q))
   {
     q = p;
     u = (GEN)compimagraw(qfp,qfp)[2];
@@ -240,12 +254,13 @@ quadhilbertimag(GEN D, GEN pq)
     GEN uq = gmodulcp((GEN)qfq[2], shifti(q,1));
     u = chinois(up,uq);
   }
+  /* u modulo 2pq */
   prec = 3;
   for(;;)
   {
     long ex, exmax = 0;
     pari_sp av0 = avma;
-    GEN lead, sqd = gsqrt(negi(D),prec);
+    GEN lead, sqd = sqrtr_abs(itor(D, prec));
     P = cgetg(h+1,t_VEC);
     for (i=1; i<=h; i++)
     {
@@ -262,7 +277,7 @@ quadhilbertimag(GEN D, GEN pq)
     if (DEBUGLEVEL>1) msgtimer("product, error bits = %ld",exmax);
     if (exmax <= -10)
     {
-      if (pq && !issquarefree(P)) { avma=av; return gen_0; }
+      if (pq && degpol(srgcd(P, derivpol(P)))) { avma = av; return gen_0; }
       break;
     }
     avma = av0; prec += (DEFAULTPREC-2) + (1 + (exmax >> TWOPOTBITS_IN_LONG));
@@ -493,9 +508,11 @@ PRECPB:
 static GEN
 do_compo(GEN x, GEN y)
 {
-  long a, ph = degpol(y);
+  long a, i, l = lg(y);
   GEN z;
-  y = gmul(gpowgs(polx[0],ph), gsubst(y,0,gdiv(polx[MAXVARN],polx[0])));
+  y = dummycopy(y); /* y := t^deg(y) y(#/t) */
+  for (i = 2; i < l; i++)
+    if (signe(y[i])) y[i] = (long)monomial((GEN)y[i], l-i-1, MAXVARN);
   for  (a = 0;; a = nexta(a))
   {
     if (a) x = gsubst(x, 0, gaddsg(a, polx[0]));
@@ -556,7 +573,7 @@ compocyclo(GEN nf, long m, long d)
   if (d==1) return do_compo(p1,p2);
 
   ell = m&1 ? m : (m>>2);
-  if (!cmpsi(-ell,D)) /* ell = |D| */
+  if (equalui(ell,D)) /* ell = |D| */
   {
     p2 = gcoeff(nffactor(nf,p2),1,1);
     return do_compo(p1,p2);
@@ -585,7 +602,7 @@ static long
 isZ(GEN I)
 {
   GEN x = gcoeff(I,1,1);
-  if (signe(gcoeff(I,1,2)) || !egalii(x, gcoeff(I,2,2))) return 0;
+  if (signe(gcoeff(I,1,2)) || !equalii(x, gcoeff(I,2,2))) return 0;
   return is_bigint(x)? -1: itos(x);
 }
 
@@ -598,14 +615,14 @@ treatspecialsigma(GEN nf, GEN gf)
 
   if (i == 1) return quadhilbertimag((GEN)nf[3], NULL); /* f = 1 ? */
 
-  if (cmpis(D,-3)==0)
+  if (equaliu(D,3))
   {
     if (i == 4 || i == 5 || i == 7) return cyclo(i,0);
-    if (cmpis(gcoeff(gf,1,1), 9) || cmpis(content(gf),3)) return NULL;
+    if (!equaliu(gcoeff(gf,1,1),9) || !equaliu(content(gf),3)) return NULL;
     p1 = (GEN)nfroots(nf,cyclo(3,0))[1]; /* f = P_3^3 */
     return gadd(gpowgs(polx[0],3), p1); /* x^3+j */
   }
-  if (cmpis(D,-4)==0)
+  if (equaliu(D,4))
   {
     if (i == 3 || i == 5) return cyclo(i,0);
     if (i != 4) return NULL;
@@ -626,11 +643,11 @@ treatspecialsigma(GEN nf, GEN gf)
   p2 = gcoeff(gf,2,2);
   if (gcmp1(p2)) { fl = 0; tryf = p1; }
   else {
-    if (Ds % 16 != 8 || !egalii(content(gf),gen_2)) return NULL;
+    if (Ds % 16 != 8 || !equalii(content(gf),gen_2)) return NULL;
     fl = 1; tryf = shifti(p1,-1);
   }
   /* tryf integer > 0 */
-  if (cmpis(tryf, 3) <= 0 || signe(remii(D, tryf)) || !isprime(tryf))
+  if (cmpiu(tryf, 3) <= 0 || signe(remii(D, tryf)) || !isprime(tryf))
     return NULL;
 
   i = itos(tryf); if (fl) i *= 4;
@@ -678,13 +695,13 @@ get_lambda(GEN bnr)
     for (b=0; b<f2; b++)
     {
       la = gaddgs(gmulsg(a,w),b);
-      if (smodis(gnorm(la), f2) != 1) continue;
+      if (umodiu(gnorm(la), f2) != 1) continue;
       if (DEBUGLEVEL>1) fprintferr("[%ld,%ld] ",a,b);
 
       labas = algtobasis(nf, la);
       lamodf = colreducemodHNF(labas, f, NULL);
       for (i=1; i<lu; i++)
-        if (gegal(lamodf, (GEN)u[i])) break;
+        if (gequal(lamodf, (GEN)u[i])) break;
       if (i < lu) continue; /* la = unit mod f */
       if (DEBUGLEVEL)
       {
@@ -783,7 +800,7 @@ static GEN
 qfr_pf5(GEN D, long p)
 {
   pari_sp av = avma;
-  GEN y = primeform(D,stoi(p),PRECREG);
+  GEN y = primeform(D,utoipos(p),PRECREG);
   y = qfr5_init(y,PRECREG);
   return gerepilecopy(av, redrealform(y));
 }
@@ -792,12 +809,12 @@ static GEN
 qfr_pf(GEN D, long p)
 {
   pari_sp av = avma;
-  GEN y = primeform(D,stoi(p),PRECREG);
+  GEN y = primeform(D,utoipos(p),PRECREG);
   return gerepilecopy(av, redrealform(y));
 }
 
 static GEN
-qfi_pf(GEN D, long p) { return primeform(D,stoi(p),0); }
+qfi_pf(GEN D, long p) { return primeform(D,utoipos(p),0); }
 
 static GEN
 qfr_comp3(GEN x, GEN y)
@@ -850,16 +867,6 @@ qfi_random(GEN ex) { return random_form(ex, &compimag); }
 /*                     Common subroutines                          */
 /*                                                                 */
 /*******************************************************************/
-static void
-buch_init(void)
-{
-  if (DEBUGLEVEL) (void)timer2();
-  primfact  = new_chunk(100);
-  exprimfact  = new_chunk(100);
-  badprim = new_chunk(100);
-  hashtab = (long**) new_chunk(HASHT);
-}
-
 double
 check_bach(double cbach, double B)
 {
@@ -870,45 +877,102 @@ check_bach(double cbach, double B)
   return cbach;
 }
 
-/* FIXME: use buch2.c:smooth_int() */
+#if 0
 static long
 factorquad(GEN f, long kcz, ulong limp)
 {
   ulong p;
   long i, k, lo;
   pari_sp av;
-  GEN q, x = (GEN)f[1];
+  GEN x = (GEN)f[1];
 
-  if (is_pm1(x)) { primfact[0]=0; return 1; }
-  av=avma; lo=0;
-  if (signe(x) < 0) x = absi(x);
+  if (is_pm1(x)) { primfact[0] = 0; return 1; }
+  av = avma; lo = 0;
+  x = absi(x);
   for (i=1; ; i++)
   {
-    ulong r;
-    p = (ulong)FB[i];
-    q = diviu_rem(x,p,&r);
-    if (!r)
-    {
-      for (k=0; !r; k++) { x=q; q = diviu_rem(x,p,&r); }
-      primfact[++lo]=(ulong)p; exprimfact[lo]=k;
-    }
-    if (cmpiu(q,p) <= 0) break;
-    if (i==kcz) { avma=av; return 0; }
+    int stop;
+    k = Z_lvalrem_stop(x, (ulong)FB[i], &stop);
+    if (k) { primfact[++lo] = i; exprimfact[lo] = k; }
+    if (stop) break;
+    if (i == kcz) { avma = av; return 0; }
   }
   avma = av;
   if (lgefint(x) != 3 || (p=(ulong)x[2]) > limhash) return 0;
 
   if (p != 1 && p <= limp)
   {
-    for (i=1; i<=badprim[0]; i++)
-      if (p % badprim[i] == 0) return 0;
-    primfact[++lo]=p; exprimfact[lo]=1;
+    if (badprim && cgcd(p, umodiu(badprim,p)) > 1) return 0;
+    primfact[++lo] = numFB[p]; exprimfact[lo] = 1;
     p = 1;
   }
-  primfact[0]=lo; return p;
+  primfact[0] = lo; return p;
 }
 
-/* q may not be prime, but check for a "large prime relation" involving q */
+#else /* Same, Z_lvalrem_stop unrolled. Ugly but more than 30% faster :-( */
+
+/* Is |q| <= p ? */
+static int
+isless_iu(GEN q, ulong p) {
+  long l = lgefint(q);
+  return l==2 || (l == 3 && (ulong)q[2] <= p);
+}
+
+long
+static long
+factorquad(GEN f, long kcz, ulong limp)
+{
+  ulong X;
+  long i, lo;
+  pari_sp av;
+  GEN x = (GEN)f[1];
+
+  if (is_pm1(x)) { primfact[0] = 0; return 1; }
+  av = avma; lo = 0;
+  for (i=1; lgefint(x) > 3; i++)
+  {
+    ulong p = (ulong)FB[i], r;
+    GEN q = diviu_rem(x, p, &r);
+    if (!r)
+    {
+      long k = 0;
+      do { k++; x = q; q = diviu_rem(x, p, &r); } while (!r);
+      primfact[++lo] = i; exprimfact[lo] = k; 
+    }
+    if (isless_iu(q,p)) {
+      avma = av;
+      if (lgefint(x) == 3) { X = (ulong)x[2]; goto END; }
+      return 0;
+    }
+    if (i == kcz) { avma = av; return 0; }
+  }
+  avma = av; X = (ulong)x[2];
+  for (;; i++)
+  { /* single precision affair, split for efficiency */
+    ulong p = (ulong)FB[i];
+    ulong q = X / p, r = X % p; /* gcc makes a single div */
+    if (!r)
+    {
+      long k = 0;
+      do { k++; X = q; q = X / p; r = X % p; } while (!r);
+      primfact[++lo] = i; exprimfact[lo] = k; 
+    }
+    if (q <= p) break;
+    if (i == kcz) return 0;
+  }
+END:
+  if (X > limhash) return 0;
+  if (X != 1 && X <= limp)
+  {
+    if (badprim && cgcd(X, umodiu(badprim,X)) > 1) return 0;
+    primfact[++lo] = numFB[X]; exprimfact[lo] = 1;
+    X = 1;
+  }
+  primfact[0] = lo; return X;
+}
+#endif
+
+/* Check for a "large prime relation" involving q; q may not be prime */
 static long *
 largeprime(long q, long *ex, long np, long nrho)
 {
@@ -950,7 +1014,7 @@ is_bad(GEN D, ulong p)
   avma = av; return r;
 }
 
-/* create FB, numFB; fill badprim. Return L(kro_D, 1) */
+/* create FB, numFB; set badprim. Return L(kro_D, 1) */
 static GEN
 FBquad(GEN Disc, long n2, long n)
 {
@@ -964,32 +1028,25 @@ FBquad(GEN Disc, long n2, long n)
   av = avma;
   KC = 0; bad = 0; i = 0;
   maxprime_check((ulong)n2);
+  badprim = gen_1;
   for (p = 0;;) /* p <= n2 */
   {
     NEXT_PRIME_VIADIFF(p, d);
     if (!KC && p > n) KC = i;
     if (p > n2) break;
     s = krois(Disc,p);
+    Res = mulsr(p, divrs(Res, p - s));
     switch (s)
     {
       case -1: break; /* inert */
       case  0: /* ramified */
-        if (is_bad(Disc, (ulong)p)) { badprim[++bad]=p; break; }
+        if (is_bad(Disc, (ulong)p)) { badprim = muliu(badprim, p); break; }
         /* fall through */
       default:  /* split */
         i++; numFB[p]=i; FB[i] = p; break;
     }
-    Res = mulsr(p, divrs(Res, p - s));
   }
   if (!KC) return NULL;
-  LIM = (expi(Disc) < 16)? 100: 1000;
-  while (p < LIM)
-  {
-    s = krois(Disc,p);
-    Res = mulsr(p, divrs(Res, p - s));
-    NEXT_PRIME_VIADIFF(p, d);
-  }
-  Res = gerepileupto(av, Res);
   KC2 = i;
   setlg(FB, KC2+1);
   if (DEBUGLEVEL)
@@ -1002,7 +1059,21 @@ FBquad(GEN Disc, long n2, long n)
       fprintferr("\n");
     }
   }
-  badprim[0] = bad; return Res;
+  LIM = (expi(Disc) < 16)? 100: 1000;
+  while (p < LIM)
+  {
+    s = krois(Disc,p);
+    Res = mulsr(p, divrs(Res, p - s));
+    NEXT_PRIME_VIADIFF(p, d);
+  }
+  if (badprim != gen_1)
+    gerepileall(av, 2, &Res, &badprim);
+  else
+  {
+    badprim = NULL;
+    Res = gerepileuptoleaf(av, Res);
+  }
+  return Res;
 }
 
 /* create vperm, return subFB */
@@ -1020,8 +1091,8 @@ subFBquad(GEN D, double PROD, long KC)
   no    = cgetg(lv, t_VECSMALL); ino = 1;
   for (i=j=1; j < lv; j++)
   {
-    long p = FB[j];
-    if (smodis(D, p) == 0) no[ino++] = j; /* ramified */
+    ulong p = FB[j];
+    if (!umodiu(D, p)) no[ino++] = j; /* ramified */
     else
     {
       vperm[i] = j; i++;
@@ -1083,24 +1154,26 @@ static void
 sub_fact(GEN col, GEN F)
 {
   GEN b = (GEN)F[2];
-  long i, p, e;
+  long i;
   for (i=1; i<=primfact[0]; i++)
   {
-    p = primfact[i]; e = exprimfact[i];
-    if (smodis(b, p<<1) > p) e = -e;
-    col[numFB[p]] -= e;
+    ulong k = primfact[i], p = FB[k];
+    long e = exprimfact[i];
+    if (umodiu(b, p<<1) > p) e = -e;
+    col[k] -= e;
   }
 }
 static void
 add_fact(GEN col, GEN F)
 {
   GEN b = (GEN)F[2];
-  long i, p, e;
+  long i;
   for (i=1; i<=primfact[0]; i++)
   {
-    p = primfact[i]; e = exprimfact[i];
-    if (smodis(b, p<<1) > p) e = -e;
-    col[numFB[p]] += e;
+    ulong k = primfact[i], p = FB[k];
+    long e = exprimfact[i];
+    if (umodiu(b, p<<1) > p) e = -e;
+    col[k] += e;
   }
 }
 
@@ -1196,7 +1269,7 @@ trivial_relations(long **mat, GEN C)
   GEN col;
   for (i=1; i<=KC; i++) 
   {
-    if (smodis(Disc, FB[i])) continue;
+    if (umodiu(Disc, FB[i])) continue;
     /* ramified prime ==> trivial relation */
     col = mat[++s];
     col[i] = 2;
@@ -1206,10 +1279,9 @@ trivial_relations(long **mat, GEN C)
 }
 
 static void
-dbg_all(long phase, long s, long n)
+dbg_all(char *phase, long s, long n)
 {
-  if (DEBUGLEVEL>1) fprintferr("\n");
-  msgtimer("%s rel [#rel/#test = %ld/%ld]", phase? "random": "initial", s, n);
+  fprintferr("\nTime %s rel [#rel/#test = %ld/%ld]: %ld", phase,s,n,timer2());
 }
 
 void
@@ -1255,7 +1327,7 @@ imag_relations(long LIM, long lim, long LIMC, long **mat)
     if (s >= lim) {
       if (s >= LIM) break;
       lim = LIM; first = 0;
-      if (DEBUGLEVEL) dbg_all(0, s, nbtest);
+      if (DEBUGLEVEL) dbg_all("initial", s, nbtest);
     }
     avma = av; current = first? 1+(s%KC): 1+s-RELSUP;
     form = qfi_pf(Disc, FB[current]);
@@ -1269,7 +1341,7 @@ imag_relations(long LIM, long lim, long LIMC, long **mat)
     if (fpc > 1)
     {
       long *fpd = largeprime(fpc,ex,current,0);
-      long b1, b2, p;
+      ulong b1, b2, p;
       GEN form2;
       if (!fpd)
       {
@@ -1279,8 +1351,8 @@ imag_relations(long LIM, long lim, long LIMC, long **mat)
       form2 = qfi_factorback(fpd);
       form2 = compimag(form2, qfi_pf(Disc, FB[fpd[-2]]));
       p = fpc << 1;
-      b1 = smodis((GEN)form2[2], p);
-      b2 = smodis((GEN)form[2],  p);
+      b1 = umodiu((GEN)form2[2], p);
+      b2 = umodiu((GEN)form[2],  p);
       if (b1 != b2 && b1+b2 != p) continue;
 
       col = mat[++s];
@@ -1310,7 +1382,7 @@ imag_relations(long LIM, long lim, long LIMC, long **mat)
       s--; for (i=1; i<=KC; i++) col[i]=0;
     }
   }
-  if (DEBUGLEVEL) dbg_all(1, s, nbtest);
+  if (DEBUGLEVEL) dbg_all("random", s, nbtest);
   return C;
 }
 
@@ -1354,13 +1426,13 @@ real_relations(long LIM, long lim, long LIMC, long **mat)
   av = avma; limstack = stack_lim(av,1);
   s = trivial_relations(mat, C);
   lim += s; if (lim > LIM) lim = LIM;
-NEW:
   for(;;)
   {
+NEW:
     if (s >= lim) {
       if (lim == LIM) break;
       lim = LIM; first = 0;
-      if (DEBUGLEVEL) dbg_all(0, s, nbtest);
+      if (DEBUGLEVEL) dbg_all("initial", s, nbtest);
     }
     avma = av;
     form = qfr_random(ex);
@@ -1375,7 +1447,7 @@ NEW:
     rho = -1;
 
 CYCLE:
-    if (endcycle) goto NEW;
+    if (endcycle || rho > 5000) goto NEW;
     if (low_stack(limstack, stack_lim(av,1)))
     {
       if(DEBUGMEM>1) err(warnmem,"real_relations");
@@ -1388,7 +1460,7 @@ CYCLE:
       rhoacc++;
       if (first)
         endcycle = (absi_equal((GEN)form[1],(GEN)form0[1])
-             && egalii((GEN)form[2],(GEN)form0[2])
+             && equalii((GEN)form[2],(GEN)form0[2])
              && (!narrow || signe(form0[1])==signe(form[1])));
       else
       {
@@ -1397,13 +1469,13 @@ CYCLE:
         else if (absi_equal((GEN)form[1], (GEN)form[3])) /* a = -c */
         {
           if (absi_equal((GEN)form[1],(GEN)form0[1]) &&
-                  egalii((GEN)form[2],(GEN)form0[2])) goto NEW;
+                  equalii((GEN)form[2],(GEN)form0[2])) goto NEW;
           form = rhorealform(form); rho++;
         }
         else
           { setsigne(form[1],1); setsigne(form[3],-1); }
-        if (egalii((GEN)form[1],(GEN)form0[1]) &&
-            egalii((GEN)form[2],(GEN)form0[2])) goto NEW;
+        if (equalii((GEN)form[1],(GEN)form0[1]) &&
+            equalii((GEN)form[2],(GEN)form0[2])) goto NEW;
       }
     }
     nbtest++; fpc = factorquad(form,KC,LIMC);
@@ -1415,7 +1487,7 @@ CYCLE:
     if (fpc > 1)
     { /* look for Large Prime relation */
       long *fpd = largeprime(fpc,ex,current,rhoacc);
-      long b1, b2, p;
+      ulong b1, b2, p;
       GEN form2;
       if (!fpd)
       {
@@ -1439,8 +1511,8 @@ CYCLE:
         setsigne(form2[3],-1);
       }
       p = fpc << 1;
-      b1 = smodis((GEN)form2[2], p);
-      b2 = smodis((GEN)form1[2], p);
+      b1 = umodiu((GEN)form2[2], p);
+      b2 = umodiu((GEN)form1[2], p);
       if (b1 != b2 && b1+b2 != p) goto CYCLE;
 
       col = mat[++s];
@@ -1452,7 +1524,7 @@ CYCLE:
         sub_fact(col, form2);
         if (fpd[-2]) col[fpd[-2]]++; /* implies !first */
         d = qfr5_dist(subii((GEN)form1[4],(GEN)form2[4]),
-                     divrr((GEN)form1[5],(GEN)form2[5]), PRECREG);
+                      divrr((GEN)form1[5],(GEN)form2[5]), PRECREG);
       }
       else
       {
@@ -1460,8 +1532,9 @@ CYCLE:
         add_fact(col, form2);
         if (fpd[-2]) col[fpd[-2]]--;
         d = qfr5_dist(addii((GEN)form1[4],(GEN)form2[4]),
-                     mulrr((GEN)form1[5],(GEN)form2[5]), PRECREG);
+                      mulrr((GEN)form1[5],(GEN)form2[5]), PRECREG);
       }
+      if (DEBUGLEVEL) fprintferr(" %ldP",s);
     }
     else
     { /* standard relation */
@@ -1477,8 +1550,8 @@ CYCLE:
       for (i=1; i<lgsub; i++) col[subFB[i]] = -ex[i];
       add_fact(col, form1);
       d = qfr5_dist((GEN)form1[4], (GEN)form1[5], PRECREG);
+      if (DEBUGLEVEL) fprintferr(" %ld",s);
     }
-    if (DEBUGLEVEL) fprintferr(" %ld",s);
     affrr(d, (GEN)C[s]);
     if (first)
     {
@@ -1494,7 +1567,7 @@ CYCLE:
       }
     }
   }
-  if (DEBUGLEVEL) dbg_all(1, s, nbtest);
+  if (DEBUGLEVEL) dbg_all("random", s, nbtest);
   return C;
 }
 
@@ -1515,8 +1588,8 @@ real_be_honest()
       if (fpc == 1) { nbtest=0; s++; break; }
       if (++nbtest > 20) return 0;
       F = fix_signs( rhorealform(F) );
-      if (egalii((GEN)F[1],(GEN)F0[1])
-       && egalii((GEN)F[2],(GEN)F0[2])) break;
+      if (equalii((GEN)F[1],(GEN)F0[1])
+       && equalii((GEN)F[2],(GEN)F0[2])) break;
     }
     avma = av;
   }
@@ -1618,7 +1691,7 @@ buchquad(GEN D, double cbach, double cbach2, long RELSUP0, long flag, long prec)
   Disc = D;
   if (s < 0)
   {
-    if (cmpis(Disc,-4) >= 0)
+    if (cmpiu(Disc,4) <= 0)
     {
       GEN z = cgetg(6,t_VEC);
       z[1] = z[4] = z[5] = (long)gen_1;
@@ -1630,7 +1703,12 @@ buchquad(GEN D, double cbach, double cbach2, long RELSUP0, long flag, long prec)
       err(talker,"sorry, narrow class group not implemented. Use bnfnarrow");
     PRECREG = 1;
   }
-  buch_init(); RELSUP = RELSUP0;
+  if (DEBUGLEVEL) (void)timer2();
+  primfact   = new_chunk(100);
+  exprimfact = new_chunk(100);
+  hashtab = (long**) new_chunk(HASHT);
+
+  RELSUP = RELSUP0;
   drc = fabs(gtodouble(Disc));
   LOGD = log(drc);
   LOGD2 = LOGD * LOGD;
@@ -1646,6 +1724,7 @@ buchquad(GEN D, double cbach, double cbach2, long RELSUP0, long flag, long prec)
   av = avma; cbach /= 2;
   mat = NULL;
 
+/* LIMC = Max(cbach*(log D)^2,  exp(sqrt(log D loglog D) / 8)) */
 START: avma = av; cbach = check_bach(cbach,6.);
   if (mat) { desalloc(mat); mat = NULL; }
   nreldep = nrelsup = 0;

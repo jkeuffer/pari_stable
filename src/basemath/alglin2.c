@@ -960,9 +960,9 @@ GEN
 matrixqz0(GEN x,GEN p)
 {
   if (typ(p)!=t_INT) err(typeer,"matrixqz0");
-  if (signe(p)>=0)  return matrixqz(x,p);
-  if (!cmpsi(-1,p)) return matrixqz2(x);
-  if (!cmpsi(-2,p)) return matrixqz3(x);
+  if (signe(p)>=0) return matrixqz(x,p);
+  if (equaliu(p,1)) return matrixqz2(x);
+  if (equaliu(p,2)) return matrixqz3(x);
   err(flagerr,"matrixqz"); return NULL; /* not reached */
 }
 
@@ -2438,7 +2438,7 @@ allhnfmod(GEN x, GEN dm, int flag)
       c = cgetg(li, t_COL);
       for (j = 1; j < i; j++) c[j] = lremii(gcoeff(x,j,i),d);
       for (     ; j <li; j++) c[j] = (long)gen_0;
-      if (!egalii(dm, d)) c = gmul(c, diviiexact(dm, d));
+      if (!equalii(dm, d)) c = gmul(c, diviiexact(dm, d));
       x[li] = (long)c;
       FpV_Fp_mul_part_ip((GEN)x[i], u, dm, i-1);
       for (j = i - 1; j > ldef; j--)

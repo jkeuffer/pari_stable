@@ -396,7 +396,7 @@ FpX_eval(GEN x,GEN y,GEN p)
   long j, i=lg(x)-1;
   if (i<=2)
     return (i==2)? modii((GEN)x[2],p): gen_0;
-  res=cgetg(lgefint(p),t_INT);
+  res=cgeti(lgefint(p));
   av=avma; p1=(GEN)x[i];
   /* specific attention to sparse polynomials (see poleval)*/
   /*You've guess it! It's a copy-paste(tm)*/
@@ -1072,7 +1072,7 @@ GEN FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zetan)
 
   q = addsi(-1, gpowgs(p,degpol(T)));
   m = bezout(n,q,&u1,&u2);
-  if (!egalii(m,n)) a = FpXQ_pow(a, modii(u1,q), T,p);
+  if (!equalii(m,n)) a = FpXQ_pow(a, modii(u1,q), T,p);
   if (zetan) z = polun[varn(T)];
   lim = stack_lim(ltop,1);
   if (!gcmp1(m))
@@ -2428,7 +2428,7 @@ FpV_polint(GEN xa, GEN ya, GEN p)
     if (!signe(ya[i])) continue;
     T = FpX_div_by_X_x(Q, (GEN)xa[i], p);
     inv = Fp_inv(FpX_eval(T,(GEN)xa[i], p), p);
-    if (i < n-1 && egalii(addii((GEN)xa[i], (GEN)xa[i+1]), p))
+    if (i < n-1 && equalii(addii((GEN)xa[i], (GEN)xa[i+1]), p))
     {
       dP = pol_comp(T, muliimod((GEN)ya[i],  inv,p),
                        muliimod((GEN)ya[i+1],inv,p));
@@ -3411,7 +3411,7 @@ ffinit_fact(GEN p, long n)
   GEN P; /* pol */
   long i;
   /* If n is even, then F[1] is 2^bfffo(n)*/
-  if (!odd(n) && egalii(p, gen_2))
+  if (!odd(n) && equalii(p, gen_2))
     P = f2init(vals(n));
   else
     P = fpinit(p, F[1]);

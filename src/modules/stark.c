@@ -53,7 +53,7 @@ GEN
 InitRU(GEN den, long prec)
 {
   GEN c, s;
-  if (egalii(den, gen_2)) return gen_m1;
+  if (equalii(den, gen_2)) return gen_m1;
   gsincos(divri(Pi2n(1, prec), den), &s, &c, prec);
   return mkcomplex(c, s);
 }
@@ -235,7 +235,7 @@ GetPrimChar(GEN chi, GEN bnr, GEN bnrc, long prec)
 
   cond  = gmael(bnr,  2, 1);
   condc = gmael(bnrc, 2, 1);
-  if (gegal(cond, condc)) return NULL;
+  if (gequal(cond, condc)) return NULL;
 
   cyc   = gmael(bnr, 5, 2); nbg = lg(cyc)-1;
   Mrc   = diagonal(gmael(bnrc, 5, 2));
@@ -636,7 +636,7 @@ ComputeArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
   for (ic = 0, i = 1; i <= nChar; i++)
   {
     CHI = (GEN)LCHI[i];
-    if (cmpsi(2, (GEN)CHI[3]) >= 0) { W[i] = (long)gen_1; continue; } /* trivial case */
+    if (cmpui(2, (GEN)CHI[3]) >= 0) { W[i] = (long)gen_1; continue; } /* trivial case */
     ic++; indW[ic] = i;
     lC[ic] = (CHI_t*)new_chunk(sizeof(CHI_t));
     init_CHI_C(lC[ic], CHI);
@@ -823,7 +823,7 @@ bnrrootnumber(GEN bnr, GEN chi, long flag, long prec)
   else
   {
     condc = bnrconductorofchar(bnr, chi);
-    if (gegal(cond, condc)) flag = 1;
+    if (gequal(cond, condc)) flag = 1;
   }
 
   if (flag)
@@ -965,10 +965,10 @@ InitChar(GEN bnr, GEN listCR, long prec)
     /* do we already know about the invariants of chi? */
     olddata = NULL;
     for (j = 1; j < i; j++)
-      if (gegal(cond, gmael(listCR,j,2))) { olddata = (GEN)dataCR[j]; break; }
+      if (gequal(cond, gmael(listCR,j,2))) { olddata = (GEN)dataCR[j]; break; }
 
     /* if cond(chi) = cond(bnr) */
-    if (!olddata && gegal(cond, modul))
+    if (!olddata && gequal(cond, modul))
     {
       data[2] = lmul(C, gsqrt(det((GEN)cond[1]), prec2));
       data[3] = (long)bnr;
@@ -1045,7 +1045,7 @@ get_listCR(GEN bnr, GEN dtQ)
     lchi = LiftChar(Mr, Surj, chi);
 
     for (j = 1; j < tnc; j++)
-      if (gegal(lchi, (GEN)allCR[j])) break;
+      if (gequal(lchi, (GEN)allCR[j])) break;
     if (j != tnc) continue;
 
     cond = bnrconductorofchar(bnr, lchi);
@@ -1057,7 +1057,7 @@ get_listCR(GEN bnr, GEN dtQ)
 
     /* if chi is not real, add its conjugate character to allCR */
     d = Order(Mr, lchi);
-    if (!egalii(d, gen_2))
+    if (!equalii(d, gen_2))
       allCR[tnc++] = (long)ConjChar(lchi, Mr);
   }
   disable_dbg(-1);
@@ -1665,7 +1665,7 @@ sortChars(GEN dataCR, int quad)
   {
     GEN cond = _cond((GEN)dataCR[j], quad);
     for (k = 1; k <= ncond; k++)
-      if (gegal(cond, (GEN)vCond[k])) break;
+      if (gequal(cond, (GEN)vCond[k])) break;
     if (k > ncond) vCond[++ncond] = (long)cond;
     nvCond[k]++; CC[j] = k; /* char j has conductor number k */
   }
@@ -2368,7 +2368,7 @@ define_hilbert(void *S, GEN pol)
 
   if (degpol(pol) != T->cl + degpol(d)) return NULL;
   pol = gdivexact(pol, d);
-  return (T->cl & 1 || !egalii(smalldiscf(pol), T->dkpow))? pol: NULL;
+  return (T->cl & 1 || !equalii(smalldiscf(pol), T->dkpow))? pol: NULL;
 }
 
 /* let polrel define Hk/k,  find L/Q such that Hk=Lk and L and k are
@@ -2402,7 +2402,7 @@ makescindold(GEN nf, GEN polrel, long cl)
     for (i = 1; i < l; i++)
     {
       pol = gmael(L, i, 1);
-      if (cl & 1 || !egalii(smalldiscf(pol), T.dkpow)) break;
+      if (cl & 1 || !equalii(smalldiscf(pol), T.dkpow)) break;
     }
     if (i == l)
       for (i = 1; i < l; i++)
@@ -2707,7 +2707,7 @@ START:
 
   /* if the exponent of the class group is 2, use Genus Theory */
   exp = gmael4(bnf, 8, 1, 2, 1);
-  if (egalii(exp, gen_2)) return gerepileupto(av, GenusField(bnf));
+  if (equalii(exp, gen_2)) return gerepileupto(av, GenusField(bnf));
 
   CATCH(precer) {
     prec += EXTRA_PREC; pol = NULL;
@@ -2892,7 +2892,7 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
 
     a = i;
     for (j = 1; j <= nc; j++)
-      if (gegal(gmael(listCR, j, 1), clchi)) { a = -j; break; }
+      if (gequal(gmael(listCR, j, 1), clchi)) { a = -j; break; }
 
     if (a > 0)
     {

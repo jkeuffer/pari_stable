@@ -83,6 +83,7 @@ ulong  Fl_sub(ulong a, ulong b, ulong p);
 int    dvdii(GEN x, GEN y);
 int    dvdiiz(GEN x, GEN y, GEN z);
 int    dvdisz(GEN x, long y, GEN z);
+int    dvdiuz(GEN x, ulong y, GEN z);
 void   dvmdiiz(GEN x, GEN y, GEN z, GEN t);
 GEN    dvmdis(GEN x, long y, GEN *z);
 void   dvmdisz(GEN x, long y, GEN z, GEN t);
@@ -895,8 +896,18 @@ dvdisz(GEN x, long y, GEN z)
   const pari_sp av = avma;
   long rem;
   GEN p1 = divis_rem(x,y, &rem);
-  if (rem) { avma = av; return 0; }
-  affii(p1,z); avma = av; return 1;
+  avma = av; if (rem) return 0;
+  affii(p1,z); return 1;
+}
+
+INLINE int
+dvdiuz(GEN x, ulong y, GEN z)
+{
+  const pari_sp av = avma;
+  ulong rem;
+  GEN p1 = diviu_rem(x,y, &rem);
+  avma = av; if (rem) return 0;
+  affii(p1,z); return 1;
 }
 
 INLINE double

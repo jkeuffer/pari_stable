@@ -294,7 +294,7 @@ subFB_change(FB_t *F, GEN nf, GEN L_jid)
     }
     if (i == lv) return 0;
   }
-  if (gegal(F->subFB, yes))
+  if (gequal(F->subFB, yes))
   {
     if (chg != sfb_UNSUITABLE) F->sfb_chg = 0;
   }
@@ -358,7 +358,7 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf)
         if (j == 2 && !red(nf, vp, F->G0, &M)) { j = 1; m = M; }
         break;
       }
-      if (gegal(J, (GEN)id2[j-1])) { j = 1; break; }
+      if (gequal(J, (GEN)id2[j-1])) { j = 1; break; }
       id2[j] = (long)J;
       alg[j] = (long)m;
     }
@@ -536,19 +536,17 @@ divide_p_quo(FB_t *F, long p, long k, GEN nf, GEN I, GEN m)
 static int
 smooth_int(FB_t *F, GEN *N, GEN *ex)
 {
-  GEN q, FB = F->FB;
+  GEN FB = F->FB;
   const long KCZ = F->KCZ;
   const ulong limp = (ulong)FB[KCZ]; /* last p in FB */
-  long i, k;
+  long i;
 
   *ex = new_chunk(KCZ+1);
   for (i=1; ; i++)
   {
-    ulong r, p = (ulong)FB[i];
-    q = diviu_rem(*N, p, &r);
-    for (k=0; !r; k++) { *N = q; q = diviu_rem(*N, p, &r); }
-    (*ex)[i] = k;
-    if (cmpiu(q,p) <= 0) break;
+    int stop;
+    (*ex)[i] = Z_lvalrem_stop(*N, (ulong)FB[i], &stop);
+    if (stop) break;
     if (i == KCZ) return 0;
   }
   (*ex)[0] = i;
@@ -566,7 +564,7 @@ divide_p(FB_t *F, long p, long k, GEN nf, GEN I, GEN m)
 /* Let x = m if I == NULL,
  *         I if m == NULL,
  *         m/I otherwise.
- * Can we factor the integral ideal x ? N = Norm x > 0 */
+ * Can we factor the integral ideal x ? N = Norm x > 0 [DESTROYED] */
 static long
 can_factor(FB_t *F, GEN nf, GEN I, GEN m, GEN N)
 {
@@ -822,7 +820,7 @@ get_norm_fact(GEN gen, GEN ex, GEN *pd)
     {
       I = (GEN)gen[i]; e = (GEN)ex[i]; n = dethnf_i(I);
       ne = powgi(n,e);
-      de = egalii(n, gcoeff(I,1,1))? ne: powgi(gcoeff(I,1,1), e);
+      de = equalii(n, gcoeff(I,1,1))? ne: powgi(gcoeff(I,1,1), e);
       N = mulii(N, ne);
       d = mulii(d, de);
     }
@@ -909,7 +907,7 @@ pr_index(GEN L, GEN pr)
   long j, l = lg(L);
   GEN al = (GEN)pr[2];
   for (j=1; j<l; j++)
-    if (gegal(al, gmael(L,j,2))) return j;
+    if (gequal(al, gmael(L,j,2))) return j;
   err(bugparier,"codeprime");
   return 0; /* not reached */
 }
@@ -1078,7 +1076,7 @@ testprimes(GEN bnf, long bound)
     {
       GEN P = (GEN)vP[i];
       if (DEBUGLEVEL>1) fprintferr("  Testing P = %Z\n",P);
-      if (cmpis(idealnorm(bnf,P), bound) >= 0)
+      if (cmpiu(idealnorm(bnf,P), bound) >= 0)
       {
         if (DEBUGLEVEL>1) fprintferr("    Norm(P) > Zimmert bound\n");
         continue;
@@ -1153,14 +1151,14 @@ get_Garch(GEN nf, GEN gen, GEN clg2, long prec)
   {
     g = (GEN)gen[i];
     z = (GEN)clorig[i]; J = (GEN)z[1];
-    if (!gegal(g,J))
+    if (!gequal(g,J))
     {
       z = idealinv(nf,z); J = (GEN)z[1];
       J = gmul(J,denom(J));
-      if (!gegal(g,J))
+      if (!gequal(g,J))
       {
         z = ideallllred(nf,z,NULL,prec); J = (GEN)z[1];
-        if (!gegal(g,J))
+        if (!gequal(g,J))
           err(bugparier,"isprincipal (incompatible bnf generators)");
       }
     }
@@ -1250,7 +1248,7 @@ fact_ok(GEN nf, GEN y, GEN C, GEN g, GEN e)
     if (signe(e[i])) z = idealmul(nf, z, idealpow(nf, (GEN)g[i], (GEN)e[i]));
   if (typ(z) != t_MAT) z = idealhermite(nf,z);
   if (typ(y) != t_MAT) y = idealhermite(nf,y);
-  i = gegal(y, z); avma = av; return i;
+  i = gequal(y, z); avma = av; return i;
 }
 
 /* assume x in HNF. cf class_group_gen for notations */
@@ -1618,7 +1616,7 @@ zsignunits(GEN bnf, GEN archp, int add_zu)
   if (add_zu)
   {
     GEN w = gmael3(bnf,8,4,1), v = cgetg(l, t_COL);
-    if (egalii(w,gen_2)) (void)vecconst(v, gen_1);
+    if (equalii(w,gen_2)) (void)vecconst(v, gen_1);
     y[j++] = (long)v;
   }
   for ( ; j < RU; j++) y[j] = (long)zsign_from_logarch((GEN)A[j], invpi, archp);
@@ -2389,7 +2387,7 @@ makecycgen(GEN bnf)
   l = lg(gen); h = cgetg(l, t_VEC);
   for (i=1; i<l; i++)
   {
-    if (cmpis((GEN)cyc[i], 5) < 0)
+    if (cmpiu((GEN)cyc[i], 5) < 0)
     {
       GEN N = dethnf_i((GEN)gen[i]);
       y = isprincipalarch(bnf,(GEN)GD[i], N, (GEN)cyc[i], gen_1, &e);
@@ -2750,24 +2748,12 @@ regulator(GEN P, GEN data, long prec)
 
   if (typ(P)==t_INT)
   {
-    if (signe(P)>0)
-    {
-      z=quadclassunit0(P,0,data,prec);
-      return gerepilecopy(av,(GEN)z[4]);
-    }
-    return gen_1;
+    if (signe(P) < 0) return gen_1;
+    z=quadclassunit0(P,0,data,prec);
+    return gerepilecopy(av,(GEN)z[4]);
   }
   z=(GEN)classgroupall(P,data,6,prec)[1];
   return gerepilecopy(av,(GEN)z[6]);
-}
-
-GEN
-cgetc_col(long n, long prec)
-{
-  GEN c = cgetg(n+1,t_COL);
-  long i;
-  for (i=1; i<=n; i++) c[i] = (long)cgetc(prec);
-  return c;
 }
 
 static GEN
@@ -2807,7 +2793,7 @@ extract_full_lattice(GEN x)
     for (k = 0; k < dj; k++) v[lv+k] = j+k;
     setlg(v, lv + dj);
     h2 = hnfall_i(vecextract_p(x, v), NULL, 1);
-    if (gegal(h, h2))
+    if (gequal(h, h2))
     { /* these dj columns can be eliminated */
       avma = av; setlg(v, lv);
       j += dj;
@@ -2822,7 +2808,7 @@ extract_full_lattice(GEN x)
     }
     else
     { /* this column should be kept */
-      if (gegal(h2, H)) break;
+      if (gequal(h2, H)) break;
       h = h2; j++;
     }
   }

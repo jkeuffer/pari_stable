@@ -419,7 +419,7 @@ new_sol(GEN z, GEN S)
 {
   int i, l = lg(S);
   for (i=1; i<l; i++)
-    if (gegal(z,(GEN)S[i])) return 0;
+    if (gequal(z,(GEN)S[i])) return 0;
   return 1;
 }
 
@@ -434,9 +434,9 @@ static void
 check_sol(GEN x, GEN y, GEN P, GEN rhs, GEN *pS)
 {
   if (gcmp0(y))
-  { if (gegal(gpowgs(x,degpol(P)), rhs)) add_sol(pS, x, gen_0); }
+  { if (gequal(gpowgs(x,degpol(P)), rhs)) add_sol(pS, x, gen_0); }
   else
-  { if (gegal(poleval(rescale_pol(P,y),x), rhs)) add_sol(pS, x, y); }
+  { if (gequal(poleval(rescale_pol(P,y),x), rhs)) add_sol(pS, x, y); }
 }
 
 /* Check whether a potential solution is a true solution. Return 0 if
@@ -542,9 +542,9 @@ SmallSols(GEN S, int Bx, GEN poly, GEN rhs, GEN ro)
 
   /* x = 0 first */
   Y = ground(sqrtnRHS);
-  if (gegal(gpowgs(Y,n), rhs)) add_sol(&S, Y, gen_0);
+  if (gequal(gpowgs(Y,n), rhs)) add_sol(&S, Y, gen_0);
   Y = negi(Y);
-  if (gegal(gpowgs(Y,n), rhs)) add_sol(&S, Y, gen_0);
+  if (gequal(gpowgs(Y,n), rhs)) add_sol(&S, Y, gen_0);
 
   /* x != 0 */
   P = cgetg(lg(poly), t_POL); P[1] = poly[1]; 
@@ -635,44 +635,49 @@ thueinit(GEN pol, long flag, long prec)
   return gerepilecopy(av,tnf);
 }
 
+static void
+init_get_B(long i1, long i2, GEN Delta, GEN Lambda, GEN eps5, baker_s *BS,
+           long prec)
+{
+  GEN delta, lambda, errdelta;
+  if (BS->r > 1)
+  {
+    delta = divrr((GEN)Delta[i2],(GEN)Delta[i1]);
+    lambda = gdiv(gsub(gmul((GEN)Delta[i2],(GEN)Lambda[i1]),
+                       gmul((GEN)Delta[i1],(GEN)Lambda[i2])),
+                  (GEN)Delta[i1]);
+    errdelta = mulrr(addsr(1,delta),
+                     divrr(eps5, subrr(mpabs((GEN)Delta[i1]),eps5)));
+  }
+  else
+  { /* r == 1, single fundamental unit (i1 = s = t = 1) */
+    GEN p1, Pi2 = Pi2n(1, prec);
+    GEN fu = (GEN)BS->MatFU[1], ro = BS->ro;
+
+    p1 = gdiv((GEN)fu[2], (GEN)fu[3]);
+    delta = divrr(garg(p1,prec), Pi2);
+
+    p1 = gmul(gdiv(gsub((GEN)ro[1], (GEN)ro[2]),
+                   gsub((GEN)ro[1], (GEN)ro[3])),
+              gdiv((GEN)BS->NE[3], (GEN)BS->NE[2]));
+    lambda = divrr(garg(p1,prec), Pi2);
+
+    errdelta = ginv(gmul2n(gabs((GEN)fu[2],prec), bit_accuracy(prec)-1));
+  }
+  if (DEBUGLEVEL>1) fprintferr("  errdelta = %Z\n",errdelta);
+  BS->delta = delta;
+  BS->lambda = lambda;
+  BS->errdelta = errdelta;
+}
+
 static GEN
 get_B0(int i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
 {
-  GEN delta, lambda, errdelta, B0 = Baker(BS);
-  int i2, r = BS->r;
-
-  i2 = (i1 == 1)? 2: 1;
+  GEN B0 = Baker(BS);
+  int i2 = (i1 == 1)? 2: 1;
   for(;;) /* i2 from 1 to r unless r = 1 [then i2 = 2] */
   {
-    if (r > 1)
-    {
-      delta = divrr((GEN)Delta[i2],(GEN)Delta[i1]);
-      lambda = gdiv(gsub(gmul((GEN)Delta[i2],(GEN)Lambda[i1]),
-                         gmul((GEN)Delta[i1],(GEN)Lambda[i2])),
-                    (GEN)Delta[i1]);
-      errdelta = mulrr(addsr(1,delta),
-                       divrr(eps5, subrr(mpabs((GEN)Delta[i1]),eps5)));
-    }
-    else
-    { /* r == 1, single fundamental unit (i1 = s = t = 1) */
-      GEN p1, Pi2 = Pi2n(1, prec);
-      GEN fu = (GEN)BS->MatFU[1], ro = BS->ro;
-
-      p1 = gdiv((GEN)fu[2], (GEN)fu[3]);
-      delta = divrr(garg(p1,prec), Pi2);
-
-      p1 = gmul(gdiv(gsub((GEN)ro[1], (GEN)ro[2]),
-                     gsub((GEN)ro[1], (GEN)ro[3])),
-                gdiv((GEN)BS->NE[3], (GEN)BS->NE[2]));
-      lambda = divrr(garg(p1,prec), Pi2);
-
-      errdelta = gdiv(gmul2n(gen_1, 1 - bit_accuracy(prec)),
-                      gabs((GEN)fu[2],prec));
-    }
-    BS->delta = delta;
-    BS->lambda= lambda; BS->errdelta = errdelta;
-    if (DEBUGLEVEL>1) fprintferr("  errdelta = %Z\n",errdelta);
-
+    init_get_B(i1,i2, Delta,Lambda,eps5, BS, prec);
     if (DEBUGLEVEL>1) fprintferr("  Entering CF...\n");
     /* Reduce B0 as long as we make progress: newB0 < oldB0 - 0.1 */
     for (;;)
@@ -691,11 +696,11 @@ get_B0(int i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
       { /* Semirational or totally rational case */
         GEN Q, ep, q, l0, denbound;
 
-        if (! (Q = GuessQi(delta, lambda, &ep)) ) break;
+        if (! (Q = GuessQi(BS->delta, BS->lambda, &ep)) ) break;
 
         denbound = gadd(B0, absi((GEN)Q[2]));
-        q = denom( bestappr(delta, denbound) );
-        l0 = subrr(errnum(delta, q), ep);
+        q = denom( bestappr(BS->delta, denbound) );
+        l0 = subrr(errnum(BS->delta, q), ep);
         if (signe(l0) <= 0) break;
 
         B0 = divrr(mplog(divrr(mulir((GEN)Q[3], BS->c15), l0)),  BS->c13);
@@ -705,7 +710,7 @@ get_B0(int i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
       if (gcmp(oldB0, gadd(B0,dbltor(0.1))) <= 0) return gmin(oldB0, B0);
     }
     i2++; if (i2 == i1) i2++;
-    if (i2 > r) break;
+    if (i2 > BS->r) break;
   }
   err(bugparier,"thue (totally rational case)");
   return NULL; /* not reached */
@@ -714,44 +719,11 @@ get_B0(int i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
 static GEN
 get_Bx_LLL(int i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
 {
-  GEN B0 = Baker(BS), delta, lambda, errdelta, Bx = NULL;
-  int r = BS->r, i2; 
-
-  i2 = (i1 == 1)? 2: 1;
-
+  GEN B0 = Baker(BS), Bx = NULL;
+  int i2 = (i1 == 1)? 2: 1;
   for(;;) /* i2 from 1 to r unless r = 1 [then i2 = 2] */
   {
-    if (r > 1)
-    {    
-      delta = divrr((GEN)Delta[i2],(GEN)Delta[i1]);
-      lambda = gdiv(gsub(gmul((GEN)Delta[i2],(GEN)Lambda[i1]),
-                         gmul((GEN)Delta[i1],(GEN)Lambda[i2])),
-                    (GEN)Delta[i1]);
-      errdelta = mulrr(addsr(1,delta),
-                       divrr(eps5, subrr(mpabs((GEN)Delta[i1]),eps5)));
-    }
-    else
-    { /* r == 1, single fundamental unit (i1 = s = t = 1) */
-      GEN p1, Pi2 = Pi2n(1, prec);
-      GEN fu = (GEN)BS->MatFU[1], ro = BS->ro;
-
-      p1 = gdiv((GEN)fu[2], (GEN)fu[3]);
-      delta = divrr(garg(p1,prec), Pi2);
-
-      p1 = gmul(gdiv(gsub((GEN)ro[1], (GEN)ro[2]),
-                     gsub((GEN)ro[1], (GEN)ro[3])),
-                gdiv((GEN)BS->NE[3], (GEN)BS->NE[2]));
-      lambda = divrr(garg(p1,prec), Pi2);
-
-      errdelta = gdiv(gmul2n(gen_1, 1 - bit_accuracy(prec)),
-                      gabs((GEN)fu[2],prec));
-    }
-    
-    BS->delta = delta;
-    BS->lambda = lambda; 
-    BS->errdelta = errdelta;
-    
-    if (DEBUGLEVEL>1) fprintferr("  errdelta = %Z\n",errdelta);
+    init_get_B(i1,i2, Delta,Lambda,eps5, BS, prec);
     if (DEBUGLEVEL>1) fprintferr("  Entering LLL...\n");
     /* Reduce B0 as long as we make progress: newB0 < oldB0 - 0.1 */
     for (;;)
@@ -771,12 +743,12 @@ get_Bx_LLL(int i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
       { /* Semirational or totally rational case */
         GEN Q, ep, q, l0, denbound;
 
-        if (! (Q = GuessQi(delta, lambda, &ep)) ) break;
+        if (! (Q = GuessQi(BS->delta, BS->lambda, &ep)) ) break;
 
         denbound = addri(mulri(B0, absi((GEN)Q[2])), 
 			 mulii(BS->Ind, absi((GEN)Q[3])));
-        q = denom( bestappr(delta, denbound) );
-        l0 = divri(subrr(errnum(delta, q), ep), absi((GEN)Q[3])); 
+        q = denom( bestappr(BS->delta, denbound) );
+        l0 = divri(subrr(errnum(BS->delta, q), ep), absi((GEN)Q[3])); 
         if (signe(l0) <= 0) break;
 
 	B0 = divrr(mulir(BS->Ind, mplog(divrr(mulir(BS->Ind, BS->c15), l0))),
@@ -791,7 +763,7 @@ get_Bx_LLL(int i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
       if (oldBx && gcmp(oldBx, Bx) <= 0) return oldBx;
     }
     i2++; if (i2 == i1) i2++;
-    if (i2 > r) break;
+    if (i2 > BS->r) break;
   }
   err(bugparier,"thue (totally rational case)");
   return NULL; /* not reached */
@@ -1067,12 +1039,9 @@ fix_Partial(long i)
   long k;
   pari_sp av = avma;
   for (k=1; k<lg(Partial[1]); k++)
-    addiiz(
-      (GEN) Partial[i-1][k],
-            mulis((GEN) Relations[i][k], u[i]),
-      (GEN) Partial[i][k]
-    );
-  avma=av;
+    affii(addii((GEN)Partial[i-1][k], mulis((GEN)Relations[i][k], u[i])),
+          (GEN)Partial[i][k]);
+  avma = av;
 }
 
 /* Recursive loop. Suppose u[1..i] has been filled

@@ -989,7 +989,7 @@ root_bound(GEN P0)
   /* P0 = lP x^d + Q, deg Q < d */
   Q = normalizepol_i(Q, d+2);
   for (k=lg(Q)-1; k>1; k--) Q[k] = labsi((GEN)Q[k]);
-  k = gexpo( cauchy_bound(P0) );
+  k = (long)(cauchy_bound(P0) / LOG2);
   for (  ; k >= 0; k--)
   {
     pari_sp av = avma;
@@ -1003,7 +1003,7 @@ root_bound(GEN P0)
   for(k=0; ; k++)
   {
     z = shifti(addii(x,y), -1);
-    if (egalii(x,z) || k > 5) break;
+    if (equalii(x,z) || k > 5) break;
     if (cmpii(poleval(Q,z), mulii(lP, gpowgs(z, d))) < 0)
       y = z;
     else
@@ -1261,7 +1261,7 @@ AGAIN:
     if (DEBUGLEVEL>2) msgTIMER(&ti2, "for this block of traces");
 
     i = lg(CM_L) - 1;
-    if (i == r && gegal(CM_L, oldCM_L))
+    if (i == r && gequal(CM_L, oldCM_L))
     {
       CM_L = oldCM_L;
       avma = av2; continue;
@@ -1779,7 +1779,7 @@ nfrootsQ(GEN x)
 /***********************************************************************/
 #define LT 17
 #define assign_or_fail(x,y) {\
-  if (y==NULL) y=x; else if (!gegal(x,y)) return 0;\
+  if (y==NULL) y=x; else if (!gequal(x,y)) return 0;\
 }
 #define tsh 6
 #define typs(x,y) ((x << tsh) | y)
@@ -2062,7 +2062,7 @@ gauss_factor(GEN x)
   {
     GEN p = (GEN)P[i], w, w2, t, we, pe;
     long v, e = itos((GEN)E[i]);
-    int is2 = egalii(p, gen_2);
+    int is2 = equalii(p, gen_2);
     if (is2)
       w = mkcomplex(gen_1, gen_1);
     else
@@ -2118,7 +2118,7 @@ gauss_factor(GEN x)
       long e;
       int is2;
       if (mod4(p) == 3) continue;
-      is2 = egalii(p, gen_2);
+      is2 = equalii(p, gen_2);
       e = itos((GEN)E[i]);
       if (is2)
         w = mkcomplex(gen_1,gen_1);
@@ -2614,7 +2614,7 @@ ggcd(GEN x, GEN y)
         return gcdii(x,y);
 
       case t_INTMOD: z=cgetg(3,t_INTMOD);
-        if (egalii((GEN)x[1],(GEN)y[1]))
+        if (equalii((GEN)x[1],(GEN)y[1]))
           copyifstack(x[1],z[1]);
         else
           z[1] = (long)gcdii((GEN)x[1],(GEN)y[1]);
@@ -2637,7 +2637,7 @@ ggcd(GEN x, GEN y)
         return triv_cont_gcd(y,x);
 
       case t_PADIC:
-        if (!egalii((GEN)x[2],(GEN)y[2])) return gen_1;
+        if (!equalii((GEN)x[2],(GEN)y[2])) return gen_1;
         vx = valp(x);
         vy = valp(y); return gpowgs((GEN)y[2], min(vy,vx));
 
@@ -2730,7 +2730,7 @@ ggcd(GEN x, GEN y)
       switch(ty)
       {
 	case t_POLMOD: z=cgetg(3,t_POLMOD);
-          if (gegal((GEN)x[1],(GEN)y[1]))
+          if (gequal((GEN)x[1],(GEN)y[1]))
 	    copyifstack(x[1],z[1]);
           else
             z[1] = lgcd((GEN)x[1],(GEN)y[1]);

@@ -174,7 +174,7 @@ invmod(GEN a, GEN b, GEN *res)
   }
   /* get here when the final sprint was skipped (d1 was zero already) */
   avma = av;
-  if (!egalii(d,gen_1)) { *res = icopy(d); return 0; }
+  if (!equalii(d,gen_1)) { *res = icopy(d); return 0; }
   *res = modii(v,b);
 #ifdef DEBUG_LEHMER
   output(*res); fprintferr("============================Done.\n");

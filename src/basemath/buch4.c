@@ -32,7 +32,7 @@ psquare(GEN a,GEN p)
   if (!signe(a) || gcmp1(a)) return 1;
   v = Z_pvalrem(a, p, &ap);
   if (v&1) return 0;
-  return egalii(p, gen_2)? umodiu(ap, 8) == 1
+  return equalii(p, gen_2)? umodiu(ap, 8) == 1
                          : kronecker(ap,p) == 1;
 }
 
@@ -99,12 +99,13 @@ zpsol(GEN pol,GEN p,long nu,GEN pnu,GEN x0)
   pari_sp ltop=avma;
   GEN x,pnup;
 
-  result = (cmpis(p,2)) ? lemma6(pol,p,nu,x0) : lemma7(pol,nu,x0);
-  if (result==+1) return 1; if (result==-1) return 0;
-  x=gcopy(x0); pnup=mulii(pnu,p);
-  for (i=0; i<itos(p); i++)
+  result = equalis(p,2)? lemma7(pol,nu,x0): lemma6(pol,p,nu,x0);
+  if (result== 1) return 1;
+  if (result==-1) return 0;
+  x = gcopy(x0); pnup = mulii(pnu,p);
+  for (i=0; i < itos(p); i++)
   {
-    x=addii(x,pnu);
+    x = addii(x,pnu);
     if (zpsol(pol,p,nu+1,pnup,x)) { avma=ltop; return 1; }
   }
   avma=ltop; return 0;
@@ -253,11 +254,8 @@ zpsolnf(GEN nf,GEN pol,GEN p,long nu,GEN pnu,GEN x0,GEN repr,GEN zinit)
   pari_sp ltop=avma;
   GEN pnup;
 
-  nf=checknf(nf);
-  if (cmpis((GEN) p[1],2))
-    result=lemma6nf(nf,pol,p,nu,x0);
-  else
-    result=lemma7nf(nf,pol,p,nu,x0,zinit);
+  result = zinit? lemma7nf(nf,pol,p,nu,x0,zinit)
+                : lemma6nf(nf,pol,p,nu,x0);
   if (result== 1) return 1;
   if (result==-1) return 0;
   pnup = gmul(pnu, basistoalg(nf,(GEN)p[2]));
@@ -268,7 +266,7 @@ zpsolnf(GEN nf,GEN pol,GEN p,long nu,GEN pnu,GEN x0,GEN repr,GEN zinit)
   avma=ltop; return 0;
 }
 
-/* calcule one systeme de representants Zk/p */
+/* calcule un systeme de representants Zk/p */
 static GEN
 repres(GEN nf,GEN p)
 {
@@ -307,18 +305,19 @@ qpsolublenf(GEN nf,GEN pol,GEN pr)
   if (gcmp0(pol)) return 1;
   if (typ(pol)!=t_POL) err(notpoler,"qpsolublenf");
   checkprimeid(pr);
+  nf = checknf(nf);
 
-  if (egalii((GEN) pr[1], gen_2))
+  if (equaliu((GEN)pr[1], 2))
   { /* tough case */
     zinit = zidealstarinit(nf, idealpows(nf,pr,1+2*idealval(nf,gen_2,pr)));
-    if (psquare2nf(nf,(GEN) pol[2],pr,zinit)) return 1;
+    if (psquare2nf(nf,(GEN)pol[2],pr,zinit)) return 1;
     if (psquare2nf(nf, leading_term(pol),pr,zinit)) return 1;
   }
   else
   {
     if (psquarenf(nf,(GEN) pol[2],pr)) return 1;
     if (psquarenf(nf, leading_term(pol),pr)) return 1;
-    zinit = gen_0;
+    zinit = NULL;
   }
   repr = repres(nf,pr);
   if (zpsolnf(nf,pol,pr,0,gen_1,gen_0,repr,zinit)) { avma=ltop; return 1; }
@@ -332,32 +331,31 @@ qpsolublenf(GEN nf,GEN pol,GEN pr)
 /* =1 si l'equation y^2 = pol(x) a une solution entiere p-adique
  * =0 sinon.
  * Les coefficients de pol doivent etre des entiers de nf.
- * p est one ideal premier sous forme primedec.
+ * p est un ideal premier sous forme primedec.
  */
 long
-zpsolublenf(GEN nf,GEN pol,GEN p)
+zpsolublenf(GEN nf,GEN pol,GEN pr)
 {
   GEN repr,zinit;
   pari_sp ltop=avma;
 
   if (gcmp0(pol)) return 1;
   if (typ(pol)!=t_POL) err(notpoler,"zpsolublenf");
-  if (typ(p)!=t_VEC || lg(p)!=6)
-    err(talker,"not a prime ideal in zpsolublenf");
-  nf=checknf(nf);
+  checkprimeid(pr);
+  nf = checknf(nf);
 
-  if (cmpis((GEN)p[1],2))
+  if (equaliu((GEN)pr[1],2))
   {
-    if (psquarenf(nf,(GEN) pol[2],p)) return 1;
-    zinit=gen_0;
+    zinit = zidealstarinit(nf,idealpows(nf,pr,1+2*idealval(nf,gen_2,pr)));
+    if (psquare2nf(nf,(GEN) pol[2],pr,zinit)) return 1;
   }
   else
   {
-    zinit=zidealstarinit(nf,idealpows(nf,p,1+2*idealval(nf,gen_2,p)));
-    if (psquare2nf(nf,(GEN) pol[2],p,zinit)) return 1;
+    if (psquarenf(nf,(GEN) pol[2],pr)) return 1;
+    zinit = NULL;
   }
-  repr=repres(nf,p);
-  if (zpsolnf(nf,pol,p,0,gen_1,gen_0,repr,zinit)) { avma=ltop; return 1; }
+  repr=repres(nf,pr);
+  if (zpsolnf(nf,pol,pr,0,gen_1,gen_0,repr,zinit)) { avma=ltop; return 1; }
   avma=ltop; return 0;
 }
 
@@ -390,7 +388,7 @@ nfhilbertp(GEN nf,GEN a,GEN b,GEN pr)
   checkprimeid(pr); nf = checknf(nf);
   p = (GEN)pr[1];
 
-  if (egalii(p,gen_2)) return hilb2nf(nf,a,b,pr);
+  if (equalii(p,gen_2)) return hilb2nf(nf,a,b,pr);
 
   /* pr not above 2, compute t = tame symbol */
   va = idealval(nf,a,pr);
@@ -517,10 +515,8 @@ bnfsunit(GEN bnf,GEN S,long prec)
   if (lg(H) > 1)
   { /* non trivial (rare!) */
     GEN U, D = smithall(H, &U, NULL);
-    for(i=1; i<lg(D); i++)
-      if (gcmp1((GEN)D[i])) break;
-    setlg(D,i); D = mattodiagonal_i(D); /* cf smithrel */
-    card = detcyc(D);
+    card = detcyc(D, &i);
+    setlg(D,i); D = mattodiagonal_i(D);
     p1=cgetg(i,t_VEC); pow=ZM_inv(U,gen_1);
     for(i--; i; i--)
       p1[i] = (long)factorback_i(gen, (GEN)pow[i], nf, 1);

@@ -1,4 +1,8 @@
 /* For compatibility with 1.x.x */
+#define egalii equalii
+#define gegal gequal
+#define gegalgs gequalgs
+#define gegalsg gequalsg
 #define zero  (long)gen_0
 #define un    (long)gen_1
 #define deux  (long)gen_2
