@@ -1768,7 +1768,8 @@ chk_gen_init(FP_chk_fun *chk, GEN gram, GEN mat)
     B = gcoeff(gram,i,i);
     if (gcmp(B,bound) >= 0) continue; /* don't assume increasing norms */
 
-    x[i] = un; P = get_polmin(d,x);
+    /* use canon_pol to recognized trivial automorphism P --> P(-x) */
+    x[i] = un; P = get_polmin(d,x); (void)canon_pol(P);
     x[i] = zero;
     if (degpol(P) == N)
     {
@@ -1781,9 +1782,9 @@ chk_gen_init(FP_chk_fun *chk, GEN gram, GEN mat)
     /* Q(w[1],...,w[i-1]) = Q[X]/(prev) is a strict subfield of nf */
     if (prev && degpol(prev) < N && !gegal(prev,P))
     {
-      if (degpol(prev) * degpol(P) > 64) continue; /* too expensive */
+      if (degpol(prev) * degpol(P) > 128) continue; /* too expensive */
       P = compositum(prev,P);
-      P = (GEN)P[lg(P)-1];
+      P = (GEN)P[lg(P)-1]; (void)canon_pol(P);
       if (degpol(P) == N) continue;
       if (DEBUGLEVEL>2 && degpol(P) != degpol(prev))
         fprintferr("chk_gen_init: subfield %Z\n",P);

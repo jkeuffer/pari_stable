@@ -109,6 +109,8 @@ IZ 16- make X11.builtin-gnuplot-dynamic the default graphic library.
 IZ 17- allow changing the gnuplot DLL name for gnuplot-dynamic at Configure-time
        e.g. Configure --graphic=gnuplot-dynamic,gnpltdrw
    18- allow Vecsmall(t_STR)
+   19- polredabs heuristic (try harder to detect subfields).
+       Ex: try it on polcompositum(x^2 - d, polcyclo(11));
 
   Added:
     1- [TeXmacs:] contextual completion (<TAB>)
