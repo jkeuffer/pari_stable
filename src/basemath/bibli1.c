@@ -2588,8 +2588,8 @@ algdep0(GEN x, long n, long bit, long prec)
   GEN y,p1;
 
   if (! is_scalar_t(tx)) err(typeer,"algdep0");
-  if (tx==t_POLMOD) { y=forcecopy((GEN)x[1]); setvarn(y,0); return y; }
-  if (gcmp0(x)) return gzero;
+  if (tx==t_POLMOD) { y = forcecopy((GEN)x[1]); setvarn(y,0); return y; }
+  if (gcmp0(x)) return polx[0];
   if (n <= 0)
   {
     if (!n) return gun;
