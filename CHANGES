@@ -1085,6 +1085,7 @@ IZ 23- more verbose error messages for online help
     6- function znlog()
 IZ  7- added default(color, "yes" / "no")
     8- --static flag to Configure
+GH  9- inline alpha assembler (gcc specific)
 
   Removed
     1- isinclfast/isisomfast
