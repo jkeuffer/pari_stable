@@ -71,7 +71,8 @@ static char *DFT_PRETTYPRINTER = "tex2mail -TeX -noindent -ragged -by_par";
 #define DFT_INPROMPT ""
 static char prompt[MAX_PROMPT_LEN], prompt_cont[MAX_PROMPT_LEN];
 
-static int tm_is_waiting = 0, handle_C_C = 0, gpsilent = 0;
+static int handle_C_C = 0, gpsilent = 0;
+static int tm_is_waiting = 0, tm_did_complete = 0;
 
 static ulong paribufsize, primelimit;
 
@@ -2221,7 +2222,10 @@ do_prompt(int in_comment, char *p)
 static char *
 fgets_texmacs(char *s, int n, FILE *f)
 {
-  tm_start_output(); tm_end_output(); /* tell TeXmacs we need input */
+  if (!tm_did_complete)
+  {
+    tm_start_output(); tm_end_output(); /* tell TeXmacs we need input */
+  }
   return fgets(s,n,f);
 }
 
@@ -2351,18 +2355,18 @@ free_cmd(tm_cmd *c)
 static int
 get_line_from_file(char *prompt, filtre_t *F, FILE *file)
 {
-  const int TeXmacs = ((GP_DATA->flags & TEXMACS) && file == stdin);
+  const int Texmacs_stdin = ((GP_DATA->flags & TEXMACS) && file == stdin);
   char *s;
   input_method IM;
 
   IM.file = file;
-  IM.fgets= TeXmacs? &fgets_texmacs: &fgets;
+  IM.fgets= Texmacs_stdin? &fgets_texmacs: &fgets;
   IM.prompt = NULL;
   IM.getline= &file_input;
   IM.free = 0;
   if (! input_loop(F,&IM))
   {
-    if (TeXmacs) tm_start_output();
+    if (Texmacs_stdin) tm_start_output();
     return 0;
   }
 
@@ -2377,17 +2381,19 @@ get_line_from_file(char *prompt, filtre_t *F, FILE *file)
   }
   if (GP_DATA->flags & TEXMACS) 
   {
-    if (TeXmacs && *s == DATA_BEGIN)
+    tm_did_complete = 0;
+    if (Texmacs_stdin && *s == DATA_BEGIN)
     {
 #ifdef READLINE
       tm_cmd c;
       parse_texmacs_command(&c, s);
       if (strcmp(c.cmd, "complete"))
-        err(talker,"TeXmacs command %s not implemented", c.cmd);
+        err(talker,"Texmacs_stdin command %s not implemented", c.cmd);
       if (c.n != 2) 
-        err(talker,"was expecting 2 arguments for TeXmacs command");
+        err(talker,"was expecting 2 arguments for Texmacs_stdin command");
       texmacs_completion(c.v[0], atol(c.v[1])-1);
       free_cmd(&c); *s = 0;
+      tm_did_complete = 1;
 #else
       err(talker, "readline not available");
 #endif
@@ -2503,15 +2509,12 @@ gp_main_loop(int ismain)
   Buffer *b = new_buffer();
   filtre_t F;
 
-  if (!setjmp(b->env))
-  {
-    b->flenv = 1;
-    push_stack(&bufstack, (void*)b);
-  }
   init_filtre(&F, (void*)b);
-
-  for (; ; setjmp(b->env))
+  push_stack(&bufstack, (void*)b);
+  b->flenv = 1;
+  for(;;)
   {
+    if (setjmp(b->env)) av = avma;
     if (ismain)
     {
       static long tloc, outtyp;
