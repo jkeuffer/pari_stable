@@ -230,6 +230,8 @@ again2:
   if (aux1 > hiremainder) {q2--; hiremainder += v1; aux -= v2; goto again2;}
   hiremainder = GLUE(hiremainder - aux1, LOWWORD(u4 - aux2)) >> k;
   return GLUE(q1, q2);
+#undef GLUE
+#undef SPLIT
 }
 
 #endif
