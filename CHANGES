@@ -81,7 +81,8 @@ RS 21- gcc-3.4 breaks on compatibility code to support old readline versions
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu
     2- exported FFTinit() / FFT() wrappers to rootpol.c:fft() [not under GP yet]
     3- routines Rg_to_Fl, Rg_to_Fp, RgX_to_FpX, RgX_to_FpXQX, RgX_to_FqX,
-       RgV_to_FpV, RgXQ_mul, RgXQ_sqr.
+       RgV_to_FpV, RgXQ_mul, RgXQ_sqr, RgX_div_by_X_x, FpX_div_by_X_x,
+       RgXV_unscale
     4- file Qfb.c [ stuff related to binary quad. forms moved out of arith1.c ]
     5- routines truedivii, truedvmdis, truedivis
 
