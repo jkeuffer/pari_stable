@@ -3925,7 +3925,7 @@ FpY_FpXY_resultant(GEN a, GEN b0, GEN p)
   if (OK_ULONG(p))
   {
     ulong pp = (ulong)p[2];
-    long l = lg(b);
+    long l = lgef(b);
     if (degpol(a) * degpol(b) >= pp)
       return lift(subres(FpX(a,p), gmul(b, gmodulss(1,pp))));
 
@@ -3966,7 +3966,7 @@ check_theta(ulong bound)
 {
   ulong c = (ulong)ceil((bound * LOG2 + 27225.388) / 0.98);
   if (maxprime() < c)
-    err(talker,"not enough precalculated primes: need primelimit ~ %ld", c);
+    err(talker,"not enough precalculated primes: need primelimit ~ %lu", c);
 }
 
 /* 0, 1, -1, 2, -2, ... */
@@ -4233,8 +4233,11 @@ QX_caract(GEN A, GEN B, long v)
 static GEN
 trivial_case(GEN A, GEN B)
 {
+  long d;
   if (typ(A) == t_INT) return gpowgs(A, degpol(B));
-  if (degpol(A) == 0) return trivial_case((GEN)A[2],B);
+  d = degpol(A);
+  if (d == 0) return trivial_case((GEN)A[2],B);
+  if (d < 0) return gzero;
   return NULL;
 }
 
