@@ -857,6 +857,7 @@ incgamc(GEN s, GEN x, long prec)
   pari_sp av = avma, av1;
 
   if (typ(x) != t_REAL) { gaffect(x,z); x=z; }
+  if (!signe(x)) return z;
   l=lg(x); n = -bit_accuracy(l)-1;
   p3 = realun(l);
   p2 = rcopy(p3);
@@ -893,6 +894,7 @@ incgam0(GEN s, GEN x, GEN g, long prec)
   pari_sp av = avma;
 
   if (typ(x) != t_REAL) { gaffect(x,z); x=z; }
+  if (!signe(x)) { gaffect(g? g: ggamma(s,prec), z); avma = av; return z; }
   if (gcmp(subrs(x,1),s) > 0 || gsigne(real_i(s)) <= 0)
     p1 = incgam2(s,x,prec);
   else
@@ -1056,6 +1058,7 @@ gerfc(GEN x, long prec)
   GEN p1, p2;
 
   if (typ(x)!=t_REAL) return transc(&gerfc, x, prec);
+  if (!signe(x)) return realun(prec);
   av = avma; p1 = incgam(ghalf,gsqr(x),prec);
   p2 = mpsqrt(mppi(lg(x)));
   p1 = divrr(p1,p2);
