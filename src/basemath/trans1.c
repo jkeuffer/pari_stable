@@ -1614,7 +1614,6 @@ mpsc1(GEN x0, long *ptmod8)
   double alpha,beta,a,b,c,d;
   GEN y, p1, p2, x2, x = x0;
 
-  if (typ(x) != t_REAL) err(typeer,"mpsc1");
   l = lg(x); y = cgetr(l); av = avma;
 
   e = expo(x);
@@ -1704,14 +1703,14 @@ mpsc1(GEN x0, long *ptmod8)
   affrr(p1,y); avma=av; return y;
 }
 
-/* sqrt (1 - (1+x)^2) = sqrt(-x*(x+2)). Sends cos(x)-1 to |sin(x)| */
+/* sqrt (|1 - (1+x)^2|) = sqrt(|x*(x+2)|). Sends cos(x)-1 to |sin(x)| */
 static GEN
 mpaut(GEN x)
 {
   pari_sp av = avma;
-  GEN p1 = mulrr(x, addsr(2,x));
-  if (!signe(p1)) return realzero_bit(expo(p1) >> 1);
-  return gerepileuptoleaf(av, sqrtr_abs(p1));
+  GEN t = mulrr(x, addsr(2,x)); /* != 0 */
+  if (!signe(t)) return realzero_bit(expo(t) >> 1);
+  return gerepileuptoleaf(av, sqrtr_abs(t));
 }
 
 /********************************************************************/
@@ -1731,14 +1730,10 @@ mpcos(GEN x)
   av = avma; p1 = mpsc1(x,&mod8);
   switch(mod8)
   {
-    case 0: case 4:
-      y=addsr(1,p1); break;
-    case 1: case 7:
-      y=mpaut(p1); setsigne(y,-signe(y)); break;
-    case 2: case 6:
-      y=subsr(-1,p1); break;
-    default: /* case 3: case 5: */
-      y=mpaut(p1); break;
+    case 0: case 4: y = addsr(1,p1); break;
+    case 1: case 7: y = mpaut(p1); setsigne(y,-signe(y)); break;
+    case 2: case 6: y = subsr(-1,p1); break;
+    default:        y = mpaut(p1); break; /* case 3: case 5: */
   }
   return gerepileuptoleaf(av, y);
 }
@@ -1799,14 +1794,10 @@ mpsin(GEN x)
   av = avma; p1 = mpsc1(x,&mod8);
   switch(mod8)
   {
-    case 0: case 6:
-      y=mpaut(p1); break;
-    case 1: case 5:
-      y=addsr(1,p1); break;
-    case 2: case 4:
-      y=mpaut(p1); setsigne(y,-signe(y)); break;
-    default: /* case 3: case 7: */
-      y=subsr(-1,p1); break;
+    case 0: case 6: y=mpaut(p1); break;
+    case 1: case 5: y=addsr(1,p1); break;
+    case 2: case 4: y=mpaut(p1); setsigne(y,-signe(y)); break;
+    default:        y=subsr(-1,p1); break; /* case 3: case 7: */
   }
   return gerepileuptoleaf(av, y);
 }
