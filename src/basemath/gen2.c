@@ -595,11 +595,15 @@ polvaluation(GEN x, GEN *Z)
     if (!isexactzero((GEN)x[2+v])) break;
   if (Z)
   {
-    long i, lz = lgef(x)-v;
-    GEN z = cgetg(lz, t_POL);
-    z[1] = x[1]; setlgef(z,lz); x += v;
-    for (i=2; i<lz; i++) z[i] = x[i];
-    *Z = z;
+    if (!v) *Z = x;
+    else
+    {
+      long i, lz = lgef(x)-v;
+      GEN z = cgetg(lz, t_POL);
+      z[1] = x[1]; setlgef(z,lz); x += v;
+      for (i=2; i<lz; i++) z[i] = x[i];
+      *Z = z;
+    }
   }
   return v;
 }

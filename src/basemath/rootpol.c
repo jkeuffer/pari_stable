@@ -568,15 +568,6 @@ homothetie_gauss(GEN p, long e,long f)
   }
 }
 
-static long
-valuation(GEN p)
-{
-  long j=0,n=degpol(p);
-
-  while ((j<=n) && isexactzero((GEN)p[j+2])) j++;
-  return j;
-}
-
 /* provides usually a good lower bound on the largest modulus of the roots,
 puts in k an upper bound of the number of roots near the largest root
 at a distance eps */
@@ -618,7 +609,7 @@ static GEN
 max_modulus(GEN p, double tau)
 {
   GEN q,aux,gunr;
-  long i,j,k,valuat,n=degpol(p),nn,ltop=avma,bitprec,imax,e;
+  long i,k,n=degpol(p),nn,ltop=avma,bitprec,imax,e;
   double r,rho,eps, tau2 = (tau > 3.0)? 0.5: tau/6.;
 
   eps = - 1/log(1.5*tau2); /* > 0 */
@@ -637,7 +628,7 @@ max_modulus(GEN p, double tau)
     if (rho > exp2(-(double) e)) e = (long) -floor(log2(rho));
     r -= e / exp2((double)i);
     if (++i == imax) {
-      avma = ltop; 
+      avma = ltop;
       if (fabs(r) * exp2(i) < 1) return realun(DEFAULTPREC); /* r = 0 */
       return gpui(dbltor(2.),dbltor(r),DEFAULTPREC);
     }
@@ -650,12 +641,7 @@ max_modulus(GEN p, double tau)
       bitprec=(long) ((double) k* log2(1./tau2)+
                       3.*log2((double) nn))+1;
     homothetie_gauss(q,e,bitprec-(long)floor(mylog2((GEN) q[2+nn])+0.5));
-    valuat=valuation(q);
-    if (valuat>0)
-    {
-      nn-=valuat; setlgef(q,nn+3);
-      for (j=0; j<=nn; j++) q[2+j]=q[2+valuat+j];
-    }
+    nn -= polvaluation(q, &q);
     set_karasquare_limit(gexpo(q));
     q = gerepileupto(ltop, graeffe(q));
     tau2 *= 1.5; eps = 1/log(1./tau2);
@@ -668,10 +654,10 @@ static GEN
 modulus(GEN p, long k, double tau)
 {
   GEN q,gunr;
-  long i,j,kk=k,imax,n=degpol(p),nn,nnn,valuat,av,ltop=avma,bitprec,decprec,e;
+  long i,kk=k,imax,n=degpol(p),nn,av,ltop=avma,bitprec,decprec,e;
   double tau2,r;
 
-  tau2=tau/6; nn=n;
+  tau2 = tau/6;
   bitprec= (long) ((double) n*(2.+log2(3.*(double) n)+log2(1./tau2)));
   decprec=(long) ((double) bitprec * L2SL10)+1;
   gunr=myrealun(bitprec);
@@ -684,16 +670,9 @@ modulus(GEN p, long k, double tau)
   imax=(long) ((log2(3./tau)+log2(log(4.*(double) n)) ))+1;
   for (i=1; i<imax; i++)
   {
-    q=eval_rel_pol(q,bitprec);
-
-    nnn=degpol(q); valuat=valuation(q);
-    if (valuat>0)
-    {
-      kk-=valuat;
-      for (j=0; j<=nnn-valuat; j++) q[2+j]=q[2+valuat+j];
-      setlgef(q,nnn-valuat+3);
-    }
-    nn=nnn-valuat;
+    q = eval_rel_pol(q,bitprec);
+    kk -= polvaluation(q, &q);
+    nn = degpol(q);
 
     set_karasquare_limit(bitprec);
     q = gerepileupto(av, graeffe(q));
@@ -764,7 +743,7 @@ static long
 dual_modulus(GEN p, GEN R, double tau, long l)
 {
   GEN q;
-  long i,j,imax,k,delta_k=0,n=degpol(p),nn,nnn,valuat,ltop=avma,bitprec,ll=l;
+  long i,imax,k,delta_k=0,n=degpol(p),nn,nnn,valuat,ltop=avma,bitprec,ll=l;
   double logmax,aux,tau2;
 
   tau2=7.*tau/8.;
@@ -778,24 +757,18 @@ dual_modulus(GEN p, GEN R, double tau, long l)
     bitprec=6*nn-5*ll+(long) ((double) nn*(log2(1/tau2)+8.*tau2/7.));
 
     q=eval_rel_pol(q,bitprec);
-    nnn=degpol(q); valuat=valuation(q);
-    if (valuat>0)
-    {
-      delta_k+=valuat;
-      for (j=0; j<=nnn-valuat; j++) q[2+j]=q[2+valuat+j];
-      setlgef(q,nnn-valuat+3);
-    }
+    nnn = degpol(q); valuat = polvaluation(q, &q);
     ll= (-valuat<nnn-n)? ll-valuat: ll+nnn-n; /* min(ll-valuat,ll+nnn-n) */
     if (ll<0) ll=0;
 
-    nn=nnn-valuat;
+    nn = nnn-valuat; delta_k += valuat;
     if (nn==0) return delta_k;
 
     set_karasquare_limit(bitprec);
     q = gerepileupto(ltop, graeffe(q));
     tau2=tau2*7./4.;
   }
-  k=-1; logmax=- (double) pariINFINITY;
+  k = -1; logmax = - (double)pariINFINITY;
   for (i=0; i<=degpol(q); i++)
   {
     aux=mylog2((GEN)q[2+i]);
@@ -892,7 +865,7 @@ static GEN
 exp_i(GEN x)
 {
   GEN v;
-  
+
   if (!signe(x)) return realun(lg(x)); /* should not happen */
   v = cgetg(3,t_COMPLEX);
   mpsincos(x, (GEN*)(v+2), (GEN*)(v+1));
@@ -1379,7 +1352,7 @@ compute_radius(GEN* radii, GEN p, long k, double aux, double *delta)
   {
     if (!signe(radii[i]) || cmprr(radii[i], p1) < 0)
       affrr(p1, radii[i]);
-    else      
+    else
       p1 = radii[i];
   }
   *delta = rtodbl(gmul2n(mplog(divrr(rmax,rmin)), -1));
@@ -1434,7 +1407,7 @@ conformal_mapping(GEN *radii, GEN ctr, GEN p, long k, long bitprec,
 
   rho = compute_radius(radii, q,k,aux/10., &delta);
   invrho = update_radius(radii, rho, &param, &param2);
-  
+
   bitprec2 += (long) (((double)n) * fabs(log2ir(rho)) + 1.);
   R = mygprec(invrho,bitprec2);
   q = scalepol(q,R,bitprec2);
@@ -1936,7 +1909,7 @@ all_roots(GEN p, long bitprec)
   bitprec2 = bitprec0; e = 0;
   for (av=avma,i=1;; i++,avma=av)
   {
-    roots_pol = cgetg(n+1,t_VEC); setlg(roots_pol,1); 
+    roots_pol = cgetg(n+1,t_VEC); setlg(roots_pol,1);
     bitprec2 += e + (1<<i)*n;
     q = gmul(myrealun(bitprec2), mygprec(pd,bitprec2));
     m = split_complete(q,bitprec2,roots_pol);
