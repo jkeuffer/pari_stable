@@ -39,12 +39,16 @@ XR  7- check subgroup argument in bnrL1
    10- incorrect result in matdet over Z[1/n] (Gauss-Bareiss) [gdivexact]
    11- solve(x=0,1,deriv(x)) --> SEGV
    12- ??' --> weird error
+   13- generic SNF (polynomial entries) couldn't handle 0s on diagonal
+   14- incorrect handling of 0 ideals in some functions
+XR 15- typos in bnrL1
 
   Changed
 XR  1- bnrL1 now takes a congruence subgroup as second argument
     2- allow some functions to modify bnf/bnr structures (matal + cycgen)
 CB  3- modified TeX macros for pdftex
     4- have abs(t_COMPLEX) give an exact result if possible [abs(0*I) was 0.0]
+IS  5- improved generic gcc compilation flags
 
   Added
 BA  1- function galoissubcyclo()
