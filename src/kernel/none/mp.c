@@ -1993,7 +1993,7 @@ absr_cmp(GEN x, GEN y)
 #define _sqri_l 47
 #define _muli_l 25 /* optimal on PII 350MHz + gcc 2.7.2.1 (gp-dyn) */
 
-#if 0 /* for tunings */
+#if 1 /* for tunings */
 long KARATSUBA_SQRI_LIMIT = _sqri_l;
 long KARATSUBA_MULI_LIMIT = _muli_l;
 

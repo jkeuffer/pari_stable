@@ -153,6 +153,14 @@ DLLDFLAGS  = $DLLDFLAGS
 EXTRADLLDFLAGS = $EXTRADLLDFLAGS
 CPP        = $CPP
 
+# HIGHLY EXPERIMENTAL (only tested with gmp-4.0):
+# If you've configured and compiled GMP and would like to tune PARI using
+# the nice cycle counting functions in GMP, uncomment the two lines below
+# (correct the first one to the path to your gmp source tree).
+#
+#GMP     = /some/directory/gmp-4.0/tune
+#GMPOBJS = \$(GMP)/time.o \$(GMP)/freq.o
+
 _O	   = .o
 _A	   = .a
 LIB_PREFIX = lib
@@ -252,7 +260,16 @@ test-kernel:: kerntest
 	@./kerntest > gp.out;\
 	diff -c gp.out $src/test/$numbits/$kerntest > kern.dif;\
 	if test -s kern.dif; then echo "KERNEL BUG"; else echo OK; fi
+
+tune.o: $src/test/tune.c
+	\$(CC) \$(CFLAGS) \$(CPPFLAGS) -o \$@ \$< -c
+
+tune-dyn: tune.o
+	\$(CC) \$(LDFLAGS) \$(RUNPTH) -o \$@ \$< $GMPOBJS -L. \$(LDDYN) \$(LIBS)
+tune-sta: tune.o
+	\$(CC) \$(LDFLAGS) -o \$@ \$< $GMPOBJS ./\$(LIBPARI_STA) \$(LIBS)
 EOT
+
 if test -n "$ranlib"; then
 cat >> $file << EOT
 
