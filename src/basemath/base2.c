@@ -289,7 +289,11 @@ ordmax(GEN *cf, GEN p, long epsilon, GEN *ptdelta)
   const GEN pp = sqri(p);
   const long pps = (2*expi(pp)+2<BITS_IN_LONG)? pp[2]: 0;
 
-  if (cmpis(p,n) > 0) hard_case_exponent = 0;
+  if (cmpis(p,n) > 0)
+  {
+    hard_case_exponent = 0;
+    sp = 0; /* gcc -Wall */
+  }
   else
   {
     long k;
@@ -598,6 +602,7 @@ allbase4(GEN f,long code, GEN *y, GEN *ptw)
 
   allbase_check_args(f,code,y, &w1,&w2);
   first=1; v = varn(f); n = lgef(f)-3; h = lg(w1)-1;
+  a = da = NULL; /* gcc -Wall */
   for (i=1; i<=h; i++)
   {
     mf=itos((GEN)w2[i]); if (mf == 1) continue;
@@ -608,7 +613,7 @@ allbase4(GEN f,long code, GEN *y, GEN *ptw)
     db=denom(p1);
     if (! gcmp1(db))
     {
-      if (first==1) { da=db; a=gmul(b,db); first=0; }
+      if (first) { da=db; a=gmul(b,db); first=0; }
       else
       {
         da=mulii(da,db); b=gmul(da,b); a=gmul(db,a);
@@ -641,9 +646,9 @@ allbase4(GEN f,long code, GEN *y, GEN *ptw)
               coeff(a,l,k)=lsubii(gcoeff(a,l,k),gcoeff(a,l,j));
       }
   }
+  lfa = 0;
   if (ptw)
   {
-    lfa=0;
     for (j=1; j<=h; j++)
     {
       k=ggval(*y,(GEN)w1[j]);
@@ -825,7 +830,10 @@ maxord(GEN p,GEN f,long mf)
   GEN w,g,h,res;
 
   if (flw)
+  {
+    h = NULL; r = 0; /* gcc -Wall */
     g = Fp_deuc(f, Fp_pol_gcd(f,derivpol(f), p), p);
+  }
   else
   {
     w=(GEN)factmod(f,p)[1]; r=lg(w)-1;
@@ -3203,16 +3211,17 @@ rnflllgram(GEN nf, GEN pol, GEN order,long prec)
 GEN
 rnfpolred(GEN nf, GEN pol, long prec)
 {
-  long av=avma,tetpil,i,j,k,n,N,flbnf, vpol = varn(pol);
+  long av=avma,tetpil,i,j,k,n,N, vpol = varn(pol);
   GEN id,id2,newid,newor,p1,p2,al,newpol,w,z;
   GEN bnf,zk,newideals,ideals,order,neworder;
 
   if (typ(nf)!=t_VEC) err(idealer1);
   switch(lg(nf))
   {
-    case 10: flbnf=0; break;
-    case 11: flbnf=1; bnf=nf; nf=checknf((GEN)nf[7]); break;
+    case 10: bnf = NULL; break;
+    case 11: bnf = nf; nf = checknf((GEN)nf[7]); break;
     default: err(idealer1);
+      return NULL; /* not reached */
   }
   if (lgef(pol) <= 4) 
   {
@@ -3220,7 +3229,7 @@ rnfpolred(GEN nf, GEN pol, long prec)
     w[1]=lpolx[vpol]; return w;
   }
   id=rnfpseudobasis(nf,pol); N=lgef(nf[1])-3;
-  if (flbnf && gcmp1(gmael3(bnf,8,1,1))) /* if bnf is principal */
+  if (bnf && gcmp1(gmael3(bnf,8,1,1))) /* if bnf is principal */
   {
     ideals=(GEN)id[2]; n=lg(ideals)-1; order=(GEN)id[1];
     newideals=cgetg(n+1,t_VEC); neworder=cgetg(n+1,t_MAT);

@@ -954,6 +954,7 @@ get_mul_table(GEN x,GEN bas,GEN *ptT)
     sym = polsym(x,n-1); T=cgetg(n+1,t_MAT); *ptT = T;
     for (j=1; j<=n; j++) T[j]=lgetg(n+1,t_COL);
   }
+  else { T = sym = NULL; /* gcc -Wall */ }
   bas = dummycopy(bas);
   for (i=1; i<=n; i++)
   {
@@ -1058,6 +1059,7 @@ initalgall0(GEN x, long flag, long prec)
     if (DEBUGLEVEL) msgtimer("mult. table");
     p1=vecpol_to_mat(bas,n);
   }
+  else p1 = mul = NULL; /* gcc -Wall */
 
   ro=get_roots(x,r1,ru,PRECREG);
   if (DEBUGLEVEL) msgtimer("roots");
@@ -1067,6 +1069,7 @@ initalgall0(GEN x, long flag, long prec)
     if (!(flag & nf_REDUCE)) err(talker,"bad flag in initalgall0");
     res = cgetg(3,t_VEC);
   }
+  else res = NULL; /* gcc -Wall */
   nf=cgetg(10,t_VEC);
   nf[1]=lcopy(x);
   nf[2]=lgetg(3,t_VEC);

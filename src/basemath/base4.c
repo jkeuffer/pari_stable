@@ -233,7 +233,8 @@ get_arch(GEN nf,GEN x,long prec)
   if (isnfscalar(x)) /* rational number */
   {
     v = cgetg(RU+1,t_VEC);
-    p1=glog((GEN)x[1],prec); if (RU!=R1) p2=gmul2n(p1,1);
+    p1 = glog((GEN)x[1],prec);
+    p2 = (RU > R1)? gmul2n(p1,1): NULL;
     for (i=1; i<=R1; i++) v[i]=(long)p1;
     for (   ; i<=RU; i++) v[i]=(long)p2;
   }
@@ -261,7 +262,7 @@ get_arch_real(GEN nf,GEN x,GEN *emb,long prec)
     i = signe(u);
     if (!i) err(talker,"0 in get_arch_real");
     p1= (i > 0)? glog(u,prec): gzero;
-    if (RU != R1) p2 = gmul2n(p1,1);
+    p2 = (RU > R1)? gmul2n(p1,1): NULL;
     for (i=1; i<=R1; i++) v[i]=(long)p1;
     for (   ; i<=RU; i++) v[i]=(long)p2;
   }
@@ -392,13 +393,13 @@ check_elt(GEN a, GEN pol, GEN pnorm, GEN idz)
   
   if (!signe(a)) return NULL;
   p1 = content(a);
-  if (gcmp1(p1)) { x=a; p1=NULL; }
+  if (gcmp1(p1)) { x=a; p2=NULL; }
   else { x=gdiv(a,p1); p2=gpowgs(p1, lgef(pol)-3); }
 
-  norme = resultantducos(pol,x); if (p1) norme = gmul(norme,p2);
+  norme = resultantducos(pol,x); if (p2) norme = gmul(norme,p2);
   if (gcmp1(mppgcd(divii(norme,pnorm),pnorm))) return a;
 
-  if (p1)
+  if (p2)
   { 
     idz=gdiv(idz,p1);
     if (typ(idz) == t_FRAC) /* should be exceedingly rare */
@@ -410,7 +411,7 @@ check_elt(GEN a, GEN pol, GEN pnorm, GEN idz)
   }
   x = gadd(x,idz);
 
-  norme = resultantducos(pol,x); if (p1) norme = gmul(norme,p2);
+  norme = resultantducos(pol,x); if (p2) norme = gmul(norme,p2);
   if (gcmp1(mppgcd(divii(norme,pnorm),pnorm))) return a;
   return NULL;
 }
@@ -487,6 +488,7 @@ mat_ideal_two_elt(GEN nf, GEN x)
   }
   pnorm = dethnf(x);
   beta = gmul((GEN)nf[7], x);
+  a = NULL; /* gcc -Wall */
   for (i=2; i<=N; i++)
   {
     a = check_elt((GEN)beta[i], pol, pnorm, idz);
@@ -591,7 +593,11 @@ idealfactor(GEN nf, GEN x)
   N=lgef(nf[1])-3; if (lg(x) != N+1) x = idealmat_to_hnf(nf,x);
   if (lg(x)==1) err(talker,"zero ideal in idealfactor");
   denx=denom(x);
-  if (gcmp1(denx)) lff=1;
+  if (gcmp1(denx))
+  {
+    ff1 = ff2 = NULL; /* gcc -Wall */
+    lff=1;
+  }
   else
   {
     ff=factor(denx); ff1=(GEN)ff[1]; ff2=(GEN)ff[2];
@@ -929,6 +935,7 @@ element_invmodideal(GEN nf, GEN x, GEN y)
     case t_POL: case t_POLMOD: case t_COL:
       xh = idealhermite_aux(nf,x); break;
     default: err(typeer,"element_invmodideal");
+      return NULL; /* not reached */
   }
   p1 = get_p1(nf,xh,yh,fl);
   p1 = element_div(nf,p1,x);
@@ -1028,12 +1035,12 @@ idealmulh(GEN nf, GEN ix, GEN iy)
 
   if (typ(ix)==t_VEC) {f=1;  x=(GEN)ix[1];} else x=ix;
   if (typ(iy)==t_VEC && typ(iy[1]) != t_INT) {f+=2; y=(GEN)iy[1];} else y=iy;
-  if (f) res = cgetg(3,t_VEC);
+  res = f? cgetg(3,t_VEC): NULL;
 
   if (typ(y) != t_VEC) y = ideal_two_elt(nf,y);
   y = idealmulspec(nf,x,(GEN)y[1],(GEN)y[2]);
-
   if (!f) return y;
+
   res[1]=(long)y;
   if (f==3) y = gadd((GEN)ix[2],(GEN)iy[2]);
   else
@@ -1094,7 +1101,7 @@ idealmul(GEN nf, GEN x, GEN y)
     res=x; x=y; y=res;
     f=tx; tx=ty; ty=f;
   }
-  f = (ax||ay); if (f) res = cgetg(3,t_VEC); /* product is an idele */
+  f = (ax||ay); res = f? cgetg(3,t_VEC): NULL; /* product is an idele */
   nf=checknf(nf); av=avma;
   switch(tx)
   {
@@ -1191,7 +1198,7 @@ oldidealinv(GEN nf, GEN x)
   long av,tetpil, tx = idealtyp(&x,&ax);
 
   if (tx!=id_MAT) return idealinv(nf,x);
-  if (ax) res = cgetg(3,t_VEC);
+  res = ax? cgetg(3,t_VEC): NULL;
   nf=checknf(nf); av=avma;
   if (lg(x)!=lgef(nf[1])) x = idealmat_to_hnf(nf,x);
 
@@ -1219,7 +1226,7 @@ idealinv(GEN nf, GEN x)
   GEN res,ax;
   long av=avma, tx = idealtyp(&x,&ax);
 
-  if (ax) res = cgetg(3,t_VEC);
+  res = ax? cgetg(3,t_VEC): NULL;
   nf=checknf(nf); av=avma;
   switch (tx)
   {
@@ -1272,7 +1279,7 @@ idealpow(GEN nf, GEN x, GEN n)
 
   if (typ(n) != t_INT) err(talker,"non-integral exponent in idealpow");
   tx = idealtyp(&x,&ax);
-  if (ax) res = cgetg(3,t_VEC);
+  res = ax? cgetg(3,t_VEC): NULL;
   nf = checknf(nf);
   av=avma; N=lgef(nf[1])-3; s=signe(n);
   if (!s) x = idmat(N);
@@ -1520,7 +1527,7 @@ ideallllredall(GEN nf, GEN x, GEN vdir, long prec, long precint)
   vdir = chk_vdir(nf,vdir);
   pol = (GEN)nf[1]; N = lgef(pol)-3;
   tx = idealtyp(&x,&ax); ix=x; iax=ax;
-  if (ax) res = cgetg(3,t_VEC);
+  res = ax? cgetg(3,t_VEC): NULL;
   if (tx == id_PRINCIPAL)
   {
     if (gcmp0(x))
@@ -2439,7 +2446,7 @@ nfhermite(GEN nf, GEN x)
 GEN
 nfsmith(GEN nf, GEN x)
 {
-  long av,tetpil,i,j,k,l,lim,c,fl,n,m,N;
+  long av,tetpil,i,j,k,l,lim,c,n,m,N;
   GEN p1,p2,p3,p4,z,b,u,v,w,d,dinv,unnf,A,I,J;
 
   nf=checknf(nf); N=lgef(nf[1])-3;
@@ -2514,25 +2521,28 @@ nfsmith(GEN nf, GEN x)
 	b=gcoeff(A,i,i); if (gcmp0(b)) break;
 
 	b=idealmul(nf,b,idealmul(nf,(GEN)J[i],(GEN)I[i]));
-	fl=1;
-	for (k=1; k<i && fl; k++)
-	  for (l=1; l<i && fl; l++)
+	for (k=1; k<i; k++)
+	  for (l=1; l<i; l++)
 	  {
-	    p3=gcoeff(A,k,l);
+	    p3 = gcoeff(A,k,l);
 	    if (!gcmp0(p3))
-	      fl=gegal(idealadd(nf,b,idealmul(nf,p3,idealmul(nf,(GEN)J[l],(GEN)I[k]))),b);
+            {
+              p4 = idealmul(nf,p3,idealmul(nf,(GEN)J[l],(GEN)I[k]));
+	      if (!gegal(idealadd(nf,b,p4), b))
+              {
+                k--; l--;
+                b=idealdiv(nf,(GEN)I[k],(GEN)I[i]);
+                p4=gauss(idealdiv(nf,(GEN)J[i],idealmul(nf,p3,(GEN)J[l])),b);
+                l=1; while (l<=N && gcmp1(denom((GEN)p4[l]))) l++;
+                if (l>N) err(talker,"bug2 in nfsmith");
+                p3=element_mulvecrow(nf,(GEN)b[l],A,k,i);
+                for (l=1; l<=i; l++)
+                  coeff(A,i,l) = ladd(gcoeff(A,i,l),(GEN)p3[l]);
+              
+                k = l = i; c = 1;
+              }
+            }
 	  }
-	if (!fl)
-	{
-	  k--; l--;
-	  b=idealdiv(nf,(GEN)I[k],(GEN)I[i]);
-	  p4=gauss(idealdiv(nf,(GEN)J[i],idealmul(nf,p3,(GEN)J[l])),b);
-	  l=1; while (l<=N && gcmp1(denom((GEN)p4[l]))) l++;
-	  if (l>N) err(talker,"bug2 in nfsmith");
-	  p3=element_mulvecrow(nf,(GEN)b[l],A,k,i);
-	  for (l=1; l<=i; l++)
-	    coeff(A,i,l) = ladd(gcoeff(A,i,l),(GEN)p3[l]);
-	}
       }
       if (low_stack(lim, stack_lim(av,1)))
       {
@@ -2541,7 +2551,7 @@ nfsmith(GEN nf, GEN x)
         gptr[0]=&A; gptr[1]=&I; gptr[2]=&J; gerepilemany(av,gptr,3);
       }
     }
-    while (c || !fl);
+    while (c);
   }
   unnf=gscalcol_i(gun,N);
   p1=gcoeff(A,1,1); coeff(A,1,1)=(long)unnf;

@@ -106,7 +106,7 @@ element_mul(GEN nf, GEN x, GEN y)
 GEN
 element_inv(GEN nf, GEN x)
 {
-  long av=avma,tetpil,flx,i,N,tx=typ(x);
+  long av=avma,i,N,tx=typ(x);
   GEN p1,p;
 
   nf=checknf(nf); N=lgef(nf[1])-3;
@@ -114,8 +114,7 @@ element_inv(GEN nf, GEN x)
   {
     if (tx==t_POLMOD) checknfelt_mod(nf,x);
     else if (tx==t_POL) x=gmodulcp(x,(GEN)nf[1]);
-    p1=ginv(x); tetpil=avma;
-    return gerepile(av,tetpil,algtobasis(nf,p1));
+    return gerepileupto(av, algtobasis(nf, ginv(x)));
   }
   if (isnfscalar(x))
   {
@@ -123,25 +122,25 @@ element_inv(GEN nf, GEN x)
     for (i=2; i<=N; i++) p1[i]=lcopy((GEN)x[i]);
     return p1;
   }
-  flx=1;
+  p = NULL;
   for (i=1; i<=N; i++)
     if (typ(x[i])==t_INTMOD)
     {
-      p=gmael(x,i,1); x=lift(x);
-      flx=0; break;
+      p = gmael(x,i,1);
+      x = lift(x); break;
     }
   p1 = ginvmod(gmul((GEN)nf[7],x), (GEN)nf[1]);
   p1 = algtobasis_intern(nf,p1);
 
-  if (flx) return gerepileupto(av,p1);
-  tetpil=avma; return gerepile(av,tetpil,Fp_vec(p1, p));
+  if (p) p1 = Fp_vec(p1, p);
+  return gerepileupto(av,p1);
 }
 
 /* quotient of x and y in nf */
 GEN
 element_div(GEN nf, GEN x, GEN y)
 {
-  long av=avma,tetpil,flx,i,N,tx=typ(x),ty=typ(y);
+  long av=avma,i,N,tx=typ(x),ty=typ(y);
   GEN p1,p;
 
   nf=checknf(nf); N=lgef(nf[1])-3;
@@ -159,40 +158,42 @@ element_div(GEN nf, GEN x, GEN y)
       if (ty!=t_COL) err(typeer,"nfdiv");
       p1=gdiv(x,gmodulcp(gmul((GEN)nf[7],y),(GEN)nf[1]));
     }
-    tetpil=avma; return gerepile(av,tetpil,algtobasis(nf,p1));
+    return gerepileupto(av, algtobasis(nf,p1));
   }
   if (is_extscalar_t(ty))
   {
     if (tx!=t_COL) err(typeer,"nfdiv");
     p1=gdiv(gmodulcp(gmul((GEN)nf[7],x),(GEN)nf[1]),y);
-    tetpil=avma; return gerepile(av,tetpil,algtobasis(nf,p1));
+    return gerepileupto(av, algtobasis(nf,p1));
   }
 
   if (isnfscalar(y)) return gdiv(x,(GEN)y[1]);
   if (isnfscalar(x))
   {
-    p1=element_inv(nf,y); tetpil=avma;
-    return gerepile(av,tetpil,gmul((GEN)x[1],p1));
+    p1=element_inv(nf,y);
+    return gerepileupto(av, gmul((GEN)x[1],p1));
   }
 
-  flx=1;
+  p = NULL;
   for (i=1; i<=N; i++)
     if (typ(x[i])==t_INTMOD)
     {
-      p=gmael(x,i,1); x=lift(x);
-      flx=0; break;
+      p = gmael(x,i,1);
+      x = lift(x); break;
     }
   for (i=1; i<=N; i++)
     if (typ(y[i])==t_INTMOD)
     {
-      p=gmael(y,i,1); y=lift(y);
-      flx=0; break;
+      p1 = gmael(y,i,1);
+      if (p && !egalii(p,p1))
+        err(talker,"inconsistant prime moduli in element_inv");
+      y = lift(y); break;
     }
 
   p1 = gmul(gmul((GEN)nf[7],x), ginvmod(gmul((GEN)nf[7],y), (GEN)nf[1]));
   p1 = algtobasis_intern(nf, gres(p1, (GEN)nf[1]));
-  if (flx) return gerepileupto(av,p1);
-  tetpil=avma; return gerepile(av,tetpil, Fp_vec(p1,p));
+  if (p) p1 = Fp_vec(p1,p);
+  return gerepileupto(av,p1);
 }
 
 /* product of INTEGERS (i.e vectors with integral coeffs) x and y in nf */
@@ -1120,6 +1121,7 @@ zprimestar(GEN nf,GEN pr,GEN ep,GEN x,GEN arch)
   e = itos(ep); prk=(e==1)? pr: idealpow(nf,pr,ep);
   if(DEBUGLEVEL>=4) {fprintferr("prk calcule\n");flusherr();}
   g0 = v;
+  uv = NULL; /* gcc -Wall */
   if (x)
   {
     uv = idealaddtoone(nf,prk,idealdivexact(nf,x,prk));
@@ -1280,6 +1282,7 @@ zinternallog(GEN nf,GEN list_set,long nbgen,GEN arch,GEN fa,GEN a,long index)
     if (DEBUGLEVEL>5) fprintferr("with a = %Z\n",a);
   }
   ainit = a; psigne = zsigne(nf,ainit,arch);
+  p2 = NULL; /* gcc -Wall */
   for (k=1; k<=nbp; k++)
   {
     list=(GEN)list_set[k];
@@ -1321,6 +1324,7 @@ zinternallog(GEN nf,GEN list_set,long nbgen,GEN arch,GEN fa,GEN a,long index)
           a = element_mulmodideal(nf,a,p3,prk);
         }
         i++; if (i==lg(cyc)) break;
+        /* never reached if j = 1 since lg(cyc) = 2 */
         p3 = (GEN)p2[i];
       }
     }
@@ -1350,6 +1354,7 @@ compute_gen(GEN nf, GEN u1, GEN met, GEN gen, GEN module, long nbp, GEN sarch)
   {
     x = (typ(module) == t_MAT)? module: (GEN)module[1];
     nba = 0;
+    arch = generator = NULL; /* gcc -Wall */
   }
   for (j=1; j<c; j++)
   {
@@ -1862,6 +1867,7 @@ ideallistzstarall(GEN bnf,long bound,long flag)
 
   p=cgeti(3); p[1]=evalsigne(1) | evallgefint(3);
   av=avma; lim=stack_lim(av,1);
+  lu2 = embunit = NULL; /* gcc -Wall */
   for (p[2]=0; p[2]<=bound; )
   {
     if (!*ptdif) err(primer1);
@@ -1996,10 +2002,15 @@ ideallistarchall(GEN bnf,GEN list,GEN arch,long flag)
     z = (GEN)list[1];
     lu= (GEN)list[2]; if (typ(lu) != t_VEC) err(typeer, "ideallistarch");
   }
-  else z = list;
+  else
+  {
+    z = list;
+    y = lu = NULL; /* gcc -Wall */
+  }
   if (typ(z) != t_VEC) err(typeer, "ideallistarch");
   z = ideallist_arch(nf,z,arch, flag & 1);
   if (!do_units) return z;
+
   y[1]=(long)z; av=avma;
   init_units(bnf,&funits,&racunit);
   lu2=cgetg(lg(z),t_VEC);

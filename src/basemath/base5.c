@@ -333,6 +333,9 @@ rnfelementreltoabs(GEN rnf,GEN x)
 	      p3 = (GEN)p3[2]; /* fall through */
 	    case t_POL:
 	      p2 = poleval(p3,alpha);
+              break;
+            default: err(talker, "incorrect data in rnfelementreltoabs");
+              return NULL; /* not reached */
 	  }
 	s=gadd(p2,gmul(teta,s));
       }
