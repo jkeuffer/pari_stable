@@ -161,7 +161,7 @@ check_ZXY(GEN x, char *s)
     GEN t = gel(x,k);
     switch(typ(t)) {
       case t_INT: break;
-      case t_POL: if (_check_ZX(x)) break;
+      case t_POL: if (_check_ZX(t)) break;
       /* fall through */
       default: err(talker,"polynomial not in Z[X,Y] in %s",s);
     }
