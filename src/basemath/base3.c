@@ -1767,6 +1767,7 @@ zideallog(GEN nf, GEN x, GEN bid)
     case t_POLMOD: case t_POL:
       x = algtobasis(nf,x); break;
     case t_MAT:
+      if (lg(x) == 1) return zerocol(c-1);
       return famat_ideallog(nf,(GEN)x[1],(GEN)x[2],bid);
     case t_COL: break;
     default: err(talker,"not an element in zideallog");
@@ -1777,8 +1778,8 @@ zideallog(GEN nf, GEN x, GEN bid)
   {
     GEN g = cgetg(3, t_COL);
     GEN e = cgetg(3, t_COL);
-    g[1] = lmul(x,den); e[1] = un;
-    g[2] = (long)den;   e[2] = lstoi(-1);
+    g[1] = (long)Q_muli_to_int(x,den); e[1] = un;
+    g[2] = (long)den;                  e[2] = lstoi(-1);
     p1 = famat_ideallog(nf, g, e, bid);
   }
   else
