@@ -227,6 +227,7 @@ src/modules/galois.c
 src/modules/kummer.c
 src/modules/mpqs.c
 src/modules/nffactor.c
+src/modules/part.c
 src/modules/stark.c
 src/modules/subfield.c
 src/modules/thue.c
