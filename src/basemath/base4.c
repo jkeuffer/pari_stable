@@ -1383,7 +1383,7 @@ init_idele(GEN nf)
   x[2] = (long)zerovec(RU); return x;
 }
 
-/* compute x^n (x ideal, n integer), reducing along the way if n is big */
+/* compute x^n (x ideal, n integer), reducing along the way */
 GEN
 idealpowred(GEN nf, GEN x, GEN n, long prec)
 {
@@ -1391,11 +1391,6 @@ idealpowred(GEN nf, GEN x, GEN n, long prec)
   GEN y, p1;
 
   if (typ(n) != t_INT) err(talker,"non-integral exponent in idealpowred");
-  if (absi_cmp(n,stoi(16)) < 0)
-  {
-    y = idealpow(nf,x,n);
-    return gerepileupto(av, ideallllred(nf,y,NULL,prec));
-  }
   p1 = n+2; m = *p1;
   y = x; j=1+bfffo(m); m<<=j; j = BITS_IN_LONG-j;
   for (i=lgefint(n)-2;;)
@@ -1410,6 +1405,7 @@ idealpowred(GEN nf, GEN x, GEN n, long prec)
     m = *++p1, j = BITS_IN_LONG;
   }
   if (s < 0) y = idealinv(nf,y);
+  if (y == x) y = ideallllred(nf,x,NULL,prec);
   return gerepileupto(av,y);
 }
 
