@@ -997,7 +997,7 @@ static void
 get_roots_for_M(nffp_t *F)
 {
   long n, eBD, er, PREC;
-  
+
   if (F->extraprec < 0)
   { /* not initialized yet */
     n = degpol(F->x);
@@ -1037,7 +1037,7 @@ make_M(nffp_t *F, int trunc)
       for (i=1; i<l; i++) m[i] = lmul((GEN)m[i], invd);
     }
   }
-  
+
   if (trunc && gprecision(M) > F->prec)
   {
     M     = gprec_w(M, F->prec);
@@ -1302,9 +1302,9 @@ ok_pol(void *TT, GEN xn)
 {
   ok_pol_t *T = (ok_pol_t*)TT;
   GEN dxn;
-  
+
   if (++T->ind > T->indmax && T->xbest) return T->xbest;
-  
+
   if (!ZX_is_squarefree(xn)) return (T->ind == T->indmax)? T->xbest: NULL;
   if (DEBUGLEVEL>3) outerr(xn);
   dxn = ZX_disc(xn);
@@ -1682,8 +1682,8 @@ sum(GEN v, long a, long b)
 }
 
 GEN
-  T2_from_embed_norm(GEN x, long r1)
-  {
+T2_from_embed_norm(GEN x, long r1)
+{
   GEN p = sum(x, 1, r1);
   GEN q = sum(x, r1+1, lg(x)-1);
   if (q != gzero) p = gadd(p, gmul2n(q,1));
@@ -1818,7 +1818,7 @@ findmindisc(GEN *py, GEN *pa)
 {
   GEN v, dmin, z, b, discs, y = *py, a = *pa;
   long i,k, l = lg(y);
-  
+
   if (l == 2) { *py = (GEN)y[1]; *pa = (GEN)a[1]; return; }
 
   discs = cgetg(l,t_VEC);
