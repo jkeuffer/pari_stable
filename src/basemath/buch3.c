@@ -150,13 +150,17 @@ buchnarrow(GEN bnf)
   v[3] = (long)basecl; return gerepilecopy(av, v);
 }
 
-/* given two coprime integral ideals x and f, compute "small" a in x,
+/* given two coprime integral ideals x and f (f HNF), compute "small" a in x,
  * such that a = 1 mod (f). */
 static GEN
 findalpha(GEN nf,GEN x,GEN f)
 {
-  GEN p1,y, b = idealaddtoone_i(nf,x,f); /* a = b mod (x f) */
+  GEN p1,y,b;
 
+  if (gcmp1(gcoeff(f,1,1)))
+    return ideallllred_elt(nf, x); /* f = 1 */
+
+  b = idealaddtoone_i(nf,x,f); /* a = b mod (x f) */
   y = ideallllred_elt(nf, idealmullll(nf,x,f));
   p1 = ground(element_div(nf,b,y));
   return gsub(b, element_mul(nf,p1,y)); /* != 0 since = 1 mod f */
