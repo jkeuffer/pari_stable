@@ -38,6 +38,8 @@ Done for version 2.2.3 (released ??/??/2002):
     4- stack corruption in ellap (LARGE p)
     5- zeta(s) destroyed the Bernoulli cache when using the functional equation
     6- oo loop in random_relation (called from bnfinit)
+    7- fixed lower bound for p in nfsubfields (could get oo loop: pol never
+       squarefree mod p)
 
   Changed
 BA  1- improved Fp_isom
