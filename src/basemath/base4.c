@@ -291,12 +291,15 @@ get_arch_real(GEN nf,GEN x,GEN *emb,long prec)
   if (isnfscalar(x)) /* rational number */
   {
     GEN u = (GEN)x[1];
+    long l = lg(x);
     i = signe(u);
     if (!i) err(talker,"0 in get_arch_real");
     p1= (i > 0)? glog(u,prec): gzero;
     p2 = (RU > R1)? gmul2n(p1,1): NULL;
     for (i=1; i<=R1; i++) v[i] = (long)p1;
     for (   ; i<=RU; i++) v[i] = (long)p2;
+    x = cgetg(l, t_COL);
+    for (i=1; i<l; i++) x[i] = (long)u;
   }
   else
   {
