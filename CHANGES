@@ -155,7 +155,7 @@ HC 12- gamma function for integral/rational arguments
     1- mplog2() function --> faster mplog()
     2- gcd for Gaussian integers
 HC  3- APRCL primality test
-    4- (strong) Lucas primality test
+    4- (strong) Lucas primality test + Baillie-Pomerance-Selfridge-Wagstaff test
 BA  5- Facilities for permutation groups (perm.c).
 BA  6- New functions galoissubgroups, galoisubfields.
 HC  7- Implemented all Bessel functions J, I, N, K, H1, H2, and Bessel functions
@@ -167,7 +167,9 @@ GTo 9- Implemented Cipolla's algorithm for sqrt(Mod(x, p))
    12- library functions corepartial, core2partial
    13- library functions affui, itou
    14- library function lllint_ip (in place)
-   15- library functions Q_primitive_part, Q_primpart, Q_remove_denom
+   15- library functions Q_primitive_part, Q_primpart, Q_remove_denom, Q_denom
+   16- allow polredabs to use a partial factorisation of disc(nf) [as polred,
+       but inconsistent values. Backward compatibility problem here...]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.2 (released 10/01/2002):
