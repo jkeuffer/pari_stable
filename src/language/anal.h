@@ -73,7 +73,7 @@ void hit_return(void);
 void push_val(entree *ep, GEN a);
 void pop_val(entree *ep);
 
-extern long prec;
+extern ulong prec;
 extern GEN gnil;
 
 extern char *current_function;

@@ -46,7 +46,7 @@ void    *global_err_data;
 jmp_buf environnement;
 long    *ordvar;
 ulong   DEBUGFILES,DEBUGLEVEL,DEBUGMEM,compatible;
-long    prec,precdl;
+ulong   prec,precdl;
 ulong   init_opts = INIT_JMPm | INIT_SIGm;
 gpmem_t bot = 0, top = 0, avma;
 size_t memused;
