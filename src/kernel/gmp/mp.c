@@ -548,7 +548,7 @@ mpent(GEN x)
   if ((e=expo(x)) < 0) return stoi(-1);
   d = (e>>TWOPOTBITS_IN_LONG) + 3;
   m = e & (BITS_IN_LONG-1);
-  lx=lg(x); if (d>lx) err(precer, "mpent (precision loss in trucation)");
+  lx=lg(x); if (d>lx) err(precer, "mpent (precision loss in truncation)");
   y = cgeti(d+1);
   if (++m == BITS_IN_LONG)
   {
