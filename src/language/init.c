@@ -612,8 +612,8 @@ pari_init(size_t parisize, ulong maxprime)
   if (pari_kernel_init()) err(talker,"Cannot initialize kernel");
 
   varentries = (entree**) gpmalloc((MAXVARN+1)*sizeof(entree*));
-  polvar = (GEN) gpmalloc((MAXVARN+1)*sizeof(long));
   ordvar = (GEN) gpmalloc((MAXVARN+1)*sizeof(long));
+  polvar = (GEN) gpmalloc((MAXVARN+1)*sizeof(long));
   polx  = (GEN*) gpmalloc((MAXVARN+1)*sizeof(GEN));
   polun = (GEN*) gpmalloc((MAXVARN+1)*sizeof(GEN));
   polvar[0] = evaltyp(t_VEC) | evallg(1);
@@ -708,6 +708,9 @@ freeall(void)
   while (cur_bloc) delete_from_bloclist(cur_bloc);
   killallfiles(1);
   free((void *)functions_hash);
+  free((void *)funct_old_hash);
+  free((void *)members_hash);
+  free((void *)dft_handler);
   free((void *)bot);
   free((void *)diffptr);
   free(current_logfile);

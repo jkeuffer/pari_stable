@@ -104,6 +104,7 @@ IS 25- config/get_head would not work only if one invoked $PWD/Configure
       207898980728832*x^2 + 2879456034816; nfroots(nfinit(subst(p,x,y)), p); }
       --> loop forever in lllintpartial()
       Fix: abort lllintpartial if progress negligible (was: if _no_ progress)
+   32- some permanent structs not freed in freeall()
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.
