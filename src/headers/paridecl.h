@@ -149,6 +149,7 @@ GEN     strtoGENstr(char *s, long flag);
 /* arith1.c */
 
 GEN     bestappr(GEN x, GEN k);
+GEN     bestappr0(GEN x, GEN a, GEN b);
 long    carrecomplet(GEN x, GEN *pt);
 long    cgcd(long a,long b);
 GEN     chinese(GEN x, GEN y);

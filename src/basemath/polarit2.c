@@ -1378,9 +1378,7 @@ squff2(GEN x, long hint)
   return L;
 }
 
-/* klim=0 habituellement, sauf si l'on ne veut chercher que les facteurs
- * de degre <= klim
- */
+/* Factor x in Z[t]. Assume all factors have degree divisible by hint */
 GEN
 factpol(GEN x, long hint)
 {
@@ -3418,8 +3416,8 @@ GEN FpM(GEN z, GEN p);
 GEN polpol_to_mat(GEN v, long n);
 GEN mat_to_polpol(GEN x, long v, long w);
 
-static
-GEN to_frac(GEN a, GEN b)
+static GEN
+to_frac(GEN a, GEN b)
 {
   GEN f = cgetg(3, t_FRAC);
   f[1] = (long)a;

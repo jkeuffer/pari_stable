@@ -1855,6 +1855,43 @@ pnqn(GEN x)
   return gerepile(av,tetpil,y);
 }
 
+/* x t_INTMOD. Look for coprime integers a<=A and b<=B, such that a/b = x */
+GEN
+bestappr_mod(GEN x, GEN A, GEN B)
+{
+  long i,lx,tx;
+  GEN y;
+  tx = typ(x);
+  switch(tx)
+  {
+    case t_INTMOD:
+    {
+      ulong av = avma;
+      GEN a,b,d, t = cgetg(3, t_FRAC);
+      if (! ratlift((GEN)x[2], (GEN)x[1], &a,&b,A,B)) return NULL;
+      if (is_pm1(b)) return icopy_av(a, (GEN)av);
+      d = mppgcd(a,b);
+      if (!is_pm1(d)) { avma = av; return NULL; }
+      cgiv(d);
+      t[1] = (long)a;
+      t[2] = (long)b; return t;
+    }
+    case t_COMPLEX: case t_POL: case t_SER: case t_RFRAC:
+    case t_RFRACN: case t_VEC: case t_COL: case t_MAT:
+      lx = (tx==t_POL)? lgef(x): lg(x); y=cgetg(lx,tx);
+      for (i=1; i<lontyp[tx]; i++) y[i]=x[i];
+      for (   ; i<lx; i++)
+      {
+        GEN t = bestappr_mod((GEN)x[i],A,B);
+        if (!t) return NULL;
+        y[i] = (long)t;
+      }
+      return y;
+  }
+  err(typeer,"bestappr0");
+  return NULL; /* not reached */
+}
+
 GEN
 bestappr(GEN x, GEN k)
 {
@@ -1905,6 +1942,18 @@ bestappr(GEN x, GEN k)
   }
   err(typeer,"bestappr");
   return NULL; /* not reached */
+}
+
+GEN
+bestappr0(GEN x, GEN a, GEN b)
+{
+  ulong av;
+  GEN t;
+  if (!b) return bestappr(x,a);
+  av = avma;
+  t = bestappr_mod(x,a,b):
+  if (!t) { avma = av; return stoi(-1); }
+  return t;
 }
 
 /***********************************************************************/

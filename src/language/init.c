@@ -1722,7 +1722,7 @@ entree functions_basic[]={
 {"bernvec",11,(void*)bernvec,3,"L"},
 {"besseljh",29,(void*)jbesselh,3,"GGp"},
 {"besselk",99,(void*)kbessel0,3,"GGD0,L,p"},
-{"bestappr",2,(void*)bestappr,4,"GG"},
+{"bestappr",99,(void*)bestappr0,4,"GGDG"},
 {"bezout",2,(void*)vecbezout,4,"GG"},
 {"bezoutres",2,(void*)vecbezoutres,4,"GG"},
 {"bigomega",18,(void*)gbigomega,4,"G"},
