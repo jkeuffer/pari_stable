@@ -8,6 +8,7 @@
 #include "pari.h"
 
 #define EXTRA_PREC (DEFAULTPREC-1)
+#define ADD_PREC   (DEFAULTPREC-2)*3
 
 GEN roots_to_pol_intern(GEN L, GEN a, long v, int plus);
 static int*** computean(GEN dtcr,  long nmax, long prec);
@@ -48,6 +49,25 @@ ConjChar(GEN chi, GEN cyc)
   return p1;
 }
 
+/* compute the next element for FindEltofGroup */
+static GEN
+NextEltofGroup(GEN cyc, long l, long adec)
+{
+  GEN p1;
+  long dj, j;
+
+  p1 = cgetg(l + 1, t_COL);
+  
+  for (j = l; j; j--)
+  {
+    dj = itos((GEN)cyc[j]);
+    p1[j] = lstoi(adec%dj);
+    adec /= dj;
+  }
+  
+  return p1;
+}
+
 /* Compute all the elements of a group given by its SNF */
 static GEN
 FindEltofGroup(long order, GEN cyc)
@@ -60,18 +80,7 @@ FindEltofGroup(long order, GEN cyc)
   rep = cgetg(order + 1, t_VEC);
 
   for  (i = 1; i <= order; i++)
-  {
-    p1 = cgetg(l + 1, t_COL);
-    rep[i] = (long)p1;
-    adec = i;
-
-    for (j = l; j; j--)
-    {
-      dj = itos((GEN)cyc[j]);
-      p1[j] = lstoi(adec%dj);
-      adec /= dj;
-    }
-  }
+    rep[i] = (long)NextEltofGroup(cyc, l, i);
 
   return rep;
 }
@@ -441,7 +450,7 @@ CplxModulus(GEN data, long *newprec, long prec)
 
   pr = gexpo(pol)>>TWOPOTBITS_IN_LONG;
   if (pr < 0) pr = 0;
-  *newprec = max(prec, pr + DEFAULTPREC);
+  *newprec = max(prec, pr + ADD_PREC);
 
   return gerepileupto(av, cpl);
 }
@@ -729,7 +738,6 @@ ComputeArtinNumber(GEN datachi, long flag, long prec)
 
   /* Sum chi(beta) * exp(2i * Pi * Tr(beta * mu / lambda) where beta
      runs through the classes of (Ok/cond0)^* and beta cond1-positive */
-  allclass = FindEltofGroup(zcard, zstruc);
 
   p3 = cgetg(N + 1, t_COL);
   for (i = 1; i <= N; i++) p3[i] = zero;
@@ -752,7 +760,7 @@ ComputeArtinNumber(GEN datachi, long flag, long prec)
   {
     beta = gun;
     chib = gun;
-    p1 = (GEN)allclass[i];
+    p1 = NextEltofGroup(zstruc, nz, i);
 
     for (j = 1; j <= nz; j++)
     {
@@ -2193,21 +2201,26 @@ static GEN
 RecCoeff3(GEN nf, GEN beta, GEN B, long v, long prec)
 {
   GEN A, M, nB, cand, sol, p1, plg, B2, C2, max = stoi(10000);
-  GEN beta2, eps, nf2;
-  long N, G, i, j, k, l, ct = 0, av = avma, prec2;
+  GEN beta2, eps, nf2, Bd, maxBd = gpowgs(stoi(10), 8);
+  long N, G, i, j, k, l, ct = 0, av = avma, prec2, nbs;
 
   N   = degree((GEN)nf[1]);
   G   = min( - 20, - bit_accuracy(prec) >> 4);
 
   eps  = gpowgs(stoi(10), - max(8, (G >> 1)));
 
-  p1    = gceil(gdiv(glog(B, DEFAULTPREC), dbltor(2.3026)));
+  if (cmpii(B, maxBd) > 0)
+    Bd = maxBd;
+  else 
+    Bd = B;
+
+  p1    = gceil(gdiv(glog(Bd, DEFAULTPREC), dbltor(2.3026)));
   prec2 = max((prec << 1) - 2, (long)(itos(p1) * pariK1 + BIGDEFAULTPREC));
   nf2   = nfnewprec(nf, prec2);
   beta2 = gprec_w(beta, prec2);
 
  LABrcf: ct++;
-  B2 = sqri(B);
+  B2 = sqri(Bd);
   C2 = gdiv(B2, gsqr(eps));
 
   M = gmael(nf2, 5, 1);
@@ -2253,9 +2266,11 @@ RecCoeff3(GEN nf, GEN beta, GEN B, long v, long prec)
   l = lg(cand) - 1;
 
   if (DEBUGLEVEL >= 2)
-    fprintferr("Found %ld vector(s) in RecCoeff3 \n", l);
+    fprintferr("RecCoeff3: found %ld candidate(s)\n", l);
 
   sol = cgetg(N + 1, t_COL);
+  nbs = 0;
+
   for (i = 1; i <= l; i++)
   {
     p1 = (GEN)cand[i];
@@ -2264,10 +2279,20 @@ RecCoeff3(GEN nf, GEN beta, GEN B, long v, long prec)
       for (j = 1; j <= N; j++)
 	sol[j] = lmulii((GEN)p1[1], (GEN)p1[j + 1]);
       plg = gmul(M, sol);
-      if (TestOne(plg, beta, B, v, G, N))
-	return gerepileupto(av, basistoalg(nf, sol));
+
+      if (TestOne(plg, beta, B, v, G, N)) nbs++;
+      
+      /* there are more than one solution, more precision needed */
+      if (nbs > 1) 
+      {
+	fprintferr("RecCoeff3: too many solutions!\n");
+	break;
+      }
     }
   }
+  
+  if (nbs == 1) return gerepileupto(av, basistoalg(nf, sol));
+ 
   avma = av; return NULL;
 }
 
@@ -2278,7 +2303,7 @@ GEN
 RecCoeff(GEN nf,  GEN pol,  long v, long prec)
 {
   long av = avma, j, G, cl = lgef(pol)-3;
-  GEN p1, beta, Bmax = stoi(10000);
+  GEN p1, beta;
 
   /* if precision(pol) is too low, abort */
   for (j = 2; j <= cl+1; j++)
@@ -2300,7 +2325,6 @@ RecCoeff(GEN nf,  GEN pol,  long v, long prec)
     p1 = RecCoeff2(nf, beta, bound, v, prec);
     if (!p1)
     {
-      if (cmpii(bound, Bmax) > 0) bound = Bmax;
       p1 = RecCoeff3(nf, beta, bound, v, prec);
       if (!p1) return NULL;
     }
@@ -2963,7 +2987,7 @@ LABDOUB:
     /* we compute the precision that we need */
     pr = 1 + (gexpo(polrelnum)>>TWOPOTBITS_IN_LONG);
     if (pr < 0) pr = 0;
-    newprec = DEFAULTPREC + max(newprec,pr);
+    newprec = ADD_PREC + max(newprec,pr);
 
     if (DEBUGLEVEL) err(warnprec, "AllStark", newprec);
 
