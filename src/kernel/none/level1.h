@@ -559,9 +559,9 @@ INLINE void
 dvmdsiz(long x, GEN y, GEN z, GEN t)
 {
   const pari_sp av = avma;
-  long rem;
+  ulong rem;
   mpaff(divsi_rem(x,y, &rem), z);
-  affsi(rem,t); avma = av;
+  affsi((long)rem,t); avma = av;
 }
 
 INLINE void
@@ -569,7 +569,7 @@ dvmdisz(GEN x, long y, GEN z, GEN t)
 {
   const pari_sp av=avma;
   ulong rem;
-  mpaff(divis_rem(x,y, &rem),z); affsi(rem,t); avma=av;
+  mpaff(divis_rem(x,y, &rem),z); affsi((long)rem,t); avma=av;
 }
 
 INLINE void
