@@ -2118,22 +2118,18 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN vecG, GEN L_jid, long *pjid)
 
 /* remark: F->KCZ changes if be_honest() fails */
 static int
-be_honest(FB_t *F, GEN nf)
+be_honest(FB_t *F, GEN nf, GEN vecG)
 {
-  long ex, i, j, J, k, iz, nbtest, ru, lgsub = lg(F->subFB), KCZ0 = F->KCZ;
+  long ex, i, j, J, k, iz, nbtest, ru;
+  long nbG = lg(vecG)-1, lgsub = lg(F->subFB), KCZ0 = F->KCZ;
   GEN P, ideal, m, vdir;
   pari_sp av;
 
-  if (F->KCZ2 <= F->KCZ) return 1;
-  if (DEBUGLEVEL)
-  {
-    fprintferr("Be honest for primes from %ld to %ld\n",
+  if (DEBUGLEVEL) {
+    fprintferr("Be honest for %ld primes from %ld to %ld\n", F->KCZ2 - F->KCZ,
                F->FB[ F->KCZ+1 ], F->FB[ F->KCZ2 ]);
-    flusherr();
   }
-  if (!F->pow) powFBgen(F, NULL, nf);
-  ru = lg(nf[6]);
-  vdir = cgetg(ru, t_VECSMALL);
+  ru = lg(nf[6]); vdir = cgetg(ru, t_VECSMALL);
   av = avma;
   for (iz=F->KCZ+1; iz<=F->KCZ2; iz++, avma = av)
   {
@@ -2145,25 +2141,21 @@ be_honest(FB_t *F, GEN nf)
 
     for (j=1; j<J; j++)
     {
-      GEN IDEAL, ideal0 = prime_to_ideal(nf,(GEN)P[j]);
-      pari_sp av2 = avma;
+      GEN ideal0 = prime_to_ideal(nf,(GEN)P[j]);
+      pari_sp av1, av2 = avma;
       for(nbtest=0;;)
       {
 	ideal = ideal0;
 	for (i=1; i<lgsub; i++)
 	{
-	  ex = random_bits(RANDOM_BITS);
+	  ex = random_bits(RANDOM_BITS) % F->pow->ord[i];
 	  if (ex) ideal = idealmulh(nf,ideal, gmael(F->pow->id2,i,ex));
 	}
         ideal = remove_content(ideal);
-        IDEAL = lllint_ip(ideal, 4);
-        for (i=1; i<ru; i++) vdir[i] = random_bits(RANDOM_BITS);
-	for (k=1; k<ru; k++)
+        for (av1 = avma, k = 1; k <= nbG; k++, avma = av1)
 	{
-          m = pseudomin(IDEAL, computeGtwist(nf, vdir));
-          if (m && factorgen(F,nf,ideal,m)) break;
-	  for (i=1; i<ru; i++) vdir[i] = 0;
-          vdir[k] = 10;
+          m = pseudomin(ideal, (GEN)vecG[j]);
+          if (factorgen(F,nf,ideal,m)) break;
 	}
 	avma = av2; if (k < ru) break;
         if (++nbtest > 50)
@@ -2180,8 +2172,7 @@ be_honest(FB_t *F, GEN nf)
     if (DEBUGLEVEL>1) fprintferr("\n");
     msgtimer("be honest");
   }
-  F->KCZ = KCZ0;
-  avma = av; return 1;
+  F->KCZ = KCZ0; avma = av; return 1;
 }
 
 int
@@ -2437,17 +2428,16 @@ static GEN
 compute_vecG(GEN nf, long n)
 {
   GEN vecG, G0, Gtw, G = gmael(nf,5,2);
-  long e, i, j, ind, r1 = nf_get_r1(nf);
+  long e, i, j, ind, r1 = nf_get_r1(nf), l = lg(G);
 
   for (e = 4; ; e <<= 1)
   {
-    G0 = ground(G);
-    if (lg(hnf(G0)) == lg(G)) break;
+    G0 = ground(G); Gtw = ground(gmul2n(G, 10));
+    if (lg(hnf(G0)) == l && lg(hnf(Gtw)) == l) break;
     G = gmul2n(G, e);
   }
   vecG = cgetg(1 + n*(n+1)/2,t_VEC);
   if (n == 1) { vecG[1] = (long)G0; return vecG; }
-  Gtw = ground(gmul2n(G, 10));
   for (ind=j=1; j<=n; j++)
     for (i=1; i<=j; i++) vecG[ind++] = (long)shift_G(G0,Gtw,i,j,r1);
   if (DEBUGLEVEL) msgtimer("weighted G matrices");
@@ -3154,7 +3144,16 @@ PRECPB:
   }
   /* DONE */
 
-  if (!be_honest(&F, nf)) goto START;
+  if (F.KCZ2 > F.KCZ)
+  {
+    if (!vecG) vecG = compute_vecG(nf, min(RU, 9));
+    if (!F.pow) powFBgen(&F, NULL, nf);
+    if (F.sfb_chg) {
+      if (!subFB_change(&F, nf, L_jid)) goto START;
+      powFBgen(&F, NULL, nf);
+    }
+    if (!be_honest(&F, nf, vecG)) goto START;
+  }
   F.KCZ2 = 0; /* be honest only once */
 
   /* fundamental units */
