@@ -5244,10 +5244,13 @@ particular, beware that:
 @eprog
 
 If $x$ is a power series, $z$ must be either a polynomial, a power series, or
-a rational function. $y$ must be a simple variable name.
+a rational function. $y$ must be a simple variable name, or a monome of the
+form $t^k$ for some simple variable $t$. In the latter case, substitution
+may not always be possible since PARI doesn't know about algebraic functions.
 
-\syn{gsubst}{x,v,z}, where $v$ is the number of
-the variable $y$.
+\syn{gsubst}{x,v,z}, where $v$ is the number of the variable $y$ for regular
+usage. Also available is \tet{gsubst0}$(x,y,z)$ where $y$ is a \kbd{GEN}
+monomial of the form $t^k$.
 
 \subsecidx{taylor}$(x,y)$: Taylor expansion around $0$ of $x$ with respect
 to\label{se:taylor}
