@@ -17,7 +17,7 @@ if test -n "$myuname"; then
   darwin*)  arch=`uname -p`
             if test "$arch" = powerpc; then arch=ppc; fi ;;
   osf1)     case "$5" in alpha) arch=alpha;; esac;;
-  cygwin*)  arch=$HOSTTYPE; osname=cygwin;;
+  cygwin*)  arch=${HOSTTYPE:-i386}; osname=cygwin;;
   linux)    arch=`uname -m`
 	    case "`cat /proc/cpuinfo`" in
 	    *SuperSparc*)   arch=sparcv8_super;;

@@ -83,6 +83,8 @@ BA 27- [GMP kernel] factor(18295370635792208009) --> error
        ***   division by zero in gdiv, gdivgs or ginv
 BA 31- uninitialized memory read in divrr(x,y), when lg(y) < lg(x), leading
        to random rounding of result.
+   32- [Cygwin + bash >= 2.05a]: HOSTTYPE no longer auto-exported by bash -->
+       Cygwin compilation broken. Define it to i386 by default.
 
   Changed
     1- rnf structure (removed useless components)
