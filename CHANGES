@@ -51,6 +51,7 @@ BA  1- gp2c description of == operator was broken.
     7- diviuexact destroyed input and made further assumptions [=> wrong results
        in ellglobalred]. Replaced it by a clean wrapper.
 GH  8- thue(thueinit(x^3 - 2), 2) --> SEGV
+    9- reorder([1]) --> SEGV (bad input, but sanity check was wrong)
 
   Added
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu

@@ -824,8 +824,8 @@ reorder(GEN x)
   for (n=0; n<lx; n++)
   {
     var[n] = i = gvar((GEN)x[n+1]);
-    varsort[n] = ordvar[i]; /* position in polvar */
     if (i >= nvar) err(talker,"variable out of range in reorder");
+    varsort[n] = ordvar[i]; /* position in polvar */
     /* check if x is a permutation */
     if (t1[i]) err(talker,"duplicate indeterminates in reorder");
     t1[i] = 1;
