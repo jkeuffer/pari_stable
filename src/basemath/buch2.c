@@ -363,14 +363,14 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf)
   pari_sp av = avma;
   long i, j, c = 1, n = lg(F->subFB);
   GEN Id2, Alg, Ord;
-  powFB_t *old = F->pow, *new;
+  powFB_t *old = F->pow, *New;
 
   if (DEBUGLEVEL) fprintferr("Computing powers for subFB: %Z\n",F->subFB);
-  F->pow = new = (powFB_t*) gpmalloc(sizeof(powFB_t));
+  F->pow = New = (powFB_t*) gpmalloc(sizeof(powFB_t));
   Id2 = cgetg(n, t_VEC);
   Alg = cgetg(n, t_VEC);
   Ord = cgetg(n, t_VECSMALL);
-  new->arc = NULL;
+  New->arc = NULL;
   if (cache) pre_allocate(cache, n);
   for (i=1; i<n; i++)
   {
@@ -401,7 +401,7 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf)
       for (k = 2; k < j; k++) m = element_mul(nf, m, (GEN)alg[k]);
       rel->m = gclone(m);
       rel->ex= NULL;
-      rel->pow = new;
+      rel->pow = New;
       cache->last = rel;
     }
     /* trouble with subFB: include ideal even though it's principal */
@@ -410,10 +410,10 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf)
     setlg(alg, j); Ord[i] = j; if (c < 64) c *= j;
     if (DEBUGLEVEL>1) fprintferr("\n");
   }
-  new->prev = old;
-  new->id2 = gclone(Id2);
-  new->ord = gclone(Ord);
-  new->alg = gclone(Alg); avma = av;
+  New->prev = old;
+  New->id2 = gclone(Id2);
+  New->ord = gclone(Ord);
+  New->alg = gclone(Alg); avma = av;
   if (DEBUGLEVEL) msgtimer("powFBgen");
   /* if c too small we'd better change the subFB soon */
   F->sfb_chg = (c < 6)? sfb_UNSUITABLE: 0;
