@@ -441,7 +441,7 @@ static GEN
 addmul_col(GEN a, long s, GEN b)
 {
   long i,l;
-  if (!s) return b;
+  if (!s) return a? dummycopy(a): a;
   if (!a) return gmulsg(s,b);
   l = lg(a);
   for (i=1; i<l; i++)
@@ -454,7 +454,7 @@ static GEN
 addmul_mat(GEN a, long s, GEN b)
 {
   long j,l;
-  if (!s) return a;
+  if (!s) return a? dummycopy(a): a; /* copy otherwise next call corrupts a */
   if (!a) return gmulsg(s,b);
   l = lg(a);
   for (j=1; j<l; j++)
