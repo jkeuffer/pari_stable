@@ -57,15 +57,12 @@ while test $# -gt 0; do
   --share-prefix=*)
                share_prefix=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
   --bindir=*) dfltbindir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
-  --descdir=*) dfltdescdir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
-  --docdir=*) dfltdocdir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
-  --emacsdir=*) dfltemacsdir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
-  --libdir=*) dfltlibdir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
-  --paricfgdir=*) dfltparicfgdir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
-  --mandir=*) dfltmandir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
-  --miscdir=*) dfltmiscdir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
   --datadir=*) dfltdatadir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
+  --emacsdir=*) dfltemacsdir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
   --includedir=*) dfltincludedir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
+  --libdir=*) dfltlibdir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
+  --mandir=*) dfltmandir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
+  --sysdatadir=*) dfltsysdatadir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
   --host=*) target_host=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
   --kernel=*) kernel=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
   --builddir) dfltobjdir=auto;;
@@ -140,15 +137,12 @@ Installation directories:
   --prefix=<dir>        install files in <dir> (default $prefix)
   --share-prefix=<dir>  as 'prefix', for architecture independent files
   --bindir=<dir>        for binaries
-  --descsdir=<dir>      for data associated to GP's function description system
-  --docdir=<dir>        for manuals and general documentation (TeX, DVI)
   --emacsdir=<dir>      for emacs macros
-  --libdir=<dir>        for libraries
-  --paricfgdir=<dir>    for pari.cfg file (architecture-dependent config data)
-  --mandir=<dir>        for manual pages
-  --miscdir=<dir>       for miscellaneous documentation and examples
-  --datadir=<dir>       for precomputed data (Galois resolvents for polgalois)
   --includedir=<dir>    for C header files
+  --libdir=<dir>        for libraries
+  --mandir=<dir>        for manual pages
+  --sysdatadir=<dir>    for architecture-dependent data
+  --datadir=<dir>       for architecture-independent data 
 
 Optional libraries:
   --without-readline          do not link with GNU readline

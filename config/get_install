@@ -17,58 +17,44 @@ EOT
 echo $n "Installation prefix ? $c"
 . ./myread; prefix=$ans
 
+if test -d $prefix/share -a -z "$share_prefix"; then 
+  share_prefix=$prefix/share
+fi
 echo $n "...for architecture-independent files (share-prefix) ? $c"
 dflt=$share_prefix; . ./myread; share_prefix=$ans
 
 if test -z "$share_prefix"; then
   dfltman=$prefix/man/man1
-  dfltmisc=$prefix/lib/pari/misc
-  dfltdoc=$prefix/lib/pari/doc
   dfltemacs=$prefix/emacs/site-lisp
   possibleemacs=/usr/share/emacs/site-lisp
   if test ! -d $dfltemacs -a $prefix = '/usr/local' -a -d $possibleemacs; then
   # pray this is correct...
     dfltemacs=$possibleemacs
   fi
+  dfltdata=$prefix/lib/pari
 else
   dfltman=$share_prefix/man/man1
-  dfltmisc=$share_prefix/doc/pari
-  dfltdoc=$share_prefix/pari/doc
   dfltemacs=$share_prefix/emacs/site-lisp
+  dfltdata=$share_prefix/pari
 fi
 
-echo $n ..."\"gp\" executable ? $c"
+echo $n ..."executables (gp, gphelp) ? $c"
 dflt=${dfltbindir:-$prefix/bin}; . ./myread; bindir=$ans
 
-echo $n ..."\"pari\" library ? $c"
+echo $n ..."libraries (libpari) ? $c"
 dflt=${dfltlibdir:-$prefix/lib}; . ./myread; libdir=$ans
 
 echo $n ..."include files ? $c"
 dflt=${dlftincludedir:-$prefix/include/pari}; . ./myread; includedir=$ans
 
-echo $n ..."pari.cfg file ? $c"
-dflt=${dfltparicfgdir:-$prefix/lib/pari}; . ./myread; paricfgdir=$ans
-
-echo $n ..."documentation (TeX, DVI files) ? $c"
-dflt=${dfltdocdir:-$prefix/doc}; . ./myread; docdir=$ans
-
 echo $n ..."manual pages ? $c"
 dflt=${dfltmandir:-$dfltman}; . ./myread; mandir=$ans
-
-echo $n ..."miscellaneous files, examples ? $c"
-dflt=${dfltmiscdir:-$dfltmisc}; . ./myread; miscdir=$ans
 
 echo $n ..."emacs macros ? $c"
 dflt=${dfltemacsdir:-$dfltemacs}; . ./myread; emacsdir=$ans
 
-if test -z "$share_prefix"; then
-  dfltdat=$miscdir
-else
-  dfltdat=$share_prefix/pari
-fi
+echo $n ..."other system-dependant data ? $c"
+dflt=${dfltsysdatadir:-$prefix/lib/pari}; . ./myread; sysdatadir=$ans
 
-echo $n ..."miscellaneous data (galois resolvents) ? $c"
-dflt=${dfltdatadir:-$dfltdat}; . ./myread; datadir=$ans
-
-echo $n ..."associated to GP's function description system ? $c"
-dflt=${dfltdescdir:-$datadir}; . ./myread; descdir=$ans
+echo $n ..."other system-independant data ? $c"
+dflt=${dfltdatadir:-$dfltdata}; . ./myread; datadir=$ans

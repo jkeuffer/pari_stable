@@ -255,16 +255,15 @@ STRIPFLAGS =
 INCLUDEDIR= \$(DESTDIR)$includedir
 LIBDIR    = \$(DESTDIR)$libdir
 BINDIR    = \$(DESTDIR)$bindir
-DATADIR   = \$(DESTDIR)$datadir
-PARICFGDIR= \$(DESTDIR)$paricfgdir
 MANDIR    = \$(DESTDIR)$mandir
 EMACSDIR  = \$(DESTDIR)$emacsdir
-ALLDIR    = \$(DESTDIR)$miscdir
-DESCDIR   = \$(DESTDIR)$descdir
-DOCDIR    = \$(DESTDIR)$docdir
-READMEDIR = \$(ALLDIR)
-EXDIR     = \$(ALLDIR)/examples
-MISCDIR   = \$(ALLDIR)
+DATADIR   = \$(DESTDIR)$datadir
+SYSDATADIR= \$(DESTDIR)$sysdatadir
+
+READMEDIR = \$(DATADIR)
+EXDIR     = \$(DATADIR)/examples
+MISCDIR   = \$(DATADIR)/misc
+DOCDIR    = \$(DATADIR)/doc
 
 INSTALL = $cfg/install
 INSTALL_PROGRAM = \$(INSTALL)
@@ -432,10 +431,10 @@ install-top::
 	\$(INSTALL_DATA) $TOP/TODO         \$(READMEDIR)
 
 install-cfg::
-	-mkdir -p \$(DESCDIR) \$(DESCDIR)/PARI \$(PARICFGDIR)
-	\$(INSTALL_DATA) $desc/pari.desc   \$(DESCDIR)
-	\$(INSTALL_DATA) $desc/PARI/822.pm \$(DESCDIR)/PARI
-	\$(INSTALL_DATA) pari.cfg  \$(PARICFGDIR)
+	-mkdir -p \$(SYSDATADIR)/PARI
+	\$(INSTALL_DATA) $desc/pari.desc   \$(SYSDATADIR)
+	\$(INSTALL_DATA) $desc/PARI/822.pm \$(SYSDATADIR)/PARI
+	\$(INSTALL_DATA) pari.cfg  \$(SYSDATADIR)
 
 install-doc::
 	-mkdir -p \$(BINDIR) \$(DOCDIR)
