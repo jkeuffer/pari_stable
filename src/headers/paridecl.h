@@ -319,6 +319,7 @@ GEN     mathnf0(GEN x,long flag);
 GEN     matsnf0(GEN x,long flag);
 long    nf_get_r1(GEN nf);
 long    nf_get_r2(GEN nf);
+void    nf_get_sign(GEN nf, long *r1, long *r2);
 long    nfgetprec(GEN x);
 GEN     nfinit0(GEN x,long flag, long prec);
 GEN     nfnewprec(GEN nf, long prec);

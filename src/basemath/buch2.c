@@ -2487,8 +2487,7 @@ bnfnewprec(GEN bnf, long prec)
   funits = check_units(bnf,"bnfnewprec");
   nf = (GEN)bnf[7];
   ro = (GEN)nf[6]; ru = lg(ro)-1;
-  r1 = nf_get_r1(nf);
-  r2 = (r1 + ru) >> 1;
+  nf_get_sign(nf, &r1, &r2);
   pl1 = (ru == 1 && r1 == 0)? 0: gexpo(funits);
   pl2 = gexpo(ro);
   prec1 = prec;
@@ -2809,7 +2808,7 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
   fu = NULL; /* gcc -Wall */
   N = degpol(P);
   PRECREG = max(BIGDEFAULTPREC,prec);
-  PRECLLLadd = MEDDEFAULTPREC;
+  PRECLLLadd = DEFAULTPREC;
   if (!nf)
   {
     nf = initalgall0(P, nf_REGULAR, PRECREG);
@@ -2821,7 +2820,7 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
   zu[2] = lmul((GEN)nf[7],(GEN)zu[2]);
   if (DEBUGLEVEL) msgtimer("initalg & rootsof1");
 
-  R1 = nf_get_r1(nf); R2 = (N-R1)>>1; RU = R1+R2;
+  nf_get_sign(nf, &R1, &R2); RU = R1+R2;
   D = (GEN)nf[3]; drc = fabs(gtodouble(D));
   LOGD2 = log(drc); LOGD2 = LOGD2*LOGD2;
   lim = (long) (exp(-(double)N) * sqrt(2*PI*N*drc) * pow(4/PI,(double)R2));
@@ -2881,7 +2880,7 @@ START:
   /* PRECLLL = prec for LLL-reductions (idealred)
    * PRECREG = prec for archimedean components */
   PRECLLL = PRECLLLadd
-          + (expi(D)*(lg(subFB)-2) + ((N*N)>>2)) / sizeof(long);
+          + ((expi(D)*(lg(subFB)-2) + ((N*N)>>2)) >> TWOPOTBITS_IN_LONG);
   if (!precdouble) PRECREG = prec+1;
   if (PRECREG < PRECLLL)
   { /* very rare */
