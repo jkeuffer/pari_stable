@@ -1270,6 +1270,11 @@ $\Q[X]/(P(X))$, see~\secref{se:compquad}. Exact complex numbers may be
 implemented as quadratics, but \typ{COMPLEX} is in general more versatile
 (\typ{REAL} components are allowed) and more efficient.
 
+Operations involving a \typ{QUAD} and \typ{COMPLEX} are implemented by
+converting the \typ{QUAD} to a \typ{REAL} (or \typ{COMPLEX} with \typ{REAL}
+components) to the accuracy of the \typ{COMPLEX}. As a consequence,
+between \typ{QUAD} and \emph{exact} \typ{COMPLEX}s are not allowed.
+
 \subsec{Type \typ{POLMOD} (polmod)}:\kbdsidx{t_POLMOD}\sidx{polmod} exactly as
 for intmods, \kbd{z[1]} points to the modulus, and \kbd{z[2]} to a
 polynomial representing the class of~\kbd{z}. Both must be of type
