@@ -380,7 +380,7 @@ otherroot(GEN x, GEN r, GEN p)
   return s;
 }
 
-/* by splitting, assume p > 2 prime */
+/* by splitting, assume p > 2 prime and deg(f) > 0 */
 static GEN
 FpX_roots_i(GEN f, GEN p)
 {
@@ -392,9 +392,9 @@ FpX_roots_i(GEN f, GEN p)
   if (!ZX_valuation(f, &f)) n = 0;
   else {
     y[j++] = zero; 
+    if (lg(f) <= 3) { setlg(y, 2); return y; }
     n = 1;
   }
-  if (lg(f) <= 3) { setlg(y, n+1); return y; }
 
   /* take gcd(x^(p-1) - 1, f) by splitting (x^q-1) * (x^q+1) */
   b = FpXQ_pow(polx[varn(f)],q, f,p);
@@ -440,6 +440,7 @@ GEN
 FpX_roots(GEN f, GEN p) {
   pari_sp av = avma;
   long q = modBIL(p);
+  if (lg(f) == 3) return cgetg(1, t_COL);
   if ((q & 1) == 0) return root_mod_even(f,q);
   return gerepileupto(av, FpX_roots_i(f, p));
 }
