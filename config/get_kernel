@@ -12,8 +12,8 @@ case "$arch" in
   i?86)          asmarch=ix86 ;         pretty=$arch ;;
   x86_64)  case "$sizeof_long" in   
            4) asmarch=ix86;;
-           8) asmarch=none;;
-           esac;                        pretty=$arch ;;
+           8) asmarch=x86_64;;
+           esac;                        pretty='amd64/ia32e';;
   ia64)          asmarch=ia64 ;         pretty=Itanium ;;
   hppa)          asmarch=none ;         pretty='HP Precision'
         case "$osname-`uname -r`" in
@@ -52,8 +52,8 @@ An optimized Pari kernel is available for these architectures
 ("none" means that we will use the portable C version of GP/PARI)
 ("-gmp" means we will use the GMP library (that needs to be installed))
 EOM
-  rep='none sparcv7 sparcv8_super sparcv8_micro ix86 alpha hppa ppc
-  none-gmp sparcv7-gmp sparcv8_super-gmp sparcv8_micro-gmp ix86-gmp alpha-gmp hppa-gmp ppc-gmp'
+  rep='none sparcv7 sparcv8_super sparcv8_micro ix86 alpha hppa ppc x86_64
+  none-gmp sparcv7-gmp sparcv8_super-gmp sparcv8_micro-gmp ix86-gmp alpha-gmp hppa-gmp ppc-gmp x86_64-gmp'
   . ./display
   echo $n ..."Which of these apply, if any ? $c"
   dflt=$asmarch; . ./myread; 
@@ -77,6 +77,7 @@ case "$kernlvl0" in
   hppa)          prettyk=HPPA;;
   alpha)         prettyk=Alpha;;
   ppc)           prettyk=PPC;;
+  x86_64)        prettyk=x86_64;;
   *)             prettyk="$kernlvl0";;
 esac
 
