@@ -75,7 +75,7 @@ if test -n "$DLLD"; then
     os2) DLLDFLAGS="$CFLAGS -Zdll" ;; # assume DLLD = gcc
   esac
   if test -n "$DLLDisGCC"; then
-    DLLDFLAGS="-shared \$(CFLAGS) $DLLDFLAGS"
+    DLLDFLAGS="-shared -mimpure-text \$(CFLAGS) $DLLDFLAGS"
   fi
   case "$osname" in
     osf1|freebsd|linux|sunos|solaris) EXTRADLLDFLAGS='-lc ${LIBS}';;
