@@ -63,6 +63,7 @@ BA 11- [hi-res plot: fltk] line plotting was broken
 BA 16- galoisinit() could fail to find a polynomial defining the fixed field.
    17- elllseries had an apparent singularity at s = 2 [ loss of accuracy ]
    18- gcoeff, gmael & their variants were not lvalues.
+   19- typo in element_val(t_FRAC) [ "non invertible" errors in rnfpseudobasis ]
 
   Changed
     1- increased maximum binary exponent for t_REAL, and maximum GEN length
