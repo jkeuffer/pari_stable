@@ -2038,7 +2038,7 @@ Let's check that \kbd{s} is of order 2: \kbd{subst(lift(s), x, s)}. It is. We
 may express it as a matrix:
 \bprog
   w = Vec( matid(4) ) \\@com canonical basis
-  v = vector(4, i, nfgaloisapply(nf, s, w[i]))
+  v = vector(#w, i, nfgaloisapply(nf, s, w[i]))
   M = Mat(v)
 @eprog\noindent
 The vector \kbd{v} contains the images of the integral basis elements (as
@@ -2133,9 +2133,9 @@ Whereas it's very easy to go to HNF form (use \kbd{idealhnf(nf,id)} for valid
 ideals, or \kbd{idealhnf(nf,a,b)} for a two-element representation as above),
 it's a much more complicated problem to check whether an ideal is principal
 and find a generator. In fact an \kbd{nf} does not contain enough data for
-this particular task. We'll need a Big Number Field, or \kbd{bnf}, for that.
-In particular, we need the class group and fundamental units, at least in
-some approximate form. More on this later (which will trivialize the end
+this particular task. We'll need a Buchmann Number Field, or \kbd{bnf}, for
+that. In particular, we need the class group and fundamental units, at least
+in some approximate form. More on this later (which will trivialize the end
 of the present section).\smallskip
 
  An ``idele'' will be represented as a 2-element vector \kbd{[I,v]}, \kbd{I}
@@ -2399,7 +2399,7 @@ position of \kbd{pr} in the class group. \smallskip
 \subsec{Class field theory, \kbd{bnr}}
 
 We now survey quickly some class field theoretic routines. We must first
-initialize a Big Number Ray, or \kbd{bnr}, structure, associated to a
+initialize a Buchmann Number Ray, or \kbd{bnr}, structure, associated to a
 \kbd{bnf} base field and a modulus. Let's keep $K$, and try a finite modulus
 ${\goth f} = 7\Z_K$. (See the manual for how to include infinite places in
 the modulus.) Since $K$ will now become a base field over which we want to
@@ -2500,7 +2500,7 @@ $$x^4+1=(x^2-\sqrt{-2}\*x-1)(x^2+\sqrt{-2}\*x-1)$$
 For our second example, let us take the field $K$ defined by the polynomial
 \bprog
 P = x^18 - 3*x^15 + 115*x^12 + 104*x^9 + 511*x^6 + 196*x^3 + 343
-@eprog
+@eprog\noindent
 
 As above, we type \kbd {G = galoisinit(P);} since \kbd{galoisinit} succeeds,
 the extension $K/\Q$ is Galois. This time \kbd{galoisisabelian(G)} return
@@ -2722,14 +2722,13 @@ Here is the complete program:
   plotinit(3, 0.88, 0.88, relative)
   lims = plotrecth(3, X = -2, 2, sin(X^7), recursive)
   \p 3          \\ @com $3$ significant digits for the bounding box are enough
-  limits = vector(4,i, Str(lims[i]))
   plotinit(2);      plotscale(2, 0,1, 0,1)
   plotmove(2, 0,0); plotbox(2, 1,1)
   plotmove(2, 0.1,0.1);
-  plotstring(2, limits[1], left+top+vgap)
-  plotstring(2, limits[3], bottom+vgap+right+hgap)
-  plotmove(2, 0.98,0.1); plotstring(2, limits[2], right+top+vgap)
-  plotmove(2, 0.1,0.98); plotstring(2, limits[4], right+hgap+top)
+  plotstring(2, lims[1], left+top+vgap)
+  plotstring(2, lims[3], bottom+vgap+right+hgap)
+  plotmove(2, 0.98,0.1); plotstring(2, lims[2], right+top+vgap)
+  plotmove(2, 0.1,0.98); plotstring(2, lims[4], right+hgap+top)
   plotdraw([2, 0,0,  3, 0.1,0.02], relative)
 @eprog
 
@@ -3031,7 +3030,7 @@ as well: it enables so-called \emph{break loops} when an error occurs, where
 you get a chance, e.g to inspect (and save!) values of variables before the
 prompt returns and all computations so far are lost. When break loops
 are enabled, \kbd{Control-C} is treated as a non-fatal error: it freezes a
-computation et get you a new prompt so that you may e.g., increase debugging
+computation and gets you a new prompt so that you may e.g., increase debugging
 level, inspect or modify variables (in fact, run arbitrary commands), before
 letting the program go on.
 
