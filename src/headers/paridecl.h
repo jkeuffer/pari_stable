@@ -1309,6 +1309,7 @@ double  rtodbl(GEN x);
 GEN     shifti(GEN x, long n);
 GEN     shifti3(GEN x, long n, long flag);
 GEN     sqri(GEN x);
+GEN     sqrtr_abs(GEN a, long s);
 GEN     subsr(long x, GEN y);
 GEN     truedvmdii(GEN x, GEN y, GEN *z);
 ulong   umodiu(GEN y, ulong x);

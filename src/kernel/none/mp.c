@@ -1522,6 +1522,50 @@ racine_r(GEN a, long l)
 /* Return trunc(sqrt(a))). a must be an non-negative integer*/
 GEN isqrti(GEN a) {return racine_r(a,lgefint(a));}
 
+/* compute sqrt(|a|), s being signe(a)*/
+GEN
+sqrtr_abs(GEN x, long s)
+{
+  pari_sp av, av0;
+  long l, l1, i, ex;
+  double beta;
+  GEN y, a, t;
+
+  if (!s) return realzero_bit(expo(x) >> 1);
+  l = lg(x); y = cgetr(l); av0 = avma;
+
+  a = cgetr(l+1); affrr(x,a);
+  beta = sqrt((double)(ulong)a[2]);
+  ex = expo(a); t = cgetr(l+1);
+  if (ex & 1) {
+    a[1] = evalsigne(1) | evalexpo(1);
+    beta = beta * (1UL << BITS_IN_HALFULONG);
+#ifdef LONG_IS_64BIT
+    if (a[2] >= -(1 << 11))
+    { t[1] = evalexpo(1) | evalsigne(1); t[2] = (long)HIGHBIT; }
+    else
+#endif
+    { t[1] = evalexpo(0) | evalsigne(1); t[2] = (long)(ulong)beta; }
+  } else {
+    a[1] = evalsigne(1) | evalexpo(0);
+    beta = beta * ((1UL << BITS_IN_HALFULONG) * 0.707106781186547524);
+    t[1] = evalexpo(0) | evalsigne(1); t[2] = (long)(ulong)beta;/* ~ sqrt(a) */
+  }
+  /* |x| = 2^(ex/2) a */
+  for (i = 3; i <= l; i++) t[i] = 0;
+
+  l--; l1 = 1; av = avma;
+  while (l1 < l) { /* let t := (t + a/t)/2 */
+    l1 <<= 1; if (l1 > l) l1 = l;
+    setlg(a, l1 + 2);
+    setlg(t, l1 + 2);
+    affrr(addrr(t, divrr(a,t)), t); setexpo(t, expo(t)-1);
+    avma = av;
+  }
+  affrr(t,y); setexpo(y, expo(y) + (ex>>1));
+  avma = av0; return y;
+}
+
 /* Normalize a non-negative integer.  */
 GEN
 int_normalize(GEN x, long known_zero_words)

@@ -274,6 +274,7 @@ JD 50- check for 'exuberant-ctags' before 'ctags' in make_vi_tags [ and fail
 BA 51- support for gp2c-run on Darwin
    52- remove blanks in "raw" outputs ( default(output,0) )
    53- made .fu and .tu return t_POLMOD, not t_POL
+BA 54- [GMP kernel] use mpn_sqrtrem for sqrtr_abs
 
   Added
     1- make test-all [ all available test suites (SLOW !)]
