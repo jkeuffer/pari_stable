@@ -7348,6 +7348,9 @@ called by the \kbd{+} operator of course):
 ? addii(1, 2)
 %1 = 3
 @eprog
+Re-installing a function will print a Warning, and update the prototype code
+if needed, but will reload a symbol from the library, even it the latter has
+been recompiled.
 
 \misctitle{Caution:} This function may not work on all systems, especially
 when GP has been compiled statically. In that case, the first use of an
