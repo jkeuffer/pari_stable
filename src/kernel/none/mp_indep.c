@@ -62,11 +62,11 @@ randomi(GEN N)
 
   lx = lgefint(N); x = cgeti(lx);
   x[1] = evalsigne(1) | evallgefint(lx);
-  for (i=2; i<lx; i++) x[i] = pari_rand();
-
-  t = lx-1;
   xMSW = xd = int_MSW(x);
+  for (i=2; i<lx; i++) { *xd = pari_rand(); xd = int_precW(xd); }
+
   Nd = int_MSW(N); n = *Nd;
+  xd = xMSW; t = lx-1;
   for (i=2; i<t; i++)
   {
     if ((ulong)*xd < (ulong)*Nd) break;

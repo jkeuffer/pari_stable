@@ -2380,13 +2380,8 @@ shift_r(ulong *target, ulong *source, ulong *source_end, ulong prepend, ulong sh
 GEN
 int_normalize(GEN x, long known_zero_words)
 {
-  long xl = lgefint(x);
-  long i = xl - 1 - known_zero_words;
-  while (i > 1) {
-    if (x[i]) break;
-    i--;
-  }
-  setlgefint(x, i+1);
-  if (i == 1) setsigne(x,0);
-  return x;
+  long i =  lgefint(x) - 1 - known_zero_words;
+  for ( ; i > 1; i--)
+    if (x[i]) { setlgefint(x, i+1); return x; }
+  setsigne(x,0); return x;
 }
