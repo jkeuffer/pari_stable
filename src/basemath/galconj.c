@@ -403,7 +403,7 @@ poltopermtest(GEN f, struct galois_lift *gl, GEN pf)
   return 1;
 }
 
-GEN polratlift(GEN P, GEN mod, GEN amax, GEN bmax, GEN denom);
+extern GEN polratlift(GEN P, GEN mod, GEN amax, GEN bmax, GEN denom);
 
 /*
  * Soit P un polynome de \ZZ[X] , p un nombre premier , S\in\FF_p[X]/(Q) tel
@@ -532,7 +532,7 @@ struct galois_testlift
   GEN     C;
   GEN     Cd;
 };
-GEN bezout_lift_fact(GEN T, GEN Tmod, GEN p, long e);
+extern GEN bezout_lift_fact(GEN T, GEN Tmod, GEN p, long e);
 static GEN
 galoisdolift(struct galois_lift *gl, GEN frob)
 {
@@ -1581,8 +1581,7 @@ corediscpartial(GEN n)
     res2 = gmul2n((GEN) res2, -1);
   return gerepileupto(av,gmul(res2,res3));
 }
-GEN respm(GEN x,GEN y,GEN pm);
-GEN ZX_disc(GEN x);
+extern GEN respm(GEN x,GEN y,GEN pm);
 
 GEN
 indexpartial(GEN P, GEN DP)

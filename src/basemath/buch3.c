@@ -2063,7 +2063,7 @@ rayclassnointern(GEN blist, GEN h)
   return L;
 }
 
-void rowselect_p(GEN A, GEN B, GEN p, long init);
+extern void rowselect_p(GEN A, GEN B, GEN p, long init);
 
 static GEN
 rayclassnointernarch(GEN blist, GEN h, GEN matU)

@@ -26,7 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define pswap(a,b) { GEN *_x = a; a = b; b = _x; }
 #define both_odd(a,b) ((a)&(b)&1)
 
-GEN gassoc_proto(GEN f(GEN,GEN),GEN,GEN);
+extern GEN gassoc_proto(GEN f(GEN,GEN),GEN,GEN);
 
 GEN
 polsym(GEN x, long n)

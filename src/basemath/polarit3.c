@@ -3292,7 +3292,7 @@ u_pol_comp(GEN P, ulong u, ulong v, ulong p)
   return u_normalizepol(y,l);
 }
 
-GEN roots_to_pol(GEN a, long v);
+extern GEN roots_to_pol(GEN a, long v);
 
 GEN
 polint_triv(GEN xa, GEN ya)

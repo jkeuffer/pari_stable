@@ -36,6 +36,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #endif
 #define OK_ULONG(p) (lgefint(p) == 3 && u_OK_ULONG(p[2]))
 extern GEN ZM_init_CRT(GEN Hp, ulong p);
+extern int ZM_incremental_CRT(GEN H, GEN Hp, GEN q, GEN qp, ulong p);
 extern ulong u_invmod(ulong x, ulong p);
 
 /*******************************************************************/
