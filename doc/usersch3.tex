@@ -5142,10 +5142,11 @@ rnfisnorm(T, 17)
 
 \subsecidx{rnfisnorminit}$(\var{pol},\var{polrel},\{\fl=2\})$: 
 let $K$ be defined by a root of \var{pol}, and $L/K$ the extension defined by
-tye polynomial \var{polrel}. As usual, \var{pol} can in fact be an \var{nf},
-or \var{bnf}, etc (the computations will be slightly faster). Computes
-technical data needed by \tet{rnfisnorm} to solve norm equations $Nx = a$,
-for $x$ in $L$, and $a$ in $K$.
+the polynomial \var{polrel}. As usual, \var{pol} can in fact be an \var{nf},
+or \var{bnf}, etc; if \var{pol} has degree $1$ (the base field is $\Q$),
+polrel is also allowed to be an \var{nf}, etc. Computes technical data needed
+by \tet{rnfisnorm} to solve norm equations $Nx = a$, for $x$ in $L$, and $a$
+in $K$.
 
 If $\fl = 0$, do not care whether $L/K$ is Galois or not.
 
