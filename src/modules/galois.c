@@ -239,7 +239,7 @@ galmodp(GEN pol, GEN dpol, long **TYP, long *gr, long **GR)
     case  8: nbremain = CAR? 28: 22; break;
     case  9: nbremain = CAR? 18: 16; break;
     case 10: nbremain = CAR? 12: 33; break;
-    case 11: nbremain = CAR?  5:  3; break;
+    default: nbremain = CAR?  5:  3; break; /* case 11 */
   }
 
   k = gr[0]; for (i=1; i<k; i++) gr[i]=1;
@@ -321,6 +321,7 @@ rangeroots(GEN newr, GEN oldr)
   long av = avma,i,j,k,z[NMAX+1],t[NMAX+1];
   GEN diff,diff0;
 
+  k = 0; /* gcc -Wall */
   for (i=1; i<=N; i++) t[i]=1;
   for (i=1; i<=N; i++)
   {
@@ -901,7 +902,7 @@ check_isin(GEN po,GEN *r,long nbm,long nbv, POBJ a, POBJ tau, POBJ ss, PERM s0)
 
   nbcos = getcard_obj(ss);
   nbgr  = getcard_obj(tau);
-  lastnbri = lastnbrm = -1; /* for lint */
+  lastnbri = lastnbrm = -1; sp = nbracint = nbrac = 0; /* gcc -Wall*/
   for (nogr=1; nogr<=nbgr; nogr++)
   {
     if (DEBUGLEVEL)
@@ -2559,6 +2560,7 @@ galoisbig(GEN pol, long prec)
       tab=tab11; break;
 
     default: err(impl,"galois in degree > 11");
+      return NULL; /* not reached */
   }
   avma = av;
   res[1]=lstoi(tab[t]);

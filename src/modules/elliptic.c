@@ -902,7 +902,7 @@ GEN
 elleisnum(GEN om, long k, long flag, long prec)
 {
   long av=avma,lim,av1,si;
-  GEN om1,om2,p1,pii2,tau,q,y,qn,v,ga,court,asub;
+  GEN om1,om2,p1,pii2,tau,q,y,qn,v,ga,court,asub = NULL; /* gcc -Wall */
 
   if (k%2 || k<=0) err(talker,"k not a positive even integer in elleisnum");
   if (!get_periods(om, &om1, &om2)) err(typeer,"elleisnum");
@@ -1521,6 +1521,7 @@ apell1(GEN e, GEN p)
   p1p = addsi(1,p); p2p = shifti(p1p,1);
   x=0; flcc=0; flc = kronecker((GEN)c6[2],p);
   u=c6; acon=gzero; bcon=gun; h=p1p;
+  tx = ty = ti = NULL; /* gcc -Wall */
   for(;;)
   {
     while (flc==flcc || !flc)
@@ -1646,7 +1647,7 @@ apell1(GEN e, GEN p)
       }
       if (++j > nb)
       { /* compute next nb points */
-        long save;
+        long save = 0; /* gcc -Wall */
         for (j=1; j<=nb; j++)
         {
           p1 = (GEN)pts[j];
@@ -1772,6 +1773,7 @@ apell0(GEN e, long p)
   p1p = p+1; p2p = p1p << 1;
   x=0; flcc=0; flc = kross(c6, p);
   u=c6; acon=0; bcon=1; h=p1p;
+  table = NULL; /* gcc -Wall */
   for(;;)
   {
     while (flc==flcc || !flc)
@@ -2120,10 +2122,9 @@ ghell0(GEN e, GEN a, long flag, long prec)
   p1=(GEN)factor(mppgcd(psi2,phi2))[1]; lx=lg(p1);
   switch(flag)
   {
-    case 0: z = hell2(e,a,prec); break; /* Tate 4^n */
-    case 1: z = hell(e,a,prec);  break; /* Silverman's trick */
-    case 2: z = hell0(e,a,prec); break; /* Mestre's trick */
-
+    case 0:  z = hell2(e,a,prec); break; /* Tate 4^n */
+    case 1:  z = hell(e,a,prec);  break; /* Silverman's trick */
+    default: z = hell0(e,a,prec); break; /* Mestre's trick */
   }
   for (i=1; i<lx; i++)
   {
@@ -2201,6 +2202,7 @@ lseriesell(GEN e, GEN s, GEN A, long prec)
   l=(long)((pariC2*(prec-2) + fabs(gtodouble(s)-1.)*log(rtodbl(cga)))
             / rtodbl(cgb)+1);
   v = anell(e, min(l,TEMPMAX));
+  s2 = ns = NULL; /* gcc -Wall */
   if (!flun) { s2=gsubsg(2,s); ns=gpui(cg,gsubgs(gmul2n(s,1),2),prec); }
   z=gzero;
   if (typ(s)==t_INT)
@@ -2314,6 +2316,7 @@ localreduction_carac_not23(GEN e, GEN p)
 	case  1: c = nudelta; break;
 	case -1: c = odd(nudelta)? 1: 2; break;
 	default: err(bugparier,"localred (p | c6)");
+          return NULL; /* not reached */
       }
       break;
     case 6: f = 2; kod = -4-nuj; /* Inu* */
@@ -2323,6 +2326,7 @@ localreduction_carac_not23(GEN e, GEN p)
 	c = 3 + kronecker(divii(delta, gpuigs(p, 6+nuj)), p);
       break;
     default: err(bugparier,"localred (nu_delta - nu_j != 0,6)");
+      return NULL; /* not reached */
   }
   else switch(nudelta)
   {
@@ -2348,6 +2352,7 @@ localreduction_carac_not23(GEN e, GEN p)
     case  9: f = 2; kod = -3; c = 2; break; /* III* */
     case 10: f = 2; kod = -2; c = 1; break; /* II*  */
     default: err(bugparier,"localred");
+      return NULL; /* not reached */
   }
   return localreduction_result(av,f,kod,c,v);
 }
@@ -3079,7 +3084,7 @@ torselldoud(GEN e)
     return gerepileupto(av, tors(e,k,p,NULL, v));
   }
 
-  ord = 0; tor2 = NULL;
+  ord = 0; tor1 = tor2 = NULL;
   w12 = gmul2n((GEN)e[15],-1);
   if ((p = torspnt(e,pointell(e,w12,prec),2)))
   {
@@ -3439,6 +3444,7 @@ ellrootno_all(GEN e, GEN p, GEN* ptcond)
     err(talker,"not an integral curve in ellrootno");
   if (typ(p) != t_INT || signe(p)<0)
     err(talker,"not a nonnegative integer second arg in ellrootno");
+  exs = 0; /* gcc -Wall */
   if (cmpis(p,2)>=0)
   {
     exs=ggval(cond,p);
@@ -3452,8 +3458,7 @@ ellrootno_all(GEN e, GEN p, GEN* ptcond)
     case 1: s=-1; fa=factor(cond); pr=(GEN)fa[1]; ex=(GEN)fa[2];
       for (i=1; i<lg(pr); i++) s*=ellrootno_intern(e,(GEN)pr[i],(GEN)ex[i]);
       return s;
-    case 0: return -1; /* local factor at infinity = -1 */
-    default: return 0; /* never reached */
+    default: return -1; /* case 0: local factor at infinity = -1 */
   }
 }
 
