@@ -2110,7 +2110,7 @@ entree functions_basic[]={
 {"solve",37,(void*)zbrent,9,"V=GGEp"},
 {"sqr",18,(void*)gsqr,3,"G"},
 {"sqrt",1,(void*)gsqrt,3,"Gp"},
-{"sqrtint",1,(void*)racine,4,"Gp"},
+{"sqrtint",1,(void*)racine,4,"G"},
 {"sqrtn",99,(void*)gsqrtn,3,"GGD&p"},
 {"subgrouplist",99,(void*)subgrouplist0,6,"GD0,L,D0,L,p"},
 {"subst",26,(void*)gsubst,7,"GnG"},
