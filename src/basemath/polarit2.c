@@ -2818,8 +2818,9 @@ pseudorem(GEN x, GEN y)
   x[1]=evalsigne(1) | evalvarn(vx) | evallgef(lx);
   x = revpol(x) - 2;
   if (p)
-  {
-    for (i=2; i<lx; i++) x[i] = lmul((GEN)x[i], (GEN)y[0]);
+  { /* multiply by y[0]^p   [beware dummy vars from FpY_FpXY_resultant] */  
+    GEN t = gpowgs((GEN)y[0], p);
+    for (i=2; i<lx; i++) x[i] = lmul((GEN)x[i], t);
     return gerepileupto(av, x);
   }
   return gerepilecopy(av, x);
