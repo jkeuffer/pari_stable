@@ -2228,7 +2228,7 @@ zeta_get_limx(long r1, long r2, long bit)
 
   p1 = gpowgs(Pi2n(1, DEFAULTPREC), r - 1);
   p2 = gmul2n(mpmul(gpowgs(stoi(N),r), p1), -r2);
-  c0 = mpsqrt( mpdiv(p2, gpowgs(c1, r+1)) );
+  c0 = sqrtr( mpdiv(p2, gpowgs(c1, r+1)) );
 
   A0 = mplog( gmul2n(c0, bit) ); p2 = gdiv(A0, c1);
   p1 = divrr(mulsr(N*(r+1), mplog(p2)), addsr(2*(r+1), gmul2n(A0,2)));
@@ -2266,7 +2266,7 @@ long
 zeta_get_i0(long r1, long r2, long bit, GEN limx)
 {
   pari_sp av = avma;
-  GEN B = gmul(mpsqrt( gdiv(gpowgs(mppi(DEFAULTPREC), r2-3), limx) ),
+  GEN B = gmul(sqrtr( gdiv(gpowgs(mppi(DEFAULTPREC), r2-3), limx) ),
                gmul2n(gpowgs(stoi(5), r1), bit + r2));
   long i0 = get_i0(r1, r2, B, limx);
   if (DEBUGLEVEL>1) { fprintferr("i0 = %ld\n",i0); flusherr(); }
@@ -2290,7 +2290,7 @@ initzeta(GEN pol, long prec)
   else bnf = gcopy(bnf);
   bnf = checkbnf_discard(bnf);
   prec = (prec<<1) - 1;
-  Pi = mppi(prec); racpi = mpsqrt(Pi);
+  Pi = mppi(prec); racpi = sqrtr(Pi);
 
   /* class number & regulator */
   nf = (GEN)bnf[7]; N = degpol(nf[1]);
@@ -2597,7 +2597,7 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
     cs = gexp(gmul(cstlog,s),prec);
     var1 = gmul(Pi,s);
     gammaunmoins = gdiv(Pi, gmul(gsin(var1,prec),gammas));
-    gammaunmoins2= gdiv(gmul(gmul(mpsqrt(Pi),gpui(gdeux,gsub(s,gun),prec)),
+    gammaunmoins2= gdiv(gmul(gmul(sqrtr(Pi),gpui(gdeux,gsub(s,gun),prec)),
                              gammas2),
                         gmul(gcos(gmul2n(var1,-1),prec),gammas));
     var1 = var2 = gun;

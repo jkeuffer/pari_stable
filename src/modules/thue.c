@@ -108,7 +108,7 @@ static GEN
 absisqrtn(GEN x, long n, long prec) {
   GEN r = itor(x,prec);
   if (signe(r) < 0) r = negr(r);
-  return mpsqrtn(r, n);
+  return sqrtnr(r, n);
 }
 
 static GEN
@@ -234,7 +234,7 @@ inithue(GEN P, GEN bnf, long flag, long prec)
 
     /* Compute x0. See paper, Prop. 2.2.1 */
     x0 = gmul(gpmin, Vecmax(gabs(imag_i(ro), prec)));
-    x0 = mpsqrtn(gdiv(shifti(gun,n-1), x0), n);
+    x0 = sqrtnr(gdiv(shifti(gun,n-1), x0), n);
   }
   if (DEBUGLEVEL>1) fprintferr("c1 = %Z\nc2 = %Z\n", c1, c2);
 
@@ -627,12 +627,12 @@ LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pro, GEN *pS)
   tmp = divrr(c1,c2);
   c3 = mulrr(dbltor(1.39), tmp);
   c4 = mulsr(n-1, c3);
-  x1 = gmax(x0, mpsqrtn(mulsr(2,tmp),n));
+  x1 = gmax(x0, sqrtnr(mulsr(2,tmp),n));
 
   Vect = cgetg(r+1,t_COL); for (i=1; i<=r; i++) Vect[i]=un;
   Vect = gmul(gabs(A,DEFAULTPREC), Vect);
   c14 = mulrr(c4, Vecmax(Vect));
-  x2 = gmax(x1, mpsqrtn(mulsr(10,c14), n));
+  x2 = gmax(x1, sqrtnr(mulsr(10,c14), n));
   if (DEBUGLEVEL>1) {
     fprintferr("x1 -> %Z\n",x1);
     fprintferr("x2 -> %Z\n",x2);
@@ -644,7 +644,7 @@ LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pro, GEN *pS)
   for (i=1; i<=s; i++) vecdP[i] = (long)poleval(dP, (GEN)ro[i]);
 
   zp1 = dbltor(0.01);
-  x3 = gmax(x2, mpsqrtn(mulsr(2,divrr(c14,zp1)),n));
+  x3 = gmax(x2, sqrtnr(mulsr(2,divrr(c14,zp1)),n));
 
   b = cgetg(r+1,t_COL);
   for (iroot=1; iroot<=s; iroot++)
@@ -777,7 +777,7 @@ thue(GEN tnf, GEN rhs, GEN ne)
     GEN c0   = (GEN)tnf[2]; /* t_REAL */
     S = cgetg(1,t_VEC);
     ro = roots(P, DEFAULTPREC);
-    x3 = mpsqrtn(mulir(constant_term(P), divir(absi(rhs),c0)), degpol(P));
+    x3 = sqrtnr(mulir(constant_term(P), divir(absi(rhs),c0)), degpol(P));
   }
   return gerepilecopy(av, SmallSols(S, gtolong(x3), P, rhs, ro));
 }

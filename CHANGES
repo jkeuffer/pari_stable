@@ -225,7 +225,8 @@ BA 21- type() does not allow to change object types anymore.
    43- rename FpXQX_FpXQ_mul -> FqX_Fq_mul, FpXQX_normalize -> FqX_normalize
    44- rename adduumod, subuumod, muluumod, divuumod --> Fl_[add,sub,mul,div]
        invumod --> Fl_inv, invsmod --> Fl_inv_signed, powuumod --> Fl_pow
-       powiumod -> Fp_powu, mpsqrtmod --> Fp_sqrt, mpsqrtnmod --> Fp_sqrtn
+       powiumod --> Fp_powu, mpsqrtmod --> Fp_sqrt, mpsqrtnmod --> Fp_sqrtn
+   45- rename mpsqrt --> sqrtr, mpsqrtn --> sqrtnr
 
   Added
     1- make test-all [ all available test suites (SLOW !)]

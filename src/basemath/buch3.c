@@ -785,7 +785,7 @@ regulatorbound(GEN bnf)
 
   p1 = gsqr(glog(gdiv(dKa,c1),DEFAULTPREC));
   p1 = divrs(gmul2n(gpowgs(divrs(mulrs(p1,3),N*(N*N-1)-6*R2),R),R2), N);
-  p1 = mpsqrt(gdiv(p1, hermiteconstant(R)));
+  p1 = sqrtr(gdiv(p1, hermiteconstant(R)));
   if (DEBUGLEVEL>1) fprintferr("Mahler bound for regulator: %Z\n",p1);
   return gmax(p1, dbltor(0.2));
 }

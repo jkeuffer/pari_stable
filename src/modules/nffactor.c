@@ -758,7 +758,7 @@ nfcmbf(nfcmbf_t *T, GEN p, long a, long maxK, long klim)
 
   C2ltpol = C2lt? gmul(C2lt,pol): pol;
   {
-    GEN q = ceil_safe(mpsqrt(T->BS_2));
+    GEN q = ceil_safe(sqrtr(T->BS_2));
     GEN t1,t2, ltdn, lt2dn;
     GEN trace1   = cgetg(lfamod+1, t_MAT);
     GEN trace2   = cgetg(lfamod+1, t_MAT);
@@ -1187,7 +1187,7 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long k, long rec)
 
     /* bound for f . S_k(genuine factor) = ZC * bound for T_2(S_tnew) */
     Btra = mulrr(ZC, mulsr(dP*dP, normlp(Br, 2*tnew, dnf)));
-    bmin = logint(ceil_safe(mpsqrt(Btra)), gdeux, NULL);
+    bmin = logint(ceil_safe(sqrtr(Btra)), gdeux, NULL);
     if (DEBUGLEVEL>2)
       fprintferr("\nLLL_cmbf: %ld potential factors (tmax = %ld, bmin = %ld)\n",
                  r, tmax, bmin);

@@ -56,7 +56,7 @@ psi(GEN c, GEN d, ulong q, long prec)
   GEN a = divrs(c, q), ea = mpexp(a), invea = ginv(ea);
   GEN cha = mpshift(mpadd(ea, invea), -1);  /* ch(a) */
   GEN sha = mpshift(mpsub(ea, invea), -1);  /* sh(a) */
-  return mulrr(mulrr(d, mpsqrt(stor(q,prec))), mpsub(mulrr(a,cha), sha));
+  return mulrr(mulrr(d, sqrtr(stor(q,prec))), mpsub(mulrr(a,cha), sha));
 }
 
 /* g(h, q) = if (q<3, 0, sum(k=1,q-1,k*(frac(h*k/q)-1/2))) */
@@ -137,9 +137,9 @@ estim(GEN n)
   GEN p1, pi = mppi (DEFAULTPREC);
 
   p1 = divrs( itor(shifti(n,1), DEFAULTPREC), 3 );
-  p1 = mpexp( mulrr(pi, mpsqrt(p1)) ); /* exp(Pi * sqrt(2N/3)) */
+  p1 = mpexp( mulrr(pi, sqrtr(p1)) ); /* exp(Pi * sqrt(2N/3)) */
   p1 = divri (shiftr(p1,-2), n);
-  p1 = divrr(p1, mpsqrt( stor(3,DEFAULTPREC) ));
+  p1 = divrr(p1, sqrtr( stor(3,DEFAULTPREC) ));
   return gerepileupto(av, mplog(p1));
 }
 
@@ -147,11 +147,11 @@ static void
 pinit(GEN n, GEN *c, GEN *d, GEN *Pi, ulong prec)
 {
   GEN b = divrs( itor( subis(mulis(n,24), 1), prec ), 24 ); /* n - 1/24 */
-  GEN sqrtb = mpsqrt(b), pi2sqrt2, pisqrt2d3;
+  GEN sqrtb = sqrtr(b), pi2sqrt2, pisqrt2d3;
  
   *Pi = mppi (prec);
-  pisqrt2d3 = mulrr(*Pi, mpsqrt( divrs(stor(2, prec), 3) ));
-  pi2sqrt2  = mulrr(*Pi, mpsqrt( stor(8, prec) ));
+  pisqrt2d3 = mulrr(*Pi, sqrtr( divrs(stor(2, prec), 3) ));
+  pi2sqrt2  = mulrr(*Pi, sqrtr( stor(8, prec) ));
   *c = mulrr(pisqrt2d3, sqrtb);
   *d = ginv( mulrr(pi2sqrt2, mulrr(b,sqrtb)) );
 }

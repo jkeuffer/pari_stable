@@ -88,7 +88,7 @@ mpatan(GEN x)
   for (i=1; i<=m; i++)
   {
     p5 = addsr(1, mulrr(p2,p2)); setlg(p5,l2);
-    p5 = addsr(1, mpsqrt_sign(p5, 1)); setlg(p5,l2);
+    p5 = addsr(1, sqrtr_sign(p5, 1)); setlg(p5,l2);
     affrr(divrr(p2,p5), p2); avma = av;
   }
   p3 = mulrr(p2,p2); l1 = 4;
@@ -153,7 +153,7 @@ gatan(GEN x, long prec)
 /* |x| < 1, x != 0 */
 static GEN
 mpasin(GEN x) {
-  return mpatan( divrr(x, mpsqrt( subsr(1, mulrr(x,x)) )) );
+  return mpatan( divrr(x, sqrtr( subsr(1, mulrr(x,x)) )) );
 }
 
 static GEN mpach(GEN x, long s);
@@ -492,7 +492,7 @@ mpash(GEN x)
   pari_sp av = avma;
 
   z = (s<0)? negr(x): x;
-  z = mplog( addrr(z, mpsqrt( addrs(mulrr(z,z), 1) )) );
+  z = mplog( addrr(z, sqrtr( addrs(mulrr(z,z), 1) )) );
   if (s<0) setsigne(z, -signe(z));
   affrr(z,y); avma = av; return y;
 }
@@ -548,7 +548,7 @@ mpach(GEN x, long s)
   pari_sp av = avma;
 
   if (s != signe(x)) { x = rcopy(x); setsigne(x, s); }
-  z = mplog( addrr(x, mpsqrt( subrs(mulrr(x,x), 1) )) );
+  z = mplog( addrr(x, sqrtr( subrs(mulrr(x,x), 1) )) );
   affrr(z,y); avma = av; return y;
 }
 
@@ -1106,7 +1106,7 @@ cxgamma(GEN s0, int dolog, long prec)
   p1 = gsub(gmul(gsub(nnx, ghalf), glog(nnx,prec)), nnx);
   p1 = gadd(p1, gmul(tes, a));
 
-  pi = mppi(prec); pi2 = gmul2n(pi, 1); sqrtpi2 = mpsqrt(pi2);
+  pi = mppi(prec); pi2 = gmul2n(pi, 1); sqrtpi2 = sqrtr(pi2);
 
   if (!dolog)
     {
@@ -1164,7 +1164,7 @@ gammahs(long m, long prec)
     affrr(cxgamma(z,0,prec), y);
     avma = av; return y;
   }
-  z = mpsqrt( mppi(prec) );
+  z = sqrtr( mppi(prec) );
   if (m)
   {
     GEN p1 = seq_umul(ma/2 + 1, ma);

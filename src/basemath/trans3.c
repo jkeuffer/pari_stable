@@ -761,7 +761,7 @@ kbessel2(GEN nu, GEN x, long prec)
   a = gcmp0(imag_i(nu))? cgetr(prec): cgetc(prec);
   gaddz(gun,gshift(nu,1), a);
   p1 = hyperu(gshift(a,-1),a,x2,prec);
-  p1 = gmul(gmul(p1,gpow(x2,nu,prec)), mpsqrt(mppi(prec)));
+  p1 = gmul(gmul(p1,gpow(x2,nu,prec)), sqrtr(mppi(prec)));
   return gerepileupto(av, gdiv(p1,gexp(x,prec)));
 }
 
@@ -1049,7 +1049,7 @@ gerfc(GEN x, long prec)
   if (typ(x)!=t_REAL) return transc(&gerfc, x, prec);
   if (!signe(x)) return realun(prec);
   av = avma; p1 = incgam(ghalf,gsqr(x),prec);
-  p2 = mpsqrt(mppi(lg(x)));
+  p2 = sqrtr(mppi(lg(x)));
   p1 = divrr(p1,p2);
   if (signe(x) < 0) p1 = subsr(2,p1);
   return gerepileupto(av,p1);
@@ -1977,7 +1977,7 @@ eta(GEN x, long prec)
 
 /* sqrt(3)/2 */
 static GEN
-sqrt32(long prec) { GEN z = mpsqrt(stor(3, prec)); setexpo(z, -1); return z; }
+sqrt32(long prec) { GEN z = sqrtr(stor(3, prec)); setexpo(z, -1); return z; }
 
 #define swap(x,y) { long _t=x; x=y; y=_t; }
 /* exp(i x), x = k pi/12 */
@@ -1995,7 +1995,7 @@ e12(long k, long prec)
   {
     case 0: z[1] = licopy(gun); z[2] = zero; break;
     case 1: t = gmul2n(addrs(sqrt32(prec), 1), -1);
-      z[1] = lmpsqrt(t);
+      z[1] = (long)sqrtr(t);
       z[2] = lmul2n(ginv((GEN)z[1]), -2); break;
 
     case 2: z[1] = (long)sqrt32(prec);
@@ -2135,7 +2135,7 @@ sagm(GEN x, long prec)
       {
 	a = a1; b = b1; a1 = addrr(a,b);
         setexpo(a1, expo(a1)-1);
-	b1 = mpsqrt(mulrr(a,b));
+	b1 = sqrtr(mulrr(a,b));
       }
       while (expo(subrr(b1,a1)) - expo(b1) >= l);
       affrr(a1,y); avma = av; return y;
@@ -2219,7 +2219,7 @@ logagm(GEN q)
   q1 = NULL; /* gcc -Wall */
   for (n=0; expo(q) >= lim; n++) { q1 = q; q = gsqr(q); }
 
-  if (!n) q1 = mpsqrt(q);
+  if (!n) q1 = sqrtr(q);
   y = divrr(mppi(prec), agm(addsr(1,gmul2n(q,2)), gmul2n(q1,2),prec));
   y = gmul2n(y,-n); if (s) setsigne(y,-1);
   return gerepileuptoleaf(av, y);

@@ -649,9 +649,9 @@ two_factor_bound(GEN x)
     affir(c, r);
     z = addrr(z, mulrr(gsqr(r), invbin[i]));
   }
-  z = shiftr(mpsqrt(z), n);
+  z = shiftr(sqrtr(z), n);
   z = divrr(z, dbltor(pow((double)n, 0.75)));
-  z = grndtoi(mpsqrt(z), &i);
+  z = grndtoi(sqrtr(z), &i);
   z = mulii(z, absi((GEN)x[n]));
   return gerepileuptoint(av, shifti(z, 1));
 }
@@ -664,7 +664,7 @@ Mignotte_bound(GEN S)
   long i, d = degpol(S);
   GEN lS, C, binlS, bin, N2, p1;
   
-  N2 = mpsqrt(QuickNormL2(S,DEFAULTPREC));
+  N2 = sqrtr(QuickNormL2(S,DEFAULTPREC));
   binlS = bin = vecbinome(d-1);
   lS = leading_term(S);
   if (!is_pm1(lS)) binlS = gmul(lS, bin);
@@ -702,7 +702,7 @@ Beauzamy_bound(GEN S)
   C = gpow(stoi(3), dbltor(1.5 + d), prec); /* 3^{3/2 + d} */
   C = gdiv(gmul(C, s), gmulsg(4*d, mppi(prec)));
   lS = absi(leading_term(S));
-  return mulir(lS, mpsqrt(C));
+  return mulir(lS, sqrtr(C));
 }
 
 static GEN

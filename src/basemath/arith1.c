@@ -377,8 +377,6 @@ znstar(GEN n)
 /**                     INTEGRAL SQUARE ROOT                        **/
 /**                                                                 **/
 /*********************************************************************/
-extern ulong mpsqrtl(GEN a);
-
 GEN
 gracine(GEN a)
 {
@@ -1228,7 +1226,7 @@ mplgenmod(GEN l, long e, GEN r,GEN p,GEN *zeta)
  * y is not an l-th power, hence generates the l-Sylow of (Z/p)^*
  * m = y^(q/l) != 1 */
 static GEN
-mpsqrtlmod(GEN a, GEN l, GEN p, GEN q,long e, GEN r, GEN y, GEN m)
+Fp_sqrtl(GEN a, GEN l, GEN p, GEN q,long e, GEN r, GEN y, GEN m)
 {
   pari_sp av = avma, tetpil,lim;
   long k;
@@ -1257,7 +1255,7 @@ mpsqrtlmod(GEN a, GEN l, GEN p, GEN q,long e, GEN r, GEN y, GEN m)
     w = modii(mulii(y,w),p);
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"mpsqrtlmod");
+      if(DEBUGMEM>1) err(warnmem,"Fp_sqrtl");
       gerepileall(av,4, &y,&v,&w,&m);
     }
   }
@@ -1305,7 +1303,7 @@ Fp_sqrtn(GEN a, GEN n, GEN p, GEN *zetan)
 	lbot = avma;
 	if (!is_pm1(a) || signe(a)<0)
         {
-	  a = mpsqrtlmod(a,l,p,q,e,r,y,zeta);
+	  a = Fp_sqrtl(a,l,p,q,e,r,y,zeta);
           if (!a) { avma = ltop; if (zetan) *zetan = gzero; return NULL;}
         }
 	else
@@ -2619,7 +2617,7 @@ classno(GEN x)
 
   p2 = gsqrt(absi(D),DEFAULTPREC);
   p1 = mulrr(divrr(p2,mppi(DEFAULTPREC)), dbltor(1.005)); /*overshoot by 0.5%*/
-  s = itos_or_0( mptrunc(shiftr(mpsqrt(p2), 1)) ); 
+  s = itos_or_0( mptrunc(shiftr(sqrtr(p2), 1)) ); 
   if (!s) err(talker,"discriminant too big in classno");
   if (s < 10) s = 200;
   else if (s < 20) s = 1000;
@@ -2645,7 +2643,7 @@ classno(GEN x)
   }
   r2 = two_rank(D);
   h = hin = ground(gmul2n(p1, -r2));
-  s = 2*itos(gceil(mpsqrtn(p1, 4)));
+  s = 2*itos(gceil(sqrtnr(p1, 4)));
   if (s > 10000) s = 10000;
 
   count = new_chunk(256); for (i=0; i<=255; i++) count[i]=0;
@@ -2717,7 +2715,7 @@ classno2(GEN x)
 
   Pi = mppi(DEFAULTPREC);
   d = absi(D); logd = glog(d,DEFAULTPREC);
-  p1 = mpsqrt(gdiv(gmul(d,logd), gmul2n(Pi,1)));
+  p1 = sqrtr(gdiv(gmul(d,logd), gmul2n(Pi,1)));
   if (s > 0)
   {
     p2 = subsr(1, gmul2n(divrr(mplog(reg),logd),1));
@@ -2726,7 +2724,7 @@ classno2(GEN x)
   n = itos_or_0( mptrunc(p1) );
   if (!n) err(talker,"discriminant too large in classno");
 
-  p4 = divri(Pi,d); p7 = ginv(mpsqrt(Pi));
+  p4 = divri(Pi,d); p7 = ginv(sqrtr(Pi));
   p1 = gsqrt(d,DEFAULTPREC); p3 = gzero;
   if (s > 0)
   {

@@ -2022,7 +2022,7 @@ maxnorml2(pslq_M *M)
     for (j=1; j<n; j++) s = gadd(s, gnorm(gcoeff(M->H,i,j)));
     ma = gmax(ma, s);
   }
-  return mpsqrt(gmul(ma, realun(DEFAULTPREC)));
+  return sqrtr(gmul(ma, realun(DEFAULTPREC)));
 }
 
 static void
@@ -2198,7 +2198,7 @@ one_step_gen(pslq_M *M, GEN tabga, long prec)
 static GEN
 get_tabga(int flreal, long n, long prec)
 {
-  GEN ga = mpsqrt( flreal? divrs(stor(4, prec), 3): stor(2, prec) );
+  GEN ga = sqrtr( flreal? divrs(stor(4, prec), 3): stor(2, prec) );
   GEN tabga = cgetg(n,t_VEC);
   long i;
   tabga[1] = (long)ga;

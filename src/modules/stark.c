@@ -1142,7 +1142,7 @@ CharNewPrec(GEN dataCR, GEN nf, long prec)
   N     =  degpol((GEN)nf[1]);
   prec2 = ((prec - 2)<<1) + EXTRA_PREC;
 
-  C = mpsqrt(gdiv(absi(dk), gpowgs(mppi(prec2), N)));
+  C = sqrtr(gdiv(absi(dk), gpowgs(mppi(prec2), N)));
 
   l = lg(dataCR);
   for (j = 1; j < l; j++)
@@ -1591,7 +1591,7 @@ InitPrimes(GEN bnr, long nmax, LISTray *R)
 GEN
 powrshalf(GEN x, long s)
 {
-  if (s & 1) return mpsqrt(gpowgs(x, s));
+  if (s & 1) return sqrtr(gpowgs(x, s));
   return gpowgs(x, s>>1);
 }
 /* x^(n/d), assume x t_REAL, return t_REAL */
@@ -1603,8 +1603,8 @@ powrfrac(GEN x, long n, long d)
   z = cgcd(n, d); if (z > 1) { n /= z; d /= z; }
   if (d == 1) return gpowgs(x, n);
   x = gpowgs(x, n);
-  if (d == 2) return mpsqrt(x);
-  return mpsqrtn(x, d);
+  if (d == 2) return sqrtr(x);
+  return sqrtnr(x, d);
 }
 
 static GEN /* cf polcoeff */
@@ -1653,7 +1653,7 @@ ppgamma(ST_t *T, long prec)
   x   = polx[0];
   x2  = gmul2n(x, -1); /* x/2 */
   eul = mpeuler(prec);
-  sqpi= mpsqrt(mppi(prec)); /* Gamma(1/2) */
+  sqpi= sqrtr(mppi(prec)); /* Gamma(1/2) */
 
   /* expansion of log(Gamma(u)) at u = 1 */
   gamun = cgetg(r+3, t_SER);
@@ -1912,7 +1912,7 @@ GetST(GEN dataCR, GEN vChar, long prec)
   InitPrimes(gmael(dataCR,1,4), nmax, &LIST);
 
   prec2 = ((prec-2) << 1) + EXTRA_PREC;
-  racpi = mpsqrt(mppi(prec2));
+  racpi = sqrtr(mppi(prec2));
   powracpi = (GEN*)cgetg(r1+2,t_VEC);
   powracpi++; powracpi[0] = gun; powracpi[1] = racpi;
   for (j=2; j<=r1; j++) powracpi[j] = mulrr(powracpi[j-1], racpi);
@@ -1979,7 +1979,7 @@ GetValue(GEN dtcr, GEN W, GEN S, GEN T, long fl, long fl2, long prec)
   long q, b, c;
   int isreal;
 
-  racpi = mpsqrt(mppi(prec));
+  racpi = sqrtr(mppi(prec));
   if (!W)
     W = (GEN)ComputeArtinNumber((GEN)dtcr[3], _vec((GEN)dtcr[8]), 1, prec)[1];
 
@@ -2437,7 +2437,7 @@ QuadGetST(GEN dataCR, GEN vChar, long prec)
   if (DEBUGLEVEL>1) fprintferr("nmax = %ld\n", nmax);
   InitPrimesQuad(gmael(dataCR,1,4), nmax, &LIST);
 
-  cfh = mpsqrt(mppi(prec));
+  cfh = sqrtr(mppi(prec));
   cf  = gmul2n(cfh, 1);
   av1 = avma;
   /* loop over conductors */

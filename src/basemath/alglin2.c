@@ -935,9 +935,9 @@ jacobi(GEN a, long prec)
     /* compute associated rotation in the plane formed by basis vectors number
      * p and q */
     x = divrr(subrr((GEN)L[q],(GEN)L[p]), shiftr(gcoeff(a,p,q),1));
-    y = mpsqrt(addrr(unr, mulrr(x,x)));
+    y = sqrtr(addrr(unr, mulrr(x,x)));
     t = divrr(unr, (signe(x)>0)? addrr(x,y): subrr(x,y));
-    c = mpsqrt(addrr(unr,mulrr(t,t)));
+    c = sqrtr(addrr(unr,mulrr(t,t)));
     s = divrr(t,c);
     u = divrr(t,addrr(unr,c));
 

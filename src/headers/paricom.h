@@ -109,6 +109,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define powmodulo Fp_pow
 #define mpsqrtmod Fp_sqrt
 #define mpsqrtnmod Fp_sqrtn
+#define mpsqrt  sqrtr
+#define mpsqrtn  sqrtnr
 #define resii  remii
 #define resis  remis
 #define ressi  remsi

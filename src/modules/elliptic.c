@@ -192,7 +192,7 @@ new_coords(GEN e, GEN x, GEN *pta, GEN *ptb, int flag, long prec)
     if (!is_const_t(ty)) err(typeer,"zell");
 
     /* w^2 = 2b4 + 2b2 e1 + 12 e1^2 = 4(e1-e2)(e1-e3) */
-    w = mpsqrt( gmul2n(gadd(b4, gmul(e1,gadd(b2, mulsr(6,e1)))),1) );
+    w = sqrtr( gmul2n(gadd(b4, gmul(e1,gadd(b2, mulsr(6,e1)))),1) );
     if (gsigne(p2) > 0) w = gneg_i(w);
   }
   *pta = a = gmul2n(gsub(w,p2),-2);
@@ -223,10 +223,10 @@ do_agm(GEN *ptx1, GEN a1, GEN b1, long prec)
   for(;;)
   {
     a = a1; b = b1; x = x1;
-    b1 = mpsqrt(gmul(a,b)); setsigne(b1, s);
+    b1 = sqrtr(gmul(a,b)); setsigne(b1, s);
     a1 = gmul2n(gadd(gadd(a,b), gmul2n(b1,1)),-2);
     r1 = gsub(a1,b1);
-    p1 = mpsqrt( gdiv(gadd(x,r1),x) );
+    p1 = sqrtr( gdiv(gadd(x,r1),x) );
     x1 = gmul(x,gsqr(gmul2n(gaddsg(1,p1),-1)));
     if (gcmp0(r1) || gexpo(r1) <= G + gexpo(b1)) break;
   }
@@ -2229,7 +2229,7 @@ exphellagm(GEN e, GEN z, int flag, long prec)
   while (--n > 0) x = gdiv(gsqr(x), (GEN)V[n]);
   /* height on E1 is log(x)/2. Go back to E0 */
   return flag? gsqr( gdiv(gsqr(x), x_a) )
-             : gdiv(x, mpsqrt( mpabs(x_a) ));
+             : gdiv(x, sqrtr( mpabs(x_a) ));
 }
 /* exp( 4h_oo(z) ) */
 static GEN

@@ -688,11 +688,11 @@ pre_modulus(GEN p, long k, double tau, GEN rmin, GEN rmax)
   double tau2, aux2;
 
   tau2=tau/6.;
-  aux = mulrr(mpsqrt(divrr(rmax,rmin)), dbltor(exp(4*tau2)));
+  aux = mulrr(sqrtr(divrr(rmax,rmin)), dbltor(exp(4*tau2)));
   imax = (long) log2(log((double)n)/ rtodbl(mplog(aux)));
   if (imax<=0) return modulus(p,k,tau);
 
-  R = mpsqrt(mulrr(rmin,rmax));
+  R = sqrtr(mulrr(rmin,rmax));
   av = avma;
   bitprec = (long) ((double) n*(2. + log2ir(aux) - log2(tau2)));
   q = homothetie(p,R,bitprec);
@@ -1304,7 +1304,7 @@ compute_radius(GEN* radii, GEN p, long k, double aux, double *delta)
   }
   *delta = rtodbl(gmul2n(mplog(divrr(rmax,rmin)), -1));
   if (*delta > 1.) *delta = 1.;
-  return mpsqrt(mulrr(rmin,rmax));
+  return sqrtr(mulrr(rmin,rmax));
 }
 
 static GEN
@@ -1349,7 +1349,7 @@ conformal_mapping(GEN *radii, GEN ctr, GEN p, long k, long bitprec,
       /* 2(r^2 - 1) / (r^2 - 3(r-1)) */
       p1 = divrr(gmul2n((subrs(p1,1)),1),
                    subrr(p1, mulsr(3,subrs(radii[i],1))));
-      affrr(mpsqrt(addsr(1,p1)), radii[i]);
+      affrr(sqrtr(addsr(1,p1)), radii[i]);
       avma = a;
     }
 
@@ -1400,7 +1400,7 @@ split_2(GEN p, long bitprec, GEN ctr, double thickness, GEN *F, GEN *G)
   radii[1] = rmin = min_modulus(p, aux);
   radii[n] = rmax = max_modulus(p, aux);
   i=1; j=n;
-  rho = mpsqrt(mulrr(rmin,rmax));
+  rho = sqrtr(mulrr(rmin,rmax));
   k = dual_modulus(p,rho,aux,1);
   if (k<n/5. || (n/2.<k && k<(4*n)/5.))
     { rmax=rho; j=k+1; affrr(rho, radii[j]); }
@@ -1409,7 +1409,7 @@ split_2(GEN p, long bitprec, GEN ctr, double thickness, GEN *F, GEN *G)
   while (j>i+1)
   {
     if (i+j==n+1)
-      rho = mpsqrt(mulrr(rmin,rmax));
+      rho = sqrtr(mulrr(rmin,rmax));
     else
     {
       kappa = 1. - log(1.+(double)min(i,n-j)) / log(1.+(double)min(j,n-i));
@@ -1430,7 +1430,7 @@ split_2(GEN p, long bitprec, GEN ctr, double thickness, GEN *F, GEN *G)
 
   if (ctr)
   {
-    rho = mpsqrt(mulrr(rmax,rmin));
+    rho = sqrtr(mulrr(rmax,rmin));
     invrho = ginv(rho);
     for (i=1; i<=n; i++)
       if (signe(radii[i])) affrr(mulrr(radii[i],invrho), radii[i]);

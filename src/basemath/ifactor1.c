@@ -2386,7 +2386,7 @@ is_odd_power(GEN x, GEN *pt, long *mask)
   else
     { resbyte = 1; exponent = 3; }
 
-  y = mpround( mpsqrtn(itor(x, 3 + (lx-2) / exponent), exponent) );
+  y = mpround( sqrtnr(itor(x, 3 + (lx-2) / exponent), exponent) );
   if (!egalii(gpowgs(y, exponent), x))
   {
     if (DEBUGLEVEL >= 5)
