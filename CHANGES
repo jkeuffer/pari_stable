@@ -34,13 +34,18 @@ YU = Yoshiaki Uchikawa
 
 Done for version 2.2.4 (released 10/07/2002) [hopefully]:
   Fixed
-    1- add default 'newgaloisformat' to make 2.2.3 F-22 optional (by default,
-       old format will be used, preserving compatibility).
+    1- add default 'newgaloisformat' to make 2.2.3 C-22 optional (by default,
+       old format will be used, preserving compatibility)
+ BA 2- FreeBSD: DL_DFLT_NAME value was incorrect
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).
     2- use better bounds for size of factors in nffactor()
     3- tuning for van Hoeij's factorizer (factor + nffactor)
+
+  Added
+ BA 1- Add PARI_VERSION and PARI_VERSION_CODE to paricfg.h
+ BA 2- Add pari_release at top of dft.Config.in
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.3 (released 10/06/2002):
