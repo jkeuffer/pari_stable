@@ -1555,6 +1555,8 @@ gmul(GEN x, GEN y)
       switch (ty)
       {
 	case t_SER:
+        {
+          long mix, miy;
 	  if (gcmp0(x) || gcmp0(y)) return zeroser(vx, valp(x)+valp(y));
           lx=lg(x); ly=lg(y);
 	  if (lx>ly) { k=ly; ly=lx; lx=k; p1=y; y=x; x=p1; }
@@ -1562,17 +1564,21 @@ gmul(GEN x, GEN y)
 	  z[1] = evalvalp(valp(x)+valp(y)) | evalvarn(vx) | evalsigne(1);
           x += 2; y += 2; z += 2; lx -= 3;
           p2 = (GEN)gpmalloc((lx+1)*sizeof(long));
+          p3 = (GEN)gpmalloc((ly+1)*sizeof(long));
+          mix = miy = 0;
 	  for (i=0; i<=lx; i++)
           {
-	    p2[i] = !isexactzero((GEN)y[i]);
+	    p2[i] = !isexactzero((GEN)y[i]); if (p2[i]) miy = i;
+	    p3[i] = !isexactzero((GEN)x[i]); if (p3[i]) mix = i;
             p1 = gzero; av = avma;
-            for (j=0; j<=i; j++)
-              if (p2[j])
-                p1 = gadd(p1, gmul((GEN)y[j],(GEN)x[i-j]));
+            for (j=i-mix; j<=min(i,miy); j++)
+              if (p2[j]) p1 = gadd(p1, gmul((GEN)y[j],(GEN)x[i-j]));
             z[i] = lpileupto(av,p1);
           }
           z -= 2; /* back to normalcy */
-          free(p2); return normalize(z);
+          free(p2);
+          free(p3); return normalize(z);
+        }
 
 	case t_RFRAC: case t_RFRACN:
 	  if (gcmp0(y)) return zeropol(vx);
@@ -1691,25 +1697,27 @@ gsqr(GEN x)
     }
 
     case t_SER:
+    {
+      long mi;
       if (gcmp0(x)) return zeroser(varn(x), 2*valp(x));
       lx = lg(x); z = cgetg(lx,tx);
       z[1] = evalsigne(1) | evalvalp(2*valp(x)) | evalvarn(varn(x));
       x += 2; z += 2; lx -= 3;
       p2 = (GEN)gpmalloc((lx+1)*sizeof(long));
+      mi = 0;
       for (i=0; i<=lx; i++)
       {
-	p2[i] = !isexactzero((GEN)x[i]);
-        p1=gzero; av=avma; l=(i+1)>>1;
-        for (j=0; j<l; j++)
-          if (p2[j] && p2[i-j])
-            p1 = gadd(p1, gmul((GEN)x[j],(GEN)x[i-j]));
+	p2[i] = !isexactzero((GEN)x[i]); if (p2[i]) mi = i;
+        p1=gzero; av=avma; l=((i+1)>>1) - 1;
+        for (j=i-mi; j<=min(l,mi); j++)
+          if (p2[j] && p2[i-j]) p1 = gadd(p1, gmul((GEN)x[j],(GEN)x[i-j]));
         p1 = gshift(p1,1);
         if ((i&1) == 0 && p2[i>>1])
           p1 = gadd(p1, gsqr((GEN)x[i>>1]));
         z[i] = lpileupto(av,p1);
       }
       z -= 2; free(p2); return normalize(z);
-
+    }
     case t_RFRAC: case t_RFRACN:
       z=cgetg(3,tx);
       z[1]=lsqr((GEN)x[1]);

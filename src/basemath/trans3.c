@@ -1887,18 +1887,17 @@ qq(GEN x, long prec)
   if (tx==t_PADIC) return x;
   if (is_scalar_t(tx))
   {
-    long l=precision(x);
-    GEN p1,p2,q;
+    long l = precision(x);
+    GEN p1,q;
 
     if (tx != t_COMPLEX || gcmp((GEN)x[2],gzero)<=0)
       err(talker,"argument must belong to upper half-plane");
 
-    if (!l) l=prec; p1=mppi(l); setexpo(p1,2);
-    p2=cgetg(3,t_COMPLEX); p2[1]=zero; p2[2]=(long)p1; /* 2*I*Pi */
-    q=gmul(x,p2); return gexp(q,prec);
+    if (!l) l=prec; p1=mppi(l); setexpo(p1,2); /* 2*Pi */
+    q = gmul(x,pureimag(p1)); return gexp(q,prec);
   }
-  if (tx != t_POL && tx != t_SER)
-    err(talker,"bad argument for modular function");
+  if (tx == t_SER) return x;
+  if (tx != t_POL) err(talker,"bad argument for modular function");
 
   return tayl(x,gvar(x),precdl);
 }
@@ -1912,8 +1911,7 @@ inteta(GEN q)
   y=gun; qn=gun; ps=gun;
   if (tx==t_PADIC)
   {
-    if (valp(q) <= 0)
-      err(talker,"non-positive valuation in inteta");
+    if (valp(q) <= 0) err(talker,"non-positive valuation in inteta");
     for(;;)
     {
       p1=gneg_i(gmul(ps,gmul(q,gsqr(qn))));
@@ -1923,30 +1921,31 @@ inteta(GEN q)
   }
   else
   {
-    long l = 0, v = 0; /* gcc -Wall */
+    long l, v = 0; /* gcc -Wall */
     gpmem_t av = avma, lim = stack_lim(av, 3);
 
     if (is_scalar_t(tx)) l = -bit_accuracy(precision(q));
     else
     {
-      v=gvar(q); tx = 0;
-      if (valp(q) <= 0)
-        err(talker,"non-positive valuation in inteta");
+      v = gvar(q); l = lg(q)-2; tx = 0;
+      if (valp(q) <= 0) err(talker,"non-positive valuation in inteta");
     }
     for(;;)
     {
-      p1=gneg_i(gmul(ps,gmul(q,gsqr(qn))));
-      y=gadd(y,p1); qn=gmul(qn,q); ps=gmul(p1,qn);
-      y=gadd(y,ps);
+      p1 = gneg_i(gmul(ps,gmul(q,gsqr(qn))));
+      /* qn = q^n
+       * ps = (-1)^n q^(n(3n+1)/2)
+       * p1 = (-1)^(n+1) q^(n(3n+1)/2 + 2n+1) */
+      y = gadd(y,p1); qn = gmul(qn,q); ps = gmul(p1,qn);
+      y = gadd(y,ps);
       if (tx)
         { if (gexpo(ps)-gexpo(y) < l) return y; }
       else
-        { if (gval(ps,v)>=precdl) return y; }
+        { if (gval(ps,v) >= l) return y; }
       if (low_stack(lim, stack_lim(av,3)))
       {
-        GEN *gptr[3];
+        GEN *gptr[3]; gptr[0]=&y; gptr[1]=&qn; gptr[2]=&ps;
         if(DEBUGMEM>1) err(warnmem,"inteta");
-        gptr[0]=&y; gptr[1]=&qn; gptr[2]=&ps;
         gerepilemany(av,gptr,3);
       }
     }
