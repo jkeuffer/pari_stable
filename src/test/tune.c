@@ -64,12 +64,12 @@ TIMER(int i)
 #elif defined(macintosh)
 # include <Events.h>
 static long
-TIMER(int i)
+TIMER()
 {
-  static long oldticks[MAX_TIMER];
-  long ticks = TickCount(), delay = ticks - oldticks[i];
+  static long oldticks;
+  long ticks = TickCount(), delay = ticks - oldticks;
 
-  oldticks[i] = ticks;
+  oldticks = ticks;
   return 50. * delay / 3.;
 }
 #elif USE_TIMES
@@ -78,15 +78,15 @@ TIMER(int i)
 # include <sys/time.h>
 # include <time.h>
 static long
-TIMER(int i)
+TIMER()
 {
-  static clock_t oldticks[MAX_TIMER];
+  static clock_t oldticks;
   struct tms t;
   double delay;
 
   times(&t);
-  delay = (t.tms_utime - oldticks[i]) * (1. / CLK_TCK);
-  oldticks[i] = t.tms_utime;
+  delay = (t.tms_utime - oldticks) * (1. / CLK_TCK);
+  oldticks = t.tms_utime;
   return delay;
 }
 #elif USE_GETRUSAGE
