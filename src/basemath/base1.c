@@ -1281,7 +1281,7 @@ ok_pol(void *TT, GEN xn)
   
   if (++T->ind > T->indmax && T->xbest) return T->xbest;
   
-  if (!ZX_is_squarefree(xn)) return NULL;
+  if (!ZX_is_squarefree(xn)) return (T->ind == T->indmax)? T->xbest: NULL;
   if (DEBUGLEVEL>3) outerr(xn);
   dxn = ZX_disc(xn);
   if (better_pol(xn, dxn, T->xbest, T->dxbest))
