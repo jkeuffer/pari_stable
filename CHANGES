@@ -52,6 +52,7 @@ XR  9- possible overflow in ComputeCoeff [ bnrstark() ]
 BA  4- Fp_PHlog (Pohlig-Hellman) can use a factorization of the subgroup order
     5- major update of buchall() [bnfinit]: accurate precision increase, cleanup
     6- [libpari:] rename permute/permuteInv to GP names numtoperm/permtonum
+    7- scalar + [;] --> error  [made it [;]]
 
   Added
 BA  1- function pith() [= pi(x), naïve implementation]
