@@ -1094,11 +1094,13 @@ matrixqz_aux(GEN A)
   long i,j,k,n,m;
   GEN a;
 
-  n = lg(A); if (n == 1) return cgetg(1,t_MAT);
+  n = lg(A);
+  if (n == 1) return cgetg(1,t_MAT);
+  if (n == 2) return hnf(A); /* 1 col, maybe 0 */
   m = lg(A[1]);
   for (i=1; i<m; i++)
   {
-    for (j=k=1; j<n; j++)
+    for (j = k = 1; j<n; j++)
     {
       GEN a = gcoeff(A,i,j);
       if (gcmp0(a)) continue;
