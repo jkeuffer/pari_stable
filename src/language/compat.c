@@ -239,7 +239,7 @@ entree oldfonctions[]={
 {"idealhermite2",3,(void *)idealhermite2,6,"GGG"},
 {"idealintersect",3,(void *)idealintersect,6,"GGG"},
 {"idealinv",2,(void *)idealinv,6,"GG"},
-{"idealinv2",2,(void *)oldidealinv,6,"GG"},
+{"idealinv2",2,(void *)idealinv,6,"GG"},
 {"ideallist",21,(void *)ideallist,6,"GL"},
 {"ideallistarch",3,(void *)ideallistarch,6,"GGG"},
 {"ideallistarchgen",3,(void *)ideallistarchgen,6,"GGG"},
