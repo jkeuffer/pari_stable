@@ -244,6 +244,17 @@ pariflush(void) { pariOut->flush(); }
 void
 flusherr(void) { pariErr->flush(); }
 
+static void
+_initout(pariout_t *T, char f, long sigd, long sp, long fieldw, int prettyp)
+{
+  T->format = f;
+  T->sigd = sigd;
+  T->sp = sp;
+  T->fieldw = fieldw;
+  T->initial = 1;
+  T->prettyp = prettyp;
+}
+
 /* format is standard printf format, except %Z is a GEN */
 void
 vpariputs(const char* format, va_list args)
@@ -275,7 +286,7 @@ vpariputs(const char* format, va_list args)
     buf = gpmalloc(bufsize);
     l = vsnprintf(buf,bufsize,str,args);
     if (l < 0) l = bufsize<<1; else if (l < bufsize) break;
-    free(buf); bufsize++;
+    free(buf); bufsize = l + 1;
   }
   buf[bufsize-1] = 0; /* just in case */
 #else
@@ -284,18 +295,20 @@ vpariputs(const char* format, va_list args)
 #endif
   t = s = buf;
   if (nb)
-    while (*t)
+  {
+    pariout_t T; _initout(&T,'g',-1,1,0, f_RAW);
+    for(;;)
     {
       if (*t == '\003' && t[21] == '\003')
       {
         *t = 0; t[21] = 0; /* remove the bracing chars */
-        pariOut->puts(s); brute((GEN)atol(t+1),'g',-1);
+        pariOut->puts(s); gen_output((GEN)atol(t+1), &T);
         t += 22; s = t;
         if (!--nb) break; 
       }
-      else
-        t++;
+      else t++;
     }
+  }
   pariOut->puts(s); free(buf); free(str);
 }
 
@@ -2367,17 +2380,6 @@ gen_output(GEN x, pariout_t *T)
     case f_TEX      : texi (y, T, 1); break;
   }
   avma = av;
-}
-
-static void
-_initout(pariout_t *T, char f, long sigd, long sp, long fieldw, int prettyp)
-{
-  T->format = f;
-  T->sigd = sigd;
-  T->sp = sp;
-  T->fieldw = fieldw;
-  T->initial = 1;
-  T->prettyp = prettyp;
 }
 
 void
