@@ -1159,8 +1159,8 @@ polzag(long n, long m)
   GEN A, Bx, g, s;
 
   if (d <= 0 || m < 0) return gzero;
-  A  = gsub(gun, gmul2n(polx[0],1)); /* 1 - 2x */
-  Bx = gmul2n( gmul(polx[0], gsub(gun, polx[0])), 1); /* 2x - 2x^2 */
+  A  = coefs_to_pol(2, stoi(-2), gun); /* 1 - 2x */
+  Bx = coefs_to_pol(3, stoi(-2), gdeux, gzero); /* 2x - 2x^2 */
   g = gmul(poleval(derivpol(tchebi(d,0)), A), gpowgs(Bx, (m+1)>>1));
   for (k = m; k >= 0; k--)
     g = (k&1)? derivpol(g): gadd(gmul(A,g), gmul(Bx,derivpol(g)));
@@ -1179,7 +1179,7 @@ polzagreel(long n, long m, long prec)
   GEN Bx, g, h, v, b, s;
 
   if (d <= 0 || m < 0) return gzero;
-  Bx = gmul(polx[0], gadd(gun, polx[0])); /* x + x^2 */
+  Bx = coefs_to_pol(3, gun, gun, gzero); /* x + x^2 */
   v = cgetg(d+1,t_VEC);
   g = cgetg(d+1,t_VEC);
   v[d] = un; b = stor(d2, prec);
