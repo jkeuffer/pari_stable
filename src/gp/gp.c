@@ -48,6 +48,7 @@ BEGINEXTERN
 ENDEXTERN
 #endif
 
+extern void var_make_safe();
 extern void err_clean(void);
 extern void gp_output(GEN z, gp_data *G);
 extern void errcontext(char *msg, char *s, char *entry);
@@ -2415,7 +2416,7 @@ gp_main_loop(int ismain)
   }
   init_filtre(&F, (void*)b);
 
-  for (; ; setjmp(b->env), avma = av)
+  for (; ; setjmp(b->env))
   {
     if (ismain)
     {
@@ -2452,7 +2453,7 @@ gp_main_loop(int ismain)
       TIMERstart(GP_DATA->T);
     }
     z = readseq(b->buf, GP_DATA->flags & STRICTMATCH);
-    if (! ismain) continue;
+    if (! ismain) { avma = av; continue; }
 
     if (GP_DATA->flags & CHRONO)
       pariputs(do_time(ti_REGULAR));
@@ -2463,6 +2464,7 @@ gp_main_loop(int ismain)
     if (GP_DATA->flags & SIMPLIFY) z = simplify_i(z);
     z = set_hist_entry(H, z);
     if (!gpsilent) gp_output(z, GP_DATA);
+    avma = av;
   }
 }
 
@@ -2604,7 +2606,7 @@ gp_exception_handler(long numerr)
   if (s && *s) { fprintferr("\n"); outerr(lisseq(s)); }
   else
   {
-    if (numerr == errpile) avma = top;
+    if (numerr == errpile) { var_make_safe(); avma = top; }
     return break_loop(numerr);
   }
   return 0;
