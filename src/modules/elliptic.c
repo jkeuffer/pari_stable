@@ -2986,7 +2986,7 @@ torselldoud(GEN e)
   v = ellintegralmodel(e);
   if (v) e = coordch(e,v);
 
-  b = DEFAULTPREC + (lgefint((GEN)e[12]-2) >> 1); /* b >= size of sqrt(D) */
+  b = DEFAULTPREC + ((lgefint((GEN)e[12])-2) >> 1); /* b >= size of sqrt(D) */
   prec = precision((GEN)e[15]);
   if (prec < b) err(precer, "torselldoud");
   if (b < prec) { prec = b; e = gprec_w(e, b); }
