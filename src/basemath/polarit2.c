@@ -1768,14 +1768,6 @@ factor0(GEN x,long flag)
   return NULL; /* not reached */
 }
 
-static GEN
-poldeg1(long v, GEN x0, GEN x1)
-{
-  GEN x = cgetg(4,t_POL);
-  x[1] = evalsigne(1) | evalvarn(v) | evallgef(4);
-  x[2] = (long)x0; x[3] = (long)x1; return normalizepol(x);
-}
-
 /* assume f and g coprime integer factorizations */
 GEN
 merge_factor_i(GEN f, GEN g)
@@ -1831,7 +1823,7 @@ factor(GEN x)
 	  p1=roots(x,pa); tetpil=avma;
           p2=cgetg(lx,t_COL);
 	  for (i=1; i<lx; i++)
-            p2[i] = (long)poldeg1(v, gneg((GEN)p1[i]), gun);
+            p2[i] = (long)deg1pol_i(gun, gneg((GEN)p1[i]), v);
 	  y[1]=lpile(av,tetpil,p2);
 	  p3=cgetg(lx,t_COL); for (i=1; i<lx; i++) p3[i] = un;
           y[2]=(long)p3; return y;
@@ -1842,7 +1834,7 @@ factor(GEN x)
             if (signe(gmael(p1,r1,2))) break;
 	  lx=(r1+lx)>>1; p2=cgetg(lx,t_COL);
 	  for(i=1; i<r1; i++)
-            p2[i] = (long)poldeg1(v, negr(gmael(p1,i,1)), gun);
+            p2[i] = (long)deg1pol_i(gun, negr(gmael(p1,i,1)), v);
 	  for(   ; i<lx; i++)
 	  {
 	    GEN a = (GEN) p1[2*i-r1];
@@ -1873,7 +1865,7 @@ factor(GEN x)
               case t_COMPLEX:
                 p2 = cgetg(3, t_POLMOD); x[i] = (long) p2;
                 p2[1] = (long)pol;
-                p2[2] = (long)poldeg1(v, (GEN)p1[1],(GEN)p1[2]);
+                p2[2] = (long)deg1pol_i((GEN)p1[2], (GEN)p1[1], v);
             }
           }
           killv = (avma != (long)pol);

@@ -229,8 +229,8 @@ plisprime(GEN N, long flag)
   N = absi(N);
   /* Use Jaeschke results. See above */
   if (miller(N,7))
-  {
-    if (cmpii(N,mulss(10670053,32010157)) < 0) { avma=ltop; return gun; }
+  { /* compare to 341550071728321 */
+    if (cmpii(N, u2toi(0x136a3, 0x52b2c8c1)) < 0) { avma=ltop; return gun; }
   }
   else { avma=ltop; return gzero; }
   F=(GEN)decomp_limit(addis(N,-1),racine(N))[1];

@@ -1820,9 +1820,69 @@ trunc0(GEN x, GEN *pte)
 
 /*******************************************************************/
 /*                                                                 */
-/*           CONVERSIONS GEN -->  POLYNOMIALS & SERIES             */
+/*                  CONVERSIONS -->  INT, POL & SER                */
 /*                                                                 */
 /*******************************************************************/
+
+/* return a_n B^n + ... + a_0, where B = 2^BIL. Assume n even if BIL=64 and
+ * the a_i are 32bits integers, one of which is non-zero */
+GEN
+coefs_to_int(long n, ...)
+{
+  va_list ap;
+  GEN x, y;
+  long i;
+  va_start(ap,n);
+#ifdef LONG_IS_64BIT
+  n >>= 1;
+#endif
+  x = cgetg(n+2, t_INT); y = x + 2;
+  x[1] = evallgefint(n+2) | evalsigne(1);
+  for (i=0; i <n; i++)
+  {
+#ifdef LONG_IS_64BIT
+    ulong a = va_arg(ap, long);
+    ulong b = va_arg(ap, long);
+    y[i] = (a << 32) | b;
+#else
+    y[i] = va_arg(ap, long);
+#endif
+  }
+  return x;
+}
+
+/* 2^32 a + b */
+GEN
+u2toi(ulong a, ulong b)
+{
+  GEN x;
+  if (!a && !b) return gzero;
+#ifdef LONG_IS_64BIT
+  x = cgetg(3, t_INT);
+  x[1] = evallgefint(3)|evalsigne(1);
+  x[2] = (a << 32) | b;
+#else
+  x = cgetg(4, t_INT);
+  x[1] = evallgefint(4)|evalsigne(1);
+  x[2] = a;
+  x[3] = b;
+#endif
+  return x;
+}
+
+/* return a_n x^n + ... + a_0 */
+GEN
+coefs_to_pol(long n, ...)
+{
+  va_list ap;
+  GEN x, y;
+  long i;
+  va_start(ap,n);
+  x = cgetg(n+2, t_POL); y = x + 2;
+  x[1] = evallgef(n+2) | evalvarn(0);
+  for (i=n-1; i >= 0; i--) y[i] = (long) va_arg(ap, GEN);
+  return normalizepol(x);
+}
 
 GEN
 zeropol(long v)
@@ -1839,7 +1899,7 @@ scalarpol(GEN x, long v)
                  : evallgef(3) | evalvarn(v) | evalsigne(1);
   y[2]=lcopy(x); return y;
 }
-/*FIXME:suppress poldeg1 in polarit2.c*/
+
 /* deg1pol(a,b,x)=a*x+b*/
 GEN
 deg1pol(GEN x1, GEN x0,long v)
@@ -1847,6 +1907,15 @@ deg1pol(GEN x1, GEN x0,long v)
   GEN x = cgetg(4,t_POL);
   x[1] = evalsigne(1) | evalvarn(v) | evallgef(4);
   x[2] = lcopy(x0); x[3] = lcopy(x1); return normalizepol_i(x,4);
+}
+
+/* same, no copy */
+GEN
+deg1pol_i(GEN x1, GEN x0,long v)
+{
+  GEN x = cgetg(4,t_POL);
+  x[1] = evalsigne(1) | evalvarn(v) | evallgef(4);
+  x[2] = (long)x0; x[3] = (long)x1; return normalizepol_i(x,4);
 }
 
 static GEN
