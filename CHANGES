@@ -83,6 +83,12 @@ MSo11- various bugs in anal.c: uninitialized reads in get_op_fun(), double_op()
    24- bnfinit(,1) could return without giving fundamental units (if the
        computation is unfeasible). Raise an error instead.
 IS 25- config/get_head would not work only if one invoked $PWD/Configure
+   26- obscure simplification bug:
+          x;s;t;u;
+          a = -9*u*x^3+3*u*s*x^2-3*u*s^2*x+u*s^3+u^4
+          b = 9*u*x^3+3*u*s*x^2+3*u*s^2*x+u*s^3+u^4
+          bezout(a,b) * (2*u^4*s^3+2*u^7)
+       --> involves terms like u^5/u^2
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.

@@ -943,10 +943,11 @@ mulscalrfrac(GEN x, GEN y)
   else
   {
     long td;
-    p1 = ggcd(x,d); if (isnonscalar(p1)) { x=gdeuc(x,p1); d=gdeuc(d,p1); }
-    if (typ(x) == t_POL && lg(x) == 3) x = (GEN)x[2];
-    td = typ(d);
-    if (td == t_POL && lg(d) == 3) { d = (GEN)d[2]; td = typ(d); }
+    p1 = ggcd(x,d);
+    while (typ(p1) == t_POL && lg(p1) == 3) p1 = (GEN)p1[2];
+    if (isnonscalar(p1)) { x=gdeuc(x,p1); d=gdeuc(d,p1); }
+    while (typ(x) == t_POL && lg(x) == 3) x = (GEN)x[2];
+    while ((td = typ(d)) == t_POL && lg(d) == 3) d = (GEN)d[2];
     if (is_scalar_t(td))
       return gerepileupto(av, gdiv(gmul(x,n), d));
     x = to_primitive(x, &cx);
