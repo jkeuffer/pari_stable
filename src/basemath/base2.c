@@ -1898,6 +1898,7 @@ uniformizer(GEN nf, norm_S *S, GEN P, GEN V, GEN p, int ramif)
     x = centermod(gadd(u, gmul(Mv, (GEN)P[i])), p);
     if (is_uniformizer(x, q, S)) return x;
   }
+  err(talker,"primdec: %Z is not a prime", p);
   return NULL; /* not reached */
 }
 
