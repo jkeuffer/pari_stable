@@ -3318,22 +3318,27 @@ GEN
 polcompositum0(GEN A, GEN B, long flall)
 {
   pari_sp av = avma;
+  int same = (A == B || gegal(A,B));
   long v, k;
-  GEN C, LPRS;
+  GEN C, D, LPRS;
 
   if (typ(A)!=t_POL || typ(B)!=t_POL) err(typeer,"polcompositum0");
   if (degpol(A)<=0 || degpol(B)<=0) err(constpoler,"compositum");
   v = varn(A);
   if (varn(B) != v) err(talker,"not the same variable in compositum");
-  C = content(A); if (!gcmp1(C)) A = gdiv(A, C);
-  C = content(B); if (!gcmp1(C)) B = gdiv(B, C);
-  check_pol_int(A,"compositum");
-  check_pol_int(B,"compositum");
+  A = Q_primpart(A); check_pol_int(A,"compositum");
   if (!ZX_is_squarefree(A)) err(talker,"compositum: %Z inseparable", A);
-  if (!ZX_is_squarefree(B)) err(talker,"compositum: %Z inseparable", B);
+  if (!same) {
+    B = Q_primpart(B); check_pol_int(B,"compositum");
+    if (!ZX_is_squarefree(B)) err(talker,"compositum: %Z inseparable", B);
+  }
 
-  k = 1; C = ZY_ZXY_resultant_all(A, B, &k, flall? &LPRS: NULL);
+  D = NULL; /* -Wall */
+  k = same? -1: 1; 
+  C = ZY_ZXY_resultant_all(A, B, &k, flall? &LPRS: NULL);
+  if (same) { D = rescale_pol(A, stoi(1 - k)); C = gdivexact(C, D); }
   C = DDF2(C, 0); /* C = Res_Y (A, B(X + kY)) guaranteed squarefree */
+  if (same) C = concatsp(C, D);
   C = sort_vecpol(C);
   if (flall)
   {
