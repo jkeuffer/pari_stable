@@ -90,6 +90,7 @@ BA 47- incorrect quoting in src/make_vi_tags (make ctags)
    52- bnr functions might fail with "indefinite matrix in lllgram" [prec pb]
    53- nfhilbert(nf,a,b, pr | 2) would give bogus result if nf in variable 0 (x)
 MD 54- real(1 / (a+quadgen(...)*b)) was a / (a^2 + b^2)  [assumed quadgen(-1) !]
+   55- wrong HNF (reduction not finished) when nblines >> nbcol [hnf(,0) only]
 
   Changed
     1- DOS distribution archives (GPM removed)
