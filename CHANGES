@@ -71,6 +71,7 @@ XR 34- nfdisc: fixed cache system in nilord (esp. precision handling)
 BA 35- nfgaloisconj(polcyclo(40)): accuracy lost
        nfgaloisconj(polcyclo(11)+1): oo loop
 IS 36- typo in squfof tuning on 64bit machines
+   37- -lm doesn't exist on MacOS X
 
   Changed
     1- DOS distribution archives (GPM removed)
