@@ -420,7 +420,7 @@ char *helpmessages_basic[]={
   "sqr(x): square of x. NOT identical to x*x",
   "sqrt(x): square root of x",
   "sqrtint(x): integer square root of x (x integer)",
-  "sqrtn(x,n,{,&z}): nth-root of x, n must be integer. If present, z is set to a suitable root of unity to recover all solutions. If it was not possible, z is set to zero",
+  "sqrtn(x,n,{&z}): nth-root of x, n must be integer. If present, z is set to a suitable root of unity to recover all solutions. If it was not possible, z is set to zero",
   "subgrouplist(bnr,{bound},{flag=0}): bnr being as output by bnrinit or a list of cyclic components of a finite Abelian group G, outputs the list of subgroups of G (of index bounded by bound, if not omitted), given as HNF left divisors of the SNF matrix corresponding to G. If flag=0 (default) and bnr is as output by bnrinit, gives only the subgroups for which the modulus is the conductor",
   "subst(x,y,z): in expression x, replace the variable y by the expression z",
   "sum(X=a,b,expr,{x=0}): x plus the sum (X goes from a to b) of expression expr",
