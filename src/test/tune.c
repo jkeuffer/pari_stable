@@ -96,7 +96,7 @@ rand_g(long n, long type)
 }
 
 /* ========================================================== */
-static double dummy(speed_param *s) {}
+static double dummy(speed_param *s) { return 0. }
 
 #define TIME_FUN(call) {\
   {                                            \
