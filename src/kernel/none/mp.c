@@ -3296,6 +3296,18 @@ invmod(GEN a, GEN b, GEN *res)
 
 /* SQUARE ROOT */
 
+/* sqrt()'s result may be off by 1 when a is not representable exactly as a
+ * double [64bit machine] */
+ulong
+usqrtsafe(ulong a)
+{
+  ulong x = (ulong)sqrt((double)a);
+#ifdef LONG_IS_64BIT
+  ulong y = x+1; if (y <= MAXHALFULONG && y*y <= a) x = y;
+#endif
+  return x;
+}
+
 /* Assume a >= 0 has <= 4 words, return trunc[sqrt(a)] */
 ulong
 mpsqrtl(GEN a)
@@ -3304,7 +3316,7 @@ mpsqrtl(GEN a)
   ulong x,y,z,k,m;
   int L, s;
   
-  if (l <= 3) return l==2? 0: (ulong)sqrt((double)(ulong)a[2]);
+  if (l <= 3) return l==2? 0: usqrtsafe((ulong)a[2]);
   s = bfffo(a[2]);
   if (s > 1)
   {
