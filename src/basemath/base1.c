@@ -1226,14 +1226,16 @@ get_red_G(nfbasic_t *T, GEN *pro)
 {
   GEN G, u, u0 = NULL;
   gpmem_t av;
-  long i, prec = DEFAULTPREC + (long) (degpol(T->x) * sizeof(long) / 8.);
+  long i, prec, extraprec = (long) (degpol(T->x) * sizeof(long) / 8.);
   nffp_t F;
 
+  prec = DEFAULTPREC + extraprec;
   nffp_init(&F, T, *pro, prec);
   av = avma;
   for (i=1; ; i++)
   {
     F.prec = prec; make_M_G(&F, 0); G = F.G;
+    if (i == 1 && F.extraprec > 10) F.extraprec += extraprec;
     if (u0) G = gmul(G, u0);
     if (DEBUGLEVEL)
       fprintferr("get_red_G: starting LLL, prec = %ld (%ld + %ld)\n",
