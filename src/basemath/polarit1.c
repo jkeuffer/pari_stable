@@ -70,21 +70,33 @@ poldivrem(GEN x, GEN y, GEN *pr)
 
   if (is_scalar_t(ty))
   {
-    if (pr == ONLY_REM) return gzero;
+    if (pr == ONLY_REM) {
+      if (gcmp0(y)) err(gdiver);
+      return gzero;
+    }
     if (pr && pr != ONLY_DIVIDES) *pr=gzero;
     return gdiv(x,y);
   }
-  tx=typ(x); vy=gvar9(y);
-  if (is_scalar_t(tx) || gvar9(x)>vy)
+  if (ty != t_POL) err(typeer,"euclidean division (poldivrem)");
+  tx = typ(x); vy = varn(y);
+  if (is_scalar_t(tx) || (vx = gvar(x)) > vy)
   {
+    if (!signe(y)) err(gdiver);
+    if (!degpol(y)) /* constant */
+    {
+      if (pr == ONLY_REM) return zeropol(vy);
+      p1 = gdiv(x, (GEN)y[2]);
+      if (pr == ONLY_DIVIDES) return p1;
+      if (pr) *pr = zeropol(vy);
+      return p1;
+    }
     if (pr == ONLY_REM) return gcopy(x);
     if (pr == ONLY_DIVIDES) return gcmp0(x)? gzero: NULL;
-    if (pr) *pr=gcopy(x);
+    if (pr) *pr = gcopy(x);
     return gzero;
   }
-  if (tx!=t_POL || ty!=t_POL) err(typeer,"euclidean division (poldivrem)");
+  if (tx != t_POL) err(typeer,"euclidean division (poldivrem)");
 
-  vx=varn(x);
   if (varncmp(vx, vy) < 0)
   {
     if (pr && pr != ONLY_DIVIDES)
@@ -94,8 +106,8 @@ poldivrem(GEN x, GEN y, GEN *pr)
     }
     return gdiv(x,y);
   }
-
   if (!signe(y)) err(gdiver);
+
   dy = degpol(y);
   y_lead = (GEN)y[dy+2];
   if (gcmp0(y_lead)) /* normalize denominator if leading term is 0 */

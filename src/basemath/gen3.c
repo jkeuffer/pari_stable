@@ -796,11 +796,11 @@ gmodulcp(GEN x,GEN y)
     case t_INT:
       if (tx!=t_INT && tx != t_FRAC && tx!=t_PADIC) break;
       z=cgetg(3,t_INTMOD);
-      z[1]=labsi(y);
-      z[2]=lmod(x,y); return z;
+      z[1] = labsi(y);
+      z[2] = lmod(x,y); return z;
 
     case t_POL: z=cgetg(3,t_POLMOD);
-      z[1]=lcopy(y);
+      z[1] = lcopy(y);
       if (is_scalar_t(tx))
       {
         z[2] = (lg(y) > 3)? lcopy(x): lmod(x,y);
@@ -3081,7 +3081,7 @@ simplify_i(GEN x)
       i = typ(y[1]);
       if (i != t_POL)
       {
-        if (i == t_INT) settyp(y, t_INTMOD);
+        if (i == t_INT) y[0] = evallg(3)|evaltyp(t_INTMOD);
         else y[1] = x[1]; /* invalid object otherwise */
       }
       y[2]=lmod(simplify_i((GEN)x[2]),(GEN)y[1]); return y;

@@ -986,7 +986,7 @@ ff_poltype(GEN *x, GEN *p, GEN *pol)
   {
     p1 = (GEN)P[i]; if (typ(p1) != t_POLMOD) {Q=NULL;break;}
     p2 = (GEN)p1[1];
-    if (Q==NULL) Q = p2;
+    if (Q==NULL) { Q = p2; if (degpol(Q) <= 0) return 0; }
     else if (p2 != Q)
     {
       if (!gegal(p2, Q))
