@@ -550,7 +550,7 @@ GEN
 sumnuminit(GEN sig, long m, long sgn, long prec)
 {
   pari_sp ltop = avma;
-  GEN b, t, tab, tabxp, tabwp, tabxm = NULL, tabwm = NULL, pi = mppi(prec);
+  GEN b, t, tab, tabxp, tabwp, tabxm, tabwm, pi = mppi(prec);
   long L, k, eps, flii;
 
   b = suminit_start(sig);
@@ -558,31 +558,30 @@ sumnuminit(GEN sig, long m, long sgn, long prec)
   if (flii)
     tab = intnuminit(gneg((GEN)b[1]), (GEN)b[1], m, prec);
   else
-  {
     tab = intnuminit(gzero, b, m, prec);
-    tabxm = TABxm(tab);
-    tabwm = TABwm(tab);
-  }
   eps = bit_accuracy(prec);
   t = gmul(pi, TABx0(tab));
   if (sgn < 0) TABw0(tab) = gdiv(TABw0(tab), gch(t, prec));
   else         TABw0(tab) = gmul(TABw0(tab), gth(t, prec));
   tabxp = TABxp(tab); L = lg(tabxp);
   tabwp = TABwp(tab);
+  tabxm = TABxm(tab);
+  tabwm = TABwm(tab);
   for (k = 1; k < L; k++)
   {
     if (cmprs((GEN)tabxp[k], eps) < 0)
     {
       t = mulrr(pi, (GEN)tabxp[k]);
-      if (sgn < 0) tabwp[k] = (long)divrr((GEN)tabwp[k], gch(t, prec));
-      else         tabwp[k] = (long)mulrr((GEN)tabwp[k], gth(t, prec));
+      tabwp[k] = (sgn < 0)? (long)divrr((GEN)tabwp[k], gch(t, prec))
+                          : (long)mulrr((GEN)tabwp[k], gth(t, prec));
     }
-    else if (sgn < 0) tabwp[k] = (long)realzero_bit(prec);
+    else
+      if (sgn < 0) tabwp[k] = (long)realzero_bit(-eps);
     if (!flii)
     {
       t = mulrr(pi, (GEN)tabxm[k]);
-      if (sgn < 0) tabwm[k] = (long)divrr((GEN)tabwm[k], gch(t, prec));
-      else         tabwm[k] = (long)mulrr((GEN)tabwm[k], gth(t, prec));
+      tabwm[k] = (sgn < 0)? (long)divrr((GEN)tabwm[k], gch(t, prec))
+                          : (long)mulrr((GEN)tabwm[k], gth(t, prec));
     }
   }
   return gerepilecopy(ltop, tab);
@@ -1438,9 +1437,9 @@ intinvintern(void *E, GEN (*eval)(GEN, void*), GEN sig, GEN x, GEN tab, long fla
     tmpP = gettmpP(mulcxI(gabs(x, prec)));
     tmpN = gettmpN(tmpP);
     tab = intnuminit0(tmpN, tmpP, tab, prec);
-    zR = intnall(&D, &auxinvcos, tmpN, tmpP, tab, prec);
+    zR = intnall_i(&D, &auxinvcos, tmpN, tmpP, tab, prec);
     tmpP[2] = lneg((GEN)tmpP[2]);
-    zI = intnall(&D, &auxinvsin, gettmpN(tmpP), tmpP, tab, prec);
+    zI = intnall_i(&D, &auxinvsin, gettmpN(tmpP), tmpP, tab, prec);
     z = gadd(zR, mulcxI(zI));
   }
   else
@@ -1485,20 +1484,17 @@ GEN
 intmellininvshort(GEN sig, GEN x, GEN tab, long prec)
 {
   auxmel_t D;
-  GEN z, LX, tmpP;
-  long s;
+  GEN z, tmpP, LX = gneg(glog(x, prec));
 
   if (typ(sig) != t_VEC) sig = mkvec2(sig, gun);
   if (lg(sig) != 3 || !isinR((GEN)sig[1]) || !isinR((GEN)sig[2]))
     err(typeer,"intmellininvshort");
-  s = gsigne((GEN)sig[2]);
-  if (s < 0)  err(talker,"exponential increase in intmellininvshort");
-  if (s == 0) err(talker,"slowly decreasing intinvmellinshort impossible");
-  LX = gneg(glog(x, prec));
+  if (gsigne((GEN)sig[2]) <= 0)
+    err(talker,"need exponential decrease in intinvmellinshort");
   D.L = mulcxI(LX);
   D.prec = prec;
   tmpP = gettmpP((GEN)sig[2]);
-  z = intnall(&D, &auxmelshort, gettmpN(tmpP), tmpP, tab, prec);
+  z = intnall_i(&D, &auxmelshort, gettmpN(tmpP), tmpP, tab, prec);
   return gdiv(gmul(gexp(gmul((GEN)sig[1], LX), prec), z), Pi2n(1, prec));
 }
 
@@ -1546,7 +1542,7 @@ intfouriersin(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN x, GEN tab, lo
   auxint_t D;
   GEN z, tmp;
 
-  if (gcmp0(x)) return x;
+  if (gcmp0(x)) return gcopy(x);
   tmp = gmul(x, Pi2n(1, prec));
   D.a = tmp;
   D.R = NULL;
@@ -1780,9 +1776,9 @@ sumnumall(void *E, GEN (*eval)(GEN, void*), GEN a, GEN sig, GEN tab, long flag, 
   D.E = E;
   D.prec = prec;
   if (!flii)
-    S = intnall(&D, sgn > 0? (flag ? &auxsum1 : &auxsum0)
-                           : (flag ? &auxsumalt1 : &auxsumalt0),
-                    gzero, b, tab, prec);
+    S = intnall_i(&D, sgn > 0? (flag ? &auxsum1 : &auxsum0)
+                             : (flag ? &auxsumalt1 : &auxsumalt0),
+                      gzero, b, tab, prec);
   else
   {
     if (flag)
