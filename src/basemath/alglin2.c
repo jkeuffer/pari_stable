@@ -3529,6 +3529,8 @@ Frobeniusform(GEN V, long n)
   {
     GEN  P = (GEN)V[i];
     long d = degpol(P);
+    if (k+d-2 > n)
+      err(talker, "accuracy lost in matfrobenius");
     for (j=0; j<d-1; j++, k++)
       coeff(M,k+1,k) = un;
     for (j=0; j<d; j++)
@@ -3551,6 +3553,9 @@ build_frobeniusbc(GEN V, long n)
   {
     GEN  P = (GEN)V[i];
     long d = degpol(P);
+    if (d <= 0) continue;
+    if (l+d-2 > n)
+      err(talker, "accuracy lost in matfrobenius");
     coeff(M,k,i) = un;
     for (j=1; j<d; j++,k++,l++)
     {
@@ -3585,6 +3590,8 @@ GEN matfrobenius(GEN M, long flag)
   GEN D,A,N,B,R;
   GEN p3;
   if (typ(M)!=t_MAT) err(typeer,"matfrobenius");
+  if (gvar(M)==0) 
+    err(talker,"matrix coefficients must no use variable x");
   n = lg(M)-1;
   if (n && lg(M[1])!=n+1) err(mattype1,"matfrobenius");
   if (flag<2)
