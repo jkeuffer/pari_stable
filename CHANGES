@@ -63,6 +63,7 @@ BA 25- pbs in Fp_factor_irred (factoring over Fq a pol. defined over Fp)
    27- nfsubfields(nfinit(polcyclo(13))) --> impossible inverse Mod(0, 29)
    28- argument checks for element_mulid, nf_get_r1 (access to nf.sign)
    29- typo in quadhilbertimag (SEGV for very large discriminants)
+   30- wrong precision used in numerical derivation
 
   Changed
     1- DOS distribution archives (GPM removed)
@@ -77,6 +78,7 @@ XR  8- added flag in rnfconductor to check extension is abelian (under GRH)
    10- renamed library function gsize() to sizedigit()  [conflict with gtk]
 XR 11- bnrstark: check if N0 is too large (=> computation impossible)
 IK 12- let lisGEN() return NULL when EOF is met (was oo loop)
+HC 13- algorithm for Riemann zeta 
 
   Added
     1- file README.WIN
