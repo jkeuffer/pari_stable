@@ -6,6 +6,7 @@ test_extra="\
   compat\
   galois\
   ploth\
+  round4\
 "
 
 test_basic="\
