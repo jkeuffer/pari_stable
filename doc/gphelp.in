@@ -113,7 +113,7 @@ sub init
   open(IN,"translations") || die("Could not find translation file, docdir='$docdir'");
   while(<IN>)
   {
-    chop; @_ = split(/ *\@ */);
+    chomp; @_ = split(/ *\@ */);
     $key = shift(@_);
     $transl{$key} = join('@',@_);
   }
@@ -284,8 +284,7 @@ sub apropos_check
   return if (! /$help/);
 
   $_ = $current;
-  s/\\b{(.)}/\\$1/;
-  s/\{\}//g; s/\}.*//;
+  s/\\b{(.)}/\\$1/; s/\{\}//g;
   s/\\pow/^/; s/\\%/%/; s/\\bs/\\/; s/\\\#/\#/g;
   s,\+\$/\$-,+/-,;
   if (/ /) { push(@sentence_list,$_); } else { push(@list,$_); }
@@ -300,9 +299,9 @@ sub apropos
   @sentence_list = @list = "";
   while (<DOC>)
   {
-    if (/^\\(subsubsec[a-z]*|subsec[a-z]*|section|chapter){(.*)}/)
+    if (/^\\(subsubsec[a-z]*|subsec[a-z]*|section|chapter){/)
     {
-      $new = $2;
+      $new = &get_match($_,'{','}');
       &apropos_check();
       $current = $new; $line = "";
     }
@@ -325,7 +324,7 @@ EOT
 
 sub tex
 {
-  print TEX "$first";;
+  print TEX "$first";
   while (<DOC>)
   {
     last if /^\\(section|sub[sub]*sec)/i;
@@ -467,29 +466,63 @@ sub format_text
   }
 }
 
+# argument has the form s1${open}s2${close}s3
+# Return 's2'. Set $remainder to 's3'.
+sub get_match
+{
+  local ($_, $open, $close) = (shift,shift,shift);
+  local (@tmp, $arg,$parity,$ok);
+  local ($obr) = 1;
+  $parity = ($open eq $close);
+  /$open/; $_ = $'; # remove everything before (and including) first $open
+
+  while (1) {
+    @tmp = split(/($open|$close)/);
+    while ($_ = shift(@tmp)) {
+      $obr++ if (/^$open$/);
+      if ($parity && $obr == 2) { $ok = 1; last }
+      $obr-- if (/^$close$/);
+      if (!$obr) { $ok = 1; last }
+      $arg .= $_;
+    }
+    last if ($ok);
+    $_ = <DOC>;
+  }
+  $remainder = join('',@tmp);
+  return $arg;
+}
+
 sub detex
 {
-  s/^\\[a-z][^\{]*\{//; s/\n$//;
-  $_ = &basic_subst($_);
-  if (/([^\}]*)\.*\}\.*([^:\n]*)[ :.]*/)
+  local ($fun,$args);
+  chomp;
+  $fun = &get_match($_,'{','}');
+  $fun = &basic_subst($fun);
+  $_ = $remainder;
+  if (/^ *\$/)
   {
-    if ($raw)
-      { print("\@[startbold]$1\@[endbold]$2: "); }
-    else
-      { &TeXprint("\@[startbold]$1\@[endbold]$2:"); }
-    $_ = $';
+    $args = &basic_subst(&get_match($_,'\$','\$'));
+    $_ = $remainder;
   }
-  push(@text, $_);
+  $_ = &basic_subst($_);
+  $_ = <DOC> if (!$_);
+  if (/^ *\(/)
+  {
+    $args .= ' (' . &basic_subst(&get_match($_,'\(','\)')) . ')';
+    $_ = $remainder;
+  }
+  $args .= ":" if ($args !~ /: *$/ && ($args || $fun !~ /: */));
+
+  $fun = "\@[startbold]$fun\@[endbold]$args";
+  if ($raw) { print("$fun "); } else { &TeXprint($fun); } 
+
+  if ($_) { s/^ *://; &presubst(); }
   while (<DOC>)
   {
     last if /^\\(section|sub[sub]*sec)/i;
     &presubst();
   }
-  if ($raw)
-  {
-    print join("\n", @text);
-    return;
-  }
+  if ($raw) { print join("\n", @text); return; }
     
   &format_text();
   for (@f_text) { &TeXprint("$_"); }
@@ -500,8 +533,7 @@ sub inittr {
   @ou = qw( dollar nbrk startbold endbold startcode endcode 
 	    startpodcode endpodcode startlink endlink
 	    startbcode endbcode startbi endbi startit endit
-	    startword endword startlword endlword pm empty gt lt podleader
-	  );
+	    startword endword startlword endlword pm empty gt lt podleader );
 
   @tr{@ou} = map "\@[$_]", @ou;
   $tr{dollar} = '$' if $to_pod;
@@ -536,7 +568,7 @@ sub inittr {
 
 sub basic_subst
 {
-  $_ = shift;
+  local($_) = shift;
 
   s/([^\\])\\\{/$1`lBrAcE'/g;
   s/([^\\])\\\}/$1`rBrAcE'/g;
@@ -707,7 +739,7 @@ sub basic_subst
 }
 
 sub presubst {
-  s/\n$//;
+  chomp;
   if ($in_prog && /(\\|\@)eprog/)
   {
     $in_prog = 0;
@@ -896,7 +928,7 @@ sub color
 
 sub TeXprint
 {
-  $_= $_[0];
+  local($_) = $_[0];
   s/\@\[end(bold|code|bcode|bi|it)\]/\e[m$ch/g;
   s/\@\[start(bold|code|bcode|bi)\]/$cb\e[1m/g;
   s/\@\[startit\]/$cu\e[4m/g;

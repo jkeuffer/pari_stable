@@ -1136,14 +1136,14 @@ converted to irreducible form using the function \fun{GEN}{gred}{GEN x}.
 priori \kbd{z[1]} and \kbd{z[2]} can be of any type, but only certain types
 are useful and make sense.
 
-\subsec{Type \typ{PADIC} ($p$-adic numbers):}\sidx{p-adic
-number}\kbdsidx{t_PADIC} this type has a second codeword \kbd{[1]} which
-contains the following information: the $p$-adic precision (the exponent of
-$p$ modulo which the $p$-adic unit corresponding to \kbd{z} is defined if
-\kbd{z} is not~0), i.e.~one less than the number of significant $p$-adic
-digits, and the biased exponent of \kbd{z} (the bias being equal to
-\kbd{HIGHVALPBIT} here). This information can be handled using the
-following functions:
+\subsec{Type \typ{PADIC} ($p$-adic numbers):}%
+\sidx{p-adic number}\kbdsidx{t_PADIC} this type has a second codeword
+\kbd{[1]} which contains the following information: the $p$-adic precision
+(the exponent of $p$ modulo which the $p$-adic unit corresponding to
+\kbd{z} is defined if \kbd{z} is not~0), i.e.~one less than the number of
+significant $p$-adic digits, and the biased exponent of \kbd{z} (the bias
+being equal to \kbd{HIGHVALPBIT} here). This information can be handled
+using the following functions:
 
 \fun{long}{precp}{GEN z} returns the $p$-adic precision of \kbd{z}.
 
