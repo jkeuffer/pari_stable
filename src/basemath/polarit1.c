@@ -1974,7 +1974,7 @@ padicff(GEN x,GEN p,long pr)
   g = cgetg(3,t_COL); fa[1] = (long)g;
   e = cgetg(3,t_COL); fa[2] = (long)e;
   dx = ZX_disc(x);
-  g[1] = (long)p; e[1] = lstoi(pvaluation(dx,p,&q));
+  g[1] = (long)p; e[1] = lstoi(pvaluation(absi(dx),p,&q));
   g[2] = (long)q; e[2] = un;
 
   bas = nfbasis(x, &dK, 0, fa);
