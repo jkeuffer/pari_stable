@@ -2549,12 +2549,15 @@ break_loop(long numerr)
   }
   else
   {
-    Buffer *oldb = (Buffer*)bufstack->prev->value;
     msg = "Starting break loop (type 'break' to go back to GP)";
     old = s = get_analyseur();
-    t = oldb->buf;
-    /* something fishy, probably a ^C, or we overran analyseur */
-    if (!s || !s[-1] || s < t || s >= t + oldb->len) s = NULL;
+    if (bufstack->prev)
+    {
+      Buffer *oldb = (Buffer*)bufstack->prev->value;
+      t = oldb->buf;
+      /* something fishy, probably a ^C, or we overran analyseur */
+      if (!s || !s[-1] || s < t || s >= t + oldb->len) s = NULL;
+    }
     b->flenv = 1; oldinfile = infile;
   }
   init_filtre(&F, (void*)b);

@@ -107,6 +107,7 @@ MSo44- [gp: \x] missing 'break' statement in escape()
 BA 50- [FreeBSD:] PORTOBJFORMAT undefined by the system --> Configure fails
    51- rnfisnorm() [errors, SEGV]. Had to change the prototype.
 BA 52- Oxxx/Makefile was not compatible with BSD make.
+   53- errors in files read from .gprc, containing trap() --> SEGV
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).
