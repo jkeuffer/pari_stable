@@ -2337,7 +2337,8 @@ break_loop(long numerr)
   /* sanity check */
   s = _analyseur();
   t = oldb->buf;
-  if (s < t || s >= t + oldb->len) /* something fishy, probably a ^C */
+  if (!s[-1] || s < t || s >= t + oldb->len)
+   /* something fishy, probably a ^C, or we overran analyseur */
     print_prefixed_text(msg, NULL, NULL);
   else
     errcontext(msg, s, t);

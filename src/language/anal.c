@@ -572,6 +572,7 @@ match2(char *s, char c)
     char str[64];
     if (check_new_fun && (c == '(' || c == '=' || c == ',')) err_new_fun();
     sprintf(str,"expected character: '%c' instead of",c);
+    if (!s[-1]) s--; /* in case we read ahead and are finished (cf match)*/
     err(talker2,str,s,mark.start);
   }
 }
@@ -1077,7 +1078,7 @@ any_string()
 char *
 readstring(char *src, char *s)
 {
-  match2(src++, '"'); s = translate(&src, s, NULL,NULL);
+  match2(src, '"'); src++; s = translate(&src, s, NULL,NULL);
   match2(src, '"'); return s;
 }
 
