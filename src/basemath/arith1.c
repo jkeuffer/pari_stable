@@ -1636,7 +1636,7 @@ gcf(GEN x)
 GEN
 gcf2(GEN b, GEN x)
 {
-  return sfcont0(x,b,0);
+  return contfrac0(x,b,0);
 }
 
 GEN
@@ -1646,7 +1646,7 @@ gboundcf(GEN x, long k)
 }
 
 GEN
-sfcont0(GEN x, GEN b, long flag)
+contfrac0(GEN x, GEN b, long flag)
 {
   long lb,tb,i;
   GEN y;
@@ -1654,7 +1654,7 @@ sfcont0(GEN x, GEN b, long flag)
   if (!b || gcmp0(b)) return sfcont(x,x,flag);
   tb = typ(b);
   if (tb == t_INT) return sfcont(x,x,itos(b));
-  if (! is_matvec_t(tb)) err(typeer,"sfcont0");
+  if (! is_matvec_t(tb)) err(typeer,"contfrac0");
 
   lb=lg(b); if (lb==1) return cgetg(1,t_VEC);
   if (tb != t_MAT) return sfcont2(b,x,flag);
@@ -1667,7 +1667,7 @@ sfcont0(GEN x, GEN b, long flag)
 GEN
 sfcont(GEN x, GEN x1, long k)
 {
-  long  av,lx=lg(x),tx=typ(x),e,i,j,l,l1,l2,lx1,tetpil,f;
+  long  av,lx=lg(x),tx=typ(x),e,i,j,l,l1,lx1,tetpil,f;
   GEN   y,p1,p2,p3,p4,yp;
 
   if (is_scalar_t(tx))
@@ -1696,11 +1696,11 @@ sfcont(GEN x, GEN x1, long k)
       case t_FRAC: case t_FRACN:
         l=avma; lx1=lgefint(x[2]);
 	l1 = (long) ((double) BYTES_IN_LONG/4.0*46.093443*(lx1-2)+3);
-	if (k>0 && l1>k+1) l1=k+1;
+        if (k>0 && ++k > 0 && l1 > k) l1 = k; /* beware overflow */
 	if (l1>LGBITS) l1=LGBITS;
 	if (lgefint(x[1]) >= lx1) p1=icopy((GEN)x[1]);
 	else affii((GEN)x[1],p1=cgeti(lx1));
-	p2=icopy((GEN)x[2]); l2=avma; lx1=lg(x1);
+	p2=icopy((GEN)x[2]); lx1=lg(x1);
 	y=cgetg(l1,t_VEC); f=(x!=x1); i=0;
 	while (!gcmp0(p2) && i<=l1-2)
 	{
@@ -1733,8 +1733,7 @@ sfcont(GEN x, GEN x1, long k)
 	  cgiv((GEN)y[i]); --i; cgiv((GEN)y[i]);
 	  y[i]=laddsi(1,(GEN)y[i]);
 	}
-	setlg(y,i+1); l2=l2-((l1-i-1)<<TWOPOTBYTES_IN_LONG);
-	return gerepile(l,l2,y);
+	setlg(y,i+1); return gerepileupto(l, y);
     }
     err(typeer,"sfcont");
   }

@@ -130,6 +130,7 @@ GEN     chinois(GEN x, GEN y);
 GEN     classno(GEN x);
 GEN     classno2(GEN x);
 long    clcm(long a,long b);
+GEN     contfrac0(GEN x, GEN b, long flag);
 GEN     fibo(long n);
 GEN     fundunit(GEN x);
 GEN     gboundcf(GEN x, long k);
@@ -177,7 +178,6 @@ GEN     quaddisc(GEN x);
 GEN     racine(GEN a);
 GEN     regula(GEN x, long prec);
 GEN     sfcont(GEN x, GEN x1, long k);
-GEN     sfcont0(GEN x, GEN b, long flag);
 GEN     znstar(GEN x);
 
 /* arith2.c */

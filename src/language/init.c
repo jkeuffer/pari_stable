@@ -1737,7 +1737,7 @@ entree functions_basic[]={
 {"conj",18,(void*)gconj,2,"G"},
 {"conjvec",1,(void*)conjvec,2,"Gp"},
 {"content",18,(void*)content,4,"G"},
-{"contfrac",99,(void*)sfcont0,4,"GDGD0,L,"},
+{"contfrac",99,(void*)contfrac0,4,"GDGD0,L,"},
 {"contfracpnqn",18,(void*)pnqn,4,"G"},
 {"core",99,(void*)core0,4,"GD0,L,"},
 {"coredisc",99,(void*)coredisc0,4,"GD0,L,"},
