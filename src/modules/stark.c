@@ -2206,7 +2206,7 @@ RecCoeff3(GEN nf, RC_data *d, long prec)
   eps = gpowgs(stoi(10), min(-8, (d->G >> 1)));
   tB  = gpow(gmul2n(eps, N), gdivgs(gun, 1-N), DEFAULTPREC);
 
-  Bd    = gmin(B, tB);
+  Bd    = gceil(gmin(B, tB));
   p1    = gceil(gdiv(glog(Bd, DEFAULTPREC), dbltor(2.3026)));
   prec2 = max((prec << 1) - 2, (long)(itos(p1) * pariK1 + BIGDEFAULTPREC));
   nf2   = nfnewprec(nf, prec2);
