@@ -813,12 +813,12 @@ get_split_expo(GEN xalpha, GEN yalpha, GEN vperm)
 }
 
 static GEN
-init_red_mod_units(GEN bnf, GEN *ptN2, long prec)
+init_red_mod_units(GEN bnf, long prec)
 {
-  GEN s = gzero, p1,s1,mat, matunit = (GEN)bnf[3];
+  GEN z, s = gzero, p1,s1,mat, matunit = (GEN)bnf[3];
   long i,j, RU = lg(matunit);
 
-  if (RU == 1) { *ptN2 = NULL; return NULL; }
+  if (RU == 1) return NULL;
   mat = cgetg(RU,t_MAT);
   for (j=1; j<RU; j++)
   {
@@ -833,22 +833,27 @@ init_red_mod_units(GEN bnf, GEN *ptN2, long prec)
   }
   s = gsqrt(gmul2n(s,RU),prec);
   if (gcmpgs(s,100000000) < 0) s = stoi(100000000);
-  *ptN2 = s; return mat;
+  z = cgetg(3,t_VEC);
+  z[1] = (long)mat;
+  z[2] = (long)s; return z;
 }
 
-/* mat and N2 computed above. Reduce col (arch) mod mat */
+/* z computed above. Return unit exponents that would reduce col (arch) */
 static GEN
-red_mod_units(GEN col, GEN mat, GEN N2, long prec)
+red_mod_units(GEN col, GEN z, long prec)
 {
   long i,RU;
-  GEN x;
+  GEN x,mat,N2;
 
-  if (!mat) return NULL;
+  if (!z) return NULL;
+  mat= (GEN)z[1];
+  N2 = (GEN)z[2];
   RU = lg(mat); x = cgetg(RU+1,t_COL);
   for (i=1; i<RU; i++) x[i]=lreal((GEN)col[i]);
   x[RU] = (long)N2;
-  x = concatsp(mat, x);
-  x = (GEN)lll(x,prec)[RU];
+  x = lllintern(concatsp(mat,x), 1,prec);
+  if (!x) return NULL;
+  x = (GEN)x[RU];
   if (signe(x[RU]) < 0) x = gneg_i(x);
   if (!gcmp1((GEN)x[RU])) err(bugparier,"red_mod_units");
   setlg(x,RU); return x;
@@ -934,8 +939,9 @@ isprincipalarch(GEN bnf, GEN col, GEN Nx, GEN dx, long *pe)
   col = cleancol(col,N,prec); settyp(col, t_COL);
   if (RU > 1)
   { /* reduce mod units */
-    GEN u, N2, mat = init_red_mod_units(bnf,&N2,prec);
-    u = red_mod_units(col,mat,N2,prec);
+    GEN u, z = init_red_mod_units(bnf,prec);
+    u = red_mod_units(col,z,prec);
+    if (!u && z) return NULL;
     if (u) col = gadd(col, gmul(matunit, u));
   }
   s = gdivgs(glog(Nx,prec), N);
