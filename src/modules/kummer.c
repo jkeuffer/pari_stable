@@ -28,6 +28,7 @@ extern GEN vconcat(GEN A, GEN B);
 extern long int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *newx);
 extern GEN mul_content(GEN cx, GEN cy);
 extern GEN RXQX_red(GEN P, GEN T);
+extern GEN prodid(GEN nf, GEN I);
 
 extern GEN famat_inv(GEN f);
 extern GEN famat_pow(GEN f, GEN n);
@@ -653,22 +654,22 @@ isvirtualunit(GEN bnf, GEN v, GEN cycgen, GEN cyc, GEN gell, long rc)
 static GEN
 steinitzaux(GEN nf, GEN id, GEN polrel)
 {
-  long i, degKz = lg(id)-1, degK = degpol(nf[1]);
-  GEN V = dummycopy(id),vecid,matid,pseudomat,pid;
+  long i, l = lg(id);
+  GEN x, A, I, matid = idmat(degpol(nf[1]));
 
-  vecid = cgetg(degKz+1,t_VEC); matid = idmat(degK);
-  for (i=1; i<=degKz; i++) vecid[i] = (long)matid;
-  for (i=1; i<=degKz; i++)
+  A = cgetg(l, t_VEC);
+  I = cgetg(l, t_VEC);
+  for (i = 1; i < l; i++)
   {
-    GEN v = (GEN)V[i];
+    GEN v = (GEN)id[i];
     if (typ(v) == t_POL) { v = dummycopy(v); setvarn(v, 0); }
-    V[i] = (long)gmod(v, polrel);
+    A[i] = (long)gmod(v, polrel);
+    I[i] = (long)matid;
   }
-  pseudomat = cgetg(3,t_VEC);
-  pseudomat[1] = (long)vecpol_to_mat(V, degpol(polrel));
-  pseudomat[2] = (long)vecid;
-  pid = (GEN)nfhermite(nf,pseudomat)[2];
-  return factorback(pid, nf); /* product */
+  x = cgetg(3,t_VEC);
+  x[1] = (long)vecpol_to_mat(A, degpol(polrel));
+  x[2] = (long)I;
+  return prodid(nf, (GEN)nfhermite(nf,x)[2]);
 }
 
 static GEN
