@@ -1549,7 +1549,6 @@ sqrtr_abs(GEN x, long s)
 {
   pari_sp av, av0;
   long l, l1, i, ex;
-  double beta;
   GEN y, a, t;
 
   if (!s) return realzero_bit(expo(x) >> 1);
@@ -1569,7 +1568,7 @@ sqrtr_abs(GEN x, long s)
     a[1] = evalsigne(1) | evalexpo(0);
 #ifdef LONG_IS_64BIT
     t[2] = (a[2] >> 1);
-    t[3] = (a[2] << BITS_IN_LONG-1) | (a[3] >> 1);
+    t[3] = (a[2] << (BITS_IN_LONG-1)) | (a[3] >> 1);
     t[2] = (long)sqrtu2(t+2);/* ~ sqrt(a) */
 #else
     beta = sqrt((double)(ulong)a[2]);
