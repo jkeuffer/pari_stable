@@ -3056,7 +3056,7 @@ MORE:
     if (low_stack(limpile, stack_lim(av1,1)))
     {
       if(DEBUGMEM>1) err(warnmem,"buchall");
-      gerepileall(av1,7, &W,&C,&B,&pdep,&extramat,&extraC,&first_nz);
+      gerepileall(av1,6, &W,&C,&B,&pdep,&extramat,&extraC);
     }
     list_jideal = NULL;
     W = hnfadd(W,vperm,&pdep,&B,&C, extramat,extraC);
