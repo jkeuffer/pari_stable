@@ -48,6 +48,8 @@ Done for version 2.2.2 (released ??/??/2001):
    13- bnfinit could miss some relations in the "small norm" phase
    14- x % y incorrect when y < 0 inexact (2 % -3. --> -1.)
    15- typo in gcdreal (result < 0) [introduced in 2.2.1]
+   16- some obscure problems in rnfkummer
+   17- not enough GC in hnflll
 
   Changes
     1- allow compressing *.dvi files for the online help system
@@ -65,6 +67,8 @@ Done for version 2.2.2 (released ??/??/2001):
    10- allow factorback(x, e) for prod x[i]^e[i]
    11- don't store empty lines in history [cf 2.2.1 F57]
    12- extend x \ y, x \/ y and divrem(x,y)
+XR 13- improvements in bnrstark (try harder to find modulus, need less memory)
+   14- global(x): ignore if x already global (used to raise a warning)
 
   Added
 BA  1- New function 'vectorsmall'.
