@@ -25,11 +25,25 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define lswap(a,b) { long _x = a; a = b; b = _x; }
 #define pswap(a,b) { GEN *_x = a; a = b; b = _x; }
 #define both_odd(a,b) ((a)&(b)&1)
+#define addshift(x,y) addshiftpol((x),(y),1)
 
+extern GEN FpXQX_safegcd(GEN P, GEN Q, GEN T, GEN p);
+extern GEN ZY_ZXY_resultant(GEN A, GEN B0, long *lambda);
+extern GEN addshiftpol(GEN x, GEN y, long d);
 extern GEN cauchy_bound(GEN p);
 extern GEN gassoc_proto(GEN f(GEN,GEN),GEN,GEN);
+extern GEN gauss_intern(GEN a, GEN b);
+extern GEN indexpartial(GEN P, GEN DP);
+extern GEN qf_disc(GEN x, GEN y, GEN z);
+extern GEN to_polmod(GEN x, GEN mod);
+extern GEN vconcat(GEN Q1, GEN Q2);
+extern int approx_0(GEN x, GEN y);
+extern long FpX_split_berlekamp(GEN *t, GEN pp);
 extern long u_center(ulong u, ulong p, ulong ps2);
-extern GEN Fq_mul(GEN x, GEN y, GEN T, GEN p);
+extern void gerepilemanycoeffs2(gpmem_t av, GEN x, int n, GEN y, int o);
+
+GEN matratlift(GEN M, GEN mod, GEN amax, GEN bmax, GEN denom);
+GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den);
 
 /* compute Newton sums S_1(P), ... , S_n(P). S_k(P) = sum a_j^k, a_j root of P
  * If N != NULL, assume p-adic roots and compute mod N [assume integer coeffs]
@@ -808,10 +822,8 @@ nextK:
       if (lc) lc = absi(leading_term(pol));
       lcpol = lc? gmul(lc,pol): pol;
       if (DEBUGLEVEL > 2)
-      {
-        fprintferr("\n"); msgtimer("to find factor %Z",y);
-        fprintferr("remaining modular factor(s): %ld\n", lfamod);
-      }
+        fprintferr("\nfound factor %Z\nremaining modular factor(s): %ld\n",
+                   y, lfamod);
       continue;
     }
 
@@ -935,42 +947,16 @@ root_bound(GEN P0)
   return y;
 }
 
-extern GEN gscal(GEN x,GEN y);
-extern GEN sqscal(GEN x);
-
-/* return Gram-Schmidt orthogonal basis (f) associated to (e), B is the
- * vector of the (f_i . f_i)*/
-GEN
-gram_schmidt(GEN e, GEN *ptB)
+static GEN
+ZM_HNFimage(GEN x)
 {
-  long i,j,lx = lg(e);
-  GEN f = dummycopy(e), B, iB;
-
-  B = cgetg(lx, t_VEC);
-  iB= cgetg(lx, t_VEC);
-
-  for (i=1;i<lx;i++)
-  {
-    GEN p1 = NULL;
-    gpmem_t av;
-    B[i] = (long)sqscal((GEN)f[i]);
-    iB[i]= linv((GEN)B[i]); av = avma;
-    for (j=1; j<i; j++)
-    {
-      GEN mu = gmul(gscal((GEN)e[i],(GEN)f[j]), (GEN)iB[j]);
-      GEN p2 = gmul(mu, (GEN)f[j]);
-      p1 = p1? gadd(p1,p2): p2;
-    }
-    p1 = p1? gerepileupto(av, gsub((GEN)e[i], p1)): (GEN)e[i];
-    f[i] = (long)p1;
-  }
-  *ptB = B; return f;
+  return (lg(x) > 50)? hnflll_i(x, NULL, 1): hnfall_i(x, NULL, 1);
 }
 
 GEN
 special_pivot(GEN x)
 {
-  GEN t, H = hnfall_i(x, NULL, 1);
+  GEN t, H = ZM_HNFimage(x);
   long i,j, l = lg(H), h = lg(H[1]);
   for (i=1; i<h; i++)
   {
@@ -1017,21 +1003,8 @@ norml2_spec(GEN x, long prec)
   return S;
 }
 
-/* each entry < 2^e */
-long
-init_padic_prec(long e, int BitPerFactor, long r, double LOGp2)
-{
-  long b, goodb = (long) (((e - BitPerFactor*r)) * LOGp2);
-  b = (long) ((e - 32)*LOGp2); if (b < goodb) goodb = b;
-  return goodb;
-}
-
-extern GEN sindexrank(GEN x);
-extern GEN vconcat(GEN Q1, GEN Q2);
-extern GEN gauss_intern(GEN a, GEN b);
-
 /* bound for q(vS) := || vS ||_2^2 */
-double
+static double
 bound_vS(GEN ML)
 {
   gpmem_t av = avma;
@@ -1099,11 +1072,11 @@ check_factors(GEN P, GEN ML, GEN bound, GEN famod, GEN pa)
 }
 
 long
-LLL_check_progress(GEN Bnorm, GEN m, long r, long C, GEN *ML,
+LLL_check_progress(GEN Bnorm, GEN m, long C, GEN *ML, double *BvS, long *BPF,
                    long id, long *ti_LLL)
 {
   GEN B, norm, u, up;
-  long i, s, R;
+  long i, R, r = lg(*ML)-1;
 
   if (DEBUGLEVEL>2) (void)gentimer(id);
   m = lllint_ip(m, 4);
@@ -1112,12 +1085,19 @@ LLL_check_progress(GEN Bnorm, GEN m, long r, long C, GEN *ML,
   norm = GS_norms(B, DEFAULTPREC);
   for (R=lg(m)-1; R > 0; R--)
     if (cmprr((GEN)norm[R], Bnorm) < 0) break;
-  if (R > r) return R; /* no progress */
   if (R <= 1)
   {
     if (R == 0) err(bugparier,"LLL_cmbf [no factor]");
     return R;
   }
+
+  if (R >= r && *BPF < 7)
+  {
+    *BPF+= 2;
+    if (DEBUGLEVEL>2)
+      fprintferr("LLL_cmbf: increasing BitPerFactor = %ld\n", *BPF);
+  }
+  if (R > r) return R; /* no progress */
 
   setlg(u, R+1);
   for (i=1; i<=R; i++) setlg(u[i], r+1);
@@ -1126,11 +1106,11 @@ LLL_check_progress(GEN Bnorm, GEN m, long r, long C, GEN *ML,
   up = FpM_image(u, stoi(27449)); /* inexpensive test */
   if (lg(up) != lg(u))
   {
-    s = R; u = image(u); R = lg(u)-1;
-    if (DEBUGLEVEL>2 && R < s)
-      fprintferr("LLL_cmbf: free rank decrease = %ld\n", R - s);
+    if (DEBUGLEVEL>2) fprintferr("LLL_cmbf: rank decrease\n");
+    u = ZM_HNFimage(u);
   }
-  *ML = gmul(*ML, u); return R;
+  *ML  = gmul(*ML, u);
+  *BvS = bound_vS(*ML); return lg(u)-1;
 }
 
 /* Recombination phase of Berlekamp-Zassenhaus algorithm using a variant of
@@ -1143,9 +1123,9 @@ LLL_check_progress(GEN Bnorm, GEN m, long r, long C, GEN *ML,
 static GEN
 LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
 {
-  const long N = 2; /* # of traces added at each step */
+  const long N0 = 2; /* # of traces added at each step */
   long BitPerFactor = 3; /* nb bits in p^(a-b) / modular factor */
-  long i,j,C,r,tmax,n0,dP = degpol(P);
+  long i,j,tmax,n0,dP = degpol(P);
   double logp = log((double)itos(p)), LOGp2 = LOG2/logp;
   double b0 = log((double)dP*2) / logp, logBr, BvS;
   GEN lP, Br, Bnorm, T, T2, TT, ML, m, list;
@@ -1158,7 +1138,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
   if (lP) Br = gmul(lP, Br);
   logBr = gtodouble(glog(Br, DEFAULTPREC)) / logp;
 
-  n0 = r = lg(famod) - 1;
+  n0 = lg(famod) - 1;
   list = cgetg(n0+1, t_COL);
 
   av = avma; lim = stack_lim(av, 1);
@@ -1167,41 +1147,39 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
   for (i=1; i<=n0; i++)
   {
     TT[i] = 0;
-    T [i] = lgetg(N+1, t_COL);
+    T [i] = lgetg(N0+1, t_COL);
   }
   ML = idmat(n0);
   BvS = (double)n0;
   /* tmax = current number of traces used (and computed so far) */
-  for (tmax = 0;; tmax += N)
+  for (tmax = 0;; tmax += N0)
   {
-    long bmin, b, goodb, S = tmax + N;
-
+    long C, D, bmin, b, goodb, S = tmax + N0, r = lg(ML)-1;
+    double t;
+    
     if (DEBUGLEVEL>2)
       fprintferr("\nLLL_cmbf: %ld potential factors (tmax = %ld)\n", r, tmax);
 
-    C = (long)ceil(sqrt(N*n0*n0/4. / BvS));
-    Bnorm = dbltor((BvS * C*C + N*n0*n0/4.) * 1.00001);
-
+    /* compute Newton sums (possibly relifting first) */
     bmin = (long)ceil(b0 + S*logBr);
     if (a <= bmin)
     {
-      a = (long)ceil(bmin + 3*N*logBr) + 1; /* enough for 3 more rounds */
+      a = (long)ceil(bmin + 3*N0*logBr) + 1; /* enough for 3 more rounds */
       pa = gpowgs(p,a);
       famod = hensel_lift_fact(P,famod,NULL,p,pa,a);
       for (i=1; i<=n0; i++) TT[i] = 0;
     }
-
     for (i=1; i<=n0; i++)
     {
       GEN p1 = (GEN)T[i];
       GEN p2 = polsym_gen((GEN)famod[i], (GEN)TT[i], S, NULL, pa);
       TT[i] = (long)p2;
       p2 += 1+tmax; /* ignore traces number 0...tmax */
-      for (j=1; j<=N; j++) p1[j] = p2[j];
+      for (j=1; j<=N0; j++) p1[j] = p2[j];
       if (lP)
       { /* make Newton sums integral */
         GEN lPpow = gpowgs(lP, tmax);
-        for (j=1; j<=N; j++)
+        for (j=1; j<=N0; j++)
         {
           lPpow = mulii(lPpow,lP);
           p1[j] = lmulii((GEN)p1[j], lPpow);
@@ -1209,42 +1187,53 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
       }
     }
 
+    /* compute bound */
     av2 = avma;
-    T2 = gmod( gmul(T, ML), pa );
-    r = lg(T2)-1;
-    goodb = init_padic_prec(gexpo(T2), BitPerFactor, r, LOGp2);
+    T2 = centermod( gmul(T, ML), pa );
+    goodb = (long) ((gexpo(T2) - max(32, BitPerFactor*r)) * LOGp2);
     b = max(bmin, goodb);
     if (DEBUGLEVEL>2) fprintferr("LLL_cmbf: (a, b) = (%ld, %ld)\n", a,b);
 
-    m = concatsp( vconcat( gscalsmat(C, r), gdivround(T2, gpowgs(p,b)) ),
-                  vconcat( zeromat(r, N),   gscalmat(gpowgs(p,a-b), N) ) );
+    t = sqrt(N0*n0*n0/4. / BvS);
+#if 0
+    if (t < 0.5) {
+      ML = lllint_ip(ML,1000);
+      BvS = bound_vS(ML);
+      t = sqrt(N0*n0*n0/4. / BvS);
+    }
+#endif
+    if (t < 0.5) {
+      C = 1; D = (long)ceil(1/t);
+      Bnorm = dbltor((BvS + D*D*N0*n0*n0/4.) * 1.00001);
+    } else {
+      C = (long)ceil(t); D = 1;
+      Bnorm = dbltor((BvS * C*C + N0*n0*n0/4.) * 1.00001);
+    }
+
+    /* build lattice */
+    if (D == 1)
+      m = concatsp( vconcat( gscalsmat(C, r), gdivround(T2, gpowgs(p,b)) ),
+                    vconcat( zeromat(r, N0),   gscalmat(gpowgs(p,a-b), N0) ) );
+    else
+      m = concatsp( vconcat( idmat(r), gmulsg(D,gdivround(T2, gpowgs(p,b))) ),
+                    vconcat( zeromat(r, N0),   gscalmat(gmulsg(D,gpowgs(p,a-b)), N0) ) );
     /*     [  C        0      ]
      * m = [                  ]   square matrix
      *     [ T2   p^(a-b) I_s ]   T2 = T * ML  truncated
      */
-    i = LLL_check_progress(Bnorm, m, r, C, &ML,/*dbg:*/ id, &ti_LLL);
-    if (i > r)
-    { /* no progress. Note: even if i == r we may have made some progress */
-      avma = av2;
-      if (BitPerFactor < 7)
-      {
-        BitPerFactor += 2;
-        if (DEBUGLEVEL>2)
-          fprintferr("LLL_cmbf: increasing BitPerFactor = %ld\n", BitPerFactor);
-      }
-      continue;
-    }
-    r = i;
-    if (r == 1) { list = _col(P); break; }
+    i = LLL_check_progress(Bnorm, m, C, &ML, &BvS, &BitPerFactor,
+                           /*dbg:*/ id, &ti_LLL);
+    if (i == 1) { list = _col(P); break; }
+    if (i > r) { avma = av2; continue; } /* no progress */
+
+    ML = gerepileupto(av2, ML);
 
     if (low_stack(lim, stack_lim(av,1)))
     {
       if(DEBUGMEM>1) err(warnmem,"LLL_cmbf");
       gerepileall(av, 4, &ML, &TT, &T, &famod);
     }
-    else ML = gerepileupto(av2, ML);
-    BvS = bound_vS(ML);
-    if (rec && r*rec >= n0) continue;
+    if (rec && i*rec >= n0) continue;
 
     av2 = avma;
     if (DEBUGLEVEL>2) (void)gentimer(id);
@@ -1369,7 +1358,6 @@ combine_factors(GEN target, GEN famod, GEN p, long klim, long hint)
   get_timer(id); return res;
 }
 
-extern long FpX_split_berlekamp(GEN *t, GEN pp);
 #define u_FpX_div(x,y,p) u_FpX_divrem((x),(y),(p),(0),NULL)
 
 /* Assume a squarefree, degree(a) > 0, a(0) != 0 */
@@ -2579,8 +2567,6 @@ glcm(GEN x, GEN y)
   return gerepileupto(av,p2);
 }
 
-extern int approx_0(GEN x, GEN y);
-
 /* x + r ~ x ? Assume x,r are t_POL, deg(r) <= deg(x) */
 static int
 pol_approx0(GEN r, GEN x, int exact)
@@ -3161,8 +3147,6 @@ pseudorem_i(GEN x, GEN y, GEN mod)
 GEN
 pseudorem(GEN x, GEN y) { return pseudorem_i(x,y, NULL); }
 
-extern void gerepilemanycoeffs2(gpmem_t av, GEN x, int n, GEN y, int o);
-
 /* assume dx >= dy, y non constant
  * Compute z,r s.t lc(y)^(dx-dy+1) x = z y + r */
 GEN
@@ -3504,9 +3488,6 @@ Lazard2(GEN F, GEN x, GEN y, long n)
   x = Lazard(x,y,n-1); return gdivexact(gmul(x,F),y);
 }
 
-extern GEN addshiftpol(GEN x, GEN y, long d);
-#define addshift(x,y) addshiftpol((x),(y),1)
-
 static GEN
 nextSousResultant(GEN P, GEN Q, GEN Z, GEN s)
 {
@@ -3703,9 +3684,6 @@ polresultant0(GEN x, GEN y, long v, long flag)
 /*                  GCD USING SUBRESULTANT                         */
 /*                                                                 */
 /*******************************************************************/
-extern GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den);
-extern GEN to_polmod(GEN x, GEN mod);
-
 GEN
 srgcd(GEN x, GEN y)
 {
@@ -3796,8 +3774,6 @@ srgcd(GEN x, GEN y)
   }
   return gerepileupto(av,x);
 }
-
-extern GEN qf_disc(GEN x, GEN y, GEN z);
 
 GEN
 poldisc0(GEN x, long v)
@@ -4069,12 +4045,6 @@ newtonpoly(GEN x, GEN p)
   free(vval); return y;
 }
 
-extern int cmp_pol(GEN x, GEN y);
-extern GEN ZY_ZXY_resultant(GEN A, GEN B0, long *lambda);
-extern GEN indexpartial(GEN P, GEN DP);
-GEN matratlift(GEN M, GEN mod, GEN amax, GEN bmax, GEN denom);
-GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den);
-
 /* Factor polynomial a on the number field defined by polynomial t */
 GEN
 polfnf(GEN a, GEN t)
@@ -4128,11 +4098,6 @@ polfnf(GEN a, GEN t)
   }
   return gerepilecopy(av, sort_factor(y, cmp_pol));
 }
-
-extern GEN FpXQX_safegcd(GEN P, GEN Q, GEN T, GEN p);
-extern GEN FpM(GEN z, GEN p);
-extern GEN polpol_to_mat(GEN v, long n);
-extern GEN mat_to_polpol(GEN x, long v, long w);
 
 static GEN
 to_frac(GEN a, GEN b)

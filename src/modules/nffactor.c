@@ -21,19 +21,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "parinf.h"
 
-extern int cmbf_precs(GEN q, GEN A, GEN B, long *a, long *b, GEN *qa, GEN *qb);
-extern int isrational(GEN x);
-extern GEN mulmat_pol(GEN A, GEN x);
-extern GEN dim1proj(GEN prh);
-extern GEN centermod_i(GEN x, GEN p, GEN ps2);
-extern GEN max_modulus(GEN p, double tau);
-extern double bound_vS(GEN MLinv);
-extern long LLL_check_progress(GEN Bnorm, GEN m, long r, long C, GEN *ML, long id, long *ti_LLL);
 extern GEN GS_norms(GEN B, long prec);
+extern GEN RXQX_divrem(GEN x, GEN y, GEN T, GEN *pr);
+extern GEN RXQX_red(GEN P, GEN T);
 extern GEN apply_kummer(GEN nf,GEN pol,GEN e,GEN p);
+extern GEN centermod_i(GEN x, GEN p, GEN ps2);
+extern GEN dim1proj(GEN prh);
 extern GEN hensel_lift_fact(GEN pol, GEN fact, GEN T, GEN p, GEN pev, long e);
 extern GEN initgaloisborne(GEN T, GEN dn, long prec, GEN *ptL, GEN *ptprep, GEN *ptdis);
-extern void remake_GM(GEN nf, long prec, nffp_t *F);
+extern GEN max_modulus(GEN p, double tau);
+extern GEN mulmat_pol(GEN A, GEN x);
 extern GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den);
 extern GEN polsym_gen(GEN P, GEN y0, long n, GEN T, GEN N);
 extern GEN sort_factor(GEN y, int (*cmp)(GEN,GEN));
@@ -41,8 +38,10 @@ extern GEN special_pivot(GEN x);
 extern GEN trivfact(void);
 extern GEN vandermondeinverse(GEN L, GEN T, GEN den, GEN prep);
 extern GEN vconcat(GEN A, GEN B);
-extern GEN RXQX_red(GEN P, GEN T);
-extern GEN RXQX_divrem(GEN x, GEN y, GEN T, GEN *pr);
+extern int cmbf_precs(GEN q, GEN A, GEN B, long *a, long *b, GEN *qa, GEN *qb);
+extern int isrational(GEN x);
+extern long LLL_check_progress(GEN Bnorm, GEN m, long C, GEN *ML, double *BvS, long *BPF, long id, long *ti_LLL);
+extern void remake_GM(GEN nf, long prec, nffp_t *F);
 #define RXQX_div(x,y,T) RXQX_divrem((x),(y),(T),NULL)
 #define RXQX_rem(x,y,T) RXQX_divrem((x),(y),(T),ONLY_REM)
 
@@ -988,25 +987,19 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long a, long rec)
      * m = [           ]   square matrix
      *     [ T2r    PRK]   T2r = Tra * ML  truncated
      */
-    i = LLL_check_progress(Bnorm, m, r, C, &ML, /*dbg:*/ id, &ti_LLL);
-    if (i > r)
-    { /* no progress. Note: even if i == r we may have made some progress */
-      avma = av2; BitPerFactor += 2;
-      if (DEBUGLEVEL>2)
-        fprintferr("LLL_cmbf: increasing BitPerFactor = %ld\n", BitPerFactor);
-      continue;
-    }
-    r = i;
-    if (r == 1) { list = _col(P); break; }
+    i = LLL_check_progress(Bnorm, m, C, &ML, &BvS, &BitPerFactor,
+                           /*dbg:*/ id, &ti_LLL);
+    if (i == 1) { list = _col(P); break; }
+    if (i > r) { avma = av2; continue; } /* no progress */
+
+    ML = gerepileupto(av2, ML);
 
     if (low_stack(lim, stack_lim(av,1)))
     {
       if(DEBUGMEM>1) err(warnmem,"nf_LLL_cmbf");
       gerepileall(av, 8, &ML,&TT,&Tra,&famod,&GSmin,&PRK,&PRKinv,&pa);
     }
-    else ML = gerepileupto(av2, ML);
-    BvS = bound_vS(ML);
-    if (rec && r*rec >= n0) continue;
+    if (rec && i*rec >= n0) continue;
 
     av2 = avma;
     if (DEBUGLEVEL>2) (void)gentimer(id);

@@ -122,6 +122,7 @@ GEN     hnf(GEN x);
 GEN     hnfall(GEN x);
 GEN     hnfhavas(GEN x);
 GEN     hnflll(GEN x);
+GEN     hnflll_i(GEN A, GEN *ptB, int remove);
 GEN     hnfmod(GEN x, GEN detmat);
 GEN     hnfmodid(GEN x,GEN p);
 GEN     hnfperm(GEN x);
