@@ -1587,12 +1587,12 @@ END:
 
 extern GEN addmulXn(GEN x, GEN y, long d);
 
-/* compute phi^(m)_s(x); s must be an integer */ 
-GEN 
+/* compute phi^(m)_s(x); s must be an integer */
+GEN
 phi_ms(ulong p, GEN q, long m, GEN s, long x, GEN vz)
 {
   long xp = x % p;
-  GEN p1, p2; 
+  GEN p1, p2;
 
   if (!xp) return gzero;
   p1 = Fp_pow((GEN)vz[xp], addis(s, m), q); /* vz[x] = Teichmuller(x) */
@@ -1600,9 +1600,9 @@ phi_ms(ulong p, GEN q, long m, GEN s, long x, GEN vz)
   return modii(mulii(p1,p2), q);
 }
 
-/* compute the values of the twisted partial 
+/* compute the values of the twisted partial
    zeta function Z_f(a, c, s) for a in va */
-GEN 
+GEN
 twistpartialzeta(GEN p, GEN q, long f, long c, GEN va, GEN cff)
 {
   long j, k, lva = lg(va)-1, a, N = lg(cff)-1, N0 = N;
@@ -1611,12 +1611,12 @@ twistpartialzeta(GEN p, GEN q, long f, long c, GEN va, GEN cff)
   GEN cyc, psm, invden, rep, ser;
 
   cyc = gdiv(gsubgs(gpowgs(y, c), 1), gsubgs(y, 1));
-  psm = polsym(cyc, degpol(cyc) - 1); 
+  psm = polsym(cyc, degpol(cyc) - 1);
   eta = gmodulcp(y, cyc);
   one = gmodulsg(1, q); /* Mod(1, q); */
   mon = gaddsg(1, x);
   den = gsubsg(1, gmul(gpowgs(gmul(one,eta), f), gpowgs(gmul(one,mon), f)));
-  /* FIXME: get rid of unnecessary coeffs; 
+  /* FIXME: get rid of unnecessary coeffs;
      should be done in coeff_of_phi_ms? */
   while (gcmp0((GEN)cff[N0])) N0--;
   den = gadd(den, zeroser(0, N0+5));
@@ -1634,7 +1634,7 @@ twistpartialzeta(GEN p, GEN q, long f, long c, GEN va, GEN cff)
   {
     GEN p1 = gzero;
     if (DEBUGLEVEL > 2 && !(j%50))
-      fprintferr("  twistpartialpowser: %ld\%\n", 100*j/lva);      
+      fprintferr("  twistpartialpowser: %ld\%\n", 100*j/lva);
     for (k = 1; k <= N; k++)
     {
       pari_sp av2 = avma;
@@ -1642,7 +1642,7 @@ twistpartialzeta(GEN p, GEN q, long f, long c, GEN va, GEN cff)
       p1 = gerepileupto(av2, addii(p1, mulii((GEN)cff[k], p2)));
     }
     rep[j] = lmodii(p1, q);
-    if (j < lva) 
+    if (j < lva)
     {
       long e = va[j+1] - a, i;
       GEN z = eta;
@@ -1673,12 +1673,12 @@ twistpartialzeta(GEN p, GEN q, long f, long c, GEN va, GEN cff)
   return rep;
 }
 
-/* initialize the roots of unity for the computation 
+/* initialize the roots of unity for the computation
    of the Teichmuller character (also the values of f and c) */
 GEN
 init_teich(ulong p, GEN q, long prec)
 {
-  GEN vz, gp = stoi(p);
+  GEN vz, gp = utoi(p);
   long av = avma, j;
 
   if (p == 2UL)
@@ -1699,7 +1699,7 @@ init_teich(ulong p, GEN q, long prec)
   return gerepileupto(av, gcopy(vz));
 }
 
-  /* compute the first N coefficients of the Mahler expansion 
+  /* compute the first N coefficients of the Mahler expansion
      of phi^m_s skipping the first one (which is zero) */
 GEN
 coeff_of_phi_ms(ulong p, GEN q, long m, GEN s, long N, GEN vz)
@@ -1746,41 +1746,32 @@ zetap(GEN s)
   N  = itos(muluu(p,prec)) + xp; /* FIXME: crude estimation */
   q  = gpowgs(gp, prec + xp);
 
-  /* initialize the roots of unity for the computation 
+  /* initialize the roots of unity for the computation
      of the Teichmuller character (also the values of f and c) */
   if (DEBUGLEVEL > 1) fprintferr("zetap: computing (p-1)th roots of 1\n");
   vz = init_teich(p, q, prec + xp);
-  if (p == 2UL)
-  {  
-    f = 4;
-    c = 3;
-  }
-  else
-  { 
-    f = (long)p;
-    c = 2;      
-  }
+  if (p == 2UL) {  f = 4; c = 3; } else { f = (long)p; c = 2; }
 
-  /* compute the first N coefficients of the Mahler expansion 
+  /* compute the first N coefficients of the Mahler expansion
      of phi^(-1)_s skipping the first one (which is zero) */
-  if (DEBUGLEVEL > 1) 
+  if (DEBUGLEVEL > 1)
     fprintferr("zetap: computing Mahler expansion of phi^(-1)_s\n");
   cff = coeff_of_phi_ms(p, q, -1, is, N, vz);
 
-  /* compute the coefficients of the power series corresponding 
+  /* compute the coefficients of the power series corresponding
      to the twisted partial zeta function Z_f(a, c, s) for a in va */
-  /* The line below looks a bit stupid but it is to keep the 
+  /* The line below looks a bit stupid but it is to keep the
      possibility of later adding gp-adic Dirichlet L-functions */
   va = perm_identity(f - 1);
-  if (DEBUGLEVEL > 1) 
+  if (DEBUGLEVEL > 1)
     fprintferr("zetap: computing twisted partial zeta functions\n");
   vtz = twistpartialzeta(gp, q, f, c, va, cff);
-  
-  /* sum over all a's the coefficients of the twisted 
+
+  /* sum over all a's the coefficients of the twisted
      partial zeta functions and integrate */
-  if (DEBUGLEVEL > 1) 
+  if (DEBUGLEVEL > 1)
     fprintferr("zetap: summing up and multiplying by correcting factor\n");
-  
+
   /* sum and multiply by the corrective factor */
   cft = gsubgs(gmulsg(c, phi_ms(p, q, -1, is, c, vz)), 1);
   val = gdiv(sum(vtz, 1, f-1), cft);
@@ -1808,7 +1799,7 @@ gzeta(GEN x, long prec)
 
     case t_INTMOD: err(typeer,"gzeta");
 
-    case t_PADIC: 
+    case t_PADIC:
       return zetap(x);
 
     case t_SER: err(impl,"zeta of power series");
@@ -2078,15 +2069,15 @@ gpolylog(long m, GEN x, long prec)
   return NULL; /* not reached */
 }
 
-void    
+void
 gpolylogz(long m, GEN x, GEN y)
-{       
+{
   long prec = precision(y);
   pari_sp av=avma;
 
   if (!prec) err(infprecer,"gpolylogz");
   gaffect(gpolylog(m,x,prec),y); avma=av;
-} 
+}
 
 GEN
 polylog0(long m, GEN x, long flag, long prec)
