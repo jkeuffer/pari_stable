@@ -1809,7 +1809,7 @@ GEN
 rootpadicfast(GEN f, GEN p, long e)
 {
   pari_sp av = avma;
-  GEN y, S = FpX_roots(f, p); /*no multiplicity*/
+  GEN y, S = FpX_roots(FpX_red(f,p), p); /*no multiplicity*/
   if (lg(S)==1) { avma = av; return cgetg(1,t_COL); }
   S = gclone(S); avma = av;
   y = rootpadicliftroots(f,S,p,e);
