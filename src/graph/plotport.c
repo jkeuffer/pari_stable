@@ -1224,12 +1224,10 @@ gtodblList(GEN data, long flags)
   {
     l[0].nb = nl/2;
     for (i=0; i < l[0].nb; i+=2)
-      if (l[i+1].nb)
-      {
-        xsml = xbig = l[i  ].d[0];
-        ysml = ybig = l[i+1].d[0]; break;
-      }
+      if (l[i+1].nb) break;
     if (i >= l[0].nb) { free(l); return NULL; }
+    xsml = xbig = l[i  ].d[0];
+    ysml = ybig = l[i+1].d[0];
 
     for (i=0; i < l[0].nb; i+=2)
     {
