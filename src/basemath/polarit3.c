@@ -218,7 +218,7 @@ shiftpol_ip(GEN x, long v)
  * b+2 were sent instead. na, nb = number of terms of a, b.
  * Only c, c0, c1, c2 are genuine GEN.
  */
-GEN
+static GEN
 quickmul(GEN a, GEN b, long na, long nb)
 {
   GEN a0,c,c0;
@@ -263,7 +263,7 @@ quickmul(GEN a, GEN b, long na, long nb)
   return shiftpol_ip(gerepileupto(av,c0), v);
 }
 
-GEN
+static GEN
 sqrpol(GEN x, long nx)
 {
   long i, j, l, lz, nz;
@@ -301,7 +301,7 @@ sqrpol(GEN x, long nx)
   free(p2); z -= 2; z[1]=0; return normalizepol_i(z,lz);
 }
 
-GEN
+static GEN
 quicksqr(GEN a, long na)
 {
   GEN a0,c,c0,c1;
@@ -3116,10 +3116,10 @@ FpY_FpXY_resultant(GEN a, GEN b0, GEN p)
   if (OK_ULONG(p))
   {
     ulong pp = (ulong)p[2];
-    b = ZXX_Flxy(b, pp, evalvarn(vX));
+    b = ZXX_FlxX(b, pp, vX);
     if ((ulong)dres >= pp)
     {
-      a = ZXX_Flxy(a, pp, evalvarn(vX));
+      a = ZXX_FlxX(a, pp, vX);
       x = Flyx_subres(a, b, pp);
     }
     else
@@ -3244,7 +3244,7 @@ INIT:
     if (dB) { dp = smodis(dB, p); if (!dp) continue; }
 
     a = ZX_Flx(A, p);
-    b = ZXX_Flxy(B, p, A[1]);
+    b = ZXX_FlxX(B, p, varn(A));
     if (LERS)
     {
       if (!b[lb-1] || degpol(a) < degA) continue; /* p | lc(A)lc(B) */
