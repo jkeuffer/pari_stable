@@ -2697,7 +2697,7 @@ Lazard(GEN x, GEN y, long n)
   long a, b;
   GEN c;
   
-  if (n==1) return x;
+  if (n<=1) return x;
   a=1; while (n >= (b=a+a)) a=b;
   c=x; n-=a;
   while (a>1)
@@ -2794,6 +2794,7 @@ resultantducos(GEN P, GEN Q)
     }
   }
   if (!signe(Q)) { avma = av; return gzero; }
+  if (!degree(P)){ avma = av; return gun; }
   s = Lazard(leading_term(Q), s, degree(P));
   tetpil = avma; return gerepile(av,tetpil,gcopy(s));
 }
