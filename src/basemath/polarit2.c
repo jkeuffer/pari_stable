@@ -915,7 +915,9 @@ root_bound(GEN P)
   x = y = gun;
   for (k=0; ; k++)
   {
+    gpmem_t av = avma;
     if (cmpii(poleval(P0,y), mulii(lP, gpowgs(y, d))) < 0) break;
+    avma = av;
     x = y; y = shifti(y,1);
   }
   for(;;)

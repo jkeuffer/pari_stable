@@ -709,7 +709,7 @@ long
 pvaluation(GEN x, GEN p, GEN *py)
 {
   long v;
-  gpmem_t av;
+  gpmem_t av, av2;
   GEN p1,p2;
 
   if (egalii(p,gdeux))
@@ -744,11 +744,13 @@ pvaluation(GEN x, GEN p, GEN *py)
     return v;
   }
   av = avma; v = 0; (void)new_chunk(lgefint(x));
+  av2= avma;
   for(;;)
   {
     p1 = dvmdii(x,p,&p2);
     if (p2 != gzero) { avma=av; if (py) *py = icopy(x); return v; }
     v++; x = p1;
+    if ((v & 0xff) == 0) p1 = gerepileuptoint(av2, p1);
   }
 }
 
