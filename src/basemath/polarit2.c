@@ -1877,13 +1877,10 @@ factor0(GEN x,long flag)
 GEN
 concat_factor(GEN f, GEN g)
 {
-  GEN h;
   if (lg(f) == 1) return g;
   if (lg(g) == 1) return f;
-  h = cgetg(3,t_MAT);
-  h[1] = (long)concatsp((GEN)f[1], (GEN)g[1]);
-  h[2] = (long)concatsp((GEN)f[2], (GEN)g[2]);
-  return h;
+  return mkmat2(concatsp((GEN)f[1], (GEN)g[1]),
+                concatsp((GEN)f[2], (GEN)g[2]));
 }
 
 /* assume f and g coprime integer factorizations */
@@ -2044,10 +2041,9 @@ gauss_factor(GEN x)
     exp &= 3;
   }
   if (j > 1) {
-    GEN Fa = cgetg(3, t_MAT);
-    setlg(P2, j); Fa[1] = (long)P2;
-    setlg(E2, j); Fa[2] = (long)E2;
-    fa = concat_factor(fa, Fa);
+    setlg(P2, j);
+    setlg(E2, j);
+    fa = concat_factor(fa, mkmat2(P2,E2));
   }
   if (!is_pm1(n) || !is_pm1(d))
   {
@@ -2216,12 +2212,9 @@ factor(GEN x)
       if (y) return y;
 
     case t_RFRAC:
-      p1=factor((GEN)x[1]);
-      p2=factor((GEN)x[2]); p3=gneg_i((GEN)p2[2]);
-      tetpil=avma; y=cgetg(3,t_MAT);
-      y[1]=lconcat((GEN)p1[1],(GEN)p2[1]);
-      y[2]=lconcat((GEN)p1[2],p3);
-      return gerepile(av,tetpil,y);
+      p1 = factor((GEN)x[1]);
+      p2 = factor((GEN)x[2]); p2[2] = (long)gneg_i((GEN)p2[2]);
+      return gerepilecopy(av, concat_factor(p1,p2));
   }
   err(talker,"can't factor %Z",x);
   return NULL; /* not reached */
@@ -4251,7 +4244,7 @@ GEN
 polfnf(GEN a, GEN t)
 {
   pari_sp av = avma;
-  GEN x0,y,p1,p2,u,G,fa,n,unt,dent,A;
+  GEN x0,p1,p2,u,G,fa,n,unt,dent,A;
   long lx,i,k,e;
   int sqfree, tmonic;
 
@@ -4275,14 +4268,13 @@ polfnf(GEN a, GEN t)
   }
   /* n guaranteed to be squarefree */
   fa = ZX_DDF(n,0); lx = lg(fa);
-  y = cgetg(3,t_MAT);
-  p1 = cgetg(lx,t_COL); y[1] = (long)p1;
-  p2 = cgetg(lx,t_COL); y[2] = (long)p2;
+  p1 = cgetg(lx,t_COL);
+  p2 = cgetg(lx,t_COL);
   if (lx == 2)
   { /* P^k, k irreducible */
     p1[1] = lmul(unt,u);
     p2[1] = (long)utoipos(degpol(A) / degpol(u));
-    return gerepilecopy(av, y);
+    return gerepilecopy(av, mkmat2(p1,p2));
   }
   x0 = gadd(polx[varn(A)], gmulsg(-k, gmodulcp(polx[varn(t)], t)));
   for (i=lx-1; i>0; i--)
@@ -4301,7 +4293,7 @@ polfnf(GEN a, GEN t)
     p1[i] = ldiv(gmul(unt,F), leading_term(F));
     p2[i] = (long)utoipos(e);
   }
-  return gerepilecopy(av, sort_factor(y, cmp_pol));
+  return gerepilecopy(av, sort_factor(mkmat2(p1,p2), cmp_pol));
 }
 
 static GEN
