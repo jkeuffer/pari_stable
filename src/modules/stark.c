@@ -262,9 +262,12 @@ InitQuotient0(GEN DA, GEN C)
 }
 
 /* Let m be a modulus et C a subgroup of Clk(m), compute all the data
-   needed to work with the quotient Clk(m) / C namely 1) bnr(m), 2.1)
-   its order, 2.2) its structure, 2.3) the matrix Clk(m) ->> Clk(m)/C
-   and 2.4) the group C */
+ * needed to work with the quotient Clk(m) / C namely
+ * 1) bnr(m)
+ * 2.1) its order
+ * 2.2) its structure
+ * 2.3) the matrix Clk(m) ->> Clk(m)/C
+ * 2.4) the group C */
 static GEN
 InitQuotient(GEN bnr, GEN C)
 {
@@ -289,7 +292,7 @@ ComputeKernel0(GEN P, GEN DA, GEN DB, long nbA, long nbB)
 
   herm  = hnfall(concatsp(P, DB));
   rk = nbA + nbB + 1;
-  rk -= lg((GEN)herm[1]); /* two steps: bug in pgcc 1.1.3 inlining IS */
+  rk -= lg((GEN)herm[1]); /* two steps: bug in pgcc 1.1.3 inlining (IS) */
 
   mask1 = subis(shifti(gun, nbA), 1);
   mask2 = subis(shifti(gun, rk), 1);
@@ -1325,7 +1328,8 @@ MulPolmodCoeff(GEN polmod, int* c1, int** reduc, long dg)
     for (j = 0; j < dg; j++) c += reduc[j][i] * c3[dg+j];
     c2[i] = c;
   }
-  for (     ; i < dg; i++) c2[i] = 0;
+  /* cast necessary to work around a gcc-2.96 bug on alpha-linux (IS) */
+  for (     ; i < (short)dg; i++) c2[i] = 0;
   avma = av;
 }
 
