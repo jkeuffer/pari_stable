@@ -85,6 +85,7 @@ IK 12- let lisGEN() return NULL when EOF is met (was oo loop)
    13- algorithm for zeta(), gamma() [initial GP code by HC]
    14- improved rnfnormgroup() [reduce number of calls to isprincipal]
 IZ 15- flags for OS/2 build + use generic [pre|suf]fix for object files
+BA 16- nfgaloisconj(polcyclo(40)): accuracy lost
 
   Added
     1- file README.WIN
