@@ -1309,9 +1309,10 @@ nfsqff(GEN nf, GEN pol, long fl)
       long l = lg(z);
       for (i = 1; i < l; i++)
       {
-        t = (GEN)z[i];
+        t = (GEN)z[i]; if (degpol(t) > 1) break;
         z[i] = lneg(gdiv((GEN)t[3], (GEN)t[2]));
       }
+      setlg(z, i);
     }
     return gerepilecopy(av, z);
   }
@@ -1374,20 +1375,6 @@ nfsqff(GEN nf, GEN pol, long fl)
     fprintferr("  2) Conversion from T_2 --> | |^2 bound : %Z\n", T.ZC);
     fprintferr("  3) Final bound: %Z\n", C);
   }
-
-  if (fl)
-    (void)logint(C, p, &pk);
-#if 0 /* overkill */
-  else
-  { /* overlift needed for d-1/d-2 tests? */
-    GEN pb; long b; /* junk */
-    if (cmbf_precs(p, C, T.BS_2, &a, &b, &pk, &pb))
-    { /* Rare */
-      if (DEBUGLEVEL) err(warner,"nffactor: overlift for d-1/d-2 test");
-      C = itor(pk, DEFAULTPREC);
-    }
-  }
-#endif
 
   bestlift_init(0, nf, pr, C, &L);
   T.pr = pr;
