@@ -2441,13 +2441,13 @@ FqX_factor_i(GEN f, GEN T, GEN p)
   setlg(E, nbfact); return sort_factor(mkmat2((GEN)t, E), cmp_pol);
 }
 GEN
-factmod9(GEN f, GEN p, GEN T)
+factorff(GEN f, GEN p, GEN T)
 {
   pari_sp av = avma;
   long v;
   GEN z;
 
-  if (typ(T)!=t_POL || typ(f)!=t_POL || typ(p)!=t_INT) err(typeer,"factmod9");
+  if (typ(T)!=t_POL || typ(f)!=t_POL || typ(p)!=t_INT) err(typeer,"factorff");
   v = varn(T);
   if (varncmp(v, varn(f)) <= 0)
     err(talker,"polynomial variable must have higher priority in factorff");

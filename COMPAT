@@ -112,7 +112,7 @@ Incompatible changes:
   - renamed gegal --> gequal, gegalgs --> gequalgs, gegalsg --> gequalsg,
     egalii --> equalii
   - renamed binome -> binomial, chinois -> chinese
-  - renamed apprgen9, apprgen -> padicappr
+  - renamed apprgen9, apprgen -> padicappr, factmod9 -> factorff
 
 Partially compatible changes:
 -----------------------------

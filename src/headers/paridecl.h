@@ -1431,7 +1431,7 @@ GEN     FpX_rand(long d, long v, GEN p);
 GEN     FpX_roots(GEN f, GEN p);
 GEN     factcantor(GEN x, GEN p);
 GEN     factmod(GEN f, GEN p);
-GEN     factmod9(GEN f, GEN p, GEN a);
+GEN     factorff(GEN f, GEN p, GEN a);
 GEN     factormod0(GEN f, GEN p,long flag);
 GEN     factorpadic0(GEN f,GEN p,long r,long flag);
 GEN     factorpadic2(GEN x, GEN p, long r);

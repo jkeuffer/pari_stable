@@ -32,6 +32,7 @@
 
 #define apprgen padicappr
 #define apprgen9 padicappr
+#define factmod9 factorff
 #define ggrandocp ggrando
 #define glogagm glog
 #define logagm  mplog

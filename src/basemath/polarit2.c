@@ -2177,7 +2177,7 @@ factor(GEN x)
           switch (typ2(tx))
           {
             case t_INT: p1 = polfnf(x,pol); break;
-            case t_INTMOD: p1 = factmod9(x,p,pol); break;
+            case t_INTMOD: p1 = factorff(x,p,pol); break;
 	    default: err(impl,"factor of general polynomial");
               return NULL; /* not reached */
           }
