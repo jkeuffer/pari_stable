@@ -43,6 +43,7 @@ Done for version 2.2.1 (released ??/??/2001):
     1- removed useless parameter prec in many bnr* and rnf* functions
     2- major update of bnr* functions [use elements in factored form]
     3- use /var/tmp instead of /tmp as default tmp directory [faster on Solaris]
+    4- Fp_PHlog (Pohlig-Hellman) can use a factorization of the subgroup order
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.0 (released 30/04/2001):
