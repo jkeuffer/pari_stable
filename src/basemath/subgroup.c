@@ -31,6 +31,7 @@ typedef struct slist {
 typedef struct {
   GEN hnfgroup;
   GEN listKer;
+  ulong count;
   slist *list;
 } sublist_t;
 
@@ -111,6 +112,7 @@ addcell(sublist_t *S, GEN H)
   for (j=1; j<=n; j++)
     for(i=1; i<=j; i++) pt[k++] = itos(gcoeff(H,i,j));
   S->list = cell;
+  S->count++;
 }
 
 extern int hnfdivide(GEN A, GEN B);
@@ -430,7 +432,7 @@ init_powlist(long k, long p)
   return z;
 }
 
-static long
+static void
 subgroup_engine(subgp_iter *T)
 {
   ulong av = avma;
@@ -446,7 +448,7 @@ subgroup_engine(subgp_iter *T)
   for (i=1; i<n-1; i++)
     if (!divise((GEN)cyc[i], (GEN)cyc[i+1]))
       err(talker,"not a group in forsubgroup");
-  if (n == 1) { T->fun(T, cyc); return 1; }
+  if (n == 1) { T->fun(T, cyc); return; }
   if (!signe(cyc[1]))
     err(talker,"infinite group in forsubgroup");
   if (DEBUGLEVEL) timer2();
@@ -478,7 +480,7 @@ subgroup_engine(subgp_iter *T)
     if (T->boundtype == b_EXACT)
     {
       (void)pvaluation(T->bound,p,&B);
-      if (!gcmp1(B)) { avma = av; return 0; }
+      if (!gcmp1(B)) { avma = av; return; }
     }
   }
   else
@@ -521,7 +523,7 @@ subgroup_engine(subgp_iter *T)
   }
   dopsub(T, p,indexsubq);
   if (DEBUGLEVEL) fprintferr("nb subgroup = %ld\n",T->count);
-  avma = av; return T->count;
+  avma = av;
 }
 
 static GEN
@@ -570,7 +572,7 @@ forsubgroup(entree *ep, GEN cyc, GEN bound, char *ch)
   E.ep= ep; T.fundata = (void*)&E;
   push_val(ep, gzero);
 
-  (void)subgroup_engine(&T);
+  subgroup_engine(&T);
 
   pop_val(ep);
 }
@@ -589,10 +591,10 @@ subgrouplist_i(GEN cyc, GEN bound, GEN expoI, GEN listKer)
   if (!cyc) err(typeer,"subgrouplist");
   n = lg(cyc)-1; /* not necessarily = N */
 
-  sublist = list = (slist*) gpmalloc(sizeof(slist));
-  S.list = sublist;
+  S.list = sublist = (slist*) gpmalloc(sizeof(slist));
   S.hnfgroup = diagonal(cyc);
   S.listKer = listKer;
+  S.count = 0;
   T.fun = &list_fun;
   T.fundata = (void*)&S;
 
@@ -600,10 +602,11 @@ subgrouplist_i(GEN cyc, GEN bound, GEN expoI, GEN listKer)
   T.bound = bound;
   T.expoI = expoI;
 
-  nbsub = subgroup_engine(&T);
+  subgroup_engine(&T);
 
+  nbsub = S.count;
   avma = av;
-  z = cgetg(nbsub+1,t_VEC); sublist = list;
+  z = cgetg(nbsub+1,t_VEC);
   for (ii=1; ii<=nbsub; ii++)
   {
     list = sublist; sublist = list->next; free(list);
