@@ -1274,26 +1274,31 @@ FpX_rescale(GEN P, GEN h, GEN p)
   Q[1] = P[1]; return Q;
 }
 
-/* Find a,b minimal such that A < p^a, B < p^b, 1 << p^(a-b) < 2^31 */
-void
-cmbf_precs(GEN p, GEN A, GEN B, long *pta, long *ptb, GEN *pa, GEN *pb)
+/* Find a,b minimal such that A < q^a, B < q^b, 1 << q^(a-b) < 2^31 */
+int
+cmbf_precs(GEN q, GEN A, GEN B, long *pta, long *ptb, GEN *qa, GEN *qb)
 {
-  long a,b,amin,d = (long)(31 * LOG2/log((double)itou(p))); /* a - b */
+  long a,b,amin,d = (long)(31 * LOG2/gtodouble(glog(q,DEFAULTPREC)));
+  int fl = 0;
 
-  b = logint(B, p, pb);
+  b = logint(B, q, qb);
   amin = b + d;
-  if (gcmp(gpowgs(p, amin), A) <= 0)
-    a = logint(A, p, pa);
+  if (gcmp(gpowgs(q, amin), A) <= 0)
+  {
+    a = logint(A, q, qa);
+    b = a - d; *qb = gpowgs(q, b);
+  }
   else
   { /* not enough room */
-    a = amin; *pa = gpowgs(p, a);
+    a = amin;  *qa = gpowgs(q, a);
+    fl = 1;
   }
   if (DEBUGLEVEL > 3) {
-    fprintferr("S_2 bound: %Z^%ld\n", p,b);
-    fprintferr("coeff bound: %Z^%ld\n", p,a);
+    fprintferr("S_2   bound: %Z^%ld\n", q,b);
+    fprintferr("coeff bound: %Z^%ld\n", q,a);
   }
   *pta = a;
-  *ptb = b;
+  *ptb = b; return fl;
 }
 
 /* use van Hoeij's knapsack algorithm */
@@ -1309,7 +1314,7 @@ combine_factors(GEN target, GEN famod, GEN p, long klim, long hint)
   la = absi(leading_term(target));
   B = mulsi(n, sqri(gmul(la, root_bound(target)))); /* = bound for S_2 */
 
-  cmbf_precs(p, A, B, &a, &b, &pa, &pb);
+  (void)cmbf_precs(p, A, B, &a, &b, &pa, &pb);
 
   famod = hensel_lift_fact(target,famod,NULL,p,pa,a);
   if (nft < 11) maxK = -1; /* few modular factors: try all posibilities */
