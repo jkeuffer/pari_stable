@@ -358,7 +358,7 @@ Flx_Fl_mul(GEN y, ulong x, ulong p)
  */
 
 GEN
-Flx_shift(GEN a, ulong n, ulong p)
+Flx_shift(GEN a, long n, ulong p)
 {
   long i, l = lg(a);
   GEN  b = cgetg_copy(l+n, a);

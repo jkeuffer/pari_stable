@@ -54,7 +54,7 @@ GEN     Flx_rem_montgomery(GEN x, GEN mg, GEN T, ulong p);
 GEN     Flx_rem(GEN x, GEN y, ulong p);
 GEN     Flx_renormalize(GEN x, long l);
 ulong   Flx_resultant(GEN a, GEN b, ulong p);
-GEN     Flx_shift(GEN a, ulong n, ulong p);
+GEN     Flx_shift(GEN a, long n, ulong p);
 GEN     Flx_sqr(GEN x, ulong p);
 GEN     Flx_sub(GEN x, GEN y, ulong p);
 long    Flx_valuation(GEN x);
