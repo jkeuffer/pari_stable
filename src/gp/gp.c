@@ -524,7 +524,7 @@ static GEN
 sd_seriesprecision(char *v, int flag)
 {
   char *msg[] = {NULL, "significant terms"};
-  return sd_ulong(v,flag,"seriesprecision",(ulong*)&precdl, 0,LGBITS,msg);
+  return sd_ulong(v,flag,"seriesprecision",&precdl, 0,LGBITS,msg);
 }
 
 static GEN
@@ -780,7 +780,9 @@ sd_output(char *v, int flag)
 {
   char *msg[] = {"(raw)", "(prettymatrix)", "(prettyprint)",
                  "(external prettyprint)", NULL};
-  return sd_ulong(v,flag,"output",(ulong*) &(GP_DATA->fmt->prettyp), 0,3,msg);
+  ulong n = GP_DATA->fmt->prettyp;
+  GEN z = sd_ulong(v,flag,"output", &n, 0,3,msg);
+  GP_DATA->fmt->prettyp = n; return z;
 }
 
 void
