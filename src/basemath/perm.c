@@ -366,7 +366,7 @@ GEN
 vecperm_orbits(GEN v, long n)
 {
   pari_sp av = avma;
-  return gerepilecopy(av, vecperm_orbits(v, n));
+  return gerepilecopy(av, vecperm_orbits_i(v, n));
 }
 
 /* Compute the cyclic decomposition of a permutation */
@@ -814,8 +814,9 @@ group_isA4S4(GEN G)
   if (ord[1]!=2 || ord[2]!=2 || ord[3]!=3) return 0;
   if (perm_commute((GEN)elt[1],(GEN)elt[3])) return 0;
   if (n==4) return 1;
-  if (ord[4]==2) return 2;
-  return 0;
+  if (ord[4]!=2) return 0;
+  if (perm_commute((GEN)elt[3],(GEN)elt[4])) return 0;
+  return 2;
 }
 /* compute all the subgroups of a group G */
 GEN
