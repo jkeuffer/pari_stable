@@ -11,7 +11,7 @@ from various problems, and are discussed in the rest of this document.
 It is also advised, but not mandatory to get the Documentation and Examples
 archive
 
-  ftp://megrez.math.u-bordeaux.fr/pub/pari/dos/GPDxxx.ZIP
+  ftp://pari.math.u-bordeaux.fr/pub/pari/dos/GPDxxx.ZIP
 
 which contains the following directories:
 
@@ -20,7 +20,7 @@ which contains the following directories:
        need TeX to compile them (see www.CTAN.org for how to get TeX). The
        same documents are available in PDF and PostScript format from
 
-         ftp://megrez.math.u-bordeaux.fr/pub/pari/manuals/
+         ftp://pari.math.u-bordeaux.fr/pub/pari/manuals/
 
        (and so is the "readline" reference manual if you use one of the
         solutions providing line editing)
@@ -47,12 +47,12 @@ NOTE: all .gz and .ZIP files are compressed files (or archives). Extract them
 This is the preferred solution, but it requires fetching the cygwin
 compatibility library first. We provide this file as 
 
-  ftp://megrez.math.u-bordeaux.fr/pub/pari/windows/cygwin1.dll.gz
+  ftp://pari.math.u-bordeaux.fr/pub/pari/windows/cygwin1.dll.gz
 
 (size: 268k, 600k uncompressed). It needs to be downloaded only once.
 Then fetch the GP binary
 
-  ftp://megrez.math.u-bordeaux.fr/pub/pari/windows/gp-xxx.exe.gz
+  ftp://pari.math.u-bordeaux.fr/pub/pari/windows/gp-xxx.exe.gz
  
 and put it in the same directory as the dll (or dump the dll somewhere in
 your PATH, as you prefer).
@@ -71,7 +71,7 @@ standard './Configure; make' idiom ]
 
 That is, the generic Unix sources
 
-  ftp://megrez.math.u-bordeaux.fr/pub/pari/pari.tgz
+  ftp://pari.math.u-bordeaux.fr/pub/pari/pari.tgz
 
 It is quite easy to build (or cross-build) GP and readline from the unix
 sources using mingw, but if you have installed mingw you probably also have

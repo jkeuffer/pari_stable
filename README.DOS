@@ -35,7 +35,7 @@ xxxx stands for a version number
        need TeX to compile them (see www.CTAN.org for how to get TeX) The
        same documents are available in PDF and PostScript format from
 
-         ftp://megrez.math.u-bordeaux.fr/pub/pari/manuals/
+         ftp://pari.math.u-bordeaux.fr/pub/pari/manuals/
 
      - the script GPHELP (translates Pari documentation to plain text and
        handles "apropos help"), which requires PERL (see www.CPAN.org for how

@@ -14,12 +14,12 @@ a message to pari-announce.
 ================================================
 Type the following commands from the shell
 
-  cvs -d :pserver:cvs@megrez.math.u-bordeaux.fr:/home/megrez/cvsroot login
+  cvs -d :pserver:cvs@pari.math.u-bordeaux.fr:/home/megrez/cvsroot login
 
 Hit return when asked for a password (there's no password); then back to
 the shell prompt
 
-  cvs -z3 -d :pserver:cvs@megrez.math.u-bordeaux.fr:/home/megrez/cvsroot checkout pari
+  cvs -z3 -d :pserver:cvs@pari.math.u-bordeaux.fr:/home/megrez/cvsroot checkout pari
 
 This last command creates a local copy of the distribution from the
 distant repository (in local directory 'pari'), using GNU gzip to compress
