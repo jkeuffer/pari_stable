@@ -1123,7 +1123,7 @@ ff_PHlog_Fp(GEN a, GEN g, GEN T, GEN p)
 }
 
 /* smallest n >= 0 such that g0^n=x modulo pr, assume g0 reduced
- * q = order of g0  (Npr - 1 if q = NULL) */
+ * q = order of g0. Assume T != NULL */
 static GEN
 ffshanks(GEN x, GEN g0, GEN q, GEN T, GEN p)
 {
@@ -1131,11 +1131,10 @@ ffshanks(GEN x, GEN g0, GEN q, GEN T, GEN p)
   long lbaby,i,k;
   GEN p1,smalltable,giant,perm,v,g0inv;
 
-  if (typ(x) == t_INT) return ff_PHlog_Fp(x,g0,T,p);
+  if (typ(x) == t_INT) return ff_PHlog_Fp(x,g0,T,p); /* should not occur */
+  if (!degpol(x)) return ff_PHlog_Fp(constant_term(x),g0,T,p);
 
-  /* here f > 1 ==> T != NULL */
-  p1 = q? q: addsi(-1, gpowgs(p,degpol(T)));
-  p1 = racine(p1);
+  p1 = racine(q);
   if (cmpis(p1,LGBITS) >= 0) err(talker,"module too large in ffshanks");
   lbaby = itos(p1)+1; smalltable = cgetg(lbaby+1,t_VEC);
   g0inv = FpXQ_inv(g0,T,p);
