@@ -54,7 +54,7 @@ typedef struct cell {
   void *data;
 } cell;
 
-static stack **err_catch_stack;
+static stack **err_catch_stack = NULL;
 
 void
 push_stack(stack **pts, void *a)
@@ -879,8 +879,11 @@ err(long numerr, ...)
 
   va_start(ap,numerr);
 
-  if (err_catch_stack[numerr]) trap = numerr;
-  else if (err_catch_stack[noer] && numerr >= talker) trap = noer;
+  if (err_catch_stack)
+  {
+    if (err_catch_stack[numerr]) trap = numerr;
+    else if (err_catch_stack[noer] && numerr >= talker) trap = noer;
+  }
   if (trap)
   { /* all non-syntax errors (noer), or numerr individually trapped */
     cell *a = (cell*) err_catch_stack[trap]->value;
