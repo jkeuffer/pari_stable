@@ -2544,15 +2544,15 @@ u_FpM_ker_sp(GEN x, ulong p, long deplin)
   y = cgetg(r+1, t_MAT);
   for (j=k=1; j<=r; j++,k++)
   {
-    GEN c = cgetg(n+1, t_VECSMALL);
+    GEN C = cgetg(n+1, t_VECSMALL);
 
-    y[j] = (long)c; while (d[k]) k++;
+    y[j] = (long)C; while (d[k]) k++;
     for (i=1; i<k; i++)
       if (d[i])
-        c[i] = coeff(x,d[i],k) % p;
+        C[i] = coeff(x,d[i],k) % p;
       else
-	c[i] = 0;
-    c[k] = 1; for (i=k+1; i<=n; i++) c[i] = 0;
+	C[i] = 0;
+    C[k] = 1; for (i=k+1; i<=n; i++) C[i] = 0;
   }
   return y;
 }
@@ -2561,9 +2561,9 @@ u_FpM_ker_sp(GEN x, ulong p, long deplin)
 static GEN
 FpM_ker_i(GEN x, GEN p, long deplin)
 {
-  pari_sp av0 = avma, av,lim,tetpil;
-  GEN y,c,d,piv,mun;
-  long i,j,k,r,t,n,m;
+  pari_sp av0 = avma, av, lim, tetpil;
+  GEN y, c, d, piv, mun;
+  long i, j, k, r, t, n, m;
 
   if (typ(x)!=t_MAT) err(typeer,"FpM_ker");
   n=lg(x)-1; if (!n) return cgetg(1,t_MAT);
@@ -2628,18 +2628,18 @@ FpM_ker_i(GEN x, GEN p, long deplin)
   tetpil=avma; y=cgetg(r+1,t_MAT);
   for (j=k=1; j<=r; j++,k++)
   {
-    GEN c = cgetg(n+1,t_COL);
+    GEN C = cgetg(n+1,t_COL);
 
-    y[j]=(long)c; while (d[k]) k++;
+    y[j]=(long)C; while (d[k]) k++;
     for (i=1; i<k; i++)
       if (d[i])
       {
 	GEN p1=gcoeff(x,d[i],k);
-	c[i] = lmodii(p1, p); gunclone(p1);
+	C[i] = lmodii(p1, p); gunclone(p1);
       }
       else
-	c[i] = zero;
-    c[k]=un; for (i=k+1; i<=n; i++) c[i]=zero;
+	C[i] = zero;
+    C[k]=un; for (i=k+1; i<=n; i++) C[i]=zero;
   }
   return gerepile(av0,tetpil,y);
 }
@@ -2994,18 +2994,18 @@ FqM_ker_i(GEN x, GEN T, GEN p, long deplin)
   tetpil=avma; y=cgetg(r+1,t_MAT);
   for (j=k=1; j<=r; j++,k++)
   {
-    GEN c = cgetg(n+1,t_COL);
+    GEN C = cgetg(n+1,t_COL);
 
-    y[j]=(long)c; while (d[k]) k++;
+    y[j]=(long)C; while (d[k]) k++;
     for (i=1; i<k; i++)
       if (d[i])
       {
 	GEN p1=gcoeff(x,d[i],k);
-	c[i] = (long) Fq_res(p1, T, p); gunclone(p1);
+	C[i] = (long) Fq_res(p1, T, p); gunclone(p1);
       }
       else
-	c[i] = zero;
-    c[k]=un; for (i=k+1; i<=n; i++) c[i]=zero;
+	C[i] = zero;
+    C[k]=un; for (i=k+1; i<=n; i++) C[i]=zero;
   }
   return gerepile(av0,tetpil,y);
 }
