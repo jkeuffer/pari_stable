@@ -3308,7 +3308,7 @@ GEN
 fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
 {
   pari_sp av = avma;
-  VOLATILE long i,j,l, round = 0;
+  VOLATILE long i,j,l;
   VOLATILE GEN r,rinvtrans,u,v,res,z,vnorm,rperm,perm,uperm, bound = B0;
 
   if (DEBUGLEVEL>2) fprintferr("entering fincke_pohst\n");
@@ -3328,8 +3328,7 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
       z[1] = z[2] = zero;
       z[3] = lgetg(1,t_MAT); return z;
     }
-    i = gprecision(a);
-    if (i) prec = i; else { a = mat_to_MP(a, prec); round = 1; }
+    i = gprecision(a); if (i) prec = i;
     if (DEBUGLEVEL>2) fprintferr("first LLL: prec = %ld\n", prec);
     u = lllgramintern(a, 4, 1, (prec<<1)-2);
     if (!u) return NULL;
@@ -3378,9 +3377,10 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
   } ENDCATCH;
   if (DEBUGLEVEL>2) fprintferr("leaving fincke_pohst\n");
   if (CHECK) return res;
+  if (!res) err(precer,"fincke_pohst");
 
   z = cgetg(4,t_VEC);
   z[1] = lcopy((GEN)res[1]);
-  z[2] = round? lround((GEN)res[2]): lcopy((GEN)res[2]);
+  z[2] = lcopy((GEN)res[2]);
   z[3] = lmul(u, (GEN)res[3]); return gerepileupto(av,z);
 }
