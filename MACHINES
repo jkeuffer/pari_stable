@@ -124,7 +124,7 @@ SGI/MIPS
 *R10000      196MHz  IRIX-6.4        cc  X11 dl2    8461    9856  2.0.10(8) TP
 ------------------------------------------------------------------------------
 HP/PA-RISC
-HPPA9000/778  134MHz HPUX-10.20      cc  X11   -  (16276) (29212) 2.0.12(9)
+HPPA9000/778  134MHz HPUX-10.20      cc  X11   -   18898   29138  2.0.19(9)
 *HPPA9000/778 134MHz HPUX-10.20      cc  X11   -  (23666)      -  2.0.12(10)
 HPPA9000/735  100MHz HPUX-10.20      cc  X11   -  (25106) (38898) 2.0.12(9)
 HPPA9000/735  100MHz HPUX-09-07      cc    -   -   25714       -  2.0.16(16)IS
@@ -160,13 +160,18 @@ DLLD       = cc -64
 DLLDFLAGS  = -shared -elf -no_unresolved -all -L/usr/lib64
 CPP        = cc -64 -E -I.
 
-(9) * for gp-dyn: in o-hpux.hppa/Makefile, move kernel.o from OBJS to OBJSGP.
-I couldn't find a way to have HP as (needed since gas doesn't understand our
-syntax) to produce PIC code, hence kernel.o has to be linked explicitly with
-all programs compiled with libpari.sl
+(9) * for gp-dyn: couldn't find a way to produce PIC code with either
+  -- HP as, version HP92453-03 UX.10.20.05 (DAVIS) PA-RISC 2.0 Assembler
+     (+z, +Z ignored)
+  -- gcc-2.8.1 + gas-2.6 (hppa1.1-hp-hpux9.01), using BFD version 2.6
+     (-fPIC -shared ignored)
 
-    * for gp-sta: remove +z from CFLAGS, final link only worked with the
-following command line (there has to be a better way...):
+(bad) FIX: in o-hpux.hppa/Makefile, move kernel.o from OBJS to OBJSGP.
+Hence kernel.o has to be linked explicitly with all programs compiled with
+libpari.sl
+
+    * for gp-sta: remove +z from CFLAGS and LDFLAGS, final link only worked
+with the following command line (there has to be a better way...):
 
 cc dummy.c -c
 cc -o gp-sta -Wl,-a,archive -O dummy.o [... rest as produced by Configure]
