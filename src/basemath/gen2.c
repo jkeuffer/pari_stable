@@ -903,9 +903,9 @@ gabs(GEN x, long prec)
     case t_INT: case t_REAL:
       return mpabs(x);
 
-    case t_FRAC: y=cgetg(3,tx);
+    case t_FRAC: y=cgetg(3, t_FRAC);
       y[1]=labsi((GEN)x[1]);
-      y[2]=labsi((GEN)x[2]); return y;
+      y[2]=licopy((GEN)x[2]); return y;
 
     case t_COMPLEX:
       av=avma; p1=gnorm(x);
