@@ -1245,7 +1245,7 @@ permorbite(GEN v)
 GEN
 corpsfixeorbitemod(GEN L, GEN O, long x, GEN mod, GEN l, GEN p, GEN *U)
 {
-  ulong   ltop = avma, lbot=NULL, av=NULL, av2;/*keep compiler happy (2)*/
+  ulong   ltop = avma, lbot=0, av=0, av2;/*keep compiler happy (2)*/
   GEN     g, p1, PL, *gptr[2],dg;
   int     i, j, d, dmax;
   PL = cgetg(lg(O), t_COL);
