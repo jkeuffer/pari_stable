@@ -338,7 +338,7 @@ nf_coprime_part(GEN nf, GEN x, GEN f, GEN *listpr)
  * Otherwise, assume v_pr(L0) <= 0 for all pr | f and set *ptd1 = d1
  *   return L integral, L0 = L/d1 mod f, and such that 
  *   if (L*I,f) = 1 for some integral I, then d1 | L*I  */
-static GEN
+GEN
 make_integral(GEN nf, GEN L0, GEN f, GEN *listpr, GEN *ptd1)
 {
   GEN fZ, t, L, D2, d1, d2, d = denom(L0);

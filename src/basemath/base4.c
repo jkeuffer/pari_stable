@@ -24,6 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #define principalideal_aux(nf,x) (principalideal0((nf),(x),0))
 
+extern GEN make_integral(GEN nf, GEN L0, GEN f, GEN *listpr, GEN *ptd1);
 extern GEN hnfall_i(GEN A, GEN *ptB, long remove);
 extern GEN makeprimetoideal(GEN nf,GEN UV,GEN uv,GEN x);
 extern GEN gauss_triangle_i(GEN A, GEN B,GEN t);
@@ -2152,7 +2153,8 @@ factorbackprime(GEN nf, GEN L, GEN e)
   return z;
 }
 
-/* compute anti-uniformizer for pr, integral and coprime to f outside of pr.
+/* compute anti-uniformizer for pr, coprime to f outside of pr, integral
+ * outside of p below pr.
  * sqf = product or primes dividing f, NULL if f a prime power*/
 GEN
 anti_unif_mod_f(GEN nf, GEN pr, GEN sqf)
@@ -2240,6 +2242,8 @@ idealappr0(GEN nf, GEN x, long fl)
       {
         flag = 1;
         tau = anti_unif_mod_f(nf, (GEN)list[i], sqf);
+        tau = make_integral(nf, tau, sqf, (GEN*)list, &d);
+        tau = gdiv(tau, d);
         z = element_mul(nf, z, element_pow(nf, tau, negi((GEN)e[i])));
       }
       else if (s > 0)
