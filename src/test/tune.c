@@ -37,9 +37,10 @@ typedef struct {
   long              *var;
   int               type; /* t_INT or t_REAL */
   long              min_size;
+  long              max_size;
   speed_function_t  fun1;
   speed_function_t  fun2;
-  double            step_factor;    /* how much to step sizes (rounded down) */
+  double            step_factor; /* how much to step sizes (rounded down) */
   int               stop_since_change;
   double            stop_factor;
 } tune_param;
@@ -217,17 +218,17 @@ enum { PARI = 1, GMP = 2 };
  * occur first */
 #define var(a) # a, &a
 static tune_param param[] = {
-{PARI, var(KARATSUBA_MULI_LIMIT),   t_INT, 4, speed_mulii,speed_karamulii},
-{PARI, var(KARATSUBA_SQRI_LIMIT),   t_INT, 4, speed_sqri,speed_karasqri},
-{0,    var(KARATSUBA_MULR_LIMIT),   t_REAL,4, speed_mulrr,speed_karamulrr},
-{PARI, var(MONTGOMERY_LIMIT),       t_INT, 3, speed_redc,speed_modii},
-{0,    var(REMIIMUL_LIMIT),         t_INT, 3, speed_modii,speed_remiimul},
-{GMP,  var(DIVRR_GMP_LIMIT),        t_REAL,4, speed_divrr,speed_divrrgmp},
-{GMP,  var(INVMOD_GMP_LIMIT),       t_INT, 3, speed_invmod,speed_invmodgmp},
-{0,    var(Flx_MUL_LIMIT),          t_Flx, 1, speed_Flx_mul,speed_Flx_karamul},
-{0,    var(Flx_SQR_LIMIT),          t_Flx, 1, speed_Flx_sqr,speed_Flx_karasqr},
-{0,    var(Flx_INVMONTGOMERY_LIMIT),t_NFlx,1, speed_Flx_inv,speed_Flx_invnewton},
-{0,   var(Flx_POW_MONTGOMERY_LIMIT),t_NFlx,1, speed_Flxq_pow_redc,speed_Flxq_pow_mod}
+{PARI,var(KARATSUBA_MULI_LIMIT),   t_INT, 4,0, speed_mulii,speed_karamulii},
+{PARI,var(KARATSUBA_SQRI_LIMIT),   t_INT, 4,0, speed_sqri,speed_karasqri},
+{0,   var(KARATSUBA_MULR_LIMIT),   t_REAL,4,0, speed_mulrr,speed_karamulrr},
+{PARI,var(MONTGOMERY_LIMIT),       t_INT, 3,0, speed_redc,speed_modii},
+{0,   var(REMIIMUL_LIMIT),         t_INT, 3,0, speed_modii,speed_remiimul},
+{GMP, var(DIVRR_GMP_LIMIT),        t_REAL,4,0, speed_divrr,speed_divrrgmp},
+{GMP, var(INVMOD_GMP_LIMIT),       t_INT, 3,0, speed_invmod,speed_invmodgmp},
+{0,   var(Flx_MUL_LIMIT),          t_Flx, 1,0, speed_Flx_mul,speed_Flx_karamul},
+{0,   var(Flx_SQR_LIMIT),          t_Flx, 1,0, speed_Flx_sqr,speed_Flx_karasqr},
+{0,   var(Flx_INVMONTGOMERY_LIMIT),t_NFlx,1,10000, speed_Flx_inv,speed_Flx_invnewton},
+{0,  var(Flx_POW_MONTGOMERY_LIMIT),t_NFlx,1,0, speed_Flxq_pow_redc,speed_Flxq_pow_mod}
 };
 
 /* ========================================================== */
@@ -356,6 +357,7 @@ one(tune_param *param)
   DEFAULT(stop_since_change, 80);
   DEFAULT(stop_factor, 1.2);
   DEFAULT(type, t_INT);
+  DEFAULT(max_size, 1000);
 
   s.type = param->type;
   s.size = param->min_size;
@@ -418,11 +420,10 @@ one(tune_param *param)
         break;
       }
     s.size += max((long)floor(s.size * param->step_factor), 1);
-#define MAX_SIZE 1000
-    if (s.size >= MAX_SIZE)
+    if (s.size >= param->max_size)
     {
       if (option_trace >= 1)
-        printf ("Stop: max_size (%d). Disable Algorithm B?\n", MAX_SIZE);
+        printf ("Stop: max_size (%ld). Disable Algorithm B?\n",param->max_size);
       break;
     }
   }
