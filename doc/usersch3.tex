@@ -302,17 +302,17 @@ See \secref{se:bitand} for the behaviour at negative arguments.
 \syn{bittest}{x,n}, where $n$ and the result are \kbd{long}s.
 
 \subsecidx{shiftmul}$(x,n)$: multiplies $x$ by $2^n$. The difference with
-\kbd{shift} is that when $n<0$, ordinary division takes place, hence for
-example if $x$ is an integer the result may be a fraction, while for
-\kbd{shift} Euclidean division takes place when $n<0$ hence if $x$ is an
-integer the result is still an integer.
+binary shifts \kbd{<<}, \kbd{>>} is that when $n<0$, ordinary division takes
+place, hence for example if $x$ is an integer the result may be a fraction,
+while for shifts Euclidean division takes place when $n<0$ hence if $x$
+is an integer the result is still an integer.
 
 \syn{gmul2n}{x,n} where $n$ is a \kbd{long}.
 
-\subsec{Comparison and boolean operators}.\sidx{boolean operators}
-The six standard \idx{comparison operators} \kbd{<=}, \kbd{<}, \kbd{>=},
-\kbd{>}, \kbd{==}, \kbd{!=} are available in GP, and in library mode under
-the names \tet{gle}, \tet{glt}, \tet{gge}, \tet{ggt}, \tet{geq}, \tet{gne}
+\subsec{Comparison and boolean operators}.\sidx{boolean operators} The six
+standard \idx{comparison operators} \kbd{<=}, \kbd{<}, \kbd{>=}, \kbd{>},
+\kbd{==}, \kbd{!=} are available in GP, and in library mode under the names
+\tet{gle}, \tet{glt}, \tet{gge}, \tet{ggt}, \tet{geq}, \tet{gne}
 respectively. The library syntax is $\var{co}(x,y)$, where \var{co} is the
 comparison operator. The result is 1 (as a \kbd{GEN}) if the comparison is
 true, 0 (as a \kbd{GEN}) if it is false. For the purpose of comparison,
@@ -326,9 +326,9 @@ respectively.
 
 In library mode, it is in fact usually preferable to use the two basic
 functions which are $\teb{gcmp}(x,y)$ which gives the sign (1, 0, or -1) of
-$x-y$, where $x$ and $y$ must be in $\R$, and $\teb{gegal}(x,y)$ which
-can be applied to any two PARI objects $x$ and $y$ and gives 1 (i.e.~true) if
-they are equal (but not necessarily identical), 0 (i.e.~false) otherwise.
+$x-y$, where $x$ and $y$ must be in $\R$, and $\teb{gegal}(x,y)$ which can be
+applied to any two PARI objects $x$ and $y$ and gives 1 (i.e.~true) if they
+are equal (but not necessarily identical), 0 (i.e.~false) otherwise.
 Particular cases of \teb{gegal} which should be used are $\teb{gcmp0}(x)$
 ($x==0$ ?), $\teb{gcmp1}(x)$ ($x==1$ ?), and
 $\teb{gcmp_1}(x)$ ($x==-1$ ?).

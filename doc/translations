@@ -89,11 +89,11 @@ member          @Member functions@2
 \/=             @GP operators@2
 >>=             @GP operators@2
 <<=             @GP operators@2
+<<              @GP operators@2
+>>              @GP operators@2
 <>              @Comparison and boolean operators
 +/-             @+$/$-
 min             @max
->>              @shift
-<<              @shift
 emacs           @Using GP under GNU Emacs@2
 Emacs           @Using GP under GNU Emacs@2
 0               @Functions and Operations Available in PARI and GP
