@@ -45,7 +45,7 @@ case "$arch" in
   sparcv8_super) asmarch=$arch;         pretty=SuperSparc ;;
   sparcv9)       asmarch=sparcv8_micro; pretty=UltraSparc ;;
   i?86)          asmarch=ix86 ;         pretty=$arch ;;
-  ia64)          asmarch=none ;         pretty=ia64 ;;
+  ia64)          asmarch=ia64 ;         pretty=Itanium ;;
   hppa)          asmarch=none ;         pretty='HP Precision'
         case "$osname-`uname -r`" in
         hpux-?.10.*)  asmarch=$arch ;;
@@ -100,6 +100,7 @@ case "$kernlvl0" in
   sparcv8_super) prettyk=SuperSparc;;
   sparcv8_micro) prettyk=MicroSparc;;
   ix86)          prettyk=ix86;;
+  ia64)          prettyk=ia64;;
   hppa)          prettyk=HPPA;;
   alpha)         prettyk=Alpha;;
   ppc)           prettyk=PPC;;
