@@ -8,6 +8,7 @@
 /* $Id$ */
 BEGINEXTERN
 /* alglin1.c */
+GEN     FpM_mul(GEN x, GEN y, GEN p);
 GEN     Fq_ker(GEN x, GEN T, GEN p);
 GEN     concat(GEN x, GEN y);
 GEN     concatsp(GEN x, GEN y);
@@ -995,15 +996,14 @@ GEN     rnfdedekind(GEN nf,GEN T,GEN pr);
 GEN     unifpol(GEN nf,GEN pol,long flag);
 
 /* polarit1.c */
-GEN     Fp_inv_isom(GEN S,GEN Tp, GEN p);
 long    Fp_is_squarefree(GEN f, GEN p);
 long    Fp_is_totally_split(GEN f, GEN p);
-GEN     Fp_isom(GEN l,GEN P,GEN Q);
 long    Fp_pol_nbfact(GEN u, GEN pp);
 GEN     apprgen(GEN f, GEN a);
 GEN     apprgen9(GEN f, GEN a);
 GEN     factcantor(GEN x, GEN p);
 GEN     factmod(GEN f, GEN p);
+GEN     factmod0(GEN f, GEN p);
 GEN     factmod9(GEN f, GEN p, GEN a);
 GEN     factormod0(GEN f, GEN p,long flag);
 GEN     factorpadic0(GEN f,GEN p,long r,long flag);
@@ -1077,7 +1077,13 @@ GEN     Fp_add_pol_scal(GEN y,GEN x,GEN p);
 GEN     Fp_centermod(GEN T,GEN mod);
 GEN     Fp_chinese_coprime(GEN x,GEN y,GEN Tx,GEN Ty,GEN Tz,GEN p);
 GEN     Fp_compo_mod_pol(GEN T,GEN x,GEN pol,GEN p);
+void    Fp_intersect(long n, GEN P, GEN Q, GEN l
+		     , GEN *SP, GEN *SQ, GEN MA, GEN MB);
+GEN     Fp_inv_isom(GEN S,GEN Tp, GEN p);
 GEN     Fp_inv_mod_pol(GEN x,GEN pol,GEN p);
+GEN     Fp_isom(GEN P,GEN Q,GEN l);
+GEN     Fp_mat(GEN z, GEN p);
+GEN     Fp_mat_red(GEN z, GEN p);
 GEN     Fp_mul(GEN x,GEN y,GEN p);
 GEN     Fp_mul_mod_pol(GEN y,GEN x,GEN pol,GEN p);
 GEN     Fp_mul_pol_scal(GEN y,GEN x,GEN p);
