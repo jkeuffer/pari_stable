@@ -8,20 +8,21 @@ _dlld_list='DLLD DLLDFLAGS EXTRADLLDFLAGS DLSUFFIX soname sodest'
 DLSUFFIX=so
 soname=.$soname_num
 do_dll=yes
-case "$osname-$arch" in
-  aix-*|osf1-*|solaris-*|linux-*|freebsd-*)
+case "$osname" in
+  aix|osf1|solaris|linux|freebsd)
     case $libpari_base in
       pari) sodest=.$version.$patch;; # released version
       *)    sodest=.$patch.0.0;;      # unstable version
     esac ;;
-  sunos-*) sodest=.$VersionMajor$VersionMinor.$patch
+  sunos) sodest=.$VersionMajor$VersionMinor.$patch
            soname=$sodest;;
-  hpux-*) soname= ; sodest= ; DLSUFFIX=sl;;
-  irix-*) soname= ; sodest= ;;
-  os2-*)  soname= ; sodest= ; DLSUFFIX=dll
+  hpux) soname= ; sodest= ; DLSUFFIX=sl;;
+  irix) soname= ; sodest= ;;
+  os2)  soname= ; sodest= ; DLSUFFIX=dll
           libpari_base=`echo "$libpari_base" | sed 's/\./_/g'` # 8.3 DLL name
        ;;
-  cygwin-*)soname= ; sodest= ; DLSUFFIX=dll ;;
+  cygwin)soname= ; sodest= ; DLSUFFIX=dll ;;
+  darwin)soname= ; sodest= ; DLSUFFIX=dylib;;
   *) do_dll=no ;;
 esac
 
