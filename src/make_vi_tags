@@ -6,12 +6,13 @@ $src=$ARGV[0] || "$ENV{HOME}/PARI/src";
 $tmptags="$src/tags.tmp";
 $tags="$src/tags";
 
+@tags=""; $old="";
 # assume ctags outputs sorted tags (e.g Exuberant Ctags)
 system("ctags -f $tmptags `find $src -name '*.[chs]' -type f -print`");
 getnames("$src/gp/gp_init.c");
 getnames("$src/language/init.c");
+geterrs("$src/language/errmsg.c");
 open(T,"$tmptags");
-@tags=""; $old="";
 for (sort(@gp))
 {
   ($a, $b) = split(/#/);
@@ -24,6 +25,8 @@ for (sort(@gp))
   }
 }
 while(<T>) { push(@tags,$_); }
+close(T);
+
 open(OUT,">$tags");
 print OUT sort(@tags);
 unlink $tmptags;
@@ -36,6 +39,22 @@ sub getnames
     if (/^entree functions_/../^$/)
     {
       push(@gp,"$2#$1") if (/[^"]*"([^"]*)".*\(void\*\) *([^,]*)/);
+    }
+  }
+  close(A);
+}
+
+sub geterrs
+{
+  my $f = $_[0];
+  open(A,$f);
+  while (<A>)
+  {
+    if (m,^/(\*\s*\w+\s*\*)/,)
+    {
+      $e = $pat = $1;
+      $e =~ s/\W*(\w+)\W*/$1/;
+      push(@tags, "$e\t$f\t/$pat\n");
     }
   }
   close(A);
