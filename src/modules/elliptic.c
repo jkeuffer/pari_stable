@@ -1968,7 +1968,7 @@ FOUND:
     if (B == 1) B = h;
     else
     {
-      GEN p1 = chinese(mkintmodu(A,B), mkintmodu(0,h));
+      GEN p1 = chinese(mkintmodu(smodss(A,B),B), mkintmodu(0,h));
       A = itos((GEN)p1[2]);
       if (is_bigint(p1[1])) { h = A; break; }
       B = itos((GEN)p1[1]);
