@@ -10,6 +10,7 @@ cat > $file << EOT
 #endif
 
 #define GPDATADIR "/pari/data"
+#define GPMISCDIR "/pari/"
 #define SHELL_Q '"'
 #define DL_DFLT_NAME "libpari.dll"
 

@@ -47,6 +47,7 @@ config/has_ulong.c
 config/install
 config/locate
 config/locatelib
+config/locatesymbol
 config/look
 config/myread
 config/paricfg.h.SH
