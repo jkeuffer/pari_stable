@@ -1071,6 +1071,29 @@ umodiu(GEN y, ulong x)
 GEN
 modiu(GEN y, ulong x) { return utoi(umodiu(y,x)); }
 
+/* return |y| \/ x */
+GEN
+diviu(GEN y, ulong x)
+{
+  long sy=signe(y),ly,i;
+  GEN z;
+  LOCAL_HIREMAINDER;
+
+  if (!x) err(diver4);
+  if (!sy) { hiremainder=0; SAVE_HIREMAINDER; return gzero; }
+
+  ly = lgefint(y);
+  if (x <= (ulong)y[2]) hiremainder=0;
+  else
+  {
+    if (ly==3) { hiremainder=itou(y); SAVE_HIREMAINDER; return gzero; }
+    hiremainder=y[2]; ly--; y++;
+  }
+  z = cgeti(ly); z[1] = evallgefint(ly) | evalsigne(1);
+  for (i=2; i<ly; i++) z[i]=divll(y[i],x);
+  SAVE_HIREMAINDER; return z;
+}
+
 #ifndef __M68K__
 
 GEN
@@ -1601,21 +1624,21 @@ smulss(ulong x, ulong y, ulong *rem)
 #  define DIVCONVI 14
 #endif
 
-/* convert integer --> base 10^9 [assume x > 0] */
+/* convert integer --> base 10^9 */
 GEN
 convi(GEN x)
 {
-  gpmem_t av=avma, lim;
+  gpmem_t av = avma, lim;
   long lz;
   GEN z,p1;
 
   lz = 3 + ((lgefint(x)-2)*15)/DIVCONVI;
-  z=new_chunk(lz); z[1] = -1; p1 = z+2;
+  z = new_chunk(lz); z[1] = -1; p1 = z+2;
   lim = stack_lim(av,1);
   for(;;)
   {
-    x = divis(x,1000000000); *p1++ = hiremainder;
-    if (!signe(x)) { avma=av; return p1; }
+    x = diviu(x,1000000000); *p1++ = hiremainder;
+    if (!signe(x)) { avma = av; return p1; }
     if (low_stack(lim, stack_lim(av,1))) x = gerepileuptoint((gpmem_t)z,x);
   }
 }

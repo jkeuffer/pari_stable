@@ -50,7 +50,6 @@ static entree *installep(void *f,char *name,int l,int v,int add,entree **table);
 static entree *skipentry(void);
 
 extern void killbloc0(GEN x, int inspect);
-extern char *GENtostr0(GEN x, void(*do_out)(GEN));
 
 /* last time we began parsing an object of specified type */
 static struct
@@ -1070,7 +1069,7 @@ expand_string(char *bp, char **ptbuf, char **ptlimit)
     gpmem_t av = avma;
     GEN p1 = expr();
     if (br_status) err(breaker,"here (expanding string)");
-    tmp = GENtostr0(p1, output_fun);
+    tmp = GENtostr0(p1, &DFLT_OUTPUT, &gen_output);
     len = strlen(tmp); avma = av;
     alloc = 1;
   }

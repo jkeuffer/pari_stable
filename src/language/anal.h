@@ -79,7 +79,6 @@ extern GEN gnil;
 extern char *current_function;
 extern GEN  (*gp_history_fun)(long, long, char *, char *);
 extern int  (*whatnow_fun)(char *, int);
-extern void (*output_fun)(GEN);
 extern void *foreignHandler;
 extern GEN  (*foreignExprHandler)(char*);
 extern char foreignExprSwitch;
@@ -223,3 +222,23 @@ typedef struct input_method {
   char * (*getline)(Buffer*, char**, struct input_method*);
 } input_method;
 
+/* output format */
+enum { f_RAW, f_PRETTYMAT, f_PRETTYOLD, f_PRETTY, f_TEX, f_NOEOL = 16 };
+
+/* for output */
+typedef struct {
+  char format; /* e,f,g */
+  long fieldw; /* 0 (ignored) or field width */
+  long sigd; /* -1 (all) or number of sign. digits printed */
+  int sp;
+  int initial;
+  int prettyp;
+} pariout_t;
+
+extern void gen_output(GEN x, pariout_t *T);
+extern char *GENtostr0(GEN x, pariout_t *T, void(*do_out)(GEN, pariout_t *));
+extern void bruti(GEN g, pariout_t *T, int nosign);
+extern void matbruti(GEN g, pariout_t *T);
+extern void sori(GEN g, pariout_t *T);
+extern void texi(GEN g, pariout_t *T, int nosign);
+extern pariout_t DFLT_OUTPUT;

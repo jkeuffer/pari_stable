@@ -60,7 +60,7 @@ void (*foreignFuncFree)(entree *);    /* How to free external entree.    */
 int  (*default_exception_handler)(long);
 GEN  (*gp_history_fun)(long, long, char *, char *);
 int  (*whatnow_fun)(char *, int);
-void (*output_fun)(GEN);
+pariout_t DFLT_OUTPUT = { 'g', -1, 1, 0, 0, f_RAW };
 
 extern void  initout(int initerr);
 extern int   term_width(void);
@@ -535,7 +535,6 @@ pari_init(size_t parisize, long maxprime)
 
   gp_history_fun = NULL;
   whatnow_fun = NULL;
-  output_fun = &outbrute;
   err_catch_array = (long *) gpmalloc((noer + 1) *sizeof(long));
   reset_traps(0);
   default_exception_handler = NULL;

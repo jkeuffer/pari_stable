@@ -33,20 +33,9 @@ extern jmp_buf environnement;
 /* for do_time() */
 enum { ti_NOPRINT, ti_REGULAR, ti_LAST, ti_INTERRUPT };
 
-/* GP printing format */
-typedef struct gp_format {
-  char format; /* f, g or h */
-  long field;  /* (0 = ignore) */
-  long nb;     /* significant digits for reals (-1 = all) */
-} gp_format;
-
 /* default functions (i.e setd*) */
 #define is_default(s) setdefault((s),"",d_EXISTS)==gun
 enum { d_ACKNOWLEDGE, d_INITRC, d_SILENT, d_RETURN, d_EXISTS };
-
-/* output format */
-enum { f_RAW, f_PRETTYMAT, f_PRETTYOLD, f_PRETTY, f_TEX };
-#define f_NOEOL 16
 
 /* aide() */
 #define h_REGULAR 0
