@@ -106,10 +106,6 @@ is wrong [second one is principal]. Group structure and regulator are correct!
    GLOBAL object wasn't modified during the last cycle (i.e only v[x] = ... 
    occured)
 
-1  sum(i=1,3000, exp(-i^2)) --> overflow in R*R
-   The "negligible" terms should be neglegted, not overflow because of the
-   way the computation is done. [ Tough to correct! ]
-
 ***************************  DOCUMENTATION    ****************************
 
 5  complete/update the tutorial (esp. section 11 and 12)
