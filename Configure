@@ -1017,14 +1017,14 @@ if test -n "$DLLD"; then
       aix-*)      DLLDFLAGS="-r" ;;
       hpux-*)     DLLDFLAGS="-b -E" ;;
       freebsd-*)  DLLDFLAGS="-Bshareable -x" ;;
-      linux-*)    DLLDFLAGS="-shared -soname \$(LIBPARI).$soname" ;;
+      linux-*)    DLLDFLAGS="-shared -soname \$(LIBPARI_SONAME)" ;;
       irix-*)     DLLDFLAGS="-shared -elf -no_unresolved -all" ;;
       *-alpha)    DLLDFLAGS="-shared"; EXTRADLLDFLAGS='${LIBS}'
          case "$optimization" in
            full) DLLDFLAGS="$DLLDFLAGS -O3" ;;
          esac;;
       sunos-*)    DLLDFLAGS="-assert nodefinitions" ;;
-      solaris-*)  DLLDFLAGS="-G -h \$(LIBPARI).$soname" ;;
+      solaris-*)  DLLDFLAGS="-G -h \$(LIBPARI_SONAME)" ;;
       *)          DLLD=;;
     esac
   fi
