@@ -671,7 +671,7 @@ gash(GEN x, long prec)
       if (gcmp0(x)) return gcopy(x);
       if (valp(x)<0) err(negexper,"gash");
 
-      av=avma; p1=gdiv(derivser(x),gsqrt(gaddsg(1,gsqr(x)),0));
+      av=avma; p1=gdiv(derivser(x),gsqrt(gaddsg(1,gsqr(x)),prec));
       y = integ(p1,varn(x)); if (valp(x)) return gerepileupto(av,y);
       p1=gash((GEN)x[2],prec);
       tetpil=avma; return gerepile(av,tetpil,gadd(p1,y));
