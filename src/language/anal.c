@@ -2992,9 +2992,8 @@ gen(GEN x)
   if (y)
   {
     x = cgetg(3,t_VEC);
-    x[1] = lcopy((GEN)y[1]);
-    x[2] = lcopy((GEN)y[2]);
-    return x;
+    x[1] = y[1];
+    x[2] = y[2]; return x;
   }
   get_nf(x,&t);
   if (t == typ_GAL)
