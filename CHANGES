@@ -47,6 +47,7 @@ BA  1- gp2c description of == operator was broken.
     3- make test-kernel didn't work [missing gen_m1 & int2n]
     4- thetanullk(1/2,1) --> SEGV [from 2.2.9]
     5- unit component in factor(t_INT + 0*I) was wrong
+    6- no typecheck for qfbhclassno input
 
   Added
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu

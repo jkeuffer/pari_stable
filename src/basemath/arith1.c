@@ -2994,6 +2994,8 @@ hclassno(GEN x)
 {
   long d, a, b, h, b2, f;
 
+  if (typ(x) != t_INT) err(typeer,"hclassno");
+
   d = -itos(x); if (d>0 || (d & 3) > 1) return gen_0;
   if (!d) return gdivgs(gen_1,-12);
   if (-d > (VERYBIGINT>>1))
