@@ -23,9 +23,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /* for linear algebra mod p */
 #ifdef LONG_IS_64BIT
-#  define MASK (0x7fffffff00000000UL)
+#  define MASK (0xffffffff00000000UL)
 #else
-#  define MASK (0x7fff0000UL)
+#  define MASK (0xffff0000UL)
 #endif
 
 /* 2p^2 < 2^BITS_IN_LONG */
@@ -678,10 +678,10 @@ zeromat(long m, long n)
 }
 
 GEN
-gscalcol(GEN x, long n) 
-{ 
-  GEN y=gscalcol_proto(gzero,gzero,n); 
-  if (n) y[1]=lcopy(x); 
+gscalcol(GEN x, long n)
+{
+  GEN y=gscalcol_proto(gzero,gzero,n);
+  if (n) y[1]=lcopy(x);
   return y;
 }
 
@@ -1014,39 +1014,41 @@ u_Fp_inv(long a, long p)
   return (long)u_invmod((ulong)a,(ulong)p);
 }
 
+/* assume 0 <= a[i,i] < p */
 GEN
-u_Fp_gauss_get_col(GEN a, GEN b, long piv, long li, long p)
+u_Fp_gauss_get_col(GEN a, GEN b, ulong piv, long li, ulong p)
 {
-  GEN u=cgetg(li+1,t_VECSMALL);
-  long i,j, m;
+  GEN u = cgetg(li+1,t_VECSMALL);
+  ulong m;
+  long i,j;
 
+  m = b[li] % p;
   if (u_OK_ULONG(p))
   {
-    u[li] = (b[li] *  u_Fp_inv(piv,p)) % p;
-    if (u[li] < 0) u[li] += p;
+    u[li] = (m * u_Fp_inv(piv,p)) % p;
     for (i=li-1; i>0; i--)
     {
-      m = b[i];
+      m = p - b[i]%p;
       for (j=i+1; j<=li; j++) {
-        m -= coeff(a,i,j) * u[j];
-        if (m & MASK) m %= p;
+        if (m & HIGHBIT) m %= p;
+        m += coeff(a,i,j) * u[j];
       }
-      u[i] = ((m%p) * u_Fp_inv(coeff(a,i,i), p)) % p;
-      if (u[i] < 0) u[i] += p;
+      m %= p;
+      if (m) m = ((p-m) * u_invmod((ulong)coeff(a,i,i), p)) % p; 
+      u[i] = m;
     }
   }
   else
   {
-    m = b[li] %= p; if (m < 0) m += p;
     u[li] = mulssmod(m, u_Fp_inv(piv,p), p);
     for (i=li-1; i>0; i--)
     {
-      m = b[i] % p; if (m < 0) m += p;
-      for (j=i+1; j<=li; j++) {
-        m -= mulssmod(coeff(a,i,j), u[j], p);
-        if (m < 0) m += p;
-      }
-      u[i] = mulssmod(m, u_Fp_inv(coeff(a,i,i), p), p);
+      m = p - b[i]%p;
+      for (j=i+1; j<=li; j++)
+        m += mulssmod(coeff(a,i,j), u[j], p);
+      m %= p;
+      if (m) m = mulssmod(p-m, u_invmod((ulong)coeff(a,i,i), p), p);
+      u[i] = m;
     }
   }
   return u;
@@ -1067,24 +1069,23 @@ _Fp_addmul(GEN b, long k, long i, GEN m, GEN p)
   b[k] = laddii((GEN)b[k], mulii(m, (GEN)b[i]));
 }
 
+/* assume m < p */
 static void
-_u_Fp_addmul(GEN b, long k, long i, long m, long p)
+_u_Fp_addmul(GEN b, long k, long i, ulong m, ulong p)
 {
-  long a;
+  ulong a;
   if (u_OK_ULONG(p))
   {
     if (b[i] & MASK) b[i] %= p;
     a = b[k] + m * b[i];
-    if (a & MASK) a %= p;
-    b[k] = a;
   }
   else
   {
-    b[i] %= p; if (b[i] < 0) b[i] += p;
+    b[i] %= p;
     a = b[k] + mulssmod(m, b[i], p);
-    if (a > p) a -= p;
-    b[k] = a;
   }
+  if (a & MASK) a %= p;
+  b[k] = (long)a;
 }
 
 /* Gaussan Elimination. Compute a^(-1)*b
@@ -1162,8 +1163,8 @@ gauss_intern(GEN a, GEN b)
 	m = gneg_i(gdiv(m,p));
 	for (j=i+1; j<=aco; j++) _addmul((GEN)a[j],k,i,m);
 	if (iscol) _addmul(b,k,i,m);
-        else 
-          for (j=1; j<=bco; j++) _addmul((GEN)b[j],k,i,m); 
+        else
+          for (j=1; j<=bco; j++) _addmul((GEN)b[j],k,i,m);
       }
     }
     if (low_stack(lim, stack_lim(av,1)))
@@ -1202,10 +1203,12 @@ gauss(GEN a, GEN b)
   return z;
 }
 
+/* destroy b */
 GEN
 u_FpM_gauss(GEN a, GEN b, long p)
 {
-  long piv,m,iscol,i,j,k,li,bco, aco = lg(a)-1;
+  long iscol,i,j,k,li,bco, aco = lg(a)-1;
+  ulong piv, m;
   GEN u;
 
   if (!aco) return cgetg(1,t_MAT);
@@ -1216,15 +1219,15 @@ u_FpM_gauss(GEN a, GEN b, long p)
   for (i=1; i<=aco; i++)
   {
     /* k is the line where we find the pivot */
-    coeff(a,i,i) = coeff(a,i,i) % p;
-    piv = coeff(a,i,i); k = i;
+    piv = coeff(a,i,i) % p;
+    coeff(a,i,i) = piv; k = i;
     if (!piv)
     {
       for (k++; k <= li; k++)
       {
         coeff(a,k,i) %= p;
         if (coeff(a,k,i)) break;
-      } 
+      }
       if (k>li) return NULL;
     }
 
@@ -1241,15 +1244,15 @@ u_FpM_gauss(GEN a, GEN b, long p)
 
     for (k=i+1; k<=li; k++)
     {
-      coeff(a,k,i) %= p;
-      m = coeff(a,k,i); coeff(a,k,i) = 0;
+      m = coeff(a,k,i) % p; coeff(a,k,i) = 0;
       if (m)
       {
-	m = - (m * u_Fp_inv(piv,p)) % p;
+	m = (m * u_invmod(piv,p)) % p;
+        m = p - m;
 	for (j=i+1; j<=aco; j++) _u_Fp_addmul((GEN)a[j],k,i,m, p);
 	if (iscol) _u_Fp_addmul(b,k,i,m, p);
-        else 
-          for (j=1; j<=bco; j++) _u_Fp_addmul((GEN)b[j],k,i,m, p); 
+        else
+          for (j=1; j<=bco; j++) _u_Fp_addmul((GEN)b[j],k,i,m, p);
       }
     }
   }
@@ -1305,7 +1308,7 @@ FpM_gauss(GEN a, GEN b, GEN p)
       {
         coeff(a,k,i) = lresii(gcoeff(a,k,i), p);
         if (signe(coeff(a,k,i))) break;
-      } 
+      }
       if (k>li) return NULL;
     }
 
@@ -1330,8 +1333,8 @@ FpM_gauss(GEN a, GEN b, GEN p)
         m = resii(negi(m), p);
 	for (j=i+1; j<=aco; j++) _Fp_addmul((GEN)a[j],k,i,m, p);
 	if (iscol) _Fp_addmul(b,k,i,m, p);
-        else 
-          for (j=1; j<=bco; j++) _Fp_addmul((GEN)b[j],k,i,m, p); 
+        else
+          for (j=1; j<=bco; j++) _Fp_addmul((GEN)b[j],k,i,m, p);
       }
     }
     if (low_stack(lim, stack_lim(av,1)))
@@ -1397,7 +1400,7 @@ u_FpM_Fp_mul_ip(GEN y, long x, long p)
 }
 
 /* M integral, dM such that M' = dM M^-1 is integral [e.g det(M)]. Return M' */
-GEN 
+GEN
 ZM_inv(GEN M, GEN dM)
 {
   gpmem_t av2, av = avma, lim = stack_lim(av,1);
@@ -1421,7 +1424,7 @@ ZM_inv(GEN M, GEN dM)
     Hp = u_FpM_gauss(u_Fp_FpM(M,p), ID, p);
     if (dMp != 1) Hp = u_FpM_Fp_mul_ip(Hp, dMp, p);
 
-    if (!H) 
+    if (!H)
     {
       H = ZM_init_CRT(Hp, p);
       q = utoi(p);
@@ -1434,21 +1437,20 @@ ZM_inv(GEN M, GEN dM)
     }
     if (DEBUGLEVEL>5) msgtimer("inverse mod %ld (stable=%ld)", p,stable);
     if (stable && isscalarmat(gmul(M, H), dM)) break; /* DONE */
-    
+
     if (low_stack(lim, stack_lim(av,2)))
     {
       GEN *gptr[2]; gptr[0] = &H; gptr[1] = &q;
       if (DEBUGMEM>1) err(warnmem,"ZM_inv");
       gerepilemany(av2,gptr, 2);
     }
- 
   }
   if (DEBUGLEVEL>5) msgtimer("ZM_inv done");
   return gerepilecopy(av, H);
 }
 
 /* same as above, M rational */
-GEN 
+GEN
 QM_inv(GEN M, GEN dM)
 {
   gpmem_t av = avma;
@@ -2190,13 +2192,13 @@ indexrank0(GEN x, GEN p, int small)
   return res;
 }
 
-GEN 
+GEN
 indexrank(GEN x) { return indexrank0(x,NULL,0); }
 
-GEN 
+GEN
 sindexrank(GEN x) { return indexrank0(x,NULL,1); }
 
-GEN 
+GEN
 FpM_sindexrank(GEN x, GEN p) { return indexrank0(x,p,1); }
 
 /*******************************************************************/
@@ -2204,7 +2206,7 @@ FpM_sindexrank(GEN x, GEN p) { return indexrank0(x,p,1); }
 /*                    LINEAR ALGEBRA MODULO P                      */
 /*                                                                 */
 /*******************************************************************/
-  
+
 /*If p is NULL no reduction is performed.*/
 GEN
 FpM_mul(GEN x, GEN y, GEN p)
@@ -2224,7 +2226,7 @@ FpM_mul(GEN x, GEN y, GEN p)
   {
     z[j] = lgetg(l,t_COL);
     for (i=1; i<l; i++)
-    { 
+    {
       gpmem_t av;
       GEN p1,p2;
       int k;
@@ -2251,7 +2253,7 @@ FpM_FpV_mul(GEN x, GEN y, GEN p)
   if (lx==1) return cgetg(1,t_COL);
   l=lg(x[1]);
   for (i=1; i<l; i++)
-  { 
+  {
     gpmem_t av;
     GEN p1,p2;
     int k;
@@ -2266,24 +2268,21 @@ FpM_FpV_mul(GEN x, GEN y, GEN p)
   return z;
 }
 
+/* assume x has integer entries */
 static GEN
 u_FpM_ker(GEN x, GEN pp, long nontriv)
 {
   gpmem_t av0 = avma, tetpil;
   GEN y,c,d;
-  long a,i,j,k,r,t,n,m,p = pp[2], piv;
+  long i,j,k,r,t,n;
+  ulong a, piv, m, p = pp[2];
 
   n = lg(x)-1;
   m=lg(x[1])-1; r=0;
-  x = dummycopy(x);
-  for (i=1; i<=n; i++)
-  {
-    GEN p1 = (GEN)x[i];
-    for (j=1; j<=m; j++) p1[j] = itos((GEN)p1[j]);
-  }
+  x = u_Fp_FpM(x, p);
   c=new_chunk(m+1); for (k=1; k<=m; k++) c[k]=0;
   d=new_chunk(n+1);
-  a=0; /* for gcc -Wall */
+  a = 0; /* for gcc -Wall */
   for (k=1; k<=n; k++)
   {
     for (j=1; j<=m; j++)
@@ -2300,8 +2299,8 @@ u_FpM_ker(GEN x, GEN pp, long nontriv)
     else
     {
       c[j]=k; d[k]=j;
-      piv = - u_Fp_inv(a, p);
-      coeff(x,j,k) = -1;
+      piv = p - u_invmod(a, p);
+      coeff(x,j,k) = p-1;
       for (i=k+1; i<=n; i++)
 	coeff(x,j,i) = (piv * coeff(x,j,i)) % p;
       for (t=1; t<=m; t++)
@@ -2326,9 +2325,8 @@ u_FpM_ker(GEN x, GEN pp, long nontriv)
     for (i=1; i<k; i++)
       if (d[i])
       {
-        long a = coeff(x,d[i],k) % p;
-        if (a < 0) a += p;
-	c[i] = lstoi(a);
+        a = coeff(x,d[i],k) % p;
+	c[i] = (long)utoi(a);
       }
       else
 	c[i] = zero;
@@ -2543,7 +2541,7 @@ FpM_invimage(GEN m, GEN v, GEN p)
   }
   return y;
 }
-/************************************************************** 
+/**************************************************************
  Rather stupid implementation of linear algebra in finite fields
  **************************************************************/
 static GEN
@@ -2555,7 +2553,7 @@ Fq_add(GEN x, GEN y, GEN T/*unused*/, GEN p)
     case 1: return FpX_Fp_add(x,y,p);
     case 2: return FpX_Fp_add(y,x,p);
     case 3: return FpX_add(x,y,p);
-  } 
+  }
   return NULL;
 }
 #if 0
@@ -2563,7 +2561,7 @@ Fq_add(GEN x, GEN y, GEN T/*unused*/, GEN p)
  * For consistency we write the code there.
  * To avoid having to remove static status, we rewrite it in polarit1.c
  */
-static GEN 
+static GEN
 Fq_neg(GEN x, GEN T, GEN p)
 {
   switch(typ(x)==t_POL)
@@ -2920,7 +2918,7 @@ det(GEN a)
   if (use_maximal_pivot(a)) return det_simple_gauss(a,1);
   if (DEBUGLEVEL > 7) timer2();
 
-  av = avma; lim = stack_lim(av,2); 
+  av = avma; lim = stack_lim(av,2);
   a = dummycopy(a); s = 1;
   for (pprec=gun,i=1; i<nbco; i++,pprec=p)
   {
