@@ -830,21 +830,21 @@ zell(GEN e, GEN z, long prec)
   /* which square root? test the reciprocal function (pointell) */
   if (!gcmp0(t))
   {
-    GEN x1;
-    long bad;
+    GEN z1,z2;
+    int bad;
 
-    u = pointell(e,t,3); /* we don't need much precision */
-    /* Either z = u (ok: keep t), or z = invell(e,u) (bad: t <-- -t) */
-    x1 = gsub(z,u); bad = (gexpo((GEN)x1[1]) >= gexpo((GEN)u[1])
-                        || gexpo((GEN)x1[2]) >= gexpo((GEN)u[2]));
+    z1 = pointell(e,t,3); /* we don't need much precision */
+    /* Either z = z1 (ok: keep t), or z = z2 (bad: t <-- -t) */
+    z2 = invell(e, z1);
+    bad = (gexpo(gsub(z,z1)) > gexpo(gsub(z,z2)));
     if (bad) t = gneg(t);
     if (DEBUGLEVEL)
     {
       if (DEBUGLEVEL>4)
       {
         fprintferr("  z  = %Z\n",z);
-        fprintferr("  u  = %Z\n",u);
-        fprintferr("  x1 = %Z\n",x1);
+        fprintferr("  z1 = %Z\n",z1);
+        fprintferr("  z2 = %Z\n",z2);
       }
       fprintferr("ellpointtoz: %s square root\n", bad? "bad": "good");
       flusherr();
