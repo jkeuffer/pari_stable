@@ -297,14 +297,14 @@ IsLucasPsP0(GEN N)
 
   m = addis(N,1); v = vali(m); m = shifti(m,-v);
   z = LucasMod(m, b, N);
-  if (equalii(z, gen_2)) return 1;
+  if (equaliu(z, 2)) return 1;
   N_2 = subis(N,2);
   if (equalii(z, N_2)) return 1;
   for (i=1; i<v; i++)
   {
     if (!signe(z)) return 1;
     z = modii(subis(sqri(z), 2), N);
-    if (equalii(z, gen_2)) return 0;
+    if (equaliu(z, 2)) return 0;
   }
   return 0;
 }
@@ -463,7 +463,7 @@ plisprime(GEN N, long flag)
   if (t != t_INT) err(arither1);
   if (DEBUGLEVEL>3) fprintferr("PL: proving primality of N = %Z\n", N);
 
-  eps = absi_cmp(N,gen_2);
+  eps = cmpiu(N,2);
   if (eps<=0) return eps? gen_0: gen_1;
 
   N = absi(N);
