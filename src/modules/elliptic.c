@@ -88,7 +88,6 @@ d_ellLHS(GEN e, GEN z)
   return gadd(ellLHS0(e, (GEN)z[1]), gmul2n((GEN)z[2],1));
 }
 
-
 static void
 smallinitell0(GEN x, GEN y)
 {
