@@ -797,7 +797,7 @@ muluumod(ulong a, ulong b, ulong c)
 INLINE ulong
 divuumod(ulong a, ulong b, ulong p)
 {
-  return muluumod(a, u_invmod(b, p), p);
+  return muluumod(a, invumod(b, p), p);
 }
 
 INLINE long

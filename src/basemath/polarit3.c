@@ -2356,7 +2356,7 @@ from_Kronecker(GEN z, GEN pol)
 extern ulong xgcduu(ulong d, ulong d1, int f, ulong* v, ulong* v1, long *s);
 /* 1 / Mod(x,p) , or 0 if inverse doesn't exist */
 ulong
-u_invmod(ulong x, ulong p)
+invumod(ulong x, ulong p)
 {
   long s;
   ulong xv, xv1, g = xgcduu(p, x, 1, &xv, &xv1, &s);
@@ -2393,7 +2393,7 @@ umodratu(GEN a, ulong p)
   else { /* assume a a t_FRAC */
     ulong num = umodiu((GEN)a[1],p);
     ulong den = umodiu((GEN)a[2],p);
-    return (ulong)muluumod(num, u_invmod(den,p), p);
+    return (ulong)muluumod(num, invumod(den,p), p);
   }
 }
 #endif
@@ -2455,7 +2455,7 @@ u_FpX_normalize(GEN z, ulong p)
   long l = lgef(z)-1;
   ulong p1 = z[l]; /* leading term */
   if (p1 == 1) return z;
-  return u_FpX_Fp_mul(z, u_invmod(p1,p), p);
+  return u_FpX_Fp_mul(z, invumod(p1,p), p);
 }
 
 static GEN
@@ -2483,7 +2483,7 @@ u_FpX_divrem(GEN x, GEN y, ulong p, GEN *pr)
     if (y[2] == 1UL)
       q = u_copy(x);
     else
-      q = u_FpX_Fp_mul(x, u_invmod(y[2], p), p);
+      q = u_FpX_Fp_mul(x, invumod(y[2], p), p);
     if (pr) *pr = u_zeropol();
     return q;
   }
@@ -2499,7 +2499,7 @@ u_FpX_divrem(GEN x, GEN y, ulong p, GEN *pr)
   y += 2;
   z = u_getpol(dz) + 2;
   inv = y[dy];
-  if (inv != 1UL) inv = u_invmod(inv,p);
+  if (inv != 1UL) inv = invumod(inv,p);
 
   if (u_OK_ULONG(p))
   {
@@ -3151,7 +3151,7 @@ int
 Z_incremental_CRT(GEN *H, ulong Hp, GEN q, GEN qp, ulong p)
 {
   GEN h, lim = shifti(qp,-1);
-  ulong qinv = u_invmod(umodiu(q,p), p);
+  ulong qinv = invumod(umodiu(q,p), p);
   int stable = 1;
   h = u_chrem_coprime(*H,Hp,q,p,qinv,qp);
   if (h)
@@ -3166,7 +3166,7 @@ int
 ZX_incremental_CRT(GEN *ptH, GEN Hp, GEN q, GEN qp, ulong p)
 {
   GEN H = *ptH, h, lim = shifti(qp,-1);
-  ulong qinv = u_invmod(umodiu(q,p), p);
+  ulong qinv = invumod(umodiu(q,p), p);
   long i, l = lgef(H), lp = lgef(Hp);
   int stable = 1;
 
@@ -3208,7 +3208,7 @@ int
 ZM_incremental_CRT(GEN H, GEN Hp, GEN q, GEN qp, ulong p)
 {
   GEN h, lim = shifti(qp,-1);
-  ulong qinv = u_invmod(umodiu(q,p), p);
+  ulong qinv = invumod(umodiu(q,p), p);
   long i,j, l = lg(H), m = lg(H[1]);
   int stable = 1;
   for (j=1; j<l; j++)
@@ -3263,7 +3263,7 @@ u_FpX_rem(GEN x, GEN y, ulong p)
   y += 2;
   z = u_mallocpol(dz) + 2;
   inv = y[dy];
-  if (inv != 1UL) inv = u_invmod(inv,p);
+  if (inv != 1UL) inv = invumod(inv,p);
 
   c = u_getpol(dy) + 2;
   if (u_OK_ULONG(p))
@@ -3429,7 +3429,7 @@ u_FpX_extresultant(GEN a, GEN b, ulong p, GEN *ptU, GEN *ptV)
     dy = dz; /* = degpol(y) */
   }
   res = muluumod(res, powuumod(y[2], dx, p), p);
-  lb = muluumod(res, u_invmod(y[2],p), p);
+  lb = muluumod(res, invumod(y[2],p), p);
   v = gerepileupto(av, u_FpX_Fp_mul(v, lb, p));
   av = avma;
   u = u_FpX_sub(u_scalarpol(res), u_FpX_mul(b,v,p), p);
@@ -3698,7 +3698,7 @@ u_FpV_polint(GEN xa, GEN ya, ulong p)
   {
     if (!ya[i]) continue;
     T = u_FpX_div_by_X_x(Q, xa[i], p);
-    inv = u_invmod(u_FpX_eval(T,xa[i], p), p);
+    inv = invumod(u_FpX_eval(T,xa[i], p), p);
     if (i < n-1 && (ulong)(xa[i] + xa[i+1]) == p)
     {
       dP = u_pol_comp(T, muluumod(ya[i],inv,p), muluumod(ya[i+1],inv,p), p);
@@ -3753,7 +3753,7 @@ u_FpV_polint_all(GEN xa, GEN ya, GEN C0, GEN C1, ulong p)
   for (i=1; i<n; i++)
   {
     T = u_FpX_div_by_X_x(Q, xa[i], p);
-    inv = u_invmod(u_FpX_eval(T,xa[i], p), p);
+    inv = invumod(u_FpX_eval(T,xa[i], p), p);
 
     if (ya[i])
     {
@@ -3896,7 +3896,7 @@ u_upowmod(ulong x, ulong n, ulong p)
 ulong
 u_powmod(ulong x, long n, ulong p)
 {
-  if (n < 0) return u_upowmod(u_invmod(x, p), (ulong)(-n), p);
+  if (n < 0) return u_upowmod(invumod(x, p), (ulong)(-n), p);
   else return u_upowmod(x, (ulong)n, p);
 }
 
@@ -3966,7 +3966,7 @@ u_FpX_divexact(GEN x, GEN y, ulong p)
   {
     ulong t = (ulong)y[2];
     if (t == 1) return x;
-    t = u_invmod(t, p);
+    t = invumod(t, p);
     l = lgef(x); z = cgetg(l, t_POL); z[1] = x[1];
     for (i=2; i<l; i++) z[i] = (long)u_FpX_Fp_mul((GEN)x[i],t,p);
   }
@@ -4496,7 +4496,7 @@ modulargcd(GEN A0, GEN B0)
       Hp = u_FpX_normalize(Hp, p);
     else
     {
-      ulong t = muluumod(umodiu(g, p), u_invmod(Hp[m+2],p), p);
+      ulong t = muluumod(umodiu(g, p), invumod(Hp[m+2],p), p);
       Hp = u_FpX_Fp_mul(Hp, t, p);
     }
     if (m < n)

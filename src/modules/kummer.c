@@ -1053,7 +1053,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
 
   /* step 14, 15, and 17 */
   if (DEBUGLEVEL>2) fprintferr("Step 14, 15 and 17\n");
-  mginv = (m * u_invmod(g,ell)) % ell;
+  mginv = (m * invumod(g,ell)) % ell;
   vecMsup = cgetg(lSml2+1,t_VEC);
   M = NULL;
   for (i=1; i<=lSl2; i++)

@@ -1145,7 +1145,7 @@ static long
 u_Fp_inv(long a, long p)
 {
   if (a < 0) a = p + a; /* pb with ulongs < 0 */
-  return (long)u_invmod((ulong)a,(ulong)p);
+  return (long)invumod((ulong)a,(ulong)p);
 }
 #endif
 
@@ -1169,7 +1169,7 @@ u_Fp_gauss_get_col_OK(GEN a, uGEN b, ulong invpiv, long li, ulong p)
       m += ucoeff(a,i,j) * u[j]; /* 0 <= u[j] < p */
     }
     m %= p;
-    if (m) m = ((p-m) * u_invmod(ucoeff(a,i,i), p)) % p; 
+    if (m) m = ((p-m) * invumod(ucoeff(a,i,i), p)) % p; 
     u[i] = m;
   }
   return u;
@@ -1188,7 +1188,7 @@ u_Fp_gauss_get_col(GEN a, uGEN b, ulong invpiv, long li, ulong p)
     for (j = i+1; j <= li; j++)
       m += muluumod(ucoeff(a,i,j), u[j], p);
     m %= p;
-    if (m) m = muluumod(p-m, u_invmod(ucoeff(a,i,i), p), p);
+    if (m) m = muluumod(p-m, invumod(ucoeff(a,i,i), p), p);
     u[i] = m;
   }
   return u;
@@ -1360,7 +1360,7 @@ u_FpM_gauss_sp(GEN a, GEN b, ulong p)
       if (piv) break;
     }
     if (!piv) return NULL;
-    invpiv = u_invmod(piv, p);
+    invpiv = invumod(piv, p);
 
     /* if (k!=i), exchange the lines s.t. k = i */
     if (k != i)
@@ -2543,7 +2543,7 @@ u_FpM_ker_sp(GEN x, ulong p, long deplin)
     else
     {
       c[j] = k; d[k] = j;
-      piv = p - u_invmod(a, p); /* -1/a */
+      piv = p - invumod(a, p); /* -1/a */
       ucoeff(x,j,k) = p-1;
       for (i=k+1; i<=n; i++)
 	ucoeff(x,j,i) = (piv * ucoeff(x,j,i)) % p;

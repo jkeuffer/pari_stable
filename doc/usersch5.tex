@@ -81,6 +81,23 @@ stores the remainder into \kbd{hiremainder}. An error occurs if the quotient
 cannot be represented by a ulong, i.e.~if $\kbd{hiremainder}\ge\kbd{y}$
 initially.
 
+
+The following routines implement modular operations in terms of the
+above. They are written so that no overflow occurs.
+
+\fun{ulong}{adduumod}{ulong x, ulong y, ulong m} returns the smallest
+positive representative of $x + y$ modulo $m$.
+
+\fun{ulong}{muluumod}{ulong x, ulong y, ulong m} returns the smallest positive
+representative of $x y$ modulo $m$.
+
+\fun{ulong}{divuumod}{ulong x, ulong y, ulong m} returns the smallest
+positive representative of $x y^{-1}$ modulo $m$.
+
+\fun{ulong}{invumod}{ulong x, ulong m} returns the smallest
+positive representative of $x^{-1}$ modulo $m$. If $x$ is not invertible
+mod $m$, return $0$.
+
 \section{Level 1 kernel (operations on longs, integers and reals)}
 
 \noindent
