@@ -47,6 +47,7 @@ Done for version 2.2.2 (released ??/??/2001):
    12- matrix(0,1) --> "identical index variables in matrix" [from 2.2.1 F48]
    13- bnfinit could miss some relations in the "small norm" phase
    14- x % y incorrect when y < 0 inexact (2 % -3. --> -1.)
+   15- typo in gcdreal (result < 0) [introduced in 2.2.1]
 
   Changes
     1- allow compressing *.dvi files for the online help system
