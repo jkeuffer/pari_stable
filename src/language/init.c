@@ -1128,10 +1128,7 @@ err(long numerr, ...)
   else
   {
     if (gp_function_name)
-    {
       pariputsf("  *** %s: %s", gp_function_name, errmessage[numerr]);
-      gp_function_name=NULL;
-    }
     else
       pariputsf("  ***   %s", errmessage[numerr]);
     switch (numerr)
@@ -1196,6 +1193,7 @@ err(long numerr, ...)
   }
   pariOut = out;
   if (ret) { flusherr(); return; }
+  gp_function_name=NULL;
   if (default_exception_handler)
   {
     if (dft_handler[numerr])
