@@ -1628,7 +1628,7 @@ gp_quit()
   kill_all_buffers(NULL);
   if (INIT_SIG) pari_sig_init(SIG_DFL);
   term_color(c_NONE);
-  pariputs_opt("Good bye!\n");
+  pariputs_opt("Goodbye!\n");
   if (under_texmacs) tm_end_output();
   exit(0);
 }
