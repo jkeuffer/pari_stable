@@ -259,9 +259,10 @@ hensel_lift_fact(GEN pol, GEN Q, GEN p, GEN pev, long e)
 {
   long ev,i, nf = lg(Q);
   GEN C = pol, res = cgetg(nf, t_VEC), listb = cgetg(nf, t_VEC);
+  GEN lc = leading_term(pol);
 
   if (DEBUGLEVEL > 4) (void)timer2();
-  listb[1] = lmodii(leading_term(pol), p);
+  listb[1] = lmodii(lc, p);
   for (i=2; i < nf; i++)
     listb[i] = (long)Fp_pol_red(gmul((GEN)listb[i-1], (GEN)Q[i-1]), p);
   for (i=nf-1; i>1; i--)
@@ -314,6 +315,11 @@ hensel_lift_fact(GEN pol, GEN Q, GEN p, GEN pev, long e)
       fprintferr("...lifting factor of degree %3ld. Time = %ld\n",
                  lgef(a)-3,timer2());
   }
+  if (!gcmp1(lc))
+  {
+    GEN g = mpinvmod(lc, pev);
+    C = Fp_pol_red(gmul(C, g), pev);
+  }
   res[1] = (long)C; return res;
 }
 
@@ -350,7 +356,7 @@ cmbf(GEN target, GEN famod, GEN pe, long maxK,long klim,long hint)
 nextK:
   if (K > maxK) goto END;
   if (DEBUGLEVEL > 4)
-    fprintferr("\n### K = %d, %Z combinations\n", K,binome(stoi(lfamod-1), K));
+    fprintferr("\n### K = %d, %Z combinations\n", K,binome(stoi(lfamod), K));
   setlg(ind, K+1); ind[1] = 1;
   i = 1; curdeg = deg[ind[1]];
   for(;;)
@@ -469,7 +475,7 @@ two_factor_bound(GEN x)
   z = shiftr(mpsqrt(z), n);
   z = divrr(z, dbltor(pow((double)n, 0.75)));
   z = grndtoi(mpsqrt(z), &i);
-  z = mulii(z, (GEN)x[0]);
+  z = mulii(z, absi((GEN)x[n]));
   return gerepileuptoint(av, shifti(z, 1));
 }
 
