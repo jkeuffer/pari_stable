@@ -344,7 +344,7 @@ element_pow(GEN nf, GEN x, GEN n)
 {
   ulong av = avma;
   long s,N,i,j,m;
-  GEN y,p1;
+  GEN y,p1,cx;
 
   if (typ(n)!=t_INT) err(talker,"not an integer exponent in nfpow");
   nf=checknf(nf); N=lgef(nf[1])-3;
@@ -356,6 +356,8 @@ element_pow(GEN nf, GEN x, GEN n)
     y = gscalcol_i(gun,N);
     y[1] = (long)powgi((GEN)x[1],n); return y;
   }
+  cx = content(x);
+  if (gcmp1(cx)) cx = NULL; else x = gdiv(x,cx);
   p1 = n+2; m = *p1;
   y=x; j=1+bfffo(m); m<<=j; j = BITS_IN_LONG-j;
   for (i=lgefint(n)-2;;)
@@ -369,6 +371,7 @@ element_pow(GEN nf, GEN x, GEN n)
     m = *++p1, j = BITS_IN_LONG;
   }
   if (s<0) y = element_inv(nf, y);
+  if (cx) y = gmul(y, powgi(cx, n));
   return av==avma? gcopy(y): gerepileupto(av,y);
 }
 
@@ -788,30 +791,42 @@ nfreducemodideal(GEN nf,GEN x0,GEN ideal)
 {
   GEN y = idealhermite(nf,ideal);
   GEN x = colreducemodmat(x0, y, NULL);
-  if (gcmp0(x)) return (GEN) ideal[1];
+  if (gcmp0(x)) return (GEN)y[1];
   return x == x0? gcopy(x) : x;
+}
+
+/* multiply y by t = 1 mod^* f such that sign(x) = sign(y) at sarch.
+ * If x == NULL, make y >> 0 at sarch */
+GEN
+set_sign_mod_idele(GEN nf, GEN x, GEN y, GEN idele, GEN sarch)
+{
+  GEN s,arch,gen;
+  long nba,i;
+  if (!sarch) return y;
+  arch = (GEN)idele[2];
+  gen =(GEN)sarch[2]; nba = lg(gen);
+
+  s = zsigne(nf,y,arch);
+  if (x) s = gadd(s, zsigne(nf,x,arch));
+  s = lift_intern(gmul((GEN)sarch[3],s));
+  for (i=1; i<nba; i++)
+    if (signe(s[i])) y = element_mul(nf,y,(GEN)gen[i]);
+  return y;
 }
 
 /* compute elt = x mod idele, with sign(elt) = sign(x) at arch */
 GEN
 nfreducemodidele(GEN nf,GEN x,GEN idele,GEN sarch)
 {
-  GEN p1,p2,arch,gen;
-  long nba,i;
+  GEN y;
 
   if (gcmp0(x)) return gcopy(x);
   if (!sarch || typ(idele)!=t_VEC || lg(idele)!=3)
     return nfreducemodideal(nf,x,idele);
 
-  arch =(GEN)idele[2];
-  nba = lg(sarch[1]);
-  gen =(GEN)sarch[2];
-  p1 = nfreducemodideal(nf,x,(GEN)idele[1]);
-  p2 = gadd(zsigne(nf,p1,arch), zsigne(nf,x,arch));
-  p2 = lift_intern(gmul((GEN)sarch[3],p2));
-  for (i=1; i<nba; i++)
-    if (signe(p2[i])) p1 = element_mul(nf,p1,(GEN)gen[i]);
-  return (gcmp(gnorml2(p1),gnorml2(x)) > 0)? x: p1;
+  y = nfreducemodideal(nf,x,(GEN)idele[1]);
+  y = set_sign_mod_idele(nf, x, y, idele, sarch);
+  return (gexpo(y) > gexpo(x))? x: y;
 }
 
 GEN
@@ -829,13 +844,12 @@ element_powmodideal(GEN nf,GEN x,GEN k,GEN ideal)
 GEN
 element_powmodidele(GEN nf,GEN x,GEN k,GEN idele,GEN sarch)
 {
-  GEN y = gscalcol_i(gun,lgef(nf[1])-3);
-  for(;;)
-  {
-    if (mpodd(k)) y=element_mulmodidele(nf,x,y,idele,sarch);
-    k=shifti(k,-1); if (!signe(k)) return y;
-    x = element_sqrmodidele(nf,x,idele,sarch);
-  }
+  GEN y = element_powmodideal(nf,x,k,idele);
+  if (mpodd(k))
+  { if (!gcmp1(k)) y = set_sign_mod_idele(nf, x, y, idele, sarch); }
+  else
+  { if (!gcmp0(k)) y = set_sign_mod_idele(nf, NULL, y, idele, sarch); }
+  return y;
 }
 
 /* R relation matrix among row of generators g.  Let URV = D its SNF, newU R
