@@ -184,7 +184,7 @@ static void
 pari_sighandler(int sig)
 {
   char *msg;
-  os_signal(sig,pari_sighandler);
+  (void)os_signal(sig,pari_sighandler);
   switch(sig)
   {
 #ifdef SIGBREAK
@@ -510,7 +510,7 @@ pari_init(size_t parisize, long maxprime)
   polvar[0] = evaltyp(t_VEC) | evallg(1);
   for (i=0; i <= MAXVARN; i++) { ordvar[i] = i; varentries[i] = NULL; }
 
-  fetch_var(); /* create polx/polun[MAXVARN] */
+  (void)fetch_var(); /* create polx/polun[MAXVARN] */
   primetab = (GEN) gpmalloc(1 * sizeof(long));
   primetab[0] = evaltyp(t_VEC) | evallg(1);
 
@@ -541,7 +541,7 @@ pari_init(size_t parisize, long maxprime)
 
   (void)manage_var(2,NULL); /* init nvar */
   (void)get_timer(-1); /* init timers */
-  var_not_changed = 1; fetch_named_var("x", 0);
+  var_not_changed = 1; (void)fetch_named_var("x", 0);
   try_to_recover=1;
 }
 
@@ -577,7 +577,7 @@ freeall(void)
   free(current_psfile);
 
   if (gp_history_fun)
-    gp_history_fun(0,-1,NULL,NULL);
+    (void)gp_history_fun(0,-1,NULL,NULL);
 }
 
 GEN
@@ -864,7 +864,7 @@ recover(int flag)
   }
 #endif
   try_to_recover=1;
-  os_signal(SIGINT, sigfun);
+  (void)os_signal(SIGINT, sigfun);
 }
 
 void
@@ -1032,7 +1032,7 @@ err_recover(long numerr)
 {
   initout(0);
   disable_dbg(-1);
-  get_timer(-1);
+  (void)get_timer(-1);
   killallfiles(0);
 
   if (pariErr->die) pariErr->die();    /* Caller wants to catch exceptions? */
@@ -1824,7 +1824,7 @@ get_timer(long t)
     for (i=MIN_TIMER; i < MAX_TIMER; i++)
       if (!used[i]) { used[i] = 1; t = i; break; }
     if (!t) { t = 2; err(warner, "no timers left! Using timer2()"); }
-    timer_proto(t); /* init timer */
+    (void)timer_proto(t); /* init timer */
   }
   else if (t < 0)
   { /* initialize */

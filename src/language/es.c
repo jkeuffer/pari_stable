@@ -742,7 +742,7 @@ static void
 wr_intpos(GEN x)
 {
   long *res = convi(x);
-  coinit(*--res); while (*--res >= 0) comilieu(*res);
+  (void)coinit(*--res); while (*--res >= 0) comilieu(*res);
 }
 
 /* write int. T->fieldw: field width (pad with ' ') */
@@ -760,7 +760,7 @@ wr_int(pariout_t *T, GEN x, int nosign)
 
   blancs(T->fieldw - i);
   if (minus) pariputc('-');
-  coinit(*--res); while (*--res >= 0) comilieu(*res);
+  (void)coinit(*--res); while (*--res >= 0) comilieu(*res);
 }
 
 static void
@@ -1937,16 +1937,16 @@ void
 gen_output(GEN x, pariout_t *T)
 {
   gpmem_t av = avma;
+  GEN y = changevar(x, polvar);
   if (!T) T = &DFLT_OUTPUT;
   T->initial = 1;
-  changevar(x, polvar);
   switch(T->prettyp)
   {
-    case f_PRETTYMAT: matbruti(x, T); break;
+    case f_PRETTYMAT: matbruti(y, T); break;
     case f_PRETTY:
-    case f_PRETTYOLD: sori (x, T); break;
-    case f_RAW      : bruti(x, T, 0); break;
-    case f_TEX      : texi (x, T, 0); break;
+    case f_PRETTYOLD: sori (y, T); break;
+    case f_RAW      : bruti(y, T, 0); break;
+    case f_TEX      : texi (y, T, 0); break;
   }
   avma = av;
 }
@@ -2305,7 +2305,7 @@ os_read(long fd, char ch[], long s)
   DWORD chRead;
   ReadFile((HANDLE)fd, ch, s, &chRead, NULL);
 #else
-  read(fd,ch,s);
+  (void)read(fd,ch,s);
 #endif
 }
 

@@ -38,9 +38,9 @@ subres0(GEN x, GEN y) { return subres(x,y); }
 static long
 rounderror(GEN x)
 {
-  long e;
-  gpmem_t av=avma;
-  grndtoi(x,&e); avma=av; return (long)(e*L2SL10);
+  gpmem_t av = avma;
+  long e; (void)grndtoi(x,&e);
+  avma = av; return (long)(e*L2SL10);
 }
 
 static GEN

@@ -1171,7 +1171,7 @@ strtoGENstr_t()
   old++; /* skip '"' */
   n = (n+BYTES_IN_LONG) >> TWOPOTBYTES_IN_LONG;
   x = cgetg(n+1, t_STR);
-  translate(&old, GSTR(x), NULL,NULL);
+  (void)translate(&old, GSTR(x), NULL,NULL);
   return x;
 }
 
@@ -1269,7 +1269,7 @@ check_pointers(unsigned int ptrs, matcomp *init[])
         *pt = x;
       }
       else
-        change_compo(*c, x);
+        (void)change_compo(*c, x);
       free((void*)c);
     }
 }
@@ -1986,7 +1986,7 @@ constante()
   l=lgefint(y); if (l<prec) l=prec;
   if (n)
   {
-    new_chunk(l); /* hack: mulrr and divrr need exactly l words */
+    (void)new_chunk(l); /* hack: mulrr and divrr need exactly l words */
     z=cgetr(l); affir(y,z);
     y=cgetr(l); affsr(10,y); y = gpuigs(y, labs(n));
     avma = av; /* hidden gerepile */
@@ -2153,7 +2153,7 @@ fetch_named_var(char *s, int doerr)
   }
   ep = installep(NULL,s,strlen(s),EpVAR, 7*sizeof(long),
                  functions_hash + hashvalue(s));
-  manage_var(0,ep); return ep;
+  (void)manage_var(0,ep); return ep;
 }
 
 long
@@ -2179,7 +2179,7 @@ fetch_user_var(char *s)
 void
 delete_named_var(entree *ep)
 {
-  manage_var(5, (entree*)varn(initial_value(ep)));
+  (void)manage_var(5, (entree*)varn(initial_value(ep)));
   kill0(ep);
 }
 
@@ -2231,7 +2231,7 @@ entry(void)
     { n=7*sizeof(long); val=EpVAR; }
   ep = installep(NULL,old,len,val,n, functions_hash + hash);
 
-  if (n) manage_var(0,ep); /* Variable */
+  if (n) (void)manage_var(0,ep); /* Variable */
   return ep;
 }
 
@@ -2432,7 +2432,7 @@ skiptruc(void)
     case '!': case '#': analyseur++; skipfacteur(); return;
     case '&': case '\'':
       analyseur++; check_var_name();
-      skipentry(); return;
+      (void)skipentry(); return;
   }
   if (isalpha((int)*analyseur)) { skipidentifier(); return; }
   if (isdigit((int)*analyseur) || *analyseur== '.') { skipconstante(); return; }
@@ -2467,7 +2467,7 @@ skiptruc(void)
       }
     case '%':
       if (*analyseur == '`') { while (*++analyseur == '`') /*empty*/; return; }
-      number(&n); return;
+      (void)number(&n); return;
   }
   err(caracer1,analyseur-1,mark.start);
 }
@@ -2566,7 +2566,7 @@ skipidentifier(void)
         break;
 
       case 'S': match_comma();
-        check_var_name(); skipentry(); break;
+        check_var_name(); (void)skipentry(); break;
       case '&': match_comma(); match('&'); check_matcell(); break;
       case 'V': match_comma(); check_var(); break;
 
@@ -2747,7 +2747,7 @@ f(GEN x)
 static GEN
 p(GEN x)
 {
-  int t; get_nf(x,&t);
+  int t; (void)get_nf(x,&t);
   if (t == typ_GAL)
     return gmael(x,2,1);
   x = get_primeid(x);
@@ -2831,7 +2831,7 @@ pol(GEN x) /* polynomial */
 static GEN
 mod(GEN x) /* modulus */
 {
-  int t; get_nf(x,&t);
+  int t; (void)get_nf(x,&t);
   if (t == typ_GAL)
     return gmael(x,2,3);
   switch(typ(x))
@@ -3082,7 +3082,7 @@ gen(GEN x)
     x[1] = y[1];
     x[2] = y[2]; return x;
   }
-  get_nf(x,&t);
+  (void)get_nf(x,&t);
   if (t == typ_GAL)
     return (GEN)x[7];
   x = clgp(x);
@@ -3094,8 +3094,7 @@ gen(GEN x)
 static GEN
 group(GEN x)
 {
-  int t;
-  get_nf(x,&t);
+  int t; (void)get_nf(x,&t);
   if (t == typ_GAL)
     return (GEN)x[6];
   err(member,"group",mark.member,mark.start);
@@ -3104,8 +3103,7 @@ group(GEN x)
 static GEN
 orders(GEN x)
 {
-  int t;
-  get_nf(x,&t);
+  int t; (void)get_nf(x,&t);
   if (t == typ_GAL)
     return (GEN)x[8];
   err(member,"orders",mark.member,mark.start);
@@ -3416,7 +3414,7 @@ alias0(char *s, char *old)
   ep = do_alias(ep); x = newbloc(2);
   x[0] = evaltyp(t_STR)|evallg(2); /* for getheap */
   x[1] = (long)ep;
-  installep(x, s, strlen(s), EpALIAS, 0, functions_hash + hash);
+  (void)installep(x, s, strlen(s), EpALIAS, 0, functions_hash + hash);
 }
 
 extern void err_leave_default(long n);

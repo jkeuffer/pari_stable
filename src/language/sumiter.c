@@ -280,7 +280,7 @@ forvec(entree *ep, GEN x, char *c, long flag)
   d->n = lg(x);
   d->ch = c;
   d->a = (GEN*)cgetg(d->n,t_VEC); push_val(ep, (GEN)d->a);
-  if (d->n == 1) lisseq(d->ch);
+  if (d->n == 1) (void)lisseq(d->ch);
   else
   {
     long i, t = t_INT;
