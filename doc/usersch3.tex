@@ -2313,14 +2313,10 @@ minimal model of $E$ and the global \idx{Tamagawa number} $c$. Here $E$ is an
 elliptic curve given by a medium or long vector of the type given by
 \kbd{ellinit}, {\it and is supposed to have all its coefficients $a_i$ in}
 $\Q$. The result is a 3 component vector $[N,v,c]$. $N$ is the arithmetic
-conductor of the curve, $v$ is itself a vector $[u,r,s,t]$ with rational
-components. It gives a coordinate change for $E$ over $\Q$ such that the
-resulting model has integral coefficients, is everywhere minimal, $a_1$ is 0
-or 1, $a_2$ is 0, 1 or $-1$ and $a_3$ is 0 or 1. Such a model is unique, and
-the vector $v$ is unique if we specify that $u$ is positive. To get the new
-model, simply type \kbd{ellchangecurve(E,v)}. Finally $c$ is the product of
-the local Tamagawa numbers $c_p$, a quantity which enters in the
-\idx{Birch and Swinnerton-Dyer conjecture}.
+conductor of the curve. $v$ gives the coordinate change for $E$ over $\Q$ to
+the minimal integral model (see \tet{ellminimalmodel}). Finally $c$ is the
+product of the local Tamagawa numbers $c_p$, a quantity which enters in the
+\idx{Birch and Swinnerton-Dyer conjecture}.\sidx{minimal model}
 
 \syn{globalreduction}{E}.
 
@@ -2455,7 +2451,14 @@ omitted $A$ is coded as \kbd{NULL}.
 
 \subsecidx{ellminimalmodel}$(E,\{\&v\})$:  return the standard minimal
 integral model of the rational elliptic curve $E$. If present, sets $v$ to the
-corresponding change of variables.
+corresponding change of variables, which is a vector $[u,r,s,t]$ with
+rational components. The return value is identical to that of
+\kbd{ellchangecurve(E, v)}.
+
+The resulting model has integral coefficients, is everywhere minimal, $a_1$
+is 0 or 1, $a_2$ is 0, 1 or $-1$ and $a_3$ is 0 or 1. Such a model is unique,
+and the vector $v$ is unique if we specify that $u$ is positive, which we do.
+\sidx{minimal model}
 
 \syn{ellminimalmodel}{E,\&v}, where an omitted $v$ is coded as \kbd{NULL}.
 
