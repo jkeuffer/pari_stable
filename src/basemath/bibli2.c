@@ -1044,23 +1044,21 @@ longcmp(GEN x, GEN y)
 GEN
 gen_sort(GEN x, int flag, int (*cmp)(GEN,GEN))
 {
-  long i,j,indxt,ir,l,tx=typ(x),lx=lg(x);
-  GEN q,y,indx;
+  long i, j, indxt, ir, l, tx = typ(x), lx = lg(x);
+  GEN q, y, indx;
 
   if (tx == t_LIST) { lx = lgeflist(x)-1; tx = t_VEC; x++; }
   if (!is_matvec_t(tx) && tx != t_VECSMALL) err(typeer,"gen_sort");
-  if (flag & cmp_C) tx = t_VECSMALL;
+  if      (flag & cmp_C)   tx = t_VECSMALL;
   else if (flag & cmp_IND) tx = t_VEC;
   y = cgetg(lx, tx);
   if (lx==1) return y;
   if (lx==2)
   {
-    if (flag & cmp_C)
-      y[1] = 1;
-    else if (flag & cmp_IND)
-      y[1] = un;
-    else
-      y[1] = lcopy((GEN)x[1]);
+    if      (flag & cmp_C)   y[1] = 1;
+    else if (flag & cmp_IND) y[1] = un;
+    else if (tx == t_VECSMALL) y[1] = x[1];
+    else y[1] = lcopy((GEN)x[1]); 
     return y;
   }
   if (!cmp) cmp = &longcmp;
@@ -1098,6 +1096,8 @@ gen_sort(GEN x, int flag, int (*cmp)(GEN,GEN))
     for (i=1; i<lx; i++) y[i] = indx[i];
   else if (flag & cmp_IND)
     for (i=1; i<lx; i++) y[i] = lstoi(indx[i]);
+  else if (tx == t_VECSMALL)
+    for (i=1; i<lx; i++) y[i] = x[indx[i]];
   else
     for (i=1; i<lx; i++) y[i] = lcopy((GEN)x[indx[i]]);
   free(indx); return y;
@@ -1146,7 +1146,8 @@ GEN
 vecsort0(GEN x, GEN k, long flag)
 {
   if (flag < 0 || flag >= cmp_C) err(flagerr,"vecsort");
-  return k? gen_vecsort(x,k,flag): gen_sort(x,flag, sort_fun(flag));
+  if (k) return gen_vecsort(x, k, flag);
+  return gen_sort(x, flag, (typ(x) == t_VECSMALL)?NULL: sort_fun(flag));
 }
 
 GEN

@@ -130,6 +130,7 @@ IZ 52- [tex2mail:] \over wasn't allowed within \left( \right)
    60- bnfisintnorm(bnfinit(y^4+y+1), -1) --> SEGV [ could occur for any unit ]
    61- stack corruption in matsnf() [ when GC occurs ]
    62- SEGV when trying to open invalid logfile [ introduced in A-8 ]
+   63- vecsort(t_VECSMALL) --> SEGV
 
   Changed
     1- rnf structure (removed useless components)
@@ -180,6 +181,7 @@ IZ 24- [tex2mail:] add a "cut here" sign when expression does not fit in the
        [ induces faster charpoly for sparse t_MAT ]
    26- matsnf: allow rectangular matrices + improvements for singular matrices
    27- made startup errors ( GPRC ) non fatal.
+   28- allow vecsort(t_VECSMALL)
 
   Added
     1- member function rnf.pol (polynomial generating absolute extension)
