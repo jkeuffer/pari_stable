@@ -654,53 +654,64 @@ kbessel2(GEN nu, GEN x, long prec)
 static GEN
 incgam2_0(GEN x)
 {
-  long l,n,i;
-  GEN p1;
-  double m,mx;
+  double m, mx = rtodbl(x);
+  long l = lg(x), n, i;
+  GEN z;
 
-  l = lg(x); mx = rtodbl(x);
-  m = (bit_accuracy_mul(l,LOG2) + mx)/4; n=(long)(1+m*m/mx);
-  p1 = divsr(-n, addsr(n<<1,x));
+  m = (bit_accuracy_mul(l,LOG2) + mx)/4;
+  n = (long)(1+m*m/mx);
+  z = divsr(-n, addsr(n<<1,x));
   for (i=n-1; i >= 1; i--)
-    p1 = divsr(-i, addrr(addsr(i<<1,x), mulsr(i,p1)));
-  return mulrr(divrr(mpexp(negr(x)), x), addrr(realun(l),p1));
+    z = divsr(-i, addrr(addsr(i<<1,x), mulsr(i,z)));
+  return mulrr(divrr(mpexp(negr(x)), x), addrr(realun(l),z));
 }
 
 /* assume x != 0 */
 GEN
 incgam2(GEN s, GEN x, long prec)
 {
-  GEN b, p1, p2, S, y;
+  GEN b, x_s, S, y;
   long l, n, i;
   pari_sp av = avma, av2, avlim;
   double m,mx;
 
-  if (gcmp0(s)) return gerepileuptoleaf(av, incgam2_0(x));
+  if (gcmp0(s)) return gerepileupto(av, incgam2_0(x));
   if (typ(x) != t_REAL) x = gtofp(x, prec);
-  l = lg(x); mx = rtodbl(x);
+  if (typ(x) == t_COMPLEX)
+  {
+    double a = rtodbl((GEN)x[1]);
+    double b = rtodbl((GEN)x[2]);
+    l = precision(x);
+    mx = sqrt(a*a + b*b);
+  }
+  else
+  {
+    l = lg(x);
+    mx = rtodbl(x);
+  }
   m = (bit_accuracy_mul(l,LOG2) + mx)/4;
   n = (long)(1+m*m/mx);
   i = typ(s);
   if (i == t_REAL) b = addsr(-1,s);
   else
   { /* keep b integral : final powering more efficient */
-    p1 = gtofp(s, prec);
-    b = (i == t_INT)? addsi(-1,s): gaddsg(-1,p1);
-    s = p1;
+    GEN z = gtofp(s, prec);
+    b = (i == t_INT)? addsi(-1,s): gaddsg(-1,z);
+    s = z;
   }
-  p2 = gsub(x, s);
+  x_s = gsub(x, s);
   av2 = avma; avlim = stack_lim(av2,3);
-  S = gdiv(gaddsg(-n,s), gaddgs(p2,n<<1));
+  S = gdiv(gaddsg(-n,s), gaddgs(x_s,n<<1));
   for (i=n-1; i>=1; i--)
   {
-    S = gdiv(gaddsg(-i,s), gadd(gaddgs(p2,i<<1),gmulsg(i,S)));
+    S = gdiv(gaddsg(-i,s), gadd(gaddgs(x_s,i<<1),gmulsg(i,S)));
     if (low_stack(avlim,stack_lim(av2,3)))
     {
       if(DEBUGMEM>1) err(warnmem,"incgam2");
       S = gerepileupto(av2, S);
     }
   }
-  y = gmul(mpexp(negr(x)), gpow(x,b,prec));
+  y = gmul(gexp(gneg(x), prec), gpow(x,b,prec));
   return gerepileupto(av, gmul(y, gaddsg(1,S)));
 }
 
@@ -745,15 +756,23 @@ GEN
 incgam0(GEN s, GEN x, GEN g, long prec)
 {
   pari_sp av = avma;
+  long es, e;
   GEN z;
 
-  if (typ(x) != t_REAL) x = gtofp(x, prec);
-  if (!signe(x)) { avma = av; return g? gcopy(g): ggamma(s,prec); }
-  z = real_i(s);
-  if (gsigne(z) <= 0 || gexpo(z) < -10 || gcmp(subrs(x,1),z) > 0)
+  if (gcmp0(x)) { avma = av; return g? gcopy(g): ggamma(s,prec); }
+  es = gexpo(s); e = max(es, 0);
+  if (gsigne(real_i(s)) <= 0 || gexpo(x) > e)
     z = incgam2(s,x,prec);
   else
-    z = gsub(g? g: ggamma(s,prec), incgamc(s,x,prec));
+  {
+    if (es < 0) {
+      long l = precision(s);
+      if (!l) l = prec;
+      prec = l + nbits2nlong(-es) + 1;
+      s = gtofp(s, prec);
+    }
+    z = gadd(g? g: ggamma(s,prec), gneg(incgamc(s,x,prec)));
+  }
   return gerepileupto(av, z);
 }
 
@@ -767,7 +786,10 @@ eint1(GEN x, long prec)
   pari_sp av = avma;
   GEN p1, t, S, y;
 
-  if (typ(x) != t_REAL) x = gtofp(x, prec);
+  if (typ(x) != t_REAL) {
+    x = gtofp(x, prec);
+    if (typ(x) != t_REAL) err(impl,"non-real argument in eint1");
+  }
   if (signe(x) >= 0)
   {
     GEN p3, run;
@@ -1972,7 +1994,7 @@ qq(GEN x, long prec)
   {
     if (tx == t_PADIC) return x;
     x = upper_half(x, &prec);
-    return gexp(gmul(x, PiI2(prec)), prec); /* e(x) */
+    return gexp(gmul(mulcxI(x), Pi2n(1,prec)), prec); /* e(x) */
   }
   if (! ( x = _toser(x)) ) err(talker,"bad argument for modular function");
   return x;
@@ -2093,7 +2115,7 @@ trueeta(GEN x, long prec)
   }
   Nmod24 = umodiu(N, 24);
   if (Nmod24) m = gmul(m, e12(Nmod24, prec));
-  q24 = gexp(gdivgs(gmul(PiI2(prec), x), 24),prec); /* e(x/24) */
+  q24 = gexp(gdivgs(gmul(Pi2n(1,prec), mulcxI(x)), 24),prec); /* e(x/24) */
   q = gpowgs(q24, 24);
   return gerepileupto(av, gmul(gmul(m,q24), inteta(q)));
 }
