@@ -1012,45 +1012,88 @@ matrixqz(GEN x, GEN p)
   return gerepilecopy(av,x);
 }
 
+GEN
+Z_V_mul(GEN u, GEN A)
+{
+  if (gcmp1(u)) return A;
+  if (gcmp_1(u)) return gneg(A);
+  if (gcmp0(u)) return zerocol(lg(A)-1);
+  return gmul(u,A);
+}
+
 static GEN
-matrixqz_aux(GEN x, long m, long n)
+QV_lincomb(GEN u, GEN v, GEN A, GEN B)
+{
+  if (!signe(u)) return Z_V_mul(v,B);
+  if (!signe(v)) return Z_V_mul(u,A);
+  return gadd(Z_V_mul(u,A), Z_V_mul(v,B));
+}
+
+/* cf ZV_elem */
+/* zero aj = Aij (!= 0)  using  ak = Aik (maybe 0), via linear combination of
+ * A[j] and A[k] of determinant 1. */
+static void
+QV_elem(GEN aj, GEN ak, GEN A, long j, long k)
+{
+  GEN p1,u,v,d, D;
+
+  if (gcmp0(ak)) { lswap(A[j],A[k]); return; }
+  D = mpppcm(denom(aj), denom(ak));
+  if (!is_pm1(D)) { aj = gmul(aj,D); ak = gmul(ak,D); }
+  d = bezout(aj,ak,&u,&v);
+  /* frequent special case (u,v) = (1,0) or (0,1) */
+  if (!signe(u))
+  { /* ak | aj */
+    p1 = negi(divii(aj,ak));
+    A[j]   = (long)QV_lincomb(gun, p1, (GEN)A[j], (GEN)A[k]);
+    return;
+  }
+  if (!signe(v))
+  { /* aj | ak */
+    p1 = negi(divii(ak,aj));
+    A[k]   = (long)QV_lincomb(gun, p1, (GEN)A[k], (GEN)A[j]);
+    lswap(A[j], A[k]);
+    return;
+  }
+
+  if (!is_pm1(d)) { aj = divii(aj,d); ak = divii(ak,d); }
+  p1 = (GEN)A[k]; aj = negi(aj);
+  A[k] = (long)QV_lincomb(u,v, (GEN)A[j],p1);
+  A[j] = (long)QV_lincomb(aj,ak, p1,(GEN)A[j]);
+}
+
+static GEN
+matrixqz_aux(GEN A, long m, long n)
 {
   ulong av = avma, lim = stack_lim(av,1);
-  long i,j,k,in[2];
-  GEN p1;
+  long i,j;
+  GEN a;
 
   for (i=1; i<=m; i++)
   {
-    for(;;)
+    long k = 1;
+    for (j=1; j<=n; j++)
     {
-      long fl=0;
+      GEN a = gcoeff(A,i,j);
+      if (gcmp0(a)) continue;
 
-      for (j=1; j<=n; j++)
-	if (!gcmp0(gcoeff(x,i,j)))
-	  { in[fl]=j; fl++; if (fl==2) break; }
-      if (j>n) break;
-
-      j=(gcmp(gabs(gcoeff(x,i,in[0]),DEFAULTPREC),
-	      gabs(gcoeff(x,i,in[1]),DEFAULTPREC)) > 0)? in[1]: in[0];
-      p1=gcoeff(x,i,j);
-      for (k=1; k<=n; k++)
-	if (k!=j)
-	  x[k]=lsub((GEN)x[k],gmul(ground(gdiv(gcoeff(x,i,k),p1)),(GEN)x[j]));
+      k = (j==n)? 1: j+1;
+      /* zero a = Aij  using  b = Aik */
+      QV_elem(a, gcoeff(A,i,k), A, j,k);
     }
-
-    j=1; while (j<=n && gcmp0(gcoeff(x,i,j))) j++;
-    if (j<=n)
+    a = gcoeff(A,i,k);
+    if (!gcmp0(a))
     {
-      p1=denom(gcoeff(x,i,j));
-      if (!gcmp1(p1)) x[j]=lmul(p1,(GEN)x[j]);
+      a = denom(a);
+      if (!is_pm1(a)) A[k] = lmul(a, (GEN)A[k]);
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
       if(DEBUGMEM>1) err(warnmem,"matrixqz_aux");
-      x=gerepilecopy(av,x);
+      A=gerepilecopy(av,A);
     }
   }
-  return hnf(x);
+  return hnf(A);
 }
 
 GEN
@@ -1082,7 +1125,11 @@ matrixqz3(GEN x)
     {
       c[j]=k; x[j]=ldiv((GEN)x[j],gcoeff(x,k,j));
       for (j1=1; j1<=n; j1++)
-	if (j1!=j) x[j1]=lsub((GEN)x[j1],gmul(gcoeff(x,k,j1),(GEN)x[j]));
+	if (j1!=j)
+        {
+          GEN t = gcoeff(x,k,j1);
+          if (!gcmp0(t)) x[j1] = lsub((GEN)x[j1],gmul(t,(GEN)x[j]));
+        }
       if (low_stack(lim, stack_lim(av1,1)))
       {
 	if(DEBUGMEM>1) err(warnmem,"matrixqz3");
