@@ -41,6 +41,7 @@ config/get_cc
 config/get_config_options
 config/get_dlld
 config/get_double_format
+config/get_gmp
 config/get_gnuplot_libs
 config/get_graphic_lib
 config/get_install
