@@ -151,7 +151,7 @@ Which compiler will be used ?
   Depending on the machine (architecture and operating system) and on what is
   found in the path, a compiler is automatically chosen. If you set the
   environment variable CC before typing Configure, it will be used instead.
-  Typeset the installation help ('tex INSTALL.tex') for more details.
+  Typeset the installation help ('tex doc/INSTALL.tex') for more details.
 EOT
 exit 1
 ;;
