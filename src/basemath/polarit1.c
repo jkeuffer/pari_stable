@@ -680,11 +680,9 @@ Flx_Frobenius(GEN u, ulong p)
   return Q;
 }
 
-/* u in ZZ[X] and p a prime number.
- * u must be squarefree mod p.
- * leading term of u must be prime to p. */
+/* z must be squarefree mod p*/
 long
-Flx_nbfact(GEN z, long p)
+Flx_nbfact(GEN z, ulong p)
 {
   long lgg, nfacp = 0, d = 0, e = degpol(z);
   GEN g, w, MP = Flx_Frobenius(z, p), PolX = Flx_polx(0);
@@ -715,7 +713,7 @@ Flx_nbfact(GEN z, long p)
 }
 
 long
-Flx_nbroots(GEN f, long p)
+Flx_nbroots(GEN f, ulong p)
 {
   long n = degpol(f);
   pari_sp av = avma;
