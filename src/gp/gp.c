@@ -1654,7 +1654,11 @@ print_hash_list(char *s)
 static char *
 what_readline(void)
 {
+#ifdef READLINE
   return (GP_DATA->flags & USE_READLINE)? "v"READLINE" enabled": "disabled";
+#else
+  return "disabled";
+#endif
 }
 
 static void
