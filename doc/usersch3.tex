@@ -6810,12 +6810,11 @@ Hence, if you intend to use this function, please check first on some
 harmless example such as the ones above that it works properly on your
 machine.
 
-\subsubsecidx{kill}$(x)$:\label{se:kill} kills the present value of the
-variable, alias or user-defined function $x$ (you can only kill your own
-functions). The corresponding identifier can now be used to name any GP
-object (variable or function). This is the only way to replace a variable by
-a function having the same name (or the other way round), as in the following
-example:
+\subsubsecidx{kill}$(s)$:\label{se:kill} kills the present value of the
+variable, alias or user-defined function $s$. The corresponding identifier
+can now be used to name any GP object (variable or function). This is the
+only way to replace a variable by a function having the same name (or the
+other way round), as in the following example:
 
 \bprog
 ? f = 1
@@ -6842,8 +6841,9 @@ funny way (following the same convention as used by the library function
 %2 = #<1>^2 + 1
 @eprog
 
-If you simply want to restore a variable to its original value (monomial of
-degree one), use the \idx{quote} operator: \kbd{a = 'a}.
+If you simply want to restore a variable to its ``undefined'' value
+(monomial of degree one), use the \idx{quote} operator: \kbd{a = 'a}.
+Predefined symbols (\kbd{x} and GP function names) cannot be killed.
 
 \subsubsecidx{print}$(\{\var{str}\}*)$: outputs its (string) arguments in raw
 format, ending with a newline.
