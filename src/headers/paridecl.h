@@ -775,6 +775,7 @@ GEN     galoisconj2(GEN x, long nbmax, long prec);
 GEN     galoisconj4(GEN T, GEN den, long flag, long karma);
 GEN     galoisfixedfield(GEN gal, GEN v, long flag, long y);
 GEN     galoisinit(GEN nf, GEN den, long karma);
+GEN     galoisisabelian(GEN gal, long flag);
 GEN     galoispermtopol(GEN gal, GEN perm);
 GEN     galoissubcyclo(long n, GEN H, GEN Z, long v, long flag);
 long    numberofconjugates(GEN T, long pdepart);
