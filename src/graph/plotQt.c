@@ -115,9 +115,9 @@ Plotter::Plotter( long *w, long *x, long *y, long lw,
     color[0]         = white;
     color[BLACK]     = black;
     color[BLUE]      = blue;
-    color[SIENNA]    = QColor( 160, 82, 45) ;
+    color[VIOLET]    = QColor( 208, 32, 144) ;
     color[RED]       = red;
-    color[CORNSILK]  = QColor( 255, 248, 220);
+    color[GREEN]     = green;
     color[GREY]      = gray;
     color[GAINSBORO] = QColor( 220, 220, 220);
 }

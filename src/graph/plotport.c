@@ -1681,7 +1681,7 @@ rectplothrawin(long stringrect, long drawrect, dblPointList *data,
   i = (flags & PLOT_PARAMETRIC)? 0: 1;
   for (ltype = 0; ltype < nc; ltype++)
   {
-    current_color[drawrect] = ltype&1 ? SIENNA: RED;
+    current_color[drawrect] = ltype&1 ? GREEN: RED;
     if (flags & PLOT_PARAMETRIC) x = data[i++];
 
     y=data[i++]; nbpoints=y.nb;

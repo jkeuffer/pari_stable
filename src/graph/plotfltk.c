@@ -34,16 +34,6 @@ typedef struct Rectangle_s {long x, y, width, height;} Rectangle;
 typedef struct Segment_s {long x1, y1, x2, y2;} Segment;
 typedef char* String;
 
-#ifdef __APPLE__
-/* window does not show up after fork(): infinite loop in Carbon routine
- * ClearMenuBar(), called from Fl_mac.cxx:fl_open_display(). */
-#  define BROKEN_FORK
-#endif
-
-#ifdef BROKEN_FORK
-jmp_buf fltk_env;
-#endif
-
 class Plotter: public Fl_Window {
 
 public:
@@ -92,9 +82,9 @@ Plotter::Plotter( long *w, long *x, long *y, long lw,
     color[0]         = FL_WHITE;
     color[BLACK]     = FL_BLACK;
     color[BLUE]      = FL_BLUE;
-    color[SIENNA]    = rgb_color( 160, 82, 45) ;
+    color[VIOLET]    = rgb_color( 208, 32, 144) ;
     color[RED]       = FL_RED;
-    color[CORNSILK]  = rgb_color( 255, 248, 220);
+    color[GREEN]     = FL_GREEN;
     color[GREY]      = rgb_color( 127, 127, 127);
     color[GAINSBORO] = rgb_color( 220, 220, 220);
 }
@@ -279,11 +269,7 @@ int Plotter::handle(int event)
     switch(Fl::event_button())
     {
     case 1:
-#ifdef BROKEN_FORK
-     longjmp(fltk_env, 1);
-#else
      exit(0);
-#endif
     case 2:
      {
        static int flag=0;
@@ -322,9 +308,6 @@ void
 rectdraw0(long *w, long *x, long *y, long lw, long do_free)
 {
     Plotter *win;
-#ifdef BROKEN_FORK
-    if (setjmp(fltk_env)) { delete(win); return; }
-#else
     if (fork()) return;  // parent process returns
     
     //
@@ -335,7 +318,6 @@ rectdraw0(long *w, long *x, long *y, long lw, long do_free)
     os_signal(SIGBUS, SIG_IGN);
 
     freeall();  // PARI stack isn't needed anymore, keep rectgraph
-#endif
     PARI_get_plot(1);
 
     Fl::visual(FL_DOUBLE|FL_INDEX);

@@ -49,6 +49,8 @@ Done for version 2.2.9 (released ??/??/2004):
        saved in writebin format between 2.2.1 and 2.2.8 are incompatible.
     2- new algorithm for Pi [ AGM ]
     3- new algorithm for log(2) [ AGM ]
+    4- use more readable colors for hi-res plots [ replace "sienna" by
+       "violetred" and "cornsilk" by "green" ]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.8 (released 25/11/2004):

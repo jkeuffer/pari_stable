@@ -112,9 +112,9 @@ typedef struct RectObjPS {
 
 #define BLACK      1 /* Default */
 #define BLUE       2 /* Axes */
-#define SIENNA     3 /* Odd numbered curves in ploth */
+#define VIOLET     3 /* Odd numbered curves in ploth */
 #define RED        4 /* Curves, or Even numbered curves in ploth */
-#define CORNSILK   5
+#define GREEN      5
 #define GREY       6
 #define GAINSBORO  7
 

@@ -53,9 +53,9 @@ static char *PARI_DefaultColors[MAX_COLORS] =
   " ",
   "black",    /* Default */
   "blue",     /* Axes */
-  "sienna",   /* Odd numbered curves in ploth */
+  "violetred",   /* Odd numbered curves in ploth */
   "red",      /* Curves, or Even numbered curves in ploth */
-  "cornsilk",
+  "green",
   "grey",
   "gainsboro",
 };
