@@ -1481,7 +1481,6 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
     Fa   = degpol(nu);
     /* the prime element in Zp[alpha] */
     pia  = getprime(p, chi, polx[v], chi, nu, &La, &Ea);
-    pia  = redelt(pia, pmr, pmf);
 
     if (Ea < oE)
     {
@@ -1491,10 +1490,9 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
       chi  = (GEN)w[2];
       pmr  = (GEN)w[3];
       pdr  = (GEN)w[4];
-      kapp = NULL;
       pia  = getprime(p, chi, polx[v], chi, nu, &La, &Ea);
-      pia  = redelt(pia, pmr, pmf);
     }
+    pia  = redelt(pia, pmr, pmf);
 
     oE = Ea; opa = RX_RXQ_compo(pia, alph, fx);
 
@@ -1505,7 +1503,6 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
     if (La > 1)
     {
       alph = gadd(alph, RX_RXQ_compo(pia, alph, fx));
-
       w = update_alpha(p, fx, alph, NULL, pmr, pmf, mf, ns);
       alph = (GEN)w[1];
       chi  = (GEN)w[2];
@@ -1548,9 +1545,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
       }
 
       /* eq and er are such that gamma = beta.p^-eq.nu^-er is a unit */
-      if (eq) gamm = gdiv(beta, gpowgs(p, eq));
-      else gamm = beta;
-
+      if (eq) gamm = gdiv(beta, gpowgs(p, eq)); else gamm = beta;
       if (er)
       {
 	/* kappa = nu^-1 in Zp[alpha] */
@@ -1585,8 +1580,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	eq = (long)(-L / E);
 	er = (long)(-L*Ea / E - eq*Ea);
 
-	if (eq) gamm = gmul(beta, gpowgs(p, eq));
-	else gamm = beta;
+	if (eq) gamm = gmul(beta, gpowgs(p, eq)); else gamm = beta;
 	if (er)
 	{
 	  gamm = gmul(gamm, gpowgs(nu, er));
