@@ -105,7 +105,7 @@ gred_rfrac_simple(GEN x1, GEN x2)
 
   c = denom(x1);
   y = cgetg(3,t_RFRAC);
-  y[1] = (long)numer(x1);
+  y[1] = lmul(x1,c);
   y[2] = lmul(x2,c); return y;
 }
 
