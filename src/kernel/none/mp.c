@@ -740,7 +740,7 @@ addsmulsi(long a, long b, GEN Y)
 
   (void)new_chunk(lz);
   yd = y + ny; *--z = addll(a, mulll(b, *--yd));
-  if (overflow) hiremainder++; /* result != 0 */
+  if (overflow) hiremainder++; /* can't overflow */
   while (yd > y) *--z = addmul(b,*--yd);
   if (hiremainder) *--z = hiremainder; else lz--;
   *--z = evalsigne(1) | evallgefint(lz);
