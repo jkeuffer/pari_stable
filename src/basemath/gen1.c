@@ -313,6 +313,7 @@ gaddpex(GEN x, GEN y)
   else
   {
     long c;
+    if (tx != t_INT && !is_pm1(p2)) p1 = mulii(p1, mpinvmod(p2,mod));
     u = addii(u, p1);
     if (!signe(u) || (c = pvaluation(u,p,&u)) >= r)
     {
