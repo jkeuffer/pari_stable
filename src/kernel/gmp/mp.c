@@ -1901,7 +1901,7 @@ usqrtsafe(ulong a)
   return x;
 }
 
-/* Return trunc(sqrt(abs(a)))). a must be an integer*/
+/* Return trunc(sqrt(a))). a must be an non-negative integer*/
 GEN
 isqrti(GEN a)
 {

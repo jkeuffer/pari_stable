@@ -2229,7 +2229,7 @@ racine_r(GEN a, long l)
   return gerepileuptoint(av,y);
 }
 
-/* Return trunc(sqrt(abs(a)))). a must be an integer*/
+/* Return trunc(sqrt(a))). a must be an non-negative integer*/
 GEN isqrti(GEN a) {return racine_r(a,lgefint(a));}
 
 /* target should point to a buffer of source_end - source + 1 ulongs.
