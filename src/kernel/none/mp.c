@@ -48,7 +48,7 @@ int pari_kernel_init(void)
   *t2 = (*t1<<(ulong)sh) | _k;\
 }
 #define shift_left(z2,z1,imin,imax,f, sh) {\
-  register const ulong _m = BITS_IN_LONG - sh;\
+  register const ulong _m = BITS_IN_LONG - (sh);\
   shift_left2((z2),(z1),(imin),(imax),(f),(sh),(_m));\
 }
 
@@ -68,6 +68,29 @@ int pari_kernel_init(void)
 #define shift_right(z2,z1,imin,imax,f, sh) {\
   register const ulong _m = BITS_IN_LONG - (sh);\
   shift_right2((z2),(z1),(imin),(imax),(f),(sh),(_m));\
+}
+
+/* Normalize a non-negative integer.  */
+GEN
+int_normalize(GEN x, long known_zero_words)
+{
+  long lx = lgefint(x);
+  long i = 2 + known_zero_words;
+  for ( ; i < lx; i++)
+    if (x[i]) 
+    {
+      if (i != 2)
+      {
+        GEN x0 = x;
+        i -= 2; x += i;
+        if (x0 == (GEN)avma) avma = (pari_sp)x; else stackdummy(x0, i);
+        lx -= i;
+        x[0] = evaltyp(t_INT) | evallg(lx);
+        x[1] = evalsigne(1) | evallgefint(lx);
+      }
+      return x;
+    }
+  x[1] = evalsigne(0) | evallgefint(2); return x;
 }
 
 /***********************************************************************/
@@ -1557,87 +1580,160 @@ sqrtu2_1(ulong *a)
 }
 #endif
 
-#if 0
+#if 1
+/* Karatsuba square root, adapted from Paul Zimmermann's implementation
+ * in GMP (mpn_sqrtrem) */
 void
 xmpn_copy(GEN z, GEN x, long n)
 {
   long k = n;
   while (--k >= 0) z[k] = x[k];
 }
-
+/* n[0] */
 static GEN
-sqrtrem_spec_2(GEN n, long ln, GEN *r)
+sqrtrem_spec_1(GEN n, GEN *r)
 {
-  if (ln == 1) {
-    ulong a = (ulong)sqrt((double)(ulong)n[0]);
-    *r = utoi(n[0] - a*a);
-    return utoi(a);
-  } else {
-    ulong a = (ulong)sqrt((double)(ulong)n[0]);
-    ulong c, cc, d;
-    LOCAL_HIREMAINDER;
-    LOCAL_OVERFLOW;
+  ulong a = (ulong)sqrt((double)(ulong)n[0]);
+  *r = utoi(n[0] - a*a); return utoi(a);
+}
+static GEN
+cat1u(ulong d)
+{
+  GEN R = cgeti(4);
+  R[1] = evalsigne(1)|evallgefint(4);
+  R[2] = 1;
+  R[3] = d; return R;
+}
+/* a[0..la-1] * 2^(lb BIL) | b[0..lb-1] */
+static GEN
+catii(GEN a, long la, GEN b, long lb)
+{
+  long l = la + lb + 2;
+  GEN z = cgeti(l);
+  z[1] = evalsigne(1) | evallgefint(l);
+  xmpn_copy(z + 2, a, la);
+  xmpn_copy(z + 2 + la, b, lb);
+  return int_normalize(z, 0);
+}
 
-    hiremainder = n[0]; c = divll(n[1], a);
-    c = addll(c, a) >> 1; if (overflow) c |= HIGHBIT;
-    cc = mulll(c,c);
-    d = (ulong)n[1] - cc;
-    if (!(c & HIGHBIT) && d > (c << 1)) {
-      c++;
-      d -= (c << 1) - 1;
-    }
-    *r = utoi(d);
-    return utoi(c);
+/* n[0..1] */
+static GEN
+sqrtrem_spec_2(GEN n, GEN *r)
+{
+  ulong hi, a, c, d, u1, u0 = (ulong)n[0];
+  int sh;
+  LOCAL_HIREMAINDER;
+  LOCAL_OVERFLOW;
+
+  if (!u0) return sqrtrem_spec_1(n + 1, r);
+
+  u1 = (ulong)n[1];
+  sh = bfffo(u0) & ~1UL;
+  if (sh) {
+    u0 = (u0 << sh) | (u1 >> (BITS_IN_LONG-sh));
+    u1 <<= sh;
   }
+  a = (ulong)( sqrt((double)u0) * (1 << (BITS_IN_HALFULONG-1)) ) << 1;
+  if (a <= u0) c = (u0-1) >> 1;
+  else
+  {
+    hiremainder = u0; c = divll(u1, a);
+    c = addll(c, a) >> 1; if (overflow) c |= HIGHBIT;
+  }
+  d = subll(u1, mulll(c, c));
+  hi = u0 - hiremainder; if (overflow) hi--;
+  /* remainder = hi * 2^BIL + d, hi = 0 or 1 */
+  if (c & HIGHBIT)
+  {
+    if (hi && (d > (c << 1)))
+    {
+      c++; /* (c+1)<<1 doesn't overflow */
+      d -= (c << 1) - 1; hi = 0;
+    }
+  }
+  else if (hi || d > (c << 1))
+  {
+    c++; /* no overflow */
+    d = subll(d, (c<<1) - 1);
+    if (overflow) hi = 0;
+  }
+  /* Rescale back:
+   * 2^(2k) n = S^2 + R
+   * so 2^(2k) n = (S - s0)^2 + (2*S*s0 - s0^2 + R), s0 = S mod 2^k. */
+  if (sh) {
+    int k = sh >> 1;
+    ulong s0 = c & ((1<<k) - 1);
+    d = addll(d, mulll(c, (s0<<1)));
+    if (overflow) hiremainder++;
+    hiremainder += hi; /* + 0 or 1 */
+    c >>= k;
+    d = (d>>sh) | (hiremainder << (BITS_IN_LONG-sh));
+    hi = (hiremainder & (1<<sh));
+  }
+  *r = hi? cat1u(d): utoi(d);
+  return utoi(c);
 }
 
-/* Let N = n[0..2l-1]. Return S (and set R) s.t S^2 + R = N, 0 <= R <= 2S */
+/* Let N = N[0..2n-1]. Return S (and set R) s.t S^2 + R = N, 0 <= R <= 2S */
 static GEN
-sqrtrem_spec(GEN n, long l, GEN *r)
+sqrtrem_spec(GEN N, long n, GEN *r)
 {
-  if (l == 1) return sqrtrem_spec_2(n, 2, r);
+  GEN S, R, q, z, u;
+  long l, h;
 
-  sqrtrem_spec
+  if (n == 1) return sqrtrem_spec_2(N, r);
+  l = n >> 1;
+  h = n - l; /* N = a3(h) | a2(h) | a1(l) | a0(l words) */
+  S = sqrtrem_spec(N, h, &R); /* S^2 + R = a3|a2 */
 
-  addshiftw(l)
+  z = catii(R+2, lgefint(R)-2, N + 2*h, l); /* = R | a1(l) */
+  q = dvmdii(z, shifti(S,1), &u);
+  S = addshiftw(S, q, l);
 
-  q = dvmdii(, &u);
+  z = catii(u+2, lgefint(u)-2, N + n + h, l); /* = u | a0(l) */
+  R = subii(z, sqri(q));
+  if (signe(R) < 0)
+  {
+    GEN S2 = shifti(S,1);
+    R = addis(subiispec(S2+2, R+2, lgefint(S2)-2,lgefint(R)-2), -1);
+    S = addis(S, 1);
+  }
+  *r = R; return S;
 }
 
-/* Let N = n[0..ln-1]. Return S (and set R) s.t S^2 + R = N, 0 <= R <= 2S */
+/* Return S (and set R) s.t S^2 + R = N, 0 <= R <= 2S */
 GEN
 sqrtrem(GEN N, GEN *r)
 {
   pari_sp av;
-  GEN S, R, u, n = N+2;
-  long l2, ln = lg(N) - 2;
+  GEN S, R, n = N+2;
+  long k, l2, ln = lgefint(N) - 2;
   int sh;
 
   if (ln <= 2)
   {
-    if (ln == 0) { *r = gzero; return gzero; }
-    return sqrtrem_spec_2(n, ln, *r);
+    if (ln == 2) return sqrtrem_spec_2(n, r);
+    if (ln == 1) return sqrtrem_spec_1(n, r);
+    *r = gzero; return gzero;
   }
   av = avma;
   sh = bfffo(n[0]) >> 1;
   l2 = (ln + 1) >> 1;
-  if (sh > 1 || (ln & 1)) { /* normalize n, so that n[2] >= 2^BIL / 4 */
-    GEN t = new_chunk(ln + 1);
-    t[0] = 0;
+  if (sh > 1 || (ln & 1)) { /* normalize n, so that n[0] >= 2^BIL / 4 */
+    GEN s0, t = new_chunk(ln + 1);
+    t[ln] = 0;
     if (sh)
-      shift_left(t + (ln & 1),n, 0,ln-1, 0, sh << 1);
+    { shift_left(t, n, 0,ln-1, 0, (sh << 1)); }
     else
-      xmpn_copy(t + 1, n, ln);
-    n = t; /* normalized + even number of words */
-
-    S = sqrtrem_spec(n, l2, &R);
+      xmpn_copy(t, n, ln);
+    S = sqrtrem_spec(t, l2, &R); /* t normalized, 2 * l2 words */
     /* Rescale back:
      * 2^(2k) n = S^2 + R, k = sh + (ln & 1)*BIL/2
      * so 2^(2k) n = (S - s0)^2 + (2*S*s0 - s0^2 + R), s0 = S mod 2^k. */
     k = sh + (ln & 1) * (BITS_IN_LONG/2);
     s0 = resmod2n(S, k);
-    R = addii(R, mulii(s0, shifti(S,1)));
-    R = shifti(R, -(k<<1));
+    R = addii(shifti(R,-1), mulii(s0, S));
+    R = shifti(R, 1 - (k<<1));
     S = shifti(S, -k);
   }
   else
@@ -1679,27 +1775,4 @@ sqrtr_abs(GEN x)
   }
   affrr(t,y); setexpo(y, expo(y) + (ex>>1));
   avma = av0; return y;
-}
-
-/* Normalize a non-negative integer.  */
-GEN
-int_normalize(GEN x, long known_zero_words)
-{
-  long lx = lgefint(x);
-  long i = 2 + known_zero_words;
-  for ( ; i < lx; i++)
-    if (x[i]) 
-    {
-      if (i != 2)
-      {
-        GEN x0 = x;
-        i -= 2; x += i;
-        if (x0 == (GEN)avma) avma = (pari_sp)x; else stackdummy(x0, i);
-        lx -= i;
-        x[0] = evaltyp(t_INT) | evallg(lx);
-        x[1] = evalsigne(1) | evallgefint(lx);
-      }
-      return x;
-    }
-  x[1] = evalsigne(0) | evallgefint(2); return x;
 }
