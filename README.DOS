@@ -1,15 +1,14 @@
 PARI/GP is developped and tested in the Unix world. Since sticking to Unix
-would prevent many users from enjoying the system [not everybody wants to
-install Linux], PARI has been (partly) ported to DOS using the EMX runtime
-package. The resulting binary GP.EXE should be usable on most DOS-based
-platforms, although it won't share the traditional look and feel of e.g
-native Windows programs. Binaries may or may not be available after each
-Unix release.
+would prevent many users from enjoying the system [although GNU/Linux is
+definitely worth a try], PARI has been (partly) ported to DOS/Windows using
+the EMX/RSX runtime packages. The resulting binary GP.EXE should be usable on
+most DOS-based platforms, although it won't share the traditional look and
+feel of e.g native Windows programs. Binaries may or may not be available
+after each Unix release.
 
-Everything written in this file applies to DOS 3.0 or higher, OS/2 2.0 and
-higher, and Windows 3.1 (unless noted otherwise). It seems that GP.EXE runs
-more or less correctly in a DOS window under Windows 95/98/NT, but this has
-not been extensively tested. An 80386 CPU or higher is required in any case.
+Everything written in this file applies to DOS 3.0 or higher, OS/2 2.0 or
+higher, and Windows 3.1 or higher. An 80386 CPU or higher is required in any
+case.
 =============================================================================
 
 I: What's in there ?
@@ -27,17 +26,18 @@ library yourself.
     (copy the latter to C:\_GPRC and adapt it to your needs)
 
   GP.EXE is an EMX executable; it it doesn't start up, check EMX\EMXRT.DOC
-  (DOS, OS/2) or RSX\README.TXT (Windows 3.1). The runtime packages themselves
+  (DOS, OS/2) or RSX\README.TXT (Windows). The runtime packages themselves
   are in GPRT.ZIP.
 
 2) PostScript Documentation (GPD): GPD_xxxx.ZIP
   user's manual, tutorial and reference card, in PostScript format
 
 3) TeX Documentation (GPM): GPM_xxxx.ZIP
-  in (hopefully human readable) TeX format
+  [ The same documents are available in PDF format from PARI home page. ]
   Also contains the script GPHELP (translates Pari documentation
   to plain text, handles indexing), which requires Perl (not included).
   You may have to fix paths in the first lines of the script.
+
 -----------------------------------------------------------------------------
 4) EMX/RSX runtime package (GPRT): GPRT.ZIP
   files you will need if the provided binary GP.EXE doesn't work as is.
@@ -69,17 +69,16 @@ degree 8 to 11 (higher degrees not implemented).
 ===========================================================================
 
 III: What do I do with it ?
-
+---------------------------
   1) I only want to use GP.EXE
 
 * For DOS: install EMX.EXE from GPRT somewhere in your path.  If you have
 enough RAM (~ 2MB), you can run GP.EXE as is, but some functionalities
 (extended help, external commands) will only be available if you use the
-command line EMX -P GP.EXE [put that in a GP.BAT file, or (preferably)
-fetch a decent shell (e.g. bash) and use an alias].
+command line EMX -P GP.EXE. Put that in a GP.BAT file, or (preferably)
+fetch a decent shell (e.g. bash) and use an alias.
 
-* For Windows 3.1: install RSX.EXE and CSX.EXE from GPRT somewhere in your
-path. Not thoroughly tested; looks ok, though.
+* For Windows: install RSX.EXE from GPRT somewhere in your path.
 
 * For OS/2: untested. You may need EMX.DLL from GPRT.
 
@@ -119,4 +118,5 @@ subdirectory), then type
 
 (decent shell and basic Unix tools needed: the djgpp ports of bash and GNU
 binutils work nicely, Ian Stewartson's tools are also ok). Make sure FILES
-is at least 50 in CONFIG.SYS
+is at least 50 in CONFIG.SYS. Bash and sh may run out of memory during the
+bench.
