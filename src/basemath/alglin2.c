@@ -2337,25 +2337,21 @@ allhnfmod(GEN x,GEN dm,int flag)
   if (!signe(dm)) return hnf(x);
   if (typ(x)!=t_MAT) err(typeer,"allhnfmod");
 
-  co=lg(x); if (co==1) return cgetg(1,t_MAT);
-  li=lg(x[1]);
+  co = lg(x); if (co == 1) return cgetg(1,t_MAT);
+  li = lg(x[1]);
   av = avma; lim = stack_lim(av,1);
   x = dummycopy(x);
 
-  if (flag)
+  ldef = 0;
+  if (li > co)
   {
-    if (li > co) err(talker,"nb lines > nb columns in hnfmod");
-  }
-  else
-  { /* concatenate dm * Id to x */
-    x = concatsp(x, idmat_intern(li-1,dm,gzero));
-    co += li-1;
+    ldef = li - co;
+    if (flag) err(talker,"nb lines > nb columns in hnfmod");
   }
   /* Avoid wasteful divisions. we only want to prevent coeff explosion, so
    * only reduce mod dm when lg(coeff) > ldm */
   ldm = lgefint(dm);
-  def = co-1; ldef = 0;
-  for (i=li-1; i>ldef; i--,def--)
+  for (def = co-1,i = li-1; i > ldef; i--,def--)
     for (j=def-1; j; j--)
     {
       coeff(x,i,j) = lresii(gcoeff(x,i,j), dm);
@@ -2363,8 +2359,7 @@ allhnfmod(GEN x,GEN dm,int flag)
       if (!signe(a)) continue;
 
       k = (j==1)? def: j-1;
-      /* do not reduce the appended dm [hnfmodid] */
-      if (flag || j != 1) coeff(x,i,k) = lresii(gcoeff(x,i,k), dm);
+      coeff(x,i,k) = lresii(gcoeff(x,i,k), dm);
       ZV_elem(a,gcoeff(x,i,k), x,NULL, j,k);
       p1 = (GEN)x[j];
       p2 = (GEN)x[k];
@@ -2380,19 +2375,25 @@ allhnfmod(GEN x,GEN dm,int flag)
       }
     }
   w = cgetg(li,t_MAT); b = dm;
-  for (i=li-1; i>=1; i--)
+  for (def = co-1,i = li-1; i > ldef; i--,def--)
   {
-    d = bezout(gcoeff(x,i,i+def),b,&u,&v);
-    w[i] = lmod(gmul(u,(GEN)x[i+def]), b);
+    d = bezout(gcoeff(x,i,def),b,&u,&v);
+    w[i] = lmod(gmul(u,(GEN)x[def]), b);
     if (!signe(gcoeff(w,i,i))) coeff(w,i,i) = (long)d;
     if (flag && i > 1) b = diviiexact(b,d);
   }
-  if (flag)
-  { /* compute optimal value for dm */
-    dm = gcoeff(w,1,1);
-    for (i=2; i<li; i++) dm = mpppcm(dm, gcoeff(w,i,i));
-    ldm = lgefint(dm);
+  if (ldef > 0) /* implies flag = 0, prepend relevant cols from dm * Id */
+  {
+    for (i = 1; i <= ldef; i++) 
+    {
+      GEN t = zerocol(li-1); t[i] = (long)dm;
+      w[i] = (long)t;
+    }
   }
+  /* compute optimal value for dm */
+  dm = gcoeff(w,1,1);
+  for (i=2; i<li; i++) dm = mpppcm(dm, gcoeff(w,i,i));
+  ldm = lgefint(dm);
   for (i=li-2; i>=1; i--)
   {
     GEN diag = gcoeff(w,i,i);
