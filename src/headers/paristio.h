@@ -77,9 +77,6 @@ extern char    *errmessage[], *current_psfile;
 
 #define stack_lim(av,n) (bot + (((av)-bot)>>(n)))
 
-#if defined(WINCE) && !defined(O_RDONLY)
-#  define O_RDONLY 0
-#endif
 #ifndef SIG_IGN
 #  define SIG_IGN (void(*)())1
 #endif
