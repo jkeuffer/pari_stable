@@ -624,7 +624,7 @@ lllgramall(GEN x, long alpha, long flag)
   {
     if (k > kmax)
     {
-      if (DEBUGLEVEL>3) fprintferr("K");
+      if (DEBUGLEVEL>3) fprintferr("K%ld ",k);
       for (j=1; j<=k; j++)
 	if (j==k || fl[j])
 	{
@@ -646,7 +646,6 @@ lllgramall(GEN x, long alpha, long flag)
       }
       kmax = k;
     }
-    if (DEBUGLEVEL>5) fprintferr("%ld ",k);
     REDI(k,k-1, x,h,L,(GEN)B[k],kmax);
     if (do_SWAPI(x,h,L,B,kmax,k,alpha,fl))
     {
