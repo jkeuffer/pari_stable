@@ -31,8 +31,6 @@ overflow	.comm	4
 	.export	addllx,entry,priv_lev=3,argw0=gr,argw1=gr,rtnval=gr
 	.export	subll,entry,priv_lev=3,argw0=gr,argw1=gr,rtnval=gr
 	.export	subllx,entry,priv_lev=3,argw0=gr,argw1=gr,rtnval=gr
-	.export	shiftl,entry,priv_lev=3,argw0=gr,argw1=gr,rtnval=gr
-	.export	shiftlr,entry,priv_lev=3,argw0=gr,argw1=gr,rtnval=gr
 	.export	bfffo,entry,priv_lev=3,argw0=gr,argw1=gr,rtnval=gr
 	.export	mulll,entry,priv_lev=3,argw0=gr,argw1=gr,rtnval=gr
 	.export	addmul,entry,priv_lev=3,argw0=gr,argw1=gr,rtnval=gr
@@ -89,35 +87,6 @@ subllx	.entry
 	addi,tr	1,0,%r22
 	ldi	0,%r22
 	stw	%r22,0(%r20)
-	.exit
-	.procend
-
-	.proc
-	.callinfo
-shiftl	.entry
-	addil	lt'hiremainder,%r19,%r1
-	subi	32,%arg1,%arg1
-	ldw	rt'hiremainder(%r1),%r20
-l$30	mfctl	%cr11,%r22
-	mtctl	%arg1,%cr11
-	vshd	%arg0,0,%ret0;
-	vshd	0,%arg0,%r21
-	mtctl	%r22,%cr11
-l$31	stw	%r21,0(%r20)
-	.exit
-	.procend
-
-	.proc
-	.callinfo
-shiftlr	.entry
-	addil	lt'hiremainder,%r19,%r1
-l$40	mfctl	%cr11,%r22
-	mtctl	%arg1,%cr11
-	ldw	rt'hiremainder(%r1),%r20
-	vshd	0,%arg0,%ret0;
-	vshd	%arg0,0,%r21
-	mtctl	%r22,%cr11
-l$41	stw	%r21,0(%r20)
 	.exit
 	.procend
 
