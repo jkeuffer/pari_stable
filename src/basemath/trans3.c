@@ -571,8 +571,11 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
 	nnew = (i && (i < precnew)) ? setlgcx(n,precnew) : n;
 	p2 = mppi(precnew); gsincos(gmul(nnew,p2),&s,&c,precnew);
 	ex = gexpo(s);
-	rab = (-ex)/(LOG2*BITS_IN_LONG); if (fl) rab *= 2;
-	precnew += 1 + (long)rab;
+        if (ex < 0)
+        {
+          rab = (-ex)/(LOG2*BITS_IN_LONG); if (fl) rab *= 2;
+          precnew += 1 + (long)rab;
+        }
 	nnew = (i && (i < precnew)) ? setlgcx(n,precnew) : n;
 	znew = setlgcx(znew,precnew);
 	p2 = mppi(precnew); gsincos(gmul(nnew,p2),&s,&c,precnew);
