@@ -96,6 +96,8 @@ IZ 61- updated gnuplot support
        (Ex: input() + allocatemem --> SEGV)
    64- [1] == 2 --> error (instead of 0)
    65- lngamma(-0.106) --> SEGV
+   66- quadray(-11,3) --> x^2
+XR 67- typo in nilord2 (wrong value for modular reduction)
 
   Added
 IZ  1- [gnuplot] look up directory tree for gnuplot related files
@@ -112,6 +114,7 @@ HC  4- optional argument to direuler (length of result)
     2- improved the heuristics in ellisoncurve
 HC  3- extend the range of direuler (maxp was 2^16)
     4- trial divide by the "private primes" before the primality tests
+    5- don't double stack automatically
 
   Removed
     1- sunview "support" (didn't work, hard to test, X11 is a better standard)
