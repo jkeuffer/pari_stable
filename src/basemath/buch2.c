@@ -2982,12 +2982,12 @@ static GEN
 compute_vecG(GEN nf, GEN *pG0, long n)
 {
   GEN G0, Gtw0, vecG, G = gmael(nf,5,2);
-  long e, i, j, ind, r1 = nf_get_r1(nf), l = lg(G);
+  long e, i, j, ind, r1 = nf_get_r1(nf), r = lg(G)-1;
   if (n == 1) return _vec( ground(G) );
   for (e = 4; ; e <<= 1)
   {
     G0 = ground(G); Gtw0 = ground(gmul2n(G, 10));
-    if (lg(hnf(G0)) == l && lg(hnf(Gtw0)) == l) break; /* maximal rank ? */
+    if (rank(G0) == r && rank(Gtw0) == r) break; /* maximal rank ? */
     G = gmul2n(G, e);
   }
   vecG = cgetg(1 + n*(n+1)/2,t_VEC);
