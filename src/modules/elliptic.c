@@ -354,8 +354,9 @@ initell0(GEN x, long prec)
   y[16] = (long)w2;
   p2 = thetanullk(q, 1, prec);
   if (gcmp0(p2)) err(precer,"initell");
+  /* pi^2 / 6w1 * theta'''(q,0) / theta'(q,0) */
   y[17] = ldiv(gmul(gsqr(pi),thetanullk(q,3,prec)), gmul(gmulsg(6,w1), p2));
-  y[18] = ldiv(gsub(gmul((GEN)y[17],w2),gmul(gi,pi)), w1);
+  y[18] = ldiv(gsub(gmul((GEN)y[17],w2), gmul(gi,pi)), w1);
   return y;
 }
 

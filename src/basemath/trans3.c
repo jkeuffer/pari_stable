@@ -2262,25 +2262,24 @@ GEN
 thetanullk(GEN q, long k, long prec)
 {
   long l, n;
-  pari_sp av=avma, tetpil;
+  pari_sp av = avma;
   GEN p1,ps,qn,y,ps2;
 
-  l=precision(q);
-  if (!l) { l=prec; q=gmul(q,realun(l)); }
-  if (gexpo(q)>=0) err(thetaer1);
+  l = precision(q);
+  if (!l) { l = prec; q = gmul(q,realun(l)); }
+  if (gexpo(q) >= 0) err(thetaer1);
 
   if (!(k&1)) { avma = av; return gzero; }
-  ps2=gsqr(q); ps=gneg_i(ps2);
+  ps2 = gsqr(q); ps = gneg_i(ps2);
   qn = gun; y = gun; n = 0;
-
   do
   {
-    n++; p1=gpowgs(stoi(n+n+1),k); qn=gmul(qn,ps);
-    ps=gmul(ps,ps2); p1=gmul(p1,qn); y=gadd(y,p1);
+    n++; p1 = gpowgs(stoi(n+n+1), k);
+    qn = gmul(qn,ps);
+    ps = gmul(ps,ps2); p1 = gmul(p1,qn); y = gadd(y,p1);
   }
   while (gexpo(p1) >= -bit_accuracy(l));
-  p1=gmul2n(gsqrt(gsqrt(q,prec),prec),1); tetpil=avma;
-  if (k&2) { p1=gneg_i(p1); tetpil=avma; }
-  return gerepile(av,tetpil,gmul(p1,y));
+  p1 = gmul2n(gsqrt(gsqrt(q,prec),prec),1);
+  if (k&2) p1 = gneg_i(p1);
+  return gerepileupto(av, gmul(p1,y));
 }
-
