@@ -1162,11 +1162,17 @@ global0()
 }
 
 static void
-check_pointer(unsigned int ptrs, GEN argvec[])
+check_pointer(unsigned int ptrs, entree *pointer[])
 {
   unsigned int i;
   for (i=0; ptrs; i++,ptrs>>=1)
-    if (ptrs & 1) *((GEN*)argvec[i]) = gclone(*((GEN*)argvec[i]));
+    if (ptrs & 1)
+    {
+      entree *e = pointer[i];
+      GEN x = e->value;
+      pop_val(e);
+      changevalue(e, x);
+    }
 }
 
 #define match_comma() if (matchcomma) match(','); else matchcomma = 1
@@ -1266,6 +1272,7 @@ identifier(void)
     long fake;
     void *call = ep->value;
     GEN argvec[9];
+    entree *pointers[9];
 
     if (*analyseur == '(') analyseur++;
     else
@@ -1317,9 +1324,9 @@ identifier(void)
 	  match_comma(); match('&'); mark.symbol=analyseur;
         {
           entree *e = entry();
-          if (e->value == (void*)initial_value(e))
-            changevalue(e, gzero); /* don't overwrite initial value */
+          push_val(e, e->value);
           has_pointer |= (1 << i);
+          pointers[i] = e;
 	  argvec[i++] = (GEN) &(e->value); break;
         }
         /* Input position */
@@ -1444,7 +1451,7 @@ identifier(void)
 	          argvec[4], argvec[5], argvec[6], argvec[7], argvec[8]);
 	res = gnil; break;
     }
-    if (has_pointer) check_pointer(has_pointer,argvec);
+    if (has_pointer) check_pointer(has_pointer,pointers);
     if (!alright) match(')');
     return res;
   }

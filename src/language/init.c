@@ -879,8 +879,8 @@ err(long numerr, ...)
 
   va_start(ap,numerr);
 
-  if (err_catch_stack)
-  {
+  if (err_catch_stack && numerr != memer)
+  { /* can't trap memer --> infinite recursion if we need a temp buffer */
     if (err_catch_stack[numerr]) trap = numerr;
     else if (err_catch_stack[noer] && numerr >= talker) trap = noer;
   }
