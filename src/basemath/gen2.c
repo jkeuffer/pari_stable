@@ -690,9 +690,9 @@ gegal(GEN x, GEN y)
       case t_VEC: case t_COL: case t_MAT:
         return vecegal(x,y);
     }
-  av = avma;
   {
     jmp_buf env;
+    long *AV = &avma;
     if (setjmp(env)) i = 0;
     else
     {
@@ -700,8 +700,9 @@ gegal(GEN x, GEN y)
       i = gcmp0(gadd(x, gneg_i(y)));
     }
     (void)err_leave(-1);
+    avma = *AV;
   }
-  avma = av; return i;
+  return i;
 }
 
 /*******************************************************************/
@@ -787,11 +788,8 @@ ggval(GEN x, GEN p)
 	}
 	if (vx > v) return 0;
       }
-      else
-      {
-        if (tp!=t_INT) break;
-        i=2; while (isexactzero((GEN)x[i])) i++;
-      }
+      else if (tp!=t_INT) break;
+      i=2; while (isexactzero((GEN)x[i])) i++;
       return minval(x,p,i,lgef(x));
 
     case t_SER:
@@ -920,6 +918,7 @@ gneg(GEN x)
 
     default:
       err(typeer,"negation");
+      return NULL; /* not reached */
   }
   return y;
 }
@@ -970,6 +969,7 @@ gneg_i(GEN x)
 
     default:
       err(typeer,"negation");
+      return NULL; /* not reached */
   }
   return y;
 }
@@ -1756,6 +1756,7 @@ gcvtop(GEN x, GEN p, long r)
       break;
 
     default: err(typeer,"gcvtop");
+      return NULL; /* not reached */
   }
   return y;
 }
@@ -1997,11 +1998,8 @@ gsqr(GEN x)
         {
           p1=gzero; l=avma;
           for (k=1; k<lx; k++)
-          {
-            p2=gmul(gcoeff(x,i,k),gcoeff(x,k,j));
-            tetpil=avma; p1=gadd(p1,p2);
-          }
-          coeff(z,i,j)=lpile(l,tetpil,p1);
+            p1 = gadd(p1, gmul(gcoeff(x,i,k),gcoeff(x,k,j)));
+          coeff(z,i,j)=lpileupto(l,p1);
         }
       }
       return z;
@@ -2097,6 +2095,7 @@ gtolist(GEN x)
       for (i=2; i<lx; i++) list[i] = lclone((GEN)x[i]);
       break;
     default: err(typeer,"gtolist");
+      return NULL; /* not reached */
   }
   list[1] = evallgef(lx); return list;
 }
