@@ -711,6 +711,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
   if (DEBUGLEVEL >= 1)
     msgtimer("znstar_conductor");
   if ( flag == 1 )  { avma=ltop; return stoi(cnd); }
+  if (cnd == 1) { avma=ltop; return gscycloconductor(polx[v],1,flag);}
   if (n != cnd)
   {
     H = znstar_reduce_modulus(H, cnd);
