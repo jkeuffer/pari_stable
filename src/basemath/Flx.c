@@ -1522,6 +1522,18 @@ FlxV_to_Flm(GEN v, long n)
  **                                                          **
  **************************************************************/
 
+/*Similar to normalizepol, in place*/
+/*FlxX_renormalize=zxX_renormalize */
+GEN
+FlxX_renormalize(GEN /*in place*/ x, long lx)
+{
+  long i;
+  for (i = lx-1; i>1; i--)
+    if (lgpol(x[i])) break;
+  stackdummy(x + (i+1), lg(x) - (i+1));
+  setlg(x, i+1); setsigne(x, i!=1); return x;
+}
+
 /* FlxX are t_POL with Flx coefficients.
  * Normally the variable ordering should be respected.*/
 GEN 
@@ -1567,18 +1579,6 @@ ZXXV_to_FlxXV(GEN V, ulong p, long v)
   GEN y = cgetg(N, t_VEC);
   for (j=1; j<N; j++) y[j] = (long)ZXX_to_FlxX((GEN)V[j], p, v);
   return y;
-}
-
-/*Similar to normalizepol, in place*/
-/*FlxX_renormalize=zxX_renormalize */
-GEN
-FlxX_renormalize(GEN /*in place*/ x, long lx)
-{
-  long i;
-  for (i = lx-1; i>1; i--)
-    if (lgpol(x[i])) break;
-  stackdummy(x + (i+1), lg(x) - (i+1));
-  setlg(x, i+1); setsigne(x, i!=1); return x;
 }
 
 /* matrix whose entries are given by the coeffs of the polynomial v in
