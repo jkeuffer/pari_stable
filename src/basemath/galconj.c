@@ -1705,7 +1705,7 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l, long karma_type
       {
 	if (!(group&ga_all_normal) || o > order || 
 	    (o == order && (plift == 0 || norm_o > deg 
-			    || (norm_o == deg && cgcd(p-1,karma_type)>karma ))))
+			    || (norm_o == deg && cgcd(p-1,karma_type) > (long)karma ))))
 	{
 	  deg = norm_o;
 	  order = o;
@@ -1716,7 +1716,7 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l, long karma_type
 	}
       }
       else if (!(group&ga_all_normal) && (plift == 0 || o > order 
-	    || ( o == order && cgcd(p-1,karma_type)>karma )))
+	    || ( o == order && cgcd(p-1,karma_type) > (long)karma )))
       {
 	order = o;
 	plift = p;
