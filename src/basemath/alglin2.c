@@ -1227,11 +1227,11 @@ ZM_copy(GEN x)
 
 /* return c * X. Not memory clean if c = 1 */
 GEN
-ZV_Z_mul(GEN c, GEN X)
+ZV_Z_mul(GEN X, GEN c)
 {
   long i,m = lg(X);
   GEN A = new_chunk(m);
-  if (is_pm1(c))
+  if (signe(c) && is_pm1(c))
   {
     if (signe(c) > 0)
       { for (i=1; i<m; i++) A[i] = X[i]; }
@@ -1252,8 +1252,8 @@ ZV_lincomb(GEN u, GEN v, GEN X, GEN Y)
   long i,lx,m;
   GEN p1,p2,A;
 
-  if (!signe(u)) return ZV_Z_mul(v,Y);
-  if (!signe(v)) return ZV_Z_mul(u,X);
+  if (!signe(u)) return ZV_Z_mul(Y, v);
+  if (!signe(v)) return ZV_Z_mul(X, u);
   lx = lg(X); A = cgetg(lx,t_COL); m = lgefint(u)+lgefint(v)+4;
   if (is_pm1(v)) { swap(u,v); swap(X,Y); }
   if (is_pm1(u))
@@ -2101,11 +2101,19 @@ hnfmerge_get_1(GEN A, GEN B)
       ZV_elem(t, gcoeff(C,k,k), C, U, c, k);
       if (lgefint(gcoeff(C,k,k)) > lb) C[k] = (long)FpV_red((GEN)C[k], b);
     }
-    t = gcdii(b, gcoeff(C,1,1)); /* >= 0 */
+    if (j == 1)
+      t = gcoeff(C,1,1);
+    else
+    {
+      GEN u,v;
+      t = bezout(b, gcoeff(C,1,1), &u, &v); /* >= 0 */
+      if (signe(v)) U[1] = (long)ZV_Z_mul((GEN)U[1], v);
+    }
     if (signe(t) && is_pm1(t)) break;
   }
   if (j >= l) err(talker, "non coprime ideals in hnfmerge");
   return gerepileupto(av, gmul(A,(GEN)U[1]));
+
 }
 
 /* remove: throw away lin.dep.columns */
