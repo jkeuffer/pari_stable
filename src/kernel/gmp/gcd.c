@@ -234,7 +234,7 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
      */
     GEN ca = icopy_ef(a,lgefint(a)+1);
     GEN cb = icopy_ef(b,lgefint(b)+1);
-    GEN u = cgeti(lgefint(a)+1), v;
+    GEN u = cgeti(lgefint(a)+1), v = NULL;
     GEN d = cgeti(lgefint(a)+1);
     long su,l,lu;
     l = mpn_gcdext(LIMBS(d), LIMBS(u), &lu, LIMBS(ca), NLIMBS(ca), LIMBS(cb), NLIMBS(cb));
