@@ -1278,7 +1278,7 @@ FpX_rescale(GEN P, GEN h, GEN p)
 int
 cmbf_precs(GEN q, GEN A, GEN B, long *pta, long *ptb, GEN *qa, GEN *qb)
 {
-  long a,b,amin,d = (long)(31 * LOG2/gtodouble(glog(q,DEFAULTPREC)));
+  long a,b,amin,d = (long)(31 * LOG2/gtodouble(glog(q,DEFAULTPREC)) - 1e-5);
   int fl = 0;
 
   b = logint(B, q, qb);
