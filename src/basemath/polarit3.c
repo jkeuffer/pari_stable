@@ -20,6 +20,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                                                                   **/
 /***********************************************************************/
 #include "pari.h"
+
+#define swapspec(x,y, nx,ny) {long _a=nx;GEN _z=x; nx=ny; ny=_a; x=y; y=_z;}
+#define swap(x,y) {GEN _z=x; x=y; y=_z;}
 #define deg(a) (lgef(a)-3)
 
 /*******************************************************************/
@@ -27,7 +30,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                  KARATSUBA (for polynomials)                    */
 /*                                                                 */
 /*******************************************************************/
-#define swapspec(x,y, nx,ny) {long _a=nx;GEN _z=x; nx=ny; ny=_a; x=y; y=_z;}
 
 #if 1 /* for tunings */
 long SQR_LIMIT = 6;
@@ -1064,10 +1066,11 @@ FpXQX_sqr(GEN x, GEN T, GEN p)
 }
 /* safe mean that if T is not irreducible and some
  * division fail it return NULL*/
-GEN FpXQX_safegcd(GEN P, GEN Q, GEN T, GEN p)
+GEN
+FpXQX_safegcd(GEN P, GEN Q, GEN T, GEN p)
 {
   ulong ltop = avma;
-  GEN R, U, V, z;
+  GEN U, V, z;
   long dg, vx=varn(P);
   GEN x = polx[vx];
   GEN lQ, lP;
@@ -1084,21 +1087,19 @@ GEN FpXQX_safegcd(GEN P, GEN Q, GEN T, GEN p)
       dg = lgef(P)-lgef(Q);
       if (dg < 0)
       {
-        R = P;
-        P = Q;
-        Q = R;
+        swap(P, Q);
         dg = -dg;
       }
-      lQ=(GEN)Q[lgef(Q)-1];
-      lP=(GEN)P[lgef(P)-1];
+      lQ = leading_term(Q);
+      lP = leading_term(P);
       if (typ(lQ)==t_POL)
       {
       	z = FpX_extgcd(lQ, T, p, &U, &V);
-      	if (lgef(z) != 3) { avma = ltop; return gzero; }
+      	if (lgef(z) != 3) { avma = ltop; return NULL; }
         z = mpinvmod((GEN)z[2], p);
         U = FpX_Fp_mul(U, z, p);
       }
-      else U=mpinvmod(lQ, p);
+      else U = mpinvmod(lQ, p);
       Q = FpXQX_mul(Q, scalarpol(U,vx), T, p);
       P = gsub(P, FpXQX_mul(gmul(lP, gpowgs(x, dg)), Q, T, p));
       P = FpXQX_red(P, T, p);
