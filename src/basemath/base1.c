@@ -20,6 +20,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**************************************************************/
 #include "pari.h"
 #include "parinf.h"
+
+int new_galois_format = 0;
+
 extern GEN R_from_QR(GEN x, long prec);
 extern GEN to_polmod(GEN x, GEN mod);
 extern GEN roots_to_pol_r1r2(GEN a, long r1, long v);
@@ -362,6 +365,7 @@ _res(long n, long s, long k)
   GEN y = cgetg(4, t_VEC);
   y[1] = lstoi(n);
   y[2] = lstoi(s);
+  if (!new_galois_format) k = (n == 6 && (k == 6 || k == 2))? 2: 1;
   y[3] = lstoi(k); return y;
 }
 
