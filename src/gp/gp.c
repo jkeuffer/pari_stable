@@ -2932,6 +2932,8 @@ read_opt(growarray *A, long argc, char **argv)
   char *b = NULL, *p = NULL, *s = NULL;
   int i = 1, initrc = 1;
 
+  (void)&p; (void)&b; (void)&s; /* -Wall gcc-2.95 */
+
   pari_outfile = stderr;
   while (i < argc)
   {
