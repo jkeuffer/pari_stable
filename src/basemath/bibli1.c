@@ -378,7 +378,7 @@ incrementalGS(GEN x, GEN L, GEN B, long k, GEN fl, int gram)
 
 /* x integer matrix */
 GEN
-lllint_i(GEN x, long alpha, int gram, GEN *ptfl, GEN *ptB)
+lllint_marked(long MARKED, GEN x, long alpha, int gram, GEN *ptfl, GEN *ptB)
 {
   long lx = lg(x), hx, i, j, k, l, n, kmax;
   gpmem_t av, lim;
@@ -411,22 +411,25 @@ lllint_i(GEN x, long alpha, int gram, GEN *ptfl, GEN *ptB)
       incrementalGS(x, L, B, k, fl, gram);
       kmax = k;
     }
-    REDI(k,k-1, x,h,L,(GEN)B[k],kmax,gram);
+    if (k != MARKED) REDI(k,k-1, x,h,L,(GEN)B[k],kmax,gram);
     if (do_SWAPI(x,h,L,B,kmax,k,alpha,fl,gram))
     {
+      if      (MARKED == k)   MARKED = k-1;
+      else if (MARKED == k-1) MARKED = k;
       if (k > 2) k--;
     }
     else
     {
-      for (l=k-2; l; l--)
-      {
-        REDI(k,l, x,h,L,(GEN)B[l+1],kmax, gram);
-        if (low_stack(lim, stack_lim(av,1)))
+      if (k != MARKED)
+        for (l=k-2; l; l--)
         {
-          if(DEBUGMEM>1) err(warnmem,"lllint[1]");
-          gerepileall(av,4,&B,&L,&h,&x);
+          REDI(k,l, x,h,L,(GEN)B[l+1],kmax, gram);
+          if (low_stack(lim, stack_lim(av,1)))
+          {
+            if(DEBUGMEM>1) err(warnmem,"lllint[1]");
+            gerepileall(av,4,&B,&L,&h,&x);
+          }
         }
-      }
       if (++k > n) break;
     }
     if (low_stack(lim, stack_lim(av,1)))
@@ -438,7 +441,14 @@ lllint_i(GEN x, long alpha, int gram, GEN *ptfl, GEN *ptB)
   if (DEBUGLEVEL>3) fprintferr("\n");
   if (ptB)  *ptB  = B;
   if (ptfl) *ptfl = fl;
+  if (MARKED && MARKED != 1) swap(h[1], h[MARKED]);
   return h;
+}
+
+GEN
+lllint_i(GEN x, long alpha, int gram, GEN *ptfl, GEN *ptB)
+{
+  return lllint_marked(0, x,alpha,gram,ptfl,ptB);
 }
 
 GEN
@@ -611,9 +621,12 @@ get_Gram_Schmidt(GEN x, GEN mu, GEN B, long k)
 }
 
 /* x = Gram(b_i). If precision problems return NULL if flag=1, error otherwise.
- * Quality ratio = Q = (alpha-1)/alpha. Suggested value: alpha = 100 */
+ * Quality ratio = Q = (alpha-1)/alpha. Suggested value: alpha = 100
+ *
+ * If MARKED != 0 make sure e[MARKED] is the first vector of the output basis 
+ * (which may then not be LLL-reduced) */
 GEN
-lllgramintern(GEN x, long alpha, long flag, long prec)
+lllgram_marked(int MARKED, GEN x, long alpha, long flag, long long prec)
 {
   GEN xinit,L,h,B,L1,QR;
   long retry = 2, l, i, j, k, k1, lx=lg(x), n, kmax, KMAX;
@@ -701,15 +714,18 @@ PRECPB:
       for (k1=1; k1<=kmax; k1++)
         if (!get_Gram_Schmidt(x,L,B,k1)) goto PRECPB;
     }
-    RED(k,k-1, x,h,L,KMAX);
+    if (k != MARKED) RED(k,k-1, x,h,L,KMAX);
     if (do_SWAP(x,h,L,B,kmax,k,QR))
     {
+      if      (MARKED == k)   MARKED = k-1;
+      else if (MARKED == k-1) MARKED = k;
       if (!B[k]) goto PRECPB;
       if (k>2) k--;
     }
     else
     {
-      for (l=k-2; l; l--) RED(k,l, x,h,L,KMAX);
+      if (k != MARKED)
+        for (l=k-2; l; l--) RED(k,l, x,h,L,KMAX);
       if (++k > n) break;
     }
     if (low_stack(lim, stack_lim(av,1)))
@@ -723,11 +739,15 @@ PRECPB:
     }
   }
   if (DEBUGLEVEL>3) fprintferr("\n");
+  if (MARKED && MARKED != 1) swap(h[1], h[MARKED]);
   return gerepilecopy(av0, h);
 }
 
-static GEN
-lllgram_noerr(GEN x,long prec) { return lllgramintern(x,LLLDFT,1,prec); }
+GEN
+lllgramintern(GEN x, long alpha, long flag, long prec)
+{
+  return lllgram_marked(0, x,alpha,flag,prec);
+}
 
 GEN
 lllgram(GEN x,long prec) { return lllgramintern(x,LLLDFT,0,prec); }
@@ -740,7 +760,6 @@ qflll0(GEN x, long flag, long prec)
     case 0: return lll(x,prec);
     case 1: return lllint(x);
     case 2: return lllintpartial(x);
-    case 3: return lllrat(x);
     case 4: return lllkerim(x);
     case 5: return lllkerimgen(x);
     case 8: return lllgen(x);
@@ -764,75 +783,62 @@ qflllgram0(GEN x, long flag, long prec)
   return NULL; /* not reached */
 }
 
-/* The columns of b for a lattice L = <b_i>; return u unimodular of an
- * LLL-reduced basis (c_i) in terms of the b_i. [ c = b * u ] */
 static GEN
-lll_proto(GEN b, GEN f(GEN, long), long prec)
+gram(GEN b)
 {
-  long lx=lg(b), i, j;
-  gpmem_t av, av1;
+  long i,j, lx = lg(b);
   GEN g;
-
-  if (typ(b) != t_MAT) err(typeer,"lll_proto");
-  if (lx==1) return cgetg(1,t_MAT);
-  av = avma; g = cgetg(lx,t_MAT);
-  for (j=1; j<lx; j++) g[j]=lgetg(lx,t_COL);
+  if (typ(b) != t_MAT) err(typeer,"gram");
+  g = cgetg(lx,t_MAT);
   for (i=1; i<lx; i++)
+  {
+    g[i] = lgetg(lx,t_COL);
     for (j=1; j<=i; j++)
-      coeff(g,i,j)=coeff(g,j,i)=(long)gscal((GEN)b[i],(GEN)b[j]);
-  av1 = avma; b = f(g,prec);
-  if (!b) { avma = av; return NULL; }
-  return gerepile(av,av1,b);
+      coeff(g,i,j) = coeff(g,j,i) = (long)gscal((GEN)b[i],(GEN)b[j]);
+  }
+  return g;
 }
 
+/* The columns of b for a lattice L = <b_i>; return u unimodular of an
+ * LLL-reduced basis (c_i) in terms of the b_i. [ c = b * u ] */
 GEN
 lllintern(GEN x,long flag,long prec)
 {
-  return lll_proto(x,flag? lllgram_noerr: lllgram,prec);
+  gpmem_t av = avma;
+  GEN h, g = gram(x);
+  if (flag)
+  {
+    h = lllgramintern(g,LLLDFT,1,prec);
+    if (!h) { avma = av; return NULL; }
+  }
+  else
+    h = lllgram(g, prec);
+  return gerepileupto(av, h);
 }
 
 GEN
-lll(GEN x,long prec) { return lll_proto(x,lllgram,prec); }
+lll(GEN x,long prec) {
+  gpmem_t av = avma;
+  return gerepileupto(av, lllgram(gram(x), prec));
+}
 
 GEN
-lllrat(GEN x) { return lll_proto(x,lllgram,lll_ALL); }
+lllgen(GEN x) {
+  gpmem_t av = avma;
+  return gerepileupto(av, lllgramgen(gram(x)));
+}
 
 GEN
-lllgen(GEN x) { return lll_proto(x,lllgramallgen,lll_IM); }
+lllkerimgen(GEN x) {
+  gpmem_t av = avma;
+  return gerepileupto(av, lllgramallgen(gram(x),lll_ALL));
+}
 
 GEN
 lllgramgen(GEN x) { return lllgramallgen(x,lll_IM); }
 
 GEN
 lllgramkerimgen(GEN x) { return lllgramallgen(x,lll_ALL); }
-
-GEN
-lllkerimgen(GEN x)
-{
-  long lx=lg(x), i, j;
-  gpmem_t av, av1;
-  GEN g;
-
-  if (typ(x) != t_MAT) err(typeer,"lllkerim_proto");
-  if (lx==1)
-  {
-    g=cgetg(3,t_VEC);
-    g[1]=lgetg(1,t_MAT);
-    g[2]=lgetg(1,t_MAT); return g;
-  }
-  if (lg((GEN)x[1])==1)
-  {
-    g=cgetg(3,t_VEC);
-    g[1]=(long)idmat(lx-1);
-    g[2]=lgetg(1,t_MAT); return g;
-  }
-  av=avma; g=cgetg(lx,t_MAT);
-  for (j=1; j<lx; j++) g[j]=lgetg(lx,t_COL);
-  for (i=1; i<lx; i++)
-    for (j=1; j<=i; j++)
-      coeff(g,i,j)=coeff(g,j,i)=(long)gscal((GEN)x[i],(GEN)x[j]);
-  av1=avma; return gerepile(av,av1,lllgramallgen(g,lll_ALL));
-}
 
 /*  This routine is functionally similar to lllint when all = 0.
  *

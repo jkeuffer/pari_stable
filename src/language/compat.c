@@ -345,7 +345,7 @@ entree oldfonctions[]={
 {"lllintpartial",1,(void *)lllintpartial,8,"G"},
 {"lllkerim",1,(void *)lllkerim,8,"G"},
 {"lllkerimgen",1,(void *)lllkerimgen,8,"G"},
-{"lllrat",1,(void *)lllrat,8,"G"},
+{"lllrat",1,(void *)suppressed,8,"G"},
 {"ln",1,(void *)glog,3,"Gp"},
 {"lngamma",1,(void *)glngamma,3,"Gp"},
 {"localred",2,(void *)localreduction,5,"GG"},
