@@ -1193,15 +1193,14 @@ isqrti(GEN a)
   return res;
 }
 
-/* compute sqrt(|a|), s being signe(a)*/
+/* compute sqrt(|a|), assuming a != 0 */
 GEN
-sqrtr_abs(GEN a, long s)
+sqrtr_abs(GEN a)
 {
   GEN res;
   mp_limb_t *b, *c;
   long pr=RNLIMBS(a);
   long e=expo(a),er=e>>1;
-  if (!s) return realzero_bit(er);
   res = cgetr(2 + pr);
   if (e&1)
   {

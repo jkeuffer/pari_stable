@@ -1543,15 +1543,14 @@ sqrtu2(GEN a)
 }
 #endif
 
-/* compute sqrt(|a|), s being signe(a)*/
+/* compute sqrt(|a|), assuming a != 0 */
 GEN
-sqrtr_abs(GEN x, long s)
+sqrtr_abs(GEN x)
 {
   pari_sp av, av0;
   long l, l1, i, ex;
   GEN y, a, t;
 
-  if (!s) return realzero_bit(expo(x) >> 1);
   l = lg(x); y = cgetr(l); av0 = avma;
 
   a = cgetr(l+1); affrr(x,a);

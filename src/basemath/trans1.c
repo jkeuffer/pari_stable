@@ -93,7 +93,7 @@ constpi(long prec)
     n--; n1-=6;
   }
   p1 = divsr(53360,p1);
-  mulrrz(p1,sqrtr_abs(stor(k3,prec), 1), tmppi);
+  mulrrz(p1,sqrtr_abs(stor(k3,prec)), tmppi);
   if (gpi) gunclone(gpi);
   avma = av1;  gpi = tmppi;
 }
@@ -761,9 +761,10 @@ sqrtr(GEN x) {
   long s = signe(x);
   GEN y;
   if (typ(x) != t_REAL) err(typeer,"sqrtr");
-  if (s >= 0) return sqrtr_abs(x, s);
+  if (s == 0) return realzero_bit(expo(x) >> 1);
+  if (s >= 0) return sqrtr_abs(x);
   y = cgetg(3,t_COMPLEX);
-  y[2] = (long)sqrtr_abs(x, s);
+  y[2] = (long)sqrtr_abs(x);
   y[1] = zero; return y;
 }
 
@@ -1417,7 +1418,7 @@ logr_abs(GEN x)
     l2 += m>>TWOPOTBITS_IN_LONG;
     p4 = cgetr(l2); affrr(p1,p4);
     p1 = p4; av = avma;
-    for (k=1; k<=m; k++) p1 = sqrtr_abs(p1, 1);
+    for (k=1; k<=m; k++) p1 = sqrtr_abs(p1);
     affrr(p1,p4); avma = av;
   }
   else
@@ -1709,7 +1710,8 @@ mpaut(GEN x)
 {
   pari_sp av = avma;
   GEN p1 = mulrr(x, addsr(2,x));
-  return gerepileuptoleaf(av, sqrtr_abs(p1, signe(p1)));
+  if (!signe(p1)) return realzero_bit(expo(p1) >> 1);
+  return gerepileuptoleaf(av, sqrtr_abs(p1));
 }
 
 /********************************************************************/

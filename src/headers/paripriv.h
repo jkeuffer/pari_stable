@@ -48,6 +48,7 @@ int absrnz_egal2n(GEN x);
 GEN exp1r_abs(GEN x);
 GEN logagmr_abs(GEN q);
 GEN logr_abs(GEN x);
+GEN sqrtr_abs(GEN x);
 
 /* hnf */
 GEN gauss_triangle_i(GEN A, GEN B,GEN t);
