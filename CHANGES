@@ -74,6 +74,10 @@ IZ 12- [gnuplot + dynamic link:] allow building even when dlopen() not available
    28- ellsigma(...,matid(1)) --> SEGV [bad input]
    29- ideleprincipal([],1) --> SEGV [bad input]
    30- factorback(matid(1),nfinit(x)) --> SEGV [bad input]
+   31- incomplete help message for vecsort
+   32- polredabs fails to reduce
+         x^8-2*x^7-34*x^6+78*x^5+265*x^4-628*x^3-389*x^2+1237*x-449
+       [typo in chk_gen_init: skipfirst not initialized properly]
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).
@@ -89,6 +93,7 @@ IZ  6- [gphelp:] better error messages in case TeX compilation fails
 IZ  8- [library:] unified access to diffptr (NEXT_PRIME_VIADIFF macro)
     9- buchall: re-use the same random seed when doubling prec (for units)
    10- major cleanup in thue / thueinit
+   11- major cleanup in rnfkummer (use elements in factored form)
 
   Added
  BA 1- Add PARI_VERSION and PARI_VERSION_CODE to paricfg.h

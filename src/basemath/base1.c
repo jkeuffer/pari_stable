@@ -1771,7 +1771,8 @@ chk_gen_init(FP_chk_fun *chk, GEN gram, GEN mat)
     if (prev && degpol(prev) < N && !gegal(prev,P))
     {
       if (degpol(prev) * degpol(P) > 64) continue; /* too expensive */
-      P = (GEN)compositum(prev,P)[1];
+      P = compositum(prev,P);
+      P = (GEN)P[lg(P)-1];
       if (degpol(P) == N) continue;
       if (DEBUGLEVEL>2 && degpol(P) != degpol(prev))
         fprintferr("chk_gen_init: subfield %Z\n",P);
@@ -1967,14 +1968,11 @@ polredabs0(GEN x, long flag)
 }
 
 GEN
-polredabsall(GEN x, long flun)
-{ return polredabs0(x, flun | nf_ALL); }
+polredabsall(GEN x, long flun) { return polredabs0(x, flun | nf_ALL); }
 GEN
-polredabs(GEN x)
-{ return polredabs0(x,0); }
+polredabs(GEN x) { return polredabs0(x,0); }
 GEN
-polredabs2(GEN x)
-{ return polredabs0(x,nf_ORIG); }
+polredabs2(GEN x) { return polredabs0(x,nf_ORIG); }
 
 static long
 nf_pm1(GEN y)
