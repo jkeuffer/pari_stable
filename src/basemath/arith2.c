@@ -188,23 +188,17 @@ initprimes0(ulong maxnum, long *lenp, ulong *lastp)
     /* p corresponds to curlow.  q runs over primediffs.  */
     /* Don't care about DIFFPTR_SKIP: false positives provide no problem */
     for (q = p1+2, k = 3; q <= fin1; k += *q++)
-    {
-      /* The first odd number which is >= curlow and divisible by p
-       equals (if curlow > p)
-	 the last odd number which is <= curlow + 2p - 1 and 0 (mod p)
-       which equals
-	 p + the last even number which is <= curlow + p - 1 and 0 (mod p)
-       which equals
-	 p + the last even number which is <= curlow + p - 2 and 0 (mod p)
-       which equals
-	 p + curlow + p - 2 - (curlow + p - 2)) % 2p.
-       */
+    {/* first odd number which is >= curlow > p and divisible by p
+      = last odd number which is <= curlow + 2p - 1 and 0 (mod p)
+      = p + the last even number which is <= curlow + p - 1 and 0 (mod p)
+      = p + the last even number which is <= curlow + p - 2 and 0 (mod p)
+      = p + curlow + p - 2 - (curlow + p - 2) % 2p. */
       long k2 = k*k - curlow;
 
       if (k2 > 0)
       {
 	r = p + (k2 >>= 1);
-	if (k2 > remains) break; /* Guard against an address wrap. */
+	if (k2 > remains) break; /* Guard against address wrap. */
       } else
 	r = p - (((curlow+k-2) % (2*k)) >> 1) + k - 1;
       for (s = r; s < fin; s += k) *s = 1;
