@@ -2901,7 +2901,7 @@ hqr(GEN mat) /* find all the eigenvalues of the matrix mat */
             if (k!=m)
             {
               p=a[k][k-1]; q=a[k+1][k-1];
-              r = (k != nn-1) a[k+2][k-1]: 0.0;
+              r = (k != nn-1)? a[k+2][k-1]: 0.0;
               x = fabs(p)+fabs(q)+fabs(r);
               if (x != 0.0) { p/=x; q/=x; r/=x; }
             }
