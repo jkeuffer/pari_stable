@@ -64,7 +64,7 @@ while test $# -gt 0; do
   -rdll)       DYNRELOC=yes;;
   -h|-help|-\?)error=true;;
   -v|-verbhelp)error=verb;;
-  -s|--static) DLLD=;;
+  -s|--static) static=y;;
   -graphic)   shift; which_graphic_lib=$1; graph_cmd=yes ;;
   --graphic=*|--graphi=*|--graph=*|--grap=*|--gra=*|--gr=*|--g=*)
 	       graph_cmd=yes
@@ -85,7 +85,7 @@ Options: names can be abbreviated to one character (e.g -h = -help)
  --static        build static GP binary only
  --prefix=<dir>  install files in <dir>/... (default $prefix)
  --graphic=<gr>  which graphic library to use (default X11)
-                 (none X11 sunview gnuplot)
+                 (none X11 gnuplot)
 
 Additional developer options:
  -g              creates debugging version
@@ -487,7 +487,6 @@ if test "$optimization" != profiling; then
   lib=readline; . ./locatelib
   rl_fullname=$try
 
-  addsunview=sunview
   if test -n "$readline"; then
 # Readline -- TermCap
     if test -n "`(nm $rl_fullname | grep tgetent)2>/dev/null`"; then
@@ -505,8 +504,6 @@ if test "$optimization" != profiling; then
       lib=iberty; . ./locatelib
       if test -z "$try"; then rl_liberty=; fi
     fi
-# Readline -- Version
-    if (nm $rl_fullname | grep "\<_rl_copy\>")2>/dev/null; then addsunview=; fi
 # Readline -- Headers
     case "$osname" in
       os2) incpth=`echo $C_INCLUDE_PATH | sed -e 's/\([^;]\)$/\1;/g' -e 's%;%/readline %g' -e 's,\\\\,/,g'` ;;
@@ -588,18 +585,10 @@ if test "$optimization" != profiling; then
       cat << EOM
 ==========================================================================
 EOM
-     test -z "$addsunview" && cat <<EOT
-Your readline library won't compile with sunview. You have four choices :
-1) Avoid choosing sunview as your graphic lib (by the way, I won't let you).
-2) Fetch a new readline (version number at least 2.0)
-3) Recompile your GNU readline library, replacing rl_copy in the file
-   readline.c by some weird name (GNU chose rl_copy_text in later versions).
-4) Answer "n" to the following question (not recommended).
-EOT
       echo $n "Do you want to use GNU readline library within GP ? $c"
       rep='y n'; dflt=y; . ./myread
       case $ans in
-        n) addsunview=sunview; readline=;;
+        n) readline=;;
       esac
     fi
   fi
@@ -613,10 +602,10 @@ EOT
     cat << EOT
 ==========================================================================
 GP contains high resolution plotting functions. Choose among
-       none       $addX11         $addsunview        $addgnuplot
+       none       $addX11         $addgnuplot
 EOT
     echo $n ..."Use which graphic library (\"none\" means no hi-res plot) ? $c"
-    rep="none $addX11 $addsunview $addgnuplot";
+    rep="none $addX11 $addgnuplot";
     dflt=$which_graphic_lib; . ./myread
     which_graphic_lib=$ans
 
@@ -980,7 +969,7 @@ if test -z "$DLLD"; then
   static=y
 else
   echo "Dynamic Lib linker is  $DLLD  $DLLDFLAGS"
-  static=n
+  static=${static-n}
 fi
 
 if test "$fastread" != yes; then

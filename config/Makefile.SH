@@ -81,12 +81,6 @@ gnuplot)
     *) libgnuplot=$gnuplot/libgnuplot.a;;
   esac
   ;;
-sunview)
-  PLOTFILE=plotsun.c
-  PLOTCFLAGS=
-  PLOTLIBS='-lsuntool -lsunwindow -lpixrect'
-  plotrunpath=
-  ;;
 X11)
   PLOTFILE=plotX.c
   PLOTCFLAGS=-I$Xincroot
