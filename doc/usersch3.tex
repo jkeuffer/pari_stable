@@ -2066,6 +2066,7 @@ the point $z$ on the elliptic curve $E$. The vector $E$ must be a long vector
 of the type given by \kbd{ellinit}, with $\fl=1$. If $\fl=0$, this
 computation is done using sigma and theta-functions and a trick due to J.
 Silverman. If $\fl=1$, use Tate's $4^n$ algorithm, which is much slower.
+$E$ is assumed to be integral, given by a minimal model.
 
 \syn{ellheight0}{E,z,\fl,\var{prec}}. The Archimedean
 contribution alone is given by the library function
