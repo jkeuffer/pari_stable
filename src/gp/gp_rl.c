@@ -460,7 +460,7 @@ rl_print_aide(char *s, int flag)
 
   rl_point = 0; rl_end = 0; pari_outfile = rl_outstream;
   SAVE_PROMPT();
-  rl_message("");
+  rl_message("%s",""); /* rl_message("") ==> "zero length format" warning */
   aide(s, flag);
   RESTORE_PROMPT();
   rl_point = p; rl_end = e; pari_outfile = save;
