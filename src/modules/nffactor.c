@@ -328,7 +328,7 @@ nffactor(GEN nf,GEN pol)
     ex=(GEN)gpmalloc(l * sizeof(long));
     for (j=l-1; j>=1; j--)
     {
-      GEN fact=(GEN)y[j], quo = g, rem;
+      GEN fact=lift((GEN)y[j]), quo = g, rem;
       long e = 0;
       do { e++; quo = RXQX_divrem(quo,fact,T, &rem); } while (gcmp0(rem));
       ex[j] = e;
@@ -1079,24 +1079,20 @@ nf_LLL_cmbf(nfcmbf_t *T, long a, GEN p, long rec)
       {
         prk = idealpows(T->nf, T->pr, a);
         pa = gcoeff(prk,1,1);
-        prk = gmul(prk, lllintpartial(prk));
+        PRK = gmul(prk, lllintpartial(prk));
 
-        u = lllgramint_i(gram_matrix(prk), 4, NULL, &B);
+        u = lllgramint_i(gram_matrix(PRK), 4, NULL, &B);
         PRK_GSmin = vecmin(GS_norms(B, DEFAULTPREC));
         if (gcmp(PRK_GSmin, Btra) >= 0) break;
       }
-      PRK = gmul(prk, u);
+      PRK = gmul(PRK, u);
       PRKinv = ZM_inv(PRK, pa);
 
       polred = nf_pol_red(unifpol(T->nf,P,0), prk);
       famod = hensel_lift_fact(polred,famod,NULL,p,pa,a);
       /* recompute old Newton sums to new precision */
       if (tmax)
-        for (i=1; i<=n0; i++)
-        {
-          GEN p2 = polsym_gen((GEN)famod[i], NULL, tmax, NULL, pa);
-          TT[i] = (long)p2;
-        }
+        for (i=1; i<=n0; i++) TT[i] = 0;
     }
 
     for (i=1; i<=n0; i++)
