@@ -1104,7 +1104,7 @@ static GEN
 triv_gen(GEN nf, GEN x, long c, long flag)
 {
   GEN y;
-  if (!(flag & nf_GEN)) return cgetg(1,t_COL);
+  if (!(flag & nf_GEN)) return zerocol(c);
   y = cgetg(4,t_VEC);
   y[1] = (long)zerocol(c);
   x = (typ(x) == t_COL)? gcopy(x): algtobasis(nf,x);
@@ -1189,7 +1189,7 @@ isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag)
       {
         GEN t, u = lift_intern(basistoalg(nf, (GEN)y[2]));
         if (flag & nf_GENMAT)
-          y[2] = gcmp1(u)? id[2]: (long)arch_mul((GEN)id[2], u);
+          y[2] = (gcmp1(u)&&lg(id[2])>1)? id[2]: (long)arch_mul((GEN)id[2], u);
         else
         {
           t = basistoalg(nf, famat_to_nf(nf, (GEN)id[2]));

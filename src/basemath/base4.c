@@ -1924,7 +1924,7 @@ ideallllred(GEN nf, GEN I, GEN vdir, long prec)
     switch(typ(aI))
     {
       case t_POLMOD: case t_MAT:
-        y = gmul(x, gdiv(c1? mulii(c,c1): c,Nx));
+        y = gmul(x, gdiv(c1? gmul(c,c1): c,Nx));
         break;
       default:
         y = gneg_i(get_arch(nf,y,prec));
