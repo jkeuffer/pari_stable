@@ -3035,8 +3035,7 @@ LABDOUB:
   if (!polrel) /* if it fails... */
   {
     long pr;
-    if (++cpt >= 3) err(talker,
-                        "insufficient precision: computation impossible");
+    if (++cpt >= 3) err(precer, "stark (computation impossible)");
 
     /* we compute the precision that we need */
     pr = 1 + (gexpo(polrelnum)>>TWOPOTBITS_IN_LONG);
@@ -3089,8 +3088,10 @@ LABDOUB:
 GEN
 quadhilbertreal(GEN D, GEN flag, long prec)
 {
-  long av = avma, cl, newprec;
-  GEN pol, bnf, bnr, dataC, bnrh, nf, exp;
+  VOLATILE long av = avma, cl;
+  long newprec;
+  VOLATILE GEN pol, bnf, bnr, dataC, bnrh, nf, exp;
+  void *catcherr = NULL;
 
   if (DEBUGLEVEL) timer2();
 
@@ -3108,6 +3109,7 @@ quadhilbertreal(GEN D, GEN flag, long prec)
   pol = quadpoly(D);
   setvarn(pol, fetch_var());
 
+ START:
   /* compute the class group */
   bnf = bnfinit0(pol, 1, NULL, prec);
   nf  = (GEN)bnf[7];
@@ -3119,8 +3121,18 @@ quadhilbertreal(GEN D, GEN flag, long prec)
   exp = gmael4(bnf, 8, 1, 2, 1);
   if (gegal(exp, gdeux)) { delete_var(); return GenusField(bnf, prec); }
 
-  /* find the modulus defining N */
+  { /* catch precision problems (precision too small) */
+    jmp_buf env;
+    if (setjmp(env)) 
+    {
+      prec += EXTRA_PREC;
+      err (warnprec, "quadhilbertreal", prec);
+      goto START;
+    }
+    catcherr = err_catch(precer, env, NULL);
+  }
 
+  /* find the modulus defining N */
   bnr   = buchrayinitgen(bnf, gun);
   dataC = InitQuotient(bnr, gzero);
   if (gcmp0(flag)) 
