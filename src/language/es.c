@@ -1858,8 +1858,8 @@ texi(GEN g, long nosign)
       pariputc('}'); break;
 
     case t_STR:
-      pariputs("\\mbox{"); pariputs(GSTR(g)); pariputc('}');
-      return;
+      pariputs("\\mbox{"); pariputs(GSTR(g));
+      pariputc('}'); break;
 
     case t_MAT:
       pariputs("\\pmatrix{\n "); r = lg(g);
@@ -1983,6 +1983,9 @@ fprintferr(char* format, ...)
 /*******************************************************************/
 /**                            FILES                              **/
 /*******************************************************************/
+/* stack of temporary files (includes all infiles + some output) */
+static pariFILE *last_tmp_file = NULL;
+/* stack of "permanent" (output) files */
 static pariFILE *last_file = NULL;
 #if defined(UNIX) || defined(__EMX__)
 #  include <pwd.h>
@@ -1999,12 +2002,21 @@ newfile(FILE *f, char *name, int type)
   file->type = type;
   file->name = strcpy((char*)(file+1), name);
   file->file = f;
-  file->prev = last_file;
   file->next = NULL;
-  if (last_file) last_file->next = file;
+  if (type & mf_PERM)
+  {
+    file->prev = last_file;
+    last_file = file;
+  }
+  else
+  {
+    file->prev = last_tmp_file;
+    last_tmp_file = file;
+  }
+  if (file->prev) (file->prev)->next = file;
   if (DEBUGFILES)
     fprintferr("I/O: opening file %s (code %d) \n",name,type);
-  return last_file = file;
+  return file;
 }
 
 static void
@@ -2034,7 +2046,7 @@ pari_kill_file(pariFILE *f)
 void
 pari_fclose(pariFILE *f)
 {
-  if (f->next) (f->next)->prev = f->prev; else last_file = f->prev;
+  if (f->next) (f->next)->prev = f->prev; else last_tmp_file = f->prev;
   if (f->prev) (f->prev)->next = f->next;
   pari_kill_file(f);
 }
@@ -2059,6 +2071,7 @@ pari_unlink(char *s)
 
 /* Remove one INFILE from the stack. Reset infile (to the most recent infile)
  * Return -1, if we're trying to pop out stdin itself; 0 otherwise
+ * Check for leaked file handlers (temporary files)
  */
 int
 popinfile()
@@ -2066,30 +2079,41 @@ popinfile()
   pariFILE *f;
 
   filtre(NULL, f_ENDFILE);
-  for (f = last_file; f; f = f->prev)
+  for (f = last_tmp_file; f; f = f->prev)
   {
     if (f->type & mf_IN) break;
     err(warner, "I/O: leaked file descriptor (%d): %s",
 		f->type, f->name);
     pari_fclose(f);
   }
-  last_file = f; if (!last_file) return -1;
-  pari_fclose(last_file);
-  for (f = last_file; f; f = f->prev)
+  last_tmp_file = f; if (!last_tmp_file) return -1;
+  pari_fclose(last_tmp_file);
+  for (f = last_tmp_file; f; f = f->prev)
     if (f->type & mf_IN) { infile = f->file; return 0; }
   infile = stdin; return 0;
 }
 
-void
-killallfiles(int check)
+static void
+kill_file_stack(pariFILE **s)
 {
-  if (check) popinfile(); /* look for leaks */
-  while (last_file)
+  pariFILE *f = *s;
+  while (f)
   {
-    pariFILE *f = last_file->prev;
-    pari_kill_file(last_file);
-    last_file = f;
+    pariFILE *t = f->prev;
+    pari_kill_file(f);
+    *s = f = t; /* have to update *s in case of ^C */
   }
+}
+
+void
+killallfiles(int leaving)
+{
+  if (leaving)
+  {
+    popinfile(); /* look for leaks */
+    kill_file_stack(&last_file);
+  }
+  kill_file_stack(&last_tmp_file);
   infile = stdin;
 }
 
@@ -2106,6 +2130,7 @@ try_pipe(char *cmd, int flag)
   if (_osmode == DOS_MODE) /* no pipes under DOS */
   {
     char *s;
+    if (flag & mf_OUT) err(archer);
     f = pari_unique_filename("pipe");
     s = gpmalloc(strlen(cmd)+strlen(f)+4);
     sprintf(s,"%s > %s",cmd,f);
@@ -2120,7 +2145,8 @@ try_pipe(char *cmd, int flag)
   else
 #  endif
   {
-    file = (FILE *) popen(cmd,"r");
+    file = (FILE *) popen(cmd, (flag & mf_OUT)? "w": "r");
+    if (flag & mf_OUT) flag |= mf_PERM;
     f = "";
   }
   if (!file) err(talker,"%s failed !",cmd);
@@ -2264,11 +2290,12 @@ gp_expand_path(char *v)
   }
 }
 
-/* name is a malloc'ed (existing) filename. Accept it (unzip if needed). */
+/* name is a malloc'ed (existing) filename. Accept it as new infile
+ * (unzip if needed). */
 static FILE *
 accept_file(char *name, FILE *file)
 {
-  if (! last_file)
+  if (! last_tmp_file)
   {  /* empty file stack, record this name */
     if (last_filename) free(last_filename);
     last_filename = pari_strdup(name);

@@ -162,6 +162,8 @@ enum { c_ERR, c_HIST, c_PROMPT, c_INPUT, c_OUTPUT, c_HELP, c_TIME, c_LAST };
 #define mf_IN    1
 #define mf_PIPE  2
 #define mf_FALSE 4
+#define mf_OUT   8
+#define mf_PERM 16
 
 /* for filtre */
 #define f_COMMENT  0

@@ -9,10 +9,6 @@
 /* Read lib/gpalias BEFORE gp prompts you for commands.
  * The file contains some standard abbreviations (correct the path first !) */
 
-\\ secure = 1
-/* Disable commands system() and extern(). These commands are dangerous
- * since they allow scripts to execute arbitrary Unix commands */
-
 \\ compatible = 0
 /* CAUTION: scripts written in the old (1.x) syntax WILL NOT WORK AS BEFORE.
  * If compatible>1, the OLD functions are the ONLY ONES known to gp, save
@@ -53,6 +49,9 @@ prompt = "(%R) \e[1mgp\e[m > "
  *  (concat "^([0-9][0-9]:[0-9][0-9]) gp > [\C-j\t ]*\\|" gp-prompt-pattern))
  */
 
+\\ use an alternate prettyprinter
+prettyprinter = "/usr/local/bin/tex2mail -TeX -noindent -ragged -by_par"
+
 \\ clear background:
 \\   #ifnot EMACS colors = "9, 5, no, no, 4, 1, 2"
 \\ dark background:
@@ -83,6 +82,10 @@ prompt = "(%R) \e[1mgp\e[m > "
 
 \\ Output for postscript-producing gp commands.
 \\ psfile = "~/tmp/pari.ps"
+
+\\ secure = 1
+/* Disable commands system() and extern(). These commands are dangerous
+ * since they allow scripts to execute arbitrary Unix commands */
 
 \\********************** FORMAT OF THIS FILE :    ***************************
 \\  Lines starting with '\\' and between '/*' '*/' pairs are comments

@@ -974,6 +974,7 @@ err(long numerr, ...)
       case warnfile:
         ch1=va_arg(ap, char*);
         pariputsf(" %s: %s", ch1, va_arg(ap, char*));
+        ret = 1; break;
     }
   }
   term_color(c_NONE); va_end(ap);

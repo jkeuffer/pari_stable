@@ -57,6 +57,8 @@ static GEN *hist;
 static char *help_prg,*path;
 static char prompt[MAX_PROMPT_LEN];
 static char thestring[256];
+static char *prettyprinter;
+static pariFILE *prettyprinter_file;
 static long prettyp, test_mode, quiet_mode, gpsilent, simplifyflag;
 static long chrono, pariecho, primelimit, parisize, strictmatch;
 static long tglobal, histsize, paribufsize, lim_lines;
@@ -133,6 +135,8 @@ gp_preinit(int force)
   tglobal = 0;
   bufstack = NULL;
   secure = test_mode = under_emacs = chrono = pariecho = 0;
+  prettyprinter = NULL;
+  prettyprinter_file = NULL;
   fmt.format = 'g'; fmt.field = 0;
 #ifdef LONG_IS_64BIT
   fmt.nb = 38;
@@ -227,6 +231,31 @@ gp_output(GEN x)
       case f_RAW      : brute(x, fmt.format, fmt.nb); break;
       case f_TEX      : texe(x, fmt.format, fmt.nb); break;
     }
+}
+
+/* initialise external prettyprinter (tex2mail) */
+static void
+prettyp_init()
+{
+  if (!prettyprinter_file)
+    prettyprinter_file = try_pipe(prettyprinter, mf_OUT);
+  pariflush();
+  pari_outfile = prettyprinter_file->file;
+  prettyp = f_TEX;
+}
+
+/* Wait for prettyprinter for finish, to prevent new prompt from overwriting
+ * the output.  Fill the output buffer, wait until it is read.
+ * Better than sleep(2): give possibility to print */
+static void
+prettyp_wait()
+{
+  char *s = "                                                     \n";
+  int i = 400;
+
+  pariputs("\n\n"); pariflush(); /* start translation */
+  while (--i) pariputs(s);
+  pariputs("\n"); pariflush();
 }
 
 /* print a sequence of (NULL terminated) GEN */
@@ -719,14 +748,17 @@ static GEN
 sd_psfile(char *v, int flag)
 { return sd_filename(v, flag, "psfile", &current_psfile); }
 
+static void
+err_secure(char *d, char *v)
+{ err(talker,"[secure mode]: can't modify '%s' default (to %s)",d,v); }
+
 static GEN
 sd_help(char *v, int flag)
 {
   char *str;
   if (*v)
   {
-    if (secure)
-      err(talker,"[secure mode]: can't modify 'help' default (to %s)",v);
+    if (secure) err_secure("help",v);
     if (help_prg) free(help_prg);
     help_prg = expand_tilde(v);
   }
@@ -750,6 +782,29 @@ sd_path(char *v, int flag)
   if (flag == d_RETURN) return strtoGENstr(path,0);
   if (flag == d_ACKNOWLEDGE)
     pariputsf("   path = \"%s\"\n",path);
+  return gnil;
+}
+
+static GEN
+sd_prettyprinter(char *v, int flag)
+{
+  if (*v)
+  {
+    char *old = prettyprinter;
+
+    if (secure) err_secure("prettyprinter",v);
+    if (old && strcmp(old,v) && prettyprinter_file)
+    {
+      pari_fclose(prettyprinter_file);
+      prettyprinter_file = NULL;
+    }
+    prettyprinter = pari_strdup(v);
+    if (old) free(old);
+    if (flag == d_INITRC) return gnil;
+  }
+  if (flag == d_RETURN) return strtoGEN(prettyprinter? prettyprinter: "");
+  if (flag == d_ACKNOWLEDGE)
+    pariputsf("   prettyprinter = \"%s\"\n",prettyprinter? prettyprinter: "");
   return gnil;
 }
 
@@ -788,6 +843,7 @@ default_type gp_default_list[] =
   {"parisize",(void*)sd_parisize},
   {"path",(void*)sd_path},
   {"primelimit",(void*)sd_primelimit},
+  {"prettyprinter",(void*)sd_prettyprinter},
   {"prompt",(void*)sd_prompt},
   {"psfile",(void*)sd_psfile},
   {"realprecision",(void*)sd_realprecision},
@@ -1088,6 +1144,7 @@ slash_commands(void)
 \\h {m-n}: hashtable information\n\
 \\l {f}  : enable/disable logfile (set logfile=f)\n\
 \\m {n}  : print result in prettymatrix format\n\
+\\o {n}  : change output method (0=raw, 1=prettymatrix, 2=prettyprint)\n\
 \\p {n}  : change real precision\n\
 \\ps{n}  : change series precision\n\
 \\q      : quit completely this GP session\n\
@@ -1584,6 +1641,7 @@ escape(char *tch)
       }
       sd_log(logfile?"0":"1",d_ACKNOWLEDGE);
       break;
+    case 'o': sd_output(s,d_ACKNOWLEDGE); break;
     case 'p':
       switch (*s)
       {
@@ -2149,20 +2207,44 @@ gp_main_loop(int ismain)
     hist[i] = z = gclone(z); avma = av;
     if (gpsilent) continue;
 
-    if (test_mode) { init80(0); gp_output(z); }
+    if (test_mode) { init80(0); gp_output(z); pariputc('\n'); }
     else
-    {
+    { /* save state */
+      int prettyprint = (prettyprinter && prettyp == f_PRETTY);
       PariOUT *old = pariOut;
+      FILE *o_out = pari_outfile;
+      int o_prettyp = prettyp;
+
       if (DEBUGLEVEL > 4) fprintferr("prec = [%ld, %ld]\n", prec,precdl);
-      term_color(c_HIST);
-      sprintf(thestring, "%%%ld = ",tglobal);
+      if (prettyprint) prettyp_init();
+
+      /* history number */
+      if (prettyprint)
+        sprintf(thestring, "\\%%%ld = ", tglobal);
+      else
+      {
+        term_color(c_HIST);
+        sprintf(thestring,   "%%%ld = ", tglobal);
+      }
       pariputs_opt(thestring);
-      term_color(c_OUTPUT);
-      init_lim_lines(thestring,lim_lines);
-      gp_output(z); pariOut=old;
+
+      /* output */
+      if (!prettyprint)
+      {
+        term_color(c_OUTPUT);
+        init_lim_lines(thestring,lim_lines);
+      }
+      gp_output(z);
+      if (prettyprint) prettyp_wait();
+
+      /* restore */
+      pariOut = old;
+      pari_outfile = o_out;
+      prettyp = o_prettyp;
       term_color(c_NONE);
+      if (!prettyprint) pariputc('\n');
     }
-    pariputc('\n'); pariflush();
+    pariflush();
   }
 }
 

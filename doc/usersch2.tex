@@ -390,6 +390,11 @@ GP will look for it in these directories, in the order they were written in
 \kbd{path}. Here, as usual, '.' means the current directory, and '$.\,.$' its
 immediate parent. Tilde expansion is performed.
 
+\subsecidxunix{prettyprinter} (default \kbd{""}) the name of an external
+prettyprinter to use instead of the default (ugly) one when \kbd{output}
+is~2 (\var{prettyprint}). {\bf This is experimental} (for the time being,
+coloring directives are not honoured when this default is used).
+
 \subsecidx{primelimit} (default \kbd{200k} on the Mac, and \kbd{500k}
 otherwise): GP precomputes a list of all primes less than \kbd{primelimit}
 at initialization time. These are used by many arithmetical functions. If

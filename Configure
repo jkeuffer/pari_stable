@@ -14,6 +14,7 @@ dflt_conf_file=dft.Config.in
 # Directories
 config_dir=config
 src_dir=src
+misc_dir=misc
 emacs_dir=emacs
 doc_dir=doc
 data_dir=data

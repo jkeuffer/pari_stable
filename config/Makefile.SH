@@ -8,6 +8,7 @@ rm -f $file
 
 # Path to directories
 case "$src_dir"    in /*) src=$src_dir ;;    *) src=../$src_dir ;; esac
+case "$misc_dir"   in /*) misc=$misc_dir ;;    *) misc=../$misc_dir ;; esac
 case "$data_dir"   in /*) data=$data_dir ;;  *) data=../$data_dir ;; esac
 case "$doc_dir"    in /*) doc=$doc_dir ;;    *) doc=../$doc_dir ;; esac
 case "$emacs_dir"  in /*) emx=$emacs_dir ;;  *) emx=../$emacs_dir ;; esac
@@ -288,6 +289,7 @@ install-man::
 	-\$(LN) gp.1 \$(MANDIR)/pari.1
 
 install-misc: $install_emacs_files
+	\$(INSTALL_PROGRAM) $misc/tex2mail \$(BINDIR)
 
 install-doc:
 	-mkdir -p \$(MISCDIR)
