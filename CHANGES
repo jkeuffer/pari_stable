@@ -118,6 +118,8 @@ GH 36- lngamma was not even continuous : its argument was reduced mod 2Pi
    41- Pol(Ser(1+x)) != 1+x  [ bitmask not cleared properly in gconvsp() ]
    42- default(datadir,"...") --> SEGV [ attempt to free a static string ]
    43- Configure was missing log2/exp2 on systems that had it
+   44- typo in base2.c:init_norm() [ wrong result in idealprimedec for huge 
+       fields ]
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.

@@ -2010,16 +2010,16 @@ init_norm(norm_S *S, GEN nf, GEN p)
   }
   if (!S->M)
   {
-    GEN a, D, Dp, w = Q_remove_denom((GEN)nf[7], &D);
+    GEN a, D, Dp, w = Q_remove_denom((GEN)nf[7], &D), q = sqri(p);
     long i;
     if (D)
     {
       long v = pvaluation(D, p, &a);
       D = gpowgs(p, v);
-      Dp = mulii(D, p);
+      Dp = mulii(D, q);
     } else {
       w = dummycopy(w);
-      Dp = p;
+      Dp = q;
     }
     for (i=1; i<=N; i++) w[i] = (long)FpX_red((GEN)w[i], Dp);
     S->D = D;
