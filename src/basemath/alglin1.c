@@ -149,6 +149,8 @@ vconcat(GEN A, GEN B)
   long la,ha,hb,hc,i,j;
   GEN M,a,b,c;
 
+  if (!A) return B;
+  if (!B) return A;
   la = lg(A); if (la==1) return A;
   ha = lg(A[1]); M = cgetg(la,t_MAT);
   hb = lg(B[1]); hc = ha+hb-1;
@@ -668,7 +670,8 @@ GEN
 zeromat(long m, long n)
 {
   GEN y = cgetg(n+1,t_MAT);
-  long i; for (i=1; i<=n; i++) y[i]=(long)zerocol(m);
+  GEN v = zerocol(m);
+  long i; for (i=1; i<=n; i++) y[i]=(long)v;
   return y;
 }
 
