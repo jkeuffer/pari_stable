@@ -72,6 +72,8 @@ static int did_init_matched = 0;
 #  define RESTORE_PROMPT() rl_restore_prompt()
 #else
 #  ifdef HAS_UNDERSCORE_RL_SAVE_PROMPT
+extern void* _rl_restore_prompt(void);
+extern void* _rl_save_prompt(void);
 #    define SAVE_PROMPT() _rl_save_prompt()
 #    define RESTORE_PROMPT() _rl_restore_prompt()
 #  else
