@@ -794,10 +794,10 @@ create it on the stack but stash it for later use under the global
 name \teb{gpi} (with no parentheses), use instead $\teb{constpi}(\var{prec})$.
 
 \subsecidx{abs}$(x)$: absolute value of $x$ (modulus if $x$ is complex).
-Power series and rational functions are not allowed.
-Contrary to most transcendental functions, an integer is \var{not}
-converted to a real number before applying \kbd{abs}.
-If $x$ is a polynomial, returns $-x$ if the leading coefficient is a negative real number (including integer and rational) else returns $x$.
+Power series and rational functions are not allowed. Contrary to most
+transcendental functions, an integer is \var{not} converted to a real
+number before applying \kbd{abs}. If $x$ is a polynomial, returns $-x$ if
+the leading coefficient is real and negative else returns $x$.
 
 \syn{gabs}{x,\var{prec}}.
 
