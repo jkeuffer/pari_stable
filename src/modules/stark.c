@@ -1584,74 +1584,84 @@ InitPrimes(GEN bnr, long nmax, LISTray *R)
   }
 }
 
-static GEN
-get_limx(long r1, long r2, long prec, GEN *pteps)
+/* x^(s/2), assume x t_REAL */
+GEN
+powrshalf(GEN x, long s)
 {
-  GEN eps, p1, a, c0, A0, limx;
-  long r, N;
+  if (s & 1) return mpsqrt(gpowgs(x, s));
+  return gpowgs(x, s>>1);
+}
+/* x^(n/d), assume x t_REAL, return t_REAL */
+GEN
+powrfrac(GEN x, long n, long d)
+{
+  long z;
+  if (!n) return realun(lg(x));
+  z = cgcd(n, d); if (z > 1) { n /= z; d /= z; }
+  if (d == 1) return gpowgs(x, n);
+  x = gpowgs(x, n);
+  if (d == 2) return mpsqrt(x);
+  return mpsqrtn(x, d);
+}
 
-  N = r1 + 2*r2; r = r1 + r2;
-  a = gmulgs(gpow(gdeux, gdiv(stoi(-2*r2), stoi(N)), DEFAULTPREC), N);
+/* N_0 = floor( C_K / limx ) */
+static GEN
+get_limx(long r1, long r2, long bit)
+{
+  pari_sp av = avma;
+  GEN p1, p2, c0, c1, A0;
+  long r = r1 + r2, N = r + r2;
 
-  eps = real2n(-bit_accuracy(prec), DEFAULTPREC);
-  c0 = gpowgs(mpsqrt(Pi2n(1, DEFAULTPREC)), r-1);
-  c0 = gdivgs(gmul2n(c0,1), N);
-  c0 = gmul(c0, gpow(gdeux, gdiv(stoi(r1 * (r2-1)), stoi(2*N)),
-		     DEFAULTPREC));
+  /* c1 = N 2^(-2r2 / N) */
+  c1 = mulrs(powrfrac(real2n(1, DEFAULTPREC), -2*r2, N), N);
 
-  A0 = glog(gdiv(gmul2n(c0,1), eps), DEFAULTPREC);
-
-  limx = gpow(gdiv(a, A0), gdiv(stoi(N), gdeux), DEFAULTPREC);
-  p1   = gsub(glog(A0, DEFAULTPREC), glog(a, DEFAULTPREC));
-  p1   = gmulgs(p1, N*(r+1));
-  p1   = gdiv(p1, gaddgs(gmul2n(A0, 2), 2*(r+1)));
-
-  if (pteps) *pteps = eps;
-  return gmul(limx, gaddgs(p1, 1));
+  c0 = gpowgs(Pi2n(1, DEFAULTPREC), r-1);
+  c0 = gmul(c0, powrfrac(real2n(1, DEFAULTPREC), r1 * (r2-1), N));
+  c0 = mpsqrt( divrs( gmul2n(c0, 3), N*N) );
+ 
+  A0 = mplog( gmul2n(c0, bit) );
+  p2 = gdiv(A0, c1);
+  p1 = divrr(mulsr(N*(r+1), mplog(p2)), addsr(2*(r+1), gmul2n(A0,2)));
+  return gerepileuptoleaf(av, divrr(addrs(p1, 1), powrshalf(p2, N)));
 }
 
 static long
 GetBoundN0(GEN C,  long r1, long r2,  long prec)
 {
   pari_sp av = avma;
-  GEN limx = get_limx(r1, r2, prec, NULL);
+  GEN limx = get_limx(r1, r2, bit_accuracy(prec));
 
   limx = gfloor(gdiv(C, limx));
   if (is_bigint(limx))
-    err(talker, "Too many coefficients (%Z) needed in GetST: computation impossible", limx);
-
+    err(talker, "need %Z coefficients in GetST: computation impossible", limx);
   avma = av; return itos(limx);
 }
 
-static long
-GetBoundi0(long r1, long r2,  long prec)
+long
+zeta_get_imax(long r1, long r2, GEN B, GEN limx)
 {
-  long imin, i0, itest;
-  pari_sp av = avma;
-  GEN ftest, borneps, eps, limx = get_limx(r1, r2, prec, &eps);
-
-  borneps = gmul(gmul2n(gun, r2), gpowgs(mpsqrt(mppi(DEFAULTPREC)), r2-3));
-  borneps = gdiv(gmul(borneps, gpowgs(stoi(5), r1)), eps);
-  borneps = gdiv(borneps, gsqrt(limx, DEFAULTPREC));
-
-  imin = 1;
-  i0   = 1400;
-  while(i0 - imin >= 4)
+  long imin = 1, imax   = 1400;
+  while(imax - imin >= 4)
   {
-    itest = (i0 + imin) >> 1;
-
-    ftest = gpowgs(limx, itest);
-    ftest = gmul(ftest, gpowgs(mpfactr(itest/2, DEFAULTPREC), r1));
-    ftest = gmul(ftest, gpowgs(mpfactr(itest  , DEFAULTPREC), r2));
-
-    if (gcmp(ftest, borneps) >= 0)
-      i0 = itest;
-    else
-      imin = itest;
+    long i = (imax + imin) >> 1;
+    GEN t = gpowgs(limx, i);
+    t = gmul(t, gpowgs(mpfactr(i/2, DEFAULTPREC), r1));
+    t = gmul(t, gpowgs(mpfactr(i  , DEFAULTPREC), r2));
+    if (gcmp(t, B) >= 0) imax = i; else imin = i;
   }
-  avma = av;
+  return imax & ~1; /* make it even */
+}
 
-  return i0 &= ~1; /* make it even */
+static long
+GetBoundi0(long r1, long r2,  long bit)
+{
+  pari_sp av = avma;
+  GEN B, limx = get_limx(r1, r2, bit);
+  long imax;
+  B = mpsqrt( gdiv(gpowgs(mppi(DEFAULTPREC), r2-3), limx) );
+  B = gmul(B, gmul2n(gpowgs(stoi(5), r1), bit + r2));
+  imax = zeta_get_imax(r1, r2, B, limx);
+  avma = av; return imax;
 }
 
 static GEN /* cf polcoeff */
@@ -1952,7 +1962,7 @@ GetST(GEN dataCR, GEN vChar, long prec)
   }
   if ((ulong)nmax > maxprime())
     err(talker, "Not enough precomputed primes (need all p <= %ld)", nmax);
-  i0 = GetBoundi0(r1, r2, prec);
+  i0 = GetBoundi0(r1, r2, bit_accuracy(prec));
 
   if (DEBUGLEVEL>1) fprintferr("nmax = %ld, i0 = %ld\n", nmax, i0);
   InitPrimes(gmael(dataCR,1,4), nmax, &LIST);
@@ -2714,7 +2724,7 @@ LABDOUB:
       FreeMat(matan, n);
     }
 
-    p1 = gmul2n(gpowgs(mpsqrt(mppi(newprec)), N - 2), 1);
+    p1 = gmul2n(powrshalf(mppi(newprec), N - 2), 1);
 
     Lp = cgetg(cl+1, t_VEC);
     for (i = 1; i <= cl; i++)

@@ -23,6 +23,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 int new_galois_format = 0;
 
+extern long zeta_get_imax(long r1, long r2, GEN B, GEN limx);
+extern GEN powrshalf(GEN x, long s);
+extern GEN powrfrac(GEN x, long n, long d);
 extern GEN split_realimag(GEN x, long r1, long r2);
 extern GEN R_from_QR(GEN x, long prec);
 extern GEN to_polmod(GEN x, GEN mod);
@@ -2219,76 +2222,72 @@ dirzetak(GEN nf, GEN b)
   free(c); return z;
 }
 
+static GEN
+Limx(long r1,long r2,long bit)
+{
+  pari_sp av = avma;
+  GEN p1, p2, c0, c1, A0;
+  long r = r1 + r2, N = r + r2;
+
+  /* c1 = N 2^(-2r2 / N) */
+  c1 = mulrs(powrfrac(real2n(1, DEFAULTPREC), -2*r2, N), N);
+
+  p1 = gpowgs(Pi2n(1, DEFAULTPREC), r - 1);
+  p2 = gmul2n(mpmul(gpowgs(stoi(N),r), p1), -r2);
+  c0 = mpsqrt( divrr(p2, gpowgs(c1, r+1)) );
+
+  A0 = mplog( gmul2n(c0, bit) );
+  p2 = gdiv(A0, c1);
+  p1 = divrr(mulsr(N*(r+1), mplog(p2)), addsr(2*(r+1), gmul2n(A0,2)));
+  return gerepileuptoleaf(av, divrr(addrs(p1, 1), powrshalf(p2, N)));
+}
 GEN
 initzeta(GEN pol, long prec)
 {
-  GEN nfz,nf,alpha,beta,mu,gr1,gr2,gru,p1,p2,cst,A0,c0,c1,c2,eps,coef;
+  GEN nfz, nf, gr1, gr2, gru, p1, p2, cst, coef;
   GEN limx,bnf,resi,zet,C,coeflog,racpi,aij,tabj,colzero, *tabcstn, *tabcstni;
-  GEN c_even,ck_even,c_odd,ck_odd,serie_even,serie_odd,serie_exp,Pi;
-  long N0,imin,imax,r1,r2,ru,R,N,i,j,k,n;
-  pari_sp av,av2,tetpil;
+  GEN c_even, ck_even, c_odd, ck_odd, serie_even, serie_odd, serie_exp, Pi;
+  long N0, imax, r1, r2, r, R, N, i, j, k, n, bit = bit_accuracy(prec) + 6;
+
+  pari_sp av, av2;
   long court[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3),0};
   stackzone *zone, *zone0, *zone1;
 
-  /*************** Calcul du residu et des constantes ***************/
-  eps=gmul2n(gun,-bit_accuracy(prec)-6); p1=dbltor(0.5);
-  nfz=cgetg(10,t_VEC);
+  /*************** residue & constants ***************/
+  nfz = cgetg(10,t_VEC);
   bnf = bnfinit0(pol,2,NULL,prec+1); prec=(prec<<1)-1;
   bnf = checkbnf_discard(bnf);
-  Pi = mppi(prec); racpi=gsqrt(Pi,prec);
+  Pi = mppi(prec); racpi = mpsqrt(Pi);
 
-  /* Nb de classes et regulateur */
-  nf=(GEN)bnf[7]; N=degpol(nf[1]);
-  r1 = nf_get_r1(nf); r2 = (N-r1)>>1;
-  gr1=gmael(nf,2,1); gr2=gmael(nf,2,2);
-  ru=r1+r2; R=ru+2;
-  av=avma; p1=(GEN)bnf[8]; p2 = gmul(gmul2n(gmael(p1,1,1),r1), (GEN)p1[2]);
-  tetpil = avma; resi=gerepile(av,tetpil,gdiv(p2, gmael(p1,4,1)));
+  /* class number & regulator */
+  nf = (GEN)bnf[7]; N = degpol(nf[1]);
+  nf_get_sign(nf, &r1, &r2);
+  gr1 = gmael(nf,2,1); gr2 = gmael(nf,2,2);
+  r = r1 + r2; R = r+2;
+  av = avma; p1 = (GEN)bnf[8]; p2 = gmul(gmul2n(gmael(p1,1,1),r1), (GEN)p1[2]);
+  resi = gerepileupto(av, gdiv(p2, gmael(p1,4,1)));
 
-  /* Calcul de N0 */
-  cst = cgetr(prec); av = avma;
-  mu = gadd(gmul2n(gr1,-1),gr2);
-  alpha = gmul2n(stoi(ru+1),-1);
-  beta = gpui(gdeux,gmul2n(gr1,-1),DEFAULTPREC);
-  A0 = gmul2n(gpowgs(mu,R),r1);
-  A0 = gmul(A0,gpowgs(gmul2n(Pi,1),1-ru));
-  A0 = gsqrt(A0,DEFAULTPREC);
+  av = avma;
+  p1 = gsqrt(absi((GEN)nf[3]), prec);
+  p2 = gmul2n(gpowgs(racpi,N), r2);
+  cst = gerepileuptoleaf(av, divrr(p1,p2));
 
-  c1 = gmul(mu,gpui(beta,ginv(mu),DEFAULTPREC));
-  c0 = gdiv(gmul(A0,gpowgs(gmul2n(Pi,1),ru-1)),mu);
-  c0 = gmul(c0,gpui(c1,gneg_i(alpha),DEFAULTPREC));
-  c2 = gdiv(alpha,mu);
-
-  p1 = glog(gdiv(c0,eps),DEFAULTPREC);
-  limx = gdiv(gsub(glog(p1,DEFAULTPREC),glog(c1,DEFAULTPREC)),
-              gadd(c2,gdiv(p1,mu)));
-  limx = gmul(gpui(gdiv(c1,p1),mu,DEFAULTPREC),
-              gadd(gun,gmul(alpha,limx)));
-  p1 = gsqrt(absi((GEN)nf[3]),prec);
-  p2 = gmul2n(gpowgs(racpi,N),r2);
-  gaffect(gdiv(p1,p2), cst);
+  /* N0 */
+  limx = Limx(r1,r2,bit);
 
   av = avma; p1 = gfloor(gdiv(cst,limx)); N0 = p1[2];
   if (is_bigint(p1) || N0 > 10000000)
     err(talker,"discriminant too large for initzeta, sorry");
-  if (DEBUGLEVEL>=2)
-    { fprintferr("\ninitzeta:\nN0 = %ld\n",N0); flusherr(); (void)timer2(); }
+  if (DEBUGLEVEL>1)
+    { fprintferr("\ninitzeta:\nN0 = %ld\n",N0); (void)timer2(); }
 
-  /* Calcul de imax */
+  /* imax */
+  p1 = mpsqrt( gdiv(gpowgs(mppi(DEFAULTPREC), r2-3), limx) );
+  p1 = gmul(p1, gmul2n(gpowgs(stoi(5), r1), bit + r2 + 4));
+  imax = zeta_get_imax(r1, r2, p1, limx);
+  avma = av;
 
-  imin=1; imax=1400;
-  p1 = gmul(gpowgs(gmul2n(racpi,1),r2),gpowgs(stoi(5),r1));
-  p1 = gdiv(p1,gmul(gmul(gsqrt(limx,DEFAULTPREC),gmul2n(eps,4)),
-                         gpowgs(racpi,3)));
-  while (imax-imin >= 4)
-  {
-    long itest = (imax+imin)>>1;
-    p2 = gmul(gpowgs(mpfactr(itest,DEFAULTPREC),r2),gpowgs(limx,itest));
-    p2 = gmul(p2,gpowgs(mpfactr(itest/2,DEFAULTPREC),r1));
-    if (gcmp(p2,p1) >= 0) imax=itest; else imin=itest;
-  }
-  imax -= (imax & 1); avma = av;
-  if (DEBUGLEVEL>=2) { fprintferr("imax = %ld\n",imax); flusherr(); }
+  if (DEBUGLEVEL>1) { fprintferr("imax = %ld\n",imax); flusherr(); }
   /* Tableau des i/cst (i=1 a N0) */
 
   i = prec*N0;
@@ -2305,7 +2304,7 @@ initzeta(GEN pol, long prec)
   /********** compute coefficients a(i,j), independent from s **********/
 
   zet=cgetg(R,t_VEC); zet[1] = lmpeuler(prec);
-  for (i=2; i<R; i++) zet[i] = (long)gzeta(stoi(i),prec);
+  for (i=2; i<R; i++) zet[i] = (long)szeta(i, prec);
 
   aij=cgetg(imax+1,t_VEC);
   for (i=1; i<=imax; i++) aij[i] = lgetg(R,t_VEC);
@@ -2313,32 +2312,32 @@ initzeta(GEN pol, long prec)
   c_even = realun(prec);
   c_even = gmul2n(c_even,r1);
   c_odd = gmul(c_even,gpowgs(racpi,r1));
-  if (ru&1) c_odd=gneg_i(c_odd);
+  if (r&1) c_odd=gneg_i(c_odd);
   ck_even=cgetg(R,t_VEC); ck_odd=cgetg(r2+2,t_VEC);
   for (k=1; k<R; k++)
   {
     ck_even[k]=lmul((GEN)zet[k],gadd(gr2,gmul2n(gr1,-k)));
     if (k&1) ck_even[k]=lneg((GEN)ck_even[k]);
   }
-  gru=stoi(ru);
+  gru=stoi(r);
   for (k=1; k<=r2+1; k++)
   {
     ck_odd[k]=lmul((GEN)zet[k], gsub(gru, gmul2n(gr1,-k)));
     if (k&1) ck_odd[k]=lneg((GEN)ck_odd[k]);
     ck_odd[k]=ladd(gru,(GEN)ck_odd[k]);
   }
-  ck_odd[1]=lsub((GEN)ck_odd[1],gmul(gr1,mplog2(prec)));
-  serie_even =cgetg(ru+3,t_SER); serie_odd=cgetg(r2+3,t_SER);
+  ck_odd[1]=lsub((GEN)ck_odd[1], mulsr(r1, mplog2(prec)));
+  serie_even =cgetg(r+3,t_SER); serie_odd=cgetg(r2+3,t_SER);
   serie_even[1] = serie_odd[1] = evalsigne(1)+evalvalp(1);
   i=0;
 
-  while (i<imax/2)
+  while (i < imax/2)
   {
     for (k=1; k<R; k++)
       serie_even[k+1]=ldivgs((GEN)ck_even[k],k);
     serie_exp=gmul(c_even,gexp(serie_even,0));
     p1=(GEN)aij[2*i+1];
-    for (j=1; j<R; j++) p1[j]=serie_exp[ru+3-j];
+    for (j=1; j<R; j++) p1[j]=serie_exp[r+3-j];
 
     for (k=1; k<=r2+1; k++)
       serie_odd[k+1]=ldivgs((GEN)ck_odd[k],k);
@@ -2348,8 +2347,8 @@ initzeta(GEN pol, long prec)
     for (   ; j<R; j++) p1[j]=zero;
     i++;
 
-    c_even = gdiv(c_even,gmul(gpowgs(stoi(i),ru),gpowgs(stoi(2*i-1),r2)));
-    c_odd  = gdiv(c_odd, gmul(gpowgs(stoi(i),r2),gpowgs(stoi(2*i+1),ru)));
+    c_even = gdiv(c_even,gmul(gpowgs(stoi(i),r),gpowgs(stoi(2*i-1),r2)));
+    c_odd  = gdiv(c_odd, gmul(gpowgs(stoi(i),r2),gpowgs(stoi(2*i+1),r)));
     c_even = gmul2n(c_even,-r2);
     c_odd  = gmul2n(c_odd,r1-r2);
     if (r1&1) { c_even=gneg_i(c_even); c_odd=gneg_i(c_odd); }
@@ -2379,15 +2378,15 @@ initzeta(GEN pol, long prec)
   /************* Calcul du nombre d'ideaux de norme donnee *************/
   coef = dirzetak0(nf,N0); tabj = cgetg(N0+1,t_MAT);
   if (DEBUGLEVEL>=2) msgtimer("coef");
-  colzero = zerocol(ru+1);
+  colzero = zerocol(r+1);
   for (i=1; i<=N0; i++)
     if (coef[i])
     {
-      GEN t = cgetg(ru+2,t_COL);
+      GEN t = cgetg(r+2,t_COL);
       p1 = mplog((GEN)tabcstn[i]); setsigne(p1, -signe(p1));
       t[1] = lstoi(coef[i]);
       t[2] = lmul((GEN)t[1],p1);
-      for (j=2; j<=ru; j++)
+      for (j=2; j<=r; j++)
       {
         pari_sp av2 = avma;
         p2 = gmul((GEN)t[j], p1);
@@ -2417,21 +2416,20 @@ initzeta(GEN pol, long prec)
 
   /******************** Calcul des coefficients Cik ********************/
 
-  C = cgetg(ru+1,t_MAT);
-  for (k=1; k<=ru; k++) C[k] = lgetg(imax+1,t_COL);
+  C = cgetg(r+1,t_MAT);
+  for (k=1; k<=r; k++) C[k] = lgetg(imax+1,t_COL);
   av2 = avma;
   for (i=1; i<=imax; i++)
   {
     stackzone *z;
-    for (k=1; k<=ru; k++)
+    for (k=1; k<=r; k++)
     {
       p1 = NULL;
       for (n=1; n<=N0; n++)
         if (coef[n])
-          for (j=1; j<=ru-k+1; j++)
+          for (j=1; j<=r-k+1; j++)
           {
-            p2 = gmul(tabcstni[n],
-                      gmul(gmael(aij,i,j+k), gmael(tabj,n,j)));
+            p2 = gmul(tabcstni[n], gmul(gmael(aij,i,j+k), gmael(tabj,n,j)));
             p1 = p1? gadd(p1,p2): p2;
           }
       coeff(C,i,k) = p1? (long)gerepileupto(av2,p1): zero;
