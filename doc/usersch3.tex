@@ -3141,7 +3141,7 @@ relatively small ($p < 2^31$).
 
 \subsecidx{galoisfixedfield}$(\var{gal},\var{perm},\{p\})$: \var{gal} 
 being be a Galois field as output by galoisinit and \var{perm} an
- element of $\var{gal}.group$ or a vector of such elements, compute the
+ element of $\var{gal}.group$ or a vector of such elements, computes the
  fixed field of \var{gal} by the automorphims defined by the
  permutations \var{perm} of the roots $\var{gal}.roots$.
 
@@ -3157,7 +3157,7 @@ being be a Galois field as output by galoisinit and \var{perm} an
 
 \syn{galoisfixedfield}{\var{gal},\var{perm},p}.
 
-\subsecidx{galoisinit}$(\var{pol},\{den\})$: Compute the Galois group
+\subsecidx{galoisinit}$(\var{pol},\{den\})$: Computes the Galois group
 and all neccessary informations for computing the fixed fields of the
 Galois extension $K/\Q$ where $K$ is the number field defined by
 $\var{pol}$ which can be a monic irreducible polynomial in $\Z[X]$ or
@@ -3168,35 +3168,35 @@ super-solvable (see \kbd{nfgaloisconj})
 
 \misctitle{Warning:} The interface of this function is experimental,
 so the described output can be subject to important changes in the
-near future. However the function itself should works as
-described. For any remarks about improving this interface , please
-mail allomber@math.u-bordeaux.fr.
+near future. However the function itself should works as described. For any
+remarks about improving this interface, please mail
+allomber@math.u-bordeaux.fr.
 
 The output is an 8-component vector \var{gal}.
 
- $\var{gal\/}[1]$ contains the polynomial \var{pol}
+ $\var{gal}[1]$ contains the polynomial \var{pol}
  (\kbd{\var{gal}.pol}).
 
- $\var{gal\/}[2]$ contains a prime number $p$ such that \var{pol}
+ $\var{gal}[2]$ contains a prime number $p$ such that \var{pol}
  totally split modulo $p$ (\kbd{\var{gal}.p}).
 
- $\var{gal\/}[3]$ is a vector $L$ containing the $p$-adic roots of
+ $\var{gal}[3]$ is a vector $L$ containing the $p$-adic roots of
  \var{pol} (as an \typ{INTMOD} and not a \typ{PADIC})
  (\kbd{\var{gal}.roots}).
 
- $\var{gal\/}[4]$ is the inverse of the Van der Monde matrix of the
- $p$-adic roots of \var{pol}, multiplied by $\var{gal\/}[5]$.
+ $\var{gal}[4]$ is the inverse of the Van der Monde matrix of the
+ $p$-adic roots of \var{pol}, multiplied by $\var{gal}[5]$.
 
- $\var{gal\/}[5]$ is a multiple of the least common denominator of the
+ $\var{gal}[5]$ is a multiple of the least common denominator of the
  automorphisms expressed as polynomial in a root of \var{pol}.
 
- $\var{gal\/}[6]$ is the Galois group $G$ expressed as a vector of
+ $\var{gal}[6]$ is the Galois group $G$ expressed as a vector of
  permutations of $L$ (\kbd{\var{gal}.group}).
 
- $\var{gal\/}[7]$ is a generating subset $S=[s_1,\ldots,s_g]$ of $G$
+ $\var{gal}[7]$ is a generating subset $S=[s_1,\ldots,s_g]$ of $G$
  expressed as a vector of permutations of $L$ (\kbd{\var{gal}.gen}).
 
- $\var{gal\/}[8]$ contains the relative orders $[o_1,\ldots,o_g]$ of
+ $\var{gal}[8]$ contains the relative orders $[o_1,\ldots,o_g]$ of
  the generators of $S$ (\kbd{\var{gal}.orders}).
 
 We have the following properties:
@@ -3231,7 +3231,7 @@ $[e_1,\ldots,e_g]$ such that (no exceptions):
 In this implementation the $o_i$ are prime powers. It can be relaxed
 in the future.
 
-If present $den$ must be a suitable value for $\var{gal\/}[5]$.
+If present $den$ must be a suitable value for $\var{gal}[5]$.
 
 \syn{galoisinit}{\var{gal},\var{den}}.
 
