@@ -3066,7 +3066,7 @@ LABDOUB:
 /* compute the polynomial over Q of the Hilbert class field of
    Q(sqrt(D)) where D is a positive fundamental discriminant */
 GEN
-quadhilbertreal(GEN D,  long prec)
+quadhilbertreal(GEN D, GEN flag, long prec)
 {
   long av = avma, cl, newprec;
   GEN pol, bnf, bnr, dataC, bnrh, nf, exp;
@@ -3102,7 +3102,10 @@ quadhilbertreal(GEN D,  long prec)
 
   bnr   = buchrayinitgen(bnf, gun, prec);
   dataC = InitQuotient(bnr, gzero);
-  bnrh  = FindModulus(dataC, 1, &newprec, prec, 0);
+  if (gcmp0(flag)) 
+    bnrh  = FindModulus(dataC, 1, &newprec, prec, 0);
+  else
+    bnrh  = FindModulus(dataC, 1, &newprec, prec, -10);
 
   if (DEBUGLEVEL) msgtimer("FindModulus");
 

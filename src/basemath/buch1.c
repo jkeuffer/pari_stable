@@ -256,7 +256,7 @@ quadhilbertimag(GEN D, GEN flag)
   return gerepileupto(av,P);
 }
 
-GEN quadhilbertreal(GEN D, long prec);
+GEN quadhilbertreal(GEN D, GEN flag, long prec);
 
 GEN
 quadhilbert(GEN D, GEN flag, long prec)
@@ -274,7 +274,7 @@ quadhilbert(GEN D, GEN flag, long prec)
     if (!isfundamental(D))
       err(talker,"quadhilbert needs a fundamental discriminant");
   }
-  return (signe(D)>0)? quadhilbertreal(D,prec)
+  return (signe(D)>0)? quadhilbertreal(D,flag,prec)
                      : quadhilbertimag(D,flag);
 }
 
