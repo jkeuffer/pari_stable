@@ -988,7 +988,7 @@ gabs(GEN x, long prec)
       return gerepile(l,tetpil,gsqrt(p1,prec));
 
     case t_QUAD:
-      l=avma; p1=cgetr(prec); affsr(1,p1); p1=gmul(x,p1); tetpil=avma;
+      l=avma; p1=gmul(x, realun(prec)); tetpil=avma;
       return gerepile(l,tetpil,gabs(p1,prec));
 
     case t_POL:

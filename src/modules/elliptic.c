@@ -2017,10 +2017,10 @@ hell(GEN e, GEN a, long prec)
 static GEN
 hells(GEN e, GEN x, long prec)
 {
-  GEN w,z,t,mu,e72,e82,unreel = cgetr(prec);
+  GEN w,z,t,mu,e72,e82;
   long n,lim;
 
-  affsr(1,unreel); t = gdiv(unreel,(GEN)x[1]);
+  t = gdiv(realun(prec),(GEN)x[1]);
   mu = gmul2n(glog(numer((GEN)x[1]),prec),-1);
   e72 = gmul2n((GEN)e[7],1);
   e82 = gmul2n((GEN)e[8],1);

@@ -758,7 +758,7 @@ lllgramintern(GEN x, long alpha, long flag, long prec)
   if (k == 2)
   {
     if (!prec) return lllgramint(x);
-    affsr(1,q=cgetr(prec+1)); x=gmul(x,q);
+    x = gmul(x, realun(prec+1));
   }
   else if (prec < k) prec = k;
   h = idmat(n); 
@@ -1035,9 +1035,9 @@ lllgram1(GEN x, long prec)
   cst=gdivgs(stoi(99),100); /* LLL proposent 0.75 */
   if (prec)
   {
-    affsr(1,unreel=cgetr(prec+1));
-    x=gmul(x,unreel);
-    cst=gmul(cst,unreel);
+    unreel = realun(prec+1);
+    x = gmul(x,unreel);
+    cst = gmul(cst,unreel);
   }
   av=avma; lim=stack_lim(av,1);
   mu=gtrans(sqred(x)); B=cgetg(lx,t_COL);
@@ -1431,7 +1431,7 @@ lindep(GEN x, long prec)
 
   if (! is_vec_t(tx)) err(typeer,"lindep");
   if (lx<=2) return cgetg(1,t_VEC);
-  r = cgetr(prec); affsr(1, r); x = gmul(x, r);
+  x = gmul(x, realun(prec));
   re=greal(x); im=gimag(x);
   if (lx == 3)
   { /* independant over R ? */
@@ -2323,7 +2323,7 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
     err(talker,"not a definite form in minim00");
 
   n--;
-  p1=cgetr(DEFAULTPREC); affsr(1,p1); a=gmul(a,p1); r=sqred1(a);
+  a = gmul(a, realun(DEFAULTPREC)); r = sqred1(a);
   if (DEBUGLEVEL>4) { fprintferr("minim: r = "); outerr(r); }
   for (j=1; j<=n; j++)
   {
@@ -2529,7 +2529,7 @@ smallvectors(GEN a, GEN BORNE, GEN STOCKMAX, long flag, long prec,
   if (q == NULL) { avma=av; return NULL; }
   if (DEBUGLEVEL>5) fprintferr("q = %Z",q);
   epsbit = bit_accuracy(prec) >> 1;
-  eps=cgetr(prec); affsr(1,eps); setexpo(eps,-epsbit);
+  eps=realun(prec); setexpo(eps,-epsbit);
   alpha = dbltor(0.95);
   normax1=gzero;
   borne1=gadd(BORNE,eps);
@@ -2722,7 +2722,7 @@ fincke_pohst(GEN a,GEN bound,GEN stockmax,long flag, long prec,
   if (DEBUGLEVEL>2) { fprintferr("entering fincke_pohst\n"); flusherr(); }
   if (typ(a) == t_VEC) { nf = a; a = gmael(nf,5,3); } else nf = NULL;
   pr = gprecision(a);
-  if (pr) prec = pr; else {GEN unr=cgetr(prec); affsr(1,unr); a=gmul(a,unr);}
+  if (pr) prec = pr; else a = gmul(a,realun(prec));
   if (DEBUGLEVEL>2) fprintferr("first LLL: prec = %ld\n", prec);
   v1 = lllgramintern(a,4,flag&1, (prec<<1)-2);
   if (v1 == NULL) goto PRECPB;

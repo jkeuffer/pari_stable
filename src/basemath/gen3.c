@@ -1627,8 +1627,8 @@ ground(GEN x)
       long ex, s = signe(x);
       if (s==0 || (ex=expo(x)) < -1) return gzero;
       if (ex < 0) return s>0? gun: negi(gun);
-      av=avma; p1 = cgetr(3 + (ex>>TWOPOTBITS_IN_LONG));
-      affsr(1,p1); setexpo(p1,-1); /* p1 = 0.5 */
+      av=avma; p1 = realun(3 + (ex>>TWOPOTBITS_IN_LONG));
+      setexpo(p1,-1); /* p1 = 0.5 */
       p1 = addrr(x,p1); tetpil = avma;
       return gerepile(av,tetpil,mpent(p1));
     }

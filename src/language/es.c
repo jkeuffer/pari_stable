@@ -566,33 +566,35 @@ GENtostr(GEN x) { return GENtostr0(x,outbrute); }
 /********************************************************************/
 extern jmp_buf environnement;
 #include "TeXmacs.h"
+static TeXmacs_exports_1 *TeXmacs;
 
 static char *
 pari_evaluate(char *s, char *session, char **fail)
 {
-  PariOUT *tmp = pariErr;
+  static PariOUT *tmp;
+  static outString *tmps;
+  outString newStr;
   long av = avma;
   char *t;
-  outString *tmps = ErrStr, newStr;
 
-  pariErr = &pariErr2Str; ErrStr = &newStr;
+  tmp = pariErr; pariErr = &pariErr2Str;
+  tmps = ErrStr; ErrStr  = &newStr;
   ErrStr->len = 0; ErrStr->size=0; ErrStr->string=NULL;
-  if (setjmp(environnement))
+  if (setjmp(environnement)) t = NULL;
+  else
   {
-    if (ErrStr->string) ErrStr->string[ErrStr->len] = 0;
-    *fail = ErrStr->string;
-    return NULL;
+    t = GENtostr(flisexpr(s));
+    avma = av;
   }
-  t = GENtostr(flisexpr(s));
   if (ErrStr->string) ErrStr->string[ErrStr->len] = 0;
   *fail = ErrStr->string;
-  pariErr = tmp; ErrStr = tmps;
-  avma = av; return t;
+  pariErr = tmp; ErrStr = tmps; return t;
 }
 
 static char *
-pari_install(TeXmacs_exports_1* TeXmacs, char *options, char **fail)
+pari_install(TeXmacs_exports_1* _TeXmacs, char *options, char **fail)
 {
+  *TeXmacs = *_TeXmacs;
   pari_init(1000000, 500000);
   if (setjmp(environnement))
   {
@@ -612,7 +614,7 @@ pari_execute(char *s, char *session, char **fail)
   *fail = NULL; return pari_strdup("");
 }
 
-static package_exports_1 PARI_exports = {
+static package_exports_1 PARI_exports_1 = {
   "TeXmacs communication protocol 1", 
   PARIVERSION,
   &pari_install,
@@ -621,9 +623,9 @@ static package_exports_1 PARI_exports = {
 };
 
 package_exports_1 *
-get_my_package(pack )
+get_my_package(int i)
 {
-  return &PARI_exports;
+  return &PARI_exports_1;
 }
 
 

@@ -226,8 +226,7 @@ quadhilbertimag(GEN D, GEN flag)
     }
     if (DEBUGLEVEL>=2) msgtimer("roots");
     /* to avoid integer overflow (1 + 0.) */
-    if (emax < bit_accuracy(prec)) lead = gun;
-    else { lead = cgetr(prec); affsr(1,lead); }
+    lead = (emax < bit_accuracy(prec))? gun: realun(prec);
 
     y = greal(roots_to_pol_intern(lead,LG,0,0));
     y = grndtoi(y,&emax);
@@ -1016,7 +1015,7 @@ redrealform_init(GEN x)
   GEN y = cgetg(6,t_VEC);
 
   y[1]=x[1]; y[2]=x[2]; y[3]=x[3]; y[4]=zero;
-  y[5]=lgetr(PRECREG); affsr(1,(GEN)y[5]);
+  y[5]=(long)realun(PRECREG);
   y = redrealform(y); tetpil=avma;
   return gerepile(av,tetpil,gcopy(y));
 }
@@ -1284,7 +1283,7 @@ powsubfact(long n, long a)
     unform[2]=(mod2(Disc) == mod2(isqrtD))? (long)isqrtD: laddsi(-1,isqrtD);
     unform[3]=lshifti(subii(sqri((GEN)unform[2]),Disc),-2);
     unform[4]=zero;
-    unform[5]=lgetr(PRECREG); affsr(1,(GEN)unform[5]);
+    unform[5]=(long)realun(PRECREG);
     for (i=1; i<=n; i++)
     {
       x[i][0] = unform;
@@ -1331,10 +1330,9 @@ static GEN
 lfunc(GEN Disc)
 {
   long av=avma, p;
-  GEN y=cgetr(DEFAULTPREC);
+  GEN y=realun(DEFAULTPREC);
   byteptr d=diffptr;
 
-  affsr(1,y);
   for(p = *d++; p<=30000; p += *d++)
   {
     if (!*d) err(primer1);

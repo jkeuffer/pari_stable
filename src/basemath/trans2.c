@@ -84,7 +84,7 @@ mpatan(GEN x)
     divrrz(p2,p5,p2); avma=av;
   }
   mulrrz(p2,p2,p3); l1=4;
-  unr=cgetr(l2); affsr(1,unr); setlg(unr,4);
+  unr=realun(l2); setlg(unr,4);
   p4=cgetr(l2); setlg(p4,4);
   divrsz(unr,2*n+1,p4);
 
@@ -856,11 +856,11 @@ mpbern(long nb, long prec)
   bernzone[0]=evallg(d);
   bernzone[1]=nb;
   bernzone[2]=prec;
-  av=avma; l = prec+1; p1=cgetr(l);
+  av=avma; l = prec+1; p1=realun(l);
 
   code0 = evaltyp(t_REAL) | evallg(prec);
   *(bern(0)) = code0; affsr(1,bern(0));
-  affsr(1,p1); p2 = p1; av2=avma;
+  p2 = p1; av2=avma;
   for (i=1; i<=nb; i++)
   {
     if (i>1)
@@ -1011,7 +1011,7 @@ mpgamma(GEN x)
   }
   mpbern(p,l2); p3=mplog(p2);
 
-  p4=cgetr(l2); affsr(1,p4); setexpo(p4,-1);
+  p4=realun(l2); setexpo(p4,-1);
   p6 = subrr(p2,p4); p6 = mulrr(p6,p3);
   p6 = subrr(p6,p2);
   pitemp = mppi(l2); setexpo(pitemp,2);
@@ -1085,10 +1085,10 @@ cxgamma(GEN x, long prec)
   }
   mpbern(p,l2); p3 = glog(p2,l2);
 
-  p4=cgetg(3,t_COMPLEX); p4[1]=lgetr(l2); p4[2]=lgetr(l2);
-  affsr(1,(GEN)p4[1]); setexpo(p4[1],-1);
-  subrrz((GEN)p2[1],(GEN)p4[1],(GEN)p4[1]);
+  p4=cgetg(3,t_COMPLEX);
+  p4[1] = (long)realun(l2); setexpo(p4[1],-1);
   p4[2] = (long)rcopy((GEN)p2[2]);
+  subrrz((GEN)p2[1],(GEN)p4[1],(GEN)p4[1]);
   gmulz(p4,p3,p4); gsubz(p4,p2,p4);
 
   pitemp = mppi(l2); setexpo(pitemp,2);
@@ -1213,7 +1213,7 @@ mplngamma(GEN x)
   }
   mpbern(p,l2); p3=mplog(p2);
 
-  p4=cgetr(l2); affsr(1,p4); setexpo(p4,-1);
+  p4=realun(l2); setexpo(p4,-1);
   p6 = subrr(p2,p4); p6 = mulrr(p6,p3);
   p6 = subrr(p6,p2);
   pitemp = mppi(l2); setexpo(pitemp,2);
@@ -1314,8 +1314,8 @@ cxlngamma(GEN x, long prec)
   }
   mpbern(p,l2); p3 = glog(p2,l2);
 
-  p4=cgetg(3,t_COMPLEX); p4[1]=lgetr(l2); p4[2]=lgetr(l2);
-  affsr(1,(GEN)p4[1]); setexpo(p4[1],-1);
+  p4=cgetg(3,t_COMPLEX);
+  p4[1] = (long)realun(l2); setexpo(p4[1],-1);
   subrrz((GEN)p2[1],(GEN)p4[1],(GEN)p4[1]);
   p4[2] = (long)rcopy((GEN)p2[2]);
   gmulz(p4,p3,p4); gsubz(p4,p2,p4);
@@ -1436,7 +1436,7 @@ mpgamd(long x, long prec)
   y=cgetr(prec); av=avma;
 
   p1 = mpsqrt(mppi(l));
-  j = 1; p2 = cgetr(l); affsr(1,p2);
+  j = 1; p2 = realun(l);
   for (i=1; i<a; i++)
   {
     j += 2;

@@ -757,7 +757,7 @@ jacobi(GEN a, long prec)
       e=expo(gcoeff(c,i,j)); if (e>e2) { e2=e; p=i; q=j; }
     }
   }
-  a=c; affsr(1,unr=cgetr(prec));
+  a=c; unr = realun(prec);
   de=bit_accuracy(prec);
 
  /* e1 = min des expo des coeff diagonaux

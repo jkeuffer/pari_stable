@@ -55,7 +55,7 @@ UltraSPARC   167MHz  Solaris-2.5     gcc X11 dl2   11100   11370  2.0.17
 UltraSPARC   167MHz  Solaris-2.5     g++ X11 dl2   13474   13418  2.0.9 (7) LG
 UltraSPARC   167MHz  Solaris-2.5     CC  X11 -     15778   16400  2.0.9     LG
 UltraSPARC   167MHz  Solaris-2.5     cc  X11 dl2   16241   17048  2.0.9     LG
-UltraSPARC   143MHz  Solaris-2.5     gcc X11 dl2   12880   13256  2.0.16
+UltraSPARC   143MHz  Solaris-2.5     gcc X11 dl2   13216   13473  2.0.17
 
 SuperSPARC2   75MHz  Solaris-2.5     gcc X11 dl2   16969   17013  2.0.10    LG
 SuperSPARC    40MHz  SunOS-4.1.3     gcc X11 dl2   31906   31386  2.0.17

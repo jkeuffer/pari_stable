@@ -236,16 +236,15 @@ static GEN
 incgam2_0(GEN x)
 {
   long l,n,i;
-  GEN p1,unr;
+  GEN p1;
   double m,mx;
 
   l = lg(x); mx = rtodbl(x);
   m = (bit_accuracy(l)*LOG2 + mx)/4; n=(long)(1+m*m/mx);
-  unr = cgetr(l); affsr(1, unr);
   p1 = divsr(-n, addsr(n<<1,x));
   for (i=n-1; i >= 1; i--)
     p1 = divsr(-i, addrr(addsr(i<<1,x), mulsr(i,p1)));
-  return mulrr(divrr(mpexp(negr(x)), x), addrr(unr,p1));
+  return mulrr(divrr(mpexp(negr(x)), x), addrr(realun(l),p1));
 }
 
 GEN
@@ -310,7 +309,7 @@ incgam3(GEN a, GEN x, long prec)
 
   if (typ(x) != t_REAL) { gaffect(x,z); x=z; }
   l=lg(x); n = -bit_accuracy(l)-1;
-  p3 = cgetr(l); affsr(1,p3);
+  p3 = realun(l);
   p2 = rcopy(p3);
   i = typ(a);
   if (i == t_REAL) b = a;
@@ -368,7 +367,7 @@ eint1(GEN x, long prec)
     l = lg(x); consteuler(l);
     n = -bit_accuracy(l)-1;
     
-    run = cgetr(l); affsr(1,run);
+    run = realun(l);
     p4 = p3 = p2 = p1 = run;
     for (i=2; expo(p2)>=n; i++)
     {
@@ -404,8 +403,7 @@ eint1(GEN x, long prec)
       y  = gadd(p3, p1);
     } else {
       p1 = gdivsg(1, y);
-      p2 = cgetr(l);
-      affsr(1, p2);
+      p2 = realun(l);
       p3 = p2;
       p4 = gzero;
       i  = 1;
@@ -452,7 +450,7 @@ veceint1(GEN C, GEN nmax, long prec)
 
   e1=mpexp(negr(mulsr(n,C)));
   e2=mpexp(mulsr(10,C));
-  unr = cgetr(prec); affsr(1,unr);
+  unr = realun(prec);
   zeror=realzero(prec); deninit=negr(unr);
   f=cgetg(3,t_COL); M2=cgetg(3,t_VEC); av1=avma;
 
@@ -661,10 +659,7 @@ izeta(long k, long prec)
     y=bernreal(1-k,prec); tetpil=avma;
     return gerepile(av,tetpil,divrs(y,k-1));
   }
-  if (k > bit_accuracy(prec)+1)
-  {
-    y=cgetr(prec); affsr(1,y); return y;
-  }
+  if (k > bit_accuracy(prec)+1) return realun(prec);
   pitemp=mppi(prec); setexpo(pitemp,2);
   if ((k&1) == 0)
   {
@@ -673,7 +668,7 @@ izeta(long k, long prec)
     y=divrr(p1,y); setexpo(y,expo(y)-1);
     return gerepile(av,tetpil,y);
   }
-  binom = cgetr(prec+1); affsr(1,binom);
+  binom = realun(prec+1);
   q = mpexp(pitemp); kk = k+1;
   li = -(1+bit_accuracy(prec));
   if ((k&3)==3)
@@ -828,7 +823,7 @@ polylog(long m, GEN x, long prec)
     return gerepile(av,tetpil,gneg(p1));
   }
   l=precision(x);
-  if (!l) { l=prec; p1=cgetr(l); affsr(1,p1); x=gmul(p1,x); }
+  if (!l) { l=prec; x=gmul(x, realun(l)); }
   e=gexpo(gnorm(x)); if (!e || e== -1) return cxpolylog(m,x,prec);
   if (e>0)
   {
@@ -897,7 +892,7 @@ polylogd0(long m, GEN x, long flag, long prec)
   if (gcmp0(x)) return gcopy(x);
   if (gcmp1(x) && m>=2) return m2?izeta(m,prec):gzero;
   l=precision(x);
-  if (!l) { l=prec; p1=cgetr(l); affsr(1,p1); x=gmul(p1,x); }
+  if (!l) { l=prec; x=gmul(x,realun(l)); }
   p1=gabs(x,prec); fl=0;
   if (gcmpgs(p1,1)>0) { x=ginv(x); p1=gabs(x,prec); fl=!m2; }
 
@@ -943,7 +938,7 @@ polylogp(long m, GEN x, long prec)
   if (gcmp0(x)) return gcopy(x);
   if (gcmp1(x) && m>=2) return m2?izeta(m,prec):gzero;
   l=precision(x);
-  if (!l) { l=prec; p1=cgetr(l); affsr(1,p1); x=gmul(p1,x); }
+  if (!l) { l=prec; x=gmul(x,realun(l)); }
   p1=gabs(x,prec); fl=0;
   if (gcmpgs(p1,1)>0) { x=ginv(x); p1=gabs(x,prec); fl=!m2; }
 
@@ -1251,7 +1246,7 @@ sagm(GEN x, long prec)
   {
     case t_REAL:
       l = precision(x); y = cgetr(l); av=avma;
-      a1 = x; b1 = cgetr(l); affsr(1,b1);
+      a1 = x; b1 = realun(l);
       l = 5-bit_accuracy(prec);
       do
       {
@@ -1386,7 +1381,7 @@ theta(GEN q, GEN z, long prec)
 
   if (gexpo(q)>=0) err(thetaer1);
   l=precision(q); if (l) prec=l;
-  p1=cgetr(prec); affsr(1,p1); z=gmul(p1,z);
+  p1=realun(prec); z=gmul(p1,z);
   if (!l) q=gmul(p1,q);
   zy = gimag(z);
   if (gcmp0(zy)) k=gzero;
@@ -1424,10 +1419,7 @@ thetanullk(GEN q, long k, long prec)
   if (!(k&1)) return gzero;
   n=0; qn=gun; ps2=gsqr(q); ps=gneg_i(ps2);
   y=gun; l=precision(q);
-  if (!l)
-  {
-    l=prec; p1=cgetr(prec); affsr(1,p1); q=gmul(p1,q);
-  }
+  if (!l) { l=prec; q=gmul(q,realun(l)); }
 
   do
   {
@@ -1480,8 +1472,7 @@ jbesselh(GEN n, GEN z, long prec)
       return gerepile(av,tetpil,jbesselh(n,p1,prec));
 
     case t_QUAD:
-      av=avma; p1=cgetr(prec); affsr(1,p1);
-      p1=gmul(z,p1); tetpil=avma;
+      av=avma; p1=gmul(z,realun(prec)); tetpil=avma;
       return gerepile(av,tetpil,jbesselh(n,p1,prec));
 
     case t_POL: case t_RFRAC: case t_RFRACN:

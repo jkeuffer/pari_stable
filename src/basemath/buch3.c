@@ -749,7 +749,7 @@ static GEN
 minimforunits(GEN nf, long borne, long stockmax)
 {
   long av = avma,av1,n1,n,i,j,k,s,norme,normax,*x,fl1,cmpt;
-  GEN u,r,unr,S,S1,a,base,p1;
+  GEN u,r,S,S1,a,base,p1;
   double p;
   double **q,*v,*y,*z;
   double eps=0.000001;
@@ -768,9 +768,8 @@ minimforunits(GEN nf, long borne, long stockmax)
   v=(double*)gpmalloc(n1*sizeof(double));
   q=(double**)gpmalloc(n1*sizeof(double*));
   for (j=1; j<=n; j++) q[j]=(double*)gpmalloc(n1*sizeof(double));
-  affsr(1,unr=cgetr(10));
   u=lllgram(a,BIGDEFAULTPREC); base=gmul((GEN)nf[7],u);
-  a=gmul(qf_base_change(a,u,1),unr);
+  a=gmul(qf_base_change(a,u,1), realun(BIGDEFAULTPREC));
   r=sqred1(a);
   for (j=1; j<=n; j++)
   {

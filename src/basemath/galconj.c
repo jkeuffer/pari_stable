@@ -1497,7 +1497,7 @@ initborne(GEN T, GEN disc, struct galois_borne * gb, long ppp)
       break;
     L[i] = z[1];
   }
-  M = vandermondeinverse(L, gmul(T, dbltor(1.)), disc);
+  M = vandermondeinverse(L, gmul(T, realun(DEFAULTPREC)), disc);
   borne = gzero;
   for (i = 1; i <= n; i++)
   {

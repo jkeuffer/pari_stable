@@ -99,8 +99,8 @@ consteuler(long prec)
 
   l = prec+1; x = (long) (1 + (bit_accuracy(l) >> 2) * LOG2);
   a=cgetr(l); affsr(x,a); u=mplog(a); setsigne(u,-1); affrr(u,a);
-  b=cgetr(l); affsr(1,b);
-  v=cgetr(l); affsr(1,v);
+  b=realun(l);
+  v=realun(l);
   n=(long)(1+3.591*x); /* z=3.591: z*[ ln(z)-1 ]=1 */
   av2 = avma;
   if (x < SQRTVERYBIGINT)
@@ -154,8 +154,7 @@ transc(GEN (*f)(GEN,long), GEN x, long prec)
       return gerepile(av,tetpil,f(p1,prec));
 
     case t_COMPLEX: case t_QUAD:
-      av=avma; p1=cgetr(prec); affsr(1,p1);
-      p1=gmul(x,p1); tetpil=avma;
+      av=avma; p1=gmul(x,realun(prec)); tetpil=avma;
       return gerepile(av,tetpil,f(p1,prec));
 
     case t_POL: case t_RFRAC: case t_RFRACN:
@@ -826,7 +825,7 @@ mpexp1(GEN x)
     n=(long)(1+beta/alpha);
     m=0;
   }
-  unr=cgetr(l2); affsr(1,unr);
+  unr=realun(l2);
   p2=rcopy(unr); setlg(p2,4);
   p4=cgetr(l2); affrr(x,p4); setsigne(p4,1);
   if (m) setexpo(p4,ex-m);
@@ -1010,7 +1009,7 @@ mplog(GEN x)
     n=(long)(1+beta/alpha);
     m=0; p4 = p1;
   }
-  unr=cgetr(l2); affsr(1,unr);
+  unr=realun(l2);
   p2=cgetr(l2); p3=cgetr(l2); av=avma;
 
   /* affrr needed here instead of setlg since prec may DECREASE */
@@ -1235,9 +1234,9 @@ mpsc1(GEN x, long *ptmod8)
   }
   else { m=0; n=(long)((1+beta/alpha)/2.0); }
   l2=l+1+(m>>TWOPOTBITS_IN_LONG);
-  p2=cgetr(l2); affsr(1,p2); setlg(p2,4);
+  p2=realun(l2); setlg(p2,4);
   p4=cgetr(l2); av = avma;
-  affrr(mulrr(p1,p1),p4); setlg(p4,4);
+  affrr(gsqr(p1),p4); setlg(p4,4);
 
   if (n>mmax)
     p3 = divrs(divrs(p4,2*n+2),2*n+1);

@@ -1952,7 +1952,7 @@ roots_com(GEN p, long l)
   if (!isvalidpol(p)) err(talker,"invalid coefficients in roots");
   if (lgef(p) == 3) return cgetg(1,t_VEC); /* constant polynomial */
   if (l<3) l=3;
-  bitprec=bit_accuracy(l); gunr=cgetr(l); affsr(1,gunr);
+  bitprec=bit_accuracy(l); gunr=realun(l);
   return isexactpol(p)? solve_exact_pol(p,bitprec): all_roots(p,bitprec);
 }
 

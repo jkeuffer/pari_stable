@@ -1431,8 +1431,8 @@ initzeta(GEN pol, long prec)
   aij=cgetg(imax+1,t_VEC);
   for (i=1; i<=imax; i++) aij[i] = lgetg(R,t_VEC);
 
-  c_even = cgetr(prec); affsr(1,c_even);
- c_even = gmul2n(c_even,r1);
+  c_even = realun(prec);
+  c_even = gmul2n(c_even,r1);
   c_odd = gmul(c_even,gpowgs(racpi,r1));
   if (ru&1) c_odd=gneg_i(c_odd);
   ck_even=cgetg(R,t_VEC); ck_odd=cgetg(r2+2,t_VEC);
@@ -1695,10 +1695,9 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
   {
     GEN Pi = mppi(prec);
     if (is_frac_t(ts))
-    {
-      p1 = cgetr(bigprec); affsr(1,p1); s=gmul(s,p1);
-    }
-    else s = gprec_w(s, bigprec);
+      s = gmul(s, realun(bigprec));
+    else
+      s = gprec_w(s, bigprec);
 
     unmoins = gsub(gun,s);
     lambd = gdiv(resi,gmul(s,gsub(s,gun)));

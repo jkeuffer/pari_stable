@@ -2814,7 +2814,7 @@ AllStark(GEN data,  GEN nf,  long flag,  long newprec)
   long cl, i, j, cpt = 0, av, av2, N, h, v, n, bnd = 300;
   int ***matan;
   GEN p0, p1, p2, S, T, polrelnum, polrel, Lp, W, A, veczeta, sig, valchi;
-  GEN degs, ro, C, Cmax, dataCR, cond1, L1, *gptr[2], an, Pi, lead;
+  GEN degs, ro, C, Cmax, dataCR, cond1, L1, *gptr[2], an, Pi;
 
   N     = degree((GEN)nf[1]);
   cond1 = gmael4(data, 1, 2, 1, 2);
@@ -2919,8 +2919,7 @@ LABDOUB:
     p1 = gexp(gmul2n((GEN)veczeta[j], 1), newprec);
     ro[j] = ladd(p1, ginv(p1));
   }
-  lead = cgetr(newprec); affsr(1,lead);
-  polrelnum = roots_to_pol_intern(lead,ro, 0,0);
+  polrelnum = roots_to_pol_intern(realun(newprec),ro, 0,0);
   if (DEBUGLEVEL)
   {
     if (DEBUGLEVEL >= 2) fprintferr("polrelnum = %Z\n", polrelnum);

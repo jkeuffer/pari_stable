@@ -266,12 +266,12 @@ GEN
 suminf(entree *ep, GEN a, char *ch, long prec)
 {
   long fl,G,tetpil, av0 = avma, av,lim;
-  GEN p1,x = cgetr(prec);
+  GEN p1,x = realun(prec);
 
   if (typ(a) != t_INT) err(talker,"non integral index in suminf");
   a = setloop(a);
   av = avma; lim = stack_lim(av,1);
-  affsr(1,x); push_val(ep, a);
+  push_val(ep, a);
   fl=0; G = bit_accuracy(prec) + 5;
   for(;;)
   {
@@ -369,12 +369,12 @@ GEN
 prodinf(entree *ep, GEN a, char *ch, long prec)
 {
   long fl,G,tetpil, av0 = avma, av,lim;
-  GEN p1,x = cgetr(prec);
+  GEN p1,x = realun(prec);
 
   if (typ(a) != t_INT) err(talker,"non integral index in prodinf");
   a = setloop(a);
   av = avma; lim = stack_lim(av,1);
-  affsr(1,x); push_val(ep, a);
+  push_val(ep, a);
   fl=0; G = -bit_accuracy(prec)-5;
   for(;;)
   {
@@ -396,12 +396,12 @@ GEN
 prodinf1(entree *ep, GEN a, char *ch, long prec)
 {
   long fl,G,tetpil, av0 = avma, av,lim;
-  GEN p1,p2,x = cgetr(prec);
+  GEN p1,p2,x = realun(prec);
 
   if (typ(a) != t_INT) err(talker,"non integral index in prodinf1");
   a = setloop(a);
   av = avma; lim = stack_lim(av,1);
-  affsr(1,x); push_val(ep, a);
+  push_val(ep, a);
   fl=0; G = -bit_accuracy(prec)-5;
   for(;;)
   {
@@ -423,10 +423,10 @@ GEN
 prodeuler(entree *ep, GEN a, GEN b, char *ch, long prec)
 {
   long prime,tetpil, av,av0 = avma, lim;
-  GEN p1,x = cgetr(prec);
+  GEN p1,x = realun(prec);
   byteptr p=diffptr;
 
-  affsr(1,x); prime = 0;
+  prime = 0;
   b = gfloor(b); a = gceil(a);
   while (*p && cmpis(a,prime)>0) prime += *p++;
   if (cmpsi(prime,b) > 0)
@@ -833,7 +833,7 @@ qromb(entree *ep, GEN a, GEN b, char *ch, long prec)
 
   s=new_chunk(JMAXP);
   h=new_chunk(JMAXP);
-  affsr(1,(GEN)(h[0]=lgetr(prec)));
+  h[0] = (long)realun(prec);
 
   push_val(ep, a);
   p1=lisexpr(ch); if (p1 == a) p1=rcopy(p1);
@@ -881,7 +881,7 @@ qromo(entree *ep, GEN a, GEN b, char *ch, long prec)
 
   s=new_chunk(JMAXP);
   h=new_chunk(JMAXP);
-  affsr(1,(GEN)(h[0]=lgetr(prec)));
+  h[0] = (long)realun(prec);
 
   p1 = shiftr(addrr(a,b),-1); push_val(ep, p1);
   p1=lisexpr(ch); s[0]=lmul(qlint,p1);
@@ -933,7 +933,7 @@ qromi(entree *ep, GEN a, GEN b, char *ch, long prec)
 
   s=new_chunk(JMAXP);
   h=new_chunk(JMAXP);
-  affsr(1,(GEN)(h[0]=lgetr(prec)));
+  h[0] = (long)realun(prec);
 
   x=divsr(2,addrr(a,b)); push_val(ep, x);
   p1=gmul(lisexpr(ch),mulrr(x,x));
@@ -1041,15 +1041,14 @@ GEN
 polzagreel(long n, long m, long prec)
 {
   long d1,d,r,j,k,k2,av=avma,tetpil;
-  GEN p2,pol1,g,h,v,b,gend,s,unreel;
+  GEN p2,pol1,g,h,v,b,gend,s;
 
   if (m>=n || m<0)
     err(talker,"first index must be greater than second in polzag");
-  affsr(1,unreel=cgetr(prec));
   d1=n-m; d=d1<<1; d1--; pol1=gadd(gun,polx[0]);
   p2=gmul(polx[0],pol1); r=(m+1)>>1; gend=stoi(d);
   v=cgetg(d1+2,t_VEC); g=cgetg(d1+2,t_VEC);
-  v[d1+1]=un; b=mulri(unreel,gend); g[d1+1]=(long)b;
+  v[d1+1]=un; b=mulri(realun(prec),gend); g[d1+1]=(long)b;
   for (k=1; k<=d1; k++)
   {
     v[d1-k+1]=un;
@@ -1104,8 +1103,8 @@ zbrent(entree *ep, GEN a, GEN b, char *ch, long prec)
   ep->value = (void*)b; fb = lisexpr(ch);
   if (gsigne(fa)*gsigne(fb) > 0)
     err(talker,"roots must be bracketed in solve");
-  itmax = (prec<<(TWOPOTBITS_IN_LONG+1)) + 1; affsr(1,tol=cgetr(3));
-  tol=shiftr(tol, 5-bit_accuracy(prec));
+  itmax = (prec<<(TWOPOTBITS_IN_LONG+1)) + 1;
+  tol = realun(3); setexpo(tol, 5-bit_accuracy(prec));
   fc=fb;
   for (iter=1; iter<=itmax; iter++)
   {

@@ -1422,9 +1422,8 @@ GEN
 mpfactr(long n, long prec)
 {
   long av,tetpil,lim,k;
-  GEN f = cgetr(prec);
+  GEN f = realun(prec);
 
-  affsr(1,f);
   if (n<2)
   {
     if (n<0) err(facter);

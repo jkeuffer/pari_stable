@@ -2353,7 +2353,7 @@ roots2(GEN pol,long PREC)
 {
   long av = avma,tetpil,N,flagexactpol,flagrealpol,flagrealrac,ti,i,j;
   long nbpol,k,av1,multiqol,deg,nbroot,fr,f;
-  GEN unp,p1,p2,rr,EPS,qol,qolbis,x,b,c,*ad,v,tabqol;
+  GEN p1,p2,rr,EPS,qol,qolbis,x,b,c,*ad,v,tabqol;
 
   if (typ(pol)!=t_POL) err(typeer,"roots2");
   if (!signe(pol)) err(zeropoler,"roots2");
@@ -2361,12 +2361,12 @@ roots2(GEN pol,long PREC)
   if (!N) return cgetg(1,t_COL);
   if (N==1)
   {
-    unp=cgetr(PREC); affsr(1,unp);
-    p1=gmul(unp,(GEN)pol[3]); p2=gneg_i(gdiv((GEN)pol[2],p1));
+    p1=gmul(realun(PREC),(GEN)pol[3]);
+    p2=gneg_i(gdiv((GEN)pol[2],p1));
     tetpil=avma; return gerepile(av,tetpil,gcopy(p2));
   }
-  EPS=cgetr(3); affsr(1,EPS); flagrealpol=1; flagexactpol=1;
-  EPS=gmul2n(EPS, 12 - bit_accuracy(PREC));
+  EPS=realun(3); setexpo(EPS, 12 - bit_accuracy(PREC));
+  flagrealpol=1; flagexactpol=1;
   for (i=2; i<=N+2; i++)
   {
     ti=typ(pol[i]);

@@ -2695,7 +2695,7 @@ INCREASEGEN:
   p1 = gmul2n(divir(clh,z), 1);
   c1 = compute_check(sublambda,p1,&parch,&reg);
   if (!c1)
-  { /* precision problem */
+  { /* precision problems */
     prec=(PRECREG<<1)-2;
     if (DEBUGLEVEL) err(warnprec,"buchall (compute_check)",prec);
     avma = av0; nf = nfnewprec(nf,prec);
