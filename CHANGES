@@ -88,6 +88,8 @@ BA 47- gdiv(SER,POL) --> SEGV when POL has lgef < lg
    48- check relative pol is monic before calling a rnf* function
 XR 49- cleaned up bnrL1 character computations
 XR 50- round 4: possible problems when increasing p-adic precision
+   51- stack corruption in mppgcd(huge t_FRAC, huge t_FRAC)
+BA 52- abs(t_SER) not allowed
 
   Changed
 BA  1- more efficient quadratic Hensel lift
@@ -107,15 +109,18 @@ BA  3- more efficient factorff when pol belongs to Fp[X] (based on Fp_isom)
    13- allow color changes in error messages (when sample input is given)
    14- format for bnf[9] (new isprincipal)
    15- cleaned up isprincipal + bnfinit (small_norm, getfu, class_group_gen)
+XR 16- added flag for D>0 in quadhilbert: if non-zero, try more modulii
+   17- idealred: reduce huge ideals as Z-module first (using lllintpartial)
 
   Added
-    1- new library function zerovec
+    1- library function zerovec
     2- van Hoeij's algo. for modular factors recombination (factor over Z[X])
     3- algdep for p-adic numbers
 IZ  4- default values for 'colors' (light/dark) and 'prettyprinter' (tex2mail)
     5- hnflll implementation (old one was preliminary and didn't work at all)
 GN  6- squfof implementation
     7- numerical derivation
+XR  8- GP interface to hensel_lift functions (polhensellift)
 
   Removed
     1- quadrayimagwei, preliminary implementation to quadray(D < 0) 
