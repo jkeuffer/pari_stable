@@ -155,6 +155,7 @@ IZ 12- add error messages (as in err(shier2)) to emacs tag file
 IZ 14- add flag to shift() to enable consistency with 2-complement semantic
 IZ 15- default 'prompt_cont' for continuation lines
 IZ 16- default 'readline' to switch readline on/off in readline-able binaries
+IZ 17- capabilities to 'bittest' (return bitmap, 2-complement arithmetic)
 
   Removed
     1- obsolete functions twototwo, threetotwo, threetotwo2
