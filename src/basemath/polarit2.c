@@ -672,8 +672,11 @@ cmbf(GEN target, GEN famod, GEN p, long b, long a,
   lctarget = gmul(lc,target);
 
   {
-    GEN pa_b = gpowgs(p, a-b), pa_bs2 = shifti(pa_b,-1);
-    GEN pb   = gpowgs(p, b),   pbs2   = shifti(pb,-1);
+    GEN pa_b,pa_bs2,pb,pbs2;
+    pa_b = gpowgs(p, a-b); /* make sure p^(a-b) < 2^(BIL-1) */
+    while (is_bigint(pa_b)) { b++; pa_b = divii(pa_b, p); }
+    pa_bs2 = shifti(pa_b,-1);
+    pb= gpowgs(p, b); pbs2 = shifti(pb,-1);
     for (i=1; i <= lfamod; i++)
     {
       GEN T, p1 = (GEN)famod[i];
