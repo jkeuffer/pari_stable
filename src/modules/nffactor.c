@@ -1353,14 +1353,13 @@ nf_LLL_cmbf(nfcmbf_t *T, long a, GEN p, long rec)
   GEN P = simplify(T->pol);
   GEN ZC = L2_bound(nfT, &dn);
   GEN Br = nf_root_bounds(P, nfT);
-  GEN B, Btra, PRK = T->h, PRK_GSmin;
+  GEN B, Btra, PRK = T->h, PRKinv = T->hinv, PRK_GSmin;
   long dnf = degpol(nfT), dP = degpol(P);
 
   long BitPerFactor = 3; /* nb bits / modular factor */
   long i,j,C,r,tmax,tnew,n0,n;
-  GEN y, Tra, T2, TT, BL, m, u, norm, target, M, piv, list;
+  GEN y, Tra, T2, T2r, TT, BL, m, u, norm, target, M, piv, list;
   gpmem_t av, av2, lim;
-  int did_recompute_famod = 0;
 
   n0 = n = r = lg(famod) - 1;
   list = cgetg(n0+1, t_COL);
@@ -1388,9 +1387,10 @@ nf_LLL_cmbf(nfcmbf_t *T, long a, GEN p, long rec)
     tnew = tmax+1;
     { /* bound for f . S_k(genuine factor) */
       GEN N2 = mulsr(dP*dP, normlp(Br, tnew)); /* bound for T_2(S_tnew) */
+      double sqrtBvS = sqrt(BvS);
       Btra = mulrr(ZC, N2);
       /* assume q > sqrt(Btra) */
-      Blow = 1. + 0.25*(3*sqrt(BvS) + sqrt((double)dnf));
+      Blow = 1. + 0.5*sqrtBvS + 0.5 * sqrt((double)dnf) * (sqrtBvS + 1);
 
       Blow *= Blow;
       /* q(S1 vS + P1 vP) <= Blow for all (vS,vP) assoc. to true factors */
@@ -1412,8 +1412,10 @@ nf_LLL_cmbf(nfcmbf_t *T, long a, GEN p, long rec)
 
         u = lllgramint_i(gram_matrix(prk), 4, NULL, &B);
         PRK_GSmin = vecmin(GS_norms(B, DEFAULTPREC));
-        if (gcmp(PRK_GSmin, Btra) >= 0) { PRK = gmul(prk, u); break; }
+        if (gcmp(PRK_GSmin, Btra) >= 0) break;
       }
+      PRK = gmul(prk, u);
+      PRKinv = ZM_inv(PRK, pa);
 
       polred = nf_pol_red(unifpol(T->nf,P,0), prk);
       famod = hensel_lift_fact(polred,famod,NULL,p,pa,a);
@@ -1425,7 +1427,6 @@ nf_LLL_cmbf(nfcmbf_t *T, long a, GEN p, long rec)
           if (!gcmp1(dn)) { p2 = gmul(p2,dn); p2 = FpV_red(p2, pa); }
           TT[i] = (long)p2;
         }
-      did_recompute_famod = 1;
     }
 
     for (i=1; i<=n0; i++)
@@ -1438,21 +1439,16 @@ nf_LLL_cmbf(nfcmbf_t *T, long a, GEN p, long rec)
 
     av2 = avma;
     T2 = gmod( gmul(Tra, BL), pa );
-    T2 = gsub(T2, gmul(PRK, ground(gauss(PRK, T2))));
+    T2r= gsub(T2, gmul(PRK, gdivround(gmul(PRKinv, T2), pa)));
 
-#if 0 /* without truncation */
-    m = concatsp( vconcat( gscalmat(C, r), T2 ),
-                  vconcat(zeromat(r, dnf), PRK));
-#else
-    goodq = shifti(gun, gexpo(T2) - BitPerFactor * r);
+    goodq = shifti(gun, gexpo(T2r) - BitPerFactor * r);
     if (cmpii(goodq, q) > 0) q = goodq;
 
-    m = concatsp( vconcat( gscalsmat(C, r), gdivround(T2, q) ),
+    m = concatsp( vconcat( gscalsmat(C, r), gdivround(T2r, q) ),
                   vconcat(zeromat(r, dnf),  gdivround(PRK,q)));
-#endif
     /*     [  C     0  ]
      * m = [           ]   square matrix
-     *     [ T2    PRK ]   T2 = Tra * BL  truncated
+     *     [ T2r    PRK]   T2r = Tra * BL  truncated
      */
     u = lllgramint_i(gram_matrix(m), 4, NULL, &B);
     norm = GS_norms(B, DEFAULTPREC);
@@ -1479,10 +1475,10 @@ nf_LLL_cmbf(nfcmbf_t *T, long a, GEN p, long rec)
     BL = gerepileupto(av2, gmul(BL, u));
     if (low_stack(lim, stack_lim(av,1)))
     {
-      GEN *gptr[5]; gptr[0]=&BL; gptr[1]=&TT; gptr[2]=&Tra; gptr[3]=&famod;
-      gptr[4]=&PRK_GSmin;
+      GEN *gptr[8]; gptr[0]=&BL; gptr[1]=&TT; gptr[2]=&Tra; gptr[3]=&famod;
+      gptr[4]=&PRK_GSmin; gptr[5]=&PRK; gptr[6]=&PRKinv; gptr[7]=&pa;
       if(DEBUGMEM>1) err(warnmem,"nf_LLL_cmbf");
-      gerepilemany(av, gptr, did_recompute_famod? 5: 4);
+      gerepilemany(av, gptr, 8);
     }
     if (rec && r*rec >= n0) continue;
 
@@ -1499,7 +1495,7 @@ nf_LLL_cmbf(nfcmbf_t *T, long a, GEN p, long rec)
 
       y = NULL;
       for (j=1; j<=n0; j++)
-        if (signe(p1[j])) y = y? FpX_mul(y, (GEN)famod[j], pa): (GEN)famod[j];
+        if (signe(p1[j])) y = y? FpX_mul(y,(GEN)famod[j],T->den): (GEN)famod[j];
       y = nf_pol_lift(y, T);
 
       /* y is the candidate factor */
@@ -1512,5 +1508,6 @@ nf_LLL_cmbf(nfcmbf_t *T, long a, GEN p, long rec)
       if (DEBUGLEVEL>2) fprintferr("nf_LLL_cmbf: %ld factors\n", r);
       setlg(list,r+1); return list;
     }
+    avma = av2;
   }
 }
