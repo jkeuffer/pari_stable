@@ -3040,6 +3040,7 @@ print_elt(long a)
 }
 
 extern GEN ZY_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LPRS);
+extern GEN ZX_invmod(GEN A, GEN B);
 extern GEN squff2(GEN x, long klim, long hint);
 extern GEN to_polmod(GEN x, GEN mod);
 
@@ -3069,8 +3070,8 @@ polcompositum0(GEN A, GEN B, long flall)
     long i,l = lg(C);
     GEN w,a,b; /* a,b,c root of A,B,C = compositum, c = b - k a */
     for (i=1; i<l; i++)
-    { /* first line possibly very costly */
-      a = gmul((GEN)LPRS[1], ginvmod((GEN)LPRS[2], (GEN)C[i]));
+    { /* invmod possibly very costly */
+      a = gmul((GEN)LPRS[1], ZX_invmod((GEN)LPRS[2], (GEN)C[i]));
       a = gneg_i(gmod(a, (GEN)C[i]));
       b = gadd(polx[v], gmulsg(k,a));
       w = cgetg(5,t_VEC); /* [C, a, b, n ] */

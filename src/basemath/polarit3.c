@@ -21,8 +21,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /***********************************************************************/
 #include "pari.h"
 
-#define swapspec(x,y, nx,ny) {long _a=nx;GEN _z=x; nx=ny; ny=_a; x=y; y=_z;}
-#define swap(x,y) {GEN _z=x; x=y; y=_z;}
+#define lswap(x,y) {long _z=x; x=y; y=_z;}
+#define pswap(x,y) {GEN *_z=x; x=y; y=_z;}
+#define swap(x,y)  {GEN  _z=x; x=y; y=_z;}
+#define swapspec(x,y, nx,ny) {swap(x,y); lswap(nx,ny);}
 #define deg(a) (lgef(a)-3)
 
 /*******************************************************************/
@@ -105,7 +107,7 @@ u_FpX_deriv(GEN z, ulong p)
 
 static GEN u_FpX_gcd(GEN a, GEN b, ulong p);
 
-static int 
+static int
 u_FpX_is_squarefree(GEN z, ulong p)
 {
   ulong av = avma;
@@ -135,7 +137,7 @@ u_FpX_mullimb(GEN x, GEN y, ulong p, long a, long b)
   ulong p1 = 0;
   long i;
   for (i=a; i<b; i++)
-    if (y[i]) 
+    if (y[i])
     {
       p1 += y[i] * x[-i];
       if (p1 & HIGHBIT) p1 %= p;
@@ -149,7 +151,7 @@ u_FpX_mullimb_safe(GEN x, GEN y, ulong p, long a, long b)
   ulong p1 = 0;
   long i;
   for (i=a; i<b; i++)
-    if (y[i]) 
+    if (y[i])
       p1 = addssmod(p1, mulssmod(y[i],x[-i],p), p);
   return p1;
 }
@@ -221,10 +223,17 @@ u_allocpol(long d, int malloc)
 }
 
 static GEN
+u_scalarpol(ulong x, int malloc)
+{
+  GEN z = u_allocpol(0,malloc);
+  z[2] = x; return z;
+}
+
+static GEN
 u_FpX_neg_i(GEN x, ulong p)
 {
   long i, l = lgef(x);
-  for (i=2; i<l; i++) 
+  for (i=2; i<l; i++)
     if (x[i]) x[i] = p - x[i];
   return x;
 }
@@ -236,7 +245,7 @@ u_FpX_shiftip(long av, GEN x, long v)
   long i, lx = lgef(x), ly;
   GEN y;
   if (v <= 0 || !signe(x)) return gerepileupto(av, x);
-  avma = av; ly = lx + v; 
+  avma = av; ly = lx + v;
   x += lx; y = new_chunk(ly) + ly;
   for (i = 2; i<lx; i++) *--y = *--x;
   for (i = 0; i< v; i++) *--y = 0;
@@ -259,7 +268,7 @@ u_FpX_Kmul(GEN a, GEN b, ulong p, long na, long nb)
   if (na < nb) swapspec(a,b, na,nb);
   if (!nb) return u_zeropol(0);
 
-  av = avma; 
+  av = avma;
   if (nb < u_MUL_LIMIT)
     return u_FpX_shiftip(av,s_FpX_mulspec(a,b,p,na,nb), v);
   i=(na>>1); n0=na-i; na=i;
@@ -410,7 +419,7 @@ mulpol_limb(GEN x, GEN y, char *ynonzero, long a, long b)
   GEN p1 = NULL;
   long i,av = avma;
   for (i=a; i<b; i++)
-    if (ynonzero[i]) 
+    if (ynonzero[i])
     {
       GEN p2 = gmul((GEN)y[i],(GEN)x[-i]);
       p1 = p1 ? gadd(p1, p2): p2;
@@ -695,18 +704,18 @@ FpX_sub(GEN x,GEN y,GEN p)
 {
   long lx,ly,i,lz;
   GEN z;
-  lx = lgef(x); ly = lgef(y); 
+  lx = lgef(x); ly = lgef(y);
   lz=max(lx,ly);
   z = cgetg(lz,t_POL);
   if (lx >= ly)
-  {  
+  {
     z[1] = x[1];
     for (i=2; i<ly; i++) z[i]=lsubii((GEN)x[i],(GEN)y[i]);
     for (   ; i<lx; i++) z[i]=licopy((GEN)x[i]);
     (void)normalizepol_i(z, lz);
   }
   else
-  {  
+  {
     z[1] = y[1];
     for (i=2; i<lx; i++) z[i]=lsubii((GEN)x[i],(GEN)y[i]);
     for (   ; i<ly; i++) z[i]=lnegi((GEN)y[i]);
@@ -720,7 +729,7 @@ GEN
 FpX_mul(GEN x,GEN y,GEN p)
 {
   GEN z = quickmul(y+2, x+2, lgef(y)-2, lgef(x)-2);
-  setvarn(z,varn(x)); 
+  setvarn(z,varn(x));
   if (!p) return z;
   return FpX_red(z, p);
 }
@@ -728,7 +737,7 @@ GEN
 FpX_sqr(GEN x,GEN p)
 {
   GEN z = quicksqr(x+2, lgef(x)-2);
-  setvarn(z,varn(x)); 
+  setvarn(z,varn(x));
   if (!p) return z;
   return FpX_red(z, p);
 }
@@ -756,7 +765,7 @@ u_FpXQ_sqr(GEN y,GEN pol,ulong p)
  * return lift(lift(Mod(x*Mod(1,p), pol*Mod(1,p))^-1)) */
 GEN
 FpXQ_invsafe(GEN x, GEN T, GEN p)
-{ 
+{
   GEN z, U, V;
 
   if (typ(x) != t_POL) return mpinvmod(x, p);
@@ -787,13 +796,13 @@ FpXQ_mul(GEN y,GEN x,GEN T,GEN p)
 GEN
 FpXQ_sqr(GEN y,GEN pol,GEN p)
 {
-  GEN z = quicksqr(y+2,lgef(y)-2); setvarn(z,varn(y)); 
+  GEN z = quicksqr(y+2,lgef(y)-2); setvarn(z,varn(y));
   z = FpX_red(z, p); return FpX_res(z,pol, p);
 }
 /*Modify y[2].
  *No reduction if p is NULL
  */
-GEN 
+GEN
 FpX_Fp_add(GEN y,GEN x,GEN p)
 {
   if (!signe(x)) return y;
@@ -806,10 +815,10 @@ FpX_Fp_add(GEN y,GEN x,GEN p)
 }
 /* y is a polynomial in ZZ[X] and x an integer.
  * If p is NULL, no reduction is perfomed and return x*y
- * 
+ *
  * else the result is lift(y*x*Mod(1,p))
  */
-GEN 
+GEN
 FpX_Fp_mul(GEN y,GEN x,GEN p)
 {
   GEN z;
@@ -820,7 +829,7 @@ FpX_Fp_mul(GEN y,GEN x,GEN p)
   z[1]=y[1];
   for(i=2;i<lgef(y);i++)
     z[i]=lmulii((GEN)y[i],x);
-  if(!p) return z; 
+  if(!p) return z;
   return FpX_red(z,p);
 }
 /*****************************************************************
@@ -895,7 +904,7 @@ FpX_eval(GEN x,GEN y,GEN p)
 /* Tz=Tx*Ty where Tx and Ty coprime
  * return lift(chinese(Mod(x*Mod(1,p),Tx*Mod(1,p)),Mod(y*Mod(1,p),Ty*Mod(1,p))))
  * if Tz is NULL it is computed
- * =======>: As we do not return it, and the caller will frequently need it, 
+ * =======>: As we do not return it, and the caller will frequently need it,
  * it must compute it and pass it.
  */
 GEN
@@ -918,7 +927,7 @@ FpXQ_pow(GEN x, GEN n, GEN pol, GEN p)
   long m,i,j,ltop=avma, av, lim=stack_lim(avma,1), vx = varn(x);
   GEN p1 = n+2, y;
   if (!signe(n)) return polun[vx];
-  if (signe(n)<0) 
+  if (signe(n)<0)
   {
     x=FpXQ_inv(x,pol,p);
     if (is_pm1(n)) return x;/*n=-1*/
@@ -1149,7 +1158,7 @@ FpXQX_safegcd(GEN P, GEN Q, GEN T, GEN p)
 #define FqX_mul FpXQX_mul
 #define FqX_sqr FpXQX_sqr
 #define FqX_red FpXQX_red
-static GEN 
+static GEN
 Fq_neg(GEN x, GEN T, GEN p)/*T is not used but it is for consistency*/
 {
   switch(typ(x)==t_POL)
@@ -1188,9 +1197,9 @@ static GEN fflgen(GEN l, long e, GEN r, GEN T ,GEN p, GEN *zeta)
   if (is_bigint(p))
     pp=VERYBIGINT;
   else
-    pp=itos(p); 
+    pp=itos(p);
   z=(lgef(T)==4)?polun[x]:polx[x];
- 
+
   av1 = avma;
   for (k=1; ; k++)
   {
@@ -1267,9 +1276,9 @@ ffsqrtlmod(GEN a, GEN l, GEN T ,GEN p , GEN q, long e, GEN r, GEN y, GEN m)
 }
 /*  n is an integer, a is in Fp[X]/(T), p is prime, T is irreducible mod p
 
-return a solution of 
+return a solution of
 
-x^n=a mod p 
+x^n=a mod p
 
 1)If there is no solution return NULL and if zetan is not NULL set zetan to gzero.
 
@@ -1337,7 +1346,7 @@ GEN ffsqrtnmod(GEN a, GEN n, GEN T, GEN p, GEN *zetan)
 	lbot=av1;
       }
     }
-  }  
+  }
   if (zetan)
   {
     *zetan=gcopy(z);
@@ -1376,7 +1385,7 @@ matrixpow(long n, long m, GEN y, GEN P,GEN l)
   return gerepileupto(av,M);
 }
 /* compute the reciprocical isomorphism of S mod T,p, i.e. V such that
-   V(S)=X  mod T,p*/  
+   V(S)=X  mod T,p*/
 GEN
 Fp_inv_isom(GEN S,GEN T, GEN p)
 {
@@ -1404,7 +1413,7 @@ Fp_inv_isom(GEN S,GEN T, GEN p)
   FF_l[X]/(Q) ).  */
 void
 Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
-{  
+{
   ulong ltop=avma,lbot;
   long vp,vq,np,nq,e,pg;
   GEN q;
@@ -1416,7 +1425,7 @@ Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
     err(talker,"bad degrees in Fp_intersect: %d,%d,%d",n,degree(P),degree(Q));
   e=pvaluation(stoi(n),l,&q);
   pg=itos(q);
-  avma=ltop; 
+  avma=ltop;
   if (DEBUGLEVEL>=4) timer2();
   if(!MA) MA=matrixpow(np,np,FpXQ_pow(polx[vp],l,P,l),P,l);
   if(!MB) MB=matrixpow(nq,nq,FpXQ_pow(polx[vq],l,Q,l),Q,l);
@@ -1449,7 +1458,7 @@ Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       An=(GEN) FpXQ_pow(A,ipg,P,l)[2];
       Bn=(GEN) FpXQ_pow(B,ipg,Q,l)[2];
       z=modii(mulii(An,mpinvmod(Bn,l)),l);
-      L=mpsqrtnmod(z,ipg,l,NULL); 
+      L=mpsqrtnmod(z,ipg,l,NULL);
       if ( !L )
         err(talker,"Polynomials not irreducible in Fp_intersect");
       if (DEBUGLEVEL>=4) msgtimer("mpsqrtnmod");
@@ -1464,11 +1473,11 @@ Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       ipg=stoi(pg);
       if (DEBUGLEVEL>=4) timer2();
       A=FqM_ker(gaddmat(z, MA),lU,l);
-      if (lg(A)!=2) 
+      if (lg(A)!=2)
 	err(talker,"ZZ_%Z[%Z]/(%Z) is not a field in Fp_intersect"
 	    ,l,polx[vp],P);
       A=gmul((GEN)A[1],gmodulcp(gmodulcp(gun,l),U));
-      A=gtopolyrev(A,vp);  
+      A=gtopolyrev(A,vp);
       B=FqM_ker(gaddmat(z, MB),lU,l);
       if (lg(B)!=2)
 	err(talker,"ZZ_%Z[%Z]/(%Z) is not a field in Fp_intersect"
@@ -1478,11 +1487,11 @@ Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       if (DEBUGLEVEL>=4) msgtimer("FqM_ker");
       /*Somewhat ugly, but it is a proof that POLYMOD are useful and
         powerful.*/
-      An=lift(lift((GEN)lift(gpowgs(gmodulcp(A,P),pg))[2])); 
+      An=lift(lift((GEN)lift(gpowgs(gmodulcp(A,P),pg))[2]));
       Bn=lift(lift((GEN)lift(gpowgs(gmodulcp(B,Q),pg))[2]));
       z=FpXQ_inv(Bn,lU,l);
       z=FpXQ_mul(An,z,lU,l);
-      L=ffsqrtnmod(z,ipg,lU,l,NULL); 
+      L=ffsqrtnmod(z,ipg,lU,l,NULL);
       if ( !L )
         err(talker,"Polynomials not irreducible in Fp_intersect");
       if (DEBUGLEVEL>=4) msgtimer("ffsqrtn");
@@ -1511,7 +1520,7 @@ Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       for(i=2;i<=nq;i++) VQ[i]=zero;
     }
     for(j=0;j<e;j++)
-    { 
+    {
       if (j)
       {
 	Ay=FpXQ_mul(Ay,FpXQ_pow(Ap,lmun,P,l),P,l);
@@ -1861,7 +1870,7 @@ u_Fp_FpX(GEN x, int malloc, ulong p)
   return u_normalizepol(a,lx);
 }
 
-static GEN 
+static GEN
 u_FpX_Fp_mul(GEN y, ulong x,ulong p, int malloc)
 {
   GEN z;
@@ -2179,22 +2188,21 @@ u_gerepilemany(long av, GEN* gptr[], long n)
 static GEN
 u_FpX_extgcd(GEN a, GEN b, ulong p, GEN *ptu, GEN *ptv)
 {
-  GEN q,r,u,v,v1,d,d1;
+  GEN q,z,u,v, x = a, y = b;
 
-  d = a; d1 = b;
-  v = u_zeropol(0);
-  v1= u_allocpol(0, 0); v1[2] = 1; /* v1 = 1 */
-  while (signe(d1))
+  u = u_zeropol(0);
+  v= u_scalarpol(1, 0); /* v = 1 */
+  while (signe(y))
   {
-    q = u_FpX_divrem(d,d1,p, 0,&r);
-    v = u_FpX_sub(v, u_FpX_mul(q,v1, p), p); /* v -= q v1 */
-    u=v; v=v1; v1=u;
-    u=r; d=d1; d1=u;
+    q = u_FpX_divrem(x,y,p, 0,&z);
+    x = y; y = z; /* (x,y) = (y, x - q y) */
+    z = u_FpX_sub(u, u_FpX_mul(q,v, p), p);
+    u = v; v = z; /* (u,v) = (v, u - q v) */
   }
-  u = u_FpX_sub(d, u_FpX_mul(b,v,p), p);
-  u = u_FpX_div(u,a,p);
-  *ptu = u;
-  *ptv = v; return d;
+  z = u_FpX_sub(x, u_FpX_mul(b,u,p), p);
+  z = u_FpX_div(z,a,p);
+  *ptu = z;
+  *ptv = u; return x;
 }
 
 static GEN
@@ -2272,7 +2280,7 @@ u_chrem_coprime(GEN a, ulong b, GEN q, ulong p, ulong qinv, GEN pq)
 }
 
 /* centerlift(u mod p) */
-GEN 
+GEN
 u_center(ulong u, ulong p, ulong ps2)
 {
   return stoi((long) (u > ps2)? u - p: u);
@@ -2330,162 +2338,6 @@ incremental_CRT(GEN H, GEN Hp, GEN q, GEN qp, ulong p)
     }
   }
   return stable;
-}
-
-/* A0 and B0 in Q[X] */
-GEN
-modulargcd(GEN A0, GEN B0)
-{
-  GEN a,b,Hp,D,A,B,q,qp,H,g,p1;
-  long m,n;
-  ulong p, av2, av = avma, avlim = stack_lim(av,1);
-  byteptr d = diffptr;
-
-  if (typ(A0)!=t_POL || typ(B0)!=t_POL) err(notpoler,"modulargcd");
-  if (!signe(A0)) return gcopy(B0);
-  if (!signe(B0)) return gcopy(A0);
-  A = content(A0);
-  B = content(B0); D = ggcd(A,B);
-  A = gcmp1(A)? A0: gdiv(A0,A);
-  B = gcmp1(B)? B0: gdiv(B0,B);
-  /* A, B in Z[X] */
-  g = mppgcd(leading_term(A), leading_term(B)); /* multiple of lead(gcd) */
-  if (deg(A) < deg(B)) swap(A, B);
-  av2 = avma; n = 1 + deg(B); /* > degree(gcd) */
-
-  H = NULL;
-  d += 3000; /* 27449 = prime(3000) */
-  for(p = 27449; ; p+= *d++)
-  {
-    if (!*d) err(primer1);
-    if (!umodiu(g,p)) continue;
-
-    a = u_Fp_FpX(A, 0, p);
-    b = u_Fp_FpX(B, 0, p); Hp = u_FpX_gcd(a,b, p);
-    m = deg(Hp);
-    if (m == 0) { H = polun[varn(A0)]; break; } /* coprime. DONE */
-    if (m > n) continue; /* p | Res(A/G, B/G). Discard */
-
-    if (is_pm1(g)) /* make sure lead(H) = g mod p */
-      Hp = u_FpX_normalize(Hp, p);
-    else
-    {
-      ulong t = umodiu(g, p) * u_invmod(Hp[m+2],p);
-      Hp = u_FpX_Fp_mul(Hp, t % p, p, 0);
-    }
-    if (m < n)
-    { /* First time or degree drop [all previous p were as above; restart]. */
-      H = init_CRT(Hp,p,varn(A0));
-      q = utoi(p); n = m; continue;
-    }
-
-    qp = muliu(q,p);
-    if (incremental_CRT(H, Hp, q, qp, p))
-    { /* H stable: check divisibility */
-      if (!is_pm1(g)) { p1 = content(H); if (!is_pm1(p1)) H = gdiv(H,p1); }
-      if (!signe(gres(A,H)) && !signe(gres(B,H))) break; /* DONE */
-
-      if (DEBUGLEVEL) fprintferr("modulargcd: trial division failed"); /*rare*/
-    }
-    q = qp;
-    if (low_stack(avlim, stack_lim(av,1)))
-    {
-      GEN *gptr[2]; gptr[0]=&H; gptr[1]=&q;
-      if (DEBUGMEM>1) err(warnmem,"modulargcd");
-      gerepilemany(av2,gptr,2);
-    }
-  }
-  return gerepileupto(av, gmul(D,H));
-}
-
-extern GEN polratlift(GEN P, GEN mod, GEN amax, GEN bmax, GEN denom);
-
-GEN
-ZX_extgcd(GEN A0, GEN B0, GEN *ptU, GEN *ptV)
-{
-  GEN a,b,Hp,D,A,B,q,qp,H,g,p1, Up,Vp,U,V,UU,VV,bo,den;
-  long m,n;
-  ulong p, av2, av = avma, avlim = stack_lim(av,1);
-  byteptr d = diffptr;
-
-  if (typ(A0)!=t_POL || typ(B0)!=t_POL) err(notpoler,"modulargcd");
-  if (!signe(A0)) return gcopy(B0);
-  if (!signe(B0)) return gcopy(A0);
-  A = content(A0);
-  B = content(B0); D = ggcd(A,B);
-  A = gcmp1(A)? A0: gdiv(A0,A);
-  B = gcmp1(B)? B0: gdiv(B0,B);
-  /* A, B in Z[X] */
-  den = ZX_resultant(A,B);
-  if (DEBUGLEVEL)
-    fprintferr("ZX_extgcd: denominator bound %Z\n",den);
-  g = mppgcd(leading_term(A), leading_term(B)); /* multiple of lead(gcd) */
-  if (deg(A) < deg(B)) { GEN *_x; swap(A, B); _x = ptU; ptU = ptV; ptV = _x; }
-  av2 = avma; n = 1 + deg(B); /* > degree(gcd) */
-
-  H = NULL;
-  d += 3000; /* 27449 = prime(3000) */
-  for(p = 27449; ; p+= *d++)
-  {
-    if (!*d) err(primer1);
-    if (!umodiu(g,p) || !umodiu(den,p)) continue;
-
-    a = u_Fp_FpX(A, 0, p);
-    b = u_Fp_FpX(B, 0, p); Hp = u_FpX_extgcd(a,b,p, &Up,&Vp);
-    m = deg(Hp);
-    if (m > n) continue; /* p | Res(A/G, B/G). Discard */
-
-    /* make sure lead(H) = g mod p */
-    {
-      ulong t = (umodiu(g, p) * u_invmod(Hp[m+2],p)) % p;
-      Hp = u_FpX_Fp_mul(Hp, t, p, 0);
-      Up = u_FpX_Fp_mul(Up, t, p, 0);
-      Vp = u_FpX_Fp_mul(Vp, t, p, 0);
-    }
-    if (m < n)
-    { /* First time or degree drop [all previous p were as above; restart]. */
-      H = init_CRT(Hp,p,varn(A0));
-      U = init_CRT(Up,p,varn(A0));
-      V = init_CRT(Vp,p,varn(A0));
-      q = utoi(p); n = m; continue;
-    }
-
-    qp = muliu(q,p);
-    bo = shifti(gun, expi(qp)/2 - 1);
-    (void)incremental_CRT(U, Up, q,qp, p);
-    (void)incremental_CRT(V, Vp, q,qp, p);
-    if ( incremental_CRT(H, Hp, q,qp, p)
-      && (UU = polratlift(U,qp, bo,bo,den))
-      && (VV = polratlift(V,qp, bo,bo,den)) )
-    { /* all stable: check divisibility */
-      if (!is_pm1(g))
-      {
-        p1 = content(H);
-        if (!is_pm1(p1)) { H = gdiv(H,p1); UU = gdiv(UU,p1); VV = gdiv(VV,p1); }
-      }
-      p1 = content(UU);
-      if (gegal(gadd(gmul(A,gdiv(UU,p1)),
-                     gmul(B,gdiv(VV,p1))), gdiv(H,p1))) break; /* DONE */
-
-      if (DEBUGLEVEL) fprintferr("ZX_extgcd: char 0 check failed"); /*rare*/
-    }
-    q = qp;
-    if (low_stack(avlim, stack_lim(av,1)))
-    {
-      GEN *gptr[4]; gptr[0]=&H; gptr[1]=&q; gptr[2]=&U; gptr[3]=&V;
-      if (DEBUGMEM>1) err(warnmem,"ZX_extgcd");
-      gerepilemany(av2,gptr,4);
-    }
-  }
-  {
-    GEN *gptr[3];
-    ulong tetpil = avma;
-    H = gmul(H, D); gptr[0]=&H;
-    *ptU= gmul(UU, D);gptr[1]=ptU;
-    *ptV= gmul(VV, D);gptr[2]=ptV;
-    gerepilemanysp(av,tetpil, gptr,3);
-  }
-  return H;
 }
 
 /* returns a polynomial in variable v, whose coeffs correspond to the digits
@@ -2621,7 +2473,7 @@ u_FpX_resultant(GEN a, GEN b, ulong p)
     c = u_FpX_rem(a,b, p);
     a = b; b = c; dc = deg(c);
     if (dc < 0) { avma = av; return 0; }
-  
+
     if (da & db & 1) res = p - res;
     if (lb != 1) res = mulssmod(res, powuumod(lb, da - dc, p), p);
     if (++cnt == 4) { cnt = 0; avma = av; }
@@ -2629,6 +2481,49 @@ u_FpX_resultant(GEN a, GEN b, ulong p)
     db = dc; /* = deg(b) */
   }
   avma = av; return mulssmod(res, powuumod(b[2], da, p), p);
+}
+
+/* If resultant is 0, *ptU and *ptU are not set */
+ulong
+u_FpX_extresultant(GEN a, GEN b, ulong p, GEN *ptU, GEN *ptV)
+{
+  GEN z,q,u,v, x = a, y = b;
+  ulong lb, av = avma, res = 1UL;
+  long dx,dy,dz;
+
+  if (!signe(x) || !signe(y)) return 0;
+  dx = deg(x);
+  dy = deg(y);
+  if (dy > dx)
+  {
+    swap(x,y); lswap(dx,dy); pswap(ptU, ptV);
+    a = x; b = y;
+    if (dx & dy & 1) res = p-res;
+  }
+  u = u_zeropol(0);
+  v = u_scalarpol(1, 0); /* v = 1 */
+  while (dy)
+  { /* b u = x (a), b v = y (a) */
+    lb = y[dy+2];
+    q = u_FpX_divrem(x,y, p, 0, &z);
+    x = y; y = z; /* (x,y) = (y, x - q y) */
+    dz = deg(z); if (dz < 0) { avma = av; return 0; }
+    z = u_FpX_sub(u, u_FpX_mul(q,v, p), p);
+    u = v; v = z; /* (u,v) = (v, u - q v) */
+
+    if (dx & dy & 1) res = p - res;
+    if (lb != 1) res = mulssmod(res, powuumod(lb, dx-dz, p), p);
+    dx = dy; /* = deg(x) */
+    dy = dz; /* = deg(y) */
+  }
+  res = mulssmod(res, powuumod(y[2], dx, p), p);
+  lb = mulssmod(res, u_invmod(y[2],p), p);
+  v = gerepileupto(av, u_FpX_Fp_mul(v, lb, p, 0));
+  av = avma;
+  u = u_FpX_sub(u_scalarpol(res,0), u_FpX_mul(b,v,p), p);
+  u = gerepileupto(av, u_FpX_div(u,a,p)); /* = (res - b v) / a */
+  *ptU = u;
+  *ptV = v; return res;
 }
 
 /* assuming the PRS finishes on a degree 1 polynomial C0 + C1X, with "generic"
@@ -2660,7 +2555,7 @@ u_FpX_resultant_all(GEN a, GEN b, long *C0, long *C1, GEN dglist, ulong p)
     if (dc < 0) { avma = av; return 0; }
 
     ind++;
-    if (C0) 
+    if (C0)
     { /* check that Euclidean remainder sequence doesn't degenerate */
       if (dc != dglist[ind]) { avma = av; return 0; }
       /* update resultant */
@@ -2672,7 +2567,7 @@ u_FpX_resultant_all(GEN a, GEN b, long *C0, long *C1, GEN dglist, ulong p)
         if (dc) cx = mulssmod(cx, t, p);
       }
     }
-    else 
+    else
     {
       if (dc > dglist[ind]) dglist[ind] = dc;
     }
@@ -2693,16 +2588,6 @@ u_FpX_resultant_all(GEN a, GEN b, long *C0, long *C1, GEN dglist, ulong p)
     lb = b[2];
   } else lb = powuumod(b[2], da, p);
   avma = av; return mulssmod(res, lb, p);
-}
-
-ulong
-FpX_resultant_long(GEN x, GEN y, GEN p)
-{
-  ulong pp = (ulong)p[2], av = avma;
-  GEN a = u_Fp_FpX(x,0, pp);
-  GEN b = u_Fp_FpX(y,0, pp);
-  ulong res = u_FpX_resultant(a, b, pp);
-  avma = av; return res;
 }
 
 static ulong global_pp;
@@ -2747,7 +2632,7 @@ pol_comp(GEN P, GEN u, GEN v)
   for (i=2; i<l; i++)
   {
     GEN t = (GEN)P[i];
-    y[i] = gcmp0(t)? zero: 
+    y[i] = gcmp0(t)? zero:
                      (i&1)? lmul(t, gsub(u,v)) /*  odd degree */
                           : lmul(t, gadd(u,v));/* even degree */
   }
@@ -2762,7 +2647,7 @@ u_pol_comp(GEN P, ulong u, ulong v, ulong p)
   for (i=2; i<l; i++)
   {
     ulong t = P[i];
-    y[i] = (t == 0)? 0: 
+    y[i] = (t == 0)? 0:
                      (i&1)? mulssmod(t, u + (p - v), p)
                           : mulssmod(t, u + v, p);
   }
@@ -3127,7 +3012,7 @@ INIT:
     if (LERS)
     {
       int stable;
-      if (!H) 
+      if (!H)
       {
         q = utoi(p); stable = 0;
         H = init_CRT(Hp, p,vX);
@@ -3147,7 +3032,7 @@ INIT:
     }
     else
     {
-      if (!H) 
+      if (!H)
       {
         q = utoi(p);
         H = init_CRT(Hp, p,vX);
@@ -3253,7 +3138,7 @@ ZX_resultant_all(GEN A, GEN B, ulong bound)
     a = u_Fp_FpX(A, 0, p);
     b = u_Fp_FpX(B, 0, p);
     Hp= u_FpX_resultant(a, b, p);
-    if (!H) 
+    if (!H)
     {
       stable = 0; q = utoi(p);
       H = u_center(Hp, p, p>>1);
@@ -3300,33 +3185,121 @@ ZX_issquarefree(GEN x)
   avma = av; return d;
 }
 
-#if 0
+/* A0 and B0 in Q[X] */
 GEN
-result_interp(GEN A, GEN B)
+modulargcd(GEN A0, GEN B0)
 {
-  long i,n, la = lgef(A), lb = lgef(B), dres = (la-3)*(lb-3);
-  GEN leadB = leading_term(B), gn;
-  GEN x = cgetg(dres+2, t_VEC);
-  GEN y = cgetg(dres+2, t_VEC);
-  if (typ(leadB) != t_POL || lgef(leadB) == 3) leadB = NULL;
-  if (DEBUGLEVEL) timer2();
-  i = 0;
-  for (n=0; i<=dres; n++)
+  GEN a,b,Hp,D,A,B,q,qp,H,g,p1;
+  long m,n;
+  ulong p, av2, av = avma, avlim = stack_lim(av,1);
+  byteptr d = diffptr;
+
+  if ((typ(A0) | typ(B0)) !=t_POL) err(notpoler,"modulargcd");
+  if (!signe(A0)) return gcopy(B0);
+  if (!signe(B0)) return gcopy(A0);
+  A = content(A0);
+  B = content(B0); D = ggcd(A,B);
+  A = gcmp1(A)? A0: gdiv(A0,A);
+  B = gcmp1(B)? B0: gdiv(B0,B);
+  /* A, B in Z[X] */
+  g = mppgcd(leading_term(A), leading_term(B)); /* multiple of lead(gcd) */
+  if (deg(A) < deg(B)) swap(A, B);
+  n = 1 + deg(B); /* > degree(gcd) */
+
+  av2 = avma; H = NULL;
+  d += 3000; /* 27449 = prime(3000) */
+  for(p = 27449; ; p+= *d++)
   {
-    gn = stoi(n);
-    if (leadB && (gcmp0(poleval(leadB, gn))
-                 || (n && gcmp0(poleval(leadB, negi(gn)))))) continue;
-    i++;
-    x[i] = (long)gn;
-    y[i] = (long)subres(poleval(B, gn), A);
-    if (n == 0) continue;
-    if (i > dres) break;
-    i++; gn = negi(gn);
-    x[i] = (long)gn;
-    y[i] = (long)subres(poleval(B, gn), A);
-    if (DEBUGLEVEL) fprintferr(" %ld", i);
+    if (!*d) err(primer1);
+    if (!umodiu(g,p)) continue;
+
+    a = u_Fp_FpX(A, 0, p);
+    b = u_Fp_FpX(B, 0, p); Hp = u_FpX_gcd(a,b, p);
+    m = deg(Hp);
+    if (m == 0) { H = polun[varn(A0)]; break; } /* coprime. DONE */
+    if (m > n) continue; /* p | Res(A/G, B/G). Discard */
+
+    if (is_pm1(g)) /* make sure lead(H) = g mod p */
+      Hp = u_FpX_normalize(Hp, p);
+    else
+    {
+      ulong t = mulssmod(umodiu(g, p), u_invmod(Hp[m+2],p), p);
+      Hp = u_FpX_Fp_mul(Hp, t, p, 0);
+    }
+    if (m < n)
+    { /* First time or degree drop [all previous p were as above; restart]. */
+      H = init_CRT(Hp,p,varn(A0));
+      q = utoi(p); n = m; continue;
+    }
+
+    qp = muliu(q,p);
+    if (incremental_CRT(H, Hp, q, qp, p))
+    { /* H stable: check divisibility */
+      if (!is_pm1(g)) { p1 = content(H); if (!is_pm1(p1)) H = gdiv(H,p1); }
+      if (!signe(gres(A,H)) && !signe(gres(B,H))) break; /* DONE */
+
+      if (DEBUGLEVEL) fprintferr("modulargcd: trial division failed");
+    }
+    q = qp;
+    if (low_stack(avlim, stack_lim(av,1)))
+    {
+      GEN *gptr[2]; gptr[0]=&H; gptr[1]=&q;
+      if (DEBUGMEM>1) err(warnmem,"modulargcd");
+      gerepilemany(av2,gptr,2);
+    }
   }
-  if (DEBUGLEVEL) msgtimer("done evals");
-  return polint_triv(x,y);
+  return gerepileupto(av, gmul(D,H));
 }
-#endif
+
+/* lift(1 / Mod(A,B)) */
+GEN
+ZX_invmod(GEN A0, GEN B0)
+{
+  GEN a,b,D,A,B,q,qp,Up,Vp,U,V,res;
+  long stable;
+  ulong p, av2, av = avma, avlim = stack_lim(av,1);
+  byteptr d = diffptr;
+
+  if ((typ(A0) | typ(B0)) !=t_POL) err(notpoler,"ZX_invmod");
+  A = content(A0); D = A;
+  B = content(B0);
+  A = gcmp1(A)? A0: gdiv(A0,A);
+  B = gcmp1(B)? B0: gdiv(B0,B);
+  /* A, B in Z[X] */
+  av2 = avma; U = NULL;
+  d += 3000; /* 27449 = prime(3000) */
+  for(p = 27449; ; p+= *d++)
+  {
+    if (!*d) err(primer1);
+    a = u_Fp_FpX(A, 0, p);
+    b = u_Fp_FpX(B, 0, p);
+    /* if p | Res(A/G, B/G), discard */
+    if (!u_FpX_extresultant(b,a,p, &Vp,&Up)) continue;
+
+    if (!U)
+    { /* First time */
+      U = init_CRT(Up,p,varn(A0));
+      V = init_CRT(Vp,p,varn(A0));
+      q = utoi(p); continue;
+    }
+    if (DEBUGLEVEL>5) msgtimer("ZX_invmod: mod %ld (bound 2^%ld)", p,expi(q));
+    qp = muliu(q,p);
+    stable  = incremental_CRT(U, Up, q,qp, p);
+    stable &= incremental_CRT(V, Vp, q,qp, p);
+    if (stable)
+    { /* all stable: check divisibility */
+      res = gadd(gmul(A,U), gmul(B,V));
+      if (deg(res) == 0) break; /* DONE */
+      if (DEBUGLEVEL) fprintferr("ZX_invmod: char 0 check failed");
+    }
+    q = qp;
+    if (low_stack(avlim, stack_lim(av,1)))
+    {
+      GEN *gptr[3]; gptr[0]=&q; gptr[1]=&U; gptr[2]=&V;
+      if (DEBUGMEM>1) err(warnmem,"ZX_invmod");
+      gerepilemany(av2,gptr,3);
+    }
+  }
+  return gerepileupto(av, gmul(U,gdiv(D,res)));
+}
+
