@@ -100,6 +100,7 @@ AMD K6       233Mhz  Linux-2.2.14    gcc            6968    7158  2.0.18    QL
 IBM/Cyrix    200MHz  Linux-2.0.35    gcc           13190   13729  2.0.15    AP
 
 PentiumIV   2800MHz  Linux-2.4.18    gcc-3.2	     507     580  2.2.6	    IS	
+PentiumIV   2000MHz  Linux-2.4.20    gcc-3.3	     794     962  2.2.6 (42)ID
 PentiumIV   2000MHz  Linux-2.4.18    gcc-3.2	     849     835  2.1.5 (25)FU
 PentiumIV   1800MHz  WinXP + Cygwin  gcc-3.2        1384!      -  2.2.5 (38)DC
 PentiumIV   1695MHz  FreeBSD 4.6.2   gcc-2.95.3      904     918  2.2.5     MW
@@ -337,6 +338,9 @@ Used -fprofile-arcs for the first compilation parse, then -fbranch-probabilities
 to generate optimized executables. For this machine, many benchmarks are too
 short to provide accurate results (TIME=0 or 10).
 
+(42) gcc 3.3 version 20030226  -O3 failed to compile buch2.c with "internal
+compiler error". Works fine after compiling manually this file at -O2.
+
 =============================================================================
 Contributors:
   AW = Aleksander Wittlin
@@ -356,6 +360,7 @@ Contributors:
   HG = Herbert Gangl
   HR = Herman te Riele
   HS = Hans Schaechl
+  ID = Ingo Dittmer
   IS = Igor Schein
   JC = John Cremona
   KK = Kimitoshi Kono
