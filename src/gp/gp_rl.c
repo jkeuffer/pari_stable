@@ -537,7 +537,7 @@ pari_completion(char *text, int START, int END)
     while (j <= END && isspace((int)rl_line_buffer[j])) j++;
     k = END;
     while (k > j && isspace((int)rl_line_buffer[k])) k--;
-    /* If we are in empty parens, insert arguments for the function: */
+    /* If we are in empty parens, output function help */
     if (do_args_complete && k == j
          && (rl_line_buffer[j] == ')' || !rl_line_buffer[j])
 	 && (iend - i < MAX_KEYWORD)
@@ -545,25 +545,6 @@ pari_completion(char *text, int START, int END)
 	      buf[iend - i] = 0, 1)
 	 && (ep = is_entry(buf)) && ep->help)
      {
-#if 0
-      char *s = ep->help;
-
-      while (is_keyword_char(*s)) s++;
-      if (*s++ == '(')
-      { /* Function, print arguments! */
-        char *endh = s;
-        while (*endh && *endh != ')' && *endh != '(') endh++;
-        if (*endh == ')')
-        { /* Well-formed help.  */
-          char *str = strncpy((char*) gpmalloc(endh-s + 1), s, endh-s);
-          char **ret = (char**)gpmalloc(sizeof(char*)*2);
-          str[endh-s] = 0;
-          ret[0] = str; ret[1] = NULL;
-          if (under_emacs) ret = matches_for_emacs("",ret);
-          return ret;
-        }
-      }
-#endif
       rl_print_aide(buf,h_RL);
       rl_attempted_completion_over = 1;
       return NULL;
