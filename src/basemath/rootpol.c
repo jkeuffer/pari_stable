@@ -369,7 +369,7 @@ findpower(GEN p)
   {
     logbinomial += log2((double) (i+1) / (double) (n-i));
     x = mylog2((GEN)p[i+2]);
-    if (x > -pariINFINITY)
+    if (x != -pariINFINITY)
     {
       pente = (x - logbinomial) / (double) (n-i);
       if (pente > pentemax) pentemax = pente;

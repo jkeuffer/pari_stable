@@ -5,5 +5,9 @@ for fun in $list; do
   else
     eval "has_$fun=no"; echo ..."I did not find $fun."
   fi;
+  case "$_has_list" in
+    *has_$fun*);;
+    *) _has_list="$_has_list has_$fun";;
+  esac
 done
 rm -f $exe

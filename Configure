@@ -1129,6 +1129,7 @@ esac
 # Looking in C lib for some functions.
 #
 exe=$osname-$arch-tmp$$
+_has_list=
 echo Checking some common types...
 list=ulong; . ./look
 echo Looking in C lib for some symbols...
@@ -1146,6 +1147,7 @@ list='sigrelse sigsetmask'; . ./look
 list=TIOCGWINSZ; . ./look
 list=getrlimit; . ./look
 list=opendir; . ./look
+list=vsnprintf; . ./look
 
 # For install(). Do we need libdl.so?
 # on irix and osf1 -ldl not needed
@@ -1298,11 +1300,9 @@ for variable in\
   rl_appendchar rl_genericbind rl_save_prompt _rl_save_prompt rl_message\
   rl_completion_matches rl_completion_func_t\
   RLINCLUDE RLLIBS\
-  sizeof_long endian has_exp2\
-  has_getrusage has_times has_ulong has_ftime has_strftime has_opendir\
-  has_sigrelse has_sigsetmask has_dlopen has_TIOCGWINSZ has_getrlimit\
+  sizeof_long endian\
   gnuplot extralib X11 Xincroot which_graphic_lib gnuplot_libs\
-  ; do
+  $_has_list; do
   eval "echo $variable=\'"'$'"$variable\'" \>\> $dflt_conf_file
 done
 
