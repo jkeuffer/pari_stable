@@ -967,7 +967,7 @@ x^5 + 3021*x^4 - 786303*x^3 - 6826636057*x^2 - 546603588746*x + 385389051407
 [12, 1, 1]
 ? nf3=initalg(x^6+108);galoisconj(nf3)
 [-x, x, -1/12*x^4 - 1/2*x, -1/12*x^4 + 1/2*x, 1/12*x^4 - 1/2*x, 1/12*x^4 + 1
-/2*x]
+/2*x]~
 ? galoisconjforce(nf3)
   ***   this function has been suppressed.
 
