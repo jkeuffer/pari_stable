@@ -607,7 +607,8 @@ err_match(char *s, char c)
 }
 
 #define match2(s,c) if (*s != c) err_match(s,c);
-#define match(c) do { match2(analyseur, c); analyseur++; } while (0);
+#define match(c) \
+  do { match2(analyseur, c); analyseur++; } while (0)
 
 static long
 readlong()
@@ -1263,7 +1264,7 @@ check_pointers(unsigned int ptrs, matcomp *init[])
 }
 
 #define match_comma() \
-  do { if (matchcomma) match(','); else matchcomma = 1; } while (0);
+  do { if (matchcomma) match(','); else matchcomma = 1; } while (0)
 
 static void
 skipdecl(void)
