@@ -953,7 +953,7 @@ GEN
 matrixqz(GEN x, GEN p)
 {
   ulong av = avma, av1, lim;
-  long i,j,j1,m,n,t,nfact;
+  long i,j,j1,m,n,nfact;
   GEN p1,p2,p3;
 
   if (typ(x) != t_MAT) err(typeer,"matrixqz");
@@ -970,7 +970,7 @@ matrixqz(GEN x, GEN p)
   p1 = x; x = cgetg(n+1,t_MAT);
   for (j=1; j<=n; j++)
   {
-    x[j] = primpart((GEN)p1[j]);
+    x[j] = (long)primpart((GEN)p1[j]);
     if (!ZV_isin((GEN)p1[j])) err(talker, "not a rational matrix in matrixqz");
   }
   /* x integral */
