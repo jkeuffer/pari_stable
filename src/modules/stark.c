@@ -453,7 +453,7 @@ CplxModulus(GEN data, long *newprec, long prec)
 
   pr = gexpo(pol)>>TWOPOTBITS_IN_LONG;
   if (pr < 0) pr = 0;
-  *newprec = max(prec, pr + ADD_PREC);
+  *newprec = max(prec, pr + EXTRA_PREC);
 
   return gerepileupto(av, cpl);
 }
@@ -1946,6 +1946,9 @@ GetST(GEN dataCR, long prec)
     N0[i] = GetBoundN0((GEN)C[i], N, prec, 0);
     if (nmax < N0[i]) nmax  = N0[i];
   }
+
+  if (nmax > maxprime())
+    err(talker, "Not enough precomputed primes (need all primes up to %ld)", nmax);
 
   i0 = GetBoundi0(N, prec);
 
