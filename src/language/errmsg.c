@@ -263,8 +263,6 @@ char *errmessage[]=
 
   /*  POLARIT.C */
 
-/* poler9 */
-  "too many iterations in roots",
 /* rootper1 */
   "incorrect type(s) or zero polynomial in rootpadic or factorpadic",
 /* rootper2 */

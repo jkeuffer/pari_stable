@@ -76,7 +76,7 @@ enum {
 
 /* polarit.c */
 
-  poler9, rootper1, rootper2, rootper4,
+  rootper1, rootper2, rootper4,
 
 /* trans.c */
 

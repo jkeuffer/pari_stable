@@ -2615,8 +2615,7 @@ roots2(GEN pol,long PREC)
   rr=cgetg(N+1,t_COL);
   for (i=1; i<=N; i++)
   {
-    rr[i]=lgetg(3,t_COMPLEX); p1=(GEN)rr[i];
-    mael(rr,i,1)=lgetr(PREC); mael(rr,i,2)=lgetr(PREC);
+    p1 = cgetc(PREC); rr[i] = (long)p1;
     for (j=3; j<PREC; j++) mael(p1,2,j)=mael(p1,1,j)=0;
   }
   if (flagexactpol) tabqol=square_free_factorization(pol);
@@ -2706,11 +2705,11 @@ roots2(GEN pol,long PREC)
   tetpil=avma; return gerepile(av,tetpil,gcopy(rr));
 
  RLAB:
-  avma=av;
+  avma = av;
   for(i=2;i<=N+2;i++)
   {
-    ti=typ(pol[i]);
-    if (is_intreal_t(ti) || ti==t_INTMOD) err(poler9);
+    ti = typ(pol[i]);
+    if (!is_intreal_t(ti)) err(talker,"too many iterations in roots");
   }
   if (DEBUGLEVEL)
   {
