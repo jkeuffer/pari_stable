@@ -2286,7 +2286,7 @@ int_read_more(GEN y, char **ps)
   while (isdigit((int)**ps))
   {
     ulong m = number(&nb, ps);
-    if (++i == 4) { avma = av; i = 0; } /* HACK gerepile */
+    if (avma != av && ++i > 4) { avma = av; i = 0; } /* HACK gerepile */
     y = addumului(m, u_pow10(nb), y);
   }
   return y;
