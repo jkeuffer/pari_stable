@@ -878,14 +878,6 @@ fix_rfrac_if_pol(GEN x, GEN y)
   avma = av; return NULL;
 }
 
-static long
-mingvar(GEN x, GEN y)
-{
-  long i = gvar(x);
-  long j = gvar(y);
-  return min(i,j);
-}
-
 static GEN
 to_primitive(GEN x, GEN *cx)
 {
@@ -901,40 +893,43 @@ to_primitive(GEN x, GEN *cx)
 GEN
 mulscalrfrac(GEN x, GEN y)
 {
-  GEN p1,z,y1,y2,cx,cy1,cy2;
-  long tx;
-  pari_sp tetpil;
+  GEN p1, z, n, d, cx, cn, cd;
+  long vx, vn, vd;
+  pari_sp av = avma, tetpil;
 
   if (gcmp0(x)) return gcopy(x);
 
-  y1=(GEN)y[1]; if (gcmp0(y1)) return gcopy(y1);
-  y2=(GEN)y[2]; tx = typ(x);
+  n = (GEN)y[1]; if (gcmp0(n)) return gcopy(n);
+  d = (GEN)y[2];
+  vx = gvar(x);
+  vn = gvar(n);
+  vd = gvar(d); /* vd <= vn */
   z = cgetg(3, t_RFRAC);
-  if (is_const_t(tx) || varn(x) > mingvar(y1,y2)) { cx = x; x = gun; }
+  if (vx > vd) { cx = x; x = gun; }
   else
   {
-    p1 = ggcd(x,y2); if (isnonscalar(p1)) { x=gdeuc(x,p1); y2=gdeuc(y2,p1); }
+    p1 = ggcd(x,d); if (isnonscalar(p1)) { x=gdeuc(x,p1); d=gdeuc(d,p1); }
+    if (lgef(d) == 3) return gerepileupto(av, gdiv(gmul(x,n), (GEN)d[2]));
     x = to_primitive(x, &cx);
   }
-  y1 = to_primitive(y1, &cy1);
-  y2 = to_primitive(y2, &cy2);
-  if (x != gun) y1 = gmul(y1,x);
-  x = gdiv(gmul(cx,cy1), cy2);
-  if (typ(x) == t_POL)
+  n = to_primitive(n, &cn); if (x != gun) n = gmul(n,x);
+  d = to_primitive(d, &cd);
+  cx = gdiv(gmul(cx,cn), cd);
+  if (typ(cx) == t_POL)
   {
-    cy2 = denom(content(x));
-    cy1 = gmul(x, cy2);
+    cd = denom(content(cx));
+    cn = gmul(cx, cd);
   }
   else
   {
-    cy1 = numer(x);
-    cy2 = denom(x);
+    cn = numer(cx);
+    cd = denom(cx);
   }
   tetpil = avma;
-  z[2] = lmul(y2, cy2);
-  z[1] = lmul(y1, cy1);
+  z[2] = lmul(d, cd);
+  z[1] = lmul(n, cn);
   p1 = fix_rfrac_if_pol((GEN)z[1],(GEN)z[2]);
-  if (p1) return gerepileupto((pari_sp)(z+3), p1);
+  if (p1) return gerepileupto(av, p1);
   gerepilemanyvec((pari_sp)z,tetpil,z+1,2); return z;
 }
 
