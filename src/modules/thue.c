@@ -548,7 +548,6 @@ SmallSols(GEN S, int Bx, GEN poly, GEN rhs, GEN ro)
 
   /* x != 0 */
   P = cgetg(lg(poly), t_POL); P[1] = poly[1]; 
-
   for (x = -Bx; x <= Bx; x++)
   {
     if (!x) continue;
@@ -567,8 +566,9 @@ SmallSols(GEN S, int Bx, GEN poly, GEN rhs, GEN ro)
       if (typ((GEN)r[j]) == t_INT) add_sol(&S, (GEN)r[j], stoi(x)); 
     if (low_stack(lim,stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"Check_small");
+      if(DEBUGMEM>1) err(warnmem,"SmallSols");
       S = gerepilecopy(av, S);
+      P = cgetg(lg(poly), t_POL); P[1] = poly[1]; 
     }
   }
   return S;

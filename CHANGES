@@ -97,6 +97,7 @@ LGr39- very rare SEGV in idealprimedec() [ typo in init_norm(), using FpX_red
    40- [library:] precision() output "wrong" value for small non-zero t_REAL
        (depended on exponent, not the bit accuracy of the input). Change so
        that true bit accuracy is used unless input is 0 (then use exponent).
+   41- rare memory corruption in thue() [ SmallSols ]
 
   Added
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu
