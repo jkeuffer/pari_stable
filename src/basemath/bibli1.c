@@ -3091,7 +3091,6 @@ clonefill(GEN S, long s, long t)
   return S;
 }
 
-#define nexta(a) (a>0 ? -1-a : 1-a)
 INLINE void 
 step(GEN x, GEN y, GEN inc, long k)
 {
@@ -3104,7 +3103,6 @@ step(GEN x, GEN y, GEN inc, long k)
     inc[k] = (i > 0)? -1-i: 1-i;
   }
 }
-#undef nexta
 /* q is the Gauss reduction (sqred1) of the quadratic form */
 /* general program for positive definit quadratic forms (real coeffs).
  * One needs BORNE != 0; LLL reduction done in fincke_pohst().

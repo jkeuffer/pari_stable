@@ -23,7 +23,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "parinf.h"
 
 extern GEN hnfmerge_get_1(GEN A, GEN B);
-extern GEN makeprimetoideal(GEN nf,GEN UV,GEN uv,GEN x);
 extern GEN gauss_triangle_i(GEN A, GEN B,GEN t);
 extern GEN hnf_invimage(GEN A, GEN b);
 extern int hnfdivide(GEN A, GEN B);
@@ -32,6 +31,7 @@ extern GEN special_anti_uniformizer(GEN nf, GEN pr);
 extern long int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *newx);
 
 static GEN mat_ideal_two_elt2(GEN nf, GEN x, GEN a);
+
 
 /*******************************************************************/
 /*                                                                 */
@@ -179,6 +179,8 @@ idealhermite_aux(GEN nf, GEN x)
   if (tx == id_PRIME) return prime_to_ideal_aux(nf,x);
   if (tx == id_PRINCIPAL)
   {
+    x = _algtobasis(nf, x);
+    if (isnfscalar(x)) return gscalmat((GEN)x[1], lg(x)-1);
     x = eltmul_get_table(nf, x);
     return idealmat_to_hnf(nf,x);
   }
@@ -640,8 +642,8 @@ GEN
 idealfactor(GEN nf, GEN x)
 {
   pari_sp av;
-  long tx, i, j, k, lf, lc, N, l, v, vc, e;
-  GEN f, f1, f2, c1, c2, y1, y2, y, p1, p2, cx, P;
+  long tx, i, j, k, lf, lc, N, v, vc, e;
+  GEN X, f, f1, f2, c1, c2, y1, y2, y, p1, p2, cx, P;
 
   tx = idealtyp(&x,&y);
   if (tx == id_PRIME)
@@ -653,11 +655,39 @@ idealfactor(GEN nf, GEN x)
   av = avma;
   nf = checknf(nf);
   N = degpol(nf[1]);
-  if (tx == id_PRINCIPAL) x = idealhermite_aux(nf, x);
+  if (tx == id_PRINCIPAL) 
+  {
+    x = _algtobasis(nf, x);
+    if (isnfscalar(x)) x = (GEN)x[1];
+    tx = typ(x);
+    if (tx == t_INT || tx == t_FRAC)
+    {
+      f = factor(x);
+      c1 = (GEN)f[1]; f1 = cgetg(1, t_VEC);
+      c2 = (GEN)f[2]; f2 = cgetg(1, t_COL);
+      for (i = 1; i < lg(c1); i++)
+      {
+        GEN P = primedec(nf, (GEN)c1[i]), E = (GEN)c2[i], z;
+        long l = lg(P);
+        z = cgetg(l, t_COL);
+        for (j = 1; j < l; j++) z[j] = lmulii(gmael(P,j,3), E);
+        f1 = concatsp(f1, P);
+        f2 = concatsp(f2, z);
+      }
+      f[1] = (long)f1; settyp(f1, t_COL);
+      f[2] = (long)f2; return gerepilecopy(av, f);
+    }
+    /* faster valuations for principal ideal x than for X = x in HNF form */
+    x = Q_primitive_part(x, &cx);
+    X = idealhermite_aux(nf, x);
+  }
   else
+  {
+    x = Q_primitive_part(x, &cx);
     if (lg(x) != N+1) x = idealmat_to_hnf(nf,x);
-  if (lg(x)==1) err(talker,"zero ideal in idealfactor");
-  x = Q_primitive_part(x, &cx);
+    X = x;
+  }
+  if (lg(X)==1) err(talker,"zero ideal in idealfactor");
   if (!cx)
   {
     c1 = c2 = NULL; /* gcc -Wall */
@@ -669,7 +699,7 @@ idealfactor(GEN nf, GEN x)
     c1 = (GEN)f[1];
     c2 = (GEN)f[2]; lc = lg(c1);
   }
-  f = factor_norm(x);
+  f = factor_norm(X);
   f1 = (GEN)f[1];
   f2 = (GEN)f[2]; lf = lg(f1);
   y1 = cgetg((lf+lc-2)*N+1, t_COL);
@@ -677,8 +707,8 @@ idealfactor(GEN nf, GEN x)
   k = 1;
   for (i=1; i<lf; i++)
   {
+    long l = f2[i]; /* = v_p(Nx) */
     p1 = primedec(nf,(GEN)f1[i]);
-    l = f2[i]; /* = v_p(Nx) */
     vc = cx? ggval(cx,(GEN)f1[i]): 0;
     for (j=1; j<lg(p1); j++)
     {
@@ -701,7 +731,7 @@ idealfactor(GEN nf, GEN x)
   for (i=1; i<lc; i++)
   {
     /* p | Nx already treated */
-    if (divise(gcoeff(x,1,1),(GEN)c1[i])) continue;
+    if (divise(gcoeff(X,1,1),(GEN)c1[i])) continue;
     p1 = primedec(nf,(GEN)c1[i]);
     vc = itos((GEN)c2[i]);
     for (j=1; j<lg(p1); j++)
@@ -1790,14 +1820,14 @@ GEN
 idealpow(GEN nf, GEN x, GEN n)
 {
   pari_sp av;
-  long tx,N,s;
+  long tx, N, s = signe(n);
   GEN res,ax,m,cx,n1,a,alpha;
 
   if (typ(n) != t_INT) err(talker,"non-integral exponent in idealpow");
   tx = idealtyp(&x,&ax);
   res = ax? cgetg(3,t_VEC): NULL;
   nf = checknf(nf);
-  av=avma; N=degpol(nf[1]); s=signe(n);
+  av = avma; N = degpol(nf[1]);
   if (!s) x = idmat(N);
   else
     switch(tx)
@@ -1814,7 +1844,12 @@ idealpow(GEN nf, GEN x, GEN n)
       case id_PRIME:
         x = idealpowprime(nf,x,n); break;
       default:
-        n1 = (s<0)? negi(n): n;
+        if (is_pm1(n))
+        {
+          x = (s < 0)? idealinv(nf, x): gcopy(x);
+          break;
+        }
+        n1 = (s < 0)? negi(n): n;
 
         x = Q_primitive_part(x, &cx);
         a=ideal_two_elt(nf,x); alpha=(GEN)a[2]; a=(GEN)a[1];
@@ -2532,16 +2567,23 @@ ideal_two_elt2(GEN nf, GEN x, GEN a)
 /* Given 2 integral ideals x and y in nf, returns a beta in nf such that
  * beta * x is an integral ideal coprime to y */
 GEN
+idealcoprime_fact(GEN nf, GEN x, GEN fy)
+{
+  long i, r;
+  GEN L, e, f = cgetg(3, t_MAT);
+
+  L = (GEN)fy[1]; r = lg(L);
+  e = cgetg(r, t_COL);
+  f[1] = fy[1];
+  f[2] = (long)e;
+  for (i=1; i<r; i++) e[i] = lstoi( -idealval(nf,x,(GEN)L[i]) );
+  return idealapprfact_i(nf, f, 0);
+}
+GEN
 idealcoprime(GEN nf, GEN x, GEN y)
 {
   pari_sp av = avma;
-  long i, r;
-  GEN L, e, fact = idealfactor(nf,y);
-
-  L = (GEN)fact[1];
-  e = (GEN)fact[2]; r = lg(e);
-  for (i=1; i<r; i++) e[i] = lstoi( -idealval(nf,x,(GEN)L[i]) );
-  return gerepileupto(av, idealapprfact_i(nf,fact,0));
+  return gerepileupto(av, idealcoprime_fact(nf, x, idealfactor(nf,y)));
 }
 
 /*******************************************************************/

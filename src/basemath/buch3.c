@@ -21,6 +21,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "parinf.h"
 
+extern GEN idealcoprime_fact(GEN nf, GEN x, GEN fy);
+extern GEN zideallog_sgn(GEN nf, GEN x, GEN sgn, GEN bid);
+extern GEN zsign_from_logarch(GEN Larch, GEN invpi, GEN archp);
 extern GEN init_units(GEN BNF);
 extern GEN F2V_red_ip(GEN v);
 extern GEN zlog(GEN nf, GEN a, GEN sgn, zlog_S *S);
@@ -52,50 +55,14 @@ extern void minim_alloc(long n, double ***q, GEN *x, double **y,  double **z, do
 extern void rowselect_p(GEN A, GEN B, GEN p, long init);
 extern int hnfdivide(GEN A, GEN B);
 extern GEN perm_to_arch(GEN nf, GEN archp);
-
-/* FIXME: obsolete, see zarchstar (which is much slower unfortunately). */
-static GEN
-get_full_rank(GEN nf, GEN v, GEN gen, long ngen, long rankmax)
-{
-  GEN vecsign,v1,p1,alpha, bas=(GEN)nf[7], rac=(GEN)nf[6];
-  long rankinit = lg(v)-1, N = degpol(nf[1]), va = varn(nf[1]);
-  long limr,i,k,kk,r,rr;
-  vecsign = cgetg(rankmax+1,t_COL);
-  for (r=1,rr=3; ; r++,rr+=2)
-  {
-    p1 = gpowgs(stoi(rr),N);
-    limr = is_bigint(p1)? BIGINT: p1[2];
-    limr = (limr-1)>>1;
-    for (k=rr;  k<=limr; k++)
-    {
-      pari_sp av1=avma;
-      alpha = gzero;
-      for (kk=k,i=1; i<=N; i++,kk/=rr)
-      {
-        long lambda = (kk+r)%rr - r;
-        if (lambda) alpha = gadd(alpha,gmulsg(lambda,(GEN)bas[i]));
-      }
-      for (i=1; i<=rankmax; i++)
-	vecsign[i] = (gsigne(gsubst(alpha,va,(GEN)rac[i])) > 0)? zero
-                                                               : un;
-      v1 = concatsp(v, vecsign);
-      if (FpM_rank(v1, gdeux) == rankinit) { avma = av1; continue; }
-
-      v=v1; rankinit++; ngen++;
-      gen[ngen] = (long) alpha;
-      if (rankinit == rankmax) return FpM_inv(v, gdeux); /* full rank */
-      vecsign = cgetg(rankmax+1,t_COL);
-    }
-  }
-}
+extern GEN archstar_full_rk(GEN x, GEN bas, GEN v, GEN gen);
 
 /* FIXME: obsolete. Replace by a call to buchrayall (currently much slower) */
 GEN
 buchnarrow(GEN bnf)
 {
-  GEN nf,cyc,gen,v,matsign,arch,cycgen,logs;
-  GEN dataunit,p1,p2,h,basecl,met,u1;
-  long r1,R,i,j,ngen,sizeh,t,lo,c;
+  GEN nf, cyc, gen, GD, v, invpi, logs, p1, p2, R, basecl, met, u1, archp;
+  long r1, i, j, ngen, t, lo, c;
   pari_sp av = avma;
 
   bnf = checkbnf(bnf);
@@ -103,42 +70,35 @@ buchnarrow(GEN bnf)
   if (!r1) return gcopy(gmael(bnf,8,1));
 
   cyc = gmael3(bnf,8,1,2);
-  gen = gmael3(bnf,8,1,3); ngen = lg(gen)-1;
-  matsign = signunits(bnf); R = lg(matsign);
-  dataunit = cgetg(R+1,t_MAT);
-  for (j=1; j<R; j++)
-  {
-    p1=cgetg(r1+1,t_COL); dataunit[j]=(long)p1;
-    for (i=1; i<=r1; i++)
-      p1[i] = (signe(gcoeff(matsign,i,j)) > 0)? zero: un;
-  }
-  v = cgetg(r1+1,t_COL); for (i=1; i<=r1; i++) v[i] = un;
-  dataunit[R] = (long)v; v = FpM_image(dataunit, gdeux); t = lg(v)-1;
+  gen = gmael3(bnf,8,1,3);
+  v = FpM_image(zsignunits(bnf, NULL, 1), gdeux);
+  t = lg(v)-1;
   if (t == r1) { avma = av; return gcopy(gmael(bnf,8,1)); }
 
-  sizeh = ngen+r1-t; p1 = cgetg(sizeh+1,t_COL);
+  ngen = lg(gen)-1;
+  p1 = cgetg(ngen+r1-t + 1,t_COL);
   for (i=1; i<=ngen; i++) p1[i] = gen[i];
   gen = p1;
-  v = get_full_rank(nf,v,gen,ngen,r1);
+  v = archstar_full_rk(NULL, gmael(nf,5,1), ZM_Flm(v, 2), gen + (ngen - t));
+  v = rowextract_i(v, t+1, r1);
 
-  arch = cgetg(r1+1,t_VEC); for (i=1; i<=r1; i++) arch[i]=un;
-  cycgen = check_and_build_cycgen(bnf);
   logs = cgetg(ngen+1,t_MAT);
+  GD = gmael(bnf,9,3); invpi = ginv( mppi(DEFAULTPREC) );
+  archp = perm_identity(r1);
   for (j=1; j<=ngen; j++)
   {
-    GEN u = gmul(v, zsigne(nf,(GEN)cycgen[j],arch));
-    logs[j] = (long)F2V_red_ip( vecextract_i(u, t+1, r1) );
+    GEN z = zsign_from_logarch((GEN)GD[j], invpi, archp);
+    logs[j] = (long)F2V_red_ip( gmul(v, z) );
   }
   /* [ cyc  0 ]
    * [ logs 2 ] = relation matrix for Cl_f */
-  h = concatsp(
+  R = concatsp(
     vconcat(diagonal(cyc), logs),
     vconcat(zeromat(ngen, r1-t), gscalmat(gdeux,r1-t))
   );
  
-  lo = lg(h)-1;
-  met = smithrel(h,NULL,&u1);
-  c = lg(met);
+  met = smithrel(R,NULL,&u1);
+  lo = lg(R); c = lg(met);
   if (DEBUGLEVEL>3) msgtimer("smith/class group");
 
   basecl = cgetg(c,t_VEC);
@@ -147,19 +107,19 @@ buchnarrow(GEN bnf)
     p1 = gcoeff(u1,1,j);
     p2 = idealpow(nf,(GEN)gen[1],p1);
     if (signe(p1) < 0) p2 = numer(p2);
-    for (i=2; i<=lo; i++)
+    for (i=2; i<lo; i++)
     {
       p1 = gcoeff(u1,i,j);
       if (signe(p1))
       {
 	p2 = idealmul(nf,p2, idealpow(nf,(GEN)gen[i],p1));
-        p2 = primpart(p2);
+        p2 = Q_primpart(p2);
       }
     }
     basecl[j] = (long)p2;
   }
   v = cgetg(4,t_VEC);
-  v[1] = (long)dethnf_i(h);
+  v[1] = lmul2n(gmael3(bnf,8,1,1), r1-t);
   v[2] = (long)met;
   v[3] = (long)basecl; return gerepilecopy(av, v);
 }
@@ -458,13 +418,14 @@ buchrayall(GEN bnf,GEN module,long flag)
   genbid = gmael(bid,2,3);
   Ri = lg(cycbid)-1; lh = ngen+Ri;
 
-  x = idealhermite(nf,module);
+  x = gmael(bid,1,1);
   if (Ri || add_gen || do_init)
   {
+    GEN fx = (GEN)bid[3];
     El = cgetg(ngen+1,t_VEC);
     for (j=1; j<=ngen; j++)
     {
-      p1 = idealcoprime(nf,(GEN)gen[j],x);
+      p1 = idealcoprime_fact(nf, (GEN)gen[j], fx);
       if (isnfscalar(p1)) p1 = (GEN)p1[1];
       El[j] = (long)p1;
     }
@@ -505,7 +466,10 @@ buchrayall(GEN bnf,GEN module,long flag)
   {
     p1 = (GEN)cycgen[j];
     if (typ(El[j]) != t_INT) /* <==> != 1 */
-      p1 = arch_mul(to_famat_all((GEN)El[j], (GEN)cyc[j]), p1);
+    {
+      GEN F = to_famat_all((GEN)El[j], (GEN)cyc[j]);
+      p1 = arch_mul(F, p1);
+    }
     logs[j] = (long)zideallog(nf, p1, bid); /* = log(Gen[j]) */
   }
   /* [ cyc  0   ]

@@ -135,6 +135,8 @@ BA  5- Library .so link changed to libpari.so for all versions.
    10- bnfinit: cache multiplication table by prime ideal anti-uniformizers
        (faster valuations)
 BA 11- improve binomial (use divide_conquer_prod)
+   12- improve bnrinit & idealstart when finite part of conductor is 1 (+
+       improve stability)
 
   Added
     1- make test-all [ all test suite (SLOW !)]

@@ -1264,7 +1264,7 @@ isprincipalarch(GEN bnf, GEN col, GEN kNx, GEN e, GEN dx, long *pe)
   if (!prec) prec = prec_arch(bnf);
   matunit = (GEN)bnf[3];
   N = degpol(nf[1]);
-  R1 = itos(gmael(nf,2,1));
+  R1 = nf_get_r1(nf);
   RU = (N + R1)>>1;
   col = cleanarch(col,N,prec); settyp(col, t_COL);
   if (RU > 1)
@@ -1643,10 +1643,25 @@ isunit(GEN bnf,GEN x)
 }
 
 GEN
+zsign_from_logarch(GEN LA, GEN invpi, GEN archp)
+{
+  long l = lg(archp), i;
+  GEN y = cgetg(l, t_COL);
+  pari_sp av = avma;
+
+  for (i=1; i<l; i++)
+  {
+    GEN p1 = ground( gmul(imag_i((GEN)LA[archp[i]]), invpi) );
+    y[i] = mpodd(p1)? un: zero;
+  }
+  avma = av; return y;
+}
+
+GEN
 zsignunits(GEN bnf, GEN archp, int add_zu)
 {
-  GEN y, A = (GEN)bnf[3], pi = mppi(DEFAULTPREC);
-  long l, i, j = 1, RU = lg(A);
+  GEN y, A = (GEN)bnf[3], invpi = ginv( mppi(DEFAULTPREC) );
+  long l, j = 1, RU = lg(A);
 
   if (!archp) archp = perm_identity( nf_get_r1((GEN)bnf[7]) );
   l = lg(archp);
@@ -1655,21 +1670,10 @@ zsignunits(GEN bnf, GEN archp, int add_zu)
   if (add_zu)
   {
     GEN w = gmael3(bnf,8,4,1), v = cgetg(l, t_COL);
-    if (egalii(w,gdeux)) (void)vecconst(v, stoi(-1));
+    if (egalii(w,gdeux)) (void)vecconst(v, gun);
     y[j++] = (long)v;
   }
-  for ( ; j < RU; j++)
-  {
-    GEN c = cgetg(l,t_COL), d = (GEN)A[j];
-    pari_sp av = avma;
-    y[j] = (long)c;
-    for (i=1; i<l; i++)
-    {
-      GEN p1 = ground( gdiv(imag_i((GEN)d[ archp[i] ]), pi) );
-      c[i] = mpodd(p1)? (long)un: zero;
-    }
-    avma = av;
-  }
+  for ( ; j < RU; j++) y[j] = (long)zsign_from_logarch((GEN)A[j], invpi, archp);
   return y;
 }
 
@@ -2449,7 +2453,7 @@ makecycgen(GEN bnf)
   l = lg(gen); h = cgetg(l, t_VEC);
   for (i=1; i<l; i++)
   {
-    if (cmpis((GEN)cyc[i], 16) < 0)
+    if (cmpis((GEN)cyc[i], 5) < 0)
     {
       GEN N = dethnf_i((GEN)gen[i]);
       y = isprincipalarch(bnf,(GEN)GD[i], N, (GEN)cyc[i], gun, &e);
