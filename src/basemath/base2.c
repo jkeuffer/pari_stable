@@ -2073,11 +2073,19 @@ uniformizer_appr(GEN nf, GEN L, long i, GEN p)
     Q = (GEN)L[j]; if (typ(Q) != t_MAT) break;
     inter = inter? FpM_intersect(inter, Q, p): Q;
   }
-  inter = hnfmodid(inter, p);
-  for (   ; j; j--)
+  if (!inter)
   {
-    Q = (GEN)L[j];
-    inter = idealmul(nf, inter, Q);
+    setlg(L, l);
+    inter = idealprodprime(nf, L);
+  }
+  else
+  {
+    inter = hnfmodid(inter, p);
+    for (   ; j; j--)
+    {
+      Q = (GEN)L[j];
+      inter = idealmul(nf, inter, Q);
+    }
   }
 
   /* inter = prod L[j], j != i */
@@ -2101,14 +2109,13 @@ uniformizer_appr(GEN nf, GEN L, long i, GEN p)
 /* Input: an ideal mod p, P != Z_K (Fp-basis, in matrix form)
  * Output: x such that P = (p,x) */
 static GEN
-uniformizer(GEN nf, GEN L, long ind, GEN p)
+uniformizer(GEN nf, GEN P, GEN p)
 {
-  GEN M, q, D, Dp, w, beta, a, P = (GEN)L[ind], T = (GEN)nf[1];
+  GEN M, q, D, Dp, w, beta, a, T = (GEN)nf[1];
   long prec, ex, i, f, N = degpol(T), m = lg(P)-1;
   gpmem_t av;
 
   if (!m) return gscalcol_i(p,N);
-  if (lg(L) > 8) return uniformizer_appr(nf, L, ind, p);
 
   /* we want v_p(Norm(beta)) = p^f, f = N-m */
   av = avma; f = N-m;
@@ -2237,7 +2244,7 @@ pol_min(GEN mul, GEN p)
 }
 
 static GEN
-get_pr(GEN nf, GEN L, long i, GEN p)
+get_pr(GEN nf, GEN L, long i, GEN p, int appr)
 {
   GEN pr, u, t, P = (GEN)L[i];
   long e, f;
@@ -2245,8 +2252,8 @@ get_pr(GEN nf, GEN L, long i, GEN p)
 
   if (typ(P) == t_VEC) return P; /* already done (Kummer) */
 
-  av = avma;
-  u = uniformizer(nf,L,i,p);
+  if (appr) u = uniformizer_appr(nf, L, i, p);
+  else      u = uniformizer(nf, P, p);
   t = anti_uniformizer(nf,p,u);
   av = avma;
   e = 1 + int_elt_val(nf,t,p,t,NULL);
@@ -2260,6 +2267,25 @@ get_pr(GEN nf, GEN L, long i, GEN p)
   pr[5] = (long)t; return pr;
 }
 
+int
+use_appr(GEN L, GEN pp, long N)
+{
+  long i, f, l = lg(L);
+  double prod = 1., NP;
+  GEN P;
+  gpmem_t av = avma;
+
+  for (i=1; i<l; i++)
+  {
+    P = (GEN)L[i];
+    f = typ(P)==t_VEC? itos((GEN)P[4]): N - (lg(P)-1);
+    NP = gtodouble(gpowgs(pp, f));
+    prod *= (1 - 1./NP);
+  }
+  avma = av;
+  return (prod * N * 10 < 1);
+}
+
 /* prime ideal decomposition of p sorted by increasing residual degree */
 GEN
 primedec(GEN nf, GEN p)
@@ -2267,6 +2293,7 @@ primedec(GEN nf, GEN p)
   gpmem_t av = avma;
   long i,k,c,iL,N;
   GEN ex,F,L,Lpr,Ip,H,phi,mat1,T,f,g,h,p1,UN;
+  int appr;
 
   if (DEBUGLEVEL>2) (void)timer2();
   nf = checknf(nf); T = (GEN)nf[1];
@@ -2297,7 +2324,7 @@ primedec(GEN nf, GEN p)
       L[iL++] = (long)apply_kummer(nf,(GEN)F[i],(GEN)ex[i],p);
     else /* F[i] | (f,g,h), happens at least once by Dedekind criterion */
       ex[i] = 0;
-  if (DEBUGLEVEL>2) msgtimer("Kummer factors");
+  if (DEBUGLEVEL>2) msgtimer("%ld Kummer factors", iL-1);
 
   /* phi matrix of x -> x^p - x in algebra Z_K/p */
   Ip = pradical(nf,p,&phi);
@@ -2354,21 +2381,18 @@ primedec(GEN nf, GEN p)
 	h[c++] = (long)FpM_image(concatsp(H, I), p);
       }
       if (n == dim)
-        for (i=1; i<=n; i++)
-        {
-          H = (GEN)h[--c]; L[iL++] = (long)H;
-          if (DEBUGLEVEL>2) msgtimer("L[%ld]",iL-1);
-        }
+        for (i=1; i<=n; i++) { H = (GEN)h[--c]; L[iL++] = (long)H; }
     }
     else /* A2 field ==> H maximal, f = N-k = dim(A2) */
-    {
       L[iL++] = (long)H;
-      if (DEBUGLEVEL>2) msgtimer("*L[%ld]",iL-1);
-    }
   }
   setlg(L, iL);
   Lpr = cgetg(iL, t_VEC);
-  for (i=1; i<iL; i++) Lpr[i] = (long)get_pr(nf, L, i, p);
+  if (DEBUGLEVEL>2) msgtimer("splitting %ld factors",iL-1);
+  appr = use_appr(L,p,N);
+  if (DEBUGLEVEL>2 && appr) fprintferr("using the approximation theorem\n");
+  for (i=1; i<iL; i++) Lpr[i] = (long)get_pr(nf, L, i, p, appr);
+  if (DEBUGLEVEL>2) msgtimer("finding uniformizers");
   return gerepileupto(av, gen_sort(Lpr,0,cmp_prime_over_p));
 }
 
