@@ -2319,6 +2319,8 @@ zk_to_ff(GEN x, GEN modpr)
 }
 
 /* REDUCTION Modulo a prime ideal */
+
+/* assume x in t_COL form, v_pr(x) >= 0 */
 static GEN
 kill_denom(GEN x, GEN nf, GEN p, GEN modpr)
 {
@@ -2532,6 +2534,22 @@ mymod(GEN x, GEN p)
 }
 
 static GEN
+mat_ff_to_nf(GEN x, GEN modpr)
+{
+  long i,j,h,l = lg(x);
+  GEN y = cgetg(l, t_MAT);
+  if (l == 1) return y;
+
+  h = lg(x[1]);
+  for (j=1; j<l; j++)
+  {
+    GEN p1 = cgetg(h,t_COL); y[j] = (long)p1;
+    for (i=1; i<h; i++) p1[i]=(long)ff_to_nf(gcoeff(x,i,j), modpr);
+  }
+  return y;
+}
+
+static GEN
 rnfordmax(GEN nf, GEN pol, GEN pr)
 {
   gpmem_t av=avma,av1,lim;
@@ -2606,8 +2624,9 @@ rnfordmax(GEN nf, GEN pol, GEN pr)
           p2 = mulmat_pol(Aainv, p1);
         for (k=1; k<=n; k++)
         {
-          coeff(multab,k,(i-1)*n+j) = p2[k];
-          coeff(multab,k,(j-1)*n+i) = p2[k];
+          GEN c = gres((GEN)p2[k], nfT);
+          coeff(multab,k,(i-1)*n+j) = (long)c;
+          coeff(multab,k,(j-1)*n+i) = (long)c;
         }
       }
     multabmod = modprM(multab,nf,modpr);
@@ -2615,28 +2634,28 @@ rnfordmax(GEN nf, GEN pol, GEN pr)
     R[1] = rnfId[1];
     for (j=2; j<=n; j++)
       R[j] = (long) rnfelementid_powmod(multabmod,j,q1,T,p);
-    R = modprM(lift(R), nf, modpr);
     baseIp = FqM_ker(R,T,p);
     baseOp = lg(baseIp)==1? rnfId: FqM_suppl(baseIp,T,p);
-    alpha = cgetg(n+1,t_MAT);
-    for (j=1; j<lg(baseIp); j++) alpha[j] = baseOp[j];
+    alpha = mat_ff_to_nf(baseOp, modpr);
+    for (j=1; j<lg(baseIp); j++)
+    {
+      p1 = (GEN)alpha[j];
+      for (i=1; i<=n; i++) p1[i] = (long)to_polmod((GEN)p1[i], nfT);
+    }
     for (   ; j<=n; j++)
     {
-      p1 = cgetg(n+1,t_COL); alpha[j] = (long)p1;
-      for (i=1; i<=n; i++)
-        p1[i] = lmul(pip, ff_to_nf(gcoeff(baseOp,i,j), modpr));
+      p1 = (GEN)alpha[j];
+      for (i=1; i<=n; i++) p1[i] = lmul(pip, (GEN)p1[i]);
     }
     alphainv = lift_intern(ginv(alpha));
+    alpha = lift_intern(alpha);
 
     matprod = cgetg(n+1,t_MAT);
     for (j=1; j<=n; j++)
     {
       p1 = cgetg(n+1,t_COL); matprod[j] = (long)p1;
       for (i=1; i<=n; i++)
-      {
-        p2 = element_mulid(multab, (GEN)alpha[i],j);
-        p1[i] = (long)p2;
-      }
+        p1[i] = (long)gmod(element_mulid(multab, (GEN)alpha[i],j), nfT);
     }
     matC = cgetg(n+1,t_MAT);
     for (j=1; j<=n; j++)
@@ -2645,16 +2664,21 @@ rnfordmax(GEN nf, GEN pol, GEN pr)
       for (i=1; i<=n; i++)
       {
 	p2 = gmul(alphainv, gcoeff(matprod,i,j));
-	for (k=1; k<=n; k++) p1[(i-1)*n+k]=(long)nf_to_ff(nf,(GEN)p2[k],modpr);
+	for (k=1; k<=n; k++)
+        {
+          GEN c = gres((GEN)p2[k], nfT);
+          p1[(i-1)*n+k] = (long)nf_to_ff(nf,c,modpr);
+        }
       }
     }
     matG = FqM_ker(matC,T,p); m = lg(matG)-1;
+    matG = mat_ff_to_nf(matG, modpr);
     vecpro = cgetg(3,t_VEC);
     vecpro[1] = (long)concatsp(matG,rnfId);
+
     p2 = cgetg(n+m+1,t_VEC);
-    for (j=1; j<=m; j++)
-      p2[j] = (long)prhinv;
     vecpro[2] = (long)p2;
+    for (j=1; j<=m; j++) p2[j] = (long)prhinv;
     p2 += m;
     for (j=1; j<=n; j++)
       p2[j] = (long)idealmul(nf,(GEN)I[j],(GEN)alphalistinv[j]);

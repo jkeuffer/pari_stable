@@ -352,7 +352,8 @@ sqr_by_tab(GEN tab, GEN x)
 	if (signe(c))
 	{
           p1 = gmul((GEN)x[i],(GEN)x[j]);
-	  p1 = gcmp1(c)? gmul2n(p1,1): gmul(p1,shifti(c,1));
+	  p1 = gmul2n(p1,1);
+          if (!gcmp1(c)) p1 = gmul(p1, c);
 	  s = gadd(s,p1);
 	}
       }

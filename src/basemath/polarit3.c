@@ -2748,6 +2748,16 @@ RXQX_red(GEN P, GEN T)
   return Q;
 }
 
+/* R = any base ring */
+GEN
+RXQV_red(GEN P, GEN T)
+{
+  long i, l = lg(P);
+  GEN Q = cgetg(l, typ(P));
+  for (i=1; i<l; i++) Q[i] = lres((GEN)P[i], T);
+  return Q;
+}
+
 /* x and y in (R[Y]/T)[X]  (lifted), T in R[Y]. y preferably monic */
 GEN
 RXQX_divrem(GEN x, GEN y, GEN T, GEN *pr)

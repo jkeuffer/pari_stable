@@ -114,7 +114,7 @@ unifpol(GEN nf,GEN pol,long flag)
   return unifpol0(nf,(GEN) pol, flag);
 }
 
-/* lift coeffs of pol to Zk (in algtobasis form) */
+/* lift coeffs of pol to Zk (as t_POL) */
 static GEN
 zkX(GEN x, GEN modpr)
 {
