@@ -2516,22 +2516,24 @@ conductor_part(GEN x, GEN *ptD, GEN *ptreg, GEN *ptfa)
   GEN e,p,H,d,D,fa,reg;
 
   fa = auxdecomp(absi(x),1);
-  e = (GEN)fa[2]; fa = (GEN)fa[1];
+  e = gtovecsmall((GEN)fa[2]);
+  fa = (GEN)fa[1];
   n = lg(fa); d = gun;
   for (i=1; i<n; i++)
-    if (mod2((GEN)e[i])) d = mulii(d,(GEN)fa[i]);
-  fl2 = (mod4(x)==0); /* 4 | x */
+    if (e[i] & 1) d = mulii(d,(GEN)fa[i]);
   if (mod4(d) == 2-s) fl2 = 0;
   else
   {
-    if (!fl2) err(funder2,"classno2");
+    fl2 = (mod4(x)==0);
+    if (!fl2) err(funder2,"classno");
     d = shifti(d,2);
   }
   H = gun; D = (s<0)? negi(d): d; /* d = abs(D) */
   /* f \prod_{p|f}  [ 1 - (D/p) p^-1 ] */
   for (i=1; i<n; i++)
   {
-    k = itos((GEN)e[i]); p = (GEN)fa[i];
+    p = (GEN)fa[i];
+    k = e[i];
     if (fl2 && i==1) k -= 2; /* p = 2 */
     if (k >= 2)
     {
