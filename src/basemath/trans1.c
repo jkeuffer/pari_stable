@@ -289,7 +289,7 @@ puiss0(GEN x)
       lx=lg(x); if (lx==1) return cgetg(1,t_MAT);
       if (lx != (lg(x[1]))) err(mattype1,"gpowgs");
       y = idmat(lx-1);
-      for (i=1; i<lx; i++) coeff(y,i,i) = lpuigs(gcoeff(x,i,i),0);
+      for (i=1; i<lx; i++) coeff(y,i,i) = (long)puiss0(gcoeff(x,i,i));
       break;
     case t_QFR: return real_unit_form(x);
     case t_QFI: return imag_unit_form(x);
@@ -464,8 +464,8 @@ gpowgs(GEN x, long n)
     case t_RFRAC: case t_RFRACN:
     {
       av=avma; y=cgetg(3,tx); m = labs(n);
-      y[1]=lpuigs((GEN)x[1],m);
-      y[2]=lpuigs((GEN)x[2],m);
+      y[1]=lpowgs((GEN)x[1],m);
+      y[2]=lpowgs((GEN)x[2],m);
       if (n<0) y=ginv(y);	/* let ginv worry about normalizations */
       return gerepileupto(av,y);
     }
@@ -489,23 +489,37 @@ gpowgs(GEN x, long n)
   }
 }
 
+/* assume x != 0 */
 GEN
-pow_monome(GEN x, GEN nn)
+pow_monome(GEN x, GEN N)
 {
-  long n, m, i, l, dd;
-  pari_sp tetpil, av = avma;
-  GEN p1,y;
-  if (is_bigint(nn)) err(talker,"power overflow in pow_monome");
-  n = itos(nn); m = labs(n);
-  l = lg(x); dd = (l-3)*m+3;
-  p1 = cgetg(dd,t_POL); p1[1] = x[1];
-  for (i=2; i<dd-1; i++) p1[i]=zero;
-  p1[i] = lpuigs((GEN)x[l-1],m);
-  if (n>0) return p1;
+  long n, i, dx, d;
+  GEN A, b, y;
 
-  tetpil=avma; y=cgetg(3,t_RFRAC);
-  y[1]=(long)denom((GEN)p1[i]);
-  y[2]=lmul(p1,(GEN)y[1]); return gerepile(av,tetpil,y);
+  if (is_bigint(N)) err(talker,"degree overflow in pow_monome");
+  n = itos(N);
+  if (n < 0) { n = -n; y = cgetg(3, t_RFRAC); } else y = NULL;
+  
+  dx = degpol(x);
+  if (HIGHWORD(dx) || HIGHWORD(n))
+  {
+    LOCAL_HIREMAINDER;
+    d = (long)mulll((ulong)dx, (ulong)n);
+    if (hiremainder || ((d+3) & ~LGBITS))
+      err(talker,"degree overflow in pow_monome");
+    d += 2;
+  }
+  else d = dx*n + 2;
+  A = cgetg(d+1, t_POL); A[1] = x[1];
+  for (i=2; i < d; i++) A[i] = zero;
+  b = gpowgs((GEN)x[dx+2], n); /* not memory clean if (n < 0) */
+  if (!y) y = A;
+  else { 
+    GEN c = denom(b);
+    if (c != gun) b = gmul(b,c);
+    y[1] = (long)c; y[2] = (long)A;
+  }
+  A[d] = (long)b; return y;
 }
 
 extern GEN powrealform(GEN x, GEN n);
