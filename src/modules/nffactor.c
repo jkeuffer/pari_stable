@@ -629,9 +629,10 @@ choose_prime(GEN nf, GEN dk, GEN lim, long ct)
 GEN
 nfroots(GEN nf,GEN pol)
 {
-  long av=avma,tetpil,i,d=lgef(pol);
-  GEN p1,p2,polbase,polmod,den;
+  long av=avma,tetpil,i,d=lgef(pol),ct,fl=0;
+  GEN p1,p2,polbase,polmod,den,lt,pr,p,prh;
 
+  p2=NULL; /* gcc -Wall */
   nf=checknf(nf);
   if (typ(pol)!=t_POL) err(talker,"not a polynomial in nfroots");
   if (varn(pol) >= varn(nf[1]))
@@ -667,12 +668,44 @@ nfroots(GEN nf,GEN pol)
   polmod=unifpol(nf,polbase,1);
 
   if (DEBUGLEVEL>=4)
-    fprintferr("On teste si le polynome est square-free\n");
+    fprintferr("test if the polynomial is square-free\n");
 
-  p1=derivpol(polmod);
-  p2=nf_pol_subres(nf,polmod,p1);
+  /* test if the discriminant of pol modulo some few primes is non-zero */
+  ct = 3;
+  lt = (GEN)leading_term(polbase)[1];
+  for (;;)
+  {
+    /* small primes tend to divide discriminants more often 
+       than large ones so we look at primes >= 101 */
+    pr = choose_prime(nf,lt,stoi(101),30); 
+    if (!pr) break;
 
-  if (degree(p2) > 0)
+    p=(GEN)pr[1];
+    prh=prime_to_ideal(nf,pr);
+
+    p2=gcopy(polbase);
+    lt=mpinvmod(lt,p);
+
+    for (i=2; i<d; i++)
+      p2[i] = nfreducemodpr_i(gmul(lt,(GEN)p2[i]), prh)[1];
+    p2 = normalizepol(p2);
+
+    /* discriminant is non-zero => polynomial is square-free */
+    if (!gcmp0(p2) && !divise(discsr(p2),p))  { fl = 1; break; }
+    
+    ct--; 
+    if (!ct) { fl = 0; break; }
+  }
+
+  /* the polynomial may not be square-free ... */
+  if (!fl) 
+  {
+    p1=derivpol(polmod);
+    p2=nf_pol_subres(nf,polmod,p1);
+    if (degree(p2) == 0) fl = 1; 
+  }
+
+  if (!fl)
   {
     p1=element_inv(nf,leading_term(p2));
     p2=nf_pol_mul(nf,p1,p2);
@@ -736,11 +769,12 @@ nf_pol_eval(GEN nf,GEN pol,GEN elt)
 /* return the factorization of x in nf */
 GEN
 nffactor(GEN nf,GEN pol)
-{ GEN y,p1,p2,den,p3,p4,quot, rep = cgetg(3,t_MAT);
-  long av = avma,tetpil,i,j,d;
+{ GEN y,p1,p2,den,p3,p4,quot,pr,p,prh,lt, rep = cgetg(3,t_MAT);
+  long av = avma,tetpil,i,j,d,ct,fl=0;
 
   if (DEBUGLEVEL >= 4) timer2();
 
+  p3=NULL; /* gcc -Wall */
   nf=checknf(nf);
   if (typ(pol)!=t_POL) err(typeer,"nffactor");
   if (varn(pol) >= varn(nf[1]))
@@ -772,12 +806,44 @@ nffactor(GEN nf,GEN pol)
       p1[i] = lmul(den,(GEN)p1[i]);
 
   if (DEBUGLEVEL>=4)
-    fprintferr("On teste si le polynome est square-free\n");
+    fprintferr("test if the polynomial is square-free\n");
 
-  p2=derivpol(p1);
-  p3=nf_pol_subres(nf,p1,p2);
+  /* test if the discriminant of pol modulo some few primes is non-zero */
+  ct = 3;
+  lt = (GEN)leading_term(p1)[1];
+  for (;;)
+  {
+    /* small primes tend to divide discriminants more often 
+       than large ones so we look at primes >= 101 */
+    pr = choose_prime(nf,lt,stoi(101),30); 
+    if (!pr) break;
 
-  if (degree(p3) > 0)
+    p=(GEN)pr[1];
+    prh=prime_to_ideal(nf,pr);
+
+    p2=gcopy(p1);
+    lt=mpinvmod(lt,p);
+
+    for (i=2; i<d; i++)
+      p2[i] = nfreducemodpr_i(gmul(lt,(GEN)p2[i]), prh)[1];
+    p2 = normalizepol(p2);
+
+    /* discriminant is non-zero => polynomial is square-free */
+    if (!gcmp0(p2) && !divise(discsr(p2),p))  { fl = 1; break; }
+    
+    ct--; 
+    if (!ct) { fl = 0; break; }
+  }
+
+  /* polynomial may not be square-free ... */
+  if (!fl) 
+  {
+    p2=derivpol(p1);
+    p3=nf_pol_subres(nf,p1,p2);
+    if (degree(p3) == 0) fl = 1; 
+  }
+
+  if (!fl)
   {
     p4=element_inv(nf,leading_term(p3));
     p3=nf_pol_mul(nf,p4,p3);
@@ -937,7 +1003,8 @@ nfsqff(GEN nf,GEN pol, long fl)
     for (i=2; i<d; i++)
     { 
       p2 = gmul(run, (GEN)polbase[i]);
-      p1 = addrr(p1, qfeval(T2, p2));
+      p2 = qfeval(T2, p2);
+      p1 = addrr(p1, gdiv(p2, binome(stoi(d), i-2)));
       if (signe(p1) < 0) break;
     }
 
@@ -947,29 +1014,18 @@ nfsqff(GEN nf,GEN pol, long fl)
     if (DEBUGLEVEL > 1) err(warnprec, "nfsqff", prec);
   }
 
-  if (DEBUGLEVEL>=4)
-    fprintferr("La norme de ce polynome est : %Z\n", p1);
-
-  lt=(GEN)leading_term(polbase)[1];
-  p2=mulis(sqri(lt),n);
-  C=mpadd(p1,p2);
-  C=mpadd(C,gsqrt(gmul(p1,p2),prec));
-	    
-  if (!fl)
-    C=mpmul(C,sqri(binome(shifti(stoi(n-1),-1),(n-1)>>2)));
-    
-  C=gmul(C,sqri(lt));
+  lt = (GEN)leading_term(polbase)[1];
+  p1 = gmul(p1, mulis(sqri(lt), n));
+  C = gpow(stoi(3), gadd(gmulsg(3, ghalf), stoi(d)), prec);
+  C = gdiv(gmul(C, p1), gmulsg(d, mppi(prec)));
   
   if (DEBUGLEVEL>=4)
     fprintferr("the bound on the T2-norm of the coeff. is: %Z\n", C);
-  
-  /* this is the theoretical bound for the exponent */
-  /* k2=gadd(glog(gdivgs(C,n),DEFAULTPREC), mulsr(n*(n-1), dbltor(0.347)));
-     k2=gmul2n(gmulgs(k2,n),-1); */
 
-  /* we use instead the following heuristic bound */
-  k2=gmul2n(gmulgs(glog(gdivgs(gmul2n(C,2),n),DEFAULTPREC),n),-1); 
-  k2=mulrr(k2,dbltor(1.2));
+  /* the theoretical bound for the exponent should be: 
+     k2=gadd(glog(gdivgs(C,n),DEFAULTPREC), mulsr(n*(n-1), dbltor(0.347))); */
+  k2=gadd(glog(gdivgs(C,n),DEFAULTPREC), mulsr(n*(n-1), dbltor(0.15)));
+  k2=gmul2n(gmulgs(k2,n),-1);
 
   minp=gmin(gexp(gmul2n(k2,-6),BIGDEFAULTPREC), maxp);
   minp=gceil(minp);
