@@ -2559,11 +2559,8 @@ matkerint0(GEN x, long flag)
 GEN
 kerint1(GEN x)
 {
-  gpmem_t av=avma, tetpil;
-  GEN p1,p2;
-
-  p1=matrixqz3(ker(x)); p2=lllint(p1); tetpil=avma;
-  return gerepile(av,tetpil,gmul(p1,p2));
+  gpmem_t av = avma;
+  return gerepilecopy(av, lllint_ip(matrixqz3(ker(x)), 100));
 }
 
 GEN
