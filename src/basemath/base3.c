@@ -1038,7 +1038,7 @@ element_sqrmodideal(GEN nf, GEN x, GEN id) {
 }
 static GEN
 element_mulmodideal(GEN nf, GEN x, GEN y, GEN id) {
-  return x? nfreducemodideal_i(element_mul(nf,x,y),id): y;
+  return x? nfreducemodideal_i(element_mul(nf,x,y),id): _algtobasis(nf, y);
 }
 /* assume k >= 0, ideal in HNF */
 GEN
