@@ -2607,13 +2607,10 @@ int
 gp_exception_handler(long numerr)
 {
   char *s = (char*)global_err_data;
-  if (s && *s) { fprintferr("\n"); outerr(lisseq(s)); }
-  else
-  {
-    if (numerr == errpile) { var_make_safe(); avma = top; }
-    return break_loop(numerr);
-  }
-  return 0;
+  if (!s) return 0;
+  if (*s) { fprintferr("\n"); outerr(lisseq(s)); return 0; }
+  if (numerr == errpile) { var_make_safe(); avma = top; }
+  return break_loop(numerr);
 }
 
 static void

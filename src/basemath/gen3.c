@@ -500,7 +500,7 @@ gdivgs(GEN x, long s)
   gpmem_t av;
   GEN z,p1;
 
-  if (!s) err(gdiver2);
+  if (!s) err(gdiver);
   switch(tx)
   {
     case t_INT:
@@ -1200,7 +1200,7 @@ ginv(GEN x)
   {
     case t_INT:
       if (is_pm1(x)) return icopy(x);
-      if (!signe(x)) err(gdiver2);
+      if (!signe(x)) err(gdiver);
       z=cgetg(3,t_FRAC);
       z[1] = (signe(x)<0)? lnegi(gun): un;
       z[2]=labsi(x); return z;
@@ -1214,7 +1214,7 @@ ginv(GEN x)
 
     case t_FRAC: case t_FRACN:
       s = signe(x[1]);
-      if (!s) err(gdiver2);
+      if (!s) err(gdiver);
       if (is_pm1(x[1]))
         return s>0? icopy((GEN)x[2]): negi((GEN)x[2]);
       z = cgetg(3,tx);
@@ -1232,7 +1232,7 @@ ginv(GEN x)
       return gerepile(av,tetpil,gdiv(p2,p1));
 
     case t_PADIC: z = cgetg(5,t_PADIC);
-      if (!signe(x[4])) err(gdiver2);
+      if (!signe(x[4])) err(gdiver);
       z[1] = evalprecp(precp(x)) | evalvalp(-valp(x));
       icopyifstack(x[2], z[2]);
       z[3] = licopy((GEN)x[3]);
@@ -1246,7 +1246,7 @@ ginv(GEN x)
       return gdiv(gun,x);
 
     case t_RFRAC: case t_RFRACN:
-      if (gcmp0((GEN) x[1])) err(gdiver2);
+      if (gcmp0((GEN) x[1])) err(gdiver);
       p1 = fix_rfrac_if_pol((GEN)x[2],(GEN)x[1]);
       if (p1) return p1;
       z=cgetg(3,tx);

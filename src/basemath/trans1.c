@@ -1176,7 +1176,7 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
 		directly from gp*/
     else if (gcmp0(x))
     {
-      if (gsigne(n) < 0) err(gdiver2);
+      if (gsigne(n) < 0) err(gdiver);
       if (isinexactreal(x))
         y = realzero_bit( itos( gfloor(gdivsg(gexpo(x), n)) ) );
       else

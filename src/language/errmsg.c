@@ -240,7 +240,7 @@ char *errmessage[]=
   "impossible",
 /* operf */
   "forbidden",
-/* gdiver2 */
+/* gdiver */
   "division by zero in gdiv, gdivgs or ginv",
 /* inter2 */
   "a log/atan appears in the integration, PARI cannot handle that",

@@ -1789,7 +1789,7 @@ gdiv(GEN x, GEN y)
     switch (signe(x))
     {
       case 0:
-        if (gcmp0(y)) err(gdiver2);
+        if (gcmp0(y)) err(gdiver);
         if (ty != t_INTMOD) return gzero;
         z = cgetg(3,t_INTMOD); icopyifstack(y[1],z[1]); z[2]=zero;
         return z;
@@ -1848,7 +1848,7 @@ gdiv(GEN x, GEN y)
         return gerepile(av,tetpil,gdiv(p2,p1));
     }
   }
-  if (gcmp0(y) && ty != t_MAT) err(gdiver2);
+  if (gcmp0(y) && ty != t_MAT) err(gdiver);
 
   if (is_const_t(tx) && is_const_t(ty))
   {
@@ -2230,7 +2230,7 @@ gdiv(GEN x, GEN y)
               y_lead = (GEN)y[2]; ly--; l--;
               if (!gcmp0(y_lead)) break;
             }
-            if (i>=ly) err(gdiver2);
+            if (i>=ly) err(gdiver);
           }
 	  if (ly < lx) lx = ly;
 	  p2 = (GEN)gpmalloc(lx*sizeof(long));

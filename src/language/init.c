@@ -76,13 +76,12 @@ int EXTERM_DLL_DPES;
 #endif	/* defined BOTH_GNUPLOT_AND_X11 */
 
 typedef struct {
-  void *env;
-  void *data;
+  jmp_buf *penv;
   long flag;
 } cell;
 
 static stack *err_catch_stack = NULL;
-static long *err_catch_array;
+static char **dft_handler;
 
 void
 push_stack(stack **pts, void *a)
@@ -427,11 +426,11 @@ pari_sig_init(void (*f)(int))
 }
 
 static void
-reset_traps(int warn)
+reset_traps()
 {
   long i;
-  if (warn) err(warner,"missing cell in err_catch stack. Resetting all traps");
-  for (i=0; i <= noer; i++) err_catch_array[i] = 0;
+  if (DEBUGLEVEL) err(warner,"Resetting all traps");
+  for (i=0; i <= noer; i++) dft_handler[i] = NULL;
 }
 
 static void
@@ -544,8 +543,8 @@ pari_init(size_t parisize, ulong maxprime)
   gp_init_entrees(pari_membermodules, members_hash, 1);
 
   whatnow_fun = NULL;
-  err_catch_array = (long *) gpmalloc((noer + 1) *sizeof(long));
-  reset_traps(0);
+  dft_handler = (char **) gpmalloc((noer + 1) *sizeof(char *));
+  reset_traps();
   default_exception_handler = NULL;
 
   (void)manage_var(2,NULL); /* init nvar */
@@ -935,7 +934,7 @@ errcontext(char *msg, char *s, char *entry)
 }
 
 void *
-err_catch(long errnum, jmp_buf env, void *data)
+err_catch(long errnum, jmp_buf *penv)
 {
   cell *v;
   /* for fear of infinite recursion... */
@@ -943,10 +942,8 @@ err_catch(long errnum, jmp_buf env, void *data)
   if (errnum == CATCH_ALL) errnum = noer;
   if (errnum > noer) err(talker, "no such error number: %ld", errnum);
   v = (cell*)gpmalloc(sizeof(cell));
-  v->data = data;
-  v->env  = env;
+  v->penv  = penv;
   v->flag = errnum;
-  err_catch_array[errnum]++;
   push_stack(&err_catch_stack, (void*)v);
   return (void*)v;
 }
@@ -957,41 +954,24 @@ pop_catch_cell(stack **s)
   cell *c = (cell*)pop_stack(s);
   if (c)
   {
-    err_catch_array[c->flag]--;
     free(c);
   }
 }
 
-/* kill last handler for error n */
-static void
-err_leave_default(long n)
-{
-  stack *s = err_catch_stack, *lasts;
-
-  if (n < 0) n = noer;
-  if (!s || !err_catch_array[n]) return;
-  for (lasts = NULL; s; lasts = s, s = s->prev)
-    if (((cell*)s->value)->flag == n) break;
-  pop_catch_cell(&s);
-  if (!lasts) err_catch_stack = s; else lasts->prev = s;
-}
-
 /* reset traps younger than V (included) */
 void
-err_leave(void **V)
+err_leave(void *v)
 {
-  cell *v = (cell*)*V;
   while (err_catch_stack)
   {
     cell *t = (cell*)err_catch_stack->value;
     pop_catch_cell(&err_catch_stack);
-    if (t == v) return;
+    if (t == (cell*)v) return;
   }
-  reset_traps(1);
+  reset_traps();
 }
 
-/* We know somebody is trapping n
- * Get last (most recent) handler for error n (or generic noer) killing all
+/* Get last (most recent) handler for error n (or generic noer) killing all
  * more recent non-applicable handlers (now obsolete) */
 static cell *
 err_seek(long n)
@@ -1002,25 +982,15 @@ err_seek(long n)
     if (t->flag == n || t->flag == noer) return t;
     pop_catch_cell(&err_catch_stack);
   }
-  reset_traps(1); return NULL;
+  return NULL;
 }
 
-/* untrapped error: find oldest trap depending from a longjmp, and kill
- * everything more recent */
+/* untrapped error: kill all error handlers */
 void
 err_clean(void)
 {
-  stack *s = err_catch_stack, *lasts = NULL;
-  for ( ; s; s = s->prev)
-  {
-    cell *c = (cell*)s->value;
-    if (c->env) lasts = s;
-  }
-  if (lasts) 
-  {
-    void *c = (void*)s->value;
-    err_leave(&c);
-  }
+  while (err_catch_stack)
+    pop_catch_cell(&err_catch_stack);
 }
 
 static int
@@ -1054,27 +1024,22 @@ err(long numerr, ...)
   int ret = 0;
   PariOUT *out = pariOut;
   va_list ap;
-  cell *trapped = NULL;
 
   va_start(ap,numerr);
 
   global_err_data = NULL;
   if (err_catch_stack && !is_warn(numerr))
   {
-    if (!err_catch_array[numerr] && !err_catch_array[noer]) err_clean();
-    else if ( (trapped = err_seek(numerr)) )
+    cell *trapped = NULL;
+    if ( (trapped = err_seek(numerr)) )
     {
-      void *e = trapped->env;
-      if (e)
+      jmp_buf *e = trapped->penv;
+      if (numerr == invmoder)
       {
-        if (numerr == invmoder)
-        {
-          (void)va_arg(ap, char*); /* junk 1st arg */
-          global_err_data = (void*)va_arg(ap, GEN);
-        }
-        longjmp(e, numerr);
+        (void)va_arg(ap, char*); /* junk 1st arg */
+        global_err_data = (void*)va_arg(ap, GEN);
       }
-      global_err_data = trapped->data;
+      longjmp(*e, numerr);
     }
   }
 
@@ -1179,21 +1144,37 @@ err(long numerr, ...)
     fprintferr("  [hint] you can increase GP stack with allocatemem()\n");
   }
   pariOut = out;
-  if (ret || (trapped && default_exception_handler &&
-              default_exception_handler(numerr))) { flusherr(); return; }
+  if (ret) { flusherr(); return; }
+  if (default_exception_handler)
+  {
+    if (dft_handler[numerr])
+      global_err_data = dft_handler[numerr];
+    else
+      global_err_data = dft_handler[noer];
+    if (default_exception_handler(numerr)) { flusherr(); return; }
+  }
   err_recover(numerr);
+}
+
+static char *BREAK_LOOP = "";
+
+static void
+kill_dft_handler(int numerr)
+{
+  char *s = dft_handler[numerr];
+  if (s && s != BREAK_LOOP) free(s);
+  dft_handler[numerr] = NULL;
 }
 
 /* Try f (trapping error e), recover using r (break_loop, if NULL) */
 GEN
 trap0(char *e, char *r, char *f)
 {
-  long numerr = -1;
-  GEN x = gnil;
+  long numerr = CATCH_ALL;
   char *F;
        if (!strcmp(e,"errpile")) numerr = errpile;
   else if (!strcmp(e,"typeer")) numerr = typeer;
-  else if (!strcmp(e,"gdiver2")) numerr = gdiver2;
+  else if (!strcmp(e,"gdiver")) numerr = gdiver;
   else if (!strcmp(e,"invmoder")) numerr = invmoder;
   else if (!strcmp(e,"accurer")) numerr = accurer;
   else if (!strcmp(e,"archer")) numerr = archer;
@@ -1204,6 +1185,7 @@ trap0(char *e, char *r, char *f)
   { /* explicit recovery text */
     char *a = get_analyseur();
     gpmem_t av = avma;
+    VOLATILE GEN x;
 
     CATCH(numerr) { x = NULL; }
     TRY { x = lisseq(f); } ENDCATCH;
@@ -1212,21 +1194,17 @@ trap0(char *e, char *r, char *f)
   }
 
   F = f? f: r; /* define a default handler */
- /* default will execute F (or start a break loop), then jump to
-  * environnement */
-  if (F)
+ /* will execute F (break loop if F = NULL), then jump to environnement */
+  if (numerr == CATCH_ALL) numerr = noer;
+  kill_dft_handler(numerr);
+  if (!F)
+    dft_handler[numerr] = BREAK_LOOP;
+  else if (*F && (*F != '"' || F[1] != '"'))
   {
-    if (!*F || (*F == '"' && F[1] == '"')) /* unset previous handler */
-    {/* TODO: find a better interface
-      * TODO: no leaked handler from the library should have survived
-      */
-      err_leave_default(numerr);
-      return x;
-    }
     F = pari_strdup(F);
+    dft_handler[numerr] = F;
   }
-  (void)err_catch(numerr, NULL, F);
-  return x;
+  return gnil;
 }
 
 /*******************************************************************/

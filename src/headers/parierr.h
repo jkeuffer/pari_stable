@@ -64,7 +64,7 @@ enum {
   elliper1, heller1,
 
 /* gen.c */
-  operi, operf, gdiver2, inter2, overwriter,
+  operi, operf, gdiver, inter2, overwriter,
 
 /* init.c */
 
