@@ -2472,29 +2472,28 @@ rnfelement_sqrmod(GEN nf, GEN multab, GEN unnf, GEN x, GEN prhall)
   return z;
 }
 
-/* Compute x^n mod pr in the extension, assume n >= 0 */
+/* Compute x^n mod pr in the extension, assume n >= 0 [cf puissii()]*/
 static GEN
 rnfelementid_powmod(GEN nf, GEN multab, GEN matId, long h, GEN n, GEN prhall)
 {
-  long i,m,av=avma,tetpil;
-  GEN y, unrnf=(GEN)matId[1], unnf=(GEN)unrnf[1];
-  ulong j;
+  ulong av = avma;
+  long i,k,m;
+  GEN y,p1, unrnf=(GEN)matId[1], unnf=(GEN)unrnf[1];
 
   if (!signe(n)) return unrnf;
-  y=(GEN)matId[h]; i = lgefint(n)-1; m=n[i]; j=HIGHBIT;
-  while ((m&j)==0) j>>=1;
-  for (j>>=1; j; j>>=1)
+  y = (GEN)matId[h]; p1 = n+2; m = *p1;
+  k = 1+bfffo(m); m<<=k; k = BITS_IN_LONG-k;
+  for (i=lgefint(n)-2;;)
   {
-    y = rnfelement_sqrmod(nf,multab,unnf,y,prhall);
-    if (m&j) y = rnfelement_mulidmod(nf,multab,unnf,y,h,prhall);
-  }
-  for (i--; i>=2; i--)
-    for (m=n[i],j=HIGHBIT; j; j>>=1)
+    for (; k; m<<=1,k--)
     {
       y = rnfelement_sqrmod(nf,multab,unnf,y,prhall);
-      if (m&j) y = rnfelement_mulidmod(nf,multab,unnf,y,h,prhall);
+      if (m < 0) y = rnfelement_mulidmod(nf,multab,unnf,y,h,prhall);
     }
-  tetpil=avma; return gerepile(av,tetpil,gcopy(y));
+    if (--i == 0) break;
+    m = *++p1; k = BITS_IN_LONG;
+  }
+  return gerepileupto(av, gcopy(y));
 }
 
 GEN
