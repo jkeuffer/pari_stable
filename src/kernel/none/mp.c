@@ -169,7 +169,7 @@ addsispec(long s, GEN x, long nx)
 
 #define swapspec(x,y, nx,ny) {long _a=nx;GEN _z=x; nx=ny; ny=_a; x=y; y=_z;}
 
-INLINE GEN
+GEN
 addiispec(GEN x, GEN y, long nx, long ny)
 {
   GEN xd,yd,zd;
@@ -225,7 +225,7 @@ subisspec(GEN x, long s, long nx)
 }
 
 /* assume x > y */
-INLINE GEN
+GEN
 subiispec(GEN x, GEN y, long nx, long ny)
 {
   GEN xd,yd,zd;
@@ -720,7 +720,7 @@ mulsr(long x, GEN y)
   z[1] = evalsigne(s) | evalexpo(m+e); return z;
 }
 
-static GEN muliispec(GEN a, GEN b, long na, long nb);
+GEN muliispec(GEN a, GEN b, long na, long nb);
 /*#define KARAMULR_VARIANT*/
 
 #ifdef KARAMULR_VARIANT
@@ -1974,7 +1974,7 @@ addshiftw(GEN x, GEN y, long d)
 /* Fast product (Karatsuba) of integers. a and b are "special" GENs
  * c,c0,c1,c2 are genuine GENs.
  */
-static GEN
+GEN
 muliispec(GEN a, GEN b, long na, long nb)
 {
   GEN a0,c,c0;
@@ -2100,7 +2100,7 @@ resmod2n(GEN x, long n)
   return z;
 }
 
-static GEN
+GEN
 sqrispec(GEN a, long na)
 {
   GEN a0,c;
