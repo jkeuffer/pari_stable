@@ -7,6 +7,10 @@ for dir in $pth; do
       if test -n "$ok"; then
         # for .so and .sl
         try=`ls $dir/lib$lib.s? 2> /dev/null` 
+        # in case it's missing a .so, but has e.g a .so.5. Take most recent
+        if test -z "$try"; then
+          try=`(ls $dir/lib$lib.s?.* | tail -1) 2> /dev/null` 
+        fi
         if test -z "$try"; then
           try=`ls $dir/lib$lib.a 2> /dev/null`
         else 
