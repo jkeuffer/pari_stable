@@ -68,7 +68,7 @@ BA 23- fix accuracy problems in vandermondeinverse
 IZ 30- typo in Configure [rl_save_prompt and _eprintf not found in target libs]
 MD 31- oo loop in ellap [uninitialized array length in apell1]
    32- stack corruption in addfrac [wrong result for large denominators]
-   33- resmod2n [called from powmodulo] could return unnormalized integers
+MD 33- resmod2n [called from powmodulo] could return unnormalized integers
    34- not enough GC in nfinit for huge degrees [get_mul_table]
    35- intformal(1/2/t^2) --> apparent oo loop
    36- polredabs(degree 1 polynomial) --> x  [could be very slow]
@@ -106,7 +106,7 @@ BA  8- factorback, chinese, lcm and gcd now accept a single vector
    13- rnfequation: use modular (bivariate) resultant
    14- polynomial gcd (srgcd): uses modular algo (modulargcd,nfgcd) if possible
    15- unified internal hnf* functions
-   16- improved nfsubfields [better Hensel lift]
+   16- improved nfsubfields [Hensel lift, allow nfsubfields(pol) instead of nf]
    17- merged all "integer logarithms" + "safe ceil" functions (mylogint,
        get_e, floor_bound, myceil)
    18- readline: TAB on empty parentheses following a function name has the
@@ -116,14 +116,14 @@ IS 20- obscure compiler bug in rootpol.c:max_modulus() [don't modify tau]
    21- make bench ('elliptic'): explained [BUG] message
    22- allow lift(t_PADIC)
    23- faster polroots for Q of the form P(x^k)
-   24- allow nfsubfields(pol,)  [had to be nf]
-   25- allow subst(t, x^n, x)
-   26- ?user_fun: do not include function text if help available from addhelp
+   24- allow subst(t, x^n, x)
+   25- ?user_fun: do not include function text if help available from addhelp
        [always include it for ??user_fun]
-   27- default values for used defined function arguments are evaluated when
+   26- default values for used defined function arguments are evaluated when
        the function is called [used to be "when it's defined"]
-   28- allow subgrouplist(znstar(5)) [didn't accept groups in general form]
-   29- taught GP about GP2C-style type declaration [ignored]
+   27- allow subgrouplist(znstar(5)) [didn't accept groups in general form]
+   28- taught GP about GP2C-style type declaration [ignored]
+   29- 0. [realzero()] is now coded on 2 words (was 3, with third one ignored)
 
   Added
 BA  1- function pith() [= pi(x), naïve implementation]

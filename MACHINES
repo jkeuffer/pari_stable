@@ -10,7 +10,7 @@ General notes:
  a star (*) in the first column means GP was built using portable kernel.
 
 - Configure
- dlD = install() available in all binaries (no [BUG] message in benches)
+ dl = install() available in all binaries (no [BUG] message in benches)
  dlD= install() available in gp-dyn only ([BUG] in gp-sta `program' bench)
  not available at all otherwise           ([BUG] in both `program' benches)
  Note that symbols from C++ modules will have a mangled name. Use
@@ -30,6 +30,7 @@ Clock frequency in MHz when known, in BM (BogoMIPS) otherwise.
 Arch / proc:         OS:             Configure:     sta:    dyn:  GP version:
 ==============================================================================
 DEC/Alpha
+alpha?????   ???     OSF1-V5.1        cc X11 dl     1867    2099  2.1.1     JC
 alpha21264   667Mhz  FreeBSD-4.0     gcc X11 dlD    2626    2656  2.0.20    IS
 alpha21264   500MHz  OSF1-V4.0       gcc X11 dl     3178    3436  2.1.0 (20)JC
 alpha21164a  600MHz  Linux-2.2.13   egcs X11 dl     4270    4350  2.0.19(28)IS
