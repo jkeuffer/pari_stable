@@ -231,8 +231,8 @@ roundr_up_ip(GEN x, long l)
 void
 affir(GEN x, GEN y)
 {
-  const long s=signe(x),ly=lg(y);
-  long lx,sh,i;
+  const long s = signe(x), ly = lg(y);
+  long lx, sh, i;
 
   if (!s)
   {
@@ -979,24 +979,25 @@ karamulrr1(GEN y, GEN x, long ly, long lz)
 }
 #endif
 
-GEN
-mulrr(GEN x, GEN y)
+/* set z <-- x*y, floating point multiplication.
+ * lz = lg(z) = lg(x) <= ly <= lg(y), sz = signe(z) */
+#ifdef INLINE
+INLINE
+#endif
+void
+mulrrz_i(GEN z, GEN x, GEN y, long lz, long ly, long sz)
 {
-  long sx = signe(x), sy = signe(y), e = expo(x)+expo(y);
-  long i, j, ly, lz, lzz, flag, p1;
+  const int flag = (lz != ly);
+  long ez = expo(x) + expo(y);
+  long i, j, lzz, p1;
   ulong garde;
-  GEN z, y1;
+  GEN y1;
   LOCAL_HIREMAINDER;
   LOCAL_OVERFLOW;
 
-  if (!sx || !sy) return realzero_bit(e);
-  if (sy < 0) sx = -sx;
-  lz = lg(x); ly = lg(y);
-  if (lz>ly) { lz=ly; z=x; x=y; y=z; flag=1; } else flag = (lz!=ly);
-  z = cgetr(lz);
-
   if (lz > KARATSUBA_MULR_LIMIT) 
   {
+    pari_sp av = avma;
 #ifdef KARAMULR_VARIANT
     GEN hi = karamulrr1(y+2, x+2, lz+flag-2, lz-2); 
 #else
@@ -1005,7 +1006,7 @@ mulrr(GEN x, GEN y)
     long i, garde = hi[lz];
     if (hi[2] < 0)
     {
-      e++;
+      ez++;
       for (i=2; i<lz ; i++) z[i] = hi[i];
     }
     else
@@ -1016,12 +1017,12 @@ mulrr(GEN x, GEN y)
     if (garde < 0)
     { /* round to nearest */
       i = lz; do z[--i]++; while (z[i]==0 && i > 1);
-      if (i == 1) { z[2] = HIGHBIT; e++; }
+      if (i == 1) { z[2] = HIGHBIT; ez++; }
     }
-    z[1] = evalsigne(sx)|evalexpo(e);
-    avma = (pari_sp)z; return z;
+    z[1] = evalsigne(sz)|evalexpo(ez);
+    avma = av; return;
   }
-  if (lz==3)
+  if (lz == 3)
   {
     if (flag)
     {
@@ -1030,13 +1031,26 @@ mulrr(GEN x, GEN y)
     }
     else
       garde = mulll(x[2],y[2]);
-    if ((long)hiremainder<0) { z[2]=hiremainder; e++; }
-    else z[2] = (hiremainder<<1) | (garde>>(BITS_IN_LONG-1));
-    z[1] = evalsigne(sx)|evalexpo(e);
-    return z;
+    if (hiremainder & HIGHBIT)
+    {
+      ez++;
+      /* hiremainder < (2^BIL-1)^2 / 2^BIL, hence hiremainder+1 != 0 */
+      if (garde & HIGHBIT) hiremainder++; /* round properly */
+    }
+    else
+    {
+      hiremainder = (hiremainder<<1) | (garde>>(BITS_IN_LONG-1));
+      if (garde & (HIGHBIT-1))
+      {
+        hiremainder++; /* round properly */
+        if (!hiremainder) { hiremainder = HIGHBIT; ez++; }
+      }
+    }
+    z[1] = evalsigne(sz) | evalexpo(ez);
+    z[2] = hiremainder; return;
   }
 
-  if (flag) { (void)mulll(x[2],y[lz]); garde = hiremainder; } else garde=0;
+  if (flag) { (void)mulll(x[2],y[lz]); garde = hiremainder; } else garde = 0;
   lzz=lz-1; p1=x[lzz];
   if (p1)
   {
@@ -1061,7 +1075,7 @@ mulrr(GEN x, GEN y)
     }
     else z[j]=0;
   }
-  p1=x[2]; y1++;
+  p1 = x[2]; y1++;
   garde = addll(mulll(p1,y1[lz]), garde);
   for (i=lzz; i>2; i--)
   {
@@ -1069,77 +1083,40 @@ mulrr(GEN x, GEN y)
     z[i] = addll(addmul(p1,y1[i]), z[i]);
   }
   z[2] = hiremainder+overflow;
-  if (z[2] < 0) e++; else shift_left(z,z,2,lzz,garde, 1);
-  z[1] = evalsigne(sx) | evalexpo(e);
+  if (z[2] < 0) ez++; else shift_left(z,z,2,lzz,garde, 1);
+  z[1] = evalsigne(sz) | evalexpo(ez);
+}
+
+GEN
+mulrr(GEN x, GEN y)
+{
+  long ly, lz, sx = signe(x), sy = signe(y);
+  GEN z;
+
+  if (!sx || !sy) return realzero_bit(expo(x) + expo(y));
+  if (sy < 0) sx = -sx;
+  lz = lg(x);
+  ly = lg(y); if (lz > ly) { lz = ly; z = x; x = y; y = z; }
+  z = cgetr(lz);
+  mulrrz_i(z, x,y, lz,ly, sx);
   return z;
 }
 
 GEN
 mulir(GEN x, GEN y)
 {
-  long sx=signe(x),sy,lz,lzz,ey,e,p1,i,j;
-  ulong garde;
-  GEN z,y1;
-  LOCAL_HIREMAINDER;
-  LOCAL_OVERFLOW;
+  long sx = signe(x), sy, lz;
+  GEN z;
 
   if (!sx) return gzero;
-  if (!is_bigint(x)) return mulsr(itos(x),y);
-  sy=signe(y); ey=expo(y);
-  if (!sy) return realzero_bit(expi(x)+ey);
-
-  if (sy<0) sx = -sx;
-  lz=lg(y); z=cgetr(lz);
-  y1 = itor(x, lz); x = y; y = y1;
-  e = expo(y)+ey;
-  if (lz==3)
-  {
-    (void)mulll(x[2],y[3]);
-    garde=addmul(x[2],y[2]);
-    if ((long)hiremainder < 0) { z[2]=hiremainder; e++; }
-    else z[2]=(hiremainder<<1) | (garde>>(BITS_IN_LONG-1));
-    z[1] = evalsigne(sx) | evalexpo(e);
-    avma=(pari_sp)z; return z;
-  }
-
-  (void)mulll(x[2],y[lz]); garde=hiremainder;
-  lzz=lz-1; p1=x[lzz];
-  if (p1)
-  {
-    (void)mulll(p1,y[3]);
-    garde=addll(addmul(p1,y[2]),garde);
-    z[lzz] = overflow+hiremainder;
-  }
-  else z[lzz]=0;
-  for (j=lz-2, y1=y-j; j>=3; j--)
-  {
-    p1=x[j]; y1++;
-    if (p1)
-    {
-      (void)mulll(p1,y1[lz+1]);
-      garde = addll(addmul(p1,y1[lz]), garde);
-      for (i=lzz; i>j; i--)
-      {
-        hiremainder += overflow;
-        z[i] = addll(addmul(p1,y1[i]), z[i]);
-      }
-      z[j] = hiremainder+overflow;
-    }
-    else z[j]=0;
-  }
-  p1=x[2]; y1++;
-  garde = addll(mulll(p1,y1[lz]), garde);
-  for (i=lzz; i>2; i--)
-  {
-    hiremainder += overflow;
-    z[i] = addll(addmul(p1,y1[i]), z[i]);
-  }
-  z[2] = hiremainder+overflow;
-  if (z[2] < 0) e++;
-  else
-    shift_left(z,z,2,lzz,garde, 1);
-  z[1] = evalsigne(sx) | evalexpo(e);
-  avma=(pari_sp)z; return z;
+  if (!is_bigint(x)) return mulsr(itos(x), y);
+  sy = signe(y);
+  if (!sy) return realzero_bit(expi(x) + expo(y));
+  if (sy < 0) sx = -sx;
+  lz = lg(y);
+  z = cgetr(lz);
+  mulrrz_i(z, itor(x,lz),y, lz,lz, sx);
+  avma = (pari_sp)z; return z;
 }
 
 /***********************************************************************/
