@@ -409,8 +409,8 @@ GEN
 auxdecomp1(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
 		  GEN state, long all, long hint)
 {
-  long pp[] = { evaltyp(t_INT)|m_evallg(3), evalsigne(1)|evallgefint(3),2,0 };
-  long nb = 0,i,k,lim1,av,lp;
+  long pp[] = { evaltyp(t_INT)|m_evallg(4), 0,0,0 };
+  long nb = 0,i,k,lim1,av,lp,p;
   byteptr d=diffptr+1;
 
   if (typ(n) != t_INT) err(arither1);
@@ -430,19 +430,20 @@ auxdecomp1(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
   lim1 = tridiv_bound(n, all);
 
   /* trial division */
-  while (*d && pp[2] <= lim1)
+  p = 2;
+  while (*d && p <= lim1)
   {
-    pp[2] += *d++;
-    if (mpdivis(n,pp,n))
+    p += *d++;
+    if (mpdivisis(n,p,n))
     {
-      nb++; k=1; while (mpdivis(n,pp,n)) k++;
-      icopy(pp); stoi(k);
+      nb++; k=1; while (mpdivisis(n,p,n)) k++;
+      utoi(p); stoi(k);
       if (is_pm1(n)) return aux_end(n,nb);
     }
   }
 
   /* pp = square of biggest p tried so far */
-  av=avma; setlg(pp,4); affii(sqri(pp),pp); avma=av;
+  av=avma; affii(muluu(p,p),pp); avma=av;
   if (cmpii(pp,n) > 0)
   {
     nb++;
