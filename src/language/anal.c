@@ -695,9 +695,15 @@ matcell(GEN p, matcomp *C)
         c = check_array_index(lgef(p)-1) + 1;
         pt = (GEN*)(p + c); match(']'); break;
 
-      case t_VEC: case t_COL: case t_VECSMALL:
+      case t_VEC: case t_COL:
         c = check_array_index(lg(p));
         pt = (GEN*)(p + c); match(']'); break;
+
+      case t_VECSMALL:
+        c = check_array_index(lg(p));
+        pt = (GEN*)(p + c); match(']');
+        if (*analyseur == '[') err(caracer1,analyseur,mark.start);
+        break;
 
       case t_MAT:
         if (lg(p)==1) err(talker2,"a 0x0 matrix has no elements",
