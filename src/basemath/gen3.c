@@ -1179,8 +1179,7 @@ ginv(GEN x)
       z[2]=lmpinvmod((GEN)x[2],(GEN)x[1]); return z;
 
     case t_FRAC:
-      s = signe(x[1]);
-      if (!s) err(gdiver);
+      s = signe(x[1]); if (!s) err(gdiver);
       if (is_pm1(x[1]))
         return s>0? icopy((GEN)x[2]): negi((GEN)x[2]);
       z = cgetg(3,t_FRAC);
