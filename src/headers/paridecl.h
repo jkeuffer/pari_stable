@@ -8,7 +8,7 @@
 /* $Id$ */
 
 /* alglin1.c */
-
+GEN     Fq_ker(GEN x, GEN T, GEN p);
 GEN     concat(GEN x, GEN y);
 GEN     concatsp(GEN x, GEN y);
 GEN     deplin(GEN x);

@@ -1813,6 +1813,166 @@ inverseimage_mod_p(GEN m, GEN v, GEN p)
   }
   return y;
 }
+/************************************************************** 
+ Rather stupid implementation of linear algebra in finite fields
+ **************************************************************/
+static GEN Fq_add(GEN x, GEN y, GEN T, GEN p)
+{
+  switch((typ(x)==t_POL)|((typ(y)==t_POL)<<1))
+  {
+  case 0:
+    return modii(addii(x,y),p);
+  case 1:
+    return Fp_add_pol_scal(x,y,p);
+  case 2:
+    return Fp_add_pol_scal(y,x,p);
+  case 3:
+    return Fp_add(x,y,p);
+  } 
+  return NULL;
+}
+static GEN Fq_mul(GEN x, GEN y, GEN T, GEN p)
+{
+  switch((typ(x)==t_POL)|((typ(y)==t_POL)<<1))
+  {
+  case 0:
+    return modii(mulii(x,y),p);
+  case 1:
+    return Fp_mul_pol_scal(x,y,p);
+  case 2:
+    return Fp_mul_pol_scal(y,x,p);
+  case 3:
+    return Fp_mul_mod_pol(x,y,T,p);
+  }
+  return NULL;
+}
+static GEN Fq_neg_inv(GEN x, GEN T, GEN p)
+{
+  switch(typ(x)==t_POL)
+  {
+  case 0:
+    return mpinvmod(negi(x),p);
+  case 1:
+    return Fp_inv_mod_pol(Fp_neg(x,p),T,p);
+  }
+
+  return NULL;
+}
+static GEN Fq_res(GEN x, GEN T, GEN p)
+{
+  ulong ltop=avma;
+  switch(typ(x)==t_POL)
+  {
+  case 0:
+    return modii(x,p);
+  case 1:
+    return gerepileupto(ltop,Fp_res(Fp_pol_red(x,p),T,p));
+  }
+  return NULL;
+}
+static void
+Fq_gerepile_gauss_keep(GEN x, GEN T, GEN p, long m, long n, long k, long t, long av)
+{
+  long tetpil = avma,dec,u,A,i;
+
+  if (DEBUGMEM > 1) err(warnmem,"gauss_pivot_keep. k=%ld, n=%ld",k,n);
+  for (u=t+1; u<=m; u++)
+    if (isonstack(coeff(x,u,k))) coeff(x,u,k) = (long) Fq_res(gcoeff(x,u,k),T,p);
+  for (i=k+1; i<=n; i++)
+    for (u=1; u<=m; u++)
+      if (isonstack(coeff(x,u,i))) coeff(x,u,i) = (long) Fq_res(gcoeff(x,u,i),T,p);
+
+  (void)gerepile(av,tetpil,NULL); dec = av-tetpil;
+  for (u=t+1; u<=m; u++)
+  {
+    A=coeff(x,u,k);
+    if (A<av && A>=bot) coeff(x,u,k)+=dec;
+  }
+  for (i=k+1; i<=n; i++)
+    for (u=1; u<=m; u++)
+    {
+      A=coeff(x,u,i);
+      if (A<av && A>=bot) coeff(x,u,i)+=dec;
+    }
+}
+
+static GEN
+Fq_ker_i(GEN x, GEN T, GEN p, long nontriv)
+{
+  GEN y,c,d,piv,mun;
+  long i,j,k,r,t,n,m,av0,av,lim,tetpil;
+
+  if (typ(x)!=t_MAT) err(typeer,"ker_mod_p");
+  n=lg(x)-1; if (!n) return cgetg(1,t_MAT);
+  /*if (!is_bigint(p) && p[2] < (MAXHALFULONG>>1))
+    return ker_mod_p_small(x, p, nontriv);*/
+
+  m=lg(x[1])-1; r=0; av0 = avma;
+  x=dummycopy(x); mun=negi(gun);
+  c=new_chunk(m+1); for (k=1; k<=m; k++) c[k]=0;
+  d=new_chunk(n+1);
+  av=avma; lim=stack_lim(av,1);
+  for (k=1; k<=n; k++)
+  {
+    for (j=1; j<=m; j++)
+      if (!c[j])
+      {
+        coeff(x,j,k) = (long) Fq_res(gcoeff(x,j,k), T, p);
+        if (signe(coeff(x,j,k))) break;
+      }
+    if (j>m)
+    {
+      if (nontriv) { avma = av0; return NULL; }
+      r++; d[k]=0;
+      for(j=1; j<k; j++)
+        if (d[j]) coeff(x,d[j],k) = lclone(gcoeff(x,d[j],k));
+    }
+    else
+    {
+      c[j]=k; d[k]=j; piv = Fq_neg_inv(gcoeff(x,j,k), T, p);
+      coeff(x,j,k) = (long)mun;
+      for (i=k+1; i<=n; i++)
+	coeff(x,j,i) = (long) Fq_mul(piv,gcoeff(x,j,i), T, p);
+      for (t=1; t<=m; t++)
+	if (t!=j)
+	{
+	  piv = Fq_res(gcoeff(x,t,k), T, p);
+          if (signe(piv))
+          {
+            coeff(x,t,k)=zero;
+            for (i=k+1; i<=n; i++)
+              coeff(x,t,i) = (long)Fq_add(gcoeff(x,t,i),Fq_mul(piv,gcoeff(x,j,i), T, p), T, p);
+            if (low_stack(lim, stack_lim(av,1)))
+              Fq_gerepile_gauss_keep(x,T,p,m,n,k,t,av);
+          }
+	}
+    }
+  }
+
+  tetpil=avma; y=cgetg(r+1,t_MAT);
+  for (j=k=1; j<=r; j++,k++)
+  {
+    GEN c = cgetg(n+1,t_COL);
+
+    y[j]=(long)c; while (d[k]) k++;
+    for (i=1; i<k; i++)
+      if (d[i])
+      {
+	GEN p1=gcoeff(x,d[i],k);
+	c[i] = (long) Fq_res(p1, T, p); gunclone(p1);
+      }
+      else
+	c[i] = zero;
+    c[k]=un; for (i=k+1; i<=n; i++) c[i]=zero;
+  }
+  return gerepile(av0,tetpil,y);
+}
+GEN
+Fq_ker(GEN x, GEN T, GEN p)
+{
+  return Fq_ker_i(x, T, p, 0);
+}
+
 /*******************************************************************/
 /*                                                                 */
 /*                        EIGENVECTORS                             */
