@@ -24,16 +24,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define numberof(x) (sizeof(x) / sizeof((x)[0]))
 
 int option_trace = 0;
-long Step_Factor = .01; /* small steps by default */
+double Step_Factor = .01; /* small steps by default */
 ulong DFLT_mod = 17UL;
 
 typedef struct {
-  ulong reps, size, type;
-  long *var;
+  ulong reps, type;
+  long *var, size;
   GEN x, y;
 } speed_param;
 
-typedef double (*speed_function_t)(ANYARG);
+typedef double (*speed_function_t)(speed_param *s);
 
 typedef struct {
   int               kernel;
@@ -232,7 +232,7 @@ struct dat_t {
 } *dat = NULL;
 
 int
-double_cmp_ptr(double *x, double *y) { return *x - *y; }
+double_cmp_ptr(double *x, double *y) { return (int)(*x - *y); }
 
 double
 time_fun(speed_function_t fun, speed_param *s)
@@ -240,7 +240,7 @@ time_fun(speed_function_t fun, speed_param *s)
   const double TOLERANCE = 1.005; /* 0.5% */
   pari_sp av = avma;
   double t[30];
-  long i,j,e;
+  ulong i, j, e;
 
   s->x = rand_g(s->size, s->type);
   s->y = rand_g(s->size, s->type); s->reps = 1;
@@ -419,7 +419,7 @@ void error(char **argv) {
   long i;
   printf("usage: tune [-t] [-s step_factor] [-p mod] [-u unittime] var1 var2 ...\n");
   printf("Tunable variables: (omitting variable indices tunes everybody)\n");
-  for (i = 0; i < numberof(param); i++)
+  for (i = 0; i < (long)numberof(param); i++)
     printf("  %2ld: %-25s (default %4ld)\n", i, param[i].name, *(param[i].var));
   exit(1);
 }
@@ -438,21 +438,21 @@ main(int argc, char **argv)
       switch(*++s) {
         case 't': option_trace += 2; break;
         case 'p':
-          if (!*s)
+          if (!*++s)
           {
             if (++i == argc) error(argv);
             s = argv[i];
           }
-          DFLT_mod = (ulong)atol(s); break;
+          DFLT_mod = itou(flisexpr(s)); break;
         case 's':
-          if (!*s)
+          if (!*++s)
           {
             if (++i == argc) error(argv);
             s = argv[i];
           }
           Step_Factor = atof(s); break;
         case 'u': s++;
-          if (!*s)
+          if (!*++s)
           {
             if (++i == argc) error(argv);
             s = argv[i];
@@ -462,7 +462,7 @@ main(int argc, char **argv)
       }
     } else {
       if (!isdigit((int)*s)) error(argv);
-      r = atol(s); if (r >= numberof(param) || r < 0) error(argv);
+      r = atol(s); if (r >= (long)numberof(param) || r < 0) error(argv);
       v[n++] = r;
     }
   }
