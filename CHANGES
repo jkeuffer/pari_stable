@@ -45,6 +45,9 @@ XR 11- bnrstark initializations (incorrect when field not totally real)
    15- (x^2+3)/(2*x)*x --> invalid RFRAC
    16- factorpadic result used too high a precision (+improved handling of
        nonmonic polynomials)
+   17- sqrt(Mod(0,1)) --> oo loop (+ improved a bit mpsqrtmod)
+   18- no GC in norml2
+IZ 19- tex2mail had difficulties with rational functions
   
   Changed
     1- renamed .DOC files to .txt (explorer getting confused...)
