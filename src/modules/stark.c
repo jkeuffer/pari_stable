@@ -2314,16 +2314,14 @@ RecCoeff3(GEN nf, GEN beta, GEN B, long v, long prec)
       if (TestOne(plg, beta, B, v, G, N)) nbs++;
       
       /* there are more than one solution, more precision needed */
-      if (nbs > 1) 
-      {
-	fprintferr("RecCoeff3: too many solutions!\n");
-	break;
-      }
+      if (nbs > 1) break;
     }
   }
   
   if (nbs == 1) return gerepileupto(av, basistoalg(nf, sol));
  
+  if (DEBUGLEVEL)
+    fprintferr("RecCoeff3: too many solutions!\n");
   avma = av; return NULL;
 }
 
