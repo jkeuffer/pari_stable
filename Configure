@@ -18,6 +18,7 @@
 # The Configure included in Perl distribution (written by Larry Wall), as
 # well as GNU autoconfig package were of much help in writing these config
 # files.
+# $Id$
 
 TOP=`pwd`
 dflt_conf_file=dft.Config.in
