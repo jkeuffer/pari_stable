@@ -2348,6 +2348,7 @@ break_loop(long numerr)
   static char *old = NULL;
   VOLATILE int go_on = 0;
   char *s, *t, *msg;
+  static FILE *oldinfile = NULL;
 
   if (b) jump_to_given_buffer(b);
   
@@ -2359,6 +2360,7 @@ break_loop(long numerr)
   }
   else
   {
+    oldinfile = infile;
     msg = "Starting break loop (type 'break' to go back to GP)";
     old = s = _analyseur();
     t = current_buffer->buf;
@@ -2399,7 +2401,8 @@ break_loop(long numerr)
     if (numerr == siginter && flag == 2) { go_on = 1; break; }
   }
   if (old && !s) _set_analyseur(old);
-  pop_buffer(); b = NULL; return go_on;
+  pop_buffer(); infile = oldinfile;
+  b = NULL; return go_on;
 }
 
 int
