@@ -89,6 +89,8 @@ XR 48- rare bug in bnrL1 (wrong value!)
    58- incorrect handling of INTMODs modulo integers of different magnitude
 XR 59- matsnf(3 x 3 matrix, 4) --> SEGV
    60- some pathological bnfinit() computations (strive to get maximal rank)
+XR 61- precision problems in nfsqff() [increase precision for T2-norm bound]
+   62- time wasted checking generators of the form [x,0,...,0] in polredabs
 
   Changed
 XR  1- modulus choice in bnrstark
