@@ -1726,6 +1726,7 @@ content(GEN x)
 /*                         SOUS RESULTANT                          */
 /*                                                                 */
 /*******************************************************************/
+/* for internal use */
 GEN
 gdivexact(GEN x, GEN y)
 {

@@ -1940,6 +1940,15 @@ det2(GEN a)
   return det_simple_gauss(a,use_maximal_pivot(a));
 }
 
+static GEN
+mydiv(GEN x, GEN y)
+{
+  long tx = typ(x), ty = typ(y);
+  if (tx == ty && tx == t_POL && varn(x) == varn(y))
+    return gdeuc(x,y);
+  return gdiv(x,y);
+}
+
 /* determinant in a ring A: all computations are done within A
  * (Gauss-Bareiss algorithm)
  */
@@ -1967,7 +1976,7 @@ det(GEN a)
       k=i+1; while (k<=nbco && gcmp0(gcoeff(a,i,k))) k++;
       if (k>nbco) return gerepileupto(av, gcopy(p));
       swap(a[k], a[i]); s = -s;
-      p=gcoeff(a,i,i);
+      p = gcoeff(a,i,i);
     }
     ci = (GEN*)a[i];
     for (k=i+1; k<=nbco; k++)
@@ -1977,14 +1986,14 @@ det(GEN a)
       {
         if (gcmp1(p))
         {
-          if (!gcmp1(pprec))
-            a[k] = (long)gdivexact((GEN)a[k], pprec);
+          if (diveuc)
+            a[k] = (long)mydiv((GEN)a[k], pprec);
         }
         else
           for (j=i+1; j<=nbco; j++)
           {
             p1 = gmul(p,ck[j]);
-            if (diveuc) p1 = gdivexact(p1,pprec);
+            if (diveuc) p1 = mydiv(p1,pprec);
             ck[j] = p1;
           }
       }
@@ -1994,7 +2003,7 @@ det(GEN a)
         for (j=i+1; j<=nbco; j++)
         {
           p1 = gadd(gmul(p,ck[j]), gmul(m,ci[j]));
-          if (diveuc) p1 = gdivexact(p1,pprec);
+          if (diveuc) p1 = mydiv(p1,pprec);
           ck[j] = p1;
         }
       }

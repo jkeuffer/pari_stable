@@ -36,6 +36,7 @@ HC  6- nfnewprec(bnf) could contain objects of low accuracy
 XR  7- check subgroup argument in bnrL1
     8- typo in ideal_two_elt (oo loop)
     9- pb with GNU as + preprocessor on Sparc
+   10- incorrect result in matdet (Gauss-Bareiss) [gdivexact]
 
   Changed
 XR  1- bnrL1 now takes a congruence subgroup as second argument
