@@ -777,6 +777,8 @@ GEN     vandermondeinverse(GEN L, GEN T, GEN den, GEN prep);
 GEN     gadd(GEN x, GEN y);
 GEN     gdiv(GEN x, GEN y);
 GEN     gmul(GEN x, GEN y);
+GEN     gred(GEN x);
+GEN     gred_rfrac(GEN x);
 GEN     gsub(GEN x, GEN y);
 
 /* gen2.c */
@@ -1059,8 +1061,6 @@ GEN     factorpadic0(GEN f,GEN p,long r,long flag);
 GEN     factorpadic2(GEN x, GEN p, long r);
 GEN     factorpadic4(GEN x, GEN p, long r);
 int     gdivise(GEN x, GEN y);
-GEN     gred(GEN x);
-GEN     gred_rfrac(GEN x);
 long    hensel_lift_accel(long n, long *pmask);
 GEN     incloop(GEN a);
 GEN     is_irred_mod_p(GEN f, GEN p);

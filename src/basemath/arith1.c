@@ -1203,7 +1203,7 @@ mppgcd(GEN a, GEN b)
   }
 
   /* larger than gcd: "avma=av" gerepile (erasing t) is valid */
-  av = avma; new_chunk(lgefint(b));
+  av = avma; new_chunk(lgefint(b)); /* HACK */
   t = resii(a,b);
   if (!signe(t)) { avma=av; return absi(b); }
 
@@ -1340,7 +1340,7 @@ chinois_int_coprime(GEN x2, GEN y2, GEN x1, GEN y1, GEN z1)
 {
   ulong av = avma;
   GEN ax,p1;
-  (void)new_chunk((lgefint(z1)<<1)+lgefint(x1)+lgefint(y1));
+  (void)new_chunk((lgefint(z1)<<1)+lgefint(x1)+lgefint(y1)); /* HACK */
   ax = mulii(mpinvmod(x1,y1), x1);
   p1 = addii(x2, mulii(ax, subii(y2,x2)));
   avma = av; return modii(p1,z1);

@@ -208,8 +208,7 @@ type0(GEN x, char *st)
   {
     if (is_frac_t(t))
     {
-      x = gred_rfrac(x);
-      tx = typ(x);
+      x = simplify(gred(x)); tx = typ(x);
       if (!is_frac_t(tx)) err(typeer, "type");
     }
     else

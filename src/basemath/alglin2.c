@@ -1196,7 +1196,7 @@ ZV_lincomb(GEN u, GEN v, GEN X, GEN Y)
         else if (!signe(p2)) A[i] = licopy(p1);
         else
         {
-          av = avma; (void)new_chunk(m+lgefint(p1)+lgefint(p2));
+          av = avma; (void)new_chunk(m+lgefint(p1)+lgefint(p2)); /* HACK */
           p2 = mulii(v,p2);
           avma = av; A[i] = laddii(p1,p2);
         }
@@ -1211,7 +1211,7 @@ ZV_lincomb(GEN u, GEN v, GEN X, GEN Y)
         else if (!signe(p2)) A[i] = lnegi(p1);
         else
         {
-          av = avma; (void)new_chunk(m+lgefint(p1)+lgefint(p2));
+          av = avma; (void)new_chunk(m+lgefint(p1)+lgefint(p2)); /* HACK */
           p2 = mulii(v,p2);
           avma = av; A[i] = lsubii(p2,p1);
         }
@@ -1226,7 +1226,7 @@ ZV_lincomb(GEN u, GEN v, GEN X, GEN Y)
       else if (!signe(p2)) A[i] = lmulii(u,p1);
       else
       {
-        av = avma; (void)new_chunk(m+lgefint(p1)+lgefint(p2));
+        av = avma; (void)new_chunk(m+lgefint(p1)+lgefint(p2)); /* HACK */
         p1 = mulii(u,p1);
         p2 = mulii(v,p2);
         avma = av; A[i] = laddii(p1,p2);

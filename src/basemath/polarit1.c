@@ -85,7 +85,7 @@ incloop(GEN a)
 /*******************************************************************/
 /*                                                                 */
 /*                           DIVISIBILITE                          */
-/*                 Renvoie 1 si y divise x, 0 sinon .              */
+/*                 Return 1 if y  |  x,  0 otherwise               */
 /*                                                                 */
 /*******************************************************************/
 
@@ -103,99 +103,6 @@ poldivis(GEN x, GEN y, GEN *z)
   GEN p1 = poldivres(x,y,ONLY_DIVIDES);
   if (p1) { *z = p1; return 1; }
   avma=av; return 0;
-}
-
-/*******************************************************************/
-/*                                                                 */
-/*                          REDUCTION                              */
-/*    Do the transformation t_FRACN/t_RFRACN --> t_FRAC/t_RFRAC    */
-/*                                                                 */
-/*******************************************************************/
-
-/* x[1] is scalar, non-zero */
-static GEN
-gred_simple(GEN x)
-{
-  GEN p1,p2,x2,x3;
-
-  x2=content((GEN)x[2]);
-  if (gcmp1(x2)) { x = gcopy(x); settyp(x, t_RFRAC); return gcopy(x); }
-  x3=gdiv((GEN)x[1],x2); p2=denom(x3);
-  x2=gdiv((GEN)x[2],x2);
-
-  p1=cgetg(3,t_RFRAC);
-  p1[1]=(long)numer(x3);
-  p1[2]=lmul(x2,p2); return p1;
-}
-
-GEN
-gred_rfrac(GEN x)
-{
-  GEN y,p1,xx1,xx2,x3, x1 = (GEN)x[1], x2 = (GEN)x[2];
-  long tx,ty;
-
-  if (gcmp0(x1)) return gcopy(x1);
-
-  tx=typ(x1); ty=typ(x2);
-  if (ty!=t_POL)
-  {
-    if (tx!=t_POL) return gcopy(x);
-    if (gvar2(x2) > varn(x1)) return gdiv(x1,x2);
-    err(talker,"incompatible variables in gred");
-  }
-  if (tx!=t_POL)
-  {
-    if (varn(x2) < gvar2(x1)) return gred_simple(x);
-    err(talker,"incompatible variables in gred");
-  }
-  if (varn(x2) < varn(x1)) return gred_simple(x);
-  if (varn(x2) > varn(x1)) return gdiv(x1,x2);
-
-  /* now x1 and x2 are polynomials with the same variable */
-  xx1=content(x1); if (!gcmp1(xx1)) x1=gdiv(x1,xx1);
-  xx2=content(x2); if (!gcmp1(xx2)) x2=gdiv(x2,xx2);
-  x3=gdiv(xx1,xx2);
-  y = poldivres(x1,x2,&p1);
-  if (!signe(p1)) return gmul(x3,y);
-
-  p1 = ggcd(x2,p1);
-  if (!isscalar(p1)) { x1=gdeuc(x1,p1); x2=gdeuc(x2,p1); }
-  if (typ(x3) == t_POL)
-  {
-    xx2 = denom(content(x3));
-    xx1 = gmul(x3, xx2);
-  }
-  else
-  {
-    xx1 = numer(x3);
-    xx2 = denom(x3);
-  }
-  p1=cgetg(3,t_RFRAC);
-  p1[1]=lmul(x1,xx1);
-  p1[2]=lmul(x2,xx2); return p1;
-}
-/*must NEVER returns a FRACN or a RFRACN*/
-GEN
-gred(GEN x)
-{
-  long tx=typ(x),av=avma;
-  GEN y,p1,x1,x2;
-
-  if (is_frac_t(tx))
-  {
-    x1=(GEN)x[1]; x2=(GEN)x[2];
-    y = dvmdii(x1,x2,&p1);
-    if (p1 == gzero) return y; /* gzero volontaire */
-    (void)new_chunk((lgefint(x1)+lgefint(x2))<<1);
-    p1=mppgcd(x2,p1);
-    if (is_pm1(p1)) { avma=av; y=gcopy(x); settyp(y,t_FRAC); return y; }
-    avma=av; y=cgetg(3,t_FRAC);
-    y[1]=ldivii(x1,p1);
-    y[2]=ldivii(x2,p1); return y;
-  }
-  if (is_rfrac_t(tx))
-    return gerepileupto(av, gred_rfrac(x));
-  return gcopy(x);
 }
 
 /*******************************************************************/

@@ -1894,7 +1894,7 @@ gsqr(GEN x)
 	return mulrr(x,x);
 	
       case t_INTMOD: z=cgetg(3,t_INTMOD); p2=(GEN)x[1];
-        (void)new_chunk(lgefint(p2)<<2);
+        (void)new_chunk(lgefint(p2)<<2); /* HACK */
         p1=sqri((GEN)x[2]); avma=(long)z;
         z[2]=lmodii(p1,p2); icopyifstack(p2,z[1]); return z;
 
