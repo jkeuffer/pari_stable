@@ -32,24 +32,24 @@ if test -n "$gmp"; then
   GMPINCLUDE="-I$gmp_include"
   GMPLIBS="-L$gmp -lgmp"
   LIBS="$LIBS $GMPLIBS"
+
+  exe=$osname-$arch-rlv$$
+  $CC $extraflag $GMPINCLUDE -o $exe gmp_version.c $GMPLIBS 2> /dev/null
+  if test -r $exe; then
+    gmp_version=`env LD_LIBRARY_PATH="$LD_LIBRARY_PATH$dir_sep$gmp" $exe`;
+  else
+    echo "### Your version of GMP is too old for PARI. Please upgrade"
+    gmp=
+  fi
+  rm -f $exe $exe$exe_suff
 fi
 
 if test -z "$gmp"; then
   echo "### Building without GNU MP support"
 else
   if test "$fastread" = yes; then
-    exe=$osname-$arch-rlv$$
-    $CC $extraflag $GMPINCLUDE -o $exe gmp_version.c $GMPLIBS 2> /dev/null
-    if test -r $exe; then
-      gmp_version=`env LD_LIBRARY_PATH="$LD_LIBRARY_PATH$dir_sep$gmp" $exe`;
-    else
-      gmp_version="?.?";
-    fi
-    rm -f $exe $exe$exe_suff
     echo "Using GNU MP, version $gmp_version"
-  fi
-
-  if test "$fastread" != yes; then
+  else
     cat << EOM
 ==========================================================================
 EOM
