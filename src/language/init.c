@@ -2262,6 +2262,7 @@ entree functions_basic[]={
 {"frac",18,(void*)gfrac,2,"G"},
 {"galoisexport",99,(void*)galoisexport,6,"GD0,L,"},
 {"galoisfixedfield",99,(void*)galoisfixedfield,6,"GGD0,L,Dn"},
+{"galoisidentify",18,(void*)galoisidentify,6,"G"},
 {"galoisinit",99,(void*)galoisinit,6,"GDGD0,L,"},
 {"galoisisabelian",99,(void*)galoisisabelian,6,"GD0,L,"},
 {"galoispermtopol",2,(void*)galoispermtopol,6,"GG"},
