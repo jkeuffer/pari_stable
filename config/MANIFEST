@@ -236,6 +236,7 @@ src/test/64/sumiter
 src/test/64/trans
 src/test/dotest
 src/test/kerntest.c
+src/test/tune.c
 src/test/in/analyz
 src/test/in/compat
 src/test/in/elliptic
