@@ -1057,8 +1057,8 @@ bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *T)
     pk = gcoeff(prk,1,1);
 
     if (expi(pk) > 1000)
-    { /* reduce size first, "scramble" the matrix */
-      PRK = gmul(PRK, lllintpartial(PRK));
+    { /* reduce size first, "scramble" matrix */
+      PRK = lllintpartial_ip(PRK);
       /* now floating point reduction is fast */
       PRK = gmul(PRK, lll(PRK, DEFAULTPREC));
     }

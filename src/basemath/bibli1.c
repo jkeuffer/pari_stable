@@ -1472,42 +1472,41 @@ lllgramgen(GEN x) { return lllgramallgen(x,lll_IM); }
 GEN
 lllgramkerimgen(GEN x) { return lllgramallgen(x,lll_ALL); }
 
-/*  This routine is functionally similar to lllint when all = 0.
+/* Def: a matrix M is said to be -partially reduced- if | m1 +- m2 | >= |m1|
+ * for any two columns m1 != m2, in M.
  *
- *    The input is an integer matrix mat (not necessarily square) whose
- *  columns are linearly independent.  It outputs another matrix T such that
- *  mat * T is partially reduced.  If all = 0, the size of mat * T is the
- *  same as the size of mat.  If all = 1 the number of columns of mat * T
- *  is at most equal to its number of rows.  A matrix M is said to be
- *  -partially reduced- if | m1 +- m2 | >= |m1| for any two distinct
- *  columns m1, m2, in M.
+ * Input: an integer matrix mat whose columns are linearly independent. Find
+ * another matrix T such that mat * T is partially reduced.
  *
- *    This routine is designed to quickly reduce lattices in which one row
- *  is huge compared to the other rows.  For example, when searching for a
- *  polynomial of degree 3 with root a mod p, the four input vectors might
- *  be the coefficients of
- *      X^3 - (a^3 mod p), X^2 - (a^2 mod p), X - (a mod p), p.
- *  All four constant coefficients are O(p) and the rest are O(1). By the
- *  pigeon-hole principle, the coefficients of the smallest vector in the
- *  lattice are O(p^(1/4)), Hence significant reduction of vector lengths
- *  can be anticipated.
+ * Output: mat * T if flag = 0;  T if flag != 0,
  *
- *  		Peter Montgomery (July, 1994)
+ * This routine is designed to quickly reduce lattices in which one row
+ * is huge compared to the other rows.  For example, when searching for a
+ * polynomial of degree 3 with root a mod N, the four input vectors might
+ * be the coefficients of
+ *     X^3 - (a^3 mod N), X^2 - (a^2 mod N), X - (a mod N), N.
+ * All four constant coefficients are O(p) and the rest are O(1). By the
+ * pigeon-hole principle, the coefficients of the smallest vector in the
+ * lattice are O(p^(1/4)), hence significant reduction of vector lengths
+ * can be anticipated.
  *
- *  If flag = 1 complete the reduction using lllint, otherwise return
- *  partially reduced basis. */
+ * An improved algorithm would look only at the leading digits of dot*.  It
+ * would use single-precision calculations as much as possible.
+ *
+ * Original code: Peter Montgomery (1994) */
 GEN
 lllintpartialall(GEN m, long flag)
 {
   const long ncol = lg(m)-1;
-  const pari_sp ltop1 = avma;
-  long ncolnz;
+  const pari_sp av = avma;
   GEN tm1, tm2, mid;
 
-  if (typ(m) != t_MAT) err(typeer,"lllintpartialall");
-  if (ncol <= 1) return idmat(ncol);
+  if (typ(m) != t_MAT) err(typeer,"lllintpartial");
+  if (ncol <= 1) return flag? idmat(ncol): gcopy(m);
 
+  tm1 = flag? idmat(ncol): NULL;
   {
+    const pari_sp av2 = avma;
     GEN dot11 = sqscali((GEN)m[1]);
     GEN dot22 = sqscali((GEN)m[2]);
     GEN dot12 = gscali((GEN)m[1], (GEN)m[2]);
@@ -1516,28 +1515,20 @@ lllintpartialall(GEN m, long flag)
     int progress = 0;
     long npass2 = 0;
 
-/* Try to row reduce the first two columns of m.
- * Our best result so far is (first two columns of m)*tm.
+/* Row reduce the first two columns of m. Our best result so far is
+ * (first two columns of m)*tm.
  *
  * Initially tm = 2 x 2 identity matrix.
- * The inner products of the reduced matrix are in
- * dot11, dot12, dot22. */
+ * Inner products of the reduced matrix are in dot11, dot12, dot22. */
     while (npass2 < 2 || progress)
     {
       GEN dot12new, q = diviiround(dot12, dot22);
 
       npass2++; progress = signe(q);
       if (progress)
-      {
-       /* Conceptually replace (v1, v2) by (v1 - q*v2, v2),
-        * where v1 and v2 represent the reduced basis for the
-        * first two columns of the matrix.
-        *
-        * We do this by updating tm and the inner products.
-        *
-        * An improved algorithm would look only at the leading
-        * digits of dot11, dot12, dot22.  It would use
-        * single-precision calculations as much as possible. */
+      {/* Conceptually replace (v1, v2) by (v1 - q*v2, v2), where v1 and v2
+        * represent the reduced basis for the first two columns of the matrix.
+        * We do this by updating tm and the inner products. */
         q = negi(q);
         dot12new = addii(dot12, mulii(q, dot22));
         dot11 = addii(dot11, mulii(q, addii(dot12, dot12new)));
@@ -1550,161 +1541,142 @@ lllintpartialall(GEN m, long flag)
 
       /* Occasionally (including final pass) do garbage collection.  */
       if (npass2 % 8 == 0 || !progress)
-        gerepileall(ltop1, 4, &dot11,&dot12,&dot22,&tm);
+        gerepileall(av2, 4, &dot11,&dot12,&dot22,&tm);
     } /* while npass2 < 2 || progress */
 
     {
-      long icol;
+      long i;
       GEN det12 = subii(mulii(dot11, dot22), mulii(dot12, dot12));
 
-      tm1 = idmat(ncol);
       mid = cgetg(ncol+1, t_MAT);
-      for (icol = 1; icol <= 2; icol++)
+      for (i = 1; i <= 2; i++)
       {
-        coeff(tm1,1,icol) = coeff(tm,1,icol);
-	coeff(tm1,2,icol) = coeff(tm,2,icol);
-        mid[icol] = (long)ZV_lincomb(
-           gcoeff(tm,1,icol),gcoeff(tm,2,icol), (GEN)m[1],(GEN)m[2]);
+        if (tm1)
+        {
+          coeff(tm1,1,i) = coeff(tm,1,i);
+          coeff(tm1,2,i) = coeff(tm,2,i);
+        }
+        mid[i] = (long)ZV_lincomb(
+           gcoeff(tm,1,i),gcoeff(tm,2,i), (GEN)m[1],(GEN)m[2]);
       }
-      for (icol = 3; icol <= ncol; icol++)
+      for (i = 3; i <= ncol; i++)
       {
-        GEN curcol = (GEN)m[icol];
-	GEN dot1i = gscali((GEN)mid[1], curcol);
-        GEN dot2i = gscali((GEN)mid[2], curcol);
-       /* Try to solve
+        GEN c = (GEN)m[i];
+	GEN dot1i = gscali((GEN)mid[1], c);
+        GEN dot2i = gscali((GEN)mid[2], c);
+       /* ( dot11  dot12 ) (q1)   ( dot1i )
+        * ( dot12  dot22 ) (q2) = ( dot2i )
         *
-        * ( dot11  dot12 ) (q1)    ( dot1i )
-        * ( dot12  dot22 ) (q2)  = ( dot2i )
-        *
-        * Round -q1 and -q2 to the nearest integer.
-        * Then compute curcol - q1*mid[1] - q2*mid[2].
-        * This will be approximately orthogonal to the
-        * first two vectors in the new basis. */
+        * Round -q1 and -q2 to nearest integer. Then compute
+        *   c - q1*mid[1] - q2*mid[2].
+        * This will be approximately orthogonal to the first two vectors in
+        * the new basis. */
 	GEN q1neg = subii(mulii(dot12, dot2i), mulii(dot22, dot1i));
         GEN q2neg = subii(mulii(dot12, dot1i), mulii(dot11, dot2i));
 
         q1neg = diviiround(q1neg, det12);
         q2neg = diviiround(q2neg, det12);
-        coeff(tm1, 1, icol) = ladd(mulii(q1neg, gcoeff(tm,1,1)),
-				   mulii(q2neg, gcoeff(tm,1,2)));
-        coeff(tm1, 2, icol) = ladd(mulii(q1neg, gcoeff(tm,2,1)),
-				   mulii(q2neg, gcoeff(tm,2,2)));
-        mid[icol] = ladd(curcol,
-          ZV_lincomb(q1neg,q2neg, (GEN)mid[1],(GEN)mid[2]));
-      } /* for icol */
+        if (tm1)
+        {
+          coeff(tm1, 1, i) = ladd(mulii(q1neg, gcoeff(tm,1,1)),
+                                     mulii(q2neg, gcoeff(tm,1,2)));
+          coeff(tm1, 2, i) = ladd(mulii(q1neg, gcoeff(tm,2,1)),
+                                     mulii(q2neg, gcoeff(tm,2,2)));
+        }
+        mid[i] = ladd(c, ZV_lincomb(q1neg,q2neg, (GEN)mid[1],(GEN)mid[2]));
+      } /* for i */
     } /* local block */
   }
   if (DEBUGLEVEL>6)
   {
-    fprintferr("tm1 = %Z",tm1);
+    if (tm1) fprintferr("tm1 = %Z",tm1);
     fprintferr("mid = %Z",mid); /* = m * tm1 */
   }
-  gerepileall(ltop1,2, &tm1, &mid);
+  gerepileall(av, tm1? 2: 1, &mid, &tm1);
   {
    /* For each pair of column vectors v and w in mid * tm2,
     * try to replace (v, w) by (v, v - q*w) for some q.
     * We compute all inner products and check them repeatedly. */
-    const pari_sp ltop3 = avma; /* Excludes region with tm1 and mid */
-    const pari_sp lim = stack_lim(ltop3,2);
-    long icol, npass = 0;
-    GEN dotprd = cgetg(ncol+1, t_MAT);
+    const pari_sp av3 = avma, lim = stack_lim(av3,2);
+    long i, j, npass = 0;
+    GEN dot = cgetg(ncol+1, t_MAT); /* scalar products */
 
     tm2 = idmat(ncol);
-    for (icol=1; icol <= ncol; icol++)
+    for (i=1; i <= ncol; i++)
     {
-      long jcol;
-
-      dotprd[icol] = lgetg(ncol+1,t_COL);
-      for (jcol=1; jcol <= icol; jcol++)
-	coeff(dotprd,jcol,icol) = coeff(dotprd,icol,jcol) =
-          (long)gscali((GEN)mid[icol], (GEN)mid[jcol]);
-    } /* for icol */
+      dot[i] = lgetg(ncol+1,t_COL);
+      for (j=1; j <= i; j++)
+	coeff(dot,j,i) = coeff(dot,i,j) = (long)gscali((GEN)mid[i],(GEN)mid[j]);
+    }
     for(;;)
     {
       long reductions = 0;
-      for (icol=1; icol <= ncol; icol++)
+      for (i=1; i <= ncol; i++)
       {
 	long ijdif;
         for (ijdif=1; ijdif < ncol; ijdif++)
 	{
-          long dcol, jcol, k1, k2;
+          long d, k1, k2;
           GEN codi, q;
 
-          jcol = icol + ijdif;
-          if (jcol > ncol) jcol -= ncol;
-          if (cmpii(gcoeff(dotprd,icol,icol),
-		    gcoeff(dotprd,jcol,jcol)) > 0)
-          { k1 = icol; k2 = jcol; }
-          else
-          { k2 = icol; k1 = jcol; }
-	  /* k1, resp. k2,  index of larger, resp. smaller, column */
-	  codi = gcoeff(dotprd,k2,k2);
-          q = signe(codi)? diviiround(gcoeff(dotprd,k1,k2), codi): gzero;
+          j = i + ijdif; if (j > ncol) j -= ncol;
+	  /* let k1, resp. k2,  index of larger, resp. smaller, column */
+          if (cmpii(gcoeff(dot,i,i),
+		    gcoeff(dot,j,j)) > 0) { k1 = i; k2 = j; }
+          else                            { k1 = j; k2 = i; }
+	  codi = gcoeff(dot,k2,k2);
+          q = signe(codi)? diviiround(gcoeff(dot,k1,k2), codi): gzero;
           if (!signe(q)) continue;
 
 	  /* Try to subtract a multiple of column k2 from column k1.  */
           reductions++; q = negi(q);
-          tm2[k1]   = (long)ZV_lincomb(gun,q, (GEN)tm2[k1], (GEN)tm2[k2]);
-          dotprd[k1]= (long)ZV_lincomb(gun,q, (GEN)dotprd[k1], (GEN)dotprd[k2]);
-          coeff(dotprd, k1, k1) = laddii(gcoeff(dotprd,k1,k1),
-                                         mulii(q, gcoeff(dotprd,k2,k1)));
-          for (dcol = 1; dcol <= ncol; dcol++)
-            coeff(dotprd,k1,dcol) = coeff(dotprd,dcol,k1);
+          tm2[k1] = (long)ZV_lincomb(gun,q, (GEN)tm2[k1], (GEN)tm2[k2]);
+          dot[k1] = (long)ZV_lincomb(gun,q, (GEN)dot[k1], (GEN)dot[k2]);
+          coeff(dot, k1, k1) = laddii(gcoeff(dot,k1,k1),
+                                      mulii(q, gcoeff(dot,k2,k1)));
+          for (d = 1; d <= ncol; d++) coeff(dot,k1,d) = coeff(dot,d,k1);
         } /* for ijdif */
-        if (low_stack(lim, stack_lim(ltop3,2)))
+        if (low_stack(lim, stack_lim(av3,2)))
 	{
           if(DEBUGMEM>1) err(warnmem,"lllintpartialall");
-	  gerepileall(ltop3, 2, &dotprd,&tm2);
+	  gerepileall(av3, 2, &dot,&tm2);
         }
-      } /* for icol */
+      } /* for i */
       if (!reductions) break;
       if (DEBUGLEVEL>6)
       {
-	GEN diag_prod = dbltor(1.0);
-	for (icol = 1; icol <= ncol; icol++)
-	  diag_prod = mpmul(diag_prod, gcoeff(dotprd,icol,icol));
+	GEN d = dbltor(1.0);
+	for (i = 1; i <= ncol; i++) d = mpmul(d, gcoeff(dot,i,i));
         npass++;
 	fprintferr("npass = %ld, red. last time = %ld, diag_prod = %Z\n\n",
-	            npass, reductions, diag_prod);
+	            npass, reductions, d);
       }
     } /* for(;;)*/
 
    /* Sort columns so smallest comes first in m * tm1 * tm2.
     * Use insertion sort. */
-    for (icol = 1; icol < ncol; icol++)
+    for (i = 1; i < ncol; i++)
     {
-      long jcol, s = icol;
+      long j, s = i;
 
-      for (jcol = icol+1; jcol <= ncol; jcol++)
-	if (cmpii(gcoeff(dotprd,s,s),gcoeff(dotprd,jcol,jcol)) > 0) s = jcol;
-      if (icol != s)
+      for (j = i+1; j <= ncol; j++)
+	if (cmpii(gcoeff(dot,s,s),gcoeff(dot,j,j)) > 0) s = j;
+      if (i != s)
       { /* Exchange with proper column */
-        /* Only diagonal of dotprd is updated */
-        swap(tm2[icol], tm2[s]);
-        swap(coeff(dotprd,icol,icol), coeff(dotprd,s,s));
+        /* Only diagonal of dot is updated */
+        swap(tm2[i], tm2[s]);
+        swap(coeff(dot,i,i), coeff(dot,s,s));
       }
-    } /* for icol */
-    icol = 1;
-    while (icol <= ncol && !signe(gcoeff(dotprd,icol,icol))) icol++;
-    ncolnz = ncol - icol + 1;
+    }
+    i = 1;
+    while (i <= ncol && !signe(gcoeff(dot,i,i))) i++;
+    if (i > 1)
+    {
+      tm2 += (i - 1);
+      tm2[0] = evaltyp(t_MAT)|evallg(ncol - i);
+    }
   } /* local block */
-
-  if (flag)
-  {
-    if (ncolnz == lg((GEN)m[1])-1)
-    {
-      tm2 += (ncol-ncolnz);
-      tm2[0]=evaltyp(t_MAT)|evallg(ncolnz+1);
-    }
-    else
-    {
-      tm1 = gmul(tm1, tm2);
-      tm2 = lllint(gmul(m, tm1));
-    }
-  }
-  if (DEBUGLEVEL>6)
-    fprintferr("lllintpartial output = %Z", gmul(tm1, tm2));
-  return gerepileupto(ltop1, gmul(tm1, tm2));
+  return gerepileupto(av, gmul(tm1? tm1: mid, tm2));
 }
 
 GEN
@@ -1713,6 +1685,11 @@ lllintpartial(GEN mat)
   return lllintpartialall(mat,1);
 }
 
+GEN
+lllintpartial_ip(GEN mat)
+{
+  return lllintpartialall(mat,0);
+}
 /********************************************************************/
 /**                                                                **/
 /**                   LINEAR & ALGEBRAIC DEPENDENCE                **/

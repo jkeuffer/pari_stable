@@ -575,6 +575,7 @@ GEN     lllint_i(GEN x, long alpha, int gram, GEN *h, GEN *ptfl, GEN *ptB);
 GEN     lllint_ip(GEN x, long alpha);
 GEN     lllintern(GEN x, long D, long flag, long prec);
 GEN     lllintpartial(GEN mat);
+GEN     lllintpartial_ip(GEN mat);
 GEN     lllkerim(GEN x);
 GEN     lllkerimgen(GEN x);
 GEN     matkerint0(GEN x,long flag);
