@@ -462,7 +462,7 @@ rnfidealhermite(GEN rnf,GEN x)
 {
   long tx=typ(x), lx=lg(x), i, j, n, m;
   gpmem_t av=avma, tetpil;
-  GEN z,p1,p2,x1,x2,x1j,nf,bas,unnf,zeronf;
+  GEN z,p1,p2,x1,x2,x1j,nf,bas;
 
   checkrnf(rnf);
   n = degpol(rnf[1]); nf = (GEN)rnf[10]; bas = (GEN)rnf[7];
@@ -594,8 +594,8 @@ rnfidealreltoabs(GEN rnf,GEN x)
 GEN
 rnfidealabstorel(GEN rnf,GEN x)
 {
-  long n, m, j, k;
-  gpmem_t av=avma, tetpil;
+  long n, m, j;
+  gpmem_t av = avma;
   GEN nf,basabs,M,xj,p1,p2,id;
 
   checkrnf(rnf); nf = (GEN)rnf[10];
