@@ -89,8 +89,8 @@ member          @Member functions@2
 \/=             @GP operators@2
 >>=             @GP operators@2
 <<=             @GP operators@2
-<<              @GP operators@2
->>              @GP operators@2
+<<              @shift
+>>              @shift
 <>              @Comparison and boolean operators
 +/-             @+$/$-
 min             @max

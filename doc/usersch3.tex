@@ -301,23 +301,32 @@ See \secref{se:bitand} for the behaviour at negative arguments.
 
 \syn{bittest}{x,n}, where $n$ and the result are \kbd{long}s.
 
+\subsecidx{shift}$(x,n)$ or $x$ \kbd{<<} $n$ (= $x$ \kbd{>>} $(-n)$): shifts
+$x$ componentwise left by $n$ bits if $n\ge0$ and right by $|n|$ bits if $n<0$.
+A left shift by $n$ corresponds to multiplication by $2^n$. A right shift of an
+integer $x$ by $|n|$ corresponds to a Euclidean division of $x$ by $2^{|n|}$
+with a remainder of the same sign as $x$, hence is not the same (in general) as
+$x \kbd{\bs} 2^n$.
+
+\syn{gshift}{x,n} where $n$ is a \kbd{long}.
+
 \subsecidx{shiftmul}$(x,n)$: multiplies $x$ by $2^n$. The difference with
-binary shifts \kbd{<<}, \kbd{>>} is that when $n<0$, ordinary division takes
-place, hence for example if $x$ is an integer the result may be a fraction,
-while for shifts Euclidean division takes place when $n<0$ hence if $x$
-is an integer the result is still an integer.
+\kbd{shift} is that when $n<0$, ordinary division takes place, hence for
+example if $x$ is an integer the result may be a fraction, while for shifts
+Euclidean division takes place when $n<0$ hence if $x$ is an integer the result
+is still an integer.
 
 \syn{gmul2n}{x,n} where $n$ is a \kbd{long}.
 
 \subsec{Comparison and boolean operators}.\sidx{boolean operators} The six
 standard \idx{comparison operators} \kbd{<=}, \kbd{<}, \kbd{>=}, \kbd{>},
 \kbd{==}, \kbd{!=} are available in GP, and in library mode under the names
-\tet{gle}, \tet{glt}, \tet{gge}, \tet{ggt}, \tet{geq}, \tet{gne}
-respectively. The library syntax is $\var{co}(x,y)$, where \var{co} is the
-comparison operator. The result is 1 (as a \kbd{GEN}) if the comparison is
-true, 0 (as a \kbd{GEN}) if it is false. For the purpose of comparison,
-\typ{STR} objects are strictly larger than any other non-string type; two
-\typ{STR} objects are compared using the standard lexicographic order.
+\tet{gle}, \tet{glt}, \tet{gge}, \tet{ggt}, \tet{geq}, \tet{gne} respectively.
+The library syntax is $\var{co}(x,y)$, where \var{co} is the comparison
+operator. The result is 1 (as a \kbd{GEN}) if the comparison is true, 0 (as a
+\kbd{GEN}) if it is false. For the purpose of comparison, \typ{STR} objects are
+strictly larger than any other non-string type; two \typ{STR} objects are
+compared using the standard lexicographic order.
 
 The standard boolean functions  \kbd{||} (\idx{inclusive or}), \kbd{\&\&}
 (\idx{and})\sidx{or} and \kbd{!} (\idx{not}) are also available, and the
@@ -327,10 +336,10 @@ respectively.
 In library mode, it is in fact usually preferable to use the two basic
 functions which are $\teb{gcmp}(x,y)$ which gives the sign (1, 0, or -1) of
 $x-y$, where $x$ and $y$ must be in $\R$, and $\teb{gegal}(x,y)$ which can be
-applied to any two PARI objects $x$ and $y$ and gives 1 (i.e.~true) if they
-are equal (but not necessarily identical), 0 (i.e.~false) otherwise.
-Particular cases of \teb{gegal} which should be used are $\teb{gcmp0}(x)$
-($x==0$ ?), $\teb{gcmp1}(x)$ ($x==1$ ?), and
+applied to any two PARI objects $x$ and $y$ and gives 1 (i.e.~true) if they are
+equal (but not necessarily identical), 0 (i.e.~false) otherwise. Particular
+cases of \teb{gegal} which should be used are $\teb{gcmp0}(x)$ ($x==0$ ?),
+$\teb{gcmp1}(x)$ ($x==1$ ?), and
 $\teb{gcmp_1}(x)$ ($x==-1$ ?).
 
 Note that $\teb{gcmp0}(x)$ tests whether $x$ is equal to zero, even if $x$ is
