@@ -33,6 +33,7 @@ Done for version 2.2.2 (released ??/??/2001):
   Fixed
     1- qfbred(Qfb(4, 17, 18)) --> SIGFPE
     2- broken compilation in arith.c when CC != gcc
+    3- nfhilbert (local case pr | 2) expected POLMOD argument without check
 
   Changes
     1- allow compressing *.dvi files for the online help system
