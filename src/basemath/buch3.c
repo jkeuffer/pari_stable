@@ -21,6 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "parinf.h"
 
+extern GEN make_integral(GEN nf, GEN L0, GEN f, GEN *listpr);
 extern GEN unif_mod_fZ(GEN pr, GEN F);
 extern GEN init_unif_mod_fZ(GEN L);
 extern void testprimes(GEN bnf, long bound);
@@ -273,7 +274,7 @@ fast_val(GEN nf,GEN L0,GEN cx,GEN pr,GEN tau)
 
 /* x coprime to fZ, return y = x mod fZ, y integral */
 static GEN
-make_integral(GEN x, GEN fZ)
+make_integral_Z(GEN x, GEN fZ)
 {
   GEN d, y = Q_remove_denom(x, &d);
   if (d) y = FpV_red(gmul(y, mpinvmod(d, fZ)), fZ);
@@ -282,20 +283,27 @@ make_integral(GEN x, GEN fZ)
 
 /* p pi^(-1) mod f */
 static GEN
-get_invpi(GEN nf, GEN fZ, GEN pr, GEN F, GEN *v)
+get_pinvpi(GEN nf, GEN fZ, GEN p, GEN pi, GEN *v)
 {
   if (!*v) {
-    GEN invpi, p = (GEN)pr[1];
-    invpi = element_inv(nf, unif_mod_fZ(pr, F));
-    *v = make_integral(gmul(p, invpi), mulii(p, fZ));
+    GEN invpi = element_inv(nf, pi);
+    *v = make_integral_Z(gmul(p, invpi), mulii(p, fZ));
   }
   return *v; 
 }
+/* p pi^(-1) mod f */
+static GEN
+get_pi(GEN F, GEN pr, GEN *v)
+{
+  if (!*v) *v = unif_mod_fZ(pr, F);
+  return *v; 
+}
+
 static GEN
 compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
 {
-  GEN f, fZ, basecl, module, fa, fa2, *listpr, *listep, *vecinvpi, *vectau;
-  GEN pr, t, EX, sarch, cyc, F;
+  GEN f, fZ, basecl, module, fa, fa2, pr, t, EX, sarch, cyc, F;
+  GEN *listpr, *listep, *vecpi, *vecpinvpi, *vectau;
   long i,j,l,lp;
 
   /* basecl = generators in factored form */
@@ -310,19 +318,21 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
   listep = (GEN*)fa[2];
 
   lp = lg(listpr);
-  vecinvpi  = (GEN*)cgetg(lp, t_VEC);
+  vecpinvpi = (GEN*)cgetg(lp, t_VEC);
+  vecpi  = (GEN*)cgetg(lp, t_VEC);
   vectau = (GEN*)cgetg(lp, t_VEC);
   for (i=1; i<lp; i++) 
   {
     pr = listpr[i];
-    vecinvpi[i] = NULL; /* to be computed if needed */
+    vecpi[i]    = NULL; /* to be computed if needed */
+    vecpinvpi[i] = NULL; /* to be computed if needed */
     vectau[i] = eltmul_get_table(nf, (GEN)pr[5]);
   }
 
   l = lg(basecl);
   for (i=1; i<l; i++)
   {
-    GEN invpi, dmulI, mulI, G, I, A, e, L, newL;
+    GEN p, pi, pinvpi, dmulI, mulI, G, I, A, e, L, newL;
     long la, v, k;
     /* G = [I, A=famat(L,e)] is a generator, I integral */
     G = (GEN)basecl[i];
@@ -351,8 +361,10 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
       pr = listpr[j]; 
       v  = idealval(nf, I, pr);
       if (!v) continue;
-      invpi = get_invpi(nf, fZ, pr, F, &vecinvpi[j]);
-      t = element_pow(nf, invpi, stoi(v));
+      p  = (GEN)pr[1];
+      pi = get_pi(F, pr, &vecpi[j]);
+      pinvpi = get_pinvpi(nf, fZ, p, pi, &vecpinvpi[j]);
+      t = element_pow(nf, pinvpi, stoi(v));
       mulI = mulI? element_mul(nf, mulI, t): t;
       t = gpowgs((GEN)pr[1], v);
       dmulI = dmulI? mulii(dmulI, t): t;
@@ -370,12 +382,22 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
         pr = listpr[j];
         v  = fast_val(nf, L0,cx, pr,vectau[j]); /* = val_pr(LL) */
         if (!v) continue;
-        invpi = get_invpi(nf, fZ, pr, F, &vecinvpi[j]);
-        t = element_pow(nf,invpi,stoi(v));
-        LL = element_mul(nf, LL, t);
-        LL = gdivexact(LL, gpowgs((GEN)pr[1], v));
+        p  = (GEN)pr[1];
+        pi = get_pi(F, pr, &vecpi[j]);
+        if (v > 0)
+        {
+          pinvpi = get_pinvpi(nf, fZ, p, pi, &vecpinvpi[j]);
+          t = element_pow(nf,pinvpi,stoi(v));
+          LL = element_mul(nf, LL, t);
+          LL = gdiv(LL, gpowgs(p, v));
+        }
+        else
+        {
+          t = element_pow(nf,pi,stoi(-v));
+          LL = element_mul(nf, LL, t);
+        }
       }
-      newL[k] = (long)FpV_red(make_integral(LL,fZ), fZ);
+      newL[k] = (long)FpV_red(make_integral(nf,LL,f,listpr), fZ);
     }
 
     /* G in nf, = L^e mod f */

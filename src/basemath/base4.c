@@ -2187,7 +2187,7 @@ coprime_part(GEN x, GEN f)
 }
 
 /* x t_INT, f ideal. Write x = x1 x2, sqf(x1) | f, (x2,f) = 1. Return x2 */
-GEN
+static GEN
 nf_coprime_part(GEN nf, GEN x, GEN *listpr)
 {
   long v, j, lp = lg(listpr), N = degpol(nf[1]);
@@ -2219,6 +2219,33 @@ nf_coprime_part(GEN nf, GEN x, GEN *listpr)
   x2 = x1? idealdivexact(nf, x, x1): x;
 #endif
   return x2;
+}
+
+/* L0 in K^*, assume (L0,f) = 1. Return L integral, L0 = L mod f  */
+GEN
+make_integral(GEN nf, GEN L0, GEN f, GEN *listpr)
+{
+  GEN fZ, t, L, D2, d1, d2, d;
+
+  L = Q_remove_denom(L0, &d);
+  if (!d) return L0;
+      
+  /* L0 = L / d, L integral */
+  fZ = gcoeff(f,1,1);
+  /* Kill denom part coprime to fZ */
+  d2 = coprime_part(d, fZ);
+  t = mpinvmod(d2, fZ); if (!is_pm1(t)) L = gmul(L,t);
+  if (egalii(d, d2)) return L;
+          
+  d1 = diviiexact(d, d2);
+  /* L0 = (L / d1) mod f. d1 not coprime to f
+   * write (d1) = D1 D2, D2 minimal, (D2,f) = 1. */
+  D2 = nf_coprime_part(nf, d1, listpr);
+  t = idealaddtoone_i(nf, D2, f); /* in D2, 1 mod f */
+  L = element_muli(nf,t,L);
+    
+  /* if (L0, f) = 1, then L in D1 ==> in D1 D2 = (d1) */
+  return Q_div_to_int(L, d1); /* exact division */
 }
 
 /* assume L is a list of prime ideals. Return the product */
@@ -3018,13 +3045,15 @@ nfdetint(GEN nf,GEN pseudo)
 
 /* clean in place (destroy x) */
 static void
-nfcleanmod(GEN nf, GEN x, long lim, GEN detmat)
+nfcleanmod(GEN nf, GEN x, long lim, GEN D)
 {
   long lx = lg(x), i;
+  GEN d;
   if (lim<=0 || lim>=lx) lim = lx-1;
-  detmat = lllint_ip(detmat, 4);
+  D = lllint_ip(Q_remove_denom(D, &d), 4);
+  if (d) D = gdiv(D,d);
   for (i=1; i<=lim; i++)
-    x[i] = (long)element_reduce(nf, (GEN)x[i], detmat);
+    x[i] = (long)element_reduce(nf, (GEN)x[i], D);
 }
 
 GEN
