@@ -515,17 +515,14 @@ p_ok(GEN nf, GEN p, GEN a)
   {
     GEN pr = (GEN)dec[i];
     if (is_pm1(pr[4]))
-    {
-      if (DEBUGLEVEL>=4)
-        fprintferr("Premier choisi pour decomposition: %Z\n", pr);
       return pr;
-    }
   }	
   avma = av; return NULL;
 }
 
+/* for each new prime ct--, if ct = 0, return NULL */
 static GEN
-choose_prime(GEN nf, GEN dk, GEN lim)
+choose_prime(GEN nf, GEN dk, GEN lim, long ct)
 {
   GEN p, pr;
 
@@ -533,6 +530,8 @@ choose_prime(GEN nf, GEN dk, GEN lim)
   for (;;)
   {
     if ((pr = p_ok(nf,p,dk))) break;
+    ct--;
+    if (!ct) return NULL;
     p = nextprime(addis(p,2));
   }
 
@@ -825,9 +824,9 @@ T2_matrix_pow(GEN nf, GEN pre, GEN p, GEN C, long *kmax, long prec)
 static GEN
 nfsqff(GEN nf,GEN pol, long fl)
 {
-  long d=lgef(pol),i,k,m,n,av=avma,tetpil,newprec,prec;
-  GEN p1,pr,p2,rep,k2,C,h,dk,dki,p,prh,p3,T2,polbase,fact,pk;
-  GEN polmod,polred,hinv,lt,minp,den,maxp=shifti(gun,32),run;
+  long d=lgef(pol),i,k,m,n,av=avma,tetpil,newprec,prec,nbf=BIGINT,anbf,ct=3;
+  GEN p1,pr,p2,rep,k2,C,h,dk,dki,p,prh,p3,T2,polbase,fact,pk,ap,apr;
+  GEN polmod,polred,hinv,lt,minp,den,maxp=shifti(gun,32),run,aprh;
 
   dk=absi((GEN)nf[3]);
   dki=mulii(dk,(GEN)nf[4]);
@@ -876,9 +875,14 @@ nfsqff(GEN nf,GEN pol, long fl)
   if (DEBUGLEVEL>=4)
     fprintferr("La borne de la norme des coeff du diviseur est : %Z\n", C);
   
-  k2=gmul2n(gmulgs(glog(gdivgs(gmul2n(C,2),n),DEFAULTPREC),n),-1);
-  if (!fl) k2=mulrr(k2,dbltor(1.1));
- 
+  /* this is the theoretical bound for the exponent */
+  /* k2=gadd(glog(gdivgs(C,n),DEFAULTPREC), mulsr(n*(n-1), dbltor(0.347)));
+     k2=gmul2n(gmulgs(k2,n),-1); */
+
+  /* we use instead the following heuristic bound */
+  k2=gmul2n(gmulgs(glog(gdivgs(gmul2n(C,2),n),DEFAULTPREC),n),-1); 
+  k2=mulrr(k2,dbltor(1.2));
+
   minp=gmin(gexp(gmul2n(k2,-6),BIGDEFAULTPREC), maxp);
   minp=gceil(minp);
   
@@ -887,29 +891,54 @@ nfsqff(GEN nf,GEN pol, long fl)
     fprintferr("borne inf. sur les nombres premiers : %Z\n", minp);
     msgtimer("Calcul des bornes");
   }
+
+  pr=NULL;
   for (;;)
   {
-    pr=choose_prime(nf,dki,minp); p=(GEN)pr[1];
-    prh=prime_to_ideal(nf,pr);
+    if (pr)
+      apr=choose_prime(nf,dki,minp,30); 
+    else
+      apr=choose_prime(nf,dki,minp,0); 
+
+    if (!apr) break;
+
+    ap=(GEN)apr[1];
+    aprh=prime_to_ideal(nf,apr);
 
     polred=gcopy(polbase);
     lt=(GEN)leading_term(polbase)[1];
-    lt=mpinvmod(lt,p);
+    lt=mpinvmod(lt,ap);
 
     for (i=2; i<d; i++)
-      polred[i] = nfreducemodpr_i(gmul(lt,(GEN)polbase[i]), prh)[1];
-    if (!divise(discsr(polred),p)) break;
-    minp = addis(p,1);
+      polred[i] = nfreducemodpr_i(gmul(lt,(GEN)polbase[i]), aprh)[1];
+
+    if (!divise(discsr(polred),ap))
+    {
+      rep=(GEN)simplefactmod(polred,ap)[1];
+      anbf=lg(rep)-1;
+      ct--;
+      if (anbf < nbf)
+      {
+	nbf=anbf;
+	pr=gcopy(apr);
+	p=gcopy(ap);
+	if (DEBUGLEVEL>=4)
+	{
+	  fprintferr("Ideal premier pr considere pour decomposition: %Z\n", pr);
+	  fprintferr("Nombre de facteurs irreductibles modulo pr = %ld\n", nbf);
+	}
+	if (nbf == 1) break;
+      }
+    }
+    if (pr && !ct) break;
+
+    minp = addis(ap,1);
   }
 
   k = itos(gceil(gdiv(k2,glog(p,BIGDEFAULTPREC))));	
-  rep=(GEN)simplefactmod(polred,p)[1];
 
-  if (DEBUGLEVEL>=4)
-  {
-    msgtimer("Choix de l'ideal premier");
-    fprintferr("Nombre de facteurs irreductibles modulo pr = %ld\n", lg(rep)-1);
-  }
+  if (DEBUGLEVEL>=4) msgtimer("Choix de l'ideal premier");
+
   if (lg(rep)==2)
   {
     if (fl) { avma=av; return cgetg(1,t_VEC); }
