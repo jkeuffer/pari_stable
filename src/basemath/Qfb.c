@@ -1192,10 +1192,8 @@ qfbsolve(GEN Q,GEN n)
   if (typ(n)!=t_INT) err(typeer,"qfbsolve");
   switch(typ(Q))
   {
-  case t_QFI:
-    return qfbimagsolvep(Q,n);
-  case t_QFR:
-    return qfbrealsolvep(Q,n);
+  case t_QFI: return qfbimagsolvep(Q,n);
+  case t_QFR: return qfbrealsolvep(Q,n);
   default:
     err(typeer,"qfbsolve");
     return NULL; /* NOT REACHED */
