@@ -2142,9 +2142,8 @@ chk_gen_init(FP_chk_fun *chk, GEN nf, GEN gram, GEN mat, long *ptprec)
   chk->skipfirst = skipfirst;
   if (DEBUGLEVEL>2) fprintferr("chk_gen_init: skipfirst = %ld\n",skipfirst);
 
-  /* should be [max_k C^n_k (bound/k) ^ k] ^ (1/2) */
-  B = gsqrt(gpowgs(bound, n), 3);
-  prec2 = (1 + (gexpo(B) >> TWOPOTBITS_IN_LONG));
+  /* should be gexpo( [max_k C^n_k (bound/k) ^ k] ^ (1/2) ) */
+  prec2 = (1 + (((gexpo(bound)*n)/2) >> TWOPOTBITS_IN_LONG));
   if (prec2 < 0) prec2 = 0;
   prec = 3 + prec2;
   prec2= (long)nfnewprec(nf,-1);
@@ -2693,13 +2692,12 @@ perf(GEN a)
  * One needs BORNE != 0; LLL reduction done in fincke_pohst().
  * If (flag & 2) stop as soon as stockmax is reached.
  * If (flag & 1) return NULL on precision problems (no error).
- * If (check != NULL consider only vectors passing the check [assumes
+ * If (check != NULL consider only vectors passing the check [ assumes
  *   stockmax > 0 and we only want the smallest possible vectors ] */
 static GEN
-smallvectors(GEN a, GEN BORNE, long stockmax, long flag, long prec,
-             FP_chk_fun *CHECK)
+smallvectors(GEN a, GEN BORNE, long stockmax, long flag, FP_chk_fun *CHECK)
 {
-  long av,av1,lim,N,n,i,j,k,s,epsbit,checkcnt = 0;
+  long av,av1,lim,N,n,i,j,k,s,epsbit,prec,checkcnt = 0;
   GEN u,S,x,y,z,v,q,norme1,normax1,borne1,borne2,eps,p1,alpha,norms,dummy;
   GEN (*check)(GEN,GEN) = CHECK? CHECK->f: NULL;
   GEN data = CHECK? CHECK->data: NULL;
@@ -2711,6 +2709,7 @@ smallvectors(GEN a, GEN BORNE, long stockmax, long flag, long prec,
   q = sqred1intern(a,flag&1);
   if (q == NULL) return NULL;
   if (DEBUGLEVEL>5) fprintferr("q = %Z",q);
+  prec = gprecision(q);
   epsbit = bit_accuracy(prec) >> 1;
   eps = realun(prec); setexpo(eps,-epsbit);
   alpha = dbltor(0.95);
@@ -2981,7 +2980,7 @@ fincke_pohst(GEN a,GEN bound,long stockmax,long flag, long PREC,
   for (i=1; i<n; i++)
   {
     res = smallvectors(gram, bound? bound: gcoeff(gram,i,i),
-                       stockmax,flag,prec,CHECK);
+                       stockmax,flag,CHECK);
     if (!res) goto PRECPB;
     if (!CHECK || bound || lg(res[2]) > 1) break;
     if (DEBUGLEVEL>2) fprintferr("  i = %ld failed\n",i);
