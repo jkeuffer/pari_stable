@@ -23,30 +23,24 @@ GEN respm(GEN f1,GEN f2,GEN pm);
 static void
 allbase_check_args(GEN f, long code, GEN *y, GEN *ptw1, GEN *ptw2)
 {
-  GEN w,w1,w2,q;
-  long i,h;
-
+  GEN w;
   if (typ(f)!=t_POL) err(notpoler,"allbase");
   if (lgef(f)<=3) err(constpoler,"allbase");
-  *y=discsr(f);
-  if (!signe(*y)) err(talker,"reducible polynomial in allbase");
   if (DEBUGLEVEL) timer2();
   switch(code)
   {
     case 0: case 1:
-      w=auxdecomp(absi(*y),1-code);
-      w1=(GEN)w[1]; w2=(GEN)w[2]; break;
-    default: w=(GEN)code;
-      if (typ(w)!=t_MAT || lg(w)!=3)
-        err(talker,"not a n x 2 matrix as factorization in factoredbase");
-      w1=(GEN)w[1]; w2=(GEN)w[2]; h=lg(w1); q=gun;
-      for (i=1; i<h; i++)
-	q=gmul(q,powgi((GEN)w1[i], (GEN)w2[i]));
-      if (gcmp(absi(q), absi(*y)))
-        err(talker,"incorrect factorization in factoredbase");
+      *y = discsr(f);
+      if (!signe(*y)) err(talker,"reducible polynomial in allbase");
+      w = auxdecomp(absi(*y),1-code);
+      break;
+    default:
+      w = (GEN)code;
+      *y = factorback(w, NULL);
   }
   if (DEBUGLEVEL) msgtimer("disc. factorisation");
-  *ptw1=w1; *ptw2=w2;
+  *ptw1 = (GEN)w[1];
+  *ptw2 = (GEN)w[2];
 }
 
 /*******************************************************************/
@@ -1973,6 +1967,15 @@ eltppm(GEN f,GEN pd,GEN theta,GEN k)
   return gerepileupto(av,gdiv(phi,pd));
 }
 
+GEN addshiftw(GEN x, GEN y, long d);
+
+static GEN
+shiftpol(GEN x, long v)
+{
+  x = addshiftw(x, zeropol(v), 1);
+  setvarn(x,v); return x;
+}
+
 /* Sylvester's matrix, mod p^m (assumes f1 monic) */
 static GEN
 sylpm(GEN f1,GEN f2,GEN pm)
@@ -1989,7 +1992,7 @@ sylpm(GEN f1,GEN f2,GEN pm)
     for (k=1; k<=deg+1; k++) coeff(a,k,j)=h[k+1];
     for (   ; k<=n; k++) coeff(a,k,j)=zero;
 
-    if (j<n) h = Fp_res(gmul(polx[v],h),f1,pm);
+    if (j<n) h = Fp_res(shiftpol(h,v),f1,pm);
   }
   return hnfmodid(a,pm);
 }
@@ -3214,16 +3217,16 @@ polcompositum0(GEN pol1, GEN pol2, long flall)
   GEN pro1,p1,p2,p3,p4,p5,fa,rk,y;
 
   if (typ(pol1)!=t_POL || typ(pol2)!=t_POL) err(typeer,"polcompositum0");
-  v=varn(pol1);
+  if (lgef(pol1)<=3 || lgef(pol2)<=3) err(constpoler,"compositum");
+  v = varn(pol1);
   if (varn(pol2)!=v) err(talker,"not the same variable in compositum");
-  if (lgef(pol1)<=3 || lgef(pol2)<=3)
-    err(constpoler,"compositum");
-  if (lgef(ggcd(pol1,derivpol(pol1)))>3 || lgef(ggcd(pol2,derivpol(pol2)))>3)
-    err(talker,"not a separable polynomial in compositum");
+  if (lgef(ggcd(pol1,derivpol(pol1))) > 3 ||
+      lgef(ggcd(pol2,derivpol(pol2))) > 3)
+        err(talker,"not a separable polynomial in compositum");
 
   for (a=1; ; a=nexta(a))
   {
-    avma=av;
+    avma = av;
     if (DEBUGLEVEL>=2)
     {
       fprintferr("trying beta ");
@@ -3234,30 +3237,26 @@ polcompositum0(GEN pol1, GEN pol2, long flall)
     pro1 = gadd(polx[MAXVARN],gmulsg(a,polx[v]));
     p1 = gsubst(pol2,v,pro1);
     p2 = subresall(pol1,p1,&rk);
-    if (lgef(ggcd(p2,deriv(p2,MAXVARN)))==3)
+    if (typ(rk)!=t_POL || lgef(rk)!=4 || lgef(ggcd(p2,deriv(p2,MAXVARN)))!=3)
+      continue;
+    p2 = gsubst(p2,MAXVARN,polx[v]);
+    fa = factor(p2); fa = (GEN)fa[1];
+    if (flall)
     {
-      p2 = gsubst(p2,MAXVARN,polx[v]);
-      fa = factor(p2); fa = (GEN)fa[1];
-      if (typ(rk)==t_POL && lgef(rk)==4)
+      l=lg(fa); y=cgetg(l,t_VEC);
+      for (i=1; i<l; i++)
       {
-	if (flall)
-	{
-	  l=lg(fa); y=cgetg(l,t_VEC);
-	  for (i=1; i<l; i++)
-	  {
-	    p3=cgetg(5,t_VEC); p3[1]=fa[i]; y[i]=(long)p3;
-	    p4=gmodulcp(polx[v],(GEN)fa[i]);
-	    p5=gneg_i(gdiv(gsubst((GEN)rk[2],MAXVARN,p4),
-	                   gsubst((GEN)rk[3],MAXVARN,p4)));
-	    p3[2]=(long)p5;
-            p3[3]=ladd(p4,gmulsg(a,p5));
-            p3[4]=lstoi(-a);
-	  }
-	}
-	else y=fa;
-	tetpil=avma; return gerepile(av,tetpil,gcopy(y));
+        p3=cgetg(5,t_VEC); p3[1]=fa[i]; y[i]=(long)p3;
+        p4=gmodulcp(polx[v],(GEN)fa[i]);
+        p5=gneg_i(gdiv(gsubst((GEN)rk[2],MAXVARN,p4),
+                       gsubst((GEN)rk[3],MAXVARN,p4)));
+        p3[2]=(long)p5;
+        p3[3]=ladd(p4,gmulsg(a,p5));
+        p3[4]=lstoi(-a);
       }
     }
+    else y=fa;
+    tetpil=avma; return gerepile(av,tetpil,gcopy(y));
   }
 }
 
