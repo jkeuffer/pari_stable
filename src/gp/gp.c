@@ -2391,7 +2391,7 @@ get_line_from_file(char *prompt, filtre_t *F, FILE *file)
         err(talker,"Texmacs_stdin command %s not implemented", c.cmd);
       if (c.n != 2) 
         err(talker,"was expecting 2 arguments for Texmacs_stdin command");
-      texmacs_completion(c.v[0], atol(c.v[1])-1);
+      texmacs_completion(c.v[0], atol(c.v[1]));
       free_cmd(&c); *s = 0;
       tm_did_complete = 1;
 #else

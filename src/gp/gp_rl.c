@@ -659,8 +659,8 @@ init_readline(void)
 #endif
 }
 
-static char *
-escape_string(char *s)
+static void
+print_escape_string(char *s)
 {
   long l = strlen(s);
   char *t, *t0 = gpmalloc(l * 3 + 3);
@@ -677,9 +677,42 @@ escape_string(char *s)
       case '"': *t++ = '\\'; continue;
     }
   *t++ = '"';
-  *t++ = 0; return t0;
+  *t++ = 0; printf(t0); free(t0);
 }
 
+static char *
+completion_word(long end)
+{
+  char *s = rl_line_buffer + end, *found_quote = NULL;
+  long i;
+  /* truncate at cursor position */
+  *s = 0;
+  /* first look for unclosed string */
+  for (i=0; i < end; i++)
+  {
+    switch(rl_line_buffer[i])
+    {
+      case '"':
+        found_quote = found_quote? NULL: rl_line_buffer + i;
+        break;
+
+      case '\\': i++; break;
+    }
+  
+  }
+  if (found_quote) return found_quote + 1; /* return next char after quote */
+
+  /* else find beginning of word */
+  while (s >  rl_line_buffer)
+  {
+    s--;
+    if (!is_keyword_char(*s)) { s++; break; }
+  }
+  return s;
+}
+
+/* completion required with cursor on s + pos. Complete wrt strict left
+ * prefix */
 void
 texmacs_completion(char *s, long pos)
 {
@@ -688,23 +721,23 @@ texmacs_completion(char *s, long pos)
 
   if (rl_line_buffer) free(rl_line_buffer);
   rl_line_buffer = pari_strdup(s);
-  text = rl_line_buffer + pos;
-  while (text >  rl_line_buffer && isalpha((int)*text)) text--;
-  rl_point = pos;
+  text = completion_word(pos);
+  /* text = start of expression we complete */
   rl_end = l;
-  matches = pari_completion(text, pos, l);
+  rl_point = pos;
+  matches = pari_completion(text, text - rl_line_buffer, pos);
   printf("%cscheme:(tuple",DATA_BEGIN);
   if (matches)
   {
-    char *t;
-    long prelen = ((rl_line_buffer+pos) - text) + 1;
-    matches[0] = t = gpmalloc(l+1); /* prefix */
-    strncpy(t, text, prelen); t[prelen] = 0;
-    for (i=0; matches[i]; i++)
+    long prelen = (rl_line_buffer+pos) - text;
+    char *t = gpmalloc(l+1);
+    strncpy(t, text, prelen); t[prelen] = 0; /* prefix */
+    printf(" ");
+    print_escape_string(t); free(t);
+    for (i = matches[1]? 1: 0; matches[i]; i++)
     {
-      t = escape_string(matches[i] + (i? prelen: 0));
       printf(" ");
-      printf(t); free(t);
+      print_escape_string(matches[i] + prelen);
       free(matches[i]);
     }
     free(matches);
