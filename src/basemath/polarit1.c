@@ -1104,6 +1104,8 @@ split_berlekamp(GEN Q, GEN *t, GEN pp, GEN pps2)
         if (lgef(p2) <= 3) { avma=av; continue; }
         p2 = Fp_pow_mod_pol(p2,pps2, p1,pp);
         /* set p2 = p2 - 1 */
+        if (!signe(p2))
+          err(talker,"%Z not a prime in split_berlekamp",pp);
         p2[2] = laddis((GEN)p2[2], -1);
         p2 = Fp_pol_gcd(p1,p2, pp); l2=lgef(p2)-3;
         if (l2>0 && l2<l1)
