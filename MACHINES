@@ -91,10 +91,11 @@ PentiumIII   800MHz  Linux-2.2.14   egcs X11 dl2    1900    1882  2.0.20    CL
 PentiumIII   733MHz  Linux-2.2.14   egcs X11 dl2    2080    2090  2.0.19    IS
 PentiumIII   533MHz  Linux-2.2.14    gcc X11 dl2    2710    2730  2.0.19    IS
 PentiumIII   500MHz  Linux-2.2.12   egcs X11 dl2    3154    3176  2.0.18    HC
-PentiumII    400MHz  Linux-2.3.99    gcc X11 dl2    3392    3410  2.0.20(25)GH
+PentiumII    400MHz  Linux-2.3.99    gcc X11 dl2    3392    3410  2.0.20(26)GH
 PentiumII    400MHz  Linux-2.2.14    gcc X11 dl2    3886    3902  2.0.20    GH
-PentiumII    350MHz  Linux-2.0.35    gcc X11 dl2    4312    4488  2.0.20
-PentiumII    350MHz  Cygwin-B20.1    gcc   -   -    6585       -  2.0.20(23)
+PentiumII    350MHz  Linux-2.0.35    gcc X11 dl2    4309    4483  2.1.0
+PentiumII    350MHz  Win98         mingw   -   -    4412       -  2.1.0 (25)
+PentiumII    350MHz  Cygwin-B20.1    gcc   -   -    4490       -  2.1.0 (23)
 PentiumII    350MHz  Win98 + RSX     gcc   -   -    9436       -  2.0.20(24)
 PentiumII    350Mhz  Linux 2.0.36   pgcc X11 dl2   (3310)  (3340) 2.0.12(11)PE
 PentiumII    350Mhz  Linux 2.0.36   egcs X11 dl2   (3352)  (3402) 2.0.12(11)PE
@@ -232,8 +233,15 @@ hppa kernel. Remove +z from compiler flags
 (22) asmarch incorrectly defaulted to MicroSPARC (bypassed using Configure -a)
 (23) same machine as the line above, running Win98. Used 'make gp-sta'
      (gp-dyn is the default, and compilation fails [ld -shared no supported])
+     bench 'elliptic' fails as described in INSTALL, ok otherwise
 (24) same machine as above, using the RSX compatibility package
-(25) Xeon
+(25) same machine as above, native binary compiled with mingw32-gcc-2.95.2
+     had to modify Odos/Makefile (to link with readline-4.0). 
+     PROBLEMS: 
+      * when started from the shell, on ^C GP quits! OK when started from GUI
+      * stdin redirection from the shell (gp < file) doesn't work (SEGV in gp).
+      * ANSI escape sequences are printed "as is" (so don't enable colors)
+(26) Xeon
 
 =============================================================================
 Contributors:
