@@ -1289,8 +1289,9 @@ gsubst(GEN x, long v, GEN y)
 
     case t_VEC: case t_COL: case t_MAT: z=cgetg(lx,tx);
       for (i=1; i<lx; i++) z[i]=lsubst((GEN)x[i],v,y);
+      return z;
   }
-  return z;
+  return gcopy(x);
 }
 
 /*******************************************************************/
