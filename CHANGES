@@ -145,6 +145,8 @@ BA 31- uninitialized memory read in divrr(x,y), when lg(y) < lg(x), leading
    18- nffactor: allow modular factorization over primes of degree > 1
 IZ 19- try to output usable TeX (avoid braces, let TeX split lines)
    20- [libpari internals:] jmp_buf 'environnement' no longer global
+MS 21- allow poltchebi(n < 0) [ := poltchebi(-n), still satisfies the 3-term
+       recursion ]
 
   Added
     1- member function rnf.pol (polynomial generating absolute extension)

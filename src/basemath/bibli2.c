@@ -95,7 +95,7 @@ tchebi(long n, long v) /* Assume 4*n < VERYBIGINT */
   GEN q,a,r;
 
   if (v<0) v = 0;
-  if (n < 0) err(talker,"negative degree in tchebi");
+  if (n < 0) n = -n;
   if (n==0) return polun[v];
   if (n==1) return polx[v];
 
