@@ -1680,7 +1680,7 @@ random_relation(long phase,long cglob,long LIMC,long PRECREG,
                 GEN nf,GEN subFB,GEN vecT2,GEN *mat,GEN matarch,GEN list_jideal)
 {
   static long jideal, jdir;
-  long lim,i,av,av1,cptzer,nbT2,lgsub,r1, jlist = 1;
+  long lim,i,av,av1,cptlist,cptzer,nbT2,lgsub,r1, jlist = 1;
   GEN arch,col,colarch,ideal,m,P,ex;
 
   if (phase != 1) { jideal=jdir=1; if (phase<0) return 0; }
@@ -1689,18 +1689,24 @@ random_relation(long phase,long cglob,long LIMC,long PRECREG,
   lim = lg(mat)-1; /* requested number of relations */
   nbT2 = lg(vecT2)-1;
   lgsub = lg(subFB); ex = cgetg(lgsub, t_VECSMALL);
-  cptzer = 0;
+  cptzer = cptlist = 0;
   if (DEBUGLEVEL && list_jideal)
     fprintferr("looking hard for %Z\n",list_jideal);
   P = NULL; /* gcc -Wall */
   for (av = avma;;)
   {
     if (list_jideal && jlist < lg(list_jideal) && jdir <= nbT2)
-      jideal = list_jideal[jlist++];
+    {
+      jideal = list_jideal[jlist++]; cptlist = 0;
+    }
     if (!list_jideal || jdir <= nbT2)
     {
       avma = av;
       P = prime_to_ideal(nf, (GEN)vectbase[jideal]);
+    }
+    else
+    {
+      if (++cptlist > 300) return -1;
     }
     ideal = P;
     do {
