@@ -3031,7 +3031,8 @@ GEN galoiscoset(GEN perm, GEN O)
   return coset;
 }
 GEN
-fixedfieldfactor(GEN L, GEN O, GEN perm,GEN PL, GEN M, GEN den, GEN mod, long x,long y)
+fixedfieldfactor(GEN L, GEN O, GEN perm, GEN M, GEN den, GEN mod
+		 , long x,long y)
 {
   ulong   ltop=avma, av;
   GEN     g;
@@ -3112,11 +3113,12 @@ galoisfixedfield(GEN gal, GEN perm, long flag, long y)
     if (y==-1)
       y = fetch_user_var("y");
     if (y<=x)
-      err(talker,"priority of optionnal variable too high in  galoisfixedfield");
+      err(talker,"priority of optional variable too high in galoisfixedfield");
     res = cgetg(4, t_VEC);
     res[1] = (long) gcopy(P);
     res[2] = (long) gmodulcp(S, (GEN) gal[1]);
-    res[3] = (long) fixedfieldfactor((GEN) gal[3],O,(GEN)gal[6],PL,PM,Pden,gmael(gal,2,1),x,y);
+    res[3] = (long) fixedfieldfactor((GEN) gal[3],O,(GEN)gal[6],
+				     PM,Pden,gmael(gal,2,1),x,y);
     return gerepile(ltop, lbot, res);
   }
 }

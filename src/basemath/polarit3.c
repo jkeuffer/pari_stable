@@ -647,7 +647,7 @@ FqX_mul(GEN x, GEN y, GEN T, GEN p)
   z = quickmul(ky+2, kx+2, lgef(ky)-2, lgef(kx)-2);
   z = Fp_pol_red(z,p);
   z = Fq_from_Kronecker(z,T,p);
-  setvarn(z,vx);/*quickmul and Fq_from_Kronecker are nor varn-clean*/
+  setvarn(z,vx);/*quickmul and Fq_from_Kronecker are not varn-clean*/
   return gerepileupto(ltop,z);
 }
 GEN/*Unused/untested*/
@@ -669,7 +669,7 @@ FqX_sqr(GEN x, GEN T, GEN p)
 /*                                                                 */
 /*******************************************************************/
 /*NO clean stack*/
-static GEN fflgen(GEN l, GEN q, long e, GEN r,GEN T ,GEN p,GEN *zeta)
+static GEN fflgen(GEN l, long e, GEN r, GEN T ,GEN p, GEN *zeta)
 {
   ulong av1;
   GEN z,m,m1;
@@ -691,7 +691,7 @@ static GEN fflgen(GEN l, GEN q, long e, GEN r,GEN T ,GEN p,GEN *zeta)
     {
       z=gadd(z,gpowgs(polx[x],v));
       if (DEBUGLEVEL>=6)
-	fprintferr("FF l-Gen:next %Z  +d",z);
+	fprintferr("FF l-Gen:next %Z",z);
     }
     m1 = m = Fp_pow_mod_pol(z,r,T,p);
     for (i=1; i<e; i++)
@@ -714,7 +714,7 @@ static GEN fflgen(GEN l, GEN q, long e, GEN r,GEN T ,GEN p,GEN *zeta)
  * ouf!
  */
 GEN
-ffsqrtlmod(GEN a, GEN l, GEN T ,GEN p ,GEN q,long e, GEN r, GEN y, GEN m)
+ffsqrtlmod(GEN a, GEN l, GEN T ,GEN p , GEN q, long e, GEN r, GEN y, GEN m)
 {
   long av = avma,tetpil,lim,i,k;
   GEN p1,p2,u1,u2,v,w,z;
@@ -802,7 +802,7 @@ GEN ffsqrtnmod(GEN a, GEN n, GEN T, GEN p, GEN *zetan)
     {
       l=gcoeff(m,i,1); j=itos(gcoeff(m,i,2));
       e=pvaluation(q,l,&r);
-      y=fflgen(l,q,e,r,T,p,&zeta);
+      y=fflgen(l,e,r,T,p,&zeta);
       if (zetan) z=Fp_mul_mod_pol(z,Fp_pow_mod_pol(y,gpowgs(l,e-j),T,p),T,p);
       do
       {
