@@ -1199,21 +1199,29 @@ gsubst(GEN x, long v, GEN y)
   switch(tx)
   {
     case t_POL:
-      l=lgef(x);
+      l = lgef(x);
       if (l==2)
         return (ty==t_MAT)? gscalmat(gzero,ly-1): gzero;
 
-      vx=varn(x);
-      if (vx<v)
+      vx = varn(x);
+      if (vx < v)
       {
+        if (gvar(y) > vx)
+        { /* easy special case */
+          z = cgetg(l, t_POL); z[1] = x[1];
+          for (i=2; i<l; i++) z[i] = lsubst((GEN)x[i],v,y);
+          return normalizepol_i(z,l);
+        }
+        /* general case */
 	av=avma; p1=polx[vx]; z= gsubst((GEN)x[l-1],v,y);
 	for (i=l-1; i>2; i--) z=gadd(gmul(z,p1),gsubst((GEN)x[i-1],v,y));
 	return gerepileupto(av,z);
       }
+      /* v <= vx */
       if (ty!=t_MAT)
-        return (vx>v)? gcopy(x): poleval(x,y);
+        return (vx > v)? gcopy(x): poleval(x,y);
 
-      if (vx>v) return gscalmat(x,ly-1);
+      if (vx > v) return gscalmat(x,ly-1);
       if (l==3) return gscalmat((GEN)x[2],ly-1);
       av=avma; z=(GEN)x[l-1];
       for (i=l-1; i>2; i--) z=gaddmat((GEN)x[i-1],gmul(z,y));
