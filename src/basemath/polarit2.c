@@ -1526,6 +1526,18 @@ poldeg1(long v, GEN x0, GEN x1)
   x[2] = (long)x0; x[3] = (long)x1; return normalizepol(x);
 }
 
+/* assume f and g coprime integer factorizations */
+GEN
+merge_factor_i(GEN f, GEN g)
+{
+  GEN h = cgetg(3,t_MAT);
+  if (lg(f) == 1) return g;
+  if (lg(g) == 1) return f;
+  h[1] = (long)concatsp((GEN)f[1], (GEN)g[1]);
+  h[2] = (long)concatsp((GEN)f[2], (GEN)g[2]);
+  return sort_factor_gen(h, cmpii);
+}
+
 GEN
 factor(GEN x)
 {
@@ -1551,22 +1563,11 @@ factor(GEN x)
     case t_INT: return decomp(x);
 
     case t_FRACN:
-      x=gred(x); /* fall through */
+      x = gred(x); /* fall through */
     case t_FRAC:
       p1 = decomp((GEN)x[1]);
-      p2 = decomp((GEN)x[2]);
-      p4 = concatsp((GEN)p1[1], (GEN)p2[1]);
-      p5 = concatsp((GEN)p1[2], gneg_i((GEN)p2[2]));
-      p3 = sindexsort(p4); lx = lg(p3);
-      tetpil=avma; y=cgetg(3,t_MAT);
-      p1 = cgetg(lx,t_COL); y[1]=(long)p1;
-      p2 = cgetg(lx,t_COL); y[2]=(long)p2;
-      for (i=1; i<lx; i++)
-      {
-      	p1[i] = licopy((GEN)p4[p3[i]]);
-      	p2[i] = licopy((GEN)p5[p3[i]]);
-      }
-      return gerepile(av,tetpil,y);
+      p2 = decomp((GEN)x[2]); p2[2] = (long)gneg_i((GEN)p2[2]);
+      return gerepileupto(av, gcopy(merge_factor_i(p1,p2)));
 
     case t_POL:
       tx=poltype(x,&p,&pol,&pa);

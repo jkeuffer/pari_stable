@@ -588,8 +588,10 @@ static GEN testc2(GEN p,GEN fa,GEN pmr,GEN alph2,long Ea,GEN thet2,long Et);
 static int
 fnz(GEN x,long j)
 {
-  long i=1; while (!signe(x[i])) i++;
-  return i==j;
+  long i;
+  for (i=1; i<j; i++)
+    if (signe(x[i])) return 0;
+  return 1;
 }
 
 /* retourne la base, dans y le discf et dans ptw la factorisation (peut
@@ -598,41 +600,46 @@ GEN
 allbase4(GEN f,long code, GEN *y, GEN *ptw)
 {
   GEN w,w1,w2,a,da,b,db,bas,q,p1,*gptr[3];
-  long v,n,mf,h,lfa,i,j,k,l,first,tetpil,av = avma;
+  long v,n,mf,h,lfa,i,j,k,l,tetpil,av = avma;
 
   allbase_check_args(f,code,y, &w1,&w2);
-  first=1; v = varn(f); n = lgef(f)-3; h = lg(w1)-1;
-  a = da = NULL; /* gcc -Wall */
+  v = varn(f); n = lgef(f)-3; h = lg(w1)-1;
+  a = NULL; /* gcc -Wall */
+  da= NULL;
   for (i=1; i<=h; i++)
   {
     mf=itos((GEN)w2[i]); if (mf == 1) continue;
     if (DEBUGLEVEL) fprintferr("Treating p^k = %Z^%ld\n",w1[i],mf);
 
-    b = maxord((GEN)w1[i],f,mf);
-    p1=cgetg(n+1,t_VEC); for (j=1; j<=n; j++) p1[j]=coeff(b,j,j);
-    db=denom(p1);
-    if (! gcmp1(db))
+    b = maxord((GEN)w1[i],f,mf); db = gun;
+    for (j=1; j<=n; j++)
     {
-      if (first) { da=db; a=gmul(b,db); first=0; }
+      p1 = denom(gcoeff(b,j,j));
+      if (cmpii(p1,db) > 0) db = p1;
+    }
+    if (db != gun)
+    { /* db = denom(diag(b)), (da,db) = 1 */
+      b = gmul(b,db);
+      if (!da) { da=db; a=b; }
       else
       {
-        da=mulii(da,db); b=gmul(da,b); a=gmul(db,a);
         j=1; while (j<=n && fnz((GEN)a[j],j) && fnz((GEN)b[j],j)) j++;
+        b = gmul(da,b); a = gmul(db,a);
         k=j-1; p1=cgetg(2*n-k+1,t_MAT);
         for (j=1; j<=k; j++)
         {
-          p1[j]=a[j];
+          p1[j] = a[j];
           coeff(p1,j,j) = lmppgcd(gcoeff(a,j,j),gcoeff(b,j,j));
         }
-        for (  ; j<=n; j++) p1[j]=a[j];
-        for (  ; j<=2*n-k; j++) p1[j]=b[j+k-n];
-        a = hnfmodid(p1, da);
+        for (  ; j<=n;     j++) p1[j] = a[j];
+        for (  ; j<=2*n-k; j++) p1[j] = b[j+k-n];
+        da = mulii(da,db); a = hnfmodid(p1, da);
       }
     }
     if (DEBUGLEVEL>5)
       fprintferr("Result for prime %Z is:\n%Z\n",w1[i],b);
   }
-  if (!first)
+  if (da)
   {
     for (j=1; j<=n; j++)
       *y = mulii(divii(*y,sqri(da)),sqri(gcoeff(a,j,j)));
@@ -661,7 +668,7 @@ allbase4(GEN f,long code, GEN *y, GEN *ptw)
   {
     q=cgetg(k+2,t_POL); bas[k]=(long)q;
     q[1] = evalsigne(1) | evallgef(k+2) | evalvarn(v);
-    if (!first)
+    if (da)
       for (j=1; j<=k; j++) q[j+1]=ldiv(gcoeff(a,j,k),da);
     else
     {
@@ -671,7 +678,9 @@ allbase4(GEN f,long code, GEN *y, GEN *ptw)
   }
   if (ptw)
   {
-    *ptw=w=cgetg(3,t_MAT); w[1]=lgetg(lfa+1,t_COL); w[2]=lgetg(lfa+1,t_COL);
+    *ptw=w=cgetg(3,t_MAT);
+    w[1]=lgetg(lfa+1,t_COL);
+    w[2]=lgetg(lfa+1,t_COL);
     for (j=1; j<=lfa; j++)
     {
       coeff(w,j,1)=(long)icopy((GEN)w1[j]);
@@ -684,27 +693,51 @@ allbase4(GEN f,long code, GEN *y, GEN *ptw)
   return bas;
 }
 
+extern GEN merge_factor_i(GEN f, GEN g);
+
+static GEN
+update_fact(GEN x0, GEN x, GEN lead, GEN f)
+{
+  GEN e,q,d = discsr(x), g = cgetg(3, t_MAT), p = (GEN)f[1];
+  long iq,i,k,l;
+  if (typ(f)!=t_MAT || lg(f)!=3)
+    err(talker,"not a factorisation in nfbasis");
+  l = lg(p);
+  q = cgetg(l,t_COL); g[1]=(long)q;
+  e = cgetg(l,t_COL); g[2]=(long)e; iq = 1;
+  for (i=1; i<l; i++)
+  {
+    k = pvaluation(d, (GEN)p[i], &d);
+    if (k) { q[iq] = p[i]; e[iq] = lstoi(k); iq++; } 
+  }
+  setlg(q,iq); setlg(e,iq);
+  return merge_factor_i(decomp(d), g);
+}
+
 /* if y is non-NULL, it receives the discriminant
  * return basis if (ret_basis != 0), discriminant otherwise
  */
 static GEN
-nfbasis00(GEN x, long flag, GEN p, long ret_basis, GEN *y)
+nfbasis00(GEN x0, long flag, GEN p, long ret_basis, GEN *y)
 {
-  GEN disc, basis, lead;
+  GEN x, disc, basis, lead;
   GEN *gptr[2];
-  long k, tetpil, av = avma, n = lgef(x)-3, smll;
+  long k, tetpil, av = avma, l = lgef(x0), smll;
 
-  if (typ(x)!=t_POL) err(typeer,"nfbasis00");
-  if (n<=0) err(zeropoler,"nfbasis00");
-  for (k=n+2; k>=2; k--)
-    if (typ(x[k])!=t_INT) err(talker,"polynomial not in Z[X] in nfbasis");
+  if (typ(x0)!=t_POL) err(typeer,"nfbasis00");
+  if (l<=3) err(zeropoler,"nfbasis00");
+  for (k=2; k<l; k++)
+    if (typ(x0[k])!=t_INT) err(talker,"polynomial not in Z[X] in nfbasis");
 
-  x = pol_to_monic(x,&lead);
+  x = pol_to_monic(x0,&lead);
 
   if (!p || gcmp0(p))
     smll = (flag & 1); /* small basis */
   else
+  {
+    if (lead) p = update_fact(x0,x,lead,p);
     smll = (long) p;   /* factored basis */
+  }
 
   if (flag & 2)
     basis = allbase(x,smll,&disc); /* round 2 */

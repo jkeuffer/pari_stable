@@ -848,6 +848,12 @@ pvaluation(GEN x, GEN p, GEN *py)
     if (py) *py = shifti(x, -v);
     return v;
   }
+  if (is_pm1(p))
+  {
+    v = (signe(p) < 0 && signe(x) < 0);
+    if (py) { *py = v? negi(x): icopy(x); }
+    return v;
+  }
   if (!is_bigint(x))
   {
     long y;
