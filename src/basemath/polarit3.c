@@ -1792,22 +1792,6 @@ from_Kronecker(GEN z, GEN pol)
 /*                          MODULAR GCD                            */
 /*                                                                 */
 /*******************************************************************/
-static GEN
-maxnorm(GEN p)
-{
-  long i,n=deg(p),ltop=avma,lbot;
-  GEN x, m = gzero;
-
-  p += 2;
-  for (i=0; i<n; i++)
-  {
-    x = (GEN)p[i];
-    if (absi_cmp(x,m) > 0) m = x;
-  }
-  m = divii(absi(m), absi((GEN)p[n])); lbot = avma;
-  return gerepile(ltop,lbot,addis(m,1));
-}
-
 ulong xgcduu(ulong d, ulong d1, int f, ulong* v, ulong* v1, long *s);
 /* 1 / Mod(x,p) , or 0 if inverse doesn't exist */
 static ulong
@@ -2309,66 +2293,68 @@ incremental_CRT(GEN H, GEN Hp, GEN *ptq, ulong p)
   *ptq = qp; return stable;
 }
 
-/* a and b in Q[X] */
+/* A0 and B0 in Q[X] */
 GEN
 modulargcd(GEN A0, GEN B0)
 {
-  GEN a,b,Hp,D,A,B,q,H,g,limit,ma,mb,p1;
-  long av=avma,avlim=stack_lim(av,1), m,n,nA,nB,av2;
+  GEN a,b,Hp,D,A,B,q,H,g,p1;
+  long m,n;
+  ulong p, av2, av = avma, avlim = stack_lim(av,1);
   byteptr d = diffptr;
-  ulong p;
 
   if (typ(A0)!=t_POL || typ(B0)!=t_POL) err(notpoler,"modulargcd");
   if (!signe(A0)) return gcopy(B0);
   if (!signe(B0)) return gcopy(A0);
   A = content(A0);
   B = content(B0); D = ggcd(A,B);
-  A = gcmp1(A)? A0: gdiv(A0,A); nA=deg(A);
-  B = gcmp1(B)? B0: gdiv(B0,B); nB=deg(B);
-  g = mppgcd((GEN)A[nA+2], (GEN)B[nB+2]);
-  av2=avma; n=1+min(nA,nB);
-  ma=maxnorm(A); mb=maxnorm(B);
-  if (cmpii(ma,mb) > 0) limit=mb; else limit=ma;
-  limit = shifti(mulii(limit,g), n+1);
+  A = gcmp1(A)? A0: gdiv(A0,A);
+  B = gcmp1(B)? B0: gdiv(B0,B);
+  /* A, B in Z[X] */
+  g = mppgcd(leading_term(A), leading_term(B)); /* multiple of lead(gcd) */
+  if (deg(A) < deg(B)) swap(A, B);
+  av2 = avma; n = 1 + deg(B); /* > degree(gcd) */
 
-  p = 27449; d += 3000; /* p = prime(3000) */
   H = NULL;
-  for(;;)
+  d += 3000; /* 27449 = prime(3000) */
+  for(p = 27449; ; p+= *d++)
   {
-    p += *d++; if (!*d) err(primer1);
+    if (!*d) err(primer1);
     if (!umodiu(g,p)) continue;
 
     a = u_Fp_FpX(A, 0, p);
     b = u_Fp_FpX(B, 0, p); Hp = u_FpX_gcd(a,b, p);
     m = deg(Hp);
-    if (m==0) return gerepileupto(av,gmul(D,polun[varn(A)]));
-    if (is_pm1(g))
+    if (m == 0) { H = polun[varn(A0)]; break; } /* coprime. DONE */
+    if (m > n) continue; /* p | Res(A/G, B/G). Discard */
+
+    if (is_pm1(g)) /* make sure lead(H) = g mod p */
       Hp = u_FpX_normalize(Hp, p);
     else
     {
       ulong t = umodiu(g, p) * u_invmod(Hp[m+2],p);
       Hp = u_FpX_Fp_mul(Hp, t % p, p, 0);
     }
-    if (m<n)
-    {
-      q = utoi(p); H = small_to_pol(Hp); setvarn(H, varn(A0));
-      limit = shifti(limit,m-n); n = m;
+    if (m < n)
+    { /* First time or degree drop [all previous p were as above; restart]. */
+      H = small_to_pol(Hp); setvarn(H, varn(A0));
+      q = utoi(p); n = m; continue;
     }
-    else
-      if (m==n && H && incremental_CRT(H, Hp, &q, p))
-      { /* H stable: check divisibility */
-        p1 = content(H); if (!gcmp1(p1)) H = gdiv(H,p1);
-        if (!signe(gres(A,H)) && !signe(gres(B,H)))
-          return gerepileupto(av, gmul(D,H));
-        H = NULL; /* failed */
-      }
+
+    if (incremental_CRT(H, Hp, &q, p))
+    { /* H stable: check divisibility */
+      if (!is_pm1(g)) { p1 = content(H); if (!is_pm1(p1)) H = gdiv(H,p1); }
+      if (!signe(gres(A,H)) && !signe(gres(B,H))) break; /* DONE */
+
+      if (DEBUGLEVEL) fprintferr("modulargcd: trial division failed"); /*rare*/
+    }
     if (low_stack(avlim, stack_lim(av,1)))
     {
-      GEN *gptr[3]; gptr[0]=&H; gptr[1]=&q; gptr[2]=&limit;
+      GEN *gptr[2]; gptr[0]=&H; gptr[1]=&q;
       if (DEBUGMEM>1) err(warnmem,"modulargcd");
-      gerepilemany(av2,gptr,3);
+      gerepilemany(av2,gptr,2);
     }
   }
+  return gerepileupto(av, gmul(D,H));
 }
 
 /* returns a polynomial in variable v, whose coeffs correspond to the digits
