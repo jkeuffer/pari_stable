@@ -768,7 +768,7 @@ rnfisnorm(GEN bnf,GEN ext,GEN x,long flag,long PREC)
     aux=(GEN)aux[1];
   }
   if (lg(aux)>1)
-    sunitrelnf=concatsp(gtrans(aux),sunitrelnf);
+    sunitrelnf=concatsp(aux,sunitrelnf);
   lgsunitrelnf=lg(sunitrelnf);
   M=cgetg(lgsunitrelnf+1,t_MAT);
   sunitnormnf=cgetg(lgsunitrelnf,t_VEC);
