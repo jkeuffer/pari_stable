@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                                                                **/
 /********************************************************************/
 #include "pari.h"
+extern GEN _ei(long n, long i);
 
 /********************************************************************/
 /**                                                                **/
@@ -984,35 +985,55 @@ permtonum(GEN x)
 /**                                                                **/
 /********************************************************************/
 
+/* return (1,...a^l) mod T */
+GEN
+RX_powers(GEN a, GEN T, long l)
+{
+  long j, N = degpol(T);
+  GEN b, y;
+
+  y = cgetg(l+2,t_MAT);
+  y[1] = (long)gscalcol_i(gun, N);
+  l++; b = a;
+  for (j=2; j<=l; j++)
+  {
+    y[j] = (long)pol_to_vec(b, N);
+    if (j < l) b = gmod(gmul(b,a), T);
+  }
+  return y;
+}
+
+/* return y such that Mod(y, charpoly(Mod(a,T)) = Mod(a,T) */
+GEN
+modreverse(GEN a, GEN T)
+{
+  gpmem_t av = avma;
+  long n = degpol(T);
+  GEN y;
+
+  if (n <= 0) return gcopy(a);
+  if (n == 1)
+    return gerepileupto(av, gneg(gdiv((GEN)T[2], (GEN)T[3])));
+  if (gcmp0(a) || typ(a) != t_POL) err(talker,"reverse polmod does not exist");
+
+  y = gauss(RX_powers(a,T,n-1), _ei(n, 2));
+  return gerepilecopy(av, vec_to_pol(y, varn(T)));
+}
+
 GEN
 polymodrecip(GEN x)
 {
-  long v, i, j, n, lx;
-  GEN p1, T, a, y;
-  gpmem_t av;
+  long v, n;
+  GEN T, a, y;
 
   if (typ(x)!=t_POLMOD) err(talker,"not a polmod in modreverse");
   T = (GEN)x[1];
   a = (GEN)x[2];
-  v = varn(T); n = degpol(T); if (n<=0) return gcopy(x);
-  if (n == 1)
-  {
-    y = cgetg(3,t_POLMOD);
-    y[1] = lsub(polx[v], a); av = avma;
-    y[2] = lpileupto(av, neg(gdiv((GEN)T[2], (GEN)T[3])));
-    return y;
-  }
-  if (gcmp0(a) || typ(a) != t_POL) err(talker,"reverse polmod does not exist");
-  av = avma; y = cgetg(n+1,t_MAT);
-  y[1] = (long)gscalcol_i(gun,n);
-  p1 = a;
-  for (j=2; j<=n; j++)
-  {
-    y[j] = (long)pol_to_vec(p1, n);
-    if (j < n) p1 = gmod(gmul(p1,a), T);
-  }
-  y = gauss(y, _ei(n, 2));
-  return gerepileupto(av, gmodulcp(vec_to_pol(y,v), caract(x,v)));
+  n = degpol(T); if (n <= 0) return gcopy(x);
+  v = varn(T);
+  y = cgetg(3,t_POLMOD);
+  y[1] = (n==1)? lsub(polx[v], a): (long)caract2(T, a, v);
+  y[2] = (long)modreverse(a, T); return y;
 }
 
 /********************************************************************/
