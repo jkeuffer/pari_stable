@@ -1394,28 +1394,25 @@ gaffect(GEN x, GEN y)
   }
 
   if (is_const_t(ty)) {
-#define initial_value(ep) ((ep)+1)
-      if (tx == t_POL) {
-	  entree *var = varentries[ordvar[varn(x)]];
-	  /* Is a bound expression, thus should not loop: */
-	  if (var && var->value != (void*)initial_value(var)) {
-	      gaffect(geval(x),y);
-	      return;
-	  }	  
-      } else if (is_rfrac_t(tx)) {
-	  GEN num = (GEN)x[1], den = (GEN)x[2];
-	  entree *varnum = varentries[ordvar[varn(num)]];
-	  entree *varden = varentries[ordvar[varn(den)]];
-
-	  /* Are bound expressions, thus should not loop: */
-	  if (varnum && varnum->value != (void*)initial_value(varnum)
-	   && varden && varden->value != (void*)initial_value(varden)) {
-	      gaffect(geval(x),y);
-	      return;
-	  }
+    entree *varnum, *varden;
+    long vnum, vden;
+    GEN num, den;
+    if (tx == t_POL) {
+      vnum = varn(x); varnum = varentries[ordvar[vnum]];
+      if (varnum) {
+        x = geval(x); tx = typ(x);
+        if (tx != t_POL || varn(x) != vnum) { gaffect(x, y); return; }
+      }	  
+    } else if (is_rfrac_t(tx)) {
+      num = (GEN)x[1]; vnum = gvar(num); varnum = varentries[ordvar[vnum]];
+      den = (GEN)x[2]; vden = gvar(den); varden = varentries[ordvar[vden]];
+      if (varnum && varden) {
+        vnum = min(vnum, vden);
+        x = geval(x); tx = typ(x);
+        if (!is_rfrac_t(tx) || gvar(x) != vnum) { gaffect(x, y); return; }
       }
-#undef initial_value
-      err(operf,"",x,y);
+    }
+    err(operf,"",x,y);
   }
   
   switch(tx)
