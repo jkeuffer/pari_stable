@@ -2634,6 +2634,8 @@ extendedgcd(GEN A)
   GEN z,B, **lambda, *D;
 
   n = lg(A);
+  for (i=0; i<n; i++)
+    if (typ(A[i]) != t_INT) err(typeer,"extendedgcd");
   A = dummycopy(A);
   B = idmat(n-1);
   D = (GEN*)new_chunk(n); lambda = (GEN**) cgetg(n,t_MAT);
