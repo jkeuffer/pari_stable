@@ -891,7 +891,7 @@ gadd(GEN x, GEN y)
       switch(ty)
       {
         case t_PADIC:
-          return Zp_nosquare_m1((GEN)y[2])? addRc(x, y): addTp(x, y);
+          return Zp_nosquare_m1((GEN)y[2])? addRc(y, x): addTp(x, y);
         case t_QUAD:
           lx = precision(x); if (!lx) err(operi,"+",x,y);
           return gcmp0(y)? rcopy(x): addqf(y, x, lx);
