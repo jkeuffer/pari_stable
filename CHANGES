@@ -92,6 +92,8 @@ XR 51- increase precision automatically when needed in quadhilbertreal
    54- subst() didn't check its arguments (e.g SEGV on t_STR)
    55- qfbclassno(x < 0): wrong algo when x non fundamental 
    56- obscure bugs with types FRACN/RFRACN [when simplifies to INT/POL]
+IZ 57- readline history: while inputing continuation lines, the partial
+       command was not put into history until full command was run
 
   Changed
     1- removed useless parameter prec in many bnr* and rnf* functions
@@ -127,6 +129,8 @@ IS 20- obscure compiler bug in rootpol.c:max_modulus() [don't modify tau]
    27- allow subgrouplist(znstar(5)) [didn't accept groups in general form]
    28- taught GP about GP2C-style type declaration [ignored]
    29- 0. [realzero()] is now coded on 2 words (was 3, with third one ignored)
+IZ 30- readline history: lines are remembered as they were input (whitespace
+       was deleted)
 
   Added
 BA  1- function pith() [= pi(x), naïve implementation]
@@ -143,6 +147,7 @@ XR 10- new error message "precer" (precision too low in...)
 IZ 12- add error messages (as in err(shier2)) to emacs tag file
    13- add error messages (as in err(shier2)) to vi tag file
 IZ 14- add flag to shift() to enable consistency with 2-complement semantic
+IZ 15- new default 'prompt_cont' for continuation lines
 
   Removed
     1- obsolete functions twototwo, threetotwo, threetotwo2
