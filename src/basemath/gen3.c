@@ -20,8 +20,7 @@ gvar(GEN x)
 
   if (is_polser_t(tx)) return varn(x);
   if (tx==t_POLMOD) return varn(x[1]);
-  if (is_const_t(tx) || is_qf_t(tx) || tx == t_STR || tx == t_LIST)
-    return BIGINT;
+  if (is_const_t(tx) || is_qf_t(tx) || is_noncalc_t(tx)) return BIGINT;
   v=BIGINT;
   for (i=1; i < lg(x); i++) { w=gvar((GEN)x[i]); if (w<v) v=w; }
   return v;
@@ -32,7 +31,7 @@ gvar2(GEN x)
 {
   long tx=typ(x),i,v,w;
 
-  if (is_const_t(tx) || is_qf_t(tx)) return BIGINT;
+  if (is_const_t(tx) || is_qf_t(tx) || is_noncalc_t(tx)) return BIGINT;
   v = BIGINT;
   switch(tx)
   {
