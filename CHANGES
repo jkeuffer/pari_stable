@@ -82,6 +82,7 @@ MSo11- various bugs in anal.c: uninitialized reads in get_op_fun(), double_op()
    23- erfc(0) --> error  [ instead of 1 ]
    24- bnfinit(,1) could return without giving fundamental units (if the
        computation is unfeasible). Raise an error instead.
+IS 25- config/get_head would not work only if one invoked $PWD/Configure
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.
