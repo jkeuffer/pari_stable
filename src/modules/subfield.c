@@ -640,13 +640,7 @@ choose_prime(GEN pol,GEN dpol,long d,GEN *ptff,GEN *ptlistpotbl, long *ptlcm)
     if (DEBUGLEVEL) msgtimer("#pbs = %ld",llist);
     av = avma;
   }
-  if (DEBUGLEVEL)
-  {
-    fprintferr("Chosen prime: p = %ld\n",pp);
-    if (DEBUGLEVEL>2)
-      fprintferr("Potential block systems of size %ld: %Z\n", d,oldlistpotbl);
-    flusherr();
-  }
+  if (DEBUGLEVEL) fprintferr("Chosen prime: p = %ld\n",pp);
   *ptlistpotbl=oldlistpotbl; *ptff=oldff; *ptlcm=oldlcm; return stoi(pp);
 }
 
