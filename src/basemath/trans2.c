@@ -1253,7 +1253,7 @@ red_mod_2z(GEN x, GEN z)
 static GEN
 cxgamma(GEN s0, int dolog, long prec)
 {
-  GEN s, u, a, y, res, tes, sig, invn2, p1, nnx, pi, sqrtpi2;
+  GEN s, u, a, y, res, tes, sig, invn2, p1, nnx, pi, pi2, sqrtpi2;
   long i, lim, nn;
   pari_sp av, av2, avlim;
   int funeq = 0;
@@ -1356,15 +1356,32 @@ cxgamma(GEN s0, int dolog, long prec)
     }
   }
   else
-    for (i=1; i < nn; i++)
+    if (!dolog) /* Compute lngamma mod 2 I Pi */
     {
-      y = gmul(y, gaddgs(s,i));
-      if (low_stack(avlim,stack_lim(av2,3)))
+      for (i=1; i < nn; i++)
       {
-        if(DEBUGMEM>1) err(warnmem,"gamma");
-        y = gerepileupto(av2, y);
+        y = gmul(y, gaddgs(s,i));
+        if (low_stack(avlim,stack_lim(av2,3)))
+        {
+          if(DEBUGMEM>1) err(warnmem,"gamma");
+          y = gerepileupto(av2, y);
+        }
       }
     }
+    else /* Be careful with the imaginary part */
+    {
+      y = glog(y, prec);
+      for (i=1; i < nn; i++)
+      {
+        y = gadd(y, glog(gaddgs(s,i), prec));
+        if (low_stack(avlim,stack_lim(av2,3)))
+        {
+          if(DEBUGMEM>1) err(warnmem,"gamma");
+          y = gerepileupto(av2, y);
+        }
+      }
+    }
+
   nnx = gaddgs(s, nn);
   if (DEBUGLEVEL) msgtimer("product from 0 to N-1");
 
@@ -1381,25 +1398,44 @@ cxgamma(GEN s0, int dolog, long prec)
   p1 = gsub(gmul(gsub(nnx, ghalf), glog(nnx,prec)), nnx);
   p1 = gadd(p1, gmul(tes, a));
 
-  pi = mppi(prec); sqrtpi2 = mpsqrt( gmul2n(pi, 1) );
-  if (funeq)
-  { /* y --> y Pi/(sin(Pi s) * sqrt(2Pi)) */
-    y = gdiv(gmul(pi,y), gmul(sqrtpi2, gsin(gmul(s,pi), prec)));
-    p1 = gneg(p1);
-  }
-  else /* y --> sqrt(2Pi) / y */
-    y = gdiv(sqrtpi2, y);
+  pi = mppi(prec); pi2 = gmul2n(pi, 1); sqrtpi2 = mpsqrt(pi2);
+
+  if (!dolog)
+    {
+      if (funeq)
+      { /* y --> y Pi/(sin(Pi s) * sqrt(2Pi)) */
+        y = gmul2n(gdiv(gmul(sqrtpi2,y), gsin(gmul(s,pi), prec)), -1);
+        p1 = gneg(p1);
+      }
+      else /* y --> sqrt(2Pi) / y */
+	y = gdiv(sqrtpi2, y);
+    }
+  else
+    {
+      if (funeq)
+      { /* 2 Pi ceil( (2Re(s) - 3)/4 ) */
+        GEN p2 = mulri(pi2, gceil(gmul2n(subrs(gmul2n(sig,1), 3), -2)));
+        /* y --> y + log Pi - log sqrt(2Pi) - log sin(Pi s) */
+        y = gsub(gadd(glog(gmul2n(Pi2n(-1,prec),-1), prec), y),
+                      glog(gsin(gmul(s,pi), prec), prec));
+        if (gsigne(imag_i(s)) < 0) setsigne(p2, -signe(p2));
+        y[2] = (long)addrr((GEN)y[2], p2);
+        p1 = gneg(p1);
+      }
+      else /* y --> sqrt(2Pi) / y */
+	y = gsub(glog(sqrtpi2, prec), y);
+    }
+
   if (dolog)
   {
-    y = gadd(p1, glog(y, prec));
+    y = gadd(p1, y);
     if (typ(y) == t_COMPLEX)
     {
-      long ly; 
-      y[2] = (long)red_mod_2z((GEN)y[2], pi);
+      long ly;
       if (typ(res) == t_REAL) return gerepilecopy(av, y);
       ly = lg(y[2]);
       if (ly < prec)
-      { /* reduction mod 2pi canceled significant words */
+      {
         setlg(res[2], ly);
         stackdummy((GEN)res[2] + ly, prec - ly - 1);
       }

@@ -1877,9 +1877,9 @@ gfrac(GEN x)
 GEN
 gceil(GEN x)
 {
-  GEN y,p1;
-  long i, lx, tx=typ(x);
-  pari_sp av, tetpil;
+  GEN y, p1;
+  long i, lx, tx = typ(x);
+  pari_sp av;
 
   switch(tx)
   {
@@ -1887,19 +1887,16 @@ gceil(GEN x)
       return gcopy(x);
 
     case t_REAL:
-      av=avma; y=mpent(x);
-      if (!gegal(x,y))
-      {
-        tetpil=avma; return gerepile(av,tetpil,addsi(1,y));
-      }
+      av = avma; y = mpent(x);
+      if (cmpri(x, y)) return gerepileuptoint(av, addsi(1,y));
       return y;
 
     case t_FRAC: case t_FRACN:
-      av=avma; y=dvmdii((GEN)x[1],(GEN)x[2],&p1);
-      if (p1 != gzero && gsigne(x)>0)
+      av = avma; y = dvmdii((GEN)x[1],(GEN)x[2],&p1);
+      if (p1 != gzero && gsigne(x) > 0)
       {
-        cgiv(p1); tetpil=avma;
-        return gerepile(av,tetpil,addsi(1,y));
+        cgiv(p1);
+        return gerepileuptoint(av, addsi(1,y));
       }
       return y;
 
@@ -1907,8 +1904,8 @@ gceil(GEN x)
       return gdeuc((GEN)x[1],(GEN)x[2]);
 
     case t_VEC: case t_COL: case t_MAT:
-      lx=lg(x); y=cgetg(lx,tx);
-      for (i=1; i<lx; i++) y[i]=lceil((GEN)x[i]);
+      lx = lg(x); y = cgetg(lx,tx);
+      for (i=1; i<lx; i++) y[i] = lceil((GEN)x[i]);
       return y;
   }
   err(typeer,"gceil");
