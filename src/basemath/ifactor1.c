@@ -3144,19 +3144,8 @@ ifac_start(GEN n, long moebius, long hint)
   part = cgetg(ifac_initial_length, t_VEC);
   here = part + ifac_initial_length;
   part[1] = moebius? un : LNULL;
-  switch(hint)
-  {
-  case 0:
-    part[2] = zero; break;
-  case 1:
-    part[2] = un; break;
-  case 2:
-    part[2] = deux; break;
-  default:
-    part[2] = (long)stoi(hint);
-  }
-  if (isonstack(n))
-    n = absi(n);
+  part[2] = lstoi(hint);
+  if (isonstack(n)) n = absi(n);
   /* make copy, because we'll later want to mpdivis() into it in place.
    * If it's not on stack, then we assume it is a clone made for us by
    * auxdecomp0(), and we assume the sign has already been set positive
@@ -3246,14 +3235,6 @@ ifac_realloc(GEN *partial, GEN *where, long new_lg)
   long old_lg = lg(*partial);
   GEN newpart, scan_new, scan_old;
 
-  if (DEBUGLEVEL >= 5)		/* none of these should ever happen */
-  {
-    if (!*partial || typ(*partial) != t_VEC)
-      err(typeer, "ifac_realloc");
-    if (lg(*partial) < ifac_initial_length)
-      err(talker, "partial impossibly short in ifac_realloc");
-  }
-
   if (new_lg == 1)
     new_lg = 2*old_lg - 6;	/* from 7 slots to 13 to 25... */
   else if (new_lg <= old_lg)	/* includes case new_lg == 0 */
@@ -3290,18 +3271,12 @@ ifac_realloc(GEN *partial, GEN *where, long new_lg)
     if (*where == scan_old) *where = scan_new;
     if (!*scan_old) continue;	/* skip empty slots */
 
-    *scan_new =
-      isonstack((GEN)(*scan_old)) ?
-	licopy((GEN)(*scan_old)) : *scan_old;
-    scan_new[1] =
-      isonstack((GEN)(scan_old[1])) ?
-	licopy((GEN)(scan_old[1])) : scan_old[1];
-    scan_new[2] = scan_old[2];
-    scan_new -= 3;
+    icopyifstack(*scan_old, *scan_new);
+    icopyifstack(scan_old[1], scan_new[1]);
+    scan_new[2] = scan_old[2]; scan_new -= 3;
   }
   scan_new += 3;		/* back up to last slot written */
-  while (scan_new > newpart + 3)
-    *--scan_new = LNULL;
+  while (scan_new > newpart + 3) *--scan_new = LNULL;
   *partial = newpart;
 }
 
@@ -3959,14 +3934,13 @@ ifac_main(GEN *partial)
 {
   /* leave the basic error checking to ifac_find() */
   GEN here = ifac_find(partial, partial);
-  long res, nf;
+  long nf;
 
   /* if nothing left, return gun */
   if (!here) return gun;
 
   /* if we are in Moebius mode and have already detected a repeated factor,
-   * stop right here.  Shouldn't really happen
-   */
+   * stop right here.  Shouldn't really happen */
   if (moebius_mode && here[1] != un)
   {
     if (DEBUGLEVEL >= 3)
@@ -3978,24 +3952,21 @@ ifac_main(GEN *partial)
   }
 
   /* loop until first entry is a finished prime.  May involve reallocations
-   * and thus updates of *partial
-   */
+   * and thus updates of *partial */
   while (here[2] != deux)
   {
-    /* if it's unknown, something has gone wrong;  try to recover */
     if (!(here[2]))
-    {
+    { /* unknown: something has gone wrong. Try to recover */
       err(warner, "IFAC: unknown factor seen in main loop");
-      res = ifac_resort(partial, &here);
-      if (res) return gzero;	/* can only happen in Moebius mode */
+      /* can only happen in Moebius mode */
+      if (ifac_resort(partial, &here)) return gzero;
+
       ifac_whoiswho(partial, &here, -1);
-      /* defrag for good measure */
       ifac_defrag(partial, &here);
       continue;
     }
-    /* if it's composite, crack it */
     if (here[2] == zero)
-    {
+    { /* composite: crack it */
       /* make sure there's room for another factor */
       if (here < *partial + 6)
       {				/* try defrag first */
@@ -4003,10 +3974,8 @@ ifac_main(GEN *partial)
 	if (here < *partial + 6) /* no luck */
 	{
 	  ifac_realloc(partial, &here, 1); /* guaranteed to work */
-	  /* Unfortunately, we can't do a garbage collection here since we
-	   * know too little about where in the stack the old components
-	   * were.
-	   */
+	  /* Unfortunately, we can't do a garbage collection here since we know
+           * too little about where in the stack the old components were.*/
 	}
       }
       nf = ifac_crack(partial, &here);
@@ -4019,17 +3988,13 @@ ifac_main(GEN *partial)
 	}
 	return gzero;
       }
-      /* deal with the new unknowns.  No resort, since ifac_crack will
-       * already have sorted them
-       */
+      /* deal with the new unknowns.  No sort: ifac_crack already sorts them */
       ifac_whoiswho(partial, &here, nf);
       continue;
     }
-    /* if it's prime but not yet finished, finish it */
     if (here[2] == un)
-    {
-      res = ifac_divide(partial, &here);
-      if (res)
+    { /* prime but not yet finished: finish it */
+      if (ifac_divide(partial, &here))
       {
 	if (moebius_mode)
 	{
@@ -4042,15 +4007,13 @@ ifac_main(GEN *partial)
 	}
 	ifac_defrag(partial, &here);
 	(void)(ifac_resort(partial, &here)); /* sort new cofactors down */
-	/* it doesn't matter right now whether this finds a repeated factor,
-	 * since we never get to this point in Moebius mode
-	 */
+        /* it doesn't matter whether this finds a repeated factor: we never
+         * get to this point in Moebius mode */
 	ifac_defrag(partial, &here); /* resort may have created new gaps */
 	ifac_whoiswho(partial, &here, -1);
       }
       continue;
     }
-    /* there are no other cases, never reached */
     err(talker, "non-existent factor class in ifac_main");
   } /* while */
   if (moebius_mode && here[1] != un)
@@ -4060,11 +4023,11 @@ ifac_main(GEN *partial)
       fprintferr("IFAC: after main loop: repeated old factor\n\t%Z\n", *here);
       flusherr();
     }
-    return gzero; /* just a safety net */
+    return gzero;
   }
   if (DEBUGLEVEL >= 4)
   {
-    long nf = (*partial + lg(*partial) - here - 3)/3;
+    nf = (*partial + lg(*partial) - here - 3)/3;
     if (nf)
       fprintferr("IFAC: main loop: %ld factor%s left\n",
 		 nf, (nf>1 ? "s" : ""));
@@ -4075,9 +4038,7 @@ ifac_main(GEN *partial)
   return here;
 }
 
-/* Caller of the following should worry about stack management, it makes
- * a rather shameless mess :^)
- */
+/* Caller of the following should worry about stack management */
 GEN
 ifac_primary_factor(GEN *partial, long *exponent)
 {
@@ -4115,7 +4076,6 @@ ifac_primary_factor(GEN *partial, long *exponent)
  * compact little routine.
  */
 
-#define ifac_overshoot 64	/* lgefint(n)+64 words reserved */
 /* ifac_decomp_break:
  *
  * Find primary factors of n until ifac_break return true, or n is
@@ -4135,38 +4095,25 @@ long
 ifac_decomp_break(GEN n, long (*ifac_break)(GEN n,GEN pairs,GEN here,GEN state),
 		  GEN state, long hint)
 {
-  long tf=lgefint(n);
-  pari_sp av=avma, lim=stack_lim(av, 1);
-  long nb=0;
-  GEN part, here, workspc = new_chunk(tf + ifac_overshoot), pairs = (GEN)av;
-  /* workspc will be doled out by us in pairs of smaller t_INTs */
-  pari_sp tetpil = avma;		/* remember head of workspc zone */;
+  pari_sp av = avma, lim = stack_lim(av, 1);
+  long nb = 0;
+  GEN part, here, workspc, pairs = (GEN)av;
+
+  /* workspc will be doled out in pairs of smaller t_INTs. For n = prod p^{e_p}
+   * (p not necessarily prime), need room to store all p and e_p [ cgeti(3) ],
+   * bounded by
+   *    sum_{p | n} ( log_{2^BIL} (p) + 6 ) <= log_{2^BIL} n + 6 log_2 n */ 
+  workspc = new_chunk((expi(n) + 1) * 7);
 
   if (!n || typ(n) != t_INT) err(typeer, "ifac_decomp");
-  if (!signe(n) || tf < 3) err(talker, "factoring 0 in ifac_decomp");
+  if (!signe(n)) err(talker, "factoring 0 in ifac_decomp");
 
   part = ifac_start(n, 0, hint);
   here = ifac_main(&part);
 
   while (here != gun)
   {
-    long lf=lgefint((GEN)(*here));
-    if (pairs - workspc < lf + 3) /* out of room, leapfrog */
-    {
-      /* the ifac_realloc() below will clear tetpil - avma words
-       * on the stack, which should be about enough for the extra
-       * primes we're going to see, and we'll want several more to
-       * accommodate further exponents.  In most cases, the lf + 3
-       * below is pure paranoia, but the factor we're about to copy
-       * might be the one sitting off the stack in the original n,
-       * so let's play safe
-       */
-      workspc = new_chunk(lf + 3 + ifac_overshoot);
-      ifac_realloc(&part, &here, 0);
-      here = ifac_find(&part, &part);
-      tetpil = (pari_sp)workspc;
-    }
-    /* room enough now */
+    long lf = lgefint(*here);
     nb++;
     pairs -= lf;
     *pairs = evaltyp(t_INT) | evallg(lf);
@@ -4186,7 +4133,7 @@ ifac_decomp_break(GEN n, long (*ifac_break)(GEN n,GEN pairs,GEN here,GEN state),
     {
       if(DEBUGMEM>1) err(warnmem,"[2] ifac_decomp");
       ifac_realloc(&part, &here, 0);
-      part = gerepileupto(tetpil, part);
+      part = gerepileupto((pari_sp)workspc, part);
     }
   }
   avma = (pari_sp)pairs;

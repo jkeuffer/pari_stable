@@ -704,7 +704,6 @@ tridiv_bound(GEN n, long all)
 }
 
 /* function imported from ifactor1.c */
-extern long ifac_decomp(GEN n, long hint);
 extern long ifac_decomp_break(GEN n, long (*ifac_break)(GEN,GEN,GEN,GEN),
                   GEN state, long hint);
 static GEN
