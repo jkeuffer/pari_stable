@@ -164,7 +164,7 @@ bitvec_test(GEN bitvec, long b)
 {
   long q=b>>TWOPOTBITS_IN_LONG;
   long r=b&(BITS_IN_LONG-1);
-  return (bitvec[1+q]>>r)&1;
+  return (bitvec[1+q]>>r)&1L;
 }
 
 void
@@ -172,7 +172,7 @@ bitvec_set(GEN bitvec, long b)
 {
   long q=b>>TWOPOTBITS_IN_LONG;
   long r=b&(BITS_IN_LONG-1);
-  bitvec[1+q]|=1<<r;
+  bitvec[1+q]|=1L<<r;
 }
 
 void
@@ -180,7 +180,7 @@ bitvec_clear(GEN bitvec, long b)
 {
   long q=b>>TWOPOTBITS_IN_LONG;
   long r=b&(BITS_IN_LONG-1);
-  bitvec[1+q]&=~(1<<r);
+  bitvec[1+q]&=~(1L<<r);
 }
 
 /*************************************************************************/
