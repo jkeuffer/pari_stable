@@ -248,46 +248,45 @@ cleanprimetab(void)
   setlg(primetab,j);
 }
 
-/* primes is a single element or a row vector with "primes" to add to
- * primetab. If the "prime" shares a non-trivial factor with another element
- * in primetab, it is taken into account.
- */
+/* p is a single element or a row vector with "primes" to add to primetab.
+ * If p shares a non-trivial factor with another element in primetab, take it
+ * into account. */
 GEN
-addprimes(GEN prime)
+addprimes(GEN p)
 {
-  long i,tx, av = avma, lp = lg(primetab);
-  GEN p1,p2;
+  ulong av;
+  long i,k,tx,lp;
+  GEN L;
 
-  if (!prime) return primetab;
-  tx = typ(prime);
+  if (!p) return primetab;
+  tx = typ(p);
   if (is_vec_t(tx))
   {
-    for (i=1; i < lg(prime); i++) addprimes((GEN) prime[i]);
+    for (i=1; i < lg(p); i++) addprimes((GEN) p[i]);
     return primetab;
   }
   if (tx != t_INT) err(typeer,"addprime");
-  if (is_pm1(prime)) return primetab;
-  i = signe(prime);
+  if (is_pm1(p)) return primetab;
+  av = avma; i = signe(p);
   if (i == 0) err(talker,"can't accept 0 in addprimes");
-  if (i < 0) prime=absi(prime); 
+  if (i < 0) p = absi(p); 
 
-  p1=cgetg(1,t_VEC);
+  lp = lg(primetab);
+  L = cgetg(2*lp,t_VEC); k = 1;
   for (i=1; i < lp; i++)
   {
-    p2 = mppgcd((GEN) primetab[i], prime);
-    if (! gcmp1(p2))
+    GEN n = (GEN)primetab[i], d = mppgcd(n, p);
+    if (! is_pm1(d))
     {
-      if (!egalii(prime,p2)) p1=concatsp(p1,p2);
-      p1 = concatsp(p1,divii((GEN)primetab[i],p2));
-      gunclone((GEN)primetab[i]); primetab[i]=0;
+      if (!egalii(p,d)) L[k++] = (long)d;
+      L[k++] = ldivii(n,d);
+      gunclone(n); primetab[i] = 0;
     }
   }
-  if (i == NUMPRTBELT+1 && lg(p1) == 1)
-    err(talker,"extra primetable overflows");
-  primetab[i] = lclone(prime); setlg(primetab, lp+1);
-  cleanprimetab();
-  if (lg(p1) > 1) addprimes(p1);
-  avma=av; return primetab;
+  primetab = (GEN) gprealloc(primetab, (lp+1)*sizeof(long), lp*sizeof(long));
+  primetab[i] = lclone(p); setlg(primetab, lp+1);
+  if (k > 1) { cleanprimetab(); setlg(L,k); addprimes(L); }
+  avma = av; return primetab;
 }
 
 static GEN

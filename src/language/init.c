@@ -457,7 +457,7 @@ pari_init(long parisize, long maxprime)
   gi[1] = zero;
   gi[2] = un;
   fetch_var(); /* create polx/polun[MAXVARN] */
-  primetab = (GEN) gpmalloc((NUMPRTBELT+2)*sizeof(long));
+  primetab = (GEN) gpmalloc(1 * sizeof(long));
   primetab[0] = evaltyp(t_VEC) | evallg(1);
 
   pari_addfunctions(&pari_modules, functions_basic,helpmessages_basic);

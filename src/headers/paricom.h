@@ -56,7 +56,6 @@ extern GEN   gun,gdeux,ghalf,gi,gzero;
 extern const long lontyp[];
 extern void* global_err_data;
 
-#define NUMPRTBELT 100 /* primetable size */
 #define MAXITERPOL  10 /* max #of prec increase in polredabs-type operations */
 
                                                 /* let SL = sizeof(long) */
