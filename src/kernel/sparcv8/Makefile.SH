@@ -10,8 +10,8 @@
 
 if test -z "$__gnuc__" -o "$osname" = "nextstep" -o "$osname" = "linux"; then
   kernel="$kernel kernel2"
-  if test "$gnuas" = "yes"; then do_cpp=yes; fi
 fi
+if test "$gnuas" = "yes"; then do_cpp=yes; fi
 
 ker=$src/kernel/sparcv8
 kernel1=$ker/level0_$asmarch.S
