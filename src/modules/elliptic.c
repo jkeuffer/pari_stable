@@ -1062,7 +1062,7 @@ static GEN
 reduce_z(GEN z, SL2_red *T)
 {
   GEN Z = gdiv(z, T->W2);
-  long t = typ(z);
+  long t = typ(z), pr;
 
   if (!is_scalar_t(t) || t == t_INTMOD || t == t_PADIC || t == t_POLMOD)
     err(typeer,"reduction mod SL2 (reduce_z)");
@@ -1070,8 +1070,8 @@ reduce_z(GEN z, SL2_red *T)
   Z = gsub(Z, gmul(T->x,T->Tau));
   T->y = ground(greal(Z));
   Z = gsub(Z, T->y);
-  if (gcmp0(Z) || gexpo(Z) < 5 - bit_accuracy(gprecision(Z)))
-    Z = NULL; /* z in L */
+  pr = gprecision(Z);
+  if (gcmp0(Z) || (pr && gexpo(Z) < 5 - bit_accuracy(pr))) Z = NULL; /*z in L*/
   return Z;
 }
 
