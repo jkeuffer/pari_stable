@@ -607,7 +607,7 @@ err_match(char *s, char c)
 }
 
 #define match2(s,c) if (*s != c) err_match(s,c);
-#define match(c) ({match2(analyseur, c); analyseur++;})
+#define match(c) do { match2(analyseur, c); analyseur++; } while (0);
 
 static long
 readlong()
