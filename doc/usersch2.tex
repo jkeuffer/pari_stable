@@ -310,8 +310,8 @@ defined (not enough significant digits); if the letter is \kbd{e}, they
 will be printed in \idx{scientific format}, always with an explicit
 exponent (e.g.~\kbd{3.3e-5}). If the letter is \kbd{g}, real numbers will
 be printed in \kbd{f} format, except when their absolute value is less than
-$2^{-32}$, in which case they are printed in \kbd{e} format.
-\label{se:format}
+$2^{-32}$ or they are real zeroes (of arbitrary exponent), in which case
+they are printed in \kbd{e} format.\label{se:format}
 
 The number $n$ is the number of significant digits printed for real
 numbers, except if $n<0$ where all the significant digits will be printed

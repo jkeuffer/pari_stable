@@ -832,7 +832,6 @@ wr_exp(GEN x)
  *   if format isn't correct (one of the above) act as e.
  * decimals: number of decimals to print (all if <0).
  */
-#define print_float(fo,ex) ((fo == 'g' && ex >= -32) || fo == 'f')
 static void
 wr_real(GEN x, long nosign)
 {
@@ -840,7 +839,7 @@ wr_real(GEN x, long nosign)
 
   if (!sx) /* real 0 */
   {
-    if (print_float(format,ex))
+    if (format == 'f')
     {
       if (decimals<0)
       {
@@ -859,10 +858,9 @@ wr_real(GEN x, long nosign)
   }
   if (!nosign && sx < 0) pariputc('-'); /* print sign if needed */
   ltop = avma;
-  if (print_float(format,ex)) wr_float(x); else wr_exp(x);
+  if ((format == 'g' && ex>=-32) || format == 'f') wr_float(x); else wr_exp(x);
   avma = ltop;
 }
-#undef print_float
 
 void
 ecrire(GEN x, char f, long d, long fw)

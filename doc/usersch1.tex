@@ -312,7 +312,9 @@ For real numbers, the precision $k$ is also irrelevant, and a real zero will
 in fact be $O(2^e)$ where $e$ is now usually a negative binary exponent. This
 of course will be printed as usual for a real number ($0.0000\cdots$ in
 \kbd{f} format or $0.Exx$ in \kbd{e} format) and not with a $O()$ symbol as
-with $p$-adics or power series.
+with $p$-adics or power series. With respect to the natural ordering on the
+reals we make the following convention: whatever its exponent a real
+zero is smaller than any positive number, and any two real zeroes are equal.
 
 \section{Operations and functions}
 
@@ -347,6 +349,8 @@ any number less than $2^e$ may be treated as an exact zero:
 \bprog
 ? 0.E-28 + 1.E-100
 %1 = 0.E-28
+? 0.E100 + 1
+%2 = 0.E100
 @eprog
 \noindent As an exercise, if \kbd{a = 2\pow (-100)}, why do \kbd{a + 0.} and
 \kbd{a * 1.} differ ?

@@ -493,7 +493,11 @@ addir(GEN x, GEN y)
   if (!signe(y))
   {
     l=lgefint(x)-(expo(y)>>TWOPOTBITS_IN_LONG);
+#if 0
     if (l<3) err(adder3);
+#else /* design issue: make 0.0 "absorbing" */
+    if (l<3) return rcopy(y);
+#endif
     z=cgetr(l); affir(x,z); return z;
   }
 
