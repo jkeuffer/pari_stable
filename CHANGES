@@ -185,6 +185,9 @@ HC 21- new implementation of gamma()
        scratch after a precision increase. All relations stored in algebraic
        form, so that data is easily recomputed to higher accuracy if necessary.
        Use lower default precision.
+   27- remove special handling of t_STR by printtex / writetex [ 2-2-6-C19:
+       a \ would be inserted in front of $, %,  etc. ]. This broke things like
+       printtex("$", x, "$"), and is better done by the user herself.
 
   Added
     1- [Configure:] flag --with-ncurses-lib=*
@@ -256,11 +259,9 @@ BA 31- uninitialized memory read in divrr(x,y), when lg(y) < lg(x), leading
    32- [Cygwin + bash >= 2.05a]: HOSTTYPE no longer auto-exported by bash -->
        Cygwin compilation broken. Define it to i386 by default.
    33- TODO items related to polgalois
-       polgalois(x^8-1864259299553450972214799899167226732549697977945716*x^6+331143259018657601105207922631212331088735421305543663274125986698777318014979969*x^4-2225286541902342283500014249183311190477390*x^2+5); --> degree too large
-
-       setrand(7); polgalois(x^8+162644002617632464507038884216211529274267271168000002) --> wrong result
-  
-       polgalois(x^11 - 2) took a looong time.
+       + polgalois(x^8-1864259299553450972214799899167226732549697977945716*x^6+331143259018657601105207922631212331088735421305543663274125986698777318014979969*x^4-2225286541902342283500014249183311190477390*x^2+5); --> degree too large
+       + setrand(7); polgalois(x^8+162644002617632464507038884216211529274267271168000002) --> wrong result
+       + polgalois(x^11 - 2) took a looong time.
    34- systematic warning in bnfisnorm()  [ "useless flag" ]
    35- charpoly could not handle t_POL in variable MAXVARN
    36- \p400 + sin(2*Pi) boasted far too many significant digits

@@ -2149,10 +2149,10 @@ texi_nobrace(GEN g, pariout_t *T, int addsign)
 
     case t_STR:
     {
-      char *s;
-  
-      pariputs("\\mbox{");
-      s = GSTR(g);
+#if 0 /* This makes it impossible to print reliably. What it I want to 
+         printtex("$$", x, "$$") ? */
+      char *s = GSTR(g);
+      pariputs("\\hbox{");
       while (*s) {
 	if (strchr("\\{}$_^%#&~", *s))
 	  pariputc('\\');		/* What to do with \\ ? */
@@ -2161,6 +2161,9 @@ texi_nobrace(GEN g, pariout_t *T, int addsign)
 	  pariputs("{}");
       }
       pariputc('}'); break;
+#else
+      pariputs(GSTR(g)); break;
+#endif
     }
     case t_MAT:
       pariputs("\\pmatrix{\n "); r = lg(g);
