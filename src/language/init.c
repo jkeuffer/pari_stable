@@ -126,6 +126,7 @@ extern void* get_stack(double,int);
 #    define STACK_CHECK_INIT(b)		\
 	((void)b, PARI_stack_limit = get_stack(1./16, 32*1024))
 #  else /* !__EMX__ */
+#include <sys/types.h>
 #include <sys/resource.h>
 
 /* Set PARI_stack_limit to (a little above) the lowest safe address that can
