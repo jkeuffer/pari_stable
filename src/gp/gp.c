@@ -1406,6 +1406,7 @@ e, f : inertia/residues degree            prid\n\
 fu   : fundamental units                                       bnf, bnr\n\
 futu : [u,w] where u=unit group, w=torsion                     bnf, bnr\n\
 gen  : generators                         prid, clgp           bnf, bnr\n\
+index: index                                                   bnf, bnr\n\
 j    : j-invariant                                    ell\n\
 mod  : modulus\n\
 nf   : number field                                            bnf, bnr\n\

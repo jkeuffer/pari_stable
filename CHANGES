@@ -143,6 +143,7 @@ BA 47- bitneg(1,0) --> SEGV (caused by 2.2.5 A10).
 BA 59- quoted strings were not displayed properly quoted.
    60- bestappr(0.1, 8) --> 0 [ should be 1/8 ]
    61- rare bugs in copying routines [ clone bit sometimes not unset ]
+   62- SEGV in qfminim when integer entries and precision error occured
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.
@@ -187,9 +188,14 @@ BA 21- type() does not allow to change object types anymore.
        model ]. Remove that unecessary assumption.
    23- more informative error messages in concat()
    24- in affsi / affui (s, z) : do not check that lg(z) >= 3
-   25- replace gexpo(t_QUAD) by a rough aproximation (as t_COMPLEXE): faster
-   26- for P a polynomial with t_INTMOD coefficients, define content(P) = 1
+   25- replace gexpo(t_QUAD) by a rough aproximation (as t_COMPLEX): faster
+   26- made Mat(t_VEC of w t_COLs of the same length h) return a h x w matrix
+       Used to be a 1 x w matrix whose elements were t_COLs. Obsoletes such
+       hacks as: v = vector(...); v[1] = Mat(v[1]); concat(v). Now Mat(v) is
+       enough.
    27- move BEGINEXTERN / ENDEXTERN pairs out of kernel headers into pari.h
+   28- split the User's manual in two: PARI/GP and libpari.
+   29- updated and completed the tutorial
 
   Added
     1- make test-all [ all available test suites (SLOW !)]
@@ -206,6 +212,7 @@ BA  9- x86_64 level0 inline assembly kernel
 BA 10- add POSIX-style long options --fast, --quiet, --primelimit and 
        --stacksize.
    11- new internal library routine itos_or_0
+   12- new member function .index
 
   Removed
     1- obsolete macro leadingcoeff [kept for backward compatibility but

@@ -2471,6 +2471,23 @@ gtovec(GEN x)
 }
 
 GEN
+gtocol(GEN x)
+{
+  long lx, tx, i, j, h;
+  GEN y;
+  if (!x) return cgetg(1,t_COL);
+  tx = typ(x);
+  if (tx != t_MAT) { y = gtovec(x); settyp(y, t_COL); return y; }
+  lx = lg(x); if (lx == 1) return cgetg(1, t_COL);
+  h = lg(x[1]); y = cgetg(h, t_COL);
+  for (i = 1 ; i < h; i++) {
+    y[i] = lgetg(lx, t_VEC);
+    for (j = 1; j < lx; j++) mael(y,i,j) = lcopy(gcoeff(x,i,j));
+  }
+  return y;
+}
+
+GEN
 gtovecsmall(GEN x)
 {
   GEN V;

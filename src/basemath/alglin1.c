@@ -771,18 +771,47 @@ gtomat(GEN x)
   }
   switch(tx)
   {
-    case t_VEC:
+    case t_VEC: {
       lx=lg(x); y=cgetg(lx,t_MAT);
+      if (lx == 1) break;
+      if (typ(x[1]) == t_COL) {
+        long h = lg(x[1]);
+        for (i=2; i<lx; i++) {
+          if (typ(x[i]) != t_COL || lg(x[i]) != h) break;
+        }
+        if (i == lx) { /* matrix with h-1 rows */
+          y = cgetg(lx, t_MAT);
+          for (i=1 ; i<lx; i++) y[i] = lcopy((GEN)x[i]);
+          return y;
+        }
+      }
       for (i=1; i<lx; i++)
       {
-	p1=cgetg(2,t_COL); y[i]=(long)p1;
-	p1[1]=lcopy((GEN) x[i]);
+	p1 = cgetg(2,t_COL); y[i] = (long)p1;
+	p1[1] = lcopy((GEN) x[i]);
       }
       break;
-    case t_COL:
-      y=cgetg(2,t_MAT); y[1]=lcopy(x); break;
+    }
+    case t_COL: 
+      lx = lg(x);
+      if (lx == 1) return cgetg(1, t_MAT);
+      if (typ(x[1]) == t_VEC) {
+        long j, h = lg(x[1]);
+        for (i=2; i<lx; i++) {
+          if (typ(x[i]) != t_VEC || lg(x[i]) != h) break;
+        }
+        if (i == lx) { /* matrix with h cols */
+          y = cgetg(h, t_MAT);
+          for (j=1 ; j<h; j++) {
+            y[j] = lgetg(lx, t_COL);
+            for (i=1; i<lx; i++) coeff(y,i,j) = lcopy(gmael(x,i,j));
+          }
+          return y;
+        }
+      }
+      y = cgetg(2,t_MAT); y[1] = lcopy(x); break;
     default: /* case t_MAT: */
-      y=gcopy(x); break;
+      y = gcopy(x); break;
   }
   return y;
 }

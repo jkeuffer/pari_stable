@@ -136,6 +136,14 @@ member_sign(GEN x) /* signature */
   return (GEN)y[2];
 }
 
+GEN
+member_index(GEN x)
+{
+  int t; GEN y = get_nf(x,&t);
+  if (!y) member_err("index");
+  return (GEN)y[4];
+}
+
 /* x assumed to be output by get_nf: ie a t_VEC with length 11 */
 static GEN
 nfmats(GEN x)
