@@ -155,16 +155,6 @@ printperm(PERM perm)
   fprintferr(" )\n");
 }
 
-/* return i if typ = TYP[i], 0 otherwise */
-static long
-numerotyp(GEN TYP, GEN galtyp)
-{
-  long i, nb = lg(TYP);
-  for (i=1; i<nb; i++)
-    if (gequal(galtyp,(GEN)TYP[i])) return i;
-  return 0;
-}
-
 static int
 raye(long *g, long num)
 {
@@ -222,9 +212,10 @@ rayergroup(long **GR, long num, long *gr)
 static long
 galmodp(GEN pol, GEN dpol, GEN TYP, long *gr, long **GR)
 {
-  long p = 0, i,k,l,n,nbremain;
+  long i,k,l,n,nbremain;
   byteptr d = diffptr;
   GEN p1, dtyp;
+  ulong p = 0;
 
   switch(N)
   {
@@ -239,13 +230,13 @@ galmodp(GEN pol, GEN dpol, GEN TYP, long *gr, long **GR)
   for (k=1; k<15; k++)
   {
     NEXT_PRIME_VIADIFF_CHECK(p,d);
-    if (!smodis(dpol,p)) continue; /* p divides dpol */
+    if (!umodiu(dpol,p)) continue; /* p divides dpol */
 
     p1 = (GEN)FpX_degfact(pol,utoipos(p))[1];
     l = lg(p1);
     dtyp[0] = evaltyp(t_VECSMALL)|evallg(l);
     for (i=1; i<l; i++) dtyp[i] = p1[l-i]; /* decreasing order */
-    n = numerotyp(TYP,dtyp);
+    n = isinvector(TYP, dtyp);
     if (!n) return 1; /* only for N=11 */
     nbremain -= rayergroup(GR,n,gr);
     if (nbremain==1) return 1;

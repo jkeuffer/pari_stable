@@ -2509,6 +2509,10 @@ idealcoprime(GEN nf, GEN x, GEN y)
 /*                  LINEAR ALGEBRA OVER Z_K  (HNF,SNF)             */
 /*                                                                 */
 /*******************************************************************/
+/* A torsion-free module M over Z_K is given by [A,I].
+ * I=[a_1,...,a_k] is a row vector of k fractional ideals given in HNF.
+ * A is an n x k matrix (same k) such that if A_j is the j-th column of A then
+ * M=a_1 A_1+...+a_k A_k. We say that [A,I] is a pseudo-basis if k=n */
 void
 check_ZKmodule(GEN x, char *s)
 {
@@ -2516,17 +2520,6 @@ check_ZKmodule(GEN x, char *s)
   if (typ(x[1]) != t_MAT) err(talker,"not a matrix in %s", s);
   if (typ(x[2]) != t_VEC || lg(x[2]) != lg(x[1]))
     err(talker,"not a correct ideal list in %s", s);
-}
-
-/* returns the first index i<=n such that x=v[i] if it exits, 0 otherwise */
-long
-isinvector(GEN v, GEN x, long n)
-{
-  long i;
-
-  for (i=1; i<=n; i++)
-    if (gequal((GEN)v[i],x)) return i;
-  return 0;
 }
 
 static GEN
@@ -2549,8 +2542,8 @@ element_mulvec(GEN nf, GEN x, GEN v)
 
   if (typ(x) != t_COL) return scalmul(x, v);
   if (isnfscalar(x)) return scalmul((GEN)x[1], v);
-  l = lg(v); y = cgetg(l, typ(v));
   M = eltmul_get_table(nf,x);
+  l = lg(v); y = cgetg(l, typ(v));
   for (i=1; i < l; i++) y[i] = lmul(M, (GEN)v[i]);
   return y;
 }
@@ -2587,11 +2580,7 @@ element_close(GEN nf, GEN x, GEN ideal)
   return gerepileupto(av, close_modinvertible(x, ideal));
 }
 
-/* A torsion-free module M over Z_K will be given by a row vector [A,I] with
- * two components. I=[\a_1,...,\a_k] is a row vector of k fractional ideals
- * given in HNF. A is an nxk matrix (same k and n the rank of the module)
- * such that if A_j is the j-th column of A then M=\a_1A_1+...\a_kA_k. We say
- * that [A,I] is a pseudo-basis if k=n */
+/* u A + v B */
 static GEN
 colcomb(GEN nf, GEN u, GEN v, GEN A, GEN B)
 {
@@ -2663,7 +2652,7 @@ nfbezout(GEN nf,GEN a,GEN b, GEN A,GEN B, GEN *pu,GEN *pv,GEN *pw,GEN *pdi)
       u = vec_ei(lg(B)-1, 1);
     else
     {
-      u =  element_inv(nf, a);
+      u = element_inv(nf, a);
       w = idealmulelt(nf, u, w); /* AB/d */
     }
   }
@@ -2695,7 +2684,7 @@ nfbezout(GEN nf,GEN a,GEN b, GEN A,GEN B, GEN *pu,GEN *pv,GEN *pw,GEN *pdi)
   *pdi = di; return d;
 }
 
-/* Given a torsion-free module x as above outputs a pseudo-basis for x in HNF */
+/* Given a torsion-free module x outputs a pseudo-basis for x in HNF */
 GEN
 nfhermite(GEN nf, GEN x)
 {
@@ -2739,7 +2728,7 @@ nfhermite(GEN nf, GEN x)
       I[def] = (long)d; I[j] = (long)w;
     }
     d = (GEN)I[def];
-    if (!di) di = hnfideal_inv(nf,d);
+    if (!di) di = idealinv(nf,d);
     J[def] = (long)di;
     for (j=def+1; j<=k; j++)
     {

@@ -1773,29 +1773,39 @@ factormul(GEN fa1,GEN fa2)
   setlg(e, c+1); return y;
 }
 
+/* returns the first index i<=n such that x=v[i] if it exits, 0 otherwise */
+long
+isinvector(GEN v, GEN x)
+{
+  long i, l = lg(v);
+  for (i = 1; i < l; i++)
+    if (gequal(gel(v,i), x)) return i;
+  return 0;
+}
+
 static GEN
 factordivexact(GEN fa1,GEN fa2)
 {
-  long i,j,k,c,lx1,lx2;
-  GEN Lpr,Lex,Lpr1,Lex1,Lpr2,Lex2,p1;
+  long i, j, k, c, l;
+  GEN P, E, P1, E1, P2, E2, p1;
 
-  Lpr1 = (GEN)fa1[1]; Lex1 = (GEN)fa1[2]; lx1 = lg(Lpr1);
-  Lpr2 = (GEN)fa2[1]; Lex2 = (GEN)fa2[2]; lx2 = lg(Lpr1);
-  Lpr = cgetg(lx1,t_COL);
-  Lex = cgetg(lx1,t_COL);
-  for (c=0,i=1; i<lx1; i++)
+  P1 = (GEN)fa1[1]; E1 = (GEN)fa1[2]; l = lg(P1);
+  P2 = (GEN)fa2[1]; E2 = (GEN)fa2[2];
+  P = cgetg(l,t_COL);
+  E = cgetg(l,t_COL);
+  for (c = i = 1; i < l; i++)
   {
-    j = isinvector(Lpr2,(GEN)Lpr1[i],lx2-1);
-    if (!j) { c++; Lpr[c] = Lpr1[i]; Lex[c] = Lex1[i]; }
+    j = isinvector(P2,(GEN)P1[i]);
+    if (!j) { P[c] = P1[i]; E[c] = E1[i]; c++; }
     else
     {
-      p1 = subii((GEN)Lex1[i], (GEN)Lex2[j]); k = signe(p1);
-      if (k<0) err(talker,"factordivexact is not exact!");
-      if (k>0) { c++; Lpr[c] = Lpr1[i]; Lex[c] = (long)p1; }
+      p1 = subii((GEN)E1[i], (GEN)E2[j]); k = signe(p1);
+      if (k < 0) err(talker,"factordivexact is not exact!");
+      if (k > 0) { P[c] = P1[i]; E[c] = (long)p1; c++; }
     }
   }
-  setlg(Lpr,c+1);
-  setlg(Lex,c+1); return mkmat2(Lpr, Lex);
+  setlg(P, c);
+  setlg(E, c); return mkmat2(P, E);
 }
 /* remove index k */
 static GEN
@@ -2188,8 +2198,7 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
           for (k=1; k<lp1; k++)
           {
             p3 = (GEN)p1[k];
-            if (q == i ||
-                ((p4=gmael(p3,1,1)) && !isinvector(p4,fauxpr,lg(p4)-1)))
+            if (q == i || ((p4=gmael(p3,1,1)) && !isinvector(p4,fauxpr)))
               p2[++c] = (long)zsimpjoin(p3,bidp,faussefa,embunit);
           }
 
