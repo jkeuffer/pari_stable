@@ -1302,7 +1302,7 @@ gconvsp(GEN x, int flpile)
   av=avma; y=dummycopy(x); settyp(y,t_POL);
   i=lg(x)-1; while (i>1 && gcmp0((GEN)y[i])) i--;
   setlgef(y,i+1);
-  p1=gpuigs(polx[v],valp(x));
+  p1=gpowgs(polx[v],valp(x));
   tetpil=avma; p1=gmul(p1,y);
   return flpile? gerepile(av,tetpil,p1): p1;
 }
@@ -1402,7 +1402,7 @@ gsubst(GEN x, long v, GEN y)
         p2=gsubst(p1,v,y); tetpil=avma; z=tayl(p2,vx,lx-2);
         if (ex)
         {
-          p1=gpuigs(polx[vx],ex); tetpil=avma; z=gmul(z,p1);
+          p1=gpowgs(polx[vx],ex); tetpil=avma; z=gmul(z,p1);
         }
         return gerepile(av,tetpil,z);
       }
@@ -1423,7 +1423,7 @@ gsubst(GEN x, long v, GEN y)
 	    av=avma; z = zeroser(vy,0);
 	    for (i=lx-1; i>=2; i--)
               z = gadd((GEN)x[i], gmul(y,z));
-	    if (ex) z = gmul(z, gpuigs(y,ex));
+	    if (ex) z = gmul(z, gpowgs(y,ex));
 	    return gerepileupto(av,z);
 	  }
 
@@ -1456,8 +1456,8 @@ gsubst(GEN x, long v, GEN y)
 	  }
 	  if (!ex) return gerepilecopy(av,z);
 
-          if (l<ly) { setlg(y,l); p1=gpuigs(y,ex); setlg(y,ly); }
-          else p1=gpuigs(y,ex);
+          if (l<ly) { setlg(y,l); p1=gpowgs(y,ex); setlg(y,ly); }
+          else p1=gpowgs(y,ex);
           tetpil=avma; return gerepile(av,tetpil,gmul(z,p1));
 
         case t_POL: case t_RFRAC: case t_RFRACN:
@@ -3235,30 +3235,31 @@ hqfeval(GEN q, GEN x)
 GEN
 poleval(GEN x, GEN y)
 {
-  long i, j, imin, tx=typ(x);
-  gpmem_t av, tetpil;
-  GEN p1,p2,p3,r,s;
+  long i, j, imin, tx = typ(x);
+  gpmem_t av0 = avma, av, lim;
+  GEN p1, p2, r, s;
 
   if (is_scalar_t(tx)) return gcopy(x);
   switch(tx)
   {
     case t_POL:
-      i=lgef(x)-1; imin=2; break;
+      i = lgef(x)-1; imin = 2; break;
 
-    case t_RFRAC: case t_RFRACN: av=avma;
-      p1=poleval((GEN)x[1],y);
-      p2=poleval((GEN)x[2],y); tetpil=avma;
-      return gerepile(av,tetpil,gdiv(p1,p2));
+    case t_RFRAC: case t_RFRACN:
+      p1 = poleval((GEN)x[1],y);
+      p2 = poleval((GEN)x[2],y);
+      return gerepileupto(av0, gdiv(p1,p2));
 
     case t_VEC: case t_COL:
-      i=lg(x)-1; imin=1; break;
+      i = lg(x)-1; imin = 1; break;
     default: err(typeer,"poleval");
       return NULL; /* not reached */
   }
   if (i<=imin)
     return (i==imin)? gcopy((GEN)x[imin]): gzero;
 
-  av=avma; p1=(GEN)x[i]; i--;
+  lim = stack_lim(av0,2);
+  p1 = (GEN)x[i]; i--;
   if (typ(y)!=t_COMPLEX)
   {
 #if 0 /* standard Horner's rule */
@@ -3271,21 +3272,31 @@ poleval(GEN x, GEN y)
       for (j=i; gcmp0((GEN)x[j]); j--)
         if (j==imin)
         {
-          if (i!=j) y = gpuigs(y,i-j+1);
-          tetpil=avma; return gerepile(av,tetpil,gmul(p1,y));
+          if (i!=j) y = gpowgs(y, i-j+1);
+          return gerepileupto(av0, gmul(p1,y));
         }
-      r = (i==j)? y: gpuigs(y,i-j+1);
+      r = (i==j)? y: gpowgs(y, i-j+1);
       p1 = gadd(gmul(p1,r), (GEN)x[j]);
+      if (low_stack(lim, stack_lim(av0,2)))
+      {
+        if (DEBUGMEM>1) err(warnmem,"poleval: i = %ld",i);
+        p1 = gerepileupto(av0, p1);
+      }
     }
-    return gerepileupto(av,p1);
+    return gerepileupto(av0,p1);
   }
 
-  p2=(GEN)x[i]; i--; r=gtrace(y); s=gneg_i(gnorm(y));
+  p2 = (GEN)x[i]; i--; r = gtrace(y); s = gneg_i(gnorm(y));
+  av = avma;
   for ( ; i>=imin; i--)
   {
-    p3=gadd(p2,gmul(r,p1));
-    p2=gadd((GEN)x[i],gmul(s,p1)); p1=p3;
+    GEN p3 = gadd(p2, gmul(r, p1));
+    p2 = gadd((GEN)x[i], gmul(s, p1)); p1 = p3;
+    if (low_stack(lim, stack_lim(av0,2)))
+    {
+      if (DEBUGMEM>1) err(warnmem,"poleval: i = %ld",i);
+      gerepileall(av, 2, &p1, &p2);
+    }
   }
-  p1=gmul(y,p1); tetpil=avma;
-  return gerepile(av,tetpil,gadd(p1,p2));
+  return gerepileupto(av0, gadd(p2, gmul(y,p1)));
 }
