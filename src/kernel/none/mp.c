@@ -648,8 +648,7 @@ addrr(GEN x, GEN y)
         if (i==1)
         {
           shift_right(z,z, 2,lz, 1,1);
-          ey=evalexpo(ey+1);
-          z[1] = evalsigne(sx) | ey; return z;
+          z[1] = evalsigne(sx) | evalexpo(ey+1); return z;
         }
         z[i] = y[i]+1; if (z[i--]) break;
       }
@@ -690,9 +689,8 @@ addrr(GEN x, GEN y)
 
   x = z+2; i=0; while (!x[i]) i++;
   lz -= i; z += i; m = bfffo(z[2]);
-  e = evalexpo(ey - (m | (i<<TWOPOTBITS_IN_LONG)));
   if (m) shift_left(z,z,2,lz-1, 0,m);
-  z[1] = evalsigne(sx) | e;
+  z[1] = evalsigne(sx) | evalexpo(ey - (m | (i<<TWOPOTBITS_IN_LONG)));
   z[0] = evaltyp(t_REAL) | evallg(lz);
   avma = (gpmem_t)z; return z;
 }
@@ -849,7 +847,7 @@ mulrr(GEN x, GEN y)
   if (sy<0) sx = -sx;
   lz=lg(x); ly=lg(y);
   if (lz>ly) { lz=ly; z=x; x=y; y=z; flag=1; } else flag = (lz!=ly);
-  z=cgetr(lz); z[1] = evalsigne(sx) | evalexpo(e);
+  z=cgetr(lz);
   if (lz==3)
   {
     if (flag)
@@ -859,8 +857,9 @@ mulrr(GEN x, GEN y)
     }
     else
       garde = mulll(x[2],y[2]);
-    if ((long)hiremainder<0) { z[2]=hiremainder; z[1]++; }
+    if ((long)hiremainder<0) { z[2]=hiremainder; e++; }
     else z[2]=(hiremainder<<1) | (garde>>(BITS_IN_LONG-1));
+    z[1] = evalsigne(sx)|evalexpo(e);
     return z;
   }
 
@@ -897,9 +896,8 @@ mulrr(GEN x, GEN y)
     z[i] = addll(addmul(p1,y1[i]), z[i]);
   }
   z[2] = hiremainder+overflow;
-  if (z[2] < 0) z[1]++;
-  else
-    shift_left(z,z,2,lzz,garde, 1);
+  if (z[2] < 0) e++; else shift_left(z,z,2,lzz,garde, 1);
+  z[1] = evalsigne(sx) | evalexpo(e);
   return z;
 }
 
@@ -921,14 +919,14 @@ mulir(GEN x, GEN y)
   lz=lg(y); z=cgetr(lz);
   y1=cgetr(lz+1);
   affir(x,y1); x=y; y=y1;
-  e = evalexpo(expo(y)+ey);
-  z[1] = evalsigne(sx) | e;
+  e = expo(y)+ey;
   if (lz==3)
   {
     (void)mulll(x[2],y[3]);
     garde=addmul(x[2],y[2]);
-    if ((long)hiremainder < 0) { z[2]=hiremainder; z[1]++; }
+    if ((long)hiremainder < 0) { z[2]=hiremainder; e++; }
     else z[2]=(hiremainder<<1) | (garde>>(BITS_IN_LONG-1));
+    z[1] = evalsigne(sx) | evalexpo(e);
     avma=(gpmem_t)z; return z;
   }
 
@@ -965,9 +963,10 @@ mulir(GEN x, GEN y)
     z[i] = addll(addmul(p1,y1[i]), z[i]);
   }
   z[2] = hiremainder+overflow;
-  if (z[2] < 0) z[1]++;
+  if (z[2] < 0) e++;
   else
     shift_left(z,z,2,lzz,garde, 1);
+  z[1] = evalsigne(sx) | evalexpo(e);
   avma=(gpmem_t)z; return z;
 }
 
@@ -1227,7 +1226,7 @@ modiiz(GEN x, GEN y, GEN z)
 GEN
 divrs(GEN x, long y)
 {
-  long i,lx,ex,garde,sh,s=signe(x);
+  long i,lx,garde,sh,s=signe(x);
   GEN z;
   LOCAL_HIREMAINDER;
 
@@ -1240,9 +1239,9 @@ divrs(GEN x, long y)
   for (i=2; i<lx; i++) z[i]=divll(x[i],y);
 
   /* we may have hiremainder != 0 ==> garde */
-  garde=divll(0,y); sh=bfffo(z[2]); ex=evalexpo(expo(x)-sh);
+  garde=divll(0,y); sh=bfffo(z[2]);
   if (sh) shift_left(z,z, 2,lx-1, garde,sh);
-  z[1] = evalsigne(s) | ex;
+  z[1] = evalsigne(s) | evalexpo(expo(x)-sh);
   return z;
 }
 
