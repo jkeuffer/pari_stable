@@ -33,11 +33,16 @@ src_dir=src
 
 extract_dir_list="$doc_dir $emacs_dir $misc_dir"
 
-#
 # Version number and patch level.
-#
 . $config_dir/version
 version=$VersionMajor.$VersionMinor
+if test `expr $VersionMinor % 2` = 1; then
+  echo "Configuring pari-$version.$patch (STABLE)"
+  libpari_base=pari
+else
+  echo "Configuring pari-$version.$patch (DEVELOPMENT VERSION)"
+  libpari_base=pari-$version
+fi
 
 cd $config_dir
 
@@ -953,7 +958,11 @@ if test "$optimization" = profiling; then DLLD=; else
     sunos-*) sodest=$VersionMajor$VersionMinor.$patch
              soname=$sodest;;
     *-alpha|solaris-*|linux-*|freebsd-*)
-             sodest=$version.$patch ;;
+      case $libpari_base in
+        pari) sodest=$version.$patch;; # released versions
+        *) sodest=0.0.$patch
+           soname=$patch ;; # unstable versions
+      esac ;;
     cygwin*) soname= ; sodest= ; DLSUFFIX=dll;;
     hpux-*)  soname= ; sodest= ; DLSUFFIX=sl;;
     irix-*)  soname= ; sodest= ;;
@@ -1200,7 +1209,7 @@ fi
 case "$osname" in
   *cygwin*) LDDYN="-L$libdir -lpari_dll" ; runpath="$libdir" ;
 	    DYNLIBS=-lpari_dll ; DYNFLAGS=-Dlibpari_USE_DLL ;;
-  *)        LDDYN="-L$libdir -lpari" ; runpath="$libdir" ;;
+  *)        LDDYN="-L$libdir -l$libpari_base" ; runpath="$libdir" ;;
 esac
 
 cat << EOT
@@ -1225,7 +1234,7 @@ case "$osname" in
 esac
 
 for variable in\
-  version TOP config_dir src_dir emacs_dir doc_dir\
+  libpari_base version TOP config_dir src_dir emacs_dir doc_dir\
   bindir includedir mandir miscdir libdir datadir\
   optimization objdir static suffix\
   arch asmarch osname pretty prefix share_prefix\
