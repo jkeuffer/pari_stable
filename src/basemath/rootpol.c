@@ -346,7 +346,7 @@ log2ir(GEN x)
   return 1.+ (double) expo(x)+log2( (double)(ulong) x[2]) - (double) BITS_IN_LONG;
 }
 
-static double
+double
 mylog2(GEN z)
 {
   double x,y;

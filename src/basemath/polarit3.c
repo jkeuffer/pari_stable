@@ -35,6 +35,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #define both_odd(x,y) ((x)&(y)&1)
 extern GEN caractducos(GEN p, GEN x, int v);
+extern double mylog2(GEN z);
 
 /*******************************************************************/
 /*                                                                 */
@@ -3831,7 +3832,7 @@ vec_FpX_eval_gen(GEN b, GEN x, GEN p, int *drop)
 /* Interpolate at roots of 1 and use Hadamard bound for univariate resultant:
  *   bound = N_2(A)^degpol B N_2(B)^degpol(A),  where
  *     N_2(A) = sqrt(sum (N_1(Ai))^2)
- * Return B such that bound < 2^B */
+ * Return e such that Res(A, B) < 2^e */
 ulong
 ZY_ZXY_ResBound(GEN A, GEN B)
 {
@@ -3845,7 +3846,9 @@ ZY_ZXY_ResBound(GEN A, GEN B)
     if (typ(t) == t_POL) t = gnorml1(t, 0);
     b = addii(b, sqri(t));
   }
-  b = gmul(gpowgs(mulir(a,run), degpol(B)), gpowgs(mulir(b,run), degpol(A)));
+  a = mulir(a,run);
+  b = mulir(b,run);
+  b = gmul(gpowgs(a, degpol(B)), gpowgs(b, degpol(A)));
   avma = av; return 1 + (gexpo(b)>>1);
 }
 
@@ -4045,7 +4048,7 @@ INIT:
 
   H = H0 = H1 = NULL;
   lb = lgef(B); b = u_allocpol(degpol(B), 0);
-  bound = ZY_ZXY_ResBound(A,B);
+  bound = ZY_ZXY_ResBound(A, B);
   if (DEBUGLEVEL>4) fprintferr("bound for resultant coeffs: 2^%ld\n",bound);
   check_theta(bound);
 
@@ -4235,11 +4238,31 @@ trivial_case(GEN A, GEN B)
   return NULL;
 }
 
-GEN
-ZX_resultant_all(GEN A, GEN B, ulong bound)
+/* x^n mod p */
+ulong
+u_powmod(ulong x, long n, ulong p)
 {
-  ulong Hp;
+  ulong y = 1, z;
+  long m;
+
+  if (n < 0) { n = -n; x = u_invmod(x, p); }
+  m = n;
+  z = x;
+  for (;;)
+  {
+    if (m&1) y = mulssmod(y,z, p);
+    m >>= 1; if (!m) return y;
+    z = mulssmod(z,z, p);
+  }
+}
+
+/* Res(A, B/dB), assuming the A,B in Z[X] and result is integer */
+GEN
+ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound)
+{
+  ulong Hp, dp;
   gpmem_t av = avma, av2, lim;
+  long degA;
   int stable;
   GEN q, a, b, H;
   byteptr d = diffptr + 3000;
@@ -4248,16 +4271,25 @@ ZX_resultant_all(GEN A, GEN B, ulong bound)
   if ((H = trivial_case(A,B)) || (H = trivial_case(B,A))) return H;
   q = H = NULL;
   av2 = avma; lim = stack_lim(av,2);
-  if (!bound) bound = ZY_ZXY_ResBound(A,B);
+  degA = degpol(A);
+  if (!bound)
+  {
+    bound = ZY_ZXY_ResBound(A, B);
+    if (dB) bound -= (long)(mylog2(dB)*degA);
+  }
   if (DEBUGLEVEL>4) fprintferr("bound for resultant: 2^%ld\n",bound);
   check_theta(bound);
 
+  dp = 0; /* gcc -Wall */
   for(;;)
   {
     p += *d++; if (!*d) err(primer1);
+    if (dB) { dp = smodis(dB, p); if (!dp) continue; }
+
     a = u_Fp_FpX(A, 0, p);
     b = u_Fp_FpX(B, 0, p);
     Hp= u_FpX_resultant(a, b, p);
+    if (dp) Hp = mulssmod(Hp, u_powmod(dp, -degA, p), p);
     if (!H)
     {
       stable = 0; q = utoi(p);
@@ -4283,15 +4315,29 @@ ZX_resultant_all(GEN A, GEN B, ulong bound)
 }
 
 GEN
-ZX_resultant(GEN A, GEN B) { return ZX_resultant_all(A,B,0); }
+ZX_resultant(GEN A, GEN B) { return ZX_resultant_all(A,B,NULL,0); }
+
+GEN
+ZX_QX_resultant(GEN A, GEN B)
+{
+  GEN c, d, n, R;
+  gpmem_t av = avma;
+  B = Q_primitive_part(B, &c);
+  if (!c) return ZX_resultant(A,B);
+  n = numer(c);
+  d = denom(c); if (is_pm1(d)) d = NULL;
+  R = ZX_resultant_all(A, B, d, 0);
+  if (!is_pm1(n)) R = mulii(R, gpowgs(n, degpol(A)));
+  return gerepileuptoint(av, R);
+}
 
 /* assume x has integral coefficients */
 GEN
 ZX_disc_all(GEN x, ulong bound)
 {
   gpmem_t av = avma;
-  GEN l, d = ZX_resultant_all(x, derivpol(x), bound);
-  l = leading_term(x); if (!gcmp1(l)) d = divii(d,l);
+  GEN l, d = ZX_resultant_all(x, derivpol(x), NULL, bound);
+  l = leading_term(x); if (!gcmp1(l)) d = diviiexact(d,l);
   if (degpol(x) & 2) d = negi(d);
   return gerepileuptoint(av,d);
 }

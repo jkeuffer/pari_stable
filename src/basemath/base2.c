@@ -979,18 +979,8 @@ dbasis(GEN p, GEN f, long mf, GEN alpha, GEN U)
 static GEN
 get_partial_order_as_pols(GEN p, GEN f)
 {
-  long i,j, n = degpol(f), vf = varn(f);
-  GEN b,ib,h,col;
-
-  b = maxord(p,f, ggval(ZX_disc(f),p));
-  ib = cgetg(n+1,t_VEC);
-  for (i=1; i<=n; i++)
-  {
-    h=cgetg(i+2,t_POL); ib[i]=(long)h; col=(GEN)b[i];
-    h[1]=evalsigne(1)|evallgef(i+2)|evalvarn(vf);
-    for (j=1;j<=i;j++) h[j+1]=col[j];
-  }
-  return ib;
+  GEN b = maxord(p,f, ggval(ZX_disc(f),p));
+  return mat_to_vecpol(b, varn(f));
 }
 
 /* if flag != 0, factorization to precision r (maximal order otherwise) */
@@ -1881,7 +1871,7 @@ pol_min(GEN mul, GEN p)
 static int
 is_uniformizer(GEN a, GEN T, GEN pf, GEN p)
 {
-  GEN N = subres(a,T); /* norm(a) */
+  GEN N = ZX_QX_resultant(T,a); /* norm(a) */
   return (resii(diviiexact(N,pf), p) != gzero);
 }
 
