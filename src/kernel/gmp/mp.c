@@ -1591,6 +1591,14 @@ red_montgomery(GEN T, GEN N, ulong inv)
 
 /* EXACT INTEGER DIVISION */
 
+/* assume xy>0, y odd */
+GEN
+diviuexact(GEN x, ulong y)
+{
+  /*TODO: implement true exact division.*/
+  return divii(x,utoi(y));
+}
+
 /* Find z such that x=y*z, knowing that y | x (unchecked)
  * Method: y0 z0 = x0 mod B = 2^BITS_IN_LONG ==> z0 = 1/y0 mod B.
  *    Set x := (x - z0 y) / B, updating only relevant words, and repeat */
