@@ -1333,7 +1333,7 @@ famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prn, GEN EX)
   else
   {
     newg[i] = (long)z;
-    e = concatsp(e, zpow);
+    e = concatsp(e, negi(zpow));
   }
   e = gmod(e, EX);
   return famat_to_nf_modideal_coprime(nf, newg, e, prn);
