@@ -332,14 +332,21 @@ GEN
 gnorml2(GEN x)
 {
   GEN y;
-  long i,tx=typ(x),lx,av;
+  long i,tx=typ(x),lx,av,lim;
 
   if (! is_matvec_t(tx)) return gnorm(x);
   lx=lg(x); if (lx==1) return gzero;
 
-  av=avma; y = gnorml2((GEN) x[1]);
+  av=avma; lim = stack_lim(av,1); y = gnorml2((GEN) x[1]);
   for (i=2; i<lx; i++)
-     y = gadd(gnorml2((GEN) x[i]), y);
+  {
+    y = gadd(y, gnorml2((GEN) x[i]));
+    if (low_stack(lim, stack_lim(av,1)))
+    {
+      if (DEBUGMEM>1) err(warnmem,"gnorml2");
+      y = gerepileupto(av, y);
+    }
+  }
   return gerepileupto(av,y);
 }
 
