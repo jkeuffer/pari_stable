@@ -1792,7 +1792,7 @@ listinsert(GEN L, GEN object, long index)
 
   if (typ(L) != t_LIST) err(typeer,"listinsert");
   if (index <= 0 || index > l-1) err(talker,"bad index in listinsert");
-  l++; if (l > lg(L)) err(talker,"no more room in this L");
+  l++; if (l > lg(L)) err(talker,"no more room in this list");
 
   for (i=l-2; i > index; i--) L[i+1] = L[i];
   L[index+1] = lclone(object);
