@@ -2007,10 +2007,10 @@ If $\fl=1$, compute the class number using \idx{Euler product}s and the
 functional equation. However, it is in $O(|D|^{1/2})$.
 
 \misctitle{Important warning.} For $D < 0$, this function may give incorrect
-results when the class group is non-cyclic, because the authors were too lazy
-to implement \idx{Shanks}' method completely. It is therefore strongly
-recommended to use either the version with $\fl = 1$, the function
-$\kbd{qfbhclassno}(-D)$ if $D$ is known to be a fundamental discriminant, or
+results when the class group has a low exponent (has many cyclic factors),
+because implementing \idx{Shanks}'s method in full generality slows it down
+immensely. It is therefore strongly recommended to double-check results using
+either the version with $\fl = 1$, the function $\kbd{qfbhclassno}(-D)$ or
 the function \kbd{quadclassunit}.
 
 \misctitle{Warning.} contrary to what its name implies, this routine does not
