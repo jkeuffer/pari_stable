@@ -49,9 +49,6 @@ is wrong [second one is principal]. Group structure and regulator are correct!
    supplied polynomial to compute roots in Qp, then return them at precision
    p^r [ better, polroots() and factorpadic() behave this way ] ?
 
-5  polgalois(x^8-1864259299553450972214799899167226732549697977945716*x^6+331143259018657601105207922631212331088735421305543663274125986698777318014979969*x^4-2225286541902342283500014249183311190477390*x^2+5);
-  ***   degree too large in tschirn.
-
 5  setrand(1); bnfinit(x^4-9192452294206514*x^2+375140840302653653082195143217)
    --> never finishes.
 
@@ -59,11 +56,6 @@ is wrong [second one is principal]. Group structure and regulator are correct!
    we evaluate at regularly spaced control points, interpolating the results
    obtained when increasing the number of points. When result looks stable,
    we stop. For some periodic function, this gives a ridiculous result.
-
-4  precision problems in polgalois:
-   setrand(7);
-   polgalois(x^8+162644002617632464507038884216211529274267271168000002)
-   gives wrong result at \p28 [32,-1,17], correct at \p38 [32,-1,15]
 
 4  gcmp/gegal not transitive: [] == 0, [0] == 0, but [0] != []
 

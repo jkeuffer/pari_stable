@@ -85,6 +85,12 @@ BA 31- uninitialized memory read in divrr(x,y), when lg(y) < lg(x), leading
        to random rounding of result.
    32- [Cygwin + bash >= 2.05a]: HOSTTYPE no longer auto-exported by bash -->
        Cygwin compilation broken. Define it to i386 by default.
+   33- TODO items related to polgalois
+       polgalois(x^8-1864259299553450972214799899167226732549697977945716*x^6+331143259018657601105207922631212331088735421305543663274125986698777318014979969*x^4-2225286541902342283500014249183311190477390*x^2+5); --> degree too large
+
+       setrand(7); polgalois(x^8+162644002617632464507038884216211529274267271168000002) --> wrong result
+  
+       polgalois(x^11 - 2) took a looong time.
 
   Changed
     1- rnf structure (removed useless components)
