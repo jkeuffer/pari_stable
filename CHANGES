@@ -63,7 +63,7 @@ HC 24- Corrected p-adic initell.
    26- possible overflow in u_FpM_gauss (from ZM_inv)
    27- various problems with C++ compilers
    28- polredabs could fail to reduce "obvious" input, e.g x^2 + n*x + n^2
-   29- nfgcd(x,y,1) didn't check its arguments
+   29- gcd(x,y,1) didn't check its arguments
    30- typo in elltors: could forget a point of order 2
    31- gdivgs(t_RFRAC,x) incorrect (if numerator had denominator)
    32- serreverse(O(x) or x + O(x^2)) --> SEGV
