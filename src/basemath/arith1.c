@@ -2093,9 +2093,8 @@ bestappr_mod(GEN x, GEN A, GEN B)
     }
     case t_COMPLEX: case t_POL: case t_SER: case t_RFRAC:
     case t_VEC: case t_COL: case t_MAT:
-      lx = lg(x); y = cgetg(lx,tx);
-      for (i=1; i<lontyp[tx]; i++) y[i]=x[i];
-      for (   ; i<lx; i++)
+      y = init_gen_op(x, tx, &lx, &i);
+      for (; i<lx; i++)
       {
         GEN t = bestappr_mod((GEN)x[i],A,B);
         if (!t) return NULL;
@@ -2186,9 +2185,8 @@ bestappr(GEN x, GEN k)
    }
    case t_COMPLEX: case t_POL: case t_SER: case t_RFRAC:
    case t_VEC: case t_COL: case t_MAT:
-      lx = lg(x); y = cgetg(lx,tx);
-      for (i=1; i<lontyp[tx]; i++) y[i]=x[i];
-      for (   ; i<lx; i++) y[i]=(long)bestappr((GEN)x[i],k);
+      y = init_gen_op(x, tx, &lx, &i);
+      for (; i<lx; i++) y[i] = (long)bestappr((GEN)x[i],k);
       return y;
   }
   err(typeer,"bestappr");

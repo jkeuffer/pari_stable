@@ -1046,7 +1046,7 @@ gdivmod(GEN x, GEN y, GEN *pr)
 GEN
 gshift(GEN x, long n)
 {
-  long i,l,lx, tx = typ(x);
+  long i, lx, tx = typ(x);
   GEN y;
 
   switch(tx)
@@ -1057,9 +1057,8 @@ gshift(GEN x, long n)
       return shiftr(x,n);
 
     case t_VEC: case t_COL: case t_MAT:
-      lx=lg(x); y=cgetg(lx,tx); l=lontyp[tx];
-      for (i=1; i<l ; i++) y[i]=x[i];
-      for (   ; i<lx; i++) y[i]=lshift((GEN)x[i],n);
+      lx = lg(x); y = cgetg(lx,tx);
+      for (i=1; i<lx; i++) y[i] = lshift((GEN)x[i],n);
       return y;
   }
   return gmul2n(x,n);
@@ -1127,11 +1126,10 @@ gmul2n(GEN x, long n)
       copyifstack(x[1],y[1]);
       y[2]=lmul2n((GEN)x[2],n); return y;
 
-    case t_POL: case t_COMPLEX: case t_SER:
+    case t_COMPLEX: case t_POL: case t_SER:
     case t_VEC: case t_COL: case t_MAT:
-      lx = lg(x); y=cgetg(lx,tx); l=lontyp[tx];
-      for (i=1; i<l ; i++) y[i]=x[i];
-      for (   ; i<lx; i++) y[i]=lmul2n((GEN)x[i],n);
+      y = init_gen_op(x, tx, &lx, &i);
+      for (; i<lx; i++) y[i]=lmul2n((GEN)x[i],n);
       return y;
 
     case t_RFRAC: av=avma; p1 = gmul2n(gun,n); tetpil = avma;
@@ -1911,9 +1909,8 @@ ground(GEN x)
       return y;
 
     case t_POL: case t_SER: case t_RFRAC: case t_VEC: case t_COL: case t_MAT:
-      lx = lg(x); y=cgetg(lx,tx);
-      for (i=1; i<lontyp[tx]; i++) y[i]=x[i];
-      for (   ; i<lx; i++) y[i]=lround((GEN)x[i]);
+      y = init_gen_op(x, tx, &lx, &i);
+      for (; i<lx; i++) y[i] = lround((GEN)x[i]);
       if (tx==t_POL) return normalizepol_i(y, lx);
       if (tx==t_SER) return normalize(y);
       return y;
@@ -1969,9 +1966,8 @@ grndtoi(GEN x, long *e)
       return y;
 
     case t_POL: case t_SER: case t_RFRAC: case t_VEC: case t_COL: case t_MAT:
-      lx = lg(x); y = cgetg(lx,tx);
-      for (i=1; i<lontyp[tx]; i++) y[i] = x[i];
-      for (   ; i<lx; i++)
+      y = init_gen_op(x, tx, &lx, &i);
+      for (; i<lx; i++)
       {
         y[i] = lrndtoi((GEN)x[i],&e1);
         if (e1 > *e) *e = e1;
@@ -2791,7 +2787,7 @@ lift_intern0(GEN x, long v)
 GEN
 centerlift0(GEN x, long v)
 {
-  long lx, tx=typ(x), i;
+  long i, lx, tx = typ(x);
   pari_sp av;
   GEN y;
 
@@ -2801,32 +2797,26 @@ centerlift0(GEN x, long v)
       return icopy(x);
 
     case t_INTMOD:
-      av=avma; i=cmpii(shifti((GEN)x[2],1),(GEN)x[1]); avma=av;
-      return (i>0)? subii((GEN)x[2],(GEN)x[1]): icopy((GEN)x[2]);
+      av = avma; i = cmpii(shifti((GEN)x[2],1), (GEN)x[1]); avma = av;
+      return (i > 0)? subii((GEN)x[2],(GEN)x[1]): icopy((GEN)x[2]);
 
     case t_POLMOD:
       if (v < 0 || v == varn((GEN)x[1])) return gcopy((GEN)x[2]);
-      y=cgetg(3,tx);
-      y[1]=(long)centerlift0((GEN)x[1],v); y[2]=(long)centerlift0((GEN)x[2],v);
-      return y;
+      y = cgetg(3, t_POLMOD);
+      y[1] = (long)centerlift0((GEN)x[1],v);
+      y[2] = (long)centerlift0((GEN)x[2],v); return y;
 
-    case t_SER:
-      if (!signe(x)) return gcopy(x);
-      lx=lg(x); y=cgetg(lx,tx); y[1]=x[1];
-      for (i=2; i<lx; i++) y[i]=(long)centerlift0((GEN)x[i],v);
-      return y;
-
-    case t_POL:
+    case t_POL: case t_SER:
     case t_FRAC: case t_COMPLEX: case t_RFRAC:
     case t_VEC: case t_COL: case t_MAT:
-      lx = lg(x); y=cgetg(lx,tx); y[1]=x[1];
-      for (i=lontyp[tx]; i<lx; i++) y[i]=(long)centerlift0((GEN)x[i],v);
+      y = init_gen_op(x, tx, &lx, &i);
+      for (; i<lx; i++) y[i] = (long)centerlift0((GEN)x[i],v);
       return y;
 
     case t_QUAD:
-      y=cgetg(4,tx); copyifstack(x[1],y[1]);
-      for (i=2; i<4; i++) y[i]=(long)centerlift0((GEN)x[i],v);
-      return y;
+      y=cgetg(4, t_QUAD); copyifstack(x[1],y[1]);
+      y[2] = (long)centerlift0((GEN)x[2],v);
+      y[3] = (long)centerlift0((GEN)x[3],v); return y;
   }
   err(typeer,"centerlift");
   return NULL; /* not reached */

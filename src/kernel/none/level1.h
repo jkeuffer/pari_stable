@@ -174,6 +174,13 @@ cgetg_copy(long lx, GEN x) {
   GEN y = new_chunk((size_t)lx);
   y[0] = x[0] & (TYPBITS|LGBITS); return y;
 }
+INLINE GEN
+init_gen_op(GEN x, long tx, long *lx, long *i) {
+  GEN y;
+  *lx = lg(x); y = cgetg_copy(*lx, x);
+  if (lontyp[tx] == 1) *i = 1; else { y[1] = x[1]; *i = 2; }
+  return y;
+}
 
 INLINE GEN
 cgetg(long x, long y)
