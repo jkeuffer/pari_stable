@@ -2117,8 +2117,6 @@ GEN Fp_factor_rel(GEN P, GEN l, GEN Q)
 }
 
 /*******************************************************************/
-extern int ff_poltype(GEN *x, GEN *p, GEN *pol);
-
 static GEN
 to_intmod(GEN x, GEN p)
 {
