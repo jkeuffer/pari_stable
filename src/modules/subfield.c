@@ -835,6 +835,7 @@ ffinit(GEN p,long n,long v)
   GEN pol,fpol;
 
   if (n<=0) err(talker,"non positive degree in ffinit");
+  if (typ(p) != t_INT) err(typeer,"ffinit");
   if (is_bigint(p)) err(talker,"prime field too big in ffinit");
   if (v<0) v = 0;
   av=avma; pp=itos(p); pol = cgetg(n+3,t_POL);
