@@ -2258,14 +2258,8 @@ makecycgen(GEN bnf)
       if (y) { h[i] = (long)to_famat_all(y,gun); continue; }
     }
     y = isprincipalfact(bnf, gen, (GEN)D[i], NULL,
-                        nf_GEN|nf_GENMAT|nf_FORCE|nf_GIVEPREC);
-    if (typ(y) != t_INT)
-      h[i] = y[2];
-    else
-    {
-      y = idealpow(nf, (GEN)gen[i], (GEN)cyc[i]);
-      h[i] = isprincipalgenforce(bnf,y)[2];
-    }
+                        nf_GEN|nf_GENMAT|nf_FORCE);
+    h[i] = y[2];
   }
   return h;
 }
