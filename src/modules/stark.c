@@ -296,22 +296,19 @@ InitQuotient(GEN bnr, GEN C)
 }
 
 /* Let s: A -> B given by P, and let DA, DB be resp. the matrix of the
-   relations of A and B, let nbA, nbB be resp. the rank of A and B,
-   compute the kernel of s. If DA = 0 then A is free */
+   relations of A and B, compute the kernel of s. If DA = 0 then A is free */
 static GEN
-ComputeKernel0(GEN P, GEN DA, GEN DB, long nbA, long nbB)
+ComputeKernel0(GEN P, GEN DA, GEN DB)
 {
-  long rk, av = avma;
-  GEN herm, mask1, mask2, U;
+  ulong av = avma;
+  long nbA = lg(DA)-1, rk;
+  GEN herm, U;
 
   herm  = hnfall(concatsp(P, DB));
-  rk = nbA + nbB + 1;
-  rk -= lg((GEN)herm[1]); /* two steps: bug in pgcc 1.1.3 inlining (IS) */
-
-  mask1 = subis(shifti(gun, nbA), 1);
-  mask2 = subis(shifti(gun, rk), 1);
-
-  U = matextract((GEN)herm[2], mask1, mask2);
+  rk = nbA + lg(DB) - lg(herm[1]);
+  U = (GEN)herm[2];
+  U = vecextract_i(U, 1,rk);
+  U = rowextract_i(U, 1,nbA);
 
   if (!gcmp0(DA)) U = concatsp(U, DA);
   return gerepileupto(av, hnf(U));
@@ -319,26 +316,25 @@ ComputeKernel0(GEN P, GEN DA, GEN DB, long nbA, long nbB)
 
 /* Let m and n be two moduli such that n|m and let C be a congruence
    group modulo n, compute the corresponding congruence group modulo m
-   ie then kernel of the map Clk(m) ->> Clk(n)/C */
+   ie the kernel of the map Clk(m) ->> Clk(n)/C */
 static GEN
 ComputeKernel(GEN bnrm, GEN dataC)
 {
-  long av = avma, i, nbm, nbq;
+  long av = avma, i, nbm;
   GEN bnrn, Mrm, genm, Mrq, mgq, P;
 
   bnrn = (GEN)dataC[1];
   Mrm  = diagonal(gmael(bnrm, 5, 2));
+  Mrq  = diagonal(gmael(dataC, 2, 2));
   genm = gmael(bnrm, 5, 3);
   nbm  = lg(genm) - 1;
-  Mrq  = diagonal(gmael(dataC, 2, 2));
   mgq  = gmael(dataC, 2, 3);
-  nbq  = lg(mgq) - 1;
 
   P = cgetg(nbm + 1, t_MAT);
   for (i = 1; i <= nbm; i++)
     P[i] = lmul(mgq, isprincipalray(bnrn, (GEN)genm[i]));
 
-  return gerepileupto(av, ComputeKernel0(P, Mrm, Mrq, nbm, nbq));
+  return gerepileupto(av, ComputeKernel0(P, Mrm, Mrq));
 }
 
 /* Let C a congruence group in bnr, compute its subgroups of index 2 as
@@ -346,30 +342,24 @@ ComputeKernel(GEN bnrm, GEN dataC)
 static GEN
 ComputeIndex2Subgroup(GEN bnr, GEN C)
 {
-  long nb, i, l, av = avma;
-  GEN snf, Mr, U, CU, subgrp, rep, p1;
+  ulong av = avma;
+  long nb, i;
+  GEN snf, Mr, U, CU, subgrp;
 
   disable_dbg(0); 
 
   Mr = diagonal(gmael(bnr, 5, 2));
-  snf = smith2(gmul(ginv(C), Mr));
-
+  snf = smith2(gauss(C, Mr));
   U = ginv((GEN)snf[1]);
-  l = lg((GEN)snf[3]);
+  CU = gmul(C,U);
+  subgrp  = subgrouplist((GEN)snf[3], gdeux);
+  nb = lg(subgrp) - 1;
 
-  p1 = cgetg(l, t_VEC);
-  for (i = 1; i < l; i++)
-    p1[i] = mael3(snf, 3, i, i);
-
-  subgrp  = subgrouplist(p1, gdeux);
-  nb = lg(subgrp) - 1; CU = gmul(C,U);
-
-  rep = cgetg(nb, t_VEC);
   for (i = 1; i < nb; i++) /* skip Id which comes last */
-    rep[i] = (long)hnf(concatsp(gmul(CU, (GEN)subgrp[i]), Mr));
+    subgrp[i] = (long)hnf(concatsp(gmul(CU, (GEN)subgrp[i]), Mr));
 
   disable_dbg(-1); 
-  return gerepilecopy(av, rep);
+  return gerepilecopy(av, subgrp);
 }
 
 /* Let pr be a prime (pr may divide mod(bnr)), compute the indexes
@@ -568,65 +558,60 @@ FindModulus(GEN dataC, long fl, long *newprec, long prec, long bnd)
 	  bnrm = buchrayinitgen(bnf, m);
 	  p1   = conductor(bnrm, gzero, -1);
 	  disable_dbg(-1);
-	  if (signe(p1))
-	  {
-	    /* compute Im(C) in Clk(m)... */
-	    ImC = ComputeKernel(bnrm, dataC);
-
-	    /* ... and its subgroups of index 2 */
-	    candD  = ComputeIndex2Subgroup(bnrm, ImC);
-	    nbcand = lg(candD) - 1;
-	    for (c = 1; c <= nbcand; c++)
-	    {
-	      /* check if m is the conductor */
-	      D  = (GEN)candD[c];
-	      disable_dbg(0);
-	      p1 = conductor(bnrm, D, -1);
-	      disable_dbg(-1);
-	      if (signe(p1))
-	      {
-		/* check the splitting of primes */
-		for (j = 1; j <= nbp; j++)
-		{
-		  p1 = GetIndex((GEN)bpr[j], bnrm, D);
-		  p1 = mulii((GEN)p1[1], (GEN)p1[2]);
-		  if (egalii(p1, (GEN)indpr[j])) break; /* no good */
-		}
-                if (j > nbp)
-                {
-		  p2 = cgetg(6, t_VEC);
-
-		  p2[1] = lcopy(bnrm);
-                  p2[2] = lcopy(D);
-                  p2[3] = (long)InitQuotient((GEN)p2[1], (GEN)p2[2]);
-                  p2[4] = (long)InitQuotient((GEN)p2[1], ImC);
-
-		  p1 = CplxModulus(p2, &pr, prec);
-
-		  if (first == 1 || gcmp(p1, (GEN)rep[5]) < 0)
-		  {
-		    *newprec = pr;
-		    for (j = 1; j <= 4; j++) rep[j] = p2[j];
-		    rep[5] = (long)p1;
-		  }
-
-		  if (!fl || (gcmp(p1, rb) < 0))
-		  {
-		    rep[5] = (long)InitChar0((GEN)rep[3], *newprec);
-		    return gerepilecopy(av, rep);
-		  }
-		  if (DEBUGLEVEL >= 2)
-		    fprintferr("Trying to find another modulus...");
-		  first--;
-                }
-	      }
-	    }
-	  }
           arch[N+1-s] = un;
+	  if (!signe(p1)) continue;
+         
+          /* compute Im(C) in Clk(m)... */
+          ImC = ComputeKernel(bnrm, dataC);
+
+          /* ... and its subgroups of index 2 */
+          candD  = ComputeIndex2Subgroup(bnrm, ImC);
+          nbcand = lg(candD) - 1;
+          for (c = 1; c <= nbcand; c++)
+          {
+            /* check if m is the conductor */
+            D  = (GEN)candD[c];
+            disable_dbg(0);
+            p1 = conductor(bnrm, D, -1);
+            disable_dbg(-1);
+            if (!signe(p1)) continue;
+           
+            /* check the splitting of primes */
+            for (j = 1; j <= nbp; j++)
+            {
+              p1 = GetIndex((GEN)bpr[j], bnrm, D);
+              p1 = mulii((GEN)p1[1], (GEN)p1[2]);
+              if (egalii(p1, (GEN)indpr[j])) break; /* no good */
+            }
+            if (j <= nbp) continue;
+           
+            p2 = cgetg(6, t_VEC);
+            p2[1] = lcopy(bnrm);
+            p2[2] = lcopy(D);
+            p2[3] = (long)InitQuotient((GEN)p2[1], (GEN)p2[2]);
+            p2[4] = (long)InitQuotient((GEN)p2[1], ImC);
+
+            p1 = CplxModulus(p2, &pr, prec);
+
+            if (first == 1 || gcmp(p1, (GEN)rep[5]) < 0)
+            {
+              *newprec = pr;
+              for (j = 1; j <= 4; j++) rep[j] = p2[j];
+              rep[5] = (long)p1;
+            }
+
+            if (!fl || (gcmp(p1, rb) < 0))
+            {
+              rep[5] = (long)InitChar0((GEN)rep[3], *newprec);
+              return gerepilecopy(av, rep);
+            }
+            if (DEBUGLEVEL>1) fprintferr("Trying to find another modulus...");
+            first--;
+          }
 	}
         if (first <= bnd)
 	{
-	  if (DEBUGLEVEL >= 2)
+	  if (DEBUGLEVEL>1)
 	    fprintferr("No, we're done!\nModulus = %Z and subgroup = %Z\n",  
 		       gmael3(rep, 1, 2, 1), rep[2]);
 	  rep[5] = (long)InitChar0((GEN)rep[3], *newprec);
