@@ -942,14 +942,22 @@ permtonum(GEN x)
 GEN
 RX_RXQ_compo(GEN f, GEN x, GEN T)
 {
-  pari_sp av = avma;
+  pari_sp av = avma, limit;
   long l;
   GEN y;
 
   if (typ(f) != t_POL) return gcopy(f);
   l = lg(f)-1; y = (GEN)f[l];
+  limit = stack_lim(av, 1);
   for (l--; l>=2; l--)
+  {
     y = gres(gadd(gmul(y,x), (GEN)f[l]), T);
+    if (low_stack(limit,stack_lim(av,1)))
+    {
+      if (DEBUGMEM > 1) err(warnmem, "RX_RXQ_compo");
+      y = gerepilecopy(av,y);
+    }
+  }
   return gerepileupto(av, y);
 }
 
