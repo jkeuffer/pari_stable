@@ -1029,13 +1029,14 @@ aprcl(GEN N)
     flaglp[p] = (powuumod(smodis(N,q),p-1,q) != 1);
   }
   calcjac(et);
+  sgtaut = 0;
+  av = avma; l = lg(globfa);
   if (dotime)
   {
     sgtjac = timer2();
-    fprintferr("Jacobi sums and tables computed\nq-values: ");
+    fprintferr("Jacobi sums and tables computed\n");
+    fprintferr("q-values (# = %ld, largest = %Z): ", l-1, globfa[l-1]);
   }
-  sgtaut = 0;
-  av = avma; l = lg(globfa);
   for (i=1; i<l; i++)
   {
     avma = av;
