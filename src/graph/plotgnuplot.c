@@ -147,6 +147,7 @@ term_set(char *s)
   char *t, *size = NULL;
   double x, y;
 
+  setup_gpshim();
   if (*s == 0)
       s = pari_plot.name;
   t = s;

@@ -434,7 +434,7 @@ if test "$optimization" != profiling; then
   pth=$libpth
 #   LIB: gnuplot
   opth="$pth"
-  pth="$TOP/gnuplot-$osname-$arch $TOP/gnuplot $pth"
+  pth="$TOP/gnuplot-$osname-$arch $TOP/gnuplot $TOP/../gnuplot-$osname-$arch $TOP/../gnuplot $TOP/../../gnuplot-$osname-$arch $TOP/../../gnuplot $pth"
   gpth="$pth"
   lib=gnuplot; . ./locatelib
   pth="$opth"
@@ -463,6 +463,8 @@ if test "$optimization" != profiling; then
 	    echo "###"
 	    echo "### Could not find gnuplot library in:"
 	    echo "###   ./gnuplot-$osname-$arch ./gnuplot"
+	    echo "###   ../gnuplot-$osname-$arch ../gnuplot"
+	    echo "###   ../../gnuplot-$osname-$arch ../../gnuplot"
 	    echo "###   $pth"
 	    echo "###"
 	    case "$osname" in
@@ -473,6 +475,7 @@ if test "$optimization" != profiling; then
 	    echo "###   ar cr $tlib version.o util.o term.o bitmap.o stdfn.o"
 	    echo "### In the build directory of gnuplot-3.7, and move"
 	    echo "### $tlib to ./gnuplot-$osname-$arch or ./gnuplot subdirs"
+	    echo "### or to similarly-named directories up the directory tree." 
 	    echo "###"
 	fi
 	;;
