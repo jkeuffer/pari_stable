@@ -2567,7 +2567,7 @@ GEN
 extendedgcd(GEN A)
 {
   long m1 = 1, n1 = 1; /* alpha = m1/n1. Maybe 3/4 here ? */
-  long av = avma, do_swap,i,j,n,k;
+  long av = avma, do_swap,i,n,k;
   GEN z,B, **lambda, *D;
 
   n = lg(A);
