@@ -63,6 +63,7 @@ HC 24- Corrected p-adic initell.
    26- possible overflow in u_FpM_gauss (from ZM_inv)
    27- various problems with C++ compilers
    28- polredabs could fail to reduce "obvious" input, e.g x^2 + n*x + n^2
+   29- nfgcd(x,y,1) didn't check its arguments
 
   Changed
 BA  1- improved Fp_isom
@@ -80,6 +81,7 @@ BA 11- new interface for galoissubcyclo
 HC 12- gamma function for integral/rational arguments
    13- faster factornf / nfgcd
    14- removed readline-specific code from gp.c
+   15- allow bnrstark over Q
 
   Added
     1- mplog2() function --> faster mplog()
