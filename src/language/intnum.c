@@ -348,8 +348,8 @@ divr2_ip(GEN x) { setexpo(x, expo(x)-1); return x; }
 static GEN
 inittanhsinh(long m, long prec)
 {
-  pari_sp ltop = avma;
-  GEN h, et, ct, st, ext, ex;
+  pari_sp av, ltop = avma;
+  GEN h, et, ct, st, ext, ex, xp, wp;
   long k, nt = -1, lim;
   intdata D; intinit_start(&D, m, 0, prec);
 
@@ -357,17 +357,19 @@ inittanhsinh(long m, long prec)
   D.tabx0 = realzero(prec);
   D.tabw0 = divr2_ip(stor(3, prec));
   h = real2n(-D.m, prec);
-  ex = mpexp(h);
-  et = realun(prec);
+  et = ex = mpexp(h);
   for (k = 1; k <= lim; k++)
   {
-    et = mulrr(et, ex);
+    D.tabxp[k] = lgetr(prec+1);
+    D.tabwp[k] = lgetr(prec+1); av = avma;
     ct = divr2_ip(addrr(et, ginv(et)));
     st = subrr(et, ct);
     ext = divsr(2, addrs(mpexp(mulsr(3, st)), 1));
-    D.tabxp[k] = lsubsr(1, ext);
-    D.tabwp[k] = (long)divr2_ip(mulsr(3, mulrr(ct, mulrr(ext, addsr(1, (GEN)D.tabxp[k])))));
-    if (expo((GEN)D.tabwp[k]) < -D.eps) { nt = k-1; break; }
+    xp = subsr(1, ext);
+    wp = divr2_ip(mulsr(3, mulrr(ct, mulrr(ext, addsr(1, xp)))));
+    if (expo(wp) < -D.eps) { nt = k-1; break; }
+    affrr(xp, (GEN)D.tabxp[k]);
+    affrr(wp, (GEN)D.tabwp[k]); et = gerepileuptoleaf(av, mulrr(et, ex));
   }
   return gerepilecopy(ltop, intinit_end(&D, nt, 0));
 }
@@ -377,8 +379,8 @@ inittanhsinh(long m, long prec)
 static GEN
 initsinhsinh(long m, long prec)
 {
-  pari_sp ltop = avma;
-  GEN h, et, ct, st, ext, exu, ex;
+  pari_sp av, ltop = avma;
+  GEN h, et, ct, st, ext, exu, ex, xp, wp;
   long k, nt = -1, lim;
   intdata D; intinit_start(&D, m, 0, prec);
 
@@ -386,18 +388,20 @@ initsinhsinh(long m, long prec)
   D.tabx0 = realzero(prec);
   D.tabw0 = realun(prec);
   h = real2n(-D.m, prec);
-  ex = mpexp(h);
-  et = realun(prec);
+  et = ex = mpexp(h);
   for (k = 1; k <= lim; k++)
   {
-    et = mulrr(et, ex);
+    D.tabxp[k] = lgetr(prec+1);
+    D.tabwp[k] = lgetr(prec+1); av = avma;
     ct = divr2_ip(addrr(et, ginv(et)));
     st = subrr(et, ct);
     ext = mpexp(st);
     exu = ginv(ext);
-    D.tabxp[k] = lmul2n(subrr(ext, exu), -1);
-    D.tabwp[k] = lmul2n(mulrr(ct, addrr(ext, exu)), -1);
-    if (expo((GEN)D.tabwp[k]) - 2*expo((GEN)D.tabxp[k]) < -D.eps) { nt = k-1; break; }
+    xp = divr2_ip(subrr(ext, exu));
+    wp = divr2_ip(mulrr(ct, addrr(ext, exu)));
+    if (expo(wp) - 2*expo(xp) < -D.eps) { nt = k-1; break; }
+    affrr(xp, (GEN)D.tabxp[k]);
+    affrr(wp, (GEN)D.tabwp[k]); et = gerepileuptoleaf(av, mulrr(et, ex));
   }
   return gerepilecopy(ltop, intinit_end(&D, nt, 0));
 }
@@ -407,8 +411,8 @@ initsinhsinh(long m, long prec)
 static GEN
 initsinh(long m, long prec)
 {
-  pari_sp ltop = avma;
-  GEN h, et, ex, eti;
+  pari_sp av, ltop = avma;
+  GEN h, et, ex, eti, xp, wp;
   long k, nt = -1, lim;
   intdata D; intinit_start(&D, m, 0, prec);
 
@@ -416,16 +420,17 @@ initsinh(long m, long prec)
   D.tabx0 = realzero(prec);
   D.tabw0 = real2n(1, prec);
   h = real2n(-D.m, prec);
-  ex = mpexp(h);
-  et = realun(prec);
+  et = ex = mpexp(h);
   for (k = 1; k <= lim; k++)
   {
-    et = mulrr(et, ex);
+    D.tabxp[k] = lgetr(prec+1);
+    D.tabwp[k] = lgetr(prec+1); av = avma;
     eti = ginv(et);
-    D.tabxp[k] = lsubrr(et, eti);
-    D.tabwp[k] = laddrr(et, eti);
-    if (cmprs((GEN)D.tabxp[k], (long)(LOG2 * (expo((GEN)D.tabwp[k]) + D.eps) + 1)) > 0)
-      { nt = k-1; break; }
+    xp = subrr(et, eti);
+    wp = addrr(et, eti);
+    if (cmprs(xp, (long)(LOG2*(expo(wp)+D.eps) + 1)) > 0) { nt = k-1; break; }
+    affrr(xp, (GEN)D.tabxp[k]);
+    affrr(wp, (GEN)D.tabwp[k]); et = gerepileuptoleaf(av, mulrr(et, ex));
   }
   return gerepilecopy(ltop, intinit_end(&D, nt, 0));
 }
@@ -436,7 +441,7 @@ static GEN
 initexpsinh(long m, long prec)
 {
   pari_sp ltop = avma;
-  GEN h, et, eti, ex;
+  GEN h, et, eti, ex, xp;
   long k, nt = -1, lim;
   intdata D; intinit_start(&D, m, 0, prec);
 
@@ -451,11 +456,12 @@ initexpsinh(long m, long prec)
     GEN t;
     et = mulrr(et, ex);
     eti = ginv(et); t = addrr(et, eti);
-    D.tabxp[k] = (long)mpexp(subrr(et, eti));
-    D.tabwp[k] = (long)mulrr((GEN)D.tabxp[k], t);
-    D.tabxm[k] = linv((GEN)D.tabxp[k]);
+    xp = mpexp(subrr(et, eti));
+    D.tabxp[k] = (long)xp;
+    D.tabwp[k] = (long)mulrr(xp, t);
+    D.tabxm[k] = linv(xp);
     D.tabwm[k] = (long)mulrr((GEN)D.tabxm[k], t);
-    if (expo((GEN)D.tabxm[k]) < -D.eps) { nt = k-1; break; }
+    if (expo(D.tabxm[k]) < -D.eps) { nt = k-1; break; }
   }
   return gerepilecopy(ltop, intinit_end(&D, nt, nt));
 }
@@ -464,8 +470,8 @@ initexpsinh(long m, long prec)
 static GEN
 initexpexp(long m, long prec)
 {
-  pari_sp ltop = avma;
-  GEN kh, h, et, eti, ex;
+  pari_sp av, ltop = avma;
+  GEN kh, h, et, eti, ex, xp, xm, wp, wm;
   long k, nt = -1, lim;
   intdata D; intinit_start(&D, m, 0, prec);
 
@@ -473,17 +479,23 @@ initexpexp(long m, long prec)
   D.tabx0 = mpexp(realmun(prec));
   D.tabw0 = gmul2n(D.tabx0, 1);
   h = real2n(-D.m, prec);
-  ex = mpexp(negr(h));
-  et = realun(prec);
+  et = ex = mpexp(negr(h));
   for (k = 1; k <= lim; k++)
   {
-    et = mulrr(et, ex); /* exp(-kh) */
+    D.tabxp[k] = lgetr(prec+1);
+    D.tabwp[k] = lgetr(prec+1);
+    D.tabxm[k] = lgetr(prec+1);
+    D.tabwm[k] = lgetr(prec+1); av = avma;
     eti = ginv(et); kh = mulsr(k,h);
-    D.tabxp[k] = (long)mpexp(subrr(kh, et));
-    D.tabwp[k] = (long)mulrr((GEN)D.tabxp[k], addsr(1, et));
-    D.tabxm[k] = (long)mpexp(negr(addrr(kh, eti)));
-    D.tabwm[k] = (long)mulrr((GEN)D.tabxm[k], addsr(1, eti));
-    if (expo((GEN)D.tabxm[k]) < -D.eps && cmprs((GEN)D.tabxp[k], (long)(LOG2 * (expo((GEN)D.tabwp[k]) + D.eps) + 1)) > 0) { nt = k-1; break; }
+    xp = mpexp(subrr(kh, et));
+    xm = mpexp(negr(addrr(kh, eti)));
+    wp = mulrr(xp, addsr(1, et));
+    wm = mulrr(xm, addsr(1, eti));
+    if (expo(xm) < -D.eps && cmprs(xp, (long)(LOG2*(expo(wp)+D.eps) + 1)) > 0) { nt = k-1; break; }
+    affrr(xp, (GEN)D.tabxp[k]);
+    affrr(wp, (GEN)D.tabwp[k]);
+    affrr(xm, (GEN)D.tabxm[k]);
+    affrr(wm, (GEN)D.tabwm[k]); et = gerepileuptoleaf(av, mulrr(et, ex));
   }
   return gerepilecopy(ltop, intinit_end(&D, nt, nt));
 }
@@ -492,9 +504,9 @@ initexpexp(long m, long prec)
 static GEN
 initnumsine(long m, long prec)
 {
-  pari_sp ltop = avma;
+  pari_sp av, ltop = avma;
   GEN h, et, eti, ex, st, ct, extp, extm, extp1, extm1, extp2, extm2, kpi, kct;
-  GEN pi = mppi(prec);
+  GEN xp, xm, wp, wm, pi = mppi(prec);
   long k, nt = -1, lim;
   intdata D; intinit_start(&D, m, 0, prec);
 
@@ -502,25 +514,31 @@ initnumsine(long m, long prec)
   D.tabx0 = gmul2n(pi, D.m);
   D.tabw0 = gmul2n(pi, D.m - 1);
   h = real2n(-D.m, prec);
-  ex = mpexp(h);
-  et = realun(prec);
+  et = ex = mpexp(h);
   for (k = 1; k <= lim; k++)
   {
-    et = mulrr(et, ex); /* exp(kh) */
-    eti = ginv(et);     /* exp(-kh) */
-    ct = divr2_ip(addrr(et, eti)); /* ch(kh) */
-    st = divr2_ip(subrr(et, eti)); /* sh(kh) */
+    D.tabxp[k] = lgetr(prec+1);
+    D.tabwp[k] = lgetr(prec+1);
+    D.tabxm[k] = lgetr(prec+1);
+    D.tabwm[k] = lgetr(prec+1); av = avma;
+    eti = ginv(et); /* exp(-kh) */
+    ct = divr2_ip(addrr(et, eti));
+    st = divr2_ip(subrr(et, eti));
     extp = mpexp(st);  extp1 = subsr(1, extp); extp2 = ginv(extp1);
     extm = ginv(extp); extm1 = subsr(1, extm); extm2 = ginv(extm1);
     kpi = mulsr(k, pi);
     kct = mulsr(k, ct);
     setexpo(extm1, expo(extm1) + D.m);
     setexpo(extp1, expo(extp1) + D.m);
-    D.tabxp[k] = (long)mulrr(kpi, extm2);
-    D.tabwp[k] = (long)mulrr(subrr(extm1, mulrr(kct, extm)), mulrr(pi, gsqr(extm2)));
-    D.tabxm[k] = (long)mulrr(negr(kpi), extp2);
-    D.tabwm[k] = (long)mulrr(addrr(extp1, mulrr(kct, extp)), mulrr(pi, gsqr(extp2)));
-    if (expo((GEN)D.tabwm[k]) < -D.eps && expo(extm) + D.m + expi(stoi(10 * k)) < -D.eps) { nt = k-1; break; }
+    xp = mulrr(kpi, extm2);
+    wp = mulrr(subrr(extm1, mulrr(kct, extm)), mulrr(pi, gsqr(extm2)));
+    xm = mulrr(negr(kpi), extp2);
+    wm = mulrr(addrr(extp1, mulrr(kct, extp)), mulrr(pi, gsqr(extp2)));
+    if (expo(wm) < -D.eps && expo(extm) + D.m + expi(stoi(10 * k)) < -D.eps) { nt = k-1; break; }
+    affrr(xp, (GEN)D.tabxp[k]);
+    affrr(wp, (GEN)D.tabwp[k]);
+    affrr(xm, (GEN)D.tabxm[k]);
+    affrr(wm, (GEN)D.tabwm[k]); et = gerepileuptoleaf(av, mulrr(et, ex));
   }
   return gerepilecopy(ltop, intinit_end(&D, nt, nt));
 }
@@ -556,7 +574,7 @@ sumnuminit(GEN sig, long m, long sgn, long prec)
   b = suminit_start(sig);
   flii = gcmp0((GEN)b[2]);
   if (flii)
-    tab = intnuminit(gneg((GEN)b[1]), (GEN)b[1], m, prec);
+    tab = intnuminit(mkvec(negi(gun)), mkvec(gun), m, prec);
   else
     tab = intnuminit(gzero, b, m, prec);
   eps = bit_accuracy(prec);
@@ -628,8 +646,8 @@ intn(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
   for (k = 1; k <= m; k++)
   {
     long pas = 1<<(m-k);
-    for (i = 0; i < L; i += pas)
-      if (i % (pas + pas) || (k == 1 && i))
+    for (i = pas; i < L; i += pas)
+      if (i & pas || k == 1)
       {
 	bmb = gmul(bma, (GEN)tabxp[i]);
 	SP = eval(gsub(bpa, bmb), E);
@@ -666,8 +684,8 @@ intnsing(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
   for (k = 1; k <= m; k++)
   {
     long pas = 1<<(m-k);
-    for (i = 0; i < L; i += pas)
-      if (i % (pas + pas) || ((k == 1) && i))
+    for (i = pas; i < L; i += pas)
+      if (i & pas || k == 1) /* i = odd multiple of pas = 2^(m-k) */
       {
         GEN p = gaddsg(1, (GEN)tabxp[i]);
         GEN m = gsubsg(1, (GEN)tabxp[i]);
@@ -706,8 +724,8 @@ intninfpm(void *E, GEN (*eval)(GEN, void*), GEN a, long si, GEN tab, long prec)
   for (k = 1; k <= m; k++)
   {
     h++; pas = 1<<(m-k);
-    for (i = 0; i < L; i += pas)
-      if (i % (pas + pas) || ((k == 1) && i))
+    for (i = pas; i < L; i += pas)
+      if (i & pas || k == 1)
       {
 	SP = eval(gadd(a, (GEN)tabxp[i]), E);
 	SM = eval(gadd(a, (GEN)tabxm[i]), E);
@@ -743,8 +761,8 @@ intninfinfintern(void *E, GEN (*eval)(GEN, void*), GEN tab, long flag, long prec
   for (k = 1; k <= m; k++)
   {
     long pas = 1<<(m-k);
-    for (i = 0; i < L; i += pas)
-      if (i % (pas + pas) || ((k == 1) && i))
+    for (i = pas; i < L; i += pas)
+      if (i & pas || k == 1)
       {
 	SP = eval((GEN)tabxp[i], E);
 	if (spf) S = gadd(S, real_i(gmul((GEN)tabwp[i], SP)));
@@ -868,13 +886,11 @@ homtab(GEN tab, GEN k)
 }
 
 static GEN
-expscal(GEN v, GEN ea, long prec) { return gpow(v, ea, prec); }
-static GEN
 expvec(GEN v, GEN ea, long prec)
 {
   long lv = lg(v), i;
   GEN z = cgetg(lv, t_VEC);
-  for (i = 1; i < lv; i++) z[i] = (long)expscal((GEN)v[i],ea,prec);
+  for (i = 1; i < lv; i++) z[i] = lpow((GEN)v[i],ea,prec);
   return z;
 }
 
@@ -904,7 +920,7 @@ exptab(GEN tab, GEN k, long prec)
   ea = ginv(gsubsg(-1, k));
   v = cgetg(8, t_VEC);
   TABm(v) = icopy(TABm(tab));
-  TABx0(v) = expscal(TABx0(tab), ea, prec);
+  TABx0(v) = gpow(TABx0(tab), ea, prec);
   TABw0(v) = expscalpr(TABx0(v), TABx0(tab), TABw0(tab), ea);
   TABxp(v) = expvec(TABxp(tab), ea, prec);
   TABwp(v) = expvecpr(TABxp(v), TABxp(tab), TABwp(tab), ea);
