@@ -20,7 +20,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*******************************************************************/
 BEGINEXTERN
 /* Flx.c */
-
 GEN     Fl_Flx(ulong x, long sv);
 GEN     Flm_FlxV(GEN x, long sv);
 GEN     Flm_ZM(GEN z);
@@ -163,6 +162,7 @@ GEN     sum(GEN v, long a, long b);
 GEN     suppl(GEN x);
 GEN     vconcat(GEN A, GEN B);
 GEN     vec_ei(long n, long i);
+GEN     vec_Cei(long n, long i, GEN c);
 GEN     vecextract_i(GEN A, long y1, long y2);
 GEN     vecextract_ip(GEN A, GEN p, long y1, long y2);
 GEN     vecextract_p(GEN A, GEN p);

@@ -2324,17 +2324,21 @@ hnf0(GEN A, int remove)
 GEN
 hnf(GEN x) { return hnf0(x,1); }
 
-#define MOD  1
-#define PART 2
+enum { hnf_MOD = 1, hnf_PART = 2 };
 
-/* u*c[1..k] mod b */
-static GEN
-update_up(GEN c, GEN u, GEN b, long k)
+/* u*z[1..k] mod b, in place */
+static void
+FpV_Fp_mul_part_ip(GEN z, GEN u, GEN p, long k)
 {
   long i;
   for (i = 1; i <= k; i++) 
-    if (signe(c[i])) c[i] = lmodii(mulii(u,(GEN)c[i]), b);
-  return c;
+    if (signe(z[i])) z[i] = lmodii(mulii(u,(GEN)z[i]), p);
+}
+static void
+FpV_red_part_ip(GEN z, GEN p, long k)
+{
+  long i;
+  for (i = 1; i <= k; i++) z[i] = lmodii((GEN)z[i], p);
 }
 /* dm = multiple of diag element (usually detint(x)) */
 /* flag & MOD:     don't/do append dm*matid. */
@@ -2343,8 +2347,9 @@ static GEN
 allhnfmod(GEN x, GEN dm, int flag)
 {
   pari_sp av, lim;
-  long li,co,i,j,k,def,ldef,ldm;
-  GEN a,b,w,p1,p2,d,u,v;
+  const int modid = ((flag & hnf_MOD) == 0);
+  long li, co, i, j, k, def, ldef, ldm;
+  GEN a, b, w, p1, p2, u, v, DONE = NULL;
 
   if (typ(dm)!=t_INT) err(typeer,"allhnfmod");
   if (!signe(dm)) return hnf(x);
@@ -2352,6 +2357,7 @@ allhnfmod(GEN x, GEN dm, int flag)
 
   co = lg(x); if (co == 1) return cgetg(1,t_MAT);
   li = lg(x[1]);
+  if (modid) DONE = vecsmall_const(li - 1, 0);
   av = avma; lim = stack_lim(av,1);
   x = dummycopy(x);
 
@@ -2359,10 +2365,10 @@ allhnfmod(GEN x, GEN dm, int flag)
   if (li > co)
   {
     ldef = li - co;
-    if (flag & MOD) err(talker,"nb lines > nb columns in hnfmod");
+    if (!modid) err(talker,"nb lines > nb columns in hnfmod");
   }
-  /* Avoid wasteful divisions. we only want to prevent coeff explosion, so
-   * only reduce mod dm when lg(coeff) > ldm */
+  /* Avoid wasteful divisions. To prevent coeff explosion, only reduce mod dm
+   * when lg(coeff) > ldm */
   ldm = lgefint(dm);
   for (def = co-1,i = li-1; i > ldef; i--,def--)
   {
@@ -2389,30 +2395,64 @@ allhnfmod(GEN x, GEN dm, int flag)
 	x = gerepilecopy(av, x);
       }
     }
-    if ((flag&MOD)==0 && !signe(coeff(x,i,def)))
+    if (modid && !signe(coeff(x,i,def)))
     { /* missing pivot on line i, insert column */
       GEN a = cgetg(co + 1, t_MAT);
       for (k = 1; k <= def; k++) a[k] = x[k];
       a[k++] = (long)vec_Cei(li-1, i, dm);
       for (     ; k <= co;  k++) a[k] = x[k-1];
       ldef--; if (ldef < 0) ldef = 0;
-      co++; def++; x = a;
+      co++; def++; x = a; DONE[i] = 1;
     }
   }
-  w = cgetg(li,t_MAT); b = dm;
+  w = cgetg(modid? li+1: li, t_MAT); b = dm;
   for (def = co-1,i = li-1; i > ldef; i--,def--)
   {
-    d = bezout(gcoeff(x,i,def),b,&u,&v);
-    w[i] = (long)update_up((GEN)x[def], u, b, i-1);
+    GEN d = bezout(gcoeff(x,i,def),b,&u,&v);
+    w[i] = x[def];
+    FpV_Fp_mul_part_ip((GEN)w[i], u, b, i-1);
     coeff(w,i,i) = (long)d;
-    if ((flag & MOD) && i > 1) b = diviiexact(b,d);
+    if (!modid && i > 1) b = diviiexact(b,d);
   }
-  for (i = 1; i <= ldef; i++) w[i] = (long)vec_Cei(li-1, i, dm);
-  if (flag & PART) return w;
+  for (i = 1; i <= ldef; i++){ w[i] = (long)vec_Cei(li-1, i, dm); DONE[i] = 1; }
+  if (modid)
+  { /* w[li] is an accumulator, discarded at the end */
+    for (i = li-1; i > 1; i--)
+    { /* add up the missing dm*Id components */
+      GEN d, c;
+      if (DONE[i]) continue;
+      d = gcoeff(w,i,i); if (is_pm1(d)) continue;
 
-  /* compute optimal value for dm */
-  dm = gcoeff(w,1,1);
-  for (i = 2; i < li; i++) dm = mpppcm(dm, gcoeff(w,i,i));
+      c = cgetg(li, t_COL);
+      for (j = 1; j < i; j++) c[j] = lresii(gcoeff(w,j,i),d);
+      for (     ; j <li; j++) c[j] = zero;
+      if (!egalii(dm,d)) c = gmul(diviiexact(dm,d), c);
+      w[li] = (long)c;
+      for (j = i - 1; j > 0; j--)
+      {
+        GEN a = gcoeff(w, j, li);
+        if (!signe(a)) continue;
+        ZV_elem(a, gcoeff(w,j,j), w, NULL, li,j);
+        FpV_red_part_ip((GEN)w[li], dm, j-1);
+        FpV_red_part_ip((GEN)w[j],  dm, j-1);
+      }
+    }
+    setlg(w, li);
+    for (i = li-1; i > 0; i--)
+    {
+      GEN d = bezout(gcoeff(w,i,i),dm,&u,&v);
+      FpV_Fp_mul_part_ip((GEN)w[i], u, dm, i-1);
+      coeff(w,i,i) = (long)d;
+    }
+  }
+  if (flag & hnf_PART) return w;
+
+  if (!modid)
+  { /* compute optimal value for dm */
+    dm = gcoeff(w,1,1);
+    for (i = 2; i < li; i++) dm = mpppcm(dm, gcoeff(w,i,i));
+  }
+
   ldm = lgefint(dm);
   for (i = li-2; i > 0; i--)
   {
@@ -2435,15 +2475,13 @@ allhnfmod(GEN x, GEN dm, int flag)
 }
 
 GEN
-hnfmod(GEN x, GEN detmat) { return allhnfmod(x,detmat, MOD); }
+hnfmod(GEN x, GEN detmat) { return allhnfmod(x,detmat, hnf_MOD); }
 
 GEN
 hnfmodid(GEN x, GEN p) { return allhnfmod(x, p, 0); }
 
 GEN
-hnfmodidpart(GEN x, GEN p) { return allhnfmod(x, p, PART); }
-#undef MOD
-#undef PART
+hnfmodidpart(GEN x, GEN p) { return allhnfmod(x, p, hnf_PART); }
 
 /***********************************************************************/
 /*                                                                     */
