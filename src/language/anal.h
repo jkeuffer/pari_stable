@@ -39,10 +39,11 @@ typedef struct GENbin {
   size_t len; /* taille(x) */
   GEN x; /* binary copy of x */
   GEN base; /* base address of p->x */
+  int canon; /* 1: t_INT in canonical (native kernel) form,
+                0: t_INT according to current kernel */
 } GENbin;
 #define GENbase(p) ((GEN)p+3)
 
-void shiftaddress(GEN x, long dec);
 GENbin* copy_bin(GEN x);
 GEN bin_copy(GENbin *p);
 

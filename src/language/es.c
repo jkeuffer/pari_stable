@@ -2981,6 +2981,7 @@ switchout(char *name)
 /**                    I/O IN BINARY FORM                         **/
 /**                                                               **/
 /*******************************************************************/
+extern GENbin* copy_bin_canon(GEN x);
 #define _fwrite(a,b,c,d) \
   if (fwrite((a),(b),(c),(d)) < (c)) err(talker,"write failed")
 #define _fread(a,b,c,d) \
@@ -3009,7 +3010,7 @@ wr_long(long L, FILE *f)
 static void
 wrGEN(GEN x, FILE *f)
 {
-  GENbin *p = copy_bin(x);
+  GENbin *p = copy_bin_canon(x);
   size_t L = p->len;
 
   wr_long(L,f);
