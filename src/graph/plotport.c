@@ -7,11 +7,11 @@
 #include "pari.h"
 #include "rect.h"
 
-void push_val(entree *ep, GEN a);
-void pop_val(entree *ep);
-void postdraw0(long *w, long *x, long *y, long lw);
-void postdraw00(long *w, long *x, long *y, long lw, long scale);
-void rectdraw0(long *w, long *x, long *y, long lw, long do_free);
+extern void push_val(entree *ep, GEN a);
+extern void pop_val(entree *ep);
+extern void postdraw0(long *w, long *x, long *y, long lw);
+extern void postdraw00(long *w, long *x, long *y, long lw, long scale);
+extern void rectdraw0(long *w, long *x, long *y, long lw, long do_free);
 static void PARI_get_psplot();
 
 static long current_color[NUMRECT];
@@ -1504,7 +1504,7 @@ rectplothin(entree *ep, GEN a, GEN b, char *ch, long prec, ulong flags,
   return pl;
 }
 
-GEN polint_i(GEN xa, GEN ya, GEN x, long n, GEN *ptdy);
+extern GEN polint_i(GEN xa, GEN ya, GEN x, long n, GEN *ptdy);
 
 /* Uses highlevel plotting functions to implement splines as
    a low-level plotting function.

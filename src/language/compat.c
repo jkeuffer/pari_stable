@@ -1,6 +1,6 @@
 /* $Id$ */
 #include "pari.h"
-GEN geni(void);
+extern GEN geni(void);
 
 static GEN
 prod0(GEN x, entree *ep, GEN a, GEN b, char *ch) {return produit(ep,a,b,ch,x);}

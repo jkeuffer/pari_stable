@@ -6,8 +6,8 @@
 /* $Id$ */
 #include "pari.h"
 #include "anal.h"
-GEN confrac(GEN x); /* should be static here, but use hiremainder */
-GEN convi(GEN x);
+extern GEN confrac(GEN x); /* should be static here, but use hiremainder */
+extern GEN convi(GEN x);
 static void bruti(GEN g, long n);
 static void texi(GEN g, long nosign);
 static void sori(GEN g);

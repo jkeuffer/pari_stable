@@ -8,7 +8,7 @@
 #include "rect.h"
 #include "../language/anal.h"
 
-void  free_graph(void);
+extern void  free_graph(void);
 
 #ifdef HPPA
 #  ifndef __GNUC__

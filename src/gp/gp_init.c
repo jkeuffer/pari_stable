@@ -7,21 +7,21 @@
 #include "pari.h"
 #include "../graph/rect.h"
 
-void  addhelp(entree *ep, char *s);
-void  allocatemem0(unsigned long newsize);
-GEN   default0(char *a, char *b, long flag);
-void  error0(GEN *g);
-GEN   extern0(char *cmd);
-void  gp_quit(void);
-GEN   input0();
-void  kill0(entree *ep);
-void  print0(GEN *g,long flag);
-GEN   read0(char *s);
-long  setprecr(long n);
-void  system0(char *cmd);
-GEN   trap0(char *e, char *f, char *r);
-int   whatnow(char *s, int silent);
-void  write0(char *s, GEN *g, long flag);
+extern void  addhelp(entree *ep, char *s);
+extern void  allocatemem0(unsigned long newsize);
+extern GEN   default0(char *a, char *b, long flag);
+extern void  error0(GEN *g);
+extern GEN   extern0(char *cmd);
+extern void  gp_quit(void);
+extern GEN   input0();
+extern void  kill0(entree *ep);
+extern void  print0(GEN *g,long flag);
+extern GEN   read0(char *s);
+extern long  setprecr(long n);
+extern void  system0(char *cmd);
+extern GEN   trap0(char *e, char *f, char *r);
+extern int   whatnow(char *s, int silent);
+extern void  write0(char *s, GEN *g, long flag);
 
 static void
 whatnow0(char *s) { whatnow(s,0); }
