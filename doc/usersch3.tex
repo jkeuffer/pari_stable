@@ -3662,7 +3662,25 @@ the main variable of $t$. For example
 
 \syn{polfnf}{x,t}.
 
-\subsecidx{galoisfixedfield}$(\var{gal},\var{perm},\{fl=0\},\{v=y\}))$:
+\subsecidx{galoisexport}$(\var{gal},\{\fl=0\})))$:
+\var{gal} being be a Galois field as output by \tet{galoisinit},
+export the underlying permutation group as a string suitable
+for (no flags or $\fl=0$) GAP or ($\fl=1$) Magma.
+
+The following example compute the index of the underlying abstract
+group in the GAP library:
+
+\bprog
+? G=galoisinit(x^6+108);
+? s=galoisexport(G)
+%2 = "Group((1, 2, 3)(4, 5, 6), (1, 4)(2, 6)(3, 5))"
+? extern("echo \"IdGroup("s");\"| gap -q")
+%3 = [6, 1]
+@eprog
+
+\syn{galoisexport}{\var{gal},\fl}.
+
+\subsecidx{galoisfixedfield}$(\var{gal},\var{perm},\{\fl=0\},\{v=y\}))$:
 \var{gal} being be a Galois field as output by \tet{galoisinit} and
 \var{perm} an element of $\var{gal}.group$ or a vector of such elements,
 computes the fixed field of \var{gal} by the automorphism defined by the
@@ -3688,7 +3706,7 @@ galoisfixedfield(G,G.group[2],2)
 @eprog
 computes the factorization  $x^4+1=(x^2-\sqrt{-2}x-1)(x^2+\sqrt{-2}x-1)$
 
-\syn{galoisfixedfield}{\var{gal},\var{perm},p}.
+\syn{galoisfixedfield}{\var{gal},\var{perm},\fl,$v$}, where $v$ is a variable number, an omitted $v$ being coded by $-1$.
 
 \subsecidx{galoisinit}$(\var{pol},\{den\})$: computes the Galois group
 and all necessary information for computing the fixed fields of the
@@ -3697,10 +3715,10 @@ $\var{pol}$ (monic irreducible polynomial in $\Z[X]$ or
 a number field as output by \tet{nfinit}). The extension $K/\Q$ must be
 Galois with Galois group ``weakly'' super-solvable (see \tet{nfgaloisconj})
 
-\misctitle{Warning:} The interface of this function is experimental,
-so the described output can be subject to important changes in the
-near future. However the function itself should work as described. For any
-remarks about this interface, please mail \kbd{allomber@math.u-bordeaux.fr}.
+%\misctitle{Warning:} The interface of this function is experimental,
+%so the described output can be subject to important changes in the
+%near future. However the function itself should work as described. For any
+%remarks about this interface, please mail \kbd{allomber@math.u-bordeaux.fr}.
 
 The output is an 8-component vector \var{gal}.
 
