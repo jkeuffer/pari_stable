@@ -35,8 +35,7 @@ refcard.ps: refcard.dvi
 users.dvi: users.tex appa.tex appb.tex appc.tex\\
  usersch1.tex usersch2.tex usersch3.tex usersch4.tex usersch5.tex\\
  paricfg.tex parimacro.tex
-	-rm -f $pdf
-	rm -f users.std; tex users;
+	-rm -f $pdf; rm -f users.std; tex users;
 	sed -e 's/!\([1-9]\)!/!00\1!/'\\
 	    -e 's/!\([1-9][0-9]\)!/!0\1!/'\\
 	    -e 's/\\\\EFF {}/f/g'\\
@@ -47,7 +46,7 @@ users.dvi: users.tex appa.tex appb.tex appc.tex\\
 users.pdf: users.tex appa.tex appb.tex appc.tex\\
  usersch1.tex usersch2.tex usersch3.tex usersch4.tex usersch5.tex\\
  paricfg.tex parimacro.tex
-	rm -f users.std; touch $pdf; pdftex users;
+	-rm -f users.std; touch $pdf; pdftex users;
 	sed -e 's/!\([1-9]\)!/!00\1!/'\\
 	    -e 's/!\([1-9][0-9]\)!/!0\1!/'\\
 	    -e 's/\\\\EFF {}/f/g'\\
@@ -76,7 +75,6 @@ veryclean: clean
 	ipfc /INF \$*.ipf
 
 # This is for testing:
-
 .pod.ipf:
 	pod2ipf \$*.pod > tmp_ipf && mv tmp_ipf \$*.ipf
 
@@ -84,10 +82,6 @@ pari.ipf:  refcard.pod tutorial.pod usersch1.pod usersch1.pod usersch2.pod users
 	pod2ipf --title="PARI/GP Manual" --by-files --section-name="Getting started" --file=refcard.pod --file=tutorial.pod --section-name="User guide" --file=usersch1.pod --file=usersch1.pod --file=usersch2.pod --file=usersch3.pod --file=usersch4.pod --file=usersch5.pod --section-name=Appendices --file=appa.pod --file=appb.pod --file=appc.pod > tmp_ipf && mv tmp_ipf pari.ipf
 
 dumbpod: appa.dumbpod appb.dumbpod appc.dumbpod usersch1.dumbpod usersch2.dumbpod usersch3.dumbpod usersch4.dumbpod usersch5.dumbpod
-
-# Wrong syntax...  How to convert a group of files?
-#pari.html:  refcard.dumbpod tutorial.dumbpod usersch1.dumbpod usersch1.dumbpod usersch2.dumbpod usersch3.dumbpod usersch4.dumbpod usersch5.dumbpod appa.dumbpod appb.dumbpod appc.dumbpod
-#	pod2html --title="PARI/GP Manual" --by-files --section-name="Getting started" --file=refcard.dumbpod --file=tutorial.dumbpod --section-name="User guide" --file=usersch1.dumbpod --file=usersch1.dumbpod --file=usersch2.dumbpod --file=usersch3.dumbpod --file=usersch4.dumbpod --file=usersch5.dumbpod --section-name=Appendices --file=appa.dumbpod --file=appb.dumbpod --file=appc.dumbpod > tmp_ipf && mv tmp_ipf pari.html
 
 .dumbpod.html:
 	pod2html --title="PARI/GP Manual, part \$*" --infile=\$*.dumbpod --outfile=tmp_html && mv tmp_html \$*.html
