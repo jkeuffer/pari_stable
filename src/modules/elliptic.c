@@ -2660,6 +2660,16 @@ ellintegralmodel(GEN e)
   v = init_ch(); v[1] = linv(u); return v;
 }
 
+static void
+standard_model(GEN e, GEN *pv)
+{
+  GEN r, s, t;
+  s = gdiventgs((GEN)e[1], -2);
+  r = gdiventgs(gaddgs(gsub(gsub((GEN)e[2], gmul(s,(GEN)e[1])), gsqr(s)), 1), -3);
+  t = gdiventgs(ellLHS0(e,r), -2);
+  cumule(pv, &e, gun, r, s, t);
+}
+
 GEN
 ellminimalmodel(GEN E, GEN *ptv)
 {
@@ -2680,7 +2690,7 @@ ellminimalmodel(GEN E, GEN *ptv)
     if (!gcmp1((GEN)w[1]))
       cumule(&v, &e, (GEN)w[1], (GEN)w[2], (GEN)w[3], (GEN)w[4]);
   }
-
+  standard_model(e, &v);
   e = coordch(E, v);
   if (ptv) { gerepileall(av, 2, &e, &v); *ptv = v; }
   else e = gerepileupto(av, e);
@@ -2700,7 +2710,7 @@ globalreduction(GEN E)
 {
   long k, l;
   gpmem_t av = avma;
-  GEN c, prims, result, N, r, s, t, v, e;
+  GEN c, prims, result, N, v, e;
 
   v = ellintegralmodel(E);
   e = ell_to_small(E);
@@ -2718,10 +2728,7 @@ globalreduction(GEN E)
     if (!gcmp1((GEN)w[1]))
       cumule(&v, &e, (GEN)w[1], (GEN)w[2], (GEN)w[3], (GEN)w[4]);
   }
-  s = gdiventgs((GEN)e[1], -2);
-  r = gdiventgs(gaddgs(gsub(gsub((GEN)e[2], gmul(s,(GEN)e[1])), gsqr(s)), 1), -3);
-  t = gdiventgs(ellLHS0(e,r), -2);
-  cumule(&v, &e, gun, r, s, t);
+  standard_model(e, &v);
   result = cgetg(4, t_VEC);
   result[1] = (long)N;
   result[2] = (long)v;
