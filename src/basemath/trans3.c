@@ -1925,7 +1925,7 @@ inteta(GEN q)
   y=gun; qn=gun; ps=gun;
   if (tx==t_PADIC)
   {
-    if (valp(q) <= 0) err(talker,"non-positive valuation in inteta");
+    if (valp(q) <= 0) err(talker,"non-positive valuation in eta");
     for(;;)
     {
       p1=gneg_i(gmul(ps,gmul(q,gsqr(qn))));
@@ -1942,7 +1942,7 @@ inteta(GEN q)
     else
     {
       v = gvar(q); l = lg(q)-2; tx = 0;
-      if (valp(q) <= 0) err(talker,"non-positive valuation in inteta");
+      if (valp(q) <= 0) err(talker,"non-positive valuation in eta");
     }
     for(;;)
     {
@@ -1958,9 +1958,8 @@ inteta(GEN q)
         { if (gval(ps,v) >= l) return y; }
       if (low_stack(lim, stack_lim(av,3)))
       {
-        GEN *gptr[3]; gptr[0]=&y; gptr[1]=&qn; gptr[2]=&ps;
-        if(DEBUGMEM>1) err(warnmem,"inteta");
-        gerepilemany(av,gptr,3);
+        if(DEBUGMEM>1) err(warnmem,"eta");
+        gerepileall(av, 3, &y, &qn, &ps);
       }
     }
   }
