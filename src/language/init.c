@@ -1179,19 +1179,18 @@ checkmemory(GEN z)
 /*                               TIMER                             */
 /*                                                                 */
 /*******************************************************************/
-#define MAX_TIMER 3
+#define MAX_TIMER 32
 
 #ifdef WINCE
-static long
-timer_proto(int i)
-{
-	static DWORD oldticks[MAX_TIMER];
-	DWORD ticks = GetTickCount();
-	DWORD delay = ticks - oldticks[i];
-	oldticks[i] = ticks;
-	return delay;
-
-}
+  static long
+  timer_proto(int i)
+  {
+    static DWORD oldticks[MAX_TIMER];
+    DWORD ticks = GetTickCount();
+    DWORD delay = ticks - oldticks[i];
+    oldticks[i] = ticks;
+    return delay;
+  }
 #elif defined(macintosh)
 # include <Events.h>
   static long
@@ -1270,22 +1269,91 @@ timer_proto(int i)
 #endif
 
 long
-gptimer() { return timer_proto(0); }
+gptimer() {return timer_proto(0);}
 long
-timer() { return timer_proto(1); }
+timer()   {return timer_proto(1);}
 long
-timer2() { return timer_proto(2); }
+timer2()  {return timer_proto(2);}
+
+/* internal */
+typedef long (*gptimer_t)(void);
+static long __timer3() {return timer_proto(3); }
+static long __timer4() {return timer_proto(4); }
+static long __timer5() {return timer_proto(5); }
+static long __timer6() {return timer_proto(6); }
+static long __timer7() {return timer_proto(7); }
+static long __timer8() {return timer_proto(8); }
+static long __timer9() {return timer_proto(9); }
+static long __timer10(){return timer_proto(10); }
+static long __timer11(){return timer_proto(11); }
+static long __timer12(){return timer_proto(12); }
+static long __timer13(){return timer_proto(13); }
+static long __timer14(){return timer_proto(14); }
+static long __timer15(){return timer_proto(15); }
+static gptimer_t timer_list[] = { NULL,NULL,NULL,
+  &__timer3,
+  &__timer4,
+  &__timer5,
+  &__timer6,
+  &__timer7,
+  &__timer8,
+  &__timer9,
+  &__timer10,
+  &__timer11,
+  &__timer12,
+  &__timer13,
+  &__timer14,
+  &__timer15
+};
+
+gptimer_t
+get_timer(gptimer_t t)
+{
+  static int used[MAX_TIMER];
+  int i;
+  if (!t)
+  { /* get new timer */
+    for (i=3; i < MAX_TIMER; i++)
+      if (!used[i]) { used[3] = 1; t = timer_list[i]; break; }
+    if (i == MAX_TIMER)
+    {
+      err(warner, "no timers left! Using timer2()");
+      t = &timer2;
+    }
+    t();
+  }
+  else
+  { /* delete it */
+    for (i=3; i < MAX_TIMER; i++)
+      if (t == timer_list[i])
+      {
+        if (!used[i]) err(warner, "timer %ld wasn't in use", i);
+        used[i] = 0; break;
+      }
+    t = NULL;
+  }
+  return t;
+}
 
 void
-msgtimer(char *format, ...)
+msgtimer2(gptimer_t t, char *format, ...)
 {
   va_list args;
   PariOUT *out = pariOut; pariOut = pariErr;
 
   pariputs("Time "); va_start(args, format);
   vpariputs(format,args); va_end(args);
-  pariputsf(": %ld\n",timer2()); pariflush();
+  pariputsf(": %ld\n",t()); pariflush();
   pariOut = out;
+}
+
+void
+msgtimer(char *format, ...)
+{
+  va_list args;
+
+  va_start(args,format); msgtimer2(&timer2, format, args);
+  va_end(args);
 }
 
 /*******************************************************************/
