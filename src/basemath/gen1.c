@@ -1891,7 +1891,7 @@ gdiv(GEN x, GEN y)
               y_lead = (GEN)y[2]; ly--; l--;
               if (!gcmp0(y_lead)) break;
             }
-            if (i==ly) err(gdiver2);
+            if (i>=ly) err(gdiver2);
           }
 	  if (ly < lx) lx = ly;
 	  p2 = (GEN)gpmalloc(lx*sizeof(long));
