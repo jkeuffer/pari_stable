@@ -2226,7 +2226,7 @@ zeta_get_limx(long r1, long r2, long bit)
 
   p1 = gpowgs(Pi2n(1, DEFAULTPREC), r - 1);
   p2 = gmul2n(mpmul(gpowgs(stoi(N),r), p1), -r2);
-  c0 = mpsqrt( divrr(p2, gpowgs(c1, r+1)) );
+  c0 = mpsqrt( mpdiv(p2, gpowgs(c1, r+1)) );
 
   A0 = mplog( gmul2n(c0, bit) ); p2 = gdiv(A0, c1);
   p1 = divrr(mulsr(N*(r+1), mplog(p2)), addsr(2*(r+1), gmul2n(A0,2)));
