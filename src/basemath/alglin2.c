@@ -1993,12 +1993,12 @@ hnfadd(GEN H, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, /* cf hnfspec */
   H = hnffinal(matb,perm,ptdep,ptB,&Cnew);
   *ptC = concatsp(vecextract_i(C, 1, col-lH), Cnew);
 
-  gerepileall(av, 4, ptC, ptdep, ptB, &H);
   if (DEBUGLEVEL)
   {
     if (DEBUGLEVEL>7) fprintferr("H = %Z\nC = %Z\n",H,*ptC);
     msgtimer("hnfadd (%ld)", lg(extramat)-1);
   }
+  gerepileall(av, 4, ptC, ptdep, ptB, &H);
   return H;
 }
 
