@@ -2313,7 +2313,6 @@ parse_texmacs_command(tm_cmd *c, char *ch)
   char *t, *s = ch, *send = s+l-1;
   growarray A;
 
-fprintferr(ch); flusherr();
   if (*s != DATA_BEGIN || *send-- != DATA_END)
     err(talker, "missing DATA_[BEGIN | END] in TeXmacs command");
   s++;
@@ -2330,10 +2329,11 @@ fprintferr(ch); flusherr();
     char *u = gpmalloc(strlen(s) + 1);
     skip_space(s);
     if (*s == '"') s = readstring(s, u);
-    {
+    else
+    { /* read integer */
       t = s;
       while (isdigit((int)*s)) s++;
-      strncpy(u, t, s - t);
+      strncpy(u, t, s - t); u[s-t] = 0;
     }
     grow_append(&A, (void*)u);
   }
@@ -2386,7 +2386,7 @@ get_line_from_file(char *prompt, filtre_t *F, FILE *file)
         err(talker,"TeXmacs command %s not implemented", c.cmd);
       if (c.n != 2) 
         err(talker,"was expecting 2 arguments for TeXmacs command");
-      texmacs_completion(c.v[0], atol(c.v[1]));
+      texmacs_completion(c.v[0], atol(c.v[1])-1);
       free_cmd(&c); *s = 0;
 #else
       err(talker, "readline not available");

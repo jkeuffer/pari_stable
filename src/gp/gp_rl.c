@@ -685,6 +685,7 @@ texmacs_completion(char *s, long pos)
 {
   char **matches, *text;
   long i, l = strlen(s)-1;
+
   if (rl_line_buffer) free(rl_line_buffer);
   rl_line_buffer = pari_strdup(s);
   text = rl_line_buffer + pos;
