@@ -81,6 +81,7 @@ IZ  6- [gphelp:] better error messages in case TeX compilation fails
        header when using CVS
 IZ  8- [library:] unified access to diffptr (NEXT_PRIME_VIADIFF macro)
     9- buchall: re-use the same random seed when doubling prec (for units)
+   10- major cleanup in thue / thueinit
 
   Added
  BA 1- Add PARI_VERSION and PARI_VERSION_CODE to paricfg.h
