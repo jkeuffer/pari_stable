@@ -102,6 +102,8 @@ MSo 8- allow numtoperm(0,k)  [ --> [] ]
 
   Added
     1- [Configure:] flag --with-ncurses-lib=*
+BA  2- support for FLTK graphical library [ hi-res plot ]
+BA  3- galoisidentify for order 96 to 127.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.6 (released 19/06/2003):
