@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "anal.h"
 extern void changevalue_p(entree *ep, GEN x);
 extern GEN polint_i(GEN xa, GEN ya, GEN x, long n, GEN *ptdy);
+extern void lisseq_void(char *t);
 
 /********************************************************************/
 /**                                                                **/
@@ -41,9 +42,9 @@ forpari(entree *ep, GEN a, GEN b, char *ch)
   push_val(ep, a);
   while (gcmp(a,b) <= 0)
   {
-    pari_sp av1=avma; (void)lisseq(ch); avma=av1;
+    pari_sp av1=avma; lisseq_void(ch); avma=av1;
     if (loop_break()) break;
-    a = (GEN) ep->value; a = gadd(a,gun);
+    a = (GEN) ep->value; a = typ(a) == t_INT? addis(a, 1): gadd(a,gun);
     if (low_stack(lim, stack_lim(av,1)))
     {
       if (DEBUGMEM>1) err(warnmem,"forpari");
@@ -77,7 +78,7 @@ forstep(entree *ep, GEN a, GEN b, GEN s, char *ch)
   i = 0;
   while (cmp(a,b) <= 0)
   {
-    pari_sp av1=avma; (void)lisseq(ch); avma=av1;
+    pari_sp av1=avma; lisseq_void(ch); avma=av1;
     if (loop_break()) break;
     if (v)
     {
@@ -168,7 +169,7 @@ forprime(entree *ep, GEN ga, GEN gb, char *ch)
   avma = av; push_val(ep, (GEN)prime);
   while (prime[2] < b)
   {
-    (void)lisseq(ch); if (loop_break()) break;
+    lisseq_void(ch); if (loop_break()) break;
     if (ep->value == prime)
       NEXT_PRIME_VIADIFF(prime[2], d);
     else
@@ -177,7 +178,7 @@ forprime(entree *ep, GEN ga, GEN gb, char *ch)
   }
   /* if b = P --> *d = 0 now and the loop wouldn't end if it read 'while
    * (prime[2] <= b)' */
-  if (prime[2] == b) { (void)lisseq(ch); (void)loop_break(); avma = av; }
+  if (prime[2] == b) { lisseq_void(ch); (void)loop_break(); avma = av; }
   pop_val(ep);
 }
 
@@ -192,7 +193,7 @@ fordiv(GEN a, entree *ep, char *ch)
   for (i=1; i<l; i++)
   {
     ep->value = (void*) t[i];
-    (void)lisseq(ch); if (loop_break()) break;
+    lisseq_void(ch); if (loop_break()) break;
     avma = av2;
   }
   pop_val(ep); avma=av;
@@ -226,7 +227,7 @@ fvloop(long i, fvdat *d)
   if (i+1 == d->n)
     while (gcmp(d->a[i], d->M[i]) <= 0)
     {
-      pari_sp av = avma; (void)lisseq(d->ch); avma = av;
+      pari_sp av = avma; lisseq_void(d->ch); avma = av;
       if (loop_break()) { d->n = 0; return; }
       d->a[i] = gadd(d->a[i], gun);
     }
@@ -258,7 +259,7 @@ fvloop_i(long i, fvdat *d)
   if (i+1 == d->n)
     while (gcmp(d->a[i], d->M[i]) <= 0)
     {
-      pari_sp av = avma; (void)lisseq(d->ch); avma = av;
+      pari_sp av = avma; lisseq_void(d->ch); avma = av;
       if (loop_break()) { d->n = 0; return; }
       d->a[i] = incloop(d->a[i]);
     }
@@ -283,7 +284,7 @@ forvec(entree *ep, GEN x, char *c, long flag)
   d->n = lg(x);
   d->ch = c;
   d->a = (GEN*)cgetg(d->n,t_VEC); push_val(ep, (GEN)d->a);
-  if (d->n == 1) (void)lisseq(d->ch);
+  if (d->n == 1) lisseq_void(d->ch);
   else
   {
     long i, t = t_INT;

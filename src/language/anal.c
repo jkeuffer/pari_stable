@@ -392,6 +392,29 @@ lisseq0(char *t, GEN (*f)(void))
   return gerepileupto(av, res);
 }
 
+/* for sumiter: (void)lisseq(t) */
+void
+lisseq_void(char *t)
+{
+  const pari_sp av = avma;
+  char *olds = analyseur, *olde = mark.start;
+
+  if (foreignExprHandler && *t == foreignExprSwitch)
+  {
+    (void)(*foreignExprHandler)(t); return; 
+  }
+
+  check_new_fun = NULL;
+  skipping_fun_def = 0;
+  mark.start = analyseur = t;
+
+  br_status = br_NONE;
+  if (br_res) { killbloc(br_res); br_res = NULL; }
+  (void)seq();
+  analyseur = olds; mark.start = olde;
+  avma = av;
+}
+
 /* filtered lisexpr = remove blanks and comments */
 static GEN
 flisseq0(char *s, GEN (*f)(void))
