@@ -1592,7 +1592,11 @@ phi_ms(ulong p, GEN q, long m, GEN s, long x, GEN vz)
   GEN p1, p2;
 
   if (!xp) return gzero;
-  p1 = Fp_pow((GEN)vz[xp], addis(s, m), q); /* vz[x] = Teichmuller(x) */
+  if (vz)
+    p1 =(GEN)vz[xp]; /* vz[x] = Teichmuller(x) */
+  else 
+    p1 = (x & 2)? negi(gun): gun;
+  p1 = Fp_pow(p1, addis(s, m), q);
   p2 = Fp_pow(stoi(x), negi(s), q);
   return modii(mulii(p1,p2), q);
 }
@@ -1602,7 +1606,7 @@ phi_ms(ulong p, GEN q, long m, GEN s, long x, GEN vz)
 GEN
 twistpartialzeta(GEN p, GEN q, long f, long c, GEN va, GEN cff)
 {
-  long j, k, lva = lg(va)-1, a, N = lg(cff)-1, N0 = N;
+  long j, k, lva = lg(va)-1, a, N = lg(cff)-1;
   pari_sp av, lim;
   GEN x = polx[0], y = polx[fetch_user_var("y")], eta, one, mon, den;
   GEN cyc, psm, invden, rep, ser;
@@ -1613,10 +1617,7 @@ twistpartialzeta(GEN p, GEN q, long f, long c, GEN va, GEN cff)
   one = gmodulsg(1, q); /* Mod(1, q); */
   mon = gaddsg(1, x);
   den = gsubsg(1, gmul(gpowgs(gmul(one,eta), f), gpowgs(gmul(one,mon), f)));
-  /* FIXME: get rid of unnecessary coeffs;
-     should be done in coeff_of_phi_ms? */
-  while (gcmp0((GEN)cff[N0])) N0--;
-  den = gadd(den, zeroser(0, N0+5));
+  den = gadd(den, zeroser(0, N+1));
   av = avma; lim = stack_lim(av, 1);
   invden = ginv(den);
   rep = zerovec(lva);
@@ -1631,7 +1632,7 @@ twistpartialzeta(GEN p, GEN q, long f, long c, GEN va, GEN cff)
   {
     GEN p1 = gzero;
     if (DEBUGLEVEL > 2 && !(j%50))
-      fprintferr("  twistpartialpowser: %ld\%\n", 100*j/lva);
+      fprintferr("  twistpartialzeta: %ld\%\n", 100*j/lva);      
     for (k = 1; k <= N; k++)
     {
       pari_sp av2 = avma;
@@ -1663,7 +1664,7 @@ twistpartialzeta(GEN p, GEN q, long f, long c, GEN va, GEN cff)
     }
     if (low_stack(lim, stack_lim(av, 1)))
     {
-      if(DEBUGMEM>1) err(warnmem, "twistpartialpowser, j = %ld/%ld", j,lva);
+      if(DEBUGMEM>1) err(warnmem, "twistpartialzeta, j = %ld/%ld", j,lva);
       gerepileall(av, 2, &rep, &ser);
     }
   }
@@ -1679,7 +1680,7 @@ init_teich(ulong p, GEN q, long prec)
   long av = avma, j;
 
   if (p == 2UL)
-    vz = NULL;
+    return NULL;
   else
   { /* primitive (p-1)-th root of 1 */
     GEN z, z0 = padicsqrtnlift(gun, utoi(p-1), Fp_gener(gp), gp, prec);
@@ -1696,8 +1697,8 @@ init_teich(ulong p, GEN q, long prec)
   return gerepileupto(av, gcopy(vz));
 }
 
-  /* compute the first N coefficients of the Mahler expansion
-     of phi^m_s skipping the first one (which is zero) */
+/* compute the first N coefficients of the Mahler expansion 
+   of phi^m_s skipping the first one (which is zero) */
 GEN
 coeff_of_phi_ms(ulong p, GEN q, long m, GEN s, long N, GEN vz)
 {
@@ -1721,7 +1722,11 @@ coeff_of_phi_ms(ulong p, GEN q, long m, GEN s, long N, GEN vz)
       p1 = addii(p1, mulii((GEN)bn[j], (GEN)cff[j]));
     cff[k] = (long)gerepileuptoint(av2, modii(subii(A, p1), q));
   }
-
+  while(gcmp0((GEN)cff[k-1])) k--;
+  setlg(cff, k);
+  if (DEBUGLEVEL > 3) 
+    fprintferr("  coeff_of_phi_ms: %ld coefficients kept out of %ld\n", 
+	       k-1, N);
   return cff;
 }
 
@@ -1737,10 +1742,12 @@ zetap(GEN s)
     err(talker, "argument must be a gp-adic integer");
 
   gp = (GEN)s[2]; p = itou(gp);
+  is = gtrunc(s);  /* make s an integer */
+
   xp = (long) log2(p); /* the extra precision; FIXME: quite arbitrary */
   if (DEBUGLEVEL > 2) fprintferr("zetap: extra prec = %ld\n", xp);
-  is = gtrunc(s);  /* make s an integer */
-  N  = itos(muluu(p,prec)) + xp; /* FIXME: crude estimation */
+
+  N  = itos(muluu(p,prec)) + xp;     /* FIXME: quite arbitrary */
   q  = gpowgs(gp, prec + xp);
 
   /* initialize the roots of unity for the computation
