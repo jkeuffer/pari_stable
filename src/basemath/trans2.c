@@ -815,64 +815,64 @@ gathz(GEN x, GEN y)
 /**                                                                **/
 /********************************************************************/
 #define BERN(i)       (B + 3 + (i)*B[2])
+#define set_bern(c0, i, B) STMT_START { \
+  *(BERN(i)) = c0; affrr(B, BERN(i)); } STMT_END
 /* pour calculer B_0,B_2,...,B_2*nb */
 void
 mpbern(long nb, long prec)
 {
-  long n, m, i, j, d, d1, d2, l, code0;
+  long i, l, c0;
   pari_sp av, av2;
-  GEN p1,p2, B;
+  GEN p1, B;
+  pari_timer T;
 
+  if (bernzone && bernzone[1] >= nb && bernzone[2] >= prec) return;
   if (nb < 0) nb = 0;
-  if (bernzone && bernzone[1]>=nb && bernzone[2]>=prec) return;
-  d = 3 + prec*(nb+1); B=newbloc(d);
-  B[0]=evallg(d);
-  B[1]=nb;
-  B[2]=prec;
-  av=avma; l = prec+1; p1=realun(l);
+  l = 3 + prec*(nb+1); B = newbloc(l);
+  B[0] = evallg(l);
+  B[1] = nb;
+  B[2] = prec;
+  av = avma; l = prec+1;
 
-  code0 = evaltyp(t_REAL) | evallg(prec);
-  *(BERN(0)) = code0; affsr(1,BERN(0));
-  if (bernzone && bernzone[2]>=prec)
+  c0 = evaltyp(t_REAL) | evallg(prec);
+  *(BERN(0)) = c0; affsr(1, BERN(0));
+  if (bernzone && bernzone[2] >= prec)
   { /* don't recompute known Bernoulli */
-    for (i=1; i<=bernzone[1]; i++)
-    {
-      *(BERN(i)) = code0; affrr(bern(i),BERN(i));
-    }
+    for (i = 1; i <= bernzone[1]; i++) set_bern(c0, i, bern(i));
   }
   else i = 1;
-  if (DEBUGLEVEL)
-  {
+  if (DEBUGLEVEL) {
     fprintferr("caching Bernoulli numbers 2*%ld to 2*%ld, prec = %ld\n",
                i,nb,prec);
-    (void)timer2();
+    TIMERstart(&T);
   }
 
-  p2 = p1; av2=avma;
-  for (   ; i<=nb; i++)
+  p1 = realun(l); av2 = avma;
+  if (i == 1 && nb > 0)
   {
-    if (i>1)
-    {
-      n=8; m=5; d = d1 = i-1; d2 = 2*i-3;
-      for (j=d; j>0; j--)
-      {
-        p2 = BERN(j);
-        if (j<d) p2 = addrr(p2,p1);
-        else
-        {
-          affrr(p2,p1); p2=p1;
-        }
-        p2 = mulsr(n*m,p2); setlg(p2,l);
-        p2 = divrs(p2, d1*d2); affrr(p2,p1);
-        n+=4; m+=2; d1--; d2-=2;
-      }
-      p2 = addsr(1,p1); setlg(p2,l);
-    }
-    p2 = divrs(p2,2*i+1); p2 = subsr(1,p2);
-    setexpo(p2, expo(p2) - 2*i);
-    *(BERN(i)) = code0; affrr(p2,BERN(i)); avma=av2;
+    set_bern(c0, 1, divrs(p1,6));
+    i = 2; avma = av2;
   }
-  if (DEBUGLEVEL) msgtimer("Bernoulli");
+  for (   ; i <= nb; i++, avma = av2)
+  { /* i > 1 */
+    long j, n = 8, m = 5, d1 = i-1, d2 = 2*i-3;
+    GEN S;
+    affrr(BERN(d1), p1); S = p1;
+    for (j = d1;;)
+    {
+      S = divrs(mulrs(S, n*m), d1*d2);
+      if (j == 1) break;
+      affrr(S, p1);
+      j--;
+      S = addrr(BERN(j), p1);
+      n += 4; m += 2; d1--; d2 -= 2;
+    }
+    S = addsr(1, S); setlg(S,l);
+    S = subsr(1, divrs(S, 2*i+1));
+    setexpo(S, expo(S) - 2*i);
+    set_bern(c0, i, S);
+  }
+  if (DEBUGLEVEL) msgTIMER(&T, "Bernoulli");
   if (bernzone) gunclone(bernzone);
   avma = av; bernzone = B;
 }
