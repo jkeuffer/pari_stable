@@ -178,6 +178,9 @@ names
 table of functions in init.c, etc, to include the explicit function name).
 Should be easy: the code is mostly there.
 
+3  write an analog of the 'echo' default which would print code as it is
+executed, not as it is read
+
 2  write a GP scripts debugger (cf above)
 
 2  write a GP scripts profiler (cf above)

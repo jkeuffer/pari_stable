@@ -29,6 +29,8 @@ Arch / proc:         OS:             Configure:     sta:    dyn:  GP version:
 ==============================================================================
 DEC/Alpha
 alpha21264   ???MHz  OSF1-V4.0       cc  X11 dl2    3169    3434  2.0.16(20)JC
+alpha21164a  600MHz  Linux-2.2.12   gcc  X11 dl2    4440    ????  2.0.17(22)IS
+
 alpha21164   600MHz  OSF1-V4.0D      cc  X11 dl2    3996    4384  2.0.10    LG
 alpha21164   533Mhz  Linux 2.0.34    gcc X11 dl2   (4294)  (4385) 2.0.12    JC
 alpha21164   500Mhz  Linux-2.0.35    gcc X11 dl2    5327    5493  2.0.17(13)
@@ -202,6 +204,7 @@ hppa kernel. Remove +z from compiler flags
 (19) 2  MB L2 Cache - Ultra U10
 (20) gcc-2.8.1 also works and produces a faster binary [sta=3097, dyn=3387]
 (21) replace err by pari_err in src/kernel/sparcv7/level0.S [in 2.0.16 or 17]
+(22) broken timer in gp-dyn. Ok otherwise.
 
 =============================================================================
 Contributors:

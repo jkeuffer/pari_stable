@@ -1174,17 +1174,30 @@ aide0(char *s, int flag)
     case '.' : member_commands(); return;
   }
   ep = is_entry(s);
+  if (ep && long_help)
+  {
+    if (!strcmp(ep->name, "default"))
+    {
+      char *t = s+7;
+      if (*t == '/' && is_default(t+1))
+      {
+        external_help(t+1, 2);
+        return;
+      }
+    }
+  }
   if (!ep)
   {
-    n = whatnow(s,1);
-    if (n) err(obsoler,s,s, s,n);
+    n = is_default(s)? 2: 3;
     if (long_help)
-    {
-      n = setdefault(s,"",d_EXISTS) == gun? 2: 3;
       external_help(s,n);
-    }
     else
+    {
+      if (n == 2) { aide_err(s,"default",flag); return; }
+      n = whatnow(s,1);
+      if (n) err(obsoler,s,s, s,n);
       aide_err(s,"unknown identifier",flag);
+    }
     return;
   }
 

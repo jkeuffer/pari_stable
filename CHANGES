@@ -44,9 +44,12 @@ BA 11- bound problems in nfgaloisconj()
 IZ 15- ploth() plots are 1/2-pixel off
 BA 16- result was not always complete in nfgaloisconj()
    17- type(1/y, RFRACN) --> SEGV + check compatibility before applying type()
+   18- made 'secure' safer. Confirm before write, prevent from changing 'help'
 
   Added
 IZ  1- [gnuplot] look up directory tree for gnuplot related files
+    2- improved on-line help wrt to defaults and ambiguities
+       (? default/some_default, ? some_default)
 
 ===========================================================================
 Done for version 2.0.17.beta (released 24/09/99):
