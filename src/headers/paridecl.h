@@ -1595,6 +1595,8 @@ int     u_val(ulong n, ulong p);
 
 /* RgX.c */
 
+int     is_rational(GEN x);
+int     RgX_is_rational(GEN x);
 GEN     RgM_to_RgXV(GEN x, long v);
 GEN     RgM_to_RgXX(GEN x, long v,long w);
 GEN     RgM_zc_mul(GEN x, GEN y);

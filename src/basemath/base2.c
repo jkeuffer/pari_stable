@@ -42,7 +42,6 @@ extern GEN pol_to_monic(GEN pol, GEN *lead);
 extern GEN sqr_by_tab(GEN tab, GEN x);
 extern GEN to_polmod(GEN x, GEN mod);
 extern GEN unnf_minus_x(GEN x);
-extern int isrational(GEN x);
 extern long int_elt_val(GEN nf, GEN x, GEN p, GEN bp, GEN *t);
 extern GEN gauss_realimag(GEN x, GEN y);
 extern void check_ZKmodule(GEN x, char *s);
@@ -3488,7 +3487,7 @@ nfissquarefree(GEN nf, GEN x)
 {
   pari_sp av = avma;
   GEN g, y = derivpol(x);
-  if (isrational(x))
+  if (RgX_is_rational(x))
     g = modulargcd(x, y);
   else
     g = nfgcd(x, y, nf, NULL);

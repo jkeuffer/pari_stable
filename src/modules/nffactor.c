@@ -43,7 +43,6 @@ extern GEN special_pivot(GEN x);
 extern GEN trivfact(void);
 extern GEN vandermondeinverse(GEN L, GEN T, GEN den, GEN prep);
 extern int cmbf_precs(GEN q, GEN A, GEN B, long *a, long *b, GEN *qa, GEN *qb);
-extern int isrational(GEN x);
 extern GEN LLL_check_progress(GEN Bnorm, long n0, GEN m, int final, long *ti_LLL);
 extern void remake_GM(GEN nf, nffp_t *F, long prec);
 
@@ -529,8 +528,7 @@ nf_root_bounds(GEN P, GEN T)
   long lR, i, j, l, prec;
   GEN Ps, R, V, nf;
 
-  if (isrational(P)) return complex_bound(P);
-
+  if (RgX_is_rational(P)) return complex_bound(P);
   T = get_nfpol(T, &nf);
 
   prec = ZXY_get_prec(P);

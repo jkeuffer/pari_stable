@@ -2555,29 +2555,10 @@ gauss_gcd(GEN x, GEN y)
   return gerepileupto(av, gdiv(x, lcmii(dx, dy)));
 }
 
-#define fix_frac(z) if (signe(z[2])<0)\
-{\
-  setsigne(z[1],-signe(z[1]));\
-  setsigne(z[2],1);\
-}
-
-int
-isrational(GEN x)
-{
-  long i, t = typ(x);
-  if (t != t_POL) return is_rational_t(t);
-  for (i=lg(x)-1; i>1; i--)
-  {
-    t = typ(x[i]);
-    if (!is_rational_t(t)) return 0;
-  }
-  return 1;
-}
-
 static int
-cx_isrational(GEN x)
+c_is_rational(GEN x)
 {
-  return (isrational((GEN)x[1]) && isrational((GEN)x[2]));
+  return (is_rational((GEN)x[1]) && is_rational((GEN)x[2]));
 }
 
 /* y == 0 */
@@ -2596,7 +2577,7 @@ zero_gcd(GEN x, GEN y, long tx, long ty)
   {
     case t_INT: return absi(x);
     case t_FRAC: return gabs(x,0);
-    case t_COMPLEX: return cx_isrational(x)? gauss_gcd(x, gzero): gun;
+    case t_COMPLEX: return c_is_rational(x)? gauss_gcd(x, gzero): gun;
     case t_REAL: return gun;
     default: return gcopy(x);
   }
@@ -2647,7 +2628,7 @@ ggcd(GEN x, GEN y)
         return z;
 
       case t_COMPLEX:
-        if (cx_isrational(x) && cx_isrational(y)) return gauss_gcd(x,y);
+        if (c_is_rational(x) && c_is_rational(y)) return gauss_gcd(x,y);
         return triv_cont_gcd(y,x);
 
       case t_PADIC:
@@ -2686,7 +2667,7 @@ ggcd(GEN x, GEN y)
             z[2] = licopy((GEN)y[2]); return z;
 
           case t_COMPLEX:
-            if (cx_isrational(y)) return gauss_gcd(x,y);
+            if (c_is_rational(y)) return gauss_gcd(x,y);
           case t_QUAD:
             return triv_cont_gcd(y,x);
 
@@ -2715,7 +2696,7 @@ ggcd(GEN x, GEN y)
         switch(ty)
         {
           case t_COMPLEX:
-            if (cx_isrational(y)) return gauss_gcd(x,y);
+            if (c_is_rational(y)) return gauss_gcd(x,y);
           case t_QUAD:
             return triv_cont_gcd(y,x);
 
