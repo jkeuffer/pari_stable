@@ -941,8 +941,6 @@ voir2(GEN x, long nb, long bl)
   
   pariputsf("%s(lg=%ld%s):",type_name(tx)+2,lx,isclone(x)? ",CLONE" : "");
   sorstring(VOIR_STRING2,x[0]);
-/*  if (tx == t_POL || tx == t_LIST || tx == t_INT || tx == t_REAL)
-    lx = lgef(x); */
   if (! is_recursive_t(tx)) /* t_SMALL, t_INT, t_REAL, t_STR, t_VECSMALL */
   {
     if (tx == t_STR)
