@@ -907,6 +907,10 @@ detint(GEN x)
     p1=cgetg(m1,t_COL); pass[j]=(long)p1;
     for (i=1; i<=m; i++) p1[i]=zero;
   }
+  for (k=1; k<=n; k++)
+    for (j=1; j<=m; j++)
+      if (typ(gcoeff(x,j,k)) != t_INT)
+        err(talker,"not an integer matrix in detint");
   v=cgetg(m1,t_COL);
   det1=gzero; piv=pivprec=gun;
   for (rg=0,k=1; k<=n; k++)
