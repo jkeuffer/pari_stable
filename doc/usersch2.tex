@@ -349,15 +349,16 @@ be \var{appended} at the end.
 \subsecidx{logfile} (default \kbd{"pari.log"}): name of the log file to be
 used when the \kbd{log} toggle is on. Tilde and time expansion are performed.
 
-\subsecidx{output} (default \kbd{1}): this can take three values: 0
-(=~\var{raw}), 1 (=~\var{prettymatrix}), or 2 (=~\var{prettyprint}). This
+\subsecidx{output} (default \kbd{1}): this can take four values: 0
+(=~\var{raw}), 1 (=~\var{prettymatrix}), 2 (=~\var{prettyprint}), or 3
+(=~\var{external prettyprint}). This
 means that, independently of the default \kbd{format} for reals which we
-explained above, you can print results in three ways: either in
-\tev{raw format}, i.e.~a format which is equivalent to what you input,
-including explicit multiplication signs, and everything typed on a line
-instead of two dimensional boxes. This can have several advantages, for
-instance it allows you to pick the result with a mouse or an editor, and to
-put it somewhere else.\label{se:output}
+explained above, you can print results in four ways: either in \tev{raw
+format}, i.e.~a format which is equivalent to what you input, including
+explicit multiplication signs, and everything typed on a line instead of
+two dimensional boxes. This can have several advantages, for instance it
+allows you to pick the result with a mouse or an editor, and to paste it
+somewhere else.\label{se:output}
 
 The second format is the \tev{prettymatrix format}. The only difference to
 raw format is that matrices are printed as boxes instead of horizontally.
@@ -366,6 +367,11 @@ vectors are still printed horizontally.
 
 The third format is the \tev{prettyprint format}, or beautified format. In
 the present version \vers, this is not beautiful at all.
+
+\unix{The fourth format is \tev{external prettyprint}, which pipes all GP
+output in TeX format to an external prettyprinter, according to the value
+of \tet{prettyprinter}. The default script (\tet{tex2mail}) converts
+its input to readable two-dimensional text.}
 
 Independently of the setting of this default, an object can be printed
 in any of the three formats at any time using the commands \b{a}, \b{m}
@@ -394,10 +400,12 @@ GP will look for it in these directories, in the order they were written in
 \kbd{path}. Here, as usual, '.' means the current directory, and '$.\,.$' its
 immediate parent. Tilde expansion is performed.
 
-\subsecidxunix{prettyprinter} (default \kbd{""}) the name of an external
-prettyprinter to use instead of the default (ugly) one when \kbd{output}
-is~2 (\var{prettyprint}). {\bf This is experimental} (for the time being,
-coloring directives are not honoured when this default is used).
+\subsecidxunix{prettyprinter} (default \kbd{"tex2mail -TeX -noindent
+-ragged -by_par"}) the name of an external prettyprinter to use when
+\kbd{output} is~3 (\var{alternate prettyprinter}). {\bf This is
+experimental} but the default \tet{tex2mail} looks already much nicer than
+the built-in ``beautified format'' ($\kbd{output} = 2$). If the
+corresponding program doesn't exist on your system,
 
 \subsecidx{primelimit} (default \kbd{200k} on the Mac, and \kbd{500k}
 otherwise): GP precomputes a list of all primes less than \kbd{primelimit}
@@ -647,7 +655,7 @@ If a \var{logfile} argument is given, change the default logfile name to
 \subsec{\b{m}}: as \b{a}, but using prettymatrix format.
 
 \subsec{\b{o}} $\{n\}$: sets \tet{output} mode to $n$ ($0$: raw, $1$:
-prettymatrix, $2$: prettyprint).
+prettymatrix, $2$: prettyprint, $3$: external prettyprint).
 
 \subsec{\b{p}} $\{n\}$: sets \tet{realprecision} to $n$ decimal
 digits. Prints its current value if $n$ is omitted.
