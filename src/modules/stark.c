@@ -584,20 +584,13 @@ FindModulus(GEN dataC, long fl, long *newprec, long prec, long bnd)
 
 		  p1 = CplxModulus(p2, &pr, prec);
 
-		  if (first == 1)
+		  if (first == 1 || gcmp(p1, (GEN)rep[5]) < 0)
 		  {
 		    *newprec = pr;
 		    for (j = 1; j <= 4; j++) rep[j] = p2[j];
 		    rep[5] = (long)p1;
 		  }
-		  else
-		    if (gcmp(p1, (GEN)rep[5]) < 0)
-		      {
-			*newprec = pr;
-			for (j = 1; j <= 5; j++) rep[j] = p2[j];
-			rep[5] = (long)p1;
-		      }		   
-				
+
 		  if (!fl || (gcmp(p1, rb) < 0))
 		  {
 		    rep[5] = (long)InitChar0((GEN)rep[3], *newprec);
