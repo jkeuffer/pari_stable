@@ -35,6 +35,7 @@ This file lists the incompatible changes between Version 2.x and older versions
     and msgTIMER which are fully reentrant and easier to use.
   - (undocumented) macros buch[gen | genfu | init | iniftu]
   - rnfisnorm() prototype has changed [ + need to call rnfisnorminit first ]
+  - incgam4 renamed to incgam0, incgam3 renamed to incgamc
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
