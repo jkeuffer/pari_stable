@@ -1730,7 +1730,10 @@ to_Kronecker(GEN P, GEN Q)
   {
     p1 = (GEN)P[i]; l = typ(p1);
     if (l == t_POLMOD) { p1 = (GEN)p1[2]; l = typ(p1); }
-    if (is_scalar_t(l) || varn(p1) > vQ) { y[k++] = (long)p1; j = 3; }
+    if (is_scalar_t(l) || varncmp(varn(p1), vQ) > 0)
+    {
+      y[k++] = (long)p1; j = 3;
+    }
     else
     {
       l = lg(p1);
