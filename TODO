@@ -13,6 +13,49 @@ Priority classification (first column): [subjective and debatable!]
 1    probably not
 -    unclassified
 
+***************************   BUGS (general)     ****************************
+
+5  silent overflows in codeword-handling macros: O(2^50000) --> O(2^-15535)
+
+5  some doubles can overflow in rootpol.c, should use t_REAL everywhere
+  ?  polroots(x^3 + 2^1024*x + 1)
+    ***   underflow or overflow in a R->dbl conversion
+
+4  gcmp/gegal not transitive: [] == 0, [0] == 0, but [0] != []
+
+4  mateigen([1,1;1,2]) won't succeed at default precision (28 digits).
+
+3  quadclassunit not reliable when fed non fundamental discriminants
+   (infinite loop [e.g quadclassunit(-352)], wrong result)
+
+3  ellinit over Q_2 doesn't work (AGM loses too much precision)
+
+3  ellpointtoz over Q_p makes no difference between P and -P (corrected over
+   C by a cheap trick)
+
+3  polgalois should handle precision problems. Symptom: applied to
+polzagier(11,0)/polzagier(1,0), gives wrong result with 38 digits
+
+3  recursive plot easily fooled. One could split intervals in 3 + make sure
+size of neighbouring intervals don't differ too much.
+
+***************************   BUGS (GP specific) ****************************
+
+-  sum(i=1,3000, exp(-i^2)) --> overflow in R*R
+   The "negligible" terms should be neglegted, not overflow because of the
+   way the computation is done.
+   [ Tough to correct, even with a way to trap exceptions ]
+
+4  changing primelimit from within a forprime loop yields random results
+
+3  after allocatemem() / default(parisize, ...), the rest of the command is
+discarded (ends by a longjmp).
+
+2  under GP after an error, memory is only recovered from "entire variables".
+Individual components of lists/vectors/matrices are left alone if the
+GLOBAL object wasn't modified during the last cycle (i.e only v[x] = ... 
+occured)
+
 ***************************  DOCUMENTATION    ****************************
 
 5  complete/update the tutorial (esp. section 11 and 12)
@@ -25,41 +68,6 @@ pariFILE, bloc ...)
 3  clean up gphelp / TeX macros
 
 2  HTML version (pod ? SGML ? yodl ???)
-
-***************************   BUGS            ****************************
-
--  sum(i=1,3000, exp(-i^2)) --> overflow in R*R
-   The "negligible" terms should be neglegted, not overflow because of the
-   way the computation is done. Tough to correct, even with a way to trap
-   exceptions
-
-5  nfgaloisconj still misses some conjugates. Symptom: try it on
-   polcompositum(quadpoly(11321), x^15-3*x^14-46*x^13+69*x^12+794*x^11-50*x^10-5226*x^9-4559*x^8+9682*x^7+15656*x^6+3342*x^5-5950*x^4-4386*x^3-1136*x^2-100*x+1)
-[Hilbert class field extension]
-
-5  silent overflows in codeword-handling macros: O(2^50000) --> O(2^-15535)
-
-5  some doubles can overflow in rootpol.c, should use t_REAL everywhere
-  ?  polroots(x^3 + 2^1024*x + 1)
-    ***   underflow or overflow in a R->dbl conversion
-
-4  gcmp/gegal not transitive: [] == 0, [0] == 0, but [0] != []
-
-4  mateigen([1,1;1,2]) won't succeed at default precision (28 digits).
-
-3  ellinit over Q_2 doesn't work (AGM loses too much precision)
-
-3  ellpointtoz over Q_p makes no difference between P and -P (corrected over
-   C by a cheap trick)
-
-3  polgalois should handle precision problems. Symptom: applied to
-polzagier(11,0)/polzagier(1,0), gives wrong result with 38 digits
-
-3  after allocatemem() / default(parisize, ...), the rest of the command is
-discarded (ends by a longjmp).
-
-3  recursive plot easily fooled. One could split intervals in 3 + make sure
-size of neighbouring intervals don't differ too much.
 
 ***************************   DEVELOPMENT     ****************************
 
@@ -89,8 +97,6 @@ Misc:
 
 4  decent finite field package (remove all the nfxxxmodpr functions)
 
-4  round 4 (too slow, use modular techniques)
-
 4  rnfkummer (doesn't work)
 
 4  nfsubfields [use known subfields to discard blocs right away] (current uses
@@ -102,9 +108,6 @@ far too much memory)
 polynomial multiplication + remainder is O(n^2) [+ can use Karatsuba/FFT]
 
 3  have quadclassunit return bnf structure
-
-3  have quadclassunit treat reliably non fundamental discriminants (at
-   least, make relevant checks before entering infinite loops)
 
 3  2-adic initell
 

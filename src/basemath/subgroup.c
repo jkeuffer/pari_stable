@@ -265,9 +265,9 @@ dopsub(long p, long *gtyp, long *indexsubq)
         if (DEBUGLEVEL > 3)
         {
           fprintferr("    lambda = "); printtyp(lam);
-          fprintferr("    lambda' = "); printtyp(lp);
+          fprintferr("    lambda'= "); printtyp(lp);
           fprintferr("    mu = "); printtyp(mmu);
-          fprintferr("    mu' = "); printtyp(mp);
+          fprintferr("    mu'= "); printtyp(mp);
         }
         for (j=1; j<=mp[0]; j++)
         {
