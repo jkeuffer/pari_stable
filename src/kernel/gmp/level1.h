@@ -807,7 +807,7 @@ INLINE long
 expi(GEN x)
 {
   const long lx=lgefint(x);
-  return lx==2? -HIGHEXPOBIT: bit_accuracy(lx)-bfffo(x[lx-1])-1;
+  return lx==2? -(long)HIGHEXPOBIT: bit_accuracy(lx)-bfffo(x[lx-1])-1;
 }
 
 #endif
