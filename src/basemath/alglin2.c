@@ -835,111 +835,111 @@ sqred(GEN a) { return sqred2(a,1); }
 GEN
 signat(GEN a) { return sqred2(a,0); }
 
-/* Diagonalization of a REAL symetric matrix. Return a 2-component vector:
- * 1st comp = vector of eigenvalues
- * 2nd comp = matrix of eigenvectors
- */
+/* Diagonalization of a REAL symetric matrix. Return a vector [L, r]:
+ * L = vector of eigenvalues
+ * r = matrix of eigenvectors */
 GEN
 jacobi(GEN a, long prec)
 {
-  pari_sp av1, av2;
-  long de,e,e1,e2,l,n,i,j,p,q;
-  GEN c,s,t,u,ja,lambda,r,unr,x,y,x1,y1;
+  pari_sp av1;
+  long de, e, e1, e2, i, j, p, q, l = lg(a);
+  GEN c, s, t, u, ja, L, r, unr, x, y, x1, y1;
 
-  if (typ(a)!=t_MAT) err(mattype1,"jacobi");
-  ja=cgetg(3,t_VEC); l=lg(a); n=l-1;
-  e1=HIGHEXPOBIT-1;
-  lambda=cgetg(l,t_COL); ja[1]=(long)lambda;
-  for (j=1; j<=n; j++)
+  if (typ(a) != t_MAT) err(mattype1,"jacobi");
+  ja = cgetg(3,t_VEC);
+  L = cgetg(l,t_COL); ja[1] = (long)L;
+  r = cgetg(l,t_MAT); ja[2] = (long)r;
+  if (l == 1) return ja;
+  if (lg(a[1]) != l) err(mattype1,"jacobi");
+
+  e1 = HIGHEXPOBIT-1;
+  for (j=1; j<l; j++)
   {
-    lambda[j]=lgetr(prec);
-    gaffect(gcoeff(a,j,j), (GEN)lambda[j]);
-    e=expo(lambda[j]); if (e<e1) e1=e;
+    gaffect(gcoeff(a,j,j), (GEN)(L[j] = lgetr(prec)));
+    e = expo(L[j]); if (e < e1) e1 = e;
   }
-  r=cgetg(l,t_MAT); ja[2]=(long)r;
-  for (j=1; j<=n; j++)
+  for (j=1; j<l; j++)
   {
     r[j] = lgetg(l,t_COL);
-    for (i=1; i<=n; i++) coeff(r,i,j) = (long)stor(i==j, prec);
+    for (i=1; i<l; i++) coeff(r,i,j) = (long)stor(i==j, prec);
   }
-  av1=avma;
+  av1 = avma;
 
-  e2=-HIGHEXPOBIT;p=q=1;
-  c=cgetg(l,t_MAT);
-  for (j=1; j<=n; j++)
+  e2 = -HIGHEXPOBIT; p = q = 1;
+  c = cgetg(l,t_MAT);
+  for (j=1; j<l; j++)
   {
-    c[j]=lgetg(j,t_COL);
+    c[j] = lgetg(j,t_COL);
     for (i=1; i<j; i++)
     {
-      gaffect(gcoeff(a,i,j), (GEN)(coeff(c,i,j)=lgetr(prec)));
-      e=expo(gcoeff(c,i,j)); if (e>e2) { e2=e; p=i; q=j; }
+      gaffect(gcoeff(a,i,j), (GEN)(coeff(c,i,j) = lgetr(prec)));
+      e = expo(gcoeff(c,i,j)); if (e > e2) { e2 = e; p = i; q = j; }
     }
   }
-  a=c; unr = realun(prec);
-  de=bit_accuracy(prec);
+  a = c; unr = realun(prec);
+  de = bit_accuracy(prec);
 
- /* e1 = min des expo des coeff diagonaux
-  * e2 = max des expo des coeff extra-diagonaux
-  * Test d'arret: e2 < e1-precision
-  */
-  while (e1-e2<de)
+ /* e1 = min expo(a[i,i])
+  * e2 = max expo(a[i,j]), i != j */
+  while (e1-e2 < de)
   {
-    /*calcul de la rotation associee dans le plan
-	  des p et q-iemes vecteurs de base   */
-    av2=avma;
-    x=divrr(subrr((GEN)lambda[q],(GEN)lambda[p]),shiftr(gcoeff(a,p,q),1));
-    y=mpsqrt(addrr(unr,mulrr(x,x)));
-    t=(gsigne(x)>0)? divrr(unr,addrr(x,y)) : divrr(unr,subrr(x,y));
-    c=divrr(unr,mpsqrt(addrr(unr,mulrr(t,t))));
-    s=mulrr(t,c); u=divrr(s,addrr(unr,c));
+    pari_sp av2 = avma;
+    /* compute associated rotation in the plane formed by basis vectors number 
+     * p and q */
+    x = divrr(subrr((GEN)L[q],(GEN)L[p]), shiftr(gcoeff(a,p,q),1));
+    y = mpsqrt(addrr(unr, mulrr(x,x)));
+    t = divrr(unr, (signe(x)>0)? addrr(x,y): subrr(x,y));
+    c = divrr(unr, mpsqrt(addrr(unr,mulrr(t,t))));
+    s = mulrr(t,c);
+    u = divrr(s,addrr(unr,c));
 
-    /* Recalcul des transformees successives de a et de la matrice
-	   cumulee (r) des rotations :  */
-
+    /* compute successive transforms of a and the matrix of accumulated
+     * rotations (r) */
     for (i=1; i<p; i++)
     {
-      x=gcoeff(a,i,p); y=gcoeff(a,i,q);
-      x1=subrr(x,mulrr(s,addrr(y,mulrr(u,x))));
-      y1=addrr(y,mulrr(s,subrr(x,mulrr(u,y))));
-      affrr(x1,gcoeff(a,i,p)); affrr(y1,gcoeff(a,i,q));
+      x = gcoeff(a,i,p); y = gcoeff(a,i,q);
+      x1 = subrr(x,mulrr(s,addrr(y,mulrr(u,x))));
+      y1 = addrr(y,mulrr(s,subrr(x,mulrr(u,y))));
+      affrr(x1,x); affrr(y1,y);
     }
     for (i=p+1; i<q; i++)
     {
-      x=gcoeff(a,p,i); y=gcoeff(a,i,q);
-      x1=subrr(x,mulrr(s,addrr(y,mulrr(u,x))));
-      y1=addrr(y,mulrr(s,subrr(x,mulrr(u,y))));
-      affrr(x1,gcoeff(a,p,i)); affrr(y1,gcoeff(a,i,q));
+      x = gcoeff(a,p,i); y = gcoeff(a,i,q);
+      x1 = subrr(x,mulrr(s,addrr(y,mulrr(u,x))));
+      y1 = addrr(y,mulrr(s,subrr(x,mulrr(u,y))));
+      affrr(x1,x); affrr(y1,y);
     }
-    for (i=q+1; i<=n; i++)
+    for (i=q+1; i<l; i++)
     {
-      x=gcoeff(a,p,i); y=gcoeff(a,q,i);
-      x1=subrr(x,mulrr(s,addrr(y,mulrr(u,x))));
-      y1=addrr(y,mulrr(s,subrr(x,mulrr(u,y))));
-      affrr(x1,gcoeff(a,p,i)); affrr(y1,gcoeff(a,q,i));
+      x = gcoeff(a,p,i); y = gcoeff(a,q,i);
+      x1 = subrr(x,mulrr(s,addrr(y,mulrr(u,x))));
+      y1 = addrr(y,mulrr(s,subrr(x,mulrr(u,y))));
+      affrr(x1,x); affrr(y1,y);
     }
-    x=(GEN)lambda[p]; y=gcoeff(a,p,q); subrrz(x,mulrr(t,y),(GEN)lambda[p]);
-    x=y; y=(GEN)lambda[q]; addrrz(y,mulrr(t,x),y);
-    setexpo(x,expo(x)-de-1);
+    y = gcoeff(a,p,q);
+    t = mulrr(t, y); setexpo(y, expo(y)-de-1);
+    x = (GEN)L[p]; subrrz(x,t, x);
+    y = (GEN)L[q]; addrrz(y,t, y);
 
-    for (i=1; i<=n; i++)
+    for (i=1; i<l; i++)
     {
-      x=gcoeff(r,i,p); y=gcoeff(r,i,q);
-      x1=subrr(x,mulrr(s,addrr(y,mulrr(u,x))));
-      y1=addrr(y,mulrr(s,subrr(x,mulrr(u,y))));
-      affrr(x1,gcoeff(r,i,p)); affrr(y1,gcoeff(r,i,q));
+      x = gcoeff(r,i,p); y = gcoeff(r,i,q);
+      x1 = subrr(x,mulrr(s,addrr(y,mulrr(u,x))));
+      y1 = addrr(y,mulrr(s,subrr(x,mulrr(u,y))));
+      affrr(x1,x); affrr(y1,y);
     }
 
-    e2=expo(gcoeff(a,1,2)); p=1; q=2;
-    for (j=1; j<=n; j++)
+    e2 = expo(gcoeff(a,1,2)); p = 1; q = 2;
+    for (j=1; j<l; j++)
     {
       for (i=1; i<j; i++)
 	if ((e=expo(gcoeff(a,i,j))) > e2) { e2=e; p=i; q=j; }
-      for (i=j+1; i<=n; i++)
+      for (i=j+1; i<l; i++)
 	if ((e=expo(gcoeff(a,j,i))) > e2) { e2=e; p=j; q=i; }
     }
-    avma=av2;
+    avma = av2;
   }
-  avma=av1; return ja;
+  avma = av1; return ja;
 }
 
 /*************************************************************************/
