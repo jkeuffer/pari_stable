@@ -2767,7 +2767,6 @@ bezoutpol(GEN x, GEN y, GEN *U, GEN *V)
 /*               RESULTANT PAR L'ALGORITHME DE DUCOS               */
 /*                                                                 */
 /*******************************************************************/
-GEN addshiftw(GEN x, GEN y, long d);
 
 static GEN
 reductum(GEN P)
@@ -2800,14 +2799,8 @@ Lazard2(GEN F, GEN x, GEN y, long n)
   x = Lazard(x,y,n-1); return gdivexact(gmul(x,F),y);
 }
 
-static GEN
-addshift(GEN x, GEN y)
-{
-  long v = varn(x);
-  if (!signe(x)) return y;
-  x = addshiftw(x,y,1);
-  setvarn(x,v); return x;
-}
+extern GEN addshiftpol(GEN x, GEN y, long d);
+#define addshift(x,y) addshiftpol((x),(y),1)
 
 static GEN
 nextSousResultant(GEN P, GEN Q, GEN Z, GEN s)
