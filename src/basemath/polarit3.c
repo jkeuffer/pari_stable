@@ -1780,7 +1780,7 @@ Fp_factor_irred(GEN P,GEN l, GEN Q)
   E=Fp_factorgalois(P,l,d,vq,FP);
   E=polpol_to_mat(E,np);
   MP = matrixpow(np,d,SP,P,l);
-  IR = (GEN)FpM_sindexrank(MP,l)[1];
+  IR = (GEN)FpM_indexrank(MP,l)[1];
   E = rowextract_p(E, IR);
   M = rowextract_p(MP,IR);
   M = FpM_inv(M,l);
