@@ -26,17 +26,15 @@ esac
 language=`ls $src_dir/language/*.c | sed 's,.*/\(.*\)\.c,\1,'`
 basemath=`ls $src_dir/basemath/*.c | sed 's,.*/\(.*\)\.c,\1,'`
 modules=`ls $src_dir/modules/*.c   | sed 's,.*/\(.*\)\.c,\1,'`
+systems=`ls $src_dir/systems/$osname/*.c | sed 's,.*/\(.*\)\.c,\1,'`
 lib_prefix=lib
 dllib_prefix=lib
 case "$osname" in
-  os2)	systems=$osname; dllib_prefix="";
-	lib_prefix=lib	# Different, to allow gp-dyn link with DLL
+  os2)  dllib_prefix=	# != lib_prefix to allow gp-dyn link with DLL
 	export_lib_create=emximp; export_lib='$(DLLIBPARI)$(_A)'
 	export_file=pari.def; export_create="emxexp -u"
-	# Actually, the build will fail until the switch to -Zomf...
+	# Actually, the build will fail until the switch to -Zomf
 	dlld_ignore=- ;;
-  darwin) systems=$osname;;
-  *)   systems=;;
 esac
 
 hlist='pari paritype paricast paricom parierr parigen paristio parisys pariport'
@@ -596,9 +594,14 @@ fi
 HUGELINE=
 for dir in basemath modules language gp graph gpdyn graphdyn systems; do
   eval list='$'$dir
+  if test "$dir" = systems; then
+    SRC=$src/$dir/$osname
+  else
+    SRC=$src/$dir
+  fi
   for f in $list; do
 
-  source="$src/$dir/$f.c"
+  source="$SRC/$f.c"
   depend=
   cflags="\$(CFLAGS) \$(CPPFLAGS)"
   case "$f" in
