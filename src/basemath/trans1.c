@@ -325,12 +325,12 @@ _sqri(void *data /* ignored */, GEN x) { (void)data; return sqri(x); }
 static GEN
 _muli(void *data /* ignored */, GEN x, GEN y) { (void)data; return mulii(x,y); }
 
-/* INTEGER POWERING (a^|n| for integer a != 0 and integer n != 0)
+/* INTEGER POWERING (a^n for integer a != 0 and integer n > 0)
  *
  * Use left shift binary algorithm (RS is wasteful: multiplies big numbers,
  * with LS one of them is the base, hence small). Sign of result is set
- * to s (= +-1) regardless of what it would have been. Makes life easier for
- * caller, which otherwise might do a setsigne(gen_1,-1) */
+ * to s (= 1,-1). Makes life easier for caller, which otherwise might do a
+ * setsigne(gen_1 / gen_m1) */
 static GEN
 powiu(GEN a, ulong N, long s)
 {
@@ -609,9 +609,7 @@ powgi(GEN x, GEN n)
       return gen_0;
     case t_POL: err(errlg);
 
-    case t_QFR:
-      if (signe(x[4])) return qfr_pow(x,n);
-      /* fall through */
+    case t_QFR: return qfr_pow(x,n);
     default: {
       pari_sp av = avma;
       y = leftright_pow(x, n, NULL, &_sqr, &_mul);
@@ -747,10 +745,7 @@ gpow(GEN x, GEN n, long prec)
     }
     else if (tx == t_PADIC)
     {
-      if (equalii(d, gen_2))
-        z = padic_sqrt(x);
-      else
-        z = padic_sqrtn(x, d, NULL);
+      z = equaliu(d, 2)? padic_sqrt(x): padic_sqrtn(x, d, NULL);
       return gerepileupto(av, powgi(z, a));
     }
   }
@@ -857,7 +852,7 @@ padic_sqrt(GEN x)
   mod = (GEN)x[3];
   x   = (GEN)x[4]; /* lift to int */
   e >>= 1; av = avma;
-  if (equalii(gen_2, p))
+  if (equaliu(p,2))
   {
     long r = mod8(x);
     if (pp <= 3)
@@ -1250,7 +1245,7 @@ paexp(GEN x)
   long k, e = valp(x), pp = precp(x), n = e + pp;
   pari_sp av;
   GEN y, r, p = (GEN)x[2];
-  int is2 = equalii(gen_2, p);
+  int is2 = equaliu(p,2);
 
   if (gcmp0(x)) return gaddgs(x,1);
   if (e <= 0 || (e == 1 && is2)) return NULL;
@@ -1664,7 +1659,7 @@ teich(GEN x)
   p = (GEN)x[2];
   q = (GEN)x[3];
   z = (GEN)x[4]; y = cgetp(x); av = avma;
-  if (equalii(p, gen_2))
+  if (equaliu(p,2))
     z = (mod4(z) & 2)? addsi(-1,q): gen_1;
   else
   {
@@ -1689,13 +1684,13 @@ palogaux(GEN x)
   if (equalii(gen_1, (GEN)x[4]))
   {
     long v = valp(x)+precp(x);
-    if (equalii(gen_2,p)) v--;
+    if (equaliu(p,2)) v--;
     return zeropadic(p, v);
   }
   y = gdiv(gaddgs(x,-1), gaddgs(x,1));
   e = valp(y); /* > 0 */
   pp = e+precp(y);
-  if (equalii(gen_2,p)) pp--;
+  if (equaliu(p,2)) pp--;
   else
   {
     GEN p1;
@@ -1718,7 +1713,7 @@ palog(GEN x)
   GEN y, p = (GEN)x[2];
 
   if (!signe(x[4])) err(talker,"zero argument in palog");
-  if (equalii(p, gen_2))
+  if (equaliu(p,2))
   {
     y = gsqr(x); setvalp(y,0);
     y = palogaux(y);

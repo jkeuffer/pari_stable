@@ -1206,7 +1206,7 @@ ggamma(GEN x, long prec)
       return cxgamma(x, 0, prec);
 
     case t_FRAC:
-      if (!equalii((GEN)x[2], gen_2)) break;
+      if (!equaliu((GEN)x[2],2)) break;
       z = (GEN)x[1]; /* true argument is z/2 */
       if (is_bigint(z) || labs(m = itos(z)) > 962354)
       {
