@@ -245,8 +245,9 @@ get_sep_colon_ok(const char *t)
 static ulong
 safe_mul(ulong x, ulong y)
 {
+  ulong z;
   LOCAL_HIREMAINDER;
-  ulong z = mulll(x, y);
+  z = mulll(x, y);
   return hiremainder? 0: z;
 }
 
