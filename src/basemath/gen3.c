@@ -1864,7 +1864,10 @@ gtopoly0(GEN x, long v, int reverse)
     case t_POL:
       y=gcopy(x); break;
     case t_SER:
-      y=gconvsp(x,1); break;
+      y=gconvsp(x,1);
+      if (typ(y) != t_POL)
+        err(talker,"t_SER with negative valuation in gtopoly");
+      break;
     case t_RFRAC: case t_RFRACN:
       y=gdeuc((GEN)x[1],(GEN)x[2]); break;
     case t_QFR: case t_QFI: case t_VEC: case t_COL: case t_MAT:
