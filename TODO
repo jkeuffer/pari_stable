@@ -19,6 +19,9 @@ Priority classification (first column): [subjective and debatable!]
 
 4  mateigen([1,1;1,2]) won't succeed at default precision (28 digits).
 
+3  many functions assume MAXVARN is a free variable, yielding bogus
+   results if the input involve it (only affect library programming).
+
 3  quadclassunit not reliable when fed non fundamental discriminants
    (infinite loop [e.g quadclassunit(-352)], wrong result)
 
