@@ -46,6 +46,7 @@ Done for version 2.2.3 (released ??/??/2002):
 IZ 11- shift(x > 0,, flag!=0) didn't act as the docs said [flag now ignored]
    12- lindep(Vec(x^48)) --> oo loop
    13- could get NaN in max_modulus (polroots) --> havoc later
+   14- missing normalizepol() in centermod(t_POL,)
 
   Changed
 BA  1- improved Fp_isom
