@@ -261,6 +261,7 @@ gpolcomp(GEN p1, GEN p2)
   return 0;
 }
 
+/* assume pol in Z[X] */
 GEN
 primitive_pol_to_monic(GEN pol, GEN *ptlead)
 {
@@ -268,9 +269,8 @@ primitive_pol_to_monic(GEN pol, GEN *ptlead)
   GEN lead,fa,e, a = dummycopy(pol);
 
   a += 2; lead = (GEN)a[n];
-  if (gcmp1(lead)) { if (ptlead) *ptlead = NULL; return a-2; }
-  lead = (GEN) a[n];
-  fa = auxdecomp(lead,0); lead = gun;
+  if (is_pm1(lead)) { if (ptlead) *ptlead = NULL; return a-2; }
+  fa = auxdecomp(absi(lead),0); lead = gun;
   e = (GEN)fa[2]; fa = (GEN)fa[1];
   for (i=lg(e)-1; i>0;i--) e[i] = itos((GEN)e[i]);
   for (i=lg(fa)-1; i>0; i--)
