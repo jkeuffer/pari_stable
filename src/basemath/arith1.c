@@ -1198,7 +1198,7 @@ GEN
 bezout(GEN a, GEN b, GEN *ptu, GEN *ptv)
 {
   GEN u,v,t,x,y,q,r, *tmp;
-  long av;
+  long av, av2, lim;
 
   if (typ(a) != t_INT || typ(b) != t_INT) err(arither1);
   if (absi_cmp(a,b) < 0)
@@ -1225,12 +1225,20 @@ bezout(GEN a, GEN b, GEN *ptu, GEN *ptv)
   av = avma;
   (void)new_chunk(lgefint(b) + (lgefint(a)<<1)); /* room for x, u and v */
   x = a; y = b; u = gun; v = gzero;
+  av2 = avma;
+  lim = stack_lim(av2,3);
   do
   {
     q = dvmdii(x,y,&r);
     v = subii(v, mulii(q,u));
     t=v; v=u; u=t;
     x=y; y=r;
+    if (low_stack(lim, stack_lim(av2,3)))
+    {
+      GEN *gptr[2]; gptr[0]=&x; gptr[1]=&y;
+      if(DEBUGMEM>1) err(warnmem,"bezout");
+      gerepilemany(av2,gptr,2);
+    }
   } while (signe(y));
   u = divii(subii(x, mulii(b,v)), a);
   avma = av; x = icopy(x); v = icopy(v); u = icopy(u);
