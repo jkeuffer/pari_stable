@@ -397,7 +397,7 @@ forvec_start(GEN x, long flag, GEN *gd, GEN (**next)(GEN,GEN))
   forvec_data *d;
   if (!is_vec_t(tx)) err(talker,"not a vector in forvec");
   if (l == 1) { *next = &forvec_dummy; return cgetg(1, t_VEC); }
-  *gd = new_chunk(sizeof(forvec_data)/sizeof(long));
+  *gd = cgetg(sizeof(forvec_data)/sizeof(long) + 1, t_VECSMALL) + 1;
   d = (forvec_data*) *gd;
   d->n = l - 1;
   d->a = (GEN*)cgetg(l,t_VEC);
