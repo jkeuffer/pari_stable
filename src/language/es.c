@@ -874,7 +874,7 @@ wr_float(pariout_t *T, GEN x, int f_format)
   if (dif <= 0) f_format = 0; /* write in E format */
   if (dec > 0)
   { /* reduce precision if possible */
-    l = 3 + (dec * pariK1);
+    l = (long)(3 + (dec * pariK1));
     if (lx > l) { x = rtor(x, l); lx = l; }
   }
   
