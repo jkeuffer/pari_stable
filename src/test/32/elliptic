@@ -61,7 +61,7 @@
 ? ellheight(acurve,apoint)
 0.81778253183950144377417759611107234562
 ? ellheight(acurve,apoint,1)
-0.81778253183950144377417759611107234578
+0.81778253183950144377417759611107234576
 ? ellordinate(acurve,1)
 [8, 3]
 ? ellztopoint(acurve,ellpointtoz(acurve,apoint))
