@@ -2551,6 +2551,7 @@ break_loop(long numerr)
   {
     msg = "Starting break loop (type 'break' to go back to GP)";
     old = s = get_analyseur();
+    t = NULL;
     if (bufstack->prev)
     {
       Buffer *oldb = (Buffer*)bufstack->prev->value;
