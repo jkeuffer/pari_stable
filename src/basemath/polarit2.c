@@ -3310,15 +3310,12 @@ revpol(GEN x)
   return y;
 }
 
-/* assume dx >= dy, y non constant. */
+/* assume dx >= dy, y non constant, mod either NULL or a t_POL. */
 static GEN
 pseudorem_i(GEN x, GEN y, GEN mod)
 {
   long vx = varn(x), dx, dy, dz, i, lx, p;
   pari_sp av = avma, av2, lim;
-  GEN (*red)(GEN,GEN) = NULL;
-
-  if (mod) red = (typ(mod) == t_INT)? &FpX_red: &gmod;
 
   if (!signe(y)) err(gdiver);
   (void)new_chunk(2);
@@ -3331,12 +3328,12 @@ pseudorem_i(GEN x, GEN y, GEN mod)
     for (i=1; i<=dy; i++)
     {
       x[i] = ladd(gmul((GEN)y[0], (GEN)x[i]), gmul((GEN)x[0],(GEN)y[i]));
-      if (red) x[i] = (long)red((GEN)x[i], mod);
+      if (mod) x[i] = (long)RgX_rem((GEN)x[i], mod);
     }
     for (   ; i<=dx; i++)
     {
       x[i] = lmul((GEN)y[0], (GEN)x[i]);
-      if (red) x[i] = (long)red((GEN)x[i], mod);
+      if (mod) x[i] = (long)RgX_rem((GEN)x[i], mod);
     }
     do { x++; dx--; } while (dx >= 0 && gcmp0((GEN)x[0]));
     if (dx < dy) break;
@@ -3357,16 +3354,16 @@ pseudorem_i(GEN x, GEN y, GEN mod)
     if (mod)
     { /* assume p fairly small */
       for (i=1; i<p; i++)
-        t = red(gmul(t, (GEN)y[0]), mod);
+        t = RgX_rem(gmul(t, (GEN)y[0]), mod);
     }
     else
       t = gpowgs(t, p);
     for (i=2; i<lx; i++)
     {
       x[i] = lmul((GEN)x[i], t);
-      if (red) x[i] = (long)red((GEN)x[i], mod);
+      if (mod) x[i] = (long)RgX_rem((GEN)x[i], mod);
     }
-    if (!red) return gerepileupto(av, x);
+    if (!mod) return gerepileupto(av, x);
   }
   return gerepilecopy(av, x);
 }
@@ -4020,7 +4017,7 @@ poldisc0(GEN x, long v)
       return poldisc0((GEN)x[1], v);
 
     case t_QFR: case t_QFI:
-      av = avma; return gerepileuptoint(av, qf_disc(x,NULL,NULL));
+      av = avma; return gerepileuptoint(av, qf_disc(x));
 
     case t_VEC: case t_COL: case t_MAT:
       i=lg(x); z=cgetg(i,tx);
