@@ -79,7 +79,11 @@ if test -n "$DLLD"; then
     cygwin) DLLDFLAGS="-Wl,--out-implib=\$(LIBPARI_SO)\$(_A),--export-all-symbols";;
   esac
   if test -n "$DLLDisGCC"; then
-    DLLDFLAGS="-shared -mimpure-text \$(CFLAGS) $DLLDFLAGS"
+    case "$arch" in
+      sparc*) extra='-mimpure-text';;
+      *) extra=;;
+    esac
+    DLLDFLAGS="-shared $extra \$(CFLAGS) $DLLDFLAGS"
   fi
   case "$osname" in
     osf1|freebsd|linux|sunos|solaris) EXTRADLLDFLAGS='-lc ${LIBS}';;
