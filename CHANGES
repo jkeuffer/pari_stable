@@ -58,6 +58,8 @@ BA 16- result was not always complete in nfgaloisconj()
    27- 'make clean' wasn't thorough
    28- ellpointtoz(e, [0,0]) could correspond to the inverse point
    29- "ideals not coprime" in rnfsteinitz
+BA 30- typo in Configure [CPP] (cc --> CC) 
+BA 31- member functions for galoisinit
 
   Added
 IZ  1- [gnuplot] look up directory tree for gnuplot related files
