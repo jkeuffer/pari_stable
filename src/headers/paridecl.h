@@ -75,7 +75,6 @@ GEN     idmat_intern(long n,GEN myun,GEN myzero);
 GEN     image(GEN x);
 GEN     image2(GEN x);
 GEN     imagecompl(GEN x);
-GEN     imagereel(GEN x, long prec);
 GEN     indexrank(GEN x);
 GEN     inverseimage(GEN mat, GEN y);
 long    isdiagonal(GEN x);
@@ -126,7 +125,6 @@ GEN     gtrace(GEN x);
 GEN     hess(GEN x);
 GEN     hnf(GEN x);
 GEN     hnfall(GEN x);
-GEN     hnfhavas(GEN x);
 GEN     hnflll(GEN x);
 GEN     hnflll_i(GEN A, GEN *ptB, int remove);
 GEN     hnfmod(GEN x, GEN detmat);
@@ -514,7 +512,6 @@ GEN     nfkermodpr(GEN nf, GEN x, GEN modpr);
 GEN     nfmodprinit(GEN nf, GEN pr);
 GEN     nfsmith(GEN nf, GEN x);
 GEN     nfsolvemodpr(GEN nf, GEN a, GEN b, GEN modpr);
-GEN     oldidealinv(GEN nf, GEN ix);
 GEN     prime_to_ideal(GEN nf, GEN vp);
 GEN     principalideal(GEN nf, GEN a);
 GEN     principalidele(GEN nf, GEN a, long prec);
@@ -1224,7 +1221,6 @@ GEN     gcd0(GEN x, GEN y,long flag);
 GEN     gdeflate(GEN x, long v, long d);
 GEN     gdivexact(GEN x, GEN y);
 GEN     ggcd(GEN x, GEN y);
-GEN     ggcd0(GEN x, GEN y);
 GEN     ginvmod(GEN x, GEN y);
 GEN     gisirreducible(GEN x);
 GEN     glcm(GEN x, GEN y);
@@ -1282,7 +1278,6 @@ GEN     FpX_mul(GEN x,GEN y,GEN p);
 GEN     FpX_neg(GEN x,GEN p);
 GEN     FpX_normalize(GEN z, GEN p);
 GEN     FpX_red(GEN z, GEN p);
-GEN     FpX_small(GEN z, GEN p, long l);
 GEN     FpX_sqr(GEN x,GEN p);
 GEN     FpX_sub(GEN x,GEN y,GEN p);
 GEN     FpXQ_charpoly(GEN x, GEN T, GEN p);
@@ -1366,7 +1361,6 @@ GEN     znstar_small(GEN zn);
 
 GEN     subfields(GEN nf,GEN d);
 GEN     subfields0(GEN nf,GEN d);
-GEN     conjugates(GEN pol);
 
 /* subgroup.c */
 
