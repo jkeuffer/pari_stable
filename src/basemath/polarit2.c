@@ -2431,15 +2431,33 @@ gisirreducible(GEN x)
 /*                         GENERIC GCD                             */
 /*                                                                 */
 /*******************************************************************/
+static GEN
+mapgcd(GEN f(GEN,GEN), GEN x, GEN y)
+{
+  if (!y)
+  {
+    pari_sp av = avma;
+    long i, tx = typ(x), lx = lg(x);
+    GEN t;
+    if (!is_vec_t(tx)) err(typeer,"association");
+    if (lx == 1) return gen_0;
+    t = gel(x,1);
+    if (lx == 2) return gcopy(t);
+    /* more efficient than divide & conquer ! */
+    for (i = 2; i < lx; i++) t = f(t, gel(x,i));
+    return gerepileupto(av, t);
+  }
+  return f(x,y);
+}
 
 GEN
 gcd0(GEN x, GEN y, long flag)
 {
   switch(flag)
   {
-    case 0: return gassoc_proto(ggcd,x,y);
-    case 1: return gassoc_proto(modulargcd,x,y);
-    case 2: return gassoc_proto(srgcd,x,y);
+    case 0: return mapgcd(ggcd,x,y);
+    case 1: return mapgcd(modulargcd,x,y);
+    case 2: return mapgcd(srgcd,x,y);
     default: err(flagerr,"gcd");
   }
   return NULL; /* not reached */
@@ -2731,10 +2749,8 @@ ggcd(GEN x, GEN y)
   return NULL; /* not reached */
 }
 
-GEN glcm0(GEN x, GEN y)
-{
-  return gassoc_proto(glcm,x,y);
-}
+GEN
+glcm0(GEN x, GEN y) { return gassoc_proto(glcm,x,y); }
 
 GEN
 glcm(GEN x, GEN y)

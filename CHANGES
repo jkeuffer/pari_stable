@@ -116,6 +116,7 @@ LGr39- very rare SEGV in idealprimedec() [ typo in init_norm(), using FpX_red
    52- rnfidealnormabs(rnfinit(nfinit(y),x^2+1),1) --> SEGV
    53- no argument check in primepi()
    54- ellminimalmodel(ellinit([1,2,3,4,5])) --> gerepile error
+   55- gcd([]) was 1 [ should be 0 ] + gcd([...]) used an inefficient algorithm
 
   Added
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu
