@@ -1021,33 +1021,41 @@ primeform(GEN x, GEN p, long prec)
   y[1] = licopy(p); return y;
 }
 
+static GEN
+qfbsolve_cornacchia(GEN c, GEN p, int swap)
+{
+  pari_sp av = avma;
+  GEN M, N;
+  if (kronecker(negi(c), p) < 0 || !cornacchia(c, p, &M,&N)) {
+    avma = av; return gen_0;
+  }
+  return gerepilecopy(av, swap? mkvec2(N,M): mkvec2(M,N));
+}
+
 GEN
 qfbimagsolvep(GEN Q, GEN p)
 {
   GEN M, N, x,y, a,b,c, d;
   pari_sp av = avma;
-  if (gcmp1(gel(Q,1)) && !signe(gel(Q,2)))
-  { /* principal form. Use faster cornacchia */
-    c = gel(Q,3);
-    if (kronecker(negi(c), p) < 0) { avma = av; return gen_0; }
-    avma = av;
-    if (!cornacchia(c, p, &M,&N)) return gen_0;
-    goto END;
+  if (!signe(gel(Q,2)))
+  {
+    a = gel(Q,1);
+    c = gel(Q,3); /* if principal form, use faster cornacchia */
+    if (gcmp1(a)) return qfbsolve_cornacchia(c, p, 0);
+    if (gcmp1(c)) return qfbsolve_cornacchia(a, p, 1);
   }
   d = qf_disc(Q);
   if (kronecker(d,p) < 0) return gen_0;
   a = redimagsl2(Q, &N);
   b = redimagsl2(primeform(d, p, 0), &M);
   if (!gequal(a, b)) return gen_0;
-  a = gcoeff(M,1,1); x = gcoeff(N,1,1);
-  b = gcoeff(M,1,2); y = gcoeff(N,1,2);
-  c = gcoeff(M,2,1);
-  d = gcoeff(M,2,2); /* inverse: [d,-b; -c,a]. Return (N/M)[1] */
-
-  M = subii(mulii(d,x), mulii(b,y));
-  N = subii(mulii(a,y), mulii(c,x));
-END:
-  return gerepilecopy(av, mkvec2(M,N));
+  a = gcoeff(N,1,1); x = gcoeff(M,2,2);
+  b = gcoeff(N,1,2); y = gcoeff(M,2,1); /* M^(-1)[,1] = [x, -y]~ */
+  c = gcoeff(N,2,1);
+  d = gcoeff(N,2,2);
+  /* return (N * M^(-1))[,1] */
+  M = subii(mulii(a,x), mulii(b,y));
+  N = subii(mulii(c,x), mulii(d,x)); return gerepilecopy(av, mkvec2(M,N));
 }
 
 GEN
