@@ -1515,23 +1515,28 @@ racine_r(GEN a, long l)
 /* Return trunc(sqrt(a))). a must be an non-negative integer*/
 GEN isqrti(GEN a) {return racine_r(a,lgefint(a));}
 
-
 #ifdef LONG_IS_64BIT
-/* 64 bits of sqrt(a[0] * 2^64 + a[1]) */
+/* 64 bits of b = sqrt(a[0] * 2^64 + a[1])  [ up to 1ulp ] */
 static ulong
 sqrtu2(GEN a)
 {
-  ulong b, c;
-  double beta;
+  double beta = sqrt((double)(ulong)a[0]); /* 2^31*2^(1/2) <= beta < 2^32 */
+  ulong c, b = ((ulong)(beta*32768)) << 1; /*~ beta * 2^32, no overflow*/
   LOCAL_HIREMAINDER;
   LOCAL_OVERFLOW;
 
-  beta = sqrt((double)(ulong)a[0]);
-  beta = beta * (1UL << BITS_IN_HALFULONG);
-  /* 53 correct bits, 1 Newton iteration to reach 64 */
-  b = (ulong)beta;
+  /* 52 correct bits, 1 Newton iteration to reach 64 */
   hiremainder = a[0]; c = divll(a[1], b);
   return (addll(c, b) >> 1) | HIGHBIT;
+}
+/* 64 bits of sqrt(a[0] * 2^63) */
+static ulong
+sqrtu2_1(GEN a)
+{
+  long t[2];
+  t[0] = (a[0] >> 1);
+  t[1] = (a[0] << (BITS_IN_LONG-1)) | (a[1] >> 1);
+  return sqrtu2(t);
 }
 #else
 /* 32 bits of sqrt(a[0] * 2^32) */
@@ -1541,44 +1546,36 @@ sqrtu2(GEN a)
   double beta = sqrt((double)(ulong)a[0]);
   return (ulong)(beta * (1UL << BITS_IN_HALFULONG));
 }
+/* 32 bits of sqrt(a[0] * 2^31) */
+static ulong
+sqrtu2_1(GEN a)
+{
+  double beta = sqrt((double)(ulong)a[0]); /* 0.707... ~ 1/sqrt(2) */
+  return (ulong)(beta * ((1UL << BITS_IN_HALFULONG) * 0.707106781186547524));
+}
 #endif
 
 /* compute sqrt(|a|), assuming a != 0 */
 GEN
 sqrtr_abs(GEN x)
 {
-  pari_sp av, av0;
-  long l, l1, i, ex;
-  GEN y, a, t;
-
-  l = lg(x); y = cgetr(l); av0 = avma;
+  long l1, i, l = lg(x), ex = expo(x);
+  GEN a, t, y = cgetr(l);
+  pari_sp av, av0 = avma;
 
   a = cgetr(l+1); affrr(x,a);
-  ex = expo(a); t = cgetr(l+1);
-  if (ex & 1) {
+  t = cgetr(l+1);
+  if (ex & 1) { /* odd exponent */
     a[1] = evalsigne(1) | evalexpo(1);
-#ifdef LONG_IS_64BIT
-    if (a[2] >= -(1 << 11))
-    { t[1] = evalexpo(1) | evalsigne(1); t[2] = (long)HIGHBIT; }
-    else
-#endif
-    { t[1] = evalexpo(0) | evalsigne(1); t[2] = (long)sqrtu2(a + 2); }
-  } else {
+    t[2] = (long)sqrtu2(a + 2);
+  } else { /* even exponent */
     a[1] = evalsigne(1) | evalexpo(0);
-#ifdef LONG_IS_64BIT
-    t[2] = (a[2] >> 1);
-    t[3] = (a[2] << (BITS_IN_LONG-1)) | (a[3] >> 1);
-    t[2] = (long)sqrtu2(t+2);/* ~ sqrt(a) */
-#else
-    beta = sqrt((double)(ulong)a[2]);
-    beta = beta * ((1UL << BITS_IN_HALFULONG) * 0.707106781186547524);
-    t[2] = (long)(ulong)beta;/* ~ sqrt(a) */
-#endif
-    t[1] = evalexpo(0) | evalsigne(1);
+    t[2] = (long)sqrtu2_1(a + 2);
   }
-  /* |x| = 2^(ex/2) a */
+  t[1] = evalsigne(1) | evalexpo(0);
   for (i = 3; i <= l; i++) t[i] = 0;
 
+  /* |x| = 2^(ex/2) a, t ~ sqrt(a) */
   l--; l1 = 1; av = avma;
   while (l1 < l) { /* let t := (t + a/t)/2 */
     l1 <<= 1; if (l1 > l) l1 = l;
