@@ -1219,6 +1219,8 @@ trap0(char *e, char *r, char *f)
   else if (!strcmp(e,"invmoder")) numerr = invmoder;
   else if (!strcmp(e,"accurer")) numerr = accurer;
   else if (!strcmp(e,"archer")) numerr = archer;
+  else if (!strcmp(e,"talker")) numerr = talker;
+  else if (!strcmp(e,"siginter")) numerr = siginter;
   else if (*e) err(impl,"this trap keyword");
   /* TO BE CONTINUED */
 
