@@ -4526,8 +4526,8 @@ ZX_is_squarefree(GEN x)
 static GEN
 _gcd(GEN a, GEN b)
 {
-  if (!a) return a = gun;
-  if (!b) return b = gun;
+  if (!a) a = gun;
+  if (!b) b = gun;
   return ggcd(a,b);
 }
 
