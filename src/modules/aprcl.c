@@ -321,8 +321,6 @@ powpolmod(Cache *C, Red *R, int p, int k, GEN jac)
   return _powpolmod(C, jac, R, _sqr);
 }
 
-#define MAXP 16777215
-
 static GEN
 e(ulong t)
 {
@@ -351,10 +349,7 @@ e(ulong t)
     }
     /* d runs through the divisors of t */
     if (BSW_psp(utoi(++d)))
-    {
-      if (d > MAXP) return gzero;
       s = muliu(s, (ulong)u_pow(d, 1 + u_val(t,d)));
-    }
   }
   return s;
 }
@@ -363,73 +358,71 @@ static ulong
 compt(GEN N)
 {
   pari_sp av0 = avma;
-  ulong Bint,t;
+  ulong C, t;
   GEN B;
 
   B = mulsr(100, divrr(glog(N,DEFAULTPREC), dbltor(log(10.))));
-  Bint = itos(gceil(B));
+  C = itos( gceil(B) );
   avma = av0;
-  /* Bint < [200*log_10 e(t)] ==> return t. For e(t) < 10^529, N < 10^1058 */
-  if (Bint <    540) return        6;
-  if (Bint <    963) return       12;
-  if (Bint <   1023) return       24;
-  if (Bint <   1330) return       48;
-  if (Bint <   1628) return       36;
-  if (Bint <   1967) return       60;
-  if (Bint <   2349) return      120;
-  if (Bint <   3083) return      180;
-  if (Bint <   3132) return      240;
-  if (Bint <   3270) return      504;
-  if (Bint <   3838) return      360;
-  if (Bint <   4115) return      420;
-  if (Bint <   4621) return      720;
-  if (Bint <   4987) return      840;
-  if (Bint <   5079) return     1440;
-  if (Bint <   6212) return     1260;
-  if (Bint <   6686) return     1680;
-  if (Bint <   8137) return     2520;
-  if (Bint <   8415) return     3360;
-  if (Bint <  10437) return     5040;
-  if (Bint <  11643) return    13860;
-  if (Bint <  12826) return    10080;
-  if (Bint <  11643) return    13860;
-  if (Bint <  12826) return    10080;
-  if (Bint <  13369) return    16380;
-  if (Bint <  13540) return    21840;
-  if (Bint <  15060) return    18480;
-  if (Bint <  15934) return    27720;
-  if (Bint <  17695) return    32760;
-  if (Bint <  18816) return    36960;
-  if (Bint <  21338) return    55440;
-  if (Bint <  23179) return    65520;
-  if (Bint <  23484) return    98280;
-  if (Bint <  27465) return   110880;
-  if (Bint <  30380) return   131040;
-  if (Bint <  31369) return   166320;
-  if (Bint <  33866) return   196560;
-  if (Bint <  34530) return   262080;
-  if (Bint <  36195) return   277200;
-  if (Bint <  37095) return   360360;
-  if (Bint <  38179) return   480480;
-  if (Bint <  41396) return   332640;
-  if (Bint <  43301) return   554400;
-  if (Bint <  47483) return   720720;
-  if (Bint <  47742) return   665280;
-  if (Bint <  50202) return   831600;
-  if (Bint <  52502) return  1113840;
-  if (Bint <  60245) return  1441440;
-  if (Bint <  63112) return  1663200;
-  if (Bint <  65395) return  2227680;
-  if (Bint <  69895) return  2162160;
-  if (Bint <  71567) return  2827440;
-  if (Bint <  75708) return  3326400;
-  if (Bint <  79377) return  3603600;
-  if (Bint <  82703) return  6126120;
-  if (Bint <  91180) return  4324320;
-  if (Bint <  93978) return  6683040;
-  if (Bint <  98840) return  7207200;
-  if (Bint <  99282) return 11138400;
-  if (Bint < 105811) return  8648640;
+  /* C < [200*log_10 e(t)] ==> return t. For e(t) < 10^529, N < 10^1058 */
+  if (C <    540) return        6;
+  if (C <    963) return       12;
+  if (C <   1023) return       24;
+  if (C <   1330) return       48;
+  if (C <   1628) return       36;
+  if (C <   1967) return       60;
+  if (C <   2349) return      120;
+  if (C <   3083) return      180;
+  if (C <   3132) return      240;
+  if (C <   3270) return      504;
+  if (C <   3838) return      360;
+  if (C <   4115) return      420;
+  if (C <   4621) return      720;
+  if (C <   4987) return      840;
+  if (C <   5079) return     1440;
+  if (C <   6212) return     1260;
+  if (C <   6686) return     1680;
+  if (C <   8137) return     2520;
+  if (C <   8415) return     3360;
+  if (C <  10437) return     5040;
+  if (C <  11643) return    13860;
+  if (C <  12826) return    10080;
+  if (C <  13369) return    16380;
+  if (C <  13540) return    21840;
+  if (C <  15060) return    18480;
+  if (C <  15934) return    27720;
+  if (C <  17695) return    32760;
+  if (C <  18816) return    36960;
+  if (C <  21338) return    55440;
+  if (C <  23179) return    65520;
+  if (C <  23484) return    98280;
+  if (C <  27465) return   110880;
+  if (C <  30380) return   131040;
+  if (C <  31369) return   166320;
+  if (C <  33866) return   196560;
+  if (C <  34530) return   262080;
+  if (C <  36195) return   277200;
+  if (C <  37095) return   360360;
+  if (C <  38179) return   480480;
+  if (C <  41396) return   332640;
+  if (C <  43301) return   554400;
+  if (C <  47483) return   720720;
+  if (C <  47742) return   665280;
+  if (C <  50202) return   831600;
+  if (C <  52502) return  1113840;
+  if (C <  60245) return  1441440;
+  if (C <  63112) return  1663200;
+  if (C <  65395) return  2227680;
+  if (C <  69895) return  2162160;
+  if (C <  71567) return  2827440;
+  if (C <  75708) return  3326400;
+  if (C <  79377) return  3603600;
+  if (C <  82703) return  6126120;
+  if (C <  91180) return  4324320;
+  if (C <  93978) return  6683040;
+  if (C <  98840) return  7207200;
+  if (C <  99282) return 11138400;
+  if (C < 105811) return  8648640;
 
   B = racine(N);
   for (t = 8648640+840;; t+=840)
