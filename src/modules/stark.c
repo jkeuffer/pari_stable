@@ -1588,7 +1588,7 @@ InitPrimes(GEN bnr, long nmax, LISTray *R)
     {
       pr  = (GEN)tabpr[j];
       Npr = powgi((GEN)pr[1], (GEN)pr[4]);
-      if (is_bigint(Npr) || (np = Npr[2]) > nmax) continue;
+      if (is_bigint(Npr) || (np = Npr[2]) > nmax) break;
       if (condZ % p == 0 && idealval(nf, cond, pr)) continue;
 
       appendL(R->L1, (GEN)np);
