@@ -110,28 +110,41 @@ rand_g(long n, long type)
 
 extern void setsqri(long a);
 extern void setmuli(long a);
-#define disable_Karatsuba(s) (setmuli(lg(s->x)), setsqri(lg(s->x)))
-#define  enable_Karatsuba(s) (setmuli(lg(s->x)-2), setsqri(lg(s->x)-2))
-#define MULFUN(call, s) {\
-  disable_Karatsuba(s);  \
+extern void setmulr(long a);
+#define disable_Karatsuba_r(s) (setmulr(lg(s->x)))
+#define  enable_Karatsuba_r(s) (setmulr(lg(s->x)-2))
+#define disable_Karatsuba_i(s) (setmuli(lg(s->x)), setsqri(lg(s->x)))
+#define  enable_Karatsuba_i(s) (setmuli(lg(s->x)-2), setsqri(lg(s->x)-2))
+#define MULFUN_i(call, s) {\
+  disable_Karatsuba_i(s);  \
   TIME_FUN(call(s->x, s->y)); }
 
-#define SQRFUN(call, s) {\
-  disable_Karatsuba(s);  \
-  TIME_FUN(call(s->x)); }
-
-#define KARAMULFUN(call, s) {\
-  enable_Karatsuba(s);       \
+#define MULFUN_r(call, s) {\
+  disable_Karatsuba_r(s);  \
   TIME_FUN(call(s->x, s->y)); }
 
-#define KARASQRFUN(call, s) {\
-  enable_Karatsuba(s);       \
+#define SQRFUN_i(call, s) {\
+  disable_Karatsuba_i(s);  \
   TIME_FUN(call(s->x)); }
 
-static double speed_mulii(speed_param *s) { MULFUN(mulii, s); }
-static double speed_sqri (speed_param *s) { SQRFUN( sqri, s); }
-static double speed_karamulii(speed_param *s) { KARAMULFUN(mulii, s); }
-static double speed_karasqri (speed_param *s) { KARASQRFUN( sqri, s); }
+#define KARAMULFUN_i(call, s) {\
+  enable_Karatsuba_i(s);     \
+  TIME_FUN(call(s->x, s->y)); }
+
+#define KARAMULFUN_r(call, s) {\
+  enable_Karatsuba_r(s);     \
+  TIME_FUN(call(s->x, s->y)); }
+
+#define KARASQRFUN_i(call, s) {\
+  enable_Karatsuba_i(s);     \
+  TIME_FUN(call(s->x)); }
+
+static double speed_mulrr(speed_param *s) { MULFUN_r(mulrr, s); }
+static double speed_mulii(speed_param *s) { MULFUN_i(mulii, s); }
+static double speed_sqri (speed_param *s) { SQRFUN_i( sqri, s); }
+static double speed_karamulrr(speed_param *s) { KARAMULFUN_r(mulrr, s); }
+static double speed_karamulii(speed_param *s) { KARAMULFUN_i(mulii, s); }
+static double speed_karasqri (speed_param *s) { KARASQRFUN_i( sqri, s); }
  
 extern  GEN init_remainder(GEN M);
 extern ulong invrev(ulong b);
@@ -285,7 +298,7 @@ print_define(const char *name, long value)
   printf("#define %-25s  %5ld\n\n", name, value);
 }
 
-double
+int
 one(tune_param *param)
 {
   int  since_positive, since_thresh_change;
@@ -383,7 +396,7 @@ void error(int argc/* ignored */, char **argv)
 int
 main(int argc, char **argv)
 {
-  int i, MONTGOMERY_LIMIT;
+  int i, MONTGOMERY_LIMIT, KARATSUBA_MULI_LIMIT;
   pari_init(4000000, 2);
   for (i = 1; i < argc; i++)
   {
@@ -408,6 +421,15 @@ main(int argc, char **argv)
     param.min_size[0] = 4;
     param.fun1 = &speed_mulii;
     param.fun2 = &speed_karamulii;
+    KARATSUBA_MULI_LIMIT = one(&param);
+  }
+  { static tune_param param; 
+    param.name[0] = "KARATSUBA_MULR_LIMIT";
+    param.min_size[0] = 4;
+    param.type = t_REAL;
+    setmuli(KARATSUBA_MULI_LIMIT);
+    param.fun1 = &speed_mulrr;
+    param.fun2 = &speed_karamulrr;
     (void)one(&param);
   }
   { static tune_param param; 

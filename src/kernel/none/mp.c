@@ -78,6 +78,12 @@ egalii(GEN x, GEN y)
 }
 #undef MASK
 
+/***********************************************************************/
+/**								      **/
+/**		         ADDITION / SUBTRACTION          	      **/
+/**                                                                   **/
+/***********************************************************************/
+
 #ifdef INLINE
 INLINE
 #endif
@@ -772,7 +778,43 @@ addrr(GEN x, GEN y)
   z[0] = evaltyp(t_REAL) | evallg(lz);
   avma = (pari_sp)z; return z;
 }
+#endif 
 
+/***********************************************************************/
+/**								      **/
+/**		          MULTIPLICATION                 	      **/
+/**                                                                   **/
+/***********************************************************************/
+#define _sqri_l 47
+#define _muli_l 25 /* optimal on PII 350MHz + gcc 2.7.2.1 (gp-dyn) */
+#define _mulr_l 50
+
+#if 1 /* for tunings */
+long KARATSUBA_SQRI_LIMIT = _sqri_l;
+long KARATSUBA_MULI_LIMIT = _muli_l;
+long KARATSUBA_MULR_LIMIT = _mulr_l;
+
+void setsqri(long a) { KARATSUBA_SQRI_LIMIT = a; }
+void setmuli(long a) { KARATSUBA_MULI_LIMIT = a; }
+void setmulr(long a) { KARATSUBA_MULR_LIMIT = a; }
+
+GEN
+speci(GEN x, long nx)
+{
+  GEN z;
+  long i;
+  if (!nx) return gzero;
+  z = cgeti(nx+2); z[1] = evalsigne(1)|evallgefint(nx+2);
+  for (i=0; i<nx; i++) z[i+2] = x[i];
+  return z;
+}
+#else
+#  define KARATSUBA_SQRI_LIMIT _sqri_l
+#  define KARATSUBA_MULI_LIMIT _muli_l
+#  define KARATSUBA_MULR_LIMIT _mulr_l
+#endif
+
+#ifndef __M68K__
 GEN
 mulss(long x, long y)
 {
@@ -910,13 +952,11 @@ mulsr(long x, GEN y)
   z[1] = evalsigne(s) | evalexpo(m+e); return z;
 }
 
-#define MULRR_LIMIT  32
-#define MULRR2_LIMIT 32
-
-static GEN addshiftw(GEN x, GEN y, long d);
 static GEN quickmulii(GEN a, GEN b, long na, long nb);
+#define KARAMULR_VARIANT
 
-#if 0
+#ifdef KARAMULR_VARIANT
+static GEN addshiftw(GEN x, GEN y, long d);
 static GEN
 karamulrr1(GEN y, GEN x, long ly, long lz)
 {
@@ -955,10 +995,13 @@ mulrr(GEN x, GEN y)
   if (lz>ly) { lz=ly; z=x; x=y; y=z; flag=1; } else flag = (lz!=ly);
   z = cgetr(lz);
 
-  if (lz > MULRR_LIMIT) 
-  { /* use Karatsuba */
+  if (lz > KARATSUBA_MULR_LIMIT) 
+  {
+#ifdef KARAMULR_VARIANT
+    GEN hi = karamulrr1(y+2, x+2, lz+flag-2, lz-2); 
+#else
     GEN hi = quickmulii(y+2, x+2, lz+flag-2, lz-2);
-/*  GEN hi = karamulrr1(y+2, x+2, lz+flag-2, lz-2); */
+#endif
     long i, garde = hi[lz];
     if (hi[2] < 0)
     {
@@ -1098,6 +1141,12 @@ mulir(GEN x, GEN y)
   z[1] = evalsigne(sx) | evalexpo(e);
   avma=(pari_sp)z; return z;
 }
+
+/***********************************************************************/
+/**								      **/
+/**		          DIVISION                       	      **/
+/**                                                                   **/
+/***********************************************************************/
 
 /* written by Bruno Haible following an idea of Robert Harley */
 long
@@ -1712,6 +1761,12 @@ DIVIDE: /* quotient is non-zero */
   avma = (pari_sp)qd; return q;
 }
 
+/***********************************************************************/
+/**								      **/
+/**		          GCD                            	      **/
+/**                                                                   **/
+/***********************************************************************/
+
 /* Ultra-fast private ulong gcd for trial divisions.  Called with y odd;
    x can be arbitrary (but will most of the time be smaller than y).
    Will also be used from inside ifactor2.c, so it's `semi-private' really.
@@ -2318,31 +2373,6 @@ absr_cmp(GEN x, GEN y)
 /**               INTEGER MULTIPLICATION (KARATSUBA)               **/
 /**                                                                **/
 /********************************************************************/
-#define _sqri_l 47
-#define _muli_l 25 /* optimal on PII 350MHz + gcc 2.7.2.1 (gp-dyn) */
-
-#if 1 /* for tunings */
-long KARATSUBA_SQRI_LIMIT = _sqri_l;
-long KARATSUBA_MULI_LIMIT = _muli_l;
-
-void setsqri(long a) { KARATSUBA_SQRI_LIMIT = a; }
-void setmuli(long a) { KARATSUBA_MULI_LIMIT = a; }
-
-GEN
-speci(GEN x, long nx)
-{
-  GEN z;
-  long i;
-  if (!nx) return gzero;
-  z = cgeti(nx+2); z[1] = evalsigne(1)|evallgefint(nx+2);
-  for (i=0; i<nx; i++) z[i+2] = x[i];
-  return z;
-}
-#else
-#  define KARATSUBA_SQRI_LIMIT _sqri_l
-#  define KARATSUBA_MULI_LIMIT _muli_l
-#endif
-
 /* nx >= ny = num. of digits of x, y (not GEN, see mulii) */
 #ifdef INLINE
 INLINE
@@ -2640,6 +2670,12 @@ quicksqri(GEN a, long na)
 
 GEN
 sqri(GEN a) { return quicksqri(a+2, lgefint(a)-2); }
+
+/********************************************************************/
+/**                                                                **/
+/**              EXPONENT / CONVERSION t_REAL --> double           **/
+/**                                                                **/
+/********************************************************************/
 
 #ifdef LONG_IS_64BIT
 long
@@ -4585,6 +4621,12 @@ mpsqrtl(GEN a)
   return y;
 }
 
+/********************************************************************/
+/**                                                                **/
+/**                             SHIFT                              **/
+/**                                                                **/
+/********************************************************************/
+
 /* target should point to a buffer of source_end - source + 1 ulongs.
 
    fills this buffer by bits of ulongs in source..source_end-1 shifted
@@ -4609,7 +4651,12 @@ shift_r(ulong *target, ulong *source, ulong *source_end, ulong prepend, ulong sh
       target[i] = source[i];
   }
 }
-/*Random function*/
+
+/********************************************************************/
+/**                                                                **/
+/**                         RANDOM INTEGERS                        **/
+/**                                                                **/
+/********************************************************************/
 static long pari_randseed = 1;
 
 /* BSD rand gives this: seed = 1103515245*seed + 12345 */
