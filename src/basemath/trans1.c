@@ -700,77 +700,131 @@ mpsqrt(GEN x)
   avma=av; return y;
 }
 
+/* O(p^e) */
+GEN
+padiczero(GEN p, long e)
+{
+  GEN y = cgetg(5,t_PADIC);
+  y[4] = zero;
+  y[3] = un;
+  copyifstack(p,y[2]);
+  y[1] = evalvalp(e) | evalprecp(0);
+  return y;
+}
+
+/* assume x unit, precp(x) = pp > 3 */
+static GEN
+sqrt_2adic(GEN x, long pp)
+{
+  GEN z = mod16(x)==1? gun: stoi(3);
+  long zp;
+  ulong av, lim;
+
+  if (pp == 4) return z;
+  zp = 3; /* number of correct bits in z (compared to sqrt(x)) */
+
+  av = avma; lim = stack_lim(av,2);
+  for(;;)
+  {
+    GEN mod;
+    zp = (zp<<1) - 1;
+    if (zp > pp) zp = pp;
+    mod = shifti(gun, zp);
+    z = addii(z, resmod2n(mulii(x, mpinvmod(z,mod)), zp));
+    z = shifti(z, -1); /* (z + x/z) / 2 */
+    if (pp == zp) return z;
+
+    if (zp < pp) zp--;
+
+    if (low_stack(lim,stack_lim(av,2)))
+    {
+      if (DEBUGMEM > 1) err(warnmem,"padic_sqrt");
+      z = gerepileuptoint(av,z);
+    }
+  }
+}
+
+/* x unit defined modulo modx = p^pp, p != 2, pp > 0 */
+static GEN
+sqrt_padic(GEN x, GEN modx, long pp, GEN p)
+{
+  GEN mod, z = mpsqrtmod(x, p);
+  long zp = 1;
+  ulong av, lim;
+
+  if (!z) err(sqrter5);
+  if (pp <= zp) return z; 
+
+  av = avma; lim = stack_lim(av,2);
+  mod = p;
+  for(;;)
+  { /* could use the hensel_lift_accel idea. Not really worth it */
+    GEN inv2;
+    zp <<= 1;
+    if (zp < pp) mod = sqri(mod); else { zp = pp; mod = modx; }
+    inv2 = shifti(mod, -1); /* = (mod + 1)/2 = 1/2 */
+    z = addii(z, resii(mulii(x, mpinvmod(z,mod)), mod));
+    z = mulii(z, inv2);
+    z = modii(z, mod); /* (z + x/z) / 2 */
+    if (pp <= zp) return z;
+
+    if (low_stack(lim,stack_lim(av,2)))
+    {
+      GEN *gptr[2]; gptr[0]=&z; gptr[1]=&mod;
+      if (DEBUGMEM>1) err(warnmem,"padic_sqrt");
+      gerepilemany(av,gptr,2);
+    }
+  }
+}
+
 static GEN
 padic_sqrt(GEN x)
 {
-  long av = avma, av2,lim,e,r,lpp,lp,pp;
-  GEN y;
+  long pp, e = valp(x);
+  GEN z,y,mod, p = (GEN)x[2];
+  ulong av;
 
-  e=valp(x); y=cgetg(5,t_PADIC); copyifstack(x[2],y[2]);
-  if (gcmp0(x))
-  {
-    y[4] = zero; e = (e+1)>>1;
-    y[3] = un;
-    y[1] = evalvalp(e) | evalprecp(precp(x));
-    return y;
-  }
+  if (gcmp0(x)) return padiczero(p, (e+1) >> 1);
   if (e & 1) err(sqrter6);
-  e>>=1; setvalp(y,e); y[3] = y[2];
+
+  y = cgetg(5,t_PADIC);
   pp = precp(x);
-  if (egalii(gdeux, (GEN)x[2]))
+  mod = (GEN)x[3];
+  x   = (GEN)x[4]; /* lift to int */
+  e >>= 1; av = avma;
+  if (egalii(gdeux, p))
   {
-    lp=3; y[4] = un; r = mod8((GEN)x[4]);
-    if ((r!=1 && pp>=2) && (r!=5 || pp!=2)) err(sqrter5);
-    if (pp <= lp) { setprecp(y,1); return y; }
-
-    x = dummycopy(x); setvalp(x,0); setvalp(y,0);
-    av2=avma; lim = stack_lim(av2,2);
-    y[3] = lstoi(8);
-    for(;;)
+    long r = mod8(x);
+    if (pp <= 3)
     {
-      lpp=lp; lp=(lp<<1)-1;
-      if (lp < pp) y[3] = lshifti((GEN)y[3], lpp-1);
-      else
-        { lp=pp; y[3] = x[3]; }
-      setprecp(y,lp); y = gdiv(gadd(y, gdiv(x,y)), gdeux);
-      if (lp < pp) lp--;
-      if (cmpii((GEN)y[4], (GEN)y[3]) >= 0)
-        y[4] = lsubii((GEN)y[4], (GEN)y[3]);
-
-      if (pp <= lp) break;
-      if (low_stack(lim,stack_lim(av2,2)))
-      {
-        if (DEBUGMEM > 1) err(warnmem,"padic_sqrt");
-        y = gerepileupto(av2,y);
+      switch(pp) {
+        case 1: break;
+        case 2: if ((r&3) == 1) break;
+        case 3: if (r == 1) break;
+        default: err(sqrter5);
       }
+      z = gun;
+      pp = 1;
     }
-    y = gcopy(y);
+    else
+    {
+      if (r != 1) err(sqrter5);
+      z = sqrt_2adic(x, pp);
+      z = gerepileuptoint(av, z);
+      pp--;
+    }
+    mod = shifti(gun, pp);
   }
   else /* p != 2 */
   {
-    lp=1; y[4] = (long)mpsqrtmod((GEN)x[4],(GEN)x[2]);
-    if (!y[4]) err(sqrter5);
-    if (pp <= lp) { setprecp(y,1); return y; }
-
-    x = dummycopy(x); setvalp(x,0); setvalp(y,0);
-    av2=avma; lim = stack_lim(av2,2);
-    for(;;)
-    {
-      lp<<=1;
-      if (lp < pp) y[3] = lsqri((GEN)y[3]);
-      else
-        { lp=pp; y[3] = x[3]; }
-      setprecp(y,lp); y = gdiv(gadd(y, gdiv(x,y)), gdeux);
-
-      if (pp <= lp) break;
-      if (low_stack(lim,stack_lim(av2,2)))
-      {
-        if (DEBUGMEM > 1) err(warnmem,"padic_sqrt");
-        y = gerepileupto(av2,y);
-      }
-    }
+    z = sqrt_padic(x, mod, pp, p);
+    z = gerepileuptoint(av, z);
+    mod = icopy(mod);
   }
-  setvalp(y,e); return gerepileupto(av,y);
+  y[1] = evalprecp(pp) | evalvalp(e);
+  copyifstack(p,y[2]);
+  y[3] = (long)mod;
+  y[4] = (long)z; return y;
 }
 
 GEN
