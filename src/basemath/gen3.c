@@ -1389,7 +1389,7 @@ derivpol(GEN x)
   long i,lx = lgef(x)-1;
   GEN y;
 
-  if (lx<3) return gzero;
+  if (lx<3) return zeropol(varn(x));
   y = cgetg(lx,t_POL);
   for (i=2; i<lx ; i++) y[i] = lmulsg(i-1,(GEN)x[i+1]);
   y[1] = x[1]; return normalizepol_i(y,i);
