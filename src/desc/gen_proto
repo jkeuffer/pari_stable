@@ -71,14 +71,16 @@ foreach my $name (sort keys %funcs)
       my %func=%{$funcs{$name}};
       next if ($func{'Class'} ne $class);
       my $gpname=$func{'Function'};
+      defined($func{'Section'}) or die("No section for $name");
       my $sec=$secnumber{$func{'Section'}};
+      defined($sec) or $sec=0;
       my $proto=$func{'Prototype'};
       my $cname=$func{'C-Name'};
       if (defined($cname))
       {
         my $fproto=$proto;
         $proto =~ s/^[vl]//;
-        if ($proto eq "" || $proto =~ /^[DpP]/)
+        if ($proto eq "" || $proto =~ /^(s\*)|[DpP]/)
         {
           $valence=0;
         }
