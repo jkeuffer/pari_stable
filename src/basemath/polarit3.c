@@ -3445,68 +3445,71 @@ fpinit(GEN p, long l)
   return FpX_red(subcyclo(n,l,0),p);
 }
 
-GEN
+static GEN
 ffinit_fact(GEN p, long n)
 {
-  pari_sp ltop=avma;
-  GEN F;	  /* vecsmall */
-  GEN P;	  /* pol */
+  GEN F = (GEN)decomp_small(n)[3];
+  GEN P; /* pol */
   long i;
-  F = (GEN) decomp_small(n)[3];
   /* If n is even, then F[1] is 2^bfffo(n)*/
-  if (!(n&1) && egalii(p, gdeux))
+  if (!odd(n) && egalii(p, gdeux))
     P = f2init(vals(n));
   else
     P = fpinit(p, F[1]);
   for (i = 2; i < lg(F); ++i)
     P = FpX_direct_compositum(fpinit(p, F[i]), P, p);
-  return gerepileupto(ltop,FpX_to_mod(P,p));
+  return P;
 }
 
-GEN
+static GEN
 ffinit_nofact(GEN p, long n)
 {
-  pari_sp av = avma;
-  GEN P,Q=NULL;
+  GEN P, Q = NULL;
   if (lgefint(p)==3)
   {
-    ulong lp=p[2], q;
-    long v=svaluation(n,lp,&q);
+    ulong lp = p[2], q;
+    long v = svaluation(n,lp,&q);
     if (v>0)
     {
-      if (lp==2)
-        Q=f2init(v);
-      else
-        Q=fpinit(p,n/q);
-      n=q;
+      if (lp==2) Q = f2init(v);
+      else       Q = fpinit(p,n/q);
+      n = q;
     }
   }
-  if (n==1)
-    P=Q;
+  if (n==1) P = Q;
   else
   {
     P = fpinit(p, n);
     if (Q) P = FpX_direct_compositum(P, Q, p);
   }
-  return gerepileupto(av, FpX_to_mod(P,p));
+  return P;
 }
 
-GEN
-ffinit(GEN p, long n, long v)
+static GEN
+FqX_init_i(GEN p, long n, long v)
 {
-  pari_sp ltop=avma;
   GEN P;
   if (n <= 0) err(talker,"non positive degree in ffinit");
   if (typ(p) != t_INT) err(typeer, "ffinit");
   if (v < 0) v = 0;
-  if (n == 1) return FpX_to_mod(polx[v],p);
-  /*If we are in a easy case just use cyclo*/
-  if (fpinit_check(p, n + 1, n))
-    return gerepileupto(ltop,FpX_to_mod(cyclo(n + 1, v),p));
+  if (n == 1) return polx[v];
+  /*If easy case, use cyclo*/
+  if (fpinit_check(p, n + 1, n)) return cyclo(n + 1, v);
   if ((ulong)lgefint(p)-2 < BITS_IN_LONG-bfffo(n))
-    P=ffinit_fact(p,n);
+    P = ffinit_fact(p,n);
   else
-    P=ffinit_nofact(p,n);
-  setvarn(P, v);
-  return P;
+    P = ffinit_nofact(p,n);
+  setvarn(P, v); return P;
+}
+GEN
+FqX_init(GEN p, long n, long v)
+{
+  pari_sp av = avma;
+  return gerepileupto(av, FqX_init_i(p, n, v));
+}
+GEN
+ffinit(GEN p, long n, long v)
+{
+  pari_sp av = avma;
+  return gerepileupto(av, FpX_to_mod(FqX_init_i(p, n, v), p));
 }
