@@ -534,7 +534,7 @@ isvirtualunit(GEN bnfz, GEN v, GEN vecalpha, GEN cyc)
 static GEN
 steinitzaux(GEN nfz, GEN nf, GEN id, GEN polrel)
 {
-  long i,j, degKz = degpol(nfz), degK = degpol(nf);
+  long i,j, degKz = degpol(nfz[1]), degK = degpol(nf[1]);
   GEN p1,p2,p3,vecid,matid,pseudomat,pid;
 
   p1=gsubst(gmul((GEN)nfz[7],id),vnf,polx[0]);
