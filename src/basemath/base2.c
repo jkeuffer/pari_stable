@@ -3488,6 +3488,7 @@ nf_all_roots(GEN nf, GEN x, long prec)
   x = unifpol(nf, x, 0);
   y[1] = x[1];
   for (i=2; i<l; i++) y[i] = (long) nftocomplex(nf, (GEN)x[i]);
+  if (gprecision(y) <= 3) return NULL;
 
   v = cgetg(ru, t_VEC);
   z = cgetg(l, t_POL); z[1] = x[1];
@@ -3634,7 +3635,9 @@ rel_T2(GEN nf, GEN pol, long lx, long prec)
   long ru, i, j, k, l;
   GEN T2, m, s, unro, roorder, powreorder;
 
-  roorder = nf_all_roots(nf, pol, prec); ru = lg(roorder);
+  roorder = nf_all_roots(nf, pol, prec);
+  if (!roorder) return NULL;
+  ru = lg(roorder);
   unro = cgetg(lx,t_COL); for (i=1; i<lx; i++) unro[i] = un;
   powreorder = cgetg(lx,t_MAT); powreorder[1] = (long)unro;
   T2 = cgetg(ru, t_VEC);
@@ -3677,7 +3680,7 @@ rnflllgram(GEN nf, GEN pol, GEN order,long prec)
   pari_sp av = avma, lim = stack_lim(av,2);
   long j, k, l, kmax, r1, lx, count = 0;
   GEN M, I, h, H, mth, MC, MPOL, MCS, B, mu, y, z;
-  const int alpha = 10;
+  const int alpha = 10, MAX_COUNT = 4;
 
   nf = checknf(nf); r1 = nf_get_r1(nf);
   check_ZKmodule(order, "rnflllgram");
@@ -3690,17 +3693,19 @@ rnflllgram(GEN nf, GEN pol, GEN order,long prec)
   MPOL = matbasistoalg(nf, M);
   MCS = idmat(lx-1); /* dummy for gerepile */
 PRECNF:
+  if (count == MAX_COUNT)
+  { 
+    prec = (prec<<1)-2; count = 0;
+    if (DEBUGLEVEL) err(warnprec,"rnflllgram",prec);
+    nf = nfnewprec(nf,prec);
+  }
   mth = rel_T2(nf, pol, lx, prec);
+  if (!mth) { count = MAX_COUNT; goto PRECNF; }
   h = NULL;
 PRECPB:
   if (h)
-  { /* precision problem, recompute */
-    if (++count == 4 || isidentity(h))
-    { /* no progress: increase nf precision */
-      prec = (prec<<1)-2; count = 0;
-      if (DEBUGLEVEL) err(warnprec,"rnflllgram",prec);
-      nf = nfnewprec(nf,prec); goto PRECNF;
-    }
+  { /* precision problem, recompute. If no progress, increase nf precision */
+    if (++count == MAX_COUNT || isidentity(h)) {count = MAX_COUNT; goto PRECNF;}
     H = H? gmul(H, h): h;
     MPOL = gmul(MPOL, h);
   }
@@ -3748,7 +3753,7 @@ PRECPB:
     if (low_stack(lim, stack_lim(av,2)))
     {
       if(DEBUGMEM>1) err(warnmem,"rnflllgram");
-      gerepileall(av, H?9:8, &mth,&h,&MPOL,&B,&MC,&MCS,&mu,&I,&H);
+      gerepileall(av, H?10:9, &nf,&mth,&h,&MPOL,&B,&MC,&MCS,&mu,&I,&H);
     }
   }
   while (k < lx);
