@@ -214,7 +214,7 @@ entree oldfonctions[]={
 {"hell2",2,(void *)ghell2,5,"GGp"},
 {"hermite",1,(void *)hnf,8,"G"},
 {"hermite2",1,(void *)hnfall,8,"G"},
-{"hermitehavas",1,(void *)hnfhavas,8,"G"},
+{"hermitehavas",1,(void *)suppressed,8,"G"},
 {"hermitemod",2,(void *)hnfmod,8,"GG"},
 {"hermitemodid",2,(void *)hnfmodid,8,"GG"},
 {"hermiteperm",1,(void *)hnfperm,8,"G"},

@@ -194,7 +194,7 @@ static const whatnow_t whatnowlist[]={
 {"ellheight","(e,x)","(e,x,1)"},
 {"mathnf","(x)","(x)"},
 {"mathnf","(x)","(x,1)"},
-{"mathnf","(x)","(x,2)"},
+{REMOV},
 {"mathnfmod","(x,d)","(x,d)"},
 {"mathnfmodid","(x,d)","(x,d)"},
 {"mathnf","(x)","(x,3)"},
