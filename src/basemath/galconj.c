@@ -2174,7 +2174,7 @@ s4galoisgen(struct galois_lift *gl)
   for (i = 1; i < lg(isom); i++)
   {
     misom[i] = lgetg(lg(Tmod), t_COL);
-    isom[i] = (long) Fp_isom(p, (GEN) Tmod[1], (GEN) Tmod[i]);
+    isom[i] = (long) Fp_isom((GEN) Tmod[1], (GEN) Tmod[i], p);
     if (DEBUGLEVEL >= 6)
       fprintferr("S4GaloisConj:Computing isomorphisms %d:%Z\n", i,
 		 (GEN) isom[i]);
