@@ -3119,8 +3119,7 @@ galoisinit(GEN nf, GEN den, long karma)
   GEN     G;
   G = galoisconj4(nf, den, 1, karma);
   if (typ(G) == t_INT)
-    err(talker,
-	"galoisinit: field not Galois or Galois group not weakly super solvable");
+    err(talker, "field not Galois or Galois group not weakly super solvable");
   return G;
 }
 
