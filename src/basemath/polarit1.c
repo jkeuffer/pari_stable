@@ -2483,7 +2483,7 @@ FqX_factor_i(GEN f, GEN T, GEN p)
     {
 #if 0
       t[nbfact] = FqX_normalize(u, T,p);
-      nbfact += (N==1)? 1: FqX_split_berlekamp(t+nbfact, q, T, p);
+      nbfact += (N==1)? 1: FqX_split_Berlekamp(t+nbfact, q, T, p);
 #else
       t[nbfact] = u;
       nbfact += (N==1)? 1: FqX_sqf_split(t+nbfact, q, T, p);
