@@ -1773,19 +1773,28 @@ while the second (before the \kbd{"b"}) is completely optional and GP
 actually suppresses it, as it would with any number of whitespace characters
 at this point (i.e.~outside of any string).
 
-$\bullet$ If you insert an expression without quotes when GP expects a
-string, it gets ``expanded'': it is evaluated as a standard GP expression,
-and the final result (as would have been printed if you had typed it by
-itself) is then converted to a string, as if you had typed it directly. For
-instance \kbd{"a" 1+1 "b"} is equivalent to \kbd{"a2b"}: three strings get
-created, the middle one being the expansion of \kbd{1+1}, and these are then
-concatenated according to the rule described above. Another tricky point
-here: assume you did not assign a value to \kbd{aaa} in a GP expression
-before. Then typing \kbd{aaa} by itself in a string context will actually
-produce the correct output (i.e.~the string whose content is aaa), but in a
-fortuitous way. This \kbd{aaa} gets expanded to the monomial of degree one in
-the variable \kbd{aaa}, which is of course printed as \kbd{aaa}, and thus
-will expand to the three letters you were expecting.
+$\bullet$ If you insert any expression when GP expects a string, it gets
+``expanded'': it is evaluated as a standard GP expression, and the final
+result (as would have been printed if you had typed it by itself) is then
+converted to a string, as if you had typed it directly. For instance \kbd{"a"
+1+1 "b"} is equivalent to \kbd{"a2b"}: three strings get created, the middle
+one being the expansion of \kbd{1+1}, and these are then concatenated
+according to the rule described above. Another tricky point here: assume you
+did not assign a value to \kbd{aaa} in a GP expression before. Then typing
+\kbd{aaa} by itself in a string context will actually produce the correct
+output (i.e.~the string whose content is aaa), but in a fortuitous way. This
+\kbd{aaa} gets expanded to the monomial of degree one in the variable
+\kbd{aaa}, which is of course printed as \kbd{aaa}, and thus will expand to
+the three letters you were expecting.
+
+\misctitle{Warning:} expression involving strings are not handled in a
+special way; even in string context, the largest possible expression is
+evaluated, hence \kbd{print("a"[1])} is incorrect since \kbd{"a"} is not an
+object whose first component can be extracted. On the other hand
+\kbd{print("a", [1])} is correct (two distinct argument, each converted to a
+string), and so is \kbd{print("a" 1)} (since \kbd{"a"1} is not a valid
+expression, only \kbd{"a"} gets expanded, then \kbd{1}, and the result is
+concatenated as explained above).
 
 $\bullet$ Since there are cases where expansion is not really desirable, we
 now distinguish between ``Keywords'' and ``Strings''. String is what has been
