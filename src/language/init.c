@@ -1866,7 +1866,7 @@ entree functions_basic[]={
 {"idealfactor",2,(void*)idealfactor,6,"GG"},
 {"idealhnf",99,(void*)idealhnf0,6,"GGDG"},
 {"idealintersect",3,(void*)idealintersect,6,"GGG"},
-{"idealinv",25,(void*)idealinv0,6,"GGD0,L,"},
+{"idealinv",25,(void*)idealinv,6,"GG"},
 {"ideallist",99,(void*)ideallist0,6,"GLD4,L,"},
 {"ideallistarch",99,(void*)ideallistarch0,6,"GGDGD0,L,"},
 {"ideallog",3,(void*)zideallog,6,"GGG"},

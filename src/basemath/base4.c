@@ -326,18 +326,6 @@ idealmul0(GEN nf, GEN x, GEN y, long flag, long prec)
 }
 
 GEN
-idealinv0(GEN nf, GEN ix, long flag)
-{
-  switch(flag)
-  {
-    case 0: return idealinv(nf,ix);
-    case 1: return oldidealinv(nf,ix);
-    default: err(flagerr,"idealinv");
-  }
-  return NULL; /* not reached */
-}
-
-GEN
 idealdiv0(GEN nf, GEN x, GEN y, long flag)
 {
   switch(flag)
@@ -1249,25 +1237,6 @@ hnfideal_inv(GEN nf, GEN I)
   dual = hnfmodid(dual, NI);
   if (dI) NI = gdiv(NI,dI);
   return gdiv(dual,NI);
-}
-
-GEN
-oldidealinv(GEN nf, GEN x)
-{
-  GEN res,dual,di,ax;
-  long av,tetpil, tx = idealtyp(&x,&ax);
-
-  if (tx!=id_MAT) return idealinv(nf,x);
-  res = ax? cgetg(3,t_VEC): NULL;
-  nf=checknf(nf); av=avma;
-  if (lg(x)!=lgef(nf[1])) x = idealmat_to_hnf(nf,x);
-
-  dual = ginv(gmul(gtrans(x), gmael(nf,5,4)));
-  di=denom(dual); dual=gmul(di,dual);
-  dual = idealmat_mul(nf,gmael(nf,5,5), dual);
-  tetpil=avma; dual = gerepile(av,tetpil,gdiv(dual,di));
-  if (!ax) return dual;
-  res[1]=(long)dual; res[2]=lneg(ax); return res;
 }
 
 /* return p * P^(-1)  [integral] */

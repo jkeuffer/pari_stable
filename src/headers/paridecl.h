@@ -428,7 +428,6 @@ GEN     idealhermite2(GEN nf, GEN a, GEN b);
 GEN     idealhnf0(GEN nf, GEN a, GEN b);
 GEN     idealintersect(GEN nf, GEN x, GEN y);
 GEN     idealinv(GEN nf, GEN ix);
-GEN     idealinv0(GEN nf, GEN ix,long flag);
 GEN     ideallllred(GEN nf,GEN ix,GEN vdir,long prec);
 GEN     ideallllredall(GEN nf, GEN ix, GEN vdir, long prec, long precint);
 GEN     idealmul(GEN nf, GEN ix, GEN iy);
