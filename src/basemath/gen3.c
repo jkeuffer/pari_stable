@@ -1310,14 +1310,13 @@ static GEN
 gconvsp(GEN x, long e)
 {
   long v = varn(x), i;
-  GEN p1, y;
+  GEN y;
 
   if (gcmp0(x)) return zeropol(v);
   y = dummycopy(x);
   i=lg(x)-1; while (i>1 && gcmp0((GEN)y[i])) i--;
   y[0] = evaltyp(t_POL) | evallg(i+1);
-  if (e) p1 = gpowgs(polx[v], e);
-  return gmul(p1, y);
+  return e? gmul(y,  gpowgs(polx[v], e)): y;
 }
 
 /*
