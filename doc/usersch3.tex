@@ -308,7 +308,9 @@ The six standard \idx{comparison operators} \kbd{<=}, \kbd{<}, \kbd{>=},
 the names \tet{gle}, \tet{glt}, \tet{gge}, \tet{ggt}, \tet{geq}, \tet{gne}
 respectively. The library syntax is $\var{co}(x,y)$, where \var{co} is the
 comparison operator. The result is 1 (as a \kbd{GEN}) if the comparison is
-true, 0 (as a \kbd{GEN}) if it is false.
+true, 0 (as a \kbd{GEN}) if it is false. For the purpose of comparison,
+\typ{STR} objects are strictly larger than any other non-string type; two
+\typ{STR} objects are compared using the standard lexicographic order.
 
 The standard boolean functions  \kbd{||} (\idx{inclusive or}), \kbd{\&\&}
 (\idx{and})\sidx{or} and \kbd{!} (\idx{not}) are also available, and the
