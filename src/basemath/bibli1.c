@@ -2027,7 +2027,7 @@ GEN roots_to_pol_r1r2(GEN a, long r1, long v);
 
 /* data[0] = r1
  * data[1] = embeddings of Zk basis
- * data[2] = embeddings of Zk basis */
+ * data[2] = embeddings of final LLL reduced Zk basis */
 static GEN
 chk_gen_init(GEN data, GEN nf, GEN mat, GEN bound)
 {
@@ -2823,6 +2823,8 @@ fincke_pohst(GEN a,GEN bound,long stockmax,long flag, long PREC,
     prec += 2 * ((gexpo(v1) + gexpo((GEN)nf[1])) >> TWOPOTBITS_IN_LONG);
     nf = nfnewprec(nf, prec);
     r = qf_base_change(T,v1,1);
+    i = PREC + (gexpo(r) >> TWOPOTBITS_IN_LONG);
+    if (i < prec) prec = i;
     r = gmul(r, realun(prec));
   }
   else
