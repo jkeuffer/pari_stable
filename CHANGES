@@ -77,6 +77,8 @@ BA 38- pariformats (e.g %Z) incorrect on 64bit machines
    39- polhensellift(x,[x,1],2,2) --> "bug in multiplication"
    40- glitches in readline completion (random() * ne<TAB) --> inserted args)
 IZ 41- (obsolete, probably unused) CLK_TCK may reside in time.h
+   42- misleading definition for ?omega / ?bigomega
+   43- on \q, "Good bye" --> Goodbye
 
   Changed
     1- removed useless parameter prec in many bnr* and rnf* functions
