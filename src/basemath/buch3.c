@@ -234,6 +234,7 @@ idealpowmodidele(GEN nf,GEN x,GEN n, GEN ideal,GEN sarch,GEN arch)
 
   if (!signe(n)) return idealpow(nf,x,n);
   if (gcmp1(n)) return x;
+
   D.nf = nf;
   D.ideal= ideal;
   D.arch = arch;
@@ -242,13 +243,44 @@ idealpowmodidele(GEN nf,GEN x,GEN n, GEN ideal,GEN sarch,GEN arch)
   return gerepileupto(av,y);
 }
 
+/* EX = group exponent */
+static GEN
+compute_gen(GEN nf, GEN u1, GEN gen, GEN bid, GEN EX)
+{
+  GEN p1, basecl, sarch, fa2, module = (GEN)bid[1];
+  GEN x = (GEN)module[1], arch = (GEN)module[2];
+  long i,j, c = lg(u1), h = lg(u1[1]); /* c > 1 */
+
+  basecl = cgetg(c,t_VEC);
+
+  fa2 = (GEN)bid[4]; sarch = (GEN)fa2[lg(fa2)-1];
+  for (j=1; j<c; j++)
+  {
+    GEN plus = NULL;
+    gpmem_t av1 = avma;
+    for (i=1; i<h; i++)
+    {
+      p1 = modii(gcoeff(u1,i,j), EX);
+      if (!signe(p1)) continue;
+
+      p1 = idealpowmodidele(nf,(GEN)gen[i],p1,x,sarch,arch);
+      plus = plus? idealmulmodidele(nf,plus,p1,x,sarch,arch)
+                 : p1;
+    } 
+    basecl[j] = lpileupto(av1,plus);
+  }
+  return basecl;
+}
+
 static GEN
 buchrayall(GEN bnf,GEN module,long flag)
 {
-  GEN nf,cyc,gen,genplus,fa2,sarch,hmatu,u,clg,logs;
-  GEN dataunit,p1,p2,h,genray,met,u1,u2,U,cycgen;
+  GEN nf,cyc,gen,genplus,hmatu,u,clg,logs;
+  GEN dataunit,p1,h,met,u1,u2,U,cycgen;
   GEN racunit,bigres,bid,cycbid,genbid,x,y,funits,hmat,vecel;
-  long RU, Ri, i, j, ngen, lh, lo, c;
+  long RU, Ri, j, ngen, lh;
+  const int add_gen = flag & nf_GEN;
+  const int do_init = flag & nf_INIT;
   gpmem_t av=avma;
 
   bnf = checkbnf(bnf); nf = checknf(bnf);
@@ -264,7 +296,7 @@ buchrayall(GEN bnf,GEN module,long flag)
   Ri = lg(cycbid)-1; lh = ngen+Ri;
 
   x = idealhermite(nf,module);
-  if (Ri || flag & (nf_INIT|nf_GEN))
+  if (Ri || add_gen || do_init)
   {
     vecel = cgetg(ngen+1,t_VEC);
     for (j=1; j<=ngen; j++)
@@ -274,34 +306,32 @@ buchrayall(GEN bnf,GEN module,long flag)
       vecel[j]=(long)p1;
     }
   }
-  if (flag & nf_GEN)
+  if (add_gen)
   {
     genplus = cgetg(lh+1,t_VEC);
     for (j=1; j<=ngen; j++)
-      genplus[j] = (long) idealmul(nf,(GEN)vecel[j],(GEN)gen[j]);
+      genplus[j] = (long)idealmul(nf,(GEN)vecel[j],(GEN)gen[j]);
     for (  ; j<=lh; j++)
       genplus[j] = genbid[j-ngen];
   }
   if (!Ri)
   {
-    if (!(flag & nf_GEN)) clg = cgetg(3,t_VEC);
-    else
-      { clg = cgetg(4,t_VEC); clg[3] = (long)genplus; }
+    clg = cgetg(add_gen? 4: 3,t_VEC);
+    if (add_gen) clg[3] = (long)genplus;
     clg[1] = mael(bigres,1,1);
     clg[2] = (long)cyc;
-    if (!(flag & nf_INIT)) return gerepilecopy(av,clg);
+    if (!do_init) return gerepilecopy(av,clg);
     y = cgetg(7,t_VEC);
-    y[1] = lcopy(bnf);
-    y[2] = lcopy(bid);
-    y[3] = lcopy(vecel);
+    y[1] = (long)bnf;
+    y[2] = (long)bid;
+    y[3] = (long)vecel;
     y[4] = (long)idmat(ngen);
-    y[5] = lcopy(clg); u = cgetg(3,t_VEC);
+    y[5] = (long)clg; u = cgetg(3,t_VEC);
     y[6] = (long)u;
       u[1] = lgetg(1,t_MAT);
       u[2] = (long)idmat(RU);
-    return gerepileupto(av,y);
+    return gerepilecopy(av,y);
   }
-  fa2 = (GEN)bid[4]; sarch = (GEN)fa2[lg(fa2)-1];
 
   cycgen = check_and_build_cycgen(bnf);
   dataunit = cgetg(RU+1,t_MAT); racunit = gmael(bigres,4,2);
@@ -329,50 +359,12 @@ buchrayall(GEN bnf,GEN module,long flag)
     vconcat(diagonal(cyc), gneg_i(logs)),
     vconcat(zeromat(ngen, Ri), hmat)
   );
-  h = hnf(h);
- 
-  met = smithall(h, &U, NULL); /* cf smithrel */
-  lo = lg(met)-1;
-  for (c=1; c<=lo; c++)
-    if (gcmp1(gcoeff(met,c,c))) break;
-  setlg(met,c);
- 
-  if (flag & nf_GEN)
-  {
-    GEN Id = idmat(degpol(nf[1])), arch = (GEN)module[2];
-    u1 = ginv(U); setlg(u1,c);
-    u1 = reducemodHNF(u1, h, NULL);
-    genray = cgetg(c,t_VEC);
-    for (j=1; j<c; j++)
-    {
-      GEN *op, minus = Id, plus = Id;
-      long s;
-      gpmem_t av1 = avma;
-      for (i=1; i<=lo; i++)
-      {
-	p1 = gcoeff(u1,i,j);
-        if (!(s = signe(p1))) continue;
-
-        if (s > 0) op = &plus; else { op = &minus; p1 = negi(p1); }
-        p1 = idealpowmodidele(nf,(GEN)genplus[i],p1,x,sarch,arch);
-        *op = *op==Id? p1
-                     : idealmulmodidele(nf,*op,p1,x,sarch,arch);
-      }
-      if (minus == Id) p1 = plus;
-      else
-      {
-        p2 = ideleaddone_aux(nf,minus,module);
-        p1 = idealdivexact(nf,idealmul(nf,p2,plus),minus);
-        p1 = idealmodidele(nf,p1,x,sarch,arch);
-      }
-      genray[j]=lpileupto(av1,p1);
-    }
-    clg = cgetg(4,t_VEC); clg[3] = lcopy(genray);
-  } else clg = cgetg(3,t_VEC);
-  met = mattodiagonal(met);
-  clg[1] = (long)dethnf_i(h);
+  met = smithrel(hnf(h), &U, add_gen? &u1: NULL);
+  clg = cgetg(add_gen? 4: 3, t_VEC);
+  clg[1] = (long)detcyc(met);
   clg[2] = (long)met;
-  if (!(flag & nf_INIT)) return gerepileupto(av,clg);
+  if (add_gen) clg[3] = (long)compute_gen(nf,u1,genplus,bid, (GEN)met[1]);
+  if (!do_init) return gerepilecopy(av, clg);
 
   u2 = cgetg(Ri+1,t_MAT);
   u1 = cgetg(RU+1,t_MAT); u = (GEN)hmatu[2];
