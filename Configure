@@ -571,6 +571,9 @@ if test "$optimization" != profiling; then
          if (grep rl_completion_append_character $x > /dev/null 2>&1); then
            rl_appendchar=yes
          fi
+         if (grep rl_generic_bind $x > /dev/null 2>&1); then
+           rl_genericbind=yes
+         fi
          if (grep rl_save_prompt $x > /dev/null 2>&1); then
            rl_save_prompt=yes;
          else
@@ -606,6 +609,9 @@ if test "$optimization" != profiling; then
     fi
     if test -z "$rl_appendchar"; then
       echo ..."Library readline does not have completion_append_char"
+    fi
+    if test -z "$rl_genericbind"; then
+      echo ..."Library readline does not have rl_generic_bind"
     fi
     if test -z "$rl_save_prompt"; then
       echo ..."Library readline does not have rl_save_prompt"
@@ -1267,7 +1273,7 @@ for variable in\
   runpath runpathprefix LDDYN LIBS DYNLIBS DYNFLAGS DYNRELOC\
   ranlib gzip zcat emacs perl ln_s make_sh exe_suff\
   readline readline_enabledp CPPF_defined rl_refresh_line_oldproto\
-  rl_appendchar rl_save_prompt _rl_save_prompt rl_message\
+  rl_appendchar rl_genericbind rl_save_prompt _rl_save_prompt rl_message\
   rl_completion_matches rl_completion_func_t\
   RLINCLUDE RLLIBS\
   sizeof_long endian has_exp2\
