@@ -1503,7 +1503,7 @@ _fix(GEN x, long k)
 }
 
 /* low word of integer x */
-#define _low(x) ((x)[lgefint(x)-1])
+#define _low(x) (__x=(GEN)x, __x[lgefint(__x)-1])
 
 /* compute a_p using Shanks/Mestre + Montgomery's trick. Assume p > 20, say */
 GEN
@@ -1511,6 +1511,7 @@ apell1(GEN e, GEN p)
 {
   long *tx, *ty, *ti, av = avma, av2,pfinal,i,j,j2,s,flc,flcc,x,nb;
   GEN p1,p2,p3,h,mfh,f,fh,fg,pordmin,u,v,p1p,p2p,acon,bcon,c4,c6,cp4,pts;
+  GEN __x;
 
   if (DEBUGLEVEL) timer2();
   p1 = gmodulsg(1,p);
