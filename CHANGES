@@ -93,7 +93,8 @@ IZ 37- [OS/2:] ^C would only work once
    44- Compilation failure on ORIGIN + Irix: rename 'sgi' --> 'SG' in
        basemath/galconj.c
    45- '\r a' where file 'a' is empty --> "a is not a GP binary file".
-
+   46- make sure qflll[gram](x) never fails when x has exact entries [ much
+       faster than qflll(x,1) when the dimension is large ]
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available

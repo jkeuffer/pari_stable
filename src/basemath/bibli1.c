@@ -1134,6 +1134,7 @@ lllfp_marked(int MARKED, GEN x, long D, long flag, long prec, int gram)
   GEN xinit,L,h,B,L1,delta, Q;
   long retry = 2, lx = lg(x), hx, l, i, j, k, k1, n, kmax, KMAX;
   pari_sp av0 = avma, av, lim;
+  int isexact;
 
   if (typ(x) != t_MAT) err(typeer,"lllfp");
   n = lx-1; if (n <= 1) return idmat(n);
@@ -1164,33 +1165,38 @@ lllfp_marked(int MARKED, GEN x, long D, long flag, long prec, int gram)
   }
   if (k == 2)
   {
-    if (!prec) return gram? lllgramint(x): lllint(x);
+    if (!prec) return lllint_marked(MARKED, x, D, gram, &h, NULL, NULL);
     x = gmul(x, realun(prec+1));
+    isexact = 1;
   }
   else
   {
     if (prec < k) prec = k;
     x = mat_to_mp(x, prec+1);
+    isexact = 0;
   }
  /* kmax = maximum column index attained during this run
   * KMAX = same over all runs (after PRECPB) */
   kmax = KMAX = 1;
-
-  Q = zerovec(n);
+  h = idmat(n);
 
 PRECPB:
   switch(retry--)
   {
-    case 2: h = idmat(n); break; /* entry */
+    case 2: break; /* entry */
     case 1:
       if (DEBUGLEVEL > 3) fprintferr("\n");
       if (flag == 2) return _vec(h);
-      if (gram && kmax > 2)
+      if (isexact || (gram && kmax > 2))
       { /* some progress but precision loss, try again */
         prec = (prec<<1)-2; kmax = 1;
         if (DEBUGLEVEL) err(warnprec,"lllfp",prec);
-        x = gprec_w(xinit,prec);
+        x = isexact? xinit: gprec_w(xinit,prec);
         if (gram) x = qf_base_change(x,h,1); else x = gmul(x,h);
+        if (isexact) {
+          x = gmul(x, realun(prec+1)); 
+          retry = 1; /* never abort if x is exact */
+        }
         gerepileall(av,2,&h,&x);
         if (DEBUGLEVEL) err(warner,"lllfp starting over");
         break;
@@ -1201,9 +1207,9 @@ PRECPB:
       if (flag) { avma=av; return NULL; }
       err(lllger3);
   }
-
-  L=cgetg(lx,t_MAT);
-  B=cgetg(lx,t_COL);
+  Q = zerovec(n);
+  L = cgetg(lx,t_MAT);
+  B = cgetg(lx,t_COL);
   for (j=1; j<lx; j++) { L[j] = (long)zerocol(n); B[j] = zero; }
   if (gram && !incrementalGS(x, L, B, 1))
   {
