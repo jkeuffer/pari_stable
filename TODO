@@ -111,11 +111,6 @@ is wrong [second one is principal]. Group structure and regulator are correct!
 
 Kernel:
 =======
-5  ensure consistent rounding in floating point operations. At least document
-   it. Currently most routines truncate instead of rounding, most of the time.
-
-5  check NaN in dbltor and related routines
-
 5  implement Jebelean-Krandick diviiexact
 
 5  implement Mulders/Hanrot-Zimmermann Karatsuba short product t_REAL * t_REAL
@@ -134,9 +129,12 @@ Kernel:
 
 2  add support for different multiprecision kernels (a la LiDIA)
 
+0  check NaN in dbltor and related routines
+   [ not worth it ]
+
 Misc:
 =====
-4  decent finite field package (remove all the nfxxxmodpr functions)
+4  decent finite field package [ esp. in small characteristic ]
 
 4  rnfkummer (non-prime degree)
 
@@ -152,7 +150,7 @@ Misc:
 3  p-adic ellztopoint
 
 0  graphics: allow FIG output (besides PostScript) [easier to edit!]
-   [ No: use pstoedit ]
+   [ use pstoedit ]
 
 ***************************   LIBRARY DESIGN   ****************************
 
@@ -183,18 +181,21 @@ Misc:
    p-adic fields, elliptic curves, ...). Would keep list of types small
    (and fast)
 
-3  better representations for multivariate polynomials
+3  sparse representations for multivariate polynomials and martrices.
 
 3  type "element in" ([number|finite] field...), "point" on elliptic curve
 
 3  find a way to deal (generically) with "integral object + its content"
-   Application (e.g): fractional ideals much more efficient.
-
-2  "mute" variables for t_POLMOD. Should have Mod(x,x^2+1) == Mod(y,y^2+1).
+   [ rational arithmetic would be much more efficient, when polynomials or
+     matrices are involved. Currently, the content is being recomputed all
+     the time, removed, then multiplied back in ]
 
 2  have some header magic (transparently) prepend some prefix (e.g "pari_")
    before all exported functions to prevent name conflicts. Build alias
    files for debuggers
+
+0  "mute" variables for t_POLMOD. Should have Mod(x,x^2+1) == Mod(y,y^2+1).
+   [ too confusing ]
 
 ***************************   GP DESIGN       ****************************
 
