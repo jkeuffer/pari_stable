@@ -1453,8 +1453,15 @@ static GEN
 ctop(GEN x, GEN p, long d)
 {
   pari_sp av = avma; 
-  GEN p1 = gsqrt(cvtop(stoi(-1), p, d), 0);
-  return gerepileupto(av, gadd((GEN)x[1], gmul((GEN)x[2], p1)) );
+  GEN z, u = (GEN)x[1], v = (GEN)x[2];
+  if (isexactzero(v)) return cvtop(u, p, d);
+  z = cgetg(5, t_PADIC); /* = -1 */
+  z[1] = evalprecp(d) | evalvalp(0);
+  z[2] = (long)p;
+  z[3] = lpowgs(p, d);
+  z[4] = laddis((GEN)z[3], -1);
+  z = gsqrt(z, 0); /* = I */
+  return gerepileupto(av, gadd(u, gmul(v, z)) );
 }
 
 /* cvtop(x, (GEN)y[2], precp(y)), internal, not memory-clean */
