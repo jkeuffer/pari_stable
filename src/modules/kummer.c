@@ -597,7 +597,7 @@ normrelz(GEN id)
 {
   GEN p1;
 
-  p1=steinitzaux(id);
+  p1=steinitzaux(idealhermite(nfz, id));
   return idealdiv(nf,p1,steinitzZk);
 }
 
@@ -954,7 +954,8 @@ rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
       /* step 7 */
   p1=conductor(bnr,subgroup,2,prec);
       /* fin step 7 */
-  bnr=(GEN)p1[2];
+  bnr=(GEN)p1[2]; 
+  subgroup=(GEN)p1[3]; /* don't forget to update subgroup! (K.B) */
   rayclgp=(GEN)bnr[5];
   raycyc=(GEN)rayclgp[2]; lraycyc=lg(raycyc)-1;
   bid=(GEN)bnr[2]; module=(GEN)bid[1];
