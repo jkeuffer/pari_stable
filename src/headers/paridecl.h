@@ -130,6 +130,7 @@ GEN     gtrans(GEN x);
 GEN     gtrans_i(GEN x);
 GEN     hnfadd(GEN mit,GEN perm,GEN* ptdep,GEN* ptA,GEN* ptC,GEN extramat,GEN extraC);
 GEN     hnfadd_i(GEN mit,GEN perm,GEN* ptdep,GEN* ptA,GEN* ptC,GEN extramat,GEN extraC);
+int     hnfdivide(GEN A, GEN B);
 GEN     hnfspec(long** mat,GEN perm,GEN* ptdep,GEN* ptA,GEN* ptC,long k0);
 GEN     hnfspec_i(long** mat,GEN perm,GEN* ptdep,GEN* ptA,GEN* ptC,long k0);
 GEN     idmat(long n);

@@ -25,7 +25,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 extern GEN hnfmerge_get_1(GEN A, GEN B);
 extern GEN gauss_triangle_i(GEN A, GEN B,GEN t);
 extern GEN hnf_invimage(GEN A, GEN b);
-extern int hnfdivide(GEN A, GEN B);
 extern GEN colreducemodHNF(GEN x, GEN y, GEN *Q);
 extern GEN special_anti_uniformizer(GEN nf, GEN pr);
 extern long int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *newx);
