@@ -1463,7 +1463,7 @@ bruti(GEN g, long nosign)
 	  if (i) padic_nome(v,i);
           sp_plus_sp();
 	}
-        if ((i & 0xfff) == 0) g = gerepileuptoint(av,g);
+        if ((i & 0xff) == 0) g = gerepileuptoint(av,g);
       }
       pariputs("O("); padic_nome(v,i); pariputc(')');
       free(v); break;
