@@ -78,6 +78,7 @@ BA 16- galoisinit() could fail to find a polynomial defining the fixed field.
        (*eval)(GEN,void*) everywhere instead of entree * ]
 BA  5- allow Configure -l <directory>  [ in addition to <directory>/pari.cfg ]
     6- renamed gun --> gone, gdeux --> gtwo.
+    7- replaced kludgy matexp.c example by straightforward extgcd
 
   Added
     1- new algorithm for log( t_COMPLEX ), log(2) [ AGM ]
