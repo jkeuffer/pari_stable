@@ -912,7 +912,7 @@ get_line_from_readline(char *prompt, char *bare_prompt, filtre_t *F)
     }
 
     /* update logfile */
-    switch (logstyle) {
+    if (logfile) switch (logstyle) {
     case logstyle_TeX:
 	fprintf(logfile,
 		"\\PARIpromptSTART|%s\\PARIpromptEND|%s\\PARIinputEND|%%\n",

@@ -29,7 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /*      Variables statiques communes :         */
 FILE    *pari_outfile, *errfile, *logfile, *infile;
-ulong   logstyle;
+ulong   logstyle = logstyle_none;
 GEN     *polun, *polx;
 GEN     gnil, gzero, gun, gdeux, ghalf, polvar, gi;
 GEN     gpi=NULL, geuler=NULL, bernzone=NULL;
