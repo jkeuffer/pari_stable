@@ -20,15 +20,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*******************************************************************/
 #include "pari.h"
 
-static ulong sgtaut,sgt6,sgtjac,kglob,NBITSN;
-static GEN globfa,tabfaq,tabj,tabj2,tabj3,sgt,ctsgt;
-static GEN *tabaall,*tabtall,tabefin,*tabcyc,tabE,tabTH,tabeta;
-
-/* contains [t,floor(200*log(e(t))/log(10))] for e(t) < 10^529, good for
- N<10^1058 */
-
-static ulong vet[61][2] =
-{{6,540},{12,963},{24,1023},{48,1330},{36,1628},{60,1967},{120,2349},{180,3083},{240,3132},{504,3270},{360,3838},{420,4115},{720,4621},{840,4987},{1440,5079},{1260,6212},{1680,6686},{2520,8137},{3360,8415},{5040,10437},{13860,11643},{10080,12826},{13860,11643},{10080,12826},{16380,13369},{21840,13540},{18480,15060},{27720,15934},{32760,17695},{36960,18816},{55440,21338},{65520,23179},{98280,23484},{110880,27465},{131040,30380},{131040,30380},{166320,31369},{196560,33866},{262080,34530},{277200,36195},{360360,37095},{480480,38179},{332640,41396},{554400,43301},{720720,47483},{665280,47742},{831600,50202},{1113840,52502},{1441440,60245},{1663200,63112},{2227680,65395},{2162160,69895},{2827440,71567},{3326400,75708},{3603600,79377},{6126120,82703},{4324320,91180},{6683040,93978},{7207200,98840},{11138400,99282},{8648640,105811}};
+static ulong kglob,NBITSN;
+static GEN *tabaall,*tabtall,*tabcyc,tabE,tabTH,tabeta,globfa,tabfaq,tabj,sgt,ctsgt;
 
 typedef struct red_t {
   long n;
@@ -37,8 +30,7 @@ typedef struct red_t {
   GEN (*red)(GEN x, struct red_t *);
 } red_t;
 
-/* programmes de puissances de polmods mod N, fenetre flexible */
-/* la donnee est un polmod, la sortie est un pol entiers. */
+/* powering t_POLMOD mod N, flexible window */
 
 static GEN
 makepoldeg1(GEN c, GEN d)
@@ -62,10 +54,10 @@ red_mod_cyclo(GEN T, long p)
 {
   long i, d;
   GEN y, *z;
- 
+
   d = degpol(T) - p; /* < p */
   if (d <= -2) return T;
- 
+
   /* reduce mod (x^p - 1) */
   y = dummycopy(T); z = (GEN*)(y+2);
   for (i = 0; i<=d; i++) z[i] = addii(z[i], z[i+p]);
@@ -77,6 +69,56 @@ red_mod_cyclo(GEN T, long p)
   return normalizepol_i(y, d+2);
 }
 
+/* x t_VECSMALL, n > 0. Return x mod polcyclo(2^n) = (x^(2^(n-1)) + 1). DESTROY x */
+static GEN
+u_red_mod_cyclo2n(GEN x, int n)
+{
+  long i, pow2 = 1<<(n-1);
+  GEN z;
+
+  for (i = lg(x)-1; i>pow2; i--) x[i-pow2] -= x[i];
+  for (; i>0; i--)
+    if (x[i]) break;
+  i += 2; 
+  z = cgetg(i, t_POL); z[1] = evalsigne(1)|evallgef(i);
+  for (i--; i>=2; i--) z[i] = lstoi(x[i-1]);
+  return z;
+}
+/* x t_POL, n > 0. Return x mod polcyclo(2^n) = (x^(2^(n-1)) + 1). DESTROY x */
+static GEN
+red_mod_cyclo2n(GEN x, int n)
+{
+  long i, pow2 = 1<<(n-1);
+
+  for (i = lgef(x)-1; i>pow2+1; i--)
+    if (signe(x[i])) x[i-pow2] = lsubii((GEN)x[i-pow2], (GEN)x[i]);
+  for (; i>1; i--)
+    if (signe(x[i])) break;
+  i += 1; setlgef(x,i);
+  return x;
+}
+
+/* x a non-zero VECSMALL */
+static GEN
+smallpolrev(GEN x)
+{
+  long i,j, lx = lg(x);
+  GEN y;
+
+  while (lx-- && x[lx]==0) /* empty */;
+  i = lx+2; y = cgetg(i,t_POL);
+  y[1] = evallgef(i) | evalsigne(1);
+  for (j=2; j<i; j++) y[j] = lstoi(x[j-1]);
+  return y;
+}
+
+/* x polynomial in t_VECSMALL form, T t_POL return x mod T */
+static GEN
+u_red(GEN x, GEN T)
+{
+  return gres(smallpolrev(x), T);
+}
+
 /* special case R->C = polcyclo(p) */
 static GEN
 _red2(GEN x, red_t *R) {
@@ -84,7 +126,7 @@ _red2(GEN x, red_t *R) {
 }
 static GEN
 _red(GEN x, red_t *R) {
-  return FpX_red(gmod(x, R->C), R->N);
+  return FpX_red(gres(x, R->C), R->N);
 }
 
 static GEN
@@ -136,7 +178,7 @@ sqrmod4(GEN pol, red_t *R)
 static GEN
 sqrmod5(GEN pol, red_t *R)
 {
-  GEN a2,c2,a,b,c,d,A,B,C,D;
+  GEN c2,b,c,d,A,B,C,D;
   long lv=lgef(pol);
 
   if (lv==2) return pol;
@@ -153,7 +195,7 @@ sqrmod5(GEN pol, red_t *R)
   }
   else
   {
-    a = (GEN)pol[5]; a2 = shifti(a,1);
+    GEN a = (GEN)pol[5], a2 = shifti(a,1);
     /* 2a(d - c) + b(2c - b) */
     A = addii(mulii(a2, subii(d,c)), mulii(b, subii(c2,b)));
     /* c(c - 2a) + b(2d - b) */
@@ -180,7 +222,7 @@ _powpolmod(int pk, GEN jac, red_t *R, GEN (*_sqr)(GEN, red_t *))
 {
   const GEN taba = tabaall[pk];
   const GEN tabt = tabtall[pk];
-  const int efin = tabefin[pk];
+  const int efin = lg(taba)-1;
   GEN res,pol2, *vz;
   int lv,tf,f,i;
   ulong av;
@@ -222,29 +264,52 @@ powpolmod(red_t *R, int k, int pk, GEN jac)
   return _powpolmod(pk,jac, R, _sqr);
 }
 
+/* FIXME: these 2 could be exported */
+static long
+u_val(ulong n, ulong p)
+{
+  ulong dummy;
+  return svaluation(n,p,&dummy);
+}
+static int
+u_pow(int p, int k)
+{
+  int i, pk;
+
+  if (!k) return 1;
+  if (p == 2) return 1<<k;
+  pk = p; for (i=2; i<=k; i++) pk *= p;
+  return pk;
+}
+
 static GEN
 e(ulong t)
 {
-  GEN fa,fapr,faex,s,dp1, T = stoi(t);
-  ulong nbd,m,k,ex,d;
+  GEN fa,pr,ex,s;
+  ulong nbd,m,k,d;
   int lfa,i,j;
 
-  fa = decomp(T);
-  fapr = (GEN)fa[1];
-  faex = (GEN)fa[2]; lfa = lg(fapr);
-  nbd=1; for (i=1; i<lfa; i++) nbd *= itos((GEN)faex[i])+1;
-  s = stoi(2);
+  fa = decomp(stoi(t));
+  pr = (GEN)fa[1]; settyp(pr, t_VECSMALL);
+  ex = (GEN)fa[2]; settyp(ex, t_VECSMALL); lfa = lg(pr);
+  nbd = 1;
+  for (i=1; i<lfa; i++)
+  {
+    ex[i] = itos((GEN)ex[i]) + 1;
+    pr[i] = itos((GEN)pr[i]);
+    nbd *= ex[i];
+  }
+  s = gdeux; /* nbd = number of divisors */
   for (k=0; k<nbd; k++)
   {
     m = k; d = 1;
-    for (j=1; j<lfa; j++)
+    for (j=1; m; j++)
     {
-      ex = itos((GEN)faex[j])+1;
-      d *= itos(gpowgs((GEN)fapr[j], m%ex));
-      m /= ex;
+      d *= u_pow(pr[j], m % ex[j]);
+      m /= ex[j];
     }
-    dp1 = stoi(d+1);
-    if (isprime(dp1)) s = mulii(s, gpuigs(dp1, 1 + ggval(T,dp1)));
+    /* d runs through the divisors of t */
+    if (isprime(stoi(++d))) s = muliu(s, u_pow(d, 1 + u_val(t,d)));
   }
   return s;
 }
@@ -252,121 +317,197 @@ e(ulong t)
 static ulong
 compt(GEN N)
 {
-  int lvet,i;
-  ulong lim,Bint,t;
-  GEN B,LN = glog(N,DEFAULTPREC);
+  ulong Bint,t;
+  GEN B;
 
-  Bint = itos(gceil(mulsr(100,divrr(LN, glog(stoi(10),DEFAULTPREC)))));
-  lvet = 61;
-  for (i=0; i<lvet; i++)
-    if (vet[i][1]>Bint) return vet[i][0];
-  B = racine(N); lim = 0xffffffff;
-  for (t = vet[lvet-1][0]+840; t<=lim; t+=840)
-    if (cmpii(e(t),B) > 0) return t;
-  err(talker,"no t < 2^32 found in compt");
-  return 0; /* not reached */
+  B = mulsr(100, divrr(glog(N,DEFAULTPREC), dbltor(log(10.))));
+  Bint = itos(gceil(B));
+/* Bint < [200*log_10 e(t)] ==> return t. For e(t) < 10^529, good for N < 10^1058 */
+  if (Bint <    540) return        6;
+  if (Bint <    963) return       12;
+  if (Bint <   1023) return       24;
+  if (Bint <   1330) return       48;
+  if (Bint <   1628) return       36;
+  if (Bint <   1967) return       60;
+  if (Bint <   2349) return      120;
+  if (Bint <   3083) return      180;
+  if (Bint <   3132) return      240;
+  if (Bint <   3270) return      504;
+  if (Bint <   3838) return      360;
+  if (Bint <   4115) return      420;
+  if (Bint <   4621) return      720;
+  if (Bint <   4987) return      840;
+  if (Bint <   5079) return     1440;
+  if (Bint <   6212) return     1260;
+  if (Bint <   6686) return     1680;
+  if (Bint <   8137) return     2520;
+  if (Bint <   8415) return     3360;
+  if (Bint <  10437) return     5040;
+  if (Bint <  11643) return    13860;
+  if (Bint <  12826) return    10080;
+  if (Bint <  11643) return    13860;
+  if (Bint <  12826) return    10080;
+  if (Bint <  13369) return    16380;
+  if (Bint <  13540) return    21840;
+  if (Bint <  15060) return    18480;
+  if (Bint <  15934) return    27720;
+  if (Bint <  17695) return    32760;
+  if (Bint <  18816) return    36960;
+  if (Bint <  21338) return    55440;
+  if (Bint <  23179) return    65520;
+  if (Bint <  23484) return    98280;
+  if (Bint <  27465) return   110880;
+  if (Bint <  30380) return   131040;
+  if (Bint <  31369) return   166320;
+  if (Bint <  33866) return   196560;
+  if (Bint <  34530) return   262080;
+  if (Bint <  36195) return   277200;
+  if (Bint <  37095) return   360360;
+  if (Bint <  38179) return   480480;
+  if (Bint <  41396) return   332640;
+  if (Bint <  43301) return   554400;
+  if (Bint <  47483) return   720720;
+  if (Bint <  47742) return   665280;
+  if (Bint <  50202) return   831600;
+  if (Bint <  52502) return  1113840;
+  if (Bint <  60245) return  1441440;
+  if (Bint <  63112) return  1663200;
+  if (Bint <  65395) return  2227680;
+  if (Bint <  69895) return  2162160;
+  if (Bint <  71567) return  2827440;
+  if (Bint <  75708) return  3326400;
+  if (Bint <  79377) return  3603600;
+  if (Bint <  82703) return  6126120;
+  if (Bint <  91180) return  4324320;
+  if (Bint <  93978) return  6683040;
+  if (Bint <  98840) return  7207200;
+  if (Bint <  99282) return 11138400;
+  if (Bint < 105811) return  8648640;
+
+  B = racine(N);
+  for (t = 8648640+840;; t+=840)
+    if (cmpii(e(t),B) > 0) break;
+  return t;
 }
 
-/* x a non-zero VECSMALL */
-GEN
-smallpolrev(GEN x)
-{
-  long i,j, lx = lg(x);
-  GEN y;
+extern ulong u_gener(ulong p);
 
-  while (lx-- && x[lx]==0);
-  i = lx+2; y = cgetg(i,t_POL);
-  y[1] = evallgef(i) | evalsigne(1);
-  for (j=2; j<i; j++) y[j] = lstoi(x[j-1]);
-  return y;
-}
-
-/* tabdl[i] = discrete log of i+1 */
+/* tabdl[i] = discrete log of i+1 in (Z/q)^*, q odd prime */
 static GEN
 computetabdl(ulong q)
 {
-  GEN v = cgetg(q-1,t_VECSMALL);
-  ulong h,qm3s2,qm1s2,qm1,a,i;
-  ulong av = avma;
+  GEN v = cgetg(q-1,t_VECSMALL), w = v-1; /* w[i] = dl(i) */
+  ulong g,qm3s2,qm1s2,a,i;
 
-  h = itos(lift(gener(stoi(q))));
-  avma = av;
+  g = u_gener(q);
   qm3s2 = (q-3)>>1;
   qm1s2 = qm3s2+1;
-  qm1 = q-1;
-  v[q-2]=qm1s2; a=1;
+  w[q-1] = qm1s2; a = 1;
   for (i=1; i<=qm3s2; i++)
   {
-    a = mulssmod(h,a,q);
-    v[a-1]   = i;
-    v[qm1-a] = i+qm1s2;
+    a = mulssmod(g,a,q);
+    w[a]   = i;
+    w[q-a] = i+qm1s2;
   }
   return v;
 }
 
-static int
-_pk(int p, int k)
+static void
+compute_fg(ulong q, int half, GEN *tabf, GEN *tabg)
 {
-  int i, pk;
-  pk = p; for (i=2; i<=k; i++) pk *= p;
-  return pk;
+  const long qm3s2 = (q-3)>>1;
+  const long l = half? qm3s2: q-2;
+  ulong x;
+  *tabf = computetabdl(q);
+  *tabg = cgetg(l+1,t_VECSMALL);
+  for (x=1; x<=l; x++) (*tabg)[x] = (*tabf)[x] + (*tabf)[q-x-1];
+}
+
+/* p odd prime */
+static GEN
+get_jac(GEN N, ulong q, ulong p, int k, GEN tabf, GEN tabg)
+{
+  GEN ze, vpk;
+  long i, qm3s2;
+  ulong x, pk;
+
+  pk = u_pow(p,k);
+  vpk = cgetg(pk+1,t_VECSMALL);
+  for (i=1; i<=pk; i++) vpk[i] = 0;
+  ze = tabcyc[pk];
+
+  qm3s2 = (q-3)>>1;
+  for (x=1; x<=qm3s2; x++) vpk[ tabg[x]%pk + 1 ] += 2;
+  vpk[ (2*tabf[qm3s2+1])%pk + 1 ]++;
+  return u_red(vpk,ze);
+}
+
+/* p = 2 */
+static GEN
+get_jac2(GEN N, ulong q, int k, GEN *j2q, GEN *j3q)
+{
+  GEN jpq, vpk, tabf, tabg;
+  long i, qm3s2;
+  ulong x, pk;
+
+  if (k == 1) return NULL;
+
+  compute_fg(q,0, &tabf,&tabg);
+
+  pk = u_pow(2,k);
+  vpk = cgetg(pk+1,t_VECSMALL);
+  for (i=1; i<=pk; i++) vpk[i] = 0;
+
+  qm3s2 = (q-3)>>1;
+  for (x=1; x<=qm3s2; x++) vpk[ tabg[x]%pk + 1 ] += 2;
+  vpk[ (2*tabf[qm3s2+1])%pk + 1 ]++;
+  jpq = u_red_mod_cyclo2n(vpk, k);
+
+  if (k == 2) return jpq;
+
+  if (mod8(N) >= 5)
+  {
+    GEN v8 = cgetg(9,t_VECSMALL);
+    for (x=1; x<=8; x++) v8[x] = 0;
+    for (x=1; x<=q-2; x++) v8[ ((2*tabf[x]+tabg[x])&7) + 1 ]++;
+    *j2q = polinflate(gsqr(u_red_mod_cyclo2n(v8,3)), pk>>3);
+    *j2q = red_mod_cyclo2n(*j2q, k);
+  }
+
+  for (i=1; i<=pk; i++) vpk[i] = 0;
+  for (x=1; x<=q-2; x++) vpk[ (tabf[x]+tabg[x])%pk + 1 ]++;
+  *j3q = gmul(jpq, u_red_mod_cyclo2n(vpk,k));
+  *j3q = red_mod_cyclo2n(*j3q, k);
+  return jpq;
 }
 
 static void
-calcjac(GEN et)
+calcjac(GEN N, GEN et)
 {
-  ulong q,ltabg,qm3s2,x, l;
-  int lfaq,p,k,ii,i,j,pk;
-  GEN T,ze8,tabf,tabg,faq,faqpr,faqex,ze,vpk,v8;
+  ulong q, l;
+  int lfaq,p,k,i,j;
+  GEN J,tabf,tabg,faq,faqpr,faqex;
 
   globfa = (GEN)decomp(shifti(et,-vali(et)))[1];
   l = lg(globfa);
   tabfaq= cgetg(l,t_VEC);
   tabj  = cgetg(l,t_VEC);
-  tabj2 = cgetg(l,t_VEC);
-  tabj3 = cgetg(l,t_VEC);
-  ze8 = cyclo(8,0);
-  v8 = cgetg(9,t_VECSMALL);
   for (i=1; i<l; i++)
   {
-    q = itos((GEN)globfa[i]);
-    tabf = computetabdl(q);
-    qm3s2 = (q-3)>>1;
+    q = itos((GEN)globfa[i]); /* odd prime */
     faq = decomp(stoi(q-1)); tabfaq[i] = (long)faq;
     faqpr = (GEN)faq[1];
     faqex = (GEN)faq[2]; lfaq = lg(faqpr);
     k = itos((GEN)faqex[1]);
-    ltabg = k>=3? q-2: qm3s2;
-    tabg = cgetg(ltabg+1,t_VECSMALL);
-    for (x=1; x<=ltabg; x++) tabg[x] = tabf[x] + tabf[q-x-1];
-   
-    T = cgetg(lfaq,t_VEC); tabj[i] = (long)T;
-    for (j=1; j<lfaq; j++)
+
+    compute_fg(q, 1, &tabf, &tabg); /* faqpr[1] = 2 */
+
+    J = cgetg(lfaq,t_VEC); tabj[i] = (long)J;
+    for (j=2; j<lfaq; j++) /* skip p = 2 */
     {
       p = itos((GEN)faqpr[j]);
       k = itos((GEN)faqex[j]);
-      pk = _pk(p,k);
-      vpk = cgetg(pk+1,t_VECSMALL); for (ii=1; ii<=pk; ii++) vpk[ii] = 0;
-      ze = tabcyc[pk];
-      if (p>=3 || k>=2)
-      {
-	for (x=1; x<=qm3s2; x++) vpk[ tabg[x]%pk + 1 ]++;
-	for (x=1; x<=pk;    x++) vpk[x] <<= 1;
-	vpk[ (2*tabf[qm3s2+1])%pk + 1 ]++;
-	T[j] = lmod(smallpolrev(vpk),ze);
-      }
-      if (p==2 && k>=3)
-      {
-	for (x=1; x<=ltabg; x++) tabg[x] += tabf[x];
-
-	for (x=1; x<=8; x++) v8[x] = 0;
-	for (x=1; x<=q-2; x++) v8[ ((tabf[x]+tabg[x])&7) + 1 ]++;
-	tabj2[i] = lmod(polinflate(gsqr(gmod(smallpolrev(v8),ze8)), pk>>3),ze);
-
-	for (x=1; x<=pk; x++) vpk[x] = 0;
-	for (x=1; x<=q-2; x++) vpk[ tabg[x]%pk + 1 ]++;
-	tabj3[i] = lmod(gmul((GEN)T[1], gmod(smallpolrev(vpk),ze)), ze);
-      }
+      J[j] = (long)get_jac(N,q,p,k,tabf,tabg);
     }
   }
 }
@@ -378,7 +519,6 @@ inittabs(int lv)
   tabaall = (GEN*)cgetg(lv,t_VECSMALL);
   tabtall = (GEN*)cgetg(lv,t_VECSMALL);
   tabcyc  = (GEN*)cgetg(lv,t_VEC);
-  tabefin = cgetg(lv,t_VECSMALL);
   tabE = cgetg(lv,t_VEC);
   tabTH= cgetg(lv,t_VEC);
   tabeta=cgetg(lv,t_VEC);
@@ -390,28 +530,29 @@ inittabs(int lv)
 static void
 filltabs(GEN N, int p, int k, ulong ltab)
 {
-  int pk,efin,i,j,LE=0;
-  ulong s,mask=(1<<kglob)-1,ee,lp1;
-  GEN tabt,taba,m,E=gzero,p1,p2;
+  const ulong mask = (1<<kglob)-1;
+  int pk,i,j,LE=0;
+  ulong s,e;
+  GEN tabt,taba,m,E=gzero,p1;
 
-  pk = _pk(p,k);
+  pk = u_pow(p,k);
   tabcyc[pk] = cyclo(pk,0);
 
   p1 = cgetg(pk+1,t_VEC);
-  for (i=1; i<=pk; i++) p1[i] = lmod(gpuigs(polx[0],i-1), tabcyc[pk]);
+  for (i=1; i<=pk; i++) p1[i] = lmod(gpowgs(polx[0],i-1), tabcyc[pk]);
   tabeta[pk] = lmul(gmodulcp(gun,N),p1);
 
   if (p > 2)
   {
-    LE = pk-pk/p+1; E = cgetg(LE,t_VECSMALL);
+    LE = pk - pk/p + 1; E = cgetg(LE,t_VECSMALL);
     for (i=1,j=0; i<pk; i++)
-      if (i%p) E[++j]=i;
+      if (i%p) E[++j] = i;
   }
   else if (k >= 3)
   {
     LE = (pk>>2) + 1; E = cgetg(LE,t_VECSMALL);
     for (i=1,j=0; i<pk; i++)
-      if ((i%8)==1 || (i%8)==3) E[++j]=i;
+      if ((i%8)==1 || (i%8)==3) E[++j] = i;
   }
   if (p>2 || k>=3)
   {
@@ -419,7 +560,7 @@ filltabs(GEN N, int p, int k, ulong ltab)
     p1 = cgetg(LE,t_VEC);
     for (i=1; i<LE; i++)
     {
-      p2=cgetg(3,t_VECSMALL);
+      GEN p2 = cgetg(3,t_VECSMALL);
       p2[1] = p2[2] = E[i];
       p1[i] = (long)p2;
     }
@@ -429,20 +570,16 @@ filltabs(GEN N, int p, int k, ulong ltab)
   tabt = cgetg(ltab+1,t_VECSMALL);
   taba = cgetg(ltab+1,t_VECSMALL);
   m = divis(N,pk);
-  s = vali(m); tabt[1] = s; efin = ltab+1;
-  for (ee=1; ee<=ltab; ee++)
+  for (e=1; e<=ltab && signe(m); e++)
   {
-    p1 = shifti(m,-s); lp1 = lgefint(p1);
-    taba[ee] = lp1==2? 0: (((p1[lp1-1])&mask)+1)>>1;
-    m = shifti(m, -(s+kglob));
-    if (!signe(m)) { efin = ee; break; }
-    s = vali(m);
-    tabt[ee+1] = s+kglob;
+    s = vali(m); m = shifti(m,-s);
+    tabt[e] = e==1? s: s+kglob;
+    taba[e] = signe(m)? ((modBIL(m) & mask)+1)>>1: 0;
+    m = shifti(m, -kglob);
   }
-  if (efin > ltab) err(bugparier,"filltabs");
-  tabaall[pk] = taba;
-  tabtall[pk] = tabt;
-  tabefin[pk] = efin;
+  if (e > ltab) err(bugparier,"filltabs");
+  setlg(taba, e); tabaall[pk] = taba;
+  setlg(tabt, e); tabtall[pk] = tabt;
 }
 
 static void
@@ -467,7 +604,7 @@ extend(GEN *ptv, int lz)
 static void
 extendtabs(GEN N, int p, int k)
 {
-  const int pk = _pk(p,k), L = lg(tabaall)-1, lz = pk - L;
+  const int pk = u_pow(p,k), L = lg(tabaall)-1, lz = pk - L;
   const ulong ltab = (NBITSN/kglob)+2;
 
   if (lz <= 0)
@@ -478,7 +615,6 @@ extendtabs(GEN N, int p, int k)
   extend((GEN*)&tabaall, lz);
   extend((GEN*)&tabtall, lz);
   extend((GEN*)&tabcyc, lz);
-  extend(&tabefin, lz);
   extend(&tabE, lz);
   extend(&tabTH, lz);
   extend(&tabeta, lz);
@@ -499,19 +635,21 @@ calcglobs(GEN N, ulong t)
   NBITSN++;
   kglob=3; while (((kglob+1)*(kglob+2) << (kglob-1)) < NBITSN) kglob++;
   ltab = (NBITSN/kglob) + 2;
+
   fat = decomp(stoi(t));
   fapr = (GEN)fat[1];
   faex = (GEN)fat[2];
   lfa = lg(fapr); ltaball = 1;
   for (i=1; i<lfa; i++)
   {
-    pk = _pk(itos((GEN)fapr[i]), itos((GEN)faex[i]));
+    pk = u_pow(itos((GEN)fapr[i]), itos((GEN)faex[i]));
     if (pk > ltaball) ltaball = pk;
   }
   inittabs(ltaball+1);
   for (i=1; i<lfa; i++)
   {
-    p = itos((GEN)fapr[i]); ex = itos((GEN)faex[i]);
+    p = itos((GEN)fapr[i]);
+    ex= itos((GEN)faex[i]);
     for (k=1; k<=ex; k++) filltabs(N,p,k,ltab);
   }
   return fapr;
@@ -519,12 +657,12 @@ calcglobs(GEN N, ulong t)
 
 /* Calculer sig_a^{-1}(z) pour z dans Q(ze) et sig_a: ze -> ze^a */
 static GEN
-aut(int pk, GEN z,int x)
+aut(int pk, GEN z,int a)
 {
   GEN v = cgetg(pk+1,t_VEC);
   int i;
   for (i=1; i<=pk; i++)
-    v[i] = (long)polcoeff0(z, (x*(i-1))%pk, 0);
+    v[i] = (long)polcoeff0(z, (a*(i-1))%pk, 0);
   return gmodulcp(gtopolyrev(v,0), tabcyc[pk]);
 }
 
@@ -535,7 +673,8 @@ autvec(int pk, GEN z, GEN v)
   int i,lv = lg(v);
   GEN s = gun;
   for (i=1; i<lv; i++)
-    s = gmul(s, gpuigs(aut(pk,z,((GEN)v[i])[1]), ((GEN)v[i])[2]));
+    if (((GEN)v[i])[2])
+      s = gmul(s, gpowgs(aut(pk,z,((GEN)v[i])[1]), ((GEN)v[i])[2]));
   return s;
 }
 
@@ -557,30 +696,41 @@ get_AL(GEN N, int pk)
 }
 
 static int
-step4a(GEN N, int p, int k, GEN jpq)
+look_eta(int pk, GEN s)
 {
-  int pk,i,ind;
-  GEN AL,s1,s2,s3,etats;
+  GEN etats = (GEN)tabeta[pk];
+  long i;
+  for (i=1; i<=pk; i++)
+    if (gegal(s, (GEN)etats[i])) return i-1;
+  return pk;
+}
+
+static int
+step4a(GEN N, ulong q, int p, int k, GEN jpq)
+{
+  int pk,ind;
+  GEN AL,s1,s2,s3;
   red_t R;
 
-  pk = _pk(p,k);
+  if (!jpq)
+  {
+    GEN tabf, tabg;
+    compute_fg(q,1, &tabf,&tabg);
+    jpq = get_jac(N,q,p,k,tabf,tabg);
+  }
+  pk = u_pow(p,k);
   R.N = N;
   R.C = tabcyc[pk];
   AL = get_AL(N, pk);
 
-  if (DEBUGLEVEL) timer();
   s1 = autvec(pk,jpq,(GEN)tabTH[pk]);
-  if (DEBUGLEVEL) sgtaut+=timer();
+  if (DEBUGLEVEL) timer();
   s2 = powpolmod(&R, k,pk,s1);
   if (DEBUGLEVEL) {sgt[pk]+=timer();ctsgt[pk]++;};
   s3 = autvec(pk,jpq,AL);
-  if (DEBUGLEVEL) sgtaut+=timer();
   s3 = _red(gmul(lift(s3),s2), &R);
-  if (DEBUGLEVEL) sgt[pk]+=timer();
 
-  etats = (GEN)tabeta[pk]; ind=pk;
-  for (i=1; i<=pk; i++)
-    if (gegal(s3,(GEN)etats[i])) { ind = i-1; break; }
+  ind = look_eta(pk, s3);
   if (ind == pk) return -1;
   return (ind%p) != 0;
 }
@@ -592,52 +742,46 @@ is_m1(GEN x, GEN N)
   return egalii(addis(x,1), N);
 }
 
-
 /* p=2, k>=3 */
 static int
-step4b(GEN N, ulong q, int k, GEN j2q, GEN j3q)
+step4b(GEN N, ulong q, int k)
 {
-  const int pk = 1<<k;
-  int ind,i;
-  GEN AL,s1,s2,s3,etats;
+  const int pk = u_pow(2,k);
+  int ind;
+  GEN AL,s1,s2,s3, j2q,j3q;
   red_t R;
+
+  (void)get_jac2(N,q,k, &j2q,&j3q);
 
   R.N = N;
   R.C = tabcyc[pk];
   AL = get_AL(N, pk);
 
-  if (DEBUGLEVEL) timer();
   s1 = autvec(pk,j3q,(GEN)tabTH[pk]);
-  if (DEBUGLEVEL) sgtaut+=timer();
+  if (DEBUGLEVEL) timer();
   s2 = powpolmod(&R, k,pk,s1);
   if (DEBUGLEVEL) {sgt[pk]+=timer();ctsgt[pk]++;}
   s3 = autvec(pk,j3q,AL);
-  if (DEBUGLEVEL) sgtaut+=timer();
   s3 = _red(gmul(lift(s3),s2), &R);
   if (mod8(N) >= 5) s3 = _red(gmul(j2q, s3), &R);
 
-  if (DEBUGLEVEL) sgt[pk]+=timer();
-  etats = (GEN)tabeta[pk]; ind = pk;
-  for (i=1; i<=pk; i++)
-    if (gegal(s3,(GEN)etats[i])) { ind = i-1; break; }
-  if (ind==pk) return -1;
+  ind = look_eta(pk, s3);
+  if (ind == pk) return -1;
   if ((ind&1)==0) return 0;
   else
   {
-    if (DEBUGLEVEL) timer();
     s3 = powmodulo(stoi(q), shifti(N,-1), N);
-    if (DEBUGLEVEL) {sgt[pk]+=timer();ctsgt[pk]++;}
     return is_m1(s3, N);
   }
 }
 
 /* p=2, k=2 */
 static int
-step4c(GEN N, ulong q, GEN jpq)
+step4c(GEN N, ulong q)
 {
   const int pk = 4;
-  int ind,i;
-  GEN s0,s1,s3,etats;
+  int ind;
+  GEN s0,s1,s3, jpq = get_jac2(N,q,2, NULL,NULL);
   red_t R;
 
   R.N = N;
@@ -647,19 +791,15 @@ step4c(GEN N, ulong q, GEN jpq)
   s1 = gmulsg(q,s0);
   if (DEBUGLEVEL) timer();
   s3 = powpolmod(&R, 2,pk,s1);
+  if (DEBUGLEVEL) {sgt[pk]+=timer();ctsgt[pk]++;}
   if (mod4(N) == 3) s3 = _red(gmul(s0,s3), &R);
 
-  if (DEBUGLEVEL) {sgt[pk]+=timer();ctsgt[pk]++;}
-  etats = (GEN)tabeta[pk]; ind = pk;
-  for (i=1; i<=pk; i++)
-    if (gegal(s3,(GEN)etats[i])) { ind = i-1; break; }
-  if (ind==pk) return -1;
+  ind = look_eta(pk, s3);
+  if (ind == pk) return -1;
   if ((ind&1)==0) return 0;
   else
   {
-    if (DEBUGLEVEL) timer();
     s3 = powmodulo(stoi(q), shifti(N,-1), N);
-    if (DEBUGLEVEL) {sgt[pk]+=timer();ctsgt[pk]++;}
     return is_m1(s3,N);
   }
 }
@@ -670,9 +810,7 @@ step4d(GEN N, ulong q)
 {
   GEN s1;
 
-  if (DEBUGLEVEL) timer();
   s1 = powmodulo(negi(stoi(q)), shifti(N,-1), N);
-  if (DEBUGLEVEL) {sgt[2]+=timer();ctsgt[2]++;}
   if (gcmp1(s1)) return 0;
   if (is_m1(s1,N)) return (mod4(N) == 1);
   return -1;
@@ -682,57 +820,24 @@ step4d(GEN N, ulong q)
 static int
 step5(GEN N, int p, GEN et)
 {
-  ulong qm3s2,ltabg,q,qp,x,av;
-  int k,pk,fl=-1,i;
-  GEN ze8,tabf,tabg,ze,jpq=gun,j3q,j2q,vpk,v8;
-  byteptr d=diffptr+1;
+  ulong q,av;
+  int k, fl = -1;
+  byteptr d = diffptr+2;
 
-  ze8 = cyclo(8,0);
-  v8 = cgetg(9,t_VECSMALL);
-  av = avma; q = 2;
-  while (*d && q<=10000)
+  av = avma;
+  for (q = 3; *d; q += *d++)
   {
-    avma = av; q += *d++;
-    if (q%p == 1 && smodis(et,q))
-    {
-      if (smodis(N,q) == 0) return -1;
-      k = 1; qp = (q-1)/p; pk = p;
-      while (qp%p==0) { k++; pk *= p; qp /= p; }
-      extendtabs(N,p,k);
-      tabf = computetabdl(q);
-      qm3s2 = (q-3)>>1;
-      ltabg = (p==2 && k>=3)? q-2: qm3s2;
-      tabg = cgetg(ltabg+1,t_VECSMALL);
-      for (x=1; x<=ltabg; x++) tabg[x] = tabf[x] + tabf[q-x-1];
+    avma = av;
+    if (q%p != 1 || smodis(et,q) == 0) continue;
 
-      vpk = cgetg(pk+1,t_VECSMALL); for (i=1; i<=pk; i++) vpk[i] = 0;
-      ze = tabcyc[pk];
-      if (p>=3 || k>=2)
-      {
-	for (x=1; x<=qm3s2; x++) vpk[ tabg[x]%pk + 1 ]++;
-	for (x=1; x<=pk;    x++) vpk[x] <<= 1;
-	vpk[ (2*tabf[qm3s2+1])%pk + 1 ]++;
-	jpq = gmod(smallpolrev(vpk),ze);
-      }
-      if (p>=3) fl = step4a(N,p,k,jpq);
-      else if (k>=3) /* p == 2 */
-      {
-        for (x=1; x<=pk; x++) vpk[x] = 0;
-        for (x=1; x<=ltabg; x++) tabg[x] += tabf[x];
+    if (smodis(N,q) == 0) return -1;
+    k = u_val(q-1, p);
+    extendtabs(N,p,k);
 
-        for (x=1; x<=q-2; x++) vpk[ tabg[x]%pk + 1 ]++;
-        j3q = gmod(gmul(jpq,gmod(smallpolrev(vpk),ze)),ze);
-        if (mod8(N) >= 5)
-        {
-          for (x=1; x<=8; x++) v8[x] = 0;
-          for (x=1; x<=q-2; x++) v8[ ((tabf[x]+tabg[x])&7) + 1 ]++;
-          j2q = gmod(polinflate(gsqr(gmod(smallpolrev(v8),ze8)), pk>>3), ze);
-        }
-        else j2q = gun;
-        fl = step4b(N,q,k,j2q,j3q);
-      }
-      else fl = (k==2)? step4c(N,q,jpq): step4d(N,q);
-    }
+    if (p>=3)        fl = step4a(N,q,p,k, NULL);
+    else if (k >= 3) fl = step4b(N,q,k);
+    else if (k == 2) fl = step4c(N,q);
+    else             fl = step4d(N,q);
     if (fl == -1) return (int)(-q);
     if (fl == 1) return 1;
   }
@@ -745,21 +850,19 @@ step6(GEN N, ulong t, GEN et)
   GEN N1,r,p1;
   ulong i,av;
 
-  if (DEBUGLEVEL) timer();
-  N1 = modii(N, et);
+  N1 = resii(N, et);
   r = gun; av = avma;
   for (i=1; i<t; i++)
   {
-    avma = av;
-    r = modii(mulii(r,N1), et);
-    if (!signe(modii(N,r)) && !gcmp1(r) && !egalii(r,N))
+    r = resii(mulii(r,N1), et);
+    if (!signe(resii(N,r)) && !gcmp1(r) && !egalii(r,N))
     {
       p1 = cgetg(3,t_VEC);
       p1[1] = (long)r;
       p1[2] = zero; return p1;
     }
+    if ((i & 0x1f) == 0) r = gerepileuptoint(av, r);
   }
-  if (DEBUGLEVEL) sgt6=timer();
   return gun;
 }
 
@@ -781,32 +884,28 @@ aprcl(GEN N)
   ulong av;
 
   if (cmpis(N,12) <= 0)
-  {
     switch(itos(N))
     {
       case 2: case 3: case 5: case 7: case 11: return gun;
       default: return _res(0,0);
     }
-  }
-  if (DEBUGLEVEL) timer();
   t = compt(N);
   if (DEBUGLEVEL>=2) fprintferr("choosing t = %ld\n",t);
   et = e(t);
-  if (cmpii(sqri(et),N) < 0) err(talker,"e(t) not large enough in aprcl");
+  if (cmpii(sqri(et),N) < 0) err(bugparier,"aprcl: e(t) too small");
   if (!gcmp1(mppgcd(N,mulsi(t,et)))) return _res(1,0);
 
-  fat=calcglobs(N,t); lfat=lg(fat);
-  flaglp = cgetg(itos((GEN)fat[lfat-1])+1, t_VECSMALL);
+  fat = calcglobs(N,t); lfat = lg(fat);
+  p = itos((GEN)fat[lfat-1]); /* largest p | t */
+  flaglp = cgetg(p+1, t_VECSMALL);
+  flaglp[2] = 0;
   for (i=2; i<lfat; i++)
   {
-    p = itos((GEN)fat[i]);
-    flaglp[p] = ! gcmp1(powmodulo(N,stoi(p-1),stoi(p*p)));
+    p = itos((GEN)fat[i]); q = p*p;
+    flaglp[p] = (powuumod(smodis(N,q),p-1,q) != 1);
   }
-  calcjac(et);
-  if (DEBUGLEVEL) sgtjac=timer();
-  if (DEBUGLEVEL>=3)
-    fprintferr("Jacobi sums and tables computed in %ld ms\nq-values: ",sgtjac);
-  sgtaut=0;
+  calcjac(N, et);
+  if (DEBUGLEVEL>=3) fprintferr("Jacobi sums and tables computed\nq-values: ");
   av = avma; l = lg(globfa);
   for (i=1; i<l; i++)
   {
@@ -820,9 +919,9 @@ aprcl(GEN N)
     {
       p = itos((GEN)faqpr[j]);
       k = itos((GEN)faqex[j]);
-      if (p >= 3)      fl = step4a(N,p,k,gmael(tabj,i,j));
-      else if (k >= 3) fl = step4b(N,q,k,(GEN)tabj2[i],(GEN)tabj3[i]);
-      else if (k == 2) fl = step4c(N,q,gmael(tabj,i,1));
+      if (p >= 3)      fl = step4a(N,q,p,k, gmael(tabj,i,j));
+      else if (k >= 3) fl = step4b(N,q,k);
+      else if (k == 2) fl = step4c(N,q);
       else             fl = step4d(N,q);
       if (fl == -1) return _res(q,p);
       if (fl == 1) flaglp[p] = 1;
