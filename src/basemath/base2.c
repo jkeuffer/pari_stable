@@ -1867,6 +1867,9 @@ get_LV(GEN nf, GEN L, GEN p, long N)
   return LV;
 }
 
+static void
+errprime(GEN p) { err(talker, "primedec: %Z is not prime", p); }
+
 /* P = Fp-basis (over O_K/p) for pr.
  * V = Z-basis for I_p/pr. ramif != 0 iff some pr|p is ramified.
  * Return a p-uniformizer for pr. */
@@ -2021,9 +2024,6 @@ get_powers(GEN mul, GEN p)
   }
   return pow;
 }
-
-static void
-errprime(GEN p) { err(talker, "primedec: %Z is not prime", p); }
 
 /* minimal polynomial of a in A (dim A = d).
  * mul = multiplication table by a in A */
