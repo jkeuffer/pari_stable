@@ -1728,7 +1728,7 @@ gdiv(GEN x, GEN y)
 	    return gerepile(l,tetpil,gdiv(p1,p2));
 
 	  case t_REAL:
-	    err(talker,"forbidden division p-adic/R");
+	    err(operf,"/",tx,ty);
 	}
 
       case t_QUAD:
