@@ -17,6 +17,11 @@ Unless specified otherwise, examples assume 32bit machine and default precision
 5  setrand(5);thueinit(x^3 + x^2 - 43690*x - 3529208)
    ***   non positive argument in mplog. \\ precision problem
 
+4  precision problems in polgalois:
+   setrand(7);
+   polgalois(x^8+162644002617632464507038884216211529274267271168000002)
+   gives wrong result at \p28 [32,-1,17], correct at \p38 [32,-1,15]
+
 4  gcmp/gegal not transitive: [] == 0, [0] == 0, but [0] != []
 
 4  rnfpolred is numerically unstable:
@@ -38,9 +43,6 @@ Unless specified otherwise, examples assume 32bit machine and default precision
 
 3  ellpointtoz over Q_p makes no difference between P and -P (corrected over
    C by a cheap trick)
-
-3  polgalois should handle precision problems. Symptom: applied to
-   polzagier(11,0)/(1-2*x), gives wrong result with 38 digits
 
 3  recursive plot easily fooled. One could split intervals in 3 + make sure
    size of neighbouring intervals don't differ too much.
