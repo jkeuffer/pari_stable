@@ -134,6 +134,7 @@ IZ 52- [tex2mail:] \over wasn't allowed within \left( \right)
         2.2.4-F21: LHS for matrix assignment was evaluated twice ]
         Rem: v = vector(2); v[j++] = v = 0 --> SEGV. Don't cry.
 BA 64- [ix86 + gcc compilation]: fix "invalid preprocessing token" Warning
+BA 65- galoisinit could very rarely trigger a 'impossible inverse modulo' error.
 
   Changed
     1- rnf structure (removed useless components)
