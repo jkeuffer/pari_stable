@@ -1165,10 +1165,10 @@ AGAIN:
       q = gpowgs(p, b); q2 = gpowgs(p, a-b);
       m = vconcat( CM_L, centermod(gdivround(T2, q), q2) );
     }
-    if (DEBUGLEVEL>2)
-      fprintferr("LLL_cmbf: (a, b) = (%4ld, %4ld), r = %4ld, time = %ld\n",
-                 a,b,lg(m)-1, TIMER(&TI));
     CM_L = LLL_check_progress(Bnorm, n0, m, b == bmin, /*dbg:*/ &ti, &ti_LLL);
+    if (DEBUGLEVEL>2)
+      fprintferr("LLL_cmbf: (a,b) =%4ld,%4ld; r =%3ld -->%3ld, time = %ld\n",
+                 a,b, lg(m)-1, CM_L? lg(CM_L)-1: 1, TIMER(&TI));
     if (!CM_L) { list = _col(P); break; }
     i = lg(CM_L) - 1;
     if (b > bmin) 

@@ -313,6 +313,9 @@ nffactor(GEN nf,GEN pol)
   }
 
   A = fix_relative_pol(nf,pol,0);
+  if (degpol(nf[1]) == 1)
+    return gerepileupto(av, factpol(simplify(pol), 0));
+
   A = primpart( lift_intern(A) );
   if (DEBUGLEVEL>3) fprintferr("test if polynomial is square-free\n");
   g = nfgcd(A, derivpol(A), T, NULL);
@@ -958,7 +961,7 @@ bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *T)
   gpmem_t av = avma;
   GEN prk, PRK, B, GSmin, pk;
 
-  if (!a)  a = (long) bestlift_bound(C, degpol(nf[1]), alpha, idealnorm(nf,pr));
+  if (!a) a = (long)bestlift_bound(C, degpol(nf[1]), alpha, idealnorm(nf,pr));
 
   for (;; avma = av, a<<=1)
   {
@@ -1113,11 +1116,11 @@ AGAIN:
     }
     else
       m = vconcat( CM_L, T2 );
-    if (DEBUGLEVEL>2)
-      fprintferr("LLL_cmbf: b = %4ld, r = %4ld, time = %ld\n",
-                 b,lg(m)-1,TIMER(&TI));
     CM_L = LLL_check_progress(Bnorm, n0, m, b == bmin, /*dbg:*/ &ti, &ti_LLL);
-    if (!CM_L) { list = _col(P); break; }
+    if (DEBUGLEVEL>2)
+      fprintferr("LLL_cmbf: b =%4ld; r =%3ld -->%3ld, time = %ld\n",
+                 b, lg(m)-1, CM_L? lg(CM_L)-1: 1, TIMER(&TI));
+    if (!CM_L) { list = _col(QXQ_normalize(P,nfT)); break; }
     i = lg(CM_L) - 1;
     if (b > bmin)
     {
@@ -1179,7 +1182,7 @@ nf_combine_factors(nfcmbf_t *T, GEN polred, GEN p, long a, long klim)
 
 /* return the factorization of the square-free polynomial x.
    The coeff of x are in Z_nf and its leading term is a rational integer.
-   deg(x) > 1
+   deg(x) > 1, deg(nfpol) > 1
    If fl = 1,return only the roots of x in nf */
 static GEN
 nfsqff(GEN nf, GEN pol, long fl)
@@ -1223,7 +1226,8 @@ nfsqff(GEN nf, GEN pol, long fl)
                    nbf, fl?"roots": "factors", p);
       if (nbf <= 1)
       {
-        if (!fl) return gerepilecopy(av, _vec(polmod)); /* irreducible */
+        if (!fl) /* irreducible */
+          return gerepilecopy(av, _vec(QXQ_normalize(polmod, nfpol)));
         if (!nbf) return cgetg(1,t_VEC); /* no root */
       }
     }
