@@ -1801,7 +1801,7 @@ mpsc1(GEN x, long *ptmod8)
   GEN y, unr, p2, p1, x2;
 
   n = 0;
-  if (e > 0)
+  if (e >= 0)
   {
     GEN q, z, pitemp = mppi(DEFAULTPREC + (e >> TWOPOTBITS_IN_LONG));
     setexpo(pitemp,-1);
