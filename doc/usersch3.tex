@@ -1738,21 +1738,24 @@ of Adleman--Lenstra algorithm, and is much faster than in earlier versions.
 and $y$. $x$ and $y$ can be of quite general types, for instance both
 rational numbers. Vector/matrix types are also accepted, in which case
 the GCD is taken recursively on each component. Note that for these
-types, \kbd{gcd} is not commutative.
+types, \kbd{gcd} is not commutative. \fl\ is obsolete and should not be used.
 
 If $y$ is omitted and $x$ is a vector, return the $\text{gcd}$ of all
-components of $x$.
+components of $x$. The algorithm used is a naive \idx{Euclid} except for the
+following inputs:
 
-If $\fl=0$, use \idx{Euclid}'s algorithm.
+$\bullet$ integers: use modified right-shift binary (``plus-minus''
+variant).
 
-If $\fl=1$, use the modular gcd algorithm ($x$ and $y$ have to be
-polynomials in the same variable, with rational coefficients).
+$\bullet$ univariate polynomials with coeffients in the same number
+field (in particular rational): use modular gcd algorithm.
 
-If $\fl=2$, use the \idx{subresultant algorithm}.
+$\bullet$ general polynomials: use the \idx{subresultant algorithm} if
+coefficient explosion is likely (exact, non modular, coefficients).
 
-\syn{gcd0}{x,y,\fl}. Also available are
-$\teb{ggcd}(x,y)$, $\teb{modulargcd}(x,y)$, and $\teb{srgcd}(x,y)$
-corresponding to $\fl=0$, $1$ and $2$ respectively.
+\syn{ggcd}{x,y}. For general polynomial inputs, $\teb{srgcd}(x,y)$ is also
+available. For univariate {\it rational} polynomials, one also has
+$\teb{modulargcd}(x,y)$.
 
 \subsecidx{hilbert}$(x,y,\{p\})$: \idx{Hilbert symbol} of $x$ and $y$ modulo
 $p$. If $x$ and $y$ are of type integer or fraction, an explicit third
