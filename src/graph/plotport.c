@@ -423,6 +423,127 @@ rectline0(long ne, double gx2, double gy2, long relative) /* code = ROt_MV/ROt_L
   RoCol(z)=current_color[ne];
 }
 
+/* Given coordinates of ends of a line, and labels l1 l2 attached to the
+   ends, plot ticks where the label coordinate takes "round" values */
+
+static void
+rectticks(long ne, double dx1, double dy1, double dx2, double dy2, double l1, double l2, long flags)
+{
+  long dx,dy,dxy,dxy1,x1,y1,x2,y2,nticks,n,n1,dn;
+  double minstep, maxstep, step, l_min, l_max, minl, maxl, dl, dtx, dty, x, y;
+  double ddx, ddy;
+  const double mult[3] = { 2./1., 5./2., 10./5. };
+  PariRect *e = check_rect_init(ne);
+
+  x1 = DTOL(dx1*RXscale(e) + RXshift(e));
+  y1 = DTOL(dy1*RYscale(e) + RYshift(e));
+  x2 = DTOL(dx2*RXscale(e) + RXshift(e));
+  y2 = DTOL(dy2*RYscale(e) + RYshift(e));
+  dx = x2 - x1;
+  dy = y2 - y1;
+  if (dx < 0)
+    dx = -dx;
+  if (dy < 0)
+    dy = -dy;
+  if (dx < dy)
+    dxy1 = dy;
+  else
+    dxy1 = dx;
+  dx /= h_unit;
+  dy /= v_unit;
+  dxy = sqrt(dx*dx + dy*dy);
+  nticks = (dxy + 2.5)/4;
+  if (!nticks)
+    return;
+  /* Now we want to find nticks (or less) "round" numbers between l1 and l2.
+     For our purpose round numbers have "last significant" digit either 
+	*) any;
+	*) even;
+	*) divisible by 5.
+     We need to choose which alternative is better.
+   */
+  if (l1 < l2)
+    l_min = l1, l_max = l2;
+  else
+    l_min = l2, l_max = l1;
+  minstep = (l_max - l_min)/(nticks + 1);
+  maxstep = 2.5*(l_max - l_min);
+  step = exp(log(10) * floor(log10(minstep)));
+  if (!(flags & TICKS_ENDSTOO)) {
+    double d = 2*(l_max - l_min)/dxy1;	/* Two pixels off */
+
+    l_min += d;
+    l_max -= d;
+  }
+  for (n = 0; ; n++) {
+    if (step >= maxstep)
+      return;
+    if (step >= minstep) {
+      minl = ceil(l_min/step);
+      maxl = floor(l_max/step);
+      if (minl <= maxl && maxl - minl + 1 <= nticks) {
+	nticks = maxl - minl + 1;
+        l_min = minl * step;
+        l_max = maxl * step;
+	if (!(flags & TICKS_NODOUBLE)) {
+	  /* Where to position doubleticks, variants:
+ 	     small: each 5, double: each 10	(n===2 mod 3)
+	     small: each 2, double: each 10	(n===1  mod 3)
+	     small: each 1, double: each  5 */
+	  if (n % 3 == 2)
+	    dn = 2;
+          else
+	    dn = 5;
+	  n1 = ((long)minl) % dn;
+	}
+	break;
+      }
+    }
+    step *= mult[ n % 3 ];
+  }
+  /* now l_min and l_max keep min/max values of l with ticks, and nticks is
+     the number of ticks to draw. */
+  if (nticks > 1) {
+    dl = (l_max - l_min)/(nticks - 1);
+    ddx = (dx2 - dx1) * dl / (l2 - l1);
+    ddy = (dy2 - dy1) * dl / (l2 - l1);
+  }
+  x = dx1 + (dx2 - dx1) * (l_min - l1) / (l2 - l1);
+  y = dy1 + (dy2 - dy1) * (l_min - l1) / (l2 - l1);
+  /* assume h_unit and v_unit form a square.  For clockwise ticks: */
+  dtx = h_unit * dy/dxy * (y2 > y1 ? 1 : -1);	/* y-coord runs down */
+  dty = v_unit * dx/dxy * (x2 > x1 ? 1 : -1);
+  for (n = 0; n < nticks; n++) {
+    RectObj *z = (RectObj*) gpmalloc(sizeof(RectObj2P));
+    double lunit = h_unit > 1 ? 1.5 : 2;
+    double l;
+
+    RoNext(z) = 0;
+    RoLNx1(z) = RoLNx2(z) = x*RXscale(e) + RXshift(e);
+    RoLNy1(z) = RoLNy2(z) = y*RYscale(e) + RYshift(e);
+    l = ((flags & TICKS_NODOUBLE) || (n + n1) % dn != 0) ? 1 : lunit;
+
+    if (flags & TICKS_CLOCKW) {
+      RoLNx1(z) += dtx*l;
+      RoLNy1(z) -= dty*l;		/* y-coord runs down */
+    }
+    if (flags & TICKS_ACLOCKW) {
+      RoLNx2(z) -= dtx*l;
+      RoLNy2(z) += dty*l;		/* y-coord runs down */
+    }
+    RoType(z) = ROt_LN;
+
+    if (!RHead(e))
+      RHead(e)=RTail(e)=z;
+    else {
+      RoNext(RTail(e))=z; RTail(e)=z;
+    }
+    RoCol(z)=current_color[ne];
+    x += ddx;
+    y += ddy;
+  }
+}
+
 void
 rectline(long ne, GEN gx2, GEN gy2)
 {
@@ -1511,10 +1632,24 @@ rectplothrawin(long stringrect, long drawrect, dblPointList *data,
 
   if (!(flags & PLOT_NO_FRAME))
   {
+    int do_double = (flags & PLOT_NODOUBLETICK) ? TICKS_NODOUBLE : 0;
+
     rectlinetype(drawrect, -2); 		/* Frame. */
     current_color[drawrect]=BLACK;
     rectmove0(drawrect,xsml,ysml,0);
     rectbox0(drawrect,xbig,ybig,0);
+    if (!(flags & PLOT_NO_TICK_X)) {
+      rectticks(drawrect, xsml, ysml, xbig, ysml, xsml, xbig,
+	TICKS_CLOCKW | do_double);
+      rectticks(drawrect, xbig, ybig, xsml, ybig, xbig, xsml,
+	TICKS_CLOCKW | do_double);
+    }
+    if (!(flags & PLOT_NO_TICK_Y)) {
+      rectticks(drawrect, xbig, ysml, xbig, ybig, ysml, ybig,
+	TICKS_CLOCKW | do_double);
+      rectticks(drawrect, xsml, ybig, xsml, ysml, ybig, ysml,
+	TICKS_CLOCKW | do_double);
+    }
   }
 
   if (!(flags & PLOT_NO_AXE_Y) && (xsml<=0 && xbig >=0))

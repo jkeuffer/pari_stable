@@ -207,6 +207,9 @@ typedef struct RectObjPS {
 #define PLOT_POINTS       0x00040
 #define PLOT_POINTS_LINES 0x00080
 #define PLOT_SPLINES      0x00100
+#define PLOT_NO_TICK_X    0x00200
+#define PLOT_NO_TICK_Y    0x00400
+#define PLOT_NODOUBLETICK 0x00800
 
 #define PLOT_POSTSCRIPT   0x80000
 
@@ -215,6 +218,15 @@ typedef struct RectObjPS {
 #define RECT_CP_SW        0x2
 #define RECT_CP_SE        0x4
 #define RECT_CP_NE        0x6
+
+#define TICKS_CLOCKW	1		/* Draw in clockwise direction */
+#define TICKS_ACLOCKW	2		/* Draw in anticlockwise direction */
+#define TICKS_ENDSTOO	4		/* Draw at endspoints if needed */
+#define TICKS_NODOUBLE	8		/* Do not draw double-length ticks */
+
+/* Not implemented yet */
+#define TICKS_COORD	16		/* Output [x,y,l,isdbl] for each tick */
+#define TICKS_RELATIVE	32		/* x,y-coordinates are relative */
 
 extern PariRect  **rectgraph;
 extern long  rectpoint_itype;

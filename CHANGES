@@ -68,6 +68,8 @@ IS  5- improved generic gcc compilation flags
 BA  1- function galoissubcyclo()
 BA  2- (for now internal) function inverseimage_mod_p()
 BA  3- optional arguments (vertical range) to plot()
+IZ  4- `ticks' on hi-res plots
+IZ  5- prettyprinter default and tex2mail file
 
 ===========================================================================
 Done for version 2.0.18.beta (released 20/12/1999):
