@@ -970,13 +970,11 @@ static long muldiv(long a,long b,long c)
   return (long)((double)a*(double)b/c);
 }
 
-/*
- * F est la decomposition en cycle de sigma, B est la decomposition en cycle
- * de cl(tau) Teste toutes les permutations pf pouvant correspondre a tau tel
- * que : tau*sigma*tau^-1=sigma^s et tau^d=sigma^t  ou d est l'ordre de
- * cl(tau) --------- x: vecteur des choix y: vecteur des mises a jour G:
- * vecteur d'acces a F linéaire
- */
+/* F = cycle decomposition of sigma, B = cycle decomposition of cl(tau).
+ * Check all permutations pf who can possibly correspond to tau, such that
+ * tau*sigma*tau^-1 = sigma^s and tau^d = sigma^t, where d = ord cl(tau)
+ * x: vector of choices, y: vector of updates, G: vector allowing linear
+ * access to elts of F. */
 GEN
 testpermutation(GEN F, GEN B, long s, long t, long cut,
 		struct galois_test *td)
@@ -2910,11 +2908,8 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
   return gerepile(ltop, lbot, res);
 }
 
-/*
- * T: polynome ou nf den optionnel: si présent doit etre un multiple du
- * dénominateur commun des solutions Si T est un nf et den n'est pas présent,
- * le denominateur de la base d'entiers est pris pour den
- */
+/* T: polynomial or nf, den multiple of common denominator of solutions or
+ * NULL (unknown). If T is nf, and den unknown, use den = denom(nf.zk) */
 GEN
 galoisconj4(GEN T, GEN den, long flag, long karma)
 {
@@ -3025,8 +3020,7 @@ galoisconj4(GEN T, GEN den, long flag, long karma)
   return gerepileupto(ltop, gen_sort(aut, 0, cmp_pol));
 }
 
-/* Calcule le nombre d'automorphisme de T avec forte probabilité */
-/* pdepart premier nombre premier a tester */
+/* Heuristic computation of #Aut(T), pdepart first prime to be tested */
 long
 numberofconjugates(GEN T, long pdepart)
 {

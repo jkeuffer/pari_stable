@@ -1727,7 +1727,7 @@ apell1(GEN e, GEN p)
         k2 = modBIL((GEN)ftest[2]);
         for (r++; tx[r] == k && r <= (ulong)s; r++)
           if (ty[r] == k2 || ty[r] == pfinal - k2)
-          { /* [h+j2] f == ± ftest (= [i.s] f)? */
+          { /* [h+j2] f == +/- ftest (= [i.s] f)? */
             j2 = ti[r] - 1;
             if (DEBUGLEVEL) msgtimer("[apell1] giant steps, i = %ld",i);
             p1 = addsell(cp4, powsell(cp4,F,stoi(j2),p),fh,p);

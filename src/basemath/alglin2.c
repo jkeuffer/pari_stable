@@ -1704,7 +1704,7 @@ hnfspec(long** mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
     T = cgetg(co, t_MAT); updateT = 0;
     for (j=1; j<co; j++) T[j] = (long)z;
   }
-  /* Look for lines with a single non-0 entry, equal to ±1 */
+  /* Look for lines with a single non-0 entry, equal to 1 in absolute value */
   while (i > lk0)
     switch( count(mat,perm[i],col,&n) )
     {
@@ -1737,7 +1737,7 @@ hnfspec(long** mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
   }
 
 #define absmax(s,z) {long _z; _z = labs(z); if (_z > s) s = _z;}
-  /* Get rid of all lines containing only 0 and ± 1, keeping track of column
+  /* Get rid of all lines containing only 0 and +/- 1, keeping track of column
    * operations in T. Leave the rows 1..lk0 alone [up to k0, coeff
    * explosion, between k0+1 and lk0, row is 0] */
   s = 0;
@@ -1747,7 +1747,7 @@ hnfspec(long** mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
       if (count(mat,perm[i],col,&n) > 0) break;
     if (i == lk0) break;
 
-    /* only 0, ±1 entries, at least 2 of them non-zero */
+    /* only 0, +/- 1 entries, at least 2 of them non-zero */
     lswap(perm[i], perm[lig]);
     swap(mat[n], mat[col]); p = mat[col];
     lswap(T[n], T[col]); p1 = (GEN)T[col];
@@ -1780,7 +1780,7 @@ hnfspec(long** mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
       T = gerepilecopy(av2, T);
     }
   }
-  /* As above with lines containing a ±1 (no other assumption).
+  /* As above with lines containing a +/- 1 (no other assumption).
    * Stop when single precision becomes dangerous */
   for (j=1; j<=col; j++)
   {

@@ -192,7 +192,7 @@ cyclo(long n, long v)
   setvarn(yn,v); return yn;
 }
 
-/* compute prod (L*x ± a[i]) */
+/* compute prod (L*x +/- a[i]) */
 GEN
 roots_to_pol_intern(GEN L, GEN a, long v, int plus)
 {
