@@ -47,6 +47,10 @@ XR  9- possible overflow in ComputeCoeff [ bnrstark() ]
    12- factornf(P, non-monic t) --> error
    13- forsubgroup/subgrouplist idn't check their arguments nor accepted SNF
        matrices
+XR 14- typo in nilord4 --> SEGV, e.g.
+       nfdisc(x^16-363*x^14+53550*x^12-4091823*x^10+170172414*x^8 \\
+         -3663509067*x^6+33703350345*x^4-63300912912*x^2+32451860736)
+   15- some messages didn't distinguish between MBytes and milllions of Bytes
 
   Changed
     1- removed useless parameter prec in many bnr* and rnf* functions
