@@ -776,10 +776,10 @@ sqrtr_abs(GEN x, long s)
     beta = beta * (1UL << BITS_IN_HALFULONG);
 #ifdef LONG_IS_64BIT
     if (a[2] >= -(1 << 11))
-      t[1] = evalexpo(1) | evalsigne(1); t[2] = (long)~0; 
+    { t[1] = evalexpo(1) | evalsigne(1); t[2] = (long)~0; }
     else
 #endif
-      t[1] = evalexpo(0) | evalsigne(1); t[2] = (long)(ulong)beta;/* ~ sqrt(a) */
+    { t[1] = evalexpo(0) | evalsigne(1); t[2] = (long)(ulong)beta; }
   } else {
     a[1] = evalsigne(1) | evalexpo(0);
     beta = beta * ((1UL << BITS_IN_HALFULONG) * 0.707106781186547524);
