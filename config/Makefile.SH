@@ -17,9 +17,11 @@ case "$src_dir"    in /*) src=$src_dir ;;    *) src=../$src_dir ;; esac
 kernel="kernel mp"
 inline="mpinl"
 
-graph=
-gp="gp gp_init gp_rl whatnow"
-DIRgplib="gp/highlvl graph/plotport"
+#graph=
+#gp="gp gp_init gp_rl whatnow"
+#DIRgplib="gp/highlvl graph/plotport"
+graph=plotport
+gp="gp gp_init gp_rl whatnow highlvl"
 gplib=
 for i in $DIRgplib; do tmp=`basename $i`; gplib="$gplib $tmp"; done
 
