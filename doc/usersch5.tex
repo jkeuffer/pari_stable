@@ -84,7 +84,8 @@ initially.
 
 The following routines are not part of the level 0 kernel per se, but
 implement modular operations on words in terms of the above. They are written
-so that no overflow may occur.
+so that no overflow may occur. All operands representing classes modulo $m$
+are assumed to belong to $[0,m-1[$.
 
 \fun{ulong}{adduumod}{ulong x, ulong y, ulong m} returns the smallest
 positive representative of $x + y$ modulo $m$.
