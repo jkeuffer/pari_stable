@@ -23,7 +23,7 @@ case "$arch" in
   ppc)  case "$sizeof_long" in   
         4) asmarch=$arch;;
         8) asmarch=none;;
-        esac;                           pretty='Power PC' ;; 
+        esac;                           pretty='PowerPC' ;; 
   arm*)          asmarch=none;          pretty=$arch ;;
   mips)          asmarch=none;          pretty=MIPS ;;
   m68k)          asmarch=none;          pretty='Motorola 68k';;
