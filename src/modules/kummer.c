@@ -696,7 +696,6 @@ invimsubgroup(GEN bnrz, GEN bnr, GEN subgroup, toK_s *T)
 
   polrel = polrelKzK(T, polx[varn(polz)]);
   StZk = Stelt(nf, (GEN)nfz[7], polrel); 
-  if (gcmp1(gcoeff(StZk,1,1))) StZk = NULL;
   rayclgpz = (GEN)bnrz[5];
   raycycz = (GEN)rayclgpz[2]; l = lg(raycycz);
   raygenz = (GEN)rayclgpz[3];
@@ -705,7 +704,7 @@ invimsubgroup(GEN bnrz, GEN bnr, GEN subgroup, toK_s *T)
   {
     GEN g, id = idealhermite(nfz, (GEN)raygenz[j]);
     g = Stelt(nf, gmul((GEN)nfz[7], id), polrel);
-    if (StZk) g = idealdiv(nf, g, StZk); /* N_{Kz/K}(gen[j]) */
+    g = idealdiv(nf, g, StZk); /* N_{Kz/K}(gen[j]) */
     P[j] = (long)isprincipalray(bnr, g);
   }
   U = (GEN)hnfall(concatsp(P, subgroup))[2];
