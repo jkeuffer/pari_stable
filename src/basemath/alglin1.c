@@ -2058,6 +2058,22 @@ Fq_add(GEN x, GEN y, GEN T/*unused*/, GEN p)
   } 
   return NULL;
 }
+#if 0
+/* this function is really for FpV_roots_to_pol in polarit1.c
+ * For consistency we write the code there.
+ * To avoid having to remove static status, we rewrite it in polarit1.c
+ */
+static GEN 
+Fq_neg(GEN x, GEN T, GEN p)
+{
+  switch(typ(x)==t_POL)
+  {
+    case 0: return signe(x)?subii(p,x):gzero;
+    case 1: return FpX_neg(x,p);
+  }
+  return NULL;
+}
+#endif
 
 static GEN
 Fq_mul(GEN x, GEN y, GEN T, GEN p)

@@ -582,7 +582,7 @@ static GEN spec_FpXQ_pow(GEN x, GEN p, GEN S);
  * f in ZZ[X] and p a prime number.
  */
 long
-Fp_is_squarefree(GEN f, GEN p)
+FpX_is_squarefree(GEN f, GEN p)
 {
   long av = avma;
   GEN z;
@@ -609,7 +609,7 @@ FpX_nbroots(GEN f, GEN p)
   avma = av; return lgef(z)-3;
 }
 long
-Fp_is_totally_split(GEN f, GEN p)
+FpX_is_totally_split(GEN f, GEN p)
 {
   long av = avma, n=lgef(f);
   GEN z;
@@ -659,6 +659,21 @@ FpX_nbfact(GEN u, GEN pp)
   avma=ltop;
   return lg(vker)-1;
 }
+static GEN modulo;
+static GEN gsmul(GEN a,GEN b){return FpX_mul(a,b,modulo);}
+GEN
+FpV_roots_to_pol(GEN V, GEN p, long v)
+{
+  ulong ltop=avma;
+  long i;
+  GEN g=cgetg(lg(V),t_VEC);
+  for(i=1;i<lg(V);i++)
+    g[i]=(long)deg1pol(gun,negi((GEN)V[i]),v);
+  modulo=p;
+  g=divide_conquer_prod(g,&gsmul);
+  return gerepileupto(ltop,g);
+}
+
 /************************************************************/
 GEN
 trivfact(void)

@@ -1043,8 +1043,9 @@ GEN     rnfdedekind(GEN nf,GEN T,GEN pr);
 GEN     unifpol(GEN nf,GEN pol,long flag);
 
 /* polarit1.c */
-long    Fp_is_squarefree(GEN f, GEN p);
-long    Fp_is_totally_split(GEN f, GEN p);
+GEN     FpV_roots_to_pol(GEN V, GEN p, long v);
+long    FpX_is_squarefree(GEN f, GEN p);
+long    FpX_is_totally_split(GEN f, GEN p);
 long    FpX_nbfact(GEN f, GEN p);
 long    FpX_nbroots(GEN f, GEN p);
 GEN     apprgen(GEN f, GEN a);
@@ -1159,6 +1160,7 @@ GEN     Fp_factor_rel0(GEN P, GEN l, GEN Q);
 void    Fp_intersect(long n,GEN P,GEN Q,GEN l,GEN *SP,GEN *SQ,GEN MA,GEN MB);
 GEN     Fp_inv_isom(GEN S,GEN Tp, GEN p);
 GEN     Fp_isom(GEN P,GEN Q,GEN l);
+GEN     FqV_roots_to_pol(GEN V, GEN p, GEN Tp, long v);
 GEN     ZX_disc(GEN x);
 GEN     ZX_resultant(GEN A, GEN B);
 GEN     ffsqrtnmod(GEN a, GEN n, GEN T, GEN p, GEN *zetan);

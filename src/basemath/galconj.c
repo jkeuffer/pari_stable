@@ -253,12 +253,12 @@ initborne(GEN T, GEN den, struct galois_borne *gb, long ppp)
     if (gcmp(z, borneroots) > 0)
       borneroots = z;
   }
-  borneabs = addsr(1, gpowgs(addsr(n, borneroots), n / ppp));
+  borneabs = addsr(1, gmulsg(n, gpowgs(borneroots, n / ppp)));
   borneroots = addsr(1, gmul(borne, borneroots));
   av2 = avma;
   /*We use d-1 test, so we must overlift to 2^BITS_IN_LONG*/
   gb->valsol = mylogint(gmul2n(borneroots,2+BITS_IN_LONG), gb->l, prec);
-  gb->valabs = mylogint(gmul2n(borneabs,4+(n>>1)), gb->l, prec);
+  gb->valabs = mylogint(gmul2n(borneabs,2), gb->l, prec);
   gb->valabs =  max(gb->valsol,gb->valabs);
   if (DEBUGLEVEL >= 4)
     fprintferr("GaloisConj:val1=%ld val2=%ld\n", gb->valsol, gb->valabs);
@@ -1365,8 +1365,67 @@ permorbite(GEN v)
   cycle = gcopy(cycle);
   return gerepile(ltop, lbot, cycle);
 }
+
+GEN
+fixedfieldnewtonsumaut(GEN sigma, GEN p, GEN Tp, GEN e, long g)
+{
+  ulong ltop=avma;
+  long i;
+  GEN s,f;
+  sigma=lift(gmul(sigma,gmodulsg(1,p)));
+  f=polx[varn(sigma)];
+  s=FpXQ_pow(f,e,Tp,p);
+  for(i=2; i<=g;i++)
+  {
+    f=FpX_FpXQ_compo(f,sigma,Tp,p);
+    s=FpX_add(s,FpXQ_pow(f,e,Tp,p),p);
+  }
+  return gerepileupto(ltop, s);
+}
+GEN
+fixedfieldnewtonsum(GEN O, GEN L, GEN mod, GEN e)
+{
+  long f,g;
+  long i,j;
+  GEN PL;
+  f=lg(O)-1;
+  g=lg(O[1])-1;
+  PL=cgetg(lg(O), t_COL);
+  for(i=1; i<=f; i++)
+  {
+    ulong ltop=avma; 
+    GEN s=gzero;
+    for(j=1; j<=g; j++)
+      s=addii(s,powmodulo((GEN)L[mael(O,i,j)],e,mod));
+    PL[i]=lpileupto(ltop,modii(s,mod));
+  }
+  return PL;
+}
+/*not stack clean*/
+GEN
+fixedfieldorbit(GEN O, GEN L, GEN mod, GEN l, GEN p, GEN *U, long *e,long v)
+{
+  ulong ltop=avma;
+  long n=lg(L)-1;
+  GEN s=gzero,P=gzero;
+  for ((*e)=1; (*e)<=n; (*e)++)
+  {
+    avma=ltop;
+    s=fixedfieldnewtonsum(O, L, mod, stoi(*e));
+    P=FpV_roots_to_pol(s,mod,v);
+    if (!FpX_is_squarefree(P,l))
+      continue;
+    P=FpX_redc(P,mod);
+    if (FpX_is_squarefree(P,p))
+      break;
+  }
+  *U=s;
+  return P;
+}
+
+
 /* Calcule un polynome R de la variable x definissant le corps fixe de
- * T pour les orbites O tel que R est sans-facteur carre modulo mod et
+ * T pour les orbites O tel que R est sans facteur carre modulo mod et
  * modulo l. Retourne dans U les racines de R APRES R dans la pile*/
 
 GEN
@@ -1761,7 +1820,7 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
     if (p <= (n << 1))
       continue;
     ip=stoi(p);
-    if (!Fp_is_squarefree(T,ip))
+    if (!FpX_is_squarefree(T,ip))
       continue;
     nbtest++;
     av=avma;
@@ -1849,7 +1908,7 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
       nb=FpX_nbroots(T,stoi(p));
       if (nb == n)
 	l = p;
-      else if (nb && Fp_is_squarefree(T,stoi(p)))
+      else if (nb && FpX_is_squarefree(T,stoi(p)))
       {
 	avma = ltop;
 	if (DEBUGLEVEL >= 2)
@@ -1877,191 +1936,7 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
     msgtimer("galoisanalysis()");
   avma = ltop;
 }
-#if 0
-/* peut-etre on peut accelerer(distinct degree factorisation */
-void
-galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
-{
-  ulong   ltop = avma;
-  long    n, p, ex, plift, nbmax, nbtest, exist6 = 0, p4 = 0;
-  GEN     F, fc;
-  byteptr primepointer, pp = 0;
-  long    pha, ord, deg, ppp, pgp, ordmax = 0, l = 0;
-  int     i;
-  /* Etude du cardinal: */
-  /* Calcul de l'ordre garanti d'un sous-groupe cyclique */
-  /* Tout les groupes d'ordre n sont cyclique ssi gcd(n,phi(n))==1 */
-  if (DEBUGLEVEL >= 1)
-    timer2();
-  n = degree(T);
-  F = factor(stoi(n));
-  fc = cgetg(lg(F[1]), t_VECSMALL);
-  for (i = 1; i < lg(fc); i++)
-    fc[i] = itos(powgi(((GEN **) F)[1][i], ((GEN **) F)[2][i]));
-  ppp = itos(((GEN **) F)[1][1]);	/* Plus Petit diviseur Premier */
-  pgp = itos(((GEN **) F)[1][lg(F[1]) - 1]);	/* Plus Grand diviseur
-						 * Premier */
-  pha = 1;
-  ord = 1;
-  ex = 0;
-  for (i = lg(F[1]) - 1; i > 0; i--)
-  {
-    p = itos(((GEN **) F)[1][i]);
-    if (pha % p != 0)
-    {
-      ord *= p;
-      pha *= p - 1;
-    }
-    else
-    {
-      ex = 1;
-      break;
-    }
-    if (!gcmp1(((GEN **) F)[2][i]))
-      break;
-  }
-  plift = 0;
-  /* Etude des ordres des Frobenius */
-  nbmax = n >> 1;
-  nbmax = max(8, nbmax);	/* Nombre maxi d'éléments à tester */
-  nbtest = 0;
-  deg = 0;
-  for (p = 0, primepointer = diffptr; 
-       plift == 0 
-	 || (nbtest < nbmax && ord != n && (nbtest <=6 || ord != (n>>1))) 
-	 || (n == 24 && exist6 == 0 && p4 == 0);)
-  {
-    long    u, s, c;
-    GEN     gp;
-    c = *primepointer++;
-    if (!c)
-      err(primer1);
-    p += c;
-    if (p <= (n << 1))
-      continue;
-    gp=stoi(p);
-    if (Fp_is_squarefree(T,gp))
-    {
-      s=FpX_nbfact(T,gp);
-      if (n%s)
-      {
-	avma = ltop;
-	if (DEBUGLEVEL >= 2)
-	  fprintferr("GaloisAnalysis:non Galois for p=%ld\n", p);
-	ga->p = p;
-	ga->deg = 0;
-	return;		/* Not a Galois polynomial */
-      }
-      s = n/s;
-      if (l == 0 && s == 1)
-	l = p;
-      nbtest++;
-      if (nbtest > (3 * nbmax) && (n == 60 || n == 75))
-	break;
-      if (s % 6 == 0)
-	exist6 = 1;
-      if (p4 == 0 && s == 4)
-	p4 = p;
-      if (DEBUGLEVEL >= 6)
-	fprintferr("GaloisAnalysis:Nbtest=%ld,plift=%ld,p=%ld,s=%ld,ord=%ld\n",
-		   nbtest, plift, p, s, ord);
-      if (s > ordmax)
-	ordmax = s;
-      if (s >= ord)		/* Calcul de l'exposant distinguant minimal
-				 * garanti */
-      {
-	if (s * ppp == n)	/* Tout sous groupe d'indice ppp est distingué */
-	  u = s;
-	else			/* Théorème de structure des groupes
-				   * hyper-résoluble */
-	{
-	  u = 1;
-	  for (i = lg(fc) - 1; i > 0; i--)
-	  {
-	    if (s % fc[i] == 0)
-	      u *= fc[i];
-	    else
-	      break;
-	  }
-	}
-	if (u != 1)
-	{
-	  if (!ex || s > ord || (s == ord && (plift == 0 || u > deg)))
-	  {
-	    deg = u;
-	    ord = s;
-	    plift = p;
-	    pp = primepointer;
-	    ex = 1;
-	  }
-	}
-	else if (!ex && (plift == 0 || s > ord))
-	  /*
-	   * J'ai besoin de plus de connaissance sur les p-groupes, surtout
-	   * pour p=2;
-	   */
-	{
-	  deg = pgp;
-	  ord = s;
-	  plift = p;
-	  pp = primepointer;
-	  ex = 0;
-	}
-      }
-    }
-  }
-  if (plift == 0 || ((n == 36 || n == 48) && !exist6)
-      || (n == 56 && ordmax == 7) || (n == 60 && ordmax == 5) || (n == 72
-								  && !exist6)
-      || (n == 80 && ordmax == 5))
-  {
-    deg = 0;
-    err(warner, "Galois group almost certainly not weakly super solvable");
-  }
-  avma = ltop;
-  if (calcul_l)
-  {
-    ulong   av;
-    long    c;
-    av = avma;
-    while (l == 0)
-    {
-      long nb;
-      c = *primepointer++;
-      if (!c)
-	err(primer1);
-      p += c;
-      nb=FpX_nbroots(T,stoi(p));
-      if (nb == n)
-	l = p;
-      else if (nb && Fp_is_squarefree(T,stoi(p)))
-      {
-	avma = ltop;
-	if (DEBUGLEVEL >= 2)
-	  fprintferr("GaloisAnalysis:non Galois for p=%ld\n", p);
-	ga->p = p;
-	ga->deg = 0;
-	return;		/* Not a Galois polynomial */
-      }
-      avma = av;
-    }
-    avma = ltop;
-  }
-  ga->p = plift;
-  ga->group = ex;
-  ga->deg = deg;
-  ga->ord = ord;
-  ga->l = l;
-  ga->primepointer = pp;
-  ga->ppp = ppp;
-  ga->p4 = p4;
-  if (DEBUGLEVEL >= 4)
-    fprintferr("GaloisAnalysis:p=%ld l=%ld exc=%ld deg=%ld ord=%ld ppp=%ld\n",
-               p, l, ex, deg, ord, ppp);
-  if (DEBUGLEVEL >= 1)
-    msgtimer("galoisanalysis()");
-}
-#endif
+
 /* Groupe A4 */
 GEN
 a4galoisgen(GEN T, struct galois_test *td)
@@ -2827,7 +2702,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
   long    Pm = 0, fp;
   long    x;
   int     i, j;
-  GEN     Lden;
+  GEN     Lden, sigma;
   GEN     Tmod, res, pf = gzero, split, psi, ip, ppsi;
   GEN     frob;
   GEN     O;
@@ -2878,6 +2753,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
   O = permorbite(frob);
   split = splitorbite(O);
   deg=lg(O[1])-1;
+  sigma = permtopol(frob, L, M, den, gb->ladicabs, x);
   if (DEBUGLEVEL >= 9)
     fprintferr("GaloisConj:Orbite:%Z\n", O);
   if (deg == n)			/* Cyclique */
@@ -2888,29 +2764,25 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
     res[2] = lgetg(lg(split[2]), t_VECSMALL);
     for (i = 1; i < lg(split[1]); i++)
     {
-      ((GEN **) res)[1][i] = gcopy(((GEN **) split)[1][i]);
-      ((GEN *) res)[2][i] = ((GEN *) split)[2][i];
+      mael(res,1,i) = lcopy(gmael(split,1,i));
+      mael(res,2,i) = mael(split,2,i);
     }
     return gerepile(ltop, lbot, res);
   }
   if (DEBUGLEVEL >= 9)
     fprintferr("GaloisConj:Frobenius:%Z\n", frob);
   {
-    GEN     S, Tp, Fi, Sp;
-    long    gp = n / fp;
+    GEN     Tp, Fi, Sp;
+    long    gp = n / fp, se;
     ppsi = cgetg(gp + 1, t_VECSMALL);
-    P = corpsfixeorbitemod(L, O, x, gb->ladicabs, gb->l, ip, &PL);
-    S = corpsfixeinclusion(O, PL);
-    S = vectopol(S, M, den, gb->ladicabs, x);
-    if (DEBUGLEVEL >= 9)
-      fprintferr("GaloisConj:Inclusion:%Z\n", S);
+    P = fixedfieldorbit(O, L, gb->ladicabs, gb->l, ip, &PL, &se, x);
     Pmod = lift((GEN)factmod(P, ip)[1]);
     Tp = FpX_red(T,ip);
-    /*S not in Z[X]*/
-    Sp = lift(gmul(S,gmodulcp(gun,ip)));
+    Sp = fixedfieldnewtonsumaut(sigma,ip,Tp,stoi(se),deg);
     Pp = FpX_red(P,ip);
     if (DEBUGLEVEL >= 4)
     {
+      fprintferr("GaloisConj:P=%Z   (%ld)\n", P,se);
       fprintferr("GaloisConj:psi=%Z\n", psi);
       fprintferr("GaloisConj:Sp=%Z\n", Sp);
       fprintferr("GaloisConj:Pmod=%Z\n", Pmod);
@@ -3630,11 +3502,7 @@ long znconductor(long n, GEN v, GEN V)
   avma=ltop;
   return n;
 }
-/* Hack to use divide_and_conquer_prod. Sometimes a copy-paste seems
- * better.  
- */
-static GEN modulo;
-static GEN gsmul(GEN a,GEN b){return FpX_mul(a,b,modulo);}
+
 static GEN gscycloconductor(GEN g, long n, long flag)
 {
   if (flag==2)
@@ -3646,6 +3514,7 @@ static GEN gscycloconductor(GEN g, long n, long flag)
   }
   return g;
 }
+
 GEN 
 galoissubcyclo(long n, GEN H, GEN Z, long v, long flag)
 {
@@ -3743,13 +3612,11 @@ galoissubcyclo(long n, GEN H, GEN Z, long v, long flag)
     s=gzero;
     for(j=1;j<=o;j++)
       s=addii(s,(GEN)powz[mael(O,i,j)]);
-    s=modii(negi(s),le);
-    g[i]=(long)deg1pol(gun,s,v);
+    g[i]=(long)modii(negi(s),le);
   }
   if (DEBUGLEVEL >= 1)
     msgtimer("computing new roots."); 
-  modulo=le;
-  g=divide_conquer_prod(g,&gsmul);
+  g=FpV_roots_to_pol(g,le,v);
   if (DEBUGLEVEL >= 1)
     msgtimer("computing products."); 
   g=FpX_redc(g,le);

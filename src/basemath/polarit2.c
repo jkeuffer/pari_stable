@@ -1239,7 +1239,7 @@ squff(GEN a, long hint)
     p += *pt++; if (!*pt) err(primer1);
     if (!smodis((GEN)a[da+2],p)) continue;
     prime[2] = p; z = FpX_red(a, prime);
-    if (!Fp_is_squarefree(z, prime)) continue;
+    if (!FpX_is_squarefree(z, prime)) continue;
 
     for (j=0; j<lbit-1; j++) tabkbit[j] = 0;
     tabkbit[j] = 1;
@@ -3533,7 +3533,7 @@ GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den)
       if (!*primepointer) err(primer1);
       if (!smodis(den, p))
         continue;/*Discard primes dividing the disc(T) or leadingcoeff(PQ) */
-      if (DEBUGLEVEL>=5) fprintferr("p=%d\n",p);
+      if (DEBUGLEVEL>=5) fprintferr("nfgcd: p=%d\n",p);
       if ((R = FpXQX_safegcd(P, Q, nf, stoi(p))) == NULL)
         continue;/*Discard primes when modular gcd does not exist*/
       dR = deg(R);

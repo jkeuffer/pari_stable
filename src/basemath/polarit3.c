@@ -910,6 +910,7 @@ FpX_chinese_coprime(GEN x,GEN y,GEN Tx,GEN Ty,GEN Tz,GEN p)
   p1 = FpX_res(p1,Tz,p);
   return gerepileupto(av,p1);
 }
+
 /* x,pol in Z[X], p in Z, n in Z, compute lift(x^n mod (p, pol)) */
 GEN
 FpXQ_pow(GEN x, GEN n, GEN pol, GEN p)
@@ -1148,6 +1149,30 @@ FpXQX_safegcd(GEN P, GEN Q, GEN T, GEN p)
 #define FqX_mul FpXQX_mul
 #define FqX_sqr FpXQX_sqr
 #define FqX_red FpXQX_red
+static GEN 
+Fq_neg(GEN x, GEN T, GEN p)/*T is not used but it is for consistency*/
+{
+  switch(typ(x)==t_POL)
+  {
+    case 0: return signe(x)?subii(p,x):gzero;
+    case 1: return FpX_neg(x,p);
+  }
+  return NULL;
+}
+static GEN modulo,Tmodulo;
+static GEN fgmul(GEN a,GEN b){return FqX_mul(a,b,Tmodulo,modulo);}
+GEN
+FqV_roots_to_pol(GEN V, GEN Tp, GEN p, long v)
+{
+  ulong ltop=avma;
+  long k;
+  GEN W=cgetg(lg(V),t_VEC);
+  for(k=1;k<lg(V);k++)
+    W[k]=(long)deg1pol(gun,Fq_neg((GEN)V[k],Tp,p),v);
+  modulo=p;Tmodulo=Tp;
+  W=divide_conquer_prod(W,&fgmul);
+  return gerepileupto(ltop,W);
+}
 
 /*******************************************************************/
 /*                                                                 */
@@ -1529,32 +1554,23 @@ GEN Fp_isom(GEN P,GEN Q,GEN l)
   R=FpX_FpXQ_compo(R,SQ,Q,l);
   return gerepileupto(ltop,R);
 }
-static GEN modulo,Tmodulo;
-static GEN fgmul(GEN a,GEN b){return FqX_mul(a,b,Tmodulo,modulo);}
 GEN
 Fp_factorgalois(GEN P,GEN l, long d, long w)
 {
   ulong ltop=avma;
-  GEN R,Pw,V,ld;
+  GEN R,V,ld,Tl;
   long n,k,m;
   long v;
   v=varn(P);
-  Pw=FpX(P,l);
-  setvarn(Pw,w);
   n=degree(P);
   m=n/d;
   ld=gpowgs(l,d);
-  R=polx[w];
+  Tl=gcopy(P); setvarn(Tl,w);
   V=cgetg(m+1,t_VEC);
-  V[1]=(long)deg1pol(gun,FpX_neg(R,l),v);
+  V[1]=lpolx[w];
   for(k=2;k<=m;k++)
-  {
-    R=FpXQ_pow(R,ld,P,l);
-    V[k]=(long)deg1pol(gun,FpX_neg(R,l),v);
-  }
-  modulo=l;Tmodulo=gcopy(P);
-  setvarn(Tmodulo,w);
-  R=divide_conquer_prod(V,&fgmul);
+    V[k]=(long)FpXQ_pow((GEN)V[k-1],ld,Tl,l);
+  R=FqV_roots_to_pol(V,Tl,l,v);
   return gerepileupto(ltop,R);
 }
 extern GEN mat_to_polpol(GEN x, long v,long w);
