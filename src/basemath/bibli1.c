@@ -2024,21 +2024,23 @@ ordred(GEN x, long prec)
 }
 
 GEN roots_to_pol_r1r2(GEN a, long r1, long v);
-static GEN chk_basis_embed;
-long chk_r1, chk_v;
 
+/* data[0] = r1
+ * data[1] = embeddings of Zk basis
+ * data[2] = embeddings of Zk basis */
 static GEN
-init_chk(GEN nf, GEN mat, GEN bound)
+chk_gen_init(GEN data, GEN nf, GEN mat, GEN bound)
 {
   GEN M = gmael(nf,5,1);
   long n = lg(nf[7])-1, prec,prec2;
 
   if (!bound)
   {
-    chk_v = varn(nf[1]);
-    chk_r1 = itos(gmael(nf,2,1));
-    chk_basis_embed = gmul(M, mat);
-    return gmul((GEN)nf[7],mat);
+    data = new_chunk(3);
+    data[0] = itos(gmael(nf,2,1));
+    data[1] = lmul(M, mat);
+    data[2] = lmul((GEN)nf[7],mat);
+    return data;
   }
 
   /* should be [max_k C^n_k (B/k) ^ k] ^ (1/2) */
@@ -2048,26 +2050,32 @@ init_chk(GEN nf, GEN mat, GEN bound)
   prec = 3 + prec2;
   prec2= (long)nfnewprec(nf,-1);
   if (DEBUGLEVEL)
-    fprintferr("init_chk: estimated prec = %ld (initially %ld)\n",
-                 prec, prec2);
+    fprintferr("chk_gen_init: estimated prec = %ld (initially %ld)\n",
+                prec, prec2);
   if (prec > prec2) return NULL;
-  if (prec < prec2) chk_basis_embed = gprec_w(chk_basis_embed, prec);
+  if (prec < prec2) data[1] = (long)gprec_w((GEN)data[1], prec);
   return (GEN)prec;
 }
 
 static GEN
-checkgenerator(GEN x)
+chk_gen_post(GEN data, GEN res)
 {
-  long l,i,av = avma;
-  GEN g = gmul(chk_basis_embed,x);
-  GEN r = gneg((GEN)g[1]);
-  long epsbit = 5 - bit_accuracy(gprecision(r));
+  GEN basis = (GEN)data[2];
+  GEN p1 = (GEN)res[2];
+  long i, l = lg(p1);
+  for (i=1; i<l; i++) p1[i] = lmul(basis, (GEN)p1[i]);
+  return res;
+}
+
+/* does x generate the correct field ? */
+static GEN
+chk_gen(GEN data, GEN x)
+{
+  long av = avma;
+  GEN basis_embed = (GEN)data[1];
+  GEN g = gmul(basis_embed,x);
   
-  l = lg(g)-1;
-  for (i=2; i<=l; i++)
-    if (gexpo(gadd((GEN)g[i], r)) < epsbit) { avma=av; return NULL; }
-  
-  g = roots_to_pol_r1r2(g, chk_r1, chk_v);
+  g = roots_to_pol_r1r2(g, data[0], 0);
   g = ground(g);
   if (lgef(modulargcd(g,derivpol(g))) > 3) { avma=av; return NULL; }
   if (DEBUGLEVEL>3) fprintferr("  generator: %Z\n",g);
@@ -2149,6 +2157,13 @@ polredabs0(GEN x, long flun, long prec)
   long i,nv, av = avma;
   GEN nf,v,y,a,phimax;
   GEN (*storepols)(GEN, GEN, GEN, GEN, long);
+  FP_chk_fun *chk;
+
+  chk = (FP_chk_fun*)new_chunk(sizeof(FP_chk_fun));
+  chk->f         = &chk_gen;
+  chk->f_init    = &chk_gen_init;
+  chk->f_post    = &chk_gen_post;
+  chk->skipfirst = 1;
 
   if ((ulong)flun >= 16) err(flagerr,"polredabs");
   nf = initalgall0(x,nf_SMALL|nf_REGULAR,prec);
@@ -2164,7 +2179,7 @@ polredabs0(GEN x, long flun, long prec)
   nv = lgef(nf[1])==4? 1: 2;
   for (i=1; ; i++)
   {
-    v = fincke_pohst(nf,NULL,stoi(5000),3,prec, &checkgenerator);
+    v = fincke_pohst(nf,NULL,5000,3,prec, chk);
     if (v) break;
     if (i==MAXITERPOL) err(accurer,"polredabs0");
     prec = (prec<<1)-2; nf = nfnewprec(nf,prec);
@@ -2189,6 +2204,11 @@ polredabs0(GEN x, long flun, long prec)
     x=(GEN)nf[1];
     y = cgetg(2,t_VEC); y[1]=(long)x;
     a = cgetg(2,t_VEC); a[1]=(long)polx[varn(x)];
+  }
+  if (varn(y[1]) != varn(x))
+  {
+    long vx = varn(x);
+    for (i=1; i<nv; i++) setvarn(y[i], vx);
   }
   return gerepileupto(av, storepols(nf,y,a,phimax,flun));
 }
@@ -2538,7 +2558,7 @@ qfminim0(GEN a, GEN borne, GEN stockmax, long flag, long prec)
   {
     case 0: return minim00(a,borne,stockmax,min_ALL);
     case 1: return minim00(a,borne,gzero   ,min_FIRST);
-    case 2: return fincke_pohst(a,borne,stockmax,0,prec,NULL);
+    case 2: return fincke_pohst(a,borne,itos(stockmax),0,prec,NULL);
     default: err(flagerr,"qfminim");
   }
   return NULL; /* not reached */
@@ -2562,19 +2582,21 @@ perf(GEN a)
   return minim00(a,gzero,gzero,min_PERF);
 }
 
-/* programme general pour les formes quadratiques definies positives
- * quelconques (a coeffs reels). On doit avoir BORNE != 0; on n'entre dans
- * cette fonction qu'a partir de fincke_pohst (la reduction LLL n'est donc
- * pas faite ici). Si flag >= 2, on s'arrete des que stockmax est atteint.
- * Si flag&1 == 1, pas d'erreur dans sqred1intern. */
+/* general program for positive definit quadratic forms (real coeffs).
+ * One needs BORNE != 0; LLL reduction done in fincke_pohst().
+ * If (flag & 2) stop as soon as stockmax is reached.
+ * If (flag & 1) return NULL on precision problems (no error). */
 static GEN
-smallvectors(GEN a, GEN BORNE, GEN STOCKMAX, long flag, long prec,
-             GEN (*check)(GEN))
+smallvectors(GEN a, GEN BORNE, long stockmax, long flag, long prec,
+             FP_chk_fun *CHECK)
 {
-  long av = avma,av1,av2,lim,N,n,i,j,k,s,stockmax,epsbit,checkcnt = 0;
+  long av = avma,av1,av2,lim,N,n,i,j,k,s,epsbit,checkcnt = 0;
   GEN u,S,x,y,z,v,q,norme1,normax1,borne1,borne2,eps,p1,alpha,norms;
+  GEN (*check)(GEN,GEN) = CHECK? CHECK->f: NULL;
+  GEN data = CHECK? CHECK->data: NULL;
+  int skipfirst = CHECK? CHECK->skipfirst: 0;
 
-  N=lg(a); n=N-1; stockmax=itos(STOCKMAX);
+  N=lg(a); n=N-1;
   if (DEBUGLEVEL)
     fprintferr("smallvectors looking for norm <= %Z\n",gprec_w(BORNE,3));
 
@@ -2627,7 +2649,7 @@ smallvectors(GEN a, GEN BORNE, GEN STOCKMAX, long flag, long prec,
           avma=av1; x[k] = lmpent(p1); /* safe */
         }
       }
-      else if (check)
+      else if (skipfirst)
       { /* don't waste time on the [x,0,...0] */
         for (i=2; i<N; i++)
           if (signe(x[i])) break;
@@ -2684,7 +2706,7 @@ smallvectors(GEN a, GEN BORNE, GEN STOCKMAX, long flag, long prec,
       {
         if (checkcnt < 5 && mpcmp(norme1, borne2) < 0)
         {
-          if (check(x))
+          if (check(data,x))
           {
             borne1 = mpadd(norme1,eps);
             borne2 = mpmul(borne1,alpha);
@@ -2707,7 +2729,7 @@ smallvectors(GEN a, GEN BORNE, GEN STOCKMAX, long flag, long prec,
           for (i=1; i<=s; i++)
           {
             long k = per[i];
-            if (check((GEN)S[k]))
+            if (check(data,(GEN)S[k]))
             {
               S[1] = S[k]; avma = av1;
               borne1 = mpadd(norme1,eps);
@@ -2734,7 +2756,7 @@ CONTINUE:
     {
       long k = per[i];
       if (j && mpcmp((GEN)norms[k], borne1) > 0) break;
-      if ((p = check((GEN)S[k])))
+      if ((p = check(data,(GEN)S[k])))
       {
         if (!j) borne1 = gadd((GEN)norms[k],eps);
         j++; pols[j]=(long)p; alph[j]=S[k];
@@ -2765,22 +2787,25 @@ get_Bnf(GEN nf)
   return p;
 }
 
-/* solve x~.a.x <= borne, a > 0. If check is non-NULL keep x only if check(x).
- * flag = 1, return NULL in case of precision problems (sqred1 or lllgram)
+/* solve x~.a.x <= BOUND, a > 0. If check is non-NULL keep x only if check(x).
+ * flag & 1, return NULL in case of precision problems (sqred1 or lllgram)
  *   raise an error otherwse.
- * flag = 2, return as soon as stockmax vectors found.
- * flag = 3, corresponds to 1+2 */
+ * flag & 2, return as soon as stockmax vectors found.
+ * If a is a number field, use its T2 matrix
+ */
 GEN
-fincke_pohst(GEN a,GEN BOUND,GEN stockmax,long flag, long PREC,
-             GEN (*check)(GEN))
+fincke_pohst(GEN a,GEN BOUND,long stockmax,long flag, long PREC,
+             FP_chk_fun *CHECK)
 {
   VOLATILE long pr,av=avma,i,j,n, prec = PREC;
-  VOLATILE GEN B,nf,r,rinvtrans,v,v1,u,s,res,z,vnorm,sperm,perm,uperm,basis;
+  VOLATILE GEN B,nf,r,rinvtrans,v,v1,u,s,res,z,vnorm,sperm,perm,uperm;
   VOLATILE GEN gram, bound = BOUND;
+  VOLATILE GEN (*chk)(GEN,GEN) = CHECK? CHECK->f: NULL;
+  VOLATILE GEN (*chk_init)(GEN,GEN,GEN,GEN) = CHECK? CHECK->f_init: NULL;
   void *catcherr = NULL;
 
   if (DEBUGLEVEL>2) { fprintferr("entering fincke_pohst\n"); flusherr(); }
-  if (typ(a) == t_VEC) { nf = a; a = gmael(nf,5,3); } else nf = NULL;
+  if (typ(a) == t_VEC) { nf = checknf(a); a = gmael(nf,5,3); } else nf = NULL;
   pr = gprecision(a);
   if (pr) prec = pr; else a = gmul(a,realun(prec));
   if (DEBUGLEVEL>2) fprintferr("first LLL: prec = %ld\n", prec);
@@ -2838,37 +2863,40 @@ fincke_pohst(GEN a,GEN BOUND,GEN stockmax,long flag, long PREC,
     catcherr = err_catch(truer2, env, NULL);
   }
 
-  if (nf) basis = init_chk(nf,uperm,NULL);
+  if (chk_init) 
+    CHECK->data = chk_init(CHECK->data,nf,uperm,NULL);
   if (!bound)
-  { /* polred */
+  { /* set bound */
     GEN x = cgetg(n,t_COL);
     if (nf) bound = get_Bnf(nf);
     for (j=1; j<n; j++) x[j]=zero;
     for (j=2; j<n; j++)
     {
-      x[j]=un; B = gcoeff(gram,j,j);
+      x[j] = un; B = gcoeff(gram,j,j);
       if (!bound || mpcmp(B,bound) < 0)
-        if (!check || check(x)) bound = B;
-      x[j]=zero;
+        if (!chk || chk(CHECK->data,x)) bound = B;
+      x[j] = zero;
     }
   }
-  if (nf && !(prec = (long)init_chk(nf,uperm,bound))) goto PRECPB;
+  /* update precision if needed */
+  if (chk_init)
+    if (!(prec = (long)chk_init(CHECK->data,nf,uperm,bound))) goto PRECPB;
 
   if (DEBUGLEVEL>2) {fprintferr("entering smallvectors\n"); flusherr();}
-  i = check? 2: 1; if (i == n) i--;
+  i = (CHECK && CHECK->skipfirst)? 2: 1;
+  if (i == n) i--;
   for (   ; i<n; i++)
   {
-    res = smallvectors(gram,gceil(bound? bound: gcoeff(gram,i,i)),
-                       stockmax,flag,prec,check);
+    res = smallvectors(gram, bound? bound: gcoeff(gram,i,i),
+                       stockmax,flag,prec,CHECK);
     if (!res) goto PRECPB;
-    if (!check || lg(res[2]) > 1) break;
+    if (!chk || lg(res[2]) > 1) break;
     if (DEBUGLEVEL>2) fprintferr("  i = %ld failed\n",i);
   }
   err_leave(&catcherr); catcherr = NULL;
-  if (check)
+  if (CHECK)
   {
-    GEN p1 = (GEN)res[2];
-    for (i=1; i<lg(p1); i++) p1[i] = lmul(basis, (GEN)p1[i]);
+    if (CHECK->f_post) res = CHECK->f_post(CHECK->data, res);
     return res;
   }
 

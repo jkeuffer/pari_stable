@@ -1,4 +1,3 @@
-
 /*******************************************************************/
 /*                                                                 */
 /*                      Fichier Include PARI                       */
@@ -468,7 +467,6 @@ GEN     algdep0(GEN x, long n, long bit,long prec);
 GEN     algdep2(GEN x, long n, long bit);
 GEN     factoredpolred(GEN x, GEN p, long prec);
 GEN     factoredpolred2(GEN x, GEN p, long prec);
-GEN     fincke_pohst(GEN a, GEN borne, GEN stockmax, long flag, long prec, GEN (*check)(GEN));
 GEN     kerint(GEN x);
 GEN     kerint1(GEN x);
 GEN     kerint2(GEN x);

@@ -1253,7 +1253,7 @@ rootsof1(GEN nf)
 #endif
   for (i=1; ; i++)
   {
-    p1 = fincke_pohst(gmael(nf,5,3),stoi(N),stoi(1000),1,prec,NULL);
+    p1 = fincke_pohst(nf,stoi(N),1000,1,prec,NULL);
     if (p1) break;
     if (i == MAXITERPOL) err(accurer,"rootsof1");
     prec=(prec<<1)-2;

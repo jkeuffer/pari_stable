@@ -40,3 +40,14 @@ GEN initalgall0(GEN x, long flag, long prec);
 #define min_ALL   0
 #define min_FIRST 1
 #define min_PERF  2
+
+/* for fincke_pohst() */
+typedef struct {
+  GEN (*f)(GEN,GEN);
+  GEN (*f_init)(GEN,GEN,GEN,GEN);
+  GEN (*f_post)(GEN,GEN);
+  GEN data;
+  int skipfirst;
+} FP_chk_fun;
+
+GEN fincke_pohst(GEN a,GEN BOUND,long stockmax,long flag, long PREC, FP_chk_fun *CHECK);

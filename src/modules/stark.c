@@ -6,12 +6,12 @@
 /*******************************************************************/
 /* $Id$ */
 #include "pari.h"
+#include "parinf.h"
 
 #define EXTRA_PREC (DEFAULTPREC-1)
 #define ADD_PREC   (DEFAULTPREC-2)*3
 
 GEN roots_to_pol_intern(GEN L, GEN a, long v, int plus);
-static int*** computean(GEN dtcr,  long nmax, long prec);
 
 /********************************************************************/
 /*                    Miscellaneous functions                       */
@@ -2239,7 +2239,7 @@ RecCoeff2(GEN nf,  GEN beta,  GEN B,  long v,  long prec)
 static GEN
 RecCoeff3(GEN nf, GEN beta, GEN B, long v, long prec)
 {
-  GEN A, M, nB, cand, sol, p1, plg, B2, C2, max = stoi(10000);
+  GEN A, M, nB, cand, sol, p1, plg, B2, C2;
   GEN beta2, eps, nf2, Bd, maxBd = gpowgs(stoi(10), 8);
   long N, G, i, j, k, l, ct = 0, av = avma, prec2, nbs;
 
@@ -2288,7 +2288,7 @@ RecCoeff3(GEN nf, GEN beta, GEN B, long v, long prec)
     }
 
   nB = mulsi(N+1, B2);
-  cand = fincke_pohst(A, nB, max, 3, prec2, NULL);
+  cand = fincke_pohst(A, nB, 10000, 3, prec2, NULL);
 
   if (!cand)
   {

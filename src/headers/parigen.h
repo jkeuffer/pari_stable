@@ -4,6 +4,7 @@
 
 typedef long *GEN;
 typedef int (*QSCOMP)(const void *, const void *);
+
 #ifdef ULONG_NOT_DEFINED
   typedef unsigned long ulong;
 #endif
