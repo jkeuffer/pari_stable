@@ -462,6 +462,7 @@ char *helpmessages_basic[]={
   "vecmin(x): minimum of the elements of the vector/matrix x",
   "vecsort(x,{k},{flag=0}): sorts the vector of vectors (or matrix) x, according to the value of its k-th component if k is not omitted. Binary digits of flag (if present) mean: 1: indirect sorting, return the permutation instead of the permuted vector, 2: sort using ascending lexicographic order",
   "vector(n,{X},{expr=0}): row vector with n components of expression expr (X ranges from 1 to n). By default, fill with 0s",
+  "vectorsmall(n,{X},{expr=0}): VECSMALL with n components of expression expr (X ranges from 1 to n) which must be small integers. By default, fill with 0s",
   "vectorv(n,{X},{expr=0}): column vector with n components of expression expr (X ranges from 1 to n). By default, fill with 0s",
   "weber(x,{flag=0}): One of Weber's f function of x. flag is optional, and can be 0: default, function f(x)=exp(-i*Pi/24)*eta((x+1)/2)/eta(x) such that (j=(f^24-16)^3/f^24), 1: function f1(x)=eta(x/2)/eta(x) such that (j=(f1^24+16)^3/f2^24), 2: function f2(x)=sqrt(2)*eta(2*x)/eta(x) such that (j=(f2^24+16)^3/f2^24)",
   "while(a,seq):  while a is nonzero evaluate the expression sequence seq. Otherwise 0",

@@ -1041,7 +1041,12 @@ gmul_err(GEN x, GEN y, long tx, long ty)
       case t_VECSMALL:
         l = lg(x); z = cgetg(l, t_VECSMALL);
         if (l != lg(y)) err(operf,"*",tx,ty);
-        for (i=1; i<l; i++) z[i]=x[y[i]];
+        for (i=1; i<l; i++) 
+	{
+	  long yi=y[i];
+	  if (yi<1 || yi>=l) err(operf,"*",tx,ty);
+	  z[i]=x[y[i]];
+	}
         return z;
     }
   err(operf,"*",tx,ty);
