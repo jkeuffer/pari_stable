@@ -1360,8 +1360,8 @@ szeta(long k, long prec)
 GEN
 czeta(GEN s0, long prec)
 {
-  GEN s, u, a, y, res, tes, sig, invn2, p1, unr;
-  GEN sim, ms, s1, s2, s3, s4, s5, *tab, tabn;
+  GEN s, u, a, y, res, tes, sig, invn2, unr;
+  GEN sim, *tab, tabn;
   long p, i, sqn, nn, lim, lim2, ct;
   pari_sp av, av2 = avma, avlim;
   int funeq = 0;
@@ -1370,7 +1370,8 @@ czeta(GEN s0, long prec)
   if (DEBUGLEVEL>2) (void)timer2();
   s = trans_fix_arg(&prec,&s0,&sig,&av,&res);
   if (gcmp0(s)) { y = gneg(ghalf); goto END; }
-  if (signe(sig) <= 0 || expo(sig) < -1)
+  if (gexpo(gsub(s, gun)) < -5 || 
+      (gexpo(s) > -5 && (signe(sig) <= 0 || expo(sig) < -1)))
   { /* s <--> 1-s */
     if (typ(s0) == t_INT)
     {
@@ -1427,19 +1428,18 @@ czeta(GEN s0, long prec)
   }
   else
   { /* general case */
-    ms = gneg(s); p1 = cgetr(prec);
+    GEN ms = gneg(s), rp = cgetr(prec);
     for (p=2; p < nn;)
     {
-      affsr(p, p1);
-      tab[p] = gexp(gmul(ms, mplog(p1)), prec);
+      affsr(p, rp);
+      tab[p] = gexp(gmul(ms, mplog(rp)), prec);
       NEXT_PRIME_VIADIFF(p,d);
     }
-    affsr(nn,p1);
-    a = gexp(gmul(ms, mplog(p1)), prec);
+    affsr(nn, rp);
+    a = gexp(gmul(ms, mplog(rp)), prec);
   }
-  sqn = (long)sqrt(nn-1.);
+  sqn = (long)sqrt(nn-1.); maxprime_check(sqn);
   d = diffptr + 2; /* fill in odd prime powers */
-  maxprime_check(sqn);
   for (p=3; p <= sqn; )
   {
     ulong oldq = p, q = p*p;
@@ -1483,6 +1483,7 @@ czeta(GEN s0, long prec)
   }
   else /* typ(s0) != t_INT */
   {
+    GEN s1, s2, s3, s4, s5; 
     s1 = gsub(gmul2n(s,1), unr);
     s2 = gmul(s, gsub(s,unr));
     s3 = gmul2n(invn2,3);
@@ -1496,16 +1497,15 @@ czeta(GEN s0, long prec)
       tes = gadd(bernreal(i,prec), gdivgs(gmul(s5,tes), (i+1)*(i+2)));
       if (low_stack(avlim,stack_lim(av2,3)))
       {
-        GEN *gptr[3]; gptr[0]=&tes; gptr[1]=&s5; gptr[2]=&s4;
         if(DEBUGMEM>1) err(warnmem,"czeta");
-        gerepilemany(av2,gptr,3);
+        gerepileall(av2,3, &tes,&s5,&s4);
       }
     }
     u = gmul(gmul(tes,invn2), gmul2n(s2, -1));
     tes = gmulsg(nn, gaddsg(1, u));
   }
   if (DEBUGLEVEL>2) msgtimer("Bernoulli sum");
-  /* y += tes a / (s-1) */
+  /* y += tes n^(-s) / (s-1) */
   y = gadd(y, gmul(tes, gdiv(a, gsub(s, unr))));
 
 END:
