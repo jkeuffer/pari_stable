@@ -2263,9 +2263,9 @@ allhnfmod(GEN x,GEN dm,int flag)
         if (lgefint(p1[k]) > ldm) p1[k] = lresii((GEN)p1[k], dm);
       if (low_stack(lim, stack_lim(av,1)))
       {
+        GEN *gptr[2]; gptr[0]=&w; gptr[1]=&dm;
         if (DEBUGMEM>1) err(warnmem,"allhnfmod[2]. i=%ld", i);
-        tetpil=avma; w=gerepile(av,tetpil,ZM_copy(w));
-        diag = gcoeff(w,i,i);
+        gerepilemany(av,gptr,2); diag = gcoeff(w,i,i);
       }
     }
   }
