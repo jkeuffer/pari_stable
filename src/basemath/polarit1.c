@@ -2216,7 +2216,7 @@ factmod9(GEN f, GEN pp, GEN a)
   if (va<=vf) err(talker,"polynomial variable must be of higher priority than finite field\nvariable in factorff");
   if (isabsolutepol(f, pp, a))
   {
-    GEN z= Fp_factor_rel0(lift(lift(f)), pp, lift(a));
+    GEN z= Fp_factor_rel0(simplify(lift(lift(f))), pp, lift(a));
     GEN t=(GEN)z[1],ex=(GEN)z[2];
     unfp = gmodulsg(1,pp);
     unfq = gmodulcp(gmul(unfp, polun[va]), gmul(unfp,a));

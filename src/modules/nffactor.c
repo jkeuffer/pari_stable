@@ -19,6 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                                                                 */
 /*******************************************************************/
 #include "pari.h"
+#include "parinf.h"
 
 extern GEN hensel_lift(GEN pol,GEN fk,GEN fkk,GEN p,long e);
 extern GEN hensel_lift_fact(GEN pol, GEN fact, GEN p, GEN pev, long e);
@@ -27,17 +28,14 @@ extern GEN nfreducemodpr_i(GEN x, GEN prh);
 extern GEN sort_factor(GEN y, int (*cmp)(GEN,GEN));
 extern GEN pidealprimeinv(GEN nf, GEN x);
 
+static GEN nffactormod2(GEN nf,GEN pol,GEN pr);
+static GEN nfmod_split2(GEN nf, GEN prhall, GEN polb, GEN v, GEN q);
 static GEN nf_pol_mul(GEN nf,GEN pol1,GEN pol2);
-static GEN nf_pol_sqr(GEN nf,GEN pol1);
 static GEN nf_pol_divres(GEN nf,GEN pol1,GEN pol2, GEN *pr);
 static GEN nf_pol_subres(GEN nf,GEN pol1,GEN pol2);
 static GEN nfmod_pol_reduce(GEN nf,GEN prhall,GEN pol);
-static GEN nfmod_pol_mul(GEN nf,GEN prhall,GEN pol1,GEN pol2);
-static GEN nfmod_pol_sqr(GEN nf,GEN prhall,GEN pol1);
 static GEN nfmod_pol_divres(GEN nf,GEN prhall,GEN pol1,GEN pol2, GEN *pr);
-static GEN nfmod_split2(GEN nf,GEN prhall,GEN pmod,GEN pol,GEN exp);
 static GEN nfmod_pol_gcd(GEN nf,GEN prhall,GEN pol1,GEN pol2);
-static GEN nfmod_pol_pow(GEN nf,GEN prhall,GEN pmod,GEN pol,GEN exp);
 static GEN nf_bestlift(GEN id,GEN idinv,GEN den,GEN elt);
 static GEN nf_pol_lift(GEN id,GEN idinv,GEN den,GEN pol);
 static GEN nfsqff(GEN nf,GEN pol,long fl);
@@ -81,10 +79,10 @@ unifpol0(GEN nf,GEN pol,long flag)
   return gerepileupto(av,pol);
 }
 
-/* Pour pol un polynome a coefficients dans Z, nf ou l'algebre correspondant
- * renvoie le meme polynome avec pour coefficients:
- *  si flag=0: des vecteurs sur la base d'entiers.
- *  si flag=1: des polymods.
+/* Let pol be a polynomial with coefficients in Z or nf (vectors or polymods)
+ * return the same polynomial with coefficients expressed:
+ *  if flag=0: as vectors (on the integral basis).
+ *  if flag=1: as polymods.
  */
 GEN
 unifpol(GEN nf,GEN pol,long flag)
@@ -103,8 +101,9 @@ unifpol(GEN nf,GEN pol,long flag)
   return unifpol0(nf,(GEN) pol, flag);
 }
 
-/* cree un polynome unitaire de degre d a entrees au hazard dans Z_nf */
-GEN
+#if 0 
+/* return a monic polynomial of degree d with random coefficients in Z_nf */
+static GEN
 random_pol(GEN nf,long d)
 {
   long i,j, n = lgef(nf[1])-3;
@@ -123,8 +122,9 @@ random_pol(GEN nf,long d)
   pl[1] = evalsigne(1) | evallgef(d+3) | evalvarn(0);
   return pl;
 }
+#endif 
 
-/* multiplication de x par y dans nf (x element accepte) */
+/* multiplication of x by y */
 static GEN
 nf_pol_mul(GEN nf,GEN x,GEN y)
 {
@@ -135,7 +135,7 @@ nf_pol_mul(GEN nf,GEN x,GEN y)
   return gerepile(av,tetpil,unifpol(nf,res,0));
 }
 
-/* calcule x^2 dans nf (x element accepte) */
+/* compute x^2 in nf */
 static GEN
 nf_pol_sqr(GEN nf,GEN x)
 {
@@ -146,7 +146,7 @@ nf_pol_sqr(GEN nf,GEN x)
   return gerepile(av,tetpil,unifpol(nf,res,0));
 }
 
-/* Reduction modulo phall des coefficients de pol (pol element accepte) */
+/* reduce the coefficients of pol modulo prhall */
 static GEN
 nfmod_pol_reduce(GEN nf,GEN prhall,GEN pol)
 {
@@ -163,7 +163,7 @@ nfmod_pol_reduce(GEN nf,GEN prhall,GEN pol)
   return gerepile(av,tetpil, normalizepol(p1));
 }
 
-/* x^2 modulo prhall ds nf (x elt accepte) */
+/* x^2 modulo prhall */
 static GEN
 nfmod_pol_sqr(GEN nf,GEN prhall,GEN x)
 {
@@ -177,7 +177,7 @@ nfmod_pol_sqr(GEN nf,GEN prhall,GEN x)
   return gerepile(av,tetpil,nfmod_pol_reduce(nf,prhall,px));
 }
 
-/* multiplication des polynomes x et y modulo prhall ds nf (x elt accepte) */
+/* multiplication of x by y modulo prhall */
 static GEN
 nfmod_pol_mul(GEN nf,GEN prhall,GEN x,GEN y)
 {
@@ -191,7 +191,7 @@ nfmod_pol_mul(GEN nf,GEN prhall,GEN x,GEN y)
   return gerepile(av,tetpil,nfmod_pol_reduce(nf,prhall,px));
 }
 
-/* division euclidienne du polynome x par le polynome y */
+/* Euclidan division of x by y */
 static GEN
 nf_pol_divres(GEN nf,GEN x,GEN y,GEN *pr)
 {
@@ -206,7 +206,7 @@ nf_pol_divres(GEN nf,GEN x,GEN y,GEN *pr)
   return nq;
 }
 
-/* division euclidienne du polynome x par le polynome y modulo prhall */
+/* Euclidan division of x by y modulo prhall */
 static GEN
 nfmod_pol_divres(GEN nf,GEN prhall,GEN x,GEN y, GEN *pr)
 {
@@ -284,7 +284,7 @@ nfmod_pol_divres(GEN nf,GEN prhall,GEN x,GEN y, GEN *pr)
   *pr=p3; return z;
 }
 
-/* PGCD des polynomes x et y, par l'algorithme du sub-resultant */
+/* GCD of x and y */
 static GEN
 nf_pol_subres(GEN nf,GEN x,GEN y)
 {
@@ -294,7 +294,7 @@ nf_pol_subres(GEN nf,GEN x,GEN y)
   tetpil=avma; return gerepile(av,tetpil,unifpol(nf,s,1));
 }
 
-/* PGCD des polynomes x et y modulo prhall */
+/* GCD of x and y modulo prhall */
 static GEN
 nfmod_pol_gcd(GEN nf,GEN prhall,GEN x,GEN y)
 {
@@ -314,7 +314,7 @@ nfmod_pol_gcd(GEN nf,GEN prhall,GEN x,GEN y)
   return gerepileupto(av,p1);
 }
 
-/* Calcul pol^e modulo prhall et le polynome pmod */
+/* return pol^e modulo prhall and the polynomial pmod */
 static GEN
 nfmod_pol_pow(GEN nf,GEN prhall,GEN pmod,GEN pol,GEN e)
 {
@@ -342,11 +342,90 @@ nfmod_pol_pow(GEN nf,GEN prhall,GEN pmod,GEN pol,GEN e)
   return gerepileupto(av,p1);
 }
 
+static long
+isdivbyprime(GEN nf, GEN x, GEN pr)
+{
+  GEN elt, p = (GEN)pr[1], tau = (GEN)pr[5];
+
+  elt = element_mul(nf, x, tau);
+  if (divise(content(elt), p)) return 1;
+
+  return 0; 
+}
+
+/* return the factor of nf.pol modulo p corresponding to pr */
+static GEN
+localpol(GEN nf, GEN pr)
+{
+  long i, l;
+  GEN fct, pol = (GEN)nf[1], p = (GEN)pr[1];
+
+  fct = lift((GEN)factmod(pol, p)[1]);
+  l = lg(fct) - 1;
+  for (i = 1; i <= l; i++)
+    if (isdivbyprime(nf, (GEN)fct[i], pr)) return (GEN)fct[i];
+
+  err(talker, "cannot find a suitable factor in localpol");
+  return NULL; /* not reached */
+}
+
+/* factorization of x modulo pr */
+static GEN
+nffactormod0(GEN nf, GEN x, GEN pr)
+{
+  long av = avma, j, l, vx = varn(x), vn = varn((GEN)nf[1]);
+  GEN rep, pol, xrd, prh, p1;
+
+  nf=checknf(nf);
+  if (typ(x)!=t_POL) err(typeer,"nffactormod");
+  if (vx >= vn)
+    err(talker,"polynomial variable must have highest priority in nffactormod");
+
+  if (divise((GEN)nf[4], (GEN)pr[1]))
+    return gerepileupto(av, nffactormod2(nf,x,pr));
+
+  prh = nfmodprinit(nf, pr);
+  xrd = nfmod_pol_reduce(nf, prh, x);
+  if (gcmp1((GEN)pr[4]))
+  {
+    pol = gun; /* dummy */
+    for (j = 2; j < lg(xrd); j++)
+      xrd[j] = mael(xrd, j, 1);
+    rep = factmod(xrd, (GEN)pr[1]);
+    rep = lift(rep);
+  }
+  else
+  {
+    pol = localpol(nf, pr);
+    xrd = lift(unifpol(nf, xrd, 1));
+    p1  = gun;
+    for (j = 2; j < lg(xrd); j++)
+    {
+      xrd[j] = lmod((GEN)xrd[j], pol);
+      p1 = mpppcm(p1, denom(content((GEN)xrd[j])));
+    }
+    rep = factmod9(gmul(xrd, p1), (GEN)pr[1], pol);
+    rep = lift(lift(rep));
+  }
+
+  l = lg((GEN)rep[1]); 
+  for (j = 1; j < l; j++)
+    mael(rep, 1, j) = (long)unifpol(nf, gmael(rep, 1, j), 1);
+
+  return gerepileupto(av, gcopy(rep));
+}
+
+GEN
+nffactormod(GEN nf, GEN x, GEN pr)
+{
+  return nffactormod0(nf, x, pr);
+}
+
 extern GEN trivfact(void);
 
-/* factorisation du polynome x modulo pr */
+/* factorization of x modulo pr */
 GEN
-nffactormod(GEN nf,GEN pol,GEN pr)
+nffactormod2(GEN nf,GEN pol,GEN pr)
 {
   long av = avma, tetpil,lb,nbfact,psim,N,n,i,j,k,d,e,vf,r,kk;
   GEN y,ex,*t,f1,f2,f3,df1,g1,polb,pold,polu,vker;
@@ -489,7 +568,8 @@ nffactormod(GEN nf,GEN pol,GEN pr)
   return gerepile(av,tetpil,y);
 }
 
-/* Calcule pol + pol^2 + ... + pol^(q/2) modulo prhall et le polynome pmod */
+/* return pol + pol^2 + ... + pol^(q/2) modulo prhall and 
+   the polynomial pmod */
 static GEN
 nfmod_split2(GEN nf,GEN prhall,GEN pmod,GEN pol,GEN exp)
 {
@@ -545,7 +625,7 @@ choose_prime(GEN nf, GEN dk, GEN lim, long ct)
   return pr;
 }
 
-/* Renvoie les racines de pol contenues dans nf */
+/* return the roots of pol in nf */
 GEN
 nfroots(GEN nf,GEN pol)
 {
@@ -616,14 +696,14 @@ nfroots(GEN nf,GEN pol)
   tetpil=avma; return gerepile(av, tetpil, gen_sort(p1, 0, cmp_pol));
 }
 
-/* Relevement de elt modulo id minimal */
+/* return a minimal lift of elt modulo id */
 static GEN
 nf_bestlift(GEN id,GEN idinv,GEN den,GEN elt)
 {
   return gsub(elt,gmul(id,ground(gmul(den,gmul(idinv,elt)))));
 }
 
-/* Releve le polynome pol avec des coeff de norme t2 <= C si possible */
+/* return the lift of pol with coefficients of T2-norm <= C (if possible) */
 static GEN
 nf_pol_lift(GEN id,GEN idinv,GEN den,GEN pol)
 {
@@ -637,7 +717,7 @@ nf_pol_lift(GEN id,GEN idinv,GEN den,GEN pol)
 }
 
 #if 0
-/* Evalue le polynome pol en elt */
+/* return pol(elt) */
 static GEN
 nf_pol_eval(GEN nf,GEN pol,GEN elt)
 {
@@ -653,7 +733,7 @@ nf_pol_eval(GEN nf,GEN pol,GEN elt)
 }
 #endif
 
-/* Calcule la factorisation du polynome x dans nf */
+/* return the factorization of x in nf */
 GEN
 nffactor(GEN nf,GEN pol)
 { GEN y,p1,p2,den,p3,p4,quot, rep = cgetg(3,t_MAT);
@@ -744,12 +824,12 @@ nffactor(GEN nf,GEN pol)
     p2=cgetg(i+1, t_COL); for (; i>=1; i--) p2[i]=un;
   }
   if (DEBUGLEVEL>=4)
-    fprintferr("Nombre de facteur(s) trouve(s) : %ld\n", nfcmbf.nfact);
+    fprintferr("number of factor(s) found: %ld\n", nfcmbf.nfact);
   rep[1]=(long)y;
   rep[2]=(long)p2; return sort_factor(rep, cmp_pol);
 }
 
-/* teste si la matrice M est suffisament orthogonale */
+/* test if the matrix M is suitable */
 static long
 test_mat(GEN M, GEN p, GEN C2, long k)
 {
@@ -767,7 +847,7 @@ test_mat(GEN M, GEN p, GEN C2, long k)
   return (i < 0);
 }
 
-/* calcule la matrice correspondant a pr^e jusqu'a ce que R(pr^e) > C */
+/* return the matrix corresponding to pr^e with R(pr^e) > C */
 static GEN
 T2_matrix_pow(GEN nf, GEN pre, GEN p, GEN C, long *kmax, long prec)
 {
@@ -793,7 +873,7 @@ T2_matrix_pow(GEN nf, GEN pre, GEN p, GEN C, long *kmax, long prec)
 
     for(;;)
     {
-      u = tot_real? lllgramint(p3): lllgramintern(p3,100,1,prec);
+      u = tot_real? lllgramall(p3,2,lll_IM) : lllgramintern(p3,2,1,prec);
       if (u) break;
 
       prec=(prec<<1)-2;
@@ -809,7 +889,7 @@ T2_matrix_pow(GEN nf, GEN pre, GEN p, GEN C, long *kmax, long prec)
       return gerepileupto(av,gmul(p1,u));
     }
 
-    /* il faut augmenter la precision en meme temps */
+    /* we also need to increase the precision */
     p2=shifti(gceil(mulsr(k, glog(p,DEFAULTPREC))),-1);
     prec += (long)(itos(p2)*pariK1);
     if (DEBUGLEVEL > 1) err(warnprec,"nffactor[2]",prec);
@@ -824,16 +904,17 @@ T2_matrix_pow(GEN nf, GEN pre, GEN p, GEN C, long *kmax, long prec)
   }
 }
 
-/* Calcule la factorisation du polynome x qui est sans facteurs carres dans nf,
-   Le polynome est a coefficients dans Z_k et son terme dominant est un entier
-   rationnel, si fl=1 renvoie seulement les racines du polynome contenues
-   dans le corps */
+/* return the factorization of the square-free polynomial x. 
+   The coeff of x are in Z_nf and its leading term is a rational 
+   integer. If fl = 1,return only the roots of x in nf */
 static GEN
 nfsqff(GEN nf,GEN pol, long fl)
 {
   long d=lgef(pol),i,k,m,n,av=avma,tetpil,newprec,prec,nbf=BIGINT,anbf,ct=3;
   GEN p1,pr,p2,rep,k2,C,h,dk,dki,p,prh,p3,T2,polbase,fact,pk,ap,apr;
   GEN polmod,polred,hinv,lt,minp,den,maxp=shifti(gun,32),run,aprh;
+
+  if (DEBUGLEVEL>=4) msgtimer("square-free");
 
   dk=absi((GEN)nf[3]);
   dki=mulii(dk,(GEN)nf[4]);
@@ -880,7 +961,7 @@ nfsqff(GEN nf,GEN pol, long fl)
   C=gmul(C,sqri(lt));
   
   if (DEBUGLEVEL>=4)
-    fprintferr("La borne de la norme des coeff du diviseur est : %Z\n", C);
+    fprintferr("the bound on the T2-norm of the coeff. is: %Z\n", C);
   
   /* this is the theoretical bound for the exponent */
   /* k2=gadd(glog(gdivgs(C,n),DEFAULTPREC), mulsr(n*(n-1), dbltor(0.347)));
@@ -895,8 +976,8 @@ nfsqff(GEN nf,GEN pol, long fl)
   
   if (DEBUGLEVEL>=4)
   {
-    fprintferr("borne inf. sur les nombres premiers : %Z\n", minp);
-    msgtimer("Calcul des bornes");
+    fprintferr("lower bound for the prime numbers: %Z\n", minp);
+    msgtimer("bounds computation");
   }
 
   p = rep = polred = NULL; /* gcc -Wall */
@@ -928,8 +1009,8 @@ nfsqff(GEN nf,GEN pol, long fl)
 	p=gcopy(ap);
 	if (DEBUGLEVEL>=4)
 	{
-	  fprintferr("Ideal premier pr considere pour decomposition: %Z\n", pr);
-	  fprintferr("Nombre de facteurs irreductibles modulo pr = %ld\n", nbf);
+	  fprintferr("prime ideal considered: %Z\n", pr);
+	  fprintferr("number of irreducible factors: %ld\n", nbf);
 	}
 	if (nbf == 1) break;
       }
@@ -941,7 +1022,11 @@ nfsqff(GEN nf,GEN pol, long fl)
 
   k = itos(gceil(gdiv(k2,glog(p,BIGDEFAULTPREC))));	
 
-  if (DEBUGLEVEL>=4) msgtimer("Choix de l'ideal premier");
+  if (DEBUGLEVEL>=4)
+  {
+    fprintferr("prime ideal chosen: %Z\n", pr);
+    msgtimer("choice of the prime ideal");
+  }
 
   if (lg(rep)==2)
   {
@@ -956,7 +1041,7 @@ nfsqff(GEN nf,GEN pol, long fl)
 
   newprec = MEDDEFAULTPREC + (long)(itos(p2)*pariK1);
   if (DEBUGLEVEL>=4)
-    fprintferr("nouvelle precision : %ld\n",newprec);
+    fprintferr("new precision: %ld\n",newprec);
 
   prh = idealpows(nf,pr,k); m = k;
   h = T2_matrix_pow(nf,prh,p,C, &k, newprec);
@@ -964,8 +1049,8 @@ nfsqff(GEN nf,GEN pol, long fl)
 
   if (DEBUGLEVEL>=4)
   {
-    fprintferr("un exposant convenable est : %ld\n",(long)k);
-    msgtimer("Calcul de H");
+    fprintferr("a suitable exponent is: %ld\n",(long)k);
+    msgtimer("computation of H");
   }
 
   pk = gcoeff(prh,1,1);
@@ -979,7 +1064,7 @@ nfsqff(GEN nf,GEN pol, long fl)
   fact = lift_intern((GEN)factmod(polred,p)[1]);
   rep = hensel_lift_fact(polred,fact,p,pk,k);
 
-  if (DEBUGLEVEL >= 4) msgtimer("Calcul de la factorisation pr-adique");
+  if (DEBUGLEVEL >= 4) msgtimer("computation of the p-adic factorization");
 
   den=ginv(det(h));
   hinv=adj(h);
@@ -988,7 +1073,7 @@ nfsqff(GEN nf,GEN pol, long fl)
   if (fl)
   {
     long x_a[] = { evaltyp(t_POL)|m_evallg(4), 0,0,0 };
-    GEN mlt = negi(lt), rem;
+    GEN mlt = gneg_i(lt), rem;
     x_a[1] = polbase[1]; setlgef(x_a, 4);
     x_a[3] = un;
     p1=cgetg(lg(rep)+1,t_VEC);
@@ -1023,7 +1108,7 @@ nfsqff(GEN nf,GEN pol, long fl)
   nfcmbf.nfactmod = lg(rep)-1;
   nf_combine_factors(nf,1,NULL,d-3,1);
 
-  if (DEBUGLEVEL >= 4) msgtimer("Reconnaissance des facteurs");
+  if (DEBUGLEVEL >= 4) msgtimer("computation of the factors");
 
   i = nfcmbf.nfact;
   if (lgef(nfcmbf.pol)>3)
@@ -1100,8 +1185,8 @@ nf_combine_factors(GEN nf,long fxn,GEN psf,long dlim,long hint)
   return val;
 }
 
-/* Calcule le polynome caracteristique de alpha sur nf ou alpha est un
-   element de l'algebre nf[X]/(T) exprime comme polynome en x */
+/* return the characteristic polynomial of alpha over nf, where alpha 
+   is an element of the algebra nf[X]/(T) given as a polynomial in X */
 GEN
 rnfcharpoly(GEN nf,GEN T,GEN alpha,int v)
 {
@@ -1126,8 +1211,8 @@ rnfcharpoly(GEN nf,GEN T,GEN alpha,int v)
 }
 
 #if 0
-/* Calcule le polynome minimal de alpha sur nf ou alpha est un
-   element de l'algebre nf[X]/(T) exprime comme polynome en x */
+/* return the minimal polynomial of alpha over nf, where alpha is 
+   an element of the algebra nf[X]/(T) given as a polynomial in X */
 GEN
 rnfminpoly(GEN nf,GEN T,GEN alpha,int n)
 {
