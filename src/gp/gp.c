@@ -1764,7 +1764,7 @@ escape0(char *tch)
 	case 'a': brute   (x, GP_DATA->fmt->format, -1); break;
 	case 'm': matbrute(x, GP_DATA->fmt->format, -1); break;
 	case 'b': sor(x, GP_DATA->fmt->format, -1, GP_DATA->fmt->fieldw); break;
-	case 'x': voir(x, get_int(s, -1)); 
+	case 'x': voir(x, get_int(s, -1)); break;
         case 'w':
 	{
 	  GEN g[2]; g[0] = x; g[1] = NULL;
