@@ -28,7 +28,7 @@ TP = Thomas Papanikolaou
 XR = Xavier Roblot
 YU = Yoshiaki Uchikawa
 
-Done for version 2.2.0 (released ??/??/????):
+Done for version 2.2.0 (released ??/??/2001):
 
   Fixed
 BA  1- gpflog could print some lines twice
@@ -45,6 +45,7 @@ XR  4- don't compute discriminant in nffactor/nfroots + better bounds in nfsqff
 
   Added
     1- file README.WIN
+GN  2- Jebelean extended gcd
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.1.0 (released 17/11/2000):
