@@ -42,6 +42,7 @@ Done for version 2.2.1 (released ??/??/2001):
     7- check arguments in polcompositum()
 TH  8- [Cygwin:] fixed paths for readline on cygwin 1.*
 XR  9- possible overflow in ComputeCoeff [ bnrstark() ]
+   10- numtoperm(2,x) --> SEGV [check arguments now]
 
   Changed
     1- removed useless parameter prec in many bnr* and rnf* functions
@@ -49,6 +50,7 @@ XR  9- possible overflow in ComputeCoeff [ bnrstark() ]
     3- use /var/tmp instead of /tmp as default tmp directory [faster on Solaris]
 BA  4- Fp_PHlog (Pohlig-Hellman) can use a factorization of the subgroup order
     5- major update of buchall() [bnfinit]: accurate precision increase, cleanup
+    6- [libpari:] rename permute/permuteInv to GP names numtoperm/permtonum
 
   Added
 BA  1- function pith() [= pi(x), naïve implementation]
