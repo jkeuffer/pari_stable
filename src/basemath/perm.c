@@ -491,7 +491,8 @@ perm_commute(GEN p, GEN q)
  * orders (vecsmall): relatives orders of generators.
  */
 
-GEN trivialsubgroups(void)
+static GEN
+trivialsubgroups(void)
 {
   GEN p2,p3;	  /* vec */
   p2 = cgetg(2, t_VEC);
@@ -501,8 +502,6 @@ GEN trivialsubgroups(void)
   p2[1] = (long) p3;
   return p2;
 }
-
-
 
 /* Compute the orders of p modulo the group S given by a set.
  */
@@ -767,8 +766,8 @@ long group_perm_normalize(GEN N, GEN g)
 }
 
 /* L is a list of subgroups, C is a coset and r a rel. order.*/
-static
-GEN liftlistsubgroups(GEN L, GEN C, long r)
+static GEN
+liftlistsubgroups(GEN L, GEN C, long r)
 {
   pari_sp ltop=avma;
   GEN p4;
@@ -802,7 +801,8 @@ GEN liftlistsubgroups(GEN L, GEN C, long r)
  * Return all the subgroups K of G such that
  * S= K mod H and K inter H={1}.
  */
-static GEN liftsubgroup(GEN C, GEN H, GEN S)
+static GEN
+liftsubgroup(GEN C, GEN H, GEN S)
 {
   pari_sp ltop=avma;
   GEN V = trivialsubgroups();
