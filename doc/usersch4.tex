@@ -723,19 +723,27 @@ is less efficient than either \tet{gerepileupto} or \tet{gerepile}, because
 To cope with complicated cases where many objects have to be
 preserved, you can use
 
-\fun{void}{gerepilemany}{ulong ltop, GEN *gptr[], long n)}
+\fun{void}{gerepileall}{ulong ltop, int n, ...}
 
-\noindent which cleans up the most recent part of the stack (between
-\kbd{ltop} and \kbd{avma}). All the \kbd{GEN}s pointed at by the elements of
-the array \kbd{gptr} (of length \kbd{n}) are updated. A copy is done just
-before the cleaning to preserve them, so they don't need to be connected
-before the call. With \kbd{gerepilecopy}, this is the most robust of the
-\kbd{gerepile} functions (the less prone to user error), but also the
-slowest.
+\noindent where the routine expects $n$ further arguments, which are the {\it
+addresses} of the \kbd{GEN}s you want to preserve. It cleans up the most
+recent part of the stack (between \kbd{ltop} and \kbd{avma}), updating all
+the \kbd{GEN}s added to the argument list. A copy is done just before the
+cleaning to preserve them, so they don't need to be connected before the
+call. With \kbd{gerepilecopy}, this is the most robust of the \kbd{gerepile}
+functions (the less prone to user error), but also the slowest.
+
+An alternative, unnecessarily complicated, syntax is given by
+
+\fun{void}{gerepilemany}{ulong ltop, GEN *gptr[], int n}
+
+\noindent which works exactly as above, except that the preserved \kbd{GEN}s
+are the elements of the array \kbd{gptr} (of length $n$): \kbd{gptr[0]},
+\kbd{gptr[1]}, \dots, \kbd{gptr[$n$-1]}.
 
 \noindent$\bullet$ More efficient, but tricky to use is
 
-\fun{void}{gerepilemanysp}{ulong ltop, ulong lbot, GEN *gptr[], long n}
+\fun{void}{gerepilemanysp}{ulong ltop, ulong lbot, GEN *gptr[], int n}
 
 \noindent which cleans the stack between \kbd{lbot} and \kbd{ltop} and
 updates the \kbd{GEN}s pointed at by the elements of \kbd{gptr} without doing
@@ -907,7 +915,12 @@ assume anything about the stack: the garbage can be disconnected and
 \kbd{z1}, \kbd{z2} need not be at the bottom of the stack. If all of these
 assumptions are in fact satisfied, then we can call \kbd{gerepilemanysp}
 instead, which will usually be faster since we don't need the initial copy
-(on the other hand, it is less cache friendly).
+(on the other hand, it is less cache friendly). The whole thing could (and
+should) be abbreviated as
+\bprog
+  gerepileall(ltop, 2, &z1, &z2)
+@eprog
+so that the array \kbd{gptr} is not needed anymore.
 
 Another important usage is ``random'' garbage collection during loops
 whose size requirements we cannot (or don't bother to) control in advance:
@@ -921,11 +934,7 @@ whose size requirements we cannot (or don't bother to) control in advance:
     garbage(); y = anything()
     garbage();
     if (avma < limit) /*@Ccom memory is running low (half spent since entry) */
-    {
-       GEN *gptr[2];
-       gptr[0] = &x; gptr[1] = &y;
-       gerepilemany(ltop, gptr, 2);
-    } 
+       gerepileall(ltop, 2, &x, &y);
   } 
 @eprog
 \noindent Here we assume that only \kbd{x} and \kbd{y} are needed from one
