@@ -1,5 +1,5 @@
 This file lists some of the novelties in PARI/GP 2.0. Incompatible changes are
-described in COMPAT.
+described in COMPAT. See TODO for possible future improvements.
 
 ==========================================================================
 The GP/PARI structure has been cleaned up.
@@ -72,9 +72,9 @@ GP has been completely re-written:
      file new.dico provides a translation (available under GP using "whatnow")
 
    * You can retrieve basic information from complicated objects using member
-     functions (you cannot define your own). For instance x.disc will yield the
-     discriminant of x, whether it was created by nfinit (aka initalg), bnfinit
-     (aka buchinit), ellinit (aka initell).
+     functions. For instance x.disc will yield the discriminant of x, whether
+     it was created by nfinit (aka initalg), bnfinit (aka buchinit), ellinit
+     (aka initell).
 
    * A `gprc' file is available to set "permanent" defaults (such as
      global variables, aliases, custom user functions, etc...).  For instance,
@@ -101,10 +101,11 @@ GP has been completely re-written:
    * The familiar functions "break", "next" and "return" are now available.
      These should supersede the buggy label/goto provided in older versions.
 
-   * somewhat enhanced on-line help. Even more: if you have perl on your
-     system, try ?? function-name (?? bnfinit for instance). This is provided
-     by external scripts which can be used independently, outside of the GP
-     session.
+   * Enhanced on-line help. If you have perl on your system, try
+     ?? function-name (e.g ?? bnfinit), or
+     ??? Topic (e.g. ??? "elliptic curve").
+     This is provided by external scripts which can be used independently,
+     outside of the GP session.
 
    * If readline is installed on your system, a context-dependent completion
      (not yet user-programmable) is now available (try hitting <TAB> here and
