@@ -2289,21 +2289,17 @@ RecCoeff2(GEN nf,  RC_data *d,  long prec)
   bacmax = (long)(.315 * bit_accuracy(prec));
 
   av2 = avma;
-
-  for (i = bacmax; i >= bacmin; i-=16)
+  for (i = bacmax; i >= bacmin; i-=16, avma = av2)
   {
     p1 = lindep2(vec, i);
+    if (!signe((GEN)p1[1])) continue;
 
-    if (signe((GEN)p1[1]))
-    {
-      p1    = ground(gdiv(p1, (GEN)p1[1]));
-      cand  = gmodulcp(gmul(velt, gtrans(p1)), pol);
-      cand2 = algtobasis(nf, cand);
-      plg   = gmul(M, cand2);
+    p1    = ground(gdiv(p1, (GEN)p1[1]));
+    cand  = gmodulcp(gmul(velt, p1), pol);
+    cand2 = algtobasis(nf, cand);
+    plg   = gmul(M, cand2);
 
-      if (TestOne(plg, d)) return gerepilecopy(av, cand);
-    }
-    avma = av2;
+    if (TestOne(plg, d)) return gerepilecopy(av, cand);
   }
   /* failure */
   return RecCoeff3(nf,d,prec);
