@@ -2047,7 +2047,7 @@ expodb(double x)
   const int expo_len = 11; /* number of bits of exponent */
 
   if (x==0) return -308;
-  fi.f = x; z = cgetr(DEFAULTPREC);
+  fi.f = x;
   return ((fi.i & (HIGHBIT-1)) >> mant_len) - exp_mid;
 }
 
