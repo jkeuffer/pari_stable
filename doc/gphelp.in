@@ -731,8 +731,8 @@ sub basic_subst
   s/ *\\mid(?![a-zA-Z]) */ | /g;
 
   s/\\idxtyp\{([^{}]*)\}/\\sidx{t_$1}/g;
-  s/\\ref\{[^\}]*\}/$tr{startbold}??$tr{endbold}/g unless $to_pod;
-  s/\\secref\{[^\}]*\}/Section ($tr{startbold}??$tr{endbold})/g unless $to_pod;
+  s/\\ref\{([^\}]*)\}/[$tr{startbold}Label: $1$tr{endbold}]/g unless $to_pod;
+  s/\\secref\{([^\}]*)\}/Section [$tr{startbold}Label: $1$tr{endbold}]/g unless $to_pod;
   s/\\label\{[^\}]*\}//g unless $to_pod;
 
   s/\\(noindent|medskip|bigskip|smallskip|left|right)(?![a-zA-Z])[ \t]*//g;

@@ -67,7 +67,7 @@
   \def\toindex#1{}
   \def\tocwrite#1{}
   \def\label#1{}
-  \def\ref#1{[{\bf ??}]} % all crossref marked as [??]
+  \def\ref#1{[Label: {\tt #1}]}
 \else % none of the following is needed by gphelp
   \def\typeout#1{\immediate\write\out{#1}}
   \def\@namedef#1{\expandafter\def\csname#1\endcsname}
