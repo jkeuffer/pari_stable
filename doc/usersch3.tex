@@ -84,13 +84,15 @@ advised when using the calculator \kbd{gp}.
 
 As an alternative, one can replace a numeric flag by a character string
 containing symbolic identifiers. For a generic flag, the mnemonic
-corresponding to the numeric identifier is given after it as in (taken from
-description of $\tet{log}(x,\{\fl=0\})$):
+corresponding to the numeric identifier is given after it as in
 
-\centerline{If \fl\ is equal to $1 = \kbd{AGM}$, use an agm formula\dots}
+\bprog
+fun(x, {flag = 0} ):
 
-\noindent which means that one can use indifferently \kbd{log($x$, 1)} or
-\kbd{log($x$, AGM)}.
+  If flag is equal to 1 = AGM, use an agm formula\dots
+@eprog
+\noindent which means that one can use indifferently \kbd{fun($x$, 1)} or
+\kbd{fun($x$, AGM)}.
 
 For a binary flag, mnemonics corresponding to the various toggles are given
 after each of them. They can be negated by prepending \kbd{no\_} to the
@@ -1937,13 +1939,10 @@ Rho and SQUFOF, 8: don't run final ECM (as a result, a huge composite may be
 declared to be prime). Note that a (strong) probabilistic primality test is
 used; thus composites might (very rarely) not be detected.
 
-The machinery underlying this function is still in a somewhat experimental
-state, but should be much faster on average than pure ECM as used by all
-PARI versions up to 2.0.8, at the expense of heavier memory use. You are
-invited to play with the flag settings and watch the internals at work by
-using \kbd{gp}'s \tet{debuglevel} default parameter (level 3 shows just the
-outline, 4 turns on time keeping, 5 and above show an increasing amount
-of internal details). If you see anything funny happening, please let
+You are invited to play with the flag settings and watch the internals at
+work by using \kbd{gp}'s \tet{debuglevel} default parameter (level 3 shows
+just the outline, 4 turns on time keeping, 5 and above show an increasing
+amount of internal details). If you see anything funny happening, please let
 us know.
 
 \syn{factorint}{n,\fl}.
