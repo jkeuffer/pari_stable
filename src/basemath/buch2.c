@@ -940,8 +940,7 @@ testprimes(GEN bnf, long bound)
   if ((ulong)bound > maxprime()) err(primer1);
   Vbase = get_Vbase(bnf);
   (void)recover_partFB(&F, Vbase, degpol(nf[1]));
-  av = avma;
-  for (p = 0; p < bound; )
+  for (av=avma, p=0; p < bound; avma=av)
   {
     NEXT_PRIME_VIADIFF(p, d);
     if (DEBUGLEVEL>1) fprintferr("*** p = %ld\n",p);
@@ -963,9 +962,8 @@ testprimes(GEN bnf, long bound)
       else if (DEBUGLEVEL>1)
         fprintferr("    is %Z\n", isprincipal(bnf,P));
       else /* faster: don't compute result */
-        SPLIT(&F, nf, prime_to_ideal(nf,P), Vbase);
+        (void)SPLIT(&F, nf, prime_to_ideal(nf,P), Vbase);
     }
-    avma = av;
   }
   if (DEBUGLEVEL>1) { fprintferr("End of PHASE 1.\n\n"); flusherr(); }
   avma = av0;
