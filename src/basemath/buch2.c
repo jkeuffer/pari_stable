@@ -308,10 +308,13 @@ subFB_change(FB_t *F, GEN nf, GEN L_jid)
 }
 
 static GEN
+init_famat(GEN x) { return mkvec2(x, cgetg(1,t_MAT)); }
+
+static GEN
 red(GEN nf, GEN I, GEN G0, GEN *pm)
 {
   GEN m, y;
-  y = ideallllred(nf, mkvec2(I, cgetg(1,t_MAT)), G0, 0);
+  y = ideallllred(nf, init_famat(I), G0, 0);
   m = (GEN)y[2];
   y = (GEN)y[1]; *pm = lg(m)==1? gen_1: gmael(m, 1, 1);
   return is_pm1(gcoeff(y,1,1))? NULL: ideal_two_elt(nf,y);
@@ -887,9 +890,6 @@ recover_partFB(FB_t *F, GEN Vbase, long N)
   F->LV = (GEN*)LV;
   F->iLP= iLP; return L;
 }
-
-static GEN
-init_famat(GEN x) { return mkvec2(x, cgetg(1,t_MAT)); }
 
 /* add v^e to factorization */
 static void
