@@ -1901,8 +1901,8 @@ apell0(GEN e, ulong p)
   table = NULL;
 
   av = avma;
-  c4 = itou( gmodgs(gdivgs((GEN)e[10],  -48), (long)p) );
-  c6 = itou( gmodgs(gdivgs((GEN)e[11], -864), (long)p) );
+  c4 = itou( lift_intern( gmodgs(gdivgs((GEN)e[10],  -48), (long)p) ) );
+  c6 = itou( lift_intern( gmodgs(gdivgs((GEN)e[11], -864), (long)p) ) );
   pordmin = (long)(1 + 4*sqrt((float)p));
   p1p = p+1;
   p2p = p1p << 1;
@@ -2352,7 +2352,7 @@ lseriesell(GEN e, GEN s, GEN A, long prec)
   cg = divrr(Pi2n(1, prec), gsqrt(N,prec));
   cga = gmul(cg, A);
   cgb = gdiv(cg, A);
-  l = (long)((pariC2*(prec-2) + fabs(gtodouble(s)-1.) * log(rtodbl(cga)))
+  l = (long)((pariC2*(prec-2) + fabs(gtodouble(greal(s))-1.) * log(rtodbl(cga)))
             / rtodbl(cgb) + 1);
   if (l < 1) l = 1;
   v = anell(e, min((ulong)l,LGBITS-1));
