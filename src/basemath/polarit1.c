@@ -594,19 +594,19 @@ Fp_is_squarefree(GEN f, GEN p)
 /* idem
  * leading term of f must be prime to p.
  */
-/* Compute the number of roots in Fp without counting multiplicity*/
+/* Compute the number of roots in Fp without counting multiplicity
+ * return -1 for 0 polynomial.
+ */
 long
 FpX_nbroots(GEN f, GEN p)
 {
   long av = avma, n=lgef(f);
   GEN z;
-  if (n <= 4) return 1;
-  if (!is_bigint(p) && n-3 > p[2]) return 0;
+  if (n <= 4) return n-3;
   f = FpX_red(f, p);
-  if (lgef(f) != n) { avma=av; return 0; }
   z = FpXQ_pow(polx[varn(f)], p, f, p);
-  z = FpX_sub(z,polx[varn(f)],p);
-  z = FpX_gcd(z,f,p);
+  z = FpX_sub(z,polx[varn(f)],NULL);
+  z = FpX_gcd(z,f,p),
   avma = av; return lgef(z)-3;
 }
 long
@@ -617,7 +617,6 @@ Fp_is_totally_split(GEN f, GEN p)
   if (n <= 4) return 1;
   if (!is_bigint(p) && n-3 > p[2]) return 0;
   f = FpX_red(f, p);
-  if (lgef(f) != n) { avma=av; return 0; }
   z = FpXQ_pow(polx[varn(f)], p, f, p);
   avma = av; return lgef(z)==4 && gcmp1((GEN)z[3]) && !signe(z[2]);
 }
