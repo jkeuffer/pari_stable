@@ -1223,24 +1223,22 @@ static int**
 InitMatAn(long n, long deg, long flag)
 {
   long i, j;
-  int **A;
-
-  A = (int**)gpmalloc((n+1)*sizeof(int*));
+  int *a, **A = (int**)gpmalloc((n+1)*sizeof(int*));
   for (i = 0; i <= n; i++)
   {
-    A[i] = (int*)gpmalloc(deg*sizeof(int));
-    A[i][0] = (i == 1 || flag);
-     for (j = 1; j < deg; j++) A[i][j] = 0;
+    a = (int*)gpmalloc(deg*sizeof(int));
+    A[i] = a; a[0] = (i == 1 || flag);
+    for (j = 1; j < deg; j++) a[j] = 0;
   }
   return A;
 }
 
 static void
-FreeMat(int **m, long n)
+FreeMat(int **A, long n)
 {
   long i;
-  for (i = 0; i <= n; i++) free((void*)m[i]);
-  free((void*)m);
+  for (i = 0; i <= n; i++) free((void*)A[i]);
+  free((void*)A);
 }
 
 /* initialize coeff reduction */
@@ -1390,7 +1388,7 @@ EvalCoeff(GEN z, int* c, long deg)
   return e;
 }
 
-/* copy the n * m array matan */
+/* copy the n * (m+1) array matan */
 static void
 CopyCoeff(int** a, int** a2, long n, long m)
 {
@@ -1399,7 +1397,7 @@ CopyCoeff(int** a, int** a2, long n, long m)
   for (i = 1; i <= n; i++)
   {
     int *b = a[i], *b2 = a2[i];
-    for (j = 0; j <= m; j++) b2[j] = b[j];
+    for (j = 0; j < m; j++) b2[j] = b[j];
   }
 }
 
@@ -2565,132 +2563,123 @@ computean(GEN dtcr, long n, long deg, long prec)
   avma = av; return matan;
 }
 
+/* sort chars according to conductor */
+static GEN
+sortChars(GEN dtcr)
+{
+  const long cl = lg(dtcr) - 1;
+  GEN vCond  = cgetg(cl+1, t_VEC);
+  GEN CC     = cgetg(cl+1, t_VECSMALL);
+  GEN nvCond = cgetg(cl+1, t_VECSMALL);
+  long j,k, ncond;
+  GEN vChar;
+ 
+  for (j = 1; j <= cl; j++) nvCond[j] = 0;
+ 
+  ncond = 0;
+  for (j = 1; j <= cl; j++)
+  {
+    GEN cond  = gmael(dtcr, j, 7);
+    for (k = 1; k <= ncond; k++)
+      if (gegal(cond, (GEN)vCond[k])) break;
+    if (k > ncond) vCond[++ncond] = (long)cond;
+    nvCond[k]++; CC[j] = k; /* char j has conductor number k */
+  }
+  vChar = cgetg(ncond+1, t_VEC);
+  for (k = 1; k <= ncond; k++)
+  {
+    vChar[k] = lgetg(nvCond[k]+1, t_VECSMALL);
+    nvCond[k] = 0;
+  }
+  for (j = 1; j <= cl; j++)
+  {
+    k = CC[j]; nvCond[k]++;
+    mael(vChar,k,nvCond[k]) = j;
+  }
+  return vChar;
+}
+ 
 /* compute S and T for the quadratic case */
 static GEN
 QuadGetST(GEN data, long prec)
 {
-  long av = avma, n, j, nmax, cl, av1, av2, k;
-  int ***matans;
-  GEN nn, C, CC, p1, c2, cexp, cn, v, veclprime2, veclprime1;
-  GEN dtcr, cond, rep, an, cf, degs, veint1;
-
-  dtcr     = (GEN)data[5];
-  cl       = lg(dtcr) - 1;
-  degs     = GetDeg(dtcr);
-
-  cf   = gmul2n(mpsqrt(mppi(prec)), 1);
-  C    = cgetg(cl+1, t_VEC);
-  cond = cgetg(cl+1, t_VEC);
-  c2   = cgetg(cl + 1, t_VEC);
-  nn   = new_chunk(cl+1);
-  CC   = new_chunk(cl+1);
-  nmax = 0;
-  for (j = 1; j <= cl; j++)
-  {
-    C[j]    = mael(dtcr, j, 2);
-    c2[j]   = ldivsg(2, (GEN)C[j]);
-    cond[j] = mael(dtcr, j, 7);
-    nn[j]   = (long)(bit_accuracy(prec) * gtodouble((GEN)C[j]) * 0.35);
-    nmax  = max(nmax, nn[j]);
-    for (k = 1; k < j; k++)
-      if (gegal((GEN)cond[j], (GEN)cond[k])) break;
-    CC[j] = k;
-  }
-
-  if (nmax >= VERYBIGINT)
-    err(talker, "Too many coefficients (%ld) in QuadGetST: computation impossible", nmax);
-
-  if (DEBUGLEVEL >= 2)
-    fprintferr("nmax = %ld\n", nmax);
-
-  matans = (int***)gpmalloc((cl+1)*sizeof(int**));
-  
-  /* allocate memory for the answer */
+  const GEN dtcr = (GEN)data[5];
+  const long cl  = lg(dtcr) - 1;
+  ulong av;
+  long ncond, n, j, k, nmax;
+  GEN rep, vChar, nn, C, vlprime2, vlprime1, cf, cfh, an, degs;
+ 
+  /* allocate memory for answer */
   rep = cgetg(3, t_VEC);
-
-  /* allocate memory for veclprime1 */
-  veclprime1 = cgetg(cl + 1, t_VEC);
+  vlprime1 = cgetg(cl+1, t_VEC); rep[1] = (long)vlprime1;
+  vlprime2 = cgetg(cl+1, t_VEC); rep[2] = (long)vlprime2;
   for (j = 1; j <= cl; j++)
   {
-    v = cgetg(3, t_COMPLEX);
-    v[1] = lgetr(prec);
-    v[2] = lgetr(prec); gaffect(gzero, v);
-    veclprime1[j] = (long)v;
+    vlprime1[j] = (long)cgetc(prec);
+    vlprime2[j] = (long)cgetc(prec);
   }
+  av = avma;
 
-  /* allocate memory for veclprime2 */
-  veclprime2 = cgetg(cl + 1, t_VEC);
-  for (j = 1; j <= cl; j++)
+  /* initializations */
+  degs = GetDeg(dtcr);
+  vChar= sortChars(dtcr); ncond = lg(vChar)-1;
+  C    = cgetg(ncond+1, t_VEC);
+  nn   = cgetg(ncond+1, t_VECSMALL);
+  nmax = 0;
+  for (j = 1; j <= ncond; j++)
   {
-    v = cgetg(3, t_COMPLEX);
-    v[1] = lgetr(prec);
-    v[2] = lgetr(prec); gaffect(gzero, v);
-    veclprime2[j] = (long)v;
+    C[j]  = mael(dtcr, j, 2);
+    nn[j] = (long)(bit_accuracy(prec) * gtodouble((GEN)C[j]) * 0.35);
+    nmax  = max(nmax, nn[j]);
   }
+  if (nmax >= VERYBIGINT)
+    err(talker, "Too many coeffs (%ld) in QuadGetST: computation impossible", nmax);
+  if (DEBUGLEVEL>1) fprintferr("nmax = %ld\n", nmax);
 
-  av1 = avma;
+  cf  = gmul2n(mpsqrt(mppi(prec)), 1);
+  cfh = gmul2n(cf, -1);
 
-  cn = cgetr(prec);
-  p1 = gmul2n(cf, -1);
-
-  /* compute veclprime1 */
-  for (j = 1; j <= cl; j++)
+  /* loop over conductors */
+  for (j = 1; j <= ncond; j++)
   {
-    long n0 = 0;
+    ulong av1 = avma, av2;
+    const GEN c1 = (GEN)C[j], c2 = gdivsg(2,c1), cexp = gexp(gneg(c2), prec);
+    const GEN LChar = (GEN)vChar[j];
+    const long nChar = lg(LChar)-1, NN = nn[j];
+    const GEN veint1 = veceint1(c2, stoi(NN), prec);
+    GEN vcn = cgetg(NN+1, t_VEC);
+   
+    vcn[1] = (long)cexp;
+    for (n=2; n<=NN; n++) vcn[n] = lmul((GEN)vcn[n-1], cexp);
+    av2 = avma;
+    for (n=2; n<=NN; n++) gaffect(divrs((GEN)vcn[n],n), (GEN)vcn[n]);
+    avma = av2;
 
-    if (CC[j] != j) continue;
-
-    if (DEBUGLEVEL >1 ) fprintferr("id = %ld (hk = %ld)", j, cl);
-    for (k = 1; k <= cl; k++)
-      if (CC[k] == j)
-	matans[k] = computean((GEN)dtcr[k], nn[k], degs[k], prec);
-
-    cexp = gexp(gneg_i((GEN)c2[j]), prec);
-    av2 = avma; 
-    affsr(1, cn); 
-    for (n = 1; n <= nn[j]; n++)
+    if (DEBUGLEVEL>1)
+      fprintferr("* conductor no %ld (N = %ld)\n  char. no:", j,NN);
+    for (k = 1; k <= nChar; k++)
     {
-      affrr(gmul(cn, gpowgs(cexp, n - n0)), cn);
-      n0 = n;
-      for (k = 1; k <= cl; k++)
-	if (CC[k] == j && 
-	    (an = EvalCoeff(gmael3(dtcr, k, 5, 2), matans[k][n], degs[k])))
-	  gaffect(gadd((GEN)veclprime1[k], gmul(divrs(cn,n), an)),
-		  (GEN)veclprime1[k]);
-      avma = av2;
+      const long t = LChar[k], d = degs[t];
+      const GEN z = gmael3(dtcr, t, 5, 2);
+      GEN p1 = gzero, p2 = gzero;
+      int **matan = computean((GEN)dtcr[t], NN, d, prec);
+     
+      if (DEBUGLEVEL>1) fprintferr(" %ld", t);
+      for (n = 1; n <= NN; n++)
+	if ((an = EvalCoeff(z, matan[n], d)))
+        {
+          p1 = gadd(p1, gmul(an, (GEN)vcn[n]));
+	  p2 = gadd(p2, gmul(an, (GEN)veint1[n]));
+        }
+      gaffect(gmul(cfh, gmul(p1,c1)), (GEN)vlprime1[t]);
+      gaffect(gmul(cf,  gconj(p2)),   (GEN)vlprime2[t]);
+      FreeMat(matan,NN); avma = av2;
     }
-    for (k = 1; k <= cl; k++)
-      if (CC[k] == j)
-	gaffect(gmul(p1, gmul((GEN)veclprime1[k], (GEN)C[j])), 
-		(GEN)veclprime1[k]);
-
-    veint1 = veceint1((GEN)c2[j], stoi(nn[j]), prec);
-    av2 = avma; 
-    for (n = 1; n <= nn[j]; n++)
-      for (k = 1; k <= cl; k++)
-	if (CC[k] == j && 
-	    (an = EvalCoeff(gmael3(dtcr, k, 5, 2), matans[k][n], degs[k])))
-	{
-	  gaffect(gadd((GEN)veclprime2[k], gmul((GEN)veint1[n], an)), 
-		  (GEN)veclprime2[k]);
-	  avma = av2;
-	}
-
-    for (k = 1; k <= cl; k++)
-      if (CC[k] == j)
-      {
-	gaffect(gmul(cf, gconj((GEN)veclprime2[k])), (GEN)veclprime2[k]);
-	FreeMat(matans[k], nn[j]);
-      }
+    if (DEBUGLEVEL>1) fprintferr("\n");
+    avma = av1;
   }
-  free(matans);
-  avma = av1;
-  
-  rep[1] = (long)veclprime1;
-  rep[2] = (long)veclprime2;
-  
-  if (DEBUGLEVEL) msgtimer("Compute V1 & V2");
-  return gerepileupto(av, rep);
+  if (DEBUGLEVEL) msgtimer("V1 & V2");
+  avma = av; return rep;
 }
 
 #if 0
