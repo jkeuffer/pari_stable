@@ -1062,22 +1062,25 @@ special_pivot(GEN x)
   return x;
 }
 
-/* Assume P is monic squarefree in Z[X], factor it.
+/* Recombination phase of Berlekamp-Zassenhaus algorithm using a variant of
+ * van Hoeij's knapsack 
+ * 
+ * P = monic squarefree in Z[X].
  * famod = array of (lifted) modular factors mod p^a
- *
+ * bound = Mignotte bound for the size of divisors of P (sor the sup norm)
  * previously recombined all set of factors with less than rec elts
  */
 GEN
 LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
 {
-  long i,j,C,r,tmax,n0,n,s,dP = lgef(P)-3;
+  const long s = 2; /* # of traces added at each step */
+  long i,j,C,r,tmax,n0,n,dP = lgef(P)-3;
   double logp = log(gtodouble(p));
   double b0 = log((double)dP*2) / logp;
   double k = gtodouble(glog(root_bound(P), DEFAULTPREC)) / logp;
   GEN y, T, T2, TT, BL, m, mGram, u, norm, target, M, piv, list;
 
   n0 = n = r = lg(famod) - 1;
-  s = 2;
   BL = idmat(n0);
   list = cgetg(n0+1, t_COL);
   TT = cgetg(n0+1, t_VEC);
@@ -1088,7 +1091,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
     T [i] = lgetg(s+1, t_COL);
   }
   for(tmax = 0;; tmax += s) 
-  {
+  { /* tmax = number of traces added so far */
     long b = (long)ceil(b0 + (tmax+s)*k), goodb;
     GEN pas2, pa_b, pb_as2, pbs2, pb, BE;
 
@@ -1097,7 +1100,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
       a = ceil(b + 3*s*k) + 1;
       pa = gpowgs(p,a);
       famod = hensel_lift_fact(P,famod,p,pa,a);
-      /* recompute old Newton sums to new precision ! */
+      /* recompute old Newton sums to new precision */
       for (i=1; i<=n0; i++)
         TT[i] = (long)polsym_gen((GEN)famod[i], NULL, tmax, pa);
     }
@@ -1106,8 +1109,8 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
     if (goodb > b) b = goodb;
     pa_b = gpowgs(p, a-b); pb_as2 = shifti(pa_b,-1);
     pb   = gpowgs(p, b);   pbs2    = shifti(pb,-1);
-    C = (long)(sqrt((double)s*n)/ 2);
-    M = dbltor((C*C*n + s*n*n/4.) * 1.00001);
+    C = (long)(sqrt((double)s*n)/ 2.);
+    M = dbltor((C*C*n + (tmax+s)*n*n/4.) * 1.00001);
 
     if (DEBUGLEVEL>3)
       fprintferr("LLL_cmbf: %ld potential factors (tmax = %ld)\n", r, tmax);
