@@ -1521,11 +1521,12 @@ static ulong
 sqrtu2(ulong *a)
 {
   double beta = sqrt((double)a[0]); /* 2^31*2^(1/2) <= beta < 2^32 */
-  ulong c, b = ((ulong)(beta*2147483648)) << 1; /*~ beta * 2^32, no overflow*/
+  ulong c, b = ((ulong)(beta*32768)) << 17; /*~ beta * 2^32, no overflow*/
   LOCAL_HIREMAINDER;
   LOCAL_OVERFLOW;
 
-  /* 52 correct bits, 1 Newton iteration to reach 64 */
+  /* > 32 correct bits, 1 Newton iteration to reach 64 */
+  if (!b) b = ~0UL;
   hiremainder = a[0]; c = divll(a[1], b);
   return (addll(c, b) >> 1) | HIGHBIT;
 }
