@@ -538,7 +538,7 @@ getfu(GEN nf,GEN *ptxarch,GEN reg,long flun,long *pte,long prec)
 
   if (DEBUGLEVEL) fprintferr("\n#### Computing fundamental units\n");
   R1 = itos(gmael(nf,2,1)); RU = (N+R1)>>1;
-  if (RU==1) { *pte=BIGINT; return cgetg(1,t_MAT); }
+  if (RU==1) { *pte=BIGINT; return cgetg(1,t_VEC); }
 
   *pte = 0; xarch = *ptxarch;
   if (gexpo(reg) < -8) return not_given(av,flun,RELAT);
