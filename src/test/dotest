@@ -119,7 +119,7 @@ pwd=`pwd`
 wrln
 wrln "PROBLEMS WERE NOTED. The following files list them in diff format: "
 wrln "Directory: $pwd"
-bugp=; buge=; stop=
+bugp=; buge=;
 for suf in $SUF; do
   B=`eval echo '$'BUG$suf`; BUG="$BUG$B"
   if test -n "$B"; then
@@ -129,15 +129,13 @@ for suf in $SUF; do
       case "$f" in
         *program*)  bugp="$suf$bugp";;
         *elliptic*) buge="$suf$buge";;
-        *) stop=OK;;
       esac
     done
   fi
 done
-if test -n "$stop"; then exit 1; fi
 
 case "$buge" in
-  all) end=""
+  *) end=""
        file_diff=elliptic-sta.dif;;
   sta|dyn)
        end=" (gp-$buge only)"
@@ -146,8 +144,9 @@ case "$buge" in
        end=" (gp-$buge)"
        file_diff=elliptic.dif;;
 esac
-pate=`head -4 $file_diff|tail -1|grep "141,154"`
-if test -n "$pate"; then
+len=`wc -l $file_diff | sed -e 's/ *\([0-9]*\).*/\1/'`
+pat=`head -4 $file_diff|tail -1|grep "141,154"`
+if test $len -eq 46  -a  -n "$pat"; then
 cat << EOT
 NOTE: the problem noted in 'elliptic' boils down to different FPU and
 compiler optimizations than on our test machine. It can safely be ignored,
@@ -165,8 +164,9 @@ case "$bugp" in
        end=" (gp-$bugp)"
        file_diff=program.dif;;
 esac
-patp=`head -4 $file_diff|tail -1|grep "108,118"`
-if test -n "$patp"; then
+len=`wc -l $file_diff | sed -e 's/ *\([0-9]*\).*/\1/'`
+pat=`head -4 $file_diff|tail -1|grep "108,118"`
+if test $len -eq 29  -a  -n "$pat"; then
 cat << EOT
 NOTE: the problem noted in 'program' is that install() does not work in your
 configuration$end, so you will not be able to use this feature. Otherwise you
