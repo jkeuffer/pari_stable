@@ -201,7 +201,6 @@ mod(x^3 + 5, x^5 - 5*x^3 + 5*x + 25)
 
 ? move(0,0,0);box(0,500,500)
 ? setrand(1);buchimag(1-10^7,1,1)
-  ***   Warning: not a fundamental discriminant in quadclassunit.
 [2416, [1208, 2], [qfi(277, 55, 9028), qfi(1700, 1249, 1700)], 1, 1.01137207
 94145545546]
 ? setrand(1);bnf=buchinitfu(x^2-x-57,0.2,0.2)
@@ -2682,5 +2681,5 @@ d(391, 3120), mod(2081, 3120)]]
 ? getheap()
 [621, 118437]
 ? print("Total time spent: ",gettime());
-Total time spent: 1330
+Total time spent: 3650
 ? \q
