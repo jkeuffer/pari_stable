@@ -26,7 +26,8 @@ extern GEN FpX_rand(long d1, long v, GEN p);
 extern GEN hensel_lift_fact(GEN pol, GEN Q, GEN T, GEN p, GEN pe, long e);
 extern GEN ZX_disc_all(GEN x, ulong bound);
 extern GEN indexpartial(GEN P, GEN DP);
-extern GEN initgaloisborne(GEN T, GEN dn, GEN *ptL, GEN *ptprep, GEN *ptdis, long *ptprec);
+extern GEN initgaloisborne(GEN T, GEN dn, long prec, GEN *ptL, GEN *ptprep, GEN *ptdis);
+extern long ZX_get_prec(GEN x);
 
 static GEN print_block_system(long N,GEN Y,long d,GEN vbs,long maxl);
 
@@ -952,7 +953,7 @@ subfields_poldata(GEN T, struct poldata *PD)
   }
   else
   {
-    PD->den = initgaloisborne(T,NULL, &L,NULL,&dis,NULL);
+    PD->den = initgaloisborne(T,NULL,ZX_get_prec(T), &L,NULL,&dis);
     PD->roo = L;
     PD->dis = absi(dis);
   }

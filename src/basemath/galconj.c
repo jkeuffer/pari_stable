@@ -19,6 +19,7 @@ extern GEN respm(GEN x,GEN y,GEN pm);
 extern GEN ZX_disc_all(GEN,long);
 extern GEN polratlift(GEN P, GEN mod, GEN amax, GEN bmax, GEN denom);
 extern GEN znstar_hnf_elts(GEN Z, GEN H);
+extern long ZX_get_prec(GEN x);
 
 /*************************************************************************/
 /**									**/
@@ -232,23 +233,19 @@ vandermondeinverseprep(GEN L)
 GEN
 vandermondeinverse(GEN L, GEN T, GEN den, GEN prep)
 {
-  gpmem_t lbot, ltop = avma;
-  int     i, j, n = lg(L);
+  gpmem_t ltop = avma;
+  int     i, n = lg(L)-1;
   long    x = varn(T);
   GEN     M, P;
   if (!prep)
-    prep=vandermondeinverseprep(L);
-  M = cgetg(n, t_MAT);
-  for (i = 1; i < n; i++)
+    prep = vandermondeinverseprep(L);
+  M = cgetg(n+1, t_MAT);
+  for (i = 1; i <= n; i++)
   {
-    M[i] = lgetg(n, t_COL);
     P = gdiv(gdeuc(T, gsub(polx[x], (GEN) L[i])), (GEN) prep[i]);
-    for (j = 1; j < n; j++)
-      ((GEN *) M)[i][j] = P[1 + j];
+    M[i] = (long)pol_to_vec(P,n);
   }
-  lbot = avma;
-  M = gmul(den, M);
-  return gerepile(ltop, lbot, M);
+  return gerepileupto(ltop, gmul(den, M));
 }
 
 /* Calcule les bornes sur les coefficients a chercher */
@@ -265,29 +262,22 @@ struct galois_borne
 
 
 GEN
-initgaloisborne(GEN T, GEN dn, GEN *ptL, GEN *ptprep, GEN *ptdis, long *ptprec)
+initgaloisborne(GEN T, GEN dn, long prec, GEN *ptL, GEN *ptprep, GEN *ptdis)
 {
-  int     n = degpol(T);
-  int     i;
-  GEN     L, z, prep, den;
-  long    prec;
-  prec = 1;
-  for (i = 2; i < lgef(T); i++)
-    if (lg(T[i]) > prec)
-      prec = lg(T[i]);
-  /*prec++;*/
+  int i, n = degpol(T);
+  GEN L, z, prep, den;
+
   if (DEBUGLEVEL>=4) (void)gentimer(3);
   L = roots(T, prec);
   if (DEBUGLEVEL>=4) genmsgtimer(3,"roots");
   for (i = 1; i <= n; i++)
   {
     z = (GEN) L[i];
-    if (signe(z[2]))
-      break;
+    if (signe(z[2])) break;
     L[i] = z[1];
   }
   if (DEBUGLEVEL>=4) (void)gentimer(3);
-  prep=vandermondeinverseprep(L);
+  prep = vandermondeinverseprep(L);
   if (!dn)
   {
     GEN dis, res = divide_conquer_prod(gabs(prep,prec), mpmul);
@@ -300,7 +290,6 @@ initgaloisborne(GEN T, GEN dn, GEN *ptL, GEN *ptprep, GEN *ptdis, long *ptprec)
   else
     den = dn;
   if (ptprep) *ptprep = prep;
-  if (ptprec) *ptprec = prec;
   *ptL = L; return den;
 }
 
@@ -347,7 +336,8 @@ galoisborne(GEN T, GEN dn, struct galois_borne *gb, long ppp)
   GEN     L, M, prep, den;
   long    prec;
 
-  den = initgaloisborne(T,dn, &L,&prep,NULL,&prec);
+  prec = ZX_get_prec(T);
+  den = initgaloisborne(T,dn,prec, &L,&prep,NULL);
   if (!dn) den = gclone(den);
   M = vandermondeinverse(L, gmul(T, realun(prec)), den, prep);
   if (DEBUGLEVEL>=4) genmsgtimer(3,"vandermondeinverse");

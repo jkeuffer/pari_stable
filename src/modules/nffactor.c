@@ -31,7 +31,7 @@ extern double bound_vS(long tmax, GEN *BL);
 extern GEN GS_norms(GEN B, long prec);
 extern GEN apply_kummer(GEN nf,GEN pol,GEN e,GEN p);
 extern GEN hensel_lift_fact(GEN pol, GEN fact, GEN T, GEN p, GEN pev, long e);
-extern GEN initgaloisborne(GEN T, GEN dn, GEN *ptL, GEN *ptprep, GEN *ptdis, long *ptprec);
+extern GEN initgaloisborne(GEN T, GEN dn, long prec, GEN *ptL, GEN *ptprep, GEN *ptdis);
 extern void remake_GM(GEN nf, long prec, nffp_t *F);
 extern GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den);
 extern GEN polsym_gen(GEN P, GEN y0, long n, GEN T, GEN N);
@@ -415,7 +415,7 @@ ZXY_get_prec(GEN P)
   return prec + 1;
 }
 
-static long
+long
 ZM_get_prec(GEN x)
 {
   long i, j, l, k = 2, lx = lg(x);
@@ -424,6 +424,17 @@ ZM_get_prec(GEN x)
   {
     GEN c = (GEN)x[j];
     for (i=1; i<lx; i++) { l = lgefint(c[i]); if (l > k) k = l; }
+  }
+  return k;
+}
+long
+ZX_get_prec(GEN x)
+{
+  long j, l, k = 2, lx = lgef(x);
+
+  for (j=2; j<lx; j++)
+  {
+    l = lgefint(x[j]); if (l > k) k = l;
   }
   return k;
 }
@@ -477,9 +488,9 @@ L2_bound(GEN T, GEN tozk, GEN *ptden)
   T = get_nfpol(T, &nf);
   u = NULL; /* gcc -Wall */
 
+  prec = ZX_get_prec(T) + ZM_get_prec(tozk);
   den = nf? gun: NULL;
-  den = initgaloisborne(T, den, &L, &prep, NULL, &prec);
-  prec += ZM_get_prec(tozk);
+  den = initgaloisborne(T, den, prec, &L, &prep, NULL);
   M = vandermondeinverse(L, gmul(T, realun(prec)), den, prep);
   if (nf) M = gmul(tozk, M);
   if (gcmp1(den)) den = NULL;
