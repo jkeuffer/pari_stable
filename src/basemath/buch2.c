@@ -1672,7 +1672,7 @@ remove_content(GEN I)
 /* if phase != 1 re-initialize static variables. If <0 return immediately */
 static long
 random_relation(long phase,long cglob,long lim,long LIMC,
-                long PRECREG,long PRECREGINT,GEN nf,GEN subFB,GEN T2vec,
+                long PRECREG,long PRECREGINT,GEN nf,GEN subFB,GEN vecT2,
 		long **ma,GEN maarch,long *ex,GEN list_jideal)
 {
   static long jideal, jdir;
@@ -1681,7 +1681,7 @@ random_relation(long phase,long cglob,long lim,long LIMC,
 
   if (phase != 1) { jideal=jdir=1; if (phase<0) return 0; }
 
-  nbT2 = lg(T2vec)-1;
+  nbT2 = lg(vecT2)-1;
   lgsub = lg(subFB);
   cptzer = 0;
   if (DEBUGLEVEL && list_jideal)
@@ -1713,7 +1713,7 @@ random_relation(long phase,long cglob,long lim,long LIMC,
       if (DEBUGLEVEL>2)
         fprintferr("phase=%ld,jideal=%ld,jdir=%ld,rand=%ld\n",
                    phase,jideal,jdir,getrand());
-      idealpro = ideallllredpart1((GEN)ideal[1],(GEN)T2vec[jdir],PRECREGINT);
+      idealpro = ideallllredpart1((GEN)ideal[1],(GEN)vecT2[jdir],PRECREGINT);
       if (!idealpro) return -2;
       if (!factorgen(nf,idealpro,KCZ,LIMC))
       {
@@ -2036,29 +2036,38 @@ class_group_gen(GEN nf,GEN W,GEN C,GEN vperm,GEN *ptclg1,GEN *ptclg2,long prec)
   if (DEBUGLEVEL) msgtimer("classgroup generators");
 }
 
-static GEN
-compute_matt2(long RU,GEN nf)
-{
-  GEN matt2, MCcopy, MCshif, M = gmael(nf,5,1), MC = gmael(nf,5,2);
-  long i,j,k,n = min(RU,9), N = n*(n+1)/2, ind = 1;
+extern GEN mul_real(GEN x, GEN y);
 
-  MCcopy=cgetg(RU+1,t_MAT); MCshif=cgetg(n+1,t_MAT);
-  for (k=1; k<=RU; k++) MCcopy[k]=MC[k];
-  for (k=1; k<=n; k++) MCshif[k]=lmul2n((GEN)MC[k],20);
-  matt2=cgetg(N+1,t_VEC);
-  for (j=1; j<=n; j++)
+/* real(MC * M), where columns a and b of MC have been multiplied by 2^20+1 */
+static GEN
+shift_t2(GEN T2, GEN M, GEN MC, long a, long b)
+{
+  long i,j,N = lg(T2);
+  GEN z, t2 = cgetg(N,t_MAT);
+  for (j=1; j<N; j++)
   {
-    MCcopy[j]=MCshif[j];
-    for (i=1; i<=j; i++)
+    t2[j] = lgetg(N,t_COL);
+    for (i=1; i<=j; i++) 
     {
-      MCcopy[i]=MCshif[i];
-      matt2[ind++] = (long)mulmat_real(MCcopy,M);
-      MCcopy[i]=MC[i];
+      z = mul_real(gcoeff(MC,i,a), gcoeff(M,a,j));
+      if (a!=b) z = gadd(z, mul_real(gcoeff(MC,i,b), gcoeff(M,b,j)));
+      coeff(t2,j,i) = coeff(t2,i,j) = ladd(gcoeff(T2,i,j), gmul2n(z,20));
     }
-    MCcopy[j]=MC[j];
   }
+  return t2;
+}
+
+static GEN
+compute_vecT2(long RU,GEN nf)
+{
+  GEN vecT2, M = gmael(nf,5,1), MC = gmael(nf,5,2), T2 = gmael(nf,5,3);
+  long i,j,n = min(RU,9), ind = 1;
+
+  vecT2=cgetg(1 + n*(n+1)/2,t_VEC);
+  for (j=1; j<=n; j++)
+    for (i=1; i<=j; i++) vecT2[ind++] = (long)shift_t2(T2,M,MC,i,j);
   if (DEBUGLEVEL) msgtimer("weighted T2 matrices");
-  return matt2;
+  return vecT2;
 }
 
 /* cf. relationrank()
@@ -2765,7 +2774,7 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
   long first = 1, sfb_increase = 0, sfb_trials = 0, precdouble = 0;
   long **mat,**matcopy,*ex;
   double cbach,cbach2,drc,LOGD2,lim,LIMC,LIMC2;
-  GEN p1,p2,lmatt2,fu,zu,nf,LLLnf,D,xarch,W,reg,lfun,z,clh,vperm,subFB;
+  GEN p1,p2,vecT2,fu,zu,nf,LLLnf,D,xarch,W,reg,lfun,z,clh,vperm,subFB;
   GEN B,C,c1,sublambda,pdep,parch,liste,invp,clg1,clg2;
   GEN CHANGE=NULL, extramat=NULL, extraC=NULL, list_jideal = NULL;
   char *precpb = NULL;
@@ -2912,7 +2921,7 @@ INCREASEGEN:
 
   slim = KCCO; phase = 0;
   nlze = matcopymax = 0; /* for lint */
-  lmatt2 = NULL;
+  vecT2 = NULL;
 
   /* random relations */
   if (cglob == KCCO) /* enough relations, initialize nevertheless */
@@ -2960,9 +2969,9 @@ INCREASEGEN:
       maarch = extraC - cglob; /* start at 0, the others at cglob */
       ma = matcopy;
     }
-    if (!lmatt2)
+    if (!vecT2)
     {
-      lmatt2 = compute_matt2(RU,nf);
+      vecT2 = compute_vecT2(RU,nf);
       av1 = avma;
     }
     if (!powsubFB)
@@ -2971,7 +2980,7 @@ INCREASEGEN:
       av1 = avma;
     }
     ss = random_relation(phase,cglob,slim,(long)LIMC,PRECREG,PRECREGINT,
-                         nf,subFB,lmatt2,ma,maarch,ex,list_jideal);
+                         nf,subFB,vecT2,ma,maarch,ex,list_jideal);
     if (ss < 0) /* could not find relations */
     {
       if (phase == 0) { for (j=1; j<=KCCO; j++) free(mat[j]); free(mat); }
