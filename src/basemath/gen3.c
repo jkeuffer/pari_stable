@@ -40,6 +40,16 @@ gvar(GEN x)
   return v;
 }
 
+/* assume x POLMOD */
+static int
+_varPOLMOD(GEN x)
+{
+  long v = gvar2((GEN)x[1]);
+  long w = gvar2((GEN)x[2]); if (w<v) v=w;
+  return v;
+
+}
+
 int
 gvar2(GEN x)
 {
@@ -50,9 +60,7 @@ gvar2(GEN x)
   switch(tx)
   {
     case t_POLMOD:
-      v=gvar2((GEN)x[1]);
-      w=gvar2((GEN)x[2]); if (w<v) v=w;
-      return v;
+      return _varPOLMOD(x);
 
     case t_SER:
       for (i=2; i < lg(x); i++) { w=gvar((GEN)x[i]); if (w<v) v=w; }
@@ -64,6 +72,12 @@ gvar2(GEN x)
   }
   for (i=1; i<lg(x); i++) { w=gvar2((GEN)x[i]); if (w<v) v=w; }
   return v;
+}
+
+int
+gvar9(GEN x)
+{
+  return (typ(x) == t_POLMOD)? _varPOLMOD(x): gvar(x);
 }
 
 GEN

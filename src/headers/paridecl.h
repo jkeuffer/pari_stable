@@ -907,6 +907,7 @@ GEN     gtovecsmall(GEN x);
 GEN     gtrunc(GEN x);
 int     gvar(GEN x);
 int     gvar2(GEN x);
+int     gvar9(GEN x);
 GEN     hqfeval(GEN q, GEN x);
 GEN     integ(GEN x, long v);
 int     iscomplex(GEN x);

@@ -117,7 +117,6 @@ extern void* global_err_data;
 #define max(a,b) ((a)>(b)?(a):(b))
 
 #define gval(x,v) (ggval((x),polx[v]))
-#define gvar9(x) ((typ(x)==t_POLMOD)? gvar2(x): gvar(x))
 
 #define ggrando(x,n) (grando0((x),(n),1))
 #define ggrandocp(x,n) (grando0((x),(n),0))
