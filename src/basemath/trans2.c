@@ -101,6 +101,7 @@ mpatan(GEN x)
     setlg(p3,l1); p5 = mulrr(p4,p3);
     s -= e; l1 += (s>>TWOPOTBITS_IN_LONG);
     s %= BITS_IN_LONG;
+    if (l1 > l2) l1 = l2;
     setlg(unr,l1); p5 = subrr(divrs(unr,2*i-1), p5);
     setlg(p4,l1); affrr(p5,p4); avma = av;
   }
