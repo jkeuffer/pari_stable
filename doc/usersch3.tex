@@ -4326,26 +4326,23 @@ $\var{nf}[3]$ contains the discriminant $d(K)$ (\kbd{\var{nf}.disc}) of $K$.
 $\var{nf}[4]$ contains the index of $\var{nf}[1]$,
 i.e.~$[\Z_K : \Z[\theta]]$, where $\theta$ is any root of $\var{nf}[1]$.
 
-$\var{nf}[5]$ is a vector containing 7 matrices $M$, $MC$, $T2$, $T$,
+$\var{nf}[5]$ is a vector containing 7 matrices $M$, $G$, $T2$, $T$,
 $MD$, $TI$, $MDI$ useful for certain computations in the number field $K$.
 
 \quad$\bullet$ $M$ is the $(r1+r2)\times n$ matrix whose columns represent
 the numerical values of the conjugates of the elements of the integral
 basis. 
 
-\quad$\bullet$ $MC$ is essentially the conjugate of the transpose of $M$,
-except that the last $r2$ columns are also multiplied by 2.
+\quad$\bullet$ $G$ is such that $T2 = {}^t G G$, where $T2$ is the quadratic
+form $T_2(x) = \sum |\sigma(x)|^2$, $\sigma$ running over the embeddings of
+$K$ into $\CM$.
 
-\quad$\bullet$ $T2$ is an $n\times n$ matrix equal to the real part of the
-product $MC\cdot M$ (which is a real positive definite symmetric matrix), the
-so-called $T_2$-matrix (\kbd{\var{nf}.t2}). 
+\quad$\bullet$ The $T2$ component is deprecated and currently unused.
 
 \quad$\bullet$ $T$ is the $n\times n$ matrix whose coefficients are
 $\text{Tr}(\omega_i\omega_j)$ where the $\omega_i$ are the elements of the
-integral basis. Note that $T=\overline{MC}\cdot M$ and in particular that
-$T=T_2$ if the field is totally real (in practice $T_2$ will have real
-approximate entries and $T$ will have integer entries). Note also that
-$\det(T)$ is equal to the discriminant of the field $K$.
+integral basis. Note also that $\det(T)$ is equal to the discriminant of the
+field $K$.
 
 \quad$\bullet$ The columns of $MD$ (\kbd{\var{nf}.diff}) express a $\Z$-basis
 of the different of $K$ on the integral basis.
@@ -4365,7 +4362,10 @@ embeddings of the number field into $\C$ (the first $r1$ components are real,
 the next $r2$ have positive imaginary part).
 
 $\var{nf}[7]$ is an integral basis for $\Z_K$ (\kbd{\var{nf}.zk}) expressed
-on the powers of~$\theta$. Its first element is guaranteed to be $1$.
+on the powers of~$\theta$. Its first element is guaranteed to be $1$. This
+basis is LLL-reduced with respect to $T_2$ (strictly speaking, it is a
+permutation of such a basis, due to the condition that the first element be
+$1$).
 
 $\var{nf}[8]$ is the $n\times n$ integral matrix expressing the power
 basis in terms of the integral basis, and finally
