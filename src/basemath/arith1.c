@@ -115,11 +115,11 @@ garith_proto2gs(GEN f(GEN,long), GEN x, long y)
 GEN
 gassoc_proto(GEN f(GEN,GEN), GEN x, GEN y)
 {
-  int tx = typ(x);
   if (!y)
   {
     pari_sp av = avma;
-    if (tx != t_VEC && tx != t_COL) err(typeer,"association");
+    long tx = typ(x);
+    if (!is_vec_t(tx)) err(typeer,"association");
     return gerepileupto(av, divide_conquer_prod(x,f));
   }
   return f(x,y);
@@ -1537,7 +1537,7 @@ lcmii(GEN x, GEN y)
  *    x = [1. mod(5, 11), mod(X + mod(2, 7), X^2 + 1)]
  *    y = [1, mod(7, 17), mod(X + mod(0, 3), X^2 + 1)],
  *
- *  then chinois(x, y) returns
+ *  then chinese(x, y) returns
  *
  *    [1, mod(16, 187), mod(X + mod(9, 21), X^2 + 1)]
  *
@@ -1545,30 +1545,29 @@ lcmii(GEN x, GEN y)
  *  quadratic numbers.
  */
 
-GEN chinese(GEN x, GEN y)
-{
-  return gassoc_proto(chinois,x,y);
-}
+GEN
+chinese1(GEN x) { return gassoc_proto(chinese,x,NULL); }
 
 GEN
-chinois(GEN x, GEN y)
+chinese(GEN x, GEN y)
 {
   pari_sp av,tetpil;
   long i,lx, tx = typ(x);
   GEN z,p1,p2,d,u,v;
 
+  if (!y) return chinese1(x);
   if (gequal(x,y)) return gcopy(x);
   if (tx == typ(y)) switch(tx)
   {
     case t_POLMOD:
+      z = cgetg(3, t_POLMOD);
       if (gequal((GEN)x[1],(GEN)y[1]))  /* same modulus */
       {
-	z = cgetg(3, t_INTMOD);
 	z[1]=lcopy((GEN)x[1]);
-	z[2]=(long)chinois((GEN)x[2],(GEN)y[2]);
+	z[2]=(long)chinese((GEN)x[2],(GEN)y[2]);
         return z;
       }
-      z=cgetg(3,t_POLMOD); av=avma;
+      av=avma;
       d=gbezout((GEN)x[1],(GEN)y[1],&u,&v);
       p2 = gadd((GEN)y[2],gneg((GEN)x[2]));
       if (!gcmp0(gmod(p2, d))) break;
@@ -1592,19 +1591,19 @@ chinois(GEN x, GEN y)
     case t_POL:
       lx=lg(x); z = cgetg(lx,t_POL); z[1] = x[1];
       if (lx != lg(y) || varn(x) != varn(y)) break;
-      for (i=2; i<lx; i++) z[i]=(long)chinois((GEN)x[i],(GEN)y[i]);
+      for (i=2; i<lx; i++) z[i]=(long)chinese((GEN)x[i],(GEN)y[i]);
       return z;
 
     case t_VEC: case t_COL: case t_MAT:
       lx=lg(x); z=cgetg(lx,tx); if (lx!=lg(y)) break;
-      for (i=1; i<lx; i++) z[i]=(long)chinois((GEN)x[i],(GEN)y[i]);
+      for (i=1; i<lx; i++) z[i]=(long)chinese((GEN)x[i],(GEN)y[i]);
       return z;
   }
   err(typeer,"chinese");
   return NULL; /* not reached */
 }
 
-/* return lift(chinois(a mod A, b mod B))
+/* return lift(chinese(a mod A, b mod B))
  * assume(A,B)=1, a,b,A,B integers and C = A*B */
 GEN
 Z_chinese_coprime(GEN a, GEN b, GEN A, GEN B, GEN C)

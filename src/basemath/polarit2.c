@@ -714,7 +714,7 @@ all_factor_bound(GEN x)
   for (i=2; i<=n+2; i++) z = addii(z, sqri((GEN)x[i]));
   t = absi((GEN)x[n+2]);
   z = addii(t, addsi(1, sqrti(z)));
-  z = mulii(z, binome(stoi(n-1), n>>1));
+  z = mulii(z, binomial(stoi(n-1), n>>1));
   return shifti(mulii(t,z),1);
 }
 #endif
@@ -783,7 +783,7 @@ cmbf(GEN pol, GEN famod, GEN bound, GEN p, long a, long b,
 nextK:
   if (K > maxK || 2*K > lfamod) goto END;
   if (DEBUGLEVEL > 3)
-    fprintferr("\n### K = %d, %Z combinations\n", K,binome(utoipos(lfamod), K));
+    fprintferr("\n### K = %d, %Z combinations\n", K,binomial(utoipos(lfamod), K));
   setlg(ind, K+1); ind[1] = 1;
   Sbound = (ulong) ((K+1)>>1);
   i = 1; curdeg = degpol[ind[1]];

@@ -1,4 +1,6 @@
 /* For compatibility with 1.x.x */
+#define chinois chinese
+#define binome binomial
 #define egalii equalii
 #define gegal gequal
 #define gegalgs gequalgs

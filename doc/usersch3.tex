@@ -1654,7 +1654,7 @@ multiplicity. $x$ must be an integer.
 \subsecidx{binomial}$(x,y)$: \idx{binomial coefficient} $\binom x y$.
 Here $y$ must be an integer, but $x$ can be any PARI object.
 
-\syn{binome}{x,y}, where $y$ must be a \kbd{long}.
+\syn{binomial}{x,y}, where $y$ must be a \kbd{long}.
 
 \subsecidx{chinese}$(x,\{y\})$: if $x$ and $y$ are both intmods or both
 polmods, creates (with the same type) a $z$ in the same residue class
@@ -1672,7 +1672,8 @@ Finally $\kbd{chinese}(x,x) = x$ regardless of the type of $x$; this allows
 vector arguments to contain other data, so long as they are identical in both
 vectors.
 
-\syn{chinois}{x,y}.
+\syn{chinese}{x,y}. Also available is \tet{chinese1}$(x)$, corresponding to an
+ommitted \kbd{y}.
 
 \subsecidx{content}$(x)$: computes the gcd of all the coefficients of $x$,
 when this gcd makes sense. If $x$ is a scalar, this simply returns the

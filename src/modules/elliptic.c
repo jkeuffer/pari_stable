@@ -1781,7 +1781,7 @@ FOUND: /* found a point of exponent h on E_u */
     if (B == gen_1) B = h;
     else
     {
-      p1 = chinois(gmodulcp(A,B), gmodulsg(0,h));
+      p1 = chinese(gmodulcp(A,B), gmodulsg(0,h));
       A = (GEN)p1[2];
       B = (GEN)p1[1];
     }
@@ -1968,7 +1968,7 @@ FOUND:
     if (B == 1) B = h;
     else
     {
-      GEN p1 = chinois(mkintmodu(A,B), mkintmodu(0,h));
+      GEN p1 = chinese(mkintmodu(A,B), mkintmodu(0,h));
       A = itos((GEN)p1[2]);
       if (is_bigint(p1[1])) { h = A; break; }
       B = itos((GEN)p1[1]);

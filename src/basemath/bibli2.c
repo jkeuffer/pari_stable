@@ -479,7 +479,7 @@ polrecip_i(GEN x)
 /*******************************************************************/
 
 GEN
-binome(GEN n, long k)
+binomial(GEN n, long k)
 {
   long i;
   pari_sp av;

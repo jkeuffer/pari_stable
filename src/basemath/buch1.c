@@ -210,7 +210,7 @@ gpq(GEN form, GEN p, GEN q, long e, GEN sqd, GEN u, long prec)
 {
   long a = form[1], a2 = a << 1; /* gcd(a2, u) = 2 */
   GEN p1,p2,p3,p4;
-  GEN w = lift(chinois(gmodulss(-form[2], a2), u));
+  GEN w = lift(chinese(gmodulss(-form[2], a2), u));
   GEN al = mkcomplex(gdivgs(w, -a2), gdivgs(sqd, a2));
   p1 = trueeta(gdiv(al,p),prec);
   p2 = p == q? p1: trueeta(gdiv(al,q),prec);
@@ -252,7 +252,7 @@ quadhilbertimag(GEN D, GEN pq)
     GEN qfq = primeform(D,q,0);
     GEN up = gmodulcp((GEN)qfp[2], shifti(p,1));
     GEN uq = gmodulcp((GEN)qfq[2], shifti(q,1));
-    u = chinois(up,uq);
+    u = chinese(up,uq);
   }
   /* u modulo 2pq */
   prec = 3;

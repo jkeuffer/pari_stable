@@ -760,7 +760,7 @@ nfcmbf(nfcmbf_t *T, GEN p, long a, long maxK, long klim)
 nextK:
   if (K > maxK || 2*K > lfamod) goto END;
   if (DEBUGLEVEL > 3)
-    fprintferr("\n### K = %d, %Z combinations\n", K,binome(utoipos(lfamod), K));
+    fprintferr("\n### K = %d, %Z combinations\n", K,binomial(utoipos(lfamod), K));
   setlg(ind, K+1); ind[1] = 1;
   i = 1; curdeg = degpol[ind[1]];
   for(;;)

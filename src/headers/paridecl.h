@@ -261,8 +261,8 @@ GEN     bestappr(GEN x, GEN k);
 long    carrecomplet(GEN x, GEN *pt);
 long    cgcd(long a,long b);
 void    check_quaddisc(GEN x, long *s, long *r, char *f);
+GEN     chinese1(GEN x);
 GEN     chinese(GEN x, GEN y);
-GEN     chinois(GEN x, GEN y);
 GEN     classno2(GEN x);
 GEN     classno(GEN x);
 long    clcm(long a,long b);
@@ -705,7 +705,7 @@ GEN     zncoppersmith(GEN P0, GEN N, GEN X, GEN B) ;
 
 /* bibli2.c */
 
-GEN     binome(GEN x, long k);
+GEN     binomial(GEN x, long k);
 int     cmp_pol(GEN x, GEN y);
 int     cmp_prime_ideal(GEN x, GEN y);
 int     cmp_prime_over_p(GEN x, GEN y);

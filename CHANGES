@@ -76,7 +76,8 @@ GH  8- thue(thueinit(x^3 - 2), 2) --> SEGV
     5- improved zetakinit() [save some multiplications, about half of them
        for quadratic fields. Less so as the degree increases. ]
     6- renamed RgX_RgX_compo -> RgX_RgXQ_compo 
-
+    7- renamed binome -> binomial, chinois -> chinese [ added chinese1(x)
+       for chinese(x, NULL) ]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.9 (released 23/12/2004):

@@ -1189,7 +1189,7 @@ Fp_PHlog(GEN a, GEN g, GEN p, GEN ord)
     }
     v[i] = lmodulcp(n_q, (GEN)qj[e]);
   }
-  return gerepileuptoint(av, lift(chinese(v,NULL)));
+  return gerepileuptoint(av, lift(chinese1(v)));
 }
 
 /* discrete log in Fq for a in Fp^*, g primitive root in Fq^* */
@@ -1314,7 +1314,7 @@ ff_PHlog(GEN a, GEN g, GEN T, GEN p)
     }
     v[i] = lmodulcp(n_q, (GEN)qj[e]);
   }
-  return gerepileuptoint(av, lift(chinese(v,NULL)));
+  return gerepileuptoint(av, lift(chinese1(v)));
 }
 
 /* same in nf.zk / pr */

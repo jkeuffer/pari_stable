@@ -1934,7 +1934,7 @@ RecCoeff(GEN nf,  GEN pol,  long v, long prec)
   { /* start with the coefficients in the middle,
        since they are the harder to recognize! */
     long cf = md + (j%2? j/2: -j/2);
-    GEN bound = binome(stoi(cl), cf);
+    GEN bound = binomial(stoi(cl), cf);
 
     bound = shifti(bound, cl - cf);
 

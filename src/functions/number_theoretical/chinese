@@ -5,6 +5,6 @@ Prototype: GDG
 Help: chinese(x,{y}): x,y being both intmods (or polmods) computes z in the
  same residue classes as x and y
 Description: 
- (gen):gen      chinese($1, NULL)
- (gen, gen):gen chinois($1, $2)
+ (gen):gen      chinese1($1)
+ (gen, gen):gen chinese($1, $2)
 

@@ -111,6 +111,7 @@ Incompatible changes:
   - renamed gzero --> gen_0, gun --> gen_1, gdeux --> gen_2
   - renamed gegal --> gequal, gegalgs --> gequalgs, gegalsg --> gequalsg,
     egalii --> equalii
+  - renamed binome -> binomial, chinois -> chinese
 
 Partially compatible changes:
 -----------------------------
