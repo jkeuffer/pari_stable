@@ -705,7 +705,7 @@ lllint_marked(long MARKED, GEN x, long D, int gram,
           else  ZRED_gram(k,l, x,h,L,(GEN)B[l+1],kmax);
           if (low_stack(lim, stack_lim(av,1)))
           {
-            if(DEBUGMEM>1) err(warnmem,"lllint[1]");
+            if(DEBUGMEM>1) err(warnmem,"lllint[1], kmax = %ld", kmax);
             gerepileall(av,h?4:3,&B,&L,&x,&h);
           }
         }
@@ -713,7 +713,7 @@ lllint_marked(long MARKED, GEN x, long D, int gram,
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"lllint[2]");
+      if(DEBUGMEM>1) err(warnmem,"lllint[2], kmax = %ld", kmax);
       gerepileall(av,h?4:3,&B,&L,&x,&h);
     }
   }
@@ -1254,7 +1254,7 @@ PRECPB:
           if (!j) goto PRECPB;
           if (low_stack(lim, stack_lim(av,1)))
           {
-            if(DEBUGMEM>1) err(warnmem,"lllfp[1]");
+            if(DEBUGMEM>1) err(warnmem,"lllfp[1], kmax = %ld", kmax);
             gerepileall(av,5,&B,&L,&h,&x,&Q);
           }
         }
@@ -1271,7 +1271,7 @@ PRECPB:
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"lllfp[2]");
+      if(DEBUGMEM>1) err(warnmem,"lllfp[2], kmax = %ld", kmax);
       gerepileall(av,5,&B,&L,&h,&x,&Q);
     }
   }
