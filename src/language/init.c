@@ -949,7 +949,7 @@ err(long numerr, ...)
 
       case operi: case operf:
       {
-        char *op = va_arg(ap, char*), *f;
+        char *f, *op = va_arg(ap, char*);
         long   x = va_arg(ap, long);
         long   y = va_arg(ap, long);
              if (*op == '+') f = "addition";

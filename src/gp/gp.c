@@ -2123,7 +2123,6 @@ gp_main_loop(int ismain)
     }
     pariputc('\n'); pariflush();
   }
-  pop_buffer();
 }
 
 GEN
