@@ -32,7 +32,7 @@ TP = Thomas Papanikolaou
 XR = Xavier Roblot
 YU = Yoshiaki Uchikawa
 
-Done for version 2.2.3 (released 08/06/2002):
+Done for version 2.2.3 (released 10/06/2002):
   Fixed
     1- bnrinit(bnfinit(subst(polsubcyclo(89,8),x,-x)),4) --> SEGV [make sure
     isprincipalfact is used in makecygen, even in case of precision problems]
@@ -188,7 +188,7 @@ GTo 9- Implemented Cipolla's algorithm for sqrt(Mod(x, p))
    14- library function lllint_ip (in place)
    15- library functions Q_primitive_part, Q_primpart, Q_remove_denom, Q_denom
    16- allow polredabs to use a partial factorisation of disc(nf) [as polred,
-       but inconsistent values. Backward compatibility problem here...]
+       but inconsistent values for flag. Backward compatibility problem here...]
    17- routine ellminimalmodel()
 IZ 18- systems/ directory (currently for OS/2 only)
 IZ 19- [OS/2:] install() for OS/2 system  (using builtin dlopen)
