@@ -1948,8 +1948,8 @@ ideallistzstarall(GEN bnf,long bound,long flag)
         if (do_units) embunit = logunitmatrix(nf,funits,racunit,ideal);
         for (i=q; i<=bound; i+=q)
         {
-          p1 = (GEN)z[i/q];
-          if ((lp1 = lg(p1)) == 1) continue;
+          p1 = (GEN)z[i/q]; lp1 = lg(p1);
+          if (lp1 == 1) continue;
 
           p2 = cgetg(lp1,t_VEC);
           for (k=1; k<lp1; k++)

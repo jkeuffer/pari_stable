@@ -2089,17 +2089,20 @@ rayclassnointern(GEN sous, GEN clh)
   return sousray;
 }
 
+void rowselect_p(GEN A, GEN B, GEN p, long init);
+
 static GEN
 rayclassnointernarch(GEN sous, GEN clh, GEN matarchunit)
 {
-  long lx,nc,nq,k,kk,j,lm,lh,r1,jj,i,nba,nbarch,ii;
-  GEN bidsimp,qm,sousray,cyclic,m,p2,p1,p1all,p3,mm,mj,qmk,matk;
+  long lx,nc,nq,k,kk,j,lm,lh,r1,jj,nba,nbarch;
+  GEN bidsimp,qm,sousray,cyclic,m,p2,p1,p1all,mm,qmk,matk,rowsel;
 
   if (!matarchunit) return rayclassnointern(sous,clh);
+  lx = lg(sous); if (lx == 1) return sous;
 
-  lm=lg(matarchunit); if (!lm) err(talker,"no units in rayclassnointernarch");
-  r1=lg(matarchunit[1])-1; if (r1>15) err(talker,"r1>15 in rayclassnointernarch");
-  lx=lg(sous); sousray=cgetg(lx,t_VEC);
+  lm=lg(matarchunit); 
+  r1=lg(matarchunit[1])-1;
+  sousray=cgetg(lx,t_VEC); nbarch=(1<<r1);
   for (j=1; j<lx; j++)
   {
     bidsimp=(GEN)sous[j]; qm=gmul((GEN)bidsimp[3],(GEN)bidsimp[4]);
@@ -2124,29 +2127,26 @@ rayclassnointernarch(GEN sous, GEN clh, GEN matarchunit)
       p2=cgetg(nc+r1+1,t_COL); m[k]=(long)p2;
       for (kk=1; kk<=nc+r1; kk++) p2[kk]=(kk==k-nq)?deux:zero;
     }
-    m=hnf(m);
-    nbarch=(1<<r1); p1all=cgetg(nbarch+1,t_VEC); lh=lg(m);
-    if (lh!=nc+r1+1) err(bugparier,"rayclassnointernarch (3)");
+    p1all=cgetg(nbarch+1,t_VEC);
+    m = hnf(m); lh = lg(m);
+    mm = dummycopy(m);
+    rowsel = cgetg(nc+r1+1,t_VECSMALL);
+    
     for (k=0; k<=nbarch-1; k++)
     {
-      p2=cgetg(r1+1,t_COL); kk=k; nba=0;
+      kk=k; nba=nc+1;
       for (jj=1; jj<=r1; jj++)
       {
-	if (kk%2) { nba++; p2[jj]=un; } else p2[jj]=zero;
+	if (kk&1) rowsel[nba++] = nc + jj;
 	kk>>=1;
       }
-      mm=cgetg(lh,t_MAT);
-      for (jj=1; jj<lh; jj++)
-      {
-	p3=cgetg(nc+nba+1,t_COL); mm[jj]=(long)p3; mj=(GEN)m[jj];
-	for (i=1; i<=nc; i++) p3[i]=mj[i];
-	for (ii=1; ii<=r1; ii++)
-          if (signe(p2[ii])) p3[i++]=mj[nc+ii];
-      }
-      p1all[k+1]=lmul(clh,dethnf(hnf(mm)));
+      setlg(rowsel, nba);
+      rowselect_p(m, mm, rowsel, nc+1);
+      p1all[k+1] = lmul(clh, dethnf(hnf(mm)));
     }
-    p1=cgetg(3,t_VEC); p1[2]=(long)p1all; p1[1]=bidsimp[1];
-    sousray[j]=(long)p1;
+    p1 = cgetg(3,t_VEC); sousray[j] = (long)p1;
+    p1[1] = bidsimp[1];
+    p1[2] = (long)p1all;
   }
   return sousray;
 }
@@ -2241,7 +2241,13 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
   }
   p1=cgetg(3,t_VEC); p1[1]=(long)idmat(degk); p1[2]=(long)arch;
   bidp=zidealstarinitall(nf,p1,0);
-  matarchunit = allarch? logunitmatrix(nf,funits,racunit,bidp): (GEN)NULL;
+  if (allarch)
+  {
+    matarchunit = logunitmatrix(nf,funits,racunit,bidp);
+    if (r1>15) err(talker,"r1>15 in discrayabslistarchintern");
+  }
+  else
+    matarchunit = (GEN)NULL;
 
   p=cgeti(3); p[1]=evalsigne(1)|evallgef(3);
   sqbou=(long)sqrt((double)bound) + 1;
@@ -2293,8 +2299,8 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
         embunit=logunitmatrix(nf,funits,racunit,bidp);
         for (i=q; i<=bound; i+=q)
         {
-          p1 = getcompobig(z,i/q);
-          if ((lp1 = lg(p1)) == 1) continue;
+          p1 = getcompobig(z,i/q); lp1 = lg(p1);
+          if (lp1 == 1) continue;
 
           p2 = cgetg(lp1,t_VEC); c=0;
           for (k=1; k<lp1; k++)
@@ -2302,12 +2308,8 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
             p3=(GEN)p1[k];
             if (q == (ulong)i ||
                 ((p4=gmael(p3,1,1)) && !isinvector(p4,fauxpr,lg(p4)-1)))
-            {
-              c++;
-              p2[c]=(long)zsimpjoin(p3,bidp,faussefa,embunit);
-            }
+              p2[++c] = (long)zsimpjoin(p3,bidp,faussefa,embunit);
           }
-          if (!c) continue;
 
           setlg(p2,c+1);
           if (p[2]<=sqbou)

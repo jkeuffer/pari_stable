@@ -394,6 +394,23 @@ rowextract_p(GEN A, GEN p)
   return B;
 }
 
+void
+vecselect_p(GEN A, GEN B, GEN p, long init, long lB)
+{
+  long i; setlg(B, lB);
+  for (i=init; i<lB; i++) B[i] = A[p[i]];
+}
+
+/* B := p . A = row selection according to permutation p. Treat only lower
+ * right corner init x init */
+void
+rowselect_p(GEN A, GEN B, GEN p, long init)
+{
+  long i, lB = lg(A), lp = lg(p);
+  for (i=1; i<init; i++) setlg(B[i],lp);
+  for (   ; i<lB;   i++) vecselect_p((GEN)A[i],(GEN)B[i],p,init,lp);
+}
+
 GEN
 extract(GEN x, GEN l)
 {
