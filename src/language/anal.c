@@ -772,7 +772,9 @@ facteur(void)
       case '[':
       {
         matcomp c;
-        x = matcell(x, &c); break;
+        x = matcell(x, &c);
+        if (isonstack(x)) x = gcopy(x);
+        break;
       }
       case '!':
 	if (analyseur[1] != '=')
@@ -1012,11 +1014,14 @@ matrix_block(GEN p)
   end = analyseur;
   analyseur = ini;
   cpt = matcell(p, &c);
-  if (!res) return cpt; /* no assignment */
-
-  if (fun) res = fun(cpt, res);
-  res = change_compo(c,res);
-  analyseur = end; return res;
+  if (res)
+  {
+    if (fun) res = fun(cpt, res);
+    res = change_compo(c,res);
+    analyseur = end;
+  }
+  else res = isonstack(cpt)? gcopy(cpt): cpt; /* no assignment */
+  return res;
 }
 
 static char*
