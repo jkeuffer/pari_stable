@@ -1004,7 +1004,7 @@ idealaddmultoone(GEN nf, GEN list)
 {
   pari_sp av = avma;
   long N, i, l, tx = typ(list);
-  GEN z, v, H, U, perm, L;
+  GEN z, H, U, perm, L;
 
   nf = checknf(nf); N = degpol(nf[1]);
   if (!is_vec_t(tx)) err(talker,"not a list in idealaddmultoone");
@@ -1025,7 +1025,7 @@ idealaddmultoone(GEN nf, GEN list)
   U = (GEN)U[(l-2)*N + i]; /* z U = 1 */
   for (i=1; i<l; i++)
     L[i] = lmul((GEN)L[i], vecextract_i(U, (i-1)*N + 1, i*N));
-  return gerepilecopy(av, v);
+  return gerepilecopy(av, L);
 }
 
 /* multiplication */
