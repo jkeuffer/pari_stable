@@ -150,6 +150,7 @@ BA 60- add "const" keyword to allow building with g++
    88- (x/y)*(y/x) --> y/y 
    89- fix pari_init_stackcheck to avoid bogus "deep recursion" messages on
        broken machines.
+   90- reused invalid (gerepile'd) pointer in mat_ideal_two_elt.
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available

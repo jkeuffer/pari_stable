@@ -509,8 +509,9 @@ mat_ideal_two_elt(GEN nf, GEN x)
   xZ = gcoeff(x,1,1);
   if (gcmp1(xZ))
   {
-    y[1] = lpilecopy(av,cx);
-    y[2] = (long)gscalcol(cx, N); return y;
+    cx = gerepilecopy(av,cx);
+    y[1] = (long)cx;
+    y[2] = (long)gscalcol_i(cx, N); return y;
   }
   av0 = avma;
   a = NULL; /* gcc -Wall */
