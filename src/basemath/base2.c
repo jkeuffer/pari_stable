@@ -3125,7 +3125,7 @@ rnfequation0(GEN nf, GEN B, long flall)
   if (lA<=3 || lB<=3) err(constpoler,"rnfequation");
 
   check_pol_int(A,"rnfequation");
-  B = lift_intern(B); B = gdiv(B, content(B));
+  B = primpart(lift_intern(B));
   for (k=2; k<lB; k++)
     if (lgef(B[k]) >= lA) B[k] = lres((GEN)B[k],A);
 
