@@ -719,10 +719,10 @@ gpow(GEN x, GEN n, long prec)
   {
     long tn = typ(n);
     if (!is_scalar_t(tn) || tn == t_PADIC || tn == t_INTMOD)
-      err(talker,"gpow: (long)gen_0 to a forbidden power");
+      err(talker,"gpow: 0 to a forbidden power");
     n = real_i(n);
     if (gsigne(n) <= 0)
-      err(talker,"gpow: (long)gen_0 to a non positive exponent");
+      err(talker,"gpow: 0 to a non positive exponent");
     if (!precision(x)) return gcopy(x);
 
     x = ground(gmulsg(gexpo(x),n));
