@@ -2161,7 +2161,8 @@ compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR)
   den = Q_denom(lambda);
   if (gcmp(den,D) > 0)
   {
-    if (DEBUGLEVEL) fprintferr("D = %Z\nden = %Z\n",D,den);
+    if (DEBUGLEVEL) fprintferr("D = %Z\nden = %Z\n",D,
+                    lgefint(den) <= DEFAULTPREC? den: itor(den,3));
     return fupb_PRECI;
   }
   L = Q_muli_to_int(lambda, den);
