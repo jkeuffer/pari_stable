@@ -72,6 +72,7 @@ long   itos(GEN x);
 long   itos_or_0(GEN x);
 ulong  itou(GEN x);
 GEN    modis(GEN x, long y);
+GEN    modss(long x, long y);
 GEN    mpabs(GEN x);
 GEN    mpadd(GEN x, GEN y);
 void   mpaff(GEN x, GEN y);
@@ -94,6 +95,7 @@ GEN    realzero_bit(long bitprec);
 void   resiiz(GEN x, GEN y, GEN z);
 GEN    resis(GEN x, long y);
 GEN    ressi(long x, GEN y);
+GEN    resss(long x, long y);
 GEN    rtor(GEN x, long prec);
 GEN    shiftr(GEN x, long n);
 long   smodis(GEN x, long y);
@@ -279,6 +281,28 @@ itos_or_0(GEN x) {
   long n;
   if (lgefint(x) != 3 || (n = x[2]) & HIGHBIT) return 0;
   return signe(x) > 0? n: -n;
+}
+
+INLINE GEN
+modss(long x, long y)
+{
+  LOCAL_HIREMAINDER;
+
+  if (!y) err(moder1);
+  if (y<0) y=-y;
+  hiremainder=0; (void)divll(labs(x),y);
+  if (!hiremainder) return gzero;
+  return (x < 0) ? stoi(y-hiremainder) : stoi(hiremainder);
+}
+
+INLINE GEN
+resss(long x, long y)
+{
+  LOCAL_HIREMAINDER;
+
+  if (!y) err(reser1);
+  hiremainder=0; (void)divll(labs(x),labs(y));
+  return (x < 0) ? stoi(-((long)hiremainder)) : stoi(hiremainder);
 }
 
 INLINE void

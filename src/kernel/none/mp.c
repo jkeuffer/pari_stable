@@ -824,28 +824,6 @@ vals(ulong z)
 }
 
 GEN
-modss(long x, long y)
-{
-  LOCAL_HIREMAINDER;
-
-  if (!y) err(moder1);
-  if (y<0) y=-y;
-  hiremainder=0; (void)divll(labs(x),y);
-  if (!hiremainder) return gzero;
-  return (x < 0) ? stoi(y-hiremainder) : stoi(hiremainder);
-}
-
-GEN
-resss(long x, long y)
-{
-  LOCAL_HIREMAINDER;
-
-  if (!y) err(reser1);
-  hiremainder=0; (void)divll(labs(x),labs(y));
-  return (x < 0) ? stoi(-((long)hiremainder)) : stoi(hiremainder);
-}
-
-GEN
 divsi_rem(long x, GEN y, ulong *rem)
 {
   long p1, s = signe(y);
