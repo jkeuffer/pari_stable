@@ -98,7 +98,7 @@ filtre0(filtre_t *F)
     /* weed out comments and spaces */
     if (c=='\\' && *s=='\\') { F->in_comment = ONE_LINE_COMMENT; continue; }
     if (isspace((int)c)) continue;
-    *t++ = downcase? tolower(c): c;
+    *t++ = downcase? tolower((int)c): c;
 
     switch(c)
     {
