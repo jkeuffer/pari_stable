@@ -126,7 +126,7 @@ principle allowed to create objects which are ``complex numbers of complex
 numbers'', but don't expect PARI to make sensible use of such objects: you
 will mainly get nonsense.
 
-On the other hand, one thing which {\it is\/} allowed is to have components
+On the other hand, one thing which \emph{is} allowed is to have components
 of different, but compatible, types. For example, taking again complex
 numbers, the real part could be of type integer, and the imaginary part of
 type rational.
@@ -338,7 +338,7 @@ or add $0.$ to $(1/3)$.
 The result of operations between imprecise objects will be as precise as
 possible. Consider for example one of the most difficult cases, that is the
 addition of two real numbers $x$ and $y$. The \idx{accuracy} of the result is
-{\it a priori\/} unpredictable; it depends on the precisions of $x$ and $y$,
+\emph{a priori} unpredictable; it depends on the precisions of $x$ and $y$,
 on their sizes (i.e.~their exponents), and also on the size of $x+y$. PARI
 works out automatically the right precision for the result, even when it is
 working in calculator mode GP where there is a \idx{default precision}.

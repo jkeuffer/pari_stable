@@ -793,7 +793,7 @@ sub basic_subst
     s/\\(?:key|li)\{((?:[^{}]+(?=[{}])|\{[^{}]*\})*)\}\s*\{(([^{}]+(?=[{}])|\{[^{}]*\})*)\}/\n=item $tr{startcode}$2$tr{endcode}\n\n$1\n/g;
   }
 
-  s/\\var\{([^\}]*)\}/$tr{startit}$1$tr{endit}/g;
+  s/\\(var|emph)\{([^\}]*)\}/$tr{startit}$1$tr{endit}/g;
   s/\\fl(?![a-zA-Z])/$tr{startit}flag$tr{endit}/g;
   s/\\b{([^}]*)}/$tr{startcode}\\$1$tr{endcode}/g;
   s/\\kbdsidx/\\sidx/g;

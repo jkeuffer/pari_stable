@@ -29,7 +29,7 @@ as above, or interactively during a GP session or in a preferences file (also
 known as \tet{gprc}).
 
 \unix Some new features were developed on UNIX platforms, and depend heavily
-on the operating system in use. It is \var{possible} that some of these
+on the operating system in use. It is \emph{possible} that some of these
 will be ported to other operating systems (BeOS, MacOS, DOS, OS/2, Windows,
 etc.) in future versions (most of them should be easy tasks for anybody
 acquainted with those). As for now, most of them were not. So, whenever a
@@ -274,7 +274,7 @@ help for GP old-timers. Thus, to encourage switching to \kbd{compatible}=0,
 it is not possible to disable the warning.
 
 \quad \kbd{compatible} = 2: use only the old function naming scheme (as
-used up to version 1.39.15), but {\it taking case into account}. Thus
+used up to version 1.39.15), but \emph{taking case into account}. Thus
 \kbd{I} (${}=\sqrt{-1}$) is not the same as \kbd{i} (user variable, unbound
 by default), and you won't get an error message using \kbd{i} as a loop
 index as used to be the case.
@@ -285,7 +285,7 @@ But these differences are usually for the better (they were meant to,
 anyway), and will probably not be discovered by the casual user.
 
 One adverse side effect is that any user functions and aliases that have
-been defined \var{before} changing \kbd{compatible} will get erased if this
+been defined \emph{before} changing \kbd{compatible} will get erased if this
 change modifies the function list, i.e.~if you move between groups
 $\{0,1\}$ and $\{2,3\}$ (variables are unaffected). We of course strongly
 encourage you to try and get used to the setting \kbd{compatible}=0.
@@ -360,7 +360,7 @@ long.
 exact name is determined by the \kbd{logfile} default. Subsequently, all the
 commands and results will be written to that file (see \b{l}). In case a file
 with this precise name already existed, it will not be erased: your data will
-be \var{appended} at the end.
+be \emph{appended} at the end.
 
 \subsecidx{logfile} (default \kbd{"pari.log"}): name of the log file to be
 used when the \kbd{log} toggle is on. Tilde and time expansion are performed.
@@ -400,17 +400,17 @@ Independently of the setting of this default, an object can be printed
 in any of the three formats at any time using the commands \b{a}, \b{m}
 and~\b{b} respectively (see below).
 
-\subsecidx{parisize} (default, 1M bytes on the Mac, 4M otherwise): GP, and
-in fact any program using the PARI library, needs a stack in which to do
-its computations. \kbd{parisize} is the stack size, in bytes. It is
-strongly recommended you increase this default (using the \kbd{-s}
-command-line switch, or a \tet{gprc}) if you can afford it. Don't increase
-it beyond the actual amount of RAM installed on your computer or GP will
-spend most of its time paging.
+\subsecidx{parisize}\label{se:parisize} (default, 1M bytes on the Mac, 4M
+otherwise): GP, and in fact any program using the PARI library, needs a stack
+in which to do its computations. \kbd{parisize} is the stack size, in bytes.
+It is strongly recommended you increase this default (using the \kbd{-s}
+command-line switch, or a \tet{gprc}) if you can afford it. Don't increase it
+beyond the actual amount of RAM installed on your computer or GP will spend
+most of its time paging.
 
 In case of emergency, you can use the \tet{allocatemem} function to
 increase \kbd{parisize}, once the session is started. GP will try to
-\var{double} the stack size by itself when memory runs low during a
+\emph{double} the stack size by itself when memory runs low during a
 computation, but this very computation will then be lost, and you will have
 to type the command again.
 
@@ -458,7 +458,7 @@ separate your input from previous GP results, without ambiguity. It's not a
 trivial problem to adapt automatically this regular expression to an
 arbitrary prompt (which can be self-modifying!). Thus, in this version \vers,
 Emacs relies on the prompt being the default one. So, do not tamper with the
-\kbd{prompt} variable \var{unless} you modify it simultaneously in your
+\kbd{prompt} variable \emph{unless} you modify it simultaneously in your
 \kbd{.emacs} file (see \kbd{emacs/pariemacs.txt} and \kbd{misc/gprc.dft} for
 examples).
 
@@ -521,14 +521,14 @@ complicated nested loops.
 (on) or 0 (off). If on, every instruction sequence (anything ended by a
 newline in your input) is timed, to some accuracy depending on the hardware
 and operating system. The time measured is the user \idx{CPU time},
-\var{not} including the time for printing the results (see \kbd{\#} and
+\emph{not} including the time for printing the results (see \kbd{\#} and
 \kbd{\#\#}).
 
 \subsec{Note on output formats.}
 
 \noindent
 A zero real number is printed in \kbd{e} format as $0.Exx$ where $xx$ is
-the (usually negative) \var{decimal} exponent of the number (cf.\ %
+the (usually negative) \emph{decimal} exponent of the number (cf.\ %
 \secref{se:whatzero}). This allows the user to check the accuracy of the zero
 in question (this could also be done using \b{x}, but that would be more
 technical).
@@ -549,10 +549,10 @@ probably of type complex with zero imaginary part (if you want to be sure, type
 \noindent
 Simple metacommands are meant as shortcuts and should not be used in GP
 scripts (see \secref{se:programming}). Beware that these, as all of GP input,
-are now \var{case sensitive}. For example, \b{Q} is no longer identical to
-\b{q}. In the following list, braces are used to denote optional arguments,
-with their default values when applicable, e.g.~$\{n=0\}$ means that if $n$
-is not there, it is assumed to be~$0$. Whitespace (or spaces) between the
+are \emph{case sensitive}. For example, \b{Q} is not identical to \b{q}. In
+the following list, braces are used to denote optional arguments, with their
+default values when applicable, e.g.~$\{n=0\}$ means that if $n$ is not
+there, it is assumed to be~$0$. Whitespace (or spaces) between the
 metacommand and its arguments and within arguments is optional. (This can
 cause problems only with \b{w}, when you insist on having a filename whose
 first character is a digit, and with \b{r} or \b{w}, if the filename itself
@@ -778,21 +778,21 @@ number with internal precision at least 45 (although less may be printed).
 
 You can also use scientific notation with the letter \kbd{E} or
 \kbd{e}, in which case the (non leading) decimal point may be omitted (like
-\kbd{6.02 E 23} or \kbd{1e-5}, but \var{not} \kbd{e10}). By definition,
+\kbd{6.02 E 23} or \kbd{1e-5}, but \emph{not} \kbd{e10}). By definition,
 \kbd{0.E $N$} (or \kbd{0 E $N$}) returns a real $0$ of (decimal) exponent
 $N$, whereas \kbd{0.} returns a real 0 ``of default precision'' (of exponent
 $-\kbd{defaultprecision}$), see \secref{se:whatzero}.
 
 \subsec{Integermods}\sidx{integermod}
 (type \tet{t_INTMOD}): to enter $n \mod m$, type
-\kbd{Mod(n,m)}, \var{not} \kbd{n\%m} (see \secref{se:Mod}).
+\kbd{Mod(n,m)}, \emph{not} \kbd{n\%m} (see \secref{se:Mod}).
 
 \subsec{Rational numbers}\sidx{rational number}
 (types \tet{t_FRAC} and \tet{t_FRACN}): under GP, all fractions are
 automatically reduced to lowest terms, so it is in principle impossible to
 work with reducible fractions (of type \typ{FRACN}), although of course in
 library mode this is easy. To enter $n/m$ just type it as written. As
-explained in \secref{se:gdiv}, division will \var{not} be performed, only
+explained in \secref{se:gdiv}, division will \emph{not} be performed, only
 reduction to lowest terms.\label{se:FRAC}
 
 If you really want a reducible fraction under GP, you must use the \kbd{type}
@@ -800,7 +800,7 @@ function (see \secref{se:gptype}), by typing \kbd{type(x,FRACN)}. Be warned
 however that this function must be used with extreme care.
 
 \subsec{Complex numbers}\sidx{complex number}
-(type \tet{t_COMPLEX}): to enter $x+iy$, type \kbd{x + I*y} (\var{not}
+(type \tet{t_COMPLEX}): to enter $x+iy$, type \kbd{x + I*y} (\emph{not}
 \kbd{x+i*y}). The letter \tet{I} stands for $\sqrt{-1}$. Recall from
 Chapter 1 that $x$ and $y$ can be of type \typ{INT}, \typ{REAL},
 \typ{INTMOD}, \typ{FRAC}/\typ{FRACN}, or \typ{PADIC}.
@@ -833,7 +833,7 @@ function, in the following way. Write something like
 \bprog
 w = quadgen(d)
 @eprog\noindent
-where \kbd{d} is the \var{discriminant} of the quadratic order in
+where \kbd{d} is the \emph{discriminant} of the quadratic order in
 which you want to work (hence $d$ is congruent to $0$ or $1$ modulo $4$). The
 name \kbd{w} is of course just a suggestion, but corresponds to traditional
 usage. You can of course use any variable name that you like. However,
@@ -941,7 +941,7 @@ u,v]}. \kbd{[ ; ]} yields the empty (0x0) matrix. The function \tet{Mat}
 can be used to transform any object into a matrix (see Chapter 3).
 
 Note that although the internal representation is essentially the same (only
-the type number is different), a row vector of column vectors is \var{not}
+the type number is different), a row vector of column vectors is \emph{not}
 a matrix; for example, multiplication will not work in the same way.
 
 Note also that it is possible to create matrices (by conversion of empty
@@ -995,7 +995,7 @@ the argument: $x$~\var{op}) position, never both
 meanings). Binary operators all use the syntax $x$~\var{op}~$y$. Most of
 them are well known, some are borrowed from C~syntax, and a few are specific
 to GP. Beware that some GP operators may differ slightly from their C
-counterparts. For instance, GP's postfix \kbd{++} returns the \var{new}
+counterparts. For instance, GP's postfix \kbd{++} returns the \emph{new}
 value, like the prefix \kbd{++} of~C, and the binary shifts \kbd{<<},
 \kbd{>>} have a priority which is different from (higher than) that of
 their C counterparts.
@@ -1019,7 +1019,7 @@ statement \kbd{++$x$} (there is no prefix \kbd{++} operator in GP).
 (i.e.~a binary operator with no side effects, i.e.~one of those defined below)
 which is not a boolean operator (comparison or logical).
 \kbd{x~\var{op}=~$y$} assigns $(\kbd{x}~\var{op}~y)$ to~\kbd{x},
-and returns the new value of~\kbd{x}, \var{not} a reference to the
+and returns the new value of~\kbd{x}, \emph{not} a reference to the
 \idx{variable}~\kbd{x}. (Thus an assignment cannot occur on the left hand
 side of another assignment.)
 
@@ -1027,7 +1027,7 @@ side of another assignment.)
 %
 \kbd{=} is the assignment operator. The result of \kbd{x~=~$y$} is the value
 of the expression~$y$, which is also assigned to the variable~\kbd{x}. This
-is \var{not} the equality test operator. Beware that a statement like
+is \emph{not} the equality test operator. Beware that a statement like
 \kbd{x~=~1} is always true (i.e.~non-zero), and sets \kbd{x} to~1.
 The right hand side of the assignment operator is evaluated before the left
 hand side. If the left hand side cannot be modified, raise an error.
@@ -1173,7 +1173,7 @@ conventions about operator priorities and left to right associativity (see
 the previous section), using the available operator symbols, function names
 (including user-defined functions and member functions see
 \secref{se:user_defined}), and special variables. Please note that, from
-version $1.900$ on, there\sidx{case distinction} \var{is} a distinction
+version $1.900$ on, there\sidx{case distinction} \emph{is} a distinction
 between lowercase and uppercase. Also, note that, outside of constant
 strings, blanks are completely ignored in the input to GP.
 
@@ -1227,7 +1227,7 @@ following an \kbd{=}.
 
 The third one cannot be used everywhere, but is in general much more useful.
 It is the use of braces \kbd{\obr} and  \kbd{\cbr}.\sidx{brace characters}
-When GP sees an opening brace (\kbd{\obr}) {\it at the beginning of a line}
+When GP sees an opening brace (\kbd{\obr}) \emph{at the beginning of a line}
 (modulo spaces as usual), it understands that you are typing a multi-line
 command, and newlines will be ignored until you type a closing brace
 \kbd{\cbr}. However, there is an important (but easily obeyed) restriction:
@@ -1278,7 +1278,7 @@ mistaken for $\sqrt{-1}$, and that \kbd{o} is not synonymous anymore to
 \kbd{O}. If you grew addicted to the previous behaviour, you can have it back
 by setting the default \kbd{compatible} to $3$.
 
-  Now the main thing to understand is that PARI/GP is \var{not} a symbolic
+  Now the main thing to understand is that PARI/GP is \emph{not} a symbolic
 manipulation package, although it shares some of the functionalities. One of
 the main consequences of this fact is that all expressions are evaluated as
 soon as they are written, they never stay in a purely abstract form%
@@ -1288,7 +1288,7 @@ so though, since we do some work to treat the quoted characters correctly
 (those preceded by a \b{)}.}.
 %
 As an important example, consider what happens when you use a variable name
-\var{before} assigning a value into it. This is perfectly acceptable to GP,
+\emph{before} assigning a value into it. This is perfectly acceptable to GP,
 which considers this variable in fact as a polynomial of degree 1, with
 coefficients 1 in degree 1, 0 in degree 0, whose variable is the variable
 name you used.
@@ -1299,7 +1299,7 @@ their value, use the function \kbd{eval} (see \secref{se:eval}).
 
   Finally, note that if the variable $x$ contains a vector or list, you can
 assign a result to $x[m]$ (i.e.~write something like $x[k]=\var{expr}$). If
-$x$ is a matrix, you can assign a result to $x[m,n]$, but \var{not} to
+$x$ is a matrix, you can assign a result to $x[m,n]$, but \emph{not} to
 $x[m]$. If you want to assign an expression to the $m$-th column of a matrix
 $x$, use $x[,m]=\var{expr}$ instead. Similarly, use $x[m,]=\var{expr}$ to
 assign an expression to the $m$-th row of $x$. This process is recursive, so
@@ -1409,8 +1409,8 @@ denominator is taken with respect to $\Q(y)(x)$; $y/x = (y*x^0) / x$ is in
 $\Q(y)(x)$ so $y$ is invertible in the coefficient ring. On the other hand,
 $2/x$ involves a single variable and the coefficient ring is simply $\Z$.
 
-These problems arise because the variable ordering defines an {\it
-implicit} variable with respect to which division takes place. This is
+These problems arise because the variable ordering defines an \emph{implicit}
+variable with respect to which division takes place. This is
 the price to pay to allow \kbd{\%} and \kbd{/} operators on polynomials
 instead of requiring a more cumbersome \kbd{divrem($x$, $y$, \var{var})}
 (which also exists). Unfortunately, in some functions like \tet{content} and
@@ -1696,7 +1696,7 @@ the built-in member functions, so typing the above text would in fact produce
 an error (you'd have to call it e.g.~\kbd{x.j2} in order for GP to accept it).
 
 \misctitle{Warning:} contrary to user functions arguments, the structure
-accessed by a member function is \var{not} copied before being used.
+accessed by a member function is \emph{not} copied before being used.
 Any modification to the structure's components will be permanent.
 
 \misctitle{Note:} Member functions were not meant to be too complicated or to
@@ -1719,7 +1719,7 @@ x.j = correct_ell_if_needed(x)[13];
 @eprog
 Typing \b{um} will output the list of user-defined member functions.
 
-\subsec{Strings and Keywords}\sidx{string}\sidx{keyword}
+\subsec{Strings and Keywords.}\sidx{string}\sidx{keyword}
 \label{se:strings}
 
 \noindent
@@ -1741,7 +1741,7 @@ putting a \kbd{\bs} just before them; the translation is as follows
 For any other character $x$, \b{$x$} is expanded to $x$. In particular, the
 only way to put a \kbd{"} into a string is to escape it. Thus, for
 instance, \kbd{"\bs"a\bs""} would produce the string whose content is
-``a''. This is definitely \var{not} the same thing as typing \kbd{"a"},
+``a''. This is definitely \emph{not} the same thing as typing \kbd{"a"},
 whose content is merely the one-letter string a.
 
 You can concatenate two strings using the \tet{concat} function. If either
@@ -1839,7 +1839,7 @@ matrices\sidx{generic matrix}\sidx{matrix}:
 Note that the argument of \kbd{Str} is evaluated in string context, and
 really consists of 5 pieces (exercise: why are the empty strings
 necessary?). This part could also have been written as
-\kbd{concat(concat(Str(s), i), j)} (but \var{not} as \kbd{concat(Str(s),
+\kbd{concat(concat(Str(s), i), j)} (but \emph{not} as \kbd{concat(Str(s),
 concat(i,j))}!). More simply, we could have written \kbd{concat([Str(s),
 i,j])}, or even \kbd{concat([s,i,j])}, silently assuming that \kbd{s} will
 indeed be a string. In practice \kbd{Str} is much more efficient, if
@@ -1876,6 +1876,246 @@ context:
 \+&\tet{type} (second argument)\cr
 \+&\tet{whatnow}\cr
 
+\section{Errors and error recovery}
+
+\subsec{Errors.}\sidx{error}
+
+There are two kind of errors: syntax errors, and errors produced by functions
+in the PARI library. Both kinds will be fatal to your computation sending you
+back to the GP prompt.
+
+When reporting a syntax error, GP tries to give meaningful context by copying
+the sentence it was trying to read (whitespace and comments stripped
+out), indicating an error with a little caret like in
+\bprog
+? factor(x^2 - 1
+  ***   expected character: ',' instead of: factor(x^2-1
+                                                        ^
+@eprog
+\noindent possibly enlarged to a full arrow given enough trailing context
+\bprog
+? if (siN(x) < eps, do_something())
+  ***   expected character: '=' instead of: if(siN(x)<eps,do_something())
+                                                     ^--------------------
+@eprog
+\noindent
+GP error messages will often be mysterious, because GP cannot guess what
+you were trying to do and the error usually occurs once GP has been
+sidetracked. Let's have a look at the two messages above.
+
+The first error is a missing parenthesis, but from GP's point of view, you
+might as well have intended to give further arguments to \kbd{factor} (this is
+possible, and often useful, see the description of the function). Since GP
+did not see the closing parenthesis, it tried to read a second argument,
+first looking for the comma that would separate it form the first. The error
+occurred at this point. So GP tells you that it was expecting a comma and saw
+a blank.
+
+The second error is even weirder. It is a simple typo, \kbd{siN} instead of
+\kbd{sin} and GP tells us that is was expecting an equal sign a few
+characters later? What happens is this: \kbd{siN} is not a recognized
+identifier, but from the context, it looks like a function (it is followed by
+an open parenthesis), then we have an argument, then a closing parenthesis.
+Then if \kbd{siN} were a known function we would evaluate it; but it is not,
+so GP assumes that you were trying to \emph{define} it, as in
+\bprog 
+? if (siN(x)=sin(x), ...)
+@eprog
+This is actually allowed (!) and defines the function \kbd{siN} as an alias for
+\kbd{sin}. As any expression a function definition has a value, which is $0$,
+hence the test is meaningful, and false, so nothing happens. (Admittedly this
+doesn't look like a useful syntax but it can be interesting in other contexts
+to let functions define other functions. Anyway, it is allowed by the
+language definition.)  So GP tells you in good faith that to correctly define
+a function, you need an equal sign between its name and its body.
+
+Error messages from the library will usually be much clearer since, by
+definition, they answer a correctly worded query (otherwise GP would have
+protested first). Also they have more mathematical content, which should be
+easier to grasp than a parser's logic. For instance:
+\bprog
+? 1/0
+  ***   division by zero in gdiv, gdivgs or ginv
+@eprog
+The first half of the sentence is crystal clear, and the second one only
+gives more context as to where exactly the problem occured in the library.
+Unfortunately library errors do not give context, so it can be hard to track
+down exactly where in your program the error occured.
+
+\subsec{Error recovery}\sidx{error recovery}\label{se:errorrec}
+
+It is quite annoying to wait for some program to finish and find out the hard
+way that there was a mistake in it (like the division by 0 above), sending
+you back to the prompt. First you may lose some valuable intermediate data.
+Also, correcting the error may not be ovious; you might have to change your
+program, adding a number of extra statements and tests to try and narrow down
+the problem.
+
+A slightly different situation, still related to error recovery, is when you
+you actually foresee that some error may occur, are unable to prevent it, but
+quite capable of recovering from it, given the chance. Examples include lazy
+factorization (cf.~\tet{addprimes}), where you knowingly use a pseudo prime
+$N$ as if it were prime; you may then encounter an ``impossible'' situation,
+but this would usually exhibit a factor of $N$, enabling you to refine the
+factorization and go on. Or you might run an expensive computation at low
+precision to guess the size of the output, hence the right precision to use.
+You can then encounter errors like ``precision loss in truncation'', e.g when
+trying to convert \kbd{1E1000}, known to $28$ digits of accuracy, to an
+integer; or ``division by 0'', e.g inverting \kbd{0E1000} when all accuracy
+has been lost, and no significant digit remains. It would be enough to
+restart part of the computation at a slightly higher precision.
+
+We now describe \tev{error trapping}, a useful mechanism which alleviates
+much of the pain in the first situation, and provides a satisfactory way out
+of the second one. Everything is handled via the \tet{trap} function whose
+different modes we now describe.
+
+\subsec{Break loop}\label{se:breakloop}
+
+A \tev{break loop} is a special debugging mode that you enter whenever an
+error occurs, freezing the GP state, and preventing cleanup until you get out
+of the loop. Any error: syntax error, library error, user error (from
+\tet{error}), even user interrupts like \kbd{C-c} (Control-C). During a break
+loop, a prompt is issued, commands are read and evaluated, and results
+printed as during the main GP loop, except that no history of results is kept
+(history of commands is kept, if you are using readline).
+
+Break loops are useful as a debugging tool to inspect the values of GP
+variables to understand why a problem occurred, or to change GP behaviour
+(increase debugging level, start storing results in a logfile, modify
+parameters\dots) in the middle of a long computation (hit \kbd{C-c}, type
+in your modifications, then let the computation go on as explained below).
+
+To get out of the break loop, you can use \tet{next}, \tet{break},
+\tet{return} of \kbd{C-d} (\kbd{EOF}). In general, terminating a break loop will
+send you back to the GP prompt. There is an important exception if the error
+is not fatal (in current version \vers, an error is non-fatal iff it was
+initiated by a \kbd{C-c} typed by the user). In that case, \kbd{next} will
+continue the computation as if nothing had happened, except of course, you
+may have changed GP state during the break loop. After a user interrupt
+(\kbd{C-c}), entering an empty input line (i.e hitting the return key) has
+the same effect as \kbd{next}. An empty line has no effect in case of a fatal
+error, to ensure you do not get out of the loop prematurely.
+
+A break loop looks like this:
+\bprog
+? for(v = -2, 2, print(1/v))
+-1/2
+-1
+  ***   division by zero in gdiv, gdivgs or ginv
+  ***   Starting break loop (type 'break' to go back to GP): 
+  ***   for(v=-2,2,print(1/v))
+                            ^--
+break>
+@eprog
+\noindent So the standard error message is printed first, except now we always
+have context, whether the error comes from the library or the parser. The
+\kbd{break>} at the bottow is a prompt, and hitting \kbd{v} then return, we
+see:
+\bprog
+break> v
+0
+@eprog
+\noindent exhibiting the culprit. We could have typed any command, not only
+the name of a variable, of course.
+
+\misctitle{Important Note:} upon startup, this mechanism is \emph{off}. Type 
+\kbd{trap()} (or include it in a script) to start trapping errors in this
+way. By default, you will be sent back to the prompt.
+
+\misctitle{Technical Note:} When you enter a break loop, the pari stack is
+reset so that you can run commands, even when the error was a stack overflow,
+but you do not lose the value of any GP variable in the process.
+
+\subsec{Error handlers}
+
+The break loop described above is a (sophisticated) example of an \tev{error
+handler}: a function that is executed whenever an error occurs, supposedly to
+try and recover. The break loop is quite a satisfactory error handler, but it
+may not be adequate for some purposes, for instance when GP runs in
+non-interactive mode, detached from a terminal.
+
+So, you can define a different error handler, to be used in place of the
+break loop. This is the purpose of the \emph{second} argument of \kbd{trap}:
+to specify an error handler. (We will discuss the first argument at the very
+end.) For instance:
+\bprog
+? { trap( ,                \\@ note the comma: arg1 is omitted
+      print(reorder);
+      writebin("crash")) }
+@eprog
+\noindent After that, whenever an error occurs, the list of all user
+variables is printed, and they are all saved in binary format in file
+\kbd{crash}, ready for inspection. Of course break loops are no longer
+available: the new handler has replaced the default one. Besides user-defined
+handlers as above, there are two special handlers you can use in \kbd{trap},
+which are 
+
+$\bullet$ \kbd{trap(, "")} (do-nothing handler): to disable the trapping
+mechanism and let errors propagate, which is the default situation on
+startup.
+
+$\bullet$  \kbd{trap(, )} (omitted argument, default handler): to trap errors
+by a break loop.
+
+\subsec{Protecting code}
+Finally \kbd{trap} can define a temporary handler used within the scope of a
+code frament, protecting it from errors, by providing replacement code should
+the trap be activated. The expression
+
+  \kbd{trap}( , \var{recovery}, \var{statements})
+
+\noindent evaluates and returns the value of \var{statements}, unless an
+error occurs during the evaluation in which case the value of \var{recovery}
+is returned. As in an if/else clause, with the difference that
+\var{statements} has been partially evaluated, with possible side effects.
+For instance one could define a fault tolerant inversion function as follows:
+\bprog
+? inv(x) = trap (, "oo", 1/x)
+? for (i=-1,1, print(inv(i)))
+-1
+oo
+1
+@eprog
+\noindent Protected codes can be nested without adverse effect, the last trap
+seen being the first to spring.
+
+\subsec{Trapping specific exceptions}
+We have not yet seen the use of the first argument of trap, which has been
+omitted in all previous examples. It simply indicates that only errors of a
+specific type should be intercepted, to be chosen among
+
+\kbd{accurer}: accuracy problem
+
+\kbd{gdiver}: division by 0
+
+\kbd{invmoder}: impossible inverse modulo
+
+\kbd{archer}: not available on this architecture or operating system
+
+\kbd{typeer}: wrong type
+
+\kbd{errpile}: the PARI stack overflows
+
+\noindent Omitting the error name means we are trapping all errors. The
+following can be used to check in a safe way whether \tet{install} works in
+the system considered:
+\bprog
+check_install() = 
+{
+  trap(archer, return (1),
+    install(addii,GG)
+  );
+  trap(, 2,
+    if (addii(1,1) != 2, 3)
+  )
+}
+@eprog
+\noindent The function returns 0 if everything works (the omitted \var{else}
+clause of the \kbd{if}), 1 if the operating system does not support
+\kbd{install}, 2 if using an installed function triggers an error, and 3 if
+the installed function did not behave as expected.
+
 \section{Interfacing GP with other languages}
 \noindent
 The PARI library was meant to be interfaced with C programs. This specific
@@ -1897,8 +2137,8 @@ help of other mathematical libraries than PARI!), and to easily and
 efficiently import foreign functions for use under GP
 (see~\secref{se:install}).}
 
-We are aware of three PARI-related public domain libraries. {\it We neither
-endorse nor support any of them}. You might want to give them a try if you
+We are aware of three PARI-related public domain libraries. We \emph{neither
+endorse nor support} any of them. You might want to give them a try if you
 are familiar with the languages they are based on. First, there are
 \tet{PariPerl}%
 \footnote{*}{
@@ -1925,7 +2165,7 @@ version 1.39.$xx$.
 This file, called \tet{gprc} in the sequel, is used to modify or extend GP
 default behaviour, in all GP sessions: e.g customize \kbd{default} values or
 load common user functions and aliases. GP opens the \kbd{gprc} file and
-processes the commands in there, \var{before} doing anything else,
+processes the commands in there, \emph{before} doing anything else,
 e.g.~creating the PARI stack. If the file does not exist or cannot be read,
 GP will proceed to the initialization phase at once, eventually emitting a
 prompt. If any explicit command line switches are given, they override the
@@ -2139,7 +2379,7 @@ program or in the PARI system), you will usually stay under Emacs, but the GP
 buffer will be killed. To recover it, simply type again \kbd{M-x gp} (or
 \kbd{C-u M-x gp}), and a new session of GP will be started after the old one,
 so you can recover what you have typed. Note that this will of course
-\var{not} work if for some reason you kill Emacs and start a new session.
+\emph{not} work if for some reason you kill Emacs and start a new session.
 
 \smallskip
 You also have at your disposal a few other commands and many possible
@@ -2152,11 +2392,11 @@ standard distribution for details.
 
   Thanks to the initial help of Ilya Zakharevich, there is a possibility of
 line editing and command name completion outside of an Emacs buffer
-\var{if} you have compiled GP with the GNU \idx{readline} library. If you
+\emph{if} you have compiled GP with the GNU \idx{readline} library. If you
 don't have Emacs available, or can't stand using it, we really advise you
 to make sure you get this very useful library before configuring or
 compiling GP. In fact, with \kbd{readline}, even line editing becomes
-\var{more} powerful outside an Emacs buffer!
+\emph{more} powerful outside an Emacs buffer!
 
 \subsec{A (too) short introduction to readline}:
 \label{se:readline}
