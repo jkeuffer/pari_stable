@@ -1747,7 +1747,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, double LOGD, GEN nf,long nbrelpid,
     ideal = prime_to_ideal(nf,ideal);
     IDEAL = lllint_ip(ideal,4); /* should be almost T2-reduced */
     r = red_ideal(&IDEAL,Gvec,prvec);
-    if (!r) err(bugparier, "precision too low in small_norm");
+    if (!r) err(bugparier, "small_norm (precision too low)");
 
     for (k=1; k<=N; k++)
     {
@@ -1977,7 +1977,7 @@ random_rel(long phase, RELCACHE_t *cache, FB_t *F, long MAXRELSUP, GEN nf,
       if (DEBUGLEVEL>2)
         fprintferr("jideal=%ld,jdir=%ld,rand=%ld\n", jideal,jdir,getrand());
       m = pseudomin(IDEAL, (GEN)vecG[jdir]);
-      if (!m) err(bugparier, "precision too low in random_rel");
+      if (!m) err(bugparier, "random_rel (precision too low)");
       if (!factorgen(F,nf,ideal,m))
       {
         if (DEBUGLEVEL>1) { fprintferr("."); flusherr(); }
