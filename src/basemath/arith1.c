@@ -766,10 +766,10 @@ long
 isanypower(GEN x, GEN *pty)
 {
   pari_sp av = avma;
-  long ex, ex0 = 11, k = 1, mask = 7;
+  long ex, k = 1, mask = 7;
   GEN logx, y;
   byteptr d = diffptr;
-  ulong p = 0, e2;
+  ulong p = 0, e2, ex0 = 11;
 
   if (typ(x) != t_INT || cmpii(x, gdeux) < 0)
     err(talker, "isanypower: argument must be > 1");

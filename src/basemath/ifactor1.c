@@ -2474,7 +2474,7 @@ is_kth_power(GEN x, ulong p, GEN *pt, byteptr d)
  * under consideration, these word-sized computations take negligible time.
  * Experimentally making the cutoff point caller-configurable... */
 long
-is_odd_power(GEN x, GEN *pt, long *curexp, long cutoffbits)
+is_odd_power(GEN x, GEN *pt, ulong *curexp, long cutoffbits)
 {
   long size = expi(x) /* not +1 */;
   ulong p = 0;

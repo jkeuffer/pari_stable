@@ -1159,7 +1159,7 @@ long    group_ident(GEN G, GEN S);
 
 long    BSW_psp(GEN N);
 long    is_357_power(GEN x, GEN *pt, long *mask);
-long    is_odd_power(GEN x, GEN *pt, long *curexp, long cutoffbits);
+long    is_odd_power(GEN x, GEN *pt, ulong *curexp, long cutoffbits);
 long    millerrabin(GEN n, long k);
 GEN     nextprime(GEN n);
 GEN     plisprime(GEN N, long flag);
