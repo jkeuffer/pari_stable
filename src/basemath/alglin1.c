@@ -1415,11 +1415,11 @@ Flm_gauss_sp(GEN a, GEN b, ulong p)
 }
 
 GEN
-u_idmat(long n)
+Flm_id(long n)
 {
   GEN y = cgetg(n+1,t_MAT);
   long i;
-  if (n < 0) err(talker,"negative size in u_idmat");
+  if (n < 0) err(talker,"negative size in Flm_id");
   for (i=1; i<=n; i++) { y[i] = (long)vecsmall_const(n, 0); coeff(y, i,i) = 1; }
   return y;
 }
@@ -1430,7 +1430,7 @@ Flm_gauss(GEN a, GEN b, ulong p) {
 }
 static GEN
 Flm_inv_sp(GEN a, ulong p) {
-  return Flm_gauss_sp(a, u_idmat(lg(a)-1), p);
+  return Flm_gauss_sp(a, Flm_id(lg(a)-1), p);
 }
 GEN
 Flm_inv(GEN a, ulong p) {

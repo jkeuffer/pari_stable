@@ -1782,7 +1782,7 @@ addcolumn_mod(GEN V, GEN invp, GEN L, ulong p)
 static GEN
 relationrank(RELCACHE_t *cache, GEN L, ulong p)
 {
-  GEN invp = u_idmat(lg(L) - 1);
+  GEN invp = Flm_id(lg(L) - 1);
   REL_t *rel = cache->base + 1;
   for (; rel <= cache->last; rel++) (void)addcolumn_mod(rel->R, invp, L, p);
   return invp;

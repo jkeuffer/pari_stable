@@ -113,7 +113,7 @@ void pop_val(entree *ep);
 extern ulong prec;
 extern GEN gnil;
 
-extern char *current_function;
+extern char *gp_function_name;
 extern int  (*whatnow_fun)(char *, int);
 extern void *foreignHandler;
 extern GEN  (*foreignExprHandler)(char*);
@@ -122,14 +122,13 @@ extern entree * (*foreignAutoload)(char*, long);
 extern void (*foreignFuncFree)(entree *);
 extern int (*default_exception_handler)(long);
 
-extern const int    functions_tblsz;     /* hashcodes table size */
-
 /* Variables containing the list of PARI functions */
 extern module *pari_modules;       /* list of functions modules */
 extern entree **functions_hash;    /* functions hashtable */
 extern entree **members_hash;      /* members hashtable */
 extern char   *helpmessages_basic[];
 extern entree functions_basic[];
+extern const int functions_tblsz;  /* hashcodes table size */
 
 /* Variables containing the list of specific GP functions */
 extern char   *helpmessages_gp[];
