@@ -1228,7 +1228,6 @@ Fq_pow(GEN x, GEN n, GEN pol, GEN p)
 /*                                                                 */
 /*******************************************************************/
 /*Polynomials whose coefficients are either polynomials or integers*/
-
 GEN
 FpXX_red(GEN z, GEN p)
 {
@@ -1237,7 +1236,9 @@ FpXX_red(GEN z, GEN p)
   res=cgetg(lgef(z),t_POL);
   res[1] = evalsigne(1) | evalvarn(varn(z)) | evallgef(lgef(z));
   for(i=2;i<lgef(res);i++)
-    if (typ(z[i])!=t_INT)
+    if (typ(z[i])==t_INT)
+      res[i] = lmodii((GEN)z[i],p);
+    else
     {
       pari_sp av=avma;
       res[i]=(long)FpX_red((GEN)z[i],p);
@@ -1247,10 +1248,7 @@ FpXX_red(GEN z, GEN p)
         else res[i]=lpilecopy(av,gmael(res,i,2));
       }
     }
-    else
-      res[i]=lmodii((GEN)z[i],p);
-  res=normalizepol_i(res,lgef(res));
-  return res;
+  return normalizepol_i(res,lgef(res));
 }
 
 /*******************************************************************/
@@ -1288,15 +1286,12 @@ FpVQX_red(GEN z, GEN T, GEN p)
   int i, l = lg(z);
   res=cgetg(l,typ(z));
   for(i=1;i<l;i++)
-    if (typ(z[i]) != t_INT)
-    {
-      if (T)
-        res[i]=(long)FpX_res((GEN)z[i],T,p);
-      else
-        res[i]=(long)FpX_red((GEN)z[i],p);
-    }
-    else
+    if (typ(z[i]) == t_INT)
       res[i] = lmodii((GEN)z[i],p);
+    else if (T)
+      res[i] = (long)FpX_res((GEN)z[i],T,p);
+    else
+      res[i] = (long)FpX_red((GEN)z[i],p);
   return res;
 }
 GEN
@@ -1307,15 +1302,12 @@ FpXQX_red(GEN z, GEN T, GEN p)
   res=cgetg(l,t_POL);
   res[1] = evalsigne(1) | evalvarn(varn(z)) | evallgef(lgef(z));
   for(i=2;i<l;i++)
-    if (typ(z[i]) != t_INT)
-    {
-      if (T)
-        res[i]=(long)FpX_res((GEN)z[i],T,p);
-      else
-        res[i]=(long)FpX_red((GEN)z[i],p);
-    }
+    if (typ(z[i]) == t_INT)
+      res[i] = lmodii((GEN)z[i],p);
+    else if (T)
+      res[i] = (long)FpX_res((GEN)z[i],T,p);
     else
-      res[i]=lmodii((GEN)z[i],p);
+      res[i] = (long)FpX_red((GEN)z[i],p);
   res=normalizepol_i(res,lgef(res));
   return res;
 }
