@@ -76,6 +76,8 @@ BA 23- cos(2^2^22) --> precision too low [ idem sin, tan ]
        wrong result).   [ fix: increase factor base ]
    26- sign of elleisnum(E, 6, 1) was wrong
 BA 27- [GMP kernel] factor(18295370635792208009) --> error
+   28- idealprimedec(nfinit(x^16+16),256) --> SEGV [ bad input ]
+
 
   Changed
     1- rnf structure (removed useless components)
