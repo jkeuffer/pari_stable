@@ -2632,28 +2632,14 @@ ZX_incremental_CRT(GEN *ptH, GEN Hp, GEN q, GEN qp, ulong p)
   if (l < lp)
   { /* degree increases */
     GEN x = cgetg(lp, t_POL);
-    for (i=1; i<l; i++) x[i] = H[i];
-    for (   ; i<lp; i++)
-    {
-      h = stoi(Hp[i]);
-      if (cmpii(h,lim) > 0) h = subii(h,qp);
-      x[i] = (long)h;
-    }
+    for (i=1; i<l; i++)  x[i] = H[i];
+    for (   ; i<lp; i++) x[i] = zero;
     *ptH = H = x;
-    stable = 0; lp = l;
+    stable = 0;
   }
   for (i=2; i<lp; i++)
   {
     h = u_chinese_coprime((GEN)H[i],Hp[i],q,p,qinv,qp);
-    if (h)
-    {
-      if (cmpii(h,lim) > 0) h = subii(h,qp);
-      H[i] = (long)h; stable = 0;
-    }
-  }
-  for (   ; i<l; i++)
-  {
-    h = u_chinese_coprime((GEN)H[i],   0,q,p,qinv,qp);
     if (h)
     {
       if (cmpii(h,lim) > 0) h = subii(h,qp);
@@ -3701,8 +3687,8 @@ QX_invmod(GEN A0, GEN B0)
     err(notpoler,"QX_invmod");
   }
   if (degpol(A0) < 15) return ginvmod(A0,B0);
-  A = primitive_part(A0, &D);
-  B = primpart(B0);
+  A = Q_primitive_part(A0, &D);
+  B = Q_primpart(B0);
   /* A, B in Z[X] */
   av2 = avma; U = NULL;
   d = init_modular(&p);
@@ -3733,9 +3719,8 @@ QX_invmod(GEN A0, GEN B0)
     q = qp;
     if (low_stack(avlim, stack_lim(av,1)))
     {
-      GEN *gptr[3]; gptr[0]=&q; gptr[1]=&U; gptr[2]=&V;
       if (DEBUGMEM>1) err(warnmem,"QX_invmod");
-      gerepilemany(av2,gptr,3);
+      gerepileall(av2, 3, &q,&U,&V);
     }
   }
   D = D? gmul(D,res): res;

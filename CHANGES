@@ -173,6 +173,7 @@ JD 74- [Configure:] detection of times()
    79- t_SER ^ t_QUAD --> SEGV
    80- nffactor(non-monic t_POL) --> SEGV due to FpX_red interface change
        [ don't allow t_INT argument, t_POL is mandatory ]
+   81- ZX_incremental_CRT: wrong handling of degree increase (--> oo loop)
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.
