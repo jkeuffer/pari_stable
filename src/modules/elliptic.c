@@ -385,9 +385,11 @@ initell0(GEN x, long prec)
   y[16] = (long)w2;
   T = vecthetanullk(q, 2, prec);
   if (gcmp0((GEN)T[1])) err(precer,"initell");
+  T = gdiv((GEN)T[2], (GEN)T[1]);
+  if (typ(T) == t_COMPLEX && gcmp0((GEN)T[2])) T = (GEN)T[1];
   /* pi^2 / 6w1 * theta'''(q,0) / theta'(q,0) */
-  y[17] = ldiv(gmul(gsqr(pi),(GEN)T[2]), gmul(gmulsg(6,w1), (GEN)T[1]));
-  y[18] = ldiv(gsub(gmul((GEN)y[17],w2), gmul(gi,pi)), w1);
+  y[17] = ldiv(gmul(gsqr(pi),T), gmulsg(6,w1));
+  y[18] = ldiv(gsub(gmul((GEN)y[17],w2), gmulbyi(pi)), w1);
   return y;
 }
 
