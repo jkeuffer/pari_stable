@@ -2229,7 +2229,15 @@ break_loop(long numerr)
     if (!(flag = check_meta(b->buf)))
     {
       GEN x = lisseq(b->buf);
-      if (did_break()) break;
+      if (did_break())
+      {
+        if (numerr == siginter && did_break() == br_NEXT)
+        {
+          (void)loop_break(); /* clear status flag */
+          go_on = 1;
+        }
+        break;
+      }
       if (x == gnil) continue;
 
       term_color(c_OUTPUT);
@@ -2238,11 +2246,6 @@ break_loop(long numerr)
       pariputc('\n');
     }
     if (numerr == siginter && flag == 2) { go_on = 1; break; }
-  }
-  if (numerr == siginter && did_break() == br_NEXT)
-  {
-    (void)loop_break(); /* clear status flag */
-    go_on = 1;
   }
   pop_buffer(); return go_on;
 }
@@ -2255,7 +2258,7 @@ gp_exception_handler(long numerr)
   else
   {
     if (numerr == errpile) avma = top;
-    if (break_loop(numerr)) return 1;
+    return break_loop(numerr);
   }
   return 0;
 }
