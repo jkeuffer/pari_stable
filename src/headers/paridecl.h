@@ -283,7 +283,6 @@ GEN     compositum(GEN pol1, GEN pol2);
 GEN     compositum2(GEN pol1, GEN pol2);
 GEN     discf(GEN x);
 GEN     discf2(GEN x);
-GEN     factcp(GEN p,GEN f,GEN beta);
 GEN     factoredbase(GEN x, GEN p, GEN *y);
 GEN     factoreddiscf(GEN x, GEN p);
 GEN     gcdpm(GEN f1,GEN f2,GEN pm);
