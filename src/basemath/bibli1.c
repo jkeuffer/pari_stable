@@ -492,8 +492,12 @@ lllgramall(GEN x, long alpha, long flag)
 	  if (j<k) coeff(L,k,j)=(long)u;
 	  else
 	  {
-	    if (signe(u)) { B[k+1]=(long)u; coeff(L,k,k)=un; fl[k]=1; }
-	    else { B[k+1]=B[k]; fl[k]=0; }
+            long s = signe(u);
+            if (s < 0) err(lllger3);
+	    if (s)
+              { B[k+1]=(long)u; coeff(L,k,k)=un; fl[k]=1; }
+	    else
+              { B[k+1]=B[k]; fl[k]=0; }
 	  }
 	}
     } else if (DEBUGLEVEL>5) {fprintferr(" %ld",k); flusherr();}
