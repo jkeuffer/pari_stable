@@ -544,8 +544,8 @@ gtrace(GEN x)
       return y;
 
     case t_MAT:
-      lx=lg(x); if (lx!=lg(x[1])) err(mattype1,"gtrace");
-      if (lx==1) return gzero;/*now lx>=2*/
+      lx=lg(x); if (lx==1) return gzero;/*now lx>=2*/
+      if (lx!=lg(x[1])) err(mattype1,"gtrace");
       l=avma; p1=gcoeff(x,1,1); if (lx==2) return gcopy(p1);
       for (i=2; i<lx-1; i++)
 	p1=gadd(p1,gcoeff(x,i,i));
