@@ -2191,7 +2191,7 @@ identifier(void)
       analyseur = ch1-1; /* points to '(' */
 
       free_args((gp_args*)ep->args);
-      free(ep->args);
+      free(ep->args); ep->args = NULL;
       ep->valence = EpNEW;
     /* Fall through */
 
