@@ -1808,6 +1808,7 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
     { /* primitive element */
       if (gcmp(B,bound) < 0) bound = B ;
       if (!firstprim) firstprim = i; /* index of first primitive element */
+      if (DEBUGLEVEL>2) fprintferr("chk_gen_init: generator %Z\n",P);
       S[i] = 0;
     }
     else
