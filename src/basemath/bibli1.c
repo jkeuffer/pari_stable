@@ -2966,8 +2966,7 @@ fincke_pohst(GEN a,GEN B0,long stockmax,long flag, long PREC, FP_chk_fun *CHECK)
   {
     GEN p1;
     if (DEBUGLEVEL>2)
-      fprintferr("final LLLs: prec = %ld, precision(rinvtrans) = %ld\n",
-                  prec,gprecision(rinvtrans));
+      fprintferr("final LLLs: prec = %ld\n", gprecision(rinvtrans));
     p1 = lllintern(rinvtrans, 100, flag&1, 0);
     if (!p1) goto PRECPB;
     if (ishnfall(p1)) break; /* upper triangular */

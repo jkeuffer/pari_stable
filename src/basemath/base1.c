@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**************************************************************/
 #include "pari.h"
 #include "parinf.h"
+extern GEN to_polmod(GEN x, GEN mod);
 extern GEN roots_to_pol_r1r2(GEN a, long r1, long v);
 extern GEN modreverse_i(GEN a, GEN T);
 extern GEN idealhermite_aux(GEN nf, GEN x);
@@ -1038,7 +1039,7 @@ make_T(GEN x, GEN w)
 
 /* return G real such that G~ * G = T_2 */
 static GEN
-make_Cholevsky_T2(GEN M, long r1, long prec)
+make_G(GEN M, long r1, long prec)
 {
   GEN G, m, g, r, sqrt2 = gsqrt(gdeux, prec);
   long i, j, k, l = lg(M);
@@ -1067,12 +1068,12 @@ make_Cholevsky_T2(GEN M, long r1, long prec)
   return G;
 }
 
-GEN
-make_G(GEN x, GEN bas, long r1, long prec)
+void
+remake_GM(GEN nf, long prec, GEN *G, GEN *M)
 {
-  GEN M, basden = get_bas_den(bas), ro = roots(x, prec);
-  M = make_M(basden,ro);
-  return make_Cholevsky_T2(M, r1, prec);
+  GEN basden = get_bas_den((GEN)nf[7]), ro = roots((GEN)nf[1], prec);
+  *M = make_M(basden,ro);
+  *G = make_G(*M, nf_get_r1(nf), prec);
 }
 
 /* fill mat = nf[5], as well as nf[8] and nf[9]
@@ -1099,7 +1100,7 @@ get_nf_matrices(GEN nf, long prec, long small)
     M = gprec_w(M, prec);
     nf[6] = (long)gprec_w(ro,prec);
   }
-  G = make_Cholevsky_T2(M, nf_get_r1(nf), prec);
+  G = make_G(M, nf_get_r1(nf), prec);
   mat[1] = (long)M;
   mat[2] = (long)G;
   if (small) { nf[8] = nf[9] = zero; return; }
@@ -1217,7 +1218,7 @@ get_red_T2(basicnf_t *T, GEN *polr)
   {
     ro = get_roots(T->x,T->r1,prec);
     M = make_M(basden, ro);
-    G2 = make_Cholevsky_T2(M, T->r1, prec);
+    G2 = make_G(M, T->r1, prec);
     if (u0) G2 = gmul(G2, u0);
     if ((u = lllfp_marked(1, G2, 100, 2, prec, 0)))
     {
@@ -1414,7 +1415,7 @@ _initalg(GEN x, long flag, long prec)
       if (dmat) d = diviiexact(d, dmat);
 }
 #else
-      for (i=1; i<=n; i++) bas[i] = (long)eleval(x, (GEN)bas[i], rev);
+      for (i=1; i<=n; i++) bas[i] = (long)RX_RXQ_compo((GEN)bas[i], rev, x);
       d = denom(content(bas)); mat = vecpol_to_mat(gmul(d, bas), n);
 #endif
       if (!is_pm1(d)) mat = gdiv(hnfmodid(mat,d), d); else mat = idmat(n);
@@ -1486,25 +1487,23 @@ nfgetprec(GEN x)
 GEN
 nfnewprec(GEN nf, long prec)
 {
-  const gpmem_t av=avma;
-  long r1,r2,ru,n;
-  GEN y,pol,ro,basden,mat;
+  const gpmem_t av = avma;
+  long r1;
+  GEN y, ro, basden, mat;
 
   if (typ(nf) != t_VEC) err(talker,"incorrect nf in nfnewprec");
   if (lg(nf) == 11) return bnfnewprec(nf,prec);
   if (lg(nf) ==  7) return bnrnewprec(nf,prec);
   (void)checknf(nf);
   y = dummycopy(nf);
-  pol=(GEN)nf[1]; n=degpol(pol);
   r1 = nf_get_r1(nf);
-  r2 = (n - r1) >> 1; ru = r1+r2;
   mat=dummycopy((GEN)nf[5]);
-  ro=get_roots(pol,r1,prec);
+  ro=get_roots((GEN)nf[1], r1, prec);
   y[5]=(long)mat;
   y[6]=(long)ro;
   basden = get_bas_den((GEN)nf[7]);
-  mat[1]=(long)make_M(basden,ro);
-  mat[2]=(long)make_Cholevsky_T2((GEN)mat[1], r1, prec);
+  mat[1]=(long)make_M(basden, ro);
+  mat[2]=(long)make_G((GEN)mat[1], r1, prec);
   return gerepilecopy(av, y);
 }
 
@@ -1778,85 +1777,98 @@ chk_gen_post(void *data, GEN res)
   return res;
 }
 
-/* no garbage collecting, done in polredabs0 */
+/* store phi(beta mod z). Suitable for gerepileupto */
 static GEN
-findmindisc(GEN nf, GEN y, GEN a, GEN phimax, long flun)
+storeeval(GEN phi, GEN beta, GEN z)
 {
-  long i,k, c = lg(y);
-  GEN v,dmin,z,beta,discs = cgetg(c,t_VEC);
+  GEN y = cgetg(3,t_VEC);
+  z = gcopy(z);
+  beta = RX_RXQ_compo(phi,beta, z);
+  y[1] = (long)z;
+  y[2] = (long)to_polmod(beta,z);
+  return y;
+}
 
-  for (i=1; i<c; i++) discs[i] = labsi(ZX_disc((GEN)y[i]));
+static GEN
+storeraw(GEN beta, GEN z)
+{
+  GEN y = cgetg(3,t_VEC);
+  y[1] = lcopy(z);
+  y[2] = lcopy(beta); return y;
+}
+
+/* no garbage collecting, done in polredabs0 */
+static void
+findmindisc(GEN *py, GEN *pa)
+{
+  GEN v, dmin, z, b, discs, y = *py, a = *pa;
+  long i,k, l = lg(y);
+
+  discs = cgetg(l,t_VEC);
+  for (i=1; i<l; i++) discs[i] = labsi(ZX_disc((GEN)y[i]));
   v = sindexsort(discs);
   k = v[1];
   dmin = (GEN)discs[k];
   z    = (GEN)y[k];
-  beta = (GEN)a[k];
-  for (i=2; i<c; i++)
+  b = (GEN)a[k];
+  for (i=2; i<l; i++)
   {
     k = v[i];
     if (!egalii((GEN)discs[k], dmin)) break;
-    if (gpolcomp((GEN)y[k],z) < 0) { z = (GEN)y[k]; beta = (GEN)a[k]; }
+    if (gpolcomp((GEN)y[k],z) < 0) { z = (GEN)y[k]; b = (GEN)a[k]; }
   }
-  if (flun & nf_RAW)
+  *py = z; *pa = b;
+}
+
+static GEN
+storepol(GEN nf, GEN z, GEN a, GEN phi, long flag)
+{
+  GEN y, b;
+  if (flag & nf_RAW)
+    y = storeraw(a, z);
+  else if (phi)
   {
-    y=cgetg(3,t_VEC);
-    y[1]=lcopy(z);
-    y[2]=lcopy(beta);
+    b = modreverse_i(a, (GEN)nf[1]);
+    y = storeeval(phi,b,z);
   }
-  else if (phimax)
-  {
-    beta=polymodrecip(gmodulcp(beta,(GEN)nf[1]));
-    y=cgetg(3,t_VEC);
-    y[1]=lcopy(z);
-    y[2]=(long)poleval(phimax,beta);
-  }
-  else y = gcopy(z);
+  else
+    y = gcopy(z);
   return y;
 }
 
 /* no garbage collecting, done in polredabs0 */
 static GEN
-storeallpols(GEN nf, GEN z, GEN a, GEN phimax, long flun)
+storeallpol(GEN nf, GEN z, GEN a, GEN phi, long flag)
 {
-  GEN p1,y,beta;
+  GEN y, b;
 
-  if (flun & nf_RAW)
+  if (flag & nf_RAW)
   {
     long i, c = lg(z);
-    y=cgetg(c,t_VEC);
-    for (i=1; i<c; i++)
-    {
-      p1=cgetg(3,t_VEC); y[i]=(long)p1;
-      p1[1]=lcopy((GEN)z[i]);
-      p1[2]=lcopy((GEN)a[i]);
-    }
+    y = cgetg(c,t_VEC);
+    for (i=1; i<c; i++) y[i] = (long)storeraw((GEN)a[i], (GEN)z[i]);
   }
-  else if (phimax)
+  else if (phi)
   {
     long i, c = lg(z);
-    beta = new_chunk(c);
+    b = cgetg(c, t_VEC);
     for (i=1; i<c; i++)
-      beta[i] = (long)polymodrecip(gmodulcp((GEN)a[i],(GEN)nf[1]));
+      b[i] = (long)modreverse_i((GEN)a[i], (GEN)nf[1]);
 
-    y=cgetg(c,t_VEC);
-    for (i=1; i<c; i++)
-    {
-      p1=cgetg(3,t_VEC); y[i]=(long)p1;
-      p1[1]=lcopy((GEN)z[i]);
-      p1[2]=(long)poleval(phimax,(GEN)beta[i]);
-    }
+    y = cgetg(c,t_VEC);
+    for (i=1; i<c; i++) y[i] = (long)storeeval(phi, (GEN)b[i], (GEN)z[i]);
   }
-  else y = gcopy(z);
+  else
+    y = gcopy(z);
   return y;
 }
 
 GEN
-polredabs0(GEN x, long flun, long prec)
+polredabs0(GEN x, long flag, long prec)
 {
-  long i, nv;
+  long i, nv, vx;
   gpmem_t av = avma;
-  GEN nf,v,y,a,phimax;
-  GEN (*storepols)(GEN, GEN, GEN, GEN, long);
+  GEN nf,v,y,a,phi;
   FP_chk_fun chk;
   CG_data d;
 
@@ -1865,21 +1877,21 @@ polredabs0(GEN x, long flun, long prec)
   chk.f_post = &chk_gen_post;
   chk.data   = (void*)&d;
 
-  if ((ulong)flun >= 16) err(flagerr,"polredabs");
+  if ((ulong)flag >= 16) err(flagerr,"polredabs");
   nf = _initalg(x,nf_SMALL,prec);
+  phi = NULL;
   if (lg(nf) == 3)
   {
-    phimax = lift_to_pol((GEN)nf[2]);
+    phi = lift_to_pol((GEN)nf[2]);
     nf = (GEN)nf[1];
   }
-  else
-    phimax = (flun & nf_ORIG)? polx[0]: (GEN)NULL;
   prec = nfgetprec(nf);
-  x = (GEN)nf[1];
+  x = (GEN)nf[1]; vx = varn(x);
+  if (!phi && (flag & nf_ORIG)) phi = polx[vx];
 
   if (degpol(x) == 1)
   {
-    y = _vec(polx[varn(x)]);
+    y = _vec(polx[vx]);
     a = _vec(gsub((GEN)y[1], (GEN)x[2]));
   }
   else
@@ -1903,21 +1915,24 @@ polredabs0(GEN x, long flun, long prec)
 
   if (DEBUGLEVEL)
     { fprintferr("%ld minimal vectors found.\n",nv-1); flusherr(); }
-  if (nv >= 10000) flun &= (~nf_ALL); /* should not happen */
-  storepols = (flun & nf_ALL)? storeallpols: findmindisc;
+  if (nv >= 10000) flag &= (~nf_ALL); /* should not happen */
 
   if (DEBUGLEVEL) fprintferr("\n");
   if (nv==1)
   {
     y = _vec(x);
-    a = _vec(polx[varn(x)]);
+    a = _vec(polx[vx]);
   }
-  if (varn(y[1]) != varn(x))
-  {
-    long vx = varn(x);
+  if (varn(y[1]) != vx)
     for (i=1; i<nv; i++) setvarn(y[i], vx);
+  if (flag & nf_ALL)
+    y = storeallpol(nf,y,a,phi,flag);
+  else
+  {
+    findmindisc(&y, &a);
+    y = storepol(nf,y,a,phi,flag);
   }
-  return gerepileupto(av, storepols(nf,y,a,phimax,flun));
+  return gerepileupto(av, y);
 }
 
 GEN

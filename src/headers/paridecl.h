@@ -580,6 +580,7 @@ GEN     smallpolred2(GEN x, long prec);
 /* bibli2.c */
 
 GEN     RXQ_powers(GEN a, GEN T, long l);
+GEN     RX_RXQ_compo(GEN f, GEN x, GEN T);
 GEN     binome(GEN x, long k);
 int     cmp_pol(GEN x, GEN y);
 int     cmp_prime_ideal(GEN x, GEN y);

@@ -856,25 +856,6 @@ polmodi_keep(GEN x, GEN y)
   z[1]=x[1]; return normalizepol_i(z, lx);
 }
 
-/* evaluate h(a) mod f */
-GEN
-eleval(GEN f,GEN h,GEN a)
-{
-  gpmem_t av,tetpil;
-  long n;
-  GEN y;
-
-  if (typ(h) != t_POL) return gcopy(h);
-  av = tetpil = avma;
-  n=lgef(h)-1; y=(GEN)h[n];
-  for (n--; n>=2; n--)
-  {
-    y = gadd(gmul(y,a),(GEN)h[n]);
-    tetpil=avma; y = gmod(y,f);
-  }
-  return gerepile(av,tetpil,y);
-}
-
 static GEN
 shiftpol(GEN x, long v)
 {
@@ -954,7 +935,7 @@ dbasis(GEN p, GEN f, long mf, GEN alpha, GEN U)
   {
     if (i == dU)
     {
-      ha = gdiv(gmul(pd,eleval(f,U,alpha)),p);
+      ha = gdiv(gmul(pd,RX_RXQ_compo(U,alpha,f)),p);
       ha = polmodi(ha,pdp);
     }
     else
@@ -1030,7 +1011,7 @@ Decomp(GEN p,GEN f,long mf,GEN theta,GEN chi,GEN nu,long flag)
   b2 = FpX_div(chi, b1, p);
   a = FpX_mul(FpXQ_inv(b2, b1, p), b2, p);
   pdr = respm(f, derivpol(f), gpowgs(p,mf+1));
-  e = eleval(f, a, theta);
+  e = RX_RXQ_compo(a, theta, f);
   e = gdiv(polmodi(gmul(pdr,e), mulii(pdr,p)),pdr);
 
   pr = flag? gpowgs(p,flag): mulii(p,sqri(pdr));
@@ -1318,7 +1299,7 @@ getprime(GEN p, GEN chi, GEN phi, GEN chip, GEN nup, long *Lp, long *Ep)
     s += q*L;
   }
 
-  pip = eleval(chi, nup, phi);
+  pip = RX_RXQ_compo(nup, phi, chi);
   pip = lift_intern(gpowgs(gmodulcp(pip, chi), r));
   pp  = gpowgs(p, s);
 
@@ -1450,7 +1431,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
       pia  = redelt(pia, pmr, pmf);
     }
 
-    oE = Ea; opa = eleval(fx, pia, alph);
+    oE = Ea; opa = RX_RXQ_compo(pia, alph, fx);
 
     if (DEBUGLEVEL >= 5)
       fprintferr("  Fa = %ld and Ea = %ld \n", Fa, Ea);
@@ -1458,7 +1439,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
     /* we change alpha such that nu = pia */
     if (La > 1)
     {
-      alph = gadd(alph, eleval(fx, pia, alph));
+      alph = gadd(alph, RX_RXQ_compo(pia, alph, fx));
 
       w = update_alpha(p, fx, alph, NULL, pmr, pmf, mf, ns);
       alph = (GEN)w[1];
@@ -1557,7 +1538,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
       if (l > 1)
       {
 	/* there are at least 2 factors mod. p => chi can be split */
-	phi  = eleval(fx, gamm, alph);
+	phi  = RX_RXQ_compo(gamm, alph, fx);
 	phi  = redelt(phi, p, pmf);
 	if (flag) mf += 3;
         return Decomp(p, fx, mf, phi, chig, nug, flag);
@@ -1573,7 +1554,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	if (gcmp1((GEN)w[1]))
 	{
 	  /* there are at least 2 factors mod. p => chi can be split */
-	  phi = eleval(fx, (GEN)w[2], alph);
+	  phi = RX_RXQ_compo((GEN)w[2], alph, fx);
 	  phi = redelt(phi, p, pmf);
           if (flag) mf += 3;
           return Decomp(p, fx, mf, phi, (GEN)w[3], (GEN)w[4], flag);
@@ -1614,7 +1595,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
         {
           /* there are at least 2 factors mod. p => chi can be split */
           (void)delete_var();
-          phi = eleval(fx, eta, alph);
+          phi = RX_RXQ_compo(eta, alph, fx);
           phi = redelt(phi, p, pmf);
           if (flag) mf += 3;
           return Decomp(p, fx, mf, phi, chie, nue, flag);
@@ -1639,7 +1620,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	if (gcmp1((GEN)w[1]))
 	{
 	  /* there are at least 2 factors mod. p => chi can be split */
-	  phi = eleval(fx, (GEN)w[2], alph);
+	  phi = RX_RXQ_compo((GEN)w[2], alph, fx);
 	  phi = redelt(phi, p, pmf);
           if (flag) mf += 3;
           return Decomp(p, fx, mf, phi, (GEN)w[3], (GEN)w[4], flag);
@@ -1653,7 +1634,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
     }
 
     /* we replace alpha by a new alpha with a larger F or E */
-    alph = eleval(fx, (GEN)w[2], alph);
+    alph = RX_RXQ_compo((GEN)w[2], alph, fx);
     chi  = (GEN)w[3];
     nu   = (GEN)w[4];
 

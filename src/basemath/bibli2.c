@@ -984,8 +984,22 @@ permtonum(GEN x)
 /**                       MODREVERSE                               **/
 /**                                                                **/
 /********************************************************************/
+/* evaluate f(x) mod T */
+GEN
+RX_RXQ_compo(GEN f, GEN x, GEN T)
+{
+  gpmem_t av = avma;
+  long l;
+  GEN y;
 
-/* return (1,...a^l) mod T */
+  if (typ(f) != t_POL) return gcopy(f);
+  l = lgef(f)-1; y = (GEN)f[l];
+  for (l--; l>=2; l--)
+    y = gres(gadd(gmul(y,x), (GEN)f[l]), T);
+  return gerepileupto(av, y);
+}
+
+/* return (1,...a^l) mod T. Not memory clean */
 GEN
 RXQ_powers(GEN a, GEN T, long l)
 {
