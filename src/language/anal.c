@@ -1130,7 +1130,7 @@ matcell(GEN p, matcomp *C)
           if (*analyseur == '[')
           { /* collapse [,c][r] into [r,c] */
             analyseur++;
-            r = check_array_index(lg(p));
+            r = check_array_index(lg(p[c]));
             pt = (GEN*)(((GEN)p[c]) + r); /* &coeff(p,r,c) */
             match(']');
           }
