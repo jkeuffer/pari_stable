@@ -748,9 +748,9 @@ lllint_i(GEN x, long D, int gram, GEN *pth, GEN *ptfl, GEN *ptB)
 GEN
 lllint_ip(GEN x, long D)
 {
-  GEN h = lllint_i(x, D, 0, NULL, NULL, NULL);
-  if (!h) h = x;
-  return h;
+  GEN fl, h = lllint_i(x, D, 0, NULL, &fl, NULL);
+  if (!h) h = lll_trivial(x, lll_IM);
+  return lll_finish(h, fl, lll_IM);
 }
 
 GEN
