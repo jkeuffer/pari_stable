@@ -595,7 +595,7 @@ isprincipalrayall(GEN bnr, GEN x, long flag)
 {
   long i, j, c;
   gpmem_t av=avma;
-  GEN bnf,nf,bid,matu,vecel,ep,p1,beta,idep,y,rayclass;
+  GEN bnf,nf,bid,matu,vecel,ep,p1,beta,idep,ex,rayclass;
   GEN divray,genray,alpha,alphaall,racunit,res,funit;
 
   checkbnr(bnr);
@@ -604,6 +604,9 @@ isprincipalrayall(GEN bnr, GEN x, long flag)
   vecel=(GEN)bnr[3];
   matu =(GEN)bnr[4];
   rayclass=(GEN)bnr[5];
+  divray = (GEN)rayclass[2]; c = lg(divray)-1;
+  ex = cgetg(c+1,t_COL);
+  if (c == 0 && !(flag & nf_GEN)) return ex;
 
   if (typ(x) == t_VEC && lg(x) == 3)
   { idep = (GEN)x[2]; x = (GEN)x[1]; }  /* precomputed */
@@ -611,16 +614,14 @@ isprincipalrayall(GEN bnr, GEN x, long flag)
     idep = quick_isprincipalgen(bnf, x);
   ep  = (GEN)idep[1];
   beta= (GEN)idep[2];
-  c = lg(ep);
-  for (i=1; i<c; i++) /* modify beta as if gen -> vecel.gen (coprime to bid) */
+  j = lg(ep);
+  for (i=1; i<j; i++) /* modify beta as if gen -> vecel.gen (coprime to bid) */
     if (typ(vecel[i]) != t_INT && signe(ep[i])) /* <==> != 1 */
       beta = arch_mul(to_famat_all((GEN)vecel[i], negi((GEN)ep[i])), beta);
   p1 = gmul(matu, concatsp(ep, zideallog(nf,beta,bid)));
-  divray = (GEN)rayclass[2]; c = lg(divray);
-  y = cgetg(c,t_COL);
-  for (i=1; i<c; i++)
-    y[i] = lmodii((GEN)p1[i],(GEN)divray[i]);
-  if (!(flag & nf_GEN)) return gerepileupto(av, y);
+  for (i=1; i<=c; i++)
+    ex[i] = lmodii((GEN)p1[i],(GEN)divray[i]);
+  if (!(flag & nf_GEN)) return gerepileupto(av, ex);
 
   /* compute generator */
   if (lg(rayclass)<=3)
@@ -628,7 +629,7 @@ isprincipalrayall(GEN bnr, GEN x, long flag)
 
   genray = (GEN)rayclass[3];
   /* TODO: should be using nf_GENMAT and function should return a famat */
-  alphaall = isprincipalfact(bnf, genray, gneg(y), x, nf_GEN | nf_FORCE);
+  alphaall = isprincipalfact(bnf, genray, gneg(ex), x, nf_GEN | nf_FORCE);
   if (!gcmp0((GEN)alphaall[1])) err(bugparier,"isprincipalray (bug1)");
 
   res = (GEN)bnf[8];
@@ -649,7 +650,7 @@ isprincipalrayall(GEN bnr, GEN x, long flag)
     alpha = gdiv(alpha,p1);
   }
   p1 = cgetg(4,t_VEC);
-  p1[1] = lcopy(y);
+  p1[1] = lcopy(ex);
   p1[2] = (long)algtobasis(nf,alpha);
   p1[3] = lcopy((GEN)alphaall[3]);
   return gerepileupto(av, p1);

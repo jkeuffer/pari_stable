@@ -1028,6 +1028,8 @@ isprincipalall0(GEN bnf, GEN x, long *ptprec, long flag)
   U = (GEN)clg2[1];
   cyc = gmael3(bnf,8,1,2); c = lg(cyc)-1;
   gen = gmael3(bnf,8,1,3);
+  ex = cgetg(c+1,t_COL);
+  if (c == 0 && !(flag & nf_GEN)) return ex;
 
   vectbase = (GEN)bnf[5]; /* needed by factorgensimple */
 
@@ -1047,7 +1049,6 @@ isprincipalall0(GEN bnf, GEN x, long *ptprec, long flag)
   A = gsub(Wex, gmul(B,Bex));
   if (old_format) U = ginv(U);
   Q = gmul(U, A);
-  ex = cgetg(c+1,t_COL);
   for (i=1; i<=c; i++)
     Q[i] = (long)truedvmdii((GEN)Q[i],(GEN)cyc[i],(GEN*)(ex+i));
   if (!(flag & nf_GEN)) return gcopy(ex);
