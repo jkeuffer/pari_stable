@@ -133,13 +133,17 @@ mulpol(GEN x, GEN y, long nx, long ny)
   free(p1); z -= 2; z[1]=0; return normalizepol_i(z, lz);
 }
 
-/* return (x * X^d) + y. Assume d > 0, x > 0 and y >= 0 */
+/* return (x * X^d) + y. Assume d > 0, x,y != 0 */
 GEN
 addmulXn(GEN x, GEN y, long d)
 {
-  GEN xd,yd,zd = (GEN)avma;
-  long a,lz,ny = lgpol(y), nx = lgpol(x);
-
+  GEN xd, yd, zd;
+  long a, lz, nx, ny;
+  
+  if (!signe(x)) return y;
+  ny = lgpol(y);
+  nx = lgpol(x);
+  zd = (GEN)avma;
   x += 2; y += 2; a = ny-d;
   if (a <= 0)
   {
@@ -165,7 +169,6 @@ GEN
 addshiftpol(GEN x, GEN y, long d)
 {
   long v = varn(x);
-  if (!signe(x)) return y;
   x = addmulXn(x,y,d);
   setvarn(x,v); return x;
 }
@@ -174,9 +177,13 @@ addshiftpol(GEN x, GEN y, long d)
 static GEN
 addmulXncopy(GEN x, GEN y, long d)
 {
-  GEN xd,yd,zd = (GEN)avma;
-  long a,lz,ny = lgpol(y), nx = lgpol(x);
-
+  GEN xd, yd, zd;
+  long a, lz, nx, ny;
+  
+  if (!signe(x)) return gcopy(y);
+  nx = lgpol(x);
+  ny = lgpol(y);
+  zd = (GEN)avma;
   x += 2; y += 2; a = ny-d;
   if (a <= 0)
   {
@@ -221,7 +228,7 @@ shiftpol_ip(GEN x, long v)
 static GEN
 quickmul(GEN a, GEN b, long na, long nb)
 {
-  GEN a0,c,c0;
+  GEN a0, c, c0;
   long n0, n0a, i, v = 0;
   pari_sp av;
 
@@ -233,8 +240,8 @@ quickmul(GEN a, GEN b, long na, long nb)
   if (v) (void)cgetg(v,t_STR); /* v gerepile-safe cells for shiftpol_ip */
   if (nb < MUL_LIMIT)
     return shiftpol_ip(mulpol(a,b,na,nb), v);
-  i=(na>>1); n0=na-i; na=i;
-  av=avma; a0=a+n0; n0a=n0;
+  i = (na>>1); n0 = na-i; na = i;
+  av = avma; a0 = a+n0; n0a = n0;
   while (n0a && isexactzero((GEN)a[n0a-1])) n0a--;
 
   if (nb > n0)
@@ -252,18 +259,14 @@ quickmul(GEN a, GEN b, long na, long nb)
 
     c1 = quickmul(c1+2,c2+2, lgpol(c1),lgpol(c2));
     c2 = gadd(c1, gneg_i(gadd(c0,c)));
-    if (signe(c0)) {
-      c0 = addmulXn(c0, c2, n0);
-      c0 = addmulXncopy(c0,c,n0);
-    }
+    c0 = addmulXn(c0, c2, n0);
   }
   else
   {
     c = quickmul(a,b,n0a,nb);
     c0 = quickmul(a0,b,na,nb);
-    if (signe(c0))
-      c0 = addmulXncopy(c0,c,n0);
   }
+  c0 = addmulXncopy(c0,c,n0);
   return shiftpol_ip(gerepileupto(av,c0), v);
 }
 
@@ -308,15 +311,15 @@ sqrpol(GEN x, long nx)
 static GEN
 quicksqr(GEN a, long na)
 {
-  GEN a0,c,c0,c1;
+  GEN a0, c, c0, c1;
   long n0, n0a, i, v = 0;
   pari_sp av;
 
   while (na && isexactzero((GEN)a[0])) { a++; na--; v += 2; }
   if (v) (void)new_chunk(v);
   if (na<SQR_LIMIT) return shiftpol_ip(sqrpol(a,na), v);
-  i=(na>>1); n0=na-i; na=i;
-  av=avma; a0=a+n0; n0a=n0;
+  i = (na>>1); n0 = na-i; na = i;
+  av = avma; a0 = a+n0; n0a = n0;
   while (n0a && isexactzero((GEN)a[n0a-1])) n0a--;
 
   c = quicksqr(a,n0a);
