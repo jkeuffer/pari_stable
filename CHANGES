@@ -57,7 +57,7 @@ XR 14- typo in nilord4 --> SEGV, e.g.
    19- stack corruption in factorff
 BA 20- better interface for galoissubcyclo
 BA 21- galoisfixedfield(,,2) now works with non Galois subfields
-BA 22- nfgaloisconj now use `p-1'-test + better strategy
+BA 22- nfgaloisconj now use `d-1'-test + better strategy
 BA 23- fix accuracy problems in vandermondeinverse
    24- missed some simplifications when handling multivariate t_RFRAC
    25- [Cygwin:] incorrect default 'path' (used : instead of ;)
@@ -84,6 +84,7 @@ IZ 41- CLK_TCK may reside in time.h
    46- when host badily configured (~ not expanded), gp would die on startup 
 XR 47- factorpadic(, not a prime, ) --> SEGV
    48- matrix(2,2,i,i, ...) allowed, with weird result
+BA 49- better arguments checking for galoisfixedfield
 
   Changed
     1- removed useless parameter prec in many bnr* and rnf* functions
