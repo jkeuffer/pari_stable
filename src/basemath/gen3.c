@@ -666,8 +666,10 @@ gmod(GEN x, GEN y)
 	case t_POL:
 	  return gres(x,y);
 
-	case t_RFRAC: case t_RFRACN:
-	  av=avma; if (tx==t_RFRACN) x=gred_rfrac(x);
+        case t_RFRACN:
+	  av=avma; return gerepileupto(av, gmod(gred_rfrac(x), y));
+	case t_RFRAC:
+	  av=avma;
 	  p1=gmul((GEN)x[1],ginvmod((GEN)x[2],y)); tetpil=avma;
           return gerepile(av,tetpil,gres(p1,y));
 

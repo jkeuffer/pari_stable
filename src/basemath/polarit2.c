@@ -1802,8 +1802,7 @@ factor(GEN x)
     case t_INT: return decomp(x);
 
     case t_FRACN:
-      x = gred(x);
-      return gerepileupto(av, factor(x));
+      return gerepileupto(av, factor(gred(x)));
     case t_FRAC:
       p1 = decomp((GEN)x[1]);
       p2 = decomp((GEN)x[2]); p2[2] = (long)gneg_i((GEN)p2[2]);
@@ -1905,7 +1904,7 @@ factor(GEN x)
       }
 
     case t_RFRACN:
-      x=gred_rfrac(x); /* fall through */
+      return gerepileupto(av, factor(gred_rfrac(x)));
     case t_RFRAC:
       p1=factor((GEN)x[1]);
       p2=factor((GEN)x[2]); p3=gneg_i((GEN)p2[2]);
