@@ -24,8 +24,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define RXQX_rem(x,y,T) RXQX_divrem((x),(y),(T),ONLY_REM)
 #define FpX_rem(x,y,p) FpX_divres((x),(y),(p),ONLY_REM)
 extern GEN addshiftw(GEN x, GEN y, long d);
-extern GEN gmul_mat_smallvec(GEN x, GEN y);
-extern GEN hnf_invimage(GEN A, GEN b);
 extern GEN norm_by_embed(long r1, GEN x);
 extern GEN ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound);
 extern GEN polsym_gen(GEN P, GEN y0, long n, GEN T, GEN N);
@@ -44,7 +42,6 @@ extern GEN col_to_ff(GEN x, long v);
 extern GEN element_mulidid(GEN nf, long i, long j);
 extern GEN eltmulid_get_table(GEN nf, long i);
 extern GEN idealaddtoone_i(GEN nf, GEN x, GEN y);
-extern GEN mat_to_vecpol(GEN x, long v);
 extern GEN merge_factor_i(GEN f, GEN g);
 extern GEN mulmat_pol(GEN A, GEN x);
 extern GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den);
