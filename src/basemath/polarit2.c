@@ -1079,7 +1079,7 @@ check_factors(GEN P, GEN BL, GEN bound, GEN famod, GEN pa)
 
   piv = special_pivot(BL);
   if (!piv) return NULL;
-  if (DEBUGLEVEL) fprintferr("special_pivot output:\n%Z\n",piv);
+  if (DEBUGLEVEL>3) fprintferr("special_pivot output:\n%Z\n",piv);
 
   pas2 = shifti(pa,-1);
   r  = lg(piv)-1;
