@@ -36,23 +36,20 @@ void
 znstar_partial_coset_func(long n, GEN H, void (*func)(void *data,long c)
     , void *data, long d, long c)
 {
-  GEN gen=(GEN) H[1];
-  GEN ord=(GEN) H[2];
-  GEN cache=vecsmall_const(d,c);
-  long i,j;
-  long card=1;
+  GEN gen = (GEN) H[1];
+  GEN ord = (GEN) H[2];
+  GEN cache = vecsmall_const(d,c);
+  long i, j, card = 1;
+
   (*func)(data,c);
-  for (i = 1; i <= d; i++)
-    card *= ord[i];
+  for (i = 1; i <= d; i++) card *= ord[i];
   for(i=1; i<card; i++)
   {
-    long k,m=i;
-    for(j=1; j<d && m%ord[j]==0 ;j++)
-      m/=ord[j];
-    cache[j]=mulssmod(cache[j],gen[j],n);
-    for (k=1; k<j; k++)
-      cache[k]=cache[j];
-    (*func)(data,cache[j]);
+    long k, m = i;
+    for(j=1; j<d && m%ord[j]==0 ;j++) m /= ord[j];
+    cache[j] = mulssmod(cache[j],gen[j],n);
+    for (k=1; k<j; k++) cache[k] = cache[j];
+    (*func)(data, cache[j]);
   }
 }
 
@@ -409,15 +406,23 @@ struct _subcyclo_orbits_s
 {
   GEN powz;
   GEN *s;
+  ulong count;
+  gpmem_t ltop;
 };
 
 void
 _subcyclo_orbits(struct _subcyclo_orbits_s *data, long k)
 {
-  GEN powz=data->powz;
-  GEN *s=data->s;
-  *s=gadd(*s,(GEN)powz[k]);
+  GEN powz = data->powz;
+  GEN *s = data->s;
+  
+  if (!data->count) data->ltop= avma;
+  *s = gadd(*s,(GEN)powz[k]);
+  data->count++;
+  if ((data->count & 0xffUL) == 0)
+    *s = gerepileupto(data->ltop, *s);
 }
+
 /* Newton sums mod le. if le==NULL, works with complex instead */
 GEN
 subcyclo_orbits(long n, GEN H, GEN O, GEN powz, GEN le)
@@ -426,17 +431,18 @@ subcyclo_orbits(long n, GEN H, GEN O, GEN powz, GEN le)
   GEN V=cgetg(d,t_VEC);
   struct _subcyclo_orbits_s data;
   long lle=le?lg(le)*2+1:2*lg(powz[1])+3;/*Assume dvmdii use lx+ly space*/
-  data.powz=powz;
+  data.powz = powz;
   for(i=1; i<d; i++)
   {
-    GEN s=gzero;
-    gpmem_t av=avma;
+    GEN s = gzero;
+    gpmem_t av = avma;
     (void)new_chunk(lle);
-    data.s=&s;
+    data.count = 0;
+    data.s     = &s;
     znstar_coset_func(n, H, (void (*)(void *,long)) _subcyclo_orbits,
       (void *) &data, O[i]);
-    avma=av; /* HACK */
-    V[i]=le?lmodii(s,le):lcopy(s);
+    avma = av; /* HACK */
+    V[i] = le?lmodii(s,le):lcopy(s);
   }
   return V;
 }
