@@ -1777,14 +1777,6 @@ resiu(GEN y, ulong x)
   return mpn_mod_1(LIMBS(y), NLIMBS(y), x);
 }
 
-/* private version of mulss */
-ulong
-smulss(ulong x, ulong y, ulong *rem)
-{
-  LOCAL_HIREMAINDER;
-  x=mulll(x,y); *rem=hiremainder; return x;
-}
-
 GEN
 truedvmdii(GEN x, GEN y, GEN *z)
 {
