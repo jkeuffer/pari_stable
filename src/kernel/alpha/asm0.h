@@ -6,7 +6,19 @@ ulong hiremainder;
 #define SAVE_OVERFLOW
 #define SAVE_HIREMAINDER
 
+#ifndef ASMINLINE
+BEGINEXTERN
+  extern long addll(ulong a, ulong b);
+  extern long addllx(ulong a, ulong b);
+  extern long subll(ulong a, ulong b);
+  extern long subllx(ulong a, ulong b);
+  extern long shiftl(ulong x, ulong y);
+  extern long shiftlr(ulong x, ulong y);
+  extern long mulll(ulong x, ulong y);
+  extern long addmul(ulong x, ulong y);
+ENDEXTERN
 
+#else /* ASMINLINE */
 /* From the PARI source, using gcc __asm__ format. */
 
 #define addll(a, b)\
@@ -133,5 +145,4 @@ extern ulong invert_word(ulong);
   hiremainder = _r >> _k;                                               \
   _q;                                                                   \
 })
-
-
+#endif

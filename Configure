@@ -820,10 +820,21 @@ if test -z "$__gnuc__"; then
   rm -f $exe
 fi
 
+ASMINLINE=
 if test -n "$__gnuc__"; then
   __GNUC__="-D__GNUC__"
   warn="-Wall -Wno-implicit"
-  OPTFLAGS="-O3 -DGCC_INLINE $warn"
+  OPTFLAGS=-O3
+  ASMINLINE=yes
+  case "$asmarch" in
+    alpha)
+      case "$__gnuc__" in
+        2.95.3*|3.*) OPTFLAGS=-O;; # avoid optimizer bugs
+        *) ASMINLINE=;; # doesn't work with 2.95.2.
+      esac
+    ;;
+  esac
+  OPTFLAGS="$OPTFLAGS -DGCC_INLINE $warn"
   DBGFLAGS="-g $warn"
   # Some architectures need -fPIC for building dynamic lib
   case "$osname-$arch" in hpux-*) DLCFLAGS=-fPIC;; esac
@@ -1267,7 +1278,7 @@ for variable in\
   libpari_base version TOP config_dir src_dir emacs_dir doc_dir\
   bindir includedir mandir miscdir libdir datadir\
   optimization objdir static suffix\
-  arch asmarch osname pretty prefix share_prefix\
+  ASMINLINE arch asmarch osname pretty prefix share_prefix\
   __gnuc__ gnuas CPP AS ASFLAGS CC cflags DBGFLAGS OPTFLAGS LD LDFLAGS\
   DLLD DLSUFFIX soname sodest KERNELCPPFLAGS DLLDFLAGS EXTRADLLDFLAGS\
   runpath runpathprefix LDDYN LIBS DYNLIBS DYNFLAGS DYNRELOC\

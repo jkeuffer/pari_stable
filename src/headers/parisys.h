@@ -37,7 +37,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #  define ENDEXTERN }
 #  define INLINE inline
 #  ifdef __GNUC__
-#    define ASMINLINE
 #    define VOLATILE volatile
 #  else
 #    define VOLATILE
@@ -47,7 +46,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #  define BEGINEXTERN
 #  define ENDEXTERN
 #  ifdef __GNUC__
-#    define ASMINLINE
 #    define VOLATILE __volatile__
 #    ifdef GCC_INLINE
 #      ifndef __OPTIMIZE__

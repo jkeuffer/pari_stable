@@ -50,6 +50,10 @@ case $asmarch in
   m68k) echo '#define __M68K__' >> $file;;
 esac
 
+if test -n "$ASMINLINE"; then
+  echo '#define ASMINLINE' >> $file
+fi
+
 if test -n "$gzip"; then
   cat >> $file << EOT
 
