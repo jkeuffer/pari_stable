@@ -359,8 +359,39 @@ BSW_psp(GEN N)
   /* no prime divisor < 103 */
   if (n && n < 10427) return 1;
   k = bad_for_base(init_miller(N), gdeux);
-  avma = av;
-  k = (!k && IsLucasPsP0(N));
+  avma = av; if (k) return 0;
+  if (n && n < 1016801)
+    switch(n) {
+      case 42799:
+      case 49141:
+      case 88357:
+      case 90751:
+      case 104653:
+      case 130561:
+      case 196093:
+      case 220729:
+      case 253241:
+      case 256999:
+      case 271951:
+      case 280601:
+      case 357761:
+      case 390937:
+      case 458989:
+      case 486737:
+      case 489997:
+      case 514447:
+      case 580337:
+      case 741751:
+      case 838861:
+      case 873181:
+      case 877099:
+      case 916327:
+      case 976873:
+      case 983401: /* strong 2-pseudoprimes without prime divisors < 103 */
+        return 0;
+      default: return 1;
+    }
+  k = IsLucasPsP0(N);
   avma = av; return k;
 }
 
