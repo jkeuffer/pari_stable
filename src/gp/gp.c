@@ -2020,6 +2020,14 @@ gprc_get(void)
 static int get_line_from_file(char *prompt, filtre_t *F, FILE *file);
 #define err_gprc(s,t,u) { fprintferr("\n"); err(talker2,s,t,u); }
 
+static void 
+init_filtre(filtre_t *F, void *data)
+{
+  F->data = data;
+  F->in_string  = 0;
+  F->in_comment = 0;
+}
+
 static char **
 gp_initrc(void)
 {
@@ -2032,8 +2040,7 @@ gp_initrc(void)
   if (!file) return NULL;
   flist = (char **) gpmalloc(fnum * sizeof(char*));
   b = new_buffer();
-  F.data = (void*)b;
-  F.in_comment = 0;
+  init_filtre(&F, (void*)b);
   for(;;)
   {
     if (!get_line_from_file(NULL,&F,file))
@@ -2503,9 +2510,8 @@ gp_main_loop(int ismain)
     b->flenv = 1;
     push_stack(&bufstack, (void*)b);
   }
+  init_filtre(&F, (void*)b);
 
-  F.data = (void*)b;
-  F.in_comment = 0;
   for (;; setjmp(b->env))
   {
     if (ismain)
@@ -2622,8 +2628,7 @@ input0(void)
   filtre_t F;
   GEN x;
 
-  F.data = (void*)b;
-  F.in_comment = 0;
+  init_filtre(&F, (void*)b);
   push_stack(&bufstack, (void*)b);
   while (! get_line_from_file(DFT_INPROMPT,&F,infile))
     if (popinfile()) { fprintferr("no input ???"); gp_quit(); }
@@ -2682,8 +2687,7 @@ break_loop(long numerr)
     if (!s || !s[-1] || s < t || s >= t + oldb->len) s = NULL;
     b->flenv = 1; oldinfile = infile;
   }
-  F.data = (void*)b;
-  F.in_comment = 0;
+  init_filtre(&F, (void*)b);
 
   term_color(c_ERR); pariputc('\n');
   errcontext(msg, s, t); if (s) pariputc('\n');
