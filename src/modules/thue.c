@@ -108,7 +108,7 @@ LogHeight(GEN x, long prec)
 static GEN
 absisqrtn(GEN x, long n, long prec) {
   GEN r = itor(x,prec);
-  if (signe(r) < 0) r = negr(r);
+  if (signe(r) < 0) setsigne(r,1);
   return sqrtnr(r, n);
 }
 
@@ -153,7 +153,8 @@ static GEN logabs(GEN x, long prec) { return glog(gabs(x,prec), prec); }
 static GEN
 T_A_Matrices(GEN MatFU, int r, GEN *eps5, long prec)
 {
-  GEN A, p1, m1, IntM, nia, eps3, eps2, eps1 = shifti(gun, bit_accuracy(prec));
+  GEN A, p1, m1, IntM, nia, eps3, eps2;
+  long e = bit_accuracy(prec);
 
   m1 = rowextract_i(vecextract_i(MatFU, 1,r), 1,r); /* minor order r */
   m1 = logabs(m1,prec);
@@ -161,14 +162,14 @@ T_A_Matrices(GEN MatFU, int r, GEN *eps5, long prec)
   A = invmat(m1);
   IntM = gsub(gmul(A,m1), idmat(r));
 
-  eps2 = gadd(vecmax(gabs(IntM,prec)), ginv(eps1));
+  eps2 = gadd(vecmax(gabs(IntM,prec)), real2n(-e, prec));
   nia = vecmax(gabs(A,prec));
 
   /* Check for the precision in matrix inversion. See paper, Lemma 2.4.2. */
-  p1 = gadd(gmulsg(r, gmul(nia,eps1)), eps2);
-  if (gcmp(gmulgs(p1, 2*r), gun) < 0) err(precer,"thue");
+  p1 = gadd(gmulsg(r, gmul2n(nia, e)), eps2);
+  if (gexpo(p1) < -2*r) err(precer,"thue");
 
-  p1 = gadd(gmulsg(r, gdiv(nia,eps1)), eps2);
+  p1 = gadd(gmulsg(r, gmul2n(nia,-e)), eps2);
   eps3 = gmul(gmulsg(2*r*r,nia), p1);
   eps3 = myround(eps3, 1);
 
@@ -206,16 +207,14 @@ inithue(GEN P, GEN bnf, long flag, long prec)
 
   nf_get_sign(checknf(bnf), &s, &t);
   prec_roots = prec; 
-  ro = tnf_get_roots(P, prec_roots, s, t);
-  MatFU = Conj_LH(gmael(bnf,8,5), &ALH, ro, prec);
-  while (!MatFU)
-    {
-      if (DEBUGLEVEL>1) 
-	fprintferr("Increasing root precision %d\n", prec_roots); 
-      prec_roots <<= 1; 
-      ro = tnf_get_roots(P, prec_roots, s, t);
-      MatFU = Conj_LH(gmael(bnf,8,5), &ALH, ro, prec);
-    }
+  for(;;)
+  {
+    ro = tnf_get_roots(P, prec_roots, s, t);
+    MatFU = Conj_LH(gmael(bnf,8,5), &ALH, ro, prec);
+    if (MatFU) break;
+    prec_roots = (prec_roots << 1) - 2;
+    if (DEBUGLEVEL>1) err(warnprec, "inithue", prec_roots); 
+  }
 
   dP = derivpol(P);
   c1 = NULL; /* min |P'(r_i)|, i <= s */
