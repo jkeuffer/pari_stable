@@ -1632,11 +1632,10 @@ print_hash_list(const char *s)
       print_entree(ep,n);
 }
 
-static char const *
-what_readline(void)
+static void
+what_readline(char *buf)
 {
 #ifdef READLINE
-  static char RL_ver[128];
   char *ver, extra[64];
 #  if defined(HAS_RL_LIBRARY_VERSION) || defined(FAKE_RL_LIBRARY_VERSION)
 #    ifdef FAKE_RL_LIBRARY_VERSION
@@ -1654,12 +1653,11 @@ what_readline(void)
     ver = READLINE;
     extra[0] = 0;
   }
-  sprintf(RL_ver, "v%s %s%s", ver,
+  sprintf(buf, "v%s %s%s", ver,
             (GP_DATA->flags & USE_READLINE)? "enabled": "disabled",
             extra);
-  return RL_ver;
 #else
-  return "not compiled in";
+  sprintf(buf, "not compiled in");
 #endif
 }
 
@@ -1676,12 +1674,29 @@ print_shortversion(void)
 }
 
 static void
+what_cc(char *buf)
+{
+#ifdef GCC_VERSION
+  sprintf(buf, "gcc-%s", GCC_VERSION); return;
+#endif
+#ifdef _MSC_VER
+  sprintf(buf,"MSVC-%s", _MSC_VER); return;
+#endif
+  *buf = 0;
+}
+
+static void
 print_version(void)
 {
-  char buf[256];
+  char buf[256], ver[128];
 
   center(PARIVERSION); center(PARIINFO);
-  sprintf(buf,"(readline %s, extended help%s available)", what_readline(),
+  what_cc(ver);
+  if (*ver) sprintf(buf,"compiled: %s, %s", __DATE__, ver);
+  else      sprintf(buf,"compiled: %s", __DATE__);
+  center(buf);
+  what_readline(ver);
+  sprintf(buf,"(readline %s, extended help%s available)", ver,
           has_ext_help()? "": " not");
   center(buf);
 }

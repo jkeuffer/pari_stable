@@ -48,6 +48,10 @@ cat >> $file << EOT
 #define PARI_DOUBLE_FORMAT ${doubleformat}
 EOT
 
+if test -n "$__gnuc__"; then
+  echo "#define GCC_VERSION \"$__gnuc__\"" >> $file
+fi
+
 case $asmarch in
   none) echo '#define __HAS_NO_ASM__' >> $file;;
   hppa) echo '#define __HPPA__' >> $file;;
