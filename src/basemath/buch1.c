@@ -1075,7 +1075,7 @@ subFBquad(GEN D, double PROD, long KC)
       if (prod > PROD) break;
     }
   }
-  if (j > KC) return NULL;
+  if (j == lv) return NULL;
   lgsub = i;
   for (j = 1; j <ino; i++,j++) vperm[i] = no[j];
   for (     ; i < lv; i++)     vperm[i] = i;
@@ -1259,6 +1259,30 @@ trivial_relations(long **mat, GEN C)
   return s;
 }
 
+static void
+dbg_all(long phase, long s, long n)
+{
+  if (DEBUGLEVEL>1) fprintferr("\n");
+  msgtimer("%s rel [#rel/#test = %ld/%ld]", phase? "random": "initial", s, n);
+}
+
+void
+wr_rel(GEN col)
+{
+  long i, l = lg(col);
+  fprintferr("\nrel = ");
+  for (i=1; i<l; i++)
+    if (col[i]) fprintferr("%ld^%ld ",i,col[i]);
+  fprintferr("\n");
+}
+
+void
+dbg_rel(long s, GEN col)
+{
+  if (DEBUGLEVEL == 1) fprintferr("%4ld",s);
+  else { fprintferr("cglob = %ld. ", s); wr_rel(col); }
+  flusherr(); 
+}
 /*******************************************************************/
 /*                                                                 */
 /*                    Imaginary Quadratic fields                   */
@@ -1285,7 +1309,7 @@ imag_relations(long LIM, long lim, long LIMC, long **mat)
     if (s >= lim) {
       if (s >= LIM) break;
       lim = LIM; first = 0;
-      if (DEBUGLEVEL) msgtimer("initial rel [#rel/#test = %ld/%ld]", s, nbtest); 
+      if (DEBUGLEVEL) dbg_all(0, s, nbtest);
     }
     avma = av; current = first? 1+(s%KC): 1+s-RELSUP;
     form = imagpf(Disc, FB[current]);
@@ -1318,12 +1342,12 @@ imag_relations(long LIM, long lim, long LIMC, long **mat)
       (void)factorquad(form2,KC,LIMC);
       if (b1==b2)
       {
-        for (i=1; i<lgsub; i++) col[subFB[i]] = fpd[i]-ex[i];
+        for (i=1; i<lgsub; i++) col[subFB[i]] += fpd[i]-ex[i];
         sub_fact(col, form2); col[fpd[-2]]++;
       }
       else
       {
-        for (i=1; i<lgsub; i++) col[subFB[i]] = -fpd[i]-ex[i];
+        for (i=1; i<lgsub; i++) col[subFB[i]] += -fpd[i]-ex[i];
         add_fact(col, form2); col[fpd[-2]]--;
       }
     }
@@ -1333,14 +1357,14 @@ imag_relations(long LIM, long lim, long LIMC, long **mat)
       for (i=1; i<lgsub; i++) col[subFB[i]] = -ex[i];
       add_fact(col, form);
     }
-    if (DEBUGLEVEL) fprintferr(" %ld",s);
     col[current]--;
+    if (DEBUGLEVEL) dbg_rel(s, col);
     if (!first && fpc == 1 && col[current] == 0)
     {
       s--; for (i=1; i<=KC; i++) col[i]=0;
     }
   }
-  if (DEBUGLEVEL) msgtimer("random rel [#rel/#test = %ld/%ld]", s, nbtest);
+  if (DEBUGLEVEL) dbg_all(1, s, nbtest);
   return C;
 }
 
@@ -1400,7 +1424,7 @@ NEW:
     if (s >= lim) {
       if (lim == LIM) break;
       lim = LIM; first = 0;
-      if (DEBUGLEVEL) msgtimer("initial rel [#rel/#test = %ld/%ld]", s, nbtest);
+      if (DEBUGLEVEL) dbg_all(0, s, nbtest);
     }
     avma = av;
     form = real_random_form(ex);
@@ -1528,7 +1552,7 @@ CYCLE:
       }
     }
   }
-  if (DEBUGLEVEL) msgtimer("random rel [#rel/#test = %ld/%ld]", s, nbtest);
+  if (DEBUGLEVEL) dbg_all(1, s, nbtest);
   return C;
 }
 
@@ -1699,7 +1723,7 @@ START: avma = av; cbach = check_bach(cbach,6.);
 
   Res = FBquad(Disc,LIMC2,LIMC);
   if (!Res) goto START;
-  subFB = subFBquad(Disc, min(lim,LIMC2) + 0.5, KC);
+  subFB = subFBquad(Disc, lim + 0.5, KC);
   if (!subFB) goto START;
   powsubFB = powsubFBquad(CBUCH+1);
   limhash = ((ulong)LIMC < (MAXHALFULONG>>1))? LIMC*LIMC: HIGHBIT>>1;

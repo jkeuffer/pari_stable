@@ -41,6 +41,8 @@ extern GEN init_idele(GEN nf);
 extern GEN norm_by_embed(long r1, GEN x);
 extern void minim_alloc(long n,double ***q,long **x,double **y,double **z,double **v);
 extern GEN arch_mul(GEN x, GEN y);
+extern void wr_rel(GEN col);
+extern void dbg_rel(long s, GEN col);
 
 #define SFB_MAX 2
 #define SFB_STEP 2
@@ -1396,16 +1398,6 @@ red_ideal(GEN *ideal,GEN Gvec,GEN prvec)
 }
 
 static void
-wr_rel(GEN col)
-{
-  long i, l = lg(col);
-  fprintferr("\nrel = ");
-  for (i=1; i<l; i++)
-    if (col[i]) fprintferr("%ld^%ld ",i,col[i]);
-  fprintferr("\n");
-}
-
-static void
 set_log_embed(GEN col, GEN x, long R1, long prec)
 {
   long i, l = lg(x);
@@ -1558,12 +1550,7 @@ small_norm_for_buchall(long cglob,GEN *mat,GEN first_nz, GEN matarch,
       set_log_embed((GEN)matarch[cglob], xembed, R1, PRECREG);
       dependent = 0;
 
-      if (DEBUGLEVEL)
-      {
-        if (DEBUGLEVEL==1) fprintferr("%4ld",cglob);
-        else { fprintferr("cglob = %ld. ",cglob); wr_rel(mat[cglob]); }
-        flusherr(); nbfact++;
-      }
+      if (DEBUGLEVEL) { nbfact++; dbg_rel(cglob, mat[cglob]); }
       if (cglob >= nbrel) goto END; /* we have enough */
       if (++nbrelideal == nbrelpid) break;
 
