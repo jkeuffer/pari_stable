@@ -27,6 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #  endif
 #endif
 
+const int     functions_tblsz = 135; /* size of functions_hash          */
 /*      Variables statiques communes :         */
 FILE    *pari_outfile, *errfile, *logfile, *infile;
 ulong   logstyle = logstyle_none;
@@ -39,7 +40,6 @@ char    *current_logfile, *current_psfile, *pari_datadir = NULL;
 int     gp_colors[c_LAST];
 int     disable_color = 1, added_newline = 1;
 
-int     functions_tblsz = 135; /* size of functions_hash          */
 entree  **varentries;
 
 void    *global_err_data;

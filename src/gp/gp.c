@@ -1146,9 +1146,9 @@ print_fun_list(char **list, int nbli)
 static void
 commands(int n)
 {
-  const size_t LIST_LEN = 1023;
-  size_t size = LIST_LEN;
-  int i, s = 0;
+  const size_t LIST_LEN = 1023UL;
+  size_t size = LIST_LEN, s = 0;
+  int i;
   entree *ep;
   char **list = (char **) gpmalloc((size+1)*sizeof(char *));
 
