@@ -30,7 +30,7 @@ Arch / proc:         OS:             Configure:     sta:    dyn:  GP version:
 DEC/Alpha
 alpha21264   667Mhz  FreeBSD-4.0     gcc X11 dl     2626    2656  2.0.20    IS
 alpha21264   500MHz  OSF1-V4.0       gcc X11 dl2    3178    3436  2.1.0 (20)JC
-alpha21164a  600MHz  Linux-2.2.13   egcs X11 dl2    4270    4350  2.0.19    IS
+alpha21164a  600MHz  Linux-2.2.13   egcs X11 dl2    4270    4350  2.0.19(28)IS
 alpha21164   600MHz  OSF1-V4.0D      cc  X11 dl2    3996    4384  2.0.10    LG
 alpha21164   533Mhz  Linux 2.0.34    gcc X11 dl2   (4294)  (4385) 2.0.12    JC
 alpha21164   500Mhz  Linux-2.2.13   egcs X11 dl2    5219    5337  2.1.0 (13)
@@ -247,6 +247,8 @@ hppa kernel. Remove +z from compiler flags
      bench 'elliptic' fails as described in INSTALL, ok otherwise
 (26) same machine as above, using the RSX compatibility package
 (27) Xeon
+(28) RedHat-7.0 + alpha has a broken glibc-2.1.x [issquare(8388609^2) = 0 !]
+     Updating to glibc-2.2 fixes the problem.
 
 =============================================================================
 Contributors:
