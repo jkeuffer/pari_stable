@@ -39,17 +39,14 @@ psquare(GEN a,GEN p)
 static long
 lemma6(GEN pol,GEN p,long nu,GEN x)
 {
-  long i, lambda, mu;
+  long lambda, mu;
   pari_sp ltop=avma;
   GEN gx, gpx;
 
-  for (i=lgpol(pol), gx=(GEN)pol[i+1]; i>1; i--)
-    gx = addii(mulii(gx,x), (GEN)pol[i]);
+  gx = poleval(pol, x);
   if (psquare(gx,p)) return 1;
 
-  for (i=lgpol(pol),gpx=mulis((GEN)pol[i+1],i-1); i>2; i--)
-    gpx = addii(mulii(gpx,x), mulis((GEN)pol[i], i-2));
-
+  gpx = poleval(derivpol(pol), x);
   lambda = Z_pval(gx, p);
   mu = gcmp0(gpx)? BIGINT: Z_pval(gpx,p);
   avma = ltop;
@@ -62,18 +59,15 @@ lemma6(GEN pol,GEN p,long nu,GEN x)
 static long
 lemma7(GEN pol,long nu,GEN x)
 {
-  long i, odd4, lambda, mu, mnl;
+  long odd4, lambda, mu, mnl;
   pari_sp ltop = avma;
   GEN gx, gpx, oddgx;
 
-  for (i=lgpol(pol), gx=(GEN)pol[i+1]; i>1; i--)
-    gx = addii(mulii(gx,x), (GEN)pol[i]);
+  gx = poleval(pol, x);
   if (psquare(gx,gen_2)) return 1;
 
-  for (i=lgpol(pol),gpx=mulis((GEN)pol[i+1],i-1); i>2; i--)
-    gpx = gadd(gmul(gpx,x), mulis((GEN)pol[i],i-2));
-
-  lambda = vali(gx); oddgx = shifti(gx,-lambda);
+  gpx = poleval(derivpol(pol), x);
+  lambda = Z_lvalrem(gx, 2, &oddgx);
   mu = gcmp0(gpx)? BIGINT: vali(gpx);
   mnl = mu+nu-lambda;
   odd4 = umodiu(oddgx,4);
@@ -99,7 +93,7 @@ zpsol(GEN pol,GEN p,long nu,GEN pnu,GEN x0)
   pari_sp ltop=avma;
   GEN x,pnup;
 
-  result = equalis(p,2)? lemma7(pol,nu,x0): lemma6(pol,p,nu,x0);
+  result = equaliu(p,2)? lemma7(pol,nu,x0): lemma6(pol,p,nu,x0);
   if (result== 1) return 1;
   if (result==-1) return 0;
   x = gcopy(x0); pnup = mulii(pnu,p);
@@ -131,7 +125,7 @@ qpsoluble(GEN pol,GEN p)
   if ((typ(pol)!=t_POL && typ(pol)!=t_INT) || typ(p)!=t_INT )
     err(typeer,"qpsoluble");
   if (zpsol(pol,p,0,gen_1,gen_0)) return 1;
-  return (zpsol(polrecip(pol),p,1,p,gen_0));
+  return zpsol(polrecip(pol),p,1,p,gen_0);
 }
 
 /* (pr,2) = 1. return 1 if a square in (ZK / pr), 0 otherwise */
@@ -158,11 +152,14 @@ psquarenf(GEN nf,GEN a,GEN pr)
 static long
 check2(GEN nf, GEN a, GEN zinit)
 {
-  GEN zlog=zideallog(nf,a,zinit), p1 = gmael(zinit,2,2);
-  long i;
+  GEN zlog = zideallog(nf,a,zinit), cyc = gmael(zinit,2,2);
+  long i, l = lg(cyc);
 
-  for (i=1; i<lg(p1); i++)
-    if (!mpodd((GEN)p1[i]) && mpodd((GEN)zlog[i])) return 0;
+  for (i=1; i<l; i++)
+  {
+    if (mpodd((GEN)cyc[i])) break;
+    if (mpodd((GEN)zlog[i])) return 0;
+  }
   return 1;
 }
 
@@ -180,106 +177,91 @@ psquare2nf(GEN nf,GEN a,GEN pr,GEN zinit)
   v = check2(nf,a,zinit); avma = ltop; return v;
 }
 
-/* pr | 2. Return 1 if a square in (ZK / pr^q)^*, and 0 otherwise */
 static long
-psquare2qnf(GEN nf,GEN a,GEN p,long q)
+lemma6nf(GEN nf,GEN pol,GEN pr,long nu,GEN x)
 {
-  long v;
-  pari_sp ltop=avma;
-  GEN zinit = zidealstarinit(nf,idealpows(nf,p,q));
+  long lambda, mu;
+  GEN gx, gpx;
 
-  v = check2(nf,a,zinit); avma = ltop; return v;
-}
+  gx = poleval(pol, x);
+  if (psquarenf(nf,gx,pr)) return 1;
+  lambda = idealval(nf,gx,pr);
 
-static long
-lemma6nf(GEN nf,GEN pol,GEN p,long nu,GEN x)
-{
-  long i, lambda, mu;
-  pari_sp ltop=avma;
-  GEN gx,gpx;
+  gpx = poleval(derivpol(pol), x);
+  mu = gcmp0(gpx)? BIGINT: idealval(nf,gpx,pr);
 
-  for (i=lgpol(pol),gx=(GEN) pol[i+1]; i>1; i--)
-    gx = gadd(gmul(gx,x),(GEN) pol[i]);
-  if (psquarenf(nf,gx,p)) { avma=ltop; return 1; }
-  lambda = idealval(nf,gx,p);
-
-  for (i=lgpol(pol),gpx=gmulgs((GEN) pol[i+1],i-1); i>2; i--)
-    gpx=gadd(gmul(gpx,x),gmulgs((GEN) pol[i],i-2));
-  mu = gcmp0(gpx)? BIGINT: idealval(nf,gpx,p);
-
-  avma=ltop;
   if (lambda > mu<<1) return 1;
   if (lambda >= nu<<1  && mu >= nu) return 0;
   return -1;
 }
 
 static long
-lemma7nf(GEN nf,GEN pol,GEN p,long nu,GEN x,GEN zinit)
+lemma7nf(GEN nf,GEN pol,GEN pr,long nu,GEN x,GEN zinit)
 {
-  long res, i, lambda, mu, q;
-  pari_sp ltop=avma;
-  GEN gx,gpx,p1;
+  long res, lambda, mu, q;
+  GEN gx, gpx, p1;
 
-  for (i=lgpol(pol), gx=(GEN) pol[i+1]; i>1; i--)
-    gx=gadd(gmul(gx,x),(GEN) pol[i]);
-  if (psquare2nf(nf,gx,p,zinit)) { avma=ltop; return 1; }
-  lambda=idealval(nf,gx,p);
+  gx = poleval(pol, x);
+  if (psquare2nf(nf,gx,pr,zinit)) return 1;
+  lambda = element_val(nf,gx,pr);
 
-  for (i=lgpol(pol),gpx=gmulgs((GEN) pol[i+1],i-1); i>2; i--)
-    gpx=gadd(gmul(gpx,x),gmulgs((GEN) pol[i],i-2));
-  if (!gcmp0(gpx)) mu=idealval(nf,gpx,p); else mu=BIGINT;
+  gpx = poleval(derivpol(pol), x);
+  mu = gcmp0(gpx)? BIGINT: idealval(nf,gpx,pr);
+  if (lambda > (mu<<1)) return 1;
 
-  if (lambda>(mu<<1)) { avma=ltop; return 1; }
   if (nu > mu)
   {
-    if (lambda&1) { avma=ltop; return -1; }
+    if (lambda&1) return -1;
     q=mu+nu-lambda; res=1;
   }
   else
   {
-    if (lambda>=(nu<<1)) { avma=ltop; return 0; }
-    if (lambda&1) { avma=ltop; return -1; }
+    if (lambda>=(nu<<1)) return 0;
+    if (lambda&1) return -1;
     q=(nu<<1)-lambda; res=0;
   }
-  if (q > itos((GEN) p[3])<<1) { avma=ltop; return -1; }
-  p1 = gmodulcp(gpowgs(gmul((GEN)nf[7],(GEN)p[2]), lambda), (GEN)nf[1]);
-  if (!psquare2qnf(nf,gdiv(gx,p1), p,q)) res = -1;
-  avma=ltop; return res;
+  if (q > itos((GEN) pr[3])<<1)  return -1;
+  p1 = gpowgs(basistoalg(nf, (GEN)pr[2]), lambda);
+
+  zinit = zidealstarinit(nf, idealpows(nf,pr,q));
+  if (!check2(nf,gdiv(gx,p1),zinit)) res = -1;
+  return res;
 }
 
 static long
-zpsolnf(GEN nf,GEN pol,GEN p,long nu,GEN pnu,GEN x0,GEN repr,GEN zinit)
+zpsolnf(GEN nf,GEN pol,GEN pr,long nu,GEN pnu,GEN x0,GEN repr,GEN zinit)
 {
   long i, result;
   pari_sp ltop=avma;
   GEN pnup;
 
-  result = zinit? lemma7nf(nf,pol,p,nu,x0,zinit)
-                : lemma6nf(nf,pol,p,nu,x0);
+  result = zinit? lemma7nf(nf,pol,pr,nu,x0,zinit)
+                : lemma6nf(nf,pol,pr,nu,x0);
+  avma = ltop;
   if (result== 1) return 1;
   if (result==-1) return 0;
-  pnup = gmul(pnu, basistoalg(nf,(GEN)p[2]));
+  pnup = gmul(pnu, basistoalg(nf,(GEN)pr[2]));
   nu++;
   for (i=1; i<lg(repr); i++)
-    if (zpsolnf(nf,pol,p,nu,pnup,gadd(x0,gmul(pnu,(GEN)repr[i])),repr,zinit))
+    if (zpsolnf(nf,pol,pr,nu,pnup,gadd(x0,gmul(pnu,(GEN)repr[i])),repr,zinit))
     { avma=ltop; return 1; }
   avma=ltop; return 0;
 }
 
-/* calcule un systeme de representants Zk/p */
+/* calcule un systeme de representants Zk/pr */
 static GEN
-repres(GEN nf,GEN p)
+repres(GEN nf,GEN pr)
 {
   long i,j,k,f,pp,ppf,ppi;
   GEN mat,fond,rep;
 
   fond=cgetg(1,t_VEC);
-  mat=idealhermite(nf,p);
+  mat=idealhermite(nf,pr);
   for (i=1; i<lg(mat); i++)
     if (!gcmp1(gmael(mat,i,i)))
       fond = concatsp(fond,gmael(nf,7,i));
   f=lg(fond)-1;
-  pp=itos((GEN) p[1]);
+  pp=itos((GEN) pr[1]);
   for (i=1,ppf=1; i<=f; i++) ppf*=pp;
   rep=cgetg(ppf+1,t_VEC);
   rep[1]= (long)gen_0; ppi=1;
@@ -293,13 +275,11 @@ repres(GEN nf,GEN p)
 /* =1 si l'equation y^2 = z^deg(pol) * pol(x/z) a une solution rationnelle
  *    p-adique (eventuellement (1,y,0) = oo)
  * =0 sinon.
- * Les coefficients de pol doivent etre des entiers de nf.
- * p est one ideal premier sous forme primedec.
- */
+ * Les coefficients de pol doivent etre des entiers de nf. */
 long
 qpsolublenf(GEN nf,GEN pol,GEN pr)
 {
-  GEN repr,zinit,p1;
+  GEN repr, zinit, p1;
   pari_sp ltop=avma;
 
   if (gcmp0(pol)) return 1;
@@ -310,18 +290,18 @@ qpsolublenf(GEN nf,GEN pol,GEN pr)
   if (equaliu((GEN)pr[1], 2))
   { /* tough case */
     zinit = zidealstarinit(nf, idealpows(nf,pr,1+2*idealval(nf,gen_2,pr)));
-    if (psquare2nf(nf,(GEN)pol[2],pr,zinit)) return 1;
+    if (psquare2nf(nf,constant_term(pol),pr,zinit)) return 1;
     if (psquare2nf(nf, leading_term(pol),pr,zinit)) return 1;
   }
   else
   {
-    if (psquarenf(nf,(GEN) pol[2],pr)) return 1;
+    if (psquarenf(nf,constant_term(pol),pr)) return 1;
     if (psquarenf(nf, leading_term(pol),pr)) return 1;
     zinit = NULL;
   }
   repr = repres(nf,pr);
   if (zpsolnf(nf,pol,pr,0,gen_1,gen_0,repr,zinit)) { avma=ltop; return 1; }
-  p1 = gmodulcp(gmul((GEN) nf[7],(GEN) pr[2]),(GEN) nf[1]);
+  p1 = basistoalg(nf, (GEN)pr[2]);
   if (zpsolnf(nf,polrecip(pol),pr,1,p1,gen_0,repr,zinit))
     { avma=ltop; return 1; }
 
@@ -330,9 +310,7 @@ qpsolublenf(GEN nf,GEN pol,GEN pr)
 
 /* =1 si l'equation y^2 = pol(x) a une solution entiere p-adique
  * =0 sinon.
- * Les coefficients de pol doivent etre des entiers de nf.
- * p est un ideal premier sous forme primedec.
- */
+ * Les coefficients de pol doivent etre des entiers de nf. */
 long
 zpsolublenf(GEN nf,GEN pol,GEN pr)
 {
@@ -347,11 +325,11 @@ zpsolublenf(GEN nf,GEN pol,GEN pr)
   if (equaliu((GEN)pr[1],2))
   {
     zinit = zidealstarinit(nf,idealpows(nf,pr,1+2*idealval(nf,gen_2,pr)));
-    if (psquare2nf(nf,(GEN) pol[2],pr,zinit)) return 1;
+    if (psquare2nf(nf,constant_term(pol),pr,zinit)) return 1;
   }
   else
   {
-    if (psquarenf(nf,(GEN) pol[2],pr)) return 1;
+    if (psquarenf(nf,constant_term(pol),pr)) return 1;
     zinit = NULL;
   }
   repr=repres(nf,pr);
@@ -403,10 +381,7 @@ nfhilbertp(GEN nf,GEN a,GEN b,GEN pr)
   ordp= subis( p, 1);                 /* |F_p^*|        */
   modpr = nf_to_ff_init(nf, &pr,&T,&p);
   t = nf_to_ff(nf,t,modpr);
-  if (T)
-    t = FpXQ_pow(t, diviiexact(ord, ordp), T,p); /* in F_p^* */
-  else
-    t = Fp_pow(t, diviiexact(ord, ordp), p);
+  t = Fq_pow(t, diviiexact(ord, ordp), T,p); /* in F_p^* */
   if (typ(t) == t_POL)
   {
     if (degpol(t)) err(bugparier,"nfhilbertp");
