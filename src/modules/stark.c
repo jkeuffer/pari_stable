@@ -428,11 +428,13 @@ CplxModulus(GEN data, long *newprec, long prec)
   {
     p1[5] = (long)InitChar0((GEN)data[3], dprec);
     pol   = AllStark(p1, nf, -1, dprec);
-    cpl   = mpabs(poldisc0(pol, 0));
-
-    if (!gcmp0(cpl)) break;
+    if (!gcmp0(leading_term(pol)))
+    {
+      cpl   = mpabs(poldisc0(pol, 0));
+      if (!gcmp0(cpl)) break;
+    }
+    dprec += 2;
     if (DEBUGLEVEL >= 2) err(warnprec, "CplxModulus", dprec);
-    dprec++;
   }
 
   if (DEBUGLEVEL >= 2) fprintferr("cpl = %Z\n", cpl);
