@@ -199,8 +199,7 @@ transc(GEN (*f)(GEN,long), GEN x, long prec)
       return gerepile(av,tetpil,f(p1,prec));
 
     case t_POL: case t_RFRAC: case t_RFRACN:
-      p1=tayl(x,gvar(x),precdl); tetpil=avma;
-      return gerepile(av,tetpil,f(p1,prec));
+      return gerepileupto(av, f(_toser(x), prec));
 
     case t_VEC: case t_COL: case t_MAT:
       lx = lg(x); y = cgetg(lx,typ(x));
