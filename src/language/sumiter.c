@@ -296,26 +296,45 @@ suminf(entree *ep, GEN a, char *ch, long prec)
 GEN
 divsum(GEN num, entree *ep, char *ch)
 {
-  long av=avma,d,n,d2;
-  GEN y,z, p1 = icopy(gun);
+  long av=avma;
+  GEN z, y = gzero;
 
-  push_val(ep, p1); n=itos(num); /* provisoire */
-  y=gzero;
-  for (d=d2=1; d2 < n; d++, d2 += d+d-1)
-    if (n%d == 0)
+  push_val(ep, NULL);
+#if 0
+  {
+    long d,n,d2;
+    GEN p1 = icopy(gun);
+    n=itos(num); /* provisoire */
+    ep->value = (void*)p1;
+    for (d=d2=1; d2 < n; d++, d2 += d+d-1)
+      if (n%d == 0)
+      {
+        p1[2]=d; y=gadd(y, lisexpr(ch));
+        if (did_break()) err(breaker,"divsum");
+        p1[2]=n/d; z = lisexpr(ch);
+        if (did_break()) err(breaker,"divsum");
+        y=gadd(y,z);
+      }
+    if (d2 == n)
     {
-      p1[2]=d; y=gadd(y, lisexpr(ch));
-      if (did_break()) err(breaker,"divsum");
-      p1[2]=n/d; z = lisexpr(ch);
+      p1[2]=d; z = lisexpr(ch);
       if (did_break()) err(breaker,"divsum");
       y=gadd(y,z);
     }
-  if (d2 == n)
-  {
-    p1[2]=d; z = lisexpr(ch);
-    if (did_break()) err(breaker,"divsum");
-    y=gadd(y,z);
   }
+#else
+  {
+    GEN t = divisors(num);
+    long i, l=lg(t);
+    for (i=1; i<l; i++)
+    {
+      ep->value = (void*) t[i]; 
+      z = lisseq(ch);
+      if (did_break()) err(breaker,"divsum");
+      y = gadd(y, z);
+    }
+  }
+#endif
   pop_val(ep); return gerepileupto(av,y);
 }
 
