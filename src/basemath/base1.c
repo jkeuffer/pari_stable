@@ -2387,7 +2387,6 @@ initzeta(GEN pol, long prec)
   }
   nfz[4] = (long) C;
   if (DEBUGLEVEL>=2) msgtimer("Cik");
-  gunclone(aij);
   free((void*)zone); free((void*)zone1); free((void*)zone0);
   free((void*)coef); return nfz;
 }

@@ -102,7 +102,8 @@ pop_stack(stack **pts)
   return a;
 }
 
-void debug_stack(void)
+void
+debug_stack(void)
 {
   GEN z;
   fprintferr("bot=0x%lx\t top=0x%lx\n",bot,top);
@@ -110,14 +111,91 @@ void debug_stack(void)
     fprintferr("0x%p:\t0x%lx\t%lu\n",z,*z,*z);
 }
 
-#ifdef STACK_CHECK
+/*********************************************************************/
+/*                                                                   */
+/*                               BLOCS                               */
+/*                                                                   */
+/*********************************************************************/
+static long next_bloc;
+static GEN cur_bloc=NULL; /* current bloc in bloc list */
+
+/* Return x, where:
+ * x[-3]: adress of next bloc
+ * x[-2]: adress of preceding bloc.
+ * x[-1]: number of allocated blocs.
+ * x[0..n-1]: malloc-ed memory. */
+GEN
+newbloc(long n)
+{
+  long *x = (long *) gpmalloc((n + BL_HEAD)*sizeof(long)) + BL_HEAD;
+
+  bl_next(x) = 0; /* the NULL address */
+  bl_prev(x) = (long)cur_bloc;
+  bl_num(x)  = next_bloc++;
+  if (n) *x = 0; /* initialize first cell to 0. See killbloc */
+  if (cur_bloc) bl_next(cur_bloc) = (long)x;
+  if (DEBUGMEM)
+  {
+    if (!n) err(warner,"mallocing NULL object in newbloc");
+    if (DEBUGMEM > 2)
+      fprintferr("new bloc, size %6lu (no %ld): %08lx\n", n, next_bloc-1, x);
+  }
+  return cur_bloc = x;
+}
+
+static void
+free_bloc(GEN x)
+{
+  if (DEBUGMEM > 2)
+    fprintferr("killing bloc (no %ld): %08lx\n", bl_num(x), x); 
+  free((void*)bl_base(x));
+}
+
+static void
+delete_from_bloclist(GEN x)
+{
+  if (bl_next(x)) bl_prev(bl_next(x)) = bl_prev(x);
+  else
+  {
+    cur_bloc = (GEN)bl_prev(x);
+    next_bloc = bl_num(x);
+  }
+  if (bl_prev(x)) bl_next(bl_prev(x)) = bl_next(x);
+  free_bloc(x);
+}
+
+/* Recursively look for clones in the container and kill them. Then kill
+ * container if clone. */
+void
+killsubblocs(GEN x)
+{
+  long i, lx;
+  switch(typ(x)) /* HACK: if x is not a GEN, we have typ(x)=0 */
+  {
+    case t_VEC: case t_COL: case t_MAT:
+      lx = lg(x);
+      for (i=1;i<lx;i++) killsubblocs((GEN)x[i]);
+      break;
+    case t_LIST:
+      lx = lgef(x);
+      for (i=2;i<lx;i++) killsubblocs((GEN)x[i]);
+      break;
+  }
+  if (isclone(x)) delete_from_bloclist(x);
+}
+
+/* FIXME: SIGINT should be blocked until killsubblocs() returns */
+void
+killbloc(GEN x) { killsubblocs(x); }
+void
+gunclone(GEN x) { delete_from_bloclist(x); }
+
 /*********************************************************************/
 /*                                                                   */
 /*                       C STACK SIZE CONTROL                        */
-/*             (to avoid core dump on deep recursion)                */
-/*                                                                   */
+/*                (avoid core dump on deep recursion)                */
 /*********************************************************************/
-
+#ifdef STACK_CHECK
 /* adapted from Perl code written by Dominic Dunlop */
 void *PARI_stack_limit = NULL;
 
@@ -161,8 +239,6 @@ pari_init_stackcheck(void *stack_base)
 /*********************************************************************/
 static int var_not_changed; /* altered in reorder() */
 static int try_to_recover = 0;
-static long next_bloc;
-static GEN cur_bloc=NULL; /* current bloc in bloc list */
 static GEN universal_constants;
 
 #if __MWERKS__
@@ -625,8 +701,7 @@ freeall(void)
   free((void*)primetab);
   free((void*)universal_constants);
 
-  /* set first cell to 0 to inhibit recursion in all cases */
-  while (cur_bloc) { *cur_bloc=0; killbloc(cur_bloc); }
+  while (cur_bloc) delete_from_bloclist(cur_bloc);
   killallfiles(1);
   free((void *)functions_hash);
   free((void *)bot);
@@ -656,79 +731,6 @@ getheap(void)
   x=cgetg(3,t_VEC); x[1]=lstoi(m); x[2]=lstoi(l);
   return x;
 }
-
-/* Return x, where:
- * x[-3]: adress of next bloc
- * x[-2]: adress of preceding bloc.
- * x[-1]: number of allocated blocs.
- * x[0..n-1]: malloc-ed memory.
- */
-GEN
-newbloc(long n)
-{
-  long *x = (long *) gpmalloc((n + BL_HEAD)*sizeof(long)) + BL_HEAD;
-
-  bl_next(x) = 0; /* the NULL address */
-  bl_prev(x) = (long)cur_bloc;
-  bl_num(x)  = next_bloc++;
-  if (n) *x = 0; /* initialize first cell to 0. See killbloc */
-  if (cur_bloc) bl_next(cur_bloc) = (long)x;
-  if (DEBUGMEM)
-  {
-    if (!n) err(warner,"mallocing NULL object in newbloc");
-    if (DEBUGMEM > 2)
-      fprintferr("new bloc, size %6lu (no %ld): %08lx\n", n, next_bloc-1, x);
-  }
-  return cur_bloc = x;
-}
-
-/* recursively look for clones in the container and kill them */
-static void
-inspect(GEN x)
-{
-  long i, lx;
-  switch(typ(x)) /* HACK: if x is not a GEN, we have typ(x)=0 */
-  {
-    case t_VEC: case t_COL: case t_MAT:
-      lx = lg(x);
-      for (i=1;i<lx;i++) inspect((GEN)x[i]);
-      break;
-    case t_LIST:
-      lx = lgef(x);
-      for (i=2;i<lx;i++) inspect((GEN)x[i]);
-      break;
-  }
-  if (isclone(x)) gunclone(x); /* Don't inspect here! components are dead */
-}
-
-/* If insp is set, recursively inspect x, killing all clones found. The GP
- * expression x[i] = y is implemented as x[i] := gclone(y) and we need to
- * reclaim the memory. Useless to inspect when x does not correspond to a GP
- * variable [not dangerous, though] */
-void
-killbloc0(GEN x, int insp)
-{
-  if (!x || isonstack(x)) return;
-  if (bl_next(x)) bl_prev(bl_next(x)) = bl_prev(x);
-  else
-  {
-    cur_bloc = (GEN)bl_prev(x);
-    next_bloc = bl_num(x);
-  }
-  if (bl_prev(x)) bl_next(bl_prev(x)) = bl_next(x);
-  if (DEBUGMEM > 2)
-    fprintferr("killing bloc (no %ld): %08lx\n", bl_num(x), x);
-  if (insp)
-  { /* FIXME: SIGINT should be blocked until inspect() returns */
-    unsetisclone(x); /* important: oo recursion otherwise */
-    inspect(x);
-  }
-  free((void *)bl_base(x));
-}
-void
-killbloc(GEN x) { killbloc0(x,1); }
-void
-gunclone(GEN x) { killbloc0(x,0); }
 
 /********************************************************************/
 /**                                                                **/

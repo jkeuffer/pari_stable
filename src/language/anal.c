@@ -30,6 +30,8 @@ typedef GEN (*PFGEN)(ANYARG);
 typedef GEN (*F2GEN)(GEN,GEN);
 typedef GEN (*F1GEN)(GEN);
 
+extern void killsubblocs(GEN x);
+
 static GEN    constante();
 static GEN    expr();
 static GEN    facteur();
@@ -55,8 +57,6 @@ static entree *installep(void *f,char *name,int l,int v,int add,entree **table);
 /* Is the name proper??? */
 #define SIZEOF_VAR_POLS		(VAR_POLS_LONGS*sizeof(long))
 
-
-extern void killbloc0(GEN x, int inspect);
 extern int term_width(void);
 extern GEN addsmulsi(long a, long b, GEN Y);
 extern GEN rpowsi(ulong a, GEN n, long prec);
@@ -1452,7 +1452,7 @@ change_compo(matcomp *c, GEN res)
     if (typ(res) != t_COL || lg(res) != lg(*pt)) err(caseer2,old,mark.start);
 
   res = gclone(res);
-  if (isclone(*pt)) killbloc(*pt);
+  killsubblocs(*pt);
   return *pt = res;
 }
 

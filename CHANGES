@@ -97,6 +97,9 @@ BA 31- uninitialized memory read in divrr(x,y), when lg(y) < lg(x), leading
    37- [Configure:] --with-readline=path did not work
    38- [Configure:] $TOP/readline was added to search path for ncurses,
        termcap, etc
+   39- memory leak:
+         x = vector(2); y = vectorv(2);
+         while(1, m = matrix(2,2); m[2, ] = x; m[, 2] = y) --> out of memory
 
   Changed
     1- rnf structure (removed useless components)

@@ -205,7 +205,8 @@ addrr(GEN x, GEN y)
     i--;
     for (; j>=2; i--,j--) z[i] = addllx(x[j],y[i]);
     if (overflow)
-    { /* stops since z[0] != 0 */
+    {
+      z[1] = 1; /* stops since z[1] != 0 */
       for (;;) { z[i] = y[i]+1; if (z[i--]) break; }
       if (i <= 0)
       {

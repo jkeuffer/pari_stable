@@ -95,7 +95,8 @@ constpi(long prec)
   }
   p1 = divsr(53360,p1);
   mulrrz(p1,mpsqrt(stor(k3,prec)), tmppi);
-  gunclone(gpi); avma = av1;  gpi = tmppi;
+  if (gpi) gunclone(gpi);
+  avma = av1;  gpi = tmppi;
 }
 
 GEN
@@ -173,7 +174,8 @@ consteuler(long prec)
     }
   }
   divrrz(u,v,tmpeuler);
-  gunclone(geuler); avma = av1; geuler = tmpeuler;
+  if (geuler) gunclone(geuler);
+  avma = av1; geuler = tmpeuler;
 }
 
 GEN
@@ -1449,8 +1451,8 @@ constlog2(long prec)
     s = addrr(s, divrs(u,k));
   }
   setexpo(s, -1); affrr(s, tmplog2);
-  gunclone(glog2); glog2 = tmplog2;
-  avma = av0; return glog2;
+  if (glog2) gunclone(glog2);
+  glog2 = tmplog2; avma = av0; return glog2;
 } 
 
 GEN
