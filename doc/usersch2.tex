@@ -1460,7 +1460,10 @@ The operating system will automatically limit the \idx{recursion depth}:
                         ^---------------
 @eprog
 There's no way to increase the recursion limit (which may be different on
-your machine), since it would simply crash the GP process.
+your machine) from within, since it would simply crash the GP process. To
+increase it before launching GP, you can use \tet{ulimit} or \tet{limit},
+depending on your shell, to raise the process available stack space
+(increase \tet{stacksize}).
 
 \misctitle{Function which take functions as parameters ?} This is easy
 in GP using the following trick (neat example due to Bill Daly):
