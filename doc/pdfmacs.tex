@@ -126,6 +126,7 @@
 
 %% labels and symbolic cross-refs.  For this we use the parameter to
 %% build the symbolic pdf destination.
+\@ifundef{pdfstartlink}{\global\let\pdfstartlink\pdfannotlink}{}
 \def\label#1{\immediate\write\aux{\string
    \newlabel{#1}{{\the\chapno}{\currentlabel}}}
    \pdfdest name {pdf@lab#1} xyz}
