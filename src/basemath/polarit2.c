@@ -675,7 +675,7 @@ static GEN
 uniform_Mignotte_bound(GEN x)
 {
   long e, n = lgef(x)-3;
-  GEN p1, N2 = mpsqrt(fastnorml2(x,DEFAULTPREC));
+  GEN p1, N2 = mpsqrt(QuickNormL2(x,DEFAULTPREC));
 
   p1 = grndtoi(gmul2n(N2, n), &e);
   if (e>=0) p1 = addii(p1, shifti(gun, e));
@@ -3522,12 +3522,13 @@ newtonpoly(GEN x, GEN p)
 }
 
 extern int cmp_pol(GEN x, GEN y);
+extern GEN ZY_ZXY_resultant(GEN A, GEN B0, long *lambda);
 
 /* Factor polynomial a on the number field defined by polynomial t */
 GEN
 polfnf(GEN a, GEN t)
 {
-  GEN x0, y,p1,p2,u,g,fa,n,unt;
+  GEN x0, y,p1,p2,u,fa,n,unt;
   long av=avma,tetpil,lx,v,i,k,vt;
 
   if (typ(a)!=t_POL || typ(t)!=t_POL) err(typeer,"polfnf");
@@ -3537,14 +3538,9 @@ polfnf(GEN a, GEN t)
     err(talker,"polynomial variable must be of higher priority than number field variable\nin factornf");
   u = gdiv(a, ggcd(a,derivpol(a)));
   unt = gmodulsg(1,t); u = gmul(unt,u);
-  g = lift(u);
-  for (k=-1; ; k++)
-  {
-    n = gsub(polx[MAXVARN], gmulsg(k,polx[vt]));
-    n = subres(t, poleval(g,n));
-    if (issquarefree(n)) break;
-  }
+  n = ZY_ZXY_resultant(t, lift(u), &k);
   if (DEBUGLEVEL > 4) fprintferr("polfnf: choosing k = %ld\n",k);
+
   fa=factor(n); fa=(GEN)fa[1]; lx=lg(fa);
   y=cgetg(3,t_MAT);
   p1=cgetg(lx,t_COL); y[1]=(long)p1;

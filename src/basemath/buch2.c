@@ -580,8 +580,8 @@ getfu(GEN nf,GEN *ptxarch,GEN reg,long flun,long *pte,long prec)
   for (j=1; j<RU; j++)
   {
     p1 = (GEN)y[j]; p2 = ginvmod(p1, (GEN)nf[1]);
-    if (gcmp(fastnorml2(p2,DEFAULTPREC),
-             fastnorml2(p1,DEFAULTPREC)) < 0)
+    if (gcmp(QuickNormL2(p2,DEFAULTPREC),
+             QuickNormL2(p1,DEFAULTPREC)) < 0)
     {
       xarch[j] = lneg((GEN)xarch[j]);
       p1 = p2;

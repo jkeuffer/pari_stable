@@ -622,7 +622,6 @@ binome(GEN n, long k)
 /**                  POLYNOMIAL INTERPOLATION                      **/
 /**                                                                **/
 /********************************************************************/
-
 /* assume n > 1 */
 GEN
 polint_i(GEN xa, GEN ya, GEN x, long n, GEN *ptdy)

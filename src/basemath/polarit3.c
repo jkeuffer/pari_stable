@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                                                                   **/
 /***********************************************************************/
 #include "pari.h"
+#define deg(a) (lgef(a)-3)
 
 /*******************************************************************/
 /*                                                                 */
@@ -82,8 +83,30 @@ u_normalizepol(GEN x, long lx)
   setsigne(x, (i > 1)); return x;
 }
 
-/* z in Z[X], return lift(z * Mod(1,p)), normalized*/
 GEN
+u_FpX_deriv(GEN z, ulong p)
+{
+  long i,l = lgef(z)-1;
+  GEN x;
+  if (l < 2) l = 2;
+  x = cgetg(l,t_VECSMALL); x[1] = z[1]; z++;
+  for (i=2; i<l; i++) x[i] = ((i-1) * z[i]) % p;
+  return u_normalizepol(x,l);
+}
+
+static GEN u_FpX_gcd(GEN a, GEN b, ulong p);
+
+static int 
+u_FpX_is_squarefree(GEN z, ulong p)
+{
+  ulong av = avma;
+  GEN d = u_FpX_gcd(z, u_FpX_deriv(z,p) , p);
+  avma = av; return (deg(d) == 0);
+}
+
+#if 0
+/* z in Z[X], return lift(z * Mod(1,p)), normalized */
+static GEN
 u_FpX_red(GEN z, ulong p)
 {
   long i,l = lgef(z);
@@ -91,6 +114,7 @@ u_FpX_red(GEN z, ulong p)
   for (i=2; i<l; i++) x[i] = z[i] % p;
   x[1] = z[1]; return u_normalizepol(x,l);
 }
+#endif
 
 static GEN
 u_FpX_addspec(GEN x, GEN y, long p, long lx, long ly)
@@ -693,8 +717,10 @@ FpX_sqr(GEN x,GEN p)
   if (!p) return z;
   return FpX_red(z, p);
 }
-static GEN u_FpX_divres(GEN x, GEN y, ulong p, int malloc, GEN *pr);
+static GEN u_FpX_divrem(GEN x, GEN y, ulong p, int malloc, GEN *pr);
 static GEN u_Fp_FpX(GEN x,int malloc, ulong p);
+#define u_FpX_div(x,y,p,malloc) u_FpX_divrem((x),(y),(p),(malloc),NULL)
+#define u_FpX_rem(x,y,p,malloc) u_FpX_divrem((x),(y),(p),(malloc),ONLY_REM)
 
 /* Product of y and x in Z/pZ[X]/(pol), as t_VECSMALL */
 static GEN
@@ -703,7 +729,7 @@ u_FpXQ_mul(GEN y,GEN x,GEN pol,ulong p)
   GEN z;
   long vy = varn(y);
   z = u_FpX_mul(y,x,p); setvarn(z,vy); 
-  return u_FpX_divres(z,pol,p, 0,ONLY_REM);
+  return u_FpX_rem(z,pol,p, 0);
 }
 /* Square of y in Z/pZ[X]/(pol), as t_VECSMALL */
 static GEN
@@ -713,7 +739,7 @@ u_FpXQ_sqr(GEN y,GEN pol,ulong p)
   long vy = varn(y);
   z = u_FpX_sqr(y,p);
   setvarn(z,vy); 
-  return u_FpX_divres(z,pol,p, 0,ONLY_REM);
+  return u_FpX_rem(z,pol,p, 0);
 }
 
 /* Product of y and x in Z/pZ[X]/(pol)
@@ -943,7 +969,7 @@ GEN /*Somewhat copy-pasted...*/
 /*Not malloc nor warn-clean.*/
 Fq_from_Kronecker(GEN z, GEN pol, GEN p)
 {
-  long i,j,lx,l = lgef(z), N = ((lgef(pol)-3)<<1) + 1;
+  long i,j,lx,l = lgef(z), N = (deg(pol)<<1) + 1;
   GEN x, t = cgetg(N,t_POL);
   t[1] = pol[1] & VARNBITS;
   lx = (l-2) / (N-2); x = cgetg(lx+3,t_POL);
@@ -1123,7 +1149,7 @@ GEN ffsqrtnmod(GEN a, GEN n, GEN T, GEN p, GEN *zetan)
     err(talker,"1/0 exponent in ffsqrtnmod");
   if(gcmp1(n)) {if (zetan) *zetan=gun;return gcopy(a);}
   if(gcmp0(a)) {if (zetan) *zetan=gun;return gzero;}
-  q=addsi(-1,gpowgs(p,lgef(T)-3));
+  q=addsi(-1,gpowgs(p,deg(T)));
   m=bezout(n,q,&u1,&u2);
   if (gcmp(m,n))
   {
@@ -1195,7 +1221,7 @@ matrixpow(long n, long m, GEN y, GEN P,GEN l)
   for (i=1;i<=m;i++)
   {
     M[i] = lgetg(n+1, t_COL);
-    d=lgef((GEN)Z[i])-3;
+    d=deg(Z[i]);
     for (j = 1; j <= d+1 ; j++)
       mael(M,i,j) = licopy((GEN) mael(Z,i,1 + j));
     for (     ; j <= n; j++)
@@ -1634,7 +1660,7 @@ small_to_pol(GEN z)
 GEN
 FqX_from_Kronecker(GEN z, GEN pol, GEN p)
 {
-  long i,j,lx,l = lgef(z), N = ((lgef(pol)-3)<<1) + 1;
+  long i,j,lx,l = lgef(z), N = (deg(pol)<<1) + 1;
   GEN a,x, t = cgetg(N,t_POL);
   t[1] = pol[1] & VARNBITS;
   lx = (l-2) / (N-2); x = cgetg(lx+3,t_POL);
@@ -1671,7 +1697,7 @@ from_Kronecker(GEN z, GEN pol)
 static GEN
 maxnorm(GEN p)
 {
-  long i,n=lgef(p)-3,ltop=avma,lbot;
+  long i,n=deg(p),ltop=avma,lbot;
   GEN x, m = gzero;
 
   p += 2;
@@ -1684,7 +1710,7 @@ maxnorm(GEN p)
   return gerepile(ltop,lbot,addis(m,1));
 }
 
-/* return x[0 .. dx] mod p as t_VECSMALL. Assume x a t_POL */
+/* return x[0 .. dx] mod p as t_VECSMALL. Assume x a t_POL/VECSMALL/INT */
 static GEN
 u_Fp_FpX(GEN x, int malloc, ulong p)
 {
@@ -1692,7 +1718,12 @@ u_Fp_FpX(GEN x, int malloc, ulong p)
   ulong m;
   GEN a;
 
-  if (typ(x) == t_VECSMALL) return x;
+  switch (typ(x))
+  {
+    case t_VECSMALL: return x;
+    case t_INT: a = u_allocpol(0, malloc);
+      a[2] = umodiu(x, p); return a;
+  }
   lx = lgef(x); m = 0;
   for (i=lx-1; i>1; i--)
   {
@@ -1716,8 +1747,18 @@ Fq_res_long(GEN x, GEN y, GEN T, ulong p, GEN *pr)
 }
 #endif
 
-ulong xgcduu(ulong d, ulong d1, int f, ulong* v, ulong* v1, long *s);
+static GEN 
+u_FpX_Fp_mul(GEN y, ulong x,ulong p, int malloc)
+{
+  GEN z;
+  int i, l;
+  if (!x) return u_zeropol(malloc);
+  l = lgef(y); z = u_allocpol(l-3, malloc);
+  for(i=2; i<l; i++) z[i] = (y[i] * x) % p;
+  return z;
+}
 
+ulong xgcduu(ulong d, ulong d1, int f, ulong* v, ulong* v1, long *s);
 /* 1 / Mod(x,p) , or 0 if inverse doesn't exist */
 static ulong
 u_invmod(ulong x, ulong p)
@@ -1729,15 +1770,13 @@ u_invmod(ulong x, ulong p)
   return xv;
 }
 
-static GEN 
-u_FpX_Fp_mul(GEN y, ulong x,ulong p, int malloc)
+static GEN
+u_FpX_normalize(GEN z, ulong p)
 {
-  GEN z;
-  int i, l;
-  if (!x) return u_zeropol(malloc);
-  l = lgef(y); z = u_allocpol(l-3, malloc);
-  for(i=2; i<l; i++) z[i] = (y[i] * x) % p;
-  return z;
+  long l = lgef(z)-1;
+  ulong p1 = z[l]; /* leading term */
+  if (p1 == 1) return z;
+  return u_FpX_Fp_mul(z, u_invmod(p1,p), p, 0);
 }
 
 static GEN
@@ -1751,13 +1790,13 @@ u_copy(GEN x, int malloc)
 
 /* as FpX_divres but working only on ulong types. ASSUME pr != ONLY_DIVIDES */
 static GEN
-u_FpX_divres(GEN x, GEN y, ulong p, int malloc, GEN *pr)
+u_FpX_divrem(GEN x, GEN y, ulong p, int malloc, GEN *pr)
 {
   GEN z,q,c;
   long dx,dy,dz,i,j;
   ulong p1,inv;
 
-  dy = lgef(y)-3;
+  dy = deg(y);
   if (!dy)
   {
     if (pr && pr != ONLY_DIVIDES)
@@ -1768,7 +1807,7 @@ u_FpX_divres(GEN x, GEN y, ulong p, int malloc, GEN *pr)
     if (y[2] == 1UL) return u_copy(x,malloc);
     return u_FpX_Fp_mul(x, u_invmod(y[2], p), p, malloc);
   }
-  dx = lgef(x)-3;
+  dx = deg(x);
   x += 2;
   y += 2;
   dz = dx-dy;
@@ -1831,7 +1870,7 @@ FpX_divres(GEN x, GEN y, GEN p, GEN *pr)
 
   if (!p) return poldivres(x,y,pr);
   if (!signe(y)) err(talker,"division by zero in FpX_divres");
-  vx=varn(x); dy=lgef(y)-3; dx=lgef(x)-3;
+  vx=varn(x); dy=deg(y); dx=deg(x);
   if (dx < dy)
   {
     if (pr)
@@ -1861,7 +1900,7 @@ FpX_divres(GEN x, GEN y, GEN p, GEN *pr)
     ulong pp = (ulong)p[2];
     GEN a = u_Fp_FpX(x,1, pp);
     GEN b = u_Fp_FpX(y,1, pp);
-    GEN zz= u_FpX_divres(a,b,pp,1, pr);
+    GEN zz= u_FpX_divrem(a,b,pp,1, pr);
     if (pr && pr != ONLY_DIVIDES && pr != ONLY_REM)
     {
       rem = small_to_pol(*pr);
@@ -1924,21 +1963,30 @@ FpX_divres(GEN x, GEN y, GEN p, GEN *pr)
 }
 
 static GEN
+u_FpX_gcd(GEN a, GEN b, ulong p)
+{
+  GEN c;
+  if (lgef(b) > lgef(a)) { c = b; b = a; a = c; }
+  while (signe(b))
+  {
+    c = u_FpX_rem(a,b,p,0);
+    a = b; b = c;
+  }
+  return a;
+}
+
+static GEN
 FpX_gcd_long(GEN x, GEN y, GEN p)
 {
-  ulong pp = (ulong)p[2];
-  GEN a,b,c,z;
+  ulong pp = (ulong)p[2], av = avma;
+  GEN a,b,z;
 
-  a = u_Fp_FpX(x,1, pp);
-  if (!signe(a)) { free(a); return FpX_red(y,p); }
-  b = u_Fp_FpX(y,1, pp);
-  if (lgef(b) > lgef(a)) { c = b; b = a; a = c; }
-  while (lgef(b) > 2)
-  {
-    c = u_FpX_divres(a,b, pp,1, ONLY_REM);
-    free(a); a = b; b = c;
-  }
-  z = small_to_pol(a); free(a); free(b);
+  (void)new_chunk((lgef(x) + lgef(y)) << 2); /* scratch space */
+  a = u_Fp_FpX(x,0, pp);
+  if (!signe(a)) { avma = av; return FpX_red(y,p); }
+  b = u_Fp_FpX(y,0, pp);
+  a = u_FpX_gcd(a,b, pp);
+  avma = av; z = small_to_pol(a);
   setvarn(z, varn(x)); return z;
 }
 
@@ -2046,13 +2094,13 @@ FpX_extgcd_long(GEN x, GEN y, GEN p, GEN *ptu, GEN *ptv)
   v1= u_Fp_FpX(polun[0],0, pp);
   while (signe(d1))
   {
-    q = u_FpX_divres(d,d1,pp, 0,&r);
+    q = u_FpX_divrem(d,d1,pp, 0,&r);
     v = u_FpX_sub(v, u_FpX_mul(q,v1, pp), pp); /* v -= q v1 */
     u=v; v=v1; v1=u;
     u=r; d=d1; d1=u;
   }
   u = u_FpX_sub(d, u_FpX_mul(b,v,pp), pp);
-  u = u_FpX_divres(u,a,pp,0,NULL);
+  u = u_FpX_div(u,a,pp,0);
   *ptu = u;
   *ptv = v;
   {
@@ -2100,80 +2148,116 @@ FpX_extgcd(GEN x, GEN y, GEN p, GEN *ptu, GEN *ptv)
   *ptu = u; *ptv = v; return d;
 }
 
-extern GEN chinois_int_coprime(GEN x2, GEN y2, GEN x1, GEN y1, GEN z1);
+/* return z = a mod q, b mod p (p,q) = 1 */
+static GEN
+u_chrem_coprime(GEN a, ulong b, GEN q, ulong p, GEN pq)
+{
+  ulong av = avma, d, qmod, amod = umodiu(a,p);
+  GEN ax,z;
+  int cmp;
+
+  if (b == amod) return NULL;
+  d = (b > amod)? b - amod: p - (amod - b); /* (b - a) mod p */
+  qmod = umodiu(q,p);
+  (void)new_chunk((lgefint(pq)<<1));
+  ax = mului((d * u_invmod(qmod, p)) % p, q); /* d mod p, 0 mod q */
+  z = addii(a, ax);
+  cmp = cmpii(z,pq); avma = av;
+  if (!cmp) return gzero;
+  if (cmp > 0) return subii(z, pq);
+  return icopy(z);
+}
+
+GEN
+init_CRT(GEN Hp, GEN *ptq, ulong p)
+{
+  long h, i, l = lgef(Hp), lim = (long)(p>>1);
+  GEN H = cgetg(l, t_POL);
+  *ptq = utoi(p); H[1] = evalsigne(1)|evallgef(l);
+  for (i=2; i<l; i++)
+  {
+    h = Hp[i]; if (h > lim) h -= (long)p;
+    H[i] = lstoi(h);
+  }
+  return H;
+}
+
+int
+incremental_CRT(GEN H, GEN Hp, GEN *ptq, ulong p)
+{
+  GEN h, q = *ptq, qp = muliu(q,p), lim = shifti(qp,-1);
+  long i, l = lgef(H);
+  int stable = 1;
+  for (i=2; i<l; i++)
+  {
+    h = u_chrem_coprime((GEN)H[i],Hp[i],q,p,qp);
+    if (h)
+    {
+      if (cmpii(h,lim) > 0) h = subii(h,qp);
+      H[i] = (long)h; stable = 0;
+    }
+  }
+  *ptq = qp; return stable;
+}
 
 /* a and b in Q[X] */
 GEN
-modulargcd(GEN a, GEN b)
+modulargcd(GEN A0, GEN B0)
 {
-  GEN D,A,B,Cp,p,q,H,g,limit,ma,mb,p1;
-  long av=avma,avlim=stack_lim(av,1), m,n,nA,nB,av2,lbot,i;
-  long prime[]={evaltyp(t_INT)|m_evallg(3),evalsigne(1)|evallgefint(3),0};
+  GEN a,b,Hp,D,A,B,q,H,g,limit,ma,mb,p1;
+  long av=avma,avlim=stack_lim(av,1), m,n,nA,nB,av2;
   byteptr d = diffptr;
+  ulong p;
 
-  if (typ(a)!=t_POL || typ(b)!=t_POL) err(notpoler,"modulargcd");
-  if (!signe(a)) return gcopy(b);
-  if (!signe(b)) return gcopy(a);
-  A = content(a);
-  B = content(b); D = ggcd(A,B);
-  A = gcmp1(A)? a: gdiv(a,A); nA=lgef(A)-3;
-  B = gcmp1(B)? b: gdiv(b,B); nB=lgef(B)-3;
+  if (typ(A0)!=t_POL || typ(B0)!=t_POL) err(notpoler,"modulargcd");
+  if (!signe(A0)) return gcopy(B0);
+  if (!signe(B0)) return gcopy(A0);
+  A = content(A0);
+  B = content(B0); D = ggcd(A,B);
+  A = gcmp1(A)? A0: gdiv(A0,A); nA=deg(A);
+  B = gcmp1(B)? B0: gdiv(B0,B); nB=deg(B);
   g = mppgcd((GEN)A[nA+2], (GEN)B[nB+2]);
   av2=avma; n=1+min(nA,nB);
   ma=maxnorm(A); mb=maxnorm(B);
   if (cmpii(ma,mb) > 0) limit=mb; else limit=ma;
   limit = shifti(mulii(limit,g), n+1);
 
-  prime[2] = 27449; d += 3000; /* p = prime(3000) */
-  p = prime; H = NULL;
+  p = 27449; d += 3000; /* p = prime(3000) */
+  H = NULL;
   for(;;)
   {
-    do
-    {
-      if (*d) p[2] += *d++;
-      else p = nextprime(addis(p,1)); /* never used */
-    }
-    while (!signe(resii(g,p)));
-    Cp = FpX_gcd(A,B,p);
-    m = lgef(Cp)-3;
+    p += *d++; if (!*d) err(primer1);
+    if (!umodiu(g,p)) continue;
+
+    a = u_Fp_FpX(A, 0, p);
+    b = u_Fp_FpX(B, 0, p); Hp = u_FpX_gcd(a,b, p);
+    m = deg(Hp);
     if (m==0) return gerepileupto(av,gmul(D,polun[varn(A)]));
-    if (gcmp1(g))
-      Cp = FpX_normalize(Cp, p);
+    if (is_pm1(g))
+      Hp = u_FpX_normalize(Hp, p);
     else
-    { /* very rare */
-      p1 = modii(mulii(g, mpinvmod((GEN)Cp[m+2],p)),p);
-      Cp = FpX_red(gmul(p1,Cp), p);
+    {
+      ulong t = umodiu(g, p) * u_invmod(Hp[m+2],p);
+      Hp = u_FpX_Fp_mul(Hp, t % p, p, 0);
     }
-    if (m<n) { q=icopy(p); H=Cp; limit=shifti(limit,m-n); n=m; }
+    if (m<n)
+    {
+      q = utoi(p); H = small_to_pol(Hp); setvarn(H, varn(A0));
+      limit = shifti(limit,m-n); n = m;
+    }
     else
-      if (m==n && H)
-      {
-        GEN q2 = mulii(q,p);
-        for (i=2; i<=n+2; i++) /* lc(H) = g (mod q2) */
-          H[i]=(long) chinois_int_coprime((GEN)H[i],(GEN)Cp[i],q,p,q2);
-        q = q2;
-	if (cmpii(limit,q) <= 0)
-	{
-	  GEN limit2=shifti(limit,-1);
-	  for (i=2; i<=n+2; i++)
-	  {
-	    p1 = (GEN)H[i];
-	    if (cmpii(p1,limit2) > 0) H[i]=lsubii(p1,q);
-	  }
-          p1 = content(H); if (!gcmp1(p1)) H = gdiv(H,p1);
-	  if (!signe(gres(A,H)) && !signe(gres(B,H)))
-	  {
-	    lbot=avma;
-	    return gerepile(av,lbot,gmul(D,H));
-	  }
-	  H = NULL; /* failed */
-	}
+      if (m==n && H && incremental_CRT(H, Hp, &q, p))
+      { /* H stable: check divisibility */
+        p1 = content(H); if (!gcmp1(p1)) H = gdiv(H,p1);
+        if (!signe(gres(A,H)) && !signe(gres(B,H)))
+          return gerepileupto(av, gmul(D,H));
+        H = NULL; /* failed */
       }
     if (low_stack(avlim, stack_lim(av,1)))
     {
-      GEN *gptr[4]; gptr[0]=&H; gptr[1]=&p; gptr[2]=&q; gptr[3]=&limit;
+      GEN *gptr[3]; gptr[0]=&H; gptr[1]=&q; gptr[2]=&limit;
       if (DEBUGMEM>1) err(warnmem,"modulargcd");
-      gerepilemany(av2,gptr,4);
+      gerepilemany(av2,gptr,3);
     }
   }
 }
@@ -2203,3 +2287,424 @@ stopoly_gen(GEN m, GEN p, long v)
   return y;
 }
 
+/* modular resultant */
+static ulong
+powuumod(ulong x, ulong n0, ulong p)
+{
+  ulong y = 1, z = x, n = n0;
+  while (n)
+  {
+    if (n&1) { y *= z; y %= p; }
+    n>>=1; if (!n) break;
+    z *= z; z %= p;
+  }
+  return y;
+}
+
+ulong
+u_FpX_resultant(GEN a, GEN b, ulong p)
+{
+  long d0,d1,d2,cnt, res = 1;
+  ulong lb,av;
+  GEN c;
+
+  if (!signe(a) || !signe(b)) return 0;
+  if (lgef(b) > lgef(a))
+  {
+    c = b; b = a; a = c;
+    if (deg(a) & deg(b) & 1) res = p-res;
+  }
+  d1 = deg(a); if (!d1) return 1;
+  d2 = deg(b); cnt = 0; av = avma;
+  for(;;)
+  {
+    d0 = d1;
+    d1 = d2; lb = b[d1+2];
+    c = u_FpX_rem(a,b, p,0);
+    a = b; b = c;
+    
+    d2 = deg(c);
+    if (d2 < 0) break;
+    if (lb != 1)
+    {
+      res *= powuumod(lb, d0 - d2, p);
+      res %= p;
+    }
+    if (d0 & d1 & 1) res = p - res;
+    if (++cnt == 4) { cnt = 0; avma = av; }
+  }
+  if (d1) res = 0;
+  else
+  {
+    res *= powuumod(lb, d0, p);
+    res %= p;
+  }
+  avma = av; return res;
+}
+
+ulong
+FpX_resultant_long(GEN x, GEN y, GEN p)
+{
+  ulong pp = (ulong)p[2], av = avma;
+  GEN a = u_Fp_FpX(x,0, pp);
+  GEN b = u_Fp_FpX(y,0, pp);
+  ulong res = u_FpX_resultant(a, b, pp);
+  avma = av; return res;
+}
+
+static ulong global_pp;
+
+static GEN
+_u_FpX_mul(GEN a, GEN b)
+{
+  return u_FpX_mul(a,b, global_pp);
+}
+
+/* compute prod (x - a[i]) */
+GEN
+u_FpV_roots_to_pol(GEN a, ulong pp)
+{
+  long i,k,lx = lg(a);
+  GEN p1,p2;
+  if (lx == 1) return polun[0];
+  p1 = cgetg(lx, t_VEC); global_pp = pp;
+  for (k=1,i=1; i<lx-1; i+=2)
+  {
+    p2 = cgetg(5,t_VECSMALL); p1[k++] = (long)p2;
+    p2[2] = (a[i] * a[i+1]) % pp;
+    p2[3] = (pp<<1) - (a[i] + a[i+1]);
+    p2[4] = 1; p2[1] = evallgef(5);
+  }
+  if (i < lx)
+  {
+    p2 = cgetg(4,t_POL); p1[k++] = (long)p2;
+    p2[1] = evallgef(4);
+    p2[2] = pp - a[i];
+    p2[3] = 1;
+  }
+  setlg(p1, k); return divide_conquer_prod(p1, _u_FpX_mul);
+}
+
+
+/* u P(X) + v P(-X) */
+static GEN
+pol_comp(GEN P, GEN u, GEN v)
+{
+  long i, l = lgef(P);
+  GEN y = cgetg(l, t_POL);
+  for (i=2; i<l; i++)
+  {
+    GEN t = (GEN)P[i];
+    y[i] = gcmp0(t)? zero: 
+                     (i&1)? lmul(t, gsub(u,v)) /*  odd degree */
+                          : lmul(t, gadd(u,v));/* even degree */
+  }
+  y[1] = P[1]; return normalizepol_i(y,l);
+}
+
+static GEN
+u_pol_comp(GEN P, ulong u, ulong v, ulong p)
+{
+  long i, l = lgef(P);
+  GEN y = u_allocpol(l-3, 0);
+  for (i=2; i<l; i++)
+  {
+    ulong t = P[i];
+    y[i] = (t == 0)? 0: 
+                     (i&1)? (t * (u + (p - v))) % p
+                          : (t * (u + v)) % p;
+  }
+  return u_normalizepol(y,l);
+}
+
+GEN roots_to_pol(GEN a, long v);
+
+GEN
+polint_triv(GEN xa, GEN ya)
+{
+  GEN P = NULL, Q = roots_to_pol(xa,0);
+  long i, n = lg(xa), av = avma, lim = stack_lim(av,2);
+  for (i=1; i<n; i++)
+  {
+    GEN T,dP,u;
+    long e, prec;
+    if (gcmp0((GEN)ya[i])) continue;
+
+    T = gdeuc(Q, gsub(polx[0], (GEN)xa[i]));
+    e = gexpo((GEN)ya[i]) + gexpo(T);
+    prec = DEFAULTPREC + (e >> TWOPOTBITS_IN_LONG);
+    u = cgetr(prec);
+    gaffect(poleval(T,(GEN)xa[i]), u);
+    u = ginv(u);
+
+    if (i < n-1 && absi_equal((GEN)xa[i], (GEN)xa[i+1]))
+    { /* x_i = -x_{i+1} */
+      T = gmul(T, u);
+      dP = pol_comp(T, (GEN)ya[i], (GEN)ya[i+1]);
+      i++;
+    }
+    else
+    {
+      dP = gmul((GEN)ya[i], T);
+      dP = gmul(dP, u);
+    }
+    P = P? gadd(P, dP): dP;
+    if (low_stack(lim,stack_lim(av,2)))
+    {
+      if (DEBUGMEM>1) err(warnmem,"polint_triv (i = %ld)",i);
+      P = gerepileupto(av, P);
+    }
+  }
+  return P? ground(P): zeropol(0);
+}
+
+GEN
+polint_triv2(GEN xa, GEN ya)
+{
+  GEN P = NULL, Q = roots_to_pol(xa,0);
+  long i, n = lg(xa), av = avma, lim = stack_lim(av,2);
+  for (i=1; i<n; i++)
+  {
+    GEN T,dP;
+    if (gcmp0((GEN)ya[i])) continue;
+    T = gdeuc(Q, gsub(polx[0], (GEN)xa[i]));
+    if (i < n-1 && absi_equal((GEN)xa[i], (GEN)xa[i+1]))
+    { /* x_i = -x_{i+1} */
+      T = gdiv(T, poleval(T, (GEN)xa[i]));
+      dP = pol_comp(T, (GEN)ya[i], (GEN)ya[i+1]);
+      i++;
+    }
+    else
+    {
+      dP = gmul((GEN)ya[i], T);
+      dP = gdiv(dP, poleval(T,(GEN)xa[i]));
+    }
+    P = P? gadd(P, dP): dP;
+    if (low_stack(lim,stack_lim(av,2)))
+    {
+      if (DEBUGMEM>1) err(warnmem,"polint_triv2 (i = %ld)",i);
+      P = gerepileupto(av, P);
+    }
+  }
+  return P? ground(P): zeropol(0);
+}
+
+ulong
+u_FpX_eval(GEN x, ulong y, ulong p)
+{
+  ulong p1,r;
+  long i,j;
+  i=lgef(x)-1;
+  if (i<=2)
+    return (i==2)? x[2]: 0;
+  p1 = x[i];
+  /* specific attention to sparse polynomials (see poleval)*/
+  for (i--; i>=2; i=j-1)
+  {
+    for (j=i; !x[j]; j--)
+      if (j==2)
+      {
+	if (i != j) y = powuumod(y, i-j+1, p);
+	return (p1 * y) % p;
+      }
+    r = (i==j)? y: powuumod(y, i-j+1, p);
+    p1 = ((p1*r) + x[j]) % p;
+  }
+  return p1;
+}
+
+/* xa, ya = t_VECSMALL */
+GEN
+u_FpV_polint(GEN xa, GEN ya, ulong p)
+{
+  GEN X_x,T,dP, P = NULL, Q = u_FpV_roots_to_pol(xa, p);
+  long i, n = lg(xa);
+  ulong av, inv;
+  X_x = u_allocpol(1, 0);
+  X_x[3] = 1; /* X_x will hold X - x[i] */
+  av = avma; (void)new_chunk(n+3); /* scratch space */
+  for (i=1; i<n; i++)
+  {
+    if (!ya[i]) continue;
+    X_x[2] = p - xa[i]; T = u_FpX_div(Q, X_x, p, 0);
+    inv = u_invmod(u_FpX_eval(T,xa[i], p), p);
+    if (i < n-1 && xa[i] + xa[i+1] == p)
+    {
+      dP = u_pol_comp(T, (ya[i] * inv) % p, (ya[i+1] * inv) % p, p);
+      i++; /* x_i = -x_{i+1} */
+    }
+    else
+      dP = u_FpX_Fp_mul(T, (ya[i] * inv) % p, p, 0);
+    avma = av;
+    P = P? u_FpX_add(P, dP, p): dP;
+  }
+  return P? P: u_zeropol(0);
+}
+
+/* TODO: split coeffs of b in odd/even part --> FpX_eval twice faster */
+static int
+vec_u_FpX_eval(GEN b, ulong x, ulong pp, GEN *evalp, GEN *evalm)
+{
+  ulong leadp, leadm = 0, mx = pp - x;
+  long i, lb = lgef(b);
+  GEN m, p;
+  leadp = u_FpX_eval((GEN)b[lb-1], x,   pp); if (!leadp) return 0;
+  if (x)
+  {
+    leadm = u_FpX_eval((GEN)b[lb-1],mx, pp); if (!leadm) return 0;
+  }
+  *evalp = p = u_allocpol(lb-3, 0);
+  for (i=2; i<lb-1; i++)
+    p[i] = u_FpX_eval((GEN)b[i], x, pp);
+  p[i] = leadp; if (!x) return 1;
+  *evalm = m = u_allocpol(lb-3, 0);
+  for (i=2; i<lb-1; i++)
+    m[i] = u_FpX_eval((GEN)b[i],mx, pp);
+  m[i] = leadm; return 1;
+}
+
+/* interpolate at roots of 1 and use Hadamard bound for univariate resultant */
+static GEN
+ZY_ZXY_ResBound(GEN A, GEN B)
+{
+  ulong av = avma;
+  GEN a = gzero, b = gzero;
+  long i , lA = lgef(A), lB = lgef(B);
+  for (i=2; i<lA; i++) a = addii(a, sqri((GEN)A[i]));
+  for (i=2; i<lB; i++) b = addii(b, sqri((GEN)gnorml1((GEN)B[i], 0)));
+  b = mulii(gpowgs(a, deg(B)), gpowgs(b, deg(A)));
+  return gerepileupto(av, addis(racine(b), 1));
+}
+
+/* If lambda = NULL, assume A in Z[Y], B in Z[Y][X], return Res_Y(A,B)
+ * Otherwise, find a small lambda such that R(X) = Res_Y(A, B(X - lambda Y))
+ * is squarefree, set *lambda and return R */
+GEN
+ZY_ZXY_resultant(GEN A, GEN B0, long *lambda)
+{
+  ulong av = avma, av2, lim;
+  GEN B = B0, q, a, b, evalp, evalm, H, Hp, bound;
+  long i,n, lb, dres = deg(A)*deg(B);
+  GEN x = cgetg(dres+2, t_VECSMALL);
+  GEN y = cgetg(dres+2, t_VECSMALL);
+  byteptr d = diffptr + 3000;
+  ulong p = 27449; /* p = prime(3000) */
+  long vX = varn(B);
+  long vY = varn(A); /* assume vX < vY */
+  int checksqfree = lambda? 1: 0;
+
+  q = H = NULL;
+  if (vY == MAXVARN)
+  {
+    vY = fetch_var();
+    B0 = gsubst(B0, MAXVARN, polx[vY]);
+    A = dummycopy(A); setvarn(A, vY);
+  }
+
+  av2 = avma; lim = stack_lim(av,2);
+  if (lambda)
+  {
+    *lambda = -1;
+    B = poleval(B0, gadd(polx[MAXVARN], gmulsg(-*lambda, polx[vY])));
+  }
+  else
+    B = poleval(B0, polx[MAXVARN]);
+  b = u_allocpol(deg(B), 0);
+  lb = lgef(B);
+  bound = ZY_ZXY_ResBound(A,B);
+  if (DEBUGLEVEL>4) fprintferr("bound for resultant coeffs: %Z\n",bound);
+
+  for(;;)
+  {
+    p += *d++; if (!*d) err(primer1);
+    a = u_Fp_FpX(A, 0, p);
+    for (i=2; i<lb; i++)
+      b[i] = (long)u_Fp_FpX((GEN)B[i], 0, p);
+    n = dres & 1;
+    for (i = 0; i<=dres; n++)
+    { /* evaluate at +/- n */
+      if (!vec_u_FpX_eval(b, n, p, &evalp, &evalm)) continue; /* degree drop */
+      x[++i] = n;
+      y[i] = u_FpX_resultant(a, evalp, p);
+      if (n == 0) continue;
+      if (i > dres) break;
+      x[++i] = p - n;
+      y[i] = u_FpX_resultant(a, evalm, p);
+    }
+    Hp = u_FpV_polint(x,y, p);
+    if (checksqfree) {
+      if (u_FpX_is_squarefree(Hp, p))
+      {
+        if (DEBUGLEVEL>4) fprintferr("Final lambda = %ld\n",*lambda);
+        checksqfree = 0;
+      }
+      else
+      {
+        (*lambda)++; H = NULL; avma = av2;
+        B = poleval(B0, gadd(polx[MAXVARN], gmulsg(-*lambda, polx[vY])));
+        b = u_allocpol(deg(B), 0);
+        lb = lgef(B);
+        bound = ZY_ZXY_ResBound(A,B);
+        if (DEBUGLEVEL>4)
+        {
+          fprintferr("Restarting with lambda = %ld\n",*lambda);
+          fprintferr("bound for resultant coeffs: %Z\n",bound);
+        }
+        continue;
+      }
+    }
+    if (!H) 
+      H = init_CRT(Hp, &q, p);
+    else /* could make it probabilistic ??? [e.g if stable twice, etc] */
+      (void)incremental_CRT(H, Hp, &q, p);
+    if (DEBUGLEVEL>5) msgtimer("resultant mod %ld", p);
+    if (cmpii(q, bound) >= 0) break; /* DONE */
+    if (low_stack(lim, stack_lim(av,2)))
+    {
+      GEN *gptr[4]; gptr[0] = &H; gptr[1] = &q; gptr[2] = &bound; gptr[3] = &B;
+      if (DEBUGMEM>1) err(warnmem,"ZY_ZXY_resultant");
+      gerepilemany(av2,gptr,lambda? 4: 2); b = u_allocpol(deg(B), 0);
+    }
+  }
+  setvarn(H, vX); delete_var();
+  return gerepileupto(av, gcopy(H));
+}
+
+GEN
+mycaract(GEN A, GEN B)
+{
+  long i;
+  B = dummycopy(B); setvarn(B,0);
+  return ZY_ZXY_resultant(A, B, &i);
+}
+
+#if 0
+GEN
+result_interp(GEN A, GEN B)
+{
+  long i,n, la = lgef(A), lb = lgef(B), dres = (la-3)*(lb-3);
+  GEN leadB = leading_term(B), gn;
+  GEN x = cgetg(dres+2, t_VEC);
+  GEN y = cgetg(dres+2, t_VEC);
+  if (typ(leadB) != t_POL || lgef(leadB) == 3) leadB = NULL;
+  if (DEBUGLEVEL) timer2();
+  i = 0;
+  for (n=0; i<=dres; n++)
+  {
+    gn = stoi(n);
+    if (leadB && (gcmp0(poleval(leadB, gn))
+                 || (n && gcmp0(poleval(leadB, negi(gn)))))) continue;
+    i++;
+    x[i] = (long)gn;
+    y[i] = (long)subres(poleval(B, gn), A);
+    if (n == 0) continue;
+    if (i > dres) break;
+    i++; gn = negi(gn);
+    x[i] = (long)gn;
+    y[i] = (long)subres(poleval(B, gn), A);
+    if (DEBUGLEVEL) fprintferr(" %ld", i);
+  }
+  if (DEBUGLEVEL) msgtimer("done evals");
+  return polint_triv(x,y);
+}
+#endif

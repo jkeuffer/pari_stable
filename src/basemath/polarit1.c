@@ -2368,7 +2368,6 @@ factmod9(GEN f, GEN pp, GEN a)
 /*                                                                 */
 /*******************************************************************/
 GEN square_free_factorization(GEN pol);
-static GEN gnorml1(GEN x, long PREC);
 static GEN laguer(GEN pol,long N,GEN y0,GEN EPS,long PREC);
 static GEN zrhqr(GEN a,long PREC);
 
@@ -2744,16 +2743,16 @@ laguer(GEN pol,long N,GEN y0,GEN EPS,long PREC)
   x=y0;
   for (iter=1; iter<=MAXIT; iter++)
   {
-    b=(GEN)pol[N+2]; erre=gnorml1(b,PREC);
-    d=gzero; f=gzero; abx=gnorml1(x,PREC);
+    b=(GEN)pol[N+2]; erre=QuickNormL1(b,PREC);
+    d=gzero; f=gzero; abx=QuickNormL1(x,PREC);
     for (j=N-1; j>=0; j--)
     {
       f=gadd(gmul(x,f),d); d=gadd(gmul(x,d),b);
       b=gadd(gmul(x,b),(GEN)pol[j+2]);
-      erre=gadd(gnorml1(b,PREC),gmul(abx,erre));
+      erre=gadd(QuickNormL1(b,PREC),gmul(abx,erre));
     }
     erre=gmul(erre,EPS);
-    if (gcmp(gnorml1(b,PREC),erre)<=0)
+    if (gcmp(QuickNormL1(b,PREC),erre)<=0)
     {
       gaffect(x,rac); avma = av1; return rac;
     }
@@ -2766,7 +2765,7 @@ laguer(GEN pol,long N,GEN y0,GEN EPS,long PREC)
     else
       dx = gmul(gadd(gun,abx),gexp(gmulgs(I,iter),PREC));
     x1=gsub(x,dx);
-    if (gcmp(gnorml1(gsub(x,x1),PREC),EPS)<0)
+    if (gcmp(QuickNormL1(gsub(x,x1),PREC),EPS)<0)
     {
       gaffect(x,rac); avma = av1; return rac;
     }
@@ -2777,38 +2776,6 @@ laguer(GEN pol,long N,GEN y0,GEN EPS,long PREC)
 
 #undef MR
 #undef MT
-
-static GEN
-gnorml1(GEN x,long PREC)
-{
-  long av,tetpil,lx,i;
-  GEN p1,p2,s;
-  av=avma;
-  switch(typ(x))
-  {
-    case t_INT: case t_REAL: case t_FRAC: case t_FRACN:
-      return gabs(x,PREC);
-
-    case t_INTMOD: case t_PADIC: case t_POLMOD: case t_POL:
-    case t_SER: case t_RFRAC: case t_RFRACN: case t_QFR: case t_QFI:
-      return gcopy(x);
-
-    case t_COMPLEX:
-      p1=gabs((GEN)x[1],PREC); p2=gabs((GEN)x[2],PREC); tetpil=avma;
-      return gerepile(av,tetpil,gadd(p1,p2));
-
-    case t_QUAD:
-      p1=gabs((GEN)x[2],PREC); p2=gabs((GEN)x[3],PREC); tetpil=avma;
-      return gerepile(av,tetpil,gadd(p1,p2));
-
-    case t_VEC: case t_COL: case t_MAT:
-      lx=lg(x); s=gzero;
-      for (i=1; i<lx; i++) s=gadd(s,gnorml1((GEN)x[i],PREC)); tetpil=avma;
-      return gerepile(av,tetpil,gcopy(s));
-  }
-  err(talker,"not a PARI object in gnorml1");
-  return NULL; /* not reached */
-}
 
 /***********************************************************************/
 /**                                                                   **/

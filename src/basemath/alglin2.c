@@ -365,13 +365,78 @@ gnorml2(GEN x)
 }
 
 GEN
-fastnorml2(GEN x, long prec)
+QuickNormL2(GEN x, long prec)
 {
   long av = avma;
   GEN y = gmul(x, realun(prec));
   if (typ(x) == t_POL)
     *++y = evaltyp(t_VEC) | evallg(lgef(x)-1);
   return gerepileupto(av, gnorml2(y));
+}
+
+GEN
+gnorml1(GEN x,long prec)
+{
+  ulong av = avma;
+  long lx,i;
+  GEN s;
+  switch(typ(x))
+  {
+    case t_INT: case t_REAL: case t_COMPLEX: case t_FRAC:
+    case t_FRACN: case t_QUAD:
+      return gabs(x,prec);
+
+    case t_POL:
+      lx = lg(x); s = gzero;
+      for (i=2; i<lx; i++) s = gadd(s, gabs((GEN)x[i],prec));
+      break;
+
+    case t_VEC: case t_COL: case t_MAT:
+      lx = lg(x); s = gzero;
+      for (i=1; i<lx; i++) s = gadd(s, gabs((GEN)x[i],prec));
+      break;
+
+    default: err(typeer,"gnorml1");
+      return NULL; /* not reached */
+  }
+  return gerepileupto(av, s);
+}
+
+GEN
+QuickNormL1(GEN x,long prec)
+{
+  ulong av = avma;
+  long lx,i;
+  GEN p1,p2,s;
+  switch(typ(x))
+  {
+    case t_INT: case t_REAL: case t_FRAC: case t_FRACN:
+      return gabs(x,prec);
+
+    case t_INTMOD: case t_PADIC: case t_POLMOD:
+    case t_SER: case t_RFRAC: case t_RFRACN:
+      return gcopy(x);
+
+    case t_COMPLEX:
+      p1=gabs((GEN)x[1],prec); p2=gabs((GEN)x[2],prec);
+      return gerepileupto(av, gadd(p1,p2));
+
+    case t_QUAD:
+      p1=gabs((GEN)x[2],prec); p2=gabs((GEN)x[3],prec);
+      return gerepileupto(av, gadd(p1,p2));
+
+    case t_POL:
+      lx=lg(x); s=gzero;
+      for (i=2; i<lx; i++) s=gadd(s,QuickNormL1((GEN)x[i],prec));
+      return gerepileupto(av, s);
+
+    case t_VEC: case t_COL: case t_MAT:
+      lx=lg(x); s=gzero;
+      for (i=1; i<lx; i++) s=gadd(s,QuickNormL1((GEN)x[i],prec));
+      return gerepileupto(av, s);
+  }
+  err(typeer,"QuickNormL1");
+  return NULL; /* not reached */
 }
 
 /*******************************************************************/
