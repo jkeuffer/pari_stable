@@ -1066,6 +1066,7 @@ GEN     nfisincl(GEN a, GEN b);
 GEN     nfisisom(GEN a, GEN b);
 GEN     poldisc0(GEN x, long v);
 GEN     polfnf(GEN a, GEN t);
+GEN     polhensellift(GEN pol, GEN fct, GEN p, long exp);
 GEN     polresultant0(GEN x, GEN y,long v,long flag);
 GEN     polsym(GEN x, long n);
 GEN     quadgen(GEN x);

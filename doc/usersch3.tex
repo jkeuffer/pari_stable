@@ -5017,6 +5017,13 @@ product is equal to the absolute value of the discriminant of~$f$.
 
 \syn{reduceddiscsmith}{x}.
 
+\subsecidx{polhensellift}$(x, y, p, e)$: given a vector $y$ of
+polynomials that are pairwise relatively prime modulo the prime $p$,
+and whose product is congruent to $x$ modulo $p$, lift the elements of
+$y$ to polynomials whose product is congruent to $x$ modulo $p^e$.
+
+\syn{polhensellift}{x,y,p,e} where $e$ must be a \kbd{long}.
+
 \subsecidx{polinterpolate}$(xa,\{ya\},\{v=x\},\{\&e\})$: given the data vectors
 $xa$ and $ya$ of the same length $n$ ($xa$ containing the $x$-coordinates,
 and $ya$ the corresponding $y$-coordinates), this function finds the
@@ -5206,13 +5213,13 @@ $\text{Norm}(x)=a$ modulo units of positive norm in the number field
 defined by $P$ (as computed by \kbd{bnfisintnorm}). If \var{tnf} was
 computed without assuming \idx{GRH} ($\fl=1$ in \kbd{thueinit}), the
 result is unconditional. For instance, here's how to solve the Thue
-equation $x^13 - 5y^13 = - 4$:
+equation $x^{13} - 5y^{13} = - 4$:
 
 \bprog
 ? tnf = thueinit(x^13 - 5);
 ? thue(tnf, -4)
 %1 = [[1, 1]]
-\@eprog
+@eprog
 Hence, assuming GRH, the only solution is $x = 1$, $y = 1$.
 
 \syn{thue}{\var{tnf},a,\var{sol}}, where an omitted \var{sol} is coded

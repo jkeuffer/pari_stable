@@ -338,6 +338,49 @@ hensel_lift_fact(GEN pol, GEN Q, GEN p, GEN pev, long e)
   res[1] = (long)C; return res;
 }
 
+/* front-end for hensel_lift_factor:
+   lift the factorization of pol mod p given by fct to p^exp (if possible) */
+GEN 
+polhensellift(GEN pol, GEN fct, GEN p, long exp)
+{
+  GEN p1, p2, p3;
+  long av = avma, j, k, l;
+
+  /* we check the arguments */
+  if (typ(pol) != t_POL) 
+    err(talker, "not a polynomial in polhensellift");
+  if ((typ(fct) != t_COL && typ(fct) != t_VEC) || (lg(fct) < 3))
+    err(talker, "not a factorization in polhensellift");
+  if (typ(p) != t_INT || !isprime(p))
+    err(talker, "not a prime number in polhensellift");
+  if (exp < 1) 
+    err(talker, "not a positive exponent in polhensellift");
+
+  p1 = lift(fct); /* make sure the coeffs are integers and not intmods */
+  l = lg(p1) - 1;
+
+  /* then we check that pol \equiv \prod f ; f \in fct mod p */
+  p2 = (GEN)p1[1];
+  for (j = 2; j <= l; j++) p2 = Fp_mul(p2, (GEN)p1[j], p);
+  if (!gcmp0(Fp_sub(pol, p2, p)))
+    err(talker, "not a correct factorization in polhensellift");
+
+  /* finally we check that the elements of fct are coprime mod p */
+  for (j = 1; j < l; j++)
+  {
+    p2 = (GEN)p1[j];
+    for (k = j+1; k <= l; k++) 
+    {
+      p3 = (GEN)p1[k];
+      if (degree(Fp_pol_gcd(p2, p3, p)) > 0)
+	err(talker, "factors are not coprime in polhensellift");
+    }
+  }
+
+  return gerepileupto(av, gcopy(hensel_lift_fact(pol, p1, p, 
+						 gpowgs(p, exp), exp)));
+}
+
 #if 0
 /* lift factorisation mod p: C = lc(C) \prod Q_k  to  mod p^e = pev */
 GEN
