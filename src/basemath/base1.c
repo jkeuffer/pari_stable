@@ -1549,8 +1549,9 @@ _polred(GEN x, GEN a, GEN *pta, FP_chk_fun *CHECK)
     ch = QX_caract(x, (GEN)a[i], v);
     if (CHECK)
     {
-      if (CHECK->f(CHECK->data, ch)) return ch;
-      continue;
+      ch = CHECK->f(CHECK->data, ch);
+      if (!ch) continue;
+      return ch;
     }
     d = modulargcd(derivpol(ch), ch);
     if (degpol(d)) ch = gdivexact(ch,d);

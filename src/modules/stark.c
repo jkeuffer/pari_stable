@@ -2594,7 +2594,7 @@ define_hilbert(void *S, GEN pol)
   DH_t *T = (DH_t*)S;
   GEN d = modulargcd(derivpol(pol), pol);
 
-  if (degpol(pol) != T->cl * degpol(d)) return NULL;
+  if (degpol(pol) != T->cl + degpol(d)) return NULL;
   pol = gdivexact(pol, d);
   return (T->cl & 1 || !egalii(discf(pol), T->dkpow))? pol: NULL;
 }
