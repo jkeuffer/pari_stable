@@ -585,7 +585,8 @@ if test -n "$emacs"; then
   cat >> $file << EOT
 $pari_elc: $emx/pari.el
 	@echo "Byte-Compiling pari.el..."
-	-cd $emx; $emacs -batch -l compile
+	-cd $emx; $emacs -batch --eval '(byte-compile-file "pari.el")'
+
 
 $install_emacs_files: $pari_elc
 	-mkdir -p \$(EMACSDIR)

@@ -101,7 +101,6 @@ doc/usersch2.tex
 doc/usersch3.tex
 doc/usersch4.tex
 doc/usersch5.tex
-emacs/compile
 emacs/pari-translator.el
 emacs/pari.el-changes
 emacs/pari.el.in

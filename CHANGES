@@ -91,6 +91,9 @@ IS 18- [HPUX:] remove -E from DLCFLAGS
   Added
     1- member function rnf.pol (polynomial generating absolute extension)
 
+  Remove
+    1- remove emacs/compile [ integrated in Makefile ]
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.5 (released 11/02/2003):
   Fixed
