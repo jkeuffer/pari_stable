@@ -566,20 +566,36 @@ gdivgs(GEN x, long s)
       z[1]=x[1]; return z;
 
     case t_RFRAC:
-      z = cgetg(3, t_RFRAC);
-      i = ggcd(stoi(s),(GEN)x[1])[2];
-      avma = (gpmem_t)z;
-      if (i == 1)
+      av = avma;
+      p1 = ggcd(stoi(s),(GEN)x[1]);
+      if (typ(p1) == t_INT)
       {
-        z[2]=lmulsg(s,(GEN)x[2]);
-        z[1]=lcopy((GEN)x[1]); return z;
+        avma = av;
+        z = cgetg(3, t_RFRAC);
+        i = p1[2];
+        if (i == 1)
+        {
+          z[1] = lcopy((GEN)x[1]);
+          z[2] = lmulsg(s,(GEN)x[2]);
+        }
+        else
+        {
+          z[1] = ldivgs((GEN)x[1], i);
+          z[2] = lmulgs((GEN)x[2], s/i);
+        }
       }
-      z[1] = ldivgs((GEN)x[1], i);
-      z[2] = lmulgs((GEN)x[2], s/i); return z;
+      else /* t_FRAC */
+      {
+        z = cgetg(3, t_RFRAC);
+        z[1] = ldiv((GEN)x[1], p1);
+        z[2] = lmul((GEN)x[2], gdivsg(s,p1));
+        z = gerepilecopy(av, z);
+      }
+      return z;
 
     case t_RFRACN: z=cgetg(3,t_RFRACN);
-      z[2]=lmulsg(s,(GEN)x[2]);
-      z[1]=lcopy((GEN)x[1]); return z;
+      z[1]=lcopy((GEN)x[1]);
+      z[2]=lmulsg(s,(GEN)x[2]); return z;
 
     case t_VEC: case t_COL: case t_MAT: z=cgetg(lx,tx);
       for (i=1; i<lx; i++) z[i]=ldivgs((GEN)x[i],s);
