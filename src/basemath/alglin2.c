@@ -1956,15 +1956,15 @@ END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
     msgtimer("hnfspec [%ld x %ld] --> [%ld x %ld]",li-1,co-1, lig-1,col-1);
   if (CO > co)
   { /* treat the rest, N cols at a time (hnflll slow otherwise) */
-    const long N = 50;
+    const long N = 60;
     long a, L = CO - co, l = min(L, N);
-    GEN mat = cgetg(N + 1, t_MAT), emb = cgetg(N + 1, t_MAT);
     GEN CC = *ptC, m0 = (GEN)mat0;
     setlg(CC, CO); /* restore */
     CC += co-1;
     m0 += co-1;
     for (a = 1;;)
     {
+      GEN mat = cgetg(N + 1, t_MAT), emb = cgetg(N + 1, t_MAT);
       for (j = 1 ; j <= l; j++)
       {
         mat[j] = (long)m0[j];
@@ -1974,6 +1974,7 @@ END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
       setlg(emb, l+1); CC += l;
       H = hnfadd_i(H, perm, ptdep, ptB, &C, mat, emb);
       if (a == L) break;
+      gerepileall(av, 4, &H,&C,ptB,ptdep); 
       a += N; if (a > L) { l = N - (a - L); a = L; }
     }
   }

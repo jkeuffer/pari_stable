@@ -1882,7 +1882,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, double LOGD, GEN nf,long nbrelpid,
     }
 
     BOUND = v[2] + v[1] * q[1][2] * q[1][2];
-    if (BOUND < v[1]) BOUND = v[1];
+    if (BOUND > v[1]) BOUND = v[1];
     BOUND *= 2; /* at most twice larger than smallest known vector */
     if (DEBUGLEVEL>1)
     {
