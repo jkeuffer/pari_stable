@@ -115,9 +115,10 @@ Partly modified internally"
 ;;------------------------
 
 (defsubst gp-default-face (gp-face default-face doc)
-  (when (not (facep gp-face))
-        (copy-face default-face gp-face)
-        (set-face-documentation gp-face doc)))
+  (if (not (null (get gp-face 'saved-face)))
+      (custom-declare-face gp-face (get 'saved-face default-face) doc)
+    (copy-face default-face gp-face)
+    (set-face-documentation gp-face doc)))
 
 (defun gp-init-font-lock-faces nil
   "Define gp-faces."
