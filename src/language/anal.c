@@ -1300,7 +1300,11 @@ identifier(void)
 	case 'n': /* var number */
 	  match_comma(); argvec[i++] = (GEN) readvar(); break;
 
-	case 'V': case 'S': /* variable or symbol */
+        case 'S': /* symbol */
+	  match_comma(); mark.symbol=analyseur;
+	  argvec[i++] = (GEN)entry(); break;
+
+	case 'V': /* variable */
 	  match_comma(); mark.symbol=analyseur;
         {
           entree *e = entry();
