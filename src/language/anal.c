@@ -630,7 +630,8 @@ pop_val_if_newer(entree *ep, long loc)
   if (v->flag == COPY_VAL)
   {
     GEN x = (GEN)ep->value;
-    if (DEBUGMEM) fprintferr("popping %s (bloc no %ld)\n", ep->name, bl_num(x));
+    if (DEBUGMEM>2)
+      fprintferr("popping %s (bloc no %ld)\n", ep->name, bl_num(x));
     if (bl_num(x) < loc) return 0; /* older */
     killbloc((GEN)ep->value);
   }
