@@ -141,17 +141,21 @@ lisGEN(FILE *fi)
   long size = 512, n = size;
   char *buf = gpmalloc(n), *s = buf;
 
-  for(;;)
-    if (fgets(s, n, fi))
+  while (fgets(s, n, fi))
+  {
+    if (s[strlen(s)-1] == '\n')
     {
-      if (s[strlen(s)-1] == '\n')
-      {
-        GEN x = flisexpr(buf);
-        free(buf); return x;
-      }
-      buf = gprealloc(buf, size<<1, size);
-      s = buf + (size-1); n = size+1; size <<= 1;
+      GEN x = flisexpr(buf);
+      free(buf); return x;
     }
+    buf = gprealloc(buf, size<<1, size);
+    s = buf + (size-1); n = size+1; size <<= 1;
+  }
+#if defined(UNIX) || defined(__EMX__)
+  if (!feof(fi))
+#endif
+    err(talker, "failed read from file");
+  return NULL;
 }
 
 /********************************************************************/
