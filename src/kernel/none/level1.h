@@ -99,7 +99,7 @@ evallgef(ulong x)
 }
 
 INLINE ulong
-evalvalp(long x)
+evalvalp(ulong x)
 {
   const long v = m_evalvalp(x);
   if (v & ~VALPBITS) err(errvalp);
@@ -107,7 +107,7 @@ evalvalp(long x)
 }
 
 INLINE ulong
-evalexpo(long x)
+evalexpo(ulong x)
 {
   const long v = m_evalexpo(x);
   if (v & ~EXPOBITS) err(errexpo);
