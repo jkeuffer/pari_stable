@@ -1464,11 +1464,12 @@ apell1(GEN e, GEN p)
     /* look for h s.t f^h = 0 */
     if (bcon == gun)
     { /* first time: initialize */
-      tx = newbloc(s+1); *tx = evaltyp(t_VECSMALL) | evallg(s+1);
+      tx = newbloc(s+1);
       ty = newbloc(s+1);
       ti = newbloc(s+1);
     }
     else f = powsell(cp4,f,bcon,p); /* F */
+    *tx = evaltyp(t_VECSMALL) | evallg(s+1);
     if (!fh) goto FOUND;
 
     p1 = gcopy(fh);
