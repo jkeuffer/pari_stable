@@ -1136,32 +1136,31 @@ InitChar0(GEN dataD, long prec)
 static GEN
 CharNewPrec(GEN dataCR, GEN nf, long prec)
 {
-  GEN dk, C, p1, Pi;
-  long av = avma, N, l, j, prec2;
+  GEN dk, C, p1, Pi, _2iPi;
+  long N, l, j, prec2;
 
   dk    =  (GEN)nf[3];
   N     =  degpol((GEN)nf[1]);
-  l     =  lg(dataCR) - 1;
   prec2 = ((prec - 2)<<1) + EXTRA_PREC;
 
   Pi    = mppi(prec2);
+  _2iPi = gmul2n(gmul(gi, Pi), 1);
 
   C = gsqrt(gdiv(dk, gpowgs(Pi, N)), prec2);
 
-  for (j = 1; j <= l; j++)
+  l = lg(dataCR);
+  for (j = 1; j < l; j++)
   {
-    mael(dataCR, j, 2) = lmul(C, gsqrt(det(gmael(dataCR, j, 7)), prec2));
+    GEN dtcr = (GEN)dataCR[j];
+    dtcr[2] = lmul(C, gsqrt(det((GEN)dtcr[7]), prec2));
 
-    mael4(dataCR, j, 3, 1, 7) = lcopy(nf);
+    mael3(dtcr, 3, 1, 7) = (long)nf;
 
-    p1 = gmael(dataCR, j, 5);
-    p1[2] = lexp(gdiv(gmul2n(gmul(gi, Pi), 1), (GEN)p1[3]), prec);
-
-    p1 = gmael(dataCR, j, 8);
-    p1[2] = lexp(gdiv(gmul2n(gmul(gi, Pi), 1), (GEN)p1[3]), prec);
+    p1 = (GEN)dtcr[5]; p1[2] = lexp(gdiv(_2iPi, (GEN)p1[3]), prec);
+    p1 = (GEN)dtcr[8]; p1[2] = lexp(gdiv(_2iPi, (GEN)p1[3]), prec);
   }
 
-  return gerepilecopy(av, dataCR);
+  return dataCR;
 }
 
 /********************************************************************/
@@ -1373,113 +1372,10 @@ CopyCoeff(int** a, int** a2, long n, long m)
   }
 }
 
-#if 0
-/* initialize the data for GetRay */
 static GEN
-InitGetRay(GEN bnr,  long nmax)
+GetRay(GEN bnr, GEN pr)
 {
-  long bd, i, j, l;
-  GEN listid, listcl, id, rep, bnf, cond;
-
-  bnf  =  (GEN)bnr[1];
-  cond =  gmael3(bnr, 2, 1, 1);
-
-  if (nmax < 1000) return NULL;
-
-  rep = cgetg(4, t_VEC);
-
-  disable_dbg(0);
-  bd = min(1000, nmax / 50);
-  listid = ideallist(bnf, bd);
-  disable_dbg(-1);
-
-  listcl = cgetg(bd + 1, t_VEC);
-  for (i = 1; i <= bd; i++)
-  {
-    l = lg((GEN)listid[i]) - 1;
-    listcl[i] = lgetg(l + 1, t_VEC);
-
-    for (j = 1; j <= l; j++)
-    {
-      id = gmael(listid, i, j);
-      if (gcmp1(gcoeff(idealadd(bnf, id, cond), 1, 1)))
-	mael(listcl, i, j) = (long)isprincipalray(bnr, id);
-    }
-  }
-
-  if (DEBUGLEVEL) msgtimer("InitGetRay");
-
-  rep[1] = (long)listid;
-  rep[2] = (long)listcl;
-  rep[3] = nf_get_r2((GEN)bnf[7])? 0: un; /* != 0 iff nf is totally real */
-  return rep;
-}
-#endif
-
-static GEN
-GetRay(GEN bnr,  GEN dataray,  GEN pr, long prec)
-{
-#if 0
-/* compute the class of the prime ideal pr in cl(bnr) using dataray */
-  long av = avma, N, n, bd, c;
-  GEN id, tid, t2, u, alpha, p1, cl, listid, listcl, nf, cond;
-
-  if (!dataray)
-    return isprincipalray(bnr, pr);
-
-  listid =  (GEN)dataray[1];
-  listcl =  (GEN)dataray[2];
-  cond   =  gmael3(bnr, 2, 1, 1);
-  bd     =  lg(listid) - 1;
-  nf     =  gmael(bnr, 1, 7);
-  N      =  degpol(nf[1]);
-
-  if (dataray[3])
-    t2 = gmael(nf, 5, 4);
-  else
-    t2 = gmael(nf, 5, 3);
-
-  id  = prime_to_ideal(nf, pr);
-  tid = qf_base_change(t2, id, 1);
-
-  if (dataray[3])
-    u = lllgramint(tid);
-  else
-    u = lllgramintern(tid,100,1,prec);
-
-  if (!u) return gerepileupto(av, isprincipalray(bnr, id));
-
-  c = 1; alpha = NULL;
-  for (c=1; c<=N; c++)
-  {
-    p1 = gmul(id, (GEN)u[c]);
-    if (gcmp1(gcoeff(idealadd(nf, p1, cond), 1, 1))) { alpha = p1; break; }
-  }
-  if (!alpha)
-    return gerepileupto(av, isprincipalray(bnr, pr));
-
-  id = idealdivexact(nf, alpha, id);
-
-  n = itos(det(id));
-  if (n > bd)
-    cl = isprincipalray(bnr, id);
-  else
-  {
-    cl = NULL;
-    c  = 1;
-    p1 = (GEN)listid[n];
-    while (!cl)
-    {
-      if (gegal((GEN)p1[c], id))
-	cl = gmael(listcl, n, c);
-      c++;
-    }
-  }
-
-  return gerepileupto(av, gsub(isprincipalray(bnr, alpha), cl));
-#else
   return isprincipalray(bnr, pr);
-#endif
 }
 
 /* correct the coefficients an(chi) according with diff(chi) in place */
@@ -1544,8 +1440,6 @@ ComputeCoeff(GEN datachi, long n, long deg, long prec)
   bnr  =  (GEN)datachi[4];
   bnf  =  (GEN)bnr[1];
   cond =  gmael3(bnr, 2, 1, 1);
-
-  /* dataray = InitGetRay(bnr, nmax); */
   dataray = NULL; /* gcc -Wall */
 
   matan  = InitMatAn(n, deg, 0);
@@ -1569,15 +1463,14 @@ ComputeCoeff(GEN datachi, long n, long deg, long prec)
                          || idealval(bnf, cond, pr)) continue;
 
       CopyCoeff(matan, matan2, n, deg);
-      ray = GetRay(bnr, dataray, pr, prec);
+      ray = GetRay(bnr, pr);
       ki = ComputeImagebyChar((GEN)datachi[5], ray, 1);
       ki2 = ki;
 
       Bq = n/np;
       for (q1 = 1; q1 <= Bq; q1 *= np)
       {
-	q = q1*np;
-        limk = n/q;
+	q = q1*np; limk = n/q;
 	if (gcmp1(ki2))
 	  c = NULL;
 	else
@@ -2098,116 +1991,72 @@ GetValue1(GEN bnr, long flag, long prec)
 /********************************************************************/
 /*                6th part: recover the coefficients                */
 /********************************************************************/
+typedef struct {
+  GEN M, beta, B, U, nB;
+  long v, G, N;
+} RC_data;
 
 static long
-TestOne(GEN plg,  GEN beta,  GEN B,  long v,  long G,  long N)
+TestOne(GEN plg, RC_data *d)
 {
-  long j;
+  long j, v = d->v;
   GEN p1;
 
-  p1 = gsub(beta, (GEN)plg[v]);
-  if (expo(p1) >= G) return 0;
+  p1 = gsub(d->beta, (GEN)plg[v]);
+  if (expo(p1) >= d->G) return 0;
 
-  for (j = 1; j <= N; j++)
+  for (j = 1; j <= d->N; j++)
     if (j != v)
     {
       p1 = gabs((GEN)plg[j], DEFAULTPREC);
-      if (gcmp(p1, B) > 0) return 0;
+      if (gcmp(p1, d->B) > 0) return 0;
     }
   return 1;
 }
 
-/* Using linear dependance relations */
 static GEN
-RecCoeff2(GEN nf,  GEN beta,  GEN B,  long v,  long prec)
-{
-  long N, G, i, bacmin, bacmax, av = avma, av2;
-  GEN vec, velt, p1, cand, M, plg, pol, cand2;
-
-  M    = gmael(nf, 5, 1);
-  pol  = (GEN)nf[1];
-  N    = degpol(pol);
-  vec  = gtrans((GEN)gtrans(M)[v]);
-  velt = (GEN)nf[7];
-
-  G = min( - 20, - bit_accuracy(prec) >> 4);
-
-  p1 = cgetg(2, t_VEC);
-
-  p1[1] = lneg(beta);
-  vec = concat(p1, vec);
-
-  p1[1] = zero;
-  velt = concat(p1, velt);
-
-  bacmin = (long)(.225 * bit_accuracy(prec));
-  bacmax = (long)(.315 * bit_accuracy(prec));
-
-  av2 = avma;
-
-  for (i = bacmax; i >= bacmin; i--)
-  {
-    p1 = lindep2(vec, i);
-
-    if (signe((GEN)p1[1]))
-    {
-      p1    = ground(gdiv(p1, (GEN)p1[1]));
-      cand  = gmodulcp(gmul(velt, gtrans(p1)), pol);
-      cand2 = algtobasis(nf, cand);
-      plg   = gmul(M, cand2);
-
-      if (TestOne(plg, beta, B, v, G, N))
-        return gerepilecopy(av, cand);
-    }
-    avma = av2;
-  }
-  return NULL;
-}
-
-GEN
 chk_reccoeff_init(FP_chk_fun *chk, GEN nf, GEN gram, GEN mat, long *ptprec)
 {
-  GEN data = chk->data;
-  data[6] = (long)mat;
-  chk->data = data;
-  return (GEN)data[7];
+  RC_data *d = (RC_data*)chk->data;
+  d->U = mat; return d->nB;
 }
 
-GEN
-chk_reccoeff(GEN data, GEN x)
+static GEN
+chk_reccoeff(void *data, GEN x)
 {
-  GEN M = (GEN)data[0], beta = (GEN)data[1], B = (GEN)data[2];
-  long v = data[3], G = data[4], N = data[5], j;
-  GEN U = (GEN)data[6], p1 = gmul(U, x), sol, plg;
+  RC_data *d = (RC_data*)data;
+  long N = d->N, j;
+  GEN p1 = gmul(d->U, x), sol, plg;
 
   if (!gcmp1((GEN)p1[1])) return NULL;
 
   sol = cgetg(N + 1, t_COL);
   for (j = 1; j <= N; j++)
     sol[j] = lmulii((GEN)p1[1], (GEN)p1[j + 1]);
-  plg = gmul(M, sol);
+  plg = gmul(d->M, sol);
 
-  if (TestOne(plg, beta, B, v, G, N)) return sol;
+  if (TestOne(plg, d)) return sol;
   return NULL;
 }
 
-GEN
-chk_reccoeff_post(GEN data, GEN res)
+static GEN
+chk_reccoeff_post(void *data /* unused */, GEN res)
 {
   return res;
 }
 
 /* Using Cohen's method */
 static GEN
-RecCoeff3(GEN nf, GEN beta, GEN B, long v, long prec)
+RecCoeff3(GEN nf, RC_data *d, long prec)
 {
-  GEN A, M, nB, cand, p1, B2, C2, data, tB, beta2, eps, nf2, Bd;
-  long N, G, i, j, k, l, ct = 0, av = avma, prec2;
+  GEN A, M, nB, cand, p1, B2, C2, tB, beta2, eps, nf2, Bd;
+  GEN beta = d->beta, B = d->B;
+  long N = d->N, v = d->v;
+  long i, j, k, l, ct = 0, av = avma, prec2;
   FP_chk_fun *chk;
 
-  N   = degpol(nf[1]);
-  G   = min(-10, -bit_accuracy(prec) >> 4);
-  eps = gpowgs(stoi(10), min(-8, (G >> 1)));
+  d->G = min(-10, -bit_accuracy(prec) >> 4);
+  eps = gpowgs(stoi(10), min(-8, (d->G >> 1)));
   tB  = gpow(gmul2n(eps, N), gdivgs(gun, 1-N), DEFAULTPREC);
 
   Bd    = gmin(B, tB);
@@ -2221,6 +2070,7 @@ RecCoeff3(GEN nf, GEN beta, GEN B, long v, long prec)
   C2 = gdiv(B2, gsqr(eps));
 
   M = gmael(nf2, 5, 1);
+  d->M = M;
 
   A = cgetg(N+2, t_MAT);
   for (i = 1; i <= N+1; i++)
@@ -2246,22 +2096,13 @@ RecCoeff3(GEN nf, GEN beta, GEN B, long v, long prec)
     }
 
   nB = mulsi(N+1, B2);
-
-  data = new_chunk(8);
-  data[0] = (long)M;
-  data[1] = (long)beta;
-  data[2] = (long)B;
-  data[3] = v;
-  data[4] = G;
-  data[5] = N;
-  data[6] = (long)NULL;
-  data[7] = (long)nB;
+  d->nB = nB;
 
   chk = (FP_chk_fun*)new_chunk(sizeof(FP_chk_fun));
   chk->f         = &chk_reccoeff;
   chk->f_init    = &chk_reccoeff_init;
   chk->f_post    = &chk_reccoeff_post;
-  chk->data      = data;
+  chk->data      = (void*)d;
   chk->skipfirst = 0;
 
   cand = fincke_pohst(A, nB, 20000, 3, prec2, chk);
@@ -2288,6 +2129,51 @@ RecCoeff3(GEN nf, GEN beta, GEN B, long v, long prec)
   avma = av; return NULL;
 }
 
+/* Using linear dependance relations */
+static GEN
+RecCoeff2(GEN nf,  RC_data *d,  long prec)
+{
+  long i, bacmin, bacmax, av = avma, av2;
+  GEN vec, velt, p1, cand, M, plg, pol, cand2;
+  GEN beta = d->beta;
+
+  d->G = min(-20, -bit_accuracy(prec) >> 4);
+  M    = gmael(nf, 5, 1);
+  pol  = (GEN)nf[1];
+  vec  = gtrans((GEN)gtrans(M)[d->v]);
+  velt = (GEN)nf[7];
+
+  p1 = cgetg(2, t_VEC);
+  p1[1] = lneg(beta);
+  vec = concat(p1, vec);
+
+  p1[1] = zero;
+  velt = concat(p1, velt);
+
+  bacmin = (long)(.225 * bit_accuracy(prec));
+  bacmax = (long)(.315 * bit_accuracy(prec));
+
+  av2 = avma;
+
+  for (i = bacmax; i >= bacmin; i--)
+  {
+    p1 = lindep2(vec, i);
+
+    if (signe((GEN)p1[1]))
+    {
+      p1    = ground(gdiv(p1, (GEN)p1[1]));
+      cand  = gmodulcp(gmul(velt, gtrans(p1)), pol);
+      cand2 = algtobasis(nf, cand);
+      plg   = gmul(M, cand2);
+
+      if (TestOne(plg, d)) return gerepilecopy(av, cand);
+    }
+    avma = av2;
+  }
+  /* failure */
+  return RecCoeff3(nf,d,prec);
+}
+
 /* Attempts to find a polynomial with coefficients in nf such that
    its coefficients are close to those of pol at the place v and
    less than B at all the other places */
@@ -2296,6 +2182,7 @@ RecCoeff(GEN nf,  GEN pol,  long v, long prec)
 {
   long av = avma, j, md, G, cl = degpol(pol);
   GEN p1, beta;
+  RC_data d;
 
   /* if precision(pol) is too low, abort */
   for (j = 2; j <= cl+1; j++)
@@ -2307,6 +2194,9 @@ RecCoeff(GEN nf,  GEN pol,  long v, long prec)
 
   md = cl/2;
   pol = dummycopy(pol);
+
+  d.N = degpol(nf[1]);
+  d.v = v;
 
   for (j = 1; j <= cl; j++)
   {
@@ -2321,12 +2211,10 @@ RecCoeff(GEN nf,  GEN pol,  long v, long prec)
 				   cf, bound);
 
     beta = greal((GEN)pol[cf+2]);
-    p1 = RecCoeff2(nf, beta, bound, v, prec);
-    if (!p1)
-    {
-      p1 = RecCoeff3(nf, beta, bound, v, prec);
-      if (!p1) return NULL;
-    }
+    d.beta = beta;
+    d.B    = bound;
+    p1 = RecCoeff2(nf, &d, prec);
+    if (!p1) return NULL;
     pol[cf+2] = (long)p1;
   }
   pol[cl+2] = un;
@@ -2358,7 +2246,6 @@ computean(GEN dtcr, long n, long deg, long prec)
 
   bnr = (GEN)dtcr[4];
   bnf = (GEN)bnr[1];
-  /* dataray = InitGetRay(bnr, nmax); */
   dataray = NULL;
 
   id = gmael3(bnr, 2, 1, 1);
@@ -2366,9 +2253,9 @@ computean(GEN dtcr, long n, long deg, long prec)
   dk = gmael(bnf, 7, 3);
   Rays = cgetg(idZ+1, t_VEC);
   /* precompute GetRay(x), x in Z. Enough to do it for primes [TODO] */
-  for (i=1; i<=idZ; i++)
+  for (i=1; i<idZ; i++)
     if (cgcd(i,idZ) == 1)
-      Rays[i] = (long)GetRay(bnr, dataray, stoi(i), prec);
+      Rays[i] = (long)GetRay(bnr, stoi(i));
 
   p = 2; prime = stoi(p);
   dp++;
@@ -2421,7 +2308,7 @@ computean(GEN dtcr, long n, long deg, long prec)
       if (!fldiv)
       {
 	pr   = (GEN)primedec(bnf, prime)[1];
-	xray = GetRay(bnr, dataray, pr, prec);
+	xray = GetRay(bnr, pr);
 	chi  = ComputeImagebyChar((GEN)dtcr[5], xray, 1);
 	chi2 = chi;
       }
@@ -2429,7 +2316,8 @@ computean(GEN dtcr, long n, long deg, long prec)
       for(;;)
       {
 	for (cp = 1, i = q; i <= n; i += q, cp++)
-	  if(cp % p)
+	  if (cp == p) cp = 0;
+          else
           {
 	    if (fldiv)
 	      _0toCoeff(matan[i], deg);
@@ -2452,7 +2340,7 @@ computean(GEN dtcr, long n, long deg, long prec)
       pr2 = (GEN)p1[2];
       if (idZ % p)
       { /* generic case, use pr1 pr2 = (p) */
-	GEN xray1 = GetRay(bnr, dataray, pr1, prec);
+	GEN xray1 = GetRay(bnr, pr1);
 	GEN xray2 = gsub((GEN)Rays[p % idZ],  xray1);
 	GEN chi11 = ComputeImagebyChar((GEN)dtcr[5], xray1, 1);
 	GEN chi12 = ComputeImagebyChar((GEN)dtcr[5], xray2, 1);
@@ -2463,7 +2351,8 @@ computean(GEN dtcr, long n, long deg, long prec)
 	while (q <= n)
         {
 	  for (cp = 1, i = q; i <= n; i += q, cp++)
-	    if(cp % p)
+            if (cp == p) cp = 0;
+            else
 	      MulPolmodCoeff(chi1, matan[i], reduc, deg);
 
 	  qg = mulss(q, p);
@@ -2478,11 +2367,11 @@ computean(GEN dtcr, long n, long deg, long prec)
       {
         v1 = idealval(bnf, id, pr1);
         v2 = idealval(bnf, id, pr2);
-	if (v1) { v  = v2; pr = pr2; } else { v  = v1; pr = pr1; }
+	if (v1) { v = v2; pr = pr2; } else { v = 0; pr = pr1; }
 	
 	if (!v)
         {
-	  xray = GetRay(bnr, dataray, pr, prec);
+	  xray = GetRay(bnr, pr);
 	  chi1 = ComputeImagebyChar((GEN)dtcr[5], xray, 1);
 	  chi  = chi1;
 	}
@@ -2490,7 +2379,8 @@ computean(GEN dtcr, long n, long deg, long prec)
         for(;;)
         {
 	  for (cp = 1, i = q; i <= n; i += q, cp++)
-	    if(cp % p)
+	    if (cp == p) cp = 0;
+            else
             {
 	      if (v)
 		_0toCoeff(matan[i], deg);
@@ -2520,9 +2410,8 @@ computean(GEN dtcr, long n, long deg, long prec)
 
 /* compute S and T for the quadratic case */
 static GEN
-QuadGetST(GEN data, long prec)
+QuadGetST(GEN dataCR, long prec)
 {
-  const GEN dataCR = (GEN)data[5];
   const long cl  = lg(dataCR) - 1;
   ulong av, av1, av2;
   long ncond, n, j, k, nmax;
@@ -2802,6 +2691,7 @@ AllStark(GEN data,  GEN nf,  long flag,  long newprec)
   r2    = (N - r1)>>1;
   cond1 = gmael4(data, 1, 2, 1, 2);
   Pi    = mppi(newprec);
+  dataCR = (GEN)data[5];
 
   v = 1;
   while(gcmp1((GEN)cond1[v])) v++;
@@ -2810,7 +2700,6 @@ LABDOUB:
 
   av = avma;
 
-  dataCR = (GEN)data[5];
   cl = lg(dataCR)-1;
   degs = GetDeg(dataCR);
   h  = itos(gmul2n(det((GEN)data[2]), -1));
@@ -2819,7 +2708,7 @@ LABDOUB:
   {
     /* compute S,T differently if nf is quadratic */
     if (N == 2)
-      p1 = QuadGetST(data, newprec);
+      p1 = QuadGetST(dataCR, newprec);
     else
       p1 = GetST(dataCR, newprec);
 
@@ -2938,11 +2827,10 @@ LABDOUB:
     if (DEBUGLEVEL) err(warnprec, "AllStark", newprec);
 
     nf = nfnewprec(nf, newprec);
-    data[5] = (long)CharNewPrec((GEN)data[5], nf, newprec);
+    dataCR = CharNewPrec(dataCR, nf, newprec);
 
-    gptr[0] = &data;
-    gptr[1] = &nf;
-    gerepilemany(av, gptr, 2);
+    gptr[0] = &dataCR;
+    gptr[1] = &nf; gerepilemany(av, gptr, 2);
 
     goto LABDOUB;
   }
