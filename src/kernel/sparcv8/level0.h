@@ -55,6 +55,7 @@ ENDEXTERN
 
 #else /* ASMINLINE */
 
+#define REGISTER_MP_OPERANDS
 register ulong hiremainder __asm__("%g5");
 register ulong overflow __asm__("%g6");
 
