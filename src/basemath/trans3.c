@@ -768,17 +768,46 @@ izeta(long k, long prec)
 }
 #endif
 
+/* return x^n, assume n > 0 */
+static long
+pows(long x, long n)
+{
+  long i, y = x;
+  for (i=1; i<n; i++) y *= x;
+  return y;
+}
+
+/* return n^-s, n > 1 odd. tab[q] := q^-s, q prime power */
+static GEN
+n_s(long n, GEN *tab)
+{
+  byteptr d =  diffptr + 2;
+  GEN x = NULL;
+  long p, e;
+
+  for (p = 3; n > 1; p += *d++)
+  {
+    e = svaluation(n, p, &n);
+    if (e)
+    {
+      GEN y = tab[pows(p,e)];
+      if (!x) x = y; else x = gmul(x,y);
+    }
+  }
+  return x;
+}
+
+GEN rpowsi(ulong a, GEN n, long prec);
+
 /* s0 a t_INT, t_REAL or t_COMPLEX.
- * If a t_INT, assume it's not a trivial case (i.e we have s0 > 1, odd and
- * "small")
+ * If a t_INT, assume it's not a trivial case (i.e we have s0 > 1, odd)
  * */
 GEN
 czeta(GEN s0, long prec)
 {
-  GEN s = s0, u, a, y, res, tes, sig, in2, p1, unr;
-  GEN ms, s1, s2, s3, s4, s5, *tab, tabn, ta, sim;
-  long sqn, i, nn, lim, lim2, kk, ct, av;
-  ulong p;
+  GEN s = s0, u, a, y, res, tes, sig, invn2, p1, unr;
+  GEN sim, ms, s1, s2, s3, s4, s5, *tab, tabn;
+  long p, i, sqn, nn, lim, lim2, ct, av, av2, avlim;
   int funeq = 0;
   byteptr d;
 
@@ -797,27 +826,24 @@ czeta(GEN s0, long prec)
 
   /* s <--> 1-s */
   if (signe(sig) < 0) { funeq = 1; s = gsub(gun, s); sig = greal(s); }
+  if (gcmp(sig, stoi(bit_accuracy(prec) + 1)) > 0) { y = gun; goto END; }
 
-  {
+  { /* find "optimal" parameters [lim, nn] */
+    GEN sapprox = gmul(s, realun(3));
     double ssig = rtodbl(sig);
     double st = rtodbl(gimag(s));
-    double ns = ssig * ssig + st * st;
-    double l,l2;
+    double ns = ssig * ssig + st * st, l,l2;
     long la = 1;
-    GEN sapprox = gmul(s, realun(3));
 
     if (typ(s0) == t_INT)
     {
       long ss = itos(s0);
       switch(ss)
-      { /* should depend on prec */
+      { /* should depend on prec ? */
         case 3:  la = 6; break;
-        case 5:  la = 3; break;
-        case 7:  la = 3; break;
-        default: la = 2; break;
+        default: la = 3; break;
       }
     }
-
     /* l2 = Re( (s - 1/2) log (s-1) ) */
     l2 = rtodbl(greal(gmul(gsub(sapprox,ghalf), glog(gsub(sapprox,gun),3))));
     l = (pariC2*(prec-2) - l2 + ssig*2*pariC1) / (2. * (1.+ log((double)la)));
@@ -827,93 +853,101 @@ czeta(GEN s0, long prec)
     l2 = (lim+ssig/2.-.25);
     nn = (long) 1 + ceil( sqrt(l2*l2 + st*st/4) / PI * la );
     if (DEBUGLEVEL) fprintferr("lim, nn: [%ld, %ld]\n",lim,nn);
+    if (nn >= maxprime()) err(primer1);
   }
-  prec++; /* compute with one extra word of precision */
-
+  prec++; unr = realun(prec); /* one extra word of precision */
+  
   tab = (GEN*)cgetg(nn, t_VEC); /* table of q^(-s), q = p^e */
-  if (nn >= maxprime()) err(primer1);
   d = diffptr + 1;
-
-  unr = realun(prec);
   if (typ(s0) == t_INT)
-  {
-    a = divri(unr, powgi(stoi(nn), s0));
+  { /* no explog for 1/p^s */
     for (p=2; p < nn; p += *d++)
-      tab[p] = divri(unr, powgi(stoi(p), s0));
+      tab[p] = divrr(unr, rpowsi(p, s0, prec));
+    a = divrr(unr, rpowsi(nn, s0, prec));
   }
   else
-  {
+  { /* general case */
     ms = gneg(s); p1 = cgetr(prec);
-    affsr(nn,p1); /* otherwise precision increase */
-    a = gexp(gmul(ms, mplog(p1)), prec);
     for (p=2; p < nn; p += *d++)
     {
       affsr(p, p1);
       tab[p] = gexp(gmul(ms, mplog(p1)), prec);
     }
+    affsr(nn,p1);
+    a = gexp(gmul(ms, mplog(p1)), prec);
   }
   sqn = (long)sqrt(nn-1.);
-  d = diffptr + 2;
+  d = diffptr + 2; /* fill in odd prime powers */
   for (p=3; p <= sqn; p += *d++)
   {
     ulong oldq = p, q = p*p;
     while (q<nn) { tab[q] = gmul(tab[p], tab[oldq]); oldq = q; q *= p; }
   }
-  if (DEBUGLEVEL) msgtimer("tabpn^-s from 1 to N-1"); 
-  tabn = cgetg(nn, t_VECSMALL); kk = nn-1; ct = 0;
-  while (kk) { tabn[++ct] = (kk-1)>>1; kk>>=1; }
-  ta = tab[2];
+  if (DEBUGLEVEL) msgtimer("tab[q^-s] from 1 to N-1"); 
+
+  tabn = cgetg(nn, t_VECSMALL); ct = 0;
+  for (i = nn-1; i; i>>=1) tabn[++ct] = (i-1)>>1;
   sim = y = unr;
   for (i=ct; i > 1; i--)
   {
-    long j;
+    long j, av2 = avma;
     for (j=tabn[i]+1; j<=tabn[i-1]; j++)
-    {
-      GEN fa = factor(stoi(2*j+1)), p = (GEN)fa[1], e = (GEN)fa[2];
-      GEN pro = tab[ itos(powgi((GEN)p[1], (GEN)e[1])) ];
-      long k;
-      for (k=2; k<lg(p); k++)
-        pro = gmul(pro, tab[ itos(powgi((GEN)p[k], (GEN)e[k])) ]);
-      sim = gadd(sim, pro);
-    }
-    y = gadd(sim, gmul(ta,y));
+      sim = gadd(sim, n_s(2*j+1, tab));
+    sim = gerepileupto(av2, sim);
+    y = gadd(sim, gmul(tab[2],y));
   }
   y = gadd(y, gmul2n(a,-1));
   if (DEBUGLEVEL) msgtimer("sum from 1 to N-1");
 
-  in2 = divrs(realun(prec), nn*nn); lim2 = lim<<1;
+  invn2 = divrs(unr, nn*nn); lim2 = lim<<1;
   tes = bernreal(lim2, prec);
-  if (DEBUGLEVEL) msgtimer("Bernoullis");
-  if (typ(s0) != t_INT)
+  if (typ(s0) == t_INT)
   {
-    s1 = gsub(gmul2n(s,1), gun);
-    s2 = gmul(s, gsub(s,gun));
-    s3 = gmul2n(in2,3);
-    s4 = gmul(in2, gmul2n(gaddsg(4*lim-2,s1),1));
-    s5 = gmul(in2, gadd(s2, gmulsg(lim2, gaddgs(s1, lim2))));
+    av2 = avma; avlim = stack_lim(av2,3);
+    for (i=lim2-2; i>=2; i-=2)
+    { /* using single prec (when (s0 + i) < 2^31) not faster (even at \p28) */
+      u = mulri(mulrr(tes,invn2), mulii(addsi(i,s0), addsi(i-1,s0)));
+      if (i < 46340) /* (i+1)(i+2) < 2^31 */
+        tes = addrr(bernreal(i,prec), divrs(u, (i+1)*(i+2)));
+      else
+        tes = addrr(bernreal(i,prec), divrs(divrs(u, i+1), i+2));
+      if (low_stack(avlim,stack_lim(av2,3)))
+      {
+        if(DEBUGMEM>1) err(warnmem,"czeta");
+        tes = gerepileuptoleaf(av2, tes);
+      }
+    }
+    u = gmul(gmul(tes,invn2), gmul2n(mulii(s0, addsi(-1,s0)), -1));
+    tes = gmulsg(nn, gaddsg(1, u));
+  }
+  else /* typ(s0) != t_INT */
+  {
+    s1 = gsub(gmul2n(s,1), unr);
+    s2 = gmul(s, gsub(s,unr));
+    s3 = gmul2n(invn2,3);
+    av2 = avma; avlim = stack_lim(av2,3);
+    s4 = gmul(invn2, gmul2n(gaddsg(4*lim-2,s1),1));
+    s5 = gmul(invn2, gadd(s2, gmulsg(lim2, gaddgs(s1, lim2))));
     for (i = lim2-2; i>=2; i -= 2)
     {
       s5 = gsub(s5, s4);
       s4 = gsub(s4, s3);
       tes = gadd(bernreal(i,prec), gdivgs(gmul(s5,tes), (i+1)*(i+2)));
+      if (low_stack(avlim,stack_lim(av2,3)))
+      {
+        GEN *gptr[3]; gptr[0]=&tes; gptr[1]=&s5; gptr[2]=&s4;
+        if(DEBUGMEM>1) err(warnmem,"czeta");
+        gerepilemany(av2,gptr,3);
+      }
     }
-    u = gmul(gmul(tes,in2), gmul2n(s2, -1));
-    tes = gmulsg(nn, gaddsg(1, u));
-  }
-  else
-  {
-    for (i=lim2-2; i>=2; i-=2)
-    {
-      u = gmul(gmul(tes,in2), mulii(addsi(i,s0), addsi(i-1,s0)));
-      tes = gadd(bernreal(i,prec), gdivgs(u, (i+1)*(i+2)));
-    }
-    u = gmul(gmul(tes,in2), gmul2n(mulii(s0, addsi(-1,s0)), -1));
+    u = gmul(gmul(tes,invn2), gmul2n(s2, -1));
     tes = gmulsg(nn, gaddsg(1, u));
   }
   if (DEBUGLEVEL) msgtimer("Bernoulli sum");
   /* y += tes a / (s-1) */
-  y = gadd(y, gmul(tes, gdiv(a, gsub(s, gun))));
+  y = gadd(y, gmul(tes, gdiv(a, gsub(s, unr))));
 
+END:
   if (funeq)
   {
     GEN pitemp = mppi(prec); setexpo(pitemp,2); /* 2Pi */

@@ -866,7 +866,7 @@ mpbern(long nb, long prec)
   long n,m,i,j,d,d1,d2,l,av,av2,code0;
   GEN p1,p2, B;
 
-  if (nb<0) nb=0;
+  if (nb < 0) nb = 0;
   if (bernzone && bernzone[1]>=nb && bernzone[2]>=prec) return;
   d = 3 + prec*(nb+1); B=newbloc(d);
   B[0]=evallg(d);
@@ -876,8 +876,23 @@ mpbern(long nb, long prec)
 
   code0 = evaltyp(t_REAL) | evallg(prec);
   *(BERN(0)) = code0; affsr(1,BERN(0));
+  if (bernzone && bernzone[2]>=prec)
+  { /* don't recompute known Bernoulli */
+    for (i=1; i<=bernzone[1]; i++)
+    {
+      *(BERN(i)) = code0; affrr(bern(i),BERN(i));
+    }
+  }
+  else i = 1;
+  if (DEBUGLEVEL)
+  {
+    fprintferr("caching Bernoulli numbers 2*%ld to 2*%ld, prec = %ld\n",
+               i,nb,prec);
+    timer2();
+  }
+
   p2 = p1; av2=avma;
-  for (i=1; i<=nb; i++)
+  for (   ; i<=nb; i++)
   {
     if (i>1)
     {
@@ -900,6 +915,7 @@ mpbern(long nb, long prec)
     setexpo(p2, expo(p2) - 2*i);
     *(BERN(i)) = code0; affrr(p2,BERN(i)); avma=av2;
   }
+  if (DEBUGLEVEL) msgtimer("Bernoulli");
   if (bernzone) gunclone(bernzone);
   avma = av; bernzone = B;
 }
