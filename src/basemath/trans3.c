@@ -2125,9 +2125,12 @@ sagm(GEN x, long prec)
 
     case t_INTMOD: err(impl,"agm of mod");
     default:
+    {
+      int exact;
       av = avma; if (!(y = _toser(x))) break;
       a1 = y; b1 = gun; l = lg(y)-2;
       l2 = 5-bit_accuracy(prec);
+      exact = gprecision(x) == 0;
       do
       {
 	a = a1; b = b1;
@@ -2135,8 +2138,9 @@ sagm(GEN x, long prec)
         b1 = gsqrt(gmul(a,b),prec);
 	p1 = gsub(b1,a1); ep = valp(p1)-valp(b1);
       }
-      while (ep<l && !gcmp0(p1) && gexpo(p1) - gexpo(b1) >= l2);
+      while (ep<l && !gcmp0(p1) && (exact || gexpo(p1) - gexpo(b1) >= l2));
       return gerepilecopy(av,a1);
+    }
   }
   return transc(sagm,x,prec);
 }
