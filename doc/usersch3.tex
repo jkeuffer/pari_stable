@@ -3118,7 +3118,7 @@ structure of the ray class group as would have been output with $\fl=0$.
 If $\fl=1$, as above, except that the generators of the ray class group are
 not computed, which saves time.
 
-\syn{bnrclass0}{\var{bnf},\var{ideal},\fl,\var{prec}}.
+\syn{bnrclass0}{\var{bnf},\var{ideal},\fl}.
 
 \subsecidx{bnrclassno}$(\var{bnf},I)$: $\var{bnf}$ being a big number field
 as output
@@ -3143,7 +3143,7 @@ outputs the list of the class numbers of the corresponding ray class groups.
 subfield of a ray class field as defined by $[a_1,a_2,a_3]$ (see \kbd{bnr}
 at the beginning of this section).
 
-\syn{bnrconductor}{a_1,a_2,a_3,\fl,\var{prec}}, where an omitted argument
+\syn{bnrconductor}{a_1,a_2,a_3,\fl}, where an omitted argument
 among the $a_i$ is input as \kbd{gzero}, and $\fl$ is a C long.
 
 \subsecidx{bnrconductorofchar}$(\var{bnr},\var{chi})$: \var{bnr} being a
@@ -3152,8 +3152,7 @@ as output by \kbd{bnrclass}, and \var{chi} being a row vector representing a
 \idx{character} as expressed on the generators of the ray class group, gives
 the conductor of this character as a modulus.
 
-\syn{bnrconductorofchar}{\var{bnr},\var{chi},\var{prec}} where $\var{prec}$
-is a \kbd{long}.
+\syn{bnrconductorofchar}{\var{bnr},\var{chi}}.
 
 \subsecidx{bnrdisc}$(a1,\{a2\},\{a3\},\{\fl=0\})$: $a1$, $a2$, $a3$
 defining a big ray number field $L$ over a groud field $K$ (see \kbd{bnr}
@@ -3173,7 +3172,7 @@ conductor corresponding to the $L$, no data is computed and the result is $0$
 
    If $\fl=3$, as case 2, outputting relative data.
 
-\syn{bnrdisc0}{a1,a2,a3,\fl,\var{prec}}.
+\syn{bnrdisc0}{a1,a2,a3,\fl}.
 
 \subsecidx{bnrdisclist}$(\var{bnf},\var{bound},\{\var{arch}\},\{\fl=0\})$:
 $\var{bnf}$ being a big
@@ -3219,7 +3218,7 @@ initializes data linked
 to the ray class group structure corresponding to this module. This is the
 same as $\kbd{bnrclass}(\var{bnf},\var{ideal},\fl+1)$.
 
-\syn{bnrinit0}{\var{bnf},\var{ideal},\fl,\var{prec}}.
+\syn{bnrinit0}{\var{bnf},\var{ideal},\fl}.
 
 \subsecidx{bnrisconductor}$(a1,\{a2\},\{a3\})$: $a1$, $a2$, $a3$ represent
 an extension of the base field, given by class field theory for some modulus
@@ -4460,7 +4459,7 @@ matrix in HNF defining the subgroup of the ray class group on the
 given generators gen. If $\fl$ is non-zero, check under GRH that
 \var{pol} indeed defines an Abelian extension, return 0 if it does not.
 
-\syn{rnfconductor}{\var{rnf},\var{pol},\fl,\var{prec}}.
+\syn{rnfconductor}{\var{rnf},\var{pol},\fl}.
 
 \subsecidx{rnfdedekind}$(\var{nf},\var{pol},\var{pr})$: given a number field
 $\var{nf}$ as output by \kbd{nfinit} and a polynomial \var{pol} with
@@ -4888,8 +4887,8 @@ SNF\sidx{Smith normal form} matrix corresponding to $G$. If $\fl=0$
 (default) and \var{bnr} is as output by
 \kbd{bnrinit}, gives only the subgroups whose modulus is the conductor.
 
-\syn{subgrouplist0}{\var{bnr},\var{bound},\fl,\var{prec}}, where
-\var{bound}, $\fl$ and $\var{prec}$ are long integers.
+\syn{subgrouplist0}{\var{bnr},\var{bound},\fl}, where \var{bound} and $\fl$
+are long integers.
 
 \subsecidx{zetak}$(\var{znf},x,\{\fl=0\})$: \var{znf} being a number
 field initialized by \kbd{zetakinit} (\var{not} by \kbd{nfinit}),
