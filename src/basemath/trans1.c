@@ -555,20 +555,16 @@ gpow(GEN x, GEN n, long prec)
   if (gcmp0(x))
   {
     n = greal(n);
-    if (gsigne(n)<=0) err(talker,"zero to a non positive exponent in gpow");
-    i = precision(x); if (!i) return gcopy(x);
+    if (gsigne(n) <= 0)
+      err(talker,"zero to a non positive exponent in gpow");
+    if (!precision(x)) return gcopy(x);
 
-    x=ground(gmulsg(gexpo(x),n));
-    if (lgefint(x)<=3)
-    {
-      i = itos(x);
-      if (labs(i) < (long)HIGHEXPOBIT)
-      {
-        avma=av; y=cgetr(3); y[1]=evalexpo(i); y[2]=0;
-        return y;
-      }
-    }
-    err(talker,"underflow or overflow in gpow");
+    x = ground(gmulsg(gexpo(x),n));
+    if (is_bigint(x) || (ulong)x[2] >= (ulong)HIGHEXPOBIT)
+      err(talker,"underflow or overflow in gpow");
+    avma = av; y = cgetr(3);
+    y[1] = evalexpo(itos(x));
+    y[2] = 0; return y;
   }
   i = (long) precision(n); if (i) prec=i;
   y=gmul(n,glog(x,prec)); tetpil=avma;
