@@ -1047,6 +1047,7 @@ GEN     mulss(long x, long y);
 GEN     mului(ulong x, GEN y);
 GEN     muluu(ulong x, ulong y);
 int     ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax);
+GEN     resmod2n(GEN x, long n);
 GEN     resss(long x, long y);
 double  rtodbl(GEN x);
 GEN     shifti(GEN x, long n);
