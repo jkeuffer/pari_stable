@@ -616,10 +616,9 @@ max_modulus(GEN p, double tau)
 {
   GEN q,aux,gunr;
   long i,j,k,valuat,n=lgef(p)-3,nn,ltop=avma,bitprec,imax,e;
-  double r=0.,rho,tau2,eps;
+  double r,rho,eps, tau2 = (tau > 3.0)? 0.5: tau/6.;
 
-  if (tau>3.0) tau=3.0; /* fix PZ 7.2.98: ensures eps is positive */
-  eps=1/log(4./tau); tau2=tau/6.;
+  eps = - 1/log(1.5*tau2); /* > 0 */
   bitprec=(long) ((double) n*log2(1./tau2)+3*log2((double) n))+1;
   gunr=myrealun(bitprec+2*n);
   aux=gdiv(gunr,(GEN) p[2+n]);
@@ -628,7 +627,7 @@ max_modulus(GEN p, double tau)
   e=findpower(q); homothetie2n(q,e); r=-(double) e;
   q=mygprec(q,bitprec+(n<<1));
   pol_to_gaussint(q,bitprec);
-  imax=(long) ((log(log(4.*n))+log(3./tau))/log(2.))+2;
+  imax=(long) ((log(log(4.*n)/(2*tau2))) / log(2.)) + 2;
   for (i=0,e=0;;)
   {
     rho=lower_bound(q,&k,eps);
