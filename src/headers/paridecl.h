@@ -1435,6 +1435,7 @@ GEN     simplefactmod(GEN f, GEN p);
 
 /* polarit2.c */
 
+GEN     Hensel_exponents(long e);
 GEN     Q_content(GEN x);
 GEN     Q_denom(GEN x);
 GEN     Q_div_to_int(GEN x, GEN c);

@@ -896,6 +896,40 @@ mpinv(GEN b)
 }
 
 GEN
+inv_ser(GEN b)
+{
+  pari_sp av = avma, av2, lim;
+  long i, j, le, l = lg(b), e = valp(b), v = varn(b);
+  GEN E, y, x = cgetg(l, t_SER), a = dummycopy(b);
+
+  if (!signe(b)) err(gdiver);
+
+  for (j = 3; j < l; j++) x[j] = zero;
+  x[2] = linv((GEN)b[2]);
+  a[1] = x[1] = evalvalp(0) | evalvarn(v) | evalsigne(1);
+  E = Hensel_exponents(l - 2);
+  av2 = avma; lim = stack_lim(av2, 2);
+  le = lg(E)-1;
+  for (i = le; i > 1; i--) {
+    long l1 = E[i-1], l2 = E[i];
+    setlg(a, l1 + 2);
+    setlg(x, l1 + 2);
+    /* TODO: gmul(a,x) should be a half product (the higher half is known) */
+    y = gadd(x, gmul(x, gsubsg(1, gmul(a,x))));
+    for (j = l2+2; j < l1+2; j++) x[j] = y[j];
+    if (low_stack(lim, stack_lim(av2,2)))
+    {
+      if(DEBUGMEM>1) err(warnmem,"gsubst");
+      y = gerepilecopy(av, y);
+      x = cgetg(l, t_SER);
+      for (j = l2+2; j < l1+2; j++) x[j] = y[j];
+    }
+  }
+  x[1] = evalvalp(valp(x)-e) | evalvarn(v) | evalsigne(1);
+  return gerepilecopy(av, x);
+}
+
+GEN
 ginv(GEN x)
 {
   long s;

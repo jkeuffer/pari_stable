@@ -445,6 +445,15 @@ TreeLift(GEN link, GEN v, GEN w, GEN T, GEN p, long e0, long e1, GEN f, int noin
   RecTreeLift(link, v, w, T, pd, p0, f, lgpol(v), noinv);
 }
 
+GEN
+Hensel_exponents(long e)
+{
+  GEN E = cgetg(BITS_IN_LONG, t_VECSMALL);
+  long l = 1; E[l++] = e;
+  while (e > 1) { e = (e+1)>>1; E[l++] = e; }
+  setlg(E, l); return E;
+}
+
 /* a = modular factors of f mod (p,T) [possibly T=NULL], lift to precision p^e0
  * flag = 0: standard.
  * flag = 1: return TreeLift structure
@@ -461,9 +470,9 @@ MultiLift(GEN f, GEN a, GEN T, GEN p, long e0, int flag)
   if (typ(a[1]) == t_INT) flag = 2;
   else if (flag == 2) flag = 1;
 
-  E = cgetg(BITS_IN_LONG, t_VECSMALL);
-  l = 0; E[++l] = e;
-  while (e > 1) { e = (e+1)/2; E[++l] = e; }
+  E = Hensel_exponents(e);
+  e = 1;
+  l = lg(E)-1;
 
   if (DEBUGLEVEL > 3) TIMERstart(&Ti);
 
