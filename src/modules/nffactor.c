@@ -1158,8 +1158,9 @@ nf_LLL_cmbf(nfcmbf_t *T, long a, GEN p, long rec)
     if (!piv) { avma = av2; continue; }
     if (DEBUGLEVEL) fprintferr("special_pivot output:\n%Z\n",piv);
 
+    r = lg(piv); /* BL need not have maximal rank */
     target = T->pol;
-    for (i=1; i<=r; i++)
+    for (i=1; i<r; i++)
     {
       GEN p1 = (GEN)piv[i], rem;
       if (DEBUGLEVEL) fprintferr("LLL_cmbf: checking factor %ld\n",i);
@@ -1174,10 +1175,10 @@ nf_LLL_cmbf(nfcmbf_t *T, long a, GEN p, long rec)
       if (!gcmp0(rem)) break;
       list[i] = (long)y;
     }
-    if (i > r)
+    if (i == r)
     {
       if (DEBUGLEVEL>2) fprintferr("nf_LLL_cmbf: %ld factors\n", r);
-      setlg(list,r+1); return list;
+      setlg(list,r); return list;
     }
     avma = av2;
   }
