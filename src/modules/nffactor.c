@@ -296,7 +296,7 @@ nffactor(GEN nf,GEN pol)
       ex[j] = e;
     }
     avma = av1; y = gerepileupto(av, y);
-    p1 = cgetg(l, t_COL); for (j=l-1; j>=1; j--) p1[j] = lstoi(ex[j]);
+    p1 = cgetg(l, t_COL); for (j=l-1; j>=1; j--) p1[j] = (long)utoipos(ex[j]);
     free(ex);
   }
   else
@@ -423,7 +423,7 @@ nf_Beauzamy_bound(GEN nf, GEN polbase)
   }
   lt = leading_term(polbase);
   s = gmul(s, mulis(sqri(lt), n));
-  C = gpow(stoi(3), dbltor(1.5 + d), DEFAULTPREC); /* 3^{3/2 + d} */
+  C = powrshalf(stor(3,DEFAULTPREC), 3 + 2*d); /* 3^{3/2 + d} */
   return gdiv(gmul(C, s), gmulsg(d, mppi(DEFAULTPREC)));
 }
 
@@ -766,7 +766,7 @@ nfcmbf(nfcmbf_t *T, GEN p, long a, long maxK, long klim)
 nextK:
   if (K > maxK || 2*K > lfamod) goto END;
   if (DEBUGLEVEL > 3)
-    fprintferr("\n### K = %d, %Z combinations\n", K,binome(stoi(lfamod), K));
+    fprintferr("\n### K = %d, %Z combinations\n", K,binome(utoipos(lfamod), K));
   setlg(ind, K+1); ind[1] = 1;
   i = 1; curdeg = degpol[ind[1]];
   for(;;)
@@ -1194,7 +1194,7 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long k, long rec)
     av2 = avma;
     b = delta = 0; /* -Wall */
 AGAIN:
-    M_L = Q_div_to_int(CM_L, stoi(C));
+    M_L = Q_div_to_int(CM_L, utoipos(C));
     VV = get_V(Tra, M_L, PRK, PRKinv, pk, &a);
     if (first)
     { /* initialize lattice, using few p-adic digits for traces */
@@ -1247,7 +1247,7 @@ AGAIN:
     {
       pari_timer ti;
       if (DEBUGLEVEL>2) TIMERstart(&ti);
-      list = nf_chk_factors(T, P, Q_div_to_int(CM_L,stoi(C)), famod, pk);
+      list = nf_chk_factors(T, P, Q_div_to_int(CM_L,utoipos(C)), famod, pk);
       if (DEBUGLEVEL>2) ti_CF += TIMER(&ti);
       if (list) break;
       CM_L = gerepilecopy(av2, CM_L);
@@ -1415,7 +1415,7 @@ nfsqff(GEN nf, GEN pol, long fl)
     {
       NEXT_PRIME_VIADIFF_CHECK(pp, pt);
       if (! umodiu(bad,pp)) continue;
-      ap = utoi(pp);
+      ap = utoipos(pp);
       list = (GEN)FpX_factor(FpX_red(nfpol,ap), ap)[1];
       if (maxf == 1)
       { /* deg.1 factors are best */

@@ -422,7 +422,7 @@ subcyclo_start(long n, long d, long o, GEN borne, long *ptr_val,long *ptr_l)
   long i;
   long e,val;
   if (DEBUGLEVEL >= 1) (void)timer2();
-  l=stoi(n+1);e=1;
+  l=utoipos(n+1);e=1;
   while(!isprime(l)) { l=addis(l,n); e++; }
   if (DEBUGLEVEL >= 4)
     fprintferr("Subcyclo: prime l=%Z\n",l);
@@ -433,7 +433,7 @@ subcyclo_start(long n, long d, long o, GEN borne, long *ptr_val,long *ptr_l)
       Vecmax(Vec((x+o)^d)=max{binome(d,i)*o^i ;1<=i<=d} 
      */
     i=d-(1+d)/(1+o);
-    borne=mulii(binome(stoi(d),i),gpowgs(stoi(o),i));
+    borne=mulii(binome(utoipos(d),i),gpowgs(utoipos(o),i));
   }
   if (DEBUGLEVEL >= 4)
     fprintferr("Subcyclo: borne=%Z\n",borne);
@@ -443,7 +443,7 @@ subcyclo_start(long n, long d, long o, GEN borne, long *ptr_val,long *ptr_l)
     fprintferr("Subcyclo: val=%ld\n",val);
   le=gpowgs(l,val);
   z=lift(gpowgs(gener(l),e));
-  z=padicsqrtnlift(gun,stoi(n),z,l,val);
+  z=padicsqrtnlift(gun,utoipos(n),z,l,val);
   if (DEBUGLEVEL >= 1)
     msgtimer("padicsqrtnlift.");
   *ptr_val=val;
@@ -674,7 +674,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
     n = cnd;
   }
   card = group_order(H);
-  phi_n= itos(phi(stoi(n)));
+  phi_n= itos(phi(utoipos(n)));
   if ( card==phi_n )
   {
     avma=ltop;
@@ -715,7 +715,7 @@ subcyclo(long n, long d, long v)
   if (d<=0 || n<=0) err(typeer,"subcyclo");
   if ((n & 3) == 2) n >>= 1;
   if (n == 1 || d >= n) err(talker,"degree does not divide phi(n) in subcyclo");
-  fa = decomp(stoi(n));
+  fa = decomp(utoipos(n));
   p = itos(gmael(fa,1,1));
   al= itos(gmael(fa,2,1));
   if (lg((GEN)fa[1]) > 2 || (p==2 && al>2))
@@ -732,7 +732,7 @@ subcyclo(long n, long d, long v)
     GEN pol = powgi(polx[v],gdeux); pol[2]=un; /* replace gzero */
     return pol; /* = x^2 + 1 */
   }
-  G=gener(stoi(n));
+  G=gener(utoipos(n));
   g=itos((GEN)G[2]);
   gd=itos((GEN)gpowgs(G,d)[2]);
   avma=ltop;

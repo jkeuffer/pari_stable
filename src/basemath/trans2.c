@@ -766,11 +766,11 @@ bernfracspec(long k)
   pari_sp av, lim;
   GEN s, c, N, b;
 
-  c = N = utoi(K); s = gun; b = gzero;
+  c = N = utoipos(K); s = gun; b = gzero;
   av = avma; lim = stack_lim(av,2);
   for (n=2; ; n++) /* n <= k+1 */
   {
-    c = diviiexact(muliu(c,k+2-n), utoi(n));
+    c = diviiexact(muliu(c,k+2-n), utoipos(n));
     if (n & 1) setsigne(c, 1); else setsigne(c, -1);
     /* c = (-1)^(n-1) binomial(k+1, n),  s = 1^k + ... + (n-1)^k */
 
@@ -789,13 +789,13 @@ bernfracspec(long k)
 
 static GEN
 B2(void){ GEN z = cgetg(3, t_FRAC);
-  z[1] = un; z[2] = lutoi(6UL);
-  return z;
+  z[1] = un;
+  z[2] = (long)utoipos(6); return z;
 }
 static GEN
 B4(void) { GEN z = cgetg(3, t_FRAC);
-  z[1] = lstoi(-1); z[2] = lutoi(30UL);
-  return z;
+  z[1] = (long)utoineg(1);
+  z[2] = (long)utoipos(30); return z;
 }
 
 GEN
@@ -823,13 +823,13 @@ bernvec_old(long nb)
   for (n = 1; n <= nb; n++)
   { /* compute y[n+1] = B_{2n} */
     pari_sp av = avma;
-    GEN b = gmul2n(stoi(1-2*n), -1); /* 1 + (2n+1)B_1 = (1-2n) /2 */
+    GEN b = gmul2n(utoineg(2*n - 1), -1); /* 1 + (2n+1)B_1 = -(2n-1) /2 */
     GEN c = gun;
     ulong u1 = 2*n + 1, u2 = n, d1 = 1, d2 = 1;
 
     for (i = 1; i < n; i++)
     {
-      c = diviiexact(muliu(c, u1*u2), utoi(d1*d2)); /* = binomial(2n+1, 2*i) */
+      c = diviiexact(muliu(c, u1*u2), utoipos(d1*d2));/*= binomial(2n+1, 2*i) */
       b = gadd(b, gmul(c, (GEN)y[i+1]));
       u1 -= 2; u2--; d1++; d2 += 2;
     }

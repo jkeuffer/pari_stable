@@ -60,7 +60,7 @@ RHSpol(GEN e)
   z[2] = e[8];
   z[3] = lmul2n((GEN)e[7],1);
   z[4] = e[6];
-  z[5] = lstoi(4); return z;
+  z[5] = (long)utoipos(4); return z;
 }
 
 /* x^3 + a2 x^2 + a4 x + a6 */
@@ -272,7 +272,7 @@ padic_initell(GEN y, GEN p, long prec)
     err(talker,"valuation of j must be negative in p-adic ellinit");
   if (egalii(p,gdeux))
   {
-    pv = stoi(4); 
+    pv = utoipos(4); 
     err(impl,"initell for 2-adic numbers");
   }
   else
@@ -898,9 +898,8 @@ typedef struct {
 static void
 set_gamma(SL2_red *T)
 {
-  GEN t = T->tau, a, b, c, d, run;
+  GEN t = T->tau, a, b, c, d, run = dbltor(1. - 1e-8);
 
-  run = gsub(realun(DEFAULTPREC), gpowgs(stoi(10),-8));
   a = d = gun;
   b = c = gzero;
   for(;;)
@@ -1219,7 +1218,7 @@ ellsigma(GEN w, GEN z, long flag, long prec)
     u1 = gsub(uhalf,ginv(uhalf));
     y = gdiv(gmul(T.W2,u1),pii2);
     av1 = avma; lim = stack_lim(av1,1); qn=q;
-    negu = stoi(-1);
+    negu = utoineg(1);
     for(;;)
     {
       p1 = gmul(gadd(gmul(qn,u),negu),gadd(gmul(qn,uinv),negu));
@@ -1860,7 +1859,7 @@ s_powell(sellpt *Q, sellpt *P, long n, long c4, long p)
 static long
 sexact_order(long H, sellpt *f, long c4, long p)
 {
-  GEN P, e, fa = decomp(stoi(H));
+  GEN P, e, fa = decomp(utoipos(H));
   long h = H, pp, i, j, l;
   sellpt fh;
 
@@ -2370,13 +2369,13 @@ lseriesell(GEN e, GEN s, GEN A, long prec)
   av1 = avma; lim = stack_lim(av1,1);
   for (n = 1; n <= l; n++)
   {
-    GEN p1, p2;
-    p1 = gdiv(incgam0(s,mulsr(n,cga),gs,prec), gpow(stoi(n),s,prec));
+    GEN p1, p2, gn = utoipos(n);
+    p1 = gdiv(incgam0(s,mulsr(n,cga),gs,prec), gpow(gn,s,prec));
     p2 = flun? p1: gdiv(gmul(ns, incgam(s2,mulsr(n,cgb),prec)),
-                        gpow(stoi(n), s2,prec));
+                        gpow(gn, s2,prec));
     if (eps < 0) p2 = gneg_i(p2);
     z = gadd(z, gmul(gadd(p1,p2),
-                     ((ulong)n<LGBITS)? (GEN)v[n]: akell(e,stoi(n))));
+                     ((ulong)n<LGBITS)? (GEN)v[n]: akell(e,gn)));
     if (low_stack(lim, stack_lim(av1,1)))
     {
       if(DEBUGMEM>1) err(warnmem,"lseriesell");
@@ -2645,8 +2644,8 @@ localred_carac_23(GEN e, long p)
         if (theroot) cumule(&v, &e, gun, stoi(theroot * p), gzero, gzero);
             /* p | a1; p^2  | a2, a3; p^3 | a4; p^4 | a6 */
         nu = 1;
-        pk  = stoi(p2);
-        p2k = stoi(p2 * p2);
+        pk  = utoipos(p2);
+        p2k = utoipos(p2 * p2);
         for(;;)
         {
           be =  aux2((GEN)e[3], p, pk);
@@ -2695,7 +2694,7 @@ localred_carac_23(GEN e, long p)
         if (smodis((GEN)e[5], p4 * p2))
           return localred_result(nudelta - 8, -2, 1, v);
             /* II*  */
-        cumule(&v, &e, stoi(p), gzero, gzero, gzero); /* not minimal */
+        cumule(&v, &e, utoipos(p), gzero, gzero, gzero); /* not minimal */
         nudelta -= 12;
     }
   }
@@ -2986,7 +2985,7 @@ orderell(GEN e, GEN p)
   checkell(e); checkpt(p);
   t = typ(e[13]);
   if (!is_rational_t(t)) err(impl,"orderell for nonrational elliptic curves");
-  return stoi( _orderell(e, p) );
+  return utoipos( _orderell(e, p) );
 }
 
 /* Using Lutz-Nagell */
@@ -3091,7 +3090,7 @@ torsellnagelllutz(GEN e)
 
   if (nlr<3)
   {
-    w2 = mkvec( stoi(t) );
+    w2 = mkvec( utoipos(t) );
     for (k=2; k<=t; k++)
       if (_orderell(e,(GEN)r[k]) == t) break;
     if (k>t) err(bugparier,"torsell (bug1)");
@@ -3102,12 +3101,12 @@ torsellnagelllutz(GEN e)
   {
     if (t&3) err(bugparier,"torsell (bug2)");
     t2 = t>>1;
-    w2 = mkvec2(stoi(t2), gdeux);
+    w2 = mkvec2(utoipos(t2), gdeux);
     for (k=2; k<=t; k++)
       if (_orderell(e,(GEN)r[k]) == t2) break;
     if (k>t) err(bugparier,"torsell (bug3)");
 
-    p1 = powell(e,(GEN)r[k],stoi(t>>2));
+    p1 = powell(e,(GEN)r[k],utoipos(t>>2));
     k2 = (lg(p1)==3 && gegal((GEN)r[2],p1))? 3: 2;
     w3 = mkvec2((GEN)r[k], (GEN)r[k2]);
   }
@@ -3116,7 +3115,7 @@ torsellnagelllutz(GEN e)
     v[1] = linv((GEN)v[1]);
     w3 = pointch(w3,v);
   }
-  return gerepilecopy(av, mkvec3(stoi(t), w2,w3));
+  return gerepilecopy(av, mkvec3(utoipos(t), w2,w3));
 }
 
 /* Using Doud's algorithm */
@@ -3168,7 +3167,7 @@ torspnt(GEN E, GEN w, long n, long prec)
   p[2] = lmul2n(_round(gmul2n((GEN)q[2],3), &e),-3);
   if (e > -5 || typ(p[2]) == t_COMPLEX) return NULL;
   return (oncurve(E,p)
-      && lg(powell(E,p,stoi(n))) == 2
+      && lg(powell(E,p,utoipos(n))) == 2
       && _orderell(E,p) == n)? p: NULL;
 }
 
@@ -3203,7 +3202,7 @@ tors(GEN e, long k, GEN p, GEN q, GEN v)
   if (q)
   {
     long n = k>>1;
-    GEN p1, best = q, np = powell(e,p,stoi(n));
+    GEN p1, best = q, np = powell(e,p,utoipos(n));
     if (n % 2 && smaller_x((GEN)np[1], (GEN)best[1])) best = np;
     p1 = addell(e,q,np);
     if (smaller_x((GEN)p1[1], (GEN)best[1])) q = p1;
@@ -3215,8 +3214,8 @@ tors(GEN e, long k, GEN p, GEN q, GEN v)
       q = pointch(q,v);
     }
     r = cgetg(4,t_VEC);
-    r[1] = lstoi(2*k);
-    r[2] = (long)mkvec2(stoi(k), gdeux);
+    r[1] = (long)utoipos(2*k);
+    r[2] = (long)mkvec2(utoipos(k), gdeux);
     r[3] = (long)mkvec2copy(p, q);
   }
   else
@@ -3226,7 +3225,7 @@ tors(GEN e, long k, GEN p, GEN q, GEN v)
       p = best_in_cycle(e,p,k);
       if (v) p = pointch(p,v);
       r = cgetg(4,t_VEC);
-      r[1] = lstoi(k);
+      r[1] = (long)utoipos(k);
       r[2] = (long)mkvec( (GEN)r[1] );
       r[3] = (long)mkvec( gcopy(p) );
     }
@@ -3613,10 +3612,9 @@ ellrootno_p(GEN e, GEN p, GEN ex)
   if (gcmp1(ex)) return -kronecker(negi((GEN)e[11]),p);
   j=(GEN)e[13];
   if (!gcmp0(j) && ggval(j,p) < 0) return kronecker(negi(gun),p);
-  ep=12/cgcd(12,ggval((GEN)e[12],p));
-  if (ep==4) z=2;
-  else z=(ep%2==0) ? 1 : 3;
-  return kronecker(stoi(-z),p);
+  ep = 12/cgcd(12,ggval((GEN)e[12],p));
+  if (ep==4) z = 2; else z = (ep&1) ? 3 : 1;
+  return krosi(-z, p);
 }
 
 static long
@@ -3638,29 +3636,27 @@ ellrootno_intern(GEN e, GEN p, GEN ex)
 static long
 ellrootno_all(GEN e, GEN p, GEN* ptcond)
 {
-  long s,exs,i;
-  GEN fa,gr,cond,pr,ex;
+  long s, i;
+  GEN fa, cond, pr, ex, gr = globalreduction(e);
 
-  gr=globalreduction(e);
-  e=coordch(e,(GEN)gr[2]);
-  cond=(GEN)gr[1]; if(ptcond) *ptcond=cond;
-  if (typ(e[12]) != t_INT)
-    err(talker,"not an integral curve in ellrootno");
-  if (typ(p) != t_INT || signe(p)<0)
-    err(talker,"not a nonnegative integer second arg in ellrootno");
-  exs = 0; /* gcc -Wall */
-  if (cmpis(p,2)>=0)
+  e = coordch(e,(GEN)gr[2]);
+  cond = (GEN)gr[1]; if(ptcond) *ptcond = cond;
+  if (typ(e[12]) != t_INT) err(talker,"not an integral curve in ellrootno");
+  if (typ(p) != t_INT || signe(p) < 0) err(typeer,"ellrootno");
+  if (cmpis(p,2) >= 0)
   {
-    exs=ggval(cond,p);
+    long exs = ggval(cond,p);
     if (!exs) return 1;
+    if (cmpis(p,3) > 0) return ellrootno_p(e,p, utoipos(exs));
   }
-  if (cmpis(p,3)>0) return ellrootno_p(e,p,stoi(exs));
   switch(itos(p))
   {
     case 3: return ellrootno_3(e);
     case 2: return ellrootno_2(e);
-    case 1: s=-1; fa=factor(cond); pr=(GEN)fa[1]; ex=(GEN)fa[2];
-      for (i=1; i<lg(pr); i++) s*=ellrootno_intern(e,(GEN)pr[i],(GEN)ex[i]);
+    case 1: s = -1; fa = factor(cond);
+      pr = (GEN)fa[1];
+      ex = (GEN)fa[2];
+      for (i=1; i<lg(pr); i++) s *= ellrootno_intern(e,(GEN)pr[i],(GEN)ex[i]);
       return s;
     default: return -1; /* case 0: local factor at infinity = -1 */
   }

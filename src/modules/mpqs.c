@@ -553,7 +553,7 @@ mpqs_iterate_primes(ulong *p, byteptr primes_ptr)
   else
   {
     pari_sp av = avma;
-    prime = itou(nextprime(utoi(prime + 1)));
+    prime = itou(nextprime(utoipos(prime + 1)));
     avma = av;
   }
   *p = prime; return primes_ptr;
@@ -968,7 +968,7 @@ mpqs_self_init(GEN A, GEN B, GEN N, GEN kN, long *FB, long *sqrt_mod_p_kN,
     for (j = 0; (ulong)j < total_no_of_primes_for_A; j++)
       if (*bin_index & (1UL << j)) {
         p = (ulong)FB[start_index_FB + 1 + j];
-        p1 = p1? muliu(p1, p): utoi(p);
+        p1 = p1? muliu(p1, p): utoipos(p);
       }
     affii(p1, A); avma = av;
 
@@ -1208,7 +1208,7 @@ mpqs_factorback(long *FB, char *relations, GEN kN)
   {
     e = atol(s); if (!e) break;
     s = strtok(NULL, " \n");
-    p_e = Fp_powu(stoi(FB[atol(s)]), (ulong)e, kN);
+    p_e = Fp_powu(utoipos(FB[atol(s)]), (ulong)e, kN);
     prod = remii(mulii(prod, p_e), kN);
     s = strtok(NULL, " \n");
   }
@@ -1482,7 +1482,7 @@ mpqs_combine_large_primes(FILE *COMB, FILE *FNEW, long size_of_FB,
 
   i = 1; /* second relation will go into row 1 */
   old_q = e[0].q;
-  while (!invmod(stoi(old_q), kN, &inv_q)) /* can happen */
+  while (!invmod(utoipos(old_q), kN, &inv_q)) /* can happen */
   {
     inv_q = gcdii(inv_q, N);
     if (is_pm1(inv_q) || egalii(inv_q, N)) /* pity */
@@ -1509,7 +1509,7 @@ mpqs_combine_large_primes(FILE *COMB, FILE *FNEW, long size_of_FB,
       /* switch to combining a new bunch, swapping the rows */
       old_q = e[i].q;
       avma = av; /* discard old inv_q and Y1 */
-      if (!invmod(stoi(old_q), kN, &inv_q)) /* can happen --GN */
+      if (!invmod(utoipos(old_q), kN, &inv_q)) /* can happen --GN */
       {
 	inv_q = gcdii(inv_q, N);
 	if (is_pm1(inv_q) || egalii(inv_q, N)) /* pity */
@@ -1576,7 +1576,7 @@ mpqs_combine_large_primes(FILE *COMB, FILE *FNEW, long size_of_FB,
 	exi = atol(s); if (!exi) break;
 	s = strtok(NULL, " \n");
 	pi = atol(s);
-	pi_ei = Fp_pow(stoi(FB[pi]), stoi(exi), kN);
+	pi_ei = Fp_pow(utoipos(FB[pi]), utoipos(exi), kN);
 	prod_pi_ei = modii(mulii(prod_pi_ei, pi_ei), kN);
 	s = strtok(NULL, " \n");
       }
@@ -1875,7 +1875,7 @@ split(GEN N, long *e, long *res)
   if ( (flag = is_357_power(N, &base, &mask)) )
   {
     if (res) *res = (long)base; else affii(base, N); 
-    *e = lstoi(flag);
+    *e = (long)utoipos(flag);
     if (DEBUGLEVEL >= 5)
       fprintferr("MPQS: decomposed a %s\n",
                  (flag == 3 ? "cube" :
@@ -1986,7 +1986,7 @@ mpqs_solve_linear_system(GEN kN, GEN N, long rel, long *FB, long size_of_FB)
       if (ei[j])
       {
         if (ei[j] & 1) err(bugparier, "MPQS (relation is a nonsquare)");
-	X = remii(mulii(X, Fp_powu(stoi(FB[j]), (ulong)ei[j]>>1, N_or_kN)),
+	X = remii(mulii(X, Fp_powu(utoipos(FB[j]), (ulong)ei[j]>>1, N_or_kN)),
 		  N_or_kN);
 	if (low_stack(lim3, stack_lim(av3,1)))
 	{
@@ -2282,7 +2282,7 @@ mpqs(GEN N)
     if (DEBUGLEVEL >= 4)
       fprintferr("\nMPQS: found factor = %ld whilst creating factor base\n", p);
     if (mpqs_diffptr == diffptr) mpqs_diffptr = NULL;
-    all_clean = 1; avma = av; return utoi(p);
+    all_clean = 1; avma = av; return utoipos(p);
   }
 
   if (DEBUGLEVEL >= 4)

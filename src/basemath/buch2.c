@@ -1121,7 +1121,7 @@ init_red_mod_units(GEN bnf, long prec)
     p1[RU]=zero; if (mpcmp(s1,s) > 0) s = s1;
   }
   s = gsqrt(gmul2n(s,RU),prec);
-  if (expo(s) < 27) s = utoi(1UL << 27);
+  if (expo(s) < 27) s = utoipos(1UL << 27);
   return mkvec2(mat, s);
 }
 
@@ -2368,7 +2368,7 @@ static GEN
 codeprime(GEN L, long N, GEN pr)
 {
   long p = itos((GEN)pr[1]);
-  return utoi( N*p + pr_index((GEN)L[p], pr)-1 );
+  return utoipos( N*p + pr_index((GEN)L[p], pr)-1 );
 }
 
 static GEN

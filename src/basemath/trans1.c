@@ -390,7 +390,7 @@ rpowuu(ulong a, ulong n, long prec)
   D.mulug = &mului;
   D.prec = prec;
   D.a = (long)a;
-  y = leftright_pow_u(utoi(a), n, (void*)&D, &_rpowuu_sqr, &_rpowuu_mul);
+  y = leftright_pow_u(utoipos(a), n, (void*)&D, &_rpowuu_sqr, &_rpowuu_mul);
   if (typ(y) == t_INT) y = itor(y, prec);
   return gerepileuptoleaf(av, y);
 }
@@ -781,7 +781,7 @@ sqrtr(GEN x) {
 static GEN
 sqrt_2adic(GEN x, long pp)
 {
-  GEN z = mod16(x)==1? gun: stoi(3);
+  GEN z = mod16(x)==1? gun: utoipos(3);
   long zp;
   pari_sp av, lim;
 
@@ -1693,12 +1693,13 @@ palogaux(GEN x)
     return zeropadic(p, v);
   }
   y = gdiv(gaddgs(x,-1), gaddgs(x,1));
-  e = valp(y); pp = e+precp(y);
+  e = valp(y); /* > 0 */
+  pp = e+precp(y);
   if (egalii(gdeux,p)) pp--;
   else
   {
     GEN p1;
-    for (p1=stoi(e); cmpsi(pp,p1)>0; pp++) p1 = mulii(p1, p);
+    for (p1=utoipos(e); cmpsi(pp,p1)>0; pp++) p1 = mulii(p1, p);
     pp -= 2;
   }
   k = pp/e; if (!odd(k)) k--;

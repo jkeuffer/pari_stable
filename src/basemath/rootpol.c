@@ -1267,7 +1267,7 @@ conformal_mapping(GEN *radii, GEN ctr, GEN p, long k, long bitprec,
   double delta,param,param2;
 
   bitprec2=bitprec+(long) (n*(2.*log2(2.732)+log2(1.5)))+1;
-  a = gsqrt(stoi(3), 2*MEDDEFAULTPREC - 2);
+  a = sqrtr_abs( stor(3, 2*MEDDEFAULTPREC - 2) );
   a = gmul(mygprec(a,bitprec2),mygprec(ctr,bitprec2));
   a = gdivgs(a,-6); /* a = -ctr/2sqrt(3) */
 
@@ -1772,7 +1772,7 @@ fix_roots(GEN r, GEN *m, long h, long bitprec)
   for (k=1,i=1; i<=l; i++)
   {
     GEN p2, p1 = (GEN)r[i];
-    p2 = (h == 2)? gsqrt(p1, prec): gsqrtn(p1, stoi(h), NULL, prec);
+    p2 = (h == 2)? gsqrt(p1, prec): gsqrtn(p1, utoipos(h), NULL, prec);
     for (j=0; j<h; j++) allr[k++] = lmul(p2, (GEN)ro1[j]);
     gunclone(p1);
   }

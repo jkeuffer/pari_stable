@@ -59,9 +59,9 @@ invmod(GEN a, GEN b, GEN *res)
     fprintferr(" -> %lu,%ld,%lu; %lx\n", g,s,xv1,avma);
 #endif
     avma = av;
-    if (g != 1UL) { *res = utoi(g); return 0; }
+    if (g != 1UL) { *res = utoipos(g); return 0; }
     xv = xv1 % (ulong)(b[2]); if (s < 0) xv = ((ulong)(b[2])) - xv;
-    *res = utoi(xv); return 1;
+    *res = utoipos(xv); return 1;
   }
 
   (void)new_chunk(lgefint(b));
@@ -155,7 +155,7 @@ invmod(GEN a, GEN b, GEN *res)
     fprintferr(" <- %lu,%lu\n", (ulong)d[2], (ulong)d1[2]);
     fprintferr(" -> %lu,%ld,%lu; %lx\n", g,s,xv1,avma);
 #endif
-    if (g != 1UL) { avma = av; *res = utoi(g); return 0; }
+    if (g != 1UL) { avma = av; *res = utoipos(g); return 0; }
     /* (From the xgcduu() blurb:)
      * For finishing the multiword modinv, we now have to multiply the
      * returned matrix  (with properly adjusted signs)  onto the values

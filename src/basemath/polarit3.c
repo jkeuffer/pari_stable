@@ -2904,7 +2904,7 @@ INIT:
 
     if (!H)
     { /* initialize */
-      q = utoi(p); stable = 0;
+      q = utoipos(p); stable = 0;
       H = ZX_init_CRT(Hp, p,vX);
       if (LERS) {
         H0= ZX_init_CRT(H0p, p,vX);
@@ -3054,7 +3054,7 @@ ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound)
     if (dp != 1) Hp = Fl_mul(Hp, Fl_pow(Fl_inv(dp,p), degA, p), p);
     if (!H)
     {
-      stable = 0; q = utoi(p);
+      stable = 0; q = utoipos(p);
       H = stoi(Fl_center(Hp, p, p>>1));
     }
     else /* could make it probabilistic ??? [e.g if stable twice, etc] */
@@ -3184,7 +3184,7 @@ modulargcd(GEN A0, GEN B0)
     if (m < n)
     { /* First time or degree drop [all previous p were as above; restart]. */
       H = ZX_init_CRT(Hp,p,varn(A0));
-      q = utoi(p); n = m; continue;
+      q = utoipos(p); n = m; continue;
     }
     if (DEBUGLEVEL>5)
       msgtimer("gcd mod %lu (bound 2^%ld)", p,expi(q));
@@ -3253,7 +3253,7 @@ QXQ_inv(GEN A0, GEN B0)
     { /* First time */
       U = ZX_init_CRT(Up,p,varn(A0));
       V = ZX_init_CRT(Vp,p,varn(A0));
-      q = utoi(p); continue;
+      q = utoipos(p); continue;
     }
     if (DEBUGLEVEL>5) msgtimer("QXQ_inv: mod %ld (bound 2^%ld)", p,expi(q));
     qp = muliu(q,p);

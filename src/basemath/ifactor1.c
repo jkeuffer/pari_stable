@@ -117,7 +117,7 @@ millerrabin(GEN n, long k)
   {
     do r = umodui((ulong)pari_rand31(), n); while (!r);
     if (DEBUGLEVEL > 4) fprintferr("Miller-Rabin: testing base %ld\n", r);
-    if (bad_for_base(&S, utoi(r))) { avma = av; return 0; }
+    if (bad_for_base(&S, utoipos(r))) { avma = av; return 0; }
     avma = av2;
   }
   avma = av; return 1;
@@ -181,7 +181,7 @@ miller(GEN n, long k)
   for (i=1; i<=k; i++)
   {
     r = umodui(p[i],n); if (!r) break;
-    if (bad_for_base(&S, utoi(r))) { avma = av; return 0; }
+    if (bad_for_base(&S, utoipos(r))) { avma = av; return 0; }
     avma = av2;
   }
   avma = av; return 1;
@@ -201,7 +201,7 @@ LucasMod(GEN n, ulong P, GEN N)
   pari_sp av = avma, lim = stack_lim(av, 1);
   GEN nd = int_MSW(n);
   long i, m = *nd, j = 1+bfffo((ulong)m);
-  GEN v = utoi(P), v1 = utoi(P*P - 2);
+  GEN v = utoipos(P), v1 = utoipos(P*P - 2);
 
   m <<= j; j = BITS_IN_LONG - j;
   for (i=lgefint(n)-2;;) /* cf. leftright_pow */
@@ -432,7 +432,7 @@ pl831(GEN N, GEN p)
   av = avma;
   for(a = 2;; a++, avma = av)
   {
-    GEN b = Fp_pow(utoi(a), Nmunp, N);
+    GEN b = Fp_pow(utoipos(a), Nmunp, N);
     GEN c = Fp_pow(b,p,N), g = gcdii(addis(b,-1), N);
     if (!is_pm1(c)) return 0;
     if (is_pm1(g)) { avma=ltop; return a; }
@@ -555,9 +555,9 @@ nextprime(GEN n)
   { /* check if n <= 7 */
     ulong k = n[2];
     if (k <= 2) { avma = av; return gdeux; }
-    if (k == 3) { avma = av; return utoi(3); }
-    if (k <= 5) { avma = av; return utoi(5); }
-    if (k <= 7) { avma = av; return utoi(7); }
+    if (k == 3) { avma = av; return utoipos(3); }
+    if (k <= 5) { avma = av; return utoipos(5); }
+    if (k <= 7) { avma = av; return utoipos(7); }
   }
   /* here n > 7 */
   if (!mod2(n)) n = addsi(1,n);
@@ -596,9 +596,9 @@ precprime(GEN n)
     ulong k = n[2];
     if (k <= 1)  { avma = av; return gzero; }
     if (k == 2)  { avma = av; return gdeux; }
-    if (k <= 4)  { avma = av; return utoi(3); }
-    if (k <= 6)  { avma = av; return utoi(5); }
-    if (k <= 10) { avma = av; return utoi(7); }
+    if (k <= 4)  { avma = av; return utoipos(3); }
+    if (k <= 6)  { avma = av; return utoipos(5); }
+    if (k <= 10) { avma = av; return utoipos(7); }
   }
   /* here n >= 11 */
   if (!mod2(n)) n = addsi(-1,n);
@@ -2125,12 +2125,12 @@ squfof(GEN n)
 	  { /* q^2 divides D1 hence n [ assuming n % 3 != 0 ] */
 	    avma = av;
 	    if (DEBUGLEVEL >= 4) fprintferr("SQUFOF: found factor %ld^2\n", q);
-	    return mkvec3(stoi(q), gdeux, NULL);	/* exponent 2, unknown status */
+	    return mkvec3(utoipos(q), gdeux, NULL);/* exponent 2, unknown status */
 	  }
 	  /* chase the inverse root form back along the ambiguous cycle */
 	  q = squfof_ambig(a, b1, dd1, D1);
 	  if (nm4 == 3 && q % 3 == 0) q /= 3;
-	  if (q > 1) { avma = av; return stoi(q); } /* SUCCESS! */
+	  if (q > 1) { avma = av; return utoipos(q); } /* SUCCESS! */
 	}
 	else if (DEBUGLEVEL >= 4) /* blacklisted */
 	  fprintferr("SQUFOF: ...but the root form seems to be on the "
@@ -2168,12 +2168,12 @@ squfof(GEN n)
 	  { /* q^2 divides D2 hence n [ assuming n % 5 != 0 ] */
 	    avma = av;
 	    if (DEBUGLEVEL >= 4) fprintferr("SQUFOF: found factor %ld^2\n", q);
-	    return mkvec3(stoi(q), gdeux, NULL);	/* exponent 2, unknown status */
+	    return mkvec3(utoipos(q), gdeux, NULL);/* exponent 2, unknown status */
 	  }
 	  /* chase the inverse root form along the ambiguous cycle */
 	  q = squfof_ambig(a, b2, dd2, D2);
 	  if (nm4 == 1 && q % 5 == 0) q /= 5;
-	  if (q > 1) { avma = av; return stoi(q); } /* SUCCESS! */
+	  if (q > 1) { avma = av; return utoipos(q); } /* SUCCESS! */
 	}
 	else if (DEBUGLEVEL >= 4)	/* blacklisted */
 	  fprintferr("SQUFOF: ...but the root form seems to be on the "
@@ -2421,7 +2421,7 @@ is_kth_power(GEN x, ulong p, GEN *pt, byteptr d)
       if (*d0) NEXT_PRIME_VIADIFF(q,d0);
       else {
         if (init) q += p; else { init = 1; q += (p + 1 - q % p); }
-        while ( !BSW_psp( utoi(q) ) ) { q += p; }
+        while ( !BSW_psp( utoipos(q) ) ) { q += p; }
         break;
       }
     } while (q % p != 1);
@@ -2480,7 +2480,7 @@ is_odd_power(GEN x, GEN *pt, ulong *curexp, ulong cutoffbits)
   /* prepare for iterating curexp over primes */
   if (*curexp < 11) *curexp = 11;
   while (p < *curexp) { NEXT_PRIME_VIADIFF(p,d); if (!*d) break; }
-  while (p < *curexp) {  p = itou( nextprime(utoi(p + 1)) ); }
+  while (p < *curexp) {  p = itou( nextprime(utoipos(p + 1)) ); }
   *curexp = p;
 
   if (DEBUGLEVEL>4) fprintferr("OddPwrs: examining %Z\n", x);
@@ -3110,7 +3110,7 @@ ifac_divide(GEN *partial, GEN *where)
     }
     if (newexp > exponent)	/* did anything happen? */
     {
-      (*where)[1] = (newexp == 2 ? deux : lstoi(newexp));
+      (*where)[1] = (newexp == 2 ? deux : (long)utoipos(newexp));
       exponent = newexp;
       if (is_pm1(*scan)) /* factor dissolved completely */
       {
@@ -3183,7 +3183,7 @@ ifac_crack(GEN *partial, GEN *where)
     if (exponent == gun)
       (*where)[1] = deux;
     else if (exponent == gdeux)
-    { (*where)[1] = (long)stoi(4); av = avma; }
+    { (*where)[1] = (long)utoipos(4); av = avma; }
     else
       affsi(itos(exponent) << 1, (GEN)((*where)[1]));
     exponent = (GEN)((*where)[1]);
@@ -3200,8 +3200,8 @@ ifac_crack(GEN *partial, GEN *where)
   }
   /* still composite -- carry on */
 
-  /* MPQS cannot factor prime powers; check for cubes/5th/7th powers. Do this
-   * even if MPQS is blocked by hint: it is useful in bounded factorization */
+  /* MPQS cannot factor prime powers. Do this even if MPQS is blocked by hint:
+   * it is useful in bounded factorization */
   {
     ulong exp0 = 0, mask = 7;
     if (DEBUGLEVEL == 4) fprintferr("IFAC: checking for odd power\n");
@@ -3214,9 +3214,9 @@ ifac_crack(GEN *partial, GEN *where)
 	fprintferr("IFAC: found %Z =\n\t%Z ^%ld\n", **where, factor, exp1);
       affii(factor, (GEN)(**where)); avma = av; factor = NULL;
       if (exponent == gun)
-      { (*where)[1] = (long)stoi(exp1); av = avma; }
+      { (*where)[1] = (long)utoipos(exp1); av = avma; }
       else if (exponent == gdeux)
-      { (*where)[1] = (long)stoi(exp1<<1); av = avma; }
+      { (*where)[1] = (long)utoipos(exp1<<1); av = avma; }
       else
         affsi(exp1 * itos(exponent), (GEN)((*where)[1]));
       exponent = (GEN)((*where)[1]);
@@ -3231,9 +3231,9 @@ ifac_crack(GEN *partial, GEN *where)
 	fprintferr("IFAC: found %Z =\n\t%Z ^%ld\n", **where, factor, exp1);
       affii(factor, (GEN)(**where)); avma = av; factor = NULL;
       if (exponent == gun)
-      { (*where)[1] = (long)stoi(exp1); av = avma; }
+      { (*where)[1] = (long)utoipos(exp1); av = avma; }
       else if (exponent == gdeux)
-      { (*where)[1] = (long)stoi(exp1<<1); av = avma; }
+      { (*where)[1] = (long)utoipos(exp1<<1); av = avma; }
       else
         affsi(exp1 * itos(exponent), (GEN)((*where)[1]));
       exponent = (GEN)((*where)[1]);
@@ -3405,7 +3405,7 @@ ifac_insert_multiplet(GEN *partial, GEN *where, GEN facvec)
     {
       (*where)[-2] = (exponent == 1 ? un :
 		      (exponent == 2 ? deux :
-		       lstoi(exponent))); /* inherit parent's exponent */
+		       (long)utoipos(exponent)));/* inherit parent's exponent */
     }
     (*where)[-3] = isonstack(factor) ? licopy(factor) : (long)factor;
 				/* keep components younger than *partial */

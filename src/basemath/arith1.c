@@ -177,7 +177,7 @@ Fl_gener_fact(ulong p, GEN fa)
   GEN L;
   if (p == 2) return 1;
 
-  if (!fa) { fa = L = (GEN)decomp(utoi(q))[1]; k = lg(fa)-1; }
+  if (!fa) { fa = L = (GEN)decomp(utoipos(q))[1]; k = lg(fa)-1; }
   else { fa = (GEN)fa[1]; k = lg(fa)-1; L = cgetg(k + 1, t_VECSMALL); }
 
   for (i=1; i<=k; i++) L[i] = (long)(q / itou((GEN)fa[i]));
@@ -201,14 +201,14 @@ Fp_gener_fact(GEN p, GEN fa)
   long k, i;
   GEN x, q, V;
   if (egalii(p, gdeux)) return gun;
-  if (lgefint(p) == 3) return utoi(Fl_gener_fact((ulong)p[2], fa));
+  if (lgefint(p) == 3) return utoipos(Fl_gener_fact((ulong)p[2], fa));
 
   q = subis(p, 1);
   if (!fa) { fa = V = (GEN)decomp(q)[1]; k = lg(fa)-1; }
   else { fa = (GEN)fa[1]; k = lg(fa)-1; V = cgetg(k + 1, t_VEC); }
 
   for (i=1; i<=k; i++) V[i] = (long)diviiexact(q, (GEN)fa[i]);
-  x = utoi(2UL);
+  x = utoipos(2);
   for (;; x[2]++)
   {
     GEN d = gcdii(p,x);
@@ -217,7 +217,7 @@ Fp_gener_fact(GEN p, GEN fa)
       GEN e = Fp_pow(x, (GEN)V[i], p);
       if (is_pm1(e)) break;
     }
-    if (!i) { avma = av0; return utoi((ulong)x[2]); }
+    if (!i) { avma = av0; return utoipos((ulong)x[2]); }
   }
 }
 
@@ -736,7 +736,7 @@ gisanypower(GEN x, GEN *pty)
     if (sw) swap(a, b);
     k = isanypower(a, pty? &a: NULL);
     if (!k) { avma = (pari_sp)(z + 3); return 0; }
-    fa = factor(utoi(k));
+    fa = decomp(utoipos(k));
     P = (GEN)fa[1];
     E = (GEN)fa[2]; h = k;
     for (i = lg(P) - 1; i > 0; i--)
@@ -779,7 +779,7 @@ isanypower(GEN x, GEN *pty)
   do
   {
     if (*d) NEXT_PRIME_VIADIFF(p,d);
-    else { p = itou( nextprime(utoi(p + 1)) ); }
+    else { p = itou( nextprime(utoipos(p + 1)) ); }
   } while (p < ex0);
 
   e2 = expi(x) + 1;
@@ -791,7 +791,7 @@ isanypower(GEN x, GEN *pty)
       continue; /* success, retry same p */
     }
     if (*d) NEXT_PRIME_VIADIFF(p, d);
-    else p = itou( nextprime(utoi(p + 1)) );
+    else p = itou( nextprime(utoipos(p + 1)) );
   }
   if (pty) *pty = gerepilecopy(av, x); else avma = av;
   return k == 1? 0: k;
@@ -1271,7 +1271,7 @@ Fp_sqrt(GEN a, GEN p)
   if (typ(a) != t_INT || typ(p) != t_INT) err(arither1);
   if (signe(p) <= 0 || is_pm1(p)) err(talker,"not a prime in Fp_sqrt");
   if (lgefint(p) == 3)
-    return utoi( Fl_sqrt(umodiu(a, (ulong)p[2]), (ulong)p[2]) );
+    return utoipos( Fl_sqrt(umodiu(a, (ulong)p[2]), (ulong)p[2]) );
 
   p1 = addsi(-1,p); e = vali(p1);
 

@@ -1593,7 +1593,7 @@ ZM_inv(GEN M, GEN dM)
     if (!H)
     {
       H = ZM_init_CRT(Hp, p);
-      q = utoi(p);
+      q = utoipos(p);
     }
     else
     {

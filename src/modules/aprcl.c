@@ -311,7 +311,7 @@ e(ulong t)
   ulong nbd, m, k, d;
   int lfa, i, j;
 
-  fa = decomp(utoi(t));
+  fa = decomp(utoipos(t));
   P = (GEN)fa[1]; settyp(P, t_VECSMALL);
   E = (GEN)fa[2]; settyp(E, t_VECSMALL); lfa = lg(P);
   nbd = 1;
@@ -331,7 +331,7 @@ e(ulong t)
       m /= E[j];
     }
     /* d runs through the divisors of t */
-    if (BSW_psp(utoi(++d)))
+    if (BSW_psp(utoipos(++d)))
       s = muliu(s, (ulong)u_pow(d, 1 + u_lval(t,d)));
   }
   return s;
@@ -514,7 +514,7 @@ calcjac(Cache **pC, GEN globfa, GEN *ptabfaq, GEN *ptabj)
   {
     q = itos((GEN)globfa[i]); /* odd prime */
     globfa[i] = q;
-    faq = decomp( utoi(q-1) ); tabfaq[i] = (long)faq;
+    faq = decomp( utoipos(q-1) ); tabfaq[i] = (long)faq;
     P = (GEN)faq[1]; settyp(P, t_VECSMALL);
     E = (GEN)faq[2]; settyp(E, t_VECSMALL); lfaq = lg(P);
     P[1] = 2;
@@ -547,7 +547,7 @@ finda(Cache *Cp, GEN N, int pk, int p)
   }
   else
   {
-    GEN gp = utoi(p), ph, b, N1;
+    GEN gp = utoipos(p), ph, b, N1;
     ulong u = 2;
     int v = Z_pvalrem(addis(N,-1), gp, &N1);
     ph = gpowgs(gp, v-1); pv = mulis(ph, p); /* N - 1 = p^v q */ 
@@ -555,7 +555,7 @@ finda(Cache *Cp, GEN N, int pk, int p)
     {
       for (;;u++)
       {
-	a = Fp_pow(utoi(u), N1, N);
+	a = Fp_pow(utoipos(u), N1, N);
 	b = Fp_pow(a, ph, N);
 	if (!gcmp1(b)) break;
       }
@@ -563,7 +563,7 @@ finda(Cache *Cp, GEN N, int pk, int p)
     else
     {
       while (krosi(u,N) >= 0) u++;
-      a = Fp_pow(utoi(u), N1, N);
+      a = Fp_pow(utoipos(u), N1, N);
       b = Fp_pow(a, ph, N);
     }
     /* checking b^p = 1 mod N done economically in caller */
@@ -684,7 +684,7 @@ calcglobs(Red *R, ulong t, long *pltab, GEN *pP)
   R->lv = 1 << (k-1);
   R->mask = (1UL << k) - 1;
 
-  fat = decomp(utoi(t));
+  fat = decomp(utoipos(t));
   P = (GEN)fat[1]; settyp(P, t_VECSMALL);
   E = (GEN)fat[2]; settyp(E, t_VECSMALL); lfa = lg(P);
   lv = 1;
@@ -843,7 +843,7 @@ step4b(Cache *C, Red *R, ulong q, int k)
   if (ind < 0) return -1;
   if ((ind&1)==0) return 0;
   if (DEBUGLEVEL>2) C->ctsgt++;
-  s3 = Fp_pow(utoi(q), R->N2, R->N);
+  s3 = Fp_pow(utoipos(q), R->N2, R->N);
   return is_m1(s3, R->N);
 }
 
@@ -863,7 +863,7 @@ step4c(Cache *C, Red *R, ulong q)
   if (ind < 0) return -1;
   if ((ind&1)==0) return 0;
   if (DEBUGLEVEL>2) C->ctsgt++;
-  s3 = Fp_pow(utoi(q), R->N2, R->N);
+  s3 = Fp_pow(utoipos(q), R->N2, R->N);
   return is_m1(s3, R->N);
 }
 
@@ -871,7 +871,7 @@ step4c(Cache *C, Red *R, ulong q)
 static int
 step4d(Cache *C, Red *R, ulong q)
 {
-  GEN s1 = Fp_pow(negi(utoi(q)), R->N2, R->N);
+  GEN s1 = Fp_pow(negi(utoipos(q)), R->N2, R->N);
   if (DEBUGLEVEL>2) C->ctsgt++;
   if (gcmp1(s1)) return 0;
   if (is_m1(s1, R->N)) return (mod4(R->N) == 1);

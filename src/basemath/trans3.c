@@ -1168,15 +1168,15 @@ GEN
 bernfrac_using_zeta(long n)
 {
   pari_sp av = avma;
-  GEN iz, a, d, D = divisors(stoi( n/2 ));
+  GEN iz, a, d, D = divisors(utoipos( n/2 ));
   long i, prec, l = lg(D);
   double t, u;
 
-  d = stoi(6); /* 2 * 3 */
+  d = utoipos(6); /* 2 * 3 */
   for (i = 2; i < l; i++) /* skip 1 */
   { /* Clausen - von Staudt */
-    long p = 2*itos((GEN)D[i]) + 1;
-    if (isprime(stoi(p))) d = mulis(d, p);
+    ulong p = 2*itou((GEN)D[i]) + 1;
+    if (isprime(utoipos(p))) d = muliu(d, p);
   }
   /* 1.712086 = ??? */
   t = log( gtodouble(d) ) + (n + 0.5) * log(n) - n*(1+log2PI) + 1.712086;
@@ -1380,7 +1380,7 @@ czeta(GEN s0, long prec)
     }
     funeq = 1; s = gsub(gun, s); sig = real_i(s);
   }
-  if (gcmp(sig, stoi(bit_accuracy(prec) + 1)) > 0) { y = gun; goto END; }
+  if (gcmpgs(sig, bit_accuracy(prec) + 1) > 0) { y = gun; goto END; }
   optim_zeta(s, prec, &lim, &nn);
   maxprime_check((ulong)nn);
   prec++; unr = realun(prec); /* one extra word of precision */
@@ -1580,14 +1580,14 @@ twistpartialzeta(GEN p, GEN q, long f, long c, GEN va, GEN cff)
 GEN
 init_teich(ulong p, GEN q, long prec)
 {
-  GEN vz, gp = utoi(p);
+  GEN vz, gp = utoipos(p);
   long av = avma, j;
 
   if (p == 2UL)
     return NULL;
   else
   { /* primitive (p-1)-th root of 1 */
-    GEN z, z0 = padicsqrtnlift(gun, utoi(p-1), Fp_gener(gp), gp, prec);
+    GEN z, z0 = padicsqrtnlift(gun, utoipos(p-1), Fp_gener(gp), gp, prec);
     z = z0;
     vz = cgetg(p, t_VEC);
     for (j = 1; j < (long)p-2; j++)
@@ -1733,7 +1733,7 @@ cxpolylog(long m, GEN x, long prec)
 
   if (gcmp1(x)) return szeta(m,prec);
   z=glog(x,prec); h=gneg_i(glog(gneg_i(z),prec));
-  for (i=1; i<m; i++) h = gadd(h,ginv(stoi(i)));
+  for (i=1; i<m; i++) h = gadd(h, ginv(utoipos(i)));
 
   bern_upto=m+50; mpbern(bern_upto,prec);
   q=gun; s=szeta(m,prec);
@@ -1966,7 +1966,7 @@ gpolylog(long m, GEN x, long prec)
       n = (lg(y)-3 + v) / v;
       a = zeroser(varn(y), lg(y)-2);
       for (i=n; i>=1; i--)
-	a = gmul(y, gadd(a, gpowgs(stoi(i),-m)));
+	a = gmul(y, gadd(a, gpowgs(utoipos(i),-m)));
       return gerepileupto(av, a);
 
     case t_VEC: case t_COL: case t_MAT:
@@ -2289,7 +2289,7 @@ thetanullk(GEN q, long k, long prec)
     GEN t;
     qn = gmul(qn,ps);
     ps = gmul(ps,ps2);
-    t = gmul(qn, gpowgs(stoi(2*n+1), k)); y = gadd(y, t);
+    t = gmul(qn, gpowgs(utoipos(2*n+1), k)); y = gadd(y, t);
     if (gexpo(t) < -bit_accuracy(prec)) break;
   }
   p1 = gmul2n(gsqrt(gsqrt(q,prec),prec),1);
@@ -2316,7 +2316,7 @@ vecthetanullk(GEN q, long k, long prec)
   for (n = 1;; n++)
   {
     ulong N = 2*n + 1;
-    GEN t = NULL/*-Wall*/, P = utoi(N), N2 = sqru(N);
+    GEN t = NULL/*-Wall*/, P = utoipos(N), N2 = sqru(N);
     qn = gmul(qn,ps);
     ps = gmul(ps,ps2);
     for (i = 1; i <= k; i++)

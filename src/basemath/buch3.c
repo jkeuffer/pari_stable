@@ -1070,7 +1070,7 @@ primecertify(GEN bnf, GEN beta, ulong p, GEN bad)
   lb = lg(beta)-1; mat = cgetg(1,t_MAT); q = 1UL;
   for(;;)
   {
-    q += 2*p; gq = utoi(q);
+    q += 2*p; gq = utoipos(q);
     if (!umodiu(bad,q) || !isprime(gq)) continue;
 
     LQ = primedec(bnf,gq); nbqq = lg(LQ)-1;
@@ -1081,7 +1081,7 @@ primecertify(GEN bnf, GEN beta, ulong p, GEN bad)
       /* Q has degree 1 */
       if (!g)
       {
-        ord = decomp(utoi(q-1));
+        ord = decomp(utoipos(q-1));
         g = Fp_gener_fact(gq, ord); /* primitive root */
       }
       modpr = zkmodprinit(nf, Q);

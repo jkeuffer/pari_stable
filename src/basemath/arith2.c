@@ -35,7 +35,7 @@ prime(long n)
 
   if (n <= 0) err(talker, "n-th prime meaningless if n = %ld",n);
   while (n--) NEXT_PRIME_VIADIFF_CHECK(prime,p);
-  return utoi(prime);
+  return utoipos(prime);
 }
 
 GEN
@@ -735,7 +735,7 @@ auxdecomp1(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
     if (dvdisz(n,p,n))
     {
       nb++; k=1; while (dvdisz(n,p,n)) k++;
-      (void)utoi(p); (void)utoi(k);
+      (void)utoipos(p); (void)utoipos(k);
       if (is_pm1(n)) return aux_end(n,nb);
     }
   }
@@ -754,7 +754,7 @@ auxdecomp1(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
     if (dvdiiz(n,(GEN) primetab[i],n))
     {
       nb++; k=1; while (dvdiiz(n,(GEN) primetab[i],n)) k++;
-      (void)icopy((GEN) primetab[i]); (void)utoi(k);
+      (void)icopy((GEN) primetab[i]); (void)utoipos(k);
       if (is_pm1(n)) return aux_end(n,nb);
     }
 
@@ -1214,7 +1214,7 @@ sumdiv(GEN n)
     NEXT_PRIME_VIADIFF(p,d);
     if (dvdisz(n,p,n))
     {
-      m1 = utoi(p+1);
+      m1 = utoipos(p+1);
       while (dvdisz(n,p,n)) m1 = addsi(1, mului(p,m1));
       m = mulii(m1,m); if (is_pm1(n)) return gerepileuptoint(av,m);
     }
@@ -1260,7 +1260,7 @@ sumdivk(GEN n, long k)
     NEXT_PRIME_VIADIFF(p,d);
     if (dvdisz(n,p,n))
     {
-      pk = gpowgs(utoi(p),k); m1 = addsi(1,pk);
+      pk = gpowgs(utoipos(p),k); m1 = addsi(1,pk);
       while (dvdisz(n,p,n)) m1 = addsi(1, mulii(pk,m1));
       m = mulii(m1,m); if (is_pm1(n)) goto fin;
     }

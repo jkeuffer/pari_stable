@@ -773,7 +773,7 @@ Z_lvalrem(GEN x, ulong p, GEN *py)
   if (p == 2) { vx = vali(x); *py = shifti(x, -vx); return vx; }
   if (lgefint(x) == 3) {
     ulong u;
-    vx = u_lvalrem((ulong)x[2], p, &u); *py = utoi(u);
+    vx = u_lvalrem((ulong)x[2], p, &u); *py = utoipos(u);
     if (signe(x) < 0) (*py)[1] = evalsigne(-1)|evallgefint(3);
     return vx;
   }
