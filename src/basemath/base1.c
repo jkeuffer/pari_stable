@@ -1146,7 +1146,7 @@ get_nf_matrices(GEN nf, long small)
 GEN
 initalgall0(GEN x, long flag, long prec)
 {
-  GEN lead = NULL,nf,ro,bas,mat,rev,dK,dx,index,fa,res;
+  GEN lead = NULL,nf,ro,bas,mat,rev,dK,dx,index,res;
   long av=avma,n,i,r1,r2,ru,PRECREG;
 
   if (DEBUGLEVEL) timer2();
@@ -1165,7 +1165,7 @@ initalgall0(GEN x, long flag, long prec)
         flag = flag | nf_REDUCE | nf_ORIG;
       }
     }
-    bas=allbase4(x,0,&dK,&fa);
+    bas = allbase4(x,0,&dK,NULL);
     if (DEBUGLEVEL) msgtimer("round4");
     dx = discsr(x); r1 = sturm(x);
   }
@@ -1175,12 +1175,10 @@ initalgall0(GEN x, long flag, long prec)
     if (typ(x) == t_VEC && i<=4 && i>=3 && typ(x[1])==t_POL)
     { /* polynomial + integer basis */
       bas=(GEN)x[2]; x=(GEN)x[1]; n=lgef(x)-3;
-      if (gisirreducible(x) == gzero) err(redpoler,"nfinit");
-      dx=discsr(x);
       if (typ(bas) == t_MAT) { mat = bas; bas = mat_to_vecpol(mat,varn(x)); }
       else mat = vecpol_to_mat(bas,n);
+      dx = discsr(x); r1 = sturm(x);
       dK = gmul(dx, gsqr(det2(mat)));
-      r1 = sturm(x);
     }
     else
     {
