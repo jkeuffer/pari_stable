@@ -2143,7 +2143,7 @@ be_honest(FB_t *F, GEN nf)
         ideal = remove_content(ideal);
         for (av1 = avma, k = 1; k <= nbG; k++, avma = av1)
 	{
-          m = pseudomin(ideal, (GEN)(F->vecG)[j]);
+          m = pseudomin(ideal, (GEN)(F->vecG)[k]);
           if (factorgen(F,nf,ideal,m)) break;
 	}
 	avma = av2; if (k < ru) break;
