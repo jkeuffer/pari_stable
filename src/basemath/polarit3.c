@@ -4010,6 +4010,14 @@ ZX_is_squarefree(GEN x)
   avma = av; return d;
 }
 
+static GEN
+_gcd(GEN a, GEN b)
+{
+  if (!a) return a = gun;
+  if (!b) return b = gun;
+  return ggcd(a,b);
+}
+
 /* A0 and B0 in Q[X] */
 GEN
 modulargcd(GEN A0, GEN B0)
@@ -4023,10 +4031,11 @@ modulargcd(GEN A0, GEN B0)
   if ((typ(A0) | typ(B0)) !=t_POL) err(notpoler,"modulargcd");
   if (!signe(A0)) return gcopy(B0);
   if (!signe(B0)) return gcopy(A0);
-  A = content(A0);
-  B = content(B0); D = ggcd(A,B);
-  A = gcmp1(A)? A0: gdiv(A0,A);
-  B = gcmp1(B)? B0: gdiv(B0,B);
+  A = primitive_part(A0, &a); check_pol_int(A, "modulargcd");
+  B = primitive_part(B0, &b); check_pol_int(B, "modulargcd");
+  D = _gcd(a,b);
+  if (varn(A) != varn(B)) err(talker,"different variables in modulargcd");
+ 
   /* A, B in Z[X] */
   g = mppgcd(leading_term(A), leading_term(B)); /* multiple of lead(gcd) */
   if (degpol(A) < degpol(B)) swap(A, B);
