@@ -254,11 +254,6 @@ void    checkrnf(GEN rnf);
 GEN     differente(GEN nf, GEN premiers);
 GEN     galois(GEN x, long prec);
 GEN     galoisapply(GEN nf, GEN aut, GEN x);
-GEN     galoisconj(GEN nf);
-GEN     galoisconj0(GEN nf,long flag, GEN d, long prec);
-GEN     galoisconj1(GEN x);
-GEN     galoisconj2(GEN x, long prec);
-GEN     galoisconjforce(GEN x);
 GEN     get_bnf(GEN x,int *t);
 GEN     get_nf(GEN x,int *t);
 GEN     get_primeid(GEN x);
@@ -715,6 +710,14 @@ char*   type_name(long t);
 void    voir(GEN x, long nb);
 void    vpariputs(char* format, va_list args);
 
+/* galconj.c */
+
+GEN     galoisconj(GEN nf);
+GEN     galoisconj0(GEN nf,long flag, GEN d, long prec);
+GEN     galoisconj2(GEN x, long nbmax, long prec);
+GEN     galoisconj4(GEN T, GEN den);
+GEN     galoisgroup(GEN x);
+long    numberofconjugates(GEN T, long pdepart);
 /* gen1.c */
 
 GEN     gadd(GEN x, GEN y);
