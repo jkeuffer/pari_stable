@@ -1022,20 +1022,3 @@ subfields0(GEN nf,GEN d)
   return d? subfields(nf,d): subfieldsall(nf);
 }
 
-/* irreducible (unitary) polynomial of degree n over Fp[v] */
-GEN
-ffinit(GEN p,long n,long v)
-{
-  long av = avma;
-  GEN pol;
-
-  if (n<=0) err(talker,"non positive degree in ffinit");
-  if (typ(p) != t_INT) err(typeer,"ffinit");
-  if (v<0) v = 0;
-  for(;; avma = av)
-  {
-    pol = gadd(gpowgs(polx[v],n), FpX_rand(n-1,v, p));
-    if (FpX_is_irred(pol, p)) break;
-  }
-  return gerepileupto(av, FpX(pol,p));
-}

@@ -3015,7 +3015,7 @@ extern GEN ZY_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LPRS);
 extern GEN DDF2(GEN x, long klim, long hint);
 extern GEN to_polmod(GEN x, GEN mod);
 
-/* modular version. TODO: check that compositum2 is not slower */
+/* modular version */
 GEN
 polcompositum0(GEN A, GEN B, long flall)
 {

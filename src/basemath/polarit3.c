@@ -3587,6 +3587,7 @@ FpX_resultant_after_eval(GEN a, GEN b, GEN n, GEN p, GEN la)
   return r;
 }
 
+/* assume deg(a) * deg(b) < p */
 static GEN
 u_FpY_FpXY_resultant(GEN a, GEN b, ulong p)
 {
@@ -3629,7 +3630,7 @@ swap_vars(GEN b0, long v)
   return b;
 }
 
-/* assume varn(b) < varn(a) and p >= deg(a)deg(b) */
+/* assume varn(b) < varn(a) */
 GEN
 FpY_FpXY_resultant(GEN a, GEN b0, GEN p)
 {
@@ -3640,6 +3641,9 @@ FpY_FpXY_resultant(GEN a, GEN b0, GEN p)
   {
     ulong pp = (ulong)p[2];
     long l = lg(b);
+    if (degpol(a) * degpol(b) >= pp)
+      return lift(subres(FpX(a,p), gmul(b, gmodulss(1,pp))));
+
     a = u_Fp_FpX(a, 0, pp);
     for (i=2; i<l; i++)
       b[i] = (long)u_Fp_FpX((GEN)b[i], 0, pp);
@@ -4114,3 +4118,75 @@ QX_invmod(GEN A0, GEN B0)
   return gerepileupto(av, gdiv(U,D));
 }
 
+extern GEN FpX_rand(long d1, long v, GEN p);
+
+/* irreducible (unitary) polynomial of degree n over Fp */
+static GEN
+f2init(GEN p,long n)
+{
+  ulong av = avma;
+  GEN pol;
+
+  for(;; avma = av)
+  {
+    pol = gadd(gpowgs(polx[0],n), FpX_rand(n-1,0, p));
+    if (FpX_is_irred(pol, p)) break;
+  }
+  return pol;
+}
+
+/* assume p > 2 or 8 does not divide l. Return an irreducible polynomial of
+ * degree l over F_p */
+static GEN
+fpinit(GEN p, long l)
+{
+  ulong q, n = 1, k = 0;
+  for (;;)
+  {
+    do { n += l; k++; } while (!isprime(stoi(n)));
+    q = smodis(p, n);
+    if (q && itos(order(gpowgs(gmodulss(q,n), k))) == l) break;
+  }
+  return subcyclo(stoi(n),stoi(l),0);
+}
+
+GEN
+FpX_compositum(GEN A, GEN B, GEN p)
+{
+  long k;
+  GEN C, a,b;
+
+  a = dummycopy(A); setvarn(a, MAXVARN);
+  b = dummycopy(B); setvarn(b, MAXVARN);
+  for (k = 1;; k = next_lambda(k))
+  {
+    GEN x = gadd(polx[0], gmulsg(k, polx[MAXVARN]));
+    C = FpY_FpXY_resultant(a, poleval(b, x),p);
+    if (FpX_is_squarefree(C, p)) break;
+  }
+  return C;
+}
+
+GEN
+ffinit(GEN p, long n, long v)
+{
+  ulong av = avma;
+  long m;
+  GEN k, k2 = NULL;
+  if (n <= 0) err(talker,"non positive degree in ffinit");
+  if (typ(p) != t_INT) err(typeer,"ffinit");
+  if (v < 0) v = 0;
+  if (egalii(p, gdeux))
+  {
+    m = vals(n);
+    if (m > 2)
+    { /* 8 | n */
+      n >>= m;
+      k2 = f2init(gdeux, 1<<m);
+    }
+  }
+  k = fpinit(p, n);
+  if (k2) k = FpX_compositum(k,k2, p);
+  setvarn(k, v);
+  return gerepileupto(av, FpX(k,p));
+}

@@ -2813,7 +2813,12 @@ pseudorem(GEN x, GEN y)
   x[0]=evaltyp(t_POL) | evallg(lx);
   x[1]=evalsigne(1) | evalvarn(vx) | evallgef(lx);
   x = revpol(x) - 2;
-  return gerepileupto(av, gmul(x, gpowgs((GEN)y[0], p)));
+  if (p)
+  {
+    for (i=2; i<lx; i++) x[i] = lmul((GEN)x[i], (GEN)y[0]);
+    return gerepileupto(av, x);
+  }
+  return gerepilecopy(av, x);
 }
 
 extern void gerepilemanycoeffs2(long av, GEN x, long n, GEN y, long o);
@@ -2877,8 +2882,7 @@ pseudodiv(GEN x, GEN y, GEN *ptr)
 }
 
 /* Return resultant(u,v). If sol != NULL: set *sol to the last non-zero
- * polynomial in the prs IF the sequence was computed, and gzero otherwise
- */
+ * polynomial in the prs IF the sequence was computed, and gzero otherwise */
 GEN
 subresall(GEN u, GEN v, GEN *sol)
 {

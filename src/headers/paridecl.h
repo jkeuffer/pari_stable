@@ -1111,6 +1111,7 @@ GEN     factormod0(GEN f, GEN p,long flag);
 GEN     factorpadic0(GEN f,GEN p,long r,long flag);
 GEN     factorpadic2(GEN x, GEN p, long r);
 GEN     factorpadic4(GEN x, GEN p, long r);
+GEN     ffinit(GEN p,long n, long v);
 int     gdivise(GEN x, GEN y);
 long    hensel_lift_accel(long n, long *pmask);
 GEN     incloop(GEN a);
@@ -1274,7 +1275,6 @@ GEN     roots0(GEN x,long flag,long l);
 
 /* subfields.c */
 
-GEN     ffinit(GEN p,long n, long v);
 GEN     subfields(GEN nf,GEN d);
 GEN     subfields0(GEN nf,GEN d);
 GEN     conjugates(GEN pol);
