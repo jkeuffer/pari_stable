@@ -69,7 +69,7 @@ typedef struct Buffer {
   int flenv;
 } Buffer;
 
-#define current_buffer ((Buffer*)(bufstack->value))
+#define current_buffer (bufstack?((Buffer*)(bufstack->value)):NULL)
 static stack *bufstack = NULL;
 
 #define LBRACE '{'
@@ -300,12 +300,15 @@ pop_buffer()
   del_buffer(b);
 }
 
-/* if (but_one != 0),  leave a single buffer standing */
+/* kill all buffers until B is met */
 static void
-kill_all_buffers(int but_one)
+kill_all_buffers(Buffer *B)
 {
-  while (bufstack->prev) pop_buffer();
-  if (! but_one) pop_buffer();
+  for(;;) {
+    Buffer *b = current_buffer;
+    if (b == B) break;
+    pop_buffer();
+  }
 }
 
 static void
@@ -1429,7 +1432,7 @@ void
 gp_quit()
 {
   free_graph(); freeall();
-  kill_all_buffers(0);
+  kill_all_buffers(NULL);
 #ifdef WINCE
 #else
   if (INIT_SIG)
@@ -1838,10 +1841,10 @@ do_time(long flag)
   last = delay;
   switch(flag)
   {
-    case ti_NOPRINT: return NULL;
     case ti_REGULAR:   s = "time = "; break;
     case ti_INTERRUPT: s = "user interrupt after "; break;
     case ti_LAST:      s = "  ***   last result computed in "; break;
+    default: return NULL;
   }
   strcpy(thestring,s); s=thestring+strlen(s);
   strcpy(s, term_get_color(c_TIME)); s+=strlen(s);
@@ -2076,7 +2079,7 @@ gp_main_loop(int ismain)
 	  i--; j--;
 	}
         tglobal = tloc; prettyp = outtyp;
-        kill_all_buffers(1);
+        kill_all_buffers(b);
       }
     }
     added_newline = 1;
@@ -2261,14 +2264,22 @@ void
 break_loop(long numerr)
 {
   Buffer *oldb = current_buffer, *b = new_buffer();
+  char *s, *t, *msg;
   push_stack(&bufstack, (void*)b);
 
   term_color(c_ERR);
   fprintferr("\n");
-  errcontext("Starting break loop (type 'break' to go back to GP prompt)",
-              _analyseur(), oldb->buf);
+
+  msg = "Starting break loop (type 'break' to go back to GP prompt)";
+  /* sanity check */
+  s = _analyseur();
+  t = oldb->buf;
+  if (s < t || s >= t + oldb->len) /* something fishy, probably a ^C */
+    print_prefixed_text(msg, NULL, NULL);
+  else
+    errcontext(msg, s, t);
   term_color(c_NONE);
-  if (numerr == siginter) fprintferr("['next' will continue]\n");
+  if (numerr == siginter) pariputs("['next' will continue]\n");
   infile = stdin;
   for(;;)
   {
@@ -2418,6 +2429,7 @@ main(int argc, char **argv)
 #endif
   gp_history_fun = gp_history;
   whatnow_fun = whatnow;
+  output_fun = gp_output;
   default_exception_handler = gp_exception_handler;
   gp_expand_path(path);
 
