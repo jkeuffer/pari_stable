@@ -802,11 +802,11 @@ nfisincl(GEN a, GEN b)
 /**			       INITALG					**/
 /**									**/
 /*************************************************************************/
-GEN LLL_nfbasis(GEN *x, GEN polr, GEN base, long prec);
-GEN eleval(GEN f,GEN h,GEN a);
-int canon_pol(GEN z);
-GEN mat_to_vecpol(GEN x, long v);
-GEN vecpol_to_mat(GEN v, long n);
+extern GEN LLL_nfbasis(GEN *x, GEN polr, GEN base, long prec);
+extern GEN eleval(GEN f,GEN h,GEN a);
+extern int canon_pol(GEN z);
+extern GEN mat_to_vecpol(GEN x, long v);
+extern GEN vecpol_to_mat(GEN v, long n);
 
 /* For internal use. compute trace(x mod pol), sym=polsym(pol,deg(pol)-1) */
 GEN
@@ -822,6 +822,19 @@ quicktrace(GEN x, GEN sym)
       p1 = gadd(p1, gmul((GEN)x[i],(GEN)sym[i]));
   }
   return p1;
+}
+
+/* T = trace(w[i]), x = sum x[i] w[i], x[i] integer */
+static GEN
+trace_col(GEN x, GEN T)
+{
+  GEN t = gzero;
+  long i, l = lg(x);
+
+  t = mulii((GEN)x[1],(GEN)T[1]);
+  for (i=2; i<l; i++)
+    if (signe(x[i])) t = addii(t, mulii((GEN)x[i],(GEN)T[i]));
+  return t;
 }
 
 /* Seek a new, simpler, polynomial pol defining the same number field as
@@ -939,40 +952,51 @@ make_MDI(GEN nf, GEN TI, GEN *ideal, GEN *dideal)
   return gmul(c, ideal_two_elt(nf, p1));
 }
 
-/* basis = integer basis. roo = real part of the roots */
+/* [bas[i]/den[i]]= integer basis. roo = real part of the roots */
 GEN
-make_M(long n,long ru,GEN basis,GEN roo)
+make_M(GEN basden,GEN roo)
 {
-  GEN p1,res = cgetg(n+1,t_MAT);
-  long i,j;
-
-  for (j=1; j<=n; j++)
+  GEN p1,d,M, bas=(GEN)basden[1], den=(GEN)basden[2];
+  long i,j, ru = lg(roo), n = lg(bas);
+  M = cgetg(n,t_MAT);
+  for (j=1; j<n; j++)
   {
-    p1=cgetg(ru+1,t_COL); res[j]=(long)p1;
-    for (i=1; i<=ru; i++)
-      p1[i]=(long)poleval((GEN)basis[j],(GEN)roo[i]);
+    p1=cgetg(ru,t_COL); M[j]=(long)p1;
+    for (i=1; i<ru; i++)
+      p1[i]=(long)poleval((GEN)bas[j],(GEN)roo[i]);
+  }
+  if (den)
+  {
+    long prec = precision((GEN)roo[1]);
+    GEN invd,rd = cgetr(prec+1);
+    for (j=1; j<n; j++)
+    {
+      d = (GEN)den[j]; if (!d) continue;
+      p1 = (GEN)M[j]; affir(d,rd); invd = ginv(rd);
+      for (i=1; i<ru; i++) p1[i] = lmul((GEN)p1[i], invd);
+    }
   }
   if (DEBUGLEVEL>4) msgtimer("matrix M");
-  return res;
+  return M;
 }
 
 GEN
-make_MC(long n,long r1,long ru,GEN M)
+make_MC(long r1,GEN M)
 {
-  GEN p1,p2,res=cgetg(ru+1,t_MAT);
-  long i,j,av,tetpil;
+  long i,j,av,tetpil, n = lg(M), ru = lg(M[1]);
+  GEN p1,p2,MC=cgetg(ru,t_MAT);
 
-  for (j=1; j<=ru; j++)
+  for (j=1; j<ru; j++)
   {
-    p1=cgetg(n+1,t_COL); res[j]=(long)p1;
-    for (i=1; i<=n; i++)
+    p1=cgetg(n,t_COL); MC[j]=(long)p1;
+    for (i=1; i<n; i++)
     {
       av=avma; p2=gconj(gcoeff(M,j,i)); tetpil=avma;
       p1[i] = (j<=r1)? (long)p2: lpile(av,tetpil,gmul2n(p2,1));
     }
   }
   if (DEBUGLEVEL>4) msgtimer("matrix MC");
-  return res;
+  return MC;
 }
 
 GEN
@@ -986,38 +1010,79 @@ get_roots(GEN x,long r1,long ru,long prec)
   roo[0]=evaltyp(t_VEC)|evallg(ru+1); return roo;
 }
 
+extern GEN mulmat_pol(GEN A, GEN x);
+
 GEN
-get_mul_table(GEN x,GEN bas,GEN *ptT)
+get_T(GEN mul, GEN x, GEN basden)
 {
-  long i,j,k, n = lgef(x)-3;
-  GEN T,sym, mul = cgetg(n*n+1,t_MAT), den = cgetg(n+1,t_VEC);
-  
-  for (j=1; j<=n*n; j++) mul[j]=lgetg(n+1,t_COL);
-  if (ptT)
-  {
-    sym = polsym(x,n-1); T=cgetg(n+1,t_MAT); *ptT = T;
-    for (j=1; j<=n; j++) T[j]=lgetg(n+1,t_COL);
-  }
-  else { T = sym = NULL; /* gcc -Wall */ }
-  bas = dummycopy(bas);
+  GEN tr,T,T1,sym, bas=(GEN)basden[1], den=(GEN)basden[2];
+  long i,j,n = lg(bas)-1;
+  T = cgetg(n+1,t_MAT);
+  T1 = cgetg(n+1,t_COL);
+  sym = polsym(x, n-1);
+
   for (i=1; i<=n; i++)
   {
-    den[i] = (long)denom(content((GEN)bas[i]));
-    bas[i] = lmul((GEN)bas[i],(GEN)den[i]);
+    tr = quicktrace((GEN)bas[i], sym);
+    if (den && den[i]) tr = gdivexact(tr,(GEN)den[i]);
+    T1[i] = (long)tr; /* tr(w[i]) */
   }
+  T[1] = (long)T1;
+  for (i=2; i<=n; i++)
+  {
+    T[i] = lgetg(n+1,t_COL); coeff(T,1,i) = T1[i];
+    for (j=2; j<=i; j++)
+      coeff(T,i,j) = coeff(T,j,i) = (long)trace_col((GEN)mul[j+(i-1)*n], T1);
+  }
+  return T;
+}
 
+/* return [bas[i]*denom(bas[i]), denom(bas[i])], denom 1 is given as NULL */
+GEN
+get_bas_den(GEN bas)
+{
+  GEN z,d,den, dbas = dummycopy(bas);
+  long i, c = 0, l = lg(bas);
+  den = cgetg(l,t_VEC);
+  for (i=1; i<l; i++)
+  {
+    d = denom(content((GEN)dbas[i]));
+    if (is_pm1(d)) d = NULL; else { dbas[i] = lmul((GEN)dbas[i],d); c++; }
+    den[i] = (long)d;
+  }
+  if (!c) den = NULL; /* power basis */
+  z = cgetg(3,t_VEC);
+  z[1] = (long)dbas;
+  z[2] = (long)den; return z;
+}
+
+/* allow x or y = NULL (act as 1) */
+static GEN
+_mulii(GEN x, GEN y)
+{
+  if (!x) return y;
+  if (!y) return x;
+  return mulii(x,y);
+}
+
+GEN
+get_mul_table(GEN x,GEN basden,GEN invbas)
+{
+  long i,j, n = lgef(x)-3;
+  GEN z,d, mul = cgetg(n*n+1,t_MAT), bas=(GEN)basden[1], den=(GEN)basden[2];
+  
+  for (j=1; j<=n*n; j++) mul[j]=lgetg(n+1,t_COL);
   for (i=1; i<=n; i++)
     for (j=i; j<=n; j++)
     {
-      GEN d,t = gres(gmul((GEN)bas[j],(GEN)bas[i]), x);
-      GEN a = (GEN)mul[j+(i-1)*n];
-      GEN b = (GEN)mul[i+(j-1)*n];
-      long l = lgef(t)-1;
-      d = mulii((GEN)den[i], (GEN)den[j]);
-      if (!is_pm1(d)) t = gdiv(t, d);
-      for (k=1; k<l ; k++) a[k] = b[k] = t[k+1];
-      for (   ; k<=n; k++) a[k] = b[k] = zero;
-      if (ptT) coeff(T,i,j) = coeff(T,j,i) = (long)quicktrace(t,sym);
+      z = gres(gmul((GEN)bas[j],(GEN)bas[i]), x);
+      z = mulmat_pol(invbas, z); /* integral column */
+      if (den)
+      {
+        d = _mulii((GEN)den[i], (GEN)den[j]);
+        if (d) z = gdivexact(z, d);
+      }
+      mul[j+(i-1)*n] = mul[i+(j-1)*n] = (long)z;
     }
   return mul;
 }
@@ -1041,7 +1106,7 @@ get_mul_table(GEN x,GEN bas,GEN *ptT)
 GEN
 initalgall0(GEN x, long flag, long prec)
 {
-  GEN lead = NULL,nf,ro,bas,mul,mat,M,MC,T,p1,rev,dK,dx,index,fa,res;
+  GEN lead = NULL,nf,ro,bas,mat,M,MC,T,rev,dK,dx,index,fa,basden,res;
   long av=avma,n,i,r1,r2,ru,PRECREG;
 
   if (DEBUGLEVEL) timer2();
@@ -1089,6 +1154,7 @@ initalgall0(GEN x, long flag, long prec)
   r2=(n-r1)>>1; ru=r1+r2;
   PRECREG = prec + (expi(dK)>>(TWOPOTBITS_IN_LONG+1))
                  + (long)((sqrt((double)n)+3) / sizeof(long) * 4);
+  rev = NULL;
   if (flag & nf_REDUCE)
   {
     nfinit_reduce(flag, &x, &dx, &rev, &bas, r1==n? 0: prec);
@@ -1097,78 +1163,61 @@ initalgall0(GEN x, long flag, long prec)
   if (!carrecomplet(divii(dx,dK),&index))
     err(bugparier,"nfinit (incorrect discriminant)");
 
-  if (!(flag & nf_SMALL))
-  {
-    mul = get_mul_table(x,bas, &T);
-    if (DEBUGLEVEL) msgtimer("mult. table");
-    p1=vecpol_to_mat(bas,n);
-  }
-  else p1 = mul = NULL; /* gcc -Wall */
-
   ro=get_roots(x,r1,ru,PRECREG);
   if (DEBUGLEVEL) msgtimer("roots");
 
-  if (flag & nf_ORIG)
-  {
-    if (!(flag & nf_REDUCE)) err(talker,"bad flag in initalgall0");
-    res = cgetg(3,t_VEC);
-  }
-  else res = NULL; /* gcc -Wall */
   nf=cgetg(10,t_VEC);
-  nf[1]=lcopy(x);
+  nf[1]=(long)x;
   nf[2]=lgetg(3,t_VEC);
   mael(nf,2,1)=lstoi(r1);
   mael(nf,2,2)=lstoi(r2);
-  nf[3]=lcopy(dK);
-  nf[4]=lcopy(index); mat = cgetg(8,t_VEC);
+  nf[3]=(long)dK;
+  nf[4]=(long)index; mat = cgetg(8,t_VEC);
   nf[5]=(long)mat;
-  nf[6]=lcopy(ro);
-  nf[7]=lcopy(bas);
-  if (flag & nf_SMALL) nf[8]=nf[9]=zero;
-  else
-  {
-    nf[8]=linvmat(p1);
-    nf[9]=lmul((GEN)nf[8],mul);
-  }
+  nf[6]=(long)ro;
+  nf[7]=(long)bas;
 
-  M = make_M(n,ru,bas,ro);
-  MC = make_MC(n,r1,ru,M);
+  basden = get_bas_den(bas);
+  M = make_M(basden,ro);
+  MC = make_MC(r1,M);
   mat[1]=(long)M;
   mat[3]=(long)mulmat_real(MC,M);
   if (flag & nf_SMALL)
-    mat[2]=mat[4]=mat[5]=mat[6]=mat[7]=zero;
+    nf[8]=nf[9]=mat[2]=mat[4]=mat[5]=mat[6]=mat[7]=zero;
   else
   {
-    long av2;
-    GEN MDI, D, TI, A, dA, *gptr[2];
+    GEN mul,invbas,MDI,D,TI,A,dA;
 
-    mat[2]=(long)MC;
-    mat[4]=lcopy(T);
-    av2 = avma;
-    TI = gerepileupto(av2, gmul(ginv(T), dK));
-    mat[6] = (long)TI;
+    invbas = invmat(vecpol_to_mat(bas,n));
+    mul = get_mul_table(x,basden,invbas);
+    T = get_T(mul,x,basden);
+    if (DEBUGLEVEL) msgtimer("mult. table");
+    
+    nf[8]=(long)invbas;
+    nf[9]=(long)mul;
 
-    av2 = avma;
+    TI = gauss(T, gscalmat(dK, n));
     MDI = make_MDI(nf,TI, &A, &dA);
-    mat[7] = (long)MDI; /* needed in idealinv below */
-    if (gcmp1((GEN)nf[4]))
+    mat[6]=(long)TI;
+    mat[7]=(long)MDI; /* needed in idealinv below */
+    if (is_pm1(index))
       D = idealhermite_aux(nf, derivpol(x));
     else
       D = gmul(dA, idealinv(nf, A));
-    gptr[0] = &D; gptr[1]=&MDI;
-    gerepilemany(av2, gptr, 2);
-    mat[5] = (long)D;
-    mat[7] = (long)MDI;
+    mat[2]=(long)MC;
+    mat[4]=(long)T;
+    mat[5]=(long)D;
   }
-  if (DEBUGLEVEL>1) msgtimer("matrices");
+  if (DEBUGLEVEL) msgtimer("matrices");
 
-  if (!(flag & nf_ORIG)) res = nf;
-  else
+  if (flag & nf_ORIG)
   {
-    res[1]=(long)nf;
-    res[2]=lead? ldiv(rev,lead): lcopy(rev);
+    if (!rev) err(talker,"bad flag in initalgall0");
+    res = cgetg(3,t_VEC);
+    res[1]=(long)nf; nf = res;
+    res[2]=lead? ldiv(rev,lead): (long)rev;
   }
-  return gerepileupto(av,res);
+  return gerepileupto(av, gcopy(nf));
 }
 
 GEN
@@ -1209,8 +1258,8 @@ initalg(GEN x, long prec)
 GEN
 nfnewprec(GEN nf, long prec)
 {
-  long av=avma,i,r1,r2,ru,n,nf_small,tetpil;
-  GEN y,pol,ro,bas,MC,mat,M;
+  long av=avma,i,r1,r2,ru,n,nf_small;
+  GEN y,pol,ro,basden,MC,mat,M;
 
   if (typ(nf) != t_VEC) err(talker,"incorrect nf in nfnewprec");
   if (lg(nf) == 11) return bnfnewprec(nf,prec);
@@ -1230,9 +1279,10 @@ nfnewprec(GEN nf, long prec)
   pol=(GEN)nf[1]; n=degree(pol);
   r1=itos(gmael(nf,2,1)); r2=itos(gmael(nf,2,2)); ru=r1+r2;
   mat=cgetg(8,t_VEC); y[5]=(long)mat;
-  bas=(GEN)nf[7]; ro=get_roots(pol,r1,ru,prec);
-  M = make_M(n,ru,bas,ro);
-  MC = make_MC(n,r1,ru,M);
+  ro=get_roots(pol,r1,ru,prec);
+  basden = get_bas_den((GEN)nf[7]);
+  M = make_M(basden,ro);
+  MC = make_MC(r1,M);
   if (nf_small) mat[2]=mat[4]=mat[5]=mat[6]=mat[7]=zero;
   else
   {
@@ -1242,8 +1292,8 @@ nfnewprec(GEN nf, long prec)
     for (i=4; i<=7; i++) mat[i]=matrices[i];
   }
   mat[1]=(long)M;
-  mat[3]=lreal(gmul(MC,M));
-  tetpil=avma; return gerepile(av,tetpil,gcopy(y));
+  mat[3]=(long)mulmat_real(MC,M);
+  return gerepileupto(av, gcopy(y));
 }
 
 static long

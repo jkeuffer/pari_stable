@@ -12,15 +12,19 @@ extern double check_bach(double cbach, double B);
 extern GEN gmul_mat_smallvec(GEN x, GEN y);
 extern GEN get_arch_real(GEN nf,GEN x,GEN *emb,long prec);
 extern GEN get_arch(GEN nf,GEN x,long prec);
+extern GEN get_bas_den(GEN bas);
+extern GEN get_mul_table(GEN x,GEN basden,GEN invbas);
 extern GEN get_roots(GEN x,long r1,long ru,long prec);
+extern GEN get_T(GEN mul, GEN x, GEN basden);
 extern long ideal_is_zk(GEN ideal,long N);
 extern long int_elt_val(GEN nf, GEN x, GEN p, GEN b, long v);
-extern GEN make_M(long n,long ru,GEN basis,GEN roo);
-extern GEN make_MC(long n,long r1,long ru,GEN M);
+extern GEN make_M(GEN basden,GEN roo);
+extern GEN make_MC(long r1,GEN M);
 extern GEN make_MDI(GEN nf, GEN TI, GEN *a, GEN *b);
 extern GEN init_idele(GEN nf);
 extern GEN norm_by_embed(long r1, GEN x);
 extern GEN gmul_mati_smallvec(GEN x, GEN y);
+extern GEN vecpol_to_mat(GEN v, long n);
 
 #define SFB_MAX 2
 #define SFB_STEP 2
@@ -2478,46 +2482,31 @@ GEN
 bnfmake(GEN sbnf, long prec)
 {
   long av = avma, j,k,n,r1,r2,ru,lpf;
-  GEN p1,p2,pol,bas,ro,m,mul,pok,M,MC,T2,mas,T,TI,nf,mun,funits;
-  GEN pfc,vp,mc,clgp,clgp2,res,y,W,racu,reg,matal;
+  GEN p1,p2,x,bas,basden,ro,mul,M,MC,T2,mas,T,TI,nf,mun,funits;
+  GEN invbas,pfc,vp,mc,clgp,clgp2,res,y,W,racu,reg,matal;
 
   if (typ(sbnf)!=t_VEC || lg(sbnf)!=13)
     err(talker,"incorrect sbnf in bnfmake");
-  pol=(GEN)sbnf[1]; bas=(GEN)sbnf[4]; n=lg(bas)-1;
+  x=(GEN)sbnf[1]; bas=(GEN)sbnf[4]; n=lg(bas)-1;
   r1=itos((GEN)sbnf[2]); r2=(n-r1)/2; ru=r1+r2;
   ro=(GEN)sbnf[5];
-  if (prec > gprecision(ro)) ro=get_roots(pol,r1,ru,prec);
+  if (prec > gprecision(ro)) ro=get_roots(x,r1,ru,prec);
 
-  m=cgetg(n+1,t_MAT);
-  for (k=1; k<=n; k++)
-  {
-    p1=cgetg(n+1,t_COL); m[k]=(long)p1; p2=(GEN)bas[k];
-    for (j=1; j<=n; j++) p1[j]=(long)truecoeff(p2,j-1);
-  }
-  m=invmat(m);
-  mul=cgetg(n*n+1,t_MAT);
-  for (k=1; k<=n*n; k++)
-  {
-    pok = gres(gmul((GEN)bas[(k-1)%n+1], (GEN)bas[(long)((k-1)/n)+1]), pol);
-    p1=cgetg(n+1,t_COL); mul[k]=(long)p1;
-    for (j=1; j<=n; j++) p1[j]=(long)truecoeff(pok,j-1);
-  }
-  mul=gmul(m,mul);
-
-  M  = make_M(n,ru,bas,ro);
-  MC = make_MC(n,r1,ru,M);
+  basden = get_bas_den(bas);
+  M  = make_M(basden,ro);
+  MC = make_MC(r1,M);
+  invbas = invmat(vecpol_to_mat(bas,n));
+  mul = get_mul_table(x,basden,invbas);
+  T = get_T(mul,x,basden);
   T2 = mulmat_real(MC,M);
-  p1=mulmat_real(gconj(MC),M); T=ground(p1);
-  if (gexpo(gnorml2(gsub(p1,T))) > -30)
-    err(talker,"insufficient precision in bnfmake");
-  TI=gmul((GEN)sbnf[3],invmat(T));
+  TI = gauss(T, gscalmat((GEN)sbnf[3], n));
 
   mas=cgetg(8,t_VEC);
   nf=cgetg(10,t_VEC);
   p1=cgetg(3,t_VEC); p1[1]=lstoi(r1); p1[2]=lstoi(r2);
-  nf[1]=sbnf[1]  ; nf[2]=(long)p1;  nf[3]=sbnf[3];
-  nf[4]=ldet(m)  ; nf[5]=(long)mas; nf[6]=(long)ro;
-  nf[7]=(long)bas; nf[8]=(long)m;   nf[9]=(long)mul;
+  nf[1]=sbnf[1];      nf[2]=(long)p1;     nf[3]=sbnf[3];
+  nf[4]=ldet(invbas); nf[5]=(long)mas;    nf[6]=(long)ro;
+  nf[7]=(long)bas;    nf[8]=(long)invbas; nf[9]=(long)mul;
 
   mas[1]=(long)M; mas[2]=(long)MC; mas[3]=(long)T2;
   mas[4]=(long)T; mas[5]=sbnf[6];  mas[6]=(long)TI;

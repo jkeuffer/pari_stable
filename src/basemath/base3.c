@@ -575,6 +575,19 @@ pol_to_vec(GEN x, long N)
   return z;
 }
 
+/* gmul(A, pol_to_vec(x)), A matrix of compatible dimensions */
+GEN
+mulmat_pol(GEN A, GEN x)
+{
+  long i,l=lgef(x)-1;
+  GEN z;
+  if (l == 1) return zerocol(lg(A)==1? 0: lg(A[1])-1);
+  x++; z = gmul((GEN)x[1], (GEN)A[1]);
+  for (i=2; i<l ; i++) 
+    if (!gcmp0((GEN)x[i]))z = gadd(z, gmul((GEN)x[i], (GEN)A[i]));
+  return z;
+}
+
 /* valid for scalars and polynomial, degree less than N.
  * No garbage collecting. No check (SEGV for vectors).
  */
@@ -590,7 +603,7 @@ algtobasis_intern(GEN nf,GEN x)
     if (varn(x) != varn(P))
       err(talker,"incompatible variables in algtobasis");
     if (lgef(x)-3 >= N) x=gres(x,P);
-    return gmul((GEN)nf[8], pol_to_vec(x, N));
+    return mulmat_pol((GEN)nf[8], x);
   }
   z = cgetg(N+1,t_COL);
   z[1]=lcopy(x); for (i=2; i<=N; i++) z[i]=zero;

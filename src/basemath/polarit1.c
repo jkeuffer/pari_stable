@@ -6,13 +6,14 @@
 /***********************************************************************/
 /* $Id$ */
 #include "pari.h"
-extern GEN get_mul_table(GEN x,GEN bas,GEN *T);
-extern GEN pol_to_monic(GEN pol, GEN *lead);
-extern GEN sort_factor(GEN y, int (*cmp)(GEN,GEN));
 extern GEN bsrch(GEN p, GEN fa, long Ka, GEN eta, long Ma);
 extern GEN eleval(GEN f,GEN h,GEN a);
+extern GEN get_bas_den(GEN bas);
+extern GEN get_mul_table(GEN x,GEN bas,GEN invbas);
+extern GEN pol_to_monic(GEN pol, GEN *lead);
 extern GEN respm(GEN f1,GEN f2,GEN pm);
 extern GEN setup(GEN p,GEN f,GEN theta,GEN nut, long *La, long *Ma);
+extern GEN sort_factor(GEN y, int (*cmp)(GEN,GEN));
 extern GEN vstar(GEN p,GEN h);
 
 /* see splitgen() for how to use these two */
@@ -1710,7 +1711,7 @@ padicff2(GEN nf,GEN p,long pr)
 static GEN
 padicff(GEN x,GEN p,long pr)
 {
-  GEN q,bas,mul,dx,nf,mat;
+  GEN q,basden,bas,invbas,mul,dx,nf,mat;
   long n=lgef(x)-3,av=avma;
 
   nf=cgetg(10,t_VEC); nf[1]=(long)x; dx=discsr(x);
@@ -1720,10 +1721,12 @@ padicff(GEN x,GEN p,long pr)
   bas=allbase4(x,(long)mat,(GEN*)(nf+3),NULL);
   if (!carrecomplet(divii(dx,(GEN)nf[3]),(GEN*)(nf+4)))
     err(bugparier,"factorpadic2 (incorrect discriminant)");
-  mul = get_mul_table(x,bas,NULL);
+  basden = get_bas_den(bas);
+  invbas = invmat(vecpol_to_mat(bas,n));
+  mul = get_mul_table(x,basden,invbas);
   nf[7]=(long)bas;
-  nf[8]=linv(vecpol_to_mat(bas,n));
-  nf[9]=lmul((GEN)nf[8],mul); nf[2]=nf[5]=nf[6]=zero;
+  nf[8]=(long)invbas;
+  nf[9]=(long)mul; nf[2]=nf[5]=nf[6]=zero;
   return gerepileupto(av,padicff2(nf,p,pr));
 }
 
