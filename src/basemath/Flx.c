@@ -902,7 +902,7 @@ Flx_invmontgomery_basecase(GEN T, ulong p)
     for (i=4;i<l;i++)
     {
       long u = 0;
-      for (k=3;k<i;k++) { u -= T[l-i+k] * r[k]; if (u & HIGHBIT) u %= p; }
+      for (k=3;k<i;k++) { u += T[l-i+k] * r[k]; if (u & HIGHBIT) u %= p; }
       u %= p;
       r[i] = (long)Fl_neg((ulong)u, p);
     }
