@@ -3752,25 +3752,24 @@ modulargcd(GEN A0, GEN B0)
   return gerepileupto(av, gmul(D,H));
 }
 
-/* lift(1 / Mod(A,B)) */
+/* lift(1 / Mod(A,B)). B0 a t_POL, A0 a scalar or a t_POL. Rational coeffs */
 GEN
-ZX_invmod(GEN A0, GEN B0)
+QX_invmod(GEN A0, GEN B0)
 {
   GEN a,b,D,A,B,q,qp,Up,Vp,U,V,res;
   long stable;
   ulong p, av2, av = avma, avlim = stack_lim(av,1);
   byteptr d = diffptr;
 
-  if (typ(B0) != t_POL) err(notpoler,"ZX_invmod");
+  if (typ(B0) != t_POL) err(notpoler,"QX_invmod");
   if (typ(A0) != t_POL)
   {
     if (is_scalar_t(typ(A0))) return ginv(A0);
-    err(notpoler,"ZX_invmod");
+    err(notpoler,"QX_invmod");
   }
-  A = content(A0); D = A;
-  B = content(B0);
-  A = gcmp1(A)? A0: gdiv(A0,A);
-  B = gcmp1(B)? B0: gdiv(B0,B);
+  if (degpol(A0) < 15) return ginvmod(A0,B0);
+  A = primitive_part(A0, &D);
+  B = primitive_part(B0, NULL);
   /* A, B in Z[X] */
   av2 = avma; U = NULL;
   d += 3000; /* 27449 = prime(3000) */
@@ -3788,7 +3787,7 @@ ZX_invmod(GEN A0, GEN B0)
       V = ZX_init_CRT(Vp,p,varn(A0));
       q = utoi(p); continue;
     }
-    if (DEBUGLEVEL>5) msgtimer("ZX_invmod: mod %ld (bound 2^%ld)", p,expi(q));
+    if (DEBUGLEVEL>5) msgtimer("QX_invmod: mod %ld (bound 2^%ld)", p,expi(q));
     qp = muliu(q,p);
     stable  = ZX_incremental_CRT(U, Up, q,qp, p);
     stable &= ZX_incremental_CRT(V, Vp, q,qp, p);
@@ -3796,17 +3795,17 @@ ZX_invmod(GEN A0, GEN B0)
     { /* all stable: check divisibility */
       res = gadd(gmul(A,U), gmul(B,V));
       if (degpol(res) == 0) break; /* DONE */
-      if (DEBUGLEVEL) fprintferr("ZX_invmod: char 0 check failed");
+      if (DEBUGLEVEL) fprintferr("QX_invmod: char 0 check failed");
     }
     q = qp;
     if (low_stack(avlim, stack_lim(av,1)))
     {
       GEN *gptr[3]; gptr[0]=&q; gptr[1]=&U; gptr[2]=&V;
-      if (DEBUGMEM>1) err(warnmem,"ZX_invmod");
+      if (DEBUGMEM>1) err(warnmem,"QX_invmod");
       gerepilemany(av2,gptr,3);
     }
   }
-  D = gmul(D,res);
+  D = D? gmul(D,res): res;
   return gerepileupto(av, gdiv(U,D));
 }
 

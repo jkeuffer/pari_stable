@@ -1595,7 +1595,7 @@ idealinv(GEN nf, GEN x)
           case t_COL: x = gmul((GEN)nf[7],x); break;
           case t_POLMOD: x = (GEN)x[2]; break;
         }
-        x = ginvmod(x,(GEN)nf[1]);
+        x = QX_invmod(x,(GEN)nf[1]);
       }
       x = idealhermite_aux(nf,x); break;
     case id_PRIME:
@@ -1974,7 +1974,7 @@ ideallllred(GEN nf, GEN I, GEN vdir, long prec)
   if (DEBUGLEVEL>5) msgtimer("LLL reduction");
 
   x = gmul((GEN)nf[7], y); Nx = subres(pol,x);
-  b = gmul(Nx, ginvmod(x,pol));
+  b = gmul(Nx, QX_invmod(x,pol));
   b = algtobasis_intern(nf,b);
   J = cgetg(N+1,t_MAT); /* = I Nx / x integral */
   for (i=1; i<=N; i++)
@@ -2694,7 +2694,7 @@ element_invmodpr(GEN nf, GEN y, GEN prhall)
   long av=avma;
   GEN p1;
 
-  p1=ginvmod(gmul((GEN)nf[7],trivlift(y)), (GEN)nf[1]);
+  p1=QX_invmod(gmul((GEN)nf[7],trivlift(y)), (GEN)nf[1]);
   p1=algtobasis_intern(nf,p1);
   return gerepileupto(av,nfreducemodpr(nf,p1,prhall));
 }

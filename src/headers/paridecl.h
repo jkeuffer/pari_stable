@@ -1196,7 +1196,7 @@ GEN     Fp_isom(GEN P,GEN Q,GEN l);
 GEN     FqV_roots_to_pol(GEN V, GEN p, GEN Tp, long v);
 GEN     ZX_caract(GEN A, GEN B, long v);
 GEN     ZX_disc(GEN x);
-GEN     ZX_invmod(GEN A, GEN B);
+GEN     QX_invmod(GEN A, GEN B);
 GEN     ZX_resultant(GEN A, GEN B);
 GEN     ZX_s_add(GEN y,long x);
 long    brent_kung_optpow(long d, long n);

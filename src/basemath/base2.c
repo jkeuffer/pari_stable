@@ -1516,7 +1516,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	/* kappa = nu^-1 in Zp[alpha] */
 	if (!kapp)
 	{
-	  kapp = ginvmod(nu, chi);
+	  kapp = QX_invmod(nu, chi);
 	  kapp = redelt(kapp, pmr, pmf);
 	  kapp = gmodulcp(kapp, chi);
 	}
@@ -3025,7 +3025,7 @@ polcompositum0(GEN A, GEN B, long flall)
     GEN w,a,b; /* a,b,c root of A,B,C = compositum, c = b - k a */
     for (i=1; i<l; i++)
     { /* invmod possibly very costly */
-      a = gmul((GEN)LPRS[1], ZX_invmod((GEN)LPRS[2], (GEN)C[i]));
+      a = gmul((GEN)LPRS[1], QX_invmod((GEN)LPRS[2], (GEN)C[i]));
       a = gneg_i(gmod(a, (GEN)C[i]));
       b = gadd(polx[v], gmulsg(k,a));
       w = cgetg(5,t_VEC); /* [C, a, b, n ] */
@@ -3070,7 +3070,7 @@ rnfequation0(GEN nf, GEN B, long flall)
 {
   ulong av = avma;
   long v,vpol,k,lA,lB;
-  GEN cC,A,C,LPRS;
+  GEN A,C,LPRS;
 
   if (typ(nf)==t_POL) A=nf; else { nf=checknf(nf); A=(GEN)nf[1]; }
   B = fix_relative_pol(nf,B,1);
@@ -3088,12 +3088,12 @@ rnfequation0(GEN nf, GEN B, long flall)
 
   k = 0; C = ZY_ZXY_resultant_all(A, B, &k, flall? &LPRS: NULL);
   if (gsigne(leadingcoeff(C)) < 0) C = gneg_i(C);
-  C = primitive_part(C, &cC);
+  C = primitive_part(C, NULL);
   if (flall)
   {
     GEN w,a,b; /* a,b,c root of A,B,C = compositum, c = b - k a */
     /* invmod possibly very costly */
-    a = gmul((GEN)LPRS[1], ZX_invmod((GEN)LPRS[2], C));
+    a = gmul((GEN)LPRS[1], QX_invmod((GEN)LPRS[2], C));
     a = gneg_i(gmod(a, C));
     b = gadd(polx[v], gmulsg(k,a));
     w = cgetg(4,t_VEC); /* [C, a, n ] */
