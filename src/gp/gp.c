@@ -2499,6 +2499,7 @@ gp_main_loop(int ismain)
 {
   gp_hist *H  = GP_DATA->hist;
   VOLATILE GEN z = gnil;
+  VOLATILE gpmem_t av = avma;
   Buffer *b = new_buffer();
   filtre_t F;
 
@@ -2511,7 +2512,6 @@ gp_main_loop(int ismain)
 
   for (; ; setjmp(b->env))
   {
-    VOLATILE gpmem_t av;
     if (ismain)
     {
       static long tloc, outtyp;
@@ -2522,7 +2522,7 @@ gp_main_loop(int ismain)
       { /* recover from error */
         char *s = (char*)global_err_data;
         if (s && *s) outerr(lisseq(s));
-	avma = top;
+	avma = av = top;
         prune_history(H, tloc);
         GP_DATA->fmt->prettyp = outtyp;
         kill_all_buffers(b);
@@ -2546,9 +2546,9 @@ gp_main_loop(int ismain)
       gpsilent = is_silent(b->buf);
       TIMERstart(GP_DATA->T);
     }
-    av = avma;
+    avma = av;
     z = readseq(b->buf, GP_DATA->flags & STRICTMATCH);
-    if (! ismain) { avma = av; continue; }
+    if (! ismain) continue;
 
     if (GP_DATA->flags & CHRONO)
       pariputs(do_time(ti_REGULAR));
@@ -2559,7 +2559,6 @@ gp_main_loop(int ismain)
     if (GP_DATA->flags & SIMPLIFY) z = simplify_i(z);
     z = set_hist_entry(H, z);
     if (!gpsilent) gp_output(z, GP_DATA);
-    avma = av;
   }
 }
 
