@@ -249,16 +249,44 @@ get_arch(GEN nf,GEN x,long prec)
   return v;
 }
 
+GEN get_arch_real(GEN nf,GEN x,GEN *emb,long prec);
+
+static GEN
+famat_get_arch_real(GEN nf,GEN x,GEN *emb,long prec)
+{
+  GEN A, T, a, t, g = (GEN)x[1], e = (GEN)x[2];
+  long i, l = lg(e);
+
+  if (l <= 1)
+    return get_arch_real(nf, gun, emb, prec);
+  A = T = NULL; /* -Wall */
+  for (i=1; i<l; i++)
+  {
+    a = get_arch_real(nf, (GEN)g[i], &t, prec);
+    a = gmul((GEN)e[i], a);
+    t = vecpow(t, (GEN)e[i]);
+    if (i == 1) { A = a;          T = t; }
+    else        { A = gadd(A, a); T = vecmul(T, t); }
+  }
+  *emb = T; return A;
+}
+
 /* as above but return NULL if precision problem, and set *emb to the
  * embeddings of x */
 GEN
 get_arch_real(GEN nf,GEN x,GEN *emb,long prec)
 {
-  long i,R1,RU;
-  GEN v,p1,p2;
+  long i, RU, R1;
+  GEN v, p1, p2;
 
-  R1=itos(gmael(nf,2,1)); RU = R1+itos(gmael(nf,2,2));
-  if (typ(x)!=t_COL) x = algtobasis_i(nf,x);
+  R1 = nf_get_r1(nf);
+  RU = lg(nf[6])-1;
+  switch(typ(x))
+  {
+    case t_MAT: return famat_get_arch_real(nf,x,emb,prec);
+    case t_COL: break;
+    default: x = algtobasis_i(nf,x);
+  }
   v = cgetg(RU+1,t_COL);
   if (isnfscalar(x)) /* rational number */
   {
@@ -267,8 +295,8 @@ get_arch_real(GEN nf,GEN x,GEN *emb,long prec)
     if (!i) err(talker,"0 in get_arch_real");
     p1= (i > 0)? glog(u,prec): gzero;
     p2 = (RU > R1)? gmul2n(p1,1): NULL;
-    for (i=1; i<=R1; i++) v[i]=(long)p1;
-    for (   ; i<=RU; i++) v[i]=(long)p2;
+    for (i=1; i<=R1; i++) v[i] = (long)p1;
+    for (   ; i<=RU; i++) v[i] = (long)p2;
   }
   else
   {
@@ -1109,6 +1137,15 @@ to_famat(GEN g, GEN e)
 GEN
 to_famat_all(GEN x, GEN y) { return to_famat(_col(x), _col(y)); }
 
+static GEN
+append(GEN v, GEN x)
+{
+  long i, l = lg(v);
+  GEN w = cgetg(l+1, typ(v));
+  for (i=1; i<l; i++) w[i] = lcopy((GEN)v[i]);
+  w[i] = lcopy(x); return w;
+}
+
 /* add x^1 to factorisation f */
 static GEN
 famat_add(GEN f, GEN x)
@@ -1121,7 +1158,7 @@ famat_add(GEN f, GEN x)
   }
   else
   {
-    h[1] = (long)concat((GEN)f[1], x);
+    h[1] = (long)append((GEN)f[1], x); /* x may be a t_COL */
     h[2] = (long)concat((GEN)f[2], gun);
   }
   return h;
