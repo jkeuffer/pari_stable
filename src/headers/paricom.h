@@ -41,14 +41,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  * RETRY = as TRY, but execute 'recovery', then 'code' again [still catching] */
 #define CATCH(err) {         \
   VOLATILE long __err = err; \
+  int pari_errno;            \
   jmp_buf __env;             \
   void *__catcherr;          \
-  if (setjmp(__env)) 
+  if ((pari_errno = setjmp(__env))) 
 
 #define RETRY { __catcherr = err_catch(__err, __env, NULL); {
 #define TRY else { __catcherr = err_catch(__err, __env, NULL); {
 
+#define CATCH_RELEASE() err_leave(&__catcherr)
 #define ENDCATCH }} err_leave(&__catcherr); }
+
+#define CATCH_ALL -1
 /*=====================================================================*/
 
 #define bit_accuracy(x) (((x)-2) << TWOPOTBITS_IN_LONG)

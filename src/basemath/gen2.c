@@ -501,6 +501,18 @@ vecegal(GEN x, GEN y)
   return 1;
 }
 
+static int
+gegal_try(GEN x, GEN y)
+{
+  int i;
+  CATCH(CATCH_ALL) {
+    CATCH_RELEASE(); return 0;
+  } TRY {
+    i = gcmp0(gadd(x, gneg_i(y)));
+  } ENDCATCH;
+  return i;
+}
+
 int
 gegal(GEN x, GEN y)
 {
@@ -552,14 +564,8 @@ gegal(GEN x, GEN y)
           if (x[i] != y[i]) return 0;
         return 1;
     }
-  CATCH(-1) {
-    i = 0;
-  } TRY {
-    av = avma;
-    i = gcmp0(gadd(x, gneg_i(y)));
-    avma = av;
-  } ENDCATCH;
-  return i;
+  av = avma; i = gegal_try(x, y);
+  avma = av; return i;
 }
 #undef MASK
 

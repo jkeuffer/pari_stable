@@ -2375,6 +2375,22 @@ killallfiles(int leaving)
   infile = stdin;
 }
 
+static int
+ok_pipe(FILE *f)
+{
+  if (DEBUGFILES) fprintferr("I/O: checking output pipe...\n");
+  CATCH(CATCH_ALL) {
+    CATCH_RELEASE(); return 0;
+  }
+  TRY {
+    int i;
+    fprintf(f,"\n\n"); fflush(f);
+    for (i=1; i<1000; i++) fprintf(f,"                  \n");
+    fprintf(f,"\n"); fflush(f);
+  } ENDCATCH;
+  return 1;
+}
+
 pariFILE *
 try_pipe(char *cmd, int fl)
 {
@@ -2383,11 +2399,8 @@ try_pipe(char *cmd, int fl)
 #else
   FILE *file;
   char *f;
-  VOLATILE int flag = fl;
+  int flag = fl;
 
-  (void)&f;
-  (void)&file; /* avoid might be clobbered by `longjmp' or `vfork' Warning */
- 
 #  ifdef __EMX__
   if (_osmode == DOS_MODE) /* no pipes under DOS */
   {
@@ -2404,18 +2417,7 @@ try_pipe(char *cmd, int fl)
   {
     file = (FILE *) popen(cmd, (flag & mf_OUT)? "w": "r");
     if (flag & mf_OUT) flag |= mf_PERM;
-    if (flag & (mf_TEST | mf_OUT))
-    {
-      if (DEBUGFILES) fprintferr("I/O: checking output pipe...\n");
-      CATCH(-1) { file = NULL; }
-      TRY {
-        int i;
-        fprintf(file,"\n\n"); fflush(file);
-        for (i=1; i<1000; i++) fprintf(file,"                  \n");
-        fprintf(file,"\n"); fflush(file);
-      } ENDCATCH;
-      if (!file) return NULL;
-    }
+    if ((flag & (mf_TEST | mf_OUT)) && !ok_pipe(file)) return NULL;
     f = cmd;
   }
   if (!file) err(talker,"[pipe:] '%s' failed",cmd);

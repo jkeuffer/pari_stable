@@ -938,9 +938,9 @@ void *
 err_catch(long errnum, jmp_buf env, void *data)
 {
   cell *v;
-  /* for fear of infinite recursion don't trap memory errors */
+  /* for fear of infinite recursion... */
   if (errnum == memer) err(talker, "can't trap memory errors");
-  if (errnum < 0) errnum = noer;
+  if (errnum == CATCH_ALL) errnum = noer;
   if (errnum > noer) err(talker, "no such error number: %ld", errnum);
   v = (cell*)gpmalloc(sizeof(cell));
   v->data = data;
