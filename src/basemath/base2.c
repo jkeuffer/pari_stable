@@ -3040,7 +3040,6 @@ print_elt(long a)
 }
 
 extern GEN ZY_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LPRS);
-extern GEN ZX_invmod(GEN A, GEN B);
 extern GEN squff2(GEN x, long klim, long hint);
 extern GEN to_polmod(GEN x, GEN mod);
 

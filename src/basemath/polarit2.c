@@ -863,15 +863,16 @@ gram_schmidt(GEN e, GEN *ptB)
   for (i=1;i<lx;i++)
   {
     GEN p1 = NULL;
+    ulong av;
     B[i] = (long)sqscal((GEN)f[i]);
-    iB[i]= linv((GEN)B[i]);
+    iB[i]= linv((GEN)B[i]); av = avma;
     for (j=1; j<i; j++)
     {
       GEN mu = gmul(gscal((GEN)e[i],(GEN)f[j]), (GEN)iB[j]);
       GEN p2 = gmul(mu, (GEN)f[j]);
       p1 = p1? gadd(p1,p2): p2;
     }
-    p1 = p1? gsub((GEN)e[i], p1): (GEN)e[i];
+    p1 = p1? gerepileupto(av, gsub((GEN)e[i], p1)): (GEN)e[i];
     f[i] = (long)p1;
   }
   *ptB = B; return f;
@@ -1221,21 +1222,21 @@ combine_factors(GEN a, GEN famod, GEN p, long klim, long hint)
 }
 
 extern long split_berlekamp(GEN Q, GEN *t, GEN pp, GEN pps2);
+#define u_FpX_div(x,y,p) u_FpX_divrem((x),(y),(p),(0),NULL)
 
 /* assume degree(a) > 0, a(0) != 0, and a squarefree */
 static GEN
 squff(GEN a, long hint)
 {
-  GEN res,Q,prime,primes2,famod,p1,y,g,z,w,*tabd,*tabdnew;
-  long av=avma,va=varn(a),da=deg(a);
-  long klim,chosenp,p,nfacp,lbit,i,j,d,e,np,nmax,lgg,nf,nft;
-  ulong *tabbit, *tabkbit, *tmp;
+  GEN PolX,lead,res,Q,prime,primes2,famod,p1,y,g,z,w,*tabd,*tabdnew;
+  long da = deg(a), klim,chosenp,p,nfacp,lbit,i,j,d,e,np,nmax,nf,nft;
+  ulong *tabbit, *tabkbit, *tmp, av = avma;
   byteptr pt=diffptr;
-  const int NOMBDEP = 5;
+  const int MAXNP = max(5, (long)sqrt(da));
 
   if (hint <= 0) hint = 1;
   if (DEBUGLEVEL > 2) timer2();
-  lbit=(da>>4)+1; nmax=da+1; klim=da>>1;
+  lbit = (da>>4)+1; nmax = da+1; klim = da>>1;
   chosenp = 0;
   tabd = NULL;
   tabdnew = (GEN*)new_chunk(nmax);
@@ -1243,33 +1244,36 @@ squff(GEN a, long hint)
   tabkbit = (ulong*)new_chunk(lbit);
   tmp     = (ulong*)new_chunk(lbit);
   prime = icopy(gun);
-  for (p = np = 0; np < NOMBDEP; )
+  lead = (GEN)a[da+2]; PolX = u_Fp_FpX(polx[0],0, 2);
+  for (p = np = 0; np < MAXNP; )
   {
-    GEN minuspolx;
+    ulong av0 = avma;
     p += *pt++; if (!*pt) err(primer1);
-    if (!smodis((GEN)a[da+2],p)) continue;
-    prime[2] = p; z = FpX_red(a, prime);
-    if (!FpX_is_squarefree(z, prime)) continue;
+    if (!smodis(lead,p)) continue;
+    z = u_Fp_FpX(a,0, p);
+    if (!u_FpX_is_squarefree(z, p)) { avma = av0; continue ; }
 
     for (j=0; j<lbit-1; j++) tabkbit[j] = 0;
     tabkbit[j] = 1;
-    d=0; e=da; nfacp=0;
-    w = polx[va]; minuspolx = gneg(w);
+    d = 0; e = da; nfacp = 0;
+    w = PolX; prime[2] = p;
     while (d < (e>>1))
     {
-      d++; w = FpXQ_pow(w, prime, z, prime);
-      g = FpX_gcd(z, gadd(w, minuspolx), prime);
-      tabdnew[d]=g; lgg=deg(g);
-      if (lgg > 0)
+      long lgg;
+      d++; w = u_FpXQ_pow(w, prime, z, p);
+      g = u_FpX_gcd(z, u_FpX_sub(w, PolX, p), p);
+      lgg = deg(g);
+      if (lgg == 0) g = NULL;
+      else
       {
-	z = FpX_div(z, g, prime); e = deg(z);
-        w = FpX_res(w, z, prime);
+	z = u_FpX_div(z, g, p); e = deg(z);
+        w = u_FpX_rem(w, z, p);
         lgg /= d; nfacp += lgg;
         if (DEBUGLEVEL>5)
-          fprintferr("   %3ld %s of degree %3ld\n",
-                     lgg, lgg==1?"factor": "factors",d);
+          fprintferr("   %3ld factor%s of degree %3ld\n", lgg, lgg==1?"":"s",d);
 	record_factors(lgg, d, lbit-1, tabkbit, tmp);
       }
+      tabdnew[d] = g;
     }
     if (e > 0)
     {
@@ -1277,39 +1281,37 @@ squff(GEN a, long hint)
       tabdnew[e] = z; nfacp++;
       record_factors(1, e, lbit-1, tabkbit, tmp);
     }
+
     if (np)
       for (j=0; j<lbit; j++) tabbit[j] &= tabkbit[j];
     else
       for (j=0; j<lbit; j++) tabbit[j] = tabkbit[j];
     if (DEBUGLEVEL > 4)
-      fprintferr("...tried prime %3ld (%-3ld %s). Time = %ld\n",
-                  p,nfacp,nfacp==1?"factor": "factors",timer2());
-    if (min_deg(lbit-1,tabbit) > klim)
-    {
-      avma = av; y = cgetg(2,t_COL);
-      y[1] = lcopy(a); return y;
-    }
+      fprintferr("...tried prime %3ld (%-3ld factor%s). Time = %ld\n",
+                  p, nfacp, nfacp==1?"": "s", timer2());
+    if (min_deg(lbit-1,tabbit) > klim) { avma = av; return _col(a); }
     if (nfacp < nmax)
     {
-      nmax=nfacp; tabd=tabdnew; chosenp=p;
-      for (j=d+1; j<e; j++) tabd[j]=polun[va];
+      nmax = nfacp; tabd = tabdnew; chosenp = p;
+      for (j=d+1; j<e; j++) tabd[j] = NULL;
       tabdnew = (GEN*)new_chunk(da);
     }
+    else avma = av0;
     np++;
   }
-  prime[2]=chosenp; primes2 = shifti(prime, -1);
-  nf=nmax; nft=1;
-  y=cgetg(nf+1,t_COL); famod=cgetg(nf+1,t_COL);
+  prime[2] = chosenp; primes2 = shifti(prime, -1);
+  nf = nmax; nft = 1;
+  y = cgetg(nf+1,t_COL); famod = cgetg(nf+1,t_COL);
   Q = cgetg(da+1,t_MAT);
   for (i=1; i<=da; i++) Q[i] = lgetg(da+1, t_COL);
   p1 = (GEN)Q[1]; for (i=1; i<=da; i++) p1[i] = zero;
-  for (d=1; nft<=nf; d++)
+  for (d = 1; nft <= nf; d++)
   {
-    g=tabd[d]; lgg=deg(g);
-    if (lgg)
+    g = tabd[d]; 
+    if (g)
     {
-      long n = lgg/d;
-      famod[nft] = (long)FpX_normalize(g, prime);
+      long n = deg(g)/d;
+      famod[nft] = (long)small_to_pol(u_FpX_normalize(g, chosenp));
       if (n > 1) (void)split_berlekamp(Q, (GEN*)(famod+nft),prime,primes2);
       nft += n;
     }

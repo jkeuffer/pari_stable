@@ -1070,6 +1070,7 @@ split_berlekamp(GEN Q, GEN *t, GEN pp, GEN pps2)
 {
   GEN u = *t, p1, p2, vker,v,w,pol;
   long av,N = lgef(u)-3, d,i,j,kk,l1,l2,p, vu = varn(u);
+  ulong av0 = avma;
   
   if (DEBUGLEVEL > 7) timer2();
   p = is_bigint(pp)? 0: pp[2];
@@ -1093,11 +1094,11 @@ split_berlekamp(GEN Q, GEN *t, GEN pp, GEN pps2)
   if (DEBUGLEVEL > 7) msgtimer("kernel");
   d = lg(vker)-1;
   if (p)
-    for (i=1; i<=d; i++)
-    {
-      p1 = (GEN)vker[i];
-      for (j=2; j<lg(p1); j++) p1[j] = itos((GEN)p1[j]);
-    }
+  {
+    avma = av0; p1 = cgetg(d+1, t_VEC); /* hack: hidden gerepile */
+    for (i=1; i<=d; i++) p1[i] = (long)pol_to_small((GEN)vker[i]);
+    vker = p1;
+  }
   pol = cgetg(N+3,t_POL);
 
   for (kk=1; kk<d; )

@@ -1161,14 +1161,23 @@ GEN     Fp_inv_isom(GEN S,GEN Tp, GEN p);
 GEN     Fp_isom(GEN P,GEN Q,GEN l);
 GEN     FqV_roots_to_pol(GEN V, GEN p, GEN Tp, long v);
 GEN     ZX_disc(GEN x);
+GEN     ZX_invmod(GEN A, GEN B);
 GEN     ZX_resultant(GEN A, GEN B);
 GEN     ffsqrtnmod(GEN a, GEN n, GEN T, GEN p, GEN *zetan);
 GEN     modulargcd(GEN a,GEN b);
 GEN     quickmul(GEN a, GEN b, long na, long nb);
 GEN     quicksqr(GEN a, long na);
 GEN     small_to_pol(GEN z);
+GEN     pol_to_small(GEN x);
 GEN     stopoly(long m, long p, long v);
 GEN     stopoly_gen(GEN m, GEN p, long v);
+GEN     u_FpXQ_pow(GEN x, GEN n, GEN pol, ulong p);
+GEN     u_FpX_divrem(GEN x, GEN y, ulong p, int malloc, GEN *pr);
+GEN     u_FpX_rem(GEN x, GEN y, ulong p);
+GEN     u_Fp_FpX(GEN x,int malloc, ulong p);
+GEN     u_FpX_normalize(GEN z, ulong p);
+GEN     u_FpX_sub(GEN x, GEN y, ulong p);
+GEN     u_FpX_gcd(GEN a, GEN b, ulong p);
 
 /* rootpol.c */
 
