@@ -20,6 +20,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                                                                **/
 /********************************************************************/
 #include "pari.h"
+extern GEN PiI2(long prec);
+extern GEN rpowsi(ulong a, GEN n, long prec);
+extern GEN divrs2_safe(GEN x, long i);
+extern void dcxlog(double s, double t, double *a, double *b);
+extern double dnorm(double s, double t);
+extern GEN trans_fix_arg(long *prec, GEN *s0, GEN *sig, gpmem_t *av, GEN *res);
 
 GEN
 cgetc(long l)
@@ -1382,12 +1388,6 @@ izeta(long k, long prec)
   return czeta(stoi(k), prec);
 }
 
-extern GEN rpowsi(ulong a, GEN n, long prec);
-extern GEN divrs2_safe(GEN x, long i);
-extern void dcxlog(double s, double t, double *a, double *b);
-extern double dnorm(double s, double t);
-extern GEN trans_fix_arg(long *prec, GEN *s0, GEN *sig, gpmem_t *av, GEN *res);
-
 /* s0 a t_INT, t_REAL or t_COMPLEX.
  * If a t_INT, assume it's not a trivial case (i.e we have s0 > 1, odd)
  * */
@@ -1888,13 +1888,11 @@ qq(GEN x, long prec)
   if (is_scalar_t(tx))
   {
     long l = precision(x);
-    GEN p1,q;
-
-    if (tx != t_COMPLEX || gcmp((GEN)x[2],gzero)<=0)
+    if (!l) l = prec;
+    if (tx != t_COMPLEX || gsigne((GEN)x[2]) <= 0)
       err(talker,"argument must belong to upper half-plane");
 
-    if (!l) l=prec; p1=mppi(l); setexpo(p1,2); /* 2*Pi */
-    q = gmul(x,pureimag(p1)); return gexp(q,prec);
+    return gexp(gmul(x, PiI2(l)), l); /* e(x) */
   }
   if (tx == t_SER) return x;
   if (tx != t_POL) err(talker,"bad argument for modular function");
