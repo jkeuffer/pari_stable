@@ -426,7 +426,7 @@ gprec_w(GEN x, long pr)
 /* internal: precision given in word length (including codewords), truncate
  * mantissa to precision 'pr' but never _increase_ it */
 GEN
-gprec_trunc(GEN x, long pr)
+gprec_wtrunc(GEN x, long pr)
 {
   long tx = typ(x), lx, i;
   GEN y;
@@ -438,7 +438,7 @@ gprec_trunc(GEN x, long pr)
     case t_COMPLEX: case t_POLMOD: case t_POL: case t_RFRAC:
     case t_VEC: case t_COL: case t_MAT:
       y = init_gen_op(x, tx, &lx, &i);
-      for (; i<lx; i++) y[i]=(long)gprec_trunc((GEN)x[i],pr);
+      for (; i<lx; i++) y[i]=(long)gprec_wtrunc((GEN)x[i],pr);
       break;
     default: return x;
   }

@@ -106,6 +106,13 @@ LGr39- very rare SEGV in idealprimedec() [ typo in init_norm(), using FpX_red
    47- ellrootno & elllseries didn't check their arguments
    48- rnfisnorminit(non-monic polynomial) --> SEGV
    49- prevent Ser & Pol from creating invalid objects (e.g Pol(x+y, y) -> y+y)
+   50- TODO item:  polrootspadic(x^2+8*x+4, 2, 2) --> 2 + O(2^2), whereas
+   there's no padic root. The documentation is not clear enough: should
+   polrootspadic(x,p,r) find roots in Z/p^r [current behaviour], or use the
+   precision of the supplied polynomial to compute roots in Qp, then return
+   them at precision p^r [ better, polroots() and factorpadic() behave this
+   way ] ?
+   51- padicappr(f, t_POLMOD) didn't work
 
   Added
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu
@@ -121,6 +128,7 @@ BA  7- support for real forms for qfbsolve.
        in base field ]
 BA  9- new algorithm for exp(t_REAL) [ Newton ]
    10- new macro ndec2prec()
+   11- use Trager's trick in factorff()
 
   Changed
     1- renamed gegal --> gequal, gegalgs --> gequalgs, gegalsg --> gequalsg,
@@ -164,6 +172,7 @@ MW 13- ellap: if E has CM by a principal order, use Cornacchia instead
        0 <= Re(z) < Re(w1).
    20- bnfinit(non-monic t_POL) --> now discard variable change
    21- rename apprgen9 -> padicappr
+   22- rewrite padicappr()
 
   Removed
     1- obsolete implementation incgam1 [ use incgam. As far as private

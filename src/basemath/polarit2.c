@@ -1391,7 +1391,7 @@ DDF_roots(GEN pol, GEN polp, GEN p)
   }
   else
   {
-    z = rootpadicliftroots(pol, z, p, e);
+    z = ZpX_liftroots(pol, z, p, e);
     z = deg1_from_roots(z, v);
   }
   if (DEBUGLEVEL>2) msgTIMER(&T, "Hensel lift (mod %Z^%ld)", p,e);
@@ -4235,71 +4235,6 @@ newtonpoly(GEN x, GEN p)
   free(vval); return y;
 }
 
-/* Factor polynomial a on the number field defined by polynomial t */
-GEN
-polfnf(GEN a, GEN t)
-{
-  pari_sp av = avma;
-  GEN x0,p1,p2,u,G,fa,n,unt,dent,A;
-  long lx,i,k,e;
-  int sqfree, tmonic;
-
-  if (typ(a)!=t_POL || typ(t)!=t_POL) err(typeer,"polfnf");
-  if (gcmp0(a)) return gcopy(a);
-  A = lift(fix_relative_pol(t,a,0));
-  p1 = content(A); if (!gcmp1(p1)) A = gdiv(A, p1);
-  t = primpart(t);
-  tmonic = is_pm1(leading_term(t));
-
-  dent = indexpartial(t, NULL); unt = gmodulsg(1,t);
-  G = nfgcd(A,derivpol(A), t, dent);
-  sqfree = gcmp1(G);
-  u = sqfree? A: RgXQX_div(A, G, t);
-  k = 0; n = ZY_ZXY_resultant(t, u, &k);
-  if (DEBUGLEVEL>4) fprintferr("polfnf: choosing k = %ld\n",k);
-  if (!sqfree)
-  {
-    G = poleval(G, gadd(polx[varn(A)], gmulsg(k, polx[varn(t)])));
-    G = ZY_ZXY_resultant(t, G, NULL);
-  }
-  /* n guaranteed to be squarefree */
-  fa = ZX_DDF(n,0); lx = lg(fa);
-  p1 = cgetg(lx,t_COL);
-  p2 = cgetg(lx,t_COL);
-  if (lx == 2)
-  { /* P^k, k irreducible */
-    p1[1] = lmul(unt,u);
-    p2[1] = (long)utoipos(degpol(A) / degpol(u));
-    return gerepilecopy(av, mkmat2(p1,p2));
-  }
-  x0 = gadd(polx[varn(A)], gmulsg(-k, gmodulcp(polx[varn(t)], t)));
-  for (i=lx-1; i>0; i--)
-  {
-    GEN f = (GEN)fa[i], F = lift_intern(poleval(f, x0));
-    if (!tmonic) F = primpart(F);
-    F = nfgcd(u, F, t, dent);
-    if (typ(F) != t_POL || degpol(F) == 0)
-      err(talker,"reducible modulus in factornf");
-    e = 1;
-    if (!sqfree)
-    {
-      while (poldvd(G,f, &G)) e++;
-      if (degpol(G) == 0) sqfree = 1;
-    }
-    p1[i] = ldiv(gmul(unt,F), leading_term(F));
-    p2[i] = (long)utoipos(e);
-  }
-  return gerepilecopy(av, sort_factor(mkmat2(p1,p2), cmp_pol));
-}
-
-static GEN
-to_frac(GEN a, GEN b)
-{
-  GEN f = cgetg(3, t_FRAC);
-  f[1] = (long)a;
-  f[2] = (long)b; return f;
-}
-
 static GEN
 lift_to_frac(GEN t, GEN mod, GEN amax, GEN bmax, GEN denom)
 {
@@ -4308,7 +4243,7 @@ lift_to_frac(GEN t, GEN mod, GEN amax, GEN bmax, GEN denom)
   if (!ratlift(t, mod, &a, &b, amax, bmax)
      || (denom && !dvdii(denom,b))
      || !gcmp1(gcdii(a,b))) return NULL;
-  if (!is_pm1(b)) a = to_frac(a, b);
+  if (!is_pm1(b)) a = mkfrac(a, b);
   return a;
 }
 

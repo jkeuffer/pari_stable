@@ -60,19 +60,6 @@ to_primitive(GEN x, GEN *cx)
   return x;
 }
 
-/* assume gvar(x) = varn(mod) */
-GEN
-to_polmod(GEN x, GEN mod)
-{
-  long tx = typ(x);
-  GEN z = cgetg(3, t_POLMOD);
-
-  if (tx == t_RFRAC) x = gmul((GEN)x[1], ginvmod((GEN)x[2],mod));
-  z[1] = (long)mod;
-  z[2] = (long)x;
-  return z;
-}
-
 /* is -1 not a square in Zp, assume p prime */
 INLINE int
 Zp_nosquare_m1(GEN p) { return (mod4(p) & 2); /* 2 or 3 mod 4 */ }

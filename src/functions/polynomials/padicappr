@@ -1,6 +1,6 @@
 Function: padicappr
 Section: polynomials
-C-Name: apprgen9
+C-Name: padicappr
 Prototype: GG
 Help: padicappr(x,a): p-adic roots of the polynomial x congruent to a mod p
 

@@ -2012,16 +2012,14 @@ FlxqX_safegcd(GEN P, GEN Q, GEN T, ulong p)
     {
       q = Flxq_mul(U, Flx_neg(leading_term(P), p), T, p);
       P = FlxX_add(P, FlxqX_Flxq_mul(FlxX_shift(Q, dg), q, T, p), p);
-      P = FlxqX_red(P, T, p); /* wasteful, but negligible */
       dg = lg(P)-lg(Q);
     } while (dg >= 0);
     if (!signe(P)) break;
 
     if (low_stack(st_lim, stack_lim(btop, 1)))
     {
-      GEN *bptr[2]; bptr[0]=&P; bptr[1]=&Q;
-      if (DEBUGLEVEL>1) err(warnmem,"FlxqX_safegcd");
-      gerepilemany(btop, bptr, 2);
+      if (DEBUGMEM>1) err(warnmem,"FlxqX_safegcd");
+      gerepileall(btop, 2, &P,&Q);
     }
     swap(P, Q); dg = -dg;
   }

@@ -28,12 +28,6 @@ the correct value.
  * setrand(867341586); bnfinit(y^4 - y^3 + 6122*y^2 + 6121*y + 37466641).gen
 is wrong [second one is principal]. Group structure and regulator are correct!
 
-5  polrootspadic(x^2+8*x+4, 2, 2) --> 2 + O(2^2), whereas there's no padic
-   root. The documentation is not clear enough: should polrootspadic(x,p,r)
-   find roots in Z/p^r [current behaviour], or use the precision of the
-   supplied polynomial to compute roots in Qp, then return them at precision
-   p^r [ better, polroots() and factorpadic() behave this way ] ?
-
 4  factorback should not accept [;] since matrix(0,2) is the only valid
    form of an empty matrix input, corresponding e.g to factor(1). But the
    empty matrix is used in many places as a marker for a void factorization.

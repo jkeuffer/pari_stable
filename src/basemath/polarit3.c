@@ -514,12 +514,12 @@ FpX_eval(GEN x,GEN y,GEN p)
   pari_sp av;
   GEN p1,r,res;
   long j, i=lg(x)-1;
-  if (i<=2)
+  if (i<=1)
     return (i==2)? modii((GEN)x[2],p): gen_0;
   res=cgeti(lgefint(p));
   av=avma; p1=(GEN)x[i];
   /* specific attention to sparse polynomials (see poleval)*/
-  /*You've guess it! It's a copy-paste(tm)*/
+  /*You've guessed it! It's a copy-paste(tm)*/
   for (i--; i>=2; i=j-1)
   {
     for (j=i; !signe((GEN)x[j]); j--)
@@ -536,6 +536,30 @@ FpX_eval(GEN x,GEN y,GEN p)
   modiiz(p1,p,res);
   avma=av;
   return res;
+}
+GEN
+FqX_eval(GEN x, GEN y, GEN T, GEN p)
+{
+  pari_sp av;
+  GEN p1, r;
+  long j, i=lg(x)-1;
+  if (i<=2)
+    return (i==2)? Fq_red((GEN)x[2], T, p): gen_0;
+  av=avma; p1=(GEN)x[i];
+  /* specific attention to sparse polynomials (see poleval)*/
+  /*You've guessed it! It's a copy-paste(tm)*/
+  for (i--; i>=2; i=j-1)
+  {
+    for (j=i; !signe((GEN)x[j]); j--)
+      if (j==2)
+      {
+	if (i!=j) y = Fq_pow(y,utoipos(i-j+1), T, p);
+        return gerepileupto(av, gmul(p1,y));
+      }
+    r = (i==j)? y: Fq_pow(y, utoipos(i-j+1), T, p);
+    p1 = Fq_red(gadd(gmul(p1,r), (GEN)x[j]), T, p);
+  }
+  return gerepileupto(av, p1);
 }
 /* Tz=Tx*Ty where Tx and Ty coprime
  * return lift(chinese(Mod(x*Mod(1,p),Tx*Mod(1,p)),Mod(y*Mod(1,p),Ty*Mod(1,p))))
@@ -649,6 +673,19 @@ FpXX_red(GEN z, GEN p)
     }
   return FpXX_renormalize(res,lg(res));
 }
+GEN
+FpXX_add(GEN x, GEN y, GEN p)
+{
+  long i,lz;
+  GEN z; 
+  long lx=lg(x);
+  long ly=lg(y);
+  if (ly>lx) swapspec(x,y, lx,ly);
+  lz = lx; z = cgetg(lz, t_POL); z[1]=x[1];
+  for (i=2; i<ly; i++) z[i] = (long) FpX_add((GEN)x[i], (GEN)y[i], p);
+  for (   ; i<lx; i++) z[i] = (long) gcopy((GEN)x[i]);
+  return FpXX_renormalize(z, lz);
+}
 
 /*******************************************************************/
 /*                                                                 */
@@ -744,6 +781,16 @@ FpXQX_gcd(GEN P, GEN Q, GEN T, GEN p)
   pari_sp btop, ltop = avma, st_lim;
   long dg;
   GEN U, q;
+  if (lgefint(p) == 3)
+  {
+    ulong pp = (ulong)p[2];
+    GEN Pl = ZXX_to_FlxX(P, pp, varn(T));
+    GEN Ql = ZXX_to_FlxX(Q, pp, varn(T));
+    GEN Tl = ZX_to_Flx(T, pp);
+    U = FlxqX_safegcd(Pl, Ql, Tl, pp);
+    if (!U) err(talker, "non-invertible polynomial in FpXQX_gcd");
+    return gerepileupto(ltop, FlxX_to_ZXX(U));
+  }
   P = FpXX_red(P, p); btop = avma;
   Q = FpXX_red(Q, p);
   if (!signe(P)) return gerepileupto(ltop, Q);
@@ -759,17 +806,15 @@ FpXQX_gcd(GEN P, GEN Q, GEN T, GEN p)
     do /* set P := P % Q */
     {
       q = Fq_mul(U, Fq_neg(leading_term(P), T, p), T, p);
-      P = gadd(P, FqX_Fq_mul(RgX_shift(Q, dg), q, T, p));
-      P = FpXQX_red(P, T, p); /* wasteful, but negligible */
+      P = FpXX_add(P, FqX_Fq_mul(RgX_shift(Q, dg), q, T, p), p);
       dg = lg(P)-lg(Q);
     } while (dg >= 0);
     if (!signe(P)) break;
 
     if (low_stack(st_lim, stack_lim(btop, 1)))
     {
-      GEN *bptr[2]; bptr[0]=&P; bptr[1]=&Q;
-      if (DEBUGLEVEL>1) err(warnmem,"FpXQX_gcd");
-      gerepilemany(btop, bptr, 2);
+      if (DEBUGMEM>1) err(warnmem,"FpXQX_gcd");
+      gerepileall(btop, 2, &P,&Q);
     }
     swap(P, Q); dg = -dg;
   }
@@ -1682,12 +1727,7 @@ FpX_factorff_irred(GEN P, GEN Q, GEN l)
 }
 /*******************************************************************/
 static GEN
-to_intmod(GEN x, GEN p)
-{
-  GEN a = cgetg(3,t_INTMOD);
-  a[1] = (long)p;
-  a[2] = lmodii(x,p); return a;
-}
+to_intmod(GEN x, GEN p) { return mkintmod(modii(x, p), p); }
 
 /* z in Z[X], return z * Mod(1,p), normalized*/
 GEN
@@ -2826,7 +2866,9 @@ GEN
 swap_vars(GEN b0, long v)
 {
   long i, n = poldegree(b0, v);
-  GEN b = cgetg(n+3, t_POL), x = b + 2;
+  GEN b, x;
+  if (n < 0) return zeropol(v);
+  b = cgetg(n+3, t_POL); x = b + 2;
   b[1] = evalsigne(1) | evalvarn(v);
   for (i=0; i<=n; i++) x[i] = (long)polcoeff_i(b0, i, v);
   return b;

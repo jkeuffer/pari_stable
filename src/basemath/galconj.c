@@ -457,7 +457,7 @@ monomorphismratlift(GEN P, GEN S, struct galois_lift *gl, GEN frob)
   nb=hensel_lift_accel(e, &mask);
   Pr = FpX_red(P,q);
   Qr = (P==Q)?Pr:FpX_red(Q, q);/*A little speed up for automorphismlift*/
-  W=FpX_FpXQ_compo(deriv(Pr, x),S,Qr,q);
+  W=FpX_FpXQ_compo(ZX_deriv(Pr),S,Qr,q);
   W=FpXQ_inv(W,Qr,q);
   qold = p; qm1old=gen_1;
   Qrold = Qr;
@@ -480,7 +480,7 @@ monomorphismratlift(GEN P, GEN S, struct galois_lift *gl, GEN frob)
 
     if (i)
     {
-      W = FpXQ_mul(Wr, FpX_FpXQV_compo(deriv(Pr,-1),FpXV_red(Spow,qold),Qrold,qold), Qrold, qold);
+      W = FpXQ_mul(Wr, FpX_FpXQV_compo(ZX_deriv(Pr),FpXV_red(Spow,qold),Qrold,qold), Qrold, qold);
       W = FpX_neg(W, qold);
       W = FpX_Fp_add(W, gen_2, qold);
       W = FpXQ_mul(Wr, W, Qrold, qold);
@@ -1330,7 +1330,7 @@ vandermondeinversemod(GEN L, GEN T, GEN den, GEN mod)
   GEN     M, P, Tp;
   M = cgetg(n, t_MAT);
   av=avma;
-  Tp = gclone(FpX_red(deriv(T, x),mod)); /*clone*/
+  Tp = gclone(FpX_deriv(T,mod)); /*clone*/
   avma=av;
   for (i = 1; i < n; i++)
   {
@@ -2582,7 +2582,7 @@ galoisgenfixedfield(GEN Tp, GEN Pmod, GEN V, GEN ip, struct galois_borne *gb, GE
       if (DEBUGLEVEL>=4)
 	fprintferr("GaloisConj:increase prec of p-adic roots of %ld.\n"
 	    ,Pgb.valabs-gb->valabs);
-      PL = rootpadicliftroots(P,PL,gb->l,Pgb.valabs);
+      PL = ZpX_liftroots(P,PL,gb->l,Pgb.valabs);
     }
     PM = vandermondeinversemod(PL, P, Pden, Pgb.ladicabs);
     PG = galoisgen(P, PL, PM, Pden, &Pgb, &Pga);
@@ -3230,8 +3230,8 @@ galoisfixedfield(GEN gal, GEN perm, long flag, long y)
         if (DEBUGLEVEL>=4)
           fprintferr("GaloisConj:increase prec of p-adic roots of %ld.\n"
               ,Pgb.valabs-val);
-        PL = rootpadicliftroots(P,PL,Pgb.l,Pgb.valabs);
-        L = rootpadicliftroots((GEN) gal[1],L,Pgb.l,Pgb.valabs);
+        PL = ZpX_liftroots(P,PL,Pgb.l,Pgb.valabs);
+        L = ZpX_liftroots((GEN) gal[1],L,Pgb.l,Pgb.valabs);
         mod = Pgb.ladicabs;
       }
     }
