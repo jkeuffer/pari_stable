@@ -954,10 +954,11 @@ static long
 prec_arch(GEN bnf)
 {
   GEN a = (GEN)bnf[4];
-  long i,prec;
+  long i, l = lg(a), prec;
 
-  for (i=1; ; i++)
+  for (i=1; i<l; i++)
     if ( (prec = gprecision((GEN)a[i])) ) return prec;
+  return DEFAULTPREC;
 }
 
 /* col = archimedian components of x, Nx its norm, dx a bound for its
