@@ -2099,10 +2099,49 @@ padic_gcd(GEN x, GEN y)
   return gpuigs((GEN)y[2], v);
 }
 
+/* x,y in Z[i], at least one of which is t_COMPLEX */
+static GEN
+gaussian_gcd(GEN x, GEN y)
+{
+  ulong av = avma;
+  GEN dx = denom(x);
+  GEN dy = denom(y);
+  GEN den = mpppcm(dx, dy);
+
+  x = gmul(x, dx);
+  y = gmul(y, dy);
+  while (!gcmp0(y))
+  {
+    GEN z = gdiv(x,y);
+    GEN r0 = greal(z), r = gfloor(r0);
+    GEN i0 = gimag(z), i = gfloor(i0);
+    if (gcmp(r0, ghalf) > 0) r = addis(r,1);
+    if (gcmp(i0, ghalf) > 0) i = addis(i,1);
+    if (gcmp0(i)) z = r;
+    else
+    {
+      z = cgetg(3, t_COMPLEX);
+      z[1] = (long)r;
+      z[2] = (long)i;
+    }
+    z = gsub(x, gmul(z,y));
+    x = y; y = z;
+  }
+  if (signe(greal(x)) < 0) x = gneg(x);
+  if (signe(gimag(x)) < 0) x = gmul(x, gi);
+  return gerepileupto(av, gdiv(x, den));
+}
+
 #define fix_frac(z) if (signe(z[2])<0)\
 {\
   setsigne(z[1],-signe(z[1]));\
   setsigne(z[2],1);\
+}
+
+static int
+cx_isrational(GEN x)
+{ 
+  return (isrational((GEN)x[1]) && isrational((GEN)x[2]));
 }
 
 GEN
@@ -2158,22 +2197,7 @@ ggcd(GEN x, GEN y)
         return z;
 
       case t_COMPLEX:
-        av=avma; p1=gdiv(x,y);
-        if (gcmp0((GEN)p1[2]))
-        {
-          p1 = (GEN)p1[1];
-          switch(typ(p1))
-          {
-            case t_INT:
-              avma=av; return gcopy(y);
-            case t_FRAC: case t_FRACN:
-              tetpil=avma; return gerepile(av,tetpil,gdiv(y,(GEN)p1[2]));
-            default: avma=av; return gun;
-          }
-        }
-        if (typ(p1[1])==t_INT && typ(p1[2])==t_INT) {avma=av; return gcopy(y);}
-        p1 = ginv(p1); avma=av;
-        if (typ(p1[1])==t_INT && typ(p1[2])==t_INT) return gcopy(x);
+        if (cx_isrational(x) && cx_isrational(y)) return gaussian_gcd(x,y);
         return triv_cont_gcd(y,x);
 
       case t_PADIC:
@@ -2211,7 +2235,9 @@ ggcd(GEN x, GEN y)
             z[1] = lmppgcd(x,(GEN)y[1]);
             z[2] = licopy((GEN)y[2]); return z;
 
-          case t_COMPLEX: case t_QUAD:
+          case t_COMPLEX:
+            if (cx_isrational(y)) return gaussian_gcd(x,y);
+          case t_QUAD:
             return triv_cont_gcd(y,x);
 
           case t_PADIC:
@@ -2238,7 +2264,9 @@ ggcd(GEN x, GEN y)
       case t_FRAC:
         switch(ty)
         {
-          case t_COMPLEX: case t_QUAD:
+          case t_COMPLEX:
+            if (cx_isrational(y)) return gaussian_gcd(x,y);
+          case t_QUAD:
             return triv_cont_gcd(y,x);
 
           case t_PADIC:
