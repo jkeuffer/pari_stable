@@ -377,366 +377,6 @@ case "$osname-$arch" in
   *)       ln_s="ln -s"; make_sh="/bin/sh"; exe_suff=; extraflag="" ;;
 esac
 
-####################### CONFIGURE - LIBRARIES ###############################
-#
-# Looking for libraries now
-#
-case "$osname" in 
-  cygwin*) ver=`uname -r | cut -d. -f1`
-    cygtop=/cygdrive/c
-    if test ! -d $cygtop; then
-      cygtop=/Cygnus/cygwin/B$ver
-      if test ! -d $cygtop; then
-        cygtop=/Cygnus/cygwin-B$ver
-        if test ! -d $cygtop; then
-          cygtop=/usr/${arch}-pc-cygwin
-          if test ! -d $cygtop; then
-            echo ..."I could not find Cygwin top directory" >&2
-          fi
-        fi
-      fi
-    fi;;
-esac
-readline_enabledp="nil"
-if test "$optimization" != profiling; then
-# First, construct the PATHs
-  case "$osname" in
-    cygwin*) if test "$cygtop" = /cygdrive/c; then
-# cygnus for version 1.*
-	libpth="
-	    /usr/local/lib\
-            /lib\
-        "
-	cygtop=/
-        else
-# cygnus for version 0.*
-	libpth="
- 	    $cygtop/H-${arch}-cygwin32/lib\
- 	    $cygtop/H-${arch}-cygwin32/${arch}-cygwin32/lib\
-        "
-	fi;;
-    os2) libpth=`echo $LIBRARY_PATH | sed 's/;/ /g' | sed 's,\\\\,/,g'`;;
-    *) libpth="\
- 	/usr/local/lib\
- 	/lib\
- 	/usr/lib\
- 	/opt/lib\
- 	/opt/local/lib\
- 	/opt/gnu/lib\
- 	/lib/pa1.1\
- 	/usr/lib/large\
- 	/lib/large\
- 	/usr/lib/small\
- 	/lib/small\
- 	/usr/ccs/lib\
- 	/usc/ucblib\
- 	/usr/shlib\
- 	.\
-     ";;
-  esac
-
-  tdir=$osname-$arch-X11$$
-  mkdir $tdir; cp Imakefile $tdir; cd $tdir
-  if (xmkmf) >/dev/null 2>&1 && test -f Makefile; then
-    eval `make gp-X11 2> /dev/null | grep -v make`
-    rm -f Makefile Makefile.bak
-    x11pth="$usrlibdir $libdir";
-  fi
-  cd ..; rm -rf $tdir
-
-# We want these libraries:
-#
-  echo Checking for optional libraries and headers...
-
-# ========  GRAPHICS environment search  ==============
-
-# At this moment $which_graphic_lib is either none, or the argument to
-# --graphic option; $graph_cmd is "" unless --graphic option was specified.
-
-#   LIB: X11
-  pth=$x11pth
-  lib=X11; . ./locatelib
-  if test -f $Xincroot/X11/Xos.h -a -z "$graph_cmd"; then
-    which_graphic_lib=X11
-    test -n "$extralib" && echo ..."Extra Libraries are $extralib"
-    echo ..."Found X11 header files in $Xincroot/X11"
-  fi
-
-#   LIB: gnuplot
-#   Look for it unconditionally, without read/write of
-#     $which_graphic_lib or $graph_cmd
-  pth="$TOP/gnuplot-$osname-$arch $TOP/gnuplot\
-       $TOP/../gnuplot-$osname-$arch $TOP/../gnuplot\
-       $TOP/../../gnuplot-$osname-$arch $TOP/../../gnuplot $libpth"
-  lib=gnuplot; . ./locatelib
-  gnuplot_fullpath="$try"
-  gnuplot_libs=
-  case $gnuplot in
-    /*|[c-z]:/*)
-        addgnuplot=gnuplot
-	for lib in vga vesa jmgraph linuxvga gd png z
-	do
-	    . ./locatelib
-	    eval "elib=\$$lib"
-	    case $elib in
-	      /*|[c-z]:/*) gnuplot_libs="$gnuplot_libs -l$lib";;
-	    esac
-	done
-	if test "$which_graphic_lib" = gnuplot; then
-	    if test -z "$gnuplot_libs"; then
-		echo "...I expect that no libraries are needed for gnuplot"
-	    else
-		echo "...I expect that libraries $gnuplot_libs are needed for gnuplot"
-	    fi
-	fi
-	;;
-    *)
-	if test "$which_graphic_lib" = gnuplot; then
-            pth=`echo $pth | sed -e "s,$TOP,.,g"`
-	    echo "###"
-	    echo "### Could not find gnuplot library in $pth"
-	    echo "###"
-	    case "$osname" in
-		os2) tlib=gnuplot.a ;;
-		*)   tlib=libgnuplot.a ;;
-	    esac
-	    echo "### You may need to execute"
-	    echo "###   ar cr $tlib version.o util.o term.o bitmap.o stdfn.o"
-	    echo "### In the build directory of gnuplot-3.7, and move"
-	    echo "### $tlib to ./gnuplot-$osname-$arch or ./gnuplot subdirs"
-	    echo "### or to similarly-named directories up the directory tree." 
-	    echo "###"
-	fi
-	;;
-  esac
-
-# ========  END of GRAPHICS environment search  ==============
-
-#   LIB: GNU ReadLine
-  readline_add="$GP_READLINE $TOP/readline-$osname-$arch $TOP/readline"
-  pth="$readline_add $libpth"
-  lib=readline; . ./locatelib
-  rl_fullname=$try
-
-
-  if test -n "$readline"; then
-# Readline -- TermCap
-    lib=$rl_fullname; sym=tgetent; . ./locatesymbol
-    if test -n "$try"; then # tgetent needed
-      lib=ncurses; . ./locatelib
-      if test -n "$try"; then # ncurses found. Does it contain tgetent ?
-        lib=$try; . ./locatesymbol
-      fi
-      if test -n "$try"; then
-        rl_ncurses=$ncurses
-      else
-        lib=termcap; . ./locatelib
-        if test -z "$try"; then
-          echo "cannot use readline: please install libncurses or libtermcap."
-          readline=
-        fi
-        rl_termcap=$termcap
-      fi
-    fi
-# Readline -- Allocation
-    lib=$rl_fullname; sym=alloca; . ./locatesymbol
-    if test -n "$try"; then # alloca needed
-      lib=iberty; . ./locatelib
-      rl_liberty="$try"
-    fi
-# Readline -- Headers
-    case "$osname" in
-      os2) incpth=`echo $C_INCLUDE_PATH | sed -e 's/\([^;]\)$/\1;/g' -e 's%;%/readline %g' -e 's,\\\\,/,g'` ;;
-      cygwin*) incpth="\
-       $cygtop/usr/local/include/readline\
-       $cygtop/usr/local/include\
-       $cygtop/usr/include/readline\
-       $cygtop/usr/include\
-       $cygtop/H-${arch}-cygwin32/${arch}-cygwin32/include\
-     ";;
-      *) incpth="\
-      /usr/local/include/readline\
-      /usr/include/readline\
-      /opt/include/readline\
-      /opt/local/include/readline\
-      /opt/gnu/include/readline\
-      /usr/unsupported/include/readline\
-      /usr/local/include\
-      /usr/include\
-      /opt/include\
-      /opt/local/include\
-      /opt/gnu/include\
-    ";;
-    esac
-    pth="$readline_add $incpth"
-    x=`./locate 'readline.h' '' $pth`
-    CPPF_defined=
-    case $x in
-     ?:/*|/*) rl_include=`echo $x | sed 's,/readline.h,,'`
-         if (grep CPPFunction $x > /dev/null 2>&1); then CPPF_defined=yes; fi
-         if (grep rl_message  $x > /dev/null 2>&1); then rl_message=yes; fi
-         if (grep rl_completion_matches $x > /dev/null 2>&1); then
-           rl_completion_matches=yes;
-         fi
-         if (grep rl_completion_func_t $x > /dev/null 2>&1); then
-           rl_completion_func_t=yes;
-         fi
-         if (grep "rl_refresh_line *()" $x > /dev/null 2>&1); then
-           rl_refresh_line_oldproto=yes
-         fi
-         if (grep rl_completion_append_character $x > /dev/null 2>&1); then
-           rl_appendchar=yes
-         fi
-         if (grep rl_generic_bind $x > /dev/null 2>&1); then
-           rl_genericbind=yes
-         fi
-         if (grep rl_save_prompt $x > /dev/null 2>&1); then
-           rl_save_prompt=yes;
-         else
-          lib=$rl_fullname; sym=rl_save_prompt; . ./locatesymbol
-          _rl_save_prompt=$try
-         fi;;
-      *) echo ..."But no header file has been found"
-         readline=;;
-    esac
-  fi
-
-  if test -z "$readline"; then
-      echo "### Building without GNU readline support"
-  else
-    if test "$fastread" = yes; then
-      echo "Using GNU readline:"
-    fi
-    echo ..."Found readline header in $rl_include"
-    if (echo $rl_include | grep "readline$" > /dev/null); then
-      rl_include=`echo $rl_include | sed 's,/readline$,,'`
-      RLINCLUDE="-I$rl_include"
-    else
-# in case headers are not installed correctly
-      RLINCLUDE="-I$rl_include -DREADLINE_LIBRARY"
-    fi
-    RLLIBS="-L$readline -lreadline"
-    if test -n "$rl_ncurses"; then
-      echo ..."Library ncurses needed by readline"
-      RLLIBS="$RLLIBS -L$rl_ncurses -lncurses"
-    fi
-    if test -n "$rl_termcap"; then
-      echo ..."Library termcap needed by readline"
-      RLLIBS="$RLLIBS -L$rl_termcap -ltermcap"
-    fi
-    if test -n "$rl_liberty"; then
-      echo ..."Library liberty needed by readline"
-      RLLIBS="$RLLIBS -L$rl_liberty -liberty"
-    fi
-    if test -z "$rl_appendchar"; then
-      echo ..."Library readline does not have completion_append_char"
-    fi
-    if test -z "$rl_genericbind"; then
-      echo ..."Library readline does not have rl_generic_bind"
-    fi
-    if test -z "$rl_save_prompt"; then
-      echo ..."Library readline does not have rl_save_prompt"
-      if test -n "$_rl_save_prompt"; then
-        echo ......"but it has _rl_save_prompt"
-      fi
-    fi
-
-    if test "$fastread" != yes; then
-      cat << EOM
-==========================================================================
-EOM
-      echo $n "Do you want to use GNU readline library within GP ? $c"
-      rep='y n'; dflt=y; . ./myread
-      case $ans in
-        n) readline=;;
-      esac
-    fi
-  fi
-
-  if test -n "$readline"; then readline_enabledp="t"; fi
-
-#  Graphic libs now.
-#
-  if test "$fastread" != yes; then
-    if test -n "$X11"; then addX11="X11 builtin.X11-gnuplot-dynamic"; fi
-    if test -n "$X11" -a -n "$addgnuplot"; then
-	addX11="$addX11 builtin.X11-gnuplot"
-    fi
-    cat << EOT
-==========================================================================
-GP contains high resolution plotting functions. Choose among
-       none       $addX11         $addgnuplot	gnuplot-dynamic
-EOT
-    echo $n ..."Use which graphic library (\"none\" means no hi-res plot) ? $c"
-    rep="none $addX11 $addgnuplot gnuplot-dynamic";
-    dflt=$which_graphic_lib; . ./myread
-    which_graphic_lib=$ans
-
-  case "$which_graphic_lib" in
-    *X11*)
-      # If xmkmf did not give the right answer
-      # X11 -- Headers
-      if test ! -f $Xincroot/X11/Xos.h; then
-        x11pth="\
-          /usr/openwin/share/lib\
-          /usr/openwin/lib\
-          /usr/X11R6/lib\
-          /usr/X11R5/lib\
-          /usr/X11R4/lib\
-          /usr/lib/X11R6\
-          /usr/lib/X11R5\
-          /usr/lib/X11R4\
-          /usr/local/X11R6/lib\
-          /usr/local/X11R5/lib\
-          /usr/local/X11R4/lib\
-          /usr/local/lib/X11R6\
-          /usr/local/lib/X11R5\
-          /usr/local/lib/X11R4\
-          /usr/X11/lib\
-          /usr/lib/X11\
-          /usr/local/X11/lib\
-          /usr/local/lib/X11\
-          /usr/X386/lib\
-          /usr/x386/lib\
-          /usr/XFree86/lib/X11\
-          /usr/lib\
-          /usr/local/lib\
-          /usr/unsupported/lib\
-          /usr/athena/lib\
-          /usr/local/x11r5/lib\
-          /usr/lpp/Xamples/lib\
-        ";
-        pth=`echo $x11pth | s,/lib,/include,g`
-        x=`./locate X11/Xos.h '' $pth`
-        case $x in
-         /*) Xincroot=`echo $x | sed 's,/X11/Xos.h,,'`;;
-         *)  Xincroot=;;
-        esac
-        if test -n "$Xincroot"; then
-          echo ..."Found X11 header files in $Xincroot/X11"
-        fi
-      fi
-      # X11 -- Lib
-      if test -f $Xincroot/X11/Xos.h -a -z "$X11"; then
-        pth=$x11pth;
-        lib=X11; . ./locatelib
-      fi ;;
-  esac
-  case "$which_graphic_lib" in
-    *gnuplot*) ;;
-    *)gnuplot=;;
-  esac
-  else # fastread = yes
-    # TEST: --graphic was not given, X11 not found, and gnuplot library found
-    if test "$which_graphic_lib" = none -a -z "$graph_cmd" -a -n "$gnuplot"; then
-      which_graphic_lib=gnuplot
-    fi
-    if test -z "$X11" -a -z "$gnuplot" -a -z "$readline" -a "X$which_graphic_lib" != Xgnuplot-dynamic; then
-      echo ...none
-    fi
-  fi
-fi
-
 ####################### CONFIGURE - COMPILATION #############################
 #
 # Which optimization ?
@@ -830,7 +470,7 @@ gcc/g++ enables the inlining of kernel routines (about 20% speedup; if you
 use g++, it is a good idea to include the -fpermissive flag).  If you choose
 not to use gcc, the C++ version of Pari will be a little faster because of
 general inlining, but can be used in library mode only with C++ programs (we
-**really** recommand using gcc all the way through).
+_really_ recommand using gcc all the way through).
 EOT
   echo $n ..."Which C compiler shall I use ? $c"
   dflt=$CC; rep=; . ./myread
@@ -1110,14 +750,6 @@ in the Makefile
 EOT
 fi
 
-####################### CONFIGURE - READLINE VERSION ########################
-if test -n "$readline"; then
-  exe=$osname-$arch-rlv$$
-  $CC $extraflag $RLINCLUDE -o $exe rl_version.c $RLLIBS 2>/dev/null
-  if test -r $exe; then readline=`$exe`; else readline=1.0; fi
-  rm -f $exe $exe$exe_suff
-fi
-
 ####################### CONFIGURE - LIBC ####################################
 #
 #  sizeof(long), double format
@@ -1208,6 +840,382 @@ fi
 if test "$has_dlopen" = no -a X"$osname" = Xos2; then
   echo "Will use the builtin dlopen() support for OS/2..."
   has_dlopen=builtin
+fi
+
+####################### CONFIGURE - LIBRARIES ###############################
+#
+# Looking for libraries now
+#
+case "$osname" in 
+  cygwin*) ver=`uname -r | cut -d. -f1`
+    cygtop=/cygdrive/c
+    if test ! -d $cygtop; then
+      cygtop=/Cygnus/cygwin/B$ver
+      if test ! -d $cygtop; then
+        cygtop=/Cygnus/cygwin-B$ver
+        if test ! -d $cygtop; then
+          cygtop=/usr/${arch}-pc-cygwin
+          if test ! -d $cygtop; then
+            echo ..."I could not find Cygwin top directory" >&2
+          fi
+        fi
+      fi
+    fi;;
+esac
+readline_enabledp="nil"
+if test "$optimization" != profiling; then
+# First, construct the PATHs
+  case "$osname" in
+    cygwin*) if test "$cygtop" = /cygdrive/c; then
+# cygnus for version 1.*
+	libpth="
+	    /usr/local/lib\
+            /lib\
+        "
+	cygtop=/
+        else
+# cygnus for version 0.*
+	libpth="
+ 	    $cygtop/H-${arch}-cygwin32/lib\
+ 	    $cygtop/H-${arch}-cygwin32/${arch}-cygwin32/lib\
+        "
+	fi;;
+    os2) libpth=`echo $LIBRARY_PATH | sed 's/;/ /g' | sed 's,\\\\,/,g'`;;
+    *) libpth="\
+ 	/usr/local/lib\
+ 	/lib\
+ 	/usr/lib\
+ 	/opt/lib\
+ 	/opt/local/lib\
+ 	/opt/gnu/lib\
+ 	/lib/pa1.1\
+ 	/usr/lib/large\
+ 	/lib/large\
+ 	/usr/lib/small\
+ 	/lib/small\
+ 	/usr/ccs/lib\
+ 	/usc/ucblib\
+ 	/usr/shlib\
+ 	.\
+     ";;
+  esac
+
+  tdir=$osname-$arch-X11$$
+  mkdir $tdir; cp Imakefile $tdir; cd $tdir
+  if (xmkmf) >/dev/null 2>&1 && test -f Makefile; then
+    eval `make gp-X11 2> /dev/null | grep -v make`
+    rm -f Makefile Makefile.bak
+    x11pth="$usrlibdir $libdir";
+  fi
+  cd ..; rm -rf $tdir
+
+# We want these libraries:
+#
+  echo Checking for optional libraries and headers...
+
+# ========  GRAPHICS environment search  ==============
+
+# At this moment $which_graphic_lib is either none, or the argument to
+# --graphic option; $graph_cmd is "" unless --graphic option was specified.
+
+#   LIB: X11
+  pth=$x11pth
+  lib=X11; . ./locatelib
+  if test -f $Xincroot/X11/Xos.h -a -z "$graph_cmd"; then
+    which_graphic_lib=X11
+    test -n "$extralib" && echo ..."Extra Libraries are $extralib"
+    echo ..."Found X11 header files in $Xincroot/X11"
+  fi
+
+#   LIB: gnuplot
+#   Look for it unconditionally, without read/write of
+#     $which_graphic_lib or $graph_cmd
+  pth="$TOP/gnuplot-$osname-$arch $TOP/gnuplot\
+       $TOP/../gnuplot-$osname-$arch $TOP/../gnuplot\
+       $TOP/../../gnuplot-$osname-$arch $TOP/../../gnuplot $libpth"
+  lib=gnuplot; . ./locatelib
+  gnuplot_fullpath="$try"
+  gnuplot_libs=
+  case $gnuplot in
+    /*|[c-z]:/*)
+        addgnuplot=gnuplot
+	for lib in vga vesa jmgraph linuxvga gd png z
+	do
+	    . ./locatelib
+	    eval "elib=\$$lib"
+	    case $elib in
+	      /*|[c-z]:/*) gnuplot_libs="$gnuplot_libs -l$lib";;
+	    esac
+	done
+	if test "$which_graphic_lib" = gnuplot; then
+	    if test -z "$gnuplot_libs"; then
+		echo "...I expect that no libraries are needed for gnuplot"
+	    else
+		echo "...I expect that libraries $gnuplot_libs are needed for gnuplot"
+	    fi
+	fi
+	;;
+    *)
+	if test "$which_graphic_lib" = gnuplot; then
+            pth=`echo $pth | sed -e "s,$TOP,.,g"`
+	    echo "###"
+	    echo "### Could not find gnuplot library in $pth"
+	    echo "###"
+	    case "$osname" in
+		os2) tlib=gnuplot.a ;;
+		*)   tlib=libgnuplot.a ;;
+	    esac
+	    echo "### You may need to execute"
+	    echo "###   ar cr $tlib version.o util.o term.o bitmap.o stdfn.o"
+	    echo "### In the build directory of gnuplot-3.7, and move"
+	    echo "### $tlib to ./gnuplot-$osname-$arch or ./gnuplot subdirs"
+	    echo "### or to similarly-named directories up the directory tree." 
+	    echo "###"
+	fi
+	;;
+  esac
+
+# ========  END of GRAPHICS environment search  ==============
+
+#   LIB: GNU ReadLine
+  readline_add="$GP_READLINE $TOP/readline-$osname-$arch $TOP/readline"
+  pth="$readline_add $libpth"
+  lib=readline; . ./locatelib
+  rl_fullname=$try
+
+  if test -n "$readline"; then
+# Readline -- Headers
+    case "$osname" in
+      os2) incpth=`echo $C_INCLUDE_PATH | sed -e 's/\([^;]\)$/\1;/g' -e 's%;%/readline %g' -e 's,\\\\,/,g'` ;;
+      cygwin*) incpth="\
+       $cygtop/usr/local/include/readline\
+       $cygtop/usr/local/include\
+       $cygtop/usr/include/readline\
+       $cygtop/usr/include\
+       $cygtop/H-${arch}-cygwin32/${arch}-cygwin32/include\
+     ";;
+      *) incpth="\
+      /usr/local/include/readline\
+      /usr/include/readline\
+      /opt/include/readline\
+      /opt/local/include/readline\
+      /opt/gnu/include/readline\
+      /usr/unsupported/include/readline\
+      /usr/local/include\
+      /usr/include\
+      /opt/include\
+      /opt/local/include\
+      /opt/gnu/include\
+    ";;
+    esac
+    pth="$readline_add $incpth"
+    x=`./locate 'readline.h' '' $pth`
+    CPPF_defined=
+    case $x in
+     ?:/*|/*) rl_include=`echo $x | sed 's,/readline.h,,'`
+         echo ..."Found readline header in $rl_include"
+         if (grep CPPFunction $x > /dev/null 2>&1); then CPPF_defined=yes; fi
+         if (grep rl_message  $x > /dev/null 2>&1); then rl_message=yes; fi
+         if (grep rl_completion_matches $x > /dev/null 2>&1); then
+           rl_completion_matches=yes;
+         fi
+         if (grep rl_completion_func_t $x > /dev/null 2>&1); then
+           rl_completion_func_t=yes;
+         fi
+         if (grep "rl_refresh_line *()" $x > /dev/null 2>&1); then
+           rl_refresh_line_oldproto=yes
+         fi
+         if (grep rl_completion_append_character $x > /dev/null 2>&1); then
+           rl_appendchar=yes
+         fi
+         if (grep rl_generic_bind $x > /dev/null 2>&1); then
+           rl_genericbind=yes
+         fi
+         if (grep rl_save_prompt $x > /dev/null 2>&1); then
+           rl_save_prompt=yes;
+         else # might be defined but not declared (old readline)
+          lib=$rl_fullname; sym=rl_save_prompt; . ./locatesymbol
+          _rl_save_prompt=$try
+         fi;;
+      *) echo ..."But no header file has been found"
+         readline=;;
+    esac
+  fi
+
+  pth="$readline_add $libpth"
+  if test -n "$readline"; then
+# Readline -- Allocation
+    lib=$rl_fullname; sym=alloca; . ./locatesymbol
+    if test -n "$try"; then # alloca needed
+      lib=iberty; . ./locatelib
+      rl_liberty="$try"
+    fi
+# Readline -- TermCap
+    lib=$rl_fullname; sym=tgetent; . ./locatesymbol
+    need_tgetent="$try"
+    if test -n "$need_tgetent"; then
+      lib=ncurses; . ./locatelib
+      if test -n "$try"; then # ncurses found. Does it contain tgetent ?
+        lib=$try; . ./locatesymbol
+      fi
+      if test -n "$try"; then
+        rl_ncurses=$ncurses
+        need_tgetent=
+      else # give termcap a try
+        lib=termcap; . ./locatelib
+        if test -n "$try"; then
+          rl_termcap=$termcap
+          need_tgetent=
+        fi
+      fi
+    fi
+# Readline -- CFLAGS
+    if (echo $rl_include | grep "readline$" > /dev/null); then
+      rl_include=`echo $rl_include | sed 's,/readline$,,'`
+      RLINCLUDE="-I$rl_include"
+    else # in case headers are not installed correctly
+      RLINCLUDE="-I$rl_include -DREADLINE_LIBRARY"
+    fi
+    RLLIBS="-L$readline -lreadline"
+    if test -n "$rl_ncurses"; then
+      echo ..."Library ncurses needed by readline"
+      RLLIBS="$RLLIBS -L$rl_ncurses -lncurses"
+    fi
+    if test -n "$rl_termcap"; then
+      echo ..."Library termcap needed by readline"
+      RLLIBS="$RLLIBS -L$rl_termcap -ltermcap"
+    fi
+    if test -n "$rl_liberty"; then
+      echo ..."Library liberty needed by readline"
+      RLLIBS="$RLLIBS -L$rl_liberty -liberty"
+    fi
+# Readline -- last chance for tgetent
+    if test -n "$need_tgetent"; then # try to compile anyway (in libc?)
+      list=readline; extra_flags="$RLLIBS $RLINCLUDE"; ./look
+      if test "$has_readline" = no; then
+        echo "cannot use readline: please install libncurses or libtermcap."
+        readline=
+      fi
+    fi
+  fi
+
+  if test -z "$readline"; then
+    echo "### Building without GNU readline support"
+  else
+    if test "$fastread" = yes; then
+      exe=$osname-$arch-rlv$$
+      $CC $extraflag $RLINCLUDE -o $exe rl_version.c $RLLIBS 2> /dev/null
+      if test -r $exe; then readline=`$exe`; else readline=1.0; fi
+      rm -f $exe $exe$exe_suff
+      echo "Using GNU readline, version $readline"
+    fi
+    if test -z "$rl_appendchar"; then
+      echo ..."Library readline does not have completion_append_char"
+    fi
+    if test -z "$rl_genericbind"; then
+      echo ..."Library readline does not have rl_generic_bind"
+    fi
+    if test -z "$rl_save_prompt"; then
+      echo ..."Library readline does not have rl_save_prompt"
+      if test -n "$_rl_save_prompt"; then
+        echo ......"but it has _rl_save_prompt"
+      fi
+    fi
+
+    if test "$fastread" != yes; then
+      cat << EOM
+==========================================================================
+EOM
+      echo $n "Do you want to use GNU readline library within GP ? $c"
+      rep='y n'; dflt=y; . ./myread
+      case $ans in
+        n) readline=;;
+      esac
+    fi
+  fi
+
+  if test -n "$readline"; then readline_enabledp="t"; fi
+
+#  Graphic libs now.
+#
+  if test "$fastread" != yes; then
+    if test -n "$X11"; then addX11="X11 builtin.X11-gnuplot-dynamic"; fi
+    if test -n "$X11" -a -n "$addgnuplot"; then
+	addX11="$addX11 builtin.X11-gnuplot"
+    fi
+    cat << EOT
+==========================================================================
+GP contains high resolution plotting functions. Choose among
+       none       $addX11         $addgnuplot	gnuplot-dynamic
+EOT
+    echo $n ..."Use which graphic library (\"none\" means no hi-res plot) ? $c"
+    rep="none $addX11 $addgnuplot gnuplot-dynamic";
+    dflt=$which_graphic_lib; . ./myread
+    which_graphic_lib=$ans
+
+  case "$which_graphic_lib" in
+    *X11*)
+      # If xmkmf did not give the right answer
+      # X11 -- Headers
+      if test ! -f $Xincroot/X11/Xos.h; then
+        x11pth="\
+          /usr/openwin/share/lib\
+          /usr/openwin/lib\
+          /usr/X11R6/lib\
+          /usr/X11R5/lib\
+          /usr/X11R4/lib\
+          /usr/lib/X11R6\
+          /usr/lib/X11R5\
+          /usr/lib/X11R4\
+          /usr/local/X11R6/lib\
+          /usr/local/X11R5/lib\
+          /usr/local/X11R4/lib\
+          /usr/local/lib/X11R6\
+          /usr/local/lib/X11R5\
+          /usr/local/lib/X11R4\
+          /usr/X11/lib\
+          /usr/lib/X11\
+          /usr/local/X11/lib\
+          /usr/local/lib/X11\
+          /usr/X386/lib\
+          /usr/x386/lib\
+          /usr/XFree86/lib/X11\
+          /usr/lib\
+          /usr/local/lib\
+          /usr/unsupported/lib\
+          /usr/athena/lib\
+          /usr/local/x11r5/lib\
+          /usr/lpp/Xamples/lib\
+        ";
+        pth=`echo $x11pth | s,/lib,/include,g`
+        x=`./locate X11/Xos.h '' $pth`
+        case $x in
+         /*) Xincroot=`echo $x | sed 's,/X11/Xos.h,,'`;;
+         *)  Xincroot=;;
+        esac
+        if test -n "$Xincroot"; then
+          echo ..."Found X11 header files in $Xincroot/X11"
+        fi
+      fi
+      # X11 -- Lib
+      if test -f $Xincroot/X11/Xos.h -a -z "$X11"; then
+        pth=$x11pth;
+        lib=X11; . ./locatelib
+      fi ;;
+  esac
+  case "$which_graphic_lib" in
+    *gnuplot*) ;;
+    *)gnuplot=;;
+  esac
+  else # fastread = yes
+    # TEST: --graphic was not given, X11 not found, and gnuplot library found
+    if test "$which_graphic_lib" = none -a -z "$graph_cmd" -a -n "$gnuplot"; then
+      which_graphic_lib=gnuplot
+    fi
+    if test -z "$X11" -a -z "$gnuplot" -a -z "$readline" -a "X$which_graphic_lib" != Xgnuplot-dynamic; then
+      echo ...none
+    fi
+  fi
 fi
 
 ####################### CONFIGURE - MAKE ####################################
