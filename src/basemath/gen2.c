@@ -146,6 +146,7 @@ glength(GEN x)
     case t_POL: case t_LIST: return lgef(x)-2;
     case t_REAL: return signe(x)? lg(x)-2: 0;
     case t_STR: return strlen(GSTR(x));
+    case t_VECSMALL: return lg(x)-1;
   }
   return lg(x)-lontyp[typ(x)];
 }
