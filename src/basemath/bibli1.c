@@ -22,8 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "parinf.h"
 extern GEN ZV_lincomb(GEN u, GEN v, GEN X, GEN Y);
 extern GEN roots_to_pol_r1r2(GEN a, long r1, long v);
-extern GEN make_T2(GEN base, GEN polr, long r1);
-extern GEN make_T(GEN x, GEN w);
+extern GEN LLL_nfbasis(GEN x, GEN polr, GEN base, long prec);
 
 /* default quality ratio for LLL: 99/100 */
 #define LLLDFT 100
@@ -285,8 +284,8 @@ RED_gram(long k, long l, GEN x, GEN h, GEN L, long K)
 static void
 RED(long k, long l, GEN x, GEN h, GEN L, long K)
 {
-  long e,i,lx;
-  GEN q = grndtoi(gcoeff(L,k,l), &e);
+  long i,lx;
+  GEN q = ground(gcoeff(L,k,l));
   GEN xk, xl;
   if (!signe(q)) return;
   q = negi(q);
@@ -308,7 +307,7 @@ RED(long k, long l, GEN x, GEN h, GEN L, long K)
 }
 
 static int
-do_ZSWAP(GEN x, GEN h, GEN L, GEN B, long kmax, long k, long alpha, GEN fl,
+do_ZSWAP(GEN x, GEN h, GEN L, GEN B, long kmax, long k, long D, GEN fl,
          int gram)
 {
   GEN la,la2,p1,Bk;
@@ -322,9 +321,9 @@ do_ZSWAP(GEN x, GEN h, GEN L, GEN B, long kmax, long k, long alpha, GEN fl,
   if (fl[k])
   {
     GEN q;
-    if (!alpha) return 0; /* only swap non-kernel + kernel vector */
+    if (!D) return 0; /* only swap non-kernel + kernel vector */
     q = addii(la2, mulii((GEN)B[k-1],(GEN)B[k+1]));
-    if (cmpii(mulsi(alpha-1,sqri(Bk)), mulsi(alpha,q)) <= 0) {
+    if (cmpii(mulsi(D-1,sqri(Bk)), mulsi(D,q)) <= 0) {
       avma = av; return 0;
     }
     B[k] = (long)diviiexact(q, Bk);
@@ -334,8 +333,8 @@ do_ZSWAP(GEN x, GEN h, GEN L, GEN B, long kmax, long k, long alpha, GEN fl,
   { /* output diagnostics associated to re-normalized rational quantities */
     gpmem_t av1 = avma;
     GEN d = mulii((GEN)B[k-1],(GEN)B[k+1]);
-    p1 = subii(mulsi(alpha-1, sqri(Bk)), mulsi(alpha, la2));
-    fprintferr(" (%ld)", expi(p1) - expi(mulsi(alpha, d)));
+    p1 = subii(mulsi(D-1, sqri(Bk)), mulsi(D, la2));
+    fprintferr(" (%ld)", expi(p1) - expi(mulsi(D, d)));
     avma = av1;
   }
   if (h) swap(h[k-1], h[k]);
@@ -384,7 +383,7 @@ do_ZSWAP(GEN x, GEN h, GEN L, GEN B, long kmax, long k, long alpha, GEN fl,
 }
 
 static int
-do_SWAP(GEN x, GEN h, GEN L, GEN B, long kmax, long k, GEN QR, int gram)
+do_SWAP(GEN x, GEN h, GEN L, GEN B, long kmax, long k, GEN delta, int gram)
 {
   GEN la,la2, BK,BB,q;
   long i, j, lx;
@@ -392,7 +391,7 @@ do_SWAP(GEN x, GEN h, GEN L, GEN B, long kmax, long k, GEN QR, int gram)
 
   av = avma;
   la = gcoeff(L,k,k-1); la2 = gsqr(la);
-  q = gmul((GEN)B[k-1], gsub(QR,la2));
+  q = gmul((GEN)B[k-1], gsub(delta,la2));
   if (gcmp(q, (GEN)B[k]) <= 0) { avma = av; return 0; }
 
   /* SWAP(k-1,k) */
@@ -416,9 +415,11 @@ do_SWAP(GEN x, GEN h, GEN L, GEN B, long kmax, long k, GEN QR, int gram)
   {
     GEN t = gcoeff(L,i,k);
     coeff(L,i,k) = lsub(gcoeff(L,i,k-1), gmul(la,t));
+#if 0
     coeff(L,i,k-1) = ladd(gmul(gcoeff(L,k,k-1),gcoeff(L,i,k-1)), gmul(BK,t));
-   /*              = ladd(t, gmul(gcoeff(L,k,k-1), gcoeff(L,i,k)));
-    * would save one multiplication, but loses precision faster... */
+#else /* saves one multiplication, but loses precision faster */
+    coeff(L,i,k-1) = ladd(t, gmul(gcoeff(L,k,k-1), gcoeff(L,i,k)));
+#endif
   }
   return 1;
 }
@@ -450,8 +451,8 @@ ZincrementalGS(GEN x, GEN L, GEN B, long k, GEN fl, int gram)
 }
 
 /* x integer matrix. Beware: this function can return NULL */
-static GEN
-lllint_marked(long MARKED, GEN x, long alpha, int gram,
+GEN
+lllint_marked(long MARKED, GEN x, long D, int gram,
               GEN *pth, GEN *ptfl, GEN *ptB)
 {
   long lx = lg(x), hx, i, j, k, l, n, kmax;
@@ -490,7 +491,7 @@ lllint_marked(long MARKED, GEN x, long alpha, int gram,
       if (!gram) ZRED(k,k-1, x,h,L,(GEN)B[k],kmax);
       else  ZRED_gram(k,k-1, x,h,L,(GEN)B[k],kmax);
     }
-    if (do_ZSWAP(x,h,L,B,kmax,k,alpha,fl,gram))
+    if (do_ZSWAP(x,h,L,B,kmax,k,D,fl,gram))
     {
       if      (MARKED == k)   MARKED = k-1;
       else if (MARKED == k-1) MARKED = k;
@@ -530,25 +531,25 @@ lllint_marked(long MARKED, GEN x, long alpha, int gram,
 
 /* Beware: this function can return NULL (dim x <= 1) */
 GEN
-lllint_i(GEN x, long alpha, int gram, GEN *pth, GEN *ptfl, GEN *ptB)
+lllint_i(GEN x, long D, int gram, GEN *pth, GEN *ptfl, GEN *ptB)
 {
-  return lllint_marked(0, x,alpha,gram,pth,ptfl,ptB);
+  return lllint_marked(0, x,D,gram,pth,ptfl,ptB);
 }
 
 /* return x * lllint(x). No garbage collection */
 GEN
-lllint_ip(GEN x, long alpha)
+lllint_ip(GEN x, long D)
 {
-  GEN h = lllint_i(x, alpha, 0, NULL, NULL, NULL); 
+  GEN h = lllint_i(x, D, 0, NULL, NULL, NULL); 
   if (!h) h = x;
   return h;
 }
 
 GEN
-lllall(GEN x, long alpha, int gram, long flag)
+lllall(GEN x, long D, int gram, long flag)
 {
   gpmem_t av = avma;
-  GEN fl, junk, h = lllint_i(x, alpha, gram, &junk, &fl, NULL);
+  GEN fl, junk, h = lllint_i(x, D, gram, &junk, &fl, NULL);
   if (!h) return lll_trivial(x,flag);
   return gerepilecopy(av, lll_finish(h,fl,flag));
 }
@@ -814,14 +815,14 @@ incrementalGS(GEN x, GEN mu, GEN B, long k)
 }
 
 /* x = Gram(b_i). If precision problems return NULL if flag=1, error otherwise.
- * Quality ratio = Q = (alpha-1)/alpha. Suggested value: alpha = 100
+ * Quality ratio = delta = (D-1)/D. Suggested value: D = 100
  *
  * If MARKED != 0 make sure e[MARKED] is the first vector of the output basis
  * (which may then not be LLL-reduced) */
 GEN
-lllfp_marked(int MARKED, GEN x, long alpha, long flag, long prec, int gram)
+lllfp_marked(int MARKED, GEN x, long D, long flag, long prec, int gram)
 {
-  GEN xinit,L,h,B,L1,QR;
+  GEN xinit,L,h,B,L1,delta;
   long retry = 2, lx = lg(x), hx, l, i, j, k, k1, n, kmax, KMAX;
   gpmem_t av0 = avma, av, lim;
 
@@ -829,8 +830,8 @@ lllfp_marked(int MARKED, GEN x, long alpha, long flag, long prec, int gram)
   n = lx-1; if (n <= 1) return idmat(n);
   hx = lg(x[1]);
   if (gram && hx != lx) err(mattype1,"lllfp");
-  QR = cgetr(DEFAULTPREC); affsr(alpha-1,QR);
-  QR = divrs(QR,alpha);
+  delta = cgetr(DEFAULTPREC); affsr(D-1,delta);
+  delta = divrs(delta,D);
   xinit = x;
   av = avma; lim = stack_lim(av,1);
   if (gram) {
@@ -867,7 +868,7 @@ PRECPB:
   {
     case 2: h = idmat(n); break; /* entry */
     case 1:
-      if (kmax > 2)
+      if (gram && kmax > 2)
       { /* some progress but precision loss, try again */
         prec = (prec<<1)-2; kmax = 1;
         if (DEBUGLEVEL > 3) fprintferr("\n");
@@ -907,7 +908,7 @@ PRECPB:
     }
     else if (DEBUGLEVEL>5) fprintferr(" %ld",k);
     L1 = gcoeff(L,k,k-1);
-    if (typ(L1) == t_REAL && 2*gexpo(L1) > bit_accuracy(lg(L1)))
+    if (typ(L1) == t_REAL && gexpo(L1) + 20 > bit_accuracy(lg(L1)))
     {
       if (DEBUGLEVEL>3)
 	fprintferr("\nRecomputing Gram-Schmidt, kmax = %ld\n", kmax);
@@ -916,14 +917,18 @@ PRECPB:
         for (k1=1; k1<=kmax; k1++)
           if (!incrementalGS(x, L, B, k1)) goto PRECPB;
       }
-      else if (!Householder_get_mu(x, L, B, kmax, prec)) goto PRECPB;
+      else
+      {
+        if (flag == 2) return _vec(h);
+        goto PRECPB;
+      }
     }
     if (k != MARKED)
     {
       if (!gram) RED(k,k-1, x,h,L,KMAX);
       else  RED_gram(k,k-1, x,h,L,KMAX);
     }
-    if (do_SWAP(x,h,L,B,kmax,k,QR,1))
+    if (do_SWAP(x,h,L,B,kmax,k,delta,1))
     {
       if      (MARKED == k)   MARKED = k-1;
       else if (MARKED == k-1) MARKED = k;
@@ -957,19 +962,22 @@ PRECPB:
 }
 
 GEN
-lllgramintern(GEN x, long alpha, long flag, long prec)
+lllgramintern(GEN x, long D, long flag, long prec)
 {
-  return lllfp_marked(0, x,alpha,flag,prec,1);
+  return lllfp_marked(0, x,D,flag,prec,1);
 }
 
 GEN
-lllintern(GEN x, long flag, long prec)
+lllintern(GEN x, long D, long flag, long prec)
 {
-  return lllfp_marked(0, x,LLLDFT,flag,prec,0);
+  return lllfp_marked(0, x,D,flag,prec,0);
 }
 
 GEN
 lllgram(GEN x,long prec) { return lllgramintern(x,LLLDFT,0,prec); }
+
+GEN
+lll(GEN x,long prec) { return lllintern(x,LLLDFT,0,prec); }
 
 GEN
 qflll0(GEN x, long flag, long prec)
@@ -1016,12 +1024,6 @@ gram(GEN b)
       coeff(g,i,j) = coeff(g,j,i) = (long)gscal((GEN)b[i],(GEN)b[j]);
   }
   return g;
-}
-
-GEN
-lll(GEN x,long prec) {
-  gpmem_t av = avma;
-  return gerepileupto(av, lllgram(gram(x), prec));
 }
 
 GEN
@@ -2429,54 +2431,14 @@ pols_for_polred(GEN x, GEN a, GEN *pta,
   return y;
 }
 
-extern GEN make_Cholevsky_T2(GEN bas, GEN ro, long r1);
-extern GEN get_roots(GEN x,long r1,long prec);
-
-static GEN
-get_red_T2(GEN T2, GEN base, GEN x, long r1, long prec)
-{
-  long i;
-  GEN u;
-  for (i=1; ; i++)
-  {
-    if ((u = lllfp_marked(1, T2, 100, 1, prec, 0))) return u;
-    if (i == MAXITERPOL) err(accurer,"red_T2");
-    prec = (prec<<1)-2;
-    if (DEBUGLEVEL) err(warnprec,"red_T2",prec);
-    T2 = make_Cholevsky_T2(base, get_roots(x,r1, prec), r1);
-  }
-}
-
-/* Return the base change matrix giving the an LLL-reduced basis for the
- * integer basis of the nf(x).
- * base = vector of elts in Z[Y]/(x) generating the maximal order
- * polr = roots of x, computed to precision prec */
-GEN
-LLL_nfbasis(GEN x, GEN polr, GEN base, long prec)
-{
-  GEN T2, h;
-  int r1, n = degpol(x);
-
-  if (typ(x) != t_POL || n == 1) return idmat(n); /* nf, or degree 1 */
-
-  if (typ(base) != t_VEC || lg(base)-1 != n)
-    err(talker,"incorrect Zk basis in LLL_nfbasis");
-  if (!prec || (r1 = sturm(x)) == n)
-    return lllint_marked(1, make_T(x, base), 100, 1, &h,NULL,NULL);
-
-  T2 = make_Cholevsky_T2(base, polr? polr: get_roots(x,r1,prec), r1);
-  return get_red_T2(T2, base, x, r1, prec);
-}
-
-/* x can be a polynomial, but also an nf or a bnf */
-/* if check != NULL, return the first polynomial pol
-   found such that check(arg, pol) != 0; return NULL
-   if there are no such pol */
+/* x can be a polynomial, but also an nf, or [pol, integer basis]
+ * if check != NULL, return the first polynomial pol found such that
+ * check(arg, pol) != 0; return NULL if there are no such pol */
 static GEN
 allpolred0(GEN x, GEN *pta, long code, long prec,
 	   int (*check)(void *,GEN), void *arg)
 {
-  GEN y, base = NULL;
+  GEN y, base = NULL, nf = NULL;
   gpmem_t av = avma;
 
   if (typ(x) == t_POL)
@@ -2487,22 +2449,21 @@ allpolred0(GEN x, GEN *pta, long code, long prec,
     if (!gcmp1(leading_term(x)))
       err(impl,"allpolred for nonmonic polynomials");
     base = allbase4(x,code,&p1,NULL); /* p1 is junk */
-    base = gmul(base, LLL_nfbasis(x,NULL,base,prec));
   }
   else
   {
     long i = lg(x);
     if (typ(x) == t_VEC && i==3 && typ(x[1])==t_POL)
     { /* polynomial + integer basis */
-      base=(GEN)x[2]; x=(GEN)x[1];
-      base = gmul(base, LLL_nfbasis(x,NULL,base,prec));
+      base = (GEN)x[2]; x = (GEN)x[1];
     }
     else
     {
-      x = checknf(x);
-      base=(GEN)x[7]; x=(GEN)x[1];
+      nf = checknf(x);
+      base = (GEN)nf[7]; x = (GEN)nf[1];
     }
   }
+  if (!nf) base = gmul(base, LLL_nfbasis(x,NULL,base,prec));
   y = pols_for_polred(x, base, pta, check, arg);
   if (check)
   {
@@ -2646,29 +2607,29 @@ chk_gen_init(FP_chk_fun *chk, GEN nf, GEN gram, GEN mat, long *ptprec)
   x = zerocol(N-1);
   for (i=1; i<N; i++)
   {
-    x[i] = un;
-    P = get_polmin(d,x);
+    B = gcoeff(gram,i,i);
+    if (gcmp(B,bound) >= 0 && skipfirst != i-1) continue;
+
+    x[i] = un; P = get_polmin(d,x);
     x[i] = zero;
     if (degpol(P) == n)
     {
-      B = gcoeff(gram,i,i);
       if (gcmp(B,bound) < 0) bound = B ;
+      continue;
     }
-    else
+
+    if (DEBUGLEVEL>2) fprintferr("chk_gen_init: subfield %Z\n",P);
+    if (skipfirst == i-1)
     {
-      if (DEBUGLEVEL>2) fprintferr("chk_gen_init: subfield %Z\n",P);
-      if (skipfirst == i-1)
+      if (prev && !gegal(prev,P))
       {
-        if (prev && !gegal(prev,P))
-        {
-          if (degpol(prev) * degpol(P) > 32) continue; /* too expensive */
-          P = (GEN)compositum(prev,P)[1];
-          if (degpol(P) == n) continue;
-          if (DEBUGLEVEL>2 && lgef(P)>lgef(prev))
-            fprintferr("chk_gen_init: subfield %Z\n",P);
-        }
-        skipfirst++; prev = P;
+        if (degpol(prev) * degpol(P) > 32) continue; /* too expensive */
+        P = (GEN)compositum(prev,P)[1];
+        if (degpol(P) == n) continue;
+        if (DEBUGLEVEL>2 && lgef(P)>lgef(prev))
+          fprintferr("chk_gen_init: subfield %Z\n",P);
       }
+      skipfirst++; prev = P;
     }
   }
   /* x_1,...,x_skipfirst generate a strict subfield [unless n=skipfirst=1] */
@@ -3464,7 +3425,7 @@ fincke_pohst(GEN a,GEN B0,long stockmax,long flag, long PREC, FP_chk_fun *CHECK)
     if (DEBUGLEVEL>2)
       fprintferr("final LLLs: prec = %ld, precision(rinvtrans) = %ld\n",
                   prec,gprecision(rinvtrans));
-    p1 = lllintern(rinvtrans, flag&1, 0);
+    p1 = lllintern(rinvtrans, 100, flag&1, 0);
     if (!p1) goto PRECPB;
     if (ishnfall(p1)) break; /* upper triangular */
     if (v) v = gmul(v,p1); else v = p1;

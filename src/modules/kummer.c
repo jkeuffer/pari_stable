@@ -789,7 +789,7 @@ reducebeta(GEN bnfz, GEN be)
     nf = nfnewprec(nf,prec);
   }
   z = concatsp(matunit, z);
-  u = lllintern(z, 1, prec);
+  u = lllintern(z, 100, 1, prec);
   if (!u) return reducebetanaive(bnfz,be,emb); /* shouldn't occur */
   ru = lg(u);
   for (j=1; j<ru; j++)
