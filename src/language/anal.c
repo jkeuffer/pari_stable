@@ -1276,7 +1276,7 @@ num_deriv(void *call, GEN argvec[])
   }
   pr = precision(x); ex = gexpo(x);
   if (!pr) pr = prec;
-  pr2 = (long)ceil(pr * 3.)/2;
+  pr2 = (long)ceil(pr * 1.5);
   l = 2+pr2;
   e = pr2 * BITS_IN_HALFULONG;
   if (ex == -HIGHEXPOBIT) ex = 0;
@@ -1301,7 +1301,7 @@ num_derivU(GEN p, GEN *arg, GEN *loc, int narg, int nloc)
   }
   pr = precision(x); ex = gexpo(x);
   if (!pr) pr = prec;
-  pr2 = (long)ceil(pr * 3.)/2;
+  pr2 = (long)ceil(pr * 1.5);
   l = 2+pr2;
   e = pr2 * BITS_IN_HALFULONG;
   if (ex == -HIGHEXPOBIT) ex = 0;
