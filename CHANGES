@@ -33,11 +33,14 @@ Done for version 2.2.0 (released ??/??/????):
   Fixed
 BA  1- gpflog could print some lines twice
     2- return() could forget objects on heap
+    3- polhensellift didn't accept factors which were not squarefree
+    4- Configure missed some shared libraries (when only .so.version was there)
 
   Changed
     1- DOS distribution archives (GPM removed)
-XR  2- round 4 algorithm: compute char. polynomials via Newton sums
+XR  2- round 4 algorithm: compute characteristic polynomials via Newton sums
 XR  3- nffactormod now calls factmod / factmod9 when possible
+XR  4- don't compute discriminant in nffactor/nfroots + better bounds in nfsqff
 
   Added
     1- file README.WIN
