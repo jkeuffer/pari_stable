@@ -2832,7 +2832,8 @@ GEN
 quadhilbertreal(GEN D, GEN flag, long prec)
 {
   VOLATILE gpmem_t av = avma;
-  VOLATILE long newprec, cl;
+  VOLATILE long cl;
+  long newprec;
   VOLATILE GEN pol, bnf, bnr, dataC, bnrh, nf, exp;
   void *catcherr = NULL;
 
