@@ -431,7 +431,11 @@ init_powlist(long k, long p)
   GEN z = new_chunk(k+1);
   long i;
   z[0] = 1; z[1] = (long)p;
-  for (i=1; i<=k; i++) z[i] = p * z[i-1];
+  for (i=1; i<=k; i++)
+  {
+    GEN t = muluu(p, z[i-1]);
+    z[i] = itos(t);
+  }
   return z;
 }
 
