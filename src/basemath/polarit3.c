@@ -1475,22 +1475,21 @@ static GEN fflgen(GEN l, long e, GEN r, GEN T ,GEN p, GEN *zeta)
     pp=VERYBIGINT;
   else
     pp=itos(p);
-  z=(lgef(T)==4)?polun[x]:polx[x];
-
   av1 = avma;
-  for (k=1; ; k++)
+  for (k=0; ; k++)
   {
-    u=k;v=0;
-    while (u%pp==0){u/=pp;v++;}
-    if(!v)
-      z=gadd(z,gun);
-    else
+    z=(lgef(T)==4)?polun[x]:polx[x];
+    u=k/pp;v=2;/*FpX_Fp_add modify y[2]*/
+    z=gaddgs(z, k%pp);
+    while(u)
     {
-      z=gadd(z,gpowgs(polx[x],v));
-      if (DEBUGLEVEL>=6)
-	fprintferr("FF l-Gen:next %Z",z);
+      z=FpX_add(z, monomial(stoi(u%pp),v,x), NULL);
+      u/=pp; v++;
     }
+    if ( DEBUGLEVEL>=6 )
+      fprintferr("FF l-Gen:next %Z\n",z);
     m1 = m = FpXQ_pow(z,r,T,p);
+    if (gcmp1(m)) {avma = av1; continue;}
     for (i=1; i<e; i++)
       if (gcmp1(m=FpXQ_pow(m,l,T,p))) break;
     if (i==e) break;
@@ -1516,7 +1515,7 @@ ffsqrtlmod(GEN a, GEN l, GEN T ,GEN p , GEN q, long e, GEN r, GEN y, GEN m)
   gpmem_t av = avma, lim;
   long i,k;
   GEN p1,p2,u1,u2,v,w,z;
-
+  if(gcmp1(a)) return gcopy(a);
   bezout(r,l,&u1,&u2);
   v=FpXQ_pow(a,u2,T,p);
   w=FpXQ_pow(a,modii(mulii(negi(u1),r),q),T,p);
@@ -1600,7 +1599,9 @@ GEN ffsqrtnmod(GEN a, GEN n, GEN T, GEN p, GEN *zetan)
     {
       l=gcoeff(m,i,1); j=itos(gcoeff(m,i,2));
       e=pvaluation(q,l,&r);
+      if(DEBUGLEVEL>=6) timer2();
       y=fflgen(l,e,r,T,p,&zeta);
+      if(DEBUGLEVEL>=6) msgtimer("fflgen");
       if (zetan) z=FpXQ_mul(z,FpXQ_pow(y,gpowgs(l,e-j),T,p),T,p);
       do
       {
