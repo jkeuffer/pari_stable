@@ -32,10 +32,12 @@ Done for version 2.2.0 (released ??/??/????):
 
   Fixed
 BA  1- gpflog could print some lines twice
+    2- return() could forget objects on heap
 
   Changed
     1- DOS distribution archives (GPM removed)
 XR  2- round 4 algorithm: compute char. polynomials via Newton sums
+XR  3- nffactormod now calls factmod / factmod9 when possible
 
   Added
     1- file README.WIN
