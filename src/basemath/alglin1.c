@@ -3212,7 +3212,7 @@ det(GEN a)
 static GEN
 gaussmoduloall(GEN M, GEN D, GEN Y, GEN *ptu1)
 {
-  pari_sp av = avma, tetpil;
+  pari_sp av = avma;
   long n,m,i,j,lM;
   GEN p1,delta,H,U,u1,u2,x;
 

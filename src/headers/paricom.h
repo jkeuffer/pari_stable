@@ -304,10 +304,6 @@ extern int new_galois_format;
 
 #define leadingcoeff(x) (pollead((x),-1))
 #define lift_intern(x) (lift_intern0((x),-1))
-
-#define idealmullll(nf,x,y) (idealoplll(idealmul,(nf),(x),(y)))
-#define idealdivlll(nf,x,y) (idealoplll(idealdiv,(nf),(x),(y)))
-
 #define invmat(a) (gauss((a),NULL))
 
 #define element_divmodideal(nf,x,y,ideal) (\
