@@ -275,7 +275,8 @@ if test "$fastread" != yes; then
 Currently supported architectures:
 EOM
   rep='none sparcv7 sparcv8_super sparcv8_micro sparcv9
-       m68k ix86 i386 i486 i586 i686 hppa alpha mips fx2800'
+       m68k ix86 i386 i486 i586 i686 alpha arm fx2800 hppa ia64 mips 
+       ppc s390'
   . ./display
   echo $n ..."Which of these apply, if any ? $c"
   dflt=$arch; . ./myread; arch=$ans
@@ -308,13 +309,17 @@ case "$arch" in
   sparcv9)       asmarch=sparcv8_micro; pretty=UltraSparc ;;
   m68k)          asmarch=$arch;         pretty="MC680x0, x>=2" ;;
   i?86)          asmarch=ix86 ;         pretty=$arch ;;
-  hppa)          asmarch=none ;         pretty=HP
+  ia64)          asmarch=none ;         pretty=ia64 ;;
+  hppa)          asmarch=none ;         pretty="HP Precision"
         case "$osname-`uname -r`" in
         hpux-?.10.*)  asmarch=$arch ;;
         esac ;;
   alpha)         asmarch=$arch;         pretty=Alpha ;;
+  arm*)          asmarch=none;          pretty=$arch ;;
   mips)          asmarch=none;          pretty=Mips ;;
   fx2800)        asmarch=none;          pretty="Alliant FX/2800" ;;
+  ppc)           asmarch=none;          pretty="Power PC" ;;
+  s390)          asmarch=none;          pretty="S/390" ;;
   none)          asmarch=none;          pretty="unknown" ;;
   *)             asmarch=none;          pretty=$arch
                  echo "        Warning ! architecture $arch not tested";;
