@@ -2260,7 +2260,7 @@ main(int argc, char **argv)
     for ( ; *s; s++) { read0(*s); free(*s); }
     bufindex = b; chrono=c; pariecho=e; logfile=l; free(flist);
   }
-  gptimer(); timer2();
+  (void)gptimer(); (void)timer(); (void)timer2();
   (void)gp_main_loop();
   gp_quit(); return 0; /* not reached */
 }
