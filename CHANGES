@@ -85,6 +85,7 @@ BA 47- incorrect quoting in src/make_vi_tags (make ctags)
    48- 1/[;] --> error, whereas [;]^-1 --> [;]  [ now, allow 1/[;] ]
    49- ??real  only gave the help on t_REALs, not on real()
    50- eigen: "missing eigenspace" [roundoff pb in ker() compared to exact 0]
+   51- error messages on GP metacommands (\...) indicated wrong context
 
   Changed
     1- DOS distribution archives (GPM removed)
@@ -111,6 +112,7 @@ IZ 16- readline: hit_return() would not work after Esc-H
    21- allow library functions to return NULL to the GP interpreter
    22- let A^-1 and 1/A return a left inverse of A if it exists [A had to be
        square]
+   23- retuned factorization over Z[X] (+ "d-1 test" in naive recombination)
 
   Added
     1- files README.WIN, config/[arch-osname|locatesymbol], doc/tex2mail.1
