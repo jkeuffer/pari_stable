@@ -948,19 +948,22 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   }
 
   vecC = cgetg(rc+1,t_VEC);
-  for (j=1; j<=rc; j++) vecC[j] = lgetg(1, t_MAT);
-  p1 = cgetg(m,t_VEC);
-  p1[1] = (long)idmat(rc);
-  for (j=2; j<=m-1; j++) p1[j] = lmul((GEN)p1[j-1],Tc);
-  p2 = vecB;
-  for (j=1; j<=m-1; j++)
+  if (rc)
   {
-    GEN z = FpM_red(gmulsg((j*d)%ell,(GEN)p1[m-j]), gell);
-    p2 = tauofvec(p2, tau);
-    for (i=1; i<=rc; i++)
-      vecC[i] = (long)famat_mul((GEN)vecC[i], famat_factorback(p2, (GEN)z[i]));
+    for (j=1; j<=rc; j++) vecC[j] = lgetg(1, t_MAT);
+    p1 = cgetg(m,t_VEC);
+    p1[1] = (long)idmat(rc);
+    for (j=2; j<=m-1; j++) p1[j] = lmul((GEN)p1[j-1],Tc);
+    p2 = vecB;
+    for (j=1; j<=m-1; j++)
+    {
+      GEN z = FpM_red(gmulsg((j*d)%ell,(GEN)p1[m-j]), gell);
+      p2 = tauofvec(p2, tau);
+      for (i=1; i<=rc; i++)
+        vecC[i] = (long)famat_mul((GEN)vecC[i], famat_factorback(p2,(GEN)z[i]));
+    }
+    for (i=1; i<=rc; i++) vecC[i] = (long)famat_reduce((GEN)vecC[i]);
   }
-  for (i=1; i<=rc; i++) vecC[i] = (long)famat_reduce((GEN)vecC[i]);
   /* step 5 */
   if (DEBUGLEVEL>2) fprintferr("Step 5\n");
   Tv = cgetg(rv+1,t_MAT);
