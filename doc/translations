@@ -79,19 +79,19 @@ member          @Member functions@2
 ~               @mattranspose
 -               @+
 %               @\%
-++	        @GP operators@2
---	        @GP operators@2
--=	        @GP operators@2
-+=	        @GP operators@2
-*=	        @GP operators@2
-/=	        @GP operators@2
-%=	        @GP operators@2
-\/=	        @GP operators@2
->>=	        @GP operators@2
-<<=	        @GP operators@2
-==	        @GP operators@2
-!=	        @GP operators@2
-<>	        @GP operators@2
+++              @GP operators@2
+--              @GP operators@2
+-=              @GP operators@2
++=              @GP operators@2
+*=              @GP operators@2
+/=              @GP operators@2
+%=              @GP operators@2
+\/=             @GP operators@2
+>>=             @GP operators@2
+<<=             @GP operators@2
+==              @GP operators@2
+!=              @GP operators@2
+<>              @GP operators@2
 +/-             @+$/$-
 min             @max
 >>              @shift
