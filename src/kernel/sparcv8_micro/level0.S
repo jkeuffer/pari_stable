@@ -42,6 +42,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 	.align	4
 C(tabshi): .word	4,3,2,2,1,1,1,1,0,0,0,0,0,0,0,0
 
+#if   defined(sun)
+	.type C(tabshi),#object
+	.size C(tabshi),64
+#endif
+	
 	.seg "text"
 #elif defined(NeXT)
 .data
@@ -101,3 +106,9 @@ C(divll): sethi	%hi(C(hiremainder)),%o4
 1:	subcc	%o3,%o5,%o2
 	retl
 	st	%o2,[%o4+%lo(C(hiremainder))]
+
+
+#if   defined(sun)
+	.type C(bfffo),#function
+	.type C(divll),#function
+#endif

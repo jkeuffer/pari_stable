@@ -15,6 +15,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /* The following symbols are defined in this file: bfffo (& tabshi) */
 
+#if   defined(sun)
+      .type C(tabshi),#object
+      .size C(tabshi),64
+#endif
+
 #if   defined(sun) || defined(linux)
 	.seg	"data"
 	.align	4
@@ -69,3 +74,7 @@ C(bfffo): sethi	%hi(65535),%o2
 	ld	[%o3+%o2],%o0
 	retl
 	add	%o1,%o0,%o0
+
+#if   defined(sun)
+      .type C(bfffo),#function
+#endif

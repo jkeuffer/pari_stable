@@ -48,6 +48,8 @@ Done for version 2.2.8 (released ??/??/2004):
        --> SEGV ( typo in FpXQX_from_Kronecker )
     4- make -j4 bench could start the bench before the binary was built
     5- matkerint had stopped working [from 2.2.7]
+GN  6- [Solaris + cc:] fix linker warnings (missing object types in
+       src/kernel/*.S)
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.

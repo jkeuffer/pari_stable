@@ -93,12 +93,31 @@ C(addmul): umul	%o0,%o1,%o0
 	addx	%g0,%o4,%o4
 	retl
 	st	%o4,[%o3+%lo(C(hiremainder))]
+
 	
+#if   defined(sun)
+	.type C(addll),#function
+	.type C(subll),#function
+	.type C(addllx),#function
+	.type C(subllx),#function
+	.type C(shiftl),#function
+	.type C(shiftlr),#function
+	.type C(mulll),#function
+	.type C(addmul),#function
+#endif
+
 #if   defined(sun) || defined(linux)
 	.seg	"bss"
 	.align	4
 C(hiremainder): .skip  4
 C(overflow): .skip  4
+#if   defined(sun)
+	.type C(hiremainder),#object
+	.type C(overflow),#object
+	.size C(hiremainder),4
+	.size C(overflow),4
+#endif
+	
 #elif defined(NeXT)
 	.comm C(overflow),8
 	.comm C(hiremainder),8
