@@ -5,7 +5,7 @@
 ? sum(x=1,25,sum(y=1,100,x/y),0.0);
 ? sum(x=1,100,sum(y=1,100,x/y,0.0));
 ? getheap
-[5, 51]
+[5, 50]
 ? print("Total time spent: ",gettime);
-Total time spent: 120
+Total time spent: 130
 ? \q
