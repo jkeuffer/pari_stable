@@ -814,126 +814,126 @@ red_pol_mod_units(GEN bnf, GEN x, GEN mat, GEN C, long prec)
 }
 #endif
 
+static GEN
+split_realimag(GEN z, long r1, long r2)
+{
+  long i, ru = r1+r2;
+  GEN a, x = cgetg(ru+r2+1,t_COL), y = x + r2;
+  for (i=1; i<=r1; i++) { a = (GEN)z[i]; x[i] = lreal(a); }
+  for (   ; i<=ru; i++) { a = (GEN)z[i]; x[i] = lreal(a); y[i] = limag(a); }
+  return x;
+}
+
+/* assume x = (r1+r2) x (r1+2r2) matrix and y compatible vector 
+ * r1 first lines of x,y are real. Solve the system obtained by splitting
+ * real and imaginary parts.
+ */
+static GEN
+gauss_realimag(GEN x, GEN y)
+{
+  long i, l = lg(x), r2 = l - lg(x[1]), r1 = l-1 - 2*r2;
+  GEN x2 = cgetg(l, t_MAT);
+  for (i=1; i<l; i++) x2[i] = (long)split_realimag((GEN)x[i], r1, r2);
+  return gauss(x2, split_realimag(y,r1,r2));
+}
+
 /* assume x in HNF */
 static GEN
 isprincipalall0(GEN bnf, GEN x, long *ptprec, long flall)
 {
-  long i,j,colW,colB,N,R1,R2,RU,e,c, prec = *ptprec;
-  GEN xar,xalpha,yalpha,u2,y,p1,p2,p3,p4,gen,cyc,u1inv,xc,ex;
+  long i,lW,lB,N,R1,RU,e,c, prec = *ptprec;
+  GEN xar,Wex,Bex,u2,y,p1,p2,gen,cyc,u1inv,xc,ex,M,clorig,s,d,col;
   GEN W       = (GEN)bnf[1];
   GEN B       = (GEN)bnf[2];
   GEN matunit = (GEN)bnf[3];
+  GEN WB_C    = (GEN)bnf[4];
   GEN vperm   = (GEN)bnf[6];
   GEN nf      = (GEN)bnf[7];
   GEN RES     = (GEN)bnf[8];
   GEN clg2    = (GEN)bnf[9];
 
-  vectbase = (GEN)bnf[5]; /* needed by factorgensimple */
-
-  N=lgef(nf[1])-3;
-  R1=itos(gmael(nf,2,1)); R2=(N-R1)>>1; RU=R1+R2;
-  xc = content(x); if (!gcmp1(xc)) x=gdiv(x,xc);
-
-  colW=lg(W)-1; colB=lg(B)-1;
-  xar = zerovec(RU);
-  p1 = split_ideal(nf,x,xar,prec,vperm);
-  if (p1 != xar) xar = cleancol(p1,N,prec);
-
-  xalpha=cgetg(colW+1,t_COL); for (i=1; i<=colW; i++) xalpha[i]=zero;
-  yalpha=cgetg(colB+1,t_COL); for (i=1; i<=colB; i++) yalpha[i]=zero;
-  get_split_expo(xalpha,yalpha,vperm);
-
-  u1inv= (GEN)clg2[1]; /* 1/u1, we have u1*W*u2=diag(cyc_i) */
-  u2   = (GEN)clg2[2];
-  cyc = gmael(RES,1,2);
+  M = gmael(nf,5,1);
+  u1inv = (GEN)clg2[1]; /* 1/u1, we have u1*W*u2=diag(cyc_i) */
+  u2    = (GEN)clg2[2];
+  clorig= (GEN)clg2[3];
+  cyc = gmael(RES,1,2); c = lg(cyc)-1;
   gen = gmael(RES,1,3);
 
-  /* p1 unused otherwise */
-  if (colW) p1 = gauss(u1inv, gsub(xalpha, gmul(B,yalpha)));
-  p4 = cgetg(colW+colB+1,t_COL); c = lg(cyc)-1;
+  vectbase = (GEN)bnf[5]; /* needed by factorgensimple */
+
+  N = lgef(nf[1])-3;
+  R1 = itos(gmael(nf,2,1)); RU = (N+R1)>>1;
+  xc = content(x); if (!gcmp1(xc)) x = gdiv(x,xc);
+
+  /* factor x */
+  xar = split_ideal(nf,x,zerovec(RU),prec,vperm);
+  lW = lg(W)-1; Wex = zerocol(lW);
+  lB = lg(B)-1; Bex = zerocol(lB); get_split_expo(Wex,Bex,vperm);
+
   ex = cgetg(c+1,t_COL);
+  p1 = NULL; /* gcc -Wall */
+  if (c) p1 = gauss(u1inv, gsub(Wex, gmul(B,Bex)));
   for (i=1; i<=c; i++)
-    p4[i] = (long)truedvmdii((GEN)p1[i],(GEN)cyc[i],(GEN*)(ex+i));
+    p1[i] = (long)truedvmdii((GEN)p1[i],(GEN)cyc[i],(GEN*)(ex+i));
   if (!(flall & nf_GEN)) return gcopy(ex);
 
-{
-  GEN col, baseclorig = (GEN)clg2[3];
-  GEN M=gmael(nf,5,1), M2,s,s2;
-  GEN Bc = dummycopy((GEN)bnf[4]);
-
-  for (; i<=colW; i++) p4[i]=p1[i];
-  for (; i<=colW+colB; i++) p4[i]=yalpha[i-colW];
-  p2=cgetg(colW+1,t_MAT);
-  for (i=1; i<=colW; i++) p2[i]=Bc[i];
-  p3=gmul(p2,u2);
-  for (i=1; i<=colW; i++) Bc[i]=p3[i];
-  settyp(xar,t_COL); col=gsub(gmul(Bc,p4),xar);
-  p4=cgetg(c+1,t_MAT);
-  for (j=1; j<=c; j++)
-  {
-    GEN dmin,pmin,d;
-    pmin = p2 = (GEN)baseclorig[j];
-    dmin = dethnf((GEN)p2[1]);
-    p1 = idealinv(nf,p2);
-    p1[1]=(long)numer((GEN)p1[1]);
-
-    d=dethnf_i((GEN)p1[1]);
-    if (mpcmp(d,dmin) < 0) { pmin=p1; dmin=d; }
-    p1 = ideallllred(nf,p1,NULL,prec);
-    d = dethnf_i((GEN)p1[1]);
-    if (mpcmp(d,dmin) < 0) pmin = p1;
-
-    if (!gegal((GEN)pmin[1], (GEN)gen[j]))
-      err(bugparier,"isprincipal(1)");
-    p4[j]=lneg((GEN)pmin[2]); settyp(p4[j],t_COL);
+  p1 = c? concatsp(gmul(u2,p1), Bex): Bex;
+  if (xar[1] != zero) xar = cleancol(xar,N,prec);
+  settyp(xar,t_COL);
+  col = gsub(gmul(WB_C,p1), xar);
+  settyp(col, t_VEC);
+  for (i=1; i<=c; i++)
+  { /* we may have changed generators in class_group_gen */
+    /* TODO: modify bnfinit: clorig is useless, only its modified
+     * archimedian part should be stored. We shouldn't be recomputing g! */
+    GEN g,z,J;
+    if (!signe(ex[i])) continue;
+    g = (GEN)gen[i];
+    z = (GEN)clorig[i]; J = (GEN)z[1];
+    if (!gegal(g,J))
+    {
+      z = idealinv(nf,z); J = (GEN)z[1];
+      J = gmul(J,denom(J));
+      if (!gegal(g,J))
+      {
+        z = ideallllred(nf,z,NULL,prec); J = (GEN)z[1];
+        if (!gegal(g,J))
+          err(bugparier,"isprincipal (incompatible bnf generators)");
+      }
+    }
+    col = gadd(col, gmul((GEN)z[2], negi((GEN)ex[i])));
   }
-  if (c) col = gadd(col,gmul(p4,ex));
+  settyp(col, t_COL);
   col = cleancol(col,N,prec);
-
   if (RU > 1)
   {
     GEN mat = init_red_mod_units(bnf,&s,prec);
     s = red_mod_units(col,mat,s,prec);
     if (s) col = gadd(col, gmul(matunit, s));
   }
-
-  s2 = gun;
-  for (j=1; j<=c; j++)
-    if (signe(ex[j]))
-      s2 = mulii(s2, powgi(dethnf_i((GEN)gen[j]), (GEN)ex[j]));
-  /* s2 = Norm \prod g[j]^e[j] */
-  s = gdivgs(glog(gdiv(dethnf_i(x),s2),prec), N);
-  p4 = cgetg(N+1,t_COL);
-  for (i=1; i<=R1; i++) p4[i]=lexp(gadd(s,(GEN)col[i]),prec);
-  for (   ; i<=RU; i++)
-  {
-    p4[i]=lexp(gadd(s,gmul2n((GEN)col[i],-1)),prec); ;
-    p4[i+R2]=lconj((GEN)p4[i]);
-  }
-  M2=cgetg(N+1,t_MAT);
-  for (j=1; j<=N; j++)
-  {
-    p1=cgetg(N+1,t_COL); M2[j]=(long)p1;
-    for (i=1; i<=R1; i++) p1[i]=coeff(M,i,j);
-    for (   ; i<=RU; i++)
+  d = s = gun;
+  for (i=1; i<=c; i++)
+    if (signe(ex[i]))
     {
-      p1[i]=coeff(M,i,j);
-      p1[i+R2]=lconj((GEN)p1[i]);
+      p1 = (GEN)gen[i]; p2 = (GEN)ex[i];
+      s = mulii(s, powgi(dethnf_i(p1), p2));
+      d = mulii(d, powgi(gcoeff(p1,1,1), p2));
     }
-  }
-  p1 = gdiv(grndtoi(gmul(s2,greal(gauss(M2,p4))),&e), s2);
+  /* s = Norm \prod gj^ej, denom(alpha) | d */
+  s = gdivgs(glog(gdiv(dethnf_i(x),s),prec), N);
+  for (i=1; i<=R1; i++) col[i] = lexp(gadd(s, (GEN)col[i]),prec);
+  for (   ; i<=RU; i++) col[i] = lexp(gadd(s, gmul2n((GEN)col[i],-1)),prec);
+  /* d.alpha such that x = alpha \prod gj^ej */
+  p1 = grndtoi(gmul(d, gauss_realimag(M,col)),&e);
   if (e < -5)
-  {
-    p3 = p1;
-    if (!c) p3=idealhermite(nf,p3);
-    else
-      for (j=1; j<=c; j++)
-        p3 = idealmul(nf,p3,idealpow(nf,(GEN)gen[j],(GEN)ex[j]));
-    if (!gegal(x,p3)) e=0;
+  { /* check product */
+    p1 = p2 = gdiv(p1, d);
+    if (!c) p2 = idealhermite(nf,p2);
+    for (i=1; i<=c; i++)
+      p2 = idealmul(nf,p2,idealpow(nf,(GEN)gen[i],(GEN)ex[i]));
+    if (!gegal(x,p2)) e = 0; /* failure */
   }
-  y=cgetg(4,t_VEC); y[1]=lcopy(ex);
-  if (e < -5) { y[2]=lmul(xc,p1); y[3]=lstoi(-e); }
-  else
+  if (e >= -5)
   {
     *ptprec = prec + (e >> TWOPOTBITS_IN_LONG) + (MEDDEFAULTPREC-2);
     if (flall & nf_FORCE)
@@ -943,10 +943,12 @@ isprincipalall0(GEN bnf, GEN x, long *ptprec, long flall)
       return NULL;
     }
     err(warner,"insufficient precision for generators, not given");
-    y[2]=lgetg(1,t_COL); y[3]=zero;
+    e = 0;
   }
-}
-  return y;
+  y = cgetg(4,t_VEC);
+  y[1] = lcopy(ex);
+  y[2] = e? lmul(xc,p1): lgetg(1,t_COL);
+  y[3] = lstoi(-e); return y;
 }
 
 static GEN
@@ -1817,8 +1819,8 @@ class_group_gen(GEN nf,GEN cyc,GEN clh,GEN u1,GEN u2,GEN vperm,
     { fprintferr("#### Computing class group generators\n"); flusherr(); }
   if (vperm)
   {
-    s = lg(Vbase); Vbase = cgetg(s,t_VEC);
-    for (i=1; i<s; i++) Vbase[i] = vectbase[vperm[i]];
+    Vbase = cgetg(lo,t_VEC);
+    for (i=1; i<lo; i++) Vbase[i] = vectbase[vperm[i]];
   }
   if (typ(cyc) == t_MAT)
   { /* diagonal matrix */
@@ -1861,12 +1863,12 @@ class_group_gen(GEN nf,GEN cyc,GEN clh,GEN u1,GEN u2,GEN vperm,
     J = ideallllred(nf,J,NULL,prec);
     d = dethnf_i(J);
     if (cmpii(d,dmin) < 0) { inv=1; I=J; }
-    basecl[j] = (long)I;
     if (inv)
     {
       u1[j] = lneg((GEN)u1[j]);
       u2[j] = lneg((GEN)u2[j]);
     }
+    basecl[j] = (long)I;
   }
   p1 = cgetg(4,t_VEC);
   p1[1]=(long)clh;
@@ -2243,10 +2245,10 @@ static void
 my_class_group_gen(GEN bnf, GEN *ptcl, GEN *ptcl2)
 {
   GEN nf=(GEN)bnf[7], Vbase=(GEN)bnf[5], vperm=(GEN)bnf[6], *gptr[2];
-  long av = avma, i, lv = lg(Vbase);
+  long av = avma, i, c = lg(bnf[1]);
 
-  vectbase = cgetg(lv, t_VEC);
-  for (i=1; i<lv; i++) vectbase[i] = Vbase[itos((GEN)vperm[i])];
+  vectbase = cgetg(c, t_VEC);
+  for (i=1; i<c; i++) vectbase[i] = Vbase[itos((GEN)vperm[i])];
   classintern(nf,(GEN)bnf[1],ptcl,ptcl2);
   gptr[0]=ptcl; gptr[1]=ptcl2; gerepilemany(av,gptr,2);
 }
