@@ -1,6 +1,6 @@
 /* $Id$
 
-Copyright (C) 2000  The PARI group.
+Copyright (C) 2004  The PARI group.
 
 This file is part of the PARI/GP package.
 
@@ -198,6 +198,7 @@ enum manage_var_t {
 
 #define addis(x,s)  (addsi((s),(x)))
 #define addrs(x,s)  (addsr((s),(x)))
+#define addri(x,s)  (addir((s),(x)))
 #define mulis(x,s)  (mulsi((s),(x)))
 #define muliu(x,s)  (mului((s),(x)))
 #define mulri(x,s)  (mulir((s),(x)))
