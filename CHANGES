@@ -48,12 +48,13 @@ IS 13- function prototypes (missing 'extern')
    15- deficient argument checks: asinh(2*x-1), agm(1,1-x), zetakinit(2*x-1),
        nfnewprec([2*x-1]), thueinit(non-monic or degree 1), lcm(x, 0)
        rnfidealmul(2*x-1,0), galoisfixedfield(2*x-1), qfbnupow(2*x-1, 0),
-       polred([x,x]), bezout(Mod(x,x^2+1),0) : SEGV
+       polred([x,x]), bezout(Mod(x,x^2+1),0), numtoperm(-1,0), polred(nf),
+       idealhnf(nf,y+z) : SEGV
    16- check variable numbers in algtobasis: nfalgtobasis(nfinit(P(y), x))
    17- often printed more digits than were significant [ precision(Pi,20) ]
    18- factorcantor(x^4 - x^3 - 2*x - 1, 3) --> SEGV [typo!]
    19- matsupplement(non-exact entries): fixed zero test (--> |x| < eps)
-
+   20- precision(I*1.) --> +oo (should be realprecision)
 
   Changed
 BA  1- more efficient quadratic Hensel lift
@@ -62,6 +63,9 @@ BA  3- more efficient factorff when pol belongs to Fp[X] (based on Fp_isom)
 
   Added
     1- new library function zerovec
+
+  Removed
+    1- quadrayimagwei, preliminary implementation to quadray(D < 0) 
 
 ===========================================================================
 Done for version 2.0.20.beta (released 07/06/2000):
