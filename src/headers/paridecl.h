@@ -973,6 +973,7 @@ GEN     vandermondeinverse(GEN L, GEN T, GEN den, GEN prep);
 /* gen1.c */
 
 GEN     gadd(GEN x, GEN y);
+GEN     gaddsg(long x, GEN y);
 GEN     gdiv(GEN x, GEN y);
 GEN     gmul(GEN x, GEN y);
 GEN     gsqr(GEN x);
