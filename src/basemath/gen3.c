@@ -1238,7 +1238,12 @@ ginv(GEN x)
     {
       long i,lx = lg(x);
       y = cgetg(lx,t_VECSMALL);
-      for (i=1; i<lx; i++) y[x[i]] = i;
+      for (i=1; i<lx; i++)
+      {
+        long xi=x[i];
+	  if (xi<1 || xi>=lx) err(talker,"incorrect permtuation to inverse");
+        y[xi] = i;
+      }
       return y;
     }
   }
