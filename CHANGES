@@ -183,10 +183,11 @@ IZ 36- cache optimization in initprimes() [ default(primelimit,.) ]
    44- made all GEN macros return signed types [ had inadvertently switched
        to ulong as a side effect of some other change, long ago ]
 BA 45- split kernel Makefiles in MakeLVL0 and MakeLVL1. 
+BA 46- --disable-kernel Configure option replaced by --kernel=none
 
   Added:
     1- [TeXmacs:] contextual completion (<TAB>)
-BA  2- routines ishiftr, gfloor2n
+BA  2- routines ishiftr, gfloor2n, isqrti, randomi
     3- routine random_bits
 BA  4- [Configure:] --builddir flag
 IZ  5- File README.os2
@@ -194,7 +195,8 @@ IZ  5- File README.os2
     7- routines Strexpand(), Strtex()
 IZ  8- detect infinite recursion on OS/2 [as on Unix systems] (cf STACK_CHECK)
 RS  9- routine numbpart()
-BA 10- GMP kernel
+BA 10- GMP kernel 
+BA 11- --kernel Configure option
 
   Removed
     1- macro definition BITS_IN_RANDOM (useless)

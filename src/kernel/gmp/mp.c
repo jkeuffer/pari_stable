@@ -42,30 +42,33 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include <gmp.h>
 
+#ifndef REGISTER_MP_OPERANDS
 ulong overflow;
 ulong hiremainder;
+#endif
 
+void setmontgomerylimit(long n); 
 int pari_kernel_init(void)
 {
   /*Montgomery mult is not supported*/
   setmontgomerylimit(0);
   /*setresiilimit(50);*/
   /* Use gpmalloc instead of malloc */
-  mp_set_memory_functions((void *(*)()) gpmalloc
-		  	,(void *(*)()) gprealloc
-		        ,(void (*)()) free);
+  mp_set_memory_functions((void *(*)(unsigned int)) gpmalloc
+		  	,(void *(*)(void *, unsigned int, unsigned int)) gprealloc
+		        ,NULL);
 
   return 0;
 }
 
-#define LIMBS(x)  ((x)+2)
+#define LIMBS(x)  ((mp_limb_t *)((x)+2))
 #define NLIMBS(x) (lgefint(x)-2)
 
 #ifdef INLINE
 INLINE
 #endif
 void
-xmpn_copy(long *x, long *y, long n)
+xmpn_copy(mp_limb_t *x, mp_limb_t *y, long n)
 {
   while (--n >= 0) x[n]=y[n];
 }
@@ -74,7 +77,7 @@ xmpn_copy(long *x, long *y, long n)
 INLINE
 #endif
 void
-xmpn_mirror(long *x, long n)
+xmpn_mirror(mp_limb_t *x, long n)
 {
   long i;
   for(i=0;i<(n>>1);i++)
@@ -98,16 +101,11 @@ icopy_ef(GEN x, long l)
   return y;
 }
 
-#ifndef REGISTER_MP_OPERANDS
-ulong overflow;
-ulong hiremainder;
-#endif
-
 /* NOTE: arguments of "spec" routines (muliispec, addiispec, etc.) aren't
  * GENs but pairs (long *a, long na) representing a list of digits (in basis
  * BITS_IN_LONG) : a[0], ..., a[na-1]. [ In ordre to facilitate splitting: no
  * need to reintroduce codewords ]
- * Use speci(a,na) to visualize the coresponding GEN.
+ * Use speci(a,na) to visualize the corresponding GEN.
  */
 
 /* z2 := z1[imin..imax].f shifted left sh bits (feeding f from the right) */
@@ -170,7 +168,7 @@ addsispec(long s, GEN x, long nx)
   long lz;
 
   lz = nx+3; zd = cgeti(lz);
-  if (mpn_add_1(LIMBS(zd),x,nx,s))
+  if (mpn_add_1(LIMBS(zd),(mp_limb_t *)x,nx,s))
     zd[lz-1]=1;
   else
     lz--;
@@ -193,7 +191,7 @@ addiispec(GEN x, GEN y, long nx, long ny)
   if (ny == 1) return addsispec(*y,x,nx);
   lz = nx+3; zd = cgeti(lz);
 
-  if (mpn_add(LIMBS(zd),x,nx,y,ny))
+  if (mpn_add(LIMBS(zd),(mp_limb_t *)x,nx,(mp_limb_t *)y,ny))
     zd[lz-1]=1;
   else
     lz--;
@@ -213,7 +211,7 @@ subisspec(GEN x, long s, long nx)
   long lz;
   lz = nx + 2; zd = cgeti(lz);
   
-  mpn_sub_1 (LIMBS(zd), x, nx, s);
+  mpn_sub_1 (LIMBS(zd), (mp_limb_t *)x, nx, s);
   if (! zd[lz - 1]) { --lz; }
 
   zd[1] = evalsigne(1) | evallgefint(lz);
@@ -232,7 +230,7 @@ subiispec(GEN x, GEN y, long nx, long ny)
   if (ny==1) return subisspec(x,*y,nx);
   lz = nx+2; zd = cgeti(lz);
   
-  mpn_sub (LIMBS(zd), x, nx, y, ny);
+  mpn_sub (LIMBS(zd), (mp_limb_t *)x, nx, (mp_limb_t *)y, ny);
   while (lz >= 3 && zd[lz - 1] == 0) { lz--; }
   
   zd[1] = evalsigne(1) | evallgefint(lz);
@@ -941,7 +939,7 @@ mulsispec(long x, GEN y, long ny)
 {
   long lz = ny+3;
   GEN z=cgeti(lz);
-  ulong hi = mpn_mul_1 (LIMBS(z), y, ny, x);
+  ulong hi = mpn_mul_1 (LIMBS(z), (mp_limb_t *)y, ny, x);
   if (hi) { z[lz - 1] = hi; } else lz--;
   z[1] = evalsigne(1) | evallgefint(lz);
   return z;
@@ -1029,12 +1027,12 @@ GEN
 quickmulii(GEN x, GEN y, long nx, long ny)
 {
   GEN z;
-  xmpn_mirror(x,nx);
-  if (x!=y) xmpn_mirror(y,ny);
+  xmpn_mirror((mp_limb_t *)x,nx);
+  if (x!=y) xmpn_mirror((mp_limb_t *)y,ny);
   z=muliispec(x, y, nx, ny);
   xmpn_mirror(LIMBS(z),NLIMBS(z));
-  xmpn_mirror(x,nx);
-  if (x!=y) xmpn_mirror(y,ny);
+  xmpn_mirror((mp_limb_t *)x,nx);
+  if (x!=y) xmpn_mirror((mp_limb_t *)y,ny);
   return z;
 }
 
@@ -2171,7 +2169,7 @@ muliispec(GEN x, GEN y, long nx, long ny)
     
   lz = nx+ny+2;
   zd = cgeti(lz);
-  hi = mpn_mul(LIMBS(zd), x, nx, y, ny);
+  hi = mpn_mul(LIMBS(zd), (mp_limb_t *)x, nx, (mp_limb_t *)y, ny);
   if (!hi) lz--;
   /*else zd[lz-1]=hi; GH tell me it is not neccessary.*/
 
@@ -2193,7 +2191,7 @@ sqrispec(GEN x, long nx)
     
   lz = (nx<<1)+2;
   zd = cgeti(lz);
-  mpn_mul_n(LIMBS(zd), x, x, nx);
+  mpn_mul_n(LIMBS(zd), (mp_limb_t *)x, (mp_limb_t *)x, nx);
   if (zd[lz-1]==0) lz--;
 
   zd[1] = evalsigne(1) | evallgefint(lz);
