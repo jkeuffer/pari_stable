@@ -299,19 +299,25 @@ affsi(long s, GEN x)
 }
 
 INLINE void
-affsr(long s, GEN x)
+affsr(long x, GEN y)
 {
-  long l;
+  long sh, i, ly = lg(y);
 
-  if (!s)
+  if (!x)
   {
-    x[1] = evalexpo(-bit_accuracy(lg(x)));
+    y[1] = evalexpo(-bit_accuracy(ly));
     return;
   }
-  if (s<0) { x[1] = evalsigne(-1); s = -s; }
-  else x[1] = evalsigne(1);
-  l=bfffo(s); x[1] |= evalexpo((BITS_IN_LONG-1)-l);
-  x[2] = s<<l; for (l=3; l<lg(x); l++) x[l]=0;
+  if (x < 0) {
+    x = -x; sh = bfffo(x);
+    y[1] = evalsigne(-1) | evalexpo((BITS_IN_LONG-1)-sh);
+  }
+  else
+  {
+    sh = bfffo(x);
+    y[1] = evalsigne(1) | evalexpo((BITS_IN_LONG-1)-sh);
+  }
+  y[2] = x<<sh; for (i=3; i<ly; i++) y[i]=0;
 }
 
 INLINE void
