@@ -408,7 +408,7 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
 
   lp = lg(listpr);
   /* sqf = squarefree kernel of f */
-  sqf = lp == 2? NULL: prime_to_ideal(nf, listpr[1]);
+  sqf = lp <= 2? NULL: prime_to_ideal(nf, listpr[1]);
   for (i=2; i<lp; i++) sqf = idealmulprime(nf,sqf, listpr[i]);
 
   vecinvpi = (GEN*)cgetg(lp, t_VEC);
