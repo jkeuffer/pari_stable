@@ -1726,7 +1726,7 @@ main()
   GEN x;
 
   /*@Ccom take a stack of $10^6$ bytes, no prime table */
-  pari_init(1000000,2);
+  pari_init(1000000, 2);
   printf("precision of the computation in decimal digits:\n");
   d = itos(lisGEN(stdin));
   if (d > 0) prec = (long) (d*pariK1+3);
@@ -1734,7 +1734,7 @@ main()
   printf("input your matrix in GP format:\n");
   x = matexp(lisGEN(stdin), prec);
 
-  sor(x,'g',d,0);
+  sor(x, 'g', d, 0);
   exit(0);
 }@eprog
 \noindent

@@ -370,6 +370,7 @@ undefined\on@line}}
   \ttverb}
 
 % complete verbatim (including _ and $)
+\def\bprogfile#1{\bprog\input#1\eprog}
 \def\bprog{\bprogpart\catcode`\_=12\catcode`\$=12}
 \def\eprog{\endgroup\par}
 {\obeylines
