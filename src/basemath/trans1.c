@@ -505,11 +505,12 @@ pow_monome(GEN x, GEN N)
   {
     LOCAL_HIREMAINDER;
     d = (long)mulll((ulong)dx, (ulong)n);
-    if (hiremainder || ((d+3) & ~LGBITS))
-      err(talker,"degree overflow in pow_monome");
+    if (hiremainder || (d &~ LGBITS)) d = LGBITS; /* overflow */
     d += 2;
   }
-  else d = dx*n + 2;
+  else 
+    d = dx*n + 2;
+  if ((d + 1) & ~LGBITS) err(talker,"degree overflow in pow_monome");
   A = cgetg(d+1, t_POL); A[1] = x[1];
   for (i=2; i < d; i++) A[i] = zero;
   b = gpowgs((GEN)x[dx+2], n); /* not memory clean if (n < 0) */
