@@ -2855,8 +2855,7 @@ extract_full_lattice(GEN x)
 
   if (l < 200) return NULL; /* not worth it */
 
-  v = cgetg(l, t_VECSMALL);
-  setlg(v, 1);
+  v = cget1(l, t_VECSMALL);
   H = hnfall_i(x, NULL, 1);
   h = cgetg(1, t_MAT);
   dj = 1;
@@ -2872,14 +2871,14 @@ extract_full_lattice(GEN x)
     { /* these dj columns can be eliminated */
       avma = av; setlg(v, lv);
       j += dj;
-      if (j >= l) break; /* shouldn't occur */
+      if (j >= l) break;
       dj <<= 1;
-      if (j + dj >= l) dj = (l - j) >> 1;
+      if (j + dj >= l) { dj = (l - j) >> 1; if (!dj) dj = 1; }
     }
     else if (dj > 1)
     { /* at least one interesting column, try with first half of this set */
       avma = av; setlg(v, lv);
-      dj >>= 1;
+      dj >>= 1; /* > 0 */
     }
     else
     { /* this column should be kept */
