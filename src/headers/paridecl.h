@@ -1,6 +1,6 @@
 /* $Id$
 
-Copyright (C) 2000  The PARI group.
+Copyright (C) 2000-2003  The PARI group.
 
 This file is part of the PARI/GP package.
 
@@ -1156,7 +1156,10 @@ void    bitvec_set(GEN bitvec, long b);
 void    bitvec_clear(GEN bitvec, long b);
 GEN     cyclicperm(long l, long d);
 GEN     cyc_powtoperm(GEN cyc, long exp);
+GEN     group_abelianHNF(GEN G, GEN L);
+GEN     group_abelianSNF(GEN G, GEN L);
 GEN     group_elts(GEN G, long n);
+GEN     group_export(GEN G, long format);
 long    group_isabelian(GEN G);
 long    group_order(GEN G);
 GEN     group_subgroups(GEN G);
@@ -1164,6 +1167,7 @@ GEN     perm_cycles(GEN v);
 GEN     perm_identity(long l);
 GEN     perm_inv(GEN x);
 GEN     perm_mul(GEN s, GEN t);
+long    perm_order(GEN perm);
 GEN     perm_pow(GEN perm, long exp);
 GEN     vecperm_orbits(GEN v, long n);
 GEN     vecsmall_append(GEN V, long s);

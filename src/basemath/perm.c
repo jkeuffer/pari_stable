@@ -1,6 +1,6 @@
 /* $Id$
 
-Copyright (C) 2000  The PARI group.
+Copyright (C) 2000-2003  The PARI group.
 
 This file is part of the PARI/GP package.
 
@@ -136,7 +136,19 @@ GEN vecsmall_concat(GEN u, GEN v)
     res[i+l1] = v[i];
   return res;
 }
+/* return the number of indices where u and v are equal.
+ */
 
+long
+vecsmall_coincidence(GEN u, GEN v)
+{
+  long l=min(lg(u),lg(v));
+  long i,s=0;
+  for(i=1;i<l;i++)
+    if(u[i]==v[i])
+      s++;
+  return s;
+}
 
 /*************************************************************************/
 /**                                                                     **/
@@ -348,6 +360,33 @@ cyc_powtoperm(GEN cyc, long exp)
   return p;
 }
 
+/*Output the order of p*/
+
+long
+perm_order(GEN p)
+{
+  long l=lg(p)-1;
+  GEN id=perm_identity(l);
+  GEN q=p;
+  long o=1,inc,linc=-1;
+  long k=1;
+  linc=vecsmall_coincidence(p,id);
+  while(linc<l)
+  {
+    q=perm_mul(p,q);  
+    k++; 
+    inc=vecsmall_coincidence(q,id);
+    if(inc>linc)
+    {
+      p=q;
+      o*=k;
+      k=1;
+      linc=inc;
+    }
+  }
+  return o;
+}
+
 /*
  * Compute the power of a permutation.
  * TODO: make it more clever with small exp.
@@ -358,6 +397,56 @@ perm_pow(GEN perm, long exp)
   return cyc_powtoperm(perm_cycles(perm),exp);
 }
 
+GEN 
+perm_to_GAP(GEN p)	  /* genstr */
+{
+  pari_sp ltop=avma;
+  GEN gap;	  /* genstr */
+  GEN x;	  /* vec */
+  long i;
+  long nb=0,c=0;
+  char *s;
+  if (typ(p) != t_VECSMALL)  err(typeer, "perm_to_GAP");
+  x = perm_cycles(p);
+  /*Dry run*/
+  for (i = 1; i < lg(x); ++i)
+  {
+    long j;
+    GEN z = (GEN) x[i];
+    for (j = 1; j < lg(z); ++j)
+    {
+      long n;
+      if (j > 1)
+        nb+=2;
+      for(n=z[j]; n ; n /= 10) 
+        nb++;
+    }
+    nb+=3;
+  }
+  /*Real run*/
+  nb = (nb+2*BYTES_IN_LONG-1) >> TWOPOTBYTES_IN_LONG;
+  gap = cgetg(nb,t_STR);
+  s = (char*)(gap+1);
+  for (i = 1; i < lg(x); ++i)
+  {
+    long j;
+    GEN z = (GEN) x[i];
+    s[c++] = '(';
+    for (j = 1; j < lg(z); ++j)
+    {
+      long n;
+      if (j > 1)
+      {
+        s[c++] = ','; s[c++] = ' ';
+      }
+      for(n = z[j]; n ; n /= 10) 
+        s[c++] = n%10 + '0';
+    }
+    s[c++] = ')';
+  }
+  s[c++]=0;
+  return gerepileupto(ltop,gap);
+}
 /*************************************************************************/
 /**                                                                     **/
 /**                   Routine for handling groups                       **/
@@ -421,6 +510,15 @@ long group_order(GEN G)
   for (i = 1; i < lg(ord); i++) 
     card *= ord[i];
   return card;
+}
+
+/* G being a subgroup of S_n, output n
+ */
+long group_domain(GEN G)
+{
+  if ( lg(G[1]) < 2 )
+    err(talker,"empty group in group_domain");
+  return lg(mael(G,1,1))-1;
 }
 
 /*Compute the left coset of g mod G: gG*/
@@ -516,7 +614,7 @@ GEN group_quotient(GEN G, GEN H)
   GEN p1,p2,p3;
   long i,j,k;
   long a=1;
-  long n=lg(mael(G,1,1))-1;
+  long n=group_domain(G);
   long o=group_order(H);
   GEN elt = vecvecsmall_sort(group_elts(G,n));
   GEN used = bitvec_alloc(lg(elt));
@@ -683,6 +781,19 @@ static GEN liftsubgroup(GEN C, GEN H, GEN S)
   }
   return gerepilecopy(ltop,V);
 }
+/* 1:A4 2:S4 0: other */
+long
+group_isA4S4(GEN G)
+{
+  GEN ord=(GEN)G[2];
+  long n = lg(ord);
+  if (n!=4 && n!=5) return 0;
+  if (ord[1]!=2 || ord[2]!=2 || ord[3]!=3)
+    return 0;
+  if (n==4) return 1;
+  if (ord[4]==2) return 2;
+  return 0;
+}
 /* compute all the subgroups of a group G
  */
 GEN group_subgroups(GEN G) 
@@ -699,8 +810,7 @@ GEN group_subgroups(GEN G)
   if (n == 1)
     return trivialsubgroups();
   l = lg(gen[1]);/*now lg(gen)>1*/
-  if ( ( n == 4 || n == 5) && ord[1]==2 && ord[2]==2 && ord[3]==3 
-      && (n == 4 || ord[4]==2) )
+  if (group_isA4S4(G))
   {
     GEN u=perm_mul((GEN) gen[1],(GEN) gen[2]);
     H = dicyclicgroup((GEN) gen[1],(GEN) gen[2],2,2);
@@ -770,13 +880,14 @@ group_isabelian(GEN G)
 
 /*If G is abelian, return its HNF matrix*/
 
-GEN group_abelianHNF(GEN G)
+GEN group_abelianHNF(GEN G, GEN S)
 {
   long i, j;
   long n=lg(G[1]);
-  GEN M,S;
+  GEN M;
   if (!group_isabelian(G)) return NULL;
-  S=group_elts(G,lg(mael(G,1,1)));
+  if (!S)
+    S=group_elts(G,group_domain(G));
   M=cgetg(n,t_MAT);
   for(i=1;i<n;i++)
   {
@@ -804,36 +915,16 @@ GEN group_abelianHNF(GEN G)
   return M;
 }
 
-#if 0
-/* Compute generators for the subgroup of (Z/nZ)* given in HNF. 
- * I apologize for the following spec:
- * If zns=znstar(n) then
- * zn2=gtovecsmall((GEN)zns[2]);
- * zn3=lift((GEN)zns[3]);
- * gen and ord : VECSMALL of length lg(zn3).
- * the result is in gen. 
- * ord contains the relatives orders of the generators.
- */
+/*If G is abelian, return its abstract SNF matrix*/
 
-GEN
-znstar_group(long n, GEN ZN, GEN H)
+GEN group_abelianSNF(GEN G, GEN L)
 {
   pari_sp ltop=avma;
-  int j,h;
-  GEN m=stoi(n);
-  GEN gen;
-  for (j = 1; j < lg(gen); j++)
-  {
-    gen[j] = 1;
-    for (h = 1; h < lg(lss); h++)
-      gen[j] = mulssmod(gen[j], itos(powmodulo((GEN)zn3[h],gmael(lss,j,h),m)),n);
-    ord[j] = zn2[j] / itos(gmael(lss,j,j));
-  }
-  avma=ltop;
-  return gen;
+  GEN S,H=group_abelianHNF(G,L);
+  if (!H) return NULL;
+  S=smithclean(smith(H));
+  return gerepileupto(ltop,S);
 }
-#endif
-
 
 GEN
 abelian_group(GEN v)
@@ -866,3 +957,62 @@ abelian_group(GEN v)
   }
   return G;
 }
+
+
+ 
+GEN 
+group_export_GAP(GEN G)
+{
+  pari_sp ltop=avma;
+  GEN s;
+  long i;
+  long l = lg(G[1]);
+  if (l == 1)
+    return STRtoGENstr("Group(())");
+  s = STRtoGENstr("Group(");
+  for (i = 1; i < l; ++i)
+  {
+    if (i > 1)
+      s = concat(s, STRtoGENstr(", "));
+    s = concat(s, perm_to_GAP(gmael(G,1,i)));
+  }
+  s = concat(s, STRtoGENstr(")"));
+  return gerepileupto(ltop,s);
+}  
+
+GEN 
+group_export_MAGMA(GEN G)
+{
+  pari_sp ltop=avma;
+  GEN s;
+  long i;
+  long l = lg(G[1]);
+  if (l == 1)
+    return STRtoGENstr("PermutationGroup<1|>");
+  s = STRtoGENstr("PermutationGroup<");
+  s = concat(s,stoi(group_domain(G)));
+  s = concat(s,STRtoGENstr("|"));
+  for (i = 1; i < l; ++i)
+  {
+    if (i > 1)
+      s = concat(s, STRtoGENstr(", "));
+    s = concat(s, small_to_vec(gmael(G,1,i)));
+  }
+  s = concat(s, STRtoGENstr(">"));
+  return gerepileupto(ltop,s);
+}  
+
+GEN 
+group_export(GEN G, long format)
+{
+  switch(format)
+  {
+  case 0:
+    return group_export_GAP(G);
+  case 1:
+    return group_export_MAGMA(G);
+  }
+  err(flagerr,"galoisexport");
+  return NULL; /*-Wall*/
+}
+

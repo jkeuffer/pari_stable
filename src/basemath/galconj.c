@@ -1,6 +1,6 @@
 /* $Id$
 
-Copyright (C) 2000  The PARI group.
+Copyright (C) 2000-2003  The PARI group.
 
 This file is part of the PARI/GP package.
 
@@ -3353,69 +3353,36 @@ galoisfixedfield(GEN gal, GEN perm, long flag, long y)
     return gerepile(ltop, lbot, res);
   }
 }
+/* gal being a galois group output the underlying wss group.
+ */
 
-/*return 1 if gal is abelian, else 0*/
-long 
-galoistestabelian(GEN gal)
+GEN
+galois_group(GEN gal)
 {
-  pari_sp ltop=avma;
   GEN G;
-  long test;
   gal = checkgal(gal);
-  G=cgetg(3,t_VEC);
-  G[1]=gal[7];
-  G[2]=gal[8];
-  test=group_isabelian(G);
-  avma=ltop;
-  return test;
+  G = cgetg(3,t_VEC);
+  G[1] = gal[7];
+  G[2] = gal[8];
+  return G;
 }
 
 GEN galoisisabelian(GEN gal, long flag)
 {
-  long i, j;
-  long test, n;
-  GEN M;
-  gal = checkgal(gal);
-  test=galoistestabelian(gal);
-  if (!test) return gzero;
-  if (flag==1)  return gun;
+  pari_sp ltop=avma;
+  GEN G=galois_group(gal);
+  if (!group_isabelian(G)) {avma=ltop;return gzero;}
+  if (flag==1) {avma=ltop;return gun;}
+  if (flag==2) return gerepileupto(ltop,group_abelianSNF(G,(GEN)gal[6]));
   if (flag) err(flagerr,"galoisisabelian");
-  n=lg(gal[7]);
-  M=cgetg(n,t_MAT);
-  for(i=1;i<n;i++)
-  {
-    pari_sp btop;
-    GEN P;
-    long k;
-    M[i]=lgetg(n,t_COL);
-    btop=avma;
-    P=perm_pow(gmael(gal,7,i),mael(gal,8,i));
-    for(j=1;j<lg(gal[6]);j++)
-      if (gegal(P,gmael(gal,6,j)))
-	  break;
-    avma=btop;
-    if (j==lg(gal[6])) err(talker,"wrong argument in galoisisabelian");
-    j--;
-    for(k=1;k<i;k++)
-    {
-      mael(M,i,k)=lstoi(j%mael(gal,8,k));
-      j/=mael(gal,8,k);
-    }  
-    mael(M,i,k++)=lstoi(mael(gal,8,i));
-    for(  ;k<n;k++)
-      mael(M,i,k)=zero;
-  }
-  return M;
+  return gerepileupto(ltop,group_abelianHNF(G,(GEN)gal[6]));
 }
-GEN galoissubgroups(GEN G)
+
+GEN galoissubgroups(GEN gal)
 {
   pari_sp ltop=avma;
-  GEN H;
-  G = checkgal(G);
-  H=cgetg(3,t_VEC);
-  H[1]=G[7];
-  H[2]=G[8];
-  return gerepileupto(ltop,group_subgroups(H));
+  GEN G=galois_group(gal);
+  return gerepileupto(ltop,group_subgroups(G));
 }
 
 GEN galoissubfields(GEN G, long flag, long v)
@@ -3430,3 +3397,10 @@ GEN galoissubfields(GEN G, long flag, long v)
   return gerepileupto(ltop,p3);
 }
 
+GEN
+galoisexport(GEN gal, long format)
+{
+  pari_sp ltop=avma;
+  GEN G=galois_group(gal);
+  return gerepileupto(ltop,group_export(G,format));
+}
