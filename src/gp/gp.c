@@ -1931,7 +1931,7 @@ init_filtre(char *s)
 static int
 get_line_from_file(FILE *file, Buffer *b, char *prompt)
 {
-  int f_flag = prompt? f_REG | f_KEEPCASE: f_REG;
+  int f_flag = prompt? f_REG: f_REG | f_KEEPCASE;
   int wait_for_brace, wait_for_input;
   long len = b->len;
   char *s =  b->buf;
