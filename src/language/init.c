@@ -1600,7 +1600,10 @@ geni(void) { return gi; }
  * code: describe function prototype. NULL = use valence instead.
  * -----
  * Arguments:
- *  I  input position (to be processed with lisexpr or lisseq).
+ *  I  input position (to be processed with lisseq) - a string with a
+ *     sequence of PARI expressions.
+ *  E  input position (to be processed with lisexpr) - a string with a
+ *     PARI expression.
  *  G  GEN
  *  L  long
  *  S  symbol (i.e GP function name)
