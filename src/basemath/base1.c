@@ -148,7 +148,7 @@ checkbid(GEN bid)
 void
 checkprimeid(GEN id)
 {
-  if (typ(id) != t_VEC || lg(id) != 6)
+  if (typ(id) != t_VEC || lg(id) != 6 || typ(id[2]) != t_COL)
     err(talker,"incorrect prime ideal");
 }
 
@@ -1255,7 +1255,7 @@ get_red_G(nfbasic_t *T, GEN *pro)
   long i, prec, extraprec, n = degpol(T->x);
   nffp_t F;
 
-  extraprec = (long) (0.5 * n * sizeof(long) / 8.);
+  extraprec = (long) (0.25 * n * (sizeof(long) / 4));
   prec = DEFAULTPREC + extraprec;
   nffp_init(&F, T, *pro, prec);
   av = avma;
