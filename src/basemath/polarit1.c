@@ -1160,7 +1160,7 @@ RXX_to_RM(GEN v, long n)
   return y;
 }
 
-/* P(X,Y) --> P(Y,X), n-1 is the degree in Y */
+/* P(X,Y) --> P(Y,X), n is an upper bound for deg_Y(P) */
 GEN
 RXY_swap(GEN x, long n, long w)
 {

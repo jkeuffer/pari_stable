@@ -2151,7 +2151,7 @@ gdiv(GEN x, GEN y)
           return signe(x[4])? divpT(x, y)
                             : zeropadic(p, valp(x) - ggval(y,p));
         }
-        case t_PADIC: { GEN Y = (GEN)y[1];
+        case t_INTMOD: { GEN Y = (GEN)y[1];
           z = cgetg(3, t_INTMOD);
           return div_intmod_same(z, Y, ptolift(x, Y), (GEN)y[2]);
         }
