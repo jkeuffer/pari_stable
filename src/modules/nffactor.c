@@ -1,6 +1,6 @@
 /* $Id$
 
-Copyright (C) 2000  The PARI group.
+Copyright (C) 2000-2004  The PARI group.
 
 This file is part of the PARI/GP package.
 
@@ -37,7 +37,6 @@ extern GEN GS_norms(GEN B, long prec);
 extern GEN apply_kummer(GEN nf,GEN pol,GEN e,GEN p);
 extern GEN centermod_i(GEN x, GEN p, GEN ps2);
 extern GEN dim1proj(GEN prh);
-extern GEN hensel_lift_fact(GEN pol, GEN fact, GEN T, GEN p, GEN pev, long e);
 extern GEN initgaloisborne(GEN T, GEN dn, long prec, GEN *ptL, GEN *ptprep, GEN *ptdis);
 extern GEN max_modulus(GEN p, double tau);
 extern GEN mulmat_pol(GEN A, GEN x);

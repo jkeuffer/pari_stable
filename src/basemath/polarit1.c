@@ -1,6 +1,6 @@
 /* $Id$
 
-Copyright (C) 2000  The PARI group.
+Copyright (C) 2000-2004  The PARI group.
 
 This file is part of the PARI/GP package.
 
@@ -1985,7 +1985,6 @@ factorpadic2(GEN f, GEN p, long prec)
 /***********************/
 /*   Using ROUND 4     */
 /***********************/
-extern GEN hensel_lift_fact(GEN pol, GEN Q, GEN T, GEN p, GEN pev, long e);
 extern GEN maxord_i(GEN p, GEN f, long mf, GEN w, long flag);
 
 static int
