@@ -98,6 +98,7 @@ BA  5- Facilities for permutation groups (perm.c).
 BA  6- New functions galoissubgroups, galoisubfields.
 HC  7- Implemented all Bessel functions J, I, N, K, H1, H2, and Bessel functions
        for power series and polynomials.
+HC  8- Implemented PSLQ [preliminary]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.2 (released 10/01/2002):
