@@ -150,7 +150,8 @@ XR 10- new error message "precer" (precision too low in...)
 IZ 12- add error messages (as in err(shier2)) to emacs tag file
    13- add error messages (as in err(shier2)) to vi tag file
 IZ 14- add flag to shift() to enable consistency with 2-complement semantic
-IZ 15- new default 'prompt_cont' for continuation lines
+IZ 15- default 'prompt_cont' for continuation lines
+IZ 16- default 'readline' to switch readline on/off in readline-able binaries
 
   Removed
     1- obsolete functions twototwo, threetotwo, threetotwo2
