@@ -28,6 +28,25 @@ TP = Thomas Papanikolaou
 XR = Xavier Roblot
 YU = Yoshiaki Uchikawa
 ===========================================================================
+Done for version ??? (released ??/??/2000):
+  Fixed
+    1- trap(gdiver2,a,1/0) <C-D> trap(,a,1/0); trap(gdiver2,a,1/0) --> crash
+    2- lllgramintern could change the lattice (after many precision problems)
+XR  3- not enough GC in bezout()
+    4- use hnfmodid in ideallllred  (work mod I \cap Z, not mod N(I))
+IS  5- C++ compilation problem (compl is a C++ operator + casts)
+    6- idealinv( , incorrect type) --> SEGV
+    7- factor(x^2 - 16810110*x + 62994937599000) --> division by 0
+BA  8- Pocklington-Lehmer didn't stop factorisation after sqrt(N)
+
+  Changed
+BA  1- more efficient quadratic Hensel lift
+    2- made ya optional in polinterpolate
+
+  Added
+    1- new library function zerovec
+
+===========================================================================
 Done for version 2.0.20.beta (released 07/06/2000):
   Fixed
     1- gp -p1e -->SEGV
