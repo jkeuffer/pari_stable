@@ -796,7 +796,7 @@ if test -n "$__gnuc__"; then
   OPTFLAGS_dft="-O3 -DGCC_INLINE $WARN_dft"
 
   DBGFLAGS="-g $WARN_dft"
-  PRFFLAGS="-pg"
+  PRFFLAGS="-pg $OPTFLAGS_dft"
   # omit-frame-pointer incompatible with -pg
   case "$optimization" in
     full) OPTFLAGS="$OPTFLAGS_dft -fomit-frame-pointer";;
