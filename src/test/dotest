@@ -66,41 +66,43 @@ for testdata in $testlist; do
   file_in=$testdir/in/$testname
   file_out=$testdir/$bitlen/$testname
   if test ! -r $file_out; then file_out=$testdir/32/$testname; fi
-  if test ! -r $file_in -o ! -r $file_out; then
+  if test ! -r $file_out; then touch $file_out; fi
+  if test ! -r $file_in; then
     wrln "Error! Missing file, can't test $testname"
-  else
-    testmul=${testmul:-1000}
-    wr "* Testing $testname $c"
-    for suf in $SUF; do
-      wr "	for gp-$suf..$c"
-      case "$suf" in
-        exe) file_diff=$testname.dif;;
-	*)   file_diff=$testname-$suf.dif
-	     gp=$execdir/gp-$suf;;
-      esac
-      $gp -q --test < $file_in > $file_test 2>&1
-      diff -c $file_out $file_test > $file_diff
-      pat=`grep "^[-+!] " $file_diff | grep -v "Total time"`
-      time=`tail -2 $file_test | sed -n 's,.*Total time spent: \(.*\),\1,p'`
-      if test -n "$time"; then
-        eval t='$'time$suf
-	if test -n "$exprbug"; then
-	  t=`expr $time \'\*\' $testmul / 1000 + $t`
-	else
-	  t=`expr $time '*' $testmul / 1000 + $t`
-	fi
-        eval time$suf=$t
-      fi
-      if test -z "$pat"; then
-        wr "TIME=$time";
-      else
-        eval BUG$suf=BUG
-        eval files$suf=\"'$'files$suf $file_diff\"
-        wr "BUG [${time:-0}]"
-      fi
-    done
-    wrln
+    exit 1
   fi
+
+  testmul=${testmul:-1000}
+  wr "* Testing $testname $c"
+  for suf in $SUF; do
+    wr "	for gp-$suf..$c"
+    case "$suf" in
+      exe) file_diff=$testname.dif;;
+      *)   file_diff=$testname-$suf.dif
+           gp=$execdir/gp-$suf;;
+    esac
+    $gp -q --test < $file_in > $file_test 2>&1
+    diff -c $file_out $file_test > $file_diff
+    pat=`grep "^[-+!] " $file_diff | grep -v "Total time"`
+    time=`tail -2 $file_test | sed -n 's,.*Total time spent: \(.*\),\1,p'`
+    if test -n "$time"; then
+      eval t='$'time$suf
+      if test -n "$exprbug"; then
+        t=`expr $time \'\*\' $testmul / 1000 + $t`
+      else
+        t=`expr $time '*' $testmul / 1000 + $t`
+      fi
+      eval time$suf=$t
+    fi
+    if test -z "$pat"; then
+      wr "TIME=$time";
+    else
+      eval BUG$suf=BUG
+      eval files$suf=\"'$'files$suf $file_diff\"
+      wr "BUG [${time:-0}]"
+    fi
+  done
+  wrln
 done
 $RM -f $file_test
 BUG=
