@@ -41,6 +41,8 @@ Done for version 2.2.5 (released ??/11/2002): [hopefully]
     4- typo in var_make_safe() [ protecting user variables after trapped 
        "stack overflow" ] --> possible SEGV
 BA  5- [Configure:] add -lm -lc to EXTRADLLDFLAGS, not DLLDFLAGS
+    6- typo in gp_main_loop [avma not restored properly after allocatemem.
+       Introduced in 2.2.4]
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available
