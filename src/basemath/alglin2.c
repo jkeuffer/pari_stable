@@ -2473,7 +2473,8 @@ hnflll_i(GEN A, GEN *ptB)
   n = lg(A);
   A = ZM_copy(fix_rows(A));
   B = ptB? idmat(n-1): NULL;
-  D = (GEN*)new_chunk(n); lambda = (GEN**) cgetg(n,t_MAT);
+  D = (GEN*)cgetg(n+1,t_VEC); lambda = (GEN**) cgetg(n,t_MAT);
+  D++;
   for (i=0; i<n; i++) D[i] = gun;
   for (i=1; i<n; i++) lambda[i] = (GEN*)zerocol(n-1);
   k = 2;
