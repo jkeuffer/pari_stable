@@ -2346,17 +2346,26 @@ polredabs0(GEN x, long flun, long prec)
   else
     phimax = (flun & nf_ORIG)? polx[0]: (GEN)NULL;
   prec = nfgetprec(nf);
+  x = (GEN)nf[1];
 
-  for (i=1; ; i++)
+  if (lgef(x) == 4)
   {
-    v = fincke_pohst(nf,NULL,5000,3,prec, chk);
-    if (v) break;
-    if (i==MAXITERPOL) err(accurer,"polredabs0");
-    prec = (prec<<1)-2; nf = nfnewprec(nf,prec);
-    if (DEBUGLEVEL) err(warnprec,"polredabs0",prec);
+    y = _vec(polx[varn(x)]);
+    a = _vec(gsub((GEN)y[1], (GEN)x[2]));
   }
-  a = (GEN)v[2];
-  y = (GEN)v[1];
+  else
+  {
+    for (i=1; ; i++)
+    {
+      v = fincke_pohst(nf,NULL,5000,3,prec, chk);
+      if (v) break;
+      if (i==MAXITERPOL) err(accurer,"polredabs0");
+      prec = (prec<<1)-2; nf = nfnewprec(nf,prec);
+      if (DEBUGLEVEL) err(warnprec,"polredabs0",prec);
+    }
+    a = (GEN)v[2];
+    y = (GEN)v[1];
+  }
   nv = lg(a);
   for (i=1; i<nv; i++)
     if (canon_pol((GEN)y[i]) < 0 && phimax)
@@ -2369,11 +2378,10 @@ polredabs0(GEN x, long flun, long prec)
   storepols = (flun & nf_ALL)? storeallpols: findmindisc;
 
   if (DEBUGLEVEL) fprintferr("\n");
-  x = (GEN)nf[1];
   if (nv==1)
   {
-    y = cgetg(2,t_VEC); y[1]=(long)x;
-    a = cgetg(2,t_VEC); a[1]=(long)polx[varn(x)];
+    y = _vec(x);
+    a = _vec(polx[varn(x)]);
   }
   if (varn(y[1]) != varn(x))
   {
