@@ -1817,7 +1817,6 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
     else
     {
       if (DEBUGLEVEL>2) fprintferr("chk_gen_init: subfield %Z\n",P);
-#if 1
       S[i] = dP;
       if (firstprim)
       { /* cycle basis vectors so that primitive elements come last */
@@ -1836,7 +1835,6 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
         R[firstprim] = (long)tR;
         S[firstprim] = tS; firstprim++;
       }
-#endif
     }
   }
 
@@ -1847,9 +1845,9 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
     GEN Mx, M2;
     long j, h, rkM, dP = S[i];
 
-    if (!dP || skipfirst != i-1) continue;
+    if (!dP) break;
     Mx = set_mulid(V, d->ZKembed, inv, r1, r2, N, i);
-    if (!Mx) continue;
+    if (!Mx) break;
     rkM = lg(M)-1;
     for (h = 1; h < dP; h++)
     {
@@ -1864,9 +1862,13 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
       M = image(concatsp(M, M2));
       r = lg(M) - 1;
       if (r == rkM) break;
-      if (r > rkM) rkM = r;
+      if (r > rkM)
+      {
+        rkM = r;
+        if (rkM == N) break;
+      }
     }
-    if (rkM == N) continue;
+    if (rkM == N) break;
 
     /* Q(w[1],...,w[i-1]) is a strict subfield of nf */
     skipfirst++;
