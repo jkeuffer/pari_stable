@@ -8,9 +8,11 @@ case "$name" in
   kernlvl1=`echo "$name" | sed -e 's/.*-\(.*\)/\1/'`
   ;;
   gmp) #Alias for auto-gmp
-  kernlvl0="$arch"; kernlvl1="gmp";;
+  kernlvl0="$arch"; kernlvl1=gmp ;;
+  none) #Alias for none-none
+  kernlvl0=none; kernlvl1=none;;
   *)
-  kernlvl0="$name"; kernlvl1="none";;
+  kernlvl0="$name"; kernlvl1=auto ;;
 esac
 
 if [ "$kernlvl0" = "auto" ]; then

@@ -74,14 +74,18 @@ while test $# -gt 0; do
   --graphic=*|--graphi=*|--graph=*|--grap=*|--gra=*|--gr=*|--g=*)
 	       graph_cmd=yes
 	       which_graphic_lib=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
-  --without-readline) without_readline=yes ;;
+
+  --without-readline|--with-readline=no) without_readline=yes ;;
+  --with-readline) with_readline=yes ;;
   --with-readline=*)
       with_readline=`echo "$1" | sed -e 's/[-a-z]*=//'` ;;
   --with-readline-lib=*)
       with_readline_lib=`echo "$1" | sed -e 's/[-a-z]*=//'` ;;
   --with-readline-include=*)
       with_readline_include=`echo "$1" | sed -e 's/[-a-z]*=//'` ;;
-  --without-gmp) without_gmp=yes ;;
+
+  --without-gmp|--with-gmp=no) without_gmp=yes ;;
+  --with-gmp) with_gmp=yes ;;
   --with-gmp=*)
       with_gmp=`echo "$1" | sed -e 's/[-a-z]*=//'` ;;
   --with-gmp-lib=*)
@@ -126,12 +130,12 @@ Installation directories:
 
 Optional libraries:
   --without-readline          do not link with GNU readline
-  --with-readline=DIR         specify prefix for readline files
+  --with-readline[=DIR]       use GNU readline [prefix for readline files]
   --with-readline-include=DIR specify location of readline headers
   --with-readline-lib=DIR     specify location of readline libs
 
   --without-gmp               use the native kernel instead of GNU MP
-  --with-gmp=DIR              specify prefix for gmp files
+  --with-gmp[=DIR]            use the GMP kernel [prefix for gmp files]
   --with-gmp-include=DIR      specify location of gmp headers
   --with-gmp-lib=DIR          specify location of gmp libs
 

@@ -68,10 +68,9 @@ case "$osname" in
   nextstep|cygwin*|linux|freebsd|os2) pretty="$pretty running $osname";;
 esac
 
+tmp_kern=auto-none
 if test  -n "$kernel"; then
-  tmp_kern=`./kernel-name $kernel $asmarch`
-  kernlvl0=`echo "$tmp_kern" | sed -e 's/\(.*\)-.*/\1/'`
-  kernlvl1=`echo "$tmp_kern" | sed -e 's/.*-\(.*\)/\1/'`
+  tmp_kern=$kernel
 else
   if test "$fastread" != yes; then
   cat << EOM
@@ -85,18 +84,15 @@ EOM
   . ./display
   echo $n ..."Which of these apply, if any ? $c"
   dflt=$asmarch; . ./myread; 
-  tmp_kern=`./kernel-name $ans $asmarch`
-  kernlvl0=`echo "$tmp_kern" | sed -e 's/\(.*\)-.*/\1/'`
-  kernlvl1=`echo "$tmp_kern" | sed -e 's/.*-\(.*\)/\1/'`
+  tmp_kern=$ans
   cat << EOM
 ==========================================================================
 EOM
-  else
-    tmp_kern=`./kernel-name auto $asmarch`
-    kernlvl0=`echo "$tmp_kern" | sed -e 's/\(.*\)-.*/\1/'`
-    kernlvl1=`echo "$tmp_kern" | sed -e 's/.*-\(.*\)/\1/'`
   fi
 fi
+tmp_kern=`./kernel-name $tmp_kern $asmarch`
+kernlvl0=`echo "$tmp_kern" | sed -e 's/\(.*\)-.*/\1/'`
+kernlvl1=`echo "$tmp_kern" | sed -e 's/.*-\(.*\)/\1/'`
 
 case "$kernlvl0" in
   none)          prettyk="C portable";;
