@@ -1181,7 +1181,7 @@ else
 fi
 
 echo $n ..."miscellaneous data (galois resolvents) ? $c"
-dflt=${dfltdatadir:-dfltdat}; . ./myread; datadir=$ans
+dflt=${dfltdatadir:-$dfltdat}; . ./myread; datadir=$ans
 
 if test "$optimization" = debugging; then static=y; fi
 if test "$fastread" != yes; then
