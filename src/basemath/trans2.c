@@ -1394,8 +1394,15 @@ cxgamma(GEN s0, int dolog, long prec)
     y = gadd(p1, glog(y, prec));
     if (typ(y) == t_COMPLEX)
     {
+      long ly; 
       y[2] = (long)red_mod_2z((GEN)y[2], pi);
       if (typ(res) == t_REAL) return gerepilecopy(av, y);
+      ly = lg(y[2]);
+      if (ly < prec)
+      { /* reduction mod 2pi canceled significant words */
+        setlg(res[2], ly);
+        stackdummy((GEN)res[2] + ly, prec - ly - 1);
+      }
     }
   }
   else

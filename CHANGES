@@ -76,6 +76,7 @@ MSo11- various bugs in anal.c: uninitialized reads in get_op_fun(), double_op()
    17- (0. * x) / x --> 0.E-28 * x
    18- content(0.*x) --> 0
    19- nfinit([x^2+1, y]) --> SEGV (bad input)
+   20- lngamma(10^50*I) returned many more digits than were significant
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.
