@@ -89,6 +89,126 @@ gscali(GEN x,GEN y)
   return gerepileuptoint(av,z);
 }
 
+/********************************************************************/
+/**                                                                **/
+/**             QR Factorization via Householder matrices          **/
+/**                                                                **/
+/********************************************************************/
+
+/* zero x[1..k-1] */
+static int
+FindApplyH(GEN x, GEN mu, GEN B, long k, GEN Q, long prec)
+{
+  long i, lx = lg(x)-1, lv = lx - (k-1);
+  GEN v, p1, beta, Nx, x2, x1, xd = x + (k-1);
+
+  x1 = (GEN)xd[1];
+  x2 = gsqr(x1);
+  if (k < lx)
+  {
+    v = cgetg(lv+1, t_VEC);
+    for (i=2; i<=lv; i++) x2 = mpadd(x2, gsqr((GEN)xd[i]));
+    if (gcmp0(x2)) return 0;
+
+    Nx = gsqrt(x2, prec);
+    if (signe(x1) < 0) setsigne(Nx, -1);
+    v[1] = lmpadd(x1, Nx);
+    for (i=2; i<=lv; i++) v[i] = xd[i];
+
+    beta = ginv(mpadd(x2, mpmul(Nx,x1)));
+    p1 = cgetg(3,t_VEC); Q[k] = (long)p1;
+    p1[1] = (long)beta;
+    p1[2] = (long)v;
+
+    coeff(mu,k,k) = lmpneg(Nx);
+  }
+  else
+    coeff(mu,k,k) = x[k];
+  for (i=1; i<k; i++) coeff(mu,k,i) = x[i];
+  B[k] = (long)x2; return 1;
+}
+
+static void
+ApplyH(GEN Q, GEN r)
+{
+  GEN s, rd, beta = (GEN)Q[1], v = (GEN)Q[2];
+  long i, l = lg(v), lr = lg(r);
+
+  rd = r + (lr - l);
+  s = mpmul((GEN)v[1], (GEN)rd[1]);
+  for (i=2; i<l; i++) s = mpadd(s, mpmul((GEN)v[i] ,(GEN)rd[i]));
+  s = mpneg(mpmul(beta, s));
+  for (i=1; i<l; i++) rd[i] = lmpadd((GEN)rd[i], mpmul(s, (GEN)v[i]));
+}
+
+/* compute B[k] = | x[k] |^2, update mu(k, 1..k-1) using Householder matrices
+ * (Q = Householder(x[1..k-1]) in factored form) */
+static int
+incrementalH(GEN x, GEN L, GEN B, GEN Q, long k, long prec)
+{
+  gpmem_t av = avma;
+  GEN r = dummycopy((GEN)x[k]);
+  long j;
+  for (j=1; j<k; j++) ApplyH((GEN)Q[j], r);
+  r = gerepilecopy(av, r);
+  return FindApplyH(r, L, B, k, Q, prec);
+}
+
+/* Q vector of Householder matrices orthogonalizing x[1..j0].
+ * Q[i] = 0 means not computed yet */
+static int
+Householder_get_mu(GEN x, GEN L, GEN B, long k, GEN Q, long prec)
+{
+  GEN Nx, invNx, m;
+  long i, j, j0;
+  if (!Q) Q = zerovec(k);
+  for (j=1; j<=k; j++) 
+    if (typ(Q[j]) == t_INT) break;
+  j0 = j;
+  for (   ; j<=k; j++)
+    if (! incrementalH(x, L, B, Q, j, prec)) return 0;
+  for (j=1; j<=k; j++)
+  {
+    m = (GEN)L[j]; Nx = (GEN)m[j]; /* should set m[j] = un; but need it later */
+    if (j == k) break;
+    invNx = ginv(Nx); 
+    for (i=max(j0, j+1); i<=k; i++) m[i] = lmpmul(invNx, (GEN)m[i]);
+  }
+  return 1;
+}
+
+GEN
+sqred1_from_QR(GEN x, long prec)
+{
+  long j, k = lg(x)-1;
+  GEN L, B = zerovec(k);
+  L = cgetg(k+1, t_MAT);
+  for (j=1; j<=k; j++) L[j] = (long)zerocol(k);
+  if (!Householder_get_mu(x, L, B, k, NULL, prec)) return NULL;
+  for (j=1; j<=k; j++) coeff(L,j,j) = B[j];
+  return gtrans_i(L);
+}
+
+GEN
+R_from_QR(GEN x, long prec)
+{
+  long j, k = lg(x)-1;
+  GEN L, B = zerovec(k), Q = cgetg(k+1, t_VEC);
+  L = cgetg(k+1, t_MAT);
+  for (j=1; j<=k; j++) L[j] = (long)zerocol(k);
+  for (j=1; j<=k; j++)
+    if (!incrementalH(x, L, B, Q, j, prec)) return NULL;
+  return gtrans_i(L);
+}
+
+/********************************************************************/
+/**                                                                **/
+/**                          LLL ALGORITHM                         **/
+/**                                                                **/
+/********************************************************************/
+#define swap(x,y) { long _t=x; x=y; y=_t; }
+#define gswap(x,y) { GEN _t=x; x=y; y=_t; }
+
 static GEN
 lll_trivial(GEN x, long flag)
 {
@@ -144,14 +264,6 @@ lll_finish(GEN h,GEN fl,long flag)
   h += k-1; h[0] = evaltyp(t_MAT) | evallg(l-k+1);
   y[2] = (long)h; return y;
 }
-
-/********************************************************************/
-/**                                                                **/
-/**                          LLL ALGORITHM                         **/
-/**                                                                **/
-/********************************************************************/
-#define swap(x,y) { long _t=x; x=y; y=_t; }
-#define gswap(x,y) { GEN _t=x; x=y; y=_t; }
 
 /* h[,k] += q * h[,l] */
 static void
@@ -756,106 +868,6 @@ lllgramallgen(GEN x, long flag)
   return gerepilecopy(av0, lll_finish(h,fl,flag));
 }
 
-/* zero x[1..k-1] */
-static int
-FindApplyH(GEN x, GEN mu, GEN B, long k, GEN P, long prec)
-{
-  long i, lx = lg(x)-1, lv = lx - (k-1);
-  GEN v, p1, beta, Nx, x2, x1, xd = x + (k-1);
-
-  x1 = (GEN)xd[1];
-  x2 = gsqr(x1);
-  if (k < lx)
-  {
-    v = cgetg(lv+1, t_VEC);
-    for (i=2; i<=lv; i++) x2 = mpadd(x2, gsqr((GEN)xd[i]));
-    if (gcmp0(x2)) return 0;
-
-    Nx = gsqrt(x2, prec);
-    if (signe(x1) < 0) setsigne(Nx, -1);
-    v[1] = lmpadd(x1, Nx);
-    for (i=2; i<=lv; i++) v[i] = xd[i];
-
-    beta = ginv(mpadd(x2, mpmul(Nx,x1)));
-    p1 = cgetg(3,t_VEC); P[k] = (long)p1;
-    p1[1] = (long)beta;
-    p1[2] = (long)v;
-
-    coeff(mu,k,k) = lmpneg(Nx);
-  }
-  else
-    coeff(mu,k,k) = x[k];
-  for (i=1; i<k; i++) coeff(mu,k,i) = x[i];
-  B[k] = (long)x2; return 1;
-}
-
-static void
-ApplyH(GEN P, GEN r)
-{
-  GEN s, rd, beta = (GEN)P[1], v = (GEN)P[2];
-  long i, l = lg(v), lr = lg(r);
-
-  rd = r + (lr - l);
-  s = mpmul((GEN)v[1], (GEN)rd[1]);
-  for (i=2; i<l; i++) s = mpadd(s, mpmul((GEN)v[i] ,(GEN)rd[i]));
-  s = mpneg(mpmul(beta, s));
-  for (i=1; i<l; i++) rd[i] = lmpadd((GEN)rd[i], mpmul(s, (GEN)v[i]));
-}
-
-/* compute B[k] = | x[k] |^2, update mu(k, 1..k-1) using Householder matrices
- * (P = Householder(x[1..k-1]) in factored form) */
-static int
-incrementalH(GEN x, GEN L, GEN B, GEN P, long k, long prec)
-{
-  gpmem_t av = avma;
-  GEN r = dummycopy((GEN)x[k]);
-  long j;
-  for (j=1; j<k; j++) ApplyH((GEN)P[j], r);
-  r = gerepilecopy(av, r);
-  return FindApplyH(r, L, B, k, P, prec);
-}
-
-static int
-Householder_get_mu(GEN x, GEN L, GEN B, long k, long prec)
-{
-  GEN Nx, invNx, m, P = cgetg(k+1, t_VEC);
-  long i, j;
-  for (j=1; j<=k; j++)
-    if (! incrementalH(x, L, B, P, j, prec)) return 0;
-  for (j=1; j<=k; j++)
-  {
-    m = (GEN)L[j]; Nx = (GEN)m[j]; m[j] = un;
-    if (j == k) break;
-    invNx = ginv(Nx); 
-    for (i=j+1; i<=k; i++) m[i] = lmpmul(invNx, (GEN)m[i]);
-  }
-  return 1;
-}
-
-GEN
-sqred1_from_QR(GEN x, long prec)
-{
-  long j, k = lg(x)-1;
-  GEN L, B = zerovec(k);
-  L = cgetg(k+1, t_MAT);
-  for (j=1; j<=k; j++) L[j] = (long)zerocol(k);
-  if (!Householder_get_mu(x, L, B, k, prec)) return NULL;
-  for (j=1; j<=k; j++) coeff(L,j,j) = B[j];
-  return gtrans_i(L);
-}
-
-GEN
-R_from_QR(GEN x, long prec)
-{
-  long j, k = lg(x)-1;
-  GEN L, B = zerovec(k), P = cgetg(k+1, t_VEC);
-  L = cgetg(k+1, t_MAT);
-  for (j=1; j<=k; j++) L[j] = (long)zerocol(k);
-  for (j=1; j<=k; j++)
-    if (!incrementalH(x, L, B, P, j, prec)) return NULL;
-  return gtrans_i(L);
-}
-
 /* compute B[k] = | x[k] |^2, update mu(k, 1..k-1).
  * Classical Gram-Schmidt (unstable!) */
 static int
@@ -885,7 +897,7 @@ incrementalGS(GEN x, GEN mu, GEN B, long k)
 GEN
 lllfp_marked(int MARKED, GEN x, long D, long flag, long prec, int gram)
 {
-  GEN xinit,L,h,B,L1,delta;
+  GEN xinit,L,h,B,L1,delta, Q;
   long retry = 2, lx = lg(x), hx, l, i, j, k, k1, n, kmax, KMAX;
   gpmem_t av0 = avma, av, lim;
 
@@ -925,6 +937,8 @@ lllfp_marked(int MARKED, GEN x, long D, long flag, long prec, int gram)
  /* kmax = maximum column index attained during this run
   * KMAX = same over all runs (after PRECPB) */
   kmax = KMAX = 1;
+
+  Q = zerovec(n);
 
 PRECPB:
   switch(retry--)
@@ -967,7 +981,7 @@ PRECPB:
       kmax = k; if (KMAX < kmax) KMAX = kmax;
       if (DEBUGLEVEL>3) {fprintferr(" K%ld",k);flusherr();}
       if (gram) j = incrementalGS(x, L, B, k);
-      else      j = Householder_get_mu(x, L, B, k, prec);
+      else      j = Householder_get_mu(x, L, B, k, Q, prec);
       if (!j) goto PRECPB;
     }
     else if (DEBUGLEVEL>5) fprintferr(" %ld",k);
@@ -986,11 +1000,12 @@ PRECPB:
       else j = RED_gram(k,k-1, x,h,L,KMAX);
       if (!j) goto PRECPB;
     }
-    if (do_SWAP(x,h,L,B,kmax,k,delta,1))
+    if (do_SWAP(x,h,L,B,kmax,k,delta,gram))
     {
       if      (MARKED == k)   MARKED = k-1;
       else if (MARKED == k-1) MARKED = k;
       if (!B[k]) goto PRECPB;
+      Q[k] = Q[k-1] = zero;
       if (k>2) k--;
     }
     else
@@ -1004,7 +1019,7 @@ PRECPB:
           if (low_stack(lim, stack_lim(av,1)))
           {
             if(DEBUGMEM>1) err(warnmem,"lllfp[1]");
-            gerepileall(av,4,&B,&L,&h,&x);
+            gerepileall(av,5,&B,&L,&h,&x,&Q);
           }
         }
       if (++k > n) break;
@@ -1012,7 +1027,7 @@ PRECPB:
     if (low_stack(lim, stack_lim(av,1)))
     {
       if(DEBUGMEM>1) err(warnmem,"lllfp[2]");
-      gerepileall(av,4,&B,&L,&h,&x);
+      gerepileall(av,5,&B,&L,&h,&x,&Q);
     }
   }
   if (DEBUGLEVEL>3) fprintferr("\n");
