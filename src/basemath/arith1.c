@@ -204,8 +204,8 @@ gener(GEN m)
   if (typ(m) != t_INT) err(arither1);
   e = signe(m);
   if (!e) err(talker,"zero modulus in znprimroot");
-  if (is_pm1(m)) { avma=av; return gmodulss(0,1); }
-  if (e<0) m = absi(m);
+  if (is_pm1(m)) return gmodulss(0,1);
+  if (e < 0) m = absi(m);
 
   e = mod4(m);
   if (e == 0) /* m = 0 mod 4 */
