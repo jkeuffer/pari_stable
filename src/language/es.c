@@ -36,9 +36,9 @@ void
 hit_return()
 {
   char tmp[16];
+  if (under_texmacs || under_emacs) return;
   pariputs("---- (type return to continue) ----");
   do fgets(tmp,16,stdin); while (tmp[strlen(tmp)-1] != '\n');
-  /* \n has to be echoed later if we are under emacs (E. Kowalski) */
   pariputc('\n');
 }
 
@@ -199,28 +199,12 @@ normalErrF(void)
 }
 PariOUT defaultErr = {normalErrC, normalErrS, normalErrF, NULL};
 
-/**                         TEXMACS INTERFACE                      **/
-static void
-texmacs_putc(char c)
-{
-  printf("%cverbatim:%c", DATA_BEGIN,c);
-  printf("%c", DATA_END);
-}
-static void
-texmacs_puts(char *s)
-{
-  printf("%cverbatim:%s", DATA_BEGIN,s);
-  printf("%c", DATA_END); fflush(stdout);
-}
-
-PariOUT texmacsOut = {texmacs_putc, texmacs_puts, normalOutF, NULL};
-
 /**                         GENERIC PRINTING                       **/
 void
 initout(int initerr)
 {
   infile = stdin; pari_outfile = stdout; errfile = stderr;
-  pariOut = under_texmacs? &texmacsOut: &defaultOut;
+  pariOut = &defaultOut;
   if (initerr) pariErr = &defaultErr;
 }
 
@@ -341,7 +325,8 @@ term_width_intern()
 #ifdef HAS_TIOCGWINSZ
   {
     struct winsize s;
-    if (!under_emacs && !ioctl(0, TIOCGWINSZ, &s)) return s.ws_col;
+    if (!under_emacs && !under_texmacs && !ioctl(0, TIOCGWINSZ, &s))
+      return s.ws_col;
   }
 #endif
 #ifdef UNIX
@@ -365,7 +350,8 @@ term_height_intern()
 #ifdef HAS_TIOCGWINSZ
   {
     struct winsize s;
-    if (!under_emacs && !ioctl(0, TIOCGWINSZ, &s)) return s.ws_row;
+    if (!under_emacs && !under_texmacs && !ioctl(0, TIOCGWINSZ, &s))
+      return s.ws_row;
   }
 #endif
 #ifdef UNIX
@@ -1302,7 +1288,11 @@ wr_texnome(GEN a, char *v, long d)
     {
       pariputs(" + \\left("); texi(a,sig); pariputs("\\right) ");
     }
-    if (d) texnome(v,d);
+    if (d)
+    {
+      if (under_texmacs) pariputs("\\*");
+      texnome(v,d);
+    }
   }
 }
 
@@ -1342,7 +1332,11 @@ wr_lead_texnome(GEN a, char *v, long d, long nosign)
     {
       pariputs(" \\left("); texi(a,0); pariputs("\\right) ");
     }
-    if (d) texnome(v,d);
+    if (d)
+    {
+      if (under_texmacs) pariputs("\\*");
+      texnome(v,d);
+    }
   }
 }
 

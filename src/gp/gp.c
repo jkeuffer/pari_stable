@@ -65,6 +65,15 @@ extern void   install0(char *name, char *code, char *gpname, char *lib);
 void   pari_sig_init(void (*f)(int));
 int    whatnow(char *s, int flag);
 
+#if 0 /* to debug TeXmacs interface */
+#define DATA_BEGIN  ((char) 'B')
+#define DATA_END    ((char) 'E')
+#else
+#define DATA_BEGIN  ((char) 2)
+#define DATA_END    ((char) 5)
+#endif
+#define DATA_ESCAPE ((char) 27)
+
 #define MAX_PROMPT_LEN 128
 #define DFT_PROMPT "? "
 #define COMMENTPROMPT "comment> "
@@ -79,6 +88,7 @@ static pariFILE *prettyprinter_file;
 static long prettyp, test_mode, quiet_mode, gpsilent, simplifyflag;
 static long chrono, pariecho, primelimit, parisize, strictmatch;
 static long tglobal, histsize, paribufsize, lim_lines;
+static int tm_is_waiting = 0;
 static gp_format fmt;
 
 typedef struct Buffer {
@@ -1582,11 +1592,10 @@ static void
 texmacs_output(GEN z, long n)
 {
   char *sz = GENtostr0(z, &outtex);
-  printf("%cverbatim:",DATA_BEGIN);
   printf("%clatex:", DATA_BEGIN);
-  printf("\\magenta\\%%%ld = \\blue ", n);
-  printf("%s%c", sz,DATA_END); free(sz);
-  printf("%c",DATA_END); fflush(stdout);
+  printf("\\magenta\\%%%ld = $\\blue ", n);
+  printf("%s$%c", sz,DATA_END); free(sz);
+  fflush(stdout);
 }
 
 /* Wait for prettyprinter for finish, to prevent new prompt from overwriting
@@ -1942,6 +1951,11 @@ get_line_from_file(FILE *file, Buffer *b, char *prompt)
 	len += b->len; fix_buffer(b, n);
 	s = b->buf + l;
       }
+    }
+    if (under_texmacs && file == stdin && !read_more)
+    { /* received an empty line from TeXmacs */
+      printf("%cverbatim:%c", DATA_BEGIN,DATA_END);
+      fflush(stdout);
     }
     if (!fgets(s, len, file)) break;
     if (!read_more && !wait_for_brace)
@@ -2315,7 +2329,19 @@ gp_main_loop(int ismain)
 
     for(;;)
     {
-      int r = read_line(do_prompt(), b);
+      int r;
+      if (tm_is_waiting)
+      {
+        printf("%c", DATA_END);
+        fflush(stdout);
+        tm_is_waiting = 0;
+      } 
+      r = read_line(do_prompt(), b);
+      if (under_texmacs && !tm_is_waiting)
+      {
+        printf("%cverbatim:",DATA_BEGIN);
+        tm_is_waiting = 1;
+      }
       term_color(c_NONE);
       if (!r)
       {
@@ -2605,6 +2631,11 @@ main(int argc, char **argv)
   argc = ccommand(&argv);
 #endif
   flist = read_opt(argc,argv);
+  if (under_texmacs)
+  {
+    printf("%cverbatim:",DATA_BEGIN);
+    tm_is_waiting = 1;
+  }
   pari_addfunctions(&pari_modules, functions_gp,helpmessages_gp);
   pari_addfunctions(&pari_modules, functions_highlevel,helpmessages_highlevel);
   pari_addfunctions(&pari_oldmodules, functions_oldgp,helpmessages_oldgp);
@@ -2630,9 +2661,21 @@ main(int argc, char **argv)
     char **s = flist;
     chrono=0; pariecho=0; logfile=NULL;
     for ( ; *s; s++) { read0(*s); free(*s); }
+    if (tm_is_waiting)
+    {
+      printf("%c",DATA_END);
+      fflush(stdout);
+      tm_is_waiting = 0;
+    }
     chrono=c; pariecho=e; logfile=l; free(flist);
   }
   (void)gptimer(); (void)timer(); (void)timer2();
   (void)gp_main_loop(1);
+  if (tm_is_waiting)
+  {
+    printf("%c",DATA_END);
+    fflush(stdout);
+    tm_is_waiting = 0;
+  }
   gp_quit(); return 0; /* not reached */
 }
