@@ -38,10 +38,10 @@ case "$osname" in
 	dlld_ignore=- ;;
   *)   systems=;;
 esac
+
 #FIXME:
 #This is a kludge to work around the fact that there is two kernels
 #in the sparcv8 directory...
- 
 case "$kernlvl0" in
   sparcv8*) dirlvl0=sparcv8;;
   *) dirlvl0="$kernlvl0";;
@@ -601,7 +601,6 @@ EOT
 #FIXME:
 #This is a kludge to work around the fact that there is two kernels
 #in the sparcv8 directory...
-
 case "$kernlvl0" in
   sparcv8*) dirlvl0=sparcv8;;
   *) dirlvl0=$kernlvl0;;
