@@ -1834,6 +1834,13 @@ repeatedly called on the polynomial's coefficients.
 \fun{GEN}{FlxX_to_ZXX}{GEN B}, converts an \kbd{FlxX} to a polynomial with
 \kbd{ZX} or \typ{INT} coefficients (repeated calls to \kbd{Flx\_to\_ZX}).
 
+\fun{GEN}{FlxV_to_ZXC}{GEN x}, converts a vector of \kbd{Flx} to a column
+vector of polynomials with \typ{INT} coefficients (repeated calls to
+\kbd{Flx\_to\_ZX}).
+
+\fun{GEN}{FlxM_to_ZXM}{GEN z}, converts a matrix of \kbd{Flx} to a matrix of
+polynomials with \typ{INT} coefficients (repeated calls to \kbd{Flx\_to\_ZX}).
+
 \fun{GEN}{zx_to_ZX}{GEN z}, as \kbd{Flx\_to\_ZX}, without assuming
 coefficients are non-negative.
 
@@ -1880,7 +1887,9 @@ Multiply a multiprecision object by a single-precision one.
 
 \fun{GEN}{polx_zx}{long sv} as \kbd{polx\_Flx}
 
-\fun{GEN}{Fl_to_Flx}{ulong x, long sv} converts from scalar to degree~$1$
+\fun{GEN}{Fl_to_Flx}{ulong x, long sv} converts a \kbd{unsigned long} to a scalar \kbd{Flx} in shifted variable $sv$.
+
+\fun{GEN}{Z_to_Flx}{GEN x, ulong p, long v} converts a \typ{INT} to a scalar
 polynomial in variable $v$.
 
 \fun{GEN}{Flx_to_Flv}{GEN x, long n} converts from \kbd{Flx} to \kbd{Flv}

@@ -127,6 +127,26 @@ Flm_to_FlxV(GEN x, long sv)
   return y;
 }
 
+/*FlxV_to_ZXC=zxV_to_ZXC*/
+GEN
+FlxV_to_ZXC(GEN x)
+{
+  long i, l=lg(x);
+  GEN z = cgetg(l,t_COL); 
+  for (i=1; i<l ; i++) z[i] = (long)Flx_to_ZX((GEN)x[i]);
+  return z;
+}
+
+/*FlxM_to_ZXM=zxM_to_ZXM*/
+GEN
+FlxM_to_ZXM(GEN z)
+{
+  long i, l = lg(z);
+  GEN x = cgetg(l,t_MAT);
+  for (i=1; i<l; i++) x[i] = (long)FlxV_to_ZXC((GEN)z[i]);
+  return x;
+}
+
 /***********************************************************************/
 /**                                                                   **/
 /**          Conversion to Flx                                        **/
@@ -165,6 +185,18 @@ Fl_to_Flx(ulong x, long sv)
   z = cgetg(3, t_VECSMALL);
   z[1] = sv;
   z[2] = (long)x; return z;
+}
+
+GEN
+Z_to_Flx(GEN x, ulong p, long v)
+{
+  GEN z;
+  long sv=evalvarn(v);
+  if (!signe(x)) return zero_Flx(sv);
+  z = cgetg(3, t_VECSMALL);
+  z[1] = sv;
+  z[2] = (long) umodiu(x,p); 
+  return z;
 }
 
 /* return x[0 .. dx] mod p as t_VECSMALL. Assume x a t_POL*/
@@ -1451,13 +1483,12 @@ ZXX_to_FlxX(GEN B, ulong p, long v)
   long lb=lg(B);
   long i;
   GEN b=cgetg(lb,t_POL);
-  long vs = evalvarn(v);
   b[1]=evalsigne(1)|(((ulong)B[1])&VARNBITS);
   for (i=2; i<lb; i++) 
     switch (typ(B[i]))
     {
     case t_INT:  
-      b[i] = (long)Fl_to_Flx(umodiu((GEN)B[i], p), vs);
+      b[i] = (long) Z_to_Flx((GEN)B[i], p, v);
       break;
     case t_POL:
       b[i] = (long)ZX_to_Flx((GEN)B[i], p);
