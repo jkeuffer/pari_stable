@@ -496,7 +496,7 @@ GEN
 prodeuler(entree *ep, GEN ga, GEN gb, char *ch, long prec)
 {
   long p[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
-  ulong a,b, *prime = p;
+  ulong a,b, *prime = (ulong*)p;
   pari_sp av, av0 = avma, lim;
   GEN p1,x = realun(prec);
   byteptr d;
@@ -505,7 +505,7 @@ prodeuler(entree *ep, GEN ga, GEN gb, char *ch, long prec)
   d = prime_loop_init(ga,gb, &a,&b, prime);
   if (!d) { avma = av; return x; }
 
-  av = avma; push_val(ep, prime);
+  av = avma; push_val(ep, (GEN)prime);
   lim = stack_lim(avma,1);
   while (prime[2] < b)
   {
@@ -534,7 +534,7 @@ GEN
 direulerall(entree *ep, GEN ga, GEN gb, char *ch, GEN c)
 {
   long pp[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
-  ulong a, b, i, k, n, p, *prime = pp;
+  ulong a, b, i, k, n, p, *prime = (ulong*)pp;
   pari_sp av0 = avma, av, lim = stack_lim(av0, 1);
   long j, tx, lx;
   GEN x, y, s, polnum, polden;
@@ -544,7 +544,7 @@ direulerall(entree *ep, GEN ga, GEN gb, char *ch, GEN c)
   n = c? itou(c): b;
   if (!d || b < 2 || (c && signe(c) < 0)) return _vec(gun);
   if (n < b) b = n;
-  push_val(ep, prime);
+  push_val(ep, (GEN)prime);
 
   y = cgetg(n+1,t_VEC); av = avma;
   x = cgetg(n+1,t_VEC); x[1]=un; for (i=2; i<=n; i++) x[i]=zero;
