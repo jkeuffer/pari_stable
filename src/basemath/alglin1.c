@@ -2573,7 +2573,7 @@ Fq_neg(GEN x, GEN T, GEN p)
 }
 #endif
 
-static GEN
+GEN
 Fq_mul(GEN x, GEN y, GEN T, GEN p)
 {
   switch((typ(x)==t_POL)|((typ(y)==t_POL)<<1))

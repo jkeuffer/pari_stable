@@ -51,6 +51,57 @@ polsym(GEN x, long n)
   return y;
 }
 
+extern GEN Fq_mul(GEN x, GEN y, GEN T, GEN p);
+/* compute Newton sums S_1(P), ... , S_n(P). S_k(P) = sum a_j^k, a_j root of P
+ * If N != NULL, assume p-adic roots and compute mod N [assume integer coeffs]
+ * If T != NULL, compute mod (T,N) [assume integer coeffs and N != NULL]
+ * If y0!= NULL, precomputed i-th powers, i=1..m, m = length(y0) */
+GEN
+polsym_gen(GEN P, GEN y0, long n, GEN T, GEN N)
+{
+  long dP=degpol(P), i, k, m;
+  gpmem_t av1, av2;
+  GEN s,y,P_lead;
+
+  if (n<0) err(impl,"polsym of a negative n");
+  if (typ(P) != t_POL) err(typeer,"polsym");
+  if (!signe(P)) err(zeropoler,"polsym");
+  y = cgetg(n+2,t_COL);
+  if (y0)
+  {
+    if (typ(y0) != t_COL) err(typeer,"polsym_gen");
+    m = lg(y0)-1;
+    for (i=1; i<=m; i++) y[i] = lcopy((GEN)y0[i]);
+  }
+  else
+  {
+    m = 1;
+    y[1] = lstoi(dP);
+  }
+  P += 2; /* strip codewords */
+
+  P_lead=(GEN)P[dP]; if (gcmp1(P_lead)) P_lead=NULL;
+  if (N && P_lead) P_lead = FpXQ_inv(P_lead,T,N);
+  for (k=m; k<=n; k++)
+  {
+    av1=avma; s = (dP>=k)? gmulsg(k,(GEN)P[dP-k]): gzero;
+    for (i=1; i<k && i<=dP; i++)
+      s = gadd(s, gmul((GEN)y[k-i+1],(GEN)P[dP-i]));
+    if (N)
+    {
+      if (T)
+        s = FpX_res(FpX_red(s,N), T, N);
+      else
+        s = modii(s, N);
+      if (P_lead) s = Fq_mul(s, P_lead, T, N);
+    }
+    else
+      if (P_lead) s = gdiv(s,P_lead);
+    av2=avma; y[k+1]=lpile(av1,av2,gneg(s));
+  }
+  return y;
+}
+
 static int (*polcmp_coeff_cmp)(GEN,GEN);
 
 /* assume x and y are polynomials in the same variable whose coeffs can be
@@ -610,7 +661,7 @@ cmbf(GEN target, GEN famod, GEN p, long b, long a,
   GEN lc, lctarget, pa = gpowgs(p,a), pas2 = shifti(pa,-1);
   GEN trace    = cgetg(lfamod+1, t_VECSMALL);
   GEN ind      = cgetg(lfamod+1, t_VECSMALL);
-  GEN degpol      = cgetg(lfamod+1, t_VECSMALL);
+  GEN degpol   = cgetg(lfamod+1, t_VECSMALL);
   GEN degsofar = cgetg(lfamod+1, t_VECSMALL);
   GEN listmod  = cgetg(lfamod+1, t_COL);
   GEN fa       = cgetg(lfamod+1, t_COL);
@@ -817,54 +868,6 @@ END:
     
 /* recombination of modular factors: van Hoeij's algorithm */
 
-/* compute Newton sums of P (i-th powers of roots, i=1..n)
- * If N != NULL, assume p-adic roots and compute mod N [assume integer coeffs]
- * If y0!= NULL, precomputed i-th powers, i=1..m, m = length(y0) */
-GEN
-polsym_gen(GEN P, GEN y0, long n, GEN N)
-{
-  long dP=degpol(P), i, k, m;
-  gpmem_t av1, av2;
-  GEN s,y,P_lead;
-
-  if (n<0) err(impl,"polsym of a negative n");
-  if (typ(P) != t_POL) err(typeer,"polsym");
-  if (!signe(P)) err(zeropoler,"polsym");
-  y = cgetg(n+2,t_COL);
-  if (y0)
-  {
-    if (typ(y0) != t_COL) err(typeer,"polsym_gen");
-    m = lg(y0)-1;
-    for (i=1; i<=m; i++) y[i] = lcopy((GEN)y0[i]);
-  }
-  else
-  {
-    m = 1;
-    y[1] = lstoi(dP);
-  }
-  P += 2; /* strip codewords */
-
-  P_lead=(GEN)P[dP]; if (gcmp1(P_lead)) P_lead=NULL;
-  if (N && P_lead)
-    if (!invmod(P_lead,N,&P_lead))
-      err(talker,"polsyn: non-invertible leading coeff: %Z", P_lead);
-  for (k=m; k<=n; k++)
-  {
-    av1=avma; s = (dP>=k)? gmulsg(k,(GEN)P[dP-k]): gzero;
-    for (i=1; i<k && i<=dP; i++)
-      s = gadd(s, gmul((GEN)y[k-i+1],(GEN)P[dP-i]));
-    if (N)
-    {
-      s = modii(s, N);
-      if (P_lead) { s = mulii(s,P_lead); s = modii(s,N); }
-    }
-    else
-      if (P_lead) s = gdiv(s,P_lead);
-    av2=avma; y[k+1]=lpile(av1,av2,gneg(s));
-  }
-  return y;
-}
-
 /* return integer y such that all roots of P are less than y */
 static GEN
 root_bound(GEN P)
@@ -950,8 +953,8 @@ special_pivot(GEN x)
 }
 
 /* x matrix: compute a bound for | \sum e_i x_i | ^ 2, e_i = 0,1 */
-static GEN
-my_norml2(GEN x)
+GEN
+norml2_spec(GEN x)
 {
   long i,j, co = lg(x), li;
   GEN S = gzero;
@@ -1001,7 +1004,7 @@ extern GEN gauss_intern(GEN a, GEN b);
 GEN
 LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
 {
-  long s = 2; /* # of traces added at each step */
+  const long s = 2; /* # of traces added at each step */
   long BitPerFactor = 3; /* nb bits in p^(a-b) / modular factor */
   long i,j,C,r,S,tmax,n0,n,dP = degpol(P);
   double logp = log(gtodouble(p)), LOGp2 = LOG2/logp;
@@ -1046,7 +1049,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
         av2 = avma;
         r = lg(BL)-1; z = invmat(BL);
       }
-      Nx = gtodouble(my_norml2(gmul(run, z)));
+      Nx = gtodouble(norml2_spec(gmul(run, z)));
       avma = av2;
     }
     else
@@ -1064,13 +1067,13 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
       famod = hensel_lift_fact(P,famod,NULL,p,pa,a);
       /* recompute old Newton sums to new precision */
       for (i=1; i<=n0; i++)
-        TT[i] = (long)polsym_gen((GEN)famod[i], NULL, tmax, pa);
+        TT[i] = (long)polsym_gen((GEN)famod[i], NULL, tmax, NULL, pa);
       did_recompute_famod = 1;
     }
     for (i=1; i<=n0; i++)
     {
       GEN p1 = (GEN)T[i];
-      GEN p2 = polsym_gen((GEN)famod[i], (GEN)TT[i], S, pa);
+      GEN p2 = polsym_gen((GEN)famod[i], (GEN)TT[i], S, NULL, pa);
       TT[i] = (long)p2;
       p2 += 1+tmax; /* ignore traces number 0...tmax */
       for (j=1; j<=s; j++) p1[j] = p2[j];
@@ -1106,22 +1109,18 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
     m = concatsp( vconcat( gscalmat(stoi(C), r), T2 ), BE );
     /*     [  C        0      ]
      * m = [                  ]   square matrix
-     *     [ T2   p^(a-b) I_S ]   T2 = T * BL  truncated
+     *     [ T2   p^(a-b) I_s ]   T2 = T * BL  truncated
      */
     u = lllgramintern(gram_matrix(m), 4, 0, 0);
     m = gmul(m,u);
     (void)gram_schmidt(gmul(run,m), &norm);
     for (i=r+s; i>0; i--)
       if (cmprr((GEN)norm[i], M) < 0) break;
-    if (i > r)
+    if (i > r || (i == r && tmax > 0))
     { /* no progress */
       avma = av2; BitPerFactor += 2;
       if (DEBUGLEVEL>2)
         fprintferr("LLL_cmbf: increasing BitPerFactor = %ld\n", BitPerFactor);
-#if 0
-      s++; for (i=1; i<=n; i++) T[i] = lgetg(s+1, t_COL);
-      if (DEBUGLEVEL>2) fprintferr("LLL_cmbf: increasing s = %ld\n", s);
-#endif
       continue;
     }
 
@@ -3979,7 +3978,8 @@ nfgcd(GEN P, GEN Q, GEN nf, GEN den)
         continue;
       sol = mat_to_polpol(sol,x,y);
       dsol = primpart(sol);
-      if (gcmp0(pseudorem_i(P, dsol, nf)) && gcmp0(pseudorem_i(Q, dsol, nf))) break;
+      if (gcmp0(pseudorem_i(P, dsol, nf))
+       && gcmp0(pseudorem_i(Q, dsol, nf))) break;
     }
   }
   return gerepilecopy(ltop, sol);
