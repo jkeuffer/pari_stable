@@ -7,4 +7,5 @@ Help: type(x,{t}): if t is not present, output the type of the GEN x. Else
  make a copy of x with type t. Use with extreme care, usually with t =
  t_FRACN or t = t_RFRACN). Try \\t for a list of types
 Description:
-  (gen):typ              typ($1)
+ (gen):typ              typ($1)
+
