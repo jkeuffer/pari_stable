@@ -76,8 +76,7 @@ member_zk(GEN x)
     switch(t)
     {
       case typ_CLA: return gmael(x,1,4);
-      case typ_Q: y = cgetg(3,t_VEC);
-        y[1]=un; y[2]=lpolx[varn(x[1])]; return y;
+      case typ_Q: return _vec2(gun, polx[varn(x[1])]);
     }
     member_err("zk");
   }
@@ -383,12 +382,7 @@ member_gen(GEN x)
 {
   int t;
   GEN y = get_primeid(x);
-  if (y)
-  {
-    x = cgetg(3,t_VEC);
-    x[1] = y[1];
-    x[2] = y[2]; return x;
-  }
+  if (y) return _vec2((GEN)y[1], (GEN)y[2]);
   (void)get_nf(x,&t);
   if (t == typ_GAL)
     return (GEN)x[7];
@@ -504,23 +498,17 @@ member_j(GEN x)
 GEN
 member_omega(GEN x)
 {
-  GEN y;
-
   if (!is_bigell(x)) member_err("omega");
   if (gcmp0((GEN)x[19])) err(talker,"curve not defined over R");
-  y=cgetg(3,t_VEC); y[1]=x[15]; y[2]=x[16];
-  return y;
+  return _vec2((GEN)x[15], (GEN)x[16]);
 }
 
 GEN
 member_eta(GEN x)
 {
-  GEN y;
-
   if (!is_bigell(x)) member_err("eta");
   if (gcmp0((GEN)x[19])) err(talker,"curve not defined over R");
-  y=cgetg(3,t_VEC); y[1]=x[17]; y[2]=x[18];
-  return y;
+  return _vec2((GEN)x[17], (GEN)x[18]);
 }
 
 GEN
@@ -534,7 +522,7 @@ member_area(GEN x)
 GEN
 member_tate(GEN x)
 {
-  GEN z = cgetg(3,t_VEC);
+  GEN z = cgetg(4,t_VEC);
   if (!is_bigell(x)) member_err("tate");
   if (!gcmp0((GEN)x[19])) err(talker,"curve not defined over a p-adic field");
   z[1]=x[15];

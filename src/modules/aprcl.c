@@ -919,7 +919,7 @@ step5(Cache **pC, Red *R, int p, GEN et, ulong ltab)
 static GEN
 step6(GEN N, ulong t, GEN et)
 {
-  GEN r, p1, N1 = remii(N, et);
+  GEN r, N1 = remii(N, et);
   ulong i;
   pari_sp av = avma;
 
@@ -928,25 +928,14 @@ step6(GEN N, ulong t, GEN et)
   {
     r = remii(mulii(r,N1), et);
     if (gcmp1(r)) break;
-    if (!signe(remii(N,r)) && !egalii(r,N))
-    {
-      p1 = cgetg(3,t_VEC);
-      p1[1] = (long)r;
-      p1[2] = zero; return p1;
-    }
+    if (!signe(remii(N,r)) && !egalii(r,N)) return _vec2(r, gzero);
     if ((i & 0x1f) == 0) r = gerepileuptoint(av, r);
   }
   return gun;
 }
 
 static GEN
-_res(long a, long b)
-{
-  GEN z;
-  if (b) { z=cgetg(3, t_VEC); z[1]=lstoi(a); z[2]=lstoi(b); }
-  else   { z=cgetg(2, t_VEC); z[1]=lstoi(a); }
-  return z;
-}
+_res(long a, long b) { return b? _vec2s(a, b): _vecs(a); }
 
 GEN
 aprcl(GEN N)

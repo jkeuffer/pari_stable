@@ -155,13 +155,6 @@ rnfmakematrices(GEN rnf)
   z[6] = lgetg(1,t_MAT);
   z[7] = lgetg(1,t_MAT); return z;
 }
-static GEN
-vec2s(long a, long b)
-{
-  GEN z = cgetg(3, t_VEC);
-  z[1] = (long)stoi(a);
-  z[2] = (long)stoi(b); return z;
-}
 
 static GEN
 rnf_roots(GEN nf, GEN pol, long prec, GEN *pts)
@@ -178,13 +171,13 @@ rnf_roots(GEN nf, GEN pol, long prec, GEN *pts)
     long r1j = 0;
     ro = roots(gsubst(pol,v,(GEN)ro[j]), prec);
     while (r1j<n && gcmp0(imag_i((GEN)ro[r1j+1]))) r1j++;
-    s[j] = (long)vec2s(r1j, (n-r1j)>>1);
+    s[j] = (long)_vec2s(r1j, (n-r1j)>>1);
     r[j] = (long)get_roots(ro, r1j, 0);
   }
   for (; j<=r1+r2; j++)
   {
     ro = roots(gsubst(pol,v,(GEN)ro[j]), prec);
-    s[j] = (long)vec2s(0, n);
+    s[j] = (long)_vec2s(0, n);
     r[j] = (long)ro;
   }
   *pts = s; return r;
@@ -681,10 +674,8 @@ rnfidealtwoelement(GEN rnf, GEN x)
   y = rnfidealreltoabs(rnf,x);
   y = algtobasis(NF, y); settyp(y, t_MAT);
   y = ideal_two_elt(NF, hnf(y));
-  z = cgetg(3,t_VEC);
-  z[1] = y[1];
-  z[2] = (long)rnfelementabstorel(rnf, gmul((GEN)NF[7], (GEN)y[2]));
-  return gerepilecopy(av, z);
+  z = rnfelementabstorel(rnf, gmul((GEN)NF[7], (GEN)y[2]));
+  return gerepilecopy(av, _vec2((GEN)y[1], z));
 }
 
 GEN
@@ -700,8 +691,6 @@ rnfidealmul(GEN rnf,GEN x,GEN y) /* x et y sous HNF relative uniquement */
   x2 = (GEN)x[2];
   p1 = gmul((GEN)z[1], (GEN)x[1]);
   p2 = rnfalgtobasis(rnf, gmul((GEN)z[2], x1)); settyp(p2, t_MAT);
-  z = cgetg(3,t_VEC);
-  z[1] = (long)concatsp(p1, p2);
-  z[2] = (long)concatsp(x2, x2);
+  z = _vec2(concatsp(p1, p2), concatsp(x2, x2));
   return gerepileupto(av, nfhermite(nf,z));
 }

@@ -454,17 +454,17 @@ buchrayall(GEN bnf,GEN module,long flag)
   u += RU;
   for (j=1; j<=Ri; j++) { u2[j]=u[j]; setlg(u[j],RU+1); }
  
+  /* log(Units) U2 = H (mod D)
+   * log(Units) U1 = 0 (mod D) */
+  u1 = lllint_ip(u1,100);
+  u2 = gmul(reducemodinvertible(u2,u1), ginv(H));
   y = cgetg(7,t_VEC);
   y[1] = (long)bnf;
   y[2] = (long)bid;
   y[3] = (long)El;
   y[4] = (long)U;
-  y[5] = (long)clg; u = cgetg(3,t_VEC);
-  y[6] = (long)u;
-  /* log(Units) U2 = H (mod D)
-   * log(Units) U1 = 0 (mod D) */
-    u[2] = (long)lllint_ip(u1,100);
-    u[1] = lmul(reducemodinvertible(u2,(GEN)u[2]), ginv(H));
+  y[5] = (long)clg;
+  y[6] = (long)_vec2(u2,u1);
   return gerepilecopy(av,y);
 }
 
@@ -529,13 +529,10 @@ rayclassno(GEN bnf,GEN ideal)
 
 GEN
 quick_isprincipalgen(GEN bnf, GEN x)
-{
-  GEN z = cgetg(3, t_VEC), gen = gmael3(bnf,8,1,3);
-  GEN idep, ep = isprincipal(bnf,x);
-  /* x \prod g[i]^(-ep[i]) = factorisation of principal ideal */
+{ /* x \prod g[i]^(-ep[i]) = factorisation of principal ideal */
+  GEN idep, gen = gmael3(bnf,8,1,3), ep = isprincipal(bnf,x);
   idep = isprincipalfact(bnf, gen, gneg(ep), x, nf_GENMAT|nf_FORCE);
-  z[1] = (long)ep;
-  z[2] = idep[2]; return z;
+  return _vec2(ep, (GEN)idep[2]);
 }
 
 GEN
@@ -1553,10 +1550,9 @@ rnfconductor(GEN bnf, GEN polrel, long flag)
   if (flag && !rnf_is_abelian(nf, pol2)) { avma = av; return gzero; }
 
   pol2 = fix_relative_pol(nf, pol2, 1);
-  module = cgetg(3,t_VEC);
-  module[1] = rnfdiscf(nf,pol2)[1];
   R1 = nf_get_r1(nf); arch = cgetg(R1+1,t_VEC);
-  module[2] = (long)arch; for (i=1; i<=R1; i++) arch[i]=un;
+  for (i=1; i<=R1; i++) arch[i]=un;
+  module = _vec2((GEN)rnfdiscf(nf,pol2)[1], arch);
   bnr   = buchrayall(bnf,module,nf_INIT | nf_GEN);
   group = rnfnormgroup(bnr,pol2);
   if (!group) { avma = av; return gzero; }

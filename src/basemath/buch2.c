@@ -897,12 +897,7 @@ recover_partFB(FB_t *F, GEN Vbase, long N)
 }
 
 static GEN
-init_famat(GEN x)
-{
-  GEN y = cgetg(3, t_VEC);
-  y[1] = (long)x;
-  y[2] = lgetg(1,t_MAT); return y;
-}
+init_famat(GEN x) { return _vec2(x, cgetg(1,t_MAT)); }
 
 /* add v^e to factorization */
 static void
@@ -2480,7 +2475,7 @@ check_and_build_matal(GEN bnf) {
 GEN
 smallbuchinit(GEN pol, double bach, double bach2, long nbrelpid, long prec)
 {
-  GEN y, bnf, nf, res, p1;
+  GEN y, bnf, nf, res;
   pari_sp av = avma;
 
   if (typ(pol)==t_VEC) bnf = checkbnf(pol);
@@ -2503,15 +2498,10 @@ smallbuchinit(GEN pol, double bach, double bach2, long nbrelpid, long prec)
   y[7] = bnf[1];
   y[8] = bnf[2];
   y[9] = (long)codeprimes((GEN)bnf[5], degpol(nf[1]));
-
-  p1 = cgetg(3, t_VEC);
-  p1[1] = mael(res,4,1);
-  p1[2] = (long)algtobasis(bnf,gmael(res,4,2));
-  y[10] = (long)p1;
-
-  y[11] = (long)algtobasis(bnf, (GEN)res[5]);
+  y[10]= (long)_vec2(gmael(res,4,1), algtobasis(bnf,gmael(res,4,2)));
+  y[11]= (long)algtobasis(bnf, (GEN)res[5]);
   (void)check_and_build_matal(bnf);
-  y[12] = bnf[10]; return gerepilecopy(av, y);
+  y[12]= bnf[10]; return gerepilecopy(av, y);
 }
 
 static GEN

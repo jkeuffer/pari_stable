@@ -2789,11 +2789,10 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc)
   long vt, r, d, n, m, i, j;
   pari_sp av = avma;
   GEN Prd, A, I, p, tau, g, matid;
-  GEN modpr, res, h, k, base, nfT, T, gzk, hzk, prinvp, X, pal;
+  GEN modpr, h, k, base, nfT, T, gzk, hzk, prinvp, X, pal;
 
   P = lift(P);
   nf = checknf(nf); nfT = (GEN)nf[1];
-  res = cgetg(4,t_VEC);
   modpr = nf_to_ff_init(nf,&pr, &T, &p);
   tau = gmul((GEN)nf[7], (GEN)pr[5]);
   n = degpol(nfT);
@@ -2814,10 +2813,6 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc)
   k  = FqX_gcd(FqX_gcd(g,h,  T,p), k, T,p);
   d = degpol(k);  /* <= m */
   if (!d) return NULL; /* pr-maximal */
-
-  vt = vdisc - 2*d;
-  res[3] = lstoi(vt);
-  res[1] = vt < 2? un: zero;
 
   A = cgetg(m+d+1,t_MAT);
   I = cgetg(m+d+1,t_VEC); base = _vec2(A, I);
@@ -2843,7 +2838,8 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc)
   base = nfhermitemod(nf,base, gmul(gpowgs(p, m-d),
                                     idealpows(nf, prinvp, d)));
   base[2] = ldiv((GEN)base[2], p); /* cancel the factor p */
-  res[2] = (long)base; return gerepilecopy(av, res);
+  vt = vdisc - 2*d;
+  return gerepilecopy(av, _vec3(vt < 2? gun: gzero, base, stoi(vt)));
 }
 
 /* [L:K] = n, [K:Q] = m */
@@ -3503,16 +3499,11 @@ rnfequation0(GEN A, GEN B, long flall)
   A = get_nfpol(A, &nf);
   C = _rnfequation(A, B, &k, flall? &LPRS: NULL);
   if (flall)
-  {
-    GEN w,a; /* a,b,c root of A,B,C = compositum, c = b + k a */
-    /* invmod possibly very costly */
-    a = gmul((GEN)LPRS[1], QXQ_inv((GEN)LPRS[2], C));
+  { /* a,b,c root of A,B,C = compositum, c = b + k a */
+    GEN a = gmul((GEN)LPRS[1], QXQ_inv((GEN)LPRS[2], C));/* inv is costly !*/
     a = gneg_i(gmod(a, C));
     /* b = gadd(polx[varn(A)], gmulsg(k,a)); */
-    w = cgetg(4,t_VEC); /* [C, a, n ] */
-    w[1] = (long)C;
-    w[2] = (long)to_polmod(a, (GEN)w[1]);
-    w[3] = lstoi(k); C = w;
+    C = _vec3(C, to_polmod(a, C), stoi(k));
   }
   return gerepilecopy(av, C);
 }

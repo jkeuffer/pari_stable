@@ -286,10 +286,7 @@ GEN
 rectcursor(long ne)
 {
   PariRect *e = check_rect_init(ne);
-  GEN z=cgetg(3,t_VEC);
-
-  z[1] = lstoi((long)RXcursor(e)); z[2] = lstoi((long)RYcursor(e));
-  return z;
+  return _vec2s((long)RXcursor(e), (long)RYcursor(e));
 }
 
 static void

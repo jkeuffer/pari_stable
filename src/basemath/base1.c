@@ -358,12 +358,9 @@ roots_to_ZX(GEN z, long *e)
 static GEN
 _res(long n, long s, long k)
 {
-  GEN y = cgetg(4, t_VEC);
-  y[1] = lstoi(n);
-  y[2] = lstoi(s);
   if (!new_galois_format)
     k = ((n == 24 && k == 6) || (n == 6 && k == 2))? 2: 1;
-  y[3] = lstoi(k); return y;
+  return _vec3s(n,s,k);
 }
 
 GEN
@@ -1112,12 +1109,7 @@ get_nf_fp_compo(nfbasic_t *T, nffp_t *F, GEN ro, long prec)
 }
 
 static GEN
-get_sign(long r1, long n)
-{
-  GEN s = cgetg(3, t_VEC);
-  s[1] = lstoi(r1);
-  s[2] = lstoi((n - r1) >> 1); return s;
-}
+get_sign(long r1, long n) { return _vec2s(r1, (n-r1)>>1); }
 
 GEN
 nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec)
@@ -2021,9 +2013,8 @@ polredabs0(GEN x, long flag)
     {
       GEN t, y0 = y, B = RgX_to_RgM(T.bas, lg(T.bas)-1);
       t = (flag & nf_ORIG)? lift_intern((GEN)y[2]): modreverse_i(a, x);
-      y = cgetg(3, t_VEC);
-      y[1] = (long)y0;
-      y[2] = lmul(RgX_powers(t, z, degpol(z)-1), B);
+      t = gmul(RgX_powers(t, z, degpol(z)-1), B);
+      y = _vec2(y0, t);
     }
   }
   return gerepilecopy(av, y);
@@ -2071,18 +2062,17 @@ is_primitive_root(GEN nf, GEN fa, GEN x, long w)
 static GEN
 trivroots(GEN nf)
 {
-  GEN y = cgetg(3, t_VEC);
+  GEN y = cgetg(3, t_VEC), mun = gscalcol_i(utoineg(1), degpol(nf[1]));
   y[1] = deux;
-  y[2] = (long)gscalcol_i(negi(gun), degpol(nf[1]));
-  return y;
+  y[2] = (long)mun; return y;
 }
 
 GEN
 rootsof1(GEN nf)
 {
   pari_sp av = avma;
-  long N,k,i,ws,prec;
-  GEN p1,y,d,list,w;
+  long N, k, i, ws, prec;
+  GEN z, y, d, list, w;
 
   nf = checknf(nf);
   if ( nf_get_r1(nf) ) return trivroots(nf);
@@ -2093,29 +2083,26 @@ rootsof1(GEN nf)
     GEN R = R_from_QR(gmael(nf,5,2), prec);
     if (R)
     {
-      p1 = fincke_pohst(_vec(R),stoi(N),1000, 0, NULL);
-      if (p1) break;
+      y = fincke_pohst(_vec(R),stoi(N),1000, 0, NULL);
+      if (y) break;
     }
     if (i == MAXITERPOL) err(accurer,"rootsof1");
     prec = (prec<<1)-2;
     if (DEBUGLEVEL) err(warnprec,"rootsof1",prec);
     nf = nfnewprec(nf,prec);
   }
-  if (itos(ground((GEN)p1[2])) != N) err(bugparier,"rootsof1 (bug1)");
-  w = (GEN)p1[1]; ws = itos(w);
+  if (itos(ground((GEN)y[2])) != N) err(bugparier,"rootsof1 (bug1)");
+  w = (GEN)y[1]; ws = itos(w);
   if (ws == 2) { avma = av; return trivroots(nf); }
 
-  d = decomp(w); list = (GEN)p1[3]; k = lg(list);
+  d = decomp(w); list = (GEN)y[3]; k = lg(list);
   for (i=1; i<k; i++)
   {
-    p1 = (GEN)list[i];
-    p1 = is_primitive_root(nf,d,p1,ws);
-    if (p1) break;
+    z = is_primitive_root(nf, d, (GEN)list[i], ws);
+    if (z) return gerepilecopy(av, _vec2(stoi(ws), z));
   }
-  if (!p1) err(bugparier,"rootsof1");
-  y = cgetg(3, t_VEC);
-  y[1] = lstoi(ws);
-  y[2] = (long)p1; return gerepilecopy(av, y);
+  err(bugparier,"rootsof1");
+  return NULL; /* not reached */
 }
 
 /*******************************************************************/

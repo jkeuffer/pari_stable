@@ -782,9 +782,7 @@ rnfisnorm(GEN T, GEN x, long flag)
 {
   pari_sp av = avma;
   GEN bnf = (GEN)T[1], rel = (GEN)T[2], relpol = (GEN)T[3], theta = (GEN)T[4];
-  GEN nf, aux, H, U, Y, M, A, suni, sunitrel, futu, tu, w;
-  GEN prod, S1, S2;
-  GEN res = cgetg(3,t_VEC);
+  GEN nf, aux, H, U, Y, M, A, suni, sunitrel, futu, tu, w, prod, S1, S2;
   long L, i, drel, itu;
 
   if (typ(T) != t_VEC || lg(T) != 9)
@@ -797,6 +795,7 @@ rnfisnorm(GEN T, GEN x, long flag)
   drel = degpol(relpol);
   if (gcmp0(x) || gcmp1(x) || (gcmp_1(x) && odd(drel)))
   {
+    GEN res = cgetg(3, t_VEC);
     res[1] = (long)simplify((GEN)x[2]);
     res[2] = un; return res;
   }
@@ -862,9 +861,7 @@ rnfisnorm(GEN T, GEN x, long flag)
   }
   if (typ(aux) == t_POLMOD && degpol(nf[1]) == 1)
     aux[2] = (long)lift_intern((GEN)aux[2]);
-  res[1] = (long)aux;
-  res[2] = (long)x;
-  return gerepilecopy(av, res);
+  return gerepilecopy(av, _vec2(aux, x));
 }
 
 GEN

@@ -748,7 +748,6 @@ cmbf(GEN pol, GEN famod, GEN bound, GEN p, long a, long b,
   GEN degsofar = cgetg(lfamod+1, t_VECSMALL);
   GEN listmod  = cgetg(lfamod+1, t_COL);
   GEN fa       = cgetg(lfamod+1, t_COL);
-  GEN res = cgetg(3, t_VEC);
 
   if (maxK < 0) maxK = lfamod-1;
 
@@ -908,9 +907,8 @@ END:
     fa[cnt++] = (long)pol;
   }
   if (DEBUGLEVEL>6) fprintferr("\n");
-  setlg(listmod, cnt); setlg(fa, cnt);
-  res[1] = (long)fa;
-  res[2] = (long)listmod; return res;
+  setlg(listmod, cnt);
+  setlg(fa, cnt); return _vec2(fa, listmod);
 }
 
 void

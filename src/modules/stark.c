@@ -452,12 +452,10 @@ GetIndex(GEN pr, GEN bnr, GEN subgroup)
   p1   = gmul(gmael(dtQ, 2, 3), p1);
   cycQ = gmael(dtQ, 2, 2);
   f  = itos( Order(cycQ, p1) );
-
+  avma = av;
   rep = cgetg(3, t_VECSMALL);
   rep[1] = (long)e;
-  rep[2] = (long)f;
-
-  return gerepileupto(av, rep);
+  rep[2] = (long)f; return rep;
 }
 
 static GEN get_listCR(GEN dataD);
@@ -469,7 +467,7 @@ static GEN InitChar(GEN bnr, GEN listCR, long prec);
 static long
 CplxModulus(GEN data, long *newprec, long prec)
 {
-  long pr, dprec, ex;
+  long pr, ex, dprec = DEFAULTPREC;
   pari_sp av;
   GEN pol, listCR, cpl, bnr = (GEN)data[1], nf = checknf(bnr);
 
@@ -478,29 +476,25 @@ CplxModulus(GEN data, long *newprec, long prec)
 	       mael(bnr, 2, 1), (GEN)data[2]);
 
   listCR = get_listCR((GEN)data[3]);
-  dprec = DEFAULTPREC;
   for (av = avma;; avma = av)
   {
     data[5] = (long)InitChar(bnr, listCR, dprec);
     pol = AllStark(data, nf, -1, dprec);
+    pr = gexpo(pol) >> (TWOPOTBITS_IN_LONG+1);
+    if (pr < 0) pr = 0;
+    dprec = max(dprec, pr) + EXTRA_PREC;
     if (!gcmp0(leading_term(pol)))
     {
       cpl = QuickNormL2(pol, DEFAULTPREC);
       if (!gcmp0(cpl)) break;
     }
-    pr = gexpo(pol) >> (TWOPOTBITS_IN_LONG+1);
-    if (pr < 0) pr = 0;
-    dprec = max(dprec, pr) + EXTRA_PREC;
-
     if (DEBUGLEVEL>1) err(warnprec, "CplxModulus", dprec);
   }
   ex = gexpo(cpl); avma = av;
   if (DEBUGLEVEL>1) fprintferr("cpl = 2^%ld\n", ex);
 
-  pr = gexpo(pol) >> TWOPOTBITS_IN_LONG;
-  if (pr < 0) pr = 0;
-  *newprec = max(prec, pr + EXTRA_PREC);
-  data[5] = (long)listCR; return ex;
+  data[5] = (long)listCR;
+  *newprec = dprec; return ex;
 }
 
 /* Let f be a conductor without infinite part and let C be a
@@ -626,7 +620,7 @@ FindModulus(GEN dataC, long fl, long *newprec, long prec, long bnd)
             if (oldcpl < 0 || cpl < oldcpl)
             {
               *newprec = pr;
-              if (rep)    gunclone(rep);
+              if (rep) gunclone(rep);
               rep    = gclone(p2);
               oldcpl = cpl;
             }

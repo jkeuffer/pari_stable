@@ -35,8 +35,12 @@ GEN    _mat(GEN x);
 GEN    _matcopy(GEN x);
 GEN    _vec(GEN x);
 GEN    _vec2(GEN x, GEN y);
+GEN    _vec2s(long x, long y);
 GEN    _vec2copy(GEN x, GEN y);
+GEN    _vec3(GEN x, GEN y, GEN z);
+GEN    _vec3s(long x, long y, long z);
 GEN    _veccopy(GEN x);
+GEN    _vecs(long x);
 GEN    _vecsmall(long x);
 void   affiz(GEN x, GEN y);
 void   affsz(long x, GEN y);
@@ -256,6 +260,9 @@ INLINE GEN
 _vec2(GEN x, GEN y) {
   GEN v = cgetg(3,t_VEC); v[1] = (long)x; v[2] = (long)y; return v; }
 INLINE GEN
+_vec3(GEN x, GEN y, GEN z) {
+  GEN v=cgetg(4,t_VEC); v[1]=(long)x; v[2]=(long)y; v[3]=(long)z; return v; }
+INLINE GEN
 _vec2copy(GEN x, GEN y) {
   GEN v = cgetg(3,t_VEC); v[1] = lcopy(x); v[2] = lcopy(y); return v; }
 INLINE GEN
@@ -350,6 +357,14 @@ stoi(long x)
   if (!x) return gzero;
   return x > 0? utoipos((ulong)x): utoineg((ulong)-x);
 }
+INLINE GEN
+_vecs(long x) { GEN v = cgetg(2, t_VEC); v[1] = lstoi(x); return v; }
+INLINE GEN
+_vec2s(long x, long y) {
+  GEN v = cgetg(3,t_VEC); v[1] = lstoi(x); v[2] = lstoi(y); return v; }
+INLINE GEN
+_vec3s(long x, long y, long z) {
+  GEN v=cgetg(4,t_VEC); v[1]=lstoi(x); v[2]=lstoi(y); v[3]=lstoi(z); return v; }
 
 INLINE GEN
 stosmall(long x)

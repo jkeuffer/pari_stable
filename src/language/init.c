@@ -734,8 +734,7 @@ getheap(void)
     else /* GEN */
       l += taille(x);
   }
-  x=cgetg(3,t_VEC); x[1]=lstoi(m); x[2]=lstoi(l);
-  return x;
+  return _vec2s(m, l);
 }
 
 /********************************************************************/
