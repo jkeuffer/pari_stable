@@ -56,6 +56,7 @@ GH  8- thue(thueinit(x^3 - 2), 2) --> SEGV
        POLMOD coeffs + used a wrong algorithm [ not modular + wrong result ]
    11- broken code in hnfmodid() wrt GC (would add one 0 column, Bug #129)
    12- sqrti(gen_0) --> SEGV [native kernel]
+BA 13- polrootsmod(,,1) could return a line vector instead of a column.
 
   Added
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu

@@ -347,7 +347,7 @@ rootmod2(GEN f, GEN pp)
   if (!factmod_init(&f, pp)) { avma = av; return cgetg(1,t_COL); }
   p = init_p(pp); if (!p) err(talker,"prime too big in rootmod2");
   if (p & 1) 
-    y = Flv_to_ZV(Flx_roots_naive(ZX_to_Flx(f,p), p));
+    y = Flv_to_ZC(Flx_roots_naive(ZX_to_Flx(f,p), p));
   else 
     y = root_mod_even(f,p);
   return gerepileupto(av, FpV_to_mod(y, pp));
