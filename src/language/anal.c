@@ -3151,21 +3151,21 @@ trap0(char *e, char *r, char *f)
   if (f && r)
   { /* explicit recovery text */
     char *a = analyseur;
-    void *catch;
+    void *catcherr;
     jmp_buf env;
 
     if (setjmp(env)) 
     {
       avma = av;
-      err_leave(&catch);
+      err_leave(&catcherr);
       x = lisseq(r);
       skipseq();
     }
     else
     {
-      catch = err_catch(numerr, env, NULL);
+      catcherr = err_catch(numerr, env, NULL);
       x = lisseq(f);
-      err_leave(&catch);
+      err_leave(&catcherr);
     }
     analyseur = a;
     return x;

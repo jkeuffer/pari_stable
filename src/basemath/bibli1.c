@@ -2777,7 +2777,7 @@ fincke_pohst(GEN a,GEN BOUND,GEN stockmax,long flag, long PREC,
   VOLATILE long pr,av=avma,i,j,n, prec = PREC;
   VOLATILE GEN B,nf,r,rinvtrans,v,v1,u,s,res,z,vnorm,sperm,perm,uperm,basis;
   VOLATILE GEN gram, bound = BOUND;
-  void *catch = NULL;
+  void *catcherr = NULL;
 
   if (DEBUGLEVEL>2) { fprintferr("entering fincke_pohst\n"); flusherr(); }
   if (typ(a) == t_VEC) { nf = a; a = gmael(nf,5,3); } else nf = NULL;
@@ -2835,7 +2835,7 @@ fincke_pohst(GEN a,GEN BOUND,GEN stockmax,long flag, long PREC,
   { /* catch precision problems (truncation error) */
     jmp_buf env;
     if (setjmp(env)) goto PRECPB;
-    catch = err_catch(truer2, env, NULL);
+    catcherr = err_catch(truer2, env, NULL);
   }
 
   if (nf) basis = init_chk(nf,uperm,NULL);
@@ -2864,7 +2864,7 @@ fincke_pohst(GEN a,GEN BOUND,GEN stockmax,long flag, long PREC,
     if (!check || lg(res[2]) > 1) break;
     if (DEBUGLEVEL>2) fprintferr("  i = %ld failed\n",i);
   }
-  err_leave(&catch); catch = NULL;
+  err_leave(&catcherr); catcherr = NULL;
   if (check)
   {
     GEN p1 = (GEN)res[2];
@@ -2878,7 +2878,7 @@ fincke_pohst(GEN a,GEN BOUND,GEN stockmax,long flag, long PREC,
   z[2]=pr? lcopy((GEN)res[2]) : lround((GEN)res[2]);
   z[3]=lmul(uperm, (GEN)res[3]); return gerepileupto(av,z);
 PRECPB:
-  if (catch) err_leave(&catch);
+  if (catcherr) err_leave(&catcherr);
   if (!(flag & 1))
     err(talker,"not a positive definite form in fincke_pohst");
   avma = av; return NULL;
