@@ -913,6 +913,7 @@ mulsr(long x, GEN y)
 static GEN addshiftw(GEN x, GEN y, long d);
 static GEN quickmulii(GEN a, GEN b, long na, long nb);
 
+#if 0
 static GEN
 karamulrr1(GEN y, GEN x, long ly, long lz)
 {
@@ -933,6 +934,7 @@ karamulrr1(GEN y, GEN x, long ly, long lz)
   if (l > 0) hi = addiispec(hi+2,lo2+2, lgefint(hi)-2,l);
   return hi;
 }
+#endif
 
 GEN
 mulrr(GEN x, GEN y)
@@ -949,13 +951,11 @@ mulrr(GEN x, GEN y)
   lz = lg(x); ly = lg(y);
   if (lz>ly) { lz=ly; z=x; x=y; y=z; flag=1; } else flag = (lz!=ly);
   z = cgetr(lz);
+
   if (lz > MULRR_LIMIT) 
   { /* use Karatsuba */
-#if 1
     GEN hi = quickmulii(y+2, x+2, lz+flag-2, lz-2);
-#else
-    GEN hi = karamulrr1(y+2, x+2, lz+flag-2, lz-2);
-#endif
+/*  GEN hi = karamulrr1(y+2, x+2, lz+flag-2, lz-2); */
     long i, garde = hi[lz];
     if (hi[2] < 0)
     {
@@ -969,8 +969,8 @@ mulrr(GEN x, GEN y)
     }
     if (garde < 0)
     { /* round to nearest */
-      i=lz; do z[--i]++; while (z[i]==0);
-      if (i==1) z[2] = HIGHBIT;
+      i = lz; do z[--i]++; while (z[i]==0 && i > 1);
+      if (i == 1) { z[2] = HIGHBIT; e++; }
     }
     z[1] = evalsigne(sx)|evalexpo(e);
     avma = (pari_sp)z; return z;
