@@ -1118,7 +1118,7 @@ wr_rel(long *col)
 
 static long
 small_norm_for_buchall(long t,long **mat,GEN matarch,long nbrel,long LIMC,
-		       long PRECREG,GEN nf, GEN gborne,long nbrelpid, GEN invp,
+		       long PRECREG,GEN nf,GEN gborne,long nbrelpid,GEN invp,
 		       long *L)
 {
   long av=avma,av1,av2,av3,tetpil,limpile, *x,i,j,k,noideal,ran,keep_old_invp;

@@ -5,7 +5,7 @@ cat > $file << EOT
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 
-#ifdef _MSC_VER /* Bill Daly: avoid spurious Warnings from MSVS */
+#ifdef _MSC_VER /* Bill Daly: avoid spurious Warnings from MSVC */
 #  pragma warning(disable: 4013 4018 4146 4244 4761)
 #endif
 

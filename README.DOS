@@ -1,10 +1,10 @@
 PARI/GP is developped and tested in the Unix world. Since sticking to Unix
 would prevent many users from enjoying the system [not everybody wants to
-install Linux], it has been (partly) ported to DOS using the EMX runtime
+install Linux], PARI has been (partly) ported to DOS using the EMX runtime
 package. The resulting binary GP.EXE should be usable on most DOS-based
-systems, although it definitely won't share the traditional look and feel of
-e.g native Windows programs. This version is currently not maintained;
-binaries may or may not become available after each Unix release.
+platforms, although it won't share the traditional look and feel of e.g
+native Windows programs. Binaries may or may not be available after each
+Unix release.
 
 Everything written in this file applies to DOS 3.0 or higher, OS/2 2.0 and
 higher, and Windows 3.1 (unless noted otherwise). It seems that GP.EXE runs
@@ -23,7 +23,7 @@ library yourself.
 
 1) Binaries (GPB): GPB_xxxx.ZIP
   + GP.EXE binary, linked with GNU readline 
-  + an EXAMPLES directory, containing a sample GP scripts and a GPRC file
+  + an EXAMPLES directory, containing sample GP scripts and a GPRC file
     (copy the latter to C:\_GPRC and adapt it to your needs)
 
   GP.EXE is an EMX executable; it it doesn't start up, check EMX\EMXRT.DOC
@@ -38,7 +38,6 @@ library yourself.
   Also contains the script GPHELP (translates Pari documentation
   to plain text, handles indexing), which requires Perl (not included).
   You may have to fix paths in the first lines of the script.
-
 -----------------------------------------------------------------------------
 4) EMX/RSX runtime package (GPRT): GPRT.ZIP
   files you will need if the provided binary GP.EXE doesn't work as is.
@@ -85,8 +84,8 @@ path. Not thoroughly tested; looks ok, though.
 * For OS/2: untested. You may need EMX.DLL from GPRT.
 
 If you want to use the polgalois function for polynomials of degree 8 to
-11, fetch galdata.tgz and extract it in \usr\local\lib\pari\data (can't be
-customized in this version, sorry).
+11, fetch galdata.tgz and extract it in \pari\data (can't be customized
+without recompiling).
 
   2) I want to build the PARI library for my own C programs
 
