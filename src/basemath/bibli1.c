@@ -1597,7 +1597,7 @@ lllintpartialall(GEN m, long flag)
   if (DEBUGLEVEL>6)
   {
     fprintferr("tm1 = %Z",tm1);
-    fprintferr("mid = %Z",mid);
+    fprintferr("mid = %Z",mid); /* = m * tm1 */
   }
   gerepileall(ltop1,2, &tm1, &mid);
   {
@@ -1605,8 +1605,8 @@ lllintpartialall(GEN m, long flag)
     * try to replace (v, w) by (v, v - q*w) for some q.
     * We compute all inner products and check them repeatedly. */
     const pari_sp ltop3 = avma; /* Excludes region with tm1 and mid */
-    const pari_sp lim = stack_lim(ltop3,1);
-    long icol, reductions, npass = 0;
+    const pari_sp lim = stack_lim(ltop3,2);
+    long icol, npass = 0;
     GEN dotprd = cgetg(ncol+1, t_MAT);
 
     tm2 = idmat(ncol);
@@ -1621,7 +1621,7 @@ lllintpartialall(GEN m, long flag)
     } /* for icol */
     for(;;)
     {
-      reductions = 0;
+      long reductions = 0;
       for (icol=1; icol <= ncol; icol++)
       {
 	long ijdif;
@@ -1633,7 +1633,7 @@ lllintpartialall(GEN m, long flag)
           jcol = icol + ijdif;
           if (jcol > ncol) jcol -= ncol;
           if (cmpii(gcoeff(dotprd,icol,icol),
-		    gcoeff(dotprd,jcol,jcol) ) > 0)
+		    gcoeff(dotprd,jcol,jcol)) > 0)
           { k1 = icol; k2 = jcol; }
           else
           { k2 = icol; k1 = jcol; }
@@ -1651,7 +1651,7 @@ lllintpartialall(GEN m, long flag)
           for (dcol = 1; dcol <= ncol; dcol++)
             coeff(dotprd,k1,dcol) = coeff(dotprd,dcol,k1);
         } /* for ijdif */
-        if (low_stack(lim, stack_lim(ltop3,1)))
+        if (low_stack(lim, stack_lim(ltop3,2)))
 	{
           if(DEBUGMEM>1) err(warnmem,"lllintpartialall");
 	  gerepileall(ltop3, 2, &dotprd,&tm2);
