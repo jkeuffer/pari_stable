@@ -3934,14 +3934,22 @@ redimagsl2(GEN V)
 GEN
 qfbimagsolvep(GEN Q,GEN p)
 {
-  pari_sp ltop = avma;
-  GEN M, res, N, d = qf_disc(Q, NULL, NULL);
+  pari_sp av = avma;
+  GEN M, N, x,y, a,b,c,d = qf_disc(Q, NULL, NULL);
   if (kronecker(d,p) < 0) return gen_0;
   N = redimagsl2(Q);
   M = redimagsl2( primeform(d, p, 0) );
   if (!gequal((GEN)M[1], (GEN)N[1])) return gen_0;
-  res = (GEN)gdiv((GEN)N[2], (GEN)M[2])[1];
-  return gerepilecopy(ltop,res);
+  N = (GEN)N[2];
+  M = (GEN)M[2]; 
+  a = gcoeff(M,1,1); x = gcoeff(N,1,1);
+  b = gcoeff(M,1,2); y = gcoeff(N,1,2);
+  c = gcoeff(M,2,1);
+  d = gcoeff(M,2,2); /* inverse: [d,-b; -c,a]. Return (N/M)[1] */
+
+  M = subii(mulii(d,x), mulii(b,y));
+  N = subii(mulii(a,y), mulii(c,x));
+  return gerepilecopy(av, mkvec2(M,N));
 }
 
 GEN

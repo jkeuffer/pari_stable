@@ -2016,11 +2016,13 @@ gauss_cmp(GEN x, GEN y)
   return gcmp((GEN)x[1], (GEN)y[1]);
 }
 
+/* 0 or canonical representative in Z[i]^* / <i> (impose imag(x) >= 0) */
 static GEN
 gauss_normal(GEN x)
 {
-  if (signe(real_i(x)) < 0) x = gneg(x);
-  if (signe(imag_i(x)) < 0) x = mulcxI(x);
+  if (typ(x) != t_COMPLEX) return (signe(x) < 0)? negi(x): x;
+  if (signe(x[1]) < 0) x = gneg(x);
+  if (signe(x[2]) < 0) x = mulcxI(x);
   return x;
 }
 
@@ -2040,7 +2042,7 @@ gauss_factor(GEN x)
 {
   pari_sp av = avma;
   GEN a = (GEN)x[1], b = (GEN)x[2], d = gen_1;
-  GEN n, y, fa, P, E, P2, E2;
+  GEN n, y, fa, P, E, P2, E2, Q = qfi(gen_1,gen_0,gen_1);
   long t1 = typ(a);
   long t2 = typ(b), i, j, l, exp = 0;
   if (t1 == t_FRAC) d = (GEN)a[2];
@@ -2054,19 +2056,20 @@ gauss_factor(GEN x)
   }
   if (t1 != t_INT || t2 != t_INT) return NULL;
   y = gauss_primpart(y, &n);
-  fa = factor(gnorm(y)); P = (GEN)fa[1]; E = (GEN)fa[2];
-  l = lg(P);
+  fa = factor(cxnorm(y));
+  P = (GEN)fa[1];
+  E = (GEN)fa[2]; l = lg(P);
   P2 = cgetg(l, t_COL);
   E2 = cgetg(l, t_COL);
   for (j = 1, i = l-1; i > 0; i--) /* remove largest factors first */
   {
     GEN p = (GEN)P[i], w, w2, t, we, pe;
     long v, e = itos((GEN)E[i]);
-    int is2 = equalii(p, gen_2);
+    int is2 = equaliu(p, 2);
     if (is2)
       w = mkcomplex(gen_1, gen_1);
     else
-      w = vec_to_gauss(qfbimagsolvep(qfi(gen_1,gen_0,gen_1),p));
+      w = gauss_normal(vec_to_gauss(qfbimagsolvep(Q, p)));
     w2 = gauss_normal( gconj(w) );
     /* w * w2 * I^3 = p, w2 = gconj(w) * I */
     pe = gpowgs(p, e);
@@ -2117,13 +2120,17 @@ gauss_factor(GEN x)
       GEN w, p = (GEN)P[i];
       long e;
       int is2;
-      if (mod4(p) == 3) continue;
-      is2 = equalii(p, gen_2);
+      switch(mod4(p))
+      {
+        case 3: continue;
+        case 2: is2 = 1; break;
+        default:is2 = 0; break;
+      }
       e = itos((GEN)E[i]);
       if (is2)
         w = mkcomplex(gen_1,gen_1);
       else
-        w = vec_to_gauss(qfbimagsolvep(qfi(gen_1,gen_0,gen_1),p));
+        w = gauss_normal(vec_to_gauss(qfbimagsolvep(Q,p)));
       P[i] = (long)w;
       if (is2)
         E[i] = lstoi(e << 1);
