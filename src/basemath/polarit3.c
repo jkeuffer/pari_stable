@@ -1633,7 +1633,7 @@ intersect_ker(GEN P, GEN MA, GEN U, GEN l)
   }
   if (DEBUGLEVEL>=4) msgtimer("matrix cyclo");
   if (lg(A)!=r+1)
-    err(talker,"ZZ_%Z[%Z]/(%Z) is not a field in Fp_intersect"
+    err(talker,"ZZ_%Z[%Z]/(%Z) is not a field in FpX_ffintersect"
         ,l,polx[vp],P);
   A=gerepileupto(ltop,A);
   /*The formula is 
@@ -1666,7 +1666,7 @@ intersect_ker(GEN P, GEN MA, GEN U, GEN l)
  * so we handle Frobenius as matrices.
  */
 void
-Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
+FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
 {
   pari_sp lbot, ltop=avma;
   long vp,vq,np,nq,e,pg;
@@ -1676,7 +1676,7 @@ Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
   vp=varn(P);vq=varn(Q);
   np=degpol(P);nq=degpol(Q);
   if (np<=0 || nq<=0 || n<=0 || np%n!=0 || nq%n!=0)
-    err(talker,"bad degrees in Fp_intersect: %d,%d,%d",n,degpol(P),degpol(Q));
+    err(talker,"bad degrees in FpX_ffintersect: %d,%d,%d",n,degpol(P),degpol(Q));
   e=pvaluation(stoi(n),l,&q);
   pg=itos(q);
   avma=ltop;
@@ -1693,29 +1693,29 @@ Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
     {
       GEN L,An,Bn,ipg,z;
       z=FpX_roots(FpX_red(cyclo(pg,-1),l), l);
-      if (lg(z)<2) err(talker,"%Z is not a prime in Fp_intersect",l);
+      if (lg(z)<2) err(talker,"%Z is not a prime in FpX_ffintersect",l);
       z=negi((GEN)z[1]);
       ipg=stoi(pg);
       if (DEBUGLEVEL>=4) (void)timer2();
       A=FpM_ker(gaddmat(z, MA),l);
       if (lg(A)!=2)
-	err(talker,"ZZ_%Z[%Z]/(%Z) is not a field in Fp_intersect"
+	err(talker,"ZZ_%Z[%Z]/(%Z) is not a field in FpX_ffintersect"
 	    ,l,polx[vp],P);
       A=RV_to_RX((GEN)A[1],vp);
       B=FpM_ker(gaddmat(z, MB),l);
       if (lg(B)!=2)
-	err(talker,"ZZ_%Z[%Z]/(%Z) is not a field in Fp_intersect"
+	err(talker,"ZZ_%Z[%Z]/(%Z) is not a field in FpX_ffintersect"
 	    ,l,polx[vq],Q);
       B=RV_to_RX((GEN)B[1],vq);
       if (DEBUGLEVEL>=4) msgtimer("FpM_ker");
       An=(GEN) FpXQ_pow(A,ipg,P,l)[2];
       Bn=(GEN) FpXQ_pow(B,ipg,Q,l)[2];
       if (!invmod(Bn,l,&z))
-        err(talker,"Polynomials not irreducible in Fp_intersect");
+        err(talker,"Polynomials not irreducible in FpX_ffintersect");
       z=modii(mulii(An,z),l);
       L=Fp_sqrtn(z,ipg,l,NULL);
       if ( !L )
-        err(talker,"Polynomials not irreducible in Fp_intersect");
+        err(talker,"Polynomials not irreducible in FpX_ffintersect");
       if (DEBUGLEVEL>=4) msgtimer("Fp_sqrtn");
       B=FpX_Fp_mul(B,L,l);
     }
@@ -1735,7 +1735,7 @@ Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       L=FpXQ_sqrtn(z,ipg,U,l,NULL);
       if (DEBUGLEVEL>=4) msgtimer("FpXQ_sqrtn");
       if ( !L )
-        err(talker,"Polynomials not irreducible in Fp_intersect");
+        err(talker,"Polynomials not irreducible in FpX_ffintersect");
       B=FqX_Fq_mul(B,L,U,l);
       B=gsubst(B,MAXVARN,gzero);
       A=gsubst(A,MAXVARN,gzero);
@@ -1800,7 +1800,7 @@ FpX_ffisom(GEN P,GEN Q,GEN l)
 {
   pari_sp av = avma;
   GEN SP, SQ, R;
-  Fp_intersect(degpol(P),P,Q,l,&SP,&SQ,NULL,NULL);
+  FpX_ffintersect(P,Q,degpol(P),l,&SP,&SQ,NULL,NULL);
   R = Fp_inv_isom(SP,P,l);
   return gerepileupto(av, FpX_FpXQ_compo(R,SQ,Q,l));
 }
@@ -1852,7 +1852,7 @@ FpX_factorff_irred(GEN P, GEN Q, GEN l)
   FP=FpXQ_matrix_pow(np,np,FpXQ_pow(polx[vp],l,P,l),P,l);
   FQ=FpXQ_matrix_pow(nq,nq,FpXQ_pow(polx[vq],l,Q,l),Q,l);
   if (DEBUGLEVEL>=4) msgtimer("FpXQ_matrix_pows");
-  Fp_intersect(d,P,Q,l,&SP,&SQ,FP,FQ);
+  FpX_ffintersect(P,Q,d,l,&SP,&SQ,FP,FQ);
   av=avma;
   E=Fp_factorgalois(P,l,d,vq,FP);
   if (OK_ULONG(l))
