@@ -183,6 +183,5 @@ enum { c_ERR, c_HIST, c_PROMPT, c_INPUT, c_OUTPUT, c_HELP, c_TIME, c_LAST };
 #define f_COMMENT  0
 #define f_INIT     1
 #define f_KEEPCASE 2
-#define f_READL    4
-#define f_REG      8
-#define f_ENDFILE 16
+#define f_REG      4
+#define f_ENDFILE  8

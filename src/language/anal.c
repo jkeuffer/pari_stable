@@ -229,14 +229,11 @@ lisexpr(char *t)
 
 /* filtered lisexpr = remove blanks and comments */
 GEN
-flisexpr(char *t)
+flisexpr(char *s)
 {
-  char *tmp = pari_strdup(t);
-  GEN x;
-
-  filtre(tmp, f_INIT | f_REG);
-  x = lisseq0(tmp, expr);
-  free(tmp); return x;
+  char *t = filtre(s,NULL, f_INIT | f_REG);
+  GEN x = lisseq0(t, expr);
+  free(t); return x;
 }
 
 /* check syntax, then execute */

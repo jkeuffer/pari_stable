@@ -708,7 +708,7 @@ const char* eng_ord(long i);
 void    ecrire(GEN x, char format, long dec, long chmp);
 void    etatpile(unsigned int n);
 char*   expand_tilde(char *s);
-char*   filtre(char *s,int status);
+char*   filtre(char *s,char *t,int status);
 void    flusherr(void);
 void    fprintferr(char* pat, ...);
 void    killallfiles(int check);

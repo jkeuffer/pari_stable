@@ -50,18 +50,19 @@ hit_return()
 
 #define ONE_LINE_COMMENT   2
 #define MULTI_LINE_COMMENT 1
-/* filter s in place. If status not a query, return pointer to ending '\0'.
- * return s / NULL otherwise
+/* Filter s into t. If flag is a query, return s (yes) / NULL (no)
+ * Otherwise, if t == NULL, allocate enough room, filter then return t.
+ *            if not return pointer to ending '\0' in t.
  */
 char *
-filtre(char *s, int status)
+filtre(char *s0, char *t0, int flag)
 {
   static int in_string, in_comment = 0;
-  char c, *t;
-  int downcase;
+  char c, *s, *t;
+  int downcase, return_end;
 
-  if (status & f_INIT) in_string = 0;
-  switch(status)
+  if (flag & f_INIT) in_string = 0;
+  switch(flag)
   {
     case f_ENDFILE:
       if (in_string)
@@ -75,10 +76,14 @@ filtre(char *s, int status)
         in_comment = 0;
       } /* fall through */
     case f_INIT: case f_COMMENT:
-      return in_comment? s: NULL;
+      return in_comment? s0: NULL;
   }
-  downcase = ((status & f_KEEPCASE) == 0 && compatible == OLDALL);
-  t = s;
+
+  downcase = ((flag & f_KEEPCASE) == 0 && compatible == OLDALL);
+  s = s0; return_end = (t0 != NULL);
+  if (!t0) t0 = gpmalloc(strlen(s)+1);
+  t = t0;
+
   while ((c = *s++))
   {
     if (in_string) *t++ = c; /* copy verbatim */
@@ -88,7 +93,7 @@ filtre(char *s, int status)
       {
         while (c != '*' || *s != '/')
         {
-          if (!*s) { *t=0; return t; }
+          if (!*s) goto END;
           c = *s++;
         }
         s++;
@@ -96,11 +101,7 @@ filtre(char *s, int status)
       else
         while (c != '\n')
         {
-          if (!*s)
-          {
-            if (status == f_READL) in_comment=0;
-            *t=0; return t;
-          }
+          if (!*s) { in_comment=0; goto END; }
           c = *s++;
         }
       in_comment=0; continue;
@@ -120,7 +121,7 @@ filtre(char *s, int status)
 
       case '\\':
         if (!in_string) break;
-        if (!*s) return t;     /* this will result in an error */
+        if (!*s) goto END;     /* this will result in an error */
         *t++ = *s++; break; /* in strings, \ is the escape character */
         /*  \" does not end a string. But \\" does */
 
@@ -128,7 +129,8 @@ filtre(char *s, int status)
         in_string = !in_string;
     }
   }
-  *t = 0; return t;
+END:
+  *t = 0; return return_end? t: t0;
 }
 #undef ONE_LINE_COMMENT
 #undef MULTI_LINE_COMMENT
@@ -2103,7 +2105,7 @@ popinfile()
 {
   pariFILE *f;
 
-  filtre(NULL, f_ENDFILE);
+  filtre(NULL,NULL, f_ENDFILE);
   for (f = last_tmp_file; f; f = f->prev)
   {
     if (f->type & mf_IN) break;

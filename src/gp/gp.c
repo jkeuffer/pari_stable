@@ -529,7 +529,6 @@ sd_colors(char *v, int flag)
   long c,l;
   if (*v && !under_emacs && !under_texmacs)
   {
-    char *tmp;
     disable_color=1;
     l = strlen(v);
     if (l <= 2 && strncmp(v, "no", l) == 0)
@@ -538,10 +537,9 @@ sd_colors(char *v, int flag)
       v = "1, 5, 3, 7, 6, 2, 3";	/* Assume recent ReadLine. */
     if (l <= 7 && strncmp(v, "lightbg", l) == 0)
       v = "1, 6, 3, 4, 5, 2, 3";	/* Assume recent ReadLine. */
-    tmp = v = pari_strdup(v); filtre(v, f_INIT|f_REG);
+    v = filtre(v,NULL, f_INIT|f_REG);
     for (c=c_ERR; c < c_LAST; c++)
       gp_colors[c] = gp_get_color(&v);
-    free(tmp);
   }
   if (flag == d_ACKNOWLEDGE || flag == d_RETURN)
   {
@@ -1911,96 +1909,7 @@ gprc_get()
   return f;
 }
 
-static int
-init_brace(char *s)
-{
-  while (isspace((int)*s)) s++;
-  if (*s == LBRACE) { *s=' '; return 1; }
-  return 0;
-}
-
-/* return 1 if we deleted a '{' */
-static int
-init_filtre(char *s)
-{
-  if (filtre(s, f_INIT)) return 0; /* in comment */
-  return init_brace(s);
-}
-
-/* prompt = NULL --> from gprc */
-static int
-get_line_from_file(FILE *file, Buffer *b, char *prompt)
-{
-  int f_flag = prompt? f_REG: f_REG | f_KEEPCASE;
-  int wait_for_brace, wait_for_input;
-  long len = b->len;
-  char *s =  b->buf;
-
-  if (under_texmacs && file == stdin) tm_end_output();
-  handle_C_C = 0;
-  if (!fgets(s, len, file))
-  { 
-    if (under_texmacs && file == stdin) tm_start_output();
-    /* received ^C  in fgets, give another chance */
-    if (handle_C_C) { *s = 0; return 1; }
-    return 0;
-  }
-
-  wait_for_input = wait_for_brace = init_filtre(s);
-  for(;;)
-  {
-    int read_more = (s[strlen(s)-1] != '\n');
-    char *end = filtre(s, f_flag);
-    if (!*s) { if (!wait_for_input) break; }
-    else
-    {
-      if (read_more)
-      {
-        s = end;
-	if (wait_for_brace && end[-1] == RBRACE) end[-1]=0;
-      }
-      else if (end[-1] == '\\')
-      {
-        if (*s == '?') break;
-        s = end-1;
-      }
-      else if (end[-1] == '=' && *s != '?')
-      {
-        wait_for_input = 1; s = end;
-      }
-      else
-      {
-	if (!wait_for_brace) break;
-	if (end[-1] == RBRACE) { end[-1]=0; break; }
-	s = end;
-      }
-      len = b->len - (s - b->buf);
-      if (len < 512)
-      {
-	long n = b->len << 1, l = s - b->buf;
-	len += b->len; fix_buffer(b, n);
-	s = b->buf + l;
-      }
-    }
-    if (under_texmacs && file == stdin)
-    { /* need more data from TeXmacs */
-      tm_start_output();
-      tm_end_output(); 
-    }
-    if (!fgets(s, len, file)) break;
-    if (wait_for_input && !wait_for_brace)
-      wait_for_brace = init_filtre(s);
-  }
-  if (prompt && *(b->buf))
-  {
-    if (pariecho) { pariputs(prompt); pariputs(b->buf); pariputc('\n'); }
-    else if (logfile) fprintf(logfile, "%s%s\n",prompt,b->buf);
-    pariflush();
-  }
-  if (under_texmacs) tm_start_output();
-  return 1;
-}
-
+static int get_line_from_file(char *prompt, Buffer *b, FILE *file);
 #define err_gprc(s,t,u) { fprintferr("\n"); err(talker2,s,t,u); }
 
 static char **
@@ -2016,7 +1925,7 @@ gp_initrc()
   b = new_buffer();
   for(;;)
   {
-    if (! get_line_from_file(file, b, NULL))
+    if (!get_line_from_file(NULL,b,file))
     {
       del_buffer(b);
       if (!quiet_mode) fprintferr("Done.\n\n");
@@ -2206,7 +2115,7 @@ do_prompt()
   /* escape sequences bug readline, so use special bracing (if available) */
   brace_color(s, c_PROMPT, 0);
   s += strlen(s);
-  if (filtre(s, f_COMMENT)) 
+  if (filtre(s,NULL, f_COMMENT)) 
     strcpy(s, COMMENTPROMPT);
   else
     do_strftime(prompt,s);
@@ -2214,85 +2123,194 @@ do_prompt()
   brace_color(s, c_INPUT, 1); return buf;
 }
 
+static void
+unblock_SIGINT()
+{
+#ifdef USE_SIGRELSE
+  sigrelse(SIGINT);
+#elif USE_SIGSETMASK
+  sigsetmask(0);
+#endif
+}
+
+/* Read from file (up to '\n' or EOF) and copy at s0 (points in b->buf) */
+static char *
+file_input(Buffer *b, char *s0, FILE *file, int TeXmacs)
+{
+  int first = 1;
+  char *s = s0;
+  long used = s - b->buf;
+
+  for(;;)
+  {
+    long left = b->len - used, ls;
+    /* if from TeXmacs, tell him we need input */
+    if (TeXmacs) { tm_start_output(); tm_end_output(); }
+
+    if (left < 512) fix_buffer(b, b->len << 1);
+    s = b->buf + used;
+    if (! fgets(s, left, file)) return first? NULL: s0; /* EOF */
+    ls = strlen(s); first = 0;
+    if (ls < left || s[ls-1] == '\n') return s0; /* \n */
+    used += ls;
+  }
+}
+
+static char *
+gprl_input(Buffer *b, char *s0, char *prompt)
+{
+  long used = s0 - b->buf;
+  long left = b->len - used;
+  char *s;
+  
+  if (! (s = readline(prompt)) ) return NULL; /* EOF */
+  if (left < strlen(s)) fix_buffer(b, b->len << 1);
+  return s;
+}
+
+#define skip_space(s) while (isspace((int)*s)) s++
+#define ask_filtre(t) filtre("",NULL,t)
+
+static void
+input_loop(Buffer *b, char *buf0, FILE *file, char *prompt)
+{
+  const int TeXmacs = (under_texmacs && file == stdin);
+  const int f_flag = prompt? f_REG: f_REG | f_KEEPCASE;
+  char *end, *s = b->buf, *buf = buf0;
+  int wait_for_brace = 0;
+  int wait_for_input = 0;
+
+  /* buffer is not empty, init filter */
+  (void)ask_filtre(f_INIT);
+  for(;;)
+  {
+    char *t = buf;
+    if (!ask_filtre(f_COMMENT))
+    { /* not in comment */
+      skip_space(t);
+      if (*t == LBRACE) { t++; wait_for_input = wait_for_brace = 1; }
+    }
+    end = filtre(t,s, f_flag);
+
+    if (!*s) { if (!wait_for_input) break; }
+    else
+    {
+      if (*(b->buf) == '?') break;
+
+      s = end-1; /* *s = last input char */
+      if (*s == '\\')
+      {
+      }
+      else if (*s == '=')
+      {
+        wait_for_input = 1; s++;
+      }
+      else
+      {
+	if (!wait_for_brace) break;
+	if (*s == RBRACE) { *s=0; break; }
+	s++;
+      }
+    }
+    /* read continuation line */
+    if (file)
+      buf = file_input(b,s,file,TeXmacs);
+    else
+    { free(buf); buf = gprl_input(b,s,""); }
+    if (!buf) break;
+  }
+  if (!file && buf) free(buf);
+}
+
+/* prompt = NULL --> from gprc. Return 1 if new input, and 0 if EOF */
+static int
+get_line_from_file(char *prompt, Buffer *b, FILE *file)
+{
+  const int TeXmacs = (under_texmacs && file == stdin);
+  char *buf, *s =  b->buf;
+
+  handle_C_C = 0;
+  while (! (buf = file_input(b,s,file,TeXmacs)) )
+  { /* EOF */
+    if (!handle_C_C)
+    {
+      if (TeXmacs) tm_start_output();
+      return 0;
+    }
+    /* received ^C  in fgets, retry (as is "\n" were input) */
+  }
+  input_loop(b,buf,file,prompt);
+
+  if (*s && prompt) /* don't echo if from gprc */
+  {
+    if (pariecho)
+      { pariputs(prompt); pariputs(s); pariputc('\n'); }
+    else
+      if (logfile) fprintf(logfile, "%s%s\n",prompt,s);
+    pariflush();
+  }
+  if (under_texmacs) tm_start_output();
+  return 1;
+}
+
+/* request one line interactively.
+ * Return 0: EOF
+ *        1: got one line from readline or infile */
+#ifndef READLINE
+static int
+get_line_from_user(char *prompt, Buffer *b)
+{
+  pariputs(prompt);
+  return get_line_from_file(prompt,b,infile);
+}
+#else
+static int
+get_line_from_user(char *prompt, Buffer *b)
+{
+  static char *previous_hist = NULL;
+  char *buf, *s = b->buf;
+
+  if (! (buf = gprl_input(b,s, prompt)) )
+  { /* EOF */
+    pariputs("\n"); return 0;
+  }
+  input_loop(b,buf,NULL,prompt);
+  unblock_SIGINT(); /* bug in readline 2.0: need to unblock ^C */
+
+  if (*s)
+  {
+    /* update history (don't add the same entry twice) */
+    if (!previous_hist || strcmp(s,previous_hist))
+    {
+      if (previous_hist) free(previous_hist);
+      previous_hist = pari_strdup(s); add_history(s);
+    }
+    /* update logfile */
+    if (logfile) fprintf(logfile, "%s%s\n",prompt,s);
+  }
+  return 1;
+}
+#endif
+
+static int
+is_interactive()
+{
+#if defined(UNIX) || defined(__EMX__)
+  return (infile == stdin && !under_texmacs
+                          && (under_emacs || isatty(fileno(stdin))));
+#else
+  return (infile == stdin && !under_texmacs);
+#endif
+}
+
+/* return 0 if no line could be read (EOF) */
 static int
 read_line(char *promptbuf, Buffer *b)
 {
-  if (infile == stdin /* interactive use */
-     && !under_texmacs
-#if defined(UNIX) || defined(__EMX__)
-     && (under_emacs || isatty(fileno(stdin)))
-#endif
-  )
-  {
-#ifdef READLINE
-    static char *previous_hist = NULL;
-    char *rlbuffer = readline(promptbuf), *s = b->buf;
-    int wait_for_brace, wait_for_input;
-
-    if (!rlbuffer) { pariputs("\n"); return 0; } /* EOF */
-    wait_for_input = wait_for_brace = init_filtre(rlbuffer);
-    for(;;)
-    {
-      long len = s - b->buf;
-      char *end = filtre(rlbuffer, f_READL);
-      long l = end - rlbuffer;
-
-      if (len + l > b->len)
-      {
-	fix_buffer(b, len+l+1);
-	s = b->buf + len;
-      }
-      strcpy(s,rlbuffer);
-      if (!*s) { if (!wait_for_input) break; }
-      else
-      {
-	s += l-1; /* *s = last input char */
-	if (wait_for_brace && *s == RBRACE) {*s=0; break;}
-	if (*s == '\\')
-        {
-          if (*rlbuffer == '?') break;
-        }
-        else if (*s == '=' && s[1-l] != '?')
-        {
-          wait_for_input = 1; s++;
-        }
-        else
-	{
-	  if (!wait_for_brace) break;
-	  s++;
-	}
-      }
-      free(rlbuffer);
-      /* read continuation line */
-      if (!(rlbuffer = readline(""))) break;
-      if (wait_for_input && !wait_for_brace)
-        wait_for_brace = init_brace(rlbuffer);
-    }
-    /* bug in readline 2.0: need to unblock ^C */
-# ifdef USE_SIGRELSE
-    sigrelse(SIGINT);
-# elif USE_SIGSETMASK
-    sigsetmask(0);
-# endif
-    s = b->buf;
-    if (*s)
-    {
-      /* update history (don't add the same entry twice) */
-      if (!previous_hist || strcmp(s,previous_hist))
-      {
-	if (previous_hist) free(previous_hist);
-	previous_hist = pari_strdup(s); add_history(s);
-      }
-      /* update logfile */
-      if (logfile) fprintf(logfile, "%s%s\n",promptbuf,s);
-    }
-    return 1;
-#else
-    pariputs(promptbuf);
-#endif /* defined(READLINE) */
-  }
-  else promptbuf = DFT_PROMPT;
-  return get_line_from_file(infile, b, promptbuf);
+  if (is_interactive())
+    return get_line_from_user(promptbuf, b);
+  else
+    return get_line_from_file(DFT_PROMPT,b,infile);
 }
 
 static void
@@ -2363,7 +2381,7 @@ gp_main_loop(int ismain)
     {
       int r;
       r = read_line(do_prompt(), b);
-      term_color(c_NONE);
+      if (!disable_color) term_color(c_NONE);
       if (!r)
       {
 #ifdef _WIN32
@@ -2450,7 +2468,7 @@ input0()
   GEN x;
 
   push_stack(&bufstack, (void*)b);
-  while (! get_line_from_file(infile, b, DFT_INPROMPT))
+  while (! get_line_from_file(DFT_INPROMPT,b,infile))
     if (popinfile()) { fprintferr("no input ???"); gp_quit(); }
   x = lisseq(b->buf);
   pop_buffer(); return x;
