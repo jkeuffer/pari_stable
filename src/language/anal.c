@@ -732,7 +732,7 @@ GEN
 type0(GEN x)
 {
   char *s = type_name(typ(x));
-  return STRtoGENstr(s);
+  return strtoGENstr(s);
 }
 
 /*******************************************************************/
@@ -1118,20 +1118,7 @@ _strtoGENstr(const char *s, long n0)
 }
 
 GEN
-STRtoGENstr(const char *s) { return _strtoGENstr(s, strlen(s)); }
-
-/* FIXME: obsolete, kept for gp2c compatibility */
-GEN
-strtoGENstr(char *s, long flag)
-{
-  GEN x;
-
-  if (flag) s = expand_tilde(s);
-  x = _strtoGENstr(s, strlen(s));
-  if (flag) free(s);
-  return x;
-}
-
+strtoGENstr(const char *s) { return _strtoGENstr(s, strlen(s)); }
 /********************************************************************/
 /**                                                                **/
 /**                          READ FUNCTIONS                        **/

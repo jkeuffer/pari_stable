@@ -252,8 +252,7 @@ GEN     lisseq(char *t);
 long    manage_var(long n, entree *ep);
 void    name_var(long n, char *s);
 GEN     readseq(char *c, int strict);
-GEN     STRtoGENstr(const char *s);
-GEN     strtoGENstr(char *s, long flag); /* FIXME: obsolete */
+GEN     strtoGENstr(const char *s);
 GEN     type0(GEN x);
 
 /* arith1.c */
@@ -1290,7 +1289,6 @@ GEN     incloop(GEN a);
 GEN     incpos(GEN a);
 int     invmod(GEN a, GEN b, GEN *res);
 ulong   invrev(ulong b);
-long    Fl_inv_signed(long x, long p);
 ulong   Fl_inv(ulong x, ulong p);
 GEN     ishiftr(GEN x, long n);
 GEN     isqrti(GEN a);

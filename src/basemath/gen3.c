@@ -2219,7 +2219,7 @@ gtovec(GEN x)
     for (i=1; i<lx; i++)
     {
       t[0] = y[i];
-      y[i] = (long)STRtoGENstr(t);
+      y[i] = (long)strtoGENstr(t);
     }
     settyp(y,t_VEC); return y;
   }

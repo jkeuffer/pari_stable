@@ -734,7 +734,7 @@ pGENtostr(GEN g, long flag) {
 }
 GEN Str0(GEN g, long flag) {
   char *t = pGENtostr(g, flag);
-  GEN z = STRtoGENstr(t);
+  GEN z = strtoGENstr(t);
   free(t); return z;
 }
 GEN Str(GEN g)    { return Str0(g, f_RAW); }
@@ -742,7 +742,7 @@ GEN Strtex(GEN g) { return Str0(g, f_TEX); }
 GEN
 Strexpand(GEN g) {
   char *s = pGENtostr(g, f_RAW), *t = expand_tilde(s);
-  GEN z = STRtoGENstr(t);
+  GEN z = strtoGENstr(t);
   free(t); free(s); return z;
 }
 
@@ -754,7 +754,7 @@ GENtoGENstr(GEN x)
   GEN z;
   T.prettyp = f_RAW;
   s = GENtostr0(x, &T, &gen_output);
-  z = STRtoGENstr(s); free(s); return z;
+  z = strtoGENstr(s); free(s); return z;
 }
 
 GEN
@@ -766,7 +766,7 @@ GENtocanonicalstr(GEN x)
   T.prettyp = f_RAW;
   T.sp = 0;
   s = GENtostr0(x, &T, &gen_output);
-  z = STRtoGENstr(s); free(s); return z;
+  z = strtoGENstr(s); free(s); return z;
 }
 
 static char
