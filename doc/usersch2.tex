@@ -1010,7 +1010,11 @@ equal to $0$ (specifically, if \kbd{gcmp0($x$)==1}), and $0$ otherwise.
 %
 \kbd{\pow}: powering.
 
-\kbd{'} (unary, postfix): derivative with respect to the main variable.
+\kbd{'} (unary, postfix): derivative with respect to the main variable. If
+$f$ is a (GP or user) function, $f'(x)$ is allowed. If $x$ is a scalar, the
+operator performs \idx{numerical derivation}, defined as $(f(x+\varepsilon) -
+f(x-\varepsilon)) / 2\varepsilon$ for a suitably small epsilon depending on
+current precision. It behaves as $(f(x))'$ otherwise.
 
 \strut\kbd{\til} (unary, postfix): vector/matrix transpose.
 
