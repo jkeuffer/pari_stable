@@ -1711,23 +1711,6 @@ do_call(void *call, GEN x, GEN argvec[])
                           argvec[5], argvec[6], argvec[7], argvec[8]);
 }
 
-static GEN
-fix(GEN x, long l)
-{
-  GEN y;
-  if (typ(x) == t_COMPLEX)
-  {
-    y = cgetg(3,t_COMPLEX);
-    y[1] = (long)fix((GEN)x[1],l);
-    y[2] = (long)fix((GEN)x[2],l);
-  }
-  else
-  {
-    y = cgetr(l); gaffect(x,y);
-  }
-  return y;
-}
-
 /* Rationale: (f(2^-e) - f(-2^-e) + O(2^-pr)) / (2 * 2^-e) = f'(0) + O(2^-2e)
  * since 2nd derivatives cancel.
  *   prec(LHS) = pr - e
@@ -1755,8 +1738,8 @@ num_deriv(void *call, GEN argvec[])
   e = fpr * BITS_IN_HALFULONG; /* 1/2 required prec (in sig. bits) */
 
   eps = real2n(-e, l);
-  y = fix(gsub(x, eps), l); a = do_call(call, y, argvec);
-  y = fix(gadd(x, eps), l); b = do_call(call, y, argvec);
+  y = gtofp(gsub(x, eps), l); a = do_call(call, y, argvec);
+  y = gtofp(gadd(x, eps), l); b = do_call(call, y, argvec);
   setexpo(eps, e-1);
   return gerepileupto(av, gmul(gsub(b,a), eps));
 }
@@ -1783,8 +1766,8 @@ num_derivU(GEN p, GEN *arg, gp_args *f)
   e = fpr * BITS_IN_HALFULONG; /* 1/2 required prec (in sig. bits) */
 
   eps = real2n(-e, l);
-  *arg = fix(gsub(x, eps), l); a = call_fun(p,arg,f);
-  *arg = fix(gadd(x, eps), l); b = call_fun(p,arg,f);
+  *arg = gtofp(gsub(x, eps), l); a = call_fun(p,arg,f);
+  *arg = gtofp(gadd(x, eps), l); b = call_fun(p,arg,f);
   setexpo(eps, e-1);
   return gerepileupto(av, gmul(gsub(b,a), eps));
 }

@@ -1818,6 +1818,24 @@ gcvtoi(GEN x, long *e)
   return gtrunc(x);
 }
 
+long
+isint(GEN n, long *ptk)
+{
+  switch(typ(n))
+  {
+    case t_INT: *ptk = itos(n); return 1;
+    case t_REAL: {
+      GEN z = floorr(n);
+      if (!signe(subri(n, z))) return 0;
+      *ptk = itos(z); return 1;
+    }
+    case t_FRAC:    return 0;
+    case t_COMPLEX: return gcmp0((GEN)n[2]) && isint((GEN)n[1],ptk);
+    case t_QUAD:    return gcmp0((GEN)n[3]) && isint((GEN)n[2],ptk);
+    default: err(typeer,"isint"); return 0; /* not reached */
+  }
+}
+
 /* smallest integer greater than any incarnations of the real x
  * [avoid mpfloor() and "precision loss in truncation"] */
 GEN

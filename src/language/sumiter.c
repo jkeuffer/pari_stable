@@ -1081,14 +1081,6 @@ typedef struct {
   void *E;
 } invfun;
 
-/* we need to make a copy in any case, cf forpari */
-static GEN
-fix(GEN a, long prec)
-{
-  GEN p = cgetr(prec);
-  gaffect(a,p); return p;
-}
-
 /* f(x) */
 static GEN
 _gp_eval(GEN x, void *dat)
@@ -1127,8 +1119,8 @@ qrom3(void *dat, GEN (*eval)(GEN,void *), GEN a, GEN b, long prec)
   GEN ss,s,h,p1,p2,qlint,del,x,sum;
   long j, j1, it, sig;
 
-  a = fix(a,prec);
-  b = fix(b,prec);
+  a = gtofp(a,prec);
+  b = gtofp(b,prec);
   qlint = subrr(b,a); sig = signe(qlint);
   if (!sig)  return gzero;
   if (sig < 0) { setsigne(qlint,1); swap(a,b); }
@@ -1169,8 +1161,8 @@ qrom2(void *dat, GEN (*eval)(GEN,void *), GEN a, GEN b, long prec)
   GEN ss,s,h,p1,qlint,del,ddel,x,sum;
   long j, j1, it, sig;
 
-  a = fix(a, prec);
-  b = fix(b, prec);
+  a = gtofp(a, prec);
+  b = gtofp(b, prec);
   qlint = subrr(b,a); sig = signe(qlint);
   if (!sig)  return gzero;
   if (sig < 0) { setsigne(qlint,1); swap(a,b); }
@@ -1365,8 +1357,8 @@ zbrent(void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, long prec)
   pari_sp av = avma;
   GEN c,d,e,tol,tol1,min1,min2,fa,fb,fc,p,q,r,s,xm;
 
-  a = fix(a,prec);
-  b = fix(b,prec); sig = cmprr(b,a);
+  a = gtofp(a,prec);
+  b = gtofp(b,prec); sig = cmprr(b,a);
   if (!sig) return gerepileupto(av, a);
   if (sig < 0) { c=a; a=b; b=c; } else c = b;
 

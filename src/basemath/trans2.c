@@ -911,19 +911,14 @@ trans_fix_arg(long *prec, GEN *s0, GEN *sig, pari_sp *av, GEN *res)
   if (typ(s) == t_COMPLEX)
   { /* s = sig + i t */
     *res = cgetc(l); *av = avma;
-    p1 = cgetc(l+1); gaffect(s,p1);
-    s = p1; *sig = (GEN)s[1];
+    s = ctofp(s, l+1); *sig = (GEN)s[1];
   }
   else /* real number */
   {
     *res = cgetr(l); *av = avma;
-    p1 = cgetr(l+1); gaffect(s,p1);
-    *sig = s = p1;
-  }
-  if (typ(s)==t_REAL)
-  {
+    *sig = s = gtofp(s, l+1);
     p1 = floorr(s);
-    if (gcmp0(subri(s,p1))) *s0 = p1;
+    if (!signe(subri(s,p1))) *s0 = p1;
   }
   *prec = l; return s;
 }

@@ -1305,9 +1305,7 @@ gaffect(GEN x, GEN y)
 	case t_FRAC:
 	  switch(ty)
 	  {
-	    case t_REAL: av = avma;
-              affrr(rdivii((GEN)x[1],(GEN)x[2], lg(y)), y);
-              avma = av; break;
+	    case t_REAL: rdiviiz((GEN)x[1],(GEN)x[2], y); break;
 	    case t_INTMOD: av = avma;
               p1 = Fp_inv((GEN)x[2],(GEN)y[1]);
 	      modiiz(mulii((GEN)x[1],p1),(GEN)y[1],(GEN)y[2]);
@@ -1635,6 +1633,21 @@ gcvtop(GEN x, GEN p, long r)
   }
   err(typeer,"gcvtop");
   return NULL; /* not reached */
+}
+
+/* Force z to be of type real/complex with floating point components */
+GEN
+gtofp(GEN z, long prec)
+{
+  switch(typ(z))
+  {
+    case t_INT:  return itor(z, prec);
+    case t_FRAC: return rdivii((GEN)z[1], (GEN)z[2], prec);
+    case t_REAL: return rtor(z, prec);
+    case t_COMPLEX: return ctofp(z, prec);
+    case t_QUAD: return quadtoc(z, prec);
+    default: err(typeer,"gtofp"); return gzero; /* not reached */
+  }
 }
 
 long

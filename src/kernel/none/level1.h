@@ -45,6 +45,7 @@ void   affsi(long s, GEN x);
 void   affsr(long s, GEN x);
 void   affui(long s, GEN x);
 void   affur(ulong s, GEN x);
+GEN    cgetc(long x);
 GEN    cgetg_copy(long lx, GEN x);
 GEN    cgetg(long x, long y);
 GEN    cgeti(long x);
@@ -109,6 +110,7 @@ GEN    mptrunc(GEN x);
 GEN    new_chunk(size_t x);
 long   random_bits(long k);
 GEN    rdivii(GEN x, GEN y, long prec);
+GEN    rdiviiz(GEN x, GEN y, GEN z);
 GEN    rdivis(GEN x, long y, long prec);
 GEN    rdivsi(long x, GEN y, long prec);
 GEN    rdivss(long x, long y, long prec);
@@ -228,6 +230,12 @@ cgetr(long x)
   const GEN z = new_chunk((size_t)x);
   z[0] = evaltyp(t_REAL) | evallg(x);
   return z;
+}
+INLINE GEN
+cgetc(long l)
+{
+  GEN u = cgetg(3,t_COMPLEX); u[1]=lgetr(l); u[2]=lgetr(l);
+  return u;
 }
 INLINE GEN
 _veccopy(GEN x) { GEN v = cgetg(2, t_VEC); v[1] = lcopy(x); return v; }
@@ -449,6 +457,11 @@ INLINE GEN
 itor(GEN x, long prec) { GEN z = cgetr(prec); affir(x,z); return z; }
 INLINE GEN
 rtor(GEN x, long prec) { GEN z = cgetr(prec); affrr(x,z); return z; }
+INLINE GEN
+ctofp(GEN x, long prec) { GEN z = cgetg(3,t_COMPLEX);
+  z[1] = (long)gtofp((GEN)x[1],prec);
+  z[2] = (long)gtofp((GEN)x[2],prec); return z;
+}
 
 INLINE GEN
 shiftr(GEN x, long n)
@@ -690,19 +703,23 @@ rdivss(long x, long y, long prec)
   avma = av; return z;
 }
 
-INLINE GEN 
-rdivii(GEN x, GEN y, long prec)
+INLINE GEN
+rdiviiz(GEN x, GEN y, GEN z)
 {
-  GEN z = cgetr(prec);
   const pari_sp av = avma;
+  long prec = lg(z);
+  affir(x, z);
   if (!is_bigint(y)) {
-    affrr(divrs(itor(x,prec), y[2]), z);
+    affrr(divrs(z, y[2]), z);
     if (signe(y) < 0) setsigne(z, -signe(z));
   }
   else
-    affrr(divrr(itor(x,prec), itor(y,prec)), z);
+    affrr(divrr(z, itor(y,prec)), z);
   avma = av; return z;
 }
+
+INLINE GEN 
+rdivii(GEN x, GEN y, long prec) { return rdiviiz(x, y, cgetr(prec)); }
 
 INLINE void
 divrrz(GEN x, GEN y, GEN z)
