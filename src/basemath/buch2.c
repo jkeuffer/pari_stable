@@ -569,7 +569,7 @@ can_factor(FB_t *F, GEN nf, GEN I, GEN m, GEN N)
   return is_pm1(N) || divide_p(F, itos(N), 1, nf, I, m);
 }
 
-/* can we factor I/m ? [m in I from pseudomin] */
+/* can we factor m/I ? [m in I from pseudomin] */
 static long
 factorgen(FB_t *F, GEN nf, GEN I, GEN m)
 {
@@ -923,7 +923,7 @@ Vbase_to_FB(FB_t *F, GEN pr)
   return F->iLP[p] + pr_index(F->LV[p], pr);
 }
 
-/* return famat y (principal ideal) such that x / y is smooth [wrt Vbase] */
+/* return famat y (principal ideal) such that y / x is smooth [wrt Vbase] */
 static GEN
 SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase)
 {
@@ -980,7 +980,7 @@ SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase)
       if (factorgen(F, nf, (GEN)id[1], y))
       {
         for (i=1; i<lgsub; i++)
-          if (ex[i]) add_to_fact(Vbase_to_FB(F,(GEN)Vbase[i]), -ex[i]);
+          if (ex[i]) add_to_fact(Vbase_to_FB(F,(GEN)Vbase[i]), ex[i]);
         return famat_mul((GEN)id[2], y);
       }
       for (i=1; i<ru; i++) vdir[i] = 0;
@@ -1001,6 +1001,7 @@ SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase)
   }
 }
 
+/* return principal y such that y / x is smooth. Store factorization of latter*/
 static GEN
 split_ideal(GEN nf, GEN x, GEN Vbase)
 {
@@ -1289,9 +1290,12 @@ _isprincipal(GEN bnf, GEN x, long *ptprec, long flag)
     else        Bex[l] = exprimfact[i];
   }
 
-  /* x = g_W Wex + g_B Bex - [xar]
-   *   = g_W A - [xar] + [C_B]Bex  since g_W B + g_B = [C_B] */
-  A = gsub(vecsmall_col(Wex), ZM_zc_mul(B,Bex));
+  /* x = -g_W Wex - g_B Bex + [xar]    | x = g_W Wex + g_B Bex if xar = NULL
+   *   = g_W A + [xar] - [C_B]Bex  since g_W B + g_B = [C_B] */
+  if (xar)
+    A = gsub(ZM_zc_mul(B,Bex), vecsmall_col(Wex));
+  else
+    A = gsub(vecsmall_col(Wex), ZM_zc_mul(B,Bex));
   Q = gmul(U, A);
   for (i=1; i<=c; i++)
     Q[i] = (long)truedvmdii((GEN)Q[i], (GEN)cyc[i], (GEN*)(ex+i));
