@@ -136,11 +136,14 @@ static void
 pari_init_stackcheck(void *stack_base)
 {
   struct rlimit rip;
+  ulong size;
 
-  if (getrlimit(RLIMIT_STACK, &rip) || rip.rlim_cur  == RLIM_INFINITY) return;
-/* DEC cc doesn't like this line:
- * PARI_stack_limit = stack_base - ((rip.rlim_cur/16)*15); */
-  PARI_stack_limit = (void*)((long)stack_base - (rip.rlim_cur/16)*15);
+  if (getrlimit(RLIMIT_STACK, &rip)) return;
+  size = rip.rlim_cur;
+  if (size == RLIM_INFINITY || size > (ulong)stack_base)
+    PARI_stack_limit = (void*)(((ulong)stack_base) / 16);
+  else
+    PARI_stack_limit = (void*)((ulong)stack_base - (size/16)*15);
 }
 #    define STACK_CHECK_INIT(b) pari_init_stackcheck(b)
 #  endif /* !__EMX__ */
