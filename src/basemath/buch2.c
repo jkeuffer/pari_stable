@@ -1308,10 +1308,14 @@ _isprincipal(GEN bnf, GEN x, long *ptprec, long flag)
     else        Bex[l] = exprimfact[i];
   }
 
-  /* x = -g_W Wex - g_B Bex + [xar]    | x = g_W Wex + g_B Bex if xar = NULL
-   *   = g_W A + [xar] - [C_B]Bex  since g_W B + g_B = [C_B] */
+  /* x = -g_W Wex - g_B Bex + [xar]  | x = g_W Wex + g_B Bex if xar = NULL
+   *   = g_W A + [xar] - [C_B]Bex    |   = g_W A + [C_B]Bex
+   * since g_W B + g_B = [C_B] */
   if (xar)
+  {
     A = gsub(ZM_zc_mul(B,Bex), vecsmall_col(Wex));
+    Bex = gneg(Bex);
+  }
   else
     A = gsub(vecsmall_col(Wex), ZM_zc_mul(B,Bex));
   Q = gmul(U, A);

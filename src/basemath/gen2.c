@@ -846,6 +846,10 @@ gneg(GEN x)
       for (i=2; i<lx; i++) y[i]=lneg((GEN)x[i]);
       break;
 
+    case t_VECSMALL:
+      lx=lg(x); y=cgetg(lx,tx);
+      for (i=1; i<lx; i++) y[i] = -x[i];
+      break;
     default:
       err(typeer,"negation");
       return NULL; /* not reached */
@@ -892,6 +896,11 @@ gneg_i(GEN x)
     case t_POL: case t_SER:
       lx=lg(x); y=cgetg(lx,tx); y[1]=x[1];
       for (i=2; i<lx; i++) y[i]=(long)gneg_i((GEN)x[i]);
+      break;
+
+    case t_VECSMALL:
+      lx=lg(x); y=cgetg(lx,tx);
+      for (i=1; i<lx; i++) y[i] = -x[i];
       break;
 
     default:
