@@ -1421,7 +1421,7 @@ static GEN
 rnfnormgroup0(GEN bnr, GEN polrel, GEN rnf)
 {
   long av=avma,i,j,reldeg,sizemat,p,pmax,nfac,k;
-  GEN bnf,polreldisc,nf,raycl,group,detgroup,fa,greldeg;
+  GEN bnf,polreldisc,discnf,nf,raycl,group,detgroup,fa,greldeg;
   GEN contreld,primreld,reldisc,famo,ep,fac,col,p1,bd,upnf;
   byteptr d = diffptr + 1; /* start at p = 2 */
 
@@ -1457,17 +1457,21 @@ rnfnormgroup0(GEN bnr, GEN polrel, GEN rnf)
   contreld= content(reldisc);
   primreld= gcmp1(contreld)? reldisc: gdiv(reldisc, contreld);
 
-  k=degree(gmael3(bnr,1,7,1));
-  bd=gmulsg(k,glog(mpabs(gmael3(bnr,1,7,3)),DEFAULTPREC));
-  bd=gadd(bd,glog(mpabs(det(reldisc)),DEFAULTPREC));
-  k=reldeg*k;p1=gaddgs(gmulsg(k,dbltor(2.5)),5);
-  bd=gfloor(gsqr(gadd(gmulsg(4,bd),p1)));
+  discnf = (GEN)nf[3];
+  k = degree((GEN)nf[1]);
+  bd = gmulsg(k, glog(absi(discnf), DEFAULTPREC));
+  bd = gadd(bd,glog(mpabs(det(reldisc)),DEFAULTPREC));
+  p1 = dbltor(reldeg * k * 2.5 + 5);
+  bd = gfloor(gsqr(gadd(gmulsg(4,bd),p1)));
 
-  if (rnf && DEBUGLEVEL) 
-    fprintferr("rnfnormgroup: bound for primes = %Z\n", bd);
   pmax = is_bigint(bd)? 0: itos(bd);
+  if (rnf) 
+  {
+    if (DEBUGLEVEL) fprintferr("rnfnormgroup: bound for primes = %Z\n", bd);
+    if (!pmax) err(warner,"rnfnormgroup: prime bound too large, can't certify");
+  }
   sizemat=lg(group)-1;
-  for (p=2; p < pmax; p += *d++)
+  for (p=2; !pmax || p < pmax; p += *d++)
   {
     long oldf = -1, lfa;
     /* If all pr are unramified and have the same residue degree, p =prod pr
@@ -1478,6 +1482,7 @@ rnfnormgroup0(GEN bnr, GEN polrel, GEN rnf)
     if (!smodis(contreld,p)) continue; /* all pr|p ramified */
 
     fa = primedec(nf,stoi(p)); lfa = lg(fa)-1;
+
     for (i=1; i<=lfa; i++)
     {
       GEN pr = (GEN)fa[i];
@@ -1520,10 +1525,10 @@ rnfnormgroup0(GEN bnr, GEN polrel, GEN rnf)
           }
         }
       }
+      if (oldf < 0) oldf = f; else if (oldf != f) oldf = 0;
       if (f == reldeg) continue; /* reldeg-th powers already included */
 
-      if (oldf < 0) oldf = f; else if (oldf != f) oldf = 0;
-      if (oldf && i == lfa) pr = stoi(p); 
+      if (oldf && i == lfa && !smodis(discnf, p)) pr = stoi(p); 
 
       /* pr^f = N P, P | pr, hence is in norm group */
       col = gmulsg(f, isprincipalrayall(bnr,pr,nf_REGULAR));
