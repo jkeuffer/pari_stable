@@ -102,6 +102,12 @@ representative of $x y$ modulo $m$.
 positive representative of $x^{-1}$ modulo $m$. If $x$ is not invertible
 mod $m$, return $0$.
 
+\fun{long}{invsmod}{long x, long m} returns the smallest
+positive representative of $x^{-1}$ modulo $m$. If $x$ is not invertible
+mod $m$, return $0$. In this routine no specific assumptions are made about
+the respective size or sign of $x$ and $m$. Consequently, it is slower than
+\kbd{invumod}.
+
 \fun{ulong}{divuumod}{ulong x, ulong y, ulong m} returns the smallest
 positive representative of $x y^{-1}$ modulo $m$. Ix $y$ is not invertible 
 mod $m$, return $0$.
