@@ -184,6 +184,8 @@ IZ 36- cache optimization in initprimes() [ default(primelimit,.) ]
        to ulong as a side effect of some other change, long ago ]
 BA 45- split kernel Makefiles in MakeLVL0 and MakeLVL1. 
 BA 46- --disable-kernel Configure option replaced by --kernel=none
+   47- compute_polrel() [rnfkummer] was very slow for [L:K] > 5 (compute
+       Newton sums directly)
 
   Added:
     1- [TeXmacs:] contextual completion (<TAB>)
