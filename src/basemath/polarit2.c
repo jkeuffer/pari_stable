@@ -31,7 +31,7 @@ extern GEN gassoc_proto(GEN f(GEN,GEN),GEN,GEN);
 extern GEN Fq_mul(GEN x, GEN y, GEN T, GEN p);
 /* compute Newton sums S_1(P), ... , S_n(P). S_k(P) = sum a_j^k, a_j root of P
  * If N != NULL, assume p-adic roots and compute mod N [assume integer coeffs]
- * If T != NULL, compute mod (T,N) [assume integer coeffs and N != NULL]
+ * If T != NULL, compute mod (T,N) [assume integer coeffs if N != NULL]
  * If y0!= NULL, precomputed i-th powers, i=1..m, m = length(y0) */
 GEN
 polsym_gen(GEN P, GEN y0, long n, GEN T, GEN N)
@@ -58,7 +58,11 @@ polsym_gen(GEN P, GEN y0, long n, GEN T, GEN N)
   P += 2; /* strip codewords */
 
   P_lead = (GEN)P[dP]; if (gcmp1(P_lead)) P_lead = NULL;
-  if (N && P_lead) P_lead = FpXQ_inv(P_lead,T,N);
+  if (P_lead)
+  {
+    if (N) P_lead = FpXQ_inv(P_lead,T,N);
+    else if (T) P_lead = QX_invmod(P_lead,T);
+  }
   for (k=m; k<=n; k++)
   {
     av1 = avma; s = (dP>=k)? gmulsg(k,(GEN)P[dP-k]): gzero;
@@ -70,8 +74,13 @@ polsym_gen(GEN P, GEN y0, long n, GEN T, GEN N)
       else   s = modii(s, N);
       if (P_lead) s = Fq_mul(s, P_lead, T, N);
     }
+    else if (T)
+    {
+      s = gres(s, T);
+      if (P_lead) s = gres(gmul(s, P_lead), T);
+    }
     else
-      if (P_lead) s = gdiv(s,P_lead);
+      if (P_lead) s = gdiv(s, P_lead);
     av2 = avma; y[k+1] = lpile(av1,av2, gneg(s));
   }
   return y;
@@ -2885,7 +2894,7 @@ Q_div_to_int(GEN x, GEN c)
       for (j=1; j<l; j++)
       {
         GEN c = (GEN)x[j], C = cgetg(h,t_COL);
-        for (i=1; i<l; i++) C[i] = (long)_rc((GEN)c[i], n,d);
+        for (i=1; i<h; i++) C[i] = (long)_rc((GEN)c[i], n,d);
         y[j] = (long)C;
       }
       break;
