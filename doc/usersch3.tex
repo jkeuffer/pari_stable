@@ -6106,8 +6106,8 @@ but much faster than $x*\kbd{matdiagonal}(d)$.
 \syn{matmuldiagonal}{x,d}.
 
 \subsecidx{matmultodiagonal}$(x,y)$: product of the matrices $x$ and $y$
-knowing that the result is a diagonal matrix. Much faster than $x*y$ in
-that case.
+assuming that the result is a diagonal matrix. Much faster than $x*y$ in
+that case. The result is undefined if $x*y$ is not diagonal.
 
 \syn{matmultodiagonal}{x,y}.
 
