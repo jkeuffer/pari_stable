@@ -463,7 +463,7 @@ quick_isprincipalgen(GEN bnf, GEN x)
   GEN z = cgetg(3, t_VEC), gen = gmael3(bnf,8,1,3);
   GEN idep, ep = isprincipal(bnf,x);
   /* x \prod g[i]^(-ep[i]) = factorisation of principal ideal */
-  idep = isprincipalfact(bnf, gen, gneg(ep), x, nf_GENMAT | nf_GEN);
+  idep = isprincipalfact(bnf, gen, gneg(ep), x, nf_GENMAT | nf_GEN | nf_FORCE);
   z[1] = (long)ep;
   z[2] = idep[2]; return z;
 }
