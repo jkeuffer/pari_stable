@@ -1271,7 +1271,6 @@ Flv_polint(GEN xa, GEN ya, ulong p, long vs)
   GEN Q = Flv_roots_to_pol(xa, p, vs);
   ulong inv;
   P[1] = vs;
-  if (DEBUGLEVEL>=4) fprintferr("Flv_polint(%ld)\n",n);
   for (j=2; j<=n; j++) P[j] = 0UL;
   for (i=1; i<n; i++)
   {
