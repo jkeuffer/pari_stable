@@ -683,37 +683,28 @@ CM_powell(GEN e, GEN z, GEN n)
   z[2] = lmul2n(y,-1); return gerepileupto(av, z);
 }
 
+static GEN
+ell_sqr(void *e, GEN x) { return addell((GEN)e, x, x); }
+
 GEN
 powell(GEN e, GEN z, GEN n)
 {
+  pari_sp av;
+  long s;
   GEN y;
-  long i, j, s;
-  pari_sp av=avma, tetpil;
-  ulong m;
 
   checksell(e); checkpt(z);
   if (typ(n)==t_QUAD) return CM_powell(e,z,n);
   if (typ(n)!=t_INT)
     err(impl,"powell for nonintegral or non CM exponents");
-  if (lg(z)<3) return gcopy(z);
-  s=signe(n);
-  if (!s) { y=cgetg(2,t_VEC); y[1]=zero; return y; }
-  if (s < 0) { n=negi(n); z = invell(e,z); }
-  if (is_pm1(n)) return gerepilecopy(av,z);
-
-  y=cgetg(2,t_VEC); y[1]=zero;
-  for (i=lgefint(n)-1; i>2; i--)
-    for (m=n[i],j=0; j<BITS_IN_LONG; j++,m>>=1)
-    {
-      if (m&1) y = addell(e,y,z);
-      z = addell(e,z,z);
-    }
-  for (m=n[2]; m>1; m>>=1)
-  {
-    if (m&1) y = addell(e,y,z);
-    z = addell(e,z,z);
-  }
-  tetpil=avma; return gerepile(av,tetpil,addell(e,y,z));
+  s = signe(n);
+  if (!s || lg(z) == 2) return _vec(gzero);
+  av = avma;
+  if (s < 0) z = invell(e,z);
+  if (is_pm1(n)) return z;
+  z = gclone(z); avma = av;
+  y = leftright_pow(z, n, (void*)e, &ell_sqr, (GEN(*)(void*,GEN,GEN))&addell);
+  gunclone(z); return y;
 }
 
 GEN
@@ -1469,15 +1460,14 @@ addsell(GEN e, GEN z1, GEN z2, GEN p)
   x1 = (GEN)z1[1]; y1 = (GEN)z1[2];
   x2 = (GEN)z2[1]; y2 = (GEN)z2[2];
   z = cgetg(3, t_VEC); av = avma;
-  p2 = subii(x2, x1);
-  if (p2 == gzero)
+  if (x1 == x2 || egalii(x1, x2))
   {
     if (!signe(y1) || !egalii(y1,y2)) return NULL;
     p2 = shifti(y1,1);
     p1 = addii(e, mulii(x1,mulsi(3,x1)));
     p1 = resii(p1, p);
   }
-  else p1 = subii(y2,y1);
+  else { p1 = subii(y2,y1); p2 = subii(x2, x1); }
   p1 = mulii(p1, mpinvmod(p2, p));
   p1 = resii(p1, p);
   x = subii(sqri(p1), addii(x1,x2));
@@ -1520,34 +1510,35 @@ negsell(GEN f, GEN p)
   return g;
 }
 
+typedef struct {
+  GEN e, p;
+} sellp;
+
+static GEN
+mul_sell(void *d, GEN x, GEN y)
+{
+  sellp *S = (sellp*)d;
+  return addsell(S->e, x, y, S->p);
+}
+static GEN
+sqr_sell(void *d, GEN x)
+{
+  sellp *S = (sellp*)d;
+  return addsell(S->e, x, x, S->p);
+}
+
 static GEN
 powsell(GEN e, GEN z, GEN n, GEN p)
 {
-  GEN y;
-  long s=signe(n),i,j;
-  ulong m;
+  long s = signe(n);
+  sellp S;
 
   if (!s || !z) return NULL;
-  if (s < 0)
-  {
-    z = negsell(z, p);
-    n = negi(n);
-  }
+  if (s < 0) z = negsell(z, p);
   if (is_pm1(n)) return z;
-
-  y = NULL;
-  for (i=lgefint(n)-1; i>2; i--)
-    for (m=n[i],j=0; j<BITS_IN_LONG; j++,m>>=1)
-    {
-      if (m&1) y = addsell(e,y,z,p);
-      z = addsell(e,z,z,p);
-    }
-  for (m=n[2]; m>1; m>>=1)
-  {
-    if (m&1) y = addsell(e,y,z,p);
-    z = addsell(e,z,z,p);
-  }
-  return addsell(e,y,z,p);
+  S.e = e;
+  S.p = p;
+  return leftright_pow(z, n, &S, &sqr_sell, &mul_sell);
 }
 
 /* assume H.f = 0, return exact order of f */
