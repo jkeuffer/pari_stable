@@ -2069,7 +2069,14 @@ init_pslq(pslq_M *M, GEN x, long *PREC)
   if (n <= 1) return cgetg(1, t_COL);
   for (k = 1; k <= n; k++)
     if (gcmp0((GEN)x[k])) return vec_ei(n, k);
-  prec = gprecision(x)-1; if (prec < DEFAULTPREC) prec = DEFAULTPREC;
+  prec = gprecision(x)-1;
+  if (prec < 0)
+  { /* exact components */
+    pari_sp av = avma;
+    x = Q_primpart(x); if (tx == t_COL) x = gtrans_i(x);
+    return gerepilecopy(av, (GEN)kerint(gtomat(x))[1]);
+  }
+  if (prec < DEFAULTPREC) prec = DEFAULTPREC;
   *PREC = prec;
   M->EXP = - bit_accuracy(prec) + max(2*n, 32);
   M->flreal = is_zero(gimag(x), M->EXP, prec);
