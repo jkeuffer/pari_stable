@@ -53,27 +53,27 @@ suppressed(void) {err(talker,"this function has been suppressed");}
 #define BUCH_PROTO "GD0.3,G,D0.3,G,D5,G,D1,G,D4,L,D3,L,p"
 static GEN
 buchgen(GEN g1,GEN g2,GEN g3,GEN g4, GEN g5,long l1,long l2, long prec) {
-  return buchall(g1,g2,g3,g4,g5,l1,l2,0,prec);
+  return buchall(g1,gtodouble(g2),gtodouble(g3),l1,0,prec);
 }
 static GEN
 buchgenfu(GEN g1,GEN g2,GEN g3,GEN g4, GEN g5,long l1,long l2,long prec) {
-  return buchall(g1,g2,g3,g4,g5,l1,l2,nf_UNITS,prec);
+  return buchall(g1,gtodouble(g2),gtodouble(g3),l1,nf_UNITS,prec);
 }
 static GEN
 buchgenforcefu(GEN g1,GEN g2,GEN g3,GEN g4, GEN g5,long l1,long l2,long prec) {
-  return buchall(g1,g2,g3,g4,g5,l1,l2,nf_UNITS|nf_FORCE,prec);
+  return buchall(g1,gtodouble(g2),gtodouble(g3),l1,nf_UNITS|nf_FORCE,prec);
 }
 static GEN
 buchinit(GEN g1,GEN g2,GEN g3,GEN g4, GEN g5,long l1,long l2,long prec) {
-  return buchall(g1,g2,g3,g4,g5,l1,l2,nf_INIT,prec);
+  return buchall(g1,gtodouble(g2),gtodouble(g3),l1,nf_INIT,prec);
 }
 static GEN
 buchinitfu(GEN g1,GEN g2,GEN g3,GEN g4, GEN g5,long l1,long l2,long prec) {
-  return buchall(g1,g2,g3,g4,g5,l1,l2,nf_INIT|nf_UNITS,prec);
+  return buchall(g1,gtodouble(g2),gtodouble(g3),l1,nf_INIT|nf_UNITS,prec);
 }
 static GEN
 buchinitforcefu(GEN g1,GEN g2,GEN g3,GEN g4, GEN g5,long l1,long l2,long prec) {
-  return buchall(g1,g2,g3,g4,g5,l1,l2,nf_INIT|nf_UNITS|nf_FORCE,prec);
+  return buchall(g1,gtodouble(g2),gtodouble(g3),l1,nf_INIT|nf_UNITS|nf_FORCE,prec);
 }
 
 entree oldfonctions[]={
