@@ -527,9 +527,8 @@ all_factor_bound(GEN x)
  * rigorous bound [for efficiency])
  */
 static GEN
-cmbf(GEN target, GEN famod, GEN pe, long maxK,long klim,long hint)
-{
-  long K = 1, cnt = 1, i,j,k, curdeg, lfamod = lg(famod)-1;
+cmbf(GEN target, GEN famod, GEN pe, long maxK, long kinit, long klim,long hint) {
+  long K = kinit, cnt = 1, i,j,k, curdeg, lfamod = lg(famod)-1;
   GEN lc, lctarget, pes2 = shifti(pe,-1);
   GEN ind      = cgetg(lfamod+1, t_VECSMALL);
   GEN deg      = cgetg(lfamod+1, t_VECSMALL);
@@ -700,7 +699,7 @@ refine_factors(GEN LL, GEN prime, long klim, long hint, long e, GEN res,
       {
         if (e2 != e) famod = hensel_lift_fact(x,famod,prime,pe,e2);
 
-        L2 = cmbf(x, famod, pe, 0, klim2, hint);
+        L2 = cmbf(x, famod, pe, 0, 1,klim2, hint);
         if (DEBUGLEVEL > 4 && lg(L2[1]) > 2)
           fprintferr("split in %ld\n",lg(L2[1])-1);
         refine_factors(L2, prime, klim, hint, e2, res, &cnt, 0);
@@ -919,18 +918,20 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
   }
   for(tmax = 0;; tmax += s) 
   {
-    long b = (long)ceil(b0 + (tmax+s)*k);
-    GEN pas2, pa_b, pb_as2, pbs2, pb = gpowgs(p, b), BE;
+    long b = (long)ceil(b0 + (tmax+s)*k), goodb;
+    GEN pas2, pa_b, pb_as2, pbs2, pb, BE;
 
     if (a <= b)
     {
-      a = ceil(b + 4*k);
+      a = ceil(b + 3*s*k) + 1;
       pa = gpowgs(p,a);
       famod = hensel_lift_fact(P,famod,p,pa,a);
     }
-    pa_b = gpowgs(p, a-b);
-    pb_as2 = shifti(pa_b,-1);
-    pbs2 = shifti(pb,-1);
+    goodb = (long) a - 0.12 * n0 * n0 / logp;
+    if ((a - goodb)*logp < 64*LOG2) goodb = (long) a - 64*LOG2/logp;
+    if (goodb > b) b = goodb;
+    pa_b = gpowgs(p, a-b); pb_as2 = shifti(pa_b,-1);
+    pb   = gpowgs(p, b);   pbs2    = shifti(pb,-1);
     C = (long)(sqrt((double)s*n)/ 2);
     M = dbltor((C*C*n + s*n*n/4.) * 1.00001);
 
@@ -1013,7 +1014,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
 }
 
 extern long split_berlekamp(GEN Q, GEN *t, GEN pp, GEN pps2);
-extern GEN primitive_pol_to_monic_factor(GEN pol, GEN *ptlead);
+extern GEN primitive_pol_to_monic(GEN pol, GEN *ptlead);
 
 /* assume degree(a) > 0, a(0) != 0, and a squarefree */
 static GEN
@@ -1125,7 +1126,7 @@ squff(GEN a, long klim, long hint)
 
   if (DEBUGLEVEL > 4) fprintferr("(first) bound: %Z\n", B);
   famod = hensel_lift_fact(a,famod,prime,pe,e);
-  L = cmbf(a, famod, pe, maxK, klim, hint);
+  L = cmbf(a, famod, pe, maxK, 1,klim, hint);
   if (maxK)
   {
     GEN listmod = (GEN)L[2];
@@ -1146,9 +1147,9 @@ squff(GEN a, long klim, long hint)
   e = get_e(B, prime, &pe);
 
   if (DEBUGLEVEL > 4) fprintferr("Mignotte bound: %Z\n", B);
-  if (nft < 11) maxK = 0;
   famod = hensel_lift_fact(a,famod,prime,pe,e);
-  L = cmbf(a, famod, pe, maxK, klim, hint);
+  if (nft < 11) maxK = 0;
+  L = cmbf(a, famod, pe, maxK, 1,klim, hint);
 
   res = (GEN)L[1];
   listmod = (GEN)L[2];
@@ -1166,10 +1167,17 @@ squff(GEN a, long klim, long hint)
     else
     {
       if (DEBUGLEVEL > 4) fprintferr("making it monic\n");
-      a = primitive_pol_to_monic_factor(a, &lt);
+      a = primitive_pol_to_monic(a, &lt);
+      #if 0
       B = uniform_Mignotte_bound(a);
       e = get_e(B, prime, &pe);
+
+      double logp = log((long)chosenp);
+      double b0 = log((double)da*2) / logp;
+      double k = gtodouble(glog(root_bound(a), DEFAULTPREC)) / logp;
+      if (e > )ceil(b0 + 20 * k);
       famod = hensel_lift_fact(a,famod,prime,pe,e);
+      #endif
     }
     setlg(res, l-1); /* remove last elt (possibly unfactored) */
     L = LLL_cmbf(a, famod, prime, pe, B, e, maxK);

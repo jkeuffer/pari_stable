@@ -261,54 +261,45 @@ gpolcomp(GEN p1, GEN p2)
   return 0;
 }
 
-/* pol is assumed to be non-zero, primitive and integral */
-static GEN
-primitive_pol_to_monic(GEN pol, GEN *ptlead)
-{
-  long n = lgef(pol)-1;
-  GEN p1,lead,res;
-
-  if (gcmp1((GEN)pol[n])) { if (ptlead) *ptlead = NULL; return pol; }
-  res = cgetg(n+1,t_POL); res[1]=pol[1];
-  lead = (GEN) pol[n]; p1 = gun;
-  res[n] = un; n--;
-  if (n>1) res[n] = pol[n];
-  for (n--; n>1; n--)
-  {
-    p1 = mulii(lead,p1);
-    res[n] = lmulii(p1,(GEN)pol[n]);
-  }
-  if (ptlead) *ptlead = lead; return res;
-}
-
 GEN
-primitive_pol_to_monic_factor(GEN pol, GEN *ptlead)
+primitive_pol_to_monic(GEN pol, GEN *ptlead)
 {
   long i,j,n = lgef(pol)-3;
   GEN lead,fa,e, a = dummycopy(pol);
 
   a += 2; lead = (GEN)a[n];
-  if (gcmp1(lead)) { if (ptlead) *ptlead = NULL; return a; }
+  if (gcmp1(lead)) { if (ptlead) *ptlead = NULL; return a-2; }
   lead = (GEN) a[n];
   fa = auxdecomp(lead,0); lead = gun;
   e = (GEN)fa[2]; fa = (GEN)fa[1];
   for (i=lg(e)-1; i>0;i--) e[i] = itos((GEN)e[i]);
   for (i=lg(fa)-1; i>0; i--)
   {
-    GEN p = (GEN)fa[i], pd, pk, pkn;
-    long k = ceil((double)e[i] / n); /* try to replace x by x p^k */
-    long d = n - e[i] % n; /* have to multiply a by p^d */
+    GEN p = (GEN)fa[i], p1,pk,pku;
+    long k = ceil((double)e[i] / n);
+    long d = k * n - e[i], v, j0;
+    /* find d, k such that  p^d pol(x / p^k) monic */
     for (j=n-1; j>0; j--)
     {
-      long v = ggval((GEN)a[j], p);
-      while (v < k * j - d) { k++; d += n; }
+      if (!signe(a[j])) continue;
+      v = pvaluation((GEN)a[j], p, &p1);
+      while (v + d < k * j) { k++; d += n; }
     }
-    pd = gpowgs(p,d);
-    pk = gpowgs(p,k); pkn = gun;
-    for (j=0; j<=n; j++)
+    pk = gpowgs(p,k); j0 = d/k;
+    pku = gpowgs(p,d - k*j0);
+    /* a[j] *= p^(d - kj) */
+    for (j=j0; j>=0; j--)
     {
-      a[j] = ldivii(mulii((GEN)a[j], pd), pkn);
-      pkn = mulii(pkn, pk);
+      if (j < j0) pku = mulii(pku, pk);
+      a[j] = lmulii((GEN)a[j], pku);
+    }
+    j0++;
+    pku = gpowgs(p,k*j0 - d);
+    /* a[j] /= p^(kj - d) */
+    for (j=j0; j<=n; j++)
+    {
+      if (j > j0) pku = mulii(pku, pk);
+      a[j] = ldivii((GEN)a[j], pku);
     }
     lead = mulii(lead, pk);
   }
