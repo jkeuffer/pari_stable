@@ -110,15 +110,15 @@ enum { PARSEMNU_TEMPL_TERM_NL, PARSEMNU_ARG_WHITESP };
     } else err(talker,reason,s); } STMT_END
 
 unsigned long
-parse_option_string(char *arg, char *template, long flag, char **failure, char **failure_arg)
+parse_option_string(char *arg, char *tmplate, long flag, char **failure, char **failure_arg)
 {
     unsigned long retval = 0;
-    char *etemplate = NULL;
+    char *etmplate = NULL;
 
     if (flag & PARSEMNU_TEMPL_TERM_NL)
-	etemplate = strchr(template, '\n');
-    if (!etemplate)
-	etemplate = template + strlen(template);
+	etmplate = strchr(tmplate, '\n');
+    if (!etmplate)
+	etmplate = tmplate + strlen(tmplate);
 
     if (failure)
 	*failure = NULL;
@@ -154,22 +154,22 @@ parse_option_string(char *arg, char *template, long flag, char **failure, char *
 	negate = 0;
 	negated = NULL;
       find:
-	id = template;
-	while ((id = strstr(id, buf)) && id < etemplate) {
+	id = tmplate;
+	while ((id = strstr(id, buf)) && id < etmplate) {
 	    if (IS_ID(id[l])) {		/* We do not allow abbreviations yet */
 		id = id + l;		/* False positive */
 		continue;
 	    }
-	    if ((id >= template + 2) && (IS_ID(id[-1]))) {
+	    if ((id >= tmplate + 2) && (IS_ID(id[-1]))) {
 		char *s = id;
 
-		if ( !negate && s >= template+3
+		if ( !negate && s >= tmplate+3
 		     && ((id[-1] == '_') || (id[-1] == '-')) )
 		    s--;
 		/* Check whether we are preceeded by "no" */
 		if ( negate		/* buf initially started with "no" */
-		     || (s < template+2) || (s[-1] != 'o') || (s[-2] != 'n')
-		     || (s >= template+3 && IS_ID(s[-3]))) {
+		     || (s < tmplate+2) || (s[-1] != 'o') || (s[-2] != 'n')
+		     || (s >= tmplate+3 && IS_ID(s[-3]))) {
 		    id = id + l;		/* False positive */
 		    continue;
 		}
