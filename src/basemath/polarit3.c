@@ -1100,7 +1100,6 @@ FpXQX_safegcd(GEN P, GEN Q, GEN T, GEN p)
         dg = -dg;
       }
       lQ = leading_term(Q);
-      lP = leading_term(P);
       if (typ(lQ)==t_POL)
       {
       	z = FpX_extgcd(lQ, T, p, &U, &V);
@@ -1110,10 +1109,15 @@ FpXQX_safegcd(GEN P, GEN Q, GEN T, GEN p)
       }
       else U = scalarpol(mpinvmod(lQ, p),vy);
       Q = FpXQX_FpXQ_mul(Q, U, T, p);
-      P = gsub(P, FpXQX_mul(gmul(lP, gpowgs(x, dg)), Q, T, p));
-      P = FpXQX_red(P, T, p);
+      do
+      {
+	lP = leading_term(P);
+	P = gsub(P, FpXQX_mul(gmul(lP, gpowgs(x, dg)), Q, T, p));
+	P = FpXQX_red(P, T, p);
+	dg = lgef(P)-lgef(Q);
+      }while(dg>=0);
       if (low_stack(st_lim, stack_lim(btop, 1)))
-        gerepilemany(btop, bptr, 2);
+	gerepilemany(btop, bptr, 2);
     }while(signe(P));
   }
   return gerepileupto(ltop, Q);
