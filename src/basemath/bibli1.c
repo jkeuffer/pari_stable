@@ -1746,7 +1746,7 @@ lindep2(GEN x, long bit)
     p1[lx]           = lcvtoi(gshift((GEN)re[i],bit),&e);
     if (im) p1[lx+1] = lcvtoi(gshift((GEN)im[i],bit),&e);
   }
-  p1 = (GEN)lllint_ip(p2,100)[1];
+  p1 = (GEN)lllint_fp_ip(p2,100)[1];
   p1[0] = evaltyp(t_COL) | evallg(lx);
   return gerepilecopy(av, p1);
 }
@@ -2580,7 +2580,7 @@ plindep(GEN x)
     coeff(m,1  ,i) = x[i+1];
   }
   for (i=1; i<=lx; i++) coeff(m,i,lx-1+i) = (long)pn;
-  m = lllint_ip(m, 100);
+  m = lllint_fp_ip(m, 100);
   return gerepilecopy(av, (GEN)m[1]);
 }
 
@@ -2653,7 +2653,7 @@ GEN
 kerint1(GEN x)
 {
   pari_sp av = avma;
-  return gerepilecopy(av, lllint_ip(matrixqz3(ker(x)), 100));
+  return gerepilecopy(av, lllint_fp_ip(matrixqz3(ker(x)), 100));
 }
 
 GEN
@@ -2664,7 +2664,7 @@ kerint(GEN x)
   if (h) h = lll_finish(h,fl, lll_KER);
   else   h = lll_trivial(x, lll_KER);
   if (lg(h)==1) { avma = av; return cgetg(1, t_MAT); }
-  return gerepilecopy(av, lllint_ip(h, 100));
+  return gerepilecopy(av, lllint_fp_ip(h, 100));
 }
 
 /********************************************************************/
