@@ -33,6 +33,7 @@ $miscdir= "@miscdir@";
 $wwwsite= "http://hasse.mathematik.tu-muenchen.de/ntsw/pari/";
 $docdir = $ENV{GPDOCDIR} || $ENV{GPHELP_DOCDIR} || $miscdir;
 $xdvi = $ENV{GPXDVI} || "xdvi";
+$xdviref = $ENV{GPXDVIREF} || "$xdvi -paper 29.7x21cm";
 $gzip = "gzip";
 $zcat = "$gzip -dc";
 
@@ -133,12 +134,13 @@ sub choose_chap
 
 sub open_dvi_then_quit
 {
-  local($dvifile) = $_[0];
+  local($dvifile)= $_[0];
+  local($viewer) = $_[1];
   $dvifile = "$docdir/$dvifile" if (! -f "$dvifile");
   die "could not find $dvifile" if (! -f "$dvifile");
   (!$ENV{DISPLAY} && !$ENV{GPXDVI}) && die "xdvi needs X-Windows";
   print "displaying \'$docdir/$dvifile\'.";
-  system("$xdvi $dvifile 2>/dev/null >/dev/null&");
+  system("$viewer $dvifile 2>/dev/null >/dev/null&");
   cleanexit();
 }
 
@@ -171,9 +173,9 @@ sub treat
 
   if (!$apropos)
   {
-    open_dvi_then_quit("users.dvi") if (/^$/);
-    open_dvi_then_quit("tutorial.dvi") if (/^tutorial$/);
-    open_dvi_then_quit("refcard.dvi") if (/^refcard$/);
+    open_dvi_then_quit("users.dvi",$xdvi) if (/^$/);
+    open_dvi_then_quit("tutorial.dvi",$xdvi) if (/^tutorial$/);
+    open_dvi_then_quit("refcard.dvi",$xdviref) if (/^refcard$/);
   }
 
   if (!$apropos && $transl{$_}) { $_ = $transl{$_}; &choose_chap; }
