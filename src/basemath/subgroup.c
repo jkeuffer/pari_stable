@@ -429,20 +429,39 @@ subgroup_engine(GEN cyc, long bound)
   avma=av; return count;
 }
 
+static GEN
+get_snf(GEN x)
+{
+  GEN cyc;
+  long n;
+  switch(typ(x))
+  {
+    case t_MAT:
+      if (isdiagonal(x)) return NULL;
+      cyc = mattodiagonal_i(x); break;
+    case t_VEC:
+    case t_COL: cyc = dummycopy(x); break;
+    default: return NULL;
+  }
+  for (n = lg(cyc)-1; n > 1; n--) /* take care of trailing 1s */
+  {
+    GEN c = (GEN)cyc[n];
+    if (typ(c) != t_INT) return NULL;
+    if (!gcmp1(c)) break;
+  }
+  setlg(cyc, n+1); return cyc;
+}
+
 void
 forsubgroup(entree *oep, GEN cyc, long bound, char *och)
 {
   entree *saveep = ep;
   char *savech = gpch;
   void(*savefun)(GEN) = treatsub_fun;
-  long n, N = lg(cyc)-1;
 
   treatsub_fun = std_fun;
-  if (typ(cyc) != t_VEC) err(typeer,"forsubgroup");
-  cyc = dummycopy(cyc);
-  for (n = N; n > 1; n--) /* take care of trailing 1s */
-    if (!gcmp1((GEN)cyc[n])) break;
-  setlg(cyc, n+1);
+  cyc = get_snf(cyc);
+  if (!cyc) err(typeer,"forsubgroup");
   gpch = och;
   ep = oep;
   push_val(ep, gzero);
@@ -464,11 +483,9 @@ subgrouplist(GEN cyc, long bound)
 
   sublist = list = (slist*) gpmalloc(sizeof(slist));
   treatsub_fun = list_fun;
-  if (typ(cyc) != t_VEC) err(typeer,"subgrouplist");
-  cyc = dummycopy(cyc);
-  for (n = N; n > 1; n--) /* take care of trailing 1s */
-    if (!gcmp1((GEN)cyc[n])) break;
-  setlg(cyc, n+1);
+  cyc = get_snf(cyc);
+  if (!cyc) err(typeer,"subgrouplist");
+  n = lg(cyc)-1;
   hnfgroup = diagonal(cyc);
   nbsub = subgroup_engine(cyc,bound);
   hnfgroup = ohnfgroup; avma = av;
