@@ -2667,7 +2667,7 @@ standard_model(GEN e, GEN *pv)
   s = gdiventgs((GEN)e[1], -2);
   r = gdiventgs(gaddgs(gsub(gsub((GEN)e[2], gmul(s,(GEN)e[1])), gsqr(s)), 1), -3);
   t = gdiventgs(ellLHS0(e,r), -2);
-  cumule(pv, &e, gun, r, s, t);
+  cumulev(pv, gun, r, s, t);
 }
 
 GEN
