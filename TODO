@@ -103,10 +103,6 @@ Kernel:
 
 Misc:
 =====
-5  don't assume that nf.zk is HNF. Allow using LLL-T2-reduced bases (with
-   first element 1) --> huge improvement to all idealred computations (esp.
-   bnfisprincipal, bnfinit)
-
 4  graphics: allow FIG output (besides PostScript) [easier to edit!]
 
 4  decent finite field package (remove all the nfxxxmodpr functions)
