@@ -1569,7 +1569,11 @@ static FILE *
 gprc_chk(char *s)
 {
   FILE *f = fopen(s, "r");
-  if (f && !quiet_mode) fprintferr("Reading GPRC: %s ...", s);
+  if (f && !quiet_mode)
+  {
+    fprintferr("Reading GPRC: %s ...", s);
+    added_newline = 0;
+  }
   return f;
 }
 
