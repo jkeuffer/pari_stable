@@ -274,6 +274,7 @@ znstar(GEN n)
 /**                     INTEGRAL SQUARE ROOT                        **/
 /**                                                                 **/
 /*********************************************************************/
+extern ulong mpsqrtl(GEN a);
 
 GEN
 gracine(GEN a)
@@ -281,55 +282,43 @@ gracine(GEN a)
   return garith_proto(racine,a,1); /* hm. --GN */
 }
 
-/* assume a >= 0 */
-GEN
-racine_i(GEN a, int roundup)
+/* Use l as lgefint(a) [a may have more digits] */
+static GEN
+racine_r(GEN a, long l)
 {
-  long av = avma, k,s,L, l = lgefint(a);
-  ulong m;
+  long av,s;
   GEN x,y,z;
-  if (l == 2) return gzero;
-  if (l == 3)
-  {
-    m = (ulong)sqrt((double)(ulong)a[2]);
-    if (roundup && m * m != (ulong)a[2]) m++;
-    return stoi((long)m);
-  }
-  s = bfffo(a[2]);
-  if (s > 1)
-  {
-    long z;
-    s -= (s & 1); /* make it even */
-    z = BITS_IN_LONG - s;
-    m = (ulong)(a[2] << s) | (a[3] >> z);
-    L = ((l - 4) * BITS_IN_LONG + z)>>1;
-  }
-  else
-  {
-    m = (ulong)a[2];
-    L = (l - 3) * (BITS_IN_LONG/2);
-  }
-  k = (long) sqrt((double)m);
-  x = shifti(stoi(k+1), L);
+
+  if (l <= 4) return utoi(mpsqrtl(a));
+  av = avma;
+  s = 2 + ((l-1) >> 1);
+  setlgefint(a, s);
+  x = addis(racine_r(a, s), 1); setlgefint(a, l);
+  /* x = good approx (from above) of sqrt(a): about l/2 correct bits */
+  x = shifti(x, (l - s)*(BITS_IN_LONG/2));
   do
-  {
+  { /* one or two iterations should do the trick */
     z = shifti(addii(x,divii(a,x)), -1);
     y = x; x = z;
   }
-  while ((k = cmpii(x,y)) < 0);
+  while (cmpii(x,y) < 0);
   avma = (long)y;
-  if (roundup)
-  {
-    if (!k)
-    {
-      m = (ulong)y[lgefint(y)-1];
-      if (m * m != (ulong)a[l-1]) k = 1; /* != mod 2^BIL */
-      else /* expensive but rare */
-        { k = cmpii(sqri(y), a); avma = (long)y; }
-    }
-    if (k) y = addis(y,1);
-  }
   return gerepileuptoint(av,y);
+}
+
+GEN
+racine_i(GEN a, int roundup)
+{
+  long k,m,l = lgefint(a), av = avma;
+  GEN x = racine_r(a, l);
+  if (roundup && signe(x))
+  {
+    m = x[lgefint(x)-1];
+    k = (m * m != a[l-1] || !egalii(sqri(x),a));
+    avma = (long)x;
+    if (k) x = gerepileuptoint(av, addis(x,1));
+  }
+  return x;
 }
 
 GEN

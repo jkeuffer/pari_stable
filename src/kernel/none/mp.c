@@ -3293,3 +3293,46 @@ invmod(GEN a, GEN b, GEN *res)
 #endif
   return 1;
 }
+
+/* SQUARE ROOT */
+
+/* Assume a >= 0 has <= 4 words, return trunc[sqrt(a)] */
+ulong
+mpsqrtl(GEN a)
+{
+  long l = lgefint(a);
+  ulong x,y,z,k,m;
+  int L, s;
+  
+  if (l <= 3) return l==2? 0: (ulong)sqrt((double)(ulong)a[2]);
+  s = bfffo(a[2]);
+  if (s > 1)
+  {
+    s &= ~1UL; /* make it even */
+    z = BITS_IN_LONG - s;
+    m = (ulong)(a[2] << s) | (a[3] >> z);
+    L = z>>1;
+  }
+  else
+  {
+    m = (ulong)a[2];
+    L = BITS_IN_LONG/2;
+  }
+  /* m = BIL-1 (bffo odd) or BIL first bits of a */
+  k = (long) sqrt((double)m);
+  if (L == BITS_IN_LONG/2 && k == MAXHALFULONG)
+    x = MAXULONG;
+  else
+    x = (k+1) << L;
+  do
+  {
+    LOCAL_HIREMAINDER;
+    LOCAL_OVERFLOW;
+    hiremainder = a[2];
+    z = addll(x, divll(a[3],x));
+    z >>= 1; if (overflow) z |= HIGHBIT;
+    y = x; x = z;
+  }
+  while (x < y);
+  return y;
+}
