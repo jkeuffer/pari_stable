@@ -167,10 +167,11 @@ rnfinitalg(GEN nf,GEN pol,long prec)
   RES[7]=(long)bas;
   RES[8]=linvmat(p2);
 
-  f2=idealdiv(nf,discsr(pol),(GEN)p1[3]);
-  fac=idealfactor(nf,f2);
-  fac1=(GEN)fac[1]; fac2=(GEN)fac[2]; lfac=lg(fac1)-1;
-  f=idmat(m);
+  f2 = idealdiv(nf, discsr(pol), (GEN)p1[3]);
+  fac = idealfactor(nf,f2);
+  fac1 = (GEN)fac[1];
+  fac2 = (GEN)fac[2]; lfac = lg(fac1)-1;
+  f = idmat(m);
   for (i=1; i<=lfac; i++)
   {
     if (mpodd((GEN)fac2[i])) err(bugparier,"rnfinitalg (odd exponent)");
