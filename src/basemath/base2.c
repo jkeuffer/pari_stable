@@ -2033,7 +2033,7 @@ pol_min(GEN mul, GEN p)
 }
 
 static GEN
-get_pr(GEN nf, norm_S *S, GEN p, GEN P, GEN V)
+get_pr(GEN nf, norm_S *S, GEN p, GEN P, GEN V, int ramif)
 {
   GEN pr, u, t;
   long e, f;
@@ -2045,7 +2045,7 @@ get_pr(GEN nf, norm_S *S, GEN p, GEN P, GEN V)
   u = gerepilecopy(av, uniformizer(nf, S, P, V, p));
   t = anti_uniformizer(nf,p,u);
   av = avma;
-  e = 1 + int_elt_val(nf,t,p,t,NULL);
+  e = ramif? 1 + int_elt_val(nf,t,p,t,NULL): 1;
   f = degpol(nf[1]) - (lg(P)-1);
   avma = av;
   pr = cgetg(6,t_VEC);
@@ -2159,8 +2159,10 @@ _primedec(GEN nf, GEN p)
 {
   GEN Lpr = cgetg(iL, t_VEC);
   GEN LV = get_LV(nf, L,p,N);
+  int ramif = divise((GEN)nf[3], p);
   norm_S S; init_norm(&S, nf, p);
-  for (i=1; i<iL; i++) Lpr[i] = (long)get_pr(nf, &S, p, (GEN)L[i], (GEN)LV[i]);
+  for (i=1; i<iL; i++)
+    Lpr[i] = (long)get_pr(nf, &S, p, (GEN)L[i], (GEN)LV[i], ramif);
   if (DEBUGLEVEL>2) msgtimer("finding uniformizers");
   return Lpr;
 }
