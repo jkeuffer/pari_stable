@@ -112,6 +112,9 @@ BA 31- uninitialized memory read in divrr(x,y), when lg(y) < lg(x), leading
    11- allow system() under Windows (95 and higher)
    12- use cmprr() in gegal(t_REAL, t_REAL)
    13- have Configure check explicitly that the C compiler is ANSI
+   14- faster modular algorithm for characteristic polynomial of algebraic
+       integers Mod(x, y)  [ ZX_caract(): old would replace x by its integral
+       part and correct at the end; new is fully modular ]
 
   Added
     1- member function rnf.pol (polynomial generating absolute extension)
