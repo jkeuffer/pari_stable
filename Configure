@@ -886,7 +886,7 @@ esac
 
 if test "$fastread" != yes; then
   echo $n ..."With which flags ? $c"
-  dflt=${CFLAGS:-cflags}; rep=; . ./myread
+  dflt=${CFLAGS:-$cflags}; rep=; . ./myread
   cflags=$ans
 fi
 
