@@ -488,7 +488,7 @@ hensel_lift_fact(GEN pol, GEN Q, GEN p, GEN pe, long e)
   return MultiLift(pol, Q, p, e, 0);
 }
 
-#if 0
+/* U = NULL treated as 1 */
 static void
 BezoutPropagate(GEN link, GEN v, GEN w, GEN pe, GEN U, GEN f, long j)
 {
@@ -496,8 +496,13 @@ BezoutPropagate(GEN link, GEN v, GEN w, GEN pe, GEN U, GEN f, long j)
   if (j < 0) return;
 
   Q = FpX_mul((GEN)v[j], (GEN)w[j], pe);
-  if (U) Q = FpXQ_mul(Q, U, f, pe);
-  R = FpX_Fp_add(FpX_neg(Q, pe), gun, pe); /* U v[j+1] w[j+1] mod f */
+  if (U)
+  {
+    Q = FpXQ_mul(Q, U, f, pe);
+    R = FpX_sub(U, Q, pe);
+  }
+  else
+    R = FpX_Fp_add(FpX_neg(Q, pe), gun, pe);
   w[j+1] = (long)Q; /*  0 mod U v[j],  1 mod (1-U) v[j+1] */
   w[j  ] = (long)R; /*  1 mod U v[j],  0 mod (1-U) v[j+1] */
   BezoutPropagate(link, v, w, pe, R, f, link[j  ]);
@@ -513,11 +518,12 @@ bezout_lift_fact(GEN pol, GEN Q, GEN p, long e)
   GEN E, link, v, w, pe;
   long i, k = lg(Q)-1;
   if (k == 1) { GEN d = cgetg(2, t_VEC); d[1] = (long)pol; return d; }
+  pe = gpowgs(p, e);
   pol = FpX_normalize(pol, pe);
   E = MultiLift(pol, Q, p, e, 1);
   link = (GEN) E[2];
   v    = (GEN) E[3];
-  w    = (GEN) E[4]; pe = gpowgs(p, e);
+  w    = (GEN) E[4];
   BezoutPropagate(link, v, w, pe, NULL, pol, lg(v) - 2);
   E = cgetg(k+1, t_VEC);
   for (i = 1; i <= 2*k-2; i++)
@@ -525,9 +531,10 @@ bezout_lift_fact(GEN pol, GEN Q, GEN p, long e)
     long t = link[i];
     if (t < 0) E[-t] = w[i];
   }
-  return E;
+  return gcopy(E);
 }
-#else
+
+#if 0
 /* polT in Z[X], and pola is a factor modulo p. Return the Bezout
  * polynomial Q s.t Q = 1 (mod A), Q = 0 mod (polT / A) in Z/p^e [X]
  * where A is the lift of a mod p^e */
