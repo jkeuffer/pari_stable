@@ -138,6 +138,8 @@ BA 47- bitneg(1,0) --> SEGV (caused by 2.2.5 A10).
    56- Mod(a^0,i^0) --> Mod(1,1)  [ should be Mod(0,1) ]
    57- factor(HUGE, 100000) --> "pointers lost in gerepile" in random GC in 
        ifac_realloc() [ missing copy() for (*partial)[2] ]
+   58- incorrect gerepile() behaviour on t_LIST [ would try to update
+       non-existing components if list not full ]
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.
