@@ -175,8 +175,6 @@ transc(GEN (*f)(GEN,long), GEN x, long prec)
         y[i] = (long)f((GEN)p2[i],prec);
       return gerepile(av,tetpil,y);
 
-    case t_QFR: case t_QFI:
-      err(talker,"quadratic forms cannot be used in transcendental functions");
   default:
     err(typeer,"a transcendental function");
   }
