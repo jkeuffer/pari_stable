@@ -216,8 +216,10 @@ forvec_next_i(forvec_data *d, GEN ignored)
   long i = d->n;
   (void)ignored;
   for (;;) {
-    d->a[i] = incloop(d->a[i]);
-    if (cmpii(d->a[i], d->M[i]) <= 0) return (GEN)d->a;
+    if (cmpii(d->a[i], d->M[i]) < 0) {
+      d->a[i] = incloop(d->a[i]);
+      return (GEN)d->a;
+    }
     d->a[i] = resetloop(d->a[i], d->m[i]);
     if (--i <= 0) return NULL;
   }
@@ -245,9 +247,9 @@ forvec_next_le_i(forvec_data *d, GEN ignored)
   long i = d->n, imin = d->n;
   (void)ignored;
   for (;;) {
-    d->a[i] = incloop(d->a[i]);
-    if (cmpii(d->a[i], d->M[i]) <= 0)
+    if (cmpii(d->a[i], d->M[i]) < 0)
     {
+      d->a[i] = incloop(d->a[i]);
       while (i < d->n)
       {
         i++;
@@ -256,8 +258,10 @@ forvec_next_le_i(forvec_data *d, GEN ignored)
         {
           i = imin - 1; if (!i) return NULL;
           imin = i;
-          d->a[i] = incloop(d->a[i]);
-          if (cmpii(d->a[i], d->M[i]) <= 0) break;
+          if (cmpii(d->a[i], d->M[i]) < 0) {
+            d->a[i] = incloop(d->a[i]);
+            break;
+          }
         } 
         if (i > 1) {
           GEN t = d->a[i-1]; if (cmpii(t, d->m[i]) < 0) t = d->m[i];
@@ -313,9 +317,9 @@ forvec_next_lt_i(forvec_data *d, GEN ignored)
   long i = d->n, imin = d->n;
   (void)ignored;
   for (;;) {
-    d->a[i] = incloop(d->a[i]);
-    if (cmpii(d->a[i], d->M[i]) <= 0)
+    if (cmpii(d->a[i], d->M[i]) < 0)
     {
+      d->a[i] = incloop(d->a[i]);
       while (i < d->n)
       {
         i++;
@@ -324,8 +328,10 @@ forvec_next_lt_i(forvec_data *d, GEN ignored)
         {
           i = imin - 1; if (!i) return NULL;
           imin = i;
-          d->a[i] = incloop(d->a[i]);
-          if (cmpii(d->a[i], d->M[i]) <= 0) break;
+          if (cmpii(d->a[i], d->M[i]) < 0) {
+            d->a[i] = incloop(d->a[i]);
+            break;
+          }
         } 
         if (i > 1) {
           GEN t = addis(d->a[i-1],1); if (cmpii(t, d->m[i]) < 0) t = d->m[i];

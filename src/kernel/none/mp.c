@@ -114,6 +114,7 @@ incneg(GEN a)
   {
     if (l == 2 && !a[2])
     {
+      a++; /* save one cell */
       a[0] = evaltyp(t_INT) | _evallg(2);
       a[1] = evalsigne(0) | evallgefint(2);
     }
