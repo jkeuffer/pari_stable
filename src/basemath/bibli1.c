@@ -2244,18 +2244,6 @@ get_red_T2(GEN T2, GEN base, GEN x, long r1, long prec)
   }
 }
 
-GEN
-nf_get_LLL(GEN nf)
-{
-  long prec;
-
-  nf = checknf(nf);
-  if (! nf_get_r2(nf))
-    return lllint_marked(1, gmael(nf,5,4), 100, 1, NULL,NULL);
-  prec = nfgetprec(nf);
-  return get_red_T2(gmael(nf,5,3), (GEN)nf[7], (GEN)nf[1], nf_get_r1(nf), prec);
-}
-
 /* Return the base change matrix giving the an LLL-reduced basis for the
  * integer basis of the nf(x).
  * base = vector of elts in Z[Y]/(x) generating the maximal order
@@ -2264,11 +2252,10 @@ GEN
 LLL_nfbasis(GEN x, GEN polr, GEN base, long prec)
 {
   GEN T2;
-  int n, r1;
+  int r1, n = degpol(x);
 
-  if (typ(x) != t_POL) return nf_get_LLL(x);
+  if (typ(x) != t_POL || n == 1) return idmat(n); /* nf, or degree 1 */
 
-  n = degpol(x);
   if (typ(base) != t_VEC || lg(base)-1 != n)
     err(talker,"incorrect Zk basis in LLL_nfbasis");
   if (!prec || (r1 = sturm(x)) == n)
