@@ -5,10 +5,6 @@ case "$asmarch" in
   *) ASMARCH=$asmarch;;
 esac
 
-if test -s $src_dir/kernel/$ASMARCH/MakeVar.SH; then
-  . $src_dir/kernel/$ASMARCH/MakeVar.SH
-fi
-
 echo Extracting $file
 rm -f $file
 
@@ -36,6 +32,10 @@ esac
 language=`ls $src_dir/language/*.c | sed 's,.*/\(.*\)\.c,\1,'`
 basemath=`ls $src_dir/basemath/*.c | sed 's,.*/\(.*\)\.c,\1,'`
 modules=`ls $src_dir/modules/*.c   | sed 's,.*/\(.*\)\.c,\1,'`
+
+if test -s $src_dir/kernel/$ASMARCH/MakeVar.SH; then
+  . $src_dir/kernel/$ASMARCH/MakeVar.SH
+fi
 
 case "$ASMARCH" in
   m68k) hlist=pari68k
