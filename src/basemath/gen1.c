@@ -965,6 +965,27 @@ gadd(GEN x, GEN y)
   return NULL; /* not reached */
 }
 
+GEN
+gaddsg(long x, GEN y)
+{
+  long ty = typ(y);
+  GEN z;
+
+  switch(ty)
+  {
+    case t_INT:  return addsi(x,y);
+    case t_REAL: return addsr(x,y);
+    case t_INTMOD:
+      z = cgetg(3, t_INTMOD);
+      return add_intmod_same(z, (GEN)y[1], (GEN)y[2], modsi(x, (GEN)y[1]));
+    case t_FRAC: z = cgetg(3,t_FRAC);
+      z[1] = lpileuptoint((pari_sp)z, addii((GEN)y[1], mulis((GEN)y[2],x)));
+      z[2] = licopy((GEN)y[2]); return z;
+
+    default: return gadd(stoi(x), y);
+  }
+}
+
 /********************************************************************/
 /**                                                                **/
 /**                        MULTIPLICATION                          **/
@@ -1511,6 +1532,8 @@ gmul(GEN x, GEN y)
       av = avma; y = gmod(y, (GEN)x[1]);
       return gerepileupto(av, mul_polmod_same((GEN)x[1], (GEN)x[2], y));
     }
+    if ((ty == t_QFI || ty == t_QFR) && tx == t_INT && gcmp1(x))
+      return gcopy(y);
     return mul_scal(y, x, ty);
   }
 
