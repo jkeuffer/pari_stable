@@ -126,7 +126,7 @@ filtre0(filtre_t *F)
         break;
 
       case ':':
-        if (compatible) {
+        if (!compatible) {
           t--; while (is_keyword_char(*s)) { s++; }
         }
         break;
