@@ -1271,7 +1271,7 @@ Fp_sqrt(GEN a, GEN p)
   if (typ(a) != t_INT || typ(p) != t_INT) err(arither1);
   if (signe(p) <= 0 || is_pm1(p)) err(talker,"not a prime in Fp_sqrt");
   if (lgefint(p) == 3)
-    return utoipos( Fl_sqrt(umodiu(a, (ulong)p[2]), (ulong)p[2]) );
+    return utoi( Fl_sqrt(umodiu(a, (ulong)p[2]), (ulong)p[2]) );
 
   p1 = addsi(-1,p); e = vali(p1);
 
