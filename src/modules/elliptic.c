@@ -171,7 +171,7 @@ ellprint(GEN e)
   if (typ(e) != t_VEC || lg(e) < 6)
     err(talker, "not an elliptic curve in ellprint");
   name_var(vx, "X");
-  name_var(vy, "Y"); z = _vec2(polx[vx], polx[vy]);
+  name_var(vy, "Y"); z = mkvec2(polx[vx], polx[vy]);
   fprintferr("%Z - (%Z)\n", ellLHS(e, z), ellRHS(e, polx[vx]));
   (void)delete_var();
   (void)delete_var(); avma = av;
@@ -314,7 +314,7 @@ padic_initell(GEN y, GEN p, long prec)
   q = ginv(w);
   if (valp(q) < 0) q = ginv(q);
 
-  y[14] = (long)_vec(e1);
+  y[14] = (long)mkvec(e1);
   y[15] = (long)u2;
   y[16] = (kronecker((GEN)u2[4],p) <= 0 || (valp(u2)&1))? zero: lsqrt(u2,0);
   y[17] = (long)q;
@@ -436,7 +436,7 @@ _coordch(GEN e, GEN u, GEN r, GEN s, GEN t)
     }
     else if (typ(e[1])==t_PADIC)
     {
-      y[14] = (long)_vec( gmul(v2, gsub((GEN)p1[1],r)) );
+      y[14] = (long)mkvec( gmul(v2, gsub((GEN)p1[1],r)) );
       y[15] = lmul((GEN)e[15], gsqr(u));
       y[16] = lmul((GEN)e[16], u);
       y[17] = e[17];
@@ -566,10 +566,10 @@ addell(GEN e, GEN z1, GEN z2)
         eq = (gexpo(gadd(ellLHS0(e,x1),gadd(y1,y2))) >= gexpo(y1));
       else
         eq = gegal(y1,y2);
-      if (!eq) { avma=av; return _vec(gzero); }
+      if (!eq) { avma=av; return mkvec(gzero); }
     }
     p2 = d_ellLHS(e,z1);
-    if (gcmp0(p2)) { avma=av; return _vec(gzero); }
+    if (gcmp0(p2)) { avma=av; return mkvec(gzero); }
     p1 = gadd(gsub((GEN)e[4],gmul((GEN)e[1],y1)),
               gmul(x1,gadd(gmul2n((GEN)e[2],1),gmulsg(3,x1))));
   }
@@ -723,7 +723,7 @@ powell(GEN e, GEN z, GEN n)
   if (typ(n)==t_QUAD) return CM_powell(e,z,n);
   if (typ(n) != t_INT) err(impl,"powell for non integral, non CM, exponents");
   s = signe(n);
-  if (!s || lg(z) == 2) return _vec(gzero);
+  if (!s || lg(z) == 2) return mkvec(gzero);
   if (s < 0) z = invell(e,z);
   if (is_pm1(n)) return s < 0? gerepilecopy(av, z): gcopy(z);
   z = leftright_pow(z, n, (void*)e, &ell_sqr, (GEN(*)(void*,GEN,GEN))&addell);
@@ -1051,7 +1051,7 @@ elleta(GEN om, long prec)
   }
   else
     y1 = gsub(gmul(T.tau,y2), gdiv(PiI2(prec), T.w2));
-  return gerepilecopy(av, _vec2(y1,y2));
+  return gerepilecopy(av, mkvec2(y1,y2));
 }
 
 static GEN
@@ -1128,7 +1128,7 @@ weipellnumall(SL2_red *T, GEN z, long flall, long prec)
   if (flall)
   {
     yp = gmul(u, gmul(gmul(u1,u2),yp));/* yp *= u (2i pi / w2)^3 */
-    v = _vec2(y, gmul2n(yp,-1));
+    v = mkvec2(y, gmul2n(yp,-1));
   }
   else v = y;
   return gerepilecopy(av, v);
@@ -1277,7 +1277,7 @@ pointell(GEN e, GEN z, long prec)
 
   checkbell(e); (void)get_periods(e, &T);
   v = weipellnumall(&T,z,1,prec);
-  if (!v) { avma = av; return _vec(gzero); }
+  if (!v) { avma = av; return mkvec(gzero); }
   v[1] = lsub((GEN)v[1], gdivgs((GEN)e[6],12));
   v[2] = lsub((GEN)v[2], gmul2n(ellLHS0(e,(GEN)v[1]),-1));
   return gerepilecopy(av, v);
@@ -2854,7 +2854,7 @@ globalreduction(GEN E)
       cumule(&v, &e, (GEN)w[1], (GEN)w[2], (GEN)w[3], (GEN)w[4]);
   }
   standard_model(e, &v);
-  return gerepilecopy(av, _vec3(N,v,c));
+  return gerepilecopy(av, mkvec3(N,v,c));
 }
 
 /* accumulate the effects of variable changes [u,r,s,t] and [U,R,S,T].
@@ -3001,7 +3001,7 @@ ratroot(GEN p)
   long i,t;
 
   i=2; while (!signe(p[i])) i++;
-  if (i==5) return _vec(gzero);
+  if (i==5) return mkvec(gzero);
   if (i==4)
     { v=cgetg(3,t_VEC); v[1]=zero; v[2]=ldivgs((GEN)p[4],-4); return v; }
 
@@ -3049,7 +3049,7 @@ torsellnagelllutz(GEN e)
   if (v) e = coordch(e,v);
   pol = RHSpol(e);
   lr=ratroot(pol); nlr=lg(lr)-1;
-  r=cgetg(17,t_VEC); r[1]=(long)_vec(gzero);
+  r=cgetg(17,t_VEC); r[1]=(long)mkvec(gzero);
   for (t=1,i=1; i<=nlr; i++)
   {
     p1=cgetg(3,t_VEC);
@@ -3091,32 +3091,32 @@ torsellnagelllutz(GEN e)
 
   if (nlr<3)
   {
-    w2 = _vec( stoi(t) );
+    w2 = mkvec( stoi(t) );
     for (k=2; k<=t; k++)
       if (_orderell(e,(GEN)r[k]) == t) break;
     if (k>t) err(bugparier,"torsell (bug1)");
 
-    w3 = _vec( (GEN)r[k] );
+    w3 = mkvec( (GEN)r[k] );
   }
   else
   {
     if (t&3) err(bugparier,"torsell (bug2)");
     t2 = t>>1;
-    w2 = _vec2(stoi(t2), gdeux);
+    w2 = mkvec2(stoi(t2), gdeux);
     for (k=2; k<=t; k++)
       if (_orderell(e,(GEN)r[k]) == t2) break;
     if (k>t) err(bugparier,"torsell (bug3)");
 
     p1 = powell(e,(GEN)r[k],stoi(t>>2));
     k2 = (lg(p1)==3 && gegal((GEN)r[2],p1))? 3: 2;
-    w3 = _vec2((GEN)r[k], (GEN)r[k2]);
+    w3 = mkvec2((GEN)r[k], (GEN)r[k2]);
   }
   if (v)
   {
     v[1] = linv((GEN)v[1]);
     w3 = pointch(w3,v);
   }
-  return gerepilecopy(av, _vec3(stoi(t), w2,w3));
+  return gerepilecopy(av, mkvec3(stoi(t), w2,w3));
 }
 
 /* Using Doud's algorithm */
@@ -3216,8 +3216,8 @@ tors(GEN e, long k, GEN p, GEN q, GEN v)
     }
     r = cgetg(4,t_VEC);
     r[1] = lstoi(2*k);
-    r[2] = (long)_vec2(stoi(k), gdeux);
-    r[3] = (long)_vec2copy(p, q);
+    r[2] = (long)mkvec2(stoi(k), gdeux);
+    r[3] = (long)mkvec2copy(p, q);
   }
   else
   {
@@ -3227,8 +3227,8 @@ tors(GEN e, long k, GEN p, GEN q, GEN v)
       if (v) p = pointch(p,v);
       r = cgetg(4,t_VEC);
       r[1] = lstoi(k);
-      r[2] = (long)_vec( (GEN)r[1] );
-      r[3] = (long)_vec( gcopy(p) );
+      r[2] = (long)mkvec( (GEN)r[1] );
+      r[3] = (long)mkvec( gcopy(p) );
     }
     else
     {

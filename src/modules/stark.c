@@ -386,7 +386,7 @@ ComputeIndex2Subgroup(GEN bnr, GEN C)
   Mr = diagonal(gmael(bnr, 5, 2));
   D = smithall(gauss(C, Mr), &U, NULL);
   T = gmul(C,ginv(U));
-  subgrp  = subgrouplist(D, _vec(gdeux));
+  subgrp  = subgrouplist(D, mkvec(gdeux));
   nb = lg(subgrp);
   for (i = 1; i < nb; i++)
     subgrp[i] = (long)hnf(concatsp(gmul(T, (GEN)subgrp[i]), Mr));
@@ -875,7 +875,7 @@ bnrrootnumber(GEN bnr, GEN chi, long flag, long prec)
     bnrc = buchrayinitgen((GEN)bnr[1], condc);
     CHI = (GEN)GetPrimChar(chi, bnr, bnrc, prec)[1];
   }
-  return gerepilecopy(av, (GEN)ComputeArtinNumber(bnrc, _vec(CHI), 1, prec)[1]);
+  return gerepilecopy(av, (GEN)ComputeArtinNumber(bnrc, mkvec(CHI), 1, prec)[1]);
 }
 
 /********************************************************************/
@@ -941,7 +941,7 @@ ComputeAChi(GEN dtcr, long flag, long prec)
       B = gsub(gun, p1);
     A = gmul(A, B);
   }
-  return flag? A: _vec2(stoi(r), A);
+  return flag? A: mkvec2(stoi(r), A);
 }
 
 static GEN
@@ -1095,7 +1095,7 @@ get_listCR(GEN dataD)
     if (gcmp0((GEN)cond[2])) continue;
 
     /* the infinite part of chi is non trivial */
-    listCR[nc++] = (long)_vec2(lchi, cond);
+    listCR[nc++] = (long)mkvec2(lchi, cond);
     allCR[tnc++] = (long)lchi;
 
     /* if chi is not real, add its conjugate character to allCR */
@@ -1691,7 +1691,7 @@ ppgamma(ST_t *T, long prec)
 static GEN
 _cond(GEN dtcr, int quad)
 {
-  return  quad? (GEN)dtcr[7]: _vec2((GEN)dtcr[7], (GEN)dtcr[9]);
+  return  quad? (GEN)dtcr[7]: mkvec2((GEN)dtcr[7], (GEN)dtcr[9]);
 }
 
 /* sort chars according to conductor */
@@ -1926,7 +1926,7 @@ GetValue(GEN dtcr, GEN W, GEN S, GEN T, long fl, long fl2, long prec)
 
   racpi = sqrtr(mppi(prec));
   if (!W)
-    W = (GEN)ComputeArtinNumber((GEN)dtcr[3], _vec((GEN)dtcr[8]), 1, prec)[1];
+    W = (GEN)ComputeArtinNumber((GEN)dtcr[3], mkvec((GEN)dtcr[8]), 1, prec)[1];
 
   isreal = (itos(gmael(dtcr, 8, 3)) <= 2);
 
@@ -1950,7 +1950,7 @@ GetValue(GEN dtcr, GEN W, GEN S, GEN T, long fl, long fl2, long prec)
       VL = gmul((GEN)A[2], VL);
       rchi = gadd(rchi, (GEN)A[1]);
     }
-    rep = _vec2(rchi, VL);
+    rep = mkvec2(rchi, VL);
   }
   else
   { /* VL = S(chi) + W(chi).T(chi)) / (C(chi) sqrt(Pi)^{r1 - q}) */
@@ -1996,7 +1996,7 @@ GetValue1(GEN bnr, long flag, long prec)
     for (i = 1; i <= l; i++)
       c = gmul(c, glog(idealnorm(nf, (GEN)diff[i]), prec));
   }
-  return gerepilecopy(av, _vec2(stoi(r), c));
+  return gerepilecopy(av, mkvec2(stoi(r), c));
 }
 
 /********************************************************************/
@@ -2120,7 +2120,7 @@ RecCoeff2(GEN nf,  RC_data *d,  long prec)
 
   d->G = min(-20, -bit_accuracy(prec) >> 4);
 
-  vec  = concatsp(_vec(gneg(beta)), row(M, d->v));
+  vec  = concatsp(mkvec(gneg(beta)), row(M, d->v));
   bacmin = (long)bit_accuracy_mul(prec, .225);
   bacmax = (long)bit_accuracy_mul(prec, .315);
 
@@ -2932,7 +2932,7 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
   if (flag & 4)
   {
     rep = cgetg(cl + 1, t_VEC);
-    for (i = 1; i <= cl; i++) rep[i] = (long)_vec2((GEN)allCR[i], (GEN)L1[i]);
+    for (i = 1; i <= cl; i++) rep[i] = (long)mkvec2((GEN)allCR[i], (GEN)L1[i]);
   }
   else
     rep = L1;

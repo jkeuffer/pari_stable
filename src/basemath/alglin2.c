@@ -93,7 +93,7 @@ easychar(GEN x, long v, GEN *py)
       p1=cgetg(4,t_POL);
       p1[1]=evalsigne(1) | evalvarn(v);
       p1[2]=lneg(x); p1[3]=un;
-      if (py) *py = _mat(_colcopy(x));
+      if (py) *py = mkmat(mkcolcopy(x));
       return p1;
 
     case t_COMPLEX: case t_QUAD:
@@ -551,7 +551,7 @@ conjvec(GEN x,long prec)
   switch(tx)
   {
     case t_INT: case t_INTMOD: case t_FRAC:
-      return _colcopy(x);
+      return mkcolcopy(x);
 
     case t_COMPLEX: case t_QUAD:
       z=cgetg(3,t_COL); z[1]=lcopy(x); z[2]=lconj(x); break;
@@ -855,7 +855,7 @@ sqred2(GEN a, long signature)
     }
   }
   if (!signature) return gerepilecopy(av, a);
-  avma = av; return _vec2s(sp, sn);
+  avma = av; return mkvec2s(sp, sn);
 }
 
 GEN
@@ -1014,7 +1014,7 @@ matrixqz(GEN x, GEN p)
 
     p1 = (GEN)factor(p2)[1];
   }
-  else p1 = _vec(p);
+  else p1 = mkvec(p);
   nfact = lg(p1)-1;
   av1 = avma; lim = stack_lim(av1,1);
   for (i=1; i<=nfact; i++)
@@ -2793,7 +2793,7 @@ extendedgcd(GEN A)
     A[n-1] = (long)mynegi((GEN)A[n-1]);
     ZV_neg_ip((GEN)B[n-1]);
   }
-  return gerepilecopy(av, _vec2((GEN)A[n-1], B));
+  return gerepilecopy(av, mkvec2((GEN)A[n-1], B));
 }
 
 /* HNF with permutation. */
@@ -3472,7 +3472,7 @@ gsmithall(GEN x,long all)
       coeff(x,k,k) = (long)T;
     }
   }
-  z = all? _vec3(gtrans_i(U), V, x): mattodiagonal_i(x);
+  z = all? mkvec3(gtrans_i(U), V, x): mattodiagonal_i(x);
   return gerepilecopy(av, z);
 }
 
@@ -3629,5 +3629,5 @@ GEN matfrobenius(GEN M, long flag)
   N = Frobeniusform(D, n);
   B = build_frobeniusbc(D, n);
   R = build_basischange(N, gmul(B,(GEN) A[1]));
-  return gerepilecopy(ltop, _vec2(N,R));
+  return gerepilecopy(ltop, mkvec2(N,R));
 }

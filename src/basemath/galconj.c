@@ -1097,7 +1097,7 @@ listsousgroupes(long m, long p)
   if (m == 2)
   {
     res = cgetg(2, t_VEC);
-    res[1] = (long)_vecsmall(1);
+    res[1] = (long)mkvecsmall(1);
     return res;
   }
   zn = znstar(stoi(m));
@@ -1275,7 +1275,7 @@ fixedfieldsurmer(GEN O, GEN L, GEN mod, GEN l, GEN p, GEN S, GEN deg, long v, GE
       {
 	if (DEBUGLEVEL>=4) 
 	  debug_surmer("FixedField: Sym: %Z\n",S,n);
-	return _vec2copy(s, P);/*do not swap*/
+	return mkvec2copy(s, P);/*do not swap*/
       }
       else
       {
@@ -2889,7 +2889,7 @@ galoisconj4(GEN T, GEN den, long flag, long karma)
   n = degpol(T);
   if (n == 1)			/* Too easy! */
   {
-    if (!flag) return _col( polx[varn(T)] );
+    if (!flag) return mkcol( polx[varn(T)] );
     ga.l = 3;
     ga.deg = 1;
     ga.ppp = 1;
@@ -3068,7 +3068,7 @@ galoisconj0(GEN nf, long flag, GEN d, long prec)
   default:
     err(flagerr, "nfgaloisconj");
   }
-  return _col( polx[varn(T)] );	/* Failure */
+  return mkcol( polx[varn(T)] );	/* Failure */
 }
 
 
@@ -3289,7 +3289,7 @@ galoisfixedfield(GEN gal, GEN perm, long flag, long y)
  */
 
 GEN
-galois_group(GEN gal) { return _vec2((GEN)gal[7], (GEN)gal[8]); }
+galois_group(GEN gal) { return mkvec2((GEN)gal[7], (GEN)gal[8]); }
 
 GEN
 checkgroup(GEN g, GEN *S)

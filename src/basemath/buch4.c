@@ -529,7 +529,7 @@ bnfsunit(GEN bnf,GEN S,long prec)
     p1=cgetg(i,t_VEC); pow=ZM_inv(U,gun);
     for(i--; i; i--)
       p1[i] = (long)factorback_i(gen, (GEN)pow[i], nf, 1);
-    res[5] = (long)_vec3(card,D,p1);
+    res[5] = (long)mkvec3(card,D,p1);
   }
 
   /* S-units */
@@ -564,7 +564,7 @@ bnfsunit(GEN bnf,GEN S,long prec)
     sunit = basistoalg(nf,sunit);
     /* HNF in split form perm + (H B) [0 Id missing] */
     res[1] = (long)lift_intern(sunit);
-    res[2] = (long)_vec3(perm,A,den);
+    res[2] = (long)mkvec3(perm,A,den);
   }
 
   /* S-regulator */
@@ -853,7 +853,7 @@ rnfisnorm(GEN T, GEN x, long flag)
   }
   if (typ(aux) == t_POLMOD && degpol(nf[1]) == 1)
     aux[2] = (long)lift_intern((GEN)aux[2]);
-  return gerepilecopy(av, _vec2(aux, x));
+  return gerepilecopy(av, mkvec2(aux, x));
 }
 
 GEN

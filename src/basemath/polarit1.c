@@ -1013,7 +1013,7 @@ FpX_factcantor_i(GEN f, GEN pp, long flag)
   }
   if (flag > 1) return gun; /* irreducible */
   setlg(t, nbfact);
-  setlg(E, nbfact); y = _vec2((GEN)t, E);
+  setlg(E, nbfact); y = mkvec2((GEN)t, E);
   if (!flag) (void)sort_factor(y,cmpii);
   return y;
 }
@@ -1325,7 +1325,7 @@ FpX_factor_i(GEN f, GEN pp)
     e *= p; f = poldeflate_i(f2, p);
   }
   setlg(t, nbfact);
-  setlg(E, nbfact); return sort_factor(_vec2((GEN)t,E), cmpii);
+  setlg(E, nbfact); return sort_factor(mkvec2((GEN)t,E), cmpii);
 }
 GEN
 FpX_factor(GEN f, GEN p)
@@ -1467,8 +1467,8 @@ padic_trivfact(GEN x, GEN p, long r)
 {
   GEN y = cgetg(3,t_MAT);
   p = icopy(p);
-  y[1]=(long)_col(pol_to_padic(x,gpowgs(p,r),p,r));
-  y[2]=(long)_col(gun); return y;
+  y[1]=(long)mkcol(pol_to_padic(x,gpowgs(p,r),p,r));
+  y[2]=(long)mkcol(gun); return y;
 }
 
 /* Assume x reduced mod p. q = p^e (simplified version of int_to_padic).
@@ -1496,7 +1496,7 @@ apprgen_i(GEN f, GEN a)
   GEN fp, u, p, q, P, res, a0, rac;
   long i, j, k, prec = gcmp0(a)? valp(a): precp(a);
 
-  if (prec <= 1) return _vec(a);
+  if (prec <= 1) return mkvec(a);
   fp = derivpol(f); u = modulargcd(f,fp);
   if (degpol(u) > 0) { f = gdeuc(f,u); fp = derivpol(f); }
   p = (GEN)a[2];
@@ -1506,7 +1506,7 @@ apprgen_i(GEN f, GEN a)
   {
     res = rootpadiclift(f, a0, p, prec);
     res = strict_int_to_padic(res,p,gpowgs(p,prec),prec,NULL);
-    return _vec(res);
+    return mkvec(res);
   }
 
   f = poleval(f, gadd(a, gmul(P,polx[varn(f)])));
@@ -1830,7 +1830,7 @@ apprgen9(GEN f, GEN a)
       a = gsub(a, gdiv(p1, poleval(fp,a)));
       p1 = poleval(f,a);
     }
-    return gerepilecopy(av, _col(a));
+    return gerepilecopy(av, mkcol(a));
   }
   n = degpol(f);
   pro = cgetg(n+1,t_COL);
@@ -2291,7 +2291,7 @@ typedef struct {
 } FqX_split_t;
 
 static void
-add(GEN z, GEN g, long d) { appendL(z, _vec2(stoi(d), g)); }
+add(GEN z, GEN g, long d) { appendL(z, mkvec2(stoi(d), g)); }
 /* return number of roots */
 long
 FqX_split_deg1(GEN *pz, GEN u, GEN q, GEN T, GEN p)
@@ -2418,7 +2418,7 @@ FpX_factorff(GEN P,GEN l, GEN Q)
     }
   }
   setlg(V,lfact);
-  setlg(E,lfact); return sort_factor(_vec2(V,E), cmp_pol);
+  setlg(E,lfact); return sort_factor(mkvec2(V,E), cmp_pol);
 }
 
 static GEN
@@ -2497,7 +2497,7 @@ FqX_factor_i(GEN f, GEN T, GEN p)
       }
   }
   setlg(t, nbfact);
-  setlg(E, nbfact); return sort_factor(_vec2((GEN)t, E), cmp_pol);
+  setlg(E, nbfact); return sort_factor(mkvec2((GEN)t, E), cmp_pol);
 }
 GEN
 factmod9(GEN f, GEN p, GEN T)
@@ -2780,8 +2780,8 @@ roots2(GEN pol,long PREC)
   if (flagexactpol) factors = ZX_squff(pol, &ex);
   else
   {
-    factors = _col(pol);
-    ex = _vecsmall(1);
+    factors = mkcol(pol);
+    ex = mkvecsmall(1);
   }
   nbpol = lg(ex)-1;
   nbroot= 0;

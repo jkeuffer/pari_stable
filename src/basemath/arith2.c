@@ -1344,7 +1344,7 @@ core2partial(GEN n, long all)
     if (mod2(e))   c = mulii(c, (GEN)p1[i]);
     if (!gcmp1(e)) f = mulii(f, powgi((GEN)p1[i], shifti(e,-1)));
   }
-  return gerepilecopy(av, _vec2(c,f));
+  return gerepilecopy(av, mkvec2(c,f));
 }
 
 GEN core(GEN n)  { return corepartial(n,1); }
@@ -1404,7 +1404,7 @@ binaire(GEN x)
     {
       GEN xp=int_MSW(x);
       lx=lgefint(x);
-      if (lx==2) return _vec(gzero);
+      if (lx==2) return mkvec(gzero);
       ly = BITS_IN_LONG+1; m=HIGHBIT; u=*xp;
       while (!(m & u)) { m>>=1; ly--; }
       y = cgetg(ly+((lx-3)<<TWOPOTBITS_IN_LONG),t_VEC); ly=1;

@@ -693,7 +693,7 @@ direulerall(entree *ep, GEN ga, GEN gb, char *ch, GEN c)
 
   d = prime_loop_init(ga,gb, &a,&b, prime);
   n = c? itou(c): b;
-  if (!d || b < 2 || (c && signe(c) < 0)) return _vec(gun);
+  if (!d || b < 2 || (c && signe(c) < 0)) return mkvec(gun);
   if (n < b) b = n;
   push_val(ep, (GEN)prime);
 

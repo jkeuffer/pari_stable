@@ -567,7 +567,7 @@ bnr_to_znstar(GEN bnr, long *complex)
       x = (GEN) x[1];
     v[i] = (long) gmodulcp(absi(x), cond);
   }
-  return _vec3((GEN)zk[1], (GEN)zk[2], v);
+  return mkvec3((GEN)zk[1], (GEN)zk[2], v);
 }
 
 GEN 
@@ -621,7 +621,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
   switch(typ(sg))
   {
      case t_INTMOD: case t_INT: 
-      V = _vecsmall( lift_check_modulus(sg,n) );
+      V = mkvecsmall( lift_check_modulus(sg,n) );
       break;
     case t_VECSMALL:
       V = gcopy(sg);
@@ -770,7 +770,7 @@ GEN polsubcyclo(long n, long d, long v)
     avma=ltop; 
     return subcyclo(n, d, v);
   }
-  L=subgrouplist((GEN) Z[2], _vec(stoi(d)));
+  L=subgrouplist((GEN) Z[2], mkvec(stoi(d)));
   if (lg(L) == 2)
     return gerepileupto(ltop, galoissubcyclo(Z, (GEN) L[1], 0, v));
   else

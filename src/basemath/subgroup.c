@@ -230,7 +230,7 @@ dopsubtyp(subgp_iter *T)
   pari_sp av = avma;
   long i,r, l = len(T->L), t = len(T->M);
 
-  if (!t) { treatsub(T, _mat( zerocol(l) )); avma = av; return; }
+  if (!t) { treatsub(T, mkmat( zerocol(l) )); avma = av; return; }
   if (l==1) /* imply t = 1 */
   {
     GEN p1 = gtomat(stoi(T->powlist[T->L[1]-T->M[1]]));
@@ -490,7 +490,7 @@ subgroup_engine(subgp_iter *T)
     if (T->boundtype == b_EXACT)
     {
       (void)Z_pvalrem(T->bound,p,&B);
-      B = _vec(B);
+      B = mkvec(B);
     }
     T->expoI = (GEN)cycI[1];
     T->subq = subgrouplist_i(cycI, B, T->expoI, NULL);

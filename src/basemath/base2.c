@@ -628,7 +628,7 @@ allbase(GEN f, int flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
       for ( ; k < lw; k++) w2[k] = lstoi(Z_pvalrem(N, (GEN)w1[k], &N));
     } RETRY {
       if (DEBUGLEVEL) fprintferr("Treating p^k = %Z^%ld\n",w1[i],mf);
-      ordmax = concatsp(ordmax, _vec( maxord((GEN)w1[i],f,mf) ));
+      ordmax = concatsp(ordmax, mkvec( maxord((GEN)w1[i],f,mf) ));
     } ENDCATCH;
   }
 
@@ -2815,7 +2815,7 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc)
   if (!d) return NULL; /* pr-maximal */
 
   A = cgetg(m+d+1,t_MAT);
-  I = cgetg(m+d+1,t_VEC); base = _vec2(A, I);
+  I = cgetg(m+d+1,t_VEC); base = mkvec2(A, I);
  /* base[2] temporarily multiplied by p, for the final nfhermitemod,
   * which requires integral ideals */
   matid = gscalmat(p, n);
@@ -2839,7 +2839,7 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc)
                                     idealpows(nf, prinvp, d)));
   base[2] = ldiv((GEN)base[2], p); /* cancel the factor p */
   vt = vdisc - 2*d;
-  return gerepilecopy(av, _vec3(vt < 2? gun: gzero, base, stoi(vt)));
+  return gerepilecopy(av, mkvec3(vt < 2? gun: gzero, base, stoi(vt)));
 }
 
 /* [L:K] = n, [K:Q] = m */
@@ -3004,7 +3004,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
       gerepileall(av1,2, &W,&I);
     }
   }
-  return gerepilecopy(av, _vec2(W, I));
+  return gerepilecopy(av, mkvec2(W, I));
 }
 
 static void
@@ -3136,7 +3136,7 @@ rnfdiscf(GEN nf, GEN pol)
 {
   pari_sp av = avma;
   GEN D, d; (void)rnfallbase(nf,pol, &D, &d, NULL);
-  return gerepilecopy(av, _vec2(D,d));
+  return gerepilecopy(av, mkvec2(D,d));
 }
 
 GEN
@@ -3418,7 +3418,7 @@ polcompositum0(GEN A, GEN B, long flall)
   {
     D = rescale_pol(A, stoi(1 - k));
     C = gdivexact(C, D);
-    if (degpol(C) <= 0) C = _vec(D); else C = concatsp(DDF2(C, 0), D);
+    if (degpol(C) <= 0) C = mkvec(D); else C = concatsp(DDF2(C, 0), D);
   }
   else
     C = DDF2(C, 0); /* C = Res_Y (A, B(X + kY)) guaranteed squarefree */
@@ -3503,7 +3503,7 @@ rnfequation0(GEN A, GEN B, long flall)
     GEN a = gmul((GEN)LPRS[1], QXQ_inv((GEN)LPRS[2], C));/* inv is costly !*/
     a = gneg_i(gmod(a, C));
     /* b = gadd(polx[varn(A)], gmulsg(k,a)); */
-    C = _vec3(C, to_polmod(a, C), stoi(k));
+    C = mkvec3(C, to_polmod(a, C), stoi(k));
   }
   return gerepilecopy(av, C);
 }
@@ -3821,7 +3821,7 @@ PRECPB:
   if (H) h = gmul(H, h);
   if (DEBUGLEVEL) fprintferr("\n");
   y = cgetg(3,t_VEC);
-  y[1] = (long)_vec2(algtobasis(nf,MPOL), gcopy(I));
+  y[1] = (long)mkvec2(algtobasis(nf,MPOL), gcopy(I));
   y[2] = (long)algtobasis(nf,h); return gerepileupto(av, y);
 }
 
@@ -3835,7 +3835,7 @@ rnfpolred(GEN nf, GEN pol, long prec)
   if (typ(pol)!=t_POL) err(typeer,"rnfpolred");
   bnf = nf; nf = checknf(bnf);
   bnf = (nf == bnf)? NULL: checkbnf(bnf);
-  if (degpol(pol) <= 1) return _vec(polx[v]);
+  if (degpol(pol) <= 1) return mkvec(polx[v]);
 
   id = rnfpseudobasis(nf,pol);
   if (bnf && gcmp1(gmael3(bnf,8,1,1))) /* if bnf is principal */
@@ -3850,7 +3850,7 @@ rnfpolred(GEN nf, GEN pol, long prec)
       newI[j] = (long)zk; al = gen_if_principal(bnf,(GEN)I[j]);
       newO[j] = (long)element_mulvec(nf, al, (GEN)O[j]);
     }
-    id = _vec2(newO, newI);
+    id = mkvec2(newO, newI);
   }
 
   id = (GEN)rnflllgram(nf,pol,id,prec)[1];
@@ -3925,7 +3925,7 @@ makebasis(GEN nf, GEN pol, GEN rnfeq)
   }
   B = Q_remove_denom(B, &den);
   if (den) { B = hnfmodid(B, den); B = gdiv(B, den); } else B = idmat(m);
-  return gerepilecopy(av, _vec2(polabs, B));
+  return gerepilecopy(av, mkvec2(polabs, B));
 }
 
 /* relative polredabs. Returns relative polynomial by default (flag = 0)
@@ -3973,7 +3973,7 @@ rnfpolredabs(GEN nf, GEN relpol, long flag)
   if (DEBUGLEVEL>1) fprintferr("reduced absolute generator: %Z\n",pol);
   if (flag & nf_ABSOLUTE)
   {
-    if (flag & nf_ADDZK) pol = _vec2(pol, (GEN)red[2]);
+    if (flag & nf_ADDZK) pol = mkvec2(pol, (GEN)red[2]);
     return gerepilecopy(av, pol);
   }
 
@@ -3981,5 +3981,5 @@ rnfpolredabs(GEN nf, GEN relpol, long flag)
   pol = rnfcharpoly(nf,relpol,elt,v);
   if (!(flag & nf_ORIG)) return gerepileupto(av, pol);
   elt = to_polmod(modreverse_i((GEN)elt[2],(GEN)elt[1]), pol);
-  return gerepilecopy(av, _vec2(pol, elt));
+  return gerepilecopy(av, mkvec2(pol, elt));
 }

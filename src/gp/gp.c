@@ -1868,7 +1868,7 @@ escape0(char *tch)
 	case 'x': voir(x, get_int(s, -1)); break;
         case 'w':
 	  s = get_sep(s); if (!*s) s = current_logfile;
-	  write0(s, _vec(x)); return;
+	  write0(s, mkvec(x)); return;
       }
       pariputc('\n'); return;
     }

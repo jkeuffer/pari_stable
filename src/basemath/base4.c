@@ -640,8 +640,8 @@ idealfactor(GEN nf, GEN x)
   if (tx == id_PRIME)
   {
     y = cgetg(3,t_MAT);
-    y[1] = (long)_col(gcopy(x));
-    y[2] = (long)_col(gun); return y;
+    y[1] = (long)mkcol(gcopy(x));
+    y[2] = (long)mkcol(gun); return y;
   }
   av = avma;
   nf = checknf(nf);
@@ -1137,7 +1137,7 @@ to_famat(GEN g, GEN e)
 }
 
 GEN
-to_famat_all(GEN x, GEN y) { return to_famat(_col(x), _col(y)); }
+to_famat_all(GEN x, GEN y) { return to_famat(mkcol(x), mkcol(y)); }
 
 static GEN
 append(GEN v, GEN x)
@@ -1155,8 +1155,8 @@ famat_add(GEN f, GEN x)
   GEN h = cgetg(3,t_MAT);
   if (lg(f) == 1)
   {
-    h[1] = (long)_colcopy(x);
-    h[2] = (long)_col(gun);
+    h[1] = (long)mkcolcopy(x);
+    h[2] = (long)mkcol(gun);
   }
   else
   {
@@ -2116,7 +2116,7 @@ END:
       break;
   }
   if (y) aI = arch_mul(aI,y);
-  return gerepilecopy(av, _vec2(I, aI));
+  return gerepilecopy(av, mkvec2(I, aI));
 }
 
 GEN
@@ -2758,7 +2758,7 @@ nfhermite(GEN nf, GEN x)
   }
   A += k-m; A[0] = evaltyp(t_MAT)|evallg(m+1);
   I += k-m; I[0] = evaltyp(t_VEC)|evallg(m+1);
-  return gerepilecopy(av0, _vec2(A, I));
+  return gerepilecopy(av0, mkvec2(A, I));
 }
 
 /* A torsion module M over Z_K will be given by a row vector [A,I,J] with
@@ -3128,5 +3128,5 @@ nfhermitemod(GEN nf, GEN x, GEN detmat)
       gerepileall(av,3, &A,&I,&J);
     }
   }
-  return gerepilecopy(av0, _vec2(A, I));
+  return gerepilecopy(av0, mkvec2(A, I));
 }

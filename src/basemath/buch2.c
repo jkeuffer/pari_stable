@@ -311,7 +311,7 @@ static GEN
 red(GEN nf, GEN I, GEN G0, GEN *pm)
 {
   GEN m, y;
-  y = ideallllred(nf, _vec2(I, cgetg(1,t_MAT)), G0, 0);
+  y = ideallllred(nf, mkvec2(I, cgetg(1,t_MAT)), G0, 0);
   m = (GEN)y[2];
   y = (GEN)y[1]; *pm = lg(m)==1? gun: gmael(m, 1, 1);
   return is_pm1(gcoeff(y,1,1))? NULL: ideal_two_elt(nf,y);
@@ -346,7 +346,7 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf)
   {
     GEN M, m, alg, id2, vp = (GEN)F->LP[ F->subFB[i] ];
     id2 = cgetg(a+1,t_VEC); Id2[i] = (long)id2;
-    id2[1] = (long)_vec2((GEN)vp[1], (GEN)vp[2]);
+    id2[1] = (long)mkvec2((GEN)vp[1], (GEN)vp[2]);
     alg = cgetg(a+1,t_VEC); Alg[i] = (long)alg; alg[1] = un;
     vp = prime_to_ideal(nf,vp);
     for (j=2; j<=a; j++)
@@ -897,7 +897,7 @@ recover_partFB(FB_t *F, GEN Vbase, long N)
 }
 
 static GEN
-init_famat(GEN x) { return _vec2(x, cgetg(1,t_MAT)); }
+init_famat(GEN x) { return mkvec2(x, cgetg(1,t_MAT)); }
 
 /* add v^e to factorization */
 static void
@@ -1122,7 +1122,7 @@ init_red_mod_units(GEN bnf, long prec)
   }
   s = gsqrt(gmul2n(s,RU),prec);
   if (expo(s) < 27) s = utoi(1UL << 27);
-  return _vec2(mat, s);
+  return mkvec2(mat, s);
 }
 
 /* z computed above. Return unit exponents that would reduce col (arch) */
@@ -1354,7 +1354,7 @@ _isprincipal(GEN bnf, GEN x, long *ptprec, long flag)
   }
   if (xc && col) col = gmul(xc, col);
   if (!col) col = cgetg(1, t_COL);
-  return (flag & nf_GEN_IF_PRINCIPAL)? col: _vec2(ex, col);
+  return (flag & nf_GEN_IF_PRINCIPAL)? col: mkvec2(ex, col);
 }
 
 static GEN
@@ -2329,8 +2329,8 @@ class_group_gen(GEN nf,GEN W,GEN C,GEN Vbase,long prec, GEN nf0,
       setlg(G,lo); setlg(Ga,lo); setlg(GD,lo); break;
     }
   }
-  *ptclg1 = _vec3(dethnf_i(W), cyc, G);
-  *ptclg2 = _vec3(Ur, ga,GD);
+  *ptclg1 = mkvec3(dethnf_i(W), cyc, G);
+  *ptclg2 = mkvec3(Ur, ga,GD);
   if (DEBUGLEVEL) msgtimer("classgroup generators");
 }
 
@@ -2492,7 +2492,7 @@ smallbuchinit(GEN pol, double bach, double bach2, long nbrelpid, long prec)
   y[7] = bnf[1];
   y[8] = bnf[2];
   y[9] = (long)codeprimes((GEN)bnf[5], degpol(nf[1]));
-  y[10]= (long)_vec2(gmael(res,4,1), algtobasis(bnf,gmael(res,4,2)));
+  y[10]= (long)mkvec2(gmael(res,4,1), algtobasis(bnf,gmael(res,4,2)));
   y[11]= (long)algtobasis(bnf, (GEN)res[5]);
   (void)check_and_build_matal(bnf);
   y[12]= bnf[10]; return gerepilecopy(av, y);
@@ -2616,8 +2616,8 @@ buchall_end(GEN nf,long fl,GEN res, GEN clg2, GEN W, GEN B, GEN A, GEN C,
     GEN x = cgetg(5, t_VEC);
     x[1]=nf[1];
     x[2]=nf[2];
-    x[3]=(long)_vec2((GEN)nf[3], (GEN)nf[4]);
-    x[4]=nf[7]; return _mat( concatsp(x, res) );
+    x[3]=(long)mkvec2((GEN)nf[3], (GEN)nf[4]);
+    x[4]=nf[7]; return mkmat( concatsp(x, res) );
   }
   z = cgetg(11,t_VEC);
   z[1]=(long)W;
@@ -2669,7 +2669,7 @@ bnfmake(GEN sbnf, long prec)
   class_group_gen(nf,W,C,Vbase,prec,NULL, &clgp,&clgp2);
 
   zu = (GEN)sbnf[10];
-  zu = _vec2((GEN)zu[1], gmul(bas,(GEN)zu[2]));
+  zu = mkvec2((GEN)zu[1], gmul(bas,(GEN)zu[2]));
 
   res = get_clfu(clgp, get_regulator(A), zu, fu, nf_UNITS);
   y = buchall_end(nf,nf_INIT,res,clgp2,W,(GEN)sbnf[8],A,C,Vbase);
@@ -2781,8 +2781,8 @@ buchall_for_degree_one_pol(GEN nf, long flun)
 {
   GEN v = cgetg(1,t_VEC), m = cgetg(1,t_MAT);
   GEN W, B, A, C, Vbase, res;
-  GEN fu = v, R = gun, zu = _vec2(gdeux, utoineg(1));
-  GEN clg1 = _vec3(gun,v,v), clg2 = _vec3(m,v,v);
+  GEN fu = v, R = gun, zu = mkvec2(gdeux, utoineg(1));
+  GEN clg1 = mkvec3(gun,v,v), clg2 = mkvec3(m,v,v);
 
   W = B = A = C= m;
   Vbase = cgetg(1,t_COL);
@@ -2909,7 +2909,7 @@ compute_vecG(GEN nf, FB_t *F, long n)
 {
   GEN G0, Gtw0, vecG, G = gmael(nf,5,2);
   long e, i, j, ind, r1 = nf_get_r1(nf), r = lg(G)-1;
-  if (n == 1) { F->G0 = G0 = ground(G); F->vecG = _vec( G0 ); return; }
+  if (n == 1) { F->G0 = G0 = ground(G); F->vecG = mkvec( G0 ); return; }
   for (e = 32;;)
   {
     G = gmul2n(G, e);
@@ -3137,7 +3137,7 @@ buchall(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long prec)
     if (lg(nf)==3) { CHANGE = (GEN)nf[2]; nf = (GEN)nf[1]; }
   }
   z = buch(&nf, cbach, cbach2, nbrelpid, flun, PRECREG);
-  if (CHANGE) z = _vec2(z, CHANGE);
+  if (CHANGE) z = mkvec2(z, CHANGE);
   z = gerepilecopy(av, z); if (nf) gunclone(nf);
   return z;
 }

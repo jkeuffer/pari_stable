@@ -29,20 +29,20 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #endif
 
 #if !defined(INLINE) || defined(INLINE_IS_STATIC)
-GEN    _col(GEN x);
-GEN    _colcopy(GEN x);
-GEN    _mat(GEN x);
-GEN    _matcopy(GEN x);
-GEN    _vec(GEN x);
-GEN    _vec2(GEN x, GEN y);
-GEN    _vec2s(long x, long y);
-GEN    _vec2copy(GEN x, GEN y);
-GEN    _vec3(GEN x, GEN y, GEN z);
-GEN    _vec3s(long x, long y, long z);
-GEN    _vec4(GEN x, GEN y, GEN z, GEN t);
-GEN    _veccopy(GEN x);
-GEN    _vecs(long x);
-GEN    _vecsmall(long x);
+GEN    mkcol(GEN x);
+GEN    mkcolcopy(GEN x);
+GEN    mkmat(GEN x);
+GEN    mkmatcopy(GEN x);
+GEN    mkvec(GEN x);
+GEN    mkvec2(GEN x, GEN y);
+GEN    mkvec2s(long x, long y);
+GEN    mkvec2copy(GEN x, GEN y);
+GEN    mkvec3(GEN x, GEN y, GEN z);
+GEN    mkvec3s(long x, long y, long z);
+GEN    mkvec4(GEN x, GEN y, GEN z, GEN t);
+GEN    mkveccopy(GEN x);
+GEN    mkvecs(long x);
+GEN    mkvecsmall(long x);
 void   affiz(GEN x, GEN y);
 void   affsz(long x, GEN y);
 GEN    addii(GEN x, GEN y);
@@ -252,32 +252,32 @@ cgetc(long l)
   return u;
 }
 INLINE GEN
-_vec(GEN x) { GEN v = cgetg(2, t_VEC); v[1] = (long)x; return v; }
+mkvec(GEN x) { GEN v = cgetg(2, t_VEC); v[1] = (long)x; return v; }
 INLINE GEN
-_vecsmall(long x) { GEN v = cgetg(2, t_VECSMALL); v[1] = x; return v; }
+mkvecsmall(long x) { GEN v = cgetg(2, t_VECSMALL); v[1] = x; return v; }
 INLINE GEN
-_veccopy(GEN x) { GEN v = cgetg(2, t_VEC); v[1] = lcopy(x); return v; }
+mkveccopy(GEN x) { GEN v = cgetg(2, t_VEC); v[1] = lcopy(x); return v; }
 INLINE GEN
-_vec2(GEN x, GEN y) {
+mkvec2(GEN x, GEN y) {
   GEN v = cgetg(3,t_VEC); v[1] = (long)x; v[2] = (long)y; return v; }
 INLINE GEN
-_vec3(GEN x, GEN y, GEN z) {
+mkvec3(GEN x, GEN y, GEN z) {
   GEN v=cgetg(4,t_VEC); v[1]=(long)x; v[2]=(long)y; v[3]=(long)z; return v; }
 INLINE GEN
-_vec4(GEN x, GEN y, GEN z, GEN t) {
+mkvec4(GEN x, GEN y, GEN z, GEN t) {
   GEN v=cgetg(5,t_VEC); v[1]=(long)x; v[2]=(long)y; v[3]=(long)z; v[4]=(long)t;
   return v; }
 INLINE GEN
-_vec2copy(GEN x, GEN y) {
+mkvec2copy(GEN x, GEN y) {
   GEN v = cgetg(3,t_VEC); v[1] = lcopy(x); v[2] = lcopy(y); return v; }
 INLINE GEN
-_col(GEN x) { GEN v = cgetg(2, t_COL); v[1] = (long)x; return v; }
+mkcol(GEN x) { GEN v = cgetg(2, t_COL); v[1] = (long)x; return v; }
 INLINE GEN
-_colcopy(GEN x) { GEN v = cgetg(2, t_COL); v[1] = lcopy(x); return v; }
+mkcolcopy(GEN x) { GEN v = cgetg(2, t_COL); v[1] = lcopy(x); return v; }
 INLINE GEN
-_mat(GEN x) { GEN v = cgetg(2, t_MAT); v[1] = (long)x; return v; }
+mkmat(GEN x) { GEN v = cgetg(2, t_MAT); v[1] = (long)x; return v; }
 INLINE GEN
-_matcopy(GEN x) { GEN v = cgetg(2, t_MAT); v[1] = lcopy(x); return v; }
+mkmatcopy(GEN x) { GEN v = cgetg(2, t_MAT); v[1] = lcopy(x); return v; }
 
 /* cannot do memcpy because sometimes x and y overlap */
 INLINE GEN
@@ -363,12 +363,12 @@ stoi(long x)
   return x > 0? utoipos((ulong)x): utoineg((ulong)-x);
 }
 INLINE GEN
-_vecs(long x) { GEN v = cgetg(2, t_VEC); v[1] = lstoi(x); return v; }
+mkvecs(long x) { GEN v = cgetg(2, t_VEC); v[1] = lstoi(x); return v; }
 INLINE GEN
-_vec2s(long x, long y) {
+mkvec2s(long x, long y) {
   GEN v = cgetg(3,t_VEC); v[1] = lstoi(x); v[2] = lstoi(y); return v; }
 INLINE GEN
-_vec3s(long x, long y, long z) {
+mkvec3s(long x, long y, long z) {
   GEN v=cgetg(4,t_VEC); v[1]=lstoi(x); v[2]=lstoi(y); v[3]=lstoi(z); return v; }
 
 INLINE GEN

@@ -76,7 +76,7 @@ member_zk(GEN x)
     switch(t)
     {
       case typ_CLA: return gmael(x,1,4);
-      case typ_Q: return _vec2(gun, polx[varn(x[1])]);
+      case typ_Q: return mkvec2(gun, polx[varn(x[1])]);
     }
     member_err("zk");
   }
@@ -223,7 +223,7 @@ member_clgp(GEN x) /* class group (3-component row vector) */
   {
     switch(t)
     {
-      case typ_QUA: return _vec3((GEN)x[1], (GEN)x[2], (GEN)x[3]);
+      case typ_QUA: return mkvec3((GEN)x[1], (GEN)x[2], (GEN)x[3]);
       case typ_CLA: return gmael(x,1,5);
     }
     if (typ(x)==t_VEC)
@@ -379,7 +379,7 @@ member_gen(GEN x)
 {
   int t;
   GEN y = get_primeid(x);
-  if (y) return _vec2((GEN)y[1], (GEN)y[2]);
+  if (y) return mkvec2((GEN)y[1], (GEN)y[2]);
   (void)get_nf(x,&t);
   if (t == typ_GAL)
     return (GEN)x[7];
@@ -497,7 +497,7 @@ member_omega(GEN x)
 {
   if (!is_bigell(x)) member_err("omega");
   if (gcmp0((GEN)x[19])) err(talker,"curve not defined over R");
-  return _vec2((GEN)x[15], (GEN)x[16]);
+  return mkvec2((GEN)x[15], (GEN)x[16]);
 }
 
 GEN
@@ -505,7 +505,7 @@ member_eta(GEN x)
 {
   if (!is_bigell(x)) member_err("eta");
   if (gcmp0((GEN)x[19])) err(talker,"curve not defined over R");
-  return _vec2((GEN)x[17], (GEN)x[18]);
+  return mkvec2((GEN)x[17], (GEN)x[18]);
 }
 
 GEN
@@ -521,7 +521,7 @@ member_tate(GEN x)
 {
   if (!is_bigell(x)) member_err("tate");
   if (!gcmp0((GEN)x[19])) err(talker,"curve not defined over a p-adic field");
-  return _vec3((GEN)x[15], (GEN)x[16], (GEN)x[17]);
+  return mkvec3((GEN)x[15], (GEN)x[16], (GEN)x[17]);
 }
 
 GEN

@@ -121,7 +121,7 @@ FindApplyQ(GEN x, GEN mu, GEN B, long k, GEN Q, long prec)
       beta = mpmul(x2, realun(prec)); /* make sure typ(beta) != t_INT */
     else
       beta = mpadd(x2, mpmul(Nx,x1));
-    Q[k] = (long)_vec2(ginv(beta), v);
+    Q[k] = (long)mkvec2(ginv(beta), v);
 
     coeff(mu,k,k) = lmpneg(Nx);
   }
@@ -327,7 +327,7 @@ lll_finish(GEN h,GEN fl,long flag)
   }
   g = cgetg(k, t_MAT); for (i=1; i<k; i++) g[i] = h[i];
   h += k-1; h[0] = evaltyp(t_MAT) | evallg(l-k+1);
-  return _vec2(g, h);
+  return mkvec2(g, h);
 }
 
 /* h[,k] += q * h[,l]. Inefficient if q = 0 */
@@ -1070,7 +1070,7 @@ lll_scaled(int MARKED, GEN X0, long D)
 
 PRECPB:
   k = 1;
-  if (retry++) return _vec(h);
+  if (retry++) return mkvec(h);
   Q  = zerovec(N-1);
   Xs = zeromat(N-1, N-1);
   R  = cgetg(N, t_MAT);
@@ -1132,7 +1132,7 @@ good_prec(GEN x, long kmax)
  * Quality ratio = delta = (D-1)/D. Suggested values: D = 4 or D = 100
  *
  *   if (flag = 1): if precision problems, return NULL
- *   if (flag = 2): if precision problems, return _vec ( h )
+ *   if (flag = 2): if precision problems, return mkvec ( h )
  *                  [ partial transformation matrix ], unless we could not
  *                  even start; return NULL in this case.
  *   if (flag = 3): assume x exact and !gram; return LLL-reduced basis, not
@@ -1210,7 +1210,7 @@ PRECPB:
     case 2: break; /* entry */
     case 1:
       if (DEBUGLEVEL>3) fprintferr("\n");
-      if (flag == 2) return _vec(h);
+      if (flag == 2) return mkvec(h);
       if (isexact || (gram && kmax > 2))
       { /* some progress but precision loss, try again */
         if (prec < PREC_THRESHOLD)
@@ -3417,7 +3417,7 @@ END:
     }
     setlg(pols,j+1);
     setlg(alph,j+1); if (isclone(S)) { alph = forcecopy(alph); gunclone(S); }
-    return _vec2(pols, alph);
+    return mkvec2(pols, alph);
   }
   u = cgetg(4,t_VEC);
   u[1] = lstoi(s<<1);

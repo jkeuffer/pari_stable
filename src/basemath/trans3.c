@@ -890,7 +890,7 @@ veceint1(GEN C, GEN nmax, long prec)
       { fprintferr("%ld ",n) ; chkpoint -= (itos(nmax) / 20); }
     minvn = divrs(unr,-n);
     mcn   = divrs(C,  -n);
-    vdiff = _vec( divrs(e1,-n) ); cd = 1; /* cd = #vdiff */
+    vdiff = mkvec( divrs(e1,-n) ); cd = 1; /* cd = #vdiff */
     affrr(mulrr(e1,e2), e1);
     for (a=1,n--; n>=nmin; n--,a++)
     {

@@ -171,13 +171,13 @@ rnf_roots(GEN nf, GEN pol, long prec, GEN *pts)
     long r1j = 0;
     ro = roots(gsubst(pol,v,(GEN)ro[j]), prec);
     while (r1j<n && gcmp0(imag_i((GEN)ro[r1j+1]))) r1j++;
-    s[j] = (long)_vec2s(r1j, (n-r1j)>>1);
+    s[j] = (long)mkvec2s(r1j, (n-r1j)>>1);
     r[j] = (long)get_roots(ro, r1j, 0);
   }
   for (; j<=r1+r2; j++)
   {
     ro = roots(gsubst(pol,v,(GEN)ro[j]), prec);
-    s[j] = (long)_vec2s(0, n);
+    s[j] = (long)mkvec2s(0, n);
     r[j] = (long)ro;
   }
   *pts = s; return r;
@@ -294,7 +294,7 @@ rnfinitalg(GEN nf, GEN pol, long prec)
   bas = rnfallbase(nf,pol, &D,&d, &f);
   B = matbasistoalg(nf,(GEN)bas[1]);
   bas[1] = (long)lift_if_rational( RgM_to_RgXV(B,vpol) );
-  delta = _vec2(D, d);
+  delta = mkvec2(D, d);
 
   rnf = cgetg(13, t_VEC);
   rnf[1] = (long)pol;
@@ -520,7 +520,7 @@ rnfprincipaltohermite(GEN rnf,GEN x)
   x = rnfbasistoalg(rnf,x);
   x = rnfalgtobasis(rnf, gmul(x, gmodulcp((GEN)bas[1], (GEN)rnf[1])));
   settyp(x, t_MAT);
-  return gerepileupto(av, nfhermite(nf, _vec2(x, (GEN)bas[2])));
+  return gerepileupto(av, nfhermite(nf, mkvec2(x, (GEN)bas[2])));
 }
 
 GEN
@@ -628,7 +628,7 @@ rnfidealabstorel(GEN rnf, GEN x)
   if (lg(x)-1 != N) err(typeer, "rnfidealabstorel");
   if (typ(x) != t_VEC) err(typeer,"rnfidealabstorel");
   A = cgetg(N+1,t_MAT);
-  I = cgetg(N+1,t_VEC); z = _vec2(A,I); id = idmat(m);
+  I = cgetg(N+1,t_VEC); z = mkvec2(A,I); id = idmat(m);
   for (j=1; j<=N; j++)
   {
     GEN t = lift_intern( rnfelementabstorel(rnf, (GEN)x[j]) );
@@ -657,7 +657,7 @@ rnfidealup(GEN rnf,GEN x)
   n = degpol(rnf[1]);
   bas = (GEN)rnf[7]; bas2 = (GEN)bas[2];
 
-  I = cgetg(n+1,t_VEC); z = _vec2((GEN)bas[1], I);
+  I = cgetg(n+1,t_VEC); z = mkvec2((GEN)bas[1], I);
   for (i=1; i<=n; i++) I[i] = (long)idealmul(nf,x,(GEN)bas2[i]);
   return gerepilecopy(av, modulereltoabs(rnf, z));
 }
@@ -675,7 +675,7 @@ rnfidealtwoelement(GEN rnf, GEN x)
   y = algtobasis(NF, y); settyp(y, t_MAT);
   y = ideal_two_elt(NF, hnf(y));
   z = rnfelementabstorel(rnf, gmul((GEN)NF[7], (GEN)y[2]));
-  return gerepilecopy(av, _vec2((GEN)y[1], z));
+  return gerepilecopy(av, mkvec2((GEN)y[1], z));
 }
 
 GEN
@@ -691,6 +691,6 @@ rnfidealmul(GEN rnf,GEN x,GEN y) /* x et y sous HNF relative uniquement */
   x2 = (GEN)x[2];
   p1 = gmul((GEN)z[1], (GEN)x[1]);
   p2 = rnfalgtobasis(rnf, gmul((GEN)z[2], x1)); settyp(p2, t_MAT);
-  z = _vec2(concatsp(p1, p2), concatsp(x2, x2));
+  z = mkvec2(concatsp(p1, p2), concatsp(x2, x2));
   return gerepileupto(av, nfhermite(nf,z));
 }

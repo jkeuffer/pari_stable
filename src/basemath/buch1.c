@@ -255,7 +255,7 @@ quadhilbertimag(GEN D, GEN flag)
     {
       GEN s = gpq((GEN)L[i], p, q, e, sqd, u, prec);
       if (DEBUGLEVEL>3) fprintferr("%ld ", i);
-      P[i] = raw? (long)_vec2((GEN)L[i], s): (long)s;
+      P[i] = raw? (long)mkvec2((GEN)L[i], s): (long)s;
       ex = gexpo(s); if (ex > 0) exmax += ex;
     }
     if (DEBUGLEVEL>1) msgtimer("roots");
@@ -303,7 +303,7 @@ quadhilbert(GEN D, GEN flag, long prec)
 /* Z-basis for a (over C) */
 static GEN
 get_om(GEN nf, GEN a) {
-  return _vec2(to_approx(nf,(GEN)a[2]),
+  return mkvec2(to_approx(nf,(GEN)a[2]),
                to_approx(nf,(GEN)a[1]));
 }
 
@@ -432,7 +432,7 @@ ellphistinit(GEN om, long prec)
 {
   GEN res,om1b,om2b, om1 = (GEN)om[1], om2 = (GEN)om[2];
 
-  if (gsigne(imag_i(gdiv(om1,om2))) < 0) { swap(om1,om2); om = _vec2(om1,om2); }
+  if (gsigne(imag_i(gdiv(om1,om2))) < 0) { swap(om1,om2); om = mkvec2(om1,om2); }
   om1b = gconj(om1);
   om2b = gconj(om2); res = cgetg(4,t_VEC);
   res[1] = ldivgs(elleisnum(om,2,0,prec),12);
@@ -489,7 +489,7 @@ PRECPB:
     GEN om = get_om(nf, idealdiv(nf,f,(GEN)listray[i]));
     GEN s = computeth2(om,lanum,prec);
     if (!s) { prec = (prec<<1)-2; goto PRECPB; }
-    P[i] = raw? (long)_vec2((GEN)listray[i], s): (long)s;
+    P[i] = raw? (long)mkvec2((GEN)listray[i], s): (long)s;
   }
   if (!raw)
   {
@@ -751,7 +751,7 @@ quadray(GEN D, GEN f, GEN flag, long prec)
   if (gcmp1(gmael(bnr,5,1)))
   {
     avma = av; if (!raw) return polx[0];
-    y = cgetg(2,t_VEC); y[1] = (long)_vec2(idmat(2), polx[0]);
+    y = cgetg(2,t_VEC); y[1] = (long)mkvec2(idmat(2), polx[0]);
     return y;
   }
   if (signe(D) > 0)

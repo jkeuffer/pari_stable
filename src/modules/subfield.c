@@ -763,7 +763,7 @@ compute_data(blockdata *B)
 
 /* g = polynomial, h = embedding. Return [[g,h]] */
 static GEN
-_subfield(GEN g, GEN h) { return _vec(_vec2(g,h)); }
+_subfield(GEN g, GEN h) { return mkvec(mkvec2(g,h)); }
 
 /* Return a subfield, gzero [ change p ] or NULL [ not a subfield ] */
 static GEN

@@ -2501,5 +2501,5 @@ galoisbig(GEN pol, long prec)
     }
     for (i = 1; i < lg(BR.r); i++) gunclone((GEN)BR.r[i]);
   }
-  avma = av; return _vec3s(tab[t], EVEN? 1: -1, t);
+  avma = av; return mkvec3s(tab[t], EVEN? 1: -1, t);
 }

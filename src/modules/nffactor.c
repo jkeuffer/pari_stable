@@ -150,7 +150,7 @@ nfroots(GEN nf,GEN pol)
   if (d == 1)
   {
     A = gneg_i(gdiv((GEN)pol[2],(GEN)pol[3]));
-    return gerepilecopy(av, _vec( basistoalg(nf,A) ));
+    return gerepilecopy(av, mkvec( basistoalg(nf,A) ));
   }
   A = fix_relative_pol(nf,pol,0);
   A = Q_primpart( lift_intern(A) );
@@ -257,8 +257,8 @@ nffactor(GEN nf,GEN pol)
   rep = cgetg(3, t_MAT); av = avma;
   if (d == 1)
   {
-    rep[1] = (long)_col( gcopy(pol) );
-    rep[2] = (long)_col( gun );
+    rep[1] = (long)mkcol( gcopy(pol) );
+    rep[2] = (long)mkcol( gun );
     return rep;
   }
 
@@ -885,8 +885,8 @@ END:
   if (DEBUGLEVEL>6) fprintferr("\n");
   if (cnt == 2) { 
     avma = av0; 
-    res[1] = (long)_vec(T->pol);
-    res[2] = (long)_vec(T->fact);
+    res[1] = (long)mkvec(T->pol);
+    res[2] = (long)mkvec(T->fact);
   }
   else
   {
@@ -1228,7 +1228,7 @@ AGAIN:
     if (DEBUGLEVEL>2)
       fprintferr("LLL_cmbf: (a,b) =%4ld,%4ld; r =%3ld -->%3ld, time = %ld\n",
                  a,b, lg(m)-1, CM_L? lg(CM_L)-1: 1, TIMER(&TI));
-    if (!CM_L) { list = _col(QXQX_normalize(P,nfT)); break; }
+    if (!CM_L) { list = mkcol(QXQX_normalize(P,nfT)); break; }
     if (b > bmin)
     {
       CM_L = gerepilecopy(av2, CM_L);
@@ -1456,7 +1456,7 @@ nfsqff(GEN nf, GEN pol, long fl)
     if (anbf <= 1)
     {
       if (!fl) /* irreducible */
-        return gerepilecopy(av, _vec(QXQX_normalize(polmod, nfpol)));
+        return gerepilecopy(av, mkvec(QXQX_normalize(polmod, nfpol)));
       if (!anbf) return cgetg(1,t_VEC); /* no root */
     }
 

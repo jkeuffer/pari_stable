@@ -928,14 +928,14 @@ step6(GEN N, ulong t, GEN et)
   {
     r = remii(mulii(r,N1), et);
     if (gcmp1(r)) break;
-    if (!signe(remii(N,r)) && !egalii(r,N)) return _vec2(r, gzero);
+    if (!signe(remii(N,r)) && !egalii(r,N)) return mkvec2(r, gzero);
     if ((i & 0x1f) == 0) r = gerepileuptoint(av, r);
   }
   return gun;
 }
 
 static GEN
-_res(long a, long b) { return b? _vec2s(a, b): _vecs(a); }
+_res(long a, long b) { return b? mkvec2s(a, b): mkvecs(a); }
 
 GEN
 aprcl(GEN N)

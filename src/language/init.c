@@ -734,7 +734,7 @@ getheap(void)
     else /* GEN */
       l += taille(x);
   }
-  return _vec2s(m, l);
+  return mkvec2s(m, l);
 }
 
 /********************************************************************/

@@ -196,13 +196,13 @@ concatsp(GEN x, GEN y)
 
   if (! is_matvec_t(tx))
   {
-    if (! is_matvec_t(ty)) return _vec2(x, y);
+    if (! is_matvec_t(ty)) return mkvec2(x, y);
     z=cgetg(ly+1,ty);
     if (ty != t_MAT) p1 = x;
     else
     {
       if (lg(y[1])!=2) err_cat(x,y);
-      p1 = _col(x);
+      p1 = mkcol(x);
     }
     for (i=2; i<=ly; i++) z[i]=y[i-1];
     z[1]=(long)p1; return z;
@@ -214,7 +214,7 @@ concatsp(GEN x, GEN y)
     else
     {
       if (lg(x[1])!=2) err_cat(x,y);
-      p1 = _col(y);
+      p1 = mkcol(y);
     }
     for (i=1; i<lx; i++) z[i]=x[i];
     z[lx]=(long)p1; return z;
@@ -320,13 +320,13 @@ concat(GEN x, GEN y)
 
   if (! is_matvec_t(tx))
   {
-    if (! is_matvec_t(ty)) return _vec2copy(x, y);
+    if (! is_matvec_t(ty)) return mkvec2copy(x, y);
     z=cgetg(ly+1,ty);
     if (ty != t_MAT) p1 = gcopy(x);
     else
     {
       if (lg(y[1])!=2) err_cat(x,y);
-      p1 = _colcopy(x);
+      p1 = mkcolcopy(x);
     }
     for (i=2; i<=ly; i++) z[i]=lcopy((GEN) y[i-1]);
     z[1]=(long)p1; return z;
@@ -338,7 +338,7 @@ concat(GEN x, GEN y)
     else
     {
       if (lg(x[1])!=2) err_cat(x,y);
-      p1 = _colcopy(y);
+      p1 = mkcolcopy(y);
     }
     for (i=1; i<lx; i++) z[i]=lcopy((GEN) x[i]);
     z[lx]=(long)p1; return z;
@@ -722,7 +722,7 @@ gtomat(GEN x)
   tx = typ(x);
   if (! is_matvec_t(tx))
   {
-    y=cgetg(2,t_MAT); y[1]=(long)_colcopy(x);
+    y=cgetg(2,t_MAT); y[1]=(long)mkcolcopy(x);
     return y;
   }
   switch(tx)
@@ -741,7 +741,7 @@ gtomat(GEN x)
           return y;
         }
       }
-      for (i=1; i<lx; i++) y[i] = (long)_colcopy((GEN)x[i]);
+      for (i=1; i<lx; i++) y[i] = (long)mkcolcopy((GEN)x[i]);
       break;
     }
     case t_COL: 
@@ -761,7 +761,7 @@ gtomat(GEN x)
           return y;
         }
       }
-      y = _matcopy(x); break;
+      y = mkmatcopy(x); break;
     default: /* case t_MAT: */
       y = gcopy(x); break;
   }
@@ -1230,7 +1230,7 @@ init_gauss(GEN a, GEN *b, long *aco, long *li, int *iscol)
         break;
       case t_COL: *iscol = 1;
         if (lg(*b)-1 != *aco) err(consister,"gauss");
-        *b = _mat( dummycopy(*b) );
+        *b = mkmat( dummycopy(*b) );
         break;
       default: err(typeer,"gauss");
     }
@@ -1337,7 +1337,7 @@ Flm_gauss_sp(GEN a, GEN b, ulong p)
   li = lg(a[1])-1;
   bco = lg(b)-1;
   iscol = (typ(b)!=t_MAT);
-  if (iscol) b = _mat(b);
+  if (iscol) b = mkmat(b);
   piv = invpiv = 0; /* -Wall */
   for (i=1; i<=aco; i++)
   {

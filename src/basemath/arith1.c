@@ -275,8 +275,8 @@ znstar(GEN n)
   {
     z = cgetg(4,t_VEC);
     z[1] = deux;
-    z[2] = (long)_vec(gdeux);
-    z[3] = (long)_vec(utoineg(1));
+    z[2] = (long)mkvec(gdeux);
+    z[3] = (long)mkvec(utoineg(1));
     return z;
   }
   av=avma; n=absi(n);
@@ -340,7 +340,7 @@ znstar(GEN n)
       }
   q=gun; for (i=1; i<=sizeh && !gcmp1((GEN)h[i]); i++) q=mulii(q,(GEN)h[i]);
   setlg(h,i); setlg(gen,i); 
-  return gerepilecopy(av, _vec3(q,h,gen));
+  return gerepilecopy(av, mkvec3(q,h,gen));
 }
 
 /*********************************************************************/
@@ -1643,7 +1643,7 @@ GEN
 init_remiimul(GEN M)
 {
   GEN iM = ginv( itor(M, lgefint(M) + 1) ); /* 1. / M */
-  return _vec2(M, iM);
+  return mkvec2(M, iM);
 }
 
 typedef struct {
@@ -1934,7 +1934,7 @@ BSW_isprime(GEN x)
   F = (GEN)auxdecomp(subis(x,1), 0)[1];
   l = lg(F); p = (GEN)F[l-1];
   if (BSW_psp(p))
-    res = isprimeSelfridge(_vec2(x,F)); /* smooth */
+    res = isprimeSelfridge(mkvec2(x,F)); /* smooth */
   else
     res = isprimeAPRCL(x);
   avma = av; return res;
@@ -2178,10 +2178,10 @@ sfcont(GEN x, long k)
 
   if (is_scalar_t(tx))
   {
-    if (gcmp0(x)) return _vec(gzero);
+    if (gcmp0(x)) return mkvec(gzero);
     switch(tx)
     {
-      case t_INT: return _veccopy(x);
+      case t_INT: return mkveccopy(x);
       case t_REAL:
         av = avma; lx = lg(x);
         e = bit_accuracy(lx)-1-expo(x);
@@ -2206,7 +2206,7 @@ sfcont(GEN x, long k)
 
   switch(tx)
   {
-    case t_POL: return _veccopy(x);
+    case t_POL: return mkveccopy(x);
     case t_SER:
       av = avma;
       return gerepileupto(av, sfcont(gtrunc(x), k));

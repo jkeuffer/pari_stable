@@ -360,7 +360,7 @@ _res(long n, long s, long k)
 {
   if (!new_galois_format)
     k = ((n == 24 && k == 6) || (n == 6 && k == 2))? 2: 1;
-  return _vec3s(n,s,k);
+  return mkvec3s(n,s,k);
 }
 
 GEN
@@ -911,7 +911,7 @@ get_bas_den(GEN bas)
     den[i] = (long)d; if (d) power = 0;
   }
   if (power) den = NULL; /* power basis */
-  return _vec2(dbas, den);
+  return mkvec2(dbas, den);
 }
 
 /* allow x or y = NULL (act as 1) */
@@ -1109,7 +1109,7 @@ get_nf_fp_compo(nfbasic_t *T, nffp_t *F, GEN ro, long prec)
 }
 
 static GEN
-get_sign(long r1, long n) { return _vec2s(r1, (n-r1)>>1); }
+get_sign(long r1, long n) { return mkvec2s(r1, (n-r1)>>1); }
 
 GEN
 nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec)
@@ -1471,7 +1471,7 @@ _initalg(GEN x, long flag, long prec)
   }
 
   nf = nfbasic_to_nf(&T, ro, prec);
-  if (flag & nf_ORIG) nf = _vec2(nf, rev);
+  if (flag & nf_ORIG) nf = mkvec2(nf, rev);
   return gerepilecopy(av, nf);
 }
 
@@ -1650,7 +1650,7 @@ ordred(GEN x)
   if (typ(x) != t_POL) err(typeer,"ordred");
   if (!gcmp1(leading_term(x))) err(impl,"ordred");
   if (!signe(x)) return gcopy(x);
-  y = _vec2(x, idmat(degpol(x)));
+  y = mkvec2(x, idmat(degpol(x)));
   return gerepileupto(av, polred(y));
 }
 
@@ -1818,7 +1818,7 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
     Mx = set_mulid(V, d->ZKembed, inv, r1, r2, N, i);
     if (!Mx) break; /* prec. problem. Stop */
     rkM = lg(M)-1;
-    if (dP == 1 && !rkM) M = _mat(vec_ei(N, 1));
+    if (dP == 1 && !rkM) M = mkmat(vec_ei(N, 1));
     M2 = cgetg(N+1, t_MAT); /* we will add to M the elts of M2 */
     M2[1] = (long)vec_ei(N, i); /* nf.zk[i] */
     k = 2;
@@ -1861,7 +1861,7 @@ storeeval(GEN a, GEN x, GEN z, GEN lead)
 {
   GEN beta = modreverse_i(a, x);
   if (lead) beta = gdiv(beta, lead);
-  return _vec2(z, to_polmod(beta,z));
+  return mkvec2(z, to_polmod(beta,z));
 }
 
 static void
@@ -1893,7 +1893,7 @@ storepol(GEN x, GEN z, GEN a, GEN lead, long flag)
 {
   GEN y;
   if (flag & nf_RAW)
-    y = _vec2(z, a);
+    y = mkvec2(z, a);
   else if (flag & nf_ORIG)
     y = storeeval(a, x, z, lead);
   else
@@ -1910,7 +1910,7 @@ storeallpol(GEN x, GEN z, GEN a, GEN lead, long flag)
   {
     long i, c = lg(z);
     y = cgetg(c,t_VEC);
-    for (i=1; i<c; i++) y[i] = (long)_vec2((GEN)z[i], (GEN)a[i]);
+    for (i=1; i<c; i++) y[i] = (long)mkvec2((GEN)z[i], (GEN)a[i]);
   }
   else if (flag & nf_ORIG)
   {
@@ -1952,7 +1952,7 @@ _polredabs(nfbasic_t *T, GEN *u)
     d.M    = F.M;
     if (R)
     {
-      v = fincke_pohst(_vec(R),NULL,-1, 0, &chk);
+      v = fincke_pohst(mkvec(R),NULL,-1, 0, &chk);
       if (v) break;
     }
     if (i == MAXITERPOL) err(accurer,"polredabs0");
@@ -1977,8 +1977,8 @@ polredabs0(GEN x, long flag)
   if (degpol(x) == 1)
   {
     u = NULL;
-    y = _vec(polx[vx]);
-    a = _vec(gsub((GEN)y[1], (GEN)x[2]));
+    y = mkvec(polx[vx]);
+    a = mkvec(gsub((GEN)y[1], (GEN)x[2]));
   }
   else
   {
@@ -1993,8 +1993,8 @@ polredabs0(GEN x, long flag)
   l = lg(a);
   if (l == 1)
   {
-    y = _vec(x);
-    a = _vec(polx[vx]);
+    y = mkvec(x);
+    a = mkvec(polx[vx]);
   }
   if (DEBUGLEVEL) fprintferr("Found %ld minimal polynomials.\n",l-1);
   if (flag & nf_ALL)
@@ -2014,7 +2014,7 @@ polredabs0(GEN x, long flag)
       GEN t, y0 = y, B = RgX_to_RgM(T.bas, lg(T.bas)-1);
       t = (flag & nf_ORIG)? lift_intern((GEN)y[2]): modreverse_i(a, x);
       t = gmul(RgX_powers(t, z, degpol(z)-1), B);
-      y = _vec2(y0, t);
+      y = mkvec2(y0, t);
     }
   }
   return gerepilecopy(av, y);
@@ -2083,7 +2083,7 @@ rootsof1(GEN nf)
     GEN R = R_from_QR(gmael(nf,5,2), prec);
     if (R)
     {
-      y = fincke_pohst(_vec(R),stoi(N),1000, 0, NULL);
+      y = fincke_pohst(mkvec(R),stoi(N),1000, 0, NULL);
       if (y) break;
     }
     if (i == MAXITERPOL) err(accurer,"rootsof1");
@@ -2099,7 +2099,7 @@ rootsof1(GEN nf)
   for (i=1; i<k; i++)
   {
     z = is_primitive_root(nf, d, (GEN)list[i], ws);
-    if (z) return gerepilecopy(av, _vec2(stoi(ws), z));
+    if (z) return gerepilecopy(av, mkvec2(stoi(ws), z));
   }
   err(bugparier,"rootsof1");
   return NULL; /* not reached */

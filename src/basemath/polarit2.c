@@ -486,7 +486,7 @@ MultiLift(GEN f, GEN a, GEN T, GEN p, long e0, int flag)
   }
 
   if (flag)
-    E = _vec4(stoi(e0), link, v, w);
+    E = mkvec4(stoi(e0), link, v, w);
   else
   {
     E = cgetg(k+1, t_VEC);
@@ -505,7 +505,7 @@ GEN
 hensel_lift_fact(GEN pol, GEN Q, GEN T, GEN p, GEN pe, long e)
 {
   pari_sp av = avma;
-  if (lg(Q) == 2) return _vec(pol);
+  if (lg(Q) == 2) return mkvec(pol);
   pol = FqX_normalize(pol, T, pe);
   return gerepilecopy(av, MultiLift(pol, Q, T, p, e, 0));
 }
@@ -540,7 +540,7 @@ bezout_lift_fact(GEN pol, GEN Q, GEN p, long e)
   pari_sp av = avma;
   GEN E, link, v, w, pe;
   long i, k = lg(Q)-1;
-  if (k == 1) return _vec(pol);
+  if (k == 1) return mkvec(pol);
   pe = gpowgs(p, e);
   pol = FpX_normalize(pol, pe);
   E = MultiLift(pol, Q, NULL, p, e, 1);
@@ -902,7 +902,7 @@ END:
   }
   if (DEBUGLEVEL>6) fprintferr("\n");
   setlg(listmod, cnt);
-  setlg(fa, cnt); return _vec2(fa, listmod);
+  setlg(fa, cnt); return mkvec2(fa, listmod);
 }
 
 void
@@ -1252,7 +1252,7 @@ AGAIN:
     if (DEBUGLEVEL>2)
       fprintferr("LLL_cmbf: (a,b) =%4ld,%4ld; r =%3ld -->%3ld, time = %ld\n",
                  a,b, lg(m)-1, CM_L? lg(CM_L)-1: 1, TIMER(&TI));
-    if (!CM_L) { list = _col(P); break; }
+    if (!CM_L) { list = mkcol(P); break; }
     if (b > bmin) 
     {
       CM_L = gerepilecopy(av2, CM_L);
@@ -1518,7 +1518,7 @@ DDF(GEN a, long hint, int fl)
     {
       if (nfacp <= 1)
       {
-        if (!fl) { avma = av; return _col(a); } /* irreducible */
+        if (!fl) { avma = av; return mkcol(a); } /* irreducible */
         if (!nfacp) return cgetg(1, t_VEC); /* no root */
       }
       nmax = nfacp; chosenp = p;
@@ -2148,7 +2148,7 @@ gauss_factor(GEN x)
 
   y = gmul(y, Ipow(exp));
   if (!gcmp1(y)) {
-    fa[1] = (long)concatsp(_col(y), (GEN)fa[1]);
+    fa[1] = (long)concatsp(mkcol(y), (GEN)fa[1]);
     fa[2] = (long)concatsp(gun,     (GEN)fa[2]);
   }
   return gerepilecopy(av, fa);
@@ -2170,8 +2170,8 @@ factor(GEN x)
   if (gcmp0(x))
   {
     y = cgetg(3,t_MAT);
-    y[1] = (long)_colcopy(x);
-    y[2] = (long)_col(gun); return y;
+    y[1] = (long)mkcolcopy(x);
+    y[2] = (long)mkcol(gun); return y;
   }
   av = avma;
   switch(tx)

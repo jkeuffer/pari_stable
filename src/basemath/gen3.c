@@ -2290,7 +2290,7 @@ gtovec(GEN x)
 
   if (!x) return cgetg(1,t_VEC);
   tx = typ(x);
-  if (is_scalar_t(tx) || tx == t_RFRAC) return _veccopy(x);
+  if (is_scalar_t(tx) || tx == t_RFRAC) return mkveccopy(x);
   if (tx == t_STR)
   {
     char t[2] = {0,0};
@@ -2322,7 +2322,7 @@ gtovec(GEN x)
     return y;
   }
   if (tx == t_VECSMALL) return vecsmall_to_vec(x);
-  if (!signe(x)) return _vec(gzero);
+  if (!signe(x)) return mkvec(gzero);
   lx=lg(x); y=cgetg(lx-1,t_VEC); x++;
   for (i=1; i<=lx-2; i++) y[i]=lcopy((GEN)x[i]);
   return y;
@@ -2354,7 +2354,7 @@ gtovecsmall(GEN x)
   if (!x) return cgetg(1,t_VECSMALL);
   tx = typ(x);
   if (tx == t_VECSMALL) return gcopy(x);
-  if (tx == t_INT) return _vecsmall(itos(x));
+  if (tx == t_INT) return mkvecsmall(itos(x));
   if (tx == t_STR) return str_to_vecsmall(x);
   if (!is_vec_t(tx)) err(typeer,"vectosmall");
   l = lg(x);

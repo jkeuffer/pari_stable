@@ -289,7 +289,7 @@ GEN
 rectcursor(long ne)
 {
   PariRect *e = check_rect_init(ne);
-  return _vec2s((long)RXcursor(e), (long)RYcursor(e));
+  return mkvec2s((long)RXcursor(e), (long)RYcursor(e));
 }
 
 static void

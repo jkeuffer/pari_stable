@@ -1509,7 +1509,7 @@ FpX_factorff_irred(GEN P, GEN Q, GEN l)
   long i,d=cgcd(np,nq);
   long vp=varn(P),vq=varn(Q);
 
-  if (d==1) return _colcopy(P);
+  if (d==1) return mkcolcopy(P);
   if (DEBUGLEVEL>=4) (void)timer2();
   FP=FpXQ_matrix_pow(np,np,FpXQ_pow(polx[vp],l,P,l),P,l);
   FQ=FpXQ_matrix_pow(nq,nq,FpXQ_pow(polx[vq],l,Q,l),Q,l);
@@ -2941,7 +2941,7 @@ END:
   setvarn(H, vX); if (delvar) (void)delete_var();
   if (LERS)
   {
-    *LERS = _vec2(H0,H1);
+    *LERS = mkvec2(H0,H1);
     gerepileall(av, 2, &H, LERS);
     return H;
   }

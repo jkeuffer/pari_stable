@@ -1118,7 +1118,7 @@ zidealij(GEN x, GEN y, GEN *U)
     p1[1] = laddsi(1, (GEN)p1[1]); /* 1 + g_j */
   }
   if (U) *U = gmul(*U, ginv(x));
-  return _vec2(cyc, G);
+  return mkvec2(cyc, G);
 }
 
 /* smallest integer n such that g0^n=x modulo p prime. Assume g0 has order q
@@ -1498,10 +1498,10 @@ zprimestar(GEN nf, GEN pr, GEN ep, GEN x, GEN arch)
 
   list = cget1(e+1, t_VEC);
   y = cgetg(6,t_VEC); appendL(list, y);
-  y[1] = (long)_vec(addis(gpowgs(p,f), -1));
-  y[2] = (long)_vec(v);
-  y[3] = (long)_vec(g0);
-  y[4] = (long)_vec(zsigne(nf,g0,arch));
+  y[1] = (long)mkvec(addis(gpowgs(p,f), -1));
+  y[2] = (long)mkvec(v);
+  y[3] = (long)mkvec(g0);
+  y[4] = (long)mkvec(zsigne(nf,g0,arch));
   y[5] = un;
   prb = prh;
   for (a = b = 1; a < e; a = b)
@@ -1611,13 +1611,13 @@ zarchstar(GEN nf, GEN x, GEN archp)
   gZ = x? subsi(1, gcoeff(x,1,1)): negi(gun); /* gZ << 0, gZ = 1 mod x */
   if (nba == 1)
   {
-    y[2] = (long)_vec(gZ);
+    y[2] = (long)mkvec(gZ);
     y[3] = (long)gscalmat(gun,1); return y;
   }
   bas = gmael(nf,5,1); N = lg(bas)-1;
   if (lg(bas[1]) > lg(archp)) bas = rowextract_p(bas, archp);
   gen = cgetg(nba+1,t_VEC);
-  v = _mat( vecsmall_const(nba, 1) );
+  v = mkmat( vecsmall_const(nba, 1) );
   gen[1] = (long)gZ;
 
   mat = archstar_full_rk(x, bas, v, gen);
@@ -1641,7 +1641,7 @@ zlog_pk(GEN nf, GEN a0, GEN y, GEN pr, GEN prk, GEN list, GEN *psigne)
     s   = (GEN)L[4];
     U   = (GEN)L[5];
     if (j == 1)
-      e = _col( nf_PHlog(nf, a, (GEN)gen[1], pr) );
+      e = mkcol( nf_PHlog(nf, a, (GEN)gen[1], pr) );
     else if (typ(a) == t_INT)
       e = gmul(subis(a, 1), (GEN)U[1]);
     else
@@ -1791,7 +1791,7 @@ log_gen_pr(zlog_S *S, long index, GEN nf, long e)
     L = (GEN)L2[1];
     y = zerocol(S->n); y[yind + 1] = un;
     zlog_add_sign(y, gmael(L,4,1), S->lists);
-    A = _mat(y);
+    A = mkmat(y);
   }
   else
   {
@@ -1928,7 +1928,7 @@ zidealstarinitall(GEN nf, GEN ideal,long add_gen)
   }
 
   y = cgetg(6,t_VEC);
-  y[1] = (long)_vec2(x, arch);
+  y[1] = (long)mkvec2(x, arch);
   y[3] = (long)fa;
   y[4] = (long)lists;
   y[5] = (long)U;
@@ -2072,7 +2072,7 @@ zidealstarinitjoin(GEN nf, GEN bid1, GEN bid2)
   f2 = (GEN)bid2[1]; clgp2 = (GEN)bid2[2]; fa2 = (GEN)bid2[3];
   gen = (lg(clgp1)>3 && lg(clgp2)>3)? gun: NULL;
   x = idealmul(nf, (GEN)f1[1],(GEN)f2[1]);
-  f = _vec2(x, (GEN)f1[2]);
+  f = mkvec2(x, (GEN)f1[2]);
 
   P1 = (GEN)fa1[1]; lx1 = lg(P1);
   P2 = (GEN)fa2[1]; lx2 = lg(P2);
@@ -2138,7 +2138,7 @@ zidealstarinitjoinarch(GEN nf, GEN bid1, GEN arch, long add_gen)
   nf = checknf(nf); checkbid(bid1);
   module1 = (GEN)bid1[1]; struct1 = (GEN)bid1[2]; fact1 = (GEN)bid1[3];
   x = (GEN)module1[1];
-  module = _vec2(x, arch);
+  module = mkvec2(x, arch);
   if (!gcmp0((GEN)module1[2]))
     err(talker,"non-0 Archimedian components in zidealstarinitjoinarch");
 
@@ -2226,14 +2226,14 @@ ideallistzstarall(GEN bnf,long bound,long flag)
 
   ideal = idmat(degpol(nf[1]));
   if (big_id) ideal = zidealstarinitall(nf,ideal,do_gen);
-  z[1] = (long)_vec(ideal);
+  z[1] = (long)mkvec(ideal);
   lu = U = sgnU = NULL; /* -Wall */
   if (do_units)
   {
     U = init_units(bnf);
     sgnU = zsignunits(bnf, NULL, 1);
     lu = cgetg(bound+1,t_VEC);
-    lu[1] = (long)_vec(logunitmatrix(nf, U, sgnU, ideal));
+    lu[1] = (long)mkvec(logunitmatrix(nf, U, sgnU, ideal));
     for (i=2; i<=bound; i++) lu[i] = lgetg(1,t_VEC);
   }
 
@@ -2296,7 +2296,7 @@ ideallistzstarall(GEN bnf,long bound,long flag)
     long l = lg(p2);
     for (j = 1; j < l; j++) p2[j] = lmul(gmael(p1,j,5), (GEN)p2[j]);
   }
-  return gerepilecopy(av0, _vec2(z, lu));
+  return gerepilecopy(av0, mkvec2(z, lu));
 }
 
 GEN

@@ -426,8 +426,8 @@ new_sol(GEN z, GEN S)
 static void
 add_sol(GEN *pS, GEN x, GEN y)
 {
-  GEN u = _vec2(x,y);
-  if (new_sol(u, *pS)) *pS = concatsp(*pS, _vec(u));
+  GEN u = mkvec2(x,y);
+  if (new_sol(u, *pS)) *pS = concatsp(*pS, mkvec(u));
 }
 
 static void
@@ -652,7 +652,7 @@ thueinit(GEN pol, long flag, long prec)
     if (!gisirreducible(pol)) err(redpoler,"thueinit");
     for (k=1; k<lg(ro); k++) c0 = gmul(c0, imag_i((GEN)ro[k]));
     c0 = ginv( mpabs(c0) );
-    tnf = _vec2(pol, c0);
+    tnf = mkvec2(pol, c0);
   }
   return gerepilecopy(av,tnf);
 }
@@ -1271,8 +1271,8 @@ bnfisintnormabs(GEN bnf, GEN a)
   bnf = checkbnf(bnf); nf = (GEN)bnf[7];
   if (typ(a)!=t_INT)
     err(talker,"expected an integer in bnfisintnorm");
-  if (!signe(a))  return _vec(gzero);
-  if (gcmp1(a)) return _vec(gun);
+  if (!signe(a))  return mkvec(gzero);
+  if (gcmp1(a)) return mkvec(gun);
 
   get_sol_abs(bnf, absi(a), &Primes);
 

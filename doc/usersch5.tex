@@ -2131,15 +2131,13 @@ with main variable number~\kbd{v}.
 might be zero), normalizes \kbd{x} correctly in place. Returns~\kbd{x}.
 For internal use.
 
-\subsec{Constructors}
+\subsec{Clean Constructors}
 
 \fun{GEN}{zeropadic}{GEN p, long n} creates a $0$ \typ{PADIC} equal to
 $O(\kbd{p}^\kbd{n})$.
 
 \fun{GEN}{zeroser}{long v, long n} creates a $0$ \typ{SER} in variable
 \kbd{v} equal to $O(X^\kbd{n})$.
-
-% dans j, pas dans i
 
 \fun{GEN}{scalarser}{GEN x, long v, long prec} creates a constant \typ{SER}
 in variable \kbd{v} and precision \kbd{prec}, whose constant coefficient is
@@ -2162,13 +2160,62 @@ Assumes that \kbd{x} is non-zero.
 set to \kbd{gzero}, but the \kbd{i}-th one which us set to \kbd{gun}
 (\kbd{i}-th vector in the canonical basis).
 
-\fun{GEN}{vec_Cei}{long n, long i} creates a \typ{VEC} with \kbd{n}
-components set to \kbd{gzero}, but the \kbd{i}-th one which us set to
-\kbd{C}. \emph{No copy is made}, so if \kbd{C} is not a permanent object, the
-result is not suitable for \kbd{gerepileupto}.
-
 \fun{GEN}{zeromat}{long m, long n} creates a \typ{MAT} with \kbd{m} x \kbd{n}
 components set to \kbd{gzero}.
+\smallskip
+See also next section for analogs of the following functions:
+
+\fun{GEN}{mkcolcopy}{GEN x} creates a 1-dimensional \typ{COL} containing
+\kbd{x}.
+
+\fun{GEN}{mkmatcopy}{GEN x} creates a 1-by-1 \typ{MAT} containing \kbd{x}.
+
+\fun{GEN}{mkveccopy}{GEN x} creates a 1-dimensional \typ{VEC} containing
+\kbd{x}.
+
+\fun{GEN}{mkvec2copy}{GEN x, GEN y} creates a 2-dimensional \typ{VEC} equal
+to \kbd{[x,y]}.
+
+\fun{GEN}{mkvecs}{long x} creates a 1-dimensional \typ{VEC}
+containing \kbd{stoi(x)}.
+
+\fun{GEN}{mkvec2s}{long x, long y} creates a 2-dimensional \typ{VEC}
+containing \kbd{[stoi(x), stoi(y)]}.
+
+\fun{GEN}{mkvec3s}{long x, long y, long z} creates a 3-dimensional \typ{VEC}
+containing \kbd{[stoi(x), stoi(y), stoi(z)]}.
+
+
+\fun{GEN}{mkvecsmall}{long x} creates a 1-dimensional \typ{VECSMALL}
+containing \kbd{x}.
+
+\subsec{Unclean Constructors}
+
+Contrary to the policy of general PARI functions, the functions in this
+subsection do \emph{not} copy their arguments, nor do they produce an object
+a priori suitable for \tet{gerepileupto}. In particular, they are
+faster than their clean equivalent (which may not exist). \emph{If} you
+restrict their arguments to universal objects (e.g \kbd{gun}, \kbd{gzero}),
+then the above warning does not apply.
+
+\fun{GEN}{vec_Cei}{long n, long i} creates a \typ{VEC} with \kbd{n}
+components set to \kbd{gzero}, but the \kbd{i}-th one which us set to
+\kbd{C}.
+
+\fun{GEN}{mkcol}{GEN x} creates a 1-dimensional \typ{COL} containing \kbd{x}.
+
+\fun{GEN}{mkmat}{GEN x} creates a 1-by-1 \typ{MAT} containing \kbd{x}.
+
+\fun{GEN}{mkvec}{GEN x} creates a 1-dimensional \typ{VEC} containing \kbd{x}.
+
+\fun{GEN}{mkvec2}{GEN x, GEN y} creates a 2-dimensional \typ{VEC} equal to
+\kbd{[x,y]}.
+
+\fun{GEN}{mkvec3}{GEN x, GEN y, GEN z} creates a 3-dimensional \typ{VEC}
+equal to \kbd{[x,y,z]}.
+
+\fun{GEN}{mkvec4}{GEN x, GEN y, GEN z, GEN t} creates a 4-dimensional \typ{VEC}
+equal to \kbd{[x,y,z,t]}.
 
 \smallskip
 
@@ -2196,10 +2243,6 @@ coefficients (\kbd{GEN}) follow.
 
 \fun{GEN}{coefs_to_col}{long n, ...} returns the \typ{COL} whose $n$
 coefficients (\kbd{GEN}) follow.
-
-\misctitle{Warning}: Contrary to the policy of general PARI functions, the
-latter three functions do \emph{not} copy their arguments, nor do they produce
-an object a priori suitable for \tet{gerepileupto}.
 
 \subsec{Integer parts}
 
