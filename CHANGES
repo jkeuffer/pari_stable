@@ -56,6 +56,7 @@ ellpointtoz(E,[x1,y1]); -->  impossible addition t_VEC + t_VEC.
     9- polgalois(x^6-3*x^4+3) --> [24, -1, 1], should be [24, -1, 2]. From 2.2.4
    10- nfisincl(x, x^2+1/2) --> SEGV   [ assumed integral inputs ]
    11- numbpart(10^15+2) --> SEGV  [ check for x < 10^15 incorrect ]
+   12- polcompositum(x,x) --> SEGV [ problem with poldeflate(deg 0 pol) ]
 
   Changed
     1- bnfinit: [small_norm phase] speed up norm computations.

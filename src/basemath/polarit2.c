@@ -1531,7 +1531,7 @@ poldeflate_i(GEN x0, long d)
 {
   GEN z, y, x;
   long i,id, dy, dx = degpol(x0);
-  if (d == 1) return x0;
+  if (d <= 1) return x0;
   if (dx < 0) return zeropol(varn(x0));
   dy = dx/d;
   y = cgetg(dy+3, t_POL);
