@@ -659,6 +659,7 @@ Flm_Flx_mul(GEN x, GEN y, ulong p)
   *z-- = vs; return z;
 }
 
+/* assume deg(u) > 0 */
 static GEN
 Flx_Frobenius(GEN u, ulong p)
 {

@@ -3336,9 +3336,14 @@ polcompositum0(GEN A, GEN B, long flall)
   D = NULL; /* -Wall */
   k = same? -1: 1; 
   C = ZY_ZXY_resultant_all(A, B, &k, flall? &LPRS: NULL);
-  if (same) { D = rescale_pol(A, stoi(1 - k)); C = gdivexact(C, D); }
-  C = DDF2(C, 0); /* C = Res_Y (A, B(X + kY)) guaranteed squarefree */
-  if (same) C = concatsp(C, D);
+  if (same)
+  {
+    D = rescale_pol(A, stoi(1 - k));
+    C = gdivexact(C, D);
+    if (degpol(C) <= 0) C = _vec(D); else C = concatsp(DDF2(C, 0), D);
+  }
+  else
+    C = DDF2(C, 0); /* C = Res_Y (A, B(X + kY)) guaranteed squarefree */
   C = sort_vecpol(C, &cmpii);
   if (flall)
   {
