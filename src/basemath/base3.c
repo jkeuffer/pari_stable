@@ -269,7 +269,7 @@ element_muli(GEN nf, GEN x, GEN y)
 	}
       }
     }
-    v[k]=(long) gerepileuptoint(av,s); av=avma;
+    v[k] = lpileuptoint(av,s); av = avma;
   }
   return v;
 }
@@ -311,7 +311,7 @@ element_sqri(GEN nf, GEN x)
 	}
       }
     }
-    v[k]=(long) gerepileuptoint(av,s); av=avma;
+    v[k] = lpileuptoint(av,s); av = avma;
   }
   return v;
 }

@@ -1030,7 +1030,7 @@ make_T(GEN x, GEN w)
         d = _mulii((GEN)den[i],(GEN)den[j]);
         if (d) t = diviiexact(t, d);
       }
-      p1[j] = (long)gerepileuptoint(av, t);
+      p1[j] = lpileuptoint(av, t);
     }
   }
   return T;

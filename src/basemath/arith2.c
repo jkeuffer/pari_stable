@@ -1295,7 +1295,7 @@ real_unit_form_by_disc(GEN D, long prec)
   if (mod2(D) != mod2(isqrtD))
     isqrtD = gerepileuptoint(av, addsi(-1,isqrtD));
   y[2] = (long)isqrtD; av = avma;
-  y[3] = (long)gerepileuptoint(av, shifti(subii(sqri(isqrtD),D),-2));
+  y[3] = lpileuptoint(av, shifti(subii(sqri(isqrtD),D),-2));
   y[4] = (long)realzero(prec); return y;
 }
 
@@ -1331,7 +1331,7 @@ imag_unit_form_by_disc(GEN D)
   if (isodd)
   {
     gpmem_t av = avma;
-    y[3] = (long)gerepileuptoint(av, addis((GEN)y[3],1));
+    y[3] = lpileuptoint(av, addis((GEN)y[3],1));
   }
   return y;
 }
@@ -1346,7 +1346,7 @@ imag_unit_form(GEN x)
   y[2] = mpodd((GEN)x[2])? un: zero;
   av = avma; p1 = mulii((GEN)x[1],(GEN)x[3]);
   p2 = shifti(sqri((GEN)x[2]),-2);
-  y[3] = (long)gerepileuptoint(av, subii(p1,p2));
+  y[3] = lpileuptoint(av, subii(p1,p2));
   return y;
 }
 

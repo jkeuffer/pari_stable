@@ -167,7 +167,7 @@ mtran(GEN v, GEN w, GEN q, GEN m, GEN mo2, long k0)
       gpmem_t av = avma;
       p1 = subii((GEN)v[k], mulii(q,(GEN)w[k]));
       p1 = centermodii(p1, m, mo2);
-      v[k] = (long)gerepileuptoint(av, p1);
+      v[k] = lpileuptoint(av, p1);
     }
   return v;
 }

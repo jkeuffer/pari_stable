@@ -1644,7 +1644,7 @@ gsqr(GEN x)
         z[1] = evalprecp(precp(x)+i) | evalvalp(2*valp(x));
 	icopyifstack(x[2], z[2]);
         z[3] = lshifti((GEN)x[3], i); av = avma;
-	z[4] = (long)gerepileuptoint(av, modii(sqri((GEN)x[4]), (GEN)z[3]));
+	z[4] = lpileuptoint(av, modii(sqri((GEN)x[4]), (GEN)z[3]));
 	return z;
 	
       case t_QUAD:

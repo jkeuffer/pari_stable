@@ -564,7 +564,7 @@ ZincrementalGS(GEN x, GEN L, GEN B, long k, GEN fl, int gram)
           u = subii(mulii((GEN)B[i+1], u), mulii(gcoeff(L,k,i), gcoeff(L,j,i)));
           u = diviiexact(u, (GEN)B[i]);
         }
-      coeff(L,k,j) = (long)gerepileuptoint(av, u);
+      coeff(L,k,j) = lpileuptoint(av, u);
     }
   s = signe(u);
   if (s == 0) B[k+1] = B[k];
@@ -2470,7 +2470,7 @@ gmul_mati_smallvec(GEN x, GEN y)
     av = avma; s = mulis(gcoeff(x,i,1),y[1]);
     for (j=2; j<c; j++)
       if (y[j]) s = addii(s, mulis(gcoeff(x,i,j),y[j]));
-    z[i]=(long)gerepileuptoint(av,s);
+    z[i] = lpileuptoint(av,s);
   }
   return z;
 }

@@ -183,7 +183,7 @@ centermod_i(GEN x, GEN p, GEN ps2)
       for (i=2; i<lx; i++)
       {
 	av = avma;
-	y[i] = (long)gerepileuptoint(av, centermodii((GEN)x[i],p,ps2));
+	y[i] = lpileuptoint(av, centermodii((GEN)x[i],p,ps2));
       }
       return normalizepol_i(y, lx);
 

@@ -938,13 +938,13 @@ gauss_triangle_i(GEN A, GEN B, GEN t)
     GEN u = cgetg(n+1, t_COL), b = (GEN)B[k];
     gpmem_t av = avma;
     c[k] = (long)u; m = mulii((GEN)b[n],t);
-    u[n] = (long)gerepileuptoint(av, divii(m, gcoeff(A,n,n)));
+    u[n] = lpileuptoint(av, divii(m, gcoeff(A,n,n)));
     for (i=n-1; i>0; i--)
     {
       av = avma; m = mulii(negi((GEN)b[i]),t);
       for (j=i+1; j<=n; j++)
         m = addii(m, mulii(gcoeff(A,i,j),(GEN) u[j]));
-      u[i] = (long)gerepileuptoint(av, divii(negi(m), gcoeff(A,i,i)));
+      u[i] = lpileuptoint(av, divii(negi(m), gcoeff(A,i,i)));
     }
   }
   return c;
@@ -1001,7 +1001,7 @@ hnf_invimage(GEN A, GEN b)
       m = addii(m, mulii(gcoeff(A,i,j),(GEN) u[j]));
     m = dvmdii(m, gcoeff(A,i,i), &r);
     if (r != gzero) { avma = av; return NULL; }
-    u[i] = (long)gerepileuptoint(av2, negi(m));
+    u[i] = lpileuptoint(av2, negi(m));
   }
   return u;
 }
