@@ -454,14 +454,12 @@ if test "$optimization" != profiling; then
     echo ..."Found X11 header files in $Xincroot/X11"
   fi
 
-  pth=$libpth
 #   LIB: gnuplot
-  opth="$pth"
-  pth="$TOP/gnuplot-$osname-$arch $TOP/gnuplot $TOP/../gnuplot-$osname-$arch $TOP/../gnuplot $TOP/../../gnuplot-$osname-$arch $TOP/../../gnuplot $pth"
-  gpth="$pth"
+  pth="$TOP/gnuplot-$osname-$arch $TOP/gnuplot\
+       $TOP/../gnuplot-$osname-$arch $TOP/../gnuplot\
+       $TOP/../../gnuplot-$osname-$arch $TOP/../../gnuplot $libpth"
   lib=gnuplot; . ./locatelib
   gnuplot_fullpath="$try"
-  pth="$opth"
   gnuplot_libs=
   case $gnuplot in
     /*|[c-z]:/*)
@@ -484,12 +482,9 @@ if test "$optimization" != profiling; then
 	;;
     *)
 	if test "$which_graphic_lib" = gnuplot; then
+            pth=`echo $pth | sed -e "s,$TOP,.,g"`
 	    echo "###"
-	    echo "### Could not find gnuplot library in:"
-	    echo "###   ./gnuplot-$osname-$arch ./gnuplot"
-	    echo "###   ../gnuplot-$osname-$arch ../gnuplot"
-	    echo "###   ../../gnuplot-$osname-$arch ../../gnuplot"
-	    echo "###   $pth"
+	    echo "### Could not find gnuplot library in $pth"
 	    echo "###"
 	    case "$osname" in
 		os2) tlib=gnuplot.a ;;
@@ -507,7 +502,7 @@ if test "$optimization" != profiling; then
 
 #   LIB: GNU ReadLine
   readline_add="$GP_READLINE $TOP/readline-$osname-$arch $TOP/readline"
-  pth="$readline_add $pth"
+  pth="$readline_add $libpth"
   lib=readline; . ./locatelib
   rl_fullname=$try
 
@@ -601,15 +596,15 @@ if test "$optimization" != profiling; then
     RLLIBS="-L$readline -lreadline"
     if test -n "$rl_ncurses"; then
       echo ..."Library ncurses needed by readline"
-      RLLIBS="$RLLIBS -lncurses"
+      RLLIBS="$RLLIBS -L$rl_ncurses -lncurses"
     fi
     if test -n "$rl_termcap"; then
       echo ..."Library termcap needed by readline"
-      RLLIBS="$RLLIBS -ltermcap"
+      RLLIBS="$RLLIBS -L$rl_termcap -ltermcap"
     fi
     if test -n "$rl_liberty"; then
       echo ..."Library liberty needed by readline"
-      RLLIBS="$RLLIBS -liberty"
+      RLLIBS="$RLLIBS -L$rl_liberty -liberty"
     fi
     if test -z "$rl_appendchar"; then
       echo ..."Library readline does not have completion_append_char"
@@ -776,8 +771,7 @@ if test "$which_graphic_lib" = gnuplot -a -z "$gcc"; then
     if test -n "$try"; then
 	echo "...Looks like gcc-compiled gnuplot.  I add -lgcc to graphic libraries"
 	_ogcc="$gcc"
-	opth="$pth"
-	pth="$pth /opt/local/gnu/lib /usr/local/gnu/lib"
+	pth="$libpth /opt/local/gnu/lib /usr/local/gnu/lib"
 	gcclibspec="`gcc -v 2>&1 | grep specs | sed 's/.*specs from //'`"
 	if test -n "$gcclibspec"; then
 	    pth="`dirname $gcclibspec` $pth"
@@ -791,7 +785,6 @@ if test "$which_graphic_lib" = gnuplot -a -z "$gcc"; then
 	    echo "...###   PLOTLIBS = ..."
 	    echo "...### line in your architecture-Makefile."
 	fi
-	pth="$opth"
 	gcc="$_ogcc"
 	gnuplot_libs="$gnuplot_libs -lgcc"
     fi
