@@ -251,8 +251,10 @@ padic_initell(GEN y, GEN p, long prec)
   b1=gmul2n(w,-1); x1=NULL;
   u2 = do_padic_agm(&x1,a1,b1,pv);
 
-  w=gaddsg(1,ginv(gmul2n(gmul(u2,x1),1)));
-  q=ginv(gadd(w,gsqrt(gaddgs(gsqr(w),-1),0)));
+  w = gaddsg(1,ginv(gmul2n(gmul(u2,x1),1)));
+  w = gadd(w,gsqrt(gaddgs(gsqr(w),-1),0));
+  if (gcmp0(w)) err(talker,"precision too low in initell");
+  q=ginv(w);
   if (valp(q)<0) q=ginv(q);
 
   p1=cgetg(2,t_VEC); p1[1]=(long)e1;
@@ -269,7 +271,7 @@ invcmp(GEN x, GEN y) { return -gcmp(x,y); }
 static GEN
 initell0(GEN x, long prec)
 {
-  GEN b2,b4,D,p1,p2,p,u,w,a1,b1,x1,u2,q,e1,pi,pi2,tau,w1,w2;
+  GEN b2,b4,D,p1,p2,p,w,a1,b1,x1,u2,q,e1,pi,pi2,tau,w1,w2;
   GEN y = cgetg(20,t_VEC);
   long ty,i,e,sw;
 
