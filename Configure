@@ -783,7 +783,7 @@ fi
 
 if test -n "$__gnuc__"; then
   __GNUC__="-D__GNUC__"
-  OPTFLAGS="-O2 -DGCC_INLINE"
+  OPTFLAGS="-O3 -DGCC_INLINE -fomit-frame-pointer"
   DBGFLAGS="-g -Wall -Wno-implicit"
   PRFFLAGS="-pg"
   # Some architectures need -fPIC for building dynamic lib
@@ -791,7 +791,6 @@ if test -n "$__gnuc__"; then
   # Specific optimisations for some architectures
   case "$osname-$arch" in
     linux-i?86|cygwin*) OPTFLAGS="-O3 -DGCC_INLINE -fexpensive-optimizations -malign-loops=2 -malign-jumps=2 -malign-functions=2";;
-    linux-alpha*) OPTFLAGS="-O3 -DGCC_INLINE -fexpensive-optimizations";;
   esac
   case "$osname-$asmarch" in *-sparcv8*) CFLAGS="$CFLAGS -mv8" ;; esac
 else
