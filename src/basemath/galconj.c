@@ -494,7 +494,7 @@ poltopermtest(GEN f, struct galois_lift *gl, GEN pf)
 	&& cmpii((GEN)f[i],gl->gb->lbornesol)<0)
     {
       if (DEBUGLEVEL>=4)
-	fprintferr("GalConj: Solution too large, discard it.\n");
+	fprintferr("GaloisConj: Solution too large, discard it.\n");
       return 0;
     }
   ll=lg(gl->L);
@@ -1429,8 +1429,29 @@ fixedfieldpolsigma(GEN sigma, GEN p, GEN Tp, GEN sym, GEN deg, long g)
   }
   return gerepileupto(ltop, s);
 }
+GEN caractducos(GEN p, GEN x, int v);
 
-GEN
+static GEN 
+fixedfieldminpoly(GEN S, GEN T, GEN p)
+{
+  GEN R=lift(caractducos(FpX(T,p),FpX(S,p),varn(S)));
+  GEN G=FpX_gcd(R,deriv(R,-1),p);
+  G=FpX_Fp_mul(G, mpinvmod((GEN) G[lgef(G) - 1],p),p);
+  return FpX_div(R,G,p);
+}
+
+  GEN
+fixedfieldfactmod(GEN Sp, GEN p, GEN Tmod)
+{
+  long i;
+  long l=lg(Tmod);
+  GEN F=cgetg(l,t_VEC);
+  for(i=1;i<l;i++)
+    F[i]=(long)fixedfieldminpoly(Sp, (GEN) Tmod[i],p);
+  return F;
+}
+
+  GEN
 fixedfieldnewtonsumaut(GEN sigma, GEN p, GEN Tp, GEN e, long g)
 {
   ulong ltop=avma;
@@ -1446,7 +1467,7 @@ fixedfieldnewtonsumaut(GEN sigma, GEN p, GEN Tp, GEN e, long g)
   }
   return gerepileupto(ltop, s);
 }
-GEN
+  GEN
 fixedfieldnewtonsum(GEN O, GEN L, GEN mod, GEN e)
 {
   long f,g;
@@ -1570,7 +1591,16 @@ fixedfieldsympol(GEN O, GEN L, GEN mod, GEN l, GEN p, GEN S, GEN deg, long v)
 	  return gerepileupto(ltop,V);
 	}
 	else
+	{
+	  if (DEBUGLEVEL>=6)
+	  {
+	    long l=lg(S);
+	    setlg(S,n+1);
+	    fprintferr("FixedField: bad mod: %Z\n",S);
+	    setlg(S,l);
+	  }
 	  avma=av;
+	}
       }
       if (n==1)
 	err(talker, "primes too small in fixedfield");
@@ -1675,6 +1705,20 @@ permtopol(GEN p, GEN L, GEN M, GEN den, GEN mod, long x)
   }
   gunclone(mod2); /*unclone*/
   return normalizepol_i(z,n+1);
+}
+
+GEN
+galoisgrouptopol( GEN res, GEN L, GEN M, GEN den, GEN mod, long v)
+{
+  GEN aut = cgetg(lg(res), t_COL);
+  long i;
+  for (i = 1; i < lg(res); i++)
+  {
+    if (DEBUGLEVEL>=6)
+      fprintferr("%d ",i);
+    aut[i] = (long) permtopol((GEN) res[i], L, M, den, mod, v);
+  }
+  return aut;
 }
 /* No more used and ugly.
  * However adding corepartial to GP seem a good idea.
@@ -2313,7 +2357,7 @@ a4galoisgen(GEN T, struct galois_test *td)
   if (DEBUGLEVEL >= 1 && hop)
     fprintferr("A4GaloisConj: %ld hop sur %ld iterations\n", hop, N);
   if (DEBUGLEVEL >= 4)
-    fprintferr("A4GaloisConj:tau=%Z \n", u);
+    fprintferr("A4GaloisConj:tau=%Z \n", pfu);
   avma = av2;
   orb = cgetg(3, t_VEC);
   orb[1] = (long) pft;
@@ -2950,11 +2994,11 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
   struct galois_frobenius gf;
   ulong   ltop = avma, lbot, ltop2;
   long    n, p, deg;
-  long    Pm = 0, fp;
+  long    fp,gp;
   long    x;
   int     i, j;
   GEN     Lden, sigma;
-  GEN     Tmod, res, pf = gzero, split, psi, ip, ppsi;
+  GEN     Tmod, res, pf = gzero, split, psi, ip;
   GEN     frob;
   GEN     O;
   GEN     P, PG, PL, Pden, PM, Pmod, Pp, Pladicabs;
@@ -3001,7 +3045,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
   p=gf.p;lo=gf.sg;deg=gf.deg;psi=gf.psi;
   ip=stoi(p);
   Tmod=gf.Tmod;
-  fp=gf.fp;
+  fp=gf.fp; gp=n/fp;
   O = permorbite(frob);
   split = splitorbite(O);
   deg=lg(O[1])-1;
@@ -3024,17 +3068,15 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
   if (DEBUGLEVEL >= 9)
     fprintferr("GaloisConj:Frobenius:%Z\n", sigma);
   {
-    GEN     V, Tp, Fi, Sp, sym, dg;
-    long    gp = n / fp;
-    ppsi = cgetg(gp + 1, t_VECSMALL);
+    GEN     V, Tp, Sp, sym, dg;
     sym=cgetg(lg(L),t_VECSMALL);
     dg=cgetg(lg(L),t_VECSMALL);
     V = fixedfieldsympol(O, L, gb->ladicabs, gb->l, ip, sym, dg, x);
     P=(GEN)V[2];
     PL=(GEN)V[1];
-    Pmod = lift((GEN)factmod(P, ip)[1]);
     Tp = FpX_red(T,ip);
     Sp = fixedfieldpolsigma(sigma,ip,Tp,sym,dg,deg);
+    Pmod = fixedfieldfactmod(Sp,ip,Tmod);
     Pp = FpX_red(P,ip);
     if (DEBUGLEVEL >= 4)
     {
@@ -3044,33 +3086,6 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
       fprintferr("GaloisConj:Pmod=%Z\n", Pmod);
       fprintferr("GaloisConj:Tmod=%Z\n", Tmod);
     }
-    for (i = 1; i <= gp; i++)
-    {
-      Fi = FpX_gcd(Tp, FpX_FpXQ_compo((GEN) Pmod[i], Sp,Tp,ip),ip);
-      /*normalize gcd*/
-      Fi = FpX_Fp_mul(Fi, mpinvmod((GEN) Fi[lgef(Fi) - 1],ip),ip);
-      if (DEBUGLEVEL >= 6)
-	fprintferr("GaloisConj:Fi=%Z  %d", Fi, i);
-      for (j = 1; j <= gp; j++)
-	if (gegal(Fi, ((GEN *) Tmod)[j]))
-	  break;
-      if (DEBUGLEVEL >= 6)
-	fprintferr("-->%d\n", j);
-      if (j == gp + 1)
-      {
-	avma = ltop;
-	return gzero;
-      }
-      if (j == gp)
-      {
-	Pm = i;
-	ppsi[i] = 1;
-      }
-      else
-	ppsi[i] = psi[j];
-    }
-    if (DEBUGLEVEL >= 4)
-      fprintferr("GaloisConj:Pm=%ld   ppsi=%Z\n", Pm, ppsi);
     if ( n == (deg<<1))
     {
       PG=cgetg(3,t_VEC);
@@ -3145,7 +3160,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
       fprintferr("GaloisConj:Paut=%Z\n", tau);
     /*tau not in Z[X]*/
     tau = lift(gmul(tau,gmodulcp(gun,ip)));
-    tau = FpX_FpXQ_compo((GEN) Pmod[Pm], tau,Pp,ip);
+    tau = FpX_FpXQ_compo((GEN) Pmod[gp], tau,Pp,ip);
     tau = FpX_gcd(Pp, tau,ip);
     /*normalize gcd*/
     tau = FpX_Fp_mul(tau,mpinvmod((GEN) tau[lgef(tau) - 1],ip),ip);
@@ -3154,13 +3169,18 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
     for (g = 1; g < lg(Pmod); g++)
       if (gegal(tau, (GEN) Pmod[g]))
 	break;
+    if (DEBUGLEVEL >= 6)
+      fprintferr("GaloisConj:g=%ld\n", g);
     if (g == lg(Pmod))
     {
       freetest(&td);
       avma = ltop;
       return gzero;
     }
-    w = lo[ppsi[g]];
+    if (g == gp)
+      w = lo[1];
+    else
+      w = lo[psi[g]];
     dss = deg / cgcd(deg, w - 1);
     sr = 1;
     for (i = 1; i < lg(B[1]) - 1; i++)
@@ -3307,13 +3327,7 @@ galoisconj4(GEN T, GEN den, long flag)
     grp[6] = (long) res;
     return gerepileupto(ltop, grp);
   }
-  aut = cgetg(n + 1, t_COL);
-  for (i = 1; i <= n; i++)
-  {
-    if (DEBUGLEVEL>=6)
-      fprintferr("%d ",i);
-    aut[i] = (long) permtopol((GEN) res[i], L, M, den, gb.ladicsol, varn(T));
-  }
+  aut = galoisgrouptopol(res,L,M,den,gb.ladicsol, varn(T));
   if (DEBUGLEVEL >= 1)
     msgtimer("Calcul polynomes");
   return gerepileupto(ltop, aut);
