@@ -43,10 +43,14 @@ pariFILE, bloc ...)
   ?  polroots(x^3 + 2^1024*x + 1)
     ***   underflow or overflow in a R->dbl conversion
 
-4  gcmp is not transitive: [] == 0, [0] == 0, but [0] != []
+4  gcmp/gegal not transitive: [] == 0, [0] == 0, but [0] != []
 
 4  mateigen([1,1;1,2]) won't succeed at default precision (28 digits).
-Should use iterative methods.
+
+3  ellinit over Q_2 doesn't work (AGM loses too much precision)
+
+3  ellpointtoz over Q_p makes no difference between P and -P (corrected over
+   C by a cheap trick)
 
 3  polgalois should handle precision problems. Symptom: applied to
 polzagier(11,0)/polzagier(1,0), gives wrong result with 38 digits
@@ -103,6 +107,8 @@ polynomial multiplication + remainder is O(n^2) [+ can use Karatsuba/FFT]
    least, make relevant checks before entering infinite loops)
 
 3  2-adic initell
+
+3  p-adic ellztopoint
 
 ***************************   LIBRARY DESIGN   ****************************
 
