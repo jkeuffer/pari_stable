@@ -1809,7 +1809,8 @@ non-negative and congruent to 0 or 3 modulo 4. See also \kbd{qfbclassno}.
 definite binary quadratic forms $x$ and $y$ using the NUCOMP and NUDUPL
 algorithms of \idx{Shanks} (\`a la Atkin). $l$ is any positive constant,
 but for optimal speed, one should take $l=|D|^{1/4}$, where $D$ is the common
-discriminant of $x$ and $y$.
+discriminant of $x$ and $y$. When $x$ and $y$ do not have the same
+discriminant, the result is undefined.
 
 \syn{nucomp}{x,y,l}. The auxiliary function
 $\teb{nudupl}(x,l)$ should be used instead for speed when $x=y$.
