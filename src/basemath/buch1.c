@@ -544,7 +544,7 @@ findquad_pol(GEN nf, GEN a, GEN x)
 }
 
 static GEN
-compocyclo(GEN nf, long m, long d, long prec)
+compocyclo(GEN nf, long m, long d)
 {
   GEN sb,a,b,s,p1,p2,p3,res,polL,polLK,nfL, D = (GEN)nf[3];
   long ell,vx;
@@ -567,7 +567,7 @@ compocyclo(GEN nf, long m, long d, long prec)
   polL = gsubst((GEN)res[1],0,polx[vx]); /* = charpoly(t) */
   a = gsubst(lift((GEN)res[2]), 0,polx[vx]);
   b = gsub(polx[vx], gmul((GEN)res[3], a));
-  nfL = initalg(polL,prec);
+  nfL = initalg(polL, DEFAULTPREC);
   p1 = gcoeff(nffactor(nfL,p1),1,1);
   p2 = gcoeff(nffactor(nfL,p2),1,1);
   p3 = do_compo(p1,p2); /* relative equation over L */
@@ -589,10 +589,12 @@ isZ(GEN I)
 
 /* Treat special cases directly. return NULL if not special case */
 static GEN
-treatspecialsigma(GEN nf, GEN gf, long prec)
+treatspecialsigma(GEN nf, GEN gf)
 {
   GEN p1, p2, tryf, D = (GEN)nf[3];
   long Ds, fl, i = isZ(gf);
+
+  if (i == 1) return quadhilbertimag((GEN)nf[3], NULL); /* f = 1 ? */
 
   if (cmpis(D,-3)==0)
   {
@@ -611,10 +613,10 @@ treatspecialsigma(GEN nf, GEN gf, long prec)
   Ds = smodis(D,48);
   if (i)
   {
-    if (i==2 && Ds%16== 8) return compocyclo(nf, 4,1,prec);
-    if (i==3 && Ds% 3== 1) return compocyclo(nf, 3,1,prec);
-    if (i==4 && Ds% 8== 1) return compocyclo(nf, 4,1,prec);
-    if (i==6 && Ds   ==40) return compocyclo(nf,12,1,prec);
+    if (i==2 && Ds%16== 8) return compocyclo(nf, 4,1);
+    if (i==3 && Ds% 3== 1) return compocyclo(nf, 3,1);
+    if (i==4 && Ds% 8== 1) return compocyclo(nf, 4,1);
+    if (i==6 && Ds   ==40) return compocyclo(nf,12,1);
     return NULL;
   }
 
@@ -630,7 +632,7 @@ treatspecialsigma(GEN nf, GEN gf, long prec)
     return NULL;
 
   i = itos(tryf); if (fl) i *= 4;
-  return compocyclo(nf,i,2,prec);
+  return compocyclo(nf,i,2);
 }
 
 static GEN
@@ -649,21 +651,18 @@ getallrootsof1(GEN bnf)
   }
 }
 
-/* Compute ray class field polynomial using sigma */
 static GEN
-quadrayimagsigma(GEN bnr, long prec)
+get_lambda(GEN bnr)
 {
-  GEN allf,bnf,nf,pol,w,f,la,P,labas,lamodf,u;
-  long a,b,f2,i,lu;
+  GEN allf, bnf, nf, pol, w, f, la, P, labas, lamodf, u;
+  long a, b, f2, i, lu;
 
   allf = conductor(bnr,NULL,2); bnr = (GEN)allf[2];
   f = gmael(allf,1,1);
   bnf= (GEN)bnr[1];
   nf = (GEN)bnf[7];
   pol= (GEN)nf[1];
-  if (gcmp1(gcoeff(f,1,1))) /* f = 1 ? */
-    return quadhilbertimag((GEN)nf[3], NULL);
-  P = treatspecialsigma(nf,f,prec);
+  P = treatspecialsigma(nf,f);
   if (P) return P;
 
   w = gmodulcp(polx[varn(pol)], pol);
@@ -690,32 +689,30 @@ quadrayimagsigma(GEN bnr, long prec)
         if (DEBUGLEVEL>1) fprintferr("\n");
         fprintferr("lambda = %Z\n",la);
       }
-      return computeP2(bnr,labas,prec);
+      return labas;
     }
-  err(bugparier,"quadrayimagsigma");
+  err(bugparier,"get_lambda");
   return NULL;
 }
 
 GEN
 quadray(GEN D, GEN f, GEN flag, long prec)
 {
-  GEN bnr,y,pol,bnf,lambda;
+  GEN bnr, y, pol, bnf;
   pari_sp av = avma;
 
-  if (!flag) flag = gzero;
-  if (typ(flag)==t_INT) lambda = NULL;
-  else
+  if (flag)
   {
-    if (typ(flag)!=t_VEC || lg(flag)!=3) err(flagerr,"quadray");
-    lambda = (GEN)flag[1]; flag = (GEN)flag[2];
-    if (typ(flag)!=t_INT) err(flagerr,"quadray");
+    long t = typ(flag);
+    if (t == t_INT && !signe(flag)) flag = NULL;
+    if (t != t_VEC || lg(flag)!=3) err(flagerr,"quadray");
   }
   if (typ(D) != t_INT)
   {
     bnf = checkbnf(D);
     if (degpol(gmael(bnf,7,1)) != 2)
       err(talker,"not a polynomial of degree 2 in quadray");
-    D=gmael(bnf,7,3);
+    D = gmael(bnf,7,3);
   }
   else
   {
@@ -727,13 +724,13 @@ quadray(GEN D, GEN f, GEN flag, long prec)
   bnr = bnrinit0(bnf,f,1);
   if (gcmp1(gmael(bnr,5,1))) { avma = av; return polx[0]; }
   if (signe(D) > 0)
-    y = bnrstark(bnr,gzero, gcmp0(flag)?1:5, prec);
+    y = bnrstark(bnr,gzero, flag?1:5, prec);
   else
   {
-    if (lambda)
-      y = computeP2(bnr,lambda,prec);
+    if (!flag) flag = get_lambda(bnr);
+    if (typ(flag) == t_POL) y = flag; /* special case */
     else
-      y = quadrayimagsigma(bnr,prec);
+      y = computeP2(bnr,flag,prec);
   }
   return gerepileupto(av, y);
 }

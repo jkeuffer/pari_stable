@@ -2720,7 +2720,7 @@ START:
     /* find the modulus defining N */
     bnr   = buchrayinitgen(bnf, gun);
     dataC = InitQuotient(bnr, gzero);
-    bnrh  = FindModulus(dataC, 1, &newprec, prec, gcmp0(flag)? 0: -10);
+    bnrh  = FindModulus(dataC, 1, &newprec, prec, flag? -1: 0);
 
     if (DEBUGLEVEL) msgtimer("FindModulus");
 
