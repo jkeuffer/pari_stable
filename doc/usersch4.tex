@@ -81,7 +81,7 @@ these polynomials are \emph{not} created upon initialization. It
 is the programmer's responsibility to fill them before use. We will see how
 this is done in \secref{se:vars} (\emph{never} through direct assignment).
 
-$\bullet$ a \emph{heap} which is just a linked list of permanent
+$\bullet$ a \tev{heap} which is just a linked list of permanent
 universal objects. For now, it contains exactly the ones listed above. You
 will probably very rarely use the heap yourself; and if so, only as a
 collection of copies of objects taken from the stack (called \idx{clone}s in
@@ -263,7 +263,7 @@ architectures (the odd ones) have no precise equivalents on 64-bit machines.
 
 \noindent
 As we have seen, the \kbd{pari\_init} routine allocates a big range of
-addresses, the \emph{stack}, that are going to be used throughout. Recall
+addresses, the \tev{stack}, that are going to be used throughout. Recall
 that all PARI objects are pointers. Except for a few universal objects,
 they all point at some part of the stack.
 
