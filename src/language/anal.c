@@ -2240,6 +2240,7 @@ entry(void)
 /**                          SKIP FUNCTIONS                        **/
 /**                                                                **/
 /********************************************************************/
+extern int term_width(void);
 
 /* as skipseq without modifying analyseur && al */
 static void
