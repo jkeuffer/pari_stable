@@ -1087,6 +1087,52 @@ long    taille2(GEN x);
 long    timer(void);
 long    timer2(void);
 
+/* members.c */
+
+GEN     member_e(GEN x);
+GEN     member_f(GEN x);
+GEN     member_p(GEN x);
+GEN     member_bnf(GEN x);
+GEN     member_nf(GEN x);
+GEN     member_zk(GEN x);
+GEN     member_disc(GEN x);
+GEN     member_pol(GEN x);
+GEN     member_mod(GEN x);
+GEN     member_sign(GEN x);
+GEN     member_t2(GEN x);
+GEN     member_diff(GEN x);
+GEN     member_codiff(GEN x);
+GEN     member_roots(GEN x);
+GEN     member_clgp(GEN x);
+GEN     member_reg(GEN x);
+GEN     member_fu(GEN x);
+GEN     member_tu(GEN x);
+GEN     member_futu(GEN x);
+GEN     member_tufu(GEN x);
+GEN     member_zkst(GEN bid);
+GEN     member_no(GEN clg);
+GEN     member_cyc(GEN clg);
+GEN     member_gen(GEN x);
+GEN     member_group(GEN x);
+GEN     member_orders(GEN x);
+GEN     member_a1(GEN x);
+GEN     member_a2(GEN x);
+GEN     member_a3(GEN x);
+GEN     member_a4(GEN x);
+GEN     member_a6(GEN x);
+GEN     member_b2(GEN x);
+GEN     member_b4(GEN x);
+GEN     member_b6(GEN x);
+GEN     member_b8(GEN x);
+GEN     member_c4(GEN x);
+GEN     member_c6(GEN x);
+GEN     member_j(GEN x);
+GEN     member_omega(GEN x);
+GEN     member_eta(GEN x);
+GEN     member_area(GEN x);
+GEN     member_tate(GEN x);
+GEN     member_w(GEN x);
+
 /* mp.c */
 
 int     absi_cmp(GEN x, GEN y);
