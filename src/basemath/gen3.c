@@ -1307,19 +1307,17 @@ ginv(GEN x)
 
 /* Convert t_SER --> t_POL / t_RFRAC */
 static GEN
-gconvsp(GEN x, int flpile)
+gconvsp(GEN x, long e)
 {
   long v = varn(x), i;
-  pari_sp av, tetpil;
-  GEN p1,y;
+  GEN p1, y;
 
   if (gcmp0(x)) return zeropol(v);
-  av=avma; y = dummycopy(x);
+  y = dummycopy(x);
   i=lg(x)-1; while (i>1 && gcmp0((GEN)y[i])) i--;
   y[0] = evaltyp(t_POL) | evallg(i+1);
-  p1 = gpowgs(polx[v],valp(x));
-  tetpil=avma; p1=gmul(p1,y);
-  return flpile? gerepile(av,tetpil,p1): p1;
+  if (e) p1 = gpowgs(polx[v], e);
+  return gmul(p1, y);
 }
 
 /*
@@ -1456,9 +1454,9 @@ gsubst(GEN x, long v, GEN y)
       if (vx < v)
       {
         if (!signe(x)) return gcopy(x);
-        /* a ameliorer */
-        av=avma; setvalp(x,0); p1=gconvsp(x,0); setvalp(x,ex);
-        p2=gsubst(p1,v,y); z = tayl(p2,vx,lx-2);
+        /* FIXME: improve this */
+        av = avma; p1 = gconvsp(x, 0);
+        z = tayl(gsubst(p1,v,y), vx, lx-2);
         if (ex) z = gmul(z, gpowgs(polx[vx],ex));
         return gerepileupto(av, z);
       }
@@ -1467,7 +1465,8 @@ gsubst(GEN x, long v, GEN y)
         case t_SER:
 	  ey = valp(y);
           vy = varn(y);
-	  if (ey < 1) return zeroser(vy,ey*(ex+lx-2));
+	  if (ey < 1) return zeroser(vy, ey*(ex+lx-2));
+          if (!signe(x)) return zeroser(vy, ey*ex);
 	  l = (lx-2)*ey+2;
 	  if (ex) { if (l>ly) l = ly; }
 	  else
@@ -1515,8 +1514,9 @@ gsubst(GEN x, long v, GEN y)
           vy=gvar(y); e=gval(y,vy);
           if (e<=0)
             err(talker,"non positive valuation in a series substitution");
-	  av=avma; p1=gconvsp(x,0); p2=gsubst(p1,v,y); tetpil=avma;
-	  return gerepile(av,tetpil,tayl(p2,vy,e*(lx-2+ex)));
+	  av = avma; p1 = gconvsp(x, ex); 
+          z = tayl(gsubst(p1,v,y), vy, e*(lx-2+ex));
+	  return gerepileupto(av, z);
 
         default:
           err(talker,"non polynomial or series type substituted in a series");
@@ -2102,6 +2102,13 @@ ceil_safe(GEN x)
   return gerepileuptoint(av, y);
 }
 
+static GEN
+ser2rfrac(GEN x)
+{
+  pari_sp av = avma;
+  return gerepilecopy(av, gconvsp(x, valp(x)));
+}
+
 GEN
 gtrunc(GEN x)
 {
@@ -2138,13 +2145,11 @@ gtrunc(GEN x)
       return gdeuc((GEN)x[1],(GEN)x[2]);
 
     case t_SER:
-      return gconvsp(x,1);
+      return ser2rfrac(x);
 
     case t_VEC: case t_COL: case t_MAT:
     {
-      long lx=lg(x);
-
-      y=cgetg(lx,tx);
+      long lx = lg(x); y = cgetg(lx,tx);
       for (i=1; i<lx; i++) y[i]=ltrunc((GEN)x[i]);
       return y;
     }
@@ -2309,7 +2314,7 @@ gtopoly0(GEN x, long v, int reverse)
     case t_POL:
       y=gcopy(x); break;
     case t_SER:
-      y=gconvsp(x,1);
+      y = ser2rfrac(x);
       if (typ(y) != t_POL)
         err(talker,"t_SER with negative valuation in gtopoly");
       break;
