@@ -63,7 +63,10 @@ if test -z "$zcat" -a -n "$gzip"; then zcat="$gzip -dc"; fi
 echo Checking for optional libraries and headers...
 . ./get_libpth # initialize
 if test -n "$kernel"; then # kernel explicitly provided
-  if test "$kernlvl1" = none; then with_gmp=; fi
+  case "$kernlvl1" in
+    none) with_gmp= ;;
+    gmp) if test -z "$with_gmp"; then with_gmp=yes; fi ;;
+  esac
 fi
 if test -n "$with_gmp"; then
   . ./get_gmp  # $_gmp_list
