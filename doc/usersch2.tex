@@ -7,29 +7,14 @@
 % under the terms of the GNU General Public License
 \chapter{Specific Use of the gp Calculator}
 
+
+
 Originally, \tet{gp} was designed as a debugging device for the PARI system
 library, and not much thought had been given to making it user-friendly. The
-situation has now changed somewhat, and \kbd{gp} is very useful as a
-stand-alone tool. The operations and functions available in PARI and \kbd{gp}
-will be described in the next chapter. In the present one, we describe the
-specific use of the \kbd{gp} programmable calculator.
-
-\unix The calculator is developed on UNIX platforms, and depend heavily on
-the operating system in use. Whenever a specific feature of the UNIX version
-is discussed in a paragraph, a UNIX sign sticks out in the left margin, like
-here. Just skip these if you're stranded on a different operating system: the
-core GP functions, in particular everything which is even faintly
-mathematical in nature, are still available to you. It should also be
-possible (and then advisable) to install \idx{Linux} or \idx{FreeBSD} on your
-machine.
-
-\emacs If you have GNU Emacs, you can work in a special Emacs shell (see
-\secref{se:emacs}), which is started by typing \kbd{M-x gp} (where as usual
-\kbd{M} is the \kbd{Meta} key) if you accept the default stack, prime and
-buffer sizes, or \kbd{C-u M-x gp} which will ask you for the name of the gp
-executable, the stack size, the prime limit and the buffer size. Specific
-features of this Emacs shell will be indicated by an EMACS sign.\smallskip
-
+situation has changed, and \kbd{gp} is very useful as a stand-alone tool. The
+operations and functions available in PARI and \kbd{gp} will be described in
+the next chapter. In the present one, we describe the specific use of the
+\kbd{gp} programmable calculator.
 
 To start the calculator, the general command line syntax is:
 
@@ -71,7 +56,7 @@ simultaneously to Section $3.n$ of this manual.
 If you type \kbd{?}\var{functionname} where \var{functionname} is the name of
 a PARI function, you will get a short explanation of this function.
 
-\unix If extended help (see \secref{se:exthelp}) is available on your system,
+If extended help (see \secref{se:exthelp}) is available on your system,
 you can double or triple the \kbd{?} sign to get much more: respectively the
 complete description of the function (e.g.~\kbd{??~sqrt}), or a list of
 \kbd{gp} functions relevant to your query (e.g.~ \kbd{???~"elliptic curve"}
@@ -103,6 +88,10 @@ metacommands which allow the user to exchange information with \kbd{gp}. The
 available metacommands can be divided into default setting commands
 (explained below) and simple commands (or keyboard shortcuts, to be dealt
 with in \secref{se:meta}).
+
+\emacs If you have GNU Emacs, you can work in a special Emacs shell,
+described in \secref{se:emacs}. Specific features of this Emacs shell will
+be indicated by an EMACS sign in the left margin.
 
 \section{Defaults and output formats}\sidx{defaults}\sidx{output formats}
 \label{se:defaults}
@@ -401,10 +390,10 @@ vectors are still printed horizontally.
 The third format is the \tev{prettyprint format}, or beautified format. In
 the present version \vers, this is not beautiful at all.
 
-\unix{\indent The fourth format is \tev{external prettyprint}, which pipes
+The fourth format is \tev{external prettyprint}, which pipes
 all \kbd{gp} output in TeX format to an external prettyprinter, according to the
 value of \tet{prettyprinter}. The default script (\tet{tex2mail}) converts
-its input to readable two-dimensional text.}
+its input to readable two-dimensional text.
 
 Independently of the setting of this default, an object can be printed
 in any of the three formats at any time using the commands \b{a}, \b{m}
@@ -461,8 +450,8 @@ extra spaces in your prompt, then you'll have to get a more recent
 \kbd{readline}. See the file \kbd{misc/gprc.dft} for an example.
 
 \emacs {\bf Caution}: Emacs needs to know about the prompt pattern to
-separate your input from previous \kbd{gp} results, without ambiguity. It's not a
-trivial problem to adapt automatically this regular expression to an
+separate your input from previous \kbd{gp} results, without ambiguity. It is
+not a trivial problem to adapt automatically this regular expression to an
 arbitrary prompt (which can be self-modifying!). Thus, in this version \vers,
 Emacs relies on the prompt being the default one. So, do not tamper with the
 \kbd{prompt} variable \emph{unless} you modify it simultaneously in your
@@ -594,7 +583,7 @@ information, read Chapter 3 of this manual (the source code is at your
 disposal as well, though a trifle less readable!). Much better help can be
 obtained through the extended help system (see below).
 
-\unix If the line before the copyright message indicates that extended help
+If the line before the copyright message indicates that extended help
 is available (this means \kbd{perl} is installed on your system, \kbd{gp} was
 told about it at compile time, and the whole PARI distribution was
 correctly installed), you can add more \kbd{?} signs for extended
@@ -722,20 +711,21 @@ Prints its current value if $n$ is omitted.
 \subsec{\b{q}}: quits the \kbd{gp} session and returns to the system.
 Shortcut for the function \tet{quit} (see \secref{se:quit}).
 
-\subsec{\b{r}} $\{$\var{filename}$\}$: \idx{read}s into \kbd{gp} all the commands
-contained in the named file as if they had been typed from the keyboard, one
-line after the other. Can be used in combination with the \b{w} command (see
-below). Related but not equivalent to the function \kbd{read} (see
-\secref{se:read}); in particular, if the file contains more than one line of
-input, there will be one history entry for each of them, whereas \kbd{read}
-would only record the last one. If \var{filename} is omitted, re-read the
-previously used input file (fails if no file has ever been successfully read
-in the current session). If a \kbd{gp} \tet{binary file} (see \secref{se:writebin})
-is read using this command, it is silently loaded, without cluttering the
-history.
+\subsec{\b{r}} $\{$\var{filename}$\}$: \idx{read}s into \kbd{gp} all the
+commands contained in the named file as if they had been typed from the
+keyboard, one line after the other. Can be used in combination with the \b{w}
+command (see below). Related but not equivalent to the function \kbd{read}
+(see \secref{se:read}); in particular, if the file contains more than one
+line of input, there will be one history entry for each of them, whereas
+\kbd{read} would only record the last one. If \var{filename} is omitted,
+re-read the previously used input file (fails if no file has ever been
+successfully read in the current session). If a \kbd{gp} \tet{binary file}
+(see \secref{se:writebin}) is read using this command, it is silently loaded,
+without cluttering the history.
 
-\unix This command accepts compressed files in \idx{compress}ed (\kbd{.Z})
-or \idx{gzip}ped (\kbd{.gz} or \kbd{.z}) format. They will be uncompressed on
+Assuming \kbd{gp} figures how to decompress files on your machine, this
+command accepts compressed files in \idx{compress}ed (\kbd{.Z}) or
+\idx{gzip}ped (\kbd{.gz} or \kbd{.z}) format. They will be uncompressed on
 the fly as \kbd{gp} reads them, without changing the files themselves.
 
 \subsec{\b{s}}: prints the state of the PARI \idx{stack} and \idx{heap}.
@@ -2187,7 +2177,7 @@ use will be dealt with extensively in Chapter~4. \kbd{gp} itself provides a
 convenient, if simple-minded, interpreter, which enables you to execute
 rather intricate scripts (see \secref{se:programming}).
 
-Scripts, when properly written, tend to be shorter and much clearer than C
+Scripts, when properly written, tend to be shorter and clearer than C
 programs, and are certainly easier to write, maintain or debug. You don't
 need to deal with memory management, garbage collection, pointers,
 declarations, and so on. Because of their intrinsic simplicity, they are more
@@ -2195,11 +2185,10 @@ robust as well. They are unfortunately somewhat slower. Thus their use will
 remain complementary: it is suggested that you test and debug your algorithms
 using scripts, before actually coding them in C for the sake of speed.
 
-\unix{Note that the \kbd{install} command enables you to concentrate on
-critical parts of your programs only (which can of course be written with the
-help of other mathematical libraries than PARI!), and to easily and
-efficiently import foreign functions for use under \kbd{gp}
-(see~\secref{se:install}).}
+Note that the \kbd{install} command enables you to concentrate on critical
+parts of your programs only (which can of course be written with the help of
+other mathematical libraries than PARI!), and to efficiently import foreign
+functions for use under \kbd{gp} (see~\secref{se:install}).
 
 We are aware of three PARI-related public domain libraries. We \emph{neither
 endorse nor support} any of them. You might want to give them a try if you
