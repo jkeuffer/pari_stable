@@ -1014,18 +1014,15 @@ red_montgomery(GEN T, GEN N, ulong inv)
 
 /* EXACT INTEGER DIVISION */
 
-/* assume xy>0 and the division is exact. Not stack-clean if y is even
- * and not a power of 2 */
-GEN
-diviuexact(GEN x, ulong y)
+/* assume xy>0, the division is exact and y is odd. Destroy x */
+static GEN
+diviuexact_i(GEN x, ulong y)
 {
-  long i, lz, lx, vy;
+  long i, lz, lx;
   ulong q, yinv;
   GEN z, z0, x0, x0min;
 
-  vy = vals(y);
-  if (vy) { y >>= vy; x = shifti(x, -vy); }
-  if (y == 1) return vy? x: icopy(x);
+  if (y == 1) return icopy(x);
   lx = lgefint(x);
   if (lx == 3) return utoipos((ulong)x[2] / y);
   yinv = invrev(y);
@@ -1062,6 +1059,37 @@ diviuexact(GEN x, ulong y)
   avma = (pari_sp)z; return z;
 }
 
+/* assume y != 0 and the division is exact */
+GEN
+diviuexact(GEN x, ulong y)
+{
+  pari_sp av;
+  long lx, vy, s = signe(x);
+  GEN z;
+  
+  if (!s) return gen_0;
+  if (y == 1) return icopy(x);
+  lx = lgefint(x);
+  if (lx == 3) {
+    ulong q = (ulong)x[2] / y;
+    return (s > 0)? utoipos(q): utoineg(q);
+  }
+  av = avma; (void)new_chunk(lx); vy = vals(y);
+  if (vy) { 
+    y >>= vy;
+    if (y == 1) { avma = av; return shifti(x, -vy); }
+    x = shifti(x, -vy);
+    if (lx == 3) {
+      ulong q = (ulong)x[2] / y;
+      avma = av;
+      return (s > 0)? utoipos(q): utoineg(q);
+    }
+  } else x = icopy(x);
+  avma = av;
+  z = diviuexact_i(x, y);
+  setsigne(z, s); return z;
+}
+
 /* Find z such that x=y*z, knowing that y | x (unchecked)
  * Method: y0 z0 = x0 mod B = 2^BITS_IN_LONG ==> z0 = 1/y0 mod B.
  *    Set x := (x - z0 y) / B, updating only relevant words, and repeat */
@@ -1075,15 +1103,17 @@ diviiexact(GEN x, GEN y)
 
   if (!sy) err(gdiver);
   if (!sx) return gen_0;
+  lx = lgefint(x);
+  if (lx == 3) {
+    q = (ulong)x[2] / (ulong)y[2];
+    return (sx+sy) ? utoipos(q): utoineg(q);
+  }
   vy = vali(y); av = avma;
-  (void)new_chunk(lgefint(x)); /* enough room for z */
+  (void)new_chunk(lx); /* enough room for z */
   if (vy)
   { /* make y odd */
-#if 0
-    if (vali(x) < vy) err(talker,"impossible division in diviiexact");
-#endif
     y = shifti(y,-vy);
-    x = shifti(x,-vy);
+    x = shifti(x,-vy); lx = lgefint(x);
   }
   else x = icopy(x); /* necessary because we destroy x */
   avma = av; /* will erase our x,y when exiting */
@@ -1091,11 +1121,10 @@ diviiexact(GEN x, GEN y)
   ly = lgefint(y);
   if (ly == 3)
   {
-    x = diviuexact(x,(ulong)y[2]);
-    if (signe(x)) setsigne(x,sx*sy); /* should have x != 0 at this point */
+    x = diviuexact_i(x,(ulong)y[2]); /* x != 0 */
+    if (!(sx+sy)) setsigne(x, -1);
     return x;
   }
-  lx = lgefint(x); if (ly>lx) err(talker,"impossible division in diviiexact");
   y0inv = invrev(y[ly-1]);
   i=2; while (i<ly && y[i]==x[i]) i++;
   lz = (i==ly || (ulong)y[i] < (ulong)x[i]) ? lx-ly+3 : lx-ly+2;
@@ -1140,7 +1169,7 @@ diviiexact(GEN x, GEN y)
 #endif
   z += i-2; lz -= (i-2);
   z[0] = evaltyp(t_INT)|evallg(lz);
-  z[1] = evalsigne(sx*sy)|evallg(lz);
+  z[1] = evalsigne((sx+sy) ? 1 : -1) | evallg(lz);
   avma = (pari_sp)z; return z;
 }
 
