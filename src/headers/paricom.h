@@ -1,10 +1,7 @@
 /******************************************************************/
-/******************************************************************/
 /*                                                                */
-/*                       Fichier Include PARI                     */
-/*                   commun a toutes les versions                 */
+/*              PARI header file (common to all versions)         */
 /*                                                                */
-/******************************************************************/
 /******************************************************************/
 /* $Id$ */
 
@@ -45,9 +42,8 @@ extern GEN   gun,gdeux,ghalf,gi,gzero;
 extern const long lontyp[];
 extern void* global_err_data;
 
-#define NUMPRTBELT     100 /* taille table de premiers prives */
-#define MAXITERPOL     10  /* nombre maximum de doublement de precision
-			      dans les operations de type polredabs */
+#define NUMPRTBELT 100 /* primetable size */
+#define MAXITERPOL  10 /* max #of prec increase in polredabs-type operations */
 
                                                 /* let SL = sizeof(long) */
 #define pariK  (9.632959862*(BYTES_IN_LONG/4))  /* SL*log(2)/log(10)     */
