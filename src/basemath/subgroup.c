@@ -446,7 +446,7 @@ subgroup_engine(subgp_iter *T)
     parse_bound(T);
     switch(T->boundtype)
     {
-      case b_EXACT: break;
+      case b_EXACT: if (!is_pm1(T->bound)) break;
       default: T->fun(T, cyc);
     }
     avma = av; return;
