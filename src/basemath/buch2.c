@@ -720,6 +720,7 @@ get_split_expo(GEN xalpha, GEN yalpha, GEN vperm)
   }
 }
 
+/* assume x in HNF */
 static GEN
 isprincipalall0(GEN bnf, GEN x, long prec, long flall)
 {
@@ -2004,6 +2005,7 @@ makematal(GEN bnf)
     GEN id = (j<=lm)? gun: (GEN)pfb[j];
     for (k=1; k<=lm; k++)
       id = idealmul(nf,id,idealpow(nf,(GEN)pfb[k],(GEN)ex[k]));
+    if (typ(id) != t_MAT) id = idealhermite(nf,id);
     for (;;)
     {
       long av1 = avma, c = getrand();
