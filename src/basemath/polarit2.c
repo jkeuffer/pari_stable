@@ -1457,6 +1457,7 @@ gdeflate(GEN x, long v, long d)
   long i, lx, tx = typ(x);
   GEN z;
   if (is_scalar_t(tx)) return gcopy(x);
+  if (d <= 0) err(talker,"need positive degree in gdeflate");
   if (tx == t_POL)
   {
     long vx = varn(x);
