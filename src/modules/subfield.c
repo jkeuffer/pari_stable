@@ -503,33 +503,54 @@ chinese_retrieve_pol(GEN DATA, GEN listdelta)
 }
 
 /* return P(X + c) using destructive Horner */
-static GEN
+GEN
 TR_pol(GEN P, GEN c)
 {
-  GEN Q = dummycopy(P), *R;
-  long i,k,n;
+  gpmem_t av = avma, lim;
+  GEN Q, *R;
+  long i, k, n;
   
-  if (!signe(P)) return Q;
+  if (!signe(P) || gcmp0(c)) return gcopy(P);
+  Q = dummycopy(P);
   R = (GEN*)(Q+2); n = degpol(P);
+  lim = stack_lim(av, 2);
   if (gcmp1(c))
   {
     for (i=1; i<=n; i++)
-      for (k=n-i; k<n; k++)
-        R[k] = gadd(R[k], R[k+1]);
+    {
+      for (k=n-i; k<n; k++) R[k] = gadd(R[k], R[k+1]);
+      if (low_stack(lim, stack_lim(av,2)))
+      {
+        if(DEBUGMEM>1) err(warnmem,"TR_POL(1), i = %ld/%ld", i,n);
+        Q = gerepilecopy(av, Q); R = (GEN*)Q+2;
+      }
+    }
   }
   else if (gcmp_1(c))
   {
     for (i=1; i<=n; i++)
-      for (k=n-i; k<n; k++)
-        R[k] = gsub(R[k], R[k+1]);
+    {
+      for (k=n-i; k<n; k++) R[k] = gsub(R[k], R[k+1]);
+      if (low_stack(lim, stack_lim(av,2)))
+      {
+        if(DEBUGMEM>1) err(warnmem,"TR_POL(-1), i = %ld/%ld", i,n);
+        Q = gerepilecopy(av, Q); R = (GEN*)Q+2;
+      }
+    }
   }
   else
   {
     for (i=1; i<=n; i++)
-      for (k=n-i; k<n; k++)
-        R[k] = gadd(R[k], gmul(c, R[k+1]));
+    {
+      for (k=n-i; k<n; k++) R[k] = gadd(R[k], gmul(c, R[k+1]));
+      if (low_stack(lim, stack_lim(av,2)))
+      {
+        if(DEBUGMEM>1) err(warnmem,"TR_POL, i = %ld/%ld", i,n);
+        Q = gerepilecopy(av, Q); R = (GEN*)Q+2;
+      }
+    }
   }
-  return Q;
+  return gerepilecopy(av, Q);
 }
 
 /* g in Z[X] potentially defines a subfield of Q[X]/f. It is a subfield iff A

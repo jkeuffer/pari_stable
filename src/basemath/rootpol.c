@@ -21,6 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*******************************************************************/
 #include "pari.h"
 
+extern GEN TR_pol(GEN P, GEN c);
 extern GEN polrecip_i(GEN x);
 #define pariINFINITY 100000
 #define NEWTON_MAX 10
@@ -497,19 +498,19 @@ static GEN
 mygfloor(GEN z)
 {
   if (typ(z)!=t_COMPLEX) return gfloor(z);
-  z[1]=lfloor((GEN)z[1]); z[2]=lfloor((GEN)z[2]); return z;
+  z[1] = lfloor((GEN)z[1]);
+  z[2] = lfloor((GEN)z[2]); return z;
 }
 
 /* returns a polynomial q in (Z[i])[x] keeping bitprec bits of p */
 static GEN
 eval_rel_pol(GEN p,long bitprec)
 {
-  long e=gexpo(p),n=lgef(p),i,shift;
-  GEN q = gprec(p,(long) ((double) bitprec * L2SL10)+2);
+  long e = gexpo(p), n = lgef(p), i, shift;
+  GEN q = gprec_w(p, DEFAULTPREC + (bitprec >> TWOPOTBITS_IN_LONG));
 
-  shift=bitprec-e+1;
-  for (i=2; i<n; i++)
-    q[i]=(long) mygfloor(myshiftic((GEN)q[i],shift));
+  shift = bitprec-e+1;
+  for (i=2; i<n; i++) q[i] = (long) mygfloor(myshiftic((GEN)q[i],shift));
   return q;
 }
 
@@ -560,7 +561,7 @@ homothetie2n(GEN p, long e)
 static void
 homothetie_gauss(GEN p, long e,long f)
 {
-  if (e||f)
+  if (e || f)
   {
     long i, n=lgef(p)-1;
     for (i=2; i<=n; i++) p[i]=(long) myshiftic((GEN) p[i],f+(n-i)*e);
@@ -646,7 +647,7 @@ max_modulus(GEN p, double tau)
     eps = -1/log(tau2); /* > 0 */
     e = findpower(q);
   }
-  if (!signe(r)) { avma = ltop; return realun(DEFAULTPREC); } 
+  if (!signe(r)) { avma = ltop; return realun(DEFAULTPREC); }
   r = itor(r, DEFAULTPREC);
   setexpo(r, expo(r) - M);
   rho = rtodbl(r);
@@ -660,16 +661,15 @@ static GEN
 modulus(GEN p, long k, double tau)
 {
   GEN q,gunr;
-  long i, kk=k, imax, n=degpol(p), nn, bitprec, decprec, e;
+  long i, kk=k, imax, n=degpol(p), nn, bitprec, e;
   gpmem_t av, ltop=avma;
   double tau2,r;
 
   tau2 = tau/6;
   bitprec= (long) ((double) n*(2.+log2(3.*(double) n)+log2(1./tau2)));
-  decprec=(long) ((double) bitprec * L2SL10)+1;
   gunr=myrealun(bitprec);
   av = avma;
-  q = gprec(p,decprec);
+  q = gprec_w(p, 3 + (bitprec>>TWOPOTBITS_IN_LONG));
   q = gmul(gunr,q);
   e = newton_polygon(q,k);
   homothetie2n(q,e);
@@ -930,7 +930,7 @@ parameters(GEN p, double *mu, double *gamma,
 {
   GEN q,pc,Omega,coef,RU,prim,aux,aux0,ggamma,gx,mygpi;
   long n=degpol(p), bitprec, NN, K, i, j;
-  gpmem_t ltop2, ltop=avma, limite=stack_lim(ltop, 1);
+  gpmem_t av2, av=avma, limite=stack_lim(av, 1);
   double lx;
 
   bitprec=gexpo(p)+(long)param2+8;
@@ -953,49 +953,45 @@ parameters(GEN p, double *mu, double *gamma,
   ggamma = gzero;
   aux0 = myrealun(bitprec);
   if (polreal) K=K/2+1;
-  ltop2=avma;
+  av2=avma;
   for (i=0; i<K; i++)
   {
     aux = aux0;
     for (j=0; j<=n; j++)
     {
-      pc[j]=lmul((GEN)q[j+2],aux);
-      aux=gmul(aux,RU); /* RU = prim^i, aux=prim^(ij) */
+      pc[j] = lmul((GEN)q[j+2],aux);
+      aux = gmul(aux,RU); /* RU = prim^i, aux=prim^(ij) */
     }
 
     fft(Omega,pc,coef,1,Lmax);
     for (j=0; j<Lmax; j++)
     {
-      aux=gprec((GEN)coef[j],DEFAULTPREC);
-      gx=gabs(aux,DEFAULTPREC);
-      lx=gtodouble(mplog(gx));
-      if (lx<*mu) *mu=lx;
+      aux = gprec_w((GEN)coef[j], DEFAULTPREC);
+      gx = gabs(aux, DEFAULTPREC);
+      lx = gtodouble(mplog(gx));
+      if (lx < *mu) *mu = lx;
       if (polreal && (i>0 && i<K-1))
-      {
-	gx=gdiv(gdeux,gx);
-	ggamma=gadd(ggamma,gx);
-      }
+	ggamma = gadd(ggamma, gdiv(gdeux,gx));
       else
-	ggamma=gadd(ggamma,ginv(gx));
+	ggamma = gadd(ggamma, ginv(gx));
     }
-    RU=gmul(RU,prim);
-    if (low_stack(limite, stack_lim(ltop,1)))
+    RU = gmul(RU, prim);
+    if (low_stack(limite, stack_lim(av,1)))
     {
-      GEN *gptr[2];
       if(DEBUGMEM>1) err(warnmem,"parameters");
-      gptr[0]=&ggamma; gptr[1]=&RU; gerepilemany(ltop2,gptr,2);
+      gerepileall(av2,2, &ggamma,&RU);
     }
   }
   ggamma=gdivgs(ggamma,NN);
-  *gamma=gtodouble(glog(ggamma,DEFAULTPREC))/log(2.);
-  avma=ltop;
+  *gamma=gtodouble(glog(ggamma,DEFAULTPREC)) / log(2.);
+  avma=av;
 }
 
 /* NN is a multiple of Lmax */
 static void
 dft(GEN p, long k, long NN, long bitprec, GEN F, GEN H, long polreal)
 {
-  GEN Omega,q,qd,pc,pdc,alpha,beta,gamma,RU,aux,U,W,mygpi,prim,prim2,*gptr[3];
+  GEN Omega,q,qd,pc,pdc,alpha,beta,gamma,RU,aux,U,W,mygpi,prim,prim2;
   long n=degpol(p),i,j,K;
   gpmem_t ltop;
 
@@ -1072,8 +1068,7 @@ dft(GEN p, long k, long NN, long bitprec, GEN F, GEN H, long polreal)
       }
     }
     prim2=gmul(prim2,prim);
-    gptr[0]=&W; gptr[1]=&U; gptr[2]=&prim2;
-    gerepilemany(ltop,gptr,3);
+    gerepileall(ltop,3, &W,&U,&prim2);
   }
 
   for (i=1; i<=k; i++)
@@ -1104,9 +1099,8 @@ refine_H(GEN F, GEN G, GEN HH, long bitprec, long shiftbitprec)
   {
     if (low_stack(limite, stack_lim(ltop,1)))
     {
-      GEN *gptr[2]; gptr[0]=&D; gptr[1]=&H;
       if(DEBUGMEM>1) err(warnmem,"refine_H");
-      gerepilemany(ltop,gptr,2);
+      gerepileall(ltop,2, &D,&H);
     }
     bitprec1=-error+shiftbitprec;
     aux=gmul(mygprec(H,bitprec1),mygprec(D,bitprec1));
@@ -1150,9 +1144,8 @@ refine_F(GEN p, GEN *F, GEN *G, GEN H, long bitprec, double gamma)
     }
     if (low_stack(limite, stack_lim(ltop,1)))
     {
-      GEN *gptr[4]; gptr[0]=&FF; gptr[1]=&GG; gptr[2]=&r; gptr[3]=&HH;
       if(DEBUGMEM>1) err(warnmem,"refine_F");
-      gerepilemany(ltop,gptr,4);
+      gerepileall(ltop,4, &FF,&GG,&r,&HH);
     }
 
     bitprec1=-error+shiftbitprec2;
@@ -1257,32 +1250,6 @@ scalepol(GEN p, GEN R, long bitprec)
   return q;
 }
 
-extern GEN addshiftpol(GEN x, GEN y, long d);
-
-/* returns q(x) = p(x+b) */
-static GEN
-shiftpol(GEN p, GEN b)
-{
-  long i;
-  gpmem_t av = avma, limit = stack_lim(av, 1);
-  GEN q = gzero;
-
-  if (gcmp0(b)) return p;
-
-  for (i=lgef(p)-1; i>=2; i--)
-  {
-    if (!signe(q)) { q = scalarpol((GEN)p[i], varn(p)); continue; }
-    q = addshiftpol(q, gmul(b,q), 1); /* q = q*(x + b) */
-    q[2] = ladd((GEN)q[2], (GEN)p[i]); /* q = q + p[i] */
-    if (low_stack(limit, stack_lim(av,1)))
-    {
-      if(DEBUGMEM>1) err(warnmem,"rootpol.c:shiftpol()");
-      q = gerepilecopy(av, q);
-    }
-  }
-  return gerepilecopy(av, q);
-}
-
 /* return (conj(a)X-1)^n * p[ (X-a) / (conj(a)X-1) ] */
 static GEN
 conformal_pol(GEN p, GEN a, long bitprec)
@@ -1308,9 +1275,8 @@ conformal_pol(GEN p, GEN a, long bitprec)
     aux = gmul(pui,aux);
     if (low_stack(limit, stack_lim(av,2)))
     {
-      GEN *gptr[2]; gptr[0] = &r; gptr[1] = &aux;
       if(DEBUGMEM>1) err(warnmem,"rootpol.c:conformal_pol()");
-      gerepilemany(av, gptr, 2);
+      gerepileall(av,2, &r,&aux);
     }
   }
 }
@@ -1380,16 +1346,16 @@ static void
 conformal_mapping(GEN *radii, GEN ctr, GEN p, long k, long bitprec,
                   double aux, GEN *F,GEN *G)
 {
-  long bitprec2, n=degpol(p), decprec, i;
+  long bitprec2, n=degpol(p), i;
   gpmem_t ltop = avma, av;
-  GEN q,FF,GG,a,R, *gptr[2];
+  GEN q,FF,GG,a,R;
   GEN rho,invrho;
   double delta,param,param2;
 
   bitprec2=bitprec+(long) (n*(2.*log2(2.732)+log2(1.5)))+1;
-  a=gsqrt(stoi(3), 2*MEDDEFAULTPREC - 2);
-  a=gmul(mygprec(a,bitprec2),mygprec(ctr,bitprec2));
-  a=gdivgs(a,-6); /* a = -ctr/2sqrt(3) */
+  a = gsqrt(stoi(3), 2*MEDDEFAULTPREC - 2);
+  a = gmul(mygprec(a,bitprec2),mygprec(ctr,bitprec2));
+  a = gdivgs(a,-6); /* a = -ctr/2sqrt(3) */
 
   av = avma; q = mygprec(p,bitprec2);
   q = conformal_pol(q,a,bitprec2);
@@ -1411,8 +1377,7 @@ conformal_mapping(GEN *radii, GEN ctr, GEN p, long k, long bitprec,
   bitprec2 += (long) (((double)n) * fabs(log2ir(rho)) + 1.);
   R = mygprec(invrho,bitprec2);
   q = scalepol(q,R,bitprec2);
-  gptr[0] = &q; gptr[1] = &R;
-  gerepilemany(av,gptr,2);
+  gerepileall(av,2, &q,&R);
 
   optimize_split(q,k,delta,bitprec2,&FF,&GG,param,param2);
   bitprec2 += n; R = ginv(R);
@@ -1422,16 +1387,14 @@ conformal_mapping(GEN *radii, GEN ctr, GEN p, long k, long bitprec,
   a = mygprec(a,bitprec2);
   FF = conformal_pol(FF,a,bitprec2);
   GG = conformal_pol(GG,a,bitprec2);
-  a = ginv(gsub(gun, gnorm(a)));
-  a = glog(a,(long) (bitprec2 * L2SL10)+1);
 
-  decprec = (long) ((bitprec+n) * L2SL10)+1;
-  FF = gmul(FF,gexp(gmulgs(a,k),decprec));
-  GG = gmul(GG,gexp(gmulgs(a,n-k),decprec));
+  a = mplog( ginv(gsub(gun, gnorm(a))) );
+  FF = gmul(FF, mpexp(mulrs(a,k)));
+  GG = gmul(GG, mpexp(mulrs(a,n-k)));
 
   *F = mygprec(FF,bitprec+n);
   *G = mygprec(GG,bitprec+n);
-  gptr[0]=F; gptr[1]=G; gerepilemany(ltop,gptr,2);
+  gerepileall(ltop,2, F,G);
 }
 
 static GEN
@@ -1542,7 +1505,7 @@ split_1(GEN p, long bitprec, GEN *F, GEN *G)
   ctr = NULL; imax = polreal? 3: 4;
   for (i=1; i<=imax; i++)
   {
-    qq = shiftpol(q, (GEN)v[i]);
+    qq = TR_pol(q, (GEN)v[i]);
     rmin = min_modulus(qq,0.05);
     if (cmpsr(3, mulrr(rmin, thickness)) > 0)
     {
@@ -1556,8 +1519,8 @@ split_1(GEN p, long bitprec, GEN *F, GEN *G)
   bitprec2 = bitprec + gexpo(newq) - ep + (long)((double)n*log2(3.)+1);
   split_2(newq,bitprec2,ctr, rtodbl(mplog(thickness)),&FF,&GG);
   r = gneg(mygprec(ctr,bitprec2));
-  FF = shiftpol(FF,r);
-  GG = shiftpol(GG,r);
+  FF = TR_pol(FF,r);
+  GG = TR_pol(GG,r);
 
   gr = ginv(gr); bitprec2 = bitprec - ep + gexpo(FF)+gexpo(GG);
   *F = scalepol(FF,gr,bitprec2);
@@ -1581,7 +1544,7 @@ split_0_2(GEN p, long bitprec, GEN *F, GEN *G)
 
   q=mygprec(p,bitprec2);
   b=gdivgs(gdiv((GEN)q[n+1],(GEN)q[n+2]),-n);
-  q = shiftpol(q,b);
+  q = TR_pol(q,b);
 
   k=0; eq=gexpo(q);
   while
@@ -1605,8 +1568,8 @@ split_0_2(GEN p, long bitprec, GEN *F, GEN *G)
   }
   GG = mygprec(GG,bitprec2);
   b = mygprec(gneg(b),bitprec2);
-  *F = shiftpol(FF,b);
-  *G = shiftpol(GG,b); return 1;
+  *F = TR_pol(FF,b);
+  *G = TR_pol(GG,b); return 1;
 }
 
 /* put in F and G two polynomials such that |P-FG|<2^(-bitprec)|P|,
@@ -1780,7 +1743,7 @@ append_clone(GEN r, GEN a) { a = gclone(a); appendL(r, a); return a; }
 static GEN
 split_complete(GEN p, long bitprec, GEN roots_pol)
 {
-  long n=degpol(p), decprec;
+  long n = degpol(p);
   gpmem_t ltop;
   GEN p1,F,G,a,b,m1,m2,m;
 
@@ -1792,9 +1755,8 @@ split_complete(GEN p, long bitprec, GEN roots_pol)
   ltop = avma;
   if (n==2)
   {
-    F=gsub(gsqr((GEN)p[3]),gmul2n(gmul((GEN)p[2],(GEN)p[4]),2));
-    decprec=(long) ((double) bitprec * L2SL10)+1;
-    F=gsqrt(F,decprec);
+    F = gsub(gsqr((GEN)p[3]), gmul2n(gmul((GEN)p[2],(GEN)p[4]), 2));
+    F = gsqrt(F, 3 + (bitprec >> TWOPOTBITS_IN_LONG));
     p1 = gmul2n((GEN)p[4],1);
     a = gneg_i(gdiv(gadd(F,(GEN)p[3]), p1));
     b =        gdiv(gsub(F,(GEN)p[3]), p1);
