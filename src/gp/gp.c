@@ -868,8 +868,8 @@ sd_logfile(char *v, int flag)
 }
 
 static GEN
-sd_newgaloisformat(char *v, int flag)
-{ return sd_toggle(v,flag,"newgaloisformat", &new_galois_format); }
+sd_new_galois_format(char *v, int flag)
+{ return sd_toggle(v,flag,"new_galois_format", &new_galois_format); }
 
 static GEN
 sd_psfile(char *v, int flag)
@@ -993,7 +993,7 @@ default_type gp_default_list[] =
   {"lines",(void*)sd_lines},
   {"log",(void*)sd_log},
   {"logfile",(void*)sd_logfile},
-  {"newgaloisformat",(void*)sd_newgaloisformat},
+  {"new_galois_format",(void*)sd_new_galois_format},
   {"output",(void*)sd_output},
   {"parisize",(void*)sd_parisize},
   {"path",(void*)sd_path},
