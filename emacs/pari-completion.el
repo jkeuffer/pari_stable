@@ -165,18 +165,20 @@ name to 'gp-cpl-lists-list."
 
 (defun gp-find-word-to-complete nil
   (save-excursion
-   (let ((pt (point)))
+   (let ((pt (point)) ans)
       (if (char-equal (preceding-char) ?() (forward-char -1))
       (if (not (bolp))
           (progn
             (forward-char -1)           
             (if (looking-at "\\w")
                 (progn (forward-char 1) (forward-word -1))
-                (forward-char 1))))
+              (forward-char 1))))
       ;; In case it is a command-word:
       (if (= (preceding-char) ?\\) (forward-char -1))
-      (if (= (point) pt) " "
-          (buffer-substring-no-properties (point) pt)))))
+      (setq ans (if (= (point) pt) " "
+                  (buffer-substring-no-properties (point) pt)))
+      ;(princ "\n") (princ (list "(gp-find-word-to-complete) word:" ans))
+      ans)))
 
 (defun gp-string-to-list (astring)
   "ASTRING is a succession of gp-words separated by spaces or newlines.
@@ -269,7 +271,7 @@ ie a list of lists whose cars are strings used for completion."
         (process-send-string gp-process (concat context "\t" ))
         (let ((notdone t))
 	  (while notdone 
-	    (accept-process-output gp-process)
+	    (accept-process-output gp-process);(sleep-for 1)(princ " .. ")
 	    (let ((p (point)))
 	      (if (or
 		    (not (and (processp gp-process) 
@@ -345,8 +347,7 @@ is a list of list of possible matching words."
              ;; Do not use general completion (let readline work !):
              '("" nil)
              ;; Ask for general completion:
-             (gp-ask-cpl-via-list
-                word (car gp-cpl-lists-list)))))
+           (gp-ask-cpl-via-list word (car gp-cpl-lists-list)))))
     (mapcar
       (lambda (a-cpl-list)
         (setq lst
@@ -361,12 +362,16 @@ is a list of list of possible matching words."
            (save-excursion
               (if (re-search-backward gp-prompt-pattern nil t)
                   (setq gp-completion-input-start (match-end 0))  ;; end of prompt
-                  (setq gp-completion-input-start (point-min))))
+                (setq gp-completion-input-start (point-min))))
+           ;(princ "\n")
+           ;(princ "((gp-ask-cpl-via-readline-and-emacs) readline enabled and inside gp buffer)")
            (gp-merge-cpls
               word lst
               (gp-ask-cpl-via-readline
                 (buffer-substring-no-properties gp-completion-input-start (point)))))
           (gp-readline-enabledp
+           ;(princ "\n")
+           ;(princ "((gp-ask-cpl-via-readline-and-emacs) readline enabled and outside gp buffer)")
            (gp-merge-cpls
               word lst
               (gp-ask-cpl-via-readline
