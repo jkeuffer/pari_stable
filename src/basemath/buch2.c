@@ -441,9 +441,11 @@ cleancol(GEN x,long N,long PRECREG)
   }
   if (!is_vec_t(tx)) err(talker,"not a vector/matrix in cleancol");
   av = avma; RU=lg(x)-1; R1 = (RU<<1)-N;
-  re=greal(x); s=(GEN)re[1]; for (i=2; i<=RU; i++) s=gadd(s,(GEN)re[i]);
-  s=gdivgs(s,-N); if (N>R1) s2=gmul2n(s,1);
-  p2=gmul2n(mppi(PRECREG),2); im=gimag(x);
+  re = greal(x); s=(GEN)re[1]; for (i=2; i<=RU; i++) s=gadd(s,(GEN)re[i]);
+  im = gimag(x);
+  s = gdivgs(s,-N);
+  s2 = (N>R1)? gmul2n(s,1): NULL;
+  p2=gmul2n(mppi(PRECREG),2);
   tetpil=avma; y=cgetg(RU+1,tx);
   for (i=1; i<=RU; i++)
   {
@@ -1078,18 +1080,15 @@ quad_form(GEN *cbase,GEN ideal,GEN T2vec,GEN prvec)
 GEN
 gmul_mat_smallvec(GEN x, GEN y, long hx, long ly)
 {
-  GEN z=cgetg(hx+1,t_COL), p1,p2;
-  long i,j,av,tetpil;
+  GEN z=cgetg(hx+1,t_COL), p1;
+  long i,j,av;
 
   for (i=1; i<=hx; i++)
   {
     p1=gzero; av=avma;
     for (j=1; j<=ly; j++)
-    {
-      p2=gmulgs(gcoeff(x,i,j),y[j]);
-      tetpil=avma; p1=gadd(p1,p2);
-    }
-    z[i]=lpile(av,tetpil,p1);
+      p1 = gadd(p1, gmulgs(gcoeff(x,i,j),y[j]));
+    z[i]=lpileupto(av,p1);
   }
   return z;
 }
@@ -1131,7 +1130,7 @@ small_norm_for_buchall(long t,long **mat,GEN matarch,long nbrel,long LIMC,
 {
   const double eps = 0.000001;
   double *y,*zz,**qq,*vv, MINKOVSKI_BOUND,IDEAL_BOUND,normideal;
-  long av=avma,av1,av2,av3,tetpil,limpile, *x,i,j,k,noideal;
+  long av=avma,av1,av2,tetpil,limpile, *x,i,j,k,noideal;
   long nbsmallnorm,nbsmallfact,R1,RU, N = lgef(nf[1])-3;
   GEN V,alpha,M,T2,ideal,rrr,cbase,T2vec,prvec,oldinvp;
 
@@ -1139,8 +1138,10 @@ small_norm_for_buchall(long t,long **mat,GEN matarch,long nbrel,long LIMC,
   if (DEBUGLEVEL)
   {
     fprintferr("\n#### Looking for %ld relations (small norms)\n",nbrel);
-    nbsmallnorm = nbsmallfact = 0; flusherr();
+    flusherr();
   }
+  alpha = NULL; /* gcc -Wall */
+  nbsmallnorm = nbsmallfact = 0;
   R1=itos(gmael(nf,2,1)); RU = R1 + itos(gmael(nf,2,2));
   M = gmael(nf,5,1); T2 = gmael(nf,5,3);
   prvec=cgetg(3,t_VECSMALL);
@@ -1185,8 +1186,8 @@ small_norm_for_buchall(long t,long **mat,GEN matarch,long nbrel,long LIMC,
     for(;; x[1]--)
     {
       GEN p1, *newcol;
-      long *colt;
-	double p;
+      long *colt, av3 = avma;
+      double p;
 
       for(;;) /* looking for primitive element of small norm */
       {
@@ -1211,7 +1212,7 @@ small_norm_for_buchall(long t,long **mat,GEN matarch,long nbrel,long LIMC,
 	  if (!x[1] && y[1]<=eps) { flbreak=1; break; }
 	  if (ccontent(x)==1) /* primitive */
 	  {
-	    av3=avma; alpha=gmul(ideal,gmul_mat_smallvec(cbase,x,N,N));
+	    alpha=gmul(ideal,gmul_mat_smallvec(cbase,x,N,N));
 	    j=N; while (j>=2 && !signe(alpha[j])) --j;
 	    if (j!=1)
 	    {
@@ -1248,7 +1249,7 @@ small_norm_for_buchall(long t,long **mat,GEN matarch,long nbrel,long LIMC,
 	for (i=1; i<=primfact[0]; i++) V[primfact[i]] = expoprimfact[i];
 	
         if (! addcolumntomatrix(V,KC,&invp,L))
-      {
+        {
           if (DEBUGLEVEL>1) { fprintferr("*"); flusherr(); }
           avma = av3; continue;
         }
@@ -1462,6 +1463,7 @@ random_relation(long phase,long cmptglob,long lim,long LIMC,long N,
   cptzer = 0;
   if (DEBUGLEVEL && list_jideal)
     fprintferr("looking hard for %Z\n",list_jideal);
+  P = NULL; /* gcc -Wall */
   for (av = avma;;)
   {
     if (list_jideal && jlist < lg(list_jideal) && jdir <= nbmatt2) 
@@ -1825,7 +1827,7 @@ relationrank_partial(GEN ptinvp, GEN y, long k, long n)
 static GEN
 relationrank(long **mat,long n,long r,long *L)
 {
-  long av = avma,tetpil,i,j,lim;
+  long av = avma,i,j,lim;
   GEN ptinvp,y;
 
   if (r>n) err(talker,"incorrect matrix in relationrank");
@@ -1844,10 +1846,10 @@ relationrank(long **mat,long n,long r,long *L)
     if (low_stack(lim, stack_lim(av,1)))
     {
       if(DEBUGMEM>1) err(warnmem,"relationrank");
-      tetpil=avma; ptinvp=gerepile(av,tetpil,gcopy(ptinvp));
+      ptinvp = gerepileupto(av, gcopy(ptinvp));
     }
   }
-  tetpil=avma; ptinvp=gerepile(av,tetpil,gcopy(ptinvp));
+  ptinvp = gerepileupto(av, gcopy(ptinvp));
   if (DEBUGLEVEL>1)
     { fprintferr("\nRank of trivial relations matrix: %ld\n",r); flusherr(); }
   return ptinvp;
@@ -2346,6 +2348,8 @@ classgroupall(GEN P, GEN data, long flag, long prec)
     case 4: flun=2; break;
     case 5: flun=3; break;
     case 6: flun=0; break;
+    default: err(flagerr,"classgroupall");
+      return NULL; /* not reached */
   }
   return buchall(P,bach,bach2,RELSUP,borne,nbrelpid,minsfb,flun,prec);
 }
@@ -2513,6 +2517,7 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
   if (RELSUP<=0) err(talker,"not enough relations in bnfxxx");
 
   /* Initializations */
+  fu = NULL; PRECREG = KCCOPRO = extrarel = 0; /* gcc -Wall */
   N=lgef(P)-3;
   if (!nf)
   {

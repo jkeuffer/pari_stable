@@ -1203,6 +1203,7 @@ zbrent(entree *ep, GEN a, GEN b, char *ch, long prec)
   itmax = (prec<<(TWOPOTBITS_IN_LONG+1)) + 1;
   tol = realun(3); setexpo(tol, 5-bit_accuracy(prec));
   fc=fb;
+  e = d = NULL; /* gcc -Wall */
   for (iter=1; iter<=itmax; iter++)
   {
     if (gsigne(fb)*gsigne(fc) > 0)

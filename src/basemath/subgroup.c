@@ -216,7 +216,7 @@ weight(long *typ)
 static long
 dopsub(long p, long *gtyp, long *indexsubq)
 {
-  long w,i,j,k,n, wg, wmin = 0, count = 0;
+  long w,i,j,k,n, wg = 0, wmin = 0, count = 0;
 
   if (DEBUGLEVEL) { fprintferr("\ngroup:"); printtyp(gtyp); }
   if (indexbound)
@@ -343,7 +343,7 @@ subgroup_engine(GEN cyc, long bound)
   indexbound = bound;
   fa = factor((GEN)cyc[1]); primlist = (GEN)fa[1];
   nbprim = lg(primlist);
-  listgtyp = new_chunk(n); k = 0;
+  listgtyp = new_chunk(n); imax = k = 0;
   for (i=1; i<nbprim; i++)
   {
     gtyp = new_chunk(n); p = (GEN)primlist[i];

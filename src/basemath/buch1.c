@@ -1633,7 +1633,8 @@ real_relations(long lim, long s, long LIMC, long *ex, long **mat, GEN glog2,
   GEN p1,p2,form,form0,form1,form2;
 
   limstack=stack_lim(av,1);
-  if (first) { nbtest = 0; current = 0; }
+  if (first) nbtest = 0;
+  current = 0;
   while (s<lim)
   {
     form = real_random_form(ex);
@@ -1923,6 +1924,7 @@ buchquad(GEN D, double cbach, double cbach2, long RELSUP0, long flag, long prec)
 
   Disc = D; if (typ(Disc)!=t_INT) err(typeer,"buchquad");
   s=mod4(Disc);
+  glog2 = vecexpo = NULL; /* gcc -Wall */
   switch(signe(Disc))
   {
     case -1:

@@ -584,6 +584,7 @@ choose_prime(GEN pol,GEN dpol,long d,GEN *ptff,GEN *ptlistpotbl, long *ptnn)
   di++; p = stoi(2); N = lgef(pol)-3;
   while (p[2]<=N) p[2] += *di++;
   oldllist = oldnn = BIGINT;
+  oldlistpotbl = oldff = NULL; pp = 0; /* gcc -Wall */
   n = new_chunk(N+1);
   for(k=1; k<11 || oldnn == BIGINT; k++,p[2]+= *di++)
   {
@@ -1205,12 +1206,12 @@ minimalexponent(GEN T,long longT,GEN frobp,GEN p,long N)
 GEN
 conjugates(GEN pol)
 {
-  long av,tetpil,N,i,j,pp,bound_primes,nbprimes,longT,v0,flL,f,longTnew,*tab,nop,flnf;
+  long av,tetpil,N,i,j,pp,bound_primes,nbprimes,longT,v0,flL,f,longTnew,*tab,nop;
   GEN T,S,p1,p2,p,dpol,modunp,polp,xbar,frobp,frob,d,B,nf;
   byteptr di;
 
   if (DEBUGLEVEL>2){ fprintferr("** Entree dans conjugates\n"); flusherr(); }
-  flnf=0; if (typ(pol)!=t_POL){ nf=checknf(pol); flnf=1; pol=(GEN)nf[1]; }
+  if (typ(pol)==t_POL) nf = NULL; else { nf = checknf(pol); pol=(GEN)nf[1]; }
   av=avma; N=lgef(pol)-3; v0=varn(pol);
   if (N==1) { S=cgetg(2,t_VEC); S[1]=(long)polx[v0]; return S; }
   if (N==2)
@@ -1222,7 +1223,7 @@ conjugates(GEN pol)
   dpol=absi(discsr(pol));
   if (DEBUGLEVEL>2)
     { fprintferr("discriminant du polynome: "); outerr(dpol); }
-  d = flnf? (GEN)nf[4]: compute_denom(dpol);
+  d = nf? (GEN)nf[4]: compute_denom(dpol);
   if (DEBUGLEVEL>2)
     { fprintferr("facteur carre du discriminant: "); outerr(d); }
   B=compute_bound_for_lift(pol,dpol,d);

@@ -279,6 +279,7 @@ square_free_factorization(GEN pol)
   p1 = content(pol); if (!gcmp1(p1)) pol = gdiv(pol,p1);
 
   x=cgetg(3,t_MAT);
+  t1 = NULL; /* gcc -Wall */
   if (deg > 1)
   {
     t1 = modulargcd(pol,derivpol(pol));
@@ -1511,7 +1512,7 @@ split_1(GEN p, long bitprec, GEN *F, GEN *G)
 {
   long bitprec2,bitprec3,i,imax,n=lgef(p)-3, polreal = isreal(p);
   GEN rmax,rmin,thickness,quo;
-  GEN q,qq,newq,FF,GG,v,gr,r;
+  GEN q,qq,FF,GG,v,gr,r, newq = NULL; /* gcc -Wall */
 
   r=max_modulus(p,0.01);
   bitprec2=bitprec+n;

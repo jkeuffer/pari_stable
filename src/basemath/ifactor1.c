@@ -930,6 +930,7 @@ ellfacteur(GEN n, int insist)
     nbc &= ~3;			/* nbc is always a multiple of 4 */
     if (nbc > nbcmax) nbc = nbcmax;
     a = 1 + (nbcmax<<7);	/* seed for choice of curves */
+    rep = 0; /* gcc -Wall */
   }
   else
   {
@@ -1456,14 +1457,15 @@ PB_RETRY:
   * of something we've already seen, we had better avoid the same delta) */
   switch ((size + retries) & 7)
   {
-    case 0: delta=  1; break;
-    case 1: delta= -1; break;
-    case 2: delta=  3; break;
-    case 3: delta=  5; break;
-    case 4: delta= -5; break;
-    case 5: delta=  7; break;
-    case 6: delta= 11; break;
-    case 7: delta=-11; break;
+    case 0:  delta=  1; break;
+    case 1:  delta= -1; break;
+    case 2:  delta=  3; break;
+    case 3:  delta=  5; break;
+    case 4:  delta= -5; break;
+    case 5:  delta=  7; break;
+    case 6:  delta= 11; break;
+    /* case 7: */
+    default: delta=-11; break;
   }
   if (DEBUGLEVEL > 3)
   {

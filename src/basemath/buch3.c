@@ -229,6 +229,7 @@ buchrayall(GEN bnf,GEN module,long flag,long prec)
 
   bnf = checkbnf(bnf); nf=checknf(bnf); bigres=(GEN)bnf[8];
   funits = check_units(bnf, "buchrayall");
+  vecel = genplus = NULL; /* gcc -Wall */
   N=lgef(nf[1])-3;
   cyc=gmael(bigres,1,2);
   gen=gmael(bigres,1,3); ngen=lg(cyc)-1;
@@ -799,7 +800,7 @@ minimforunits(GEN nf, long borne, long stockmax)
       q[i][j]=rtodbl(gcoeff(r,i,j));
   }
   normax=0;
-  if (stockmax) S=cgetg(stockmax+1,t_MAT);
+  S = cgetg(stockmax+1,t_MAT);
   s=0; k=n; cmpt=0; y[n]=z[n]=0;
   x[n]=(long)(sqrt(borne/v[n]+eps));
 
@@ -884,10 +885,9 @@ compute_M0(GEN M_star,long N) /* On connait M_star; on calcule M0 */
   vz = fetch_var(); z=polx[vz];
   vy = fetch_var(); y=polx[vy];
   vx = fetch_var(); x=polx[vx];
-  vx=varn(x); vy=varn(y); vz=varn(z); vM=varn(M_formel);
 
   PREC = PREC>>1; if (!PREC) PREC=DEFAULTPREC;
-  eps=dbltor(0.0000001); M0=gzero; m1=(N-(N%3))/3;
+  eps=dbltor(0.0000001); M0=gzero; m1=N/3;
   for (n1=1; n1<=m1; n1++)
   {
     m2 = (N-n1)>>1;
@@ -1221,13 +1221,13 @@ certifybuchall(GEN bnf)
     nbf1=lg(factfd1[1]); f1=(GEN)factfd1[1];
     for (i=1; i<nbf1; i++)
       if (cmpis((GEN)f1[i],bound) > 0) nfa++;
-  }
-  if (DEBUGLEVEL>=2 && nfa)
-    { fprintferr("  Testing primes > B (# = %ld)\n\n",nfa); flusherr(); }
-  for (j=1; j<=nfa; j++)
-  {
-    pp = itos((GEN)f1[nbf1-j]);
-    check_prime(pp,bnf,gzero,cyc,R,cycgen,funits,rootsofone,big);
+    if (DEBUGLEVEL>=2 && nfa)
+      { fprintferr("  Testing primes > B (# = %ld)\n\n",nfa); flusherr(); }
+    for (j=1; j<=nfa; j++)
+    {
+      pp = itos((GEN)f1[nbf1-j]);
+      check_prime(pp,bnf,gzero,cyc,R,cycgen,funits,rootsofone,big);
+    }
   }
   avma=av; return 1;
 }
@@ -1292,6 +1292,7 @@ args_to_bnr(GEN arg0, GEN arg1, GEN arg2, GEN *subgroup, long prec)
       *subgroup=arg2; break;
 
     default: err(talker,"neither bnf nor bnr in conductor or discray");
+      return NULL; /* not reached */
   }
   if (!gcmp0(*subgroup))
   {
@@ -1358,8 +1359,8 @@ conductor(GEN bnr,GEN subgroup,long all,long prec)
       err(talker,"incorrect subgroup in conductor");
     if (gcmp1(det(p1))) trivial=1;
     clhray = absi(det(subgroup));
-    H = getH(bnf, gen);
   }
+  H = (!trivial || all > 0)? getH(bnf, gen): NULL;
   fa=(GEN)bid[3]; fa2=(GEN)fa[1]; ex=(GEN)fa[2];
   p2=cgetg(3,t_VEC); p2[2]=(long)arch;
   for (k=1; k<lg(fa2); k++)
@@ -1502,6 +1503,7 @@ discrayrelall(GEN bnr,GEN subgroup,long flag,long prec)
   cyc=gmael(bnr,5,2); gen=gmael(bnr,5,3);
   nf=(GEN)bnf[7]; r1=itos(gmael(nf,2,1));
 
+  H = NULL; /* gcc -Wall */
   if (gcmp0(subgroup)) { trivial=1; clhray=gmael(bnr,5,1); }
   else
   {
@@ -1785,6 +1787,7 @@ discrayabslist(GEN bnf,GEN listes)
   modulist=(GEN)listes[1];
   disclist=cgetg(lx,t_VEC); nf=(GEN)bnf[7]; r1=itos(gmael(nf,2,1));
   degk=lgef(nf[1])-3; dkabs=gabs((GEN)nf[3],0);
+  nbdezero = 0; dlk = NULL; /* gcc -Wall */
   for (ii=1; ii<lx; ii++)
   {
     sous=(GEN)modulist[ii]; sousclass=(GEN)classlist[ii];
@@ -2087,7 +2090,7 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
   byteptr ptdif=diffptr;
   long degk,lim,av0,av,av1,tetpil,i,j,k,p2s,lfa,lp1,sqbou,cex, allarch;
   long ffs,fs,resp,flbou,tdi,nba, k2,karch,kka,nbarch,jjj,jj,square;
-  long ii2,ii,ly,clhray,lfa2,ep,som,clhss,normps,normi,nbdezero,r1,R1,n,lp4,c;
+  long ii2,ii,ly,clhray,lfa2,ep,som,clhss,normps,normi,nbdezero,r1,R1,n,c;
   ulong q;
   GEN nf,p,z,pol,p1,p2,p3,fa,pr,normp,ideal,bidp,z2,matarchunit;
   GEN bigres,funits,racunit,embunit,sous,clh,sousray,raylist;
@@ -2095,6 +2098,9 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
   GEN sousdisc,module,fa2,ex,fac,no1,no2,fad,fad1,fad2,fadkabs,pz;
   GEN arch2,dlk,disclist,bidsimp,p4,faussefa,pex,fauxpr,gprime;
   GEN *gptr[2];
+
+  clhray = nbdezero = 0; /* gcc -Wall */
+  module = Id = dlk = ideal = clhrayall = discall = faall = NULL;
 
   /* ce qui suit recopie d'assez pres ideallistzstarall */
   if (DEBUGLEVEL>2) timer2();
@@ -2185,8 +2191,9 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
 	      p2=cgetg(lp1,t_VEC); c=0;
 	      for (k=1; k<lp1; k++)
 	      {
-		p3=(GEN)p1[k]; if (i>q) { p4=gmael(p3,1,1); lp4=lg(p4)-1; }
-		if (i==q || !isinvector(p4,fauxpr,lp4))
+		p3=(GEN)p1[k];
+		if (i==q ||
+                    ((p4=gmael(p3,1,1)) && !isinvector(p4,fauxpr,lg(p4)-1)))
 		{
 		  c++;
 		  p2[c]=(long)zsimpjoin(p3,bidp,faussefa,embunit);

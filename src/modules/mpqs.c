@@ -393,7 +393,7 @@ mpqs_mergesort_lp_file0(FILE *LPREL, FILE *LPNEW, long mode)
   pariFILE *pTMP = pari_fopen(TMP_str, WRITE);
   FILE *TMP = pTMP->file;
   pariFILE *pCOMB = NULL;
-  FILE *COMB;
+  FILE *COMB = NULL; /* gcc -Wall */
   char line1[MPQS_STRING_LENGTH], line2[MPQS_STRING_LENGTH];
   char line[MPQS_STRING_LENGTH];
   char *line_new = line1, *line_new_old = line2, *line_tmp;

@@ -199,7 +199,7 @@ static GEN
 nfmod_pol_divres(GEN nf,GEN prhall,GEN x,GEN y, GEN *pr)
 {
   long av=avma,dx,dy,dz,i,j,k,l,n,tetpil;
-  GEN z,p1,p2,p3,px,py;
+  GEN z,p1,p3,px,py;
 
   py = nfmod_pol_reduce(nf,prhall,y);
   if (gcmp0(py))
@@ -224,18 +224,17 @@ nfmod_pol_divres(GEN nf,GEN prhall,GEN x,GEN y, GEN *pr)
     z[1]=evallgef(2) | evalvarn(varn(px));
     return z;
   }
+  p1 = NULL; /* gcc -Wall */
 
   z=cgetg(dz+3,t_POL); z[1]=evalsigne(1) | evallgef(3+dz);
   setvarn(z,varn(px));
   z[dz+2] = (long) element_divmodpr(nf,(GEN)px[dx+2],(GEN)py[dy+2],prhall);
   for (i=dx-1; i>=dy; --i)
   {
-    l=avma; p1=nfreducemodpr(nf,(GEN)px[i+2],prhall);
+    l=avma; p1=(GEN)px[i+2];
     for (j=i-dy+1; j<=i && j<=dz; j++)
-    {
-      p2=element_mul(nf,(GEN)z[j+2],(GEN)py[i-j+2]);
-      p2=nfreducemodpr(nf,p2,prhall); p1=gsub(p1,p2);
-    }
+      p1 = gsub(p1, element_mul(nf,(GEN)z[j+2],(GEN)py[i-j+2]));
+    p1 = nfreducemodpr(nf,p1,prhall);
     tetpil=avma; p3=element_divmodpr(nf,p1,(GEN)py[dy+2],prhall);
     z[i-dy+2]=lpile(l,tetpil,p3);
     z[i-dy+2]=(long)nfreducemodpr(nf,(GEN)z[i-dy+2],prhall);
@@ -245,12 +244,9 @@ nfmod_pol_divres(GEN nf,GEN prhall,GEN x,GEN y, GEN *pr)
   {
     l=avma; p1=((GEN)px[i+2]);
     for (j=0; j<=i && j<=dz; j++)
-    {
-      p2=element_mul(nf,(GEN)z[j+2],(GEN)py[i-j+2]);
-      p2=nfreducemodpr(nf,p2,prhall); tetpil=avma; p1=gsub(p1,p2);
-    }
-    p1=gerepile(l,tetpil,p1);
-    if (!gcmp0(nfreducemodpr(nf,p1,prhall))) break;
+      p1 = gsub(p1, element_mul(nf,(GEN)z[j+2],(GEN)py[i-j+2]));
+    p1 = gerepileupto(l, nfreducemodpr(nf,p1,prhall));
+    if (!gcmp0(p1)) break;
   }
 
   if (!pr) { avma = l; return z; }
@@ -270,11 +266,8 @@ nfmod_pol_divres(GEN nf,GEN prhall,GEN x,GEN y, GEN *pr)
   {
     l=avma; p1=((GEN)px[k+2]);
     for (j=0; j<=k && j<=dz; j++)
-    {
-      p2=element_mul(nf,(GEN)z[j+2],(GEN)py[k-j+2]);
-      p2=nfreducemodpr(nf,p2,prhall); tetpil=avma; p1=gsub(p1,p2);
-    }
-    p3[k+2]=lpile(l,tetpil,nfreducemodpr(nf,p1,prhall));
+      p1 = gsub(p1, element_mul(nf,(GEN)z[j+2],(GEN)py[k-j+2]));
+    p3[k+2]=lpileupto(l,nfreducemodpr(nf,p1,prhall));
   }
   *pr=p3; return z;
 }
@@ -353,6 +346,7 @@ nffactormod(GEN nf,GEN pol,GEN pr)
   prhall=nfmodprinit(nf,pr); n=lgef(nf[1])-3;
   vun = gscalcol_i(gun, n);
   vzero = gscalcol_i(gzero, n);
+  q = vker = NULL; /* gcc -Wall */
 
   f=unifpol(nf,pol,0); f=nfmod_pol_reduce(nf,prhall,f);
   d=lgef(f)-3; vf=varn(f);
@@ -893,6 +887,7 @@ nfsqff(GEN nf,GEN pol, long fl)
     msgtimer("Calcul des bornes");
   }
 
+  p = rep = polred = NULL; /* gcc -Wall */
   pr=NULL;
   for (;;)
   {

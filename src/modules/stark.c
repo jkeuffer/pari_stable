@@ -2412,6 +2412,7 @@ computean(GEN dtcr,  long nmax, long prec)
 
   av1 = avma;
 
+  chi = chi1 = chi2 = NULL; /* gcc -Wall */
   while (*dp && prime[2] <= nmax)
   {
     qg = prime;
@@ -2493,7 +2494,7 @@ computean(GEN dtcr,  long nmax, long prec)
       break;
 
     /* prime is split */
-    case 1:
+    default: /* case 1: */
       p1  = primedec(bnf, prime);
       pr1 = (GEN)p1[1];
       pr2 = (GEN)p1[2];
@@ -2858,6 +2859,7 @@ GenusField(GEN bnf, long prec)
   div = divisors(disc);
   c = 1;
   l = 0;
+  pol = NULL; /* gcc -Wall */
 
   while(l < hk)
   {

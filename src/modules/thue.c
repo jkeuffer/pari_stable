@@ -672,6 +672,7 @@ thue(GEN thueres, GEN rhs, GEN ne)
   if (!checktnf(thueres)) err(talker,"not a tnf in thue");
 
   av=avma; SOL=cgetg(1,t_VEC);
+  upb = 0; ep = NULL; /* gcc -Wall */
 
   if (lg(thueres)==8)
   {
@@ -1055,6 +1056,7 @@ bnfisintnorm(GEN bnf, GEN a)
   get_sol_abs(bnf, absi(a), &Primes);
 
   res = cgetg(1,t_VEC); unit = NULL;
+  norm_1 = 0; /* gcc -Wall */
   for (i=1; i<=sindex; i++)
   {
     id = gun; x = normsol[i];
