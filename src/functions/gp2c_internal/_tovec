@@ -1,0 +1,5 @@
+Function: _tovec
+Class: gp2c_internal
+Description:
+ (gen,...):vec  coefs_to_vec($#, $2)
+
