@@ -222,7 +222,8 @@ static PariRect *
 check_rect(long ne)
 {
   if (!GOODRECT(ne))
-    err(talker,"not an rplot vector type in graphic function");
+    err(talker,"incorrect rectwindow number in graphic function ([0, %ld])",
+               NUMRECT-1);
   return rectgraph[ne];
 }
 
@@ -230,8 +231,7 @@ static PariRect *
 check_rect_init(long ne)
 {
   PariRect *e = check_rect(ne);
-  if (!RHead(e))
-    err(talker,"you must initialize the rectwindow first");
+  if (!RHead(e)) err(talker,"you must initialize the rectwindow first");
   return e;
 }
 
