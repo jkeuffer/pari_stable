@@ -168,7 +168,7 @@ JD 74- [Configure:] detection of times()
        error, x + [] --> OK but x * [] --> [] instead of '[]*x' , etc. ]
    76- obscure bugs wrt polynomials with t_MAT coefficients created via Pol()
        [ e.g content(x*[;]) --> [;], primitive_part(x*[;]) --> [;] ]
-   77- incorrect behaviour in scalarpol() for exact 0 argument
+   77- incorrect behaviour in scalarpol()/scalarser() for exact 0 argument
    78- typo in ellap: e defined over Fp didn't work any more
    79- t_SER ^ t_QUAD --> SEGV
    80- nffactor(non-monic t_POL) --> SEGV due to FpX_red interface change

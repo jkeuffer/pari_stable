@@ -2079,8 +2079,11 @@ gtopoly(GEN x, long v) { return gtopoly0(x,v,0); }
 GEN
 scalarser(GEN x, long v, long prec)
 {
-  long i, l = prec+2;
-  GEN y = cgetg(l, t_SER);
+  long i, l;
+  GEN y;                                                                       
+
+  if (isexactzero(x)) return zeroser(v,0);                                     
+  l = prec + 2; y = cgetg(l, t_SER);         
   y[1] = evalsigne(1) | evalvalp(0) | evalvarn(v);
   y[2] = lcopy(x); for (i=3; i<l; i++) y[i] = zero;
   return y;
