@@ -2112,7 +2112,7 @@ bestappr(GEN x, GEN k)
 {
   pari_sp av = avma;
   long tx = typ(x), tk = typ(k), lx, i;
-  GEN p0,p1,p,q0,q1,q,a,y;
+  GEN p0, p1, p, q0, q1, q, a, y;
 
   if (tk != t_INT)
   {
@@ -2129,6 +2129,7 @@ bestappr(GEN x, GEN k)
 
     case t_FRAC:
       if (cmpii((GEN)x[2],k) <= 0) { avma = av; return gcopy(x); }
+      y = x;
       p1 = gun; a = p0 = gfloor(x); q1 = gzero; q0 = gun;
       while (cmpii(q0,k) <= 0)
       {
@@ -2137,7 +2138,20 @@ bestappr(GEN x, GEN k)
 
 	x = ginv(x); /* > 1 */
         a = typ(x)==t_INT? x: divii((GEN)x[1], (GEN)x[2]);
-        if (cmpii(a,k) > 0) a = k;
+        if (cmpii(a,k) > 0)
+        { /* next partial quotient will overflow limits */
+          GEN n, d;
+          a = divii(subii(k, q1), q0);
+	  p = addii(mulii(a,p0), p1); p1=p0; p0=p;
+          q = addii(mulii(a,q0), q1); q1=q0; q0=q; 
+          /* compare |y-p0/q0|, |y-p1/q1| */
+          n = (GEN)y[1];
+          d = (GEN)y[2];
+          if (absi_cmp(mulii(q1, subii(mulii(q0,n), mulii(d,p0))),
+                       mulii(q0, subii(mulii(q1,n), mulii(d,p1)))) < 0)
+                       { p1 = p0; q1 = q0; }
+          break;
+        }
 	p = addii(mulii(a,p0), p1); p1=p0; p0=p;
         q = addii(mulii(a,q0), q1); q1=q0; q0=q;
       }
@@ -2145,6 +2159,7 @@ bestappr(GEN x, GEN k)
 
     case t_REAL: {
       GEN kr = itor(k, lg(x));
+      y = x;
       p1 = gun; a = p0 = mpent(x); q1 = gzero; q0 = gun;
       while (cmpii(q0,k) <= 0)
       {
@@ -2152,7 +2167,18 @@ bestappr(GEN x, GEN k)
 	if (!signe(x)) { p1 = p0; q1 = q0; break; }
 
 	x = ginv(x); /* > 1 */
-        a = (cmprr(x,kr) > 0)? k: mptrunc(x); /* mptrunc(x) may raise precer */
+        if (cmprr(x,kr) > 0)
+        { /* next partial quotient will overflow limits */
+          a = divii(subii(k, q1), q0);
+	  p = addii(mulii(a,p0), p1); p1=p0; p0=p;
+          q = addii(mulii(a,q0), q1); q1=q0; q0=q; 
+          /* compare |y-p0/q0|, |y-p1/q1| */
+          if (absr_cmp(mpmul(q1, mpsub(mulir(q0,y), p0)),
+                       mpmul(q0, mpsub(mulir(q1,y), p1))) < 0)
+                       { p1 = p0; q1 = q0; }
+          break;
+        }
+        a = mptrunc(x); /* mptrunc(x) may raise precer */
 	p = addii(mulii(a,p0), p1); p1=p0; p0=p;
         q = addii(mulii(a,q0), q1); q1=q0; q0=q;
       }

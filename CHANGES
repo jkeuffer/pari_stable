@@ -140,6 +140,7 @@ BA 47- bitneg(1,0) --> SEGV (caused by 2.2.5 A10).
        ifac_realloc() [ missing copy() for (*partial)[2] ]
    58- incorrect gerepile() behaviour on t_LIST [ would try to update
        non-existing components if list not full ]
+   59- bestappr(0.1, 8) --> 0 [ should be 1/8 ]
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.
