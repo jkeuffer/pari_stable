@@ -915,7 +915,7 @@ FpXQX_mul(GEN x, GEN y, GEN T, GEN p)
   ky= to_Kronecker(y,T);
   z = quickmul(ky+2, kx+2, lgpol(ky), lgpol(kx));
   z = FpXQX_from_Kronecker(z,T,p);
-  setvarn(z,vx);/*quickmul and Fq_from_Kronecker are not varn-clean*/
+  setvarn(z,vx);/*quickmul and FpXQX_from_Kronecker are not varn-clean*/
   return gerepileupto(ltop,z);
 }
 GEN
@@ -927,7 +927,7 @@ FpXQX_sqr(GEN x, GEN T, GEN p)
   kx= to_Kronecker(x,T);
   z = quicksqr(kx+2, lgpol(kx));
   z = FpXQX_from_Kronecker(z,T,p);
-  setvarn(z,vx);/*quickmul and Fq_from_Kronecker are nor varn-clean*/
+  setvarn(z,vx);/*quickmul and FpXQX_from_Kronecker are nor varn-clean*/
   return gerepileupto(ltop,z);
 }
 
@@ -1924,16 +1924,6 @@ FpXQX_normalize(GEN z, GEN T, GEN p)
   if (lg(z) == 2 || gcmp1(p1)) return z;
   if (!T) return FpX_normalize(z,p);
   return FpXQX_FpXQ_mul(z, Fq_inv(p1,T,p), T,p);
-}
-/*FIXME: misplaced*/
-GEN
-matsmall_mat(GEN z)
-{
-  long i, l = lg(z);
-  GEN x = cgetg(l,t_MAT);
-  for (i=1; i<l; i++)
-    x[i] = (long)vecsmall_col((GEN)z[i]);
-  return x;
 }
 
 /* z in Z[X,Y] representing an elt in F_p[X,Y] mod T(Y) i.e F_q[X])

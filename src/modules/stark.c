@@ -165,12 +165,12 @@ EltsOfGroup(long order, GEN cyc)
   G.j = vecsmall_const(G.r, 0);
 
   rep = cgetg(order + 1, t_VEC);
-  rep[order] = (long)vecsmall_col(G.j);
+  rep[order] = (long)zv_ZC(G.j);
 
   for  (i = 1; i < order; i++)
   {
     (void)NextElt(&G);
-    rep[i] = (long)vecsmall_col(G.j);
+    rep[i] = (long)zv_ZC(G.j);
   }
   return rep;
 }

@@ -140,7 +140,7 @@ FqX_factor(GEN x, GEN T, GEN p)
   if (!T)
   {
     rep = factmod0(x, p);
-    rep[2] = (long)vecsmall_vec((GEN)rep[2]);
+    rep[2] = (long)zv_ZC((GEN)rep[2]);
   }
   else
   {

@@ -1561,7 +1561,6 @@ GEN     ZX_QX_resultant(GEN A, GEN B);
 GEN     ZX_s_add(GEN y,long x);
 long    brent_kung_optpow(long d, long n);
 GEN     ffsqrtnmod(GEN a, GEN n, GEN T, GEN p, GEN *zetan);
-GEN     matsmall_mat(GEN z);
 GEN     modulargcd(GEN a,GEN b);
 GEN     quickmul(GEN a, GEN b, long na, long nb);
 GEN     quicksqr(GEN a, long na);

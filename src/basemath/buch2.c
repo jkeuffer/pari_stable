@@ -1333,11 +1333,11 @@ _isprincipal(GEN bnf, GEN x, long *ptprec, long flag)
    * since g_W B + g_B = [C_B] */
   if (xar)
   {
-    A = gsub(ZM_zc_mul(B,Bex), vecsmall_col(Wex));
+    A = gsub(ZM_zc_mul(B,Bex), zv_ZC(Wex));
     Bex = gneg(Bex);
   }
   else
-    A = gsub(vecsmall_col(Wex), ZM_zc_mul(B,Bex));
+    A = gsub(zv_ZC(Wex), ZM_zc_mul(B,Bex));
   Q = gmul(U, A);
   for (i=1; i<=c; i++)
     Q[i] = (long)truedvmdii((GEN)Q[i], (GEN)cyc[i], (GEN*)(ex+i));
@@ -1350,7 +1350,7 @@ _isprincipal(GEN bnf, GEN x, long *ptprec, long flag)
   if (old_format)
   {
     GEN Garch, V = (GEN)clg2[2];
-    Bex = vecsmall_col(Bex);
+    Bex = zv_ZC(Bex);
     p1 = c? concatsp(gmul(V,Q), Bex): Bex;
     col = act_arch(p1, WB_C);
     if (c)

@@ -40,6 +40,7 @@ else\
   gerepilemanyvec((pari_sp)z, tetpil, z+1, 2); }
 
 extern GEN quickmul(GEN a, GEN b, long na, long nb);
+extern GEN FpXQX_from_Kronecker(GEN Z, GEN T, GEN p);
 extern GEN shiftpol_i(GEN x, long v);
 
 #define cpifstack(x) isonstack(x)?gcopy(x):x
@@ -1702,8 +1703,13 @@ gsqr(GEN x)
       if (ff_poltype(&x,&p,&pol))
       {
         z = quicksqr(x+2, lgpol(x));
-        if (p) z = FpX(z,p);
-        if (pol) z = from_Kronecker(z,pol);
+        if (p)
+        {
+          z = FpX(z,p);
+          if (pol) z = FpXQX_from_Kronecker(z,pol,p);
+        }
+        else
+          z = from_Kronecker(z,pol);
         z = gerepileupto(av, z);
       }
       else

@@ -1445,7 +1445,7 @@ FpM_gauss(GEN a, GEN b, GEN p)
     a = ZM_Flm(a, pp);
     b = ZM_Flm(b, pp);
     u = Flm_gauss_sp(a,b, pp);
-    u = iscol? vecsmall_col((GEN)u[1]): matsmall_mat(u);
+    u = iscol? zv_ZC((GEN)u[1]): zm_ZM(u);
     return gerepileupto(av, u);
   }
   lim = stack_lim(av,1);
@@ -2624,7 +2624,7 @@ FpM_ker_i(GEN x, GEN p, long deplin)
     y = ZM_Flm(x, pp);
     y = Flm_ker_sp(y, pp, deplin);
     if (!y) return y;
-    y = deplin? vecsmall_col(y): matsmall_mat(y);
+    y = deplin? zv_ZC(y): zm_ZM(y);
     return gerepileupto(av0, y);
   }
 

@@ -1546,7 +1546,7 @@ archstar_full_rk(GEN x, GEN bas, GEN v, GEN gen)
         a[1] = laddis((GEN)a[1], 1);
       }
       gen[lgmat] = (long)a;
-      if (lgmat++ == nba) return matsmall_mat( Flm_inv(mat,2) ); /* full rank */
+      if (lgmat++ == nba) return zm_ZM( Flm_inv(mat,2) ); /* full rank */
       setlg(mat,lgmat+1);
     }
   }
