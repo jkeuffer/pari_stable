@@ -1365,7 +1365,7 @@ factmod0(GEN f, GEN pp)
 
   if (!(d = factmod_init(&f, pp, &p))) { avma=av; return trivfact(); }
   /* to hold factors and exponents */
-  t = (GEN*)cgetg(d+1,t_VEC); ex = cgetg(d+1,t_VECSMALL);
+  t = (GEN*)cgetg(d+1,t_COL); ex = cgetg(d+1,t_VECSMALL);
   val = ZX_valuation(f, &f);
   e = nbfact = 1;
   if (val) { t[1] = polx[varn(f)]; ex[1] = val; nbfact++; }
