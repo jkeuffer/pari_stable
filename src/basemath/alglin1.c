@@ -604,6 +604,19 @@ extract0(GEN x, GEN l1, GEN l2)
   return matextract(x,l1,l2);
 }
 
+/* v[a] + ... + v[b] */
+GEN
+sum(GEN v, long a, long b)
+{
+  GEN p;
+  long i;
+  if (a > b) return gzero;
+  if (b > lg(v)-1) err(talker,"incorrect length in sum");
+  p = (GEN)v[a];
+  for (i=a+1; i<=b; i++) p = gadd(p, (GEN)v[i]);
+  return p;
+}
+
 /*******************************************************************/
 /*                                                                 */
 /*                     SCALAR-MATRIX OPERATIONS                    */

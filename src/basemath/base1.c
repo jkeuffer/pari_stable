@@ -1671,17 +1671,6 @@ factoredpolred2(GEN x, GEN fa)
 /********************************************************************/
 
 GEN
-sum(GEN v, long a, long b)
-{
-  GEN p;
-  long i;
-  if (a > b) return gzero;
-  p = (GEN)v[a];
-  for (i=a+1; i<=b; i++) p = gadd(p, (GEN)v[i]);
-  return p;
-}
-
-GEN
 T2_from_embed_norm(GEN x, long r1)
 {
   GEN p = sum(x, 1, r1);
@@ -2142,7 +2131,7 @@ initzeta(GEN pol, long prec)
   /*************** Calcul du residu et des constantes ***************/
   eps=gmul2n(gun,-bit_accuracy(prec)-6); p1=dbltor(0.5);
   nfz=cgetg(10,t_VEC);
-  bnf=buchinit(pol,p1,p1,prec+1); prec=(prec<<1)-1;
+  bnf = bnfinit0(pol,2,NULL,prec+1); prec=(prec<<1)-1;
   bnf = checkbnf_discard(bnf);
   Pi = mppi(prec); racpi=gsqrt(Pi,prec);
 
