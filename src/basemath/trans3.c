@@ -691,50 +691,53 @@ incgam1(GEN a, GEN x, long prec)
 
 /* assume x != 0 */
 GEN
-incgam2(GEN a, GEN x, long prec)
+incgam2(GEN s, GEN x, long prec)
 {
-  GEN b,p1,p2,p3,y, z = cgetr(prec);
+  GEN b, p1, p2, p3, y;
   long l, n, i;
-  pari_sp av = avma, av1;
+  pari_sp av = avma, av2, avlim;
   double m,mx;
 
-  if (typ(x) != t_REAL) { gaffect(x,z); x=z; }
-  if (gcmp0(a)) { affrr(incgam2_0(x), z); avma = av; return z; }
-  l=lg(x); mx=rtodbl(x);
-  m = (bit_accuracy_mul(l,LOG2) + mx)/4; n=(long)(1+m*m/mx);
-  i = typ(a);
-  if (i == t_REAL) b = addsr(-1,a);
+  if (gcmp0(s)) return gerepileuptoleaf(av, incgam2_0(x));
+  if (typ(x) != t_REAL) x = gtofp(x, prec);
+  l = lg(x); mx = rtodbl(x);
+  m = (bit_accuracy_mul(l,LOG2) + mx)/4;
+  n = (long)(1+m*m/mx);
+  i = typ(s);
+  if (i == t_REAL) b = addsr(-1,s);
   else
   { /* keep b integral : final powering more efficient */
-    p1 = gtofp(a, prec);
-    b = (i == t_INT)? addsi(-1,a): addsr(-1,p1);
-    a = p1;
+    p1 = gtofp(s, prec);
+    b = (i == t_INT)? addsi(-1,s): gaddsg(-1,p1);
+    s = p1;
   }
-  p2 = cgetr(l); gaffect(subrr(x,a),p2);
-  p3 = divrr(addsr(-n,a), addrs(p2,n<<1));
-  av1 = avma;
+  p2 = gsub(x, s);
+  av2 = avma; avlim = stack_lim(av2,3);
+  p3 = gdiv(gaddsg(-n,s), gaddgs(p2,n<<1));
   for (i=n-1; i>=1; i--)
   {
-    affrr(divrr(addsr(-i,a), addrr(addrs(p2,i<<1),mulsr(i,p3))), p3);
-    avma = av1;
+    p3 = gdiv(gaddsg(-i,s), gadd(gaddgs(p2,i<<1),gmulsg(i,p3)));
+    if (low_stack(avlim,stack_lim(av2,3)))
+    {
+      if(DEBUGMEM>1) err(warnmem,"incgam2");
+      p3 = gerepileupto(av2, p3);
+    }
   }
   y = gmul(mpexp(negr(x)), gpow(x,b,prec));
-  affrr(mulrr(y, addsr(1,p3)), z);
-  avma = av; return z;
+  return gerepileupto(av, gmul(y, gaddsg(1,p3)));
 }
 
 GEN
 incgamc(GEN s, GEN x, long prec)
 {
-  GEN b,p1,p2,p3,y, z = cgetr(prec);
+  GEN b, p1, p2, p3, y;
   long l, n, i;
-  pari_sp av = avma, av1;
+  pari_sp av = avma, av2, avlim;
 
-  if (typ(x) != t_REAL) { gaffect(x,z); x=z; }
-  if (!signe(x)) return z;
-  l=lg(x); n = -bit_accuracy(l)-1;
-  p3 = realun(l);
-  p2 = rcopy(p3);
+  if (typ(x) != t_REAL) x = gtofp(x, prec);
+  if (!signe(x)) return x;
+
+  l = lg(x); n = -bit_accuracy(l)-1;
   i = typ(s);
   if (i == t_REAL) b = s;
   else
@@ -745,36 +748,41 @@ incgamc(GEN s, GEN x, long prec)
   }
   if (signe(s) <= 0)
   {
-    p1 = gcvtoi(s, &i);
+    p1 = grndtoi(real_i(s), &i);
     if (i < 5 - bit_accuracy(prec))
       err(talker,"negative argument too close to an integer in incgamc");
   }
-  av1 = avma;
+  av2 = avma; avlim = stack_lim(av2,3);
+  p2 = p3 = realun(l);
   for (i=1; expo(p2) >= n; i++)
   {
-    affrr(divrr(mulrr(x,p2), addsr(i,s)), p2);
-    affrr(addrr(p2,p3), p3); avma = av1;
+    p2 = gdiv(gmul(x,p2), gaddsg(i,s));
+    p3 = gadd(p2,p3);
+    if (low_stack(avlim,stack_lim(av2,3)))
+    {
+      if(DEBUGMEM>1) err(warnmem,"incgamc");
+      gerepileall(av2, 2, &p2, &p3);
+    }
   }
-  y = gdiv(mulrr(mpexp(negr(x)), gpow(x,b,prec)), s);
-  affrr(mulrr(y,p3), z);
-  avma = av; return z;
+  y = gdiv(gmul(mpexp(negr(x)), gpow(x,b,prec)), s);
+  return gerepileupto(av, gmul(y,p3));
 }
 
 /* If g != NULL, assume that g=gamma(s,prec). */
 GEN
 incgam0(GEN s, GEN x, GEN g, long prec)
 {
-  GEN p1, z = cgetr(prec);
   pari_sp av = avma;
+  GEN z;
 
-  if (typ(x) != t_REAL) { gaffect(x,z); x=z; }
-  if (!signe(x)) { gaffect(g? g: ggamma(s,prec), z); avma = av; return z; }
-  if (gcmp(subrs(x,1),s) > 0 || gsigne(real_i(s)) <= 0)
-    p1 = incgam2(s,x,prec);
+  if (typ(x) != t_REAL) x = gtofp(x, prec);
+  if (!signe(x)) { avma = av; return g? gcopy(g): ggamma(s,prec); }
+  z = real_i(s);
+  if (gcmp(subrs(x,1),z) > 0 || gsigne(z) <= 0)
+    z = incgam2(s,x,prec);
   else
-    p1 = gsub(g? g: ggamma(s,prec), incgamc(s,x,prec));
-  affrr(p1, z);
-  avma = av; return z;
+    z = gsub(g? g: ggamma(s,prec), incgamc(s,x,prec));
+  return gerepileupto(av, z);
 }
 
 GEN
