@@ -1860,7 +1860,6 @@ nbasis(GEN ibas,GEN pd)
 /*                   BUCHMANN-LENSTRA ALGORITHM                    */
 /*                                                                 */
 /*******************************************************************/
-static GEN lens(GEN nf,GEN p,GEN a);
 GEN element_powid_mod_p(GEN nf, long I, GEN n, GEN p);
 
 /* return a Z basis of Z_K's p-radical, phi = x--> x^p-x */
@@ -1898,75 +1897,8 @@ pol_min(GEN mula, GEN Mi2, GEN p)
     P[i] = (long)FpM_FpV_mul(Mi2, z, p); /* a^i */
     if (i!=d2) z = FpM_FpV_mul(mula, z, p);
   }
-  z = (GEN)FpM_ker(pow, p)[1];
+  z = (GEN)FpM_deplin(pow, p);
   return gerepileupto(av, gtopolyrev(z,0));
-}
-
-static GEN
-kerlens2(GEN x, GEN p)
-{
-  gpmem_t av = avma;
-  GEN y = deplin(gmul(x,gmodulsg(1,p)));
-  return gerepileupto(av, lift(y));
-}
-
-static GEN
-kerlens(GEN x, GEN pgen)
-{
-  gpmem_t av = avma;
-  long i,j,k,t,nc,nl,p,q,*c,*l,*d,**a;
-  GEN y;
-
-  if (cmpis(pgen, MAXHALFULONG>>1) > 0)
-    return kerlens2(x,pgen);
-  /* ici p <= (MAXHALFULONG>>1) ==> long du C */
-  p=itos(pgen); nl=nc=lg(x)-1;
-  a=(long**)new_chunk(nc+1);
-  for (j=1; j<=nc; j++)
-  {
-    c=a[j]=new_chunk(nl+1);
-    for (i=1; i<=nl; i++) c[i]=smodis(gcoeff(x,i,j),p);
-  }
-  c=new_chunk(nl+1); for (i=1; i<=nl; i++) c[i]=0;
-  l=new_chunk(nc+1);
-  d=new_chunk(nc+1);
-  k = t = 1;
-  while (t<=nl && k<=nc)
-  {
-    for (j=1; j<k; j++)
-      for (i=1; i<=nl; i++)
-	if (i!=l[j])
-          a[k][i] = (d[j]*a[k][i] - a[j][i]*a[k][l[j]]) % p;
-    t=1; while (t<=nl && (c[t] || !a[k][t])) t++;
-    if (t<=nl) { d[k]=a[k][t]; c[t]=k; l[k++]=t; }
-  }
-  if (k>nc) err(bugparier,"kerlens");
-  avma=av; y=cgetg(nc+1,t_COL);
-  t=(k>1) ? a[k][l[1]]:1;
-  y[1]=(t>=0)? lstoi(t):lstoi(t+p);
-  for (q=1,j=2; j<k; j++)
-  {
-    q = (q*d[j-1]) % p;
-    t = (a[k][l[j]]*q) % p;
-    y[j] = (t>=0) ? lstoi(t) : lstoi(t+p);
-  }
-  if (k>1)
-  {
-    t = (q*d[k-1]) % p;
-    y[k] = (t>0) ? lstoi(p-t) : lstoi(-t);
-  }
-  for (j=k+1; j<=nc; j++) y[j]=zero;
-  return y;
-}
-
-/* Calcule la constante de lenstra de l'ideal p.Z_K+a.Z_K ou a est un
-vecteur sur la base d'entiers */
-static GEN
-lens(GEN nf, GEN p, GEN a)
-{
-  gpmem_t av = avma;
-  GEN mat = eltmul_get_table(nf, a);
-  return gerepileupto(av, kerlens(mat,p));
 }
 
 /* a in pr | p, norm(pr) = pf. Return 1 if (a,p) = pr, and 0 otherwise */
@@ -1987,7 +1919,7 @@ prime_check_elt(GEN a, GEN T, GEN p, GEN pf)
 }
 
 static GEN
-random_prime_two_elt_loop(GEN beta, GEN pol, GEN p, GEN pf)
+random_uniformizer_loop(GEN beta, GEN pol, GEN p, GEN pf)
 {
   gpmem_t av = avma;
   long z,i, m = lg(beta)-1;
@@ -1998,7 +1930,7 @@ random_prime_two_elt_loop(GEN beta, GEN pol, GEN p, GEN pf)
   for(i=1; i<=m; i++)
     if ((a = prime_check_elt((GEN)beta[i],pol,p,pf))) return a;
   (void)setrand(1);
-  if (DEBUGLEVEL) fprintferr("prime_two_elt_loop, hard case: ");
+  if (DEBUGLEVEL) fprintferr("uniformizer_loop, hard case: ");
   for(;;avma=av)
   {
     if (DEBUGLEVEL) fprintferr("%d ", ++c);
@@ -2017,25 +1949,25 @@ random_prime_two_elt_loop(GEN beta, GEN pol, GEN p, GEN pf)
   }
 }
 
-/* Input: an ideal mod p (!= Z_K)
- * Output: a 2-elt representation [p, x] */
+/* Input: an ideal mod p, P != Z_K (Fp-basis, in matrix form)
+ * Output: x such that P = (p,x) */
 static GEN
-prime_two_elt(GEN nf, GEN p, GEN ideal)
+uniformizer(GEN nf, GEN p, GEN P)
 {
   GEN beta,a,pf, T = (GEN)nf[1];
-  long f, N=degpol(T), m=lg(ideal)-1;
+  long f, N=degpol(T), m=lg(P)-1;
   gpmem_t av;
 
   if (!m) return gscalcol_i(p,N);
 
   /* we want v_p(Norm(beta)) = p^f, f = N-m */
   av = avma; f = N-m; pf = gpowgs(p,f);
-  ideal = centermod(ideal, p);
-  ideal = concatsp(gscalcol(p,N), ideal);
-  ideal = ideal_better_basis(nf, ideal, p);
-  beta = gmul((GEN)nf[7], ideal);
+  P = centermod(P, p);
+  P = concatsp(gscalcol(p,N), P);
+  P = ideal_better_basis(nf, P, p);
+  beta = gmul((GEN)nf[7], P);
 
-  a = random_prime_two_elt_loop(beta,T,p,pf);
+  a = random_uniformizer_loop(beta,T,p,pf);
   a = centermod(algtobasis_i(nf,a), p);
   if (!is_uniformizer(gmul((GEN)nf[7],a), T,pf,p)) a[1] = laddii((GEN)a[1],p);
 
@@ -2070,10 +2002,20 @@ apply_kummer(GEN nf,GEN u,GEN e,GEN p)
   return pr;
 }
 
+/* Assuming P = (p,u) prime, return tau such that p Z + tau Z = p P^(-1)*/
+static GEN
+anti_uniformizer(GEN nf, GEN p, GEN u)
+{
+  gpmem_t av = avma;
+  GEN mat = eltmul_get_table(nf, u);
+  return gerepileupto(av, FpM_deplin(mat,p));
+}
+
 static GEN
 get_pr(GEN nf, GEN p, GEN H, long f)
 {
-  GEN pr, u = prime_two_elt(nf,p,H), t = lens(nf,p,u);
+  GEN pr, u = uniformizer(nf,p,H);
+  GEN t = anti_uniformizer(nf,p,u);
   gpmem_t av = avma;
   long e = 1 + int_elt_val(nf,t,p,t,NULL);
   avma = av;
@@ -2151,6 +2093,8 @@ primedec(GEN nf, GEN p)
   { /* Let A:= (Z_K/p) / Ip; try to split A2 := A / Im H ~ Im M2
        H * ? + M2 * Mi2 = Id_N ==> M2 * Mi2 projector A --> A2 */
     GEN M, Mi, M2, Mi2, phi2;
+    long dim;
+
     H = (GEN)h[c]; k = lg(H)-1;
     M   = FpM_suppl(concatsp(H,UN), p); 
     Mi  = FpM_inv(M, p);
@@ -2158,7 +2102,8 @@ primedec(GEN nf, GEN p)
     Mi2 = rowextract_i(Mi,k+1,N);
     phi2 = FpM_mul(Mi2, FpM_mul(phi,M2, p), p);
     mat1 = FpM_ker(phi2, p);
-    if (lg(mat1) > 2)
+    dim = lg(mat1)-1; /* A2 product of 'dim' fields */
+    if (dim > 1)
     { /* phi2 v = 0 <==> a = M2 v in Ker phi */
       GEN I,R,r,a,mula, v = (GEN)mat1[2];
       long n;
@@ -2174,7 +2119,7 @@ primedec(GEN nf, GEN p)
         I = gaddmat_i(negi(r), mula);
 	h[c++] = (long)FpM_image(concatsp(H, I), p);
       }
-      if (n == N-k)
+      if (n == dim)
         for (i=1; i<=n; i++) L[iL++] = (long)get_pr(nf,p,(GEN)h[--c], 1);
     }
     else /* A2 field ==> H maximal, f = N-k = dim(A2) */

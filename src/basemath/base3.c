@@ -19,7 +19,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                                                                 */
 /*******************************************************************/
 #include "pari.h"
-extern int ker_trivial_mod_p(GEN x, GEN p);
+extern GEN u_FpM_deplin(GEN x, ulong p);
+extern GEN u_FpM_inv(GEN a, ulong p);
 extern long ideal_is_zk(GEN ideal,long N);
 extern GEN famat_ideallog(GEN nf, GEN g, GEN e, GEN bid);
 extern GEN famat_to_nf_modidele(GEN nf, GEN g, GEN e, GEN bid);
@@ -1433,7 +1434,7 @@ zarchstar(GEN nf,GEN x,GEN arch,long nba)
   zk = ideal_is_zk(x,N);
   genarch = cgetg(nba+1,t_VEC);
   mat = cgetg(nba+1,t_MAT); setlg(mat,2);
-  for (i=1; i<=nba; i++) mat[i] = lgetg(nba+1, t_MAT);
+  for (i=1; i<=nba; i++) mat[i] = lgetg(nba+1, t_VECSMALL);
   lambda = cgetg(N+1, t_VECSMALL);
 
   bas = dummycopy(gmael(nf,5,1)); r = lg(arch);
@@ -1474,9 +1475,9 @@ zarchstar(GEN nf,GEN x,GEN arch,long nba)
       }
       p1 = (GEN)mat[lgmat];
       for (i=1; i<=nba; i++)
-        p1[i] = (gsigne((GEN)alpha[i]) > 0)? zero: un;
+        p1[i] = (gsigne((GEN)alpha[i]) < 0)? 1: 0;
 
-      if (ker_trivial_mod_p(mat, gdeux)) avma = av1;
+      if (u_FpM_deplin(mat, 2)) avma = av1;
       else
       { /* new vector indep. of previous ones */
         avma = av1; alpha = nfun;
@@ -1487,7 +1488,8 @@ zarchstar(GEN nf,GEN x,GEN arch,long nba)
 	if (lgmat > nba)
 	{
           GEN *gptr[2];
-          mat = ginv(mat); gptr[0]=&genarch; gptr[1]=&mat;
+          mat = small_to_mat( u_FpM_inv(mat, 2) );
+          gptr[0]=&genarch; gptr[1]=&mat;
           gerepilemany(av,gptr,2);
 	  y[2]=(long)genarch;
           y[3]=(long)mat; return y;

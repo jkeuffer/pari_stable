@@ -1252,9 +1252,9 @@ gauss(GEN a, GEN b)
   return z;
 }
 
-/* destroy b */
-GEN
-u_FpM_gauss(GEN a, GEN b, long p)
+/* destroy a, b */
+static GEN
+u_FpM_gauss_sp(GEN a, GEN b, ulong p)
 {
   long iscol,i,j,k,li,bco, aco = lg(a)-1;
   ulong piv, m;
@@ -1316,6 +1316,16 @@ u_FpM_gauss(GEN a, GEN b, long p)
 }
 
 GEN
+u_FpM_gauss(GEN a, GEN b, ulong p) {
+  return u_FpM_gauss_sp(dummycopy(a), dummycopy(b), p);
+}
+GEN
+u_FpM_inv(GEN a, ulong p) {
+  GEN b = idmat_intern(lg(a)-1,(GEN)1,(GEN)0);
+  return u_FpM_gauss_sp(dummycopy(a), b, p);
+}
+
+GEN
 FpM_gauss(GEN a, GEN b, GEN p)
 {
   gpmem_t av,lim;
@@ -1339,7 +1349,7 @@ FpM_gauss(GEN a, GEN b, GEN p)
     ulong pp=p[2];
     a = u_Fp_FpM(a, pp);
     b = iscol? u_Fp_FpV(b, pp): u_Fp_FpM(b, pp);
-    u = u_FpM_gauss(a,b, pp);
+    u = u_FpM_gauss_sp(a,b, pp);
     u = iscol? small_to_col(u): small_to_mat(u);
     return gerepileupto(av, u);
   }
@@ -1581,10 +1591,10 @@ detint(GEN x)
 }
 
 static void
-gerepile_gauss_ker(GEN x, long m, long n, long k, long t, gpmem_t av)
+gerepile_gauss_ker(GEN x, long k, long t, gpmem_t av)
 {
   gpmem_t tetpil = avma, A;
-  long u,i;
+  long u,i, n = lg(x)-1, m = n? lg(x[1])-1: 0;
   size_t dec;
 
   if (DEBUGMEM > 1) err(warnmem,"gauss_pivot_ker. k=%ld, n=%ld",k,n);
@@ -1607,10 +1617,10 @@ gerepile_gauss_ker(GEN x, long m, long n, long k, long t, gpmem_t av)
 }
 
 static void
-gerepile_gauss_FpM_ker(GEN x, GEN p, long m, long n, long k, long t, gpmem_t av)
+gerepile_gauss_FpM_ker(GEN x, GEN p, long k, long t, gpmem_t av)
 {
   gpmem_t tetpil = avma, A;
-  long u,i;
+  long u,i, n = lg(x)-1, m = n? lg(x[1])-1: 0;
   size_t dec;
 
   if (DEBUGMEM > 1) err(warnmem,"gauss_pivot_ker. k=%ld, n=%ld",k,n);
@@ -1637,10 +1647,10 @@ gerepile_gauss_FpM_ker(GEN x, GEN p, long m, long n, long k, long t, gpmem_t av)
 /* special gerepile for huge matrices */
 
 static void
-gerepile_gauss(GEN x,long m,long n,long k,long t,gpmem_t av, long j, GEN c)
+gerepile_gauss(GEN x,long k,long t,gpmem_t av, long j, GEN c)
 {
   gpmem_t tetpil = avma, A;
-  long u,i;
+  long u,i, n = lg(x)-1, m = n? lg(x[1])-1: 0;
   size_t dec;
 
   if (DEBUGMEM > 1) err(warnmem,"gauss_pivot. k=%ld, n=%ld",k,n);
@@ -1672,166 +1682,15 @@ gerepile_gauss(GEN x,long m,long n,long k,long t,gpmem_t av, long j, GEN c)
 /*          return n - rk(x) linearly independant vectors          */
 /*                                                                 */
 /*******************************************************************/
-
-/* x has INTEGER coefficients */
-GEN
-keri(GEN x)
-{
-  gpmem_t av, av0, tetpil, lim;
-  GEN c,d,y,p,pp;
-  long i,j,k,r,t,n,m;
-
-  if (typ(x)!=t_MAT) err(typeer,"keri");
-  n=lg(x)-1; if (!n) return cgetg(1,t_MAT);
-
-  av0=avma; m=lg(x[1])-1; r=0;
-  pp=cgetg(n+1,t_COL);
-  x=dummycopy(x); p=gun;
-  c=new_chunk(m+1); for (k=1; k<=m; k++) c[k]=0;
-  d=new_chunk(n+1); av=avma; lim=stack_lim(av,1);
-  for (k=1; k<=n; k++)
-  {
-    j=1;
-    while (j<=m && (c[j] || !signe(gcoeff(x,j,k))) ) j++;
-    if (j>m)
-    {
-      r++; d[k]=0;
-      for(j=1; j<k; j++)
-	if (d[j]) coeff(x,d[j],k) = lclone(gcoeff(x,d[j],k));
-      pp[k]=lclone(p);
-    }
-    else
-    {
-      GEN p0 = p;
-      gpmem_t av1;
-
-      c[j]=k; d[k]=j; p = gcoeff(x,j,k);
-
-      for (t=1; t<=m; t++)
-	if (t!=j)
-	{
-	  GEN q=gcoeff(x,t,k), p1,p2;
-	  for (i=k+1; i<=n; i++)
-	  {
-	    av1=avma; (void)new_chunk(lgefint(p0));
-	    p1=mulii(q,gcoeff(x,j,i));
-	    p2=mulii(p,gcoeff(x,t,i));
-	    p1=subii(p2,p1); avma=av1;
-	    coeff(x,t,i) = ldivii(p1,p0);
-	  }
-	  if (low_stack(lim, stack_lim(av,1)))
-          {
-            p1 = gclone(p);
-            gerepile_gauss_ker(x,m,n,k,t,av);
-            p = gcopy(p1); gunclone(p1);
-          }
-	}
-    }
-  }
-  if (!r) { avma=av0; y=cgetg(1,t_MAT); return y; }
-
-  /* non trivial kernel */
-  tetpil=avma; y=cgetg(r+1,t_MAT);
-  for (j=k=1; j<=r; j++,k++)
-  {
-    p = cgetg(n+1, t_COL);
-    y[j]=(long)p; while (d[k]) k++;
-    for (i=1; i<k; i++)
-      if (d[i])
-      {
-	c=gcoeff(x,d[i],k);
-	p[i] = (long) forcecopy(c); gunclone(c);
-      }
-      else
-	p[i] = zero;
-    p[k]=lnegi((GEN)pp[k]); gunclone((GEN)pp[k]);
-    for (i=k+1; i<=n; i++) p[i]=zero;
-  }
-  return gerepile(av0,tetpil,y);
-}
-
-GEN
-deplin(GEN x)
-{
-  gpmem_t av = avma;
-  long i,j,k,t,nc,nl;
-  GEN y,q,c,l,*d;
-
-  t = typ(x);
-  if (t != t_MAT)
-  {
-    if (t != t_VEC) err(typeer,"deplin");
-    x = gtomat(x);
-  }
-  nc = lg(x)-1; if (!nc) err(talker,"empty matrix in deplin");
-  nl = lg(x[1])-1;
-  c = new_chunk(nl+1);
-  l = new_chunk(nc+1);
-  d = (GEN*)cgetg(nl+1,t_VEC);
-  for (i=1; i<=nl; i++) { d[i]=gun; c[i]=0; }
-  for (k=t=1; k<=nc; k++)
-  {
-    for (j=1; j<k; j++)
-     for (i=1; i<=nl; i++)
-      if (i!=l[j])
-       coeff(x,i,k) = lsub(gmul(d[j], gcoeff(x,i,k)),
-                           gmul(gcoeff(x,i,j), gcoeff(x,l[j],k)));
-    t = 1;
-    while ( t<=nl && (c[t] || gcmp0(gcoeff(x,t,k))) ) t++;
-    if (t > nl) break;
-
-    d[k] = gcoeff(x,t,k);
-    c[t] = k; l[k]=t;
-  }
-  if (k > nc) { avma = av; return zerocol(nc); }
-  if (k == 1) { avma = av; return gscalcol_i(gun,nc); }
-  y = cgetg(nc+1,t_COL);
-  y[1] = coeff(x,l[1],k);
-  for (q=d[1],j=2; j<k; j++)
-  {
-    y[j] = lmul(gcoeff(x,l[j],k), q);
-    q = gmul(q, d[j]);
-  }
-  y[j] = lneg(q);
-  for (j++; j<=nc; j++) y[j] = zero;
-  return gerepileupto(av, gdiv(y,content(y)));
-}
-
-/*******************************************************************/
-/*                                                                 */
-/*         GAUSS REDUCTION OF MATRICES  (m lines x n cols)         */
-/*           (kernel, image, complementary image, rank)            */
-/*                                                                 */
-/*******************************************************************/
-static long gauss_ex;
-static int (*gauss_is_zero)(GEN);
-
-static int
-real0(GEN x)
-{
-  return gcmp0(x) || (gexpo(x) < gauss_ex);
-}
-
-static void
-gauss_get_prec(GEN x, long prec)
-{
-  long pr = matprec(x);
-
-  if (!pr) { gauss_is_zero = &gcmp0; return; }
-  if (pr > prec) prec = pr;
-
-  gauss_ex = - (long)(0.85 * bit_accuracy(prec));
-  gauss_is_zero = &real0;
-}
-
 static long
 gauss_get_pivot_NZ(GEN x, GEN x0/*unused*/, GEN c, long i0)
 {
   long i,lx = lg(x);
+  (void)x0;
   if (c)
     for (i=i0; i<lx; i++)
     {
-      if (c[i]) continue;
+      if (c[i]) continue; /* already a pivot in line i */
       if (!gcmp0((GEN)x[i])) break;
     }
   else
@@ -1873,6 +1732,158 @@ gauss_get_pivot_max(GEN x, GEN x0, GEN c, long i0)
   p = (GEN)x[k];
   r = (GEN)x0[k]; if (isexactzero(r)) r = x0;
   return approx_0(p, r)? i: k;
+}
+
+/* x has INTEGER coefficients */
+GEN
+keri(GEN x)
+{
+  gpmem_t av, av0, tetpil, lim;
+  GEN c,l,y,p,pp;
+  long i,j,k,r,t,n,m;
+
+  if (typ(x)!=t_MAT) err(typeer,"keri");
+  n=lg(x)-1; if (!n) return cgetg(1,t_MAT);
+
+  av0=avma; m=lg(x[1])-1; r=0;
+  pp=cgetg(n+1,t_COL);
+  x=dummycopy(x); p=gun;
+  c=cgetg(m+1, t_VECSMALL); for (k=1; k<=m; k++) c[k]=0;
+  l=cgetg(n+1, t_VECSMALL);
+  av = avma; lim = stack_lim(av,1);
+  for (k=1; k<=n; k++)
+  {
+    j = 1;
+    while ( j <= m && (c[j] || !signe(gcoeff(x,j,k))) ) j++;
+    if (j > m)
+    {
+      r++; l[k] = 0;
+      for(j=1; j<k; j++)
+	if (l[j]) coeff(x,l[j],k) = lclone(gcoeff(x,l[j],k));
+      pp[k]=lclone(p);
+    }
+    else
+    {
+      GEN p0 = p;
+      c[j]=k; l[k]=j; p = gcoeff(x,j,k);
+
+      for (t=1; t<=m; t++)
+	if (t!=j)
+	{
+	  GEN q=gcoeff(x,t,k), p1;
+	  for (i=k+1; i<=n; i++)
+	  {
+	    gpmem_t av1 = avma;
+	    p1 = subii(mulii(p,gcoeff(x,t,i)), mulii(q,gcoeff(x,j,i)));
+            p1 = gerepileuptoint(av1, diviiexact(p1,p0));
+	    coeff(x,t,i) = (long)p1;
+	  }
+	  if (low_stack(lim, stack_lim(av,1)))
+          {
+            p1 = gclone(p);
+            gerepile_gauss_ker(x,k,t,av);
+            p = gcopy(p1); gunclone(p1);
+          }
+	}
+    }
+  }
+  if (!r) { avma=av0; y=cgetg(1,t_MAT); return y; }
+
+  /* non trivial kernel */
+  tetpil=avma; y=cgetg(r+1,t_MAT);
+  for (j=k=1; j<=r; j++,k++)
+  {
+    p = cgetg(n+1, t_COL);
+    y[j]=(long)p; while (l[k]) k++;
+    for (i=1; i<k; i++)
+      if (l[i])
+      {
+	c=gcoeff(x,l[i],k);
+	p[i] = (long) forcecopy(c); gunclone(c);
+      }
+      else
+	p[i] = zero;
+    p[k]=lnegi((GEN)pp[k]); gunclone((GEN)pp[k]);
+    for (i=k+1; i<=n; i++) p[i]=zero;
+  }
+  return gerepile(av0,tetpil,y);
+}
+
+GEN
+deplin(GEN x0)
+{
+  gpmem_t av = avma;
+  long i,j,k,t,nc,nl;
+  GEN x,y,piv,q,c,l,*d,*ck,*cj;
+
+  t = typ(x0);
+  if (t == t_MAT) x = dummycopy(x0);
+  else
+  {
+    if (t != t_VEC) err(typeer,"deplin");
+    x = gtomat(x0);
+  }
+  nc = lg(x)-1; if (!nc) err(talker,"empty matrix in deplin");
+  nl = lg(x[1])-1;
+  d = (GEN*)cgetg(nl+1,t_VEC); /* pivot list */
+  c = cgetg(nl+1, t_VECSMALL);
+  l = cgetg(nc+1, t_VECSMALL); /* not initialized */
+  for (i=1; i<=nl; i++) { d[i] = gun; c[i] = 0; }
+  for (k=1; k<=nc; k++)
+  {
+    ck = (GEN*)x[k];
+    for (j=1; j<k; j++)
+    {
+      cj = (GEN*)x[j]; piv = d[j]; q = gneg(ck[l[j]]);
+      for (i=1; i<=nl; i++)
+        if (i != l[j]) ck[i] = gadd(gmul(piv, ck[i]), gmul(q, cj[i]));
+    }
+
+    i = gauss_get_pivot_NZ((GEN)ck, NULL, c, 1);
+    if (i > nl) break;
+
+    d[k] = ck[i];
+    c[i] = k; l[k] = i; /* pivot d[k] in x[i,k] */
+  }
+  if (k > nc) { avma = av; return zerocol(nc); }
+  if (k == 1) { avma = av; return gscalcol_i(gun,nc); }
+  y = cgetg(nc+1,t_COL);
+  y[1] = (long)ck[ l[1] ];
+  for (q=d[1],j=2; j<k; j++)
+  {
+    y[j] = lmul(ck[ l[j] ], q);
+    q = gmul(q, d[j]);
+  }
+  y[j] = lneg(q);
+  for (j++; j<=nc; j++) y[j] = zero;
+  return gerepileupto(av, gdiv(y,content(y)));
+}
+
+/*******************************************************************/
+/*                                                                 */
+/*         GAUSS REDUCTION OF MATRICES  (m lines x n cols)         */
+/*           (kernel, image, complementary image, rank)            */
+/*                                                                 */
+/*******************************************************************/
+static long gauss_ex;
+static int (*gauss_is_zero)(GEN);
+
+static int
+real0(GEN x)
+{
+  return gcmp0(x) || (gexpo(x) < gauss_ex);
+}
+
+static void
+gauss_get_prec(GEN x, long prec)
+{
+  long pr = matprec(x);
+
+  if (!pr) { gauss_is_zero = &gcmp0; return; }
+  if (pr > prec) prec = pr;
+
+  gauss_ex = - (long)(0.85 * bit_accuracy(prec));
+  gauss_is_zero = &real0;
 }
 
 /* return the transform of x under a standard Gauss pivot. r = dim ker(x).
@@ -1924,7 +1935,7 @@ gauss_pivot_ker(GEN x0, GEN a, GEN *dd, long *rr)
 	  for (i=k+1; i<=n; i++)
 	    coeff(x,t,i) = ladd(gcoeff(x,t,i),gmul(p,gcoeff(x,j,i)));
           if (low_stack(lim, stack_lim(av,1)))
-            gerepile_gauss_ker(x,m,n,k,t,av);
+            gerepile_gauss_ker(x,k,t,av);
 	}
     }
   }
@@ -1980,7 +1991,7 @@ gauss_pivot(GEN x0, GEN *dd, long *rr)
           for (i=k+1; i<=n; i++)
             coeff(x,t,i) = ladd(gcoeff(x,t,i), gmul(p,gcoeff(x,j,i)));
           if (low_stack(lim, stack_lim(av,1)))
-            gerepile_gauss(x,m,n,k,t,av,j,c);
+            gerepile_gauss(x,k,t,av,j,c);
         }
       for (i=k; i<=n; i++) coeff(x,j,i) = zero; /* dummy */
     }
@@ -2321,20 +2332,19 @@ FpM_FpV_mul(GEN x, GEN y, GEN p)
   return z;
 }
 
-/* assume x has integer entries */
+/* in place, destroy x */
 static GEN
-u_FpM_ker(GEN x, GEN pp, long nontriv)
+u_FpM_ker_sp(GEN x, ulong p, long deplin)
 {
-  gpmem_t av0 = avma, tetpil;
   GEN y,c,d;
   long i,j,k,r,t,n;
-  ulong a, piv, m, p = pp[2];
+  ulong a, piv, m;
 
   n = lg(x)-1;
   m=lg(x[1])-1; r=0;
-  x = u_Fp_FpM(x, p);
-  c=new_chunk(m+1); for (k=1; k<=m; k++) c[k]=0;
-  d=new_chunk(n+1);
+
+  c = new_chunk(m+1); for (k=1; k<=m; k++) c[k] = 0;
+  d = new_chunk(n+1);
   a = 0; /* for gcc -Wall */
   for (k=1; k<=n; k++)
   {
@@ -2344,15 +2354,20 @@ u_FpM_ker(GEN x, GEN pp, long nontriv)
         a = coeff(x,j,k) % p;
         if (a) break;
       }
-    if (j>m)
+    if (j > m)
     {
-      if (nontriv) { avma=av0; return NULL; }
-      r++; d[k]=0;
+      if (deplin) {
+        c = cgetg(n+1, t_VECSMALL);
+        for (i=1; i<k; i++) c[i] = coeff(x,d[i],k) % p;
+        c[k] = 1; for (i=k+1; i<=n; i++) c[i] = 0;
+        return c;
+      }
+      r++; d[k] = 0;
     }
     else
     {
-      c[j]=k; d[k]=j;
-      piv = p - u_invmod(a, p);
+      c[j] = k; d[k] = j;
+      piv = p - u_invmod(a, p); /* -1/a */
       coeff(x,j,k) = p-1;
       for (i=k+1; i<=n; i++)
 	coeff(x,j,i) = (piv * coeff(x,j,i)) % p;
@@ -2368,38 +2383,45 @@ u_FpM_ker(GEN x, GEN pp, long nontriv)
 	}
     }
   }
+  if (deplin) return NULL;
 
-  tetpil=avma; y=cgetg(r+1,t_MAT);
+  y = cgetg(r+1, t_MAT);
   for (j=k=1; j<=r; j++,k++)
   {
-    GEN c = cgetg(n+1,t_COL);
+    GEN c = cgetg(n+1, t_VECSMALL);
 
-    y[j]=(long)c; while (d[k]) k++;
+    y[j] = (long)c; while (d[k]) k++;
     for (i=1; i<k; i++)
       if (d[i])
-      {
-        a = coeff(x,d[i],k) % p;
-	c[i] = (long)utoi(a);
-      }
+        c[i] = coeff(x,d[i],k) % p;
       else
-	c[i] = zero;
-    c[k]=un; for (i=k+1; i<=n; i++) c[i]=zero;
+	c[i] = 0;
+    c[k] = 1; for (i=k+1; i<=n; i++) c[i] = 0;
   }
-  return gerepile(av0,tetpil,y);
+  return y;
 }
 
+/* assume x has integer entries */
 static GEN
-FpM_ker_i(GEN x, GEN p, long nontriv)
+FpM_ker_i(GEN x, GEN p, long deplin)
 {
-  gpmem_t av0,av,lim,tetpil;
+  gpmem_t av0 = avma, av,lim,tetpil;
   GEN y,c,d,piv,mun;
   long i,j,k,r,t,n,m;
 
   if (typ(x)!=t_MAT) err(typeer,"FpM_ker");
   n=lg(x)-1; if (!n) return cgetg(1,t_MAT);
-  if (OK_ULONG(p)) return u_FpM_ker(x, p, nontriv);
+  if (OK_ULONG(p))
+  {
+    ulong pp = p[2];
+    y = u_Fp_FpM(x, pp);
+    y = u_FpM_ker_sp(y, pp, deplin);
+    if (!y) return y;
+    y = deplin? small_to_col(y): small_to_mat(y);
+    return gerepileupto(av0, y);
+  }
 
-  m=lg(x[1])-1; r=0; av0 = avma;
+  m=lg(x[1])-1; r=0;
   x=dummycopy(x); mun=negi(gun);
   c=new_chunk(m+1); for (k=1; k<=m; k++) c[k]=0;
   d=new_chunk(n+1);
@@ -2414,7 +2436,12 @@ FpM_ker_i(GEN x, GEN p, long nontriv)
       }
     if (j>m)
     {
-      if (nontriv) { avma = av0; return NULL; }
+      if (deplin) {
+        c = cgetg(n+1, t_COL);
+        for (i=1; i<k; i++) c[i] = lmodii(gcoeff(x,d[i],k), p);
+        c[k] = un; for (i=k+1; i<=n; i++) c[i] = zero;
+        return gerepileupto(av0, c);
+      }
       r++; d[k]=0;
       for(j=1; j<k; j++)
         if (d[j]) coeff(x,d[j],k) = lclone(gcoeff(x,d[j],k));
@@ -2435,11 +2462,12 @@ FpM_ker_i(GEN x, GEN p, long nontriv)
             for (i=k+1; i<=n; i++)
               coeff(x,t,i) = laddii(gcoeff(x,t,i),mulii(piv,gcoeff(x,j,i)));
             if (low_stack(lim, stack_lim(av,1)))
-              gerepile_gauss_FpM_ker(x,p,m,n,k,t,av);
+              gerepile_gauss_FpM_ker(x,p,k,t,av);
           }
 	}
     }
   }
+  if (deplin) { avma = av0; return NULL; }
 
   tetpil=avma; y=cgetg(r+1,t_MAT);
   for (j=k=1; j<=r; j++,k++)
@@ -2459,6 +2487,16 @@ FpM_ker_i(GEN x, GEN p, long nontriv)
   }
   return gerepile(av0,tetpil,y);
 }
+
+GEN
+FpM_ker(GEN x, GEN p) { return FpM_ker_i(x, p, 0); }
+GEN
+FpM_deplin(GEN x, GEN p) { return FpM_ker_i(x, p, 1); }
+/* not memory clean */
+GEN
+u_FpM_ker(GEN x, ulong p) { return u_FpM_ker_sp(dummycopy(x), p, 0); }
+GEN
+u_FpM_deplin(GEN x, ulong p) { return u_FpM_ker_sp(dummycopy(x), p, 1); }
 
 static void
 FpM_gauss_pivot(GEN x, GEN p, GEN *dd, long *rr)
@@ -2499,25 +2537,13 @@ FpM_gauss_pivot(GEN x, GEN p, GEN *dd, long *rr)
             for (i=k+1; i<=n; i++)
               coeff(x,t,i) = laddii(gcoeff(x,t,i), mulii(piv,gcoeff(x,j,i)));
             if (low_stack(lim, stack_lim(av,1)))
-              gerepile_gauss(x,m,n,k,t,av,j,c);
+              gerepile_gauss(x,k,t,av,j,c);
           }
         }
       for (i=k; i<=n; i++) coeff(x,j,i) = zero; /* dummy */
     }
   }
   *dd=d; *rr=r;
-}
-
-GEN
-FpM_ker(GEN x, GEN p)
-{
-  return FpM_ker_i(x, p, 0);
-}
-
-int
-ker_trivial_mod_p(GEN x, GEN p)
-{
-  return FpM_ker_i(x, p, 1)==NULL;
 }
 
 GEN
@@ -2663,11 +2689,10 @@ Fq_res(GEN x, GEN T, GEN p)
 }
 
 static void
-Fq_gerepile_gauss_ker(GEN x, GEN T, GEN p, long m, long n, long k, long t,
-                      gpmem_t av)
+Fq_gerepile_gauss_ker(GEN x, GEN T, GEN p, long k, long t, gpmem_t av)
 {
   gpmem_t tetpil = avma,A;
-  long u,i;
+  long u,i, n = lg(x)-1, m = n? lg(x[1])-1: 0;
   size_t dec;
 
   if (DEBUGMEM > 1) err(warnmem,"gauss_pivot_ker. k=%ld, n=%ld",k,n);
@@ -2692,7 +2717,7 @@ Fq_gerepile_gauss_ker(GEN x, GEN T, GEN p, long m, long n, long k, long t,
 }
 
 static GEN
-FqM_ker_i(GEN x, GEN T, GEN p, long nontriv)
+FqM_ker_i(GEN x, GEN T, GEN p, long deplin)
 {
   gpmem_t av0,av,lim,tetpil;
   GEN y,c,d,piv,mun;
@@ -2716,7 +2741,12 @@ FqM_ker_i(GEN x, GEN T, GEN p, long nontriv)
       }
     if (j>m)
     {
-      if (nontriv) { avma = av0; return NULL; }
+      if (deplin) {
+        c = cgetg(n+1, t_COL);
+        for (i=1; i<k; i++) c[i] = (long)Fq_res(gcoeff(x,d[i],k), T, p);
+        c[k] = un; for (i=k+1; i<=n; i++) c[i] = zero;
+        return gerepileupto(av0, c); 
+      }
       r++; d[k]=0;
       for(j=1; j<k; j++)
         if (d[j]) coeff(x,d[j],k) = lclone(gcoeff(x,d[j],k));
@@ -2737,11 +2767,12 @@ FqM_ker_i(GEN x, GEN T, GEN p, long nontriv)
             for (i=k+1; i<=n; i++)
               coeff(x,t,i) = (long)Fq_add(gcoeff(x,t,i),Fq_mul(piv,gcoeff(x,j,i), T, p), T, p);
             if (low_stack(lim, stack_lim(av,1)))
-              Fq_gerepile_gauss_ker(x,T,p,m,n,k,t,av);
+              Fq_gerepile_gauss_ker(x,T,p,k,t,av);
           }
 	}
     }
   }
+  if (deplin) { avma = av0; return NULL; }
 
   tetpil=avma; y=cgetg(r+1,t_MAT);
   for (j=k=1; j<=r; j++,k++)

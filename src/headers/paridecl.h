@@ -23,6 +23,7 @@ BEGINEXTERN
 GEN     _col(GEN x);
 GEN     _vec(GEN x);
 GEN     FpM_FpV_mul(GEN x, GEN y, GEN p);
+GEN     FpM_deplin(GEN x, GEN p);
 GEN     FpM_image(GEN x, GEN p);
 GEN     FpM_invimage(GEN m, GEN v, GEN p);
 GEN     FpM_inv(GEN x, GEN p);
