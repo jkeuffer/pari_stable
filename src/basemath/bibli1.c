@@ -1853,8 +1853,8 @@ redall(pslq_M *M, long i, long jsup)
 
   for (j=jsup; j>=1; j--)
   {
-/* FIXME: use grndtoi */
-    t = ground(gdiv(gcoeff(H,i,j), gcoeff(H,j,j)));
+    long junk;
+    t = grndtoi(gdiv(gcoeff(H,i,j), gcoeff(H,j,j)), &junk);
     if (gcmp0(t)) continue;
 
     b = (GEN)B[j];
@@ -1964,7 +1964,7 @@ init_pslq(pslq_M *M, GEN x, long *PREC)
   long lx = lg(x), n = lx-1, i, j, k, prec;
   GEN s1, s, sinv;
 
-  prec = gprecision(x); if (!prec) prec = DEFAULTPREC;
+  prec = gprecision(x)-1; if (prec < DEFAULTPREC) prec = DEFAULTPREC;
   *PREC = prec;
   M->EXP = - bit_accuracy(prec) + 2*n;
   M->flreal = (gexpo(gimag(x)) < M->EXP);
