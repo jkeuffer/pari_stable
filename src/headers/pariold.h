@@ -18,6 +18,7 @@
 #define pvaluation Z_pvalrem
 #define svaluation u_lvalrem
 
+#define ggrandocp ggrando
 #define glogagm glog
 #define logagm  mplog
 #define mpsqrtz  gopgz(absr,(x),(y))

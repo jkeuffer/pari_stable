@@ -724,7 +724,7 @@ long    getstack(void);
 long    gettime(void);
 GEN     gprec(GEN x, long l);
 GEN     gprec_w(GEN x, long pr);
-GEN     grando0(GEN x, long n, long do_clone);
+GEN     ggrando(GEN x, long n);
 GEN     gtoset(GEN x);
 GEN     indexlexsort(GEN x);
 GEN     indexsort(GEN x);

@@ -200,6 +200,8 @@ JD 74- [Configure:] detection of times()
 BA 98- Reduce stack consumption in ffinit and polsubcyclo.
    99- (p/q)' wasn't simplified if q wasn't squarefree
   100- polylog(n, x < 0) had a (small) non-zero imaginary part
+  101- 3 + O((-1)) --> oo loop
+  102- creating t_PADIC/t_SERs via x + O(...) eventually blew up the heap
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.

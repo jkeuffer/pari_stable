@@ -13,17 +13,11 @@ Check the License for details. You should have received a copy of it, along
 with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
-/********************************************************************/
-/**                                                                **/
-/**                  BIBLIOTHEQUE  MATHEMATIQUE                    **/
-/**                     (deuxieme partie)                          **/
-/**                                                                **/
-/********************************************************************/
 #include "pari.h"
 #include "paripriv.h"
 /********************************************************************/
 /**                                                                **/
-/**                 DEVELOPPEMENTS  LIMITES                        **/
+/**                         TAYLOR SERIES                          **/
 /**                                                                **/
 /********************************************************************/
 
@@ -31,43 +25,39 @@ GEN
 tayl(GEN x, long v, long precS)
 {
   long i, vx = gvar9(x);
-  pari_sp tetpil, av=avma;
-  GEN p1,y;
+  pari_sp av = avma;
+  GEN y, t;
 
-  if (v <= vx)
-  {
-    long p1[] = { evaltyp(t_SER)|_evallg(2), 0 };
-    p1[1] = evalvalp(precS) | evalvarn(v);
-    return gadd(p1,x);
-  }
-  p1=cgetg(v+2,t_VEC);
-  for (i=0; i<v; i++) p1[i+1]=lpolx[i];
-  p1[vx+1]=lpolx[v]; p1[v+1]=lpolx[vx];
-  y = tayl(changevar(x,p1), vx,precS); tetpil=avma;
-  return gerepile(av,tetpil, changevar(y,p1));
+  if (v <= vx) return gadd(zeroser(v,precS),x);
+  y = cgetg(v+2,t_VEC);
+  for (i=0; i<v; i++) y[i+1] = lpolx[i];
+  y[vx+1] = lpolx[v]; y[v+1] = lpolx[vx];
+  t = tayl(changevar(x,y), vx,precS);
+  return gerepileupto(av, changevar(t,y));
 }
 
 GEN
-grando0(GEN x, long n, long do_clone)
+ggrando(GEN x, long n)
 {
-  long m, v, tx=typ(x);
+  long m, v;
 
-  if (gcmp0(x)) err(talker,"zero argument in O()");
-  if (tx == t_INT)
+  switch(typ(x))
   {
-    if (!gcmp1(x)) /* bug 3 + O(1). We suppose x is a truc() */
-    {
-      if (do_clone) x = gclone(x);
-      return zeropadic(x,n);
-    }
-    v=0; m=0; /* 1 = x^0 */
-  }
-  else
-  {
-    if (tx != t_POL && tx != t_RFRAC)
-      err(talker,"incorrect argument in O()");
+  case t_INT:/* bug 3 + O(1). We suppose x is a truc() */
+    if (!signe(x)) err(talker,"zero argument in O()");
+    if (!is_pm1(x)) return zeropadic(x,n);
+    /* +/-1 = x^0 */
+    v = m = 0; break;
+  case t_POL:
+    if (!signe(x)) err(talker,"zero argument in O()");
+    v = varn(x); if ((ulong)v > MAXVARN) err(talker,"incorrect object in O()");
+    m = n * polvaluation(x, NULL); break;
+  case t_RFRAC:
+    if (!gcmp0((GEN)x[1])) err(talker,"zero argument in O()");
     v = gvar(x); if ((ulong)v > MAXVARN) err(talker,"incorrect object in O()");
-    m = n*gval(x,v);
+    m = n * gval(x,v); break;
+    default: err(talker,"incorrect argument in O()");
+      v = m = 0; /* not reached */
   }
   return zeroser(v,m);
 }

@@ -158,9 +158,6 @@ enum manage_var_t {
 
 #define gval(x,v) (ggval((x),polx[v]))
 
-#define ggrando(x,n) (grando0((x),(n),1))
-#define ggrandocp(x,n) (grando0((x),(n),0))
-
 #define addis(x,s)  (addsi((s),(x)))
 #define addrs(x,s)  (addsr((s),(x)))
 #define addri(x,s)  (addir((s),(x)))
