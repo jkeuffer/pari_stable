@@ -2996,21 +2996,18 @@ torselldoud(GEN e)
   w1 = (GEN)e[15];
   if (b % 4)
   {
+    p = NULL;
     for (i=10; i>1; i--)
     {
-      if (b%i==0)
+      if (b%i != 0) continue;
+      w1j = gdivgs(w1,i);
+      p = torspnt(e,pointell(e,w1j,prec),i);
+      if (!p && i%2==0)
       {
-	w1j = gdivgs(w1,i);
-	p = torspnt(e,pointell(e,w1j,prec),i);
-	if (i%2==0 && p==NULL)
-	{
-	  p = torspnt(e,pointell(e,gadd(w22,w1j),prec),i);
-	  if (p==NULL)
-	    p = torspnt(e,pointell(e,gadd(w22,gmul2n(w1j,1)),prec),i);
-	}
+        p = torspnt(e,pointell(e,gadd(w22,w1j),prec),i);
+        if (!p) p = torspnt(e,pointell(e,gadd(w22,gmul2n(w1j,1)),prec),i);
       }
-      else p = NULL;
-      if (p) {k = i; break; }
+      if (p) { k = i; break; }
     }
     return gerepileupto(av, tors(e,k,p,NULL, v));
   }
@@ -3032,23 +3029,22 @@ torselldoud(GEN e)
     case 0:
       for (i=9; i>1; i-=2)
       {
+        if (b%i!=0) continue;
         w1j=gdivgs((GEN)e[15],i);
-        p = (b%i==0)? torspnt(e,pointell(e,w1j,prec),i): NULL;
+        p = torspnt(e,pointell(e,w1j,prec),i);
         if (p) { k = i; break; }
       }
       break;
 
     case 1:
+      p = NULL;
       for (i=12; i>2; i-=2)
       {
+        if (b%i!=0) continue;
         w1j=gdivgs((GEN)e[15],i);
-        if (b%i==0)
-        {
-          p = torspnt(e,pointell(e,w1j,prec),i);
-          if (i%4==0 && p==NULL)
-            p = torspnt(e,pointell(e,gadd(w22,w1j),prec),i);
-        }
-        else p = NULL;
+        p = torspnt(e,pointell(e,w1j,prec),i);
+        if (!p && i%4==0)
+          p = torspnt(e,pointell(e,gadd(w22,w1j),prec),i);
         if (p) { k = i; break; }
       }
       if (!p) { p = tor1; k = 2; }
@@ -3057,9 +3053,10 @@ torselldoud(GEN e)
     case 2:
       for (i=5; i>1; i-=2)
       {
+        if (b%i!=0) continue;
         w1j = gdivgs((GEN)e[15],i);
-        p = (b%i==0)? torspnt(e,pointell(e,gadd(w22,w1j),prec),i+i): NULL;
-        if (p) { k = i+i; break; }
+        p = torspnt(e,pointell(e,gadd(w22,w1j),prec),i+i);
+        if (p) { k = 2*i; break; }
       }
       if (!p) { p = tor2; k = 2; }
       tor2 = NULL; break;
@@ -3067,8 +3064,9 @@ torselldoud(GEN e)
     case 3:
       for (i=8; i>2; i-=2)
       {
+        if (b%(2*i)!=0) continue;
         w1j=gdivgs((GEN)e[15],i);
-        p = (b%(2*i)==0)? torspnt(e,pointell(e,w1j,prec),i): NULL;
+        p = torspnt(e,pointell(e,w1j,prec),i);
         if (p) { k = i; break; }
       }
       if (!p) { p = tor1; k = 2; }
