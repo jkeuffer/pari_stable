@@ -1685,7 +1685,7 @@ get_log_embed(REL_t *rel, GEN M, long RU, long R1, long prec)
         t = gmael(rel->pow->arc, i, ex[i]);
         x = x? vecmul(x, t): t; /* arch components in MULTIPLICATIVE form */
       }
-    arch = vecmul(x, arch);
+    if (x) arch = vecmul(x, arch);
   }
   C = cgetg(RU+1, t_COL); arch = glog(arch, prec);
   for (i=1; i<=R1; i++) C[i] = arch[i];
@@ -2064,8 +2064,7 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, long MAXRELSUP, GEN nf, GEN vecG,
         ex[i] = random_bits(RANDOM_BITS) % F->pow->ord[i];
         if (ex[i]) ideal = idealmulh(nf,ideal, gmael(F->pow->id2,i,ex[i]));
       }
-    }
-    while (ideal == P); /* If ex  = 0, try another */
+    } while (ideal == P); /* If ex  = 0, try another */
     ideal = remove_content(ideal);
     if (gcmp1(gcoeff(ideal,1,1))) continue;
     IDEAL = lllint_fp_ip(ideal, 4);
@@ -3156,16 +3155,15 @@ PRECPB:
   z = mulrr(Res, resc); /* ~ hR if enough relations, a multiple otherwise */
   switch (compute_R(lambda, divir(h,z), &L, &R))
   {
-    case fupb_PRECI: /* precision problem unless we cheat on Bach constant */
+    case fupb_RELAT: goto MORE; /* not enough relations */
+    case fupb_PRECI: /* prec problem unless we cheat on Bach constant */
       if ((precdouble&7) < 7 || cbach>2) { precpb = "compute_R"; goto PRECPB; }
       goto START;
-    case fupb_RELAT: /* not enough relations */
-      goto MORE;
   }
   /* DONE */
 
   if (!be_honest(&F, nf)) goto START;
-  F.KCZ2 = 0; /* be honest only once ! */
+  F.KCZ2 = 0; /* be honest only once */
 
   /* fundamental units */
   if (flun & (nf_UNITS|nf_INIT))
@@ -3214,8 +3212,7 @@ buchall(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long prec)
   P = get_nfpol(P, &nf);
   if (!nf)
   {
-    nf = initalg(P, PRECREG);
-    /* P was non-monic and nfinit changed it ? */
+    nf = initalg(P, PRECREG); /* P non-monic and nfinit CHANGEd it ? */
     if (lg(nf)==3) { CHANGE = (GEN)nf[2]; nf = (GEN)nf[1]; }
   }
   z = buch(&nf, cbach, cbach2, nbrelpid, flun, PRECREG);
