@@ -1276,23 +1276,31 @@ identifier(void)
   if (ep->code)
   {
     char *s = ep->code, *oldanalyseur = NULL, *buf, *limit, *bp;
-    unsigned int ret = RET_GEN, alright=0, has_pointer=0;
+    unsigned int ret, alright, has_pointer=0;
     long fake;
     void *call = ep->value;
     GEN argvec[9];
     entree *pointers[9];
 
-    if (*analyseur == '(') analyseur++;
+    if (*analyseur == '(')
+    {
+      analyseur++;
+      alright=0; /* expect matching ')' */
+    }
     else
     { /* if no mandatory argument, no () needed */
       if (EpVALENCE(ep)) match('('); /* error */
 
       if (!*s || (!s[1] && *s == 'p'))
-	return ((GEN (*)(long))ep->value)(prec);
-      alright=1; /* no arg was given, but valence is ok */
+	return ((GEN (*)(long))call)(prec);
+      alright=1; /* no argument, but valence is ok */
     }
-    i = 0;
+    /* return type */
+    if      (*s == 'v') { ret = RET_VOID; s++; }
+    else if (*s == 'l') { ret = RET_INT;  s++; }
+    else                  ret = RET_GEN;
     /* Optimized for G and p. */
+    i = 0;
     while (*s == 'G')
     {
       match_comma(); s++;
@@ -1423,12 +1431,6 @@ identifier(void)
 
 	 case 'x': /* Foreign function */
 	   argvec[i++] = (GEN) ep; call = foreignHandler; break;
-
-	 case 'l': /* Return long */
-	   ret = RET_INT; break;
-
-	 case 'v': /* Return void */
-	   ret = RET_VOID; break;
 
 	 case ',': /* Clean up default */
 	   if (oldanalyseur)
