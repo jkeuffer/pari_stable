@@ -469,7 +469,7 @@ compute_fg(ulong q, int half, GEN *tabf, GEN *tabg)
 
 /* p odd prime */
 static GEN
-get_jac(Cache *C, ulong q, ulong p, int pk, GEN tabf, GEN tabg)
+get_jac(Cache *C, ulong q, int pk, GEN tabf, GEN tabg)
 {
   ulong x, qm3s2;
   GEN vpk = vecsmall_const(pk, 0);
@@ -549,7 +549,7 @@ calcjac(Cache **pC, GEN globfa, GEN *ptabfaq, GEN *ptabj)
       int pk;
       p = itos((GEN)P[j]); P[j] = p;
       e = itos((GEN)E[j]); E[j] = e; pk = u_pow(p,e);
-      J[j] = (long)get_jac(pC[pk], q, p, pk, tabf, tabg);
+      J[j] = (long)get_jac(pC[pk], q, pk, tabf, tabg);
     }
     tabj[i] = (long)gerepilecopy(av, J);
   }
@@ -823,7 +823,7 @@ step4a(Cache *C, Red *R, ulong q, int p, int k, GEN jpq)
   {
     GEN tabf, tabg;
     compute_fg(q,1, &tabf,&tabg);
-    jpq = get_jac(C, q, p, pk, tabf, tabg);
+    jpq = get_jac(C, q, pk, tabf, tabg);
   }
   s1 = autvec_TH(pk, jpq, C->E, C->cyc);
   s2 = powpolmod(C,R, p,k, s1);
@@ -971,8 +971,8 @@ GEN
 aprcl(GEN N)
 {
   GEN et, fat, flaglp, tabfaq, tabj, res, globfa;
-  long ltab, lfat, lfaq, fl, ctglob = 0;
-  ulong p, q, k, t, i, j, l;
+  long i, j, l, ltab, lfat, lfaq, fl, ctglob = 0;
+  ulong p, q, t;
   pari_sp av, av2;
   Red R;
   Cache **pC;
@@ -1022,7 +1022,7 @@ aprcl(GEN N)
     for (j=1; j<lfaq; j++, avma = av2)
     {
       Cache *C;
-      int pk;
+      int pk, k;
       p = P[j];
       k = E[j]; pk = u_pow(p, k); C = pC[pk];
       R.C = C->cyc;
