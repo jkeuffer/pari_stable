@@ -1,0 +1,5 @@
+Function: _stack_lim
+Class: gp2c_internal
+Description: 
+ (ulong, small):ulong		 stack_lim($1, $2)
+
