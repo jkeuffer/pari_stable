@@ -953,6 +953,35 @@ respm(GEN x, GEN y, GEN pm)
   return gerepileuptoint(av, icopy(z));
 }
 
+static void
+update_den(GEN *e, GEN *de, GEN *pp)
+{
+  GEN ce = Q_content(*e);
+  if (ce != gun) {
+    ce = gcdii(*de, ce);
+    *de = diviiexact(*de, ce);
+    *e  = gdivexact(*e, ce);
+    if (pp) *pp =diviiexact(*pp, ce);
+  }
+}
+
+/* f o g mod (T,p) */
+static GEN
+compmod(GEN f, GEN g, GEN T, GEN p)
+{
+  GEN D = NULL, z, df, dg, q;
+  f = Q_remove_denom(f, &df);
+  g = Q_remove_denom(g, &dg);
+  if (df) D = df;
+  if (dg) D = mul_content(D, gpowgs(dg, degpol(f)));
+  q = D ? mulii(p, D): p;
+  if (dg) f = FpX_rescale(f, dg, q);
+  z = FpX_FpXQ_compo(f, g, T, q);
+  if (!D) return z;
+  update_den(&z, &D, NULL);
+  return gdiv( FpX_center(z, mulii(D,p)), D );
+}
+
 static GEN
 dbasis(GEN p, GEN f, long mf, GEN alpha, GEN U)
 {
@@ -972,10 +1001,7 @@ dbasis(GEN p, GEN f, long mf, GEN alpha, GEN U)
   for (i=1; i<n; i++)
   {
     if (i == dU)
-    {
-      ha = gdiv(gmul(pd,RX_RXQ_compo(U,alpha,f)),p);
-      ha = polmodi(ha,pdp);
-    }
+      ha = gmul(diviiexact(pd, p), compmod(U, alpha, f, pdp));
     else
     {
       GEN d, mod;
@@ -1031,24 +1057,14 @@ QpX_mod(GEN e, GEN f, GEN pk)
 }
 #endif
 
-static void
-update_den(GEN *e, GEN *de, GEN *pp)
-{
-  GEN ce = Q_content(*e);
-  if (ce != gun) {
-    ce = gcdii(*de, ce);
-    *de = diviiexact(*de, ce);
-    *e  = gdivexact(*e, ce);
-    if (pp) *pp =diviiexact(*pp, ce);
-  }
-}
-
 typedef struct __decomp {
 /* constants */
   GEN p, f; /* goal: factor f p-adically */
   long df; /* p^df = reduced discriminant of f */
 /* these are updated along the way */
   GEN phi; /* a p-integer, in Q[X] */
+  GEN phi0; /* a p-integer, in Q[X] from testb2 / testc2, to be composed with
+             * phi when correct precision is known */
   GEN chi; /* characteristic polynomial of phi (mod p^*), in Z[X] */
   GEN nu; /* irreducible divisor of chi mod p, in Z[X] */
 } decomp_t;
@@ -1130,10 +1146,10 @@ Decomp(decomp_t *S, long flag)
     fred = centermod(S->f, D);
     res = cgetg(n+1, t_VEC);
     for (i=1; i<=n1; i++)
-      res[i] = (long)centermod(FpX_rem(gmul((GEN)ib1[i],e), fred, D), D);
+      res[i] = (long)FpX_center(FpX_rem(gmul((GEN)ib1[i],e), fred, D), D);
     e = gsub(de, e); ib2 -= n1;
     for (   ; i<=n; i++)
-      res[i] = (long)centermod(FpX_rem(gmul((GEN)ib2[i],e), fred, D), D);
+      res[i] = (long)FpX_center(FpX_rem(gmul((GEN)ib2[i],e), fred, D), D);
     res = vecpol_to_mat(res, n);
     return gdiv(hnfmodid(res,D), D); /* normalized integral basis */
   }
@@ -1452,6 +1468,15 @@ fastnu(GEN p, GEN f, GEN beta, GEN pdr)
   return gerepilecopy(av, nu);
 }
 
+#if 0
+/* r >= 0, s >= 0, return p^-r (nu/Dnu)^s mod(T, N) */
+static GEN
+pr_nus(GEN p, GEN nu, GEN Dnu, long r, long s, GEN T, GEN N)
+{
+
+}
+#endif
+
 /* return the prime element in Zp[phi], nup, chip in Z[X]
  * if *Ep < oE or Ep divides Ediv (!=0) return NULL (not interesting)
  * */
@@ -1459,7 +1484,7 @@ static GEN
 getprime(decomp_t *S, GEN phi, GEN chip, GEN nup, long *Lp, long *Ep, 
          long oE, long Ediv)
 {
-  GEN chin, pip, pp, d;
+  GEN chin, q;
   long r, s;
 
   if (degpol(nup) == 1)
@@ -1485,64 +1510,58 @@ getprime(decomp_t *S, GEN phi, GEN chip, GEN nup, long *Lp, long *Ep,
    * pi = nu^r / p^s is an element of valuation 1/E,
    * so is pi + O(p) since 1/E < 1. May compute nu^r mod p^(s+1) */
 
-  pip = RX_RXQ_compo(nup, phi, S->chi);
-  pip = lift_intern(gpowgs(gmodulcp(pip, S->chi), r));
-
-  pip = Q_remove_denom(pip, &d);
-  pp  = gpowgs(S->p, s);
-  if (d) pp = mulii(d, pp);
-  return gdiv(centermod(pip, mulii(pp,S->p)), pp);
+  q = gpowgs(S->p, s+1);
+  nup = FpXQ_pow(nup, stoi(r), S->chi, q);
+  return gdiv(compmod(nup, phi, S->chi, q), gpowgs(S->p, s));
 }
 
 static void
 kill_cache(GEN ns) { setsigne(ns[1], 0); }
 
+/* S->phi := T o T0 mod (p, f) */
+static void
+composemod(decomp_t *S, GEN T, GEN T0) { S->phi = compmod(T, T0, S->f, S->p); }
+
 static int 
-update_phi(decomp_t *S, GEN *ptpdr, GEN *ptpmr, GEN ns)
+update_phi(decomp_t *S, GEN *ptpdr, GEN *ptpmr, GEN ns, long *ptl, long flag)
 {
-  GEN pdr, pmr = *ptpmr, X = polx[ varn(S->f) ];
+  GEN PHI = NULL, pdr, pmr = *ptpmr, X = polx[ varn(S->f) ];
+  long k;
 
   if (!S->chi) 
   {
-    long l;
     kill_cache(ns);
     S->chi = mycaract(S->f, S->phi, S->p, pmr, S->df, ns);
-    S->nu = get_nu(S->chi, S->p, &l);
-    if (l > 1) return 0; /* check whether we can get a decomposition */
+    S->nu = get_nu(S->chi, S->p, ptl);
+    if (*ptl > 1) return 0; /* we can get a decomposition */
   }
     
-  for (;;)
+  for (k = 1;; k++)
   {
     kill_cache(ns);
     pdr = respm(S->chi, derivpol(S->chi), pmr);
     if (signe(pdr)) break;
     
     pmr = sqri(pmr); /* try a larger precision */
-    S->phi = gadd(S->phi, gmul(S->p, X));
-    S->chi = mycaract(S->f, S->phi, S->p, pmr, S->df, ns);
+
+    PHI = S->phi0? compmod(S->phi, S->phi0, S->f, pmr): S->phi;
+    PHI = gadd(PHI, gmul(mulsi(k, S->p), X));
+    S->chi = mycaract(S->f, PHI, S->p, pmr, S->df, ns);
   }
+  pmr = mulii(sqri(pdr), S->p);
+  S->chi = polmodi(S->chi, pmr);
+  if (!PHI) /* ok above for k = 0 */
+    PHI = S->phi0? compmod(S->phi, S->phi0, S->f, pmr): S->phi;
+  S->phi = PHI;
 
   if (is_pm1(pdr))
-    pmr = gun;
-  else
-  {
-    pmr = mulii(sqri(pdr), S->p);
-    S->chi = polmodi(S->chi, pmr);
-    S->phi = redelt(S->phi, pmr, S->p);
+  { /* may happen if p is unramified */
+    if (!flag) { *ptl = 1; return 0; }
+    S->nu = get_nu(S->chi, S->p, ptl);
+    return 0;
   }
   *ptpmr = pmr;
   *ptpdr = mulii(pdr, S->p); return 1;
-}
-
-/* S->phi := T o T0 mod (p, f) */
-static void
-composemod(decomp_t *S, GEN T, GEN T0) {
-  S->phi = redelt(RX_RXQ_compo(T, T0, S->f), S->p, S->p);
-}
-/* S->phi := T o T0 mod f */
-static void
-compose(decomp_t *S, GEN T, GEN T0) {
-  S->phi = RX_RXQ_compo(T, T0, S->f);
 }
 
 /* return 1 if at least 2 factors mod p ==> chi can be split
@@ -1563,8 +1582,7 @@ testb2(decomp_t *S, long D, GEN theta, GEN pmf, GEN ns)
     if (factcp(S, pmf, ns) > 1) { composemod(S, S->phi, T0); return 1; }
     if (degpol(S->nu) == D) break;
   }
-  /* F_phi = lcm(F_alpha, F_theta) = D and E_phi = E_alpha */
-  compose(S, S->phi, T0); return 0;
+  S->phi0 = T0; return 0; /* F_phi=lcm(F_alpha, F_theta)=D and E_phi=E_alpha */
 }
 
 /* return 1 if at least 2 factors mod p ==> chi can be split. 
@@ -1585,7 +1603,7 @@ testc2(decomp_t *S, GEN pmr, GEN pmf, GEN A, long Ea, GEN T, long Et, GEN ns)
   c3 = gdiv(gmod(gmul(c1, c2), S->chi), gpowgs(S->p, t));
   S->phi = gadd( polx[ varn(S->chi) ], redelt(c3, pmr, S->p) );
   if (factcp(S, pmf, ns) > 1) { composemod(S, S->phi, T0); return 1; }
-  compose(S, S->phi, T0); return 0; /* E_phi = lcm(E_alpha, E_theta) */
+  S->phi0 = T0; return 0; /* E_phi = lcm(E_alpha,E_theta) */
 }
 
 /* used to cache the newton sums of chi */
@@ -1824,6 +1842,7 @@ nilord(decomp_t *S, GEN dred, long mf, long flag)
   for(;;)
   {
     l = 2; /* Decomp by default */
+    S->phi0 = NULL; /* no delayed composition */
     Fa   = degpol(S->nu);
     for(;;)
     {
@@ -1831,7 +1850,7 @@ nilord(decomp_t *S, GEN dred, long mf, long flag)
       if (pia) break;
       S->phi = gadd(S->phi, opa);
       S->chi = NULL;
-      if (!update_phi(S, &pdr, &pmr, ns)) break;
+      if (!update_phi(S, &pdr, &pmr, ns, &l, flag)) break;
     }
     if (!pia) break;
     oE = Ea; opa = RX_RXQ_compo(pia, S->phi, S->f);
@@ -1839,7 +1858,7 @@ nilord(decomp_t *S, GEN dred, long mf, long flag)
     { /* change phi such that nu = pia */
       S->phi = gadd(S->phi, opa);
       S->chi = NULL;
-      if (!update_phi(S, &pdr, &pmr, ns)) break;
+      if (!update_phi(S, &pdr, &pmr, ns, &l, flag)) break;
     }
 
     if (DEBUGLEVEL>5) fprintferr("  (Fa, Ea) = (%ld,%ld)\n", Fa, Ea);
@@ -1849,15 +1868,7 @@ nilord(decomp_t *S, GEN dred, long mf, long flag)
       S->chi = NULL; l = 1; break;
     }
     if (loop(S, nv, pdr, pmr, pmf, Ea, Fa, ns)) break;
-    if (!update_phi(S, &pdr, &pmr, ns)) break;
-
-    if (is_pm1(pmr))
-    { /* may happen if p does not divide the field discriminant */
-      if (!flag) { l = 1; break; }
-      S->nu = get_nu(S->chi, p, &l);
-      if (l != 1) S->phi = redelt(S->phi, p, p);
-      break;
-    }
+    if (!update_phi(S, &pdr, &pmr, ns, &l, flag)) break;
   }
   (void)delete_var();
   if (l == 1) return flag? NULL: dbasis(p, S->f, mf, S->phi, S->chi);
