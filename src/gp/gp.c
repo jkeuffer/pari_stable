@@ -84,16 +84,16 @@ static stack *bufstack = NULL;
 static void
 usage(char *s)
 {
-  printf("### Usage: %s [options]\n", s);
+  printf("### Usage: %s [options] [GP files]\n", s);
   printf("Options are:\n");
-  printf("\t[-b buffersize]\tDeprecated\n");
-  printf("\t[-emacs]\tRun as if in Emacs shell\n");
   printf("\t[-f]\t\tFaststart: do not read .gprc\n");
-  printf("\t[--help]\tPrint this message\n");
   printf("\t[-q]\t\tQuiet mode: do not print banner and history numbers\n");
   printf("\t[-p primelimit]\tPrecalculate primes up to the limit\n");
   printf("\t[-s stacksize]\tStart with the PARI stack of given size (in bytes)\n");
-  printf("\t[-test]\t\tTest mode.  As -q, plus wrap long lines\n");
+  printf("\t[--emacs]\tRun as if in Emacs shell\n");
+  printf("\t[--help]\tPrint this message\n");
+  printf("\t[--test]\t\tTest mode.  As -q, plus wrap long lines\n");
+  printf("\t[--texmacs]\tRun as if using TeXmacs frontend\n");
   printf("\t[--version]\tOutput version info and exit\n");
   printf("\t[--version-short]\tOutput version number and exit\n\n");
   exit(0);
@@ -2145,7 +2145,7 @@ grow_append(growarray *A, void *e)
   A->v[A->n++] = e;
 }
 
-static void
+void
 grow_init(growarray *A)
 {
   A->len = 4;
@@ -2153,17 +2153,15 @@ grow_init(growarray *A)
   A->v   = (void**)gpmalloc(A->len * sizeof(void*));
 }
 
-static char **
-gp_initrc(char *path)
+static void
+gp_initrc(growarray *A, char *path)
 {
   char *nexts,*s,*t;
   FILE *file = gprc_get(path);
   Buffer *b;
   filtre_t F;
-  growarray A;
 
-  if (!file) return NULL;
-  grow_init(&A);
+  if (!file) return;
   b = new_buffer();
   init_filtre(&F, (void*)b);
   for(;;)
@@ -2198,7 +2196,7 @@ gp_initrc(char *path)
 	s += 4;
 	t = gpmalloc(strlen(s) + 1);
 	if (*s == '"') (void)readstring(s, t); else strcpy(t,s);
-        grow_append(&A, t);
+        grow_append(A, t);
       }
       else
       { /* set default */
@@ -2212,8 +2210,7 @@ gp_initrc(char *path)
   }
   del_buffer(b);
   if (!(GP_DATA->flags & QUIET)) fprintferr("Done.\n\n");
-  grow_append(&A, NULL);
-  fclose(file); return (char**)A.v;
+  fclose(file);
 }
 
 /********************************************************************/
@@ -2883,18 +2880,19 @@ read_arg(int *nread, char *t, long argc, char **argv)
   *nread = i+1; return argv[i];
 }
 
-static char**
-read_opt(long argc, char **argv)
+void
+read_opt(growarray *A, long argc, char **argv)
 {
-  char *b=NULL, *p=NULL, *s=NULL, **pre;
-  int i=1, initrc=1;
+  char *b = NULL, *p = NULL, *s = NULL;
+  int i = 1, initrc = 1;
 
-  pari_outfile=stderr;
-  while (i<argc)
+  pari_outfile = stderr;
+  while (i < argc)
   {
-    char *t = argv[i++];
+    char *t = argv[i];
 
-    if (*t++ != '-') usage(argv[0]);
+    if (*t++ != '-') break;
+    i++;
     switch(*t++)
     {
       case 'b': b = read_arg(&i,t,argc,argv); break;
@@ -2902,33 +2900,36 @@ read_opt(long argc, char **argv)
       case 's': s = read_arg(&i,t,argc,argv); break;
 
       case 'e':
-	if (strncmp(t,"macs",4)) usage(argv[0]);
+	if (strncmp(t,"macs",4)) usage(argv[0]); /* obsolete */
         GP_DATA->flags |= EMACS; break;
       case 'q':
         GP_DATA->flags |= QUIET; break;
       case 't':
-	if (strncmp(t,"est",3)) usage(argv[0]);
-        disable_color = 1; GP_DATA->flags |= TEST; /* fall through */
+	if (strncmp(t,"est",3)) usage(argv[0]); /* obsolete */
+        GP_DATA->flags |= TEST; /* fall through */
       case 'f':
 	initrc = 0; break;
       case '-':
         if (strcmp(t, "version-short") == 0) { print_shortversion(); exit(0); }
         if (strcmp(t, "version") == 0) { print_version(); exit(0); }
         if (strcmp(t, "texmacs") == 0) { GP_DATA->flags |= TEXMACS; break; }
+        if (strcmp(t, "emacs") == 0) { GP_DATA->flags |= EMACS; break; }
+        if (strcmp(t, "test") == 0) { GP_DATA->flags |= TEST; break; }
        /* fall through */
       default:
 	usage(argv[0]);
     }
   }
   if (GP_DATA->flags & TEXMACS) tm_start_output();
-  pre = initrc? gp_initrc(argv[0]): NULL;
+  if (initrc) gp_initrc(A, argv[0]);
+  for ( ; i < argc; i++) grow_append(A, pari_strdup(argv[i]));
 
   /* override the values from gprc */
   testuint(b, &paribufsize); if (paribufsize < 10) paribufsize = 10;
   testuint(p, &primelimit);
   testuint(s, (ulong*)&top);
-  if (GP_DATA->flags & (EMACS|TEXMACS)) disable_color = 1;
-  pari_outfile = stdout; return pre;
+  if (GP_DATA->flags & (EMACS|TEXMACS|TEST)) disable_color = 1;
+  pari_outfile = stdout;
 }
 
 #ifdef WINCE
@@ -2943,7 +2944,7 @@ int
 main(int argc, char **argv)
 {
 #endif
-  char **flist;
+  growarray A;
 
   init_defaults(1); gp_preinit();
   if (setjmp(GP_DATA->env))
@@ -2954,7 +2955,8 @@ main(int argc, char **argv)
 #ifdef __MWERKS__
   argc = ccommand(&argv);
 #endif
-  flist = read_opt(argc,argv);
+  grow_init(&A);
+  read_opt(&A, argc,argv);
   pari_addfunctions(&pari_modules, functions_gp,helpmessages_gp);
   pari_addfunctions(&pari_modules, functions_highlevel,helpmessages_highlevel);
   pari_addfunctions(&pari_oldmodules, functions_oldgp,helpmessages_oldgp);
@@ -2975,16 +2977,16 @@ main(int argc, char **argv)
   gp_expand_path(GP_DATA->path);
 
   if (!(GP_DATA->flags & QUIET)) gp_head();
-  if (flist)
+  if (A.n)
   {
     ulong f = GP_DATA->flags;
     FILE *l = logfile;
-    char **s = flist;
+    long i;
     GP_DATA->flags &= ~(CHRONO|ECHO); logfile = NULL;
-    for ( ; *s; s++) { read0(*s); free(*s); }
-    GP_DATA->flags = f; logfile = l; free(flist);
+    for (i = 0; i < A.n; i++) { read0((char*)A.v[i]); free(A.v[i]); }
+    GP_DATA->flags = f; logfile = l;
   }
-  TIMERstart(GP_DATA->T); (void)timer(); (void)timer2();
+  free(A.v);
   (void)gp_main_loop(1);
   gp_quit(); return 0; /* not reached */
 }

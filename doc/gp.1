@@ -1,19 +1,25 @@
-.TH GP 1 "28 August 2001"
+.TH GP 1 "7 April 2003"
 .SH NAME
 gp \- PARI calculator
 .SH SYNOPSIS
 .B gp
-.RB [ -emacs ]
 .RB [ -f ]
-.RB [ -test ]
 .RB [ -q ]
 .RB [ -s
 .IR stacksize ]
 .RB [ -p
 .IR primelimit ]
+.RB [ --emacs ]
+.RB [ --help ]
+.RB [ --test ]
+.RB [ --texmacs ]
+.RB [ --version ]
+.RB [ --version-short ]
+[ file1 file2 ...]
 
 .SH DESCRIPTION
-Invokes the PARI-GP calculator. gp is an advanced programmable calculator,
+Invokes the PARI-GP calculator, loading the file1, file2, ... (written in the
+GP language) on startup. gp is an advanced programmable calculator,
 which computes symbolically as long as possible, numerically where needed,
 and contains a wealth of number-theoretic functions (elliptic curves, class
 field theory...). It can be programmed with the GP scripting language. Its
@@ -45,29 +51,18 @@ and recursive combinations of these.
 .SH OPTIONS
 A numeric argument to the following options can be followed by a 
 .B k
-or a
+, a
 .B M
-at the user's convenience. In that case the argument is multiplied by 1000
-or 1000000 respectively. The following command line options are available:
-.TP
-.B \-emacs
-gp can be run in an
-.I Emacs
-shell (see GP User's manual for details). This flag is then required for
-smooth interaction with the relevant
-.I Emacs
-package (pari.el). It is set automatically by the pari.el package, and will
-produce nice display oddities if you set it outside of an
-.I Emacs
-session.
+or a
+.B G
+at the user's convenience. In that case the argument is multiplied by 1000,
+1000000, or 1000000000 respectively. The following command line options are
+available:
 .TP
 .B \-f
 Fast start (or factory settings). Do not read
 .B .gprc
 (see below) upon startup.
-.TP
-.B \-q
-Quiet mode. Don't print headers or history numbers, don't say goodbye.
 .TP
 .BI \-p " primelimit"
 Upon startup, gp computes a table of small primes used in most
@@ -77,6 +72,9 @@ is set here, include primes up to that bound instead of the default.
 Unreasonably high values will considerably increase startup time. Exceedingly
 small values will cause some number-theoretic functions to fail with the
 message "not enough precomputed primes".
+.TP
+.B \-q
+Quiet mode. Don't print headers or history numbers, don't say goodbye.
 .TP
 .BI \-s " stacksize"
 Size of gp internal stack allocated on startup. When gp runs out of space, it
@@ -92,13 +90,42 @@ from your
 .B .gprc
 Note that computations with a 
 .B smaller
-stack may be more efficient due to better data locality. Sensible
+stack may be more efficient due to better data locality. Standard
 computations should need less than 20MB.
 
 .TP
-.B \-test
+.B \--emacs
+gp can be run in an
+.I Emacs
+shell (see GP User's manual for details). This flag is then required for
+smooth interaction with the relevant
+.I Emacs
+package (pari.el). It is set automatically by the pari.el package, and will
+produce nice display oddities if you set it outside of an
+.I Emacs
+session.
+.TP
+.B \--help
+print a summary of available command-line options.
+.TP
+.B \--test
 run gp in test mode: suppress printing of history numbers and wrap long
 output lines (to get readable diff output). For benches only.
+.TP
+.B \--texmacs
+gp can be run from a
+.I TeXmacs
+frontend. This flag is set by TeXmacs, to enable special purpose
+communication channels. Do not set it yourself.
+
+.TP
+.B \--version
+output version info (banner) then exit.
+
+.TP
+.B \--version-short
+output version number then exit.
+
 .SH USE
 .TP
 .B ?
@@ -294,6 +321,7 @@ the distribution.
 .IR perl (1),
 .IR readline (3),
 .IR tex (1),
+.IR texmacs (1),
 .IR xdvi(1)
 
 .SH COPYING

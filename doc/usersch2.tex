@@ -16,29 +16,31 @@ describe the specific use of the GP programmable calculator.
 
 For starting the calculator, the general command line syntax is:
 
-\kbd{gp [-s stacksize] [-p primelimit]}
+\kbd{gp [-s \var{stacksize}] [-p \var{primelimit}] [\var{files}]}
 
 \noindent
 where items within brackets are optional\footnote{*}{On the Macintosh, even
 after clicking on the gp icon, once in the MPW Shell, you still need to type
-explicitly a command of the above form.}. These correspond to some internal
-parameters of GP, or \var{defaults}. See \secref{se:defaults} below for a
-list and explanation of all defaults, there are many more than just those
-two. These defaults can be changed by adding parameters to the input line
-as above, or interactively during a GP session or in a preferences file (also
-known as \tet{gprc}).
+explicitly a command of the above form.}. The [\var{files}] argument is
+a list of files written in the GP scripting language, which will be loaded on
+startup. The ones starting with a minus sign are \emph{flags}, setting some
+internal parameters of GP, or \var{defaults}. See \secref{se:defaults} below
+for a list and explanation of all defaults, there are many more than just
+those two. These defaults can be changed by adding parameters to the input
+line as above, or interactively during a GP session or in a preferences file
+(also known as \tet{gprc}).
 
-\unix Some new features were developed on UNIX platforms, and depend heavily
+\unix Some features were developed on UNIX platforms, and depend heavily
 on the operating system in use. It is \emph{possible} that some of these
 will be ported to other operating systems (BeOS, MacOS, DOS, OS/2, Windows,
-etc.) in future versions (most of them should be easy tasks for anybody
-acquainted with those). As for now, most of them were not. So, whenever a
-specific feature of the UNIX version is discussed in a paragraph, a UNIX sign
-sticks out in the left margin, like here. Just skip these if you're stranded
-on a different operating system: the core GP functions (i.e.~at least
-everything which is even faintly mathematical in nature) will still be
-available to you. It may also be possible (and then definitely advisable) to
-install \idx{Linux} or \idx{FreeBSD} on your machine.
+etc.) in future versions (most of them should be relatively easy tasks). As
+for now, most of them were not. So, whenever a specific feature of the UNIX
+version is discussed in a paragraph, a UNIX sign sticks out in the left
+margin, like here. Just skip these if you're stranded on a different
+operating system: the core GP functions (i.e.~at least everything which is
+even faintly mathematical in nature) will still be available to you. It
+should also be possible (and then definitely advisable) to install
+\idx{Linux} or \idx{FreeBSD} on your machine.
 
 \misctitle{Note (added in version 2.0.12):} Most UNIX goodies are now
 available for DOS, OS/2 and Windows, thanks to the \tet{EMX}/\tet{RSX}
@@ -59,17 +61,17 @@ features of this Emacs shell will be indicated by an EMACS sign.\smallskip
 If a \idx{preferences file} (or \kbd{gprc}, to be discussed in
 \secref{se:gprc}) can be found, GP will then read it and execute the commands
 it contains. This provides an easy way to customize GP without having to
-delve into the code to hardwire it to your likings.
+delve into the code to hardwire it to your likings. The \var{files} argument
+is processed right after the \kbd{gprc}.
 
-A copyright message then appears which includes the version number. Please
-note this number, so as to be sure to have the most recent version if you
-wish to have updates of PARI. The present manual is written for version
+A copyright message then appears which includes the version number, and a lot
+of useful technical information. The present manual is written for version
 \vers, and has undergone major changes since the 1.39.xx versions.
 
 After the copyright, the computer works for a few seconds (it is in fact
 computing and storing a table of primes), writes the top-level help
 information, some initial defaults, and then waits after printing its prompt
-(initially: \kbd{?}).
+(by default: \kbd{?}).
 
 Note that at any point the user can type \kbd{Ctrl-C} (that is press
 simultaneously the \kbd{Control} and \kbd{C} keys): the current

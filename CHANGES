@@ -158,6 +158,9 @@ GH  5- PowerPC level0 inline assembly kernel
 BA  7- GP function galoisexport
 IZ  8- logstyle and TeXstyle defaults
     9- [GP defaults:] support 'G' suffix (for Giga) (already supported k and M)
+   10- extend GP command line: once flags (-xxx) are processed, remaining
+       args are taken to be filenames, read upon startup [ _after_ the gprc
+       read statements have been processed ]
 
   Remove
     1- remove emacs/compile [ integrated in Makefile ]
