@@ -302,6 +302,7 @@ install-man::
 install-misc: $install_emacs_files install-top
 	-mkdir -p \$(MISCDIR) \$(BINDIR)
 	\$(INSTALL_PROGRAM) $misc/tex2mail \$(BINDIR)
+	\$(INSTALL_DATA) $misc/tex2mail.1 \$(MANDIR)
 	\$(INSTALL_DATA) $misc/README    \$(MISCDIR)
 	\$(INSTALL_DATA) $misc/color.dft \$(MISCDIR)
 	\$(INSTALL_DATA) $misc/gpalias   \$(MISCDIR)
