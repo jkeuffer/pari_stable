@@ -140,7 +140,7 @@ get_pq(GEN D, GEN z, GEN flag, GEN *ptp, GEN *ptq)
   }
 
   ell = 3;
-  while (lg(wp)<=2 || ell<=MAXL)
+  while (l < 3 || ell<=MAXL)
   {
     ell += *diffell++; if (!*diffell) err(primer1);
     if (smodis(z,ell) && kross(d,ell) > 0)
