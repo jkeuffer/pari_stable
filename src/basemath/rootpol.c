@@ -1727,7 +1727,7 @@ cauchy_bound(GEN p)
     L = dblogr(gmul(gabs(y,prec), lc)) / (n-i);
     if (L > Lmax) Lmax = L;
   }
-  avma = av; return L + LOG2;
+  avma = av; return Lmax + LOG2;
 }
 
 static GEN
