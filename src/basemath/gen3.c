@@ -625,7 +625,7 @@ gdivent(GEN x, GEN y)
     case t_INT:
       switch(tx)
       { /* equal to, but more efficient than, quot(x,y) */
-        case t_INT: return truedvmdii(x,y,NULL);
+        case t_INT: return truedivii(x,y);
         case t_REAL: case t_FRAC: return quot(x,y);
         case t_POL: return gdiv(x,y);
       }
@@ -1573,7 +1573,7 @@ gfloor(GEN x)
     case t_INT:
     case t_POL: return gcopy(x);
     case t_REAL: return floorr(x);
-    case t_FRAC: return truedvmdii((GEN)x[1],(GEN)x[2],NULL);
+    case t_FRAC: return truedivii((GEN)x[1],(GEN)x[2]);
     case t_RFRAC: return gdeuc((GEN)x[1],(GEN)x[2]);
     case t_VEC: case t_COL: case t_MAT:
       lx = lg(x); y = cgetg(lx,tx);
@@ -2174,7 +2174,7 @@ poltoser(GEN x, long v, long prec)
   if (varncmp(vx, v) < 0) return coefstoser(x, v, prec);
 
   lx = lg(x); i = 2; while (i<lx && gcmp0((GEN)x[i])) i++;
-  l = lx-i; if (precdl > (ulong)l) l = (long)precdl;
+  l = lx-i; if (prec > l) l = prec;
   l += 2;
   y = cgetg(l,t_SER);
   y[1] = evalsigne(1) | evalvalp(i-2) | evalvarn(v);
