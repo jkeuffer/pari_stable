@@ -6651,7 +6651,8 @@ preferable to have $a$ as large as possible, at least $a\ge1$.
 If $\fl=3$, the function is allowed to be undefined (but continuous) at $a$
 or $b$, for example the function $\sin(x)/x$ at $x=0$.
 
-\synt{intnum0}{entree$\,$*e,GEN a,GEN b,char$\,$*expr,long \fl,long prec}.
+\synt{intnum}{void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, long flag, long
+prec}
 
 \subsecidx{prod}$(X=a,b,\var{expr},\{x=1\})$: product of expression \var{expr},
 initialized at $x$, the formal parameter $X$ going from $a$ to $b$. As for
@@ -6700,7 +6701,7 @@ $\var{expr}(X=a) * \var{expr}(X=b) \le 0$.
 This routine uses Brent's method and can fail miserably if \var{expr} is
 not defined in the whole of $[a,b]$ (try \kbd{solve(x=1, 2, tan(x)}).
 
-\synt{zbrent}{entree *ep, GEN a, GEN b, char *expr, long prec}.
+\synt{zbrent}{void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, long prec}
 
 \subsecidx{sum}$(X=a,b,\var{expr},\{x=0\})$: sum of expression \var{expr},
 initialized at $x$, the formal parameter going from $a$ to $b$. As for

@@ -933,7 +933,7 @@ typedef struct {
 } exprdat;
 
 typedef struct {
-  GEN (*f)(void *, GEN);
+  GEN (*f)(GEN,void *);
   void *E;
 } invfun;
 
@@ -965,7 +965,7 @@ int_loop(entree *ep, char *ch)
 
 /* f(x) */
 static GEN
-_gp_eval(void *dat, GEN x)
+_gp_eval(GEN x, void *dat)
 {
   exprdat *E = (exprdat*)dat;
   E->ep->value = x;
@@ -973,11 +973,11 @@ _gp_eval(void *dat, GEN x)
 }
 /* 1/x^2 f(1/x) */
 static GEN
-_invf(void *dat, GEN x)
+_invf(GEN x, void *dat)
 {
   invfun *S = (invfun*)dat;
   GEN y = ginv(x);
-  return gmul(S->f(S->E, y), gsqr(y));
+  return gmul(S->f(y, S->E), gsqr(y));
 }
 
 #define swap(a,b) { GEN _x = a; a = b; b = _x; }
@@ -996,7 +996,7 @@ interp(GEN h, GEN s, long j, long lim, long KLOC)
 }
 
 static GEN
-qrom3(void *dat, GEN (*eval)(void *, GEN), GEN a, GEN b, long prec)
+qrom3(void *dat, GEN (*eval)(GEN,void *), GEN a, GEN b, long prec)
 {
   const long JMAX = 25, KLOC = 4;
   GEN ss,s,h,p1,p2,qlint,del,x,sum;
@@ -1013,8 +1013,8 @@ qrom3(void *dat, GEN (*eval)(void *, GEN), GEN a, GEN b, long prec)
   h = new_chunk(JMAX+KLOC-1);
   h[0] = (long)realun(prec);
 
-  p1 = eval(dat, a); if (p1 == a) p1 = rcopy(p1);
-  p2 = eval(dat, b);
+  p1 = eval(a, dat); if (p1 == a) p1 = rcopy(p1);
+  p2 = eval(b, dat);
   s[0] = lmul2n(gmul(qlint,gadd(p1,p2)),-1);
   for (it=1,j=1; j<JMAX; j++, it<<=1)
   {
@@ -1022,7 +1022,7 @@ qrom3(void *dat, GEN (*eval)(void *, GEN), GEN a, GEN b, long prec)
     av = avma; del = divrs(qlint,it);
     x = addrr(a, shiftr(del,-1));
     for (sum = gzero, j1 = 1; j1 <= it; j1++, x = addrr(x,del))
-      sum = gadd(sum, eval(dat, x));
+      sum = gadd(sum, eval(x, dat));
     sum = gmul(sum,del); p1 = gadd((GEN)s[j-1], sum);
     s[j] = lpileupto(av, gmul2n(p1,-1));
 
@@ -1033,7 +1033,7 @@ qrom3(void *dat, GEN (*eval)(void *, GEN), GEN a, GEN b, long prec)
 }
 
 static GEN
-qrom2(void *dat, GEN (*eval)(void *, GEN), GEN a, GEN b, long prec)
+qrom2(void *dat, GEN (*eval)(GEN,void *), GEN a, GEN b, long prec)
 {
   const long JMAX = 16, KLOC = 4;
   GEN ss,s,h,p1,qlint,del,ddel,x,sum;
@@ -1051,7 +1051,7 @@ qrom2(void *dat, GEN (*eval)(void *, GEN), GEN a, GEN b, long prec)
   h[0] = (long)realun(prec);
 
   p1 = shiftr(addrr(a,b),-1);
-  s[0] = lmul(qlint, eval(dat, p1));
+  s[0] = lmul(qlint, eval(p1, dat));
   for (it=1, j=1; j<JMAX; j++, it*=3)
   {
     h[j] = ldivrs((GEN)h[j-1],9);
@@ -1059,8 +1059,8 @@ qrom2(void *dat, GEN (*eval)(void *, GEN), GEN a, GEN b, long prec)
     x = addrr(a, shiftr(del,-1));
     for (sum = gzero, j1 = 1; j1 <= it; j1++)
     {
-      sum = gadd(sum, eval(dat, x)); x = addrr(x,ddel);
-      sum = gadd(sum, eval(dat, x)); x = addrr(x,del);
+      sum = gadd(sum, eval(x, dat)); x = addrr(x,ddel);
+      sum = gadd(sum, eval(x, dat)); x = addrr(x,del);
     }
     sum = gmul(sum,del); p1 = gdivgs((GEN)s[j-1],3);
     s[j] = lpileupto(av, gadd(p1,sum));
@@ -1073,7 +1073,7 @@ qrom2(void *dat, GEN (*eval)(void *, GEN), GEN a, GEN b, long prec)
 
 /* integrate after change of variables x --> 1/x */
 static GEN
-qromi(void *E, GEN (*eval)(void*, GEN), GEN a, GEN b, long prec)
+qromi(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, long prec)
 {
   GEN A = ginv(b), B = ginv(a);
   invfun S;
@@ -1083,7 +1083,7 @@ qromi(void *E, GEN (*eval)(void*, GEN), GEN a, GEN b, long prec)
 
 /* a < b, assume b "small" (< 100 say) */
 static GEN
-rom_bsmall(void *E, GEN (*eval)(void*, GEN), GEN a, GEN b, long prec)
+rom_bsmall(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, long prec)
 {
   if (gcmpgs(a,-100) >= 0) return qrom2(E,eval,a,b,prec);
   if (b == gun || gcmpgs(b, -1) >= 0)
@@ -1097,7 +1097,7 @@ rom_bsmall(void *E, GEN (*eval)(void*, GEN), GEN a, GEN b, long prec)
 }
 
 static GEN
-rombint(void *E, GEN (*eval)(void*, GEN), GEN a, GEN b, long prec)
+rombint(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, long prec)
 {
   long l = gcmp(b,a);
   GEN z;
@@ -1118,7 +1118,7 @@ rombint(void *E, GEN (*eval)(void*, GEN), GEN a, GEN b, long prec)
 }
 
 GEN
-intnum(void *E, GEN (*eval)(void*,GEN), GEN a, GEN b, long flag, long prec)
+intnum(void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, long flag, long prec)
 {
   pari_sp av = avma;
   GEN z;
@@ -1226,7 +1226,7 @@ polzagreel(long n, long m, long prec)
 /********************************************************************/
 /* Brent's method, [a,b] bracketing interval */
 GEN
-zbrent(entree *ep, GEN a, GEN b, char *ch, long prec)
+zbrent(void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, long prec)
 {
   long sig, iter, itmax;
   pari_sp av = avma;
@@ -1237,10 +1237,9 @@ zbrent(entree *ep, GEN a, GEN b, char *ch, long prec)
   if (!sig) { avma = av; return gzero; }
   if (sig < 0) { c=a; a=b; b=c; } else c = b;
 
-  push_val(ep, a);      fa = lisexpr(ch);
-  ep->value = (void*)b; fb = lisexpr(ch);
-  if (gsigne(fa)*gsigne(fb) > 0)
-    err(talker,"roots must be bracketed in solve");
+  fa = eval(a, E);
+  fb = eval(b, E);
+  if (gsigne(fa)*gsigne(fb) > 0) err(talker,"roots must be bracketed in solve");
   itmax = (prec<<(TWOPOTBITS_IN_LONG+1)) + 1;
   tol = real2n(5-bit_accuracy(prec), 3);
   fc=fb;
@@ -1286,9 +1285,20 @@ zbrent(entree *ep, GEN a, GEN b, char *ch, long prec)
     if (gcmp(gabs(d,0),tol1) > 0) b = gadd(b,d);
     else if (gsigne(xm) > 0)      b = addrr(b,tol1);
     else                          b = subrr(b,tol1);
-    ep->value = (void*)b; fb = lisexpr(ch);
+    fb = eval(b, E);
   }
   if (iter > itmax) err(talker,"too many iterations in solve");
-  pop_val(ep);
   return gerepileuptoleaf(av, rcopy(b));
+}
+
+GEN
+zbrent0(entree *ep, GEN a, GEN b, char *ch, long prec)
+{
+  exprdat E;
+  GEN z;
+
+  E.ch = ch;
+  E.ep = ep; push_val(ep, NULL);
+  z = zbrent(&E, &_gp_eval, a,b, prec);
+  pop_val(ep); return z;
 }

@@ -1481,7 +1481,8 @@ GEN     suminf(entree *ep, GEN a, char *ch, long prec);
 GEN     vecteur(GEN nmax, entree *ep, char *ch);
 GEN     vecteursmall(GEN nmax, entree *ep, char *ch);
 GEN     vvecteur(GEN nmax, entree *ep, char *ch);
-GEN     zbrent(entree *ep, GEN a, GEN b, char *ch, long prec);
+GEN     zbrent0(entree *ep, GEN a, GEN b, char *ch, long prec);
+GEN     zbrent(void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, long prec);
 
 /* thue.c */
 

@@ -57,6 +57,7 @@ ellpointtoz(E,[x1,y1]); -->  impossible addition t_VEC + t_VEC.
     3- [libpari:] renamed incgam4 --> incgam0, incgam3 --> incgamc
 BA  4- [Description system] Store GP functions in a database in
        src/functions/ instead of hard-coding them in C files.
+    5- [libpari:] modified zbrent interface to allow library programming
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.6 (released 19/06/2003):

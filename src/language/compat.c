@@ -537,7 +537,7 @@ entree oldfonctions[]={
 {"smith2",1,(void *)smith2,8,"G"},
 {"smithclean",1,(void *)smithclean,8,"G"},
 {"smithpol",1,(void *)gsmith,8,"G"},
-{"solve",37,(void *)zbrent,9,"V=GGIp"},
+{"solve",37,(void *)zbrent0,9,"V=GGIp"},
 {"sort",1,(void *)sort,8,"G"},
 {"sqr",1,(void *)gsqr,3,"G"},
 {"sqred",1,(void *)sqred,8,"G"},
