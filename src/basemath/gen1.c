@@ -973,6 +973,10 @@ gaddsg(long x, GEN y)
     case t_FRAC: z = cgetg(3,t_FRAC);
       z[1] = lpileuptoint((pari_sp)z, addii((GEN)y[1], mulis((GEN)y[2],x)));
       z[2] = licopy((GEN)y[2]); return z;
+    case t_COMPLEX:
+      z = cgetg(3, t_COMPLEX);
+      z[1] = laddsg(x, (GEN)y[1]);
+      z[2] = lcopy((GEN)y[2]); return z;
 
     default: return gadd(stoi(x), y);
   }

@@ -801,7 +801,7 @@ isanypower(GEN x, GEN *pty)
   } while (p < ex0);
 
   e2 = expi(x) + 1;
-  logx = mplog( itor(x, DEFAULTPREC + (lg(x)-2) / p) );
+  logx = logr_abs( itor(x, DEFAULTPREC + (lg(x)-2) / p) );
   while (p < e2)
   {
     if (pow_check(p, &x, &logx, &k)) {
@@ -2665,7 +2665,7 @@ regula(GEN x, long prec)
   }
   reg = gsqr(reg); setexpo(reg,expo(reg)-1);
   if (fl) reg = mulrr(reg, divri(addir(u1,rsqd),v));
-  y = mplog(divri(reg,v));
+  y = logr_abs(divri(reg,v));
   if (rexp)
   {
     u1 = mulsr(rexp, mplog2(prec));
@@ -2853,7 +2853,7 @@ classno(GEN x)
 
   p2 = gsqrt(absi(D),DEFAULTPREC);
   p1 = mulrr(divrr(p2,mppi(DEFAULTPREC)), dbltor(1.005)); /*overshoot by 0.5%*/
-  s = itos_or_0( mptrunc(shiftr(sqrtr(p2), 1)) );
+  s = itos_or_0( truncr(shiftr(sqrtr(p2), 1)) );
   if (!s) err(talker,"discriminant too big in classno");
   if (s < 10) s = 200;
   else if (s < 20) s = 1000;
@@ -2940,8 +2940,9 @@ GEN
 classno2(GEN x)
 {
   pari_sp av = avma;
+  const long prec = DEFAULTPREC;
   long n, i, k, r, s;
-  GEN p1,p2,p3,p4,p5,p7,Hf,Pi,reg,logd,d,D;
+  GEN p1, p2, S, p4, p5, p7, Hf, Pi, reg, logd, d, dr, D, half;
 
   check_quaddisc(x, &s, &r, "classno2");
   if (s < 0 && cmpiu(x,12) <= 0) return gen_1;
@@ -2949,30 +2950,34 @@ classno2(GEN x)
   Hf = conductor_part(x, r, &D, &reg, NULL);
   if (s < 0 && cmpiu(D,12) <= 0) return gerepilecopy(av, Hf); /* |D| < 12*/
 
-  Pi = mppi(DEFAULTPREC);
-  d = absi(D); logd = glog(d,DEFAULTPREC);
-  p1 = sqrtr(gdiv(gmul(d,logd), gmul2n(Pi,1)));
+  Pi = mppi(prec);
+  d = absi(D); dr = itor(d, prec);
+  logd = logr_abs(dr);
+  p1 = sqrtr(divrr(mulir(d,logd), gmul2n(Pi,1)));
   if (s > 0)
   {
-    p2 = subsr(1, gmul2n(divrr(mplog(reg),logd),1));
-    if (gcmp(gsqr(p2), divsr(2,logd)) >= 0) p1 = gmul(p2,p1);
+    p2 = subsr(1, gmul2n(divrr(logr_abs(reg),logd),1));
+    if (cmprr(gsqr(p2), divsr(2,logd)) >= 0) p1 = mulrr(p2,p1);
   }
   n = itos_or_0( mptrunc(p1) );
   if (!n) err(talker,"discriminant too large in classno");
 
-  p4 = divri(Pi,d); p7 = ginv(sqrtr(Pi));
-  p1 = gsqrt(d,DEFAULTPREC); p3 = gen_0;
+  p4 = divri(Pi,d);
+  p7 = ginv(sqrtr_abs(Pi));
+  p1 = sqrtr_abs(dr);
+  S = gen_0;
+  half = real2n(-1, prec);
   if (s > 0)
   {
     for (i=1; i<=n; i++)
     {
       k = krois(D,i); if (!k) continue;
-      p2 = mulir(mulss(i,i),p4);
-      p5 = subsr(1,mulrr(p7,incgamc(ghalf,p2,DEFAULTPREC)));
-      p5 = addrr(divrs(mulrr(p1,p5),i), eint1(p2,DEFAULTPREC));
-      p3 = (k>0)? addrr(p3,p5): subrr(p3,p5);
+      p2 = mulir(muluu(i,i), p4);
+      p5 = subsr(1, mulrr(p7,incgamc(half,p2,prec)));
+      p5 = addrr(divrs(mulrr(p1,p5),i), eint1(p2,prec));
+      S = (k>0)? addrr(S,p5): subrr(S,p5);
     }
-    p3 = shiftr(divrr(p3,reg),-1);
+    S = shiftr(divrr(S,reg),-1);
   }
   else
   {
@@ -2980,13 +2985,13 @@ classno2(GEN x)
     for (i=1; i<=n; i++)
     {
       k = krois(D,i); if (!k) continue;
-      p2 = mulir(mulss(i,i),p4);
-      p5 = subsr(1,mulrr(p7,incgamc(ghalf,p2,DEFAULTPREC)));
+      p2 = mulir(muluu(i,i), p4);
+      p5 = subsr(1, mulrr(p7,incgamc(half,p2,prec)));
       p5 = addrr(p5, divrr(divrs(p1,i),mpexp(p2)));
-      p3 = (k>0)? addrr(p3,p5): subrr(p3,p5);
+      S = (k>0)? addrr(S,p5): subrr(S,p5);
     }
   }
-  return gerepileuptoint(av, mulii(Hf,ground(p3)));
+  return gerepileuptoint(av, mulii(Hf, roundr(S)));
 }
 
 GEN
