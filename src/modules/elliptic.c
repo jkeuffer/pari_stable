@@ -2634,7 +2634,7 @@ GEN
 globalreduction(GEN e1)
 {
   long i, k, l, m;
-  gpmem_t tetpil, av = avma;
+  gpmem_t av = avma;
   GEN p1, c = gun, prims, result, N = gun, u = gun, r, s, t;
   GEN v = cgetg(5, t_VEC), a = cgetg(7, t_VEC), e = cgetg(20, t_VEC);
 
@@ -2671,10 +2671,10 @@ globalreduction(GEN e1)
   r = gdiventgs(gaddgs(gsub(gsub((GEN)e[2], gmul(s,(GEN)e[1])), gsqr(s)), 1), -3);
   t = gdiventgs(ellLHS0(e,r), -2);
   cumule(&v, &e, gun, r, s, t);
-  tetpil = avma;
-  result = cgetg(4, t_VEC); result[1] = lcopy(N); result[2] = lcopy(v);
-  result[3] = lcopy(c);
-  return gerepile(av, tetpil, result);
+  result = cgetg(4, t_VEC);
+  result[1] = (long)N;
+  result[2] = (long)v;
+  result[3] = (long)c; return gerepilecopy(av, result);
 }
 
 /* cumule les effets de plusieurs chgts de variable. On traite a part les cas
@@ -2720,8 +2720,10 @@ cumule(GEN *vtotal, GEN *e, GEN u, GEN r, GEN s, GEN t)
 {
   gpmem_t av = avma, tetpil;
   GEN v2 = cgetg(5, t_VEC);
-  v2[1] = (long)u; v2[2] = (long)r; v2[3] = (long)s; v2[4] = (long)t;
-  tetpil = avma;
+  v2[1] = (long)u;
+  v2[2] = (long)r;
+  v2[3] = (long)s;
+  v2[4] = (long)t; tetpil = avma;
   *e = gerepile(av, tetpil, coordch(*e, v2));
   cumulev(vtotal, u, r, s, t);
 }
