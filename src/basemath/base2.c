@@ -1023,7 +1023,7 @@ Decomp(GEN p,GEN f,long mf,GEN theta,GEN chi,GEN nu,long flag)
       a1 = gmul(a1,p1);
     }
   }
-  pdr = respm(f,derivpol(f),gpuigs(p,mf));
+  pdr = respm(f,derivpol(f),gpuigs(p,mf+1));
   e = eleval(f,Fp_pol_red(gmul(a1,b2), p),theta);
   e = gdiv(polmodi(gmul(pdr,e), mulii(pdr,p)),pdr);
 
@@ -1185,13 +1185,13 @@ update_alpha(GEN p, GEN fx, GEN alph, GEN chi, GEN pmr, GEN pmf, long mf)
     nalph = alph;
   }
 
-  pdr = modii(respm(nchi, derivpol(nchi), pmr), pmr);
+  pdr = respm(nchi, derivpol(nchi), pmr);
   for (;;)
   {
     if (signe(pdr)) break;
     if (!nalph) nalph = gadd(alph, gmul(p, polx[v])); 
-    nchi = mycaract(fx, nalph); /* nchi is too reduced at this point */
-    pdr = modii(respm(nchi, derivpol(nchi), pmf), pmf);
+    nchi = mycaract(fx, nalph); /* nchi was too reduced at this point */
+    pdr = respm(nchi, derivpol(nchi), pmf);
     if (signe(pdr)) break;
     if (DEBUGLEVEL >= 6)
       fprintferr("  non separable polynomial in update_alpha!\n");
@@ -1202,7 +1202,7 @@ update_alpha(GEN p, GEN fx, GEN alph, GEN chi, GEN pmr, GEN pmf, long mf)
     nnu  = (GEN)w[2]; 
     l    = itos((GEN)w[3]);
     if (l > 1) return Decomp(p, fx, mf, nalph, nchi, nnu, 0);
-    pdr = modii(respm(nchi, derivpol(nchi), pmr), pmr);
+    pdr = respm(nchi, derivpol(nchi), pmr);
   }
 
   if (is_pm1(pdr))
@@ -1249,8 +1249,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
     fprintferr("\n");
   }
   
-  /* this is quite arbitrary; what is important is that >= mf + 1 */
-  pmf = gpowgs(p, mf + 3);
+  pmf = gpowgs(p, mf + 1);
   pdr = respm(fx, derivpol(fx), pmf);
   pmr = mulii(sqri(pdr), p);
   pdr = mulii(p, pdr);
@@ -1635,10 +1634,12 @@ gcdpm(GEN f1,GEN f2,GEN pm)
 GEN
 respm(GEN x,GEN y,GEN pm)
 {
+  GEN p1;
   long av=avma,tetpil;
 
   x = sylpm(x,y,pm); tetpil=avma;
-  return gerepile(av,tetpil, icopy(gcoeff(x,1,1)));
+  p1 = gcoeff(x,1,1);
+  return gerepile(av,tetpil, egalii(p1,pm)? gzero:icopy(p1));
 }
 
 /* Normalized integral basis */
