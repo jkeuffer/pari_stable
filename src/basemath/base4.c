@@ -200,9 +200,8 @@ principalideal0(GEN nf, GEN x, long copy)
       x = gscalcol_i(x, lgef(nf[1])-3); break;
 
     case t_POLMOD:
-      if (!gegal((GEN)nf[1],(GEN)x[1]))
-	err(talker,"incompatible number fields in principalideal");
-      x=(GEN)x[2]; /* fall through */
+      x = checknfelt_mod(nf,x,"principalideal");
+      /* fall through */
     case t_POL:
       x = copy? algtobasis(nf,x): algtobasis_intern(nf,x);
       break;
@@ -542,9 +541,8 @@ ideal_two_elt(GEN nf, GEN x)
 	z[2]=(long)zerocol(N); return z;
 
       case t_POLMOD:
-        if (!gegal((GEN)nf[1],(GEN)x[1]))
-	  err(talker,"incompatible number fields in ideal_two_elt");
-	x=(GEN)x[2]; /* fall through */
+        x = checknfelt_mod(nf, x, "ideal_two_elt");
+        /* fall through */
       case t_POL:
         z[1]=zero; z[2]=(long)algtobasis(nf,x); return z;
       case t_COL:
@@ -927,19 +925,28 @@ ideleaddone(GEN nf,GEN x,GEN idele)
   return addone(ideleaddone_aux,nf,x,idele);
 }
 
+/* return integral x = 0 mod p/pr^e, (x,pr) = 1.
+ * Don't reduce mod p here: caller may need result mod pr^k */
+GEN 
+special_anti_uniformizer(GEN nf, GEN pr)
+{
+  GEN p = (GEN)pr[1], e = (GEN)pr[3];
+  return gdivexact(element_pow(nf,(GEN)pr[5],e), gpuigs(p,itos(e)-1));
+}
+
 GEN
 nfmodprinit(GEN nf, GEN pr)
 {
   long av;
-  GEN p,e,p1,prhall;
+  GEN p,p1,prhall;
 
   nf = checknf(nf); checkprimeid(pr);
   prhall = cgetg(3,t_VEC);
   prhall[1] = (long) prime_to_ideal(nf,pr);
 
-  av = avma; p = (GEN)pr[1]; e = (GEN)pr[3];
+  av = avma; p = (GEN)pr[1];
   p1 = cgetg(2,t_MAT);
-  p1[1] = ldiv(element_pow(nf,(GEN)pr[5],e), gpuigs(p,itos(e)-1));
+  p1[1] = (long)gmod(special_anti_uniformizer(nf, pr), p);
   p1 = hnfmodid(idealhermite_aux(nf,p1), p);
   p1 = idealaddtoone_i(nf,pr,p1);
 
@@ -1130,6 +1137,226 @@ add_arch(GEN nf, GEN ax, GEN y)
   return gerepile(av,tetpil,gadd(ax,y));
 }
 
+/* add x^1 to factorisation f */
+static GEN
+famat_add(GEN f, GEN x)
+{
+  GEN t,h = cgetg(3,t_MAT);
+  if (lg(f) == 1)
+  {
+    t=cgetg(2,t_COL); h[1]=(long)t; t[1]=lcopy(x);
+    t=cgetg(2,t_COL); h[2]=(long)t; t[1]=un;      
+  }
+  else
+  {
+    h[1] = (long)concat((GEN)f[1], x);
+    h[2] = (long)concat((GEN)f[2], gun);
+  }
+  return h;
+}
+
+/* cf merge_factor_i */
+static GEN
+famat_mul(GEN f, GEN g)
+{
+  GEN h;
+  if (typ(g) != t_MAT) return famat_add(f, g);
+  if (lg(f) == 1) return g;
+  if (lg(g) == 1) return f;
+  h = cgetg(3,t_MAT);
+  h[1] = (long)concat((GEN)f[1], (GEN)g[1]);
+  h[2] = (long)concat((GEN)f[2], (GEN)g[2]);
+  return h;
+}
+
+static GEN
+famat_sqr(GEN f)
+{
+  GEN h;
+  if (lg(f) == 1) return f;
+  h = cgetg(3,t_MAT);
+  h[1] = lcopy((GEN)f[1]);
+  h[2] = lmul2n((GEN)f[2],1);
+  return h;
+}
+static GEN
+famat_inv(GEN f)
+{
+  GEN h;
+  if (lg(f) == 1) return f;
+  h = cgetg(3,t_MAT);
+  h[1] = lcopy((GEN)f[1]);
+  h[2] = lneg((GEN)f[2]);
+  return h;
+}
+static GEN
+famat_pow(GEN f, GEN n)
+{
+  GEN h;
+  if (lg(f) == 1) return f;
+  h = cgetg(3,t_MAT);
+  h[1] = lcopy((GEN)f[1]);
+  h[2] = lmul((GEN)f[2],n);
+  return h;
+}
+
+GEN
+famat_to_nf(GEN nf, GEN f)
+{
+  GEN t, *x, *e;
+  long i;
+  if (lg(f) == 1) return gun;
+
+  x = (GEN*)f[1];
+  e = (GEN*)f[2];
+  t = element_pow(nf, x[1], e[1]);
+  for (i=lg(x)-1; i>1; i++)
+    t = element_mul(nf, t, element_pow(nf, x[i], e[i]));
+  return t;
+}
+
+GEN
+to_famat(GEN g, GEN e)
+{
+  GEN h = cgetg(3,t_MAT);
+  h[1] = (long)g;
+  h[2] = (long)e; return h;
+}
+
+/* assume (g[i], id) = 1 for all i. return prod g[i]^e[i] mod id */
+GEN
+famat_to_nf_modideal_coprime(GEN nf, GEN g, GEN e, GEN id)
+{
+  GEN t = NULL, n, z;
+  long i, lx = lg(g);
+  for (i=1; i<lx; i++)
+  {
+    n = (GEN)e[i];
+    if (!signe(n)) continue;
+    z = element_powmodideal(nf, (GEN)g[i], n, id);
+    t = (t == NULL)? z: element_mulmodideal(nf, t, z, id);
+  }
+  return t;
+}
+
+extern GEN zinternallog_pk(GEN nf,GEN a0,GEN y,GEN pr,GEN prk,GEN list,GEN *psigne);
+extern GEN colreducemodmat(GEN x, GEN y, GEN *Q);
+extern GEN special_anti_uniformizer(GEN nf, GEN pr);
+extern GEN set_sign_mod_idele(GEN nf, GEN x, GEN y, GEN idele, GEN sarch);
+
+/* Compute t = prod g[i]^e[i] mod pr^n, assuming (t, pr) = 1.
+ * Method: modify each g[i] so that it becomes coprime to pr :
+ *  x / (p^k u) --> x * (b/p)^v_pr(x) / z^k u, where z = b^e/p^(e-1)
+ * b/p = vp^(-1) times something prime to p; both numerator and denominator
+ * are integral and coprime to pr.  Globally, we multiply by (b/p)^v_pr(t) = 1.
+ *
+ * EX = exponent of (O_K / pr^k)^* used to reduce the product in case the
+ * e[i] are large */
+GEN
+famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prn, GEN EX)
+{
+  long i,k, l = lg(g), N = lgef(nf[1])-3;
+  GEN prnZ,cx,x,u,z, zpow = gzero, p = (GEN)pr[1], b = (GEN)pr[5];
+  GEN mul = cgetg(N+1,t_MAT), newg = cgetg(l, t_VEC);
+
+  prnZ = gcoeff(prn, 1,1);
+  z = gmod(special_anti_uniformizer(nf, pr), prnZ);
+  for (i=1; i<=N; i++) mul[i] = (long)element_mulid(nf,b,i);
+  for (i=1; i < l; i++)
+  {
+    x = algtobasis(nf, (GEN)g[i]);
+    cx = denom(x); x = gmul(x,cx);
+    k = pvaluation(cx, p, &u);
+    if (!gcmp1(u)) /* could avoid the inversion, but prnZ is small--> cheap */
+      x = gmul(x, mpinvmod(u, prnZ));
+    if (k)
+      zpow = addii(zpow, mulsi(k, (GEN)e[i]));
+    (void)int_elt_val(nf, x, p, mul, &x, VERYBIGINT);
+    newg[i] = (long)colreducemodmat(x, prn, NULL);
+  }
+  if (zpow != gzero) { newg = concatsp(newg, z); e = concatsp(e, zpow); }
+  e = gmod(e, EX);
+  return famat_to_nf_modideal_coprime(nf, newg, e, prn);
+}
+
+GEN
+famat_ideallog(GEN nf, GEN g, GEN e, GEN bid)
+{
+  ulong av = avma;
+  GEN vp = gmael(bid, 3,1), ep = gmael(bid, 3,2), arch = gmael(bid,1,2);
+  GEN cyc = gmael(bid,2,2), list_set = (GEN)bid[4], U = (GEN)bid[5];
+  GEN p1,y0,x,y, psigne = zsigne(nf, to_famat(g,e), arch);
+  long i;
+  y0 = y = cgetg(lg(U), t_COL);
+  for (i=1; i<lg(vp); i++)
+  {
+    GEN pr = (GEN)vp[i], prk;
+    prk = idealpow(nf, pr, (GEN)ep[i]);
+    /* TODO: FIX group exponent (should be mod prk, not f !) */
+    x = famat_makecoprime(nf, g, e, pr, prk, (GEN)cyc[1]);
+    y = zinternallog_pk(nf, x, y, pr, prk, (GEN)list_set[i], &psigne);
+  }
+  p1 = lift_intern(gmul(gmael(list_set,i,3), psigne));
+  for (i=1; i<lg(p1); i++) *++y = p1[i];
+  y = gmul(U,y0);
+  avma = av; x = cgetg(lg(y), t_COL);
+  for (i=1; i<lg(y); i++)
+    x[i] = lmodii((GEN)y[i], (GEN)cyc[i]);
+  return x;
+}
+
+/* prod g[i]^e[i] mod bid, assume (g[i], id) = 1 */
+GEN
+famat_to_nf_modidele(GEN nf, GEN g, GEN e, GEN bid)
+{
+  GEN t,sarch,module,cyc,fa2;
+  long lc;
+  if (lg(g) == 1) return gscalcol_i(gun, lgef(nf[1])-3); /* 1 */
+  module = (GEN)bid[1];
+  fa2 = (GEN)bid[4]; sarch = (GEN)fa2[lg(fa2)-1];
+  cyc = gmael(bid,2,2); lc = lg(cyc);
+  t = NULL;
+  if (lc != 1)
+  {
+    GEN EX = (GEN)cyc[1]; /* group exponent */
+    GEN id = (GEN)module[1];
+    t = famat_to_nf_modideal_coprime(nf,g, gmod(e,EX), id);
+  }
+  if (!t) t = gun;
+  return set_sign_mod_idele(nf, to_famat(g,e), t, module, sarch);
+}
+
+/* x,y assumed to be of the same type, either
+ * 	t_COL/t_VEC: logarithmic distance components
+ *	t_POLMOD: nf elt
+ *	t_MAT: factorisation of nf elt */
+GEN
+arch_mul(GEN x, GEN y) {
+  switch (typ(x)) {
+    case t_POLMOD: return gmul(x, y);
+    case t_MAT:    return (x == y)? famat_sqr(x): famat_mul(x,y);
+    default:       return (x == y)? gmul2n(x,1): gadd(x,y); /* t_COL, t_VEC */
+  }
+}
+
+GEN 
+arch_inv(GEN x) {
+  switch (typ(x)) {
+    case t_POLMOD: return ginv(x);
+    case t_MAT:    return famat_inv(x);
+    default:       return gneg(x); /* t_COL, t_VEC */
+  }
+}
+
+GEN
+arch_pow(GEN x, GEN n) {
+  switch (typ(x)) {
+    case t_POLMOD: return powgi(x,n);
+    case t_MAT:    return famat_pow(x,n);
+    default:       return gmul(n,x);
+  }
+}
+
 /* output the ideal product ix.iy (don't reduce) */
 GEN
 idealmul(GEN nf, GEN x, GEN y)
@@ -1174,11 +1401,7 @@ idealmul(GEN nf, GEN x, GEN y)
   if (!f) return p1;
 
   if (ax && ay)
-  {
-    if (typ(ax) == t_POLMOD) ax = gmul(ax,ay);
-    else
-      ax = (ax == ay)? gmul2n(ax,1): gadd(ax,ay);
-  }
+    ax = arch_mul(ax, ay);
   else
   {
     if (ax)
@@ -1279,7 +1502,8 @@ idealinv(GEN nf, GEN x)
       x = gdiv(pidealprimeinv(nf,x), (GEN)x[1]);
   }
   x = gerepileupto(av,x); if (!ax) return x;
-  res[1]=(long)x; res[2]=lneg(ax); return res;
+  res[1]=(long)x;
+  res[2]=(long)arch_inv(ax); return res;
 }
 
 /* return x such that vp^n = x/d */
@@ -1365,7 +1589,7 @@ idealpow(GEN nf, GEN x, GEN n)
             case t_COL: x = gmul((GEN)nf[7],x);
             case t_POL: x = gmodulcp(x,(GEN)nf[1]);
           }
-        x = gpui(x,n,0);
+        x = powgi(x,n);
         x = idealhermite_aux(nf,x); break;
       case id_PRIME:
         x = idealpowprime(nf,x,n); break;
@@ -1374,7 +1598,7 @@ idealpow(GEN nf, GEN x, GEN n)
 
         cx = content(x); if (gcmp1(cx)) cx = NULL; else x = gdiv(x,cx);
         a=ideal_two_elt(nf,x); alpha=(GEN)a[2]; a=(GEN)a[1];
-        m = cgetg(N+1,t_MAT); a = gpui(a,n1,0);
+        m = cgetg(N+1,t_MAT); a = powgi(a,n1);
         alpha = element_pow(nf,alpha,n1);
         for (i=1; i<=N; i++) m[i]=(long)element_mulid(nf,alpha,i);
         x = hnfmodid(m, a);
@@ -1383,7 +1607,7 @@ idealpow(GEN nf, GEN x, GEN n)
     }
   x = gerepileupto(av, x);
   if (!ax) return x;
-  ax = (typ(ax) == t_POLMOD)? powgi(ax,n): gmul(n,ax);
+  ax = arch_pow(ax, n);
   res[1]=(long)x;
   res[2]=(long)ax;
   return res;
@@ -1426,7 +1650,7 @@ idealpowred(GEN nf, GEN x, GEN n, long prec)
       y = ideallllred(nf,y,NULL,prec);
     }
     if (--i == 0) break;
-    m = *++p1, j = BITS_IN_LONG;
+    m = *++p1; j = BITS_IN_LONG;
   }
   if (s < 0) y = idealinv(nf,y);
   if (y == x) y = ideallllred(nf,x,NULL,prec);
@@ -1480,72 +1704,57 @@ idealdiv(GEN nf, GEN x, GEN y)
   tetpil=avma; return gerepile(av,tetpil,idealmul(nf,x,z));
 }
 
+/* This routine computes the quotient x/y of two ideals in the number field nf.
+ * It assumes that the quotient is an integral ideal.  The idea is to find an
+ * ideal z dividing y such that gcd(Nx/Nz, Nz) = 1.  Then
+ *
+ *   x + (Nx/Nz)    x
+ *   ----------- = ---
+ *   y + (Ny/Nz)    y
+ *
+ * Proof: we can assume x and y are integral. Let p be any prime ideal
+ *
+ * If p | Nz, then it divides neither Nx/Nz nor Ny/Nz (since Nx/Nz is the
+ * product of the integers N(x/y) and N(y/z)).  Both the numerator and the
+ * denominator on the left will be coprime to p.  So will x/y, since x/y is
+ * assumed integral and its norm N(x/y) is coprime to p.
+ *
+ * If instead p does not divide Nz, then v_p (Nx/Nz) = v_p (Nx) >= v_p(x).
+ * Hence v_p (x + Nx/Nz) = v_p(x).  Likewise for the denominators.  QED.
+ *
+ *		Peter Montgomery.  July, 1994. */
 GEN
-idealdivexact(GEN nf, GEN x, GEN y)
-/*  This routine computes the quotient x/y of two ideals in the number field
- *  nf. It assumes that the quotient is an integral ideal.
- *
- *  The idea is to find an ideal z dividing y
- *  such that gcd(N(x)/N(z), N(z)) = 1. Then
- *
- *    x + (N(x)/N(z))    x
- *    --------------- = -----
- *    y + (N(y)/N(z))    y
- *
- *  When x and y are integral ideals, this identity can be checked by looking
- *  at the exponent of a prime ideal p on both sides of the equation.
- *
- *  Specifically, if a prime ideal p divides N(z), then it divides neither
- *  N(x)/N(z) nor N(y)/N(z) (since N(x)/N(z) is the product of the integers
- *  N(x/y) and N(y/z)).  Both the numerator and the denominator on the left
- *  will be coprime to p.  So will x/y, since x/y is assumed integral and its
- *  norm N(x/y) is coprime to p
- *
- *  If instead p does not divide N(z), then the power of p dividing N(x)/N(z)
- *  is the same as the power of p dividing N(x), which is at least as large
- *  as the power of p dividing x.  Likewise for N(y)/N(z).  So the power of p
- *  dividing the left side equals the power of dividing the right side.
- *
- *		Peter Montgomery
- *		July, 1994.
- */
+idealdivexact(GEN nf, GEN x0, GEN y0)
 {
-  long av = avma, tetpil,N;
-  GEN x1,y1,detx1,dety1,detq,gcancel,gtemp, cy = content(y);
+  ulong av = avma;
+  GEN x,y,Nx,Ny,Nz, cy = content(y0);
 
-  nf=checknf(nf); N=lgef(nf[1])-3;
+  nf = checknf(nf);
   if (gcmp0(cy)) err(talker, "cannot invert zero ideal");
 
-  x1 = gdiv(x,cy); detx1 = idealnorm(nf,x1);
-  if (gcmp0(detx1)) { avma = av; return gcopy(x); } /* numerator is zero */
+  x = gdiv(x0,cy); Nx = idealnorm(nf,x);
+  if (gcmp0(Nx)) { avma = av; return gcopy(x0); } /* numerator is zero */
 
-  y1 = gdiv(y,cy); dety1 = idealnorm(nf,y1);
-  detq = gdiv(detx1,dety1);
-  if (!gcmp1(denom(x1)) || typ(detq) != t_INT)
+  y = gdiv(y0,cy); Ny = idealnorm(nf,y);
+  if (!gcmp1(denom(x)) || !divise(Nx,Ny)) 
     err(talker, "quotient not integral in idealdivexact");
-  gcancel = dety1;
- /* Find a norm gcancel such that
-  * (1) gcancel divides dety1;
-  * (2) gcd(detx1/gcancel, gcancel) = 1.
-  */
-  do
+  /* Find a norm Nz | Ny such that gcd(Nx/Nz, Nz) = 1 */
+  for (Nz = Ny;;)
   {
-    gtemp = ggcd(gcancel, gdiv(detx1,gcancel));
-    gcancel = gdiv(gcancel,gtemp);
+    GEN p1 = mppgcd(Nz, divii(Nx,Nz));
+    if (is_pm1(p1)) break;
+    Nz = divii(Nz,p1);
   }
-  while (!gcmp1(gtemp));
- /*                    x1 + (detx1/gcancel)
-  * Replace x1/y1 by:  --------------------
-  *                    y1 + (dety1/gcancel)
-  */
+  /* Replace x/y  by  x+(Nx/Nz) / y+(Ny/Nz) */
+  x = idealhermite_aux(nf, x);
+  x = hnfmodid(x, divii(Nx,Nz));
+  /* y reduced to unit ideal ? */
+  if (Nz == Ny) return gerepileupto(av, x);
 
-  x1 = idealadd(nf, x1, gscalmat(gdiv(detx1, gcancel), N));
-  /* y1 reduced to unit ideal ? */
-  if (gegal(gcancel,dety1)) return gerepileupto(av, x1);
-
-  y1 = idealadd(nf,y1, gscalmat(gdiv(dety1,gcancel), N));
-  y1 = hnfideal_inv(nf,y1); tetpil = avma;
-  return gerepile(av, tetpil, idealmat_mul(nf,x1,y1));
+  y = idealhermite_aux(nf, y);
+  y = hnfmodid(y, divii(Ny,Nz));
+  y = hnfideal_inv(nf,y);
+  return gerepileupto(av, idealmat_mul(nf,x,y));
 }
 
 GEN
@@ -1684,19 +1893,18 @@ ideallllred(GEN nf, GEN I, GEN vdir, long prec)
       aI = gcopy(aI);
     }
     else
-    {
-      if (typ(aI) == t_POLMOD)
+      switch(typ(aI))
       {
-        if (c1) c1 = gclone(c1);
-        I = gerepileupto(av, I);
-        if (c1) { aI = gmul(c1,aI); gunclone(c1); }
+        case t_POLMOD: case t_MAT:
+          if (c1) c1 = gclone(c1);
+          I = gerepileupto(av, I);
+          if (c1) { aI = arch_mul(aI, c1); gunclone(c1); }
+          break;
+
+        default:
+          I = gerepileupto(av, I);
+          aI = gcopy(aI);
       }
-      else
-      {
-        I = gerepileupto(av, I);
-        aI = gcopy(aI);
-      }
-    }
     res[1]=(long)I; res[2]=(long)aI; return res;
   }
 
@@ -1713,10 +1921,14 @@ ideallllred(GEN nf, GEN I, GEN vdir, long prec)
   if (DEBUGLEVEL>=6) msgtimer("new ideal");
   if (aI)
   {
-    if (typ(aI) == t_POLMOD)
-      y = gmul(x, gdiv(c1? mulii(c,c1): c,Nx));
-    else
-      y = gneg_i(get_arch(nf,y,prec));
+    switch(typ(aI))
+    {
+      case t_POLMOD: case t_MAT:
+        y = gmul(x, gdiv(c1? mulii(c,c1): c,Nx));
+        break;
+      default:
+        y = gneg_i(get_arch(nf,y,prec));
+    }
     y = gclone(y);
   }
 
@@ -1729,9 +1941,8 @@ ideallllred(GEN nf, GEN I, GEN vdir, long prec)
   p1 = gerepileupto(av, hnfmodid(p1,b));
   if (DEBUGLEVEL>=6) msgtimer("final hnf");
   if (!aI) return p1;
-  res[1]=(long)p1;
-  aI = (typ(aI)==t_POLMOD)? gmul(aI,y): gadd(aI,y);
-  res[2]=(long)aI;
+  res[1] = (long)p1;
+  res[2] = (long)arch_mul(aI,y);
   gunclone(y); return res;
 }
 
@@ -1960,11 +2171,11 @@ idealchinese(GEN nf, GEN x, GEN y)
       if (cmpis((GEN)pr[4],N))
       {
 	p2=cgetg(3,t_MAT);
-        p2[1]=(long)gscalcol_i(gpui((GEN)pr[1],p4,0), N);
+        p2[1]=(long)gscalcol_i(powgi((GEN)pr[1],p4), N);
 	p2[2]=(long)element_pow(nf,(GEN)pr[2],p4);
         t=idealmat_mul(nf,t,p2);
       }
-      else t=gmul(gpui((GEN)pr[1],p4,0),t);
+      else t=gmul(powgi((GEN)pr[1],p4),t);
     }
   }
   z=cgetg(r,t_VEC);
@@ -1973,12 +2184,12 @@ idealchinese(GEN nf, GEN x, GEN y)
     pr=(GEN)list[i]; p4=(GEN)ep[i];
     if (cmpis((GEN)pr[4],N))
     {
-      p2=cgetg(3,t_MAT); p1=gpui((GEN)pr[1],p4,0);
+      p2=cgetg(3,t_MAT); p1=powgi((GEN)pr[1],p4);
       p2[1]=(long)gscalcol_i(p1,N);
       p2[2]=(long)element_pow(nf,(GEN)pr[5],p4);
       z[i]=ldiv(idealmat_mul(nf,t,p2),p1);
     }
-    else z[i]=ldiv(t,gpui((GEN)pr[1],p4,0));
+    else z[i]=ldiv(t,powgi((GEN)pr[1],p4));
   }
   v=idealaddmultoone(nf,z);
   s=cgetg(N+1,t_COL); for (i=1; i<=N; i++) s[i]=zero;

@@ -548,11 +548,8 @@ bnfsunit(GEN bnf,GEN S,long prec)
     setlg(Sperm, lH); fa[1] = (long)Sperm;
     for (i=1; i<lH; i++)
       sunit[i] = isprincipalfact(bnf,Sperm,(GEN)H[i],NULL,fl)[2];
-    for (i=1; i<lB; i++)
-    {
-      j = lH-1 + i;
-      sunit[j] = isprincipalfact(bnf,Sperm,(GEN)B[i],(GEN)Sperm[j],fl)[2];
-    }
+    for (j=1; j<lB; j++,i++)
+      sunit[i] = isprincipalfact(bnf,Sperm,(GEN)B[j],(GEN)Sperm[i],fl)[2];
 
     p1 = cgetg(4,t_VEC);
     den = dethnf_i(H); H = gmul(den, invmat(H)); 

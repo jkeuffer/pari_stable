@@ -127,9 +127,7 @@ rnfinitalg(GEN nf,GEN pol,long prec)
     if (! is_const_t(tp1))
     {
       if (tp1!=t_POLMOD) err(typeer,"rnfinitalg");
-      if (!gegal((GEN)p1[1],(GEN)nf[1]))
-	err(talker,"incompatible number fields in rnfinitalg");
-      p1=(GEN)p1[2];
+      p1 = checknfelt_mod(nf, p1, "rnfinitalg");
       if (! is_const_t(typ(p1)))
       {
 	v1=varn(p1);

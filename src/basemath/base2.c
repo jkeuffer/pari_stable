@@ -25,7 +25,7 @@ extern GEN element_muli(GEN nf, GEN x, GEN y);
 extern GEN element_mulid(GEN nf, GEN x, long i);
 extern GEN eleval(GEN f,GEN h,GEN a);
 extern GEN ideal_better_basis(GEN nf, GEN x, GEN M);
-extern long int_elt_val(GEN nf, GEN x, GEN p, GEN bp, long v);
+extern long int_elt_val(GEN nf, GEN x, GEN p, GEN bp, GEN *t, long v);
 extern GEN mat_to_vecpol(GEN x, long v);
 extern GEN nfidealdet1(GEN nf, GEN a, GEN b);
 extern GEN nfsuppl(GEN nf, GEN x, long n, GEN prhall);
@@ -2215,7 +2215,7 @@ primedec(GEN nf, GEN p)
 {
   long av=avma,tetpil,i,j,k,kbar,np,c,indice,N,lp;
   GEN ex,f,list,ip,elth,h;
-  GEN modfrob,algebre,algebre1,b,mat1,T,nfp;
+  GEN modfrob,algebre,algebre1,b,mat1,T;
   GEN alpha,beta,p1,p2,unmodp,zmodp,idmodp;
 
   if (DEBUGLEVEL>=3) timer2();
@@ -2266,7 +2266,6 @@ primedec(GEN nf, GEN p)
   unmodp=gmodulsg(1,p); zmodp=gmodulsg(0,p);
   idmodp = idmat_intern(N,unmodp,zmodp);
   ip = gmul(ip, unmodp);
-  nfp = gscalcol_i(p,N);
 
   h=cgetg(N+1,t_VEC); h[1]=(long)ip;
   for (c=1; c; c--)
@@ -2304,9 +2303,9 @@ primedec(GEN nf, GEN p)
       p1[2]=(long)prime_two_elt(nf,p,elth);
       p1[5]=(long)lens(nf,p,(GEN)p1[2]);
       av1=avma;
-      i = int_elt_val(nf,nfp,p,(GEN)p1[5],N);
+      i = int_elt_val(nf,(GEN)p1[5],p,(GEN)p1[5],NULL,N-1);
       avma=av1;
-      p1[3]=lstoi(i);
+      p1[3]=lstoi(i+1);
     }
     if (DEBUGLEVEL>=3) msgtimer("h[%ld]",c);
   }

@@ -32,6 +32,7 @@ GEN initalgall0(GEN x, long flag, long prec);
 #define nf_GEN   1 /* for polredabs also */
 #define nf_FORCE 2
 #define nf_GIVEPREC 4
+#define nf_GENMAT 8
 
 /* for buchray */
 #define nf_INIT  4

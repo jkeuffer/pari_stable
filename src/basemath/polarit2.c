@@ -1608,9 +1608,10 @@ factor0(GEN x,long flag)
 GEN
 merge_factor_i(GEN f, GEN g)
 {
-  GEN h = cgetg(3,t_MAT);
+  GEN h;
   if (lg(f) == 1) return g;
   if (lg(g) == 1) return f;
+  h = cgetg(3,t_MAT);
   h[1] = (long)concatsp((GEN)f[1], (GEN)g[1]);
   h[2] = (long)concatsp((GEN)f[2], (GEN)g[2]);
   return sort_factor_gen(h, cmpii);
@@ -1656,7 +1657,7 @@ factor(GEN x)
 	case t_INTMOD: return factmod(x,p);
 
 	case t_COMPLEX: y=cgetg(3,t_MAT); lx=lgef(x)-2; v=varn(x);
-	  p1=roots(x,pa); tetpil=avma;
+	  av = avma; p1 = roots(x,pa); tetpil = avma;
           p2=cgetg(lx,t_COL);
 	  for (i=1; i<lx; i++)
             p2[i] = (long)deg1pol_i(gun, gneg((GEN)p1[i]), v);

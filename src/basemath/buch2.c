@@ -29,7 +29,7 @@ extern GEN get_arch(GEN nf,GEN x,long prec);
 extern GEN get_roots(GEN x,long r1,long ru,long prec);
 extern void get_nf_matrices(GEN nf, long small);
 extern long ideal_is_zk(GEN ideal,long N);
-extern long int_elt_val(GEN nf, GEN x, GEN p, GEN b, long v);
+extern long int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *t, long v);
 extern GEN init_idele(GEN nf);
 extern GEN norm_by_embed(long r1, GEN x);
 extern GEN gmul_mati_smallvec(GEN x, GEN y);
@@ -404,7 +404,7 @@ factorelt(GEN nf,GEN cbase,GEN x,GEN Nx,long kcz,long limp)
       for (j=1; j<n1; j++)
       {
         P = (GEN)p1[j];
-	v = int_elt_val(nf,x,(GEN)P[1],(GEN)P[5], k);
+	v = int_elt_val(nf,x,(GEN)P[1],(GEN)P[5], NULL, k);
 	if (v)
 	{
 	  primfact[++lo]=ip+j; expoprimfact[lo]=v;
@@ -422,7 +422,7 @@ factorelt(GEN nf,GEN cbase,GEN x,GEN Nx,long kcz,long limp)
   for (k=1,j=1; j<n1; j++)
   {
     P = (GEN)p1[j];
-    v = int_elt_val(nf,x,(GEN)P[1],(GEN)P[5], k);
+    v = int_elt_val(nf,x,(GEN)P[1],(GEN)P[5], NULL, k);
     if (v)
     {
       primfact[++lo]=ip+j; expoprimfact[lo]=v;
@@ -605,7 +605,7 @@ GEN
 buchfu(GEN bnf)
 {
   long av = avma, c;
-  GEN nf,xarch,reg,res, y = cgetg(3,t_VEC); 
+  GEN nf,xarch,reg,res, y = cgetg(3,t_VEC);
 
   bnf = checkbnf(bnf); xarch = (GEN)bnf[3]; nf = (GEN)bnf[7];
   res = (GEN)bnf[8]; reg = (GEN)res[2];
@@ -631,7 +631,7 @@ get_norm_fact_primes(GEN gen, GEN ex, GEN C, GEN *pd)
 {
   GEN N,d,P,p,e;
   long i,s,c = lg(ex);
-  d = N = gun; 
+  d = N = gun;
   for (i=1; i<c; i++)
     if ((s = signe(ex[i])))
     {
@@ -781,7 +781,7 @@ split_ideal(GEN nf, GEN x0, long prec, GEN vperm)
   if (flag && factorgensimple(nf,y)) return y;
 
   y = ideallllred(nf,x0,NULL,prec);
-  if (flag &&  ((!x0[2] && gegal((GEN)y[1], (GEN)x[1])) 
+  if (flag &&  ((!x0[2] && gegal((GEN)y[1], (GEN)x[1]))
              ||  (x0[2] && gcmp0((GEN)y[2])))) flag = 0; /* y == x0 */
   if (flag && factorgensimple(nf,y)) return y;
 
@@ -802,7 +802,7 @@ split_ideal(GEN nf, GEN x0, long prec, GEN vperm)
   {
     int non0 = 0;
     id = x0;
-    for (i=1; i<lgsub; i++) 
+    for (i=1; i<lgsub; i++)
     {
       ex[i] = mymyrand() >> randshift;
       if (ex[i])
@@ -975,10 +975,10 @@ prec_arch(GEN bnf)
   return DEFAULTPREC;
 }
 
-/* col = archimedian components of x, Nx its norm, dx a bound for its
+/* col = archimedian components of x, Nx = kNx^e its norm, dx a bound for its
  * denominator. Return x or NULL (fail) */
 GEN
-isprincipalarch(GEN bnf, GEN col, GEN Nx, GEN dx, long *pe)
+isprincipalarch(GEN bnf, GEN col, GEN kNx, GEN e, GEN dx, long *pe)
 {
   GEN nf, x, matunit, s;
   long N, R1, RU, i, prec = gprecision(col);
@@ -996,7 +996,7 @@ isprincipalarch(GEN bnf, GEN col, GEN Nx, GEN dx, long *pe)
     if (!u && z) return NULL;
     if (u) col = gadd(col, gmul(matunit, u));
   }
-  s = gdivgs(glog(Nx,prec), N);
+  s = gdivgs(gmul(e, glog(kNx,prec)), N);
   for (i=1; i<=R1; i++) col[i] = lexp(gadd(s, (GEN)col[i]),prec);
   for (   ; i<=RU; i++) col[i] = lexp(gadd(s, gmul2n((GEN)col[i],-1)),prec);
   /* d.alpha such that x = alpha \prod gj^ej */
@@ -1081,7 +1081,7 @@ isprincipalall0(GEN bnf, GEN x, long *ptprec, long flag)
 
   /* find coords on Zk; Q = N (x / \prod gj^ej) = N(alpha), denom(alpha) | d */
   Q = gdiv(dethnf_i(x), get_norm_fact(gen, ex, &d));
-  col = isprincipalarch(bnf, col, Q, d, &e);
+  col = isprincipalarch(bnf, col, Q, gun, d, &e);
   if (col && !fact_ok(nf,x, col,gen,ex)) col = NULL;
   if (!col)
   {
@@ -1148,19 +1148,22 @@ isprincipalall(GEN bnf,GEN x,long flag)
   }
 }
 
+extern GEN famat_to_nf(GEN nf, GEN f);
+extern GEN arch_mul(GEN x, GEN y);
+
 /* isprincipal for C * \prod P[i]^e[i] (C omitted if NULL) */
 GEN
 isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag)
 {
   long av = avma, l = lg(e), i,prec,c;
   GEN id,id2, nf = checknf(bnf), z = NULL; /* gcc -Wall */
-  int gen = flag & nf_GEN;
+  int gen = flag & (nf_GEN | nf_GENMAT);
 
   prec = prec_arch(bnf);
   if (gen)
   {
     z = cgetg(3,t_VEC);
-    z[2] = lmodulcp(gun, (GEN)nf[1]);
+    z[2] = lgetg(1, t_MAT);
   }
   id = C;
   for (i=1; i<l; i++) /* compute prod P[i]^e[i] */
@@ -1182,11 +1185,16 @@ isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag)
     GEN y = isprincipalall0(bnf, gen? (GEN)id[1]: id,&prec,flag);
     if (y)
     {
-      if (typ(y) == t_VEC && gen)
+      if (gen && typ(y) == t_VEC)
       {
-        GEN u = (GEN)y[2];
-        u = gmul((GEN)id[2], basistoalg(nf,u));
-        y[2] = (long)algtobasis(nf,u);
+        GEN t, u = lift_intern(basistoalg(nf, (GEN)y[2]));
+        if (flag & nf_GENMAT)
+          y[2] = gcmp1(u)? id[2]: (long)arch_mul((GEN)id[2], u);
+        else
+        {
+          t = basistoalg(nf, famat_to_nf(nf, (GEN)id[2]));
+          y[2] = (long)algtobasis(nf, gmul(t, u));
+        }
         y = gcopy(y);
       }
       return gerepileupto(av,y);
@@ -1987,7 +1995,7 @@ class_group_gen(GEN nf,GEN W,GEN C,GEN vperm,GEN *ptclg1,GEN *ptclg2,long prec)
   *   setlg_col(D && U && Y, lo) + setlg(D && V && X && Ui, lo)
   * but it's not worth the complication:
   * 1) gain is negligible (avoid computing z^0 if lo < lo0)
-  * 2) when computing ga, the products XU and VY use the original matrices 
+  * 2) when computing ga, the products XU and VY use the original matrices
   */
   Ur  = reducemodHNF(U, D, &Y);
   Uir = reducemodHNF(Ui,W, &X);
@@ -2076,7 +2084,7 @@ shift_t2(GEN T2, GEN M, GEN MC, long a, long b)
   for (j=1; j<N; j++)
   {
     t2[j] = lgetg(N,t_COL);
-    for (i=1; i<=j; i++) 
+    for (i=1; i<=j; i++)
     {
       z = mul_real(gcoeff(MC,i,a), gcoeff(M,a,j));
       if (a!=b) z = gadd(z, mul_real(gcoeff(MC,i,b), gcoeff(M,b,j)));
@@ -2230,12 +2238,13 @@ makecycgen(GEN bnf)
   l = lg(gen); h = cgetg(l, t_VEC);
   for (i=1; i<l; i++)
   {
-    GEN N = powgi(dethnf_i((GEN)gen[i]), (GEN)cyc[i]);
-    GEN y = isprincipalarch(bnf,(GEN)GD[i], N, gun, &e);
+    GEN N = dethnf_i((GEN)gen[i]);
+    GEN y = isprincipalarch(bnf,(GEN)GD[i], N, (GEN)cyc[i], gun, &e);
     if (y && !fact_ok(nf,y,NULL,gen,(GEN)D[i])) y = NULL;
     if (y) { h[i] = (long)y; continue; }
-    y = isprincipalfact(bnf,gen,(GEN)D[i],NULL, nf_GEN|nf_FORCE|nf_GIVEPREC);
-    if (typ(y) != t_INT) 
+    y = isprincipalfact(bnf, gen, (GEN)D[i], NULL,
+                        nf_GEN|nf_GENMAT|nf_FORCE|nf_GIVEPREC);
+    if (typ(y) != t_INT)
       h[i] = y[2];
     else
     {
@@ -2273,9 +2282,9 @@ makematal(GEN bnf)
     GEN ex = (j<=lW)? (GEN)W[j]: (GEN)B[j-lW];
     GEN C = (j<=lW)? NULL: (GEN)pFB[j];
     GEN dx, Nx = get_norm_fact_primes(pFB, ex, C, &dx);
-    GEN y = isprincipalarch(bnf,(GEN)WB_C[j], Nx, dx, &e);
+    GEN y = isprincipalarch(bnf,(GEN)WB_C[j], Nx,gun, dx, &e);
     if (y && !fact_ok(nf,y,C,pFB,ex)) y = NULL;
-    if (y) 
+    if (y)
     {
       if (DEBUGLEVEL>1) fprintferr("*%ld ",j);
       ma[j] = (long)y; continue;

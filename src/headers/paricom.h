@@ -274,17 +274,11 @@ extern void* global_err_data;
 #define element_mulmodideal(nf,x,y,ideal) (\
   nfreducemodideal((nf),element_mul((nf),(x),(y)),(ideal))\
 )
-#define element_mulmodidele(nf,x,y,idele,structarch) (\
-  nfreducemodidele((nf),element_mul((nf),(x),(y)),(idele),(structarch))\
-)
 #define element_mulmodpr(nf,x,y,prhall) (\
   nfreducemodpr((nf),element_mul((nf),(x),(y)),(prhall))\
 )
 #define element_sqrmodideal(nf,x,ideal) (\
   nfreducemodideal((nf),element_sqr((nf),(x)),(ideal))\
-)
-#define element_sqrmodidele(nf,x,idele,structarch) (\
-  nfreducemodidele((nf),element_sqr((nf),(x)),(idele),(structarch))\
 )
 #define element_sqrmodpr(nf,x,prhall) (\
   nfreducemodpr((nf),element_sqr((nf),(x)),(prhall))\

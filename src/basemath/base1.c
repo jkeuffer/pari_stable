@@ -141,6 +141,15 @@ check_pol_int(GEN x)
 }
 
 GEN
+checknfelt_mod(GEN nf, GEN x, char *s)
+{
+  if (!gegal((GEN)x[1],(GEN)nf[1]))
+    err(talker,"incompatible modulus in %s:\n  mod = %Z,\n  nf  = %Z",
+        s, x[1], nf[1]);
+  return (GEN)x[2];
+}
+
+GEN
 get_primeid(GEN x)
 {
   if (typ(x) != t_VEC) return NULL;

@@ -900,15 +900,7 @@ x^5 + 3021*x^4 - 786303*x^3 - 6826636057*x^2 - 546603588746*x + 385389051407
 [x^8 - x^7 + x^5 - x^4 + x^3 - x + 1 1]
 
 ? factpol2(x^15-1,0)
-
-[x - 1 1]
-
-[x^2 + x + 1 1]
-
-[x^4 + x^3 + x^2 + x + 1 1]
-
-[x^8 - x^7 + x^5 - x^4 + x^3 - x + 1 1]
-
+  ***   this function has been suppressed.
 ? fibo(100)
 354224848179261915075
 ? floor(-1/2)
@@ -977,7 +969,7 @@ mod(x^5, x^6 + 108)
 ? gcd(12345678,87654321)
 9
 ? getheap()
-[215, 48862]
+[214, 48751]
 ? getrand()
 1939683225
 ? getstack()
@@ -2854,7 +2846,7 @@ d(391, 3120), mod(2081, 3120)]]
 ? getstack()
 0
 ? getheap()
-[625, 126021]
+[624, 125910]
 ? print("Total time spent: ",gettime());
-Total time spent: 6080
+Total time spent: 6360
 ? \q

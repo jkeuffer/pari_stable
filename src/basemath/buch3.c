@@ -466,43 +466,60 @@ rayclassno(GEN bnf,GEN ideal)
   avma=av; return icopy(clno);
 }
 
+extern GEN to_famat(GEN g, GEN e);
+extern GEN arch_mul(GEN x, GEN y);
+extern GEN isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag);
+
 GEN
 isprincipalrayall(GEN bnr, GEN x, long flag)
 {
-  long av=avma,i,j,c,ngen,ngzk;
-  GEN bnf,nf,bid,vecel,vecep,matu,ep,p1,p2,beta,idep,y,rayclass;
-  GEN divray,genray,alpha,alphaall,racunit,res,funit,pol;
+  long av=avma,i,j,c;
+  GEN bnf,nf,bid,vecel,matu,ep,p1,p2,beta,idep,y,rayclass;
+  GEN divray,genray,alpha,alphaall,racunit,res,funit;
 
   checkbnr(bnr);
   bnf = (GEN)bnr[1];
   bid = (GEN)bnr[2];
-  vecel=(GEN)bnr[3]; ngen=lg(vecel)-1;
+  vecel=(GEN)bnr[3];
   matu =(GEN)bnr[4];
   rayclass=(GEN)bnr[5];
 
   nf = (GEN)bnf[7];
   if (typ(x) == t_VEC && lg(x) == 3)
-  { idep = (GEN)x[2]; x = (GEN)x[1]; } /* precomputed */
+  { /* precomputed */
+    idep = (GEN)x[2]; x = (GEN)x[1];
+    ep  =(GEN)idep[1];
+    beta=(GEN)idep[2];
+    p2 = NULL; /* make beta prime to conductor */
+    for (i=1; i<lg(ep); i++)
+      if (typ(vecel[i]) != t_INT) /* <==> != 1 */
+      {
+        p1 = element_pow(nf, (GEN)vecel[i], (GEN)ep[i]);
+        p2 = p2? element_mul(nf,p2,p1): p1;
+      }
+    if (p2) beta = element_div(nf,beta,p2);
+  }
   else
-    idep = isprincipalgenforce(bnf,x);
-  if (lg(idep[1]) != ngen+1)
-    err(talker,"incorrect generator length in isprincipalray");
-  pol=(GEN)nf[1];
-  ep  =(GEN)idep[1];
-  beta=(GEN)idep[2]; p2 = NULL;
-  for (i=1; i<=ngen; i++)
-    if (typ(vecel[i]) != t_INT) /* <==> != 1 */
-    {
-      p1 = element_pow(nf, (GEN)vecel[i], (GEN)ep[i]);
-      p2 = p2? element_mul(nf,p2,p1): p1;
-    }
-  if (p2) beta = element_div(nf,beta,p2);
-  p1 = zideallog(nf,beta,bid); ngzk=lg(p1)-1;
-  vecep = cgetg(ngen+ngzk+1,t_COL);
-  for (i=1; i<=ngen;      i++) vecep[i] = ep[i];
-  for (   ; i<=ngen+ngzk; i++) vecep[i] = p1[i-ngen];
-  p1 = gmul(matu,vecep);
-  divray = (GEN)rayclass[2]; c=lg(divray);
+  {
+    GEN v,e,gen = gmael3(bnf,8,1,3);
+    long l, lv;
+    ep = isprincipal(bnf,x);
+    /* x \prod g[i]^(-ep[i]) = factorisation of principal ideal */
+    idep = isprincipalfact(bnf, gen, gneg(ep), x, nf_GENMAT | nf_GEN);
+    beta = (GEN)idep[2];
+    v = cgetg(1, t_COL);
+    e = cgetg(1, t_COL); lv = 1; l = lg(ep);
+    for (i=1; i<l; i++)
+      if (typ(vecel[i]) != t_INT) /* <==> != 1 */
+      {
+        v[lv] = vecel[i];
+        e[lv] = ep[i]; lv++;
+      }
+    if (lv > 1) beta = arch_mul(beta, to_famat(v,e));
+    
+  }
+  p1 = gmul(matu, concatsp(ep, zideallog(nf,beta,bid)));
+  divray = (GEN)rayclass[2]; c = lg(divray);
   y = cgetg(c,t_COL);
   for (i=1; i<c; i++)
     y[i] = lmodii((GEN)p1[i],(GEN)divray[i]);
@@ -528,11 +545,11 @@ isprincipalrayall(GEN bnr, GEN x, long flag)
   p1 = zideallog(nf,(GEN)alphaall[2],bid);
   if (lg(p1) > 1)
   {
-    GEN mat = (GEN)bnr[6];
+    GEN mat = (GEN)bnr[6], pol = (GEN)nf[1];
     p1 = gmul((GEN)mat[1],p1);
     if (!gcmp1(denom(p1))) err(bugparier,"isprincipalray (bug2)");
 
-    x = lllreducemodmatrix(p1,(GEN)mat[2]);
+    x = reducemodinvertible(p1,(GEN)mat[2]);
     racunit = gmael(res,4,2);
     p1 = powgi(gmodulcp(racunit,pol), (GEN)x[1]);
     for (j=1; j<lg(funit); j++)
