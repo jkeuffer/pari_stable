@@ -109,9 +109,13 @@ Emacs           @Using GP under GNU Emacs@2
 10              @Plotting functions
 11              @Programming under GP
 ell             @Functions related to elliptic curves
-nf              @Functions related to general number fields
-bnf             @Functions related to general number fields
-bnr             @Functions related to general number fields
-ideal           @Functions related to general number fields
-idele           @Functions related to general number fields
+nf              @Number field structures
+bnf             @Number field structures
+bnr             @Number field structures
+rnf             @Relative extensions
+ideal           @Algebraic numbers and ideals
+idele           @Algebraic numbers and ideals
 component       @components of a PARI object
+modulus         @Class field theory
+CFT             @Class field theory
+bid             @Class field theory

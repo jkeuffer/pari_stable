@@ -1690,8 +1690,8 @@ zet(s) = sumalt(n=1, (-1)^(n-1)*n^(-s)) / (1 - 2^(1-s))
 wrong with the following definition?
 \bprog
 FirstPrimeDiv(x) =
-{
-  local(p);
+{ local(p);
+
   forprime(p=2, x, if (x%p == 0, break));
   p
 }
@@ -1713,11 +1713,12 @@ through consecutive prime numbers. Here is a corrected version:
 \subsec{Member functions}.\sidx{member functions} \label{se:member}
 
 Member functions use the `dot' notation to retrieve information from
-complicated structures (by default: types \tet{ell}, \tet{nf}, \tet{bnf},
-\tet{bnr} and prime ideals). The syntax \kbd{structure.member} is taken to
-mean: retrieve \kbd{member} from \kbd{structure}, e.g.~\kbd{ell.j} returns
-the $j$-invariant of the elliptic curve \kbd{ell} (or outputs an error
-message if \kbd{ell} doesn't have the correct type).
+complicated structures (by default: \tev{bid}, \tev{ell}, \tev{galois},
+\tev{nf}, \tev{bnf}, \tev{bnr} and prime ideals). The syntax
+\kbd{structure.member} is taken to mean: retrieve \kbd{member} from
+\kbd{structure}, e.g.~\kbd{ell.j} returns the $j$-invariant of the elliptic
+curve \kbd{ell}, or outputs an error message if \kbd{ell} doesn't have the
+correct type.
 
 To define your own member functions, use the syntax \var{structure.member =
 function text}, where \var{function text} is written as the \var{seq} in a
@@ -1769,8 +1770,8 @@ efficiency goes):
 
 \bprog
 correct_ell_if_needed(x) =
-{
-  local(tmp);
+{ local(tmp);
+
   if (type(x) != "t_VEC", tmp = ellinit(x))
     \\ @com some further checks
   tmp
@@ -1933,7 +1934,7 @@ in string context:
 
 \section{Errors and error recovery}
 
-\subsec{Errors.}\sidx{error}
+\subsec{Errors.}
 
 There are two kind of errors: syntax errors, and errors produced by functions
 in the PARI library. Both kinds are fatal to your computation: \kbd{gp} will
@@ -2199,22 +2200,17 @@ other mathematical libraries than PARI!), and to efficiently import foreign
 functions for use under \kbd{gp} (see~\secref{se:install}).
 
 We are aware of three PARI-related public domain libraries. We \emph{neither
-endorse nor support} any of them. You might want to give them a try if you
-are familiar with the languages they are based on. First, there are
-\tet{PariPerl}%
-\footnote{*}{
-see \kbd{%
- http://nswt.tuwien.ac.at:8000/htdocs/internet/unix/perl/math-pari.html}},
+endorse nor support} any of them; you might want to give them a try if you
+are familiar with the languages they are based on. The first is the
+\tet{Math::Pari} Perl module (see any CPAN mirror), written by Ilya
+Zakharevich. The second is \tet{PariPython}%
+\footnote{*}{see \kbd{http://www.fermigier.com/fermigier/PariPython/}},
 %
-written by Ilya Zakharevich,
-and \tet{PariPython}%
-\footnote{**}{see \kbd{http://www.fermigier.com/fermigier/PariPython/}},
-%
-by St\'efane Fermigier. Finaly, Michael Stoll has integrated PARI into
-\tet{CLISP}, which is a Common Lisp implementation by Bruno Haible, Marcus
-Daniels and others. These provide interfaces to \kbd{gp} functions for use in
-\kbd{perl}, \kbd{python} or \kbd{Lisp}\sidx{Perl}\sidx{Python}\sidx{Lisp}
-programs. Only the \kbd{perl} interface is being actively maintained.
+by St\'efane Fermigier, which is no more maintained. Finaly, Michael Stoll
+has integrated PARI into \tet{CLISP}, which is a Common Lisp implementation
+by Bruno Haible, Marcus Daniels and others. These provide interfaces to
+\kbd{gp} functions for use in \kbd{perl}, \kbd{python} or
+\kbd{Lisp}\sidx{Perl}\sidx{Python}\sidx{Lisp} programs, respectively.
 
 \section{The preferences file}\sidx{startup}\sidx{preferences file}
 \label{se:gprc}

@@ -46,11 +46,11 @@ argument, and leave the defaults in between as they stand, you can use the
 
 In this rather special case of a function having no mandatory argument, you
 can even omit the $()$: a standalone \kbd{foo} would be enough (though we
-don't really recommend it for your scripts, for the sake of clarity). In
-defining GP syntax, we strove to put optional arguments at the end of the
-argument list (of course, since they would not make sense otherwise), and in
-order of decreasing usefulness so that, most of the time, you will be able to
-ignore them.
+do not recommend it for your scripts, for the sake of clarity). In defining
+GP syntax, we strove to put optional arguments at the end of the argument
+list (of course, since they would not make sense otherwise), and in order of
+decreasing usefulness so that, most of the time, you will be able to ignore
+them.
 
 Finally, an optional argument (between braces) followed by a star, like
 $\{\var{x}\}*$, means that any number of such arguments (possibly none) can
@@ -108,14 +108,14 @@ $2=\kbd{Recursive}$, \dots}
 \kbd{Recursive} is unset by default (default value of $\fl$ is $0$,
 i.e.~everything unset).
 
-\misctitle{Pointers}.\sidx{pointer} If a parameter in the function
+\misctitle{Pointers}.\varsidx{pointer} If a parameter in the function
 prototype is prefixed with a \& sign, as in
 
 \key{foo}$(x,\&e)$
 
 \noindent it means that, besides the normal return value, the function may
 assign a value to $e$ as a side effect. When passing the argument, the \&
-sign has to be typed in explicitly. As of version \vers, this \tet{pointer}
+sign has to be typed in explicitly. As of version \vers, this \tev{pointer}
 argument is optional for all documented functions, hence the \& will always
 appear between brackets as in \kbd{issquare}$(x,\{\&e\})$.
 
@@ -1373,7 +1373,7 @@ e^{-t}t^{s-1}\,dt$.
 
 \syn{incgamc}{s,x,\var{prec}}.
 
-\subsecidx{log}$(x,\{\fl=0\})$: principal branch of the natural logarithm of
+\subsecidx{log}$(x)$: principal branch of the natural logarithm of
 $x$, i.e.~such that $\text{Im(log}(x))\in{} ]-\pi,\pi]$. The result is complex
 (with imaginary part equal to $\pi$) if $x\in \R$ and $x < 0$. In general,
 the algorithm uses the formula 
@@ -1382,9 +1382,9 @@ if $s = x 2^m$ is large enough. (The result is exact to $B$ bits provided
 $s > 2^{B/2}$.) At low accuracies, the series expansion near $1$ is used.
 
 $p$-adic arguments are also accepted for $x$, with the convention that
-$\log(p)=0$. Hence in particular $\exp(\log(x))/x$ will not in general be
-equal to 1 but to a $(p-1)$-th root of unity (or $\pm1$ if $p=2$)
-times a power of $p$.
+$\log(p)=0$. Hence in particular $\exp(\log(x))/x$ is not in general equal to
+1 but to a $(p-1)$-th root of unity (or $\pm1$ if $p=2$) times a power of
+$p$.
 
 \syn{glog}{x,\var{prec}}.
 
@@ -2920,6 +2920,8 @@ working in general number fields. Other less specific functions can be found
 in the next section on polynomials. Functions related to quadratic number
 fields are found in section \secref{se:arithmetic} (Arithmetic functions).
 
+\subsec{Number field structures}
+
 Let $K = \Q[X] / (T)$ a number field, $\Z_K$ its ring of integers, $T\in\Z[X]$
 is monic. Three basic number field structures can be associated to $K$ in
 GP:
@@ -2940,9 +2942,10 @@ output by \kbd{bnrinit}, corresponding to the ray class group structure of
 the field, for some modulus $f$. It contains a \var{bnf}, the modulus
 $f$, the ray class group $\Cl_f(K)$ and data associated to
 the discrete logarithm problem therein.
-\medskip
 
-\noindent An element in $K$ is given as
+\subsec{Algebraic numbers and ideals}
+
+\noindent An \tev{algebraic number} belonging to $K = \Q[X]/(T)$ is given as
 
 \item a \typ{INT}, \typ{FRAC} or \typ{POL} (implicitly modulo $T$), or
 
@@ -2954,9 +2957,9 @@ the element in terms of the computed integral basis, as
 will not be recognized.
 \medskip
 
-\noindent An $\tev{ideal}$ is given in any of the following ways:
+\noindent An \tev{ideal} is given in any of the following ways:
 
-\item an element in one of the above forms, defining a principal ideal.
+\item an algebraic number in one of the above forms, defining a principal ideal.
 
 \item a prime ideal, i.e.~a 5-component vector in the format output by
 \kbd{idealprimedec}.
@@ -2977,14 +2980,31 @@ these assumptions is not correct the behaviour of the routine is undefined.
 
 \item an \tev{idele} is a 2-component vector, the first being an ideal as
 above, the second being a $R_1+R_2$-component row vector giving Archimedean
-information.
+information, as complex numbers.
+\smallskip
 
-\item a \emph{character} on the Abelian group
-$\bigoplus (\Z/N_i\Z) g_i$
+\subsec{Finite abelian groups}
+
+A finite abelian group $G$ in user-readable format is given by its Smith
+Normal Form as a pair $[h,d]$ or triple $[h,d,g]$.
+Here $h$ is the cardinality of $G$, $(d_i)$ is the vector of elementary
+divisors, and $(g_i)$ is a vector of generators. In short,
+$G = \oplus_{i\leq n} (\Z/d_i\Z) g_i$, with $d_n \mid \dots \mid d_2 \mid d_1$
+and $\prod d_i = h$. This information can also be retrieved as 
+$G.\kbd{no}$, $G.\kbd{cyc}$ and $G.\kbd{gen}$.
+
+\item a \tev{character} on the abelian group
+$\oplus (\Z/d_i\Z) g_i$
 is given by a row vector $\chi = [a_1,\ldots,a_n]$ such that
-$\chi(\prod g_i^{n_i}) = exp(2i\pi\sum a_i n_i / N_i)$.
+$\chi(\prod g_i^{n_i}) = \exp(2i\pi\sum a_i n_i / d_i)$.
 
-Concerning relative extensions, some additional definitions are necessary.
+\item given such a structure, a \tev{subgroup} $H$ is input as a square
+matrix, whose column express generators of $H$ on the given generators $g_i$.
+Note that the absolute value of the determinant of that matrix is equal to
+the index $(G:H)$.
+
+\subsec{Relative extensions}
+
 When defining a relative extension, the base field $\var{nf}$ must be defined
 by a variable having a lower priority (see \secref{se:priority}) than the
 variable defining the extension. For example, you may use the variable name
@@ -3005,7 +3025,7 @@ ideals of the number field $\var{nf}$.
 relative matrix and $I$ an ideal list whose length is the same as the number
 of columns of $A$. This pair is represented by a 2-component row vector.
 
-\item The \tev{module} generated by a pseudo-matrix $(A,I)$ is
+\item The \tev{projective module} generated by a pseudo-matrix $(A,I)$ is
 the sum $\sum_i {\Bbb a}_j A_j$ where the ${\Bbb a}_j$ are the ideals of $I$
 and $A_j$ is the $j$-th column of $A$.
 
@@ -3020,29 +3040,46 @@ equal to the product of the determinant of $A$ by all the ideals of $I$. The
 determinant of a pseudo-matrix is the determinant of any pseudo-basis of the
 module it generates.
 
-Now a last set of definitions concerning the way big ray number fields
-(or \var{bnr}) are input, using class field theory.
-These are defined by a triple
+\subsec{Class field theory}
+
+A $\tev{modulus}$, in the sense of class field theory, is a divisor supported
+on the non-complex places of $K$. In PARI terms, this means either an
+ordinary ideal $I$ as above (no archimedean component), or a pair $[I,a]$,
+where $a$ is a vector with $r_1$ $\{0,1\}$-components, corresponding to the
+infinite part of the divisor. More precisely, the $i$-th component of $a$
+corresponds to the real embedding associated to the $i$-th real root of
+\kbd{K.roots}. (That ordering is not canonical, but well defined once a
+defining polynomial for $K$ is chosen.) For instance, \kbd{[1, [1,1]]} is a
+modulus for a real quadratic field, allowing ramification at any of the two
+places at infinity.
+
+A \tev{bid} or ``big ideal'' is a structure output by \kbd{idealstar}
+needed to compute in $(\Z_K/I)^*$, where $I$ is a modulus in the above sense.
+If is a finite abelian group as described above, supplemented by
+technical data needed to solve discrete log problems. 
+
+Finally we explain how to input ray number fields (or \var{bnr}), using class
+field theory. These are defined by a triple
+
 $a1$, $a2$, $a3$, where the defining set $[a1,a2,a3]$ can have any of the
 following forms: $[\var{bnr}]$, $[\var{bnr},\var{subgroup}]$,
 $[\var{bnf},\var{module}]$, $[\var{bnf},\var{module},\var{subgroup}]$, where:
 
 \item $\var{bnf}$ is as output by \kbd{bnfinit}, where units are mandatory
-unless the ideal is trivial; \var{bnr} by \kbd{bnrclass} (with $\fl>0$) or
-\kbd{bnrinit}. This is the ground field.
+unless the modulus is trivial; \var{bnr} by \kbd{bnrinit}. This is the ground
+field $K$.
 
-\item \emph{module} is either an ideal in any form (see above) or a
-two-component row vector containing an ideal and an $r_1$-component row
-vector of flags indicating which real Archimedean embeddings to take in the
-module.
+\item \emph{module} is a modulus $\goth{f}$, as described above.
 
-\item \emph{subgroup} is the HNF matrix of a subgroup of the ray class group
-of the ground field for the modulus \emph{module}. This is input as a square
-matrix expressing generators of a subgroup of the ray class group
-\kbd{\var{bnr}.clgp} on the given generators.
+\item \emph{subgroup} a subgroup of the ray class group modulo $\goth{f}$ of
+$K$. As described above, this is input as a square matrix expressing
+generators of a subgroup of the ray class group \kbd{\var{bnr}.clgp} on the
+given generators.
 
-The corresponding \var{bnr} is then the subfield of the ray class field of the
-ground field for the given modulus, associated to the given subgroup.
+The corresponding \var{bnr} is the subfield of the ray class field of $K$ 
+modulo $\goth{f}$, fixed by the given subgroup.
+
+\subsec{General use}
 
 All the functions which are specific to relative extensions, number fields,
 Buchmann's number fields, Buchmann's number rays, share the prefix \kbd{rnf},
@@ -3060,13 +3097,13 @@ a specific error message.
 
 The data types corresponding to the structures described above are rather
 complicated. Thus, as we already have seen it with elliptic curves, GP
-provides you with some ``member functions'' to retrieve the data you need
-from these structures (once they have been initialized of course). The
-relevant types of number fields are indicated between parentheses:
-\smallskip
+provides ``member functions'' to retrieve data from these structures (once
+they have been initialized of course). The relevant types of number fields
+are indicated between parentheses: \smallskip
 
 \sidx{member functions}
 \settabs\+xxxxxxx&(\var{bnr},x&\var{bnf},x&nf\hskip2pt&)x&: &\cr
+\+\tet{bid}    &(\var{bnr},&&&)&: & bid ideal structure.\cr
 
 \+\tet{bnf}    &(\var{bnr},& \var{bnf}&&)&: & Buchmann's number field.\cr
 
@@ -3118,7 +3155,7 @@ $[w,u]$.\cr
 $\Z$-basis of the maximal order.\cr
 
 \+\tet{zkst} &(\var{bnr}&    &    &)&: & structure of $(\Z_K/m)^*$ (can be
-extracted also from an \var{idealstar}).\cr
+extracted also from a \var{bid}).\cr
 
   For instance, assume that $\var{bnf} = \kbd{bnfinit}(\var{pol})$, for some
 polynomial. Then \kbd{\var{bnf}.clgp} retrieves the class group, and
@@ -3128,7 +3165,8 @@ functions are completely recursive, thus for instance
 \kbd{\var{bnr}.bnf.nf.zk} will yield the maximal order of \var{bnr}, which
 you could get directly with a simple \kbd{\var{bnr}.zk}.
 
-\medskip
+\subsec{Class group, units, and the GRH}\label{se:GRHbnf}
+
 Some of the functions starting with \kbd{bnf} are implementations of the
 sub-exponential algorithms for finding class and unit groups under \idx{GRH},
 due to Hafner-McCurley, \idx{Buchmann} and Cohen-Diaz-Olivier. The general
@@ -3157,18 +3195,18 @@ ideal in the factor base. Set it to $0$ to disable the search for small norm
 relations. Otherwise, reasonable values are between 4 and 20. (The default is
 4).
 
-\misctitle{Warning.}\label{se:GRHbnf} Make sure you understand the above! By
-default, most of the \kbd{bnf} routines depend on the correctness of a
-heuristic assumption which is stronger than the GRH. In particular, any of
-the class number, class group structure, class group generators, regulator
-and fundamental units may be wrong, independently of each other. Any result
-computed from such a \kbd{bnf} may be wrong. The only guarantee is that the
-units given generate a subgroup of finite index in the full unit group. In
-practice, very few counter-examples are known, requiring unlucky random
-seeds. No counter-example has been reported for $c_2 = 0.5$ (which should be
-almost as fast as $c_2 = 0.3$, and shall very probably become the default).
-If you use $c_2 = 12$, then everything is correct assuming the GRH holds. You
-may use \kbd{bnfcertify} to certify the computations unconditionally.
+\misctitle{Warning.} Make sure you understand the above! By default, most of
+the \kbd{bnf} routines depend on the correctness of a heuristic assumption
+which is stronger than the GRH. In particular, any of the class number, class
+group structure, class group generators, regulator and fundamental units may
+be wrong, independently of each other. Any result computed from such a
+\kbd{bnf} may be wrong. The only guarantee is that the units given generate a
+subgroup of finite index in the full unit group. In practice, very few
+counter-examples are known, requiring unlucky random seeds. No
+counter-example has been reported for $c_2 = 0.5$ (which should be almost as
+fast as $c_2 = 0.3$, and shall very probably become the default). If you use
+$c_2 = 12$, then everything is correct assuming the GRH holds. You may use
+\kbd{bnfcertify} to certify the computations unconditionally.
 
 \misctitle{Remarks.}
 
@@ -3193,15 +3231,18 @@ course): if the program answers 1, the answer is certified.
 
 \syn{certifybuchall}{\var{bnf}}, and the result is a C long.
 
-\subsecidx{bnfclassunit}$(P,\{\fl=0\},\{\var{tech}=[\,]\})$: \idx{Buchmann}'s
-sub-exponential algorithm for computing the class group, the regulator and a
-system of \idx{fundamental units} of the general algebraic number field $K$
-defined by the irreducible polynomial $P$ with integer coefficients.
+\subsecidx{bnfclassunit}$(P,\{\fl=0\},\{\var{tech}=[\,]\})$: \emph{this function
+is DEPRECATED, use \kbd{bnfinit}}.
 
-The result of this function is a vector $v$ with many components (it is
-\emph{not} a $\var{bnf}$, you need \kbd{bnfinit} for that), which for ease of
-presentation is in fact output as a one column matrix. First we describe the
-default behaviour ($\fl=0$):
+\idx{Buchmann}'s sub-exponential algorithm for computing the class group, the
+regulator and a system of \idx{fundamental units} of the general algebraic
+number field $K$ defined by the irreducible polynomial $P$ with integer
+coefficients.
+
+The result of this function is a vector $v$ with many components, which for
+ease of presentation is in fact output as a one column matrix. It is
+\emph{not} a $\var{bnf}$, you need \kbd{bnfinit} for that. First we describe
+the default behaviour ($\fl=0$):
 
  $v[1]$ is equal to the polynomial $P$.
 
@@ -3243,10 +3284,6 @@ numbers, implemented in PARI but currently not available in GP.
 If $\fl=2$, the fundamental units and roots of unity are not computed.
 Hence the result has only 7 components, the first seven ones.
 
-$\var{tech}$ is a technical vector (empty by default, see the beginning of
-the section or the keyword \kbd{bnf}). Careful use of this parameter may
-speed up your computations considerably.
-
 \syn{bnfclassunit0}{P,\fl,\var{tech},\var{prec}}.
 
 \subsecidx{bnfclgp}$(P,\{\var{tech}=[\,]\})$: as \kbd{bnfinit}, but only
@@ -3267,12 +3304,46 @@ true module.
 on a heuristic strengthening of the GRH, see \ref{se:GRHbnf}. The result is a
 10-component vector \var{bnf}.
 
-\noindent \item The first 6 and last 2 components are technical and in
-principle are not used by the casual user. However, for the sake of
-completeness, their description is as follows. We use the notations explained
-in the book by H. Cohen, \emph{A Course in Computational Algebraic Number
-Theory}, Graduate Texts in Maths \key{138}, Springer-Verlag, 1993, Section
-6.5, and subsection 6.5.5 in particular.
+This implements \idx{Buchmann}'s sub-exponential algorithm for computing the
+class group, the regulator and a system of \idx{fundamental units} of the
+general algebraic number field $K$ defined by the irreducible polynomial $P$
+with integer coefficients.
+
+If the precision becomes insufficient, \kbd{gp} outputs a warning
+(\kbd{fundamental units too large, not given}) and does not strive to compute
+the units by default ($\fl=0$).
+
+   When $\fl=1$, we insist on finding the fundamental units exactly. Be
+warned that this can take a very long time when the coefficients of the
+fundamental units on the integral basis are very large. If the fundamental
+units are simply too large to be represented in this form, an error message
+is issued. They could be obtained using the so-called compact representation
+of algebraic numbers as a formal product of algebraic integers. The latter is
+implemented internally but not publicly accessible yet.
+
+   When $\fl=2$, on the contrary, it is initially agreed that units are not
+computed. Note that the resulting \var{bnf} will not be suitable for
+\kbd{bnrinit}, and that this flag provides negligible time savings
+compared to the default. In short, it is deprecated.
+
+   When $\fl=3$, computes a very small version of \kbd{bnfinit}, a ``small
+Buchmann's number field'' (or \var{sbnf} for short) which contains enough
+information to recover the full $\var{bnf}$ vector very rapidly, but which is
+much smaller and hence easy to store and print. It is supposed to be used in
+conjunction with \kbd{bnfmake}.
+
+$\var{tech}$ is a technical vector (empty by default, see \ref{se:GRHbnf}).
+Careful use of this parameter may speed up your computations considerably.
+
+\smallskip
+
+The components of a \var{bnf} or \var{sbnf} are technical and never used by
+the casual user. In fact: \emph{never access a component directly, always use
+a proper member function.} However, for the sake of completeness and internal
+documentation, their description is as follows. We use the notations
+explained in the book by H. Cohen, \emph{A Course in Computational Algebraic
+Number Theory}, Graduate Texts in Maths \key{138}, Springer-Verlag, 1993,
+Section 6.5, and subsection 6.5.5 in particular.
 
 $\var{bnf}[1]$ contains the matrix $W$, i.e.~the matrix in Hermite normal
 form giving relations for the class group on prime ideal generators
@@ -3295,6 +3366,14 @@ ideals used in finding the relations.
 $\var{bnf}[6]$ used to contain a permutation of the prime factor base, but
 has been obsoleted. It contains a dummy $0$.
 
+$\var{bnf}[7]$ or \kbd{\var{bnf}.nf} is equal to the number field data
+$\var{nf}$ as would be given by \kbd{nfinit}.
+
+$\var{bnf}[8]$ is a vector containing the classgroup \kbd{\var{bnf}.clgp}
+as a finite abelian group, the regulator \kbd{\var{bnf}.reg}, a $1$ (used to
+contain an obsolete ``check number''), the number of roots of unity and a
+generator \kbd{\var{bnf}.tu}, the fundamental units \kbd{\var{bnf}.fu}.
+
 $\var{bnf}[9]$ is a 3-element row vector used in \tet{bnfisprincipal} only
 and obtained as follows. Let $D = U W V$ obtained by applying the
 \idx{Smith normal form} algorithm to the matrix $W$ (= $\var{bnf}[1]$) and
@@ -3304,64 +3383,31 @@ with Archimedean component $g_a$; let also $GD_a$ be the Archimedean
 components of the generators of the (principal) ideals defined by the
 \kbd{bnf.gen[i]\pow bnf.cyc[i]}. Then $\var{bnf}[9]=[U_r, g_a, GD_a]$.
 
-Finally, $\var{bnf}[10]$ is by default unused and set equal to 0. This
-field is used to store further information about the field as it becomes
-available (which is rarely needed, hence would be too expensive to compute
-during the initial \kbd{bnfinit} call). For instance, the generators of the
-principal ideals \kbd{bnf.gen[i]\pow bnf.cyc[i]} (during a call to
-\tet{bnrisprincipal}), or those corresponding to the relations in $W$ and
-$B$ (when the \kbd{bnf} internal precision needs to be increased).
-\smallskip
+$\var{bnf}[10]$ is by default unused and set equal to 0. This field is used
+to store further information about the field as it becomes available, which
+is rarely needed, hence would be too expensive to compute during the initial
+\kbd{bnfinit} call. For instance, the generators of the principal ideals
+\kbd{bnf.gen[i]\pow bnf.cyc[i]} (during a call to \tet{bnrisprincipal}), or
+those corresponding to the relations in $W$ and $B$ (when the \kbd{bnf}
+internal precision needs to be increased). \smallskip
 
-\noindent\item The less technical components are as follows:
-
-$\var{bnf}[7]$ or \kbd{\var{bnf}.nf} is equal to the number field data
-$\var{nf}$ as would be given by \kbd{nfinit}.
-
-$\var{bnf}[8]$ is a vector containing the classgroup \kbd{\var{bnf}.clgp},
-the regulator \kbd{\var{bnf}.reg}, a $1$ (used to contain an obsolete
-``check number''), the number of roots of unity and a generator
-\kbd{\var{bnf}.tu}, the fundamental units \kbd{\var{bnf}.fu}. If the
-precision becomes insufficient, \kbd{gp} outputs a warning (\kbd{fundamental
-units too large, not given}) and does not strive to compute the units by
-default ($\fl=0$).
-
-   When $\fl=1$, we insist on finding the fundamental units exactly. Be
-warned that this can take a very long time when the coefficients of the
-fundamental units on the integral basis are very large. If the fundamental
-units are simply too large to be represented in this form, an error message
-is issued. They could be obtained using the so-called compact representation
-of algebraic numbers as a formal product of algebraic integers. The latter is
-implemented internally but not publicly accessible yet.
-
-   When $\fl=2$, on the contrary, it is initially agreed that units are not
-computed. Note that the resulting \var{bnf} will not be suitable for
-\kbd{bnrinit}, and that this flag provides negligible time savings. In short,
-it is deprecated.
-
-   When $\fl=3$, computes a very small version of \kbd{bnfinit}, a ``small
-Buchmann's number field'' (or \var{sbnf} for short) which contains enough
-information to recover the full $\var{bnf}$ vector very rapidly, but which is
-much smaller and hence easy to store and print. It is supposed to be used in
-conjunction with \kbd{bnfmake}. The output is a 12 component vector $v$, as
-follows. Let $\var{bnf}$ be the result of a full \kbd{bnfinit}, complete with
-units. Then $v[1]$ is the polynomial $P$, $v[2]$ is the number of real
-embeddings $r_1$, $v[3]$ is the field discriminant, $v[4]$ is the integral
-basis, $v[5]$ is the list of roots as in the sixth component of \kbd{nfinit},
-$v[6]$ is the matrix $MD$ of \kbd{nfinit} giving a $\Z$-basis of the
-different, $v[7]$ is the matrix $\kbd{W} = \var{bnf}[1]$, $v[8]$ is the
-matrix $\kbd{matalpha}=\var{bnf}[2]$, $v[9]$ is the prime ideal factor base
-$\var{bnf}[5]$ coded in a compact way, and ordered according to the
-permutation $\var{bnf}[6]$, $v[10]$ is the 2-component vector giving the
-number of roots of unity and a generator, expressed on the integral basis,
-$v[11]$ is the list of fundamental units, expressed on the integral basis,
-$v[12]$ is a vector containing the algebraic numbers alpha corresponding to
-the columns of the matrix \kbd{matalpha}, expressed on the integral basis.
+An \var{sbnf} is a 12 component vector $v$, as follows. Let $\var{bnf}$ be
+the result of a full \kbd{bnfinit}, complete with units. Then $v[1]$ is the
+polynomial $P$, $v[2]$ is the number of real embeddings $r_1$, $v[3]$ is the
+field discriminant, $v[4]$ is the integral basis, $v[5]$ is the list of roots
+as in the sixth component of \kbd{nfinit}, $v[6]$ is the matrix $MD$ of
+\kbd{nfinit} giving a $\Z$-basis of the different, $v[7]$ is the matrix
+$\kbd{W} = \var{bnf}[1]$, $v[8]$ is the matrix $\kbd{matalpha}=\var{bnf}[2]$,
+$v[9]$ is the prime ideal factor base $\var{bnf}[5]$ coded in a compact way,
+and ordered according to the permutation $\var{bnf}[6]$, $v[10]$ is the
+2-component vector giving the number of roots of unity and a generator,
+expressed on the integral basis, $v[11]$ is the list of fundamental units,
+expressed on the integral basis, $v[12]$ is a vector containing the algebraic
+numbers alpha corresponding to the columns of the matrix \kbd{matalpha},
+expressed on the integral basis.
 
    Note that all the components are exact (integral or rational), except for
-the roots in $v[5]$. In practice, this is the only component which a user
-is allowed to modify, by recomputing the roots to a higher accuracy if
-desired. Note also that the member functions will \emph{not} work on
+the roots in $v[5]$. Note also that member functions will \emph{not} work on
 \var{sbnf}, you have to use \kbd{bnfmake} explicitly first.
 
 \syn{bnfinit0}{P,\fl,\var{tech},\var{prec}}.
@@ -3468,7 +3514,7 @@ is the narrow class number \kbd{$v$.no}, the second component is a vector
 containing the SNF\sidx{Smith normal form} cyclic components \kbd{$v$.cyc} of
 the narrow class group, and the third is a vector giving the generators of
 the corresponding \kbd{$v$.gen} cyclic groups. Note that this function is a
-special case of \kbd{bnrclass}.
+special case of \kbd{bnrinit}.
 
 \syn{buchnarrow}{\var{bnf}}.
 
@@ -3581,46 +3627,34 @@ returns the order and the first non-zero terms of the abelian
 $L$-functions $L_S(s, \chi)$ at $s = 0$ where $\chi$ runs through the
 characters of the class group of $\Q(\sqrt{229})$ and $S$ is the set
 of infinite places of $\Q(\sqrt{229})$ together with the finite prime
-$2$ (note that the ray class group modulo $2$ is in fact the class
+$2$. Note that the ray class group modulo $2$ is in fact the class
 group, so \kbd{bnrL1(bnr2,0)} returns exactly the same answer as
-\kbd{bnrL1(bnr,0)}!).
+\kbd{bnrL1(bnr,0)}!
 
 \syn{bnrL1}{\var{bnr},\var{subgroup},\fl,\var{prec}}, where an omitted
 \var{subgroup} is coded as \kbd{NULL}.
 
-\subsecidx{bnrclass}$(\var{bnf},\var{ideal},\{\fl=0\})$:
+\subsecidx{bnrclass}$(\var{bnf},\var{ideal},\{\fl=0\})$: \emph{this function
+is DEPRECATED, use \kbd{bnrinit}}.
+
 $\var{bnf}$ being as output by \kbd{bnfinit} (the units are mandatory unless
-the ideal is trivial), and \var{ideal} being either an ideal in any form or a
-two-component row vector containing an ideal and an $r_1$-component row
-vector of flags indicating which real Archimedean embeddings to take in the
-module, computes the ray class group of the number field for the module
-\var{ideal}, as a 3-component vector as all other finite Abelian groups
-(cardinality, vector of cyclic components, corresponding generators).
-
-If $\fl=2$, the output is different. It is a 6-component vector $w$. $w[1]$
-is $\var{bnf}$. $w[2]$ is the result of applying
-$\kbd{idealstar}(\var{bnf},I,2)$. $w[3]$, $w[4]$ and $w[6]$ are technical
-components used only by the function \kbd{bnrisprincipal}. $w[5]$ is the
-structure of the ray class group as would have been output with $\fl=0$.
-
-If $\fl=1$, as above, except that the generators of the ray class group are
-not computed, which saves time.
+the ideal is trivial), and \var{ideal} being a modulus, computes the ray
+class group of the number field for the modulus \var{ideal}, as a 
+finite abelian group.
 
 \syn{bnrclass0}{\var{bnf},\var{ideal},\fl}.
 
 \subsecidx{bnrclassno}$(\var{bnf},I)$: $\var{bnf}$ being as output by
 \kbd{bnfinit} (units are mandatory unless the ideal is trivial), and $I$
-being either an ideal in any form or a two-component row vector containing an
-ideal and an $r_1$-component row vector of flags indicating which real
-Archimedean embeddings to take in the modulus, computes the ray class number
-of the number field for the modulus $I$. This is faster than \kbd{bnrclass}
-and should be used if only the ray class number is desired.
+being a modulus, computes the ray class number of the number field for the
+modulus $I$. This is faster than \kbd{bnrinit} and should be used if only the
+ray class number is desired.
 
 \syn{rayclassno}{\var{bnf},I}.
 
 \subsecidx{bnrclassnolist}$(\var{bnf},\var{list})$: $\var{bnf}$ being as
 output by \kbd{bnfinit} (units are mandatory unless the ideal is trivial),
-and \var{list} being a list of modules as output by \kbd{ideallist} of
+and \var{list} being a list of modules as output by \kbd{ideallist} or
 \kbd{ideallistarch}, outputs the list of the class numbers of the
 corresponding ray class groups.
 
@@ -3633,24 +3667,20 @@ the subfield of a ray class field as defined by $[a_1,a_2,a_3]$ (see
   If $\fl = 0$, returns $f$.
 
   If $\fl = 1$, returns $[f, Cl_f, H]$, where $Cl_f$ is the ray class group
-modulo $f$, as output by $\tet{bnrclass}(,f,1)$, and $H$ is the
-subgroup of $Cl_f$ defining the extension. If $a_1$ is a \kbd{bnr}, the
-algorithm requires that it has been computed by $\tet{bnrinit}(,,1)$,
-i.e.~with generators.
+modulo $f$, as a finite abelian group; finally $H$ is the subgroup of $Cl_f$
+defining the extension.
 
   If $\fl = 2$, returns $[f, \var{bnr}(f), H]$, as above except $Cl_f$ is
 replaced by a \kbd{bnr} structure, as output by $\tet{bnrinit}(,f,1)$.
-
 
 \syn{conductor}{\var{bnr}, \var{subgroup}, \fl}, where an omitted subgroup
 (trivial subgroup, i.e.~ray class field) is input as \kbd{NULL}, and $\fl$ is
 a C long.
 
-\subsecidx{bnrconductorofchar}$(\var{bnr},\var{chi})$: \var{bnr} being a
-big ray number field
-as output by \kbd{bnrclass}, and \var{chi} being a row vector representing a
-\idx{character} as expressed on the generators of the ray class group, gives
-the conductor of this character as a modulus.
+\subsecidx{bnrconductorofchar}$(\var{bnr},\var{chi})$: \var{bnr} being a big
+ray number field as output by \kbd{bnrinit}, and \var{chi} being a row vector
+representing a \idx{character} as expressed on the generators of the ray
+class group, gives the conductor of this character as a modulus.
 
 \syn{bnrconductorofchar}{\var{bnr},\var{chi}}.
 
@@ -3670,49 +3700,69 @@ $N$), and $D$ is the relative discriminant ideal of $L/K$.
 exact conductor corresponding to the $L$, no data is computed and the result
 is $0$.
 
-   If $\fl=3$, as case 2, outputting relative data.
+   If $\fl=3$, as case 2, but output relative data.
 
 \syn{bnrdisc0}{a1,a2,a3,\fl}.
 
-\subsecidx{bnrdisclist}$(\var{bnf},\var{bound},\{\var{arch}\},\{\fl=0\})$:
+\subsecidx{bnrdisclist}$(\var{bnf},\var{bound},\{\var{arch}\})$:
 $\var{bnf}$ being as output by \kbd{bnfinit} (with units), computes a list of
 discriminants of Abelian extensions of the number field by increasing modulus
-norm up to bound \var{bound}, where the ramified Archimedean places are given
-by \var{arch} (unramified at infinity if \var{arch} is void or omitted). If
-\fl\ is non-zero, give \var{arch} all the possible values. (See \kbd{bnr} at
-the beginning of this section for the meaning of $a1$, $a2$, $a3$.)
+norm up to bound \var{bound}. The ramified Archimedean places are given by
+\var{arch}; all possible values are taken if \var{arch} is omitted.
 
-  The alternative syntax $\kbd{bnrdisclist}(\var{bnf},\var{list})$
-is supported, where \var{list} is as output by \kbd{ideallist} or
-\kbd{ideallistarch} (with units).
+The alternative syntax $\kbd{bnrdisclist}(\var{bnf},\var{list})$ is
+supported, where \var{list} is as output by \kbd{ideallist} or
+\kbd{ideallistarch} (with units), in which case \var{arch} is disregarded.
 
-  The output $v$ is a row vector of row vectors, and $v[i][j]$ is understood
-to be in fact $V[2^{15}(i-1)+j]$ of a unique big vector $V$. (This scheme
+The output $v$ is a vector of vectors, where $v[i][j]$ is understood to be in
+fact $V[2^{15}(i-1)+j]$ of a unique big vector $V$. (This akward scheme
 allows for larger vectors than could be otherwise represented.)
 
-  Such a component $V[k]$ is itself a vector $W$ (maybe of length 0) whose
-components correspond to each possible ideal of norm $k$. Each component
-$W[i]$ corresponds to an Abelian extension $L$ of $\var{bnf}$ whose modulus
-is an ideal of norm $k$ without Archimedean components (hence the extension
-is unramified at infinity). The extension $L$ is represented by a 4-component
-row vector $[m,d,r,D]$ with the following meaning. $m$ is the prime ideal
-factorization of the modulus, $d = [L:\Q]$ is the absolute degree of $L$,
-$r$ is the number of real places of $L$, and $D$ is the factorization of its
-absolute discriminant. Each prime ideal $pr = [p,\alpha,e,f,\beta]$ in the
-prime factorization $m$ is coded as the integer $p\cdot n^2+(f-1)\cdot
-n+(j-1)$, where $n$ is the degree of the base field and $j$ is such that
+$V[k]$ is itself a vector $W$, whose length is the number of ideals of norm
+$k$. We consider first the case where \var{arch} was specified. Each
+component of $W$ corresponds to an ideal $m$ of norm $k$, and
+gives invariants associated to the ray class field $L$ of $\var{bnf}$ of
+conductor $[m, \var{arch}]$. Namely, each contains a vector $[m,d,r,D]$ with
+the following meaning: $m$ is the prime ideal factorization of the modulus,
+$d = [L:\Q]$ is the absolute degree of $L$, $r$ is the number of real places
+of $L$, and $D$ is the factorization of its absolute discriminant. We set $d
+= r = D = 0$ if $m$ is not the finite part of a conductor.
+
+If \var{arch} was omitted, all $t = 2^{r_1}$ possible values are taken and a
+component of $W$ has the form $[m, [[d_1,r_1,D_1], \dots, [d_t,r_t,D_t]]]$,
+where $m$ is the finite part of the conductor as above, and
+$[d_i,r_i,D_i]$ are the invariants of the ray class field of conductor
+$[m,v_i]$, where $v_i$ is the $i$-th archimedean component, ordered by
+inverse lexicographic order; so $v_1 = [0,\dots,0]$, $v_2 = [1,0\dots,0]$,
+etc. Again, we set $d_i = r_i = D_i = 0$ if $[m,v_i]$ is not a conductor.
+
+Finally, each prime ideal $pr = [p,\alpha,e,f,\beta]$ in the prime
+factorization $m$ is coded as the integer $p\cdot n^2+(f-1)\cdot n+(j-1)$,
+where $n$ is the degree of the base field and $j$ is such that
 
 \kbd{pr = idealprimedec(\var{nf},p)[j]}.
 
-$m$ can be decoded using \kbd{bnfdecodemodule}.
+\noindent $m$ can be decoded using \kbd{bnfdecodemodule}.
 
 \syn{bnrdisclist0}{a1,a2,a3,\var{bound},\var{arch},\fl}.
 
 \subsecidx{bnrinit}$(\var{bnf},\var{ideal},\{\fl=0\})$: $\var{bnf}$ is as
-output by \kbd{bnfinit}, \var{ideal} is a valid ideal (or a module),
-initializes data linked
-to the ray class group structure corresponding to this module. This is the
-same as $\kbd{bnrclass}(\var{bnf},\var{ideal},\fl+1)$.
+output by \kbd{bnfinit}, \var{ideal} is a modulus, initializes data linked to
+the ray class group structure corresponding to this module, a so-called
+\var{bnr} structure. The following member functions are available
+on the result: \kbd{.bnf} is the underlying \var{bnf},
+\kbd{.mod} the modulus, \kbd{.bid} the \var{bid} structure associated to the 
+modulus; finally, \kbd{.clgp}, \kbd{.no}, \kbd{.cyc}, \kbd{clgp} refer to the
+ray class group (as a finite abelian group), its cardinality, its elementary
+divisors, its generators. Note that the latter group are different from the
+members of the underlying \var{bnf}, which refer to the class group; use
+\kbd{\var{bnr}.bnf.clgp} to access these.
+
+
+If $\fl=0$ (default), the generators of the ray class group are not computed,
+which saves time. Hence \kbd{\var{bnr}.gen} would produce an error.
+
+If $\fl=1$, as the default, except that generators are computed.
 
 \syn{bnrinit0}{\var{bnf},\var{ideal},\fl}.
 
@@ -4170,26 +4220,30 @@ information if it is given.
 of all ideals of norm less or equal to \var{bound} in the number field
 \var{nf}. The result is a row vector with exactly \var{bound} components.
 Each component is itself a row vector containing the information about
-ideals of a given norm, in no specific order. This information can be
-either the HNF of the ideal or the \kbd{idealstar} with possibly some
-additional information.
+ideals of a given norm, in no specific order, depending on the value of
+$\fl$:
 
-If $\fl$ is present, its binary digits are toggles meaning
+The possible values of $\fl$ are:
 
-\quad 1: give also the generators in the \kbd{idealstar}.
+\quad 0: give the \var{bid} associated to the ideals, without generators.
 
-\quad 2: output $[L,U]$, where $L$ is as before and $U$ is a vector of
-\kbd{zinternallog}s of the units.
+\quad 1: as 0, but include the generators in the \var{bid}.
 
-\quad 4: give only the ideals and not the \kbd{idealstar} or the \kbd{ideallog}
-of the units.
+\quad 2: in this case, \var{nf} must be a \var{bnf} with units. Output
+$[L,U]$, where $L$ is as case 0 and $U$ is a vector of discrete logarithms of
+the units. More precisely, $U[i]$ gives the \kbd{ideallog}s of
+\kbd{bnf.tufu} with respect to the generators of $L[i]$.
+
+\quad 3: as 2, but include the generators in the \var{bid}.
+
+\quad 4: give only the HNF of the ideal.
 
 \syn{ideallist0}{\var{nf},\var{bound},\fl}, where \var{bound} must
 be a C long integer. Also available is \funs{ideallist}{\var{nf},\var{bound}},
-corresponding to the case $\fl=0$.
+corresponding to the case $\fl=4$.
 
-\subsecidx{ideallistarch}$(\var{nf},\var{list},\{\var{arch}=[\,]\},\{\fl=0\})$:
-vector of vectors of all \kbd{idealstarinit} (see \kbd{idealstar}) of all
+\subsecidx{ideallistarch}$(\var{nf},\var{list},\{\var{arch}\},\{\fl=0\})$:
+vector of vectors of all \var{bid} (see \tet{idealstar}) of all
 modules in \var{list}, with Archimedean part \var{arch} added (void if
 omitted). \var{list} is a vector of big ideals, as output by
 \kbd{ideallist}$(\ldots, \fl)$ for instance. $\fl$ is optional; its binary
@@ -4305,31 +4359,30 @@ $I$ since ideal operations are involved.
 \syn{ideallllred}{\var{nf},x,\var{vdir},\var{prec}}, where an omitted
 \var{vdir} is coded as \kbd{NULL}.
 
-\subsecidx{idealstar}$(\var{nf},I,\{\fl=1\})$: \var{nf} being a number
-field, and $I$
-either and ideal in any form, or a row vector whose first component is an
-ideal and whose second component is a row vector of $r_1$ 0 or 1, outputs
-necessary data for computing in the group $(\Z_K/I)^*$.
+\subsecidx{idealstar}$(\var{nf},I,\{\fl=1\})$: outputs a \var{bid} structure,
+necessary for computing in the finite abelian group $G = (\Z_K/I)^*$. Here,
+\var{nf} is a number field and $I$ is a \var{modulus}: either an ideal in any
+form, or a row vector whose first component is an ideal and whose second
+component is a row vector of $r_1$ 0 or 1.
 
- If $\fl=2$, the result is a 5-component vector $w$. $w[1]$ is the ideal
-or module $I$ itself. $w[2]$ is the structure of the group. The other
-components are difficult to describe and are used only in conjunction with
-the function \kbd{ideallog}.
+This \var{bid} is used in \tet{ideallog} to compute discrete logarithms. It
+also contains useful information which can be conveniently retrieved as 
+\kbd{\var{bid}.mod} (the modulus),
+\kbd{\var{bid}.clgp} ($G$ as a finite abelian group),
+\kbd{\var{bid}.no} (the cardinality of $G$),
+\kbd{\var{bid}.cyc} (elementary divisors) and
+\kbd{\var{bid}.gen} (generators).
 
- If $\fl=1$ (default), as $\fl=2$, but do not compute explicit generators
-for the cyclic components, which saves time.
+If $\fl=1$ (default), the result is a \var{bid} structure without
+generators.
 
- If $\fl=0$, computes the structure of $(\Z_K/I)^*$ as a 3-component vector
-$v$. $v[1]$ is the order, $v[2]$ is the vector of SNF\sidx{Smith normal form}
-cyclic components and
-$v[3]$ the corresponding generators. When the row vector is explicitly
-included, the
-non-zero elements of this vector are considered as real embeddings of
-\var{nf} in the order given by \kbd{polroots}, i.e.~in \var{nf}[6]
-(\kbd{\var{nf}.roots}), and then $I$ is a module with components at infinity.
+If $\fl=2$, as $\fl=1$, but including generators, which wastes some time.
 
-To solve discrete logarithms (using \kbd{ideallog}), you have to choose
-$\fl=2$.
+If $\fl=0$, \emph{deprecated}. Only outputs $(\Z_K/I)^*$ as an abelian group,
+i.e as a 3-component vector $[h,d,g]$: $h$ is the order, $d$ is the vector of
+SNF\sidx{Smith normal form} cyclic components and $g$ the corresponding
+generators. This flag is deprecated: it is in fact slightly faster
+to compute a true \var{bid} structure, which contains much more information.
 
 \syn{idealstar0}{\var{nf},I,\fl}.
 
@@ -8507,7 +8560,7 @@ The error message is printed, as well as the result of the evaluation of
 computation is then lost.
 
 The following error handler prints the list of all user variables, then
-stores in a file their name and their values:\sidx{writebin}
+stores in a file their name and their values:\kbdsidx{writebin}
 \bprog
 ? { trap( ,
       print(reorder);

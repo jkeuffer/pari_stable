@@ -186,6 +186,7 @@
 % argument (silently) goes to index
 \def\sidx{\gdef\f@nt{rm}\let\do=\toindex\doverb}   % \rm
 \def\kbdsidx{\gdef\f@nt{tt}\let\do=\toindex\doverb}% \tt
+\def\varsidx{\gdef\f@nt{it}\let\do=\toindex\doverb}% \tt
 
 % argument printed + sent to index
 \def\@idx#1{#1\toindex{#1}}
@@ -347,7 +348,7 @@
 \def\copyrightpage{
 \begintitle
 \vskip 14cm
-\noindent Copyright \copyright\ 2000--2004 The PARI Group
+\noindent Copyright \copyright\ 2000--2005 The PARI Group
 \medskip\par
 \noindent Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice are
@@ -358,7 +359,7 @@ translations, of this manual under the conditions for verbatim copying,
 provided also that the entire resulting derived work is distributed under the
 terms of a permission notice identical to this one.
 \bigskip\par
-\noindent PARI/GP is Copyright \copyright\ 2000--2004 The PARI Group
+\noindent PARI/GP is Copyright \copyright\ 2000--2005 The PARI Group
 \medskip\par
 \noindent PARI/GP is free software;  you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the Free

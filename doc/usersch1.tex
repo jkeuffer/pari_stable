@@ -64,7 +64,7 @@ Tracking System, available from PARI's home page, or directly from the URL
   http://pari.math.u-bordeaux.fr/Bugs
 @eprog\noindent Further instructions can be found on that page.
 
-\section{The PARI types} \label{se:start}\sidx{types}
+\section{The PARI types} \label{se:start}
 
 \noindent The GP language is not typed in the traditional sense (it is
 dynamically typed); in particular, variables have no type. In library mode,
@@ -72,7 +72,7 @@ the type of all PARI objects is \kbd{GEN}, a generic type. On the other hand,
 each object has a specific internal type, depending on the mathematical
 object it represents.
 
-The crucial word is \idx{recursiveness}: most of the types PARI knows
+The crucial word is recursiveness: most of the types PARI knows
 about are recursive. For example, the basic internal type \typ{COMPLEX}
 exists. However, the components (i.e.~the real and imaginary part) of such a
 ``complex number'' can be of any type. The only sensible ones are integers
@@ -106,7 +106,7 @@ precision)\sidx{integer}\cr
 number}\cr
 %
 \+&type \tet{t_INTMOD}& $\Z/n\Z$& Intmods (integers modulo
-$n$)\sidx{intmod}\cr
+$n$)\varsidx{intmod}\cr
 %
 \+&type \tet{t_FRAC}& $\Q$& Rational numbers (in irreducible
 form)\sidx{rational number}\cr
@@ -119,7 +119,7 @@ form)\sidx{rational number}\cr
 $[\Z[w]:\Z]=2$)\sidx{quadratic number}\cr
 %
 \+&type \tet{t_POLMOD}& $T[X]/P(X)T[X]$& Polmods (polynomials modulo
-$P$)\sidx{polmod}\cr
+$P$)\varsidx{polmod}\cr
 %
 \+&type \tet{t_POL}& $T[X]$& Polynomials \sidx{polynomial}\cr
 %
@@ -309,8 +309,8 @@ UltraSparcs use the MicroSparc II version;
 A third version uses the GNU MP library to implement most of its
 multiprecision kernel. It improves significantly on the native one for large
 operands, say 100 decimal digits of accuracy or more. You should enable it if
-GMP is present on your system. This still uses profitably parts of the first
-version, but the speed-up is less important.
+GMP is present on your system. Parts of the first version are still in use
+within the GMP kernel, but are scheduled to disappear.
 
 An historical version of the PARI/GP kernel, written in 1985, was specific to
 680x0 based computers, and was entirely written in MC68020 assembly language.
@@ -424,8 +424,8 @@ usual operations on elements, ideals, prime ideals, etc\dots are available.
 More sophisticated functions are also implemented, like solving Thue
 equations, finding integral bases and discriminants of number fields,
 computing class groups and fundamental units, computing in relative number
-field extensions (including explicit class field theory), and also many
-functions dealing with elliptic curves over $\Q$ or over local fields.
+field extensions, class field theory, and also many functions dealing with
+elliptic curves over $\Q$ or over local fields.
 
 \subsec{Other functions}.
 
@@ -434,9 +434,9 @@ Quite a number of other functions dealing with polynomials (e.g.~finding
 complex or $p$-adic roots, factoring, etc), power series (e.g.~substitution,
 reversion), linear algebra (e.g.~determinant, characteristic polynomial,
 linear systems), and different kinds of recursions are also included. In
-addition, standard numerical analysis routines like Romberg integration (open
-or closed, on a finite or infinite interval), real root finding (when the
-root is bracketed), polynomial interpolation, infinite series evaluation, and
+addition, standard numerical analysis routines like univariate integration
+(using the double exponential method), real root finding (when the root is
+bracketed), polynomial interpolation, infinite series evaluation, and
 plotting are included. See the last sections of Chapter~3 for details.
 \medskip
 
