@@ -37,6 +37,10 @@ Done for version 2.2.4 (released 10/07/2002) [hopefully]:
     1- add default 'newgaloisformat' to make 2.2.3 F-22 optional (by default,
        old format will be used, preserving compatibility).
 
+  Changed
+    1- remove most global variables from gp.c (put them in struct gp_data).
+    2- use better bounds for size of factors in nffactor()
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.3 (released 10/06/2002):
   Fixed
