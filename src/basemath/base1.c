@@ -121,7 +121,7 @@ checkprhall(GEN prhall)
 void
 check_pol_int(GEN x)
 {
-  long k = lg(x)-1;
+  long k = lgef(x)-1;
   for ( ; k>1; k--)
     if (typ(x[k])!=t_INT) err(talker,"polynomial not in Z[X]");
 }
