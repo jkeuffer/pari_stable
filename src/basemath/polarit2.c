@@ -639,7 +639,7 @@ TruncTrace(GEN x, GEN pb, GEN pa_b, GEN pa_bs2, GEN pbs2)
 {
   GEN r, q = dvmdii(x, pb, &r);
   if (cmpii(r,  pbs2) > 0) q = addis(q,1);
-  if (cmpii(q,pa_bs2) > 0) q = subii(q,pa_b);
+  if (pa_bs2 && cmpii(q,pa_bs2) > 0) q = subii(q,pa_b);
   return q;
 }
 
@@ -682,7 +682,7 @@ cmbf(GEN target, GEN famod, GEN p, long b, long a,
         T = modii(mulii(lc, (GEN)p1[deg[i]+1]), pa);
       else
         T = (GEN)p1[deg[i]+1]; /* d-1 term */
-      trace[i] = itos( TruncTrace(T, pb,pa_b,pa_bs2,pbs2) );
+      trace[i] = itos( TruncTrace(T, pb,pa_b,NULL,pbs2) );
     }
     spa_b   =   pa_b[2]; /* < 2^(BIL-1) */
     spa_bs2 = pa_bs2[2]; /* < 2^(BIL-1) */
@@ -713,7 +713,7 @@ nextK:
       /* d - 1 test,  overflow is not a problem (correct mod 2^BIL) */
       for (t=trace[ind[1]],i=2; i<=K; i++)
         t = addssmod(t, trace[ind[i]], spa_b);
-      if (t > spa_bs2) t -= spa_bs2;
+      if (t > spa_bs2) t -= spa_b;
       if (labs(t) > ((K+1)>>1))
       {
         if (DEBUGLEVEL>6) fprintferr(".");
