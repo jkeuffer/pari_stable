@@ -1166,7 +1166,7 @@ FpX_split_Berlekamp(GEN *t, GEN p)
     {
       GEN pol = scalarpol(genrand(p), vu);
       for (i=2; i<=d; i++)
-        pol = FpX_add(pol, FpX_Fp_mul((GEN)vker[i], genrand(p),NULL),NULL);
+        pol = FpX_add(pol, FpX_Fp_mul((GEN)vker[i], randomi(p),NULL),NULL);
       polt = FpX_red(pol,p);
     }
     for (i=ir; i<L && L<d; i++)
