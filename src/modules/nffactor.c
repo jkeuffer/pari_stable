@@ -21,6 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "parinf.h"
 
+extern GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den);
 extern GEN hensel_lift_fact(GEN pol, GEN fact, GEN T, GEN p, GEN pev, long e);
 extern GEN nf_get_T2(GEN base, GEN polr);
 extern GEN nfreducemodpr_i(GEN x, GEN prh);
@@ -31,7 +32,6 @@ static GEN nffactormod2(GEN nf,GEN pol,GEN pr);
 static GEN nfmod_split2(GEN nf, GEN prhall, GEN polb, GEN v, GEN q);
 static GEN nf_pol_mul(GEN nf,GEN pol1,GEN pol2);
 static GEN nf_pol_divres(GEN nf,GEN pol1,GEN pol2, GEN *pr);
-static GEN nf_pol_subres(GEN nf,GEN pol1,GEN pol2);
 static GEN nfmod_pol_reduce(GEN nf,GEN prhall,GEN pol);
 static GEN nfmod_pol_divres(GEN nf,GEN prhall,GEN pol1,GEN pol2, GEN *pr);
 static GEN nfmod_pol_gcd(GEN nf,GEN prhall,GEN pol1,GEN pol2);
@@ -101,7 +101,7 @@ unifpol(GEN nf,GEN pol,long flag)
   return unifpol0(nf,(GEN) pol, flag);
 }
 
-#if 0 
+#if 0
 /* return a monic polynomial of degree d with random coefficients in Z_nf */
 static GEN
 random_pol(GEN nf,long d)
@@ -122,7 +122,7 @@ random_pol(GEN nf,long d)
   pl[1] = evalsigne(1) | evallgef(d+3) | evalvarn(0);
   return pl;
 }
-#endif 
+#endif
 
 /* multiplication of x by y */
 static GEN
@@ -286,16 +286,6 @@ nfmod_pol_divres(GEN nf,GEN prhall,GEN x,GEN y, GEN *pr)
   *pr=p3; return z;
 }
 
-/* GCD of x and y */
-static GEN
-nf_pol_subres(GEN nf,GEN x,GEN y)
-{
-  gpmem_t av=avma, tetpil;
-  GEN s = srgcd(unifpol(nf,x,1), unifpol(nf,y,1));
-
-  tetpil=avma; return gerepile(av,tetpil,unifpol(nf,s,1));
-}
-
 /* GCD of x and y modulo prhall */
 static GEN
 nfmod_pol_gcd(GEN nf,GEN prhall,GEN x,GEN y)
@@ -397,7 +387,7 @@ nffactormod0(GEN nf, GEN x, GEN pr)
     rep = lift(lift(rep));
   }
 
-  l = lg((GEN)rep[1]); 
+  l = lg((GEN)rep[1]);
   for (j = 1; j < l; j++)
     mael(rep, 1, j) = (long)unifpol(nf, gmael(rep, 1, j), 1);
 
@@ -558,7 +548,7 @@ nffactormod2(GEN nf,GEN pol,GEN pr)
   return gerepile(av,tetpil,y);
 }
 
-/* return pol + pol^2 + ... + pol^(q/2) modulo prhall and 
+/* return pol + pol^2 + ... + pol^(q/2) modulo prhall and
    the polynomial pmod */
 static GEN
 nfmod_split2(GEN nf,GEN prhall,GEN pmod,GEN pol,GEN exp)
@@ -577,82 +567,30 @@ nfmod_split2(GEN nf,GEN prhall,GEN pmod,GEN pol,GEN exp)
   return gerepileupto(av,p1);
 }
 
-/* If p doesn't divide either a or b and has a divisor of degree 1, return it.
- * Return NULL otherwise.
- */
+/* If p doesn't divide a and has a divisor of degree 1, return it.
+ * Return NULL otherwise. */
 static GEN
 p_ok(GEN nf, GEN p, GEN a)
 {
-  long m, i;
   gpmem_t av;
-  GEN dec;
+  GEN pr;
 
   if (divise(a,p)) return NULL;
-  av = avma; dec = primedec(nf,p); m=lg(dec);
-  for (i=1; i<m; i++)
-  {
-    GEN pr = (GEN)dec[i];
-    if (is_pm1(pr[4]))
-      return pr;
-  }	
+  av = avma; pr = (GEN)primedec(nf,p)[1];
+  if (is_pm1(pr[4])) return pr;
   avma = av; return NULL;
 }
 
-/* for each new prime ct--, if ct = 0, return NULL */
 static GEN
-choose_prime(GEN nf, GEN dk, GEN lim, long ct)
+choose_prime(GEN nf, GEN dk, GEN lim)
 {
-  GEN p, pr;
-
-  p = nextprime(lim);
+  GEN p, pr, L = lim;
   for (;;)
   {
-    if ((pr = p_ok(nf,p,dk))) break;
-    ct--;
-    if (!ct) return NULL;
-    p = nextprime(addis(p,2));
+    p = nextprime(L);
+    if ((pr = p_ok(nf,p,dk))) return pr;
+    L = addis(p,2);
   }
-
-  return pr;
-}
-
-/* test if the discriminant of polbase modulo some few primes 
-   is non-zero. Return 1 if it is so (=> polbase is square-free)
-   and 0 otherwise (=> polbase may or may not be square-free) */
-static int
-is_sqf(GEN nf, GEN polbase)
-{
-  GEN lt, pr, prh, p2, p;
-  long i, d = lgef(polbase), ct = 5;
-
-  lt = (GEN)leading_term(polbase)[1];
-  p  = stoi(101);
-
-  while (ct > 0)
-  {
-    /* small primes tend to divide discriminants more often 
-       than large ones so we look at primes >= 101 */
-    pr = choose_prime(nf,lt,p,30); 
-    if (!pr) break;
-
-    p=(GEN)pr[1];
-    prh=prime_to_ideal(nf,pr);
-
-    p2=gcopy(polbase);
-    lt=mpinvmod(lt,p);
-
-    for (i=2; i<d; i++)
-      p2[i] = nfreducemodpr_i(gmul(lt,(GEN)p2[i]), prh)[1];
-    p2 = normalizepol(p2);
-
-    /* discriminant is non-zero => polynomial is square-free */
-    if (!gcmp0(p2) && !divise(discsr(p2),p))  { return 1; }
-    
-    ct--; 
-    p=addis(p,1);
-  }
-  
-  return 0;
 }
 
 /* rescale p in K[X] (coeffs in algtobasis form) --> primitive in O_K[X] */
@@ -667,70 +605,45 @@ nf_pol_to_int(GEN p, GEN *den)
   *den = d; return p;
 }
 
+static GEN
+nf_pol_normalize(GEN nf, GEN P)
+{
+  GEN t = element_inv(nf, leading_term(P));
+  return nf_pol_mul(nf,t,P);
+}
+
 /* return the roots of pol in nf */
 GEN
 nfroots(GEN nf,GEN pol)
 {
-  long d=lgef(pol), fl;
-  gpmem_t av=avma, tetpil;
-  GEN p1,p2,polbase,polmod,den;
+  gpmem_t av = avma;
+  int d = degpol(pol);
+  GEN A,g,den;
 
-  p2=NULL; /* gcc -Wall */
-  nf=checknf(nf);
-  if (typ(pol)!=t_POL) err(talker,"not a polynomial in nfroots");
+  nf = checknf(nf);
+  if (typ(pol) != t_POL) err(notpoler,"nfroots");
   if (varn(pol) >= varn(nf[1]))
     err(talker,"polynomial variable must have highest priority in nfroots");
-
-  polbase=unifpol(nf,pol,0);
-
-  if (d==3)
+  if (d == 0) return cgetg(1,t_VEC);
+  if (d == 1)
   {
-    tetpil=avma; p1=cgetg(1,t_VEC);
-    return gerepile(av,tetpil,p1);
+    A = gneg_i(gdiv((GEN)pol[2],(GEN)pol[3]));
+    return gerepilecopy(av, _vec( basistoalg(nf,A) ));
   }
+  A = fix_relative_pol(nf,pol,0);
+  A = primpart( lift_intern(A) );
+  if (DEBUGLEVEL>3) fprintferr("test if polynomial is square-free\n");
+  g = nfgcd(A, derivpol(A), (GEN)nf[1], NULL);
 
-  if (d==4)
-  {
-    tetpil=avma; p1=cgetg(2,t_VEC);
-    p1[1] = (long)basistoalg(nf,gneg_i(
-      element_div(nf,(GEN)polbase[2],(GEN)polbase[3])));
-    return gerepile(av,tetpil,p1);
+  if (degpol(g))
+  { /* not squarefree */
+    g = nf_pol_normalize(nf, g);
+    A = nf_pol_divres(nf,A,g,NULL);
   }
-
-  p1=element_inv(nf,leading_term(polbase));
-  polbase=nf_pol_mul(nf,p1,polbase);
-
-  polbase = nf_pol_to_int(polbase, &den);
-  polmod=unifpol(nf,polbase,1);
-
-  if (DEBUGLEVEL>=4)
-    fprintferr("test if the polynomial is square-free\n");
-
-  fl = is_sqf(nf, polbase);
-
-  /* the polynomial may not be square-free ... */
-  if (!fl) 
-  {
-    p1=derivpol(polmod);
-    p2=nf_pol_subres(nf,polmod,p1);
-    if (degpol(p2) == 0) fl = 1; 
-  }
-
-  if (!fl)
-  {
-    p1=element_inv(nf,leading_term(p2));
-    p2=nf_pol_mul(nf,p1,p2);
-    polmod=nf_pol_divres(nf,polmod,p2,NULL);
-
-    p1=element_inv(nf,leading_term(polmod));
-    polmod=nf_pol_mul(nf,p1,polmod);
-
-    polmod = nf_pol_to_int(polmod, &den);
-    polmod=unifpol(nf,polmod,1);
-  }
-
-  p1 = nfsqff(nf,polmod,1);
-  tetpil=avma; return gerepile(av, tetpil, gen_sort(p1, 0, cmp_pol));
+  A = nf_pol_normalize(nf,A);
+  A = nf_pol_to_int(A, &den);
+  A = nfsqff(nf,A,1);
+  return gerepileupto(av, gen_sort(A, 0, cmp_pol));
 }
 
 /* return a minimal lift of elt modulo id */
@@ -773,75 +686,52 @@ nf_pol_eval(GEN nf,GEN pol,GEN elt)
 }
 #endif
 
+extern GEN trivfact(void);
+
 /* return the factorization of x in nf */
 GEN
 nffactor(GEN nf,GEN pol)
-{ 
-  GEN y,p1,p2,den,p3,p4,quot,rep=cgetg(3,t_MAT);
-  long i, j, d, fl;
-  gpmem_t av = avma, tetpil;
+{
+  GEN A,g,y,p1,den,rep;
+  long l, j, d = degpol(pol);
+  gpmem_t av;
+  if (DEBUGLEVEL>3) timer2();
 
-  if (DEBUGLEVEL >= 4) timer2();
-
-  p3=NULL; /* gcc -Wall */
-  nf=checknf(nf);
-  if (typ(pol)!=t_POL) err(typeer,"nffactor");
+  nf = checknf(nf);
+  if (typ(pol) != t_POL) err(notpoler,"nffactor");
   if (varn(pol) >= varn(nf[1]))
     err(talker,"polynomial variable must have highest priority in nffactor");
 
-  d=lgef(pol);
-  if (d==3)
+  if (d == 0) return trivfact();
+  rep = cgetg(3, t_MAT); av = avma;
+  if (d == 1)
   {
-    rep[1]=lgetg(1,t_COL);
-    rep[2]=lgetg(1,t_COL);
-    return rep;
-  }
-  if (d==4)
-  {
-    p1=cgetg(2,t_COL); rep[1]=(long)p1; p1[1]=lcopy(pol);
-    p1=cgetg(2,t_COL); rep[2]=(long)p1; p1[1]=un;
+    rep[1] = (long)_col( gcopy(pol) );
+    rep[2] = (long)_col( gun );
     return rep;
   }
 
-  p1=element_inv(nf,leading_term(pol));
-  pol=nf_pol_mul(nf,p1,pol);
+  A = fix_relative_pol(nf,pol,0);
+  A = primpart( lift_intern(A) );
+  if (DEBUGLEVEL>3) fprintferr("test if polynomial is square-free\n");
+  g = nfgcd(A, derivpol(A), (GEN)nf[1], NULL);
 
-  p1=unifpol(nf,pol,0);
-  p1 = nf_pol_to_int(p1, &den);
+  A = nf_pol_normalize(nf, A);
+  A = nf_pol_to_int(A, &den);
 
-  if (DEBUGLEVEL>=4)
-    fprintferr("test if the polynomial is square-free\n");
+  if (degpol(g))
+  { /* not squarefree */
+    gpmem_t av1;
+    GEN ex;
+    g = nf_pol_normalize(nf, g);
+    A = nf_pol_divres(nf,A,g,NULL);
 
-  fl = is_sqf(nf, p1);
-
-  /* polynomial may not be square-free ... */
-  if (!fl) 
-  {
-    p2=derivpol(p1);
-    p3=nf_pol_subres(nf,p1,p2);
-    if (degpol(p3) == 0) fl = 1; 
-  }
-
-  if (!fl)
-  {
-    p4=element_inv(nf,leading_term(p3));
-    p3=nf_pol_mul(nf,p4,p3);
-
-    p2=nf_pol_divres(nf,p1,p3,NULL);
-    p4=element_inv(nf,leading_term(p2));
-    p2=nf_pol_mul(nf,p4,p2);
-
-    p2 = nf_pol_to_int(p2, &den);
-
-    p2=unifpol(nf,p2,1); 
-    tetpil = avma; y = nfsqff(nf,p2,0);
-    i = nfcmbf.nfact;
-
-    quot=nf_pol_divres(nf,p1,p2,NULL);
-    p3=(GEN)gpmalloc((i+1) * sizeof(long));
-    for (j=i; j>=1; j--)
+    y = nfsqff(nf,A,0); av1 = avma;
+    l = lg(y);
+    ex=(GEN)gpmalloc(l * sizeof(long));
+    for (j=l-1; j>=1; j--)
     {
-      GEN fact=(GEN)y[j], quo = quot, rem;
+      GEN fact=(GEN)y[j], quo = g, rem;
       long e = 0;
 
       do
@@ -850,51 +740,48 @@ nffactor(GEN nf,GEN pol)
 	e++;
       }
       while (gcmp0(rem));
-      p3[j]=lstoi(e);
+      ex[j] = e;
     }
-    avma = (gpmem_t)y; y = gerepile(av, tetpil, y);
-    p2=cgetg(i+1, t_COL); for (; i>=1; i--) p2[i]=lcopy((GEN)p3[i]);
-    free(p3);
+    avma = av1; y = gerepileupto(av, y);
+    p1 = cgetg(l, t_COL); for (j=l-1; j>=1; j--) p1[j] = lstoi(ex[j]);
+    free(ex);
   }
   else
   {
-    tetpil=avma; y = gerepile(av,tetpil,nfsqff(nf,p1,0));
-    i = nfcmbf.nfact;
-    p2=cgetg(i+1, t_COL); for (; i>=1; i--) p2[i]=un;
+    y = gerepileupto(av, nfsqff(nf,A,0));
+    l = lg(y);
+    p1 = cgetg(l, t_COL); for (j=l-1; j>=1; j--) p1[j] = un;
   }
-  if (DEBUGLEVEL>=4)
+  if (DEBUGLEVEL>3)
     fprintferr("number of factor(s) found: %ld\n", nfcmbf.nfact);
-  rep[1]=(long)y;
-  rep[2]=(long)p2; return sort_factor(rep, cmp_pol);
+  rep[1] = (long)y;
+  rep[2] = (long)p1; return sort_factor(rep, cmp_pol);
 }
 
 /* test if the matrix M is suitable */
 static long
-test_mat(GEN M, GEN p, GEN C2, long k)
+test_mat(GEN M, GEN p2k, GEN C2)
 {
-  long i, N = lg(M);
-  gpmem_t av = avma;
-  GEN min, prod, L2, R;
+  long i, l = lg(M);
+  GEN min, prod, L2;
 
   min = prod = gcoeff(M,1,1);
-  for (i = 2; i < N; i++)
+  for (i = 2; i < l; i++)
   {
     L2 = gcoeff(M,i,i); prod = mpmul(prod,L2);
     if (mpcmp(L2,min) < 0) min = L2;
   }
-  R = mpmul(min, gpowgs(p, k<<1));
-  i = mpcmp(mpmul(C2,prod), R); avma = av;
-  return (i < 0);
+  return (mpcmp(mpmul(C2,prod), mpmul(min, p2k)) < 0);
 }
 
 /* return the matrix corresponding to pr^e with R(pr^e) > C */
 static GEN
 T2_matrix_pow(GEN nf, GEN pre, GEN p, GEN C, long *kmax, long prec)
 {
-  long k = *kmax, N = degpol((GEN)nf[1]);
+  long k = *kmax;
   gpmem_t av=avma, av1, lim;
   int tot_real = !signe(gmael(nf,2,2));
-  GEN p1,p2,p3,u,C2,T2, x = (GEN)nf[1];
+  GEN p2k,p1,p2,p3,u,C2,T2, x = (GEN)nf[1];
 
   C2 = gdiv(gmul2n(C,2), absi((GEN)nf[3]));
   p1 = gmul(pre,lllintpartial(pre)); av1 = avma;
@@ -902,7 +789,8 @@ T2_matrix_pow(GEN nf, GEN pre, GEN p, GEN C, long *kmax, long prec)
                : nf_get_T2((GEN) nf[7], roots(x,prec));
   p3 = qf_base_change(T2,p1,1);
 
-  if (N <= 6 && test_mat(p3,p,C2,k))
+  p2k = gpowgs(p, k<<1);
+  if (degpol(x) <= 6 && test_mat(p3,p2k,C2))
   {
     avma = av1; return gerepileupto(av,p1);
   }
@@ -918,13 +806,14 @@ T2_matrix_pow(GEN nf, GEN pre, GEN p, GEN C, long *kmax, long prec)
       if (u) break;
 
       prec=(prec<<1)-2;
-      if (DEBUGLEVEL > 1) err(warnprec,"nffactor[1]",prec);
+      if (DEBUGLEVEL>1) err(warnprec,"nffactor[1]",prec);
       T2 = nf_get_T2((GEN) nf[7], roots(x,prec));
       p3 = qf_base_change(T2,p1,1);
     }
     if (DEBUGLEVEL>2) msgtimer("lllgram + base change");
     p3 = qf_base_change(p3,u,1);
-    if (test_mat(p3,p,C2,k))
+    p2k = gpowgs(p, k<<1);
+    if (test_mat(p3,p2k,C2))
     {
       *kmax = k;
       return gerepileupto(av,gmul(p1,u));
@@ -933,7 +822,7 @@ T2_matrix_pow(GEN nf, GEN pre, GEN p, GEN C, long *kmax, long prec)
     /* we also need to increase the precision */
     p2=shifti(gceil(mulsr(k, glog(p,DEFAULTPREC))),-1);
     prec += (long)(itos(p2)*pariK1);
-    if (DEBUGLEVEL > 1) err(warnprec,"nffactor[2]",prec);
+    if (DEBUGLEVEL>1) err(warnprec,"nffactor[2]",prec);
     k = k<<1; p1 = idealmullll(nf,p1,p1);
     if (low_stack(lim, stack_lim(av1,2)))
     {
@@ -945,8 +834,18 @@ T2_matrix_pow(GEN nf, GEN pre, GEN p, GEN C, long *kmax, long prec)
   }
 }
 
-/* return the factorization of the square-free polynomial x. 
-   The coeff of x are in Z_nf and its leading term is a rational 
+/* assume lc(pol) != 0 mod prh */
+static GEN
+nf_pol_red(GEN pol, GEN prh)
+{
+  long i, l = lgef(pol);
+  GEN z = cgetg(l, t_POL); z[1] = pol[1];
+  for (i=2; i<l; i++) z[i] = nfreducemodpr_i((GEN)pol[i], prh)[1];
+  return z;
+}
+
+/* return the factorization of the square-free polynomial x.
+   The coeff of x are in Z_nf and its leading term is a rational
    integer. If fl = 1,return only the roots of x in nf */
 static GEN
 nfsqff(GEN nf,GEN pol, long fl)
@@ -956,7 +855,7 @@ nfsqff(GEN nf,GEN pol, long fl)
   GEN p1,pr,p2,rep,k2,C,h,dk,dki,p,prh,p3,T2,polbase,fact,pk,ap,apr;
   GEN polmod,polred,hinv,lt,minp,den,maxp=shifti(gun,32),run,aprh;
 
-  if (DEBUGLEVEL>=4) msgtimer("square-free");
+  if (DEBUGLEVEL>3) msgtimer("square-free");
 
   dk=absi((GEN)nf[3]);
   dki=mulii(dk,(GEN)nf[4]);
@@ -969,44 +868,42 @@ nfsqff(GEN nf,GEN pol, long fl)
   prec = DEFAULTPREC;
   for (;;)
   {
-    if (prec <= gprecision(nf))
+    if (prec <= nfgetprec(nf))
       T2 = gprec_w(gmael(nf,5,3), prec);
     else
       T2 = nf_get_T2((GEN)nf[7], roots((GEN)nf[1], prec));
 
-    run=realun(prec);
-    p1=realzero(prec);
+    run= realun(prec);
+    p1 = realzero(prec);
     for (i=2; i<d; i++)
-    { 
+    {
       p2 = gmul(run, (GEN)polbase[i]);
-      p2 = qfeval(T2, p2);
+      p2 = qfeval(T2, p2); if (signe(p2) < 0) break;
       p1 = addrr(p1, gdiv(p2, binome(stoi(d), i-2)));
-      if (signe(p1) < 0) break;
     }
-
-    if (signe(p1) > 0) break;
+    if (i == d) break;
 
     prec = (prec<<1)-2;
-    if (DEBUGLEVEL > 1) err(warnprec, "nfsqff", prec);
+    if (DEBUGLEVEL>1) err(warnprec, "nfsqff", prec);
   }
 
   lt = (GEN)leading_term(polbase)[1];
   p1 = gmul(p1, mulis(sqri(lt), n));
-  C = gpow(stoi(3), gadd(gmulsg(3, ghalf), stoi(d)), prec);
+  C = gpow(stoi(3), dbltor(0.75 + d), prec);
   C = gdiv(gmul(C, p1), gmulsg(d, mppi(prec)));
-  
-  if (DEBUGLEVEL>=4)
+
+  if (DEBUGLEVEL>3)
     fprintferr("the bound on the T2-norm of the coeff. is: %Z\n", C);
 
-  /* the theoretical bound for the exponent should be: 
+  /* the theoretical bound for the exponent should be:
      k2=gadd(glog(gdivgs(C,n),DEFAULTPREC), mulsr(n*(n-1), dbltor(0.347))); */
   k2=gadd(glog(gdivgs(C,n),DEFAULTPREC), mulsr(n*(n-1), dbltor(0.15)));
   k2=gmul2n(gmulgs(k2,n),-1);
 
   minp=gmin(gexp(gmul2n(k2,-6),BIGDEFAULTPREC), maxp);
   minp=gceil(minp);
-  
-  if (DEBUGLEVEL>=4)
+
+  if (DEBUGLEVEL>3)
   {
     fprintferr("lower bound for the prime numbers: %Z\n", minp);
     msgtimer("bounds computation");
@@ -1016,36 +913,25 @@ nfsqff(GEN nf,GEN pol, long fl)
   pr=NULL;
   for (;;)
   {
-    apr = choose_prime(nf,dki,minp, pr?30:0); 
-    if (!apr) break;
+    apr = choose_prime(nf,dki,minp);
+    ap = (GEN)apr[1];
+    aprh = prime_to_ideal(nf,apr);
 
-    ap=(GEN)apr[1];
-    aprh=prime_to_ideal(nf,apr);
+    polred = nf_pol_red(polbase, aprh);
+    if (!FpX_is_squarefree(polred,ap)) continue;
 
-    polred=gcopy(polbase);
-    lt=(GEN)leading_term(polbase)[1];
-    lt=mpinvmod(lt,ap);
-
-    for (i=2; i<d; i++)
-      polred[i] = nfreducemodpr_i(gmul(lt,(GEN)polbase[i]), aprh)[1];
-
-    if (!divise(discsr(polred),ap))
+    rep=(GEN)simplefactmod(polred,ap)[1];
+    anbf=lg(rep)-1;
+    ct--;
+    if (anbf < nbf)
     {
-      rep=(GEN)simplefactmod(polred,ap)[1];
-      anbf=lg(rep)-1;
-      ct--;
-      if (anbf < nbf)
+      nbf = anbf; pr = apr; p = ap;
+      if (DEBUGLEVEL>3)
       {
-	nbf=anbf;
-	pr=gcopy(apr);
-	p=gcopy(ap);
-	if (DEBUGLEVEL>=4)
-	{
-	  fprintferr("prime ideal considered: %Z\n", pr);
-	  fprintferr("number of irreducible factors: %ld\n", nbf);
-	}
-	if (nbf == 1) break;
+        fprintferr("prime ideal considered: %Z\n", pr);
+        fprintferr("number of irreducible factors: %ld\n", nbf);
       }
+      if (nbf == 1) break;
     }
     if (pr && !ct) break;
 
@@ -1054,7 +940,7 @@ nfsqff(GEN nf,GEN pol, long fl)
 
   k = itos(gceil(gdiv(k2,glog(p,BIGDEFAULTPREC))));	
 
-  if (DEBUGLEVEL>=4)
+  if (DEBUGLEVEL>3)
   {
     fprintferr("prime ideal chosen: %Z\n", pr);
     msgtimer("choice of the prime ideal");
@@ -1063,7 +949,7 @@ nfsqff(GEN nf,GEN pol, long fl)
   if (lg(rep)==2)
   {
     if (fl) { avma=av; return cgetg(1,t_VEC); }
-    rep=cgetg(2,t_VEC); rep[1]=lcopy(polmod);
+    rep = _vec( gcopy(polmod) );
     nfcmbf.nfact=1; return gerepileupto(av, rep);
   }
 
@@ -1072,38 +958,33 @@ nfsqff(GEN nf,GEN pol, long fl)
   p2=shifti(gceil(mplog(p2)),-1);
 
   newprec = MEDDEFAULTPREC + (long)(itos(p2)*pariK1);
-  if (DEBUGLEVEL>=4)
+  if (DEBUGLEVEL>3)
     fprintferr("new precision: %ld\n",newprec);
 
   prh = idealpows(nf,pr,k); m = k;
   h = T2_matrix_pow(nf,prh,p,C, &k, newprec);
-  if (m != k) prh=idealpows(nf,pr,k); 
+  if (m != k) prh=idealpows(nf,pr,k);
 
-  if (DEBUGLEVEL>=4)
+  if (DEBUGLEVEL>3)
   {
     fprintferr("a suitable exponent is: %ld\n",(long)k);
     msgtimer("computation of H");
   }
 
   pk = gcoeff(prh,1,1);
-  lt=(GEN)leading_term(polbase)[1];
-  lt=mpinvmod(lt,pk);
+  lt = (GEN)leading_term(polbase)[1];
+  lt = mpinvmod(lt, pk);
+  polred = nf_pol_red(gmul(lt,polbase), prh);
 
-  polred[1] = polbase[1];
-  for (i=2; i<d; i++)
-    polred[i] = nfreducemodpr_i(gmul(lt,(GEN)polbase[i]), prh)[1];
-
-  fact = lift_intern((GEN)factmod(polred,p)[1]);
+  fact = (GEN)factmod0(polred,p)[1];
   rep = hensel_lift_fact(polred,fact,NULL,p,pk,k);
 
-  if (DEBUGLEVEL >= 4) msgtimer("computation of the p-adic factorization");
+  if (DEBUGLEVEL>3) msgtimer("computation of the p-adic factorization");
 
   den = det(h); /* |den| = NP^k */
   hinv= adj(h);
-  lt=(GEN)leading_term(polbase)[1];
-
   if (fl)
-  {
+  { /* roots only */
     long x_a[] = { evaltyp(t_POL)|_evallg(4), 0,0,0 };
     GEN mlt = gneg_i(lt), rem;
     x_a[1] = polbase[1]; setlgef(x_a, 4);
@@ -1112,7 +993,7 @@ nfsqff(GEN nf,GEN pol, long fl)
     polbase = unifpol(nf,polbase,1);
     for (m=1,i=1; i<lg(rep); i++)
     {
-      p2=(GEN)rep[i]; if (lgef(p2)!=4) break;
+      p2 = (GEN)rep[i]; if (lgef(p2) != 4) break;
 
       p3 = algtobasis(nf, gmul(mlt,(GEN)p2[2]));
       p3 = nf_bestlift(h,hinv,den,p3);
@@ -1140,7 +1021,7 @@ nfsqff(GEN nf,GEN pol, long fl)
   nfcmbf.nfactmod = lg(rep)-1;
   nf_combine_factors(nf,1,NULL,d-3,1);
 
-  if (DEBUGLEVEL >= 4) msgtimer("computation of the factors");
+  if (DEBUGLEVEL>3) msgtimer("computation of the factors");
 
   i = nfcmbf.nfact;
   if (lgef(nfcmbf.pol)>3)
@@ -1149,9 +1030,9 @@ nfsqff(GEN nf,GEN pol, long fl)
     nfcmbf.nfact = i;
   }
 
-  tetpil=avma; rep=cgetg(i+1,t_VEC);
+  tetpil = avma; rep = cgetg(i+1,t_VEC);
   for (  ; i>=1; i--)
-    rep[i]=(long)unifpol(nf,(GEN)nfcmbf.res[i],1);
+    rep[i] = (long)unifpol(nf,(GEN)nfcmbf.res[i],1);
   return gerepile(av,tetpil,rep);
 }
 
@@ -1217,7 +1098,7 @@ nf_combine_factors(GEN nf,long fxn,GEN psf,long dlim,long hint)
   avma = av; return val;
 }
 
-/* return the characteristic polynomial of alpha over nf, where alpha 
+/* return the characteristic polynomial of alpha over nf, where alpha
    is an element of the algebra nf[X]/(T) given as a polynomial in X */
 GEN
 rnfcharpoly(GEN nf,GEN T,GEN alpha,int v)
@@ -1243,31 +1124,11 @@ rnfcharpoly(GEN nf,GEN T,GEN alpha,int v)
   return gerepileupto(av, unifpol(nf,p1,1));
 }
 
-#if 0
-/* return the minimal polynomial of alpha over nf, where alpha is 
-   an element of the algebra nf[X]/(T) given as a polynomial in X */
-GEN
-rnfminpoly(GEN nf,GEN T,GEN alpha,int n)
-{
-  gpmem_t av=avma, tetpil;
-  GEN p1,p2;
-
-  nf=checknf(nf); p1=rnfcharpoly(nf,T,alpha,n);
-  tetpil=avma; p2=nf_pol_subres(nf,p1,deriv(p1,varn(T)));
-  if (lgef(p2)==3) { avma=tetpil; return p1; }
-
-  p1 = nf_pol_divres(nf,p1,p2,NULL);
-  p2 = element_inv(nf,leading_term(p1));
-  tetpil=avma; return gerepile(av,tetpil,unifpol(nf,nf_pol_mul(nf,p2,p1),1));
-}
-#endif
-
 /* relative Dedekind criterion over nf, applied to the order defined by a
  * root of irreducible polynomial T, modulo the prime ideal pr. Returns
  * [flag,basis,val], where basis is a pseudo-basis of the enlarged order,
- * flag is 1 iff this order is pr-maximal, and val is the valuation in pr of
- * the order discriminant
- */
+ * flag is 1 iff this order is pr-maximal, and val is the valuation at pr of
+ * the order discriminant */
 GEN
 rnfdedekind(GEN nf,GEN T,GEN pr)
 {
@@ -1332,8 +1193,8 @@ rnfdedekind(GEN nf,GEN T,GEN pr)
       nf_pol_divres(nf,nf_pol_mul(nf,pal,nfx),T,&pal);
     }
     /* the modulus is integral */
-    base = nfhermitemod(nf,base, gmul(gpowgs(p, m-d), 
-				      idealpows(nf, prinvp, d))); 
+    base = nfhermitemod(nf,base, gmul(gpowgs(p, m-d),
+				      idealpows(nf, prinvp, d)));
     base[2] = ldiv((GEN)base[2], p); /* cancel the factor p */
   }
   res[2]=(long)base; return gerepilecopy(av, res);
