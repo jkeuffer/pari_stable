@@ -2821,21 +2821,21 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
         long l = k-1;
 	z[l]=0;
 	for (j=k; j<=n; j++) z[l] += q[l][j]*x[j];
-	p = x[k]+z[k];
+	p = (double)x[k] + z[k];
 	y[l] = y[k] + p*p*v[k];
 	x[l] = (long) floor(sqrt((BOUND-y[l])/v[l])-z[l]);
         k = l;
       }
       for(;;)
       {
-	p = x[k]+z[k];
+	p = (double)x[k] + z[k];
 	if (y[k] + p*p*v[k] <= BOUND) break;
 	k++; x[k]--;
       }
     }
     while (k>1);
     if (! x[1] && y[1]<=eps) break;
-    p = x[1]+z[1]; p = y[1] + p*p*v[1]; /* norm(x) */
+    p = (double)x[1] + z[1]; p = y[1] + p*p*v[1]; /* norm(x) */
     if (maxnorm >= 0)
     {
       if (flag == min_FIRST)

@@ -1671,14 +1671,14 @@ small_norm_for_buchall(long cglob,GEN mat,GEN first_nz, GEN matarch,
 	  long l = k-1;
 	  z[l] = 0;
 	  for (j=k; j<=N; j++) z[l] += q[l][j]*x[j];
-	  p = x[k]+z[k];
-	  y[l] = y[k]+p*p*v[k];
+	  p = (double)x[k] + z[k];
+	  y[l] = y[k] + p*p*v[k];
 	  x[l] = (long) floor(sqrt((BOUND-y[l])/v[l])-z[l]);
           k = l;
 	}
 	for(;;)
 	{
-	  p = x[k]+z[k];
+	  p = (double)x[k] + z[k];
 	  if (y[k] + p*p*v[k] <= BOUND) break;
 	  k++; x[k]--;
 	}
@@ -2959,7 +2959,7 @@ START:
   precadd = 0;
 
   LIMC = (long)(cbach*LOGD2);
-  if (LIMC < 20) { LIMC = 20; cbach = LIMC / LOGD2; }
+  if (LIMC < 20) { LIMC = 20; cbach = (double)LIMC / LOGD2; }
   LIMC2= max(3 * N, (long)(cbach2*LOGD2));
   if (LIMC2 < LIMC) LIMC2 = LIMC;
   if (DEBUGLEVEL) { fprintferr("LIMC = %ld, LIMC2 = %ld\n",LIMC,LIMC2); }

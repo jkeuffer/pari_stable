@@ -1723,7 +1723,7 @@ START: avma = av; cbach = check_bach(cbach,6.);
   if (mat) { desalloc(mat); mat = NULL; }
   nreldep = nrelsup = 0;
   LIMC = (long)(cbach*LOGD2);
-  if (LIMC < cp) { LIMC = cp; cbach = LIMC / LOGD2; }
+  if (LIMC < cp) { LIMC = cp; cbach = (double)LIMC / LOGD2; }
   LIMC2 = (long)(max(cbach,cbach2)*LOGD2);
   if (LIMC2 < LIMC) LIMC2 = LIMC;
   if (PRECREG)

@@ -911,14 +911,14 @@ minimforunits(GEN nf, long BORNE, GEN w)
         long l = k-1;
 	z[l] = 0;
 	for (j=k; j<=n; j++) z[l] = z[l]+q[l][j]*x[j];
-	p = x[k]+z[k];
+	p = (double)x[k] + z[k];
 	y[l] = y[k]+p*p*v[k];
 	x[l] = (long)floor(sqrt((BOUND-y[l])/v[l])-z[l]);
         k = l;
       }
       for(;;)
       {
-        p = x[k]+z[k];
+	p = (double)x[k] + z[k];
         if (y[k] + p*p*v[k] <= BOUND) break;
 	k++; x[k]--;
       }
@@ -929,7 +929,7 @@ minimforunits(GEN nf, long BORNE, GEN w)
     if (DEBUGLEVEL>8){ fprintferr("."); flusherr(); }
     if (++cnt == 5000) return NULL; /* too expensive */
 
-    p = x[1]+z[1]; norme = y[1] + p*p*v[1] + eps;
+    p = (double)x[1] + z[1]; norme = y[1] + p*p*v[1] + eps;
     if (norme > normax) normax = norme;
     if (is_unit(M,r1, x)
     && (norme > 2*n  /* exclude roots of unity */
@@ -2220,10 +2220,10 @@ static GEN
 discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
 {
   byteptr ptdif=diffptr;
-  long degk,i,j,k,p2s,lfa,lp1,sqbou,cex, allarch;
+  long degk,i,j,k,lfa,lp1,sqbou,cex, allarch;
   long ffs,fs,resp,flbou,nba, k2,karch,kka,nbarch,jjj,jj,square;
   long ii2,ii,ly,clhray,lP,ep,S,clhss,normps,normi,nz,r1,R1,n,c;
-  ulong q;
+  ulong q, p2s;
   pari_sp av0 = avma, av, av1, lim;
   GEN nf,p,z,p1,p2,p3,fa,pr,normp,ideal,bidp,z2,matarchunit;
   GEN funits,racunit,embunit,sous,clh,sousray,raylist;
@@ -2348,7 +2348,7 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
           }
         }
         if (ramip && ramip % p[2]) break;
-        pz = mulss(q,p2s);
+        pz = muluu(q, p2s);
         if (is_bigint(pz) || (q = (ulong)pz[2]) > (ulong)bound) break;
 
         ideal = idealmul(nf,ideal,pr);
