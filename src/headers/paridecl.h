@@ -91,6 +91,8 @@ GEN     matsolvemod0(GEN M, GEN D, GEN Y,long flag);
 GEN     mattodiagonal(GEN m);
 GEN     mattodiagonal_i(GEN m);
 long    rank(GEN x);
+GEN     row(GEN A, long x1);
+GEN     row_i(GEN A, long x0, long x1, long x2);
 GEN     rowextract_i(GEN A, long x1, long x2);
 GEN     rowextract_p(GEN A, GEN p);
 GEN     sindexrank(GEN x);

@@ -1366,7 +1366,7 @@ GEN
 isunit(GEN bnf,GEN x)
 {
   long tx = typ(x), i, R1, RU, n, prec;
-  gpmem_t av = avma, tetpil;
+  gpmem_t av = avma;
   GEN p1, v, rlog, logunit, y, ex, nf, z, pi2_sur_w, gn, emb;
 
   bnf = checkbnf(bnf); nf=(GEN)bnf[7];
@@ -1431,24 +1431,23 @@ isunit(GEN bnf,GEN x)
     nf = nfnewprec(nf, prec);
   }
 
-  setlg(ex, RU); p1 = cgetg(RU, t_VEC);
-  for (i=1; i<RU; i++) p1[i] = coeff(logunit, 1, i);
+  setlg(ex, RU);
+  p1 = row_i(logunit,1, 1,RU);
   p1 = gneg(gimag(gmul(p1,ex))); if (!R1) p1 = gmul2n(p1, -1);
-  p1 = gadd(garg((GEN)emb[1],DEFAULTPREC), p1);
+  p1 = gadd(garg((GEN)emb[1],prec), p1);
   /* p1 = arg(the missing root of 1) */
 
-  pi2_sur_w = divrs(mppi(DEFAULTPREC), n>>1);
+  pi2_sur_w = divrs(mppi(prec), n>>1); /* 2pi / n */
   p1 = ground(gdiv(p1, pi2_sur_w));
   if (n > 2)
   {
-    GEN ro = (GEN)gmul(rowextract_i(gmael(nf,5,1), 1, 1), z)[1];
-    GEN p2 = ground(gdiv(garg(ro, DEFAULTPREC), pi2_sur_w));
+    GEN ro = gmul(row(gmael(nf,5,1), 1), z);
+    GEN p2 = ground(gdiv(garg(ro, prec), pi2_sur_w));
     p1 = mulii(p1,  mpinvmod(p2, gn));
   }
 
-  tetpil = avma; y = cgetg(RU+1,t_COL);
-  for (i=1; i<RU; i++) y[i] = lcopy((GEN)ex[i]);
-  y[RU] = lmodulcp(p1, gn); return gerepile(av,tetpil,y);
+  ex[RU] = lmodulcp(p1, gn);
+  setlg(ex, RU+1); return gerepilecopy(av, ex);
 }
 
 GEN
@@ -1996,14 +1995,14 @@ bestappr_noer(GEN x, GEN k)
   VOLATILE GEN y;
   jmp_buf env;
   void *c;
-  if (setjmp(env)) return NULL;
+  if (setjmp(env))
+    y = NULL;
   else
   {
     c = err_catch(precer, env, NULL);
     y = bestappr(x,k);
   }
-  err_leave(&c);
-  return y;
+  err_leave(&c); return y;
 }
 
 /* Input:

@@ -478,6 +478,26 @@ rowextract_i(GEN A, long x1, long x2)
   return B;
 }
 
+/* A[x0,] */
+GEN
+row(GEN A, long x0)
+{
+  long i, lB = lg(A);
+  GEN B  = cgetg(lB, t_VEC);
+  for (i=1; i<lB; i++) B[i] = coeff(A, x0, i);
+  return B;
+}
+
+/* A[x0, x1..x2] */
+GEN
+row_i(GEN A, long x0, long x1, long x2)
+{
+  long i, lB = lg(A);
+  GEN B  = cgetg(lB, t_VEC);
+  for (i=x1; i<=x2; i++) B[i] = coeff(A, x0, i);
+  return B;
+}
+
 GEN
 vecextract_p(GEN A, GEN p)
 {

@@ -2376,6 +2376,7 @@ hnfswap(GEN A, GEN B, long k, GEN **lambda, GEN *D)
   D[k-1] = divii(addii(p1,p2), D[k-1]);
 }
 
+/* reverse row order in matrix A */
 static GEN
 fix_rows(GEN A)
 {
