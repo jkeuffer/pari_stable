@@ -3570,7 +3570,7 @@ Frobeniusform(GEN V, long n)
   {
     GEN  P = gel(V,i);
     long d = degpol(P);
-    while (gcmp0(gel(P, d+2))) d--;
+    while (d >= 0 && gcmp0(gel(P, d+2))) d--;
     if (k+d-1 > n) err(talker, "accuracy lost in matfrobenius");
     for (j=0; j<d-1; j++, k++)
       gcoeff(M,k+1,k) = gen_1;
@@ -3594,9 +3594,9 @@ build_frobeniusbc(GEN V, long n)
   {
     GEN  P = gel(V,i);
     long d = degpol(P);
-    while (gcmp0(gel(P, d+2))) d--;
+    while (d >= 0 && gcmp0(gel(P, d+2))) d--;
     if (d <= 0) continue;
-    if (l+d-1 > n) err(talker, "accuracy lost in matfrobenius");
+    if (l+d-2 > n) err(talker, "accuracy lost in matfrobenius");
     gcoeff(M,k,i) = gen_1;
     for (j=1; j<d; j++,k++,l++)
     {
