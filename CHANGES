@@ -89,6 +89,8 @@ XR  2- factorpadic so that factorback gives back the original polynomial, up
 BA  6- moved internals of mppgcd to mp.c/gcdii
 BA  7- moved internals of genrand to mp.c/randomi
 BA  8- renamed mymyrand --> pari_rand31
+    9- bnrstark: use partial factorization of discriminant when (pol)reducing
+       the polynomial [could embark into hopeless factorizations]
 
   Added:
     1- [TeXmacs:] contextual completion (<TAB>)
