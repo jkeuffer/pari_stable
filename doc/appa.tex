@@ -104,15 +104,24 @@ environment variable override the defaults if set:
 
 \kbd{CC}: C compiler.
 
-\kbd{CFLAGS}: Flags for the C compiler.
-
 \kbd{DLLD}: Dynamic library linker.
 
-\noindent For instance, \kbd{Configure} avoids \kbd{gcc} on some
+\kbd{LD}: Static linker.
+
+The contents of the following variables are \emph{prepended} to the
+values computed by \kbd{Configure}:
+
+\kbd{CFLAGS}: Flags for the \kbd{CC}.
+
+\kbd{LDFLAGS}: Flags for \kbd{LD}.
+
+\kbd{DLLDFLAGS}: Flags for \kbd{DLLD}.
+
+\noindent For instance, \kbd{Configure} may avoid \kbd{/bin/cc} on some
 architectures due to various problems which may have been fixed in your
 version of the compiler. You can try
 
-\kbd{env CC=gcc Configure}
+\kbd{env CC=cc Configure}
 
 \noindent and compare the benches. Also, if you insist on using a \kbd{C++}
 compiler and run into trouble with a recent \kbd{g++}, try to use
