@@ -2282,10 +2282,11 @@ nfmodprinit(GEN nf, GEN pr)
   for (k=i=1; i<=N; i++)
   {
     x = gcoeff(prh, i,i);
-    if (!is_pm1(x)) { c[k] = i; ffproj[i] = (long)_ei(N, k); k++; }
+    if (!is_pm1(x)) { c[k] = i; ffproj[i] = (long)_ei(N, i); k++; }
     else
-      ffproj[i] = lneg(rowextract_p((GEN)prh[i], c));
+      ffproj[i] = lneg((GEN)prh[i]);
   }
+  ffproj = rowextract_p(ffproj, c);
   if (! divise((GEN)nf[4], p))
   {
     if (N == f) T = (GEN)nf[1]; /* pr inert */
@@ -2341,9 +2342,10 @@ nfmodprinit(GEN nf, GEN pr)
   mul = FpM_mul(ffproj, mul, p);
 
   pow = get_powers(mul, p);
-  T = gtopolyrev(FpM_deplin(pow, p), 0);
+  T = gtopolyrev(FpM_deplin(pow, p), varn(nf[1]));
   nfproj = cgetg(f+1, t_MAT);
   for (i=1; i<=f; i++) nfproj[i] = (long)lift_to_zk((GEN)pow[i], c, N);
+  nfproj = gmul((GEN)nf[7], nfproj);
 
   setlg(pow, f+1);
   ffproj = FpM_mul(FpM_inv(pow, p), ffproj, p);

@@ -658,14 +658,14 @@ pol_to_vec(GEN x, long N)
   return z;
 }
 
-/* gmul(A, pol_to_vec(x)), A matrix of compatible dimensions */
+/* gmul(A, pol_to_vec(x)), A t_MAT (or t_VEC) of compatible dimensions */
 GEN
 mulmat_pol(GEN A, GEN x)
 {
   long i,l;
   GEN z;
-  if (typ(x) != t_POL) return gscalcol(x, lg(A[1])-1);
-  l=lgef(x)-1; if (l == 1) return zerocol(lg(A[1])-1);
+  if (typ(x) != t_POL) return gmul(x,(GEN)A[1]); /* scalar */
+  l=lgef(x)-1; if (l == 1) return typ(A)==t_VEC? gzero: zerocol(lg(A[1])-1);
   x++; z = gmul((GEN)x[1], (GEN)A[1]);
   for (i=2; i<l ; i++) 
     if (!gcmp0((GEN)x[i])) z = gadd(z, gmul((GEN)x[i], (GEN)A[i]));

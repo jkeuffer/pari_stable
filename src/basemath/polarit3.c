@@ -1343,10 +1343,10 @@ FpXQX_safegcd(GEN P, GEN Q, GEN T, GEN p)
   gpmem_t btop, ltop = avma, st_lim;
   long dg, vx = varn(P);
   GEN U, q;
-  P = FpXX_red(P, p);
+  P = FpXX_red(P, p); btop = avma;
   Q = FpXX_red(Q, p);
   if (!signe(P)) return gerepileupto(ltop, Q);
-  if (!signe(Q)) { avma = (gpmem_t)P; return P; }
+  if (!signe(Q)) { avma = btop; return P; }
   T = FpX_red(T, p);
 
   btop = avma; st_lim = stack_lim(btop, 1);
