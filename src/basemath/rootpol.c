@@ -1837,7 +1837,7 @@ cauchy_bound(GEN p)
 
   if (n <= 0) err(constpoler,"cauchy_bound");
 
-  lc = mpabs((GEN)q[n+2]); /* leading coefficient */
+  lc = gabs((GEN)q[n+2],DEFAULTPREC); /* leading coefficient */
   lc = ginv(lc);
   for (i=0; i<n; i++)
   {
