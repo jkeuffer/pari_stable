@@ -2667,7 +2667,6 @@ FqX_factor(GEN x, GEN T, GEN p)
 /*                       COMPLEX ROOTS                             */
 /*                                                                 */
 /*******************************************************************/
-GEN square_free_factorization(GEN pol);
 static GEN laguer(GEN pol,long N,GEN y0,long EPS,long PREC);
 GEN zrhqr(GEN a,long PREC);
 
@@ -2878,7 +2877,7 @@ roots2(GEN pol,long PREC)
   long N,flagexactpol,flagrealpol,flagrealrac,ti,i,j;
   long nbpol, k, multiqol, deg, nbroot, fr, f, EPS;
   pari_sp av1;
-  GEN p1,p2,rr,qol,qolbis,x,b,c,*ad,v,tabqol;
+  GEN p1,p2,rr,qol,qolbis,x,b,c,*ad,v, ex, factors;
 
   if (typ(pol)!=t_POL) err(typeer,"roots2");
   if (!signe(pol)) err(zeropoler,"roots2");
@@ -2912,18 +2911,18 @@ roots2(GEN pol,long PREC)
     p1 = cgetc(PREC); rr[i] = (long)p1;
     for (j=3; j<PREC; j++) mael(p1,2,j)=mael(p1,1,j)=0;
   }
-  if (flagexactpol) tabqol = square_free_factorization(pol);
+  if (flagexactpol) factors = ZX_squff(pol, &ex);
   else
   {
-    tabqol = cgetg(3,t_MAT);
-    tabqol[1] = (long)_col(gun);
-    tabqol[2] = (long)_col(gcopy(pol));
+    factors = _col(pol);
+    ex = cgetg(2, t_VECSMALL); ex[1] = 1;
   }
-  nbpol=lg(tabqol[1])-1; nbroot=0;
+  nbpol = lg(ex)-1;
+  nbroot= 0;
   for (k=1; k<=nbpol; k++)
   {
-    av1=avma; qol=gmael(tabqol,2,k); qolbis=gcopy(qol);
-    multiqol=itos(gmael(tabqol,1,k)); deg=degpol(qol);
+    av1=avma; qol = (GEN)factors[k]; qolbis = gcopy(qol);
+    multiqol = ex[k]; deg = degpol(qol);
     for (j=deg; j>=1; j--)
     {
       x = gzero; flagrealrac = 0;

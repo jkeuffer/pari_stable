@@ -1509,6 +1509,7 @@ GEN     subresext(GEN x, GEN y, GEN *U, GEN *V);
 GEN     sylvestermatrix(GEN x,GEN y);
 GEN     vecbezout(GEN x, GEN y);
 GEN     vecbezoutres(GEN x, GEN y);
+GEN     ZX_squff(GEN f, GEN *ex);
 
 /* polarit3.c */
 

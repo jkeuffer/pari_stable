@@ -273,57 +273,6 @@ graeffe(GEN p)
 
 /********************************************************************/
 /**                                                                **/
-/**        FACTORISATION SQUAREFREE AVEC LE GCD MODULAIRE          **/
-/**                                                                **/
-/********************************************************************/
-
-/* return a n x 2 matrix:
- *   col 1 contains the i's such that A_i non constant
- *   col 2 the A_i's, s.t. pol = A_i1^i1.A_i2^i2...A_in^in.
- * if pol is constant return [;]
- */
-GEN
-square_free_factorization(GEN pol)
-{
-  long deg,i,j,m;
-  GEN p1,x,t1,v1,t,v,A;
-
-  if (typ(pol)!=t_POL) err(typeer,"square_free_factorization");
-  deg=degpol(pol); if (deg<1) return cgetg(1,t_MAT);
-  p1 = content(pol); if (!gcmp1(p1)) pol = gdiv(pol,p1);
-
-  x=cgetg(3,t_MAT);
-  t1 = NULL; /* gcc -Wall */
-  if (deg > 1)
-  {
-    t1 = modulargcd(pol,derivpol(pol));
-    if (degpol(t1) == 1) deg = 1;
-  }
-  if (deg==1)
-  {
-    x[1] = (long)_col(gun);
-    x[2] = (long)_col(pol); return x;
-  }
-  A=new_chunk(deg+1); v1=gdivexact(pol,t1); v=v1; i=0;
-  while (lg(v)>3)
-  {
-    v=modulargcd(t1,v1); i++;
-    A[i]=(long)gdivexact(v1,v);
-    t=gdivexact(t1,v); v1=v; t1=t;
-  }
-  m=1; x[1]=lgetg(deg+1,t_COL); x[2]=lgetg(deg+1,t_COL);
-  for (j=1; j<=i; j++)
-    if (degpol(A[j]))
-    {
-      p1=(GEN)x[1]; p1[m] = lstoi(j);
-      p1=(GEN)x[2]; p1[m] = A[j];
-      m++;
-    }
-  setlg(x[1],m); setlg(x[2],m); return x;
-}
-
-/********************************************************************/
-/**                                                                **/
 /**                 CALCUL DU MODULE DES RACINES                   **/
 /**                                                                **/
 /********************************************************************/
@@ -1910,20 +1859,20 @@ isvalidpol(GEN p)
 static GEN
 solve_exact_pol(GEN p, long bitprec)
 {
-  GEN S,ex,factors,roots_pol,roots_fact;
-  long i,j,k,m,n,iroots;
+  GEN ex, factors, roots_pol, roots_fact;
+  long i, j, k, m, n, iroots;
 
   n=degpol(p);
 
   iroots=0;
   roots_pol=cgetg(n+1,t_VEC); for (i=1; i<=n; i++) roots_pol[i]=zero;
 
-  S=square_free_factorization(p);
-  ex=(GEN) S[1]; factors=(GEN) S[2];
+  factors = ZX_squff(Q_primpart(p), &ex);
   for (i=1; i<lg(factors); i++)
   {
-    roots_fact=all_roots((GEN)factors[i],bitprec);
-    n=degpol(factors[i]); m=itos((GEN)ex[i]);
+    roots_fact = all_roots((GEN)factors[i], bitprec);
+    n = degpol(factors[i]);
+    m = ex[i];
     for (j=1; j<=n; j++)
       for (k=1; k<=m; k++) roots_pol[++iroots] = roots_fact[j];
   }
