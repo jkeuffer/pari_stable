@@ -2105,6 +2105,12 @@ gp_sighandler(int sig)
 
 #ifdef SIGPIPE
     case SIGPIPE:
+      if (prettyprinter_file && pari_outfile == prettyprinter_file->file)
+      {
+        pariFILE *f = prettyprinter_file;
+        prettyprinter_file = NULL; /* to avoid oo recursion on error */
+        pari_outfile = stdout; pari_fclose(f);
+      }
       err(talker, "Broken Pipe, resetting file stack...");
 #endif
 
