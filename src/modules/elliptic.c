@@ -851,34 +851,42 @@ zell(GEN e, GEN z, long prec)
 /* compute gamma in SL_2(Z) and t'=gamma(t) so that t' is in the usual
    fundamental domain. Internal function no check, no garbage. */
 static GEN
-getgamma(GEN t)
+getgamma(GEN *ptt)
 {
-  GEN a,b,c,d,n,m,y,p1,unapprox;
+  GEN t = *ptt,a,b,c,d,n,m,p1,p2,run;
 
-  unapprox=gsub(gun,gpuigs(stoi(10),-8));
-  a=d=gun;b=c=gzero;
+  run = gsub(realun(DEFAULTPREC), gpuigs(stoi(10),-8));
+  a=d=gun; b=c=gzero;
   for(;;)
   {
-    n=ground(greal(t));
+    n = ground(greal(t));
     if (signe(n))
-    {
-      n=negi(n); t=gadd(t,n);
-      a=addii(a,mulii(n,c));
-      b=addii(b,mulii(n,d));
+    { /* apply T^n */
+      n = negi(n); t = gadd(t,n);
+      a = addii(a, mulii(n,c));
+      b = addii(b, mulii(n,d));
     }
-    m=gnorm(t); if (gcmp(m,unapprox)>=0) break;
-    t=gneg_i(gdiv(gconj(t),m));
+    m = gnorm(t); if (gcmp(m,run) >= 0) break;
+    t = gneg_i(gdiv(gconj(t),m)); /* apply S */
     p1=negi(c); c=a; a=p1;
     p1=negi(d); d=b; b=p1;
   }
-  y=cgetg(3,t_VEC);
-  m=cgetg(3,t_MAT); y[1]=(long)m;
+  m=cgetg(3,t_MAT); *ptt = t;
   p1=cgetg(3,t_COL); m[1]=(long)p1;
-  p1[1]=(long)a; p1[2]=(long)c;
-  p1=cgetg(3,t_COL); m[2]=(long)p1;
-  p1[1]=(long)b; p1[2]=(long)d;
-  y[2]=(long)t;
-  return y;
+  p2=cgetg(3,t_COL); m[2]=(long)p2;
+  p1[1]=(long)a; p2[1]=(long)b;
+  p1[2]=(long)c; p2[2]=(long)d; return m;
+}
+
+static GEN
+get_tau(GEN *ptom1, GEN *ptom2, GEN *ptga)
+{
+  GEN om1 = *ptom1, om2 = *ptom2, tau = gdiv(om1,om2);
+  long s = gsigne(gimag(tau));
+  if (!s)
+    err(talker,"omega1 and omega2 R-linearly dependent in elliptic function");
+  if (s < 0) { *ptom1=om2; *ptom2=om1; tau=ginv(tau); }
+  *ptga = getgamma(&tau); return tau;
 }
 
 static int
@@ -894,6 +902,8 @@ get_periods(GEN e, GEN *om1, GEN *om2)
   return 0;
 }
 
+extern GEN PiI2(long prec);
+
 /* computes the numerical values of eisenstein series. k is equal to a positive
    even integer. If k=4 or 6, computes g2 or g3. If k=2, or k>6 even,
    compute (2iPi/om2)^k*(1+2/zeta(1-k)*sum(n>=1,n^(k-1)q^n/(1-q^n)) with no
@@ -901,19 +911,14 @@ get_periods(GEN e, GEN *om1, GEN *om2)
 GEN
 elleisnum(GEN om, long k, long flag, long prec)
 {
-  long av=avma,lim,av1,si;
-  GEN om1,om2,p1,pii2,tau,q,y,qn,v,ga,court,asub = NULL; /* gcc -Wall */
+  long av=avma,lim,av1;
+  GEN om1,om2,p1,pii2,tau,q,y,qn,ga,court,asub = NULL; /* gcc -Wall */
 
   if (k%2 || k<=0) err(talker,"k not a positive even integer in elleisnum");
   if (!get_periods(om, &om1, &om2)) err(typeer,"elleisnum");
-  p1=mppi(prec); setexpo(p1,2);
-  pii2=cgetg(3,t_COMPLEX); pii2[1]=zero; pii2[2]=(long)p1;
-  tau=gdiv(om1,om2); si=gsigne(gimag(tau));
-  if (si==0)
-    err(talker,"omega1 and omega2 are R-linearly dependent in elleisnum");
-  if (si<0) { p1=om1; om1=om2; om2=p1; tau=ginv(tau); }
-  v=getgamma(tau); tau=(GEN)v[2]; ga=(GEN)v[1];
-  if (k==2) asub=gdiv(gmul(pii2,gmulsg(12,gcoeff(ga,2,1))),om2);
+  pii2 = PiI2(prec);
+  tau = get_tau(&om1,&om2, &ga);
+  if (k==2) asub=gdiv(gmul(pii2,mulsi(12,gcoeff(ga,2,1))),om2);
   om2=gadd(gmul(gcoeff(ga,2,1),om1),gmul(gcoeff(ga,2,2),om2));
   if (k==2) asub=gdiv(asub,om2);
   q=gexp(gmul(pii2,tau),prec);
@@ -943,21 +948,18 @@ elleisnum(GEN om, long k, long flag, long prec)
 }
 
 /* compute eta1, eta2 */
-
 GEN
 elleta(GEN om, long prec)
 {
-  long av=avma,tetpil;
-  GEN e2,p1,pii2,y1,y2,y;
+  long av=avma;
+  GEN e2,y1,y2,y;
 
-  e2=gdivgs(elleisnum(om,2,0,prec),12);
-  p1=mppi(prec); setexpo(p1,2);
-  pii2=cgetg(3,t_COMPLEX); pii2[1]=zero; pii2[2]=(long)p1;
-  y2=gmul((GEN)om[2],e2);
-  y1=gadd(gdiv(pii2,(GEN)om[2]),gmul((GEN)om[1],e2));
-  tetpil=avma;
-  y=cgetg(3,t_VEC); y[1]=lneg(y1); y[2]=lneg(y2);
-  return gerepile(av,tetpil,y);
+  e2 = gdivgs(elleisnum(om,2,0,prec),12);
+  y2 = gmul((GEN)om[2],e2);
+  y1 = gadd(gdiv(PiI2(prec),(GEN)om[2]), gmul((GEN)om[1],e2));
+  y = cgetg(3,t_VEC);
+  y[1] = lneg(y1);
+  y[2] = lneg(y2); return gerepileupto(av, y);
 }
 
 /* computes the numerical value of wp(z | om1 Z + om2 Z),
@@ -965,16 +967,11 @@ elleta(GEN om, long prec)
 static GEN
 weipellnumall(GEN om1, GEN om2, GEN z, long flall, long prec)
 {
-  long av=avma,tetpil,lim,av1,si,toadd;
+  long av=avma,tetpil,lim,av1,toadd;
   GEN p1,pii2,pii4,a,tau,q,u,y,yp,u1,u2,qn,v,ga;
 
-  p1=mppi(prec); setexpo(p1,2);
-  pii2=cgetg(3,t_COMPLEX); pii2[1]=zero; pii2[2]=(long)p1;
-  tau=gdiv(om1,om2); si=gsigne(gimag(tau));
-  if (si==0)
-    err(talker,"omega1 and omega2 are R-linearly dependent in ellwpnum");
-  if (si<0) { p1=om1; om1=om2; om2=p1; tau=ginv(tau); }
-  v=getgamma(tau); tau=(GEN)v[2]; ga=(GEN)v[1];
+  pii2 = PiI2(prec);
+  tau = get_tau(&om1,&om2, &ga);
   om2=gadd(gmul(gcoeff(ga,2,1),om1),gmul(gcoeff(ga,2,2),om2));
   z=gdiv(z,om2);
   a=ground(gdiv(gimag(z),gimag(tau))); z=gsub(z,gmul(a,tau));
@@ -1032,17 +1029,12 @@ weipellnumall(GEN om1, GEN om2, GEN z, long flall, long prec)
 GEN
 ellzeta(GEN om, GEN z, long prec)
 {
-  long av=avma,tetpil,lim,av1,si,toadd;
-  GEN zinit,om1,om2,p1,pii2,tau,q,u,y,u1,qn,v,ga,x1,x2,et;
+  long av=avma,tetpil,lim,av1,toadd;
+  GEN zinit,om1,om2,p1,pii2,tau,q,u,y,u1,qn,ga,x1,x2,et;
 
   if (!get_periods(om, &om1, &om2)) err(typeer,"ellzeta");
-  p1=mppi(prec); setexpo(p1,2);
-  pii2=cgetg(3,t_COMPLEX); pii2[1]=zero; pii2[2]=(long)p1;
-  tau=gdiv(om1,om2); si=gsigne(gimag(tau));
-  if (si==0)
-    err(talker,"omega1 and omega2 are R-linearly dependent in ellzeta");
-  if (si<0) { p1=om1; om1=om2; om2=p1; tau=ginv(tau); }
-  v=getgamma(tau); tau=(GEN)v[2]; ga=(GEN)v[1];
+  pii2 = PiI2(prec);
+  tau = get_tau(&om1,&om2, &ga);
   om2=gadd(gmul(gcoeff(ga,2,1),om1),gmul(gcoeff(ga,2,2),om2));
   om1=gmul(tau,om2); om=cgetg(3,t_VEC); om[1]=(long)om1; om[2]=(long)om2;
   z=gdiv(z,om2);
@@ -1084,104 +1076,17 @@ ellzeta(GEN om, GEN z, long prec)
 }
 
 /* if flag=0, return ellsigma, otherwise return log(ellsigma) */
-
-static GEN
-ellsigmasum(GEN om, GEN z, long flag, long prec)
+GEN
+ellsigma(GEN om, GEN z, long flag, long prec)
 {
-  long av=avma,tetpil,lim,av1,si,toadd,n;
-  GEN zinit,om1,om2,p1,pii2,tau,q,u,y,y1,qn,qn2,urn,urninv,v,ga;
-  GEN uinv,x1,x2,et,etnew,uhalf,q8;
-
-  if (!get_periods(om, &om1, &om2)) err(typeer,"ellsigmasum");
-  p1=mppi(prec); setexpo(p1,2);
-  pii2=cgetg(3,t_COMPLEX); pii2[1]=zero; pii2[2]=(long)p1;
-  tau=gdiv(om1,om2); si=gsigne(gimag(tau));
-  if (si==0)
-    err(talker,"omega1 and omega2 are R-linearly dependent in ellsigma");
-  if (si<0) { p1=om1; om1=om2; om2=p1; tau=ginv(tau); }
-  v=getgamma(tau); tau=(GEN)v[2]; ga=(GEN)v[1];
-  om2=gadd(gmul(gcoeff(ga,2,1),om1),gmul(gcoeff(ga,2,2),om2));
-  om1=gmul(tau,om2); om=cgetg(3,t_VEC); om[1]=(long)om1; om[2]=(long)om2;
-  z=gdiv(z,om2);
-
-  x1=ground(gdiv(gimag(z),gimag(tau))); z=gsub(z,gmul(x1,tau));
-  x2=ground(greal(z)); z=gsub(z,x2); zinit=gmul(z,om2);
-  et=elleta(om,prec);
-  etnew=gadd(gmul(x1,(GEN)et[1]),gmul(x2,(GEN)et[2]));
-  etnew=gmul(etnew,gadd(gmul2n(gadd(gmul(x1,om1),gmul(x2,om2)),-1),zinit));
-  if (mpodd(x1) || mpodd(x2)) etnew=gadd(etnew,gmul2n(pii2,-1));
-  if (gcmp0(z) || gexpo(z) < 5 - bit_accuracy(prec))
-  {
-    if (flag)
-    {
-      y=glog(zinit,prec);
-      tetpil=avma;
-      return gerepile(av,tetpil,gadd(etnew,y));
-    }
-    else
-    {
-      etnew=gexp(etnew,prec);
-      tetpil=avma;
-      return gerepile(av,tetpil,gmul(etnew,zinit));
-    }
-  }
-
-  y1=gadd(etnew,gmul2n(gmul(gmul(z,zinit),(GEN)et[2]),-1));
-
-  q8=gexp(gmul2n(gmul(pii2,tau),-3),prec);
-  q=gpuigs(q8,8);
-  uhalf=gexp(gmul(gmul2n(pii2,-1),z),prec);
-  u=gneg_i(gsqr(uhalf)); uinv=ginv(u);
-  y=gzero;
-  toadd=(long)ceil(9.065*gtodouble(gabs(gimag(z),prec)));
-/* 9.065 = 2*Pi/log(2) */
-  av1=avma; lim=stack_lim(av1,1); qn=q; qn2=gun;
-  urn=uhalf; urninv=ginv(uhalf);
-  for(n=0;;n++)
-  {
-    y=gadd(y,gmul(qn2,gsub(urn,urninv)));
-    qn2=gmul(qn,qn2);
-    qn=gmul(q,qn);
-    urn=gmul(urn,u); urninv=gmul(urninv,uinv);
-    if (gexpo(qn2) + n*toadd <= - bit_accuracy(prec) - 5) break;
-    if (low_stack(lim, stack_lim(av1,1)))
-    {
-      GEN *gptr[5]; gptr[0]=&y; gptr[1]=&qn; gptr[2]=&qn2; gptr[3]=&urn;
-      gptr[4]=&urninv;
-      if(DEBUGMEM>1) err(warnmem,"ellsigma");
-      gerepilemany(av1,gptr,5);
-    }
-  }
-
-  p1=gmul(q8,gmul(gdiv(gdiv((GEN)om[2],pii2),gpuigs(trueeta(tau,prec),3)),y));
-  if (flag)
-  {
-    p1=glog(p1,prec); tetpil=avma;
-    return gerepile(av,tetpil,gadd(y1,p1));
-  }
-  else
-  {
-    y=gexp(y1,prec); tetpil=avma;
-    return gerepile(av,tetpil,gmul(p1,y));
-  }
-}
-
-/* if flag=0, return ellsigma, otherwise return log(ellsigma) */
-
-static GEN
-ellsigmaprod(GEN om, GEN z, long flag, long prec)
-{
-  long av=avma,tetpil,lim,av1,si,toadd;
-  GEN zinit,om1,om2,p1,pii2,tau,q,u,y,y1,u1,qn,v,ga,negu,uinv,x1,x2,et,etnew,uhalf;
+  long av=avma,lim,av1,toadd;
+  GEN zinit,om1,om2,p1,pii2,tau,q,u,y,y1,u1,qn,ga,negu,uinv,x1,x2,et,etnew,uhalf;
+  int doprod = (flag >= 2);
+  int dolog = (flag & 1);
 
   if (!get_periods(om, &om1, &om2)) err(typeer,"ellsigmaprod");
-  p1=mppi(prec); setexpo(p1,2);
-  pii2=cgetg(3,t_COMPLEX); pii2[1]=zero; pii2[2]=(long)p1;
-  tau=gdiv(om1,om2); si=gsigne(gimag(tau));
-  if (si==0)
-    err(talker,"omega1 and omega2 are R-linearly dependent in ellsigma");
-  if (si<0) { p1=om1; om1=om2; om2=p1; tau=ginv(tau); }
-  v=getgamma(tau); tau=(GEN)v[2]; ga=(GEN)v[1];
+  pii2 = PiI2(prec);
+  tau = get_tau(&om1,&om2, &ga);
   om2=gadd(gmul(gcoeff(ga,2,1),om1),gmul(gcoeff(ga,2,2),om2));
   om1=gmul(tau,om2); om=cgetg(3,t_VEC); om[1]=(long)om1; om[2]=(long)om2;
   z=gdiv(z,om2);
@@ -1194,65 +1099,74 @@ ellsigmaprod(GEN om, GEN z, long flag, long prec)
   if (mpodd(x1) || mpodd(x2)) etnew=gadd(etnew,gmul2n(pii2,-1));
   if (gexpo(z) < 5 - bit_accuracy(prec))
   {
-    if (flag)
-    {
-      y=glog(zinit,prec);
-      tetpil=avma;
-      return gerepile(av,tetpil,gadd(etnew,y));
-    }
+    if (dolog)
+      return gerepileupto(av, gadd(etnew,glog(zinit,prec)));
     else
-    {
-      etnew=gexp(etnew,prec);
-      tetpil=avma;
-      return gerepile(av,tetpil,gmul(etnew,zinit));
-    }
+      return gerepileupto(av, gmul(gexp(etnew,prec),zinit));
   }
 
-  y1=gadd(etnew,gmul2n(gmul(gmul(z,zinit),(GEN)et[2]),-1));
+  y1 = gadd(etnew,gmul2n(gmul(gmul(z,zinit),(GEN)et[2]),-1));
 
-  q=gexp(gmul(pii2,tau),prec);
-  uhalf=gexp(gmul(gmul2n(pii2,-1),z),prec); u=gsqr(uhalf);
-  uinv=ginv(u);
-  u1=gsub(uhalf,ginv(uhalf));
-  y=gdiv(gmul(om2,u1),pii2);
-  toadd=(long)ceil(9.065*gtodouble(gabs(gimag(z),prec)));
-/* 9.065 = 2*Pi/log(2) */
-  av1=avma; lim=stack_lim(av1,1); qn=q;
-  negu=stoi(-1);
-  for(;;)
-  {
-    p1=gmul(gadd(gmul(qn,u),negu),gadd(gmul(qn,uinv),negu));
-    p1=gdiv(p1,gsqr(gadd(qn,negu)));
-    y=gmul(y,p1);
-    qn=gmul(q,qn);
-    if (gexpo(qn) <= - bit_accuracy(prec) - 5 - toadd) break;
-    if (low_stack(lim, stack_lim(av1,1)))
+  /* 9.065 = 2*Pi/log(2) */
+  toadd = (long)ceil(9.065*fabs(gtodouble(gimag(z))));
+  uhalf = gexp(gmul(gmul2n(pii2,-1),z),prec);
+  u = gsqr(uhalf);
+  if (doprod)
+  { /* use product */
+    q=gexp(gmul(pii2,tau),prec);
+    uinv=ginv(u);
+    u1=gsub(uhalf,ginv(uhalf));
+    y=gdiv(gmul(om2,u1),pii2);
+    av1=avma; lim=stack_lim(av1,1); qn=q;
+    negu=stoi(-1);
+    for(;;)
     {
-      GEN *gptr[2]; gptr[0]=&y; gptr[1]=&qn;
-      if(DEBUGMEM>1) err(warnmem,"ellsigma");
-      gerepilemany(av1,gptr,2);
+      p1=gmul(gadd(gmul(qn,u),negu),gadd(gmul(qn,uinv),negu));
+      p1=gdiv(p1,gsqr(gadd(qn,negu)));
+      y=gmul(y,p1);
+      qn=gmul(q,qn);
+      if (gexpo(qn) <= - bit_accuracy(prec) - 5 - toadd) break;
+      if (low_stack(lim, stack_lim(av1,1)))
+      {
+        GEN *gptr[2]; gptr[0]=&y; gptr[1]=&qn;
+        if(DEBUGMEM>1) err(warnmem,"ellsigma");
+        gerepilemany(av1,gptr,2);
+      }
     }
-  }
-
-  if (flag)
-  {
-    p1=glog(y,prec);
-    tetpil=avma;
-    return gerepile(av,tetpil,gadd(y1,p1));
   }
   else
-  {
-    p1=gexp(y1,prec);
-    tetpil=avma;
-    return gerepile(av,tetpil,gmul(p1,y));
-  }
-}
+  { /* use sum */
+    GEN q8,qn2,urn,urninv;
+    long n;
+    q8=gexp(gmul2n(gmul(pii2,tau),-3),prec);
+    q=gpuigs(q8,8);
+    u=gneg_i(u); uinv=ginv(u);
+    y=gzero;
+    av1=avma; lim=stack_lim(av1,1); qn=q; qn2=gun;
+    urn=uhalf; urninv=ginv(uhalf);
+    for(n=0;;n++)
+    {
+      y=gadd(y,gmul(qn2,gsub(urn,urninv)));
+      qn2=gmul(qn,qn2);
+      qn=gmul(q,qn);
+      urn=gmul(urn,u); urninv=gmul(urninv,uinv);
+      if (gexpo(qn2) + n*toadd <= - bit_accuracy(prec) - 5) break;
+      if (low_stack(lim, stack_lim(av1,1)))
+      {
+        GEN *gptr[5]; gptr[0]=&y; gptr[1]=&qn; gptr[2]=&qn2; gptr[3]=&urn;
+        gptr[4]=&urninv;
+        if(DEBUGMEM>1) err(warnmem,"ellsigma");
+        gerepilemany(av1,gptr,5);
+      }
+    }
 
-GEN
-ellsigma(GEN om, GEN z, long flag, long prec)
-{
-  if (flag>=2) return ellsigmaprod(om,z,flag&1,prec);
-  else return ellsigmasum(om,z,flag,prec);
+    p1=gmul(q8,gmul(gdiv(gdiv((GEN)om[2],pii2),gpuigs(trueeta(tau,prec),3)),y));
+  }
+
+  if (dolog)
+    return gerepileupto(av, gadd(y1,glog(p1,prec)));
+  else
+    return gerepileupto(av, gmul(p1,gexp(y1,prec)));
 }
 
 GEN
