@@ -3070,8 +3070,8 @@ polcompositum0(GEN A, GEN B, long flall)
   if (lgef(A)<=3 || lgef(B)<=3) err(constpoler,"compositum");
   v = varn(A);
   if (varn(B) != v) err(talker,"not the same variable in compositum");
-  C = content(A); if (!gcmC(C)) A = gdiv(A, C);
-  C = content(B); if (!gcmC(C)) B = gdiv(B, C);
+  C = content(A); if (!gcmp1(C)) A = gdiv(A, C);
+  C = content(B); if (!gcmp1(C)) B = gdiv(B, C);
   if (!issquarefree(A)) err(talker,"compositum: %Z not separable", A);
   if (!issquarefree(B)) err(talker,"compositum: %Z not separable", B);
 
