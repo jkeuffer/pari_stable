@@ -170,7 +170,7 @@ instance,
 will prepend the time of day, in the form \kbd{(\var{hh}:\var{mm})}
 to GP's usual prompt.
 
-\unix $\bullet$ \teb{environment expansion}: When the string contains a
+\unix \indent $\bullet$ \teb{environment expansion}: When the string contains a
 sequence of the form \kbd{\$\var{SOMEVAR}} (e.g.~\kbd{\$HOME}) the
 environment is searched and if \var{SOMEVAR} is defined, the sequence is
 replaced by the corresponding value. Also the \kbd{\til} symbol has the
@@ -733,11 +733,15 @@ precision 28, but typing a 45 significant digit real number will give a
 number with internal precision at least 45 (although less may be printed).
 
 You can also use scientific notation with the letter \kbd{E} or
-\kbd{e} (like \kbd{6.02 E 23} or \kbd{1e-5}).
+\kbd{e}, in which case the (non leading) decimal point may be omitted (like
+\kbd{6.02 E 23} or \kbd{1e-5}, but \var{not} \kbd{e10}). By definition,
+\kbd{0.E $N$} (or \kbd{0 E $N$}) returns a real $0$ of (decimal) exponent
+$N$, whereas \kbd{0.} returns a real 0 ``of default precision'' (of exponent
+$-\kbd{defaultprecision}$), see \secref{se:whatzero}.
 
 \subsec{Integermods}\sidx{integermod}
 (type \tet{t_INTMOD}): to enter $n \mod m$, type
-\kbd{Mod(n,m)}, \var{not} \kbd{n\%m} (see Chapter~3).
+\kbd{Mod(n,m)}, \var{not} \kbd{n\%m} (see \secref{se:Mod}).
 
 \subsec{Rational numbers}\sidx{rational number}
 (types \tet{t_FRAC} and \tet{t_FRACN}): under GP, all fractions are

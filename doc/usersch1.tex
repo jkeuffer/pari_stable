@@ -201,19 +201,19 @@ basic types. Let us have a closer look.
 
 \subsec{Integers and reals}:\sidx{integer}\sidx{real number}
 they are of arbitrary and varying length (each number carrying in its
-internal representation its own length or precision)
-with the following mild restrictions (given for
-32-bit machines, the restrictions for 64-bit machines being so weak as to be
-considered inexistent): integers must be in absolute value less than
-$2^{268435454}$ (i.e.~roughly 80807123 digits).  The precision of real
-numbers is also at most 80807123 significant decimal digits, and the binary
-exponent must be in absolute value less than $2^{23}=8388608$.
+internal representation its own length or precision) with the following mild
+restrictions (given for 32-bit machines, the restrictions for 64-bit machines
+being so weak as to be considered inexistent): integers must be in absolute
+value less than $2^{268435454}$ (i.e.~roughly 80807123 digits).  The
+precision of real numbers is also at most 80807123 significant decimal
+digits, and the binary exponent must be in absolute value less than
+$2^{23}=8388608$.
 
 Note that PARI has been optimized so that it works as fast as possible on
 numbers with at most a few thousand decimal digits. In particular, not too
 much effort has been put into fancy multiplication techniques (only the
-Karatsuba algorithm is implemented). Hence, although it is possible to use
-PARI to do computations with $10^7$ decimal digits, much better programs
+Karatsuba multiplication is implemented). Hence, although it is possible to
+use PARI to do computations with $10^7$ decimal digits, much better programs
 can be written for such huge numbers.
 
 Integers and real numbers are completely non-recursive types and are
