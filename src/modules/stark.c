@@ -39,7 +39,7 @@ typedef struct {
 /* Char evaluation */
 typedef struct {
   long ord; 
-  GEN val, chi;
+  GEN *val, chi;
 } CHI_t;
 
 /* RecCoeff */
@@ -51,7 +51,16 @@ typedef struct {
 /********************************************************************/
 /*                    Miscellaneous functions                       */
 /********************************************************************/
-
+/* exp(2iPi/den), assume den a t_INT */
+GEN
+InitRU(GEN den, long prec)
+{
+  GEN c,s, z;
+  gsincos(divri(gmul2n(mppi(prec),1), den), &c, &s, prec);
+  z = cgetg(3, t_COMPLEX);
+  z[1] = (long)c;
+  z[2] = (long)s; return z;
+}
 /* Compute the image of logelt by chi as a complex number if flag = 0,
    otherwise as a polmod, see InitChar in part 3 */
 static GEN
@@ -68,27 +77,45 @@ ComputeImagebyChar(GEN chi, GEN logelt, long flag)
   return gpowgs(x, n);
 }
 
+/* return n such that C(elt) = z^n */
+static long
+EvalChar_n(CHI_t *C, GEN logelt)
+{
+  GEN n = gmul(C->chi, logelt);
+  return smodis(n, C->ord);
+}
+/* return C(elt) */
 static GEN
 EvalChar(CHI_t *C, GEN logelt)
 {
-  GEN n = gmul(C->chi, logelt);
-  return (GEN)C->val[smodis(n, C->ord)];
+  return C->val[EvalChar_n(C, logelt)];
 }
 
 static void
-init_CHI(CHI_t *c, GEN CHI, long deg)
+init_CHI(CHI_t *c, GEN CHI, GEN z)
 {
   long i, d = itos((GEN)CHI[3]);
-  GEN v = new_chunk(d), z = (GEN)CHI[4];
-  v[1] = (long)z;
+  GEN *v = (GEN*)new_chunk(d);
+  v[1] = z;
   for (i=2; i<d; i++)
   {
-    v[i] = lmul((GEN)v[i-1], z);
+    v[i] = gmul(v[i-1], z);
   }
-  v[0] = lmul((GEN)v[i-1], z);
+  v[0] = gmul(v[i-1], z);
   c->chi = (GEN)CHI[1];
   c->ord = d; 
   c->val = v;
+}
+
+/* as t_COMPLEX */
+static void
+init_CHI_alg(CHI_t *c, GEN CHI) {
+  init_CHI(c,CHI, (GEN)CHI[4]);
+}
+/* as t_POLMOD */
+static void
+init_CHI_C(CHI_t *c, GEN CHI) {
+  init_CHI(c,CHI, (GEN)CHI[2]);
 }
 
 /* Compute the conjugate character */
@@ -187,7 +214,7 @@ get_Char(GEN chi, long prec)
 
 /* Let chi a character defined over bnr and primitif over bnrc,
    compute the corresponding primitive character and the vectors of
-   prime ideals dividing bnr but not bnr. Returns NULL if bnr = bnrc */
+   prime ideals dividing bnr but not bnrc. Returns NULL if bnr = bnrc */
 static GEN
 GetPrimChar(GEN chi, GEN bnr, GEN bnrc, long prec)
 {
@@ -219,7 +246,7 @@ GetPrimChar(GEN chi, GEN bnr, GEN bnrc, long prec)
     for (j = 1; j <= nbg; j++)
     {
       p2 = gdiv((GEN)p1[j], (GEN)cyc[j]);
-      s  = gadd(s,gmul(p2,(GEN)chi[j]));
+      s  = gadd(s, gmul(p2,(GEN)chi[j]));
     }
     chic[i] = (long)s;
   }
@@ -237,19 +264,6 @@ GetPrimChar(GEN chi, GEN bnr, GEN bnrc, long prec)
   p1[2] = lcopy(prdiff);
 
   return gerepileupto(av,p1);
-}
-
-/* Let dataCR be a list of characters, compute the image of logelt */
-static GEN
-chiideal(GEN dataCR, GEN logelt, long flag)
-{
-  long j, l = lg(dataCR);
-  GEN rep = cgetg(l, t_VEC);
-
-  for (j = 1; j < l; j++)
-    rep[j] = (long)ComputeImagebyChar(gmael(dataCR, j, 5), logelt, flag);
-
-  return rep;
 }
 
 static GEN
@@ -512,7 +526,7 @@ FindModulus(GEN dataC, long fl, long *newprec, long prec, long bnd)
   for (i = 1; i <= 5; i++) rep[i] = zero;
 
   /* if cpl < rb, it is not necessary to try another modulus */
-  rb = powgi(gmul(gmael(bnf, 7, 3), det(f)), gmul2n(gmael(bnr, 5, 1), 3));
+  rb = powgi(gmul((GEN)nf[3], det(f)), gmul2n(gmael(bnr, 5, 1), 3));
 
   bpr = (GEN)idealfactor(nf, f)[1];
   nbp = lg(bpr) - 1;
@@ -650,35 +664,54 @@ FindModulus(GEN dataC, long fl, long *newprec, long prec, long bnd)
 /*                      2nd part: compute W(X)                      */
 /********************************************************************/
 
+typedef struct {
+  long r; /* rank = lg(gen) */
+  GEN j; /* current elt is gen[1]^j[1] ... gen[r]^j[r] */
+  GEN cyc; /* t_VECSMALL of elementary divisors */
+} GROUP_t;
+
+static int
+NextElt(GROUP_t *G)
+{
+  long i = 1;
+  while (++G->j[i] == G->cyc[i]) /* from 0 to cyc[i]-1 */
+  {
+    G->j[i] = 0;
+    if (++i > G->r) return 0; /* no more elt */
+  }
+  return i; /* we have multiplied by gen[i] */
+}
+
 /* compute W(chi) such that Ld(s,chi) = W(chi) Ld(1 - s, chi*),
    if flag != 0 do not check the result */
 static GEN
-ComputeArtinNumber(GEN datachi, long flag, long prec)
+ComputeArtinNumber(GEN dtcr, long flag, long prec)
 {
-  long av = avma, av2, j, i, nz, zcard, q, N, lim;
-  GEN chi, nc, dc, p1, cond, cond0, cond1, lambda, nf, T;
-  GEN p2, chib, diff, vt, z, idg, mu, idh, zid, zstruc, zgen, zchi;
-  GEN classe, bnr, beta, s, tr, den, muslambda, Pi, lp1, beta2;
-  GEN sarch;
+  long av = avma, av2, i,j, nz, q, N, lim;
+  GEN CHI, nc, dc, cond, condZ, cond0, cond1, lambda, nf, T;
+  GEN cyc, vN, *vB, diff, vt, idg, mu, idh, zid, *gen, z, nchi;
+  GEN classe, bnr, s, tr, den, muslambda, beta2, sarch;
+  CHI_t C;
+  GROUP_t G;
 
-  chi   = (GEN)datachi[8];
+  CHI   = (GEN)dtcr[8];
   /* trivial case */
-  if (cmpsi(2, (GEN)chi[3]) >= 0) return gun;
+  if (cmpsi(2, (GEN)CHI[3]) >= 0) return gun;
+  init_CHI_C(&C, CHI);
 
-  bnr   = (GEN)datachi[3];
+  bnr   = (GEN)dtcr[3];
   nf    = gmael(bnr, 1, 7);
   diff  = gmael(nf, 5, 5);
   T     = gmael(nf,5,4);
   cond  =  gmael(bnr, 2, 1);
-  cond0 = (GEN)cond[1];
+  cond0 = (GEN)cond[1]; condZ = gcoeff(cond0,1,1);
   cond1 = (GEN)cond[2];
   N     = degpol(nf[1]);
-  Pi    = mppi(prec);
 
   nc  = idealnorm(nf, cond0);
   dc  = idealmul(nf, diff, cond0);
   den = idealnorm(nf, dc);
-  z   = gexp(gdiv(gmul2n(gmul(gi, Pi), 1), den), prec);
+  z   = InitRU(den, prec);
 
   q = 0;
   for (i = 1; i < lg(cond1); i++)
@@ -698,8 +731,8 @@ ComputeArtinNumber(GEN datachi, long flag, long prec)
      mu >> 0 at cond1 */
   if (!gcmp1(gcoeff(idg, 1, 1)))
   {
-    p1 = idealfactor(nf, idg);
-    p2 = idealfactor(nf, cond0);
+    GEN p1 = idealfactor(nf, idg);
+    GEN p2 = idealfactor(nf, cond0);
     p2[2] = (long)zerocol(lg(p2[1])-1);
     p1 = concat_factor(p1,p2);
 
@@ -713,88 +746,65 @@ ComputeArtinNumber(GEN datachi, long flag, long prec)
     idh = idg;
   }
 
-  muslambda = element_div(nf, mu, lambda);
+  muslambda = gmul(den, element_div(nf, mu, lambda));
 
   /* compute a system of generators of (Ok/cond)^* cond1-positive */
   zid = zidealstarinitgen(nf, cond0);
+  cyc = gmael(zid, 2, 2);
+  gen = (GEN*)gmael(zid, 2, 3);
+  nz = lg(gen) - 1;
 
-  zcard  = itos(gmael(zid, 2, 1));
-  zstruc = gmael(zid, 2, 2);
-  zgen   = gmael(zid, 2, 3);
-  nz = lg(zgen) - 1;
-
-  zchi = cgetg(nz + 1, t_VEC);
+  nchi = cgetg(nz + 1, t_VECSMALL);
   for (i = 1; i <= nz; i++)
   {
-    zgen[i] = (long)set_sign_mod_idele(nf, NULL,(GEN)zgen[i], cond,sarch);
-    classe = isprincipalray(bnr, (GEN)zgen[i]);
-    zchi[i] = (long)ComputeImagebyChar(chi, classe, 0);
+    gen[i] = set_sign_mod_idele(nf, NULL,gen[i], cond,sarch);
+    classe = isprincipalray(bnr, gen[i]);
+    nchi[i] = (long)EvalChar_n(&C, classe);
   }
 
-  /* Sum chi(beta) * exp(2i * Pi * Tr(beta * mu / lambda) where beta
+  /* Sum CHI(beta) * exp(2i * Pi * Tr(beta * mu / lambda) where beta
      runs through the classes of (Ok/cond0)^* and beta cond1-positive */
 
   vt = cgetg(N + 1, t_VEC); /* Tr(w_i) */
   for (i = 1; i <= N; i++) vt[i] = coeff(T,i,1);
 
-  lp1 = NULL;
-  s = gzero;
+  G.cyc = gtovecsmall(cyc);
+  G.r = nz;
+  G.j = vecsmall_const(nz, 0);
+
+  vN = vecsmall_const(nz, 0);
 
   av2 = avma; lim = stack_lim(av2, 1);
+  vB = (GEN*)cgetg(nz+1, t_VEC);
+  for (i=1; i<=nz; i++) vB[i] = gun;
 
-  for (i = 0; i < zcard; i++)
+  tr = gmod(gmul(vt, muslambda), den); /* for beta = 1 */
+  s = powgi(z, tr);
+
+  for (;;)
   {
-    p1 = NextEltofGroup(zstruc, nz, i);
+    if (! (i = NextElt(&G)) ) break;
 
-    /* we test if we can use the previous value
-       of beta / chib to compute the next one */
-    /* FIXME: there should be a better way of doing that! */
-    if (!lp1 || !gcmp1(gnorml2(gsub(p1, lp1))))
-    {
-      beta = gun;
-      chib = gun;
+    vB[i] = FpV_red(element_mul(nf, vB[i], gen[i]), condZ);
+    vN[i] = addssmod(vN[i], nchi[i], C.ord);
+    for (j=1; j<i; j++) { vN[j] = vN[i]; vB[j] = vB[i]; }
+    
+    vB[i]= set_sign_mod_idele(nf, NULL,vB[i], cond,sarch);
+    beta2 = element_mul(nf, vB[i], muslambda);
+    tr = gmod(gmul(vt, beta2), den);
 
-      for (j = 1; j <= nz; j++)
-      {
-	if (!gcmp0((GEN)p1[j]))
-	{
-	  p2 = element_powmodideal(nf, (GEN)zgen[j], (GEN)p1[j], cond0);
-	  beta = element_mulmodideal(nf, beta, p2, cond0);
-	  chib = gmul(chib, powgi((GEN)zchi[j], (GEN)p1[j]));
-	}
-      }
-    }
-    else
-    {
-      /* we use the fact that NextEltofGroup is, in general,
-	 obtained by adding 1 to a component of p1 */
-      for (j = 1; j <= nz; j++)
-	if (!gegal((GEN)p1[j], (GEN)lp1[j]))
-	{
-	  beta = element_mulmodideal(nf, beta, (GEN)zgen[j], cond0);
-	  chib = gmul(chib, (GEN)zchi[j]);
-	}
-    }
-
-    lp1 = p1;
-    beta = set_sign_mod_idele(nf, NULL,beta, cond,sarch);
-    beta2 = element_mul(nf, beta, muslambda);
-    tr = gmul(vt, beta2);
-    tr = gmod(gmul(tr, den), den);
-
-    s = gadd(s, gmul(chib, powgi(z,tr)));
+    s = gadd(s, gmul((GEN)C.val[vN[i]], powgi(z,tr)));
 
     if (low_stack(lim, stack_lim(av2, 1)))
     {
-      GEN *gptr[5];
-      gptr[0] = &s; gptr[1] = &lp1; gptr[2] = &beta; gptr[3] = &chib;
+      GEN *gptr[2]; gptr[0] = &s; gptr[1] = (GEN*)&vB;
       if (DEBUGMEM > 1) err(warnmem,"ComputeArtinNumber");
-      gerepilemany(av2, gptr, 4);
+      gerepilemany(av2, gptr, 2);
     }
   }
 
   classe = isprincipalray(bnr, idh);
-  s = gmul(s, ComputeImagebyChar(chi, classe, 0));
+  s = gmul(s, EvalChar(&C, classe));
   s = gdiv(s, gsqrt(nc, prec));
 
   if (!flag &&  - expo(subrs(gnorm(s), 1)) < bit_accuracy(prec) >> 1)
@@ -809,16 +819,14 @@ GEN
 bnrrootnumber(GEN bnr, GEN chi, long flag, long prec)
 {
   long av = avma, l, i;
-  GEN cond, condc, bnrc, chic, cyc, d, p1, p2, dtcr, Pi;
+  GEN cond, condc, bnrc, chic, cyc, d, p1, p2, dtcr;
 
-  if ((flag < 0) || (flag > 1))
-    err(flagerr,"bnrrootnumber");
+  if (flag < 0 || flag > 1) err(flagerr,"bnrrootnumber");
 
   checkbnr(bnr);
 
   cond = gmael(bnr, 2, 1);
   l    = lg(gmael(bnr, 5, 2));
-  Pi   = mppi(prec);
 
   if ((typ(chi) != t_VEC) || (lg(chi) != l))
     err(talker, "incorrect character in bnrrootnumber");
@@ -846,7 +854,7 @@ bnrrootnumber(GEN bnr, GEN chi, long flag, long prec)
   if (egalii(d, gdeux))
     p2[2] = lstoi(-1);
   else
-    p2[2] = lexp(gdiv(gmul2n(gmul(gi, Pi), 1), d), prec);
+    p2[2] = (long)InitRU(d, prec);
   p2[3] = (long)d;
 
   dtcr = cgetg(9, t_VEC);
@@ -941,7 +949,7 @@ ComputeAChi(GEN dtcr, long flag, long prec)
   return rep;
 }
 
-GEN
+static GEN
 _data9(GEN arch, long r1, long r2)
 {
   GEN z = cgetg(5, t_VECSMALL);
@@ -1123,28 +1131,25 @@ InitChar0(GEN dataD, long prec)
 static GEN
 CharNewPrec(GEN dataCR, GEN nf, long prec)
 {
-  GEN dk, C, p1, Pi, _2iPi;
+  GEN dk, C, p1;
   long N, l, j, prec2;
 
   dk    =  (GEN)nf[3];
   N     =  degpol((GEN)nf[1]);
   prec2 = ((prec - 2)<<1) + EXTRA_PREC;
 
-  Pi    = mppi(prec2);
-  _2iPi = gmul2n(gmul(gi, Pi), 1);
-
-  C = gsqrt(gdiv(dk, gpowgs(Pi, N)), prec2);
+  C = mpsqrt(gdiv(dk, gpowgs(mppi(prec2), N)));
 
   l = lg(dataCR);
   for (j = 1; j < l; j++)
   {
     GEN dtcr = (GEN)dataCR[j];
-    dtcr[2] = lmul(C, gsqrt(det((GEN)dtcr[7]), prec2));
+    dtcr[2] = lmul(C, gsqrt(dethnf_i((GEN)dtcr[7]), prec2));
 
     mael3(dtcr, 3, 1, 7) = (long)nf;
 
-    p1 = (GEN)dtcr[5]; p1[2] = lexp(gdiv(_2iPi, (GEN)p1[3]), prec);
-    p1 = (GEN)dtcr[8]; p1[2] = lexp(gdiv(_2iPi, (GEN)p1[3]), prec);
+    p1 = (GEN)dtcr[5]; p1[2] = (long)InitRU((GEN)p1[3], prec2);
+    p1 = (GEN)dtcr[8]; p1[2] = (long)InitRU((GEN)p1[3], prec2);
   }
 
   return dataCR;
@@ -1388,14 +1393,14 @@ CorrectCoeff(GEN dtcr, int** an, int** reduc, long n, long deg)
   long lg, av1, j, np;
   int **an2;
   GEN bnrc, diff, ray, chi, CHI, pr;
-  CHI_t chi_t, *C = &chi_t;
+  CHI_t C;
 
   diff =  (GEN)dtcr[6];
   lg   =  lg(diff) - 1;
   if (!lg) return;
 
   bnrc =  (GEN)dtcr[3];
-  CHI  =  (GEN)dtcr[8]; init_CHI(C, CHI, deg);
+  CHI  =  (GEN)dtcr[8]; init_CHI_alg(&C, CHI);
 
   if (DEBUGLEVEL > 2) fprintferr("diff(CHI) = %Z", diff);
 
@@ -1407,7 +1412,7 @@ CorrectCoeff(GEN dtcr, int** an, int** reduc, long n, long deg)
     np = itos(powgi((GEN)pr[1], (GEN)pr[4]));
 
     ray = isprincipalray(bnrc, pr);
-    chi  = EvalChar(C,ray);
+    chi  = EvalChar(&C,ray);
 
     an_AddMul(an,an2,np,n,deg,chi,reduc);
     avma = av1;
@@ -1423,9 +1428,9 @@ ComputeCoeff(GEN dtcr, LISTray *R, long n, long deg)
   long i, l, np;
   int **an, **reduc, **an2;
   GEN L, CHI, ray, chi;
-  CHI_t chi_t, *C = &chi_t;
+  CHI_t C;
 
-  CHI = (GEN)dtcr[5]; init_CHI(C, CHI, deg);
+  CHI = (GEN)dtcr[5]; init_CHI_alg(&C, CHI);
 
   an  = InitMatAn(n, deg, 0);
   an2 = InitMatAn(n, deg, 0);
@@ -1436,7 +1441,7 @@ ComputeCoeff(GEN dtcr, LISTray *R, long n, long deg)
   for (i=1; i<l; i++, avma = av2)
   {
     np = L[i]; ray = R->L1ray[i];
-    chi  = EvalChar(C, ray);
+    chi  = EvalChar(&C, ray);
     an_AddMul(an,an2,np,n,deg,chi,reduc);
   }
   FreeMat(an2, n);
@@ -2005,42 +2010,40 @@ GetST(GEN dataCR, long prec)
   avma = av; return rep;
 }
 
-/* Given datachi, S(chi) and T(chi), return L(1, chi) if fl = 1,
+/* Given dtcr, S(chi) and T(chi), return L(1, chi) if fl = 1,
    or [r(chi), c(chi)] where r(chi) is the rank of chi and c(chi)
    is given by L(s, chi) = c(chi).s^r(chi) at s = 0 if fl = 0.
    if fl2 = 1, adjust the value to get L_S(s, chi). */
 static GEN
-GetValue(GEN datachi, GEN S, GEN T, long fl, long fl2, long prec)
+GetValue(GEN dtcr, GEN S, GEN T, long fl, long fl2, long prec)
 {
   ulong av = avma;
-  GEN W, A, d, cf, VL, rep, racpi, nS, nT, rchi, p1;
+  GEN W, A, cf, VL, rep, racpi, p1;
   long q, b, c;
+  int isreal;
 
   racpi = mpsqrt(mppi(prec));
-  W = ComputeArtinNumber(datachi, 0, prec);
-  A = ComputeAChi(datachi, fl, prec);
+  W = ComputeArtinNumber(dtcr, 0, prec);
 
-  d = gmael(datachi, 8, 3);
+  isreal = (itos(gmael(dtcr, 8, 3)) <= 2);
 
-  p1 = (GEN)datachi[9];
+  p1 = (GEN)dtcr[9];
   q = p1[1];
   b = p1[2];
   c = p1[3];
-  rchi = stoi(b + c);
 
   if (!fl)
-  {
+  { /* VL = (W(chi).S(conj(chi)) + T(chi)) / (sqrt(Pi)^q 2^{r1 - q}) */
+    GEN rchi = stoi(b + c);
     cf = gmul2n(gpowgs(racpi, q), b);
 
-    nS = gdiv(gconj(S), cf);
-    nT = gdiv(gconj(T), cf);
-
-    /* VL = W(chi).S(conj(chi)) + T(chi)) / (sqrt(Pi)^q 2^{r1 - q}) */
-    VL = gadd(gmul(W, nS), nT);
-    if (cmpis(d, 3) < 0) VL = greal(VL);
+    VL = gadd(gmul(W, gconj(S)), gconj(T));
+    if (isreal) VL = greal(VL);
+    VL = gdiv(VL, cf);
 
     if (fl2)
     {
+      A = ComputeAChi(dtcr, fl, prec);
       VL = gmul((GEN)A[2], VL);
       rchi = gadd(rchi, (GEN)A[1]);
     }
@@ -2050,17 +2053,21 @@ GetValue(GEN datachi, GEN S, GEN T, long fl, long fl2, long prec)
     rep[2] = (long)VL;
   }
   else
-  {
-    cf = gmul((GEN)datachi[2], gpowgs(racpi, b));
+  { /* VL = S(chi) + W(chi).T(chi)) / (C(chi) sqrt(Pi)^{r1 - q}) */
+    cf = gmul((GEN)dtcr[2], gpowgs(racpi, b));
 
-    /* VL = S(chi) + W(chi).T(chi)) / (C(chi) sqrt(Pi)^{r1 - q}) */
-    rep = gdiv(gadd(S, gmul(W, T)), cf);
-    if (cmpis(d, 3) < 0) rep = greal(rep);
+    rep = gadd(S, gmul(W, T));
+    if (isreal) rep = greal(rep);
+    rep = gdiv(rep, cf);
 
-    if (fl2) rep = gmul(A, rep);
+    if (fl2)
+    {
+      A = ComputeAChi(dtcr, fl, prec);
+      rep = gmul(A, rep);
+    }
   }
 
- return gerepilecopy(av, rep);
+  return gerepilecopy(av, rep);
 }
 
 /* return the order and the first non-zero term of L(s, chi0)
@@ -2304,8 +2311,7 @@ RecCoeff(GEN nf,  GEN pol,  long v, long prec)
   d.v = v;
 
   for (j = 1; j <= cl; j++)
-  {
-    /* start with the coefficients in the middle,
+  { /* start with the coefficients in the middle,
        since they are the harder to recognize! */
     long cf = md + (j%2? j/2: -j/2);
     GEN bound = binome(stoi(cl), cf);
@@ -2326,12 +2332,10 @@ RecCoeff(GEN nf,  GEN pol,  long v, long prec)
 }
 
 /*******************************************************************/
-/*******************************************************************/
 /*                                                                 */
 /*                   Computation of class fields of                */
 /*	          real quadratic fields using Stark units          */
 /*                                                                 */
-/*******************************************************************/
 /*******************************************************************/
 
 /* an[q * i] *= chi for all (i,p)=1 */
@@ -2373,9 +2377,9 @@ computean(GEN dtcr, LISTray *R, long n, long deg)
   long i, p, q, condZ, l;
   int **an, **reduc;
   GEN L, CHI, chi, chi1, ray;
-  CHI_t chi_t, *C = &chi_t;
+  CHI_t C;
 
-  CHI = (GEN)dtcr[5]; init_CHI(C, CHI, deg);
+  CHI = (GEN)dtcr[5]; init_CHI_alg(&C, CHI);
   condZ= R->condZ;
 
   an = InitMatAn(n, deg, 1);
@@ -2392,7 +2396,7 @@ computean(GEN dtcr, LISTray *R, long n, long deg)
   {
     p = L[i];
     ray = R->rayZ[p % condZ];
-    chi  = EvalChar(C, ray);
+    chi  = EvalChar(&C, ray);
     chi1 = chi;
     for (q=p;;)
     {
@@ -2410,7 +2414,7 @@ computean(GEN dtcr, LISTray *R, long n, long deg)
   for (i=1; i<l; i++, avma = av2)
   {
     p = L[i]; ray = R->L1ray[i];
-    chi  = EvalChar(C, ray);
+    chi  = EvalChar(&C, ray);
     chi1 = chi;
     for(q=p;;)
     {
@@ -2428,8 +2432,8 @@ computean(GEN dtcr, LISTray *R, long n, long deg)
 
     p = L[i]; ray1 = R->L11ray[i]; /* use pr1 pr2 = (p) */
     ray2 = gsub(R->rayZ[p % condZ],  ray1);
-    chi11 = EvalChar(C, ray1);
-    chi12 = EvalChar(C, ray2);
+    chi11 = EvalChar(&C, ray1);
+    chi12 = EvalChar(&C, ray2);
 
     chi1 = gadd(chi11, chi12);
     chi2 = chi12;
@@ -2647,7 +2651,7 @@ AllStark(GEN data,  GEN nf,  long flag,  long newprec)
 {
   long cl, i, j, cpt = 0, av, av2, N, h, v, n, bnd = 300, sq = 1, r1, r2;
   int **matan;
-  GEN p0, p1, p2, S, T, polrelnum, polrel, Lp, W, A, veczeta, sig, valchi;
+  GEN p0, p1, p2, S, T, polrelnum, polrel, Lp, W, A, veczeta, sig;
   GEN degs, ro, C, Cmax, dataCR, cond1, L1, *gptr[2], an, Pi;
   LISTray LIST;
 
@@ -2735,26 +2739,25 @@ LABDOUB:
     GEN z = gzero;
 
     sig = (GEN)p1[i];
-    valchi = chiideal(dataCR, sig, 0);
-
     for (j = 1; j <= cl; j++)
     {
-      GEN p2 = greal(gmul((GEN)Lp[j], (GEN)valchi[j]));
-      if (!gegal(gdeux, gmael3(dataCR, j, 5, 3)))
-        p2 = gmul2n(p2, 1); /* character not real */
-      z = gadd(z,p2);
+      GEN CHI = gmael(dataCR,j,5);
+      GEN val = ComputeImagebyChar(CHI, sig, 0);
+      GEN p2 = greal(gmul((GEN)Lp[j], val));
+      if (itos((GEN)CHI[3]) != 2) p2 = gmul2n(p2, 1); /* character not real */
+      z = gadd(z, p2);
     }
     veczeta[i] = ldivgs(z, 2 * h);
   }
   if (DEBUGLEVEL >= 2) fprintferr("zetavalues = %Z\n", veczeta);
 
-  if ((flag >=0) && (flag <= 3)) sq = 0;
+  if (flag >=0 && flag <= 3) sq = 0;
 
   ro = cgetg(h+1, t_VEC); /* roots */
 
   for (;;)
   {
-    if (!sq && (DEBUGLEVEL > 1))
+    if (DEBUGLEVEL > 1 && !sq)
       fprintferr("Checking the square-root of the Stark unit...\n");
 
     for (j = 1; j <= h; j++)
@@ -2923,10 +2926,10 @@ bnrstark(GEN bnr,  GEN subgroup,  long flag,  long prec)
     err(talker, "the ground field must be distinct from Q");
 
   /* check the bnf */
-  if (!varn(gmael(bnf, 7, 1)))
+  if (!varn(nf[1]))
     err(talker, "main variable in bnrstark must not be x");
 
-  if (cmpis(gmael3(bnf, 7, 2, 1), N))
+  if (nf_get_r2(nf))
     err(talker, "not a totally real ground base field in bnrstark");
 
   /* check the subgroup */
@@ -2945,7 +2948,7 @@ bnrstark(GEN bnr,  GEN subgroup,  long flag,  long prec)
   subgroup = (GEN)p1[3];
 
   /* check the class field */
-  if (!gcmp0(gmael3(bnr, 2, 1, 2)))
+  if (nf_get_r2(checknf(bnr)))
     err(talker, "not a totally real class field in bnrstark");
 
   cl = itos(det(subgroup));
@@ -2994,7 +2997,7 @@ bnrL1(GEN bnr, GEN sbgrp, long flag, long prec)
   if (N == 1)
     err(talker, "the ground field must be distinct from Q");
 
-  if ((flag < 0) || (flag > 8))
+  if (flag < 0 || flag > 8)
     err(flagerr,"bnrL1");
 
   /* check the bnr */
@@ -3027,7 +3030,6 @@ bnrL1(GEN bnr, GEN sbgrp, long flag, long prec)
 
   /* compute all the characters */
   allCR = FindEltofGroup(cl, (GEN)Qt[2]);
-
 
   /* make a list of all non-trivial characters modulo conjugation */
   listCR = cgetg(cl, t_VEC);
