@@ -468,7 +468,7 @@ char *helpmessages_basic[]={
   "vecextract(x,y,{z}): extraction of the components of the matrix or vector x according to y and z. If z is omitted, y designs columns, otherwise y corresponds to rows and z to columns. y and z can be vectors (of indices), strings (indicating ranges as in \"1..10\") or masks (integers whose binary representation indicates the indices to extract, from left to right 1, 2, 4, 8, etc.)",
   "vecmax(x): maximum of the elements of the vector/matrix x",
   "vecmin(x): minimum of the elements of the vector/matrix x",
-  "vecsort(x,{k},{flag=0}): sorts the vector of vectors (or matrix) x, according to the value of its k-th component if k is not omitted. Binary digits of flag (if present) mean: 1: indirect sorting, return the permutation instead of the permuted vector, 2: sort using ascending lexicographic order",
+  "vecsort(x,{k},{flag=0}): sorts the vector of vectors (or matrix) x in ascending order, according to the value of its k-th component if k is not omitted. Binary digits of flag (if present) mean: 1: indirect sorting, return the permutation instead of the permuted vector, 2: sort using lexicographic order, 4: use descending instead of ascending order",
   "vector(n,{X},{expr=0}): row vector with n components of expression expr (X ranges from 1 to n). By default, fill with 0s",
   "vectorsmall(n,{X},{expr=0}): VECSMALL with n components of expression expr (X ranges from 1 to n) which must be small integers. By default, fill with 0s",
   "vectorv(n,{X},{expr=0}): column vector with n components of expression expr (X ranges from 1 to n). By default, fill with 0s",
