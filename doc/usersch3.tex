@@ -5126,47 +5126,41 @@ free, false (0) if not.
 
 \syn{rnfisfree}{\var{bnf},x}, and the result is a \kbd{long}.
 
-\subsecidx{rnfisnorm}$(\var{bnf},\var{ext},\var{el},\{\fl=1\})$: similar to
-\kbd{bnfisnorm} but in the relative case. This tries to decide whether the
-element \var{el} in \var{bnf} is the norm of some $y$ in \var{ext}.
-$\var{bnf}$ is as output by \kbd{bnfinit}.
+\subsecidx{rnfisnorm}$(\var{T},\var{a},\{\fl=1\})$: similar to
+\kbd{bnfisnorm} but in the relative case. $T$ is as output by
+$\tet{rnfisnorminit}(ext, rel)$. This tries to decide whether the element
+$a$ in \var{bnf} is the norm of some $x$ in the extension \var{ext}.
 
-$\var{ext}$ is a relative extension which has to be a row vector whose
-components are:
-
-$\var{ext}[1]$: a relative equation of the number field \var{ext} over
-\var{bnf}. As usual, the priority of the variable of the polynomial
-defining the ground field \var{bnf} (say $y$) must be lower than the
-main variable of $\var{ext}[1]$, say $x$ (see \secref{se:priority}).
-
-$\var{ext}[2]$: the generator $y$ of the base field as a polynomial in $x$ (as
-given by \kbd{rnfequation} with $\fl = 1$).
-
-$\var{ext}[3]$: is the \kbd{bnfinit} of the absolute extension $\var{ext}/\Q$.
-
-This returns a vector $[a,b]$, where $\var{el}=\var{Norm}(a)*b$. It looks for a
-solution which is an $S$-integer, with $S$ a list of places (of \var{bnf})
-containing the ramified primes, the generators of the class group of
-\var{ext}, as well as those primes dividing \var{el}. If $\var{ext}/\var{bnf}$
-is known to be \idx{Galois}, set $\fl=0$ (here \var{el} is a norm iff $b=1$).
-If $\fl$ is non zero add to $S$ all the places above the primes which: divide
-$\fl$ if $\fl<0$, or are less than $\fl$ if $\fl>0$. The answer is guaranteed
-(i.e.~\var{el} is a norm iff $b=1$) under \idx{GRH}, if $S$ contains all
+The output is a vector $[x,q]$, where $\var{a}=\var{Norm}(x)*q$.
+The algorithm looks for a solution $x$ which is an $S$-integer, with $S$ a
+list of places (of \var{bnf}) containing the ramified primes, the generators
+of the class group of \var{ext}, as well as those primes dividing \var{a}.
+If $\var{ext}/\var{bnf}$ is known to be \idx{Galois}, set $\fl=0$, and a
+suitable $S$ will be determined. Otherwise, if $\fl$ is non zero add to $S$
+all the places above the primes which: divide $\fl$ if $\fl<0$, or are less
+than $\fl$ if $\fl>0$. The answer is guaranteed (i.e.~\var{a} is a norm iff
+$q=1$) if the field is Galois, or, under \idx{GRH}, if $S$ contains all
 primes less than $12\log^2\left|\text{disc}(\var{Ext})\right|$, where
 \var{Ext} is the normal closure of $\var{ext} / \var{bnf}$. Example:
 
 \bprog
 bnf = bnfinit(y^3 + y^2 - 2*y - 1);
 p = x^2 + Mod(y^2 + 2*y + 1, bnf.pol);
-rnf = rnfequation(bnf,p,1);
-ext = [p, rnf[2], bnfinit(rnf[1])];
-rnfisnorm(bnf,ext,17, 1)
+T = rnfisnorminit(bnf, p, 1);
+rnfisnorm(T, 17, 0)
 @eprog
 \noindent checks whether $17$ is a norm in the Galois extension $\Q(\beta) /
 \Q(\alpha)$, where $\alpha^3 + \alpha^2 - 2\alpha - 1 = 0$ and $\beta^2 +
-\alpha^2 + 2*\alpha + 1 = 0$ (it is).
+\alpha^2 + 2\alpha + 1 = 0$ (it is).
 
-\syn{rnfisnorm}{\var{bnf},ext,x,\fl,\var{prec}}.
+\syn{rnfisnorm}{\var{T},x,\fl}.
+
+\subsecidx{rnfisnorminit}$(\var{bnf},\var{ext},\{\fl=0\})$: 
+computes technical data needed by \tet{rnfisnorm} to solve norm equations 
+$Nx = a$, for $x$ in \var{ext}, and $a$ in \var{bnf}. If \var{ext}/\var{bnf}
+is known to be Galois, set $\fl=1$. 
+
+\syn{rnfisnorm}{\var{bnf},\var{ext},\fl}.
 
 \subsecidx{rnfkummer}$(\var{bnr},\{\var{subgroup}\},\{deg=0\})$: \var{bnr}
 being as output by \kbd{bnrinit}, finds a relative equation for the

@@ -713,7 +713,8 @@ GEN     subgrouplist0(GEN bnr, GEN indexbound, long all);
 /* buch4.c */
 
 GEN     bnfisnorm(GEN bnf,GEN x,long flag,long PREC);
-GEN     rnfisnorm(GEN bnf,GEN ext,GEN x,long flag,long PREC);
+GEN     rnfisnorm(GEN S, GEN x, long flag);
+GEN     rnfisnorminit(GEN bnf, GEN relpol, int galois);
 GEN     bnfissunit(GEN bnf,GEN suni,GEN x);
 GEN     bnfsunit(GEN bnf,GEN s,long PREC);
 long    nfhilbert(GEN bnf,GEN a,GEN b);

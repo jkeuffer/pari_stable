@@ -24,6 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 extern GEN hnfall0(GEN A, long remove);
 extern GEN get_theta_abstorel(GEN T, GEN pol, GEN k);
+extern GEN _rnfequation(GEN A, GEN B, long *pk, GEN *pLPRS);
 
 static long
 psquare(GEN a,GEN p)
@@ -680,11 +681,53 @@ fa_pr_append(GEN nf,GEN rel,GEN N,GEN *prod,GEN *S1,GEN *S2)
   for (i=1; i<l; i++) pr_append(nf,rel,(GEN)v[i],prod,S1,S2);
 }
 
-/* bnf is the base field,  ext defines the relative extension
- * ext[1] is a t_POL defining ext over bnf
- * ext[2] is rnfequation(bnf, ext[1], 1)
- * ext[3] is bnfinit(ext)
+GEN
+rnfisnorminit(GEN bnf, GEN relpol, int galois)
+{
+  gpmem_t av = avma;
+  long i, l, drel, k = 0; /* important */
+  GEN prod, S1, S2, gen, cyc, nf, T, rnfeq, rel, res, y = cgetg(8, t_VEC);
 
+  bnf = checkbnf(bnf);
+  nf = checknf(bnf); T = (GEN)nf[1];
+  if (relpol)
+  {
+    rnfeq = _rnfequation(bnf, relpol, &k, NULL);
+    rel = bnfinit0(rnfeq, 1, NULL, nfgetprec(bnf));
+  }
+  else
+  { /* over Q */
+    rel = bnf;
+    bnf = bnfinit0(polx[MAXVARN],2,NULL,0);
+    relpol = T;
+  }
+  drel = degpol(relpol);
+
+  prod = gun; S1 = S2 = cgetg(1, t_VEC);
+  res = gmael(rel,8,1);
+  cyc = (GEN)res[2];
+  gen = (GEN)res[3]; l = lg(cyc);
+  for(i=1; i<l; i++)
+  {
+    if (cgcd(smodis((GEN)cyc[i], drel), drel) == 1) break;
+    fa_pr_append(nf,rel,gmael3(gen,i,1,1),&prod,&S1,&S2);
+  }
+  if (!galois)
+  {
+    GEN Ndiscrel = diviiexact((GEN)checknf(rel)[3], gpowgs((GEN)nf[3], drel));
+    fa_pr_append(nf,rel,absi(Ndiscrel), &prod,&S1,&S2);
+  }
+
+  y[1] = (long)bnf;
+  y[2] = (long)rel;
+  y[3] = (long)relpol;
+  y[4] = (long)get_theta_abstorel(T, relpol, stoi(-k));
+  y[5] = (long)prod;
+  y[6] = (long)S1;
+  y[7] = (long)S2; return gerepilecopy(av, y);
+}
+
+/* T as output by rnfisnorminit
  * if flag=0 assume extension is Galois (==> answer is unconditional)
  * if flag>0 add to S all primes dividing p <= flag
  * if flag<0 add to S all primes dividing abs(flag)
@@ -692,31 +735,22 @@ fa_pr_append(GEN nf,GEN rel,GEN N,GEN *prod,GEN *S1,GEN *S2)
  * answer is a vector v = [a,b] such that
  * x = N(a)*b and x is a norm iff b = 1  [assuming S large enough] */
 GEN
-rnfisnorm(GEN bnf,GEN ext,GEN x,long flag,long PREC)
+rnfisnorm(GEN T, GEN x, long flag)
 {
   gpmem_t av = avma;
-  GEN theta, nf, rel, aux, H, Y, M, A, suni, sunitrel, futu, fu, tu, w, k, T;
+  GEN bnf = (GEN)T[1], rel = (GEN)T[2], relpol = (GEN)T[3], theta = (GEN)T[4];
+  GEN nf, aux, H, Y, M, A, suni, sunitrel, futu, tu, w;
   GEN prod, S1, S2;
-  GEN res = cgetg(3,t_VEC), relpol = (GEN)ext[1], rnfeq = (GEN)ext[2];
+  GEN res = cgetg(3,t_VEC);
   long L, i, drel;
 
-  if (typ(ext)!=t_VEC || lg(ext)!=4 || typ(relpol)!=t_POL)
-    err(typeer,"rnfisnorm");
-  if (typ(rnfeq) == t_VEC)
-  {
-    if (lg(rnfeq) != 4) err(typeer, "rnfisnorm");
-    k = (GEN)rnfeq[3];
-  }
-  else
-  {
-    if (typ(rnfeq) != t_INT) err(typeer, "rnfisnorm");
-    k = rnfeq;
-  }
-
-  bnf = checkbnf(bnf); nf = checknf(bnf);
-  T = (GEN)nf[1];
+  if (typ(T) != t_VEC || lg(T) != 8)
+    err(talker,"please apply rnfisnorminit first");
+  bnf = checkbnf(bnf);
+  rel = checkbnf(rel);
+  nf = checknf(bnf);
   if (typ(x) != t_POL) x = basistoalg(nf,x);
-  if (gvar(x) != varn(T)) err(consister, "rnfisnorm");
+  if (gvar(x) != varn(nf[1])) err(consister, "rnfisnorm");
   drel = degpol(relpol);
   if (gcmp0(x) || gcmp1(x) || (gcmp_1(x) && odd(drel)))
   {
@@ -724,21 +758,10 @@ rnfisnorm(GEN bnf,GEN ext,GEN x,long flag,long PREC)
     res[2] = un; return gerepilecopy(av, res);
   }
 
-  /* build set S of ideals involved in the solutions */
-  rel = checkbnf((GEN)ext[3]);
-  fu = check_units(rel,"rnfisnorm");
-  prod = gun; S1 = S2 = cgetg(1,t_VEC);
-  if (!gcmp1(gmael3(rel,8,1,1)))
-  {
-    GEN gen = gmael3(rel,8,1,3);
-    GEN cyc = gmael3(rel,8,1,2), dext = stoi(drel);
-    for(i=1;i<lg(gen);i++)
-    {
-      if (gcmp1(ggcd((GEN)cyc[i], dext))) break;
-      fa_pr_append(nf,rel,gmael3(gen,i,1,1),&prod,&S1,&S2);
-    }
-  }
-
+  /* build set T of ideals involved in the solutions */
+  prod = (GEN)T[5];
+  S1   = (GEN)T[6];
+  S2   = (GEN)T[7];
   if (flag > 1)
   {
     byteptr d = diffptr;
@@ -753,27 +776,20 @@ rnfisnorm(GEN bnf,GEN ext,GEN x,long flag,long PREC)
   }
   else if (flag < 0)
     fa_pr_append(nf,rel,stoi(-flag),&prod,&S1,&S2);
-
-  if (flag)
-  {
-    GEN Ndiscrel=divii((GEN)checknf(rel)[3], gpowgs((GEN)nf[3], drel));
-    fa_pr_append(nf,rel,absi(Ndiscrel), &prod,&S1,&S2);
-  }
   fa_pr_append(nf,rel,idealnorm(nf,x), &prod,&S1,&S2);
 
-  /* computation on S-units */
+  /* computation on T-units */
   w  = gmael3(rel,8,4,1);
-  tu = gmael3(rel,8,4,2); futu = concatsp(fu, tu);
-  suni = bnfsunit(bnf,S1,PREC);
-  sunitrel = (GEN)bnfsunit(rel,S2,PREC)[1];
-  if (lg(sunitrel)>1)
-    sunitrel = lift(basistoalg(rel,sunitrel));
+  tu = gmael3(rel,8,4,2);
+  futu = concatsp(check_units(rel,"rnfisnorm"), tu);
+  suni = bnfsunit(bnf,S1,3);
+  sunitrel = (GEN)bnfsunit(rel,S2,3)[1];
+  if (lg(sunitrel) > 1) sunitrel = lift_intern(basistoalg(rel,sunitrel));
   sunitrel = concatsp(futu, sunitrel);
 
   A = lift(bnfissunit(bnf,suni,x));
   L = lg(sunitrel);
   M = cgetg(L+1,t_MAT);
-  theta = get_theta_abstorel(T, relpol, k);
   for (i=1; i<L; i++)
   {
     GEN u = (GEN)sunitrel[i];
@@ -804,12 +820,6 @@ GEN
 bnfisnorm(GEN bnf,GEN x,long flag,long PREC)
 {
   gpmem_t av = avma;
-  GEN ext = cgetg(4,t_VEC);
-
-  bnf = checkbnf(bnf);
-  ext[1] = mael(bnf,7,1);
-  ext[2] = zero;
-  ext[3] = (long)bnf;
-  bnf = bnfinit0(polx[MAXVARN],2,NULL,0);
-  return gerepileupto(av, rnfisnorm(bnf,ext,x,flag,PREC));
+  GEN T = rnfisnorminit(bnf, NULL, flag == 0);
+  return gerepileupto(av, rnfisnorm(T, x, flag));
 }

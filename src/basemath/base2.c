@@ -3418,7 +3418,7 @@ GEN
 polcompositum0(GEN A, GEN B, long flall)
 {
   gpmem_t av = avma;
-  long v,k;
+  long v, k;
   GEN C, LPRS;
 
   if (typ(A)!=t_POL || typ(B)!=t_POL) err(typeer,"polcompositum0");
@@ -3479,16 +3479,15 @@ nfissquarefree(GEN nf, GEN x)
 }
 
 GEN
-rnfequation0(GEN nf, GEN B, long flall)
+_rnfequation(GEN A, GEN B, long *pk, GEN *pLPRS)
 {
-  gpmem_t av = avma;
-  long v,vpol,k,lA,lB;
-  GEN A,C,LPRS;
+  long k, lA, lB;
+  GEN nf, C;
 
-  if (typ(nf)==t_POL) A=nf; else { nf=checknf(nf); A=(GEN)nf[1]; }
-  B = fix_relative_pol(nf,B,1);
-  v   = varn(A); lA = lgef(A);
-  vpol= varn(B); lB = lgef(B);
+  A = get_nfpol(A, &nf);
+  B = fix_relative_pol(A,B,1);
+  lA = lgef(A);
+  lB = lgef(B);
   if (lA<=3 || lB<=3) err(constpoler,"rnfequation");
 
   check_pol_int(A,"rnfequation");
@@ -3499,16 +3498,28 @@ rnfequation0(GEN nf, GEN B, long flall)
   if (!nfissquarefree(A,B))
     err(talker,"not k separable relative equation in rnfequation");
 
-  k = 0; C = ZY_ZXY_resultant_all(A, B, &k, flall? &LPRS: NULL);
+  *pk = 0; C = ZY_ZXY_resultant_all(A, B, pk, pLPRS);
   if (gsigne(leadingcoeff(C)) < 0) C = gneg_i(C);
   C = primpart(C);
+  return C;
+}
+
+GEN
+rnfequation0(GEN A, GEN B, long flall)
+{
+  gpmem_t av = avma;
+  long k;
+  GEN LPRS, nf, C;
+
+  A = get_nfpol(A, &nf);
+  C = _rnfequation(A, B, &k, flall? &LPRS: NULL);
   if (flall)
   {
     GEN w,a,b; /* a,b,c root of A,B,C = compositum, c = b - k a */
     /* invmod possibly very costly */
     a = gmul((GEN)LPRS[1], QX_invmod((GEN)LPRS[2], C));
     a = gneg_i(gmod(a, C));
-    b = gadd(polx[v], gmulsg(k,a));
+    b = gadd(polx[varn(A)], gmulsg(k,a));
     w = cgetg(4,t_VEC); /* [C, a, n ] */
     w[1] = (long)C;
     w[2] = (long)to_polmod(a, (GEN)w[1]);
