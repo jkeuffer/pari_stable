@@ -1891,9 +1891,9 @@ static GEN
 apell0(GEN e, ulong p)
 {
   sellpt f, fh, fg, ftest, F;
-  ulong u, c4, c6, cp4, p1p, p2p, h;
+  ulong x, u, c4, c6, cp4, p1p, p2p, h;
   long pordmin,A,B;
-  long i, s, KRO, KROold, x, l, r, m;
+  long i, s, KRO, KROold, l, r, m;
   pari_sp av;
   multiple *table;
 
