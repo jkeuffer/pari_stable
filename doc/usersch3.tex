@@ -3514,7 +3514,7 @@ in $x$, $v_{\p}(\alpha)$ is equal to the exponent of $\p$ in $x$, and for all
 other prime ideals, $v_{\p}(\alpha)\ge0$. This generalizes
 $\kbd{idealappr}(\var{nf},x,0)$ since zero exponents are allowed. Note that
 the algorithm used is slightly different, so that
-\kbd{idealapp(\var{nf},idealfactor(\var{nf},x))} may not be the same as
+\kbd{idealappr(\var{nf},idealfactor(\var{nf},x))} may not be the same as
 \kbd{idealappr(\var{nf},x,1)}.
 
 \syn{idealappr0}{\var{nf},x,\fl}.
@@ -4801,10 +4801,11 @@ defined by \var{bnr}.
 where \var{deg} is a \kbd{long}.
 
 \subsecidx{rnflllgram}$(\var{nf},\var{pol},\var{order})$: given a polynomial
-\var{pol} with coefficients in \var{nf} and an order \var{order} as output
-by \kbd{rnfpseudobasis} or similar, gives $[[\var{neworder}],U]$, where
-\var{neworder} is a reduced order and $U$ is the unimodular transformation
-matrix.
+\var{pol} with coefficients in \var{nf} defining a relative extension $L$ and
+a suborder \var{order} of $L$ (of maximal rank), as output by
+\kbd{rnfpseudobasis}$(\var{nf},\var{pol})$ or similar, gives
+$[[\var{neworder}],U]$, where \var{neworder} is a reduced order and $U$ is
+the unimodular transformation matrix.
 
 \syn{rnflllgram}{\var{nf},\var{pol},\var{order},\var{prec}}.
 
