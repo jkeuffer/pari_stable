@@ -1128,6 +1128,7 @@ idealmat_mul(GEN nf, GEN x, GEN y)
   return gcmp1(dx)? y: gdiv(y,dx);
 }
 
+#if 0
 /* y is principal */
 static GEN
 add_arch(GEN nf, GEN ax, GEN y)
@@ -1137,6 +1138,7 @@ add_arch(GEN nf, GEN ax, GEN y)
   y = get_arch(nf,y,prec); tetpil=avma;
   return gerepile(av,tetpil,gadd(ax,y));
 }
+#endif
 
 /* add x^1 to factorisation f */
 static GEN

@@ -2227,7 +2227,7 @@ get_cycgen(GEN v)
 static GEN
 makecycgen(GEN bnf)
 {
-  GEN cyc,gen,h,nf, GD,D;
+  GEN cyc,gen,h,nf,y,GD,D;
   long e,i,l;
 
   h = get_cycgen((GEN)bnf[10]);
@@ -2239,10 +2239,13 @@ makecycgen(GEN bnf)
   l = lg(gen); h = cgetg(l, t_VEC);
   for (i=1; i<l; i++)
   {
-    GEN N = dethnf_i((GEN)gen[i]);
-    GEN y = isprincipalarch(bnf,(GEN)GD[i], N, (GEN)cyc[i], gun, &e);
-    if (y && !fact_ok(nf,y,NULL,gen,(GEN)D[i])) y = NULL;
-    if (y) { h[i] = (long)to_famat_all(y,gun); continue; }
+    if (cmpis((GEN)cyc[i], 16) < 0)
+    {
+      GEN N = dethnf_i((GEN)gen[i]);
+      y = isprincipalarch(bnf,(GEN)GD[i], N, (GEN)cyc[i], gun, &e);
+      if (y && !fact_ok(nf,y,NULL,gen,(GEN)D[i])) y = NULL;
+      if (y) { h[i] = (long)to_famat_all(y,gun); continue; }
+    }
     y = isprincipalfact(bnf, gen, (GEN)D[i], NULL,
                         nf_GEN|nf_GENMAT|nf_FORCE|nf_GIVEPREC);
     if (typ(y) != t_INT)

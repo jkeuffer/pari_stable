@@ -27,7 +27,6 @@ extern GEN ideleaddone_aux(GEN nf,GEN x,GEN ideal);
 extern GEN logunitmatrix(GEN nf,GEN funits,GEN racunit,GEN bid);
 extern GEN vconcat(GEN Q1, GEN Q2);
 extern void minim_alloc(long n, double ***q, GEN *x, double **y,  double **z, double **v);
-extern GEN to_famat(GEN g, GEN e);
 extern GEN to_famat_all(GEN x, GEN y);
 extern GEN arch_mul(GEN x, GEN y);
 extern GEN isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag);
@@ -497,7 +496,7 @@ isprincipalrayall(GEN bnr, GEN x, long flag)
   c = lg(ep);
   for (i=1; i<c; i++) /* modify beta as if gen -> vecel.gen (coprime to bid) */
     if (typ(vecel[i]) != t_INT && signe(ep[i])) /* <==> != 1 */
-      beta = arch_mul(to_famat((GEN)vecel[i], negi((GEN)ep[i])), beta);
+      beta = arch_mul(to_famat_all((GEN)vecel[i], negi((GEN)ep[i])), beta);
   p1 = gmul(matu, concatsp(ep, zideallog(nf,beta,bid)));
   divray = (GEN)rayclass[2]; c = lg(divray);
   y = cgetg(c,t_COL);
@@ -539,15 +538,15 @@ isprincipalrayall(GEN bnr, GEN x, long flag)
 }
 
 GEN
-isprincipalray(GEN bignfray, GEN x)
+isprincipalray(GEN bnr, GEN x)
 {
-  return isprincipalrayall(bignfray,x,nf_REGULAR);
+  return isprincipalrayall(bnr,x,nf_REGULAR);
 }
 
 GEN
-isprincipalraygen(GEN bignfray, GEN x)
+isprincipalraygen(GEN bnr, GEN x)
 {
-  return isprincipalrayall(bignfray,x,nf_GEN);
+  return isprincipalrayall(bnr,x,nf_GEN);
 }
 
 GEN
