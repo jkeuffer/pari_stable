@@ -80,7 +80,7 @@ else
 * C compiler does not work. PARI/GP requires an ANSI C compiler! *
 * Aborting.                                                      *
 ******************************************************************
-Compiler was: $CC"
+Compiler was: $CC
 EOT
   exit 1;
 fi
