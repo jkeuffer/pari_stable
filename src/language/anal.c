@@ -1864,7 +1864,7 @@ constante()
         case '+': analyseur++; /* Fall through */
         default: n += number(&nb);
       }
-      if (nb > 8) err(talker2,"exponent too large: ",old,mark.start);
+      if (nb > 8) err(talker2,"exponent too large",old,mark.start);
       if (!signe(y))
       {
         avma = av; y = cgetr(3);
