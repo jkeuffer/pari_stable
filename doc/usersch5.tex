@@ -1725,6 +1725,14 @@ place (destroys~\kbd{x}).
 
 \fun{GEN}{Flm_mul}{GEN x, GEN y, ulong p}
 
+\subsec{\kbd{RX}}.
+
+\fun{GEN}{RX_mul}{GEN x, GEN y} multiplies the two \typ{POL} (in the same
+variable) \kbd{x} and \kbd{y}. Uses Karatsuba algorithm.
+
+\fun{GEN}{RX_sqr}{GEN x} squares the \typ{POL} \kbd{x}. Uses Karatsuba
+algorithm.
+
 \subsec{Conversions involving single precision objects}
 
 \subsubsec{To single precision}
@@ -1735,11 +1743,11 @@ place (destroys~\kbd{x}).
 \fun{GEN}{ZV_to_Flv}{GEN x, ulong p} reduce \kbd{ZV}~\kbd{x} modulo \kbd{p}
 (yielding an \kbd{Flv}).
 
-\fun{GEN}{ZXV_to_FlxV}{GEN v, ulong p}, as \kbd{ZX\_to\_Flx}, repeatedly called on
-the vector's coefficients.
+\fun{GEN}{ZXV_to_FlxV}{GEN v, ulong p}, as \kbd{ZX\_to\_Flx}, repeatedly
+called on the vector's coefficients.
 
-\fun{GEN}{ZXX_to_FlxX}{GEN B, ulong p, long v}, as \kbd{ZX\_to\_Flx}, repeatedly
-called on the polynomial's coefficients.
+\fun{GEN}{ZXX_to_FlxX}{GEN B, ulong p, long v}, as \kbd{ZX\_to\_Flx},
+repeatedly called on the polynomial's coefficients.
 
 \fun{GEN}{ZM_to_Flm}{GEN x, ulong p} reduce \kbd{ZM}~\kbd{x} modulo \kbd{p}
 (yielding an \kbd{Flm}).
@@ -1753,13 +1761,14 @@ called on the polynomial's coefficients.
 \fun{GEN}{Flx_to_ZX}{GEN z}, converts to \kbd{ZX} (\typ{POL} of non-negative
 \typ{INT}s in this case)
 
-\fun{GEN}{Flx_to_ZX_inplace}{GEN z}, same as \kbd{Flx\_to\_ZX}, in place (\kbd{z} is
-destroyed).
+\fun{GEN}{Flx_to_ZX_inplace}{GEN z}, same as \kbd{Flx\_to\_ZX}, in place
+(\kbd{z} is destroyed).
 
 \fun{GEN}{FlxX_to_ZXX}{GEN B}, converts an \kbd{FlxX} to a polynomial with
 \kbd{ZX} or \typ{INT} coefficients (repeated calls to \kbd{Flx\_to\_ZX}).
 
-\fun{GEN}{zx_to_ZX}{GEN z}, as \kbd{Flx\_to\_ZX}, without assuming coefficients are non-negative.
+\fun{GEN}{zx_to_ZX}{GEN z}, as \kbd{Flx\_to\_ZX}, without assuming
+coefficients are non-negative.
 
 \fun{GEN}{Flv_to_ZC}{GEN z}, converts to \kbd{ZC} (\typ{COL} of non-negative
 \typ{INT}s in this case)
@@ -1767,8 +1776,8 @@ destroyed).
 \fun{GEN}{Flv_to_ZV}{GEN z}, converts to \kbd{ZV} (\typ{VEC} of non-negative
 \typ{INT}s in this case)
 
-\fun{GEN}{Flm_to_ZM}{GEN z}, converts to \kbd{ZM} (\typ{MAT} with non-negative
-\typ{INT}s coefficients in this case)
+\fun{GEN}{Flm_to_ZM}{GEN z}, converts to \kbd{ZM} (\typ{MAT} with
+non-negative \typ{INT}s coefficients in this case)
 
 \fun{GEN}{zv_to_ZC}{GEN z} as \kbd{Flv\_to\_ZC}, without assuming
 coefficients are non-negative.
@@ -1813,13 +1822,14 @@ with \kbd{n} components (assumed larger than the number of coefficients of
 
 \fun{GEN}{zx_to_zv}{GEN x, long n} as \kbd{Flx\_to\_Flv}.
 
-\fun{GEN}{Flv_to_Flx}{GEN x, long sv} converts from vector (coefficient array)
-to (normalized) polynomial in variable $v$.
+\fun{GEN}{Flv_to_Flx}{GEN x, long sv} converts from vector (coefficient
+array) to (normalized) polynomial in variable $v$.
 
 \fun{GEN}{zv_to_zx}{GEN x, long n} as \kbd{Flv\_to\_Flx}.
 
-\fun{GEN}{Flm_to_FlxV}{GEN x, long sv} converts the colums of \kbd{Flm}~\kbd{x}
-to an array of \kbd{Flx} (repeated calls to \kbd{Flv\_to\_Flx}).
+\fun{GEN}{Flm_to_FlxV}{GEN x, long sv} converts the colums of
+\kbd{Flm}~\kbd{x} to an array of \kbd{Flx} (repeated calls to
+\kbd{Flv\_to\_Flx}).
 
 \fun{GEN}{zm_to_zxV}{GEN x, long n} as \kbd{Flm\_to\_FlxV}.
 
@@ -1847,10 +1857,11 @@ object~\kbd{y}.
 
 \subsubsec{Scalars}
 
-\fun{double}{rtodbl}{GEN x} applied to a \typ{REAL}~\kbd{x},
-converts \kbd{x} into a \kbd{double} if possible.
+\fun{double}{rtodbl}{GEN x} applied to a \typ{REAL}~\kbd{x}, converts \kbd{x}
+into a \kbd{double} if possible.
 
-\fun{GEN}{dbltor}{double x} converts the \kbd{double} \kbd{x} into a \typ{REAL}.
+\fun{GEN}{dbltor}{double x} converts the \kbd{double} \kbd{x} into a
+\typ{REAL}.
 
 \fun{double}{gtodouble}{GEN x} if \kbd{x} is a real number (not necessarily
 a~\typ{REAL}), converts \kbd{x} into a \kbd{double} if possible.
@@ -1890,9 +1901,9 @@ would be the conversion of coefficient vectors (coefficients are given by
 decreasing degree). E.g.~\kbd{[2,3]} goes to \kbd{2*v + 3}
 
 \fun{GEN}{gtopolyrev}{GEN x, long v} converts or truncates the object~\kbd{x}
-into a \typ{POL} with main variable number~\kbd{v}, but vectors are
-converted in reverse order compared to \kbd{gtopoly} (coefficients are given
-by increasing degree). E.g.~\kbd{[2,3]} goes to \kbd{3*v + 2}. In other words
+into a \typ{POL} with main variable number~\kbd{v}, but vectors are converted
+in reverse order compared to \kbd{gtopoly} (coefficients are given by
+increasing degree). E.g.~\kbd{[2,3]} goes to \kbd{3*v + 2}. In other words
 the vector represents a polynomial in the basis $(1,v,v^2,v^3,\dots)$.
 
 \fun{GEN}{normalizepol}{GEN x} applied to an unnormalized \typ{POL}~\kbd{x}
@@ -1904,21 +1915,21 @@ The following routines do \emph{not} copy coefficients on the stack (they
 only move pointers around), hence are very fast but not suitable for
 \kbd{gerepile} calls. Recall that an \kbd{RV} (resp.~an \kbd{RX}, resp.~an
 \kbd{RM}) is a \typ{VEC} or \typ{COL} (resp.~a \typ{POL}, resp.~a \typ{MAT})
-with arbitrary components. Similarly, an \kbd{RXV} is a \typ{VEC} or \typ{COL}
-with \kbd{RX} components, etc.
+with arbitrary components. Similarly, an \kbd{RXV} is a \typ{VEC} or
+\typ{COL} with \kbd{RX} components, etc.
 
 \fun{GEN}{RV_to_RX}{GEN x, long v} converts the \kbd{RV}~\kbd{x} to a
 (normalized) polynomial in variable~\kbd{v} (as \kbd{gtopolyrev}, without
 copy).
 
-\fun{GEN}{RX_to_RV}{GEN x, long N} converts the \typ{POL}~\kbd{x} to 
-a \typ{COL}~\kbd{v} with \kbd{N} components. Other types than \typ{POL} are
+\fun{GEN}{RX_to_RV}{GEN x, long N} converts the \typ{POL}~\kbd{x} to a
+\typ{COL}~\kbd{v} with \kbd{N} components. Other types than \typ{POL} are
 allowed for \kbd{x}, which is then considered as a constant polynomial.
 Coefficients of \kbd{x} are listed by increasing degree, so that \kbd{y[i]}
 is the coefficient of the term of degree $i-1$ in \kbd{x}.
 
-\fun{GEN}{RM_to_RXV}{GEN x, long v} converts the \kbd{RM}~\kbd{x}
-to a \typ{VEC} of \kbd{RX}, by repeated calls to \kbd{RV\_to\_RX}.
+\fun{GEN}{RM_to_RXV}{GEN x, long v} converts the \kbd{RM}~\kbd{x} to a
+\typ{VEC} of \kbd{RX}, by repeated calls to \kbd{RV\_to\_RX}.
 
 \fun{GEN}{RXV_to_RM}{GEN v, long N} converts the vector of \kbd{RX}~\kbd{v}
 to a~\typ{MAT} with \kbd{N}~rows, by repeated calls to \kbd{RX\_to\_RV}.
@@ -1939,8 +1950,6 @@ priorities: the above is an invalid object if $\kbd{varncmp(v, w)} \geq 0$.
 $\kbd{P}(u,v)$ (a \typ{POL} with \typ{POL} coefficients) to
 $P(\kbd{polx[w]},u)$, assuming \kbd{n} is an upper bound for
 $\deg_v(\kbd{P})$.
-
-\subsubsec{Other types}
 
 \fun{GEN}{greffe}{GEN x, long l, int use\_stack} applied to a
 \typ{POL}~\kbd{x}, creates a \typ{SER} of length~\kbd{l} starting

@@ -322,6 +322,18 @@ quicksqr(GEN a, long na)
   c0 = addmulXncopy(c0,c,n0);
   return shiftpol_ip(gerepileupto(av,c0), v);
 }
+GEN
+RX_mul(GEN x,GEN y)
+{
+  GEN z = quickmul(y+2, x+2, lgpol(y), lgpol(x));
+  setvarn(z,varn(x)); return z;
+}
+GEN
+RX_sqr(GEN x)
+{
+  GEN z = quicksqr(x+2, lgpol(x));
+  setvarn(z,varn(x)); return z;
+}
 
 /*Renormalize (in place) polynomial with t_INT or t_POL coefficients.*/
 
@@ -338,6 +350,8 @@ ZX_renormalize(GEN x, long lx)
 #define FpX_renormalize ZX_renormalize
 #define FpXX_renormalize ZX_renormalize
 #define FpXQX_renormalize ZX_renormalize
+#define ZX_mul RX_mul
+#define ZX_sqr RX_sqr
 
 /************************************************************************
  **                                                                    ** 
@@ -438,18 +452,14 @@ FpX_sub(GEN x,GEN y,GEN p)
 GEN
 FpX_mul(GEN x,GEN y,GEN p)
 {
-  GEN z = quickmul(y+2, x+2, lgpol(y), lgpol(x));
-  setvarn(z,varn(x));
-  if (!p) return z;
-  return FpX_red(z, p);
+  GEN z = RX_mul(x, y);
+  return p? FpX_red(z, p): z;
 }
 GEN
 FpX_sqr(GEN x,GEN p)
 {
-  GEN z = quicksqr(x+2, lgpol(x));
-  setvarn(z,varn(x));
-  if (!p) return z;
-  return FpX_red(z, p);
+  GEN z = RX_sqr(x);
+  return p? FpX_red(z, p): z;
 }
 
 /* Inverse of x in Z/pZ[X]/(pol) or NULL if inverse doesn't exist
@@ -1085,11 +1095,11 @@ FpXQYQ_red(void *data, GEN x)
 }
 static GEN
 FpXQYQ_mul(void *data, GEN x, GEN y) {
-  return FpXQYQ_red(data, FpX_mul(x,y,NULL));
+  return FpXQYQ_red(data, ZX_mul(x,y));
 }
 static GEN
 FpXQYQ_sqr(void *data, GEN x) {
-  return FpXQYQ_red(data, FpX_sqr(x,NULL));
+  return FpXQYQ_red(data, ZX_sqr(x));
 }
 
 /* x over Fq, return lift(x^n) mod S */

@@ -1278,7 +1278,7 @@ gmul(GEN x, GEN y)
         if (varncmp(vx, vy) < 0) return mul_pol_scal(x, y);
         else                     return mul_pol_scal(y, x);
       }
-      return FpX_mul(x, y, NULL);
+      return RX_mul(x, y);
 
     case t_SER: {
       long mix, miy;
@@ -1695,11 +1695,7 @@ gsqr(GEN x)
         if (pol) z = from_Kronecker(z,pol);
         z = gerepileupto(av, z);
       }
-      else
-      {
-        avma = av;
-        z = FpX_sqr(a, NULL);
-      }
+      else { avma = av; z = RX_sqr(a); }
       setvarn(z, vx); return z;
     }
 
