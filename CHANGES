@@ -58,6 +58,7 @@ GN  6- [Solaris + cc:] fix linker warnings (missing object types in
        Smaller test-case:
          setrand(1701015992)
          factorff(x^2+y+2, 3, y^3+y^2+2)
+MSo 9- bug in print_version() --> SEGV on startup if cc version number too long
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.
