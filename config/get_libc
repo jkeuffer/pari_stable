@@ -9,12 +9,10 @@ list=exp2; . ./look
 list=log2; . ./look
 extra_flags=
 list=strftime; . ./look
-case "$arch" in
-  alpha) list='times ftime';; # gp-dyn has problems with getrusage 
-  *) case "$osname" in
+case "$osname" in
+    osf1) list='times ftime';; # gp-dyn has problems with getrusage
     *cygwin*) list='times ftime';; # getrusage based timer always returns 0
     *) list='getrusage times ftime';;
-    esac;;
 esac; . ./look
 list='sigsetmask sigrelse'; . ./look
 list=TIOCGWINSZ; . ./look
