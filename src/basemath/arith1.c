@@ -2198,6 +2198,57 @@ to_form(GEN x, long f)
   return redimag(primeform(x, stoi(f), 0));
 }
 
+static GEN
+conductor_part(GEN x, GEN *ptD, GEN *ptreg, GEN *ptfa)
+{
+  long n,i,k,s=signe(x),fl2;
+  GEN e,p,H,d,D,fa,reg;
+
+  fa = auxdecomp(absi(x),1);
+  e = (GEN)fa[2]; fa = (GEN)fa[1];
+  n = lg(fa); d = gun;
+  for (i=1; i<n; i++)
+    if (mod2((GEN)e[i])) d = mulii(d,(GEN)fa[i]);
+  fl2 = (mod4(x)==0); /* 4 | x */
+  if (mod4(d) == 2-s) fl2 = 0;
+  else
+  {
+    if (!fl2) err(funder2,"classno2");
+    d = shifti(d,2);
+  }
+  H = gun; D = (s<0)? negi(d): d; /* d = abs(D) */
+  /* f \prod_{p|f}  [ 1 - (D/p) p^-1 ] */
+  for (i=1; i<n; i++)
+  {
+    k = itos((GEN)e[i]); p = (GEN)fa[i];
+    if (fl2 && i==1) k -= 2; /* p = 2 */
+    if (k >= 2)
+    {
+      H = mulii(H, subis(p, kronecker(D,p)));
+      if (k>=4) H = mulii(H,gpowgs(p,(k>>1)-1));
+    }
+  }
+  
+  /* divide by [ O^* : O_K^* ] */
+  if (s < 0)
+  {
+    reg = NULL;
+    if (!is_bigint(d))
+      switch(itos(d))
+      {
+        case 4: H = divis(H,2); break;
+        case 3: H = divis(H,3); break;
+      }
+  } else {
+    reg = regula(D,DEFAULTPREC);
+    if (!egalii(x,D))
+      H = divii(H, ground(gdiv(regula(x,DEFAULTPREC), reg)));
+  }
+  *ptfa = fa; *ptD = D; if (ptreg) *ptreg = reg;
+  return H;
+}
+
+
 static long
 two_rank(GEN x)
 {
@@ -2215,7 +2266,7 @@ two_rank(GEN x)
 }
 
 #define MAXFORM 11
-#define _low(x) (__x=(GEN)x, modBIL(__x))
+#define _low(x) ({GEN __x=(GEN)x; modBIL(__x);})
 
 /* h(x) for x<0 using Baby Step/Giant Step.
  * Assumes G is not too far from being cyclic.
@@ -2227,16 +2278,19 @@ classno(GEN x)
   long av = avma, av2,c,lforms,k,l,i,j,j1,j2,lim,com,s, forms[MAXFORM];
   long r2;
   GEN a,b,count,index,tabla,tablb,hash,p1,p2,hin,h,f,fh,fg,ftest;
-  GEN __x;
+  GEN Hf,D,fa;
   byteptr p = diffptr;
 
   if (typ(x) != t_INT) err(arither1);
   s=signe(x); if (s>=0) return classno2(x);
 
   k=mod4(x); if (k==1 || k==2) err(funder2,"classno");
-  if (gcmpgs(x,-12) >= 0) return gun;
+  if (cmpis(x,-12) >= 0) return gun;
 
-  p2 = gsqrt(absi(x),DEFAULTPREC);
+  Hf = conductor_part(x,&D,NULL,&fa);
+  if (cmpis(D,-12) >= 0) return gerepilecopy(av, Hf);
+
+  p2 = gsqrt(absi(D),DEFAULTPREC);
   p1 = divrr(p2,mppi(DEFAULTPREC));
   p2 = gtrunc(shiftr(gsqrt(p2,DEFAULTPREC),1));
   s = 1000;
@@ -2245,11 +2299,11 @@ classno(GEN x)
     if (is_bigint(p2)) err(talker,"discriminant too big in classno");
     s = itos(p2); if (s < 1000) s = 1000;
   }
-  r2 = two_rank(x);
+  r2 = two_rank(D);
   c=lforms=0;
   while (c <= s && *p)
   {
-    c += *p++; k = krogs(x,c);
+    c += *p++; k = krogs(D,c);
     if (!k) continue;
 
     av2 = avma;
@@ -2270,7 +2324,7 @@ classno(GEN x)
   tabla = new_chunk(10000);
   tablb = new_chunk(10000);
   hash  = new_chunk(10000);
-  f = gsqr(to_form(x, forms[0]));
+  f = gsqr(to_form(D, forms[0]));
   p1 = fh = powgi(f, h);
   for (i=0; i<s; i++)
   {
@@ -2300,8 +2354,9 @@ classno(GEN x)
           h = addii(addis(h,j2), mulss(s,com));
           forms[0] = (long)f;
           for (i=1; i<lforms; i++)
-            forms[i] = (long)gsqr(to_form(x, forms[i]));
+            forms[i] = (long)gsqr(to_form(D, forms[i]));
           h = end_classno(h,hin,forms,lforms);
+          h = mulii(h,Hf);
           return gerepileuptoint(av, shifti(h, r2));
         }
       }
@@ -2316,96 +2371,57 @@ classno(GEN x)
 GEN
 classno2(GEN x)
 {
-  long av=avma,tetpil,n,i,k,s=signe(x),fl2;
-  GEN p1,p2,p3,p4,p5,p7,p8,pi4,reg,logd,d,fd;
+  ulong av = avma;
+  long n,i,k,s = signe(x);
+  GEN p1,p2,p3,p4,p5,p7,Hf,Pi,reg,logd,d,D;
 
   if (typ(x) != t_INT) err(arither1);
   if (!s) err(arither2);
-  if (s<0 && gcmpgs(x,-12) >= 0) return gun;
+  if (s < 0 && cmpis(x,-12) >= 0) return gun;
 
-  p1=auxdecomp(absi(x),1); p2=(GEN)p1[2]; p1=(GEN)p1[1];
-  n=lg(p1); d=gun;
-  for (i=1; i<n; i++)
-    if (mod2((GEN)p2[i])) d=mulii(d,(GEN)p1[i]);
-  fl2 = (mod4(x)==0); /* 4 | x */
-  if (mod4(d) != 2-s)
-  {
-    if (!fl2) err(funder2,"classno2");
-    d = shifti(d,2);
-  }
-  else fl2=0;
-  p8=gun; fd = (s<0)? negi(d): d; /* d = abs(fd) */
-  for (i=1; i<n; i++)
-  {
-    k=itos((GEN)p2[i]); p4=(GEN)p1[i];
-    if (fl2 && i==1) k -= 2; /* p4 = 2 */
-    if (k>=2)
-    {
-      p8=mulii(p8,subis(p4,kronecker(fd,p4)));
-      if (k>=4) p8=mulii(p8,gpuigs(p4,(k>>1)-1));
-    }
-  }
-  if (s<0 && lgefint(d)==3)
-  {
-    switch(d[2])
-    {
-      case 4: p8=gdivgs(p8,2); break;
-      case 3: p8=gdivgs(p8,3); break;
-    }
-    if (d[2] < 12) /* |fd| < 12*/
-      { tetpil=avma; return gerepile(av,tetpil,icopy(p8)); }
-  }
+  Hf = conductor_part(x, &D, &reg, &p1);
+  if (s < 0 && cmpis(D,-12) >= 0)
+    return gerepilecopy(av, Hf); /* |D| < 12*/
 
-  pi4 = mppi(DEFAULTPREC); logd = glog(d,DEFAULTPREC);
-  p1 = gsqrt(gdiv(gmul(d,logd),gmul2n(pi4,1)),DEFAULTPREC);
-  p4 = divri(pi4,d); p7 = ginv(mpsqrt(pi4));
+  Pi = mppi(DEFAULTPREC);
+  d = absi(D); logd = glog(d,DEFAULTPREC);
+  p1 = mpsqrt(gdiv(gmul(d,logd), gmul2n(Pi,1)));
   if (s > 0)
   {
-    reg = regula(d,DEFAULTPREC);
-    p2 = gsubsg(1, gmul2n(gdiv(glog(reg,DEFAULTPREC),logd),1));
-    p3 = gsqrt(gdivsg(2,logd),DEFAULTPREC);
-    if (gcmp(p2,p3)>=0) p1 = gmul(p2,p1);
+    p2 = subsr(1, gmul2n(divrr(mplog(reg),logd),1));
+    if (gcmp(gsqr(p2), divsr(2,logd)) >= 0) p1 = gmul(p2,p1);
   }
-  else reg = NULL; /* for gcc -Wall */
-  p1 = gtrunc(p1); n=p1[2];
-  if (lgefint(p1)!=3 || n<0)
-    err(talker,"discriminant too large in classno");
+  p1 = gtrunc(p1);
+  if (is_bigint(p1)) err(talker,"discriminant too large in classno");
+  n = itos(p1);
 
+  p4 = divri(Pi,d); p7 = ginv(mpsqrt(Pi));
   p1 = gsqrt(d,DEFAULTPREC); p3 = gzero;
   if (s > 0)
   {
     for (i=1; i<=n; i++)
     {
-      k=krogs(fd,i);
-      if (k)
-      {
-	p2 = mulir(mulss(i,i),p4);
-	p5 = subsr(1,mulrr(p7,incgam3(ghalf,p2,DEFAULTPREC)));
-	p5 = addrr(divrs(mulrr(p1,p5),i),eint1(p2,DEFAULTPREC));
-	p3 = (k>0)? addrr(p3,p5): subrr(p3,p5);
-      }
+      k = krogs(D,i); if (!k) continue;
+      p2 = mulir(mulss(i,i),p4);
+      p5 = subsr(1,mulrr(p7,incgam3(ghalf,p2,DEFAULTPREC)));
+      p5 = addrr(divrs(mulrr(p1,p5),i), eint1(p2,DEFAULTPREC));
+      p3 = (k>0)? addrr(p3,p5): subrr(p3,p5);
     }
     p3 = shiftr(divrr(p3,reg),-1);
-    if (!egalii(x,fd)) /* x != p3 */
-      p8 = gdiv(p8,ground(gdiv(regula(x,DEFAULTPREC),reg)));
   }
   else
   {
-    p1 = gdiv(p1,pi4);
+    p1 = gdiv(p1,Pi);
     for (i=1; i<=n; i++)
     {
-      k=krogs(fd,i);
-      if (k)
-      {
-	p2=mulir(mulss(i,i),p4);
-	p5=subsr(1,mulrr(p7,incgam3(ghalf,p2,DEFAULTPREC)));
-	p5=addrr(p5,divrr(divrs(p1,i),mpexp(p2)));
-	p3 = (k>0)? addrr(p3,p5): subrr(p3,p5);
-      }
+      k = krogs(D,i); if (!k) continue;
+      p2 = mulir(mulss(i,i),p4);
+      p5 = subsr(1,mulrr(p7,incgam3(ghalf,p2,DEFAULTPREC)));
+      p5 = addrr(p5, divrr(divrs(p1,i),mpexp(p2)));
+      p3 = (k>0)? addrr(p3,p5): subrr(p3,p5);
     }
   }
-  p3=ground(p3); tetpil=avma;
-  return gerepile(av,tetpil,mulii(p8,p3));
+  return gerepileuptoint(av, mulii(Hf,ground(p3)));
 }
 
 GEN
