@@ -783,7 +783,7 @@ minimforunits(GEN nf, long BOUND, long stockmax)
   r1 = itos(gmael(nf,2,1));
   a = gmael(nf,5,3); n = lg(a);
   minim_alloc(n, &q, &x, &y, &z, &v);
-  n--; BOUND += eps;
+  n--; BOUND += (long)eps;
   u = lllgram(a,prec);
   M = gmul(gmael(nf,5,1), u); /* embeddings of T2-reduced basis */
   M = gprec_w(M, prec);
