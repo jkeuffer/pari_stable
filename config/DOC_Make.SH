@@ -5,6 +5,10 @@ cat > doc/Makefile << EOT
 #
 SHELL = $make_sh
 
+USERS_TEX= users.tex appa.tex appb.tex appc.tex\\
+ usersch1.tex usersch2.tex usersch3.tex usersch4.tex usersch5.tex\\
+ paricfg.tex parimacro.tex
+
 doc all: manual refcard tutorial
 docps: refcard.ps tutorial.ps users.ps INSTALL.ps
 docpdf: users.pdf tutorial.pdf refcard.pdf INSTALL.pdf
@@ -32,26 +36,21 @@ paricfg.tex: paricfg.tex.in
 refcard.ps: refcard.dvi
 	dvips -t landscape -t a4 refcard.dvi -o \$@
 
-users.dvi: users.tex appa.tex appb.tex appc.tex\\
- usersch1.tex usersch2.tex usersch3.tex usersch4.tex usersch5.tex\\
- paricfg.tex parimacro.tex
+users_dvi_init: \$(USERS_TEX)
 	-rm -f $pdf; rm -f users.std; tex users;
+users_pdf_init: \$(USERS_TEX)
+	-rm -f users.std; touch $pdf; pdftex users;
+users.std: users.idx
 	sed -e 's/!\([1-9]\)!/!00\1!/'\\
 	    -e 's/!\([1-9][0-9]\)!/!0\1!/'\\
 	    -e 's/\\\\EFF {}/f/g'\\
 	  users.idx | env LANG=C sort -f |\\
 	sed -e 's/!00*\([0-9]*\)!/!\1!/' > users.std;
+
+users.dvi: users_dvi_init users.std
 	tex users; rm -f users.idx
 
-users.pdf: users.tex appa.tex appb.tex appc.tex\\
- usersch1.tex usersch2.tex usersch3.tex usersch4.tex usersch5.tex\\
- paricfg.tex parimacro.tex
-	-rm -f users.std; touch $pdf; pdftex users;
-	sed -e 's/!\([1-9]\)!/!00\1!/'\\
-	    -e 's/!\([1-9][0-9]\)!/!0\1!/'\\
-	    -e 's/\\\\EFF {}/f/g'\\
-	  users.idx | env LANG=C sort -f |\\
-	sed -e 's/!00*\([0-9]*\)!/!\1!/' > users.std;
+users.pdf: users_pdf_init users.std
 	pdftex users; rm -f users.idx $pdf
 
 gpman: gp.1
