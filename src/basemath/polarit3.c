@@ -4121,8 +4121,8 @@ QX_invmod(GEN A0, GEN B0)
 extern GEN FpX_rand(long d1, long v, GEN p);
 
 /* irreducible (unitary) polynomial of degree n over Fp */
-static GEN
-f2init(GEN p,long n)
+GEN
+ffinit_rand(GEN p,long n)
 {
   ulong av = avma;
   GEN pol;
@@ -4133,6 +4133,51 @@ f2init(GEN p,long n)
     if (FpX_is_irred(pol, p)) break;
   }
   return pol;
+}
+
+GEN
+FpX_compositum(GEN A, GEN B, GEN p)
+{
+  GEN C, a,b;
+  long k;
+
+  a = dummycopy(A); setvarn(a, MAXVARN);
+  b = dummycopy(B); setvarn(b, MAXVARN);
+  for (k = 1;; k = next_lambda(k))
+  {
+    GEN x = gadd(polx[0], gmulsg(k, polx[MAXVARN]));
+    C = FpY_FpXY_resultant(a, poleval(b,x),p);
+    if (FpX_is_squarefree(C, p)) break;
+  }
+  return C;
+}
+
+/* return an extension of degree 2^l of F_2, assume l > 0 */
+static GEN
+f2init(long l)
+{
+  long i;
+  GEN a, q, T, S;
+
+  if (l == 1) return cyclo(3, MAXVARN);
+
+  a = gun;
+  S = coefs_to_pol(4, gun,gun,gzero,gzero); /* #(#^2 + #) */
+  setvarn(S, MAXVARN);
+  q = coefs_to_pol(3, gun,gun, S); /* X^2 + X + #(#^2+#) */
+
+  /* x^4+x+1, irred over F_2, minimal polynomial of a root of q */
+  T = coefs_to_pol(5, gun,gzero,gzero,gun,gun);
+
+  for (i=2; i<l; i++)
+  { /* q = X^2 + X + a(#) irred. over K = F2[#] / (T(#))
+     * ==> X^2 + X + a(#) b irred. over K for any root b of q
+     * ==> X^2 + X + (b^2+b)b */
+    setvarn(T, MAXVARN);
+    T = FpY_FpXY_resultant(T, q, gdeux);
+    /* T = minimal polynomial of b over F2 */
+  }
+  return T;
 }
 
 /* assume p > 2 or 8 does not divide l. Return an irreducible polynomial of
@@ -4151,23 +4196,6 @@ fpinit(GEN p, long l)
 }
 
 GEN
-FpX_compositum(GEN A, GEN B, GEN p)
-{
-  long k;
-  GEN C, a,b;
-
-  a = dummycopy(A); setvarn(a, MAXVARN);
-  b = dummycopy(B); setvarn(b, MAXVARN);
-  for (k = 1;; k = next_lambda(k))
-  {
-    GEN x = gadd(polx[0], gmulsg(k, polx[MAXVARN]));
-    C = FpY_FpXY_resultant(a, poleval(b, x),p);
-    if (FpX_is_squarefree(C, p)) break;
-  }
-  return C;
-}
-
-GEN
 ffinit(GEN p, long n, long v)
 {
   ulong av = avma;
@@ -4182,11 +4210,11 @@ ffinit(GEN p, long n, long v)
     if (m > 2)
     { /* 8 | n */
       n >>= m;
-      k2 = f2init(gdeux, 1<<m);
+      k2 = f2init(m);
     }
   }
   k = fpinit(p, n);
-  if (k2) k = FpX_compositum(k,k2, p);
+  if (k2) k = n==1? k2: FpX_compositum(k,k2, p);
   setvarn(k, v);
   return gerepileupto(av, FpX(k,p));
 }
