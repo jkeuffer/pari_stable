@@ -2389,7 +2389,7 @@ skipidentifier(void)
       check_new_fun = NOT_CREATED_YET; match('(');
       while (*analyseur != ')') { match_comma(); skipexpr(); };
       match(')');
-      if (*analyseur == '=')
+      if (*analyseur == '=' && analyseur[1] != '=')
       {
 	skipping_fun_def++;
 	analyseur++; skipseq();
