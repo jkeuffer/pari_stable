@@ -2270,7 +2270,7 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
 { return Discrayabslistarch(bnf,arch,bound, 0); }
 GEN
 discrayabslistlong(GEN bnf, long bound)
-{ return Discrayabslistarch(bnf,gen_0,bound, 0); }
+{ return Discrayabslistarch(bnf,NULL,bound, 0); }
 GEN
 discrayabslistarchsquare(GEN bnf, GEN arch, long bound)
 { return Discrayabslistarch(bnf,arch,bound, -1); }
