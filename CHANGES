@@ -32,6 +32,7 @@ OV = Oliver Voigt
 PM = Peter Montgomery
 PW = Paul van Wamelen
 RS = Ralf Stefan
+SG = Scott Garee
 TH = Teluhiko Hilano
 TP = Thomas Papanikolaou
 XR = Xavier Roblot
@@ -190,6 +191,7 @@ BA  7- routine qfbsolve(Q,p) for Q imaginary and p prime
     8- new testsuite: make test-galois (~ 1 minute)
     9- new options to Configure: --with-fltk, --emacsdir, --datadir,
        --sysdatadir
+SG 10- updated micro-kernel for HPPA
 
   Removed
     1- bruteall [ useless, undocumented variant of 'brute' ]

@@ -16,95 +16,107 @@
 ; This file modified by Nigel Smart from the original by Dominique Bernardi.
 ; HP as is needed, with +DA1.1
 	.shortdata
-        .import $global$        ; The value in the %dp register
-	.export	hiremainder
-	.export	overflow
+        .import $global$,data        ; The value in the %dp register
+	.export	hiremainder,data
+	.export	overflow,data
 	.word
 	.align	8
-hiremainder	.word
+hiremainder	.comm	4
 	.align	8
-overflow	.word
+overflow	.comm	4
 
         .code
-	.export	addll,entry
-	.export	addllx,entry
-	.export	subll,entry
-	.export	subllx,entry
-	.export	shiftl,entry
-	.export	shiftlr,entry
-	.export	bfffo,entry
-	.export	mulll,entry
- 	.export	addmul,entry
-	.export	divll,entry
+	.export	addll,entry,priv_lev=3,argw0=gr,argw1=gr,rtnval=gr
+	.export	addllx,entry,priv_lev=3,argw0=gr,argw1=gr,rtnval=gr
+	.export	subll,entry,priv_lev=3,argw0=gr,argw1=gr,rtnval=gr
+	.export	subllx,entry,priv_lev=3,argw0=gr,argw1=gr,rtnval=gr
+	.export	shiftl,entry,priv_lev=3,argw0=gr,argw1=gr,rtnval=gr
+	.export	shiftlr,entry,priv_lev=3,argw0=gr,argw1=gr,rtnval=gr
+	.export	bfffo,entry,priv_lev=3,argw0=gr,argw1=gr,rtnval=gr
+	.export	mulll,entry,priv_lev=3,argw0=gr,argw1=gr,rtnval=gr
+	.export	addmul,entry,priv_lev=3,argw0=gr,argw1=gr,rtnval=gr
+	.export	divll,entry,priv_lev=3,argw0=gr,argw1=gr,rtnval=gr
 
 	.proc
 	.callinfo
 addll	.enter
+	addil	lt'overflow,%r19,%r1
 	add	%arg0,%arg1,%ret0
+	ldw	rt'overflow(%r1),%t3
 	addc	0,0,%t1
-	stw	%t1,overflow-$global$(%dp)
+	stw	%t1,0(%t3)
 	.leave
 	.procend
 
 	.proc
 	.callinfo
 addllx	.enter
-	ldw	overflow-$global$(%dp),%t1
+	addil	lt'overflow,%r19,%r1
+	ldw	rt'overflow(%r1),%t3
+	ldw	0(%t3),%t1
 	addb,uv	%t1,%arg0,addllx2	
 	add	%arg0,%arg1,%ret0
 	addc	0,0,%t1
-	stw	%t1,overflow-$global$(%dp)
+	stw	%t1,0(%t3)
 	.leave
-addllx2	ldi	1,%t1
-	stw	%t1,overflow-$global$(%dp)
+addllx2 ldi	1,%t1
+	stw	%t1,0(%t3)
 	.leave	
 	.procend
 
 	.proc
 	.callinfo
 subll	.enter
+	addil	lt'overflow,%r19,%r1
 	sub	%arg0,%arg1,%ret0
+	ldw	rt'overflow(%r1),%t3
 	addc	0,0,%t1
 	subi	1,%t1,%t1
-	stw	%t1,overflow-$global$(%dp)
+	stw	%t1,0(%t3)
 	.leave
 	.procend
 
 	.proc
 	.callinfo
 subllx	.enter
-	ldw	overflow-$global$(%dp),%t1
+	addil	lt'overflow,%r19,%r1
+	ldw	rt'overflow(%r1),%t3
+	ldw	0(%t3),%t1
 	sub,>>=	%arg0,%arg1,%ret0
 	sub,tr	%ret0,%t1,%ret0
 	sub,>>=	%ret0,%t1,%ret0
 	addi,tr	1,0,%t1
 	ldi	0,%t1
-	stw	%t1,overflow-$global$(%dp)
+	stw	%t1,0(%t3)
 	.leave
 	.procend
 
 	.proc
 	.callinfo
 shiftl	.enter
+	addil	lt'hiremainder,%r19,%r1
 	subi	32,%arg1,%arg1
+	ldw	rt'hiremainder(%r1),%t3
 l$30	mfctl	%cr11,%t1
 	mtctl	%arg1,%cr11
 	vshd	%arg0,0,%ret0;
 	vshd	0,%arg0,%t2
 	mtctl	%t1,%cr11
-l$31	stw	%t2,hiremainder-$global$(%dp)
+l$31	stw	%t2,0(%t3)
 	.leave
 	.procend
 
 	.proc
 	.callinfo
 shiftlr	.enter
+	addil	lt'hiremainder,%r19,%r1
 l$40	mfctl	%cr11,%t1
 	mtctl	%arg1,%cr11
+	ldw	rt'hiremainder(%r1),%t3
 	vshd	0,%arg0,%ret0;
 	vshd	%arg0,0,%t2
 	mtctl	%t1,%cr11
-l$41	stw	%t2,hiremainder-$global$(%dp)
+l$41	stw	%t2,0(%t3)
 	.leave
 	.procend
 
@@ -135,35 +147,37 @@ l$1	.leave
 	.proc
 	.callinfo
 mulll	.enter
-	ldo	hiremainder-$global$(%dp),%r1
-	stw	%arg0,0(%r1)
-	fldws	0(%r1),%fr4
-	stw	%arg1,0(%r1)
-	fldws	0(%r1),%fr5
+	addil	lt'hiremainder,%r19,%r1
+	ldw	rt'hiremainder(%r1),%t3
+	stw	%arg0,0(%t3)
+	fldws	0(%t3),%fr4
+	stw	%arg1,0(%t3)
+	fldws	0(%t3),%fr5
 	xmpyu	%fr4,%fr5,%fr6
-	fstds	%fr6,0(%r1)
-	ldws	4(%r1),%ret0
+	fstds	%fr6,0(%t3)
+	ldws	4(%t3),%ret0
 	.leave
 	.procend
 
 	.proc
 	.callinfo
 addmul	.enter
-	ldo	hiremainder-$global$(%dp),%r1
-	ldw	0(%r1),%t1
-	stw	%arg0,0(%r1)
-	fldws	0(%r1),%fr4
-	stw	%arg1,0(%r1)
-	fldws	0(%r1),%fr5
+	addil	lt'hiremainder,%r19,%r1
+	ldw	rt'hiremainder(%r1),%t3
+	ldw	0(%t3),%t1
+	stw	%arg0,0(%t3)
+	fldws	0(%t3),%fr4
+	stw	%arg1,0(%t3)
+	fldws	0(%t3),%fr5
 	xmpyu	%fr4,%fr5,%fr6
-	fstds	%fr6,0(%r1)
-	ldws	4(%r1),%ret0
+	fstds	%fr6,0(%t3)
+	ldws	4(%t3),%ret0
 	add,nuv	%t1,%ret0,%ret0
 	b,n	suite
 	.leave
-suite	ldw	0(%r1),%ret1
+suite	ldw	0(%t3),%ret1
 	addi	1,%ret1,%ret1
-	stw	%ret1,0(%r1)
+	stw	%ret1,0(%t3)
 	.leave
 	.procend
 
@@ -185,7 +199,9 @@ nibble	.macro
 divll	.proc
 	.callinfo
 	.enter
-	ldw	hiremainder-$global$(%dp),hirem
+	addil	lt'hiremainder,%r19,%r1
+	ldw	rt'hiremainder(%r1),%t3
+	ldw	0(%t3),hirem
 
 	comb,<	div,0,l$50
 	copy	%arg0,loquo
@@ -202,7 +218,7 @@ divll	.proc
 	nibble
 	add,>=	0,hirem,0
 	add	hirem,div,hirem
-	stw	hirem,hiremainder-$global$(%dp)
+	stw	hirem,0(%t3)
 	.leave
 	
 l$50	copy	div,%arg0
@@ -210,12 +226,12 @@ l$50	copy	div,%arg0
 	b	l$51
 	extru	div,30,31,div
 	addb,nsv	%t3,div,l$51
-	copy	hirem,%t4
+	copy	hirem,%r1
 	copy	loquo,hirem
 	b	l$52
-	copy	%t4,loquo
+	copy	%r1,loquo
 	
-l$51	extru	loquo,31,1,%t4
+l$51	extru	loquo,31,1,%r1
 	shd	hirem,loquo,1,loquo
 	extru	hirem,30,31,hirem
 	sub	0,div,%t2
@@ -232,7 +248,7 @@ l$51	extru	loquo,31,1,%t4
 	add,>=	0,hirem,0
 	add	hirem,div,hirem
 	comb,=	0,%t3,l$53
-	sh1add	hirem,%t4,hirem
+	sh1add	hirem,%r1,hirem
 l$52	copy	%arg0,div
 	addb,nuv,n	loquo,hirem,l$54
 	sub	hirem,div,hirem
@@ -241,7 +257,9 @@ l$54	comb,<<,n	hirem,div,l$53
 	sub	hirem,div,hirem
 	addi	1,loquo,loquo
 	
-l$53	stw	hirem,hiremainder-$global$(%dp)
+l$53	addil	lt'hiremainder,%r19,%r1
+	ldw	rt'hiremainder(%r1),%t3
+	stw	hirem,0(%t3)
 	.leave	
 	.procend
 
