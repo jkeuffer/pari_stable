@@ -408,9 +408,10 @@ i.e.~it chops off the $O(X^k)$. If $x$ is a vector, this function creates
 the polynomial whose coefficients are given in $x$, with $x[1]$ being the
 leading coefficient (which can be zero).
 
-Warning: this is \var{not} a substitution function. It is intended to be
-quick and dirty. So if you try \kbd{Pol(a,y)} on the polynomial \kbd{a = x+y},
-you will get \kbd{y+y}, which is not a valid PARI object.
+\misctitle{Warning:} this is \var{not} a substitution function. It is
+intended to be quick and dirty. So if you try \kbd{Pol(a,y)} on the
+polynomial \kbd{a = x+y}, you will get \kbd{y+y}, which is not a valid PARI
+object.
 
 \syn{gtopoly}{x,v}, where $v$ is a variable number.
 
@@ -4626,6 +4627,11 @@ squares of the modulus of the roots (i.e.~the $T_2$-norm) is minimal.
 All $x$ accepted by \tet{nfinit} are also allowed here (e.g. non-monic
 polynomials, \kbd{nf}, \kbd{bnf}, \kbd{[x,Z\_K\_basis]}).
 
+\misctitle{Warning:} this routine uses an exponential-time algorithm to
+enumerate all potential generators, and may be exceedingly slow when the
+number field degree is large. E.g. do not try it on the compositum of many
+quadratic fields\dots
+
 The binary digits of $\fl$ mean
 
 1: outputs a two-component row vector $[P,a]$, where $P$ is the default
@@ -5119,6 +5125,12 @@ called the \idx{Steinitz class} of the module $\Z_L$.
 of a finite Abelian group $G$, outputs the list of subgroups of $G$. Subgroups
 are given as HNF\sidx{Hermite normal form} left divisors of the
 SNF\sidx{Smith normal form} matrix corresponding to $G$.
+
+\misctitle{Warning:} the present implementation cannot treat a group $G$
+where any cyclic factor has more than $2^{31}$, resp.~$2^{63}$ elements on a
+$32$-bit, resp.~$64$-bit architecture. \tet{forsubgroup} is a bit more
+general and can handle $G$ if all $p$-Sylow subgroups of $G$ satisfy the
+condition above.
 
 If $\fl=0$ (default) and \var{bnr} is as output by $\kbd{bnrinit}(,,1)$, gives
 only the subgroups whose modulus is the conductor. Otherwise, the modulus is
@@ -6931,6 +6943,10 @@ HNF\sidx{Hermite normal form} form), one can for instance use
 Note that in this last representation, the index $[G:H]$ is given by the
 determinant. See \tet{galoissubcyclo} and \tet{galoisfixedfield} for
 \tet{nfsubfields} applications to \idx{Galois} theory.
+
+\misctitle{Warning:} the present implementation cannot treat a group $G$, if
+one of its $p$-Sylow subgroups has a cyclic factor has more than $2^{31}$,
+resp.~$2^{63}$ elements on a $32$-bit, resp.~$64$-bit architecture.
 
 \subsubsecidx{forvec}$(X=v,\var{seq},\{\fl=0\})$: $v$ being an $n$-component
 vector (where $n$ is arbitrary) of two-component vectors $[a_i,b_i]$
