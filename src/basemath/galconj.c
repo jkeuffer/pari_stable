@@ -1198,7 +1198,7 @@ hnftoelementslist(long n, GEN zn2, GEN zn3, GEN lss, long card)
 GEN
 listsousgroupes(long m, long p)
 {
-  ulong   ltop = avma, lbot;
+  ulong   ltop = avma;
   GEN     zns, lss, sg, res, zn2, zn3;
   int     k, card, i, phi;
   if (m == 2)
@@ -1214,7 +1214,6 @@ listsousgroupes(long m, long p)
   zn2 = vectosmall((GEN)zns[2]);
   zn3 = lift((GEN)zns[3]);
   lss = subgrouplist((GEN) zns[2], 0);
-  lbot = avma;
   res = cgetg(lg(lss), t_VEC);
   for (k = 1, i = lg(lss) - 1; i >= 1; i--)
   {
