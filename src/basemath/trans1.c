@@ -839,7 +839,7 @@ rootsof1padic(GEN n, GEN y)
   r[1]=y[1];setvalp(r,0);/*rootsofunity are unramified*/
   r[2]=licopy((GEN)y[2]);
   r[3]=licopy((GEN)y[3]);
-  r[4]=(long)padicsqrtnlift(gun,n,z,(GEN)y[2],(GEN)y[3]);
+  r[4]=(long)padicsqrtnlift(gun,n,z,(GEN)y[2],precp(y));
   return gerepileupto(ltop,r);  
 }
 static GEN paexp(GEN x);
@@ -896,7 +896,7 @@ GEN padic_sqrtn_unram(GEN x, GEN n, GEN *zetan)
   r[1]=x[1];setvalp(r,v);
   r[2]=licopy(p);
   r[3]=licopy((GEN)x[3]);
-  r[4]=(long)padicsqrtnlift((GEN)x[4],n,a,p,(GEN)x[3]);
+  r[4]=(long)padicsqrtnlift((GEN)x[4],n,a,p,precp(x));
   if (zetan)
   {
     GEN z,*gptr[2];
@@ -904,7 +904,7 @@ GEN padic_sqrtn_unram(GEN x, GEN n, GEN *zetan)
     z[1]=x[1];setvalp(z,0);
     z[2]=licopy(p);
     z[3]=licopy((GEN)x[3]);
-    z[4]=(long)padicsqrtnlift(gun,n,*zetan,p,(GEN)x[3]);
+    z[4]=(long)padicsqrtnlift(gun,n,*zetan,p,precp(x));
     gptr[0]=&r;gptr[1]=&z;
     gerepilemanysp(ltop,tetpil,gptr,2);
     *zetan=z;

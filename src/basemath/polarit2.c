@@ -257,17 +257,18 @@ record_factors(long N, long d, long jmax, ulong *tabkbit, ulong *tmp)
 GEN
 hensel_lift_fact(GEN pol, GEN Q, GEN p, GEN pev, long e)
 {
-  long ev,i, nf = lg(Q);
+  long i,j, nf = lg(Q);
   GEN C = pol, res = cgetg(nf, t_VEC), listb = cgetg(nf, t_VEC);
   GEN lc = leading_term(pol);
-
+  long nb, mask;
+  nb = hensel_lift_accel(e,&mask)-1;
   if (DEBUGLEVEL > 4) (void)timer2();
   listb[1] = lmodii(lc, p);
   for (i=2; i < nf; i++)
     listb[i] = (long)Fp_pol_red(gmul((GEN)listb[i-1], (GEN)Q[i-1]), p);
   for (i=nf-1; i>1; i--)
   {
-    GEN a,b,u,v,a2,b2,s,t,pe,pe2,z,g;
+    GEN a,b,u,v,a2,b2,s,t,pe,pe2,z,g, pem1;
     long ltop = avma, lbot;
 
     a = (GEN)Q[i];     /* lead coeff(a) = 1 */
@@ -279,9 +280,14 @@ hensel_lift_fact(GEN pol, GEN Q, GEN p, GEN pev, long e)
       u = gmul(u, g);
       v = gmul(v, g);
     }
-    for(pe=p,ev=1;;)
+    for(pe=p,pem1=gun,j=0;;j++)
     {
-      ev <<= 1; pe2 = (ev>=e)? pev: sqri(pe);
+      if (j != nb )
+      {
+	pem1 = (mask&(1<<j))?sqri(pem1):mulii(pem1, pe);
+	pe2  =  mulii(pem1, p);
+      }
+      else pe2=pev;
       g = gadd(C, gneg_i(gmul(a,b)));
 
       g = Fp_pol_red(g, pe2); g = gdivexact(g, pe);
@@ -294,7 +300,7 @@ hensel_lift_fact(GEN pol, GEN Q, GEN p, GEN pev, long e)
       lbot = avma;
       b2 = gadd(b, t);
       a2 = gadd(a, s); /* already reduced mod pe2 */
-      if (ev >= e) break;
+      if (j == nb) break;
 
       g = gadd(gun, gneg_i(gadd(gmul(u,a2),gmul(v,b2))));
 

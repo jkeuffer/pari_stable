@@ -1420,59 +1420,66 @@ rootpadic(GEN f, GEN p, long r)
 /*                             rootpadicfast                             */
 /*************************************************************************/
 
+/*lift accelerator. The author of the idea is unknown.*/
+long hensel_lift_accel(long n, long *pmask)
+{
+  long a,j;
+  long mask;
+  mask=0;
+  for(j=BITS_IN_LONG-1, a=n ;; j--)
+  {
+    mask|=(a&1)<<j;
+    a=(a>>1)+(a&1);
+    if (a==1) break;
+  }
+  *pmask=mask>>j;
+  return BITS_IN_LONG-j;
+}
 /*
   SPEC:
   q is an integer > 1
-  Q is an integer > 0 and Q|q^r for an exponent r
-  
+  e>=0
   f in ZZ[X], with leading term prime to q.
   S must be a simple root mod p for all p|q.
 
-  return roots of f mod Q, as integers (implicitly mod Q)
+  return roots of f mod q^e, as integers (implicitly mod Q)
 */
 
 /* STANDARD USE
-   There exists p a prime number and a>0,b two long such that
-   q=p^a , Q=p^b
-   
+   There exists p a prime number and a>0 such that
+   q=p^a    
    f in ZZ[X], with leading term prime to p.
    S must be a simple root mod p.
 
-   return p-adics roots of f with prec b, as integers (implicitly mod Q)
+   return p-adics roots of f with prec b, as integers (implicitly mod q^e)
 */
 
 GEN
-rootpadiclift(GEN T, GEN S, GEN q, GEN Q)
+rootpadiclift(GEN T, GEN S, GEN p, long e)
 {
   ulong   ltop=avma;
   long    x;
-  GEN     qold;
+  GEN     qold, q, qm1;
   GEN     W, Tr, Sr, Wr = gzero;
-  int     flag, init;
+  long     i, nb, mask;
   x = varn(T);
-  qold = q ;
+  qold = p ;  q = p; qm1 = gun;
+  nb=hensel_lift_accel(e, &mask);
   Tr = Fp_pol_red(T,q);
   W=Fp_poleval(deriv(Tr, x),S,q);
   W=mpinvmod(W,q);
-  flag = 1; init = 0;
-  while (flag)
-  {
-    q = sqri(q);
-    if (cmpii(q,Q)>= 0)
-    {
-      flag = 0;
-      q = Q;
-    }
+  for(i=0;i<nb;i++)
+  {  
+    qm1 = (mask&(1<<i))?sqri(qm1):mulii(qm1, q);
+    q   =  mulii(qm1, p);
     Tr = Fp_pol_red(T,q);
     Sr = S;
-    if (init)
+    if (i)
     {
       W = modii(mulii(Wr,Fp_poleval(deriv(Tr,x),Sr,qold)),qold);
       W = subii(gdeux,W);
       W = modii(mulii(Wr, W),qold);
     }
-    else
-      init = 1;
     Wr = W;
     S = subii(Sr, mulii(Wr, Fp_poleval(Tr, Sr,q)));
     S = modii(S,q);
@@ -1486,7 +1493,7 @@ rootpadiclift(GEN T, GEN S, GEN q, GEN Q)
  */
 
 GEN
-rootpadicliftroots(GEN f, GEN S, GEN q, GEN pr)
+rootpadicliftroots(GEN f, GEN S, GEN q, long e)
 {
   GEN y;
   long i,n=lg(S);
@@ -1494,9 +1501,9 @@ rootpadicliftroots(GEN f, GEN S, GEN q, GEN pr)
     return gcopy(S);
   y=cgetg(n,typ(S));
   for (i=1; i<n-1; i++)
-    y[i]=(long) rootpadiclift(f, (GEN) S[i], q, pr);
+    y[i]=(long) rootpadiclift(f, (GEN) S[i], q, e);
   if (n!=lgef(f)-2)/* non totally split*/
-    y[n-1]=(long) rootpadiclift(f, (GEN) S[n-1], q, pr);
+    y[n-1]=(long) rootpadiclift(f, (GEN) S[n-1], q, e);
   else/* distinct-->totally split-->use trace trick */
   {
     ulong av=avma;
@@ -1504,7 +1511,7 @@ rootpadicliftroots(GEN f, GEN S, GEN q, GEN pr)
     z=(GEN)f[lgef(f)-2];/*-trace(roots)*/
     for(i=1; i<n-1;i++)
       z=addii(z,(GEN) y[i]);
-    z=modii(negi(z),pr);
+    z=modii(negi(z),gpowgs(q,e));
     y[n-1]=lpileupto(av,z);
   }
   return y;
@@ -1519,7 +1526,7 @@ rootpadicliftroots(GEN f, GEN S, GEN q, GEN pr)
  
 */
 GEN
-rootpadicfast(GEN f, GEN p, GEN pr)
+rootpadicfast(GEN f, GEN p, long e)
 {
   ulong ltop=avma;
   GEN S,y;
@@ -1531,7 +1538,7 @@ rootpadicfast(GEN f, GEN p, GEN pr)
   }
   S=gclone(S);
   avma=ltop;
-  y=rootpadicliftroots(f,S,p,pr);
+  y=rootpadicliftroots(f,S,p,e);
   gunclone(S);
   return y;
 }
@@ -1540,33 +1547,27 @@ rootpadicfast(GEN f, GEN p, GEN pr)
  * TODO: generalize to sparse polynomials.
  */
 GEN
-padicsqrtnlift(GEN a, GEN n, GEN S, GEN q, GEN Q)
+padicsqrtnlift(GEN a, GEN n, GEN S, GEN p, long e)
 {
   ulong   ltop=avma;
-  GEN     qold;
+  GEN     qold, q, qm1;
   GEN     W, Sr, Wr = gzero;
-  int     flag, init;
-  qold = q ;
-  W=modii(mulii(n,powmodulo(S,subii(n,gun),q)),q);
-  W=mpinvmod(W,q);
-  flag = 1; init = 0;
-  while (flag)
-  {
-    q = sqri(q);
-    if (cmpii(q,Q)>= 0)
-    {
-      flag = 0;
-      q = Q;
-    }
+  long    i, nb, mask;
+  qold = p ; q = p; qm1 = gun;
+  nb   = hensel_lift_accel(e, &mask);
+  W    = modii(mulii(n,powmodulo(S,subii(n,gun),q)),q);
+  W    = mpinvmod(W,q);
+  for(i=0;i<nb;i++)
+  {  
+    qm1 = (mask&(1<<i))?sqri(qm1):mulii(qm1, q);
+    q   =  mulii(qm1, p);
     Sr = S;
-    if (init)
+    if (i)
     {
       W = modii(mulii(Wr,mulii(n,powmodulo(Sr,subii(n,gun),qold))),qold);
       W = subii(gdeux,W);
       W = modii(mulii(Wr, W),qold);
     }
-    else
-      init = 1;
     Wr = W;
     S = subii(Sr, mulii(Wr, subii(powmodulo(Sr,n,q),a)));
     S = modii(S,q);
