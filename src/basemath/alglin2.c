@@ -214,10 +214,11 @@ caradj(GEN x, long v, GEN *py)
     y = gmul(y, x);
     t = gdivgs(mattrace(y), -k);
     for (i = 1; i < l; i++) coeff(y,i,i) = ladd(gcoeff(y,i,i), t);
-    y = gclone(y); if (k > 2) gunclone(y0);
+    y = gclone(y);
     /* beware: since y is a clone and t computed from it some components
      * may be out of stack (eg. INTMOD/POLMOD) */
     p[l-k+1] = lpileupto(av, forcecopy(t)); av = avma;
+    if (k > 2) gunclone(y0);
   }
   t = gzero;
   for (i=1; i<l; i++) t = gadd(t, gmul(gcoeff(x,1,i),gcoeff(y,i,1)));
