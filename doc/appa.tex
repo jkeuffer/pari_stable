@@ -137,7 +137,8 @@ case, we would appreciate a bug report including the complete output from
 \kbd{Configure} and the file \kbd{O$xxx$/dft.Config.in} that was produced in
 the process.
 
-Note that even in interactive mode, you can't directly tell \kbd{Configure}
+\subsec{Problems related to readline:}
+Even in interactive mode, you cannot directly tell \kbd{Configure}
 where the \kbd{readline} library and include files are. If they are not in a
 standard place, it won't find them. Nonetheless, it first searches the
 distribution toplevel for a \kbd{readline} directory. Thus, if you just want
@@ -146,6 +147,10 @@ and compile it there (you don't need to install it). You can also use this
 feature together with a symbolic link, named \kbd{readline}, in the PARI
 toplevel directory if you have compiled the readline library somewhere else,
 without installing it to one of its standard locations. 
+
+\misctitle{Linux:} several Linux distributions (RedHat, Mandrake,\dots) have
+separate \kbd{readline} and \kbd{readline-devel} packages. You need both of
+them installed to compile gp with readline support.
 
 \misctitle{Technical note:} Configure can build GP on different architectures
 simultaneously from the same toplevel sources. Instead of the \kbd{readline}
