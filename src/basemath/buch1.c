@@ -280,7 +280,7 @@ quadhilbert(GEN D, GEN flag, long prec)
   if (typ(D)!=t_INT)
   {
     D = checkbnf(D);
-    if (degree(gmael(D,7,1))!=2)
+    if (degpol(gmael(D,7,1)) != 2)
       err(talker,"not a polynomial of degree 2 in quadhilbert");
     D=gmael(D,7,3);
   }
@@ -516,7 +516,7 @@ PRECPB:
 static GEN
 do_compo(GEN x, GEN y)
 {
-  long a, ph = degree(y);
+  long a, ph = degpol(y);
   GEN z;
   y = gmul(gpuigs(polx[0],ph), gsubst(y,0,gdiv(polx[MAXVARN],polx[0])));
   for  (a = 0;; a = nexta(a))
@@ -744,7 +744,7 @@ quadray(GEN D, GEN f, GEN flag, long prec)
   if (typ(D)!=t_INT)
   {
     bnf = checkbnf(D);
-    if (degree(gmael(bnf,7,1))!=2)
+    if (degpol(gmael(bnf,7,1)) != 2)
       err(talker,"not a polynomial of degree 2 in quadray");
     D=gmael(bnf,7,3);
   }

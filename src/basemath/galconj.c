@@ -1911,7 +1911,7 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l, long karma_type
   byteptr primepointer,pp;
   if (DEBUGLEVEL >= 1)
     timer2();
-  n = degree(T);
+  n = degpol(T);
   if (!karma_type) karma_type=n;
   else err(warner,"entering black magic computation");
   O = cgetg(n+1,t_VECSMALL);
@@ -2120,7 +2120,7 @@ a4galoisgen(GEN T, struct galois_test *td)
   GEN     t, u;
   GEN     res, orb, ry;
   GEN     pft, pfu, pfv;
-  n = degree(T);
+  n = degpol(T);
   res = cgetg(3, t_VEC);
   ry = cgetg(4, t_VEC);
   res[1] = (long) ry;
@@ -2948,7 +2948,7 @@ galoisfindfrobenius(GEN T, GEN L, GEN M, GEN den, struct galois_frobenius *gf,
 {
   ulong ltop=avma,lbot;
   long try=0;
-  long n = degree(T), deg, gmask;
+  long n = degpol(T), deg, gmask;
   byteptr primepointer = ga->primepointer;
   GEN Lden,frob;
   Lden=makeLden(L,den,gb);
@@ -2968,9 +2968,9 @@ galoisfindfrobenius(GEN T, GEN L, GEN M, GEN den, struct galois_frobenius *gf,
 	isram = 1;
     if (isram == 0)
     {
-      gf->fp = degree(gmael(Tmod,1,1));
+      gf->fp = degpol(gmael(Tmod,1,1));
       for (i = 2; i < lg(Tmod[1]); i++)
-	if (degree(gmael(Tmod,1,i)) != gf->fp)
+	if (degpol(gmael(Tmod,1,i)) != gf->fp)
 	{
 	  avma = ltop;
 	  return NULL;		/* Not Galois polynomial */
@@ -3029,7 +3029,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
   GEN     frob;
   GEN     O;
   GEN     P, PG, PL, Pden, PM, Pmod, Pp, Pladicabs;
-  n = degree(T);
+  n = degpol(T);
   if (!ga->deg)
     return gzero;
   x = varn(T);
@@ -3255,7 +3255,7 @@ galoisconj4(GEN T, GEN den, long flag, long karma)
   {
     T = checknf(T);
     if (!den)
-      den = gcoeff((GEN) T[8], degree((GEN) T[1]), degree((GEN) T[1]));
+      den = gcoeff((GEN) T[8], degpol(T[1]), degpol(T[1]));
     T = (GEN) T[1];
   }
   n = degpol(T);
@@ -3266,7 +3266,7 @@ galoisconj4(GEN T, GEN den, long flag, long karma)
       err(talker, "polynomial not in Z[X] in galoisconj4");
   if (!gcmp1((GEN) T[n + 2]))
     err(talker, "non-monic polynomial in galoisconj4");
-  n = degree(T);
+  n = degpol(T);
   if (n == 1)			/* Too easy! */
   {
     if (!flag)
@@ -3367,7 +3367,7 @@ numberofconjugates(GEN T, long pdepart)
   byteptr primepointer;
   int     i;
   GEN     L;
-  n = degree(T);
+  n = degpol(T);
   card = sturm(T);
   card = cgcd(card, n - card);
   nbmax = (n<<1) + 1;
@@ -3455,7 +3455,7 @@ galoisconj0(GEN nf, long flag, GEN d, long prec)
   case 1:
     return galoisconj(nf);
   case 2:
-    return galoisconj2(nf, degree(T), prec);
+    return galoisconj2(nf, degpol(T), prec);
   case 4:
     G = galoisconj4(nf, d, 0, 0);
     if (typ(G) != t_INT)
@@ -3480,7 +3480,7 @@ isomborne(GEN P, GEN den, GEN p)
   ulong ltop=avma;
   struct galois_borne gb;
   gb.l=p;
-  galoisborne(P,den,&gb,degree(P));
+  galoisborne(P,den,&gb,degpol(P));
   avma=ltop;
   return gb.valsol;
 }

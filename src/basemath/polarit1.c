@@ -2102,12 +2102,12 @@ static long isabsolutepol(GEN f, GEN pp, GEN a)
 	err(typeer,"factmod9");
       isabsolutepol((GEN)c[1],pp,gzero);
       isabsolutepol((GEN)c[2],pp,gzero);
-      if (degree((GEN)c[1])>0)
+      if (degpol(c[1])>0)
 	res = 0;
       break;
     case t_POL:
       isabsolutepol(c,pp,gzero);
-      if (degree(c)>0)
+      if (degpol(c)>0)
 	res = 0;
       break;
     default:

@@ -1313,7 +1313,7 @@ nfnewprec(GEN nf, long prec)
   if (lg(nf) ==  7) return bnrnewprec(nf,prec);
   (void)checknf(nf);
   y = dummycopy(nf);
-  pol=(GEN)nf[1]; n=degree(pol);
+  pol=(GEN)nf[1]; n=degpol(pol);
   r1 = nf_get_r1(nf);
   r2 = (n - r1) >> 1; ru = r1+r2;
   mat=dummycopy((GEN)nf[5]);

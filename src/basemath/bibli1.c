@@ -2206,7 +2206,7 @@ chk_gen_init(FP_chk_fun *chk, GEN nf, GEN gram, GEN mat, long *ptprec)
       {
         if (prev && !gegal(prev,P))
         {
-          if (degree(prev) * degree(P) > 32) continue; /* too expensive */
+          if (degpol(prev) * degpol(P) > 32) continue; /* too expensive */
           P = (GEN)compositum(prev,P)[1];
           if (degpol(P) == n) continue;
           if (DEBUGLEVEL>2 && lgef(P)>lgef(prev))

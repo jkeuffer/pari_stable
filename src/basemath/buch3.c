@@ -1462,7 +1462,7 @@ rnfnormgroup0(GEN bnr, GEN polrel, GEN rnf)
   primreld= gcmp1(contreld)? reldisc: gdiv(reldisc, contreld);
 
   discnf = (GEN)nf[3];
-  k = degree((GEN)nf[1]);
+  k = degpol(nf[1]);
   bd = gmulsg(k, glog(absi(discnf), DEFAULTPREC));
   bd = gadd(bd,glog(mpabs(det(reldisc)),DEFAULTPREC));
   p1 = dbltor(reldeg * k * 2.5 + 5);
@@ -1576,7 +1576,7 @@ rnfconductor(GEN bnf, GEN polrel, long flag)
   p1=unifpol((GEN)bnf[7],polrel,0);
   p1=denom(gtovec(p1));
   pol2=gsubst(polrel,v,gdiv(polx[v],p1));
-  pol2=gmul(pol2,gpuigs(p1,degree(pol2)));
+  pol2=gmul(pol2,gpuigs(p1,degpol(pol2)));
   if (flag)
   {
     rnf=rnfinitalg(bnf,pol2,DEFAULTPREC);

@@ -657,7 +657,7 @@ gmod(GEN x, GEN y)
         case t_SER:
           if (ismonome(y) && varn(x) == varn(y))
           {
-            long d = degree(y);
+            long d = degpol(y);
             if (lg(x)-2 + valp(x) < d) err(operi,"%",tx,ty);
             av = avma; 
             return gerepileupto(av, gmod(gtrunc(x), y));

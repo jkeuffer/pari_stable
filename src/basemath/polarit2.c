@@ -3085,15 +3085,15 @@ nextSousResultant(GEN P, GEN Q, GEN Z, GEN s)
   long p, q, j, av, lim, v = varn(P);
 
   z0 = leading_term(Z);
-  p = degree(P); p0 = leading_term(P); P = reductum(P);
-  q = degree(Q); q0 = leading_term(Q); Q = reductum(Q);
+  p = degpol(P); p0 = leading_term(P); P = reductum(P);
+  q = degpol(Q); q0 = leading_term(Q); Q = reductum(Q);
 
   av = avma; lim = stack_lim(av,1);
   H = gneg(reductum(Z));
   A = gmul((GEN)P[q+2],H);
   for (j = q+1; j < p; j++)
   {
-    H = (degree(H) == q-1) ?
+    H = (degpol(H) == q-1) ?
       addshift(reductum(H), gdivexact(gmul(gneg((GEN)H[q+1]),Q), q0)) :
       addshift(H, zeropol(v));
     A = gadd(A,gmul((GEN)P[j+2],H));
@@ -3106,7 +3106,7 @@ nextSousResultant(GEN P, GEN Q, GEN Z, GEN s)
   }
   P = normalizepol_i(P, q+2);
   A = gdivexact(gadd(A,gmul(z0,P)), p0);
-  A = (degree(H) == q-1) ?
+  A = (degpol(H) == q-1) ?
     gadd(gmul(q0,addshift(reductum(H),A)), gmul(gneg((GEN)H[q+1]),Q)) :
     gmul(q0, addshift(H,A));
   return gdivexact(A, ((p-q)&1)? s: gneg(s));
@@ -3120,8 +3120,8 @@ resultantducos(GEN P, GEN Q)
   GEN cP,cQ,Z,s;
 
   if ((Z = init_resultant(P,Q))) return Z;
-  dP = degree(P);
-  dQ = degree(Q);
+  dP = degpol(P);
+  dQ = degpol(Q);
   P = primitive_part(P, &cP);
   Q = primitive_part(Q, &cQ);
   delta = dP - dQ;
@@ -3131,22 +3131,22 @@ resultantducos(GEN P, GEN Q)
     Q = P; P = Z; delta = -delta;
   }
   s = gun;
-  if (degree(Q) > 0)
+  if (degpol(Q) > 0)
   {
     av2 = avma; lim = stack_lim(av2,1);
     s = gpuigs(leading_term(Q),delta);
     Z = Q;
     Q = pseudorem(P, gneg(Q));
     P = Z;
-    while(degree(Q) > 0)
+    while(degpol(Q) > 0)
     {
       if (low_stack(lim,stack_lim(av,1)))
       {
         GEN *gptr[2]; gptr[0]=&P; gptr[1]=&Q;
-        if(DEBUGMEM>1) err(warnmem,"resultantducos, degpol Q = %ld",degree(Q));
+        if(DEBUGMEM>1) err(warnmem,"resultantducos, degpol Q = %ld",degpol(Q));
         gerepilemany(av2,gptr,2); s = leading_term(P);
       }
-      delta = degree(P) - degree(Q);
+      delta = degpol(P) - degpol(Q);
       Z = Lazard2(Q, leading_term(Q), s, delta);
       Q = nextSousResultant(P, Q, Z, s);
       P = Z;
@@ -3154,8 +3154,8 @@ resultantducos(GEN P, GEN Q)
     }
   }
   if (!signe(Q)) { avma = av; return gzero; }
-  if (!degree(P)){ avma = av; return gun; }
-  s = Lazard(leading_term(Q), s, degree(P));
+  if (!degpol(P)){ avma = av; return gun; }
+  s = Lazard(leading_term(Q), s, degpol(P));
   if (cP) s = gmul(s, gpowgs(cP,dQ));
   if (cQ) s = gmul(s, gpowgs(cQ,dP)); else if (!cP) s = gcopy(s);
   return gerepileupto(av, s);

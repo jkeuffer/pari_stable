@@ -180,7 +180,7 @@ rnfkummersimple(GEN bnr, GEN subgroup, long all)
   checkbnrgen(bnr);
   bnf = (GEN)bnr[1];
   nf = (GEN)bnf[7]; r1 = nf_get_r1(nf);
-  polnf = (GEN)nf[1]; vnf = varn(polnf); degnf = degree(polnf);
+  polnf = (GEN)nf[1]; vnf = varn(polnf); degnf = degpol(polnf);
   if (vnf==0) err(talker,"main variable in kummer must not be x");
 
   p1 = conductor(bnr,all ? gzero : subgroup,2);
@@ -899,7 +899,7 @@ testx(GEN bnf, GEN X, GEN module, GEN subgroup, GEN vecMsup)
   p1 = unifpol((GEN)bnf[7],polrelbe,0);
   p1 = denom(gtovec(p1));
   polrelbe = gsubst(polrelbe,v, gdiv(polx[v],p1));
-  polrelbe = gmul(polrelbe, gpowgs(p1, degree(polrelbe)));
+  polrelbe = gmul(polrelbe, gpowgs(p1, degpol(polrelbe)));
   if (DEBUGLEVEL>1) fprintferr("polrelbe = %Z\n",polrelbe);
   p1 = rnfconductor(bnf,polrelbe,0);
   if (!gegal((GEN)p1[1],module) || !gegal((GEN)p1[3],subgroup)) return NULL;
@@ -933,7 +933,7 @@ rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
     err(talker,"kummer when zeta not in K requires a specific subgroup");
   bnf = (GEN)bnr[1];
   nf = (GEN)bnf[7];
-  polnf = (GEN)nf[1]; vnf = varn(polnf); degK = degree(polnf);
+  polnf = (GEN)nf[1]; vnf = varn(polnf); degK = degpol(polnf);
   if (!vnf) err(talker,"main variable in kummer must not be x");
       /* step 7 */
   p1 = conductor(bnr,subgroup,2);
@@ -962,7 +962,7 @@ rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   }
       /* step 2 */
   if (DEBUGLEVEL>2) fprintferr("Step 2\n");
-  degKz = degree(R);
+  degKz = degpol(R);
   m = degKz/degK;
   d = (ell-1)/m;
   g = lift(gpuigs(gener(gell),d)); /* g has order m in all (Z/ell^k)^* */

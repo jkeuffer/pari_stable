@@ -684,7 +684,7 @@ rnfisnorm(GEN bnf,GEN ext,GEN x,long flag,long PREC)
   if (typ(ext)!=t_VEC || lg(ext)!=4) err (typeer,"bnfisnorm");
   if (typ(x)!=t_POL) x = basistoalg(bnf,x);
   bnf = checkbnf(bnf); relnf = (GEN)ext[3];
-  if (gcmp0(x) || gcmp1(x) || (gcmp_1(x) && (degree((GEN)ext[1])&1)))
+  if (gcmp0(x) || gcmp1(x) || (gcmp_1(x) && (degpol(ext[1])&1)))
   {
     avma = (long)res; res[1]=lcopy(x); res[2]=un; return res;
   }
@@ -698,7 +698,7 @@ rnfisnorm(GEN bnf,GEN ext,GEN x,long flag,long PREC)
     GEN genclass=gmael3(relnf,8,1,3);
     vec=cgetg(1,t_VEC);
     for(i=1;i<lg(genclass);i++)
-      if (!gcmp1(ggcd(gmael4(relnf,8,1,2,i), stoi(degree((GEN)ext[1])))))
+      if (!gcmp1(ggcd(gmael4(relnf,8,1,2,i), stoi(degpol(ext[1])))))
         vec=concatsp(vec,(GEN)factor(gmael3(genclass,i,1,1))[1]);
     vecconcat(bnf,relnf,vec,&prod,&S1,&S2);
   }

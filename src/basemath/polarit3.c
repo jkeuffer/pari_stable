@@ -1531,7 +1531,7 @@ Fp_inv_isom(GEN S,GEN T, GEN p)
   int     n, i;
   long    x;
   x = varn(T);
-  n = degree(T);
+  n = degpol(T);
   M = matrixpow(n,n,S,T,p);
   V = cgetg(n + 1, t_COL);
   for (i = 1; i <= n; i++)
@@ -1635,9 +1635,9 @@ Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
   GEN A,B,Ap,Bp;
   GEN *gptr[2];
   vp=varn(P);vq=varn(Q);
-  np=degree(P);nq=degree(Q);
+  np=degpol(P);nq=degpol(Q);
   if (np<=0 || nq<=0 || n<=0 || np%n!=0 || nq%n!=0)
-    err(talker,"bad degrees in Fp_intersect: %d,%d,%d",n,degree(P),degree(Q));
+    err(talker,"bad degrees in Fp_intersect: %d,%d,%d",n,degpol(P),degpol(Q));
   e=pvaluation(stoi(n),l,&q);
   pg=itos(q);
   avma=ltop;
@@ -1760,7 +1760,7 @@ GEN Fp_isom(GEN P,GEN Q,GEN l)
 {
   ulong ltop=avma;
   GEN SP,SQ,R;
-  Fp_intersect(degree(P),P,Q,l,&SP,&SQ,NULL,NULL);
+  Fp_intersect(degpol(P),P,Q,l,&SP,&SQ,NULL,NULL);
   R=Fp_inv_isom(SP,P,l);
   R=FpX_FpXQ_compo(R,SQ,Q,l);
   return gerepileupto(ltop,R);
@@ -1773,7 +1773,7 @@ Fp_factorgalois(GEN P,GEN l, long d, long w)
   long n,k,m;
   long v;
   v=varn(P);
-  n=degree(P);
+  n=degpol(P);
   m=n/d;
   ld=gpowgs(l,d);
   Tl=gcopy(P); setvarn(Tl,w);
@@ -1793,7 +1793,7 @@ Fp_factor_irred(GEN P,GEN l, GEN Q)
 {
   ulong ltop=avma,av;
   GEN SP,SQ,MP,MQ,M,MF,E,V,IR,res;
-  long np=degree(P),nq=degree(Q);
+  long np=degpol(P),nq=degpol(Q);
   long i,d=cgcd(np,nq);
   long vp=varn(P),vq=varn(Q);
   if (d==1)

@@ -626,7 +626,7 @@ thueinit(GEN poly, long flag, long prec)
   if (checktnf(poly)) { uftot=(GEN)poly[2]; poly=(GEN)poly[1]; }
   else
     if (typ(poly)!=t_POL) err(notpoler,"thueinit");
-  if (degree(poly)<=2) err(talker,"invalid polynomial in thue (need deg>2)");
+  if (degpol(poly)<=2) err(talker,"invalid polynomial in thue (need deg>2)");
 
   if (!gisirreducible(poly)) err(redpoler,"thueinit");
   st=sturm(poly);

@@ -722,7 +722,7 @@ nfroots(GEN nf,GEN pol)
   {
     p1=derivpol(polmod);
     p2=nf_pol_subres(nf,polmod,p1);
-    if (degree(p2) == 0) fl = 1; 
+    if (degpol(p2) == 0) fl = 1; 
   }
 
   if (!fl)
@@ -826,7 +826,7 @@ nffactor(GEN nf,GEN pol)
   {
     p2=derivpol(p1);
     p3=nf_pol_subres(nf,p1,p2);
-    if (degree(p3) == 0) fl = 1; 
+    if (degpol(p3) == 0) fl = 1; 
   }
 
   if (!fl)

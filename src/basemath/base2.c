@@ -1124,7 +1124,7 @@ redelt(GEN elt, GEN rd, GEN pd)
 GEN
 polsymmodpp(GEN g, GEN pp)
 {
-  long av1, av2, d = degree(g), i, k;
+  long av1, av2, d = degpol(g), i, k;
   GEN s , y;
 
   y = cgetg(d + 1, t_COL); 
@@ -1146,7 +1146,7 @@ polsymmodpp(GEN g, GEN pp)
 static GEN
 manage_cache(GEN chi, GEN pp, GEN ns)
 {
-  long j, n = degree(chi);
+  long j, n = degpol(chi);
   GEN ns2, npp = (GEN)ns[n+1];
 
   if (gcmp(pp, npp) > 0)
@@ -1172,7 +1172,7 @@ static GEN
 newtonsums(GEN a, GEN chi, GEN pp, GEN ns)
 {
   GEN va, pa, s, ns2;
-  long j, k, n = degree(chi), av2, lim;
+  long j, k, n = degpol(chi), av2, lim;
 
   ns2 = manage_cache(chi, pp, ns);
 
@@ -1214,7 +1214,7 @@ static GEN
 newtoncharpoly(GEN a, GEN chi, GEN pp, GEN ns)
 {
   GEN v, c, s, t;
-  long n = degree(chi), j, k, vn = varn(chi), av = avma, av2, lim;
+  long n = degpol(chi), j, k, vn = varn(chi), av = avma, av2, lim;
 
   v = newtonsums(a, chi, pp, ns);
   av2 = avma;
@@ -1253,7 +1253,7 @@ static GEN
 mycaract(GEN f, GEN beta, GEN p, GEN pp, GEN ns)
 {
   GEN p1, p2, chi, chi2, npp;
-  long j, a, v = varn(f), n = degree(f);
+  long j, a, v = varn(f), n = degpol(f);
 
   if (gcmp0(beta)) return zeropol(v);
 
@@ -1438,7 +1438,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 
   alph = polx[v];
   nu = gx; 
-  N  = degree(fx);
+  N  = degpol(fx);
   oE = 0;
   opa = NULL;
 
@@ -1455,7 +1455,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
   {
     /* kappa need to be recomputed */
     kapp = NULL;
-    Fa   = degree(nu);
+    Fa   = degpol(nu);
     /* the prime element in Zp[alpha] */
     pia  = getprime(p, chi, polx[v], chi, nu, &La, &Ea);
     pia  = redelt(pia, pmr, pmf);
@@ -1585,7 +1585,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
         return Decomp(p, fx, mf, phi, chig, nug, flag);
       }
 
-      Fg = degree(nug);
+      Fg = degpol(nug);
       if (Fa%Fg)
       {
 	if (DEBUGLEVEL >= 5)
@@ -1608,7 +1608,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	 improved the approximation given by beta */
       nv = fetch_var();
       w = Fp_factor_irred(nug, p, gsubst(nu, varn(nu), polx[nv]));
-      if (degree((GEN)w[1]) != 1)
+      if (degpol(w[1]) != 1)
         err(talker,"bug in nilord (no root). Is p a prime ?");
 
       for (i = 1;; i++)
@@ -3476,7 +3476,7 @@ rnfpolred(GEN nf, GEN pol, long prec)
     newpol=gtopoly(gmodulcp(gtovec(caract2(lift(pol),lift(p1),vpol)),
                             (GEN) nf[1]), vpol);
     p1 = ggcd(newpol, derivpol(newpol));
-    if (degree(p1)>0)
+    if (degpol(p1)>0)
     {
       newpol=gdiv(newpol,p1);
       newpol=gdiv(newpol,leading_term(newpol));
