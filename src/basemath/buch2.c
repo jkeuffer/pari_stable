@@ -633,17 +633,17 @@ cleanarch(GEN x, long N, long prec)
 static GEN
 not_given(pari_sp av, long fl, long reason)
 {
-  if (! (fl & nf_FORCE))
+  char *s;
+  switch(reason)
   {
-    char *s;
-    switch(reason)
-    {
-      case fupb_LARGE: s="fundamental units too large"; break;
-      case fupb_PRECI: s="insufficient precision for fundamental units"; break;
-      default: s="unknown problem with fundamental units";
-    }
-    err(warner,"%s, not given",s);
+    case fupb_LARGE: s="fundamental units too large"; break;
+    case fupb_PRECI: s="insufficient precision for fundamental units"; break;
+    default: s="unknown problem with fundamental units";
   }
+  if (fl & nf_FORCE)
+  { if (reason != fupb_PRECI) err(talker, "bnfinit: %s", s); }
+  else
+    err(warner,"%s, not given",s);
   avma = av; return cgetg(1,t_MAT);
 }
 

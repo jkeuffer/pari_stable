@@ -80,6 +80,8 @@ MSo11- various bugs in anal.c: uninitialized reads in get_op_fun(), double_op()
    21- bnfinit(x^4-768*x^3+220032*x^2-27869184*x+1316749312) --> recent oo loop
    22- elllseries(large t_REAL) --> 0 [ instead of ~ 1 ]
    23- erfc(0) --> error  [ instead of 1 ]
+   24- bnfinit(,1) could return without giving fundamental units (if the
+       computation is unfeasible). Raise an error instead.
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.
