@@ -1564,7 +1564,7 @@ gdeflate(GEN x, long v, long d)
     pari_sp av;
     if (vx < v)
     {
-      lx = lgef(x);
+      lx = tx == t_POL? lgef(x): lg(x);
       z = cgetg(lx, tx); z[1] = x[1];
       for (i=2; i<lx; i++) z[i] = (long)gdeflate((GEN)x[i],v,d);
       return z;
