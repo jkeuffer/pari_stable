@@ -1273,10 +1273,10 @@ lllintpartialall(GEN m, long flag)
       } /* for icol */
     } /* local block */
   }
-  if (DEBUGLEVEL>4)
+  if (DEBUGLEVEL>6)
   {
-    fprintferr("tm1 = "); outbeauterr(tm1);
-    fprintferr("mid = "); outbeauterr(mid);
+    fprintferr("tm1 = %Z",tm1);
+    fprintferr("mid = %Z",mid);
   }
   gptr[0] = &tm1; gptr[1] = &mid;
   gerepilemany(ltop1, gptr, 2);
@@ -1345,7 +1345,7 @@ lllintpartialall(GEN m, long flag)
         }
       } /* for icol */
       if (!reductions) break;
-      if (DEBUGLEVEL>4)
+      if (DEBUGLEVEL>6)
       {
 	GEN diag_prod = dbltor(1.0);
 	for (icol = 1; icol <= ncol; icol++)
@@ -1390,8 +1390,8 @@ lllintpartialall(GEN m, long flag)
       tm2 = lllint(gmul(m, tm1));
     }
   }
-  if (DEBUGLEVEL>4)
-    { fprintferr("lllintpartial output = "); outbeauterr(gmul(tm1, tm2)); }
+  if (DEBUGLEVEL>6)
+    fprintferr("lllintpartial output = %Z", gmul(tm1, tm2));
   return gerepileupto(ltop1, gmul(tm1, tm2));
 }
 
@@ -2090,7 +2090,7 @@ chk_gen(GEN data, GEN x)
 static GEN
 chk_gen_init(FP_chk_fun *chk, GEN nf, GEN gram, GEN mat, long *ptprec)
 {
-  GEN bound,prev,x,B,data, M = gmael(nf,5,1);
+  GEN P,bound,prev,x,B,data, M = gmael(nf,5,1);
   long N = lg(nf[7]), n = N-1,i,prec,prec2;
   int skipfirst = 1; /* [1,0...0] --> x rational */
 
@@ -2109,24 +2109,23 @@ chk_gen_init(FP_chk_fun *chk, GEN nf, GEN gram, GEN mat, long *ptprec)
   for (i=2; i<N; i++)
   {
     x[i] = un; B = gcoeff(gram,i,i);
-    if (mpcmp(B,bound) < 0)
+    P = get_polmin(data,x);
+    if (lgef(P)-3 == n)
+    { if (mpcmp(B,bound) < 0) bound = B ; }
+    else
     {
-      GEN p1 = get_polmin(data,x);
-      if (lgef(p1)-3 == n) bound = B;
-      else
+      if (DEBUGLEVEL>2) fprintferr("chk_gen_init: subfield %Z\n",P);
+      if (skipfirst == i-1)
       {
-        if (DEBUGLEVEL>2) fprintferr("chk_gen_init: subfield %Z\n",p1);
-        if (skipfirst == i-1)
+        if (prev && !gegal(prev,P))
         {
-          if (prev && !gegal(prev,p1))
-          {
-            p1 = (GEN)compositum(prev,p1)[1];
-            if (lgef(p1)-3 == n) continue;
-            if (DEBUGLEVEL>2 && lgef(p1)>lgef(prev))
-              fprintferr("chk_gen_init: subfield %Z\n",p1);
-          }
-          skipfirst++; prev = p1;
+          if (degree(prev) * degree(P) > 150) continue; /* too expensive */
+          P = (GEN)compositum(prev,P)[1];
+          if (lgef(P)-3 == n) continue;
+          if (DEBUGLEVEL>2 && lgef(P)>lgef(prev))
+            fprintferr("chk_gen_init: subfield %Z\n",P);
         }
+        skipfirst++; prev = P;
       }
     }
     x[i] = zero;
@@ -2911,11 +2910,11 @@ fincke_pohst(GEN a,GEN bound,long stockmax,long flag, long PREC,
   else
   {
     v1 = lllgramintern(a,4,flag&1, (prec<<1)-2);
-    if (v1 == NULL) goto PRECPB;
+    if (!v1) goto PRECPB;
     r = qf_base_change(a,v1,1);
   }
   r = sqred1intern(r,flag&1);
-  if (r == NULL) goto PRECPB;
+  if (!r) goto PRECPB;
 
   n = lg(a);
   for (i=1; i<n; i++)
@@ -2931,7 +2930,7 @@ fincke_pohst(GEN a,GEN bound,long stockmax,long flag, long PREC,
     fprintferr("final LLL: prec = %ld, precision(rinvtrans) = %ld\n",
                 prec,gprecision(rinvtrans));
   v = lllintern(rinvtrans,flag&1, (gprecision(rinvtrans)<<1)-2);
-  if (v == NULL) goto PRECPB;
+  if (!v) goto PRECPB;
   rinvtrans = gmul(rinvtrans,v);
 
   u = invmat(gtrans(v)); s = gmul(r,u);
