@@ -122,7 +122,7 @@ calc_block(blockdata *B, GEN Z, GEN Y, GEN SB)
 {
   long r = lg(Z), lK, i, j, t, tp, T, u, nn, lnon, lY;
   GEN K, n, non, pn, pnon, e, Yp, Zp, Zpp;
-  pari_sp av, av0 = avma;
+  pari_sp av0 = avma;
 
   if (DEBUGLEVEL>3)
   {
@@ -141,13 +141,24 @@ calc_block(blockdata *B, GEN Z, GEN Y, GEN SB)
   pn   = new_chunk(lnon);
 
   Zp   = cgetg(lnon,t_VEC);
-  Zpp  = cgetg(lnon,t_VEC);
-  for (i=1; i<r; i++) n[i] = lg(Z[i])-1;
+  Zpp  = cgetg(lnon,t_VEC); nn = 0;
+  for (i=1; i<r; i++) { n[i] = lg(Z[i])-1; nn += n[i]; }
   lY = lg(Y); Yp = cgetg(lY+1,t_VEC);
   for (j=1; j<lY; j++) Yp[j] = Y[j];
-  Yp[lY] = (long)Z;  av = avma;
-  SB = print_block_system(B, Yp, SB);
-  Yp[lY] = (long)Zp; avma = av;
+
+  {
+    pari_sp av = avma;
+    long k = nn / B->blockd;
+    for (j = 1; j < r; j++) 
+      if (n[j] % k) break;
+    if (j == r)
+    {
+      Yp[lY] = (long)Z;
+      SB = print_block_system(B, Yp, SB);
+      avma = av;
+    }
+  }
+  Yp[lY] = (long)Zp;
 
   K = divisors(stoi(n[1])); lK = lg(K);
   for (i=1; i<lK; i++)
