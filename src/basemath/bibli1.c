@@ -771,19 +771,19 @@ LABLLLGRAM:
     case 1: /* failed already */
       tetpil = avma; h = gcopy(h);
       prec = (prec<<1)-2;
+      if (DEBUGLEVEL > 3) fprintferr("\n");
       if (DEBUGLEVEL) err(warnprec,"lllgramintern",prec);
       x = qf_base_change(gprec_w(xinit,prec),h,1);
       {
         GEN *gsav[2]; gsav[0]=&h; gsav[1]=&x;
         gerepilemanysp(av, tetpil, gsav, 2);
       }
-      if (DEBUGLEVEL > 3) fprintferr("\n");
       if (DEBUGLEVEL) err(warner,"lllgramintern starting over");
       break;
     case 0: /* give up */
       if (DEBUGLEVEL > 3) fprintferr("\n");
       if (DEBUGLEVEL) err(warner,"lllgramintern giving up");
-      if (flag){ avma=av; return NULL; }
+      if (flag) { avma=av; return NULL; }
       if (DEBUGLEVEL) outerr(xinit);
       err(lllger3);
   }
