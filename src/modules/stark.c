@@ -2022,7 +2022,9 @@ computean(GEN dtcr, LISTray *R, long n, long deg)
   avma = av; return an;
 }
 
-/* compute S and T for the quadratic case */
+/* compute S and T for the quadratic case where
+   the extension is of the type used to construct
+   abelian extensions using Stark units */
 static void
 QuadGetST(GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
 {
@@ -2205,7 +2207,6 @@ GetST(GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
 
   bnr = gmael(dataCR,1,4);
   nf  = checknf(bnr);
-  if (degpol(nf[1]) == 2) { QuadGetST(pS,pT,dataCR,vChar,prec); return ; }
 
   if (DEBUGLEVEL) (void)timer2();
   /* allocate memory for answer */
@@ -2434,7 +2435,10 @@ LABDOUB:
   Lp = cgetg(cl + 1, t_VEC);
   if (!flag)
   {
-    GetST(&S, &T, dataCR, vChar, newprec);
+    if (degpol(nf[1]) == 2) 
+      QuadGetST(&S,&T,dataCR,vChar,newprec); 
+    else
+      GetST(&S, &T, dataCR, vChar, newprec);
     for (i = 1; i <= cl; i++)
       Lp[i] = GetValue((GEN)dataCR[i], (GEN)W[i], (GEN)S[i], (GEN)T[i],
                        2, newprec)[2];
