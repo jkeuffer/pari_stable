@@ -37,6 +37,7 @@ alpha21164a  600MHz  Linux-2.2.13   egcs X11 dl     4270    4350  2.0.19(28)IS
 alpha21164   600MHz  OSF1-V4.0D      cc  X11 dl     3996    4384  2.0.10    LG
 alpha21164   533Mhz  Linux 2.0.34    gcc X11 dl    (4294)  (4385) 2.0.12    JC
 alpha21164   500Mhz  Linux-2.2.13   egcs X11 dl     5167    5217  2.1.1 (13)
+alpha21164   500Mhz  Linux-2.2.13    gcc X11 dl     4251    4407  2.2.1 (32)
 alpha21064   172Mhz  OSF1-3.0        cc  X11 dl    34104   35564  2.1.1
 ------------------------------------------------------------------------------
 Sun/SPARC
@@ -266,6 +267,8 @@ hppa kernel. Remove +z from compiler flags
 (29) gcc-2.7
 (30) gcc-2.95.2
 (31) gcc-3.0.2
+(32) gcc-2.95.3 -O + new inline assembler [gcc-2.95.2 and gcc-2.95.3 -O3 both
+produce a broken binary]
 
 =============================================================================
 Contributors:
