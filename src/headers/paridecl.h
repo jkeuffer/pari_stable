@@ -1202,6 +1202,7 @@ GEN     FqV_roots_to_pol(GEN V, GEN p, GEN Tp, long v);
 GEN     ZX_caract(GEN A, GEN B, long v);
 GEN     ZX_disc(GEN x);
 GEN     QX_invmod(GEN A, GEN B);
+int     ZX_is_squarefree(GEN x);
 GEN     ZX_resultant(GEN A, GEN B);
 GEN     ZX_s_add(GEN y,long x);
 long    brent_kung_optpow(long d, long n);
