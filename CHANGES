@@ -162,6 +162,7 @@ BA 15- error messages now mention the GP function when the error occured.
 BA 17- macro varncmp(vx,vy) should now be used to compare variable numbers.
 BA 18- split substpol from subst ( reverse [ 2.2.1 C24 ] ). Use substpol
        for non-trivial algebraic substitution.
+   19- remove t_FRACN / t_RFRACN from \t output, add t_VECSMALL
 
   Added
     1- make test-all [ all available test suites (SLOW !)]

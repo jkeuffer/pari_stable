@@ -1306,7 +1306,6 @@ gentypes(void)
   t_REAL   : long real numbers [ cod1 ] [ cod2 ] [ man_1 ] ... [ man_k ]\n\
   t_INTMOD : integermods       [ code ] [ mod  ] [ integer ]\n\
   t_FRAC   : irred. rationals  [ code ] [ num. ] [ den. ]\n\
-  t_FRACN  : rational numbers  [ code ] [ num. ] [ den. ]\n\
   t_COMPLEX: complex numbers   [ code ] [ real ] [ imag ]\n\
   t_PADIC  : p-adic numbers    [ cod1 ] [ cod2 ] [ p ] [ p^r ] [ int ]\n\
   t_QUAD   : quadratic numbers [ cod1 ] [ mod  ] [ real ] [ imag ]\n\
@@ -1315,7 +1314,6 @@ gentypes(void)
   t_POL    : polynomials       [ cod1 ] [ cod2 ] [ man_1 ] ... [ man_k ]\n\
   t_SER    : power series      [ cod1 ] [ cod2 ] [ man_1 ] ... [ man_k ]\n\
   t_RFRAC  : irred. rat. func. [ code ] [ num. ] [ den. ]\n\
-  t_RFRACN : rational function [ code ] [ num. ] [ den. ]\n\
   t_QFR    : real qfb          [ code ] [ a ] [ b ] [ c ] [ del ]\n\
   t_QFI    : imaginary qfb     [ code ] [ a ] [ b ] [ c ]\n\
   t_VEC    : row vector        [ code ] [  x_1  ] ... [  x_k  ]\n\
@@ -1323,6 +1321,7 @@ gentypes(void)
   t_MAT    : matrix            [ code ] [ col_1 ] ... [ col_k ]\n\
   t_LIST   : list              [ code ] [ cod2 ] [ x_1 ] ... [ x_k ]\n\
   t_STR    : string            [ code ] [ man_1 ] ... [ man_k ]\n\
+  t_VECSMALL: vector small int [ code ] [ x_1 ] ... [ x_k ]\n\
 \n");
 }
 
