@@ -266,6 +266,11 @@ pariputsf(char *format, ...)
 
 /* start printing in "color" c */
 /* terminal has to support ANSI color escape sequences */
+#ifdef ESC
+#  undef ESC
+#endif
+#define ESC '\033'
+
 void
 term_color(int c)
 {
@@ -288,16 +293,18 @@ term_get_color(int n)
 
   if (disable_color) return "";
   if (n == c_NONE || (a = gp_colors[n]) == c_NONE)
-    return "\033[0m"; /* reset */
-
-  decode_color(a,c);
-  if (c[1]<8) c[1] += 30; else c[1] += 82;
-  if (a & (1<<12)) /* transparent background */
-    sprintf(s, "\033[%d;%dm", c[0], c[1]);
+    sprintf(s, "%c[0m",ESC); /* reset */
   else
   {
-    if (c[2]<8) c[2] += 40; else c[2] += 92;
-    sprintf(s, "\033[%d;%d;%dm", c[0], c[1], c[2]);
+    decode_color(a,c);
+    if (c[1]<8) c[1] += 30; else c[1] += 82;
+    if (a & (1<<12)) /* transparent background */
+      sprintf(s, "%c[%d;%dm", ESC, c[0], c[1]);
+    else
+    {
+      if (c[2]<8) c[2] += 40; else c[2] += 92;
+      sprintf(s, "%c[%d;%d;%dm", ESC, c[0], c[1], c[2]);
+    }
   }
   return s;
 }
@@ -464,7 +471,7 @@ strlen_real(char *s)
   while (*t)
   {
     t0 = t;
-    if (*t++ == '\e' && *t++ == '[')
+    if (*t++ == ESC && *t++ == '[')
     {
       while (*t && *t++ != 'm') /* empty */;
       ctrl_len += t - t0;
