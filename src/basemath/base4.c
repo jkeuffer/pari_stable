@@ -1639,6 +1639,9 @@ idealinv(GEN nf, GEN x)
           case t_COL: x = gmul((GEN)nf[7],x); break;
           case t_POLMOD: x = (GEN)x[2]; break;
         }
+        if (typ(x) != t_POL) { x = ginv(x); break; }
+        if (varn(x) != varn(nf[1]))
+          err(talker,"incompatible variables in idealinv");
         x = QXQ_inv(x,(GEN)nf[1]);
       }
       x = idealhermite_aux(nf,x); break;
