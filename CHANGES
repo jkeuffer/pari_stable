@@ -30,7 +30,7 @@ XR = Xavier Roblot
 YU = Yoshiaki Uchikawa
 
 
-Done for version 2.2.1 (released ??/??/2001):
+Done for version 2.2.1 (released ??/09/2001):
 
   Fixed
     1- typo in factornf (factor of degree 3 --> error message)
@@ -79,6 +79,9 @@ BA 38- pariformats (e.g %Z) incorrect on 64bit machines
 IZ 41- (obsolete, probably unused) CLK_TCK may reside in time.h
    42- misleading definition for ?omega / ?bigomega
    43- on \q, "Good bye" --> Goodbye
+   44- install() accepted gpnames which were not valid identifiers
+   45- bnfinit(x^4+65,,[.1]) --> SEGV   (whenever c < c2)
+   46- when host badily configured (~ not expanded), gp would die on startup 
 
   Changed
     1- removed useless parameter prec in many bnr* and rnf* functions
@@ -104,6 +107,7 @@ BA  8- factorback, chinese, lcm and gcd now accept a single vector
 IZ 19- faster computation of prime number table [better cache use]
 IS 20- obscure compiler bug in rootpol.c:max_modulus() [don't modify tau]
    21- make bench ('elliptic'): explained [BUG] message
+   22- allow lift(t_PADIC)
 
   Added
 BA  1- function pith() [= pi(x), naïve implementation]
@@ -114,6 +118,7 @@ BA  4- library function FpX_FpXQ_compo (Brent & Kung)
     6- library function primitive_part
 IZ  7- readline: allow switching readline editing on/off [for commandtools]
 IZ  8- readline: F1 has same effect as M-h, and F1F1 as M-H (short/long help)
+    9- function writebin
 
   Removed
     1- obsolete functions twototwo, threetotwo, threetotwo2

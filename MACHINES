@@ -10,8 +10,8 @@ General notes:
  a star (*) in the first column means GP was built using portable kernel.
 
 - Configure
- dl2 = install() available in gp-dyn / gp-sta (no [BUG] message in benches)
- dl  = install() available in gp-dyn only ([BUG] in gp-sta `program' bench)
+ dlD = install() available in all binaries (no [BUG] message in benches)
+ dlD= install() available in gp-dyn only ([BUG] in gp-sta `program' bench)
  not available at all otherwise           ([BUG] in both `program' benches)
  Note that symbols from C++ modules will have a mangled name. Use
  extern "C" {...} declarations if you want to import them with install()
@@ -25,134 +25,141 @@ NOTE: bench timings in version 2.0.11 and 2.0.12 were not correct (given
 between parentheses). Add about 25% to running times for comparison with
 other versions.
 
+Clock frequency in MHz when known, in BM (BogoMIPS) otherwise.
+
 Arch / proc:         OS:             Configure:     sta:    dyn:  GP version:
 ==============================================================================
 DEC/Alpha
-alpha21264   667Mhz  FreeBSD-4.0     gcc X11 dl     2626    2656  2.0.20    IS
-alpha21264   500MHz  OSF1-V4.0       gcc X11 dl2    3178    3436  2.1.0 (20)JC
-alpha21164a  600MHz  Linux-2.2.13   egcs X11 dl2    4270    4350  2.0.19(28)IS
-alpha21164   600MHz  OSF1-V4.0D      cc  X11 dl2    3996    4384  2.0.10    LG
-alpha21164   533Mhz  Linux 2.0.34    gcc X11 dl2   (4294)  (4385) 2.0.12    JC
-alpha21164   500Mhz  Linux-2.2.13   egcs X11 dl2    5167    5217  2.1.1 (13)
-alpha21064   172Mhz  OSF1-3.0        cc  X11 dl2   34104   35564  2.1.1
+alpha21264   667Mhz  FreeBSD-4.0     gcc X11 dlD    2626    2656  2.0.20    IS
+alpha21264   500MHz  OSF1-V4.0       gcc X11 dl     3178    3436  2.1.0 (20)JC
+alpha21164a  600MHz  Linux-2.2.13   egcs X11 dl     4270    4350  2.0.19(28)IS
+alpha21164   600MHz  OSF1-V4.0D      cc  X11 dl     3996    4384  2.0.10    LG
+alpha21164   533Mhz  Linux 2.0.34    gcc X11 dl    (4294)  (4385) 2.0.12    JC
+alpha21164   500Mhz  Linux-2.2.13   egcs X11 dl     5167    5217  2.1.1 (13)
+alpha21064   172Mhz  OSF1-3.0        cc  X11 dl    34104   35564  2.1.1
 ------------------------------------------------------------------------------
 Sun/SPARC
-UltraSPARC60 450MHz  Solaris-2.7     gcc X11 dl2    3970    4010  2.0.19    IS
-UltraSPARC60 450MHz  Solaris-2.7      cc X11 dl2    5070    5210  2.0.19    IS
-Ultra250     400MHz  Solaris-2.7     gcc X11 dl2    4510    4560  2.0.19    IS
-Ultra250     400MHz  Solaris-2.7      cc X11 dl2    5950    6090  2.0.19    IS
-UltraSPARC60 360MHz  Solaris-2.6     gcc X11 dl2    5034    5209  2.0.16    IS
-UltraSPARC60 360MHz  Solaris-2.6      cc X11 dl2    6329    6453  2.0.16    IS
-UltraSPARC2i 360MHz  Solaris-2.7    egcs X11 dl2    5816    6286  2.0.16(18)HS
-UltraSPARC2i 333MHz  Solaris-2.7     gcc X11 dl2    5666    6818  2.0.20(19)
-UltraSPARC10 300MHz  Solaris-2.6     gcc X11 dl2   (5932)  (6102) 2.0.12    GN
-UltraSPARC   300MHz  Solaris-2.5     gcc X11 dl2    7643    7566  2.0.9     IS
-UltraSPARC2  296MHz  Solaris-2.5.1   gcc X11 dl2    6098    6277  2.0.16    IS
-UltraSPARC2  296MHz  Solaris-2.5.1    cc X11 dl2    7676    7869  2.0.16    IS
-UltraSPARC2i 270MHz  Solaris-2.7     gcc X11 dl2    9008    7860  2.0.16    IZ
-UltraSPARC2i 270MHz  Solaris-2.6      cc X11 dl2    9200    9970  2.0.10    LG
-UltraSPARC2  248MHz  Solaris-2.7     cc5 X11 dl2    9420    9692  2.0.18(14)GN
-UltraSPARC2  248MHz  Solaris-2.7    egcs X11 dl2    7218    7262  2.0.16    HS
-UltraSPARC   200MHz  Solaris-2.5.1   gcc X11 dl2    9226    9268  2.0.16    IS
-UltraSPARC   200MHz  Solaris-2.5.1    cc X11 dl2   11226   11755  2.0.16    IS
-UltraSPARC   167MHz  Solaris-2.6     gcc X11 dl2   10767   11218  2.0.16    IS
-UltraSPARC   167MHz  Solaris-2.6      cc X11 dl2   13677   13967  2.0.16    IS
-UltraSPARC   167MHz  Solaris-2.7     gcc X11 dl2   10740   10828  2.1.1
-UltraSPARC   167MHz  Solaris-2.5     g++ X11 dl2   13474   13418  2.0.9 (7) LG
+UltraSPARC60 450MHz  Solaris-2.7     gcc X11 dl     3970    4010  2.0.19    IS
+UltraSPARC60 450MHz  Solaris-2.7      cc X11 dl     5070    5210  2.0.19    IS
+Ultra250     400MHz  Solaris-2.7     gcc X11 dl     4510    4560  2.0.19    IS
+Ultra250     400MHz  Solaris-2.7      cc X11 dl     5950    6090  2.0.19    IS
+UltraSPARC60 360MHz  Solaris-2.6     gcc X11 dl     5034    5209  2.0.16    IS
+UltraSPARC60 360MHz  Solaris-2.6      cc X11 dl     6329    6453  2.0.16    IS
+UltraSPARC2i 360MHz  Solaris-2.7    egcs X11 dl     5816    6286  2.0.16(18)HS
+UltraSPARC2i 333MHz  Solaris-2.7     gcc X11 dl     5666    6818  2.0.20(19)
+UltraSPARC10 300MHz  Solaris-2.6     gcc X11 dl    (5932)  (6102) 2.0.12    GN
+UltraSPARC   300MHz  Solaris-2.5     gcc X11 dl     7643    7566  2.0.9     IS
+UltraSPARC2  296MHz  Solaris-2.5.1   gcc X11 dl     6098    6277  2.0.16    IS
+UltraSPARC2  296MHz  Solaris-2.5.1    cc X11 dl     7676    7869  2.0.16    IS
+UltraSPARC2i 270MHz  Solaris-2.7     gcc X11 dl     9008    7860  2.0.16    IZ
+UltraSPARC2i 270MHz  Solaris-2.6      cc X11 dl     9200    9970  2.0.10    LG
+UltraSPARC2  248MHz  Solaris-2.7     cc5 X11 dl     9420    9692  2.0.18(14)GN
+UltraSPARC2  248MHz  Solaris-2.7    egcs X11 dl     7218    7262  2.0.16    HS
+UltraSPARC   200MHz  Solaris-2.5.1   gcc X11 dl     9226    9268  2.0.16    IS
+UltraSPARC   200MHz  Solaris-2.5.1    cc X11 dl    11226   11755  2.0.16    IS
+UltraSPARC   167MHz  Solaris-2.6     gcc X11 dl    10767   11218  2.0.16    IS
+UltraSPARC   167MHz  Solaris-2.6      cc X11 dl    13677   13967  2.0.16    IS
+UltraSPARC   167MHz  Solaris-2.7     gcc X11 dl    10740   10828  2.1.1
+UltraSPARC   167MHz  Solaris-2.5     g++ X11 dl    13474   13418  2.0.9 (7) LG
 UltraSPARC   167MHz  Solaris-2.5     CC  X11 -     15778   16400  2.0.9     LG
-UltraSPARC   167MHz  Solaris-2.5     cc  X11 dl2   16241   17048  2.0.9     LG
-UltraSPARC   143MHz  Solaris-2.5     gcc X11 dl2   12470   12663  2.1.1
+UltraSPARC   167MHz  Solaris-2.5     cc  X11 dl    16241   17048  2.0.9     LG
+UltraSPARC   143MHz  Solaris-2.5     gcc X11 dl    12470   12663  2.1.1
 
-SuperSPARC2   75MHz  Solaris-2.5     gcc X11 dl2   16969   17013  2.0.10    LG
-SuperSPARC    50Mhz  Linux-2.2.14    gcc X11 dl2   41126   40854  2.0.18(22)BA
-SuperSPARC    40MHz  SunOS-4.1.3     gcc X11 dl2   31178   30456  2.0.19
-SuperSPARC    40Mhz  Solaris-2.5     gcc X11 dl2   31528   31576  2.0.16
-TurboSPARC   170MHz  Solaris-2.5     gcc X11 dl2   15907   16529  2.0.9     LG
-MicroSPARC2  110MHz  NextStep-v3     cc    -   -   37794       -  2.0.9     LG
-MicroSPARC2  110MHz  SunOS-4.1.4     gcc X11 dl2   31476   32123  2.0.9     LG
-MicroSPARC2  110MHz  Solaris-2.5     gcc X11 dl2   25335   26193  2.1.1
-SPARCv7(SS2)  40MHz  SunOS-4.1.3     gcc X11 dl   115212  115364  2.0.9     LG
-SPARCv7(ELC)  33MHz  SunOS-4.1.1     gcc X11   -  139406       -  2.0.8     GN
-SPARCv7(SS400)  ???  SunOS-4.1.4     gcc   - dl2  107074  106494  2.0.16(21)DE
-SPARCv7(HWS210) ???  Linux-2.2.5     gcc   -   -   98488       -  2.0.16(15)DE
+SuperSPARC2   75MHz  Solaris-2.5     gcc X11 dl    16969   17013  2.0.10    LG
+SuperSPARC    50Mhz  Linux-2.2.14    gcc X11 dl    41126   40854  2.0.18(22)BA
+SuperSPARC    40MHz  SunOS-4.1.3     gcc X11 dl    31178   30456  2.0.19
+SuperSPARC    40Mhz  Solaris-2.5     gcc X11 dl    31528   31576  2.0.16
+TurboSPARC   170MHz  Solaris-2.5     gcc X11 dl    15907   16529  2.0.9     LG
+MicroSPARC2  110MHz  NextStep-v3     cc    -  -    37794       -  2.0.9     LG
+MicroSPARC2  110MHz  SunOS-4.1.4     gcc X11 dl    31476   32123  2.0.9     LG
+MicroSPARC2  110MHz  Solaris-2.5     gcc X11 dl    25335   26193  2.1.1
+SPARCv7(SS2)  40MHz  SunOS-4.1.3     gcc X11 dlD  115212  115364  2.0.9     LG
+SPARCv7(ELC)  33MHz  SunOS-4.1.1     gcc X11  -   139406       -  2.0.8     GN
+SPARCv7(SS400)  ???  SunOS-4.1.4     gcc   - dl   107074  106494  2.0.16(21)DE
+SPARCv7(HWS210) ???  Linux-2.2.5     gcc   -  -    98488       -  2.0.16(15)DE
 ------------------------------------------------------------------------------
 Intel/x86
-AMS Athlon  1100MHz  Linux-2.4.2-2   gcc X11 dl2    1078    1076  2.1.1     DP
-AMD Duron   1000MHz  Linux-2.4.0    egcs  -  dl2    1364    1428  2.0.20    QL
-AMD Athlon   850MHz  Linux-2.2.17    gcc X11 dl2    1364    1342  2.1.0     JC
-AMD Duron    700MHz  Linux-2.4.0    egcs X11 dl2    2066    2138  2.0.20    QL
-AMD Athlon   500MHz  Linux-2.2.13    gcc X11 dl2    2736    2724  2.0.18    MS
-AMD K6-2     350Mhz  Linux-2.0.34   egcs X11 dl2   (4856)  (4756) 2.0.11    SH
-AMD K6-2     350Mhz  Linux-2.0.36    gcc X11 dl2    5154    4850  2.0.17 
-AMD K6       266MHz  Linux-2.2.5    pgcc X11 dl2    5861    6001  2.0.16(17)IS
-AMD K6       233Mhz  Linux-2.2.14    gcc X11 dl2    6968    7158  2.0.18    QL
-IBM/Cyrix    200MHz  Linux-2.0.35    gcc X11 dl2   13190   13729  2.0.15    AP
-PentiumIII  1000MHz  Linux-2.2.15    gcc X11 dl2    1068    1164  2.2.0     XR
-PentiumIII   933MHz  Linux-2.2.15   egcs X11 dl2    1450    1485  2.0.20    IS
-PentiumIII   800MHz  Linux-2.2.14   egcs X11 dl2    1900    1882  2.0.20    CL
-PentiumIII   733MHz  Linux-2.2.14   egcs X11 dl2    2080    2090  2.0.19    IS
-PentiumIII   533MHz  Linux-2.2.14    gcc X11 dl2    2710    2730  2.0.19    IS
-PentiumIII   500MHz  Linux-2.2.12   egcs X11 dl2    3154    3176  2.0.18    HC
-PentiumII    450MHz  Linux-2.0.35    gcc X11 dl2    3220    3230  2.1.1     TT
-PentiumII    400MHz  Linux-2.3.99    gcc X11 dl2    3392    3410  2.0.20(27)GH
-PentiumII    400MHz  Linux-2.2.14    gcc X11 dl2    3886    3902  2.0.20    GH
-PentiumII    350MHz  Linux-2.2.16    gcc X11 dl2    3848    3876  2.1.0 (23)
-PentiumII    350MHz  Win98         mingw   -   -    4412       -  2.1.0 (24)
-PentiumII    350MHz  Win98 + Cygwin1 gcc   -   -    4490       -  2.1.0 (25)
-PentiumII    350MHz  Win98 + RSX     gcc   -   -    9436       -  2.0.20(26)
-PentiumII    350Mhz  Linux 2.0.36   pgcc X11 dl2   (3310)  (3340) 2.0.12(11)PE
-PentiumII    350Mhz  Linux 2.0.36   egcs X11 dl2   (3352)  (3402) 2.0.12(11)PE
-PentiumII    350Mhz  Linux 2.0.36    gcc X11 dl2   (3600)  (3610) 2.0.12    PE
-PentiumII    333Mhz  Linux-2.0.32    gcc X11 dl2   (3842)  (4164) 2.0.12    JC
-PentiumII    300MHz  NextStep-3.3    cc    -   -    5325       -  2.0.10
-PentiumII    233MHz  FreeBSD-2.2.5   gcc X11 dl2   (6251)  (6114) 2.0.11
-PentiumII    233MHz  Linux-2.0.35    gcc X11 dl2   (7460)  (7586) 2.0.12    HG
-PentiumPro   200MHz  Linux-2.2.12   egcs X11 dl2    7820    7828  2.1.1
-Pentium      266Mhz  Linux-2.0.29    gcc X11 dl2   (7256)  (7044) 2.0.11
-Pentium      200MHz  Linux-2.2.10    gcc X11 dl2   12062   12340  2.0.18    MS
-Pentium      200Mhz  NextStep-3.3    cc    -   -   16035       -  2.0.06    MS
-Pentium      166MHz  FreeBSD-2.2.5   gcc X11 dl2  (15159) (14481) 2.0.11
-Pentium      166MHz  Solaris-2.6     gcc X11 dl2  (13550) (13746) 2.0.12    GN
-Pentium      133MHz  Linux-1.2.8     gcc X11   -  (15448)      -  2.0.12(5) GN
-Pentium      133MHz  FreeBSD-2.2.5   gcc X11 dl2   15231   17259  2.0.10    KK
-486DX (Cyrix) 66MHz  Linux 2.2.18    gcc   - dl2   59078   60600  2.1.1     CC
-486DX2        50MHz  Linux-2.0.33    gcc X11 dl2  213710  216224  2.0.9     LG
-486DX         50MHz  DOS-5 + EMX     gcc   -   -   77126       -  2.0.20
-*i860         40MHz  Concentrix      cc  X11   -  147989       -  2.0.9     LG
+AMS Athlon  1100MHz  Linux-2.4.2-2   gcc X11 dl     1078    1076  2.1.1     DP
+AMD Duron   1000MHz  Linux-2.4.0    egcs  -  dl     1364    1428  2.0.20    QL
+AMD Athlon   850MHz  Linux-2.2.17    gcc X11 dl     1364    1342  2.1.0     JC
+AMD Duron    700MHz  Linux-2.4.0    egcs X11 dl     2066    2138  2.0.20    QL
+AMD Athlon   500MHz  Linux-2.2.13    gcc X11 dl     2736    2724  2.0.18    MS
+AMD K6-2     350Mhz  Linux-2.0.34   egcs X11 dl    (4856)  (4756) 2.0.11    SH
+AMD K6-2     350Mhz  Linux-2.0.36    gcc X11 dl     5154    4850  2.0.17 
+AMD K6       266MHz  Linux-2.2.5    pgcc X11 dl     5861    6001  2.0.16(17)IS
+AMD K6       233Mhz  Linux-2.2.14    gcc X11 dl     6968    7158  2.0.18    QL
+IBM/Cyrix    200MHz  Linux-2.0.35    gcc X11 dl    13190   13729  2.0.15    AP
+PentiumIII  1000MHz  Linux-2.2.15    gcc X11 dl     1068    1164  2.2.0     XR
+PentiumIII   933MHz  Linux-2.2.15   egcs X11 dl     1450    1485  2.0.20    IS
+PentiumIII   800MHz  Linux-2.2.14   egcs X11 dl     1900    1882  2.0.20    CL
+PentiumIII   733MHz  Linux-2.2.14   egcs X11 dl     2080    2090  2.0.19    IS
+PentiumIII   533MHz  Linux-2.2.14    gcc X11 dl     2710    2730  2.0.19    IS
+PentiumIII   500MHz  Linux-2.2.12   egcs X11 dl     3154    3176  2.0.18    HC
+PentiumII    450MHz  Linux-2.0.35    gcc X11 dl     3220    3230  2.1.1     TT
+PentiumII    400MHz  Linux-2.3.99    gcc X11 dl     3392    3410  2.0.20(27)GH
+PentiumII    400MHz  Linux-2.2.14    gcc X11 dl     3886    3902  2.0.20    GH
+PentiumII    350MHz  Linux-2.2.16    gcc X11 dl     3848    3876  2.1.0 (23)
+PentiumII    350MHz  Win98         mingw   -  -     4412       -  2.1.0 (24)
+PentiumII    350MHz  Win98 + Cygwin1 gcc   -  -     4490       -  2.1.0 (25)
+PentiumII    350MHz  Win98 + RSX     gcc   -  -     9436       -  2.0.20(26)
+PentiumII    350Mhz  Linux 2.0.36   pgcc X11 dl    (3310)  (3340) 2.0.12(11)PE
+PentiumII    350Mhz  Linux 2.0.36   egcs X11 dl    (3352)  (3402) 2.0.12(11)PE
+PentiumII    350Mhz  Linux 2.0.36    gcc X11 dl    (3600)  (3610) 2.0.12    PE
+PentiumII    333Mhz  Linux-2.0.32    gcc X11 dl     4446    4464  2.1.1 (29)BA
+PentiumII    333Mhz  Linux-2.0.32    gcc X11 dl     4104    4218  2.1.1 (30)BA
+PentiumII    300MHz  NextStep-3.3    cc    -  -     5325       -  2.0.10
+PentiumII    233MHz  FreeBSD-2.2.5   gcc X11 dl    (6251)  (6114) 2.0.11
+PentiumII    233MHz  Linux-2.0.35    gcc X11 dl    (7460)  (7586) 2.0.12    HG
+PentiumPro   200MHz  Linux-2.2.12   egcs X11 dl     7820    7828  2.1.1
+Pentium      266Mhz  Linux-2.0.29    gcc X11 dl    (7256)  (7044) 2.0.11
+Pentium      200MHz  Linux-2.2.10    gcc X11 dl    12062   12340  2.0.18    MS
+Pentium      200Mhz  NextStep-3.3    cc    -  -    16035       -  2.0.06    MS
+Pentium      166MHz  FreeBSD-2.2.5   gcc X11 dl   (15159) (14481) 2.0.11
+Pentium      166MHz  Solaris-2.6     gcc X11 dl   (13550) (13746) 2.0.12    GN
+Pentium      133MHz  Linux-1.2.8     gcc X11  -   (15448)      -  2.0.12(5) GN
+Pentium      133MHz  FreeBSD-2.2.5   gcc X11 dl    15231   17259  2.0.10    KK
+486DX (Cyrix) 66MHz  Linux 2.2.18    gcc   - dl    59078   60600  2.1.1     CC
+486DX2        50MHz  Linux-2.0.33    gcc X11 dl   213710  216224  2.0.9     LG
+486DX         50MHz  DOS-5 + EMX     gcc   -  -    77126       -  2.0.20
+*i860         40MHz  Concentrix      cc  X11  -   147989       -  2.0.9     LG
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+Intel/ARM
+StrongARM 110 186BM  Linux-2.4.5     gcc  -   -    17162       -  2.1.1.    BA
 ------------------------------------------------------------------------------
 Motorola
-*MC68040      25MHz  NextStep-v2     cc    -   -  250542       -  2.0.9     LG
-MC68030       25MHz  SunOS-4.0.3     gcc X11   -  683736  685248  2.0.9 (4)
-*MC68030      25MHz  SunOS-4.0.3     gcc X11   - 1034136 1038368  2.0.9
+*MC68040      25MHz  NextStep-v2     cc    -  -   250542       -  2.0.9     LG
+MC68030       25MHz  SunOS-4.0.3     gcc X11  -   683736  685248  2.0.9 (4)
+*MC68030      25MHz  SunOS-4.0.3     gcc X11  -  1034136 1038368  2.0.9
 ------------------------------------------------------------------------------
 IBM/POWER,PowerPC
-*PowerMac3,3 500MHz  Linux-2.4.2     gcc X11 dl2    3742    3732  2.1.1     BA
-*PPC800(G3)  400MHz  Linux-2.4.3     gcc   - dl2    4640    4624  2.2.0     GH
-*PPC750(G3)  266MHz  Linux-2.2.6     gcc   - dl2    6944    6924  2.0.18    DE
-*PPC604e     233MHz  AIX-4.2         cc  X11   -   (8616)      -  2.0.12(3) GN
-*PPC604      133MHz  AIX-4.2         cc  X11   -   21528       -  2.0.4 (3) GN
-*PPC601      100MHz  AIX-4.1         cc  X11   -   21692       -  2.0.4 (3) GN
-*PPC601       75MHz  Linux-2.1.24    gcc   - dl2   51810   52702  2.0.9     EK
-*PPC601       66MHz  AIX-3.2.5       cc  X11   -   66280       -  2.0.4 (3) GN
-*POWER2       66MHz  AIX-4.2         cc  X11   -   37592       -  2.0.4 (3) GN
+*PowerMac3,3 500MHz  Linux-2.4.2     gcc X11 dl     3742    3732  2.1.1     BA
+*PPC800(G3)  400MHz  Linux-2.4.3     gcc   - dl     4640    4624  2.2.0     GH
+*PPC750(G3)  266MHz  Linux-2.2.6     gcc   - dl     6944    6924  2.0.18    DE
+*PPC604e     233MHz  AIX-4.2         cc  X11  -    (8616)      -  2.0.12(3) GN
+*PPC604      133MHz  AIX-4.2         cc  X11  -    21528       -  2.0.4 (3) GN
+*PPC601      100MHz  AIX-4.1         cc  X11  -    21692       -  2.0.4 (3) GN
+*PPC601       75MHz  Linux-2.1.24    gcc   - dl    51810   52702  2.0.9     EK
+*PPC601       66MHz  AIX-3.2.5       cc  X11  -    66280       -  2.0.4 (3) GN
+*POWER2       66MHz  AIX-4.2         cc  X11  -    37592       -  2.0.4 (3) GN
 ------------------------------------------------------------------------------
 SGI/MIPS
-*R4000     50/70MHz  IRIX-5.2        gcc X11 dl2   70764   70114  2.0.9 (1) TP
-*R4000     50/70MHz  IRIX-5.2        cc  X11 dl2   81467   80176  2.0.9 (2) TP
-*R10000      196Mhz  IRIX-6.2        cc  X11 dl2   15719   15581  2.0.13(12)BN
-*R10000      196MHz  IRIX-6.4        cc  X11 dl2    8461    9856  2.0.10(8) TP
+*R4000     50/70MHz  IRIX-5.2        gcc X11 dl    70764   70114  2.0.9 (1) TP
+*R4000     50/70MHz  IRIX-5.2        cc  X11 dl    81467   80176  2.0.9 (2) TP
+*R10000      196Mhz  IRIX-6.2        cc  X11 dl    15719   15581  2.0.13(12)BN
+*R10000      196MHz  IRIX-6.4        cc  X11 dl     8461    9856  2.0.10(8) TP
 ------------------------------------------------------------------------------
 HP/PA-RISC
-HPPA9000/778  134MHz HPUX-10.20      cc  X11   -   18898   29138  2.0.19(9)
-*HPPA9000/778 134MHz HPUX-10.20      cc  X11   -  (23666)      -  2.0.12(10)
-HPPA9000/735  100MHz HPUX-10.20      cc  X11   -  (25106) (38898) 2.0.12(9)
-HPPA9000/735  100MHz HPUX-09-07      cc    -   -   25714       -  2.0.16(16)IS
-HPPA9000/720     ??? HPUX-10.20      cc  X11   -   66138       -  2.0.9
-*HPPA9000/720    ??? HPUX-10.20      cc  X11   -  101114  119626  2.0.9
-HPPA9000/712   90MHz HPUX-10.20      cc  X11   -  (26756) (45196) 2.0.12(9)
-*HPPA9000/712    ??? HPUX-10.10      gcc X11   -   66328   71250  2.0.5 (6)
-*HPPA7100LC    60MHz NextStep-v3     cc    -   -   62866       -  2.0.10    LG
-*HPPA7000      50MHz HPUX-09.05      cc  X11   -  113406  152778  2.0.9     LG
+*HPPA8500     440MHz Linux-2.4.0    gcc  X11 dl     7766       -  2.1.1(31) BA
+HPPA9000/778  134MHz HPUX-10.20      cc  X11  -    18898   29138  2.0.19(9)
+*HPPA9000/778 134MHz HPUX-10.20      cc  X11  -   (23666)      -  2.0.12(10)
+HPPA9000/735  100MHz HPUX-10.20      cc  X11  -   (25106) (38898) 2.0.12(9)
+HPPA9000/735  100MHz HPUX-09-07      cc    -  -    25714       -  2.0.16(16)IS
+HPPA9000/720     ??? HPUX-10.20      cc  X11  -    66138       -  2.0.9
+*HPPA9000/720    ??? HPUX-10.20      cc  X11  -   101114  119626  2.0.9
+HPPA9000/712   90MHz HPUX-10.20      cc  X11  -   (26756) (45196) 2.0.12(9)
+*HPPA9000/712    ??? HPUX-10.10      gcc X11  -    66328   71250  2.0.5 (6)
+*HPPA7100LC    60MHz NextStep-v3     cc    -  -    62866       -  2.0.10    LG
+*HPPA7000      50MHz HPUX-09.05      cc  X11  -   113406  152778  2.0.9     LG
 ------------------------------------------------------------------------------
 
 Notes:
@@ -255,6 +262,9 @@ hppa kernel. Remove +z from compiler flags
 (27) Xeon
 (28) RedHat-7.0 + alpha has a broken glibc-2.1.x [issquare(8388609^2) = 0 !]
      Updating to glibc-2.2 fixes the problem.
+(29) gcc-2.7
+(30) gcc-2.95.2
+(31) gcc-3.0.2
 
 =============================================================================
 Contributors:
