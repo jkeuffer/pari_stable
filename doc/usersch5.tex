@@ -475,8 +475,11 @@ remainder, i.e.~non-negative and less than the absolute value of~\kbd{y}.
 \subsec{Division with remainder}: the following functions return two objects,
 unless specifically asked for only one of them~--- a quotient and a remainder.
 The quotient is returned and a the remainder is returned through the variable
-whose address is passed as the \kbd{r} argument. All \kbd{GEN}s, whether
-returned directly or through a pointer, are created on the stack.
+whose address is passed as the \kbd{r} argument. The term \emph{true
+Euclidean remainder} refers to the non-negative one (\kbd{mod}), and
+\emph{Euclidean remainder} by itself to the one with the same sign as the
+dividend (\kbd{res}). All \kbd{GEN}s, whether returned directly or through a
+pointer, are created on the stack.
 
 \fun{GEN}{dvmdii}{GEN x, GEN y, GEN *r} returns the Euclidean quotient of the
 integer \kbd{x} by the integer \kbd{y} and puts the remainder into~\kbd{*r}.
@@ -520,13 +523,13 @@ remainder of the integer~\kbd{x} by the long~\kbd{y}. This is the
 non-negative remainder, not the one whose sign is the sign of \kbd{x}
 as in the \kbd{div} functions.
 
-\fun{long}{smodsi}{long x, GEN y} computes the Euclidean
+\fun{long}{smodsi}{long x, GEN y} computes the true Euclidean
 remainder of the long~\kbd{x} by the integer~\kbd{|y|}.
 
-\fun{ulong}{umodiu}{GEN x, ulong y} computes the Euclidean
+\fun{ulong}{umodiu}{GEN x, ulong y} computes the true Euclidean
 remainder of the integer~\kbd{|x|} by the unsigned long~\kbd{y}.
 
-\fun{ulong}{umodui}{ulong x, GEN y} computes the Euclidean
+\fun{ulong}{umodui}{ulong x, GEN y} computes the true Euclidean
 remainder of the unsigned long~\kbd{x} by the integer~\kbd{|y|}.
 
 \subsec{Miscellaneous functions}
