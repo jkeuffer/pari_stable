@@ -717,16 +717,17 @@ discf2(GEN x)
 /*******************************************************************/
 
 static GEN Decomp(GEN p,GEN f,long mf,GEN theta,GEN chi,GEN nu);
+GEN Decomppadic(GEN p,long r,GEN f,long mf,GEN theta,GEN chi,GEN nu);
 static GEN dbasis(GEN p, GEN f, long mf, GEN alpha, GEN U);
-static GEN eltppm(GEN f,GEN pd,GEN theta,GEN k);
 static GEN maxord(GEN p,GEN f,long mf);
 static GEN nbasis(GEN ibas,GEN pd);
 #if 0
+static GEN eltppm(GEN f,GEN pd,GEN theta,GEN k);
 static GEN nilord(GEN p,GEN fx,long mf,GEN gx);
-#endif
-static GEN nilord2(GEN p,GEN fx,long mf,GEN gx);
 static GEN testd(GEN p,GEN fa,long c,long Da,GEN alph2,long Ma,GEN theta);
 static GEN testb(GEN p,GEN fa,long Da,GEN theta,long Dt);
+#endif
+GEN nilord2(GEN p,GEN fx,long mf,GEN gx,long flag);
 static GEN testb2(GEN p,GEN fa,long Fa,GEN theta,long Ft);
 static GEN testc2(GEN p,GEN fa,GEN pmr,GEN alph2,long Ea,GEN thet2,long Et);
 
@@ -992,7 +993,7 @@ maxord(GEN p,GEN f,long mf)
 #if 0
     res = (r==1)? nilord(p,f,mf,h): Decomp(p,f,mf,polx[varn(f)],f,h);
 #else
-    res = (r==1)? nilord2(p,f,mf,h): Decomp(p,f,mf,polx[varn(f)],f,h);
+    res = (r==1)? nilord2(p,f,mf,h,0): Decomp(p,f,mf,polx[varn(f)],f,h);
 #endif
   }
   return gerepileupto(av,res);
@@ -1176,7 +1177,7 @@ Decomp(GEN p,GEN f,long mf,GEN theta,GEN chi,GEN nu)
 }
 
 /* minimum extension valuation: res[0]/res[1] (both are longs) */
-long *
+static long *
 vstar(GEN p,GEN h)
 {
   static long res[2];
@@ -1194,6 +1195,7 @@ vstar(GEN p,GEN h)
   res[0]=v/m; res[1]=k/m; return res;
 }
 
+#if 0
 /* Returns [theta,chi,nu] with theta non-primary */
 static GEN
 csrch(GEN p,GEN fa,GEN gamma)
@@ -1219,7 +1221,7 @@ csrch(GEN p,GEN fa,GEN gamma)
  *  [1,theta,chi,nu] if theta non-primary
  *  [2,phi, * , * ]  if D_phi > D_alpha or M_phi > M_alpha
  */
-GEN
+static GEN
 bsrch(GEN p,GEN fa,long ka,GEN eta,long Ma)
 {
   long n=lgef(fa)-3,Da=lgef(eta)-3;
@@ -1263,6 +1265,7 @@ bsrch(GEN p,GEN fa,long ka,GEN eta,long Ma)
     beta=gsub(beta,gmod(gmul(pik,delta),famod));
   }
 }
+#endif
 
 static GEN 
 mycaract(GEN f, GEN beta)
@@ -1282,9 +1285,25 @@ mycaract(GEN f, GEN beta)
   return chi;
 }
 
+/* Factor characteristic polynomial of beta mod p */
+static GEN
+factcp(GEN p,GEN f,GEN beta)
+{
+  long av,tetpil,l;
+  GEN chi,nu, b = cgetg(4,t_VEC);
+
+  chi = mycaract(f,beta);
+  av=avma; nu=(GEN)factmod(chi,p)[1]; l=lg(nu)-1;
+  nu=lift_intern((GEN)nu[1]); tetpil=avma;
+  b[1]=(long)chi;
+  b[2]=lpile(av,tetpil,gcopy(nu));
+  b[3]=lstoi(l); return b;
+}
+
+#if 0 
 /* USED TO Return [theta_1,theta_2,L_theta,M_theta] with theta non-primary */
 /* Now return theta_2 */
-GEN
+static GEN
 setup(GEN p,GEN f,GEN theta,GEN nut, long *La, long *Ma)
 {
   GEN t1,t2,v,dt,pv;
@@ -1312,6 +1331,7 @@ setup(GEN p,GEN f,GEN theta,GEN nut, long *La, long *Ma)
   p = gpuigs(p,s); tetpil=avma; *La=Lt; *Ma=Mt;
   return gerepile(av,tetpil,gdiv(t2,p));
 }
+#endif 0
 
 #define RED 1
 
@@ -1487,16 +1507,21 @@ update_alpha(GEN p, GEN fx, GEN alph, GEN chi, GEN pmr, GEN pmf, long mf)
   return rep;
 }
 
-static GEN
-nilord2(GEN p, GEN fx, long mf, GEN gx)
+/* flag != 0 iff we're looking for the p-adic factorization, 
+   in which case it is the p-adic precision we want */
+GEN
+nilord2(GEN p, GEN fx, long mf, GEN gx, long flag)
 {
   long Fa, La, Ea, oE, Fg, eq, er, v = varn(fx), i, nv, Le, Ee, N, l, vn;
-  GEN p1, alph, chi, nu, w, phi, pmf, pdr, pmr, kapp, pie, chib;
+  GEN p1, alph, chi, nu, w, phi, pmf, pdr, pmr, kapp, pie, chib, pfl;
   GEN gamm, chig, nug, delt, beta, eta, chie, nue, pia, vb, opa;
 
   if (DEBUGLEVEL >= 3)
   {
-    fprintferr("  entering Nilord2");
+    if (flag)
+      fprintferr("  entering Nilord2 (factorization)");
+    else
+      fprintferr("  entering Nilord2 (basis/discriminant)");
     if (DEBUGLEVEL >= 5)
     {
       fprintferr(" with parameters: p = %Z, expo = %ld\n", p, mf);
@@ -1504,9 +1529,11 @@ nilord2(GEN p, GEN fx, long mf, GEN gx)
     }
     fprintferr("\n");
   }
+  
+  if (flag) pfl = gpowgs(p, flag);
 
   /* this is quite arbitrary; what is important is that >= mf + 1 */
-  pmf = gpuigs(p, mf + 3); 
+  pmf = gpowgs(p, mf + 3);
   pdr = respm(fx, derivpol(fx), pmf);
   pmr = mulii(sqri(pdr), p);
   pdr = mulii(p, pdr);
@@ -1560,6 +1587,8 @@ nilord2(GEN p, GEN fx, long mf, GEN gx)
     /* if Ea*Fa == N then O = Zp[alpha] */
     if (Ea*Fa == N) 
     {
+      if (flag) return NULL;
+
       alph = redelt(alph, sqri(p), pmf);
       return dbasis(p, fx, mf, alph, p);
     }
@@ -1588,22 +1617,6 @@ nilord2(GEN p, GEN fx, long mf, GEN gx)
 	er = (long)(vb[0]*Ea / vb[1] - eq*Ea);
       }
 
-      /* the following code can be used to check if beta approximates 
-         a factor of chi well enough to derive a factorization of chi. 
-	 However, in general, the process will always end before this 
-         happens. */
-#if 0
-      {
-	GEN quo, rem;
-
-	 quo = poldivres(chi, beta, &rem);
-	 p1 = content(lift(rem));
-	 fprintferr(" val(rem) = %ld\n", ggval(p1, p));
-	 p1 = respm(beta, quo, pmr);
-	 fprintferr(" val(id)  = %ld\n", ggval(p1, p));
-      }
-#endif
-
       /* eq and er are such that gamma = beta.p^-eq.nu^-er is a unit */ 
       if (eq) gamm = gdiv(beta, gpowgs(p, eq));
       else gamm = beta;
@@ -1626,7 +1639,7 @@ nilord2(GEN p, GEN fx, long mf, GEN gx)
 
       if (er || !chib)
       {
-	p1   = mulii(pdr, ggcd(denom(content(gamm)), pdr));
+	p1 = mulii(pdr, ggcd(denom(content(gamm)), pdr));
 	chig = mycaract(redelt(chi, mulii(pdr, p1), pdr), gamm);
       }
       else
@@ -1663,7 +1676,10 @@ nilord2(GEN p, GEN fx, long mf, GEN gx)
 	/* there are at least 2 factors mod. p => chi can be split */
 	phi  = eleval(fx, gamm, alph);
 	phi  = redelt(phi, p, pmf);
-	return Decomp(p, fx, mf, phi, chig, nug);
+	if (flag)
+	  return Decomppadic(p, flag, fx, ggval(pmf, p), phi, chig, nug);
+	else
+	  return Decomp(p, fx, mf, phi, chig, nug);
       }
 
       Fg = degree(nug);
@@ -1678,7 +1694,11 @@ nilord2(GEN p, GEN fx, long mf, GEN gx)
 	  /* there are at least 2 factors mod. p => chi can be split */
 	  phi = eleval(fx, (GEN)w[2], alph);
 	  phi = redelt(phi, p, pmf);
-	  return Decomp(p, fx, mf, phi, (GEN)w[3], (GEN)w[4]);
+	  if (flag)
+	    return Decomppadic(p, flag, fx, ggval(pmf, p), phi, 
+			       (GEN)w[3], (GEN)w[4]);
+	  else
+	    return Decomp(p, fx, mf, phi, (GEN)w[3], (GEN)w[4]);
 	}
 	break;
       }
@@ -1715,7 +1735,10 @@ nilord2(GEN p, GEN fx, long mf, GEN gx)
 	    delete_var();      
 	    phi = eleval(fx, eta, alph);
 	    phi = redelt(phi, p, pmf);
-	    return Decomp(p, fx, mf, phi, chie, nue);
+	    if (flag)
+	      return Decomppadic(p, flag, fx, ggval(pmf, p), phi, chie, nue);
+	    else
+	      return Decomp(p, fx, mf, phi, chie, nue);
 	  }
 	  
 	  /* if vp(eta) = vp(gamma - delta) > 0 */
@@ -1738,7 +1761,11 @@ nilord2(GEN p, GEN fx, long mf, GEN gx)
 	  /* there are at least 2 factors mod. p => chi can be split */
 	  phi = eleval(fx, (GEN)w[2], alph);
 	  phi = redelt(phi, p, pmf);
-	  return Decomp(p, fx, mf, phi, (GEN)w[3], (GEN)w[4]);
+	  if (flag)
+	    return Decomppadic(p, flag, fx, ggval(pmf, p), phi, 
+			       (GEN)w[3], (GEN)w[4]);
+	  else 
+	    return Decomp(p, fx, mf, phi, (GEN)w[3], (GEN)w[4]);
 	}
 	break;
       }
@@ -1761,10 +1788,20 @@ nilord2(GEN p, GEN fx, long mf, GEN gx)
 
     /* that can happen if p does not divide the field discriminant! */
     if (is_pm1(pmr))
-      return dbasis(p, fx, mf, alph, chi);
+      if (flag)
+      {
+	p1 = lift((GEN)factmod(chi, p)[1]);
+	l  = lg(p1) - 1;
+	if (l == 1) return NULL;
+	phi = redelt(alph, p, pmf);
+	return Decomppadic(p, flag, fx, ggval(pmf, p), phi, chi, (GEN)p1[l]);
+      }
+      else
+	return dbasis(p, fx, mf, alph, chi);
   }
 }
 
+#if 0
 /* Returns [1,phi,chi,nu] if phi non-primary
  *         [2,phi,chi,nu] if D_phi = lcm (D_alpha, D_theta)
  */
@@ -1786,6 +1823,7 @@ testb(GEN p,GEN fa,long Da,GEN theta,long Dt)
   }
   b[2]=(long)phi; b[3]=w[1]; b[4]=w[2]; return b;
 }
+#endif 
 
 /* Returns [1,phi,chi,nu] if phi non-primary
  *         [2,phi,chi,nu] with F_phi = lcm (F_alpha, F_theta) 
@@ -1818,6 +1856,7 @@ testb2(GEN p, GEN fa, long Fa, GEN theta, long Ft)
   return b;
 }
 
+#if 0
 /* Returns [1,phi,chi,nu] if phi non-primary
  *         [2,phi,chi,nu] if M_phi = lcm (M_alpha, M_theta)
  */
@@ -1843,6 +1882,7 @@ testc(GEN p, GEN fa, long c, GEN alph2, long Ma, GEN thet2, long Mt)
   b[1] = (h[2] > 1)? un: deux;
   b[2]=(long)phi; b[3]=w[1]; b[4]=w[2]; return b;
 }
+#endif 
 
 /* Returns [1, phi, chi, nu] if phi non-primary
  *         [2, phi, chi, nu] if E_phi = lcm (E_alpha, E_theta)
@@ -1874,6 +1914,7 @@ testc2(GEN p, GEN fa, GEN pmr, GEN alph2, long Ea, GEN thet2, long Et)
   return b;
 }
 
+#if 0
 /* Returns
  *  [1,phi,chi,nu] if theta non-primary
  *  [2,phi,chi,nu] if D_phi > D_aplha or M_phi > M_alpha
@@ -1907,21 +1948,7 @@ testd(GEN p,GEN fa,long c,long Da,GEN alph2,long Ma,GEN theta)
   }
   tetpil=avma; return gerepile(av,tetpil,gcopy(b));
 }
-
-/* Factor characteristic polynomial of beta mod p */
-GEN
-factcp(GEN p,GEN f,GEN beta)
-{
-  long av,tetpil,l;
-  GEN chi,nu, b = cgetg(4,t_VEC);
-
-  chi = mycaract(f,beta);
-  av=avma; nu=(GEN)factmod(chi,p)[1]; l=lg(nu)-1;
-  nu=lift_intern((GEN)nu[1]); tetpil=avma;
-  b[1]=(long)chi;
-  b[2]=lpile(av,tetpil,gcopy(nu));
-  b[3]=lstoi(l); return b;
-}
+#endif 
 
 /* evaluate h(a) mod f */
 GEN
@@ -1941,6 +1968,7 @@ eleval(GEN f,GEN h,GEN a)
   return gerepile(av,tetpil,y);
 }
 
+#if 0
 /* Compute theta^k mod (f,pd) */
 static GEN
 eltppm(GEN f,GEN pd,GEN theta,GEN k)
@@ -1966,6 +1994,7 @@ eltppm(GEN f,GEN pd,GEN theta,GEN k)
   }
   return gerepileupto(av,gdiv(phi,pd));
 }
+#endif 
 
 GEN addshiftw(GEN x, GEN y, long d);
 

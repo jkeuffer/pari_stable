@@ -1431,8 +1431,9 @@ factorpadic2(GEN x, GEN p, long r)
 /*******************************************************************/
 GEN polmodi(GEN x, GEN y);
 GEN polmodi_keep(GEN x, GEN y);
+GEN nilord2(GEN p, GEN fx, long mf, GEN gx, long flag);
 
-static GEN
+GEN
 Decomppadic(GEN p,long r,GEN f,long mf,GEN theta,GEN chi,GEN nu)
 {
   GEN pk,ph,pdr,unmodp;
@@ -1500,63 +1501,7 @@ Decomppadic(GEN p,long r,GEN f,long mf,GEN theta,GEN chi,GEN nu)
 static GEN
 nilordpadic(GEN p,long r,GEN fx,long mf,GEN gx)
 {
-  long Da,Na,La,Ma,first=1,n,v=varn(fx);
-  GEN alpha,chi,nu,eta,w,phi,pmf,Dchi;
-
-  if (DEBUGLEVEL>=3)
-  {
-    fprintferr("  entering Nilord_padic ");
-    if (DEBUGLEVEL>=4)
-    {
-      fprintferr("with parameters: p=%Z, expo=%ld\n",p,mf);
-      fprintferr("  fx=%Z, gx=%Z",fx,gx);
-    }
-    fprintferr("\n");
-  }
-  pmf=gpuigs(p,mf+1); alpha=polx[v]; n=lgef(fx)-3;
-  for(;;)
-  {
-    if (first) { chi=fx; nu=gx; first=0; }
-    else
-    {
-      w=factcp(p,fx,alpha);
-      chi=(GEN)w[1]; nu=(GEN)w[2];
-      if (cmpis((GEN)w[3],1)==1)
-        return Decomppadic(p,r,fx,mf,alpha,chi,nu);
-    }
-    Da=lgef(nu)-3; Na=n/Da;
-
-    if (mf+1<=padicprec(chi,p))
-    {
-      Dchi=modii(discsr(polmodi_keep(chi,pmf)), pmf);
-      if (gcmp0(Dchi)) Dchi=discsr(chi);
-    }
-    else
-      Dchi=discsr(chi);
-
-    if (gcmp0(Dchi))
-      alpha=gadd(alpha,gmul(p,polx[v]));
-    else
-    {
-      if (vstar(p,chi)[0] > 0)
-        alpha=gadd(alpha,gun);
-      else
-      {
-        eta=setup(p,chi,polx[v],nu, &La, &Ma);
-        if (La>1)
-          alpha=gadd(alpha,eleval(fx,eta,alpha));
-        else
-        {
-          if (Ma==Na) return NULL; /* correspond to [fx; 1] */
-          w=bsrch(p,chi,ggval(Dchi,p),eta,Ma);
-          phi=eleval(fx,(GEN)w[2],alpha);
-          if (gcmp1((GEN)w[1]))
-            return Decomppadic(p,r,fx,mf,phi,(GEN)w[3],(GEN)w[4]);
-          alpha=phi;
-        }
-      }
-    }
-  }
+  return nilord2(p, fx, mf, gx, r);
 }
 
 static GEN
@@ -1606,7 +1551,7 @@ factorpadic4(GEN f,GEN p,long prec)
     m = (pr<=mfx)?mfx+1:pr;
     w = (GEN)factmod(fx,p)[1]; r = lg(w)-1;
     g = lift_intern((GEN)w[r]);
-    p2 = (r == 1)? nilordpadic(p,m,fx,mfx,g)
+    p2 = (r == 1)? nilordpadic(p,pr,fx,mfx,g)
                  : Decomppadic(p,m,fx,mfx,polx[v],fx,g);
     if (p2)
     {
