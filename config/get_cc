@@ -73,7 +73,7 @@ EOT
 fi
 
 exe=$osname-$arch-ansi$$
-if ($CC ansi.c 2>/dev/null); then :
+if ($CC $extraflag -o $exe ansi.c 2>/dev/null); then :
 else
   cat << EOT
 ******************************************************************
