@@ -1607,7 +1607,7 @@ dbg_newrel(long jideal, long jdir, long phase, long cglob, long *col,
 static void
 dbg_cancelrel(long jideal,long jdir,long phase, long *col)
 {
-  fprintferr("rel. cancelled. phase %ld: %ld ",phase);
+  fprintferr("rel. cancelled. phase %ld: ",phase);
   if (DEBUGLEVEL>3) fprintferr("(jideal=%ld,jdir=%ld)",jideal,jdir);
   wr_rel(col); flusherr();
 }
