@@ -787,13 +787,14 @@ dirval(GEN x)
 GEN
 dirmul(GEN x, GEN y)
 {
-  long lx,ly,lz,dx,dy,av,tetpil,i,j;
+  long lx,ly,lz,dx,dy,av,tetpil,i,j,k,lim;
   GEN z,p1;
 
   if (typ(x)!=t_VEC || typ(y)!=t_VEC) err(talker,"not a dirseries in dirmul");
   av=avma; dx=dirval(x); dy=dirval(y); lx=lg(x); ly=lg(y);
   if (ly-dy<lx-dx) { z=y; y=x; x=z; lz=ly; ly=lx; lx=lz; lz=dy; dy=dx; dx=lz; }
   lz=min(lx*dy,ly*dx);
+  lim = stack_lim(av,1);
   z=cgetg(lz,t_VEC); for (i=1; i<lz; i++) z[i]=zero;
   for (j=dx; j<lx; j++)
   {
@@ -801,14 +802,19 @@ dirmul(GEN x, GEN y)
     if (!gcmp0(p1))
     {
       if (gcmp1(p1))
-	for (i=j*dy; i<lz; i+=j) z[i]=ladd((GEN)z[i],(GEN)y[i/j]);
+	for (k=dy,i=j*dy; i<lz; i+=j,k++) z[i]=ladd((GEN)z[i],(GEN)y[k]);
       else
       {
 	if (gcmp_1(p1))
-	  for (i=j*dy; i<lz; i+=j) z[i]=lsub((GEN)z[i],(GEN)y[i/j]);
+	  for (k=dy,i=j*dy; i<lz; i+=j,k++) z[i]=lsub((GEN)z[i],(GEN)y[k]);
 	else
-	  for (i=j*dy; i<lz; i+=j) z[i]=ladd((GEN)z[i],gmul(p1,(GEN)y[i/j]));
+	  for (k=dy,i=j*dy; i<lz; i+=j,k++) z[i]=ladd((GEN)z[i],gmul(p1,(GEN)y[k]));
       }
+    }
+    if (low_stack(lim, stack_lim(av,1)))
+    {
+      if (DEBUGLEVEL) fprintferr("doubling stack in dirmul\n");
+      z = gerepileupto(av,gcopy(z));
     }
   }
   tetpil=avma; return gerepile(av,tetpil,gcopy(z));
