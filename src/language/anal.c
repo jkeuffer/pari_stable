@@ -723,8 +723,8 @@ _append(GEN **table, long *n, long *N)
   if (++(*n) == *N)
   {
     long M = *N; *N <<= 1;
-    *table = (GEN*)gprealloc((void*)*table, (M + 1)*sizeof(GEN),
-                                           (*N + 1)*sizeof(GEN));
+    *table = (GEN*)gprealloc((void*)*table,(*N + 1)*sizeof(GEN),
+                                           ( M + 1)*sizeof(GEN));
   }
   (*table)[*n] = expr();
   if (br_status) err(breaker,"array context");
@@ -830,7 +830,6 @@ repeated_op()
 static F2GEN
 get_op_fun()
 {
-  F2GEN f;
   if (!*analyseur) return (F2GEN)NULL;
 
   /* op= constructs ? */
