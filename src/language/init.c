@@ -1349,14 +1349,16 @@ gcopy_av(GEN x, GEN *AVMA)
   long i,lx,tx=typ(x);
   GEN y;
 
-  if (tx == t_SMALL) return x;
-  lx = (tx == t_INT)?lgefint(x):lg(x); *AVMA = y = *AVMA - lx;
   if (! is_recursive_t(tx))
   {
+    if (tx == t_SMALL) return x;
+    lx = (tx == t_INT)? lgefint(x): lg(x);
+    *AVMA = y = *AVMA - lx;
     for (i=0; i<lx; i++) y[i] = x[i];
   }
   else
   {
+    lx = lg(x); *AVMA = y = *AVMA - lx;
     if (tx==t_POL || tx==t_LIST) lx = lgef(x);
     for (i=0; i<lontyp[tx]; i++) y[i] = x[i];
     for (   ; i<lx; i++)         y[i] = (long)gcopy_av((GEN)x[i], AVMA);
@@ -1373,9 +1375,14 @@ gcopy_av0(GEN x, GEN *AVMA)
 
   if (! is_recursive_t(tx))
   {
-    if (tx == t_INT && !signe(x)) return NULL; /* special marker */
     if (tx == t_SMALL) return x;
-    lx = lg(x); *AVMA = y = *AVMA - lx;
+    if (tx == t_INT)
+    {
+      if (!signe(x)) return NULL; /* special marker */
+      lx = lgefint(x);
+    }
+    else lx = lg(x);
+    *AVMA = y = *AVMA - lx;
     for (i=0; i<lx; i++) y[i] = x[i];
   }
   else
@@ -1395,7 +1402,7 @@ taille0(GEN x)
   long i,n,lx, tx = typ(x);
   if (!is_recursive_t(tx))
   {
-    if (tx == t_INT && !signe(x)) return 0;
+    if (tx == t_INT) return signe(x)? lgefint(x): 0;
     n = lg(x);
   }
   else
@@ -1411,10 +1418,14 @@ long
 taille(GEN x)
 {
   long i,n,lx, tx = typ(x);
-  if (tx == t_INT) return lgefint(x);
-  n = lg(x);
-  if (is_recursive_t(tx))
+  if (!is_recursive_t(tx))
   {
+    if (tx == t_INT) return lgefint(x);
+    n = lg(x);
+  }
+  else
+  {
+    n = lg(x);
     lx = (tx==t_POL || tx==t_LIST)? lgef(x): n;
     for (i=lontyp[tx]; i<lx; i++) n += taille((GEN)x[i]);
   }
