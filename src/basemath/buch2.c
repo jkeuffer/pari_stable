@@ -676,18 +676,6 @@ get_norm_fact(GEN gen, GEN ex, GEN *pd)
   *pd = d; return N;
 }
 
-static void
-add_to_fact(long l, long v, long e)
-{
-  long i;
-  if (!e) return;
-  for (i=1; i<=l && primfact[i] < v; i++)/*empty*/;
-  if (i <= l && primfact[i] == v)
-    exprimfact[i] += e;
-  else
-    store(v, e);
-}
-
 static GEN
 get_pr_lists(GEN FB, long N, int list_pr)
 {
@@ -729,23 +717,26 @@ get_pr_lists(GEN FB, long N, int list_pr)
 static GEN
 recover_partFB(FB_t *F, GEN Vbase, long N)
 {
-  GEN FB, *LV, iLP, L = get_pr_lists(Vbase, N, 0);
+  GEN FB, LV, iLP, L = get_pr_lists(Vbase, N, 0);
   long l = lg(L), p, ip, i;
 
   i = ip = 0;
   FB = cgetg(l, t_VECSMALL);
   iLP= cgetg(l, t_VECSMALL);
-  LV = (GEN*)cgetg(l, t_VEC);
+  LV = cgetg(l, t_VEC);
+#if 1 /* for debugging */
+  for (p=1;p<l;p++) FB[p]=iLP[p]=LV[p]=0;
+#endif
   for (p = 2; p < l; p++)
   {
     if (!L[p]) continue;
     FB[++i] = p;
-    LV[p] = vecextract_p(Vbase, (GEN)L[p]);
+    LV[p] = (long)vecextract_p(Vbase, (GEN)L[p]);
     iLP[p]= ip; ip += lg(L[p])-1;
   }
   F->KCZ = i;
   F->FB = FB; setlg(FB, i+1);
-  F->LV = LV;
+  F->LV = (GEN*)LV;
   F->iLP= iLP; return L;
 }
 
@@ -755,6 +746,34 @@ init_famat(GEN x)
   GEN y = cgetg(3, t_VEC);
   y[1] = (long)x;
   y[2] = lgetg(1,t_MAT); return y;
+}
+
+/* add v^e to factorization */
+static void
+add_to_fact(long v, long e)
+{
+  long i, l = primfact[0];
+  for (i=1; i<=l && primfact[i] < v; i++)/*empty*/;
+  if (i <= l && primfact[i] == v) exprimfact[i] += e; else store(v, e);
+}
+
+/* L (small) list of primes above the same p including pr. Return pr index */
+static int
+pr_index(GEN L, GEN pr)
+{
+  long j, l = lg(L);
+  GEN al = (GEN)pr[2];
+  for (j=1; j<l; j++)
+    if (gegal(al, gmael(L,j,2))) return j;
+  err(bugparier,"codeprime");
+  return 0; /* not reached */
+}
+
+static long
+Vbase_to_FB(FB_t *F, GEN pr)
+{
+  long p = itos((GEN)pr[1]);
+  return F->iLP[p] + pr_index(F->LV[p], pr);
 }
 
 /* return famat y (principal ideal) such that x / y is smooth [wrt Vbase] */
@@ -789,9 +808,10 @@ SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase)
   ex = cgetg(lgsub, t_VECSMALL);
   z  = init_famat(NULL);
   x0 = init_famat(x);
-  nbtest = 0; nbtest_lim = (ru-1) << 2;
+  nbtest = 1; nbtest_lim = 4;
   for(;;)
   {
+    if (DEBUGLEVEL>2) fprintferr("# ideals tried = %ld\n",nbtest);
     id = x0;
     for (i=1; i<lgsub; i++)
     {
@@ -811,21 +831,19 @@ SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase)
       y = ideallllred_elt(nf, (GEN)id[1], vdir);
       if (factorgen(F, nf, (GEN)id[1], y))
       {
-        long l = primfact[0];
-        for (i=1; i<lgsub; i++) add_to_fact(l,i,-ex[i]);
+        for (i=1; i<lgsub; i++) 
+          if (ex[i]) add_to_fact(Vbase_to_FB(F,(GEN)Vbase[i]), -ex[i]);
         return famat_mul((GEN)id[2], y);
       }
       for (i=1; i<ru; i++) vdir[i] = 0;
       vdir[bou] = 10;
     }
-    nbtest += ru-1;
-    if (DEBUGLEVEL>2) fprintferr("nbtest = %ld\n",nbtest);
-    if (nbtest > nbtest_lim)
+    if (++nbtest > nbtest_lim)
     {
       nbtest = 0;
-      if (lgsub < 7)
+      if (++lgsub < 7)
       {
-        lgsub++; nbtest_lim <<= 2;
+        nbtest_lim <<= 1;
         ex = cgetg(lgsub, t_VECSMALL);
       }
       else nbtest_lim = VERYBIGINT; /* don't increase further */
@@ -840,12 +858,12 @@ split_ideal(GEN nf, GEN x, GEN Vbase)
   FB_t F;
   GEN L = recover_partFB(&F, Vbase, lg(x)-1);
   GEN y = SPLIT(&F, nf, x, Vbase);
-  long i, l = lg(F.FB);
+  long p,j, i, l = lg(F.FB);
 
+  p = j = 0; /* -Wall */
   for (i=1; i<=primfact[0]; i++)
   { /* decode index C = ip+j --> (p,j) */
-    long p,q, j,k, t, C = primfact[i];
-    p = j = 0; /* -Wall */
+    long q,k,t, C = primfact[i];
     for (t=1; t<l; t++)
     {
       q = F.FB[t];
@@ -1105,7 +1123,7 @@ _isprincipal(GEN bnf, GEN x, long *ptprec, long flag)
   GEN clg2    = (GEN)bnf[9];
   int old_format = (typ(clg2[2]) == t_MAT);
 
-  U = (GEN)clg2[1];
+  U = (GEN)clg2[1]; if (old_format) U = ginv(U);
   cyc = gmael3(bnf,8,1,2); c = lg(cyc)-1;
   gen = gmael3(bnf,8,1,3);
   ex = cgetg(c+1,t_COL);
@@ -1127,7 +1145,6 @@ _isprincipal(GEN bnf, GEN x, long *ptprec, long flag)
   /* x = g_W Wex + g_B Bex - [xar]
    *   = g_W A - [xar] + [C_B]Bex  since g_W B + g_B = [C_B] */
   A = gsub(small_to_col(Wex), gmul_mati_smallvec(B,Bex));
-  if (old_format) U = ginv(U);
   Q = gmul(U, A);
   for (i=1; i<=c; i++)
     Q[i] = (long)truedvmdii((GEN)Q[i], (GEN)cyc[i], (GEN*)(ex+i));
@@ -2270,17 +2287,16 @@ decode_pr_lists(GEN nf, GEN pfc)
 }
 
 static GEN
-codeprime(GEN L, GEN pr)
+decodeprime(GEN T, GEN L, long n)
 {
-  long j, n, l, p = itos((GEN)pr[1]);
-  GEN al, fa;
-
-  al = (GEN)pr[2]; n = lg(al)-1;
-  fa = (GEN)L[p]; l = lg(fa);
-  for (j=1; j<l; j++)
-    if (gegal(al, gmael(fa,j,2))) return utoi(j-1 + n*p);
-  err(bugparier,"codeprime");
-  return NULL; /* not reached */
+  long t = itos(T);
+  return gmael(L, t/n, t%n + 1);
+}
+static GEN
+codeprime(GEN L, long N, GEN pr)
+{
+  long p = itos((GEN)pr[1]);
+  return utoi( N*p + pr_index((GEN)L[p], pr)-1 );
 }
 
 static GEN
@@ -2289,15 +2305,8 @@ codeprimes(GEN Vbase, long N)
   GEN v, L = get_pr_lists(Vbase, N, 1);
   long i, l = lg(Vbase);
   v = cgetg(l, t_VEC);
-  for (i=1; i<l; i++) v[i] = (long)codeprime(L, (GEN)Vbase[i]);
+  for (i=1; i<l; i++) v[i] = (long)codeprime(L, N, (GEN)Vbase[i]);
   return v;
-}
-
-static GEN
-decodeprime(GEN T, GEN L, long n)
-{
-  long t = itos(T);
-  return gmael(L, t/n, t%n + 1);
 }
 
 /* v = bnf[10] */
