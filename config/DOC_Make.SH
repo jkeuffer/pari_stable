@@ -12,7 +12,7 @@ manual: users.dvi
 tutorial: tutorial.dvi
 refcard: refcard.ps
 
-.SUFFIXES: .tex .ipf .pod .inf .dumbpod
+.SUFFIXES: .tex .ipf .pod .inf .dumbpod .3 .html
 
 paricfg.tex: paricfg.tex.in
 	sed -e 's/@version@/$version.$patch/'\\
@@ -96,7 +96,7 @@ veryclean: clean
 	perl gphelp -to_pod \$*.tex > tmp_pod && mv tmp_pod \$*.pod
 
 .tex.dumbpod:
-	perl gphelp -to_dumb_pod $*.tex > tmp_pod && mv tmp_pod $*.dumbpod
+	perl gphelp -to_dumb_pod \$*.tex > tmp_pod && mv tmp_pod \$*.dumbpod
 
 .ipf.inf:
 	ipfc /INF \$*.ipf
@@ -109,12 +109,21 @@ veryclean: clean
 pari.ipf:  refcard.pod tutorial.pod usersch1.pod usersch1.pod usersch2.pod usersch3.pod usersch4.pod usersch5.pod appa.pod appb.pod appc.pod
 	pod2ipf --title="PARI/GP Manual" --by-files --section-name="Getting started" --file=refcard.pod --file=tutorial.pod --section-name="User guide" --file=usersch1.pod --file=usersch1.pod --file=usersch2.pod --file=usersch3.pod --file=usersch4.pod --file=usersch5.pod --section-name=Appendices --file=appa.pod --file=appb.pod --file=appc.pod > tmp_ipf && mv tmp_ipf pari.ipf
 
+dumbpod: appa.dumbpod appb.dumbpod appc.dumbpod usersch1.dumbpod usersch2.dumbpod usersch3.dumbpod usersch4.dumbpod usersch5.dumbpod
+
 # Wrong syntax...  How to convert a group of files?
 #pari.html:  refcard.dumbpod tutorial.dumbpod usersch1.dumbpod usersch1.dumbpod usersch2.dumbpod usersch3.dumbpod usersch4.dumbpod usersch5.dumbpod appa.dumbpod appb.dumbpod appc.dumbpod
 #	pod2html --title="PARI/GP Manual" --by-files --section-name="Getting started" --file=refcard.dumbpod --file=tutorial.dumbpod --section-name="User guide" --file=usersch1.dumbpod --file=usersch1.dumbpod --file=usersch2.dumbpod --file=usersch3.dumbpod --file=usersch4.dumbpod --file=usersch5.dumbpod --section-name=Appendices --file=appa.dumbpod --file=appb.dumbpod --file=appc.dumbpod > tmp_ipf && mv tmp_ipf pari.html
 
 .dumbpod.html:
-	pod2html --title="PARI/GP Manual $* Getting started" --file=$*.dumbpod > tmp_html && mv tmp_html $*.html
+	pod2html --title="PARI/GP Manual, part \$*" --infile=\$*.dumbpod --outfile=tmp_html && mv tmp_html \$*.html
+
+manpages: dumbpod appa.3 appb.3 appc.3 usersch1.3 usersch2.3 usersch3.3 usersch4.3 usersch5.3
+
+html: dumbpod appa.html appb.html appc.html usersch1.html usersch2.html usersch3.html usersch4.html usersch5.html
+
+.dumbpod.3:
+	pod2man --section=3 --center="PARI/GP Manual, part \$*" --release=$version.$patch --lax \$*.dumbpod > tmp_man && mv tmp_man \$*.3
 
 
 EOT
