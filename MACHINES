@@ -71,6 +71,7 @@ SPARCv7(SS400)  ???  SunOS-4.1.4     gcc   - dl2  107074  106494  2.0.16(21)DE
 SPARCv7(HWS210) ???  Linux-2.2.5     gcc   -   -   98488       -  2.0.16(15)DE
 ------------------------------------------------------------------------------
 Intel/x86
+AMD Athlon   500MHz  Linux-2.2.13    gcc X11 dl2    2736    2724  2.0.18    MS
 AMD K6-2     350Mhz  Linux-2.0.34   egcs X11 dl2   (4856)  (4756) 2.0.11    SH
 AMD K6-2     350Mhz  Linux-2.0.36    gcc X11 dl2    5154    4850  2.0.17 
 AMD K6       266MHz  Linux-2.2.5    pgcc X11 dl2    5861    6001  2.0.16(17)IS
@@ -87,6 +88,7 @@ PentiumII    233MHz  FreeBSD-2.2.5   gcc X11 dl2   (6251)  (6114) 2.0.11
 PentiumII    233MHz  Linux-2.0.35    gcc X11 dl2   (7460)  (7586) 2.0.12    HG
 PentiumPro   200MHz  Linux-2.0.29    gcc X11 dl2    6886    6592  2.0.17
 Pentium      266Mhz  Linux-2.0.29    gcc X11 dl2   (7256)  (7044) 2.0.11
+Pentium      200MHz  Linux-2.2.10    gcc X11 dl2   12062   12340  2.0.18    MS
 Pentium      200Mhz  NextStep-3.3    cc    -   -   16035       -  2.0.06    MS
 Pentium      166MHz  FreeBSD-2.2.5   gcc X11 dl2  (15159) (14481) 2.0.11
 Pentium      166MHz  Solaris-2.6     gcc X11 dl2  (13550) (13746) 2.0.12    GN
