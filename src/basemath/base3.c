@@ -805,7 +805,7 @@ GEN
 lllreducemodmatrix(GEN x,GEN y)
 {
   gpmem_t av = avma;
-  GEN z = lllint_ip(y);
+  GEN z = lllint_ip(y,4);
   return gerepileupto(av, reducemodinvertible(x, z));
 }
 
@@ -1439,7 +1439,7 @@ zarchstar(GEN nf,GEN x,GEN arch,long nba)
   r = nba+1; for (i=1; i<=N; i++) setlg(bas[i], r);
   if (!zk)
   {
-    x = lllint_ip(x);
+    x = lllint_ip(x,4);
     bas = gmul(bas, x);
   }
 

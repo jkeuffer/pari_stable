@@ -1946,7 +1946,7 @@ ideal_better_basis(GEN nf, GEN x, GEN M)
 
   if (typ(nf[5]) != t_VEC) return x;
   if ((prec<<1) < nfprec) prec = (prec+nfprec) >> 1;
-  x = lllint_ip(x);
+  x = lllint_ip(x,4);
   a = qf_base_change(gmael(nf,5,3),x,1);
   setprec(a,prec);
   b = lllgramintern(a,4,1,prec);
@@ -3507,7 +3507,7 @@ findmin(GEN nf, GEN ideal, GEN muf,long prec)
   m = lllgramintern(m,4,1,prec);
   if (!m)
   {
-    m = qf_base_change(gmael(nf,5,3), lllint_ip(ideal), 0);
+    m = qf_base_change(gmael(nf,5,3), lllint_ip(ideal,4), 0);
     m = lllgramintern(m,4,1,prec);
     if (!m) err(precer,"rnflllgram");
   }

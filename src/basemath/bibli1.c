@@ -496,9 +496,9 @@ lllint_i(GEN x, long alpha, int gram, GEN *pth, GEN *ptfl, GEN *ptB)
 
 /* return x * lllint(x) */
 GEN
-lllint_ip(GEN x)
+lllint_ip(GEN x, long alpha)
 {
-  return lllint_i(x, LLLDFT, 0, NULL, NULL, NULL);
+  return lllint_i(x, alpha, 0, NULL, NULL, NULL);
 }
 
 GEN
@@ -1197,7 +1197,7 @@ lindep2(GEN x, long bit)
     p1[lx]           = lcvtoi(gshift((GEN)re[i],bit),&e);
     if (im) p1[lx+1] = lcvtoi(gshift((GEN)im[i],bit),&e);
   }
-  p1 = (GEN)lllint_ip(p2)[1];
+  p1 = (GEN)lllint_ip(p2,100)[1];
   p1[0] = evaltyp(t_VEC) | evallg(lx);
   return gerepilecopy(av, p1);
 }
