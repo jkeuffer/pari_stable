@@ -132,6 +132,8 @@ BA 48- Configure: using gcc-3.3 + LANG=french, Configure failed to detect gcc
 9727112469435556047168454738353621102783718736137552743946577993495054202848
 9372915917197045423574773583244796785665263319216397122018435444897 ,11)
       --> impossible assignment I-->S  [ stack corruption ].
+   56- typo in kummer.c:invimsubgroup [ hnfmod --> hnfmodid ]. Very rare
+       weird error message in rnfkummer(): "wrong subgroup in conductor".
 
   Changed
     1- bnfinit: [small_norm phase] speed up norm computations.
