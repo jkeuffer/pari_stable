@@ -921,49 +921,45 @@ shiftpol(GEN x, long v)
 
 /* Sylvester's matrix, mod p^m (assumes f1 monic) */
 static GEN
-sylpm(GEN f1,GEN f2,GEN pm)
+sylpm(GEN f1, GEN f2, GEN pm)
 {
-  long n,j,v=varn(f1);
-  GEN a,h;
-
-  n=degpol(f1); a=cgetg(n+1,t_MAT);
+  long j, n = degpol(f1), v = varn(f1);
+  GEN h, a = cgetg(n+1,t_MAT);
   h = FpX_rem(f2,f1,pm);
   for (j=1;; j++)
   {
-    a[j] = (long)pol_to_vec(h,n);
+    a[j] = (long)pol_to_vec(h, n);
     if (j == n) break;
-    h = FpX_rem(shiftpol(h,v),f1,pm);
+    h = FpX_rem(shiftpol(h,v), f1, pm);
   }
-  return hnfmodid(a,pm);
+  return hnfmodidpart(a, pm);
 }
 
 /* polynomial gcd mod p^m (assumes f1 monic) */
 GEN
-gcdpm(GEN f1,GEN f2,GEN pm)
+gcdpm(GEN f1, GEN f2, GEN pm)
 {
-  pari_sp av=avma,tetpil;
-  long n,c,v=varn(f1);
-  GEN a,col;
-
-  n=degpol(f1); a=sylpm(f1,f2,pm);
-  for (c=1; c<=n; c++)
-    if (signe(resii(gcoeff(a,c,c),pm))) break;
-  if (c > n) { avma=av; return zeropol(v); }
-
-  col = gdiv((GEN)a[c], gcoeff(a,c,c)); tetpil=avma;
-  return gerepile(av,tetpil, gtopolyrev(col,v));
+  pari_sp av = avma;
+  long c, n = degpol(f1), v = varn(f1);
+  GEN col, a = sylpm(f1,f2,pm);
+  for (c = 1; c <= n; c++)
+    if (!egalii(gcoeff(a,c,c), pm))
+    {
+      col = gdiv((GEN)a[c], gcoeff(a,c,c));
+      return gerepilecopy(av, vec_to_pol(col,v));
+    }
+  avma = av; return zeropol(v);
 }
 
 /* reduced resultant mod p^m (assumes x monic) */
 GEN
-respm(GEN x,GEN y,GEN pm)
+respm(GEN x, GEN y, GEN pm)
 {
   pari_sp av = avma;
-  GEN p1 = sylpm(x,y,pm);
-
-  p1 = gcoeff(p1,1,1);
-  if (egalii(p1,pm)) { avma = av; return gzero; }
-  return gerepileuptoint(av, icopy(p1));
+  GEN z = sylpm(x,y,pm);
+  z = gcoeff(z,1,1);
+  if (egalii(z,pm)) { avma = av; return gzero; }
+  return gerepileuptoint(av, icopy(z));
 }
 
 static GEN
@@ -1198,7 +1194,7 @@ manage_cache(GEN chi, GEN pp, GEN ns)
 }
 
 
-/* compute the c first Newton sums modulo pp of the 
+/* compute the c first Newton sums modulo pp of the
    characteristic polynomial of a(x) mod g(x) */
 static GEN
 newtonsums(GEN a, GEN chi, GEN pp, GEN ns, long c)
@@ -1276,7 +1272,7 @@ newtoncharpoly(GEN a, GEN chi, GEN pp, GEN ns)
   return gerepileupto(av, gtopoly(c, vn));
 }
 
-/* guess if a mod chi has positive valuation 
+/* guess if a mod chi has positive valuation
    by looking at the newton sums */
 static long
 fastvalpos(GEN a, GEN chi, GEN p, GEN ns, long E)
@@ -1352,91 +1348,79 @@ factcp(GEN p, GEN f, GEN beta, GEN pp, GEN ns)
   b[3] = lstoi(l); return b;
 }
 
-/* compute the polynomial nu_beta. If something 
-   unexpected happens, it returns NULL */
+/* Compute nu_beta in Fp[X]. If something unexpected happens, return NULL */
 static GEN
 fastnu(GEN p, GEN f, GEN beta, GEN pdr)
 {
-  long n, j, k = 0, v = varn(f), av = avma;
-  GEN p1, p2, p3, p4, G, V, nu, h, ump;
+  long j, k, n = degpol(f), v = varn(f), N = 2*n+1, av = avma;
+  GEN p1, p2, c, d, G, V, nu, h;
 
-  n   = degree(f);
-  G   = cgetg(2*n+2, t_MAT);
-  V   = zerovec(2*n+1);
-  p3  = gzero;
-  p4  = mulii(pdr, sqri(p));
+  G   = cgetg(N+1, t_MAT);
+  c  = gzero;
+  d  = mulii(pdr, sqri(p));
 
   beta = gmul(pdr, beta);
   p1   = beta;
   for (k = 1; k <= n; k++)
   {
+    V = zerocol(N); G[N-k] = (long)V;
     V[n+1-k] = un;
-    for (j = n+1; j <= 2*n+1; j++) 
+    for (j = n+1; j <= N; j++)
     {
-      p2 = polcoeff0(p1, 2*n+1-j, -1); 
-      if (signe(p2)) p3 = ggcd(p3, p2);
+      p2 = polcoeff0(p1, N-j, -1);
+      if (signe(p2)) c = ggcd(c, p2);
       V[j] = (long)p2;
     }
-    G[2*n+1-k] = lcopy(V);
-    V[n+1-k] = zero;
-    if (k < n) 
+    if (k < n)
     {
       p1 = gdiv(gmul(p1, beta), pdr);
       p1 = gmod(p1, f);
-      p2 = ggcd(Q_denom(p1), p); 
+      p2 = ggcd(Q_denom(p1), p);
       if (!gcmp1(p2)) { avma = av; return NULL; }
-      p1 = redelt(p1, p4, gun);
+      p1 = redelt(p1, d, gun);
     }
   }
-  
-  if (DEBUGLEVEL >= 6) 
-    fprintferr(" content in fastnu is %Z\n", p3);
+
+  if (DEBUGLEVEL >= 6)
+    fprintferr(" content in fastnu is %Z\n", c);
 
   for (k = 1; k <= n; k++)
   {
-    p1 = (GEN)G[2*n+1-k];
-    for (j = n+1; j <= 2*n+1; j++) 
+    p1 = (GEN)G[N-k];
+    for (j = n+1; j <= N; j++)
     {
       p2 = (GEN)p1[j];
-      if (signe(p2)) { p2 = divii(p2, p3); p1[j] = (long)p2; }
+      if (signe(p2)) { p2 = diviiexact(p2, c); p1[j] = (long)p2; }
     }
   }
-  pdr = divii(pdr, p3);
-  p4  = divii(p4, p3);
-  
-  for (j = n+1; j <= 2*n+1; j++) V[j] = zero;
-  V[2*n+1] = (long)pdr;
-  V[n+1]   = un;
-  G[2*n+1] = lcopy(V);
-  V[2*n+1] = zero;
-  V[n+1]   = zero;
+  pdr= diviiexact(pdr, c);
+  d  = diviiexact(d, c);
+
+  V = zerocol(N); G[N] = (long)V;
+  V[N] = (long)pdr; V[n+1] = un;
 
   p1 = mulii(pdr, p);
   for (k = 1; k <= n; k++)
   {
+    V = zerocol(N); G[k] = (long)V;
     V[n+k+1] = (long)p1;
-    G[k] = lcopy(V);
-    V[n+k+1] = zero;
   }
-  
   if (DEBUGLEVEL >= 6) fprintferr("  fastnu: G is computed\n");
 
-  G = hnfmodid(G, p4);
-
+  G = hnfmodid(G, d);
   if (DEBUGLEVEL >= 6) fprintferr("  fastnu: HNF(G) is computed\n");
-  
-  ump = gmodulcp(gun, p);
-  h = gmul(ump, gtopoly((GEN)G[n+1], v));
+
+  h = gtopoly((GEN)G[n+1], v);
   for (j = 1; j <= n; j++)
-    h = ggcd(h, gmul(ump, gtopoly((GEN)G[j], v)));
+    h = FpX_gcd(h, gtopoly((GEN)G[j], v), p);
 
   h = gdiv(h, gpowgs(polx[v], n));
   if (gcmp1(h)) { avma = av; return NULL; }
-  nu = (GEN)factmod0(lift(h),p)[1];
+  nu = (GEN)factmod0(h, p)[1];
   if (lg(nu) > 2) { avma = av; return NULL; }
   return gerepilecopy(av, (GEN)nu[1]);
 }
- 
+
 /* return the prime element in Zp[phi] */
 static GEN
 getprime(GEN p, GEN chi, GEN phi, GEN chip, GEN nup, long *Lp, long *Ep)
@@ -1624,27 +1608,27 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 
       if (fm == -1 || (!fm && eq > go_fm && !er))
       {
-	if (fm == 0) 
+	if (fm == 0)
 	{
 	  if (DEBUGLEVEL >= 5)
 	    fprintferr("  ** switching to fast mode\n");
 	  fm = 1;
 	}
-	else 
+	else
 	{
 	  if (DEBUGLEVEL >= 5)
 	    fprintferr("  ** something's wrong\n  ** switching back to normal mode\n");
 	  fm = 0;
 	  go_fm = eq+2;
-	} 
+	}
       }
 
-      if (fm) 
+      if (fm)
       {
 	er++;
 	if (!(er%Ea))  { er = 0; eq++; }
       }
-      else 
+      else
       { /* if pmf divides norm(beta) then it's useless */
         long L, E;
 	p1 = modii(ZX_QX_resultant(chi, beta), pmf);
@@ -1689,7 +1673,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	if (er || !chib)
 	{
 	  chig = mycaract(chi, gamm, p, pmf, ns);
-	  /* FIXME: should not it be? 
+	  /* FIXME: should not it be?
 	     chig = mycaract(chi, gamm, p, p, ns); */
 	}
 	else
@@ -1706,7 +1690,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	  vstar(p, chib, &L, &E);
 	  eq = (long)(-L / E);
 	  er = (long)(-L*Ea / E - eq*Ea);
-	  
+	
 	  if (eq) gamm = gmul(beta, gpowgs(p, eq)); else gamm = beta;
 	  if (er)
 	  {
@@ -1722,8 +1706,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	nug  = (GEN)nug[l];
 	
 	if (l > 1)
-	{
-	  /* there are at least 2 factors mod. p => chi can be split */
+	{ /* at least 2 factors mod p ==> chi can be split */
 	  phi  = RX_RXQ_compo(gamm, alph, fx);
 	  phi  = redelt(phi, p, pmf);
 	  if (flag) mf += 3;
@@ -1731,15 +1714,12 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	}
 
 	Fg = degpol(nug);
-	if (Fa%Fg)
-	{
-	  if (DEBUGLEVEL >= 5)
-	    fprintferr("  Increasing Fa\n");
-	  /* we compute a new element such F = lcm(Fa, Fg) */
+	if (Fa % Fg)
+	{ /* compute a new element such that F = lcm(Fa, Fg) */
+	  if (DEBUGLEVEL >= 5) fprintferr("  Increasing Fa\n");
 	  w = testb2(p, chi, Fa, gamm, pmf, Fg, ns);
 	  if (gcmp1((GEN)w[1]))
-	  {
-	    /* there are at least 2 factors mod. p => chi can be split */
+	  { /* at least 2 factors mod p ==> chi can be split */
 	    phi = RX_RXQ_compo((GEN)w[2], alph, fx);
 	    phi = redelt(phi, p, pmf);
 	    if (flag) mf += 3;
@@ -1747,8 +1727,8 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	  }
 	  break;
 	}
-      } 
-      else 
+      }
+      else
       {
 	nug = fastnu(p, chi, gamm, pdr);
 	if (!nug) { fm = -1; continue; }
@@ -1764,7 +1744,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	if (!fm)
 	  err(talker, "bug in nilord (no root). Is p = %Z a prime?", p);
 	else
-          { fm = -1; continue; }  
+          { fm = -1; continue; }
       }
 
       for (i = 1;; i++)
@@ -1774,7 +1754,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	  if (!fm)
 	    err(talker, "bug in nilord (no root). Is p = %Z a prime?", p);
 	  else
-	  { fm = -1; break; }  
+	  { fm = -1; break; }
 	}
         delt = gneg_i(gsubst(gcoeff(w, 2, i), nv, polx[v]));
         eta  = gsub(gamm, delt);	
@@ -1792,15 +1772,15 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	    if (fastvalpos(eta, chi, p, ns, Ea)) break;
 	    continue;
 	  }
-	  else 
+	  else
 	  {
 	    GEN p2 = ggcd(Q_denom(eta), pdr);
-	    p1 = gmodulcp(gmul(p2, eta), 
+	    p1 = gmodulcp(gmul(p2, eta),
 			  redelt(chi, mulii(p, gpowgs(p2, N)), pmf));
 	    p1 = gmod(divii(gnorm(p1), gpowgs(p2, N)), p);
-	    if (signe(p1)) continue; 
+	    if (signe(p1)) continue;
 	    if (fm) break;
-	    
+	
 	    p1   = factcp(p, chi, eta, pmf, ns);
 	    chie = (GEN)p1[1];
 	    nue  = (GEN)p1[2];
@@ -1822,10 +1802,10 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
         if (gegal(nue, polx[v])) break;
       }
       (void)delete_var();
-      
+
       if (fm == -1) continue;
 
-      if (!fm) 
+      if (!fm)
       {
         long Le, Ee;
 	if (!signe(modii(constant_term(chie), pmr)))
@@ -2146,7 +2126,7 @@ apply_kummer(GEN nf,GEN u,GEN e,GEN p)
     {
       norm_S S;
       S.D = S.w = S.M = NULL; S.T = T;
-      if (!is_uniformizer(u, gpowgs(p,f+1), &S)) u[2] = laddii((GEN)u[2], p);  
+      if (!is_uniformizer(u, gpowgs(p,f+1), &S)) u[2] = laddii((GEN)u[2], p);
     }
     t = algtobasis_i(nf, FpX_div(T,u,p));
     pr[2] = (long)algtobasis_i(nf,u);
@@ -2201,7 +2181,7 @@ pol_min(GEN mul, GEN p)
   GEN z, pow = get_powers(mul, p);
   z = FpM_deplin(pow, p);
   if (!z) errprime(p);
-  return gerepileupto(av, gtopolyrev(z,0));
+  return gerepilecopy(av, vec_to_pol(z,0));
 }
 
 static GEN
@@ -2545,7 +2525,7 @@ modprinit(GEN nf, GEN pr, int zk)
   mul = FpM_mul(ffproj, mul, p);
 
   pow = get_powers(mul, p);
-  T = gtopolyrev(FpM_deplin(pow, p), varn(nf[1]));
+  T = vec_to_pol(FpM_deplin(pow, p), varn(nf[1]));
   nfproj = cgetg(f+1, t_MAT);
   for (i=1; i<=f; i++) nfproj[i] = (long)lift_to_zk((GEN)pow[i], c, N);
   nfproj = gmul((GEN)nf[7], nfproj);
@@ -2618,7 +2598,7 @@ kill_denom(GEN x, GEN nf, GEN p, GEN modpr)
   if (gcmp1(den)) return x;
 
   v = ggval(den,p);
-  if (v) 
+  if (v)
   {
     GEN tau = modpr_TAU(modpr);
     if (!tau) err(talker,"modpr initialized for integers only!");
@@ -3510,7 +3490,7 @@ polcompositum0(GEN A, GEN B, long flall)
   }
 
   D = NULL; /* -Wall */
-  k = same? -1: 1; 
+  k = same? -1: 1;
   C = ZY_ZXY_resultant_all(A, B, &k, flall? &LPRS: NULL);
   if (same)
   {
@@ -3772,7 +3752,7 @@ do_SWAP(GEN I, GEN MC, GEN MCS, GEN h, GEN mu, GEN B, long kmax, long k,
   swap(I[k-1],  I[k]);
   for (j=1; j<=k-2; j++) swap(coeff(mu,k-1,j),coeff(mu,k,j));
   muf = gcoeff(mu,k,k-1);
-  mufc = gconj(muf); 
+  mufc = gconj(muf);
   Bf = gadd((GEN)B[k], vecmul(real_i(vecmul(muf,mufc)), (GEN)B[k-1]));
   if (check_0(Bf)) return 1; /* precision problem */
 
@@ -3858,7 +3838,7 @@ rnflllgram(GEN nf, GEN pol, GEN order,long prec)
   MCS = idmat(lx-1); /* dummy for gerepile */
 PRECNF:
   if (count == MAX_COUNT)
-  { 
+  {
     prec = (prec<<1)-2; count = 0;
     if (DEBUGLEVEL) err(warnprec,"rnflllgram",prec);
     nf = nfnewprec(nf,prec);
@@ -3910,7 +3890,7 @@ PRECPB:
     }
     else
     {
-      for (l=k-2; l; l--) 
+      for (l=k-2; l; l--)
         if (!RED(k, l, h, mu, MC, nf, I, &Ik_inv)) goto PRECPB;
       k++;
     }
@@ -3962,7 +3942,7 @@ rnfpolred(GEN nf, GEN pol, long prec)
     id[1] = (long)newO;
     id[2] = (long)newI;
   }
-  
+
   id = (GEN)rnflllgram(nf,pol,id,prec)[1];
   O = (GEN)id[1];
   I = (GEN)id[2]; n = lg(I)-1;

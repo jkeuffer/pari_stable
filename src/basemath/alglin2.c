@@ -2324,10 +2324,14 @@ hnf0(GEN A, int remove)
 GEN
 hnf(GEN x) { return hnf0(x,1); }
 
+#define MOD  1
+#define PART 2
+
 /* dm = multiple of diag element (usually detint(x)) */
-/* flag: don't/do append dm*matid. */
+/* flag & MOD:     don't/do append dm*matid. */
+/* flag & PART: don't reduce once diagonal is known; */
 static GEN
-allhnfmod(GEN x,GEN dm,int flag)
+allhnfmod(GEN x, GEN dm, int flag)
 {
   pari_sp av, lim;
   long li,co,i,j,k,def,ldef,ldm;
@@ -2346,7 +2350,7 @@ allhnfmod(GEN x,GEN dm,int flag)
   if (li > co)
   {
     ldef = li - co;
-    if (flag) err(talker,"nb lines > nb columns in hnfmod");
+    if (flag & MOD) err(talker,"nb lines > nb columns in hnfmod");
   }
   /* Avoid wasteful divisions. we only want to prevent coeff explosion, so
    * only reduce mod dm when lg(coeff) > ldm */
@@ -2380,9 +2384,9 @@ allhnfmod(GEN x,GEN dm,int flag)
     d = bezout(gcoeff(x,i,def),b,&u,&v);
     w[i] = lmod(gmul(u,(GEN)x[def]), b);
     if (!signe(gcoeff(w,i,i))) coeff(w,i,i) = (long)d;
-    if (flag && i > 1) b = diviiexact(b,d);
+    if ((flag & MOD) && i > 1) b = diviiexact(b,d);
   }
-  if (ldef > 0) /* implies flag = 0, prepend relevant cols from dm * Id */
+  if (ldef > 0) /* implies flag&MOD = 0, prepend relevant cols from dm * Id */
   {
     for (i = 1; i <= ldef; i++) 
     {
@@ -2390,6 +2394,7 @@ allhnfmod(GEN x,GEN dm,int flag)
       w[i] = (long)t;
     }
   }
+  if (flag & PART) return w;
   /* compute optimal value for dm */
   dm = gcoeff(w,1,1);
   for (i=2; i<li; i++) dm = mpppcm(dm, gcoeff(w,i,i));
@@ -2415,10 +2420,15 @@ allhnfmod(GEN x,GEN dm,int flag)
 }
 
 GEN
-hnfmod(GEN x, GEN detmat) { return allhnfmod(x,detmat,1); }
+hnfmod(GEN x, GEN detmat) { return allhnfmod(x,detmat, MOD); }
 
 GEN
-hnfmodid(GEN x, GEN p) { return allhnfmod(x,p,0); }
+hnfmodid(GEN x, GEN p) { return allhnfmod(x, p, 0); }
+
+GEN
+hnfmodidpart(GEN x, GEN p) { return allhnfmod(x, p, PART); }
+#undef MOD
+#undef PART
 
 /***********************************************************************/
 /*                                                                     */
