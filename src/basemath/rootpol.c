@@ -13,7 +13,7 @@ GEN polrecip_i(GEN x);
 
 static GEN gunr, globalu;
 static long KARASQUARE_LIMIT, COOK_SQUARE_LIMIT, Lmax, step4;
-static double *radius;
+static GEN *radius;
 
 /********************************************************************/
 /**                                                                **/
@@ -321,10 +321,10 @@ log2ir(GEN x)
   if (signe(x)==0) return (double) -pariINFINITY;
   if (typ(x)==t_INT)
   {
-    if (lgef(x)==3) return (double) log2( (double)(ulong) x[2]);
+    if (lgefint(x)==3) return (double) log2( (double)(ulong) x[2]);
     l=(double)(ulong) x[2]+
 	(double)(ulong) x[3] / exp2((double) BITS_IN_LONG);
-    return log2(l)+ (double) BITS_IN_LONG * (lgef(x)-3.);
+    return log2(l)+ (double) BITS_IN_LONG * (lgefint(x)-3.);
   }
   /* else x is real */
   return 1.+ (double) expo(x)+log2( (double)(ulong) x[2]) - (double) BITS_IN_LONG;
@@ -337,7 +337,8 @@ mylog2(GEN z)
 
   if (typ(z)!=t_COMPLEX) return log2ir(z);
 
-  x=log2ir((GEN) z[1]); y=log2ir((GEN) z[2]);
+  x = log2ir((GEN) z[1]);
+  y = log2ir((GEN) z[2]);
   if (fabs(x-y)>10) return (x>y)? x: y;
   return x+0.5*log2( 1 + exp2(2*(y-x)));
 }
@@ -348,15 +349,15 @@ findpower(GEN p)
   double x, logbinomial,pente,pentemax=-pariINFINITY;
   long n=lgef(p)-3,i;
 
-  logbinomial=mylog2((GEN) p[n+2]);
+  logbinomial = mylog2((GEN) p[n+2]);
   for (i=n-1; i>=0; i--)
   {
-    logbinomial=logbinomial+log2((double) (i+1) / (double) (n-i));
-    x=mylog2((GEN) p[2+i])-logbinomial;
+    logbinomial += log2((double) (i+1) / (double) (n-i));
+    x = mylog2((GEN) p[2+i])-logbinomial;
     if (x>-pariINFINITY)
     {
-      pente=x/ (double) (n-i);
-      if (pente>pentemax) pentemax=pente;
+      pente = x/ (double) (n-i);
+      if (pente > pentemax) pentemax = pente;
     }
   }
   return (long) -floor(pentemax);
@@ -502,19 +503,19 @@ pol_to_gaussint(GEN p, long bitprec)
 
 /* returns p(R*x)/R^n (in R or R[i]), n=deg(p), bitprec bits of precision */
 static GEN
-homothetie(GEN p, double R, long bitprec)
+homothetie(GEN p, GEN R, long bitprec)
 {
   GEN q,r,gR,aux;
   long n=lgef(p)-3,i;
 
-  gR=mygprec(dbltor(1/R),bitprec);
+  gR=mygprec(ginv(R),bitprec);
   q=mygprec(p,bitprec);
-  r=cgetg(n+3,t_POL); r[1]=evalsigne(1)+evalvarn(varn(p))+evallgef(n+3);
+  r=cgetg(n+3,t_POL); r[1]=p[1];
   aux=gR; r[n+2]=q[n+2];
   for (i=n-1; i>=0; i--)
   {
-    r[i+2]=lmul(aux,(GEN)q[i+2]);
-    aux=gmul(aux,gR);
+    r[i+2] = lmul(aux,(GEN)q[i+2]);
+    aux = mulrr(aux,gR);
   }
   return r;
 }
@@ -588,7 +589,7 @@ lower_bound(GEN p, long *k, double eps)
 
 /* returns the maximum of the modulus of p with a relative error tau */
 static GEN
-gmax_modulus(GEN p, double tau)
+max_modulus(GEN p, double tau)
 {
   GEN q,aux,new_gunr;
   long i,j,k,valuat,n=lgef(p)-3,nn,ltop=avma,bitprec,imax,e;
@@ -637,14 +638,8 @@ gmax_modulus(GEN p, double tau)
   }
 }
 
-static double
-max_modulus(GEN p, double tau)
-{
-  return gtodouble(gmax_modulus(p,tau));
-}
-
 /* return the k-th modulus (in ascending order) of p, rel. error tau*/
-static double
+static GEN
 modulus(GEN p, long k, double tau)
 {
   GEN q,new_gunr;
@@ -685,60 +680,63 @@ modulus(GEN p, long k, double tau)
     tau2=1.5*tau2; if (tau2>1.) tau2=1.;
     bitprec= 1+(long) ((double) nn*(2.+log2(3.*(double) nn)+log2(1./tau2)));
   }
-  avma=ltop; return exp2(-r);
+  avma=ltop; return mpexp(dbltor(-r * LOG2));
 }
 
 /* return the k-th modulus r_k of p, rel. error tau, knowing that
 rmin < r_k < rmax. This helps because the information enable us to use
 less precision... quicker ! */
-static double
-pre_modulus(GEN p, long k, double tau, double rmin, double rmax)
+static GEN
+pre_modulus(GEN p, long k, double tau, GEN rmin, GEN rmax)
 {
-  GEN q;
-  long n=lgef(p)-3,i,imax,imax2,bitprec,ltop=avma;
-  double aux,tau2,R;
+  GEN R, q, aux;
+  long n=lgef(p)-3,i,imax,imax2,bitprec,ltop=avma, av;
+  double tau2, aux2;
 
-  tau2=tau/6.; aux=sqrt(rmax/rmin)*exp(4*tau2);
-  imax=(long) log2(log((double)n)/log(aux));
+  tau2=tau/6.;
+  aux = mulrr(mpsqrt(divrr(rmax,rmin)), dbltor(exp(4*tau2)));
+  imax = (long) log2(log((double)n)/ rtodbl(mplog(aux)));
   if (imax<=0) return modulus(p,k,tau);
 
-  R=sqrt(rmin*rmax);
-  bitprec=(long) ((double) n*(2.+log2(aux)+log2(1./tau2)));
-  q=homothetie(p,R,bitprec);
-  imax2=(long) ((log2(3./tau)+log2(log(4.*(double) n)) ))+1;
+  R = mpsqrt(mulrr(rmin,rmax));
+  av = avma;
+  bitprec = (long) ((double) n*(2. + log2ir(aux) - log2(tau2)));
+  q = homothetie(p,R,bitprec);
+  imax2 = (long) ((log2(3./tau)+log2(log(4.*(double) n)) ))+1;
   if (imax>imax2) imax=imax2;
 
   for (i=0; i<imax; i++)
   {
-    q=eval_rel_pol(q,bitprec);
+    q = eval_rel_pol(q,bitprec);
     set_karasquare_limit(bitprec);
-    q = gerepileupto(ltop, graeffe(q));
-    aux=aux*aux*exp(2*tau2);
-    tau2=1.5*tau2;
-    bitprec= (long) ((double) n*(2.+log2(aux)+log2(1./(1-exp(-tau2)))));
-    q=gmul(mygprec(gunr,bitprec),q);
+    q = gerepileupto(av, graeffe(q));
+    affrr(mulrr(gsqr(aux), dbltor(exp(2*tau2))), aux);
+    tau2 *= 1.5;
+    bitprec= (long) ((double) n*(2. + log2ir(aux) - log2(1-exp(-tau2))));
+    q = gmul(mygprec(gunr,bitprec),q);
   }
 
-  aux=modulus(q,k,exp2((double)imax)*tau/3.);
-  R=R*exp(log(aux)*exp2(-(double)imax));
-  avma=ltop; return R;
+  aux2 = rtodbl(mplog(modulus(q,k,exp2((double)imax)*tau/3.)));
+  R = mulrr(R, dbltor(exp(aux2*exp2(-(double)imax))));
+  return gerepileupto(ltop, R);
 }
 
 /* returns the minimum of the modulus of p with a relative error tau */
-static double
+static GEN
 min_modulus(GEN p, double tau)
 {
-  long ltop=avma;
-  double r;
+  long av=avma;
+  GEN r;
 
-  if (isexactzero((GEN)p[2])) return 0.;
-  r=1./max_modulus(polrecip_i(p),tau); avma=ltop; return r;
+  if (isexactzero((GEN)p[2])) return realzero(3);
+  r = max_modulus(polrecip_i(p),tau);
+  return gerepileupto(av, ginv(r));
 }
 
 /* returns k such that r_k e^(-tau) < R < r_{ k+1 } e^tau.
 l is such that you know in advance that l<= k <= n-l */
 static long
-dual_modulus(GEN p, double R, double tau, long l)
+dual_modulus(GEN p, GEN R, double tau, long l)
 {
   GEN q;
   long i,j,imax,k,delta_k=0,n=lgef(p)-3,nn,nnn,valuat,ltop=avma,bitprec,ll=l;
@@ -1275,9 +1273,10 @@ conformal_pol(GEN p, GEN a, long bitprec)
 static void
 conformal_mapping(GEN p, long k, long bitprec, double aux,GEN *F,GEN *G)
 {
-  long bitprec2,bitprec3,n=lgef(p)-3,decprec,i,ltop = avma, av;
-  GEN q,FF,GG,a,R, *gptr[2];
-  double rmin,rmax,rho,delta,aux2,param,param2,r1,r2;
+  long bitprec2,n=lgef(p)-3,decprec,i,ltop = avma, av;
+  GEN q,FF,GG,a,R,aux2, *gptr[3];
+  GEN rmin,rmax,rho,invrho;
+  double delta,param,param2;
 
   bitprec2=bitprec+(long) (n*(2.*log2(2.732)+log2(1.5)))+1;
   a=gsqrt(stoi(3),10);
@@ -1287,65 +1286,71 @@ conformal_mapping(GEN p, long k, long bitprec, double aux,GEN *F,GEN *G)
   av = avma; q=mygprec(p,bitprec2);
   q = conformal_pol(q,a,bitprec2);
   for (i=1; i<=n; i++)
-    if (radius[i]!=0.) /* updating array radius */
+    if (signe(radius[i])) /* updating array radius */
     {
-      aux2=radius[i]*radius[i];
-      aux2=2.*(aux2-1)/(aux2-3.*radius[i]+3.);
-      radius[i]=sqrt(1+aux2);
+      long a = avma;
+      GEN p1 = gsqr(radius[i]);
+      p1 = divrr(gmul2n((subrs(p1,1)),1),
+                   subrr(p1, mulsr(3,subrs(radius[i],1))));
+      affrr(mpsqrt(addsr(1,p1)), radius[i]);
+      avma = a;
     }
   if (k>1)
   {
-    i=k-1; while (i>0 && radius[i]==0.) i--;
-    r1=radius[i]; r2=radius[k];
-    rmin=pre_modulus(q,k,aux/10.,r1,r2);
+    i=k-1; while (i>0 && !signe(radius[i])) i--;
+    rmin = pre_modulus(q,k,aux/10., radius[i], radius[k]);
   }
   else
-    rmin=min_modulus(q,aux/10.);
-  radius[k]=rmin;
+    rmin = min_modulus(q,aux/10.);
+  affrr(rmin, radius[k]);
 
   if (k+1<n)
   {
-    i=k+2; while (i<=n && radius[i]==0.) i++;
-    r2=radius[i]; r1=radius[k+1];
-    rmax=pre_modulus(q,k+1,aux/10.,r1,r2);
+    i=k+2; while (i<=n && !signe(radius[i])) i++;
+    rmax = pre_modulus(q,k+1,aux/10., radius[k+1], radius[i]);
   }
   else /* k+1=n */
-    rmax=max_modulus(q,aux/10.);
-  radius[k+1]=rmax;
+    rmax = max_modulus(q,aux/10.);
+  affrr(radius[k+1], rmax);
 
-  rho=sqrt(rmin*rmax); delta=0.5*log(rmax/rmin);
+  rho = mpsqrt(mulrr(rmin,rmax));
+  delta = rtodbl(gmul2n(mplog(divrr(rmax,rmin)), -1));
   if (delta>1.) delta=1.;
 
-  if (rho<1.) bitprec3=(long) ((double)n*log2(1./rho))+1;
-  else bitprec3=(long) ((double)n*log2(rho))+1;
-  bitprec2=bitprec2+bitprec3;
+  bitprec2 += (long) (((double)n) * fabs(log2ir(rho)) + 1.);
 
-  R=mygprec(dbltor(1/rho),bitprec2);
+  invrho = ginv(rho);
+  R=mygprec(invrho,bitprec2);
   q=scalepol(q,R,bitprec2);
-  gptr[0]=&q; gptr[1]=&R; gerepilemany(av,gptr,2);
+  gptr[0]=&q; gptr[1]=&R; gptr[2]=&invrho;
+  gerepilemany(av,gptr,3);
 
-  aux2=radius[k];
+  aux2 = radius[k];
   for (i=k-1; i>=1; i--)
   {
-    if (radius[i]==0.) radius[i]=aux2;
-    else aux2=radius[i];
+    if (!signe(radius[i]))
+      affrr(aux2, radius[i]);
+    else
+      aux2 = radius[i];
   }
-  aux2=radius[k+1];
+  aux2 = radius[k+1];
   for (i=k+1; i<=n; i++)
   {
-    if (radius[i]==0.) radius[i]=aux2;
-    else aux2=radius[i];
+    if (!signe(radius[i]))
+      affrr(aux2, radius[i]);
+    else
+      aux2 = radius[i];
   }
   param=0.; param2=0.;
   for (i=1; i<=n; i++)
   {
-    radius[i]=radius[i]/rho;
-    aux2=fabs(1-radius[i]);
-    param+=1./aux2;
-    if (aux2<1.) param2-=log2(aux2);
+    affrr(mulrr(radius[i], invrho), radius[i]);
+    aux2 = ginv(subsr(1, radius[i]));
+    param += fabs(rtodbl(aux2));
+    if (cmprs(aux2, 1) > 0) param2 += log2ir(aux2);
   }
   optimize_split(q,k,delta,bitprec2,&FF,&GG,param,param2);
-  bitprec2=bitprec2+n; R = ginv(R);
+  bitprec2 += n; R = ginv(R);
   FF=scalepol(FF,R,bitprec2);
   GG=scalepol(GG,R,bitprec2);
 
@@ -1359,7 +1364,8 @@ conformal_mapping(GEN p, long k, long bitprec, double aux,GEN *F,GEN *G)
   FF=gmul(FF,gexp(gmulgs(a,k),decprec));
   GG=gmul(GG,gexp(gmulgs(a,n-k),decprec));
 
-  *F=mygprec(FF,bitprec+n); *G=mygprec(GG,bitprec+n);
+  *F=mygprec(FF,bitprec+n);
+  *G=mygprec(GG,bitprec+n);
   gptr[0]=F; gptr[1]=G; gerepilemany(ltop,gptr,2);
 }
 
@@ -1368,117 +1374,131 @@ such that |p-FG|< 2^(-bitprec)|p| */
 static void
 split_2(GEN p, long bitprec, double thickness, GEN *F, GEN *G)
 {
-  double rmin,rmax,rho,kappa,aux,delta,param,param2,r1,r2;
+  GEN rmin,rmax,rho,invrho;
+  double kappa,aux,delta,param,param2;
   long n=lgef(p)-3,i,j,k,disti,diste,bitprec2;
-  GEN q,FF,GG,R;
+  GEN q,FF,GG,R,aux2;
 
-  radius=(double *) gpmalloc((n+1)*sizeof(double));
-  for (i=2; i<n; i++) radius[i]=0.;
-  rmin=min_modulus(p,thickness/(double) n/4.);
-  rmax=max_modulus(p,thickness/(double) n/4.);
-  i=1; j=n; radius[1]=rmin; radius[n]=rmax;
-  rho=sqrt(rmin*rmax);
+  radius = (GEN*) cgetg(n+1, t_VEC);
+  for (i=1; i<n; i++) radius[i]=realzero(3);
+  radius[1] = rmin = min_modulus(p, thickness/(double) n/4.);
+  radius[n] = rmax = max_modulus(p, thickness/(double) n/4.);
+  i=1; j=n;
+  rho = mpsqrt(mulrr(rmin,rmax));
   k=dual_modulus(p,rho,thickness/(double) n/4.,1);
-  if (k<n/5. || (n/2.<k && k<(4*n)/5.)) { rmax=rho; j=k+1; radius[j]=rho; }
-  else { rmin=rho; i=k; radius[i]=rho; }
+  if (k<n/5. || (n/2.<k && k<(4*n)/5.))
+    { rmax=rho; j=k+1; affrr(rho, radius[j]); }
+  else
+    { rmin=rho; i=k; affrr(rho, radius[i]); }
   while (j>i+1)
   {
     disti= (i<n-j)? i: n-j; /* min(i,n-j) */
     diste= (j<n-i)? j: n-i;
-    kappa=1.-log(1.+(double)disti)/log(1.+(double)diste);
+    kappa=1. - log(1.+(double)disti) / log(1.+(double)diste);
     if (i+j<n+1)
-      rho=exp( (log(rmin)+log(rmax)*(1+kappa))/(2+kappa));
-    else if (i+j==n+1) rho=sqrt(rmin*rmax);
+      rho = mpexp(
+        divrr(addrr( mulrr(mplog(rmax),dbltor(1+kappa)), mplog(rmin) ),
+              dbltor(2+kappa))
+      );
+    else if (i+j==n+1)
+      rho = mpsqrt(mulrr(rmin,rmax));
     else
-      rho=exp( (log(rmin)*(1+kappa)+log(rmax))/(2+kappa));
-    /* use log(rmax) - log(rmin) since rmax / rmin can overflow */
-    aux=(log(rmax)-log(rmin))/(j-i)/4.;
+      rho = mpexp(
+        divrr(addrr( mulrr(mplog(rmin),dbltor(1+kappa)), mplog(rmax)),
+              dbltor(2+kappa))
+      );
+    aux = rtodbl(mplog(divrr(rmax,rmin))) / (j-i) / 4.;
 
-    k=(i<n+1-j)? i: n+1-j; /* min(i,n+1-j) */
-    k=dual_modulus(p,rho,aux,k);
-    if (k-i < j-k-1) { rmax=rho; j=k+1; radius[j]=rho*exp(-aux); }
+    k = min(i,n+1-j);
+    k = dual_modulus(p,rho,aux,k);
+    if (k-i < j-k-1)
+      { rmax=rho; j=k+1; affrr(mulrr(rho, dbltor(exp(-aux))), radius[j]); }
     else
     {
-      if (k-i > j-k-1) { rmin=rho; i=k; radius[i]=rho*exp(aux); }
+      if (k-i > j-k-1)
+        { rmin=rho; i=k; affrr(mulrr(rho, dbltor(exp(aux))), radius[i]); }
       else
       {
-	if (2*k>n) { rmax=rho; j=k+1; radius[j]=rho*exp(-aux); }
-	else { rmin=rho; i=k; radius[i]=rho*exp(aux); }
+	if (2*k>n)
+          { rmax=rho; j=k+1; affrr(mulrr(rho, dbltor(exp(-aux))), radius[j]); }
+	else
+          { rmin=rho; i=k; affrr(mulrr(rho, dbltor(exp(aux))), radius[i]); }
       }
     }
   }
-  aux=log(rmax)-log(rmin);
+  aux = rtodbl(mplog(divrr(rmax, rmin)));
 
   if (step4==0)
   {
     if (k>1)
     {
-      i=k-1; while ((i>0) && (radius[i]==0.)) i--;
-      r1=radius[i]; r2=radius[k];
-      rmin=pre_modulus(p,k,aux/10.,r1,r2);
+      i=k-1; while (i>0 && !signe(radius[i])) i--;
+      rmin = pre_modulus(p,k,aux/10., radius[i], radius[k]);
     }
     else /* k=1 */
-      rmin=min_modulus(p,aux/10.);
-    radius[k]=rmin;
+      rmin = min_modulus(p,aux/10.);
+    affrr(rmin, radius[k]);
 
     if (k+1<n)
     {
-      i=k+2; while ((i<=n) && (radius[i]==0.)) i++;
-      r2=radius[i]; r1=radius[k+1];
-      rmax=pre_modulus(p,k+1,aux/10.,r1,r2);
+      i=k+2; while (i<=n && !signe(radius[i])) i++;
+      rmax = pre_modulus(p,k+1,aux/10., radius[k+1], radius[i]);
     }
     else /* k+1=n */
-      rmax=max_modulus(p,aux/10.);
-    radius[k+1]=rmax;
-    rho=sqrt(rmin*rmax); delta=0.5*(log(rmax)-log(rmin));
+      rmax = max_modulus(p,aux/10.);
+    affrr(rmax, radius[k+1]);
 
-    aux=radius[k];
+    rho = mpsqrt(mulrr(rmin,rmax));
+    delta = rtodbl(gmul2n(mplog(divrr(rmax, rmin)), -1));
+
+    aux2 = radius[k];
     for (i=k-1; i>=1; i--)
     {
-      if (radius[i]==0.) radius[i]=aux;
-      else aux=radius[i];
+      if (!signe(radius[i]))
+        affrr(aux2, radius[i]);
+      else
+        aux2 = radius[i];
     }
-    aux=radius[k+1];
+    aux2 = radius[k+1];
     for (i=k+1; i<=n; i++)
     {
-      if (radius[i]==0.) radius[i]=aux;
-      else aux=radius[i];
+      if (!signe(radius[i]))
+        affrr(aux2, radius[i]);
+      else      
+        aux2 = radius[i];
     }
-    param=0.; param2=0.;
+    invrho = ginv(rho);
+    param = 0.;param2 = 0.;
     for (i=1; i<=n; i++)
     {
-      radius[i]=radius[i]/rho;
-      aux=fabs(1.-radius[i]);
-      param+=1./aux;
-      if (aux<1) param2-=log2(aux);
+      affrr(mulrr(radius[i], invrho), radius[i]);
+      aux2 = ginv(subsr(1, radius[i]));
+      param += fabs(rtodbl(aux2));
+      if (cmprs(aux2, 1) > 0) param2 += log2ir(aux2);
     }
-    if (rho<1.) bitprec2=(long) ((double)n*log2(1./rho))+1;
-    else bitprec2=(long) ((double)n*log2(rho))+1;
-    bitprec2 += bitprec;
+    bitprec2 = bitprec + (long) ((double)n * fabs(log2ir(rho)) + 1.);
 
-    R=mygprec(dbltor(1./rho),bitprec2);
+    R=mygprec(invrho,bitprec2);
     q=scalepol(p,R,bitprec2);
     optimize_split(q,k,delta,bitprec2,&FF,&GG,param,param2);
     bitprec2 += n; R=ginv(R);
   }
   else
   {
-    rho=sqrt(rmax*rmin);
-    if (rho<1.) bitprec2=(long) ((double)n*log2(1./rho))+1;
-    else bitprec2=(long) ((double)n*log2(rho))+1;
-    bitprec2=bitprec+bitprec2;
+    rho = mpsqrt(mulrr(rmax,rmin));
+    invrho = ginv(rho);
+    bitprec2 = bitprec + (long) ((double)n * fabs(log2ir(rho)) + 1.);
 
-    R=mygprec(dbltor(1/rho),bitprec2);
-    q=scalepol(p,R,bitprec2);
+    R = mygprec(invrho,bitprec2);
+    q = scalepol(p,R,bitprec2);
     for (i=1; i<=n; i++)
-      if (radius[i]!=0.) radius[i]=radius[i]/rho;
+      if (signe(radius[i])) affrr(mulrr(radius[i],invrho), radius[i]);
 
     conformal_mapping(q, k, bitprec2, aux, &FF, &GG);
     bitprec2 += n; R = ginv(mygprec(R,bitprec2));
   }
-  free(radius);
-  FF=scalepol(FF,R,bitprec2); GG=scalepol(GG,R,bitprec2);
-  *F=mygprec(FF,bitprec+n); *G=mygprec(GG,bitprec+n);
+  *F = mygprec(scalepol(FF,R,bitprec2), bitprec+n);
+  *G = mygprec(scalepol(GG,R,bitprec2), bitprec+n);
 }
 
 /* procedure corresponding to steps 5,6,.. page 44 in the RR n. 1852 */
@@ -1490,10 +1510,10 @@ static void
 split_1(GEN p, long bitprec, GEN *F, GEN *G)
 {
   long bitprec2,bitprec3,i,imax,n=lgef(p)-3, polreal = isreal(p);
-  double rmax,rmin,thickness,quo;
+  GEN rmax,rmin,thickness,quo;
   GEN q,qq,newq,FF,GG,v,gr,r;
 
-  r=gmax_modulus(p,0.01);
+  r=max_modulus(p,0.01);
   bitprec2=bitprec+n;
   gr=mygprec(ginv(r),bitprec2);
   q=scalepol(p,gr,bitprec2);
@@ -1502,37 +1522,42 @@ split_1(GEN p, long bitprec, GEN *F, GEN *G)
 
   bitprec3=bitprec2+(long)((double)n*2.*log2(3.)+1);
   v=cgetg(5,t_VEC); v++;
-  v[0]=lmulgs(mygprec(gunr,bitprec3),2); v[1]=lneg((GEN)v[0]);
-  v[2]=lmul((GEN)v[0],gi); v[3]=lneg((GEN)v[2]);
+  v[0]=lmul2n(mygprec(gunr,bitprec3), 1);
+  v[1]=lneg((GEN)v[0]);
+  v[2]=lmul((GEN)v[0],gi);
+  v[3]=lneg((GEN)v[2]);
   imax = polreal? 3: 4;
-  q=mygprec(q,bitprec3); thickness=1.;
+  q=mygprec(q,bitprec3); thickness=realun(3);
   for (i=0; i<imax; i++)
   {
-    qq=shiftpol(q,gadd(polx[varn(p)],(GEN)v[i]));
-    rmin=min_modulus(qq,0.05);
-    if (3./rmin > thickness)
+    qq = shiftpol(q,gadd(polx[varn(p)],(GEN)v[i]));
+    rmin = min_modulus(qq,0.05);
+    if (cmpsr(3, mulrr(rmin, thickness)) > 0)
     {
-      rmax=max_modulus(qq,0.05); quo = rmax/rmin;
-      if ((float)quo > (float)thickness)
+      rmax = max_modulus(qq,0.05);
+      quo = divrr(rmax,rmin);
+      if (cmprr(quo, thickness) > 0)
       {
 	thickness=quo; newq=qq; globalu=(GEN)v[i];
       }
     }
-    if (thickness>2.) break;
-    if (polreal && (i==1 && thickness>1.5)) break;
+    if (cmpsr(2 , thickness) < 0) break;
+    if (polreal && i==1 && cmprr(thickness, dbltor(1.5)) > 0) break;
   }
   bitprec3=bitprec2+(long)((double) n*log2(3.)+1)+gexpo(newq)-gexpo(q);
-  split_2(newq,bitprec3,log(thickness),&FF,&GG);
+  split_2(newq,bitprec3,rtodbl(mplog(thickness)),&FF,&GG);
   globalu=gsub(polx[varn(p)],mygprec(globalu,bitprec3));
-  FF=shiftpol(FF,globalu); GG=shiftpol(GG,globalu);
+  FF = shiftpol(FF,globalu);
+  GG = shiftpol(GG,globalu);
 
-  gr=ginv(gr);
-  bitprec2=bitprec2+gexpo(FF)+gexpo(GG)-gexpo(q);
-  *F=scalepol(FF,gr,bitprec2); *G=scalepol(GG,gr,bitprec2);
+  gr = ginv(gr);
+  bitprec2 += gexpo(FF)+gexpo(GG)-gexpo(q);
+  *F = scalepol(FF,gr,bitprec2);
+  *G = scalepol(GG,gr,bitprec2);
 }
 
 /* put in F and G two polynomials such that |P-FG|<2^(-bitprec)|P|,
-where the maximum modulus of the roots of p is <0.5 */
+where the maximum modulus of the roots of p is < 0.5 */
 static void
 split_0_2(GEN p, long bitprec, GEN *F, GEN *G)
 {
@@ -1542,7 +1567,7 @@ split_0_2(GEN p, long bitprec, GEN *F, GEN *G)
 
   step4=1;
   auxnorm=(double) n*log2(1+exp2(mylog2((GEN)p[n+1])
-				 -mylog2((GEN)p[n+2]))/(double)n);
+				-mylog2((GEN)p[n+2]))/(double)n);
   bitprec2=bitprec+1+(long) (log2((double)n)+auxnorm);
 
   q=mygprec(p,bitprec2);
@@ -1561,17 +1586,18 @@ split_0_2(GEN p, long bitprec, GEN *F, GEN *G)
     FF[k+2]=(long) mygprec(gunr,bitprec2);
     GG=cgetg(n-k+3,t_POL); GG[1]=evalsigne(1)+evalvarn(varn(p))+evallgef(n-k+3);
     for (i=0; i<=n-k; i++) GG[i+2]=q[i+k+2];
-    b=gsub(polx[varn(p)],mygprec(b,bitprec2));
+    b = gsub(polx[varn(p)],mygprec(b,bitprec2));
   }
   else
   {
     split_1(q,bitprec2,&FF,&GG);
-    bitprec2=bitprec+gexpo(FF)+gexpo(GG)-gexpo(p)+(long)auxnorm+1;
-    b=gsub(polx[varn(p)],mygprec(b,bitprec2));
-    FF=mygprec(FF,bitprec2);
+    bitprec2 = bitprec+gexpo(FF)+gexpo(GG)-gexpo(p)+(long)auxnorm+1;
+    b = gsub(polx[varn(p)],mygprec(b,bitprec2));
+    FF = mygprec(FF,bitprec2);
   }
-  GG=mygprec(GG,bitprec2);
-  *F=shiftpol(FF,b); *G=shiftpol(GG,b);
+  GG = mygprec(GG,bitprec2);
+  *F = shiftpol(FF,b);
+  *G = shiftpol(GG,b);
 }
 
 /* put in F and G two polynomials such that |P-FG|<2^(-bitprec)|P|,
@@ -1619,13 +1645,13 @@ split_0(GEN p, long bitprec, GEN *F, GEN *G)
   }
   else
   {
-    R = gmax_modulus(p,0.05);
+    R = max_modulus(p,0.05);
     if (gexpo(R)<1 && gtodouble(R)<1.9) split_0_1(p,bitprec,&FF,&GG);
     else
     {
       q=cgetg(n+3,t_POL); q[1]=p[1];
       for (i=0; i<=n; i++) q[i+2]=p[n-i+2]; /* p^* with copy of ptr */
-      R = gmax_modulus(q,0.05);
+      R = max_modulus(q,0.05);
       if (gexpo(R)<1 && gtodouble(R)<1.9)
       {
 	split_0_1(q,bitprec,&FF,&GG);
