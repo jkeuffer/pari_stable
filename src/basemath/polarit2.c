@@ -3283,7 +3283,7 @@ subresext(GEN x, GEN y, GEN *U, GEN *V)
 {
   gpmem_t av, av2, tetpil, lim;
   long degq,tx,ty,dx,dy,du,dv,dr,signh;
-  GEN q,z,g,h,r,p1,p2,cu,cv,u,v,um1,uze,vze,xprim,yprim;
+  GEN q,z,g,h,r,p1,p2,cu,cv,u,v,um1,uze,vze,xprim,yprim, *gptr[3];
 
   if (gcmp0(x) || gcmp0(y)) { *U = *V = gzero; return gzero; }
   tx=typ(x); ty=typ(y);
@@ -3350,7 +3350,8 @@ subresext(GEN x, GEN y, GEN *U, GEN *V)
   }
   if (signh < 0) { z = gneg_i(z); uze = gneg_i(uze); }
   p1 = gadd(z, gneg(gmul(uze,xprim)));
-  if (!poldivis(p1,yprim,&vze)) err(bugparier,"subresext");
+  vze = poldivres(p1, yprim, &r);
+  if (!gcmp0(r)) err(warner,"inexact computation in subresext");
   /* uze ppart(x) + vze ppart(y) = z = resultant(ppart(x), ppart(y)), */
   p2 = gun;
   if (cu) p2 = gmul(p2, gpowgs(cu,dy));
@@ -3359,12 +3360,13 @@ subresext(GEN x, GEN y, GEN *U, GEN *V)
   cv = cv? gdiv(p2,cv): p2;
 
   tetpil = avma;
-  z = gmul(z,p2); uze = gmul(uze,cu); vze = gmul(vze,cv);
-  {
-    GEN *gptr[3]; gptr[0]=&z; gptr[1]=&uze; gptr[2]=&vze;
-    gerepilemanysp(av,tetpil,gptr,3);
-  }
-  *U = uze; *V = vze; return z;
+  z = gmul(z,p2);
+  uze = gmul(uze,cu);
+  vze = gmul(vze,cv);
+  gptr[0]=&z; gptr[1]=&uze; gptr[2]=&vze;
+  gerepilemanysp(av,tetpil,gptr,3);
+  *U = uze;
+  *V = vze; return z;
 }
 
 static GEN
@@ -3439,18 +3441,21 @@ bezoutpol(GEN x, GEN y, GEN *U, GEN *V)
       gerepileall(av2,6,&u,&v,&g,&h,&uze,&um1);
     }
   }
-  if (!poldivis(gsub(v,gmul(uze,xprim)),yprim, &vze))
-    err(warner,"inexact computation in bezoutpol");
+  p1 = gsub(v,gmul(uze,xprim));
+  vze = poldivres(p1, yprim, &r);
+  if (!gcmp0(r)) err(warner,"inexact computation in bezoutpol");
   if (cu) uze = gdiv(uze,cu);
   if (cv) vze = gdiv(vze,cv);
-  p1 = ginv(content(v)); tetpil = avma;
-
+  p1 = ginv(content(v));
+  
+  tetpil = avma;
   uze = gmul(uze,p1);
   vze = gmul(vze,p1);
   z = gmul(v,p1);
   gptr[0]=&uze; gptr[1]=&vze; gptr[2]=&z;
   gerepilemanysp(av,tetpil,gptr,3);
-  *U = uze; *V = vze; return z;
+  *U = uze;
+  *V = vze; return z;
 }
 
 /*******************************************************************/
