@@ -47,7 +47,8 @@ hash(long q) { return (q & ((1 << (HASHBITS+1)) - 1)) >> 1; }
 #define RANDOM_BITS 4
 static const int CBUCH = (1<<RANDOM_BITS)-1;
 
-static long KC,KC2,limhash,RELSUP,PRECREG;
+static ulong limhash;
+static long KC,KC2,RELSUP,PRECREG;
 static long *primfact,*exprimfact,*badprim;
 static long *FB,*numFB, **hashtab;
 static GEN  powsubFB,vperm,subFB,Disc,sqrtD,isqrtD;
@@ -924,9 +925,10 @@ check_bach(double cbach, double B)
 
 /* FIXME: use buch2.c:smooth_int() */
 static long
-factorquad(GEN f, long kcz, long limp)
+factorquad(GEN f, long kcz, ulong limp)
 {
-  long i, p, k, lo;
+  ulong p;
+  long i, k, lo;
   pari_sp av;
   GEN q, x = (GEN)f[1];
 
@@ -935,18 +937,19 @@ factorquad(GEN f, long kcz, long limp)
   if (signe(x) < 0) x = absi(x);
   for (i=1; ; i++)
   {
-    long r;
-    p = FB[i]; q = divis_rem(x,p,&r);
+    ulong r;
+    p = (ulong)FB[i];
+    q = diviu_rem(x,p,&r);
     if (!r)
     {
-      for (k=0; !r; k++) { x=q; q = divis_rem(x,p,&r); }
-      primfact[++lo]=p; exprimfact[lo]=k;
+      for (k=0; !r; k++) { x=q; q = diviu_rem(x,p,&r); }
+      primfact[++lo]=(ulong)p; exprimfact[lo]=k;
     }
-    if (cmpis(q,p)<=0) break;
+    if (cmpiu(q,p) <= 0) break;
     if (i==kcz) { avma=av; return 0; }
   }
-  avma=av;
-  if (lgefint(x)!=3 || (p=x[2]) > limhash) return 0;
+  avma = av;
+  if (lgefint(x) != 3 || (p=(ulong)x[2]) > limhash) return 0;
 
   if (p != 1 && p <= limp)
   {

@@ -540,21 +540,21 @@ smooth_int(FB_t *F, GEN *N, GEN *ex)
 {
   GEN q, FB = F->FB;
   const long KCZ = F->KCZ;
-  const long limp = FB[KCZ]; /* last p in FB */
-  long i, p, k;
+  const ulong limp = (ulong)FB[KCZ]; /* last p in FB */
+  long i, k;
 
   *ex = new_chunk(KCZ+1);
   for (i=1; ; i++)
   {
-    long r;
-    p = FB[i]; q = divis_rem(*N, p, &r);
-    for (k=0; !r; k++) { *N = q; q = divis_rem(*N, p, &r); }
+    ulong r, p = (ulong)FB[i];
+    q = diviu_rem(*N, p, &r);
+    for (k=0; !r; k++) { *N = q; q = diviu_rem(*N, p, &r); }
     (*ex)[i] = k;
-    if (cmpis(q,p) <= 0) break;
+    if (cmpiu(q,p) <= 0) break;
     if (i == KCZ) return 0;
   }
   (*ex)[0] = i;
-  return (cmpis(*N,limp) <= 0);
+  return (cmpiu(*N,limp) <= 0);
 }
 
 static int

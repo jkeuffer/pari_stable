@@ -1276,6 +1276,7 @@ void    cgiv(GEN x);
 int     cmpii(GEN x, GEN y);
 int     cmprr(GEN x, GEN y);
 int     cmpsi(long x, GEN y);
+int     cmpui(ulong x, GEN y);
 GEN     dbltor(double x);
 GEN     diviiexact(GEN x, GEN y);
 GEN     diviuexact(GEN x, ulong y);

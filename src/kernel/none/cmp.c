@@ -53,6 +53,19 @@ cmpsi(long x, GEN y)
   return p < (ulong)(-x) ? -1 : 1;
 }
 
+/* compare x and |y| */
+int
+cmpui(ulong x, GEN y)
+{
+  ulong p;
+
+  if (!x) return signe(y)? 1: 0;
+  if (!signe(y)) return 1;
+  if (lgefint(y) > 3) return -1;
+  p = y[2]; if (p == x) return 0;
+  return p < x ? 1 : -1;
+}
+
 int
 cmpii(GEN x, GEN y)
 {
