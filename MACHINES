@@ -163,6 +163,7 @@ SGI/MIPS
 *R10000      196MHz  IRIX-6.4        cc             8461    9856  2.0.10(8) TP
 ------------------------------------------------------------------------------
 HP/PA-RISC
+HPPA9000/785  552MHz HPUX-11.00     gcc-2.9         8284    8460  2.2.4(34) IS
 *HPPA8500     440MHz Linux-2.4.16   gcc-3.0.3       7558    7814  2.1.2     BA
 HPPA9000/778  134MHz HPUX-10.20      cc            18898!  29138! 2.0.19(9)
 *HPPA9000/778 134MHz HPUX-10.20      cc           (23666!)     -  2.0.12(10)
@@ -284,6 +285,8 @@ CFLAGS= -fbranch-probabilities  -O3 -DGCC_INLINE -Wall -Wno-implicit
 
 (33) LCDS System: 9672 G6 Model ZX7 (10 way processor, 32GB RAM)
      DASD: Shark 2105-F20 (2.1 terabytes)
+
+(34) 64-bit executable
 =============================================================================
 Contributors:
   AW = Aleksander Wittlin
