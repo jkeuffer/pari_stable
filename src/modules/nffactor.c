@@ -841,9 +841,9 @@ nfcmbf(nfcmbf_t *T,long fxn,GEN psf,long dlim)
     if (gcmp0(rem))
     { /* found a factor */
       T->res[++T->nfact] = (long)QXQ_normalize(newpsf, nfpol);
-      T->fact[fxn] = 0; /* remove used modular factor */
       T->pol = primpart(quo);
       T->lt  = leading_term(T->pol);
+      T->fact[fxn] = 0; /* remove used modular factor */
       return 1;
     }
     avma = ltop;
@@ -854,7 +854,7 @@ nfcmbf(nfcmbf_t *T,long fxn,GEN psf,long dlim)
   if (newd < dlim && fxn < T->nfactmod
                   && nfcmbf(T,fxn+1,newpsf,dlim-newd))
   {
-    T->fact[fxn]=0; /* remove used modular factor */
+    T->fact[fxn] = 0; /* remove used modular factor */
     return 1;
   }
   avma = av; return val;
