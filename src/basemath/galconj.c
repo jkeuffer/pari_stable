@@ -788,7 +788,7 @@ Vmatrix(long n, struct galois_test *td)
   V = cgetg(lg(td->L), t_VEC);
   for (i = 1; i < lg(V); i++)
     V[i] = mael(td->M,i,n);
-  V = FpV_FpL_mul(td->L, V, td->ladic);
+  V = FpC_FpV_mul(td->L, V, td->ladic);
   return gerepileupto(ltop, V);
 }
 
