@@ -141,6 +141,9 @@ CPP        = $CPP
 _O	   = .o
 _A	   = .a
 LIB_PREFIX = lib
+LIBPARI    = \$(LIB_PREFIX)pari
+LIBPARI_STA= \$(LIBPARI)\$(_A)
+LIBPARI_DYN= \$(LIBPARI).$sodest
 
 RUNPTH       = $RUNPTH
 RUNPTH_FINAL = $RUNPTH_FINAL
@@ -210,10 +213,10 @@ gp: gp-$dft ../gp$suffix$exe_suff $libdft
 
 all: $exec lib-sta
 
-lib-sta: \$(LIB_PREFIX)pari\$(_A)
-lib-dyn: \$(LIB_PREFIX)pari.$somake
+lib-sta: \$(LIBPARI_STA)
+lib-dyn: \$(LIBPARI_DYN)
 
-\$(LIB_PREFIX)pari\$(_A): \$(OBJS)
+\$(LIBPARI_STA): \$(OBJS)
 	-\$(RM) \$@
 	\$(AR) r \$@ \$(OBJS)
 EOT
@@ -246,7 +249,7 @@ dotest-graphic::
 	@$doexec -g
 
 cleanobj: cleantest
-	-\$(RM) *\$(_O) *.s pariinl.h \$(LIB_PREFIX)pari\$(_A) libpari.* $exec
+	-\$(RM) *\$(_O) *.s pariinl.h \$(LIBPARI_STA) libpari.* $exec
 
 clean: cleanobj
 
@@ -314,23 +317,23 @@ install-data:
 	-mkdir -p \$(DATADIR)
 	@-for f in $data/*; do \$(INSTALL_DATA)  \$\$f \$(DATADIR); done 2>/dev/null
 
-install-lib-sta:  \$(LIB_PREFIX)pari\$(_A)
+install-lib-sta: \$(LIBPARI_STA)
 	-mkdir -p \$(LIBDIR)
-	-\$(RM) \$(LIBDIR)/\$(LIB_PREFIX)pari\$(_A)
-	\$(INSTALL_DATA) \$(LIB_PREFIX)pari\$(_A) \$(LIBDIR)/\$(LIB_PREFIX)pari\$(_A).$version
-	-\$(LN) \$(LIB_PREFIX)pari\$(_A).$version \$(LIBDIR)/\$(LIB_PREFIX)pari\$(_A)
+	-\$(RM) \$(LIBDIR)/\$(LIBPARI_STA)
+	\$(INSTALL_DATA) \$(LIBPARI_STA) \$(LIBDIR)/\$(LIBPARI_STA).$version
+	-\$(LN) \$(LIBPARI_STA).$version \$(LIBDIR)/\$(LIBPARI_STA)
 
-install-lib-dyn: \$(LIB_PREFIX)pari.$somake
+install-lib-dyn: \$(LIBPARI_DYN)
 	-mkdir -p \$(LIBDIR)
-	-\$(RM) \$(LIBDIR)/\$(LIB_PREFIX)pari.$sodest
-	\$(INSTALL_DATA) \$(LIB_PREFIX)pari.$sodest \$(LIBDIR)/\$(LIB_PREFIX)pari.$sodest
+	-\$(RM) \$(LIBDIR)/\$(LIBPARI_DYN)
+	\$(INSTALL_DATA) \$(LIBPARI_DYN) \$(LIBDIR)/\$(LIBPARI_DYN)
 EOT
-if test "$somake" != "$sodest"; then
+if test "$soname" != "$sodest"; then
   cat >> $file << EOT
-	-\$(RM) \$(LIBDIR)/\$(LIB_PREFIX)pari.$somake
-	-\$(LN) \$(LIB_PREFIX)pari.$sodest \$(LIBDIR)/\$(LIB_PREFIX)pari.$somake
-	-\$(RM) \$(LIBDIR)/\$(LIB_PREFIX)pari.$DLSUFFIX
-	-\$(LN) \$(LIB_PREFIX)pari.$sodest \$(LIBDIR)/\$(LIB_PREFIX)pari.$DLSUFFIX
+	-\$(RM) \$(LIBDIR)/\$(LIBPARI).$soname
+	-\$(RM) \$(LIBDIR)/\$(LIBPARI).$DLSUFFIX
+	-\$(LN) \$(LIBPARI_DYN) \$(LIBDIR)/\$(LIBPARI).$soname
+	-\$(LN) \$(LIBPARI_DYN) \$(LIBDIR)/\$(LIBPARI).$DLSUFFIX
 
 EOT
 fi
@@ -338,34 +341,32 @@ fi
 if test -z "$DLLD"; then
   cat >> $file << EOT
 
-\$(LIB_PREFIX)pari.$somake::
+\$(LIBPARI_DYN)::
 	@echo "Configure could not find a way to build a shared library on this machine."
 
 EOT
 else
   if test -z "$DYNLIBS"; then
     cat >> $file << EOT
-gp-dyn: \$(OBJSGP) \$(LIB_PREFIX)pari.$somake \$(GNUPLOT_OBJS)
+gp-dyn: \$(OBJSGP) \$(LIBPARI_DYN) \$(GNUPLOT_OBJS)
 	\$(RM) \$@
 	\$(LD) -o \$@ \$(LDFLAGS) \$(OBJSGP) \$(GNUPLOT_OBJS) \$(RUNPTH) \$(TOPLDDYN) \$(LDDYN) \$(PLOTLIBS) \$(LIBS)
 
-\$(LIB_PREFIX)pari.$somake: \$(OBJS)
-	-\$(RM) \$(LIB_PREFIX)pari.$somake
+\$(LIBPARI_DYN): \$(OBJS)
+	-\$(RM) \$(LIBPARI_DYN)
 	\$(DLLD) -o \$@ \$(DLLDFLAGS) \$(OBJS) \$(EXTRADLLDFLAGS)
 EOT
-# CYGWIN32 FIXME: somake & sodest make no difference...
-    if test "$somake" != "$sodest"; then
+    if test "$soname" != "$sodest"; then
       cat >> $file << EOT
-	-\$(RM) \$(LIB_PREFIX)pari.$sodest
-	-\$(MV) \$(LIB_PREFIX)pari.$somake \$(LIB_PREFIX)pari.$sodest
-	-\$(LN) \$(LIB_PREFIX)pari.$sodest \$(LIB_PREFIX)pari.$somake
-	-\$(RM) \$(LIB_PREFIX)pari.$DLSUFFIX
-	-\$(LN) \$(LIB_PREFIX)pari.$sodest \$(LIB_PREFIX)pari.$DLSUFFIX
+	-\$(RM) \$(LIBPARI).$soname
+	-\$(RM) \$(LIBPARI).$DLSUFFIX
+	-\$(LN) \$(LIBPARI_DYN) \$(LIBPARI).$soname
+	-\$(LN) \$(LIBPARI_DYN) \$(LIBPARI).$DLSUFFIX
 EOT
     fi
   else
     cat >> $file << EOT
-gp-dyn: \$(OBJSDGP) \$(LIB_PREFIX)pari.$somake
+gp-dyn: \$(OBJSDGP) \$(LIBPARI_DYN)
 	\$(RM) \$@
 	\$(LD) -o \$@ \$(LDFLAGS) \$(OBJSDGP) \$(RUNPTH) \$(TOPLDDYN) \$(LDDYN) \$(PLOTLIBS) \$(LIBS) \$(DYNLIBS)
 EOT
@@ -427,17 +428,18 @@ for dir in basemath modules language gp graph gpdyn graphdyn; do
   plot-dyn)
     source="$src/graph/\$(PLOTFILE)"
     cflags="\$(DYNFLAGS) \$(PLOTCFLAGS)"
-    depend="$src/graph/rect.h \$(LIB_PREFIX)pari.dll libpari_dll.h libpari_globals.h \$(LIB_PREFIX)pari.dll"
+    depend="$src/graph/rect.h \$(LIBPARI).dll libpari_dll.h libpari_globals.h \$(LIBPARI).dll"
     ;;
   gp-dyn|gp_rl-dyn)
     source=$src\/`echo $dir | sed -e "s/dyn//"`\/`echo $f | cut -f1 -d-`.c
     cflags="\$(DYNFLAGS) -I$src/language \$(RLINCLUDE)"
-    depend="$src/language/anal.h $src/gp/gp.h ./paricfg.h libpari_dll.h libpari_globals.h \$(LIB_PREFIX)pari.dll"
+    depend="$src/language/anal.h $src/gp/gp.h ./paricfg.h libpari_dll.h
+libpari_globals.h \$(LIBPARI).dll"
     ;;
   gp_init-dyn|plotport-dyn)
     source=$src\/`echo $dir | sed -e "s/dyn//"`\/`echo $f | cut -f1 -d-`.c
     cflags="\$(DYNFLAGS) -I$src/graph"
-    depend="$src/graph/rect.h libpari_dll.h libpari_globals.h \$(LIB_PREFIX)pari.dll"
+    depend="$src/graph/rect.h libpari_dll.h libpari_globals.h \$(LIBPARI).dll"
     ;;
   init|es|sumiter)
     depend="$src/language/anal.h"

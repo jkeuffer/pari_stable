@@ -9,3 +9,6 @@ patch='0'
 
 # Status: alpha, beta, released, development
 status='development'
+
+# soname of libpari.so is libpari.so.$soname_num
+soname_num='1'

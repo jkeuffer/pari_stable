@@ -971,27 +971,18 @@ if test "$optimization" = profiling; then DLLD=; else
 # Some others (SunOS 5) need a link from a .so
 # Some others (HPUX 09) do not want version numbers.
 #
+  soname=$DLSUFFIX.$soname_num
   case "$osname-$arch" in
 #    aix-*)  DLSUFFIX=a  ;; dynamic linking does not work!
-    hpux-*)  DLSUFFIX=sl ;;
-    irix-*)  ;;
-    sunos-*) somake=.$VersionMajor$VersionMinor.$patch ;;
-    *-alpha|solaris-*|linux-*)
-             somake=.$version
-             sodest=.$patch ;;
-    freebsd-*)
-             if test $FREEBSD_ELF = 1; then
-               somake=.$VersionMajor
-               sodest=.$VersionMinor.$patch
-             else
-               somake=.$version
-               sodest=.$patch
-             fi;;
-    cygwin*) DLSUFFIX=dll; somake= ; sodest= ;;
+    sunos-*) sodest=$VersionMajor$VersionMinor.$patch
+             soname=$sodest;;
+    *-alpha|solaris-*|linux-*|freebsd-*)
+             sodest=$version.$patch ;;
+    cygwin*) soname= ; sodest= ; DLSUFFIX=dll;;
+    hpux-*)  soname= ; sodest= ; DLSUFFIX=sl;;
+    irix-*)  soname= ; sodest= ;;
     *) DLLD=;;
   esac
-  somake=$DLSUFFIX$somake
-  sodest=$somake$sodest
 fi
 
 if test -n "$DLLD"; then
@@ -1010,21 +1001,21 @@ if test -n "$DLLD"; then
 #
   if ($DLLD -v 2>&1 | grep GNU > /dev/null); then
     echo "...Hum, this looks like GNU ld"
-    DLLDFLAGS="-shared -soname \$@"
+    DLLDFLAGS="-shared -soname \$(LIBPARI).$soname"
   else
     # not GNU ld
     case "$osname-$arch" in
       aix-*)      DLLDFLAGS="-r" ;;
       hpux-*)     DLLDFLAGS="-b -E" ;;
       freebsd-*)  DLLDFLAGS="-Bshareable -x" ;;
-      linux-*)    DLLDFLAGS="-shared -soname \$@" ;;
+      linux-*)    DLLDFLAGS="-shared -soname \$(LIBPARI).$soname" ;;
       irix-*)     DLLDFLAGS="-shared -elf -no_unresolved -all" ;;
       *-alpha)    DLLDFLAGS="-shared"; EXTRADLLDFLAGS='${LIBS}'
          case "$optimization" in
            full) DLLDFLAGS="$DLLDFLAGS -O3" ;;
          esac;;
       sunos-*)    DLLDFLAGS="-assert nodefinitions" ;;
-      solaris-*)  DLLDFLAGS="-G -h \$@" ;;
+      solaris-*)  DLLDFLAGS="-G -h \$(LIBPARI).$soname" ;;
       *)          DLLD=;;
     esac
   fi
@@ -1247,7 +1238,7 @@ for variable in\
   optimization objdir static suffix\
   arch asmarch osname pretty\
   __gnuc__ gnuas CPP AS ASFLAGS CC cflags DBGFLAGS OPTFLAGS LD LDFLAGS\
-  DLLD DLSUFFIX somake sodest KERNELCPPFLAGS DLLDFLAGS EXTRADLLDFLAGS\
+  DLLD DLSUFFIX soname sodest KERNELCPPFLAGS DLLDFLAGS EXTRADLLDFLAGS\
   runpath runpathprefix LDDYN LIBS DYNLIBS DYNFLAGS DYNRELOC\
   ranlib gzip zcat emacs perl ln_s make_sh exe_suff\
   readline readline_enabledp CPPF_defined rl_refresh_line_oldproto\
