@@ -1832,18 +1832,21 @@ split_complete(GEN p, long bitprec, GEN roots_pol)
 GEN
 cauchy_bound(GEN p)
 {
-  long i,n=degpol(p);
-  GEN x=gzero,y,lc;
+  long i, n = degpol(p);
+  GEN lc, y, q = gmul(p, realun(DEFAULTPREC)), x = gzero;
 
-  lc=gabs((GEN)p[n+2],DEFAULTPREC); /* leading coefficient */
-  lc=gdiv(dbltor(1.),lc);
+  if (n <= 0) err(constpoler,"cauchy_bound");
+
+  lc = mpabs((GEN)q[n+2]); /* leading coefficient */
+  lc = ginv(lc);
   for (i=0; i<n; i++)
   {
-    y=gmul(gabs((GEN) p[i+2],DEFAULTPREC),lc);
-    y=gpui(y,dbltor(1./(n-i)),DEFAULTPREC);
-    if (gcmp(y,x) > 0) x=y;
+    y = (GEN)q[i+2]; if (gcmp0(y)) continue;
+    y = gmul(mpabs(y), lc);
+    y = divrs(mplog(y), n-i);
+    if (gcmp(y,x) > 0) x = y;
   }
-  return x;
+  return mpexp(x);
 }
 
 static GEN
