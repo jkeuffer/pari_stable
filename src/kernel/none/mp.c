@@ -646,8 +646,8 @@ GEN
 divrr(GEN x, GEN y)
 {
   long sx=signe(x), sy=signe(y), lx,ly,lr,e,i,j;
-  ulong si,saux;
-  GEN r,r1;
+  ulong y0,y1;
+  GEN r, r1;
 
   if (!sy) err(gdiver);
   e = expo(x) - expo(y);
@@ -672,38 +672,38 @@ divrr(GEN x, GEN y)
   lr = min(lx,ly); r = new_chunk(lr);
   r1 = r-1;
   r1[1] = 0; for (i=2; i<lr; i++) r1[i]=x[i];
-  r1[lr] = (lx>lr)? x[lr]: 0;
-  si=y[2]; saux=y[3];
+  r1[lr] = (lx>ly)? x[lr]: 0;
+  y0 = y[2]; y1 = y[3];
   for (i=0; i<lr-1; i++)
   { /* r1 = r + (i-1) */
-    ulong k,qp;
+    ulong k, qp;
     LOCAL_HIREMAINDER;
     LOCAL_OVERFLOW;
 
-    if ((ulong)r1[1] == si)
+    if ((ulong)r1[1] == y0)
     {
-      qp = MAXULONG; k=addll(si,r1[2]);
+      qp = MAXULONG; k = addll(y0,r1[2]);
     }
     else
     {
-      if ((ulong)r1[1] > si) /* can't happen if i=0 */
+      if ((ulong)r1[1] > y0) /* can't happen if i=0 */
       {
         GEN y1 = y+1;
-	overflow=0;
-	for (j=lr-i; j>0; j--) r1[j] = subllx(r1[j],y1[j]);
+        j = lr-i; r1[j] = subll(r1[j],y1[j]);
+	for (j--; j>0; j--) r1[j] = subllx(r1[j],y1[j]);
 	j=i; do r[--j]++; while (j && !r[j]);
       }
-      hiremainder=r1[1]; overflow=0;
-      qp=divll(r1[2],si); k=hiremainder;
+      hiremainder = r1[1]; overflow = 0;
+      qp = divll(r1[2],y0); k = hiremainder;
     }
     if (!overflow)
     {
-      long k3 = subll(mulll(qp,saux), r1[3]);
+      long k3 = subll(mulll(qp,y1), r1[3]);
       long k4 = subllx(hiremainder,k);
-      while (!overflow && k4) { qp--; k3=subll(k3,saux); k4=subllx(k4,si); }
+      while (!overflow && k4) { qp--; k3 = subll(k3,y1); k4 = subllx(k4,y0); }
     }
     j = lr-i+1;
-    if (j<ly) (void)mulll(qp,y[j]); else { hiremainder=0 ; j=ly; }
+    if (j<ly) (void)mulll(qp,y[j]); else { hiremainder = 0 ; j = ly; }
     for (j--; j>1; j--)
     {
       r1[j] = subll(r1[j], addmul(qp,y[j]));
@@ -714,7 +714,8 @@ divrr(GEN x, GEN y)
       if ((ulong)r1[1] < hiremainder)
       {
         qp--;
-        overflow=0; for (j=lr-i-(lr-i>=ly); j>1; j--) r1[j]=addllx(r1[j], y[j]);
+        j = lr-i-(lr-i>=ly); r1[j] = addll(r1[j], y[j]);
+        for (j--; j>1; j--) r1[j] = addllx(r1[j], y[j]);
       }
       else
       {
@@ -722,16 +723,17 @@ divrr(GEN x, GEN y)
 	while (r1[1])
 	{
 	  qp++; if (!qp) { j=i; do r[--j]++; while (j && !r[j]); }
-          overflow=0; for (j=lr-i-(lr-i>=ly); j>1; j--) r1[j]=subllx(r1[j],y[j]);
+          j = lr-i-(lr-i>=ly); r1[j] = subll(r1[j],y[j]);
+          for (j--; j>1; j--) r1[j] = subllx(r1[j],y[j]);
 	  r1[1] -= overflow;
 	}
       }
     }
-    r1[1]=qp; r1++;
+    *++r1 = qp;
   }
   /* i = lr-1 */
   /* round correctly */
-  if ((ulong)r1[1] > (si>>1))
+  if ((ulong)r1[1] > (y0>>1))
   {
     j=i; do r[--j]++; while (j && !r[j]);
   }
@@ -757,10 +759,10 @@ GEN
 dvmdii(GEN x, GEN y, GEN *z)
 {
   long sx=signe(x),sy=signe(y);
-  long lx, ly, lz, i, j, sh, k, lq, lr;
+  long lx, ly, lz, i, j, sh, lq, lr;
   pari_sp av;
-  ulong si,qp,saux, *xd,*rd,*qd;
-  GEN r,q,x1;
+  ulong y0,y1, *xd,*rd,*qd;
+  GEN q, r, r1;
 
   if (!sy) { if (z == ONLY_REM && !sx) return gzero; err(gdiver); }
   if (!sx)
@@ -795,13 +797,13 @@ DIVIDE: /* quotient is non-zero */
   if (ly==3)
   {
     LOCAL_HIREMAINDER;
-    si = y[2];
-    if (si <= (ulong)x[2]) hiremainder=0;
+    y0 = y[2];
+    if (y0 <= (ulong)x[2]) hiremainder=0;
     else
     {
       hiremainder = x[2]; lx--; x++;
     }
-    q = new_chunk(lx); for (i=2; i<lx; i++) q[i]=divll(x[i],si);
+    q = new_chunk(lx); for (i=2; i<lx; i++) q[i]=divll(x[i],y0);
     if (z == ONLY_REM)
     {
       avma=av; if (!hiremainder) return gzero;
@@ -818,51 +820,55 @@ DIVIDE: /* quotient is non-zero */
     r[2] = hiremainder; *z=r; return q;
   }
 
-  x1 = new_chunk(lx); sh = bfffo(y[2]);
+  r1 = new_chunk(lx); sh = bfffo(y[2]);
   if (sh)
   { /* normalize so that highbit(y) = 1 (shift left x and y by sh bits)*/
     register const ulong m = BITS_IN_LONG - sh;
     r = new_chunk(ly);
     shift_left2(r, y,2,ly-1, 0,sh,m); y = r;
-    shift_left2(x1,x,2,lx-1, 0,sh,m);
-    x1[1] = ((ulong)x[2]) >> m;
+    shift_left2(r1,x,2,lx-1, 0,sh,m);
+    r1[1] = ((ulong)x[2]) >> m;
   }
   else
   {
-    x1[1]=0; for (j=2; j<lx; j++) x1[j]=x[j];
+    r1[1] = 0; for (j=2; j<lx; j++) r1[j] = x[j];
   }
-  x=x1; si=y[2]; saux=y[3];
+  x = r1;
+  y0 = y[2]; y1 = y[3];
   for (i=0; i<=lz; i++)
-  { /* x1 = x + i */
+  { /* r1 = x + i */
+    ulong k, qp;
     LOCAL_HIREMAINDER;
     LOCAL_OVERFLOW;
-    if ((ulong)x1[1] == si)
+
+    if ((ulong)r1[1] == y0)
     {
-      qp = MAXULONG; k=addll(si,x1[2]);
+      qp = MAXULONG; k = addll(y0,r1[2]);
     }
     else
     {
-      hiremainder=x1[1]; overflow=0;
-      qp=divll(x1[2],si); k=hiremainder;
+      hiremainder = r1[1]; overflow = 0;
+      qp = divll(r1[2],y0); k = hiremainder;
     }
     if (!overflow)
     {
-      long k3 = subll(mulll(qp,saux), x1[3]);
+      long k3 = subll(mulll(qp,y1), r1[3]);
       long k4 = subllx(hiremainder,k);
-      while (!overflow && k4) { qp--; k3=subll(k3,saux); k4=subllx(k4,si); }
+      while (!overflow && k4) { qp--; k3 = subll(k3,y1); k4 = subllx(k4,y0); }
     }
-    hiremainder=0;
-    for (j=ly-1; j>1; j--)
+    hiremainder = 0; j = ly;
+    for (j--; j>1; j--)
     {
-      x1[j] = subll(x1[j], addmul(qp,y[j]));
-      hiremainder+=overflow;
+      r1[j] = subll(r1[j], addmul(qp,y[j]));
+      hiremainder += overflow;
     }
-    if ((ulong)x1[1] < hiremainder)
+    if ((ulong)r1[1] < hiremainder)
     {
-      overflow=0; qp--;
-      for (j=ly-1; j>1; j--) x1[j] = addllx(x1[j],y[j]);
+      qp--;
+      j = ly-1; r1[j] = addll(r1[j],y[j]);
+      for (j--; j>1; j--) r1[j] = addllx(r1[j],y[j]);
     }
-    x1[1]=qp; x1++;
+    *++r1 = qp;
   }
 
   lq = lz+2;

@@ -730,8 +730,8 @@ GEN
 divrr(GEN x, GEN y)
 {
   long sx=signe(x), sy=signe(y), lx,ly,lr,e,i,j;
-  ulong si,saux;
-  GEN r,r1;
+  ulong y0,y1;
+  GEN r, r1;
 
   if (!sy) err(gdiver);
   e = expo(x) - expo(y);
@@ -759,38 +759,38 @@ divrr(GEN x, GEN y)
   lr = min(lx,ly); r = new_chunk(lr);
   r1 = r-1;
   r1[1] = 0; for (i=2; i<lr; i++) r1[i]=x[i];
-  r1[lr] = (lx>lr)? x[lr]: 0;
-  si=y[2]; saux=y[3];
+  r1[lr] = (lx>ly)? x[lr]: 0;
+  y0 = y[2]; y1 = y[3];
   for (i=0; i<lr-1; i++)
   { /* r1 = r + (i-1) */
     ulong k,qp;
     LOCAL_HIREMAINDER;
     LOCAL_OVERFLOW;
     
-    if ((ulong)r1[1] == si)
+    if ((ulong)r1[1] == y0)
     {
-      qp = MAXULONG; k=addll(si,r1[2]);
+      qp = MAXULONG; k=addll(y0,r1[2]);
     }
     else
     {
-      if ((ulong)r1[1] > si) /* can't happen if i=0 */
+      if ((ulong)r1[1] > y0) /* can't happen if i=0 */
       {
         GEN y1 = y+1;
-	overflow=0;
-	for (j=lr-i; j>0; j--) r1[j] = subllx(r1[j],y1[j]);
+        j = lr-i; r1[j] = subll(r1[j],y1[j]);
+	for (j--; j>0; j--) r1[j] = subllx(r1[j],y1[j]);
 	j=i; do r[--j]++; while (j && !r[j]);
       }
-      hiremainder=r1[1]; overflow=0;
-      qp=divll(r1[2],si); k=hiremainder;
+      hiremainder = r1[1]; overflow = 0;
+      qp = divll(r1[2],y0); k = hiremainder;
     }
     if (!overflow)
     {
-      long k3 = subll(mulll(qp,saux), r1[3]);
+      long k3 = subll(mulll(qp,y1), r1[3]);
       long k4 = subllx(hiremainder,k);
-      while (!overflow && k4) { qp--; k3=subll(k3,saux); k4=subllx(k4,si); }
+      while (!overflow && k4) { qp--; k3=subll(k3,y1); k4=subllx(k4,y0); }
     }
     j = lr-i+1;
-    if (j<ly) (void)mulll(qp,y[j]); else { hiremainder=0 ; j=ly; } 
+    if (j<ly) (void)mulll(qp,y[j]); else { hiremainder = 0 ; j = ly; } 
     for (j--; j>1; j--)
     {
       r1[j] = subll(r1[j], addmul(qp,y[j]));
@@ -801,7 +801,8 @@ divrr(GEN x, GEN y)
       if ((ulong)r1[1] < hiremainder)
       {
         qp--;
-        overflow=0; for (j=lr-i-(lr-i>=ly); j>1; j--) r1[j]=addllx(r1[j], y[j]);
+        j = lr-i-(lr-i>=ly); r1[j] = addll(r1[j], y[j]);
+        for (j--; j>1; j--) r1[j] = addllx(r1[j], y[j]);
       }
       else
       {
@@ -809,16 +810,17 @@ divrr(GEN x, GEN y)
 	while (r1[1])
 	{
 	  qp++; if (!qp) { j=i; do r[--j]++; while (j && !r[j]); }
-          overflow=0; for (j=lr-i-(lr-i>=ly); j>1; j--) r1[j]=subllx(r1[j],y[j]);
+          j = lr-i-(lr-i>=ly); r1[j] = subll(r1[j],y[j]);
+          for (j--; j>1; j--) r1[j] = subllx(r1[j],y[j]);
 	  r1[1] -= overflow;
 	}
       }
     }
-    r1[1]=qp; r1++;
+    *++r1 = qp;
   }
   /* i = lr-1 */
   /* round correctly */
-  if ((ulong)r1[1] > (si>>1))
+  if ((ulong)r1[1] > (y0>>1))
   {
     j=i; do r[--j]++; while (j && !r[j]);
   }
