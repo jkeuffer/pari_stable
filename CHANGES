@@ -193,6 +193,7 @@ JD 74- [Configure:] detection of times()
    93- typos in krosi(), kronecker() [ e.g krosi(-4,1), kronecker(0,2^32+1) ]
    94- agm(-1,2) --> oo loop
    95- tanh(10^10) --> exponent overflow [ should be 1 ! ]
+   96- gamma(exp(-373)) --> exponent overflow
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.

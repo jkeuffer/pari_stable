@@ -966,7 +966,7 @@ cxgamma(GEN s0, int dolog, long prec)
 
   if (signe(sig) <= 0 || expo(sig) < -1)
   {
-    if (typ(s) == t_COMPLEX && gexpo((GEN)s[2]) <= 16) funeq = 1;
+    if (typ(s) == t_REAL || gexpo((GEN)s[2]) <= 16) funeq = 1;
   }
   /* s <--> 1-s */
   if (funeq) { s = gsub(gun, s); sig = real_i(s); }
@@ -1073,8 +1073,8 @@ cxgamma(GEN s0, int dolog, long prec)
     if (dolog) y = mplog(y);
   }
   else
-    if (!dolog) /* Compute lngamma mod 2 I Pi */
-    {
+    if (!dolog || typ(s) == t_REAL)
+    { /* Compute lngamma mod 2 I Pi */
       for (i=1; i < nn; i++)
       {
         y = gmul(y, gaddgs(s,i));
@@ -1084,6 +1084,7 @@ cxgamma(GEN s0, int dolog, long prec)
           y = gerepileupto(av2, y);
         }
       }
+      if (dolog) y = mplog(y);
     }
     else /* Be careful with the imaginary part */
     {
@@ -1118,43 +1119,56 @@ cxgamma(GEN s0, int dolog, long prec)
   pi = mppi(prec); pi2 = gmul2n(pi, 1); sqrtpi2 = sqrtr(pi2);
 
   if (!dolog)
-    {
-      if (funeq)
-      { /* y --> y Pi/(sin(Pi s) * sqrt(2Pi)) */
-        y = gmul2n(gdiv(gmul(sqrtpi2,y), gsin(gmul(s,pi), prec)), -1);
-        p1 = gneg(p1);
-      }
-      else /* y --> sqrt(2Pi) / y */
-	y = gdiv(sqrtpi2, y);
+  {
+    if (funeq)
+    { /* y --> y Pi/(sin(Pi s) * sqrt(2Pi)) */
+      y = gmul2n(gdiv(gmul(sqrtpi2,y), gsin(gmul(s,pi), prec)), -1);
+      p1 = gneg(p1);
     }
+    else /* y --> sqrt(2Pi) / y */
+      y = gdiv(sqrtpi2, y);
+  }
   else
-    {
-      if (funeq)
-      { /* 2 Pi ceil( (2Re(s) - 3)/4 ) */
-        GEN p2 = mulri(pi2, gceil(gmul2n(subrs(gmul2n(sig,1), 3), -2)));
-        /* y --> y + log Pi - log sqrt(2Pi) - log sin(Pi s) */
-        y = gsub(gadd(y, gmul2n(mplog(Pi2n(-1,prec)), -1)),
-                 glog(gsin(gmul(s,pi), prec), prec));
+  {
+    if (funeq)
+    { /* 2 Pi ceil( (2Re(s) - 3)/4 ) */
+      GEN p2 = mulri(pi2, gceil(gmul2n(subrs(gmul2n(sig,1), 3), -2)));
+      /* y --> y + log Pi - log sqrt(2Pi) - log sin(Pi s) */
+      y = gsub(gadd(y, gmul2n(mplog(Pi2n(-1,prec)), -1)),
+               glog(gsin(gmul(s,pi), prec), prec));
+      if (signe(p2)) {
         if (gsigne(imag_i(s)) < 0) setsigne(p2, -signe(p2));
-        y[2] = (long)addrr((GEN)y[2], p2);
-        p1 = gneg(p1);
+        if (typ(y) == t_COMPLEX)
+          y[2] = (long)addrr((GEN)y[2], p2);
+        else
+          y = gadd(y, pureimag(p2));
       }
-      else /* y --> sqrt(2Pi) / y */
-	y = gsub(glog(sqrtpi2, prec), y);
+      p1 = gneg(p1);
     }
+    else /* y --> sqrt(2Pi) / y */
+      y = gsub(glog(sqrtpi2, prec), y);
+  }
 
   if (dolog)
   {
     y = gadd(p1, y);
     if (typ(y) == t_COMPLEX)
     {
-      if (typ(res) == t_REAL) return gerepilecopy(av, y);
+      if (typ(res) == t_REAL) return gerepileupto(av, y);
       rfixlg((GEN)res[2], (GEN)y[2]);
     }
     else rfixlg(res, y);
   }
   else
+  {
     y = gmul(gexp(p1, prec), y);
+    if (typ(y) == t_COMPLEX)
+    {
+      rfixlg((GEN)res[1], (GEN)y[1]);
+      rfixlg((GEN)res[2], (GEN)y[2]);
+    }
+    else rfixlg(res, y);
+  }
   gaffect(y, res); avma = av; return res;
 }
 
