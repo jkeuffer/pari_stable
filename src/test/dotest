@@ -1,34 +1,14 @@
 #!/bin/sh
 
-case "$1" in
-  8) bitlen=64 ;;
-  4) bitlen=32 ;;
-esac
-testlist="$2"
+bitlen=$1; shift
+testlist=$@
 
 wrln () { echo "$1"; echo "$1" >> $file_bench; }
-
 wr () { echo $n "$1$c"; echo $n "$1$c" >> $file_bench; }
 
 confdir=../config
 testdir=../src/test
 execdir=.
-#Format: filename_weight (weight = 1000 if omitted)
-#  individual times are not modified whereas accumulated time is weighed
-#  by (weight / 1000)
-test -z "$testlist" && testlist="\
-  objets\
-  analyz\
-  number\
-  polyser\
-  linear\
-  elliptic\
-  sumiter\
-  graph\
-  program\
-  trans\
-  nfields_200\
-"
 if test -f /bin/rm ; then RM=/bin/rm; else RM=rm ; fi
 if sh -c 'test -x /bin/sh' 2>&-; then x=-x; else x=-r; fi
 (echo "hi there\c" ; echo " ") > echotmp

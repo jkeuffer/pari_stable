@@ -153,11 +153,11 @@ if test -z "$DLLD"; then
 else
   exec="gp-sta gp-dyn"
 fi
-doexec="env \"LD_LIBRARY_PATH=.$dir_sep\$\$LD_LIBRARY_PATH\" \$(SHELL) $src/test/dotest \$(SIZEOF_LONG)"
 case "$sizeof_long" in
   4) numbits=32;;
   8) numbits=64;;
 esac
+dotest="env \"LD_LIBRARY_PATH=.$dir_sep\$\$LD_LIBRARY_PATH\" \$(SHELL) $src/test/dotest $numbits"
 if test -z "$emacs"; then
   install_emacs_files=
 else
@@ -284,6 +284,8 @@ FLTKDIR    = $FLTKDIR
 
 TOPLDDYN     = -L$TOP/$objdir \$(RLLIBS)
 
+DOTEST=$dotest
+
 OBJS   = $OBJS
 OBJSGP = $OBJSGP
 OBJSDGP = $OBJSDGP
@@ -339,19 +341,15 @@ gp-sta: $src/funclist \$(OBJS) \$(OBJSGP) \$(GNUPLOT_OBJS)
 	\$(RM) \$@
 	\$(LD) -o \$@ \$(LDFLAGS) \$(OBJS) \$(OBJSGP) \$(GNUPLOT_OBJS) \$(RUNPTH) \$(RLLIBS) \$(PLOTLIBS) \$(LIBS)
 
-bench: $exec
-	@$doexec
+bench: $exec dobench
 dobench::
-	@$doexec
-
+	@\$(DOTEST) $test_basic
 EOT
-testlist='compat graphic galois'
-for i in $testlist; do
+for i in $test_extra; do
   cat >> $file << EOT
-test-$i: $exec
-	@$doexec $i
+test-$i: $exec dotest-$i
 dotest-$i::
-	@$doexec $i
+	@\$(DOTEST) $i
 EOT
 done
 
