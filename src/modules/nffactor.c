@@ -111,7 +111,7 @@ unifpol0(GEN nf,GEN x,long flag)
       if (typ(x) != t_POL) return gcopy(x); /* scalar */
     case t_POL:
       if (!degpol(x)) return gcopy(constant_term(x));
-      return (flag == t_COL)? algtobasis_i(nf, x): gmodulcp(x, (GEN)nf[1]);
+      return (flag == t_COL)? algtobasis(nf, x): gmodulcp(x, (GEN)nf[1]);
 
     default: /* t_COL */
       return (flag == t_COL)? gcopy(x): basistoalg(nf, x);
@@ -755,6 +755,8 @@ nfcmbf(nfcmbf_t *T, GEN p, long a, long maxK, long klim)
   GEN bound = T->bound;
   GEN nfpol = (GEN)nf[1];
   long K = 1, cnt = 1, i,j,k, curdeg, lfamod = lg(famod)-1, dnf = degpol(nfpol);
+  GEN res = cgetg(3, t_VEC);
+  pari_sp av0 = avma;
   GEN pk = gpowgs(p,a), pks2 = shifti(pk,-1);
 
   GEN trace1   = cgetg(lfamod+1, t_MAT);
@@ -764,7 +766,6 @@ nfcmbf(nfcmbf_t *T, GEN p, long a, long maxK, long klim)
   GEN degsofar = cgetg(lfamod+1, t_VECSMALL);
   GEN listmod  = cgetg(lfamod+1, t_COL);
   GEN fa       = cgetg(lfamod+1, t_COL);
-  GEN res = cgetg(3, t_VEC);
   GEN q = ceil_safe(mpsqrt(T->BS_2));
   GEN lc = absi(leading_term(pol)), lt = is_pm1(lc)? NULL: lc;
   GEN C2ltpol, C = T->L->topowden, Tpk = T->L->Tpk;
@@ -932,9 +933,19 @@ END:
     fa[cnt++] = (long)pol;
   }
   if (DEBUGLEVEL>6) fprintferr("\n");
-  setlg(listmod, cnt); setlg(fa, cnt);
-  res[1] = (long)fa;
-  res[2] = (long)listmod; return res;
+  if (cnt == 2) { 
+    avma = av0; 
+    res[1] = (long)_vec(T->pol);
+    res[2] = (long)_vec(T->fact);
+  }
+  else
+  {
+    setlg(listmod, cnt); setlg(fa, cnt);
+    res[1] = (long)fa;
+    res[2] = (long)listmod;
+    gerepilecopy(av0, res);
+  }
+  return res;
 }
 
 static GEN
