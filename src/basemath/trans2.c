@@ -811,28 +811,30 @@ gathz(GEN x, GEN y)
 
 /********************************************************************/
 /**                                                                **/
-/**             FONCTION TABLEAU DES NOMBRES DE BERNOULLI          **/
+/**               CACHE BERNOULLI NUMBERS B_2k                     **/
 /**                                                                **/
 /********************************************************************/
 #define BERN(i)       (B + 3 + (i)*B[2])
 #define set_bern(c0, i, B) STMT_START { \
   *(BERN(i)) = c0; affrr(B, BERN(i)); } STMT_END
-/* pour calculer B_0,B_2,...,B_2*nb */
+/* compute B_0,B_2,...,B_2*nb */
 void
 mpbern(long nb, long prec)
 {
   long i, l, c0;
-  pari_sp av, av2;
-  GEN p1, B;
+  pari_sp av;
+  GEN B;
   pari_timer T;
 
+  prec++; /* compute one more word of accuracy than required */
   if (bernzone && bernzone[1] >= nb && bernzone[2] >= prec) return;
   if (nb < 0) nb = 0;
-  l = 3 + prec*(nb+1); B = newbloc(l);
+  l = 3 + prec*(nb+1);
+  B = newbloc(l);
   B[0] = evallg(l);
   B[1] = nb;
   B[2] = prec;
-  av = avma; l = prec+1;
+  av = avma;
 
   c0 = evaltyp(t_REAL) | evallg(prec);
   *(BERN(0)) = c0; affsr(1, BERN(0));
@@ -847,30 +849,26 @@ mpbern(long nb, long prec)
     TIMERstart(&T);
   }
 
-  p1 = realun(l); av2 = avma;
   if (i == 1 && nb > 0)
   {
-    set_bern(c0, 1, divrs(p1,6));
-    i = 2; avma = av2;
+    set_bern(c0, 1, divrs(realun(prec), 6)); /* B2 = 1/6 */
+    i = 2;
   }
-  for (   ; i <= nb; i++, avma = av2)
+  for (   ; i <= nb; i++, avma = av)
   { /* i > 1 */
-    long j, n = 8, m = 5, d1 = i-1, d2 = 2*i-3;
-    GEN S;
-    affrr(BERN(d1), p1); S = p1;
-    for (j = d1;;)
+    long n = 8, m = 5, d1 = i-1, d2 = 2*i-3;
+    GEN S = BERN(d1);
+    
+    for (;;)
     {
       S = divrs(mulrs(S, n*m), d1*d2);
-      if (j == 1) break;
-      affrr(S, p1);
-      j--;
-      S = addrr(BERN(j), p1);
+      if (d1 == 1) break;
       n += 4; m += 2; d1--; d2 -= 2;
+      S = addrr(BERN(d1), S);
     }
-    S = addsr(1, S); setlg(S,l);
-    S = subsr(1, divrs(S, 2*i+1));
+    S = divrs(subsr(2*i, S), 2*i+1);
     setexpo(S, expo(S) - 2*i);
-    set_bern(c0, i, S);
+    set_bern(c0, i, S); /* S = B_2i */
   }
   if (DEBUGLEVEL) msgTIMER(&T, "Bernoulli");
   if (bernzone) gunclone(bernzone);

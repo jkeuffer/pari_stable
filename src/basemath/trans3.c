@@ -1183,7 +1183,7 @@ czeta(GEN s, long prec)
     y = gadd(y,p2);
   }
   flag2 = (2*p < 46340);
-  mpbern(p,prec+1); p31=cgetr(prec+1); z=gzero;
+  mpbern(p,prec); p31=cgetr(prec+1); z=gzero;
   for (i=p; i>=1; i--)
   {
     i2=i<<1;
