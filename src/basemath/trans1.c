@@ -1340,8 +1340,8 @@ gcos(GEN x, long prec)
     case t_COMPLEX:
       y=cgetg(3,t_COMPLEX); av=avma;
       r=gexp((GEN)x[2],prec); p1=ginv(r);
-      p2=gmul2n(mpadd(p1,r),-1);
-      p1=mpsub(p2,r);
+      p2=gmul2n(gadd(p1,r),-1);
+      p1=gsub(p2,r);
       gsincos((GEN)x[1],&u,&v,prec);
       tetpil=avma;
       y[1]=lmul(p2,v); y[2]=lmul(p1,u);
@@ -1419,8 +1419,8 @@ gsin(GEN x, long prec)
     case t_COMPLEX:
       y=cgetg(3,t_COMPLEX); av=avma;
       r=gexp((GEN)x[2],prec); p1=ginv(r);
-      p2=gmul2n(mpadd(p1,r),-1);
-      p1=mpsub(p2,p1);
+      p2=gmul2n(gadd(p1,r),-1);
+      p1=gsub(p2,p1);
       gsincos((GEN)x[1],&u,&v,prec);
       tetpil=avma;
       y[1]=lmul(p2,u); y[2]=lmul(p1,v);
@@ -1506,12 +1506,12 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
       ps=cgetg(3,t_COMPLEX); pc=cgetg(3,t_COMPLEX);
       *s=ps; *c=pc; av=avma;
       r=gexp((GEN)x[2],prec); p1=ginv(r);
-      p2=gmul2n(mpadd(p1,r),-1);
-      p1=mpsub(p2,p1); r=mpsub(p2,r);
+      v1=gmul2n(gadd(p1,r),-1);
+      u1=gsub(v1,p1); r=gsub(v1,r);/*u1=I*sin(I*Im(x));v1=cos(I*Im(x));r=-u1*/
       gsincos((GEN)x[1],&u,&v,prec);
       tetpil=avma;
-      p1=gmul(p2,u); p2=gmul(p1,v);
-      p3=gmul(p2,v); p4=gmul(r,u);
+      p1=gmul(v1,u); p2=gmul(u1,v);
+      p3=gmul(v1,v); p4=gmul(r,u);
       gptr[0]=&p1; gptr[1]=&p2; gptr[2]=&p3; gptr[3]=&p4;
       gerepilemanysp(av,tetpil,gptr,4);
       ps[1]=(long)p1; ps[2]=(long)p2; pc[1]=(long)p3; pc[2]=(long)p4;

@@ -964,7 +964,7 @@ gmul(GEN x, GEN y)
 	    l=avma; p1=co8(y,lg(x)); tetpil=avma;
 	    return gerepile(l,tetpil,gmul(p1,x));
 	
-	  case t_INTMOD: err(gmulerf,tx,ty);
+	  case t_PADIC: case t_INTMOD: err(gmulerf,tx,ty);
 	}
 	
       case t_INTMOD:
