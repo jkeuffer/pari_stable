@@ -3836,7 +3836,7 @@ GEN
 rnfpolredabs(GEN nf, GEN relpol, long flag)
 {
   GEN red, bas, z, elt, POL, pol, T, a;
-  long v;
+  long v, fl = (flag & nf_ADDZK)? nf_ADDZK: nf_RAW;
   pari_sp av = avma;
 
   if (typ(relpol)!=t_POL) err(typeer,"rnfpolredabs");
@@ -3844,15 +3844,14 @@ rnfpolredabs(GEN nf, GEN relpol, long flag)
   if (DEBUGLEVEL>1) (void)timer2();
   relpol = unifpol(nf,relpol,1);
   T = (GEN)nf[1];
-  if ((flag & nf_ADDZK) && !(flag&nf_ABSOLUTE))
+  if ((flag & nf_ADDZK) && !(flag & nf_ABSOLUTE))
     err(impl,"this combination of flags in rnfpolredabs");
   if (flag & nf_PARTIALFACT)
   {
     long sa;
+    fl |= nf_PARTIALFACT;
     POL = _rnfequation(nf, relpol, &sa, NULL);
-    bas = cgetg(3, t_VEC);
-    bas[1] = (long)POL;
-    bas[2] = (long)smallbase(POL,NULL);
+    bas = POL;
     a = stoi(sa);
   }
   else
@@ -3869,7 +3868,7 @@ rnfpolredabs(GEN nf, GEN relpol, long flag)
       fprintferr("original absolute generator: %Z\n", POL);
     }
   }
-  red = polredabs0(bas, (flag & nf_ADDZK)? nf_ADDZK: nf_RAW);
+  red = polredabs0(bas, fl);
   pol = (GEN)red[1];
   if (DEBUGLEVEL>1) fprintferr("reduced absolute generator: %Z\n",pol);
   if (flag & nf_ABSOLUTE)
