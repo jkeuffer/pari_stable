@@ -1052,8 +1052,16 @@ bestlift_bound(GEN C, long d, double alpha, GEN Npr)
 static GEN
 get_R(GEN M)
 { 
-  GEN R = sqred1_from_QR(M, DEFAULTPREC + (gexpo(M) >> TWOPOTBITS_IN_LONG));
-  long i, l = lg(R);
+  GEN R;
+  long i, l, prec = DEFAULTPREC + (gexpo(M) >> TWOPOTBITS_IN_LONG);
+
+  for(;;)
+  {
+    R = sqred1_from_QR(M, prec);
+    if (R) break;
+    prec = (prec-1)<<1;
+  }
+  l = lg(R);
   for (i=1; i<l; i++) coeff(R,i,i) = un;
   return R;
 }
