@@ -297,7 +297,7 @@ addscalrfrac(GEN x, GEN y)
 }
 
 /* assume gvar(x) = varn(mod) */
-static GEN
+GEN
 to_polmod(GEN x, GEN mod)
 {
   long tx = typ(x);

@@ -3042,21 +3042,8 @@ print_elt(long a)
 }
 
 extern GEN ZY_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LPRS);
-extern GEN ZY_ZXY_resultant(GEN A, GEN B0, long *lambda);
 extern GEN squff2(GEN x, long klim, long hint);
-extern GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den);
-
-static void
-gsetvarn(GEN x, long v)
-{
-  switch(typ(x))
-  {
-    case t_POL: setvarn(x,v); break;
-    case t_POLMOD:
-      setvarn(x[1],v);
-      if (typ(x[2]) == t_POL) setvarn(x[2],v); break;
-  }
-}
+extern GEN to_polmod(GEN x, GEN mod);
 
 /* modular version. TODO: check that compositum2 is not slower */
 GEN
@@ -3083,12 +3070,13 @@ polcompositum0(GEN A, GEN B, long flall)
     GEN w,a,b; /* a,b,c root of A,B,C = compositum, c = b - k a */
     for (i=1; i<l; i++)
     {
-      a = gneg_i(gmul((GEN)LPRS[1], ginvmod((GEN)LPRS[2], (GEN)C[i])));
+      a = gmul((GEN)LPRS[1], ginvmod((GEN)LPRS[2], (GEN)C[i]));
+      a = gneg_i(gmod(a, (GEN)C[i]));
       b = gadd(polx[v], gmulsg(k,a));
       w = cgetg(5,t_VEC); /* [C, a, b, n ] */
       w[1] = C[i]; 
-      w[2] = lmodulcp(a, (GEN)w[1]);
-      w[3] = lmodulcp(b, (GEN)w[1]);
+      w[2] = (long)to_polmod(a, (GEN)w[1]);
+      w[3] = (long)to_polmod(b, (GEN)w[1]);
       w[4] = lstoi(-k); C[i] = (long)w;
     }
   }
