@@ -1,7 +1,7 @@
-#line 1 "../src/kernel/gmp/gcd.c"
+#line 2 "../src/kernel/gmp/gcd.c"
 /* $Id$
 
-Copyright (C) 2000  The PARI group.
+Copyright (C) 2000-2003  The PARI group.
 
 This file is part of the PARI/GP package.
 
@@ -73,70 +73,45 @@ gcdii(GEN a, GEN b)
  *==================================
  *    If a is invertible, return 1, and set res  = a^{ -1 }
  *    Otherwise, return 0, and set res = gcd(a,b)
- *
- * This is sufficiently different from bezout() to be implemented separately
- * instead of having a bunch of extra conditionals in a single function body
- * to meet both purposes.
  */
+
+static const int INVMOD_GMP_LIMIT=4;
 
 int
 invmod(GEN a, GEN b, GEN *res)
 {
-  pari_sp av;
-  long s;
-  ulong g;
-  ulong xv,xv1;		/* Lehmer stage recurrence matrix */
-
   if (typ(a) != t_INT || typ(b) != t_INT) err(arither1);
   if (!signe(b)) { *res=absi(a); return 0; }
-  av = avma;
-  if (lgefint(b) == 3) /* single-word affair */
-  {
-    GEN d1 = modiu(a, (ulong)(b[2]));
-    if (d1 == gzero)
-    {
-      if (b[2] == 1L)
-        { *res = gzero; return 1; }
-      else
-        { *res = absi(b); return 0; }
-    }
-    g = xgcduu((ulong)(b[2]), (ulong)(d1[2]), 1, &xv, &xv1, &s);
-    avma = av;
-    if (g != 1UL) { *res = utoi(g); return 0; }
-    xv = xv1 % (ulong)(b[2]); if (s < 0) xv = ((ulong)(b[2])) - xv;
-    *res = utoi(xv); return 1;
-  }
-  else
-  {
-    /* general case */
-    /*This serve two purposes:
-     * 1) mpn_gcdext destroy its input and need an extra limb
-     * 2) this allows us to use icopy instead of gerepile later.
-     * NOTE: we must put u before d else the final icopy could fail.
-     */
-    GEN  ca, cb, u, v, d;
-    long lu, l, su;
-    GEN na = modii(a,b);
-    if (!signe(na)) {avma=av; *res=icopy(b); return 0;}
-    ca = icopy_ef(na,lgefint(na)+1);
-    cb = icopy_ef(b,lgefint(b)+1);
-    u = cgeti(lgefint(b)+1);
-    d = cgeti(lgefint(b)+1);
-    l = mpn_gcdext(LIMBS(d), LIMBS(u), &lu, LIMBS(cb), NLIMBS(cb), LIMBS(ca), NLIMBS(ca));
-    d[1] = evalsigne(1)|evallgefint(l+2);
-    if (lu<=0)
-    {
-      if (lu==0) su=0;
-      else {su=-1;lu=-lu;}
-    }
+  if (NLIMBS(b) < INVMOD_GMP_LIMIT) 
+    return invmod_pari(a,b,res);
+  { /* General case: use gcdext(a+b, b) since mpn_gcdext require S1>=S2 */
+    pari_sp av = avma;
+    GEN  ca, cb, u, d;
+    long lu, l, su, sa = signe(a), lb,lna;
+    GEN na;
+    if (!sa) { avma = av; *res = absi(b); return 0; }
+    if (signe(b) < 0) b = negi(b);
+    if (absi_cmp(a, b) < 0)
+      na = sa > 0? addii(a, b): subii(a, b);
     else
-      su=1;
-    u[1] = evalsigne(su)|evallgefint(lu+2);
+      na = a;
+    /* Copy serves two purposes:
+     * 1) mpn_gcdext destroys its input and needs an extra limb
+     * 2) allows us to use icopy instead of gerepile later. */
+    lb = lgefint(b); lna = lgefint(na);
+    ca = icopy_ef(na,lna+1);
+    cb = icopy_ef( b,lb+1);
+    /* must create u first else final icopy could fail. */
+    u = cgeti(lna+1);
+    d = cgeti(lna+1);
+    /* na >= b */
+    l = mpn_gcdext(LIMBS(d), LIMBS(u), &lu, LIMBS(ca), NLIMBS(ca), LIMBS(cb), NLIMBS(cb));
+    d[1] = evalsigne(1)|evallgefint(l+2);
     if (!is_pm1(d)) {avma=av; *res=icopy(d); return 0;}
-    if (signe(b)<0) b=negi(b); 
-    v=diviiexact(subii(d,mulii(u,b)),na);
-    if (signe(v)<0) v=addii(v,b);
-    avma=av; *res=icopy(v); return 1;
+    su = lu?((sa ^ lu) < 0)? -1: 1: 0;
+    u[1] = evalsigne(su) | evallgefint(labs(lu)+2);
+    if (su < 0) u = addii(u, b);
+    avma=av; *res=icopy(u); return 1;
   }
 }
 
@@ -240,14 +215,12 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
     }
   }
   else
-  {
-    /* general case */
+  { /* general case */
     pari_sp av = avma;
-    /*This serve two purposes:
-     * 1) mpn_gcdext destroy its input and need an extra limb
-     * 2) this allows us to use icopy instead of gerepile later.
-     * NOTE: we must put u before d else the final icopy could fail.
-     */
+    /*Copy serves two purposes:
+     * 1) mpn_gcdext destroys its input and needs an extra limb
+     * 2) allows us to use icopy instead of gerepile later.
+     * NOTE: we must put u before d else the final icopy could fail. */
     GEN ca = icopy_ef(a,lgefint(a)+1);
     GEN cb = icopy_ef(b,lgefint(b)+1);
     GEN u = cgeti(lgefint(a)+1), v = NULL;
@@ -271,5 +244,3 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
     return icopy(d);
   }
 }
-
-

@@ -43,6 +43,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include <gmp.h>
 
+/*We need PARI invmod renamed to invmod_pari*/
+#define INVMOD_PARI
+
 void setmontgomerylimit(long n); 
 int pari_kernel_init(void)
 {
@@ -2179,3 +2182,4 @@ int_normalize(GEN x, long known_zero_words)
     if (x[i]) { setlgefint(x, i+1); return x; }
   x[1] = evalsigne(0) | evallgefint(2); return x;
 }
+

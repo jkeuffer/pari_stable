@@ -6,8 +6,8 @@ kern=$src/kernel/$kernlvl1
 cat >> $file << EOT
 parilvl1.h: $kern/int.h $kern/level1.h
 	cat $kern/int.h $kern/level1.h > parilvl1.h
-mp.c: $kern/mp.c $kern/gcdll.c $kern/ratlift.c $kern/gcd.c $kern/mp_indep.c
-	cat $kern/mp.c $kern/gcdll.c $kern/ratlift.c $kern/gcd.c $kern/mp_indep.c > mp.c
+mp.c: $kern/mp.c $kern/gcdll.c $kern/ratlift.c $kern/gcd.c $kern/invmod.c $kern/mp_indep.c
+	cat $kern/mp.c $kern/gcdll.c $kern/ratlift.c $kern/gcd.c $kern/invmod.c $kern/mp_indep.c > mp.c
 mp\$(_O): .headers mp.c
 	\$(CC) -c \$(CFLAGS) \$(CPPFLAGS) -o mp\$(_O) mp.c
 mpinl\$(_O): .headers parilvl1.h

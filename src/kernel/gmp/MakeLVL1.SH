@@ -7,8 +7,8 @@ knone=$src/kernel/none
 cat >> $file << EOT
 parilvl1.h: $kern/int.h $knone/level1.h
 	cat $kern/int.h $knone/level1.h > parilvl1.h
-mp.c: $kern/mp.c $knone/gcdll.c $knone/ratlift.c $kern/gcd.c $knone/mp_indep.c
-	cat $kern/mp.c $knone/gcdll.c $knone/ratlift.c $kern/gcd.c $knone/mp_indep.c > mp.c
+mp.c: $kern/mp.c $knone/gcdll.c $knone/ratlift.c $knone/invmod.c $kern/gcd.c $knone/mp_indep.c
+	cat $kern/mp.c $knone/gcdll.c $knone/ratlift.c $knone/invmod.c $kern/gcd.c $knone/mp_indep.c > mp.c
 mp\$(_O): .headers mp.c
 	\$(CC) -c \$(CFLAGS) \$(CPPFLAGS) \$(GMPINCLUDE) -o mp\$(_O) mp.c
 mpinl\$(_O): .headers parilvl1.h
