@@ -2436,6 +2436,9 @@ f(GEN x)
 static GEN
 p(GEN x)
 {
+  int t; get_nf(x,&t);
+  if (t == typ_GAL)
+    return (GEN)x[2];
   x = get_primeid(x);
   if (!x) err(member,"p",mark.member,mark.start);
   return (GEN)x[1];
@@ -2503,6 +2506,7 @@ pol(GEN x) /* polynomial */
       case typ_CLA: return gmael(x,1,1);
       case typ_POL: return x;
       case typ_Q  : return (GEN)x[1];
+      case typ_GAL: return (GEN)x[1];
     }
     if (typ(x)==t_POLMOD) return (GEN)x[2];
     err(member,"pol",mark.member,mark.start);
@@ -2564,6 +2568,7 @@ mroots(GEN x) /* roots */
   if (!y)
   {
     if (t == typ_ELL) return (GEN)x[14];
+    if (t == typ_GAL) return (GEN)x[3];
     err(member,"roots",mark.member,mark.start);
   }
   return (GEN)y[6];
@@ -2724,6 +2729,7 @@ cyc(GEN clg) /* cyclic decomposition (SNF) of a group (of type clgp) */
 static GEN
 gen(GEN x)
 {
+  int t;
   GEN y = get_primeid(x);
   if (y)
   {
@@ -2732,13 +2738,33 @@ gen(GEN x)
     x[2] = lcopy((GEN)y[2]);
     return x;
   }
+  get_nf(x,&t);
+  if (t == typ_GAL)
+    return (GEN)x[7];
   x = clgp(x);
   if (typ(x)!=t_VEC || lg(x)!=4)
     err(member,"gen",mark.member,mark.start);
   if (typ(x[1]) == t_COL) return (GEN)x[2]; /* from bnfisprincipal */
   return (GEN) x[3];
 }
-
+static GEN
+group(GEN x)
+{
+  int t;
+  get_nf(x,&t);
+  if (t == typ_GAL)
+    return (GEN)x[6];
+  err(member,"group",mark.member,mark.start);
+}
+static GEN
+orders(GEN x)
+{
+  int t;
+  get_nf(x,&t);
+  if (t == typ_GAL)
+    return (GEN)x[8];
+  err(member,"orders",mark.member,mark.start);
+}
 #define is_ell(x) (typ(x) == t_VEC && lg(x)>=14)
 #define is_bigell(x) (typ(x) == t_VEC && lg(x)>=20)
 
@@ -2904,11 +2930,13 @@ entree gp_member_list[] = {
 {"fu",0,(void*)fu},
 {"futu",0,(void*)futu},
 {"gen",0,(void*)gen},
+{"group",0,(void*)group},
 {"j",0,(void*)j},
 {"mod",0,(void*)mod},
 {"nf",0,(void*)nf},
 {"no",0,(void*)no},
 {"omega",0,(void*)momega},
+{"orders",0,(void*)orders},
 {"p",0,(void*)p},
 {"pol",0,(void*)pol},
 {"reg",0,(void*)reg},

@@ -862,7 +862,7 @@ case "$osname" in
             cppfl="-DUSE_ELF"    
     fi ;;
 esac
-CPP="$cc $cppfl -E -I."
+CPP="$CC $cppfl -E -I."
 
 echo "C PreProcessor is      $CPP"
 

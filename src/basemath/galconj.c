@@ -859,7 +859,7 @@ testpermutation(GEN F, GEN B, long s, long t, long cut,
 	V = gzero;
 	for (p2 = 1 + p4, p3 = 1 + x[p1]; p2 <= b; p2++)
 	{
-	  V = gadd(V, ((GEN **) W)[G[p6][p3]][G[p1][p2]]);
+	  V = addii(V, ((GEN **) W)[G[p6][p3]][G[p1][p2]]);
 	  p3 += s;
 	  if (p3 > b)
 	    p3 -= b;
@@ -869,7 +869,7 @@ testpermutation(GEN F, GEN B, long s, long t, long cut,
 	  p3 += b;
 	for (p2 = p4; p2 >= 1; p2--)
 	{
-	  V = gadd(V, ((GEN **) W)[G[p6][p3]][G[p1][p2]]);
+	  V = addii(V, ((GEN **) W)[G[p6][p3]][G[p1][p2]]);
 	  p3 -= s;
 	  if (p3 <= 0)
 	    p3 += b;
@@ -878,7 +878,7 @@ testpermutation(GEN F, GEN B, long s, long t, long cut,
       }
     V = gzero;
     for (p1 = 1; p1 <= a; p1++)
-      V = gadd(V, (GEN) ar[p1]);
+      V = addii(V, (GEN) ar[p1]);
     if (padicisint(V, td))
     {
       for (p1 = 1, p5 = d; p1 <= a; p1++, p5++)
@@ -1584,7 +1584,7 @@ initborne(GEN T, GEN disc, struct galois_borne *gb, long ppp)
     L[i] = z[1];
   }
   M = vandermondeinverse(L, gmul(T, realun(prec)), disc);
-  borne = gzero;
+  borne = realzero(prec);
   for (i = 1; i <= n; i++)
   {
     z = gzero;
@@ -1593,7 +1593,7 @@ initborne(GEN T, GEN disc, struct galois_borne *gb, long ppp)
     if (gcmp(z, borne) > 0)
       borne = z;
   }
-  borneroots = gzero;
+  borneroots = realzero(prec);
   for (i = 1; i <= n; i++)
   {
     z = gabs((GEN) L[i], prec);
@@ -2642,11 +2642,19 @@ galoisconj4(GEN T, GEN den, long flag)
   n = degree(T);
   if (n == 1)			/* Too easy! */
   {
-    res = cgetg(2, t_COL);
-    res[1] = (long) polx[varn(T)];
-    return res;
+    if (!flag)
+    {
+      res = cgetg(2, t_COL);
+      res[1] = (long) polx[varn(T)];
+      return res;
+    }
+    ga.l = 3;
+    ga.deg = 1;
+    ga.ppp = 1;
+    den = gun;
   }
-  galoisanalysis(T, &ga, 1);
+  else
+    galoisanalysis(T, &ga, 1);
   if (ga.deg == 0)
   {
     avma = ltop;
@@ -2673,7 +2681,14 @@ galoisconj4(GEN T, GEN den, long flag)
   if (DEBUGLEVEL >= 1)
     msgtimer("rootpadic()");
   M = vandermondeinverse(L, T, den);
-  G = galoisgen(T, L, M, den, &gb, &ga);
+  if (n == 1)
+  {
+    G = cgetg(3, t_VEC);
+    G[1] = lgetg(1, t_VECSMALL);
+    G[2] = lgetg(1, t_VECSMALL);
+  }
+  else
+    G = galoisgen(T, L, M, den, &gb, &ga);
   if (DEBUGLEVEL >= 6)
     fprintferr("GaloisConj:%Z\n", G);
   if (G == gzero)
@@ -2858,11 +2873,25 @@ galoisinit(GEN nf, GEN den)
 GEN
 galoispermtopol(GEN gal, GEN perm)
 {
+  GEN     v;
+  long    t = typ(perm);
+  int     i;
   gal = checkgal(gal);
-  if (typ(perm) != t_VECSMALL)
-    err(typeer, "galoispermtopol");
-  return permtopol(perm, (GEN) gal[3], (GEN) gal[4], (GEN) gal[5],
-		   varn((GEN) gal[1]));
+  switch (t)
+  {
+  case t_VECSMALL:
+    return permtopol(perm, (GEN) gal[3], (GEN) gal[4], (GEN) gal[5],
+		     varn((GEN) gal[1]));
+  case t_VEC:
+  case t_COL:
+  case t_MAT:
+    v = cgetg(lg(perm), t);
+    for (i = 1; i < lg(v); i++)
+      v[i] = (long) galoispermtopol(gal, (GEN) perm[i]);
+    return v;
+  }
+  err(typeer, "galoispermtopol");
+  return NULL;			/* not reached */
 }
 
 GEN

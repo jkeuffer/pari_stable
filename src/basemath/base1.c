@@ -176,7 +176,8 @@ get_nf(GEN x, int *t)
           x = (GEN)x[1]; if (typ(x)!=t_VEC || lg(x)!=11) break;
           x = (GEN)x[7]; if (typ(x)!=t_VEC || lg(x)!=10) break;
           return x;
-
+        case 9 : *t = typ_GAL;
+	  return NULL;
         case 14: case 20:
           *t = typ_ELL; return NULL;
       }break;
