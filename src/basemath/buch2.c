@@ -68,7 +68,7 @@ check_and_build_obj(GEN S, int tag, GEN (*build)(GEN))
 /*******************************************************************/
 extern GEN lllint_fp_ip(GEN x, long D);
 extern GEN R_from_QR(GEN x, long prec);
-extern GEN gauss_get_col(GEN a, GEN b, GEN p, long li);
+extern GEN hnf_invimage(GEN A, GEN b);
 extern GEN col_extract(GEN R, GEN perm);
 extern GEN vecconst(GEN v, GEN x);
 extern GEN nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec);
@@ -280,22 +280,37 @@ subFBgen(FB_t *F, GEN nf, double PROD, long minsFB)
   avma = av; return 1;
 }
 static int
-subFB_increase(FB_t *F, GEN nf, long step)
+subFB_increase(FB_t *F, GEN nf, long step, GEN L_jideal)
 {
   GEN yes, D = (GEN)nf[3];
   long i, iyes, lv = F->KC + 1, minsFB = lg(F->subFB)-1 + step;
   pari_sp av = avma;
 
   yes = cgetg(minsFB+1, t_VECSMALL); iyes = 1;
-  for (i = 1; i < lv; i++)
+  if (L_jideal)
   {
-    long t = F->perm[i];
-    if (!ok_subFB(F, t, D)) continue;
+    for (i = 1; i < lg(L_jideal); i++)
+    {
+      long t = L_jideal[i];
+      if (!ok_subFB(F, t, D)) continue;
 
-    yes[iyes++] = t;
-    if (iyes > minsFB) break;
+      yes[iyes++] = t;
+      if (iyes > minsFB) break;
+    }
   }
-  if (i == lv) return 0;
+  else i = 1;
+  if (iyes <= minsFB)
+  {
+    for ( ; i < lv; i++)
+    {
+      long t = F->perm[i];
+      if (!ok_subFB(F, t, D)) continue;
+
+      yes[iyes++] = t;
+      if (iyes > minsFB) break;
+    }
+    if (i == lv) return 0;
+  }
   gunclone(F->subFB);
   F->subFB = gclone(yes);
   F->pow = NULL; avma = av; return 1;
@@ -329,7 +344,7 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf, long a)
   F->pow->arc = NULL;
   if (cache)
   { /* make sure enough room to store relations we may stumble upon */
-    size_t slim = (cache->last - cache->base) + a;
+    size_t slim = (cache->last - cache->base) + n + 1;
     if (slim > cache->len) reallocate(cache, slim << 1);
   }
   for (i=1; i<n; i++)
@@ -1876,11 +1891,16 @@ END:
 static GEN
 pseudomin(GEN I, GEN G)
 {
+  GEN m, GI = lllint_fp_ip(gmul(G, I), 100);
+#if 0
   long n = lg(G)-1;
-  GEN m, GI = lllint_fp_ip(gmul(G, I), 100), p = gcoeff(G,n,n);
-
+  GEN p = gcoeff(G,n,n);
   m = gauss_get_col(G, (GEN)GI[1], p, n);
   if (isnfscalar(m)) m = gauss_get_col(G, (GEN)GI[2], p, n);
+#else
+  m = hnf_invimage(G, (GEN)GI[1]);
+  if (isnfscalar(m)) m = hnf_invimage(G, (GEN)GI[2]);
+#endif
   if (DEBUGLEVEL>5) fprintferr("\nm = %Z\n",m);
   return m;
 }
@@ -1962,12 +1982,15 @@ random_rel(long phase, RELCACHE_t *cache, FB_t *F, long MAXRELSUP, GEN nf,
   if (phase != 1) { jideal=0; jdir=1; if (phase < 0) return 0; }
   if (!F->pow)
   {
-    long c = 0;
+    long c = 1;
     powFBgen(F, cache, nf, CBUCHG+1);
     lgsub = lg(F->subFB);
-    for (i = 1; i <= lgsub; i++) 
-      if (F->pow->ord[1] > 1 && ++c > 1) break;
-    if (i > lgsub) return 2;
+    for (i = 1; i < lgsub; i++) 
+    {
+      c *= F->pow->ord[i];
+      if (c >= 64) break;
+    }
+    if (c < 64) return 2;
   }
   else
     lgsub = lg(F->subFB);
@@ -1982,10 +2005,11 @@ random_rel(long phase, RELCACHE_t *cache, FB_t *F, long MAXRELSUP, GEN nf,
     if (L_jideal && jlist < lg(L_jideal))
     {
       if (++cptlist > 3) { jideal = L_jideal[jlist++]; cptlist = 0; }
+      if (!jideal) jideal = 1;
     }
     else
     {
-      if (jideal == F->KC) jideal=1; else jideal++;
+      if (jideal == F->KC) jideal = 1; else jideal++;
     }
     avma = av;
     P = prime_to_ideal(nf, (GEN)F->LP[jideal]);
@@ -2000,7 +2024,7 @@ random_rel(long phase, RELCACHE_t *cache, FB_t *F, long MAXRELSUP, GEN nf,
     while (ideal == P); /* If ex  = 0, try another */
     ideal = remove_content(ideal);
     if (gcmp1(gcoeff(ideal,1,1))) continue;
-    IDEAL = lllint_ip(ideal, 4);
+    IDEAL = lllint_fp_ip(ideal, 4);
 
     if (phase != 1) jdir = 1; else phase = 2;
     for (av1 = avma; jdir <= nbG; jdir++, avma = av1)
@@ -2364,7 +2388,7 @@ static GEN
 shift_G(GEN G, GEN Gtw, long a, long b, long r1)
 {
   GEN g = dummycopy(G);
-  shift_embed(g,Gtw,a,r1);
+  if (a != b) shift_embed(g,Gtw,a,r1);
   shift_embed(g,Gtw,b,r1); return g;
 }
 
@@ -2735,8 +2759,8 @@ get_clfu(GEN clgp, GEN reg, GEN zu, GEN fu, long fl)
 }
 
 static GEN
-buchall_end(GEN nf,GEN CHANGE,long fl,GEN res, GEN clg2, GEN W, GEN B,
-            GEN A, GEN C, GEN Vbase)
+buchall_end(GEN nf,long fl,GEN res, GEN clg2, GEN W, GEN B, GEN A, GEN C,
+            GEN Vbase)
 {
   GEN p1, z;
   if (! (fl & nf_INIT))
@@ -2759,7 +2783,6 @@ buchall_end(GEN nf,GEN CHANGE,long fl,GEN res, GEN clg2, GEN W, GEN B,
   z[8]=(long)res;
   z[9]=(long)clg2;
   z[10]=zero; /* dummy: we MUST have lg(bnf) != lg(nf) */
-  if (CHANGE) { p1=cgetg(3,t_VEC); p1[1]=(long)z; p1[2]=(long)CHANGE; z=p1; }
   return z;
 }
 
@@ -2803,7 +2826,7 @@ bnfmake(GEN sbnf, long prec)
   p1[2] = lmul(bas,(GEN)zu[2]); zu = p1;
 
   res = get_clfu(clgp, get_regulator(A), zu, fu, nf_UNITS);
-  y = buchall_end(nf,NULL,nf_INIT,res,clgp2,W,(GEN)sbnf[8],A,C,Vbase);
+  y = buchall_end(nf,nf_INIT,res,clgp2,W,(GEN)sbnf[8],A,C,Vbase);
   y[10] = sbnf[12]; return gerepilecopy(av,y);
 }
 
@@ -2908,9 +2931,8 @@ cgetc_col(long n, long prec)
 }
 
 static GEN
-buchall_for_degree_one_pol(GEN nf, GEN CHANGE, long flun)
+buchall_for_degree_one_pol(GEN nf, long flun)
 {
-  pari_sp av = avma;
   GEN W,B,A,C,Vbase,res;
   GEN fu=cgetg(1,t_VEC), R=gun, zu=cgetg(3,t_VEC);
   GEN clg1=cgetg(4,t_VEC), clg2=cgetg(4,t_VEC);
@@ -2922,7 +2944,7 @@ buchall_for_degree_one_pol(GEN nf, GEN CHANGE, long flun)
   Vbase=cgetg(1,t_COL);
 
   res = get_clfu(clg1, R, zu, fu, flun);
-  return gerepilecopy(av, buchall_end(nf,CHANGE,flun,res,clg2,W,B,A,C,Vbase));
+  return buchall_end(nf,flun,res,clg2,W,B,A,C,Vbase);
 }
 
 /* return (small set of) indices of columns generating the same lattice as x.
@@ -2980,17 +3002,17 @@ nf_cloneprec(GEN nf, long prec, int *nfclone)
   avma = av; *nfclone = 1; return nf;
 }
 
-GEN
-buchall(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long prec)
+static GEN
+buch(GEN *pnf, double cbach, double cbach2, long nbrelpid, long flun, 
+     long PRECREG)
 {
-  pari_sp av = avma, av0, av2;
-  long PRECREG, N, R1, R2, RU, KCCO, LIMC, LIMC2, lim;
+  pari_sp av0, av2;
+  long N, R1, R2, RU, KCCO, LIMC, LIMC2, lim;
   long nlze, zc, nreldep, phase, i, j, k, MAXRELSUP;
   long sfb_change, sfb_trials, precdouble = 0, precadd = 0;
   double drc, LOGD, LOGD2;
   GEN vecG, fu, zu, nf, D, A, W, R, Res, z, h, L_jideal, PERM;
   GEN M, res, L, resc, B, C, lambda, pdep, liste, invp, clg1, clg2, Vbase;
-  GEN CHANGE = NULL;
   char *precpb = NULL;
   int nfclone = 0;
   const int RELSUP = 5, minsFB = 3;
@@ -2998,19 +3020,9 @@ buchall(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long prec)
   RELCACHE_t cache;
   FB_t F;
 
-  if (DEBUGLEVEL) (void)timer2();
-
-  PRECREG = max(prec, MEDDEFAULTPREC);
-  P = get_nfpol(P, &nf);
-  fu = NULL; /* gcc -Wall */
-  N = degpol(P);
-  if (!nf)
-  {
-    nf = initalg(P, PRECREG);
-    /* P was non-monic and nfinit changed it ? */
-    if (lg(nf)==3) { CHANGE = (GEN)nf[2]; nf = (GEN)nf[1]; }
-  }
-  if (N <= 1) return buchall_for_degree_one_pol(nf,CHANGE,flun);
+  nf = *pnf; *pnf = NULL;
+  N = degpol(nf[1]);
+  if (N <= 1) return buchall_for_degree_one_pol(nf, flun);
   zu = rootsof1(nf);
   zu[2] = lmul((GEN)nf[7],(GEN)zu[2]);
   if (DEBUGLEVEL) msgtimer("initalg & rootsof1");
@@ -3079,8 +3091,7 @@ START:
   invp = relationrank(&cache, liste);
 
   /* relations through elements of small norm */
-  if (nbrelpid > 0)
-    small_norm(&cache,&F,LOGD,nf,nbrelpid,invp,liste,LIMC2);
+  if (nbrelpid > 0) small_norm(&cache,&F,LOGD,nf,nbrelpid,invp,liste,LIMC2);
   avma = av2;
 
   phase = 0;
@@ -3100,7 +3111,7 @@ MORE:
     }
     if (sfb_change) {
       if (DEBUGLEVEL) fprintferr("*** Changing sub factor base\n");
-      if (!subFB_increase(&F, nf, sfb_change-1)) goto START;
+      if (!subFB_increase(&F, nf, sfb_change-1, L_jideal)) goto START;
       sfb_change = nreldep = 0;
     }
     if (phase)
@@ -3178,6 +3189,7 @@ PRECPB:
     {
       if (nlze > 20) sfb_change = 1;
       L_jideal = vecextract_i(F.perm, 1, nlze);
+      vecsmall_sort(L_jideal);
     }
     goto MORE;
   }
@@ -3222,6 +3234,7 @@ PRECPB:
     A = cleanarch(gmul(A,lllint(L)), N, PRECREG);
     if (DEBUGLEVEL) msgtimer("cleanarch");
   }
+  fu = NULL;
   if (flun & nf_UNITS)
   {
     long e;
@@ -3241,7 +3254,27 @@ PRECPB:
   Vbase = vecextract_p(F.LP, F.perm);
   class_group_gen(nf,W,C,Vbase,PRECREG,NULL, &clg1, &clg2);
   res = get_clfu(clg1, R, zu, fu, flun);
-  res = gerepilecopy(av, buchall_end(nf,CHANGE,flun,res,clg2,W,B,A,C,Vbase));
-  if (nfclone) gunclone(nf);
-  return res;
+  if (nfclone) *pnf = nf;
+  return buchall_end(nf,flun,res,clg2,W,B,A,C,Vbase);
+}
+
+GEN
+buchall(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long prec)
+{
+  pari_sp av = avma;
+  long PRECREG = max(prec, MEDDEFAULTPREC);
+  GEN z, nf, CHANGE = NULL;
+
+  if (DEBUGLEVEL) (void)timer2();
+  P = get_nfpol(P, &nf);
+  if (!nf)
+  {
+    nf = initalg(P, PRECREG);
+    /* P was non-monic and nfinit changed it ? */
+    if (lg(nf)==3) { CHANGE = (GEN)nf[2]; nf = (GEN)nf[1]; }
+  }
+  z = buch(&nf, cbach, cbach2, nbrelpid, flun, PRECREG);
+  if (CHANGE) { GEN v=cgetg(3,t_VEC); v[1]=(long)z; v[2]=(long)CHANGE; z = v; }
+  z = gerepilecopy(av, z); if (nf) gunclone(nf);
+  return z;
 }
