@@ -2586,7 +2586,7 @@ hnfspec(long** mat, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
     p_mat(mat,perm,0);
   }
 
-#define absmax(s,z) {long _z = labs(z); if (_z > s) s = _z;}
+#define absmax(s,z) {long _z; _z = labs(z); if (_z > s) s = _z;}
 
 #if 0 /* TODO: check, and put back in */
   /* Get rid of all lines containing only 0 and ± 1, keeping track of column
