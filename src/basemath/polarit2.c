@@ -2665,7 +2665,7 @@ polfnf(GEN a, GEN t)
   {
     n = gsub(polx[MAXVARN], gmulsg(k,polx[vt]));
     n = subres(t, poleval(g,n));
-    if (lgef(ggcd(n,derivpol(n))) == 3) break;
+    if (issquarefree(n)) break;
   }
   if (DEBUGLEVEL > 4) fprintferr("polfnf: choosing k = %ld\n",k);
   fa=factor(n); fa=(GEN)fa[1]; lx=lg(fa);
