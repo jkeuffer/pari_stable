@@ -4201,7 +4201,7 @@ nfgcd(GEN P, GEN Q, GEN nf, GEN den)
   if (!signe(P) || !signe(Q))
     return zeropol(x);
   /*Compute denominators*/
-  if (!den) den = indexpartial(nf, NULL);
+  if (!den) den = ZX_disc(nf);
   lP = leading_term(P);
   lQ = leading_term(Q);
   if ( !((typ(lP)==t_INT && is_pm1(lP)) || (typ(lQ)==t_INT && is_pm1(lQ))) )
