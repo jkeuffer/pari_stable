@@ -1081,8 +1081,7 @@ GEN
 nf_PHlog(GEN nf, GEN a, GEN g, GEN pr, GEN prhall)
 {
   ulong av = avma;
-  GEN v,t0,a0,b,q,g_q,n_q,ginv0,qj,ginv;
-  GEN ord = subis(idealnorm(nf,pr),1), fa = factor(ord), ex = (GEN)fa[2];
+  GEN v,t0,a0,b,q,g_q,n_q,ginv0,qj,ginv,ord,fa,ex;
   long e,i,j,l;
 
   a = lift_intern(nfreducemodpr(nf,a,prhall));
@@ -1091,13 +1090,24 @@ nf_PHlog(GEN nf, GEN a, GEN g, GEN pr, GEN prhall)
     GEN p = (GEN)pr[1], ordp = subis(p, 1);
     a = (GEN)a[1];
     if (gcmp1(a) || egalii(p, gdeux)) { avma = av; return gzero; }
+    ord = subis(idealnorm(nf,pr), 1);
     if (egalii(a, ordp)) /* -1 */
       return gerepileuptoint(av, shifti(ord,-1));
-    if (!egalii(ord, ordp)) /* we want < g > = Fp^* */
-      g = element_powmodpr(nf,g, divii(ord,ordp), prhall);
+
+    if (egalii(ord, ordp))
+      q = NULL;
+    else /* we want < g > = Fp^* */
+    {
+      q = divii(ord,ordp);
+      g = element_powmodpr(nf,g,q,prhall);
+    }
     g = lift_intern((GEN)g[1]);
-    return gerepileuptoint(av, Fp_PHlog(a,g,p));
+    n_q = Fp_PHlog(a,g,p);
+    if (q) n_q = mulii(q, n_q);
+    return gerepileuptoint(av, n_q);
   }
+  ord = subis(idealnorm(nf,pr),1);
+  fa = factor(ord); ex = (GEN)fa[2];
   fa = (GEN)fa[1];
   l = lg(fa);
   ginv = lift_intern(element_invmodpr(nf, g, prhall));
