@@ -753,18 +753,18 @@ gadd(GEN x, GEN y)
       if (lx == ly) {
         z = cgetg(lx, t_POL); z[1] = x[1];
         for (i=2; i < lx; i++) z[i] = ladd((GEN)x[i],(GEN)y[i]);
-        (void)normalizepol_i(z, lx);
-        if (lg(z) == 2) { avma = (pari_sp)(z + lx); z = zeropol(vx); }
-        return z;
+        return normalizepol_i(z, lx);
       }
       if (ly < lx) {
         z = cgetg(lx,t_POL); z[1] = x[1];
         for (i=2; i < ly; i++) z[i] = ladd((GEN)x[i],(GEN)y[i]);
         for (   ; i < lx; i++) z[i] = lcopy((GEN)x[i]);
+        if (!signe(x)) z = normalizepol_i(z, lx);
       } else {
         z = cgetg(ly,t_POL); z[1] = y[1];
         for (i=2; i < lx; i++) z[i] = ladd((GEN)x[i],(GEN)y[i]);
         for (   ; i < ly; i++) z[i] = lcopy((GEN)y[i]);
+        if (!signe(y)) z = normalizepol_i(z, ly);
       }
       return z;
     case t_SER:
