@@ -1208,14 +1208,15 @@ certifybuchall(GEN bnf)
     bad = mpppcm(bad, gcoeff(gen[i],1,1));
   for (i=1; i<=nbgen; i++)
   {
-    p1 = (GEN)cycgen[i];
+    GEN p1 = (GEN)cycgen[i];
+    long j;
     if (typ(p1) == t_MAT)
     {
       GEN h, g = (GEN)p1[1];
-      for (j=1; j<lg(g); j++)
+      for (j = 1; j < lg(g); j++)
       {
         h = idealhermite(nf, (GEN)g[j]);
-        big = mpppcm(big, gcoeff(h,1,1));
+        bad = mpppcm(bad, gcoeff(h,1,1));
       }
     }
   }
