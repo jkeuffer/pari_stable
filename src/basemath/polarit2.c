@@ -26,6 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define pswap(a,b) { GEN *_x = a; a = b; b = _x; }
 #define both_odd(a,b) ((a)&(b)&1)
 
+extern GEN cauchy_bound(GEN p);
 extern GEN gassoc_proto(GEN f(GEN,GEN),GEN,GEN);
 extern long u_center(ulong u, ulong p, ulong ps2);
 extern GEN Fq_mul(GEN x, GEN y, GEN T, GEN p);
@@ -903,28 +904,30 @@ END:
 
 /* return integer y such that all |a| <= y if P(a) = 0 */
 static GEN
-root_bound(GEN P)
+root_bound(GEN P0)
 {
-  GEN P0 = dummycopy(P), lP = absi(leading_term(P)), x,y,z;
-  long k,d = degpol(P);
+  GEN Q = dummycopy(P0), lP = absi(leading_term(Q)), P,x,y,z;
+  long k, d = degpol(Q);
 
-  setlgef(P0, d+2); /* P = lP x^d + P0 */
-  P = P0+2; /* strip codewords */
+  setlgef(Q, d+2); /* P = lP x^d + Q */
+  P = Q+2; /* strip codewords */
   for (k=0; k<d; k++) P[k] = labsi((GEN)P[k]);
 
-  x = y = gun;
+  k = gexpo(cauchy_bound(P0)) - 5;
+  if (k < 0) k = 0;
+  x = y = shifti(gun, k);
   for (k=0; ; k++)
   {
     gpmem_t av = avma;
-    if (cmpii(poleval(P0,y), mulii(lP, gpowgs(y, d))) < 0) break;
+    if (cmpii(poleval(Q,y), mulii(lP, gpowgs(y, d))) < 0) break;
     avma = av;
     x = y; y = shifti(y,1);
   }
-  for(;;)
+  for(k=0; ; k++)
   {
     z = shifti(addii(x,y), -1);
-    if (egalii(x,z)) break;
-    if (cmpii(poleval(P0,z), mulii(lP, gpowgs(z, d))) < 0)
+    if (egalii(x,z) || k == 20) break;
+    if (cmpii(poleval(Q,z), mulii(lP, gpowgs(z, d))) < 0)
       y = z;
     else
       x = z;
