@@ -2219,7 +2219,7 @@ bnfnewprec(GEN bnf, long prec)
   my_class_group_gen(y,&clgp,&clgp2);
   res[1]=(long)clgp;
   y[9]=(long)clgp2;
-  y[10]=(long)matal; return y;
+  y[10]=lcopy(bnf[10]); return y;
 }
 
 GEN
