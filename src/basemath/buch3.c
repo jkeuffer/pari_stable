@@ -1421,7 +1421,7 @@ rnfnormgroup(GEN bnr, GEN polrel)
   reldeg = degpol(polrel);
   /* reldeg-th powers are in norm group */
   greldeg = utoipos(reldeg);
-  group = diagonal(gmod((GEN)raycl[2], greldeg));
+  group = diagonal(FpV_red((GEN)raycl[2], greldeg));
   for (i=1; i<lg(group); i++)
     if (!signe(gcoeff(group,i,i))) coeff(group,i,i) = (long)greldeg;
   detgroup = dethnf_i(group);
@@ -1519,8 +1519,8 @@ rnf_is_abelian(GEN nf, GEN pol)
   for (i=1; i<l; i++)
     for (j=1; j<i; j++)
     {
-      GEN a = RgX_RgX_compo((GEN)rores[j], (GEN)ro[i], mod);
-      GEN b = RgX_RgX_compo((GEN)rores[i], (GEN)ro[j], mod);
+      GEN a = RgX_RgXQ_compo((GEN)rores[j], (GEN)ro[i], mod);
+      GEN b = RgX_RgXQ_compo((GEN)rores[i], (GEN)ro[j], mod);
       if (d) a = gmul(a, gpowgs(d, degpol(ro[i]) - degpol(ro[j])));
       if (!gequal(a, b)) return 0;
     }

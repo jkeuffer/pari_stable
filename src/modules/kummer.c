@@ -445,7 +445,7 @@ isprincipalell(GEN bnfz, GEN id, GEN cycgen, GEN u, GEN gell, long rc)
   long i, l = lg(cycgen);
   GEN logdisc, b, y = quick_isprincipalgen(bnfz, id);
 
-  logdisc = gmod((GEN)y[1], gell);
+  logdisc = FpV_red((GEN)y[1], gell);
   b = (GEN)y[2];
   for (i=rc+1; i<l; i++)
   {
@@ -857,7 +857,7 @@ lifttoKz(GEN nfz, GEN nf, GEN id, compo_s *C)
 {
   GEN I = ideal_two_elt(nf,id);
   GEN x = gmul((GEN)nf[7], (GEN)I[2]);
-  I[2] = (long)algtobasis(nfz, RgX_RgX_compo(x, C->p, C->R));
+  I[2] = (long)algtobasis(nfz, RgX_RgXQ_compo(x, C->p, C->R));
   return prime_to_ideal(nfz,I);
 }
   

@@ -1545,7 +1545,7 @@ rnfcharpoly(GEN nf,GEN T,GEN alpha,int v)
   vT = varn(T);
   if (varn(alpha) != vT || varncmp(v, vnf)>=0)
     err(talker,"incorrect variables in rnfcharpoly");
-  if (lg(alpha) >= lT) alpha = gmod(alpha,T);
+  if (lg(alpha) >= lT) alpha = RgX_rem(alpha, T);
   if (lT <= 4)
     return gerepileupto(av, gsub(polx[v], alpha));
   p1 = caract2(T, unifpol(nf,alpha, t_POLMOD), v);

@@ -1510,7 +1510,7 @@ testb2(decomp_t *S, long D, GEN theta, GEN ns)
   for (t = 1;; t++)
   {
     GEN h = m? stopoly(t, m, v): scalarpol(utoipos(t), v);
-    S->phi = gadd(theta, gmod(h, S->chi));
+    S->phi = gadd(theta, RgX_rem(h, S->chi));
     /* phi non-primary ? */
     if (factcp(S, ns) > 1) { composemod(S, S->phi, T0); return 1; }
     if (degpol(S->nu) == D) break;
@@ -1524,7 +1524,7 @@ testb2(decomp_t *S, long D, GEN theta, GEN ns)
 static int
 testc2(decomp_t *S, GEN A, long Ea, GEN T, long Et, GEN ns)
 {
-  GEN c1, c2, c3, T0 = S->phi;
+  GEN c, T0 = S->phi;
   long r, s, t; 
 
   if (DEBUGLEVEL>4) fprintferr("  Increasing Ea\n");
@@ -1532,10 +1532,9 @@ testc2(decomp_t *S, GEN A, long Ea, GEN T, long Et, GEN ns)
   while (r < 0) { r = r + Et; t++; }
   while (s < 0) { s = s + Ea; t++; }
 
-  c1 = lift_intern(gpowgs(gmodulcp(A, S->chi), s));
-  c2 = lift_intern(gpowgs(gmodulcp(T, S->chi), r));
-  c3 = gdiv(gmod(gmul(c1, c2), S->chi), gpowgs(S->p, t));
-  S->phi = gadd( polx[ varn(S->chi) ], redelt(c3, S->pmr, S->p) );
+  c = RgX_mul(RgXQ_u_pow(A, s, S->chi), RgXQ_u_pow(T, r, S->chi));
+  c = gdiv(RgX_rem(c, S->chi), gpowgs(S->p, t));
+  S->phi = gadd( polx[ varn(S->chi) ], redelt(c, S->pmr, S->p) );
   if (factcp(S, ns) > 1) { composemod(S, S->phi, T0); return 1; }
   S->phi0 = T0; return 0; /* E_phi = lcm(E_alpha,E_theta) */
 }
@@ -1774,7 +1773,7 @@ nilord(decomp_t *S, GEN dred, long mf, long flag)
       if (!update_phi(S, ns, &l, flag)) break;
     }
     if (!pia) break;
-    oE = Ea; opa = RgX_RgX_compo(pia, S->phi, S->f);
+    oE = Ea; opa = RgX_RgXQ_compo(pia, S->phi, S->f);
     if (La > 1)
     { /* change phi such that nu = pia */
       S->phi = gadd(S->phi, opa);
@@ -2302,7 +2301,7 @@ static GEN
 anti_uniformizer2(GEN nf, GEN pr)
 {
   GEN p = (GEN)pr[1], z;
-  z = gmod(special_anti_uniformizer(nf, pr), p);
+  z = FpV_red(special_anti_uniformizer(nf, pr), p);
   z = hnfmodid(eltmul_get_table(nf, z), p);
   z = idealaddtoone_i(nf, pr, z);
   return unnf_minus_x(z);
@@ -2354,11 +2353,7 @@ get_proj_modT(GEN basis, GEN T, GEN p)
     {
       w = Q_primitive_part(w, &cx);
       w = FpX_rem(w, T, p);
-      if (cx)
-      {
-        cx = gmod(cx, p);
-        w = FpX_Fp_mul(w, cx, p);
-      }
+      if (cx) w = FpX_Fp_mul(w, Rg_to_Fp(cx, p), p);
     }
     z[i] = (long)RgX_to_RgV(w, f); /* w_i mod (T,p) */
   }
@@ -2538,9 +2533,8 @@ kill_denom(GEN x, GEN nf, GEN p, GEN modpr)
     x = element_mul(nf,x, element_pow(nf, tau, utoipos(v)));
   }
   x = Q_primitive_part(x, &cx);
-  x = FpV_red(x, p);
-  if (cx) x = FpV_red(gmul(gmod(cx, p), x), p);
-  return x;
+  if (cx) x = gmul(Rg_to_Fp(cx, p), x);
+  return FpV_red(x, p);
 }
 
 /* x integral, reduce mod prh in HNF */
@@ -2595,7 +2589,7 @@ nf_to_ff(GEN nf, GEN x, GEN modpr)
   switch(t)
   {
     case t_INT: return modii(x, p);
-    case t_FRAC: return gmod(x, p);
+    case t_FRAC: return Rg_to_Fp(x, p);
     case t_POL: x = algtobasis(nf, x); break;
     case t_COL: break;
     default: err(typeer,"nf_to_ff");
@@ -2748,28 +2742,6 @@ rnfelementid_powmod(GEN multab, long h, GEN n, GEN T, GEN p)
   y = leftright_pow(NULL, n, (void*)&D, &_sqr, &_mul);
   return gerepilecopy(av, y);
 }
-
-#if 0
-GEN
-mymod(GEN x, GEN p)
-{
-  long i,lx, tx = typ(x);
-  GEN y,p1;
-
-  if (tx == t_INT) return remii(x,p);
-  if (tx == t_FRAC)
-  {
-    p1 = remii((GEN)x[2], p);
-    if (p1 != gen_0) { cgiv(p1); return gmod(x,p); }
-    return x;
-  }
-  if (!is_matvec_t(tx))
-    err(bugparier, "mymod (missing type)");
-  lx = lg(x); y = cgetg(lx,tx);
-  for (i=1; i<lx; i++) y[i] = (long)mymod((GEN)x[i],p);
-  return y;
-}
-#endif
 
 /* Relative Dedekind criterion over nf, applied to the order defined by a
  * root of irreducible polynomial P, modulo the prime ideal pr. Assume
@@ -3010,8 +2982,7 @@ check_pol(GEN x, long v)
   for (i=2; i<lx; i++)
   {
     tx = typ(x[i]);
-    if (!is_scalar_t(tx) || tx == t_POLMOD)
-      err(talker,"incorrect polcoeff in rnf function");
+    if (!is_const_t(tx)) err(talker,"incorrect coeff in rnf function");
   }
 }
 
@@ -3424,7 +3395,7 @@ polcompositum0(GEN A, GEN B, long flall)
     for (i=1; i<l; i++)
     { /* invmod possibly very costly */
       a = gmul((GEN)LPRS[1], QXQ_inv((GEN)LPRS[2], (GEN)C[i]));
-      a = gneg_i(gmod(a, (GEN)C[i]));
+      a = gneg_i(RgX_rem(a, (GEN)C[i]));
       b = gadd(polx[v], gmulsg(k,a));
       w = cgetg(5,t_VEC); /* [C, a, b, n ] */
       w[1] = C[i];
@@ -3495,7 +3466,7 @@ rnfequation0(GEN A, GEN B, long flall)
   if (flall)
   { /* a,b,c root of A,B,C = compositum, c = b + k a */
     GEN a = gmul((GEN)LPRS[1], QXQ_inv((GEN)LPRS[2], C));/* inv is costly !*/
-    a = gneg_i(gmod(a, C));
+    a = gneg_i(RgX_rem(a, C));
     /* b = gadd(polx[varn(A)], gmulsg(k,a)); */
     C = mkvec3(C, to_polmod(a, C), stoi(k));
   }
@@ -3824,17 +3795,18 @@ rnfpolred(GEN nf, GEN pol, long prec)
 {
   pari_sp av = avma;
   long i, j, n, v = varn(pol);
-  GEN id, al, w, I, O, bnf;
+  GEN id, al, w, I, O, bnf, nfpol;
 
   if (typ(pol)!=t_POL) err(typeer,"rnfpolred");
   bnf = nf; nf = checknf(bnf);
   bnf = (nf == bnf)? NULL: checkbnf(bnf);
   if (degpol(pol) <= 1) return mkvec(polx[v]);
+  nfpol = (GEN)nf[1];
 
   id = rnfpseudobasis(nf,pol);
   if (bnf && gcmp1(gmael3(bnf,8,1,1))) /* if bnf is principal */
   {
-    GEN newI, newO, zk = idmat(degpol(nf[1]));
+    GEN newI, newO, zk = idmat(degpol(nfpol));
     O = (GEN)id[1];
     I = (GEN)id[2]; n = lg(I)-1;
     newI = cgetg(n+1,t_VEC);
@@ -3860,15 +3832,14 @@ rnfpolred(GEN nf, GEN pol, long prec)
     p1 = basistoalg(nf,(GEN)al[n]);
     for (i=n-1; i; i--)
       p1 = gadd(basistoalg(nf,(GEN)al[i]), gmul(polx[v],p1));
-    p1 = gmodulcp(gtovec(caract2(pol,lift(p1),v)), (GEN)nf[1]);
-    newpol = gtopoly(p1, v);
+    newpol = RgXQX_red(caract2(pol,lift(p1),v), nfpol);
+    newpol = Q_primpart(newpol);
 
-    p1 = ggcd(newpol, derivpol(newpol));
-    if (degpol(p1) > 0)
-    {
-      newpol = gdiv(newpol, p1);
-      newpol = gdiv(newpol, leading_term(newpol));
-    }
+    p1 = nfgcd(newpol, derivpol(newpol), nfpol, (GEN)nf[4]);
+    if (degpol(p1) > 0) newpol = RgXQX_div(newpol, p1, nfpol);
+    p1 = leading_term(newpol);
+    if (typ(p1) != t_POL) p1 = scalarpol(p1, varn(nfpol));
+    newpol = RgXQX_div(newpol, p1, nfpol);
     w[j] = (long)newpol;
   }
   return gerepilecopy(av,w);

@@ -1490,7 +1490,7 @@ apprgen_i(GEN f, GEN a)
   if (degpol(u) > 0) { f = gdeuc(f,u); fp = derivpol(f); }
   p = (GEN)a[2];
   P = equalii(p,gen_2)? utoipos(4): p;
-  a0= gmod(a, P);
+  a0= padic_to_Fp(a, P);
   if (!gcmp0(FpX_eval(fp,a0,p))) /* simple zero */
   {
     res = rootpadiclift(f, a0, p, prec);

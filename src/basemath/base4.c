@@ -1285,7 +1285,7 @@ static GEN
 nf_to_Fp_simple(GEN x, GEN modpr, GEN p)
 {
   GEN c, r = zk_to_ff(Q_primitive_part(x, &c), modpr);
-  if (c) r = gmod(gmul(r, c), p);
+  if (c) r = Rg_to_Fp(gmul(r, c), p);
   return r;
 }
 
@@ -1305,7 +1305,7 @@ famat_to_Fp_simple(GEN nf, GEN x, GEN modpr, GEN p)
     {
       case t_POL: case t_POLMOD: h = algtobasis(nf, h);  /* fall through */
       case t_COL: h = nf_to_Fp_simple(h, modpr, p); break;
-      default: h = gmod(h, p);
+      default: h = Rg_to_Fp(h, p);
     }
     t = mulii(t, Fp_pow(h, n, p)); /* not worth reducing */
   }

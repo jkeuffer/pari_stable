@@ -625,7 +625,7 @@ ordell(GEN e, GEN x, long prec)
     b = gneg_i(b);
     y = cgetg(2,t_VEC);
     if (td == t_INTMOD && equalii((GEN)D[1], gen_2))
-      y[1] = (long)gmodulss(gcmp0(a)?0:1, 2);
+      y[1] = (long)mkintmodu(gcmp0(a)?0:1, 2);
     else
       y[1] = lmul2n(b,-1);
     return gerepileupto(av,y);
@@ -647,8 +647,8 @@ ordell(GEN e, GEN x, long prec)
         avma=av;
         if (!gcmp0(a)) return cgetg(1,t_VEC);
         y = cgetg(3,t_VEC);
-        y[1] = (long)gmodulss(0,2);
-        y[2] = (long)gmodulss(1,2); return y;
+        y[1] = (long)mkintmodu(0,2);
+        y[2] = (long)mkintmodu(1,2); return y;
       }
       if (kronecker((GEN)D[2],(GEN)D[1]) == -1)
         { avma=av; return cgetg(1,t_VEC); }
@@ -1390,12 +1390,11 @@ static GEN
 _a_2(GEN e)
 { /* solve y(1 + a1x + a3) = x (1 + a2 + a4) + a6 */
   pari_sp av = avma;
-  GEN unmodp = gmodulss(1,2);
-  ulong a1 = itou((GEN)gmul(unmodp,(GEN)e[1])[2]);
-  ulong a2 = itou((GEN)gmul(unmodp,(GEN)e[2])[2]);
-  ulong a3 = itou((GEN)gmul(unmodp,(GEN)e[3])[2]);
-  ulong a4 = itou((GEN)gmul(unmodp,(GEN)e[4])[2]);
-  ulong a6 = itou((GEN)gmul(unmodp,(GEN)e[5])[2]);
+  ulong a1 = Rg_to_Fl((GEN)e[1], 2);
+  ulong a2 = Rg_to_Fl((GEN)e[2], 2);
+  ulong a3 = Rg_to_Fl((GEN)e[3], 2);
+  ulong a4 = Rg_to_Fl((GEN)e[4], 2);
+  ulong a6 = Rg_to_Fl((GEN)e[5], 2);
   int N = 1; /* oo */
   if (!a3) N ++; /* x = 0, y=0 or 1 */
   else if (!a6) N += 2; /* x = 0, y arbitrary */
@@ -1412,20 +1411,18 @@ apell2_intern(GEN e, ulong p)
   else
   {
     ulong i;
-    pari_sp av = avma;
-    GEN unmodp = gmodulss(1,p);
-    ulong e6 = itos((GEN)gmul(unmodp,(GEN)e[6])[2]);
-    ulong e8 = itos((GEN)gmul(unmodp,(GEN)e[8])[2]);
-    ulong e72= itos((GEN)gmul(unmodp,(GEN)e[7])[2]) << 1;
-    long s = kross(e8, p);
+    ulong e6 = Rg_to_Fl((GEN)e[6], p);
+    ulong e8 = Rg_to_Fl((GEN)e[8], p);
+    ulong e72= Rg_to_Fl((GEN)e[7], p) << 1;
+    long s = krouu(e8, p);
 
     if (p < 757UL)
       for (i=1; i<p; i++)
-        s += kross(e8 + i*(e72 + i*(e6 + (i<<2))), p);
+        s += krouu(e8 + i*(e72 + i*(e6 + (i<<2))), p);
     else
       for (i=1; i<p; i++)
-        s += kross(e8 + Fl_mul(i, e72 + Fl_mul(i, e6 + (i<<2), p), p), p);
-    avma = av; return stoi(-s);
+        s += krouu(e8 + Fl_mul(i, e72 + Fl_mul(i, e6 + (i<<2), p), p), p);
+    return stoi(-s);
   }
 }
 
@@ -1603,8 +1600,8 @@ apell1(GEN e, GEN p)
   ty = ti = NULL; /* gcc -Wall */
 
   if (DEBUGLEVEL) (void)timer2();
-  c4 = lift_intern( gmod(gdivgs((GEN)e[10],  -48), p) );
-  c6 = lift_intern( gmod(gdivgs((GEN)e[11], -864), p) );
+  c4 = Rg_to_Fp(gdivgs((GEN)e[10],  -48), p);
+  c6 = Rg_to_Fp(gdivgs((GEN)e[11], -864), p);
   /* once #E(Fp) is know mod B >= pordmin, it is completely determined */
   pordmin = addis(sqrti(gmul2n(p,4)), 1); /* ceil( 4sqrt(p) ) */
   p1p = addsi(1, p);
@@ -1971,7 +1968,7 @@ FOUND:
     if (B == 1) B = h;
     else
     {
-      GEN p1 = chinois(gmodulss(A,B), gmodulss(0,h));
+      GEN p1 = chinois(mkintmodu(A,B), mkintmodu(0,h));
       A = itos((GEN)p1[2]);
       if (is_bigint(p1[1])) { h = A; break; }
       B = itos((GEN)p1[1]);
@@ -2000,8 +1997,8 @@ apell(GEN e, GEN p)
   if (gdvd((GEN)e[12],p)) /* D may be an intmod */
   {
     pari_sp av = avma;
-    GEN c6 = gmul((GEN)e[11],gmodulsg(1, p));
-    long s = kronecker(lift_intern(c6),p);
+    GEN c6 = Rg_to_Fp((GEN)e[11], p);
+    long s = kronecker(c6, p);
     if (mod4(p) == 3) s = -s;
     avma = av; return stoi(s);
   }

@@ -866,7 +866,7 @@ gadd(GEN x, GEN y)
         case t_COMPLEX: return addRc(x, y);
         case t_PADIC: { GEN X = (GEN)x[1];
           z = cgetg(3, t_INTMOD);
-          return add_intmod_same(z, X, (GEN)x[2], ptolift(y, X));
+          return add_intmod_same(z, X, (GEN)x[2], padic_to_Fp(y, X));
         }
         case t_QUAD: return addRq(x, y);
       }
@@ -1450,7 +1450,7 @@ gmul(GEN x, GEN y)
         case t_COMPLEX: return mulRc(x, y);
         case t_PADIC: { GEN X = (GEN)x[1];
           z = cgetg(3, t_INTMOD);
-          return mul_intmod_same(z, X, (GEN)x[2], ptolift(y, X));
+          return mul_intmod_same(z, X, (GEN)x[2], padic_to_Fp(y, X));
         }
         case t_QUAD: return mulRq(x, y);
       }
@@ -2143,7 +2143,7 @@ gdiv(GEN x, GEN y)
 
         case t_PADIC: { GEN X = (GEN)x[1];
           z = cgetg(3, t_INTMOD);
-          return div_intmod_same(z, X, (GEN)x[2], ptolift(y, X));
+          return div_intmod_same(z, X, (GEN)x[2], padic_to_Fp(y, X));
         }
         case t_REAL: err(operf,"/",x,y);
       }
@@ -2207,7 +2207,7 @@ gdiv(GEN x, GEN y)
         }
         case t_INTMOD: { GEN Y = (GEN)y[1];
           z = cgetg(3, t_INTMOD);
-          return div_intmod_same(z, Y, ptolift(x, Y), (GEN)y[2]);
+          return div_intmod_same(z, Y, padic_to_Fp(x, Y), (GEN)y[2]);
         }
         case t_COMPLEX: case t_QUAD:
           av=avma; p1=gmul(x,gconj(y)); p2=gnorm(y); tetpil=avma;

@@ -34,6 +34,7 @@ GEN    mkcol2(GEN x, GEN y);
 GEN    mkcolcopy(GEN x);
 GEN    mkcomplex(GEN x, GEN y);
 GEN    mkfrac(GEN x, GEN y);
+GEN    mkintmodu(ulong x, ulong y);
 GEN    mkmat(GEN x);
 GEN    mkmatcopy(GEN x);
 GEN    mkvec(GEN x);
@@ -389,6 +390,12 @@ mkvec2s(long x, long y) {
 INLINE GEN
 mkvec3s(long x, long y, long z) {
   GEN v=cgetg(4,t_VEC); v[1]=lstoi(x); v[2]=lstoi(y); v[3]=lstoi(z); return v; }
+INLINE GEN
+mkintmodu(ulong x, ulong y) {
+  GEN v = cgetg(3,t_INTMOD);
+  v[1] = (long)utoipos(y);
+  v[2] = (long)utoi(x); return v;
+}
 
 INLINE GEN
 stosmall(long x)

@@ -725,7 +725,7 @@ ComputeArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
   vB = (GEN*)cgetg(nz+1, t_VEC);
   for (i=1; i<=nz; i++) vB[i] = gen_1;
 
-  tr = gmod(gmul(vt, muslambda), den); /* for beta = 1 */
+  tr = Rg_to_Fp(gmul(vt, muslambda), den); /* for beta = 1 */
   s0 = powgi(z, tr);
   s = (GEN*)cgetg(nChar+1, t_VEC);
   for (ic = 1; ic <= nChar; ic++) s[ic] = s0;
@@ -745,7 +745,7 @@ ComputeArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
     vB[i]= set_sign_mod_idele(nf, NULL,vB[i], cond,sarch);
     beta2 = element_mul(nf, vB[i], muslambda);
 
-    tr = gmod(gmul(vt, beta2), den);
+    tr = Rg_to_Fp(gmul(vt, beta2), den);
     s0 = powgi(z,tr);
     for (ic = 1; ic <= nChar; ic++)
     {
@@ -857,11 +857,8 @@ LiftChar(GEN cyc, GEN Mat, GEN chi)
   lchi = cgetg(lm + 1, t_VEC);
   for (i = 1; i <= lm; i++)
   {
-    av = avma;
-    s  = gen_0;
-
-    for (j = 1; j <= l; j++)
-      s = gadd(s, gmul((GEN)chi[j], gcoeff(Mat, j, i)));
+    av = avma; s  = gen_0;
+    for (j = 1; j <= l; j++) s = gadd(s, gmul((GEN)chi[j], gcoeff(Mat, j, i)));
 
     lchi[i] = (long)gerepileupto(av, gmod(gmul(s, (GEN)cyc[i]), (GEN)cyc[i]));
   }

@@ -2753,7 +2753,7 @@ plindep(GEN x)
   if (!p) err(talker,"not a p-adic vector in plindep");
   v = ggval(x,p); pn = gpowgs(p,prec);
   if (v != 0) x = gmul(x, gpowgs(p, -v));
-  x = lift_intern(gmul(x, gmodulcp(gen_1, pn)));
+  x = RgV_to_FpV(x, pn);
 
   ly = 2*lx - 1;
   m = cgetg(ly+1,t_MAT);

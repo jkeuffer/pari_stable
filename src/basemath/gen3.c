@@ -439,7 +439,7 @@ gmod(GEN x, GEN y)
 	  z[2]=lmod((GEN)x[2],y);
           z[3]=lmod((GEN)x[3],y); return z;
 
-	case t_PADIC: return ptolift(x, y);
+	case t_PADIC: return padic_to_Fp(x, y);
 	case t_POLMOD: case t_POL:
 	  return gen_0;
       /* case t_REAL could be defined as below, but conlicting semantic
@@ -543,12 +543,11 @@ gmodulo(GEN x,GEN y)
   switch(typ(y))
   {
     case t_INT:
-      if (tx!=t_INT && tx != t_FRAC && tx!=t_PADIC) break;
       z=cgetg(3,t_INTMOD);
       if (!signe(y)) err(talker,"zero modulus in gmodulo");
       y = gclone(y); setsigne(y,1);
       z[1]=(long)y;
-      z[2]=lmod(x,y); return z;
+      z[2]=(long)Rg_to_Fp(x,y); return z;
 
     case t_POL: z=cgetg(3,t_POLMOD);
       z[1] = lclone(y);
@@ -574,10 +573,9 @@ gmodulcp(GEN x,GEN y)
   switch(typ(y))
   {
     case t_INT:
-      if (tx!=t_INT && tx != t_FRAC && tx!=t_PADIC) break;
       z=cgetg(3,t_INTMOD);
       z[1] = labsi(y);
-      z[2] = lmod(x,y); return z;
+      z[2] = (long)Rg_to_Fp(x,y); return z;
 
     case t_POL: z=cgetg(3,t_POLMOD);
       z[1] = lcopy(y);

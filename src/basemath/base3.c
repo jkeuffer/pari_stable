@@ -143,7 +143,7 @@ element_inv(GEN nf, GEN x)
 {
   pari_sp av=avma;
   long i,N,tx=typ(x);
-  GEN p1,p;
+  GEN p1;
 
   nf=checknf(nf); N=degpol(nf[1]);
   if (is_extscalar_t(tx))
@@ -159,18 +159,8 @@ element_inv(GEN nf, GEN x)
     return p1;
   }
   if (tx != t_COL) err(typeer,"element_inv");
-  p = NULL;
-  for (i=1; i<=N; i++)
-    if (typ(x[i])==t_INTMOD)
-    {
-      p = gmael(x,i,1);
-      x = lift(x); break;
-    }
   p1 = QXQ_inv(gmul((GEN)nf[7],x), (GEN)nf[1]);
-  p1 = algtobasis_i(nf,p1);
-
-  if (p) p1 = FpV_to_mod(p1, p);
-  return gerepileupto(av,p1);
+  return gerepileupto(av, algtobasis_i(nf,p1));
 }
 
 /* quotient of x and y in nf */
@@ -178,8 +168,8 @@ GEN
 element_div(GEN nf, GEN x, GEN y)
 {
   pari_sp av=avma;
-  long i,N,tx=typ(x),ty=typ(y);
-  GEN p1,p;
+  long N,tx=typ(x),ty=typ(y);
+  GEN p1;
 
   nf=checknf(nf); N=degpol(nf[1]);
   if (tx==t_POLMOD) (void)checknfelt_mod(nf,x,"element_div");
@@ -213,26 +203,9 @@ element_div(GEN nf, GEN x, GEN y)
     return gerepileupto(av, gmul((GEN)x[1],p1));
   }
 
-  p = NULL;
-  for (i=1; i<=N; i++)
-    if (typ(x[i])==t_INTMOD)
-    {
-      p = gmael(x,i,1);
-      x = lift(x); break;
-    }
-  for (i=1; i<=N; i++)
-    if (typ(y[i])==t_INTMOD)
-    {
-      p1 = gmael(y,i,1);
-      if (p && !equalii(p,p1))
-        err(talker,"inconsistant prime moduli in element_inv");
-      y = lift(y); break;
-    }
-
   p1 = gmul(gmul((GEN)nf[7],x), QXQ_inv(gmul((GEN)nf[7],y), (GEN)nf[1]));
-  p1 = algtobasis_i(nf, grem(p1, (GEN)nf[1]));
-  if (p) p1 = FpV_to_mod(p1,p);
-  return gerepileupto(av,p1);
+  p1 = RgX_rem(p1, (GEN)nf[1]);
+  return gerepileupto(av, algtobasis_i(nf,p1));
 }
 
 /* product of INTEGERS (i.e vectors with integral coeffs) x and y in nf */
@@ -714,7 +687,7 @@ algtobasis_i(GEN nf, GEN x)
   {
     if (varn(x) != varn(P))
       err(talker,"incompatible variables in algtobasis");
-    if (degpol(x) >= N) x = grem(x,P);
+    if (degpol(x) >= N) x = RgX_rem(x,P);
     return mulmat_pol((GEN)nf[8], x);
   }
   return gscalcol(x,N);
@@ -1973,7 +1946,7 @@ check_nfelt(GEN x, GEN *den)
     t = (GEN)x[i];
     switch (typ(t))
     {
-      case t_INT: case t_INTMOD: break;
+      case t_INT: break;
       case t_FRAC:
         if (!d) d = (GEN)t[2]; else d = lcmii(d, (GEN)t[2]);
         break;

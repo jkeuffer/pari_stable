@@ -4301,30 +4301,28 @@ GEN
 polfnf(GEN a, GEN t)
 {
   pari_sp av = avma;
-  GEN x0,y,p1,p2,u,G,fa,n,unt,dent,alift;
+  GEN x0,y,p1,p2,u,G,fa,n,unt,dent,A;
   long lx,i,k,e;
   int sqfree, tmonic;
 
   if (typ(a)!=t_POL || typ(t)!=t_POL) err(typeer,"polfnf");
   if (gcmp0(a)) return gcopy(a);
-  a = fix_relative_pol(t,a,0);
-  alift = lift(a);
-  p1 = content(alift); if (!gcmp1(p1)) { a = gdiv(a, p1); alift = lift(a); }
+  A = lift(fix_relative_pol(t,a,0));
+  p1 = content(A); if (!gcmp1(p1)) A = gdiv(A, p1);
   t = primpart(t);
   tmonic = is_pm1(leading_term(t));
 
   dent = indexpartial(t, NULL); unt = gmodulsg(1,t);
-  G = nfgcd(alift,derivpol(alift), t, dent);
+  G = nfgcd(A,derivpol(A), t, dent);
   sqfree = gcmp1(G);
-  u = sqfree? alift: lift_intern(gdiv(a, gmul(unt,G)));
+  u = sqfree? A: RgXQX_div(A, G, t);
   k = 0; n = ZY_ZXY_resultant(t, u, &k);
   if (DEBUGLEVEL>4) fprintferr("polfnf: choosing k = %ld\n",k);
   if (!sqfree)
   {
-    G = poleval(G, gadd(polx[varn(a)], gmulsg(k, polx[varn(t)])));
+    G = poleval(G, gadd(polx[varn(A)], gmulsg(k, polx[varn(t)])));
     G = ZY_ZXY_resultant(t, G, NULL);
   }
-
   /* n guaranteed to be squarefree */
   fa = DDF2(n,0); lx = lg(fa);
   y = cgetg(3,t_MAT);
@@ -4333,10 +4331,10 @@ polfnf(GEN a, GEN t)
   if (lx == 2)
   { /* P^k, k irreducible */
     p1[1] = lmul(unt,u);
-    p2[1] = (long)utoipos(degpol(a) / degpol(u));
+    p2[1] = (long)utoipos(degpol(A) / degpol(u));
     return gerepilecopy(av, y);
   }
-  x0 = gadd(polx[varn(a)], gmulsg(-k, gmodulcp(polx[varn(t)], t)));
+  x0 = gadd(polx[varn(A)], gmulsg(-k, gmodulcp(polx[varn(t)], t)));
   for (i=lx-1; i>0; i--)
   {
     GEN f = (GEN)fa[i], F = lift_intern(poleval(f, x0));

@@ -53,31 +53,45 @@ ZX_renormalize(GEN x, long lx)
 GEN
 Rg_to_Fp(GEN x, GEN p)
 {
+  if (lgefint(p) == 3) return utoi(Rg_to_Fl(x, (ulong)p[2]));
   switch(typ(x))
   {
     case t_INT: return modii(x, p);
-    case t_FRAC:
-      if (lgefint(p) == 3)
-      {
-        ulong q = (ulong)p[2], z = umodiu((GEN)x[1], q);
-        if (!z) return gen_0;
-        return utoipos(Fl_div(z, umodiu((GEN)x[2], q), q));
-      }
-      else
-      {
-        pari_sp av = avma;
-        GEN z = modii((GEN)x[1], p);
-        if (z == gen_0) return gen_0;
-        return gerepileuptoint(av, resii(mulii(z, Fp_inv((GEN)x[2], p)), p));
-      }
-    case t_PADIC: return ptolift(x, p);
+    case t_FRAC: {
+      pari_sp av = avma;
+      GEN z = modii((GEN)x[1], p);
+      if (z == gen_0) return gen_0;
+      return gerepileuptoint(av, resii(mulii(z, Fp_inv((GEN)x[2], p)), p));
+    }
+    case t_PADIC: return padic_to_Fp(x, p);
     case t_INTMOD: {
       GEN q = (GEN)x[1], a = (GEN)x[2];
       if (equalii(q, p)) return icopy(a);
       return resii(a, p);
     }
-    default: err(typeer, "R_to_Fp");
+    default: err(typeer, "Rg_to_Fp");
       return NULL; /* not reached */
+  }
+}
+ulong
+Rg_to_Fl(GEN x, ulong p)
+{
+  switch(typ(x))
+  {
+    case t_INT: return umodiu(x, p);
+    case t_FRAC: {
+      ulong z = umodiu((GEN)x[1], p);
+      if (!z) return 0;
+      return Fl_div(z, umodiu((GEN)x[2], p), p);
+    }
+    case t_PADIC: return padic_to_Fl(x, p);
+    case t_INTMOD: {
+      GEN q = (GEN)x[1], a = (GEN)x[2];
+      if (equaliu(q, p)) return itou(a);
+      return umodiu(a, p);
+    }
+    default: err(typeer, "Rg_to_Fl");
+      return 0; /* not reached */
   }
 }
 /* If x is a POLMOD, assume modulus is a multiple of T. */
@@ -104,7 +118,7 @@ Rg_to_FpXQ(GEN x, GEN T, GEN p)
       b = Rg_to_FpXQ((GEN)x[2], T,p);
       return FpXQ_div(a,b, T,p);
   }
-  err(typeer,"R_to_FpXQ");
+  err(typeer,"Rg_to_FpXQ");
   return NULL; /* not reached */
 }
 GEN
@@ -114,6 +128,14 @@ RgX_to_FpX(GEN x, GEN p)
   GEN z = cgetg(l, t_POL); z[1] = x[1];
   for (i = 2; i < l; i++) z[i] = (long)Rg_to_Fp((GEN)x[i], p);
   return normalizepol_i(z, l);
+}
+GEN
+RgV_to_FpV(GEN x, GEN p)
+{
+  long i, l = lg(x);
+  GEN z = cgetg(l, typ(x)); z[1] = x[1];
+  for (i = 2; i < l; i++) z[i] = (long)Rg_to_Fp((GEN)x[i], p);
+  return z;
 }
 GEN
 RgX_to_FpXQX(GEN x, GEN T, GEN p)
@@ -3466,7 +3488,7 @@ fpinit_check(GEN p, long n, long l)
   if (!isprime(utoipos(n))) {avma=ltop; return 0;}
   q = smodis(p,n);
   if (!q) {avma=ltop; return 0;}
-  o = itos(order(gmodulss(q,n)));
+  o = itos(order(mkintmodu(q,n)));
   avma = ltop;
   return ( cgcd((n-1)/o,l) == 1 );
 }

@@ -1202,7 +1202,7 @@ gaffsg(long s, GEN x)
 /*******************************************************************/
 /* x PADIC, Y INT, return lift(x * Mod(1,Y)) */
 GEN
-ptolift(GEN x, GEN Y) {
+padic_to_Fp(GEN x, GEN Y) {
   GEN z;
   long vy, vx = valp(x);
   if (!signe(Y)) err(gdiver);
@@ -1213,6 +1213,19 @@ ptolift(GEN x, GEN Y) {
   if (!signe(z) || vy > vx + precp(x)) err(operi,"",x, gmodulsg(1,Y));
   if (vx) z = mulii(z, gpowgs((GEN)x[2],vx));
   return remii(z, Y);
+}
+ulong
+padic_to_Fl(GEN x, ulong Y) {
+  ulong uz;
+  GEN z;
+  long vy, vx = valp(x);
+  vy = u_pvalrem(Y,(GEN)x[2], &uz);
+  if (vx < 0 || uz != 1) err(operi,"",x, mkintmodu(1,Y));
+  if (vx >= vy) return 0;
+  z = (GEN)x[4];
+  if (!signe(z) || vy > vx + precp(x)) err(operi,"",x, mkintmodu(1,Y));
+  if (vx) z = mulii(z, gpowgs((GEN)x[2],vx));
+  return umodiu(z, Y);
 }
 
 void
@@ -1386,7 +1399,7 @@ gaffect(GEN x, GEN y)
 	  switch(ty)
 	  {
 	    case t_INTMOD:
-              av = avma; affii(ptolift(x, (GEN)y[1]), (GEN)y[2]);
+              av = avma; affii(padic_to_Fp(x, (GEN)y[1]), (GEN)y[2]);
 	      avma = av; break;
 	    case t_POLMOD: gaffect(x,(GEN)y[2]); break;
 	    default: err(operf,"",x,y);

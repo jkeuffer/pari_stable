@@ -1367,7 +1367,7 @@ nfpolred(int part, nfbasic_t *T)
   if (canon_pol(xbest) < 0) phi = gneg_i(phi);
   if (DEBUGLEVEL>1) fprintferr("xbest = %Z\n",xbest);
   rev = modreverse_i(phi, x);
-  for (i=1; i<=n; i++) a[i] = (long)RgX_RgX_compo((GEN)a[i], rev, xbest);
+  for (i=1; i<=n; i++) a[i] = (long)RgX_RgXQ_compo((GEN)a[i], rev, xbest);
   mat = RgXV_to_RgM(Q_remove_denom(a, &d), n);
   if (d) mat = gdiv(hnfmodid(mat,d), d); else mat = idmat(n);
 

@@ -1311,6 +1311,9 @@ underlying prime $p$. Returns \kbd{lift(z * Mod(1,p))}, normalized.
 \fun{GEN}{RgX_to_FpX}{GEN z, GEN p}, \kbd{z} a \typ{POL}, returns the
 \kbd{FpX} obtained by applying \kbd{Rg\_to\_Fp} coefficientwise.
 
+\fun{GEN}{RgV_to_FpV}{GEN z, GEN p}, \kbd{z} a \typ{VEC} or \typ{COL},
+returns the \kbd{FpV} obtained by applying \kbd{Rg\_to\_Fp} coefficientwise.
+
 \fun{GEN}{FpX_to_mod}{GEN z, GEN p}, \kbd{z} a \kbd{ZX}. Returns \kbd{z *
 Mod(1,p)}, normalized. Hence the returned value has \typ{INTMOD}
 coefficients.
@@ -1708,6 +1711,12 @@ variable $v$, then the coefficients by increasing degree. An \kbd{FlxX} is a
 \kbd{evalvarn}$(v)$ for some variable number~$v$.
 
 \subsubsec{Basic operations}
+
+\fun{ulong}{Rg_to_Fl}{GEN z, ulong p}, \kbd{z} which can be mapped to
+$\Z/p\Z$: a \typ{INT}, a \typ{INTMOD} whose modulus is divisible by $p$,
+a \typ{FRAC} whose denominator is coprime to $p$, or a \typ{PADIC} with
+underlying prime $p$. Returns \kbd{lift(z * Mod(1,p))}, normalized, as an
+\kbd{Fl}.
 
 \fun{GEN}{Flx_red}{GEN z, ulong p} converts from \kbd{zx} with
 non-negative coefficients to \kbd{Flx} (by reducing them mod \kbd{p}).

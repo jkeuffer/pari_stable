@@ -1491,7 +1491,7 @@ rational_unit(GEN x, long n, long RU)
   GEN y;
   if (!gcmp1(x) && !gcmp_1(x)) return cgetg(1,t_COL);
   y = zerocol(RU);
-  y[RU] = (long)gmodulss((gsigne(x)>0)? 0: n>>1, n);
+  y[RU] = (long)mkintmodu((gsigne(x) > 0)? 0: n>>1, n);
   return y;
 }
 
@@ -1499,14 +1499,14 @@ rational_unit(GEN x, long n, long RU)
 GEN
 isunit(GEN bnf,GEN x)
 {
-  long tx = typ(x), i, R1, RU, n, prec;
+  long tx = typ(x), i, R1, RU, e, n, prec;
   pari_sp av = avma;
-  GEN p1, v, rlog, logunit, ex, nf, z, pi2_sur_w, gn, emb;
+  GEN p1, v, rlog, logunit, ex, nf, z, pi2_sur_w, emb;
 
   bnf = checkbnf(bnf); nf=(GEN)bnf[7];
   logunit = (GEN)bnf[3]; RU = lg(logunit);
   p1 = gmael(bnf,8,4); /* roots of 1 */
-  gn = (GEN)p1[1]; n = itos(gn);
+  n = itou((GEN)p1[1]);
   z  = algtobasis(nf, (GEN)p1[2]);
   switch(tx)
   {
@@ -1540,7 +1540,6 @@ isunit(GEN bnf,GEN x)
   for (i=1;;)
   {
     GEN logN, rx = get_arch_real(nf,x,&emb, MEDDEFAULTPREC);
-    long e;
     if (rx)
     {
       logN = sum(rx, 1, RU); /* log(Nx), should be ~ 0 */
@@ -1576,15 +1575,16 @@ isunit(GEN bnf,GEN x)
   /* p1 = arg(the missing root of 1) */
 
   pi2_sur_w = divrs(mppi(prec), n>>1); /* 2pi / n */
-  p1 = ground(gdiv(p1, pi2_sur_w));
+  e = umodiu(ground(gdiv(p1, pi2_sur_w)), n);
   if (n > 2)
   {
     GEN ro = gmul(row(gmael(nf,5,1), 1), z);
     GEN p2 = ground(gdiv(garg(ro, prec), pi2_sur_w));
-    p1 = mulii(p1,  Fp_inv(p2, gn));
+    e *= Fl_inv(umodiu(p2,n), n);
+    e %= n;
   }
 
-  ex[RU] = lmodulcp(p1, gn);
+  ex[RU] = (long)mkintmodu(e, n);
   setlg(ex, RU+1); return gerepilecopy(av, ex);
 }
 

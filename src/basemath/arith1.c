@@ -254,7 +254,7 @@ gener(GEN m)
 
   if (typ(m) != t_INT) err(arither1);
   if (!signe(m)) err(talker,"zero modulus in znprimroot");
-  if (is_pm1(m)) return gmodulss(0,1);
+  if (is_pm1(m)) return mkintmodu(0,1);
   z = cgetg(3, t_INTMOD);
   m = absi(m);
   z[1] = (long)m; av = avma;
@@ -1570,18 +1570,20 @@ chinois(GEN x, GEN y)
       }
       z=cgetg(3,t_POLMOD); av=avma;
       d=gbezout((GEN)x[1],(GEN)y[1],&u,&v);
-      if (!gequal(gmod((GEN)x[2],d), gmod((GEN)y[2],d))) break;
+      p2 = gadd((GEN)y[2],gneg((GEN)x[2]));
+      if (!gcmp0(gmod(p2, d))) break;
       p1 = gdiv((GEN)x[1],d);
-      p2 = gadd((GEN)x[2], gmul(gmul(u,p1), gadd((GEN)y[2],gneg((GEN)x[2]))));
+      p2 = gadd((GEN)x[2], gmul(gmul(u,p1), p2));
 
       tetpil=avma; z[1]=lmul(p1,(GEN)y[1]); z[2]=lmod(p2,(GEN)z[1]);
       gerepilecoeffssp(av,tetpil,z+1,2); return z;
     case t_INTMOD:
       z = cgetg(3,t_INTMOD); av = avma;
       d = bezout((GEN)x[1],(GEN)y[1],&u,&v);
-      if (!equalii(resii((GEN)x[2],d), resii((GEN)y[2],d))) break;
+      p2 = subii((GEN)y[2], (GEN)x[2]);
+      if (remii(p2, d) != gen_0) break;
       p1 = diviiexact((GEN)x[1],d);
-      p2 = addii((GEN)x[2], mulii(mulii(u,p1), subii((GEN)y[2], (GEN)x[2])));
+      p2 = addii((GEN)x[2], mulii(mulii(u,p1), p2));
       tetpil = avma;
       z[1] = lmulii(p1, (GEN)y[1]);
       z[2] = lmodii(p2, (GEN)z[1]);

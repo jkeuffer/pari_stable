@@ -715,30 +715,15 @@ calcglobs(Red *R, ulong t, long *pltab, GEN *pP)
 
 /* sig_a^{-1}(z) for z in Q(ze) and sig_a: ze -> ze^a */
 static GEN
-aut(int pk, GEN z, int a, GEN C)
+aut(int pk, GEN z, int a)
 {
   GEN v = cgetg(pk+1,t_VEC);
   int i;
   for (i=1; i<=pk; i++)
     v[i] = (long)polcoeff0(z, (a*(i-1))%pk, 0);
-  return gmodulcp(gtopolyrev(v,0), C);
+  return gtopolyrev(v,0);
 }
 
-#if 0
-/* z^v for v in Z[G], represented by couples [sig_x^{-1},y] */
-static GEN
-autvec(int pk, GEN z, GEN v, GEN C)
-{
-  int i, lv = lg(v);
-  GEN s = gen_1;
-  for (i=1; i<lv; i++)
-  {
-    long y = mael(v,i,2);
-    if (y) s = gmul(s, gpowgs(aut(pk,z,mael(v,i,1), C), y));
-  }
-  return lift_intern(s);
-}
-#endif
 /* z^v for v in Z[G], represented by couples [sig_x^{-1},x] */
 static GEN
 autvec_TH(int pk, GEN z, GEN v, GEN C)
@@ -748,9 +733,9 @@ autvec_TH(int pk, GEN z, GEN v, GEN C)
   for (i=1; i<lv; i++)
   {
     long y = v[i];
-    if (y) s = gmul(s, gpowgs(aut(pk,z, y, C), y));
+    if (y) s = gmul(s, RgXQ_u_pow(aut(pk,z, y), y, C));
   }
-  return lift_intern(s);
+  return s;
 }
 
 static GEN
@@ -762,9 +747,9 @@ autvec_AL(int pk, GEN z, GEN v, Red *R)
   for (i=1; i<lv; i++)
   {
     long y = (r*v[i]) / pk;
-    if (y) s = gmul(s, gpowgs(aut(pk,z, v[i], R->C), y));
+    if (y) s = gmul(s, RgXQ_u_pow(aut(pk,z, v[i]), y, R->C));
   }
-  return lift_intern(s);
+  return s;
 }
 
 /* 0 <= i < pk, such that x^i = z mod cyclo(pk),  -1 if no such i exist */

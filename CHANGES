@@ -56,7 +56,8 @@ GH  8- thue(thueinit(x^3 - 2), 2) --> SEGV
   Added
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu
     2- exported FFTinit() / FFT() wrappers to rootpol.c:fft() [not under GP yet]
-    3- routines Rg_to_Fp, RgX_to_FpX, RgX_to_FpXQX, RgX_to_FqX, 
+    3- routines Rg_to_Fl, Rg_to_Fp, RgX_to_FpX, RgX_to_FpXQX, RgX_to_FqX,
+       RgV_to_FpV.
 
   Changed
     1- renamed gegal --> gequal, gegalgs --> gequalgs, gegalsg --> gequalsg,
@@ -72,6 +73,7 @@ GH  8- thue(thueinit(x^3 - 2), 2) --> SEGV
        small degrees ].
     5- improved zetakinit() [save some multiplications, about half of them
        for quadratic fields. Less so as the degree increases. ]
+    6- renamed RgX_RgX_compo -> RgX_RgXQ_compo 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

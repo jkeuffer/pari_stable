@@ -93,7 +93,7 @@ RgV_zm_mul(GEN x, GEN y)
 
 /* evaluate f(x) mod T */
 GEN
-RgX_RgX_compo(GEN f, GEN x, GEN T)
+RgX_RgXQ_compo(GEN f, GEN x, GEN T)
 {
   pari_sp av = avma, limit;
   long l;
@@ -107,7 +107,7 @@ RgX_RgX_compo(GEN f, GEN x, GEN T)
     y = grem(gadd(gmul(y,x), (GEN)f[l]), T);
     if (low_stack(limit,stack_lim(av,1)))
     {
-      if (DEBUGMEM > 1) err(warnmem, "RgX_RgX_compo");
+      if (DEBUGMEM > 1) err(warnmem, "RgX_RgXQ_compo");
       y = gerepileupto(av, y);
     }
   }
@@ -259,7 +259,7 @@ RgXQX_red(GEN P, GEN T)
   GEN Q = cgetg(l, t_POL);
   Q[1] = P[1];
   for (i=2; i<l; i++) Q[i] = lrem((GEN)P[i], T);
-  return Q;
+  return normalizepol_i(Q, l);
 }
 
 GEN
@@ -703,4 +703,25 @@ GEN
 RgXQX_sqr(GEN x, GEN T)
 {
   return RgXQX_red(RgX_sqr(x), T);
+}
+
+static GEN
+_sqr(void *data, GEN x)
+{ return RgX_rem(RgX_sqr(x), (GEN)data); }
+static GEN
+_mul(void *data, GEN x, GEN y)
+{ return RgX_rem(RgX_mul(x,y), (GEN)data); }
+
+/* x,T in Rg[X], n in N, compute lift(x^n mod T)) */
+GEN
+RgXQ_u_pow(GEN x, ulong n, GEN T)
+{
+  pari_sp av;
+  GEN y;
+
+  if (!n) return polun[varn(x)];
+  if (n == 1) return gcopy(x);
+  av = avma;
+  y = leftright_pow_u(x, n, (void*)T, &_sqr, &_mul);
+  return gerepileupto(av, y);
 }

@@ -459,7 +459,7 @@ embedding(GEN g, GEN DATA, primedata *S, GEN den, GEN listdelta)
     if (gequal(w1_Q, w0_Q) || cmpii(q,maxp) > 0)
     {
       GEN G = gcmp1(den)? g: rescale_pol(g,den);
-      if (gcmp0(poleval(G, gmodulcp(w1_Q,T)))) break;
+      if (gcmp0(RgX_RgXQ_compo(G, w1_Q, T))) break;
     }
     if (cmpii(q, maxp) > 0)
     {
