@@ -25,7 +25,7 @@ dosversion="_$dosversion$patch"
 
 # MAINTAINER ONLY: for automated tests in Bordeaux
 bxmachine=megrez.math.u-bordeaux.fr
-gzip=/usr/local/bin/gzip
+bxgzip=/usr/local/bin/gzip
 
 cat > $file << EOT
 # This file was created by Configure. All changes made will be lost
@@ -90,7 +90,7 @@ ctags:
 
 benchbx: $ztarfile
 	rcp $ztarfile pari@$bxmachine:PARINEW
-	rsh $bxmachine -l pari "cd PARINEW; $gzip -dc $ztarfile|tar xf -; ./makeall $filename"
+	rsh $bxmachine -l pari "cd PARINEW; $bxgzip -dc $ztarfile|tar xf -; ./makeall $filename"
 EOT
 
 $ln_s $file Makefile
