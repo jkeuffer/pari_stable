@@ -138,6 +138,8 @@ char *errmessage[]=
   "object too big, length can't fit in a codeword",
 /* errlgef */
   "degree overflow",
+/* errexpo */
+  "exponent overflow",
 /* errvalp */
   "valuation overflow",
 /* rtodber */
