@@ -16,8 +16,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /* This file defines the parameters of the GEN type               */
 
 typedef long *GEN;
-typedef int (*QSCOMP)(const void *, const void *);
-
 #ifdef ULONG_NOT_DEFINED
   typedef unsigned long ulong;
 #endif

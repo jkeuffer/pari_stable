@@ -13,6 +13,9 @@ Check the License for details. You should have received a copy of it, along
 with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
+/* for qsort */
+typedef int (*QSCOMP)(const void *, const void *);
+
 #define lswap(x,y) {long _z=x; x=y; y=_z;}
 #define pswap(x,y) {GEN *_z=x; x=y; y=_z;}
 #define swap(x,y)  {GEN  _z=x; x=y; y=_z;}
