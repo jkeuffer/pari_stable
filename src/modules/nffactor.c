@@ -987,7 +987,6 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long a, long rec)
       fprintferr("LLL_cmbf: %ld potential factors (tmax = %ld, bmin = %ld)\n",
                  r, tmax, bmin);
 
-
     /* compute Newton sums (possibly relifting first) */
     if (gcmp(GSmin, Btra) < 0)
     {
@@ -1105,6 +1104,7 @@ nf_combine_factors(nfcmbf_t *T, GEN polred, GEN p, long a, long klim)
   famod = (GEN)listmod[l];
   if (maxK >= 0 && lg(famod)-1 > 2*maxK)
   {
+    if (l > 1) T->polbase = unifpol(nf, (GEN)res[l], 0);
     L = nf_LLL_cmbf(T, p, a, maxK);
     /* remove last elt, possibly unfactored. Add all new ones. */
     setlg(res, l); res = concatsp(res, L);
