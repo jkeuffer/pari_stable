@@ -2831,8 +2831,8 @@ snf_pile(gpmem_t av, GEN *x, GEN *U, GEN *V)
   gerepilemany(av,gptr,c);
 }
 
-/* Return the SNF of matrix x. If all != 0 return [d,u,v],
- * where d = u.x.v */
+/* Return the SNF D of matrix X. If ptU/ptV non-NULL set them to U/V
+ * to that D = UXV */
 GEN
 smithall(GEN x, GEN *ptU, GEN *ptV)
 {
