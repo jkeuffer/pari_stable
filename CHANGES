@@ -106,6 +106,8 @@ IS 25- config/get_head would not work only if one invoked $PWD/Configure
       Fix: abort lllintpartial if progress negligible (was: if _no_ progress)
    32- some permanent structs not freed in freeall()
    33- [--with-gmp] round(-4294967296.1) --> '-0' [ typo in mpent ]
+   34- polredabs(x^4-x^3-31*x^2-12*x+144) was not reduced [ typo in subfield
+       detection algorithm ]
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.
