@@ -10,7 +10,12 @@ if test -n "$myuname"; then
   irix*)    osname=irix;;
   fx2800)   arch=fx2800; osname=concentrix;;
   hp*)      osname=hpux; arch=`uname -m`
-            if test "x$arch" = "x" ; then arch=hppa; fi ;;
+            case $arch in
+		ia64) 		arch=ia64;;
+		9000/[34]*)	arch=m68k;;
+		9000/[678]*)	arch=hppa;;
+		*)		arch=hppa;;
+	    esac;;
   netbsd|freebsd|os2)
             arch=`uname -m`
             if test -z "$arch"; then arch=${HOSTTYPE:-ix86}; fi
@@ -24,8 +29,10 @@ if test -n "$myuname"; then
             if test "$arch" = powerpc; then arch=ppc; fi ;;
   osf1)     case "$5" in alpha) arch=alpha;; esac;;
   linux)    arch=`uname -m`
-            if test "$arch" = sparc64; then arch=sparcv9; fi
-	    case "`cat /proc/cpuinfo`" in
+	    case $arch in
+		sparc64) arch=sparcv9;;
+		parisc*) arch=hppa;;
+		sparc) case "`cat /proc/cpuinfo`" in
 	    *SuperSparc*)   arch=sparcv8_super;;
 	    *TMS390Z5[05]*) arch=sparcv8_super;; # SuperSparc I or II
 	    *TMS390S1[05]*) arch=sparcv8_micro;; # MicroSparc I
@@ -34,6 +41,7 @@ if test -n "$myuname"; then
 	    *MB86934*)      arch=sparcv8_super;; # SparcLite
 	    *RT625*)        arch=sparcv8_super;; # HyperSparc
 	    *CY605*)        arch=sparcv8_super;;
+	    	       esac;;
 	    esac;;
   sunos)    case "$3" in 5*) osname=solaris;; esac
 	    case "$5" in
