@@ -132,6 +132,49 @@ RgX_powers(GEN a, GEN T, long l)
   return v;
 }
 
+/* Return P(h * x), not memory clean */
+GEN
+RgX_unscale(GEN P, GEN h)
+{
+  long i, l = lg(P);
+  GEN hi = gen_1, Q = cgetg(l, t_POL);
+  Q[1] = P[1];
+  Q[2] = lcopy((GEN)P[2]);
+  for (i=3; i<l; i++)
+  {
+    hi = gmul(hi,h);
+    Q[i] = lmul((GEN)P[i], hi);
+  }
+  return Q;
+}
+
+GEN
+RgXV_unscale(GEN v, GEN h)
+{
+  long i, l;
+  GEN w;
+  if (!h) return v;
+  l = lg(v); w = cgetg(l, typ(v));
+  for (i=1; i<l; i++) w[i] = (long)RgX_unscale((GEN)v[i], h);
+  return w;
+}
+
+/* Return h^degpol(P) P(x / h), not memory clean */
+GEN
+RgX_rescale(GEN P, GEN h)
+{
+  long i, l = lg(P);
+  GEN Q = cgetg(l,t_POL), hi = h;
+  Q[l-1] = P[l-1];
+  for (i=l-2; i>=2; i--)
+  {
+    Q[i] = lmul((GEN)P[i], hi);
+    if (i == 2) break;
+    hi = gmul(hi,h);
+  }
+  Q[1] = P[1]; return Q;
+}
+
 /********************************************************************/
 /**                                                                **/
 /**                          CONVERSIONS                           **/
@@ -589,6 +632,152 @@ RgX_sqr(GEN x)
 /*                               DIVISION                          */
 /*                                                                 */
 /*******************************************************************/
+GEN
+RgX_div_by_X_x(GEN a, GEN x, GEN *r)
+{
+  long l = lg(a), i;
+  GEN a0, z0, z = cgetg(l-1, t_POL);
+  z[1] = a[1];
+  a0 = a + l-1;
+  z0 = z + l-2; *z0 = *a0--;
+  for (i=l-3; i>1; i--) /* z[i] = a[i+1] + x*z[i+1] */
+  {
+    GEN t = gadd((GEN)*a0--, gmul(x, (GEN)*z0--));
+    *z0 = (long)t;
+  }
+  if (r) *r = gadd((GEN)*a0, gmul(x, (GEN)*z0));
+  return z;
+}
+/* Polynomial division x / y:
+ *   if z = ONLY_REM  return remainder, otherwise return quotient
+ *   if z != NULL set *z to remainder
+ *   *z is the last object on stack (and thus can be disposed of with cgiv
+ *   instead of gerepile) */
+/* assume, typ(x) = typ(y) = t_POL, same variable */
+GEN
+RgX_divrem(GEN x, GEN y, GEN *pr)
+{
+  pari_sp avy, av, av1;
+  long dx,dy,dz,i,j,sx,lr;
+  GEN z,p1,rem,y_lead,mod;
+  GEN (*f)(GEN,GEN);
+
+  if (!signe(y)) err(gdiver);
+
+  dy = degpol(y);
+  y_lead = (GEN)y[dy+2];
+  if (gcmp0(y_lead)) /* normalize denominator if leading term is 0 */
+  {
+    err(warner,"normalizing a polynomial with 0 leading term");
+    for (dy--; dy>=0; dy--)
+    {
+      y_lead = (GEN)y[dy+2];
+      if (!gcmp0(y_lead)) break;
+    }
+  }
+  if (!dy) /* y is constant */
+  {
+    if (pr && pr != ONLY_DIVIDES)
+    {
+      if (pr == ONLY_REM) return zeropol(varn(x));
+      *pr = zeropol(varn(x));
+    }
+    return gdiv(x, constant_term(y));
+  }
+  dx = degpol(x);
+  if (dx < dy)
+  {
+    if (pr)
+    {
+      if (pr == ONLY_DIVIDES) return gcmp0(x)? gen_0: NULL;
+      if (pr == ONLY_REM) return gcopy(x);
+      *pr = gcopy(x);
+    }
+    return zeropol(varn(x));
+  }
+
+  /* x,y in R[X], y non constant */
+  dz = dx-dy; av = avma;
+  p1 = new_chunk(dy+3);
+  for (i=2; i<dy+3; i++)
+  {
+    GEN p2 = (GEN)y[i];
+    /* gneg to avoid gsub's later on */
+    p1[i] = isexactzero(p2)? 0: (long)gneg_i(p2);
+  }
+  y = p1;
+  switch(typ(y_lead))
+  {
+    case t_INTMOD:
+    case t_POLMOD: y_lead = ginv(y_lead);
+      f = gmul; mod = gmodulcp(gen_1, (GEN)y_lead[1]);
+      break;
+    default: if (gcmp1(y_lead)) y_lead = NULL;
+      f = gdiv; mod = NULL;
+  }
+  avy=avma;
+  z = cgetg(dz+3,t_POL); z[1] = x[1];
+  x += 2; y += 2; z += 2;
+
+  p1 = (GEN)x[dx];
+  z[dz] = y_lead? (long)f(p1,y_lead): lcopy(p1);
+  for (i=dx-1; i>=dy; i--)
+  {
+    av1=avma; p1=(GEN)x[i];
+    for (j=i-dy+1; j<=i && j<=dz; j++)
+      if (y[i-j] && z[j] != (long)gen_0) p1 = gadd(p1, gmul((GEN)z[j],(GEN)y[i-j]));
+    if (y_lead) p1 = f(p1,y_lead);
+
+    if (isexactzero(p1)) { avma=av1; p1 = gen_0; }
+    else
+      p1 = avma==av1? gcopy(p1): gerepileupto(av1,p1);
+    z[i-dy] = (long)p1;
+  }
+  if (!pr) return gerepileupto(av,z-2);
+
+  rem = (GEN)avma; av1 = (pari_sp)new_chunk(dx+3);
+  for (sx=0; ; i--)
+  {
+    p1 = (GEN)x[i];
+    /* we always enter this loop at least once */
+    for (j=0; j<=i && j<=dz; j++)
+      if (y[i-j] && z[j] != (long)gen_0) p1 = gadd(p1, gmul((GEN)z[j],(GEN)y[i-j]));
+    if (mod && avma==av1) p1 = gmul(p1,mod);
+    if (!gcmp0(p1)) { sx = 1; break; } /* remainder is non-zero */
+    if (!isinexactreal(p1) && !isexactzero(p1)) break;
+    if (!i) break;
+    avma=av1;
+  }
+  if (pr == ONLY_DIVIDES)
+  {
+    if (sx) { avma=av; return NULL; }
+    avma = (pari_sp)rem;
+    return gerepileupto(av,z-2);
+  }
+  lr=i+3; rem -= lr;
+  if (avma==av1) { avma = (pari_sp)rem; p1 = gcopy(p1); }
+  else p1 = gerepileupto((pari_sp)rem,p1);
+  rem[0] = evaltyp(t_POL) | evallg(lr);
+  rem[1] = z[-1];
+  rem += 2;
+  rem[i]=(long)p1;
+  for (i--; i>=0; i--)
+  {
+    av1=avma; p1 = (GEN)x[i];
+    for (j=0; j<=i && j<=dz; j++)
+      if (y[i-j] && z[j] != (long)gen_0) p1 = gadd(p1, gmul((GEN)z[j],(GEN)y[i-j]));
+    if (mod && avma==av1) p1 = gmul(p1,mod);
+    rem[i]=avma==av1? lcopy(p1):lpileupto(av1,p1);
+  }
+  rem -= 2;
+  if (!sx) (void)normalizepol_i(rem, lr);
+  if (pr == ONLY_REM) return gerepileupto(av,rem);
+  z -= 2;
+  {
+    GEN *gptr[2]; gptr[0]=&z; gptr[1]=&rem;
+    gerepilemanysp(av,avy,gptr,2); *pr = rem; return z;
+  }
+}
 
 /* x and y in (R[Y]/T)[X]  (lifted), T in R[Y]. y preferably monic */
 GEN

@@ -436,7 +436,7 @@ check_sol(GEN x, GEN y, GEN P, GEN rhs, GEN *pS)
   if (gcmp0(y))
   { if (gequal(gpowgs(x,degpol(P)), rhs)) add_sol(pS, x, gen_0); }
   else
-  { if (gequal(poleval(rescale_pol(P,y),x), rhs)) add_sol(pS, x, y); }
+  { if (gequal(poleval(RgX_rescale(P,y),x), rhs)) add_sol(pS, x, y); }
 }
 
 /* Check whether a potential solution is a true solution. Return 0 if
@@ -508,7 +508,7 @@ MiddleSols(GEN *pS, GEN bound, GEN roo, GEN poly, GEN rhs, int s, GEN c1)
       if (DEBUGLEVEL >= 2)
         fprintferr("Checking (\\pm %Z, \\pm %Z)\n",p, q);
 
-      z = poleval(rescale_pol(poly,q), p); /* = P(p/q) q^dep(P) */
+      z = poleval(RgX_rescale(poly,q), p); /* = P(p/q) q^dep(P) */
       if (absi_equal(z, rhs)) 	    
       {
         if (signe(z) == signe(rhs))

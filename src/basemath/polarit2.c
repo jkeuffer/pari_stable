@@ -1295,67 +1295,6 @@ AGAIN:
   return list;
 }
 
-/* Return P(h * x) */
-GEN
-unscale_pol(GEN P, GEN h)
-{
-  long i, l = lg(P);
-  GEN hi = gen_1, Q = cgetg(l, t_POL);
-  Q[1] = P[1];
-  Q[2] = lcopy((GEN)P[2]);
-  for (i=3; i<l; i++)
-  {
-    hi = gmul(hi,h);
-    Q[i] = lmul((GEN)P[i], hi);
-  }
-  return Q;
-}
-
-GEN
-rescale_pol_to_monic(GEN P)
-{
-  long i, l = lg(P);
-  GEN h, Q = cgetg(l,t_POL), hi = gen_1;
-  h = (GEN)P[l-1]; Q[l-1] = (long)gen_1;
-  for (i=l-2; i>=2; i--)
-  {
-    Q[i] = lmul((GEN)P[i], hi);
-    hi = gmul(hi,h);
-  }
-  Q[1] = P[1]; return Q;
-}
-
-
-/* Return h^degpol(P) P(x / h) */
-GEN
-rescale_pol(GEN P, GEN h)
-{
-  long i, l = lg(P);
-  GEN Q = cgetg(l,t_POL), hi = gen_1;
-  Q[l-1] = P[l-1];
-  for (i=l-2; i>=2; i--)
-  {
-    hi = gmul(hi,h);
-    Q[i] = lmul((GEN)P[i], hi);
-  }
-  Q[1] = P[1]; return Q;
-}
-
-/* as above over Fp[X] */
-GEN
-FpX_rescale(GEN P, GEN h, GEN p)
-{
-  long i, l = lg(P);
-  GEN Q = cgetg(l,t_POL), hi = gen_1;
-  Q[l-1] = P[l-1];
-  for (i=l-2; i>=2; i--)
-  {
-    hi = modii(mulii(hi,h), p);
-    Q[i] = lmodii(mulii((GEN)P[i], hi), p);
-  }
-  Q[1] = P[1]; return Q;
-}
-
 /* Find a,b minimal such that A < q^a, B < q^b, 1 << q^(a-b) < 2^31 */
 int
 cmbf_precs(GEN q, GEN A, GEN B, long *pta, long *ptb, GEN *qa, GEN *qb)
@@ -1422,7 +1361,7 @@ combine_factors(GEN target, GEN famod, GEN p, long klim, long hint)
 
 /* assume pol(0) != 0, polp = pol/lc(pol) mod p.
  * Return vector of rational roots of a */
-static GEN
+GEN
 DDF_roots(GEN pol, GEN polp, GEN p)
 {
   GEN lc, lcpol, z, pe, pes2, bound;
@@ -1651,7 +1590,7 @@ polinflate(GEN x0, long d)
 /* Distinct Degree Factorization (deflating first)
  * Assume x squarefree, degree(x) > 0, x(0) != 0 */
 GEN
-DDF2(GEN x, long hint)
+ZX_DDF(GEN x, long hint)
 {
   GEN L;
   long m;
@@ -1671,7 +1610,7 @@ DDF2(GEN x, long hint)
     }
     v = cgetg(k+1, t_VECSMALL); k = 1;
     for (i=1; i<l; i++)
-      for (j=1; j<=e[i]; j++) v[k++] = itos((GEN)fa[i]);
+      for (j=1; j<=e[i]; j++) v[k++] = itou((GEN)fa[i]);
     for (k--; k; k--)
     {
       GEN L2 = cgetg(1,t_VEC);
@@ -1698,12 +1637,12 @@ ZX_squff(GEN f, GEN *ex)
   P = cgetg(n,t_COL);
 
   T = modulargcd(derivpol(f), f);
-  V = gdeuc(f,T);
+  V = RgX_div(f,T);
   for (k=i=1;; k++)
   {
-    W = modulargcd(T,V); T = gdeuc(T,W); dW = degpol(W);
+    W = modulargcd(T,V); T = RgX_div(T,W); dW = degpol(W);
     /* W = prod P^e, e > k; V = prod P^e, e >= k */
-    if (dW != degpol(V)) { P[i] = ldeuc(V,W); e[i] = k; i++; }
+    if (dW != degpol(V)) { P[i] = (long)RgX_div(V,W); e[i] = k; i++; }
     if (dW <= 0) break;
     V = W;
   }
@@ -1748,7 +1687,7 @@ factpol(GEN x, long hint)
   l = lg(fa); n = 0;
   for (i=1; i<l; i++)
   {
-    fa[i] = (long)DDF2((GEN)fa[i], hint);
+    fa[i] = (long)ZX_DDF((GEN)fa[i], hint);
     n += lg(fa[i])-1;
   }
   y = fact_from_DDF(fa,ex,n);
@@ -1764,10 +1703,10 @@ nfrootsQ(GEN x)
   
   if (typ(x)!=t_POL) err(notpoler,"nfrootsQ");
   if (!signe(x)) err(zeropoler,"nfrootsQ");
-  x = primitive_part(x, NULL);
-  val = ZX_valuation(x, &x);
+  val = ZX_valuation(Q_primpart(x), &x);
   d = modulargcd(derivpol(x), x);
-  z = DDF(gdeuc(x, d), 1, 1);
+  if (degpol(d)) x = RgX_div(x, d);
+  z = DDF(x, 1, 1);
   if (val) z = concatsp(z, gen_0);
   return gerepilecopy(av, z);
 }
@@ -1975,7 +1914,11 @@ roots_from_deg1(GEN x)
 }
 
 static GEN
-vec_to_gauss(GEN x) { return mkcomplex((GEN)x[1], (GEN)x[2]); }
+gauss_factor_p(GEN p)
+{ 
+  GEN a, b; (void)cornacchia(gen_1, p, &a,&b);
+  return mkcomplex(a, b);
+}
 
 static GEN
 gauss_primpart(GEN x, GEN *c)
@@ -2020,7 +1963,7 @@ gauss_cmp(GEN x, GEN y)
 static GEN
 gauss_normal(GEN x)
 {
-  if (typ(x) != t_COMPLEX) return (signe(x) < 0)? negi(x): x;
+  if (typ(x) != t_COMPLEX) return (signe(x) < 0)? absi(x): x;
   if (signe(x[1]) < 0) x = gneg(x);
   if (signe(x[2]) < 0) x = mulcxI(x);
   return x;
@@ -2032,7 +1975,7 @@ Ipow(long e) {
   {
     case 1: return gi;
     case 2: return gen_m1;
-    case 3: return gneg(gi);
+    case 3: return pureimag(gen_m1);
   }
   return gen_1;
 }
@@ -2041,8 +1984,7 @@ static GEN
 gauss_factor(GEN x)
 {
   pari_sp av = avma;
-  GEN a = (GEN)x[1], b = (GEN)x[2], d = gen_1;
-  GEN n, y, fa, P, E, P2, E2, Q = qfi(gen_1,gen_0,gen_1);
+  GEN a = (GEN)x[1], b = (GEN)x[2], d = gen_1, n, y, fa, P, E, P2, E2;
   long t1 = typ(a);
   long t2 = typ(b), i, j, l, exp = 0;
   if (t1 == t_FRAC) d = (GEN)a[2];
@@ -2066,10 +2008,7 @@ gauss_factor(GEN x)
     GEN p = (GEN)P[i], w, w2, t, we, pe;
     long v, e = itos((GEN)E[i]);
     int is2 = equaliu(p, 2);
-    if (is2)
-      w = mkcomplex(gen_1, gen_1);
-    else
-      w = gauss_normal(vec_to_gauss(qfbimagsolvep(Q, p)));
+    w = is2? mkcomplex(gen_1,gen_1): gauss_factor_p(p);
     w2 = gauss_normal( gconj(w) );
     /* w * w2 * I^3 = p, w2 = gconj(w) * I */
     pe = gpowgs(p, e);
@@ -2127,10 +2066,7 @@ gauss_factor(GEN x)
         default:is2 = 0; break;
       }
       e = itos((GEN)E[i]);
-      if (is2)
-        w = mkcomplex(gen_1,gen_1);
-      else
-        w = gauss_normal(vec_to_gauss(qfbimagsolvep(Q,p)));
+      w = is2? mkcomplex(gen_1,gen_1): gauss_factor_p(p);
       P[i] = (long)w;
       if (is2)
         E[i] = lstoi(e << 1);
@@ -4317,7 +4253,7 @@ polfnf(GEN a, GEN t)
     G = ZY_ZXY_resultant(t, G, NULL);
   }
   /* n guaranteed to be squarefree */
-  fa = DDF2(n,0); lx = lg(fa);
+  fa = ZX_DDF(n,0); lx = lg(fa);
   y = cgetg(3,t_MAT);
   p1 = cgetg(lx,t_COL); y[1] = (long)p1;
   p2 = cgetg(lx,t_COL); y[2] = (long)p2;

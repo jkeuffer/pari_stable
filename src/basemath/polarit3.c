@@ -332,6 +332,22 @@ FpX_Fp_mul(GEN y,GEN x,GEN p)
   if(!p) return z;
   return FpX_red(z,p);
 }
+
+/* as above over Fp[X] */
+GEN
+FpX_rescale(GEN P, GEN h, GEN p)
+{
+  long i, l = lg(P);
+  GEN Q = cgetg(l,t_POL), hi = h;
+  Q[l-1] = P[l-1];
+  for (i=l-2; i>=2; i--)
+  {
+    Q[i] = lmodii(mulii((GEN)P[i], hi), p);
+    if (i == 2) break;
+    hi = modii(mulii(hi,h), p);
+  }
+  Q[1] = P[1]; return Q;
+}
 /*****************************************************************
  *                 End of unclean functions.                     *
  *****************************************************************/
@@ -2482,20 +2498,17 @@ polint_triv(GEN xa, GEN ya)
   pari_sp av = avma, lim = stack_lim(av, 2);
   for (i=1; i<n; i++)
   {
-    GEN T,dP;
+    GEN T, dP, r;
     if (gcmp0((GEN)ya[i])) continue;
-    T = gdeuc(Q, gsub(polx[0], (GEN)xa[i]));
+    T = RgX_div_by_X_x(Q, (GEN)xa[i], NULL);
+    r = poleval(T, (GEN)xa[i]);
     if (i < n-1 && absi_equal((GEN)xa[i], (GEN)xa[i+1]))
     { /* x_i = -x_{i+1} */
-      T = gdiv(T, poleval(T, (GEN)xa[i]));
-      dP = pol_comp(T, (GEN)ya[i], (GEN)ya[i+1]);
+      dP = pol_comp(gdiv(T, r), (GEN)ya[i], (GEN)ya[i+1]);
       i++;
     }
     else
-    {
-      dP = gmul((GEN)ya[i], T);
-      dP = gdiv(dP, poleval(T,(GEN)xa[i]));
-    }
+      dP = gdiv(gmul((GEN)ya[i], T), r);
     P = P? gadd(P, dP): dP;
     if (low_stack(lim,stack_lim(av,2)))
     {
@@ -2506,8 +2519,8 @@ polint_triv(GEN xa, GEN ya)
   return P? P: zeropol(0);
 }
 
-static GEN
-FpX_div_by_X_x(GEN a, GEN x, GEN p)
+GEN
+FpX_div_by_X_x(GEN a, GEN x, GEN p, GEN *r)
 {
   long l = lg(a), i;
   GEN z = cgetg(l-1, t_POL), a0, z0;
@@ -2519,6 +2532,7 @@ FpX_div_by_X_x(GEN a, GEN x, GEN p)
     GEN t = addii((GEN)*a0--, muliimod(x, (GEN)*z0--, p));
     *z0 = (long)t;
   }
+  if (r) *r = addii((GEN)*a0, muliimod(x, (GEN)*z0, p));
   return z;
 }
 
@@ -2532,7 +2546,7 @@ FpV_polint(GEN xa, GEN ya, GEN p)
   for (i=1; i<n; i++)
   {
     if (!signe(ya[i])) continue;
-    T = FpX_div_by_X_x(Q, (GEN)xa[i], p);
+    T = FpX_div_by_X_x(Q, (GEN)xa[i], p, NULL);
     inv = Fp_inv(FpX_eval(T,(GEN)xa[i], p), p);
     if (i < n-1 && equalii(addii((GEN)xa[i], (GEN)xa[i+1]), p))
     {
@@ -3311,7 +3325,7 @@ modulargcd(GEN A0, GEN B0)
         H = primpart(H);
         gunclone(bound); break;
       }
-      if (gcmp0(grem(A,H)) && gcmp0(grem(B,H))) break; /* DONE */
+      if (gcmp0(RgX_rem(A,H)) && gcmp0(RgX_rem(B,H))) break; /* DONE */
       if (DEBUGLEVEL) fprintferr("modulargcd: trial division failed");
     }
 next:

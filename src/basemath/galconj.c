@@ -187,14 +187,13 @@ vandermondeinverse(GEN L, GEN T, GEN den, GEN prep)
 {
   pari_sp ltop = avma;
   int     i, n = lg(L)-1;
-  long    x = varn(T);
   GEN     M, P;
   if (!prep)
     prep = vandermondeinverseprep(L);
   M = cgetg(n+1, t_MAT);
   for (i = 1; i <= n; i++)
   {
-    P = gdiv(gdeuc(T, gsub(polx[x], (GEN) L[i])), (GEN) prep[i]);
+    P = gdiv(RgX_div_by_X_x(T, (GEN) L[i], NULL), (GEN) prep[i]);
     M[i] = (long)RgX_to_RgV(P,n);
   }
   return gerepileupto(ltop, gmul(den, M));

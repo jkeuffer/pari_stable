@@ -837,23 +837,6 @@ matrice(GEN nlig, GEN ncol,entree *ep1, entree *ep2, char *ch)
 /**                                                                **/
 /********************************************************************/
 GEN
-RgX_div_by_X_x(GEN a, GEN x, GEN *r)
-{
-  long l = lg(a), i;
-  GEN a0, z0, z = cgetg(l-1, t_POL);
-  z[1] = a[1];
-  a0 = a + l-1;
-  z0 = z + l-2; *z0 = *a0--;
-  for (i=l-3; i>1; i--) /* z[i] = a[i+1] + x*z[i+1] */
-  {
-    GEN t = gadd((GEN)*a0--, gmul(x, (GEN)*z0--));
-    *z0 = (long)t;
-  }
-  if (r) *r = gadd((GEN)*a0, gmul(x, (GEN)*z0));
-  return z;
-}
-
-GEN
 sumalt(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
 {
   long k, N;

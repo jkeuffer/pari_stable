@@ -168,6 +168,7 @@ GEN vconcat(GEN Q1, GEN Q2);
 /* integer factorization / discrete log */
 int   BSW_isprime(GEN x);
 int   BSW_isprime_small(GEN x);
+GEN   coprime_part(GEN x, GEN f);
 GEN   decomp_limit(GEN n, GEN limit);
 GEN   Fp_PHlog(GEN a, GEN g, GEN p, GEN ord);
 GEN   Fp_shanks(GEN x,GEN g0,GEN p, GEN q);
@@ -252,7 +253,7 @@ int ZM_incremental_CRT(GEN H, GEN Hp, GEN q, GEN qp, ulong p);
 double cauchy_bound(GEN p);
 GEN chk_factors_get(GEN lt, GEN famod, GEN c, GEN T, GEN N);
 int cmbf_precs(GEN q, GEN A, GEN B, long *a, long *b, GEN *qa, GEN *qb);
-GEN DDF2(GEN x, long hint);
+GEN ZX_DDF(GEN x, long hint);
 GEN fact_from_DDF(GEN fa, GEN e, long n);
 GEN initgaloisborne(GEN T, GEN dn, long prec, GEN *pL, GEN *pprep, GEN *pdis);
 GEN logmax_modulus_bound(GEN p);

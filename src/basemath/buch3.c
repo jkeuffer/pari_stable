@@ -1539,7 +1539,7 @@ rnfconductor(GEN bnf, GEN polrel, long flag)
   bnf = checkbnf(bnf); nf = (GEN)bnf[7];
   if (typ(polrel) != t_POL) err(typeer,"rnfconductor");
   p1 = unifpol(nf, polrel, t_COL);
-  pol2 = rescale_pol(polrel, Q_denom(p1));
+  pol2 = RgX_rescale(polrel, Q_denom(p1));
   if (flag && !rnf_is_abelian(nf, pol2)) { avma = av; return gen_0; }
 
   pol2 = fix_relative_pol(nf, pol2, 1);

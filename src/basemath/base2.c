@@ -726,17 +726,6 @@ update_fact(GEN x, GEN f)
   return merge_factor_i(decomp(d), g);
 }
 
-static GEN
-unscale_vecpol(GEN v, GEN h)
-{
-  long i, l;
-  GEN w;
-  if (!h) return v;
-  l = lg(v); w = cgetg(l, typ(v));
-  for (i=1; i<l; i++) w[i] = (long)unscale_pol((GEN)v[i], h);
-  return w;
-}
-
 /* FIXME: have to deal with compatibility flags */
 static void
 _nfbasis(GEN x0, long flag, GEN fa, GEN *pbas, GEN *pdK)
@@ -754,7 +743,7 @@ _nfbasis(GEN x0, long flag, GEN fa, GEN *pbas, GEN *pdK)
   if (flag & compat_PARTIAL) fl |= nf_PARTIALFACT;
   if (flag & compat_ROUND2)  fl |= nf_ROUND2;
   basis = allbase(x, fl, &dx, &dK, &index, &fa);
-  if (pbas) *pbas = unscale_vecpol(basis, lead);
+  if (pbas) *pbas = RgXV_unscale(basis, lead);
   if (pdK)  *pdK = dK;
 }
 
@@ -1643,7 +1632,7 @@ loop(decomp_t *S, long nv, long Ea, long Fa, GEN ns)
       { /* gamm = beta/p^eq, special case of the above */
         GEN h = gpowgs(S->p, eq);
         gamm = gdiv(beta, h);
-        chig = gdiv(unscale_pol(chib, h), gpowgs(h, N));
+        chig = gdiv(RgX_unscale(chib, h), gpowgs(h, N));
         chig = gcmp1(Q_denom(chig))? FpX_red(chig, S->pmf): NULL;
       }
 
@@ -3382,12 +3371,12 @@ polcompositum0(GEN A, GEN B, long flall)
   C = ZY_ZXY_resultant_all(A, B, &k, flall? &LPRS: NULL);
   if (same)
   {
-    D = rescale_pol(A, stoi(1 - k));
+    D = RgX_rescale(A, stoi(1 - k));
     C = gdivexact(C, D);
-    if (degpol(C) <= 0) C = mkvec(D); else C = concatsp(DDF2(C, 0), D);
+    if (degpol(C) <= 0) C = mkvec(D); else C = concatsp(ZX_DDF(C, 0), D);
   }
   else
-    C = DDF2(C, 0); /* C = Res_Y (A, B(X + kY)) guaranteed squarefree */
+    C = ZX_DDF(C, 0); /* C = Res_Y (A, B(X + kY)) guaranteed squarefree */
   C = sort_vecpol(C, &cmpii);
   if (flall)
   {
