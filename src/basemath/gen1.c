@@ -280,7 +280,7 @@ gred_rfrac2_i(GEN n, GEN d)
       vn = polvaluation(n, NULL);
       if (vn)
       {
-        long v = min(vd, vd);
+        long v = min(vn, vd);
         n = shiftpol_i(n, v);
         d = shiftpol_i(d, v);
         if (gcmp1(d)) d = NULL;
@@ -986,18 +986,19 @@ fix_rfrac_if_pol(GEN x, GEN y)
   else if (varncmp(varn(y), varn(x)) > 0) return gdiv(x,y);
   avma = av; return NULL;
 }
-
+/* (n/d) * x */
 static GEN
-mul_rfrac_scal(GEN y, GEN x)
+mul_rfrac_scal(GEN n, GEN d, GEN x)
 {
-  GEN p1, z, n, d, cx, cn, cd;
+  GEN p1, z, cx, cn, cd;
   long vx, vn, vd;
   pari_sp av = avma, tetpil;
-  n = (GEN)y[1];
-  d = (GEN)y[2];
 
   if (gcmp0(x)) {
-    if (isexactzero(x)) return zeropol(gvar(y));
+    if (isexactzero(x)) {
+      vn = gvar(n);
+      vd = gvar(d); return zeropol(varncmp(vn,vd) > 0? vd: vn);
+    }
     return gerepileupto(av, gdiv(gmul(x,n), d));
   }
   if (gcmp0(n)) return gerepileupto(av, gdiv(gmul(x,n), d));
@@ -1038,13 +1039,11 @@ mul_rfrac_scal(GEN y, GEN x)
   if (p1) return gerepileupto(av, p1);
   gerepilecoeffssp((pari_sp)z,tetpil,z+1,2); return z;
 }
-
+/* (x1/x2) * (y1/y2) */
 static GEN
-mul_rfrac(GEN x, GEN y)
+mul_rfrac(GEN x1, GEN x2, GEN y1, GEN y2)
 {
   GEN z = cgetg(3,t_RFRAC), p1;
-  GEN x1 = (GEN)x[1], x2 = (GEN)x[2];
-  GEN y1 = (GEN)y[1], y2 = (GEN)y[2];
   pari_sp tetpil;
 
   p1 = ggcd(x1, y2); if (!gcmp1(p1)) { x1 = gdiv(x1,p1); y2 = gdiv(y2,p1); }
@@ -1100,7 +1099,6 @@ mul_polmod(GEN X, GEN Y, GEN x, GEN y)
   z[2] = lmul(x, y); return z;
 }
 
-
 static GEN
 mul_pol_scal(GEN y, GEN x) {
   long i, ly;
@@ -1129,7 +1127,7 @@ mul_scal(GEN y, GEN x, long ty)
   {
     case t_POL: return mul_pol_scal(y, x);
     case t_SER: return mul_ser_scal(y, x);
-    case t_RFRAC: return mul_rfrac_scal(y, x);
+    case t_RFRAC: return mul_rfrac_scal((GEN)y[1],(GEN)y[2], x);
   }
   err(operf,"*",x,y);
   return NULL; /* not reached */
@@ -1316,7 +1314,7 @@ gmul(GEN x, GEN y)
     }
     case t_QFI: return compimag(x,y);
     case t_QFR: return compreal(x,y);
-    case t_RFRAC: return mul_rfrac(x,y);
+    case t_RFRAC: return mul_rfrac((GEN)x[1],(GEN)x[2], (GEN)y[1],(GEN)y[2]);
     case t_MAT:
       ly = lg(y); if (ly == 1) return cgetg(ly,t_MAT);
       lx = lg(x);
@@ -1537,7 +1535,7 @@ gmul(GEN x, GEN y)
 	  p1 = greffe(x,lg(y),0);
           p2 = gmul(p1,y); free(p1); return p2;
 	
-        case t_RFRAC: return mul_rfrac_scal(y, x);
+        case t_RFRAC: return mul_rfrac_scal((GEN)y[1],(GEN)y[2], x);
       }
       break;
 	
@@ -1763,22 +1761,13 @@ gsqr(GEN x)
 /********************************************************************/
 static GEN
 div_rfrac_scal(GEN x, GEN y)
-{
-  long Y[3]; Y[1]=un; Y[2]=(long)y;
-  return mul_rfrac(x,Y);
-}
+{ return mul_rfrac((GEN)x[1],(GEN)x[2], gun,y); }
 static GEN
 div_scal_rfrac(GEN x, GEN y)
-{
-  long Y[3]; Y[1]=y[2]; Y[2]=y[1];
-  return mul_rfrac_scal(Y, x);
-}
+{ return mul_rfrac_scal((GEN)y[2], (GEN)y[1], x); }
 static GEN
 div_rfrac(GEN x, GEN y)
-{
-  long Y[3]; Y[1]=y[2]; Y[2]=y[1];
-  return mul_rfrac(x,Y);
-}
+{ return mul_rfrac((GEN)x[1],(GEN)x[2], (GEN)y[2],(GEN)y[1]); }
 
 #define div_ser_scal div_pol_scal
 static GEN
@@ -2526,7 +2515,7 @@ gmul2n(GEN x, long n)
       return z;
 
     case t_RFRAC: av=avma; p1 = gmul2n(gun,n); tetpil = avma;
-      return gerepile(av,tetpil, mul_rfrac_scal(x, p1));
+      return gerepile(av,tetpil, mul_rfrac_scal((GEN)x[1],(GEN)x[2], p1));
 
     case t_PADIC:
       av=avma; z=gmul2n(gun,n); tetpil=avma;
