@@ -1214,7 +1214,7 @@ red_mod_2z(GEN x, GEN z)
 }
 
 static GEN
-gammanew(GEN s0, int dolog, long prec)
+cxgamma(GEN s0, int dolog, long prec)
 {
   GEN s, u, a, y, res, tes, sig, invn2, p1, nnx, pi, sqrtpi2;
   long i, lim, nn;
@@ -1382,7 +1382,7 @@ ggamma(GEN x, long prec)
       avma = av; return y;
 
     case t_REAL: case t_COMPLEX:
-      return gammanew(x, 0, prec);
+      return cxgamma(x, 0, prec);
 
     case t_FRAC:
       if (!egalii((GEN)x[2], gdeux)) break;
@@ -1660,7 +1660,7 @@ glngamma(GEN x, long prec)
       return p2;
 
     case t_REAL: case t_COMPLEX:
-      return gammanew(x, 1, prec);
+      return cxgamma(x, 1, prec);
 
     default:
       av = avma; if (!(y = _toser(x))) break;
