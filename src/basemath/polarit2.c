@@ -1757,6 +1757,16 @@ merge_factor_i(GEN f, GEN g)
 }
 
 GEN
+deg1_from_roots(GEN L, long v)
+{
+  long i, l = lg(L);
+  GEN z = cgetg(l,t_COL);
+  for (i=1; i<l; i++)
+    z[i] = (long)deg1pol_i(gun, gneg((GEN)z[i]), v);
+  return z;
+}
+
+GEN
 factor(GEN x)
 {
   long tx=typ(x), lx, i, j, pa, v, r1;
@@ -1798,9 +1808,7 @@ factor(GEN x)
 
 	case t_COMPLEX: y=cgetg(3,t_MAT); lx=lgef(x)-2; v=varn(x);
 	  av = avma; p1 = roots(x,pa); tetpil = avma;
-          p2=cgetg(lx,t_COL);
-	  for (i=1; i<lx; i++)
-            p2[i] = (long)deg1pol_i(gun, gneg((GEN)p1[i]), v);
+          p2 = deg1_from_roots(p1, v);
 	  y[1]=lpile(av,tetpil,p2);
 	  p3=cgetg(lx,t_COL); for (i=1; i<lx; i++) p3[i] = un;
           y[2]=(long)p3; return y;
