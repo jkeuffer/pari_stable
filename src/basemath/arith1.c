@@ -492,7 +492,7 @@ gcarrecomplet(GEN x, GEN *pt)
 GEN
 gcarreparfait(GEN x)
 {
-  GEN p1,p2,p3,p4;
+  GEN p1,a,p;
   long tx=typ(x),l,i,av,v;
 
   switch(tx)
@@ -504,26 +504,51 @@ gcarreparfait(GEN x)
       return (signe(x)>=0)? gun: gzero;
 
     case t_INTMOD:
-      if (!signe(x[2])) return gun;
-      av=avma; p1=factor(absi((GEN)x[1]));
-      p2=(GEN)p1[1]; l=lg(p2); p3=(GEN)p1[2];
-      for (i=1; i<l; i++)
+    {
+      GEN b, q, e;
+      long w;
+      a = (GEN)x[2];
+      if (!signe(a)) return gun;
+      av = avma;
+      q = absi((GEN)x[1]);
+      v = vali(q);
+      if (v)
       {
-	v = pvaluation((GEN)x[2],(GEN)p2[i],&p4);
-	if (v < itos((GEN)p3[i]))
-	{
-	  if (v&1) break;
-	  if (!egalii((GEN)p2[i], gdeux))
-            { if (kronecker(p4,(GEN)p2[i]) == -1) break; }
-          else
-	  {
-	    v = itos((GEN)p3[i]) - v;
-	    if ((v>=3 && mod8(p4) != 1 ) ||
-	        (v==2 && mod4(p4) != 1)) break;
-	  }
-	}
+        w = vali(a); if (w) b = shifti(a,-w);
+        w = v - w;
+        if ((w>=3 && mod8(b) != 1 ) ||
+            (w==2 && mod4(b) != 1)) { avma = av; return gzero; }
+        q = shifti(q, -v);
       }
-      avma=av; return i<l? gzero: gun;
+      /* q is now odd */
+      i = kronecker(a,q);
+      if (i < 0) { avma = av; return gzero; }
+      if (i==0)
+      {
+        GEN d = mppgcd(a,q);
+        p1 = factor(d);
+        p = (GEN)p1[1];
+        e = (GEN)p1[2]; l = lg(e);
+        for (i=1; i<l; i++)
+        {
+          v = pvaluation(a,(GEN)p[i],&p1);
+          w = itos((GEN)e[i]);
+          if (v < w && (v&1 || kronecker(p1,(GEN)p[i]) == -1)) 
+            { avma = av; return gzero; }
+          q = diviiexact(q, gpowgs((GEN)p[i], w));
+        }
+      }
+      /* (a,q) = 1, q odd */
+      if (kronecker(a,q) == -1) { avma = av; return gzero; }
+      /* kro(a,q) = 1, need to factor q */
+      p1 = factor(q);
+      p = (GEN)p1[1]; 
+      e = (GEN)p1[2];l = lg(e) - 1;
+      /* kro(a,q) = 1, check all p|q but the last (product formula) */
+      for (i=1; i<l; i++)
+        if (kronecker(a,(GEN)p[i]) == -1) { avma = av; return gzero; }
+      return gun;
+    }
 
     case t_FRAC: case t_FRACN:
       av=avma; l=carreparfait(mulii((GEN)x[1],(GEN)x[2]));
@@ -533,14 +558,15 @@ gcarreparfait(GEN x)
       return gun;
 
     case t_PADIC:
-      p4=(GEN)x[4]; if (!signe(p4)) return gun;
+      a = (GEN)x[4]; if (!signe(a)) return gun;
       if (valp(x)&1) return gzero;
-      if (cmpis((GEN)x[2],2))
-        return (kronecker((GEN)x[4],(GEN)x[2])== -1)? gzero: gun;
+      p = (GEN)x[2];
+      if (!egalii(p, gdeux))
+        return (kronecker(a,p)== -1)? gzero: gun;
 
-      v=precp(x); /* here p=2 */
-      if ((v>=3 && mod8(p4) != 1 ) ||
-          (v==2 && mod4(p4) != 1)) return gzero;
+      v = precp(x); /* here p=2, a is odd */
+      if ((v>=3 && mod8(a) != 1 ) ||
+          (v==2 && mod4(a) != 1)) return gzero;
       return gun;
 
     case t_POL:
