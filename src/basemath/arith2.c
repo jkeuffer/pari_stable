@@ -906,8 +906,9 @@ boundfact(GEN n, long lim)
 /**                                                                   **/
 /***********************************************************************/
 
-/*Factorize n and output [fp,fe] where
- * fp and fe are vecsmall and n=prod{fp[i]^fe[i]}
+/*Factorize n and output [fp,fe,fc] where
+ * fp, fe and fc are vecsmall with n=prod{fp[i]^fe[i]}
+ * and fc[i]=fp[i]^fe[i];
  */
 
 GEN
@@ -916,34 +917,23 @@ decomp_small(long n)
   pari_sp ltop=avma;
   GEN F = factor(stoi(n));
   long i, l=lg(F[1]);
-  GEN f=cgetg(3,t_VEC);
-  GEN fp=cgetg(l,t_VECSMALL);
-  GEN fe=cgetg(l,t_VECSMALL);
+  GEN f  = cgetg(4,t_VEC);
+  GEN fp = cgetg(l,t_VECSMALL);
+  GEN fe = cgetg(l,t_VECSMALL);
+  GEN fc = cgetg(l,t_VECSMALL);
+  pari_sp lbot = avma;
   f[1] = (long) fp;
   f[2] = (long) fe;
+  f[3] = (long) fc;
   for(i = 1; i < l; i++)
   {
-    fp[i]=itos(gcoeff(F,i,1));
-    fe[i]=itos(gcoeff(F,i,2));
+    fp[i] = itos(gcoeff(F,i,1));
+    fe[i] = itos(gcoeff(F,i,2));
+    fc[i] = itos(powgi(gcoeff(F,i,1), gcoeff(F,i,2)));
   }
+  avma=lbot;
   return gerepileupto(ltop,f);
 }
-
-/*Return the primary factors of a small integer as a vecsmall*/
-GEN
-decomp_primary_small(long n)
-{
-  pari_sp ltop=avma;
-  GEN F = factor(stoi(n));
-  GEN fc = cgetg(lg(F[1]), t_VECSMALL);
-  pari_sp av=avma;
-  long i;
-  for (i = 1; i < lg(fc); i++)
-    fc[i] = itos(powgi(gmael(F,1,i), gmael(F,2,i)));
-  avma=av;
-  return gerepileupto(ltop,fc);
-}
-
 
 /***********************************************************************/
 /**                                                                   **/

@@ -3905,7 +3905,7 @@ ffinit_fact(GEN p, long n)
   GEN F;	  /* vecsmall */
   GEN P;	  /* pol */
   long i;
-  F = decomp_primary_small(n);
+  F = (GEN) decomp_small(n)[3];
   /* If n is even, then F[1] is 2^bfffo(n)*/
   if (!(n&1) && egalii(p, gdeux))
     P = f2init(vals(n));

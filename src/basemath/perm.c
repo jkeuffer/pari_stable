@@ -379,11 +379,39 @@ perm_order(GEN v)
   avma = ltop; return d;
 }
 
+GEN
+cyc_pow(GEN cyc, long exp)
+{
+  long i, j, k, l, r;
+  GEN c;
+  for (r = 1, j = 1; j < lg(cyc); j++)
+  {
+    int n = lg(cyc[j]) - 1;
+    r += cgcd(n, exp);
+  }
+  c = cgetg(r, t_VEC);
+  for (r = 1, j = 1; j < lg(cyc); j++)
+  {
+    GEN  v = (GEN) cyc[j];
+    long n = lg(v) - 1;
+    long g = cgcd(n, exp);
+    long m = n / g;
+    for (i = 0; i < g; i++)
+    {
+      GEN p = cgetg(m+1, t_VECSMALL);
+      c[r++]  = (long) p;
+      for (k = 1, l = i; k <= m; k++, l = smodss(l+exp,n))
+        p[k] = v[l+1];
+    }
+  }
+  return c;
+}
+
 /* Compute the power of a permutation given by product of cycles
  * Ouput a perm, not a cyc.
  * */
 GEN
-cyc_powtoperm(GEN cyc, long exp)
+cyc_pow_perm(GEN cyc, long exp)
 {
   int     j, k, n;
   GEN     p;
@@ -406,7 +434,7 @@ cyc_powtoperm(GEN cyc, long exp)
 GEN
 perm_pow(GEN perm, long exp)
 {
-  return cyc_powtoperm(perm_cycles(perm),exp);
+  return cyc_pow_perm(perm_cycles(perm),exp);
 }
 
 GEN 

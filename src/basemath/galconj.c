@@ -927,14 +927,16 @@ static long muldiv(long a,long b,long c)
 /* F = cycle decomposition of sigma, B = cycle decomposition of cl(tau).
  * Check all permutations pf who can possibly correspond to tau, such that
  * tau*sigma*tau^-1 = sigma^s and tau^d = sigma^t, where d = ord cl(tau)
- * x: vector of choices, G: vector allowing linear access to elts of F. */
+ * x: vector of choices, G: vector allowing linear access to elts of F. 
+ * Choices multiple of e are not changed.
+ * */
 GEN
-testpermutation(GEN F, GEN B, long s, long t, long cut,
+testpermutation(GEN F, GEN B, GEN x, long s, long e, long cut,
 		struct galois_test *td)
 {
   pari_sp av, avm = avma;
   int     a, b, c, d, n;
-  GEN     pf, x, ar, *G;
+  GEN     pf, ar, *G;
   int     p1, p2, p3, p4, p5, p6;
   long 	  l1, l2, N1, N2, R1;
   long    i, j, cx, hop = 0, start = 0;
@@ -950,12 +952,10 @@ testpermutation(GEN F, GEN B, long s, long t, long cut,
   pf = cgetg(n + 1, t_VECSMALL);
   av = avma;
   ar = cgetg(a + 2, t_VECSMALL); ar[a+1]=0;
-  x = cgetg(a + 1, t_VECSMALL);
   G = (GEN *) cgetg(a + 1, t_VECSMALL);	/* Don't worry */
   W = matheadlong((GEN) td->PV[td->ordre[n]],td->ladic);
   for (cx = 1, i = 1, j = 1; cx <= a; cx++, i++)
   {
-    x[cx] = (i != d) ? 0 : t;
     G[cx] = (GEN) F[coeff(B,i,j)];	/* Be happy */
     if (i == d)
     {
@@ -963,7 +963,7 @@ testpermutation(GEN F, GEN B, long s, long t, long cut,
       j++;
     }
   }				/* Be happy now! */
-  NN = divis(gpowgs(stoi(b), c * (d - 1)),cut);
+  NN = divis(gpowgs(stoi(b), c * (d - d/e)),cut);
   if (DEBUGLEVEL >= 4)
     fprintferr("GaloisConj:I will try %Z permutations\n", NN);
   N1=1000000;
@@ -984,18 +984,17 @@ testpermutation(GEN F, GEN B, long s, long t, long cut,
     {
       if (start)
       {
-	for (i = 1, j = d; i < a;)
+	for (i = 1, j = e; i < a;)
 	{
 	  if ((++(x[i])) != b)
 	    break;
 	  x[i++] = 0;
-	  if (i == j) { i++; j += d; }
+	  if (i == j) { i++; j += e; }
 	}
-        p5 = (i == j - 1) ? -1 : i - j + d;
       }
-      else {start=1; i = a - 1; p5 = -1;}
+      else {start=1; i = a - 1;}
       /* p5 = (p1 % d) - 1 */
-      for (p1 = i + 1 ; p1 >= 1; p1--, p5--)
+      for (p1 = i + 1, p5 = p1 % d - 1 ; p1 >= 1; p1--, p5--)
       { 
         if (p5 == - 1)
         {
@@ -1508,7 +1507,7 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l, long karma_type
   else err(warner,"entering black magic computation");
   O = cgetg(n+1,t_VECSMALL);
   for(i=1;i<=n;i++) O[i]=0;
-  F = decomp_small(n);
+  F =decomp_small(n);
   Fp=(GEN)F[1];
   Fe=(GEN)F[2];
   np=lg(Fp)-1;
@@ -2431,7 +2430,7 @@ galoisfrobeniuslift(GEN T, GEN den, GEN L,  GEN Lden,
   }
   gt.Cd=gcopy(gt.C);
 
-  F=decomp_small(gf->fp);
+  F =decomp_small(gf->fp);
   Fp=(GEN) F[1];
   Fe=(GEN) F[2];
   frob = cgetg(lg(L), t_VECSMALL);
@@ -2648,7 +2647,7 @@ galoisgenfixedfield(GEN Tp, GEN Pmod, GEN V, GEN ip, struct galois_borne *gb, GE
     {
       pari_sp btop=avma;
       tau = permtopol(gmael(PG,1,j), PL, PM, Pden, Pladicabs, x);
-      tau = lift(gmul(tau,gmodulcp(gun,ip)));
+      tau = lift(gmul(tau,gmodulsg(1,ip)));
       tau = FpX_FpXQ_compo((GEN) Pmod[gp], tau,Pp,ip);
       tau = FpX_gcd(Pp, tau,ip);
       tau = FpX_normalize(tau, ip);
@@ -2670,6 +2669,8 @@ galoisgenfixedfield(GEN Tp, GEN Pmod, GEN V, GEN ip, struct galois_borne *gb, GE
  * Compute n so that 
  * (sigma*tau)^e=sigma^n*tau^e
  * We have n=sum_{k=0}^{e-1} s^k mod m.
+ * so n*(1-s) = 1-s^e mod m
+ * Unfortunately (1-s) might not invertible mod m.
  */
 
 static long 
@@ -2680,6 +2681,23 @@ stpow(long s, long e, long m)
   for (i = 1; i < e; i++)
     n = (1 + n * s) % m;
   return n;
+}
+
+static GEN
+wpow(long s, long m, long e, long n)
+{
+  GEN   w = cgetg(n+1,t_VECSMALL);
+  long si = s;
+  long i;
+  w[1] = 1;
+  for(i=2; i<=n; i++)
+    w[i] = w[i-1]*e;
+  for(i=n; i>=1; i--)
+  {
+    si = powuumod(si,e,m);
+    w[i] = muluumod(s-1, stpow(si, w[i], m), m);
+  }
+  return w;
 }
 
 GEN
@@ -2749,7 +2767,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
     res = cgetg(3, t_VEC);
     res[1] = lgetg(2, t_VEC);
     res[2] = lgetg(2, t_VECSMALL);
-    mael(res,1,1) = (long) cyc_powtoperm(O,1);
+    mael(res,1,1) = (long) cyc_pow_perm(O,1);
     mael(res,2,1) = deg;
     return gerepile(ltop, lbot, res);
   }
@@ -2780,7 +2798,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
   res = cgetg(3, t_VEC);
   res[1] = lgetg(lg(PG[1]) + 1, t_VEC);
   res[2] = lgetg(lg(PG[1]) + 1, t_VECSMALL);
-  mael(res,1,1) = (long) cyc_powtoperm(O,1);
+  mael(res,1,1) = (long) cyc_pow_perm(O,1);
   mael(res,2,1) = deg;
   for (i = 2; i < lg(res[1]); i++)
     mael(res,1,i) = lgetg(n + 1, t_VECSMALL);
@@ -2789,6 +2807,8 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
   {
     long sr;
     long k;
+    GEN  X  = cgetg(lg(O), t_VECSMALL);
+    GEN  oX = cgetg(lg(O), t_VECSMALL);
     GEN  gj = gmael(PG,1,j);
     long s  = gf.psi[Pg[j]];
     GEN  B  = perm_cycles(gj);
@@ -2796,40 +2816,62 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
     GEN  F  = decomp_small(oj);
     GEN  Fp = (GEN) F[1];
     GEN  Fe = (GEN) F[2];
+    GEN  Fc = (GEN) F[3];
     if (DEBUGLEVEL >= 6)
       fprintferr("GaloisConj: G[%d]=%Z of relative order %d\n", j, gj, oj);
     B = perm_cycles(gmael(PG,1,j));
     pf = perm_identity(n);
     for (k=lg(Fp)-1; k>=1; k--)
     {
-      long e;
+      long f;
       long dg = 1, el = oj;
-      long ot = 0;
-      long od = 1;
-      long t;
-      long p = Fp[k];
-      GEN  pf1 = NULL;
-      
-      for(e=1;e<=Fe[k];e++)
+      long osel = 1;
+      long p  = Fp[k];
+      long e  = Fe[k];
+      long op = oj/Fc[k];
+      long a=0;
+      GEN  pf1 = NULL, w, wg;
+      GEN  Be = cgetg(e+1,t_VEC);
+      Be[e] = (long) cyc_pow(B, op);
+      for(i=e-1; i>=1; i--)
+        Be[i] = (long) cyc_pow((GEN)Be[i+1], p);
+      w = wpow(powuumod(s,op,deg),deg,p,e);
+      wg = cgetg(e+2,t_VECSMALL);
+      wg[e+1] = deg;
+      for (i=e; i>=1; i--)
+        wg[i]=cgcd(wg[i+1], w[i]);
+      for (i=1; i<lg(O); i++) oX[i] = 0;
+      for (f=1; f<=e; f++)
       { 
         long sel;
-        GEN Bel;
+        GEN Bel = (GEN) Be[f];
+        long t;
         dg *= p; el /= p;
-        Bel = perm_cycles(cyc_powtoperm(B, el));
-        sel = powuumod(s, el, deg); 
-        sr  = cgcd(stpow(sel,dg,deg),deg);
+        sel = powuumod(s,el,deg); 
         if (DEBUGLEVEL >= 6)
-          fprintferr("GaloisConj: exp %d: s=%ld [%ld] ot=%ld sr=%ld od=%ld nb=%ld \n",
-              dg, sel, deg, ot, sr, od, sr/od);
-        for (t = ot; t < sr; t += od)
-          if ( t*(sel-1)%deg==0 )
+          fprintferr("GaloisConj: B=%Z\n", Bel);
+        sr  = cgcd(stpow(sel,p,deg),deg);
+        if (DEBUGLEVEL >= 6)
+          fprintferr("GaloisConj: exp %d: s=%ld [%ld] a=%ld w=%ld wg=%ld sr=%ld\n",
+              dg, sel, deg, a, w[f], wg[f+1], sr);
+        for (t = 0; t < sr; t++)
+          if ((a+t*w[f])%wg[f+1]==0)
           {
-            pf1 = testpermutation(O, Bel, sel, t, sr, &td);
+            long i, j, k, st;
+            for (i = 1; i < lg(X); i++) X[i] = 0;
+            for (i = 0; i < lg(X); i+=dg)
+              for (j = 1, k = p, st = t; k <= dg; j++, k += p)
+              {
+                X[k+i] = (oX[j+i] + st)%deg;
+                st = (t + st*osel)%deg;
+              }
+            pf1 = testpermutation(O, Bel, X, sel, p, sr, &td);
             if (pf1)
               break;
           }
         if (!pf1) { freetest(&td); avma = ltop; return gzero; }
-        ot = t; od = sr; 
+        for (i=1; i<lg(O); i++) oX[i] = X[i];
+        osel = sel; a = (a+t*w[f])%deg;
       }
       pf = perm_mul(pf, perm_pow(pf1, el));
     }
