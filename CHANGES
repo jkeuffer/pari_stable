@@ -76,6 +76,7 @@ BD 38- typo in src/kernel/l0asm.c: ulong not recognized by MSVC
 IZ 39- TeX quasi-parsing in gphelp
    40- ^C in gp would kill an xdvi launched by gphelp via ?? [detach from tty]
    41- factor(P in Z[X]): wrong bound used in LLL_cmbf --> "no factor"
+   42- one extra blank line printed with some error messages [errcontext]
 
   Changed
     1- DOS distribution archives (GPM removed)
