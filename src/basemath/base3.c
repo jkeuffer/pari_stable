@@ -79,47 +79,10 @@ _mulii(GEN x, GEN y) {
                   : mulii(x, y);
 }
 
-#if 0 /* slower */
-GEN
-mul_by_tab(GEN tab, GEN x, GEN y)
-{
-  long i, j, k, N = lg(x)-1;
-  GEN s,c,p1, v = cgetg(N+1,t_COL);
-
-  for (k=1; k<=N; k++)
-  {
-    gpmem_t av = avma;
-    if (k == 1)
-      s = gmul((GEN)x[1],(GEN)y[1]);
-    else
-      s = gadd(gmul((GEN)x[1],(GEN)y[k]),
-               gmul((GEN)x[k],(GEN)y[1]));
-    for (i=2; i<=N; i++)
-    {
-      long base = (i-1)*N;
-      c=gcoeff(tab,k,base+i);
-      if (signe(c))
-      {
-        p1 = gmul((GEN)x[i],(GEN)y[i]);
-	s = gadd(s, _mulix(c, p1));
-      }
-      for (j=i+1; j<=N; j++)
-      {
-	c=gcoeff(tab,k,base+j);
-	if (!signe(c)) continue;
-
-        p1 = gadd(gmul((GEN)x[i],(GEN)y[j]),
-                  gmul((GEN)x[j],(GEN)y[i]));
-        s = gadd(s, _mulix(c, p1));
-      }
-    }
-    v[k] = (long)gerepileupto(av,s);
-  }
-  return v;
-}
-#endif
-GEN
-mul_by_tab(GEN tab, GEN x, GEN y)
+/* compute xy as ( sum_i x_i sum_j y_j m^{i,j}_k )_k. 
+ * Assume tab in M_{N x N^2}(Z), with x, y in Z^N */
+static GEN
+mul_by_tabi(GEN tab, GEN x, GEN y)
 {
   long i, j, k, N = lg(x)-1;
   GEN s, v = cgetg(N+1,t_COL);
@@ -174,7 +137,7 @@ element_mul(GEN nf, GEN x, GEN y)
   if (isnfscalar(y)) return gmul((GEN)y[1],x);
 
   tab = get_tab(nf, &N);
-  return mul_by_tab(tab,x,y);
+  return mul_by_tabi(tab,x,y);
 }
 
 /* inverse of x in nf */
@@ -353,8 +316,9 @@ element_sqri(GEN nf, GEN x)
   return v;
 }
 
-GEN
-sqr_by_tab(GEN tab, GEN x)
+/* cf mul_by_tabi */
+static GEN
+sqr_by_tabi(GEN tab, GEN x)
 {
   long i, j, k, N = lg(x)-1;
   GEN s, v = cgetg(N+1,t_COL);
@@ -379,7 +343,44 @@ sqr_by_tab(GEN tab, GEN x)
       {
 	c = gcoeff(tab,k,(i-1)*N+j);
 	if (!signe(c)) continue;
-        p1 = _mulix(shifti(c,1), (GEN)x[j]);
+        p1 = gmul(shifti(c,1), (GEN)x[j]);
+        t = t? gadd(t, p1): p1;
+      }
+      if (t) s = gadd(s, gmul(xi, t));
+    }
+    v[k] = (long)gerepileupto(av,s);
+  }
+  return v;
+}
+
+/* cf sqr_by_tab. Assume nothing about tab */
+GEN
+sqr_by_tab(GEN tab, GEN x)
+{
+  long i, j, k, N = lg(x)-1;
+  GEN s, v = cgetg(N+1,t_COL);
+
+  for (k=1; k<=N; k++)
+  {
+    gpmem_t av = avma;
+    if (k == 1)
+      s = gsqr((GEN)x[1]);
+    else
+      s = gmul2n(gmul((GEN)x[1],(GEN)x[k]), 1);
+    for (i=2; i<=N; i++)
+    {
+      GEN p1, c, t, xi = (GEN)x[i];
+      long base;
+      if (gcmp0(xi)) continue;
+
+      base = (i-1)*N;
+      c = gcoeff(tab,k,base+i);
+      t = !gcmp0(c)? gmul(c,xi): NULL;
+      for (j=i+1; j<=N; j++)
+      {
+	c = gcoeff(tab,k,(i-1)*N+j);
+	if (gcmp0(c)) continue;
+        p1 = gmul(gmul2n(c,1), (GEN)x[j]);
         t = t? gadd(t, p1): p1;
       }
       if (t) s = gadd(s, gmul(xi, t));
@@ -406,7 +407,7 @@ element_sqr(GEN nf, GEN x)
   if (tx != t_COL) err(typeer,"element_sqr");
 
   tab = get_tab(nf, &N);
-  return sqr_by_tab(tab,x);
+  return sqr_by_tabi(tab,x);
 }
 
 static GEN
