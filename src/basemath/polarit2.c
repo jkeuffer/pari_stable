@@ -1163,7 +1163,7 @@ combine_factors(GEN a, GEN famod, GEN p, long klim, long hint)
   e = get_e(B, p, &pe);
 
   if (DEBUGLEVEL > 4)
-    fprintferr("Mignotte bound: %Z^%ld > %f\n", p,e,gtodouble(B));
+    fprintferr("Mignotte bound: %Z^%ld\n", p,e);
   famod = hensel_lift_fact(a,famod,p,pe,e);
   if (nft < 11) maxK = -1; /* few modular factors: try all posibilities */
   else

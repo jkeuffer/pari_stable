@@ -3044,7 +3044,7 @@ polcompositum0(GEN pol1, GEN pol2, long flall)
     if (typ(rk)==t_POL && lgef(rk)==4 && issquarefree(p2)) break;
   }
   p2 = gsubst(p2,MAXVARN,polx[v]);
-  fa = factpol(p2,0,clcm(degree(pol1), degree(pol2)));
+  fa = factor(p2);
   y = fa = (GEN)fa[1];
   if (flall)
   {
