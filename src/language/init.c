@@ -823,23 +823,29 @@ errcontext(char *msg, char *s, char *entry)
 {
   int past = (s-entry);
   char str[STR_LEN + 2];
-  char *buf, *t;
+  char *buf, *t, *pre;
 
   if (!s || !entry) { print_text(msg); return; }
 
-  t = buf = gpmalloc(strlen(msg) + MAX_PAST + 5);
+  t = buf = gpmalloc(strlen(msg) + MAX_PAST + 5 + 2 * 16);
   sprintf(t,"%s: ", msg);
   if (past <= 0) past = 0;
   else
   {
     t += strlen(t);
     if (past > MAX_PAST) { past=MAX_PAST; strcpy(t, "..."); t += 3; }
+    strcpy(t, term_get_color(c_INPUT));
+    t += strlen(t);
     strncpy(t, s - past, past); t[past] = 0;
   }
   
   t = str; if (!past) *t++ = ' ';
   strncpy(t, s, STR_LEN); t[STR_LEN] = 0;
-  print_prefixed_text(buf, "  ***   ", str); free(buf);
+  pre = gpmalloc(2 * 16 + 1);
+  strcpy(pre, term_get_color(c_ERR));
+  strcat(pre, "  ***   ");
+  print_prefixed_text(buf, pre, str);
+  free(buf); free(pre);
 }
 
 void *

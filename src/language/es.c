@@ -439,16 +439,33 @@ _new_line(char *prefix)
   pariputc('\n'); if (prefix) pariputs(prefix);
 }
 
+static long
+strlen_real(char *s)
+{
+  char *t = s, *t0;
+  long ctrl_len = 0;
+  while (*t)
+  {
+    t0 = t;
+    if (*t++ == '\e' && *t++ == '[')
+    {
+      while (*t && *t++ != 'm') /* empty */;
+      ctrl_len += t - t0;
+    }
+  }
+  return strlen(s) - ctrl_len;
+}
+
 /* output: <prefix>< s wrapped at EOL >
  *         <prefix>< ... > <str>
  *                         ^---
- * If str is NULL, omit the arrow
- * If prefix is NULL, use ""
+ * If str is NULL, omit the arrow and assume the text doesn't contain ASCII
+ * escape sequences. If prefix is NULL, use ""
  */
 void
 print_prefixed_text(char *s, char *prefix, char *str)
 {
-  long prelen = prefix? strlen(prefix): 0;
+  long prelen = prefix? strlen_real(prefix): 0;
   long oldwlen=0, linelen=prelen, w = term_width();
   char word[MAX_WORD_LEN+1], oldword[MAX_WORD_LEN+1], *u=word;
 
@@ -465,7 +482,9 @@ print_prefixed_text(char *s, char *prefix, char *str)
         _new_line(prefix);
         linelen = oldwlen + prelen;
       }
-      pariputs(oldword); *u++ = ' '; *u = '\0'; oldwlen = u-word;
+      pariputs(oldword); *u++ = ' '; *u = '\0';
+      /* u-word = strlen(word); */
+      oldwlen = str ? strlen_real(word): u - word;
       if (*s) { strcpy(oldword,word);  u = word; }
     }
   }
@@ -478,15 +497,17 @@ print_prefixed_text(char *s, char *prefix, char *str)
   pariputs(word);
   if (str)
   {
-    long i,len = strlen(str);
+    long i,len = strlen_real(str);
     int space = (*str == ' ' && str[1]);
     if (linelen + len >= w)
     {
       _new_line(prefix); linelen = prelen;
       if (space) { str++; len--; space = 0; }
     }
+    term_color(c_INPUT);
     pariputs(str); if (!len || str[len-1] != '\n') pariputc('\n');
     if (space) { linelen++; len--; }
+    term_color(c_ERR);
     for (i=0; i<linelen; i++) pariputc(' ');
     pariputc('^');
     for (i=0; i<len; i++) pariputc('-');
