@@ -2321,38 +2321,36 @@ weber0(GEN x, long flag,long prec)
   return NULL; /* not reached */
 }
 
+/* assume x > 0 */
 static GEN
-agm1r(GEN x)
+agm1r_abs(GEN x)
 {
-  pari_sp av;
-  GEN a1, b1, y;
-  long l;
+  long l = lg(x), L = 5-bit_accuracy(l);
+  GEN a1, b1, y = cgetr(l);
+  pari_sp av = avma;
 
-  if (!signe(x)) return rcopy(x);
-  l = lg(x); y = cgetr(l); av = avma;
-  a1 = x; b1 = realun(l);
-  l = 5-bit_accuracy(l);
-  do
+  a1 = addrr(realun(l), x); setexpo(a1, expo(a1)-1);
+  b1 = sqrtr_abs(x);
+  while (expo(subrr(b1,a1)) - expo(b1) >= L)
   {
-    GEN a = a1; a1 = addrr(a,b1);
-    setexpo(a1, expo(a1)-1);
+    GEN a = a1;
+    a1 = addrr(a,b1); setexpo(a1, expo(a1)-1);
     b1 = sqrtr_abs(mulrr(a,b1));
   }
-  while (expo(subrr(b1,a1)) - expo(b1) >= l);
   affrr(a1,y); avma = av; return y;
 }
 
 static GEN
 agm1cx(GEN x, long prec)
 {
-  GEN a, a1, b1;
+  GEN a1, b1;
   pari_sp av = avma;
   long l = precision(x); if (!l) l = prec;
 
   a1 = x; b1 = gun; l = 5-bit_accuracy(l);
   do
   {
-    a = a1;
+    GEN a = a1;
     a1 = gmul2n(gadd(a,b1),-1);
     b1 = gsqrt(gmul(a,b1), prec);
   }
@@ -2370,7 +2368,7 @@ sagm(GEN x, long prec)
   if (gcmp0(x)) return gcopy(x);
   switch(typ(x))
   {
-    case t_REAL: return signe(x) > 0? agm1r(x): agm1cx(x, prec);
+    case t_REAL: return signe(x) > 0? agm1r_abs(x): agm1cx(x, prec);
 
     case t_COMPLEX:
       if (gcmp0((GEN)x[2]) && gsigne((GEN)x[1]) > 0)
@@ -2412,66 +2410,19 @@ sagm(GEN x, long prec)
 GEN
 agm(GEN x, GEN y, long prec)
 {
-  long ty=typ(y);
-  pari_sp av, tetpil;
-  GEN z;
+  long ty = typ(y);
+  pari_sp av;
 
   if (is_matvec_t(ty))
   {
-    ty=typ(x);
+    ty = typ(x);
     if (is_matvec_t(ty)) err(talker,"agm of two vector/matrices");
-    z=x; x=y; y=z;
+    swap(x, y);
   }
   if (gcmp0(y)) return gcopy(y);
-  av=avma; z=sagm(gdiv(x,y),prec); tetpil=avma;
-  return gerepile(av,tetpil,gmul(y,z));
+  av = avma; 
+  return gerepileupto(av, gmul(y, sagm(gdiv(x,y), prec)));
 }
-
-#if 0
-GEN
-logagmold(GEN q)
-{
-  long prec = lg(q), s, n, lim;
-  pari_sp av = avma;
-  GEN y, q1;
-
-  if (typ(q)!=t_REAL) err(typeer,"logagm");
-  if (signe(q) <= 0) err(talker,"non positive argument in logagm");
-  if (gcmp1(q)) return realzero(prec);
-  if (expo(q) < 0) s = 1; else { q = ginv(q); s = 0; }
-  lim = - (bit_accuracy(prec) >> 1);
-  q1 = NULL; /* gcc -Wall */
-  for (n=0; expo(q) >= lim; n++) { q1 = q; q = gsqr(q); }
-
-  if (!n) q1 = sqrtr(q);
-  /* Pi / agm(1 + 4q, 4sqrt(q)) */
-  y = divrr(mppi(prec), agm(addsr(1,gmul2n(q,2)), gmul2n(q1,2),prec));
-  y = gmul2n(y,-n); if (s) setsigne(y,-1);
-  return gerepileuptoleaf(av, y);
-}
-
-GEN
-logagmr_abs_old(GEN q0)
-{
-  long prec = lg(q0), lim, e = expo(q0);
-  GEN z, y, q, q4, Q, s;
-  pari_sp av;
-
-  if (absrnz_egal2n(q0)) return e? mulsr(e, mplog2(prec)): realzero(prec);
-  z = cgetr(prec); av = avma; prec++;
-  lim = - (bit_accuracy(prec) >> 1);
-  Q = cgetr(prec); affrr(q0, Q);
-  setexpo(Q, lim); q = gsqr(Q);
-
-  /* Pi / (1+4Q^2) / agm(1, 4Q / (1+4Q^2)) ~ -log(Q^2) = 2log(q0 / 2^(e-lim))*/
-  q4 = gmul2n(q,2);
-  s = mulrr(gmul2n(Q,2), subsr(1, q4));
-  y = divrr(mppi(prec), mulrr(addsr(1,q4), agm1r(s)));
-  y[1] = evalsigne(-1) | evalexpo(expo(y)-1); /* y := -y/2 */
-  y = addrr(y, mulsr(e - lim, mplog2(prec)));
-  affrr(y, z); return z;
-}
-#endif
 
 GEN
 logagmr_abs(GEN q)
@@ -2484,10 +2435,10 @@ logagmr_abs(GEN q)
   z = cgetr(prec); av = avma; prec++;
   lim = bit_accuracy(prec) >> 1;
   Q = cgetr(prec); affrr(q, Q);
-  setexpo(Q, lim);
+  Q[1] = evalsigne(1) | evalexpo(lim);
 
   /* Pi / 2agm(1, 4/Q) ~ log(Q), q = Q * 2^(e-lim) */
-  y = divrr(mppi(prec), agm1r( divsr(4, Q) ));
+  y = divrr(mppi(prec), agm1r_abs( divsr(4, Q) ));
   setexpo(y, expo(y)-1);
   y = addrr(y, mulsr(e - lim, mplog2(prec)));
   affrr(y, z); return z;
