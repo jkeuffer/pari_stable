@@ -165,6 +165,9 @@ BA 18- split substpol from subst ( reverse [ 2.2.1 C24 ] ). Use substpol
    19- remove t_FRACN / t_RFRACN from \t output, add t_VECSMALL
 BA 20- bittest() now handle negative operand as 2-adic.
 BA 21- type() does not allow to change object types anymore.
+   22- internal routines setloop()/incloop() allocated 2 chunks of memory,
+       then assumed they were connected [ true for the current allocation
+       model ]. Remove that unecessary assumption.
 
   Added
     1- make test-all [ all available test suites (SLOW !)]

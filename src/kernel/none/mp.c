@@ -78,8 +78,8 @@ int pari_kernel_init(void)
 GEN
 setloop(GEN a)
 {
-  a = icopy(a); (void)new_chunk(2); /* dummy to get two cells of extra space */
-  return a;
+  GEN z0 = (GEN)avma; (void)new_chunk(lgefint(a) + 2);
+  return icopy_av(a, z0); /* two cells of extra space before a */
 }
 
 /* assume a > 0, initialized by setloop. Do a++ */
