@@ -114,6 +114,7 @@ LGr39- very rare SEGV in idealprimedec() [ typo in init_norm(), using FpX_red
    way ] ?
    51- padicappr(f, t_POLMOD) didn't work
    52- rnfidealnormabs(rnfinit(nfinit(y),x^2+1),1) --> SEGV
+   53- no argument check in primepi()
 
   Added
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu

@@ -46,9 +46,8 @@ primepi(GEN x)
   ulong prime = 0, res = 0, n;
   GEN N = typ(x) == t_INT? x: gfloor(x);
 
-  avma = av;
-  if (signe(N) <= 0) err(talker, "primepi meaningless for n = %Z",N);
-  n = itou(N); maxprime_check(n);
+  if (typ(N) != t_INT || signe(N) <= 0) err(typeer, "primepi");
+  avma = av; n = itou(N); maxprime_check(n);
   while (prime <= n) { res++; NEXT_PRIME_VIADIFF(prime,p); }
   return utoi(res-1);
 }
