@@ -1188,7 +1188,7 @@ isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag)
     {
       if (gen && typ(y) == t_VEC)
       {
-        GEN t, u = lift_intern(basistoalg(nf, (GEN)y[2]));
+        GEN u = lift_intern(basistoalg(nf, (GEN)y[2]));
         if (flag & nf_GENMAT)
           y[2] = (gcmp1(u)&&lg(id[2])>1)? id[2]: (long)arch_mul((GEN)id[2], u);
         else
