@@ -198,7 +198,7 @@ mul_intmod_same(GEN z, GEN X, GEN x, GEN y) {
     avma = (pari_sp)z; z[2] = lutoi(u);
   }
   else
-    z[2] = lpileuptoint((pari_sp)z, resii(mulii((GEN)x[2],(GEN)y[2]), X) );
+    z[2] = lpileuptoint((pari_sp)z, resii(mulii(x,y), X) );
   icopyifstack(X, z[1]); return z;
 }
 /* cf add_intmod_same */
