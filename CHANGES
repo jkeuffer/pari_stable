@@ -57,6 +57,8 @@ IZ 12- [gnuplot + dynamic link:] allow building even when dlopen() not available
    16- conjvec([[],[],[]]) --> SEGV
    17- galoisisabelian(x) --> SEGV
    18- nfeltreducemodpr(nfinit(x),1,1) --> SEGV
+   19- idealmul(nf, principal ideal, prime ideal) returned wrong result
+       [introduced sometime in 2.2]
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).
