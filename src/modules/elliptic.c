@@ -1492,6 +1492,15 @@ addsell_part2(GEN e, GEN z1, GEN z2, GEN p, GEN p2inv)
 }
 
 static GEN
+negsell(GEN f)
+{
+  GEN g = cgetg(3, t_VEC);
+  g[1] = f[1];
+  g[2] = lnegi((GEN)f[2]);
+  return g;
+}
+
+static GEN
 powsell(GEN e, GEN z, GEN n, GEN p)
 {
   GEN y;
@@ -1501,9 +1510,8 @@ powsell(GEN e, GEN z, GEN n, GEN p)
   if (!s || !z) return NULL;
   if (s < 0)
   {
-    n = negi(n); y = cgetg(3,t_VEC);
-    y[2] = lnegi((GEN)z[2]);
-    y[1] = z[1]; z = y;
+    z = negsell(z);
+    n = negi(n);
   }
   if (is_pm1(n)) return z;
 
@@ -1530,9 +1538,6 @@ _fix(GEN x, long k)
   if (lgefint(y) < k) { GEN p1 = cgeti(k); affii(y,p1); *x = (long)p1; }
 }
 
-/* low word of integer x */
-#define _low(x) (__x=(GEN)x, __x[lgefint(__x)-1])
-
 /* compute a_p using Shanks/Mestre + Montgomery's trick. Assume p > 457 */
 GEN
 apell1(GEN e, GEN p)
@@ -1540,7 +1545,6 @@ apell1(GEN e, GEN p)
   long *tx, *ty, *ti, pfinal, i, j, j2, s, k, k1, x, nb;
   gpmem_t av = avma, av2;
   GEN p1,p2,p3,h,mfh,f,fh,fg,pordmin,u,v,p1p,p2p,A,B,c4,c6,cp4,pts;
-  GEN __x;
   tx = ty = ti = NULL; /* gcc -Wall */
 
   if (DEBUGLEVEL) (void)timer2();
@@ -1574,17 +1578,20 @@ apell1(GEN e, GEN p)
       ty = newbloc(s+1);
       ti = newbloc(s+1);
     }
-    else f = powsell(cp4,f,B,p); /* F */
+    else f = powsell(cp4,f,B,p); /* F = B.f */
     *tx = evaltyp(t_VECSMALL) | evallg(s+1);
     if (!fh) goto FOUND;
 
     p1 = gcopy(fh);
     if (s < 3)
-    { /* we're nearly done: naive method */
+    { /* we're nearly done: naive search */
+      GEN q1 = p1, mf = negsell(f); /* -F */
       for (i=1;; i++)
       {
-        p1 = addsell(cp4,p1,f,p); /* h.f + i.F */
-        if (!p1) { h = addii(h, mulsi(i,B)); goto FOUND; }
+        p1 = addsell(cp4,p1, f,p); /* h.f + i.F */
+        if (!p1) { h = addii(h, mulsi( i,B)); goto FOUND; }
+        q1 = addsell(cp4,q1,mf,p); /* h.f - i.F */
+        if (!q1) { h = addii(h, mulsi(-i,B)); goto FOUND; }
       }
     }
     /* Baby Step/Giant Step */
@@ -1594,14 +1601,13 @@ apell1(GEN e, GEN p)
     for (i=1; i<=nb; i++)
     { /* baby steps */
       pts[i] = (long)p1; /* h.f + (i-1).F */
-      _fix(p1+1, j); tx[i] = _low((GEN)p1[1]);
-      _fix(p1+2, j); ty[i] = _low((GEN)p1[2]);
+      _fix(p1+1, j); tx[i] = modBIL((GEN)p1[1]);
+      _fix(p1+2, j); ty[i] = modBIL((GEN)p1[2]);
       p1 = addsell(cp4,p1,f,p); /* h.f + i.F */
       if (!p1) { h = addii(h, mulsi(i,B)); goto FOUND; }
     }
-    mfh = dummycopy(fh);
-    mfh[2] = lnegi((GEN)mfh[2]);
-    fg = addsell(cp4,p1,mfh,p); /* nb.F */
+    mfh = negsell(fh);
+    fg = addsell(cp4,p1,mfh,p); /* h.f + nb.F - h.f = nb.F */
     if (!fg) { h = mulsi(nb,B); goto FOUND; }
     u = cgetg(nb+1, t_VEC);
     av2 = avma; /* more baby steps, nb points at a time */
@@ -1615,9 +1621,8 @@ apell1(GEN e, GEN p)
         if (u[j] == zero) /* sum = 0 or doubling */
         {
           long k = i+j-2;
-          if (egalii((GEN)p1[2],(GEN)fg[2])) k -= 2*nb; /* fg = p1 */
-          h = addii(h, mulsi(k,B));
-          goto FOUND;
+          if (egalii((GEN)p1[2],(GEN)fg[2])) k -= 2*nb; /* fg == p1 */
+          h = addii(h, mulsi(k,B)); goto FOUND;
         }
       }
       v = multi_invmod(u, p);
@@ -1626,18 +1631,19 @@ apell1(GEN e, GEN p)
       {
         p1 = (GEN)pts[j];
         addsell_part2(cp4,p1,fg,p, (GEN)v[j]);
-        tx[i] = _low((GEN)p1[1]);
-        ty[i] = _low((GEN)p1[2]);
+        tx[i] = modBIL((GEN)p1[1]);
+        ty[i] = modBIL((GEN)p1[2]);
       }
       avma = av2;
     }
-    p1 = addsell(cp4,(GEN)pts[j-1],mfh,p); /* = f^(s-1) */
+    p1 = addsell(cp4,(GEN)pts[j-1],mfh,p); /* = (s-1).F */
+    if (!p1) { h = mulsi(s-1,B); goto FOUND; }
     if (DEBUGLEVEL) msgtimer("[apell1] baby steps, s = %ld",s);
 
-    /* giant steps: fg = f^s */
+    /* giant steps: fg = s.F */
     fg = addsell(cp4,p1,f,p);
-    if (!fg) { h = addii(h, mulsi(s,B)); goto FOUND; }
-    pfinal = _low(p); av2 = avma;
+    if (!fg) { h = mulsi(s,B); goto FOUND; }
+    pfinal = modBIL(p); av2 = avma;
 
     p1 = gen_sort(tx, cmp_IND | cmp_C, NULL);
     for (i=1; i<=s; i++) ti[i] = tx[p1[i]];
@@ -1647,8 +1653,12 @@ apell1(GEN e, GEN p)
     avma = av2;
 
     gaffect(fg, (GEN)pts[1]);
-    for (j=2; j<=nb; j++) /* pts = first nb multiples of fg */
-      gaffect(addsell(cp4,(GEN)pts[j-1],fg,p), (GEN)pts[j]);
+    for (j=2; j<=nb; j++) /* pts[j] = j.fg = (s*j).F */
+    {
+      p1 = addsell(cp4,(GEN)pts[j-1],fg,p);
+      if (!p1) { h = mulii(mulss(s,j), B); goto FOUND; }
+      gaffect(p1, (GEN)pts[j]);
+    }
     /* replace fg by nb.fg since we do nb points at a time */
     avma = av2;
     fg = gcopy((GEN)pts[nb]);
@@ -1661,7 +1671,7 @@ apell1(GEN e, GEN p)
       long k, k2;
 
       avma = av2;
-      k = _low((GEN)ftest[1]);
+      k = modBIL((GEN)ftest[1]);
       while (l<r)
       {
         m = (l+r) >> 1;
@@ -1670,7 +1680,7 @@ apell1(GEN e, GEN p)
       if (r <= (ulong)s && tx[r] == k)
       {
         while (tx[r] == k && r) r--;
-        k2 = _low((GEN)ftest[2]);
+        k2 = modBIL((GEN)ftest[2]);
         for (r++; tx[r] == k && r <= (ulong)s; r++)
           if (ty[r] == k2 || ty[r] == pfinal - k2)
           { /* [h+j2] f == ± ftest (= [i.s] f)? */
