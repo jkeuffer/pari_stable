@@ -2,6 +2,12 @@
 #   individual times are printed as is, but accumulated time is weighed
 #   by (weight / 1000)
 
+test_extra="\
+  compat\
+  galois\
+  ploth\
+"
+
 test_basic="\
   objets\
   analyz\
@@ -14,12 +20,6 @@ test_basic="\
   program\
   trans\
   nfields_200\
-"
-
-test_extra="\
-  compat\
-  galois\
-  ploth\
 "
 
 top_test_extra="test-`echo $test_extra | sed -e 's/ \\([^ ]\\)/ test-\\1/g'`"
