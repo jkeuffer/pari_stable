@@ -2445,7 +2445,7 @@ dbltor(double x)
   const int expo_len = 11; /* number of bits of exponent */
   LOCAL_HIREMAINDER;
 
-  if (x==0) return realzero_bit(-308);
+  if (x==0) return realzero_bit(-1023);
   fi.f = x; z = cgetr(DEFAULTPREC);
   e = ((fi.i & (HIGHBIT-1)) >> mant_len) - exp_mid;
   z[1] = evalexpo(e) | evalsigne(x<0? -1: 1);
@@ -2498,7 +2498,7 @@ dbltor(double x)
   const int expo_len = 11; /* number of bits of exponent */
   const int shift = mant_len-32;
 
-  if (x==0) return realzero_bit(-308);
+  if (x==0) return realzero_bit(-1023);
   fi.f = x; z=cgetr(DEFAULTPREC);
   {
     const ulong a = fi.i[INDEX0];
