@@ -344,12 +344,23 @@ get_F4(GEN x)
 }
 
 extern GEN galoisbig(GEN x, long prec);
+extern GEN cauchy_bound(GEN p);
+
+static GEN
+roots_to_ZX(GEN z, long v, long *e)
+{
+  GEN a = roots_to_pol(z,0);
+  GEN b = grndtoi(greal(a),e);
+  long e1 = gexpo(gimag(a));
+  if (e1 > *e) *e = e1;
+  return b;
+}
 
 GEN
 galois(GEN x, long prec)
 {
   long av=avma,av1,i,j,k,n,f,l,l2,e,e1,pr,ind;
-  GEN x1,p1,p2,p3,p4,p5,p6,w,y,z,ee;
+  GEN x1,p1,p2,p3,p4,p5,w,y,z,ee;
   static int ind5[20]={2,5,3,4, 1,3,4,5, 1,5,2,4, 1,2,3,5, 1,4,2,3};
   static int ind6[60]={3,5,4,6, 2,6,4,5, 2,3,5,6, 2,4,3,6, 2,5,3,4,
                        1,4,5,6, 1,5,3,6, 1,6,3,4, 1,3,4,5, 1,6,2,5,
@@ -357,7 +368,7 @@ galois(GEN x, long prec)
   if (typ(x)!=t_POL) err(notpoler,"galois");
   n=degpol(x); if (n<=0) err(constpoler,"galois");
   if (n>11) err(impl,"galois of degree higher than 11");
-  x = gdiv(x,content(x));
+  x = primitive_part(x,NULL);
   check_pol_int(x, "galois");
   if (gisirreducible(x) != gun)
     err(impl,"galois of reducible polynomial");
@@ -383,9 +394,11 @@ galois(GEN x, long prec)
   if (n>7) return galoisbig(x,prec);
   for(;;)
   {
+    GEN cb = cauchy_bound(x);
     switch(n)
     {
       case 4: z = cgetg(7,t_VEC);
+        prec = DEFAULTPREC + (long)((gexpo(cb)*18. / BITS_IN_LONG));
         for(;;)
 	{
 	  p1=roots(x,prec);
@@ -395,14 +408,11 @@ galois(GEN x, long prec)
           z[4] = (long)get_F4(transroot(p1,1,4));
           z[5] = (long)get_F4(transroot(p1,2,3));
           z[6] = (long)get_F4(transroot(p1,3,4));
-          p4 = roots_to_pol(z,0);
-          p5=grndtoi(greal(p4),&e);
-          e1=gexpo(gimag(p4)); if (e1>e) e=e1;
+          p5 = roots_to_ZX(z,0, &e);
           if (e <= -10) break;
 	  prec = (prec<<1)-2;
 	}
-	p6 = modulargcd(p5, derivpol(p5));
-	if (typ(p6)==t_POL && lgef(p6)>3) goto tchi;
+        if (!ZX_is_squarefree(p5)) goto tchi;
 	p2 = (GEN)factor(p5)[1];
 	switch(lg(p2)-1)
 	{
@@ -423,7 +433,9 @@ galois(GEN x, long prec)
 	}
 
       case 5: z = cgetg(7,t_VEC);
-        ee = new_chunk(7); w = new_chunk(7);
+        ee= cgetg(7,t_VECSMALL);
+        w = cgetg(7,t_VECSMALL);
+        prec = DEFAULTPREC + (long)((gexpo(cb)*21. / BITS_IN_LONG));
         for(;;)
 	{
           for(;;)
@@ -443,14 +455,11 @@ galois(GEN x, long prec)
               e1 = gexpo(gimag(p3)); if (e1>e) e=e1;
               ee[l]=e; z[l] = (long)p3;
 	    }
-            p4 = roots_to_pol(z,0);
-	    p5=grndtoi(greal(p4),&e);
-            e1 = gexpo(gimag(p4)); if (e1>e) e=e1;
+            p5 = roots_to_ZX(z,0, &e);
             if (e <= -10) break;
 	    prec = (prec<<1)-2;
 	  }
-	  p6 = modulargcd(p5,derivpol(p5));
-	  if (typ(p6)==t_POL && lgef(p6)>3) goto tchi;
+          if (!ZX_is_squarefree(p5)) goto tchi;
 	  p3=(GEN)factor(p5)[1];
 	  f=carreparfait(discsr(x));
 	  if (lg(p3)-1==1)
@@ -470,11 +479,11 @@ galois(GEN x, long prec)
 	  if (l>6) err(bugparier,"galois (bug4)");
 	  p2=(l==6)? transroot(p1,2,5):transroot(p1,1,l);
 	  p3=gzero;
-	  for (i=1; i<=5; i++)
+	  for (i=1; i<=5; i=j)
 	  {
-	    j=(i%5)+1;
-	    p3=gadd(p3,gmul(gmul((GEN)p2[i],(GEN)p2[j]),
-			    gsub((GEN)p2[j],(GEN)p2[i])));
+	    j = i+1; if (j>5) j -= 5;
+	    p3 = gadd(p3,gmul(gmul((GEN)p2[i],(GEN)p2[j]),
+		              gsub((GEN)p2[j],(GEN)p2[i])));
 	  }
 	  p5=gsqr(p3); p4=grndtoi(greal(p5),&e);
           e1 = gexpo(gimag(p5)); if (e1>e) e=e1;
@@ -489,6 +498,7 @@ galois(GEN x, long prec)
 	}
 
       case 6: z = cgetg(7, t_VEC);
+        prec = DEFAULTPREC + (long)((gexpo(cb)*42. / BITS_IN_LONG));
         for(;;)
 	{
           for(;;)
@@ -502,18 +512,16 @@ galois(GEN x, long prec)
 	      {
 		p5=gadd(gmul((GEN)p2[ind6[k]],(GEN)p2[ind6[k+1]]),
 		        gmul((GEN)p2[ind6[k+2]],(GEN)p2[ind6[k+3]]));
-		p3=gadd(p3,gmul(gsqr(gmul((GEN)p2[i],(GEN)p2[j])),p5)); k+=4;
+		p3=gadd(p3,gmul(gsqr(gmul((GEN)p2[i],(GEN)p2[j])),p5));
+                k += 4;
 	      }
 	      z[l] = (long)p3;
 	    }
-            p4=roots_to_pol(z,0);
-	    p5=grndtoi(greal(p4),&e);
-            e1 = gexpo(gimag(p4)); if (e1>e) e=e1;
+            p5 = roots_to_ZX(z,0, &e);
             if (e <= -10) break;
 	    prec=(prec<<1)-2;
 	  }
-	  p6 = modulargcd(p5,derivpol(p5));
-	  if (typ(p6)==t_POL && lgef(p6)>3) goto tchi;
+	  if (!ZX_is_squarefree(p5)) goto tchi;
 	  p2=(GEN)factor(p5)[1];
 	  switch(lg(p2)-1)
 	  {
@@ -530,13 +538,10 @@ galois(GEN x, long prec)
 		          gmul(gmul((GEN)p2[4],(GEN)p2[5]),(GEN)p2[6]));
 		  z[++ind] = (long)p3;
 		}
-              p4 = roots_to_pol(z,0);
-	      p5=grndtoi(greal(p4),&e);
-              e1 = gexpo(gimag(p4)); if (e1>e) e=e1;
+              p5 = roots_to_ZX(z,0, &e);
 	      if (e <= -10)
 	      {
-		p6 = modulargcd(p5,derivpol(p5));
-		if (typ(p6)==t_POL && lgef(p6)>3) goto tchi;
+                if (!ZX_is_squarefree(p5)) goto tchi;
 		p2=(GEN)factor(p5)[1];
 		f=carreparfait(discsr(x));
 		avma=av; y=cgetg(4,t_VEC); y[3]=un;
@@ -605,24 +610,21 @@ galois(GEN x, long prec)
 	}
 	
       case 7: z = cgetg(36,t_VEC);
+        prec = DEFAULTPREC + (long)((gexpo(cb)*7. / BITS_IN_LONG));
         for(;;)
 	{
-	  ind = 0; p1=roots(x,prec); p4=gun;
+	  ind = 0; p1=roots(x,prec);
 	  for (i=1; i<=5; i++)
 	    for (j=i+1; j<=6; j++)
             {
-              p6 = gadd((GEN)p1[i],(GEN)p1[j]);
-	      for (k=j+1; k<=7; k++)
-                z[++ind] = (long) gadd(p6,(GEN)p1[k]);
+              GEN t = gadd((GEN)p1[i],(GEN)p1[j]);
+	      for (k=j+1; k<=7; k++) z[++ind] = ladd(t, (GEN)p1[k]);
             }
-          p4 = roots_to_pol(z,0);
-          p5 = grndtoi(greal(p4),&e);
-          e1 = gexpo(gimag(p4)); if (e1>e) e=e1;
+          p5 = roots_to_ZX(z,0, &e);
 	  if (e <= -10) break;
           prec = (prec<<1)-2;
 	}
-	p6 = modulargcd(p5,derivpol(p5));
-	if (typ(p6)==t_POL && lgef(p6)>3) goto tchi;
+        if (!ZX_is_squarefree(p5)) goto tchi;
 	p2=(GEN)factor(p5)[1];
 	switch(lg(p2)-1)
 	{
@@ -896,8 +898,7 @@ nfinit_reduce(long flag, GEN *px, GEN *pdx, GEN *prev, GEN *pbase, long prec)
       {
         p2 = gmul(p2,p3); p1[j] = lmul((GEN)p1[j], p2);
       }
-    p2 = modulargcd(derivpol(p1),p1);
-    if (lgef(p2) > 3) continue;
+    if (!ZX_is_squarefree(p1)) continue;
 
     if (DEBUGLEVEL>3) outerr(p1);
     dxn=discsr(p1); flc=absi_cmp(dxn,dx); numb++;
