@@ -956,9 +956,11 @@ polpol_to_mat(GEN v, long n)
 
 /* set x <-- x + c*y mod p */
 static void
-FpX_addmul(GEN x, GEN y, long c, long p)
+split_berlekamp_addmul(GEN x, GEN y, long c, long p)
 {
-  long i,lx = lgef(x), ly = lgef(y), l = min(lx,ly);
+  long i,lx,ly,l;
+  if (!c) return;
+  lx = lgef(x); ly = lgef(y); l = min(lx,ly);
   if (p & ~MAXHALFULONG)
   {
     for (i=2; i<l;  i++) x[i] = ((ulong)x[i]+ (ulong)mulssmod(c,y[i],p)) % p; 
@@ -1002,14 +1004,14 @@ split_berlekamp(GEN *t, GEN pp, GEN pps2)
         pol[2] = ((mymyrand() & 0x1000) == 0);
         pol[1] = evallgef(pol[2]? 3: 2);
         for (i=2; i<=d; i++)
-          FpX_addmul(pol, (GEN)vker[i], ((mymyrand() & 0x1000) == 0), p);
+          split_berlekamp_addmul(pol,(GEN)vker[i],(mymyrand()&0x1000)?0:1, p);
       }
       else
       {
         pol[2] = mymyrand()%p; /* vker[1] = 1 */
         pol[1] = evallgef(pol[2]? 3: 2);
         for (i=2; i<=d; i++)
-          FpX_addmul(pol, (GEN)vker[i], mymyrand()%p, p);
+          split_berlekamp_addmul(pol,(GEN)vker[i],mymyrand()%p, p);
       }
       polt = small_to_pol(pol,vu);
     }
