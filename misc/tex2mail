@@ -1,5 +1,6 @@
 #!/usr/local/bin/perl
 
+# $Id$
 #
 # Features:
 #      % at the end of a line followed by \n\n is recognized as end of 
@@ -101,8 +102,11 @@ sub join {
     warn "`$str1', need $h1 rows\n";
     warn "`$str2', need $h2 rows\n";
   }
+  # This is may be wrong if a zero-length record with escape sequences
+  # is appended to with something not on the same row...  But
+  # apparently, it should be OK for PARI...
   for (0..$h2-1) {
-    $str[$b-$b2+$_] = substr($str[$b-$b2+$_] . " " x $l1,0,$l1) . $str2[$_];
+    $str[$b-$b2+$_] .= " " x ($l1 - length ($str[$b-$b2+$_])) . $str2[$_];
   } 
   return "$h,$l,$b,$sp," . join("\n",@str);
 } 
@@ -535,7 +539,14 @@ sub string2record {
     $sp || ($sp=0); # Sometimes it is undef?
   }
   return "$h," . length($_[0]) . ",0,$sp,$_[0]";
-}     
+}
+
+# The second argument forces the block length no matter what is the
+# length the string (for strings with screen escapes).
+
+sub record_forcelength {
+  $_[0] =~ s/^(\d+),(\d+)/$1,$_[1]/;
+}
 
 sub finishBuffer {
   while ($#level>0) {&finish("");}
@@ -669,6 +680,16 @@ sub f_end {
     for (split(":",$e)) {&callsub($_);}
   } else {&puts("\\end{$arg}");}
 } 
+
+
+sub f_literal_no_length {
+  warn "Entering f_literal_with_length...\n" if $debug & $debug_flow;
+  # &trim(1);
+  &collapse(1);
+  &assertHave(1) || &finish("",1);
+  record_forcelength($out[$#out], 0);
+  &finish(1,1);
+}
 
 sub f_discard {
   warn "Entering f_discard...\n" if $debug & $debug_flow;
@@ -1785,6 +1806,9 @@ $contents{"\\buildrel"}="buildrel";
 $type{"\\frac"}="sub2";
 $contents{"\\frac"}="fraction";
   
+$type{"\\LITERALnoLENGTH"}="sub1";
+$contents{"\\LITERALnoLENGTH"}="literal_no_length";
+
 for ("text","operatorname","operatornamewithlimits","relax","-",
      "notag","!","/","protect","mathcal","Bbb","bf","it","em","boldsymbol",
      "cal","Cal","goth","ref","maketitle","expandafter","csname","endcsname",
@@ -2173,3 +2197,5 @@ __END__
 # Apr 00: Finishing a level 1 would not merge things into one chunk.
 # May 00: Additional argument to finish() to distinguish finishing
 	  things which cannot be broken between lines.
+# Sep 00: Add support for new macro for strings with screen escapes sequences:
+	  \LITERALnoLENGTH{escapeseq}.

@@ -2173,10 +2173,7 @@ try_pipe(char *cmd, int flag)
       void *c;
       if (DEBUGFILES) fprintferr("I/O: checking output pipe...\n");
       if (setjmp(env))
-      {
-        if (file) pclose(file);
         file = NULL; 
-      }
       else
       {
         int i;

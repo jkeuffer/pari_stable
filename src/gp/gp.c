@@ -526,8 +526,10 @@ sd_colors(char *v, int flag)
     l = strlen(v);
     if (l <= 2 && strncmp(v, "no", l) == 0)
       v = "";
-    if (l <= 3 && strncmp(v, "yes", l) == 0)
+    if (l <= 6 && strncmp(v, "darkbg", l) == 0)
       v = "1, 5, 3, 7, 6, 2, 3";	/* Assume recent ReadLine. */
+    if (l <= 7 && strncmp(v, "lightbg", l) == 0)
+      v = "1, 6, 3, 4, 5, 2, 3";	/* Assume recent ReadLine. */
     tmp = v = pari_strdup(v); filtre(v, f_INIT|f_REG);
     for (c=c_ERR; c < c_LAST; c++)
       gp_colors[c] = gp_get_color(&v);
@@ -2260,12 +2262,26 @@ gp_main_loop(int ismain)
       FILE *o_out = pari_outfile;
       int prettyprint, o_prettyp = prettyp;
 
+      /* Emit before the switch to prettyprinter */
+      if (prettyprinter && prettyp == f_PRETTY)
+	  term_color(c_OUTPUT);	/* There may be lines before the prompt */
       prettyprint = (prettyprinter && prettyp == f_PRETTY && prettyp_init());
-      if (DEBUGLEVEL > 4) fprintferr("prec = [%ld, %ld]\n", prec,precdl);
 
       /* history number */
       if (prettyprint)
-        sprintf(thestring, "\\%%%ld = ", tglobal);
+      {
+	if (*term_get_color(c_HIST) || *term_get_color(c_OUTPUT))
+	{
+	  char col1[80];	/* Expect that it would not overflow */
+
+	  strcpy(col1,term_get_color(c_HIST));
+	  sprintf(thestring,
+		  "\\LITERALnoLENGTH{%s}\\%%%ld = \\LITERALnoLENGTH{%s}",
+		  col1, tglobal, term_get_color(c_OUTPUT));
+	}
+	else
+	  sprintf(thestring, "\\%%%ld = ", tglobal);
+      }
       else
       {
         term_color(c_HIST);
@@ -2548,6 +2564,7 @@ main(int argc, char **argv)
 
   init_graph(); INIT_SIG_off;
   pari_init(parisize, primelimit);
+  INIT_SIG_on;
   pari_sig_init(gp_sighandler);
 #ifdef READLINE
   init_readline();
