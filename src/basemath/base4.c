@@ -1644,9 +1644,9 @@ ideallllredall(GEN nf, GEN I, GEN vdir, long prec, long precint)
     {
       if (typ(aI) == t_POLMOD)
       {
-        c1 = gclone(c1);
+        if (c1) c1 = gclone(c1);
         I = gerepileupto(av, I);
-        aI = gmul(c1,aI); gunclone(c1);
+        if (c1) { aI = gmul(c1,aI); gunclone(c1); }
       }
       else
       {
