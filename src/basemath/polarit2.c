@@ -2367,22 +2367,38 @@ glcm(GEN x, GEN y)
   return gerepileupto(av,p2);
 }
 
+extern int approx_0(GEN x, GEN y);
+
+/* x + r ~ x ? Assume x,r are t_POL, deg(r) <= deg(x) */
+static int
+pol_approx0(GEN r, GEN x, int inexact)
+{
+  long i, lx,lr;
+  if (!inexact) return gcmp0(x);
+  lx = lgef(x);
+  lr = lgef(r); if (lr < lx) lx = lr;
+  for (i=2; i<lx; i++)
+    if (!approx_0((GEN)r[i], (GEN)x[i])) return 0;
+  return 1;
+}
+
 static GEN
 polgcdnun(GEN x, GEN y)
 {
   long av1, av = avma, lim = stack_lim(av,1);
-  GEN p1, yorig = y;
+  GEN r, yorig = y;
+  int inexact = (isinexactreal(x) || isinexactreal(y));
 
   for(;;)
   {
-    av1 = avma; p1 = gres(x,y);
-    if (gcmp0(p1))
+    av1 = avma; r = gres(x,y);
+    if (pol_approx0(r, x, inexact))
     {
       avma = av1;
-      if (lgef(y) == 3 && isinexactreal(y)) { avma = av; return gun; }
+      if (lgef(y) == 3 && inexact) { avma = av; return gun; }
       return (y==yorig)? gcopy(y): gerepileupto(av,y);
     }
-    x = y; y = p1;
+    x = y; y = r;
     if (low_stack(lim,stack_lim(av,1)))
     {
       GEN *gptr[2]; x = gcopy(x); gptr[0]=&x; gptr[1]=&y;

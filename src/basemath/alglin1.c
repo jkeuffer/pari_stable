@@ -1719,8 +1719,8 @@ gauss_get_pivot_NZ(GEN x, GEN x0/* unused */, GEN c, long i0)
 
 }
 
-/* ~ 0 compared to reference y */
-static int
+/* x ~ 0 compared to reference y */
+int
 approx_0(GEN x, GEN y)
 {
   long tx = typ(x);
