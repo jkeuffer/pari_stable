@@ -18,7 +18,7 @@
  * nbram est le nombre de p divisant Disc elimines dans subbase
  * powsubfactorbase est la table des puissances des formes dans subfactorbase
  */
-#define HASHT 1024
+#define HASHT 1024 /* power of 2 */
 static const long CBUCH = 15; /* of the form 2^k-1 */
 static const long randshift=BITS_IN_RANDOM-1 - 4; /* BITS_IN_RANDOM-1-k */
 
@@ -1148,12 +1148,16 @@ factorisequad(GEN f, long kcz, long limp)
   primfact[0]=lo; return p;
 }
 
+/* q may not be prime, but check for a "large prime relation" involving q */
 static long *
 largeprime(long q, long *ex, long np, long nrho)
 {
-  const long hashv = ((q&2047)-1)>>1;
+  const long hashv = ((q & (2 * HASHT - 1)) - 1) >> 1;
   long *pt, i;
 
+ /* If q = 0 (2048), very slim chance of getting a relation.
+  * And hashtab[-1] is undefined anyway */
+  if (hashv < 0) return NULL;
   for (pt = hashtab[hashv]; ; pt = (long*) pt[0])
   {
     if (!pt)
