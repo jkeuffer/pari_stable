@@ -15,7 +15,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /* This file is a quick hack adapted from gmp-4.0 tuning utilities
  * (T. Granlund et al.)
- * 
+ *
  * (GMU MP Library is Copyright Free Software Foundation, Inc.) */
 #define PARI_TUNE
 #include <pari.h>
@@ -41,7 +41,6 @@ typedef struct {
   speed_function_t  fun1;
   speed_function_t  fun2;
   double            step_factor; /* how much to step sizes (rounded down) */
-  int               stop_since_change;
   double            stop_factor;
 } tune_param;
 
@@ -102,7 +101,7 @@ rand_NFlx(long n)
 
 static GEN
 rand_g(long n, long type)
-{ 
+{
   switch (type) {
     case t_INT:  return rand_INT(n);
     case t_REAL: return rand_REAL(n);
@@ -114,14 +113,14 @@ rand_g(long n, long type)
 
 /* ========================================================== */
 #define TIME_FUN(call) {\
-  {                                            \
-    pari_sp av = avma;                         \
-    int i;                                     \
-    speed_starttime();                         \
-    i = (s)->reps;                             \
-    do { call; avma = av; } while (--i != 0);  \
-  }                                            \
-  return speed_endtime();                      \
+  {                                      \
+    pari_sp av = avma;                   \
+    int i;                               \
+    speed_starttime();                   \
+    i = (s)->reps;                       \
+    do { call; avma = av; } while (--i); \
+  }                                      \
+  return speed_endtime();                \
 }
 
 #define  enable(s) (*(s->var)=lg(s->x)-2)/* enable  asymptotically fastest */
@@ -168,7 +167,7 @@ static double speed_Flx_mul(speed_param *s)
 { ulong p = DFLT_l; disable(s); TIME_FUN(Flx_mul(s->x, s->y, p)); }
 static double speed_Flx_karamul(speed_param *s)
 { ulong p = DFLT_l; enable(s); TIME_FUN(Flx_mul(s->x, s->y, p)); }
- 
+
 #define INIT_RED(s, op)                                 \
   long i, lx = lg(s->x);                                \
   op = cgeti(2*lx - 2);                                 \
@@ -176,35 +175,25 @@ static double speed_Flx_karamul(speed_param *s)
   for (i=2; i<lx; i++) op[i]      = s->x[i];            \
   for (i=2; i<lx; i++) op[lx-2+i] = s->x[i];            \
   modBIL(s->y) |= 1; /* make sure modulus is odd */
-
 static double speed_redc(speed_param *s) {
-  ulong inv;
-  GEN op;
-  INIT_RED(s, op);
-  inv = (ulong) -invrev(modBIL(s->y));
-  TIME_FUN( red_montgomery(op, s->y, inv) );
-};
+  ulong inv = (ulong)-invrev(modBIL(s->y));
+  GEN op; INIT_RED(s, op);
+  TIME_FUN( red_montgomery(op, s->y, inv) ); };
 static double speed_modii(speed_param *s) {
-  GEN op;
-  INIT_RED(s, op);
-  TIME_FUN( remii(op, s->y) );
-};
+  GEN op; INIT_RED(s, op);
+  TIME_FUN( remii(op, s->y) ); };
 static double speed_remiimul(speed_param *s) {
-  GEN op, sM;
-  INIT_RED(s, op); sM = init_remiimul(s->y);
-  TIME_FUN( remiimul(op, sM) );
-}
+  GEN sM = init_remiimul(s->y);
+  GEN op; INIT_RED(s, op);
+  TIME_FUN( remiimul(op, sM) ); }
+
 static double speed_Flxq_pow_redc(speed_param *s) {
   ulong p = DFLT_l;
-  GEN op;
-  INIT_RED(s, op); op = Flx_red(op, p); enable(s);
-  TIME_FUN( Flxq_pow(polx_Flx(0), utoi(p), s->y, p) );
+  enable(s); TIME_FUN( Flxq_pow(polx_Flx(0), utoi(p), s->y, p) );
 }
 static double speed_Flxq_pow_mod(speed_param *s) {
   ulong p = DFLT_l;
-  GEN op;
-  INIT_RED(s, op); op = Flx_red(op, p); disable(s);
-  TIME_FUN( Flxq_pow(polx_Flx(0), utoi(p), s->y, p) );
+  disable(s); TIME_FUN( Flxq_pow(polx_Flx(0), utoi(p), s->y, p) );
 }
 
 enum { PARI = 1, GMP = 2 };
@@ -227,8 +216,10 @@ static tune_param param[] = {
 {GMP, var(INVMOD_GMP_LIMIT),       t_INT, 3,0, speed_invmod,speed_invmodgmp},
 {0,   var(Flx_MUL_LIMIT),          t_Flx, 1,0, speed_Flx_mul,speed_Flx_karamul},
 {0,   var(Flx_SQR_LIMIT),          t_Flx, 1,0, speed_Flx_sqr,speed_Flx_karasqr},
-{0,   var(Flx_INVMONTGOMERY_LIMIT),t_NFlx,1,10000, speed_Flx_inv,speed_Flx_invnewton},
-{0,  var(Flx_POW_MONTGOMERY_LIMIT),t_NFlx,1,0, speed_Flxq_pow_redc,speed_Flxq_pow_mod}
+{0,   var(Flx_INVMONTGOMERY_LIMIT),t_NFlx,1,0,
+                                   speed_Flx_inv,speed_Flx_invnewton},
+{0,  var(Flx_POW_MONTGOMERY_LIMIT),t_NFlx,1,0,
+                                   speed_Flxq_pow_redc,speed_Flxq_pow_mod}
 };
 
 /* ========================================================== */
@@ -338,85 +329,77 @@ analyze_dat(int final)
 }
 
 void
-print_define(const char *name, long value) {
-  printf("#define __%-25s  %5ld\n\n", name, value);
-}
+print_define(const char *name, long value)
+{ printf("#define __%-25s  %5ld\n\n", name, value); }
 
 void
 one(tune_param *param)
 {
-  int  since_positive, since_thresh_change;
-  int  thresh_idx, new_thresh_idx;
+  int since_positive, since_change, thresh, new_thresh;
   speed_param s;
 
   if (param->kernel == AVOID) { print_define(param->name, -1); return; }
 
 #define DEFAULT(x,n)  if (! (param->x))  param->x = (n);
   DEFAULT(fun2, param->fun1);
-  DEFAULT(step_factor, 0.01);  /* small steps by default */
-  DEFAULT(stop_since_change, 80);
+  DEFAULT(step_factor, 0.01); /* small steps by default */
   DEFAULT(stop_factor, 1.2);
-  DEFAULT(type, t_INT);
   DEFAULT(max_size, 1000);
 
   s.type = param->type;
   s.size = param->min_size;
   s.var  = param->var;
-  ndat = since_positive = since_thresh_change = thresh_idx = 0;
+  ndat = since_positive = since_change = thresh = 0;
   if (option_trace >= 1)
     printf("Setting %s... (default %ld)\n", param->name, *(param->var));
   if (option_trace >= 2)
   {
-    printf("             algorithm-A  algorithm-B   ratio  possible\n");
-    printf("              (seconds)    (seconds)    diff    thresh\n");
+    printf("              algorithm-A  algorithm-B   ratio  possible\n");
+    printf("               (seconds)    (seconds)    diff    thresh\n");
   }
 
   for(;;)
   {
-    double t1,t2,d;
+    double t1, t2, d;
     t1 = time_fun(param->fun1, &s);
     t2 = time_fun(param->fun2, &s);
-    if (t2 >= t1)
-      d = (t2 - t1) / t2; /* <= 0 */
-    else
-      d = (t2 - t1) / t1; /* > 0  */
+    if (t2 >= t1) d = (t2 - t1) / t2;
+    else          d = (t2 - t1) / t1;
 
     add_dat(s.size, d);
-    new_thresh_idx = analyze_dat(0);
+    new_thresh = analyze_dat(0);
 
     if (option_trace >= 2)
-      printf ("size =%3ld    %.9f  %.9f  % .4f %c  %ld\n",
-               s.size, t1, t2, d,
-               t1 > t2 ? '#' : ' ', dat[new_thresh_idx].size);
+      printf ("size =%4ld     %.8f   %.8f  % .4f %c  %ld\n",
+               s.size, t1,t2, d, d < 0? '#': ' ', dat[new_thresh].size);
 
-    /* Stop if the last time method 1 was faster was more than a
-        certain number of measurements ago.  */
-#define STOP_SINCE_POSITIVE 20
-    if (d >= 0) 
+#define SINCE_POSITIVE 20
+#define SINCE_CHANGE 50
+    /* Stop if method B has been consistently faster for a while */
+    if (d >= 0)
       since_positive = 0;
     else
-      if (++since_positive > STOP_SINCE_POSITIVE)
+      if (++since_positive > SINCE_POSITIVE)
       {
         if (option_trace >= 1)
-          printf ("Stop: since_positive (%d)\n", STOP_SINCE_POSITIVE);
+          printf ("Stop: since_positive (%d)\n", SINCE_POSITIVE);
         break;
       }
-    /* Stop if method 1 has become slower by a certain factor. */
+    /* Stop if method A has become slower by a certain factor */
     if (t1 >= t2 * param->stop_factor)
     {
       if (option_trace >= 1)
         printf ("Stop: t1 >= t2 * factor (%.1f)\n", param->stop_factor);
       break;
     }
-    /* Stop if the threshold implied hasn't changed in a certain
-       number of measurements. */
-    if (thresh_idx != new_thresh_idx)
-      since_thresh_change = 0, thresh_idx = new_thresh_idx;
+    /* Stop if threshold implied hasn't changed for a while */
+    if (thresh != new_thresh)
+      since_change = 0, thresh = new_thresh;
     else
-      if (++since_thresh_change > param->stop_since_change)
+      if (++since_change > SINCE_CHANGE)
       {
         if (option_trace >= 1)
-          printf ("Stop: since_thresh_change (%d)\n", param->stop_since_change);
+          printf ("Stop: since_change (%d)\n", SINCE_CHANGE);
         break;
       }
     s.size += max((long)floor(s.size * param->step_factor), 1);
@@ -427,15 +410,15 @@ one(tune_param *param)
       break;
     }
   }
-  thresh_idx = dat[analyze_dat(1)].size;
-  print_define(param->name, thresh_idx);
-  *(param->var) = thresh_idx; /* reset to optimal value for next tests */
+  thresh = dat[analyze_dat(1)].size;
+  print_define(param->name, thresh);
+  *(param->var) = thresh; /* set to optimal value for next tests */
 }
 
 void error(char **argv) {
   long i;
-  printf("usage: %s [-t] [-t] [-u unittime] [-variable index]\n", argv[0]);
-  printf("Tunable variables: (omitting index tunes everybody)\n");
+  printf("usage: %s [-t] [-t] [-u unittime] var1 var2 ...\n", argv[0]);
+  printf("Tunable variables: (omitting variable indices tunes everybody)\n");
   for (i = 0; i < numberof(param); i++)
     printf("  %2ld: %-25s (default %4ld)\n", i, param[i].name, *(param[i].var));
   exit(1);
@@ -444,26 +427,32 @@ void error(char **argv) {
 int
 main(int argc, char **argv)
 {
-  int i;
+  int i, r, n = 0;
+  GEN v;
   pari_init(4000000, 2);
+  v = new_chunk(argc);
   for (i = 1; i < argc; i++)
   {
     char *s = argv[i];
-    if (*s++ != '-') error(argv);
-    switch(*s) {
-      case 't': option_trace++; break;
-      case 'u': s++;
-        if (!*s)
-        {
-          if (++i == argc) error(argv);
-          s = argv[i];
-        }
-        speed_unittime = atof(s); break;
-      default: if (!isdigit((int)*s)) error(argv);
-        i = atol(s); if (i >= numberof(param) || i < 0) error(argv);
-        one(&param[i]); return 0;
+    if (*s == '-') {
+      switch(*++s) {
+        case 't': option_trace++; break;
+        case 'u': s++;
+          if (!*s)
+          {
+            if (++i == argc) error(argv);
+            s = argv[i];
+          }
+          speed_unittime = atof(s); break;
+        default: error(argv);
+      }
+    } else {
+      if (!isdigit((int)*s)) error(argv);
+      r = atol(s); if (r >= numberof(param) || r < 0) error(argv);
+      v[n++] = r;
     }
   }
-  for (i = 0; i < numberof(param); i++) one(&param[i]);
+  if (n) { for (i = 0; i < n; i++) one(&param[ v[i] ]); }
+  else   { for (i = 0; i < n; i++) one(&param[i]); }
   return 0;
 }
