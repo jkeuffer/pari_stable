@@ -198,6 +198,22 @@ initprimes0(ulong maxnum, long *lenp, long *lastp)
 void
 init_tinyprimes_tridiv(byteptr p);	/* in ifactor2.c */
 #endif
+
+ulong
+maxprime()
+{
+  static ulong _maxprime = 0;
+
+  if (!_maxprime)
+  {
+    byteptr bp = diffptr;
+    ulong p = 0;
+    while (*bp) p += *bp++;
+    _maxprime = p;
+  }
+  return _maxprime;
+}
+
 byteptr
 initprimes(long maxnum)
 {
