@@ -1,6 +1,6 @@
 AW = Aleksander Wittlin 
 BA = Bill Allombert
-BD = Bill Dally
+BD = Bill Daly
 BH = Bruno Haible
 CB = Cliff Bergman
 CW = Carl Witty
@@ -72,6 +72,7 @@ BA 35- nfgaloisconj(polcyclo(40)): accuracy lost
        nfgaloisconj(polcyclo(11)+1): oo loop
 IS 36- typo in squfof tuning on 64bit machines
    37- -lm doesn't exist on MacOS X
+BD 38- typo in src/kernel/l0asm.c: ulong not recognized by MSVC
 
   Changed
     1- DOS distribution archives (GPM removed)
