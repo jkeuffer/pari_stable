@@ -2714,23 +2714,31 @@ ZM_zc_mul_i(GEN x, GEN y, long c, long l)
   return z;
 }
 GEN
-ZM_zc_mul(GEN x, GEN y) { return ZM_zc_mul_i(x,y, lg(x), lg(x[1])); }
+ZM_zc_mul(GEN x, GEN y) { 
+  long l = lg(x);
+  if (l == 1) return cgetg(1, t_COL);
+  return ZM_zc_mul_i(x,y, l, lg(x[1]));
+}
 
-/* x non-empty t_MAT, y a compatible zm (dimension > 0). */
+/* x t_MAT, y a compatible zm (dimension > 0). */
 GEN 
 RM_zm_mul(GEN x, GEN y)
 {
-  long j, l = lg(x), c = lg(x[1]), ly = lg(y);
+  long j, c, l = lg(x), ly = lg(y);
   GEN z = cgetg(ly, t_MAT);
+  if (l == 1) return z;
+  c = lg(x[1]);
   for (j = 1; j < ly; j++) z[j] = (long)RM_zc_mul_i(x, (GEN)y[j], l,c);
   return z;
 }
-/* x non-empty ZM, y a compatible zm (dimension > 0). */
+/* x ZM, y a compatible zm (dimension > 0). */
 GEN 
 ZM_zm_mul(GEN x, GEN y)
 {
-  long j, l = lg(x), c = lg(x[1]), ly = lg(y);
+  long j, c, l = lg(x), ly = lg(y);
   GEN z = cgetg(ly, t_MAT);
+  if (l == 1) return z;
+  c = lg(x[1]);
   for (j = 1; j < ly; j++) z[j] = (long)ZM_zc_mul_i(x, (GEN)y[j], l,c);
   return z;
 }
