@@ -55,7 +55,7 @@ dft target::
 gp all bench test-compat test-graphic install cleanobj cleantest install-bin install-doc install-lib-sta install-bin-sta dobench::
 	cd $objdir; \$(MAKE) \$@
 
-gp.dbg:
+gp.dbg::
 	cd $dbgobjdir; \$(MAKE) gp
 
 doc docps docpdf gpman cleandoc::
