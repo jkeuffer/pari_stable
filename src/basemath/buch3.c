@@ -1679,6 +1679,16 @@ get_classno(GEN t, GEN h)
   return mulii(h, dethnf_i(hnf(m)));
 }
 
+static void
+chk_listBU(GEN L, char *s) {
+  if (typ(L) != t_VEC) err(typeer,s);
+  if (lg(L) > 1) {
+    GEN z = gmael(L,1,1); /* [bid,U] */
+    if (typ(z) != t_VEC || lg(z) != 3) err(typeer, s);
+    checkbid(gel(z,1));
+  }
+}
+
 /* Given lists of [zidealstarinit, unit ideallogs], return lists of ray class
  * numbers */
 GEN
@@ -1688,11 +1698,8 @@ bnrclassnolist(GEN bnf,GEN L)
   long i, j, lz, l = lg(L);
   GEN v, z, V, h;
 
-  if (typ(L) != t_VEC) err(typeer,"bnrclassnolist");
+  chk_listBU(L, "bnrclassnolist");
   if (l == 1) return cgetg(1, t_VEC);
-  z = gmael(L,1,1);
-  if (typ(z) != t_VEC || lg(z) != 3) err(typeer, "bnrclassnolist");
-
   bnf = checkbnf(bnf); h = gmael3(bnf,8,1,1);
   V = cgetg(l,t_VEC);
   for (i = 1; i < l; i++)
@@ -1883,12 +1890,8 @@ discrayabslist(GEN bnf, GEN L)
   GEN nf, v, z, V, D, d, h;
   disc_data ID;
 
-  if (typ(L) != t_VEC) err(typeer, "discrayabslist");
+  chk_listBU(L, "discrayabslist");
   if (l == 1) return cgetg(1, t_VEC);
-  z = gel(L,1);
-  if (typ(z) != t_VEC || lg(z) != 3) err(typeer, "discrayabslist");
-  checkbid(gel(z,1));
-
   ID.bnf = bnf = checkbnf(bnf);
   nf = (GEN)bnf[7];
   h = gmael3(bnf,8,1,1);
