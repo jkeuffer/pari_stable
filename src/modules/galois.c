@@ -788,8 +788,7 @@ tschirn(GEN po, GEN *r, long pr)
     for (i=0; i<d; i++) a[i] = ((mymyrand()>>4) & 7) + 1;
     h = small_to_pol_i(a-2, d+2);
     (void)normalizepol_i(h, d+2);
-
-  } while (lgef(h) <= 3);
+  } while (lgef(h) <= 3 || !ZX_issquarefree(h));
   setvarn(h, v);
   k = 0; u = ZX_caract_sqf(h, po, &k, v);
   a[1] += k; /* a may have been modified */
