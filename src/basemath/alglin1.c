@@ -894,7 +894,7 @@ matprec(GEN x)
 }
 
 /* As above, returning 1 if the precision would be non-zero, 0 otherwise */
-static long
+static int
 use_maximal_pivot(GEN x)
 {
   long tx,i,j, lx = lg(x), ly = lg(x[1]);
@@ -1011,7 +1011,7 @@ static long
 u_Fp_inv(long a, long p)
 {
   if (a < 0) a = p + a; /* pb with ulongs < 0 */
-  return u_invmod(a,p);
+  return (long)u_invmod((ulong)a,(ulong)p);
 }
 
 GEN
@@ -1070,7 +1070,8 @@ GEN
 gauss_intern(GEN a, GEN b)
 {
   gpmem_t av, lim;
-  long inexact,iscol,i,j,k,li,bco, aco = lg(a)-1;
+  long i,j,k,li,bco, aco = lg(a)-1;
+  int inexact, iscol;
   GEN p,m,u;
 
   if (typ(a)!=t_MAT) err(mattype1,"gauss");
@@ -2060,9 +2061,9 @@ suppl_intern(GEN x, GEN myid)
   if (lx == n) return gcopy(x);
 
   zone  = switch_stack(NULL, n*n);
-  switch_stack(zone,1);
+  (void)switch_stack(zone,1);
   y = myid? dummycopy(myid): idmat(n-1);
-  switch_stack(zone,0);
+  (void)switch_stack(zone,0);
   gauss_get_prec(x,0);
   for (i=1; i<lx; i++)
   {
@@ -2751,7 +2752,7 @@ det0(GEN a,long flag)
 
 /* Exact types: choose the first non-zero pivot. Otherwise: maximal pivot */
 static GEN
-det_simple_gauss(GEN a, long inexact)
+det_simple_gauss(GEN a, int inexact)
 {
   gpmem_t av, av1;
   long i,j,k,s, nbco = lg(a)-1;
