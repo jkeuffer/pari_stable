@@ -211,13 +211,13 @@ polidivis(GEN x, GEN y, GEN bound)
   if (gcmp1(y_lead)) y_lead = NULL;
 
   p1 = (GEN)x[dx];
-  z[dz]=y_lead? ldivii(p1,y_lead): licopy(p1);
+  z[dz]=y_lead? (long)diviiexact(p1,y_lead): licopy(p1);
   for (i=dx-1; i>=dy; i--)
   {
-    av=avma; p1=(GEN)x[i];
+    av = avma; p1 = (GEN)x[i];
     for (j=i-dy+1; j<=i && j<=dz; j++)
       p1 = subii(p1, mulii((GEN)z[j],(GEN)y[i-j]));
-    if (y_lead) { p1 = gdiv(p1,y_lead); if (typ(p1)!=t_INT) return NULL; }
+    if (y_lead) p1 = diviiexact(p1,y_lead);
     if (absi_cmp(p1, bound) > 0) return NULL;
     p1 = gerepileupto(av,p1);
     z[i-dy] = (long)p1;
@@ -234,7 +234,7 @@ polidivis(GEN x, GEN y, GEN bound)
     if (!i) break;
   }
   z -= 2;
-  z[1]=evalsigne(1) | evallgef(dz+3) | evalvarn(vx);
+  z[1] = evalsigne(1) | evallgef(dz+3) | evalvarn(vx);
   return z;
 }
 
@@ -642,12 +642,12 @@ all_factor_bound(GEN x)
  * target/lc(target) modulo p^a
  * For true factors: S1,S2 <= p^b, with b <= a and p^(b-a) < 2^31 */
 static GEN
-cmbf(GEN target, GEN famod, GEN p, long a, long b,
+cmbf(GEN pol, GEN famod, GEN p, long a, long b,
      long maxK, long klim,long hint)
 {
   long K = 1, cnt = 1, i,j,k, curdeg, lfamod = lg(famod)-1;
   long spa_b, spa_bs2, Sbound;
-  GEN lc, lctarget, pa = gpowgs(p,a), pas2 = shifti(pa,-1);
+  GEN lc, lcpol, pa = gpowgs(p,a), pas2 = shifti(pa,-1);
   GEN trace1   = cgetg(lfamod+1, t_VECSMALL);
   GEN trace2   = cgetg(lfamod+1, t_VECSMALL);
   GEN ind      = cgetg(lfamod+1, t_VECSMALL);
@@ -656,19 +656,20 @@ cmbf(GEN target, GEN famod, GEN p, long a, long b,
   GEN listmod  = cgetg(lfamod+1, t_COL);
   GEN fa       = cgetg(lfamod+1, t_COL);
   GEN res = cgetg(3, t_VEC);
-  GEN bound = all_factor_bound(target);
+  GEN bound = all_factor_bound(pol);
 
   if (maxK < 0) maxK = lfamod-1;
 
-  lc = absi(leading_term(target));
-  lctarget = gmul(lc,target);
+  lc = absi(leading_term(pol));
+  if (is_pm1(lc)) lc = NULL;
+  lcpol = lc? gmul(lc,pol): pol;
 
   {
-    GEN pa_b,pa_bs2,pb,pbs2, lc2;
-    lc2 = sqri(lc);
+    GEN pa_b,pa_bs2,pb, lc2 = lc? sqri(lc): NULL;
+
     pa_b = gpowgs(p, a-b); /* < 2^31 */
     pa_bs2 = shifti(pa_b,-1);
-    pb= gpowgs(p, b); pbs2 = shifti(pb,-1);
+    pb= gpowgs(p, b);
     for (i=1; i <= lfamod; i++)
     {
       GEN T1,T2, P = (GEN)famod[i];
@@ -679,7 +680,7 @@ cmbf(GEN target, GEN famod, GEN p, long a, long b,
       T2 = sqri(T1);
       if (d > 1) T2 = subii(T2, shifti((GEN)P[d-2],1));
       T2 = modii(T2, pa); /* = S_2 Newton sum */
-      if (!gcmp1(lc))
+      if (lc)
       {
         T1 = modii(mulii(lc, T1), pa);
         T2 = modii(mulii(lc2,T2), pa);
@@ -737,18 +738,24 @@ nextK:
       /* check trailing coeff */
       y = lc;
       for (i=1; i<=K; i++)
-        y = centermod_i(mulii(y, gmael(famod,ind[i],2)), pa, pas2);
-      if (!signe(y) || resii((GEN)lctarget[2], y) != gzero)
+      {
+        GEN q = constant_term((GEN)famod[ind[i]]);
+        y = y? centermod_i(mulii(y, q), pa, pas2): q;
+      }
+      if (!signe(y) || resii((GEN)lcpol[2], y) != gzero)
       {
         if (DEBUGLEVEL>3) fprintferr("T");
         avma = av; goto NEXT;
       }
       y = lc; /* full computation */
       for (i=1; i<=K; i++)
-        y = centermod_i(gmul(y, (GEN)famod[ind[i]]), pa, pas2);
+      {
+        GEN q = (GEN)famod[ind[i]];
+        y = y? centermod_i(gmul(y, q), pa, pas2): q;
+      }
 
       /* y is the candidate factor */
-      if (! (q = polidivis(lctarget,y,bound)) )
+      if (! (q = polidivis(lcpol,y,bound)) )
       {
         if (DEBUGLEVEL>3) fprintferr("*");
         avma = av; goto NEXT;
@@ -760,9 +767,9 @@ nextK:
 
       y = primpart(y);
       fa[cnt++] = (long)y;
-      /* fix up target */
-      target = q;
-      if (!is_pm1(lc)) target = gdivexact(target, leading_term(y));
+      /* fix up pol */
+      pol = q;
+      if (lc) pol = gdivexact(pol, leading_term(y));
       for (i=j=k=1; i <= lfamod; i++)
       { /* remove used factors */
         if (j <= K && i == ind[j]) j++;
@@ -777,9 +784,9 @@ nextK:
       lfamod -= K;
       if (lfamod < 2*K) goto END;
       i = 1; curdeg = degpol[ind[1]];
-      bound = all_factor_bound(target);
-      lc = absi(leading_term(target));
-      lctarget = gmul(lc,target);
+      bound = all_factor_bound(pol);
+      if (lc) lc = absi(leading_term(pol));
+      lcpol = lc? gmul(lc,pol): pol;
       if (DEBUGLEVEL > 2)
       {
         fprintferr("\n"); msgtimer("to find factor %Z",y);
@@ -800,13 +807,13 @@ NEXT:
     }
   }
 END:
-  if (degpol(target) > 0)
+  if (degpol(pol) > 0)
   { /* leftover factor */
-    if (signe(leading_term(target)) < 0) target = gneg_i(target);
+    if (signe(leading_term(pol)) < 0) pol = gneg_i(pol);
 
     setlg(famod, lfamod+1);
     listmod[cnt] = (long)dummycopy(famod);
-    fa[cnt++] = (long)target;
+    fa[cnt++] = (long)pol;
   }
   if (DEBUGLEVEL>6) fprintferr("\n");
   setlg(listmod, cnt); setlg(fa, cnt);
@@ -1047,7 +1054,7 @@ static GEN
 check_factors(GEN P, GEN BL, GEN bound, GEN famod, GEN pa)
 {
   long i, j, r, n0;
-  GEN target = P, lctarget, lc, list, piv, y, pas2;
+  GEN pol = P, lcpol, lc, list, piv, y, pas2;
 
   piv = special_pivot(BL);
   if (!piv) return NULL;
@@ -1057,8 +1064,9 @@ check_factors(GEN P, GEN BL, GEN bound, GEN famod, GEN pa)
   r  = lg(piv)-1;
   n0 = lg(piv[1])-1;
   list = cgetg(r+1, t_COL);
-  lc = absi(leading_term(target));
-  lctarget = gmul(lc, target);
+  lc = absi(leading_term(pol));
+  if (is_pm1(lc)) lc = NULL;
+  lcpol = lc? gmul(lc, pol): pol;
   for (i=1; i<r; i++)
   {
     GEN c = (GEN)piv[i];
@@ -1067,20 +1075,23 @@ check_factors(GEN P, GEN BL, GEN bound, GEN famod, GEN pa)
     y = lc;
     for (j=1; j<=n0; j++)
       if (signe(c[j]))
-        y = centermod_i(gmul(y, (GEN)famod[j]), pa, pas2);
+      {
+        GEN q = (GEN)famod[j];
+        y = y? centermod_i(gmul(y, q), pa, pas2): q;
+      }
 
     /* y is the candidate factor */
-    if (! (target = polidivis(lctarget,y,bound)) ) return NULL;
+    if (! (pol = polidivis(lcpol,y,bound)) ) return NULL;
     y = primpart(y);
-    if (!is_pm1(lc))
+    if (lc)
     {
-      target = gdivexact(target, leading_term(y));
-      lc = absi(leading_term(target));
-      lctarget = gmul(lc, target);
+      pol = gdivexact(pol, leading_term(y));
+      lc = absi(leading_term(pol));
     }
+    lcpol = lc? gmul(lc, pol): pol;
     list[i] = (long)y;
   }
-  y = primpart(target);
+  y = primpart(pol);
   list[i] = (long)y; return list;
 }
 
@@ -2207,6 +2218,25 @@ cx_isrational(GEN x)
   return (isrational((GEN)x[1]) && isrational((GEN)x[2]));
 }
 
+static GEN
+zero_gcd(GEN x)
+{
+  switch(typ(x))
+  {
+    case t_INT: case t_FRAC: case t_FRACN:
+      return gabs(x,0);
+
+    case t_COMPLEX:
+      if (cx_isrational(x)) return gaussian_gcd(x, gzero);
+      /* fall through */
+    case t_REAL:
+      return gun;
+
+    default:
+      return gcopy(x);
+  }
+}
+
 GEN
 ggcd(GEN x, GEN y)
 {
@@ -2222,8 +2252,8 @@ ggcd(GEN x, GEN y)
     return z;
   }
   if (is_noncalc_t(tx) || is_noncalc_t(ty)) err(operf,"g",x,y);
-  if (gcmp0(x)) return gcopy(y);
-  if (gcmp0(y)) return gcopy(x);
+  if (gcmp0(x)) return zero_gcd(y);
+  if (gcmp0(y)) return zero_gcd(x);
   if (is_const_t(tx))
   {
     if (ty == t_FRACN)
