@@ -323,6 +323,50 @@ hensel_lift_fact(GEN pol, GEN Q, GEN p, GEN pev, long e)
   res[1] = (long)C; return res;
 }
 
+/* cf Beauzamy et al: upper bound for
+ *      lc(x) * [2^(5/8) / pi^(3/8)] e^(1/4n) 2^(n/2) sqrt([x]_2)/ n^(3/8)
+ * where [x]_2 = sqrt(\sum_i=0^n x[i]^2 / binomial(n,i)). One factor has 
+ * all coeffs less than then bound */
+static GEN
+two_factor_bound(GEN x)
+{
+  long av = avma, i,j, n = lgef(x) - 3;
+  GEN *invbin, c, r = cgetr(3), z;
+
+  x += 2; invbin = (GEN*)new_chunk(n+1);
+  z = realun(3); /* invbin[i] = 1 / binomial(n, i) */
+  for (i=0,j=n; j >= i; i++,j--)
+  {
+    invbin[i] = invbin[j] = z;
+    z = divrs(mulrs(z, i+1), n-i);
+  }
+  z = invbin[0]; /* = 1 */
+  for (i=0; i<=n; i++)
+  {
+    c = (GEN)x[i]; if (!signe(c)) continue;
+    affir(c, r);
+    z = addrr(z, mulrr(gsqr(r), invbin[i]));
+  }
+  z = shiftr(mpsqrt(z), n);
+  z = divrr(z, dbltor(pow((double)n, 0.75)));
+  z = grndtoi(mpsqrt(z), &i);
+  z = mulii(z, absi((GEN)x[n]));
+  return gerepileuptoint(av, shifti(z, 1));
+}
+
+/* all factors have coeffs less than the bound */
+static GEN
+all_factor_bound(GEN x)
+{
+  long i, n = lgef(x) - 3;
+  GEN t, z = gzero;
+  for (i=2; i<=n+2; i++) z = addii(z,sqri((GEN)x[i]));
+  t = absi((GEN)x[n+2]);
+  z = addii(t, addsi(1, racine(z)));
+  z = mulii(z, binome(stoi(n-1), n>>1));
+  return shifti(mulii(t,z),1);
+}
+
 /* target = polynomial we want to factor
  * famod = array of modular factors.  Each has LC 1.1 based indexing. Product
  * should be congruent to target/lc(target) modulo pe.
@@ -342,6 +386,7 @@ cmbf(GEN target, GEN famod, GEN pe, long maxK,long klim,long hint)
   GEN listmod  = cgetg(lfamod+1, t_COL);
   GEN fa       = cgetg(lfamod+1, t_COL);
   GEN res = cgetg(3, t_VEC);
+  GEN bound = all_factor_bound(target);
 
   if (!maxK) maxK = lfamod-1;
 
@@ -384,7 +429,7 @@ nextK:
         y = centermod_i(gmul(y, (GEN)famod[ind[i]]), pe, pes2);
 
       /* y is the candidate factor */
-      if (! (q = polidivis(lctarget,y,pes2)) )
+      if (! (q = polidivis(lctarget,y,bound)) )
       {
         if (DEBUGLEVEL>6) fprintferr("*");
         avma = av; goto NEXT;
@@ -412,6 +457,7 @@ nextK:
       }
       if (lfamod <= 2*K) goto END; /* = 2K in fact */
       i = 1; curdeg = deg[ind[1]];
+      bound = all_factor_bound(target);
       lc = absi(leading_term(target));
       lctarget = gmul(lc,target);
       lfamod -= K;
@@ -447,36 +493,6 @@ END:
   setlg(listmod, cnt); setlg(fa, cnt);
   res[1] = (long)fa;
   res[2] = (long)listmod; return res;
-}
-
-/* cf Beauzamy et al: upper bound for
- *      lc(x) * [2^(5/8) / pi^(3/8)] e^(1/4n) 2^(n/2) sqrt([x]_2)/ n^(3/8)
- * where [x]_2 = sqrt(\sum_i=0^n x[i]^2 / binomial(n,i))  */
-static GEN
-two_factor_bound(GEN x)
-{
-  long av = avma, i,j, n = lgef(x) - 3;
-  GEN *invbin, c, r = cgetr(3), z;
-
-  x += 2; invbin = (GEN*)new_chunk(n+1);
-  z = realun(3); /* invbin[i] = 1 / binomial(n, i) */
-  for (i=0,j=n; j >= i; i++,j--)
-  {
-    invbin[i] = invbin[j] = z;
-    z = divrs(mulrs(z, i+1), n-i);
-  }
-  z = invbin[0]; /* = 1 */
-  for (i=0; i<=n; i++)
-  {
-    c = (GEN)x[i]; if (!signe(c)) continue;
-    affir(c, r);
-    z = addrr(z, mulrr(gsqr(r), invbin[i]));
-  }
-  z = shiftr(mpsqrt(z), n);
-  z = divrr(z, dbltor(pow((double)n, 0.75)));
-  z = grndtoi(mpsqrt(z), &i);
-  z = mulii(z, absi((GEN)x[n]));
-  return gerepileuptoint(av, shifti(z, 1));
 }
 
 void
