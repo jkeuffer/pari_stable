@@ -42,7 +42,7 @@ Unless specified otherwise, examples assume 32bit machine and default precision
    C by a cheap trick)
 
 3  polgalois should handle precision problems. Symptom: applied to
-   polzagier(11,0)/polzagier(1,0), gives wrong result with 38 digits
+   polzagier(11,0)/(1-2*x), gives wrong result with 38 digits
 
 3  recursive plot easily fooled. One could split intervals in 3 + make sure
    size of neighbouring intervals don't differ too much.
@@ -74,8 +74,6 @@ discarded (ends by a longjmp).
 
 4  separate chapter 4 and 5 and document the innards of PARI (entree,
    pariFILE, bloc ...)
-
-3  clean up gphelp / TeX macros
 
 2  HTML version (pod ? SGML ? yodl ???)
 
@@ -187,6 +185,9 @@ Misc:
 5  remove limitation to 8 arguments for static functions (argvec[9])
 
 4  use divide & conquer approach in string / integer conversions
+
+4  let forprime(n=a, b, ...) work even if a,b above primelimit
+   (maybe with a Warning), via simple sieve + pseudo primality test
 
 3  split matrix_block in 2 parts: exploration + assignment. Would allow
    Math::Pari to use complicated x[][][][] constructs
