@@ -905,20 +905,43 @@ matcell(GEN p, matcomp *C)
         full_col = full_row = 0;
         if (*analyseur==',') /* whole column */
         {
-          analyseur++; full_col = 1;
+          analyseur++;
           c = check_array_index(lg(p));
-          pt = (GEN*)(p + c); match(']'); break;
+          match(']');
+          if (*analyseur == '[')
+          { /* collapse [,c][r] into [r,c] */
+            analyseur++;
+            r = check_array_index(lg(p));
+            pt = (GEN*)(((GEN)p[c]) + r); /* &coeff(p,r,c) */
+            match(']');
+          }
+          else
+          {
+            full_col = 1;
+            pt = (GEN*)(p + c);
+          }
+          break;
         }
 
         r = check_array_index(lg(p[1]));
         match(',');
         if (*analyseur == ']') /* whole row */
         {
-          GEN p2 = cgetg(lg(p),t_VEC);
           analyseur++;
-          if (*analyseur != '[') full_row = r;
-          for (c=1; c<lg(p); c++) p2[c] = coeff(p,r,c);
-          pt = &p2;
+          if (*analyseur == '[')
+          { /* collapse [r,][c] into [r,c] */
+            analyseur++;
+            c = check_array_index(lg(p));
+            pt = (GEN*)(((GEN)p[c]) + r); /* &coeff(p,r,c) */
+            match(']');
+          }
+          else
+          {
+            GEN p2 = cgetg(lg(p),t_VEC);
+            full_row = r; /* record row number */
+            for (c=1; c<lg(p); c++) p2[c] = coeff(p,r,c);
+            pt = &p2;
+          }
         }
         else
         {
