@@ -1270,12 +1270,11 @@ fixedfieldsympol(GEN O, GEN mod, GEN l, GEN p, long v)
   GEN LN=cgetg(n,t_MAT);
   GEN Ll=cgetg(n,t_MAT);
   long i,nb,ok=0;
-  for(i=1, nb=1; i<n; i++, nb*=2)
+  for(i=1, nb=1; i<n; i++, nb*=4)
   {
     LN[i]=(long)sympol_eval_newtonsum(i,O,mod);
     Ll[i]=(long)FpV_red((GEN)LN[i],l);
     if (DEBUGLEVEL>=6) fprintferr("FixedField: LN[%d]=%Z \n",i,Ll[i]);
-    if (i==n) nb*=4;
     ok = (ok || fixedfieldtests(Ll,i));
     if (ok)
       if ((V=fixedfieldsurmer(O,mod,l,p,v,LN,i,nb)))
