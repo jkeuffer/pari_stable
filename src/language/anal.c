@@ -26,7 +26,7 @@ static GEN    constante();
 static GEN    expr();
 static GEN    facteur();
 static GEN    identifier();
-static GEN    matrix_block(GEN p, entree *ep);
+static GEN    lock(GEN p, entree *ep);
 static GEN    read_member(GEN x);
 static GEN    seq();
 static GEN    truc();
@@ -99,46 +99,56 @@ static GEN br_res = NULL;
  *     read from left to right.
  *
  *  facteur:
- *      Optional leading sign (meaningfull only when "facteur" is enclosed
- *      in parentheses), followed by a "truc", then by any succession of the
- *      following:
+ *    { [+-] } followed by a "truc", then by any succession of the
+ *  following:
  *
  *        ~, ', !
  *  or    ^ facteur
- *  or    matrix_block(no_assign=1)
+ *  or    matrix_index { matrix_index }*
  *  or    .member      (see gp_member_list)
  *
  *  truc:
- *      identifier
+ *  or  ! truc
+ *  or  ' entry
+ *  or  identifier
  *  or  constante
  *  or  string {string}*
- *  or  ! truc
- *  or  ' identifier
  *  or  matrix
  *  or  (expr)
- *  or  %{ ` }*  or %number
+ *  or  % { ` }*  or %number
  *
  *  identifier:
- *      entry {'} { ( { expr or &entry } { , expr or &entry }* ) }
- *        Note: &entry form (pointer) not yet implemented for user functions
- *   or entry { matrix_block(no_assign=0) }*
+ *    entry followed by
+ *
+ *      {}
+ *  or  matrix_assignment_block
+ *  or  .entry { = seq }
+ *  or  {'} ( arg_list )
+ *  or  ( arg_list ) = seq
+ *
+ *  arg_list
+ *    { arg } { , arg }*
+ *
+ *  arg:
+ *    expr  or  &entry 
+ *    Note: &entry (pointer) not yet implemented for user functions
  *
  *  matrix
  *      [ A { ; A}* ] where A = { expr } { , { expr } }*
  *      All A must share the same length.
  *
- *  matrix_block:
- *      [ number {,} ]
- *   or [ { number } , number ]
- *
- *   optionally followed by 
- *      { = expr }
- *   or { ++ } or { -- }
- *   or { op=} where op is one of the operators in expr 1: and 2:
+ *  matrix_index:
+ *      [ expr {,} ]
+ *   or [ { expr } , expr ]
+ *  
+ *  matrix_assignment_block:
+ *     { matrix_index }  followed by
+ *        = expr
+ *     or ++  or --
+ *     or op= expr  where op is one of the operators in expr 1: and 2:
  *
  *  entry:
- *      any succesion of alphanumeric characters, the first of which is not
- *      a digit.
+ *      [A-Za-z][A-Za-z0-9_]*
  *
  *  string:
  *      " any succession of characters [^\]"
@@ -147,7 +157,7 @@ static GEN br_res = NULL;
  *      number { . } { number } { [eE] } {[+-]} { number }.
  *
  *  number:
- *      any non-negative integer.
+ *      [0-9][0-9]*
  */
 char*
 _analyseur(void)
@@ -691,7 +701,7 @@ facteur(void)
       case '~':
 	analyseur++; x = gtrans(x); break;
       case '[':
-        x = matrix_block(x,NULL); break;
+        x = lock(x,NULL); break;
       case '!':
 	if (analyseur[1] != '=')
 	{
@@ -816,7 +826,7 @@ repeated_op()
 }
 
 static GEN
-matrix_block(GEN p, entree *ep)
+lock(GEN p, entree *ep)
 {
   long tx,full_col,full_row,c,r;
   char *old;
@@ -1354,7 +1364,7 @@ identifier(void)
         ep->value = (void *)ptr; return gnil;
       }
     }
-    return matrix_block((GEN) ep->value,ep);
+    return lock((GEN) ep->value,ep);
   }
   ep = do_alias(ep); matchcomma = 0;
 #ifdef STACK_CHECK
@@ -2128,7 +2138,7 @@ skipstring()
 }
 
 static void
-skip_matrix_block(int no_affect)
+skip_lock(int no_affect)
 {
   while (*analyseur == '[')
   {
@@ -2269,7 +2279,7 @@ skipfacteur(void)
       case '~': case '\'':
 	analyseur++; break;
       case '[':
-	skip_matrix_block(1); break;
+	skip_lock(1); break;
       case '!':
 	if (analyseur[1] != '=') { analyseur++; break; }
       default: return;
@@ -2468,7 +2478,7 @@ skipidentifier(void)
   {
     case EpGVAR:
     case EpVAR: /* variables */
-      skip_matrix_block(0); return;
+      skip_lock(0); return;
 
     case EpUSER: /* fonctions utilisateur */
     {
