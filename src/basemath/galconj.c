@@ -1632,7 +1632,7 @@ initborne(GEN T, GEN disc, struct galois_borne *gb, long ppp)
 GEN
 a4galoisgen(GEN T, struct galois_test *td)
 {
-  int     ltop = avma, av, av2;
+  ulong   ltop = avma, av, av2;
   int     i, j, k;
   int     n;
   int     N, hop = 0;
@@ -1684,10 +1684,9 @@ a4galoisgen(GEN T, struct galois_test *td)
       y = 1;
       do
       {
-	hiremainder = 0;
 	y += 2;
-	x = divll(x, y);
-	a = hiremainder;
+	a = x%y;
+	x = x/y;
       }
       while (!a);
       switch (y)
@@ -1816,10 +1815,9 @@ a4galoisgen(GEN T, struct galois_test *td)
       y = -2;
       do
       {
-	hiremainder = 0;
 	y += 4;
-	x = divll(x, y);
-	a = hiremainder;
+	a = x%y;
+	x = x/y;
       }
       while (!a);
       x = u[2];
