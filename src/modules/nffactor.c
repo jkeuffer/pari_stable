@@ -776,10 +776,11 @@ nfcmbf(nfcmbf_t *T, GEN p, long a, long maxK, long klim)
       t1 = (GEN)P[d-1];/* = - S_1 */
       t2 = gsqr(t1);
       if (d > 1) t2 = gsub(t2, gmul2n((GEN)P[d-2], 1));
-      t2 = Tpk? FpX_rem(t2, Tpk, pk): modii(t2, pk); /* = S_2 Newton sum */
+      /* t2 = S_2 Newton sum */
+      t2 = typ(t2)!=t_INT? FpX_rem(t2, Tpk, pk): modii(t2, pk);
       if (lt)
       {
-        if (Tpk) {
+        if (typ(t2)!=t_INT) {
           t1 = FpX_red(gmul(ltdn, t1), pk);
           t2 = FpX_red(gmul(lt2dn,t2), pk);
         } else {
