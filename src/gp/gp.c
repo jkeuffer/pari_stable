@@ -1630,9 +1630,30 @@ static char *
 what_readline(void)
 {
 #ifdef READLINE
-  return (GP_DATA->flags & USE_READLINE)? "v"READLINE" enabled": "disabled";
+  static char RL_ver[128];
+  char *ver, extra[64];
+#  if defined(HAS_RL_LIBRARY_VERSION) || defined(FAKE_RL_LIBRARY_VERSION)
+#    ifdef FAKE_RL_LIBRARY_VERSION
+  extern char *rl_library_version;
+#    endif
+
+  if (strcmp(READLINE, rl_library_version))
+  {
+    ver = (char*)rl_library_version;
+    sprintf(extra, " [was v%s in Configure]", READLINE);
+  }
+  else
+#  endif
+  {
+    ver = READLINE;
+    extra[0] = 0;
+  }
+  sprintf(RL_ver, "v%s %s%s", ver,
+            (GP_DATA->flags & USE_READLINE)? "enabled": "disabled",
+            extra);
+  return RL_ver;
 #else
-  return "disabled";
+  return "not compiled in";
 #endif
 }
 
@@ -1651,7 +1672,7 @@ print_shortversion(void)
 static void
 print_version(void)
 {
-  char buf[64];
+  char buf[256];
 
   center(PARIVERSION); center(PARIINFO);
   sprintf(buf,"(readline %s, extended help%s available)", what_readline(),

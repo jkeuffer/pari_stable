@@ -27,6 +27,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #  undef  INLINE
 #endif
 
+extern int  bfffo(ulong x);
+
 #ifndef INLINE
 void   addsii(long x, GEN y, GEN z);
 long   addssmod(long a, long b, long p);

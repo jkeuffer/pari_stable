@@ -1,7 +1,11 @@
 #exported variables
 _readline_list="readline readline_enabledp CPPF_defined \
-rl_refresh_line_oldproto rl_appendchar rl_genericbind rl_save_prompt \
-_rl_save_prompt rl_message rl_completion_matches rl_completion_func_t \
+rl_library_version rl_fake_library_version rl_history
+rl_refresh_line_oldproto rl_appendchar rl_message \
+rl_save_prompt rl_fake_save_prompt _rl_save_prompt\
+rl_genericbind rl_bind_key_in_map
+rl_attempted_completion_over rl_completion_query_items \
+rl_completion_matches rl_completion_func_t \
 RLINCLUDE RLLIBS"
 
 readline_add="$GP_READLINE $TOP/readline-$osname-$arch $TOP/readline"
@@ -40,6 +44,12 @@ if test -n "$readline"; then
     case $x in
      ?:/*|/*) rl_include=`echo $x | sed 's,/readline.h,,'`
          echo ..."Found readline header in $rl_include"
+         if (test -r "$rl_include/history.h"); then
+            echo ..."Found history header in $rl_include"
+           rl_history=yes
+         else
+            echo ..."No history header in $rl_include"
+         fi
          if (grep CPPFunction $x > /dev/null 2>&1); then CPPF_defined=yes; fi
          if (grep rl_message  $x > /dev/null 2>&1); then rl_message=yes; fi
          if (grep rl_completion_matches $x > /dev/null 2>&1); then
@@ -56,6 +66,19 @@ if test -n "$readline"; then
          fi
          if (grep rl_generic_bind $x > /dev/null 2>&1); then
            rl_genericbind=yes
+         fi
+         if (grep rl_attempted_completion_over $x > /dev/null 2>&1); then
+           rl_attempted_completion_over=yes;
+         fi
+         if (grep rl_completion_query_items $x > /dev/null 2>&1); then
+           rl_completion_query_items=yes;
+         fi
+         if (grep rl_bind_key_in_map $x > /dev/null 2>&1); then
+           rl_bind_key_in_map=yes;
+         fi
+         if (grep rl_library_version $x > /dev/null 2>&1); then
+           rl_library_version=yes;
+          rl_extra_flags="-DHAS_RL_LIBRARY_VERSION"
          fi
          if (grep rl_save_prompt $x > /dev/null 2>&1); then
            rl_save_prompt=yes;
@@ -130,8 +153,18 @@ if test -z "$readline"; then
 else
   if test "$fastread" = yes; then
     exe=$osname-$arch-rlv$$
-    $CC $extraflag $RLINCLUDE -o $exe rl_version.c $RLLIBS 2> /dev/null
-    if test -r $exe; then readline=`$exe`; else readline=1.0; fi
+    $CC $extraflag $rl_extra_flags $RLINCLUDE -o $exe rl_version.c $RLLIBS 2> /dev/null
+    if test -r $exe; then readline=`$exe`; else readline="?.?"; fi
+    if test -z "$rl_library_version" -a "X$readline" != "X?.?"; then
+      echo "!!! Possible mismatch between readline headers and library:"
+      echo "!!!  header is apparently for v1.0, library reports $readline!"
+      case "$readline" in
+        # rl_save_prompt was not in 2.1, is in 4.1; do not know more...
+        4.[1-9]*|[5-9]*) rl_fake_save_prompt=yes;;
+      esac
+      readline="1.0=Header/$readline=Lib"
+      rl_fake_library_version=yes
+    fi
     rm -f $exe $exe$exe_suff
     echo "Using GNU readline, version $readline"
   fi
@@ -141,10 +174,23 @@ else
   if test -z "$rl_genericbind"; then
     echo ..."Library readline does not have rl_generic_bind"
   fi
+  if test -z "$rl_completion_query_items"; then
+    echo ..."Library readline does not have rl_completion_query_items"
+  fi
+  if test -z "$rl_bind_key_in_map"; then
+    echo ..."Library readline does not have rl_bind_key_in_map"
+  fi
+  if test -z "$rl_attempted_completion_over"; then
+    echo ..."Library readline does not have rl_attempted_completion_over"
+  fi
   if test -z "$rl_save_prompt"; then
     echo ..."Library readline does not have rl_save_prompt"
     if test -n "$_rl_save_prompt"; then
       echo ......"but it has _rl_save_prompt"
+      if test -n "$rl_fake_save_prompt"; then
+          echo ........."but due to library mismatch we fake rl_save_prompt"
+          rl_save_prompt=yes
+      fi
     fi
   fi
 

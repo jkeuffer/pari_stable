@@ -112,6 +112,9 @@ IZ 56- default(primelimit, 2156858852) --> SEGV and other signed/unsigned
        conversion problems.
 IZ 57- printtex("x1") and printtex("x_1") gave same output
 IZ 58- printtex(t_STR) [ protect special characters, eg ~ or \ ]
+IZ 59- [readline:] support old versions (1.0), try to recover from
+       mismatched headers wrt. library, report version of loaded library in
+       gp header [as opposed to library version at Configure time]
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available

@@ -34,10 +34,14 @@ BEGINEXTERN
 #endif
 #ifdef READLINE_LIBRARY
 #  include <readline.h>
-#  include <history.h>
+#  ifdef HAS_HISTORY_H
+#    include <history.h>
+#  endif
 #else
 #  include <readline/readline.h>
-#  include <readline/history.h>
+#  ifdef HAS_HISTORY_H
+#    include <readline/history.h>
+#  endif
 #endif
 #ifndef HAS_RL_MESSAGE
 extern int rl_message (const char *, ...);
@@ -597,7 +601,9 @@ pari_completion(char *text, int START, int END)
       }
 #else			/* Why duplicate F1 (and emit a bell)?! */
       rl_print_aide(buf,h_RL);
+#ifdef HAS_RL_ATTEMPTED_COMPLETION_OVER
       rl_attempted_completion_over = 1;
+#endif
       return NULL;
 #endif
     }
@@ -672,10 +678,16 @@ init_readline(void)
   rl_attempted_completion_function = (rl_completion_func_t*) pari_completion;
 
   /* we always want the whole list of completions under emacs */
+#ifdef HAS_RL_COMPLETION_QUERY_ITEMS
   if (GP_DATA->flags & EMACS) rl_completion_query_items = 0x8fff;
-
-#define Bind(a,b,c) (((void(*)(int,Function*,Keymap)) rl_bind_key_in_map)\
+#endif
+#ifdef HAS_RL_BIND_KEY_IN_MAP
+#  define Bind(a,b,c) (((void(*)(int,Function*,Keymap)) rl_bind_key_in_map)\
   ((a), (Function*)(b), (c)))
+#else
+#  define Bind(a,b,c)
+#endif
+
 #define Defun(a,b,c) (((void(*)(const char*,Function*,int)) rl_add_defun)\
   ((a), (Function*)(b), (c)))
 
@@ -805,6 +817,12 @@ texmacs_completion(char *s, long pos)
   printf(")%c", DATA_END);
   fflush(stdout);
 }
+
+#ifndef HAS_HISTORY_H
+extern int history_length;
+typedef struct HIST_ENTRY__ {char *line; void *data;} HIST_ENTRY;
+extern HIST_ENTRY *history_get(int);
+#endif
 
 static int
 history_is_new(char *s)
