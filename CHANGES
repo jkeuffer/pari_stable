@@ -73,6 +73,7 @@ GH 15- polsturm(1, 0, 1) ---> error  [ return 0! ]
    28- missing sanity checks in install() [ did not check the parser code ]
    29- typo in nilord() [lg-->lgefint]: nfdisc() didn't work on 64bit HP
    30- ellisoncurve(ellinit([0,0,0,0,1]),[1/2-sqrt(3)/2*I,0]) --> 0
+   31- type 'gphelp' from command line: carriage return is missing
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available

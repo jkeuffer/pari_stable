@@ -190,6 +190,7 @@ sub open_dvi_then_quit
   (!$ENV{DISPLAY} && !$ENV{GPXDVI}) && die "xdvi needs X-Windows";
   if ($f =~ /\//) { $dvifile = "$f"; } else { $dvifile = "$docdir/$f"; }
   print "displaying \'$dvifile\'.";
+  print "\n" if (!$fromgp);
   setsid; # detach from terminal (^C will not kill xdvi)
   system("$viewer $f 2>/dev/null >/dev/null&");
   cleanexit();
