@@ -73,6 +73,7 @@ MD 31- oo loop in ellap [uninitialized array length in apell1]
    35- intformal(1/2/t^2) --> apparent oo loop
    36- polredabs(degree 1 polynomial) --> x  [could be very slow]
    37- polredabs() could use a basis which was not LLL reduced
+BA 38- pariformats (e.g %Z) incorrect on 64bit machines
 
   Changed
     1- removed useless parameter prec in many bnr* and rnf* functions
@@ -163,6 +164,7 @@ MD 54- real(1 / (a+quadgen(...)*b)) was a / (a^2 + b^2)  [assumed quadgen(-4) !]
    56- rare problem in isprincipal (large non Galois base field)--> wrong 
        result (generators not required) or infinite loop.
    57- compatibility problems with readline-4.2 (build would fail)
+BA 58- pari format %Z (pariputsf) treated incorrectly on 64bit machines
 
   Changed
     1- DOS distribution archives (GPM removed)
