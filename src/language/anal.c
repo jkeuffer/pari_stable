@@ -113,7 +113,8 @@ static GEN br_res = NULL;
  *  or    .entry
  *
  *  truc:
- *      ! truc
+ *      ! facteur
+ *  or  # facteur
  *  or  ' entry
  *  or  identifier
  *  or  constante
