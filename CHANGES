@@ -33,7 +33,7 @@ TP = Thomas Papanikolaou
 XR = Xavier Roblot
 YU = Yoshiaki Uchikawa
 
-Done for version 2.2.4 (released ??/07/2002) [hopefully]:
+Done for version 2.2.4 (released 12/09/2002):
   Fixed
     1- add default 'new_galois_format' to make 2.2.3 C-22 optional (by default,
        old format will be used, preserving compatibility)
@@ -129,6 +129,8 @@ XR 63- smarter precision increase in update_alpha() (ROUND 4) [stick to
     1- remove most global variables from gp.c (put them in struct gp_data).
     2- use better bounds for size of factors in nffactor()
     3- tuning for van Hoeij's factorizer (factor + nffactor)
+       nffactor: call factornf when deg(pol) << deg(nf) + remove a priori
+       overlift for d-1/d-2 test [major overkill]
     4- automatic concatenation for strings: use longest match for expression.
        print("a"[1]) is not valid since "a" is not a vector
        print("a", [1])  prints  'a[1]'
@@ -140,22 +142,19 @@ IZ  8- [library:] unified access to diffptr (NEXT_PRIME_VIADIFF macro)
     9- buchall: re-use the same random seed when doubling prec (for units)
    10- major cleanup in thue / thueinit
    11- major improvements in rnfkummer (use elements in factored form):
-       faster, give smaller elements
+       much faster, give smaller elements, allow arbitrary prime degree
    12- improved quadray(D < 0) when relative degree is huge
    13- improved bnfisprincipal when class group large: use factorisation
        (+idealred) instead of arch. components (require much less precision)
-   14- allow arbitrary prime degree in rnfkummer
-   15- [library:] allow trapping invmoder and recovering the offending INTMOD
-   16- improved factor over Z[X] for _huge_ degrees (factorizations mod p)
-   17- minor change in ordering for primedec output [use cmp_prime_over_p]
-   18- [library:] moved (formerly) gp-specific write* and print* to libpari
-   19- nffactor: call factornf when deg(pol) << deg(nf) + remove a priori
-       overlift for d-1/d-2 test [major overkill]
-   20- input format to rnfisnorm() [use rnfisnorminit]
-   21- [GP:] break loop prompt from '>' to 'break>'
-   22- [GP:] don't get out of break loop after \r
-   23- type f(x=1)=; twice ---> x = 1
-   24- [GP:] the way default error handlers for trap() operate (see section
+   14- [library:] allow trapping invmoder and recovering the offending INTMOD
+   15- improved factor over Z[X] for _huge_ degrees (factorizations mod p)
+   16- change in ordering for primedec output [use cmp_prime_over_p]
+   17- [library:] moved (formerly) gp-specific write* and print* to libpari
+   18- input format to rnfisnorm() [use rnfisnorminit]
+   19- [GP:] break loop prompt from '>' to 'break>'
+   20- [GP:] don't get out of break loop after \r
+   21- type f(x=1)=; twice ---> x = 1
+   22- [GP:] the way default error handlers for trap() operate (see section
        2.7 of manual)
 
   Added
