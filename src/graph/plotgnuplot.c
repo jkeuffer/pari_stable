@@ -298,7 +298,7 @@ term_set(char *s)
   if ((t-s) > PLOT_NAME_LEN)
       err(talker,"name \"%s\" for terminal too long", s);
   if (*pari_plot.name && !had_error
-      && (strlen(pari_plot.name) != t - s /* As strcmp() without \0 at end */
+      && (strlen(pari_plot.name) != (size_t)(t - s) /* As strcmp() without \0 at end */
 	  || (strncmp(pari_plot.name, s, t-s) != 0)) )
 	reset();
   strncpy(pari_plot.name,s,t-s);

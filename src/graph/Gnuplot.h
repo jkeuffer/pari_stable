@@ -482,8 +482,8 @@ void myterm_table_not_loaded_v4i4d(int term_xmin, int term_xmax,
 	 ((*my_term_ftablep->mouse_feedback_func)(term_xmin, term_xmax, term_ymin, term_ymax, plot_xmin, plot_xmax, plot_ymin, plot_ymax), 0) : 0)
 #endif	/* defined USE_SET_FEEDBACK_RECTANGLE */
 
-#  define scaled_xmax()	((int)termprop(xmax)*plotsizes_scale_get(0))
-#  define scaled_ymax()	((int)termprop(ymax)*plotsizes_scale_get(1))
+#  define scaled_xmax()	((int)(termprop(xmax)*plotsizes_scale_get(0)))
+#  define scaled_ymax()	((int)(termprop(ymax)*plotsizes_scale_get(1)))
 
 #define USE_FUNCTION_FROM_TABLE
 
