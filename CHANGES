@@ -39,6 +39,7 @@ BA  1- gpflog could print some lines twice
     6- possible symlink attacks against mpqs()
     7- internal requests for precision of bnfinit(x) [ = Q ] could yield SEGV
     8- compatible = 3 not taken into account when reading a file
+    9- cbezout(0,0) = 1 (should be 0)
 
   Changed
     1- DOS distribution archives (GPM removed)
