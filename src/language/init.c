@@ -1322,42 +1322,24 @@ bin_copy(GENbin *p)
  *   stackdummy(z,l); z += l; We lose l words but save a costly gerepile.
  */
 void
-stackdummy(GEN z, long l)
+stackdummy(GEN z, long l) { z[0] = evaltyp(t_STR) | evallg(l); }
+
+/* gerepileupto(av, gcopy(x)) */
+GEN
+gerepilecopy(long av, GEN x)
 {
-  z[0] = evaltyp(t_STR) | evallg(l);
+  GENbin *p = copy_bin(x);
+  avma = av; return bin_copy(p);
 }
 
 /* Takes an array of pointers to GENs, of length n. Copies all
  * objects to contiguous locations and cleans up the stack between
- * av and avma.
- */
-
-#if 0
-void
-gerepilemany(long av, GEN* gptr[], long n)
-{
-  GEN *l = (GEN*)gpmalloc(n*sizeof(GEN));
-  long i;
-
-  /* copy objects */
-  for (i=0; i<n; i++) l[i] = gclone(*(gptr[i]));
-  avma = av;
-  /* copy them back, kill clones */
-  for (--i; i>=0; i--)
-  {
-    *(gptr[i]) = forcecopy(l[i]);
-    gunclone(l[i]);
-  }
-  free(l);
-}
-#endif
-
+ * av and avma. */
 void
 gerepilemany(long av, GEN* gptr[], long n)
 {
   GENbin **l = (GENbin**)gpmalloc(n*sizeof(GENbin*));
   long i;
-
   for (i=0; i<n; i++) l[i] = copy_bin(*(gptr[i]));
   avma = av;
   for (i=0; i<n; i++) *(gptr[i]) = bin_copy(l[i]);
@@ -1368,43 +1350,24 @@ void
 gerepilemanycoeffs(long av, GEN x, long n)
 {
   long i;
-
-  /* copy objects */
-  for (i=0; i<n; i++) x[i] = lclone((GEN)x[i]);
+  for (i=0; i<n; i++) x[i] = (long)copy_bin((GEN)x[i]);
   avma = av;
-  /* copy them back, kill clones */
-  for (--i; i>=0; i--)
-  {
-    GEN p1 = (GEN)x[i];
-    x[i] = (long)forcecopy(p1); gunclone(p1);
-  }
+  for (i=0; i<n; i++) x[i] = (long)bin_copy((GENbin*)x[i]);
 }
 
 void
 gerepilemanycoeffs2(long av, GEN x, long n, GEN y, long o)
 {
-  long i,j;
-
-  /* copy objects */
-  for (i=0; i<n; i++) x[i] = lclone((GEN)x[i]);
-  for (j=0; j<o; j++) y[j] = lclone((GEN)y[j]);
+  long i;
+  for (i=0; i<n; i++) x[i] = (long)copy_bin((GEN)x[i]);
+  for (i=0; i<o; i++) y[i] = (long)copy_bin((GEN)y[i]);
   avma = av;
-  /* copy them back, kill clones */
-  for (--i; i>=0; i--)
-  {
-    GEN p1 = (GEN)x[i];
-    x[i] = (long)forcecopy(p1); gunclone(p1);
-  }
-  for (--j; j>=0; j--)
-  {
-    GEN p1 = (GEN)y[j];
-    y[j] = (long)forcecopy(p1); gunclone(p1);
-  }
+  for (i=0; i<n; i++) x[i] = (long)bin_copy((GENbin*)x[i]);
+  for (i=0; i<o; i++) y[i] = (long)bin_copy((GENbin*)y[i]);
 }
 
 /* Takes an array of pointers to GENs, of length n.
- * Cleans up the stack between av and tetpil, updating those GENs.
- */
+ * Cleans up the stack between av and tetpil, updating those GENs. */
 void
 gerepilemanysp(long av, long tetpil, GEN* gptr[], long n)
 {
@@ -1423,9 +1386,8 @@ gerepilemanysp(long av, long tetpil, GEN* gptr[], long n)
   }
 }
 
-/* Takes an array of GENs (casted to longs), of length n. Cleans up the
- * stack between av and tetpil, and update those GENs.
- */
+/* Takes an array of GENs (cast to longs), of length n.
+ * Cleans up the stack between av and tetpil, updating those GENs. */
 void
 gerepilemanyvec(long av, long tetpil, long *g, long n)
 {
@@ -1479,30 +1441,32 @@ gerepileuptoint(long av, GEN q)
   return (GEN)avma;
 }
 
-/* check that x and all its components are out of stack, or have been
- * created after av */
-int
-ok_for_gerepileupto(long r, GEN x)
+static int
+_ok_gerepileupto(GEN av, GEN x)
 {
-  long i,lx = lg(x),tx = typ(x);
-  if (! is_recursive_t(tx))
-    return !isonstack(x) || x <= (GEN)r;
-  if (x > (GEN)r)
+  long i,lx,tx;
+  if (!isonstack(x)) return 1;
+  if (x > av)
   {
     err(warner,"bad object %Z",x);
     return 0;
   }
+  tx = typ(x);
+  if (! is_recursive_t(tx)) return 1;
 
-  lx = lg(x);
-  if (tx==t_POL || tx==t_LIST) lx = lgef(x);
+  lx = (tx==t_POL || tx==t_LIST)? lgef(x): lg(x);
   for (i=lontyp[tx]; i<lx; i++)
-    if (!ok_for_gerepileupto(r, (GEN)x[i]))
+    if (!_ok_gerepileupto(av, (GEN)x[i]))
     {
       err(warner,"bad component %ld in object %Z",i,x);
       return 0;
     }
   return 1;
 }
+/* check that x and all its components are out of stack, or have been
+ * created after av */
+int
+ok_gerepileupto(GEN x) { return _ok_gerepileupto(x, x); }
 
 GEN
 gerepile(long av, long tetpil, GEN q)
