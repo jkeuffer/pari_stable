@@ -1,10 +1,11 @@
 file=$objdir/Makefile
 
 case "$asmarch" in
-  sparcv8*) asmarch=sparcv8;;
+  sparcv8*) ASMARCH=sparcv8;;
+  *) ASMARCH=$asmarch;;
 esac
 
-if test ! -s $src_dir/kernel/$asmarch/Makefile.SH; then
+if test ! -s $src_dir/kernel/$ASMARCH/Makefile.SH; then
   echo "No Makefile for asmarch $asmarch !" >&2; fi
 
 echo Extracting $file
@@ -23,7 +24,6 @@ case "$src_dir"    in /*) src=$src_dir ;;    *) src=../$src_dir ;; esac
 kernel="kernel mp"
 inline="mpinl"
 khlist="pariinl"
-. $src_dir/kernel/$asmarch/Makefile.SH
 
 graph="plot plotport"
 gp="gp gp_init gp_rl highlvl whatnow"
@@ -36,7 +36,7 @@ language=`ls $src_dir/language/*.c | sed 's,.*/\(.*\)\.c,\1,'`
 basemath=`ls $src_dir/basemath/*.c | sed 's,.*/\(.*\)\.c,\1,'`
 modules=`ls $src_dir/modules/*.c   | sed 's,.*/\(.*\)\.c,\1,'`
 
-if test m68k = "$asmarch"; then hlist=pari68k; else hlist=pariport; fi
+if test m68k = "$ASMARCH"; then hlist=pari68k; else hlist=pariport; fi
 hlist="pari paritype paricast paricom parierr parigen paristio parisys $hlist"
 
 HEADERS=''
@@ -453,6 +453,7 @@ $install_emacs_files: $pari_elc
 EOT
 fi
 
+. $src_dir/kernel/$ASMARCH/Makefile.SH
 HUGELINE=
 for dir in basemath modules language gp graph gpdyn graphdyn; do
   eval list='$'$dir
