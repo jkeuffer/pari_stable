@@ -29,7 +29,7 @@ static long TR; /* nombre de changements de polynomes (degre fixe) */
 static GEN FACTORDL; /* factorisation of |disc(L)| */
 
 static GEN print_block_system(long N,GEN Y,long d, GEN vbs);
-static GEN compute_data(GEN nf,GEN ff,GEN p,long m,long nn);
+static GEN compute_data(GEN nf, GEN ff, GEN p, long m, long nn, long vf);
 
 /* Computation of potential block systems of given size d associated to a
  * rational prime p: give a row vector of row vectors containing the
@@ -702,7 +702,7 @@ subfields_of_given_degree(GEN nf,GEN dpol,long d)
   llist=lg(listpotbl);
 LAB0:
   av1=avma; LSB=cgetg(1,t_VEC);
-  DATA=compute_data(nf,ff,stoi(pp),d,nn);
+  DATA=compute_data(nf,ff,stoi(pp),d,nn,fetch_var());
   for (i=1; i<llist; i++)
   {
     av2=avma; A=(GEN)listpotbl[i];
@@ -746,6 +746,7 @@ LAB0:
     }
   }
   for (i=1; i<llist; i++) free((void*)listpotbl[i]);
+  delete_var();
   free((void*)(listpotbl-1)); tetpil=avma;
   return gerepile(av,tetpil,gcopy(LSB));
 }
@@ -973,7 +974,7 @@ hensel_lift(GEN pol,GEN fk,GEN fkk,GEN p,long e)
  * ces donnees sont valides pour nf, p et m (d) donnes...
  */
 static GEN
-compute_data(GEN nf, GEN ff, GEN p, long m, long nn)
+compute_data(GEN nf, GEN ff, GEN p, long m, long nn, long vf)
 {
   long i,j,l,r,*n,e,N,pp,d,r1;
   GEN DATA,p1,p2,cys,fhk,tabroots,MM,fk,dpol,maxroot,maxMM,pol;
@@ -982,8 +983,8 @@ compute_data(GEN nf, GEN ff, GEN p, long m, long nn)
   pol = (GEN)nf[1]; N = lgef(pol)-3;
   DATA=cgetg(14,t_VEC);
   DATA[1]=(long)pol;
-  DATA[2]=(long)p; r=lg(ff)-1;
-  DATA[3]=(long)ff;
+  DATA[2]=(long)p;
+  DATA[3]=(long)ff; r=lg(ff)-1;
   n = cgetg(r+1, t_VECSMALL);
   DATA[4]= (long)n;
   for (j=1; j<=r; j++) n[j]=lgef(ff[j])-3;
@@ -994,7 +995,7 @@ compute_data(GEN nf, GEN ff, GEN p, long m, long nn)
     cys[i] = (long)p1; for (j=1; j<=n[i]; j++) p1[j]=++l;
   }
   DATA[5]=(long)cys;
-  DATA[6]=(long)ffinit(p,nn,MAXVARN);
+  DATA[6]=(long)ffinit(p,nn,vf);
   tabroots=cgetg(r+1,t_VEC);
   for (j=1; j<=r; j++)
   {
@@ -1032,20 +1033,18 @@ compute_data(GEN nf, GEN ff, GEN p, long m, long nn)
   p1 = shifti(p1, 1);
   DATA[11]=(long)p1;
 
-  if (DEBUGLEVEL>1)
-  {
-    fprintferr("DATA =\n");
-    fprintferr("f = "); outerr((GEN)DATA[1]);
-    fprintferr("p = "); outerr((GEN)DATA[2]);
-    fprintferr("ff = "); outerr((GEN)DATA[3]);
-    fprintferr("lcy = "); outerr((GEN)DATA[4]);
-    fprintferr("cys = "); outerr((GEN)DATA[5]);
-    fprintferr("bigfq = "); outerr((GEN)DATA[6]);
-    fprintferr("roots = "); outerr((GEN)DATA[7]);
-    fprintferr("2 * M = "); outerr((GEN)DATA[8]);
-    fprintferr("p^e = "); outerr((GEN)DATA[9]);
-    fprintferr("lifted roots = "); outerr((GEN)DATA[10]);
-    fprintferr("2 * Hadamard bound = "); outerr((GEN)DATA[11]);
+  if (DEBUGLEVEL>1) {
+    fprintferr("f = %Z",DATA[1]);
+    fprintferr("p = %Z",DATA[2]);
+    fprintferr("ff = %Z",DATA[3]);
+    fprintferr("lcy = %Z",DATA[4]);
+    fprintferr("cys = %Z",DATA[5]);
+    fprintferr("bigfq = %Z",DATA[6]);
+    fprintferr("roots = %Z",DATA[7]);
+    fprintferr("2 * M = %Z",DATA[8]);
+    fprintferr("p^e = %Z",DATA[9]);
+    fprintferr("lifted roots = %Z",DATA[10]);
+    fprintferr("2 * Hadamard bound = %Z",DATA[11]);
   }
   return DATA;
 }
