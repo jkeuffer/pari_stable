@@ -473,7 +473,6 @@ rootmod0(GEN f, GEN p, long flag)
 /*                     FACTORISATION MODULO p                      */
 /*                                                                 */
 /*******************************************************************/
-#define FqX_red FpXQX_red
 static GEN spec_FpXQ_pow(GEN x, GEN p, GEN S);
 extern GEN FpXQX_from_Kronecker(GEN z, GEN pol, GEN p);
 extern GEN FpXQX_safegcd(GEN P, GEN Q, GEN T, GEN p);
@@ -582,7 +581,7 @@ FqX_split_part(GEN f, GEN T, GEN p)
   long n = degpol(f);
   GEN z, X = polx[varn(f)];
   if (n <= 1) return f;
-  f = FqX_red(f, T, p);
+  f = FpXQX_red(f, T, p);
   z = FpXQYQ_pow(X, gpowgs(p, degpol(T)), f, T, p);
   z = gsub(z, X);
   return FqX_gcd(z, f, T, p);
@@ -1264,7 +1263,7 @@ FpX_deriv(GEN f, GEN p)
 GEN
 FqX_deriv(GEN f, GEN T, GEN p)
 {
-  return FqX_red(derivpol(f), T, p);
+  return FpXQX_red(derivpol(f), T, p);
 }
 
 GEN
@@ -1305,7 +1304,7 @@ FqX_split_Berlekamp(GEN *t, GEN q, GEN T, GEN p)
     pol[1] = u[1];
     for (i=2; i<=d; i++)
       pol = gadd(pol, gmul((GEN)vker[i], FpX_rand(dT,vT,p)));
-    polt = FqX_red(pol,T,p);
+    polt = FpXQX_red(pol,T,p);
     for (i=ir; i<L && L<d; i++)
     {
       a = t[i]; la = degpol(a);
@@ -2233,31 +2232,31 @@ FqX_split(GEN *t, long d, GEN q, GEN S, GEN T, GEN p)
   v = varn(*t);
   if (DEBUGLEVEL > 6) (void)timer2();
   av = avma; is2 = egalii(p, gdeux);
-  for(cnt = 1;;cnt++)
+  for(cnt = 1;;cnt++, avma = av)
   { /* splits *t with probability ~ 1 - 2^(1-r) */
     w = w0 = FqX_rand(dt,v, T,p);
+    if (degpol(w) <= 0) continue;
     for (l=1; l<d; l++) /* sum_{0<i<d} w^(q^i), result in (F_q)^r */
       w = gadd(w0, spec_Fq_pow_mod_pol(w, S, T, p));
-    w = FqX_red(w, T,p);
+    w = FpXQX_red(w, T,p);
     if (is2)
     {
       w0 = w;
       for (l=1; l<dT; l++) /* sum_{0<i<k} w^(2^i), result in (F_2)^r */
       {
         w = FqX_rem(FqX_sqr(w,T,p), *t, T,p);
-        w = FqX_red(gadd(w0,w), NULL,p);
+        w = FpXQX_red(gadd(w0,w), NULL,p);
       }
     }
     else
     {
       w = FpXQYQ_pow(w, shifti(q,-1), *t, T, p);
       /* w in {-1,0,1}^r */
-      if (degpol(w) <= 0) continue;
+      if (!degpol(w)) continue;
       w[2] = ladd((GEN)w[2], gun);
     }
     w = FqX_gcd(*t,w, T,p); l = degpol(w);
     if (l && l != dt) break;
-    avma = av;
   }
   w = gerepileupto(av,w);
   if (DEBUGLEVEL > 6)
