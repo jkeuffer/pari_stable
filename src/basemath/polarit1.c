@@ -1682,6 +1682,7 @@ factorpadic2(GEN x, GEN p, long r)
 /*******************************************************************/
 GEN Decomp(GEN p,GEN f,long mf,GEN theta,GEN chi,GEN nu,long r);
 GEN nilord(GEN p, GEN fx, long mf, GEN gx, long flag);
+GEN hensel_lift_fact(GEN pol, GEN Q, GEN p, GEN pev, long e);
 
 static GEN
 squarefree(GEN f, GEN *ex)
@@ -1709,7 +1710,7 @@ GEN
 factorpadic4(GEN f,GEN p,long prec)
 {
   GEN w,g,poly,fx,y,p1,p2,ex,pols,exps,ppow,lead;
-  long v=varn(f),n=lgef(f)-3,av,tetpil,mfx,i,k,j,m,r,pr;
+  long v=varn(f),n=lgef(f)-3,av,tetpil,mfx,i,k,j,r,pr;
 
   if (typ(f)!=t_POL) err(notpoler,"factorpadic");
   if (gcmp0(f)) err(zeropoler,"factorpadic");
@@ -1727,11 +1728,23 @@ factorpadic4(GEN f,GEN p,long prec)
   {
     long av1 = avma;
     fx=(GEN)poly[i]; mfx=ggval(discsr(fx),p);
-    m = (pr<=mfx)?mfx+1:pr;
-    w = (GEN)factmod(fx,p)[1]; r = lg(w)-1;
+    w = (GEN)factmod(fx,p)[1];
+    if (!mfx)
+    { /* no repeated factors: Hensel lift */
+      p1 = hensel_lift_fact(fx, lift_intern(w), p, gpowgs(p,pr), pr);
+      p2 = stoi(ex[i]);
+      for (k=1; k<lg(p1); k++,j++)
+      {
+        pols[j] = p1[k];
+        exps[j] = (long)p2;
+      }
+      continue;
+    }
+    /* use Round 4 */
+    r = lg(w)-1;
     g = lift_intern((GEN)w[r]);
     p2 = (r == 1)? nilord(p,fx,mfx,g,pr)
-                 : Decomp(p,fx,mfx,polx[v],fx,g,m);
+                 : Decomp(p,fx,mfx,polx[v],fx,g, (pr<=mfx)? mfx+1: pr);
     if (p2)
     {
       p2 = gerepileupto(av1,p2);
@@ -1813,18 +1826,20 @@ static GEN
 Kronecker_powmod(GEN x, GEN mod, GEN n)
 {
   long lim,av,av0 = avma, i,j,m,v = varn(x);
-  GEN y, p1, p, pol;
+  GEN y, p1, p = NULL, pol = NULL;
 
   for (i=lgef(mod)-1; i>1; i--)
   {
     p1 = (GEN)mod[i];
     if (typ(p1) == t_POLMOD) { pol = (GEN)p1[1] ; break; }
   }
+  if (!pol) err(talker,"need POLMOD coeffs in Kronecker_powmod");
   for (i=lgef(pol)-1; i>1; i--)
   {
     p1 = (GEN)pol[i];
     if (typ(p1) == t_INTMOD) { p = (GEN)p1[1] ; break; }
   }
+  if (!p) err(talker,"need POLMOD coeffs in Kronecker_powmod");
   x = lift_intern(to_Kronecker(x,pol));
 
   /* adapted from powgi */
@@ -2094,7 +2109,11 @@ factmod9(GEN f, GEN pp, GEN a)
       df1=derivpol(f); f3=NULL;
     }
     f2 = f3? f3: ggcd(f,df1);
-    if (lgef(f2)==3) u=f;
+    if (lgef(f2)==3)
+    {
+      u = f;
+      df2 = NULL; /* for lint */
+    }
     else
     {
       g1=gdeuc(f,f2); df2=derivpol(f2);
@@ -2197,7 +2216,7 @@ rootsold(GEN x, long l)
     p1=cgetg(3,t_COMPLEX); p1[1]=lgetr(l); p1[2]=lgetr(l); y[i]=(long)p1;
     for (j=3; j<l; j++) ((GEN)p1[2])[j]=((GEN)p1[1])[j]=0;
   }
-  g=1; gg=1; f=1;
+  g=1; gg=1;
   for (i=2; i<=deg0+2; i++)
   {
     ti=typ(x[i]);
@@ -2222,11 +2241,12 @@ rootsold(GEN x, long l)
     if (k)
     {
       j=deg0+3-k; pax=cgetg(j,t_POL);
-      pax[1]=evalsigne(1)+evallgef(j); setvarn(pax,v);
+      pax[1] = evalsigne(1) | evalvarn(v) | evallgef(j);
       for (i=2; i<j; i++) pax[i]=x[i+k];
     }
     else pax=x;
     xd0=deriv(pax,v); m=1; pa=pax;
+    pq = NULL; /* for lint */
     if (gg) { pp=ggcd(pax,xd0); h=isnonscalar(pp); if (h) pq=gdeuc(pax,pp); }
     else{ pp=gun; h=0; }
     do
@@ -2262,25 +2282,32 @@ rootsold(GEN x, long l)
           if (i==deg)
           {
             p1=(GEN)y[k+m*i]; gdivz(gneg_i((GEN)xc[2]),(GEN)xc[3],p1);
-            p14=(GEN)(p1[1]); p15=(GEN)(p1[2]);
+            p14=(GEN)p1[1]; p15=(GEN)p1[2];
           }
           else
           {
             p3=gshift(p2,e); p4=poleval(xc,p3); p5=gnorm(p4); exc=0;
-            while (exc>= -20)
+            while (exc >= -20)
             {
-              p6=poleval(xd,p3); p7=gneg_i(gdiv(p4,p6)); f=1;
-              l3=avma;
-              if (gcmp0(p5)) exc= -32;
-              else exc=expo(gnorm(p7))-expo(gnorm(p3));
-              avma=l3;
-              for (j=1; j<=10 && f; j++)
+              p7 = gneg_i(gdiv(p4, poleval(xd,p3)));
+              l3 = avma;
+              if (gcmp0(p5)) exc = -32;
+              else exc = expo(gnorm(p7))-expo(gnorm(p3));
+              avma = l3;
+              for (j=1; j<=10; j++)
               {
                 p8=gadd(p3,p7); p9=poleval(xc,p8); p10=gnorm(p9);
-                f=(cmprr(p10,p5)>=0)&&(exc>= -20);
-                if (f){ gshiftz(p7,-2,p7); avma=l3; }
+                if (exc < -20 || cmprr(p10,p5) < 0)
+                {
+                  GEN *gptr[3];
+                  p3=p8; p4=p9; p5=p10;
+                  gptr[0]=&p3; gptr[1]=&p4; gptr[2]=&p5;
+                  gerepilemanysp(l2,l3,gptr,3);
+                  break;
+                }
+                gshiftz(p7,-2,p7); avma=l3;
               }
-              if (f)
+              if (j > 10)
               {
                 avma=av1;
                 if (DEBUGLEVEL)
@@ -2290,16 +2317,9 @@ rootsold(GEN x, long l)
                 }
                 return roots2(x,l);
               }
-              else
-              {
-                GEN *gptr[3];
-                p3=p8; p4=p9; p5=p10;
-                gptr[0]=&p3; gptr[1]=&p4; gptr[2]=&p5;
-                gerepilemanysp(l2,l3,gptr,3);
-              }
             }
             p1=(GEN)y[k+m*i]; setlg(p1[1],3); setlg(p1[2],3); gaffect(p3,p1);
-            avma=l2; p14=(GEN)(p1[1]); p15=(GEN)(p1[2]);
+            avma=l2; p14=(GEN)p1[1]; p15=(GEN)p1[2];
             for (ln=4; ln<=l; ln=(ln<<1)-2)
             {
               setlg(p14,ln); setlg(p15,ln);
@@ -2363,247 +2383,29 @@ rootsold(GEN x, long l)
           }
           xd=deriv(xc,v); l2=avma;
         }
-        k=k+deg*m;
+        k += deg*m;
       }
       m++;
     }
     while (k!=deg0);
   }
   avma=l1;
-  if (deg0>1)
+  for (j=2; j<=deg0; j++)
   {
-    for (j=2; j<=deg0; j++)
+    p1 = (GEN)y[j];
+    if (gcmp0((GEN)p1[2])) fr=0; else fr=1;
+    for (k=j-1; k>=1; k--)
     {
-      p1=(GEN)y[j]; if (gcmp0((GEN)p1[2])) fr=0; else fr=1;
-      for (k=j-1; k>=1; k--)
-      {
-        if (gcmp0((GEN)((GEN)y[k])[2])) f=0; else f=1;
-        if (f<fr) break;
-        if (f==fr && gcmp(gmael(y,k,1),(GEN)p1[1])<=0) break;
-        y[k+1]=y[k];
-      }
-      y[k+1]=(long)p1;
+      p2 = (GEN)y[k];
+      if (gcmp0((GEN)p2[2])) f=0; else f=1;
+      if (f<fr) break;
+      if (f==fr && gcmp((GEN)p2[1],(GEN)p1[1]) <= 0) break;
+      y[k+1]=y[k];
     }
+    y[k+1]=(long)p1;
   }
   return y;
 }
-
-#if 0
-GEN
-rootslong(GEN x, long l)
-{
-  long av1=avma,i,j,f,g,fr,deg,l0,l1,l2,l3,l4,ln;
-  long exc,expmin,m,deg0,k,ti,h,ii,e,e1,emax,v;
-  GEN y,xc,xd0,xd,xdabs,p1,p2,p3,p4,p5,p6,p7,p8;
-  GEN p9,p10,p11,p12,p14,p15,pa,pax,pb,pp,pq,ps;
-
-  if (typ(x)!=t_POL) err(typeer,"rootslong");
-  v=varn(x); deg0=lgef(x)-3; expmin = -bit_accuracy(l)+12;
-  if (!signe(x)) err(zeropoler,"rootslong");
-  y=cgetg(deg0+1,t_COL); if (!deg0) return y;
-  for (i=1; i<=deg0; i++)
-  {
-    p1=cgetg(3,t_COMPLEX); y[i]=(long)p1;
-    p1[1]=lgetr(l); p1[2]=lgetr(l);
-    for (j=3; j<l; j++) mael(p1,2,j)=mael(p1,1,j)=0;
-  }
-  g=1; f=1;
-  for (i=2; i<=deg0+2; i++)
-  {
-    ti=typ(x[i]);
-    if (ti==t_QUAD)
-    {
-      p2=gmael3(x,i,1,2);
-      if (gcmpgs(p2,0)>0) g=0;
-    }
-    else
-      if (!is_const_t(ti) || ti==t_PADIC || ti==t_COMPLEX) g=0;
-  }
-  l1=avma; p2=cgetg(3,t_COMPLEX);
-  p2[1]=lmppi(l);
-  p2[2]=ldivrs((GEN)p2[1],10);
-  p11=cgetg(4,t_POL); p11[1]=evalsigne(1)+evallgef(4); setvarn(p11,v); p11[3]=un;
-  p12=cgetg(5,t_POL); p12[1]=evalsigne(1)+evallgef(5); setvarn(p12,v); p12[4]=un;
-  for (i=2; (i<=deg0+2)&&(gcmp0((GEN)x[i])); i++)
-    gaffsg(0,(GEN)y[i-1]); k=i-2;
-  if (k!=deg0)
-  {
-    if (k)
-    {
-      j=deg0+3-k; pax=cgetg(j,t_POL); pax[1]=evalsigne(1)+evallgef(j);
-      setvarn(pax,v);
-      for (i=2; i<j; i++)
-        pax[i]=x[i+k];
-    }
-    else pax=x;
-    xd0=deriv(pax,v); pp=ggcd(pax,xd0); m=1; pa=pax;
-    h=isnonscalar(pp); if (h) pq=gdeuc(pax,pp);
-    do
-    {
-      if (h)
-      {
-        pa=pp; pb=pq;
-        pp=ggcd(pa,deriv(pa,v)); h=isnonscalar(pp);
-        if (h) pq=gdeuc(pa,pp); else pq=pa;
-        ps=gdeuc(pb,pq);
-      }
-      else ps=pa;
-          /* calcul des racines d'ordre exactement m */
-      deg=lgef(ps)-3;
-      if (deg)
-      {
-        l3=avma; e=gexpo((GEN)ps[deg+2]); emax=e;
-        for (i=2; i<deg+2; i++)
-        {
-          p3=(GEN)(ps[i]);
-          if (!gcmp0(p3))
-          {
-            e1=gexpo(p3);
-            if (e1>emax) emax=e1;
-          }
-        }
-        e=emax-e; if (e<0) e=0; avma=l3;
-        if (ps!=pax) xd0=deriv(ps,v);
-        xdabs=cgetg(deg+2,t_POL); xdabs[1]=xd0[1];
-        for (i=2; i<deg+2; i++)
-        {
-          l3=avma; p3=(GEN)xd0[i]; p4=gabs(greal(p3),l);
-          p5=gabs(gimag(p3),l); l4=avma;
-          xdabs[i]=lpile(l3,l4,gadd(p4,p5));
-        }
-        l0=avma; xc=gcopy(ps); xd=gcopy(xd0); l2=avma;
-        for (i=1; i<=deg; i++)
-        {
-          if (i==deg)
-          {
-            p1=(GEN)y[k+m*i];
-            gdivz(gneg_i((GEN)xc[2]),(GEN)xc[3],p1);
-            p14=(GEN)(p1[1]); p15=(GEN)(p1[2]);
-          }
-          else
-          {
-            p3=gshift(p2,e); p4=poleval(xc,p3);
-            p5=gnorm(p4); exc=0;
-            while (exc>= -20)
-            {
-              p6=poleval(xd,p3); p7=gneg_i(gdiv(p4,p6));
-              f=1; l3=avma; if (gcmp0(p5)) exc= -32;
-              else exc=expo(gnorm(p7))-expo(gnorm(p3));
-              avma=l3;
-              for (j=1; (j<=50)&&f; j++)
-              {
-                p8=gadd(p3,p7); p9=poleval(xc,p8);
-                p10=gnorm(p9);
-                f=(cmprr(p10,p5)>=0)&&(exc>= -20);
-                if (f) { gshiftz(p7,-2,p7); avma=l3; }
-              }
-              if (f) err(poler9);
-              else
-              {
-                GEN *gptr[3];
-                p3=p8; p4=p9; p5=p10;
-                gptr[0]=&p3; gptr[1]=&p4; gptr[2]=&p5;
-                gerepilemanysp(l2,l3,gptr,3);
-              }
-            }
-            p1=(GEN)y[k+m*i]; gaffect(p3,p1); avma=l2;
-            p14=(GEN)(p1[1]); p15=(GEN)(p1[2]);
-            for (ln=4; ln<=l; ln=(ln<<1)-2)
-            {
-              if (gcmp0(p14))
-              { settyp(p14,t_INT); p14[1]=2; }
-              if (gcmp0(p15))
-              { settyp(p15,t_INT); p15[1]=2; }
-              p4=poleval(xc,p1); p5=poleval(xd,p1);
-              p6=gneg_i(gdiv(p4,p5));
-              settyp(p14,t_REAL); settyp(p15,t_REAL);
-              gaffect(gadd(p1,p6),p1); avma=l2;
-            }
-          }
-          p7=gcopy(p1);
-          p14=(GEN)(p7[1]); p15=(GEN)(p7[2]);
-          setlg(p14,l+1); setlg(p15,l+1);
-          if (gcmp0(p14))
-          { settyp(p14,t_INT); p14[1]=2; }
-          if (gcmp0(p15))
-          { settyp(p15,t_INT); p15[1]=2; }
-          for (ii=1; ii<=max(32,((e<<TWOPOTBITS_IN_LONG)+2)); ii<<=1)
-          {
-            p4=poleval(ps,p7); p5=poleval(xd0,p7);
-            p6=gneg_i(gdiv(p4,p5)); p7=gadd(p7,p6);
-            p14=(GEN)(p7[1]); p15=(GEN)(p7[2]);
-            if (gcmp0(p14))
-            { settyp(p14,t_INT); p14[1]=2; }
-            if (gcmp0(p15))
-            { settyp(p15,t_INT); p15[1]=2; }
-          }
-          gaffect(p7,p1); p4=poleval(ps,p7);
-          p6=gdiv(p4,poleval(xdabs,gabs(p7,l)));
-          if ((!gcmp0(p6))&&(gexpo(p6)>=expmin))
-          {
-            avma=av1;
-            if (DEBUGLEVEL)
-            {
-              fprintferr("internal error in roots: using roots2\n"); flusherr();
-            }
-            return roots2(x,l);
-          }
-          avma=l2;
-          if ((expo(p1[2])<expmin)&&g)
-          {
-            gaffect(gzero,(GEN)p1[2]);
-            for (j=1; j<m; j++)
-              gaffect(p1,(GEN)y[k+(i-1)*m+j]);
-            p11[2]=lneg((GEN)p1[1]); l4=avma;
-            xc=gerepile(l0,l4,gdeuc(xc,p11));
-          }
-          else
-          {
-            for (j=1; j<m; j++)
-              gaffect(p1,(GEN)y[k+(i-1)*m+j]);
-            if (g)
-            {
-              p1=gconj(p1);
-              for (j=1; j<=m; j++)
-                gaffect(p1,(GEN)y[k+i*m+j]); i++;
-              p12[2]=lnorm(p1);
-              p12[3]=lmulsg(-2,(GEN)p1[1]);
-              l4=avma;
-              xc=gerepile(l0,l4,gdeuc(xc,p12));
-            }
-            else
-            {
-              p11[2]=lneg(p1); l4=avma;
-              xc=gerepile(l0,l4,gdeuc(xc,p11));
-            }
-          }
-          xd=deriv(xc,v); l2=avma;
-        }
-        k=k+deg*m;
-      }
-      m++;
-    }
-    while (k!=deg0);
-  }
-  avma=l1;
-  if (deg0>1)
-  {
-    for (j=2; j<=deg0; j++)
-    {
-      p1=(GEN)y[j]; if (gcmp0((GEN)p1[2])) fr=0; else fr=1;
-      for (k=j-1; k>=1; k--)
-      {
-        if (gcmp0((GEN)((GEN)y[k])[2])) f=0; else f=1;
-        if (f<fr) break;
-        if ((f==fr)&&(gcmp((GEN)((GEN)y[k])[1],(GEN)p1[1])<=0)) break;
-        y[k+1]=y[k];
-      }
-      y[k+1]=(long)p1;
-    }
-  }
-  return y;
-}
-#endif
 
 GEN
 roots2(GEN pol,long PREC)
@@ -2930,13 +2732,15 @@ hqr(GEN mat) /* find all the eigenvalues of the matrix mat */
         }
         else
         {
+          p = q = r = 0.0; /* for lint */
           if (its==30) err(talker,"too many iterations in hqr");
-          if ((its==10)||(its==20))
+          if (its==10 || its==20)
           {
-            t+=x; for (i=1; i<=nn; i++) a[i][i]-=x; s=fabs(a[nn][nn-1])+fabs(a[nn-1][nn-2]);
+            t+=x; for (i=1; i<=nn; i++) a[i][i]-=x;
+            s = fabs(a[nn][nn-1]) + fabs(a[nn-1][nn-2]);
             y=x=0.75*s; w=-0.4375*s*s;
           }
-          ++its;
+          its++;
           for (m=(nn-2); m>=l; m--)
           {
             z=a[m][m]; r=x-z; s=y-z; p=(r*s-w)/a[m+1][m]+a[m][m+1]; q=a[m+1][m+1]-z-r-s;
@@ -2983,9 +2787,9 @@ hqr(GEN mat) /* find all the eigenvalues of the matrix mat */
     {
       if (wi[k]) flk=1; else flk=0;
       if (flk<flj) break;
-      if ((!flk)&&(!flj)&&(wr[k]<=x)) break;
-      if (flk&&flj&&(wr[k]<x)) break;
-      if (flk&&flj&&(wr[k]==x)&&(wi[k]>0)) break;
+      if (!flk && !flj && wr[k]<=x) break;
+      if (flk&&flj&& wr[k]<x) break;
+      if (flk&&flj&& wr[k]==x && wi[k]>0) break;
       wr[k+1]=wr[k]; wi[k+1]=wi[k];
     }
     wr[k+1]=x; wi[k+1]=y;
@@ -2997,8 +2801,10 @@ hqr(GEN mat) /* find all the eigenvalues of the matrix mat */
   {
     if (wi[i])
     {
-      eig[i]=lgetg(3,t_COMPLEX);
-      ((GEN)eig[i])[1]=(long)dbltor(wr[i]); ((GEN)eig[i])[2]=(long)dbltor(wi[i]);
+      GEN p1 = cgetg(3,t_COMPLEX);
+      eig[i]=(long)p1;
+      p1[1]=(long)dbltor(wr[i]);
+      p1[2]=(long)dbltor(wi[i]);
     }
     else eig[i]=(long)dbltor(wr[i]);
   }
