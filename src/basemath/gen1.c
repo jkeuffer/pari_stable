@@ -1414,7 +1414,7 @@ gmul(GEN x, GEN y)
       switch(ty)
       {
         case t_PADIC:
-          return Zp_nosquare_m1((GEN)y[2])? mulRc(x, y): mulTp(x, y);
+          return Zp_nosquare_m1((GEN)y[2])? mulRc(y, x): mulTp(x, y);
         case t_QUAD:
           lx = precision(x); if (!lx) err(operi,"*",x,y);
           return mulqf(y, x, lx);
