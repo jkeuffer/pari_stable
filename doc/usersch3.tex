@@ -3635,36 +3635,32 @@ conductor corresponding to the $L$, no data is computed and the result is $0$
 \syn{bnrdisc0}{a1,a2,a3,\fl}.
 
 \subsecidx{bnrdisclist}$(\var{bnf},\var{bound},\{\var{arch}\},\{\fl=0\})$:
-$\var{bnf}$ being a big
-number field as output by \kbd{bnfinit} (the units are mandatory), computes a
-list of discriminants of Abelian extensions of the number field by increasing
-modulus norm up to bound \var{bound}, where the ramified Archimedean places are
-given by \var{arch} (unramified at infinity if \var{arch} is void or
-omitted). If
-\fl\ is non-zero, give \var{arch} all the possible values. (See \kbd{bnr}
-at the beginning of this section for the meaning of $a1$, $a2$, $a3$.)
+$\var{bnf}$ being as output by \kbd{bnfinit} (with units), computes a list of
+discriminants of Abelian extensions of the number field by increasing modulus
+norm up to bound \var{bound}, where the ramified Archimedean places are given
+by \var{arch} (unramified at infinity if \var{arch} is void or omitted). If
+\fl\ is non-zero, give \var{arch} all the possible values. (See \kbd{bnr} at
+the beginning of this section for the meaning of $a1$, $a2$, $a3$.)
 
   The alternative syntax $\kbd{bnrdisclist}(\var{bnf},\var{list})$
 is supported, where \var{list} is as output by \kbd{ideallist} or
 \kbd{ideallistarch} (with units).
 
-  The output format is as follows. The output $v$ is a row vector of row
-vectors, allowing the bound to be greater than $2^{16}$ for 32-bit machines,
-and $v[i][j]$ is understood to be in fact $V[2^{15}(i-1)+j]$ of a unique big
-vector $V$ (note that $2^{15}$ is hardwired and can be increased in the
-source code only on 64-bit machines and higher).
+  The output $v$ is a row vector of row vectors, and $v[i][j]$ is understood
+to be in fact $V[2^{15}(i-1)+j]$ of a unique big vector $V$. (This scheme
+allows for larger vectors than could be otherwise represented.)
 
   Such a component $V[k]$ is itself a vector $W$ (maybe of length 0) whose
 components correspond to each possible ideal of norm $k$. Each component
-$W[i]$ corresponds to an Abelian extension $L$ of $\var{bnf}$ whose modulus is
-an ideal of norm $k$ and no Archimedean components (hence the extension is
-unramified at infinity). The extension $W[i]$ is represented by a 4-component
+$W[i]$ corresponds to an Abelian extension $L$ of $\var{bnf}$ whose modulus
+is an ideal of norm $k$ without Archimedean components (hence the extension
+is unramified at infinity). The extension $L$ is represented by a 4-component
 row vector $[m,d,r,D]$ with the following meaning. $m$ is the prime ideal
-factorization of the modulus, $d=[L:\Q]$ is the absolute degree of $L$,
-$r$ is the number of real places of $L$, and $D$ is the factorization of the
-absolute discriminant. Each prime ideal $pr=[p,\alpha,e,f,\beta]$ in the
-prime factorization $m$ is coded as $p\cdot n^2+(f-1)\cdot n+(j-1)$, where
-$n$ is the degree of the base field and $j$ is such that
+factorization of the modulus, $d = [L:\Q]$ is the absolute degree of $L$,
+$r$ is the number of real places of $L$, and $D$ is the factorization of its
+absolute discriminant. Each prime ideal $pr = [p,\alpha,e,f,\beta]$ in the
+prime factorization $m$ is coded as the integer $p\cdot n^2+(f-1)\cdot
+n+(j-1)$, where $n$ is the degree of the base field and $j$ is such that
 
 \kbd{pr = idealprimedec(\var{nf},p)[j]}.
 
