@@ -1933,10 +1933,12 @@ identifier(void)
 
           if (*analyseur == '[') {
             (void)matcell((GEN)ep->value, &(g->c));
+            g->x = *(g->c.ptcell);
             g->ep = NULL;
-          }
-          else
+          } else {
+            g->x = ep->value;
             g->ep = ep;
+          }
 	  argvec[i++] = (GEN)&(g->x); break;
         }
         /* Input position */
