@@ -1467,39 +1467,48 @@ gsubst(GEN x, long v, GEN y)
 GEN
 recip(GEN x)
 {
-  long v=varn(x);
+  long v=varn(x), lx = lg(x);
   gpmem_t tetpil, av=avma;
   GEN p1,p2,a,y,u;
 
   if (typ(x)!=t_SER) err(talker,"not a series in serreverse");
-  if (valp(x)!=1) err(talker,"valuation not equal to 1 in serreverse");
+  if (valp(x)!=1 || lx < 3)
+    err(talker,"valuation not equal to 1 in serreverse");
 
   a=(GEN)x[2];
   if (gcmp1(a))
   {
-    long i, j, k, lx=lg(x);
+    long i, j, k, mi;
     gpmem_t lim=stack_lim(av, 2);
 
-    u=cgetg(lx,t_SER); y=cgetg(lx,t_SER);
-    u[1]=y[1]=evalsigne(1) | evalvalp(1) | evalvarn(v);
-    u[2]=un; u[3]=lmulsg(-2,(GEN)x[3]);
-    y[2]=un; y[3]=lneg((GEN)x[3]);
+    mi = lx-1; while (mi>=3 && gcmp0((GEN)x[mi])) mi--;
+    u = cgetg(lx,t_SER);
+    y = cgetg(lx,t_SER);
+    u[1] = y[1] = evalsigne(1) | evalvalp(1) | evalvarn(v);
+    u[2] = y[2] = un;
+    if (lx > 3)
+    {
+      u[3] = lmulsg(-2,(GEN)x[3]);
+      y[3] = lneg((GEN)x[3]);
+    }
     for (i=3; i<lx-1; )
     {
       for (j=3; j<i+1; j++)
       {
-        p1=(GEN)u[j];
-        for (k=j-1; k>2; k--)
-          p1=gsub(p1,gmul((GEN)u[k],(GEN)x[j-k+2]));
-        u[j]=lsub(p1,(GEN)x[j]);
+        p1 = (GEN)x[j];
+        for (k=max(3,j+2-mi); k<j; k++)
+          p1 = gadd(p1, gmul((GEN)u[k],(GEN)x[j-k+2]));
+        u[j] = lsub((GEN)u[j], p1);
       }
-      p1=gmulsg(i,(GEN)x[i+1]);
-      for (k=2; k<i; k++)
+      p1 = gmulsg(i,(GEN)x[i+1]);
+      for (k=2; k<max(i,mi); k++)
       {
-        p2=gmul((GEN)x[k+1],(GEN)u[i-k+2]);
-        p1=gadd(p1,gmulsg(k,p2));
+        p2 = gmul((GEN)x[k+1],(GEN)u[i-k+2]);
+        p1 = gadd(p1, gmulsg(k,p2));
       }
-      i++; u[i]=lneg(p1); y[i]=ldivgs((GEN)u[i],i-1);
+      i++;
+      u[i] = lneg(p1);
+      y[i] = ldivgs((GEN)u[i],i-1);
       if (low_stack(lim, stack_lim(av,2)))
       {
 	GEN *gptr[2];
@@ -1510,9 +1519,9 @@ recip(GEN x)
     }
     return gerepilecopy(av,y);
   }
-  y=gdiv(x,a); y[2]=un; y=recip(y);
-  a=gdiv(polx[v],a); tetpil=avma;
-  return gerepile(av,tetpil,gsubst(y,v,a));
+  y = gdiv(x,a); y[2] = un; y = recip(y);
+  a = gdiv(polx[v],a); tetpil = avma;
+  return gerepile(av,tetpil, gsubst(y,v,a));
 }
 
 /*******************************************************************/
