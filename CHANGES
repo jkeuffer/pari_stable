@@ -26,6 +26,12 @@ TP = Thomas Papanikolaou
 XR = Xavier Roblot
 YU = Yoshiaki Uchikawa
 ===========================================================================
+Done for version ??? (released ??/??/2000):
+  Fixed
+    1- gp -p1e -->SEGV
+    2- nfinit([x,1]) --> SEGV
+
+===========================================================================
 Done for version 2.0.19.beta (released 17/03/2000):
   Fixed
     1- buffer overflow in ploth (when extrema too large)
