@@ -1466,9 +1466,9 @@ conductor(GEN bnr, GEN H, long all)
   p1[1] = lcopy(mod); return gerepileupto(av, p1);
 }
 
-/* etant donne un bnr et un polynome relatif, trouve le groupe des normes
-   correspondant a l'extension relative en supposant qu'elle est abelienne
-   et que le module donnant bnr est multiple du conducteur. */
+/* return the norm group corresponding to the relative extension given by
+ * polrel over bnr.bnf, assuming it is abelian and the modulus of bnr is a
+ * multiple of the conductor */
 GEN
 rnfnormgroup(GEN bnr, GEN polrel)
 {
@@ -1547,6 +1547,7 @@ rnfnormgroup(GEN bnr, GEN polrel)
   cgiv(detgroup); return gerepileupto(av,group);
 }
 
+/* FIXME: check should be done mod p [ p \nmid Norm(disc(pol)) ]*/
 static int
 rnf_is_abelian(GEN nf, GEN pol)
 {

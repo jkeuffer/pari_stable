@@ -409,7 +409,7 @@ rnfelementabstorel(GEN rnf,GEN x)
   }
 }
 
-/* x doit etre un polymod ou un polynome ou un vecteur de tels objets... */
+/* x t_POLMOD or t_POL or vector of such objects */
 GEN
 rnfelementup(GEN rnf,GEN x)
 {
@@ -433,7 +433,7 @@ rnfelementup(GEN rnf,GEN x)
   }
 }
 
-/* x doit etre un polymod ou un polynome ou un vecteur de tels objets..*/
+/* x t_POLMOD or t_POL or vector of such objects */
 GEN
 rnfelementdown(GEN rnf,GEN x)
 {
