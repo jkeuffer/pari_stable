@@ -2138,7 +2138,7 @@ umodratu(GEN a, ulong p)
 /*FIXME: Unify the following 3 divrem routines. Treat the case x,y (lifted) in
  * R[X], y non constant. Given: (lifted) [inv(), mul()], (delayed) red() in R */
 
-/* x and y in Z[X]. Possibly x in Z */
+/* x and y in Z[X].*/
 GEN
 FpX_divrem(GEN x, GEN y, GEN p, GEN *pr)
 {
@@ -2147,15 +2147,16 @@ FpX_divrem(GEN x, GEN y, GEN p, GEN *pr)
   GEN z,p1,rem,lead;
 
   if (!signe(y)) err(gdiver);
+  if (typ(x) != t_POL) err(bugparier," FpX_divrem(x, y, p), x is not a polynomial");
   vx = varn(x);
   dy = degpol(y);
-  dx = (typ(x)==t_INT)? 0: degpol(x);
+  dx = degpol(x);
   if (dx < dy)
   {
     if (pr)
     {
       av0 = avma; x = FpX_red(x, p);
-      if (pr == ONLY_DIVIDES) { avma=av0; return signe(x)? NULL: gzero; }
+      if (pr == ONLY_DIVIDES) { avma=av0; return signe(x)? NULL: zeropol(vx); }
       if (pr == ONLY_REM) return x;
       *pr = x;
     }
