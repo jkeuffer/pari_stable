@@ -1297,7 +1297,7 @@ weipell(GEN e, long PREC)
 {
   GEN c4 = (GEN)e[10];
   GEN c6 = (GEN)e[11];
-  checkell(e); return _weipell(c4,c6,PREC);
+  (void)checkell(e); return _weipell(c4,c6,PREC);
 }
 
 GEN
