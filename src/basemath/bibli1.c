@@ -1263,7 +1263,8 @@ PRECPB:
         if (!gram && Q[n-1] == zero)
         {
           if (DEBUGLEVEL>3) fprintferr("\nChecking LLL basis\n");
-          Householder_get_mu(gmul(xinit,h), L, B, n, Q, prec);
+          j = Householder_get_mu(gmul(xinit,h), L, B, n, Q, prec);
+          if (!j) goto PRECPB;
           k = 2; continue;
         }
         break;
