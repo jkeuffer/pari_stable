@@ -1606,7 +1606,7 @@ apell1(GEN e, GEN p)
   A = gzero; B = gun; h = p1p;
   for(;;)
   {
-    while (KRO != -KROold)
+    while (!KRO || KRO == KROold)
     { /* look for points alternatively on E and its quadratic twist E' */
       x++; /* u = x^3 + c4 x + c6 */
       u = modii(addii(c6, mului(x, addii(c4, muluu(x,x)))), p);
@@ -1908,7 +1908,7 @@ apell0(GEN e, long p)
   A = 0; B = 1; h = p1p;
   for(;;)
   {
-    while (KRO != -KROold)
+    while (!KRO || KRO == KROold)
     {
       x++;
       u = addssmod(c6, mulssmod(x, c4+mulssmod(x,x,p), p), p);
@@ -1924,7 +1924,7 @@ apell0(GEN e, long p)
     if (!s) s = 1;
     if (!table)
     {
-      table = (multiple *) gpmalloc((s+1)*sizeof(multiple));
+      table = (multiple *) gpmalloc((s+1) * sizeof(multiple));
       F = f;
     }
     else
