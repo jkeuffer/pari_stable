@@ -1643,7 +1643,7 @@ static long
 a_posteriori_errors(GEN p, GEN roots_pol, long err)
 {
   GEN sigma,overn,shatzle,x;
-  long i, e, n = degpol(p), e_max = -EXPOBITS;
+  long i, e, n = degpol(p), e_max = -(long)EXPOBITS;
 
   sigma = real2n(err + (long)log2((double)n) + 1, 3);
   overn = dbltor(1./n);
