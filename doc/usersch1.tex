@@ -14,14 +14,13 @@ The PARI system is a package which is capable of doing formal computations
 on recursive mathematical types at high speed; it is primarily aimed at
 number theorists, but can be used by anybody whose primary need is speed.
 
-Although quite an amount of symbolic manipulation is possible in PARI, this
-system does badly compared to more sophisticated systems like Axiom, Macsyma,
-Maple, Mathematica or Reduce on such manipulations (e.g.~multivariate
-polynomials, formal integration, etc\dots). On the other hand, the three main
-advantages of the system are its speed (which can be between 5 and 100 times
-better on many computations), the possibility of using directly data types
-which are familiar to mathematicians, and its extensive algebraic number
-theory module which has no equivalent in the above-mentioned systems.
+Although quite an amount of symbolic manipulation is possible, PARI does
+badly compared to more sophisticated systems like Axiom, Macsyma, Maple,
+Mathematica or Reduce on such tasks (e.g.~multivariate polynomials, formal
+integration, etc\dots). On the other hand, the three main advantages of the
+system are its speed, the possibility of using directly data types which are
+familiar to mathematicians, and its extensive algebraic number theory module
+which has no equivalent in the above-mentioned systems.
 
 It is possible to use PARI in three different ways:
 
@@ -96,7 +95,7 @@ kernel is slightly slower than the native one for small operands (less than
 around 10000 decimal digits).
 
 A third version is written entirely in ANSI C, with a C++-compatible syntax,
-and should be portable without much trouble to any 32 or 64-bit computer
+and should be portable without trouble to any 32 or 64-bit computer
 having no drastic memory constraints. It is about 2 times slower than
 versions including an assembly kernel. This version has been tested for
 example on MIPS based DECstations 3100 and 5000 and SGI computers, on various
@@ -123,13 +122,12 @@ each GP or PARI object has a specific internal type, depending on the
 mathematical object it represents.
 
 The crucial word is \idx{recursiveness}: most of the types PARI knows
-about are recursive. For example, the basic internal type {\bf Complex} exists
-(actually called \typ{COMPLEX}). However, the components (i.e.~the real and
-imaginary part) of such a ``complex number'' can be of any type. The only
-sensible ones are integers (we are then in $\Z[i]$), rational numbers
-($\Q[i]$), real numbers ($\R[i]=\C$), or even elements of $\Z/n\Z$
-(in $(\Z/n\Z)[t]/(t^2+1)$), or $p$-adic numbers when $p\equiv 3 \mod 4$
-($\Q_{p}[i]$).
+about are recursive. For example, the basic internal type \typ{COMPLEX}
+exists. However, the components (i.e.~the real and imaginary part) of such a
+``complex number'' can be of any type. The only sensible ones are integers
+(we are then in $\Z[i]$), rational numbers ($\Q[i]$), real numbers
+($\R[i]=\C$), or even elements of $\Z/n\Z$ (in $(\Z/n\Z)[t]/(t^2+1)$), or
+$p$-adic numbers when $p\equiv 3 \mod 4$ ($\Q_{p}[i]$).
 
 This feature must not be used too rashly in library mode: for example you are
 in principle allowed to create objects which are ``complex numbers of complex
@@ -218,11 +216,11 @@ digits, and the binary exponent must be in absolute value less than
 $2^{23}=8388608$.
 
 Note that PARI has been optimized so that it works as fast as possible on
-numbers with at most a few thousand decimal digits. In particular, not too
-much effort has been put into asymptotically fast DFT-based techniques (only
-the Karatsuba multiplication is implemented). Hence, although it is possible
-to use PARI to do computations with $10^7$ decimal digits, much better
-programs can be written for such huge numbers.
+numbers with at most a few thousand decimal digits. In particular, no effort
+has been put into asymptotically fast DFT-based techniques (only divide and
+conquer methods are implemented, a la Karatsuba). Hence, although it is
+possible to use PARI to do computations with $10^7$ decimal digits,
+better programs can be written for such huge numbers.
 
 Integers and real numbers are non-recursive types and are sometimes called
 \tet{leaves}.
@@ -254,8 +252,7 @@ number}\sidx{quadratic number} quadratic numbers are numbers of the form
 $a+bw$, where $w$ is such that $[\Z[w]:\Z]=2$, and more precisely $w=\sqrt
 d/2$ when $d\equiv 0 \mod 4$, and $w=(1+\sqrt d)/2$ when $d\equiv 1 \mod 4$,
 where $d$ is the discriminant of a quadratic order. Complex numbers
-correspond to the very important special case
-$w=\sqrt{-1}$.\label{se:compquad}
+correspond to the important special case $w=\sqrt{-1}$.\label{se:compquad}
 
 Complex numbers are partially recursive: the two components $a$
 and $b$ can be of type \typ{INT}, \typ{REAL}, \typ{INTMOD}, \typ{FRAC}, or
@@ -292,7 +289,7 @@ object. Another important notion is that of an {\bf \idx{exact object}}: by
 definition, numbers of basic type real, $p$-adic or power series are
 imprecise, and we will say that a PARI object having one of these imprecise
 types anywhere in its tree is not exact. All other PARI objects will be
-called exact. This is a very important notion since no numerical analysis is
+called exact. This is an important notion since no numerical analysis is
 involved when dealing with exact objects.
 
 \subsubsec{Scalar types}:\sidx{scalar type} the first nine basic types, from
@@ -430,9 +427,8 @@ SQUFOF, Pollard's rho, Lenstra's ECM, the MPQS quadratic sieve). These
 routines output strong pseudoprimes, which may be certified by the APRCL
 test.
 
-There is also a very large package which enables the number theorist to work
-with ease in algebraic number fields. All the usual operations on elements,
-ideals, prime ideals, etc\dots are available.
+There is also a large package to work with algebraic number fields. All the
+usual operations on elements, ideals, prime ideals, etc\dots are available.
 
 More sophisticated functions are also implemented, like solving Thue
 equations, finding integral bases and discriminants of number fields,
