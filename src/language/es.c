@@ -2165,9 +2165,27 @@ try_pipe(char *cmd, int flag)
   {
     file = (FILE *) popen(cmd, (flag & mf_OUT)? "w": "r");
     if (flag & mf_OUT) flag |= mf_PERM;
-    f = "";
+    if (flag & (mf_TEST | mf_OUT))
+    {
+      jmp_buf env;
+      void *c;
+      if (DEBUGFILES) fprintferr("checking output pipe...\n");
+      if (setjmp(env))
+      {
+        if (file) pclose(file);
+        file = NULL; 
+      }
+      else
+      {
+        c = err_catch(-1, env, NULL);
+        fprintf(file,"       \n\n"); fflush(file);
+      }
+      err_leave(&c);
+      if (!file) return NULL;
+    }
+    f = cmd;
   }
-  if (!file) err(talker,"%s failed !",cmd);
+  if (!file) err(talker,"[pipe:] '%s' failed",cmd);
   return newfile(file, f, mf_PIPE|flag);
 #endif
 }

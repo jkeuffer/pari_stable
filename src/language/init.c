@@ -159,6 +159,12 @@ pari_sighandler(int sig)
       break;
 #endif
 
+#ifdef SIGPIPE
+    case SIGPIPE:
+      msg="broken pipe";
+      break;
+#endif
+
     default:
       msg="unknown signal";
   }

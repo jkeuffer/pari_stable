@@ -234,17 +234,6 @@ gp_output(GEN x)
     }
 }
 
-/* initialise external prettyprinter (tex2mail) */
-static void
-prettyp_init()
-{
-  if (!prettyprinter_file)
-    prettyprinter_file = try_pipe(prettyprinter, mf_OUT);
-  pariflush();
-  pari_outfile = prettyprinter_file->file;
-  prettyp = f_TEX;
-}
-
 /* Wait for prettyprinter for finish, to prevent new prompt from overwriting
  * the output.  Fill the output buffer, wait until it is read.
  * Better than sleep(2): give possibility to print */
@@ -257,6 +246,25 @@ prettyp_wait()
   pariputs("\n\n"); pariflush(); /* start translation */
   while (--i) pariputs(s);
   pariputs("\n"); pariflush();
+}
+
+/* initialise external prettyprinter (tex2mail) */
+static void
+prettyp_init()
+{
+  if (!prettyprinter_file)
+  {
+    pariFILE *f = try_pipe(prettyprinter, mf_OUT | mf_TEST);
+    if (!f)
+    {
+      err(warner,"invalid prettyprinter: '%s'",prettyprinter);
+      free(prettyprinter); prettyprinter = NULL; return;
+    }
+    prettyprinter_file = f;
+  }
+  pariflush();
+  pari_outfile = prettyprinter_file->file;
+  prettyp = f_TEX;
 }
 
 /* print a sequence of (NULL terminated) GEN */
@@ -811,8 +819,17 @@ sd_prettyprinter(char *v, int flag)
     if (secure) err_secure("prettyprinter",v);
     if (old && strcmp(old,v) && prettyprinter_file)
     {
-      pari_fclose(prettyprinter_file);
-      prettyprinter_file = NULL;
+      pariFILE *f = try_pipe(v, mf_OUT | mf_TEST);
+      if (f)
+      {
+        pari_fclose(prettyprinter_file);
+        prettyprinter_file = f;
+      }
+      else
+      {
+        err(warner,"invalid prettyprinter: '%s'",v);
+        return gnil;
+      }
     }
     prettyprinter = pari_strdup(v);
     if (old) free(old);
@@ -2010,6 +2027,11 @@ gp_sighandler(int sig)
     case SIGFPE:
       msg="GP (Floating Point Exception)";
       break;
+#endif
+
+#ifdef SIGPIPE
+    case SIGPIPE:
+      err(talker, "Broken Pipe, resetting file stack...");
 #endif
 
     default:
