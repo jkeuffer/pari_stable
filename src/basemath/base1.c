@@ -1812,6 +1812,7 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
     else
     {
       if (DEBUGLEVEL>2) fprintferr("chk_gen_init: subfield %Z\n",P);
+#if 1
       S[i] = dP;
       if (firstprim)
       { /* cycle basis vectors so that primitive elements come last */
@@ -1830,6 +1831,7 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
         R[firstprim] = (long)tR;
         S[firstprim] = tS; firstprim++;
       }
+#endif
     }
   }
 
