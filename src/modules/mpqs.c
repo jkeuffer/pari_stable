@@ -2549,7 +2549,7 @@ mpqs_solve_linear_system(GEN kN, GEN N, long rel, long *FB, long size_of_FB)
      to be prime (un), or an exponent (deux or some t_INT) if it is a proper
      power */
   av2 = avma; lim = stack_lim(av2,1);
-  if (rank > BITS_IN_LONG - 2)
+  if (rank > (long)BITS_IN_LONG - 2)
     res_max = VERYBIGINT;	/* this, unfortunately, is the common case */
   else
     res_max = 1L<<rank;		/* max number of factors we can hope for */

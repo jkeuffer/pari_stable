@@ -1191,7 +1191,7 @@ AGAIN:
     }
     else
     { /* add more p-adic digits and continue reduction */
-      long b0 = gexpo(T2) * LOGp2;
+      long b0 = (long)(gexpo(T2) * LOGp2);
       if (b0 < b) b = b0;
       b = max(b-delta, bmin);
       if (b - delta/2 < bmin) b = bmin; /* near there. Go all the way */

@@ -432,8 +432,8 @@ computetabdl(ulong q)
 static void
 compute_fg(ulong q, int half, GEN *tabf, GEN *tabg)
 {
-  const long qm3s2 = (q-3)>>1;
-  const long l = half? qm3s2: q-2;
+  const ulong qm3s2 = (q-3)>>1;
+  const ulong l = half? qm3s2: q-2;
   ulong x;
   *tabf = computetabdl(q);
   *tabg = cgetg(l+1,t_VECSMALL);
@@ -445,8 +445,7 @@ static GEN
 get_jac(ulong q, ulong p, int k, GEN tabf, GEN tabg)
 {
   GEN ze, vpk;
-  long i, qm3s2;
-  ulong x, pk;
+  ulong i, x, pk, qm3s2;
 
   pk = u_pow(p,k);
   vpk = cgetg(pk+1,t_VECSMALL);
@@ -464,8 +463,7 @@ static GEN
 get_jac2(GEN N, ulong q, int k, GEN *j2q, GEN *j3q)
 {
   GEN jpq, vpk, tabf, tabg;
-  long i, qm3s2;
-  ulong x, pk;
+  ulong x, pk, i, qm3s2;
 
   if (k == 1) return NULL;
 
@@ -502,8 +500,8 @@ static void
 calcjac(GEN et)
 {
   pari_sp av;
-  ulong q, l;
-  int lfaq,p,k,i,j;
+  ulong i, q, l;
+  int lfaq,p,k,j;
   GEN J,tabf,tabg,faq,faqpr,faqex;
 
   globfa = (GEN)decomp(shifti(et,-vali(et)))[1];
@@ -709,7 +707,7 @@ calcglobs(GEN N, ulong t)
   for (i=1; i<lfa; i++)
   {
     pk = u_pow(itos((GEN)fapr[i]), itos((GEN)faex[i]));
-    if (pk > ltaball) ltaball = pk;
+    if ((ulong)pk > ltaball) ltaball = (ulong)pk;
   }
   inittabs(ltaball+1);
   if (DEBUGLEVEL) fprintferr("Fast pk-values: ");

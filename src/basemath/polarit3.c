@@ -3531,7 +3531,7 @@ u_FpV_roots_to_pol(GEN a, ulong p)
     p2 = cgetg(5,t_VECSMALL); p1[k++] = (long)p2;
     p2[2] = mulssmod(a[i], a[i+1], p);
     p2[3] = a[i] + a[i+1];
-    if (p2[3] >= p) p2[3] -= p;
+    if ((ulong)p2[3] >= p) p2[3] -= p;
     if (p2[3]) p2[3] = p - p2[3]; /* - (a[i] + a[i+1]) mod p */
     p2[4] = 1; p2[1] = evallgef(5);
   }
@@ -4072,7 +4072,7 @@ FpY_FpXY_resultant(GEN a, GEN b0, GEN p)
     a = u_Fp_FpX(a, pp);
     for (i=2; i<l; i++)
       b[i] = (long)u_Fp_FpX((GEN)b[i], pp);
-    if (dres >= pp)
+    if ((ulong)dres >= pp)
     {
       l = lgef(a);
       a[0] = evaltyp(t_POL) | evallg(l);
@@ -4193,7 +4193,7 @@ INIT:
   }
 
   /* make sure p large enough */
-  while (p < (dres<<1)) NEXT_PRIME_VIADIFF(p,d);
+  while (p < (ulong)(dres<<1)) NEXT_PRIME_VIADIFF(p,d);
 
   H = H0 = H1 = NULL;
   lb = lgef(B); b = u_getpol(degpol(B));
@@ -4818,7 +4818,7 @@ ffinit(GEN p, long n, long v)
   /*If we are in a easy case just use cyclo*/
   if (fpinit_check(p, n + 1, n))
     return gerepileupto(ltop,FpX(cyclo(n + 1, v),p));
-  if (lgefint(p)-2<BITS_IN_LONG-bfffo(n))
+  if ((ulong)lgefint(p)-2 < BITS_IN_LONG-bfffo(n))
     P=ffinit_fact(p,n);
   else
     P=ffinit_nofact(p,n);

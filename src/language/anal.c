@@ -54,6 +54,7 @@ static entree *skipentry(void);
 extern void killbloc0(GEN x, int inspect);
 extern int term_width(void);
 extern GEN addsmulsi(long a, long b, GEN Y);
+extern GEN rpowsi(ulong a, GEN n, long prec);
 
 /* last time we began parsing an object of specified type */
 static struct
@@ -127,7 +128,7 @@ parse_option_string(char *arg, char *tmplate, long flag, char **failure, char **
 	char *e, *id;
 	char *negated;			/* action found with 'no'-ID */
 	int negate;			/* Arg has 'no' prefix removed */
-	int l, action = 0, first = 1, singleton = 0;
+	unsigned int l, action = 0, first = 1, singleton = 0;
 	char b[80], *buf, *inibuf;
 
 	if (flag & PARSEMNU_ARG_WHITESP)
@@ -135,8 +136,7 @@ parse_option_string(char *arg, char *tmplate, long flag, char **failure, char **
 	if (!*arg)
 	    break;
 	e = arg;
-	while (IS_ID(*e))
-	    e++;
+	while (IS_ID(*e)) e++;
 	/* Now the ID is whatever is between arg and e. */
 	l = e - arg;
 	if (l >= sizeof(b))
@@ -157,7 +157,7 @@ parse_option_string(char *arg, char *tmplate, long flag, char **failure, char **
 	id = tmplate;
 	while ((id = strstr(id, buf)) && id < etmplate) {
 	    if (IS_ID(id[l])) {		/* We do not allow abbreviations yet */
-		id = id + l;		/* False positive */
+		id += l;		/* False positive */
 		continue;
 	    }
 	    if ((id >= tmplate + 2) && (IS_ID(id[-1]))) {
@@ -170,16 +170,16 @@ parse_option_string(char *arg, char *tmplate, long flag, char **failure, char **
 		if ( negate		/* buf initially started with "no" */
 		     || (s < tmplate+2) || (s[-1] != 'o') || (s[-2] != 'n')
 		     || (s >= tmplate+3 && IS_ID(s[-3]))) {
-		    id = id + l;		/* False positive */
+		    id += l;		/* False positive */
 		    continue;
 		}
 		/* Found noID in the template! */
-		negated = id + l;
-		id = id + l;
+		id += l;
+		negated = id;
 		continue;		/* Try to find without 'no'. */
 	    }
 	    /* Found as is */
-	    id = id + l;
+	    id += l;
 	    break;
 	}
 	if ( !id && !negated && !negate
@@ -2285,23 +2285,21 @@ constante()
       if (nb > 8) err(talker2,"exponent too large",old,mark.start);
       if (!signe(y))
       {
-        avma = av; y = cgetr(3);
+        avma = av;
         n = (n > 0)? (long)(n/L2SL10): (long)-((-n)/L2SL10 + 1);
-        y[1] = evalsigne(0) | evalexpo(n);
-        y[2] = 0; return y;
+        return realzero_bit(n);
       }
     }
   }
-  l=lgefint(y); if (l<prec) l=prec;
+  l = lgefint(y); if (l < (long)prec) l = (long)prec;
+  z = itor(y, l);
   if (n)
   {
-    (void)new_chunk(l); /* HACK: mulrr and divrr need exactly l words */
-    z = itor(y, l);
-    y = gpowgs(stor(10,l), labs(n));
-    avma = av; /* hidden gerepile */
-    return n > 0 ?  mulrr(z,y) : divrr(z,y);
+    y = rpowsi(10UL, stoi(labs(n)), l); /* 10^|n| */
+    z = (n > 0)? mulrr(z,y): divrr(z,y);
+    z = gerepileuptoleaf(av, z);
   }
-  return itor(y, l);
+  return z;
 }
 
 /********************************************************************/
@@ -2503,7 +2501,7 @@ name_var(long n, char *s)
 
   if (n < manage_var(3,NULL))
     err(talker, "renaming a GP variable is forbidden");
-  if (n > MAXVARN)
+  if (n > (long)MAXVARN)
     err(talker, "variable number too big");
 
   ep = (entree*)gpmalloc(sizeof(entree) + strlen(s) + 1);
@@ -2560,7 +2558,7 @@ doskipseq(char *c, int strict)
     if (strict) err(talker2,"unused characters", analyseur, c);
     L = term_width();
     n = 2 * L - (17+19+1); /* Warning + unused... + . */
-    if (strlen(analyseur) > n)
+    if ((long)strlen(analyseur) > n)
     {
       s = gpmalloc(n + 1);
       n -= 5;

@@ -515,6 +515,7 @@ extern int pari_kernel_init(void);
 void
 pari_init(size_t parisize, ulong maxprime)
 {
+  ulong u;
   long i;
 
   STACK_CHECK_INIT(&i);
@@ -536,7 +537,7 @@ pari_init(size_t parisize, ulong maxprime)
   polx  = (GEN*) gpmalloc((MAXVARN+1)*sizeof(GEN));
   polun = (GEN*) gpmalloc((MAXVARN+1)*sizeof(GEN));
   polvar[0] = evaltyp(t_VEC) | evallg(1);
-  for (i=0; i <= MAXVARN; i++) { ordvar[i] = i; varentries[i] = NULL; }
+  for (u=0; u <= MAXVARN; u++) { ordvar[u] = u; varentries[u] = NULL; }
 
   (void)fetch_var(); /* create polx/polun[MAXVARN] */
   primetab = (GEN) gpmalloc(1 * sizeof(long));
@@ -764,7 +765,7 @@ changevar(GEN x, GEN y)
     p1=(GEN)y[vx];
     if (!signe(x))
     {
-      vy=gvar(p1); if (vy>MAXVARN) err(changer1);
+      vy=gvar(p1); if (vy > (long)MAXVARN) err(changer1);
       z=gcopy(x); setvarn(z,vy); return z;
     }
     av=avma; p2=changevar((GEN)x[lx-1],y);
@@ -1766,7 +1767,7 @@ long
 _get_time(pari_timer *T, long Ticks, long TickPerSecond)
 {
   long s  = Ticks / TickPerSecond;
-  long us = (long) (Ticks % TickPerSecond) * (1000000. / TickPerSecond);
+  long us = (long) ((Ticks % TickPerSecond) * (1000000. / TickPerSecond));
   long delay = 1000 * (s - T->s) + (us - T->us) / 1000;
   T->us = us;
   T->s  = s; return delay;

@@ -66,7 +66,7 @@ grando0(GEN x, long n, long do_clone)
   {
     if (tx != t_POL && ! is_rfrac_t(tx))
       err(talker,"incorrect argument in O()");
-    v = gvar(x); if (v > MAXVARN) err(talker,"incorrect object in O()");
+    v = gvar(x); if ((ulong)v > MAXVARN) err(talker,"incorrect object in O()");
     m = n*gval(x,v);
   }
   return zeroser(v,m);

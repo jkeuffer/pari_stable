@@ -124,6 +124,7 @@ BA 60- add "const" keyword to allow building with g++
    65- issquare(t_FRAC or t_RFRAC, &x) did not work [ worked without &x ]
    66- nfgaloisconj(x^2+1,4, 0) --> SEGV [ bad input ]
    67- typo in quadhilbert(-D): required O(D) memory instead of O(sqrt(D)) 
+   68- all signed/unsigned compiler warnings
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available

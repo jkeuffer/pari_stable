@@ -119,7 +119,7 @@ update_p(entree *ep, byteptr *ptr, ulong prime[])
   ulong a, c;
 
   if (typ(z) == t_INT) a = 1; else { z = gceil(z); a = 0; }
-  if (lgefint(z)>3) { prime[2] = -1; /* = infinity */ return; }
+  if (lgefint(z) > 3) { prime[2] = (long)MAXULONG; /* = infinity */ return; }
   a += itou(z); c = prime[2];
   if (c < a)
     prime[2] = sinitp(a, c, ptr); /* increased */

@@ -515,8 +515,8 @@ gegal_try(GEN x, GEN y)
 int
 gegal(GEN x, GEN y)
 {
-  ulong tx;
   pari_sp av;
+  long tx;
   long i;
   
   if (x == y) return 1;

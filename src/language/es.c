@@ -1167,7 +1167,7 @@ do_append(char **sp, char c, char *last, int count)
 }
 
 static char *
-get_texvar(long v, char *buf, int len)
+get_texvar(long v, char *buf, unsigned int len)
 {
   entree *ep = varentries[v];
   char *s, *t = buf, *e = buf + len - 1;
@@ -2909,12 +2909,12 @@ static long
 rd_long(FILE *f)
 {
   long L;
-  _lfread(&L, 1, f); return L;
+  _lfread(&L, 1UL, f); return L;
 }
 static void
 wr_long(long L, FILE *f)
 {
-  _lfwrite(&L, 1, f);
+  _lfwrite(&L, 1UL, f);
 }
 
 /* append x to file f */
@@ -2922,7 +2922,7 @@ static void
 wrGEN(GEN x, FILE *f)
 {
   GENbin *p = copy_bin(x);
-  long L = p->len;
+  size_t L = p->len;
 
   wr_long(L,f);
   wr_long((long)p->x,f);
@@ -2934,7 +2934,7 @@ wrGEN(GEN x, FILE *f)
 static void
 wrstr(char *s, FILE *f)
 {
-  long L = strlen(s)+1;
+  size_t L = strlen(s)+1;
   wr_long(L,f);
   _cfwrite(s, L, f);
 }
@@ -2942,7 +2942,7 @@ wrstr(char *s, FILE *f)
 static char *
 rdstr(FILE *f)
 {
-  long L = rd_long(f);
+  size_t L = (size_t)rd_long(f);
   char *s;
   if (!L) return NULL;
   s = gpmalloc(L);
@@ -2968,7 +2968,7 @@ writenamedGEN(GEN x, char *s, FILE *f)
 static GEN
 rdGEN(FILE *f)
 {
-  long L = rd_long(f);
+  size_t L = (size_t)rd_long(f);
   GENbin *p;
 
   if (!L) return NULL;
@@ -3018,7 +3018,7 @@ const long BINARY_VERSION = 0;
 static int
 is_magic_ok(FILE *f)
 {
-  int L = strlen(MAGIC);
+  size_t L = strlen(MAGIC);
   char *s = gpmalloc(L);
   int r = (fread(s,1,L, f) == L && strncmp(s,MAGIC,L) == 0);
   free(s); return r;

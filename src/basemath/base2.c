@@ -286,7 +286,7 @@ ordmax(GEN *cf, GEN p, long epsilon, GEN *ptdelta)
   GEN T,T2,Tn,m,v,delta,hard_case_exponent, *w;
   const GEN pp = sqri(p);
   const GEN ppo2 = shifti(pp,-1);
-  const long pps = (2*expi(pp)+2<BITS_IN_LONG)? pp[2]: 0;
+  const long pps = (2*expi(pp)+2 < (long)BITS_IN_LONG)? pp[2]: 0;
 
   if (cmpis(p,n) > 0)
   {

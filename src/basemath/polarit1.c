@@ -283,7 +283,7 @@ factmod_init(GEN *F, GEN pp, long *p)
   GEN f = *F;
   long i,d;
   if (typ(f)!=t_POL || typ(pp)!=t_INT) err(typeer,"factmod");
-  if (expi(pp) > BITS_IN_LONG - 3) *p = 0;
+  if ((ulong)expi(pp) > BITS_IN_LONG - 3) *p = 0;
   else
   {
     *p = itos(pp);

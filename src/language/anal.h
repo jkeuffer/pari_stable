@@ -36,7 +36,7 @@ typedef struct module {
 
 /* binary I/O */
 typedef struct GENbin {
-  long len; /* taille(x) */
+  size_t len; /* taille(x) */
   GEN x; /* binary copy of x */
   GEN base; /* base address of p->x */
 } GENbin;

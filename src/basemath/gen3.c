@@ -2271,7 +2271,7 @@ coefstoser(GEN x, long v, long prec)
 GEN
 poltoser(GEN x, long v, long prec)
 {
-  long tx = typ(x), vx = varn(x), lx, l, i, j;
+  long tx = typ(x), vx = varn(x), lx, i, j, l;
   GEN y;
 
   if (gcmp0(x)) return zeroser(v, prec);
@@ -2279,7 +2279,7 @@ poltoser(GEN x, long v, long prec)
   if (vx < v) return coefstoser(x, v, prec);
 
   lx = lgef(x); i = 2; while (i<lx && gcmp0((GEN)x[i])) i++;
-  l = lx-i; if (precdl > l) l = precdl;
+  l = lx-i; if (precdl > (ulong)l) l = (long)precdl;
   l += 2;
   y = cgetg(l,t_SER);
   y[1] = evalsigne(1) | evalvalp(i-2) | evalvarn(v);
