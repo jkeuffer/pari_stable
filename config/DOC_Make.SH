@@ -6,8 +6,8 @@ cat > doc/Makefile << EOT
 SHELL = $make_sh
 
 doc all: manual refcard tutorial
-docps: refcard.ps tutorial.ps users.ps ../INSTALL.ps
-docpdf: users.pdf tutorial.pdf refcard.pdf ../INSTALL.pdf
+docps: refcard.ps tutorial.ps users.ps INSTALL.ps
+docpdf: users.pdf tutorial.pdf refcard.pdf INSTALL.pdf
 manual: users.dvi
 tutorial: tutorial.dvi
 refcard: refcard.ps
@@ -20,41 +20,17 @@ paricfg.tex: paricfg.tex.in
 	    -e 's!@libdir@!$libdir!'\\
 	    -e 's!@miscdir@!$miscdir!' paricfg.tex.in > \$@
 
-tutorial.pdf: tutorial.tex paricfg.tex
-	-touch $pdf
-	pdftex tutorial.tex
-	-rm -f $pdf
+%.pdf: %.tex paricfg.tex
+	-touch $pdf; pdftex \$<; rm -f $pdf
 
-refcard.pdf: refcard.tex paricfg.tex
-	-touch $pdf
-	pdftex refcard.tex
-	-rm -f $pdf
+%.dvi: %.tex paricfg.tex
+	-rm -f $pdf; tex \$<
 
-../INSTALL.pdf: ../INSTALL.tex
-	-cd ..; touch $pdf; pdftex INSTALL.tex; rm -f $pdf
-
-tutorial.dvi: tutorial.tex paricfg.tex
-	-rm -f $pdf
-	tex tutorial.tex
-
-refcard.dvi: refcard.tex paricfg.tex
-	-rm -f $pdf
-	tex refcard.tex
-
-../INSTALL.dvi: ../INSTALL.tex
-	-cd ..; rm -f $pdf; tex INSTALL.tex
+%.ps: %.dvi
+	dvips \$< -o \$@
 
 refcard.ps: refcard.dvi
 	dvips -t landscape -t a4 refcard.dvi -o \$@
-
-users.ps: users.dvi
-	dvips users.dvi -o \$@
-
-tutorial.ps: tutorial.dvi
-	dvips tutorial.dvi -o \$@
-
-../INSTALL.ps: ../INSTALL.dvi
-	dvips ../INSTALL.dvi -o \$@
 
 users.dvi: users.tex appa.tex appb.tex appc.tex\\
  usersch1.tex usersch2.tex usersch3.tex usersch4.tex usersch5.tex\\
@@ -83,9 +59,7 @@ gpman: gp.1
 	nroff -man gp.1 | unix2dos -ascii > gp.man
 
 clean:	
-	rm -f *.log *.dvi *.idx *.ps *.pdf *.aux *.toc users.std $pdf\\
-	../INSTALL.log ../INSTALL.dvi ../INSTALL.idx ../INSTALL.pdf\\
-	../INSTALL.aux ../INSTALL.toc ../INSTALL.ps ../$pdf *.dumbpod *.3
+	rm -f *.log *.dvi *.idx *.ps *.pdf *.aux *.toc users.std $pdf *.dumbpod *.3
 
 cleandoc: clean
 
@@ -124,6 +98,4 @@ html: dumbpod appa.html appb.html appc.html usersch1.html usersch2.html usersch3
 
 .dumbpod.3:
 	pod2man --section=3 --center="PARI/GP Manual, part \$*" --release=$version.$patch --lax \$*.dumbpod > tmp_man && mv tmp_man \$*.3
-
-
 EOT

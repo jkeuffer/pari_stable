@@ -6,8 +6,7 @@ COMPAT
 COPYING
 CVS.txt
 Configure
-INSTALL.txt
-INSTALL.tex
+INSTALL
 MACHINES
 NEW
 Odos/Makefile
@@ -79,6 +78,7 @@ config/paricfgDOS.h.SH
 config/rl_version.c
 config/tar_distrib
 config/version
+doc/INSTALL.tex
 doc/appa.tex
 doc/appb.tex
 doc/appc.tex
