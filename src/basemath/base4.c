@@ -895,10 +895,13 @@ ideleaddone_i(GEN nf, GEN x, GEN y)
 
   if (gcmp0(u)) u = (GEN)idealhermite_aux(nf,x)[1];
   p2 = zarchstar(nf, idealmul(nf,x,y), archp);
-  p1 = lift_intern(gmul((GEN)p2[3], zsigne(nf,u,archp)));
   p2 = (GEN)p2[2]; nba = 0;
+  p1 = gmul((GEN)p2[3], zsigne(nf,u,archp));
   for (i = 1; i < lg(p1); i++)
-    if (signe(p1[i])) { nba = 1; u = element_mul(nf,u,(GEN)p2[i]); }
+  {
+    GEN t = (GEN)p1[i];
+    if (mpodd(t)) { nba = 1; u = element_mul(nf,u,(GEN)p2[i]); }
+  }
   if (gcmp0(u)) return gcopy((GEN)x[1]); /* can happen if y = Z_K */
   return nba? u: gcopy(u);
 }

@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*******************************************************************/
 #include "pari.h"
 #include "parinf.h"
+extern GEN F2V_red_ip(GEN v);
 extern GEN gmul_mati_smallvec(GEN x, GEN y);
 extern GEN check_and_build_cycgen(GEN bnf);
 extern GEN get_arch_real(GEN nf,GEN x,GEN *emb,long prec);
@@ -86,8 +87,8 @@ ok_congruence(GEN X, GEN ell, long lW, GEN vecMsup)
 static int
 ok_sign(GEN X, GEN msign, GEN arch)
 {
-  GEN p1 = lift(gmul(msign,X)); settyp(p1,t_VEC);
-  return gegal(p1, arch);
+  GEN p1 = F2V_red_ip( gmul(msign, X) );
+  settyp(p1,t_VEC); return gegal(p1, arch);
 }
 
 /* REDUCTION MOD ell-TH POWERS */

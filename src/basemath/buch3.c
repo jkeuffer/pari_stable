@@ -21,6 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "parinf.h"
 
+extern GEN zlog(GEN nf, GEN a, zlog_S *S);
 extern GEN make_integral(GEN nf, GEN L0, GEN f, GEN *listpr);
 extern GEN unif_mod_fZ(GEN pr, GEN F);
 extern GEN init_unif_mod_fZ(GEN L);
@@ -424,17 +425,27 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
 /**                   INIT RAY CLASS GROUP                         **/
 /**                                                                **/
 /********************************************************************/
+static GEN
+get_dataunit(GEN nf, GEN zu, GEN fu, GEN bid)
+{
+  long i, l = lg(fu) + 1;
+  GEN D = cgetg(l, t_MAT), cyc = gmael(bid,2,2);
+  zlog_S S; init_zlog_bid(&S, bid);
+  D[1] = (long)vecmodii( gmul(S.U, zlog(nf, zu, &S)), cyc );
+  for (i = 2; i < l; i++)
+    D[i] = (long)vecmodii( gmul(S.U, zlog(nf, (GEN)fu[i-1], &S)), cyc );
+  return concatsp(D, diagonal(cyc));
+}
 
 static GEN
 buchrayall(GEN bnf,GEN module,long flag)
 {
-  GEN nf,cyc,gen,genplus,hmatu,u,clg,logs;
-  GEN dataunit,p1,h,met,u1,u2,U,cycgen;
-  GEN racunit,bigres,bid,cycbid,genbid,x,y,funits,hmat,vecel;
+  GEN nf, cyc, gen, genplus, hmatu, u, clg, logs, p1, h, met, u1, u2, U, cycgen;
+  GEN bigres, bid, cycbid, genbid, x, y, funits, hmat, vecel;
   long RU, Ri, j, ngen, lh;
   const int add_gen = flag & nf_GEN;
   const int do_init = flag & nf_INIT;
-  pari_sp av=avma;
+  pari_sp av = avma;
 
   bnf = checkbnf(bnf); nf = checknf(bnf);
   funits = check_units(bnf, "buchrayall"); RU = lg(funits);
@@ -487,16 +498,12 @@ buchrayall(GEN bnf,GEN module,long flag)
   }
 
   cycgen = check_and_build_cycgen(bnf);
-  dataunit = cgetg(RU+1,t_MAT); racunit = gmael(bigres,4,2);
-  dataunit[1] = (long)zideallog(nf,racunit,bid);
-  for (j=2; j<=RU; j++)
-    dataunit[j] = (long)zideallog(nf,(GEN)funits[j-1],bid);
-  dataunit = concatsp(dataunit, diagonal(cycbid));
-  hmatu = hnfall(dataunit); hmat = (GEN)hmatu[1];
+  hmatu = hnfall( get_dataunit(nf, gmael(bigres,4,2), funits, bid) );
+  hmat = (GEN)hmatu[1];
 
   logs = cgetg(ngen+1, t_MAT);
   /* FIXME: cycgen[j] is not necessarily coprime to bid, but it is made coprime
-   * in zideallog using canonical uniformizers [from bid data]: no need to
+   * in famat_zlog using canonical uniformizers [from bid data]: no need to
    * correct it here. The same ones will be used in isprincipalrayall. Hence
    * modification by vecel is useless. */
   for (j=1; j<=ngen; j++)
@@ -504,7 +511,7 @@ buchrayall(GEN bnf,GEN module,long flag)
     p1 = (GEN)cycgen[j];
     if (typ(vecel[j]) != t_INT) /* <==> != 1 */
       p1 = arch_mul(to_famat_all((GEN)vecel[j], (GEN)cyc[j]), p1);
-    logs[j] = (long)zideallog(nf,p1,bid); /* = log(genplus[j]) */
+    logs[j] = (long)zideallog(nf, p1, bid); /* = log(genplus[j]) */
   }
   /* [ cyc  0   ]
    * [-logs hmat] = relation matrix for Cl_f */
@@ -583,8 +590,7 @@ bnrinit0(GEN bnf, GEN ideal, long flag)
 GEN
 rayclassno(GEN bnf,GEN ideal)
 {
-  GEN nf,h,dataunit,racunit,bigres,bid,cycbid,funits,H;
-  long RU,i;
+  GEN nf, h, D, bigres, bid, cycbid, funits, H;
   pari_sp av = avma;
 
   bnf = checkbnf(bnf); nf = (GEN)bnf[7];
@@ -594,13 +600,8 @@ rayclassno(GEN bnf,GEN ideal)
   if (lg(cycbid) == 1) return gerepileuptoint(av, icopy(h));
 
   funits = check_units(bnf,"rayclassno");
-  RU = lg(funits); racunit = gmael(bigres,4,2);
-  dataunit = cgetg(RU+1,t_MAT);
-  dataunit[1] = (long)zideallog(nf,racunit,bid);
-  for (i=2; i<=RU; i++)
-    dataunit[i] = (long)zideallog(nf,(GEN)funits[i-1],bid);
-  dataunit = concatsp(dataunit, diagonal(cycbid));
-  H = hnfmodid(dataunit,(GEN)cycbid[1]); /* (Z_K/f)^* / units ~ Z^n / H */
+  D = get_dataunit(nf, gmael(bigres,4,2), funits, bid);
+  H = hnfmodid(D, (GEN)cycbid[1]); /* (Z_K/f)^* / units ~ Z^n / H */
   return gerepileuptoint(av, mulii(h, dethnf_i(H)));
 }
 
@@ -1837,7 +1838,7 @@ rayclassnolist(GEN bnf,GEN lists)
   for (i = 1; i < lx; i++)
   {
     b = (GEN)B[i]; /* bid's */
-    u = (GEN)U[i]; /* units zideallogs */
+    u = (GEN)U[i]; /* units logs wrt bid */
     ly = lg(b); l = cgetg(ly,t_VEC); L[i] = (long)l;
     for (j=1; j<ly; j++)
     {

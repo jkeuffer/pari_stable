@@ -800,11 +800,10 @@ eval_sign(GEN M, GEN x, long k)
 }
 
 static GEN
-const_sign(GEN archp, int s)
+vecconst(GEN v, GEN x)
 {
-  long i, l = lg(archp);
-  GEN v = cgetg(l, t_COL), sgn = gmodulss(s? 1: 0, 2);
-  for (i = 1; i < l; i++) v[i] = (long)sgn;
+  long i, l = lg(v);
+  for (i = 1; i < l; i++) v[i] = (long)x;
   return v;
 }
 
@@ -841,31 +840,36 @@ perm_to_arch(GEN nf, GEN archp)
   return v;
 }
 
-/* return (column) vector of R1 signatures of x (coeff modulo 2)
+/* reduce mod 2 in place */
+GEN
+F2V_red_ip(GEN v)
+{
+  long i, l = lg(v);
+  for (i = 1; i < l; i++) v[i] = mpodd((GEN)v[i])? un: zero;
+  return v;
+}
+
+/* return (column) vector of R1 signatures of x (0 or 1)
  * if arch = NULL, assume arch = [0,..0] */
 GEN
 zsigne(GEN nf,GEN x,GEN arch)
 {
-  GEN _0, _1, M, vecsign, archp = arch_to_perm(arch);
+  GEN M, V, archp = arch_to_perm(arch);
   long i, s, l = lg(archp);
-  pari_sp av0, av;
+  pari_sp av;
 
   if (l == 1) return cgetg(1,t_COL);
-  av0 = avma;
-  vecsign = cgetg(l,t_COL);
-  _0 = gmodulss(0,2);
-  _1 = gmodulss(1,2); av = avma;
+  V = cgetg(l,t_COL); av = avma;
   nf = checknf(nf);
   switch(typ(x))
   {
     case t_MAT: /* factorisation */
     {
-      GEN g = (GEN)x[1], e = (GEN)x[2];
-      vecsign = const_sign(archp, 0);
+      GEN g = (GEN)x[1], e = (GEN)x[2], z = vecconst(V, gzero);
       for (i=1; i<lg(g); i++)
-        if (mpodd((GEN)e[i]))
-          vecsign = gadd(vecsign, zsigne(nf,(GEN)g[i],archp));
-      return gerepileupto(av0, vecsign);
+        if (mpodd((GEN)e[i])) z = gadd(z, zsigne(nf,(GEN)g[i],archp));
+      for (i=1; i<l; i++) V[i] = mpodd((GEN)z[i])? un: zero;
+      avma = av; return V;
     }
     case t_POLMOD: x = (GEN)x[2];      /* fall through */
     case t_POL: x = algtobasis(nf, x); /* fall through */
@@ -873,12 +877,11 @@ zsigne(GEN nf,GEN x,GEN arch)
                 x = (GEN)x[1];         /* fall through */
     case t_INT: case t_FRAC:
       s = gsigne(x); if (!s) err(talker,"zero element in zsigne");
-      avma = av0; return const_sign(archp, (s < 0));
+      return vecconst(V, (s < 0)? gun: gzero);
   }
   x = Q_primpart(x); M = gmael(nf,5,1);
-  for (i = 1; i < l; i++)
-    vecsign[i] = (eval_sign(M, x, archp[i]) > 0)? (long)_0: (long)_1;
-  avma = av; return vecsign;
+  for (i = 1; i < l; i++) V[i] = (eval_sign(M, x, archp[i]) > 0)? zero: un;
+  avma = av; return V;
 }
 
 /* return the t_COL vector of signs of x; the matrix of such if x is a vector
@@ -988,9 +991,9 @@ set_sign_mod_idele(GEN nf, GEN x, GEN y, GEN idele, GEN sarch)
   arch = (GEN)idele[2];
   s = zsigne(nf, y, arch);
   if (x) s = gadd(s, zsigne(nf, x, arch));
-  s = lift_intern(gmul((GEN)sarch[3],s));
+  s = gmul((GEN)sarch[3], s);
   for (i=1; i<nba; i++)
-    if (signe(s[i])) y = element_mul(nf,y,(GEN)gen[i]);
+    if (mpodd((GEN)s[i])) y = element_mul(nf,y,(GEN)gen[i]);
   return y;
 }
 
@@ -1629,8 +1632,8 @@ zlog_add_sign(GEN y0, GEN sgn, GEN lists)
   long i;
   if (!sgn) return;
   y = y0 + lg(y0);
-  s = lift_intern(gmul(gmael(lists, lg(lists)-1, 3), sgn));
-  for (i = lg(s)-1; i > 0; i--) *--y = s[i];
+  s = gmul(gmael(lists, lg(lists)-1, 3), lift_intern(sgn));
+  for (i = lg(s)-1; i > 0; i--) *--y = mpodd((GEN)s[i])? un: zero;
 }
 
 static GEN
@@ -1731,7 +1734,7 @@ zlog_ind(GEN nf, GEN a, zlog_S *S, long index)
   for (i=1; i <= S->n; i++) y0[i] = licopy((GEN)y0[i]);
   return y0;
 }
-static GEN
+GEN
 zlog(GEN nf, GEN a, zlog_S *S) { return zlog_ind(nf, a, S, 0); }
 
 /* Log on bid.gen of generators of P_{1,I pr^{e-1}} / P_{1,I pr^e} (I,pr) = 1,
@@ -1954,6 +1957,7 @@ zideallog(GEN nf, GEN x, GEN bid)
   pari_sp av;
   long N, lcyc;
   GEN den, cyc, y;
+  int ok = 0;
 
   nf = checknf(nf); checkbid(bid);
   cyc = gmael(bid,2,2);
@@ -1963,7 +1967,8 @@ zideallog(GEN nf, GEN x, GEN bid)
   switch(typ(x))
   {
     case t_INT: case t_FRAC: case t_FRACN:
-      x = gscalcol_i(x,N); break;
+      ok = 1; den = denom(x);
+      break;
     case t_POLMOD: case t_POL:
       x = algtobasis(nf,x); break;
     case t_COL: break;
@@ -1974,8 +1979,11 @@ zideallog(GEN nf, GEN x, GEN bid)
 
     default: err(talker,"not an element in zideallog");
   }
-  if (lg(x) != N+1) err(talker,"not an element in zideallog");
-  check_nfelt(x, &den);
+  if (!ok)
+  {
+    if (lg(x) != N+1) err(talker,"not an element in zideallog");
+    check_nfelt(x, &den);
+  }
   if (den)
   {
     GEN g = cgetg(3, t_COL);
@@ -2147,7 +2155,7 @@ logunitmatrixarch(GEN nf, GEN funits, GEN racunit, GEN bid)
   liste = (GEN)bid[4]; structarch = (GEN)liste[lg(liste)-1];
   m[1] = (long)zsigne(nf, racunit, arch);
   for (j=2; j<=R+1; j++) m[j] = (long)zsigne(nf, (GEN)funits[j-1], arch);
-  return lift_intern(gmul((GEN)structarch[3], m));
+  return F2V_red_ip(gmul((GEN)structarch[3], m));
 }
 
 static void
