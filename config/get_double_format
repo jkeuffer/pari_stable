@@ -1,7 +1,9 @@
-doubleformat=4321;
 exe=$osname-$arch-endian$$
 if ($CC $cflags $extraflag endian.c -o $exe 2>/dev/null); then
   doubleformat=`$exe`;
+else
+  echo "***************************************************************"
+  echo "Cannot compile endian.c. Aborting. PLEASE REPORT!"
 fi
 rm -f $exe $exe$exe_suff
 case "$doubleformat" in
