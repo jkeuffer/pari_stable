@@ -2040,7 +2040,7 @@ allpolred0(GEN x, GEN *pta, long code, long prec,
   if (typ(x) == t_POL)
   {
     if (!signe(x)) return gcopy(x);
-    check_pol_int(x);
+    check_pol_int(x,"polred");
     if (!gcmp1(leading_term(x)))
       err(impl,"allpolred for nonmonic polynomials");
     base = allbase4(x,code,&p1,NULL); /* p1 is junk */

@@ -3058,8 +3058,8 @@ polcompositum0(GEN A, GEN B, long flall)
   if (varn(B) != v) err(talker,"not the same variable in compositum");
   C = content(A); if (!gcmp1(C)) A = gdiv(A, C);
   C = content(B); if (!gcmp1(C)) B = gdiv(B, C);
-  check_pol_int(A);
-  check_pol_int(B);
+  check_pol_int(A,"compositum");
+  check_pol_int(B,"compositum");
   if (!ZX_issquarefree(A)) err(talker,"compositum: %Z not separable", A);
   if (!ZX_issquarefree(B)) err(talker,"compositum: %Z not separable", B);
 

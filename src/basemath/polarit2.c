@@ -3134,7 +3134,7 @@ reduceddiscsmith(GEN pol)
   if (typ(pol)!=t_POL) err(typeer,"reduceddiscsmith");
   n=deg(pol);
   if (n<=0) err(constpoler,"reduceddiscsmith");
-  check_pol_int(pol);
+  check_pol_int(pol,"poldiscreduced");
   if (!gcmp1((GEN)pol[n+2]))
     err(talker,"non-monic polynomial in poldiscreduced");
   polp = derivpol(pol); alpha = polx[varn(pol)];

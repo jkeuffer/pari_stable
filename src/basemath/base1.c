@@ -133,11 +133,11 @@ checkprhall(GEN prhall)
 }
 
 void
-check_pol_int(GEN x)
+check_pol_int(GEN x, char *s)
 {
   long k = lgef(x)-1;
   for ( ; k>1; k--)
-    if (typ(x[k])!=t_INT) err(talker,"polynomial not in Z[X]");
+    if (typ(x[k])!=t_INT) err(talker,"polynomial not in Z[X] in %s",s);
 }
 
 GEN
@@ -358,8 +358,7 @@ galois(GEN x, long prec)
   n=lgef(x)-3; if (n<=0) err(constpoler,"galois");
   if (n>11) err(impl,"galois of degree higher than 11");
   x = gdiv(x,content(x));
-  for (i=2; i<=n+2; i++)
-    if (typ(x[i])!=t_INT) err(polrationer,"galois");
+  check_pol_int(x, "galois");
   if (gisirreducible(x) != gun)
     err(impl,"galois of reducible polynomial");
 
@@ -1186,7 +1185,7 @@ initalgall0(GEN x, long flag, long prec)
   if (typ(x)==t_POL)
   {
     n=lgef(x)-3; if (n<=0) err(constpoler,"initalgall0");
-    check_pol_int(x);
+    check_pol_int(x,"initalg");
     if (gisirreducible(x) == gzero) err(redpoler,"nfinit");
     if (!gcmp1((GEN)x[n+2]))
     {
