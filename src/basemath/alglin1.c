@@ -1633,49 +1633,48 @@ keri(GEN x)
 GEN
 deplin(GEN x)
 {
-  long i,j,k,t,nc,nl, av=avma;
-  GEN y,q,c,l,d;
+  ulong av = avma;
+  long i,j,k,t,nc,nl;
+  GEN y,q,c,l,*d;
 
-  if (typ(x) != t_MAT) err(typeer,"deplin");
-  nc=lg(x)-1; if (!nc) err(talker,"empty matrix in deplin");
-  nl=lg(x[1])-1;
-  c=new_chunk(nl+1);
-  l=new_chunk(nc+1);
-  d=cgetg(nl+1,t_VEC);
-  for (i=1; i<=nl; i++) { d[i]=un; c[i]=0; }
-  k=1; t=1;
-  while (t<=nl && k<=nc)
+  t = typ(x);
+  if (t != t_MAT)
+  {
+    if (t != t_VEC) err(typeer,"deplin");
+    x = gtomat(x);
+  }
+  nc = lg(x)-1; if (!nc) err(talker,"empty matrix in deplin");
+  nl = lg(x[1])-1;
+  c = new_chunk(nl+1);
+  l = new_chunk(nc+1);
+  d = (GEN*)cgetg(nl+1,t_VEC);
+  for (i=1; i<=nl; i++) { d[i]=gun; c[i]=0; }
+  for (k=t=1; k<=nc; k++)
   {
     for (j=1; j<k; j++)
      for (i=1; i<=nl; i++)
       if (i!=l[j])
-       coeff(x,i,k)=lsub(gmul((GEN) d[j],gcoeff(x,i,k)),
-                         gmul(gcoeff(x,i,j),gcoeff(x,l[j],k)));
-    t=1;
+       coeff(x,i,k) = lsub(gmul(d[j], gcoeff(x,i,k)),
+                           gmul(gcoeff(x,i,j), gcoeff(x,l[j],k)));
+    t = 1;
     while ( t<=nl && (c[t] || gcmp0(gcoeff(x,t,k))) ) t++;
-    if (t<=nl)
-    {
-      d[k]=coeff(x,t,k);
-      c[t]=k; l[k++]=t;
-    }
+    if (t > nl) break;
+
+    d[k] = gcoeff(x,t,k);
+    c[t] = k; l[k]=t;
   }
-  if (k>nc)
+  if (k > nc) { avma = av; return zerocol(nc); }
+  if (k == 1) { avma = av; return gscalcol_i(gun,nc); }
+  y = cgetg(nc+1,t_COL);
+  y[1] = coeff(x,l[1],k);
+  for (q=d[1],j=2; j<k; j++)
   {
-    avma=av; y=cgetg(nc+1,t_COL);
-    for (j=1; j<=nc; j++) y[j]=zero;
-    return y;
+    y[j] = lmul(gcoeff(x,l[j],k), q);
+    q = gmul(q, d[j]);
   }
-  y=cgetg(nc+1,t_COL);
-  y[1]=(k>1)? coeff(x,l[1],k): un;
-  for (q=gun,j=2; j<k; j++)
-  {
-    q=gmul(q,(GEN) d[j-1]);
-    y[j]=lmul(gcoeff(x,l[j],k),q);
-  }
-  if (k>1) y[k]=lneg(gmul(q,(GEN) d[k-1]));
-  for (j=k+1; j<=nc; j++) y[j]=zero;
-  d=content(y); t=avma;
-  return gerepile(av,t,gdiv(y,d));
+  y[j] = lneg(q);
+  for (j++; j<=nc; j++) y[j] = zero;
+  return gerepileupto(av, gdiv(y,content(y)));
 }
 
 /*******************************************************************/

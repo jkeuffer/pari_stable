@@ -1587,7 +1587,7 @@ lindep(GEN x, long prec)
   }
   p1=cgetg(lx,t_COL); p1[n]=un; for (i=1; i<n; i++) p1[i]=zero;
   p2 = (GEN)b; p2[0] = evaltyp(t_MAT) | evallg(lx);
-  p2=gauss(gtrans(p2),p1); tetpil=avma;
+  p2=gauss(gtrans_i(p2),p1); tetpil=avma;
   return gerepile(av,tetpil,gtrans(p2));
 }
 

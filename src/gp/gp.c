@@ -2294,8 +2294,6 @@ gprl_input(Buffer *b, char **endp, char *prompt)
 }
 #endif
 
-#define ask_filtre(t) filtre("",NULL,t)
-
 /* True if more than one line read */
 static int
 input_loop(Buffer *b, char *already_read, FILE *file, char *prompt)
