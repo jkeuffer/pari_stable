@@ -7,11 +7,12 @@
 #include "pari.h"
 #include "parinf.h"
 
+GEN check_and_build_cycgen(GEN bnf);
 GEN compute_class_number(GEN mit,GEN *met,GEN *u1,GEN *u2);
+GEN gmul_mat_smallvec(GEN x, GEN y);
+GEN ideleaddone_aux(GEN nf,GEN x,GEN ideal);
 GEN logunitmatrix(GEN nf,GEN funits,GEN racunit,GEN bid);
 GEN vconcat(GEN Q1, GEN Q2);
-GEN ideleaddone_aux(GEN nf,GEN x,GEN ideal);
-GEN check_and_build_cycgen(GEN bnf);
 
 static GEN
 get_full_rank(GEN nf, GEN v, GEN _0, GEN _1, GEN vecsign, GEN gen,
@@ -295,7 +296,7 @@ buchrayall(GEN bnf,GEN module,long flag,long prec)
   for (j=1; j<=ngen; j++)
   {
     p1=cgetg(lh+1,t_COL); h[j]=(long)p1;
-    p2 = element_mul(nf, (GEN)cycgen[j], 
+    p2 = element_mul(nf, (GEN)cycgen[j],
                          element_pow(nf,(GEN)vecel[j],(GEN)cyc[j]));
     p2 = zideallog(nf,p2,bid);
     for (i=1; i<=ngen;  i++) p1[i] = (i==j)? cyc[j]: zero;
@@ -451,7 +452,7 @@ isprincipalrayall(GEN bnr, GEN x, long flag)
   vecel=(GEN)bnr[3]; ngen=lg(vecel)-1;
   matu =(GEN)bnr[4];
   rayclass=(GEN)bnr[5];
-  
+
   nf = (GEN)bnf[7];
   if (typ(x) == t_VEC && lg(x) == 3)
   { idep = (GEN)x[2]; x = (GEN)x[1]; } /* precomputed */
@@ -530,166 +531,135 @@ isprincipalraygen(GEN bignfray, GEN x)
   return isprincipalrayall(bignfray,x,nf_GEN);
 }
 
-/* DK = |dK|; give c[N][R1] */
-static GEN
-zimmertbound(long N,long R1,GEN DK)
+GEN
+minkowski_bound(GEN D, long N, long r2, long prec)
 {
-  long av,tetpil,i,R2;
-  GEN w,p1,minkowski;
+  long av = avma;
+  GEN p1;
+  p1 = gdiv(mpfactr(N,prec), gpowgs(stoi(N),N));
+  p1 = gmul(p1, gpowgs(gdivsg(4,mppi(prec)), r2));
+  p1 = gmul(p1, gsqrt(absi(D),prec));
+  return gerepileupto(av, p1);
+}
 
-  if (N<2) return gun;
-  av=avma;
-  if (N<21)
+/* DK = |dK| */
+static long
+zimmertbound(long N,long R2,GEN DK)
+{
+  long av = avma;
+  GEN w;
+
+  if (N < 2) return 1;
+  if (N < 21)
   {
-    double **c=(double**)gpmalloc(sizeof(double*)*21);
-    for (i=1; i<=20; i++) c[i]=(double*)gpmalloc(sizeof(double)*21);
-    c[2][2] = -0.6931;      c[3][3] = -1.71733859;
-    c[2][0] = -0.45158;     c[3][1] = -1.37420604;
+    static double c[21][11] = {
+{/*2*/  0.6931,     0.45158},
+{/*3*/  1.71733859, 1.37420604},
+{/*4*/  2.91799837, 2.50091538, 2.11943331},
+{/*5*/  4.22701425, 3.75471588, 3.31196660},
+{/*6*/  5.61209925, 5.09730381, 4.60693851, 4.14303665},
+{/*7*/  7.05406203, 6.50550021, 5.97735406, 5.47145968},
+{/*8*/  8.54052636, 7.96438858, 7.40555445, 6.86558259, 6.34608077},
+{/*9*/ 10.0630022,  9.46382812, 8.87952524, 8.31139202, 7.76081149},
+{/*10*/11.6153797, 10.9966020, 10.3907654,  9.79895170, 9.22232770, 8.66213267},
+{/*11*/13.1930961, 12.5573772, 11.9330458, 11.3210061, 10.7222412, 10.1378082},
+{/*12*/14.7926394, 14.1420915, 13.5016616, 12.8721114, 12.2542699, 11.6490374,
+       11.0573775},
+{/*13*/16.4112395, 15.7475710, 15.0929680, 14.4480777, 13.8136054, 13.1903162,
+       12.5790381},
+{/*14*/18.0466672, 17.3712806, 16.7040780, 16.0456127, 15.3964878, 14.7573587,
+       14.1289364, 13.5119848},
+{/*15*/19.6970961, 19.0111606, 18.3326615, 17.6620757, 16.9999233, 16.3467686,
+       15.7032228, 15.0699480},
+{/*16*/21.3610081, 20.6655103, 19.9768082, 19.2953176, 18.6214885, 17.9558093,
+       17.2988108, 16.6510652, 16.0131906},
 
-    c[4][4] = -2.91799837;  c[5][5] = -4.22701425;
-    c[4][2] = -2.50091538;  c[5][3] = -3.75471588;
-    c[4][0] = -2.11943331;  c[5][1] = -3.31196660;
+{/*17*/23.0371259, 22.3329066, 21.6349299, 20.9435607, 20.2591899, 19.5822454,
+       18.9131878, 18.2525157, 17.6007672},
 
-    c[6][6] = -5.61209925;  c[7][7] = -7.05406203;
-    c[6][4] = -5.09730381;  c[7][5] = -6.50550021;
-    c[6][2] = -4.60693851;  c[7][3] = -5.97735406;
-    c[6][0] = -4.14303665;  c[7][1] = -5.47145968;
+{/*18*/24.7243611, 24.0121449, 23.3056902, 22.6053167, 21.9113705, 21.2242247,
+       20.5442836, 19.8719830, 19.2077941, 18.5522234},
 
-    c[8][8] = -8.54052636;  c[9][9] = -10.0630022;
-    c[8][6] = -7.96438858;  c[9][7] = -9.46382812;
-    c[8][4] = -7.40555445;  c[9][5] = -8.87952524;
-    c[8][2] = -6.86558259;  c[9][3] = -8.31139202;
-    c[8][0] = -6.34608077;  c[9][1] = -7.76081149;
-
-    c[10][10]= -11.6153797; c[11][11]= -13.1930961;
-    c[10][8] = -10.9966020; c[11][9] = -12.5573772;
-    c[10][6] = -10.3907654; c[11][7] = -11.9330458;
-    c[10][4] = -9.79895170; c[11][5] = -11.3210061;
-    c[10][2] = -9.22232770; c[11][3] = -10.7222412;
-    c[10][0] = -8.66213267; c[11][1] = -10.1378082;
-
-    c[12][12]= -14.7926394; c[13][13]= -16.4112395;
-    c[12][10]= -14.1420915; c[13][11]= -15.7475710;
-    c[12][8] = -13.5016616; c[13][9] = -15.0929680;
-    c[12][6] = -12.8721114; c[13][7] = -14.4480777;
-    c[12][4] = -12.2542699; c[13][5] = -13.8136054;
-    c[12][2] = -11.6490374; c[13][3] = -13.1903162;
-    c[12][0] = -11.0573775; c[13][1] = -12.5790381;
-
-    c[14][14]= -18.0466672; c[15][15]= -19.6970961;
-    c[14][12]= -17.3712806; c[15][13]= -19.0111606;
-    c[14][10]= -16.7040780; c[15][11]= -18.3326615;
-    c[14][8] = -16.0456127; c[15][9] = -17.6620757;
-    c[14][6] = -15.3964878; c[15][7] = -16.9999233;
-    c[14][4] = -14.7573587; c[15][5] = -16.3467686;
-    c[14][2] = -14.1289364; c[15][3] = -15.7032228;
-    c[14][0] = -13.5119848; c[15][1] = -15.0699480;
-
-    c[16][16]= -21.3610081; c[17][17]= -23.0371259;
-    c[16][14]= -20.6655103; c[17][15]= -22.3329066;
-    c[16][12]= -19.9768082; c[17][13]= -21.6349299;
-    c[16][10]= -19.2953176; c[17][11]= -20.9435607;
-    c[16][8] = -18.6214885; c[17][9] = -20.2591899;
-    c[16][6] = -17.9558093; c[17][7] = -19.5822454;
-    c[16][4] = -17.2988108; c[17][5] = -18.9131878;
-    c[16][2] = -16.6510652; c[17][3] = -18.2525157;
-    c[16][0] = -16.0131906; c[17][1] = -17.6007672;
-
-    c[18][18]= -24.7243611; c[19][19]= -26.4217792;
-    c[18][16]= -24.0121449; c[19][17]= -25.7021950;
-    c[18][14]= -23.3056902; c[19][15]= -24.9879497;
-    c[18][12]= -22.6053167; c[19][13]= -24.2793271;
-    c[18][10]= -21.9113705; c[19][11]= -23.5766321;
-    c[18][8] = -21.2242247; c[19][9] = -22.8801952;
-    c[18][6] = -20.5442836; c[19][7] = -22.1903709;
-    c[18][4] = -19.8719830; c[19][5] = -21.5075437;
-    c[18][2] = -19.2077941; c[19][3] = -20.8321263;
-    c[18][0] = -18.5522234; c[19][1] = -20.1645647;
-
-    c[20][20]= -28.1285704;
-    c[20][18]= -27.4021674;
-    c[20][16]= -26.6807314;
-    c[20][14]= -25.9645140;
-    c[20][12]= -25.2537867;
-    c[20][10]= -24.5488420;
-    c[20][8] = -23.8499943;
-    c[20][6] = -23.1575823;
-    c[20][4] = -22.4719720;
-    c[20][2] = -21.7935548;
-    c[20][0] = -21.1227537;
-    w=gexp(dbltor(c[N][R1]),6);
-    for (i=1; i<=20; i++) free(c[i]); free(c);
-    p1=gmul(gsqrt(DK,MEDDEFAULTPREC),w);
-    tetpil=avma; return gerepile(av,tetpil,ground(p1));
+{/*19*/26.4217792, 25.7021950, 24.9879497, 24.2793271, 23.5766321, 22.8801952,
+       22.1903709, 21.5075437, 20.8321263, 20.1645647},
+{/*20*/28.1285704, 27.4021674, 26.6807314, 25.9645140, 25.2537867, 24.5488420,
+       23.8499943, 23.1575823, 22.4719720, 21.7935548, 21.1227537}
+    };
+    w = gmul(dbltor(exp(-c[N][R2])), gsqrt(DK,MEDDEFAULTPREC));
   }
-  R2=(N-R1)>>1; p1=gdiv(mpfact(N),gpuigs(stoi(N),N));
-  minkowski=ground(gmul(gmul(p1,gpuigs(gdivsg(4,mppi(MEDDEFAULTPREC)),R2)),gsqrt(DK,MEDDEFAULTPREC)));
-  if (cmpis(minkowski,500000)>0)
-    err(talker,"The field has degree more than 20 and the Minkowski bound is larger than 500 000: it is unrealistic to certify it");
-
-  tetpil=avma; return gerepile(av,tetpil,gcopy(minkowski));
+  else
+  {
+    w = minkowski_bound(DK, N, R2, MEDDEFAULTPREC);
+    if (cmpis(w, 500000))
+      err(warner,"large Minkowski bound: certification will be VERY long");
+  }
+  w = gceil(w);
+  if (is_bigint(w))
+    err(talker,"Minkowski bound is too large");
+  avma = av; return itos(w);
 }
 
 /* all primes up to Minkowski bound factor on factorbase ? */
 static void
-testprime(GEN bnf,GEN minkowski)
+testprime(GEN bnf, long minkowski)
 {
   long av = avma, pp,i,nbideal,k,pmax;
   GEN f,p1,vectpp,fb,dK, nf=checknf(bnf);
   byteptr delta = diffptr;
 
-  if (DEBUGLEVEL>=2)
-    fprintferr("PHASE 1: check primes to Zimmert bound = %Z\n\n",minkowski);
+  if (DEBUGLEVEL>1)
+    fprintferr("PHASE 1: check primes to Zimmert bound = %ld\n\n",minkowski);
   f=(GEN)nf[4]; dK=(GEN)nf[3];
   if (!gcmp1(f))
   {
     GEN different = gmael(nf,5,5);
-    if (DEBUGLEVEL>=2)
+    if (DEBUGLEVEL>1)
       fprintferr("**** Testing Different = %Z\n",different);
     p1 = isprincipalall(bnf,different,nf_FORCE);
-    if (DEBUGLEVEL>=2) fprintferr("     is %Z\n",p1);
+    if (DEBUGLEVEL>1) fprintferr("     is %Z\n",p1);
   }
   fb=(GEN)bnf[5];
   p1 = gmael(fb, lg(fb)-1, 1); /* largest p in factorbase */
   pp = 0; pmax = is_bigint(p1)? VERYBIGINT: itos(p1);
-  while (cmpsi(pp,minkowski)<1)
+  if (minkowski > maxprime()) err(primer1);
+  while (pp < minkowski)
   {
-    pp += *delta++; if (!*delta) err(primer1);
-    if (DEBUGLEVEL>=2) fprintferr("*** p = %ld\n",pp);
+    pp += *delta++;
+    if (DEBUGLEVEL>1) fprintferr("*** p = %ld\n",pp);
     vectpp=primedec(bnf,stoi(pp)); nbideal=lg(vectpp)-1;
     /* loop through all P | p if ramified, all but one otherwise */
     if (!smodis(dK,pp)) nbideal++;
     for (i=1; i<nbideal; i++)
     {
-      GEN P = (GEN)vectpp[i]; /* non inert */
-      if (DEBUGLEVEL>=2)
+      GEN P = (GEN)vectpp[i];
+      if (DEBUGLEVEL>1)
         fprintferr("  Testing P = %Z\n",P);
-      if (cmpii(idealnorm(bnf,P),minkowski) < 1)
+      if (cmpis(idealnorm(bnf,P), minkowski) < 1)
       {
 	if (pp <= pmax && (k = tablesearch(fb, P, cmp_prime_ideal)))
 	{
-	  if (DEBUGLEVEL>=2) fprintferr("    #%ld in factor base\n",k);
+	  if (DEBUGLEVEL>1) fprintferr("    #%ld in factor base\n",k);
 	}
 	else
 	{
-	  p1=isprincipalall(bnf,P,nf_FORCE);
-	  if (DEBUGLEVEL>=2) fprintferr("    is %Z\n",p1);
+	  p1 = isprincipal(bnf,P);
+	  if (DEBUGLEVEL>1) fprintferr("    is %Z\n",p1);
 	}
       }
-      else if (DEBUGLEVEL>=2)
+      else if (DEBUGLEVEL>1)
         fprintferr("    Norm(P) > Zimmert bound\n");
     }
   }
   avma=av;
-  if (DEBUGLEVEL>=2) { fprintferr("End of PHASE 1.\n\n"); flusherr(); }
+  if (DEBUGLEVEL>1) { fprintferr("End of PHASE 1.\n\n"); flusherr(); }
 }
 
-/* rend constante d'Hermite^n si connue, sinon une borne sup */
+/* return \gamma_n^n if known, an upper bound otherwise */
 static GEN
 hermiteconstant(long n)
 {
-  long av,tetpil;
   GEN h,h1;
+  long av;
 
   switch(n)
   {
@@ -703,12 +673,12 @@ hermiteconstant(long n)
     case 8: return stoi(256);
   }
   av = avma;
-  h  = gpuigs(gdiv(gdeux,mppi(DEFAULTPREC)),n);
+  h  = gpuigs(divsr(2,mppi(DEFAULTPREC)), n);
   h1 = gsqr(ggamma(gdivgs(stoi(n+4),2),DEFAULTPREC));
-  tetpil=avma; return gerepile(av,tetpil,gmul(h,h1));
+  return gerepileupto(av, gmul(h,h1));
 }
 
-/* 1 primitif, 0 s'il est peut etre imprimitif... */
+/* 1 if primitive for sure, 0 if MAYBE imprimitive */
 static long
 isprimitive(GEN nf)
 {
@@ -761,17 +731,44 @@ regulatorbound(GEN bnf)
   p1 = gsqrt(gdiv(p1, hermiteconstant(R)), DEFAULTPREC);
   if (gcmp(p1,bound) > 0) bound = p1;
   if (DEBUGLEVEL>=2)
-    { fprintferr("Mahler bound for regulator: "); outerr(p1); flusherr(); }
+    { fprintferr("Mahler bound for regulator: %Z\n",p1); flusherr(); }
   return bound;
+}
+
+/* x given by its embeddings */
+GEN 
+norm_by_embed(long r1, GEN x)
+{
+  long i, ru = lg(x)-1;
+  GEN p = (GEN)x[ru];
+  if (r1 == ru)
+  {
+    for (i=ru-1; i>0; i--) p = gmul(p, (GEN)x[i]);
+    return p;
+  }
+  p = gnorm(p);
+  for (i=ru-1; i>r1; i--) p = gmul(p, gnorm((GEN)x[i]));
+  for (      ; i>0 ; i--) p = gmul(p, (GEN)x[i]);
+  return p;
+}
+
+static int
+is_unit(GEN M, long r1, GEN x)
+{
+  long av = avma;
+  GEN Nx = ground( norm_by_embed(r1, gmul_mat_smallvec(M,x)) );
+  int ok = is_pm1(Nx);
+  avma = av; return ok;
 }
 
 #define NBMAX 5000
 /* should use smallvectors */
 static GEN
-minimforunits(GEN nf, long borne, long stockmax)
+minimforunits(GEN nf, long BOUND, long stockmax)
 {
-  long av = avma,av1,n1,n,i,j,k,s,norme,normax,*x,fl1,cmpt;
-  GEN u,r,S,S1,a,base,p1;
+  const long prec = MEDDEFAULTPREC;
+  long av = avma,n,i,j,k,s,norme,normax,*x,cmpt,r1;
+  GEN u,r,S,a,M,p1;
   double p;
   double **q,*v,*y,*z;
   double eps=0.000001;
@@ -779,30 +776,27 @@ minimforunits(GEN nf, long borne, long stockmax)
   if (DEBUGLEVEL>=2)
   {
     fprintferr("Searching minimum of T2-form on units:\n");
-    if (DEBUGLEVEL>2) fprintferr("   borne = %ld\n",borne);
+    if (DEBUGLEVEL>2) fprintferr("   BOUND = %ld\n",BOUND);
     flusherr();
   }
-  a=gmael(nf,5,3); n1=lg(a);
-  n=n1-1;
-  x=(long*)gpmalloc(n1*sizeof(long));
-  y=(double*)gpmalloc(n1*sizeof(double));
-  z=(double*)gpmalloc(n1*sizeof(double));
-  v=(double*)gpmalloc(n1*sizeof(double));
-  q=(double**)gpmalloc(n1*sizeof(double*));
-  for (j=1; j<=n; j++) q[j]=(double*)gpmalloc(n1*sizeof(double));
-  u=lllgram(a,BIGDEFAULTPREC); base=gmul((GEN)nf[7],u);
-  a=gmul(qf_base_change(a,u,1), realun(BIGDEFAULTPREC));
-  r=sqred1(a);
+  r1 = itos(gmael(nf,2,1));
+  a = gmael(nf,5,3); n = lg(a);
+  minim_alloc(n, &q, &x, &y, &z, &v);
+  n--; BOUND += eps;
+  u = lllgram(a,prec);
+  M = gmul(gmael(nf,5,1), u); /* embeddings of T2-reduced basis */
+  M = gprec_w(M, prec);
+  a = gmul(qf_base_change(a,u,1), realun(prec));
+  r = sqred1(a);
   for (j=1; j<=n; j++)
   {
-    v[j]=rtodbl(gcoeff(r,j,j));
-    for (i=1; i<j; i++)
-      q[i][j]=rtodbl(gcoeff(r,i,j));
+    v[j] = rtodbl(gcoeff(r,j,j));
+    for (i=1; i<j; i++) q[i][j] = rtodbl(gcoeff(r,i,j));
   }
   normax=0;
   S = cgetg(stockmax+1,t_MAT);
   s=0; k=n; cmpt=0; y[n]=z[n]=0;
-  x[n]=(long)(sqrt(borne/v[n]+eps));
+  x[n]=(long)(sqrt(BOUND/v[n]));
 
   for(;;)
   {
@@ -810,226 +804,207 @@ minimforunits(GEN nf, long borne, long stockmax)
     {
       if (k>1)
       {
-	k--; z[k]=0;
-	for (j=k+1; j<=n; j++) z[k]=z[k]+q[k][j]*x[j];
-	p=x[k+1]+z[k+1];
-	y[k]=y[k+1]+p*p*v[k+1];
-	x[k]=(long)floor(sqrt((borne-y[k]+eps)/v[k])-z[k]);
+        long l = k-1;
+	z[l] = 0;
+	for (j=k; j<=n; j++) z[l] = z[l]+q[l][j]*x[j];
+	p = x[k]+z[k];
+	y[l] = y[k]+p*p*v[k];
+	x[l] = (long)floor(sqrt((BOUND-y[l])/v[l])-z[l]);
+        k = l;
       }
-      while (v[k]*(x[k]+z[k])*(x[k]+z[k]) > borne-y[k]+eps)
+      for(;;)
       {
+        p = x[k]+z[k];
+        if (y[k] + p*p*v[k] <= BOUND) break;
 	k++; x[k]--;
       }
     }
     while (k>1);
     if (!x[1] && y[1]<=eps) break;
+    if (++cmpt > NBMAX) { av=avma; return NULL; }
 
-    cmpt++;
-    if (cmpt>NBMAX)
-    {
-      free(x); free(y); free(z); free(v);
-      for (j=1; j<=n; j++) free(q[j]); free(q);
-      av=avma; return NULL;
-    }
     if (DEBUGLEVEL>8){ fprintferr("."); flusherr(); }
-    norme=(long)(y[1]+v[1]*(x[1]+z[1])*(x[1]+z[1])+eps);
-    if (norme>normax) normax=norme;
-    av1=avma; p1=gzero;
-    for (i=1; i<=n; i++) p1=gadd(p1,gmulsg(x[i],(GEN)base[i]));
-    fl1=gcmp1(gabs(subres(p1,(GEN)nf[1]),0)); avma=av1;
-    if (fl1)
+    p = x[1]+z[1]; norme = (long)(y[1] + p*p*v[1] + eps);
+    if (norme > normax) normax = norme;
+    if (is_unit(M,r1, x))
     {
       if (DEBUGLEVEL>=2) { fprintferr("*"); flusherr(); }
-      s++; cmpt=0;
-      if (s<=stockmax)
+      cmpt = 0;
+      if (++s <= stockmax)
       {
-	p1=cgetg(n+1,t_COL);
+	p1 = cgetg(n+1,t_COL);
 	for (i=1; i<=n; i++) p1[i]=lstoi(x[i]);
-	S[s]=lmul(u,p1);
+	S[s] = lmul(u,p1);
       }
     }
     x[k]--;
   }
-  free(x); free(y); free(z); free(v);
-  for (j=1; j<=n; j++) free(q[j]); free(q);
   if (DEBUGLEVEL>=2){ fprintferr("\n"); flusherr(); }
-  if (stockmax)
-  {
-    av1=avma;
-    k=(s<stockmax)? s:stockmax;
-    S1=cgetg(k+1,t_MAT);
-    for (j=1; j<=k; j++) S1[j]=lcopy((GEN)S[j]);
-    S=gerepile(av,av1,S1);
-  }
-  else { avma=av; S=cgetg(1,t_MAT); }
-  u=cgetg(4,t_VEC);
-  u[1]=lstoi(s<<1);
-  u[2]=lstoi(normax);
-  u[3]=(long)S;
-  return u;
+  k = (s<stockmax)? s:stockmax; setlg(S,k+1);
+  S = gerepileupto(av, gcopy(S));
+  u = cgetg(4,t_VEC);
+  u[1] = lstoi(s<<1);
+  u[2] = lstoi(normax);
+  u[3] = (long)S; return u;
 }
 
 #undef NBMAX
+static int
+is_zero(GEN x, long bitprec) { return (gexpo(x) < -bitprec); }
+
+static int
+is_complex(GEN x, long bitprec) { return (!is_zero(gimag(x), bitprec)); }
 
 static GEN
-compute_M0(GEN M_star,long N) /* On connait M_star; on calcule M0 */
+compute_M0(GEN M_star,long N)
 {
-  long av1,tetpil,m1,m2,n1,n2,n3,k,kk,lr,lr1,lr2,i,j,l,vx,vy,vz,vM,PREC,prec;
-  GEN eps,pol,p1,p2,p3,p4,p5,p6,u,v,w,r,r1,r2,M0,M0_pro,S,P,M_formel;
-  GEN f1,f2,f3,g1,g2,g3,pg1,pg2,pg3,pf1,pf2,pf3,p7,p8,p9,p10,p11;
-  GEN x,y,z;
+  long m1,m2,n1,n2,n3,k,kk,lr,lr1,lr2,i,j,l,vx,vy,vz,vM,prec;
+  GEN pol,p1,p2,p3,p4,p5,p6,p7,p8,p9,u,v,w,r,r1,r2,M0,M0_pro,S,P,M;
+  GEN f1,f2,f3,g1,g2,g3,pg1,pg2,pg3,pf1,pf2,pf3,X,Y,Z;
+  long bitprec = 24, PREC = gprecision(M_star);
 
-  PREC=gprecision(M_star);
   if (N==2) return gmul2n(gsqr(gach(gmul2n(M_star,-1),PREC)), -1);
-  vM = fetch_var(); M_formel=polx[vM];
-  vz = fetch_var(); z=polx[vz];
-  vy = fetch_var(); y=polx[vy];
-  vx = fetch_var(); x=polx[vx];
+  vM = fetch_var(); M = polx[vM];
+  vz = fetch_var(); Z = polx[vz];
+  vy = fetch_var(); Y = polx[vy];
+  vx = fetch_var(); X = polx[vx];
 
-  PREC = PREC>>1; if (!PREC) PREC=DEFAULTPREC;
-  eps=dbltor(0.0000001); M0=gzero; m1=N/3;
+  PREC = PREC>>1; if (!PREC) PREC = DEFAULTPREC;
+  M0 = NULL; m1 = N/3;
   for (n1=1; n1<=m1; n1++)
   {
     m2 = (N-n1)>>1;
     for (n2=n1; n2<=m2; n2++)
     {
-      av1=avma; n3=N-n1-n2; prec=PREC;
-      if (!(N%3) && n1==n2 && n1==n3)
+      long av = avma; n3=N-n1-n2; prec=PREC;
+      if (n1==n2 && n1==n3) /* n1 = n2 = n3 = m1 = N/3 */
       {
-	p1=gdivgs(M_star,m1); p2=gaddsg(1,p1); p3=gsubgs(p1,3);
-	p4=gsqrt(gmul(p2,p3),prec); p5=gsubgs(p1,1);
-	u=gun; v=gmul2n(gadd(p5,p4),-1); w=gmul2n(gsub(p5,p4),-1);
+	p1=gdivgs(M_star,m1);
+        p2=gaddsg(1,p1);
+        p3=gsubgs(p1,3);
+	p4=gsqrt(gmul(p2,p3),prec);
+        p5=gsubgs(p1,1);
+	u=gun;
+        v=gmul2n(gadd(p5,p4),-1);
+        w=gmul2n(gsub(p5,p4),-1);
 	M0_pro=gmul2n(gmulsg(m1,gadd(gsqr(glog(v,prec)),gsqr(glog(w,prec)))),-2);
 	if (DEBUGLEVEL>2)
 	{
-	  fprintferr("[%ld,%ld,%ld]: ",n1,n2,n3);
-	  outerr(M0_pro); flusherr();
+	  fprintferr("[ %ld, %ld, %ld ]: %Z\n",n1,n2,n3,gprec_w(M0_pro,3));
+	  flusherr();
 	}
-	if (gcmp0(M0) || gcmp(M0_pro,M0)<0)
-	{
-	  M0=M0_pro; tetpil=avma; M0=gerepile(av1,tetpil,gcopy(M0));
-	}
-	else avma=av1;
+	if (!M0 || gcmp(M0_pro,M0)<0) M0 = M0_pro;
       }
-      else if (n1==n2 || n1==n3 || n2==n3)
-      {
-	if (n1==n2) k=n1; else if (n2==n3) k=n3;
-	kk=N-2*k;
-	p2=gsub(M_star,gmulgs(x,k));
+      else if (n1==n2 || n2==n3)
+      { /* n3 > N/3 >= n1 */
+	k = n2; kk = N-2*k;
+	p2=gsub(M_star,gmulgs(X,k));
 	p3=gmul(gpuigs(stoi(kk),kk),gpuigs(gsubgs(gmul(M_star,p2),kk*kk),k));
-	pol=gsub(p3,gmul(gmul(gpuigs(stoi(k),k),gpuigs(x,k)),gpuigs(p2,N-k)));
-	prec=gprecision(pol); if (!prec) prec=5;
-	r=roots(pol,prec); lr=lg(r)-1;
-	for (i=1; i<=lr; i++)
+	pol=gsub(p3,gmul(gmul(gpuigs(stoi(k),k),gpuigs(X,k)),gpuigs(p2,N-k)));
+	prec=gprecision(pol); if (!prec) prec = MEDDEFAULTPREC;
+	r=roots(pol,prec); lr = lg(r);
+	for (i=1; i<lr; i++)
 	{
-	  if (gcmp(gabs(gimag((GEN)r[i]),prec),eps) < 0 &&
-	      gsigne(S=greal((GEN)r[i])) > 0)
-	  {
-	    p4=gsub(M_star,gmulsg(k,S));
-	    P=gdiv(gmul(gmulsg(k,S),p4),gsubgs(gmul(M_star,p4),kk*kk));
-	    p5=gsub(gsqr(S),gmul2n(P,2));
-	    if (gsigne(p5)>=0)
-	    {
-	      p6=gsqrt(p5,prec);
-	      u=gmul2n(gadd(S,p6),-1); v=gmul2n(gsub(S,p6),-1);
-	      if ((gsigne(u)>0)&&(gsigne(v)>0))
-	      {
-		w=gpui(P,gdivgs(stoi(-k),kk),prec);
-		p6=gmulsg(k,gadd(gsqr(glog(u,prec)),gsqr(glog(v,prec))));
-		M0_pro=gmul2n(gadd(p6,gmulsg(kk,gsqr(glog(w,prec)))),-2);
-		if (DEBUGLEVEL>2)
-		{
-		  fprintferr("[%ld,%ld,%ld] : ",n1,n2,n3);
-		  outerr(M0_pro); flusherr();
-		}
-		if (gcmp0(M0) || gcmp(M0_pro,M0)<0) M0=M0_pro;
-	      }
-	    }
-	  }
+	  if (is_complex((GEN)r[i], bitprec) ||
+	      signe(S = greal((GEN)r[i])) <= 0) continue;
+
+          p4=gsub(M_star,gmulsg(k,S));
+          P=gdiv(gmul(gmulsg(k,S),p4),gsubgs(gmul(M_star,p4),kk*kk));
+          p5=gsub(gsqr(S),gmul2n(P,2));
+          if (gsigne(p5) < 0) continue;
+
+          p6=gsqrt(p5,prec);
+          v=gmul2n(gsub(S,p6),-1);
+          if (gsigne(v) <= 0) continue;
+          
+          u=gmul2n(gadd(S,p6),-1);
+          w=gpui(P,gdivgs(stoi(-k),kk),prec);
+          p6=gmulsg(k,gadd(gsqr(glog(u,prec)),gsqr(glog(v,prec))));
+          M0_pro=gmul2n(gadd(p6,gmulsg(kk,gsqr(glog(w,prec)))),-2);
+          if (DEBUGLEVEL>2)
+          {
+            fprintferr("[ %ld, %ld, %ld ]: %Z\n",n1,n2,n3,gprec_w(M0_pro,3));
+            flusherr();
+          }
+          if (!M0 || gcmp(M0_pro,M0)<0) M0 = M0_pro;
 	}
-	tetpil=avma; M0=gerepile(av1,tetpil,gcopy(M0));
       }
       else
       {
-	f1=gadd(gmulsg(n1,x),gadd(gmulsg(n2,y),gmulsg(n3,z)));
-	f1=gsub(f1,M_formel);
-	f2=gmulsg(n1,gmul(y,z));
-	f2=gadd(f2,gmulsg(n2,gmul(x,z)));
-	f2=gadd(f2,gmulsg(n3,gmul(x,y)));
-	f2=gsub(f2,gmul(M_formel,gmul(x,gmul(y,z))));
-	f3=gsub(gmul(gpuigs(x,n1),gmul(gpuigs(y,n2),gpuigs(z,n3))),gun);
+	f1 = gsub(gadd(gmulsg(n1,X),gadd(gmulsg(n2,Y),gmulsg(n3,Z))), M);
+	f2 =         gmulsg(n1,gmul(Y,Z));
+	f2 = gadd(f2,gmulsg(n2,gmul(X,Z)));
+	f2 = gadd(f2,gmulsg(n3,gmul(X,Y)));
+	f2 = gsub(f2,gmul(M,gmul(X,gmul(Y,Z))));
+	f3 = gsub(gmul(gpuigs(X,n1),gmul(gpuigs(Y,n2),gpuigs(Z,n3))), gun);
+        /* f1 = n1 X + n2 Y + n3 Z - M */
+        /* f2 = n1 YZ + n2 XZ + n3 XY */
+        /* f3 = X^n1 Y^n2 Z^n3 - 1*/
 	g1=subres(f1,f2); g1=gdiv(g1,content(g1));
 	g2=subres(f1,f3); g2=gdiv(g2,content(g2));
 	g3=subres(g1,g2); g3=gdiv(g3,content(g3));
 	pf1=gsubst(f1,vM,M_star); pg1=gsubst(g1,vM,M_star);
 	pf2=gsubst(f2,vM,M_star); pg2=gsubst(g2,vM,M_star);
 	pf3=gsubst(f3,vM,M_star); pg3=gsubst(g3,vM,M_star);
-	prec=gprecision(pg3); if (!prec) prec=5;
-	r=roots(pg3,prec); lr=lg(r)-1;
-	for (i=1; i<=lr; i++)
+	prec=gprecision(pg3); if (!prec) prec = MEDDEFAULTPREC;
+	r=roots(pg3,prec); lr = lg(r);
+	for (i=1; i<lr; i++)
 	{
-	  if (gcmp(gabs(gimag((GEN)r[i]),prec),eps) < 0 &&
-	      gsigne(w=greal((GEN)r[i])) > 0)
-	  {
-	    p1=gsubst(pg1,vz,w); p2=gsubst(pg2,vz,w);
-	    p3=gsubst(pf1,vz,w); p4=gsubst(pf2,vz,w); p5=gsubst(pf3,vz,w);
-	    prec=gprecision(p1); if (!prec) prec=5;
-	    r1=roots(p1,prec); lr1=lg(r1)-1;
-	    for (j=1; j<=lr1; j++)
-	    {
-	      if (gcmp(gabs(gimag((GEN)r1[j]),prec),eps) < 0 &&
-	         gsigne(v=greal((GEN)r1[j])) > 0)
-	      {
-		p6=gsubst(p2,vy,v);
-		if (gcmp(gabs(p6,prec),eps)<0)
-		{
-		  p7=gsubst(p3,vy,v); p8=gsubst(p4,vy,v); p9=gsubst(p5,vy,v);
-		  prec=gprecision(p7); if (!prec) prec=5;
-		  r2=roots(p7,prec); lr2=lg(r2)-1;
-		  for (l=1; l<=lr2; l++)
-		  {
-		   if (gcmp(gabs(gimag((GEN)r2[l]),prec),eps) < 0 &&
-		       gsigne(u=greal((GEN)r2[l])) > 0)
-		   {
-		     p10=gsubst(p8,vx,u);
-		     if (gcmp(gabs(p10,prec),eps)<0)
-		     {
-		       p11=gsubst(p9,vx,u);
-		       if (gcmp(gabs(p11,prec),eps)<0)
-		       {
-			 M0_pro=gmulsg(n1,gsqr(glog(u,prec)));
-			 M0_pro=gadd(M0_pro,gmulsg(n2,gsqr(glog(v,prec))));
-			 M0_pro=gadd(M0_pro,gmulsg(n3,gsqr(glog(w,prec))));
-			 M0_pro=gmul2n(M0_pro,-2);
-			 if (DEBUGLEVEL>2)
-			 {
-			   fprintferr("[ %ld,%ld,%ld ] : ",n1,n2,n3);
-			   outerr(M0_pro); flusherr();
-			 }
-			 if (gcmp0(M0) || gcmp(M0_pro,M0) < 0) M0=M0_pro;
-		       }
-		     }
-		   }
-		 }
-		}
-	      }
-	    }
-	  }
+	  if (is_complex((GEN)r[i], bitprec) ||
+	      signe(w = greal((GEN)r[i])) <= 0) continue;
+          p1=gsubst(pg1,vz,w);
+          p2=gsubst(pg2,vz,w);
+          p3=gsubst(pf1,vz,w);
+          p4=gsubst(pf2,vz,w);
+          p5=gsubst(pf3,vz,w);
+          prec=gprecision(p1); if (!prec) prec = MEDDEFAULTPREC;
+          r1 = roots(p1,prec); lr1 = lg(r1);
+          for (j=1; j<lr1; j++)
+          {
+            if (is_complex((GEN)r1[j], bitprec)
+             || signe(v = greal((GEN)r1[j])) <= 0
+             || !is_zero(gsubst(p2,vy,v), bitprec)) continue;
+
+            p7=gsubst(p3,vy,v);
+            p8=gsubst(p4,vy,v);
+            p9=gsubst(p5,vy,v);
+            prec=gprecision(p7); if (!prec) prec = MEDDEFAULTPREC;
+            r2 = roots(p7,prec); lr2 = lg(r2);
+            for (l=1; l<lr2; l++)
+            {
+              if (is_complex((GEN)r2[l], bitprec)
+               || signe(u = greal((GEN)r2[l])) <= 0
+               || !is_zero(gsubst(p8,vx,u), bitprec)
+               || !is_zero(gsubst(p9,vx,u), bitprec)) continue;
+
+              M0_pro =              gmulsg(n1,gsqr(mplog(u)));
+              M0_pro = gadd(M0_pro, gmulsg(n2,gsqr(mplog(v))));
+              M0_pro = gadd(M0_pro, gmulsg(n3,gsqr(mplog(w))));
+              M0_pro = gmul2n(M0_pro,-2);
+              if (DEBUGLEVEL>2)
+              {
+               fprintferr("[ %ld, %ld, %ld ]: %Z\n",n1,n2,n3,gprec_w(M0_pro,3));
+               flusherr();
+              }
+              if (!M0 || gcmp(M0_pro,M0) < 0) M0 = M0_pro;
+            }
+          }
 	}
-	tetpil=av1; M0_pro=gerepile(av1,tetpil,gcopy(M0));
       }
+      if (!M0) avma = av; else M0 = gerepileupto(av, gcopy(M0));
     }
   }
   for (i=1;i<=4;i++) delete_var();
-  return M0;
+  return M0? M0: gzero;
 }
 
 static GEN
-lowerboundforregulator(GEN bnf,GEN units)
+lowerboundforregulator_i(GEN bnf)
 {
   long N,R1,R2,RU,i,nbrootsofone,nbmin;
   GEN rootsofone,nf,M0,M,m,col,T2,bound,minunit,newminunit;
   GEN vecminim,colalg,p1,pol,y;
+  GEN units = check_units(bnf,"bnfcertify");
 
   rootsofone=gmael(bnf,8,4); nbrootsofone=itos((GEN)rootsofone[1]);
   nf=(GEN)bnf[7]; T2=gmael(nf,5,3); N=lgef(nf[1])-3;
@@ -1042,12 +1017,12 @@ lowerboundforregulator(GEN bnf,GEN units)
     newminunit=qfeval(T2,(GEN)units[i]);
     if (gcmp(newminunit,minunit)<0) minunit=newminunit;
   }
-  if (gcmpgs(minunit,1000000000)>0) return regulatorbound(bnf);
+  if (gcmpgs(minunit,1000000000)>0) return NULL;
 
-  vecminim=minimforunits(nf,itos(gceil(minunit)),10000);
-  if (!vecminim) return regulatorbound(bnf);
+  vecminim = minimforunits(nf,itos(gceil(minunit)),10000);
+  if (!vecminim) return NULL;
   m=(GEN)vecminim[3]; nbmin=lg(m)-1;
-  if (nbmin==10000) return regulatorbound(bnf);
+  if (nbmin==10000) return NULL;
   bound=gaddgs(minunit,1);
   for (i=1; i<=nbmin; i++)
   {
@@ -1059,28 +1034,40 @@ lowerboundforregulator(GEN bnf,GEN units)
     }
   }
   if (gcmp(bound,minunit)>0) err(talker,"bug in lowerboundforregulator");
-  if (DEBUGLEVEL>=2)
+  if (DEBUGLEVEL>1)
   {
-    fprintferr("M* = "); outerr(bound); flusherr();
+    fprintferr("M* = %Z\n",gprec_w(bound,3));
     if (DEBUGLEVEL>2)
     {
       p1=polx[0]; pol=gaddgs(gsub(gpuigs(p1,N),gmul(bound,p1)),N-1);
-      fprintferr("pol = "); outerr(pol); flusherr();
-      p1=roots(pol,DEFAULTPREC);
+      p1 = roots(pol,DEFAULTPREC);
       if (N&1) y=greal((GEN)p1[3]); else y=greal((GEN)p1[2]);
-      fprintferr("y = "); outerr(y); flusherr();
-      M0=gmul2n(gmulsg(N*(N-1),gsqr(glog(y,DEFAULTPREC))),-2);
-      fprintferr("old fashion M0 = "); outerr(M0); flusherr();
+      M0 = gmul2n(gmulsg(N*(N-1),gsqr(glog(y,DEFAULTPREC))),-2);
+      fprintferr("pol = %Z\n",pol);
+      fprintferr("old method: y = %Z, M0 = %Z\n",y,gprec_w(M0,3));
     }
+    flusherr();
   }
-  M0=compute_M0(bound,N);
-  if (DEBUGLEVEL>=2) { fprintferr("M0 = "); outerr(M0); flusherr(); }
-  M=gmul2n(gdivgs(gdiv(gpuigs(M0,RU),hermiteconstant(RU)),N),R2);
-  if (gcmp(M,dbltor(0.04))<0) return regulatorbound(bnf);
+  M0 = compute_M0(bound,N);
+  if (DEBUGLEVEL>1) { fprintferr("M0 = %Z\n",gprec_w(M0,3)); flusherr(); }
+  M = gmul2n(gdivgs(gdiv(gpuigs(M0,RU),hermiteconstant(RU)),N),R2);
+  if (gcmp(M,dbltor(0.04))<0) return NULL;
   M = gsqrt(M,DEFAULTPREC);
-  if (DEBUGLEVEL>=2)
-    { fprintferr("(lower bound for regulator) M = "); outerr(M); flusherr(); }
+  if (DEBUGLEVEL>1)
+  {
+    fprintferr("(lower bound for regulator) M = %Z\n",gprec_w(M,3));
+    flusherr();
+  }
   return M;
+}
+
+static GEN
+lowerboundforregulator(GEN bnf)
+{
+  long av = avma;
+  GEN x = lowerboundforregulator_i(bnf);
+  if (!x) { avma = av; x = regulatorbound(bnf); }
+  return x;
 }
 
 /* Calcule une matrice carree de rang lg(beta) associee a une famille
@@ -1097,38 +1084,36 @@ primecertify(GEN bnf,GEN beta,long pp,GEN big)
   sizeofmat=lg(beta)-1; mat=cgetg(1,t_MAT); qq=1;
   for(;;)
   {
-    qq += 2*pp; qgen=stoi(qq);
+    qq += 2*pp; qgen = stoi(qq);
     if (smodis(big,qq)==0 || !isprime(qgen)) continue;
 
-    decqq=primedec(bnf,qgen); nbqq=lg(decqq)-1;
+    decqq = primedec(bnf,qgen); nbqq = lg(decqq)-1;
     for (i=1; i<=nbqq; i++)
     {
-      Q=(GEN)decqq[i];
+      Q = (GEN)decqq[i];
       if (!gcmp1((GEN)Q[4])) continue;
 
-      qrhall=nfmodprinit(nf,Q); nbcol++;
-      newcol=cgetg(sizeofmat+1,t_COL);
-      if (DEBUGLEVEL>=2)
+      qrhall = nfmodprinit(nf,Q); nbcol++;
+      newcol = cgetg(sizeofmat+1,t_COL);
+      if (DEBUGLEVEL>1)
         fprintferr("       prime ideal Q: %Z\n",Q);
       eltgen = gscalcol_i(lift(gener(qgen)), N);
       for (j=1; j<=sizeofmat; j++)
-        newcol[j]=(long)nfshanks(nf,(GEN)beta[j],eltgen,Q,qrhall);
-      if (DEBUGLEVEL>=2)
+        newcol[j] = (long)nfshanks(nf,(GEN)beta[j],eltgen,Q,qrhall);
+      if (DEBUGLEVEL>1)
       {
-        fprintferr("       generator of (Zk/Q)^*: "); outerr(eltgen);
-        fprintferr("       column #%ld of the matrix log(b_j/Q): ",nbcol);
-        outerr(newcol);
+        fprintferr("       generator of (Zk/Q)^*: %Z\n",eltgen);
+        fprintferr("       column #%ld of the matrix log(b_j/Q): %Z\n",
+                   nbcol, newcol);
       }
-      mat1=concatsp(mat,newcol); ra=rank(mat1);
-      if (DEBUGLEVEL>=2)
-      {
-        fprintferr("       new rank of the matrix: %ld\n\n",ra); flusherr();
-      }
+      mat1 = concatsp(mat,newcol); ra = rank(mat1);
+      if (DEBUGLEVEL>1)
+       {fprintferr("       new rank of the matrix: %ld\n\n",ra); flusherr();}
       if (ra!=nbcol) nbcol--;
       else
       {
         if (nbcol==sizeofmat) return;
-        mat=mat1;
+        mat = mat1;
       }
     }
   }
@@ -1139,37 +1124,33 @@ check_prime(long p, GEN bnf, GEN h, GEN cyc, long R, GEN alpha,
             GEN funits, GEN rootsofone, GEN big)
 {
   long av = avma, nbpro,nbalpha,i, nbgen = lg(cyc)-1;
-  GEN p1,beta, nf = (GEN)bnf[7], nbrootsofone = (GEN)rootsofone[1];
+  GEN p1,beta, nbrootsofone = (GEN)rootsofone[1];
 
-  if (DEBUGLEVEL>=2)
-    { fprintferr("***** Testing prime p = %ld\n",p); flusherr(); }
+  if (DEBUGLEVEL>1) fprintferr("***** Testing prime p = %ld\n",p);
   if (smodis(h,p)) nbpro=0;
   else
   {
-    if (DEBUGLEVEL>=2) { fprintferr("     p divides cl(k)\n"); flusherr(); }
+    if (DEBUGLEVEL>1) fprintferr("     p divides cl(k)\n");
     for (nbpro=nbgen; nbpro; nbpro--)
       if (!smodis((GEN)cyc[nbpro],p)) break;
   }
-  nbalpha=nbpro+R;
-  if (smodis(nbrootsofone,p)) p1 = (GEN) alpha[nbpro];
+  nbalpha = nbpro+R;
+  if (smodis(nbrootsofone,p)) p1 = (GEN)alpha[nbpro];
   else
   {
-    if (DEBUGLEVEL>=2) { fprintferr("     p divides w(k)\n"); flusherr(); }
-    nbalpha++; nbpro++; p1 = algtobasis(nf,(GEN)rootsofone[2]);
+    if (DEBUGLEVEL>1) fprintferr("     p divides w(k)\n");
+    nbalpha++; nbpro++; p1 = (GEN)rootsofone[2];
   }
-  if (DEBUGLEVEL>=2)
-    { fprintferr("     t+r+e = %ld\n",nbalpha); flusherr(); }
-  beta=cgetg(nbalpha+1,t_VEC);
+  if (DEBUGLEVEL>1) {fprintferr("     t+r+e = %ld\n",nbalpha); flusherr();}
+  beta = cgetg(nbalpha+1,t_VEC);
   if (nbpro)
   {
-    for (i=1; i<nbpro; i++) beta[i]=alpha[i];
-    beta[nbpro]=(long) p1;
+    for (i=1; i<nbpro; i++) beta[i] = alpha[i];
+    beta[nbpro] = (long)p1;
   }
-  for (i=1; i<=R; i++)
-    beta[i+nbpro]=(long)algtobasis(nf,(GEN)funits[i]);
-  if (DEBUGLEVEL>=2)
-    { fprintferr("     Beta list = "); outerr(beta); flusherr(); }
-  primecertify(bnf,beta,p,big); avma=av;
+  for (i=1; i<=R; i++) beta[i+nbpro] = funits[i];
+  if (DEBUGLEVEL>2) {fprintferr("     Beta list = %Z\n",beta); flusherr();}
+  primecertify(bnf,beta,p,big); avma = av;
 }
 
 long
@@ -1184,33 +1165,40 @@ certifybuchall(GEN bnf)
   R1=itos(gmael(nf,2,1)); R2=itos(gmael(nf,2,2)); R=R1+R2-1;
   funits = check_units(bnf,"bnfcertify");
   DK=absi((GEN)nf[3]);
-  testprime(bnf,zimmertbound(N,R1,DK));
+  testprime(bnf,zimmertbound(N,R2,DK));
   p1=gmael(bnf,8,1); reg=gmael(bnf,8,2);
   h=(GEN)p1[1];
   cyc=(GEN)p1[2]; nbgen=lg(cyc)-1;
   gen=(GEN)p1[3]; rootsofone=gmael(bnf,8,4);
   if (DEBUGLEVEL>1)
   {
-    fprintferr("Class number = "); outerr(h);
-    fprintferr("Cyclic components = "); outerr(cyc);
-    fprintferr("Generators = "); outerr(gen);
-    fprintferr("Regulator = "); outerr(reg);
-    fprintferr("Roots of one = "); outerr(rootsofone);
-    fprintferr("Fundamental units = "); outerr(funits);
+    fprintferr("Class number = %Z\n",h);
+    fprintferr("Cyclic components = %Z\n",cyc);
+    fprintferr("Generators = %Z\n",gen);
+    fprintferr("Regulator = %Z\n",gprec_w(reg,3));
+    fprintferr("Roots of one = %Z\n",rootsofone);
+    fprintferr("Fundamental units = %Z\n",funits);
   }
   cycgen = check_and_build_cycgen(bnf);
-  gbound = ground(gdiv(reg,lowerboundforregulator(bnf,funits)));
+  gbound = ground(gdiv(reg,lowerboundforregulator(bnf)));
   if (is_bigint(gbound))
     err(talker,"sorry, too many primes to check");
 
-  bound = gbound[2];
-  if (DEBUGLEVEL>=2)
+  bound = itos(gbound); if (bound > maxprime()) err(primer1);
+  if (DEBUGLEVEL>1)
   {
     fprintferr("\nPHASE 2: are all primes good ?\n\n");
     fprintferr("  Testing primes <= B (= %ld)\n\n",bound); flusherr();
   }
   for (big=gun,i=1; i<=nbgen; i++)
     big = mulii(big,idealnorm(nf,(GEN)gen[i]));
+
+  funits = dummycopy(funits);
+  for (i=1; i<lg(funits); i++)
+    funits[i] = (long)algtobasis(nf, (GEN)funits[i]);
+  rootsofone = dummycopy(rootsofone);
+  rootsofone[2] = (long)algtobasis(nf, (GEN)rootsofone[2]);
+
   for (pp = *delta++; pp <= bound; pp += *delta++)
     check_prime(pp,bnf,h,cyc,R,cycgen,funits,rootsofone,big);
 
@@ -1221,7 +1209,7 @@ certifybuchall(GEN bnf)
     nbf1=lg(factfd1[1]); f1=(GEN)factfd1[1];
     for (i=1; i<nbf1; i++)
       if (cmpis((GEN)f1[i],bound) > 0) nfa++;
-    if (DEBUGLEVEL>=2 && nfa)
+    if (DEBUGLEVEL>1 && nfa)
       { fprintferr("  Testing primes > B (# = %ld)\n\n",nfa); flusherr(); }
     for (j=1; j<=nfa; j++)
     {
@@ -2514,7 +2502,7 @@ subgrouplist0(GEN bnr, long indexbound, long all, long prec)
 {
   if (typ(bnr)!=t_VEC) err(typeer,"subgrouplist");
   if (lg(bnr)!=1 && typ(bnr[1])!=t_INT)
-  { 
+  {
     if (!all) return subgroupcond(bnr,indexbound,prec);
     checkbnr(bnr); bnr = gmael(bnr,5,2);
   }
