@@ -188,20 +188,35 @@ sub safe_setsid
   };
 }
 
-sub open_dvi_then_quit
+sub open_viewer_then_quit
 {
-  local($dvifile, $viewer)= @_;
-  local($f) = "$dvifile";
-  $f = "$dvifile.gz" if (! -f "$f");
-  $f = "$docdir/$dvifile" if (! -f "$f");
-  $f = "$docdir/$dvifile.gz" if (! -f "$f");
-  die "could not find $f" if (! -f "$f");
-  (!$ENV{DISPLAY} && !$ENV{GPXDVI}) && die "xdvi needs X-Windows";
-  if ($f =~ /\//) { $dvifile = "$f"; } else { $dvifile = "$docdir/$f"; }
-  print "displaying \'$dvifile\'.";
+  my $F = shift;
+  my ($f, $viewer);
+  my $win32 = ($^O =~ /(cyg|ms)win/);
+
+  $f = "$F.dvi";
+  $f = "$F.dvi.gz" if (! -f "$f");
+  $f = "$docdir/$F.dvi" if (! -f "$f");
+  $f = "$docdir/$F.dvi.gz" if (! -f "$f");
+
+  $f = "$F.pdf" if (! -f "$f");
+  $f = "$docdir/$F.pdf" if (! -f "$f");
+  die "could not find \'$F\'" if (! -f "$f");
+
+  if ($f =~ /\.dvi/)
+  { # DVI
+    $viewer = ($f =~ /refcard/)? $xdviref: $xdvi;
+  }
+  else
+  { # PDF
+    $viewer = ($win32)? "AcroRd32.exe": "acroread";
+  }
+
+  if ($f =~ /\//) { $F = "$f"; } else { $F = "$docdir/$f"; }
+  print "displaying \'$F\'.";
   print "\n" if (!$fromgp);
   safe_setsid();
-  system("$viewer $f 2>/dev/null >/dev/null&");
+  system("$viewer $f 2>/dev/null >/dev/null &");
   cleanexit();
 }
 
@@ -239,9 +254,8 @@ sub treat
 
   if (!$apropos)
   {
-    open_dvi_then_quit("users.dvi",$xdvi) if (/^$/);
-    open_dvi_then_quit("tutorial.dvi",$xdvi) if (/^tutorial$/);
-    open_dvi_then_quit("refcard.dvi",$xdviref) if (/^refcard$/);
+    $_ = "users" if (/^$/);
+    open_viewer_then_quit($_) if (/^(users|tutorial|refcard)$/);
   }
 
   if (!$apropos && $transl{$_}) { $_ = $transl{$_}; &choose_chap; }
