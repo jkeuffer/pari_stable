@@ -2790,7 +2790,7 @@ roots2(GEN pol,long PREC)
   else
   {
     factors = _col(pol);
-    ex = cgetg(2, t_VECSMALL); ex[1] = 1;
+    ex = _vecsmall(1);
   }
   nbpol = lg(ex)-1;
   nbroot= 0;

@@ -1508,12 +1508,8 @@ FpX_factorff_irred(GEN P, GEN Q, GEN l)
   long np=degpol(P),nq=degpol(Q);
   long i,d=cgcd(np,nq);
   long vp=varn(P),vq=varn(Q);
-  if (d==1)
-  {	
-    res=cgetg(2,t_COL);
-    res[1]=lcopy(P);
-    return res;
-  }
+
+  if (d==1) return _colcopy(P);
   if (DEBUGLEVEL>=4) (void)timer2();
   FP=FpXQ_matrix_pow(np,np,FpXQ_pow(polx[vp],l,P,l),P,l);
   FQ=FpXQ_matrix_pow(nq,nq,FpXQ_pow(polx[vq],l,Q,l),Q,l);

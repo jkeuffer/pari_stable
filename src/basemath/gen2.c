@@ -1642,7 +1642,7 @@ gtofp(GEN z, long prec)
   switch(typ(z))
   {
     case t_INT:  return itor(z, prec);
-    case t_FRAC: return rdivii((GEN)z[1], (GEN)z[2], prec);
+    case t_FRAC: return fractor(z, prec);
     case t_REAL: return rtor(z, prec);
     case t_COMPLEX: return ctofp(z, prec);
     case t_QUAD: return quadtoc(z, prec);

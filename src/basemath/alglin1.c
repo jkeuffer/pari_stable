@@ -206,7 +206,7 @@ concatsp(GEN x, GEN y)
     else
     {
       if (lg(y[1])!=2) err_cat(x,y);
-      p1=cgetg(2,t_COL); p1[1]=(long)x;
+      p1 = _col(x);
     }
     for (i=2; i<=ly; i++) z[i]=y[i-1];
     z[1]=(long)p1; return z;
@@ -218,7 +218,7 @@ concatsp(GEN x, GEN y)
     else
     {
       if (lg(x[1])!=2) err_cat(x,y);
-      p1=cgetg(2,t_COL); p1[1]=(long)y;
+      p1 = _col(y);
     }
     for (i=1; i<lx; i++) z[i]=x[i];
     z[lx]=(long)p1; return z;
@@ -334,7 +334,7 @@ concat(GEN x, GEN y)
     else
     {
       if (lg(y[1])!=2) err_cat(x,y);
-      p1=cgetg(2,t_COL); p1[1]=lcopy(x);
+      p1 = _colcopy(x);
     }
     for (i=2; i<=ly; i++) z[i]=lcopy((GEN) y[i-1]);
     z[1]=(long)p1; return z;
@@ -346,7 +346,7 @@ concat(GEN x, GEN y)
     else
     {
       if (lg(x[1])!=2) err_cat(x,y);
-      p1=cgetg(2,t_COL); p1[1]=lcopy(y);
+      p1 = _colcopy(y);
     }
     for (i=1; i<lx; i++) z[i]=lcopy((GEN) x[i]);
     z[lx]=(long)p1; return z;
@@ -724,14 +724,14 @@ GEN
 gtomat(GEN x)
 {
   long tx,lx,i;
-  GEN y,p1;
+  GEN y;
 
   if (!x) return cgetg(1, t_MAT);
   tx = typ(x);
   if (! is_matvec_t(tx))
   {
-    y=cgetg(2,t_MAT); p1=cgetg(2,t_COL); y[1]=(long)p1;
-    p1[1]=lcopy(x); return y;
+    y=cgetg(2,t_MAT); y[1]=(long)_colcopy(x);
+    return y;
   }
   switch(tx)
   {
@@ -749,11 +749,7 @@ gtomat(GEN x)
           return y;
         }
       }
-      for (i=1; i<lx; i++)
-      {
-	p1 = cgetg(2,t_COL); y[i] = (long)p1;
-	p1[1] = lcopy((GEN) x[i]);
-      }
+      for (i=1; i<lx; i++) y[i] = (long)_colcopy((GEN)x[i]);
       break;
     }
     case t_COL: 
@@ -773,7 +769,7 @@ gtomat(GEN x)
           return y;
         }
       }
-      y = cgetg(2,t_MAT); y[1] = lcopy(x); break;
+      y = _matcopy(x); break;
     default: /* case t_MAT: */
       y = gcopy(x); break;
   }

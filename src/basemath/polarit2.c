@@ -544,7 +544,7 @@ bezout_lift_fact(GEN pol, GEN Q, GEN p, long e)
   pari_sp av = avma;
   GEN E, link, v, w, pe;
   long i, k = lg(Q)-1;
-  if (k == 1) { GEN d = cgetg(2, t_VEC); d[1] = (long)pol; return d; }
+  if (k == 1) return _vec(pol);
   pe = gpowgs(p, e);
   pol = FpX_normalize(pol, pe);
   E = MultiLift(pol, Q, NULL, p, e, 1);
@@ -2175,10 +2175,9 @@ factor(GEN x)
   }
   if (gcmp0(x))
   {
-    y=cgetg(3,t_MAT);
-    p1=cgetg(2,t_COL); y[1]=(long)p1; p1[1]=lcopy(x);
-    p2=cgetg(2,t_COL); y[2]=(long)p2; p2[1]=un;
-    return y;
+    y = cgetg(3,t_MAT);
+    y[1] = (long)_colcopy(x);
+    y[2] = (long)_col(gun); return y;
   }
   av = avma;
   switch(tx)

@@ -45,6 +45,9 @@ of words. Returns $ 1 + \kbd{floor}(x \times \B \log_2 10)$.
 words. Returns the smallest word count containing $x$ bits, i.e $
 \kbd{ceil}(x / \B)$.
 
+\fun{long}{nbits2prec}{long x} converts a number of bits to a number of
+codewords, i.e 2 + \kbd{nbits2nlong(x)}.
+
 \fun{long}{nchar2nlong}{long x} converts a number of bytes to number of
 words. Returns the smallest word count containing $x$ bytes, i.e
 $\kbd{ceil}(x / \kbd{sizeof(long)})$.
@@ -695,6 +698,12 @@ $\kbd{prec} > 2$.
 
 \fun{GEN}{utoi}{ulong s} converts the \kbd{ulong}~\kbd{s} into a \typ{INT}
 and return the latter.
+
+\fun{GEN}{utoipos}{ulong s} converts the \emph{non-zero} \kbd{ulong}~\kbd{s}
+into a \typ{INT} and return the latter.
+
+\fun{GEN}{utoineg}{ulong s} converts the \empn{non-zero} \kbd{ulong}~\kbd{s}
+into a \typ{INT} and return the latter.
 
 \fun{GEN}{utor}{ulong s, long prec} converts the \kbd{ulong}~\kbd{s} into a
 \typ{REAL} of length \kbd{prec} and return the latter. Assumes that
@@ -2002,10 +2011,22 @@ a~\typ{REAL}), converts \kbd{x} into a \kbd{double} if possible.
 \fun{long}{gtolong}{GEN x} if \kbd{x} is an integer (not necessarily
 a~\typ{INT}), converts \kbd{x} into a \kbd{long} if possible.
 
-\fun{GEN}{quadtoc}{GEN x, long l} applied to a quadratic number~\kbd{x} (type
-\typ{QUAD}), converts \kbd{x} into a \typ{REAL} or \typ{COMPLEX} depending on
-the sign of the discriminant of~\kbd{x}, to precision \hbox{\kbd{l} \B-bit}
-words.% forbid line brk at hyphen here [GN]
+\fun{GEN}{fractor}{GEN x, long l} applied to a \typ{FRAC}~\kbd{x}, converts
+\kbd{x} into a \typ{REAL} of length \kbd{prec}.
+
+\fun{GEN}{quadtoc}{GEN x, long l} applied to a \typ{QUAD}~\kbd{x}, converts
+\kbd{x} into a \typ{REAL} or \typ{COMPLEX} depending on the sign of the
+discriminant of~\kbd{x}, to precision \hbox{\kbd{l} \B-bit} words.% forbid
+line brk at hyphen here [GN]
+
+\fun{GEN}{ctofp}{GEN x, long prec} converts the \typ{COMPLEX}~\kbd{x} to a
+a complex whose real and imaginary parts are \typ{REAL} of length \kbd{prec},
+using \kbd{gtofp};
+
+\fun{GEN}{gtofp}{GEN x, long prec} converts the complex number~\kbd{x}
+(\typ{INT}, \typ{REAL}, \typ{FRAC}, \typ{COMPLEX} or \typ{QUAD}) to either
+a \typ{REAL} or \typ{COMPLEX} whose components are \typ{REAL} of length
+\kbd{prec}.
 
 \fun{GEN}{gcvtop}{GEN x, GEN p, long l} converts \kbd{x} into a \typ{PADIC}
 \kbd{p}-adic number of precision~\kbd{l}.

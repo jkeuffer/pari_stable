@@ -630,8 +630,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
   switch(typ(sg))
   {
      case t_INTMOD: case t_INT: 
-      V=cgetg(2,t_VECSMALL); 
-      V[1]=lift_check_modulus(sg,n);
+      V = _vecsmall( lift_check_modulus(sg,n) );
       break;
     case t_VECSMALL:
       V = gcopy(sg);

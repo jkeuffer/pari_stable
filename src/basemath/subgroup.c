@@ -230,12 +230,7 @@ dopsubtyp(subgp_iter *T)
   pari_sp av = avma;
   long i,r, l = len(T->L), t = len(T->M);
 
-  if (!t)
-  {
-    GEN p1 = cgetg(2,t_MAT);
-    p1[1] = (long)zerocol(l);
-    treatsub(T, p1); avma = av; return;
-  }
+  if (!t) { treatsub(T, _mat( zerocol(l) )); avma = av; return; }
   if (l==1) /* imply t = 1 */
   {
     GEN p1 = gtomat(stoi(T->powlist[T->L[1]-T->M[1]]));

@@ -1097,9 +1097,7 @@ listsousgroupes(long m, long p)
   if (m == 2)
   {
     res = cgetg(2, t_VEC);
-    sg = cgetg(2, t_VECSMALL);
-    res[1] = (long) sg;
-    sg[1] = 1;
+    res[1] = (long)_vecsmall(1);
     return res;
   }
   zn = znstar(stoi(m));
@@ -2895,12 +2893,7 @@ galoisconj4(GEN T, GEN den, long flag, long karma)
   n = degpol(T);
   if (n == 1)			/* Too easy! */
   {
-    if (!flag)
-    {
-      res = cgetg(2, t_COL);
-      res[1] = (long) polx[varn(T)];
-      return res;
-    }
+    if (!flag) return _col( polx[varn(T)] );
     ga.l = 3;
     ga.deg = 1;
     ga.ppp = 1;
@@ -3074,15 +3067,12 @@ galoisconj0(GEN nf, long flag, GEN d, long prec)
     return galoisconj2(nf, degpol(T), prec);
   case 4:
     G = galoisconj4(nf, d, 0, 0);
-    if (typ(G) != t_INT)
-      return G;
+    if (typ(G) != t_INT) return G;
     break;			/* Failure */
   default:
     err(flagerr, "nfgaloisconj");
   }
-  G = cgetg(2, t_COL);
-  G[1] = (long) polx[varn(T)];
-  return G;			/* Failure */
+  return _col( polx[varn(T)] );	/* Failure */
 }
 
 

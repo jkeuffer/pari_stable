@@ -1403,7 +1403,7 @@ binaire(GEN x)
     {
       GEN xp=int_MSW(x);
       lx=lgefint(x);
-      if (lx==2) { y=cgetg(2,t_VEC); y[1]=zero; return y; }
+      if (lx==2) return _vec(gzero);
       ly = BITS_IN_LONG+1; m=HIGHBIT; u=*xp;
       while (!(m & u)) { m>>=1; ly--; }
       y = cgetg(ly+((lx-3)<<TWOPOTBITS_IN_LONG),t_VEC); ly=1;

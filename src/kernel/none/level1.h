@@ -30,10 +30,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #if !defined(INLINE) || defined(INLINE_IS_STATIC)
 GEN    _col(GEN x);
+GEN    _colcopy(GEN x);
 GEN    _mat(GEN x);
+GEN    _matcopy(GEN x);
 GEN    _vec(GEN x);
 GEN    _vec2(GEN x, GEN y);
 GEN    _veccopy(GEN x);
+GEN    _vecsmall(long x);
 void   affiz(GEN x, GEN y);
 void   affsz(long x, GEN y);
 GEN    addii(GEN x, GEN y);
@@ -80,6 +83,7 @@ long   evalexpo(long x);
 long   evallg(long x);
 long   evalvalp(long x);
 long   expi(GEN x);
+GEN    fractor(GEN x, long prec);
 double gtodouble(GEN x);
 GEN    icopy_av(GEN x, GEN y);
 GEN    icopy(GEN x);
@@ -139,6 +143,8 @@ GEN    subrr(GEN x, GEN y);
 GEN    subsi(long x, GEN y);
 ulong  umodui(ulong x, GEN y);
 GEN    utoi(ulong x);
+GEN    utoineg(ulong x);
+GEN    utoipos(ulong x);
 GEN    utor(ulong s, long prec);
 long   vali(GEN x);
 
@@ -239,9 +245,11 @@ cgetc(long l)
   return u;
 }
 INLINE GEN
-_veccopy(GEN x) { GEN v = cgetg(2, t_VEC); v[1] = lcopy(x); return v; }
-INLINE GEN
 _vec(GEN x) { GEN v = cgetg(2, t_VEC); v[1] = (long)x; return v; }
+INLINE GEN
+_vecsmall(long x) { GEN v = cgetg(2, t_VECSMALL); v[1] = x; return v; }
+INLINE GEN
+_veccopy(GEN x) { GEN v = cgetg(2, t_VEC); v[1] = lcopy(x); return v; }
 INLINE GEN
 _vec2(GEN x, GEN y) {
   GEN v = cgetg(3,t_VEC);
@@ -251,7 +259,11 @@ _vec2(GEN x, GEN y) {
 INLINE GEN
 _col(GEN x) { GEN v = cgetg(2, t_COL); v[1] = (long)x; return v; }
 INLINE GEN
+_colcopy(GEN x) { GEN v = cgetg(2, t_COL); v[1] = lcopy(x); return v; }
+INLINE GEN
 _mat(GEN x) { GEN v = cgetg(2, t_MAT); v[1] = (long)x; return v; }
+INLINE GEN
+_matcopy(GEN x) { GEN v = cgetg(2, t_MAT); v[1] = lcopy(x); return v; }
 
 /* cannot do memcpy because sometimes x and y overlap */
 INLINE GEN
@@ -314,24 +326,27 @@ smodss(long x, long y)
   return (rem >= 0)? rem: labs(y) + rem;
 }
 
+/* assume x != 0, return -x as a t_INT */
 INLINE GEN
-utoi(ulong x)
+utoineg(ulong x)
 {
-  GEN y;
-  if (!x) return gzero;
-  y = cgeti(3); y[1] = evalsigne(1) | evallgefint(3); y[2] = x;
-  return y;
+  GEN y = cgeti(3);
+  y[1] = evalsigne(-1)| evallgefint(3); y[2] = x; return y;
 }
-
+/* assume x != 0, return utoi(x) */
+INLINE GEN
+utoipos(ulong x)
+{
+  GEN y = cgeti(3);
+  y[1] = evalsigne(1)| evallgefint(3); y[2] = x; return y;
+}
+INLINE GEN
+utoi(ulong x) { return x? utoipos(x): gzero; }
 INLINE GEN
 stoi(long x)
 {
-  GEN y;
   if (!x) return gzero;
-  y = cgeti(3);
-  if (x>0) { y[1] = evalsigne(1) | evallgefint(3); y[2] = x; }
-  else     { y[1] = evalsigne(-1)| evallgefint(3); y[2] = -x; }
-  return y;
+  return x > 0? utoipos((ulong)x): utoineg((ulong)-x);
 }
 
 INLINE GEN
@@ -721,6 +736,8 @@ rdiviiz(GEN x, GEN y, GEN z)
 
 INLINE GEN 
 rdivii(GEN x, GEN y, long prec) { return rdiviiz(x, y, cgetr(prec)); }
+INLINE GEN
+fractor(GEN x, long prec) { return rdivii((GEN)x[1], (GEN)x[2], prec); }
 
 INLINE void
 divrrz(GEN x, GEN y, GEN z)

@@ -845,9 +845,7 @@ gadd(GEN x, GEN y)
           if (!signe(x))
           {
             lx = expi((GEN)y[1]) - expi((GEN)y[2]) - expo(x);
-            if (lx < 0) return rcopy(x);
-            lx >>= TWOPOTBITS_IN_LONG;
-            return rdivii((GEN)y[1],(GEN)y[2], lx+3);
+            return lx < 0? rcopy(x): fractor(y, nbits2prec(lx));
           }
           av=avma; z=addir((GEN)y[1],mulir((GEN)y[2],x)); tetpil=avma;
           return gerepile(av,tetpil,divri(z,(GEN)y[2]));

@@ -273,10 +273,10 @@ znstar(GEN n)
   if (typ(n) != t_INT) err(arither1);
   if (!signe(n))
   {
-    z=cgetg(4,t_VEC);
-    z[1]=deux; p1=cgetg(2,t_VEC);
-    z[2]=(long)p1; p1[1]=deux; p1=cgetg(2,t_VEC);
-    z[3]=(long)p1; p1[1]=lneg(gun);
+    z = cgetg(4,t_VEC);
+    z[1] = deux;
+    z[2] = (long)_vec(gdeux);
+    z[3] = (long)_vec(utoineg(1));
     return z;
   }
   av=avma; n=absi(n);
@@ -2188,7 +2188,7 @@ sfcont(GEN x, long k)
     if (gcmp0(x)) return _vec(gzero);
     switch(tx)
     {
-      case t_INT: y = cgetg(2,t_VEC); y[1] = (long)icopy(x); return y;
+      case t_INT: return _veccopy(x);
       case t_REAL:
         av = avma; lx = lg(x);
         e = bit_accuracy(lx)-1-expo(x);

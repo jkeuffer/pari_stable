@@ -33,7 +33,7 @@ charpoly0(GEN x, int v, long flag)
   if (v<0) v = 0;
   switch(flag)
   {
-    case 0: return caradj(x,v,0);
+    case 0: return caradj(x,v,NULL);
     case 1: return caract(x,v);
     case 2: return carhess(x,v);
   }
@@ -84,7 +84,7 @@ easychar(GEN x, long v, GEN *py)
 {
   pari_sp av;
   long lx;
-  GEN p1,p2;
+  GEN p1;
 
   switch(typ(x))
   {
@@ -93,13 +93,7 @@ easychar(GEN x, long v, GEN *py)
       p1=cgetg(4,t_POL);
       p1[1]=evalsigne(1) | evalvarn(v);
       p1[2]=lneg(x); p1[3]=un;
-      if (py)
-      {
-	p2=cgetg(2,t_MAT);
-	p2[1]=lgetg(2,t_COL);
-	coeff(p2,1,1)=lcopy(x);
-	*py=p2;
-      }
+      if (py) *py = _mat(_colcopy(x));
       return p1;
 
     case t_COMPLEX: case t_QUAD:
@@ -557,7 +551,7 @@ conjvec(GEN x,long prec)
   switch(tx)
   {
     case t_INT: case t_INTMOD: case t_FRAC:
-      z=cgetg(2,t_COL); z[1]=lcopy(x); break;
+      return _colcopy(x);
 
     case t_COMPLEX: case t_QUAD:
       z=cgetg(3,t_COL); z[1]=lcopy(x); z[2]=lconj(x); break;

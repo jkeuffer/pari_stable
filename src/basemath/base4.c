@@ -1155,8 +1155,8 @@ famat_add(GEN f, GEN x)
   GEN t,h = cgetg(3,t_MAT);
   if (lg(f) == 1)
   {
-    t=cgetg(2,t_COL); h[1]=(long)t; t[1]=lcopy(x);
-    t=cgetg(2,t_COL); h[2]=(long)t; t[1]=un;
+    h[1] = (long)_colcopy(x);
+    h[2] = (long)_col(gun);
   }
   else
   {

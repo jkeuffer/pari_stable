@@ -1791,7 +1791,7 @@ log_gen_pr(zlog_S *S, long index, GEN nf, long e)
     L = (GEN)L2[1];
     y = zerocol(S->n); y[yind + 1] = un;
     zlog_add_sign(y, gmael(L,4,1), S->lists);
-    A = cgetg(2, t_MAT); A[1] = (long)y;
+    A = _mat(y);
   }
   else
   {

@@ -2640,8 +2640,7 @@ buchall_end(GEN nf,long fl,GEN res, GEN clg2, GEN W, GEN B, GEN A, GEN C,
     x[1]=nf[1];
     x[2]=nf[2]; p1=cgetg(3,t_VEC); p1[1]=nf[3]; p1[2]=nf[4];
     x[3]=(long)p1;
-    x[4]=nf[7];
-    z=cgetg(2,t_MAT); z[1]=(long)concatsp(x, res); return z;
+    x[4]=nf[7]; return _mat( concatsp(x, res) );
   }
   z=cgetg(11,t_VEC);
   z[1]=(long)W;
