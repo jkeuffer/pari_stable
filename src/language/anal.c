@@ -981,8 +981,7 @@ expand_string(char *bp, char **ptbuf, char **ptlimit)
   while (is_keyword_char(*s)) s++;
   if (*s == '"' || *s == ',' || *s == ')')
   { /* Do not create new user variables */
-    entree *ep = is_entry_intern(analyseur, functions_hash,0);
-    if (!ep)
+    if (! is_entry_intern(analyseur, functions_hash,0))
     { /* consider as a literal */
       tmp = analyseur;
       len = s - analyseur;

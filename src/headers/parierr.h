@@ -8,7 +8,7 @@ enum {
   talker, flagerr, warner, warnprec, warnfile,
   accurer, bugparier, impl, archer, warnmem,
 
-  typeer, consister,
+  siginter, typeer, consister,
 
 /* mp.s ou mp.c */
 
@@ -50,10 +50,7 @@ enum {
   elliper1, heller1,
 
 /* gen.c */
-  gadderi, gadderf, gmuleri, gmulerf, gdiveri,
-  gdiverf, assigneri, assignerf, gdiver2, gmoderi,
-
-  gmoderf, inter2, overwriter,
+  operi, operf, gdiver2, inter2, overwriter,
 
 /* init.c */
 

@@ -919,6 +919,8 @@ long       timer2(void);
 BEGINEXTERN
 VOLATILE void err(long numerr, ...);
 ENDEXTERN
+void       err_catch(long errnum, jmp_buf env, void *data);
+void      *err_leave(long errnum);
 
 /* mp.c ou mp.s */
 

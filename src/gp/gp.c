@@ -53,15 +53,23 @@ int    whatnow(char *s, int flag);
 #define COMMENTPROMPT "comment> "
 #define DFT_INPROMPT ""
 static GEN *hist;
-static jmp_buf local_environnement[MAX_BUFFER];
-static char *help_prg,*path,*buflist[MAX_BUFFER];
+static char *help_prg,*path;
 static char prompt[MAX_PROMPT_LEN];
 static char thestring[256];
 static long prettyp, test_mode, quiet_mode, gpsilent, simplifyflag;
 static long secure;
 static long chrono, pariecho, primelimit, parisize, strictmatch;
-static long bufindex, tglobal, histsize, paribufsize, lim_lines;
+static long tglobal, histsize, paribufsize, lim_lines;
 static gp_format fmt;
+
+typedef struct Buffer {
+  char *buf;
+  long len;
+  jmp_buf env;
+} Buffer;
+
+#define current_buffer ((Buffer*)(bufstack->value))
+static stack *bufstack = NULL;
 
 #define LBRACE '{'
 #define RBRACE '}'
@@ -132,7 +140,7 @@ gp_preinit(int force)
   prettyp = f_PRETTYMAT;
   strictmatch = simplifyflag = 1;
   tglobal = 0;
-  bufindex = -1;
+  bufstack = NULL;
   secure = test_mode = under_emacs = chrono = pariecho = 0;
   fmt.format = 'g'; fmt.field = 0;
 #ifdef LONG_IS_64BIT
@@ -487,7 +495,7 @@ sd_compatible(char *v, int flag)
 static GEN
 sd_secure(char *v, int flag)
 {
-  if (secure)
+  if (*v && secure)
   {
     fprintferr("[secure mode]: Do you want to modify the 'secure' flag? (^C if not)\n");
     hit_return();
@@ -497,7 +505,7 @@ sd_secure(char *v, int flag)
 
 static GEN
 sd_buffersize(char *v, int flag)
-{ return sd_numeric(v,flag,"buffersize",&paribufsize, 0,
+{ return sd_numeric(v,flag,"buffersize",&paribufsize, 1,
                     (VERYBIGINT / sizeof(long)) - 1,NULL); }
 static GEN
 sd_debug(char *v, int flag)
@@ -598,7 +606,7 @@ sd_parisize(char *v, int flag)
     if (flag != d_INITRC)
     {
       parisize = allocatemoremem(n);
-      longjmp(local_environnement[bufindex], 0);
+      longjmp(current_buffer->env, 0);
     }
     parisize = n;
   }
@@ -1361,11 +1369,33 @@ Type ?12 for how to get moral (and possibly technical) support.\n\n");
   pariputsf("\nparisize = %ld, primelimit = %ld\n", parisize, primelimit);
 }
 
+static void
+fix_buffer(Buffer *b, long newlbuf)
+{
+  b->buf = gprealloc(b->buf,newlbuf, b->len);
+  b->len = paribufsize = newlbuf;
+}
+
+static void
+kill_buffer()
+{
+  Buffer *b = (Buffer*) pop_stack(&bufstack);
+  if (b) free(b->buf);
+}
+
+/* if (but_one != 0),  leave a single buffer standing */
+static void
+kill_all_buffers(int but_one)
+{
+  while (bufstack->prev) kill_buffer();
+  if (! but_one) kill_buffer();
+}
+
 void
 gp_quit()
 {
   free_graph(); freeall();
-  while (bufindex) free((void *)buflist[bufindex--]);
+  kill_all_buffers(0);
 #ifdef WINCE
 #else
   if (INIT_SIG)
@@ -1633,21 +1663,14 @@ init_filtre(char *s)
   return init_brace(s);
 }
 
-static void
-fix_buffer(long newlbuf, char **ptbuf, long *ptlbuf)
-{
-  buflist[bufindex] = *ptbuf = gprealloc(*ptbuf,newlbuf,*ptlbuf);
-  *ptlbuf = paribufsize = newlbuf;
-}
-
 /* prompt = NULL --> from gprc */
 static int
-get_line_from_file(FILE *file, char **ptbuf, long *ptlbuf, char *prompt)
+get_line_from_file(FILE *file, Buffer *b, char *prompt)
 {
   int f_flag = prompt? f_REG | f_KEEPCASE: f_REG;
   int wait_for_brace;
-  long len = *ptlbuf;
-  char *s = *ptbuf;
+  long len = b->len;
+  char *s =  b->buf;
 
   if (!fgets(s, len, file)) return 0;
   wait_for_brace = init_filtre(s);
@@ -1673,23 +1696,22 @@ get_line_from_file(FILE *file, char **ptbuf, long *ptlbuf, char *prompt)
 	if (end[-1] == RBRACE) {end[-1]=0; break;}
 	s = end;
       }
-      len = *ptlbuf - (s - *ptbuf);
+      len = b->len - (s - b->buf);
       if (len < 512)
       {
-	long n = *ptlbuf << 1, l = s - *ptbuf;
-	len += *ptlbuf;
-	fix_buffer(n, ptbuf, ptlbuf);
-	s = *ptbuf + l;
+	long n = b->len << 1, l = s - b->buf;
+	len += b->len; fix_buffer(b, n);
+	s = b->buf + l;
       }
     }
     if (!fgets(s, len, file)) break;
     if (!read_more && !wait_for_brace)
       wait_for_brace = init_filtre(s);
   }
-  if (prompt && *ptbuf)
+  if (prompt && *(b->buf))
   {
-    if (pariecho) { pariputs(prompt); pariputs(*ptbuf); pariputc('\n'); }
-    else if (logfile) fprintf(logfile, "%s%s\n",prompt,*ptbuf);
+    if (pariecho) { pariputs(prompt); pariputs(b->buf); pariputc('\n'); }
+    else if (logfile) fprintf(logfile, "%s%s\n",prompt,b->buf);
     pariflush();
   }
   return 1;
@@ -1700,22 +1722,25 @@ get_line_from_file(FILE *file, char **ptbuf, long *ptlbuf, char *prompt)
 static char **
 gp_initrc()
 {
-  char **flist, *buf, *s,*s1,*s2;
+  char **flist, *s,*s1,*s2;
   FILE *file = gprc_get();
-  long fnum = 4, find = 0, *ptlbuf = &paribufsize;
+  long fnum = 4, find = 0;
+  Buffer BUF, *b = &BUF;
 
   if (!file) return NULL;
   flist = (char **) gpmalloc(fnum * sizeof(char*));
-  buflist[++bufindex] = buf = gpmalloc(*ptlbuf);
+  b->len = paribufsize;
+  b->buf = gpmalloc(b->len);
   for(;;)
   {
-    if (! get_line_from_file(file, &buf, ptlbuf, NULL))
+    if (! get_line_from_file(file, b, NULL))
     {
+      free(b->buf);
       if (!quiet_mode) fprintferr("Done.\n\n");
-      fclose(file); free(buflist[bufindex--]);
-      flist[find] = NULL; return flist;
+      fclose(file); flist[find] = NULL;
+      return flist;
     }
-    for (s = buf; *s; )
+    for (s = b->buf; *s; )
     {
       s1 = s; if (get_sep2(s)) s++;
       s += strlen(s1); /* point to next expr */
@@ -1723,12 +1748,12 @@ gp_initrc()
       { /* preprocessor directive */
         int z, NOT = 0;
         s1++;
-        if (strncmp(s1,"if",2)) err_gprc("unknown directive",s1,buf);
+        if (strncmp(s1,"if",2)) err_gprc("unknown directive",s1,b->buf);
         s1 += 2;
         if (!strncmp(s1,"not",3)) { NOT = !NOT; s1 += 3; }
         if (*s1 == '!')           { NOT = !NOT; s1++; }
         z = get_preproc_value(s1);
-	if (z < 0) err_gprc("unknown preprocessor variable",s1,buf);
+	if (z < 0) err_gprc("unknown preprocessor variable",s1,b->buf);
 	if (NOT) z = !z;
         if (!z) continue;
         s1 += 5;
@@ -1750,7 +1775,7 @@ gp_initrc()
       else
       { /* set default */
 	s2 = s1; while (*s2 && *s2 != '=') s2++;
-	if (*s2 != '=') err_gprc("missing '='",s2,buf);
+	if (*s2 != '=') err_gprc("missing '='",s2,b->buf);
 	*s2++ = 0;
 	if (*s2 == '"') (void)readstring(s2, s2);
 	setdefault(s1,s2,d_INITRC);
@@ -1818,6 +1843,7 @@ static void
 gp_sighandler(int sig)
 {
   char *msg;
+  signal(sig,gp_sighandler);
   switch(sig)
   {
     case SIGINT:
@@ -1826,26 +1852,25 @@ gp_sighandler(int sig)
     case SIGBREAK:
 # endif
       if (++win32ctrlc >= 5) _exit(3);
-      signal(sig,gp_sighandler);
       return;
 #endif
       msg = do_time(ti_INTERRUPT);
-      break;
+      err(siginter,msg);
+      return;
 
     case SIGSEGV:
-      msg="segmentation fault: bug in GP (please report)";
+      msg="GP (Segmentation Fault)";
       break;
 
 #ifdef SIGBUS
     case SIGBUS:
-      msg="bus error: bug in GP (please report)";
+      msg="GP (Bus Error)";
       break;
 #endif
     default:
-      msg="bug in signal handling (please report)";
+      msg="signal handling";
   }
-  signal(sig,gp_sighandler);
-  err(talker,msg);
+  err(bugparier,msg);
 }
 #endif
 static void
@@ -1881,7 +1906,7 @@ do_prompt()
 }
 
 static int
-read_line(char *promptbuf, char **ptbuf, long *ptlbuf)
+read_line(char *promptbuf, Buffer *b)
 {
   if (infile == stdin /* interactive use */
 #if defined(UNIX) || defined(__EMX__)
@@ -1891,23 +1916,23 @@ read_line(char *promptbuf, char **ptbuf, long *ptlbuf)
   {
 #ifdef READLINE
     static char *previous_hist = NULL;
-    char *rlbuffer = readline(promptbuf), *s = *ptbuf;
+    char *rlbuffer = readline(promptbuf), *s = b->buf;
     int wait_for_brace, wait_for_input;
 
     if (!rlbuffer) { pariputs("\n"); return 0; } /* EOF */
     wait_for_input = wait_for_brace = init_filtre(rlbuffer);
     for(;;)
     {
-      long len = s - *ptbuf;
+      long len = s - b->buf;
       char *end = filtre(rlbuffer, f_READL);
       long l = end - rlbuffer;
 
-      if (len + l > *ptlbuf)
+      if (len + l > b->len)
       {
-	fix_buffer(len+l+1, ptbuf, ptlbuf);
-	s = *ptbuf + len;
+	fix_buffer(b, len+l+1);
+	s = b->buf + len;
       }
-      strcpy(s,rlbuffer); free(rlbuffer);
+      strcpy(s,rlbuffer);
       if (!*s) { if (!wait_for_input) break; }
       else
       {
@@ -1927,6 +1952,7 @@ read_line(char *promptbuf, char **ptbuf, long *ptlbuf)
 	  s++;
 	}
       }
+      free(rlbuffer);
       /* read continuation line */
       if (!(rlbuffer = readline(""))) break;
       if (wait_for_input && !wait_for_brace)
@@ -1938,7 +1964,7 @@ read_line(char *promptbuf, char **ptbuf, long *ptlbuf)
 # elif USE_SIGSETMASK
     sigsetmask(0);
 # endif
-    s = *ptbuf;
+    s = b->buf;
     if (*s)
     {
       /* update history (don't add the same entry twice) */
@@ -1956,7 +1982,7 @@ read_line(char *promptbuf, char **ptbuf, long *ptlbuf)
 #endif /* defined(READLINE) */
   }
   else promptbuf = DFT_PROMPT;
-  return get_line_from_file(infile, ptbuf, ptlbuf, promptbuf);
+  return get_line_from_file(infile, b, promptbuf);
 }
 
 static void
@@ -1971,24 +1997,43 @@ chron(char *s)
   else { chrono = 1-chrono; sd_timer("",d_ACKNOWLEDGE); }
 }
 
-/* bufindex != 0: we are doing an immediate read (with read, extern...) */
+static int
+check_meta(char *buf)
+{
+  switch(*buf++)
+  {
+    case '?': aide(buf, h_REGULAR); break;
+    case '#': chron(buf); break;
+    case '\\': escape(buf); break;
+    case '\0': break;
+    default: return 0;
+  }
+  return 1;
+}
+
+/* If there are other buffers open (bufstack != NULL), we are doing an
+ * immediate read (with read, extern...) */
 static GEN
 gp_main_loop()
 {
-  long av, i,j, lbuf = paribufsize;
-  char *buf, *promptbuf = prompt;
+  char *promptbuf = prompt;
+  long av, i,j, first = (!bufstack);
   GEN z = gnil;
+  Buffer BUF, *b = &BUF;
 
-  if (bufindex == MAX_BUFFER) err(talker,"too many nested files");
-  buflist[++bufindex] = buf = (char *) gpmalloc(lbuf);
+  push_stack(&bufstack, (void*)b);
+  b->len = paribufsize;
+  b->buf = gpmalloc(b->len);
   for(;;)
   {
-    if (! bufindex)
+    if (first)
     {
       static long tloc, outtyp;
       tloc = tglobal; outtyp = prettyp; recover(0);
       if (setjmp(environnement))
       {
+        char *s = (char*)global_err_data;
+        if (s && *s) outerr(lisseq(s));
 	avma = top; parisize = top - bot;
 	j = tglobal - tloc; i = (tglobal-1)%histsize;
 	while (j)
@@ -1998,45 +2043,35 @@ gp_main_loop()
 	  i--; j--;
 	}
         tglobal = tloc; prettyp = outtyp;
-	while (bufindex) free((void *)buflist[bufindex--]);
+        kill_all_buffers(1);
       }
     }
-    setjmp(local_environnement[bufindex]);
-    added_newline = 1;
-    if (paribufsize != lbuf)
-      fix_buffer(paribufsize, &buf, &lbuf);
+    setjmp(b->env); added_newline = 1;
+    if (paribufsize != b->len) fix_buffer(b, paribufsize);
 
     for(;;)
     {
       if (! test_mode) promptbuf = do_prompt();
-      if (! read_line(promptbuf, &buf, &lbuf))
+      if (! read_line(promptbuf, b))
       {
 #ifdef _WIN32
 	Sleep(10); if (win32ctrlc) dowin32ctrlc();
 #endif
 	if (popinfile()) gp_quit();
-	if (bufindex) { free(buflist[bufindex--]); return z; }
+	if (!first) { kill_buffer(); return z; }
       }
-      else switch(*buf)
-      {
-	case '?': aide(buf+1, h_REGULAR); break;
-        case '#': chron(buf+1); break;
-        case '\\': escape(buf+1); break;
-	case '\0': break;
-	default: goto WORK;
-      }
+      else if (!check_meta(b->buf)) break;
     }
-WORK:
-    if (! bufindex)
+    if (first)
     {
-      char c = buf[strlen(buf) - 1];
+      char c = b->buf[strlen(b->buf) - 1];
       gpsilent = separe(c);
+      (void)gptimer();
     }
-    if (bufindex == 0) (void)gptimer();
     av = avma;
-    z = readseq(buf, strictmatch);
+    z = readseq(b->buf, strictmatch);
     if (!added_newline) pariputc('\n'); /* last output was print1() */
-    if (bufindex) continue;
+    if (! first) continue;
     if (chrono) pariputs(do_time(ti_REGULAR)); else do_time(ti_NOPRINT);
     if (z == gnil) continue;
 
@@ -2061,6 +2096,7 @@ WORK:
     }
     pariputc('\n'); pariflush();
   }
+  kill_buffer();
 }
 
 GEN
@@ -2105,23 +2141,22 @@ void
 allocatemem0(unsigned long newsize)
 {
   parisize = allocatemoremem(newsize);
-  longjmp(local_environnement[bufindex], 0);
+  longjmp(current_buffer->env, 0);
 }
 
 GEN
 input0()
 {
-  long *ptlbuf = &paribufsize;
-  char *buf;
+  Buffer BUF, *b = &BUF;
   GEN x;
 
-  if (bufindex == MAX_BUFFER) err(talker,"too many nested files");
-  buflist[++bufindex] = buf = gpmalloc(*ptlbuf);
-  while (! get_line_from_file(infile, &buf, ptlbuf, DFT_INPROMPT))
+  b->len = paribufsize;
+  b->buf = gpmalloc(b->len);
+
+  while (! get_line_from_file(infile, b, DFT_INPROMPT))
     if (popinfile()) { fprintferr("no input ???"); gp_quit(); }
-  x = lisseq(buf);
-  free(buflist[bufindex--]);
-  return x;
+  x = lisseq(b->buf);
+  free(b->buf); return x;
 }
 
 void
@@ -2143,6 +2178,76 @@ error0(GEN *g)
   pariputs("###   User error:\n\n   ");
   print0(g,f_RAW); term_color(c_NONE);
   err_recover(talker);
+}
+
+void
+trap0(char *s, char *f)
+{
+  long numerr = -1;
+       if (!strcmp(s,"errpile")) numerr = errpile;
+  else if (!strcmp(s,"typeer")) numerr = typeer;
+  else if (!strcmp(s,"gdiver2")) numerr = gdiver2;
+  else if (!strcmp(s,"accurer")) numerr = accurer;
+  else if (*s) err(impl,"this trap keyword");
+  /* TO BE CONTINUED */
+  if (f)
+  {
+    if (!*f)
+    {
+      void *a = err_leave(numerr);
+      if (a) free(a);
+    }
+    else
+    err_catch(numerr, environnement, (void*)pari_strdup(f));
+  }
+  else
+    err_catch(numerr, NULL, NULL); /* will start a break loop */
+}
+
+void errcontext(char *msg, char *s, char *entry);
+
+void
+break_loop()
+{
+  Buffer BUF, *b = &BUF;
+
+  b->len = paribufsize;
+  b->buf = gpmalloc(b->len);
+  term_color(c_ERR);
+  fprintferr("\n");
+  errcontext("Starting break loop (^D to exit)",
+             _analyseur(), current_buffer->buf);
+  term_color(c_NONE);
+  infile = stdin;
+  for(;;)
+  {
+    if (! read_line("> ", b)) break;
+    if (!check_meta(b->buf))
+    {
+      GEN x = lisseq(b->buf);
+      if (x == gnil) continue;
+
+      term_color(c_OUTPUT);
+      gp_output(x);
+      term_color(c_NONE);
+      pariputc('\n');
+    }
+  }
+  free(b->buf);
+}
+
+int
+gp_exception_handler(long numerr)
+{
+  char *s = (char*)global_err_data;
+  if (s && *s) outerr(lisseq(s));
+  else
+  {
+    if (numerr == errpile) avma = top;
+    break_loop();
+    if (numerr == siginter) return 1;
+  }
+  return 0;
 }
 
 long
@@ -2257,17 +2362,18 @@ main(int argc, char **argv)
 #endif
   gp_history_fun = gp_history;
   whatnow_fun = whatnow;
+  default_exception_handler = gp_exception_handler;
   gp_expand_path(path);
 
   if (!quiet_mode) gp_head();
   if (flist)
   {
-    long c=chrono, b=bufindex, e=pariecho;
+    long c=chrono, e=pariecho;
     FILE *l=logfile;
     char **s = flist;
-    bufindex = 0; chrono=0; pariecho=0; logfile=NULL;
+    chrono=0; pariecho=0; logfile=NULL;
     for ( ; *s; s++) { read0(*s); free(*s); }
-    bufindex = b; chrono=c; pariecho=e; logfile=l; free(flist);
+    chrono=c; pariecho=e; logfile=l; free(flist);
   }
   (void)gptimer(); (void)timer(); (void)timer2();
   (void)gp_main_loop();

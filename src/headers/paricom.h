@@ -43,6 +43,7 @@ extern GEN   polvar,*polun,*polx,primetab;
 extern GEN   gun,gdeux,ghalf,gi,gzero;
 
 extern const long lontyp[];
+extern void* global_err_data;
 
 #define NUMPRTBELT     100 /* taille table de premiers prives */
 #define MAXITERPOL     10  /* nombre maximum de doublement de precision

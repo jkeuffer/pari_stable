@@ -20,6 +20,14 @@ typedef struct module {
   char **help;
 } module;
 
+typedef struct stack {
+  struct stack *prev;
+  void *value;
+} stack;
+
+void push_stack(stack **pts, void *a);
+void *pop_stack(stack **pts);
+
 entree *do_alias(entree *ep);
 int    is_identifier(char *s);
 entree *is_entry_intern(char *s, entree **table, long *hash);
@@ -46,6 +54,7 @@ extern GEN  (*foreignExprHandler)(char*);
 extern char foreignExprSwitch;
 extern entree * (*foreignAutoload)(char*, long);
 extern void (*foreignFuncFree)(entree *);
+extern int (*default_exception_handler)(long);
 
 /* Variables containing the list of PARI functions */
 extern int    functions_tblsz;     /* hashcodes table size */

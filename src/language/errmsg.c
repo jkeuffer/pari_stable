@@ -27,15 +27,15 @@ char *errmessage[]=
 /* talker */
   "",
 /* flagerr */
-  "invalid flag in",
+  "invalid flag",
 /* warner */
   "Warning:",
 /* warnprec */
-  "Warning: increasing prec in",
+  "Warning: increasing prec",
 /* warnfile */
   "Warning: failed to",
 /* accurer */
-  "accuracy problems in",
+  "accuracy problems",
 /* bugparier */
   "bug in",
 /* impl */
@@ -44,11 +44,13 @@ char *errmessage[]=
   "sorry, not yet available on this system",
 /* warnmem */
   "collecting garbage in",
-/* typeer */
-  "incorrect type in",
 
+/* siginter */
+  "",
+/* typeer */
+  "incorrect type",
 /* consister */
-  "inconsistent data in",
+  "inconsistent data",
 
     /*  MP.S  */
 
@@ -133,7 +135,7 @@ char *errmessage[]=
   "third operand of type real",
 
 /* errpile */
-  "the PARI stack overflows !!!\n",
+  "the PARI stack overflows !",
 /* errlg */
   "object too big, length can't fit in a codeword",
 /* errlgef */
@@ -152,7 +154,7 @@ char *errmessage[]=
 /* matinv1 */
   "non invertible matrix in gauss",
 /* mattype1 */
-  "not a square matrix in",
+  "not a square matrix",
 /* suppler2 */
   "not linearly independent columns in suppl",
 
@@ -161,7 +163,7 @@ char *errmessage[]=
 /* valencer1 */
   "unknown identifier valence, please report",
 /* breaker */
-  "break not allowed in",
+  "break not allowed",
 
   /*  ARITH.C  */
 
@@ -174,7 +176,7 @@ char *errmessage[]=
 /* hiler1 */
   "insufficient precision for p=2 in hil",
 /* funder2 */
-  "discriminant not congruent to 0 or 1 mod 4 in",
+  "discriminant not congruent to 0 or 1 mod 4",
 /* generer */
   "primitive root does not exist in gener",
 /* primer1 */
@@ -183,15 +185,15 @@ char *errmessage[]=
   /*  BASE.C  */
 
 /* polrationer */
-  "not a rational polynomial in",
+  "not a rational polynomial",
 /* constpoler */
-  "constant polynomial in",
+  "constant polynomial",
 /* notpoler */
-  "not a polynomial in",
+  "not a polynomial",
 /* redpoler */
-  "reducible polynomial in",
+  "reducible polynomial",
 /* zeropoler */
-  "zero polynomial in",
+  "zero polynomial",
 /* idealer1 */
   "not a number field in some number field-related function",
 /* idealer2 */
@@ -219,33 +221,16 @@ char *errmessage[]=
 
   /*  GEN.C */
 
-/* gadderi */
-  "impossible addition",
-/* gadderf */
-  "forbidden addition",
-/* gmuleri */
-  "impossible multiplication",
-/* gmulerf */
-  "forbidden multiplication",
-/* gdiveri */
-  "impossible division",
-/* gdiverf */
-  "forbidden division",
-/* assigneri */
-  "impossible assignment",
-/* assignerf */
-  "forbidden assignment",
+/* operi */
+  "impossible",
+/* operf */
+  "forbidden",
 /* gdiver2 */
   "division by zero in gdiv, gdivgs or ginv",
-/* gmoderi */
-  "impossible division",
-
-/* gmoderf */
-  "forbidden division",
 /* inter2 */
   "a log/atan appears in the integration, PARI cannot handle that",
 /* overwriter */
-  "trying to overwrite a universal",
+  "trying to overwrite a universal object",
 
   /*  INIT.C  */
 
@@ -275,9 +260,9 @@ char *errmessage[]=
   /*  TRANS.C  */
 
 /* infprecer */
-  "infinite precision in",
+  "infinite precision",
 /* negexper */
-  "negative exponent in",
+  "negative exponent",
 /* sqrter5 */
   "non quadratic residue in gsqrt",
 /* sqrter6 */

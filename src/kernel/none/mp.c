@@ -1623,8 +1623,6 @@ invrev(ulong b)
   return x;
 }
 
-#define divllrev(a,b) (((ulong)a)*invrev(b))
-
 /* 2-adic division */
 GEN
 diviirev(GEN x, GEN y, long a)

@@ -27,6 +27,7 @@ int     disable_color = 1, added_newline = 1, under_emacs = 0;
 int     functions_tblsz = 135; /* size of functions_hash          */
 entree  **varentries;
 
+void    *global_err_data;
 jmp_buf environnement;
 long    *ordvar;
 long    DEBUGFILES,DEBUGLEVEL,DEBUGMEM,compatible;
@@ -40,11 +41,38 @@ GEN  (*foreignExprHandler)(char*);    /* Handler for foreign expressions.*/
 entree * (*foreignAutoload)(char*, long); /* Autoloader                      */
 void (*foreignFuncFree)(entree *);    /* How to free external entree.    */
 
+int  (*default_exception_handler)(long);
 GEN  (*gp_history_fun)(long, long, char *, char *);
 int  (*whatnow_fun)(char *, int);
 
 void  initout(void);
 int   term_width(void);
+
+typedef struct cell {
+  void *env;
+  void *data;
+} cell;
+
+static stack **err_catch_stack;
+
+void
+push_stack(stack **pts, void *a)
+{
+  stack *v = (stack*) gpmalloc(sizeof(stack));
+  v->value = a;
+  v->prev  = *pts; *pts = v;
+}
+
+void *
+pop_stack(stack **pts)
+{
+  stack *s = *pts, *v;
+  void *a;
+  if (!s) return NULL; /* initial value */
+  v = s->prev; *pts = v;
+  a = s->value; free((void*)s);
+  return a;
+}
 
 #ifdef STACK_CHECK
 /*********************************************************************/
@@ -322,11 +350,11 @@ pari_sig_init(void (*f)(int))
 void
 pari_init(long parisize, long maxprime)
 {
-  long n;
+  long i;
   GEN p;
 
 #ifdef STACK_CHECK
-  pari_init_stackcheck(&n);
+  pari_init_stackcheck(&i);
 #endif
   init_defaults(0);
   if (INIT_JMP && setjmp(environnement))
@@ -359,7 +387,7 @@ pari_init(long parisize, long maxprime)
   polx  = (GEN*) gpmalloc((MAXVARN+1)*sizeof(GEN));
   polun = (GEN*) gpmalloc((MAXVARN+1)*sizeof(GEN));
   polvar[0] = evaltyp(t_VEC) | evallg(1);
-  for (n=0; n <= MAXVARN; n++) ordvar[n] = n;
+  for (i=0; i <= MAXVARN; i++) ordvar[i] = i;
 
   /* 2 (gnil) + 2 (gzero) + 3 (gun) + 3 (gdeux) + 3 (half) + 3 (gi) */
   p = universal_constants = (long *) gpmalloc(16*sizeof(long));
@@ -386,11 +414,11 @@ pari_init(long parisize, long maxprime)
 
   pari_addfunctions(&pari_modules, functions_basic,helpmessages_basic);
   functions_hash = (entree **) gpmalloc(sizeof(entree*)*functions_tblsz);
-  for (n = 0; n < functions_tblsz; n++) functions_hash[n] = NULL;
+  for (i = 0; i < functions_tblsz; i++) functions_hash[i] = NULL;
 
   pari_addfunctions(&pari_oldmodules, oldfonctions,oldhelpmessage);
   funct_old_hash = (entree **) gpmalloc(sizeof(entree*)*functions_tblsz);
-  for (n = 0; n < functions_tblsz; n++) funct_old_hash[n] = NULL;
+  for (i = 0; i < functions_tblsz; i++) funct_old_hash[i] = NULL;
   gp_init_entrees(pari_oldmodules, funct_old_hash, 1);
 
   if (new_fun_set)
@@ -400,11 +428,15 @@ pari_init(long parisize, long maxprime)
 
   pari_addfunctions(&pari_membermodules, gp_member_list, NULL);
   members_hash = (entree **) gpmalloc(sizeof(entree*)*functions_tblsz);
-  for (n = 0; n < functions_tblsz; n++) members_hash[n] = NULL;
+  for (i = 0; i < functions_tblsz; i++) members_hash[i] = NULL;
   gp_init_entrees(pari_membermodules, members_hash, 1);
 
   gp_history_fun = NULL;
   whatnow_fun = NULL;
+  err_catch_stack = (stack**) gpmalloc((noer + 1) *sizeof(stack*));
+  for (i = 0; i <= noer; i++) err_catch_stack[i] = NULL;
+  default_exception_handler = NULL;
+
   (void)manage_var(2,NULL); /* init nvar */
   (void)get_timer(-1); /* init timers */
   var_not_changed = 1; fetch_named_var("x", 0);
@@ -764,8 +796,6 @@ err_recover(long numerr)
 
   /* reclaim memory stored in "blocs" */
   if (try_to_recover) recover(1);
-  /* allocate _after_ recover (otherwise we may inspect freed memory) */
-  if (numerr==errpile) (void)allocatemoremem(0);
   longjmp(environnement, numerr);
 }
 
@@ -776,7 +806,7 @@ err_recover(long numerr)
  *   s points to the offending chars.
  *   entry tells how much we can go back from s[0].
  */
-static void
+void
 errcontext(char *msg, char *s, char *entry)
 {
   char *prefix = "  ***   ";
@@ -798,20 +828,68 @@ errcontext(char *msg, char *s, char *entry)
   print_prefixed_text(buf, prefix, str); free(buf);
 }
 
-#define op_err(ap, op) {\
-  long _x = va_arg(ap, long);\
-  long _y = va_arg(ap, long);\
-  (pariputsf(" %s %s %s.",type_name(_x),(op),type_name(_y)));\
+void break_loop();
+
+#if 0
+static void
+reset_exception(long numer)
+{
+  stack *s;
+  cell *v;
+
+  if (!err_catch_stack) return;
+  s = err_catch_stack[numer];
+  if (!s) return;
+  while ( (v = (cell*) pop_stack(&s)) )
+{
+    if (v->data) free(v->data);
+    free((void*)v);
+}
+  err_catch_stack[numer] = NULL;
+}
+#endif
+
+void
+err_catch(long errnum, jmp_buf env, void *data)
+{
+  cell *v = (cell*)gpmalloc(sizeof(cell));
+  if (errnum < 0) errnum = noer;
+  v->data = data;
+  v->env  = env;
+  push_stack(err_catch_stack + errnum, (void*)v);
+}
+
+void *
+err_leave(long errnum)
+{
+  cell *v;
+  void *a;
+  if (errnum < 0) errnum = noer;
+  v = (cell*)pop_stack(err_catch_stack + errnum);
+  a = v->data; free(v); return a;
 }
 
 VOLATILE void
 err(long numerr, ...)
 {
-  char s[128], *ch1, ret = 0;
+  char s[128], *ch1;
+  int ret = 0, trap = 0;
   PariOUT *out = pariOut;
   va_list ap;
 
   va_start(ap,numerr);
+
+  if (err_catch_stack[numerr]) trap = numerr;
+  else if (err_catch_stack[noer] && numerr >= talker) trap = noer;
+  if (trap)
+  { /* all non-syntax errors (noer), or numerr individually trapped */
+    cell *a = (cell*) err_catch_stack[trap]->value;
+    global_err_data = a->data;
+    if (a->env) longjmp(a->env, numerr);
+  }
+  else
+  global_err_data = NULL;
+
   if (!added_newline) { pariputc('\n'); added_newline=1; }
   pariflush(); pariOut = pariErr;
   pariflush(); term_color(c_ERR);
@@ -826,9 +904,10 @@ err(long numerr, ...)
         errcontext(s,ch1,va_arg(ap,char *));
         if (whatnow_fun)
         {
+          term_color(c_NONE);
           print_text("For full compatibility with GP 1.39, type \"default(compatible,3)\" (you can also set \"compatible = 3\" in your GPRC file)");
           pariputc('\n');
-          term_color(c_NONE); ch1 = va_arg(ap,char *);
+          ch1 = va_arg(ap,char *);
           whatnow_fun(ch1, - va_arg(ap,int));
         }
         break;
@@ -851,7 +930,7 @@ err(long numerr, ...)
     pariputsf("  ***   %s", errmessage[numerr]);
     switch (numerr)
     {
-      case talker:
+      case talker: case siginter:
         ch1=va_arg(ap, char*);
         vpariputs(ch1,ap); pariputs(".\n"); break;
 
@@ -863,21 +942,23 @@ err(long numerr, ...)
       case accurer: case infprecer: case negexper: case polrationer:
       case funder2: case constpoler: case notpoler: case redpoler:
       case zeropoler: case consister: case flagerr:
-        pariputsf(" %s.",va_arg(ap, char*)); break;
+        pariputsf(" in %s.",va_arg(ap, char*)); break;
 
       case bugparier:
         pariputsf(" %s, please report",va_arg(ap, char*)); break;
 
-      case assigneri: case assignerf:
-        op_err(ap, "-->"); break;
-      case gadderi: case gadderf:
-        op_err(ap, "+"); break;
-      case gmuleri: case gmulerf:
-        op_err(ap, "*"); break;
-      case gdiveri: case gdiverf:
-        op_err(ap, "/"); break;
-      case gmoderi: case gmoderf:
-        op_err(ap, "%"); break;
+      case operi: case operf:
+      {
+        char *op = va_arg(ap, char*), *f;
+        long   x = va_arg(ap, long);
+        long   y = va_arg(ap, long);
+             if (*op == '+') f = "addition";
+        else if (*op == '*') f = "multiplication";
+        else if (*op == '/' || *op == '%') f = "division";
+        else { op = "-->"; f = "assignment"; }
+        pariputsf(" %s %s %s %s.",f,type_name(x),op,type_name(y));
+        break;
+      }
 
       /* the following 4 are only warnings (they return) */
       case warnmem: case warner:
@@ -886,7 +967,7 @@ err(long numerr, ...)
         ret = 1; break;
 
       case warnprec:
-        vpariputs(" %s; new prec = %ld\n",ap);
+        vpariputs(" in %s; new prec = %ld\n",ap);
         ret = 1; break;
 
       case warnfile:
@@ -895,10 +976,16 @@ err(long numerr, ...)
     }
   }
   term_color(c_NONE); va_end(ap);
-  pariOut = out; if (ret) { flusherr(); return; }
+  if (numerr==errpile) 
+  {
+    fprintferr("\n  current stack size: %.1f Mbytes\n", (double)(top-bot)/1E6);
+    fprintferr("  [hint] you can increase GP stack with allocatemem()\n");
+  }
+  pariOut = out;
+  if (ret || (trap && default_exception_handler &&
+              default_exception_handler(numerr))) { flusherr(); return; }
   err_recover(numerr); exit(1); /* not reached */
 }
-#undef op_err
 
 /*******************************************************************/
 /*                                                                 */
@@ -1102,7 +1189,7 @@ allocatemoremem(ulong newsize)
   if (!newsize)
   {
     newsize = sizeold << 1;
-    err(warner,"doubling stack size; new stack = %lu",newsize);
+    err(warner,"doubling stack size; new stack = %.1f MBytes",newsize/1E6);
   }
   else if ((long)newsize < 0)
     err(talker,"required stack memory too small");

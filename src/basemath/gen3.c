@@ -603,7 +603,7 @@ gmod(GEN x, GEN y)
 	case t_POLMOD: case t_POL:
 	  return gzero;
 
-	default: err(gmoderf,tx,ty);
+	default: err(operf,"%",tx,ty);
       }
 
     case t_REAL: case t_FRAC: case t_FRACN:
@@ -616,7 +616,7 @@ gmod(GEN x, GEN y)
 	case t_POLMOD: case t_POL:
 	  return gzero;
 
-	default: err(gmoderf,tx,ty);
+	default: err(operf,"%",tx,ty);
       }
 
     case t_POL:
@@ -643,14 +643,14 @@ gmod(GEN x, GEN y)
           if (ismonome(y) && varn(x) == varn(y))
           {
             long d = degree(y);
-            if (lg(x)-2 + valp(x) < d) err(gmoderi,tx,ty);
+            if (lg(x)-2 + valp(x) < d) err(operi,"%",tx,ty);
             av = avma; 
             return gerepileupto(av, gmod(gtrunc(x), y));
           }
-	default: err(gmoderf,tx,ty);
+	default: err(operf,"%",tx,ty);
       }
   }
-  err(gmoderf,tx,ty);
+  err(operf,"%",tx,ty);
   return NULL; /* not reached */
 }
 
@@ -667,7 +667,7 @@ gmodulsg(long x, GEN y)
     case t_POL: z=cgetg(3,t_POLMOD);
       z[1]=lcopy(y); z[2]=lstoi(x); return z;
   }
-  err(gmoderf,t_INT,typ(y)); return NULL; /* not reached */
+  err(operf,"%",t_INT,typ(y)); return NULL; /* not reached */
 }
 
 GEN
@@ -706,7 +706,7 @@ gmodulo(GEN x,GEN y)
       if (tx!=t_POL && !is_rfrac_t(tx) && tx!=t_SER) break;
       z[2]=lmod(x,y); return z;
   }
-  err(gmoderf,tx,typ(y)); return NULL; /* not reached */
+  err(operf,"%",tx,typ(y)); return NULL; /* not reached */
 }
 
 
@@ -736,7 +736,7 @@ gmodulcp(GEN x,GEN y)
       if (tx!=t_POL && !is_rfrac_t(tx) && tx!=t_SER) break;
       z[2]=lmod(x,y); return z;
   }
-  err(gmoderf,tx,typ(y)); return NULL; /* not reached */
+  err(operf,"%",tx,typ(y)); return NULL; /* not reached */
 }
 
 GEN

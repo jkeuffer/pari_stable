@@ -649,13 +649,11 @@ egalii(GEN x, GEN y)
 int
 gegal(GEN x, GEN y)
 {
-  long av,i,tx,ty;
+  long av,i,tx;
   
   if (x == y) return 1;
-  tx = typ(x); ty = typ(y);
-  if (tx!=ty)
-    { if (tx == t_STR || ty == t_STR) return 0; }
-  else
+  tx = typ(x);
+  if (tx==typ(y))
     switch(tx)
     {
       case t_INT:
@@ -692,8 +690,18 @@ gegal(GEN x, GEN y)
       case t_VEC: case t_COL: case t_MAT:
         return vecegal(x,y);
     }
-  av=avma; y=gneg_i(y); i=gcmp0(gadd(x,y));
-  avma=av; return i;
+  av = avma;
+  {
+    jmp_buf env;
+    if (setjmp(env)) i = 0;
+    else
+    {
+      err_catch(-1, env, NULL);
+      i = gcmp0(gadd(x, gneg_i(y)));
+    }
+    (void)err_leave(-1);
+  }
+  avma = av; return i;
 }
 
 /*******************************************************************/
@@ -1165,10 +1173,10 @@ gaffsg(long s, GEN x)
       gaffsg(s,(GEN)x[1]); gaffsg(1,(GEN)x[2]); break;
 
     case t_VEC: case t_COL: case t_MAT:
-      if (lg(x)!=2) err(assigneri,t_INT,typ(x));
+      if (lg(x)!=2) err(operi,"",t_INT,typ(x));
       gaffsg(s,(GEN)x[1]); break;
 
-    default: err(typeer,"gaffsg");
+    default: err(operf,"",t_INT,typ(x));
   }
 }
 
@@ -1214,27 +1222,28 @@ gaffect(GEN x, GEN y)
 	      /* y = gzero, gnil, gun or gdeux */
 	      if (is_universal_constant(y))
 	      {
-		if (y==gzero) err(overwriter,"integer: 0 (gzero)");
-		if (y==gun)   err(overwriter,"integer: 1 (gun)");
-		if (y==gdeux) err(overwriter,"integer: 2 (gdeux)");
-		err(overwriter,"integer: nil (gnil)");
+		if (y==gzero) err(overwriter,"gaffect (gzero)");
+		if (y==gun)   err(overwriter,"gaffect (gun)");
+		if (y==gdeux) err(overwriter,"gaffect (gdeux)");
+		err(overwriter,"gaffect (gnil)");
 	      }
 	      affii(x,y); break;
 
 	    case t_REAL:
-	      if (y == gpi || y==geuler) err(overwriter,"real");
+              if (y ==  gpi) err(overwriter,"gaffect (gpi)");
+              if (y==geuler) err(overwriter,"gaffect (geuler)");
 	      affir(x,y); break;
 
 	    case t_INTMOD:
 	      modiiz(x,(GEN)y[1],(GEN)y[2]); break;
 
 	    case t_FRAC:
-	      if (y == ghalf) err(overwriter,"fraction: 1/2 (ghalf)");
+	      if (y == ghalf) err(overwriter,"gaffect (ghalf)");
 	    case t_FRACN:
 	      affii(x,(GEN)y[1]); affsi(1,(GEN)y[2]); break;
 
 	    case t_COMPLEX:
-	      if (y == gi) err(overwriter,"complex number: I (gi)");
+	      if (y == gi) err(overwriter,"gaffect (gi)");
 	      gaffect(x,(GEN)y[1]); gaffsg(0,(GEN)y[2]); break;
 
 	    case t_PADIC:
@@ -1250,7 +1259,7 @@ gaffect(GEN x, GEN y)
 	    case t_POLMOD:
 	      gaffect(x,(GEN)y[2]); break;
 
-	    default: err(typeer,"gaffect");
+	    default: err(operf,"",tx,ty);
 	  }
 	  break;
 	
@@ -1268,9 +1277,9 @@ gaffect(GEN x, GEN y)
 
 	    case t_INT: case t_INTMOD: case t_FRAC:
 	    case t_FRACN: case t_PADIC: case t_QUAD:
-              err(assignerf,tx,ty);
+              err(operf,"",tx,ty);
 
-	    default: err(typeer,"gaffect");
+	    default: err(operf,"",tx,ty);
 	  }
 	  break;
 	
@@ -1279,19 +1288,13 @@ gaffect(GEN x, GEN y)
 	  {
 	    case t_INTMOD:
 	      if (!divise((GEN)x[1],(GEN)y[1]))
-                err(assigneri,tx,ty);
+                err(operi,"",tx,ty);
 	      modiiz((GEN)x[2],(GEN)y[1],(GEN)y[2]); break;
 
 	    case t_POLMOD:
 	      gaffect(x,(GEN)y[2]); break;
 
-	    case t_INT: case t_REAL: case t_FRAC:
-	    case t_FRACN: case t_COMPLEX: case t_QUAD:
-	      err(assignerf,tx,ty);
-
-	    case t_PADIC:
-	      err(assignerf,tx,ty);
-	    default: err(typeer,"gaffect");
+	    default: err(operf,"",tx,ty);
 	  }
 	  break;
 
@@ -1300,7 +1303,7 @@ gaffect(GEN x, GEN y)
 	  {
 	    case t_INT:
 	      if (! mpdivis((GEN)x[1],(GEN)x[2],y))
-                err(assigneri,tx,ty);
+                err(operi,"",tx,ty);
 	      break;
 
 	    case t_REAL:
@@ -1332,7 +1335,7 @@ gaffect(GEN x, GEN y)
 	      gaffect(x,(GEN)y[2]); gaffsg(0,(GEN)y[3]); break;
 	    case t_POLMOD:
 	      gaffect(x,(GEN)y[2]); break;
-	    default: err(typeer,"gaffect");
+	    default: err(operf,"",tx,ty);
 	  }
 	  break;
 
@@ -1340,7 +1343,7 @@ gaffect(GEN x, GEN y)
 	  switch(ty)
 	  {
 	    case t_INT:
-	      if (! mpdivis((GEN)x[1],(GEN)x[2],y)) err(assigneri,tx,ty);
+	      if (! mpdivis((GEN)x[1],(GEN)x[2],y)) err(operi,"",tx,ty);
 	      break;
 
 	    case t_REAL:
@@ -1367,7 +1370,7 @@ gaffect(GEN x, GEN y)
 	      gaffect(x,(GEN)y[2]); gaffsg(0,(GEN)y[3]); break;
 	    case t_POLMOD:
 	      gaffect(x,(GEN)y[2]); break;
-	    default: err(typeer,"gaffect");
+	    default: err(operf,"",tx,ty);
 	  }
 	  break;
 	
@@ -1376,7 +1379,7 @@ gaffect(GEN x, GEN y)
 	  {
 	    case t_INT: case t_REAL: case t_INTMOD:
 	    case t_FRAC: case t_FRACN: case t_PADIC: case t_QUAD:
-	      if (!gcmp0((GEN)x[2])) err(assigneri,tx,ty);
+	      if (!gcmp0((GEN)x[2])) err(operi,"",tx,ty);
 	      gaffect((GEN)x[1],y); break;
 	
 	    case t_COMPLEX:
@@ -1387,7 +1390,7 @@ gaffect(GEN x, GEN y)
 	    case t_POLMOD:
 	      gaffect(x,(GEN)y[2]); break;
 
-	    default: err(typeer,"gaffect");
+	    default: err(operf,"",tx,ty);
 	  }
 	  break;
 	
@@ -1395,26 +1398,22 @@ gaffect(GEN x, GEN y)
 	  switch(ty)
 	  {
 	    case t_INTMOD:
-	      if (valp(x)<0) err(assigneri,tx,ty);
+	      if (valp(x)<0) err(operi,"",tx,ty);
 	      av=avma;
 	      v = pvaluation((GEN)y[1],(GEN)x[2],&p1);
               k = signe(x[4])? (precp(x)+valp(x)): valp(x)+1;
-	      if (!gcmp1(p1) || v > k) err(assigneri,tx,ty);
+	      if (!gcmp1(p1) || v > k) err(operi,"",tx,ty);
 	      modiiz(gtrunc(x),(GEN)y[1],(GEN)y[2]); avma=av; break;
 	
 	    case t_PADIC:
-	      if (!egalii((GEN)x[2],(GEN)y[2])) err(assigneri,tx,ty);
+	      if (!egalii((GEN)x[2],(GEN)y[2])) err(operi,"",tx,ty);
 	      modiiz((GEN)x[4],(GEN)y[3],(GEN)y[4]);
 	      setvalp(y,valp(x)); break;
 	
 	    case t_POLMOD:
 	      gaffect(x,(GEN)y[2]); break;
 
-	    case t_INT: case t_REAL: case t_FRAC:
-	    case t_FRACN: case t_COMPLEX: case t_QUAD:
-              err(assignerf,tx,ty);
-
-	    default: err(typeer,"gaffect");
+	    default: err(operf,"",tx,ty);
 	  }
 	  break;
 	
@@ -1423,7 +1422,7 @@ gaffect(GEN x, GEN y)
 	  {
 	    case t_INT: case t_INTMOD: case t_FRAC:
 	    case t_FRACN: case t_PADIC:
-	      if (!gcmp0((GEN)x[3])) err(assigneri,tx,ty);
+	      if (!gcmp0((GEN)x[3])) err(operi,"",tx,ty);
 	      gaffect((GEN)x[2],y); break;
 
 	    case t_REAL:
@@ -1436,27 +1435,28 @@ gaffect(GEN x, GEN y)
 	      }
 	      else
 	      {
-                if (!gcmp0((GEN)x[3])) err(assigneri,tx,ty);
+                if (!gcmp0((GEN)x[3])) err(operi,"",tx,ty);
 		gaffect((GEN)x[2],y);
 	      }
 	      break;
 
 	    case t_QUAD:
-	      if (! gegal((GEN)x[1],(GEN)y[1])) err(assigneri,tx,ty);
+	      if (! gegal((GEN)x[1],(GEN)y[1])) err(operi,"",tx,ty);
 	      affii((GEN)x[2],(GEN)y[2]);
 	      affii((GEN)x[3],(GEN)y[3]);
 	      break;
 	    case t_POLMOD:
 	      gaffect(x,(GEN)y[2]); break;
-	    default: err(typeer,"gaffect");
+	    default: err(operf,"",tx,ty);
 	  }
 	  break;
 
 	case t_POLMOD:
-	  if (ty!=t_POLMOD) err(assignerf,tx,ty);
-	  if (! gdivise((GEN)x[1],(GEN)y[1])) err(assigneri,tx,ty);
+	  if (ty!=t_POLMOD) err(operf,"",tx,ty);
+	  if (! gdivise((GEN)x[1],(GEN)y[1])) err(operi,"",tx,ty);
 	  gmodz((GEN)x[2],(GEN)y[1],(GEN)y[2]); break;
-	default: err(typeer,"gaffect");
+
+        default: err(operf,"",tx,ty);
       }
       return;
     }
@@ -1486,10 +1486,7 @@ gaffect(GEN x, GEN y)
       case t_RFRAC: case t_RFRACN:
 	gaffect(x,(GEN)y[1]); gaffsg(1,(GEN)y[2]); break;
 
-      case t_VEC: case t_COL: case t_MAT:
-	err(assignerf,tx,ty);
-
-      default: err(typeer,"gaffect");
+      default: err(operf,"",tx,ty);
     }
     return;
   }
@@ -1516,7 +1513,7 @@ gaffect(GEN x, GEN y)
 	  }
       }
 #undef initial_value
-      err(assignerf,tx,ty);
+      err(operf,"",tx,ty);
   }
   
   switch(tx)
@@ -1526,10 +1523,10 @@ gaffect(GEN x, GEN y)
       switch(ty)
       {
 	case t_POL:
-	  vy=varn(y); if (vy>v) err(assignerf,tx,ty);
+	  vy=varn(y); if (vy>v) err(operf,"",tx,ty);
 	  if (vy==v)
 	  {
-	    l=lgef(x); if (l>ly) err(assigneri,tx,ty);
+	    l=lgef(x); if (l>ly) err(operi,"",tx,ty);
 	    y[1]=x[1]; for (i=2; i<l; i++) gaffect((GEN)x[i],(GEN)y[i]);
 	  }
 	  else
@@ -1542,7 +1539,7 @@ gaffect(GEN x, GEN y)
 	  break;
 	
 	case t_SER:
-	  vy=varn(y); if (vy>v) err(assignerf,tx,ty);
+	  vy=varn(y); if (vy>v) err(operf,"",tx,ty);
 	  if (!signe(x)) { gaffsg(0,y); return; }
 	  if (vy==v)
 	  {
@@ -1568,16 +1565,13 @@ gaffect(GEN x, GEN y)
 	case t_RFRAC: case t_RFRACN:
 	  gaffect(x,(GEN)y[1]); gaffsg(1,(GEN)y[2]); break;
 
-	case t_VEC: case t_COL: case t_MAT:
-	  err(assignerf,tx,ty);
-	
-	default: err(typeer,"gaffect");
+        default: err(operf,"",tx,ty);
       }
       break;
 
     case t_SER:
-      if (ty!=t_SER) err(assignerf,tx,ty);
-      v=varn(x); vy=varn(y); if (vy>v) err(assignerf,tx,ty);
+      if (ty!=t_SER) err(operf,"",tx,ty);
+      v=varn(x); vy=varn(y); if (vy>v) err(operf,"",tx,ty);
       if (vy==v)
       {
 	y[1]=x[1]; k=lx; if (k>ly) k=ly;
@@ -1599,7 +1593,7 @@ gaffect(GEN x, GEN y)
       switch(ty)
       {
 	case t_POL: case t_VEC: case t_COL: case t_MAT:
-	  err(assignerf,tx,ty);
+	  err(operf,"",tx,ty);
 
 	case t_POLMOD:
 	  av=avma; p1=ginvmod((GEN)x[2],(GEN)y[1]);
@@ -1622,16 +1616,16 @@ gaffect(GEN x, GEN y)
 	  gaffect((GEN)x[1],(GEN)y[1]);
 	  gaffect((GEN)x[2],(GEN)y[2]); break;
 	
-	default: err(typeer,"gaffect");
+        default: err(operf,"",tx,ty);
       }
       break;
 
     case t_QFR: case t_QFI: case t_VEC: case t_COL: case t_MAT:
-      if (ty != tx || ly != lx) err(assigneri,tx,ty);
+      if (ty != tx || ly != lx) err(operi,"",tx,ty);
       for (i=1; i<lx; i++) gaffect((GEN)x[i],(GEN)y[i]);
       break;
 
-    default: err(typeer,"gaffect");
+    default: err(operf,"",tx,ty);
   }
 }
 
@@ -1708,7 +1702,7 @@ cvtop(GEN x, GEN p, long l)
 	  n = ggval((GEN)p2[1],p) - ggval((GEN)p2[2],p);
 	  p2=gadd(p2,ggrandocp(p,n+l)); break;
 
-	default: err(assigneri,t_QUAD,t_QUAD);
+	default: err(operi,"",t_QUAD,t_QUAD);
       }
       p2=gsqrt(p2,0); p1=gmul((GEN)x[3],gsub(p2,p3)); tetpil=avma;
       return gerepile(av,tetpil,gadd((GEN)x[2],p1));
@@ -1979,7 +1973,7 @@ gsqr(GEN x)
     case t_MAT:
       lx=lg(x);
       if (lx==1) return cgetg(1,tx);
-      if (lx != lg(x[1])) err(gmuleri,tx,tx);
+      if (lx != lg(x[1])) err(operi,"*",tx,tx);
       z=cgetg(lx,tx);
       for (j=1; j<lx; j++)
       {
@@ -1996,11 +1990,8 @@ gsqr(GEN x)
         }
       }
       return z;
-
-    case t_VEC: case t_COL:
-      err(gmulerf,tx,tx);
   }
-  err(typeer,"gsqr");
+  err(operf,"*",tx,tx);
   return NULL; /* not reached */
 }
 

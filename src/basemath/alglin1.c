@@ -643,7 +643,7 @@ gaddmat(GEN x, GEN y)
   long ly,dy,i,j;
   GEN z;
 
-  ly=lg(y); if (ly==1) err(gadderf,typ(x),t_MAT);
+  ly=lg(y); if (ly==1) err(operf,"+",typ(x),t_MAT);
   dy=lg(y[1]);
   if (typ(y)!=t_MAT || ly!=dy) err(mattype1,"gaddmat");
   z=cgetg(ly,t_MAT);
