@@ -2469,7 +2469,7 @@ expodb(double x)
   const int mant_len = 52;  /* mantissa bits (excl. hidden bit) */
   const int exp_mid = 0x3ff;/* exponent bias */
 
-  if (x==0) return -1023;
+  if (x==0.) return -1023;
   fi.f = x;
   return ((fi.i & (HIGHBIT-1)) >> mant_len) - exp_mid;
 }
@@ -2485,7 +2485,7 @@ dbltor(double x)
   const int expo_len = 11; /* number of bits of exponent */
   LOCAL_HIREMAINDER;
 
-  if (x==0) return realzero_bit(-1023);
+  if (x==0.) return realzero_bit(-1023);
   fi.f = x; z = cgetr(DEFAULTPREC);
   e = ((fi.i & (HIGHBIT-1)) >> mant_len) - exp_mid;
   z[1] = evalexpo(e) | evalsigne(x<0? -1: 1);
@@ -2534,11 +2534,13 @@ expodb(double x)
   const int mant_len = 52;  /* mantissa bits (excl. hidden bit) */
   const int exp_mid = 0x3ff;/* exponent bias */
   const int shift = mant_len-32;
-  const ulong a = fi.i[INDEX0];
 
-  if (x==0) return -1023;
+  if (x==0.) return -1023;
   fi.f = x;
-  return ((a & (HIGHBIT-1)) >> shift) - exp_mid;
+  {
+    const ulong a = fi.i[INDEX0];
+    return ((a & (HIGHBIT-1)) >> shift) - exp_mid;
+  }
 }
 
 GEN
@@ -2552,7 +2554,7 @@ dbltor(double x)
   const int expo_len = 11; /* number of bits of exponent */
   const int shift = mant_len-32;
 
-  if (x==0) return realzero_bit(-1023);
+  if (x==0.) return realzero_bit(-1023);
   fi.f = x; z=cgetr(DEFAULTPREC);
   {
     const ulong a = fi.i[INDEX0];
