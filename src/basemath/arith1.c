@@ -2132,6 +2132,119 @@ bestappr0(GEN x, GEN a, GEN b)
   return t;
 }
 
+GEN 
+cornacchia(GEN d, GEN p)
+{
+  pari_sp ltop=avma, btop;
+  pari_sp st_lim;
+  GEN p1;
+  long k;
+  GEN a,b,c,l,r;
+
+  if (typ(d) != t_INT || typ(p) != t_INT)
+    err(typeer, "cornacchia");
+  if (cmpis(d, 0) <= 0)
+    err(talker, "d must be >0");
+  if (cmpii(p, d) < 0)
+    return gzero;
+  k = kronecker(negi(d), p);
+  if (k != 1)
+    return gzero;
+  b = mpsqrtmod(negi(d), p);
+  if (cmpii(shifti(b,1),p) > 0)
+    b=subii(b,p);
+  a = p;
+  l = racine(p);
+  btop = avma;
+  st_lim = stack_lim(btop, 1);
+  while (cmpii(b, l) > 0)
+  {
+    r = modii(a, b);
+    a = b;
+    if (low_stack(st_lim, stack_lim(btop, 1)))
+    {
+      GEN *bptr[2];
+      bptr[0]=&r;
+      bptr[1]=&a;
+      err(warnmem,"cornacchia");
+      gerepilemany(btop, bptr, 2);
+    }
+    b = r;
+  }
+  a = subii(p, sqri(b));
+  if (!divise(a, d) || !(carrecomplet(diviiexact(a, d), &c)))
+    return gzero;
+  p1 = cgetg(4, t_QUAD);
+  p1[1] = (long) coefs_to_pol(3,gun,gzero,lcopy(d));
+  p1[2] = lcopy(b);
+  p1[3] = lcopy(c);
+  return gerepileupto(ltop,p1);
+}
+
+GEN 
+cornacchia2(GEN d, GEN p)
+{
+  pari_sp ltop=avma, btop;
+  pari_sp st_lim;
+  GEN p1;
+  long k;
+  GEN a,b,c,l,r;
+  GEN px4;
+
+  if (typ(d) != t_INT || typ(p) != t_INT)
+    err(typeer, "cornacchia");
+  if (cmpis(d, 0) <= 0)
+    err(talker, "d must be >0");
+  if (mod4(d)==1 || mod4(d)==2)
+    err(talker,"dmust be 0 or 3 mod 4");
+  px4=shifti(p,2);
+  if (cmpii(px4, d) < 0) {avma=ltop; return gzero;}
+  if (egalii(p,gdeux))
+  {
+    if(carrecomplet(subsi(8,d),&c))
+    {
+      p1 = cgetg(4, t_QUAD);
+      p1[1] = (long) coefs_to_pol(3,gun,gzero,lcopy(d));
+      p1[2] = un;
+      p1[3] = lcopy(c);
+      return gerepileupto(ltop,p1);
+    }
+    else {avma=ltop; return gzero;}
+  } 
+  k = kronecker(negi(d), p);
+  if (k != 1)
+    return gzero;
+  b = mpsqrtmod(negi(d), p);
+  if (mod2(b)!=mod2(d))
+    b=subii(p,b);
+  a = shifti(p,1);
+  l = racine(px4);
+  btop = avma;
+  st_lim = stack_lim(btop, 1);
+  while (cmpii(b, l) > 0)
+  {
+    r = modii(a, b);
+    a = b;
+    if (low_stack(st_lim, stack_lim(btop, 1)))
+    {
+      GEN *bptr[2];
+      bptr[0]=&r;
+      bptr[1]=&a;
+      err(warnmem,"cornacchia");
+      gerepilemany(btop, bptr, 2);
+    }
+    b = r;
+  }
+  a = subii(px4, sqri(b));
+  if (!divise(a, d) || !(carrecomplet(diviiexact(a, d), &c)))
+    return gzero;
+  p1 = cgetg(4, t_QUAD);
+  p1[1] = (long) coefs_to_pol(3,gun,gzero,lcopy(d));
+  p1[2] = lcopy(b);
+  p1[3] = lcopy(c);
+  return gerepileupto(ltop,p1);
+}
+
 /***********************************************************************/
 /**                                                                   **/
 /**         FUNDAMENTAL UNIT AND REGULATOR (QUADRATIC FIELDS)         **/
