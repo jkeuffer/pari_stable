@@ -62,10 +62,10 @@ behaviour, e.g.~return more or less information. All such
 flags are optional, and will be called \fl\ in the function descriptions to
 follow. There are two different kind of flags
 
-$\bullet$ generic: all valid values for the flag are individually
+\item generic: all valid values for the flag are individually
 described (``If \fl\ is equal to $1$, then\dots'').
 
-$\bullet$ binary:\sidx{binary flag} use customary binary notation as a
+\item binary:\sidx{binary flag} use customary binary notation as a
 compact way to represent many toggles with just one integer. Let
 $(p_0,\dots,p_n)$ be a list of switches (i.e.~of properties which take either
 the value $0$ or~$1$), the number $2^3 + 2^5 = 40$ means that $p_3$ and $p_5$
@@ -492,9 +492,9 @@ compatibility reasons (it can still be useful in library mode).
 
 \syn{Mod0}{x,y,\fl}. Also available are
 
-$\bullet$ for $\fl=1$: $\teb{gmodulo}(x,y)$.
+\item for $\fl=1$: $\teb{gmodulo}(x,y)$.
 
-$\bullet$ for $\fl=0$: $\teb{gmodulcp}(x,y)$.
+\item for $\fl=0$: $\teb{gmodulcp}(x,y)$.
 
 \subsecidx{Pol}$(x,\{v=x\})$: transforms the object $x$ into a polynomial with
 main variable $v$. If $x$ is a scalar, this gives a constant polynomial. If
@@ -1053,7 +1053,7 @@ is in $x[2]$, or call the function $\key{gvar}(x)$ which returns the variable
 As a general rule, which of course in some cases may have exceptions,
 transcendental functions operate in the following way:
 
-$\bullet$ If the argument is either an integer, a real, a rational, a complex
+\item If the argument is either an integer, a real, a rational, a complex
 or a quadratic number, it is, if necessary, first converted to a real (or
 complex) number using the current \idx{precision} held in the default
 \kbd{realprecision}. Note that only exact arguments are converted, while
@@ -1079,7 +1079,7 @@ After possible conversion, the function is computed. Note that even if the
 argument is real, the result may be complex (e.g.~$\text{acos}(2.0)$ or
 $\text{acosh}(0.0)$). Note also that the principal branch is always chosen.
 
-$\bullet$ If the argument is an intmod or a $p$-adic, at present only a
+\item If the argument is an intmod or a $p$-adic, at present only a
 few functions like \kbd{sqrt} (square root), \kbd{sqr} (square), \kbd{log},
 \kbd{exp}, powering, \kbd{teichmuller} (Teichm\"uller character) and
 \kbd{agm} (arithmetic-geometric mean) are implemented.
@@ -1099,7 +1099,7 @@ must not change, and the result is hence $(0\, \mod\, 4)$ in both cases. On
 the other hand, $p$-adics are not exact objects, hence are treated
 differently.
 
-$\bullet$ If the argument is a polynomial, power series or rational function,
+\item If the argument is a polynomial, power series or rational function,
 it is, if necessary, first converted to a power series using the current
 precision held in the variable \tet{precdl}. Under \kbd{gp} this again is
 transparent to the user. When programming in library mode, however, the
@@ -1111,7 +1111,7 @@ Then the Taylor series expansion of the function around $X=0$ (where $X$ is
 the main variable) is computed to a number of terms depending on the number
 of terms of the argument and the function being computed.
 
-$\bullet$ If the argument is a vector or a matrix, the result is the
+\item If the argument is a vector or a matrix, the result is the
 componentwise evaluation of the function. In particular, transcendental
 functions on square matrices, which are not implemented in the present
 version \vers, will have a different name if they are implemented some day.
@@ -1223,7 +1223,7 @@ the \idx{Bernoulli numbers} $B_0$, $B_2$,\dots, $B_{2x}$.
 This routine is obsolete. Use \kbd{bernfrac} instead each time you need a
 Bernoulli number in exact form.
 
-\misctitle{Note:} this routine is implemented using repeated independant
+\misctitle{Note:} this routine is implemented using repeated independent
 calls to \kbd{bernfrac}, which is faster than the standard recursion in exact
 arithmetic. It is only kept for backward compatibility: it is not faster than
 individual calls to \kbd{bernfrac}, its output uses a lot of memory space,
@@ -1604,9 +1604,9 @@ fails with an error message. If rational reconstruction is not possible
 to an omitted $B$.
 
 \subsecidx{bezout}$(x,y)$: finds $u$ and $v$ minimal in a
-natural sense such that $x*u+y*v=\text{gcd}(x,y)$. The arguments
+natural sense such that $x*u+y*v=\gcd(x,y)$. The arguments
 must be both integers or both polynomials, and the result is a
-row vector with three components $u$, $v$, and $\text{gcd}(x,y)$.
+row vector with three components $u$, $v$, and $\gcd(x,y)$.
 \sidx{extended gcd}
 
 \syn{vecbezout}{x,y} to get the vector, or $\teb{gbezout}(x,y, \&u, \&v)$
@@ -1814,9 +1814,8 @@ $\teb{smallfact}(x)$ (= $\teb{factor0}(x,0)$).
 \subsecidx{factorback}$(f,\{e\},\{nf\})$: gives back the factored object
 corresponding to a factorization. The integer $1$ corresponds to the empty
 factorization. If the last argument is of number field type (e.g.~created by
-\kbd{nfinit} or \kbd{bnfinit}), assume we are dealing with an ideal
-factorization in the number field. The resulting ideal product is given in
-HNF\sidx{Hermite normal form} form.
+\kbd{nfinit}), assume we are dealing with an ideal factorization in the
+number field. The resulting ideal product is given in HNF form.
 
 If $e$ is present, $e$ and $f$ must be vectors of the same length ($e$ being
 integral), and the corresponding factorization is the product of the
@@ -1956,17 +1955,17 @@ rational numbers. Vector/matrix types are also accepted, in which case
 the GCD is taken recursively on each component. Note that for these
 types, \kbd{gcd} is not commutative. \fl\ is obsolete and should not be used.
 
-If $y$ is omitted and $x$ is a vector, return the $\text{gcd}$ of all
+If $y$ is omitted and $x$ is a vector, return the $\gcd$ of all
 components of $x$. The algorithm used is a naive \idx{Euclid} except for the
 following inputs:
 
-$\bullet$ integers: use modified right-shift binary (``plus-minus''
+\item integers: use modified right-shift binary (``plus-minus''
 variant).
 
-$\bullet$ univariate polynomials with coeffients in the same number
+\item univariate polynomials with coeffients in the same number
 field (in particular rational): use modular gcd algorithm.
 
-$\bullet$ general polynomials: use the \idx{subresultant algorithm} if
+\item general polynomials: use the \idx{subresultant algorithm} if
 coefficient explosion is likely (exact, non modular, coefficients).
 
 \syn{ggcd}{x,y}. For general polynomial inputs, $\teb{srgcd}(x,y)$ is also
@@ -2070,17 +2069,17 @@ definition, this is the extension of \idx{Legendre symbol} to $\Z \times \Z$
 by total multiplicativity in both arguments with the following special rules
 for $y = 0, -1$ or $2$:
 
-$\bullet$ $(x|0) = 1$ if $|x| = 1$ and $0$ otherwise.
+\item $(x|0) = 1$ if $|x| = 1$ and $0$ otherwise.
 
-$\bullet$ $(x|-1) = 1$ if $x \geq 0$ and $-1$ otherwise.
+\item $(x|-1) = 1$ if $x \geq 0$ and $-1$ otherwise.
 
-$\bullet$ $(x|2) = 0$ if $x$ is even and $1$ if $x = 1,-1 \mod 8$ and $-1$
+\item $(x|2) = 0$ if $x$ is even and $1$ if $x = 1,-1 \mod 8$ and $-1$
 if $x=3,-3 \mod 8$.
 
 \syn{kronecker}{x,y}, the result ($0$ or $\pm 1$) is a \kbd{long}.
 
 \subsecidx{lcm}$(x,\{y\})$: least common multiple of $x$ and $y$, i.e.~such
-that $\text{lcm}(x,y)*\text{gcd}(x,y)=\text{abs}(x*y)$.
+that $\text{lcm}(x,y)*\gcd(x,y)=\text{abs}(x*y)$.
 
 If $y$ is omitted and $x$ is a vector, return the $\text{lcm}$ of all
 components of $x$.
@@ -2280,7 +2279,7 @@ when $D<-10^{25}$, $D>10^{10}$, or when the \emph{structure} is wanted.
 
 If $\fl$ is non-zero \emph{and} $D>0$, computes the narrow class group and
 regulator, instead of the ordinary (or wide) ones. In the current version
-\vers, this doesn't work at all: use the general function \tet{bnfnarrow}.
+\vers, this does not work at all: use the general function \tet{bnfnarrow}.
 
 Optional parameter \var{tech} is a row vector of the form
 $[c_1,c_2]$, where $c_1$ and $c_2$ are positive real numbers which
@@ -2291,15 +2290,15 @@ $c_2=6$. Reasonable values for $c$ are between $0.1$ and $2$.
 The result of this function is a vector $v$ with 3 components if $D<0$, and
 $4$ otherwise. The correspond respectively to
 
-$\bullet$ $v[1]$: the class number
+\item $v[1]$: the class number
 
-$\bullet$ $v[2]$: a vector giving the structure of the class group as a
+\item $v[2]$: a vector giving the structure of the class group as a
 product of cyclic groups;
 
-$\bullet$ $v[3]$: a vector giving generators of those cyclic groups (as
+\item $v[3]$: a vector giving generators of those cyclic groups (as
 binary quadratic forms).
 
-$\bullet$ $v[4]$: (omitted if $D < 0$) the regulator, computed to an
+\item $v[4]$: (omitted if $D < 0$) the regulator, computed to an
 accuracy which is the maximum of an internal accuracy determined by the
 program and the current default (note that once the regulator is known to a
 small accuracy it is trivial to compute it to very high accuracy, see the
@@ -2395,7 +2394,7 @@ non-negative integer. The result is non-negative and rounded towards zero.
 
 \subsecidx{zncoppersmith}$(P, N, X, \{B=N\})$: finds all integers $x_0$ with
 $|x0| \leq X$ such that 
-$$\text{gcd}(N, P(x_0)) > B.$$
+$$\gcd(N, P(x_0)) > B.$$
 $X$ must be smaller than $\exp(\log^2 B / (\deg(P) \log N))$. 
 
 \syn{zncoppersmith}{P, N, X, B}, where an omitted $B$ is coded as \kbd{NULL}.
@@ -2638,7 +2637,7 @@ $j$-invariant is \kbd{$E$.j}.
 The other six components are only present if $\fl$ is $0$ (or omitted!).
 Their content depends on whether the curve is defined over $\R$ or not:
 \smallskip
-$\bullet$ When $E$ is defined over $\R$, \kbd{$E$.roots} is a vector whose
+\item When $E$ is defined over $\R$, \kbd{$E$.roots} is a vector whose
 three components contain the roots of the right hand side of the associated
 Weierstrass equation.
 $$ (y + a_1x/2 + a_3/2)^2 = g(x) $$
@@ -2658,7 +2657,7 @@ and $\eta_2$ such that $\eta_1\omega_2-\eta_2\omega_1=i\pi$.
 Finally, \kbd{$E$.area} is the volume of the complex lattice defining
 $E$.\smallskip
 
-$\bullet$ When $E$ is defined over $\Q_p$, the $p$-adic valuation of $j$
+\item When $E$ is defined over $\Q_p$, the $p$-adic valuation of $j$
 must be negative. Then \kbd{$E$.roots} is the vector with a single component
 equal to the $p$-adic root of the associated Weierstrass equation
 corresponding to $-1$ under the Tate parametrization.
@@ -2872,103 +2871,100 @@ $\C$, the result is the point at infinity $[0]$.
 In this section can be found functions which are used almost exclusively for
 working in general number fields. Other less specific functions can be found
 in the next section on polynomials. Functions related to quadratic number
-fields can be found in the section \secref{se:arithmetic} (Arithmetic
-functions).
+fields are found in section \secref{se:arithmetic} (Arithmetic functions).
 
-\noindent We shall use the following conventions:
+Let $K = \Q[X] / (T)$ a number field, $\Z_K$ its ring of integers, $T\in\Z[X]$
+is monic. Three basic number field structures can be associated to $K$ in
+GP:
 
-$\bullet$ $\tev{nf}$ denotes a number field, i.e.~a 9-component vector
-in the format output by \tet{nfinit}. This contains the basic arithmetic data
-associated to the number field: signature, maximal order, discriminant, etc.
+\item $\tev{nf}$ denotes a number field, i.e.~a data structure output by
+\tet{nfinit}. This contains the basic arithmetic data associated to the
+number field: signature, maximal order (given by a basis \kbd{nf.zk}),
+discriminant, defining polynomial $T$, etc.
 
-$\bullet$ $\tev{bnf}$ denotes a ``Buchmann's number field'', i.e.~a
-10-component vector in the format output by \tet{bnfinit}. This contains
-$\var{nf}$ and the deeper invariants of the field: units, class groups, as
-well as a lot of technical data necessary for some complex functions like
-\kbd{bnfisprincipal}.
+\item $\tev{bnf}$ denotes a ``Buchmann's number field'', i.e.~a
+data structure output by \tet{bnfinit}. This contains
+$\var{nf}$ and the deeper invariants of the field: units $U(K)$, class group
+$\Cl(K)$, as well as technical data required to solve the two associated
+discrete logarithm problems.
 
-$\bullet$ $\tev{bnr}$ denotes a ``ray number field'', i.e.~some data
-structure output by \kbd{bnrinit}, corresponding to the ray class group
-structure of the field, for some modulus.
+\item $\tev{bnr}$ denotes a ``ray number field'', i.e.~a data structure
+output by \kbd{bnrinit}, corresponding to the ray class group structure of
+the field, for some modulus $f$. It contains a \var{bnf}, the modulus 
+$f$, the ray class group $\Cl_f(K)$ and data associated to
+the discrete logarithm problem therein.
+\medskip
 
-$\bullet$ $\tev{rnf}$ denotes a relative number field (see below).
-\smallskip
+\noindent An element in $K$ is given as
 
-$\bullet$ $\tev{ideal}$ can mean any of the following:
+\item a \typ{INT}, \typ{FRAC} or \typ{POL} (implicitly modulo $T$), or
 
-\quad -- a $\Z$-basis, in Hermite normal form (HNF) or not. In this case $x$
-is a square matrix.
+\item a \typ{POLMOD} (modulo $T$), or
 
-\quad -- an \tev{idele}, i.e.~a 2-component vector, the first being an
-ideal given as a $\Z$-basis, the second being a $r_1+r_2$-component row
-vector giving the complex logarithmic Archimedean information.
+\item a \typ{COL}~\kbd{v} of dimension $N = [K:\Q]$, representing
+the element in terms of the computed integral basis, as
+\kbd{sum(i = 1, N,~v[i] * nf.zk[i])}. Note that a \typ{VEC}
+will not be recognized.
+\medskip
 
-\quad -- a $\Z_K$-generating system for an ideal.
+\noindent An $\tev{ideal}$ is given in any of the following ways:
 
-\quad -- a \emph{column} vector $x$ expressing an element of the number field
-on the integral basis, in which case the ideal is treated as being the
-principal idele (or ideal) generated by $x$.
+\item an element in one of the above forms, defining a principal ideal.
 
-\quad -- a prime ideal, i.e.~a 5-component vector in the format output by
+\item a prime ideal, i.e.~a 5-component vector in the format output by
 \kbd{idealprimedec}.
 
-\quad -- a polmod $x$, i.e.~an algebraic integer, in which case the ideal
-is treated as being the principal idele generated by $x$.
+\item a \typ{MAT} whose columns represent a basis of the ideal, preferably
+square and in HNF. If strictly less than $N = [K:\Q]$ generators are given,
+it is assumed they form a $\Z_K$-basis. If $N$ or more are given, a
+$\Z$-basis is assumed. If exactly $N$ are given, it is further assumed the
+matrix is in HNF. If any of these assumptions is not correct the behaviour
+of PARI routines is undefined.
 
-\quad -- an integer or a rational number, also treated as a principal idele.
+One may use \kbd{idealhnf} to convert an ideal to the last (preferred) format.
+\medskip
 
-$\bullet$ a \emph{character} on the Abelian group
+\item an \tev{idele} is a 2-component vector, the first being an ideal as
+above, the second being a $R_1+R_2$-component row vector giving Archimedean
+information.
+
+\item a \emph{character} on the Abelian group
 $\bigoplus (\Z/N_i\Z) g_i$
 is given by a row vector $\chi = [a_1,\ldots,a_n]$ such that
 $\chi(\prod g_i^{n_i}) = exp(2i\pi\sum a_i n_i / N_i)$.
 
-
-\misctitle{Warnings.}
-
-1) An element in $\var{nf}$ can be expressed either as a polmod or as a
-\emph{column} vector of components on the integral basis \kbd{\var{nf}.zk}.
-A row vector will not be recognized.
-
-2) When giving an ideal by a $\Z_K$ generating system to a function expecting
-an ideal, it must be ensured that the function understands that it is a
-$\Z_K$-generating system and not a $\Z$-generating system. When the number of
-generators is strictly less than the degree of the field, there is no
-ambiguity and the program assumes that one is giving a $\Z_K$-generating set.
-When the number of generators is greater than or equal to the degree of the
-field, however, the program assumes on the contrary that you are giving a
-$\Z$-generating set. If this is not the case, you \emph{must} change it into
-a $\Z$-generating set, using \kbd{idealhnf(\var{nf},$x$)}.
-
 Concerning relative extensions, some additional definitions are necessary.
 When defining a relative extension, the base field $\var{nf}$ must be defined
 by a variable having a lower priority (see \secref{se:priority}) than the
-variable defining the extension. For example, under \kbd{gp} you can use the
-variable name $y$ (or $t$) to define the base field, and the variable name
-$x$ to define the relative extension.
+variable defining the extension. For example, you may use the variable name
+$y$ to define the base field, and $x$ to define the relative extension.
 
-$\bullet$ A \emph{relative matrix} is a matrix whose entries are
+\item $\tev{rnf}$ denotes a relative number field, i.e.~a data structure
+output by \kbd{rnfinit}.
+
+\item A \emph{relative matrix} is a matrix whose entries are
 elements of a (fixed) number field $\var{nf}$, always expressed as column
 vectors on the integral basis \kbd{\var{nf}.zk}. Hence it is a matrix of
 vectors.
 
-$\bullet$ An \tev{ideal list} is a row vector of (fractional)
+\item An \tev{ideal list} is a row vector of (fractional)
 ideals of the number field $\var{nf}$.
 
-$\bullet$ A \tev{pseudo-matrix} is a pair $(A,I)$ where $A$ is a
+\item A \tev{pseudo-matrix} is a pair $(A,I)$ where $A$ is a
 relative matrix and $I$ an ideal list whose length is the same as the number
 of columns of $A$. This pair is represented by a 2-component row vector.
 
-$\bullet$ The \tev{module} generated by a pseudo-matrix $(A,I)$ is
+\item The \tev{module} generated by a pseudo-matrix $(A,I)$ is
 the sum $\sum_i {\Bbb a}_j A_j$ where the ${\Bbb a}_j$ are the ideals of $I$
 and $A_j$ is the $j$-th column of $A$.
 
-$\bullet$ A pseudo-matrix $(A,I)$ is a \tev{pseudo-basis} of the module
+\item A pseudo-matrix $(A,I)$ is a \tev{pseudo-basis} of the module
 it generates if $A$ is a square matrix with non-zero determinant and all the
 ideals of $I$ are non-zero. We say that it is in Hermite Normal
 Form\sidx{Hermite normal form} (HNF) if it is upper triangular and all the
 elements of the diagonal are equal to 1.
 
-$\bullet$ The \emph{determinant} of a pseudo-basis $(A,I)$ is the ideal
+\item The \emph{determinant} of a pseudo-basis $(A,I)$ is the ideal
 equal to the product of the determinant of $A$ by all the ideals of $I$. The
 determinant of a pseudo-matrix is the determinant of any pseudo-basis of the
 module it generates.
@@ -2980,16 +2976,16 @@ $a1$, $a2$, $a3$, where the defining set $[a1,a2,a3]$ can have any of the
 following forms: $[\var{bnr}]$, $[\var{bnr},\var{subgroup}]$,
 $[\var{bnf},\var{module}]$, $[\var{bnf},\var{module},\var{subgroup}]$, where:
 
-$\bullet$ $\var{bnf}$ is as output by \kbd{bnfclassunit} or \kbd{bnfinit},
-where units are mandatory unless the ideal is trivial; \var{bnr} by
-\kbd{bnrclass} (with $\fl>0$) or \kbd{bnrinit}. This is the ground field.
+\item $\var{bnf}$ is as output by \kbd{bnfinit}, where units are mandatory
+unless the ideal is trivial; \var{bnr} by \kbd{bnrclass} (with $\fl>0$) or
+\kbd{bnrinit}. This is the ground field.
 
-$\bullet$ \emph{module} is either an ideal in any form (see above) or a
+\item \emph{module} is either an ideal in any form (see above) or a
 two-component row vector containing an ideal and an $r_1$-component row
 vector of flags indicating which real Archimedean embeddings to take in the
 module.
 
-$\bullet$ \emph{subgroup} is the HNF matrix of a subgroup of the ray class group
+\item \emph{subgroup} is the HNF matrix of a subgroup of the ray class group
 of the ground field for the modulus \emph{module}. This is input as a square
 matrix expressing generators of a subgroup of the ray class group
 \kbd{\var{bnr}.clgp} on the given generators.
@@ -3113,7 +3109,7 @@ relations. Otherwise, reasonable values are between 4 and 20. (The default is
 default, most of the \kbd{bnf} routines depend on the correctness of a
 heuristic assumption which is stronger than the GRH. In particular, any of
 the class number, class group structure, class group generators, regulator
-and fundamental units may be wrong, independantly of each other. Any result
+and fundamental units may be wrong, independently of each other. Any result
 computed from such a \kbd{bnf} may be wrong. The only guarantee is that the
 units given generate a subgroup of finite index in the full unit group. In
 practice, very few counter-examples are known, requiring unlucky random
@@ -3155,8 +3151,7 @@ The result of this function is a vector $v$ with many components (it is
 presentation is in fact output as a one column matrix. First we describe the
 default behaviour ($\fl=0$):
 
- $v[1]$ is equal to the polynomial $P$. Note that for optimum performance,
-$P$ should have gone through \kbd{polred} or $\kbd{nfinit}(x,2)$.
+ $v[1]$ is equal to the polynomial $P$.
 
  $v[2]$ is the 2-component vector $[r1,r2]$, where $r1$ and $r2$ are as usual
 the number of real and half the number of complex embeddings of the number
@@ -3187,29 +3182,26 @@ polynomials.
 
 If $\fl=1$, and the precision happens to be insufficient for obtaining the
 fundamental units, the internal precision is doubled and the computation
-redone, until the exact results are obtained. The user should be warned that
-this can take a very long time when the coefficients of the fundamental units
-on the integral basis are very large, for example in the case of large real
-quadratic fields. In that case, there are alternate methods for representing
-algebraic numbers which are not implemented in PARI.
+redone, until the exact results are obtained. Be warned that this can take a
+very long time when the coefficients of the fundamental units on the integral
+basis are very large, for example in large real quadratic fields.
+For this case, there are alternate compact representations for algebraic
+numbers, implemented in PARI but currently not available in GP.
 
 If $\fl=2$, the fundamental units and roots of unity are not computed.
 Hence the result has only 7 components, the first seven ones.
 
-$\var{tech}$ is a technical vector (empty by default) containing $c$, $c2$,
-\var{nrel}, \var{borne}, \var{nbpid}, \var{minsfb}, in this order (see
-the beginning of the section or the keyword \kbd{bnf}).
-You can supply any number of these \emph{provided you give an actual value to
-each of them} (the ``empty arg'' trick won't work here). Careful use of these
-parameters may speed up your computations considerably.
+$\var{tech}$ is a technical vector (empty by default, see the beginning of
+the section or the keyword \kbd{bnf}). Careful use of this parameter may
+speed up your computations considerably.
 
 \syn{bnfclassunit0}{P,\fl,\var{tech},\var{prec}}.
 
-\subsecidx{bnfclgp}$(P,\{\var{tech}=[\,]\})$: as \kbd{bnfclassunit}, but only
-outputs $v[5]$, i.e.~the class group.
+\subsecidx{bnfclgp}$(P,\{\var{tech}=[\,]\})$: as \kbd{bnfinit}, but only
+outputs \kbd{bnf.clgp}, i.e.~the class group.
 
-\syn{bnfclassgrouponly}{P,\var{tech},\var{prec}}, where \var{tech}
-is as described under \kbd{bnfclassunit}.
+\syn{classgrouponly}{P,\var{tech},\var{prec}}, where \var{tech}
+is as described under \kbd{bnfinit}.
 
 \subsecidx{bnfdecodemodule}$(\var{nf},m)$: if $m$ is a module as output in the
 first component of an extension given by \kbd{bnrdisclist}, outputs the
@@ -3217,15 +3209,13 @@ true module.
 
 \syn{decodemodule}{\var{nf},m}.
 
-\subsecidx{bnfinit}$(P,\{\fl=0\},\{\var{tech}=[\,]\})$: essentially identical
-to \kbd{bnfclassunit} except that the output contains a lot of technical data,
-and should not be printed out explicitly in general. The result of
-\kbd{bnfinit} is used in programs such as \kbd{bnfisprincipal},
-\kbd{bnfisunit} or \kbd{bnfnarrow}. By default, the results are conditional
-on a heuristic strengthening of the GRH, see \ref{se:GRHbnf}. The result is a
-10-component vector $\var{bnf}$.
+\subsecidx{bnfinit}$(P,\{\fl=0\},\{\var{tech}=[\,]\})$: initialized a
+\var{bnf}, used in programs such as \kbd{bnfisprincipal}, \kbd{bnfisunit} or
+\kbd{bnfnarrow}. By default, the results are conditional on a heuristic
+strengthening of the GRH, see \ref{se:GRHbnf}. The result is a 10-component
+vector \var{bnf}.
 
-\noindent $\bullet$ The first 6 and last 2 components are technical and in
+\noindent \item The first 6 and last 2 components are technical and in
 principle are not used by the casual user. However, for the sake of
 completeness, their description is as follows. We use the notations explained
 in the book by H. Cohen, \emph{A Course in Computational Algebraic Number
@@ -3271,19 +3261,18 @@ principal ideals \kbd{bnf.gen[i]\pow bnf.cyc[i]} (during a call to
 $B$ (when the \kbd{bnf} internal precision needs to be increased).
 \smallskip
 
-\noindent$\bullet$ The less technical components are as follows:
+\noindent\item The less technical components are as follows:
 
 $\var{bnf}[7]$ or \kbd{\var{bnf}.nf} is equal to the number field data
 $\var{nf}$ as would be given by \kbd{nfinit}.
 
-$\var{bnf}[8]$ is a vector containing the last 6 components of
-\kbd{bnfclassunit[,1]}, i.e.~the classgroup \kbd{\var{bnf}.clgp}, the
-regulator \kbd{\var{bnf}.reg}, the general ``check'' number which should be
-close to 1, the number of roots of unity and a generator \kbd{\var{bnf}.tu},
-the fundamental units \kbd{\var{bnf}.fu}, and finally the check on their
-computation. If the precision becomes insufficient, \kbd{gp} outputs a warning
-(\kbd{fundamental units too large, not given}) and does not strive to
-compute the units by default ($\fl=0$).
+$\var{bnf}[8]$ is a vector containing the classgroup \kbd{\var{bnf}.clgp},
+the regulator \kbd{\var{bnf}.reg}, a $1$ (used to contain an obsolete
+``check number''), the number of roots of unity and a generator
+\kbd{\var{bnf}.tu}, the fundamental units \kbd{\var{bnf}.fu}. If the
+precision becomes insufficient, \kbd{gp} outputs a warning (\kbd{fundamental
+units too large, not given}) and does not strive to compute the units by
+default ($\fl=0$).
 
    When $\fl=1$, we insist on finding the fundamental units exactly. Be
 warned that this can take a very long time when the coefficients of the
@@ -3327,7 +3316,7 @@ desired. Note also that the member functions will \emph{not} work on
 
 \subsecidx{bnfisintnorm}$(\var{bnf},x)$: computes a complete system of
 solutions (modulo units of positive norm) of the absolute norm equation
-$\text{Norm}(a)=x$,
+$\Norm(a)=x$,
 where $a$ is an integer in $\var{bnf}$. If $\var{bnf}$ has not been certified,
 the correctness of the result depends on the validity of \idx{GRH}.
 
@@ -3345,7 +3334,7 @@ $S$ the following prime ideals, depending on the sign of $\fl$. If $\fl>0$,
 the ideals of norm less than $\fl$. And if $\fl<0$ the ideals dividing $\fl$.
 
 Assuming \idx{GRH}, the answer is guaranteed (i.e.~$x$ is a norm iff $b=1$),
-if $S$ contains all primes less than $12\log(\var{disc}(\var{Bnf}))^2$, where
+if $S$ contains all primes less than $12\log(\disc(\var{Bnf}))^2$, where
 $\var{Bnf}$ is the Galois closure of $\var{bnf}$.
 
 See also \tet{bnfisintnorm}.
@@ -3393,15 +3382,14 @@ computations.
 \syn{isprincipalall}{\var{bnf},x,\fl}.
 
 \subsecidx{bnfisunit}$(\var{bnf},x)$: $\var{bnf}$ being the number field data
-output by
-\kbd{bnfinit} and $x$ being an algebraic number (type integer, rational or
-polmod), this outputs the decomposition of $x$ on the fundamental units and
-the roots of unity if $x$ is a unit, the empty vector otherwise. More
-precisely, if $u_1$,\dots,$u_r$ are the fundamental units, and $\zeta$ is
-the generator of the group of roots of unity (found by \kbd{bnfclassunit} or
-\kbd{bnfinit}), the output is a vector $[x_1,\dots,x_r,x_{r+1}]$ such that
-$x=u_1^{x_1}\cdots u_r^{x_r}\cdot\zeta^{x_{r+1}}$. The $x_i$ are integers for
-$i\le r$ and is an integer modulo the order of $\zeta$ for $i=r+1$.
+output by \kbd{bnfinit} and $x$ being an algebraic number (type integer,
+rational or polmod), this outputs the decomposition of $x$ on the fundamental
+units and the roots of unity if $x$ is a unit, the empty vector otherwise.
+More precisely, if $u_1$,\dots,$u_r$ are the fundamental units, and $\zeta$
+is the generator of the group of roots of unity (\kbd{bnf.tu}), the output is
+a vector $[x_1,\dots,x_r,x_{r+1}]$ such that $x=u_1^{x_1}\cdots
+u_r^{x_r}\cdot\zeta^{x_{r+1}}$. The $x_i$ are integers for $i\le r$ and is an
+integer modulo the order of $\zeta$ for $i=r+1$.
 
 \syn{isunit}{\var{bnf},x}.
 
@@ -3464,7 +3452,7 @@ tpu(bnf)=
 \kbd{bnfinit}, computes its regulator.
 
 \syn{regulator}{\var{bnf},\var{tech},\var{prec}}, where \var{tech} is as in
-\kbd{bnfclassunit}.
+\kbd{bnfinit}.
 
 \subsecidx{bnfsunit}$(\var{bnf},S)$: computes the fundamental $S$-units of the
 number field $\var{bnf}$ (output by \kbd{bnfinit}), where $S$ is a list of
@@ -3716,7 +3704,7 @@ bnf = bnfinit(x^2 - 145);
 bnr = bnrinit(bnf,7,1);
 bnrrootnumber(bnr, [5])
 @eprog\noindent
-returns the root number of the character $\chi$ of $Cl_7(\Q(\sqrt{145}))$
+returns the root number of the character $\chi$ of $\Cl_7(\Q(\sqrt{145}))$
 such that $\chi(g) = \zeta^5$, where $g$ is the generator of the ray-class
 field and $\zeta = e^{2i\pi/N}$ where $N$ is the order of $g$ ($N=12$ as
 \kbd{bnr.cyc} readily tells us).
@@ -3904,23 +3892,23 @@ The output is an 8-component vector \var{gal}.
 Let $H$ be the maximal normal supersolvable subgroup of $G$, we have the
 following properties:
 
-\quad$\bullet$ if $G/H\simeq A_4$ then $[o_1,\ldots,o_g]$ ends by
+\quad\item if $G/H\simeq A_4$ then $[o_1,\ldots,o_g]$ ends by
 $[2,2,3]$.
 
-\quad$\bullet$ if $G/H\simeq S_4$ then $[o_1,\ldots,o_g]$ ends by
+\quad\item if $G/H\simeq S_4$ then $[o_1,\ldots,o_g]$ ends by
 $[2,2,3,2]$.
 
-\quad$\bullet$ else $G$ is super-solvable.
+\quad\item else $G$ is super-solvable.
 
-\quad$\bullet$ for $1\leq i \leq g$ the subgroup of $G$ generated by
+\quad\item for $1\leq i \leq g$ the subgroup of $G$ generated by
 $[s_1,\ldots,s_g]$ is normal, with the exception of $i=g-2$ in the
 second case and of $i=g-3$ in the third.
 
-\quad$\bullet$ the relative order $o_i$ of $s_i$ is its order in the
+\quad\item the relative order $o_i$ of $s_i$ is its order in the
 quotient group $G/\langle s_1,\ldots,s_{i-1}\rangle$, with the same
 exceptions.
 
-\quad$\bullet$ for any $x\in G$ there exists a unique family
+\quad\item for any $x\in G$ there exists a unique family
 $[e_1,\ldots,e_g]$ such that (no exceptions):
 
 -- for $1\leq i \leq g$ we have $0\leq e_i<o_i$
@@ -3964,14 +3952,14 @@ way (uniquely if $n$ is taken to be minimal).
 
 \noindent The pair $(n, H)$ is deduced from the parameters $(N, H)$ as follows
 
-$\bullet$ $N$ an integer: then $n = N$; $H$ is a generator, i.e. an
+\item $N$ an integer: then $n = N$; $H$ is a generator, i.e. an
 integer or an integer modulo $n$; or a vector of generators.
 
-$\bullet$ $N$ the output of \kbd{znstar($n$)}. $H$ as in the first case
+\item $N$ the output of \kbd{znstar($n$)}. $H$ as in the first case
 above, or a matrix, taken to be a HNF left divisor of the SNF for $(\Z/n\Z)^*$
 (of type \kbd{$N$.cyc}), giving the generators of $H$ in terms of \kbd{$N$.gen}.
 
-$\bullet$ $N$ the output of \kbd{bnrinit(bnfinit(y), $m$, 1)} where $m$ is a
+\item $N$ the output of \kbd{bnrinit(bnfinit(y), $m$, 1)} where $m$ is a
 module. $H$ as in the first case, or a matrix taken to be a HNF left
 divisor of the SNF for the ray class group modulo $m$
 (of type \kbd{$N$.cyc}), giving the generators of $H$ in terms of \kbd{$N$.gen}.
@@ -4672,29 +4660,29 @@ i.e.~$[\Z_K : \Z[\theta]]$, where $\theta$ is any root of $\var{nf}[1]$.
 $\var{nf}[5]$ is a vector containing 7 matrices $M$, $G$, $T2$, $T$,
 $MD$, $TI$, $MDI$ useful for certain computations in the number field $K$.
 
-\quad$\bullet$ $M$ is the $(r1+r2)\times n$ matrix whose columns represent
+\quad\item $M$ is the $(r1+r2)\times n$ matrix whose columns represent
 the numerical values of the conjugates of the elements of the integral
 basis.
 
-\quad$\bullet$ $G$ is such that $T2 = {}^t G G$, where $T2$ is the quadratic
+\quad\item $G$ is such that $T2 = {}^t G G$, where $T2$ is the quadratic
 form $T_2(x) = \sum |\sigma(x)|^2$, $\sigma$ running over the embeddings of
 $K$ into $\C$.
 
-\quad$\bullet$ The $T2$ component is deprecated and currently unused.
+\quad\item The $T2$ component is deprecated and currently unused.
 
-\quad$\bullet$ $T$ is the $n\times n$ matrix whose coefficients are
+\quad\item $T$ is the $n\times n$ matrix whose coefficients are
 $\text{Tr}(\omega_i\omega_j)$ where the $\omega_i$ are the elements of the
 integral basis. Note also that $\det(T)$ is equal to the discriminant of the
 field $K$.
 
-\quad$\bullet$ The columns of $MD$ (\kbd{\var{nf}.diff}) express a $\Z$-basis
+\quad\item The columns of $MD$ (\kbd{\var{nf}.diff}) express a $\Z$-basis
 of the different of $K$ on the integral basis.
 
-\quad$\bullet$ $TI$ is equal to $d(K)T^{-1}$, which has integral
+\quad\item $TI$ is equal to $d(K)T^{-1}$, which has integral
 coefficients. Note that, understood as as ideal, the matrix $T^{-1}$
 generates the codifferent ideal.
 
-\quad$\bullet$ Finally, $MDI$ is a two-element representation (for faster
+\quad\item Finally, $MDI$ is a two-element representation (for faster
 ideal product) of $d(K)$ times the codifferent ideal
 (\kbd{\var{nf}.disc$*$\var{nf}.codiff}, which is an integral ideal). $MDI$
 is only used in \tet{idealinv}.
@@ -5386,7 +5374,7 @@ not.
 whether the element $a$ in $K$ is the norm of some $x$ in the extension
 $L/K$.
 
-The output is a vector $[x,q]$, where $a = \var{Norm}(x)*q$. The
+The output is a vector $[x,q]$, where $a = \Norm(x)*q$. The
 algorithm looks for a solution $x$ which is an $S$-integer, with $S$ a list
 of places of $K$ containing at least the ramified primes, the generators of
 the class group of $L$, as well as those primes dividing $a$. If $L/K$ is
@@ -5396,7 +5384,7 @@ $S$: all the places above the primes $p \leq \fl$ (resp.~$p|\fl$) if $\fl>0$
 
 The answer is guaranteed (i.e.~$a$ is a norm iff $q = 1$) if the field is
 Galois, or, under \idx{GRH}, if $S$ contains all primes less than
-$12\log^2\left|\text{disc}(M)\right|$, where $M$ is the normal
+$12\log^2\left|\disc(M)\right|$, where $M$ is the normal
 closure of $L/K$.
 
 If \tet{rnfisnorminit} has determined (or was told) that $L/K$ is
@@ -5976,7 +5964,7 @@ terms in the expansion.
 \subsecidx{thue}$(\var{tnf},a,\{\var{sol}\})$: solves the equation
 $P(x,y)=a$ in integers $x$ and $y$, where \var{tnf} was created with
 $\kbd{thueinit}(P)$. \var{sol}, if present, contains the solutions of
-$\text{Norm}(x)=a$ modulo units of positive norm in the number field
+$\Norm(x)=a$ modulo units of positive norm in the number field
 defined by $P$ (as computed by \kbd{bnfisintnorm}). If \var{tnf} was
 computed without assuming \idx{GRH} ($\fl=1$ in \kbd{thueinit}), the
 result is unconditional. For instance, here's how to solve the Thue
@@ -6181,7 +6169,7 @@ copy has to be made.
 This function is useless in library mode.
 
 \subsecidx{matadjoint}$(x)$: \idx{adjoint matrix} of $x$, i.e.~the matrix $y$
-of cofactors of $x$, satisfying $x*y=\det(x)*\text{Id}$. $x$ must be a
+of cofactors of $x$, satisfying $x*y=\det(x)*\Id$. $x$ must be a
 (non-necessarily invertible) square matrix.
 
 \syn{adj}{x}.
@@ -6621,9 +6609,9 @@ $2^{31}$.
 
 \noindent The binary digits of \fl\ mean:
 
-$\bullet$ 1: count vectors of even norm from $1$ to $2B$.
+\item 1: count vectors of even norm from $1$ to $2B$.
 
-$\bullet$ 2: return a \typ{VECSMALL} instead of a \typ{GEN}
+\item 2: return a \typ{VECSMALL} instead of a \typ{GEN}
 
 \syn{qfrep0}{q, B, \fl}.
 
@@ -6688,10 +6676,10 @@ to the component numbers to be extracted, in the order specified.
 
 If $y$ is a string, it can be
 
-$\bullet$ a single (non-zero) index giving a component number (a negative
+\item a single (non-zero) index giving a component number (a negative
 index means we start counting from the end).
 
-$\bullet$ a range of the form \kbd{"$a$..$b$"}, where $a$ and $b$ are
+\item a range of the form \kbd{"$a$..$b$"}, where $a$ and $b$ are
 indexes as above. Any of $a$ and $b$ can be omitted; in this case, we take
 as default values $a = 1$ and $b = -1$, i.e.~ the first and last components
 respectively. We then extract all components in the interval $[a,b]$, in
@@ -6739,16 +6727,16 @@ first, and when these are equal, with respect to the third.
 
 \noindent The binary digits of \fl\ mean:
 
-$\bullet$ 1: indirect sorting of the vector $x$, i.e.~if $x$ is an
+\item 1: indirect sorting of the vector $x$, i.e.~if $x$ is an
 $n$-component vector, returns a permutation of $[1,2,\dots,n]$ which
 applied to the components of $x$ sorts $x$ in increasing order.
 For example, \kbd{vecextract(x, vecsort(x,,1))} is equivalent to
 \kbd{vecsort(x)}.
 
-$\bullet$ 2: sorts $x$ by ascending lexicographic order (as per the
+\item 2: sorts $x$ by ascending lexicographic order (as per the
 \kbd{lex} comparison function).
 
-$\bullet$ 4: use descending instead of ascending order.
+\item 4: use descending instead of ascending order.
 
 \syn{vecsort0}{x,k,flag}. To omit $k$, use \kbd{NULL} instead. You can also
 use the simpler functions
@@ -6987,12 +6975,12 @@ platform-independent and should be relatively easy to port or expand.
 
 These graphic functions are either
 
-$\bullet$ high-level plotting functions (all the functions starting with
+\item high-level plotting functions (all the functions starting with
 \kbd{ploth}) in which the user has little to do but explain what type of plot
 he wants, and whose syntax is similar to the one used in the preceding
 section (with somewhat more complicated flags).
 
-$\bullet$ low-level plotting functions, where every drawing primitive (point,
+\item low-level plotting functions, where every drawing primitive (point,
 line, box, etc.) must be specified by the user. These low-level functions
 (called \var{rectplot} functions, sharing the prefix \kbd{plot}) work as
 follows. You have at your disposal 16 virtual windows which are filled
@@ -7044,7 +7032,7 @@ session, without having to kill the window first. Under X11, this window can
 be closed, enlarged or reduced using the standard window manager functions.
 No zooming procedure is implemented though (yet).
 
-$\bullet$ Finally, note that in the same way that \kbd{printtex} allows you
+\item Finally, note that in the same way that \kbd{printtex} allows you
 to have a \TeX\ output corresponding to printed results, the functions
 starting with \kbd{ps} allow you to have \tet{PostScript} output of the
 plots. This will not be absolutely identical with the screen output, but will
@@ -7134,7 +7122,7 @@ the same window.
 
 \noindent The binary digits of $\fl$ mean:
 
-$\bullet$ $1 = \kbd{Parametric}$: \tev{parametric plot}. Here \var{expr} must
+\item $1 = \kbd{Parametric}$: \tev{parametric plot}. Here \var{expr} must
 be a vector with an even number of components. Successive pairs are then
 understood as the parametric coordinates of a plane curve. Each of these are
 then drawn.
@@ -7150,7 +7138,7 @@ curves.
 $y=x$.
 
 
-$\bullet$ $2 = \kbd{Recursive}$: \tev{recursive plot}. If this flag is set,
+\item $2 = \kbd{Recursive}$: \tev{recursive plot}. If this flag is set,
 only \emph{one} curve can be drawn at time, i.e.~\var{expr} must be either a
 two-component vector (for a single parametric curve, and the parametric flag
 \emph{has} to be set), or a scalar function. The idea is to choose pairs of
@@ -7172,28 +7160,28 @@ curve with slightly different parameters.
 
 The other values toggle various display options:
 
-$\bullet$ $4 = \kbd{no\_Rescale}$: do not rescale plot according to the
+\item $4 = \kbd{no\_Rescale}$: do not rescale plot according to the
 computed extrema. This is meant to be used when graphing multiple functions
 on a rectwindow (as a \tet{plotrecth} call), in conjunction with
 \tet{plotscale}.
 
-$\bullet$ $8 = \kbd{no\_X\_axis}$: do not print the $x$-axis.
+\item $8 = \kbd{no\_X\_axis}$: do not print the $x$-axis.
 
-$\bullet$ $16 = \kbd{no\_Y\_axis}$: do not print the $y$-axis.
+\item $16 = \kbd{no\_Y\_axis}$: do not print the $y$-axis.
 
-$\bullet$ $32 = \kbd{no\_Frame}$: do not print frame.
+\item $32 = \kbd{no\_Frame}$: do not print frame.
 
-$\bullet$ $64 = \kbd{no\_Lines}$: only plot reference points, do not join them.
+\item $64 = \kbd{no\_Lines}$: only plot reference points, do not join them.
 
-$\bullet$ $128 = \kbd{Points_too}$: plot both lines and points.
+\item $128 = \kbd{Points_too}$: plot both lines and points.
 
-$\bullet$ $256 = \kbd{Splines}$: use splines to interpolate the points.
+\item $256 = \kbd{Splines}$: use splines to interpolate the points.
 
-$\bullet$ $512 = \kbd{no\_X\_ticks}$: plot no $x$-ticks.
+\item $512 = \kbd{no\_X\_ticks}$: plot no $x$-ticks.
 
-$\bullet$ $1024 = \kbd{no\_Y\_ticks}$: plot no $y$-ticks.
+\item $1024 = \kbd{no\_Y\_ticks}$: plot no $y$-ticks.
 
-$\bullet$ $2048 = \kbd{Same\_ticks}$: plot all ticks with the same length.
+\item $2048 = \kbd{Same\_ticks}$: plot all ticks with the same length.
 
 \subsecidx{plothraw}$(\var{listx},\var{listy},\{\fl=0\})$: given
 \var{listx} and \var{listy} two vectors of equal length, plots (in high
