@@ -2637,6 +2637,8 @@ rnfsteinitz(GEN nf, GEN order)
     err(talker,"not a pseudo-matrix in rnfsteinitz");
   A=dummycopy((GEN)order[1]);
   I=dummycopy((GEN)order[2]); n=lg(A)-1;
+  if (typ(A) != t_MAT || typ(I) != t_VEC || lg(I) != n+1)
+    err(typeer,"rnfsteinitz");
   for (i=1; i<n; i++)
   {
     a = (GEN)I[i];

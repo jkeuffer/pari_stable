@@ -1817,6 +1817,7 @@ factorpadic4(GEN f,GEN p,long prec)
   int reverse = 0;
 
   if (typ(f)!=t_POL) err(notpoler,"factorpadic");
+  if (typ(p)!=t_INT) err(arither1);
   if (gcmp0(f)) err(zeropoler,"factorpadic");
   if (prec<=0) err(rootper4);
 

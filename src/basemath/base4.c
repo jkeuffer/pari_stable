@@ -2421,7 +2421,9 @@ element_reduce(GEN nf, GEN x, GEN ideal)
 
   if (is_extscalar_t(tx))
     x = algtobasis_intern(checknf(nf), x);
-  N = lg(x); p1=cgetg(N+1,t_MAT);
+  N = lg(x);
+  if (typ(ideal) != t_MAT || lg(ideal) != N) err(typeer,"element_reduce");
+  p1=cgetg(N+1,t_MAT);
   for (i=1; i<N; i++) p1[i]=ideal[i];
   p1[N]=(long)x; u=(GEN)ker(p1)[1];
   p1=(GEN)u[N]; setlg(u,N);
