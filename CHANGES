@@ -16,7 +16,7 @@ GTo= Gonzalo Tornaria
 HC = Henri Cohen
 IS = Igor Schein
 IK = Iwao Kimura
-IS = Ignat Soroko
+ISo= Ignat Soroko
 IZ = Ilya Zakharevich
 KO = Kiyoshi Ohgishi
 LG = Louis Granboulan
@@ -74,7 +74,7 @@ HC 24- Corrected p-adic initell.
        setrand(5);tnf=thueinit(x^3 + x^2 - 43690*x - 3529208) --> error in mplog
    35- typo in bnfnarrow ("impossible inverse")
    36- subst(x,x^0,x) --> floating point exception
-IS 37- many typos in the documentation
+ISo37- many typos in the documentation
    38- [DOS/Windows]: incorrect conversion between 'double' and t_REAL
    39- polrootspadic(4*x^2-1,2,2) --> impossible inverse: Mod(2, 16).
        [specific to 2, and non-monic equations]
