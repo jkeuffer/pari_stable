@@ -1241,9 +1241,9 @@ newtonsums(GEN a, GEN da, GEN chi, long c, GEN pp, GEN ns)
 {
   GEN va, pa, dpa, s;
   long j, k, n = degpol(chi);
-  pari_sp av = avma, lim = stack_lim(av, 1);
+  pari_sp av, lim;
 
-  a = centermod(a, pp);
+  a = centermod(a, pp); av = avma; lim = stack_lim(av, 1);
   pa = polun[varn(a)]; dpa = gun;
   va = zerovec(c);
   for (j = 1; j <= c; j++)
