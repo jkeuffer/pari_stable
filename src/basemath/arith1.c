@@ -1428,7 +1428,7 @@ mpfact(long n)
 GEN
 mpfactr(long n, long prec)
 {
-  long av = avma, tetpil,lim,k;
+  long av = avma, lim,k;
   GEN f = cgetr(prec);
 
   affsr(1,f);

@@ -42,6 +42,8 @@ BA 11- bound problems in nfgaloisconj()
    13- "Warning: in Gauss lg(a)=1..." from isprincipalall0
    14- specific error for precision problems with p-adic ell. curves 
 IZ 15- ploth() plots are 1/2-pixel off
+BA 16- result was not always complete in nfgaloisconj()
+   17- type(1/y, RFRACN) --> SEGV + check compatibility before applying type()
 
   Added
 IZ  1- [gnuplot] look up directory tree for gnuplot related files
