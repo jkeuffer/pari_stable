@@ -251,6 +251,7 @@ GEN     sumdivk(GEN n,long k);
 /* base1.c */
 
 GEN     bnfnewprec(GEN nf, long prec);
+GEN     bnrnewprec(GEN bnr, long prec);
 void    check_pol_int(GEN x);
 GEN     check_units(GEN x, char *f);
 void    checkbid(GEN bid);

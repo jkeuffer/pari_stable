@@ -2155,6 +2155,17 @@ bnfnewprec(GEN bnf, long prec)
 }
 
 GEN
+bnrnewprec(GEN bnr, long prec)
+{
+  GEN y = cgetg(7,t_VEC);
+  long i;
+  checkbnr(bnr);
+  y[1] = (long)bnfnewprec((GEN)bnr[1],prec);
+  for (i=2; i<7; i++) y[i]=lcopy((GEN)bnr[i]);
+  return y;
+}
+
+GEN
 bnfmake(GEN sbnf, long prec)
 {
   long av = avma, j,k,n,r1,r2,ru,lpf;

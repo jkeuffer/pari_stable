@@ -55,6 +55,7 @@ checknf(GEN nf)
   {
     case 10: return nf;
     case 11: return checknf((GEN)nf[7]);
+    case 7:  return checknf((GEN)nf[1]);
     case 3: if (typ(nf[2]) == t_POLMOD) return checknf((GEN)nf[1]);
   }
   err(idealer1);
