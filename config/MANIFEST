@@ -38,6 +38,7 @@ config/has_TIOCGWINSZ.c
 config/has_dlopen.c
 config/has_exp2.c
 config/has_getrusage.c
+config/has_opendir.c
 config/has_sigrelse.c
 config/has_sigsetmask.c
 config/has_strftime.c
