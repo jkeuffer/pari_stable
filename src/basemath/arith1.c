@@ -231,8 +231,8 @@ znstar(GEN n)
       sizeh = nbp; i=j=2; break;
     case 2: case 6:
       sizeh = nbp-1; i=1; j=2; break;
-    case 1: case 3: case 5: case 7:
-      sizeh = nbp; i=j=1; break;
+    default: /* 1, 3, 5, 7 */
+      sizeh = nbp; i=j=1;
   }
   for ( ; j<=nbp; i++,j++)
   {
@@ -1760,6 +1760,7 @@ sfcont(GEN x, GEN x1, long k)
       for (j=1; j<=i; j++) y[j]=lcopy((GEN)yp[j]);
       y=gerepile(av,tetpil,y); break;
     default: err(typeer,"sfcont");
+      return NULL; /* not reached */
   }
   return y;
 }
@@ -2258,35 +2259,35 @@ classno2(GEN x)
       { tetpil=avma; return gerepile(av,tetpil,icopy(p8)); }
   }
 
-  pi4=mppi(DEFAULTPREC); logd=glog(d,DEFAULTPREC);
-  p1=gsqrt(gdiv(gmul(d,logd),gmul2n(pi4,1)),DEFAULTPREC);
-  p4=divri(pi4,d); p7=ginv(mpsqrt(pi4));
-  if (s>0)
+  pi4 = mppi(DEFAULTPREC); logd = glog(d,DEFAULTPREC);
+  p1 = gsqrt(gdiv(gmul(d,logd),gmul2n(pi4,1)),DEFAULTPREC);
+  p4 = divri(pi4,d); p7 = ginv(mpsqrt(pi4));
+  if (s > 0)
   {
-    reg=regula(d,DEFAULTPREC);
-    p2=gsubsg(1,gmul2n(gdiv(glog(reg,DEFAULTPREC),logd),1));
-    p3=gsqrt(gdivsg(2,logd),DEFAULTPREC);
-    if (gcmp(p2,p3)>=0) p1=gmul(p2,p1);
+    reg = regula(d,DEFAULTPREC);
+    p2 = gsubsg(1, gmul2n(gdiv(glog(reg,DEFAULTPREC),logd),1));
+    p3 = gsqrt(gdivsg(2,logd),DEFAULTPREC);
+    if (gcmp(p2,p3)>=0) p1 = gmul(p2,p1);
   }
   p1 = gtrunc(p1); n=p1[2];
   if (lgefint(p1)!=3 || n<0)
     err(talker,"discriminant too large in classno");
 
   p1 = gsqrt(d,DEFAULTPREC); p3 = gzero;
-  if (s>0)
+  if (s > 0)
   {
     for (i=1; i<=n; i++)
     {
       k=krogs(fd,i);
       if (k)
       {
-	p2=mulir(mulss(i,i),p4);
-	p5=subsr(1,mulrr(p7,incgam3(ghalf,p2,DEFAULTPREC)));
-	p5=addrr(divrs(mulrr(p1,p5),i),eint1(p2,DEFAULTPREC));
+	p2 = mulir(mulss(i,i),p4);
+	p5 = subsr(1,mulrr(p7,incgam3(ghalf,p2,DEFAULTPREC)));
+	p5 = addrr(divrs(mulrr(p1,p5),i),eint1(p2,DEFAULTPREC));
 	p3 = (k>0)? addrr(p3,p5): subrr(p3,p5);
       }
     }
-    p3=shiftr(divrr(p3,reg),-1);
+    p3 = shiftr(divrr(p3,reg),-1);
     if (!egalii(x,fd)) /* x != p3 */
       p8 = gdiv(p8,ground(gdiv(regula(x,DEFAULTPREC),reg)));
   }
