@@ -1,31 +1,41 @@
-# Makefile for Pari/GP -- ix86 running EMX (ix86 kernel)
+# Makefile for Pari/GP -- ix86 running DOS (ix86 kernel)
 #
 #  This file was created by hand. Update it when config/ evolves
 #
-# if your make utility doesn't support .IF/.THEN/.ELSE comment out the
-# relevant lines
-.IF $(DBG) == 1
-  CFLAGS   = -g -Wall
-  RLCFLAGS = -g -Wall
-  XTRAOINL = $(OINLINE)
-.ELSE
-  CFLAGS   = -O3 -fexpensive-optimizations -DGCC_INLINE
-  RLCFLAGS = -O3 -fexpensive-optimizations
-  XTRAOINL =
-.END
+SHELL     = /bin/sh
 
-SHELL      = /bin/sh
-CC         = gcc
-CPPFLAGS   = -I. -I../src/headers
-LD         = gcc
-LDFLAGS    = -Zsysv-signals
-CPP        = gcc -E -I.
-EMX        = c:/emx/bin/emxl.exe
+CFLAGS   = -O3 -DGCC_INLINE -Wall
+#  Uncomment for debugging version
+#CFLAGS   = -g -Wall
+#XTRAOINL = $(OINLINE)
 
-RLDIR     = ../readline
-RLINCLUDE = -I$(RLDIR)
-RLLIBS    = $(RLDIR)/libreadline.a -ltermcap
-LIBS =
+LDOBJS  =$(OBJS)
+LDOBJSGP=$(OBJSGP)
+#  Uncomment if the shell complains about long lines
+#LDOBJS  =@objs
+#LDOBJSGP=@objsgp
+
+#  Correct according to your local configuration
+PREFIX=/usr/local/cross-tools/i386-mingw32
+PREFIXBIN=$(PREFIX)
+#PREFIX=/usr/local
+PREFIXBIN=/usr/local/cross-tools
+
+CC        = $(PREFIXBIN)/bin/gcc
+LD        = $(CC)
+CPP       = $(CC) -E -I.
+CPPFLAGS  = -I. -I../src/headers -I$(PREFIX)/include
+LDFLAGS   = -L$(PREFIX)/lib
+
+#  Uncomment (and correct) if you use EMX
+#EMXBIND    = emxbind -q C:/emx/bin/emxl.exe  gp gp.exe -C0
+#LDFLAGS   = -Zsysv-signals
+
+RLLIBS    = -lreadline
+#  Uncomment if you use GPRL.ZIP
+#RLDIR     = ../readline
+#RLINCLUDE = -I$(RLDIR)
+#RLLIBS    = -L$(RLDIR) -lreadline -ltermcap
 
 # use del if RM is not found.
 RM = rm -f
@@ -48,14 +58,14 @@ all: dft lib
 
 libpari.a: $(OBJS) $(OINLINE)
 	-$(RM) $@
-	ar r $@ $(OINLINE) @objs
+	ar r $@ $(OINLINE) $(LDOBJS)
 	ar s $@
 
 gp: $(OBJS) $(OBJSGP) $(XTRAOINL)
-	$(LD) -o gp $(LDFLAGS) $(XTRAOINL) @objs @objsgp $(RLLIBS) $(PLOTLIBS) $(LIBS)
+	$(LD) -o gp $(LDFLAGS) $(XTRAOINL) $(LDOBJS) $(LDOBJSGP) $(RLLIBS) $(PLOTLIBS) $(LIBS)
 
 gp.exe: gp
-	emxbind -q $(EMX) gp gp.exe -C0
+	$(EMXBIND)
 
 cleantest:
 	$(RM) *.out *.dif pari.ps
@@ -166,7 +176,7 @@ gp.o: $(HEADERS) ../src/language/anal.h ../src/gp/gp.h ./paricfg.h ../src/gp/gp.
 gp_init.o: $(HEADERS) ../src/graph/rect.h ../src/gp/gp_init.c
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) -I../src/graph -o gp_init.o ../src/gp/gp_init.c
 gp_rl.o: $(HEADERS) ../src/language/anal.h ../src/gp/gp.h ./paricfg.h ../src/gp/gp_rl.c
-	$(CC) -c $(RLCFLAGS) $(CPPFLAGS) -I../src/language $(RLINCLUDE) -o gp_rl.o ../src/gp/gp_rl.c
+	$(CC) -c $(CFLAGS) $(CPPFLAGS) -I../src/language $(RLINCLUDE) -o gp_rl.o ../src/gp/gp_rl.c
 plot.o: $(HEADERS) ../src/graph/rect.h ../src/graph/$(PLOTFILE)
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) $(PLOTCFLAGS) -o plot.o ../src/graph/$(PLOTFILE)
 plotport.o: $(HEADERS) ../src/graph/rect.h ../src/graph/plotport.c
