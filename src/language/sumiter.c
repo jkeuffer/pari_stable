@@ -153,7 +153,7 @@ prime_loop_init(GEN ga, GEN gb, long *a, long *b, long prime[])
 void
 forprime(entree *ep, GEN ga, GEN gb, char *ch)
 {
-  long prime[] = {evaltyp(t_INT)|m_evallg(3), evalsigne(1)|evallgefint(3), 0};
+  long prime[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
   long av = avma, a,b;
   byteptr p;
 
@@ -488,7 +488,7 @@ prodinf1(entree *ep, GEN a, char *ch, long prec)
 GEN
 prodeuler(entree *ep, GEN ga, GEN gb, char *ch, long prec)
 {
-  long prime[] = {evaltyp(t_INT)|m_evallg(3), evalsigne(1)|evallgefint(3), 0};
+  long prime[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
   long a,b;
   ulong av,av0 = avma, lim;
   GEN p1,x = realun(prec);
@@ -526,7 +526,7 @@ prodeuler(entree *ep, GEN ga, GEN gb, char *ch, long prec)
 GEN
 direulerall(entree *ep, GEN ga, GEN gb, char *ch, GEN c)
 {
-  long prime[] = {evaltyp(t_INT)|m_evallg(3), evalsigne(1)|evallgefint(3), 0};
+  long prime[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
   ulong av0 = avma,av, lim = (av0+bot)>>1;
   long p,n,i,j,k,tx,lx,a,b;
   GEN x,y,s,polnum,polden;
@@ -632,7 +632,7 @@ vecteur(GEN nmax, entree *ep, char *ch)
 {
   GEN y,p1;
   long i,m;
-  long c[]={evaltyp(t_INT)|m_evallg(3), evalsigne(1)|evallgefint(3), 0};
+  long c[]={evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
 
   if (typ(nmax)!=t_INT || signe(nmax) < 0)
     err(talker,"bad number of components in vector");
@@ -657,7 +657,7 @@ vecteursmall(GEN nmax, entree *ep, char *ch)
 {
   GEN y,p1;
   long i,m;
-  long c[]={evaltyp(t_INT)|m_evallg(3), evalsigne(1)|evallgefint(3), 0};
+  long c[]={evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
 
   if (typ(nmax)!=t_INT || signe(nmax) < 0)
     err(talker,"bad number of components in vector");
@@ -690,8 +690,8 @@ matrice(GEN nlig, GEN ncol,entree *ep1, entree *ep2, char *ch)
 {
   GEN y,z,p1;
   long i,j,m,n,s;
-  long c1[]={evaltyp(t_INT)|m_evallg(3), evalsigne(1)|evallgefint(3), 1};
-  long c2[]={evaltyp(t_INT)|m_evallg(3), evalsigne(1)|evallgefint(3), 1};
+  long c1[]={evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 1};
+  long c2[]={evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 1};
 
   s=signe(ncol);
   if (ep1 == ep2 && ep1) err(talker, "identical index variables in matrix");

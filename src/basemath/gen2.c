@@ -66,7 +66,7 @@ gops2ssz(GEN (*f)(long, long), long s, long y, GEN z)
 /*******************************************************************/
 
 /* small int prototype */
-static long court_p[] = { evaltyp(t_INT) | m_evallg(3),0,0 };
+static long court_p[] = { evaltyp(t_INT) | _evallg(3),0,0 };
 
 GEN
 gopsg2(GEN (*f)(GEN, GEN), long s, GEN y)

@@ -487,7 +487,7 @@ ulong
 snextpr(ulong p, byteptr *d, long *rcn, long *q, long k)
 {
   static ulong pp[] =
-    { evaltyp(t_INT)|m_evallg(3), evalsigne(1)|evallgefint(3), 0 };
+    { evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0 };
   static ulong *pp2 = pp + 2;
   static GEN gp = (GEN)pp;
   long d1 = **d, rcn0;

@@ -103,20 +103,20 @@ INLINE long
 evallg(long x)
 {
   if (x & ~LGBITS) err(errlg);
-  return m_evallg(x);
+  return _evallg(x);
 }
 
 INLINE long
 evallgef(long x)
 {
   if (x & ~LGEFBITS) err(errlgef);
-  return m_evallgef(x);
+  return _evallgef(x);
 }
 
 INLINE long
 evalvalp(long x)
 {
-  const long v = m_evalvalp(x);
+  const long v = _evalvalp(x);
   if (v & ~VALPBITS) err(errvalp);
   return v;
 }
@@ -124,7 +124,7 @@ evalvalp(long x)
 INLINE long
 evalexpo(long x)
 {
-  const long v = m_evalexpo(x);
+  const long v = _evalexpo(x);
   if (v & ~EXPOBITS) err(errexpo);
   return v;
 }
@@ -689,7 +689,7 @@ mpdivisis(GEN x, long y, GEN z)
 INLINE double
 gtodouble(GEN x)
 {
-  static long reel4[4]={ evaltyp(t_REAL) | m_evallg(4),0,0,0 };
+  static long reel4[4]={ evaltyp(t_REAL) | _evallg(4),0,0,0 };
 
   if (typ(x)==t_REAL) return rtodbl(x);
   gaffect(x,(GEN)reel4); return rtodbl((GEN)reel4);

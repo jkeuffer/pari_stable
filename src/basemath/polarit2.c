@@ -1608,12 +1608,7 @@ poltype(GEN x, GEN *ptp, GEN *ptpol, long *ptpa)
 	assign_or_fail((GEN)p1[1],p);
         t[3]=1; break;
       case t_COMPLEX:
-        if (!pcx)
-        {
-          pcx = cgetg(5,t_POL); /* x^2 + 1 */
-          pcx[1] = evalsigne(1)|evalvarn(0)|m_evallgef(5),
-          pcx[2]=pcx[4]=un; pcx[3]=zero;
-        }
+        if (!pcx) pcx = coefs_to_pol(3, gun,gzero,gun); /* x^2 + 1 */
 	for (j=1; j<=2; j++)
 	{
 	  p2 = (GEN)p1[j];
@@ -3711,7 +3706,7 @@ newtonpoly(GEN x, GEN p)
 {
   GEN y;
   long n,ind,a,b,c,u1,u2,r1,r2;
-  long *vval, num[] = {evaltyp(t_INT) | m_evallg(3), 0, 0};
+  long *vval, num[] = {evaltyp(t_INT) | _evallg(3), 0, 0};
 
   if (typ(x)!=t_POL) err(typeer,"newtonpoly");
   n=degpol(x); if (n<=0) { y=cgetg(1,t_VEC); return y; }

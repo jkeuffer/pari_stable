@@ -409,7 +409,7 @@ GEN
 auxdecomp1(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
 		  GEN state, long all, long hint)
 {
-  long pp[] = { evaltyp(t_INT)|m_evallg(4), 0,0,0 };
+  long pp[] = { evaltyp(t_INT)|_evallg(4), 0,0,0 };
   long nb = 0,i,k,lim1,av,lp,p;
   byteptr d=diffptr+1;
 

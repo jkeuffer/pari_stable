@@ -1440,7 +1440,7 @@ dirzetak0(GEN nf, long N0)
   long av=avma,i,j,k,limk,lx;
   ulong q,p,rem;
   byteptr d=diffptr;
-  long court[] = {evaltyp(t_INT)|m_evallg(3), evalsigne(1)|evallgefint(3),0};
+  long court[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3),0};
 
   pol=(GEN)nf[1]; disc=(GEN)nf[4];
   c  = (GEN) gpmalloc((N0+1)*sizeof(long));
@@ -1506,7 +1506,7 @@ initzeta(GEN pol, long prec)
   GEN limx,bnf,resi,zet,C,coeflog,racpi,aij,tabj,colzero, *tabcstn, *tabcstni;
   GEN c_even,ck_even,c_odd,ck_odd,serie_even,serie_odd,serie_exp,Pi;
   long N0,imin,imax,r1,r2,ru,R,N,i,j,k,n, av,av2,tetpil;
-  long court[] = {evaltyp(t_INT)|m_evallg(3), evalsigne(1)|evallgefint(3),0};
+  long court[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3),0};
   stackzone *zone, *zone0, *zone1;
 
   /*************** Calcul du residu et des constantes ***************/

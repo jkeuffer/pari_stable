@@ -35,7 +35,7 @@ tayl(GEN x, long v, long precdl)
 
   if (v <= vx)
   {
-    long p1[] = { evaltyp(t_SER)|m_evallg(2), 0 };
+    long p1[] = { evaltyp(t_SER)|_evallg(2), 0 };
     p1[1] = evalvalp(precdl) | evalvarn(v);
     return gadd(p1,x);
   }

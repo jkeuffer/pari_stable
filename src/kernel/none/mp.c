@@ -202,11 +202,11 @@ subiispec(GEN x, GEN y, long nx, long ny)
 
 /* prototype of positive small ints */
 static long pos_s[] = {
-  evaltyp(t_INT) | m_evallg(3), evalsigne(1) | evallgefint(3), 0 };
+  evaltyp(t_INT) | _evallg(3), evalsigne(1) | evallgefint(3), 0 };
 
 /* prototype of negative small ints */
 static long neg_s[] = {
-  evaltyp(t_INT) | m_evallg(3), evalsigne(-1) | evallgefint(3), 0 };
+  evaltyp(t_INT) | _evallg(3), evalsigne(-1) | evallgefint(3), 0 };
 
 void
 affir(GEN x, GEN y)

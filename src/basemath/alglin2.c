@@ -2288,7 +2288,7 @@ hnfmodid(GEN x, GEN p) { return allhnfmod(x,p,0); }
 static GEN
 mynegi(GEN x)
 {
-  static long mun[]={evaltyp(t_INT)|m_evallg(3),evalsigne(-1)|evallgefint(3),1};
+  static long mun[]={evaltyp(t_INT)|_evallg(3),evalsigne(-1)|evallgefint(3),1};
   long s = signe(x);
 
   if (!s) return gzero;

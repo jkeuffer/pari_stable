@@ -1769,7 +1769,7 @@ static GEN
 plothraw0(long stringrect, long drawrect, GEN listx, GEN listy, long flags)
 {
   PARI_plot *output = init_output(flags);
-  long data[] = {evaltyp(t_VEC) | m_evallg(3), 0, 0};
+  long data[] = {evaltyp(t_VEC) | _evallg(3), 0, 0};
   dblPointList *pl;
 
   data[1] = (long) listx;

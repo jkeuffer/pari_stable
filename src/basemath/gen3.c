@@ -493,7 +493,7 @@ gmulsg(long s, GEN y)
 GEN
 gdivgs(GEN x, long s)
 {
-  static long court[] = { evaltyp(t_INT) | m_evallg(3),0,0 };
+  static long court[] = { evaltyp(t_INT) | _evallg(3),0,0 };
   long tx=typ(x),lx=lg(x),i,av;
   GEN z,p1;
 
@@ -645,7 +645,7 @@ gmod(GEN x, GEN y)
 
 	case t_PADIC:
         {
-          long p1[] = {evaltyp(t_INTMOD)|m_evallg(3),0,0};
+          long p1[] = {evaltyp(t_INTMOD)|_evallg(3),0,0};
           p1[1] = (long)y;
           p1[2] = lgeti(lgefint(y));
           gaffect(x,p1); return (GEN)p1[2];

@@ -1276,7 +1276,7 @@ mppgcd(GEN a, GEN b)
     }
   }
   {
-    long r[] = {evaltyp(t_INT)|m_evallg(3), evalsigne(1)|evallgefint(3), 0};
+    long r[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
     r[2] = (long) ugcd((ulong)b[2], (ulong)a[2]);
     avma = av; return shifti(r,v);
   }

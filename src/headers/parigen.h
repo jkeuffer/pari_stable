@@ -48,42 +48,43 @@ typedef int (*QSCOMP)(const void *, const void *);
 /* You may want to change the following 32 to BITS_IN_LONG */
 #define BITS_IN_RANDOM 32
 
-/* Codeword x[0]        : TYPBITS, CLONEBIT, LGBITS
- * Codeword x[1].real   : SIGNBITS,EXPOBITS
- *               int    : SIGNBITS,LGEFINTBITS
- *               ser,pol: SIGNBITS,VARNBITS,LGEFBITS 
- *               padic  : VALPBITS,PRECPBITS 
- * Need TYPnumBITS + LGnumBITS    + 1 <= BITS_IN_LONG
- *      SIGNnumBITS + EXPOnumBITS     <= BITS_IN_LONG
- *      SIGNnumBITS + LGnumBITS       <= BITS_IN_LONG
- *      SIGNnumBITS + LGEFnumBITS + 2 <= BITS_IN_LONG
- *      VALPnumbits               + 1 <= BITS_IN_LONG */
-#ifndef LONG_IS_64BIT
-# ifndef OLD_CODES
-#   define SIGNnumBITS  2
-#   define LGnumBITS   24
-#   define TYPnumBITS   7
-# else
-#   define SIGNnumBITS  8
-#   define LGnumBITS   16
-#   define TYPnumBITS   8
-# endif
-
-#  define EXPOnumBITS  24
-#  define VALPnumBITS  16 
-#  define LGEFnumBITS  16
+/* Order of bits in codewords:
+ *  x[0]         TYPBITS, CLONEBIT, LGBITS
+ *  x[1].real    SIGNBITS, EXPOBITS
+ *       int     SIGNBITS, LGEFINTBITS
+ *       ser,pol SIGNBITS, VARNBITS ,LGEFBITS 
+ *       padic   VALPBITS, PRECPBITS 
+ * Length of bitfields are independant and satisfy:
+ *  TYPnumBITS  + LGnumBITS   + 1 <= BITS_IN_LONG (optimally =)
+ *  SIGNnumBITS + EXPOnumBITS     <= BITS_IN_LONG
+ *  SIGNnumBITS + LGnumBITS       <= BITS_IN_LONG
+ *  SIGNnumBITS + LGEFnumBITS + 2 <= BITS_IN_LONG
+ *  VALPnumbits               + 1 <= BITS_IN_LONG */
+#ifdef OLD_CODES
+#  define TYPnumBITS   8 /* obsolete (for hard-coded assembler in mp.s) */
+#  define SIGNnumBITS  8
+#else
+#  define TYPnumBITS   7
+#  define SIGNnumBITS  2
 #endif
 
 #ifdef LONG_IS_64BIT
-#  define SIGNnumBITS  2
-#  define LGnumBITS   32
-#  define TYPnumBITS  15
-
+#  define   LGnumBITS 32
 #  define EXPOnumBITS 48
-#  define VALPnumBITS 32
 #  define LGEFnumBITS 32
+#  define VALPnumBITS 32
+#else
+# ifdef OLD_CODES
+#   define  LGnumBITS 16 /* obsolete */
+# else
+#   define  LGnumBITS 24
+# endif
+#  define EXPOnumBITS 24
+#  define LGEFnumBITS 16
+#  define VALPnumBITS 16 
 #endif
 
+/* no user serviceable parts below :-) */
 #define VARNnumBITS (BITS_IN_LONG - SIGNnumBITS - LGEFnumBITS)
 #define PRECPSHIFT VALPnumBITS
 #define  VARNSHIFT LGEFnumBITS
@@ -108,11 +109,11 @@ typedef int (*QSCOMP)(const void *, const void *);
 #define evalvarn(x)    (((ulong)(x)) << VARNSHIFT)
 #define evalsigne(x)   (((long)(x)) << SIGNSHIFT)
 #define evalprecp(x)   (((long)(x)) << PRECPSHIFT)
-#define m_evalexpo(x)  (HIGHEXPOBIT + (x))
-#define m_evalvalp(x)  (HIGHVALPBIT + (x))
+#define _evalexpo(x)  (HIGHEXPOBIT + (x))
+#define _evalvalp(x)  (HIGHVALPBIT + (x))
 #define evallgefint(x) (x)
-#define m_evallg(x)    (x)
-#define m_evallgef(x)  (x)
+#define _evallg(x)    (x)
+#define _evallgef(x)  (x)
 
 #define typ(x)        ((((long)(x))&1)? t_SMALL: (((ulong) ((GEN) (x))[0]) >> TYPSHIFT))
 #define settyp(x,s)   (((GEN)(x))[0]=\

@@ -228,8 +228,7 @@ FBgen(GEN nf,long n2,long n)
 {
   byteptr delta=diffptr;
   long KC2,i,j,k,p,lon,ip,nor, N = degpol(nf[1]);
-  GEN p2,p1,NormP,Res;
-  long prim[] = { evaltyp(t_INT)|m_evallg(3), evalsigne(1)|evallgefint(3),0 };
+  GEN prim,p2,p1,NormP,Res;
 
   numFB    = cgetg(n2+1,t_VECSMALL);
   FB       = cgetg(n2+1,t_VECSMALL);
@@ -237,7 +236,7 @@ FBgen(GEN nf,long n2,long n)
   idealbase= (GEN*)cgetg(n2+1,t_VEC);
 
   Res=realun(DEFAULTPREC);
-  p=*delta++; i=0; ip=0; KC=0;
+  prim = icopy(gun); p=*delta++; i=0; ip=0; KC=0;
   while (p<=n2)
   {
     long av = avma, av1;

@@ -1778,7 +1778,7 @@ idealpow(GEN nf, GEN x, GEN n)
 GEN
 idealpows(GEN nf, GEN ideal, long e)
 {
-  long court[] = {evaltyp(t_INT) | m_evallg(3),0,0};
+  long court[] = {evaltyp(t_INT) | _evallg(3),0,0};
   affsi(e,court); return idealpow(nf,ideal,court);
 }
 

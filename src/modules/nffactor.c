@@ -1091,7 +1091,7 @@ nfsqff(GEN nf,GEN pol, long fl)
 
   if (fl)
   {
-    long x_a[] = { evaltyp(t_POL)|m_evallg(4), 0,0,0 };
+    long x_a[] = { evaltyp(t_POL)|_evallg(4), 0,0,0 };
     GEN mlt = gneg_i(lt), rem;
     x_a[1] = polbase[1]; setlgef(x_a, 4);
     x_a[3] = un;

@@ -358,7 +358,7 @@ GEN
 gpowgs(GEN x, long n)
 {
   long lim,av,m,tx;
-  static long gn[3] = {evaltyp(t_INT)|m_evallg(3), 0, 0};
+  static long gn[3] = {evaltyp(t_INT)|_evallg(3), 0, 0};
   GEN y;
 
   if (n == 0) return puiss0(x);
