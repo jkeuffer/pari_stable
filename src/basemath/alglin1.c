@@ -2130,7 +2130,7 @@ FpM_mul(GEN x, GEN y, GEN p)
   long i,j,l,lx=lg(x), ly=lg(y);
   GEN z;
   if (ly==1) return cgetg(ly,t_MAT);
-  if (lx != lg(y[1])) err(operi,"* [mod p]",t_MAT,t_MAT);
+  if (lx != lg(y[1])) err(operi,"* [mod p]",x,y);
   z=cgetg(ly,t_MAT);
   if (lx==1)
   {
@@ -2164,7 +2164,7 @@ FpM_FpV_mul(GEN x, GEN y, GEN p)
 {
   long i,l,lx=lg(x), ly=lg(y);
   GEN z;
-  if (lx != ly) err(operi,"* [mod p]",t_MAT,t_COL);
+  if (lx != ly) err(operi,"* [mod p]",x,y);
   z=cgetg(ly,t_COL);
   if (lx==1) return cgetg(1,t_COL);
   l=lg(x[1]);

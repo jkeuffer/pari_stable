@@ -655,7 +655,7 @@ gmod(GEN x, GEN y)
       /* case t_REAL could be defined as below, but conlicting semantic
        * with lift(x * Mod(1,y)). */
 
-	default: err(operf,"%",tx,ty);
+	default: err(operf,"%",x,y);
       }
 
     case t_REAL: case t_FRAC: case t_FRACN:
@@ -668,7 +668,7 @@ gmod(GEN x, GEN y)
 	case t_POLMOD: case t_POL:
 	  return gzero;
 
-	default: err(operf,"%",tx,ty);
+	default: err(operf,"%",x,y);
       }
 
     case t_POL:
@@ -697,14 +697,14 @@ gmod(GEN x, GEN y)
           if (ismonome(y) && varn(x) == varn(y))
           {
             long d = degpol(y);
-            if (lg(x)-2 + valp(x) < d) err(operi,"%",tx,ty);
+            if (lg(x)-2 + valp(x) < d) err(operi,"%",x,y);
             av = avma; 
             return gerepileupto(av, gmod(gtrunc(x), y));
           }
-	default: err(operf,"%",tx,ty);
+	default: err(operf,"%",x,y);
       }
   }
-  err(operf,"%",tx,ty);
+  err(operf,"%",x,y);
   return NULL; /* not reached */
 }
 
@@ -721,7 +721,7 @@ gmodulsg(long x, GEN y)
     case t_POL: z=cgetg(3,t_POLMOD);
       z[1]=lcopy(y); z[2]=lstoi(x); return z;
   }
-  err(operf,"%",t_INT,typ(y)); return NULL; /* not reached */
+  err(operf,"%",stoi(x),y); return NULL; /* not reached */
 }
 
 GEN
@@ -768,7 +768,7 @@ gmodulo(GEN x,GEN y)
       if (tx!=t_POL && !is_rfrac_t(tx) && tx!=t_SER) break;
       z[2]=(long)specialmod(x,y); return z;
   }
-  err(operf,"%",tx,typ(y)); return NULL; /* not reached */
+  err(operf,"%",x,y); return NULL; /* not reached */
 }
 
 GEN
@@ -801,7 +801,7 @@ gmodulcp(GEN x,GEN y)
       if (tx!=t_POL && !is_rfrac_t(tx) && tx!=t_SER) break;
       z[2]=(long)specialmod(x,y); return z;
   }
-  err(operf,"%",tx,typ(y)); return NULL; /* not reached */
+  err(operf,"%",x,y); return NULL; /* not reached */
 }
 
 GEN
@@ -857,7 +857,7 @@ gdivent(GEN x, GEN y)
       }
       if (tx == t_POL) return gdeuc(x,y);
   }
-  err(operf,"\\",tx,typ(y));
+  err(operf,"\\",x,y);
   return NULL; /* not reached */
 }
 
@@ -931,7 +931,7 @@ gdiventres(GEN x, GEN y)
         return z;
       }
   }
-  err(operf,"\\",tx,typ(y));
+  err(operf,"\\",x,y);
   return NULL; /* not reached */
 }
 

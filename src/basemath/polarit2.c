@@ -2121,7 +2121,7 @@ ggcd(GEN x, GEN y)
     for (i=1; i<l; i++) z[i]=lgcd(x,(GEN)y[i]);
     return z;
   }
-  if (is_noncalc_t(tx) || is_noncalc_t(ty)) err(operf,"g",tx,ty);
+  if (is_noncalc_t(tx) || is_noncalc_t(ty)) err(operf,"g",x,y);
   if (gcmp0(x)) return gcopy(y);
   if (gcmp0(y)) return gcopy(x);
   if (is_const_t(tx))
@@ -2228,7 +2228,7 @@ ggcd(GEN x, GEN y)
         {
           case t_FRAC:
             av = avma; p1=mppgcd((GEN)x[1],(GEN)y[2]); avma = av;
-            if (!is_pm1(p1)) err(operi,"g",tx,ty);
+            if (!is_pm1(p1)) err(operi,"g",x,y);
             return ggcd((GEN)y[1], x);
 
           case t_COMPLEX: case t_QUAD:
@@ -2294,7 +2294,7 @@ ggcd(GEN x, GEN y)
 
 	case t_RFRAC:
 	  av = avma; p1=ggcd((GEN)x[1],(GEN)y[2]); avma = av;
-          if (!gcmp1(p1)) err(operi,"g",tx,ty);
+          if (!gcmp1(p1)) err(operi,"g",x,y);
 	  return ggcd((GEN)y[1],x);
 
 	case t_RFRACN:
@@ -2330,13 +2330,13 @@ ggcd(GEN x, GEN y)
       break;
 
     case t_RFRAC: case t_RFRACN: z=cgetg(3,ty);
-      if (!is_rfrac_t(ty)) err(operf,"g",tx,ty);
+      if (!is_rfrac_t(ty)) err(operf,"g",x,y);
       p1 = gdiv((GEN)y[2], ggcd((GEN)x[2], (GEN)y[2]));
       tetpil = avma;
       z[2] = lpile((long)z,tetpil,gmul(p1, (GEN)x[2]));
       z[1] = lgcd((GEN)x[1], (GEN)y[1]); return z;
   }
-  err(operf,"g",tx,ty);
+  err(operf,"g",x,y);
   return NULL; /* not reached */
 }
 

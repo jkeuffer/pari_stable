@@ -1135,14 +1135,14 @@ err(long numerr, ...)
       case operi: case operf:
       {
         char *f, *op = va_arg(ap, char*);
-        long   x = va_arg(ap, long);
-        long   y = va_arg(ap, long);
+        GEN x = va_arg(ap, GEN);
+        GEN y = va_arg(ap, GEN);
              if (*op == '+') f = "addition";
         else if (*op == '*') f = "multiplication";
         else if (*op == '/' || *op == '%' || *op == '\\') f = "division";
         else if (*op == 'g') { op = ","; f = "gcd"; }
         else { op = "-->"; f = "assignment"; }
-        pariputsf(" %s %s %s %s.",f,type_name(x),op,type_name(y));
+        pariputsf(" %s %s %s %s.",f,type_name(typ(x)),op,type_name(typ(y)));
         break;
       }
 
