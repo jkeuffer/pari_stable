@@ -53,10 +53,10 @@ static GEN nfsqff(GEN nf,GEN pol,long fl);
 /* for nf_bestlift: reconstruction of algebraic integers known mod \wp^k */
 /* FIXME: assume \wp has degree 1 for now */
 typedef struct {
-  long a;    /* input known mod \wp^a */
-  GEN pa;    /* p^a = Norm(\wp^a)*/
-  GEN den;   /* denom(prk^-1) = p^a */
-  GEN prk;   /* |.|^2 LLL-reduced basis (b_i) of \wp^a  (NOT T2-reduced) */
+  long k;    /* input known mod \wp^k */
+  GEN pk;    /* p^k = Norm(\wp^k)*/
+  GEN den;   /* denom(prk^-1) = p^k */
+  GEN prk;   /* |.|^2 LLL-reduced basis (b_i) of \wp^k  (NOT T2-reduced) */
   GEN iprk;  /* den * prk^-1 */
   GEN GSmin; /* min |b_i^*|^2 */
   GEN ZpProj;/* projector to Zp / \wp^k = Z/p^k  (\wp unramified, degree 1) */
@@ -67,7 +67,7 @@ typedef struct {
 typedef struct /* for use in nfsqff */
 {
   nflift_t *L;
-  GEN nf, pol, fact, res, bound, pr, pa, Br, ZC, dn, polbase, BS_2;
+  GEN nf, pol, fact, res, bound, pr, pk, Br, ZC, dn, polbase, BS_2;
   long hint;
 } nfcmbf_t;
 
@@ -251,12 +251,12 @@ nf_bestlift(GEN elt, GEN bound, nflift_t *T)
   {
     if (t == t_POL) elt = mulmat_pol(T->tozk, elt);
     u = gmul(T->iprk,elt);
-    for (i=1; i<l; i++) u[i] = (long)diviiround((GEN)u[i], T->pa);
+    for (i=1; i<l; i++) u[i] = (long)diviiround((GEN)u[i], T->pk);
   }
   else
   {
     u = gmul(elt, (GEN)T->iprk[1]);
-    for (i=1; i<l; i++) u[i] = (long)diviiround((GEN)u[i], T->pa);
+    for (i=1; i<l; i++) u[i] = (long)diviiround((GEN)u[i], T->pk);
     elt = gscalcol(elt, l-1);
   }
   u = gsub(elt, gmul(T->prk, u));
@@ -683,7 +683,7 @@ nfcmbf(nfcmbf_t *T, GEN p, long a, long maxK, long klim)
   GEN nfpol = (GEN)nf[1];
   long K = 1, cnt = 1, i,j,k, curdeg, lfamod = lg(famod)-1, dnf = degpol(nfpol);
   GEN lc, lcpol;
-  GEN pa = gpowgs(p,a), pas2 = shifti(pa,-1);
+  GEN pk = gpowgs(p,a), pas2 = shifti(pk,-1);
 
   GEN trace1   = cgetg(lfamod+1, t_MAT);
   GEN trace2   = cgetg(lfamod+1, t_MAT);
@@ -715,11 +715,11 @@ nfcmbf(nfcmbf_t *T, GEN p, long a, long maxK, long klim)
       t1 = (GEN)P[d-1];/* = - S_1 */
       t2 = sqri(t1);
       if (d > 1) t2 = subii(t2, shifti((GEN)P[d-2],1));
-      t2 = modii(t2, pa); /* = S_2 Newton sum */
+      t2 = modii(t2, pk); /* = S_2 Newton sum */
       if (lc)
       {
-        t1 = modii(mulii(lc, t1), pa);
-        t2 = modii(mulii(lc2,t2), pa);
+        t1 = modii(mulii(lc, t1), pk);
+        t2 = modii(mulii(lc2,t2), pk);
       }
       trace1[i] = (long)nf_bestlift(t1, NULL, T->L);
       trace2[i] = (long)nf_bestlift(t2, NULL, T->L);
@@ -778,7 +778,7 @@ nextK:
       {
         GEN q = (GEN)famod[ind[i]];
         if (y) q = gmul(y, q);
-        y = centermod_i(q, pa, pas2);
+        y = centermod_i(q, pk, pas2);
       }
       y = nf_pol_lift(y, bound, T);
       if (!y)
@@ -856,7 +856,7 @@ END:
 }
 
 static GEN
-nf_check_factors(nfcmbf_t *T, GEN P, GEN M_L, GEN famod, GEN pa)
+nf_check_factors(nfcmbf_t *T, GEN P, GEN M_L, GEN famod, GEN pk)
 {
   GEN nf = T->nf, bound = T->bound;
   GEN nfT = (GEN)nf[1];
@@ -867,7 +867,7 @@ nf_check_factors(nfcmbf_t *T, GEN P, GEN M_L, GEN famod, GEN pa)
   if (!piv) return NULL;
   if (DEBUGLEVEL>3) fprintferr("special_pivot output:\n%Z\n",piv);
 
-  pas2 = shifti(pa,-1);
+  pas2 = shifti(pk,-1);
   r  = lg(piv)-1;
   n0 = lg(piv[1])-1;
   list = cgetg(r+1, t_COL);
@@ -885,7 +885,7 @@ nf_check_factors(nfcmbf_t *T, GEN P, GEN M_L, GEN famod, GEN pa)
       {
         GEN q = (GEN)famod[j];
         if (y) q = gmul(y, q);
-        y = centermod_i(q, pa, pas2);
+        y = centermod_i(q, pk, pas2);
       }
     y = nf_pol_lift(y, bound, T);
     if (!y) return NULL;
@@ -908,22 +908,22 @@ nf_check_factors(nfcmbf_t *T, GEN P, GEN M_L, GEN famod, GEN pa)
 }
 
 static GEN
-nf_to_Zp(GEN x, GEN pa, GEN pas2, GEN ffproj)
+nf_to_Zp(GEN x, GEN pk, GEN pas2, GEN ffproj)
 {
-  return centermodii(gmul(ffproj, x), pa, pas2);
+  return centermodii(gmul(ffproj, x), pk, pas2);
 }
 
 /* assume lc(pol) != 0 mod prh. Reduce P to Zp[X] mod p^a */
 static GEN
-ZpX(GEN P, GEN pa, GEN ffproj)
+ZpX(GEN P, GEN pk, GEN ffproj)
 {
   long i, l;
-  GEN z, pas2 = shifti(pa,-1);
+  GEN z, pas2 = shifti(pk,-1);
 
-  if (typ(P)!=t_POL) return nf_to_Zp(P,pa,pas2,ffproj);
+  if (typ(P)!=t_POL) return nf_to_Zp(P,pk,pas2,ffproj);
   l = lgef(P);
   z = cgetg(l,t_POL); z[1] = P[1];
-  for (i=2; i<l; i++) z[i] = (long)nf_to_Zp((GEN)P[i],pa,pas2,ffproj);
+  for (i=2; i<l; i++) z[i] = (long)nf_to_Zp((GEN)P[i],pk,pas2,ffproj);
   return normalizepol(z);
 }
 
@@ -955,7 +955,7 @@ bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *T)
   const int D = 4;
   const double alpha = ((double)D-1) / D; /* LLL parameter */
   gpmem_t av = avma;
-  GEN prk, PRK, B, GSmin, pa;
+  GEN prk, PRK, B, GSmin, pk;
 
   if (!a)  a = (long) bestlift_bound(C, degpol(nf[1]), alpha, idealnorm(nf,pr));
 
@@ -963,28 +963,28 @@ bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *T)
   {
     if (DEBUGLEVEL>2) fprintferr("exponent: %ld\n",a);
     prk = idealpows(nf, pr, a);
-    pa = gcoeff(prk,1,1);
-    PRK = hnfmodid(prk, pa);
+    pk = gcoeff(prk,1,1);
+    PRK = hnfmodid(prk, pk);
 
     PRK = lllint_i(PRK, D, 0, NULL, NULL, &B);
     GSmin = vecmin(GS_norms(B, DEFAULTPREC));
     if (gcmp(GSmin, C) >= 0) break;
   }
   if (DEBUGLEVEL>2) fprintferr("for this exponent, GSmin = %Z\n",GSmin);
-  T->a = a;
-  T->pa = T->den = pa;
+  T->k = a;
+  T->pk = T->den = pk;
   T->prk = PRK;
-  T->iprk = ZM_inv(PRK, pa);
+  T->iprk = ZM_inv(PRK, pk);
   T->GSmin= GSmin;
   T->ZpProj = dim1proj(prk); /* nf --> Zp */
 }
 
 /* assume pr has degree 1 */
 static GEN
-nf_LLL_cmbf(nfcmbf_t *T, GEN p, long a, long rec)
+nf_LLL_cmbf(nfcmbf_t *T, GEN p, long k, long rec)
 {
   nflift_t *L = T->L;
-  GEN pa = L->pa, PRK = L->prk, PRKinv = L->iprk, GSmin = L->GSmin;
+  GEN pk = L->pk, PRK = L->prk, PRKinv = L->iprk, GSmin = L->GSmin;
 
   GEN famod = T->fact, nf = T->nf, ZC = T->ZC, Br = T->Br;
   GEN Pbase = T->polbase, P = T->pol, dn = T->dn;
@@ -998,7 +998,7 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long a, long rec)
   double Blow;
   gpmem_t av, av2, lim;
   long ti_LLL = 0, ti_CF = 0;
-  pari_timer ti;
+  pari_timer ti, ti2, TI;
 
   if (DEBUGLEVEL>2) (void)TIMER(&ti);
 
@@ -1006,7 +1006,7 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long a, long rec)
   if (is_pm1(lP)) lP = NULL;
 
   n0 = lg(famod) - 1;
- /* Lattice: (S PRK), small vector (vS vP). To find a bound for the image,
+ /* Lattice: (S PRK), small vector (vS vP). To find k bound for the image,
   * write S = S1 q + S0, P = P1 q + P0
   * q(S1 vS + P1 vP) <= Blow for all (vS,vP) assoc. to true factors */
   Blow = get_Blow(n0, dnf);
@@ -1022,15 +1022,14 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long a, long rec)
   /* tmax = current number of traces used (and computed so far) */
   for(tmax = 0;; tmax++)
   {
-    long b, bmin, bgood, delta, tnew = tmax + 1, r = lg(CM_L)-1;
+    long a, b, bmin, bgood, delta, tnew = tmax + 1, r = lg(CM_L)-1;
     GEN M_L, q;
-    pari_timer ti2;
 
     /* bound for f . S_k(genuine factor) = ZC * bound for T_2(S_tnew) */
     Btra = mulrr(ZC, mulsr(dP*dP, normlp(Br, 2*tnew, dnf)));
     bmin = logint(ceil_safe(mpsqrt(Btra)), gdeux, NULL);
     if (DEBUGLEVEL>2)
-      fprintferr("LLL_cmbf: %ld potential factors (tmax = %ld, bmin = %ld)\n",
+      fprintferr("\nLLL_cmbf: %ld potential factors (tmax = %ld, bmin = %ld)\n",
                  r, tmax, bmin);
 
     /* compute Newton sums (possibly relifting first) */
@@ -1039,21 +1038,21 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long a, long rec)
       nflift_t L1;
       GEN polred;
 
-      bestlift_init(a<<1, nf, T->pr, Btra, &L1);
-      a      = L1.a;
-      pa     = L1.pa;
+      bestlift_init(k<<1, nf, T->pr, Btra, &L1);
+      k      = L1.k;
+      pk     = L1.pk;
       PRK    = L1.prk;
       PRKinv = L1.iprk;
       GSmin  = L1.GSmin;
 
-      polred = ZpX(Pbase, pa, L1.ZpProj);
-      famod = hensel_lift_fact(polred,famod,NULL,p,pa,a);
+      polred = ZpX(Pbase, pk, L1.ZpProj);
+      famod = hensel_lift_fact(polred,famod,NULL,p,pk,k);
       for (i=1; i<=n0; i++) TT[i] = 0;
     }
     for (i=1; i<=n0; i++)
     {
       GEN p1, lPpow;
-      GEN p2 = polsym_gen((GEN)famod[i], (GEN)TT[i], tnew, NULL, pa);
+      GEN p2 = polsym_gen((GEN)famod[i], (GEN)TT[i], tnew, NULL, pk);
       TT[i] = (long)p2;
       p1 = (GEN)p2[tnew+1];
       /* make Newton sums integral */
@@ -1063,23 +1062,24 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long a, long rec)
         p1 = mulii(p1, lPpow); /* assume pr has degree 1 */
       }
       if (dn) p1 = mulii(p1,dn);
-      if (dn || lP) p1 = modii(p1, pa);
+      if (dn || lP) p1 = modii(p1, pk);
       Tra[i] = (long)gscalcol(p1, dnf); /* S_tnew(famod) */
     }
 
     /* compute truncation parameter */
-    if (DEBUGLEVEL>2) TIMERstart(&ti2);
+    if (DEBUGLEVEL>2) { TIMERstart(&ti2); TIMERstart(&TI); }
     av2 = avma;
     delta = 0;
     b = 0; /* -Wall */
 AGAIN:
     M_L = gdivexact(CM_L, stoi(C));
-    T2 = centermod( gmul(Tra, M_L), pa );
-    T2 = gsub(T2, gmul(PRK, gdivround(gmul(PRKinv, T2), pa)));
+    T2 = centermod( gmul(Tra, M_L), pk );
+    T2 = gsub(T2, gmul(PRK, gdivround(gmul(PRKinv, T2), pk)));
 
     if (!delta)
     { /* initialize lattice, using few p-adic digits for traces */
-      bgood = (long)(gexpo(T2) - BitPerFactor * r);
+      a = gexpo(T2);
+      bgood = (long)(a - BitPerFactor * r);
       b = max(bmin, bgood);
       delta = a - b;
       q = shifti(gun, b);
@@ -1100,7 +1100,8 @@ AGAIN:
       m = vconcat( CM_L, gdivround(T2, q) );
     }
     if (DEBUGLEVEL>2)
-      fprintferr("LLL_cmbf: b = %ld, r = %ld\n", b,lg(m)-1);
+      fprintferr("LLL_cmbf: b = %4ld, r = %4ld, time = %ld\n",
+                 b,lg(m)-1,TIMER(&TI));
     CM_L = LLL_check_progress(Bnorm, n0, m, b == bmin, /*dbg:*/ &ti, &ti_LLL);
     if (!CM_L) { list = _col(P); break; }
     i = lg(CM_L) - 1;
@@ -1114,7 +1115,7 @@ AGAIN:
     if (i <= r && i*rec < n0)
     {
       if (DEBUGLEVEL>2) (void)TIMER(&ti);
-      list = nf_check_factors(T, P, M_L, famod, pa);
+      list = nf_check_factors(T, P, M_L, famod, pk);
       if (DEBUGLEVEL>2) ti_CF += TIMER(&ti);
       if (list) break;
       CM_L = gerepilecopy(av2, CM_L);
@@ -1122,7 +1123,7 @@ AGAIN:
     if (low_stack(lim, stack_lim(av,1)))
     {
       if(DEBUGMEM>1) err(warnmem,"nf_LLL_cmbf");
-      gerepileall(av, 8, &CM_L,&TT,&Tra,&famod,&pa,&GSmin,&PRK,&PRKinv);
+      gerepileall(av, 8, &CM_L,&TT,&Tra,&famod,&pk,&GSmin,&PRK,&PRKinv);
     }
   }
   if (DEBUGLEVEL>2)
@@ -1136,7 +1137,7 @@ nf_combine_factors(nfcmbf_t *T, GEN polred, GEN p, long a, long klim)
   GEN z, res, L, listmod, famod = T->fact, nf = T->nf;
   long i, m, l, maxK = 3, nft = lg(famod)-1;
 
-  T->fact = hensel_lift_fact(polred,famod,NULL,p,T->pa,a);
+  T->fact = hensel_lift_fact(polred,famod,NULL,p,T->pk,a);
   if (nft < 11) maxK = -1; /* few modular factors: try all posibilities */
   if (DEBUGLEVEL>3) msgtimer("Hensel lift");
 
@@ -1171,7 +1172,7 @@ nfsqff(GEN nf, GEN pol, long fl)
 {
   long i, a, m, n, nbf, ct, dpol = degpol(pol);
   gpmem_t av = avma;
-  GEN pr, C0, C, dk, bad, polbase, pa;
+  GEN pr, C0, C, dk, bad, polbase, pk;
   GEN N2, rep, p, ap, polmod, polred, lt, nfpol;
   byteptr pt=diffptr;
   nfcmbf_t T;
@@ -1240,14 +1241,14 @@ nfsqff(GEN nf, GEN pol, long fl)
   }
 
   if (fl)
-    (void)logint(C, p, &pa);
+    (void)logint(C, p, &pk);
   else
   { /* overlift needed for d-1/d-2 tests? */
     GEN pb; long b; /* junk */
-    if (cmbf_precs(p, C, T.BS_2, &a, &b, &pa, &pb))
+    if (cmbf_precs(p, C, T.BS_2, &a, &b, &pk, &pb))
     { /* Rare */
       if (DEBUGLEVEL) err(warner,"nffactor: overlift for d-1/d-2 test");
-      C = itor(pa, DEFAULTPREC);
+      C = itor(pk, DEFAULTPREC);
     }
   }
 
@@ -1256,13 +1257,13 @@ nfsqff(GEN nf, GEN pol, long fl)
   T.L  = &L;
 
   /* polred is monic */
-  pa = L.pa;
-  polred = ZpX(gmul(mpinvmod(lt,pa), polbase), pa, L.ZpProj);
+  pk = L.pk;
+  polred = ZpX(gmul(mpinvmod(lt,pk), polbase), pk, L.ZpProj);
 
   if (fl)
   { /* roots only */
     long x_r[] = { evaltyp(t_POL)|_evallg(4), 0,0,0 };
-    rep = rootpadicfast(polred, p, L.a);
+    rep = rootpadicfast(polred, p, L.k);
     x_r[1] = evalsigne(1) | evalvarn(varn(pol)) | evallgef(4);
     x_r[3] = un;
     for (m=1,i=1; i<lg(rep); i++)
@@ -1285,7 +1286,7 @@ nfsqff(GEN nf, GEN pol, long fl)
   T.fact  = (GEN)factmod0(polred,p)[1];
   T.hint  = 1; /* useless */
 
-  rep = nf_combine_factors(&T, polred, p, L.a, dpol-1);
+  rep = nf_combine_factors(&T, polred, p, L.k, dpol-1);
   return gerepileupto(av, rep);
 }
 

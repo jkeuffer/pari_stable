@@ -1072,7 +1072,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
   GEN lP, Br, Bnorm, Tra, T2, TT, CM_L, m, list, ZERO;
   gpmem_t av, av2, lim;
   long ti_LLL = 0, ti_CF  = 0;
-  pari_timer ti;
+  pari_timer ti, ti2, TI;
 
   if (DEBUGLEVEL>2) (void)TIMER(&ti);
 
@@ -1101,7 +1101,6 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
   {
     long b, bmin, bgood, delta, tnew = tmax + N0, r = lg(CM_L)-1;
     GEN M_L, q, q2, CM_Lp;
-    pari_timer ti2;
     
     bmin = (long)ceil(b0 + tnew*logBr);
     if (DEBUGLEVEL>2)
@@ -1136,7 +1135,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
     }
 
     /* compute truncation parameter */
-    if (DEBUGLEVEL>2) TIMERstart(&ti2);
+    if (DEBUGLEVEL>2) { TIMERstart(&ti2); TIMERstart(&TI); }
     av2 = avma;
     delta = 0;
     b = 0; /* -Wall */
@@ -1167,7 +1166,8 @@ AGAIN:
       m = vconcat( CM_L, centermod(gdivround(T2, q), q2) );
     }
     if (DEBUGLEVEL>2)
-      fprintferr("LLL_cmbf: (a, b) = (%ld, %ld), r = %ld\n", a,b,lg(m)-1);
+      fprintferr("LLL_cmbf: (a, b) = (%4ld, %4ld), r = %4ld, time = %ld\n",
+                 a,b,lg(m)-1, TIMER(&TI));
     CM_L = LLL_check_progress(Bnorm, n0, m, b == bmin, /*dbg:*/ &ti, &ti_LLL);
     if (!CM_L) { list = _col(P); break; }
     i = lg(CM_L) - 1;
@@ -1176,7 +1176,7 @@ AGAIN:
       CM_L = gerepilecopy(av2, CM_L);
       goto AGAIN;
     }
-    if (DEBUGLEVEL>2) msgTIMER(&ti2, "for this trace");
+    if (DEBUGLEVEL>2) msgTIMER(&ti2, "for this block of traces");
 
     CM_Lp = FpM_image(CM_L, stoi(27449)); /* inexpensive test */
     if (lg(CM_Lp) != lg(CM_L))
