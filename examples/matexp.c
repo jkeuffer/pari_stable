@@ -1,4 +1,4 @@
-/*@Ccom $Id$ */
+/* $Id$ */
 
 #include "pari.h"
 
