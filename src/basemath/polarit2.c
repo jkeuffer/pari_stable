@@ -1316,7 +1316,8 @@ squff(GEN a, long hint)
     {
       long n = deg(g)/d;
       famod[nft] = (long)small_to_pol(u_FpX_normalize(g, chosenp),va);
-      if (n > 1) (void)split_berlekamp(Q, (GEN*)(famod+nft),prime,primes2);
+      if (n > 1 && n != split_berlekamp(Q, (GEN*)(famod+nft),prime,primes2))
+        err(bugparier,"squff: wrong numbers of factors");
       nft += n;
     }
   }
@@ -3654,7 +3655,6 @@ polratlift(GEN P, GEN mod, GEN amax, GEN bmax, GEN denom)
  * FIXME: Handle rational coefficient for P and Q.
  * If not NULL, den must a a multiple of the denominator of the gcd,
  * for example the discriminant of nf.
- * Use resultantducos for now.(ref: polresultant0)
  *
  * NOTE: if nf is not irreducible, nfgcd may loop forever, especially if the
  * gcd divides nf !
@@ -3675,7 +3675,7 @@ nfgcd(GEN P, GEN Q, GEN nf, GEN den)
   lP = leading_term(P);
   lQ = leading_term(Q);
   if ( !((typ(lP)==t_INT && is_pm1(lP)) || (typ(lQ)==t_INT && is_pm1(lQ))) )
-    den = mulii(den, mppgcd(resultantducos(lP, nf), resultantducos(lQ, nf)));
+    den = mulii(den, mppgcd(ZX_resultant(lP, nf), ZX_resultant(lQ, nf)));
   /*Modular GCD*/
   {
     ulong btop = avma;
