@@ -40,6 +40,8 @@ constpi(long prec)
   av1 = avma; tmppi = newbloc(prec);
   *tmppi = evaltyp(t_REAL) | evallg(prec);
 
+  prec++;
+
   n=(long)(1+(prec-2)/alpha2);
   n1=6*n-1; p1=cgetr(prec);
   p2=addsi(k2,mulss(n,k1));
@@ -77,7 +79,7 @@ GEN
 mppi(long prec)
 {
   GEN x = cgetr(prec);
-  constpi(prec+1); affrr(gpi,x); return x;
+  constpi(prec); affrr(gpi,x); return x;
 }
 
 /********************************************************************/
@@ -96,6 +98,8 @@ consteuler(long prec)
 
   av1 = avma; tmpeuler = newbloc(prec);
   *tmpeuler = evaltyp(t_REAL) | evallg(prec);
+
+  prec++;
 
   l = prec+1; x = (long) (1 + (bit_accuracy(l) >> 2) * LOG2);
   a=cgetr(l); affsr(x,a); u=mplog(a); setsigne(u,-1); affrr(u,a);
@@ -130,8 +134,8 @@ consteuler(long prec)
 GEN
 mpeuler(long prec)
 {
-  GEN x=cgetr(prec);
-  consteuler(prec+1); affrr(geuler,x); return x;
+  GEN x = cgetr(prec);
+  consteuler(prec); affrr(geuler,x); return x;
 }
 
 /********************************************************************/

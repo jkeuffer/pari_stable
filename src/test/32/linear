@@ -777,7 +777,7 @@ z^2 + Mod(8186, 8191)*z + Mod(8189, 8191)
 [[4, 13, 3, 17, 14]~ [14, 16, 11, 5, 4]~ [9, 11, 13, 7, 15]~]
 
 ? getheap
-[111, 12358]
+[111, 12357]
 ? print("Total time spent: ",gettime);
-Total time spent: 180
+Total time spent: 304
 ? \q
