@@ -722,9 +722,9 @@ get_split_expo(GEN xalpha, GEN yalpha, GEN vperm)
 
 /* assume x in HNF */
 static GEN
-isprincipalall0(GEN bnf, GEN x, long prec, long flall)
+isprincipalall0(GEN bnf, GEN x, long *ptprec, long flall)
 {
-  long i,j,colW,colB,N,R1,R2,RU,e,c;
+  long i,j,colW,colB,N,R1,R2,RU,e,c, prec = *ptprec;
   GEN xalpha,yalpha,u2,y,p1,p2,p3,p4,xar,gen,cyc,u1inv,xc,ex;
   GEN W       = (GEN)bnf[1];
   GEN B       = (GEN)bnf[2];
@@ -864,8 +864,8 @@ isprincipalall0(GEN bnf, GEN x, long prec, long flall)
     {
       if (DEBUGLEVEL)
         err(warner,"precision too low for generators, e = %ld",e);
-      prec += (e >> TWOPOTBITS_IN_LONG) + (MEDDEFAULTPREC-2);
-      return stoi(prec);
+      *ptprec = prec + (e >> TWOPOTBITS_IN_LONG) + (MEDDEFAULTPREC-2);
+      return NULL;
     }
     err(warner,"insufficient precision for generators, not given");
     y[2]=lgetg(1,t_COL); y[3]=zero;
@@ -925,12 +925,11 @@ isprincipalall(GEN bnf,GEN x,long flag)
   for (;;)
   {
     long av1 = avma;
-    GEN y = isprincipalall0(bnf,x,pr,flag);
-    if (typ(y) != t_INT) return gerepileupto(av,y);
+    GEN y = isprincipalall0(bnf,x,&pr,flag);
+    if (y) return gerepileupto(av,y);
 
-    pr = itos(y); avma = av1;
     if (DEBUGLEVEL) err(warnprec,"isprincipalall0",pr);
-    bnf = bnfnewprec(bnf,pr); setrand(c);
+    avma = av1; bnf = bnfnewprec(bnf,pr); setrand(c);
   }
 }
 
@@ -2009,12 +2008,14 @@ makematal(GEN bnf)
     for (;;)
     {
       long av1 = avma, c = getrand();
-      GEN y = isprincipalall0(bnf,id,prec, nf_GEN|nf_FORCE);
-      if (typ(y) != t_INT) { ma[j] = y[2]; break; }
-
-      prec = itos(y); avma = av1;
+      GEN y = isprincipalall0(bnf,id,&prec, nf_GEN|nf_FORCE);
+      if (y)
+      {
+        y = gerepileupto(av1, y);
+        ma[j] = y[2]; break;
+      }
       if (DEBUGLEVEL) err(warnprec,"makematal",prec);
-      nf = nfnewprec(nf,prec);
+      avma = av1; nf = nfnewprec(nf,prec);
       bnf = bnfinit0(nf,1,NULL,prec); setrand(c);
     }
   }
