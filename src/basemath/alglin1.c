@@ -3454,11 +3454,14 @@ gaussmoduloall(GEN M, GEN D, GEN Y, GEN *ptu1)
     default: err(typeer,"gaussmodulo");
       return NULL; /* not reached */
   }
-  if (typ(Y) == t_INT)
+  switch(typ(Y))
   {
-    p1 = cgetg(n+1,t_COL);
-    for (i=1; i<=n; i++) p1[i]=(long)Y;
-    Y = p1;
+    case t_INT:
+      p1 = cgetg(n+1,t_COL);
+      for (i=1; i<=n; i++) p1[i]=(long)Y;
+      Y = p1; break;
+    case t_COL: break;
+    default: err(typeer,"gaussmodulo");
   }
   H = hnfall_i(concatsp(M,delta), &U, 1);
   Y = hnf_gauss(H,Y); if (!Y) return gen_0;
