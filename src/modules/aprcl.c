@@ -67,7 +67,7 @@ red_mod_cyclo(GEN T, long p)
   if (d <= -2) return T;
  
   /* reduce mod (x^p - 1) */
-  y = dummycopy(T); *z = (GEN*)(y+2);
+  y = dummycopy(T); z = (GEN*)(y+2);
   for (i = 0; i<=d; i++) z[i] = addii(z[i], z[i+p]);
 
   /* reduce mod x^(p-1) + ... + 1 */
@@ -92,47 +92,82 @@ sqrmod(GEN x, red_t *R) {
   return R->red(gsqr(x), R);
 }
 
+static GEN
+sqrconst(GEN pol, red_t *R)
+{
+  GEN p1 = cgetg(3,t_POL);
+  p1[2] = (long)modii(sqri((GEN)pol[2]), R->N);
+  p1[1] = pol[1]; return p1;
+}
+
 /* pol^2 mod (x^2+x+1, N) */
 static GEN
 sqrmod3(GEN pol, red_t *R)
 {
-  GEN a,b,bma,c,d,p1;
+  GEN a,b,bma,A,B;
   long lv=lgef(pol);
 
   if (lv==2) return pol;
-  if (lv==3)
-  {
-    p1 = cgetg(3,t_POL);
-    p1[2] = (long)modii(sqri((GEN)pol[2]), R->N);
-    p1[1] = pol[1]; return p1;
-  }
+  if (lv==3) return sqrconst(pol, R);
   a = (GEN)pol[3];
-  b = (GEN)pol[2];
-  bma = subii(b,a);
-  c = modii(mulii(a,addii(b,bma)), R->N);
-  d = modii(mulii(bma,addii(a,b)), R->N);
-  return makepoldeg1(c,d);
+  b = (GEN)pol[2]; bma = subii(b,a);
+  A = modii(mulii(a,addii(b,bma)), R->N);
+  B = modii(mulii(bma,addii(a,b)), R->N);
+  return makepoldeg1(A,B);
 }
 
-/* pol^2 mod (x^4+1,N) */
+/* pol^2 mod (x^2+1,N) */
 static GEN
 sqrmod4(GEN pol, red_t *R)
 {
-  GEN a,b,c,d,p1;
+  GEN a,b,A,B;
   long lv=lgef(pol);
 
   if (lv==2) return pol;
-  if (lv==3)
-  {
-    p1 = cgetg(3,t_POL);
-    p1[2] = (long)modii(sqri((GEN)pol[2]), R->N);
-    p1[1] = pol[1]; return p1;
-  }
+  if (lv==3) return sqrconst(pol, R);
   a = (GEN)pol[3];
   b = (GEN)pol[2];
-  c = modii(mulii(a, shifti(b,1)), R->N);
-  d = modii(mulii(subii(b,a),addii(b,a)), R->N);
-  return makepoldeg1(c,d);
+  A = modii(mulii(a, shifti(b,1)), R->N);
+  B = modii(mulii(subii(b,a),addii(b,a)), R->N);
+  return makepoldeg1(A,B);
+}
+
+/* pol^2 mod (polcyclo(5),N) */
+static GEN
+sqrmod5(GEN pol, red_t *R)
+{
+  GEN a2,c2,a,b,c,d,A,B,C,D;
+  long lv=lgef(pol);
+
+  if (lv==2) return pol;
+  if (lv==3) return sqrconst(pol, R);
+  b = (GEN)pol[4];
+  c = (GEN)pol[3]; c2 = shifti(c,1);
+  d = (GEN)pol[2];
+  if (lv==4)
+  {
+    A = mulii(b, subii(c2,b));
+    B = addii(sqri(c), mulii(b, subii(shifti(d,1),b)));
+    C = subii(mulii(c2,d), sqri(b));
+    D = mulii(subii(d,b), addii(d,b));
+  }
+  else
+  {
+    a = (GEN)pol[5]; a2 = shifti(a,1);
+    /* 2a(d - c) + b(2c - b) */
+    A = addii(mulii(a2, subii(d,c)), mulii(b, subii(c2,b)));
+    /* c(c - 2a) + b(2d - b) */
+    B = addii(mulii(c, subii(c,a2)), mulii(b, subii(shifti(d,1),b)));
+    /* (a-b)(a+b) + 2c(d - a) */
+    C = addii(mulii(subii(a,b),addii(a,b)), mulii(c2,subii(d,a)));
+    /* 2a(b - c) + (d-b)(d+b) */
+    D = addii(mulii(a2, subii(b,c)), mulii(subii(d,b), addii(d,b)));
+  }
+  A = modii(A, R->N);
+  B = modii(B, R->N);
+  C = modii(C, R->N);
+  D = modii(D, R->N);
+  return coefs_to_pol(4,A,B,C,D);
 }
 
 static GEN
@@ -176,7 +211,9 @@ powpolmod(red_t *R, int k, int pk, GEN jac)
     R->red = &_red; _sqr = &sqrmod3;
   } else if (pk == 4) {
     R->red = &_red; _sqr = &sqrmod4;
-  } else if (k == 1 && pk >= 5) {
+  } else if (pk == 5) {
+    R->red = &_red; _sqr = &sqrmod5;
+  } else if (k == 1 && pk >= 7) {
     R->n = pk;
     R->red = &_red2; _sqr = &sqrmod;
   } else {
@@ -726,23 +763,29 @@ step6(GEN N, ulong t, GEN et)
   return gun;
 }
 
+static GEN
+_res(long a, long b)
+{
+  GEN z;
+  if (b) { z=cgetg(4, t_VEC); z[1]=lstoi(a); z[2]=lstoi(b); z[3]=zero; }
+  else   { z=cgetg(3, t_VEC); z[1]=lstoi(a); z[2]=zero; }
+  return z;
+}
+
 GEN
 aprcl(GEN N)
 {
-  GEN et,fat,flaglp,faq,faqpr,faqex,p1;
+  GEN et,fat,flaglp,faq,faqpr,faqex;
   long fl;
   ulong lfat,p,q,lfaq,k,t,i,j,l;
-  ulong av, av0 = avma;
+  ulong av;
 
   if (cmpis(N,12) <= 0)
   {
     switch(itos(N))
     {
       case 2: case 3: case 5: case 7: case 11: return gun;
-      default:
-        p1 = cgetg(3,t_VEC);
-        p1[1] = zero;
-        p1[2] = zero; return p1;
+      default: return _res(0,0);
     }
   }
   if (DEBUGLEVEL) timer();
@@ -750,12 +793,8 @@ aprcl(GEN N)
   if (DEBUGLEVEL>=2) fprintferr("choosing t = %ld\n",t);
   et = e(t);
   if (cmpii(sqri(et),N) < 0) err(talker,"e(t) not large enough in aprcl");
-  if (!gcmp1(mppgcd(N,mulsi(t,et))))
-  {
-    avma = av0; p1=cgetg(3,t_VEC);
-    p1[1] = un;
-    p1[2] = zero; return p1;
-  }
+  if (!gcmp1(mppgcd(N,mulsi(t,et)))) return _res(1,0);
+
   fat=calcglobs(N,t); lfat=lg(fat);
   flaglp = cgetg(itos((GEN)fat[lfat-1])+1, t_VECSMALL);
   for (i=2; i<lfat; i++)
@@ -785,13 +824,7 @@ aprcl(GEN N)
       else if (k >= 3) fl = step4b(N,q,k,(GEN)tabj2[i],(GEN)tabj3[i]);
       else if (k == 2) fl = step4c(N,q,gmael(tabj,i,1));
       else             fl = step4d(N,q);
-      if (fl == -1)
-      {
-        avma = av0; p1 = cgetg(4,t_VEC);
-        p1[1] = lstoi(q);
-        p1[2] = lstoi(p);
-        p1[3] = zero; return p1;
-      }
+      if (fl == -1) return _res(q,p);
       if (fl == 1) flaglp[p] = 1;
     }
   }
@@ -802,18 +835,12 @@ aprcl(GEN N)
     if (flaglp[p] == 0)
     {
       fl = step5(N,p,et);
-      if (fl < 0)
-      {
-        avma = av0; p1=cgetg(4,t_VEC);
-        p1[1] = lstoi(fl);
-        p1[2] = lstoi(p);
-        p1[3] = zero; return p1;
-      }
+      if (fl < 0) return _res(fl,p);
       if (fl==0) err(talker,"aprcl test fails! this is highly improbable");
     }
   }
   if (DEBUGLEVEL>=3) fprintferr("conditions lp done, doing step6\n");
-  return gerepilecopy(av0, step6(N,t,et));
+  return step6(N,t,et);
 }
 
 /* si flag=0 retourne une reponse vrai/faux, sinon retourne des details
@@ -822,9 +849,9 @@ quand N non premier */
 GEN
 istrueprime(GEN N, int flag)
 {
-  GEN res;
-
-  res=aprcl(N);
-  if (gcmp1(res)) return gun;
-  return flag ? res : gzero;
+  ulong av = avma;
+  GEN res = aprcl(N);
+  if (typ(res) == t_INT) { avma = av; return gun; }
+  if (flag) return gerepilecopy(av, res);
+  avma = av; return gzero;
 }
