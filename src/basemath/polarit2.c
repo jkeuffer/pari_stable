@@ -1444,7 +1444,8 @@ u_FpX_nbroots(GEN f, long p)
   avma = av; return degpol(z);
 }
 
-/* Assume a squarefree, degree(a) > 0, a(0) != 0 */
+/* Assume a squarefree, degree(a) > 0, a(0) != 0.
+ * If fl != 0 look only for rational roots */
 static GEN
 DDF(GEN a, long hint, int fl)
 {
@@ -1491,7 +1492,7 @@ DDF(GEN a, long hint, int fl)
     GEN pe;
     long i, m, e;
     if (lead) a = rescale_pol_to_monic(a);
-    e = logint(root_bound(a), prime, &pe);
+    e = logint(shifti(root_bound(a), 1), prime, &pe);
     z = rootpadicfast(a, prime, e);
     for (m=1,i=1; i<lg(z); i++)
     {
@@ -1718,13 +1719,13 @@ factpol(GEN x, long hint)
 }
 
 GEN
-polrootsQ(GEN x)
+nfrootsQ(GEN x)
 {
   pari_sp av = avma;
   GEN z, d;
   
-  if (typ(x)!=t_POL) err(notpoler,"polrootsQ");
-  if (!signe(x)) err(zeropoler,"polrootsQ");
+  if (typ(x)!=t_POL) err(notpoler,"nfrootsQ");
+  if (!signe(x)) err(zeropoler,"nfrootsQ");
   d = modulargcd(derivpol(x), x);
   z = DDF(gdeuc(x, d), 1, 1);
   return gerepilecopy(av, z);

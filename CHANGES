@@ -166,6 +166,7 @@ BA  2- routines ishiftr, gfloor2n
     3- routine random_bits
 BA  4- [Configure:] --builddir flag
 IZ  5- File README.os2
+    6- Allow nfroots(, P) [ roots in Q ]
 
   Removed
     1- macro definition BITS_IN_RANDOM (useless)

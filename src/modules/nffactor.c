@@ -208,18 +208,23 @@ QXQ_normalize(GEN P, GEN T)
   return P;
 }
 
+extern GEN nfrootsQ(GEN x);
+
 /* return the roots of pol in nf */
 GEN
 nfroots(GEN nf,GEN pol)
 {
   pari_sp av = avma;
-  int d = degpol(pol);
   GEN A,g, T;
+  int d;
+
+  if (!nf) return nfrootsQ(pol);
 
   nf = checknf(nf); T = (GEN)nf[1];
   if (typ(pol) != t_POL) err(notpoler,"nfroots");
   if (varn(pol) >= varn(T))
     err(talker,"polynomial variable must have highest priority in nfroots");
+  d = degpol(pol);
   if (d == 0) return cgetg(1,t_VEC);
   if (d == 1)
   {

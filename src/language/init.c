@@ -2247,7 +2247,7 @@ entree functions_basic[]={
 {"nfkermodpr",3,(void*)nfkermodpr,6,"GGG"},
 {"nfmodprinit",2,(void*)nfmodprinit,6,"GG"},
 {"nfnewprec",1,(void*)nfnewprec,6,"Gp"},
-{"nfroots",99,(void*)nfroots,6,"GG"},
+{"nfroots",99,(void*)nfroots,6,"DGG"},
 {"nfrootsof1",18,(void*)rootsof1,6,"G"},
 {"nfsnf",2,(void*)nfsmith,6,"GG"},
 {"nfsolvemodpr",4,(void*)nfsolvemodpr,6,"GGGG"},
