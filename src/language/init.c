@@ -1874,7 +1874,7 @@ entree functions_basic[]={
 {"idealmul",99,(void*)idealmul0,6,"GGGD0,L,p"},
 {"idealnorm",2,(void*)idealnorm,6,"GG"},
 {"idealpow",99,(void*)idealpow0,6,"GGGD0,L,p"},
-{"idealprimedec",29,(void*)primedec,6,"GGp"},
+{"idealprimedec",29,(void*)primedec,6,"GG"},
 {"idealprincipal",2,(void*)principalideal,6,"GG"},
 {"idealred",99,(void*)ideallllred,6,"GGDGp"},
 {"idealstar",99,(void*)idealstar0,6,"GGD1,L,"},
