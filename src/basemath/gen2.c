@@ -1529,6 +1529,7 @@ quadtoc(GEN x, long prec)
 {
   pari_sp av;
   GEN z, Q;
+  if (gcmp0(x)) return gzero;
   if (prec < 3) return realzero_bit( gexpo(x) );
 
   av = avma; Q = (GEN) x[1];
