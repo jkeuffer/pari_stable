@@ -18,10 +18,6 @@ dbgobjdir=$dbgobjdir.dbg
 dosversion=`echo $version|sed -e 's/\.//g'`
 dosversion="_$dosversion$patch"
 
-# MAINTAINER ONLY: for automated tests in Bordeaux
-bxmachine=megrez.math.u-bordeaux.fr
-bxgzip=/usr/local/bin/gzip
-
 cat > $file << EOT
 # This file was created by Configure. All changes made will be lost
 # next time Configure is run.
