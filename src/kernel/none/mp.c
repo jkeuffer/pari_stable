@@ -1515,6 +1515,34 @@ racine_r(GEN a, long l)
 /* Return trunc(sqrt(a))). a must be an non-negative integer*/
 GEN isqrti(GEN a) {return racine_r(a,lgefint(a));}
 
+
+#ifdef LONG_IS_64BIT
+/* 64 bits of sqrt(a[0] * 2^64 + a[1]) */
+static ulong
+sqrtu2(GEN a)
+{
+  ulong b, c;
+  double beta;
+  LOCAL_HIREMAINDER;
+  LOCAL_OVERFLOW;
+
+  beta = sqrt((double)(ulong)a[0]);
+  beta = beta * (1UL << BITS_IN_HALFULONG);
+  /* 53 correct bits, 1 Newton iteration to reach 64 */
+  b = (ulong)beta;
+  hiremainder = a[0]; c = divll(a[1], b);
+  return (addll(c, b) >> 1) | HIGHBIT;
+}
+#else
+/* 32 bits of sqrt(a[0] * 2^32) */
+static ulong
+sqrtu2(GEN a)
+{
+  double beta = sqrt((double)(ulong)a[0]);
+  return (ulong)(beta * (1UL << BITS_IN_HALFULONG));
+}
+#endif
+
 /* compute sqrt(|a|), s being signe(a)*/
 GEN
 sqrtr_abs(GEN x, long s)
@@ -1528,21 +1556,27 @@ sqrtr_abs(GEN x, long s)
   l = lg(x); y = cgetr(l); av0 = avma;
 
   a = cgetr(l+1); affrr(x,a);
-  beta = sqrt((double)(ulong)a[2]);
   ex = expo(a); t = cgetr(l+1);
   if (ex & 1) {
     a[1] = evalsigne(1) | evalexpo(1);
-    beta = beta * (1UL << BITS_IN_HALFULONG);
 #ifdef LONG_IS_64BIT
     if (a[2] >= -(1 << 11))
     { t[1] = evalexpo(1) | evalsigne(1); t[2] = (long)HIGHBIT; }
     else
 #endif
-    { t[1] = evalexpo(0) | evalsigne(1); t[2] = (long)(ulong)beta; }
+    { t[1] = evalexpo(0) | evalsigne(1); t[2] = (long)sqrtu2(a + 2); }
   } else {
     a[1] = evalsigne(1) | evalexpo(0);
+#ifdef LONG_IS_64BIT
+    t[2] = (a[2] >> 1);
+    t[3] = (a[2] << BITS_IN_LONG-1) | (a[3] >> 1);
+    t[2] = (long)sqrtu2(t+2);/* ~ sqrt(a) */
+#else
+    beta = sqrt((double)(ulong)a[2]);
     beta = beta * ((1UL << BITS_IN_HALFULONG) * 0.707106781186547524);
-    t[1] = evalexpo(0) | evalsigne(1); t[2] = (long)(ulong)beta;/* ~ sqrt(a) */
+    t[2] = (long)(ulong)beta;/* ~ sqrt(a) */
+#endif
+    t[1] = evalexpo(0) | evalsigne(1);
   }
   /* |x| = 2^(ex/2) a */
   for (i = 3; i <= l; i++) t[i] = 0;
