@@ -770,12 +770,11 @@ split_ideal(GEN nf, GEN x0, long prec, GEN vperm)
   if (flag && factorgensimple(nf,y)) return y;
 
   y = ideallllred(nf,x0,NULL,prec);
-  if (flag &&  ((!x0[2] && gegal((GEN)y[1], (GEN)x[1]))
-             ||  (x0[2] && gcmp0((GEN)y[2])))) flag = 0; /* y == x0 */
+  if (flag && gcmp0((GEN)y[2])) flag = 0; /* y == x0 */
   if (flag && factorgensimple(nf,y)) return y;
 
   z = init_idele(nf); ru = lg(z[2]);
-  if (!x0[2]) { z[2] = 0; x0 = x; } /* stop cheating */
+  z[2] = lgetg(1, t_MAT);
   vdir = cgetg(ru,t_VEC);
   for (i=2; i<ru; i++) vdir[i]=zero;
   for (i=1; i<ru; i++)
@@ -1030,9 +1029,10 @@ isprincipalall0(GEN bnf, GEN x, long *ptprec, long flag)
   /* factor x */
   xc = content(x); if (!gcmp1(xc)) x = gdiv(x,xc);
 
-  p1 = init_idele(nf); p1[1] = (long)x;
-  if (!(flag & nf_GEN)) p1[2] = 0; /* don't compute archimedean part */
-  xar = split_ideal(nf,p1,prec,vperm);
+  p1 = init_idele(nf);
+  p1[1] = (long)x;
+  p1[2] = lgetg(1,t_MAT); /* compute archimedean part as a famat */
+  xar= split_ideal(nf,p1,prec,vperm);
 
   lW = lg(W)-1; Wex = zerocol(lW);
   lB = lg(B)-1; Bex = zerocol(lB); get_split_expo(Wex,Bex,vperm);
@@ -1067,7 +1067,7 @@ isprincipalall0(GEN bnf, GEN x, long *ptprec, long flag)
     if (lW) col = gadd(col, act_arch(A, ga));
     if (c)  col = gadd(col, act_arch(Q, GD));
   }
-  col = gsub(col, (GEN)xar[2]);
+  col = gadd(col, famat_to_arch(nf, (GEN)xar[2], prec));
 
   /* find coords on Zk; Q = N (x / \prod gj^ej) = N(alpha), denom(alpha) | d */
   Q = gdiv(dethnf_i(x), get_norm_fact(gen, ex, &d));
