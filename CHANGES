@@ -34,7 +34,7 @@ YU = Yoshiaki Uchikawa
 
 Done for version 2.2.4 (released ??/07/2002) [hopefully]:
   Fixed
-    1- add default 'newgaloisformat' to make 2.2.3 C-22 optional (by default,
+    1- add default 'new_galois_format' to make 2.2.3 C-22 optional (by default,
        old format will be used, preserving compatibility)
  BA 2- FreeBSD: DL_DFLT_NAME value was incorrect
     3- Configure: TIOCGWINSZ not detected on Linux
