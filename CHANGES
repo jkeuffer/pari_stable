@@ -65,6 +65,7 @@ GN  6- [ix86 + Sun cc] build fails [ unsatisfied symbol reference to 'mulll' ]
     4- library interface of functions intnum, prodeuler, suminf, sumalt,
        sumalt2, sumpos, sumpos2, prodinf, prodinf1  [ use GEN
        (*eval)(GEN,void*) everywhere instead of entree * ]
+BA  5- allow Configure -l <directory>  [ in addition to <directory>/pari.cfg ]
 
   Added
     1- new algorithm for log( t_COMPLEX ), log(2) [ AGM ]
