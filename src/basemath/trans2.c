@@ -648,8 +648,10 @@ gath(GEN x, long prec)
       if (expo(x) < 0) return mpath(x);
 
       y = cgetg(3,t_COMPLEX);
-      av = avma; 
-      p1 = logr_abs( addrs(divsr(2,addsr(-1,x)),1) );
+      av = avma;
+      p1 = addrs(divsr(2,addsr(-1,x)),1);
+      if (!signe(p1)) err(talker,"singular argument in atanh");
+      p1 = logr_abs(p1);
       setexpo(p1, expo(p1)-1);
       y[1]=(long)gerepileuptoleaf(av, p1);
       y[2]=(long)Pi2n(-1, lg(x)); return y;
