@@ -370,7 +370,8 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf)
       if (DEBUGLEVEL>1) fprintferr(" %ld",j);
       if (!J)
       {
-        if (j == 2 && !red(nf, vp, &m)) j = 1;
+        GEN M;
+        if (j == 2 && !red(nf, vp, &M)) { j = 1; m = M; }
         break;
       }
       if (gegal(J, (GEN)id2[j-1])) { j = 1; break; }
