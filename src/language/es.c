@@ -918,27 +918,57 @@ eng_ord(long i)                        /* i > 0 assumed */
   }
 }
 
+static char
+vsigne(GEN x)
+{
+  long s = signe(x);
+  if (!s) return '0';
+  return (s > 0) ? '+' : '-';
+}
+
 static void
 voir2(GEN x, long nb, long bl)
 {
   long tx=typ(x),i,j,e,dx,lx=lg(x);
 
   if (tx == t_INT && x == gzero) { pariputs("gzero\n"); return; }
+  if (tx == t_SMALL) {
+    pariputs("[SMALL ");
+    sorstring(VOIR_STRING2,(long)x);
+    pariputs("]\n"); return;
+  }
   sorstring(VOIR_STRING1,(ulong)x);
-  if (tx!=t_POL && tx!=t_SER)
-    pariputsf("%s%c", type_name(tx)+2, isclone(x)?'!':'|');
-  else
-    pariputsf("%s %d%c", type_name(tx)+2, varn(x), isclone(x)?'!':'|');
+  
+  pariputsf("%s(lg=%ld%s):",type_name(tx)+2,lx,isclone(x)? ",CLONE" : "");
+  sorstring(VOIR_STRING2,x[0]);
+/*  if (tx == t_POL || tx == t_LIST || tx == t_INT || tx == t_REAL)
+    lx = lgef(x); */
   if (! is_recursive_t(tx)) /* t_SMALL, t_INT, t_REAL, t_STR, t_VECSMALL */
   {
+    if (tx == t_STR)
+	pariputs("chars:");
+    else if (tx == t_INT)
+	pariputsf("(%c,lgef=%ld):", vsigne(x), lgefint(x));
+    else if (tx == t_REAL)
+	pariputsf("(%c,expo=%ld):", vsigne(x), expo(x));
     if (nb<0) nb = (tx==t_INT)? lgefint(x): lx;
-    if (tx == t_SMALL) x = (GEN)&x;
-    for (i=0; i<nb; i++) sorstring(VOIR_STRING2,x[i]);
+    if (tx == t_VECSMALL) nb = lx;
+    for (i=1; i < nb; i++) sorstring(VOIR_STRING2,x[i]);
     pariputc('\n'); return;
   }
 
+  if (tx == t_PADIC)
+    pariputsf("(precp=%ld,valp=%ld):", precp(x), valp(x));
+  else if (tx == t_POL)
+    pariputsf("(%c,varn=%ld,lgef=%ld):", vsigne(x), varn(x), lgef(x));
+  else if (tx == t_SER)
+    pariputsf("(%c,varn=%ld,prec=%ld,valp=%ld):",
+               vsigne(x), varn(x),lg(x)-2, valp(x));
+  else if (tx == t_LIST)
+    pariputsf("(lgef=%ld):", lgef(x));
+  
   if (tx == t_POL || tx == t_LIST) lx = lgef(x);
-  for (i=0; i<lx; i++) sorstring(VOIR_STRING2,x[i]);
+  for (i=1; i<lx; i++) sorstring(VOIR_STRING2,x[i]);
   bl+=2; pariputc('\n');
   switch(tx)
   {
@@ -961,9 +991,8 @@ voir2(GEN x, long nb, long bl)
       break;
 
     case t_PADIC:
-      blancs(bl-2); pariputsf("precp : %d   valp : %d\n", precp(x), valp(x));
       if (isonstack(x[2])) blancs(bl); else { blancs(bl-2); pariputs("* "); }
-      pariputs("  p : "); voir2((GEN)x[2],nb,bl);
+                  pariputs("  p : "); voir2((GEN)x[2],nb,bl);
       blancs(bl); pariputs("p^l : "); voir2((GEN)x[3],nb,bl);
       blancs(bl); pariputs("  I : "); voir2((GEN)x[4],nb,bl);
       break;
@@ -975,10 +1004,6 @@ voir2(GEN x, long nb, long bl)
       break;
 
     case t_POL: case t_SER:
-      if (tx == t_SER)
-      {
-	blancs(bl); pariputsf("prec : %d   valp : %d\n", lg(x)-2, valp(x));
-      }
       e = (tx==t_SER)? valp(x): 0;
       for (i=2; i<lx; i++)
       {
