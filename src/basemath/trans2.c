@@ -1292,6 +1292,7 @@ cxgamma(GEN s0, int dolog, long prec)
       double t = st * PI / l;
       la = t * log(t);
       if (la < 3) la = 3.;
+      if (la > 150) la = t;
     }
     lim = (long)ceil(l / (1.+ log(la)));
     if (lim == 0) lim = 1;
@@ -1305,8 +1306,6 @@ cxgamma(GEN s0, int dolog, long prec)
     }
     else
       nn = 1;
-    if (DEBUGLEVEL) fprintferr("lim, nn: [%ld, %ld], la = %lf\n",lim,nn,la);
-
 #if 0
     {/* same: old method */
       long e = gexpo(s);
@@ -1334,8 +1333,8 @@ cxgamma(GEN s0, int dolog, long prec)
       }
       nn++;
     }
-    if (DEBUGLEVEL) fprintferr("lim, nn: [%ld, %ld]\n",lim,nn);
 #endif
+    if (DEBUGLEVEL) fprintferr("lim, nn: [%ld, %ld], la = %lf\n",lim,nn,la);
   }
   prec++;
 
