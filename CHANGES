@@ -102,6 +102,7 @@ IZ 16- readline: hit_return() would not work after Esc-H
                  extend online help recognition capabilities (Esc h/H, F1)
    17- install the whole distribution (see ?12) + Configure flag --share-prefix
    18- clean up in the bnrdisclist ray class group internal functions
+   19- naming scheme for development versions library: libpari-2.2.so.0.0.0
 
   Added
     1- files README.WIN, config/[arch-osname|locatesymbol], doc/tex2mail.1
