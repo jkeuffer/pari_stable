@@ -1380,6 +1380,7 @@ hnfhavas(GEN x)
   av=avma; lim=stack_lim(av,1); u=idmat(co-1);
   x = gcmp1(denx)? dummycopy(x): gmul(denx,x);
   def=co; ldef=(li>co)?li-co+1:1;
+  imin = jmin = 0; cpro = NULL; /* for gcc -Wall */
   for (i=li-1; i>=ldef; i--)
   {
     def--; av1=avma; mat1=cgetg(def+1,t_MAT); col2=cgetg(def+1,t_COL);
@@ -2306,7 +2307,7 @@ smithclean(GEN z)
 static GEN
 gsmithall(GEN x,long all)
 {
-  long av,tetpil,i,j,k,l,c,fl,n, lim;
+  long av,tetpil,i,j,k,l,c,n, lim;
   GEN p1,p2,p3,p4,z,b,u,v,d,ml,mr;
 
   if (typ(x)!=t_MAT) err(typeer,"gsmithall");
@@ -2378,20 +2379,18 @@ gsmithall(GEN x,long all)
       }
       if (!c)
       {
-	b=gcoeff(x,i,i); fl=1;
+	b = gcoeff(x,i,i);
 	if (signe(b))
-	{
-	  for (k=1; k<i && fl; k++)
-	    for (l=1; l<i && fl; l++)
-	      fl = !signe(gmod(gcoeff(x,k,l),b));
-	  if (!fl)
-	  {
-	    k--;
-	    for (l=1; l<=i; l++)
-	      coeff(x,i,l) = ladd(gcoeff(x,i,l),gcoeff(x,k,l));
-	    if (all) ml[i] = ladd((GEN)ml[i],(GEN)ml[k]);
-	  }
-	}
+	  for (k=1; k<i; k++)
+	    for (l=1; l<i; l++)
+	      if (signe(gmod(gcoeff(x,k,l),b)))
+              {
+                k--;
+                for (l=1; l<=i; l++)
+                  coeff(x,i,l) = ladd(gcoeff(x,i,l),gcoeff(x,k,l));
+                if (all) ml[i] = ladd((GEN)ml[i],(GEN)ml[k]);
+                k = l = i; c = 1;
+              }
       }
       if (low_stack(lim, stack_lim(av,1)))
       {
@@ -2405,7 +2404,7 @@ gsmithall(GEN x,long all)
 	else x=gerepile(av,tetpil,gcopy(x));
       }
     }
-    while (c || !fl);
+    while (c);
   }
   if (all)
   {

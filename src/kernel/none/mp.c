@@ -1391,9 +1391,10 @@ DIVIDE: /* quotient is non-zero */
   }
 
   j=lq; while (j<lx && !x[j]) j++;
+  lz = lx-j;
   if (z == ONLY_REM)
   {
-    lz = lx-j; if (lz==0) { avma = av; return gzero; }
+    if (lz==0) { avma = av; return gzero; }
     rd = (ulong*)av; lr = lz+2;
     xd = (ulong*)(x + lx);
     if (!sh) while (lz--) *--rd = *--xd;
@@ -1415,13 +1416,13 @@ DIVIDE: /* quotient is non-zero */
     avma = (long)rd; return (GEN)rd;
   }
 
-  lz = lx-j; lr = lz+2;
+  lr = lz+2;
   if (lz)
-  {
+  { /* non zero remainder: initialize rd */
     xd = (ulong*)(x + lx);
     if (!sh)
     {
-      rd = (ulong*)avma; r = new_chunk(lr);
+      rd = (ulong*)avma; (void)new_chunk(lr);
       while (lz--) *--rd = *--xd;
     }
     else
@@ -1451,7 +1452,7 @@ DIVIDE: /* quotient is non-zero */
   q = (GEN)qd;
   if (lr==2) *z = gzero;
   else
-  {
+  { /* rd has been properly initialized: we had lz > 0 */
     while (lr--) *--qd = *--rd;
     *z = (GEN)qd;
   }

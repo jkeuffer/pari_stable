@@ -189,7 +189,11 @@ concat(GEN x, GEN y)
       { lx = lgef(x); i = 2; }
     else if (tx == t_VEC)
       { lx = lg(x); i = 1; }
-    else err(concater);
+    else
+    {
+      err(concater);
+      return NULL; /* not reached */
+    }
     if (i>=lx) err(talker,"trying to concat elements of an empty vector");
     y = (GEN)x[i++];
     for (; i<lx; i++) y = concatsp(y, (GEN)x[i]);
@@ -538,7 +542,7 @@ gtomat(GEN x)
       break;
     case t_COL:
       y=cgetg(2,t_MAT); y[1]=lcopy(x); break;
-    case t_MAT:
+    default: /* case t_MAT: */
       y=gcopy(x); break;
   }
   return y;
@@ -722,7 +726,8 @@ gauss_triangle_i(GEN A, GEN B)
   long n = lg(A)-1, i,j,k;
   GEN p, m, c = cgetg(n+1,t_MAT);
 
-  if (n) p = gcoeff(A,n,n);
+  if (!n) return c;
+  p = gcoeff(A,n,n);
   for (k=1; k<=n; k++)
   {
     GEN u = cgetg(n+1, t_COL), b = (GEN)B[k];
@@ -1552,6 +1557,7 @@ ker_mod_p_small(GEN x, GEN pp, long nontriv)
   }
   c=new_chunk(m+1); for (k=1; k<=m; k++) c[k]=0;
   d=new_chunk(n+1);
+  a=0; /* for gcc -Wall */
   for (k=1; k<=n; k++)
   {
     for (j=1; j<=m; j++)
@@ -2100,6 +2106,7 @@ det_mod_P_n(GEN a, GEN N, GEN P)
   GEN x,p;
 
   s=1; va=0; x=gun; a=dummycopy(a);
+  p = NULL; /* for gcc -Wall */
   for (i=1; i<nbco; i++)
   {
     long fl = 0;
@@ -2383,7 +2390,7 @@ hnffinal(GEN matgen,GEN perm,GEN* ptdep,GEN* ptB,GEN* ptC)
    *       [        |     ] li */
   lig -= s; col -= s; lnz -= s;
   Hnew = cgetg(lnz+1,t_MAT);
-  if (nlze) depnew = cgetg(lnz+1,t_MAT);
+  depnew = cgetg(lnz+1,t_MAT); /* only used if nlze > 0 */
   Bnew = cgetg(co-col,t_MAT);
   C = dummycopy(Cnew);
   for (j=1,i1=j1=0; j<=lnz+s; j++)
@@ -2930,6 +2937,7 @@ gaussmoduloall(GEN M, GEN D, GEN Y, GEN *ptu1)
     case t_COL: delta=diagonal(D); break;
     case t_INT: delta=gscalmat(D,n); break;
     default: err(typeer,"gaussmodulo");
+      return NULL; /* not reached */
   }
   if (typ(Y) == t_INT)
   {

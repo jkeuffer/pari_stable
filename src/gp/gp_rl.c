@@ -73,7 +73,7 @@ change_state(char *msg, int *opt, int count)
 
   switch(count)
   {
-    case  0: c = 0; break; /* off */
+    default: c = 0; break; /* off */
     case -1: c = 1; break; /* on  */
     case -2: c = 1 - *opt; /* toggle */
   }
@@ -140,7 +140,7 @@ pari_rl_default_matched_insert(int count, int key)
 static int
 pari_rl_forward_sexp(int count, int key)
 {
-  int deep = 0, dir = 1, move_point, lfail;
+  int deep = 0, dir = 1, move_point = 0, lfail;
 
   (void)key;
   if (count < 0)

@@ -573,9 +573,12 @@ squff(GEN a, long klim, long hint)
   const int NOMBDEP = 5;
 
   if (hint < 0) return decpol(a,klim);
+  if (!hint) hint = 1;
   if (DEBUGLEVEL > 2) timer2();
   lbit=(da>>4)+1; nmax=da+1; i=da>>1;
   if (!klim || klim>i) klim=i;
+  chosenp = 0;
+  tabd = NULL;
   tabdnew = (GEN*)new_chunk(nmax);
   tabbit  = (ulong*)new_chunk(lbit);
   tabkbit = (ulong*)new_chunk(lbit);
@@ -706,7 +709,7 @@ factpol(GEN x, long klim, long hint)
     nbfac++;
   }
   /* now x(0) != 0 */
-  if (lx==3) goto END;
+  if (lx==3) { fa = NULL;/* for lint */ goto END; }
   p1 = cgetg(1,t_VEC); fa=cgetg(lx,t_VEC);
   for (i=1; i<lx; i++) fa[i] = (long)p1;
   d=content(x); if (gsigne(leading_term(x)) < 0) d = gneg_i(d);
@@ -940,14 +943,14 @@ factor(GEN x)
     p2=cgetg(2,t_COL); y[2]=(long)p2; p2[1]=un;
     return y;
   }
+  av = avma;
   switch(tx)
   {
     case t_INT: return decomp(x);
 
     case t_FRACN:
-      av=avma; x=gred(x); /* fall through */
+      x=gred(x); /* fall through */
     case t_FRAC:
-      if (tx==t_FRAC) av=avma;
       p1 = decomp((GEN)x[1]);
       p2 = decomp((GEN)x[2]);
       p4 = concatsp((GEN)p1[1], (GEN)p2[1]);
@@ -972,7 +975,7 @@ factor(GEN x)
 	case t_INTMOD: return factmod(x,p);
 
 	case t_COMPLEX: y=cgetg(3,t_MAT); lx=lgef(x)-2; v=varn(x);
-	  av=avma; p1=roots(x,pa); tetpil=avma;
+	  p1=roots(x,pa); tetpil=avma;
           p2=cgetg(lx,t_COL);
 	  for (i=1; i<lx; i++)
             p2[i] = (long)poldeg1(v, gneg((GEN)p1[i]), gun);
@@ -1005,7 +1008,7 @@ factor(GEN x)
         default:
         {
           long killv;
-	  av=avma; x = dummycopy(x); lx=lgef(x);
+	  x = dummycopy(x); lx=lgef(x);
           pol = dummycopy(pol);
           v = manage_var(4,NULL);
           for(i=2; i<lx; i++)
@@ -1027,6 +1030,7 @@ factor(GEN x)
             case t_INT: p1 = polfnf(x,pol); break;
             case t_INTMOD: p1 = factmod9(x,p,pol); break;
 	    default: err(impl,"factor of general polynomial");
+              return NULL; /* not reached */
           }
           switch (typ1(tx))
           {
@@ -1038,6 +1042,7 @@ factor(GEN x)
               p5[1]=(long)pol; p5[2]=zero; p5[3]=un;
               break;
 	    default: err(impl,"factor of general polynomial");
+              return NULL; /* not reached */
           }
           p2=(GEN)p1[1];
           for(i=1; i<lg(p2); i++)
@@ -1057,9 +1062,8 @@ factor(GEN x)
       }
 
     case t_RFRACN:
-      av=avma; x=gred_rfrac(x); /* fall through */
+      x=gred_rfrac(x); /* fall through */
     case t_RFRAC:
-      if (tx==t_RFRAC) av=avma;
       p1=factor((GEN)x[1]);
       p2=factor((GEN)x[2]); p3=gneg_i((GEN)p2[2]);
       tetpil=avma; y=cgetg(3,t_MAT);
@@ -1696,6 +1700,7 @@ content(GEN x)
       lx = 4; break;
 
     default: err(typeer,"content");
+      return NULL; /* not reached */
   }
   for (i=lontyp[tx]; i<lx; i++)
     if (typ(x[i]) != t_INT) break;
