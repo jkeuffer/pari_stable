@@ -521,7 +521,7 @@ gcarreparfait(GEN x)
           {
             b = w? shifti(a,-w): a;
             if ((dv>=3 && mod8(b) != 1) ||
-                 dv==2 && mod4(b) != 1) { avma = av; return gzero; }
+                (dv==2 && mod4(b) != 1)) { avma = av; return gzero; }
           }
         }
         q = shifti(q, -v);
