@@ -1034,16 +1034,16 @@ element_powmodidele(GEN nf,GEN x,GEN k,GEN idele,GEN sarch)
   return y;
 }
 
-/* H relation matrix among row of generators g.  Let URV = D its SNF, newU R
- * newV = newD its clean SNF (no 1 in Dnew). Return the diagonal of newD,
- * newU and newUi such that  1/U = (newUi, ?).
+/* H relation matrix among row of generators g in HNF.  Let URV = D its SNF,
+ * newU R newV = newD its clean SNF (no 1 in Dnew). Return the diagonal of
+ * newD, newU and newUi such that  1/U = (newUi, ?).
  * Rationale: let (G,0) = g Ui be the new generators then
  * 0 = G U R --> G D = 0,  g = G newU  and  G = g newUi */
 GEN
 smithrel(GEN H, GEN *newU, GEN *newUi)
 { 
-  GEN U, Ui, D = smithall(H, &U, NULL);
-  long c, l = lg(D);
+  GEN U, V, Ui, D = smithall(H, &U, newUi? &V: NULL);
+  long i, c, l = lg(D);
 
   for (c=1; c<l; c++)
   {
@@ -1051,9 +1051,17 @@ smithrel(GEN H, GEN *newU, GEN *newUi)
     if (is_pm1(t)) break;
   }
   if (newU) *newU = rowextract_i(U, 1, c-1);
-  if (newUi) {
-    Ui = ZM_inv(U, gun); setlg(Ui, c);
-    *newUi = reducemodHNF(Ui, H, NULL);
+  if (newUi) { /* UHV = D --> U^-1 mod H = H(VD^-1 mod 1) mod H */
+    if (c == 1) *newUi = cgetg(1, t_MAT);
+    else
+    { /* Ui = ZM_inv(U, gun); setlg(Ui, c); */
+      setlg(V, c);
+      V = FpM_red(V, gcoeff(D,1,1));
+      Ui = gmul(H, V);
+      for (i = 1; i < c; i++)
+        Ui[i] = (long)gdivexact((GEN)Ui[i], gcoeff(D,i,i));
+      *newUi = reducemodHNF(Ui, H, NULL);
+    }
   }
   setlg(D, c); return mattodiagonal_i(D);
 }
