@@ -547,7 +547,7 @@ rnfidealhermite(GEN rnf, GEN x)
   checkrnf(rnf); nf = (GEN)rnf[10];
   switch(typ(x))
   {
-    case t_INT: case t_FRAC: case t_FRACN:
+    case t_INT: case t_FRAC:
       bas = (GEN)rnf[7]; z = cgetg(3,t_VEC);
       z[1] = (long)rnfid(degpol(rnf[1]), degpol(nf[1]));
       z[2] = lmul(x, (GEN)bas[2]); return z;

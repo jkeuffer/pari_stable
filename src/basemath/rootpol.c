@@ -1870,13 +1870,8 @@ all_roots(GEN p, long bitprec)
   }
 }
 
-/* true if x is an exact scalar, that is integer or rational */
-static int
-isexactscalar(GEN x)
-{
-  long tx=typ(x);
-  return (tx==t_INT || is_frac_t(tx));
-}
+INLINE int
+isexactscalar(GEN x) { long tx = typ(x); return is_rational_t(tx); }
 
 static int
 isexactpol(GEN p)
@@ -1884,7 +1879,7 @@ isexactpol(GEN p)
   long i,n=degpol(p);
 
   for (i=0; i<=n; i++)
-    if (isexactscalar((GEN)p[i+2])==0) return 0;
+    if (!isexactscalar((GEN)p[i+2])) return 0;
   return 1;
 }
 
@@ -1895,7 +1890,7 @@ isvalidcoeff(GEN x)
 
   switch(tx)
   {
-    case t_INT: case t_REAL: case t_FRAC: case t_FRACN: return 1;
+    case t_INT: case t_REAL: case t_FRAC: return 1;
     case t_COMPLEX:
       if (isvalidcoeff((GEN)x[1]) && isvalidcoeff((GEN)x[2])) return 1;
   }
@@ -1989,14 +1984,13 @@ isrealappr(GEN x, long e)
   long tx=typ(x),lx,i;
   switch(tx)
   {
-    case t_INT: case t_REAL: case t_FRAC: case t_FRACN:
+    case t_INT: case t_REAL: case t_FRAC:
       return 1;
     case t_COMPLEX:
       return (gexpo((GEN)x[2]) < e);
     case t_QUAD:
       err(impl,"isrealappr for type t_QUAD");
-    case t_POL: case t_SER: case t_RFRAC: case t_RFRACN:
-    case t_VEC: case t_COL: case t_MAT:
+    case t_POL: case t_SER: case t_RFRAC: case t_VEC: case t_COL: case t_MAT:
       lx = lg(x);
       for (i=lontyp[tx]; i<lx; i++)
         if (! isrealappr((GEN)x[i],e)) return 0;

@@ -1821,7 +1821,7 @@ poltype(GEN x, GEN *ptp, GEN *ptpol, long *ptpa)
     p1=(GEN)x[i];
     switch(typ(p1))
     {
-      case t_INT: case t_FRAC: case t_FRACN:
+      case t_INT: case t_FRAC:
         break;
       case t_REAL:
         s = precision(p1); if (s < pa) pa = s;
@@ -1836,7 +1836,7 @@ poltype(GEN x, GEN *ptp, GEN *ptpol, long *ptpa)
 	  p2 = (GEN)p1[j];
 	  switch(typ(p2))
 	  {
-	    case t_INT: case t_FRAC: case t_FRACN:
+	    case t_INT: case t_FRAC:
 	      assign_or_fail(pcx,pol);
 	      t[4]=1; break;
 	    case t_REAL:
@@ -1865,7 +1865,7 @@ poltype(GEN x, GEN *ptp, GEN *ptpol, long *ptpa)
 	  p2 = (GEN)p1[j];
 	  switch(typ(p2))
 	  {
-	    case t_INT: case t_FRAC: case t_FRACN:
+	    case t_INT: case t_FRAC:
 	      assign_or_fail((GEN)p1[1],pol);
 	      t[9]=1; break;
 	    case t_REAL:
@@ -1946,7 +1946,7 @@ factor0(GEN x,long flag)
 
   if (flag<0) return factor(x);
   if (is_matvec_t(tx)) return gboundfact(x,flag);
-  if (tx==t_INT || tx==t_FRAC || tx==t_FRACN) return boundfact(x,flag);
+  if (tx==t_INT || tx==t_FRAC) return boundfact(x,flag);
   err(talker,"partial factorization is not meaningful here");
   return NULL; /* not reached */
 }
@@ -2064,8 +2064,8 @@ gauss_factor(GEN x)
   GEN n, y, fa, P, E, P2, E2;
   long t1 = typ(a);
   long t2 = typ(b), i, j, l, exp = 0;
-  if (is_frac_t(t1)) d = (GEN)a[2];
-  if (is_frac_t(t2)) d = mpppcm(d, (GEN)b[2]);
+  if (t1 == t_FRAC) d = (GEN)a[2];
+  if (t2 == t_FRAC) d = mpppcm(d, (GEN)b[2]);
   if (d == gun) y = x;
   else
   {
@@ -2195,8 +2195,6 @@ factor(GEN x)
   {
     case t_INT: return decomp(x);
 
-    case t_FRACN:
-      return gerepileupto(av, factor(gred(x)));
     case t_FRAC:
       p1 = decomp((GEN)x[1]);
       p2 = decomp((GEN)x[2]); p2[2] = (long)gneg_i((GEN)p2[2]);
@@ -2298,8 +2296,6 @@ factor(GEN x)
       y = gauss_factor(x);
       if (y) return y;
 
-    case t_RFRACN:
-      return gerepileupto(av, factor(gred_rfrac(x)));
     case t_RFRAC:
       p1=factor((GEN)x[1]);
       p2=factor((GEN)x[2]); p3=gneg_i((GEN)p2[2]);
@@ -2472,7 +2468,7 @@ gisirreducible(GEN x)
     for (i=1; i<l; i++) y[i]=(long)gisirreducible((GEN)x[i]);
     return y;
   }
-  if (is_intreal_t(tx) || is_frac_t(tx)) return gzero;
+  if (is_intreal_t(tx) || tx == t_FRAC) return gzero;
   if (tx!=t_POL) err(notpoler,"gisirreducible");
   l=lg(x); if (l<=3) return gzero;
   y=factor(x); avma=av;
@@ -2602,7 +2598,7 @@ zero_gcd(GEN x, GEN y)
   }
   switch(typ(x))
   {
-    case t_INT: case t_FRAC: case t_FRACN:
+    case t_INT: case t_FRAC:
       return gabs(x,0);
 
     case t_COMPLEX:
@@ -2635,16 +2631,6 @@ ggcd(GEN x, GEN y)
   if (gcmp0(y)) return zero_gcd(x, y);
   if (is_const_t(tx))
   {
-    if (ty == t_FRACN)
-    {
-      if (tx==t_INTMOD)
-      {
-        av=avma; y = gred(y); tetpil=avma;
-        return gerepile(av,tetpil,ggcd(x,y));
-      }
-      ty = t_FRAC;
-    }
-    if (tx == t_FRACN) tx = t_FRAC;
     if (ty == tx) switch(tx)
     {
       case t_INT:
@@ -2793,10 +2779,6 @@ ggcd(GEN x, GEN y)
 	  av = avma; p1=ggcd((GEN)x[1],(GEN)y[2]); avma = av;
           if (!gcmp1(p1)) err(operi,"g",x,y);
 	  return ggcd((GEN)y[1],x);
-
-	case t_RFRACN:
-	  av=avma; p1=gred_rfrac(y); tetpil=avma;
-	  return gerepile(av,tetpil,ggcd(p1,x));
       }
       break;
 
@@ -2809,7 +2791,7 @@ ggcd(GEN x, GEN y)
 	case t_SER:
 	  return gpowgs(polx[vx],min(valp(y),gval(x,vx)));
 
-	case t_RFRAC: case t_RFRACN: av=avma; z=cgetg(3,ty);
+	case t_RFRAC: av=avma; z=cgetg(3,ty);
           z[1]=lgcd(x,(GEN)y[1]);
           z[2]=lcopy((GEN)y[2]); return z;
       }
@@ -2821,13 +2803,13 @@ ggcd(GEN x, GEN y)
 	case t_SER:
 	  return gpowgs(polx[vx],min(valp(x),valp(y)));
 
-	case t_RFRAC: case t_RFRACN:
+	case t_RFRAC:
 	  return gpowgs(polx[vx],min(valp(x),gval(y,vx)));
       }
       break;
 
-    case t_RFRAC: case t_RFRACN: z=cgetg(3,ty);
-      if (!is_rfrac_t(ty)) err(operf,"g",x,y);
+    case t_RFRAC: z=cgetg(3,t_RFRAC);
+      if (ty != t_RFRAC) err(operf,"g",x,y);
       p1 = gdiv((GEN)y[2], ggcd((GEN)x[2], (GEN)y[2]));
       tetpil = avma;
       z[2] = lpile((pari_sp)z,tetpil,gmul(p1, (GEN)x[2]));
@@ -3069,7 +3051,7 @@ polinvmod(GEN x, GEN y)
     }
     av1=avma; return gerepile(av,av1,gdiv(u,d));
   }
-  if (!is_rfrac_t(tx)) err(typeer,"polinvmod");
+  if (tx != t_RFRAC) err(typeer,"polinvmod");
   av=avma; p1=gmul((GEN)x[1],polinvmod((GEN)x[2],y));
   av1=avma; return gerepile(av,av1,gmod(p1,y));
 }
@@ -3118,8 +3100,7 @@ content(GEN x)
     switch (tx)
     {
       case t_INT: return absi(x);
-      case t_FRAC:
-      case t_FRACN: return gabs(x,0);
+      case t_FRAC: return gabs(x,0);
       case t_POLMOD: return content((GEN)x[2]);
     }
     return gcopy(x);
@@ -3127,7 +3108,7 @@ content(GEN x)
   av = avma;
   switch(tx)
   {
-    case t_RFRAC: case t_RFRACN:
+    case t_RFRAC:
     {
       GEN n = (GEN)x[1], d = (GEN)x[2];
       long vn = gvar9(n), vd = gvar9(d);
@@ -4151,7 +4132,7 @@ srgcd(GEN x, GEN y)
   else
   {
     p1=leading_term(x); ty=typ(p1);
-    if ((is_frac_t(ty) || is_intreal_t(ty)) && gsigne(p1)<0) x = gneg(x);
+    if ((ty == t_FRAC || is_intreal_t(ty)) && gsigne(p1)<0) x = gneg(x);
   }
   return gerepileupto(av,x);
 }
@@ -4239,7 +4220,7 @@ sturmpart(GEN x, GEN a, GEN b)
   t = typ(x);
   if (t != t_POL)
   {
-    if (t == t_INT || t == t_REAL || t == t_FRAC || t == t_FRACN) return 0;
+    if (t == t_INT || t == t_REAL || t == t_FRAC) return 0;
     err(typeer,"sturm");
   }
   s=lg(x); if (s==3) return 0;

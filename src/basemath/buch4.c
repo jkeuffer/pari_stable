@@ -667,8 +667,7 @@ bnfissunit(GEN bnf,GEN suni,GEN x)
   if (typ(suni)!=t_VEC || lg(suni)!=7) err(typeer,"bnfissunit");
   switch (typ(x))
   {
-    case t_INT: case t_FRAC: case t_FRACN:
-    case t_POL: case t_COL:
+    case t_INT: case t_FRAC: case t_POL: case t_COL:
       x = basistoalg(bnf,x); break;
     case t_POLMOD: break;
     default: err(typeer,"bnfissunit");

@@ -99,7 +99,7 @@ unifpol0(GEN nf,GEN x,long flag)
 {
   switch(typ(x))
   {
-    case t_INT: case t_FRAC: case t_FRACN:
+    case t_INT: case t_FRAC:
       return gcopy(x);
 
     case t_POLMOD:

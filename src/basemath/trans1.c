@@ -218,7 +218,7 @@ transc(GEN (*f)(GEN,long), GEN x, long prec)
 
   switch(typ(x))
   {
-    case t_INT: case t_FRAC: case t_FRACN:
+    case t_INT: case t_FRAC:
       p1=cgetr(prec); gaffect(x,p1); tetpil=avma;
       return gerepile(av,tetpil,f(p1,prec));
 
@@ -230,7 +230,7 @@ transc(GEN (*f)(GEN,long), GEN x, long prec)
       p1 = quadtoc(x, prec); tetpil = avma;
       return gerepile(av,tetpil,f(p1,prec));
 
-    case t_POL: case t_RFRAC: case t_RFRACN:
+    case t_POL: case t_RFRAC:
       return gerepileupto(av, f(_toser(x), prec));
 
     case t_VEC: case t_COL: case t_MAT:
@@ -266,7 +266,7 @@ puiss0(GEN x)
 
   switch(typ(x))
   {
-    case t_INT: case t_REAL: case t_FRAC: case t_FRACN: case t_PADIC:
+    case t_INT: case t_REAL: case t_FRAC: case t_PADIC:
       return gun;
 
     case t_INTMOD:
@@ -283,7 +283,7 @@ puiss0(GEN x)
       y=cgetg(3,t_POLMOD); copyifstack(x[1],y[1]);
       y[2]=lpolun[varn(x[1])]; break;
 
-    case t_POL: case t_SER: case t_RFRAC: case t_RFRACN:
+    case t_POL: case t_SER: case t_RFRAC:
       return polun[gvar(x)];
 
     case t_MAT:
@@ -442,7 +442,7 @@ gpowgs(GEN x, long n)
       y=cgetg(3,tx); copyifstack(x[1],y[1]);
       y[2]=(long)powmodulo((GEN)(x[2]),(GEN)gn,(GEN)(x[1]));
       return y;
-    case t_FRAC: case t_FRACN:
+    case t_FRAC:
     {
       GEN a = (GEN)x[1], b = (GEN)x[2];
       long sr = (n&1 && (signe(a)!=signe(b))) ? -1 : 1;
@@ -462,7 +462,7 @@ gpowgs(GEN x, long n)
     }
     case t_PADIC: case t_POL: case t_POLMOD:
       return powgi(x,gn);
-    case t_RFRAC: case t_RFRACN:
+    case t_RFRAC:
     {
       av=avma; y=cgetg(3,tx); m = labs(n);
       y[1]=lpowgs((GEN)x[1],m);
@@ -558,7 +558,7 @@ powgi(GEN x, GEN n)
       y=cgetg(3,tx); copyifstack(x[1],y[1]);
       y[2]=(long)powmodulo((GEN)x[2],n,(GEN)x[1]);
       return y;
-    case t_FRAC: case t_FRACN:
+    case t_FRAC:
     {
       GEN a = (GEN)x[1], b = (GEN)x[2];
       long sr = (mod2(n) && (signe(a)!=signe(b))) ? -1 : 1;
@@ -700,15 +700,11 @@ gpow(GEN x, GEN n, long prec)
     return y;
   }
   av = avma;
-  if (tx == t_POL || tx == t_RFRAC || tx == t_RFRACN)
-  {
-    x = _toser(x); tx = t_SER;
-  }
+  if (tx == t_POL || tx == t_RFRAC) { x = _toser(x); tx = t_SER; }
   if (tx == t_SER)
   {
     long tn = typ(n);
 
-    if (tn == t_FRACN) { n = gred(n); tn = t_FRAC; }
     if (tn == t_FRAC) return gerepileupto(av, ser_powfrac(x, n, prec));
     if (valp(x))
       err(talker,"gpow: need integer exponent if series valuation != 0");
@@ -962,7 +958,7 @@ gsqrt(GEN x, long prec)
       {
 	long tx=typ(x[1]);
 
-	if ((is_intreal_t(tx) || is_frac_t(tx)) && gsigne((GEN)x[1]) < 0)
+	if ((is_intreal_t(tx) || tx == t_FRAC) && gsigne((GEN)x[1]) < 0)
 	{
 	  y[1]=zero; p1=gneg_i((GEN)x[1]); tetpil=avma;
 	  y[2]=lpile(av,tetpil,gsqrt(p1,prec));
@@ -1233,7 +1229,7 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
 
   case t_PADIC: return padic_sqrtn(x,n,zetan);
 
-  case t_INT: case t_FRAC: case t_FRACN: case t_REAL: case t_COMPLEX:
+  case t_INT: case t_FRAC: case t_REAL: case t_COMPLEX:
     i = (long) precision(n); if (i) prec=i;
     if (tx==t_INT && is_pm1(x) && signe(x)>0)
      /*speed-up since there is no way to call rootsof1complex
@@ -1901,7 +1897,7 @@ gcos(GEN x, long prec)
       gerepilemanyvec(av,tetpil,y+1,2);
       return y;
 
-    case t_INT: case t_FRAC: case t_FRACN:
+    case t_INT: case t_FRAC:
       p1=cgetr(prec); av=avma;
       p2=gadd(x,realzero(prec)); 
       affrr(mpcos(p2),p1); avma=av;
@@ -1981,7 +1977,7 @@ gsin(GEN x, long prec)
       gerepilemanyvec(av,tetpil,y+1,2);
       return y;
     
-    case t_INT: case t_FRAC: case t_FRACN:
+    case t_INT: case t_FRAC:
       p1=cgetr(prec); av=avma;
       p2=gadd(x,realzero(prec)); 
       affrr(mpsin(p2),p1); avma=av;
@@ -2064,7 +2060,7 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
 
   switch(typ(x))
   {
-    case t_INT: case t_FRAC: case t_FRACN:
+    case t_INT: case t_FRAC:
       *s=cgetr(prec); *c=cgetr(prec); av=avma; 
       p1=gadd(x,realzero(prec)); 
       mpsincos(p1,&ps,&pc); 
@@ -2186,7 +2182,7 @@ gtan(GEN x, long prec)
       av = avma; gsincos(x,&s,&c,prec);
       return gerepileupto(av, gdiv(s,c));
 
-    case t_INT: case t_FRAC: case t_FRACN:
+    case t_INT: case t_FRAC:
       s=cgetr(prec); av=avma; 
       c=gadd(x,realzero(prec)); 
       affrr(mptan(c),s); avma=av;
@@ -2239,7 +2235,7 @@ gcotan(GEN x, long prec)
       av = avma; gsincos(x,&s,&c,prec);
       return gerepileupto(av, gdiv(c,s));
 
-    case t_INT: case t_FRAC: case t_FRACN:
+    case t_INT: case t_FRAC:
       s=cgetr(prec); av=avma; 
       c=gadd(x,realzero(prec)); 
       affrr(mpcotan(c),s); avma=av;

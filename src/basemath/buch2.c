@@ -1555,7 +1555,7 @@ isunit(GEN bnf,GEN x)
   z  = algtobasis(nf, (GEN)p1[2]);
   switch(tx)
   {
-    case t_INT: case t_FRAC: case t_FRACN:
+    case t_INT: case t_FRAC:
       return rational_unit(x, n, RU);
 
     case t_MAT: /* famat */

@@ -96,21 +96,16 @@ setlgcx2(GEN z, long l)
 long
 isint(GEN n, long *ptk)
 {
-  long tn=typ(n);
-  GEN p1,p2;
-
-  switch(tn)
+  switch(typ(n))
   {
     case t_INT:
       *ptk = itos(n); return 1;
-    case t_REAL:
-      p1 = gfloor(n); if (!gegal(p1,n)) return 0;
+    case t_REAL: {
+      GEN p1 = gfloor(n);
+      if (!gegal(p1,n)) return 0;
       *ptk = itos(p1); return 1;
+    }
     case t_FRAC: return 0;
-    case t_FRACN:
-      p1 = dvmdii((GEN)n[1],(GEN)n[2],&p2);
-      if (signe(p2)) return 0;
-      *ptk = itos(p1); return 1;
     case t_COMPLEX:
       return gcmp0((GEN)n[2]) && isint((GEN)n[1],ptk);
     case t_QUAD:
@@ -120,21 +115,14 @@ isint(GEN n, long *ptk)
 }
 
 double
-norml1(GEN n, long prec)
+norml1(GEN n)
 {
-  long tn=typ(n);
-  pari_sp av;
-  double res;
-
-  switch(tn)
+  switch(typ(n))
   {
-    case t_INT: case t_REAL: case t_FRAC: case t_FRACN:
-      return gtodouble(gabs(n,prec));
+    case t_INT: case t_REAL: case t_FRAC: case t_QUAD:
+      return fabs(gtodouble(n));
     case t_COMPLEX:
-      return norml1((GEN)n[1],prec)+norml1((GEN)n[2],prec);
-    case t_QUAD:
-      av = avma; res = norml1(gmul(n,realun(prec)),prec); avma = av;
-      return res;
+      return norml1((GEN)n[1]) + norml1((GEN)n[2]);
     default: err(typeer,"norml1"); return 0.; /* not reached */
   }
 }
@@ -225,7 +213,7 @@ jbesselintern(GEN n, GEN z, long flag, long prec)
 	y[i]=(long)jbesselintern(n,(GEN)z[i],flag,prec);
       return y;
 
-    case t_INT: case t_FRAC: case t_FRACN:
+    case t_INT: case t_FRAC:
       av=avma; p1=cgetr(prec); gaffect(z,p1); tetpil=avma;
       return gerepile(av,tetpil,jbesselintern(n,p1,flag,prec));
 
@@ -324,7 +312,7 @@ jbesselh(GEN n, GEN z, long prec)
       for (i=1; i<lz; i++) y[i]=(long)jbesselh(n,(GEN)z[i],prec);
       return y;
 
-    case t_INT: case t_FRAC: case t_FRACN:
+    case t_INT: case t_FRAC:
       av=avma; p1=cgetr(prec); gaffect(z,p1); tetpil=avma;
       return gerepile(av,tetpil,jbesselh(n,p1,prec));
 
@@ -522,7 +510,7 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
       i = precision(z); if (i) prec = i;
       x = gtodouble(gabs(z,prec));
 /* Experimentally optimal on a PIII 500 Mhz. Your optimum may vary. */
-      if ((x > (8*(prec-2)+norml1(n,prec)-3)) && !flag) return kbessel(n,z,prec);
+      if ((x > (8*(prec-2)+norml1(n)-3)) && !flag) return kbessel(n,z,prec);
       precnew = prec;
       if (x >= 1.0)
       {
@@ -579,7 +567,7 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
 	y[i]=(long)kbesselintern(n,(GEN)z[i],flag,prec);
       return y;
 
-    case t_INT: case t_FRAC: case t_FRACN:
+    case t_INT: case t_FRAC:
       av=avma; p1=cgetr(prec); gaffect(z,p1); tetpil=avma;
       return gerepile(av,tetpil,kbesselintern(n,p1,flag,prec));
 
@@ -1856,8 +1844,7 @@ gpolylog(long m, GEN x, long prec)
 
   switch(typ(x))
   {
-    case t_INT: case t_REAL: case t_FRAC: case t_FRACN:
-    case t_COMPLEX: case t_QUAD:
+    case t_INT: case t_REAL: case t_FRAC: case t_COMPLEX: case t_QUAD:
       return polylog(m,x,prec);
 
     case t_POLMOD:

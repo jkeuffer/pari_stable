@@ -81,7 +81,7 @@ idealtyp(GEN *ideal, GEN *arch)
     case t_POL: case t_POLMOD: case t_COL:
       t = id_PRINCIPAL; break;
     default:
-      if (tx!=t_INT && !is_frac_t(tx)) err(idealer2);
+      if (!is_rational_t(tx)) err(idealer2);
       t = id_PRINCIPAL;
   }
   *ideal = x; return t;
@@ -211,7 +211,7 @@ principalideal(GEN nf, GEN x)
   nf = checknf(nf);
   switch(typ(x))
   {
-    case t_INT: case t_FRAC: case t_FRACN:
+    case t_INT: case t_FRAC:
       x = gscalcol(x, degpol(nf[1])); break;
 
     case t_POLMOD:
@@ -586,7 +586,7 @@ ideal_two_elt(GEN nf, GEN x)
   {
     switch(typ(x))
     {
-      case t_INT: case t_FRAC: case t_FRACN:
+      case t_INT: case t_FRAC:
         z[1] = lcopy(x);
 	z[2] = (long)zerocol(N); return z;
 
@@ -1929,7 +1929,7 @@ isideal(GEN nf,GEN x)
   nf=checknf(nf); lx=lg(x);
   if (tx==t_VEC && lx==3) { x=(GEN)x[1]; tx=typ(x); lx=lg(x); }
   if (is_scalar_t(tx))
-    return (tx==t_INT || tx==t_FRAC || tx==t_FRACN || tx==t_POL ||
+    return (tx==t_INT || tx==t_FRAC || tx==t_POL ||
                      (tx==t_POLMOD && gegal((GEN)nf[1],(GEN)x[1])));
   if (typ(x)==t_VEC) return (lx==6);
   if (typ(x)!=t_MAT) return 0;

@@ -595,7 +595,7 @@ element_val(GEN nf, GEN x, GEN vp)
   e = itos((GEN)vp[3]);
   switch(typ(x))
   {
-    case t_INT: case t_FRAC: case t_FRACN:
+    case t_INT: case t_FRAC:
       return ggval(x,p)*e;
     case t_POLMOD: x = (GEN)x[2]; /* fall through */
     case t_POL:
@@ -678,11 +678,10 @@ _algtobasis(GEN nf, GEN x)
 { 
   switch(typ(x))
   {
-    case t_INT:
-    case t_FRAC:
-    case t_FRACN: return gscalcol_i(x, degpol( checknf(nf)[1] ));
-    case t_POLMOD:
-    case t_POL:   return algtobasis(nf,x);
+    case t_INT: case t_FRAC:
+      return gscalcol_i(x, degpol( checknf(nf)[1] ));
+    case t_POLMOD: case t_POL:
+      return algtobasis(nf,x);
     case t_COL:   break;
     default: err(typeer,"_algtobasis");
   }
@@ -1951,7 +1950,7 @@ check_nfelt(GEN x, GEN *den)
     switch (typ(t))
     {
       case t_INT: case t_INTMOD: break;
-      case t_FRACN: case t_FRAC:
+      case t_FRAC:
         if (!d) d = (GEN)t[2]; else d = mpppcm(d, (GEN)t[2]);
         break;
       default: err(talker,"%Z not a nfelt", x);
@@ -1987,7 +1986,7 @@ zideallog_sgn(GEN nf, GEN x, GEN sgn, GEN bid)
   N = degpol(nf[1]);
   switch(typ(x))
   {
-    case t_INT: case t_FRAC: case t_FRACN:
+    case t_INT: case t_FRAC:
       ok = 1; den = denom(x);
       break;
     case t_POLMOD: case t_POL:

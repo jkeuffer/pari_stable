@@ -83,8 +83,7 @@ op_polmod(GEN f(GEN,GEN), GEN x, GEN y, long tx)
 
 /*******************************************************************/
 /*                                                                 */
-/*                          REDUCTION                              */
-/*          transform  t_FRACN/t_RFRACN --> t_FRAC/t_RFRAC         */
+/*       REDUCTION to IRREDUCIBLE TERMS (t_FRAC/t_RFRAC)           */
 /*                                                                 */
 /* (static routines are not memory clean, but OK for gerepileupto) */
 /*******************************************************************/
@@ -231,13 +230,12 @@ gred_frac2(GEN x1, GEN x2)
   fix_frac(y); return y;
 }
 
-/* must NEVER returns a FRACN or a RFRACN */
 GEN
 gred(GEN x)
 {
   long tx = typ(x);
-  if (is_frac_t(tx))  return gred_frac2((GEN)x[1], (GEN)x[2]);
-  if (is_rfrac_t(tx)) return gred_rfrac(x);
+  if (tx == t_FRAC)  return gred_frac2((GEN)x[1], (GEN)x[2]);
+  if (tx == t_RFRAC) return gred_rfrac(x);
   return gcopy(x);
 }
 
@@ -500,7 +498,6 @@ to_polmod(GEN x, GEN mod)
   long tx = typ(x);
   GEN z = cgetg(3, t_POLMOD);
 
-  if (tx == t_RFRACN) { x = gred_rfrac_i(x); tx = t_RFRAC; }
   if (tx == t_RFRAC) x = gmul((GEN)x[1], ginvmod((GEN)x[2],mod));
   z[1] = (long)mod;
   z[2] = (long)x;
@@ -531,7 +528,7 @@ gadd(GEN x, GEN y)
             z[2] = (cmpii(p1,p2) >=0)? lsubii(p1,p2): licopy(p1);
 	    icopyifstack(p2,z[1]); return z;
 
-	  case t_FRAC: case t_FRACN: z=cgetg(3,ty);
+	  case t_FRAC: z=cgetg(3,t_FRAC);
             (void)new_chunk(lgefint(x)+lgefint(y[1])+lgefint(y[2])+1); /*HACK*/
             p1 = mulii((GEN)y[2],x); avma = (pari_sp)z;
 	    z[1] = laddii((GEN)y[1], p1);
@@ -555,7 +552,7 @@ gadd(GEN x, GEN y)
 	{
 	  case t_REAL: return addrr(x,y);
 	
-	  case t_FRAC: case t_FRACN:
+	  case t_FRAC:
 	    if (!signe(y[1])) return rcopy(x);
             if (!signe(x))
             {
@@ -602,7 +599,7 @@ gadd(GEN x, GEN y)
             p1=addii((GEN)x[2],(GEN)y[2]); avma=av;
 	    z[2]=lmodii(p1,p2); return z;
 	
-	  case t_FRAC: case t_FRACN: z=cgetg(3,t_INTMOD); p2=(GEN)x[1];
+	  case t_FRAC: z=cgetg(3,t_INTMOD); p2=(GEN)x[1];
 	    (void)new_chunk(lgefint(p2)<<2); /* HACK */
             p1 = mulii((GEN)y[1], mpinvmod((GEN)y[2],p2));
             p1 = addii(modii(p1,p2), (GEN)x[2]); avma=(pari_sp)z;
@@ -624,16 +621,11 @@ gadd(GEN x, GEN y)
             z[3]=lcopy((GEN)y[3]); return z;
 	}
 	
-      case t_FRAC: case t_FRACN:
+      case t_FRAC:
         switch (ty)
 	{
-	  case t_FRAC: return addfrac(x,y);
-	  case t_FRACN: z=cgetg(3,t_FRACN); av=avma;
-	    p1=mulii((GEN)x[1],(GEN)y[2]);
-	    p2=mulii((GEN)x[2],(GEN)y[1]);
-	    tetpil=avma; z[1]=lpile(av,tetpil,addii(p1,p2));
-	    z[2]=lmulii((GEN)x[2],(GEN)y[2]);
-	    return z;
+	  case t_FRAC:
+            return addfrac(x,y);
 
 	  case t_COMPLEX: z=cgetg(3,t_COMPLEX);
 	    z[1]=ladd((GEN)y[1],x);
@@ -775,10 +767,6 @@ gadd(GEN x, GEN y)
         return z;
 
       case t_RFRAC: return addscalrfrac(x,y);
-      case t_RFRACN: z=cgetg(3,t_RFRACN);
-        av=avma; p1=gmul(x,(GEN)y[2]); tetpil=avma;
-        z[1]=lpile(av,tetpil, gadd(p1,(GEN)y[1]));
-        z[2]=lcopy((GEN)y[2]); return z;
 
       case t_VEC: case t_COL: case t_MAT:
 	if (isexactzero(x)) return gcopy(y);
@@ -814,10 +802,6 @@ gadd(GEN x, GEN y)
           free(p1); return y;
 	
         case t_RFRAC: return addscalrfrac(x,y);
-        case t_RFRACN: z=cgetg(3,t_RFRACN);
-          av=avma; p1=gmul(x,(GEN)y[2]); tetpil=avma;
-          z[1]=lpile(av,tetpil, gadd(p1,(GEN)y[1]));
-          z[2]=lcopy((GEN)y[2]); return z;
       }
       break;
 
@@ -857,7 +841,7 @@ gadd(GEN x, GEN y)
           avma = av;
           return zeroser(vx, ly-2 + valp(y));
 	
-	case t_RFRAC: case t_RFRACN:
+	case t_RFRAC:
 	  if (isexactzero(y)) return gcopy(x);
 
 	  l = valp(x) - gval(y,vy); l += gcmp0(x)? 3: lg(x);
@@ -871,15 +855,8 @@ gadd(GEN x, GEN y)
       break;
 
     case t_RFRAC:
-      if (!is_rfrac_t(ty)) err(operi,"+",x,y);
+      if (ty != t_RFRAC) err(operi,"+",x,y);
       return addrfrac(x,y);
-    case t_RFRACN:
-      if (!is_rfrac_t(ty)) err(operi,"+",x,y);
-      z=cgetg(3,t_RFRACN); av=avma;
-      p1=gmul((GEN)x[1],(GEN)y[2]);
-      p2=gmul((GEN)x[2],(GEN)y[1]); tetpil=avma;
-      z[1]=lpile(av,tetpil, gadd(p1,p2));
-      z[2]=lmul((GEN)x[2],(GEN)y[2]); return z;
 
     case t_VEC: case t_COL: case t_MAT:
       if (tx != ty) err(operf,"+",x,y);
@@ -1176,10 +1153,6 @@ gmul(GEN x, GEN y)
             }
             return z;
 
-          case t_FRACN: z=cgetg(3,t_FRACN);
-	    z[1]=lmulii(x,(GEN)y[1]);
-	    z[2]=licopy((GEN)y[2]); return z;
-	
 	  case t_COMPLEX: z=cgetg(3,t_COMPLEX);
 	    z[1]=lmul(x,(GEN)y[1]);
 	    z[2]=lmul(x,(GEN)y[2]); return z;
@@ -1200,7 +1173,7 @@ gmul(GEN x, GEN y)
 	{
 	  case t_REAL: return mulrr(x,y);
 
-	  case t_FRAC: case t_FRACN:
+	  case t_FRAC:
 	    av=avma; p1=mulri(x,(GEN)y[1]); tetpil=avma;
             return gerepile(av, tetpil, divri(p1, (GEN)y[2]));
 	
@@ -1235,7 +1208,7 @@ gmul(GEN x, GEN y)
 	    p1=mulii((GEN)x[2],(GEN)y[2]); avma=av;
 	    z[2]=lmodii(p1,p2); return z;
 	
-	  case t_FRAC: case t_FRACN: z=cgetg(3,t_INTMOD); p2=(GEN)x[1];
+	  case t_FRAC: z=cgetg(3,t_INTMOD); p2=(GEN)x[1];
             (void)new_chunk(lgefint(p2)<<2); /* HACK */
             p1 = mulii((GEN)y[1], mpinvmod((GEN)y[2],p2));
             p1 = mulii(modii(p1,p2),(GEN)x[2]); avma=(pari_sp)z;
@@ -1257,7 +1230,7 @@ gmul(GEN x, GEN y)
             z[3]=lmul(x,(GEN)y[3]); return z;
 	}
 	
-      case t_FRAC: case t_FRACN:
+      case t_FRAC:
         switch(ty)
 	{
 	  case t_FRAC:
@@ -1274,9 +1247,6 @@ gmul(GEN x, GEN y)
             z[1] = lmulii(x1,y1);
             fix_frac_if_int_GC(z,tetpil); return z;
           }
-	  case t_FRACN: z=cgetg(3,t_FRACN);
-	    z[1]=lmulii((GEN)x[1],(GEN)y[1]);
-	    z[2]=lmulii((GEN)x[2],(GEN)y[2]); return z;
 	
 	  case t_COMPLEX: z=cgetg(3,t_COMPLEX);
 	    z[1]=lmul((GEN)y[1],x);
@@ -1505,9 +1475,6 @@ gmul(GEN x, GEN y)
         return normalize(z);
 	
       case t_RFRAC: return mulscalrfrac(x,y);
-      case t_RFRACN: av=avma; z=cgetg(3,t_RFRACN);
-        z[1]=lmul(x,(GEN)y[1]);
-        z[2]=lcopy((GEN)y[2]); return z;
       default: err(operf,"*",x,y);
     }
   }
@@ -1558,9 +1525,6 @@ gmul(GEN x, GEN y)
           free(p1); return p2;
 	
         case t_RFRAC: return mulscalrfrac(x,y);
-        case t_RFRACN: av=avma; z=cgetg(3,t_RFRACN);
-          z[1]=lmul(x,(GEN)y[1]);
-          z[2]=lcopy((GEN)y[2]); return z;
       }
       break;
 	
@@ -1593,7 +1557,7 @@ gmul(GEN x, GEN y)
           free(p3); return normalize(z);
         }
 
-	case t_RFRAC: case t_RFRACN:
+	case t_RFRAC:
 	  if (gcmp0(y)) return zeropol(vx);
 	  if (gcmp0(x)) return zeroser(vx, valp(x)+gval(y,vx));
 	  av=avma; p1=gmul((GEN)y[1],x); tetpil=avma;
@@ -1603,11 +1567,6 @@ gmul(GEN x, GEN y)
 	
     /* (tx,ty) == t_RFRAC <==> ty == t_RFRAC */
     case t_RFRAC: return mulrfrac(x,y);
-    case t_RFRACN:
-      if (!is_rfrac_t(ty)) break;
-      av=avma; z=cgetg(3,ty);
-      z[1]=lmul((GEN)x[1],(GEN)y[1]);
-      z[2]=lmul((GEN)x[2],(GEN)y[2]); return z;
   }
   return gmul_err(x,y,tx,ty);
 }
@@ -1633,11 +1592,9 @@ gsqr(GEN x)
         p1=sqri((GEN)x[2]); avma=(pari_sp)z;
         z[2]=lmodii(p1,p2); icopyifstack(p2,z[1]); return z;
 
-      case t_FRAC: case t_FRACN:
-	z=cgetg(3,tx);
+      case t_FRAC: z=cgetg(3,t_FRAC);
 	z[1]=lsqri((GEN)x[1]);
-	z[2]=lsqri((GEN)x[2]);
-	return z;
+	z[2]=lsqri((GEN)x[2]); return z;
 
       case t_COMPLEX:
         if (isexactzero((GEN)x[1]))
@@ -1737,8 +1694,7 @@ gsqr(GEN x)
       }
       z -= 2; free(p2); return normalize(z);
     }
-    case t_RFRAC: case t_RFRACN:
-      z=cgetg(3,tx);
+    case t_RFRAC: z=cgetg(3,t_RFRAC);
       z[1]=lsqr((GEN)x[1]);
       z[2]=lsqr((GEN)x[2]); return z;
 
@@ -1839,12 +1795,6 @@ gdiv(GEN x, GEN y)
           fix_frac_if_int(z);
         return z;
 
-      case t_FRACN:
-        z=cgetg(3,t_FRACN);
-        z[1]=lmulii((GEN)y[2], x);
-        z[2]=licopy((GEN)y[1]);
-        fix_frac(z); return z;
-
       case t_PADIC:
         av=avma; p1=cgetp(y); gaffect(x,p1); tetpil=avma;
         return gerepile(av,tetpil,gdiv(p1,y));
@@ -1869,7 +1819,7 @@ gdiv(GEN x, GEN y)
 	  case t_REAL:
 	    return divrr(x,y);
 
-	  case t_FRAC: case t_FRACN:
+	  case t_FRAC:
 	    av=avma; p1=mulri(x,(GEN)y[2]); tetpil=avma;
 	    return gerepile(av, tetpil, divri(p1,(GEN)y[1]));
 
@@ -1913,10 +1863,6 @@ gdiv(GEN x, GEN y)
             p1=mulii(modii(p1,p2),(GEN)x[2]); avma=(pari_sp)z;
             z[2]=lmodii(p1,p2); icopyifstack(p2,z[1]); return z;
 
-	  case t_FRACN:
-	    av=avma; p1=gred(y); tetpil=avma;
-	    return gerepile(av,tetpil,gdiv(x,p1));
-
 	  case t_COMPLEX: case t_QUAD:
 	    av=avma; p1=gnorm(y); p2=gmul(x,gconj(y)); tetpil=avma;
 	    return gerepile(av,tetpil,gdiv(p2,p1));
@@ -1928,29 +1874,20 @@ gdiv(GEN x, GEN y)
 	  case t_REAL: err(operf,"/",x,y);
 	}
 
-      case t_FRAC: case t_FRACN:
+      case t_FRAC:
 	switch(ty)
 	{
-	  case t_INT:
-          z = cgetg(3, tx);
-	  if (tx == t_FRAC)
+	  case t_INT: z = cgetg(3, t_FRAC);
+          p1 = mppgcd(y,(GEN)x[1]);
+          if (is_pm1(p1))
           {
-            p1 = mppgcd(y,(GEN)x[1]);
-            if (is_pm1(p1))
-            {
-              avma = (pari_sp)z; tetpil = 0;
-              z[1] = licopy((GEN)x[1]);
-            }
-            else
-            {
-              y = diviiexact(y,p1); tetpil = avma;
-              z[1] = (long)diviiexact((GEN)x[1], p1);
-            }
+            avma = (pari_sp)z; tetpil = 0;
+            z[1] = licopy((GEN)x[1]);
           }
           else
           {
-            tetpil = 0;
-            z[1] = licopy((GEN)x[1]);
+            y = diviiexact(y,p1); tetpil = avma;
+            z[1] = (long)diviiexact((GEN)x[1], p1);
           }
           z[2] = lmulii((GEN)x[2],y);
           fix_frac(z);
@@ -1967,31 +1904,21 @@ gdiv(GEN x, GEN y)
 	    p1=mulii(mpinvmod(p1,p2), modii((GEN)x[1],p2)); avma=(pari_sp)z;
 	    z[2]=lmodii(p1,p2); icopyifstack(p2,z[1]); return z;
 
-	  case t_FRAC: if (tx == t_FRACN) ty=t_FRACN;
-          case t_FRACN:
-	    z = cgetg(3,ty);
-            if (ty == t_FRAC)
-            {
-              GEN x1 = (GEN)x[1], x2 = (GEN)x[2];
-              GEN y1 = (GEN)y[1], y2 = (GEN)y[2];
-              p1 = mppgcd(x1, y1);
-              if (!is_pm1(p1)) { x1 = diviiexact(x1,p1); y1 = diviiexact(y1,p1); }
-              p1 = mppgcd(x2, y2);
-              if (!is_pm1(p1)) { x2 = diviiexact(x2,p1); y2 = diviiexact(y2,p1); }
-              tetpil = avma;
-              z[2] = lmulii(x2,y1);
-              z[1] = lmulii(x1,y2);
-              fix_frac(z);
-              fix_frac_if_int_GC(z,tetpil);
-            }
-            else
-            {
-              z[1]=lmulii((GEN)x[1],(GEN)y[2]);
-              z[2]=lmulii((GEN)x[2],(GEN)y[1]);
-              fix_frac(z);
-            }
+	  case t_FRAC: {
+            GEN x1 = (GEN)x[1], x2 = (GEN)x[2];
+            GEN y1 = (GEN)y[1], y2 = (GEN)y[2];
+            z = cgetg(3, t_FRAC);
+            p1 = mppgcd(x1, y1);
+            if (!is_pm1(p1)) { x1 = diviiexact(x1,p1); y1 = diviiexact(y1,p1); }
+            p1 = mppgcd(x2, y2);
+            if (!is_pm1(p1)) { x2 = diviiexact(x2,p1); y2 = diviiexact(y2,p1); }
+            tetpil = avma;
+            z[2] = lmulii(x2,y1);
+            z[1] = lmulii(x1,y2);
+            fix_frac(z);
+            fix_frac_if_int_GC(z,tetpil);
             return z;
-
+          }
 	  case t_COMPLEX: z=cgetg(3,t_COMPLEX);
             av=avma; p1=gnorm(y);
 	    p2=gmul(x,(GEN)y[1]);
@@ -2015,7 +1942,7 @@ gdiv(GEN x, GEN y)
       case t_COMPLEX:
 	switch(ty)
 	{
-	  case t_INT: case t_REAL: case t_INTMOD: case t_FRAC: case t_FRACN:
+	  case t_INT: case t_REAL: case t_INTMOD: case t_FRAC:
 	    z=cgetg(3,t_COMPLEX);
 	    z[1]=ldiv((GEN)x[1],y);
 	    z[2]=ldiv((GEN)x[2],y); return z;
@@ -2043,7 +1970,7 @@ gdiv(GEN x, GEN y)
       case t_PADIC:
 	switch(ty)
 	{
-	  case t_INT: case t_FRAC: case t_FRACN:
+	  case t_INT: case t_FRAC:
 	    av=avma;
 	    if (signe(x[4])) { p1=cgetp(x); gaffect(y,p1); }
 	    else p1=cvtop(y,(GEN)x[2],(valp(x)>0)?valp(x):1);
@@ -2080,7 +2007,7 @@ gdiv(GEN x, GEN y)
       case t_QUAD:
 	switch (ty)
 	{
-	  case t_INT: case t_INTMOD: case t_FRAC: case t_FRACN:
+	  case t_INT: case t_INTMOD: case t_FRAC:
 	    z=cgetg(4,t_QUAD);
 	    copyifstack(x[1], z[1]);
 	    for (i=2; i<4; i++) z[i]=ldiv((GEN)x[i],y);
@@ -2137,11 +2064,6 @@ gdiv(GEN x, GEN y)
   {
     if (tx == t_RFRAC) return divrfracscal(x,y);
     z = cgetg(lx,tx);
-    if (tx == t_RFRACN)
-    {
-      z[2]=lmul((GEN)x[2],y);
-      z[1]=lcopy((GEN)x[1]); return z;
-    }
     switch(tx)
     {
       case t_POL: case t_SER: z[1] = x[1];
@@ -2175,10 +2097,6 @@ gdiv(GEN x, GEN y)
         y = gdiv(p1,y); free(p1); return y;
 
       case t_RFRAC: return divscalrfrac(x,y);
-      case t_RFRACN: z=cgetg(ly,t_RFRACN);
-        z[1]=lmul(x,(GEN)y[2]);
-        z[2]=lcopy((GEN)y[1]); return z;
-
       case t_MAT:
 	av=avma; p1=invmat(y); tetpil=avma;
 	return gerepile(av,tetpil,gmul(x,p1));
@@ -2203,9 +2121,6 @@ gdiv(GEN x, GEN y)
           free(p1); return p2;
 
         case t_RFRAC: return divscalrfrac(x,y);
-        case t_RFRACN: z=cgetg(ly,t_RFRACN);
-	  z[1]=lmul(x,(GEN)y[2]);
-	  z[2]=lcopy((GEN)y[1]); return z;
       }
       break;
 
@@ -2265,31 +2180,22 @@ gdiv(GEN x, GEN y)
           free(p2); return z;
         }
 
-	case t_RFRAC: case t_RFRACN:
+	case t_RFRAC:
 	  av = avma;
 	  return gerepileupto(av, gdiv(gmul(x,(GEN)y[2]), (GEN)y[1]));
       }
       break;
 
-    case t_RFRAC: case t_RFRACN:
+    case t_RFRAC:
       switch(ty)
       {
-	case t_POL:
-          if (tx==t_RFRAC) return  divrfracscal(x,y);
-          z = cgetg(3,t_RFRACN);
-          z[2] = lmul((GEN)x[2],y);
-	  z[1] = lcopy((GEN)x[1]); return z;
+	case t_POL: return divrfracscal(x,y);
 
 	case t_SER:
 	  av = avma;
 	  return gerepileupto(av, gdiv((GEN)x[1], gmul((GEN)x[2],y)));
 
-	case t_RFRAC: case t_RFRACN:
-	  if (tx == t_RFRACN) ty=t_RFRACN;
-          if (ty != t_RFRACN) return divrfrac(x,y);
-	  z = cgetg(3,t_RFRACN);
-	  z[1] = lmul((GEN)x[1],(GEN)y[2]);
-          z[2] = lmul((GEN)x[2],(GEN)y[1]); return z;
+	case t_RFRAC: return divrfrac(x,y);
       }
       break;
 

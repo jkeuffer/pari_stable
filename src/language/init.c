@@ -763,7 +763,7 @@ changevar(GEN x, GEN y)
     p2=changevar((GEN)x[2],y); tetpil=avma;
     return gerepile(av,tetpil, gmodulcp(p2,p1));
   }
-  if (is_rfrac_t(tx))
+  if (tx == t_RFRAC)
   {
     av=avma;
     p1=changevar((GEN)x[1],y);

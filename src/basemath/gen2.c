@@ -221,7 +221,7 @@ gtolong(GEN x)
   {
     case t_INT:
       return itos(x);
-    case t_REAL: case t_FRAC: case t_FRACN:
+    case t_REAL: case t_FRAC:
       y=itos(ground(x)); avma=av; return y;
     case t_COMPLEX:
       if (gcmp0((GEN)x[2])) return gtolong((GEN)x[1]); break;
@@ -250,7 +250,7 @@ gcmp0(GEN x)
     case t_INTMOD: case t_POLMOD:
       return gcmp0((GEN)x[2]);
 
-    case t_FRAC: case t_FRACN:
+    case t_FRAC:
       return !signe(x[1]);
 
     case t_COMPLEX:
@@ -276,7 +276,7 @@ gcmp0(GEN x)
     case t_QUAD:
       return gcmp0((GEN)x[2]) && gcmp0((GEN)x[3]);
 
-    case t_RFRAC: case t_RFRACN:
+    case t_RFRAC:
       return gcmp0((GEN)x[1]);
 
     case t_VEC: case t_COL: case t_MAT:
@@ -314,9 +314,6 @@ gcmp1(GEN x)
 
     case t_FRAC:
       return gcmp1((GEN)x[1]) && gcmp1((GEN)x[2]);
-
-    case t_FRACN:
-      return egalii((GEN)x[1],(GEN)x[2]);
 
     case t_COMPLEX:
       return gcmp1((GEN)x[1]) && gcmp0((GEN)x[2]);
@@ -359,7 +356,7 @@ gcmp_1(GEN x)
     case t_INTMOD:
       av=avma; y=egalii(addsi(1,(GEN)x[2]), (GEN)x[1]); avma=av; return y;
 
-    case t_FRAC: case t_FRACN:
+    case t_FRAC:
       l = signe(x[1]);
       return l && l == -signe(x[2]) && !absi_cmp((GEN)x[1],(GEN)x[2]);
 
@@ -400,14 +397,14 @@ gcmp(GEN x, GEN y)
       return f > 0? 1
                   : f? -1: 0;
     }
-    if (!is_frac_t(tx)) 
+    if (tx != t_FRAC) 
     {
       if (ty == t_STR) return -1;
       err(typeer,"comparison");
     }
   }
   if (ty == t_STR) return -1;
-  if (!is_intreal_t(ty) && !is_frac_t(ty)) err(typeer,"comparison");
+  if (!is_intreal_t(ty) && ty != t_FRAC) err(typeer,"comparison");
   av=avma; y=gneg_i(y); f=gsigne(gadd(x,y)); avma=av; return f;
 }
 
@@ -563,7 +560,7 @@ gegal(GEN x, GEN y)
 	return gegal((GEN)x[1], (GEN)y[1])
             && gegal((GEN)x[2], (GEN)y[2]);
 
-      case t_FRACN: case t_RFRAC: case t_RFRACN:
+      case t_RFRAC:
 	av=avma; i=gegal(gmul((GEN)x[1],(GEN)y[2]),gmul((GEN)x[2],(GEN)y[1]));
 	avma=av; return i;
 
@@ -722,7 +719,7 @@ ggval(GEN x, GEN p)
       if (varncmp(vx, v) > 0) return 0;
       return minval(x,p,2,lg(x));
 
-    case t_FRAC: case t_FRACN: case t_RFRAC: case t_RFRACN:
+    case t_FRAC: case t_RFRAC:
       return ggval((GEN)x[1],p) - ggval((GEN)x[2],p);
 
     case t_COMPLEX: case t_QUAD: case t_VEC: case t_COL: case t_MAT:
@@ -821,7 +818,7 @@ gneg(GEN x)
       copyifstack(x[1],y[1]);
       y[2]=lneg((GEN)x[2]); break;
 
-    case t_FRAC: case t_FRACN: case t_RFRAC: case t_RFRACN:
+    case t_FRAC: case t_RFRAC:
       y=cgetg(3,tx);
       y[1]=lneg((GEN)x[1]);
       y[2]=lcopy((GEN)x[2]); break;
@@ -873,7 +870,7 @@ gneg_i(GEN x)
       y[2] = lsubii((GEN)y[1],(GEN)x[2]);
       break;
 
-    case t_FRAC: case t_FRACN: case t_RFRAC: case t_RFRACN:
+    case t_FRAC: case t_RFRAC:
       y=cgetg(3,tx); y[2]=x[2];
       y[1]=(long)gneg_i((GEN)x[1]); break;
 
@@ -930,7 +927,7 @@ gabs(GEN x, long prec)
     case t_INT: case t_REAL:
       return mpabs(x);
 
-    case t_FRAC: case t_FRACN: y=cgetg(lg(x),tx);
+    case t_FRAC: y=cgetg(lg(x),tx);
       y[1]=labsi((GEN)x[1]);
       y[2]=labsi((GEN)x[2]); return y;
 
@@ -941,9 +938,7 @@ gabs(GEN x, long prec)
         case t_INT:
           if (!carrecomplet(p1, &y)) break;
           return gerepileupto(av, y);
-        case t_FRAC:
-        case t_FRACN:
-        {
+        case t_FRAC: {
           GEN a,b;
           if (!carrecomplet((GEN)p1[1], &a)) break;
           if (!carrecomplet((GEN)p1[2], &b)) break;
@@ -962,7 +957,7 @@ gabs(GEN x, long prec)
       p1 = (GEN)x[lx-1];
       switch(typ(p1))
       {
-	case t_INT: case t_REAL: case t_FRAC: case t_FRACN:
+	case t_INT: case t_REAL: case t_FRAC:
 	  if (gsigne(p1)<0) return gneg(x);
       }
       return gcopy(x);
@@ -1087,7 +1082,7 @@ gaffsg(long s, GEN x)
     case t_INTMOD:
       modsiz(s,(GEN)x[1],(GEN)x[2]); break;
 
-    case t_FRAC: case t_FRACN:
+    case t_FRAC:
       affsi(s,(GEN)x[1]); affsi(1,(GEN)x[2]); break;
 
     case t_COMPLEX:
@@ -1127,7 +1122,7 @@ gaffsg(long s, GEN x)
       for (i=3; i<l; i++) gaffsg(0,(GEN)x[i]);
       break;
 
-    case t_RFRAC: case t_RFRACN:
+    case t_RFRAC:
       gaffsg(s,(GEN)x[1]); gaffsg(1,(GEN)x[2]); break;
 
     case t_VEC: case t_COL: case t_MAT:
@@ -1183,7 +1178,6 @@ gaffect(GEN x, GEN y)
 
 	    case t_FRAC:
 	      if (y == ghalf) err(overwriter,"gaffect (ghalf)");
-	    case t_FRACN:
 	      affii(x,(GEN)y[1]); affsi(1,(GEN)y[2]); break;
 
 	    case t_COMPLEX:
@@ -1219,8 +1213,7 @@ gaffect(GEN x, GEN y)
 	    case t_POLMOD:
 	      gaffect(x,(GEN)y[2]); break;
 
-	    case t_INT: case t_INTMOD: case t_FRAC:
-	    case t_FRACN: case t_PADIC: case t_QUAD:
+	    case t_INT: case t_INTMOD: case t_FRAC: case t_PADIC: case t_QUAD:
               err(operf,"",x,y);
 
 	    default: err(operf,"",x,y);
@@ -1258,7 +1251,7 @@ gaffect(GEN x, GEN y)
 	      modiiz(mulii((GEN)x[1],p1),(GEN)y[1],(GEN)y[2]);
 	      avma=av; break;
 
-	    case t_FRAC: case t_FRACN:
+	    case t_FRAC:
 	      affii((GEN)x[1],(GEN)y[1]);
 	      affii((GEN)x[2],(GEN)y[2]);
 	      break;
@@ -1282,47 +1275,12 @@ gaffect(GEN x, GEN y)
 	    default: err(operf,"",x,y);
 	  }
 	  break;
-
-	case t_FRACN:
-	  switch(ty)
-	  {
-	    case t_INT:
-	      if (! mpdivis((GEN)x[1],(GEN)x[2],y)) err(operi,"",x,y);
-	      break;
-
-	    case t_REAL:
-	      diviiz((GEN)x[1],(GEN)x[2],y); break;
-	    case t_INTMOD:
-	      av=avma; gaffect(gred(x),y); avma=av; break;
-	    case t_FRAC:
-	      gredz(x,y); break;
-	    case t_FRACN:
-	      affii((GEN)x[1],(GEN)y[1]);
-	      affii((GEN)x[2],(GEN)y[2]); break;
-	    case t_COMPLEX:
-	      gaffect(x,(GEN)y[1]); gaffsg(0,(GEN)y[2]); break;
-	    case t_PADIC:
-	      if (!signe(x[1])) { padicaff0(y); break; }
-	      av=avma; num=(GEN)x[1]; den=(GEN)x[2];
-	      v =  pvaluation(num,(GEN)y[2],&num)
-	         - pvaluation(den,(GEN)y[2],&den);
-	      p1=mulii(num,mpinvmod(den,(GEN)y[3]));
-	      modiiz(p1,(GEN)y[3],(GEN)y[4]); avma=av;
-	      setvalp(y,v); break;
-
-	    case t_QUAD:
-	      gaffect(x,(GEN)y[2]); gaffsg(0,(GEN)y[3]); break;
-	    case t_POLMOD:
-	      gaffect(x,(GEN)y[2]); break;
-	    default: err(operf,"",x,y);
-	  }
-	  break;
 	
 	case t_COMPLEX:
 	  switch(ty)
 	  {
 	    case t_INT: case t_REAL: case t_INTMOD:
-	    case t_FRAC: case t_FRACN: case t_PADIC: case t_QUAD:
+	    case t_FRAC: case t_PADIC: case t_QUAD:
 	      if (!gcmp0((GEN)x[2])) err(operi,"",x,y);
 	      gaffect((GEN)x[1],y); break;
 	
@@ -1364,8 +1322,7 @@ gaffect(GEN x, GEN y)
 	case t_QUAD:
 	  switch(ty)
 	  {
-	    case t_INT: case t_INTMOD: case t_FRAC:
-	    case t_FRACN: case t_PADIC:
+	    case t_INT: case t_INTMOD: case t_FRAC: case t_PADIC:
 	      if (!gcmp0((GEN)x[3])) err(operi,"",x,y);
 	      gaffect((GEN)x[2],y); break;
 
@@ -1427,7 +1384,7 @@ gaffect(GEN x, GEN y)
         for (i=3; i<ly; i++) gaffsg(0,(GEN)y[i]);
 	break;
 
-      case t_RFRAC: case t_RFRACN:
+      case t_RFRAC:
 	gaffect(x,(GEN)y[1]); gaffsg(1,(GEN)y[2]); break;
 
       default: err(operf,"",x,y);
@@ -1445,13 +1402,13 @@ gaffect(GEN x, GEN y)
         x = geval(x); tx = typ(x);
         if (tx != t_POL || varn(x) != vnum) { gaffect(x, y); return; }
       }	  
-    } else if (is_rfrac_t(tx)) {
+    } else if (tx == t_RFRAC) {
       num = (GEN)x[1]; vnum = gvar(num); varnum = varentries[ordvar[vnum]];
       den = (GEN)x[2]; vden = gvar(den); varden = varentries[ordvar[vden]];
       if (varnum && varden) {
         vnum = min(vnum, vden);
         x = geval(x); tx = typ(x);
-        if (!is_rfrac_t(tx) || gvar(x) != vnum) { gaffect(x, y); return; }
+        if (tx != t_RFRAC || gvar(x) != vnum) { gaffect(x, y); return; }
       }
     }
     err(operf,"",x,y);
@@ -1503,7 +1460,7 @@ gaffect(GEN x, GEN y)
 	case t_POLMOD:
 	  gmodz(x,(GEN)y[1],(GEN)y[2]); break;
 
-	case t_RFRAC: case t_RFRACN:
+	case t_RFRAC:
 	  gaffect(x,(GEN)y[1]); gaffsg(1,(GEN)y[2]); break;
 
         default: err(operf,"",x,y);
@@ -1530,7 +1487,7 @@ gaffect(GEN x, GEN y)
       }
       break;
 
-    case t_RFRAC: case t_RFRACN:
+    case t_RFRAC:
       switch(ty)
       {
 	case t_POL: case t_VEC: case t_COL: case t_MAT:
@@ -1545,17 +1502,8 @@ gaffect(GEN x, GEN y)
 	  gdivz((GEN)x[1],(GEN)x[2],y); break;
 	
 	case t_RFRAC:
-	  if (tx==t_RFRACN) gredz(x,y);
-	  else
-	  {
-	    gaffect((GEN)x[1],(GEN)y[1]);
-	    gaffect((GEN)x[2],(GEN)y[2]);
-	  }
-	  break;
-	
-	case t_RFRACN:
-	  gaffect((GEN)x[1],(GEN)y[1]);
-	  gaffect((GEN)x[2],(GEN)y[2]); break;
+          gaffect((GEN)x[1],(GEN)y[1]);
+          gaffect((GEN)x[2],(GEN)y[2]); break;
 	
         default: err(operf,"",x,y);
       }
@@ -1617,7 +1565,7 @@ cvtop(GEN x, GEN p, long l)
       n=ggval((GEN)x[1],p); if (n>l) n=l;
       return gadd((GEN)x[2],ggrandocp(p,n));
 
-    case t_FRAC: case t_FRACN:
+    case t_FRAC:
       n = ggval((GEN)x[1],p) - ggval((GEN)x[2],p);
       return gadd(x,ggrandocp(p,n+l));
 
@@ -1640,7 +1588,7 @@ cvtop(GEN x, GEN p, long l)
 	case t_INTMOD: case t_PADIC:
 	  break;
 
-	case t_FRAC: case t_FRACN:
+	case t_FRAC:
 	  n = ggval((GEN)p2[1],p) - ggval((GEN)p2[2],p);
 	  p2=gadd(p2,ggrandocp(p,n+l)); break;
 
@@ -1665,7 +1613,7 @@ gcvtop(GEN x, GEN p, long r)
   switch(tx)
   {
     case t_POL: case t_SER: y[1] = x[1];
-    case t_POLMOD: case t_RFRAC: case t_RFRACN:
+    case t_POLMOD: case t_RFRAC:
     case t_VEC: case t_COL: case t_MAT:
       for (i=lontyp[tx]; i<lx; i++) y[i]=(long)gcvtop((GEN)x[i],p,r);
       break;
@@ -1687,7 +1635,7 @@ gexpo(GEN x)
     case t_INT:
       return expi(x);
 
-    case t_FRAC: case t_FRACN:
+    case t_FRAC:
       if (!signe(x[1])) return -(long)HIGHEXPOBIT;
       return expi((GEN)x[1]) - expi((GEN)x[2]);
 
@@ -1766,7 +1714,7 @@ gsigne(GEN x)
     case t_INT: case t_REAL:
       return signe(x);
 
-    case t_FRAC: case t_FRACN:
+    case t_FRAC:
       return (signe(x[2])>0) ? signe(x[1]) : -signe(x[1]);
   }
   err(typeer,"gsigne");

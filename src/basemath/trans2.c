@@ -387,7 +387,7 @@ rfix(GEN x,long prec)
   GEN p1;
   switch(typ(x))
   {
-    case t_INT: case t_FRAC: case t_FRACN:
+    case t_INT: case t_FRAC:
       p1=cgetr(prec); gaffect(x,p1); return p1;
   }
   return x;
@@ -413,7 +413,7 @@ garg(GEN x, long prec)
   {
     case t_REAL:
       prec=lg(x); /* fall through */
-    case t_INT: case t_FRAC: case t_FRACN:
+    case t_INT: case t_FRAC:
       return (gsigne(x)>0)? realzero(prec): mppi(prec);
 
     case t_QUAD:
@@ -1507,10 +1507,6 @@ ggamma(GEN x, long prec)
       }
       return gammahs(m-1, prec);
 
-    case t_FRACN:
-      av = avma;
-      return gerepileupto(av, ggamma(gred(x), prec));
-
     case t_PADIC: err(impl,"p-adic gamma function");
     case t_INTMOD: err(typeer,"ggamma");
     default:
@@ -1624,7 +1620,7 @@ ggamd(GEN x, long prec)
     case t_INT:
       return mpgamd(itos(x),prec);
 
-    case t_REAL: case t_FRAC: case t_FRACN: case t_COMPLEX: case t_QUAD:
+    case t_REAL: case t_FRAC: case t_COMPLEX: case t_QUAD:
       av=avma; x = gadd(x,ghalf); tetpil=avma;
       return gerepile(av,tetpil,ggamma(x,prec));
 

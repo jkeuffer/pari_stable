@@ -514,14 +514,12 @@ gcarrecomplet(GEN x, GEN *pt)
   switch(tx)
   {
     case t_INT: return stoi( carrecomplet(x, pt) );
-    case t_FRACN:
     case t_FRAC:
       av = avma;
       l = carrecomplet(mulii((GEN)x[1],(GEN)x[2]), pt);
       break;
 
     case t_POL: return stoi( polcarrecomplet(x,pt) );
-    case t_RFRACN:
     case t_RFRAC:
       av = avma;
       l = polcarrecomplet(gmul((GEN)x[1],(GEN)x[2]), pt);
@@ -596,7 +594,7 @@ gcarreparfait(GEN x)
       return gun;
     }
 
-    case t_FRAC: case t_FRACN:
+    case t_FRAC:
       av=avma; l=carreparfait(mulii((GEN)x[1],(GEN)x[2]));
       avma=av; return l? gun: gzero;
 
@@ -623,7 +621,7 @@ gcarreparfait(GEN x)
       if (valp(x)&1) return gzero;
       return gcarreparfait((GEN)x[2]);
 
-    case t_RFRAC: case t_RFRACN:
+    case t_RFRAC:
       av=avma;
       l=itos(gcarreparfait(gmul((GEN)x[1],(GEN)x[2])));
       avma=av; return stoi(l);
@@ -817,7 +815,7 @@ hil(GEN x, GEN y, GEN p)
           p = (GEN)y[1];
 	  if (egalii(gdeux,p)) err(hiler1);
 	  return hil(x,(GEN)y[2],p);
-	case t_FRAC: case t_FRACN:
+	case t_FRAC:
 	  p1=mulii((GEN)y[1],(GEN)y[2]); z=hil(x,p1,p);
 	  avma=av; return z;
 	case t_PADIC:
@@ -829,7 +827,7 @@ hil(GEN x, GEN y, GEN p)
       break;
 
     case t_REAL:
-      if (! is_frac_t(ty)) break;
+      if (ty != t_FRAC) break;
       if (signe(x) > 0) return 1;
       return signe(y[1])*signe(y[2]);
 
@@ -841,7 +839,7 @@ hil(GEN x, GEN y, GEN p)
         case t_INTMOD:
           if (!egalii(p, (GEN)y[1])) break;
           return hil((GEN)x[2],(GEN)y[2],p);
-        case t_FRAC: case t_FRACN:
+        case t_FRAC:
 	  return hil((GEN)x[2],y,p);
         case t_PADIC:
           if (!egalii(p, (GEN)y[2])) break;
@@ -849,11 +847,11 @@ hil(GEN x, GEN y, GEN p)
       }
       break;
 
-    case t_FRAC: case t_FRACN:
+    case t_FRAC:
       p1=mulii((GEN)x[1],(GEN)x[2]);
       switch(ty)
       {
-	case t_FRAC: case t_FRACN:
+	case t_FRAC:
 	  p2=mulii((GEN)y[1],(GEN)y[2]);
 	  z=hil(p1,p2,p); avma=av; return z;
 	case t_PADIC:
@@ -1655,7 +1653,7 @@ quaddisc(GEN x)
   long i,r,tx=typ(x);
   GEN p1,p2,f,s;
 
-  if (tx != t_INT && ! is_frac_t(tx)) err(arither1);
+  if (!is_rational_t(tx)) err(arither1);
   f=factor(x); p1=(GEN)f[1]; p2=(GEN)f[2];
   s = gun;
   for (i=1; i<lg(p1); i++)
@@ -1850,17 +1848,17 @@ sfcont(GEN x, long k)
         e = bit_accuracy(lx)-1-expo(x);
         if (e < 0) err(talker,"integral part not significant in sfcont");
         p2=ishiftr_spec(x,lx,0);
-        p1 = cgetg(3, t_FRACN);
+        p1 = cgetg(3, t_FRAC);
 	p1[1] = (long)p2;
 	p1[2] = lshifti(gun, e);
        
-        p3 = cgetg(3, t_FRACN);
+        p3 = cgetg(3, t_FRAC);
 	p3[1] = laddsi(signe(x), p2);
 	p3[2] = p1[2];
 	p1 = Qsfcont(p1,NULL,k);
 	return gerepilecopy(av, Qsfcont(p3,p1,k));
 
-      case t_FRAC: case t_FRACN:
+      case t_FRAC:
         av = avma;
         return gerepileupto(av, Qsfcont(x, NULL, k));
     }
@@ -1874,7 +1872,6 @@ sfcont(GEN x, long k)
       av = avma; p1 = gtrunc(x);
       return gerepileupto(av,sfcont(p1,k));
     case t_RFRAC:
-    case t_RFRACN:
       av = avma;
       l = typ(x[1]) == t_POL? lg(x[1]): 3;
       if (lg(x[2]) > l) l = lg(x[2]);
@@ -1910,7 +1907,7 @@ sfcont2(GEN b, GEN x, long k)
   if (l1==1) return y;
   if (is_scalar_t(tx))
   {
-    if (!is_intreal_t(tx) && !is_frac_t(tx)) err(typeer,"sfcont2");
+    if (!is_intreal_t(tx) && tx != t_FRAC) err(typeer,"sfcont2");
   }
   else if (tx == t_SER) x = gtrunc(x);
 
@@ -2034,7 +2031,7 @@ bestappr_mod(GEN x, GEN A, GEN B)
       t[2] = (long)b; return t;
     }
     case t_COMPLEX: case t_POL: case t_SER: case t_RFRAC:
-    case t_RFRACN: case t_VEC: case t_COL: case t_MAT:
+    case t_VEC: case t_COL: case t_MAT:
       lx = lg(x); y=cgetg(lx,tx);
       for (i=1; i<lontyp[tx]; i++) y[i]=x[i];
       for (   ; i<lx; i++)
@@ -2058,12 +2055,12 @@ bestappr(GEN x, GEN k)
 
   if (tk != t_INT)
   {
-    if (tk != t_REAL && !is_frac_t(tk))
+    if (tk != t_REAL && tk != t_FRAC)
       err(talker,"incorrect bound type in bestappr");
     k = gcvtoi(k,&e);
   }
   if (signe(k) <= 0) k=gun;
-  tx=typ(x); if (tx == t_FRACN) { x = gred(x); tx = typ(x); }
+  tx=typ(x);
   switch(tx)
   {
     case t_INT:
@@ -2091,7 +2088,7 @@ bestappr(GEN x, GEN k)
       tetpil=avma; return gerepile(av,tetpil,gdiv(p1,q1));
 
    case t_COMPLEX: case t_POL: case t_SER: case t_RFRAC:
-   case t_RFRACN: case t_VEC: case t_COL: case t_MAT:
+   case t_VEC: case t_COL: case t_MAT:
       lx = lg(x); y=cgetg(lx,tx);
       for (i=1; i<lontyp[tx]; i++) y[i]=x[i];
       for (   ; i<lx; i++) y[i]=(long)bestappr((GEN)x[i],k);

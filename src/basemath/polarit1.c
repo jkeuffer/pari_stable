@@ -2617,7 +2617,7 @@ rootsold(GEN x, long prec)
     {
       p2 = gmael3(x,i,1,2);
       if (gsigne(p2) > 0) g = 0;
-    } else if (ti != t_INT && ti != t_INTMOD && !is_frac_t(ti)) g = 0;
+    } else if (ti != t_INT && ti != t_INTMOD && ti != t_FRAC) g = 0;
   }
   av1 = avma;
   for (i=2; i<=deg0+2 && gcmp0((GEN)x[i]); i++) gaffsg(0,(GEN)y[i-1]);
@@ -2817,7 +2817,7 @@ roots2(GEN pol,long PREC)
   for (i=2; i<=N+2; i++)
   {
     ti=typ(pol[i]);
-    if (ti!=t_INT && ti!=t_INTMOD && !is_frac_t(ti))
+    if (ti!=t_INT && ti!=t_INTMOD && ti!=t_FRAC)
     {
       flagexactpol=0;
       if (ti!=t_REAL) flagrealpol=0;

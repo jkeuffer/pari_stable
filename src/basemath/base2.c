@@ -3065,7 +3065,7 @@ fix_relative_pol(GEN nf, GEN x, int chk_lead)
   for (i=2; i<lx; i++)
     switch(typ(x[i]))
     {
-      case t_INT: case t_FRAC: case t_FRACN: break;
+      case t_INT: case t_FRAC: break;
       case t_POL:
         check_pol((GEN)x[i], vnf);
         x[i] = lmodulcp((GEN)x[i], xnf); break;

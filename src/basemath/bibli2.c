@@ -64,7 +64,7 @@ grando0(GEN x, long n, long do_clone)
   }
   else
   {
-    if (tx != t_POL && ! is_rfrac_t(tx))
+    if (tx != t_POL && tx != t_RFRAC)
       err(talker,"incorrect argument in O()");
     v = gvar(x); if ((ulong)v > MAXVARN) err(talker,"incorrect object in O()");
     m = n*gval(x,v);
@@ -410,7 +410,7 @@ gprec(GEN x, long l)
       for (i=2; i<lx; i++) y[i]=lprec((GEN)x[i],l);
       break;
 
-    case t_COMPLEX: case t_POLMOD: case t_RFRAC: case t_RFRACN:
+    case t_COMPLEX: case t_POLMOD: case t_RFRAC:
     case t_VEC: case t_COL: case t_MAT:
       y=cgetg(lx,tx);
       for (i=1; i<lx; i++) y[i]=lprec((GEN)x[i],l);
@@ -437,7 +437,7 @@ gprec_w(GEN x, long pr)
       for (i=2; i<lx; i++) y[i]=(long)gprec_w((GEN)x[i],pr);
       break;
 
-    case t_COMPLEX: case t_POLMOD: case t_RFRAC: case t_RFRACN:
+    case t_COMPLEX: case t_POLMOD: case t_RFRAC:
     case t_VEC: case t_COL: case t_MAT:
       lx=lg(x); y=cgetg(lx,tx);
       for (i=1; i<lx; i++) y[i]=(long)gprec_w((GEN)x[i],pr);

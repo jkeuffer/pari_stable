@@ -92,7 +92,7 @@ easychar(GEN x, long v, GEN *py)
   switch(typ(x))
   {
     case t_INT: case t_REAL: case t_INTMOD:
-    case t_FRAC: case t_FRACN: case t_PADIC:
+    case t_FRAC: case t_PADIC:
       p1=cgetg(4,t_POL);
       p1[1]=evalsigne(1) | evalvarn(v);
       p1[2]=lneg(x); p1[3]=un;
@@ -143,7 +143,7 @@ caract(GEN x, int v)
   p1 = gzero; p2 = gun;
   n = lg(x)-1; if (n&1) p2 = negi(p2);
   x_k = dummycopy(polx[v]);
-  p4 = cgetg(3,t_RFRACN); p4[2] = (long)x_k;
+  p4 = cgetg(3,t_RFRAC); p4[2] = (long)x_k;
   for (k=0; k<=n; k++)
   {
     p3 = det(gsub(gscalmat(stoi(k),n), x));
@@ -329,7 +329,7 @@ gnorm(GEN x)
     case t_REAL:
       return mulrr(x,x);
 
-    case t_FRAC: case t_FRACN:
+    case t_FRAC:
       return gsqr(x);
 
     case t_COMPLEX: av = avma;
@@ -342,7 +342,7 @@ gnorm(GEN x)
                             : gmul((GEN)x[2], gadd((GEN)x[2],(GEN)x[3]));
       return gerepileupto(av, gadd(p1,p2));
 
-    case t_POL: case t_SER: case t_RFRAC: case t_RFRACN: av = avma;
+    case t_POL: case t_SER: case t_RFRAC: av = avma;
       return gerepileupto(av, greal(gmul(gconj(x),x)));
 
     case t_POLMOD:
@@ -405,8 +405,7 @@ gnorml1(GEN x,long prec)
   GEN s;
   switch(typ(x))
   {
-    case t_INT: case t_REAL: case t_COMPLEX: case t_FRAC:
-    case t_FRACN: case t_QUAD:
+    case t_INT: case t_REAL: case t_COMPLEX: case t_FRAC: case t_QUAD:
       return gabs(x,prec);
 
     case t_POL:
@@ -433,11 +432,10 @@ QuickNormL1(GEN x,long prec)
   GEN p1,p2,s;
   switch(typ(x))
   {
-    case t_INT: case t_REAL: case t_FRAC: case t_FRACN:
+    case t_INT: case t_REAL: case t_FRAC:
       return gabs(x,prec);
 
-    case t_INTMOD: case t_PADIC: case t_POLMOD:
-    case t_SER: case t_RFRAC: case t_RFRACN:
+    case t_INTMOD: case t_PADIC: case t_POLMOD: case t_SER: case t_RFRAC:
       return gcopy(x);
 
     case t_COMPLEX:
@@ -476,8 +474,7 @@ gconj(GEN x)
 
   switch(tx)
   {
-    case t_INT: case t_REAL: case t_INTMOD:
-    case t_FRAC: case t_FRACN: case t_PADIC:
+    case t_INT: case t_REAL: case t_INTMOD: case t_FRAC: case t_PADIC:
       return gcopy(x);
 
     case t_COMPLEX:
@@ -498,7 +495,7 @@ gconj(GEN x)
       for (i=2; i<lx; i++) z[i] = lconj((GEN)x[i]);
       break;
 
-    case t_RFRAC: case t_RFRACN: case t_VEC: case t_COL: case t_MAT:
+    case t_RFRAC: case t_VEC: case t_COL: case t_MAT:
       lx = lg(x); z = cgetg(lx,tx);
       for (i=1; i<lx; i++) z[i] = lconj((GEN)x[i]);
       break;
@@ -529,7 +526,7 @@ conjvec(GEN x,long prec)
 
   switch(tx)
   {
-    case t_INT: case t_INTMOD: case t_FRAC: case t_FRACN:
+    case t_INT: case t_INTMOD: case t_FRAC:
       z=cgetg(2,t_COL); z[1]=lcopy(x); break;
 
     case t_COMPLEX: case t_QUAD:
@@ -553,8 +550,7 @@ conjvec(GEN x,long prec)
 	tx=typ(y[i]);
 	if (tx==t_INTMOD) p=gmael(y,i,1);
 	else
-	  if (tx != t_INT && ! is_frac_t(tx))
-	    err(polrationer,"conjvec");
+	  if (!is_rational_t(tx)) err(polrationer,"conjvec");
       }
       if (!p)
       {
@@ -625,7 +621,7 @@ gtrace(GEN x)
 
   switch(tx)
   {
-    case t_INT: case t_REAL: case t_FRAC: case t_FRACN:
+    case t_INT: case t_REAL: case t_FRAC:
       return gmul2n(x,1);
 
     case t_COMPLEX:
@@ -649,7 +645,7 @@ gtrace(GEN x)
       av = avma; y = (GEN)x[1];
       return gerepileupto(av, quicktrace((GEN)x[2], polsym(y, degpol(y)-1)));
 
-    case t_RFRAC: case t_RFRACN:
+    case t_RFRAC:
       return gadd(x, gconj(x));
 
     case t_VEC: case t_COL:
@@ -3412,7 +3408,7 @@ canon(GEN *px)
     GEN d = leading_term(x);
     switch (typ(d))
     {
-      case t_INT: case t_REAL: case t_FRAC: case t_FRACN:
+      case t_INT: case t_REAL: case t_FRAC:
         if (gsigne(d) < 0) { *px = gneg(x); return 1; }
     }
   }

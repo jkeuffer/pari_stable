@@ -641,7 +641,7 @@ galoisapply(GEN nf, GEN aut, GEN x)
   }
   switch(typ(x))
   {
-    case t_INT: case t_INTMOD: case t_FRAC: case t_FRACN: case t_PADIC:
+    case t_INT: case t_INTMOD: case t_FRAC: case t_PADIC:
       avma=av; return gcopy(x);
 
     case t_POLMOD: x = (GEN) x[2]; /* fall through */
@@ -2476,7 +2476,7 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
 
   if (typ(nfz)!=t_VEC || lg(nfz)!=10 || typ(nfz[1]) != t_VEC)
     err(talker,"not a zeta number field in zetakall");
-  if (! is_intreal_t(ts) && ts != t_COMPLEX && ! is_frac_t(ts))
+  if (! is_intreal_t(ts) && ts != t_COMPLEX && ts != t_FRAC)
     err(typeer,"gzetakall");
   resi=(GEN)nfz[2]; C=(GEN)nfz[4]; cst=(GEN)nfz[5];
   cstlog=(GEN)nfz[6]; coef=(GEN)nfz[8]; coeflog=(GEN)nfz[9];
@@ -2583,7 +2583,7 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
   else
   {
     GEN Pi = mppi(bigprec);
-    if (is_frac_t(ts))
+    if (ts == t_FRAC)
       s = gmul(s, realun(bigprec));
     else
       s = gprec_w(s, bigprec);

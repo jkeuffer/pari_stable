@@ -22,7 +22,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define t_REAL     2
 #define t_INTMOD   3
 #define t_FRAC     4
-#define t_FRACN    5
 #define t_COMPLEX  6
 #define t_PADIC    7
 #define t_QUAD     8
@@ -30,7 +29,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define t_POL      10
 #define t_SER      11
 #define t_RFRAC    13
-#define t_RFRACN   14
 #define t_QFR      15
 #define t_QFI      16
 #define t_VEC      17
@@ -44,17 +42,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /* #define is_intreal_t(t) ( (t) == t_REAL || (t) == t_INT ) */
 #define is_intreal_t(t) ( (t) <= t_REAL )
-#define is_rational_t(t) ((t)==t_INT || (t)==t_FRAC) /* FRACN omitted */
+#define is_rational_t(t) ((t)==t_INT || (t)==t_FRAC)
 
-#define is_frac_t(t) ( (t) == t_FRAC || (t) == t_FRACN )
-#define is_rfrac_t(t) ( (t) == t_RFRAC || (t) == t_RFRACN )
 #define is_polser_t(t) ( (t) == t_SER || (t) == t_POL )
 #define is_vec_t(t) ( (t) == t_VEC || (t) == t_COL )
 #define is_matvec_t(t) ( (t) >= t_VEC && (t) <= t_MAT )
 #define is_scalar_t(tx) ((tx) < t_POL)
 #define is_extscalar_t(tx) ((tx) <= t_POL)
+/* this one is not great: for deriv */
 #define is_const_t(tx) ((tx) < t_POLMOD)
-/* pas terrible celui-la: pour deriv */
 
 #define is_qf_t(t) ( (t) == t_QFR || (t) == t_QFI )
 #define is_mod_t(t) ( (t) == t_POLMOD || (t) == t_INTMOD )
@@ -67,3 +63,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define isnonscalar(x) (typ(x) == t_POL && lg(x) > 3)
 
 #define is_noncalc_t(tx) ((tx) >= t_LIST)
+
+/* backward compatibility */
+#define t_FRACN  t_FRAC
+#define t_RFRACN t_RFRAC
+#define is_frac_t(t) ( (t) == t_FRAC )
+#define is_rfrac_t(t) ( (t) == t_RFRAC )

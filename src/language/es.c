@@ -1145,7 +1145,7 @@ voir2(GEN x, long nb, long bl)
       blancs(bl); pariputs(s);        voir2((GEN)x[2],nb,bl);
       break;
     }
-    case t_FRAC: case t_FRACN: case t_RFRAC: case t_RFRACN:
+    case t_FRAC: case t_RFRAC:
       blancs(bl); pariputs("num = "); voir2((GEN)x[1],nb,bl);
       blancs(bl); pariputs("den = "); voir2((GEN)x[2],nb,bl);
       break;
@@ -1228,7 +1228,6 @@ type_name(long t)
     case t_REAL   : s="t_REAL";    break;
     case t_INTMOD : s="t_INTMOD";  break;
     case t_FRAC   : s="t_FRAC";    break;
-    case t_FRACN  : s="t_FRACN";   break;
     case t_COMPLEX: s="t_COMPLEX"; break;
     case t_PADIC  : s="t_PADIC";   break;
     case t_QUAD   : s="t_QUAD";    break;
@@ -1236,7 +1235,6 @@ type_name(long t)
     case t_POL    : s="t_POL";     break;
     case t_SER    : s="t_SER";     break;
     case t_RFRAC  : s="t_RFRAC";   break;
-    case t_RFRACN : s="t_RFRACN";  break;
     case t_QFR    : s="t_QFR";     break;
     case t_QFI    : s="t_QFI";     break;
     case t_VEC    : s="t_VEC";     break;
@@ -1410,7 +1408,7 @@ isnull(GEN g)
       return isnull((GEN)g[1]) && isnull((GEN)g[2]);
     case t_QUAD:
       return isnull((GEN)g[2]) && isnull((GEN)g[3]);
-    case t_FRAC: case t_FRACN: case t_RFRAC: case t_RFRACN:
+    case t_FRAC: case t_RFRAC:
       return isnull((GEN)g[1]);
     case t_POLMOD:
       return isnull((GEN)g[2]);
@@ -1435,7 +1433,7 @@ isone(GEN g)
       return isnull((GEN)g[2])? isone((GEN)g[1]): 0;
     case t_QUAD:
       return isnull((GEN)g[3])? isone((GEN)g[2]): 0;
-    case t_FRAC: case t_FRACN: case t_RFRAC: case t_RFRACN:
+    case t_FRAC: case t_RFRAC:
       return isone((GEN)g[1]) * isone((GEN)g[2]);
     case t_POL:
       if (!signe(g)) return 0;
@@ -1455,7 +1453,7 @@ isfactor(GEN g)
   {
     case t_INT: case t_REAL:
       return (signe(g)<0)? -1: 1;
-    case t_FRAC: case t_FRACN: case t_RFRAC: case t_RFRACN:
+    case t_FRAC: case t_RFRAC:
       return isfactor((GEN)g[1]);
     case t_COMPLEX:
       if (isnull((GEN)g[1])) return isfactor((GEN)g[2]);
@@ -1489,7 +1487,7 @@ isdenom(GEN g)
   long i,deja;
   switch(typ(g))
   {
-    case t_FRAC: case t_FRACN: case t_RFRAC: case t_RFRACN:
+    case t_FRAC: case t_RFRAC:
       return 0;
     case t_COMPLEX: return isnull((GEN)g[2]);
     case t_PADIC: return !signe((GEN)g[4]);
@@ -1660,7 +1658,7 @@ bruti(GEN g, pariout_t *T, int addsign)
       bruti((GEN)g[2],T,1); comma_sp(T);
       bruti((GEN)g[1],T,1); pariputc(')'); break;
 
-    case t_FRAC: case t_FRACN: case t_RFRAC: case t_RFRACN:
+    case t_FRAC: case t_RFRAC:
       r = isfactor((GEN)g[1]); if (!r) pariputc('(');
       bruti((GEN)g[1],T,addsign);
       if (!r) pariputc(')');
@@ -1876,7 +1874,7 @@ sori(GEN g, pariout_t *T)
   close_paren = 0;
   if (!is_graphicvec_t(tg))
   {
-    if (is_frac_t(tg) && gsigne(g) < 0) pariputc('-');
+    if (tg == t_FRAC && gsigne(g) < 0) pariputc('-');
     pariputc('('); close_paren = 1;
   }
   switch(tg)
@@ -1886,7 +1884,7 @@ sori(GEN g, pariout_t *T)
       if (tg == t_INTMOD && signe(a) < 0) a = addii(a,b);
       sori(a,T); pariputs(" mod "); sori(b,T); break;
 	
-    case t_FRAC: case t_FRACN:
+    case t_FRAC:
       a=(GEN)g[1]; wr_int(T,a,0); pariputs(" /");
       b=(GEN)g[2]; wr_int(T,b,0); break;
 
@@ -1947,7 +1945,7 @@ sori(GEN g, pariout_t *T)
       if (!i) pariputs(" 1)"); else monome(v,i);
       pariputc(')'); break;
 
-    case t_RFRAC: case t_RFRACN:
+    case t_RFRAC:
       sori((GEN)g[1],T); pariputs(" / "); sori((GEN)g[2],T);
       break;
 	
@@ -2040,7 +2038,7 @@ texi_nobrace(GEN g, pariout_t *T, int addsign)
       texi((GEN)g[2],T,1); pariputs(" mod ");
       texi((GEN)g[1],T,1); break;
 
-    case t_FRAC: case t_FRACN: case t_RFRAC: case t_RFRACN:
+    case t_FRAC: case t_RFRAC:
       if (T->TeXstyle & TEXSTYLE_FRAC)
 	pariputs("\\frac");		/* Assume that texi() puts braces */
       texi((GEN)g[1],T,addsign); 
@@ -2280,7 +2278,7 @@ tex2mail_output(GEN z, long n)
     if (logstyle == logstyle_TeX) {
 	int extrabraces = 0;
 	switch (typ(z)) {
-	case t_FRAC: case t_FRACN: case t_RFRAC: case t_RFRACN:
+	case t_FRAC: case t_RFRAC:
 	    if (!(T.TeXstyle & TEXSTYLE_FRAC))
 		/* Extra braces disable line breaks, avoid them if possible */
 		extrabraces = 1;

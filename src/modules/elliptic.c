@@ -625,7 +625,7 @@ ordell(GEN e, GEN x, long prec)
     return gerepileupto(av,y);
   }
 
-  if (td==t_INT || is_frac_t(td))
+  if (is_rational_t(td))
   {
     pd = (td==t_INT)? NULL: (GEN)D[2];
     if (pd) D = mulii((GEN)D[1],pd);
@@ -2736,7 +2736,7 @@ ellintegralmodel(GEN e)
     switch(typ(u))
     {
       case t_INT: break;
-      case t_FRAC: case t_FRACN: /* partial factorization */
+      case t_FRAC: /* partial factorization */
         L = concatsp(L, (GEN)auxdecomp((GEN)u[2], 0)[1]);
         break;
       default: err(talker, "not a rational curve in ellintegralmodel");
@@ -2974,8 +2974,7 @@ orderell(GEN e, GEN p)
   long t;
   checkell(e); checkpt(p);
   t = typ(e[13]);
-  if (t != t_INT && !is_frac_t(t))
-    err(impl,"orderell for nonrational elliptic curves");
+  if (!is_rational_t(t)) err(impl,"orderell for nonrational elliptic curves");
   return stoi( _orderell(e, p) );
 }
 
