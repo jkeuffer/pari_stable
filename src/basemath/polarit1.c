@@ -1406,14 +1406,16 @@ FqX_split_berlekamp(GEN *t, GEN q, GEN T, GEN p)
 GEN
 factmod0(GEN f, GEN pp)
 {
-  long i, j, k, e, p, N, nbfact, d;
+  long i, j, k, e, p, N, nbfact, d, val;
   pari_sp av = avma, tetpil;
   GEN pps2,ex,y,f2,p1,g1,u, *t;
 
   if (!(d = factmod_init(&f, pp, &p))) { avma=av; return trivfact(); }
   /* to hold factors and exponents */
   t = (GEN*)cgetg(d+1,t_VEC); ex = cgetg(d+1,t_VECSMALL);
+  val = polvaluation(f, &f);
   e = nbfact = 1;
+  if (val) { t[1] = polx[varn(f)]; ex[1] = val; nbfact++; }
   pps2 = shifti(pp,-1);
 
   for(;;)
