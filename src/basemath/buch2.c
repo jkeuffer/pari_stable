@@ -2249,7 +2249,6 @@ compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR)
     fprintferr("\n#### Tentative regulator : %Z\n", gprec_w(R,3));
     fprintferr("\n ***** check = %f\n",c);
   }
-//  if (c < 0.75 || c > 1.3) { avma = av; return fupb_RELAT; }
   if (c < 0.75 || c > 1.3) { avma = av; return fupb_RELAT; }
   *ptkR = R; *ptL = L; return fupb_NONE;
 }
@@ -3138,14 +3137,16 @@ PRECPB:
   /* fundamental units */
   if (flun & (nf_UNITS|nf_INIT))
   {
-    GEN v = extract_full_lattice(L); /* L may be very large */
+    GEN U, H, v = extract_full_lattice(L); /* L may be very large */
     if (v)
     {
       A = vecextract_p(A, v);
       L = vecextract_p(L, v);
     }
     /* arch. components of fund. units */
-    A = cleanarch(gmul(A,lllint(L)), N, PRECREG);
+    H = hnflll_i(L, &U, 1); U = vecextract_i(U, lg(U)-(RU-1), lg(U)-1);
+    U = gmul(U, lll(H, DEFAULTPREC));
+    A = cleanarch(gmul(A, U), N, PRECREG);
     if (DEBUGLEVEL) msgtimer("cleanarch");
   }
   fu = NULL;
