@@ -1828,101 +1828,97 @@ contfrac0(GEN x, GEN b, long flag)
 GEN
 sfcont(GEN x, GEN x1, long k)
 {
-  long  av,lx=lg(x),tx=typ(x),e,i,j,l,l1,lx1,tetpil,f;
-  GEN   y,p1,p2,p3,p4,yp;
+  long av,lx,tx=typ(x),e,i,l,lx1,f;
+  GEN  y,p1,p2,p3;
 
   if (is_scalar_t(tx))
   {
-    if (gcmp0(x)) { y=cgetg(2,t_VEC); y[1]=zero; return y; }
+    if (gcmp0(x)) return _vec(gzero);
     switch(tx)
     {
-      case t_INT:
-        y=cgetg(2,t_VEC); y[1]=lcopy(x); return y;
+      case t_INT: return _vec(icopy(x));
       case t_REAL:
-        l=avma; p1=cgetg(3,t_FRACN);
+        av = avma; lx = lg(x);
 	p2 = rcopy(x); settyp(p2,t_INT); setlgefint(p2,lx);
-	p1[1] = (long) p2; e = bit_accuracy(lx)-1-expo(x);
-	if (e<0) err(talker,"integral part not significant in scfont");
-
-	l1 = (e>>TWOPOTBITS_IN_LONG)+3; p2=cgeti(l1);
-	p2[1]= evalsigne(1)|evallgefint(l1);
-	p2[2]= (1L<<(e&(BITS_IN_LONG-1)));
-	for (i=3; i<l1; i++) p2[i]=0;
-	p1[2]=(long) p2; p3=cgetg(3,t_FRACN);
-	p3[2]=lcopy(p2);
-	p3[1]=laddsi(signe(x),(GEN)p1[1]);
-	p1=sfcont(p1,p1,k); tetpil=avma;
-	return gerepile(l,tetpil,sfcont(p3,p1,k));
+        e = bit_accuracy(lx)-1-expo(x);
+	if (e < 0) err(talker,"integral part not significant in scfont");
+        p1 = cgetg(3, t_FRACN);
+	p1[1] = (long)p2;
+	p1[2] = lshifti(gun, e);
+       
+        p3 = cgetg(3, t_FRACN);
+	p3[1] = laddsi(signe(x), p2);
+	p3[2] = p1[2];
+	p1 = sfcont(p1,p1,k);
+	return gerepileupto(av, sfcont(p3,p1,k));
 
       case t_FRAC: case t_FRACN:
-        l=avma; lx1=lgefint(x[2]);
-	l1 = (long) ((double) BYTES_IN_LONG/4.0*46.093443*(lx1-2)+3);
-        if (k>0 && ++k > 0 && l1 > k) l1 = k; /* beware overflow */
-	if ((ulong)l1>LGBITS) l1=LGBITS;
-	if (lgefint(x[1]) >= lx1) p1=icopy((GEN)x[1]);
-	else affii((GEN)x[1],p1=cgeti(lx1));
-	p2=icopy((GEN)x[2]); lx1=lg(x1);
-	y=cgetg(l1,t_VEC); f=(x!=x1); i=0;
-	while (!gcmp0(p2) && i<=l1-2)
+        av = avma; lx1 = lgefint(x[2]);
+	l = (long) ((double) BYTES_IN_LONG/4.0*46.093443*(lx1-2)+3);
+        if (k > 0 && ++k > 0 && l > k) l = k; /* beware overflow */
+	if ((ulong)l > LGBITS) l = LGBITS;
+	if (lgefint(x[1]) >= lx1)       
+          p1 = icopy((GEN)x[1]);
+	else
+        { p1 = cgeti(lx1); affii((GEN)x[1], p1); }
+	p2 = icopy((GEN)x[2]); lx1 = lg(x1);
+	y = cgetg(l,t_VEC);
+        f = (x != x1);
+        l--;
+        if (f && l > lx1) l = lx1;
+        i = 0;
+	while (!gcmp0(p2) && i < l)
 	{
-	  i++; y[i]=ldvmdii(p1,p2,&p3);
-	  if (signe(p3)>=0) affii(p3,p1);
-          else
-	  {
-	    p4=addii(p3,p2); affii(p4,p1); cgiv(p4);
-	    y[1]=laddsi(-1,(GEN)y[1]);
-	  }
-	  cgiv(p3); p4=p1; p1=p2; p2=p4;
-	  if (f)
+	  i++; y[i] = (long)truedvmdii(p1,p2,&p3);
+	  affii(p3,p1); cgiv(p3); p3 = p1;
+          p1 = p2; p2 = p3;
+	  if (f && !egalii((GEN)x1[i], (GEN)y[i]))
           {
-	    if (i>=lx1) { i--; break; }
-            if (!egalii((GEN)y[i],(GEN)x1[i]))
+            ulong av1 = avma;
+            p1 = subii((GEN)x1[i], (GEN)y[i]);
+            if (is_pm1(p1))
             {
-              av=avma;
-              if (gcmp1(absi(subii((GEN)x1[i],(GEN)y[i]))))
-              {
-                if (i>=lx1-1 || !gcmp1((GEN)x1[i+1]))
-                  affii((GEN)x1[i],(GEN)y[i]);
-              }
-              else i--;
-              avma=av; break;
+              if (i == lx1 || !gcmp1((GEN)x1[i+1]))
+                affii((GEN)x1[i],(GEN)y[i]);
             }
+            else i--;
+            avma = av1; break;
           }
 	}
-	if (i>=2 && gcmp1((GEN)y[i]))
+	if (i >= 2 && gcmp1((GEN)y[i]))
 	{
 	  cgiv((GEN)y[i]); --i; cgiv((GEN)y[i]);
-	  y[i]=laddsi(1,(GEN)y[i]);
+	  y[i] = laddsi(1,(GEN)y[i]);
 	}
-	setlg(y,i+1); return gerepileupto(l, y);
+	setlg(y,i+1); return gerepileupto(av, y);
     }
     err(typeer,"sfcont");
   }
 
   switch(tx)
   {
-    case t_POL:
-      y=cgetg(2,t_VEC); y[1]=lcopy(x); break;
+    case t_POL: return _vec(gcopy(x));
     case t_SER:
-      av=avma; p1=gtrunc(x); tetpil=avma;
-      y=gerepile(av,tetpil,sfcont(p1,p1,k)); break;
+      av = avma; p1 = gtrunc(x);
+      return gerepileupto(av,sfcont(p1,p1,k));
     case t_RFRAC:
     case t_RFRACN:
-      av=avma; l1=lgef(x[1]); if (lgef(x[2])>l1) l1=lgef(x[2]);
-      if (k>0 && l1>k+1) l1=k+1;
-      yp=cgetg(l1,t_VEC); p1=(GEN)x[1]; i=0; p2=(GEN)x[2];
-      while (!gcmp0(p2) && i<=l1-2)
+      av = avma;
+      l = typ(x[1] == t_POL)? lgef(x[1]): 3;
+      if (lgef(x[2]) > l) l = lgef(x[2]);
+      if (k > 0 && l > k+1) l = k+1;
+      y = cgetg(l,t_VEC);
+      p1 = (GEN)x[1];
+      p2 = (GEN)x[2];
+      for (i=1; i<l && !gcmp0(p2); i++)
       {
-	i++; yp[i]=ldivres(p1,p2,&p3);
-	p1=p2; p2=p3;
+	y[i] = ldivres(p1,p2,&p3);
+	p1 = p2; p2 = p3;
       }
-      tetpil=avma; y=cgetg(i+1,t_VEC);
-      for (j=1; j<=i; j++) y[j]=lcopy((GEN)yp[j]);
-      y=gerepile(av,tetpil,y); break;
-    default: err(typeer,"sfcont");
-      return NULL; /* not reached */
+      return gerepilecopy(av, y);
   }
-  return y;
+  err(typeer,"sfcont");
+  return NULL; /* not reached */
 }
 
 static GEN
