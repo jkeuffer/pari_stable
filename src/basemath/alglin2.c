@@ -1099,7 +1099,7 @@ matrixqz_aux(GEN A)
     if (!gcmp0(a))
     {
       a = denom(a);
-      if (!is_pm1(a)) A[k] = lmul(a, (GEN)A[k]);
+      if (!is_pm1(a)) A[k] = lmul((GEN)A[k], a);
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
@@ -1197,7 +1197,7 @@ init_hnf(GEN x, GEN *denx, long *co, long *li, gpmem_t *av)
 
   if (gcmp1(*denx)) /* no denominator */
     { *denx = NULL; return dummycopy(x); }
-  return gmul(x,*denx);
+  return Q_muli_to_int(x, *denx);
 }
 
 GEN
@@ -2144,7 +2144,7 @@ ZM_reduce(GEN A, GEN U, long i, long j0)
 GEN
 hnf0(GEN A, int remove)
 {
-  gpmem_t av0 = avma, av, tetpil, lim;
+  gpmem_t av0 = avma, av, lim;
   long s,li,co,i,j,k,def,ldef;
   GEN denx,a,p1;
 
@@ -2168,7 +2168,7 @@ hnf0(GEN A, int remove)
       if (low_stack(lim, stack_lim(av,1)))
       {
         if (DEBUGMEM>1) err(warnmem,"hnf[1]. i=%ld",i);
-        tetpil=avma; A=gerepile(av,tetpil,ZM_copy(A));
+        A = gerepilecopy(av, A);
       }
     }
     p1 = gcoeff(A,i,def); s = signe(p1);
@@ -2183,7 +2183,7 @@ hnf0(GEN A, int remove)
     if (low_stack(lim, stack_lim(av,1)))
     {
       if (DEBUGMEM>1) err(warnmem,"hnf[2]. i=%ld",i);
-      tetpil=avma; A=gerepile(av,tetpil,ZM_copy(A));
+      A = gerepilecopy(av, A);
     }
   }
   if (remove)
@@ -2192,9 +2192,8 @@ hnf0(GEN A, int remove)
       if (!gcmp0((GEN)A[j])) A[i++] = A[j];
     setlg(A,i);
   }
-  tetpil=avma;
   A = denx? gdiv(A,denx): ZM_copy(A);
-  return gerepile(av0,tetpil,A);
+  return gerepileupto(av0, A);
 }
 
 GEN
@@ -2205,7 +2204,7 @@ hnf(GEN x) { return hnf0(x,1); }
 static GEN
 allhnfmod(GEN x,GEN dm,int flag)
 {
-  gpmem_t av,tetpil,lim;
+  gpmem_t av, lim;
   long li,co,i,j,k,def,ldef,ldm;
   GEN a,b,w,p1,p2,d,u,v;
 
@@ -2252,7 +2251,7 @@ allhnfmod(GEN x,GEN dm,int flag)
       if (low_stack(lim, stack_lim(av,1)))
       {
         if (DEBUGMEM>1) err(warnmem,"allhnfmod[1]. i=%ld",i);
-	tetpil=avma; x=gerepile(av,tetpil,ZM_copy(x));
+	x = gerepilecopy(av, x);
       }
     }
   w = cgetg(li,t_MAT); b = dm;
@@ -2287,7 +2286,7 @@ allhnfmod(GEN x,GEN dm,int flag)
       }
     }
   }
-  tetpil=avma; return gerepile(av,tetpil,ZM_copy(w));
+  return gerepilecopy(av, w);
 }
 
 GEN
@@ -2734,9 +2733,8 @@ GEN
 hnfall_i(GEN A, GEN *ptB, long remove)
 {
   GEN B,c,h,x,p,a;
-  gpmem_t av=avma,av1,tetpil,lim;
+  gpmem_t av = avma, av1, lim;
   long m,n,r,i,j,k,li;
-  GEN *gptr[2]; 
 
   if (typ(A)!=t_MAT) err(typeer,"hnfall");
   n=lg(A)-1;
@@ -2766,11 +2764,8 @@ hnfall_i(GEN A, GEN *ptB, long remove)
         ZM_reduce(A,B, i,k);
         if (low_stack(lim, stack_lim(av1,1)))
         {
-          tetpil = avma;
-          A = ZM_copy(A); gptr[0]=&A;
-          if (B) { B = ZM_copy(B); gptr[1]=&B; }
           if (DEBUGMEM>1) err(warnmem,"hnfall[1], li = %ld", li);
-          gerepilemanysp(av1,tetpil,gptr,B? 2: 1);
+          gerepileall(av1, B? 2: 1, &A, &B);
         }	
       }
       x = gcoeff(A,li,j); if (signe(x)) break;
@@ -2794,9 +2789,8 @@ hnfall_i(GEN A, GEN *ptB, long remove)
     ZM_reduce(A,B, li,r);
     if (low_stack(lim, stack_lim(av1,1)))
     {
-      GEN *gptr[2]; gptr[0]=&A; gptr[1]=&B;
       if (DEBUGMEM>1) err(warnmem,"hnfall[2], li = %ld", li);
-      gerepilemany(av1,gptr,B? 2: 1);
+      gerepileall(av1, B? 2: 1, &A, &B);
     }	
   }
   if (DEBUGLEVEL>5) fprintferr("\nhnfall, final phase: ");
@@ -2812,18 +2806,14 @@ hnfall_i(GEN A, GEN *ptB, long remove)
       ZM_reduce(A,B, i,k);
       if (low_stack(lim, stack_lim(av1,1)))
       {
-        tetpil = avma;
-        A = ZM_copy(A); gptr[0]=&A;
-        if (B) { B = ZM_copy(B); gptr[1]=&B; }
         if (DEBUGMEM>1) err(warnmem,"hnfall[3], j = %ld", j);
-        gerepilemanysp(av1,tetpil,gptr, B? 2: 1);
+        gerepileall(av1, B? 2: 1, &A, &B);
       }	
     }
   if (DEBUGLEVEL>5) fprintferr("\n");
   /* remove the first r columns */
   if (remove) { A += r; A[0] = evaltyp(t_MAT) | evallg(n-r+1); }
-  gptr[0] = &A; gptr[1] = &B;
-  gerepilemany(av, gptr, B? 2: 1);
+  gerepileall(av, B? 2: 1, &A, &B);
   if (B) *ptB = B;
   return A;
 }
