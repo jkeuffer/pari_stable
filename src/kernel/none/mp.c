@@ -1527,6 +1527,7 @@ sqrtu2(ulong *a)
 
   /* > 32 correct bits, 1 Newton iteration to reach 64 */
   if (!b) b = ~0UL;
+  if (b <= a[0]) return ~0UL;
   hiremainder = a[0]; c = divll(a[1], b);
   return (addll(c, b) >> 1) | HIGHBIT;
 }
