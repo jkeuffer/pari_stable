@@ -503,16 +503,19 @@ binome(GEN n, long k)
     if (signe(n) > 0)
     {
       GEN z = subis(n,k);
-      if (cmpis(z,k) < 0) k = itos(z);
-      avma = av;
-      if (k <= 1)
+      if (cmpis(z,k) < 0) 
       {
-        if (k < 0) return gzero;
-        if (k == 0) return gun;
-        return icopy(n);
+        k = itos(z); avma = av;
+        if (k <= 1)
+        {
+          if (k < 0) return gzero;
+          if (k == 0) return gun;
+          return icopy(n);
+        }
       }
     }
-    if (lgefint(n) == 3)
+    /* k > 1 */
+    if (lgefint(n) == 3 && signe(n) > 0)
     {
       ulong N = itou(n);
       y = seq_umul(N-(ulong)k+1, N);
