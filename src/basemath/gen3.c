@@ -2464,7 +2464,7 @@ geval(GEN x)
   switch(tx)
   {
     case t_STR:
-      return flisexpr(GSTR(x));
+      return flisseq(GSTR(x));
 
     case t_POLMOD: y=cgetg(3,tx);
       y[1]=(long)geval((GEN)x[1]);

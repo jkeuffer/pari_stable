@@ -128,6 +128,7 @@ long    delete_var(void);
 long    fetch_user_var(char *s);
 long    fetch_var(void);
 GEN     flisexpr(char *t);
+GEN     flisseq(char *t);
 void    freeep(entree *ep);
 long    hashvalue(char *s);
 entree* install(void *f, char *name, char *code);

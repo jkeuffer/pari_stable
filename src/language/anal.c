@@ -236,6 +236,14 @@ flisexpr(char *s)
   free(t); return x;
 }
 
+GEN
+flisseq(char *s)
+{
+  char *t = filtre(s,NULL, f_INIT | f_REG);
+  GEN x = lisseq0(t, seq);
+  free(t); return x;
+}
+
 /* check syntax, then execute */
 GEN
 readseq(char *c, int strict)
