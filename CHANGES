@@ -202,6 +202,7 @@ BA  7- routine qfbsolve(Q,p) for Q imaginary and p prime
     9- new options to Configure: --with-fltk, --emacsdir, --datadir,
        --sysdatadir
 SG 10- updated micro-kernel for HPPA
+BA 11- Add code 'i' for functions returning C int (not long)
 
   Removed
     1- bruteall [ useless, undocumented variant of 'brute' ]
