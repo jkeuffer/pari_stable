@@ -1154,75 +1154,20 @@ testpermutation(GEN F, GEN B, long s, long t, long cut,
   avma = avm;
   return gzero;
 }
-/* Compute generators for the subgroup of (Z/nZ)* given in HNF. 
- * I apologize for the following spec:
- * If zns=znstar(2) then
- * zn2=gtovecsmall((GEN)zns[2]);
- * zn3=lift((GEN)zns[3]);
- * gen and ord : VECSMALL of length lg(zn3).
- * the result is in gen. 
- * ord contains the relatives orders of the generators.
- */
-GEN
-hnftogeneratorslist(long n, GEN zn2, GEN zn3, GEN lss, GEN gen, GEN ord)
-{
-  gpmem_t ltop=avma;
-  int j,h;
-  GEN m=stoi(n);
-  for (j = 1; j < lg(gen); j++)
-  {
-    gen[j] = 1;
-    for (h = 1; h < lg(lss); h++)
-      gen[j] = mulssmod(gen[j], itos(powmodulo((GEN)zn3[h],gmael(lss,j,h),m)),n);
-    ord[j] = zn2[j] / itos(gmael(lss,j,j));
-  }
-  avma=ltop;
-  return gen;
-}
-
 int pari_compare_lg(GEN x, GEN y)
 {
   return lg(x)-lg(y);
 }
-/* Compute the elements of the subgroup of (Z/nZ)* given in HNF. 
- * I apologize for the following spec:
- * If zns=znstar(2) then
- * zn2=gtovecsmall((GEN)zns[2]);
- * zn3=lift((GEN)zns[3]);
- * card=cardinal of the subgroup(i.e phi(n)/det(lss))
- */
-GEN
-hnftoelementslist(long n, GEN zn2, GEN zn3, GEN lss, long card)
-{
-  gpmem_t ltop;
-  GEN     sg, gen, ord;
-  int     k, j, l;
-  sg = cgetg(1 + card, t_VECSMALL);
-  ltop=avma;
-  gen = cgetg(lg(zn3), t_VECSMALL);
-  ord = cgetg(lg(zn3), t_VECSMALL);
-  sg[1] = 1;
-  (void)hnftogeneratorslist(n,zn2,zn3,lss,gen,ord);
-  for (j = 1, l = 1; j < lg(gen); j++)
-  {
-    int     c = l * (ord[j] - 1);
-    for (k = 1; k <= c; k++)	/* I like it */
-      sg[++l] = mulssmod(sg[k], gen[j], n);
-  }
-  vecsmall_sort(sg);
-  avma=ltop;
-  return sg;
-}
 
 /*
- * Calcule la liste des sous groupes de \ZZ/m\ZZ d'ordre divisant p et
+ * Calcule la liste des sous groupes de (\ZZ/m\ZZ)^* d'ordre divisant p et
  * retourne la liste de leurs elements
  */
 GEN
 listsousgroupes(long m, long p)
 {
   gpmem_t ltop = avma;
-  GEN     zns, lss, sg, res, zn2, zn3;
+  GEN     zn, zns, lss, sg, res;
   int     k, card, i, phi;
   if (m == 2)
   {
@@ -1232,11 +1177,10 @@ listsousgroupes(long m, long p)
     sg[1] = 1;
     return res;
   }
-  zns = znstar(stoi(m));
-  phi = itos((GEN) zns[1]);
-  zn2 = gtovecsmall((GEN)zns[2]);
-  zn3 = lift((GEN)zns[3]);
-  lss = subgrouplist((GEN) zns[2], NULL);
+  zn = znstar(stoi(m));
+  phi = itos((GEN) zn[1]);
+  zns = znstar_small(zn);
+  lss = subgrouplist((GEN) zn[2], NULL);
   res = cgetg(lg(lss), t_VEC);
   for (k = 1, i = lg(lss) - 1; i >= 1; i--)
   {
@@ -1245,7 +1189,7 @@ listsousgroupes(long m, long p)
     card = phi / itos(det((GEN) lss[i]));
     avma = av;
     if (p % card == 0)
-      res[k++] = (long) hnftoelementslist(m,zn2,zn3,(GEN)lss[i],card);
+      res[k++] = (long) znstar_hnf_elts(zns,(GEN)lss[i]);
   }
   setlg(res,k);
   res=gen_sort(res,0,&pari_compare_lg);

@@ -1331,8 +1331,9 @@ GEN     roots0(GEN x,long flag,long l);
 /*subcyclo.c */
 
 GEN     galoissubcyclo(GEN N, GEN sg, long flag, long v);
-GEN     subcyclo(long n, long d, long v);
 GEN     polsubcyclo(long n, long d, long v);
+GEN     subcyclo(long n, long d, long v);
+GEN     znstar_small(GEN zn);
 
 /* subfields.c */
 
