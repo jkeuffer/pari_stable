@@ -387,7 +387,6 @@ forvec_next_lt(GEN gd, GEN v0)
     if (--i <= 0) return NULL;
     if (i < imin) imin = i;
   }
-  return (GEN)v;
 }
 
 GEN
