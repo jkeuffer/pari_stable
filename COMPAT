@@ -47,6 +47,9 @@ This file lists the incompatible changes between Version 2.x and older versions
     elleight(), and ellbil now satisfies the proper identity for
     B(P, Q) = (h(P+Q)-h(P)-h(Q)) / 2, and 
 
+  - ':' no longer allowed as a substitute for ';' if compatible = 0. Use GP2C
+    semantics [ x:int, v:vec ]. For the time being the type information is
+    discarded.
 
 * Specific to the PARI library:
 ===============================

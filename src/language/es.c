@@ -125,6 +125,12 @@ filtre0(filtre_t *F)
         } /* skip \<CR> */
         break;
 
+      case ':':
+        if (compatible) {
+          t--; while (is_keyword_char(*s)) { s++; }
+        }
+        break;
+
       case '"': F->in_string = 1;
     }
   }
