@@ -701,7 +701,7 @@ pol_up(GEN rnfeq, GEN x)
 {
   long i, l = lgef(x);
   GEN y = cgetg(l, t_POL); y[1] = x[1];
-  for (i=1; i<l; i++) y[i] = (long)rnfelementreltoabs(rnfeq, (GEN)x[i]);
+  for (i=2; i<l; i++) y[i] = (long)rnfelementreltoabs(rnfeq, (GEN)x[i]);
   return y;
 }
 
