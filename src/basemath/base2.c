@@ -1634,12 +1634,12 @@ gcdpm(GEN f1,GEN f2,GEN pm)
 GEN
 respm(GEN x,GEN y,GEN pm)
 {
-  GEN p1;
-  long av=avma,tetpil;
+  long av = avma;
+  GEN p1 = sylpm(x,y,pm);
 
-  x = sylpm(x,y,pm); tetpil=avma;
-  p1 = gcoeff(x,1,1);
-  return gerepile(av,tetpil, egalii(p1,pm)? gzero:icopy(p1));
+  p1 = gcoeff(p1,1,1);
+  if (egalii(p1,pm)) { avma = av; return gzero; }
+  return gerepileuptoint(av, icopy(p1));
 }
 
 /* Normalized integral basis */
