@@ -40,7 +40,6 @@ numtoperm(7,1035)
 permtonum([4,7,1,6,3,5,2])
 37.
 real(5-7*I)
-arat=(x^3+x+1)/x^3;type(arat,14)
 shift(1,50)
 shift([3,4,-11,-12],-2)
 shiftmul([3,4,-11,-12],-2)
