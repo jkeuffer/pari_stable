@@ -574,7 +574,7 @@ lower_bound(GEN p, long *k, double eps)
   if (n<4) { *k=n; return 0.; }
   a=cgetg(6,t_POL); s=cgetg(6,t_POL);
   rho=(double *) gpmalloc(4*sizeof(double));
-  icd = ginv((GEN) p[n+2]);
+  icd = gdiv(realun(DEFAULTPREC), (GEN) p[n+2]);
   for (i=1; i<=4; i++) a[i+1]=lmul(icd,(GEN)p[n+2-i]);
   for (i=1; i<=4; i++)
   {
@@ -1677,8 +1677,7 @@ split_0(GEN p, long bitprec, GEN *F, GEN *G)
     if (gexpo(R)<1 && gtodouble(R)<1.9) split_0_1(p,bitprec,&FF,&GG);
     else
     {
-      q=cgetg(n+3,t_POL); q[1]=p[1];
-      for (i=0; i<=n; i++) q[i+2]=p[n-i+2]; /* p^* with copy of ptr */
+      q = polrecip_i(p);
       R = max_modulus(q,0.05);
       if (gexpo(R)<1 && gtodouble(R)<1.9)
       {
@@ -1719,7 +1718,7 @@ root_error(long n, long k, GEN roots_pol, GEN sigma, GEN shatzle)
   rho=gabs(mygprec((GEN)roots_pol[k],31),4);
   if (gcmp(rho,dbltor(1.))==-1) rho=gun;
   eps=gmul(rho,shatzle);
-  aux=gmul(gpui(rho,stoi(n),4),sigma);
+  aux=gmul(gpowgs(rho,n),sigma);
 
   for (j=1; j<=2 || (j<=5 && gcmp(rap,dbltor(1.2))==1); j++)
   {
