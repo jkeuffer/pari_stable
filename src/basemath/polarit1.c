@@ -2252,7 +2252,7 @@ FqX_split(GEN *t, long d, GEN q, GEN S, GEN T, GEN p)
     {
       w = FpXQYQ_pow(w, shifti(q,-1), *t, T, p);
       /* w in {-1,0,1}^r */
-      if (!degpol(w)) continue;
+      if (degpol(w) <= 0) continue;
       w[2] = ladd((GEN)w[2], gun);
     }
     w = FqX_gcd(*t,w, T,p); l = degpol(w);

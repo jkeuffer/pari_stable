@@ -51,6 +51,10 @@ Done for version 2.2.8 (released ??/??/2004):
 GN  6- [Solaris + cc:] fix linker warnings (missing object types in
        src/kernel/*.S)
     7- listsort(List([]), 1) --> SEGV
+    8- setrand(1582268146);
+       bnr=bnrinit(bnfinit(y^12+6*y^10+31*y^8+84*y^6+159*y^4+166*y^2+1),4,1);
+       rnfkummer(bnr,[1,0,0,0,0,0;0,1,0,0,0,0;0,0,1,0,0,0;0,0,0,1,0,0;0,0,0,0,2,1;0,0,0,0,0,1]);
+        --> bug in gadd [ typo in FqX_split ]
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.
