@@ -34,6 +34,12 @@ is wrong [second one is principal]. Group structure and regulator are correct!
    supplied polynomial to compute roots in Qp, then return them at precision
    p^r [ better, polroots() and factorpadic() behave this way ] ?
 
+4  factorback should not accept [;] since matrix(0,2) is the only valid
+   form of an empty matrix input, corresponding e.g to factor(1). But the
+   empty matrix is used in many places as a marker for a void factorization.
+   This convention should be encapsulated; then we may declare [;] invalid
+   input.
+
 4  gcmp/gegal not transitive: [] == 0, [0] == 0, but [0] != []
 
 4  ellinit over Q_2 doesn't work (AGM loses too much precision)
