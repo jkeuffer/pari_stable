@@ -133,6 +133,7 @@ IZ 52- [tex2mail:] \over wasn't allowed within \left( \right)
    63-  v = vector(2); j = 0; v[j++] = 1 --> j = 2 [ side effect of
         2.2.4-F21: LHS for matrix assignment was evaluated twice ]
         Rem: v = vector(2); v[j++] = v = 0 --> SEGV. Don't cry.
+BA 64- [ix86 + gcc compilation]: fix "invalid preprocessing token" Warning
 
   Changed
     1- rnf structure (removed useless components)

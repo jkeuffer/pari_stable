@@ -121,7 +121,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #else
 #  define TEXT() .text
 #  define GLOBL(name) .globl name
-#  define FUNBEGIN(name) C(name##:)
+#  define FUNBEGIN(name) C(name:)
 #  define FUNEND()
 #endif
 
