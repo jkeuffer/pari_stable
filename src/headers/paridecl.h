@@ -1277,6 +1277,7 @@ GEN     QX_invmod(GEN A, GEN B);
 GEN     QX_caract(GEN A, GEN B, long v);
 int     ZX_is_squarefree(GEN x);
 GEN     ZX_resultant(GEN A, GEN B);
+GEN     ZX_QX_resultant(GEN A, GEN B);
 GEN     ZX_s_add(GEN y,long x);
 long    brent_kung_optpow(long d, long n);
 GEN     ffsqrtnmod(GEN a, GEN n, GEN T, GEN p, GEN *zetan);

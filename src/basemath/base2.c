@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #define RXQX_rem(x,y,T) RXQX_divrem((x),(y),(T),ONLY_REM)
 #define FpX_rem(x,y,p) FpX_divres((x),(y),(p),ONLY_REM)
+extern GEN ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound);
 extern GEN polsym_gen(GEN P, GEN y0, long n, GEN T, GEN N);
 extern GEN FqX_gcd(GEN P, GEN Q, GEN T, GEN p);
 extern GEN FqX_factor(GEN x, GEN T, GEN p);
@@ -1867,34 +1868,37 @@ pol_min(GEN mul, GEN p)
   return gerepileupto(av, gtopolyrev(z,0));
 }
 
-/* a in pr | p, norm(pr) = pf. Return 1 if (a,p) = pr, and 0 otherwise */
+/* a/D in pr | p, norm(pr) = pf. Return 1 if (a/D,p) = pr, and 0 otherwise */
 static int
-is_uniformizer(GEN a, GEN T, GEN pf, GEN p)
+is_uniformizer(GEN D, GEN a, GEN T, GEN pf, GEN p)
 {
-  GEN N = ZX_QX_resultant(T,a); /* norm(a) */
+  GEN N = ZX_resultant_all(T, a, D, 0); /* norm(a) */
   return (resii(diviiexact(N,pf), p) != gzero);
 }
 
 static GEN
-prime_check_elt(GEN a, GEN T, GEN p, GEN pf)
+prime_check_elt(GEN D, GEN Dp, GEN a, GEN T, GEN p, GEN pf)
 {
-  if (is_uniformizer(a,T,pf,p)) return a;
+  if (a == gzero) return NULL;
+  if (is_uniformizer(D,a,T,pf,p)) return a;
   /* FIXME: can't succeed if e > 1, can we know this at this point ? */
-  if (is_uniformizer(gadd(a,p),T,pf,p)) return a;
+  if (is_uniformizer(D,gadd(a,Dp),T,pf,p)) return a;
   return NULL;
 }
 
 static GEN
-random_uniformizer_loop(GEN beta, GEN pol, GEN p, GEN pf)
+random_uniformizer_loop(GEN D, GEN beta, GEN pol, GEN p, GEN pf)
 {
-  gpmem_t av = avma;
   long z,i, m = lg(beta)-1;
   long keep = getrand();
   int c = 0;
-  GEN a;
+  GEN a, Dp = D? mulii(D,p): p;
+  gpmem_t av = avma;
+  ulong pu = is_bigint(p)? 0: itou(p);
 
+  if (pu > 7) pu = 0;
   for(i=1; i<=m; i++)
-    if ((a = prime_check_elt((GEN)beta[i],pol,p,pf))) return a;
+    if ((a = prime_check_elt(D,Dp,(GEN)beta[i],pol,p,pf))) return a;
   (void)setrand(1);
   if (DEBUGLEVEL) fprintferr("uniformizer_loop, hard case: ");
   for(;;avma=av)
@@ -1905,9 +1909,11 @@ random_uniformizer_loop(GEN beta, GEN pol, GEN p, GEN pf)
     {
       z = mymyrand() >> (BITS_IN_RANDOM-5); /* in [0,15] */
       if (z >= 9) z -= 7;
-      a = gadd(a,gmulsg(z,(GEN)beta[i]));
+      if (pu) z %= pu;
+      if (!z) continue;
+      a = gadd(a, gmulsg(z,(GEN)beta[i]));
     }
-    if ((a = prime_check_elt(a,pol,p,pf)))
+    if ((a = prime_check_elt(D,Dp,a,pol,p,pf)))
     {
       if (DEBUGLEVEL) fprintferr("\n");
       (void)setrand(keep); return a;
@@ -1920,7 +1926,7 @@ random_uniformizer_loop(GEN beta, GEN pol, GEN p, GEN pf)
 static GEN
 uniformizer(GEN nf, GEN p, GEN P)
 {
-  GEN beta,a,pf, T = (GEN)nf[1];
+  GEN D,w,beta,a,pf, T = (GEN)nf[1];
   long f, N=degpol(T), m=lg(P)-1;
   gpmem_t av;
 
@@ -1931,11 +1937,16 @@ uniformizer(GEN nf, GEN p, GEN P)
   P = centermod(P, p);
   P = concatsp(gscalcol(p,N), P);
   P = ideal_better_basis(nf, P, p);
-  beta = gmul((GEN)nf[7], P);
+  w = (GEN)nf[7];
+  D = denom(content(w)); if (is_pm1(D)) D = NULL;
+  if (D) w = gmul(w, D);
+  beta = gmul(w, P);
 
-  a = random_uniformizer_loop(beta,T,p,pf);
-  a = centermod(algtobasis_i(nf,a), p);
-  if (!is_uniformizer(gmul((GEN)nf[7],a), T,pf,p)) a[1] = laddii((GEN)a[1],p);
+  a = random_uniformizer_loop(D,beta,T,p,pf);
+  a = algtobasis_i(nf,a);
+  if (D) a = gdivexact(a,D);
+  a = centermod(a, p);
+  if (!is_uniformizer(D,gmul(w,a), T,pf,p)) a[1] = laddii((GEN)a[1],p);
 
   return gerepilecopy(av,a);
 }
@@ -1959,7 +1970,7 @@ apply_kummer(GEN nf,GEN u,GEN e,GEN p)
   {
     GEN t, pf = f==1? p: gpowgs(p,f);
     /* make sure v_pr(u) = 1 (automatic if e>1) */
-    if (is_pm1(e) && !is_uniformizer(u, T,pf,p))
+    if (is_pm1(e) && !is_uniformizer(NULL,u, T,pf,p))
       u[2] = laddii((GEN)u[2], p);
     t = algtobasis_i(nf, FpX_div(T,u,p));
     pr[2] = (long)algtobasis_i(nf,u);
