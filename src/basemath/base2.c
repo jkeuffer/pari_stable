@@ -1920,7 +1920,7 @@ indexpartial(GEN P, GEN DP)
 {
   pari_sp av = avma;
   long i, nb;
-  GEN fa, p1, res = gun, dP = derivpol(P);
+  GEN fa, res = gun, dP = derivpol(P);
   pari_timer T;
 
   if(DEBUGLEVEL>=5) (void)TIMER(&T);
@@ -1932,13 +1932,13 @@ indexpartial(GEN P, GEN DP)
   nb = lg(fa[1]);
   for (i = 1; i < nb; i++)
   {
-    long e = itos( gmael(fa,2,i) ) >> 1;
-    GEN p = gmael(fa,1,i), q;
+    long E = itos(gmael(fa,2,i)), e = E >> 1;
+    GEN p = gmael(fa,1,i), q = p;
     if (i == nb-1)
       q = gpowgs(p, (odd(e) && !BSW_psp(p))? e+1: e);
     else if (e >= 2)
     {
-      if(DEBUGLEVEL>=5) fprintferr("IndexPartial: factor %Z ",p1);
+      if(DEBUGLEVEL>=5) fprintferr("IndexPartial: factor %Z^%ld ",p,E);
       q = fast_respm(P, dP, p, e);
       if(DEBUGLEVEL>=5) { fprintferr("--> %Z : ",q); msgTIMER(&T,""); }
     }
