@@ -1733,7 +1733,7 @@ ppgamma(GEN **pta, GEN **ptb, long a, long b, long c, long i0, long prec)
   gamdm = cgetg(r+3, t_SER);
   gamdm[1] = evalsigne(1) | evalvalp(0) | evalvarn(0);
   gamdm[2] = zero;
-  gamdm[3] = lneg(gadd(gmul2n(glog(gdeux, prec), 1), eul));
+  gamdm[3] = lneg(gadd(gmul2n(mplog2(prec), 1), eul));
   for (i = 2; i <= r; i++)
     gamdm[i+2] = lmul((GEN)gamun[i+2], subis(shifti(gun,i), 1));
   gamdm = gmul(sqpi, gexp(gamdm, prec)); /* Gamma(1/2 + x) */

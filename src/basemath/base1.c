@@ -1606,7 +1606,7 @@ initzeta(GEN pol, long prec)
     if (k&1) ck_odd[k]=lneg((GEN)ck_odd[k]);
     ck_odd[k]=ladd(gru,(GEN)ck_odd[k]);
   }
-  ck_odd[1]=lsub((GEN)ck_odd[1],gmul(gr1,glog(gdeux,prec)));
+  ck_odd[1]=lsub((GEN)ck_odd[1],gmul(gr1,mplog2(prec)));
   serie_even =cgetg(ru+3,t_SER); serie_odd=cgetg(r2+3,t_SER);
   serie_even[1] = serie_odd[1] = evalsigne(1)+evalvalp(1);
   i=0;

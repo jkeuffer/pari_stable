@@ -355,7 +355,7 @@ Baker(GEN ALH, GEN Hmu)
 
   /* Compute a bound for the h_0 */
   hb0=gadd(gmul(stoi(4),halpha),gadd(gmul(gdeux,(GEN)Hmu[curne]),
-                                     gmul(gdeux,glog(gdeux,Prec))));
+                                     gmul(gdeux,mplog2(Prec))));
   hb0=gmax(hb0,gmax(ginv(gbak),
                     gdiv(gabs(glog(gdiv(gmul(gsub((GEN)roo[numroot],
                                                   (GEN)roo[i2]),

@@ -2199,7 +2199,7 @@ regula(GEN x, long prec)
   y = mplog(divri(reg,v));
   if (rexp)
   {
-    u1 = mulsr(rexp, glog(gdeux, prec));
+    u1 = mulsr(rexp, mplog2(prec));
     setexpo(u1, expo(u1)+1);
     y = addrr(y,u1);
   }

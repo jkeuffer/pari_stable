@@ -1622,7 +1622,7 @@ decodeform(GEN x, GEN d0)
     p1 = shiftr(p1,-e);
     p2 = addis(mulsi(EXP220,p2), e);
     p1 = mplog(p1);
-    p1 = mpadd(p1, mulir(p2, glog(gdeux, lg(d0))));
+    p1 = mpadd(p1, mulir(p2, mplog2(lg(d0))));
   }
   else
   { /* to avoid loss of precision */

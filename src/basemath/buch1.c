@@ -1703,7 +1703,7 @@ INCREASE: avma = av; cbach = check_bach(cbach,6.);
   if (PRECREG)
   {
     PRECREG = max(prec+1, MEDDEFAULTPREC + 2*(expi(Disc)>>TWOPOTBITS_IN_LONG));
-    glog2  = glog(gdeux,PRECREG);
+    glog2  = mplog2(PRECREG);
     sqrtD  = gsqrt(Disc,PRECREG);
     isqrtD = gfloor(sqrtD);
   }
