@@ -4,5 +4,5 @@ cvs status 2>/dev/null | grep Repository | grep -v cvsignore \
 echo Odos/paricfg.h
 echo src/language/init.h
 echo src/gp/gp_init.h
-echo src/gp/highlevel.h
+echo src/gp/highlvl.h
 echo src/desc/Def
