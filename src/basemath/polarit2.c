@@ -2070,45 +2070,24 @@ divide_conquer_prod(GEN x, GEN (*mul)(GEN,GEN))
 static GEN static_nf;
 
 static GEN
-myidealmulred(GEN x, GEN y) { return idealmulred(static_nf, x, y, 0); }
-
+idmulred(GEN x, GEN y) { return idealmulred(static_nf, x, y, 0); }
 static GEN
-myidealpowred(GEN x, GEN n) { return idealpowred(static_nf, x, n, 0); }
-
+idpowred(GEN x, GEN n) { return idealpowred(static_nf, x, n, 0); }
 static GEN
-myidealmul(GEN x, GEN y) { return idealmul(static_nf, x, y); }
-
+idmul(GEN x, GEN y) { return idealmul(static_nf, x, y); }
 static GEN
-myidealpow(GEN x, GEN n) { return idealpow(static_nf, x, n); }
+idpow(GEN x, GEN n) { return idealpow(static_nf, x, n); }
+static GEN
+eltmul(GEN x, GEN y) { return element_mul(static_nf, x, y); }
+static GEN
+eltpow(GEN x, GEN n) { return element_pow(static_nf, x, n); }
 
 GEN
-factorback_i(GEN fa, GEN e, GEN nf, int red)
+_factorback(GEN fa, GEN e, GEN (*_mul)(GEN,GEN), GEN (*_pow)(GEN,GEN))
 {
   gpmem_t av = avma;
   long k,l,lx,t = typ(fa);
   GEN p,x;
-  GEN (*_mul)(GEN,GEN);
-  GEN (*_pow)(GEN,GEN);
-  if (!nf && e && lg(e) > 1 && typ(e[1]) != t_INT) { nf = e; e = NULL; }
-  if (nf)
-  {
-    static_nf = nf;
-    if (red)
-    {
-      _mul = &myidealmulred;
-      _pow = &myidealpowred;
-    }
-    else
-    {
-      _mul = &myidealmul;
-      _pow = &myidealpow;
-    }
-  }
-  else
-  {
-    _mul = &gmul;
-    _pow = &powgi;
-  }
 
   if (e) /* supplied vector of exponents */
     p = fa;
@@ -2139,6 +2118,29 @@ factorback_i(GEN fa, GEN e, GEN nf, int red)
       x[l++] = (long)_pow((GEN)p[k],(GEN)e[k]);
   setlg(x,l);
   return gerepileupto(av, divide_conquer_prod(x, _mul));
+}
+
+GEN
+factorback_i(GEN fa, GEN e, GEN nf, int red)
+{
+  if (!nf && e && lg(e) > 1 && typ(e[1]) != t_INT) { nf = e; e = NULL; }
+  if (!nf) return _factorback(fa, e, &gmul, &powgi);
+
+  static_nf = checknf(nf);
+  if (red)
+    return _factorback(fa, e, &idmulred, &idpowred);
+  else
+    return _factorback(fa, e, &idmul, &idpow);
+}
+
+GEN
+factorbackelt(GEN fa, GEN e, GEN nf)
+{
+  if (!nf && e && lg(e) > 1 && typ(e[1]) != t_INT) { nf = e; e = NULL; }
+  if (!nf) err(talker, "missing nf in factorbackelt");
+
+  static_nf = checknf(nf);
+  return _factorback(fa, e, &eltmul, &eltpow);
 }
 
 GEN

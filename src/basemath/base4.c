@@ -1094,6 +1094,21 @@ idealmat_mul(GEN nf, GEN x, GEN y)
   return cx? gmul(y,cx): y;
 }
 
+/* operations on elements in factored form */
+
+GEN
+to_famat(GEN g, GEN e)
+{
+  GEN h = cgetg(3,t_MAT);
+  if (typ(g) != t_COL) { g = dummycopy(g); settyp(g, t_COL); }
+  if (typ(e) != t_COL) { e = dummycopy(e); settyp(e, t_COL); }
+  h[1] = (long)g;
+  h[2] = (long)e; return h;
+}
+
+GEN
+to_famat_all(GEN x, GEN y) { return to_famat(_col(x), _col(y)); }
+
 /* add x^1 to factorisation f */
 static GEN
 famat_add(GEN f, GEN x)
@@ -1136,7 +1151,7 @@ famat_sqr(GEN f)
   h[2] = lmul2n((GEN)f[2],1);
   return h;
 }
-static GEN
+GEN
 famat_inv(GEN f)
 {
   GEN h;
@@ -1146,11 +1161,12 @@ famat_inv(GEN f)
   h[2] = lneg((GEN)f[2]);
   return h;
 }
-static GEN
+GEN
 famat_pow(GEN f, GEN n)
 {
   GEN h;
   if (lg(f) == 1) return cgetg(1,t_MAT);
+  if (typ(f) != t_MAT) return to_famat_all(f,n);
   h = cgetg(3,t_MAT);
   h[1] = lcopy((GEN)f[1]);
   h[2] = lmul((GEN)f[2],n);
@@ -1179,7 +1195,7 @@ elt_cmp(GEN x, GEN y)
 {
   long tx = typ(x), ty = typ(y);
   if (ty == tx)
-    return tx == t_POL? cmp_pol(x,y): lexcmp(x,y);
+    return (tx == t_POL || tx == t_POLMOD)? cmp_pol(x,y): lexcmp(x,y);
   return tx - ty;
 }
 static int
@@ -1201,6 +1217,7 @@ famat_reduce(GEN fa)
   L = gen_sort(g, cmp_IND|cmp_C, &elt_cmp);
   G = cgetg(l, t_COL);
   E = cgetg(l, t_COL);
+  /* merge */
   for (k=i=1; i<l; i++,k++) 
   {
     G[k] = g[L[i]];
@@ -1211,21 +1228,18 @@ famat_reduce(GEN fa)
       k--;
     }
   }
+  /* kill 0 exponents */
+  l = k;
+  for (k=i=1; i<l; i++)
+    if (!gcmp0((GEN)E[i]))
+    {
+      G[k] = G[i];
+      E[k] = E[i]; k++;
+    }
   F = cgetg(3, t_MAT);
   setlg(G, k); F[1] = (long)G;
   setlg(E, k); F[2] = (long)E; return F;
 }
-
-GEN
-to_famat(GEN g, GEN e)
-{
-  GEN h = cgetg(3,t_MAT);
-  h[1] = (long)g;
-  h[2] = (long)e; return h;
-}
-
-GEN
-to_famat_all(GEN x, GEN y) { return to_famat(_col(x), _col(y)); }
 
 /* assume (num(g[i]), id) = 1 for all i. Return prod g[i]^e[i] mod id */
 GEN
@@ -1306,7 +1320,7 @@ to_Fp_simple(GEN nf, GEN x, GEN pr)
 static GEN
 famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX)
 {
-  long i,k, l = lg(g);
+  long i, l = lg(g);
   GEN prkZ,cx,x,u, zpow = gzero, p = (GEN)pr[1], b = (GEN)pr[5];
   GEN mul = eltmul_get_table(nf, b);
   GEN newg = cgetg(l+1, t_VEC); /* room for z */
@@ -1316,12 +1330,15 @@ famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX)
   {
     x = (GEN)g[i];
     if (typ(x) != t_COL) x = algtobasis(nf, x);
-    cx = denom(x); x = gmul(x,cx);
-    k = pvaluation(cx, p, &u);
-    if (!gcmp1(u)) /* could avoid the inversion, but prkZ is small--> cheap */
-      x = gmul(x, mpinvmod(u, prkZ));
-    if (k)
-      zpow = addii(zpow, mulsi(k, (GEN)e[i]));
+    x = Q_remove_denom(x, &cx);
+    if (cx)
+    {
+      long k = pvaluation(cx, p, &u);
+      if (!gcmp1(u)) /* could avoid the inversion, but prkZ is small--> cheap */
+        x = gmul(x, mpinvmod(u, prkZ));
+      if (k)
+        zpow = addii(zpow, mulsi(k, (GEN)e[i]));
+    }
     (void)int_elt_val(nf, x, p, mul, &x);
     newg[i] = (long)colreducemodHNF(x, prk, NULL);
   }
@@ -1342,14 +1359,15 @@ famat_ideallog(GEN nf, GEN g, GEN e, GEN bid)
   GEN vp = gmael(bid, 3,1), ep = gmael(bid, 3,2), arch = gmael(bid,1,2);
   GEN cyc = gmael(bid,2,2), list_set = (GEN)bid[4], U = (GEN)bid[5];
   GEN p1,y0,x,y, psigne;
-  long i;
+  long i, l;
   if (lg(cyc) == 1) return cgetg(1,t_COL);
   y0 = y = cgetg(lg(U), t_COL);
   psigne = zsigne(nf, to_famat(g,e), arch);
-  for (i=1; i<lg(vp); i++)
+  l = lg(vp);
+  for (i=1; i < l; i++)
   {
     GEN pr = (GEN)vp[i], prk;
-    prk = idealpow(nf, pr, (GEN)ep[i]);
+    prk = (l==2)? gmael(bid,1,1): idealpow(nf, pr, (GEN)ep[i]);
     /* TODO: FIX group exponent (should be mod prk, not f !) */
     x = famat_makecoprime(nf, g, e, pr, prk, (GEN)cyc[1]);
     y = zinternallog_pk(nf, x, y, pr, prk, (GEN)list_set[i], &psigne);
