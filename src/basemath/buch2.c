@@ -145,9 +145,7 @@ subFBgen(long N,long m,long minsFB,GEN vperm, long *ptss)
       fprintferr("\n***** IDEALS IN FACTORBASE *****\n\n");
       for (i=1; i<=KC; i++) fprintferr("no %ld = %Z\n",i,vectbase[i]);
       fprintferr("\n***** IDEALS IN SUB FACTORBASE *****\n\n");
-      P=cgetg(n+1,t_COL);
-      for (j=1; j<=n; j++) P[j] = vectbase[subFB[j]];
-      outerr(P);
+      outerr(vecextract_p(vectbase,subFB));
       fprintferr("\n***** INITIAL PERMUTATION *****\n\n");
       fprintferr("vperm = %Z\n\n",vperm);
     }
@@ -176,26 +174,19 @@ mulred(GEN nf,GEN x, GEN I, long prec,long precint)
 static void
 powsubFBgen(GEN nf,GEN subFB,long a,long prec,long precint)
 {
-  long i,j,n=lg(subFB),N=lgef(nf[1])-3,RU;
-  GEN id, *pow;
+  long i,j, n = lg(subFB);
+  GEN *pow, arch0 = (GEN)init_idele(nf)[2];
 
+  if (DEBUGLEVEL) fprintferr("Computing powers for sub-factor base:\n");
   powsubFB = cgetg(n, t_VEC);
-  if (DEBUGLEVEL)
-  { fprintferr("Computing powers for sub-factor base:\n"); flusherr(); }
-  RU=itos(gmael(nf,2,1)); RU = RU + (N-RU)/2;
-  id=cgetg(3,t_VEC);
-  id[1] = (long)idmat(N);
-  id[2] = (long)zerocol(RU); settyp(id[2],t_VEC);
-
   for (i=1; i<n; i++)
   {
     GEN vp = (GEN)vectbase[subFB[i]];
     GEN z = cgetg(3,t_VEC); z[1]=vp[1]; z[2]=vp[2];
-    pow = (GEN*)cgetg(a+1,t_VEC);
-    powsubFB[i] = (long)pow; pow[0]=id;
+    pow = (GEN*)cgetg(a+1,t_VEC); powsubFB[i] = (long)pow;
     pow[1]=cgetg(3,t_VEC);
     pow[1][1] = (long)z;
-    pow[1][2] = id[2];
+    pow[1][2] = (long)arch0;
     vp = prime_to_ideal(nf,vp);
     for (j=2; j<=a; j++)
     {
@@ -211,9 +202,8 @@ powsubFBgen(GEN nf,GEN subFB,long a,long prec,long precint)
       fprintferr("**** POWERS IN SUB-FACTOR BASE ****\n\n");
       for (i=1; i<n; i++)
       {
-        pow = (GEN*)powsubFB[i];
 	fprintferr("powsubFB[%ld]:\n",i);
-	for (j=0; j<=a; j++) fprintferr("^%ld = %Z\n", j,pow[j]);
+	for (j=1; j<=a; j++) fprintferr("^%ld = %Z\n", j,mael(powsubFB,i,j));
 	fprintferr("\n");
       }
     }
