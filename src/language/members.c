@@ -304,7 +304,7 @@ member_tu(GEN x)
         if (lg(x) > 8)
         {
           y = (GEN)x[8];
-          if (typ(y) == t_VEC || lg(y) == 3) break;
+          if (typ(y) == t_VEC || lg(y) == 3) { res[2] = y[2]; break; }
         }
       default: member_err("tu");
         return NULL; /* not reached */
@@ -321,9 +321,8 @@ member_tu(GEN x)
       y = rootsof1(x);
       y[2] = lmul((GEN)x[7], (GEN)y[2]);
     }
-    y[2] = (long)basistoalg(bnf, (GEN)y[2]);
+    res[2] = (long)basistoalg(bnf, (GEN)y[2]);
   }
-  res[2] = y[2];
   res[1] = y[1]; return res;
 }
 
