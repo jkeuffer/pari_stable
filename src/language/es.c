@@ -1320,7 +1320,7 @@ wr_texnome(GEN a, char *v, long d)
     if (sig) { putsigne(sig); texi(a,sig); }
     else
     {
-      pariputs("+("); texi(a,sig); pariputc(')');
+      pariputs(" + \\left("); texi(a,sig); pariputs("\\right) ");
     }
     if (d) texnome(v,d);
   }
@@ -1360,7 +1360,7 @@ wr_lead_texnome(GEN a, char *v, long d, long nosign)
     if (isfactor(a)) texi(a,nosign);
     else
     {
-      pariputc('('); texi(a,0); pariputc(')');
+      pariputs(" \\left("); texi(a,0); pariputs("\\right) ");
     }
     if (d) texnome(v,d);
   }
@@ -1818,7 +1818,7 @@ texi(GEN g, long nosign)
           a = (GEN)g[i];
           if (!isnull_for_pol(a)) wr_texnome(a,v,i);
         }
-        pariputc('+');
+        pariputs("+ ");
       }
       pariputs("O("); texnome(v,i); pariputc(')'); break;
 
