@@ -923,6 +923,7 @@ voir2(GEN x, long nb, long bl)
 {
   long tx=typ(x),i,j,e,dx,lx=lg(x);
 
+  if (tx == t_INT && x == gzero) { pariputs("gzero\n"); return; }
   sorstring(VOIR_STRING1,(ulong)x);
   if (tx!=t_POL && tx!=t_SER)
     pariputsf("%s%c", type_name(tx)+2, isclone(x)?'!':'|');

@@ -1129,7 +1129,7 @@ zbrent(entree *ep, GEN a, GEN b, char *ch, long prec)
   a = fix(a,prec);
   b = fix(b,prec); sig=cmprr(b,a);
   if (!sig) { avma = av; return gzero; }
-  if (sig<0) { c=a; a=b; b=c; }
+  if (sig < 0) { c=a; a=b; b=c; } else c = b;
 
   push_val(ep, a);      fa = lisexpr(ch);
   ep->value = (void*)b; fb = lisexpr(ch);
