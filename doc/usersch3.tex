@@ -137,11 +137,11 @@ integers, add \kbd{O(p\pow k)} to the result; finally, to obtain the
 
 \syn{gdiv}{x,y} for $x$ \kbd{/} $y$.
 
-\subseckbd{\bs}: The expression \kbd{$x$ \bs $y$} is the \idx{Euclidean
+\subseckbd{\bs}: The expression \kbd{$x$ \bs\ $y$} is the \idx{Euclidean
 quotient} of $x$ and $y$. If $y$ is a real scalar, this is defined as 
-\kbd{floor($x$/$y$)} if $y > 0$, and \kbd{floor($x$/$y$) + 1} if $y < 0$ and
-the division is not exact. Hence the remainder \kbd{$x$ - ($x$ \bs $y$) *
-$y$} is in $[0, |y|[$.
+\kbd{floor($x$/$y$)} if $y > 0$, and \kbd{ceil($x$/$y$)} if $y < 0$ and
+the division is not exact. Hence the remainder \kbd{$x$ - ($x$\bs$y$)*$y$}
+is in $[0, |y|[$.
 
 Note that when $y$ is an integer and $x$ a polynomial, $y$ is first promoted
 to a polynomial of degree $0$. When $x$ is a vector or matrix, the operator
@@ -150,7 +150,7 @@ is applied componentwise.
 \syn{gdivent}{x,y} for $x$ \kbd{\bs} $y$.
 
 \subseckbd{\bs/}: The expression $x$ \b{/} $y$ evaluates to the rounded
-\idx{Euclidean quotient} of $x$ and $y$. This is the same as \kbd{$x$ \bs $y$}
+\idx{Euclidean quotient} of $x$ and $y$. This is the same as \kbd{$x$ \bs\ $y$}
 except for scalar division: the quotient is such that the corresponding
 remainder is smallest in absolute value and in case of a tie the quotient
 closest to $+\infty$ is chosen (hence the remainder would belong to
@@ -164,16 +164,16 @@ When $x$ is a vector or matrix, the operator is applied componentwise.
 \idx{Euclidean remainder} of $x$ and $y$, which we now define. If $y$ is an
 integer, this is the smallest non-negative integer congruent to $x$ modulo
 $y$. If $y$ is a polynomial, this is the polynomial of smallest degree
-congruent to $x$ modulo $y$. When $y$ is a \typ{REAL}, a \typ{FRAC} or a
-\typ{FRACN}, $x \% y$ is defined as \kbd{$x$ - ($x$\bs$y$) * $y$}, which
+congruent to $x$ modulo $y$. When $y$ is a non-integral real number,
+ \kbd{$x$\%$y$} is defined as \kbd{$x$ - ($x$\bs$y$)*$y$}. This
 coincides with the definition for $y$ integer if and only if $x$ is an
-integer, but still satisfies $0 \leq x\kbd{\%}y < |y|$. For instance:
+integer, but still belongs to $[0, |y|[$. For instance:
 \bprog
 ? (1/2) % 3
 %1 = 2
 ? 0.5 % 3
   ***   forbidden division t_REAL % t_INT.
-? (1/2) % 3.
+? (1/2) % 3.0
 %2 = 1/2
 @eprog
 Note that when $y$ is an integer and $x$ a polynomial, $y$ is first promoted
@@ -183,14 +183,24 @@ is applied componentwise.
 \syn{gmod}{x,y} for $x$ \kbd{\%} $y$.
 
 \subsecidx{divrem}$(x,y,\{v\})$: creates a column vector with two components,
-the first being the Euclidean quotient (\kbd{$x$ \bs $y$}), the second the
-Euclidean remainder (\kbd{$x$ - ($x$\bs$y$)*y}), of the division of $x$ by
+the first being the Euclidean quotient (\kbd{$x$ \bs\ $y$}), the second the
+Euclidean remainder (\kbd{$x$ - ($x$\bs$y$)*$y$}), of the division of $x$ by
 $y$. This avoids the need to do two divisions if one needs both the quotient
 and the remainder. If $v$ is present, and $x$, $y$ are multivariate
 polynomials, divide with respect to the variable $v$.
 
 Beware that \kbd{divrem($x$,$y$)[2]} is in general not the same as
-\kbd{$x$ \% $y$}.
+\kbd{$x$ \% $y$}; there is no operator to obtain it in GP:
+\bprog
+? divrem(1/2, 3)[2]
+%1 = 1/2
+? (1/2) % 3
+%2 = 2
+? divrem(Mod(2,9), 3)[2]
+  ***   forbidden division t_INTMOD \ t_INT.
+? Mod(2,9) % 6
+%3 = Mod(2,3)
+@eprog
 
 \syn{divrem}{x,y,v},where $v$ is a \kbd{long}. Also available as
 $\teb{gdiventres}(x,y)$ when $v$ is not needed.
@@ -229,15 +239,15 @@ Beware that
 
 \syn{gpow}{x,n,\var{prec}} for $x\hbox{\kbd{\pow}}n$.
 
-\subsecidx{shift}$(x,n,\{\fl=0\})$ or $x$ \kbd{<<} $n$ (= $x$ \kbd{>>} $(-n)$): shifts
-$x$ componentwise left by $n$ bits if $n\ge0$ and right by $|n|$ bits if
-$n<0$. A left shift by $n$ corresponds to multiplication by $2^n$. A right
-shift of an integer $x$ by $|n|$ corresponds to a Euclidean division of
-$x$ by $2^{|n|}$ with a remainder of the same sign as $x$, hence is not the
-same (when $x < 0$) as $x \kbd{\bs} 2^{|n|}$. If $\fl$ is non-zero, this
-behaviour is modified and rigt shift of a negative $x$ \var{is} the same
-as $x \kbd{\bs} 2^{|n|}$ (which is consistent with $2$-complement semantic
-of negative numbers).
+\subsecidx{shift}$(x,n,\{\fl=0\})$ or $x$ \kbd{<<} $n$ (= $x$ \kbd{>>} $(-n)$):
+shifts $x$ componentwise left by $n$ bits if $n\ge0$ and right by $|n|$ bits
+if $n<0$. A left shift by $n$ corresponds to multiplication by $2^n$. A right
+shift of an integer $x$ by $|n|$ corresponds to a Euclidean division of $x$
+by $2^{|n|}$ with a remainder of the same sign as $x$, hence is not the same
+(when $x < 0$) as $x \kbd{\bs} 2^{|n|}$. If $\fl$ is non-zero, this behaviour
+is modified and rigt shift of a negative $x$ \var{is} the same as $x
+\kbd{\bs} 2^{|n|}$ (which is consistent with $2$-complement semantic of
+negative numbers).
 
 \syn{gshift3}{x,n,\fl} where $n$ is a \kbd{long}. Also available is
 $\teb{gshift}(x,n)$ for the case $\fl=0$.
