@@ -1176,6 +1176,15 @@ FqX_gcd(GEN P, GEN Q, GEN T, GEN p)
   if (!g) err(talker,"factmod9: %Z is reducible mod p!", T);
   return g;
 }
+long
+FqX_is_squarefree(GEN P, GEN T, GEN p)
+{
+  gpmem_t av = avma;
+  GEN z = FqX_gcd(P, derivpol(P), T, p);
+  avma = av;
+  return degpol(z)==0;
+
+}
 
 long
 FqX_split_berlekamp(GEN *t, GEN q, GEN T, GEN p)

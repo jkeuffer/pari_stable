@@ -21,6 +21,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "parinf.h"
 
+extern GEN FqX_factor(GEN x, GEN T, GEN p);
+extern long FqX_is_squarefree(GEN P, GEN T, GEN p);
 extern GEN sqred1_from_QR(GEN x, long prec);
 extern GEN make_integral(GEN nf, GEN L0, GEN f, GEN *listpr, GEN *ptd1);
 extern GEN idealprodprime(GEN nf, GEN L);
@@ -1509,23 +1511,21 @@ conductor(GEN bnr, GEN H, long all)
 
 /* etant donne un bnr et un polynome relatif, trouve le groupe des normes
    correspondant a l'extension relative en supposant qu'elle est abelienne
-   et que le module donnant bnr est multiple du conducteur. Verifie que
-   l'extension est bien abelienne (sous GRH) si rnf != NULL, dans ce cas
-   rnf est le rnf de l'extension relative. */
-static GEN
-rnfnormgroup0(GEN bnr, GEN polrel, GEN rnf)
+   et que le module donnant bnr est multiple du conducteur. */
+GEN
+rnfnormgroup(GEN bnr, GEN polrel)
 {
-  long i, j, reldeg, sizemat, p, pmax, nfac, k;
-  gpmem_t av=avma;
-  GEN bnf,polreldisc,discnf,nf,raycl,group,detgroup,fa,greldeg;
-  GEN contreld,primreld,reldisc,famo,ep,fac,col,p1,bd,upnf;
-  byteptr d = diffptr + 1; /* start at p = 2 */
+  long i, j, reldeg, sizemat, p, nfac, k;
+  gpmem_t av = avma;
+  GEN bnf,index,discnf,nf,raycl,group,detgroup,fa,greldeg;
+  GEN famo,ep,fac,col;
+  byteptr d = diffptr;
 
   checkbnr(bnr); bnf=(GEN)bnr[1]; raycl=(GEN)bnr[5];
   nf=(GEN)bnf[7];
   polrel = fix_relative_pol(nf,polrel,1);
   if (typ(polrel)!=t_POL) err(typeer,"rnfnormgroup");
-  reldeg=degpol(polrel);
+  reldeg = degpol(polrel);
   /* reldeg-th powers are in norm group */
   greldeg = stoi(reldeg);
   group = diagonal(gmod((GEN)raycl[2], greldeg));
@@ -1533,97 +1533,43 @@ rnfnormgroup0(GEN bnr, GEN polrel, GEN rnf)
     if (!signe(gcoeff(group,i,i))) coeff(group,i,i) = (long)greldeg;
   detgroup = dethnf_i(group);
   k = cmpis(detgroup,reldeg);
-  if (k<0)
-  {
-    if (rnf) return NULL;
+  if (k < 0)
     err(talker,"not an Abelian extension in rnfnormgroup?");
-  }
-  if (!rnf && !k) return gerepilecopy(av, group);
-
-  polreldisc=discsr(polrel);
-
-  if (rnf)
-  {
-    reldisc=gmael(rnf,3,1);
-    upnf=nfinit0(gmael(rnf,11,1),1,DEFAULTPREC);
-  }
-  else
-  {
-    reldisc = idealhermite(nf,polreldisc);
-    upnf = NULL;
-  }
-
-  reldisc = idealmul(nf, reldisc, gmael3(bnr,2,1,1));
-  contreld= content(reldisc);
-  primreld= gcmp1(contreld)? reldisc: gdiv(reldisc, contreld);
+  if (!k) return gerepilecopy(av, group);
 
   discnf = (GEN)nf[3];
-  k = degpol(nf[1]);
-  bd = gmulsg(k, glog(absi(discnf), DEFAULTPREC));
-  bd = gadd(bd,glog(mpabs(det(reldisc)),DEFAULTPREC));
-  p1 = dbltor(reldeg * k * 2.5 + 5);
-  bd = gfloor(gsqr(gadd(gmulsg(4,bd),p1)));
-
-  pmax = is_bigint(bd)? 0: itos(bd);
-  if (rnf)
-  {
-    if (DEBUGLEVEL) fprintferr("rnfnormgroup: bound for primes = %Z\n", bd);
-    if (!pmax) err(warner,"rnfnormgroup: prime bound too large, can't certify");
-  }
+  index  = (GEN)nf[4];
   sizemat=lg(group)-1;
-  for (p=2; !pmax || p < pmax; p += *d++)
+  for (p=0 ;;)
   {
     long oldf = -1, lfa;
     /* If all pr are unramified and have the same residue degree, p =prod pr
      * and including last pr^f or p^f is the same, but the last isprincipal
      * is much easier! oldf is used to track this */
 
-    if (!*d) err(primer1);
-    if (!smodis(contreld,p)) continue; /* all pr|p ramified */
+    p += *d++; if (!*d) err(primer1);
+    if (!smodis(index, p)) continue; /* can't be treated efficiently */
 
-    fa = primedec(nf,stoi(p)); lfa = lg(fa)-1;
-
+    fa = primedec(nf, stoi(p)); lfa = lg(fa)-1;
     for (i=1; i<=lfa; i++)
     {
-      GEN pr = (GEN)fa[i];
+      GEN pr = (GEN)fa[i], pp, T, polr;
+      GEN modpr = nf_to_ff_init(nf, &pr, &T, &pp);
       long f;
-      /* check decomposition of pr has Galois type */
-      if (element_val(nf,polreldisc,pr) != 0)
-      {
-        /* if pr ramified, we will have to use all (non-ram) P | pr */
-        if (idealval(nf,primreld,pr)!=0) { oldf = 0; continue; }
 
-        famo=idealfactor(upnf,rnfidealup(rnf,pr));	
-        ep=(GEN)famo[2];
-        fac=(GEN)famo[1];
-        nfac=lg(ep)-1;
-        f = itos(gmael(fac,1,4));
-        for (j=1; j<=nfac; j++)
-        {
-          if (!gcmp1((GEN)ep[j])) err(bugparier,"rnfnormgroup");
-          if (itos(gmael(fac,j,4)) != f)
-          {
-            if (rnf) return NULL;
-            err(talker,"non Galois extension in rnfnormgroup");
-          }
-        }
-      }
-      else
+      polr = modprX(polrel, nf, modpr);
+      /* if pr (probably) ramified, we have to use all (non-ram) P | pr */
+      if (!FqX_is_squarefree(polr, T,pp)) { oldf = 0; continue; }
+
+      famo = FqX_factor(polr, T, pp);
+      fac = (GEN)famo[1]; f = degpol((GEN)fac[1]);
+      ep  = (GEN)famo[2]; nfac = lg(ep)-1;
+      /* check decomposition of pr has Galois type */
+      for (j=1; j<=nfac; j++)
       {
-        famo=nffactormod(nf,polrel,pr);
-        ep=(GEN)famo[2];
-        fac=(GEN)famo[1];
-        nfac=lg(ep)-1;
-        f = degpol((GEN)fac[1]);
-        for (j=1; j<=nfac; j++)
-        {
-          if (!gcmp1((GEN)ep[j])) err(bugparier,"rnfnormgroup");
-          if (degpol(fac[j]) != f)
-          {
-            if (rnf) return NULL;
-            err(talker,"non Galois extension in rnfnormgroup");
-          }
-        }
+        if (!gcmp1((GEN)ep[j])) err(bugparier,"rnfnormgroup");
+        if (degpol(fac[j]) != f)
+          err(talker,"non Galois extension in rnfnormgroup");
       }
       if (oldf < 0) oldf = f; else if (oldf != f) oldf = 0;
       if (f == reldeg) continue; /* reldeg-th powers already included */
@@ -1636,21 +1582,46 @@ rnfnormgroup0(GEN bnr, GEN polrel, GEN rnf)
       detgroup = dethnf_i(group);
       k = cmpis(detgroup,reldeg);
       if (k < 0)
-      {
-        if (rnf) return NULL;
         err(talker,"not an Abelian extension in rnfnormgroup");
-      }
-      if (!rnf && !k) { cgiv(detgroup); return gerepileupto(av,group); }
+      if (!k) { cgiv(detgroup); return gerepileupto(av,group); }
     }
   }
   if (k>0) err(bugparier,"rnfnormgroup");
   cgiv(detgroup); return gerepileupto(av,group);
 }
 
-GEN
-rnfnormgroup(GEN bnr, GEN polrel)
+static int
+rnf_is_abelian(GEN nf, GEN pol)
 {
-  return rnfnormgroup0(bnr,polrel,NULL);
+  GEN ro, rores, nfL, L, mod, d;
+  long i,j, l;
+
+  nf = checknf(nf);
+  L = rnfequation(nf,pol);
+  mod = dummycopy(L); setvarn(mod, varn(nf[1]));
+  nfL = _initalg(mod, nf_PARTIALFACT, DEFAULTPREC);
+  ro = nfroots(nfL, L);
+  l = lg(ro)-1;
+  if (l != degpol(pol)) return 0;
+  if (isprime(stoi(l))) return 1;
+  ro = Q_remove_denom(ro, &d);
+  if (!d) rores = ro;
+  else
+  {
+    rores = cgetg(l+1, t_VEC);
+    for (i=1; i<=l; i++)
+      rores[i] = (long)rescale_pol((GEN)ro[i], d);
+  }
+  /* assume roots are sorted by increasing degree */
+  for (i=1; i<l; i++)
+    for (j=1; j<i; j++)
+    {
+      GEN a = RX_RXQ_compo((GEN)rores[j], (GEN)ro[i], mod);
+      GEN b = RX_RXQ_compo((GEN)rores[i], (GEN)ro[j], mod);
+      if (d) a = gmul(a, gpowgs(d, degpol(ro[i]) - degpol(ro[j])));
+      if (!gegal(a, b)) return 0;
+    }
+  return 1;
 }
 
 /* Etant donne un bnf et un polynome relatif polrel definissant une extension
@@ -1658,37 +1629,29 @@ rnfnormgroup(GEN bnr, GEN polrel)
    a l'extension definie par polrel sous la forme
    [[ideal,arch],[hm,cyc,gen],group] ou [ideal,arch] est le conducteur, et
    [hm,cyc,gen] est le groupe de classes de rayon correspondant. Verifie
-   (sous GRH) que polrel definit bien une extension abelienne si flag != 0 */
+   que polrel definit bien une extension abelienne si flag != 0 */
 GEN
 rnfconductor(GEN bnf, GEN polrel, long flag)
 {
   long R1, i;
-  gpmem_t av=avma, tetpil;
-  GEN nf,module,rnf,arch,bnr,group,p1,pol2;
+  gpmem_t av = avma;
+  GEN nf,module,arch,bnr,group,p1,pol2;
 
-  bnf = checkbnf(bnf); nf=(GEN)bnf[7];
+  bnf = checkbnf(bnf); nf = (GEN)bnf[7];
   if (typ(polrel)!=t_POL) err(typeer,"rnfconductor");
-  module=cgetg(3,t_VEC); R1=itos(gmael(nf,2,1));
-  p1=unifpol((GEN)bnf[7],polrel,0);
+  p1=unifpol(nf, polrel, 0);
   p1=denom(gtovec(p1));
   pol2=rescale_pol(polrel, p1);
-  if (flag)
-  {
-    rnf=rnfinitalg(bnf,pol2,DEFAULTPREC);
-    module[1]=mael(rnf,3,1);
-  }
-  else
-  {
-    rnf=NULL;
-    module[1]=rnfdiscf(nf,pol2)[1];
-  }
-  arch=cgetg(R1+1,t_VEC);
-  module[2]=(long)arch; for (i=1; i<=R1; i++) arch[i]=un;
-  bnr=buchrayall(bnf,module,nf_INIT | nf_GEN);
-  group=rnfnormgroup0(bnr,pol2,rnf);
+  if (flag && !rnf_is_abelian(bnf, pol2)) { avma = av; return gzero; }
+
+  module = cgetg(3,t_VEC);
+  module[1] = rnfdiscf(nf,pol2)[1];
+  R1 = nf_get_r1(nf); arch = cgetg(R1+1,t_VEC);
+  module[2] = (long)arch; for (i=1; i<=R1; i++) arch[i]=un;
+  bnr   = buchrayall(bnf,module,nf_INIT | nf_GEN);
+  group = rnfnormgroup(bnr,pol2);
   if (!group) { avma = av; return gzero; }
-  tetpil=avma;
-  return gerepile(av,tetpil,conductor(bnr,group,1));
+  return gerepileupto(av, conductor(bnr,group,1));
 }
 
 /* Given a number field bnf=bnr[1], a ray class group structure
