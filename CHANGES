@@ -28,7 +28,7 @@ TP = Thomas Papanikolaou
 XR = Xavier Roblot
 YU = Yoshiaki Uchikawa
 ===========================================================================
-Done for version ??? (released ??/??/2000):
+Done for version 2.0.20.beta (released ??/05/2000):
   Fixed
     1- gp -p1e -->SEGV
     2- nfinit([x,1]) --> SEGV
@@ -58,6 +58,7 @@ BA 24- bug in galconj.c:corediscpartial (could return half integer)
    25- factorff and ffinit "not random enough"
 TH 26- Configure doesn't handle cygwin new directory structure
 CW 27- polsturm(x,0,1) = 1 (should be 0)
+   28- [library:] gentimer(3) didn't work
   
   Changed
     1- renamed .DOC files to .txt (explorer getting confused...)
@@ -70,6 +71,7 @@ BA  1- Pocklington-Lehmer primality prover
 BA  2- Fp_isom (library)
 BA  3- Mod(a,b)^(c/d) fo a,b,c,d integers
     4- flag to vecsort (decreasing order)
+BA  5- function sqrtn
 
 ===========================================================================
 Done for version 2.0.19.beta (released 17/03/2000):
