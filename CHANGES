@@ -143,6 +143,9 @@ BA 11- improve binomial (use divide_conquer_prod)
        improve stability)
    13- subgrouplist(bnr,...) does not require bnr to contain generators anymore
        ( bnrinit(,,1) ). Also much faster.
+   14- allow zetakinit() to use a bnf argument [ would be recomputed before,
+       making it impossible to certify the result since bnfcertify could not be
+       applied ]
 
   Added
     1- make test-all [ all test suite (SLOW !)]

@@ -2274,19 +2274,20 @@ zeta_get_i0(long r1, long r2, long bit, GEN limx)
 GEN
 initzeta(GEN pol, long prec)
 {
-  GEN nfz, nf, gr1, gr2, gru, p1, p2, cst, coef;
-  GEN limx,bnf,resi,zet,C,coeflog,racpi,aij,tabj,colzero, *tabcstn, *tabcstni;
+  GEN nfz, nf, gr1, gr2, gru, p1, p2, cst, coef, bnf = _checkbnf(pol);
+  GEN limx, resi,zet,C,coeflog,racpi,aij,tabj,colzero, *tabcstn, *tabcstni;
   GEN c_even, ck_even, c_odd, ck_odd, serie_even, serie_odd, serie_exp, Pi;
   long N0, i0, r1, r2, r, R, N, i, j, k, n, bit = bit_accuracy(prec) + 6;
-
   pari_sp av, av2;
   long court[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3),0};
   stackzone *zone, *zone0, *zone1;
 
   /*************** residue & constants ***************/
   nfz = cgetg(10,t_VEC);
-  bnf = bnfinit0(pol,2,NULL,prec+1); prec=(prec<<1)-1;
+  if (!bnf || nfgetprec(bnf) < prec ) bnf = bnfinit0(pol, 2, NULL, prec);
+  else bnf = gcopy(bnf);
   bnf = checkbnf_discard(bnf);
+  prec = (prec<<1) - 1;
   Pi = mppi(prec); racpi = mpsqrt(Pi);
 
   /* class number & regulator */
@@ -2403,14 +2404,13 @@ initzeta(GEN pol, long prec)
       GEN t = cgetg(r+2,t_COL);
       p1 = mplog((GEN)tabcstn[i]); setsigne(p1, -signe(p1));
       t[1] = lstoi(coef[i]);
-      t[2] = lmul((GEN)t[1],p1);
+      t[2] = lmul((GEN)t[1], p1);
       for (j=2; j<=r; j++)
       {
         pari_sp av2 = avma;
         t[j+1] = (long)gerepileuptoleaf(av2, divrs(gmul((GEN)t[j], p1), j));
       }
-      /* tabj[n,j]=coef(n)*ln(c/n)^(j-1)/(j-1)! */
-      tabj[i] = (long)t;
+      tabj[i] = (long)t; /* tabj[n,j] = coef(n)*ln(c/n)^(j-1)/(j-1)! */
     }
     else
       tabj[i] = (long)colzero;
