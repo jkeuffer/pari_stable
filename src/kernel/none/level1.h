@@ -76,6 +76,8 @@ long   itos(GEN x);
 long   itos_or_0(GEN x);
 ulong  itou_or_0(GEN x);
 ulong  itou(GEN x);
+long   maxss(long x, long y);
+long   minss(long x, long y);
 GEN    modis(GEN x, long y);
 GEN    modsi(long x, GEN y);
 GEN    modss(long x, long y);
@@ -433,6 +435,18 @@ cmpsr(long x, GEN y)
   av=avma; z = stor(x, 3); avma=av;
   return cmprr(z,y);
 }	
+
+INLINE long 
+maxss(long x, long y)
+{
+  return x>y?x:y;
+}
+
+INLINE long 
+minss(long x, long y)
+{
+  return x<y?x:y;
+}
 
 INLINE void
 addssz(long x, long y, GEN z)

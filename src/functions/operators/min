@@ -4,7 +4,7 @@ C-Name: gmin
 Prototype: GG
 Help: min(x,y): minimum of x and y
 Description: 
- (@small, @small):small	min($1, $2)
+ (small, small):small	minss($1, $2)
  (small, int):int	gminsg($1, $2)
  (int, small):int	gmings($1, $2)
  (int, int):int	gmin($1, $2)
