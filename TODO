@@ -33,6 +33,10 @@ pariFILE, bloc ...)
    way the computation is done. Tough to correct, even with a way to trap
    exceptions
 
+5  nfgaloisconj still misses some conjugates. Symptom: try it on
+   polcompositum(quadpoly(11321), x^15-3*x^14-46*x^13+69*x^12+794*x^11-50*x^10-5226*x^9-4559*x^8+9682*x^7+15656*x^6+3342*x^5-5950*x^4-4386*x^3-1136*x^2-100*x+1)
+[Hilbert class field extension]
+
 5  silent overflows in codeword-handling macros: O(2^50000) --> O(2^-15535)
 
 5  some doubles can overflow in rootpol.c, should use t_REAL everywhere
@@ -43,6 +47,9 @@ pariFILE, bloc ...)
 
 4  mateigen([1,1;1,2]) won't succeed at default precision (28 digits).
 Should use iterative methods.
+
+3  polgalois should handle precision problems. Symptom: applied to
+polzagier(11,0)/polzagier(1,0), gives wrong result with 38 digits
 
 3  after allocatemem() / default(parisize, ...), the rest of the command is
 discarded (ends by a longjmp).
@@ -106,6 +113,9 @@ trap(errpile, &stack_overflow_handler)
 4  allow generic functions to process and produce t_SMALL's
 
 4  remove all dependences on types ordering [if (typ(x) < t_POL) ...]
+
+3  integrate Ilya's code for yet bigger prime tables. Unify functions using
+diffptr
 
 3  remove global variables gpi, geuler: their precision is unpredictable
 (at least as much as requested in last const[pi|euler](), possibly much more).

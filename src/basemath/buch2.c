@@ -282,7 +282,7 @@ factorbasegen(GEN nf,long n2,long n)
     if (KC == 0 && p>n) { KCZ=i; KC=ip; }
   }
   if (!KC) return NULL;
-  KCZ2=i; KC2=ip; MAXRELSUP = min(50,4*KC) / SFB_MAX;
+  KCZ2=i; KC2=ip; MAXRELSUP = min(50,4*KC);
 
   vectbase=cgetg(KC+1,t_COL);
   for (i=1; i<=KCZ; i++)
@@ -307,7 +307,7 @@ factorbasegen(GEN nf,long n2,long n)
   return lfun;
 }
 
-/* can we factor I / m (m pseudo minimum, computed in ideallllredpart1)? */
+/* can we factor I / m ? (m pseudo minimum, computed in ideallllredpart1) */
 static long
 factorisegen(GEN nf,GEN idealvec,long kcz,long limp)
 {
