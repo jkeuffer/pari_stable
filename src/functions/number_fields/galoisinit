@@ -7,5 +7,5 @@ Help: galoisinit(pol,{den}): pol being a polynomial or a number field as
  and all neccessary informations for computing fixed fields. den is optional
  and has the same meaning as in nfgaloisconj(,4)(see manual)
 Description: 
- (pol, ?int):gal	galoisinit($1,$2)
+ (pol, ?int):gal	galoisinit($1, $2, 0)
 

@@ -8,9 +8,9 @@ Help: gcd(x,{y},{flag=0}): greatest common divisor of x and y. flag is
  polynomials)
 Description: 
  (small, small, ?0):small	cgcd($1, $2)
- (int, int, ?0):int	mppgcd($1, $2)
- (gen, gen, ?0):gen	ggcd($1, $2)
- (gen, gen, 1):gen	modulargcd($1, $2)
- (gen, gen, 2):gen	srgcd($1, $2)
+ (int, int, ?0):int	        gcdii($1, $2)
+ (gen, gen, ?0):gen	        ggcd($1, $2)
+ (gen, gen, 1):gen	        modulargcd($1, $2)
+ (gen, gen, 2):gen	        srgcd($1, $2)
  (gen, ?gen, ?small):gen	gcd0($1, $2, $3)
 

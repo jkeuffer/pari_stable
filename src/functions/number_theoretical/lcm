@@ -4,7 +4,7 @@ C-Name: glcm0
 Prototype: GDG
 Help: lcm(x,{y}): least common multiple of x and y=x*y/gcd(x,y)
 Description: 
- (int, int):int	mpppcm($1, $2)
- (gen):gen	glcm0($1)
- (gen, gen):gen	glcm($1, $2)
+ (int, int):int lcmii($1, $2)
+ (gen):gen      glcm0($1, NULL)
+ (gen, gen):gen glcm($1, $2)
 
