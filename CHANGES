@@ -37,6 +37,8 @@ Done for version 2.2.2 (released ??/??/2001):
     4- poldegree(P, t) slow when t != varn(P), and may not work in library mode
     5- polrootspadic only worked when leading coeff was a unit
     6- paddicappr was very slow (esp. when p was large)
+    7- Configure: check for 'double endianness' [used for double --> t_REAL
+       conversion]. Previous check was failing on ARM architecture.
 
   Changes
     1- allow compressing *.dvi files for the online help system
@@ -44,8 +46,11 @@ Done for version 2.2.2 (released ??/??/2001):
     3- try to guess correct precision earlier in polgalois/polroots
     4- allow GP pointers to 'matrix components', e.g issquare(25,&x[i][j])
     5- changed assignment semantics to make it closer to C: x = y understood as
-       (evaluate Y:=y, then X:=x, then set X:=Y), e.g i = 0; i += (i=2) now
-       sets i to 4  (was 2)
+       (evaluate Y:=y, then set x:=Y), e.g i=0; i += (i=2) sets i to 4  (was 2)
+    6- output VECSMALLs as 'Vecsmall([...])'
+    7- more efficient polcoeff [also: made it independent of MAXVARN]
+    8- retuned bnfinit (let subfactorbase increase further):
+       setrand(1);bnfinit(x^4 + 1159*x^2 + 335241) would never finish.
 
   Added
 BA  1- New function 'vectorsmall'.
