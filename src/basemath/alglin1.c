@@ -2604,6 +2604,19 @@ FpM_ker_i(GEN x, GEN p, long deplin)
 }
 
 GEN
+FpM_intersect(GEN x, GEN y, GEN p)
+{
+  gpmem_t av = avma;
+  long j, lx = lg(x);
+  GEN z;
+
+  if (lx==1 || lg(y)==1) return cgetg(1,t_MAT);
+  z = FpM_ker(concatsp(x,y), p);
+  for (j=lg(z)-1; j; j--) setlg(z[j],lx);
+  return gerepileupto(av, FpM_mul(x,z,p));
+}
+
+GEN
 FpM_ker(GEN x, GEN p) { return FpM_ker_i(x, p, 0); }
 GEN
 FpM_deplin(GEN x, GEN p) { return FpM_ker_i(x, p, 1); }

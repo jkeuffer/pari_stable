@@ -465,7 +465,9 @@ mat_ideal_two_elt(GEN nf, GEN x)
     if (DEBUGLEVEL>3) fprintferr("ideal_two_elt, hard case: ");
     for(av1=avma;;avma=av1)
     {
-      if (DEBUGLEVEL>3) fprintferr("%ld ", ++c);
+      c++;
+      if (DEBUGLEVEL>3 && (c & 0x3f) == 0) fprintferr("%ld ", c);
+      if (c == 100) { a = mat_ideal_two_elt2(nf, x, xZ); goto END; }
       for (a=NULL,i=1; i<lm; i++)
       {
         long t = (mymyrand() >> (BITS_IN_RANDOM-5)) - 7; /* in [-7,8] */
@@ -479,6 +481,7 @@ mat_ideal_two_elt(GEN nf, GEN x)
       a = addmul_col(a, z[i], (GEN)beta[i]);
     if (DEBUGLEVEL>3) fprintferr("\n");
   }
+END:
   a = centermod(a, xZ);
   tetpil = avma;
   y[1] = lmul(xZ,cx);
@@ -764,7 +767,7 @@ idealadd(GEN nf, GEN x, GEN y)
 }
 
 /* assume x,y integral non zero */
-static GEN
+GEN
 addone_aux2(GEN nf, GEN x, GEN y)
 {
   GEN U, H;
@@ -2409,10 +2412,15 @@ static GEN
 mat_ideal_two_elt2(GEN nf, GEN x, GEN a)
 {
   GEN L, e, fact = idealfactor(nf,a);
-  long i, r;
+  long i, j, v, r;
   L = (GEN)fact[1]; r = lg(L);
   e = (GEN)fact[2];
-  for (i=1; i<r; i++) e[i] = lstoi( idealval(nf,x,(GEN)L[i]) );
+  for (i=j=1; i<r; i++)
+  {
+    v = idealval(nf,x,(GEN)L[i]);
+    if (v < itos((GEN)e[i])) { L[j] = L[i]; e[j] = lstoi(v); j++; }
+  }
+  setlg(L, j); setlg(e, j);
   return centermod(idealapprfact_i(nf,fact), gcoeff(x,1,1));
 }
 
