@@ -879,8 +879,9 @@ err_leave(void **V)
   free(v);
 }
 
+/* get last (most recent) handler for error n */
 static cell *
-err_seek(long errnum)
+err_seek(long n)
 {
   stack *s = err_catch_stack;
   cell *t = NULL;
@@ -888,15 +889,13 @@ err_seek(long errnum)
   for (;s; s = s->prev)
   {
     t = (cell*)s->value;
-    if (!t || t->flag == errnum) break;
-    err_catch_array[t->flag]--;
-    free(t);
+    if (!t || t->flag == n) break;
   }
   if (!t) reset_traps(1);
   return t;
 }
 
-/* kill last handler for error number n */
+/* kill last handler for error n */
 void 
 err_leave_default(long n)
 {
