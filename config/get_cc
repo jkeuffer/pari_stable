@@ -110,12 +110,12 @@ if test -n "$__gnuc__"; then
   case "$asmarch" in
     alpha)
       case "$__gnuc__" in
-        2.95.3*|3.*) ;;
+        2.95.[3-9]*|3.*) ;;
         *) ASMINLINE=;; # doesn't work with 2.95.2.
       esac
     ;;
   esac
-  OPTFLAGS="$OPTFLAGS -DGCC_INLINE $warn"
+  OPTFLAGS="$OPTFLAGS -DGCC_INLINE $warn -fno-strict-aliasing"
   DBGFLAGS=${DBGFLAGS:-"-g $warn"}
   # Specific optimisations for some architectures
   case "$arch" in
