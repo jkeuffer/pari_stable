@@ -2571,7 +2571,7 @@ INCREASEGEN:
     if (sfb_increase)
     { /* increase subfactorbase */
       sfb_increase = 0;
-      if (++sfb_trials > SFB_MAX ||
+      if (++sfb_trials >= SFB_MAX ||
           subfactorbasegen(N,(long)min(lim,LIMC2), lgsub-1+SFB_STEP, NULL) < 0)
         goto INCREASEGEN;
       if (DEBUGLEVEL) fprintferr("*** Increasing subfactorbase\n");
