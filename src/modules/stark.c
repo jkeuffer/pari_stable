@@ -1477,7 +1477,7 @@ static long
 PiBound(long x)
 {
   double lx = log((double)x);
-  return 1 + (long) x/lx * (1 + 3/(2*lx));
+  return 1 + (long) (x/lx * (1 + 3/(2*lx)));
 }
 
 static GEN
