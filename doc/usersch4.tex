@@ -403,6 +403,59 @@ because a matrix is really just a row vector of column vectors (hence a
 priori not a basic type), but it has been given a special type number so that
 operations with matrices become possible.
 
+Finally, to facilitate input of constant objects when speed is not paramount,
+there are three \tet{varargs} functions:
+
+\fun{GEN}{coefs_to_int}{long n, ...}
+returns the non-negative \typ{INT} whose development in base $2^{32}$
+is given by the following $n$ words (\kbd{unsigned long}). It is assumed that
+all such arguments are less than $2^{32}$ (the actual word size is
+irrelevant, the behaviour is also as above on $64$-bit machines).
+\bprog
+  coefs_to_int(3, a2, a1, a0);
+@eprog
+\noindent returns $a_2 2^{64} + a_1 2^{32} + a_0$.
+
+\fun{GEN}{coefs_to_pol}{long n, ...}
+Returns the \typ{POL} whose $n$ coefficients (\kbd{GEN}) follow, in order of
+decreasing degree.
+\bprog
+  coefs_to_pol(3, gun, gdeux, gzero);
+@eprog
+\noindent returns the polynomial $X^2 + 2X$ (in variable $0$, use
+\tet{setvarn} if you want other variable numbers). Beware that $n$ is the
+number of coefficients, \emph{not} the degree.
+
+\fun{GEN}{coefs_to_vec}{long n, ...}
+returns the \typ{VEC} whose $n$ coefficients (\kbd{GEN}) follow. If you
+would rather have a \typ{COL}, use \kbd{settyp}.
+
+\misctitle{Warning} Contrary to the policy of general PARI functions, the
+latter two functions do \emph{not} copy of its arguments, nor do they produce
+an object a priori suitable for \tet{gerepileupto}. For instance
+\bprog
+  /* gerepile-safe: components are universal objects */
+  z = coefs_to_vec(3, gun, gzero, gdeux);
+
+  /* NOT OK for gerepileupto: stoi(1) creates component before vector root */
+  z = coefs_to_vec(3, stoi(1), gzero, gdeux);
+
+  /* NO! First vector component is destroyed */
+  x = gclone(gun);
+  z = coefs_to_vec(3, x, gzero, gdeux);
+  gunclone(x);
+@eprog
+
+\noindent The following function is also available as a special case of
+\tet{coefs_to_int}:
+
+\fun{GEN}{u2toi}{ulong a, ulong b}
+
+Returns the \kbd{GEN} equal to $2^{32} a + b$, \emph{assuming} that
+$a,b < 2^{32}$. This does not depend on \kbd{sizeof(long)}: the behaviour is
+as above on both $32$ and $64$-bit machines.
+
+
 \subsec{Assignments}.
 Firstly, if \kbd{x} and \kbd{y} are both declared as \kbd{GEN} (i.e.~pointers
 to something), the ordinary C assignment \kbd{y = x} makes perfect sense: we
