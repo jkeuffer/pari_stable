@@ -96,6 +96,8 @@ is wrong [second one is principal]. Group structure and regulator are correct!
 
 5  readline: assume a file 'foo' exists, \rf<TAB> --> \foo [\r f<TAB> is OK]
 
+5  FreeBSD: install does not work in gp-sta
+
 4  changing primelimit from within forprime loop yields unpredictable results
 
 3  after allocatemem() / default(parisize, ...), the rest of the command is
