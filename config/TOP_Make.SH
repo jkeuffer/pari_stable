@@ -45,14 +45,14 @@ dft target::
 	@echo "	tune	                Generate tuning utility"
 
 gp all bench test-kernel test-compat test-graphic install cleanobj cleantest install-bin install-doc install-lib-sta install-bin-sta dobench tune::
-	cd \`$config_dir/objdir\`; \$(MAKE) \$@
+	@dir=\`config/objdir\`; echo "Making \$@ in \$\$dir"; cd \$\$dir; \$(MAKE) \$@
 
 dbg gp.dbg::
-	cd \`$config_dir/objdir\`.dbg; \$(MAKE) gp
-
+	@dir=\`config/objdir\`.dbg; echo "Making gp in \$\$dir"; cd \$\$dir; \$(MAKE) gp 
+	
 prf gp.prf::
-	cd \`$config_dir/objdir\`.prf; \$(MAKE) gp
-
+	@dir=\`config/objdir\`.prf; echo "Making gp in \$\$dir"; cd \$\$dir; \$(MAKE) gp
+	
 doc docps docpdf gpman cleandoc::
 	cd doc; \$(MAKE) \$@
 
