@@ -2692,18 +2692,13 @@ fill(long l, GEN H, GEN Hx, GEN I, GEN Ix)
 static GEN
 rnfjoinmodules_i(GEN nf, GEN Hx, GEN Ix, GEN Hy, GEN Iy)
 {
-  long i, lx, ly;
-  GEN H, I, x, z;
+  long lx = lg(Hx), ly = lg(Hy), l = lx+ly-1;
+  GEN H, I;
 
-  lx = lg(Hx);
-  ly = lg(Hy); i = lx+ly-1;
-  z = (GEN)gpmalloc(sizeof(long*)*(3+2*i));
-  *z = evaltyp(t_VEC)|evallg(3);
-  H = z+3; z[1]=(long)H; *H = evaltyp(t_MAT)|evallg(i);
-  I = H+i; z[2]=(long)I; *I = evaltyp(t_VEC)|evallg(i);
+  H = cgetg(l, t_MAT);
+  I = cgetg(l, t_VEC);
   fill(lx, H     , Hx, I     , Ix);
-  fill(ly, H+lx-1, Hy, I+lx-1, Iy);
-  x = nfhermite(nf,z); free(z); return x;
+  fill(ly, H+lx-1, Hy, I+lx-1, Iy); return nfhermite(nf, mkvec2(H, I));
 }
 static GEN
 rnfjoinmodules(GEN nf, GEN x, GEN y)
@@ -2906,10 +2901,9 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
   av1 = avma; lim = stack_lim(av1,1);
   for(cmpt=1; ; cmpt++)
   {
-    GEN I0 = dummycopy(I), W0 = dummycopy(W), Wa;
-    GEN Wainv, Waa;
-    GEN Ip, A, Ainv, MWmod, F;
-    GEN pseudo, G;
+    GEN I0 = dummycopy(I), W0 = dummycopy(W);
+    GEN Wa, Wainv, Waa, Ip, A, Ainv, MWmod, F, pseudo, G;
+
     if (DEBUGLEVEL>1) fprintferr("    pass no %ld\n",cmpt);
     for (j=1; j<=n; j++)
     {
