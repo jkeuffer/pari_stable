@@ -295,10 +295,11 @@ affect \kbd{gp-sta}.
 \subsubsec{Some more testing} [{\sl Optional\/}]
 
 You can test GP in compatibility mode with \kbd{make test-compat}. If you
-want to test the graphic routines, use \kbd{make test-graphic}. You will
-have to click on the mouse button after seeing each image (under X11).
-There will be eight of them, probably shown twice (under X11, try to resize
-at least one of them as a further test).
+want to test the graphic routines, use \kbd{make test-ploth}. You will
+have to click on the mouse button after seeing each image. There will be
+eight of them, probably shown twice (try to resize at least one of them
+as a further test). More generaly, typing \kbd{make} without argument
+will print the list of available extra tests among all available targets.
 
 The \kbd{make bench} and \kbd{make test-compat} runs produce a Postscript
 file \kbd{pari.ps} in \kbd{O$xxx$} which you can send to a Postscript
