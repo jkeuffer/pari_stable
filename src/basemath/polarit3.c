@@ -1441,7 +1441,7 @@ _FpXQYQ_mul(void *data, GEN x, GEN y)
   return _FpXQYQ_redswap(FpXQX_mul(x,y, D->S, D->p),D->S,D->T,D->p);
 }
 
-/* x,S in Z[X] = pols over Fq = Z[X]/(p,T); compute lift(x^n mod S) */
+/* x in Z[X,Y], S in Z[X] over Fq = Z[Y]/(p,T); compute lift(x^n mod (S,T,p)) */
 GEN
 _FpXQYQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
 {
