@@ -929,7 +929,7 @@ initRUgen(long N, long bitprec)
 }
 
 /* returns 1 if p has only real coefficients, 0 else */
-static long
+static int
 isreal(GEN p)
 {
   long n=degpol(p),i=0;
@@ -940,7 +940,7 @@ isreal(GEN p)
 
 static void
 parameters(GEN p, double *mu, double *gamma,
-           long polreal, double param, double param2)
+           int polreal, double param, double param2)
 {
   GEN q,pc,Omega,coef,RU,prim,aux,aux0,ggamma,gx,mygpi;
   long n=degpol(p), bitprec, NN, K, i, j;
@@ -1200,8 +1200,9 @@ split_fromU(GEN p, long k, double delta, long bitprec,
             GEN *F, GEN *G, double param, double param2)
 {
   GEN pp,FF,GG,H;
-  long n=degpol(p),NN,bitprec2,
-  ltop=avma,polreal=isreal(p);
+  long n=degpol(p),NN,bitprec2;
+  int polreal=isreal(p);
+  gpmem_t ltop;
   double mu,gamma;
 
   pp=gdiv(p,(GEN)p[2+n]);

@@ -1236,8 +1236,8 @@ GEN
 gammanew(GEN s0, long la, long prec)
 {
   GEN s, u, a, y, res, tes, sig, invn2, p1, unr, nnx, pitemp;
-  long i, nn;
-  gpmem_t lim, av, av2, avlim;
+  long i, lim, nn;
+  gpmem_t av, av2, avlim;
   int funeq = 0;
 
   if (DEBUGLEVEL) timer2();

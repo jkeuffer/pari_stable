@@ -4090,7 +4090,7 @@ ifac_decomp_break(GEN n, long (*ifac_break)(GEN n,GEN pairs,GEN here,GEN state),
       workspc = new_chunk(lf + 3 + ifac_overshoot);
       ifac_realloc(&part, &here, 0);
       here = ifac_find(&part, &part);
-      tetpil = (long)workspc;
+      tetpil = (gpmem_t)workspc;
     }
     /* room enough now */
     nb++;

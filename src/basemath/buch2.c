@@ -1688,14 +1688,14 @@ random_relation(long phase,long cglob,long LIMC,long PRECREG,
                 GEN nf,GEN subFB,GEN vecT2,GEN *mat,GEN matarch,GEN list_jideal)
 {
   static long jideal, jdir;
-  long i, cptlist, cptzer, nbT2, lgsub, r1, jlist = 1;
-  gpmem_t lim, av, av1;
+  long i, maxcglob, cptlist, cptzer, nbT2, lgsub, r1, jlist = 1;
+  gpmem_t av, av1;
   GEN arch,col,colarch,ideal,m,P,ex;
 
   if (phase != 1) { jideal=jdir=1; if (phase<0) return 0; }
 
   r1 = nf_get_r1(nf);
-  lim = lg(mat)-1; /* requested number of relations */
+  maxcglob = lg(mat)-1; /* requested number of relations */
   nbT2 = lg(vecT2)-1;
   lgsub = lg(subFB); ex = cgetg(lgsub, t_VECSMALL);
   cptzer = cptlist = 0;
@@ -1771,10 +1771,10 @@ random_relation(long phase,long cglob,long LIMC,long PRECREG,
       /* arch = archimedean component (MULTIPLICATIVE form) of ideal */
       arch = vecdiv(arch, gmul(gmael(nf,5,1), m));
       set_log_embed(colarch, arch, r1, PRECREG);
-      if (DEBUGLEVEL) dbg_newrel(jideal,jdir,phase,cglob,col,colarch,lim);
+      if (DEBUGLEVEL) dbg_newrel(jideal,jdir,phase,cglob,col,colarch,maxcglob);
 
       /* Need more, try next P */
-      if (cglob < lim) break;
+      if (cglob < maxcglob) break;
 
       /* We have found enough. Return */
       if (phase)

@@ -1096,8 +1096,8 @@ gmul2n(GEN x, long n)
         p1 = shifti((GEN)x[2],n); avma=av;
         y[2]=lmodii(p1,p2); icopyifstack(p2,y[1]); return y;
       }
-      l=avma; y=gmul2n(gun,n); tetpil=avma;
-      return gerepile(l,tetpil,gmul(y,x));
+      av=avma; y=gmul2n(gun,n); tetpil=avma;
+      return gerepile(av,tetpil,gmul(y,x));
 
     case t_FRAC: case t_FRACN:
       l = vali((GEN)x[1]);
@@ -1148,8 +1148,8 @@ gmul2n(GEN x, long n)
       return y;
 
     case t_PADIC:
-      l=avma; y=gmul2n(gun,n); tetpil=avma;
-      return gerepile(l,tetpil,gmul(y,x));
+      av=avma; y=gmul2n(gun,n); tetpil=avma;
+      return gerepile(av,tetpil,gmul(y,x));
   }
   err(typeer,"gmul2n");
   return NULL; /* not reached */
@@ -1556,7 +1556,7 @@ derivser(GEN x)
 GEN
 deriv(GEN x, long v)
 {
-  long lx, vx, tx, e, i, j, l;
+  long lx, vx, tx, e, i, j;
   gpmem_t av, tetpil;
   GEN y,p1,p2;
 
@@ -1587,11 +1587,11 @@ deriv(GEN x, long v)
       {
         if (!signe(x)) return gcopy(x);
         lx=lg(x); e=valp(x);
-	l=avma;
+	av=avma;
 	for (i=2; i<lx; i++)
         {
           if (!gcmp0(deriv((GEN)x[i],v))) break;
-          avma=l;
+          avma=av;
         }
 	if (i==lx) return ggrando(polx[vx],e+lx-2);
 	y=cgetg(lx-i+2,t_SER);
@@ -1602,11 +1602,11 @@ deriv(GEN x, long v)
       return derivser(x);
 
     case t_RFRAC: case t_RFRACN: av=avma; y=cgetg(3,tx);
-      y[2]=lsqr((GEN)x[2]); l=avma;
+      y[2]=lsqr((GEN)x[2]); av=avma;
       p1=gmul((GEN)x[2],deriv((GEN)x[1],v));
       p2=gmul(gneg_i((GEN)x[1]),deriv((GEN)x[2],v));
       tetpil=avma; p1=gadd(p1,p2);
-      if (tx==t_RFRACN) { y[1]=lpile(l,tetpil,p1); return y; }
+      if (tx==t_RFRACN) { y[1]=lpile(av,tetpil,p1); return y; }
       y[1]=(long)p1; return gerepileupto(av,gred_rfrac(y));
 
     case t_VEC: case t_COL: case t_MAT: lx=lg(x); y=cgetg(lx,tx);

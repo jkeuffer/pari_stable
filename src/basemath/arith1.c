@@ -1718,8 +1718,8 @@ mpfact(long n)
 GEN
 mpfactr(long n, long prec)
 {
-  const gpmem_t av = avma;
-  long lim,k;
+  gpmem_t av = avma, lim;
+  long k;
   GEN f = cgetr(prec);
 
   affsr(1,f);
@@ -2401,8 +2401,8 @@ two_rank(GEN x)
 GEN
 classno(GEN x)
 {
-  gpmem_t av = avma, av2;
-  long r2,c,lforms,k,l,i,j,j1,j2,lim,com,s, forms[MAXFORM];
+  gpmem_t av = avma, av2, lim;
+  long r2,c,lforms,k,l,i,j,j1,j2,com,s, forms[MAXFORM];
   GEN a,b,count,index,tabla,tablb,hash,p1,p2,hin,h,f,fh,fg,ftest;
   GEN Hf,D,fa;
   byteptr p = diffptr;

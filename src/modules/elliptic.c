@@ -1588,7 +1588,7 @@ apell1(GEN e, GEN p)
       }
       if (++j > nb)
       { /* compute next nb points */
-        gpmem_t save = 0; /* gcc -Wall */;
+        long save = 0; /* gcc -Wall */;
         for (j=1; j<=nb; j++)
         {
           p1 = (GEN)pts[j];

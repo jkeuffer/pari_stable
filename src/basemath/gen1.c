@@ -582,10 +582,10 @@ gadd(GEN x, GEN y)
             z[2]=lcopy((GEN)y[2]); return z;
 	
 	  case t_PADIC:
-	    l=avma; p1=cgetg(3,t_INTMOD);
+	    av=avma; p1=cgetg(3,t_INTMOD);
 	    p1[1]=x[1]; p1[2]=lgeti(lgefint(x[1]));
 	    gaffect(y,p1); tetpil=avma;
-	    return gerepile(l,tetpil,gadd(p1,x));
+	    return gerepile(av,tetpil,gadd(p1,x));
 	
 	  case t_QUAD: z=cgetg(4,t_QUAD);
             copyifstack(y[1], z[1]);
@@ -597,10 +597,10 @@ gadd(GEN x, GEN y)
         switch (ty)
 	{
 	  case t_FRAC: return addfrac(x,y);
-	  case t_FRACN: z=cgetg(3,t_FRACN); l=avma;
+	  case t_FRACN: z=cgetg(3,t_FRACN); av=avma;
 	    p1=mulii((GEN)x[1],(GEN)y[2]);
 	    p2=mulii((GEN)x[2],(GEN)y[1]);
-	    tetpil=avma; z[1]=lpile(l,tetpil,addii(p1,p2));
+	    tetpil=avma; z[1]=lpile(av,tetpil,addii(p1,p2));
 	    z[2]=lmulii((GEN)x[2],(GEN)y[2]);
 	    return z;
 
@@ -1077,8 +1077,8 @@ gmul_err(GEN x, GEN y, long tx, long ty)
 GEN
 gmul(GEN x, GEN y)
 {
-  long tx, ty, lx, ly, vx, vy, i, j, k;
-  gpmem_t av, tetpil, l;
+  long tx, ty, lx, ly, vx, vy, i, j, k, l;
+  gpmem_t av, tetpil;
   GEN z,p1,p2,p3,p4;
 
   if (x == y) return gsqr(x);
@@ -1130,8 +1130,8 @@ gmul(GEN x, GEN y)
 	
 	  case t_PADIC:
 	    if (!signe(x)) return gzero;
-	    l=avma; p1=cgetp(y); gaffect(x,p1); tetpil=avma;
-	    return gerepile(l,tetpil,gmul(p1,y));
+	    av=avma; p1=cgetp(y); gaffect(x,p1); tetpil=avma;
+	    return gerepile(av,tetpil,gmul(p1,y));
 	
 	  case t_QUAD: z=cgetg(4,t_QUAD);
 	    copyifstack(y[1], z[1]);
@@ -1145,16 +1145,16 @@ gmul(GEN x, GEN y)
 	  case t_REAL: return mulrr(x,y);
 
 	  case t_FRAC: case t_FRACN:
-	    l=avma; p1=mulri(x,(GEN)y[1]); tetpil=avma;
-            return gerepile(l, tetpil, divri(p1, (GEN)y[2]));
+	    av=avma; p1=mulri(x,(GEN)y[1]); tetpil=avma;
+            return gerepile(av, tetpil, divri(p1, (GEN)y[2]));
 	
 	  case t_COMPLEX: z=cgetg(3,t_COMPLEX);
 	    z[1]=lmul(x,(GEN)y[1]);
 	    z[2]=lmul(x,(GEN)y[2]); return z;
 	
 	  case t_QUAD:
-	    l=avma; p1=co8(y,lg(x)); tetpil=avma;
-	    return gerepile(l,tetpil,gmul(p1,x));
+	    av=avma; p1=co8(y,lg(x)); tetpil=avma;
+	    return gerepile(av,tetpil,gmul(p1,x));
 	
 	  default: err(operf,"*",x,y);
 	}
@@ -1190,10 +1190,10 @@ gmul(GEN x, GEN y)
 	    z[2]=lmul(x,(GEN)y[2]); return z;
 	
 	  case t_PADIC:
-	    l=avma; p1=cgetg(3,t_INTMOD);
+	    av=avma; p1=cgetg(3,t_INTMOD);
 	    p1[1]=x[1]; p1[2]=lgeti(lg(x[1]));
 	    gaffect(y,p1); tetpil=avma;
-	    return gerepile(l,tetpil,gmul(x,p1));
+	    return gerepile(av,tetpil,gmul(x,p1));
 
 	  case t_QUAD: z=cgetg(4,t_QUAD);
             copyifstack(y[1], z[1]);
@@ -1228,8 +1228,8 @@ gmul(GEN x, GEN y)
 	
 	  case t_PADIC:
 	    if (!signe(x[1])) return gzero;
-	    l=avma; p1=cgetp(y); gaffect(x,p1); tetpil=avma;
-            return gerepile(l,tetpil,gmul(p1,y));
+	    av=avma; p1=cgetp(y); gaffect(x,p1); tetpil=avma;
+            return gerepile(av,tetpil,gmul(p1,y));
 	
 	  case t_QUAD: z=cgetg(4,t_QUAD);
 	    copyifstack(y[1], z[1]);
@@ -1240,14 +1240,14 @@ gmul(GEN x, GEN y)
       case t_COMPLEX:
         switch(ty)
 	{
-	  case t_COMPLEX: z=cgetg(3,t_COMPLEX); l=avma;
+	  case t_COMPLEX: z=cgetg(3,t_COMPLEX); av=avma;
             p1=gmul((GEN)x[1],(GEN)y[1]);
             p2=gmul((GEN)x[2],(GEN)y[2]);
 	    x=gadd((GEN)x[1],(GEN)x[2]);
             y=gadd((GEN)y[1],(GEN)y[2]);
 	    y=gmul(x,y); x=gadd(p1,p2);
 	    tetpil=avma; z[1]=lsub(p1,p2); z[2]=lsub(y,x);
-	    gerepilemanyvec(l,tetpil,z+1,2); return z;
+	    gerepilemanyvec(av,tetpil,z+1,2); return z;
 	
 	  case t_PADIC:
 	    if (krosg(-1,(GEN)y[2]))
@@ -1267,8 +1267,8 @@ gmul(GEN x, GEN y)
 	
 	  case t_QUAD:
 	    lx=precision(x); if (!lx) err(operi,"*",x,y);
-	    l=avma; p1=co8(y,lx); tetpil=avma;
-	    return gerepile(l,tetpil,gmul(p1,x));
+	    av=avma; p1=co8(y,lx); tetpil=avma;
+	    return gerepile(av,tetpil,gmul(p1,x));
 	}
 	
       case t_PADIC:
@@ -1302,7 +1302,7 @@ gmul(GEN x, GEN y)
         p1=(GEN)x[1]; p2=(GEN)y[1];
         if (!gegal(p1,p2)) err(operi,"*",x,y);
 
-        copyifstack(p2, z[1]); l=avma;
+        copyifstack(p2, z[1]); av=avma;
         p2=gmul((GEN)x[2],(GEN)y[2]);
         p3=gmul((GEN)x[3],(GEN)y[3]);
         p4=gmul(gneg_i((GEN)p1[2]),p3);
@@ -1310,17 +1310,17 @@ gmul(GEN x, GEN y)
         if (gcmp0((GEN)p1[3]))
         {
           tetpil=avma;
-          z[2]=lpile(l,tetpil,gadd(p4,p2)); l=avma;
+          z[2]=lpile(av,tetpil,gadd(p4,p2)); av=avma;
           p2=gmul((GEN)x[2],(GEN)y[3]);
           p3=gmul((GEN)x[3],(GEN)y[2]); tetpil=avma;
-          z[3]=lpile(l,tetpil,gadd(p2,p3)); return z;
+          z[3]=lpile(av,tetpil,gadd(p2,p3)); return z;
         }
 
         p1 = gadd(gmul((GEN)x[2],(GEN)y[3]), gmul((GEN)x[3],(GEN)y[2]));
         tetpil=avma;
         z[2]=ladd(p2,p4);
         z[3]=ladd(p1,p3);
-        gerepilemanyvec(l,tetpil,z+2,2); return z;
+        gerepilemanyvec(av,tetpil,z+2,2); return z;
     }
     err(bugparier,"multiplication");
   }
@@ -1355,13 +1355,13 @@ gmul(GEN x, GEN y)
         {
           case t_COL:
             if (lx!=ly) err(operi,"*",x,y);
-            z=gzero; l=avma;
+            z=gzero; av=avma;
             for (i=1; i<lx; i++)
             {
               p1=gmul((GEN)x[i],(GEN)y[i]);
               z=gadd(z,p1);
             }
-            return gerepileupto(l,z);
+            return gerepileupto(av,z);
 
           case t_MAT:
             if (ly==1) return cgetg(1,t_VEC);
@@ -1422,13 +1422,13 @@ gmul(GEN x, GEN y)
             lx=lg(x[1]); z=cgetg(lx,t_COL);
             for (i=1; i<lx; i++)
             {
-              p1=gzero; l=avma;
+              p1=gzero; av=avma;
               for (j=1; j<ly; j++)
               {
                 p2=gmul(gcoeff(x,i,j),(GEN)y[j]);
                 p1=gadd(p1,p2);
               }
-              z[i]=lpileupto(l,p1);
+              z[i]=lpileupto(av,p1);
             }
             return z;
 
@@ -1578,8 +1578,8 @@ gmul(GEN x, GEN y)
 	case t_RFRAC: case t_RFRACN:
 	  if (gcmp0(y)) return zeropol(vx);
 	  if (gcmp0(x)) return zeroser(vx, valp(x)+gval(y,vx));
-	  l=avma; p1=gmul((GEN)y[1],x); tetpil=avma;
-          return gerepile(l,tetpil,gdiv(p1,(GEN)y[2]));
+	  av=avma; p1=gmul((GEN)y[1],x); tetpil=avma;
+          return gerepile(av,tetpil,gdiv(p1,(GEN)y[2]));
 	
 	default: err(operf,"*",x,y);
       }
@@ -1623,13 +1623,13 @@ gsqr(GEN x)
 	return z;
 
       case t_COMPLEX:
-	z=cgetg(3,t_COMPLEX); l=avma;
+	z=cgetg(3,t_COMPLEX); av=avma;
 	p1=gadd((GEN)x[1],(GEN)x[2]);
 	p2=gadd((GEN)x[1],gneg_i((GEN)x[2]));
 	p3=gmul((GEN)x[1],(GEN)x[2]);
 	tetpil=avma;
 	z[1]=lmul(p1,p2); z[2]=lshift(p3,1);
-	gerepilemanyvec(l,tetpil,z+1,2);
+	gerepilemanyvec(av,tetpil,z+1,2);
 	return z;
 	
       case t_PADIC:
@@ -1643,29 +1643,29 @@ gsqr(GEN x)
 	return z;
 	
       case t_QUAD:
-	p1=(GEN)x[1]; z=cgetg(4,t_QUAD); l=avma;
+	p1=(GEN)x[1]; z=cgetg(4,t_QUAD); av=avma;
 	p2=gsqr((GEN)x[2]); p3=gsqr((GEN)x[3]);
 	p4=gmul(gneg_i((GEN)p1[2]),p3);
 
 	if (gcmp0((GEN)p1[3]))
 	{
 	  tetpil=avma;
-	  z[2]=lpile(l,tetpil,gadd(p4,p2));
-	  l=avma; p2=gmul((GEN)x[2],(GEN)x[3]); tetpil=avma;
-	  z[3]=lpile(l,tetpil,gmul2n(p2,1));
+	  z[2]=lpile(av,tetpil,gadd(p4,p2));
+	  av=avma; p2=gmul((GEN)x[2],(GEN)x[3]); tetpil=avma;
+	  z[3]=lpile(av,tetpil,gmul2n(p2,1));
 	  copyifstack(p1,z[1]); return z;
 	}
 
 	p1=gmul((GEN)x[2],(GEN)x[3]);
 	p1=gmul2n(p1,1); tetpil=avma;
 	z[2]=ladd(p2,p4); z[3]=ladd(p1,p3);
-	gerepilemanyvec(l,tetpil,z+2,2);
+	gerepilemanyvec(av,tetpil,z+2,2);
 	copyifstack(x[1],z[1]); return z;
 
       case t_POLMOD:
         z=cgetg(3,t_POLMOD); copyifstack(x[1],z[1]);
-	l=avma; p1=gsqr((GEN)x[2]); tetpil=avma;
-        z[2]=lpile(l,tetpil, gres(p1,(GEN)z[1]));
+	av=avma; p1=gsqr((GEN)x[2]); tetpil=avma;
+        z[2]=lpile(av,tetpil, gres(p1,(GEN)z[1]));
 	return z;
     }
 
@@ -1726,10 +1726,10 @@ gsqr(GEN x)
         z[j]=lgetg(lx,t_COL);
         for (i=1; i<lx; i++)
         {
-          p1=gzero; l=avma;
+          p1=gzero; av=avma;
           for (k=1; k<lx; k++)
             p1 = gadd(p1, gmul(gcoeff(x,i,k),gcoeff(x,k,j)));
-          coeff(z,i,j)=lpileupto(l,p1);
+          coeff(z,i,j)=lpileupto(av,p1);
         }
       }
       return z;
@@ -1831,12 +1831,12 @@ gdiv(GEN x, GEN y)
         fix_frac(z); return z;
 
       case t_PADIC:
-        l=avma; p1=cgetp(y); gaffect(x,p1); tetpil=avma;
-        return gerepile(l,tetpil,gdiv(p1,y));
+        av=avma; p1=cgetp(y); gaffect(x,p1); tetpil=avma;
+        return gerepile(av,tetpil,gdiv(p1,y));
             
       case t_COMPLEX: case t_QUAD:
-        l=avma; p1=gnorm(y); p2=gmul(x,gconj(y)); tetpil=avma;
-        return gerepile(l,tetpil,gdiv(p2,p1));
+        av=avma; p1=gnorm(y); p2=gmul(x,gconj(y)); tetpil=avma;
+        return gerepile(av,tetpil,gdiv(p2,p1));
     }
   }
   if (gcmp0(y) && ty != t_MAT) err(gdiver2);
@@ -1855,22 +1855,22 @@ gdiv(GEN x, GEN y)
 	    return divrr(x,y);
 
 	  case t_FRAC: case t_FRACN:
-	    l=avma; p1=mulri(x,(GEN)y[2]); tetpil=avma;
-	    return gerepile(l, tetpil, divri(p1,(GEN)y[1]));
+	    av=avma; p1=mulri(x,(GEN)y[2]); tetpil=avma;
+	    return gerepile(av, tetpil, divri(p1,(GEN)y[1]));
 
 	  case t_COMPLEX: z=cgetg(3,t_COMPLEX);
-            l=avma; p1=gnorm(y);
+            av=avma; p1=gnorm(y);
 	    p2=gmul(x,(GEN)y[1]);
             p3=gmul(x,(GEN)y[2]);
 	    if (!gcmp0(p3)) p3 = gneg_i(p3);
             tetpil=avma;
 	    z[1]=ldiv(p2,p1);
             z[2]=ldiv(p3,p1);
-	    gerepilemanyvec(l,tetpil,z+1,2); return z;
+	    gerepilemanyvec(av,tetpil,z+1,2); return z;
 
 	  case t_QUAD:
-	    l=avma; p1=co8(y,lg(x)); tetpil=avma;
-	    return gerepile(l,tetpil,gdiv(x,p1));
+	    av=avma; p1=co8(y,lg(x)); tetpil=avma;
+	    return gerepile(av,tetpil,gdiv(x,p1));
 
 	  case t_INTMOD: case t_PADIC: err(operf,"/",x,y);
 	}
@@ -1899,16 +1899,16 @@ gdiv(GEN x, GEN y)
             z[2]=lmodii(p1,p2); icopyifstack(p2,z[1]); return z;
 
 	  case t_FRACN:
-	    l=avma; p1=gred(y); tetpil=avma;
-	    return gerepile(l,tetpil,gdiv(x,p1));
+	    av=avma; p1=gred(y); tetpil=avma;
+	    return gerepile(av,tetpil,gdiv(x,p1));
 
 	  case t_COMPLEX: case t_QUAD:
-	    l=avma; p1=gnorm(y); p2=gmul(x,gconj(y)); tetpil=avma;
-	    return gerepile(l,tetpil,gdiv(p2,p1));
+	    av=avma; p1=gnorm(y); p2=gmul(x,gconj(y)); tetpil=avma;
+	    return gerepile(av,tetpil,gdiv(p2,p1));
 
 	  case t_PADIC:
-	    l=avma; p1=cgetg(3,t_INTMOD); p1[1]=x[1]; p1[2]=lgeti(lg(x[1]));
-	    gaffect(y,p1); tetpil=avma; return gerepile(l,tetpil,gdiv(x,p1));
+	    av=avma; p1=cgetg(3,t_INTMOD); p1[1]=x[1]; p1[2]=lgeti(lg(x[1]));
+	    gaffect(y,p1); tetpil=avma; return gerepile(av,tetpil,gdiv(x,p1));
 
 	  case t_REAL: err(operf,"/",x,y);
 	}
@@ -1943,8 +1943,8 @@ gdiv(GEN x, GEN y)
           return z;
 
 	  case t_REAL:
-	    l=avma; p1=mulri(y,(GEN)x[2]); tetpil=avma;
-            return gerepile(l, tetpil, divir((GEN)x[1], p1));
+	    av=avma; p1=mulri(y,(GEN)x[2]); tetpil=avma;
+            return gerepile(av, tetpil, divir((GEN)x[1], p1));
 
 	  case t_INTMOD: z=cgetg(3,t_INTMOD); p2=(GEN)y[1];
             (void)new_chunk(lgefint(p2)<<2); /* HACK */
@@ -1978,23 +1978,23 @@ gdiv(GEN x, GEN y)
             return z;
 
 	  case t_COMPLEX: z=cgetg(3,t_COMPLEX);
-            l=avma; p1=gnorm(y);
+            av=avma; p1=gnorm(y);
 	    p2=gmul(x,(GEN)y[1]);
 	    p3=gmul(x,(GEN)y[2]);
             if(!gcmp0(p3)) p3 = gneg_i(p3);
 	    tetpil=avma;
 	    z[1]=ldiv(p2,p1); z[2]=ldiv(p3,p1);
-	    gerepilemanyvec(l,tetpil,z+1,2); return z;
+	    gerepilemanyvec(av,tetpil,z+1,2); return z;
 
 	  case t_PADIC:
 	    if (!signe(x[1])) return gzero;
 
-	    l=avma; p1=cgetp(y); gaffect(x,p1);
-	    tetpil=avma; return gerepile(l,tetpil,gdiv(p1,y));
+	    av=avma; p1=cgetp(y); gaffect(x,p1);
+	    tetpil=avma; return gerepile(av,tetpil,gdiv(p1,y));
 
 	  case t_QUAD:
-	    l=avma; p1=gnorm(y); p2=gmul(x,gconj(y)); tetpil=avma;
-	    return gerepile(l,tetpil,gdiv(p2,p1));
+	    av=avma; p1=gnorm(y); p2=gmul(x,gconj(y)); tetpil=avma;
+	    return gerepile(av,tetpil,gdiv(p2,p1));
 	}
 
       case t_COMPLEX:
@@ -2006,8 +2006,8 @@ gdiv(GEN x, GEN y)
 	    z[2]=ldiv((GEN)x[2],y); return z;
 
 	  case t_COMPLEX:
-	    l=avma; p1=gnorm(y); p2=gconj(y); p2=gmul(x,p2); tetpil=avma;
-	    return gerepile(l,tetpil, gdiv(p2,p1));
+	    av=avma; p1=gnorm(y); p2=gconj(y); p2=gmul(x,p2); tetpil=avma;
+	    return gerepile(av,tetpil, gdiv(p2,p1));
 
 	  case t_PADIC:
 	    if (krosg(-1,(GEN)y[2])== -1)
@@ -2021,24 +2021,24 @@ gdiv(GEN x, GEN y)
 
 	  case t_QUAD:
 	    lx=precision(x); if (!lx) err(operi,"/",x,y);
-	    l=avma; p1=co8(y,lx); tetpil=avma;
-	    return gerepile(l,tetpil,gdiv(x,p1));
+	    av=avma; p1=co8(y,lx); tetpil=avma;
+	    return gerepile(av,tetpil,gdiv(x,p1));
 	}
 
       case t_PADIC:
 	switch(ty)
 	{
 	  case t_INT: case t_FRAC: case t_FRACN:
-	    l=avma;
+	    av=avma;
 	    if (signe(x[4])) { p1=cgetp(x); gaffect(y,p1); }
 	    else p1=cvtop(y,(GEN)x[2],(valp(x)>0)?valp(x):1);
-	    tetpil=avma; return gerepile(l,tetpil,gdiv(x,p1));
+	    tetpil=avma; return gerepile(av,tetpil,gdiv(x,p1));
 
 	  case t_INTMOD:
-	    l=avma; p1=cgetg(3,t_INTMOD);
+	    av=avma; p1=cgetg(3,t_INTMOD);
 	    p1[1]=y[1]; p1[2]=lgeti(lg(y[1]));
 	    gaffect(x,p1); tetpil=avma;
-	    return gerepile(l,tetpil,gdiv(p1,y));
+	    return gerepile(av,tetpil,gdiv(p1,y));
 
 	  case t_PADIC:
 	    if (!egalii((GEN)x[2],(GEN)y[2])) err(operi,"/",x,y);
@@ -2049,15 +2049,15 @@ gdiv(GEN x, GEN y)
 	    }
 
 	    p1=(precp(x)>precp(y)) ? y : x;
-	    z=cgetp(p1); l=avma;
+	    z=cgetp(p1); av=avma;
 	    setvalp(z,valp(x)-valp(y));
 	    p2=mpinvmod((GEN)y[4],(GEN)p1[3]);
 	    modiiz(mulii((GEN)x[4],p2),(GEN)p1[3],(GEN)z[4]);
-	    avma=l; return z;
+	    avma=av; return z;
 
 	  case t_COMPLEX: case t_QUAD:
-	    l=avma; p1=gmul(x,gconj(y)); p2=gnorm(y); tetpil=avma;
-	    return gerepile(l,tetpil,gdiv(p1,p2));
+	    av=avma; p1=gmul(x,gconj(y)); p2=gnorm(y); tetpil=avma;
+	    return gerepile(av,tetpil,gdiv(p1,p2));
 
 	  case t_REAL:
 	    err(operf,"/",x,y);
@@ -2073,23 +2073,23 @@ gdiv(GEN x, GEN y)
 	    return z;
 
 	  case t_REAL:
-	    l=avma; p1=co8(x,lg(y)); tetpil=avma;
-	    return gerepile(l,tetpil,gdiv(p1,y));
+	    av=avma; p1=co8(x,lg(y)); tetpil=avma;
+	    return gerepile(av,tetpil,gdiv(p1,y));
 
 	  case t_PADIC:
-	    l=avma; p1=cvtop(x,(GEN)y[2],precp(y));
-	    tetpil=avma; return gerepile(l,tetpil,gdiv(p1,y));
+	    av=avma; p1=cvtop(x,(GEN)y[2],precp(y));
+	    tetpil=avma; return gerepile(av,tetpil,gdiv(p1,y));
 
 	  case t_COMPLEX:
 	    ly=precision(y); if (!ly) err(operi,"/",x,y);
-	    l=avma; p1=co8(x,ly); tetpil=avma;
-	    return gerepile(l,tetpil,gdiv(p1,y));
+	    av=avma; p1=co8(x,ly); tetpil=avma;
+	    return gerepile(av,tetpil,gdiv(p1,y));
 
 	  case t_QUAD:
 	    k=x[1]; l=y[1];
 	    if (!gegal((GEN)k,(GEN)l)) err(operi,"/",x,y);
-	    l=avma; p1=gnorm(y); p2=gmul(x,gconj(y)); tetpil=avma;
-	    return gerepile(l,tetpil,gdiv(p2,p1));
+	    av=avma; p1=gnorm(y); p2=gmul(x,gconj(y)); tetpil=avma;
+	    return gerepile(av,tetpil,gdiv(p2,p1));
 	}
     }
     err(bugparier,"division");
@@ -2152,8 +2152,8 @@ gdiv(GEN x, GEN y)
       case t_SER:
 	if (gcmp0(x))
 	{
-          l=avma; p1=ginv(y); tetpil=avma; /* a ameliorer !!!! */
-	  return gerepile(l,tetpil,gmul(x,p1));
+          av=avma; p1=ginv(y); tetpil=avma; /* a ameliorer !!!! */
+	  return gerepile(av,tetpil,gmul(x,p1));
 	}
         p1 = (GEN)gpmalloc(ly*sizeof(long));
         p1[0] = evaltyp(t_SER) | evallg(ly);
@@ -2167,8 +2167,8 @@ gdiv(GEN x, GEN y)
         z[2]=lcopy((GEN)y[1]); return z;
 
       case t_MAT:
-	l=avma; p1=invmat(y); tetpil=avma;
-	return gerepile(l,tetpil,gmul(x,p1));
+	av=avma; p1=invmat(y); tetpil=avma;
+	return gerepile(av,tetpil,gmul(x,p1));
 
       case t_VEC: case t_COL: err(operf,"/",x,y);
     }
@@ -2256,8 +2256,8 @@ gdiv(GEN x, GEN y)
         }
 
 	case t_RFRAC: case t_RFRACN:
-	  l=avma; p2=gmul(x,(GEN)y[2]); tetpil=avma;
-	  return gerepile(l,tetpil,gdiv(p2,(GEN)y[1]));
+	  av=avma; p2=gmul(x,(GEN)y[2]); tetpil=avma;
+	  return gerepile(av,tetpil,gdiv(p2,(GEN)y[1]));
 
 	default: err(operf,"/",x,y);
       }
@@ -2272,8 +2272,8 @@ gdiv(GEN x, GEN y)
 	  z[1]=lcopy((GEN)x[1]); return z;
 
 	case t_SER:
-	  l=avma; p2=gmul((GEN)x[2],y); tetpil=avma;
-	  return gerepile(l,tetpil, gdiv((GEN)x[1],p2));
+	  av=avma; p2=gmul((GEN)x[2],y); tetpil=avma;
+	  return gerepile(av,tetpil, gdiv((GEN)x[1],p2));
 
 	case t_RFRAC: case t_RFRACN:
 	  if (tx == t_RFRACN) ty=t_RFRACN;
@@ -2293,8 +2293,8 @@ gdiv(GEN x, GEN y)
 	return z;
       }
       if (ty!=t_MAT || ly==1 || lg(y[1])!=ly) err(operi,"/",x,y);
-      l=avma; p1=invmat(y); tetpil=avma;
-      return gerepile(l,tetpil,gmul(x,p1));
+      av=avma; p1=invmat(y); tetpil=avma;
+      return gerepile(av,tetpil,gmul(x,p1));
      case t_QFI:case t_QFR:
        break;
      default: err(operf,"/",x,y);

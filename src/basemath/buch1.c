@@ -1399,8 +1399,8 @@ real_relations(long lim, long s, long LIMC, long *ex, long **mat, GEN glog2,
 {
   static long nbtest;
   long i, j, p, fpc, b1, b2, ep, current, first = (s==0);
-  gpmem_t av = avma, av1;
-  long *col,*fpd,*oldfact,*oldexp,limstack;
+  gpmem_t av = avma, av1, limstack;
+  long *col,*fpd,*oldfact,*oldexp;
   long findecycle,nbrhocumule,nbrho;
   GEN p1,p2,form,form0,form1,form2;
 

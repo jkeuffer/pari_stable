@@ -1609,8 +1609,8 @@ agm(GEN x, GEN y, long prec)
 GEN
 logagm(GEN q)
 {
-  long prec=lg(q), s, n;
-  gpmem_t av=avma, tetpil, lim;
+  long prec=lg(q), s, n, lim;
+  gpmem_t av=avma, tetpil;
   GEN y,q4,q1;
 
   if (typ(q)!=t_REAL) err(typeer,"logagm");

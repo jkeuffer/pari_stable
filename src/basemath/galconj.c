@@ -2436,8 +2436,8 @@ suites4:
       av2 = avma;
       for (w = 0; w < 4; w += 2)
       {
+	gpmem_t av3;
 	GEN     uu;
-	long    av3;
 	pj[6] = (w + pj[3]) & 3;
 	uu =FpX_add(FpXQ_mul((GEN) bezoutcoeff[sg[5]],
 			  (GEN) pauto[(pj[6] & 3) + 1],TQ,Q),

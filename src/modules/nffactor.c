@@ -211,8 +211,8 @@ nf_pol_divres(GEN nf,GEN x,GEN y,GEN *pr)
 static GEN
 nfmod_pol_divres(GEN nf,GEN prhall,GEN x,GEN y, GEN *pr)
 {
-  long dx, dy, dz, i, j, k, l, n;
-  gpmem_t av=avma, tetpil;
+  long dx, dy, dz, i, j, k, n;
+  gpmem_t av=avma, av1, tetpil;
   GEN z,p1,p3,px,py;
 
   py = nfmod_pol_reduce(nf,prhall,y);
@@ -245,29 +245,29 @@ nfmod_pol_divres(GEN nf,GEN prhall,GEN x,GEN y, GEN *pr)
   z[dz+2] = (long) element_divmodpr(nf,(GEN)px[dx+2],(GEN)py[dy+2],prhall);
   for (i=dx-1; i>=dy; --i)
   {
-    l=avma; p1=(GEN)px[i+2];
+    av1=avma; p1=(GEN)px[i+2];
     for (j=i-dy+1; j<=i && j<=dz; j++)
       p1 = gsub(p1, element_mul(nf,(GEN)z[j+2],(GEN)py[i-j+2]));
     p1 = nfreducemodpr(nf,p1,prhall);
     tetpil=avma; p3=element_divmodpr(nf,p1,(GEN)py[dy+2],prhall);
-    z[i-dy+2]=lpile(l,tetpil,p3);
+    z[i-dy+2]=lpile(av1,tetpil,p3);
     z[i-dy+2]=(long)nfreducemodpr(nf,(GEN)z[i-dy+2],prhall);
   }
-  l=avma;
+  av1=avma;
   for (i=dy-1; i>=0; --i)
   {
-    l=avma; p1=((GEN)px[i+2]);
+    av1=avma; p1=((GEN)px[i+2]);
     for (j=0; j<=i && j<=dz; j++)
       p1 = gsub(p1, element_mul(nf,(GEN)z[j+2],(GEN)py[i-j+2]));
-    p1 = gerepileupto(l, nfreducemodpr(nf,p1,prhall));
+    p1 = gerepileupto(av1, nfreducemodpr(nf,p1,prhall));
     if (!gcmp0(p1)) break;
   }
 
-  if (!pr) { avma = l; return z; }
+  if (!pr) { avma = av1; return z; }
 
   if (i<0)
   {
-    avma=l;
+    avma=av1;
     p3 = cgetg(3,t_POL); p3[2]=zero;
     p3[1] = evallgef(2) | evalvarn(varn(px));
     *pr=p3; return z;
@@ -278,10 +278,10 @@ nfmod_pol_divres(GEN nf,GEN prhall,GEN x,GEN y, GEN *pr)
   p3[i+2]=(long)nfreducemodpr(nf,p1,prhall);
   for (k=i-1; k>=0; --k)
   {
-    l=avma; p1=((GEN)px[k+2]);
+    av1=avma; p1=((GEN)px[k+2]);
     for (j=0; j<=k && j<=dz; j++)
       p1 = gsub(p1, element_mul(nf,(GEN)z[j+2],(GEN)py[k-j+2]));
-    p3[k+2]=lpileupto(l,nfreducemodpr(nf,p1,prhall));
+    p3[k+2]=lpileupto(av1,nfreducemodpr(nf,p1,prhall));
   }
   *pr=p3; return z;
 }

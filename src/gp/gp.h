@@ -25,6 +25,7 @@ int term_height(void);
 int term_width(void);
 void hit_return(void);
 
+extern ulong secure;
 extern ulong init_opts;
 extern char *current_logfile;
 extern jmp_buf environnement;

@@ -3649,8 +3649,8 @@ sturmpart(GEN x, GEN a, GEN b)
 GEN
 quadpoly0(GEN x, long v)
 {
-  long res, l, i, sx, tx = typ(x);
-  gpmem_t tetpil;
+  long res, i, l, sx, tx = typ(x);
+  gpmem_t av, tetpil;
   GEN y,p1;
 
   if (is_matvec_t(tx))
@@ -3668,12 +3668,12 @@ quadpoly0(GEN x, long v)
   res=mod4(x); if (sx<0 && res) res=4-res;
   if (res>1) err(funder2,"quadpoly");
 
-  l=avma; p1=shifti(x,-2); setsigne(p1,-signe(p1));
+  av=avma; p1=shifti(x,-2); setsigne(p1,-signe(p1));
   y[2] = (long) p1;
   if (!res) y[3] = zero;
   else
   {
-    if (sx<0) { tetpil=avma; y[2] = lpile(l,tetpil,addsi(1,p1)); }
+    if (sx<0) { tetpil=avma; y[2] = lpile(av,tetpil,addsi(1,p1)); }
     y[3] = lnegi(gun);
   }
   return y;

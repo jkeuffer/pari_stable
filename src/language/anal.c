@@ -1914,7 +1914,7 @@ identifier(void)
       ep->value = (void *)ptr;
       ep->valence = EpUSER;
       check_new_fun=NULL;
-      avma = (long)tmpargs; return gnil;
+      avma = (gpmem_t)tmpargs; return gnil;
     }
   }
   err(valencer1); return NULL; /* not reached */

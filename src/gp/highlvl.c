@@ -28,7 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #endif
 
 void kill0(entree *ep);
-long secure;
+ulong secure;
 
 #ifdef HAS_DLOPEN
 #include <dlfcn.h>

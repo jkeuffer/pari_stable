@@ -91,9 +91,9 @@ static char thestring[256];
 static char *prettyprinter;
 static char *prettyprinter_dft = "tex2mail -TeX -noindent -ragged -by_par";
 static pariFILE *prettyprinter_file;
-static long prettyp, test_mode, quiet_mode, gpsilent, simplifyflag;
-static long chrono, pariecho, primelimit, strictmatch;
-static long tglobal, histsize, paribufsize, lim_lines;
+static ulong prettyp, test_mode, quiet_mode, gpsilent, simplifyflag;
+static ulong chrono, pariecho, primelimit, strictmatch;
+static ulong tglobal, histsize, paribufsize, lim_lines;
 static int tm_is_waiting = 0, handle_C_C = 0;
 static gp_format fmt;
 
@@ -135,8 +135,8 @@ gp_preinit(void)
   long i;
 
   primelimit = 500000; 
-  bot = 0;
-  top = (gpmem_t)1000000*sizeof(long);
+  bot = (gpmem_t)0;
+  top = (gpmem_t)(1000000*sizeof(long));
   strcpy(prompt, DFT_PROMPT);
   strcpy(prompt_cont, CONTPROMPT);
 
@@ -418,7 +418,7 @@ do_strftime(char *s, char *buf)
 }
 
 static GEN
-sd_numeric(char *v, int flag, char *s, long *ptn, ulong Min, ulong Max,
+sd_numeric(char *v, int flag, char *s, ulong *ptn, ulong Min, ulong Max,
            char **msg)
 {
   long n;
@@ -611,7 +611,7 @@ sd_compatible(char *v, int flag)
     "(use old functions, don't ignore case)",
     "(use old functions, ignore case)", NULL
   };
-  long old = compatible;
+  ulong old = compatible;
   GEN r = sd_numeric(v,flag,"compatible",&compatible, 0,3,msg);
 
   if (old != compatible && flag != d_INITRC)
@@ -755,11 +755,11 @@ allocatemem0(size_t newsize)
 static GEN
 sd_parisize(char *v, int flag)
 {
-  long n = top-bot;
-  GEN r = sd_numeric(v,flag,"parisize",&n, 10000,VERYBIGINT,NULL);
+  size_t n = top-bot;
+  GEN r = sd_numeric(v,flag,"parisize",(ulong*)&n, 10000,VERYBIGINT,NULL);
   if (n != top-bot)
   {
-    if (!bot) top = n; /* no stack allocated yet */
+    if (!bot) top = (gpmem_t)n; /* no stack allocated yet */
     if (flag != d_INITRC) allocatemem0(n);
   }
   return r;
@@ -2804,7 +2804,7 @@ read_opt(long argc, char **argv)
   /* override the values from gprc */
   testint(b, &paribufsize); if (paribufsize < 10) paribufsize = 10;
   testint(p, &primelimit);
-  testint(s, (gpmem_t*)&top);
+  testint(s, (long*)&top);
   if (under_emacs || under_texmacs) disable_color=1;
   pari_outfile=stdout; return pre;
 }

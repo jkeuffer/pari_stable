@@ -52,7 +52,7 @@ typedef struct subgp_iter {
   long *M, *L; /* mu = p-subgroup type, lambda = p-group type */
   long *powlist; /* [i] = p^i, i = 0.. */
   long *c, *maxc, *a, *maxa, **g, **maxg;
-  gpmem_t *available;
+  long *available;
   GEN **H; /* p-subgroup of type mu, in matrix form */
   GEN cyc; /* cyclic factors of G */
   GEN subq;/* subgrouplist(I) */

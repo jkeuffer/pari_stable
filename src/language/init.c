@@ -476,8 +476,8 @@ init_stack(size_t size)
       bot = (gpmem_t)__gpmalloc(s);
       if (bot) break;
     }
-  memused = avma = top = bot+s;
-  return s;
+  avma = top = bot+s;
+  memused = 0; return s;
 }
 
 /* initialise les donnees de la bibliotheque PARI. Peut être précédée d'un

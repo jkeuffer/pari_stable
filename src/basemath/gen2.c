@@ -337,6 +337,7 @@ gcmp1(GEN x)
 int
 gcmp_1(GEN x)
 {
+  gpmem_t av;
   long l,y;
   GEN p1;
 
@@ -356,7 +357,7 @@ gcmp_1(GEN x)
       return 0;
 
     case t_INTMOD:
-      l=avma; y=egalii(addsi(1,(GEN)x[2]), (GEN)x[1]); avma=l; return y;
+      av=avma; y=egalii(addsi(1,(GEN)x[2]), (GEN)x[1]); avma=av; return y;
 
     case t_FRAC: case t_FRACN:
       l = signe(x[1]);
@@ -369,11 +370,11 @@ gcmp_1(GEN x)
       return gcmp_1((GEN)x[2]) && gcmp0((GEN)x[3]);
 
     case t_PADIC:
-      l=avma; y=gegal(addsi(1,(GEN)x[4]), (GEN)x[3]); avma=l; return y;
+      av=avma; y=gegal(addsi(1,(GEN)x[4]), (GEN)x[3]); avma=av; return y;
 
     case t_POLMOD:
-      l=avma; p1=gadd(gun,(GEN)x[2]);
-      y = signe(p1) && !gegal(p1,(GEN)x[1]); avma=l; return !y;
+      av=avma; p1=gadd(gun,(GEN)x[2]);
+      y = signe(p1) && !gegal(p1,(GEN)x[1]); avma=av; return !y;
 
     case t_POL:
       return lgef(x)==3 && gcmp_1((GEN)x[2]);
@@ -550,8 +551,8 @@ gegal(GEN x, GEN y)
         return 1;
     }
   {
+    VOLATILE gpmem_t av = avma;
     jmp_buf env;
-    VOLATILE long av = avma;
     void *c;
     if (setjmp(env)) i = 0;
     else
@@ -877,8 +878,8 @@ gneg_i(GEN x)
 GEN
 gabs(GEN x, long prec)
 {
-  long tx=typ(x), lx, i, l;
-  gpmem_t tetpil;
+  long tx=typ(x), lx, i;
+  gpmem_t av, tetpil;
   GEN y,p1;
 
   switch(tx)
@@ -891,27 +892,27 @@ gabs(GEN x, long prec)
       y[2]=labsi((GEN)x[2]); return y;
 
     case t_COMPLEX:
-      l=avma; p1=gnorm(x);
+      av=avma; p1=gnorm(x);
       switch(typ(p1))
       {
         case t_INT:
           if (!carrecomplet(p1, &y)) break;
-          return gerepileupto(l, y);
+          return gerepileupto(av, y);
         case t_FRAC:
         case t_FRACN:
         {
           GEN a,b;
           if (!carrecomplet((GEN)p1[1], &a)) break;
           if (!carrecomplet((GEN)p1[2], &b)) break;
-          return gerepileupto(l, gdiv(a,b));
+          return gerepileupto(av, gdiv(a,b));
         }
       }
       tetpil=avma;
-      return gerepile(l,tetpil,gsqrt(p1,prec));
+      return gerepile(av,tetpil,gsqrt(p1,prec));
 
     case t_QUAD:
-      l=avma; p1=gmul(x, realun(prec)); tetpil=avma;
-      return gerepile(l,tetpil,gabs(p1,prec));
+      av=avma; p1=gmul(x, realun(prec)); tetpil=avma;
+      return gerepile(av,tetpil,gabs(p1,prec));
 
     case t_POL:
       lx=lgef(x); if (lx<=2) return gcopy(x);
@@ -1149,10 +1150,10 @@ gaffect(GEN x, GEN y)
 
 	    case t_PADIC:
               if (!signe(x)) { padicaff0(y); break; }
-	      l=avma;
+	      av=avma;
 	      setvalp(y, pvaluation(x,(GEN)y[2],&p1));
 	      modiiz(p1,(GEN)y[3],(GEN)y[4]);
-	      avma=l; break;
+	      avma=av; break;
 
 	    case t_QUAD:
 	      gaffect(x,(GEN)y[2]); gaffsg(0,(GEN)y[3]); break;

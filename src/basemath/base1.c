@@ -248,7 +248,7 @@ transroot(GEN x, int i, int j)
 GEN
 tschirnhaus(GEN x)
 {
-  const gpmem_t av = avma;
+  gpmem_t av = avma, av2;
   long a, v = varn(x);
   GEN u, p1 = cgetg(5,t_POL);
 
@@ -261,12 +261,12 @@ tschirnhaus(GEN x)
     a = mymyrand() >> randshift; if (a==0) a =1; p1[4]=lstoi(a);
     a = mymyrand() >> (randshift-1); if (a>=4) a-=8; p1[3]=lstoi(a);
     a = mymyrand() >> (randshift-1); if (a>=4) a-=8; p1[2]=lstoi(a);
-    u = caract2(x,p1,v); a=avma;
+    u = caract2(x,p1,v); av2=avma;
   }
   while (lgef(srgcd(u,derivpol(u))) > 3); /* while u not separable */
   if (DEBUGLEVEL>1)
     fprintferr("Tschirnhaus transform. New pol: %Z",u);
-  avma=a; return gerepileupto(av,u);
+  avma=av2; return gerepileupto(av,u);
 }
 #undef randshift
 

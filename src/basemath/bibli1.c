@@ -1322,7 +1322,8 @@ lllintpartialall(GEN m, long flag)
     * We compute all inner products and check them repeatedly.
     */
     const gpmem_t ltop3 = avma; /* Excludes region with tm1 and mid */
-    long icol, lim, reductions, npass = 0;
+    const gpmem_t lim = stack_lim(ltop3,1);
+    long icol, reductions, npass = 0;
     GEN dotprd = cgetg(ncol+1, t_MAT);
 
     tm2 = idmat(ncol);
@@ -1335,7 +1336,6 @@ lllintpartialall(GEN m, long flag)
 	coeff(dotprd,jcol,icol) = coeff(dotprd,icol,jcol) =
           (long)gscali((GEN)mid[icol], (GEN)mid[jcol]);
     } /* for icol */
-    lim = stack_lim(ltop3,1);
     for(;;)
     {
       reductions = 0;
@@ -2578,7 +2578,7 @@ minim_alloc(long n, double ***q, GEN *x, double **y,  double **z, double **v)
   *q = (double**) new_chunk(n);
 
   /* correct alignment for the following */
-  s = avma % sizeof(double); avma -= s;
+  avma -= avma % sizeof(double);
   if (avma<bot) err(errpile);
 
   s = (n * sizeof(double))/sizeof(long);
@@ -3028,7 +3028,8 @@ END:
 GEN
 fincke_pohst(GEN a,GEN B0,long stockmax,long flag, long PREC, FP_chk_fun *CHECK)
 {
-  VOLATILE long pr,av=avma,i,j,n;
+  VOLATILE gpmem_t av = avma;
+  VOLATILE long pr,i,j,n;
   VOLATILE GEN B,nf,r,rinvtrans,u,v,res,z,vnorm,sperm,perm,uperm,gram;
   VOLATILE GEN bound = B0;
   void *catcherr = NULL;
