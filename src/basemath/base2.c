@@ -1176,9 +1176,9 @@ redelt(GEN a, GEN N, GEN p)
   return a;
 }
 
-/* compute the Newton sums of g(x) mod pp from its coefficients */
+/* compute the Newton sums of g(x) mod p */
 GEN
-polsymmodpp(GEN g, GEN pp)
+polsymmodp(GEN g, GEN p)
 {
   pari_sp av1, av2;
   long d = degpol(g), i, k;
@@ -1189,11 +1189,11 @@ polsymmodpp(GEN g, GEN pp)
   for (k = 1; k < d; k++)
   {
     av1 = avma;
-    s = centermod(gmulsg(k, polcoeff0(g,d-k,-1)), pp);
+    s = centermod(mulsi(k, polcoeff0(g,d-k,-1)), p);
     for (i = 1; i < k; i++)
-      s = gadd(s, gmul((GEN)y[k-i+1], polcoeff0(g,d-i,-1)));
+      s = addii(s, mulii((GEN)y[k-i+1], polcoeff0(g,d-i,-1)));
     av2 = avma;
-    y[k + 1] = lpile(av1, av2, centermod(gneg(s), pp));
+    y[k + 1] = lpile(av1, av2, centermod(negi(s), p));
   }
 
   return y;
@@ -1203,24 +1203,20 @@ polsymmodpp(GEN g, GEN pp)
 static GEN
 manage_cache(GEN chi, GEN pp, GEN ns)
 {
-  long j, n = degpol(chi);
-  GEN ns2, npp = (GEN)ns[n+1];
-
-  if (gcmp(pp, npp) > 0)
+  if (lgefint(pp) > lgefint(ns[1]))
   {
     if (DEBUGLEVEL > 4) fprintferr("newtonsums: result doesn't fit in cache\n");
-    return polsymmodpp(chi, pp);
+    return polsymmodp(chi, pp);
   }
 
-  if (!signe((GEN)ns[1]))
+  if (!signe(ns[1]))
   {
-    ns2 = polsymmodpp(chi, pp);
-    for (j = 1; j <= n; j++) affii((GEN)ns2[j], (GEN)ns[j]);
+    GEN ns2 = polsymmodp(chi, pp);
+    long j, l = lg(ns);
+    for (j = 1; j < l; j++) affii((GEN)ns2[j], (GEN)ns[j]);
   }
-
   return ns;
 }
-
 
 /* compute the c first Newton sums modulo pp of the
    characteristic polynomial of a/d mod chi, d > 0 power of p (NULL = gun),
@@ -1544,7 +1540,7 @@ static int
 testb2(decomp_t *S, long D, GEN theta, GEN ns)
 {
   long v = varn(S->chi);
-  ulong t, m = is_bigint(S->p)? 0: (ulong)S->p[2];
+  ulong t, m = itos_or_0(S->p);
   GEN T0 = S->phi, chi0 = S->chi;
 
   if (DEBUGLEVEL>4) fprintferr("  Increasing Fa\n");
@@ -1583,17 +1579,15 @@ testc2(decomp_t *S, GEN A, long Ea, GEN T, long Et, GEN ns)
 
 /* used to cache the newton sums of chi */
 static GEN
-init_NS(long N, GEN p, GEN pmf, GEN pmr)
+init_NS(long N, GEN pp, GEN pmf, GEN pmr)
 {
-  GEN z, ns = cgetg(N + 2, t_COL);
-  long i, l;
-  z = powgi(p, gceil(gdivsg(N, mulii(p, subis(p, 1))))); /* p^(N/(p(p-1))) */
-  z = sqri(mulii(z, mulii(pmf, gpowgs(pmr, N))));
-  l  = lgefint(z); /* should be more than enough ... */
-  for (i = 1; i <= N + 1; i++) ns[i] = lgeti(l);
-  ns[N+1] = (long)z;
-  kill_cache(ns); /* no data yet */
-  return ns;
+  GEN q, ns = cgetg(N+1, t_COL);
+  long i, l, p = itos_or_0(pp);
+  q = p? gpowgs(pp, (long)ceil( N * 1. / (p * (p-1)) )): pp;
+  q = sqri(mulii(q, mulii(pmf, gpowgs(pmr, N))));
+  l  = lgefint(q); /* should be more than enough ... */
+  for (i = 1; i <= N; i++) ns[i] = lgeti(l);
+  kill_cache(ns); return ns;
 }
 
 static GEN
@@ -1631,12 +1625,13 @@ static int
 loop(decomp_t *S, long nv, long Ea, long Fa, GEN ns)
 {
   pari_sp av2 = avma, limit = stack_lim(av2, 1);
-  GEN w, chib = NULL, beta, gamm, chig = NULL, nug, delt = NULL;
+  GEN w, chib, beta, gamm, chig, nug, delt = NULL;
   long i, l, Fg, fm = 0, go_fm = 2, eq = 0, er = 0;
   long N = degpol(S->f), v = varn(S->f);
 
-  beta  = lift_intern(gpowgs(gmodulcp(S->nu, S->chi), Ea));
+  beta  = FpXQ_pow(S->nu, stoi(Ea), S->chi, S->p);
   S->invnu = NULL;
+  chib = chig = NULL; /* -Wall */
   for (;;)
   { /* beta tends to a factor of chi */
     if (DEBUGLEVEL>4) fprintferr("  beta = %Z\n", beta);
@@ -1648,13 +1643,15 @@ loop(decomp_t *S, long nv, long Ea, long Fa, GEN ns)
     } else if (!fm && eq > go_fm && !er) {
       if (DEBUGLEVEL>4) fprintferr("  ** switching to fast mode\n");
       fm = 1;
-      chib = chig = NULL;
     }
 
     if (fm)
     {
       er++;
       if (er % Ea == 0)  { er = 0; eq++; }
+      gamm = get_gamma(S, beta, eq, er); /* = beta p^-eq  nu^-er (a unit) */
+      nug = fastnu(S->p, S->chi, gamm, S->pdr);
+      if (!nug) { fm = -1; continue; }
     }
     else
     {
@@ -1673,18 +1670,8 @@ loop(decomp_t *S, long nv, long Ea, long Fa, GEN ns)
       }
       eq = (long)(L / E);
       er = (long)(L*Ea / E - eq*Ea);
-    }
-    if (DEBUGLEVEL>4) fprintferr("  (eq,er) = (%ld,%ld), fm = %ld\n", eq,er,fm);
-
-    gamm = get_gamma(S, beta, eq, er); /* = beta p^-eq  nu^-er (a unit) */
-    if (DEBUGLEVEL>5) fprintferr("  gamma = %Z\n", gamm);
-
-    if (fm) {
-      nug = fastnu(S->p, S->chi, gamm, S->pdr);
-      if (!nug) { fm = -1; continue; }
-    }
-    else
-    {
+      if (DEBUGLEVEL>4) fprintferr("  (eq,er) = (%ld,%ld)\n", eq,er);
+      gamm = get_gamma(S, beta, eq, er); /* = beta p^-eq  nu^-er (a unit) */
       if (er || !chib)
         /* reducing modulo pdr is too much in some cases.
            gamm might not be an integer ==> chig = NULL */
@@ -1698,7 +1685,6 @@ loop(decomp_t *S, long nv, long Ea, long Fa, GEN ns)
 
       if (!chig)
       { /* Valuation of beta was wrong ==> gamma fails the v*-test */
-        long L, E;
         chib = ZX_caract(S->chi, beta, v);
         vstar(S->p, chib, &L, &E);
         eq = (long)(L / E);
@@ -1710,9 +1696,8 @@ loop(decomp_t *S, long nv, long Ea, long Fa, GEN ns)
       
       nug = get_nu(chig, S->p, &l);
       if (l > 1) {
-        composemod(S, gamm, S->phi);
         S->chi = chig;
-        S->nu  = nug; return 1;
+        S->nu  = nug; composemod(S, gamm, S->phi); return 1;
       }
       
       Fg = degpol(nug);
@@ -1724,7 +1709,7 @@ loop(decomp_t *S, long nv, long Ea, long Fa, GEN ns)
     if (degpol(w[1]) != 1)
     {
       if (fm) { fm = -1; continue; }
-      err(talker, "bug in nilord (no root). Is p = %Z a prime?", S->p);
+      err(talker, "no root in nilord. Is p = %Z a prime?", S->p);
     }
 
     for (i = 1; i < lg(w); i++)
@@ -1739,7 +1724,7 @@ loop(decomp_t *S, long nv, long Ea, long Fa, GEN ns)
         continue;
       }
       
-      if (chig && typ(delt) == t_INT)
+      if (typ(delt) == t_INT)
         chie = TR_pol(chig, delt); /* frequent special case */
       else
       {
@@ -1749,8 +1734,7 @@ loop(decomp_t *S, long nv, long Ea, long Fa, GEN ns)
       nue = get_nu(chie, S->p, &l);
       if (l > 1) { 
         S->nu = nue;
-        S->chi= chie;
-        composemod(S, eta, S->phi); return 1;
+        S->chi= chie; composemod(S, eta, S->phi); return 1;
       }
 
       if (gegal(nue, polx[v]))
@@ -1761,16 +1745,14 @@ loop(decomp_t *S, long nv, long Ea, long Fa, GEN ns)
           chie = mycaract(S->chi, eta, S->p, S->pmf, -1, ns);
         
         pie = getprime(S, eta, chie, nue, &Le, &Ee,  0,Ea);
-        if (pie)
-          return testc2(S, S->nu, Ea, pie, Ee, ns);
+        if (pie) return testc2(S, S->nu, Ea, pie, Ee, ns);
         break;
       }
     }
     if (i == lg(w))
     {
       if (fm) { fm = -1; continue; }
-      else
-	err(talker, "bug in nilord (no root). Is p = %Z a prime?", S->p);
+      err(talker, "no root in nilord. Is p = %Z a prime?", S->p);
     }
 
     if (eq) delt = gmul(delt, gpowgs(S->p,  eq));
