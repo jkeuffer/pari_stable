@@ -1962,9 +1962,11 @@ negative $x$ is allowed, and the result in that case is \kbd{I*sqrtint(-x)}.
 
 \subsecidx{znlog}$(x,g)$: $g$ must be a primitive root mod a prime $p$, and
 the result is the discrete log of $x$ in the multiplicative group
-$(\Z/p\Z)^*$. This function using a simple-minded baby-step/giant-step
-approach and requires $O(\sqrt{p})$ storage, hence it cannot be used for
-$p$ greater than about $10^{13}$.
+$(\Z/p\Z)^*$. This function uses a simple-minded combination of 
+Pohlig-Hellman algorithm and Shanks baby-step/giant-step which requires
+$O(\sqrt{q})$ storage, where $q$ is the largest prime factor of $p-1$. Hence
+it cannot be used when the largest prime divisor of $p-1$ is greater than 
+about $10^{13}$.
 
 \syn{znlog}{x,g}.
 
@@ -1974,8 +1976,9 @@ is not invertible.
 
 \syn{order}{x}.
 
-\subsecidx{znprimroot}$(x)$: returns a primitive root of $x$, where $x$
-is a prime power.
+\subsecidx{znprimroot}$(n)$: returns a primitive root (generator) of
+$(\Z/n\Z)^*$, whenever this latter group is cyclic ($n = 4$ or $n = 2p^k$ or
+$n = p^k$, where $p$ is an odd prime and $k \geq 0$).
 
 \syn{gener}{x}.
 
