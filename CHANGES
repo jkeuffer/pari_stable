@@ -41,6 +41,14 @@ Done for version 2.2.6 (released ??/04/2003):
     3- setrand(1); elltors(ellinit(vector(5,k,random/random))) --> SEGV
        [ incorrect use of partial factorization in ellintegralmodel -->
        surviving denominator ] 
+    4- old typo in cauchy_bound --> factor((x - 155)*(x^2 + 160*x + 12864))
+       returned a single irreducible factor [ missing factor 2: initial upper
+       bound for roots was 125 instead of 250 ]
+    5- zeta(x) very slow near large negative integers
+    6- algdep(2^46,1) ---> 1 [from 2.2.5]
+    7- bnrclassnolist(bnfinit(y),[2,2]) --> SEGV
+IS  8- typo in paricom.h [extra , in enum] --> compilation failure
+IS  9- typo in part.c [ // comments ] --> compilation failure
 
   Changed
     1- rnf structure (removed useless components)
@@ -50,7 +58,7 @@ Done for version 2.2.6 (released ??/04/2003):
        existed in nfinit form, since the HNF matrices were _not_ ideals wrt
        this nf structure. [ also consistent with rnfeltreltoabs ]
     3- rnfidealabstorel now requires input in the above form, so use
-       rnfidealabstorel(rnf, nf.zk * A), if A is a strandard ideal in HNF
+       rnfidealabstorel(rnf, nf.zk * A), if A is a standard ideal in HNF
        form. Used to require matrices in HNF form, which was confusing since
        ideals such as A gave wrong results [ HNF wrt different implicit bases ].
     4- idealadd(x,y): multiply by lcm(denom(x), denom(y)), not their product
