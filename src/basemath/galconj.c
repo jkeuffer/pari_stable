@@ -254,7 +254,7 @@ initborne(GEN T, GEN den, struct galois_borne *gb, long ppp)
   if (DEBUGLEVEL >= 4)
     fprintferr("GaloisConj:extra=%d are you happy?\n", extra);
   borneabs = gmul2n(gmul(borne, borneabs), 2 + extra);
-  gb->valsol = mylogint(gmul2n(borneroots, 4), gb->l, prec);
+  gb->valsol = mylogint(gmul2n(borneroots, 4+(n>>1)), gb->l, prec);
   gb->valabs = mylogint(borneabs, gb->l, prec);
   gb->valabs =  max(gb->valsol,gb->valabs);
   if (DEBUGLEVEL >= 4)
