@@ -824,8 +824,18 @@ FpX_Fp_add(GEN y,GEN x,GEN p)
   if (!signe(y))
     return scalarpol(x,varn(y));
   y[2]=laddii((GEN)y[2],x);
-  if (!p) return y;
-  y[2]=lmodii((GEN)y[2],p);
+  if (p) y[2]=lmodii((GEN)y[2],p);
+  if (!signe(y[2]) && deg(y) == 0) return zeropol(varn(y));
+  return y;
+}
+GEN
+ZX_s_add(GEN y,long x)
+{
+  if (!x) return y;
+  if (!signe(y))
+    return scalarpol(stoi(x),varn(y));
+  y[2] = laddis((GEN)y[2],x);
+  if (!signe(y[2]) && deg(y) == 0) return zeropol(varn(y));
   return y;
 }
 /* y is a polynomial in ZZ[X] and x an integer.
@@ -1161,6 +1171,7 @@ FpXQX_red(GEN z, GEN T, GEN p)
   res=normalizepol_i(res,lgef(res));
   return res;
 }
+/* if T = NULL, call FpX_mul */
 GEN
 FpXQX_mul(GEN x, GEN y, GEN T, GEN p)
 {
@@ -1781,19 +1792,22 @@ GEN Fp_factor_rel(GEN P, GEN l, GEN Q)
 /*******************************************************************/
 extern int ff_poltype(GEN *x, GEN *p, GEN *pol);
 
+static GEN
+to_intmod(GEN x, GEN p)
+{
+  GEN a = cgetg(3,t_INTMOD);
+  a[1] = (long)p;
+  a[2] = lmodii(x,p); return a;
+}
+
 /* z in Z[X], return z * Mod(1,p), normalized*/
 GEN
 FpX(GEN z, GEN p)
 {
   long i,l = lgef(z);
-  GEN a,x = cgetg(l,t_POL);
+  GEN x = cgetg(l,t_POL);
   if (isonstack(p)) p = icopy(p);
-  for (i=2; i<l; i++)
-  {
-    a = cgetg(3,t_INTMOD); x[i] = (long)a;
-    a[1] = (long)p;
-    a[2] = lmodii((GEN)z[i],p);
-  }
+  for (i=2; i<l; i++) x[i] = (long)to_intmod((GEN)z[i], p);
   x[1] = z[1]; return normalizepol_i(x,l);
 }
 
@@ -1802,14 +1816,9 @@ GEN
 FpV(GEN z, GEN p)
 {
   long i,l = lg(z);
-  GEN a,x = cgetg(l,typ(z));
+  GEN x = cgetg(l,typ(z));
   if (isonstack(p)) p = icopy(p);
-  for (i=1; i<l; i++)
-  {
-    a = cgetg(3,t_INTMOD); x[i] = (long)a;
-    a[1] = (long)p;
-    a[2] = lmodii((GEN)z[i],p);
-  }
+  for (i=1; i<l; i++) x[i] = (long)to_intmod((GEN)z[i], p);
   return x;
 }
 /* z in Mat m,n(Z), return z * Mod(1,p), normalized*/
@@ -1817,18 +1826,15 @@ GEN
 FpM(GEN z, GEN p)
 {
   long i,j,l = lg(z), m = lg((GEN)z[1]);
-  GEN a,x,y;
+  GEN x,y,zi;
   if (isonstack(p)) p = icopy(p);
   x = cgetg(l,t_MAT);
   for (i=1; i<l; i++)
   {
-    x[i] = lgetg(m,t_COL);y = (GEN)x[i];
-    for(j=1; j<m; j++)
-    {
-      a = cgetg(3,t_INTMOD); y[j] = (long)a;
-      a[1] = (long)p;
-      a[2] = lmodii(gmael(z,i,j),p);
-    }
+    x[i] = lgetg(m,t_COL);
+    y = (GEN)x[i];
+    zi= (GEN)z[i];
+    for (j=1; j<m; j++) y[j] = (long)to_intmod((GEN)zi[j], p);
   }
   return x;
 }
@@ -1843,6 +1849,15 @@ FpX_red(GEN z, GEN p)
   x = cgetg(l,t_POL);
   for (i=2; i<l; i++) x[i] = lmodii((GEN)z[i],p);
   x[1] = z[1]; return normalizepol_i(x,l);
+}
+
+GEN
+FpXV_red(GEN z, GEN p)
+{
+  long i,l = lg(z);
+  GEN x = cgetg(l, t_VEC);
+  for (i=1; i<l; i++) x[i] = (long)FpX_red((GEN)z[i], p);
+  return x;
 }
 
 /* z in Z^n, return lift(z * Mod(1,p)) */
@@ -3532,6 +3547,20 @@ ZX_is_squarefree(GEN x)
   ulong av = avma;
   int d = (lgef(modulargcd(x,derivpol(x))) == 3);
   avma = av; return d;
+}
+
+/* h integer, P in Z[X]. Return h^deg(P) P(x / h) */
+GEN
+ZX_rescale_pol(GEN P, GEN h)
+{
+  long i, l = lgef(P);
+  GEN Q = cgetg(l,t_POL), hi = gun;
+  Q[l-1] = P[l-1];
+  for (i=l-2; i>=2; i--)
+  {
+    hi = gmul(hi,h); Q[i] = lmul((GEN)P[i], hi);
+  }
+  Q[1] = P[1]; return Q;
 }
 
 /* A0 and B0 in Q[X] */

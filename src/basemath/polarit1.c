@@ -174,7 +174,7 @@ poldivres(GEN x, GEN y, GEN *pr)
       if (pr == ONLY_REM) return zeropol(vx);
       *pr = zeropol(vx);
     }
-    return f(x,(GEN)y[2]);
+    return f(x, constant_term(y));
   }
   dx=lgef(x)-3;
   if (vx>vy || dx<dy)
@@ -301,7 +301,7 @@ factmod_init(GEN *F, GEN pp, long *p)
 static GEN
 root_mod_2(GEN f)
 {
-  int z1, z0 = !signe(f[2]);
+  int z1, z0 = !signe(constant_term(f));
   long i,n;
   GEN y;
 
@@ -319,8 +319,8 @@ static GEN
 root_mod_4(GEN f)
 {
   long no,ne;
-  int z0 = !signe(f[2]);
-  int z2 = ((i_mod4(f[2]) + 2*i_mod4(f[3])) & 3) == 0;
+  int z0 = !signe(constant_term(f));
+  int z2 = ((i_mod4(constant_term(f)) + 2*i_mod4(f[3])) & 3) == 0;
   int i,z1,z3;
   GEN y,p;
 
@@ -367,7 +367,7 @@ rootmod2(GEN f, GEN pp)
 
   nbrac=1;
   y=(GEN)gpmalloc((d+1)*sizeof(long));
-  if (gcmp0((GEN)f[2])) y[nbrac++] = 0;
+  if (gcmp0(constant_term(f))) y[nbrac++] = 0;
   ss = icopy(gun); av1 = avma;
   do
   {
@@ -425,9 +425,9 @@ rootmod(GEN f, GEN p)
   /* take gcd(x^(p-1) - 1, f) by splitting (x^q-1) * (x^q+1) */
   b = FpXQ_pow(polx[varn(f)],q, f,p);
   if (lgef(b)<3) err(talker,"not a prime in rootmod");
-  b[2] = laddis((GEN)b[2],-1); /* b = x^((p-1)/2) - 1 mod f */
+  b = ZX_s_add(b,-1); /* b = x^((p-1)/2) - 1 mod f */
   a = FpX_gcd(f,b, p);
-  b[2] = laddis((GEN)b[2], 2); /* b = x^((p-1)/2) + 1 mod f */
+  b = ZX_s_add(b, 2); /* b = x^((p-1)/2) + 1 mod f */
   b = FpX_gcd(f,b, p);
   la = lgef(a)-3;
   lb = lgef(b)-3; n = la + lb;
@@ -441,12 +441,12 @@ rootmod(GEN f, GEN p)
   if (j>1) { y[1] = zero; n++; }
   y[j] = (long)FpX_normalize(b,p);
   if (la) y[j+lb] = (long)FpX_normalize(a,p);
-  pol = gadd(polx[varn(f)], gun); pol0 = (GEN)pol[2];
+  pol = gadd(polx[varn(f)], gun); pol0 = constant_term(pol);
   while (j<=n)
   {
     a=(GEN)y[j]; la=lgef(a)-3;
     if (la==1)
-      y[j++] = lsubii(p, (GEN)a[2]);
+      y[j++] = lsubii(p, constant_term(a));
     else if (la==2)
     {
       GEN d = subii(sqri((GEN)a[3]), shifti((GEN)a[2],2));
@@ -456,8 +456,7 @@ rootmod(GEN f, GEN p)
     }
     else for (pol0[2]=1; ; pol0[2]++)
     {
-      b = FpXQ_pow(pol,q, a,p);
-      b[2] = laddis((GEN)b[2], -1);
+      b = ZX_s_add(FpXQ_pow(pol,q, a,p), -1); /* pol^(p-1)/2 - 1 */
       b = FpX_gcd(a,b, p); lb = lgef(b)-3;
       if (lb && lb<la)
       {
@@ -656,8 +655,7 @@ split(long m, GEN *t, long d, GEN p, GEN q, long r, GEN S)
       w = FpX_res(stopoly(m,ps,v),*t, p);
       m++; w = try_pow(w,*t,p,q,r);
       if (!w) continue;
-      /* set w = w - 1 */
-      w[2] = laddis((GEN)w[2], -1); /* w != 1 or -1 */
+      w = ZX_s_add(w, -1);
     }
     w = FpX_gcd(*t,w, p);
     l = lgef(w)-3; if (l && l!=dv) break;
@@ -683,8 +681,7 @@ splitgen(GEN m, GEN *t, long d, GEN  p, GEN q, long r)
     w = FpX_res(stopoly_gen(m,p,v),*t, p);
     w = try_pow(w,*t,p,q,r);
     if (!w) continue;
-    /* set w = w - 1 */
-    w[2] = laddis((GEN)w[2], -1); /* w != 1 or -1 */
+    w = ZX_s_add(w,-1);
     w = FpX_gcd(*t,w, p); l=lgef(w)-3;
     if (l && l!=dv) break;
 
@@ -1032,10 +1029,8 @@ split_berlekamp(GEN *t, GEN pp, GEN pps2)
         av = avma; p2 = FpX_res(polt, p1, pp);
         if (lgef(p2) <= 3) { avma=av; continue; }
         p2 = FpXQ_pow(p2,pps2, p1,pp);
-        /* set p2 = p2 - 1 */
-        if (!signe(p2))
-          err(talker,"%Z not a prime in split_berlekamp",pp);
-        p2[2] = laddis((GEN)p2[2], -1);
+        if (!signe(p2)) err(talker,"%Z not a prime in split_berlekamp",pp);
+        p2 = ZX_s_add(p2, -1);
         p2 = FpX_gcd(p1,p2, pp); l2=lgef(p2)-3;
         if (l2>0 && l2<l1)
         {
@@ -1766,7 +1761,7 @@ factorpadic4(GEN f,GEN p,long prec)
   lead = leading_term(f); pr = prec;
   if (!gcmp1(lead))
   {
-    long val = ggval(lead,p), val1 = ggval((GEN)f[2],p);
+    long val = ggval(lead,p), val1 = ggval(constant_term(f),p);
     if (val1 < val)
     {
       reverse = 1; polreverse(f);
@@ -1868,16 +1863,11 @@ static GEN
 to_fq(GEN x, GEN a, GEN p)
 {
   long i,lx = lgef(x);
-  GEN p1, z = cgetg(3,t_POLMOD), pol = cgetg(lx,t_POL);
+  GEN z = cgetg(3,t_POLMOD), pol = cgetg(lx,t_POL);
   pol[1] = x[1];
   if (lx == 2) setsigne(pol, 0);
   else
-    for (i=2; i<lx; i++)
-    {
-      p1 = cgetg(3,t_INTMOD);
-      p1[1] = (long)p;
-      p1[2] = x[i]; pol[i] = (long)p1;
-    }
+    for (i=2; i<lx; i++) pol[i] = (long)mod((GEN)x[i], p);
   /* assume deg(pol) < deg(a) */
   z[1] = (long)a;
   z[2] = (long)pol; return z;
