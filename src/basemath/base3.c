@@ -2106,6 +2106,7 @@ ideallist_arch(GEN nf,GEN list,GEN arch,long flun)
   long nba,i,j,lx,ly;
   GEN p1,z,p2;
 
+  if (typ(arch) != t_VEC) err(typeer,"ideallistarch");
   nba=0; for (i=1; i<lg(arch); i++) if (signe(arch[i])) nba++;
   lx=lg(list); z=cgetg(lx,t_VEC);
   for (i=1; i<lx; i++)
