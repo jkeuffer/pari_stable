@@ -544,7 +544,7 @@ $$ (\kbd{top} - \kbd{bot})\,/\,\kbd{sizeof(long)} $$
 is equal to the \kbd{size} argument of \kbd{pari\_init}. The PARI
 stack also has a ``current stack pointer'' called \teb{avma}, which
 stands for {\bf av}ailable {\bf m}emory {\bf a}ddress. These three variables
-are global (declared by \kbd{pari.h}). They are of type \tet{pari\_sp} (pari
+are global (declared by \kbd{pari.h}). They are of type \tet{pari_sp} (pari
 stack pointer).
 
 The stack is oriented upside-down: the more recent an object, the closer to
@@ -888,7 +888,7 @@ We leave the details to the reader, who can look at the answer in the file
 piece of garbage, but it would be a much less natural and unnecessarily
 complicated program, which would in fact be slower.
 
-\subsubec{gerepilemany}
+\subsubsec{gerepilemany}
 
 Let us now see why we may need the \kbd{gerepilemany} variants. Although it
 is not an infrequent occurrence, we will not give a specific example but a
