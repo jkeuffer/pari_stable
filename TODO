@@ -16,14 +16,23 @@ Priority classification (first column): [subjective and debatable!]
 Unless specified otherwise, examples assume 32bit machine and default precision 
 
 5  bnfinit sometimes gives wrong answers because we cheat on the value of
-Bach's bound, using 0.3 log^2 D by default, where 0.3 should really be 12
-(under GRH). If it's not enough, we compute a subquotient of the classgroup,
-i.e junk. Ex:
+Bach's bound, using B := 0.3 log^2 D by default, where 0.3 should really be 12
+(under GRH), or some suitably optimized bound following Bach's article. If
+the prime ideals of norm <= B do not generate the classgroup, we may not detect it, and compute junk. Ex:
  * setrand(3); bnfinit(y^4 + 1190*y^2 + 1416100).cyc --> [8,2,2,2].
    Wrong. The correct structure is [8,4,2].
 
- * setrand(1414185642); bnf = bnfinit(y^4 + 635*y^2 + 403225).reg is twice
+ * setrand(1414185642); bnfinit(y^4 + 635*y^2 + 403225).reg is twice
 the correct value.
+
+ * setrand(867341586); bnfinit(y^4 - y^3 + 6122*y^2 + 6121*y + 37466641).gen
+is wrong [second one is principal]. Group structure and regulator are correct!
+
+5  polrootspadic(x^2+8*x+4, 2, 2) --> 2 + O(2^2), whereas there's no padic
+   root. The documentation is not clear enough: should polrootspadic(x,p,r)
+   find roots in Z/p^r [current behaviour], or use the precision of the
+   supplied polynomial to compute roots in Qp, then return them at precision
+   p^r [ better, polroots() and factorpadic() behave this way ] ?
 
 5  polgalois(x^8-1864259299553450972214799899167226732549697977945716*x^6+331143259018657601105207922631212331088735421305543663274125986698777318014979969*x^4-2225286541902342283500014249183311190477390*x^2+5);
   ***   degree too large in tschirn.
