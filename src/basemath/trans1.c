@@ -571,7 +571,7 @@ powgi(GEN x, GEN n)
 
 /* we suppose n != 0, and valp(x) = 0 */
 static GEN
-ser_pui(GEN x, GEN n, long prec)
+ser_pow(GEN x, GEN n, long prec)
 {
   pari_sp av, tetpil;
   GEN y, p1, p2, lead;
@@ -609,6 +609,33 @@ ser_pui(GEN x, GEN n, long prec)
   p2 = gpow(lead,n, prec); return gmul(p1, p2);
 }
 
+static long
+val_from_i(GEN E)
+{
+  if (is_bigint(E)) err(talker,"valuation overflow in sqrtn");
+  return itos(E);
+}
+
+/* return x^q, assume typ(x) = t_SER, typ(q) = t_FRAC and q != 0 */
+static GEN
+ser_powfrac(GEN x, GEN q, long prec)
+{
+  long e = valp(x);
+  GEN y, E = gmulsg(e, q);
+
+  if (gcmp0(x)) return zeroser(varn(x), val_from_i(gceil(E)));
+  if (typ(E) != t_INT)
+    err(talker,"%Z should divide valuation (= %ld) in sqrtn",q[2], e);
+  e = val_from_i(E);
+  y = dummycopy(x); setvalp(y, 0);
+  y = ser_pow(y, q, prec);
+  if (typ(y) == t_SER) /* generic case */
+    y[1] = evalsigne(1) | evalvalp(e) | evalvarn(varn(x));
+  else /* e.g coeffs are POLMODs */
+    y = gmul(y, gpowgs(polx[varn(x)], e));
+  return y;
+}
+
 GEN
 gpow(GEN x, GEN n, long prec)
 {
@@ -631,39 +658,43 @@ gpow(GEN x, GEN n, long prec)
   }
   if (tx == t_SER)
   {
+    long tn = typ(n);
+
+    if (tn == t_FRACN) { n = gred(n); tn = t_FRAC; }
+    if (tn == t_FRAC) return gerepileupto(av, ser_powfrac(x, n, prec));
     if (valp(x))
-      err(talker,"need integer exponent for non-invertible series in gpow");
+      err(talker,"gpow: need integer exponent if series valuation != 0");
     if (lg(x) == 2) return gcopy(x); /* O(1) */
-    return gerepileupto(av, ser_pui(x, n, prec));
+    return gerepileupto(av, ser_pow(x, n, prec));
   }
   if (gcmp0(x))
   {
     long tn = typ(n);
     if (!is_scalar_t(tn) || tn == t_PADIC || tn == t_INTMOD)
-      err(talker,"zero to a forbidden power in gpow");
+      err(talker,"gpow: zero to a forbidden power");
     n = greal(n);
     if (gsigne(n) <= 0)
-      err(talker,"zero to a non positive exponent in gpow");
+      err(talker,"gpow: zero to a non positive exponent");
     if (!precision(x)) return gcopy(x);
 
     x = ground(gmulsg(gexpo(x),n));
     if (is_bigint(x) || (ulong)x[2] >= (ulong)HIGHEXPOBIT)
-      err(talker,"underflow or overflow in gpow");
+      err(talker,"gpow: underflow or overflow");
     avma = av; return realzero_bit(itos(x));
   }
   if (tx==t_INTMOD && typ(n)==t_FRAC)
   {
     GEN p1;
-    if (!BSW_psp((GEN)x[1])) err(talker,"modulus must be prime in gpow");
+    if (!BSW_psp((GEN)x[1])) err(talker,"gpow: modulus %Z is not prime",x[1]);
     y = cgetg(3,tx); copyifstack(x[1],y[1]);
     av = avma;
     p1 = mpsqrtnmod((GEN)x[2],(GEN)n[2],(GEN)x[1],NULL);
-    if (!p1) err(talker,"n-root does not exists in gpow");
+    if (!p1) err(talker,"gpow: n-root does not exists");
     y[2] = lpileuptoint(av, powmodulo(p1, (GEN)n[1], (GEN)x[1]));
     return y;
   }
   i = (long) precision(n); if (i) prec=i;
-  y = gmul(n,glog(x,prec));
+  y = gmul(n, glog(x,prec));
   return gerepileupto(av, gexp(y,prec));
 }
 
@@ -846,23 +877,6 @@ padic_sqrt(GEN x)
   y[4] = (long)z; return y;
 }
 
-/* return x^(1/n), assume typ(x) = t_SER */
-static GEN
-ser_sqrtn(GEN x, long n, long prec)
-{
-  long e = valp(x);
-  GEN y;
-  if (gcmp0(x)) return zeroser(varn(x), (e+n-1)/n);
-  if (e % n) err(talker,"incorrect valuation in gsqrtn");
-  y = dummycopy(x); setvalp(y, 0);
-  y = ser_pui(y, ginv(stoi(n)), prec);
-  if (typ(y) == t_SER) /* generic case */
-    y[1] = evalsigne(1) | evalvalp(e/n) | evalvarn(varn(x));
-  else /* e.g coeffs are POLMODs */
-    y = gmul(y, gpowgs(polx[varn(x)], e/n));
-  return y;
-}
-
 GEN
 gsqrt(GEN x, long prec)
 {
@@ -930,7 +944,7 @@ gsqrt(GEN x, long prec)
 
     default:
       av = avma; if (!(y = _toser(x))) break;
-      return gerepileupto(av, ser_sqrtn(y, 2, prec));
+      return gerepileupto(av, ser_powfrac(y, ghalf, prec));
   }
   return transc(gsqrt,x,prec);
 }
@@ -1175,7 +1189,7 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
 
   default:
     av = avma; if (!(y = _toser(x))) break;
-    return gerepileupto(av, ser_sqrtn(x, itos(n), prec));
+    return gerepileupto(av, ser_powfrac(y, ginv(n), prec));
   }
   err(typeer,"gsqrtn");
   return NULL;/* not reached */
