@@ -574,31 +574,34 @@ ideal_two_elt(GEN nf, GEN x)
   GEN z;
   long N, tx = idealtyp(&x,&z);
 
-  nf=checknf(nf);
-  if (tx==id_MAT) return mat_ideal_two_elt(nf,x);
+  nf = checknf(nf);
+  if (tx == id_MAT) return mat_ideal_two_elt(nf,x);
 
-  N=degpol(nf[1]); z=cgetg(3,t_VEC);
+  N = degpol(nf[1]); z = cgetg(3,t_VEC);
   if (tx == id_PRINCIPAL)
   {
     switch(typ(x))
     {
       case t_INT: case t_FRAC: case t_FRACN:
-        z[1]=lcopy(x);
-	z[2]=(long)zerocol(N); return z;
+        z[1] = lcopy(x);
+	z[2] = (long)zerocol(N); return z;
 
       case t_POLMOD:
-        x = checknfelt_mod(nf, x, "ideal_two_elt");
-        /* fall through */
+        x = checknfelt_mod(nf, x, "ideal_two_elt"); /* fall through */
       case t_POL:
-        z[1]=zero; z[2]=(long)algtobasis(nf,x); return z;
+        z[1] = zero;
+        z[2] = (long)algtobasis(nf,x); return z;
       case t_COL:
-        if (lg(x)==N+1) { z[1]=zero; z[2]=lcopy(x); return z; }
+        if (lg(x)==N+1) {
+          z[1] = zero;
+          z[2] = lcopy(x); return z;
+        }
     }
   }
   else if (tx == id_PRIME)
   {
-    z[1]=lcopy((GEN)x[1]);
-    z[2]=lcopy((GEN)x[2]); return z;
+    z[1] = lcopy((GEN)x[1]);
+    z[2] = lcopy((GEN)x[2]); return z;
   }
   err(typeer,"ideal_two_elt");
   return NULL; /* not reached */
@@ -607,7 +610,7 @@ ideal_two_elt(GEN nf, GEN x)
 /* factorization */
 
 /* x integral ideal in HNF, return v_p(Nx), *vz = v_p(x \cap Z)
- * Use x[i,i] | x[1,1], i > 0 */
+ * Use x[1,1] = x \cap Z */
 long
 val_norm(GEN x, GEN p, long *vz)
 {
@@ -633,16 +636,16 @@ factor_norm(GEN x)
 GEN
 idealfactor(GEN nf, GEN x)
 {
-  pari_sp av,tetpil;
-  long tx,i,j,k,lf,lc,N,l,v,vc,e;
-  GEN f,f1,f2,c1,c2,y1,y2,y,p1,p2,cx,P;
+  pari_sp av;
+  long tx, i, j, k, lf, lc, N, l, v, vc, e;
+  GEN f, f1, f2, c1, c2, y1, y2, y, p1, p2, cx, P;
 
   tx = idealtyp(&x,&y);
   if (tx == id_PRIME)
   {
-    y=cgetg(3,t_MAT);
-    y[1]=(long)_col(gcopy(x));
-    y[2]=(long)_col(gun); return y;
+    y = cgetg(3,t_MAT);
+    y[1] = (long)_col(gcopy(x));
+    y[2] = (long)_col(gun); return y;
   }
   av = avma;
   nf = checknf(nf);
@@ -666,8 +669,8 @@ idealfactor(GEN nf, GEN x)
   f = factor_norm(x);
   f1 = (GEN)f[1];
   f2 = (GEN)f[2]; lf = lg(f1);
-  y1 = cgetg((lf+lc-2)*N+1,t_COL);
-  y2 = cgetg((lf+lc-2)*N+1,t_VECSMALL);
+  y1 = cgetg((lf+lc-2)*N+1, t_COL);
+  y2 = cgetg((lf+lc-2)*N+1, t_VECSMALL);
   k = 1;
   for (i=1; i<lf; i++)
   {
@@ -705,11 +708,11 @@ idealfactor(GEN nf, GEN x)
       y2[k] = vc*e; k++;
     }
   }
-  tetpil=avma; y=cgetg(3,t_MAT);
-  p1=cgetg(k,t_COL); y[1]=(long)p1;
-  p2=cgetg(k,t_COL); y[2]=(long)p2;
-  for (i=1; i<k; i++) { p1[i]=lcopy((GEN)y1[i]); p2[i]=lstoi(y2[i]); }
-  y = gerepile(av,tetpil,y);
+  y = cgetg(3,t_MAT);
+  p1 = cgetg(k,t_COL); y[1] = (long)p1;
+  p2 = cgetg(k,t_COL); y[2] = (long)p2;
+  for (i=1; i<k; i++) { p1[i] = lcopy((GEN)y1[i]); p2[i] = lstoi(y2[i]); }
+  y = gerepileupto(av, y);
   return sort_factor_gen(y, cmp_prime_ideal);
 }
 
@@ -797,19 +800,18 @@ idealadd(GEN nf, GEN x, GEN y)
 {
   pari_sp av=avma;
   long N,tx,ty;
-  GEN z,p1,dx,dy,dz;
+  GEN z, p1, dx, dy, dz;
   int modid;
 
   tx = idealtyp(&x,&z);
   ty = idealtyp(&y,&z);
-  nf=checknf(nf); N=degpol(nf[1]);
-  z = cgetg(N+1, t_MAT);
+  nf = checknf(nf); N = degpol(nf[1]);
   if (tx != id_MAT || lg(x)!=N+1) x = idealhermite_aux(nf,x);
   if (ty != id_MAT || lg(y)!=N+1) y = idealhermite_aux(nf,y);
   if (lg(x) == 1) return gerepileupto(av,y);
   if (lg(y) == 1) return gerepileupto(av,x); /* check for 0 ideal */
-  dx = denom(x);
-  dy = denom(y); dz = mulii(dx,dy);
+  dx = Q_denom(x);
+  dy = Q_denom(y); dz = mulii(dx,dy);
   if (gcmp1(dz)) dz = NULL; else {
     x = Q_muli_to_int(x, dz);
     y = Q_muli_to_int(y, dz);
@@ -826,20 +828,14 @@ idealadd(GEN nf, GEN x, GEN y)
   }
   if (gcmp1(p1))
   {
-    long i,j;
-    if (!dz) { avma=av; return idmat(N); }
-    avma = (pari_sp)dz; dz = gerepileupto((pari_sp)z, ginv(dz));
-    for (i=1; i<=N; i++)
-    {
-      z[i]=lgetg(N+1,t_COL);
-      for (j=1; j<=N; j++)
-        coeff(z,j,i) = (i==j)? (long)dz: zero;
-    }
-    return z;
+    if (!dz) { avma = av; return idmat(N); }
+    dz = gclone(ginv(dz)); avma = av;
+    z = gscalmat(dz, N);
+    gunclone(dz); return z;
   }
   z = concatsp(x,y);
   z = modid? hnfmodid(z,p1): hnfmod(z, p1);
-  if (dz) z=gdiv(z,dz);
+  if (dz) z = gdiv(z,dz);
   return gerepileupto(av,z);
 }
 
@@ -849,29 +845,46 @@ idealadd(GEN nf, GEN x, GEN y)
 GEN
 addone_aux2(GEN x, GEN y)
 {
-  GEN U, H;
-  long i, l;
-
-  H = hnfall_i(concatsp(x,y), &U, 1);
-  l = lg(H);
-  for (i=1; i<l; i++)
-    if (!gcmp1(gcoeff(H,i,i)))
-      err(talker,"ideals don't sum to Z_K in idealaddtoone");
-  U = (GEN)U[l]; setlg(U, lg(x));
+  GEN U, H = hnfall_i(concatsp(x,y), &U, 1);
+  if (!gcmp1(gcoeff(H,1,1)))
+    err(talker,"ideals don't sum to Z_K in idealaddtoone");
+  U = (GEN)U[ lg(H) ]; setlg(U, lg(x));
   return gmul(x, U);
 }
+
+#if 0
+/* A,B integral in HNF. Find u in Z^n (v in Z^n not computed), such that
+ * Au + Bv = 1 */
+GEN
+hnfmerge_get_1(GEN A, GEN B)
+{
+  long i, j, c, l = lg(A);
+  GEN U = cgetg(l, t_MAT), C = cgetg(l + 1, t_MAT);
+  for (j = 1; j < l; j++)
+  {
+    c = j+1;
+    U[j] = (long)_ei(l-1, j);
+    C[j] = (long)dummycopy((GEN)A[j]);
+    C[c] = (long)dummycopy((GEN)B[j]);
+    for (k = j; k > 0; k--)
+      ZV_elem(gcoeff(C,k,c),gcoeff(C,k,k), C, U, k, c);
+    if (gcmp1(gcoeff(C,1,1))) break;
+    ZM_reduce(C, U, k)
+  }
+  return (GEN)U[1];
+}
+#endif
 
 /* assume x,y integral, non zero in HNF */
 static GEN
 addone_aux(GEN x, GEN y)
 {
-  GEN a, b, u, v;
-
+  GEN a, b, u;
   a = gcoeff(x,1,1);
   b = gcoeff(y,1,1);
   if (typ(a) != t_INT || typ(b) != t_INT)
     err(talker,"ideals don't sum to Z_K in idealaddtoone");
-  if (gcmp1(bezout(a,b,&u,&v))) return gmul(u,(GEN)x[1]);
+  if (invmod(a,b,&u)) return gmul(u,(GEN)x[1]);
   return addone_aux2(x, y);
 }
 
@@ -1026,46 +1039,34 @@ element_invmodideal(GEN nf, GEN x, GEN y)
 GEN
 idealaddmultoone(GEN nf, GEN list)
 {
-  pari_sp av=avma,tetpil;
-  long N,i,i1,j,k;
-  GEN z,v,v1,v2,v3,p1;
+  pari_sp av = avma;
+  long N, i, j, k, tx = typ(list);
+  GEN z, v, v1, v2, v3, p1;
 
-  nf=checknf(nf); N=degpol(nf[1]);
-  if (DEBUGLEVEL>4)
-  {
-    fprintferr(" entree dans idealaddmultoone() :\n");
-    fprintferr(" list = "); outerr(list);
-  }
-  if (typ(list)!=t_VEC && typ(list)!=t_COL)
-    err(talker,"not a list in idealaddmultoone");
-  k=lg(list); z=cgetg(1,t_MAT); list = dummycopy(list);
-  if (k==1) err(talker,"ideals don't sum to Z_K in idealaddmultoone");
+  nf = checknf(nf); N = degpol(nf[1]);
+  if (!is_vec_t(tx)) err(talker,"not a list in idealaddmultoone");
+  k = lg(list); z = cgetg(1,t_MAT); list = dummycopy(list);
+  if (k == 1) err(talker,"ideals don't sum to Z_K in idealaddmultoone");
   for (i=1; i<k; i++)
   {
-    p1=(GEN)list[i];
-    if (typ(p1)!=t_MAT || lg(p1)!=lg(p1[1]))
+    p1 = (GEN)list[i];
+    if (typ(p1) != t_MAT || lg(p1) != lg(p1[1]))
       list[i] = (long)idealhermite_aux(nf,p1);
-    z = concatsp(z,(GEN)list[i]);
+    z = concatsp(z, (GEN)list[i]);
   }
-  v=hnfperm(z); v1=(GEN)v[1]; v2=(GEN)v[2]; v3=(GEN)v[3]; j=0;
-  for (i=1; i<=N; i++)
-  {
-    if (!gcmp1(gcoeff(v1,i,i)))
-      err(talker,"ideals don't sum to Z_K in idealaddmultoone");
-    if (gcmp1((GEN)v3[i])) j=i;
-  }
-
-  v=(GEN)v2[(k-2)*N+j]; z=cgetg(k,t_VEC);
+  v = hnfperm(z);
+  v1 = (GEN)v[1];
+  v2 = (GEN)v[2];
+  v3 = (GEN)v[3];
+  if (!gcmp1(gcoeff(v1,1,1)))
+    err(talker,"ideals don't sum to Z_K in idealaddmultoone");
+  for (j=0, i=1; i<=N; i++)
+    if (gcmp1((GEN)v3[i])) { j = i; break; }
+  v2 = (GEN)v2[(k-2)*N + j]; /* z v2 = 1 */
+  v = cgetg(k, tx);
   for (i=1; i<k; i++)
-  {
-    p1=cgetg(N+1,t_COL); z[i]=(long)p1;
-    for (i1=1; i1<=N; i1++) p1[i1]=v[(i-1)*N+i1];
-  }
-  tetpil=avma; v=cgetg(k,typ(list));
-  for (i=1; i<k; i++) v[i]=lmul((GEN)list[i],(GEN)z[i]);
-  if (DEBUGLEVEL>2)
-    { fprintferr(" sortie de idealaddmultoone v = "); outerr(v); }
-  return gerepile(av,tetpil,v);
+    v[i] = lmul((GEN)list[i], vecextract_i(v2, (i-1)*N + 1, i*N));
+  return gerepilecopy(av, v);
 }
 
 /* multiplication */
@@ -2560,7 +2561,7 @@ idealchinese(GEN nf, GEN x, GEN w)
   if (den)
   {
     GEN p = gen_sort(x, cmp_IND|cmp_C, &cmp_prime_ideal);
-    GEN fa = idealfactor(nf,den); /* sorted */
+    GEN fa = idealfactor(nf, den); /* sorted */
     L = vecextract_p(L, p);
     e = vecextract_p(e, p);
     w = vecextract_p(w, p); settyp(w, t_VEC); /* make sure typ = t_VEC */
