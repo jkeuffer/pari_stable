@@ -1,0 +1,26 @@
+case "$which_graphic_lib" in
+  fltk) if test -z "$with_fltk"; then with_fltk=yes; fi ;;
+esac
+if test -n "$with_fltk"; then
+  which_graphic_lib=fltk
+  FLTKDIR=
+  case "$with_fltk" in
+  yes)
+     pth=$libpth; lib=fltk; . ./locatelib
+     if test -n "$fltk"; then
+       FLTKDIR=`dirname $fltk | sed -e 's/lib\/$//'`
+     fi
+     ;;
+  *) if test ! -d "$with_fltk"; then
+      echo "### FLTK directory '$with_fltk' not found"
+    else
+      FLTKDIR=$with_fltk
+    fi;;
+  esac
+  if test -n "$FLTKDIR"; then
+    echo "Using FLTK library, FLTKDIR = $FLTKDIR"
+  else
+    echo "### FLTK not found. Building without FLTK support"
+    which_graphic_lib=none
+  fi
+fi

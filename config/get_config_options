@@ -100,6 +100,10 @@ while test $# -gt 0; do
   --with-qt) with_qt=yes ;;
   --with-qt=*)
       with_qt=`echo "$1" | sed -e 's/[-a-z]*=//'` ;;
+
+  --with-fltk) with_fltk=yes ;;
+  --with-fltk=*)
+      with_fltk=`echo "$1" | sed -e 's/[-a-z]*=//'` ;;
   *) echo "*** Unrecognized option $1." >&2; error=true;;
   esac
   shift

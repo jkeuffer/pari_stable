@@ -62,6 +62,11 @@ qt)
   PLOTLIBS='-L$(QTDIR)/lib -lqt'
   graph="$graph plotQt"
   ;;
+fltk)
+  PLOTCFLAGS="-I\$(FLTKDIR)/include -I$Xincroot"
+  PLOTLIBS="-L\$(FLTKDIR)/lib -lfltk -L$X11 -lX11 $extralib"
+  graph="$graph plotfltk"
+  ;;
 gnuplot)
   PLOTCFLAGS=
   GNUPLOT_OBJS="bitmap\$(_O) term\$(_O) util\$(_O) version\$(_O) stdfn\$(_O)"
@@ -279,13 +284,13 @@ RLLIBS    = $RLLIBS
 GMPINCLUDE = $GMPINCLUDE
 # Graphic library.
 QTDIR      = $QTDIR
+MOC        = \$(QTDIR)/bin/moc
 PLOTCFLAGS = $PLOTCFLAGS
 PLOTLIBS   = $PLOTLIBS
 GNUPLOT_OBJS = $GNUPLOT_OBJS
 CPLUSPLUS  = g++
-MOC        = \$(QTDIR)/bin/moc
-# Try uncommenting this line if you're using X11 and linking fails
-#  PLOTLIBS=-L$X11 -lX11
+
+FLTKDIR    = $FLTKDIR
 
 TOPLDDYN     = -L$TOP/$objdir \$(RLLIBS)
 
@@ -616,6 +621,11 @@ for dir in basemath modules language gp graph gpdyn graphdyn systems; do
     cflags="$cflags \$(PLOTCFLAGS)"
     depend="$src/graph/rect.h"
     compile="\$(MOC) -o plotQt.moc.cpp $src/graph/plotQt.c && \$(CPLUSPLUS)"
+    ;;
+  plotfltk)
+    cflags="$cflags \$(PLOTCFLAGS)"
+    depend="$src/graph/rect.h"
+    compile="\$(CPLUSPLUS)"
     ;;
   plot*)
     cflags="$cflags \$(PLOTCFLAGS)"
