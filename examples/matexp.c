@@ -59,6 +59,5 @@ main()
   printf("input your matrix in GP format:\n");
   x = matexp(lisGEN(stdin), prec);
 
-  sor(x, 'g', d, 0);
-  exit(0);
+  outbeaut(x); exit(0);
 }
