@@ -501,8 +501,14 @@ zerocol(long n)
   return y;
 }
 
+
 GEN
-gscalcol(GEN x, long n) { return gscalcol_proto(gcopy(x),gzero,n); }
+gscalcol(GEN x, long n) 
+{ 
+  GEN y=gscalcol_proto(gzero,gzero,n); 
+  if (n) y[1]=lcopy(x); 
+  return y;
+}
 
 GEN
 gscalcol_i(GEN x, long n) { return gscalcol_proto(x,gzero,n); }
