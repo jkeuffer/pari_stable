@@ -2610,7 +2610,7 @@ try_pipe(char *cmd, int fl)
 #else
   FILE *file;
   char *f;
-  int flag = fl;
+  VOLATILE int flag = fl;
 
 #  ifdef __EMX__
   if (_osmode == DOS_MODE) /* no pipes under DOS */
