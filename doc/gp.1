@@ -3,13 +3,13 @@
 gp \- PARI calculator
 .SH SYNOPSIS
 .B gp
-.RB [ -f ]
-.RB [ -q ]
-.RB [ -s
+.RB [ --stacksize | -s
 .IR stacksize ]
-.RB [ -p
+.RB [ --primelimit | -p
 .IR primelimit ]
 .RB [ --emacs ]
+.RB [ -f | --fast ]
+.RB [ -q | --quiet ]
 .RB [ --help ]
 .RB [ --test ]
 .RB [ --texmacs ]
@@ -28,18 +28,14 @@ basic data types are
 numbers
 integers, real numbers, exact rational numbers, algebraic numbers,
 .BR p "-adic numbers,"
+modular integers (integers modulo
+.BR n "),"
 complex numbers,
 .TP
-modular integers
-integers modulo
-.BR n ,
+polynomials, rational functions,
+and power series,
 .TP
-polynomials
-and rational functions,
-.TP
-power series,
-.TP
-binary quadratic forms,
+integral binary quadratic forms,
 .TP
 matrices, vectors,
 and lists,
@@ -49,45 +45,47 @@ character strings,
 and recursive combinations of these.
 
 .SH OPTIONS
-A numeric argument to the following options can be followed by a 
+Command line options are availaible in both short form (-f) and POSIX-like
+(--fast). Numeric arguments can be followed by a modifier
 .B k
-, a
+,
 .B M
-or a
+or
 .B G
-at the user's convenience. In that case the argument is multiplied by 1000,
-1000000, or 1000000000 respectively. The following command line options are
-available:
+at the user's convenience; in that case the argument is multiplied by 10^3,
+10^6, or 10^9 respectively.
+
 .TP
-.B \-f
+.B \-f, \--fast
 Fast start (or factory settings). Do not read
 .B .gprc
 (see below) upon startup.
 .TP
-.BI \-p " primelimit"
-Upon startup, gp computes a table of small primes used in most
+.B \-p, \--primelimit limit
+Upon startup, gp computes a table of small primes used in
 number-theoretic applications. If
 .I primelimit
-is set here, include primes up to that bound instead of the default.
+is set, the table include primes up to that bound instead of the default.
 Unreasonably high values will considerably increase startup time. Exceedingly
 small values will cause some number-theoretic functions to fail with the
 message "not enough precomputed primes".
 .TP
-.B \-q
+.B \-q, \--quiet
 Quiet mode. Don't print headers or history numbers, don't say goodbye.
+
 .TP
-.BI \-s " stacksize"
+.B \-s, \--stacksize limit
 Size of gp internal stack allocated on startup. When gp runs out of space, it
 interrupts the current computation and raises a 
 .BI "stack overflow"
-exception. If this occurs frequently (especially if you make heavy use
-of linear algebra), start with a bigger stack. The stack size can also be
+exception. If this occurs frequently, start with a bigger stack. The stack
+size can also be
 increased from within gp, using
-.B default(parisize, ...)
-; it may be convenient to set 
+.BR default(parisize, ...) ";"
+it may be convenient to set 
 .B stacksize
 from your 
-.B .gprc
+.B .gprc.
 Note that computations with a 
 .B smaller
 stack may be more efficient due to better data locality. Most computations
