@@ -240,7 +240,7 @@ jbesselintern(GEN n, GEN z, long flag, long prec)
     default:
       av = avma; if (!(y = _toser(z))) break;
       if (isint(setlgcx2(n,prec),&ki)) n = stoi(labs(ki));
-      return gerepilecopy(av, _jbessel(n,z,flag,lg(z)-2));
+      return gerepilecopy(av, _jbessel(n,y,flag,lg(y)-2));
   }
   err(typeer,"jbessel");
   return NULL; /* not reached */
