@@ -1473,7 +1473,8 @@ powmodulo(GEN A, GEN N, GEN M)
     M = (GEN)k;
     D.res = (GEN(*)(GEN,GEN))&resmod2n;
   }
-  else if (lgefint(M) > RESIIMUL_LIMIT && (lgefint(N) > 3 || N[2] > 4))
+  else if (lgefint(M) > RESIIMUL_LIMIT
+       && (lgefint(N) > 3 || (((double)N[2])*lgefint(A)) > 4 * lgefint(M)))
   { /* compute x % M using multiplication by 1./M */
     M = init_remainder(M);
     D.res = &resiimul;
