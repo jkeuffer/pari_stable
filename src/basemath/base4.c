@@ -91,7 +91,7 @@ static GEN
 prime_to_ideal_aux(GEN nf, GEN vp)
 {
   GEN m = eltmul_get_table(nf, (GEN)vp[2]);
-  return hnfmodid(m, (GEN)vp[1]);
+  return hnfmodidraw(m, (GEN)vp[1]);
 }
 
 /* vp = [a,x,...], a in Z. Return (a,x)  [HACK: vp need not be prime] */
@@ -463,7 +463,7 @@ static int
 ok_elt(GEN x, GEN xZ, GEN y)
 {
   pari_sp av = avma;
-  int r = gegal(x, hnfmodid(y, xZ));
+  int r = gegal(x, hnfmodidraw(y, xZ));
   avma = av; return r;
 }
 
@@ -894,7 +894,7 @@ idealadd(GEN nf, GEN x, GEN y)
     gunclone(dz); return z;
   }
   z = concatsp(x,y);
-  z = modid? hnfmodid(z,p1): hnfmod(z, p1);
+  z = modid? hnfmodidraw(z,p1): hnfmod(z, p1);
   if (dz) z = gdiv(z,dz);
   return gerepileupto(av,z);
 }
@@ -1061,7 +1061,7 @@ idealmulspec(GEN nf, GEN x, GEN y)
   }
   mod = mulii(a, gcoeff(x,1,1));
   for (i=1; i<=N; i++) m[i+N] = lmul(a,(GEN)x[i]);
-  return hnfmodid(m,mod);
+  return hnfmodidraw(m,mod);
 }
 
 /* x ideal (matrix form,maximal rank), vp prime ideal (primedec). Output the
@@ -1147,10 +1147,7 @@ idealmat_mul(GEN nf, GEN x, GEN y)
       for (j=1; j<=ry; j++)
         m[(i-1)*ry+j] = (long)element_muli(nf,(GEN)x[i],(GEN)y[j]);
     if (isnfscalar((GEN)x[1]) && isnfscalar((GEN)y[1]))
-    {
-      GEN p1 = mulii(gcoeff(x,1,1),gcoeff(y,1,1));
-      y = hnfmodid(m, p1);
-    }
+      y = hnfmodidraw(m,  mulii(gcoeff(x,1,1),gcoeff(y,1,1)));
     else
       y = hnfmod(m, detint(m));
   }
@@ -1677,7 +1674,7 @@ hnfideal_inv(GEN nf, GEN I)
  /* I in HNF, hence easily inverted; multiply by IZ to get integer coeffs
   * missing content cancels while solving the linear equation */
   dual = gtrans_i( gauss_triangle_i(J, gmael(nf,5,6), IZ) );
-  dual = hnfmodid(dual, IZ);
+  dual = hnfmodidraw(dual, IZ);
   if (dI) IZ = gdiv(IZ,dI);
   return gdiv(dual,IZ);
 }
@@ -1854,7 +1851,7 @@ idealpow(GEN nf, GEN x, GEN n)
         a=ideal_two_elt(nf,x); alpha=(GEN)a[2]; a=(GEN)a[1];
         alpha = element_pow(nf,alpha,n1);
         m = eltmul_get_table(nf, alpha);
-        x = hnfmodid(m, powgi(a,n1));
+        x = hnfmodidraw(m, powgi(a,n1));
         if (s<0) x = hnfideal_inv(nf,x);
         if (cx) x = gmul(x, powgi(cx,n));
     }
@@ -2003,12 +2000,12 @@ idealdivexact(GEN nf, GEN x0, GEN y0)
   }
   /* Replace x/y  by  x+(Nx/Nz) / y+(Ny/Nz) */
   x = idealhermite_aux(nf, x);
-  x = hnfmodid(x, divii(Nx,Nz));
+  x = hnfmodidraw(x, divii(Nx,Nz));
   /* y reduced to unit ideal ? */
   if (Nz == Ny) return gerepileupto(av, x);
 
   y = idealhermite_aux(nf, y);
-  y = hnfmodid(y, divii(Ny,Nz));
+  y = hnfmodidraw(y, divii(Ny,Nz));
   y = hnfideal_inv(nf,y);
   return gerepileupto(av, idealmat_mul(nf,x,y));
 }
@@ -2032,7 +2029,7 @@ idealintersect(GEN nf, GEN x, GEN y)
   z = kerint(concatsp(x,y)); lz = lg(z);
   for (i=1; i<lz; i++) setlg(z[i], N+1);
   z = gmul(x,z);
-  z = hnfmodid(z, mpppcm(gcoeff(x,1,1), gcoeff(y,1,1)));
+  z = hnfmodidraw(z, mpppcm(gcoeff(x,1,1), gcoeff(y,1,1)));
   if (dx) z = gdiv(z,dx);
   return gerepileupto(av,z);
 }
@@ -2159,11 +2156,13 @@ ideallllred(GEN nf, GEN I, GEN vdir, long prec)
   J = Q_primitive_part(J, &c);
  /* c = content (I T / x) = T / den(I/x) --> d = den(I/x) = T / c
   * J = (d I / x); I[1,1] = I \cap Z --> d I[1,1] belongs to J and Z */
-  if (isnfscalar((GEN)I[1]))
+  if (isnfscalar((GEN)I[1])) {
     b = mulii(gcoeff(I,1,1), c? diviiexact(T, c): T);
-  else
+    I = hnfmodidraw(J,b);
+  } else {
     b = detint(J);
-  I = hnfmodid(J,b);
+    I = hnfmod(J,b);
+  }
   if (!aI) return gerepileupto(av, I);
 
 END:
@@ -2242,13 +2241,13 @@ nf_coprime_part(GEN nf, GEN x, GEN *listpr)
 
 #if 0 /*1) via many gcds. Expensive ! */
   GEN f = idealprodprime(nf, (GEN)listpr);
-  f = hnfmodid(f, x); /* first gcd is less expensive since x in Z */
+  f = hnfmodidraw(f, x); /* first gcd is less expensive since x in Z */
   x = gscalmat(x, N);
   for (;;)
   {
     if (gcmp1(gcoeff(f,1,1))) break;
     x = idealdivexact(nf, x, f);
-    f = hnfmodid(concatsp(f,x), gcoeff(x,1,1)); /* gcd(f,x) */
+    f = hnfmodidraw(concatsp(f,x), gcoeff(x,1,1)); /* gcd(f,x) */
   }
   x2 = x;
 #else /*2) from prime decomposition */
@@ -2366,7 +2365,7 @@ static GEN
 p_div_pr_e(GEN nf, GEN pr)
 {
   GEN t = special_anti_uniformizer(nf, pr);
-  return hnfmodid(eltmul_get_table(nf, t), (GEN)pr[1]);
+  return hnfmodidraw(eltmul_get_table(nf, t), (GEN)pr[1]);
 }
 #endif
 

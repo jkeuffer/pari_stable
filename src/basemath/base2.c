@@ -692,7 +692,7 @@ allbase(GEN f, int flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
       }
       for (  ; j<=n;     j++) p1[j] = a[j];
       for (  ; j<=2*n-k; j++) p1[j] = b[j+k-n];
-      a = hnfmodid(p1, da);
+      a = hnfmodidraw(p1, da);
     }
     if (DEBUGLEVEL>5) fprintferr("Result for prime %Z is:\n%Z\n",w1[i],b);
   }
@@ -996,7 +996,7 @@ dbasis(GEN p, GEN f, long mf, GEN alpha, GEN U)
     }
     b[i] = (long)pol_to_vec(ha,n);
   }
-  b = hnfmodid(b,pd);
+  b = hnfmodidraw(b,pd);
   if (DEBUGLEVEL>5) fprintferr("  new order: %Z\n",b);
   return gdiv(b, pd);
 }
@@ -1106,7 +1106,7 @@ Decomp(GEN p,GEN f,long mf,GEN theta,GEN chi,GEN nu,long flag)
     for (   ; i<=n; i++)
       res[i] = (long)QpX_mod(gmul(gmul(pdr,(GEN)ib2[i]),e), f, pdr);
     res = vecpol_to_mat(res, n);
-    return gdiv(hnfmodid(res,pdr), pdr); /* normalized integral basis */
+    return gdiv(hnfmodidraw(res,pdr), pdr); /* normalized integral basis */
   }
 }
 
@@ -2364,7 +2364,7 @@ anti_uniformizer2(GEN nf, GEN pr)
 {
   GEN p = (GEN)pr[1], z;
   z = gmod(special_anti_uniformizer(nf, pr), p);
-  z = hnfmodid(eltmul_get_table(nf, z), p);
+  z = hnfmodidraw(eltmul_get_table(nf, z), p);
   z = idealaddtoone_i(nf, pr, z);
   return unnf_minus_x(z);
 }
@@ -4008,7 +4008,7 @@ makebasis(GEN nf, GEN pol, GEN rnfeq)
     }
   }
   B = Q_remove_denom(B, &den);
-  if (den) { B = hnfmodid(B, den); B = gdiv(B, den); } else B = idmat(m);
+  if (den) { B = hnfmodidraw(B, den); B = gdiv(B, den); } else B = idmat(m);
   p1 = cgetg(3,t_VEC);
   p1[1] = (long)polabs;
   p1[2] = (long)B; return gerepilecopy(av, p1);

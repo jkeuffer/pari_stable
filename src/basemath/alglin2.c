@@ -2324,7 +2324,7 @@ hnf0(GEN A, int remove)
 GEN
 hnf(GEN x) { return hnf0(x,1); }
 
-enum { hnf_MOD = 1, hnf_PART = 2 };
+enum { hnf_MODID = 1, hnf_PART = 2, hnf_RAW = 4 };
 
 /* u*z[1..k] mod b, in place */
 static void
@@ -2341,13 +2341,15 @@ FpV_red_part_ip(GEN z, GEN p, long k)
   for (i = 1; i <= k; i++) z[i] = lmodii((GEN)z[i], p);
 }
 /* dm = multiple of diag element (usually detint(x)) */
-/* flag & MOD:     don't/do append dm*matid. */
+/* flag & MODID: reduce mod dm * matid [ otherwise as above ]. Explicitly
+ *               concatenate dm* matid unless (flag & RAW) */
 /* flag & PART: don't reduce once diagonal is known; */
+/* flag & RAW:  don't append dm * matid */
 static GEN
 allhnfmod(GEN x, GEN dm, int flag)
 {
   pari_sp av, lim;
-  const int modid = ((flag & hnf_MOD) == 0);
+  const int modid = (flag & hnf_MODID);
   long li, co, i, j, k, def, ldef, ldm;
   GEN a, b, w, p1, p2, u, v, DONE = NULL;
 
@@ -2405,7 +2407,8 @@ allhnfmod(GEN x, GEN dm, int flag)
       co++; def++; x = a; DONE[i] = 1;
     }
   }
-  w = cgetg(modid? li+1: li, t_MAT); b = dm;
+  w = cgetg(modid? li+1: li, t_MAT);
+  setlg(w, li); b = dm;
   for (def = co-1,i = li-1; i > ldef; i--,def--)
   {
     GEN d = bezout(gcoeff(x,i,def),b,&u,&v);
@@ -2415,7 +2418,7 @@ allhnfmod(GEN x, GEN dm, int flag)
     if (!modid && i > 1) b = diviiexact(b,d);
   }
   for (i = 1; i <= ldef; i++){ w[i] = (long)vec_Cei(li-1, i, dm); DONE[i] = 1; }
-  if (modid)
+  if (modid && !(flag & hnf_RAW))
   { /* w[li] is an accumulator, discarded at the end */
     for (i = li-1; i > 1; i--)
     { /* add up the missing dm*Id components */
@@ -2437,7 +2440,6 @@ allhnfmod(GEN x, GEN dm, int flag)
         FpV_red_part_ip((GEN)w[j],  dm, j-1);
       }
     }
-    setlg(w, li);
     for (i = li-1; i > 0; i--)
     {
       GEN d = bezout(gcoeff(w,i,i),dm,&u,&v);
@@ -2475,13 +2477,13 @@ allhnfmod(GEN x, GEN dm, int flag)
 }
 
 GEN
-hnfmod(GEN x, GEN detmat) { return allhnfmod(x,detmat, hnf_MOD); }
-
+hnfmod(GEN x, GEN detmat) { return allhnfmod(x,detmat, 0); }
 GEN
-hnfmodid(GEN x, GEN p) { return allhnfmod(x, p, 0); }
-
+hnfmodid(GEN x, GEN p) { return allhnfmod(x, p, hnf_MODID); }
 GEN
-hnfmodidpart(GEN x, GEN p) { return allhnfmod(x, p, hnf_PART); }
+hnfmodidraw(GEN x, GEN p) { return allhnfmod(x, p, hnf_MODID|hnf_RAW); }
+GEN
+hnfmodidpart(GEN x, GEN p) { return allhnfmod(x, p, hnf_MODID|hnf_PART); }
 
 /***********************************************************************/
 /*                                                                     */
