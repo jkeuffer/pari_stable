@@ -1587,6 +1587,27 @@ rat_zinternallog(GEN nf, GEN x, GEN bigideal, GEN denmat)
   return gsub(p1,p2);
 }
 
+void
+check_nfelt(GEN x, GEN *den)
+{
+  long l = lg(x), i;
+  GEN t, d = NULL;
+  if (typ(x) != t_COL) err(talker,"%Z not a nfelt", x);
+  for (i=1; i<l; i++)
+  {
+    t = (GEN)x[i];
+    switch (typ(t))
+    {
+      case t_INT: case t_INTMOD: break;
+      case t_FRACN: case t_FRAC:
+        if (!d) d = (GEN)t[2]; else d = mpppcm(d, (GEN)t[2]);
+        break;
+      default: err(talker,"%Z not a nfelt", x);
+    }
+  }
+  *den = d;
+}
+
 /* Given x (not necessarily integral), and bid as output by zidealstarinit,
  * compute the vector of components on the generators bid[2]
  */
@@ -1614,9 +1635,8 @@ zideallog(GEN nf, GEN x, GEN bid)
     default: err(talker,"not an element in zideallog");
   }
   if (lg(x) != N+1) err(talker,"not an element in zideallog");
-
-  den=denom(x);
-  if (!gcmp1(den))
+  check_nfelt(x, &den);
+  if (den)
     p1 = rat_zinternallog(nf,x,bid, gscalmat(den,N));
   else
   {
