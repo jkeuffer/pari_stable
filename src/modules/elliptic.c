@@ -2740,9 +2740,9 @@ ellintegralmodel(GEN e)
   }
   /* a = [a1, a2, a3, a4, a6] */
   d = denom(a);
-  prims = (GEN)auxdecomp(d, 0)[1]; /* partial factorization */
   if (is_pm1(d)) return NULL;
 
+  prims = (GEN)auxdecomp(d, 0)[1]; /* partial factorization */
   l = lg(prims); u = gun;
   for (k = 1; k < l; k++)
   {
