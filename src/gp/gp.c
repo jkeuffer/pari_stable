@@ -1639,6 +1639,9 @@ print_version(void)
 static void
 gp_head(void)
 {
+  if (GP_DATA->flags & TEXMACS)
+    printf("%ccommand:(cas-supports-completions-set! \"pari\")%c\n",
+           DATA_BEGIN, DATA_END);
   print_version(); pariputs("\n");
   center("Copyright (C) 2002 The PARI Group");
   print_text("\nPARI/GP is free software, covered by the GNU General Public \
