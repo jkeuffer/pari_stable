@@ -1720,7 +1720,7 @@ sqrtremi(GEN N, GEN *r)
   av = avma;
   sh = bfffo(n[0]) >> 1;
   l2 = (ln + 1) >> 1;
-  if (sh > 1 || (ln & 1)) { /* normalize n, so that n[0] >= 2^BIL / 4 */
+  if (sh || (ln & 1)) { /* normalize n, so that n[0] >= 2^BIL / 4 */
     GEN s0, t = new_chunk(ln + 1);
     t[ln] = 0;
     if (sh)
