@@ -3043,6 +3043,7 @@ Q_content(GEN x)
       for (i=3; i<l; i++)
         d = ggcd(d, Q_content((GEN)x[i]));
       return gerepileupto(av, d);
+    case t_POLMOD: return Q_content((GEN)x[2]);
   }
   err(typeer,"Q_content");
   return NULL; /* not reached */
@@ -3125,6 +3126,15 @@ Q_muli_to_int(GEN x, GEN d)
   if (typ(d) != t_INT) err(typeer,"Q_muli_to_int");
   switch (t)
   {
+    case t_INT:
+      return mulii(x,d);
+
+    case t_FRAC:
+      xn = (GEN)x[1];
+      xd = (GEN)x[2]; av = avma;
+      y = mulii(xn, diviiexact(d, xd));
+      return gerepileuptoint(av, y);
+
     case t_VEC: case t_COL: case t_MAT:
       l = lg(x); y = cgetg(l, t);
       for (i=1; i<l; i++) y[i] = (long)Q_muli_to_int((GEN)x[i], d);
@@ -3135,14 +3145,11 @@ Q_muli_to_int(GEN x, GEN d)
       for (i=2; i<l; i++) y[i] = (long)Q_muli_to_int((GEN)x[i], d);
       return y;
 
-    case t_INT:
-      return mulii(x,d);
-
-    case t_FRAC:
-      xn = (GEN)x[1];
-      xd = (GEN)x[2]; av = avma;
-      y = mulii(xn, diviiexact(d, xd));
-      return gerepileuptoint(av, y);
+    case t_POLMOD:
+      y = cgetg(3, t_POLMOD);
+      copyifstack(x[1],y[1]);
+      y[2] = (long)Q_muli_to_int((GEN)x[2], d);
+      return y;
   }
   err(typeer,"Q_muli_to_int");
   return NULL; /* not reached */
@@ -3158,16 +3165,6 @@ Q_divmuli_to_int(GEN x, GEN d, GEN n)
   
   switch(t)
   {
-    case t_VEC: case t_COL: case t_MAT:
-      l = lg(x); y = cgetg(l, t);
-      for (i=1; i<l; i++) y[i] = (long)Q_divmuli_to_int((GEN)x[i], d,n);
-      return y;
-
-    case t_POL: l = lgef(x);
-      y = cgetg(l, t_POL); y[1] = x[1];
-      for (i=2; i<l; i++) y[i] = (long)Q_divmuli_to_int((GEN)x[i], d,n);
-      return y;
-
     case t_INT:
       av = avma; y = diviiexact(x,d);
       if (n) y = gerepileuptoint(av, mulii(y,n));
@@ -3178,6 +3175,22 @@ Q_divmuli_to_int(GEN x, GEN d, GEN n)
       xd = (GEN)x[2]; av = avma;
       y = mulii(diviiexact(xn, d), diviiexact(n, xd));
       return gerepileuptoint(av, y);
+
+    case t_VEC: case t_COL: case t_MAT:
+      l = lg(x); y = cgetg(l, t);
+      for (i=1; i<l; i++) y[i] = (long)Q_divmuli_to_int((GEN)x[i], d,n);
+      return y;
+
+    case t_POL: l = lgef(x);
+      y = cgetg(l, t_POL); y[1] = x[1];
+      for (i=2; i<l; i++) y[i] = (long)Q_divmuli_to_int((GEN)x[i], d,n);
+      return y;
+
+    case t_POLMOD:
+      y = cgetg(3, t_POLMOD);
+      copyifstack(x[1],y[1]);
+      y[2] = (long)Q_divmuli_to_int((GEN)x[2], d,n);
+      return y;
   }
   err(typeer,"Q_divmuli_to_int");
   return NULL; /* not reached */
