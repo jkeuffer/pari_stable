@@ -94,8 +94,8 @@ gphelp -k gerepile@
 will search the whole manual. All chapters of the manual (usersch[1-5].tex)
 are assumed to be in 
 .B $GPDOCDIR
-.RI ( /usr/local/lib/pari
-by default). You are allowed to gzip (or compress) them, this won't affect
+.RI ( default value set by 
+Configure). You are allowed to gzip (or compress) them, this won't affect
 the search.
 
 .SH OPTIONS
@@ -166,9 +166,8 @@ mode is assumed automatically.
 
 .TP
 GPDOCDIR
-directory where PARI help files are located,
-.I /usr/local/lib/pari
-by default.
+directory where PARI help files are located. Default value set at Configure
+time.
 
 .TP
 GPTMPDIR
@@ -182,27 +181,27 @@ dvi previewer to use
 
 .SH FILES
 .TP
-.I /usr/local/bin/gp
+.I gp
 the gp calculator
 
 .TP
-.I /usr/local/bin/gphelp
+.I gphelp
 the gphelp script
 
 .TP
-.I /usr/local/lib/pari/users.dvi
+.I users.dvi
 PARI/GP User's Manual
 
 .TP
-.I /usr/local/lib/pari/tutorial.dvi
+.I tutorial.dvi
 PARI/GP tutorial
 
 .TP
-.I /usr/local/lib/pari/refcard.dvi
+.I refcard.dvi
 GP reference card
 
 .TP
-.I /usr/local/lib/pari/refcard.ps
+.I refcard.ps
 GP reference card, printer ready
 
 .SH BUGS
