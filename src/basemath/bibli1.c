@@ -2148,7 +2148,7 @@ polredabs0(GEN x, long flun, long prec)
 {
   long i,nv, av = avma;
   GEN nf,v,y,a,phimax;
-  GEN (*storepols)(ANYARG);
+  GEN (*storepols)(GEN, GEN, GEN, GEN, long);
 
   if ((ulong)flun >= 16) err(flagerr,"polredabs");
   nf = initalgall0(x,nf_SMALL|nf_REGULAR,prec);
