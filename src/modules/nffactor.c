@@ -64,7 +64,7 @@ static GEN nfsqff(GEN nf,GEN pol,long fl);
 /* for nf_bestlift: reconstruction of algebraic integers known mod \wp^k */
 typedef struct {
   long k;    /* input known mod \wp^k */
-  GEN pk;    /* p^k = Norm(\wp^k)*/
+  GEN p, pk;    /* p^k */
   GEN den;   /* denom(prk^-1) = p^k [ assume pr unramified ] */
   GEN prk;   /* |.|^2 LLL-reduced basis (b_i) of \wp^k  (NOT T2-reduced) */
   GEN prkHNF;/* HNF basis of \wp^k */
@@ -83,7 +83,12 @@ typedef struct {
 typedef struct /* for use in nfsqff */
 {
   nflift_t *L;
-  GEN nf, pol, fact, res, bound, pr, pk, Br, ZC, dn, polbase, BS_2;
+  GEN nf;
+  GEN pol, polbase; 
+  GEN fact; 
+  GEN pr; 
+  GEN Br, bound, ZC, BS_2;
+  GEN dn;
   long hint;
 } nfcmbf_t;
 
@@ -1028,6 +1033,13 @@ ZqX(GEN P, GEN pk, GEN T, GEN proj)
   return normalizepol(z);
 }
 
+static GEN
+ZqX_normalize(GEN P, GEN lt, nflift_t *L)
+{
+  GEN R = lt? gmul(mpinvmod(lt, L->pk), P): P;
+  return ZqX(R, L->pk, L->Tpk, L->ZqProj);
+}
+
 /* We want to be able to reconstruct x, |x|^2 < C, from x mod pr^k */
 static double
 bestlift_bound(GEN C, long d, double alpha, GEN Npr)
@@ -1050,7 +1062,29 @@ get_R(GEN M)
 }
 
 static void
-bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *T)
+init_proj(nflift_t *L, GEN nfT, GEN p)
+{
+  if (L->Tp)
+  {
+    GEN z = cgetg(3, t_VEC), proj;
+    z[1] = (long)L->Tp;
+    z[2] = (long)FpX_div(FpX_red(nfT,p), L->Tp, p);
+    z = hensel_lift_fact(nfT, z, NULL, p, L->pk, L->k);
+    L->Tpk = (GEN)z[1];
+    proj = get_proj_modT(L->topow, L->Tpk, L->pk);
+    if (L->topowden)
+      proj = FpM_red(gmul(mpinvmod(L->topowden, L->pk), proj), L->pk);
+    L->ZqProj = proj;
+  }
+  else
+  {
+    L->Tpk = NULL;
+    L->ZqProj = dim1proj(L->prkHNF);
+  }
+}
+
+static void
+bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *L)
 {
   const int D = 100;
   const double alpha = ((double)D-1) / D; /* LLL parameter */
@@ -1092,34 +1126,13 @@ bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *T)
   if (DEBUGLEVEL>2)
     fprintferr("for this exponent, GSmin = %Z\nTime reduction: %ld\n",
       GSmin, TIMER(&ti));
-  T->k = a;
-  T->pk = T->den = pk;
-  T->prk = PRK;
-  T->iprk = ZM_inv(PRK, pk);
-  T->GSmin= GSmin;
-  T->prkHNF = prk;
-}
-
-static void
-init_proj(nflift_t *L, GEN nfT, GEN p)
-{
-  if (L->Tp)
-  {
-    GEN z = cgetg(3, t_VEC), proj;
-    z[1] = (long)L->Tp;
-    z[2] = (long)FpX_div(FpX_red(nfT,p), L->Tp, p);
-    z = hensel_lift_fact(nfT, z, NULL, p, L->pk, L->k);
-    L->Tpk = (GEN)z[1];
-    proj = get_proj_modT(L->topow, L->Tpk, L->pk);
-    if (L->topowden)
-      proj = FpM_red(gmul(mpinvmod(L->topowden, L->pk), proj), L->pk);
-    L->ZqProj = proj;
-  }
-  else
-  {
-    L->Tpk = NULL;
-    L->ZqProj = dim1proj(L->prkHNF);
-  }
+  L->k = a;
+  L->den = L->pk = pk;
+  L->prk = PRK;
+  L->iprk = ZM_inv(PRK, pk);
+  L->GSmin= GSmin;
+  L->prkHNF = prk;
+  init_proj(L, (GEN)nf[1], (GEN)pr[1]);
 }
 
 static GEN
@@ -1184,16 +1197,13 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long k, long rec)
       GEN polred;
 
       bestlift_init(k<<1, nf, T->pr, Btra, &L1);
+      polred = ZqX_normalize(Pbase, lP, &L1);
       k      = L1.k;
       pk     = L1.pk;
       PRK    = L1.prk;
       PRKinv = L1.iprk;
       GSmin  = L1.GSmin;
-
-      init_proj(&L1, nfT, p);
-      Tpk = L1.Tpk;
-
-      polred = ZqX(Pbase, pk, Tpk, L1.ZqProj);
+      Tpk    = L1.Tpk;
       famod = hensel_lift_fact(polred, famod, Tpk, p, pk, k);
       for (i=1; i<=n0; i++) TT[i] = 0;
     }
@@ -1301,7 +1311,6 @@ nf_combine_factors(nfcmbf_t *T, GEN polred, GEN p, long a, long klim)
   if (nft < 11) maxK = -1; /* few modular factors: try all posibilities */
   if (DEBUGLEVEL>2) msgTIMER(&ti, "Hensel lift");
 
-  T->res      = cgetg(nft+1,t_VEC);
   L = nfcmbf(T, p, a, maxK, klim);
   if (DEBUGLEVEL>2) msgTIMER(&ti, "Naive recombination");
 
@@ -1321,6 +1330,48 @@ nf_combine_factors(nfcmbf_t *T, GEN polred, GEN p, long a, long klim)
   return z;
 }
 
+static GEN
+nf_DDF_roots(GEN pol, GEN polred, GEN nfpol, GEN lt, GEN init_fa, long nbf,
+             long fl, nflift_t *L)
+{
+  long Cltx_r[] = { evaltyp(t_POL)|_evallg(4), 0,0,0 };
+  long i, m;
+  GEN C2ltpol, C = L->topowden;
+  GEN Clt  = mul_content(C, lt);
+  GEN C2lt = mul_content(C,Clt);
+  GEN z;
+
+  if (L->Tpk)
+  {
+    int cof = (degpol(pol) > nbf); /* non trivial cofactor ? */
+    z = FqX_split_roots(init_fa, L->Tp, L->p, cof? polred: NULL);
+    z = hensel_lift_fact(polred, z, L->Tpk, L->p, L->pk, L->k);
+    if (cof) setlg(z, lg(z)-1); /* remove cofactor */
+    z = roots_from_deg1(z);
+  }
+  else
+    z = rootpadicfast(polred, L->p, L->k);
+  Cltx_r[1] = evalsigne(1) | evalvarn(varn(pol)) | evallgef(4);
+  Cltx_r[3] = Clt? (long)Clt: un;
+  C2ltpol  = C2lt? gmul(C2lt, pol): pol;
+  for (m=1,i=1; i<lg(z); i++)
+  {
+    GEN q, r = (GEN)z[i];
+
+    r = nf_bestlift_to_pol(r, NULL, L);
+    Cltx_r[2] = lneg(r); /* check P(r) == 0 */
+    q = RXQX_divrem(C2ltpol, Cltx_r, nfpol, ONLY_DIVIDES); /* integral */
+    if (q) { 
+      C2ltpol = C2lt? gmul(Clt,q): q;
+      if (Clt) r = gdiv(r, Clt);
+      z[m++] = (long)r;
+    }
+    else if (fl == 2) return cgetg(1, t_VEC);
+  }
+  z[0] = evaltyp(t_VEC) | evallg(m);
+  return z;
+}
+
 /* return the factorization of the square-free polynomial x.
    The coeff of x are in Z_nf and its leading term is a rational integer.
    deg(x) > 1, deg(nfpol) > 1
@@ -1329,13 +1380,12 @@ nf_combine_factors(nfcmbf_t *T, GEN polred, GEN p, long a, long klim)
 static GEN
 nfsqff(GEN nf, GEN pol, long fl)
 {
-  long i, m, n, nbf, ct, maxf, dpol = degpol(pol);
+  long i, n, nbf, ct, maxf, dpol = degpol(pol);
   ulong pp;
   pari_sp av = avma;
-  GEN pr, C0, C, dk, bad, polbase, pk, init_fa = NULL;
-  GEN N2, rep, p, polmod, polred, lt, nfpol;
+  GEN pr, C0, C, dk, bad, polbase, init_fa = NULL;
+  GEN N2, rep, polmod, polred, lt, nfpol;
   byteptr pt = diffptr;
-  double bestind = 1.;
   nfcmbf_t T;
   nflift_t L;
   pari_timer ti, ti_tot;
@@ -1375,12 +1425,20 @@ nfsqff(GEN nf, GEN pol, long fl)
   L.Tp = NULL;
 
   /* FIXME: slow factorization of large polynomials over large Fq */
-  maxf = (n >= 15)? 6: 1;
+  maxf = 1;
+  if (dpol > 100) /* tough */
+  {
+    if (n >= 20) maxf = 4;
+  }
+  else
+  {
+    if (n >= 15) maxf = 4;
+  }
+  
   for (ct = 5;;)
   {
     GEN aT, apr, ap, modpr, red;
     long anbf;
-    double ind;
     pari_timer ti_pr;
 
     GEN list, r = NULL, fa = NULL;
@@ -1435,22 +1493,21 @@ nfsqff(GEN nf, GEN pol, long fl)
       if (!anbf) return cgetg(1,t_VEC); /* no root */
     }
 
-    ind = ((double)anbf) / itos((GEN)apr[4]);
-    if (!nbf || ind <= bestind)
+    if (!nbf || anbf < nbf
+             || (anbf == nbf && cmpii((GEN)apr[4], (GEN)pr[4]) > 0))
     {
-      bestind = ind; nbf = anbf; pr = apr;
+      nbf = anbf; pr = apr;
       L.Tp = aT; init_fa = fa;
     }
     if (DEBUGLEVEL>3)
       fprintferr("%3ld %s at prime\n  %Z\nTime: %ld\n",
-                 nbf, fl?"roots": "factors", apr, TIMER(&ti_pr));
+                 anbf, fl?"roots": "factors", apr, TIMER(&ti_pr));
     if (--ct <= 0) break;
   }
   if (DEBUGLEVEL>2) {
     msgTIMER(&ti, "choice of a prime ideal");
     fprintferr("Prime ideal chosen: %Z\n", pr);
   }
-  p = (GEN)pr[1];
 
   L.tozk = (GEN)nf[8];
   L.topow= Q_remove_denom((GEN)nf[7], &L.topowden);
@@ -1472,74 +1529,35 @@ nfsqff(GEN nf, GEN pol, long fl)
     fprintferr("  3) Final bound: %Z\n", C);
   }
 
+  L.p = (GEN)pr[1];
   if (L.Tp && degpol(L.Tp) == 1) L.Tp = NULL;
   bestlift_init(0, nf, pr, C, &L);
-  T.pr = pr;
-  T.L  = &L;
-  init_proj(&L, nfpol, p);
+  polred = ZqX_normalize(polbase, lt, &L); /* monic */
 
-  pk = L.pk;
-  polred = polbase; if (lt) polred = gmul(mpinvmod(lt,pk), polred);
-  polred = ZqX(polred, pk, L.Tpk, L.ZqProj);
-
-  /* polred is monic */
-  if (fl)
-  { /* roots only */
-    long Cltx_r[] = { evaltyp(t_POL)|_evallg(4), 0,0,0 };
-    GEN C2ltpol, C = L.topowden;
-    GEN Clt  = mul_content(C, lt);
-    GEN C2lt = mul_content(C,Clt);
-
-    if (L.Tpk)
-    {
-      int cof = (dpol > nbf); /* non trivial cofactor ? */
-      rep = FqX_split_roots(init_fa, L.Tp, p, cof? polred: NULL);
-      rep = hensel_lift_fact(polred, rep, L.Tpk, p, pk, L.k);
-      if (cof) setlg(rep, lg(rep)-1); /* remove cofactor */
-      rep = roots_from_deg1(rep);
-    }
-    else
-      rep = rootpadicfast(polred, p, L.k);
-    Cltx_r[1] = evalsigne(1) | evalvarn(varn(pol)) | evallgef(4);
-    Cltx_r[3] = Clt? (long)Clt: un;
-    C2ltpol  = C2lt? gmul(C2lt, pol): pol;
-    for (m=1,i=1; i<lg(rep); i++)
-    {
-      GEN q, r = (GEN)rep[i];
-
-      r = nf_bestlift_to_pol(r, NULL, &L);
-      Cltx_r[2] = lneg(r); /* check P(r) == 0 */
-      q = RXQX_divrem(C2ltpol, Cltx_r, nfpol, ONLY_DIVIDES); /* integral */
-      if (q) { 
-        C2ltpol = C2lt? gmul(Clt,q): q;
-        if (Clt) r = gdiv(r, Clt);
-        rep[m++] = (long)r;
-      }
-      else if (fl == 2) return cgetg(1, t_VEC);
-    }
-    rep[0] = evaltyp(t_VEC) | evallg(m);
-    return gerepilecopy(av, rep);
-  }
+  if (fl) return gerepilecopy(av,
+                   nf_DDF_roots(pol, polred, nfpol, lt, init_fa, nbf, fl, &L));
 
   if (L.Tp)
-    rep = FqX_split_all(init_fa, L.Tp, p);
+    rep = FqX_split_all(init_fa, L.Tp, L.p);
   else
   {
     long d;
-    rep = cgetg(dpol + 1, t_VEC);
-    rep[1] = (long)polred;
-    d = FpX_split_berlekamp((GEN*)(rep + 1), p);
+    rep = cgetg(dpol + 1, t_VEC); rep[1] = (long)polred;
+    d = FpX_split_berlekamp((GEN*)(rep + 1), L.p);
     setlg(rep, d + 1);
   }
+  if (DEBUGLEVEL>2) msgTIMER(&ti, "splitting mod %Z", pr);
+  T.pr = pr;
+  T.L  = &L;
   T.fact  = rep;
   T.polbase = polbase;
   T.pol   = pol;
   T.nf    = nf;
   T.hint  = 1; /* useless */
 
-  rep = nf_combine_factors(&T, polred, p, L.k, dpol-1);
+  rep = nf_combine_factors(&T, polred, L.p, L.k, dpol-1);
   if (DEBUGLEVEL>2)
-    fprintferr("Total Time: %ld\n===========\n", TIMER(&ti));
+    fprintferr("Total Time: %ld\n===========\n", TIMER(&ti_tot));
   return gerepileupto(av, rep);
 }
 
