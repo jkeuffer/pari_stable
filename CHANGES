@@ -36,7 +36,11 @@ TP = Thomas Papanikolaou
 XR = Xavier Roblot
 YU = Yoshiaki Uchikawa
 
-Done for version 2.2.6 (released ??/04/2003):
+Done for version 2.2.7 (released ??/07/2003):
+  Fixed
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Done for version 2.2.6 (released 19/06/2003):
   Fixed
     1- rnfidealtwoelt, rnfidealmult --> SEGV
     2- agm(x+1, x+2) --> oo loop [2.2.5 F-61 was undone...]
