@@ -26,11 +26,8 @@ Unless specified otherwise, examples assume 32bit machine and default precision
    would be to allow dynamic GEN typing that would store type information once
    it's computed. How useful would this be ?
 
--  ? O(y^5)/(1+x) + O(x^3)
-   %1 = O(x^3)
-
-   ? O(y^5)/(1+x+O(x^3))
-   %2 = O(y^5) + O(y^5)*x + O(y^5)*x^2 + O(x^3)
+-  O(x) * y --> O(x)
+   O(y) * x --> O(y) * x
 
 -  factorff(ffinit(211,223),211,ffinit(211,223,a))
    ***   degree overflow

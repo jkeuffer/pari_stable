@@ -67,6 +67,9 @@ MSo11- various bugs in anal.c: uninitialized reads in get_op_fun(), double_op()
    13- rnfnormgroup(): restrict to primes of degree 1 [ much faster ]
    14- gamma(351/2) --> 1.235874058265488750143951998 E740  [ = gamma(351) ]
    15- gammah was much slower than gamma [ contrary to docs ]
+   16- O(y^5)/(1+x) + O(x^3)  --> O(x^3)
+       O(y^5)/(1+x+O(x^3))    --> O(y^5) + O(y^5)*x + O(y^5)*x^2 + O(x^3)
+       O(y) / (1+x)           --> O(y)
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.

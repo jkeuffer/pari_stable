@@ -116,7 +116,7 @@ gred_rfrac2_i(GEN x1, GEN x2)
   GEN y,p1,xx1,xx2,x3;
   long tx,ty;
 
-  if (gcmp0(x1)) return gcopy(x1);
+  if (isexactzero(x1)) return gcopy(x1);
   x1 = simplify_i(x1); tx = typ(x1);
   x2 = simplify_i(x2); ty = typ(x2);
   if (ty!=t_POL)
@@ -718,8 +718,8 @@ gadd(GEN x, GEN y)
 	}
 	if (l>0)
 	{
-	  if (gcmp0(x)) return gcopy(y);
-	  if (gcmp0(y)) ly=2;
+	  if (isexactzero(x)) return gcopy(y);
+	  if (gcmp0(y)) ly = 2;
 
           ly += l; z=cgetg(ly,t_SER);
 	  z[1]=evalsigne(1) | evalvalp(0) | evalvarn(vy);
@@ -739,12 +739,11 @@ gadd(GEN x, GEN y)
           }
           return z;
         }
-        avma=av; /* first coeff is 0 */
-        i=3; while (i<ly && gcmp0((GEN)y[i])) i++;
-        if (i==ly) return zeroser(vy,i-2);
-
-        z=cgetg(ly-i+2,t_SER); z[1]=evalvalp(i-2)|evalvarn(vy)|evalsigne(1);
-        for (j=2; j<=ly-i+1; j++) z[j]=lcopy((GEN)y[j+i-2]);
+        avma = av; /* first coeff is 0 */
+        i=3; while (i<ly && isexactzero((GEN)y[i])) i++;
+        ly -= i; if (!ly) return zeroser(vy,i-2);
+        z=cgetg(ly+2,t_SER); z[1]=evalvalp(i-2)|evalvarn(vy)|evalsigne(1);
+        for (j=2; j<=ly+1; j++) z[j]=lcopy((GEN)y[j+i-2]);
         return z;
 
       case t_RFRAC: return addscalrfrac(x,y);
@@ -778,7 +777,7 @@ gadd(GEN x, GEN y)
           return z;
 
 	case t_SER:
-	  if (gcmp0(x)) return gcopy(y);
+	  if (isexactzero(x)) return gcopy(y);
           ly = signe(y)? lg(y): 3;
 	  i = ly + valp(y) - polvaluation(x, NULL);
 	  if (i < 3) return gcopy(y);
@@ -831,7 +830,7 @@ gadd(GEN x, GEN y)
           return zeroser(vx, ly-2 + valp(y));
 	
 	case t_RFRAC: case t_RFRACN:
-	  if (gcmp0(y)) return gcopy(x);
+	  if (isexactzero(y)) return gcopy(x);
 
 	  l = valp(x) - gval(y,vy); l += gcmp0(x)? 3: lg(x);
 	  if (l<3) return gcopy(x);
@@ -2138,7 +2137,7 @@ gdiv(GEN x, GEN y)
       case t_SER:
 	if (gcmp0(x))
 	{
-          av=avma; p1=ginv(y); tetpil=avma; /* a ameliorer !!!! */
+          av=avma; p1=ginv(y); tetpil=avma; /* TODO: improve !!! */
 	  return gerepile(av,tetpil,gmul(x,p1));
 	}
         p1 = (GEN)gpmalloc(ly*sizeof(long));
