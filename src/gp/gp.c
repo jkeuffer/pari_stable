@@ -2688,7 +2688,7 @@ input0(void)
 void
 system0(char *s)
 {
-#if defined(UNIX) || defined(__EMX__)
+#if defined(UNIX) || defined(__EMX__) || defined(_WIN32)
   check_secure(s);
   system(s);
 #else

@@ -93,6 +93,7 @@ BA 23- cos(2^2^22) --> precision too low [ idem sin, tan ]
        different flags.
     9- upgrade pariemacs, see pariemacs.txt
    10- faster divll for portable kernel [ inspired by GMP ]
+   11- allow system() under Windows (95 and higher)
 
   Added
     1- member function rnf.pol (polynomial generating absolute extension)
