@@ -487,10 +487,10 @@ convert_to_id(GEN P)
 static GEN
 quadrayimagwei(GEN bnr, int raw, long prec)
 {
-  long clno,clrayno,lc,i,j,ia,ell;
+  long av2,clno,clrayno,lc,i,j,ia,ell, first = 1;
   byteptr p = diffptr;
-  GEN allf,f,clray,bnf,nf,D,pol,fa,P,pp,pi,pial,clgp,cyc,gen,listl;
-  GEN z,listray,pp1,pr2,listden,listc,pii2,ida,ap2,om1,om2,tau,d,al,s,v;
+  GEN z,allf,f,clray,bnf,nf,D,pol,fa,pp,pi,pial,clgp,cyc,gen,listl,d,al,s,v;
+  GEN listgenray,listray,pp1,pr2,listden,listc,pii2,ida,ap2,om1,om2,tau,P0,P;
 
   allf = conductor(bnr,gzero,1,prec);
   f = gmael(allf,1,1); clray=(GEN)allf[2];
@@ -505,21 +505,10 @@ quadrayimagwei(GEN bnr, int raw, long prec)
     if (raw) convert_to_id(P);
     return gcopy(P);
   }
-  fa = (GEN)idealfactor(nf,f)[1];
-  if (lg(fa)==2)
-  {
-    pp=(GEN)fa[1]; pi=(GEN)pp[1];
-    if (raw)
-      pial = to_approx(nf,(GEN)pp[2]);
-    else
-      pial = basistoalg(nf,(GEN)pp[2]);
-  }
-  else { pi=gun; pial=gun; }
-  clgp=gmael(bnf,8,1);
-  clno=itos((GEN)clgp[1]); cyc=(GEN)clgp[2]; gen=(GEN)clgp[3];
+  clgp=gmael(bnf,8,1); cyc=(GEN)clgp[2]; gen=(GEN)clgp[3];
   lc=lg(gen);
-  listl   = getallelts(nf,clgp);
-  listray = getallelts(nf,clray);
+  listl   = getallelts(nf,clgp);  clno    = lg(listl)-1;
+  listray = getallelts(nf,clray); clrayno = lg(listray)-1;
   if (gcmpgs(D,-4) < 0)
   {
     for (i=1; i<lc; i++) z = mulii(z,dethnf((GEN)gen[i]));
@@ -533,7 +522,29 @@ quadrayimagwei(GEN bnr, int raw, long prec)
     pr2 = idealpows(nf,(GEN)(primedec(nf,stoi(ell))[1]), 2);
   }
   else { pr2=idmat(2); ell=1; }
-  listden=cgetg(clno+1,t_VEC); listc=cgetg(clno+1,t_VEC);
+  fa = (GEN)idealfactor(nf,f)[1];
+  if (lg(fa)==2)
+  {
+    pp=(GEN)fa[1]; pi=(GEN)pp[1];
+    if (raw)
+      pial = to_approx(nf,(GEN)pp[2]);
+    else
+      pial = basistoalg(nf,(GEN)pp[2]);
+  }
+  else { pi=gun; pial=gun; }
+  listden=cgetg(clno+1,t_VEC);
+  listc=cgetg(clno+1,t_VEC);
+  listgenray=cgetg(clrayno+1,t_VEC);
+  for (i=1; i<=clrayno; i++)
+    listgenray[i] = (long)isprincipalgenforce(bnf,idealinv(nf,(GEN)listray[i]));
+  av2 = avma;
+PRECPB:
+  if (!first)
+  {
+    if (DEBUGLEVEL) err(warnprec,"quadrayimagwei",prec);
+    nf = gerepileupto(av2, nfnewprec(nf,prec));
+  }
+  first = 0;
   pii2 = gmul(gi, gmul2n(mppi(prec),1));
   for (i=1; i<=clno; i++)
   {
@@ -546,12 +557,10 @@ quadrayimagwei(GEN bnr, int raw, long prec)
     listc[i] = (long)schertzc(nf,(GEN)listl[i],d,prec);
   }
   al = to_approx(nf, idealcoprime(nf,f,f));
-  clrayno = itos((GEN)clray[1]);
   P = cgetg(clrayno+1,t_VEC);
   for (i=1; i<=clrayno; i++)
   {
-    pp = isprincipalgenforce(bnf,idealinv(nf,(GEN)listray[i]));
-    pp1 = (GEN)pp[1];
+    pp = (GEN)listgenray[i]; pp1 = (GEN)pp[1];
     for (ia=0,j=1; j<lc; j++)
       ia = ia*itos((GEN)cyc[j]) + itos((GEN)pp1[j]);
     ia++; s = gdiv(al, to_approx(nf,(GEN)pp[2]));
@@ -561,7 +570,7 @@ quadrayimagwei(GEN bnr, int raw, long prec)
     if (raw)
     {
       v = cgetg(3,t_VEC); P[i]= (long)v;
-      v[1] = (long)listray[i];
+      v[1] = listray[i];
       v[2] = lmul(pial,s);
     }
     else P[i] = lmul(pi,s);
@@ -569,11 +578,17 @@ quadrayimagwei(GEN bnr, int raw, long prec)
     * so use (small) pi and correct later */
   }
 
-  if (DEBUGLEVEL) fprintferr("P = %Z\n",P);
+  if (DEBUGLEVEL>1) fprintferr("P = %Z\n",P);
   if (!raw)
   {
-    P = findbezk_pol(nf, roots_to_pol(P, 0));
-    if (!P) return cgetg(1,t_VEC);
+    P0 = roots_to_pol(P, 0);
+    P = findbezk_pol(nf, P0);
+    if (!P)
+    {
+      i = 2 + (prec - gprecision(P0)) + (gexpo(P0) >> TWOPOTBITS_IN_LONG);
+      if (i < prec) i = prec;
+      prec += (i-2); goto PRECPB;
+    }
     P = gsubst(P,0,gmul(gdiv(pi,pial),polx[0]));
     P = gmul(P,gpuigs(gdiv(pial,pi),clrayno));
   }
@@ -640,20 +655,25 @@ computeth2(GEN nf, GEN gf, GEN gc, GEN la, long prec)
 static GEN
 computeP2(GEN bnr, GEN la, int raw, long prec)
 {
-  long av=avma, av2, clrayno,i;
-  GEN bnf,listray,nf,P,gf;
-
-  bnf=(GEN)bnr[1]; nf=(GEN)bnf[7]; gf=gmael3(bnr,2,1,1);
+  long av=avma, av2, clrayno,i, first = 1;
+  GEN listray,P0,P,f, nf = checknf(bnr);
+  
+  f = gmael3(bnr,2,1,1);
   if (typ(la) != t_COL) la = algtobasis(nf,la);
-  listray=getallelts(nf,(GEN)bnr[5]);
-  clrayno=lg(listray)-1;
-  av2 = avma;
+  listray = getallelts(nf,(GEN)bnr[5]);
+  clrayno = lg(listray)-1; av2 = avma;
 PRECPB:
+  if (!first)
+  {
+    if (DEBUGLEVEL) err(warnprec,"computeP2",prec);
+    nf = gerepileupto(av2, nfnewprec(checknf(bnr),prec));
+  }
+  first = 0;
   P = cgetg(clrayno+1,t_VEC);
   for (i=1; i<=clrayno; i++)
   {
-    GEN v, s = computeth2(nf,gf, (GEN)listray[i],la,prec);
-    if (!s) return NULL;
+    GEN v, s = computeth2(nf,f, (GEN)listray[i],la,prec);
+    if (!s) { prec = (prec<<1)-2; goto PRECPB; }
     if (raw)
     {
       v = cgetg(3,t_VEC); P[i] = (long)v;
@@ -664,14 +684,13 @@ PRECPB:
   }
   if (!raw)
   {
-    P = roots_to_pol(P, 0); i = gexpo(P);
-    P = findbezk_pol(nf, P);
+    P0 = roots_to_pol(P, 0);
+    P = findbezk_pol(nf, P0);
     if (!P)
     {
-      prec = BIGDEFAULTPREC + (i >> TWOPOTBITS_IN_LONG);
-      avma = av2; nf = nfnewprec((GEN)bnf[7],prec);
-      if (DEBUGLEVEL) err(warnprec,"computeP2",prec);
-      goto PRECPB;
+      i = 2 + (prec - gprecision(P0)) + (gexpo(P0) >> TWOPOTBITS_IN_LONG);
+      if (i < prec) i = prec;
+      prec += (i-2); goto PRECPB;
     }
   }
   return gerepileupto(av, gcopy(P));
@@ -928,10 +947,7 @@ quadray(GEN D, GEN f, GEN flag, long prec)
     bnf = bnfinit0(pol,signe(D)>0?1:0,NULL,prec);
   }
   raw = (mpodd(flag) && signe(D) < 0);
-
-PRECPB:
   bnr = bnrinit0(bnf,f,1,prec);
-
   if (gcmp1(gmael(bnr,5,1)))
   {
     avma = av; if (!raw) return polx[0];
@@ -951,11 +967,6 @@ PRECPB:
         y = quadrayimagsigma(bnr,raw,prec);
       else
         y = quadrayimagwei(bnr,raw,prec);
-    }
-    if (!y) /* failure */
-    {
-      prec = (prec<<1)-2; if (DEBUGLEVEL) err(warnprec,"quadray",prec);
-      bnf = gerepileupto(av, bnfnewprec(bnf,prec)); goto PRECPB;
     }
   }
   return gerepileupto(av, y);
