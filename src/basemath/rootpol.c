@@ -922,7 +922,7 @@ static void
 parameters(GEN p, double *mu, double *gamma,
            long polreal, double param, double param2)
 {
-  GEN q,pc,Omega,coef,RU,prim,aux,ggamma,gx,mygpi;
+  GEN q,pc,Omega,coef,RU,prim,aux,aux0,ggamma,gx,mygpi;
   long ltop=avma,limite=stack_lim(ltop,1),n=lgef(p)-3,bitprec,NN,K,i,j,ltop2;
   double lx;
 
@@ -944,11 +944,12 @@ parameters(GEN p, double *mu, double *gamma,
   coef=cgetg(Lmax+1,t_VEC); coef++;
   *mu=(double)pariINFINITY; *gamma=0.;
   ggamma = gzero;
-  aux = myrealun(bitprec);
+  aux0 = myrealun(bitprec);
   if (polreal) K=K/2+1;
   ltop2=avma;
   for (i=0; i<K; i++)
   {
+    aux = aux0;
     for (j=0; j<=n; j++)
     {
       pc[j]=lmul((GEN)q[j+2],aux);
@@ -1369,10 +1370,11 @@ conformal_mapping(GEN p, long k, long bitprec, double aux,GEN *F,GEN *G)
   param=0.; param2=0.;
   for (i=1; i<=n; i++)
   {
+    double t;
     affrr(mulrr(radius[i], invrho), radius[i]);
     aux2 = ginv(subsr(1, radius[i]));
-    param += fabs(rtodbl(aux2));
-    if (cmprs(aux2, 1) > 0) param2 += log2ir(aux2);
+    t = fabs(rtodbl(aux2));
+    param += t; if (t > 1.) param2 += log2(t);
   }
   optimize_split(q,k,delta,bitprec2,&FF,&GG,param,param2);
   bitprec2 += n; R = ginv(R);
