@@ -160,11 +160,11 @@ inithue(GEN poly, long flag)
 static void
 T_A_Matrices(void)
 {
-  GEN mask, eps1, eps2, nia, m1, IntM;
+  GEN eps1, eps2, nia, m1, IntM;
   int i,j;
 
-  m1=glog(gabs(MatFU,Prec),Prec); mask=gsub(gpui(gdeux,stoi(r),Prec),gun);
-  m1=matextract(m1,mask,mask);
+  m1 = rowextract_i(vecextract_i(MatFU, 1,r), 1,r); /* minor order r */
+  m1 = glog(gabs(m1,Prec),Prec);
 
   A=invmat(m1); IntM=gsub(gmul(A,m1),idmat(r));
 
