@@ -313,7 +313,6 @@ term_get_color(int n)
 /**                                                                **/
 /********************************************************************/
 static int col_index, lin_index, max_width, max_lin;
-void init_lim_lines(char *s, long max);
 #ifdef HAS_TIOCGWINSZ
 #  include <sys/termios.h>
 #  include <sys/ioctl.h>
@@ -447,6 +446,7 @@ void
 init_lim_lines(char *s, long max)
 {
   if (!max) return;
+  if (!s) { pariOut = &defaultOut; return; }
   max_width = term_width();
   max_lin = max;
   lin_index = 1; col_index = strlen(s);

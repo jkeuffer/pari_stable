@@ -1698,7 +1698,7 @@ normal_output(GEN z, long n)
   term_color(c_OUTPUT);
   init_lim_lines(thestring,lim_lines);
   gp_output(z);
-  init_lim_lines("",lim_lines);
+  init_lim_lines(NULL,lim_lines);
   term_color(c_NONE); pariputc('\n');
 }
 
