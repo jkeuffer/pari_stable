@@ -57,7 +57,13 @@ while test $# -gt 0; do
   -l|-load) shift; initfile=$1;
      cd $TOP
      PATH=.:$PATH; export PATH
-     if test -z "$1";then initfile=$dflt_conf_file; fi
+     if test -z "$1";then
+       tmp_host=`$config_dir/arch-osname`
+       arch=`echo "$tmp_host" | sed -e 's/\(.*\)-.*/\1/'`
+       osname=`echo "$tmp_host" | sed -e 's/.*-\(.*\)/\1/'`
+       objdir=O$osname-$arch;
+       initfile=$objdir/$dflt_conf_file;
+     fi
      if test -r "$initfile"; then
        . $initfile
        if test ! -d $objdir; then mkdir $objdir; fi
@@ -118,6 +124,7 @@ Which compiler will be used ?
   Depending on the machine (architecture and operating system) and on what is
   found in the path, a compiler is automatically chosen. If you set the
   environment variable CC before typing Configure, it will be used instead.
+  Typeset the installation help ('tex INSTALL.tex') for more details.
 EOT
 exit 1
 ;;
@@ -129,16 +136,17 @@ test "$fastread" = yes || cat <<EOT
 
 You will be asked some questions about your system. Most of the time, a list
 of acceptable answers will be supplied as well as a default between brackets.
-Type carriage return to accept these defaults.
+Type a carriage return ('Enter') to accept these defaults.
 
 Though the present script strives to prevent any fatal mistake on your part,
-there's currently no easy way out if you make one. Your best bet is to press
+there is currently no easy way out if you make one. Your best bet is to press
 Ctrl-C, then start again.  Another possibility is to wait till the questions
-end, edit the file "$dflt_conf_file", then run
+end, edit the file "Oxxx/$dflt_conf_file", then run
 
-      Configure -load $dflt_conf_file
+      Configure -load Oxxx/$dflt_conf_file
 
-(which can be abbreviated to simply "Configure -l")
+(which can be abbreviated to simply "Configure -l", provided your architecture
+is correctly detected)
 ==========================================================================
 EOT
 
