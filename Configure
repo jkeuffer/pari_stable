@@ -394,8 +394,8 @@ if test "$optimization" != profiling; then
    cygwin*) if test "$cygtop" = /cygdrive/c; then
 # cygnus for version 1.*
 	libpth="
-            /lib\
 	    /usr/local/lib\
+            /lib\
         "
 	cygtop=/
         else
@@ -525,8 +525,10 @@ if test "$optimization" != profiling; then
     case "$osname" in
       os2) incpth=`echo $C_INCLUDE_PATH | sed -e 's/\([^;]\)$/\1;/g' -e 's%;%/readline %g' -e 's,\\\\,/,g'` ;;
       cygwin*) incpth="\
-       $cygtop/include/readline\
-       $cygtop/include\
+       $cygtop/usr/local/include/readline\
+       $cygtop/usr/local/include\
+       $cygtop/usr/include/readline\
+       $cygtop/usr/include\
        $cygtop/H-${arch}-cygwin32/${arch}-cygwin32/include\
      ";;
       *) incpth="\
