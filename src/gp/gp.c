@@ -789,9 +789,9 @@ allocatemem0(size_t newsize)
 static GEN
 sd_parisize(const char *v, int flag)
 {
-  ulong n = top-bot;
+  ulong oldn = top-bot, n = oldn;
   GEN r = sd_ulong(v,flag,"parisize",&n, 10000,VERYBIGINT,NULL);
-  if (n != (ulong)top-bot)
+  if (n != oldn)
   {
     if (!bot) top = (pari_sp)n; /* no stack allocated yet */
     if (flag != d_INITRC) allocatemem0(n);
