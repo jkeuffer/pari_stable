@@ -140,7 +140,7 @@ char *helpmessages_basic[]={
   "factorcantor(x,p): factorization mod p of the polynomial x using Cantor-Zassenhaus",
   "factorff(x,p,a): factorization of the polynomial x in the finite field F_p[X]/a(X)F_p[X]",
   "factorial(x): factorial of x (x C-integer), the result being given as a real number",
-  "factorint(x,{flag=0}): factor the integer x. flag is optional, whose binary digits mean 1: avoid MPQS, 2: avoid first-stage ECM (may fall back on it later),  4: avoid Pollard-Brent Rho, 8: skip final ECM (huge composites will be declared prime)",
+  "factorint(x,{flag=0}): factor the integer x. flag is optional, whose binary digits mean 1: avoid MPQS, 2: avoid first-stage ECM (may fall back on it later),  4: avoid Pollard-Brent Rho and Shanks SQUFOF, 8: skip final ECM (huge composites will be declared prime)",
   "factormod(x,p,{flag=0}): factorization mod p of the polynomial x using Berlekamp. flag is optional, and can be 0: default or 1: simple factormod, same except that only the degrees of the irreducible factors are given",
   "factornf(x,t): factorization of the polynomial x over the number field defined by the polynomial t",
   "factorpadic(x,p,r,{flag=0}): p-adic factorization of the polynomial x to precision r. flag is optional and may be set to 0 (use round 4) or 1 (use Buchmann-Lenstra)",
