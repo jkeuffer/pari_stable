@@ -1859,8 +1859,8 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
   switch(typ(x))
   {
     case t_INT: case t_FRAC:
-      *s = cgetr(prec);
-      *c = cgetr(prec); av = avma; gaffect(x, *s);
+      *s = gtofp(x, prec);
+      *c = cgetr(prec); av = avma;
       mpsincos(*s, &ps, &pc);
       affrr(ps,*s);
       affrr(pc,*c); avma = av; return;

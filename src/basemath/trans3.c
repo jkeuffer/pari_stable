@@ -108,13 +108,9 @@ jbesselintern(GEN n, GEN z, long flag, long prec)
 	y[i]=(long)jbesselintern(n,(GEN)z[i],flag,prec);
       return y;
 
-    case t_INT: case t_FRAC:
-      av=avma; p1=cgetr(prec); gaffect(z,p1); tetpil=avma;
-      return gerepile(av,tetpil,jbesselintern(n,p1,flag,prec));
-
-    case t_QUAD:
-      av=avma; p1=gmul(z,realun(prec)); tetpil=avma;
-      return gerepile(av,tetpil,jbesselintern(n,p1,flag,prec));
+    case t_INT: case t_FRAC: case t_QUAD:
+      av = avma;
+      return gerepileupto(av, jbesselintern(n,gtofp(z,prec),flag,prec));
 
     case t_POLMOD:
       av=avma; p1=cleanroots((GEN)z[1],prec); lz=lg(p1); p2=cgetg(lz,t_COL);
@@ -207,13 +203,9 @@ jbesselh(GEN n, GEN z, long prec)
       for (i=1; i<lz; i++) y[i]=(long)jbesselh(n,(GEN)z[i],prec);
       return y;
 
-    case t_INT: case t_FRAC:
-      av=avma; p1=cgetr(prec); gaffect(z,p1); tetpil=avma;
-      return gerepile(av,tetpil,jbesselh(n,p1,prec));
-
-    case t_QUAD:
-      av=avma; p1=gmul(z,realun(prec)); tetpil=avma;
-      return gerepile(av,tetpil,jbesselh(n,p1,prec));
+    case t_INT: case t_FRAC: case t_QUAD:
+      av = avma;
+      return gerepileupto(av, jbesselh(n, gtofp(z,prec), prec));
 
     case t_POLMOD:
       av=avma; p1=cleanroots((GEN)z[1],prec); lz=lg(p1); p2=cgetg(lz,t_COL);
@@ -263,8 +255,8 @@ kbessel(GEN nu, GEN gx, long prec)
   lbin = 10 - bit_accuracy(l); av1=avma;
   if (cmprs(x, n)<0)
   {
-    zf=gsqrt(gdivgs(pitemp,n2),prec);
-    zz=cgetr(l1); gaffect(ginv(stoi(n2<<2)), zz);
+    zf = gsqrt(gdivgs(pitemp,n2),prec);
+    zz = ginv(stor(n2<<2, prec));
     s=gun; t=gzero;
     for (k=n2,k2=2*n2-1; k > 0; k--,k2-=2)
     {
@@ -462,17 +454,12 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
 
     case t_VEC: case t_COL: case t_MAT:
       lz=lg(z); y=cgetg(lz,typ(z));
-      for (i=1; i<lz; i++)
-	y[i]=(long)kbesselintern(n,(GEN)z[i],flag,prec);
+      for (i=1; i<lz; i++) y[i]=(long)kbesselintern(n,(GEN)z[i],flag,prec);
       return y;
 
-    case t_INT: case t_FRAC:
-      av=avma; p1=cgetr(prec); gaffect(z,p1); tetpil=avma;
-      return gerepile(av,tetpil,kbesselintern(n,p1,flag,prec));
-
-    case t_QUAD:
+    case t_INT: case t_FRAC: case t_QUAD:
       av = avma;
-      return gerepileupto(av, kbesselintern(n, quadtoc(z, prec),flag, prec));
+      return gerepileupto(av, kbesselintern(n, gtofp(z, prec),flag, prec));
 
     case t_POLMOD:
       av=avma; p1=cleanroots((GEN)z[1],prec); lz=lg(p1); p2=cgetg(lz,t_COL);
@@ -719,7 +706,7 @@ incgam2(GEN a, GEN x, long prec)
   if (i == t_REAL) b = addsr(-1,a);
   else
   { /* keep b integral : final powering more efficient */
-    gaffect(a,p1=cgetr(prec));
+    p1 = gtofp(a, prec);
     b = (i == t_INT)? addsi(-1,a): addsr(-1,p1);
     a = p1;
   }
@@ -752,7 +739,7 @@ incgamc(GEN s, GEN x, long prec)
   if (i == t_REAL) b = s;
   else
   {
-    gaffect(s,p1=cgetr(prec));
+    p1 = gtofp(s, prec);
     b = (i == t_INT)? s: p1;
     s = p1;
   }
@@ -800,7 +787,7 @@ eint1(GEN x, long prec)
   pari_sp av = avma, tetpil;
   GEN p1,p2,p3,p4,run,y;
 
-  if (typ(x) != t_REAL) { gaffect(x,p1=cgetr(prec)); x = p1;}
+  if (typ(x) != t_REAL) x = gtofp(x, prec);
   if (signe(x) >= 0)
   {
     if (expo(x) >= 4)
@@ -875,8 +862,7 @@ veceint1(GEN C, GEN nmax, long prec)
 
   if (signe(nmax)<=0) return cgetg(1,t_VEC);
   if (DEBUGLEVEL>1) fprintferr("Entering veceint1:\n");
-  if (typ(C) != t_REAL || lg(C) > prec)
-    { y = cgetr(prec); gaffect(C,y); C = y; }
+  if (typ(C) != t_REAL || lg(C) > prec) C = gtofp(C, prec);
   if (signe(C) <= 0) err(talker,"negative or zero constant in veceint1");
 
   G = -bit_accuracy(prec);

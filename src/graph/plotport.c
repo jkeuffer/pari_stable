@@ -106,22 +106,24 @@ static GEN quark_gen;
 
 #define READ_EXPR(s)	((s)==QUARK? quark_gen : lisexpr(s))
 
+static double
+todbl(GEN x) { return rtodbl(gtofp(x, 3)); }
+
 void
 plot(entree *ep, GEN a, GEN b, char *ch,GEN ysmlu,GEN ybigu, long prec)
 {
   long jz, j, i, sig;
   pari_sp av = avma, av2, limite;
   int jnew, jpre = 0; /* for lint */
-  GEN p1,p2,ysml,ybig,x,diff,dyj,dx,y[ISCR+1];
+  GEN ysml, ybig, x, diff, dyj, dx, y[ISCR+1];
   screen scr;
   char buf[80], z;
 
   sig=gcmp(b,a); if (!sig) return;
   if (sig<0) { x=a; a=b; b=x; }
-  x = cgetr(prec); gaffect(a,x); push_val(ep, x);
+  x = gtofp(a, prec); push_val(ep, x);
   for (i=1; i<=ISCR; i++) y[i]=cgetr(3);
-  p1 = gdivgs(gsub(b,a), ISCR-1);
-  dx = cgetr(prec); gaffect(p1, dx);
+  dx = gtofp(gdivgs(gsub(b,a), ISCR-1), prec);
   ysml=gzero; ybig=gzero;
   for (j=1; j<=JSCR; j++) scr[1][j]=scr[ISCR][j]=YY;
   for (i=2; i<ISCR; i++)
@@ -162,8 +164,8 @@ plot(entree *ep, GEN a, GEN b, char *ch,GEN ysmlu,GEN ybigu, long prec)
     avma = av2;
     jpre = jnew;
   }
-  p1=cgetr(3); gaffect(ybig,p1); pariputc('\n');
-  pariputsf("%s ", dsprintf9(rtodbl(p1), buf));
+  pariputc('\n');
+  pariputsf("%s ", dsprintf9(todbl(ybig), buf));
   for (i=1; i<=ISCR; i++) pariputc(scr[i][JSCR]);
   pariputc('\n');
   for (j=(JSCR-1); j>=2; j--)
@@ -172,13 +174,10 @@ plot(entree *ep, GEN a, GEN b, char *ch,GEN ysmlu,GEN ybigu, long prec)
     for (i=1; i<=ISCR; i++) pariputc(scr[i][j]);
     pariputc('\n');
   }
-  p1=cgetr(3); gaffect(ysml,p1);
-  pariputsf("%s ", dsprintf9(rtodbl(p1), buf));
+  pariputsf("%s ", dsprintf9(todbl(ysml), buf));
   for (i=1; i<=ISCR; i++)  pariputc(scr[i][1]);
   pariputc('\n');
-  p1=cgetr(3); gaffect(a,p1);
-  p2=cgetr(3); gaffect(b,p2);
-  pariputsf("%10s%-9.7g%*.7g\n"," ",rtodbl(p1),ISCR-9,rtodbl(p2));
+  pariputsf("%10s%-9.7g%*.7g\n"," ",todbl(a),ISCR-9,todbl(b));
   pop_val(ep); avma=av;
 }
 
@@ -1278,8 +1277,8 @@ single_recursion(dblPointList *pl,char *ch,entree *ep,GEN xleft,GEN yleft,
 
   if (depth==RECUR_MAXDEPTH) return;
 
-  yy=cgetr(3); xx=gmul2n(gadd(xleft,xright),-1);
-  ep->value = (void*) xx; gaffect(READ_EXPR(ch), yy);
+  xx = gmul2n(gadd(xleft,xright),-1); ep->value = (void*) xx;
+  yy = gtofp(READ_EXPR(ch), 3);
 
   if (dy)
   {
@@ -1307,9 +1306,10 @@ param_recursion(dblPointList *pl,char *ch,entree *ep, GEN tleft,GEN xleft,
 
   if (depth==PARAMR_MAXDEPTH) return;
 
-  xx=cgetr(3); yy=cgetr(3); tt=gmul2n(gadd(tleft,tright),-1);
-  ep->value = (void*)tt; p1=READ_EXPR(ch);
-  gaffect((GEN)p1[1],xx); gaffect((GEN)p1[2],yy);
+  tt=gmul2n(gadd(tleft,tright),-1);
+  ep->value = (void*)tt; p1 = READ_EXPR(ch);
+  xx = gtofp((GEN)p1[1], 3);
+  yy = gtofp((GEN)p1[2], 3);
 
   if (dx && dy)
   {
@@ -1357,10 +1357,10 @@ rectplothin(entree *ep, GEN a, GEN b, char *ch, long prec, ulong flags,
     nbpoints = testpoints;
 
   sig=gcmp(b,a); if (!sig) return 0;
-  if (sig<0) { x=a; a=b; b=x; }
+  if (sig<0) swap(a, b);
   dx=gdivgs(gsub(b,a),testpoints-1);
 
-  x = cgetr(prec); gaffect(a,x); push_val(ep, x);
+  x = gtofp(a, prec); push_val(ep, x);
   av2=avma; p1=READ_EXPR(ch); tx=typ(p1);
   if (!is_matvec_t(tx))
   {

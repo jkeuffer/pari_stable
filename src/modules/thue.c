@@ -1236,8 +1236,8 @@ get_sol_abs(GEN bnf, GEN a, GEN *ptPrimes)
       Partial[i]=cgetg(Ngen+1,t_COL);
       for (j=1; j<=Ngen; j++)
       {
-	Partial[i][j]=lgeti(4);
-	gaffect(gzero,(GEN) Partial[i][j]);
+        GEN z = cgeti(4); z[1] = evalsigne(0)|evallgefint(4);
+	Partial[i][j]=(long)z;
       }
     }
   smax=511; normsol = (GEN*) new_chunk(smax+1);

@@ -3172,7 +3172,7 @@ zrhqr(GEN a,long prec)
       if (gexpo(newval) < ex || (oldval && gcmp(newval,oldval) > 0)) break;
     }
     if (DEBUGLEVEL>3) fprintferr("%ld ",i);
-    rr[i] = (long)cgetc(prec); gaffect(y, (GEN)rr[i]);
+    rr[i] = (long)ctofp(y, prec);
   }
   if (DEBUGLEVEL>3) { fprintferr("\npolished roots = %Z",rr); flusherr(); }
   return gerepilecopy(av, rr);

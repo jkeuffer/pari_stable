@@ -779,11 +779,7 @@ pslg(GEN x)
 
 static GEN
 to_MP(GEN x, long prec)
-{
-  GEN y;
-  if (typ(x) == t_INT && !signe(x)) return gzero;
-  y = cgetr(prec); gaffect(x, y); return y;
-}
+{ return (typ(x) == t_INT && !signe(x))? gzero: gtofp(x, prec); }
 static GEN
 col_to_MP(GEN x, long prec)
 {
@@ -805,11 +801,7 @@ mat_to_MP(GEN x, long prec)
 
 static GEN
 to_mp(GEN x, long prec)
-{
-  GEN y;
-  if (typ(x) == t_INT) return x;
-  y = cgetr(prec); gaffect(x, y); return y;
-}
+{ return (typ(x) == t_INT)? x: gtofp(x, prec); }
 static GEN
 col_to_mp(GEN x, long prec)
 {

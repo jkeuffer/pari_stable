@@ -899,7 +899,7 @@ jacobi(GEN a, long prec)
   e1 = HIGHEXPOBIT-1;
   for (j=1; j<l; j++)
   {
-    gaffect(gcoeff(a,j,j), (GEN)(L[j] = lgetr(prec)));
+    L[j] = (long)gtofp(gcoeff(a,j,j), prec);
     e = expo(L[j]); if (e < e1) e1 = e;
   }
   for (j=1; j<l; j++)
@@ -916,7 +916,7 @@ jacobi(GEN a, long prec)
     c[j] = lgetg(j,t_COL);
     for (i=1; i<j; i++)
     {
-      gaffect(gcoeff(a,i,j), (GEN)(coeff(c,i,j) = lgetr(prec)));
+      coeff(c,i,j) = (long)gtofp(gcoeff(a,i,j), prec);
       e = expo(gcoeff(c,i,j)); if (e > e2) { e2 = e; p = i; q = j; }
     }
   }
