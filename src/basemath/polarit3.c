@@ -2956,14 +2956,16 @@ vec_u_FpX_eval(GEN b, ulong x, ulong p)
 
 /* as above, but don't care about degree drop */
 static GEN
-vec_u_FpX_eval_gen(GEN b, ulong x, ulong p)
+vec_u_FpX_eval_gen(GEN b, ulong x, ulong p, int *drop)
 {
   GEN z;
   long i, lb = lgef(b);
   z = u_allocpol(lb-3, 0);
   for (i=2; i<lb; i++)
     z[i] = u_FpX_eval((GEN)b[i], x, p);
-  return u_normalizepol(z, lb);
+  z = u_normalizepol(z, lb);
+  *drop = lb - lgef(z);
+  return z;
 }
 
 /* Interpolate at roots of 1 and use Hadamard bound for univariate resultant:
@@ -3087,19 +3089,24 @@ INIT:
     }
     else
     {
+      ulong la = (ulong)leading_term(a);
+      int drop;
      /* Evaluate at 0 (if dres even) and +/- n, so that P_n(X) = P_{-n}(-X),
       * where P_i is Lagrange polynomial: P_i(j) = 1 if i=j, 0 otherwise */
       for (i=0,n = 1; n <= nmax; n++)
       {
-        ev = vec_u_FpX_eval_gen(b, n, p);
+        ev = vec_u_FpX_eval_gen(b, n, p, &drop);
         i++; x[i] = n;   y[i] = u_FpX_resultant(a, ev, p);
-        ev = vec_u_FpX_eval_gen(b, p-n, p);
+        if (drop && la != 1) y[i] = mulssmod(y[i], powuumod(la, drop,p),p);
+        ev = vec_u_FpX_eval_gen(b, p-n, p, &drop);
         i++; x[i] = p-n; y[i] = u_FpX_resultant(a, ev, p);
+        if (drop && la != 1) y[i] = mulssmod(y[i], powuumod(la, drop,p),p);
       }
       if (i == dres)
       {
-        ev = vec_u_FpX_eval_gen(b, 0, p);
+        ev = vec_u_FpX_eval_gen(b, 0, p, &drop);
         i++; x[i] = 0;   y[i] = u_FpX_resultant(a, ev, p);
+        if (drop && la != 1) y[i] = mulssmod(y[i], powuumod(la, drop,p),p);
       }
       Hp = u_FpV_polint(x,y, p);
     }
