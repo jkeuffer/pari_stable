@@ -86,6 +86,8 @@ BA 47- incorrect quoting in src/make_vi_tags (make ctags)
    49- ??real  only gave the help on t_REALs, not on real()
    50- eigen: "missing eigenspace" [roundoff pb in ker() compared to exact 0]
    51- error messages on GP metacommands (\...) indicated wrong context
+   52- bnr functions might fail with "indefinite matrix in lllgram" [prec pb]
+   53- nfhilbert(nf,a,b, pr | 2) would give bogus result if nf in variable 0 (x)
 
   Changed
     1- DOS distribution archives (GPM removed)
