@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*******************************************************************/
 #include "pari.h"
 #include "parinf.h"
-extern GEN to_famat(GEN g, GEN e);
+extern GEN to_famat_all(GEN x, GEN y);
 extern int addcolumntomatrix(GEN V, GEN invp, GEN L);
 extern double check_bach(double cbach, double B);
 extern GEN gmul_mat_smallvec(GEN x, GEN y);
@@ -2242,13 +2242,7 @@ makecycgen(GEN bnf)
     GEN N = dethnf_i((GEN)gen[i]);
     GEN y = isprincipalarch(bnf,(GEN)GD[i], N, (GEN)cyc[i], gun, &e);
     if (y && !fact_ok(nf,y,NULL,gen,(GEN)D[i])) y = NULL;
-    if (y)
-    {
-      GEN g = cgetg(2, t_COL);
-      GEN e = cgetg(2, t_COL);
-      g[1] = (long)y;
-      e[1] = un; h[i] = (long)to_famat(g,e); continue;
-    }
+    if (y) { h[i] = (long)to_famat_all(y,gun); continue; }
     y = isprincipalfact(bnf, gen, (GEN)D[i], NULL,
                         nf_GEN|nf_GENMAT|nf_FORCE|nf_GIVEPREC);
     if (typ(y) != t_INT)

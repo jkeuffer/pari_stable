@@ -579,6 +579,14 @@ zerovec(long n)
   return y;
 }
 
+GEN
+zeromat(long m, long n)
+{
+  GEN y = cgetg(n+1,t_MAT);
+  long i; for (i=1; i<=n; i++) y[i]=(long)zerocol(m);
+  return y;
+}
+
 
 GEN
 gscalcol(GEN x, long n) 

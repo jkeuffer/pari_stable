@@ -24,7 +24,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #define principalideal_aux(nf,x) (principalideal0((nf),(x),0))
 
-GEN element_muli(GEN nf, GEN x, GEN y);
+extern GEN element_muli(GEN nf, GEN x, GEN y);
+extern GEN colreducemodmat(GEN x, GEN y, GEN *Q);
 
 static GEN nfbezout(GEN nf, GEN a, GEN b, GEN ida, GEN idb, GEN *u, GEN *v, GEN *w, GEN *di);
 
@@ -1223,20 +1224,72 @@ to_famat(GEN g, GEN e)
   h[2] = (long)e; return h;
 }
 
-/* assume (g[i], id) = 1 for all i. return prod g[i]^e[i] mod id */
+static GEN
+_col(GEN x) { GEN v = cgetg(2, t_COL); v[1] = (long)x; return v; }
+
+GEN
+to_famat_all(GEN x, GEN y) { return to_famat(_col(x), _col(y)); }
+
+/* assume (num(g[i]), id) = 1 and for all i. return prod g[i]^e[i] mod id */
 GEN
 famat_to_nf_modideal_coprime(GEN nf, GEN g, GEN e, GEN id)
 {
-  GEN t = NULL, n, z;
+  GEN t = NULL, ch,h,n,z,idZ = gcoeff(id,1,1);
   long i, lx = lg(g);
   for (i=1; i<lx; i++)
   {
-    n = (GEN)e[i];
-    if (!signe(n)) continue;
-    z = element_powmodideal(nf, (GEN)g[i], n, id);
+    n = (GEN)e[i]; if (!signe(n)) continue;
+    h = (GEN)g[i]; ch = denom(h);
+    if (!is_pm1(ch))
+    {
+      h = gmul(h,ch); ch = mpinvmod(ch,idZ);
+      h = gmod(gmul(h,ch), idZ);
+    }
+    z = element_powmodideal(nf, h, n, id);
     t = (t == NULL)? z: element_mulmodideal(nf, t, z, id);
   }
   return t? t: gscalcol(gun, lg(id)-1);
+}
+
+/* assume prh has degree 1 and coprime to numerator(x) */
+GEN
+nf_to_Fp_simple(GEN x, GEN prh)
+{
+  GEN ch = denom(x), p = gcoeff(prh,1,1);
+  if (!is_pm1(ch))
+  {
+    x = gmul(gmul(x,ch), mpinvmod(ch,p));
+  }
+  ch = colreducemodmat(gmod(x, p), prh, NULL);
+  return (GEN)ch[1]; /* in Fp^* */
+}
+
+GEN
+famat_to_Fp_simple(GEN g, GEN e, GEN prh)
+{
+  GEN t = gun, h,n, p = gcoeff(prh,1,1), q = subis(p,1);
+  long i, lx = lg(g);
+  for (i=1; i<lx; i++)
+  {
+    n = (GEN)e[i]; n = modii(n,q);
+    if (!signe(n)) continue;
+    h = nf_to_Fp_simple((GEN)g[i], prh);
+    t = mulii(t, powmodulo(h, n, p)); /* not worth reducing */
+  }
+  return modii(t, p);
+}
+
+/* cf famat_to_nf_modideal_coprime, but id is a prime of degree 1 (=prh) */
+GEN
+to_Fp_simple(GEN x, GEN prh)
+{
+  switch(typ(x))
+  {
+    case t_COL: return nf_to_Fp_simple(x,prh);
+    case t_MAT: return famat_to_Fp_simple((GEN)x[1],(GEN)x[2],prh);
+    default: err(impl,"generic conversion to finite field");
+  }
+  return NULL;
 }
 
 extern GEN zinternallog_pk(GEN nf,GEN a0,GEN y,GEN pr,GEN prk,GEN list,GEN *psigne);
@@ -1410,12 +1463,7 @@ idealmul(GEN nf, GEN x, GEN y)
   if (ax && ay)
     ax = arch_mul(ax, ay);
   else
-  {
-    if (ax)
-      ax = (ty==id_PRINCIPAL)? add_arch(nf,ax,y): gcopy(ax);
-    else
-      ax = (tx==id_PRINCIPAL)? add_arch(nf,ay,x): gcopy(ay);
-  }
+    ax = gcopy(ax? ax: ay);
   res[1]=(long)p1; res[2]=(long)ax; return res;
 }
 

@@ -455,16 +455,14 @@ ellphist(GEN om, GEN res, GEN z, long prec)
   return gsub(ellsigma(om,z,1,prec),gmul2n(gmul(z,zst),-1));
 }
 
-/* Computes phi^*(la,om)/phi^*(1,om) where om is an oriented basis of the
+/* Computes phi^*(la,om)/phi^*(1,om) where (1,om) is an oriented basis of the
    ideal gf*gc^{-1} */
 static GEN
-computeth2(GEN nf, GEN gf, GEN gc, GEN la, long prec)
+computeth2(GEN om, GEN la, long prec)
 {
-  GEN p1,p2,omdiv,res;
+  GEN p1,p2,res = ellphistinit(om,prec);
 
-  omdiv = get_om(nf, idealdiv(nf,gf,gc));
-  res = ellphistinit(omdiv,prec);
-  p1 = gsub(ellphist(omdiv,res,la,prec), ellphist(omdiv,res,gun,prec));
+  p1 = gsub(ellphist(om,res,la,prec), ellphist(om,res,gun,prec));
   p2 = gimag(p1);
   if (gexpo(greal(p1))>20 || gexpo(p2)> bit_accuracy(min(prec,lg(p2)))-10)
     return NULL;
@@ -493,7 +491,8 @@ PRECPB:
   P = cgetg(clrayno+1,t_VEC);
   for (i=1; i<=clrayno; i++)
   {
-    GEN v, s = computeth2(nf,f, (GEN)listray[i],lanum,prec);
+    GEN om = get_om(nf, idealdiv(nf,f,(GEN)listray[i]));
+    GEN v, s = computeth2(om,lanum,prec);
     if (!s) { prec = (prec<<1)-2; goto PRECPB; }
     if (raw)
     {
@@ -659,69 +658,61 @@ treatspecialsigma(GEN nf, GEN gf, int raw, long prec)
   return compocyclo(nf,i,2,prec);
 }
 
+static GEN
+getallrootsof1(GEN bnf)
+{
+  GEN z, u, nf = checknf(bnf), racunit = gmael3(bnf,8,4,2);
+  long i, n = itos(gmael3(bnf,8,4,1));
+
+  u = cgetg(n+1, t_VEC);
+  z = basistoalg(nf, racunit);
+  for (i=1; ; i++)
+  {
+    u[i] = (long)algtobasis(nf,z);
+    if (i == n) return u;
+    z = gmul(z, racunit);
+  }
+}
+
 /* Compute ray class field polynomial using sigma; if raw=1, pairs
    [ideals,roots] are given instead so that congruence subgroups can be used */
-
 static GEN
 quadrayimagsigma(GEN bnr, int raw, long prec)
 {
-  GEN allf,bnf,nf,pol,w,f,la,P,labas,gfi,Ci,Cj,Cj2,D,nfun;
-  long a,b,f2;
+  GEN allf,bnf,nf,pol,w,f,la,P,labas,gfi,u;
+  long a,b,f2,i,lu;
 
   allf = conductor(bnr,gzero,2); bnr = (GEN)allf[2];
   f = gmael(allf,1,1);
   bnf= (GEN)bnr[1];
   nf = (GEN)bnf[7];
   pol= (GEN)nf[1];
-  D  = (GEN)nf[3];
-  if (gcmp1(dethnf_i(f)))
+  if (gcmp1(gcoeff(f,1,1))) /* f = 1 ? */
   {
-    P = quadhilbertimag(D, stoi(raw));
+    P = quadhilbertimag((GEN)nf[3], stoi(raw));
     if (raw) convert_to_id(P);
     return gcopy(P);
   }
   P = treatspecialsigma(nf,f,raw,prec);
   if (P) return P;
-  w = gmodulcp(polx[varn(pol)],pol);
-  f2 = itos(gmul2n(gcoeff(f,1,1),1));
+
+  w = gmodulcp(polx[varn(pol)], pol);
+  f2 = 2 * itos(gcoeff(f,1,1));
   gfi = invmat(f);
-  if (cmpis(D,-4)) Ci = NULL;
-  else
-  {
-    P = nfroots(nf,cyclo(4,0));
-    Ci= algtobasis(nf, (GEN)P[1]); /* should be I */
-  }
-  if (cmpis(D,-3)) Cj = Cj2 = NULL;
-  else
-  {
-    P  = nfroots(nf,cyclo(3,0));
-    Cj = algtobasis(nf, (GEN)P[1]);
-    Cj2= algtobasis(nf, (GEN)P[2]); /* should be j, j^2 */
-  }
-  nfun = algtobasis(nf,gun);
+  u = getallrootsof1(bnf); lu = lg(u);
+  if (DEBUGLEVEL>1)
+    fprintferr("quadray: looking for [a,b] != unit mod 2f\n[a,b] = ");
   for (a=0; a<f2; a++)
-  {
     for (b=0; b<f2; b++)
     {
-      if (DEBUGLEVEL>1) fprintferr("[%ld,%ld] ",a,b);
       la = gaddgs(gmulsg(a,w),b);
       if (smodis(gnorm(la), f2) != 1) continue;
+      if (DEBUGLEVEL>1) fprintferr("[%ld,%ld] ",a,b);
 
       labas = algtobasis(nf, la);
-      if (gcmp1(denom(gmul(gfi,gadd(labas,nfun))))
-       || gcmp1(denom(gmul(gfi,gsub(labas,nfun))))) continue;
-      if (Ci)
-      {
-        if (gcmp1(denom(gmul(gfi,gadd(labas,Ci))))
-         || gcmp1(denom(gmul(gfi,gsub(labas,Ci))))) continue;	
-      }
-      else if (Cj)
-      {
-        if (gcmp1(denom(gmul(gfi,gadd(labas,Cj ))))
-         || gcmp1(denom(gmul(gfi,gsub(labas,Cj ))))
-         || gcmp1(denom(gmul(gfi,gadd(labas,Cj2))))
-         || gcmp1(denom(gmul(gfi,gsub(labas,Cj2))))) continue;	
-      }
+      for (i=1; i<lu; i++)
+        if (gcmp1(denom(gmul(gfi, gadd(labas, (GEN)u[i]))))) break;
+      if (i < lu) continue; /* la = unit mod f */
       if (DEBUGLEVEL)
       {
         if (DEBUGLEVEL>1) fprintferr("\n");
@@ -729,8 +720,7 @@ quadrayimagsigma(GEN bnr, int raw, long prec)
       }
       return computeP2(bnr,labas,raw,prec);
     }
-  }
-  err(talker,"bug in quadrayimagsigma, please report");
+  err(bugparier,"quadrayimagsigma");
   return NULL;
 }
 

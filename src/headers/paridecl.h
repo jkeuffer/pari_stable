@@ -79,6 +79,7 @@ GEN     suppl_intern(GEN x, GEN myid);
 GEN     vecextract_i(GEN A, long y1, long y2);
 GEN     vecextract_p(GEN A, GEN p);
 GEN     zerocol(long n);
+GEN     zeromat(long m, long n);
 GEN     zerovec(long n);
 
 /* alglin2.c */
