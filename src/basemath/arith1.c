@@ -2110,47 +2110,56 @@ bestappr_mod(GEN x, GEN A, GEN B)
 GEN
 bestappr(GEN x, GEN k)
 {
-  pari_sp av = avma, tetpil;
-  long tx,tk=typ(k),lx,i,e;
+  pari_sp av = avma;
+  long tx = typ(x), tk = typ(k), lx, i;
   GEN p0,p1,p,q0,q1,q,a,y;
 
   if (tk != t_INT)
   {
+    long e;
     if (tk != t_REAL && tk != t_FRAC)
       err(talker,"incorrect bound type in bestappr");
     k = gcvtoi(k,&e);
   }
-  if (signe(k) <= 0) k=gun;
-  tx=typ(x);
+  if (signe(k) <= 0) k = gun;
   switch(tx)
   {
     case t_INT:
-      if (av==avma) return icopy(x);
-      tetpil=avma; return gerepile(av,tetpil,icopy(x));
+      avma = av; return icopy(x);
 
     case t_FRAC:
-      if (cmpii((GEN)x[2],k) <= 0)
+      if (cmpii((GEN)x[2],k) <= 0) { avma = av; return gcopy(x); }
+      p1 = gun; a = p0 = gfloor(x); q1 = gzero; q0 = gun;
+      while (cmpii(q0,k) <= 0)
       {
-        if (av==avma) return gcopy(x);
-        return gerepilecopy(av,x);
-      }
+	x = gsub(x,a); /* 0 <= x < 1 */
+	if (gcmp0(x)) { p1 = p0; q1 = q0; break; }
 
-    case t_REAL:
-      p1=gun; a=p0=gfloor(x); q1=gzero; q0=gun;
-      while (cmpii(q0,k)<=0)
+	x = ginv(x); /* > 1 */
+        a = divii((GEN)x[1], (GEN)x[2]); if (cmpii(a,k) > 0) a = k;
+	p = addii(mulii(a,p0), p1); p1=p0; p0=p;
+        q = addii(mulii(a,q0), q1); q1=q0; q0=q;
+      }
+      return gerepileupto(av, gdiv(p1,q1));
+
+    case t_REAL: {
+      GEN kr = itor(k, lg(x));
+      p1 = gun; a = p0 = mpent(x); q1 = gzero; q0 = gun;
+      while (cmpii(q0,k) <= 0)
       {
-	x = gsub(x,a);
-	if (gcmp0(x)) { p1=p0; q1=q0; break; }
+	x = mpsub(x,a); /* 0 <= x < 1 */
+	if (!signe(x)) { p1 = p0; q1 = q0; break; }
 
-	x = ginv(x); a = (gcmp(x,k)<0)? gfloor(x): k;
-	p = addii(mulii(a,p0),p1); p1=p0; p0=p;
-        q = addii(mulii(a,q0),q1); q1=q0; q0=q;
+	x = ginv(x); /* > 1 */
+        a = (cmprr(x,kr) > 0)? k: mptrunc(x); /* mptrunc(x) may raise precer */
+	p = addii(mulii(a,p0), p1); p1=p0; p0=p;
+        q = addii(mulii(a,q0), q1); q1=q0; q0=q;
       }
-      tetpil=avma; return gerepile(av,tetpil,gdiv(p1,q1));
-
+      return gerepileupto(av, gdiv(p1,q1));
+   }
    case t_COMPLEX: case t_POL: case t_SER: case t_RFRAC:
    case t_VEC: case t_COL: case t_MAT:
-      lx = lg(x); y=cgetg(lx,tx);
+      lx = lg(x); y = cgetg(lx,tx);
       for (i=1; i<lontyp[tx]; i++) y[i]=x[i];
       for (   ; i<lx; i++) y[i]=(long)bestappr((GEN)x[i],k);
       return y;
