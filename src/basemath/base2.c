@@ -2104,7 +2104,7 @@ _primedec(GEN nf, GEN p)
     GEN mulbeta, beta = NULL;
     for (i=1; i<k; i++)
       if (!ex[i]) beta = beta? FpX_mul(beta, (GEN)F[i], p): (GEN)F[i];
-    if (!beta) err(talker,"%Z is not a prime in primedec", p);
+    if (!beta) err(talker,"primedec: %Z is not a prime", p);
     beta = FpV_red(algtobasis_i(nf,beta), p);
 
     mulbeta = FpM_red(eltmul_get_table(nf, beta), p);
