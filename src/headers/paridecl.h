@@ -781,10 +781,14 @@ GEN     zell(GEN e, GEN z, long prec);
 GEN     GENtoGENstr(GEN x);
 char*   GENtoTeXstr(GEN x);
 char*   GENtostr(GEN x);
+GEN     Str(GEN g);
+GEN     Strexpand(GEN g);
+GEN     Strtex(GEN g);
 void    brute(GEN g, char format, long dec);
 void    bruteall(GEN g, char format, long dec, long flbl);
 void    bruterr(GEN x,char format,long dec);
 const char* eng_ord(long i);
+void    error0(GEN g);
 void    etatpile(unsigned int n);
 char*   expand_tilde(const char *s);
 int     file_is_binary(FILE *f);
@@ -820,6 +824,11 @@ void    pariputc(char c);
 void    pariputs(const char *s);
 void    pariputsf(const char *format, ...);
 int     popinfile(void);
+void    print(GEN g); 
+void    print1(GEN g);
+void    printp(GEN g);
+void    printp1(GEN g);
+void    printtex(GEN g);
 GEN     readbin(const char *name, FILE *f);
 void    sor(GEN g, char fo, long dd, long chmp);
 void    switchin(const char *name);
@@ -829,7 +838,10 @@ pariFILE* try_pipe(char *cmd, int flag);
 char*   type_name(long t);
 void    voir(GEN x, long nb);
 void    vpariputs(const char* format, va_list args);
+void    write0(const char *s, GEN g);
+void    write1(const char *s, GEN g);
 void    writebin(char *name, GEN x);
+void    writetex(const char *s, GEN g);
 
 /* galconj.c */
 
