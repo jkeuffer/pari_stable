@@ -42,6 +42,21 @@ $multitokenpattern="$usualtokenclass+|$active";
 # height=0 denotes expandable string
 # Baseline=3 means the 4th row is the baseline
 
+sub debug_print_record {
+  local($h,$l,$b,$xs,$s) = split /,/, shift, 5;
+  local(@arr) = split /\n/, $s;
+  print STDERR "len=$l, h=$h, b=$b, exp_sp=$xs.\n";
+  local($i) = 0;
+  for (@arr) {
+    local($lead) = ($i++ == $b) ? 'b [' : '  [';
+    print STDERR "$lead$_]\n";
+  }
+  while ($i < $h) {		# Empty lines may skipped
+    local($lead) = ($i++ == $b) ? 'b' : '';
+    print STDERR "$lead\n";
+  }
+}
+
 # Takes length and a record, returns 2 records
 
 sub cut {
@@ -97,6 +112,10 @@ sub join {
   @str="" x $h;
   @str[$b-$b1 .. $b-$b1+$h1-1]=split(/\n/,$str1,$h1);
   @str2[0..$h2-1]=split(/\n/,$str2,$h2);
+  unless (length($str2[$b2])) {
+    $str2[$b2] = ' ' x $l2;	# Needed for length=0 "color" strings
+                                # in the baseline.
+  }
   if ($debug & $debug_record && (grep(/\n/,@str) || grep(/\n/,@str2))) {
     warn "\\n found in \@str or \@str2";
     warn "`$str1', need $h1 rows\n";
@@ -279,8 +298,21 @@ sub prepare_cut {
     }
     return $rec if $good;
   }
+  # If the added record is too long, there is no sense in cutting
+  # things we have already, since we will cut the added record anyway...
+  local($forcedcut);
+  if ($lenadd > $linelength && $lenrem) {
+      @p= &cut($lenrem,$rec);
+      warn "After forced cut: @p\n" if $debug & $debug_record;
+      push(@out,$p[0]);
+      $curlength+=$lenrem;
+      &print();
+      $rec=$p[1];
+      ($lenadd,$str)=(split(/,/,$rec,5))[1,4];
+      $lenrem=$linelength;
+  }
   # Now try to find a cut before the added record
-  if ($#out>=0) {
+  if ($#out>=0 && !$forcedcut) {
     for (0..$#out) {
       ($h,$str)=(split(/,/,$out[$#out-$_],5))[0,4];
       if ($h<2 && ($ind=rindex($str," "))>-1 && ($ind>0 || $_<$#out)) {
@@ -2199,3 +2231,7 @@ __END__
 	  things which cannot be broken between lines.
 # Sep 00: Add support for new macro for strings with screen escapes sequences:
 	  \LITERALnoLENGTH{escapeseq}.
+# Oct 00: \LITERALnoLENGTH can have a chance to work in the baseline only;
+	   in fact the previous version did not work even there...
+	  If the added record is longer than line length, do not try to
+	  break the line before it...
