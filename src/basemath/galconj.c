@@ -133,6 +133,14 @@ galoisconj2(GEN nf, long nbmax, long prec)
 /**                                                                     **/
 /**                                                                     **/
 /*************************************************************************/
+/*DEBUGLEVEL:
+  1: timing
+  2: outline
+  4: complete outline
+  6: detail
+  7: memory
+  9: complete detail
+*/
 struct galois_lift
 {
   GEN T;
@@ -405,6 +413,7 @@ inittestlift(GEN Tmod, long elift, struct galois_lift * gl, struct galois_testli
   GEN pe, autpow, plift;
   GEN Tmodp, xmodp, modQ, TmodQ, xmodQ;
   GEN *gptr[2];
+  if (DEBUGLEVEL >= 7) fprintferr("GaloisConj:Start of inittestlift():avma=%ld\n",avma);
   v = varn(gl->T);
   gt->n = lg(gl->L) - 1;
   gt->g = lg(Tmod) - 1;
@@ -413,6 +422,7 @@ inittestlift(GEN Tmod, long elift, struct galois_lift * gl, struct galois_testli
   xmodp = gmodulcp(gmul(polx[v], gmodulcp(gun, gl->p)), Tmodp);
   pe = gpowgs(gl->p, elift);
   plift = automorphismlift(powgi(xmodp, pe), gl);
+  if (DEBUGLEVEL >= 7) fprintferr("GaloisConj:inittestlift()1:avma=%ld\n",avma);
   if (frob)
   {
     GEN tlift;
@@ -426,6 +436,7 @@ inittestlift(GEN Tmod, long elift, struct galois_lift * gl, struct galois_testli
   modQ = gmodulcp(gun, gl->Q);
   TmodQ = gmul(gl->T, modQ);
   xmodQ = gmodulcp(gmul(polx[v], modQ), TmodQ);
+  if (DEBUGLEVEL >= 7) fprintferr("GaloisConj:inittestlift()2:avma=%ld\n",avma);
   gt->bezoutcoeff = cgetg(gt->g + 1, t_VEC);
   for (i = 1; i <= gt->g; i++)
   {
@@ -433,28 +444,47 @@ inittestlift(GEN Tmod, long elift, struct galois_lift * gl, struct galois_testli
     blift = bezout_lift_fact((GEN) Tmod[i], gl->T, gl->p, gl->Q, gl->e);
     gt->bezoutcoeff[i] = (long) gmodulcp(gmul(blift, modQ), TmodQ);
   }
+  if (DEBUGLEVEL>=1) timer2();
   gt->pauto = cgetg(gt->f + 1, t_VEC);
   gt->pauto[1] = (long) xmodQ;
   gt->pauto[2] = (long) plift;
+  if (DEBUGLEVEL >= 7) fprintferr("GaloisConj:inittestlift()3:avma=%ld\n",avma);
   if (gt->f > 2)
   {
+    
     autpow = cgetg(gt->n, t_VEC);
     autpow[1] = (long) plift;
     for (i = 2; i < gt->n; i++)
       autpow[i] = lmul((GEN) autpow[i - 1], plift);
+    if (DEBUGLEVEL >= 7) fprintferr("GaloisConj:inittestlift()4:avma=%ld\n",avma);
     for (i = 3; i <= gt->f; i++)
     {
       GEN s, P;
+      int n;
       P = ((GEN **) gt->pauto)[i - 1][2];
-      s = (GEN) P[2];
-      for (j = 1; j < lgef(P) - 2; j++)
-	s = gadd(s, gmul((GEN) autpow[j], (GEN) P[j + 2]));
-      gt->pauto[i] = (long) s;
+      n=lgef(P) - 3;
+      if (n<=0)
+	gt->pauto[i] = P[2];
+      else
+      {
+	ulong ltop=avma,lbot;
+	GEN p1;
+	s = (GEN) P[2];
+	for (j = 1; j < n; j++)
+	  s = gadd(s, gmul((GEN) autpow[j], (GEN) P[j + 2]));
+	p1= gmul((GEN) autpow[n], (GEN) P[n + 2]);
+	lbot=avma;
+	s = gadd(s,p1);
+	if (DEBUGLEVEL >= 7) fprintferr("GaloisConj:inittestlift()5:avma=%ld\n",avma);
+	gt->pauto[i] = (long) gerepile(ltop,lbot,s);
+      }
     }
+    if (DEBUGLEVEL>=1) msgtimer("frobenius power");
   }
   gptr[0] = &gt->bezoutcoeff;
   gptr[1] = &gt->pauto;
   gerepilemany(ltop, gptr, 2);
+  if (DEBUGLEVEL >= 7) fprintferr("GaloisConj:End of inittestlift():avma=%ld\n",avma);
   return 0;
 }
 /*
@@ -1516,10 +1546,10 @@ initborne(GEN T, GEN disc, struct galois_borne * gb, long ppp)
   }
   borneabs = addsr(1, gpowgs(addsr(n, borneroots), n / ppp));
   lbot = avma;
-  borneroots = addsr(1, gmul(borne, borneroots));
+  borneroots = addsr(1, gmul2n(gmul(borne, borneroots), 5 + (n >> 1)));
   av2 = avma;
   borneabs = gmul2n(gmul(borne, borneabs), 4);
-  gb->valsol = itos(gceil(gdiv(glog(gmul2n(borneroots, 4 + (n >> 1)), DEFAULTPREC), glog(gb->l, DEFAULTPREC))));
+  gb->valsol = itos(gceil(gdiv(glog(borneroots, DEFAULTPREC), glog(gb->l, DEFAULTPREC))));
   if (DEBUGLEVEL >= 4)
     fprintferr("GaloisConj:val1=%d\n", gb->valsol);
   gb->valabs = max(gb->valsol, itos(gceil(gdiv(glog(borneabs, DEFAULTPREC), glog(gb->l, DEFAULTPREC)))));
@@ -2580,7 +2610,7 @@ numberofconjugates(GEN T, long pdepart)
   n = degree(T);
   card = sturm(T);
   card = cgcd(card, n - card);
-  nbmax = n + 1;
+  nbmax = n + (n>>1) + 1;
   nbtest = 0;
   L = cgetg(n + 1, t_VECSMALL);
   ltop2 = avma;
@@ -2624,6 +2654,7 @@ numberofconjugates(GEN T, long pdepart)
 GEN
 galoisconj0(GEN nf, long flag, GEN d, long prec)
 {
+  ulong ltop;
   GEN G, T;
   long card;
   if (typ(nf) != t_POL)
@@ -2635,20 +2666,27 @@ galoisconj0(GEN nf, long flag, GEN d, long prec)
   switch (flag)
   {
    case 0:
-    G = galoisconj4(nf, d, 0);
-    if (typ(G) != t_INT)	/* Success */
-      return G;
-    else
-    {
-      card = G == gzero ? degree(T) : numberofconjugates(T, itos(G));
-      if (card != 1)
-      {
-	if (typ(nf) == t_POL)
-	  return galoisconj2pol(nf, card, prec);
-	else
-	  return galoisconj(nf);
-      }
-    }
+     ltop=avma;
+     G = galoisconj4(nf, d, 0);
+     if (typ(G) != t_INT)	/* Success */
+       return G;
+     else
+     {
+       card = numberofconjugates(T, G == gzero ? 2 : itos(G));
+       avma=ltop;
+       if (card != 1)
+       {
+	 if (typ(nf) == t_POL)
+	 {
+	   G=galoisconj2pol(nf, card, prec);
+	   if (lg(G)<=card)
+	     err(warner,"conjugates list may be incomplete in nfgaloisconj");
+	   return G;
+	 }
+	 else
+	   return galoisconj(nf);
+       }
+     }
     break;			/* Failure */
    case 1:
     return galoisconj(nf);
@@ -2667,7 +2705,7 @@ galoisconj0(GEN nf, long flag, GEN d, long prec)
   return G;			/* Failure */
 }
 /******************************************************************************/
-/* Galois theory related algorithms                         */
+/* Galois theory related algorithms                                           */
 /******************************************************************************/
 GEN
 checkgal(GEN gal)

@@ -3673,17 +3673,19 @@ better than in earlier versions.
 
 $\var{nf}$ can simply be a polynomial if $\fl\neq 1$.
 
-If no flags or $\fl=0$, if $\var{nf}$ is a number field use a combination
-of flag $4$ and $1$ and the result is always complete, else use a
-combination of flag $4$ and $2$ and the result is subject to the
-restriction of $\fl=2$.
+If no flags or $\fl=0$, if $\var{nf}$ is a number field use a
+combination of flag $4$ and $1$ and the result is always complete,
+else use a combination of flag $4$ and $2$ and the result is subject
+to the restriction of $\fl=2$, but a warning is issued when it is not
+proven complete.
 
 If $\fl=1$, use \kbd{nfroots} (require a number field). 
 
 If $\fl=2$, use complex approximations to the roots and an integral
-\idx{LLL}. The result is not guaranteed to be complete: some conjugates may
-be missing (especially so if the corresponding polynomial has a huge
-index). In that case, increasing the default precision may help.
+\idx{LLL}. The result is not guaranteed to be complete: some
+conjugates may be missing (no warning issued), especially so if the
+corresponding polynomial has a huge index. In that case, increasing
+the default precision may help.
 
 If $\fl=4$, use Allombert's algorithm and permutation testing. If the field
 is Galois with ``weakly'' super solvable Galois group, return the complete
