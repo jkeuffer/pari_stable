@@ -62,6 +62,7 @@ BA 23- fix accuracy problems in vandermondeinverse
    24- missed some simplifications when handling multivariate t_RFRAC
    25- [Cygwin:] incorrect default 'path' (used : instead of ;)
    26- element_sqr didn't check its arguments (SEGV if bad input)
+   27- possible stack corruption in polroots (+ improved GC there)
 
   Changed
     1- removed useless parameter prec in many bnr* and rnf* functions
