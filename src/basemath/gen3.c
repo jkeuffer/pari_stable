@@ -2397,8 +2397,8 @@ centerlift(GEN x)
 static GEN
 op_ReIm(GEN f(GEN), GEN x)
 {
-  long lx,i,j,av,tetpil, tx = typ(x);
-  GEN p1,p2,r2,i2,z;
+  long lx,i,j,av, tx = typ(x);
+  GEN z;
 
   switch(tx)
   {
@@ -2408,32 +2408,28 @@ op_ReIm(GEN f(GEN), GEN x)
         if (!gcmp0(f((GEN)x[i]))) break;
       avma=av; if (i==1) return zeropol(varn(x));
 
-      z=cgetg(i+1,tx); z[1]=evalsigne(1)|evallgef(1+i)|evalvarn(varn(x));
+      z=cgetg(i+1,t_POL); z[1]=evalsigne(1)|evallgef(1+i)|evalvarn(varn(x));
       for (j=2; j<=i; j++) z[j] = (long)f((GEN)x[j]);
       return z;
 
     case t_SER:
-      if (gcmp0(x)) { z=cgetg(2,tx); z[1]=x[1]; return z; }
+      if (gcmp0(x)) { z=cgetg(2,t_SER); z[1]=x[1]; return z; }
       lx=lg(x); av=avma;
       for (i=2; i<lx; i++)
         if (!gcmp0(f((GEN)x[i]))) break;
       avma=av; if (i==lx) return zeroser(varn(x),lx-2+valp(x));
 
-      z=cgetg(lx-i+2,tx); z[1]=x[1]; setvalp(z, valp(x)+i-2);
+      z=cgetg(lx-i+2,t_SER); z[1]=x[1]; setvalp(z, valp(x)+i-2);
       for (j=2; i<lx; j++,i++) z[j] = (long) f((GEN)x[i]);
       return z;
 
     case t_RFRAC: case t_RFRACN:
     {
-      av=avma; r2=greal((GEN)x[2]); i2=gimag((GEN)x[2]);
-      if (f==greal)
-        p1 = gadd(gmul(greal((GEN)x[1]),r2),
-                  gmul(gimag((GEN)x[1]),i2));
-      else
-        p1 = gsub(gmul(gimag((GEN)x[1]),r2),
-                  gmul(greal((GEN)x[1]),i2));
-      p2=gadd(gsqr(r2), gsqr(i2));
-      tetpil=avma; return gerepile(av,tetpil,gdiv(p1,p2));
+      GEN dxb, n, d;
+      av = avma; dxb = gconj((GEN)x[2]);
+      n = gmul((GEN)x[1], dxb);
+      d = gmul((GEN)x[2], dxb);
+      return gerepileupto(av, gdiv(f(n), d));
     }
 
     case t_VEC: case t_COL: case t_MAT:
