@@ -10,7 +10,7 @@
 #ifdef __WIN32
 #  include <io.h> /* for open, read, close */
 #endif
-GEN roots_to_pol(GEN a, long v);
+extern GEN roots_to_pol(GEN a, long v);
 
 static long TR; /* nombre de changements de polynomes (degre fixe) */
 static GEN FACTORDL; /* factorisation of |disc(L)| */
@@ -828,7 +828,7 @@ subfields0(GEN nf,GEN d)
   return d? subfields(nf,d): subfieldsall(nf);
 }
 
-GEN FpX_rand(long d1, long v, GEN p);
+extern GEN FpX_rand(long d1, long v, GEN p);
 
 /* irreducible (unitary) polynomial of degree n over Fp[v] */
 GEN

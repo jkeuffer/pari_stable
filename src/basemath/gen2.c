@@ -1862,7 +1862,7 @@ gsigne(GEN x)
   return 0; /* not reached */
 }
 
-int ff_poltype(GEN *x, GEN *p, GEN *pol);
+extern int ff_poltype(GEN *x, GEN *p, GEN *pol);
 
 GEN
 gsqr(GEN x)

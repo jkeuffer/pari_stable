@@ -30,7 +30,7 @@ static long *factorbase,*numfactorbase, *subbase, *vectbase, **hashtab;
 static GEN  **powsubfactorbase,vperm,subfactorbase,Disc,sqrtD,isqrtD;
 
 GEN buchquad(GEN D, double c, double c2, long RELSUP0, long flag, long prec);
-GEN roots_to_pol_intern(GEN L, GEN a, long v, int plus);
+extern GEN roots_to_pol_intern(GEN L, GEN a, long v, int plus);
 
 GEN
 quadclassunit0(GEN x, long flag, GEN data, long prec)
@@ -942,11 +942,11 @@ quadray(GEN D, GEN f, GEN flag, long prec)
 /*  Routines related to binary quadratic forms (for internal use)  */
 /*                                                                 */
 /*******************************************************************/
-void comp_gen(GEN z,GEN x,GEN y);
-GEN codeform5(GEN x, long prec);
-GEN comprealform5(GEN x, GEN y, GEN D, GEN sqrtD, GEN isqrtD);
-GEN redrealform5(GEN x, GEN D, GEN sqrtD, GEN isqrtD);
-GEN rhoreal_aux(GEN x, GEN D, GEN sqrtD, GEN isqrtD);
+extern void comp_gen(GEN z,GEN x,GEN y);
+extern GEN codeform5(GEN x, long prec);
+extern GEN comprealform5(GEN x, GEN y, GEN D, GEN sqrtD, GEN isqrtD);
+extern GEN redrealform5(GEN x, GEN D, GEN sqrtD, GEN isqrtD);
+extern GEN rhoreal_aux(GEN x, GEN D, GEN sqrtD, GEN isqrtD);
 
 #define rhorealform(x) rhoreal_aux(x,Disc,sqrtD,isqrtD)
 #define redrealform(x) gcopy(fix_signs(redrealform5(x,Disc,sqrtD,isqrtD)))

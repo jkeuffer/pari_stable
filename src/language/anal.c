@@ -44,8 +44,8 @@ static entree *entry(void);
 static entree *installep(void *f,char *name,int l,int v,int add,entree **table);
 static entree *skipentry(void);
 
-void killbloc0(GEN x, int inspect);
-char *GENtostr0(GEN x, void(*do_out)(GEN));
+extern void killbloc0(GEN x, int inspect);
+extern char *GENtostr0(GEN x, void(*do_out)(GEN));
 
 /* last time we began parsing an object of specified type */
 static struct
@@ -3131,7 +3131,7 @@ alias0(char *s, char *old)
   installep(x, s, strlen(s), EpALIAS, 0, functions_hash + hash);
 }
 
-void err_leave_default(long n);
+extern void err_leave_default(long n);
 
 /* Try f (trapping error e), recover using r (break_loop, if NULL) */
 GEN

@@ -1,6 +1,6 @@
 /* $Id$ */
 #include "pari.h"
-GEN hnf0(GEN x, long r);
+extern GEN hnf0(GEN x, long r);
 void push_val(entree *ep, GEN a);
 void pop_val(entree *ep);
 
@@ -309,7 +309,7 @@ expand_sub(GEN x, long n)
   return p;
 }
 
-GEN matqpascal(long n, GEN q);
+extern GEN matqpascal(long n, GEN q);
 
 static long
 subgroup_engine(GEN cyc, long bound)

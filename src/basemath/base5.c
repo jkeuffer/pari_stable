@@ -255,7 +255,7 @@ rnfbasistoalg(GEN rnf,GEN x)
   }
 }
 
-long polegal_spec(GEN x, GEN y);
+extern long polegal_spec(GEN x, GEN y);
 
 /* assume x is a t_POLMOD */
 GEN

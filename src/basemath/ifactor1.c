@@ -201,9 +201,9 @@ a[i] prime factor of N-1,
 b[i] witness for a[i] as in pl831
 c[i] plisprime(a[i])
 */
+extern GEN decomp_limit(GEN n, GEN limit);
 GEN
-decomp_limit(GEN n, GEN limit);
-GEN  plisprime(GEN N, long flag)
+plisprime(GEN N, long flag)
 {
   ulong ltop=avma;
   long i;

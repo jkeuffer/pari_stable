@@ -5,7 +5,7 @@
 /*******************************************************************/
 /* $Id$ */
 #include "pari.h"
-int ker_trivial_mod_p(GEN x, GEN p);
+extern int ker_trivial_mod_p(GEN x, GEN p);
 long ideal_is_zk(GEN ideal,long N);
 GEN idealaddtoone_i(GEN nf, GEN x, GEN y);
 

@@ -25,8 +25,8 @@ typedef struct stack {
   void *value;
 } stack;
 
-void push_stack(stack **pts, void *a);
-void *pop_stack(stack **pts);
+extern void push_stack(stack **pts, void *a);
+extern void *pop_stack(stack **pts);
 
 entree *do_alias(entree *ep);
 int    is_identifier(char *s);
@@ -35,14 +35,14 @@ long   is_keyword_char(char c);
 char   *readstring(char *src, char *s);
 long   loop_break();
 long   did_break();
-void   print_prefixed_text(char *s, char *prefix, char *str);
+extern void   print_prefixed_text(char *s, char *prefix, char *str);
 
-void term_color(int c);
-char *term_get_color(int c);
-void hit_return();
+extern void term_color(int c);
+extern char *term_get_color(int c);
+extern void hit_return();
 
-void push_val(entree *ep, GEN a);
-void pop_val(entree *ep);
+extern void push_val(entree *ep, GEN a);
+extern void pop_val(entree *ep);
 
 extern long prec, secure;
 extern GEN gnil;
@@ -150,7 +150,7 @@ enum { br_NONE, br_BREAK, br_NEXT, br_MULTINEXT, br_RETURN }; /* break status */
 #define INIT_SIG_off (init_opts &= ~INIT_SIGm)
 
 /* gp_colors */
-void decode_color(int n, int *c);
+extern void decode_color(int n, int *c);
 #define c_NONE 0xffffUL
 enum { c_ERR, c_HIST, c_PROMPT, c_INPUT, c_OUTPUT, c_HELP, c_TIME, c_LAST };
 

@@ -7,18 +7,18 @@
 /* $Id$ */
 #include "pari.h"
 #include "parinf.h"
-int addcolumntomatrix(GEN V, GEN invp, GEN L);
-double check_bach(double cbach, double B);
-GEN gmul_mat_smallvec(GEN x, GEN y);
-GEN get_arch_real(GEN nf,GEN x,GEN *emb,long prec);
-GEN get_arch(GEN nf,GEN x,long prec);
-GEN get_roots(GEN x,long r1,long ru,long prec);
-long ideal_is_zk(GEN ideal,long N);
-GEN idealpowred_prime(GEN nf, GEN vp, GEN n, long prec);
-long int_elt_val(GEN nf, GEN x, GEN p, GEN b, long v);
-GEN make_M(long n,long ru,GEN basis,GEN roo);
-GEN make_MC(long n,long r1,long ru,GEN M);
-GEN make_MDI(GEN nf, GEN TI, GEN *a, GEN *b);
+extern int addcolumntomatrix(GEN V, GEN invp, GEN L);
+extern double check_bach(double cbach, double B);
+extern GEN gmul_mat_smallvec(GEN x, GEN y);
+extern GEN get_arch_real(GEN nf,GEN x,GEN *emb,long prec);
+extern GEN get_arch(GEN nf,GEN x,long prec);
+extern GEN get_roots(GEN x,long r1,long ru,long prec);
+extern long ideal_is_zk(GEN ideal,long N);
+extern GEN idealpowred_prime(GEN nf, GEN vp, GEN n, long prec);
+extern long int_elt_val(GEN nf, GEN x, GEN p, GEN b, long v);
+extern GEN make_M(long n,long ru,GEN basis,GEN roo);
+extern GEN make_MC(long n,long r1,long ru,GEN M);
+extern GEN make_MDI(GEN nf, GEN TI, GEN *a, GEN *b);
 
 #define SFB_MAX 2
 #define SFB_STEP 2
@@ -1105,7 +1105,7 @@ wr_rel(long *col)
   fprintferr("\n");
 }
 
-void minim_alloc(long n,double ***q,long **x,double **y,double **z,double **v);
+extern void minim_alloc(long n,double ***q,long **x,double **y,double **z,double **v);
 
 static long
 small_norm_for_buchall(long t,long **mat,GEN matarch,long nbrel,long LIMC,

@@ -7,10 +7,10 @@
 /* $Id$ */
 #include "pari.h"
 
-GEN arith_proto(long f(GEN), GEN x, int do_error);
-GEN arith_proto2(long f(GEN,GEN), GEN x, GEN n);
-GEN garith_proto(GEN f(GEN), GEN x, int do_error);
-GEN garith_proto2gs(GEN f(GEN,long), GEN x, long y);
+extern GEN arith_proto(long f(GEN), GEN x, int do_error);
+extern GEN arith_proto2(long f(GEN,GEN), GEN x, GEN n);
+extern GEN garith_proto(GEN f(GEN), GEN x, int do_error);
+extern GEN garith_proto2gs(GEN f(GEN,long), GEN x, long y);
 static long court_p[]={evaltyp(t_INT)|m_evallg(3),evalsigne(1)|evallgefint(3),0};
 
 /***********************************************************************/

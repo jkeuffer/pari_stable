@@ -190,8 +190,8 @@ transc(GEN (*f)(GEN,long), GEN x, long prec)
 /*                            POWERING                             */
 /*                                                                 */
 /*******************************************************************/
-GEN real_unit_form(GEN x);
-GEN imag_unit_form(GEN x);
+extern GEN real_unit_form(GEN x);
+extern GEN imag_unit_form(GEN x);
 
 static GEN
 puiss0(GEN x)
@@ -392,7 +392,7 @@ pow_monome(GEN x, GEN nn)
   y[2]=lmul(p1,(GEN)y[1]); return gerepile(av,tetpil,y);
 }
 
-GEN powrealform(GEN x, GEN n);
+extern GEN powrealform(GEN x, GEN n);
 
 /* n is assumed to be an integer */
 GEN

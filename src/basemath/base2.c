@@ -6,19 +6,19 @@
 /* $Id$ */
 #include "pari.h"
 
-GEN caractducos(GEN p, GEN x, int v);
-GEN element_muli(GEN nf, GEN x, GEN y);
-GEN element_mulid(GEN nf, GEN x, long i);
-GEN eleval(GEN f,GEN h,GEN a);
-GEN ideal_better_basis(GEN nf, GEN x, GEN M);
-long int_elt_val(GEN nf, GEN x, GEN p, GEN bp, long v);
-GEN mat_to_vecpol(GEN x, long v);
-GEN nfidealdet1(GEN nf, GEN a, GEN b);
-GEN nfsuppl(GEN nf, GEN x, long n, GEN prhall);
-GEN pol_to_monic(GEN pol, GEN *lead);
-GEN pol_to_vec(GEN x, long N);
-GEN quicktrace(GEN x, GEN sym);
-GEN respm(GEN f1,GEN f2,GEN pm);
+extern GEN caractducos(GEN p, GEN x, int v);
+extern GEN element_muli(GEN nf, GEN x, GEN y);
+extern GEN element_mulid(GEN nf, GEN x, long i);
+extern GEN eleval(GEN f,GEN h,GEN a);
+extern GEN ideal_better_basis(GEN nf, GEN x, GEN M);
+extern long int_elt_val(GEN nf, GEN x, GEN p, GEN bp, long v);
+extern GEN mat_to_vecpol(GEN x, long v);
+extern GEN nfidealdet1(GEN nf, GEN a, GEN b);
+extern GEN nfsuppl(GEN nf, GEN x, long n, GEN prhall);
+extern GEN pol_to_monic(GEN pol, GEN *lead);
+extern GEN pol_to_vec(GEN x, long N);
+extern GEN quicktrace(GEN x, GEN sym);
+extern GEN respm(GEN f1,GEN f2,GEN pm);
 
 static void
 allbase_check_args(GEN f, long code, GEN *y, GEN *ptw1, GEN *ptw2)
@@ -1797,7 +1797,7 @@ lens(GEN nf, GEN p, GEN a)
   tetpil=avma; return gerepile(av,tetpil,kerlens(mat,p));
 }
 
-GEN det_mod_P_n(GEN a, GEN N, GEN P);
+extern GEN det_mod_P_n(GEN a, GEN N, GEN P);
 GEN sylvestermatrix_i(GEN x, GEN y);
 
 /* check if p^va doesnt divide norm x (or norm(x+p)) */

@@ -7,13 +7,13 @@
 /* $Id$ */
 #include "pari.h"
 
-GEN fix_relative_pol(GEN nf, GEN T);
+extern GEN fix_relative_pol(GEN nf, GEN T);
 GEN hensel_lift(GEN pol,GEN fk,GEN fkk,GEN p,long e);
 GEN hensel_lift_fact(GEN pol, GEN fact, GEN p, GEN pev, long e);
-GEN nf_get_T2(GEN base, GEN polr);
-GEN nfreducemodpr_i(GEN x, GEN prh);
-GEN sort_factor(GEN y, int (*cmp)(GEN,GEN));
-GEN pidealprimeinv(GEN nf, GEN x);
+extern GEN nf_get_T2(GEN base, GEN polr);
+extern GEN nfreducemodpr_i(GEN x, GEN prh);
+extern GEN sort_factor(GEN y, int (*cmp)(GEN,GEN));
+extern GEN pidealprimeinv(GEN nf, GEN x);
 
 static GEN nf_pol_mul(GEN nf,GEN pol1,GEN pol2);
 static GEN nf_pol_sqr(GEN nf,GEN pol1);

@@ -6,7 +6,7 @@
 /* $Id$ */
 #include "pari.h"
 #include "parinf.h"
-GEN lincomb_integral(GEN u, GEN v, GEN X, GEN Y);
+extern GEN lincomb_integral(GEN u, GEN v, GEN X, GEN Y);
 
 /* scalar product x.x */
 static GEN
@@ -1824,7 +1824,7 @@ canon_pol(GEN z)
   return 0;
 }
 
-GEN caractducos(GEN p, GEN x, int v);
+extern GEN caractducos(GEN p, GEN x, int v);
 
 static GEN
 pols_for_polred(GEN x, GEN base, GEN LLLbase, GEN *pta, 
@@ -2360,7 +2360,7 @@ factoredpolred2(GEN x, GEN p, long prec)
   return y;
 }
 
-GEN makebasis(GEN nf,GEN pol);
+extern GEN makebasis(GEN nf,GEN pol);
 /* relative polredabs. Returns
  * flag = 0: relative polynomial
  * flag = 1: relative polynomial + element

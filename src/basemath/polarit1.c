@@ -6,14 +6,14 @@
 /***********************************************************************/
 /* $Id$ */
 #include "pari.h"
-GEN get_mul_table(GEN x,GEN bas,GEN *T);
-GEN pol_to_monic(GEN pol, GEN *lead);
-GEN sort_factor(GEN y, int (*cmp)(GEN,GEN));
-GEN bsrch(GEN p, GEN fa, long Ka, GEN eta, long Ma);
-GEN eleval(GEN f,GEN h,GEN a);
-GEN respm(GEN f1,GEN f2,GEN pm);
-GEN setup(GEN p,GEN f,GEN theta,GEN nut, long *La, long *Ma);
-GEN vstar(GEN p,GEN h);
+extern GEN get_mul_table(GEN x,GEN bas,GEN *T);
+extern GEN pol_to_monic(GEN pol, GEN *lead);
+extern GEN sort_factor(GEN y, int (*cmp)(GEN,GEN));
+extern GEN bsrch(GEN p, GEN fa, long Ka, GEN eta, long Ma);
+extern GEN eleval(GEN f,GEN h,GEN a);
+extern GEN respm(GEN f1,GEN f2,GEN pm);
+extern GEN setup(GEN p,GEN f,GEN theta,GEN nut, long *La, long *Ma);
+extern GEN vstar(GEN p,GEN h);
 
 /* see splitgen() for how to use these two */
 GEN
@@ -1768,9 +1768,9 @@ factorpadic2(GEN x, GEN p, long r)
 /*                FACTORISATION P-adique avec ROUND 4              */
 /*                                                                 */
 /*******************************************************************/
-GEN Decomp(GEN p,GEN f,long mf,GEN theta,GEN chi,GEN nu,long r);
-GEN nilord(GEN p, GEN fx, long mf, GEN gx, long flag);
-GEN hensel_lift_fact(GEN pol, GEN Q, GEN p, GEN pev, long e);
+extern GEN Decomp(GEN p,GEN f,long mf,GEN theta,GEN chi,GEN nu,long r);
+extern GEN nilord(GEN p, GEN fx, long mf, GEN gx, long flag);
+extern GEN hensel_lift_fact(GEN pol, GEN Q, GEN p, GEN pev, long e);
 
 static GEN
 squarefree(GEN f, GEN *ex)
@@ -1916,8 +1916,8 @@ factorpadic0(GEN f,GEN p,long r,long flag)
 /*                     FACTORISATION DANS F_q                      */
 /*                                                                 */
 /*******************************************************************/
-GEN to_Kronecker(GEN P, GEN Q);
-GEN from_Kronecker(GEN z, GEN pol);
+extern GEN to_Kronecker(GEN P, GEN Q);
+extern GEN from_Kronecker(GEN z, GEN pol);
 static GEN spec_Fq_pow_mod_pol(GEN x, GEN p, GEN a, GEN S);
 
 static GEN

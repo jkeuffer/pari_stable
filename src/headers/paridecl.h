@@ -705,7 +705,6 @@ void    pari_fclose(pariFILE *f);
 pariFILE*   pari_fopen(char *s, char *mode);
 char*   pari_strdup(char *s);
 char*   pari_unique_filename(char *s);
-char*   pari_unique_filename(char *s);
 void    pari_unlink(char *s);
 void    pariflush(void);
 void    pariputc(char c);

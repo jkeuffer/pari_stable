@@ -7,7 +7,7 @@
 /* $Id$ */
 #include "pari.h"
 #include "anal.h"
-void changevalue_p(entree *ep, GEN x);
+extern void changevalue_p(entree *ep, GEN x);
 
 /********************************************************************/
 /**                                                                **/
@@ -916,7 +916,7 @@ fix(GEN a, long prec)
   gaffect(a,p); return p;
 }
 
-GEN polint_i(GEN xa, GEN ya, GEN x, long n, GEN *ptdy);
+extern GEN polint_i(GEN xa, GEN ya, GEN x, long n, GEN *ptdy);
 
 GEN
 qromb(entree *ep, GEN a, GEN b, char *ch, long prec)

@@ -7,7 +7,7 @@
 /* $Id$ */
 #include "pari.h"
 
-GEN mpsin(GEN x);
+extern GEN mpsin(GEN x);
 static GEN mpach(GEN x);
 
 /********************************************************************/

@@ -897,7 +897,7 @@ gshift(GEN x, long n)
   return gmul2n(x,n);
 }
 
-GEN mulscalrfrac(GEN x, GEN y);
+extern GEN mulscalrfrac(GEN x, GEN y);
 
 /* Shift vrai (multiplication exacte par 2^n) */
 GEN
@@ -993,7 +993,7 @@ gmul2n(GEN x, long n)
 /*                      INVERSE D'UN GEN                           */
 /*                                                                 */
 /*******************************************************************/
-GEN fix_rfrac_if_pol(GEN x, GEN y);
+extern GEN fix_rfrac_if_pol(GEN x, GEN y);
 
 GEN
 ginv(GEN x)

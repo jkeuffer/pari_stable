@@ -565,7 +565,7 @@ refine_factors(GEN LL, GEN prime, long klim, long hint, long e, GEN res,
   *pcnt = cnt;
 }
 
-long split_berlekamp(GEN Q, GEN *t, GEN pp, GEN pps2);
+extern long split_berlekamp(GEN Q, GEN *t, GEN pp, GEN pps2);
 
 /* assume degree(a) > 0, a(0) != 0, and a squarefree */
 static GEN
@@ -2375,7 +2375,7 @@ srgcd(GEN x, GEN y)
   return gerepileupto(av,x);
 }
 
-GEN qf_disc(GEN x, GEN y, GEN z);
+extern GEN qf_disc(GEN x, GEN y, GEN z);
 
 GEN
 poldisc0(GEN x, long v)
@@ -2643,7 +2643,7 @@ newtonpoly(GEN x, GEN p)
   free(vval); return y;
 }
 
-int cmp_pol(GEN x, GEN y);
+extern int cmp_pol(GEN x, GEN y);
 
 /* Factor polynomial a on the number field defined by polynomial t */
 GEN

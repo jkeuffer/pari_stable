@@ -11,7 +11,7 @@
 #define EXTRA_PREC (DEFAULTPREC-1)
 #define ADD_PREC   (DEFAULTPREC-2)*3
 
-GEN roots_to_pol_intern(GEN L, GEN a, long v, int plus);
+extern GEN roots_to_pol_intern(GEN L, GEN a, long v, int plus);
 
 /********************************************************************/
 /*                    Miscellaneous functions                       */

@@ -599,9 +599,9 @@ Fp_pow_mod_pol(GEN x, GEN n, GEN pol, GEN p)
 /*                                                                 */
 /*******************************************************************/
 
-GEN to_Kronecker(GEN P, GEN Q);
+extern GEN to_Kronecker(GEN P, GEN Q);
 GEN /*Somewhat copy-pasted...*/
-/*Not stack nor varn-clean.*/
+/*Not stack nor warn-clean.*/
 Fq_from_Kronecker(GEN z, GEN pol, GEN p)
 {
   long i,j,lx,l = lgef(z), N = ((lgef(pol)-3)<<1) + 1;
@@ -1069,8 +1069,8 @@ Fp_factorgalois(GEN P,GEN l, long d, long w)
   R=divide_conquer_prod(V,&fgmul);
   return gerepileupto(ltop,R);
 }
-GEN mat_to_polpol(GEN x, long v,long w);
-GEN polpol_to_mat(GEN v, long n);
+extern GEN mat_to_polpol(GEN x, long v,long w);
+extern GEN polpol_to_mat(GEN v, long n);
 GEN Fp_factor_irred(GEN P,GEN l, GEN Q)
 {
   ulong ltop=avma,av;
@@ -1156,7 +1156,7 @@ GEN Fp_factor_rel(GEN P,GEN l, GEN Q)
 }
 
 /*******************************************************************/
-int ff_poltype(GEN *x, GEN *p, GEN *pol);
+extern int ff_poltype(GEN *x, GEN *p, GEN *pol);
 
 /* z in Z[X], return z * Mod(1,p), normalized*/
 GEN
@@ -1599,7 +1599,7 @@ Fp_pol_extgcd(GEN x, GEN y, GEN p, GEN *ptu, GEN *ptv)
   *ptu = u; *ptv = v; return d;
 }
 
-GEN chinois_int_coprime(GEN x2, GEN y2, GEN x1, GEN y1, GEN z1);
+extern GEN chinois_int_coprime(GEN x2, GEN y2, GEN x1, GEN y1, GEN z1);
 
 /* a and b in Q[X] */
 GEN

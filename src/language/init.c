@@ -46,8 +46,8 @@ GEN  (*gp_history_fun)(long, long, char *, char *);
 int  (*whatnow_fun)(char *, int);
 void (*output_fun)(GEN);
 
-void  initout(int initerr);
-int   term_width(void);
+extern void  initout(int initerr);
+extern int   term_width(void);
 
 typedef struct cell {
   void *env;
@@ -707,8 +707,8 @@ reorder(GEN x)
 /*                         ERROR RECOVERY                          */
 /*                                                                 */
 /*******************************************************************/
-int pop_val_if_newer(entree *ep, long loc);
-void kill_from_hashlist(entree *ep);
+extern int pop_val_if_newer(entree *ep, long loc);
+extern void kill_from_hashlist(entree *ep);
 
 /* if flag = 0: record address of next bloc allocated.
  * if flag = 1: (after an error) recover all memory allocated since last call
@@ -1557,10 +1557,10 @@ msgtimer(char *format, ...)
 /*                   FUNCTIONS KNOWN TO THE ANALYZER               */
 /*                                                                 */
 /*******************************************************************/
-void alias0(char *s, char *old);
-GEN break0(long n);
-GEN next0(long n);
-GEN return0(GEN x);
+extern void alias0(char *s, char *old);
+extern GEN break0(long n);
+extern GEN next0(long n);
+extern GEN return0(GEN x);
 
 GEN
 geni(void) { return gi; }

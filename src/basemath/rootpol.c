@@ -7,7 +7,7 @@
 /* $Id$ */
 #include "pari.h"
 
-GEN polrecip_i(GEN x);
+extern GEN polrecip_i(GEN x);
 #define pariINFINITY 100000
 #define NEWTON_MAX 10
 

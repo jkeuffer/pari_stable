@@ -1169,7 +1169,7 @@ idealnorm(GEN nf, GEN x)
 }
 
 /* inverse */
-GEN gauss_triangle_i(GEN A, GEN B);
+extern GEN gauss_triangle_i(GEN A, GEN B);
 
 /* rewritten from original code by P.M & M.H.
  *

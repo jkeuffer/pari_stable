@@ -2278,8 +2278,8 @@ det(GEN a)
 /*                SPECIAL HNF (FOR INTERNAL USE !!!)               */
 /*                                                                 */
 /*******************************************************************/
-GEN lincomb_integral(GEN u, GEN v, GEN X, GEN Y);
-GEN vconcat(GEN Q1, GEN Q2);
+extern GEN lincomb_integral(GEN u, GEN v, GEN X, GEN Y);
+extern GEN vconcat(GEN Q1, GEN Q2);
 
 static int
 count(long **mat, long row, long len, long *firstnonzero)

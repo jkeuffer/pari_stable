@@ -7,12 +7,12 @@
 #include "pari.h"
 #include "parinf.h"
 
-GEN check_and_build_cycgen(GEN bnf);
-GEN compute_class_number(GEN mit,GEN *met,GEN *u1,GEN *u2);
-GEN gmul_mat_smallvec(GEN x, GEN y);
-GEN ideleaddone_aux(GEN nf,GEN x,GEN ideal);
-GEN logunitmatrix(GEN nf,GEN funits,GEN racunit,GEN bid);
-GEN vconcat(GEN Q1, GEN Q2);
+extern GEN check_and_build_cycgen(GEN bnf);
+extern GEN compute_class_number(GEN mit,GEN *met,GEN *u1,GEN *u2);
+extern GEN gmul_mat_smallvec(GEN x, GEN y);
+extern GEN ideleaddone_aux(GEN nf,GEN x,GEN ideal);
+extern GEN logunitmatrix(GEN nf,GEN funits,GEN racunit,GEN bid);
+extern GEN vconcat(GEN Q1, GEN Q2);
 
 static GEN
 get_full_rank(GEN nf, GEN v, GEN _0, GEN _1, GEN vecsign, GEN gen,
@@ -125,7 +125,7 @@ buchnarrow(GEN bnf)
   v[3]=lcopy(basecl); return gerepile(av,tetpil,v);
 }
 
-GEN idealaddtoone_i(GEN nf, GEN x, GEN y);
+extern GEN idealaddtoone_i(GEN nf, GEN x, GEN y);
 
 /* given two coprime ideals x (integral) and id, compute alpha in x,
  * alpha = 1 mod (id), with x/alpha nearly reduced.

@@ -455,8 +455,8 @@ nfhilbert0(GEN nf,GEN a,GEN b,GEN p)
   return nfhilbert(nf,a,b);
 }
 
-GEN vconcat(GEN Q1, GEN Q2);
-GEN mathnfspec(GEN x, GEN *ptperm, GEN *ptdep, GEN *ptB, GEN *ptC);
+extern GEN vconcat(GEN Q1, GEN Q2);
+extern GEN mathnfspec(GEN x, GEN *ptperm, GEN *ptdep, GEN *ptB, GEN *ptC);
 /* S a list of prime ideal in primedec format. Return res:
  * res[1] = generators of (S-units / units), as polynomials
  * res[2] = [perm, HB, den], for bnfissunit
