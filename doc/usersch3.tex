@@ -1898,29 +1898,66 @@ are the first $x$ prime numbers, which must be among the precalculated primes.
 
 \syn{primes}{x}. $x$ must be a \kbd{long}.
 
-\subsecidx{qfbclassno}$(x,\{\fl=0\})$: class number of the quadratic field
-of discriminant $x$. In the present version \vers, a simple algorithm is used
-for $x>0$, so $x$ should not be too large (say $x<10^7$) for the time to be
-reasonable. On the other hand, for $x<0$ one can reasonably compute
-classno($x$) for $|x|<10^{25}$, since the method used is \idx{Shanks}' method
-which is in $O(|x|^{1/4})$. For larger values of $|D|$, see
-\kbd{quadclassunit}.
+\subsecidx{qfbclassno}$(D,\{\fl=0\})$: ordinary class number of the quadratic
+order of discriminant $D$. In the present version \vers, a $O(D^{1/2})$
+algorithm is used for $D > 0$ (using Euler product and the functional
+equation) so $D$ should not be too large, say $D < 10^8$, for the time to be
+reasonable. On the other hand, for $D < 0$ one can reasonably compute
+\kbd{qfbclassno($D$)} for $|D|<10^{25}$, since the routine uses
+\idx{Shanks}'method which is in $O(|D|^{1/4})$. For larger values of $|D|$,
+see \kbd{quadclassunit}, which unfortunately works reliably only for
+fundamental discriminants.
 
 If $\fl=1$, compute the class number using \idx{Euler product}s and the
-functional equation. However, it is in $O(|x|^{1/2})$.
+functional equation. However, it is in $O(|D|^{1/2})$.
 
-\misctitle{Important warning.} For $D<0$, this function often gives
+\misctitle{Important warning.} For $D < 0$, this function often gives
 incorrect results when the class group is non-cyclic, because the authors
 were too lazy to implement \idx{Shanks}' method completely. It is therefore
-strongly recommended to use either the version with $\fl=1$, the function
-$\kbd{qfbhclassno}(-x)$ if $x$ is known to be a fundamental discriminant, or
+strongly recommended to use either the version with $\fl = 1$, the function
+$\kbd{qfbhclassno}(-D)$ if $D$ is known to be a fundamental discriminant, or
 the function \kbd{quadclassunit}.
 
-\syn{qfbclassno0}{x,\fl}. Also available are
-$\teb{classno}(x)$ (= $\teb{qfbclassno}(x)$),
-$\teb{classno2}(x)$ (= $\teb{qfbclassno}(x,1)$), and finally
-there exists the function $\teb{hclassno}(x)$ which computes the class
-number of an imaginary quadratic field by counting reduced forms, an $O(|x|)$
+\misctitle{Warning.} contrary to what its name implies, this routine does not
+compute the number of classes of binary primitive forms of discriminant $D$,
+which is equal to the \var{narrow} class number. The two notions are the same
+when $D < 0$ or the fundamental unit $\varepsilon$ has negative norm; when $D
+> 0$ and $N\varepsilon > 0$, the number of classes of forms is twice the
+ordinary class number. This is a problem which we cannot fix for backward
+compatibility reasons. Use the following routine if you are only interested
+in the number of classes of form:
+\bprog
+QFBclassno(D) =
+  qfbclassno(D) * if (D < 0 || norm(quadunit(D)) < 0, 1, 2)
+@eprog
+\noindent Here are a few examples, including an erroneous answer:
+\bprog
+? qfbclassno(400000028)
+time = 3,140 ms.
+%1 = 1
+? quadclassunit(400000028).no
+time = 20 ms. \\@com{ much faster}
+%2 = 1
+? qfbclassno(-400000028)
+time = 0 ms.
+%3 = 7253 \\@com{ correct, and fast enough}
+? quadclassunit(-400000028).no
+  ***   Warning: not a fundamental discriminant in quadclassunit.
+time = 0 ms.
+%4 = 7253
+? qfbclassno(-2878367)
+time = 0 ms.
+%6 = 1056 \\@com{ This is wrong! Correct answer is $1152$}
+(14:40) gp > quadclassunit(-2878367)
+time = 10 ms.
+%7 = [1152, [48, 24], [Qfb(647, 189, 1126), Qfb(2, 1, 359796)], 1, 1.000250]
+@eprog
+
+\syn{qfbclassno0}{D,\fl}. Also available:
+$\teb{classno}(D)$ (= $\teb{qfbclassno}(D)$),
+$\teb{classno2}(D)$ (= $\teb{qfbclassno}(D,1)$), and finally
+there exists the function $\teb{hclassno}(D)$ which computes the class
+number of an imaginary quadratic field by counting reduced forms, an $O(|D|)$
 algorithm. See also \kbd{qfbhclassno}.
 
 \subsecidx{qfbcompraw}$(x,y)$ \idx{composition} of the binary quadratic forms
