@@ -5145,8 +5145,8 @@ ideal of $L/\Q$, in the form of a
 $\Z$-basis, given by a vector of polynomials (modulo \kbd{rnf.pol}).
 The following routine might be useful:
 \bprog
-    \\ return y = rnfidealreltoabs(rnf,...) as an ideal in HNF form associated
-    \\ to nf = nfinit( rnf.pol );
+    \\ return y = rnfidealreltoabs(rnf,...) as an ideal in HNF form 
+    \\ associated to nf = nfinit( rnf.pol );
     idealgentoHNF(nf, y) =
     {
       local(z); z = nfalgtobasis(nf, y);
