@@ -1975,13 +1975,14 @@ static GEN
 myidealpow(GEN x, GEN n) { return idealpow(static_nf, x, n); }
 
 GEN
-factorback_i(GEN fa, GEN nf, int red)
+factorback_i(GEN fa, GEN e, GEN nf, int red)
 {
   ulong av = avma;
   long k,l,lx,t = typ(fa);
-  GEN p,e,x;
+  GEN p,x;
   GEN (*_mul)(GEN,GEN);
   GEN (*_pow)(GEN,GEN);
+  if (!nf && e && lg(e) > 1 && typ(e[1]) != t_INT) { nf = e; e = NULL; }
   if (nf)
   {
     static_nf = nf;
@@ -2001,27 +2002,28 @@ factorback_i(GEN fa, GEN nf, int red)
     _mul = &gmul;
     _pow = &powgi;
   }
-  p = (GEN)fa[1];
-  e = (GEN)fa[2];
-  if (is_vec_t(t))
+ 
+  if (e) /* supplied vector of exponents */
+    p = fa;
+  else /* genuine factorization */
   {
-    t = typ(e);
-    if (lg(fa) == 3 && is_vec_t(t))
-    { /* check whether e is an integral vector of correct length */
-      lx = lg(e);
-      if (lx == lg(p))
-      {
-        for (k=1; k<lx; k++)
-          if (typ(e[k]) != t_INT) break;
-        if (k == lx) t = t_MAT;
-      }
-    }
     if (t != t_MAT)
       return gerepileupto(av, divide_conquer_prod(fa, _mul));
+    p = (GEN)fa[1];
+    e = (GEN)fa[2];
   }
-  if (t!=t_MAT || lg(fa)!=3)
+  lx = lg(p);
+  t = t_INT; /* dummy */
+  /* check whether e is an integral vector of correct length */
+  if (is_vec_t(typ(e)) && lx == lg(e))
+  {
+    for (k=1; k<lx; k++)
+      if (typ(e[k]) != t_INT) break;
+    if (k == lx) t = t_MAT;
+  }
+  if (t != t_MAT || lg(fa)!=3)
     err(talker,"not a factorisation in factorback");
-  lx = lg(p); if (lx == 1) return gun;
+  if (lx == 1) return gun;
   x = cgetg(lx,t_VEC);
   for (l=1,k=1; k<lx; k++)
     if (signe(e[k]))
@@ -2031,9 +2033,15 @@ factorback_i(GEN fa, GEN nf, int red)
 }
 
 GEN
+factorback0(GEN fa, GEN e, GEN nf)
+{
+  return factorback_i(fa,e,nf,0);
+}
+
+GEN
 factorback(GEN fa, GEN nf)
 {
-  return factorback_i(fa,nf,0);
+  return factorback_i(fa,nf,NULL,0);
 }
 
 GEN

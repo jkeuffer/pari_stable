@@ -2084,7 +2084,7 @@ entree functions_basic[]={
 {"eval",18,(void*)geval,7,"G"},
 {"exp",1,(void*)gexp,3,"Gp"},
 {"factor",99,(void*)factor0,4,"GD-1,L,"},
-{"factorback",99,(void*)factorback,4,"GDG"},
+{"factorback",99,(void*)factorback0,4,"GDGDG"},
 {"factorcantor",2,(void*)factcantor,4,"GG"},
 {"factorff",3,(void*)factmod9,4,"GGG"},
 {"factorial",99,(void*)mpfactr,4,"Lp"},

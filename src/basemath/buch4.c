@@ -461,7 +461,7 @@ nfhilbert0(GEN nf,GEN a,GEN b,GEN p)
 extern GEN isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag);
 extern GEN vconcat(GEN Q1, GEN Q2);
 extern GEN mathnfspec(GEN x, GEN *ptperm, GEN *ptdep, GEN *ptB, GEN *ptC);
-extern GEN factorback_i(GEN fa, GEN nf, int red);
+extern GEN factorback_i(GEN fa, GEN e, GEN nf, int red);
 /* S a list of prime ideal in primedec format. Return res:
  * res[1] = generators of (S-units / units), as polynomials
  * res[2] = [perm, HB, den], for bnfissunit
@@ -476,7 +476,7 @@ bnfsunit(GEN bnf,GEN S,long prec)
   ulong ltop = avma;
   long i,j,ls;
   GEN p1,nf,classgp,gen,M,U,H;
-  GEN sunit,card,sreg,res,pow,fa = cgetg(3, t_MAT);
+  GEN sunit,card,sreg,res,pow;
 
   if (typ(S) != t_VEC) err(typeer,"bnfsunit");
   bnf = checkbnf(bnf); nf=(GEN)bnf[7];
@@ -519,12 +519,8 @@ bnfsunit(GEN bnf,GEN S,long prec)
     ClS[2]=(long)p1; /* cyc */
 
     p1=cgetg(i,t_VEC); pow=ZM_inv((GEN)SNF[1],gun);
-    fa[1] = (long)gen;
     for(i--; i; i--)
-    {
-      fa[2] = pow[i];
-      p1[i] = (long)factorback_i(fa, nf, 1);
-    }
+      p1[i] = (long)factorback_i(gen, (GEN)pow[i], nf, 1);
     ClS[3]=(long)p1; /* gen */
     res[5]=(long) ClS;
   }
@@ -550,7 +546,7 @@ bnfsunit(GEN bnf,GEN S,long prec)
     Sperm = cgetg(ls, t_VEC); sunit = cgetg(ls, t_VEC);
     for (i=1; i<ls; i++) Sperm[i] = S[perm[i]]; /* S o perm */
 
-    setlg(Sperm, lH); fa[1] = (long)Sperm;
+    setlg(Sperm, lH);
     for (i=1; i<lH; i++)
       sunit[i] = isprincipalfact(bnf,Sperm,(GEN)H[i],NULL,fl)[2];
     for (j=1; j<lB; j++,i++)

@@ -1114,6 +1114,7 @@ GEN     divide_conquer_prod(GEN x, GEN (*mul)(GEN,GEN));
 GEN     factor(GEN x);
 GEN     factor0(GEN x,long flag);
 GEN     factorback(GEN fa,GEN nf);
+GEN     factorback0(GEN fa,GEN e, GEN nf);
 GEN     factpol(GEN x, long hint);
 GEN     gbezout(GEN x, GEN y, GEN *u, GEN *v);
 GEN     gcd0(GEN x, GEN y,long flag);
