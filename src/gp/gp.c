@@ -1159,7 +1159,7 @@ print_def_arg(GEN x)
   if (typ(x)==t_STR)
     pariputs(GSTR(x)); /* otherwise it's surrounded by "" */
   else
-    bruteall(x,'g',-1,1);
+    brute(x,'g',-1);
 }
 
 static void

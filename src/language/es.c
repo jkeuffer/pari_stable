@@ -288,7 +288,7 @@ vpariputs(const char* format, va_list args)
       if (*t == '\003' && t[21] == '\003')
       {
         *t = 0; t[21] = 0; /* remove the bracing chars */
-        pariOut->puts(s); bruteall((GEN)atol(t+1),'g',-1,1);
+        pariOut->puts(s); brute((GEN)atol(t+1),'g',-1);
         t += 22; s = t;
         if (!--nb) break; 
       }
@@ -2334,9 +2334,9 @@ _initout(pariout_t *T, char f, long sigd, long sp, long fieldw, int prettyp)
 }
 
 void
-bruteall(GEN g, char f, long d, long sp)
+brute(GEN g, char f, long d)
 {
-  pariout_t T; _initout(&T,f,d,sp,0, f_RAW);
+  pariout_t T; _initout(&T,f,d,1,0, f_RAW);
   gen_output(g, &T);
 }
 
@@ -2362,10 +2362,7 @@ texe(GEN g, char f, long d)
 }
 
 void
-brute(GEN g, char f, long d) { bruteall(g,f,d,1); }
-
-void
-outbrute(GEN g) { bruteall(g,'g',-1,1); }
+outbrute(GEN g) { brute(g,'g',-1); }
 
 void
 outsor(GEN g) { sor(g,'g',-1,1); }
@@ -2409,7 +2406,7 @@ void
 bruterr(GEN x,char format,long sigd)
 {
   PariOUT *out = pariOut; pariOut = pariErr;
-  bruteall(x,format,sigd,1); pariOut = out;
+  brute(x,format,sigd); pariOut = out;
 }
 
 void

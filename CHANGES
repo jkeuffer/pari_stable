@@ -105,6 +105,9 @@ MSo 8- allow numtoperm(0,k)  [ --> [] ]
 BA  2- support for FLTK graphical library [ hi-res plot ]
 BA  3- galoisidentify for order 96 to 127.
 
+  Removed
+    1- bruteall [ useless, undocumented variant of 'brute' ]
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.6 (released 19/06/2003):
   Fixed
