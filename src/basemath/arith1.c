@@ -281,31 +281,61 @@ gracine(GEN a)
   return garith_proto(racine,a,1); /* hm. --GN */
 }
 
+/* assume a >= 0 */
+GEN
+racine_i(GEN a, int roundup)
+{
+  long av = avma, k,s, l = lgefint(a);
+  ulong m;
+  GEN x,y,z;
+  if (l == 2) return gzero;
+  if (l == 3)
+  {
+    m = (ulong)sqrt((double)(ulong)a[2]);
+    if (roundup && m * m != (ulong)a[2]) m++;
+    return stoi((long)m);
+  }
+  s = bfffo(a[2]);
+  if (s > 1)
+  {
+    long z;
+    s -= (s & 1); /* make it even */
+    z = BITS_IN_LONG - s;
+    m = (ulong)(a[2] << s) | (a[3] >> z);
+    l = ((l - 4) * BITS_IN_LONG + z)>>1;
+  }
+  else
+  {
+    m = (ulong)a[2];
+    l = (l - 3) * (BITS_IN_LONG/2);
+  }
+  k = (long) sqrt((double)m);
+  x = shifti(stoi(k+1), l);
+  do
+  {
+    z = shifti(addii(x,divii(a,x)), -1);
+    y = x; x = z;
+  }
+  while ((k = cmpii(x,y)) < 0);
+  avma = (long)y;
+  if (roundup && k) y = addis(y,1);
+  return gerepileuptoint(av,y);
+}
+
 GEN
 racine(GEN a)
 {
-  GEN x,y,z;
-  long av,k;
-
   if (typ(a) != t_INT) err(arither1);
   switch (signe(a))
   {
+    case 1: return racine_i(a,0);
     case 0: return gzero;
     case -1:
-      x=cgetg(3,t_COMPLEX); x[1]=zero;
-      setsigne(a,1); x[2]= (long)racine(a); setsigne(a,-1);
-      return x;
-
-    case 1:
-      av=avma; k = (long) sqrt((double)(ulong)a[2]);
-      x = shifti(stoi(k+1), (lgefint(a)-3)*(BITS_IN_LONG/2));
-      do
-      {
-        z = shifti(addii(x,divii(a,x)), -1);
-	y = x; x = z;
-      }
-      while (cmpii(x,y) < 0);
-      avma = (long)y; return gerepileuptoint(av,y);
+    {
+      GEN x = cgetg(3,t_COMPLEX);
+      x[1] = zero;
+      x[2] = (long)racine_i(a,0); return x;
+    }
   }
   return NULL; /* not reached */
 }
