@@ -86,6 +86,12 @@ xmpn_mirrorcopy(mp_limb_t *z, mp_limb_t *x, long n)
     z[i]=x[n-1-i];
 }
 
+INLINE void
+xmpn_zero(mp_ptr x, mp_size_t n)
+{
+  while (--n >= 0) x[n]=0;
+}
+
 INLINE GEN
 icopy_ef(GEN x, long l)
 {
@@ -1508,6 +1514,48 @@ divrs(GEN x, long y)
   return z;
 }
 
+/* We keep llx bits of x and lly bits of y*/
+GEN
+divrr_with_gmp(GEN x, GEN y)
+{
+  long lx=lg(x)-2,ly=lg(y)-2;
+  long lw=min(lx,ly);
+  long lly=min(lw+1,ly);
+  GEN  w=cgetr(lw+2);
+  pari_sp av=avma;
+  long lu=lw+lly;
+  long llx=min(lu,lx);
+  GEN u=new_chunk(lu);
+  GEN z=new_chunk(lly);
+  GEN q,r;
+  long e=expo(x)-expo(y);
+  long sx=signe(x),sy=signe(y);
+  xmpn_mirrorcopy(z,y+2,lly);
+  xmpn_mirrorcopy(u+lu-llx,x+2,llx);
+  xmpn_zero(u,lu-llx);
+  q = new_chunk(lw+1);
+  r = new_chunk(lly);
+
+  mpn_tdiv_qr(q,r,0,u,lu,z,lly);
+  
+  /*Round up: This is not exactly correct we should test 2*r>z*/
+  if ((ulong)r[lly-1] > ((ulong)z[lly-1]>>1))
+    mpn_add_1(q,q,lw+1,1);
+  
+  xmpn_mirrorcopy(w+2,q,lw);
+  /*If q[lw] then q[lw]=1. We just need to right shift to 
+   * renormalize, but then we do not need e-- */
+  if (q[lw]) 
+    shift_right(w,w, 2,lw+2, 1,1)
+  else e--;
+  avma=av;
+  if (sy < 0) sx = -sx;
+  w[1] = evalsigne(sx) | evalexpo(e);
+  return w;
+}
+
+static long DIVRR_GMP_LIMIT = 502;
+
 GEN
 divrr(GEN x, GEN y)
 {
@@ -1535,9 +1583,10 @@ divrr(GEN x, GEN y)
     hiremainder=k; r[2]=divll(l,y[2]); return r;
   }
 
+  if (ly>=DIVRR_GMP_LIMIT)
+    return divrr_with_gmp(x,y);
+
   lr = min(lx,ly); r = new_chunk(lr);
-  for (i=0;i<lr;i++) r[i]=0;
-  for (i=0;i<lr;i++) r[-i]=0;
   r1 = r-1;
   r1[1] = 0; for (i=2; i<lr; i++) r1[i]=x[i];
   r1[lr] = (lx>lr)? x[lr]: 0;
