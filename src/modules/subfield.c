@@ -625,7 +625,9 @@ bound_for_coeff(long m,GEN rr, GEN *maxroot)
   long i,r1, lrr=lg(rr);
   GEN p1,b1,b2,B,M, C = matpascal(m-1);
 
-  for (r1=0; typ(rr[r1+1]) == t_REAL; r1++) /* empty */;
+  for (r1=1; r1 < lrr; r1++)
+    if (typ(rr[r1]) != t_REAL) break;
+  r1--;
 
   rr = gabs(rr,0); *maxroot = vecmax(rr);
   for (i=1; i<lrr; i++)
