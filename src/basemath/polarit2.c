@@ -2147,7 +2147,6 @@ gaussian_gcd(GEN x, GEN y)
   setsigne(z[2],1);\
 }
 
-#define is_rational_t(t) ((t)==t_INT || (t)==t_FRAC)
 int
 isrational(GEN x)
 {

@@ -45,6 +45,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /* #define is_intreal_t(t) ( (t) == t_REAL || (t) == t_INT ) */
 #define is_intreal_t(t) ( (t) <= t_REAL )
+#define is_rational_t(t) ((t)==t_INT || (t)==t_FRAC) /* FRACN omitted */
 
 #define is_frac_t(t) ( (t) == t_FRAC || (t) == t_FRACN )
 #define is_rfrac_t(t) ( (t) == t_RFRAC || (t) == t_RFRACN )
