@@ -1764,62 +1764,23 @@ gdiv(GEN x, GEN y)
   }
 
   vx=gvar(x); vy=gvar(y);
-  if (ty==t_POLMOD && (tx==t_POLMOD || vy<vx))
-  {
-    z=cgetg(3,t_POLMOD);
-    if (tx==t_POLMOD)
-    {
-      k=x[1]; l=y[1];
-      if (gegal((GEN)k,(GEN)l))
-      {
-        copyifstack(k, z[1]); av=avma;
-        p1 = ginvmod((GEN)y[2],(GEN)z[1]);
-        p2 = gmul((GEN)x[2],p1);
-      }
-      else
-      {
-        vx=varn(x[1]); vy=varn(y[1]);
-        if (vx==vy)
-        {
-          z[1]=lgcd((GEN)k,(GEN)l); av=avma;
-          p1=ginvmod((GEN)y[2],(GEN)z[1]);
-          p2=gmul((GEN)x[2],p1);
-        }
-        else
-        {
-          if (vx<vy)
-          { copyifstack(k,z[1]); av=avma; p2=gdiv((GEN)x[2],y); }
-          else
-          { 
-            copyifstack(l,z[1]); av=avma;
-            p1 = ginvmod((GEN)y[2],(GEN)z[1]);
-            p2 = gmul(x, p1);
-          }
-        }
-      }
-      p2 = gmod(p2,(GEN)z[1]);
-    }
-    else
-    {
-      copyifstack(y[1],z[1]); av=avma;
-      p1 = ginvmod((GEN)y[2],(GEN)y[1]);
-      p2 = gmul(x,p1);
-    }
-    z[2]=lpileupto(av, p2); return z;
-  }
-  if (tx == t_POLMOD && vx<vy)
-  {
-    z=cgetg(3,t_POLMOD);
-    copyifstack(x[1],z[1]);
-    z[2]=ldiv((GEN)x[2],y); return z;
-  }
-  if (vx == vy)
+  if (ty == t_POLMOD || ty == t_INTMOD) 
   {
     av = avma;
-    if (tx == t_POLMOD)
-      return gerepileupto(av, gdiv(x, to_polmod(y,(GEN)x[1])));
-    if (ty == t_POLMOD)
-      return gerepileupto(av, gdiv(to_polmod(x,(GEN)y[1]), y));
+    return gerepileupto(av, gmul(x, ginv(y)));
+  }
+  if (tx == t_POLMOD && vx<=vy)
+  {
+    av = avma;
+    if (vx == vy)
+      y = gmul(y, gmodulsg(1, (GEN)x[1]));
+    else if (is_extscalar_t(ty))
+    {
+      z=cgetg(3,t_POLMOD);
+      copyifstack(x[1],z[1]);
+      z[2]=ldiv((GEN)x[2],y); return z;
+    }
+    return gerepileupto(av, gmul(x, ginv(y)));
   }
   if (is_noncalc_t(tx) || is_noncalc_t(ty)) err(operf,"/",tx, ty);
   /* now x and y are not both is_scalar_t */
@@ -1840,14 +1801,7 @@ gdiv(GEN x, GEN y)
       case t_POL: lx = lgef(x);
       case t_SER: z[1] = x[1];
       case t_VEC: case t_COL: case t_MAT:
-        if (ty == t_POLMOD || ty == t_INTMOD)
-        {
-          if (!gcmp1(y)) y = ginv(y); /* garbage, left alone */
-          for (i=lontyp[tx]; i<lx; i++) z[i]=lmul((GEN)x[i],y);
-          return z;
-        }
-        else
-          for (i=lontyp[tx]; i<lx; i++) z[i]=ldiv((GEN)x[i],y);
+        for (i=lontyp[tx]; i<lx; i++) z[i]=ldiv((GEN)x[i],y);
         return z;
     }
     err(operf,"/",tx,ty);
