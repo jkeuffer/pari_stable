@@ -238,19 +238,20 @@ addpadic(GEN x, GEN y)
 {
   pari_sp av = avma;
   long c,d,e,r,rx,ry;
-  GEN u,z,p,mod;
+  GEN u, z, mod, p = (GEN)x[2];
 
-  (void)new_chunk(5+lgefint(x[3])+lgefint(y[3]));
+  (void)new_chunk(5 + lgefint(x[3]) + lgefint(y[3]));
   e = valp(x);
   r = valp(y); d = r-e;
   if (d < 0) { swap(x,y); e = r; d = -d; }
-  rx = precp(x); p = (GEN)x[2];
+  rx = precp(x);
   ry = precp(y);
   if (d) /* v(x) < v(y) */
   {
     r = d+ry; z = gpowgs(p,d);
     if (r < rx) mod = mulii(z,(GEN)y[3]); else { r = rx; mod = (GEN)x[3]; }
     u = addii((GEN)x[4], mulii(z,(GEN)y[4]));
+    u = resii(u, mod);
   }
   else
   {
@@ -262,15 +263,16 @@ addpadic(GEN x, GEN y)
     }
     if (c)
     {
-      mod = divii(mod, gpowgs(p,c));
+      mod = diviiexact(mod, gpowgs(p,c));
       r -= c;
       e += c;
     }
+    u = resii(u, mod);
   }
   avma = av; z = cgetg(5,t_PADIC);
   z[1] = evalprecp(r) | evalvalp(e);
   z[3] = licopy(mod);
-  z[4] = lmodii(u,(GEN)z[3]);
+  z[4] = licopy(u);
   icopyifstack(p, z[2]); return z;
 }
 
