@@ -119,6 +119,8 @@ BA 48- Configure: using gcc-3.3 + LANG=french, Configure failed to detect gcc
    51- valuation(Mod(x,x^2), y) --> oo loop  [ now 0 ]
    52- optimization problems in new zeta() and gamma() [2.2.0 C13]
        ( e.g zeta(0.5 + 10000*I) was _much_ slower than before )
+   53- precision problem in nffactor [ in get_R() ], could yield to a SEGV, e.g
+       nffactor(nfinit(y^4+7^2),x^28-14*x^24+20321*x^20+166992*x^16+1171296*x^12+1342208*x^8-5005056*x^4+3211264); 
 
   Changed
     1- bnfinit: [small_norm phase] speed up norm computations.
