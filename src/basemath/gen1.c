@@ -794,7 +794,7 @@ gadd(GEN x, GEN y)
 	case t_SER:
 	  l = valp(y) - valp(x);
 	  if (l < 0) { l = -l; swap(x,y); }
-          /* v(x) <= v(y) */
+          /* valp(x) <= valp(y) */
 	  if (!signe(x)) return gcopy(x);
           lx = lg(x);
           ly = signe(y)? lg(y): 2;
@@ -803,45 +803,35 @@ gadd(GEN x, GEN y)
           z = cgetg(ly,t_SER);
 	  if (l)
 	  {
-	    if (l>=ly-2)
-	      for (i=2; i<ly; i++) z[i]=lcopy((GEN)x[i]);
-            else
-	    {
-	      for (i=2; i<=l+1; i++) z[i]=lcopy((GEN)x[i]);
-	      for (   ; i<ly; i++) z[i]=ladd((GEN)x[i],(GEN)y[i-l]);
-	    }
-	    z[1]=x[1]; return z;
+            for (i=2; i<=l+1; i++) z[i] = lcopy((GEN)x[i]);
+            for (   ; i < ly; i++) z[i] = ladd((GEN)x[i],(GEN)y[i-l]);
+	    z[1] = x[1]; return z;
 	  }
-          if (ly>2)
+          for (i=2; i<ly; i++)
           {
-            tetpil = avma;
-            for (i=2; i<ly; i++)
+            p1 = gadd((GEN)x[i],(GEN)y[i]);
+            if (!isexactzero(p1))
             {
-              p1 = gadd((GEN)x[i],(GEN)y[i]);
-              if (!isexactzero(p1))
-              {
-                l = i-2; stackdummy(z,l); z += l;
-                z[0]=evaltyp(t_SER) | evallg(ly-l);
-                z[1]=evalvalp(valp(x)+i-2) | evalsigne(1) | evalvarn(vx);
-                for (j=i+1; j<ly; j++)
-                  z[j-l]=ladd((GEN)x[j],(GEN)y[j]);
-                z[2]=(long)p1; return z;
-              }
-              avma = tetpil;
+              l = i-2; stackdummy(z,l); z += l;
+              z[0] = evaltyp(t_SER) | evallg(ly-l);
+              z[1] = evalvalp(valp(x)+i-2) | evalsigne(1) | evalvarn(vx);
+              for (j=i+1; j<ly; j++) z[j-l] = ladd((GEN)x[j],(GEN)y[j]);
+              z[2] = (long)p1; return z;
             }
+            avma = (pari_sp)z;
           }
           avma = av;
-          return zeroser(vx,ly-2+valp(y));
+          return zeroser(vx, ly-2 + valp(y));
 	
 	case t_RFRAC: case t_RFRACN:
 	  if (gcmp0(y)) return gcopy(x);
 
-	  l = valp(x)-gval(y,vy); l += gcmp0(x)? 3: lg(x);
+	  l = valp(x) - gval(y,vy); l += gcmp0(x)? 3: lg(x);
 	  if (l<3) return gcopy(x);
 
-	  av=avma; ty=typ(y[2]);
-          p1 = is_scalar_t(ty)? (GEN)y[2]: greffe((GEN)y[2],l,1);
-          p1 = gdiv((GEN)y[1], p1); tetpil=avma;
+	  av = avma; p1 = (GEN)y[2]; ty = typ(p1);
+          if (!is_scalar_t(ty)) p1 = greffe(p1,l,1);
+          p1 = gdiv((GEN)y[1], p1); tetpil = avma;
           return gerepile(av,tetpil,gadd(p1,x));
 
 	default: err(operf,"+",x,y);

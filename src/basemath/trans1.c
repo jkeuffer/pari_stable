@@ -184,11 +184,10 @@ mpeuler(long prec)
 GEN
 transc(GEN (*f)(GEN,long), GEN x, long prec)
 {
-  GEN p1,p2,y;
+  pari_sp tetpil, av = avma;
+  GEN p1, y;
   long lx, i;
-  pari_sp av, tetpil;
 
-  av=avma;
   switch(typ(x))
   {
     case t_INT: case t_FRAC: case t_FRACN:
@@ -196,7 +195,7 @@ transc(GEN (*f)(GEN,long), GEN x, long prec)
       return gerepile(av,tetpil,f(p1,prec));
 
     case t_COMPLEX: case t_QUAD:
-      av=avma; p1=gmul(x,realun(prec)); tetpil=avma;
+      p1=gmul(x,realun(prec)); tetpil=avma;
       return gerepile(av,tetpil,f(p1,prec));
 
     case t_POL: case t_RFRAC: case t_RFRACN:
@@ -204,21 +203,18 @@ transc(GEN (*f)(GEN,long), GEN x, long prec)
       return gerepile(av,tetpil,f(p1,prec));
 
     case t_VEC: case t_COL: case t_MAT:
-      lx=lg(x); y=cgetg(lx,typ(x));
-      for (i=1; i<lx; i++)
-	y[i] = (long) f((GEN)x[i],prec);
+      lx = lg(x); y = cgetg(lx,typ(x));
+      for (i=1; i<lx; i++) y[i] = (long)f((GEN)x[i],prec);
       return y;
 
     case t_POLMOD:
-      av=avma; p1=roots((GEN)x[1],prec); lx=lg(p1); p2=cgetg(lx,t_COL);
-      for (i=1; i<lx; i++) p2[i]=lpoleval((GEN)x[2],(GEN)p1[i]);
-      tetpil=avma; y=cgetg(lx,t_COL);
-      for (i=1; i<lx; i++)
-        y[i] = (long)f((GEN)p2[i],prec);
+      p1 = roots((GEN)x[1],prec); lx = lg(p1);
+      for (i=1; i<lx; i++) p1[i] = lpoleval((GEN)x[2],(GEN)p1[i]);
+      tetpil = avma; y = cgetg(lx,t_COL);
+      for (i=1; i<lx; i++) y[i] = (long)f((GEN)p1[i],prec);
       return gerepile(av,tetpil,y);
 
-  default:
-    err(typeer,"a transcendental function");
+    default: err(typeer,"a transcendental function");
   }
   return f(x,prec);
 }
@@ -617,31 +613,30 @@ GEN
 gpow(GEN x, GEN n, long prec)
 {
   long i, lx, tx;
-  pari_sp av, tetpil;
+  pari_sp av;
   GEN y;
 
-  if (typ(n)==t_INT) return powgi(x,n);
+  if (typ(n) == t_INT) return powgi(x,n);
   tx = typ(x);
   if (is_matvec_t(tx))
   {
-    lx=lg(x); y=cgetg(lx,tx);
-    for (i=1; i<lx; i++) y[i]=lpui((GEN)x[i],n,prec);
+    lx = lg(x); y = cgetg(lx,tx);
+    for (i=1; i<lx; i++) y[i] = lpui((GEN)x[i],n,prec);
     return y;
   }
-  if (tx==t_POL)
+  av = avma;
+  if (tx == t_POL || tx == t_RFRAC || tx == t_RFRACN)
   {
-    av=avma; y=tayl(x,gvar(x),precdl); tetpil=avma;
-    return gerepile(av,tetpil,gpow(y,n,prec));
+    x = tayl(x,gvar(x),precdl);
+    tx = t_SER;
   }
-  if (tx==t_SER)
+  if (tx == t_SER)
   {
     if (valp(x))
-      err(talker,"not an integer exponent for non invertible series in gpow");
+      err(talker,"need integer exponent for non-invertible series in gpow");
     if (lg(x) == 2) return gcopy(x); /* O(1) */
-    av = avma;
     return gerepileupto(av, ser_pui(x, n, prec));
   }
-  av=avma;
   if (gcmp0(x))
   {
     long tn = typ(n);
@@ -661,17 +656,16 @@ gpow(GEN x, GEN n, long prec)
   {
     GEN p1;
     if (!BSW_psp((GEN)x[1])) err(talker,"modulus must be prime in gpow");
-    y=cgetg(3,tx); copyifstack(x[1],y[1]);
-    av=avma;
-    p1=mpsqrtnmod((GEN)x[2],(GEN)n[2],(GEN)x[1],NULL);
-    if(!p1) err(talker,"n-root does not exists in gpow");
-    p1=powmodulo(p1,(GEN)n[1],(GEN)x[1]);
-    y[2]=lpileupto(av,p1);
+    y = cgetg(3,tx); copyifstack(x[1],y[1]);
+    av = avma;
+    p1 = mpsqrtnmod((GEN)x[2],(GEN)n[2],(GEN)x[1],NULL);
+    if (!p1) err(talker,"n-root does not exists in gpow");
+    y[2] = lpileuptoint(av, powmodulo(p1, (GEN)n[1], (GEN)x[1]));
     return y;
   }
   i = (long) precision(n); if (i) prec=i;
-  y=gmul(n,glog(x,prec)); tetpil=avma;
-  return gerepile(av,tetpil,gexp(y,prec));
+  y = gmul(n,glog(x,prec));
+  return gerepileupto(av, gexp(y,prec));
 }
 
 /********************************************************************/
@@ -853,10 +847,26 @@ padic_sqrt(GEN x)
   y[4] = (long)z; return y;
 }
 
+/* return x^(1/n), assume typ(x) = t_SER */
+static GEN
+ser_sqrtn(GEN x, long n, long prec)
+{
+  long e = valp(x);
+  GEN y;
+  if (gcmp0(x)) return zeroser(varn(x), (e+n-1)/n);
+  if (e % n) err(talker,"incorrect valuation in gsqrtn");
+  y = dummycopy(x); setvalp(y, 0);
+  y = ser_pui(y, ginv(stoi(n)), prec);
+  if (typ(y) == t_SER) /* generic case */
+    y[1] = evalsigne(1) | evalvalp(e/n) | evalvarn(varn(x));
+  else /* e.g coeffs are POLMODs */
+    y = gmul(y, gpowgs(polx[varn(x)], e/n));
+  return y;
+}
+
 GEN
 gsqrt(GEN x, long prec)
 {
-  long e;
   pari_sp av, tetpil;
   GEN y,p1,p2;
 
@@ -919,18 +929,9 @@ gsqrt(GEN x, long prec)
     case t_PADIC:
       return padic_sqrt(x);
 
-    case t_SER:
-      e = valp(x);
-      if (gcmp0(x)) return zeroser(varn(x), (e+1)>>1);
-      if (e & 1) err(sqrter6);
-      av = avma;
-      y = dummycopy(x); setvalp(y, 0);
-      y = ser_pui(y, ghalf, prec);
-      if (typ(y) == t_SER) /* generic case */
-        y[1] = evalsigne(1) | evalvalp(e>>1) | evalvarn(varn(x));
-      else /* e.g coeffs are POLMODs */
-        y = gmul(y, gpowgs(polx[varn(x)], e>>1));
-      return gerepileupto(av, y);
+    default:
+      av = avma; if (!(y = _toser(x))) break;
+      return gerepileupto(av, ser_sqrtn(y, 2, prec));
   }
   return transc(gsqrt,x,prec);
 }
@@ -1109,8 +1110,7 @@ GEN
 gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
 {
   long i, lx, tx;
-  pari_sp av, tetpil;
-  long e,m;
+  pari_sp av;
   GEN y,z;
   if (zetan) *zetan=gzero;
   if (typ(n)!=t_INT) err(talker,"second arg must be integer in gsqrtn");
@@ -1129,51 +1129,35 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
     for (i=1; i<lx; i++) y[i]=(long)gsqrtn((GEN)x[i],n,NULL,prec);
     return y;
   }
+  av = avma;
   switch(tx)
   {
-  case t_POL: case t_RFRAC: case t_RFRACN:
-    av = avma;
-    y=tayl(x,gvar(x),precdl); tetpil=avma;
-    return gerepile(av,tetpil,gsqrtn(y,n,zetan,prec));
-  case t_SER:   
-    e=valp(x);m=itos(n);
-    if (gcmp0(x)) return zeroser(varn(x), (e+m-1)/m);
-    if (e % m) err(talker,"incorrect valuation in gsqrtn");
-    av = avma;
-    y = dummycopy(x); setvalp(y, 0);
-    y = ser_pui(y, ginv(n), prec);
-    if (typ(y) == t_SER) /* generic case */
-      y[1] = evalsigne(1) | evalvalp(e/m) | evalvarn(varn(x));
-    else /* e.g coeffs are POLMODs */
-      y = gmul(y, gpowgs(polx[varn(x)], e/m));
-    return gerepileupto(av, y);
   case t_INTMOD:
-    z=gzero;
+    z = gzero;
     /*This is not great, but else it will generate too much trouble*/
     if (!BSW_psp((GEN)x[1])) err(talker,"modulus must be prime in gsqrtn");
     if (zetan) 
     {
-      z=cgetg(3,tx); copyifstack(x[1],z[1]);
-      z[2]=lgetg(lgefint(z[1]),t_INT);
+      z = cgetg(3,tx); copyifstack(x[1],z[1]);
+      z[2] = lgeti(lgefint(z[1]));
     }
-    y=cgetg(3,tx); copyifstack(x[1],y[1]);
-    y[2]=(long)mpsqrtnmod((GEN)x[2],n,(GEN)x[1],zetan);
+    y = cgetg(3,tx); copyifstack(x[1],y[1]);
+    y[2] = (long)mpsqrtnmod((GEN)x[2],n,(GEN)x[1],zetan);
+    if (!y[2]) err(talker,"n-root does not exists in gsqrtn");
     if (zetan)
     {
-      cgiv(*zetan);/*Ole!*/
-      affii(*zetan,(GEN)z[2]);
-      *zetan=z;
+      affii(*zetan, (GEN)z[2]);
+      cgiv(*zetan); *zetan = z;
     }
-    if(!y[2]) err(talker,"n-root does not exists in gsqrtn");
     return y;
 
-  case t_PADIC:
-    return padic_sqrtn(x,n,zetan);
+  case t_PADIC: return padic_sqrtn(x,n,zetan);
+
   case t_INT: case t_FRAC: case t_FRACN: case t_REAL: case t_COMPLEX:
     i = (long) precision(n); if (i) prec=i;
     if (tx==t_INT && is_pm1(x) && signe(x)>0)
-      y=gun;    /*speed-up since there is no way to call rootsof1complex
-		directly from gp*/
+      y = gun;    /*speed-up since there is no way to call rootsof1complex
+		    directly from gp*/
     else if (gcmp0(x))
     {
       if (gsigne(n) < 0) err(gdiver);
@@ -1184,17 +1168,20 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
     }
     else
     {
-      av=avma;
-      y=gmul(ginv(n),glog(x,prec)); tetpil=avma;
-      y=gerepile(av,tetpil,gexp(y,prec));
+      y = gmul(ginv(n),glog(x,prec));
+      y = gerepileupto(av, gexp(y,prec));
     }
-    if (zetan)
-      *zetan=rootsof1complex(n,prec);
+    if (zetan) *zetan = rootsof1complex(n,prec);
     return y;
+
+  case t_POL: case t_RFRAC: case t_RFRACN:
+    x = tayl(x, gvar(x), precdl); /* fall through */
+  case t_SER:   
+    return gerepileupto(av, ser_sqrtn(x, itos(n), prec));
   default:
     err(typeer,"gsqrtn");
   }
-  return NULL;/*keep GCC happy*/
+  return NULL;/* not reached */
 }
 
 /********************************************************************/
@@ -1376,8 +1363,14 @@ gexp(GEN x, long prec)
     case t_REAL: return mpexp(x);
     case t_COMPLEX: return cxexp(x,prec);
     case t_PADIC: return paexp(x);
-    case t_SER: return serexp(x,prec);
     case t_INTMOD: err(typeer,"gexp");
+    default:
+    {
+      pari_sp av = avma;
+      GEN y;
+      if (!(y = _toser(x))) break;
+      return gerepileupto(av, serexp(y,prec));
+    }
   }
   return transc(gexp,x,prec);
 }
@@ -1615,7 +1608,7 @@ GEN
 glog(GEN x, long prec)
 {
   pari_sp av, tetpil;
-  GEN y,p1,p2;
+  GEN y, p1;
 
   switch(typ(x))
   {
@@ -1634,18 +1627,13 @@ glog(GEN x, long prec)
     case t_PADIC:
       return palog(x);
 
-    case t_SER:
-      av=avma;
-      if (valp(x) || gcmp0(x)) err(talker,"log is not analytic at 0");
-      p1=gdiv(derivser(x),x);
-      tetpil=avma; p1=integ(p1,varn(x));
-      if (gcmp1((GEN)x[2])) return gerepile(av,tetpil,p1);
-
-      p2=glog((GEN)x[2],prec); tetpil=avma;
-      return gerepile(av,tetpil,gadd(p1,p2));
-
-    case t_INTMOD:
-      err(typeer,"glog");
+    case t_INTMOD: err(typeer,"glog");
+    default:
+      av = avma; if (!(y = _toser(x))) break;
+      if (valp(y) || gcmp0(y)) err(talker,"log is not analytic at 0");
+      p1 = integ(gdiv(derivser(y), y), varn(y)); /* log(y)' = y'/y */
+      if (!gcmp1((GEN)y[2])) p1 = gadd(p1, glog((GEN)y[2],prec));
+      return gerepileupto(av, p1);
   }
   return transc(glog,x,prec);
 }
@@ -1820,15 +1808,14 @@ gcos(GEN x, long prec)
       gerepilemanyvec(av,tetpil,y+1,2);
       return y;
 
-    case t_SER:
-      if (gcmp0(x)) return gaddsg(1,x);
-      if (valp(x)<0) err(negexper,"gcos");
+    case t_INTMOD: case t_PADIC: err(typeer,"gcos");
 
-      av=avma; gsincos(x,&u,&v,prec);
+    default:
+      av = avma; if (!(y = _toser(x))) break;
+      if (gcmp0(y)) return gaddsg(1,y);
+      if (valp(y) < 0) err(negexper,"gcos");
+      gsincos(y,&u,&v,prec);
       return gerepilecopy(av,v);
-
-    case t_INTMOD: case t_PADIC:
-      err(typeer,"gcos");
   }
   return transc(gcos,x,prec);
 }
@@ -1895,15 +1882,14 @@ gsin(GEN x, long prec)
       gerepilemanyvec(av,tetpil,y+1,2);
       return y;
 
-    case t_SER:
-      if (gcmp0(x)) return gcopy(x);
-      if (valp(x)<0) err(negexper,"gsin");
+    case t_INTMOD: case t_PADIC: err(typeer,"gsin");
 
-      av=avma; gsincos(x,&u,&v,prec);
+    default:
+      av = avma; if (!(y = _toser(x))) break;
+      if (gcmp0(y)) return gcopy(y);
+      if (valp(y) < 0) err(negexper,"gsin");
+      gsincos(y,&u,&v,prec);
       return gerepilecopy(av,u);
-
-    case t_INTMOD: case t_PADIC:
-      err(typeer,"gsin");
   }
   return transc(gsin,x,prec);
 }
@@ -1968,7 +1954,7 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
 {
   long ii, i, j, ex, ex2, lx, ly, mi;
   pari_sp av, tetpil;
-  GEN r,u,v,u1,v1,p1,p2,p3,p4,ps,pc;
+  GEN y, r, u, v, u1, v1, p1, p2, p3, p4, ps, pc;
   GEN *gptr[4];
 
   switch(typ(x))
@@ -1998,57 +1984,6 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
       ps[2]=(long)p2; pc[2]=(long)p4;
       return;
 
-    case t_SER:
-      if (gcmp0(x)) { *c=gaddsg(1,x); *s=gcopy(x); return; }
-
-      ex=valp(x); lx=lg(x); ex2=2*ex+2;
-      if (ex < 0) err(talker,"non zero exponent in gsincos");
-      if (ex2 > lx)
-      {
-        *s=gcopy(x); av=avma; p1=gdivgs(gsqr(x),2);
-        tetpil=avma; *c=gerepile(av,tetpil,gsubsg(1,p1));
-	return;
-      }
-      if (!ex)
-      {
-        av=avma; p1=gcopy(x); p1[2]=zero;
-        gsincos(normalize(p1),&u,&v,prec);
-        gsincos((GEN)x[2],&u1,&v1,prec);
-        p1=gmul(v1,v); p2=gmul(u1,u); p3=gmul(v1,u);
-        p4=gmul(u1,v); tetpil=avma;
-        *c=gsub(p1,p2); *s=gadd(p3,p4);
-	gptr[0]=s; gptr[1]=c;
-	gerepilemanysp(av,tetpil,gptr,2);
-	return;
-      }
-
-      ly=lx+2*ex;
-      mi = lx-1; while (mi>=3 && gcmp0((GEN)x[mi])) mi--;
-      mi += ex-2;
-      pc=cgetg(ly,t_SER); *c=pc;
-      ps=cgetg(lx,t_SER); *s=ps;
-      pc[1] = evalsigne(1) | evalvalp(0) | evalvarn(varn(x));
-      pc[2]=un; ps[1]=x[1];
-      for (i=2; i<ex+2; i++) ps[i]=lcopy((GEN)x[i]);
-      for (i=3; i<ex2; i++) pc[i]=zero;
-      for (i=ex2; i<ly; i++)
-      {
-	ii=i-ex; av=avma; p1=gzero;
-	for (j=ex; j<=min(ii-2,mi); j++)
-	  p1=gadd(p1,gmulgs(gmul((GEN)x[j-ex+2],(GEN)ps[ii-j]),j));
-	tetpil=avma;
-	pc[i]=lpile(av,tetpil,gdivgs(p1,2-i));
-	if (ii<lx)
-	{
-	  av=avma; p1=gzero;
-	  for (j=ex; j<=min(i-ex2,mi); j++)
-	    p1=gadd(p1,gmulgs(gmul((GEN)x[j-ex+2],(GEN)pc[i-j]),j));
-	  p1=gdivgs(p1,i-2); tetpil=avma;
-	  ps[i-ex]=lpile(av,tetpil,gadd(p1,(GEN)x[i-ex]));
-	}
-      }
-      return;
-    /* transc doesn't work for this prototype */
     case t_QUAD:
       av = avma; p1=gmul(x,realun(prec)); tetpil = avma;
       gsincos(p1,s,c,prec);
@@ -2056,11 +1991,58 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
       gerepilemanysp(av,tetpil,gptr,2);
       return;
 
-    case t_POL: case t_RFRAC: case t_RFRACN:
-      av = avma; p1=tayl(x,gvar(x),precdl); tetpil=avma;
-      gsincos(p1,s,c,prec);
-      gptr[0]=s; gptr[1]=c;
-      gerepilemanysp(av,tetpil,gptr,2);
+    default:
+      av = avma; if (!(y = _toser(x))) break;
+      if (gcmp0(y)) { *c = gaddsg(1,y); *s = gcopy(y); return; }
+
+      ex = valp(y); lx = lg(y); ex2 = 2*ex+2;
+      if (ex < 0) err(talker,"non zero exponent in gsincos");
+      if (ex2 > lx)
+      {
+        *s = x == y? gcopy(y): gerepilecopy(av, y); av = avma;
+        *c = gerepileupto(av, gsubsg(1, gdivgs(gsqr(y),2)));
+	return;
+      }
+      if (!ex)
+      {
+        p1 = dummycopy(y); p1[2] = zero;
+        gsincos(normalize(p1),&u,&v,prec);
+        gsincos((GEN)y[2],&u1,&v1,prec);
+        p1 = gmul(v1,v);
+        p2 = gmul(u1,u);
+        p3 = gmul(v1,u);
+        p4 = gmul(u1,v); tetpil = avma;
+        *c = gsub(p1,p2);
+        *s = gadd(p3,p4);
+	gptr[0]=s; gptr[1]=c;
+	gerepilemanysp(av,tetpil,gptr,2);
+	return;
+      }
+
+      ly = lx+2*ex;
+      mi = lx-1; while (mi>=3 && gcmp0((GEN)y[mi])) mi--;
+      mi += ex-2;
+      pc = cgetg(ly,t_SER); *c = pc;
+      ps = cgetg(lx,t_SER); *s = ps;
+      pc[1] = evalsigne(1) | evalvalp(0) | evalvarn(varn(y));
+      pc[2] = un; ps[1] = y[1];
+      for (i=2; i<ex+2; i++) ps[i] = lcopy((GEN)y[i]);
+      for (i=3; i< ex2; i++) pc[i] = zero;
+      for (i=ex2; i<ly; i++)
+      {
+	ii = i-ex; av = avma; p1 = gzero;
+	for (j=ex; j<=min(ii-2,mi); j++)
+	  p1 = gadd(p1, gmulgs(gmul((GEN)y[j-ex+2],(GEN)ps[ii-j]),j));
+	pc[i] = lpileupto(av, gdivgs(p1,2-i));
+	if (ii < lx)
+	{
+	  av = avma; p1 = gzero;
+	  for (j=ex; j<=min(i-ex2,mi); j++)
+	    p1 = gadd(p1,gmulgs(gmul((GEN)y[j-ex+2],(GEN)pc[i-j]),j));
+	  p1 = gdivgs(p1,i-2);
+	  ps[i-ex] = lpileupto(av, gadd(p1,(GEN)y[i-ex]));
+	}
+      }
       return;
   }
   err(typeer,"gsincos");
@@ -2085,23 +2067,25 @@ mptan(GEN x)
 GEN
 gtan(GEN x, long prec)
 {
-  pari_sp av, tetpil;
-  GEN s,c;
+  pari_sp av;
+  GEN y, s, c;
 
   switch(typ(x))
   {
-    case t_REAL:
-      return mptan(x);
+    case t_REAL: return mptan(x);
 
-    case t_SER:
-      if (gcmp0(x)) return gcopy(x);
-      if (valp(x)<0) err(negexper,"gtan"); /* fall through */
     case t_COMPLEX:
-      av=avma; gsincos(x,&s,&c,prec); tetpil=avma;
-      return gerepile(av,tetpil,gdiv(s,c));
+      av = avma; gsincos(x,&s,&c,prec);
+      return gerepileupto(av, gdiv(s,c));
 
-    case t_INTMOD: case t_PADIC:
-      err(typeer,"gtan");
+    case t_INTMOD: case t_PADIC: err(typeer,"gtan");
+    
+    default:
+      av = avma; if (!(y = _toser(x))) break;
+      if (gcmp0(y)) return gcopy(y);
+      if (valp(y) < 0) err(negexper,"gtan");
+      gsincos(y,&s,&c,prec);
+      return gerepileupto(av, gdiv(s,c));
   }
   return transc(gtan,x,prec);
 }
@@ -2129,23 +2113,26 @@ mpcotan(GEN x)
 GEN
 gcotan(GEN x, long prec)
 {
-  pari_sp av, tetpil;
-  GEN s,c;
+  pari_sp av;
+  GEN y, s, c;
 
   switch(typ(x))
   {
     case t_REAL:
       return mpcotan(x);
 
-    case t_SER: 
-      if (gcmp0(x)) err(talker,"0 argument in cotan");
-      if (valp(x) < 0) err(negexper,"cotan"); /* fall through */
     case t_COMPLEX:
-      av=avma; gsincos(x,&s,&c,prec); tetpil=avma;
-      return gerepile(av,tetpil,gdiv(c,s));
+      av = avma; gsincos(x,&s,&c,prec);
+      return gerepileupto(av, gdiv(c,s));
 
-    case t_INTMOD: case t_PADIC:
-      err(typeer,"gcotan");
+    case t_INTMOD: case t_PADIC: err(typeer,"gcotan");
+
+    default:
+      av = avma; if (!(y = _toser(x))) break;
+      if (gcmp0(y)) err(talker,"0 argument in cotan");
+      if (valp(y) < 0) err(negexper,"cotan"); /* fall through */
+      gsincos(y,&s,&c,prec);
+      return gerepileupto(av, gdiv(c,s));
   }
   return transc(gcotan,x,prec);
 }

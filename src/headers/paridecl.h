@@ -905,6 +905,7 @@ GEN     vecmin(GEN x);
 
 /* gen3.c */
 
+GEN     _toser(GEN x);
 GEN     Mod0(GEN x, GEN y,long flag);
 GEN     ceil_safe(GEN x);
 GEN     centerlift(GEN x);

@@ -2247,50 +2247,106 @@ gtopoly(GEN x, long v) { return gtopoly0(x,v,0); }
 GEN
 zeroser(long v, long val)
 {
-  GEN x = cgetg(2,t_SER);
-  x[1]=evalvalp(val) | evalvarn(v); return x;
+  GEN x = cgetg(2, t_SER);
+  x[1] = evalvalp(val) | evalvarn(v); return x;
 }
 
 GEN
 scalarser(GEN x, long v, long prec)
 {
-  GEN y=cgetg(prec+2,t_SER);
-  long i;
-
-  y[1]=evalsigne(1) | evalvalp(0) | evalvarn(v);
-  y[2]=lcopy(x); for (i=3; i<=prec+1; i++) y[i]=zero;
+  long i, l = prec+2;
+  GEN y = cgetg(l, t_SER);
+  y[1] = evalsigne(1) | evalvalp(0) | evalvarn(v);
+  y[2] = lcopy(x); for (i=3; i<l; i++) y[i] = zero;
   return y;
 }
 
+static GEN _gtoser(GEN x, long v, long prec);
+
+/* assume x a t_[SER|POL], apply gtoser to all coeffs */
+static GEN
+coefstoser(GEN x, long v, long prec)
+{
+  long i, tx = typ(x), lx = lg(x);
+  GEN y = cgetg(lx, tx);
+  y[1] = x[1];
+  for (i=2; i<lx; i++) y[i] = (long)_gtoser((GEN)x[i], v, prec);
+  return y;
+}
+
+/* assume x a scalar or t_POL. Not stack-clean */
 GEN
-gtoser(GEN x, long v)
+poltoser(GEN x, long v, long prec)
+{
+  long tx = typ(x), vx = varn(x), lx, l, i, j;
+  GEN y;
+
+  if (gcmp0(x)) return zeroser(v, prec);
+  if (is_scalar_t(tx) || vx > v) return scalarser(x, v, prec);
+  if (vx < v) return coefstoser(x, v, prec);
+
+  lx = lgef(x); i = 2; while (i<lx && gcmp0((GEN)x[i])) i++;
+  l = lx-i; if (precdl > l) l = precdl;
+  l += 2;
+  y = cgetg(l,t_SER);
+  y[1] = evalsigne(1) | evalvalp(i-2) | evalvarn(v);
+  for (j=2; j<=lx-i+1; j++) y[j] = x[j+i-2];
+  for (   ; j < l;     j++) y[j] = zero;
+  return y;
+}
+
+/* x a t_RFRAC[N]. Not stack-clean */
+GEN
+rfractoser(GEN x, long v, long prec)
+{
+  return gdiv(poltoser((GEN)x[1], v, prec), 
+              poltoser((GEN)x[2], v, prec));
+}
+
+GEN
+_toser(GEN x)
+{
+  switch(typ(x))
+  {
+    case t_SER: return x;
+    case t_POL: return poltoser(x, varn(x), precdl);
+    case t_RFRAC: case t_RFRACN: return rfractoser(x, gvar(x), precdl);
+  }
+  return NULL;
+}
+
+static GEN
+_gtoser(GEN x, long v, long prec)
 {
   long tx=typ(x), lx, i, j, l;
-  pari_sp av, tetpil;
-  GEN y,p1,p2;
+  pari_sp av;
+  GEN y;
 
-  if (v<0) v = 0;
-  if (tx==t_SER) { y=gcopy(x); setvarn(y,v); return y; }
-  if (isexactzero(x)) return zeroser(v,precdl);
-  if (is_scalar_t(tx)) return scalarser(x,v,precdl);
-
+  if (v < 0) v = 0;
+  if (tx == t_SER)
+  {
+    long vx = varn(x);
+    if      (vx < v) y = coefstoser(x, v, prec);
+    else if (vx > v) y = scalarser(x, v, prec);
+    else y = gcopy(x);
+    return y;
+  }
+  if (isexactzero(x)) return zeroser(v,prec);
+  if (is_scalar_t(tx)) return scalarser(x,v,prec);
   switch(tx)
   {
     case t_POL:
-      lx=lgef(x); i=2; while (i<lx && gcmp0((GEN)x[i])) i++;
-      l=lx-i; if (precdl>l) l=precdl;
-      y=cgetg(l+2,t_SER);
-      y[1] = evalsigne(1) | evalvalp(i-2) | evalvarn(v);
-      for (j=2; j<=lx-i+1; j++) y[j]=lcopy((GEN)x[j+i-2]);
-      for (   ; j<=l+1;    j++) y[j]=zero;
+      y = poltoser(x, v, prec); l = lg(y);
+      for (i=2; i<l; i++)
+        if (y[i] != zero) y[i] = lcopy((GEN)y[i]);
       break;
 
     case t_RFRAC: case t_RFRACN:
-      av=avma; p1=gtoser((GEN)x[1],v); p2=gtoser((GEN)x[2],v);
-      tetpil=avma; return gerepile(av,tetpil,gdiv(p1,p2));
+      av = avma;
+      return gerepileupto(av, rfractoser(x, v, prec));
 
     case t_QFR: case t_QFI: case t_VEC: case t_COL: case t_MAT:
-      lx=lg(x); i=1; while (i<lx && isexactzero((GEN)x[i])) i++;
+      lx = lg(x); i=1; while (i<lx && isexactzero((GEN)x[i])) i++;
       y = cgetg(lx-i+2,t_SER);
       y[1] = evalsigne(1) | evalvalp(i-1) | evalvarn(v);
       for (j=2; j<=lx-i+1; j++) y[j]=lcopy((GEN)x[j+i-2]);
@@ -2301,6 +2357,9 @@ gtoser(GEN x, long v)
   }
   return y;
 }
+
+GEN
+gtoser(GEN x, long v) { return _gtoser(x,v,precdl); }
 
 GEN
 gtovec(GEN x)

@@ -172,15 +172,14 @@ matsize(GEN x)
 
 /*******************************************************************/
 /*                                                                 */
-/*                            GREFFE                               */
-/*              Greffe d'une serie sur un polynome                 */
+/*                  Conversion t_POL --> t_SER                     */
 /*                                                                 */
 /*******************************************************************/
 
 GEN
 greffe(GEN x, long l, long use_stack)
 {
-  long i,e,k,vx;
+  long i, e, k;
   GEN y;
 
   if (typ(x)!=t_POL) err(notpoler,"greffe");
@@ -192,16 +191,16 @@ greffe(GEN x, long l, long use_stack)
   }
   if (gcmp0(x))
   {
-    y[1]=evalvalp(l-2) | evalvarn(varn(x));
-    i=2; while(i<l) { y[i]=x[2]; i++; }
+    y[1] = evalvalp(l-2) | evalvarn(varn(x));
+    for (i = 2; i < l; i++) y[i] = zero;
     return y;
   }
-  vx=varn(x); e=gval(x,vx);
-  y[1]=evalsigne(1) | evalvalp(e) | evalvarn(vx);
-  k=lgef(x)-e-1; i=l-1;
-  if (k<l)
-    while (i>k) { y[i]=zero; i--; }
-  while (i>=2) { y[i]=x[i+e]; i--; }
+  
+  e = polvaluation(x, NULL);
+  y[1] = evalsigne(1) | evalvalp(e) | evalvarn(varn(x));
+  k = lgef(x)-1 - e;
+  for (i = l-1; i >  k; i--) y[i] = zero;
+  for (       ; i >= 2; i--) y[i] = x[i+e];
   return y;
 }
 

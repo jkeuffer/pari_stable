@@ -1588,10 +1588,8 @@ gzeta(GEN x, long prec)
     case t_REAL: case t_COMPLEX:
       return czeta(x,prec);
 
-    case t_INTMOD: case t_PADIC:
-      err(typeer,"gzeta");
-    case t_SER:
-      err(impl,"zeta of power series");
+    case t_INTMOD: case t_PADIC: err(typeer,"gzeta");
+    case t_SER: err(impl,"zeta of power series");
   }
   return transc(gzeta,x,prec);
 }
@@ -2134,19 +2132,19 @@ sagm(GEN x, long prec)
       while (ep<l && !gcmp0(p1));
       return gerepilecopy(av,a1);
 
-    case t_SER:
-      av=avma; a1=x; b1=gun; l=lg(x)-2;
+    case t_INTMOD: err(impl,"agm of mod");
+    default:
+      av = avma; if (!(y = _toser(x))) break;
+      a1 = y; b1 = gun; l= lg(y)-2;
       do
       {
-	a=a1; b=b1;
-	a1=gmul2n(gadd(a,b),-1); b1=gsqrt(gmul(a,b),prec);
-	p1=gsub(b1,a1); ep=valp(p1)-valp(b1);
+	a = a1; b = b1;
+	a1 = gmul2n(gadd(a,b),-1);
+        b1 = gsqrt(gmul(a,b),prec);
+	p1 = gsub(b1,a1); ep = valp(p1)-valp(b1);
       }
       while (ep<l && !gcmp0(p1));
       return gerepilecopy(av,a1);
-
-    case t_INTMOD:
-      err(impl,"agm of mod");
   }
   return transc(sagm,x,prec);
 }
@@ -2193,7 +2191,7 @@ GEN
 glogagm(GEN x, long prec)
 {
   pari_sp av, tetpil;
-  GEN y,p1,p2;
+  GEN y, p1;
 
   switch(typ(x))
   {
@@ -2210,19 +2208,14 @@ glogagm(GEN x, long prec)
       y[1]=lpile(av,tetpil,gmul2n(p1,-1));
       return y;
 
-    case t_PADIC:
-      return palog(x);
-
-    case t_SER:
-      av=avma; if (valp(x)) err(negexper,"glogagm");
-      p1=gdiv(derivser(x),x);
-      p1=integ(p1,varn(x));
-      if (gcmp1((GEN)x[2])) return gerepileupto(av,p1);
-      p2=glogagm((GEN)x[2],prec); tetpil=avma;
-      return gerepile(av,tetpil,gadd(p1,p2));
-
-    case t_INTMOD:
-      err(typeer,"glogagm");
+    case t_PADIC: return palog(x);
+    case t_INTMOD: err(typeer,"glogagm");
+    default:
+      av = avma; if (!(y = _toser(x))) break;
+      if (valp(y)) err(negexper,"glogagm");
+      p1 = integ(gdiv(derivser(y), y), varn(y));
+      if (!gcmp1((GEN)y[2])) p1 = gadd(p1, glogagm((GEN)y[2],prec));
+      return gerepileupto(av, p1);
   }
   return transc(glogagm,x,prec);
 }
