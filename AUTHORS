@@ -1,45 +1,69 @@
-A great number of people have contributed to the successive improvements
-which eventually resulted in the present version of PARI/GP. We would like
-to thank them all here. In particular, substantial contributions have been
-made by:
+PARI/GP was originally written (1987) in the Laboratoire A2X, Universite
+Bordeaux I (France) by Christian Batut, Dominique Bernardi, Henri Cohen
+and Michel Olivier. Karim Belabas maintains PARI/GP since 1995.
 
-David Carlisle         (carlisle@cs.man.ac.uk)
-Marije Huizing         (marije@cwi.nl)
-Bruce Kaskel           (kaskel@math.berkeley.edu)
-Peter Montgomery       (pmontgom@cwi.nl)
-Klaus-Peter Nischke    (klaus@nischke.do.eunet.de)
-Harvey Rose            (H.E.Rose@bristol.ac.uk)
-Juhana Sadeharju       (kouhia@nic.funet.fi)
-Michael Stoll          (michael@rhein.iam.uni-bonn.de)
+A great number of people have contributed code through the successive
+improvements which eventually resulted in the present version of PARI/GP.
+Even more people, too numerous to list, contributed by testing, reporting
+bugs or suggesting improvements, Igor Schein foremost among them.
 
-
-Former members of the PARI development team and other major code contributors:
-
-Christian Batut        (batut@math.u-bordeaux.fr)
-Dominique Bernardi     (bernardi@math.jussieu.fr)
-Francisco Diaz y Diaz  (diaz@math.u-bordeaux.fr)
-Yves Eichenlaub        (eichen@math-labo.univ-poitiers.fr)
-Xavier Gourdon         (Xavier.Gourdon@inria.fr)
-Louis Granboulan       (granboul@ens.fr)
-Bruno Haible           (haible@ilog.fr)
-Pascal Letard
-Michel Olivier         (olivier@math.u-bordeaux.fr)
-Thomas Papanikolaou    (papanik@math.u-bordeaux.fr)
-Denis Simon            (desimon@math.u-bordeaux.fr)
-Emmanuel Tollis
-
+We would like to thank them all here.
 
 Current PARI developers:
 
-Bill Allombert         (Bill.Allombert@math.u-bordeaux.fr)
-Karim Belabas          (Karim.Belabas@math.u-psud.fr)
-Henri Cohen            (Henri.Cohen@math.u-bordeaux.fr)
-Guillaume Hanrot       (Guillaume.Hanrot@loria.fr)
-Gerhard Niklasch       (gerhard.niklasch@okay.net)
-Xavier Roblot          (roblot@euler.univ-lyon1.fr)
-Ilya Zakharevitch      (ilya@math.ohio-state.edu)
+  Bill Allombert
+  Karim Belabas
+  Henri Cohen
+  Xavier Roblot
+  Ilya Zakharevitch
 
+Former members of the PARI development team and other major code contributors:
 
-PARI was originally written (1987) in the Laboratoire A2X, Universite
-Bordeaux I (France) by Christian Batut, Dominique Bernardi, Henri Cohen and
-Michel Olivier.
+  Christian Batut
+  Dominique Bernardi
+  Francisco Diaz y Diaz
+  Yves Eichenlaub
+  Xavier Gourdon
+  Louis Granboulan
+  Bruno Haible
+  Guillaume Hanrot
+  Pascal Letard
+  Gerhard Niklasch
+  Michel Olivier
+  Thomas Papanikolaou
+  Denis Simon
+  Emmanuel Tollis
+
+Other contributors: (please, kindly remind us if you have been forgotten!)
+
+  Cliff Bergman
+  David Carlisle
+  Dan Christensen
+  Bill Daly
+  Mark Dickinson
+  Denis Excoffier
+  David Ford
+  Brian Gladman
+  Teluhiko Hilano
+  Marije Huizing
+  Bruce Kaskel
+  Iwao Kimura
+  Peter Montgomery
+  Klaus-Peter Nischke
+  Kiyoshi Ohgishi
+  Olivier Ramare
+  Harvey Rose
+  Juhana Sadeharju
+  Nils Skoruppa
+  Michael Somos
+  Ignat Soroko
+  Ralf Stefan
+  Michael Stoll
+  Glenn Thobe
+  Gonzalo Tornaria
+  Yoshiaki Uchikawa
+  Oliver Voigt
+  Mark Watkins
+  Aleksander Wittlin
+  Carl Witty
+  Paul van Wamelen
