@@ -750,13 +750,14 @@ extern GEN ZX_caract_sqf(GEN A, GEN B, long *lambda, long v);
 static void
 tschirn(GEN po, GEN *r, long pr)
 {
-  long a[NMAX],i,k, v = varn(po), d = TSCHMAX + 1;
-  GEN h,u;
+  long i,k, v = varn(po), d = TSCHMAX + 1;
+  GEN a,h,u;
 
   if (d >= N) err(talker,"degree too large in tschirn");
   if (DEBUGLEVEL)
     fprintferr("\n$$$$$ Tschirnhaus transformation of degree %ld: $$$$$\n",d);
 
+  a = new_chunk(d);
   do 
   {
     for (i=0; i<d; i++) a[i] = ((mymyrand()>>4) & 7) + 1;

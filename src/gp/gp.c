@@ -407,7 +407,7 @@ do_strftime(char *s, char *buf)
 }
 
 static GEN
-sd_numeric(char *v, int flag, char *s, ulong *ptn, ulong Min, ulong Max,
+sd_numeric(char *v, int flag, char *s, long *ptn, ulong Min, ulong Max,
            char **msg)
 {
   long n;

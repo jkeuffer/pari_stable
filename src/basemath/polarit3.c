@@ -4266,8 +4266,7 @@ ffinit_nofact(GEN p, long n)
   GEN P,Q=NULL;
   if (lgefint(p)==3)
   {
-    ulong lp=p[2];
-    long q;
+    ulong lp=p[2], q;
     long v=svaluation(n,lp,&q);
     if (v>0)
     {
