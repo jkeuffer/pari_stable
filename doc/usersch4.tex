@@ -1249,12 +1249,14 @@ $$ \kbd{z} = p^{\text{valp(z)}} * (\kbd{z[4]} + O(\kbd{z[3]})) =
      p^{\text{valp(z)}} * (\kbd{z[4]} + O(p^{\text{precp(z)}})) $$
 
 \subsec{Type \typ{QUAD} (quadratic number):}\sidx{quadratic
-number}\kbdsidx{t_QUAD} \kbd{z[1]} points to the polynomial defining the
-quadratic field, \kbd{z[2]} to the ``real part'' and \kbd{z[3]} to the
-``imaginary part'', which are to be taken as the coefficients of \kbd{z}
-with respect to the ``canonical'' basis $(1,w)$, see~\secref{se:compquad}.
-Complex numbers are a particular case of quadratics but deserve a separate
-type.
+number}\kbdsidx{t_QUAD} \kbd{z[1]} points to the canonical polynomial $P$
+defining the quadratic field (as output by \tet{quadpoly}), \kbd{z[2]} to the
+``real part'' and \kbd{z[3]} to the ``imaginary part''. The latter are of
+type \typ{INT}, \typ{FRAC}, \typ{INTMOD}, or \typ{PADIC} and are to be taken
+as the coefficients of \kbd{z} with respect to the canonical basis $(1,X)$ or
+$\Q[X]/(P(X))$, see~\secref{se:compquad}. Exact complex numbers may be
+implemented as quadratics, but \typ{COMPLEX} is in general more versatile
+(\typ{REAL} components are allowed) and more efficient.
 
 \subsec{Type \typ{POLMOD} (polmod):}\kbdsidx{t_POLMOD}\sidx{polmod} exactly as
 for integermods, \kbd{z[1]} points to the modulus, and \kbd{z[2]} to a

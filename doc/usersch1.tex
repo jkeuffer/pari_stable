@@ -237,12 +237,14 @@ where $d$ is the discriminant of a quadratic order. Complex numbers
 correspond to the very important special case
 $w=\sqrt{-1}$.\label{se:compquad}
 
-Complex and quadratic numbers are partially recursive: the two components $a$
-and $b$ can be of type integer, real, rational, integermod or $p$-adic, and
-can be mixed, subject to the limitations mentioned above. For example, $a+bi$
-with $a$ and $b$ $p$-adic is in $\Q_p[i]$, but this is equal to
-$\Q_p$ when $p\equiv 1 \mod 4$, hence we must exclude these $p$ when one
-explicitly uses a complex $p$-adic type.
+Complex numbers are partially recursive: the two components $a$
+and $b$ can be of type \typ{INT}, \typ{REAL}, \typ{INTMOD}, \typ{FRAC}, or 
+\typ{PADIC}, and can be mixed, subject to the limitations mentioned above.
+For example, $a+bi$ with $a$ and $b$ $p$-adic is in $\Q_p[i]$, but this is
+equal to $\Q_p$ when $p\equiv 1 \mod 4$, hence we must exclude these $p$ when
+one explicitly uses a complex $p$-adic type. Quadratic numbers are more
+restricted: their components may be as above, except that \typ{REAL} is not
+allowed.
 
 \subsec{Polynomials, power series, vectors, matrices and lists}:
 \sidx{polynomial}\sidx{power series}\sidx{vector}\sidx{matrix}
