@@ -779,9 +779,10 @@ frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
     }
     if (labs(cache[1])<=n )
     {
+      long ZZ=Z;
       for (j = 1; j < m; j++)
-	Z += polheadlong(gmael(C,sgi[pf[j]],j),2,gl->Q);
-      if (labs(Z)<=n )
+	ZZ += polheadlong(gmael(C,sgi[pf[j]],j),2,gl->Q);
+      if (labs(ZZ)<=n )
       {
 	u = v;
 	for (j = 1; j < m; j++)
