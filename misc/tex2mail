@@ -140,7 +140,18 @@ sub setbaseline {
 # The array @chunks keeps the beginning record of the chunks,
 # The array @level keeps the beginning chunks of the given level.
 # The last chunk can begin after the last record if this chunk is still empty.
-# We keep the inner structure of the last chunk only on the given level.
+
+# We do not keep the inner structure of the chunk unless it is the last
+# chunk on the given level.
+
+# Each record is a rectangle to output to the "page".
+
+# Each chunk is a sequence of records which reflect one finished subgroup
+# on the given level.
+
+# Each level is a sequence of chunks which correspond to a
+# not-yet-finished group in TeX input.
+
 
 # The parallel to @level array @wait
 # contains an event we wait to complete the given level of array.
@@ -151,7 +162,7 @@ sub setbaseline {
 
 sub exp_sp {$c1++;$c2=0 if $c1>$re; return " " x ($c2+$fr+1);}
 
-# Outputs the outermost level of the output list
+# Outputs the outermost level of the output list (until the start of level 1)
 # If gets a true argument, does not expand spaces
 
 sub print {
@@ -392,7 +403,11 @@ sub finish {
   $#action--;
   $#tokenByToken--;
   $#wait--;
-  if ($#level==0) {for (@t) {&commit($_);}}
+  if ($#level==0) {
+    local($c) = $#chunks;
+    for (@t) {&commit($_);}
+    $#chunks = $c;
+  }
   warn 
       "a:Last $#chunks, the first on the last level=$#level is $level[$#level]"
            if $debug & $debug_flow;
@@ -2152,3 +2167,4 @@ __END__
 	  Ignore \\ and \cr if followed by \end{whatever}.
 	  Ignore \noindent if not important.
 	  Ignore whitespace paragraphs.
+# Apr 00: Finishing a level 1 would not merge things into one chunk.
