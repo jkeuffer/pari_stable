@@ -288,7 +288,7 @@ vpariputs(char* format, va_list args)
         *f = 0; f[21] = 0; /* remove the bracing chars */
         pariOut->puts(s); bruteall((GEN)atol(f+1),'g',-1,1);
         f += 21; s = f;
-        if (!--nb) break;
+        if (!--nb) { s++; break; }
       }
   pariOut->puts(s); free(buf); free(str);
 }
