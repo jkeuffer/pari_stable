@@ -125,7 +125,8 @@ HC 12- gamma function for integral/rational arguments
    14- removed readline-specific code from gp.c
    15- allow bnrstark over Q
    16- 'subgroup' argument made optional in bnrL1, bnrstark, rnfkummer
-   17- use relative van Hoeij algorithm in nffactor
+   17- use relative van Hoeij algorithm in nffactor [can handle huge number
+       of modular factors]
    18- rewrote factorff() to use new modular functions
    19- rewrote primedec() to use new modular functions
    20- rewrote most *modpr functions
