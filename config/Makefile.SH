@@ -209,11 +209,13 @@ LIBPARI_SO   = \$(DLLIBPARI).$DLSUFFIX
 SOLIBPARI    = \$(DLLIB_PREFIX)\$(LIBPARI_BASE).$DLSUFFIX
 LIBPARI_DYN   = \$(SOLIBPARI)$sodest
 LIBPARI_SONAME= \$(SOLIBPARI)$soname
+DL_DFLT_NAME = $DL_DFLT_NAME
+
 EXPORT_FILE   = $export_file
 EXPORT_CREATE = $export_create
-EXPORT_LIB = $export_lib
+EXPORT_LIB    = $export_lib
 EXPORT_LIB_CREATE = $export_lib_create
-DLLD_IGNORE = $dlld_ignore
+DLLD_IGNORE   = $dlld_ignore
 
 RUNPTH       = $RUNPTH
 RUNPTH_FINAL = $RUNPTH_FINAL
@@ -504,12 +506,13 @@ gp-dyn: $add_funclist \$(OBJSGP) \$(LIBPARI_DYN) \$(GNUPLOT_OBJS) \$(EXPORT_LIB)
 
 \$(LIBPARI_DYN): $add_funclist \$(OBJS) \$(EXPORT_FILE)
 	-\$(RM) \$(LIBPARI_DYN)
-	\$(DLLD_IGNORE)\$(DLLD) -o \$@ \$(DLLDFLAGS) \$(OBJS) \$(EXTRADLLDFLAGS) \$(EXPORT_FILE)
-	-if test "\$(LIBPARI_SONAME)" != "\$(LIBPARI_SO)"; then \
-	  \$(RM) \$(LIBPARI_SONAME);\
+	\$(DLLD_IGNORE)\$(DLLD) -o \$(LIBPARI_DYN) \$(DLLDFLAGS) \$(OBJS) \$(EXTRADLLDFLAGS) \$(EXPORT_FILE)
+	-if test "\$(LIBPARI_DYN)" != "\$(LIBPARI_SO)"; then \
 	  \$(RM) \$(LIBPARI_SO);\
-	  \$(LN) \$(LIBPARI_DYN) \$(LIBPARI_SONAME);\
 	  \$(LN) \$(LIBPARI_DYN) \$(LIBPARI_SO); fi
+	-if test "\$(LIBPARI_DYN)" != "\$(LIBPARI_SONAME)"; then \
+	  \$(RM) \$(LIBPARI_SONAME);\
+	  \$(LN) \$(LIBPARI_DYN) \$(LIBPARI_SONAME); fi
 EOT
 fi
 
@@ -584,6 +587,7 @@ for dir in basemath modules language gp graph graphdyn systems; do
     depend="$src/graph/rect.h"
     ;;
   highlvl)
+    cflags="$cflags -DDL_DFLT_NAME=\$(DL_DFLT_NAME)"
     depend="$src/gp/highlvl.h"
     ;;
   plotQt)

@@ -170,7 +170,6 @@ esac
 case $has_dlopen in
 yes|builtin) cat >> $file << EOT
 #define HAS_DLOPEN
-#define DL_DFLT_NAME $DL_DFLT_NAME
 EOT
 ;;
 esac
