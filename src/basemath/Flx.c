@@ -2158,3 +2158,26 @@ FlxqXQ_pow(GEN x, GEN n, GEN S, GEN T, ulong p)
   y = FlxqX_from_Kronecker(y, T,p);
   return gerepileupto(av0, y);
 }
+
+static GEN Tmodulo;
+static ulong modulo; 
+static GEN _FlxqX_mul(GEN a,GEN b){return FlxqX_mul(a,b,Tmodulo,modulo);}
+
+GEN 
+FlxqXV_prod(GEN V, GEN T, ulong p)
+{
+  modulo = p; Tmodulo = T;
+  return divide_conquer_prod(V, &_FlxqX_mul);
+}
+
+GEN
+FlxqV_roots_to_pol(GEN V, GEN T, ulong p, long v)
+{
+  pari_sp ltop = avma;
+  long k;
+  GEN W = cgetg(lg(V),t_VEC);
+  for(k=1; k < lg(V); k++)
+    W[k] = (long)deg1pol_i(Fl_to_Flx(1,T[1]),Flx_neg((GEN)V[k],p),v);
+  return gerepileupto(ltop, FlxqXV_prod(W, T, p));
+}
+

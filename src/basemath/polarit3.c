@@ -1077,7 +1077,6 @@ FqX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *z)
 
 static GEN Tmodulo;
 static GEN _FpXQX_mul(GEN a,GEN b){return FpXQX_mul(a,b,Tmodulo,modulo);}
-static GEN _FlxqX_mul(GEN a,GEN b){return FlxqX_mul(a,b,Tmodulo,(ulong)modulo);}
 GEN 
 FpXQXV_prod(GEN V, GEN T, GEN p)
 {
@@ -1087,19 +1086,28 @@ FpXQXV_prod(GEN V, GEN T, GEN p)
     ulong pp = (long)p[2];
     GEN Tl = ZX_to_Flx(T, pp);
     GEN Vl = ZXXV_to_FlxXV(V, pp, varn(T));
-    modulo = (GEN)pp; Tmodulo = Tl;
-    Tl = divide_conquer_prod(Vl, &_FlxqX_mul);
+    Tl = FlxqXV_prod(Vl, Tl, pp);
     return gerepileupto(av, FlxX_to_ZXX(Tl));
   }
   modulo = p; Tmodulo = T;
   return divide_conquer_prod(V, &_FpXQX_mul);
 }
+
 GEN
 FqV_roots_to_pol(GEN V, GEN T, GEN p, long v)
 {
   pari_sp ltop = avma;
   long k;
-  GEN W = cgetg(lg(V),t_VEC);
+  GEN W;
+  if (lgefint(p) == 3)
+  {
+    ulong pp = (long)p[2];
+    GEN Tl = ZX_to_Flx(T, pp);
+    GEN Vl = FqV_to_FlxC(V, T, p);
+    Tl = FlxqV_roots_to_pol(Vl, Tl, pp, v);
+    return gerepileupto(ltop, FlxX_to_ZXX(Tl));
+  }
+  W = cgetg(lg(V),t_VEC);
   for(k=1; k < lg(V); k++)
     W[k] = (long)deg1pol_i(gen_1,Fq_neg((GEN)V[k],T,p),v);
   return gerepileupto(ltop, FpXQXV_prod(W, T, p));
