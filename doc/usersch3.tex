@@ -7736,11 +7736,11 @@ of a function that was present in GP version 1.39.15 or lower, outputs
 the new function name and syntax, if it changed at all ($387$ out of $560$
 did).\label{se:whatnow}
 
-\subsubsecidx{write}$(\var{filename},\{\var{str}*\})$: writes (appends)
+\subsubsecidx{write}$(\var{filename},\{\var{str}\}*)$: writes (appends)
 to \var{filename} the remaining arguments, and appends a newline (same output
 as \kbd{print}).\label{se:write}
 
-\subsubsecidx{write1}$(\var{filename},\{\var{str}*\})$: writes (appends) to
+\subsubsecidx{write1}$(\var{filename},\{\var{str}\}*)$: writes (appends) to
 \var{filename} the remaining arguments without a trailing newline
 (same output as \kbd{print1}).
 
@@ -7777,7 +7777,7 @@ and compatibility with future versions of \kbd{gp} is not guaranteed. Hence
 binary files should not be used for long term storage (also, they are
 larger and harder to compress than text files).
 
-\subsubsecidx{writetex}$(\var{filename},\{\var{str}*\})$: as \kbd{write},
+\subsubsecidx{writetex}$(\var{filename},\{\var{str}\}*)$: as \kbd{write},
 in \TeX\ format.\label{se:writetex}
 
 \vfill\eject
