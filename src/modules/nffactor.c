@@ -273,9 +273,12 @@ nf_bestlift(GEN elt, GEN bound, nflift_t *T)
 static GEN
 nf_bestlift_to_pol(GEN elt, GEN bound, nflift_t *T)
 {
+  pari_sp av = avma;
   GEN u = nf_bestlift(elt,bound,T);
   if (!u) return NULL;
-  return gmul(T->topow, u);
+  u = gclone(u); avma = av;
+  u = gmul(T->topow, u); 
+  gunclone(u); return u;
 }
 
 /* return the T->powden * (lift of pol with coefficients of T2-norm <= C)
@@ -994,7 +997,11 @@ nf_check_factors(nfcmbf_t *T, GEN P, GEN M_L, GEN famod, GEN pk)
           y = gerepilecopy(av, y);
         }
       }
+    if (DEBUGLEVEL>2) 
+      fprintferr("modular factor computed (avma - bot = %lu)\n", avma-bot);
     y = nf_pol_lift(y, bound, T);
+    if (DEBUGLEVEL>2) 
+      fprintferr("factor lifted (avma - bot = %lu)\n", avma-bot);
     if (!y) return NULL;
 
     y = gerepilecopy(av, y);
