@@ -811,7 +811,7 @@ moreprec(buildroot *BR)
 
 static int
 is_zero(GEN g) {
-  return !signe(g) || (lg(g) <= MEDDEFAULTPREC && expo(g) < -100);
+  return !signe(g) || (lg(g) <= MEDDEFAULTPREC && expo(g) < -90);
 }
 
 static GEN
