@@ -702,6 +702,7 @@ factorgensimple(GEN nf,GEN ideal)
     { /* divisible by P | p not in FB */
       long k,l,n;
       k = N - sum_ef;
+      if (k == 0) err(talker,"not an ideal in factorgensimple: %Z", ideal);
       if (vx % k) break;
       k = vx / k; /* ideal / p^k may factor on FB */
       for (l = lo0+1; l <= lo; l++)

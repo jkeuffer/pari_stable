@@ -626,7 +626,7 @@ get_Gram_Schmidt(GEN x, GEN mu, GEN B, long k)
  * If MARKED != 0 make sure e[MARKED] is the first vector of the output basis 
  * (which may then not be LLL-reduced) */
 GEN
-lllgram_marked(int MARKED, GEN x, long alpha, long flag, long long prec)
+lllgram_marked(int MARKED, GEN x, long alpha, long flag, long prec)
 {
   GEN xinit,L,h,B,L1,QR;
   long retry = 2, l, i, j, k, k1, lx=lg(x), n, kmax, KMAX;
@@ -2288,6 +2288,9 @@ nf_get_T(GEN x, GEN w)
   return T;
 }
 
+extern GEN lllint_marked(long MARKED, GEN x, long alpha, int gram, GEN *ptfl, GEN *ptB);
+extern GEN lllgram_marked(int MARKED, GEN x, long alpha, long flag, long prec);
+
 static GEN
 get_red_T2(GEN T2, GEN base, GEN x, long prec)
 {
@@ -2295,7 +2298,7 @@ get_red_T2(GEN T2, GEN base, GEN x, long prec)
   GEN u;
   for (i=1; ; i++)
   {
-    if ((u = lllgramintern(T2,LLLDFT,1,prec))) return u;
+    if ((u = lllgram_marked(1, T2, 100, 1, prec))) return u;
     if (i == MAXITERPOL) err(accurer,"red_T2");
     prec = (prec<<1)-2;
     if (DEBUGLEVEL) err(warnprec,"red_T2",prec);
@@ -2309,7 +2312,8 @@ nf_get_LLL(GEN nf)
   long prec;
 
   nf = checknf(nf);
-  if (! nf_get_r2(nf)) return lllgramint( gmael(nf,5,4) );
+  if (! nf_get_r2(nf))
+    return lllint_marked(1, gmael(nf,5,4), 100, 1, NULL,NULL);
   prec = nfgetprec(nf);
   return get_red_T2( gmael(nf,5,3), (GEN)nf[7], (GEN)nf[1], prec );
 }
@@ -2319,17 +2323,18 @@ nf_get_LLL(GEN nf)
  * base = vector of elts in Z[Y]/(x) generating the maximal order
  * polr = roots of x, computed to precision prec */
 GEN
-LLL_nfbasis(GEN *ptx, GEN polr, GEN base, long prec)
+LLL_nfbasis(GEN x, GEN polr, GEN base, long prec)
 {
-  GEN T2, x = *ptx;
+  GEN T2;
   int n;
 
-  if (typ(x) != t_POL) { *ptx = (GEN)x[1]; return nf_get_LLL(x); }
+  if (typ(x) != t_POL) return nf_get_LLL(x);
 
   n = degpol(x);
   if (typ(base) != t_VEC || lg(base)-1 != n)
     err(talker,"incorrect Zk basis in LLL_nfbasis");
-  if (!prec || sturm(x)==n) return lllgramint(nf_get_T(x, base));
+  if (!prec || sturm(x)==n)
+    return lllint_marked(1, nf_get_T(x, base), 100, 1, NULL,NULL);
 
   T2 = nf_get_T2(base, polr? polr: roots(x,prec));
   return get_red_T2(T2, base, x, prec);
@@ -2357,7 +2362,7 @@ allpolred0(GEN x, GEN *pta, long code, long prec,
   else
   {
     long i = lg(x);
-    if (typ(x) == t_VEC && i<=4 && i>=3 && typ(x[1])==t_POL)
+    if (typ(x) == t_VEC && i==3 && typ(x[1])==t_POL)
     { /* polynomial + integer basis */
       base=(GEN)x[2]; x=(GEN)x[1];
     }
@@ -2367,7 +2372,7 @@ allpolred0(GEN x, GEN *pta, long code, long prec,
       base=(GEN)x[7]; x=(GEN)x[1];
     }
   }
-  p1 = LLL_nfbasis(&x,polr,base,prec);
+  p1 = LLL_nfbasis(x,polr,base,prec);
   y = pols_for_polred(x, gmul(base,p1), pta, check, arg);
   if (check)
   {

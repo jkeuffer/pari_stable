@@ -382,7 +382,7 @@ galois(GEN x, long prec)
     if (n == 1) { avma = av; return _res(1, 1,1); }
     if (n == 2) { avma = av; return _res(2,-1,1); }
     /* n = 3 */
-    f = carreparfait(discsr(x));
+    f = carreparfait(ZX_disc(x));
     avma = av;
     return f? _res(3,1,1): _res(6,-1,2);
   }
@@ -412,7 +412,7 @@ galois(GEN x, long prec)
 	p2 = (GEN)factor(p5)[1];
 	switch(lg(p2)-1)
 	{
-	  case 1: f = carreparfait(discsr(x)); avma = av;
+	  case 1: f = carreparfait(ZX_disc(x)); avma = av;
             return f? _res(12,1,4): _res(24,-1,5);
 
 	  case 2: avma = av; return _res(8,-1,3);
@@ -452,7 +452,7 @@ galois(GEN x, long prec)
 	  }
           if (!ZX_is_squarefree(p5)) goto tchi;
 	  p3=(GEN)factor(p5)[1];
-	  f=carreparfait(discsr(x));
+	  f=carreparfait(ZX_disc(x));
 	  if (lg(p3)-1==1)
 	  {
 	    avma = av;
@@ -529,7 +529,7 @@ galois(GEN x, long prec)
 	      {
                 if (!ZX_is_squarefree(p5)) goto tchi;
 		p2 = (GEN)factor(p5)[1];
-		f = carreparfait(discsr(x));
+		f = carreparfait(ZX_disc(x));
 		avma = av;
 		if (lg(p2)-1==1)
                   return f? _res(360,1,15): _res(720,-1,16);
@@ -541,17 +541,17 @@ galois(GEN x, long prec)
 	    case 2: l2=degpol(p2[1]); if (l2>3) l2=6-l2;
 	      switch(l2)
 	      {
-		case 1: f = carreparfait(discsr(x));
+		case 1: f = carreparfait(ZX_disc(x));
 		  avma = av;
                   return f? _res(60,1,12): _res(120,-1,14);
-		case 2: f = carreparfait(discsr(x));
+		case 2: f = carreparfait(ZX_disc(x));
 		  if (f) { avma = av; return _res(24,1,7); }
                   p3 = (degpol(p2[1])==2)? (GEN)p2[2]: (GEN)p2[1];
-                  f = carreparfait(discsr(p3));
+                  f = carreparfait(ZX_disc(p3));
                   avma = av;
                   return f? _res(24,-1,6): _res(48,-1,11);
-		case 3: f = carreparfait(discsr((GEN)p2[1]))
-		         || carreparfait(discsr((GEN)p2[2]));
+		case 3: f = carreparfait(ZX_disc((GEN)p2[1]))
+		         || carreparfait(ZX_disc((GEN)p2[2]));
 		  avma = av;
                   return f? _res(18,-1,5): _res(36,-1,9);
 	      }
@@ -560,12 +560,12 @@ galois(GEN x, long prec)
 		if (degpol(p2[l2]) >= 3) p3 = (GEN)p2[l2];
 	      if (degpol(p3) == 3)
 	      {
-		f = carreparfait(discsr(p3)); avma = av;
+		f = carreparfait(ZX_disc(p3)); avma = av;
                 return f? _res(6,-1,1): _res(12,-1,3);
 	      }
 	      else
 	      {
-		f = carreparfait(discsr(x)); avma = av;
+		f = carreparfait(ZX_disc(x)); avma = av;
                 return f? _res(12,1,4): _res(24,-1,8);
 	      }
 	    case 4: avma = av; return _res(6,-1,2);
@@ -592,7 +592,7 @@ galois(GEN x, long prec)
 	p2=(GEN)factor(p5)[1];
 	switch(lg(p2)-1)
 	{
-	  case 1: f = carreparfait(discsr(x)); avma = av;
+	  case 1: f = carreparfait(ZX_disc(x)); avma = av;
             return f? _res(2520,1,6): _res(5040,-1,7);
 	  case 2: f = degpol(p2[1]); avma = av;
 	    return (f==7 || f==28)? _res(168,1,5): _res(42,-1,4);
@@ -711,8 +711,8 @@ nfiso0(GEN a, GEN b, long fliso)
   }
   else
   {
-    GEN da = nfa? (GEN)nfa[3]: discsr(a);
-    GEN db = nfb? (GEN)nfb[3]: discsr(b);
+    GEN da = nfa? (GEN)nfa[3]: ZX_disc(a);
+    GEN db = nfb? (GEN)nfb[3]: ZX_disc(b);
     if (fliso)
     {
       p1=gdiv(da,db);
@@ -777,7 +777,7 @@ nfisincl(GEN a, GEN b)
 /**			       INITALG					**/
 /**									**/
 /*************************************************************************/
-extern GEN LLL_nfbasis(GEN *x, GEN polr, GEN base, long prec);
+extern GEN LLL_nfbasis(GEN x, GEN polr, GEN base, long prec);
 extern GEN eleval(GEN f,GEN h,GEN a);
 extern int canon_pol(GEN z);
 extern GEN mat_to_vecpol(GEN x, long v);
@@ -824,7 +824,7 @@ trace_col(GEN x, GEN T)
 static void
 nfinit_reduce(long flag, GEN *px, GEN *pdx, GEN *prev, GEN *pbase, long prec)
 {
-  GEN chbas,a,phimax,dxn,s,sn,p1,p2,p3,polmax,rev,polr;
+  GEN chbas,a,phimax,dxn,s,sn,p1,p2,polmax,rev,polr;
   GEN x = *px, dx = *pdx, base = *pbase;
   long i,j,nmax,numb,flc,v=varn(x), n=lg(base)-1;
 
@@ -839,7 +839,7 @@ nfinit_reduce(long flag, GEN *px, GEN *pdx, GEN *prev, GEN *pbase, long prec)
   else
     s = subii(sqri((GEN)x[n+1]), shifti((GEN)x[n],1));
     
-  chbas = LLL_nfbasis(&x,polr,base,prec);
+  chbas = LLL_nfbasis(x,polr,base,prec);
   if (DEBUGLEVEL) msgtimer("LLL basis");
 
   phimax=polx[v]; polmax=dummycopy(x);
@@ -848,31 +848,25 @@ nfinit_reduce(long flag, GEN *px, GEN *pdx, GEN *prev, GEN *pbase, long prec)
   for (numb=0,i=2; i<=nmax || (!numb && i<=n); i++)
   { /* cf pols_for_polred */
     if (DEBUGLEVEL>2) { fprintferr("i = %ld\n",i); flusherr(); }
-    p1 = a = gmul(base,(GEN)chbas[i]); p3=content(p1);
-    if (gcmp1(p3)) p3 = NULL; else p1 = gdiv(p1,p3);
-    p1 = caract2(x,p1,v);
-    if (p3)
-      for (p2=gun, j=lgef(p1)-2; j>=2; j--)
-      {
-        p2 = gmul(p2,p3); p1[j] = lmul((GEN)p1[j], p2);
-      }
+    a = gmul(base,(GEN)chbas[i]);
+    p1 = QX_caract(x, a, v);
     if (!ZX_is_squarefree(p1)) continue;
 
     if (DEBUGLEVEL>3) outerr(p1);
-    dxn=discsr(p1); flc=absi_cmp(dxn,dx); numb++;
-    if (flc>0) continue;
+    dxn = ZX_disc(p1); flc = absi_cmp(dxn,dx); numb++;
+    if (flc > 0) continue;
 
     if (polr)
       for (sn=gzero,j=1; j<=n; j++)
         sn = gadd(sn,gnorm(poleval(a,(GEN)polr[j])));
     else
       sn = subii(sqri((GEN)p1[n+1]), shifti((GEN)p1[n],1));
-    if (flc>=0)
+    if (flc == 0)
     {
-      flc=gcmp(sn,s);
-      if (flc>0 || (!flc && gpolcomp(p1,polmax) >= 0)) continue;
+      flc = gcmp(sn,s);
+      if (flc > 0 || (!flc && gpolcomp(p1,polmax) >= 0)) continue;
     }
-    dx=dxn; s=sn; polmax=p1; phimax=a;
+    dx = dxn; s = sn; polmax = p1; phimax = a;
   }
   if (!numb) 
   {
@@ -1173,7 +1167,7 @@ initalgall0(GEN x, long flag, long prec)
     }
     bas = allbase4(x,0,&dK,NULL);
     if (DEBUGLEVEL) msgtimer("round4");
-    dx = discsr(x); r1 = sturm(x);
+    dx = ZX_disc(x); r1 = sturm(x);
   }
   else
   {
@@ -1183,7 +1177,7 @@ initalgall0(GEN x, long flag, long prec)
       bas=(GEN)x[2]; x=(GEN)x[1]; n=degpol(x);
       if (typ(bas) == t_MAT) { mat = bas; bas = mat_to_vecpol(mat,varn(x)); }
       else mat = vecpol_to_mat(bas,n);
-      dx = discsr(x); r1 = sturm(x);
+      dx = ZX_disc(x); r1 = sturm(x);
       dK = gmul(dx, gsqr(det2(mat)));
     }
     else
@@ -1209,6 +1203,7 @@ initalgall0(GEN x, long flag, long prec)
 
   ro=get_roots(x,r1,ru,PRECREG);
   if (DEBUGLEVEL) msgtimer("roots");
+  bas = gmul(bas, LLL_nfbasis(x,ro,bas,prec));
 
   nf=cgetg(10,t_VEC);
   nf[1]=(long)x;
