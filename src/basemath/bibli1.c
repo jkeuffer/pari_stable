@@ -2973,7 +2973,7 @@ smallvectors(GEN q, GEN BORNE, long stockmax, FP_chk_fun *CHECK)
 
   prec = gprecision(q);
   epsbit = bit_accuracy(prec) >> 1;
-  eps = real2n(-epsbit, prec);
+  eps = real2n(-epsbit, 3);
   alpha = dbltor(0.95);
   normax1 = gzero;
   borne1= gadd(BORNE,eps);
@@ -3044,7 +3044,7 @@ smallvectors(GEN q, GEN BORNE, long stockmax, FP_chk_fun *CHECK)
         }
         if (check)
         {
-          cnt+=3;
+          cnt += 3;
           for (i=s+1; i<=stockmax; i++) norms[i]=(long)dummy;
         }
 	gerepileall(av,cnt,&x,&y,&z,&normax1,&borne1,&borne2,&norms);
@@ -3104,9 +3104,8 @@ smallvectors(GEN q, GEN BORNE, long stockmax, FP_chk_fun *CHECK)
         avma = av2; s = j;
         if (j)
         {
-          checkcnt = 0;
+          checkcnt = 0; norme1 = mpsub(borne1,eps);
           for (i=1; i<=s; i++) norms[i] = (long)norme1;
-          borne1 = mpadd(norme1,eps);
           borne2 = mpmul(borne1,alpha);
         }
       }

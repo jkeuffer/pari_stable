@@ -98,6 +98,9 @@ BA 33- qfbprimeform(-3, 1) --> data corruption [ gzero's signe set to 1 ]
    39- [alg | lin]dep( t_PADIC ) had stopped working in 2.2.6
    40- some precision problems in polgalois(deg(p) > 7) [ changed slightly
        some heuristic settings: the algorithm is simply not rigorous... ]
+   41- typo in polredabs: polynomial of minimal T_2 norm might be missed
+       [ actually found, then deleted due to a typo when "Sorting" small
+       vectors, which would assess them the norm of a larger element ]
 
   Changed
     1- bnfinit: [small_norm phase] speed up norm computations.
