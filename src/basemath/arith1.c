@@ -1839,7 +1839,7 @@ Qsfcont(GEN x, GEN y, long k)
     }
   }
   i--;
-  if (i > 2 && gcmp1((GEN)z[i]))
+  if (i > 1 && gcmp1((GEN)z[i]))
   {
     cgiv((GEN)z[i]); --i;
     addsiz(1,(GEN)z[i], (GEN)z[i]);
