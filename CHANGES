@@ -96,6 +96,7 @@ MW 39- torsion group of [0,0,0,-6648,208633] reported as C2 instead of C6
 MSo44- [gp: \x] missing 'break' statement in escape()
    45- wrong bound in nf_LLL_cmbf (nffactor) [no counter example to
        the old bound, but proof was wrong anyway...]
+   46- [gp:] memory leak when assigning to multidimensional arrays (x[i][j]=1)
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).

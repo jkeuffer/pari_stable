@@ -658,12 +658,32 @@ newbloc(long n)
   return cur_bloc = x;
 }
 
-void
-killbloc0(GEN x, int inspect)
+/* recursively look for clones in the container and kill them */
+static void
+inspect(GEN x)
 {
-  long tx,lx,l,i,j;
-  GEN p1;
+  long i, lx;
+  switch(typ(x)) /* HACK: if x is not a GEN, we have typ(x)=0 */
+  {
+    case t_VEC: case t_COL: case t_MAT:
+      lx = lg(x);
+      for (i=1;i<lx;i++) inspect((GEN)x[i]);
+      break;
+    case t_LIST:
+      lx = lgef(x);
+      for (i=2;i<lx;i++) inspect((GEN)x[i]);
+      break;
+  }
+  if (isclone(x)) gunclone(x); /* Don't inspect here! components are dead */
+}
 
+/* If insp is set, recursively inspect x, killing all clones found. The GP
+ * expression x[i] = y is implemented as x[i] := gclone(y) and we need to
+ * reclaim the memory. Useless to inspect when x does not correspond to a GP
+ * variable [not dangerous, though] */
+void
+killbloc0(GEN x, int insp)
+{
   if (!x || isonstack(x)) return;
   if (bl_next(x)) bl_prev(bl_next(x)) = bl_prev(x);
   else
@@ -674,45 +694,10 @@ killbloc0(GEN x, int inspect)
   if (bl_prev(x)) bl_next(bl_prev(x)) = bl_next(x);
   if (DEBUGMEM > 2)
     fprintferr("killing bloc (no %ld): %08lx\n", bl_num(x), x);
-  if (inspect)
-  {
-    /* FIXME: SIGINT should be blocked at this point */
-    tx=typ(x); /* if x is not a GEN, we will have tx=0 */
-    if (is_vec_t(tx))
-    {
-      lx = lg(x);
-      for (i=1;i<lx;i++)
-      {
-        p1=(GEN)x[i];
-        if (isclone(p1)) killbloc(p1);
-      }
-    }
-    else if (tx==t_MAT)
-    {
-      lx = lg(x);
-      if (lx>1)
-      {
-        l=lg(x[1]);
-        if (l>1)
-          for (i=1;i<lx;i++)
-            for (j=1;j<l;j++)
-            {
-              p1=gmael(x,i,j);
-              if (isclone(p1)) killbloc(p1);
-            }
-      }
-    }
-    else if (tx==t_LIST)
-    {
-      lx = lgef(x);
-      for (i=2;i<lx;i++)
-      {
-        p1=(GEN)x[i];
-        if (isclone(p1)) killbloc(p1);
-      }
-    }
-    unsetisclone(x);
-    /* FIXME: SIGINT should be released here */
+  if (insp)
+  { /* FIXME: SIGINT should be blocked until inspect() returns */
+    unsetisclone(x); /* important: oo recursion otherwise */
+    inspect(x);
   }
   free((void *)bl_base(x));
 }
