@@ -208,7 +208,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define lround  (long)ground
 #define lscalmat (long)gscalmat
 #define lscalsmat (long)gscalsmat
-#define lsfcont (long)sfcont
 #define lsh     (long)gsh
 #define lshift  (long)gshift
 #define lshifti (long)shifti

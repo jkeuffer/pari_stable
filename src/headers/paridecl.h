@@ -221,7 +221,6 @@ GEN     qfbclassno0(GEN x,long flag);
 GEN     quaddisc(GEN x);
 GEN     racine(GEN a);
 GEN     regula(GEN x, long prec);
-GEN     sfcont(GEN x, GEN x1, long k);
 GEN     znstar(GEN x);
 
 /* arith2.c */
