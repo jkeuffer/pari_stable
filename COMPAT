@@ -14,6 +14,26 @@ This file lists the incompatible changes between Version 2.x and older versions
     only worked if rnfequation(bnf, p, 1)[3] == 0  [otherwise, crash].
     Use rnfisnorminit() now.
 
+  - rnfidealreltoabs, rnfidealup: now return a Z-basis as a vector of
+    elements in the relative extension, instead of a meaningless HNF matrix
+    wrt an unknown basis. Was especially dangerous if the extension also existed
+    in nfinit form, since the HNF matrices were _not_ ideals wrt this nf
+    structure. [ also consistent with rnfeltreltoabs ]. Use the following
+    construction instead, referring to an explicit NF structure:
+
+      \\ return y = rnfidealup(rnf,...) as an ideal in HNF form associated to
+      \\ nf = nfinit(rnf.pol);
+      idealuptoNF(nf, y) =
+      {
+        local(z); z = nfalgtobasis(nf, y);
+        z[1] = Mat(z[1]); mathnf( concat(z) );
+      }
+
+  - the "bitaccuracy component" for computations of principal ideal generators
+    (bnfisprincipal), units (bnfunit), and some of the bnf structures has
+    been removed.
+
+
 * The library PARI:
 ===================
   - gsize() renamed to sizedigit()  [conflict with gtk]
