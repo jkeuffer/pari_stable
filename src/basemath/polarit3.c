@@ -4133,6 +4133,17 @@ ffinit_rand(GEN p,long n)
 }
 
 GEN
+FpX_direct_compositum(GEN A, GEN B, GEN p)
+{
+  GEN C,a,b,x;
+  a = dummycopy(A); setvarn(a, MAXVARN);
+  b = dummycopy(B); setvarn(b, MAXVARN);
+  x = gadd(polx[0], polx[MAXVARN]);
+  C = FpY_FpXY_resultant(a, poleval(b,x),p);
+  return C;
+}
+
+GEN
 FpX_compositum(GEN A, GEN B, GEN p)
 {
   GEN C, a,b;
@@ -4149,7 +4160,9 @@ FpX_compositum(GEN A, GEN B, GEN p)
   return C;
 }
 
-/* return an extension of degree 2^l of F_2, assume l > 0 */
+/* return an extension of degree 2^l of F_2, assume l > 0 
+ * using Adleman-Lenstra Algorithm.
+ * Not stack clean. */
 static GEN
 f2init(long l)
 {
@@ -4177,41 +4190,100 @@ f2init(long l)
   return T;
 }
 
-/* assume p > 2 or 8 does not divide l. Return an irreducible polynomial of
- * degree l over F_p */
+/*Check if subcyclo(n,l,0) is irreducible modulo p*/
+static long
+fpinit_check(GEN p, long n, long l)
+{
+  ulong ltop=avma;
+  long q,o;
+  if (!isprime(stoi(n))) {avma=ltop; return 0;}
+  q = smodis(p,n);
+  if (!q) {avma=ltop; return 0;}
+  o = itos(order(gmodulss(q,n)));
+  avma = ltop;
+  return ( cgcd((n-1)/o,l) == 1 );
+}
+
+/* let k=2 if p%4==1, and k=4 else and assume k*p does not divide l.
+ * Return an irreducible polynomial of degree l over F_p.
+ * This a variant of an algorithm of Adleman and Lenstra
+ * "Finding irreducible polynomials over finite fields",
+ * ACM, 1986 (5)  350--355
+ * Not stack clean.
+ */
 static GEN
 fpinit(GEN p, long l)
 {
-  ulong q, n = 1, k = 0;
-  for (;;)
+  ulong n = 1+l, k = 1;
+  while (!fpinit_check(p,n,l)) { n += l; k++; }
+  if (DEBUGLEVEL>=4)
+    fprintferr("FFInit: using subcyclo(%ld, %ld)\n",n,l);
+  return FpX_red(subcyclo(n,l,0),p);
+}
+
+GEN
+ffinit_fact(GEN p, long n)
+{
+  ulong ltop=avma;
+  GEN F;	  /* vecsmall */
+  GEN P;	  /* pol */
+  long i;
+  F = decomp_primary_small(n);
+  /* If n is even, then F[1] is 2^bfffo(n)*/
+  if (!(n&1) && egalii(p, gdeux))
+    P = f2init(vals(n));
+  else
+    P = fpinit(p, F[1]);
+  for (i = 2; i < lg(F); ++i)
+    P = FpX_direct_compositum(fpinit(p, F[i]), P, p);
+  return gerepileupto(ltop,FpX(P,p));
+}
+
+GEN
+ffinit_nofact(GEN p, long n)
+{
+  ulong av = avma;
+  GEN P,Q=NULL;
+  if (lgefint(p)==3)
   {
-    do { n += l; k++; } while (!isprime(stoi(n)));
-    q = smodis(p, n);
-    if (q && itos(order(gpowgs(gmodulss(q,n), k))) == l) break;
+    ulong lp=p[2];
+    long q;
+    long v=svaluation(n,lp,&q);
+    if (v>0)
+    {
+      if (lp==2)
+        Q=f2init(v);
+      else
+        Q=fpinit(p,n/q);
+      n=q;
+    }
   }
-  return subcyclo(stoi(n),stoi(l),0);
+  if (n==1)
+    P=Q;
+  else
+  {
+    P = fpinit(p, n);
+    if (Q) P = FpX_direct_compositum(P, Q, p);
+  }
+  return gerepileupto(av, FpX(P,p));
 }
 
 GEN
 ffinit(GEN p, long n, long v)
 {
-  ulong av = avma;
-  long m;
-  GEN k, k2 = NULL;
+  ulong ltop=avma;
+  GEN P;
   if (n <= 0) err(talker,"non positive degree in ffinit");
-  if (typ(p) != t_INT) err(typeer,"ffinit");
+  if (typ(p) != t_INT) err(typeer, "ffinit");
   if (v < 0) v = 0;
-  if (egalii(p, gdeux))
-  {
-    m = vals(n);
-    if (m > 2)
-    { /* 8 | n */
-      n >>= m;
-      k2 = f2init(m);
-    }
-  }
-  k = fpinit(p, n);
-  if (k2) k = n==1? k2: FpX_compositum(k,k2, p);
-  setvarn(k, v);
-  return gerepileupto(av, FpX(k,p));
+  if (n == 1) return FpX(polx[v],p);
+  /*If we are in a easy case just use cyclo*/
+  if (fpinit_check(p, n + 1, n))
+    return gerepileupto(ltop,FpX(cyclo(n + 1, v),p));
+  if (cmpis(p,n)>0 && lgefint(p)-2<BITS_IN_LONG-bfffo(n))
+    P=ffinit_fact(p,n);
+  else
+    P=ffinit_nofact(p,n);
+  setvarn(P, v);
+  return P;
 }
