@@ -55,5 +55,5 @@ echo "Executable linker is   $LD  $LDFLAGS"
 case "$osname" in
   osf1|linux|cygwin*|freebsd) runpathprefix='-rpath' ;;
   solaris) runpathprefix='-R' ;;
-  hpup) runpathprefix='+b' ;;
+  hpux) runpathprefix='+b' ;;
 esac
