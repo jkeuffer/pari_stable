@@ -12,6 +12,7 @@ GEN hensel_lift_fact(GEN pol, GEN fact, GEN p, GEN pev, long e);
 GEN nf_get_T2(GEN base, GEN polr);
 GEN nfreducemodpr_i(GEN x, GEN prh);
 GEN sort_factor(GEN y, int (*cmp)(GEN,GEN));
+GEN pidealprimeinv(GEN nf, GEN x);
 
 static GEN nf_pol_mul(GEN nf,GEN pol1,GEN pol2);
 static GEN nf_pol_sqr(GEN nf,GEN pol1);
@@ -1124,7 +1125,6 @@ rnfdedekind(GEN nf,GEN T,GEN pr)
   vecun=cgetg(n+1,t_COL); vecun[1]=un;
   veczero=cgetg(n+1,t_COL); veczero[1]=zero;
   for (i=2; i<=n; i++) vecun[i] = veczero[i] = zero;
-  matid=idmat(n);
 
   p1=(GEN)nffactormod(nf,Ca,pr)[1];
   g=lift((GEN)p1[1]); r=lg(p1);
@@ -1135,7 +1135,7 @@ rnfdedekind(GEN nf,GEN T,GEN pr)
   p2=nfmod_pol_gcd(nf,prhall,g,h);
   k= nfmod_pol_gcd(nf,prhall,p2,k);
 
-  d=lgef(k)-3;
+  d=lgef(k)-3;  /* <= m */
   vt = idealval(nf,discsr(T),pr) - 2*d;
   res[3]=lstoi(vt);
   if (!d || vt<=1) res[1]=un; else res[1]=zero;
@@ -1143,6 +1143,9 @@ rnfdedekind(GEN nf,GEN T,GEN pr)
   base=cgetg(3,t_VEC);
   p1=cgetg(m+d+1,t_MAT); base[1]=(long)p1;
   p2=cgetg(m+d+1,t_VEC); base[2]=(long)p2;
+ /* if d > 0, base[2] temporarily multiplied by p, for the final nfhermitemod
+  * [ which requires integral ideals ] */
+  matid = gscalmat(d? p: gun, n);
   for (j=1; j<=m; j++)
   {
     p2[j]=(long)matid;
@@ -1150,26 +1153,25 @@ rnfdedekind(GEN nf,GEN T,GEN pr)
     for (i=1; i<=m; i++)
       coeff(p1,i,j) = (i==j)?(long)vecun:(long)veczero;
   }
-
   if (d)
   {
     GEN pal = lift(nfmod_pol_divres(nf,prhall,Ca,k,NULL));
-    GEN prinv=idealinv(nf,pr);
-    GEN nfx=unifpol(nf,polx[varn(T)],0);
+    GEN prinvp = pidealprimeinv(nf,pr); /* again multiplied by p */
+    GEN nfx = unifpol(nf,polx[varn(T)],0);
 
-    for (j=m+1; j<=m+d; j++)
+    for (   ; j<=m+d; j++)
     {
       p1[j]=lgetg(m+1,t_COL);
       da=lgef(pal)-3;
       for (i=1; i<=da+1; i++) coeff(p1,i,j)=pal[i+1];
       for (   ; i<=m; i++) coeff(p1,i,j)=(long)veczero;
-      p2[j]=(long)prinv;
+      p2[j]=(long)prinvp;
       nf_pol_divres(nf,nf_pol_mul(nf,pal,nfx),T,&pal);
     }
-    base[2] = lmul((GEN)base[2], p);
-    base = nfhermitemod(nf,base, idealmul(nf, gpowgs(p, m), 
-					  idealpow(nf, prinv, stoi(d)))); 
-    base[2] = ldiv((GEN)base[2], p);
+    /* the modulus is integral */
+    base = nfhermitemod(nf,base, gmul(gpowgs(p, m-d), 
+				      idealpows(nf, prinvp, d))); 
+    base[2] = ldiv((GEN)base[2], p); /* cancel the factor p */
   }
   res[2]=(long)base; return gerepileupto(av, gcopy(res));
 }
