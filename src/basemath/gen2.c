@@ -579,6 +579,7 @@ minval(GEN x, GEN p, long first, long lx)
   return val;
 }
 
+/* assume vx >= 0, return floor( x / t^vx ) */
 GEN
 shiftpol_i(GEN x, long vx)
 {
