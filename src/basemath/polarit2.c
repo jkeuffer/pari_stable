@@ -3361,7 +3361,7 @@ polfnf(GEN a, GEN t)
   ulong av = avma;
   GEN x0,y,p1,p2,u,fa,n,unt,dent,alift;
   long lx,i,k,e;
-  int sqfree;
+  int sqfree, tmonic;
 
   if (typ(a)!=t_POL || typ(t)!=t_POL) err(typeer,"polfnf");
   if (gcmp0(a)) return gcopy(a);
@@ -3369,6 +3369,7 @@ polfnf(GEN a, GEN t)
   alift = lift(a);
   p1 = content(alift); if (!gcmp1(p1)) { a = gdiv(a, p1); alift = lift(a); }
   p1 = content(t); if (!gcmp1(t)) t = gdiv(t, p1);
+  tmonic = is_pm1(leading_term(t));
 
   dent = ZX_disc(t); unt = gmodulsg(1,t);
   u = nfgcd(alift,derivpol(alift), t, dent);
@@ -3386,6 +3387,7 @@ polfnf(GEN a, GEN t)
   for (i=lx-1; i>1; i--)
   {
     GEN b, F = lift_intern(poleval((GEN)fa[i], x0));
+    if (!tmonic) F = gdiv(F, content(F));
     F = nfgcd(u, F, t, dent);
     if (typ(F) != t_POL || deg(F) == 0)
       err(talker,"reducible modulus in factornf");
