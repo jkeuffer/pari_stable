@@ -2192,18 +2192,18 @@ in the real case.
 
 \syn{quadhilbert}{D,\fl,\var{prec}}.
 
-\subsecidx{quadgen}$(x)$: creates the quadratic number\sidx{omega}
-$\omega=(a+\sqrt{x})/2$ where $a=0$ if $x\equiv0\mod4$,
-$a=1$ if $x\equiv1\mod4$, so that $(1,\omega)$ is an integral basis for
-the quadratic order of discriminant $x$. $x$ must be an integer congruent to
-0 or 1 modulo 4.
+\subsecidx{quadgen}$(D)$: creates the quadratic number\sidx{omega}
+$\omega=(a+\sqrt{D})/2$ where $a=0$ if $x\equiv0\mod4$,
+$a=1$ if $D\equiv1\mod4$, so that $(1,\omega)$ is an integral basis for
+the quadratic order of discriminant $D$. $D$ must be an integer congruent to
+0 or 1 modulo 4, which is not a square.
 
 \syn{quadgen}{x}.
 
 \subsecidx{quadpoly}$(D,\{v=x\})$: creates the ``canonical'' quadratic
 polynomial (in the variable $v$) corresponding to the discriminant $D$,
-i.e.~the minimal polynomial of $\kbd{quadgen}(x)$. $D$ must be an integer
-congruent to 0 or 1 modulo 4.
+i.e.~the minimal polynomial of $\kbd{quadgen}(D)$. $D$ must be an integer
+congruent to 0 or 1 modulo 4, which is not a square.
 
 \syn{quadpoly0}{x,v}.
 
