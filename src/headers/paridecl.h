@@ -1029,7 +1029,8 @@ GEN     unifpol(GEN nf,GEN pol,long flag);
 /* polarit1.c */
 long    Fp_is_squarefree(GEN f, GEN p);
 long    Fp_is_totally_split(GEN f, GEN p);
-long    FpX_nbfact(GEN u, GEN pp);
+long    FpX_nbfact(GEN f, GEN p);
+long    FpX_nbroots(GEN f, GEN p);
 GEN     apprgen(GEN f, GEN a);
 GEN     apprgen9(GEN f, GEN a);
 GEN     factcantor(GEN x, GEN p);

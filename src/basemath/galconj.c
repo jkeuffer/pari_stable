@@ -1680,12 +1680,23 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
     av = avma;
     while (l == 0)
     {
+      long nb;
       c = *primepointer++;
       if (!c)
 	err(primer1);
       p += c;
-      if (Fp_is_totally_split(T,stoi(p)))
+      nb=FpX_nbroots(T,stoi(p));
+      if (nb == n)
 	l = p;
+      else if (nb && Fp_is_squarefree(T,stoi(p)))
+      {
+	avma = ltop;
+	if (DEBUGLEVEL >= 2)
+	  fprintferr("GaloisAnalysis:non Galois for p=%ld\n", p);
+	ga->p = p;
+	ga->deg = 0;
+	return;		/* Not a Galois polynomial */
+      }
       avma = av;
     }
     avma = ltop;
