@@ -679,10 +679,7 @@ INLINE int
 mpdivisis(GEN x, long y, GEN z)
 {
   const ulong av = avma;
-  GEN p1;
-  LOCAL_HIREMAINDER;
-  
-  p1 = divis(x,y);
+  GEN p1 = divis(x,y);
   if (hiremainder) { avma = av; return 0; }
   affii(p1,z); avma = av; return 1;
 }
