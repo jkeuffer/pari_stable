@@ -225,8 +225,8 @@ do_padic_agm(GEN *ptx1, GEN a1, GEN b1, GEN p)
 static GEN
 padic_initell(GEN y, GEN p, long prec)
 {
-  GEN b2,b4,c4,c6,p1,p2,w,pv,a1,b1,x1,u2,q,e0,e1;
-  long i,alpha;
+ GEN b2, b4, c4, c6, p1, w, pv, a1, b1, x1, u2, q, e0, e1;
+  long i, alpha;
 
   q=gadd(gun,ggrandocp(p,prec));
   for (i=1; i<=13; i++) y[i]=lmul(q,(GEN)y[i]);
@@ -234,59 +234,53 @@ padic_initell(GEN y, GEN p, long prec)
     err(talker,"valuation of j must be negative in p-adic ellinit");
   if (egalii(p,gdeux))
   {
-    pv=stoi(4); 
+    pv = stoi(4); 
     err(impl,"initell for 2-adic numbers");
   }
-  else pv=p;
+  else
+    pv = p;
 
-  b2= (GEN)y[6];
-  b4= (GEN)y[7];
-  c4= (GEN)y[10];
-  c6= (GEN)y[11];
-  alpha=valp(c4)>>1;
+  b2 = (GEN)y[6];
+  b4 = (GEN)y[7];
+  c4 = (GEN)y[10];
+  c6 = (GEN)y[11];
+  alpha = valp(c4) >> 1;
   setvalp(c4,0);
-  setvalp(c6,0); e1=gdivgs(gdiv(c6,c4),6);
-  c4=gdivgs(c4,48); c6=gdivgs(c6,864);
+  setvalp(c6,0);
+  e1 = gdiv(c6, gmulsg(6,c4));
+  c4 = gdivgs(c4,48);
+  c6 = gdivgs(c6,864);
   do
   {
-    e0=e1; p2=gsqr(e0);
-    e1=gdiv(gadd(gmul2n(gmul(e0,p2),1),c6), gsub(gmulsg(3,p2),c4));
+    GEN e2 = gsqr(e1);
+    e0 = e1;
+    e1 = gdiv(gadd(gmul2n(gmul(e0,e2),1),c6), gsub(gmulsg(3,e2),c4));
   }
   while (!gegal(e0,e1));
-  setvalp(e1,valp(e1)+alpha);
+  setvalp(e1, valp(e1)+alpha);
 
-  e1=gsub(e1,gdivgs(b2,12));
-  w=gsqrt(gmul2n(gadd(b4,gmul(e1,gadd(b2,gmulsg(6,e1)))),1),0);
+  e1 = gsub(e1, gdivgs(b2,12));
+  w = gsqrt(gmul2n(gadd(b4,gmul(e1,gadd(b2,gmulsg(6,e1)))),1), 0);
 
-  p1=gaddgs(gdiv(gmulsg(3,e0),w),1);
-  if (valp(p1)<=0) w=gneg_i(w);
-  y[18]=(long)w;
+  p1 = gaddgs(gdiv(gmulsg(3,e0),w),1);
+  if (valp(p1) <= 0) w = gneg_i(w);
+  y[18] = (long)w;
 
-  a1=gmul2n(gsub(w,gadd(gmulsg(3,e1),gmul2n(b2,-2))),-2);
-  b1=gmul2n(w,-1); x1=NULL;
+  a1 = gmul2n(gsub(w,gadd(gmulsg(3,e1),gmul2n(b2,-2))),-2);
+  b1 = gmul2n(w,-1); x1 = NULL;
   u2 = do_padic_agm(&x1,a1,b1,pv);
 
   w = gaddsg(1,ginv(gmul2n(gmul(u2,x1),1)));
   w = gadd(w,gsqrt(gaddgs(gsqr(w),-1),0));
   if (gcmp0(w)) err(precer,"initell");
-  q=ginv(w);
-  if (valp(q)<0) q=ginv(q);
+  q = ginv(w);
+  if (valp(q) < 0) q = ginv(q);
 
-  y[14]=(long)_vec(e1);
-  y[15]=(long)u2;
+  y[14] = (long)_vec(e1);
+  y[15] = (long)u2;
   y[16] = (kronecker((GEN)u2[4],p) <= 0 || (valp(u2)&1))? zero: lsqrt(u2,0);
-  y[17]=(long)q;
-  y[19]=zero; return y;
-}
-
-/* mis pour debugger do_padic_agm. On peut enlever quand on veut */
-
-GEN
-dopad(GEN a, GEN b, GEN pv)
-{
-  GEN x1=NULL;
-
-  return ginv(gmul2n(do_padic_agm(&x1,a,b,pv),2));
+  y[17] = (long)q;
+  y[19] = zero; return y;
 }
   
 static int
