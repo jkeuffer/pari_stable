@@ -506,8 +506,8 @@ mat_ideal_two_elt(GEN nf, GEN x)
       for (i=1; i<=N; i++)
       {
         z = mymyrand() >> (BITS_IN_RANDOM-5); /* in [0,15] */
-        if (z >= 9) z -= 7;
-        a = gadd(a,gmulsg(z,(GEN)beta[i]));
+        z -= 7; /* in [-7, 8] */
+        a = gadd(a, gmulsg(z,(GEN)beta[i]));
       }
       a = check_elt(a, pol, pnorm, idz);
       if (a) break;
