@@ -1221,9 +1221,13 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
     i = LLL_check_progress(Bnorm, m, r, C, &ML,/*dbg:*/ id, &ti_LLL);
     if (i > r)
     { /* no progress. Note: even if i == r we may have made some progress */
-      avma = av2; BitPerFactor += 2;
-      if (DEBUGLEVEL>2)
-        fprintferr("LLL_cmbf: increasing BitPerFactor = %ld\n", BitPerFactor);
+      avma = av2;
+      if (BitPerFactor < 7)
+      {
+        BitPerFactor += 2;
+        if (DEBUGLEVEL>2)
+          fprintferr("LLL_cmbf: increasing BitPerFactor = %ld\n", BitPerFactor);
+      }
       continue;
     }
     r = i;
@@ -1388,13 +1392,14 @@ DDF(GEN a, long hint)
   tabkbit = (ulong*)new_chunk(lbit);
   tmp     = (ulong*)new_chunk(lbit);
   prime = icopy(gun);
-  lead = (GEN)a[da+2]; PolX = u_Fp_FpX(polx[0],0, 2);
+  lead = (GEN)a[da+2]; if (gcmp1(lead)) lead = NULL;
+  PolX = u_Fp_FpX(polx[0],0, 2);
   for (p = np = 0; np < MAXNP; )
   {
     gpmem_t av0 = avma;
 
     p += *pt++; if (!*pt) err(primer1);
-    if (!smodis(lead,p)) continue;
+    if (lead && !smodis(lead,p)) continue;
     z = u_Fp_FpX(a,0, p);
     if (!u_FpX_is_squarefree(z, p)) { avma = av0; continue ; }
 
