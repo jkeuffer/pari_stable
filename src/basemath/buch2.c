@@ -1606,7 +1606,7 @@ small_to_mat_i(GEN z, long d)
 /* return -1 in case of precision problems. t = current # of relations */
 static long
 small_norm_for_buchall(long cglob,GEN mat,GEN first_nz, GEN matarch,
-                       long PRECREG, FB_t *F,
+                       long PRECREG, FB_t *F, double LOGD,
                        GEN nf,long nbrelpid,GEN invp,GEN L,double LIMC2)
 {
   const int maxtry_DEP  = 20;
@@ -1625,13 +1625,12 @@ small_norm_for_buchall(long cglob,GEN mat,GEN first_nz, GEN matarch,
   R1 = nf_get_r1(nf);
   M = gmael(nf,5,1);
   G = gmael(nf,5,2);
-  /* LLL reduction produces v0 in I such that T2(v0) <= (4/3)^((n-1)/2) NI^(2/n)
-   * We consider v with T2(v) <= 2 T2(v0)
-   * Hence Nv <= ((4/3)^((n-1)/2) * 2 / n)^(n/2) NI
-   *
-   */
+ /* LLL reduction produces v0 in I such that
+  *     T2(v0) <= (4/3)^((n-1)/2) NI^(2/n) disc(K)^(1/n)
+  * We consider v with T2(v) <= 2 T2(v0)
+  * Hence Nv <= ((4/3)^((n-1)/2) * 2 / n)^(n/2) NI sqrt(disc(K)) */
   precbound = 3 + (long)ceil(
-    (N/2. * ((N-1)/2.* log(4./3) + log(2./N)) + log(LIMC2))
+    (N/2. * ((N-1)/2.* log(4./3) + log(2./N)) + log(LIMC2) + LOGD / 2)
       / (BITS_IN_LONG * log(2.))); /* enough to compute norms */
   if (precbound < nfgetprec(nf))
     Mlow = gprec_w(M, precbound);
@@ -1708,7 +1707,8 @@ small_norm_for_buchall(long cglob,GEN mat,GEN first_nz, GEN matarch,
             {
               xembed = gmul(Mlow, gx); av4 = avma; nbsmallnorm++;
               if (++try_factor > maxtry_FACT) goto ENDIDEAL;
-              Nx = ground(norm_by_embed(R1,xembed)); setsigne(Nx, 1);
+              Nx = norm_by_embed(R1,xembed);
+              Nx = ground(Nx); setsigne(Nx, 1);
               if (can_factor(F, nf, NULL, gx, Nx)) { avma = av4; break; }
               if (DEBUGLEVEL > 1) { fprintferr("."); flusherr(); }
             }
@@ -2902,7 +2902,7 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
   long nlze,zc,nrelsup,nreldep,phase,matmax,i,j,k,seed,MAXRELSUP;
   long sfb_increase, sfb_trials, precdouble=0, precadd=0;
   long cglob; /* # of relations found so far */
-  double cbach, cbach2, drc, LOGD2;
+  double cbach, cbach2, drc, LOGD, LOGD2;
   GEN vecG,fu,zu,nf,D,A,W,R,Res,z,h,list_jideal;
   GEN res,L,resc,B,C,lambda,pdep,liste,invp,clg1,clg2,Vbase;
   GEN mat;     /* raw relations found (as VECSMALL, not HNF-reduced) */
@@ -2936,7 +2936,7 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
 
   nf_get_sign(nf, &R1, &R2); RU = R1+R2;
   D = (GEN)nf[3]; drc = fabs(gtodouble(D));
-  LOGD2 = log(drc); LOGD2 = LOGD2*LOGD2;
+  LOGD = log(drc); LOGD2 = LOGD*LOGD;
   lim = (long) (exp(-(double)N) * sqrt(2*PI*N*drc) * pow(4/PI,(double)R2));
   if (lim < 3) lim = 3;
   cbach = min(12., gtodouble(gcbach)); cbach /= 2;
@@ -3048,7 +3048,7 @@ START:
   /* relations through elements of small norm */
   if (gsigne(gborne) > 0)
     cglob = small_norm_for_buchall(cglob,mat,first_nz,C,PRECREG,&F,
-                                   nf,nbrelpid,invp,liste,LIMC2);
+                                   LOGD,nf,nbrelpid,invp,liste,LIMC2);
   if (cglob < 0) { precpb = "small_norm"; goto START; }
   avma = av1; limpile = stack_lim(av1,1);
 

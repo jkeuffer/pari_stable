@@ -73,6 +73,8 @@ MSo20- bittest(1,32) --> 1  [ off-by-1 error ]
        treated properly ]
    23- memory corruption when parsing floating point constants [ constante() ]
    24- too little GC in serreverse()
+   25- bnfinit(huge field) --> "precision loss in truncation" [ missing
+       term sqrt(disc(K)) in norm bound ]
 
   Changed
     1- bnfinit: [small_norm phase] speed up norm computations.
