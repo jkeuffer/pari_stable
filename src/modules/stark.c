@@ -531,7 +531,7 @@ FindModulus(GEN dataC, long fl, long *newprec, long prec, long bnd)
      If we cannot find a suitable conductor of norm < limnorm, we stop */
   maxnorm = 50;
   minnorm = 1;
-  limnorm = 200;
+  limnorm = 400;
 
   if (DEBUGLEVEL >= 2)
     fprintferr("Looking for a modulus of norm: ");
@@ -1200,177 +1200,143 @@ CharNewPrec(GEN dataCR, GEN nf, long prec)
 /********************************************************************/
 
 static void
-_0toCoeff(int *rep, long dg)
+_0toCoeff(int *rep, long deg)
 {
   long i;
-  for (i=0; i<dg; i++) rep[i] = 0;
+  for (i=0; i<deg; i++) rep[i] = 0;
 }
 
 /* transform a polmod into coeff */
 static void
-Polmod2Coeff(int *rep, GEN polmod, long dg)
+Polmod2Coeff(int *rep, GEN polmod, long deg)
 {
   GEN pol = (GEN)polmod[2];
   long i,d = degpol(pol);
 
   pol += 2;
   for (i=0; i<=d; i++) rep[i] = itos((GEN)pol[i]);
-  for (   ; i<dg; i++) rep[i] = 0;
+  for (   ; i<deg; i++) rep[i] = 0;
 }
 
-/* initialize a cl x nmax x [degs[1], ..., degs[cl] matrix of ints */
-/* modified to allocate ints and pointers separately since this used to
-   break on 64bit platforms --GN1999Sep01 */
-static int***
-InitMatAn(long cl, long nmax, GEN degs, long flag)
+/* initialize a n x deg matrix of ints */
+static int**
+InitMatAn(long n, long deg, long flag)
 {
-  long si,dg,i,j,k, n = nmax+1;
-  int *c, **pj, ***A;
+  long i, j;
+  int **A;
 
-  for (si=0, i=1; i <= cl; i++)
+  A = (int**)gpmalloc((n+1)*sizeof(int*));
+  for (i = 0; i <= n; i++)
   {
-    dg = degs[i];
-    si += dg;
-  }
-  A = (int***)gpmalloc((cl+1)*sizeof(int**) + cl*n*sizeof(int*));
-  c = (int*)gpmalloc(si*n*sizeof(int));
-  A[0] = (int**)c;		/* keep it around for FreeMat() */
-
-  pj = (int**)(A + (cl+1));
-  for (i = 1; i <= cl; i++, pj+=n)
-  {
-    A[i] = pj; dg = degs[i];
-    for (j = 0; j < n; j++,c+=dg)
-    {
-      pj[j] = c;
-      c[0] = (j == 1 || flag);
-      for (k = 1; k < dg; k++) c[k] = 0;
-    }
+    A[i] = (int*)gpmalloc(deg*sizeof(int));
+    A[i][0] = (i == 1 || flag);
+     for (j = 1; j < deg; j++) A[i][j] = 0;
   }
   return A;
 }
 
 static void
-FreeMat(int ***m)
+FreeMat(int **m, long n)
 {
-  free((void *)(m[0]));
-  free((void *)m);
+  long i;
+  for (i = 0; i <= n; i++) free((void*)m[i]);
+  free((void*)m);
 }
 
 /* initialize coeff reduction */
-/* similar change --GN1999Sep01 */
-static int***
-InitReduction(GEN dataCR, GEN degs)
+static int**
+InitReduction(GEN datachi, long deg)
 {
-  long av = avma,si,sp,dg,i,j, cl = lg(dataCR)-1;
-  int *c, **pj, ***A;
+  long av = avma,j;
+  int **A;
   GEN d,polmod,pol, x = polx[0];
 
-  for (si=sp=0, i=1; i <= cl; i++)
+  A   = (int**)gpmalloc(deg*sizeof(int*));
+  d   = gmael(datachi, 5, 3);
+  pol = cyclo(itos(d), 0);
+  for (j = 0; j < deg; j++)
   {
-    dg = degs[i];
-    sp += dg;
-    si += dg*dg;
+    A[j] = (int*)gpmalloc(deg*sizeof(int));
+    polmod = gmodulcp(gpowgs(x, deg + j), pol);
+    Polmod2Coeff(A[j], polmod, deg);
   }
-  A = (int***)gpmalloc((cl+1)*sizeof(int**) + sp*sizeof(int*));
-  c = (int*)gpmalloc(si*sizeof(int));
-  A[0] = (int**)c;		/* keep it around for FreeMat() */
 
-  pj = (int**)(A + (cl+1));
-  for (i = 1; i <= cl; i++)
-  {
-    A[i] = pj;
-    d   = gmael3(dataCR, i, 5, 3);
-    pol = cyclo(itos(d), 0);
-    dg  = degs[i]; /* degree(pol) */
-    for (j = 0; j < dg; j++,c+=dg)
-    {
-      pj[j] = c;
-      polmod = gmodulcp(gpowgs(x, dg + j), pol);
-      Polmod2Coeff(c, polmod, dg);
-    }
-    pj += dg;
-  }
   avma = av; return A;
 }
 
 #if 0
-static void
-pan(int ***an,long cl, long nmax, GEN degs)
+void
+pan(int **an, long n, long deg)
 {
-  long i,j,k;
-  for (i = 1; i <= cl; i++)
-  {
-    long dg = degs[i];
-    for (j = 0; j <= nmax; j++)
-      for (k = 0; k < dg; k++) fprintferr("%d ",an[i][j][k]);
-  }
+  long i,j;
+  for (i = 1; i <= n; i++)
+    for (j = 0; j < deg; j++) fprintferr("%d ",an[i][j]);
 }
 #endif
 
 /* multiply (with reduction) a polmod with a coeff. put result in c1 */
 static void
-MulPolmodCoeff(GEN polmod, int* c1, int** reduc, long dg)
+MulPolmodCoeff(GEN polmod, int* c1, int** reduc, long deg)
 {
   long av,i,j;
   int c, *c2, *c3;
 
   if (gcmp1(polmod)) return;
-  for (i = 0; i < dg; i++)
+  for (i = 0; i < deg; i++)
     if (c1[i]) break;
-  if (i == dg) return;
+  if (i == deg) return;
   av = avma;
-  c3 = (int*)new_chunk(2*dg);
-  c2 = (int*)new_chunk(dg);
-  Polmod2Coeff(c2,polmod, dg);
+  c3 = (int*)new_chunk(2*deg);
+  c2 = (int*)new_chunk(deg);
+  Polmod2Coeff(c2,polmod, deg);
 
-  for (i = 0; i < 2*dg; i++)
+  for (i = 0; i < 2*deg; i++)
   {
     c = 0;
     for (j = 0; j <= i; j++)
-      if (j < dg && j > i - dg) c += c1[j] * c2[i-j];
+      if (j < deg && j > i - deg) c += c1[j] * c2[i-j];
     c3[i] = c;
   }
   c2 = c1;
-  for (i = 0; i < dg; i++)
+  for (i = 0; i < deg; i++)
   {
     c = c3[i];
-    for (j = 0; j < dg; j++) c += reduc[j][i] * c3[dg+j];
+    for (j = 0; j < deg; j++) c += reduc[j][i] * c3[deg+j];
     c2[i] = c;
   }
   /* cast necessary to work around a gcc-2.96 bug on alpha-linux (IS) */
-  for (     ; i < (short)dg; i++) c2[i] = 0;
+  for (     ; i < (short)deg; i++) c2[i] = 0;
   avma = av;
 }
 
 /* c0 <- c0 + c2 * c1 */
 static void
-AddMulCoeff(int *c0, int *c2, int* c1, int** reduc, long dg)
+AddMulCoeff(int *c0, int *c2, int* c1, int** reduc, long deg)
 {
   long av,i,j;
   int c, *c3;
 
   if (!c2) /* c2 == 1 */
   {
-    for (i = 0; i < dg; i++) c0[i] += c1[i];
+    for (i = 0; i < deg; i++) c0[i] += c1[i];
     return;
   }
-  for (i = 0; i <= dg; i++)
+  for (i = 0; i <= deg; i++)
     if (c1[i]) break;
-  if (i > dg) return;
+  if (i > deg) return;
   av = avma;
-  c3 = (int*)new_chunk(2*dg);
-  for (i = 0; i < 2*dg; i++)
+  c3 = (int*)new_chunk(2*deg);
+  for (i = 0; i < 2*deg; i++)
   {
     c = 0;
     for (j = 0; j <= i; j++)
-      if (j < dg && j > i - dg) c += c1[j] * c2[i-j];
+      if (j < deg && j > i - deg) c += c1[j] * c2[i-j];
     c3[i] = c;
   }
-  for (i = 0; i < dg; i++)
+  for (i = 0; i < deg; i++)
   {
     c = c0[i] + c3[i];
-    for (j = 0; j < dg; j++) c += reduc[j][i] * c3[dg+j];
+    for (j = 0; j < deg; j++) c += reduc[j][i] * c3[deg+j];
     c0[i] = c;
   }
 
@@ -1379,31 +1345,31 @@ AddMulCoeff(int *c0, int *c2, int* c1, int** reduc, long dg)
 
 /* returns 0 if c is zero, 1 otherwise. */
 static long
-IsZero(int* c, long dg)
+IsZero(int* c, long deg)
 {
   long i;
 
-  for (i = 0; i < dg; i++)
+  for (i = 0; i < deg; i++)
     if (c[i]) return 0;
   return 1;
 }
 
 /* evaluate the coeff. No Garbage collector */
 static GEN
-EvalCoeff(GEN z, int* c, long dg)
+EvalCoeff(GEN z, int* c, long deg)
 {
   long i,j;
   GEN e, r;
 
 #if 0
   /* standard Horner */
-  e = stoi(c[dg - 1]);
-  for (i = dg - 2; i >= 0; i--)
+  e = stoi(c[deg - 1]);
+  for (i = deg - 2; i >= 0; i--)
     e = gadd(stoi(c[i]), gmul(z, e));
 #else
   /* specific attention to sparse polynomials */
   e = NULL;
-  for (i = dg-1; i >=0; i=j-1)
+  for (i = deg-1; i >=0; i=j-1)
   {
     for (j=i; c[j] == 0; j--)
       if (j==0)
@@ -1426,23 +1392,18 @@ EvalCoeff(GEN z, int* c, long dg)
 
 /* copy the n * m array matan */
 static void
-CopyCoeff(int*** a, int*** a2, long n, long m, GEN degs)
+CopyCoeff(int** a, int** a2, long n, long m)
 {
-  long i,j,k;
+  long i,j;
 
   for (i = 1; i <= n; i++)
   {
-    long dg = degs[i];
-    int **b = a[i], **b2 = a2[i];
-    for (j = 0; j <= m; j++)
-    {
-      int *c = b[j], *c2 = b2[j];
-      for (k = 0; k < dg; k++) c2[k] = c[k];
-    }
+    int *b = a[i], *b2 = a2[i];
+    for (j = 0; j <= m; j++) b2[j] = b[j];
   }
-  return;
 }
 
+#if 0
 /* initialize the data for GetRay */
 static GEN
 InitGetRay(GEN bnr,  long nmax)
@@ -1483,11 +1444,13 @@ InitGetRay(GEN bnr,  long nmax)
   rep[3] = nf_get_r2((GEN)bnf[7])? 0: un; /* != 0 iff nf is totally real */
   return rep;
 }
+#endif
 
-/* compute the class of the prime ideal pr in cl(bnr) using dataray */
 static GEN
 GetRay(GEN bnr,  GEN dataray,  GEN pr, long prec)
 {
+#if 0
+/* compute the class of the prime ideal pr in cl(bnr) using dataray */
   long av = avma, N, n, bd, c;
   GEN id, tid, t2, u, alpha, p1, cl, listid, listcl, nf, cond;
 
@@ -1544,15 +1507,18 @@ GetRay(GEN bnr,  GEN dataray,  GEN pr, long prec)
   }
 
   return gerepileupto(av, gsub(isprincipalray(bnr, alpha), cl));
+#else
+  return isprincipalray(bnr, pr);
+#endif
 }
 
 /* correct the coefficients an(chi) according with diff(chi) in place */
 static void
-CorrectCoeff(GEN dtcr, int** an, int** reduc, long nmax, long dg)
+CorrectCoeff(GEN dtcr, int** an, int** reduc, long n, long deg)
 {
   long lg, av1, j, p, q, limk, k, l, av = avma;
-  int ***an2, **an1, *c, *c2;
-  GEN chi, bnrc, diff, ray, ki, ki2, pr, degs;
+  int **an2, *c, *c2;
+  GEN chi, bnrc, diff, ray, ki, ki2, pr;
 
   chi  =  (GEN)dtcr[8];
   bnrc =  (GEN)dtcr[3];
@@ -1562,15 +1528,14 @@ CorrectCoeff(GEN dtcr, int** an, int** reduc, long nmax, long dg)
 
   if (DEBUGLEVEL > 2) fprintferr("diff(chi) = %Z", diff);
 
-  degs = cgetg(2, t_VECSMALL); degs[1] = dg;
-  an2 = InitMatAn(1, nmax, degs, 0); an1 = an2[1];
-  c = (int*)new_chunk(dg);
+  an2 = InitMatAn(n, deg, 0);
+  c = (int*)new_chunk(deg);
   av1 = avma;
 
   for (j = 1; j <= lg; j++)
   {
-    for (k = 0; k <= nmax; k++)
-      for (l = 0; l < dg; l++) an1[k][l] = an[k][l];
+    for (k = 0; k <= n; k++)
+      for (l = 0; l < deg; l++) an2[k][l] = an[k][l];
 
     pr  = (GEN)diff[j];
     ray = isprincipalray(bnrc, pr);
@@ -1578,99 +1543,97 @@ CorrectCoeff(GEN dtcr, int** an, int** reduc, long nmax, long dg)
     ki2 = gcopy(ki);
 
     q = p = itos(powgi((GEN)pr[1], (GEN)pr[4]));
-    limk = nmax / q;
+    limk = n / q;
 
-    while (q <= nmax)
+    while (q <= n)
     {
-      if (gcmp1(ki2)) c2 = NULL; else { Polmod2Coeff(c,ki2, dg); c2 = c; }
+      if (gcmp1(ki2)) 
+	c2 = NULL; 
+      else 
+      { Polmod2Coeff(c, ki2, deg); c2 = c; }
       for(k = 1; k <= limk; k++)
-        AddMulCoeff(an[k*q], c2, an1[k], reduc, dg);
+        AddMulCoeff(an[k*q], c2, an2[k], reduc, deg);
 
       q *= p; limk /= p;
       ki2 = gmul(ki2, ki);
     }
     avma = av1;
   }
-  FreeMat(an2); avma = av;
+  FreeMat(an2, n); avma = av;
 }
 
 /* compute the coefficients an in the general case */
-static int***
-ComputeCoeff(GEN dataCR, long nmax, long prec)
+static int**
+ComputeCoeff(GEN datachi, long n, long deg, long prec)
 {
-  long cl, i, j, av = avma, av2, np, q, q1, limk, k, id, cpt = 10, dg, Bq;
-  int ***matan, ***reduc, ***matan2, *c2;
-  GEN c, degs, tabprem, bnf, pr, cond, ray, ki, ki2, prime, npg, bnr, dataray;
+  long j, av = avma, av2, np, q, q1, limk, k, cpt = 10, Bq;
+  int **matan, **reduc, **matan2, *c, *c2;
+  GEN tabprem, bnf, pr, cond, ray, ki, ki2, prime, npg, bnr, dataray;
   byteptr dp = diffptr;
 
-  bnr  =  gmael(dataCR, 1, 4);
+  bnr  =  (GEN)datachi[4];
   bnf  =  (GEN)bnr[1];
   cond =  gmael3(bnr, 2, 1, 1);
-  cl   =  lg(dataCR) - 1;
 
-  dataray = InitGetRay(bnr, nmax);
+  /* dataray = InitGetRay(bnr, nmax); */
 
-  degs = GetDeg(dataCR);
-  matan  = InitMatAn(cl, nmax, degs, 0);
-  matan2 = InitMatAn(cl, nmax, degs, 0);
-  reduc  = InitReduction(dataCR, degs);
-  c = cgetg(cl + 1, t_VEC);
-  for (i = 1; i <= cl; i++)
-    c[i] = (long)new_chunk(degs[i]);
+  matan  = InitMatAn(n, deg, 0);
+  matan2 = InitMatAn(n, deg, 0);
+  reduc  = InitReduction(datachi, deg);
+
+  c2 = (int*)new_chunk(deg);
 
   if (DEBUGLEVEL > 1) fprintferr("p = ");
 
   prime = stoi(2); dp++;
   av2 = avma;
-  while (*dp && (prime[2] <= nmax))
+  while (*dp && (prime[2] <= n))
   {
     tabprem = primedec(bnf, prime);
     for (j = 1; j < lg(tabprem); j++)
     {
       pr  = (GEN)tabprem[j];
       npg = powgi((GEN)pr[1], (GEN)pr[4]);
-      if (is_bigint(npg) || (np=npg[2]) > nmax
+      if (is_bigint(npg) || (np=npg[2]) > n
                          || idealval(bnf, cond, pr)) continue;
 
-      CopyCoeff(matan, matan2, cl, nmax, degs);
+      CopyCoeff(matan, matan2, n, deg);
       ray = GetRay(bnr, dataray, pr, prec);
-      ki  = chiideal(dataCR, ray, 1);
+      ki = ComputeImagebyChar((GEN)datachi[5], ray, 1);
       ki2 = dummycopy(ki);
 
-      Bq = nmax/np;
+      Bq = n/np;
       for (q1 = 1; q1 <= Bq; q1 *= np) 
       {
 	q = q1*np; 
-        limk = nmax / q;
-        for (id = 1; id <= cl; id++)
-        {
-          dg = degs[id];
-          if (gcmp1((GEN)ki2[id]))
-            c2 = NULL;
-          else
-          {
-            c2 = (int*)c[id];
-            Polmod2Coeff(c2, (GEN)ki2[id], dg);
-          }
-          for (k = 1; k <= limk; k++)
-            AddMulCoeff(matan[id][k*q], c2, matan2[id][k], reduc[id], dg);
-          ki2[id] = lmul((GEN)ki2[id], (GEN)ki[id]);
-        }
+        limk = n/q;
+	if (gcmp1(ki2))
+	  c = NULL;
+	else
+	{
+	  c = c2;
+	  Polmod2Coeff(c, ki2, deg);
+	}
+
+	for (k = 1; k <= limk; k++)
+	  AddMulCoeff(matan[k*q], c, matan2[k], reduc, deg);
+
+	ki2 = gmul(ki2, ki);
       }
     }
     avma = av2;
     prime[2] += (*dp++);
     if (!*dp) err(primer1);
-
+    
     if (DEBUGLEVEL > 1 && prime[2] > cpt)
       { fprintferr("%ld ", prime[2]); cpt += 10; }
   }
   if (DEBUGLEVEL > 1) fprintferr("\n");
 
-  for (i = 1; i <= cl; i++)
-    CorrectCoeff((GEN)dataCR[i], matan[i], reduc[i], nmax, degs[i]);
+  CorrectCoeff(datachi, matan, reduc, n, deg);
 
-  FreeMat(matan2); FreeMat(reduc);
+  FreeMat(matan2, n);
+  FreeMat(reduc, deg-1);
   avma = av; return matan;
 }
 
@@ -1929,7 +1892,7 @@ GetST(GEN dataCR, long prec)
   GEN degs, p1, p2, nsurc, an, rep, powlncn, powracpi;
   long i, j, k, n, av = avma, av1, av2, hk, fj, id, prec2, i0, nmax;
   long a, b, c, rc1, rc2, r, r1, r2;
-  int ***matan;
+  int ***matans;
 
   if (DEBUGLEVEL) timer2();
   bnr   = gmael(dataCR, 1, 4);
@@ -1968,10 +1931,6 @@ GetST(GEN dataCR, long prec)
 
   if(DEBUGLEVEL > 1) fprintferr("nmax = %ld and i0 = %ld\n", nmax, i0);
 
-  matan = ComputeCoeff(dataCR, nmax, prec);
-  degs = GetDeg(dataCR);
-  if (DEBUGLEVEL) msgtimer("Compute an");
-
   p1 = cgetg(3, t_COMPLEX);
   p1[1] = lgetr(prec2);
   p1[2] = lgetr(prec2);
@@ -1992,12 +1951,19 @@ GetST(GEN dataCR, long prec)
   for (j = 1; j <= hk; j++)
     powracpi[j] = (long)gpow(racpi, gmael3(dataCR, j, 9, 2), prec2);
 
-  av1 = avma;
-  if (DEBUGLEVEL > 1) fprintferr("n = ");
+  degs   = GetDeg(dataCR);
+  matans = (int***)gpmalloc((hk+1)*sizeof(int**));
+  av1    = avma;
 
   for (id = 1; id <= hk; id++)
   {
     if (CC[id] != id) continue;
+
+    if (DEBUGLEVEL >1 ) fprintferr("id = %ld (hk = %ld)\nn = ", id, hk);
+    for (k = 1; k <= hk; k++)
+      if (CC[k] == id)
+	matans[k] = ComputeCoeff((GEN)dataCR[k], N0[k], degs[k], prec);
+
     p2 = gmael(dataCR, id, 9);
     a  = itos((GEN)p2[1]);
     b  = itos((GEN)p2[2]);
@@ -2012,7 +1978,7 @@ GetST(GEN dataCR, long prec)
       if (DEBUGLEVEL > 1 && n%100 == 0) fprintferr("%ld ", n);
 
       for (k = 1; k <= hk; k++)
-        if (CC[k] == id && !IsZero(matan[k][n], degs[k])) break;
+        if (CC[k] == id && !IsZero(matans[k][n], degs[k])) break;
       if (k > hk) continue;
 
       csurn = gdivgs((GEN)C[id], n);
@@ -2055,19 +2021,22 @@ GetST(GEN dataCR, long prec)
 
       p1 = gadd(p1, gmul(csurn, (GEN)powracpi[id]));
 
-      for (j = 1; j <= hk; j++)
-        if (CC[j] == id &&
-            (an = EvalCoeff(gmael3(dataCR, j, 5, 2), matan[j][n], degs[j])))
-        {
-          gaffect(gadd((GEN)S[j], gmul(p1, an)),        (GEN)S[j]);
-          gaffect(gadd((GEN)T[j], gmul(p2, gconj(an))), (GEN)T[j]);
-        }
+      for (k = 1; k <= hk; k++)
+	if (CC[k] == id && 
+	    (an = EvalCoeff(gmael3(dataCR, k, 5, 2), matans[k][n], degs[k])))
+	{
+	  gaffect(gadd((GEN)S[k], gmul(p1, an)),        (GEN)S[k]);
+	  gaffect(gadd((GEN)T[k], gmul(p2, gconj(an))), (GEN)T[k]);
+	}
       avma = av2;
     }
     avma = av1;
+    for (k = 1; k <= hk; k++)
+      if (CC[k] == id)
+	FreeMat(matans[k], N0[id]);
   }
-  FreeMat(matan);
-
+  free(matans);
+  
   if (DEBUGLEVEL > 1) fprintferr("\n");
   if (DEBUGLEVEL) msgtimer("Compute S&T");
 
@@ -2417,29 +2386,27 @@ RecCoeff(GEN nf,  GEN pol,  long v, long prec)
 /*******************************************************************/
 
 /* compute the coefficients an for the quadratic case */
-static int***
-computean(GEN dtcr,  long nmax, long prec)
+static int**
+computean(GEN dtcr, long n, long deg, long prec)
 {
-  long i, j, cl, q, cp, al, v1, v2, v, fldiv, av, av1;
-  int ***matan, ***reduc;
-  GEN bnf, ideal, dk, degs, idno, p1, prime, chi, qg, chi1, chi2;
+  long i, q, cp, al, v1, v2, v, fldiv, av, av1;
+  int **matan, **reduc;
+  GEN bnf, ideal, dk, idno, p1, prime, chi, qg, chi1, chi2;
   GEN chi11, chi12, bnr, pr, pr1, pr2, xray, xray1, xray2, dataray;
   byteptr dp = diffptr;
 
   av = avma;
 
-  cl = lg(dtcr) - 1;
-  degs = GetDeg(dtcr);
+  matan = InitMatAn(n, deg, 1);
+  reduc = InitReduction(dtcr, deg);
 
-  matan = InitMatAn(cl, nmax, degs, 1);
-  reduc = InitReduction(dtcr, degs);
-
-  bnr = gmael(dtcr, 1, 4); bnf = (GEN)bnr[1];
-  dataray = InitGetRay(bnr, nmax);
+  bnr = (GEN)dtcr[4]; 
+  bnf = (GEN)bnr[1];
+  /* dataray = InitGetRay(bnr, nmax); */
 
   ideal = gmael3(bnr, 2, 1, 1);
   idno  = idealnorm(bnf, ideal);
-  dk = gmael(bnf, 7, 3);
+  dk    = gmael(bnf, 7, 3);
 
   prime = stoi(2);
   dp++;
@@ -2447,7 +2414,7 @@ computean(GEN dtcr,  long nmax, long prec)
   av1 = avma;
 
   chi = chi1 = chi2 = NULL; /* gcc -Wall */
-  while (*dp && prime[2] <= nmax)
+  while (*dp && prime[2] <= n)
   {
     qg = prime;
     al = 1;
@@ -2461,31 +2428,28 @@ computean(GEN dtcr,  long nmax, long prec)
 	if (!fldiv)
 	{
 	  xray = GetRay(bnr, dataray, prime, prec);
-	  chi  = chiideal(dtcr, xray, 1);
+	  chi  = ComputeImagebyChar((GEN)dtcr[5], xray, 1);
 	  chi1 = dummycopy(chi);
 	}
 
-       	while(cmpis(qg, nmax) <= 0)
+       	while(cmpis(qg, n) <= 0)
 	{
 	  q = qg[2];
 
-	  for (cp = 1, i = q; i <= nmax; i += q, cp++)
+	  for (cp = 1, i = q; i <= n; i += q, cp++)
 	    if(cp % prime[2])
 	    {
 	      if (fldiv || al%2)
-                for (j = 1; j <= cl; j++)
-		  _0toCoeff(matan[j][i], degs[j]);
+		_0toCoeff(matan[i], deg);
 	      else
-		for (j = 1; j <= cl; j++)
-		  MulPolmodCoeff((GEN)chi[j], matan[j][i], reduc[j], degs[j]);
+		MulPolmodCoeff(chi, matan[i], reduc, deg);
 	    }
 
 	  qg = mulsi(q, prime);
 	  al++;
 
 	  if (al%2 && !fldiv)
-	    for (j = 1; j <= cl; j++)
-	      chi[j] = lmul((GEN)chi[j], (GEN)chi1[j]);
+	    chi = gmul(chi, chi1);
  	}
 	break;
 
@@ -2497,33 +2461,28 @@ computean(GEN dtcr,  long nmax, long prec)
       {
 	pr   = (GEN)primedec(bnf, prime)[1];
 	xray = GetRay(bnr, dataray, pr, prec);
-	chi  = chiideal(dtcr, xray, 1);
+	chi  = ComputeImagebyChar((GEN)dtcr[5], xray, 1);
 	chi2 = dummycopy(chi);
       }
 
-      while(cmpis(qg, nmax) <= 0)
+      while(cmpis(qg, n) <= 0)
       {
 	q = qg[2];
 
-	for (cp = 1, i = q; i <= nmax; i += q, cp++)
+	for (cp = 1, i = q; i <= n; i += q, cp++)
 	  if(cp % prime[2])
           {
 	    if (fldiv)
-	      for(j = 1; j <= cl; j++)
-		_0toCoeff(matan[j][i], degs[j]);
+	      _0toCoeff(matan[i], deg);
 	    else
-            {
-	      for(j = 1; j <= cl; j++)
-		MulPolmodCoeff((GEN)chi[j], matan[j][i], reduc[j], degs[j]);
-	    }
+	      MulPolmodCoeff(chi, matan[i], reduc, deg);
 	  }
 
 	qg = mulsi(q, prime);
 	al++;
 
-	if (cmpis(qg, nmax) <= 0 && !fldiv)
-	  for (j = 1; j <= cl; j++)
-	    chi[j] = lmul((GEN)chi[j], (GEN)chi2[j]);
+	if (cmpis(qg, n) <= 0 && !fldiv)
+	  chi = gmul(chi, chi2);
       }
       break;
 
@@ -2539,77 +2498,70 @@ computean(GEN dtcr,  long nmax, long prec)
       {
 	xray1 = GetRay(bnr, dataray, pr1, prec);
 	xray2 = GetRay(bnr, dataray, pr2, prec);
-	chi11 = chiideal(dtcr, xray1, 1);
-	chi12 = chiideal(dtcr, xray2, 1);
+	chi11 = ComputeImagebyChar((GEN)dtcr[5], xray1, 1);
+	chi12 = ComputeImagebyChar((GEN)dtcr[5], xray2, 1);
 
 	chi1 = gadd(chi11, chi12);
 	chi2 = dummycopy(chi12);
 
-	while(cmpis(qg, nmax) <= 0)
+	while(cmpis(qg, n) <= 0)
         {
 	  q = qg[2];
 
-	  for (cp = 1, i = q; i <= nmax; i += q, cp++)
+	  for (cp = 1, i = q; i <= n; i += q, cp++)
 	    if(cp % prime[2])
-	      for(j = 1; j <= cl; j++)
-		MulPolmodCoeff((GEN)chi1[j], matan[j][i], reduc[j], degs[j]);
+	      MulPolmodCoeff(chi1, matan[i], reduc, deg);
 
 	  qg = mulsi(q, prime);
 	  al++;
 
-	  if(cmpis(qg, nmax) <= 0)
-	    for (j = 1; j <= cl; j++)
-            {
-	      chi2[j] = lmul((GEN)chi2[j], (GEN)chi12[j]);
-	      chi1[j] = ladd((GEN)chi2[j], gmul((GEN)chi1[j], (GEN)chi11[j]));
-	    }
+	  if(cmpis(qg, n) <= 0)
+          {
+	    chi2 = gmul(chi2, chi12);
+	    chi1 = gadd(chi2, gmul(chi1, chi11));
+	  }
 	}
       }
       else
       {
 	if (v1) { v  = v2; pr = pr2; } else { v  = v1; pr = pr1; }
-
+	
 	if (v == 0)
         {
 	  xray = GetRay(bnr, dataray, pr, prec);
-	  chi1 = chiideal(dtcr, xray, 1);
+	  chi1 = ComputeImagebyChar((GEN)dtcr[5], xray, 1);
 	  chi  = gcopy(chi1);
 	}
 
-	while(cmpis(qg, nmax) <= 0)
+	while(cmpis(qg, n) <= 0)
         {
 	  q = qg[2];
-	  for (cp = 1, i = q; i <= nmax; i += q, cp++)
+	  for (cp = 1, i = q; i <= n; i += q, cp++)
 	    if(cp % prime[2])
             {
 	      if (v)
-		for (j = 1; j <= cl; j++)
-		  _0toCoeff(matan[j][i], degs[j]);
+		_0toCoeff(matan[i], deg);
 	      else
-		for (j = 1; j <= cl; j++)
-		  MulPolmodCoeff((GEN)chi[j], matan[j][i], reduc[j], degs[j]);
+		MulPolmodCoeff(chi, matan[i], reduc, deg);
 	    }
 
 	  qg = mulii(qg, prime);
 	  al++;
-
-	  if (!v && (cmpis(qg, nmax) <= 0))
-	    for (j = 1; j <= cl; j++)
-	      chi[j] = lmul((GEN)chi[j], (GEN)chi1[j]);
+	  
+	  if (!v && (cmpis(qg, n) <= 0))
+	    chi = gmul(chi, chi1);
 	}
       }
       break;
     }
 
     prime[2] += (*dp++);
-
     avma = av1;
   }
+  
+  CorrectCoeff(dtcr, matan, reduc, n, deg);
 
-  for (i = 1; i <= cl; i++)
-    CorrectCoeff((GEN)dtcr[i], matan[i], reduc[i], nmax, degs[i]);
-
-  FreeMat(reduc);
+  FreeMat(reduc, deg-1);
   avma = av; return matan;
 }
 
@@ -2618,8 +2570,8 @@ static GEN
 QuadGetST(GEN data, long prec)
 {
   long av = avma, n, j, nmax, cl, av1, av2, k;
-  int ***matan;
-  GEN nn, C, p1, p2, c2, cexp, cn, v, veclprime2, veclprime1;
+  int ***matans;
+  GEN nn, C, CC, p1, c2, cexp, cn, v, veclprime2, veclprime1;
   GEN dtcr, cond, rep, an, cf, degs, veint1;
 
   dtcr     = (GEN)data[5];
@@ -2631,6 +2583,7 @@ QuadGetST(GEN data, long prec)
   cond = cgetg(cl+1, t_VEC);
   c2   = cgetg(cl + 1, t_VEC);
   nn   = new_chunk(cl+1);
+  CC   = new_chunk(cl+1);
   nmax = 0;
   for (j = 1; j <= cl; j++)
   {
@@ -2638,8 +2591,10 @@ QuadGetST(GEN data, long prec)
     c2[j]   = ldivsg(2, (GEN)C[j]);
     cond[j] = mael(dtcr, j, 7);
     nn[j]   = (long)(bit_accuracy(prec) * gtodouble((GEN)C[j]) * 0.35);
-
     nmax  = max(nmax, nn[j]);
+    for (k = 1; k < j; k++)
+      if (gegal((GEN)cond[j], (GEN)cond[k])) break;
+    CC[j] = k;
   }
 
   if (nmax >= VERYBIGINT)
@@ -2648,10 +2603,8 @@ QuadGetST(GEN data, long prec)
   if (DEBUGLEVEL >= 2)
     fprintferr("nmax = %ld\n", nmax);
 
-  /* compute the coefficients */
-  matan = computean(dtcr, nmax, prec);
-  if (DEBUGLEVEL) msgtimer("Compute an");
-
+  matans = (int***)gpmalloc((cl+1)*sizeof(int**));
+  
   /* allocate memory for the answer */
   rep = cgetg(3, t_VEC);
 
@@ -2665,32 +2618,6 @@ QuadGetST(GEN data, long prec)
     veclprime1[j] = (long)v;
   }
 
-  av1 = avma;
-  cn = cgetr(prec);
-  p1 = gmul2n(cf, -1);
-
-  /* compute veclprime1 */
-  for (j = 1; j <= cl; j++)
-  {
-    long n0 = 0;
-    p2 = gmael3(dtcr, j, 5, 2);
-    cexp = gexp(gneg_i((GEN)c2[j]), prec);
-    av2 = avma; affsr(1, cn); v = (GEN)veclprime1[j];
-    for (n = 1; n <= nn[j]; n++)
-      if ( (an = EvalCoeff(p2, matan[j][n], degs[j])) )
-      {
-        affrr(gmul(cn, gpowgs(cexp, n - n0)), cn);
-        n0 = n;
-        gaffect(gadd(v, gmul(divrs(cn,n), an)), v);
-        avma = av2;
-      }
-    gaffect(gmul(p1, gmul(v, (GEN)C[j])), v);
-    avma = av2;
-  }
-  avma = av1;
-  rep[1] = (long)veclprime1;
-  if (DEBUGLEVEL) msgtimer("Compute V1");
-
   /* allocate memory for veclprime2 */
   veclprime2 = cgetg(cl + 1, t_VEC);
   for (j = 1; j <= cl; j++)
@@ -2701,35 +2628,69 @@ QuadGetST(GEN data, long prec)
     veclprime2[j] = (long)v;
   }
 
-  /* compute f1(C/n) */
   av1 = avma;
 
-  veint1 = cgetg(cl + 1, t_VEC);
+  cn = cgetr(prec);
+  p1 = gmul2n(cf, -1);
+
+  /* compute veclprime1 */
   for (j = 1; j <= cl; j++)
   {
-    p1 = NULL;
-    for (k = 1; k < j; k++)
-      if (gegal((GEN)cond[j], (GEN)cond[k])) { p1 = (GEN)veint1[k]; break; }
-    if (p1 == NULL)
-    {
-      p1 = veceint1((GEN)c2[j], stoi(nn[j]), prec);
-      veint1[j] = (long)p1;
-    }
-    av2 = avma; p2 = gmael3(dtcr, j, 5, 2);
-    v = (GEN)veclprime2[j];
+    long n0 = 0;
+
+    if (CC[j] != j) continue;
+
+    if (DEBUGLEVEL >1 ) fprintferr("id = %ld (hk = %ld)", j, cl);
+    for (k = 1; k <= cl; k++)
+      if (CC[k] == j)
+	matans[k] = computean((GEN)dtcr[k], nn[k], degs[k], prec);
+
+    cexp = gexp(gneg_i((GEN)c2[j]), prec);
+    av2 = avma; 
+    affsr(1, cn); 
     for (n = 1; n <= nn[j]; n++)
-      if ( (an = EvalCoeff(p2, matan[j][n], degs[j])) )
+    {
+      affrr(gmul(cn, gpowgs(cexp, n - n0)), cn);
+      n0 = n;
+      for (k = 1; k <= cl; k++)
+	if (CC[k] == j && 
+	    (an = EvalCoeff(gmael3(dtcr, k, 5, 2), matans[k][n], degs[k])))
+	  gaffect(gadd((GEN)veclprime1[k], gmul(divrs(cn,n), an)),
+		  (GEN)veclprime1[k]);
+      avma = av2;
+    }
+    for (k = 1; k <= cl; k++)
+      if (CC[k] == j)
+	gaffect(gmul(p1, gmul((GEN)veclprime1[k], (GEN)C[j])), 
+		(GEN)veclprime1[k]);
+
+    veint1 = veceint1((GEN)c2[j], stoi(nn[j]), prec);
+    av2 = avma; 
+    for (n = 1; n <= nn[j]; n++)
+      for (k = 1; k <= cl; k++)
+	if (CC[k] == j && 
+	    (an = EvalCoeff(gmael3(dtcr, k, 5, 2), matans[k][n], degs[k])))
+	{
+	  gaffect(gadd((GEN)veclprime2[k], gmul((GEN)veint1[n], an)), 
+		  (GEN)veclprime2[k]);
+	  avma = av2;
+	}
+
+    for (k = 1; k <= cl; k++)
+      if (CC[k] == j)
       {
-        gaffect(gadd(v, gmul((GEN)p1[n], an)), v);
-        avma = av2;
+	gaffect(gmul(cf, gconj((GEN)veclprime2[k])), (GEN)veclprime2[k]);
+	FreeMat(matans[k], nn[j]);
       }
-    gaffect(gmul(cf, gconj(v)), v);
-    avma = av2;
   }
+  free(matans);
   avma = av1;
+  
+  rep[1] = (long)veclprime1;
   rep[2] = (long)veclprime2;
-  if (DEBUGLEVEL) msgtimer("Compute V2");
-  FreeMat(matan); return gerepileupto(av, rep);
+  
+  if (DEBUGLEVEL) msgtimer("Compute V1 & V2");
+  return gerepileupto(av, rep);
 }
 
 #if 0
@@ -2922,7 +2883,7 @@ static GEN
 AllStark(GEN data,  GEN nf,  long flag,  long newprec)
 {
   long cl, i, j, cpt = 0, av, av2, N, h, v, n, bnd = 300, sq = 1, r1, r2;
-  int ***matan;
+  int **matan;
   GEN p0, p1, p2, S, T, polrelnum, polrel, Lp, W, A, veczeta, sig, valchi;
   GEN degs, ro, C, Cmax, dataCR, cond1, L1, *gptr[2], an, Pi;
 
@@ -2972,8 +2933,6 @@ LABDOUB:
     if (n > bnd) n = bnd;
     if (DEBUGLEVEL) fprintferr("nmax in QuickPol: %ld \n", n);
 
-    matan = ComputeCoeff(dataCR, n, newprec);
-
     p0 = cgetg(3, t_COMPLEX);
     p0[1] = lgetr(newprec); affsr(0, (GEN)p0[1]);
     p0[2] = lgetr(newprec); affsr(0, (GEN)p0[2]);
@@ -2982,14 +2941,15 @@ LABDOUB:
     /* we use the formulae L(1) = sum (an / n) */
     for (i = 1; i <= cl; i++)
     {
+      matan = ComputeCoeff((GEN)dataCR[i], n, degs[i], newprec);
       av2 = avma;
       p1 = p0; p2 = gmael3(dataCR, i, 5, 2);
       for (j = 1; j <= n; j++)
-	if ( (an = EvalCoeff(p2, matan[i][j], degs[i])) )
+	if ( (an = EvalCoeff(p2, matan[j], degs[i])) )
           p1 = gadd(p1, gdivgs(an, j));
       L1[i] = lpileupto(av2, p1);
+      FreeMat(matan, n);
     }
-    FreeMat(matan);
 
     p1 = gmul2n(gpowgs(mpsqrt(Pi), N - 2), 1);
 
