@@ -948,6 +948,7 @@ vecpol_to_mat(GEN v, long n)
 {
   long i,j,d,N = lg(v);
   GEN p1,w, y = cgetg(N, t_MAT);
+  if (typ(v) != t_VEC) err(typeer,"vecpol_to_mat");
   n++;
   for (j=1; j<N; j++)
   {
