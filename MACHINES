@@ -77,7 +77,8 @@ SPARCv7(SS400)  ???  SunOS-4.1.4     gcc          107074  106494  2.0.16(19)DE
 SPARCv7(HWS210) ???  Linux-2.2.5     gcc           98488!      -  2.0.16(14)DE
 ------------------------------------------------------------------------------
 Intel/x86
-AMD Athlon    1800+  Linux-2.4.9     gcc-2.96        696     688  2.2.3     HC
+AMD Athlon  XP1800+  Linux-2.4.17    gcc-3.0.4       616     616  2.2.3 (30)PE
+AMD Athlon    1800+  Linux-2.4.9     gcc-2.96        696     688  2.2.3 (29)HC
 AMD Athlon  1200MHz  Linux-2.4.7     gcc-2.96       1002     992  2.1.2     CL
 AMD Athlon  1100MHz  Linux-2.4.2-2   gcc            1078    1076  2.1.1     DP
 AMD Duron   1000MHz  Linux-2.4.0    egcs            1364    1428  2.0.20    QL
@@ -97,6 +98,7 @@ PentiumIII   800MHz  Linux-2.2.19    gcc-2.96       1638    1624  2.1.2     OT
 PentiumIII   733MHz  Linux-2.2.14   egcs            2080    2090  2.0.19    IS
 PentiumIII   533MHz  Linux-2.2.14    gcc            2710    2730  2.0.19    IS
 PentiumIII   500MHz  Linux-2.2.12   egcs            3154    3176  2.0.18    HC
+PentiumII    450MHz  Linux-2.4.18    gcc-3.0.4      2348    2426  2.2.3 (31)PE
 PentiumII    450MHz  Linux-2.0.35    gcc            3220    3230  2.1.1     TT
 PentiumII    400MHz  Linux-2.3.99    gcc            3392    3410  2.0.20(25)GH
 PentiumII    400MHz  Linux-2.2.14    gcc            3886    3902  2.0.20    GH
@@ -259,6 +261,19 @@ produce a broken binary]
      gcc-2.96 fails
 (29) added -mcpu=athlon -march=athlon to CFLAGS (very minor speedup).
      Don't know clock frequency for Athlon 1800+ (something like 1500-1600MHz)
+(30) cpu=Athlon XP1800+ Mandrake 8.1, Linux-2.4.17
+CFLAGS= -fbranch-probabilities -fstrict-aliasing  -falign-jumps
+-foptimize-sibling-calls -fssa -maccumulate-outgoing-args
+-minline-all-stringops
+-march=athlon   -O3 -DGCC_INLINE -Wall -Wno-implicit  -fomit-frame-pointer
+
+(31) cpu=Pentium II 450@463 (FSB a 103mhz),  Bi-Pro
+Linux-2.4.18-rc2 + patches
+CFLAGS= -fbranch-probabilities  -O3 -DGCC_INLINE -Wall -Wno-implicit
+-fstrict-aliasing -fssa   -foptimize-sibling-calls       -falign-jumps
+-march=pentiumpro -maccumulate-outgoing-args -minline-all-stringops
+-fomit-frame-pointer
+
 
 =============================================================================
 Contributors:
