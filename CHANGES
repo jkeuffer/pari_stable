@@ -171,6 +171,7 @@ IZ  8- logstyle and TeXstyle defaults
        args are taken to be filenames, read upon startup [ _after_ the gprc
        read statements have been processed ]
 GH 11- IA64 level0 inline assembly kernel
+BA 12- GP function galoisidentify and groups identification facility
 
   Remove
     1- remove emacs/compile [ integrated in Makefile ]
