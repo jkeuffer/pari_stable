@@ -3899,6 +3899,17 @@ FpY_FpXY_resultant(GEN a, GEN b0, GEN p)
   setvarn(x, vX); return x;
 }
 
+/* check that theta(maxprime) - theta(27448) >= 2^bound */
+/* NB: theta(27449) ~ 27225.387, theta(x) > 0.98 x for x>7481
+ * (Schoenfeld, 1976 for x > 1155901 + direct calculations) */
+static void
+check_theta(ulong bound)
+{
+  ulong c = (ulong)ceil((bound * LOG2 + 27225.388) / 0.98);
+  if (maxprime() < c)
+    err(talker,"not enough precalculated primes: need primelimit ~ %ld", c);
+}
+
 /* 0, 1, -1, 2, -2, ... */
 #define next_lambda(a) (a>0 ? -a : 1-a)
 
@@ -3980,6 +3991,7 @@ INIT:
   lb = lgef(B); b = u_allocpol(degpol(B), 0);
   bound = ZY_ZXY_ResBound(A,B);
   if (DEBUGLEVEL>4) fprintferr("bound for resultant coeffs: 2^%ld\n",bound);
+  check_theta(bound);
 
   for(;;)
   {
@@ -4169,6 +4181,7 @@ ZX_resultant_all(GEN A, GEN B, ulong bound)
   av2 = avma; lim = stack_lim(av,2);
   if (!bound) bound = ZY_ZXY_ResBound(A,B);
   if (DEBUGLEVEL>4) fprintferr("bound for resultant: 2^%ld\n",bound);
+  check_theta(bound);
 
   for(;;)
   {
