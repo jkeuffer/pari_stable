@@ -1,3 +1,16 @@
+# Version number and patch level.
+. ./version
+version=$VersionMajor.$VersionMinor
+pari_release="$version.$patch"
+if test `expr $VersionMinor % 2` = 1; then
+  pari_release_verbose="$pari_release (STABLE)"
+  libpari_base=pari
+else
+  pari_release_verbose="$pari_release (DEVELOPMENT VERSION)"
+  libpari_base=pari-$version
+fi
+echo "Configuring pari-$pari_release_verbose"
+
 # Processing Options
 dflt_conf_file=dft.Config.in
 fastread=yes

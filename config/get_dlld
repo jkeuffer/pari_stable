@@ -1,3 +1,6 @@
+# Exported variables
+_dlld_list="DLLD DLLDFLAGS EXTRADLLDFLAGS DLSUFFIX soname sodest"
+
 if test "$optimization" = profiling; then DLLD=; else
   case "$osname" in
     os2) DLLD=${DLLD-$LD};;
@@ -20,7 +23,7 @@ if test "$optimization" = profiling; then DLLD=; else
         *) sodest=.$patch.0.0;; # unstable versions
       esac ;;
 # FIXME: gp-dyn.exe crashes on startup
-#   cygwin*) soname= ; sodest= ; DLSUFFIX=dll;;
+#   cygwin*)soname= ; sodest= ; DLSUFFIX=dll;;
     hpux-*) soname= ; sodest= ; DLSUFFIX=sl;;
     irix-*) soname= ; sodest= ;;
     os2-*)  soname= ; sodest= ; DLSUFFIX=dll
@@ -91,9 +94,6 @@ fi
 
 if test -z "$DLLD"; then
   echo "No Dynamic Lib"
-  static=y
 else
   echo "Dynamic Lib linker is  $DLLD  $DLLDFLAGS"
-  static=${static-n}
 fi
-

@@ -16,7 +16,6 @@
 # Perl's Configure and GNU autoconfig were of much help in writing these files.
 # $Id$
 
-# Directories
 TOP=`pwd`
 config_dir=config
 data_dir=data
@@ -26,19 +25,6 @@ examples_dir=examples
 misc_dir=misc
 src_dir=src
 extract_dir_list="$doc_dir $emacs_dir $misc_dir" # for extract_files
-
-# Version number and patch level.
-. $config_dir/version
-version=$VersionMajor.$VersionMinor
-pari_release="$version.$patch"
-if test `expr $VersionMinor % 2` = 1; then
-  pari_release_verbose="$pari_release (STABLE)"
-  libpari_base=pari
-else
-  pari_release_verbose="$pari_release (DEVELOPMENT VERSION)"
-  libpari_base=pari-$version
-fi
-echo "Configuring pari-$pari_release_verbose"
 
 cd $config_dir
 # Process options, initialize
@@ -63,43 +49,15 @@ done
 if test -z "$zcat" -a -n "$gzip"; then zcat="$gzip -dc"; fi
 
 ####################### CONFIGURE - ARCHITECTURE ############################
-. ./get_archos # arch, osname, asmarch, pretty, prettyk
+. ./get_archos # arch, osname, asmarch, pretty
 ####################### CONFIGURE - COMPILATION #############################
-# Which optimization ?
-if test "$fastread" != yes; then
-  cat << EOT
-==========================================================================
-The default is to fully optimize the compilation. You may choose to build
-  an executable for debugging or profiling instead. Choose among :
-       full       debugging       profiling
-EOT
-  echo $n ..."Which optimization do you prefer ? $c"
-  dflt=$optimization; rep='full debugging profiling'; . ./myread
-  optimization=$ans
-fi
-
-. ./get_cc   # CC, CFLAGS, CPP, exe_suff, extraflag
-. ./get_as   # AS, ASFLAGS
-. ./get_ld   # LD, LDFLAGS
-. ./get_dlld # DLLD, DLLDFLAGS, EXTRADLLDFLAGS
-if test "$fastread" != yes; then
-  cat << EOT
-==========================================================================
-Should you change your mind, you only need to modify the lines
-    CC="$CC"
-    CFLAGS="$cflags"
-    LD="$LD"
-    LDFLAGS="$LDFLAGS"
-    DLLD="$DLLD"
-    DLLDFLAGS="$DLLDFLAGS"
-in the Makefile
-==========================================================================
-EOT
-fi
-
+. ./get_cc   # $_cc_list, extraflag
+. ./get_as   # AS, ASFLAGS, KERNELCPPFLAGS, gnuas
+. ./get_ld   # LD, LDFLAGS, LIBS, runpathprefix
+. ./get_dlld # $_dlld_list, fix libpari_base
 ####################### CONFIGURE - LIBC ####################################
 . ./get_double_format # doubleformat, sizeof_long, update pretty
-. ./get_libc # has_*, _has_list
+. ./get_libc # $_has_list, update LIBS
 ####################### CONFIGURE - LIBRARIES ###############################
 # Looking for libraries: X11, gnuplot, readline
 if test "$optimization" != profiling; then
@@ -107,10 +65,7 @@ if test "$optimization" != profiling; then
   echo Checking for optional libraries and headers...
   . ./get_X11  # X11, Xincroot, extralib
   . ./get_gnuplot_libs # gnuplot, gnuplot_libs
-  . ./get_readline # readline, rl_fullname, rl_include, CPPF_defined
-                   # rl_message, rl_completion_matches, rl_completion_func_t
-                   # rl_refresh_line_oldproto, rl_appendchar, rl_genericbind
-                   # rl_save_prompt, _rl_save_prompt, readline_enabledp
+  . ./get_readline # $_readline_list
   . ./get_graphic_lib # which_graphic_lib, graphic_lib_dll
   if test -z "$X11$gnuplot$readline" \
           -a "X$which_graphic_lib" != Xgnuplot-dynamic; then
@@ -118,20 +73,20 @@ if test "$optimization" != profiling; then
   fi
 fi
 ####################### CONFIGURE - MAKE ####################################
-. ./get_install # bindir includedir mandir miscdir libdir datadir
-. ./get_objdir  # objdir
+. ./get_install # $_install_list
+. ./get_objdir  # objdir, cdobjdir
 . ./get_static  # static
+echo "Hi-Res Graphics: $which_graphic_lib"
 # For dynamic linking, before and after installing
 case "$osname" in
   *cygwin*) LDDYN="-L$libdir -lpari_dll" ; runpath="$libdir" ;
 	    DYNLIBS=-lpari_dll ; DYNFLAGS=-Dlibpari_USE_DLL ;;
   *)        LDDYN="-L$libdir -l$libpari_base" ; runpath="$libdir" ;;
 esac
-
 # Which copy, SHELL ?
-case "$osname-$arch" in
-  os2-*) ln_s=cp;      make_sh=sh;;
-  *)     ln_s="ln -s"; make_sh="/bin/sh";;
+case "$osname" in
+  os2) ln_s=cp;      make_sh=sh;;
+  *)   ln_s="ln -s"; make_sh="/bin/sh";;
 esac
 ####################### CONFIGURE - CLEANUP #################################
 rm -f gmon.out # created by Configure -pg
@@ -155,21 +110,18 @@ case "$osname" in
 esac
 
 for variable in\
-  pari_release pari_release_verbose\
-  libpari_base version TOP config_dir src_dir emacs_dir doc_dir\
-  bindir includedir mandir miscdir libdir datadir\
-  optimization objdir static suffix\
-  ASMINLINE arch asmarch osname pretty prefix share_prefix\
-  __gnuc__ gnuas CPP AS ASFLAGS CC cflags DBGFLAGS OPTFLAGS LD LDFLAGS\
-  DLLD DLSUFFIX soname sodest KERNELCPPFLAGS DLLDFLAGS EXTRADLLDFLAGS\
-  runpath runpathprefix LDDYN LIBS DYNLIBS DYNFLAGS DYNRELOC\
-  ranlib gzip zcat emacs perl ln_s make_sh exe_suff\
-  readline readline_enabledp CPPF_defined rl_refresh_line_oldproto\
-  rl_appendchar rl_genericbind rl_save_prompt _rl_save_prompt rl_message\
-  rl_completion_matches rl_completion_func_t\
-  RLINCLUDE RLLIBS\
+  pari_release pari_release_verbose version libpari_base static TOP objdir\
+  arch asmarch osname pretty\
+  gnuas AS ASFLAGS KERNELCPPFLAGS \
+  LD LDFLAGS LIBS runpathprefix\
+  runpath LDDYN DYNLIBS DYNFLAGS DYNRELOC\
+  ranlib gzip zcat emacs perl ln_s make_sh\
   sizeof_long doubleformat\
-  gnuplot extralib X11 Xincroot which_graphic_lib gnuplot_libs graphic_lib_dll\
+  X11 Xincroot extralib which_graphic_lib graphic_lib_dll gnuplot gnuplot_libs\
+  $_install_list\
+  $_cc_list\
+  $_dlld_list\
+  $_readline_list\
   $_has_list; do
   eval "echo $variable=\'"'$'"$variable\'" \>\> $dflt_conf_file
 done
@@ -183,11 +135,6 @@ EOT
 
 echo $n "Shall we try to build pari $version.$patch ($status) now (y/n)? $c"
 dflt=n; rep='y n'; . $config_dir/myread
-
-cdobjdir=
-if test "$objdir" != "$cst_objdir"; then 
-  cdobjdir="cd $objdir; "
-fi
 
 case $ans in
 y) if (cd $objdir; make gp); then

@@ -1,3 +1,19 @@
+# Exported variables
+_cc_list="__gnuc__ CC cflags optimization DBGFLAGS OPTFLAGS CPP exe_suff suffix ASMINLINE DLCFLAGS"
+
+# Which optimization ?
+if test "$fastread" != yes; then
+  cat << EOT
+==========================================================================
+The default is to fully optimize the compilation. You may choose to build
+  an executable for debugging or profiling instead. Choose among :
+       full       debugging       profiling
+EOT
+  echo $n ..."Which optimization do you prefer ? $c"
+  dflt=$optimization; rep='full debugging profiling'; . ./myread
+  optimization=$ans
+fi
+
 case "$osname-$arch" in
   os2-*)   exe_suff=.exe; extraflag="-Zexe";;
   cygwin*) exe_suff=.exe; extraflag="";;

@@ -1,3 +1,6 @@
+# Exported variables
+_install_list="prefix share_prefix bindir includedir mandir miscdir libdir datadir"
+
 dflt=$prefix; rep=
 test "$fastread" = yes || cat <<EOT
 ==========================================================================

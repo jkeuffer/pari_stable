@@ -1,3 +1,9 @@
+#exported variables
+_readline_list="readline readline_enabledp CPPF_defined \
+rl_refresh_line_oldproto rl_appendchar rl_genericbind rl_save_prompt \
+_rl_save_prompt rl_message rl_completion_matches rl_completion_func_t \
+RLINCLUDE RLLIBS"
+
 readline_add="$GP_READLINE $TOP/readline-$osname-$arch $TOP/readline"
 pth="$readline_add $libpth"
 lib=readline; . ./locatelib

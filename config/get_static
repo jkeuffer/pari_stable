@@ -1,4 +1,8 @@
-if test "$optimization" = debugging; then static=y; fi
+if test -z "$DLLD" -o "$optimization" = debugging; then
+  static=y
+else
+  static=${static-n}
+fi
 if test "$fastread" != yes; then
   if test -z "$DLLD"; then
     cat <<EOT
@@ -8,10 +12,10 @@ EOT
   else
     cat <<EOT
 ==========================================================================
-By default, we will try to build the shared library and gp will be an
-  executable dynamically linked with it. Do you prefer to have the static
-  archive libpari.a and a statically linked executable (which is a bit
-  faster, but takes more disk place) ?
+By default, we try to build the shared library and gp is an executable
+  dynamically linked with it. Do you prefer to have the static archive
+  libpari.a and a statically linked executable (which is a bit faster,
+  but takes more disk place) ?
 You can always type "make all" in case you want both later.
 EOT
   echo $n "Do you want static executable and library ? $c"
@@ -19,6 +23,6 @@ EOT
   fi
 fi
 case "$static" in
-  y) echo "Default is static executable and archive library, graphic=$which_graphic_lib" ;;
-  n) echo "Default is dynamic executable and shared library, graphic=$which_graphic_lib" ;;
+  y) echo "Default is static executable and archive library";;
+  n) echo "Default is dynamic executable and shared library";;
 esac

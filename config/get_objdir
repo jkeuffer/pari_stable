@@ -2,9 +2,9 @@
 pre=O
 cst_objdir=$pre$osname-$arch;
 case "$optimization" in
-  full)      objdir=$pre$osname-$arch ;;
-  debugging) objdir=$pre$osname-$arch.dbg ;;
-  profiling) objdir=$pre$osname-$arch.prf ;;
+  full)      objdir=$cst_objdir;;
+  debugging) objdir=$cst_objdir.dbg ;;
+  profiling) objdir=$cst_objdir.prf ;;
 esac
 if test -n "$dfltobjdir"; then
   objdir="$dfltobjdir"
@@ -20,3 +20,7 @@ EOT
   objdir=$ans
 fi
 
+cdobjdir=
+if test "$objdir" != "$cst_objdir"; then 
+  cdobjdir="cd $objdir; "
+fi
