@@ -572,8 +572,8 @@ GEN nilord(GEN p,GEN fx,long mf,GEN gx,long flag);
 GEN Decomp(GEN p,GEN f,long mf,GEN theta,GEN chi,GEN nu,long r);
 static GEN dbasis(GEN p, GEN f, long mf, GEN alpha, GEN U);
 static GEN maxord(GEN p,GEN f,long mf);
-static GEN testb2(GEN p,GEN fa,long Fa,GEN theta,GEN pmf,long Ft,GEN ns);
-static GEN testc2(GEN p,GEN fa,GEN pmr,GEN pmf,GEN alph2,
+static int testb2(GEN *w,GEN p,GEN fa,long Fa,GEN theta,GEN pmf,long Ft,GEN ns);
+static int testc2(GEN *w,GEN p,GEN fa,GEN pmr,GEN pmf,GEN alph2,
 		  long Ea,GEN thet2,long Et,GEN ns);
 
 static int
@@ -1044,7 +1044,7 @@ static void
 update_den(GEN *e, GEN *de)
 {
   GEN ce = Q_content(*e);
-  if (ce != gun) { 
+  if (ce != gun) {
     ce = gcdii(*de, ce);
     *de = diviiexact(*de, ce);
     *e  = gdivexact(*e, ce);
@@ -1168,7 +1168,7 @@ redelt(GEN a, GEN N, GEN p)
 {
   GEN da, z;
   a = Q_remove_denom(a, &da);
-  if (da) 
+  if (da)
   {
     long v = pvaluation(da, p, &z);
     if (v) {
@@ -1369,18 +1369,15 @@ mycaract(GEN f, GEN beta, GEN p, GEN pp, GEN ns)
 
 /* Factor characteristic polynomial of beta mod p */
 static GEN
-factcp(GEN p, GEN f, GEN beta, GEN pp, GEN ns)
+factcp(GEN p, GEN f, GEN beta, GEN pp, GEN ns, long *ptl)
 {
   pari_sp av;
-  GEN chi,nu, b = cgetg(4,t_VEC);
-  long l;
+  GEN chi,nu, b = cgetg(3,t_VEC);
 
   chi = mycaract(f,beta,p,pp,ns);
-  av = avma; nu = (GEN)factmod0(chi,p)[1]; l = lg(nu)-1;
-  nu = (GEN)nu[1];
-  b[1] = (long)chi;
-  b[2] = lpilecopy(av,nu);
-  b[3] = lstoi(l); return b;
+  av = avma; nu = (GEN)factmod0(chi,p)[1];
+  b[1] = (long)chi; *ptl = lg(nu)-1;
+  b[2] = lpilecopy(av, (GEN)nu[1]); return b;
 }
 
 /* Compute nu_beta in Fp[X]. If something unexpected happens, return NULL */
@@ -1500,20 +1497,19 @@ update_alpha(GEN p, GEN fx, GEN alph, GEN chi, GEN pmr, GEN pmf, long mf,
     pdr = respm(nchi, derivpol(nchi), pmr);
     if (signe(pdr)) break;
     nalph = gadd(nalph, gmul(p, polx[v]));
-    if (first) 
+    if (first)
     {
       /* check whether we can get a decomposition */
       first = 0;
-      w = factcp(p, fx, nalph, NULL, ns);
+      w = factcp(p, fx, nalph, NULL, ns, &l);
       nchi = (GEN)w[1];
       nnu  = (GEN)w[2];
-      l    = itos((GEN)w[3]);
       if (l > 1) return Decomp(p, fx, mf, nalph, nchi, nnu, 0);
     }
     /* nchi was too reduced at this point; try a larger precision */
     pmr  = sqri(pmr);
   }
-  
+
   if (is_pm1(pdr))
     npmr = gun;
   else
@@ -1633,18 +1629,12 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 
       if (fm == -1 || (!fm && eq > go_fm && !er))
       {
-	if (fm == 0)
-	{
-	  if (DEBUGLEVEL >= 5)
-	    fprintferr("  ** switching to fast mode\n");
+	if (fm == 0) {
+	  if (DEBUGLEVEL >= 5) fprintferr("  ** switching to fast mode\n");
 	  fm = 1;
-	  chib = NULL;
-	  chig = NULL;
-	}
-	else
-	{
-	  if (DEBUGLEVEL >= 5)
-	    fprintferr("  ** something's wrong\n  ** switching back to normal mode\n");
+	  chib = chig = NULL;
+	} else {
+	  if (DEBUGLEVEL >= 5) fprintferr("  ** switching to normal mode\n");
 	  fm = 0;
 	  go_fm = eq+2;
 	}
@@ -1655,7 +1645,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	er++;
 	if (!(er%Ea))  { er = 0; eq++; }
       }
-      else 
+      else
       {
         long L, E;
 	/* if pmf divides norm(beta) then it's useless */
@@ -1696,13 +1686,12 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
       if (DEBUGLEVEL >= 6)
 	fprintferr("  gamma = %Z\n", gamm);
 
-      if (!fm) 
+      if (!fm)
       {
-      
 	if (er || !chib)
 	{
 	  /* reducing modulo pdr is too much in some cases */
-	  chig = mycaract(chi, gamm, p, pmr, ns); 
+	  chig = mycaract(chi, gamm, p, pmr, ns);
 	  if (fm && !chig) { fm = -1; continue; }
 	}
 	else
@@ -1710,12 +1699,12 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	  chig = poleval(chib, gmul(polx[v], gpowgs(p, eq)));
 	  chig = gdiv(chig, gpowgs(p, N*eq));
 	  if (gcmp1(chig))
-	  { 
+	  {
 	    if (fm) { fm = -1; continue; }
 	    chig = polmodi(chig, pmf);
 	  }
 	}
-      
+
 	if (!chig || !gcmp1(Q_denom(chig)))
 	{ /* Valuation of beta was wrong ==> gamma fails the v*-test */
 	  long L, E;
@@ -1723,7 +1712,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	  vstar(p, chib, &L, &E);
 	  eq = (long)(-L / E);
 	  er = (long)(-L*Ea / E - eq*Ea);
-	  
+	
 	  if (eq) gamm = gmul(beta, gpowgs(p, eq)); else gamm = beta;
 	  if (er)
 	  {
@@ -1751,13 +1740,13 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	if (Fa % Fg)
 	{ /* compute a new element such that F = lcm(Fa, Fg) */
 	  if (DEBUGLEVEL >= 5) fprintferr("  Increasing Fa\n");
-	  w = testb2(p, chi, Fa, gamm, pmf, Fg, ns);
-	  if (gcmp1((GEN)w[1]))
+	
+	  if (testb2(&w, p, chi, Fa, gamm, pmf, Fg, ns))
 	  { /* at least 2 factors mod p ==> chi can be split */
-	    phi = RX_RXQ_compo((GEN)w[2], alph, fx);
+	    phi = RX_RXQ_compo((GEN)w[1], alph, fx);
 	    phi = redelt(phi, p, p);
 	    if (flag) mf += 3;
-	    return Decomp(p, fx, mf, phi, (GEN)w[3], (GEN)w[4], flag);
+	    return Decomp(p, fx, mf, phi, (GEN)w[2], (GEN)w[3], flag);
 	  }
 	  break;
 	}
@@ -1765,10 +1754,10 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
       else
       {
 	/* using fastnu: */
-	nug = fastnu(p, chi, gamm, pdr); 
+	nug = fastnu(p, chi, gamm, pdr);
 	if (!nug) { fm = -1; continue; }
       }
-      
+
       /* we look for a root delta of nug in Fp[alpha] such that
 	 vp(gamma - delta) > 0. This root can then be used to
 	 improved the approximation given by beta */
@@ -1796,9 +1785,9 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	if (fm)
 	{
 	  if (fastvalpos(eta, chi, p, ns, Ea)) break;
-	  continue; 
+	  continue;
 	}
-	    
+	
 	if (chig && typ(delt) == t_INT)
 	{
           chie = poleval(chig, gadd(polx[v], delt));
@@ -1809,13 +1798,12 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	else
 	{
 	  p1 = modii(ZX_QX_resultant(chi, eta), p);
-	  if (signe(p1)) continue; 
-	  
-	  p1   = factcp(p, chi, eta, pmr, ns);
+	  if (signe(p1)) continue;
+	
+	  p1   = factcp(p, chi, eta, pmr, ns, &l);
 	  chie = (GEN)p1[1];
 	  nue  = (GEN)p1[2];
-	  l    = itos((GEN)p1[3]);
-	} 
+	}
 	
         if (l > 1)
         {
@@ -1846,15 +1834,13 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	  if (DEBUGLEVEL >= 5)
 	    fprintferr("  Increasing Ea\n");
 	  pie = redelt(pie, p, p);
-	  /* we compute a new element such E = lcm(Ea, Ee) */	
-	  w = testc2(p, chi, pmr, pmf, nu, Ea, pie, Ee, ns);
-	  if (gcmp1((GEN)w[1]))
-	  {
-	    /* there are at least 2 factors mod. p => chi can be split */
-	    phi = RX_RXQ_compo((GEN)w[2], alph, fx);
+	  /* compute a new element such E = lcm(Ea, Ee) */	
+	  if (testc2(&w, p, chi, pmr, pmf, nu, Ea, pie, Ee, ns))
+	  { /* there are at least 2 factors mod. p => chi can be split */
+	    phi = RX_RXQ_compo((GEN)w[1], alph, fx);
 	    phi = redelt(phi, p, p);
 	    if (flag) mf += 3;
-	    return Decomp(p, fx, mf, phi, (GEN)w[3], (GEN)w[4], flag);
+	    return Decomp(p, fx, mf, phi, (GEN)w[2], (GEN)w[3], flag);
 	  }
 	  break;
 	}
@@ -1872,47 +1858,41 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
     }
 
     /* we replace alpha by a new alpha with a larger F or E */
-    alph = RX_RXQ_compo((GEN)w[2], alph, fx);
-    chi  = (GEN)w[3];
-    nu   = (GEN)w[4];
+    alph = RX_RXQ_compo((GEN)w[1], alph, fx);
+    chi  = (GEN)w[2];
+    nu   = (GEN)w[3];
 
     w = update_alpha(p, fx, alph, chi, pmr, pmf, mf, ns);
     alph = (GEN)w[1];
     chi  = (GEN)w[2];
     pmr  = (GEN)w[3];
     pdr  = (GEN)w[4];
-    
-    /* that can happen if p does not divide the field discriminant! */
+
     if (is_pm1(pmr))
-    {
-      if (flag)
-      {
-	p1 = (GEN)factmod0(chi, p)[1];
-	l  = lg(p1) - 1;
-	if (l == 1) { avma = av; return NULL; }
-	phi = redelt(alph, p, p);
-	return Decomp(p, fx, ggval(pmf, p), phi, chi, (GEN)p1[l], flag);
-      }
-      else
-	return dbasis(p, fx, mf, alph, chi);
+    { /* may happen if p does not divide the field discriminant */
+      if (!flag) return dbasis(p, fx, mf, alph, chi);
+      p1 = (GEN)factmod0(chi, p)[1];
+      l  = lg(p1) - 1;
+      if (l == 1) { avma = av; return NULL; }
+      phi = redelt(alph, p, p);
+      return Decomp(p, fx, ggval(pmf, p), phi, chi, (GEN)p1[l], flag);
     }
     fm = 0;
   }
 }
 
-/* Returns [1,phi,chi,nu] if phi non-primary
- *         [2,phi,chi,nu] with F_phi = lcm (F_alpha, F_theta)
- *                         and E_phi = E_alpha
- */
-static GEN
-testb2(GEN p, GEN fa, long Fa, GEN theta, GEN pmf, long Ft, GEN ns)
+/* Returns 1 if phi non-primary
+ *         0 otherwise with F_phi = lcm(F_alpha, F_theta) and E_phi = E_alpha
+ * set w = [phi,chi,nu] */
+static int
+testb2(GEN *ptw, GEN p, GEN fa, long Fa, GEN theta, GEN pmf, long Ft, GEN ns)
 {
-  long Dat, v = varn(fa);
+  long Dat, l, v = varn(fa);
   ulong t, m;
   GEN b, w, phi, h;
 
   Dat = clcm(Fa, Ft) + 3;
-  b = cgetg(5, t_VEC);
+  b = cgetg(4, t_VEC);
   m = p[2];
   if (degpol(p) > 0 || ((long)m) < 0) m = 0;
 
@@ -1920,29 +1900,27 @@ testb2(GEN p, GEN fa, long Fa, GEN theta, GEN pmf, long Ft, GEN ns)
   {
     h = m? stopoly(t, m, v): scalarpol(utoi(t), v);
     phi = gadd(theta, gmod(h, fa));
-    w = factcp(p, fa, phi, pmf, ns);
-    h = (GEN)w[3];
-    if (h[2] > 1) { b[1] = un; break; }
+    w = factcp(p, fa, phi, pmf, ns, &l);
+    if (l > 1) { b[1] = un; break; }
     if (lg(w[2]) == Dat) { b[1] = deux; break; }
   }
 
-  b[2] = (long)phi;
-  b[3] = w[1];
-  b[4] = w[2];
-  return b;
+  b[1] = (long)phi;
+  b[2] = w[1];
+  b[3] = w[2]; *ptw = b; return (l > 1);
 }
 
-/* Returns [1, phi, chi, nu] if phi non-primary
- *         [2, phi, chi, nu] if E_phi = lcm (E_alpha, E_theta)
- */
-static GEN
-testc2(GEN p, GEN fa, GEN pmr, GEN pmf, GEN alph2, long Ea, GEN thet2,
-       long Et, GEN ns)
+/* Returns 1 if phi non-primary
+ *         0 otherwise, E_phi = lcm(E_alpha, E_theta)
+ * set w = [phi, chi, nu] */
+static int
+testc2(GEN *ptw, GEN p, GEN fa, GEN pmr, GEN pmf, GEN alph2, long Ea,
+       GEN thet2, long Et, GEN ns)
 {
-  GEN b, c1, c2, c3, psi, phi, w, h;
-  long r, s, t, v = varn(fa);
+  GEN b, c1, c2, c3, psi, phi, w;
+  long l, r, s, t, v = varn(fa);
 
-  b=cgetg(5, t_VEC);
+  b=cgetg(4, t_VEC);
 
   (void)cbezout(Ea, Et, &r, &s); t = 0;
   while (r < 0) { r = r + Et; t++; }
@@ -1955,13 +1933,10 @@ testc2(GEN p, GEN fa, GEN pmr, GEN pmf, GEN alph2, long Ea, GEN thet2,
   psi = redelt(c3, pmr, p);
   phi = gadd(polx[v], psi);
 
-  w = factcp(p, fa, phi, pmf, ns);
-  h = (GEN)w[3];
-  b[1] = (h[2] > 1)? un: deux;
-  b[2] = (long)phi;
-  b[3] = w[1];
-  b[4] = w[2];
-  return b;
+  w = factcp(p, fa, phi, pmf, ns, &l);
+  b[1] = (long)phi;
+  b[2] = w[1];
+  b[3] = w[2]; *ptw = b; return (l > 1);
 }
 
 /*******************************************************************/
