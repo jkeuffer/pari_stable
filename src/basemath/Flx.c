@@ -25,9 +25,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /* Flx objects are defined as follows:
    Let l an ulong. An Flx is a t_VECSMALL:
    x[0] = codeword
-   x[1] = variable number (signe is not stored).
+   x[1] = evalvarn(variable number)  (signe is not stored).
    x[2] = a_0 x[3] = a_1, etc.
    With 0 <= a_i < l
+   
+   signe(x) is not valid. Use degpol(x)>=0 instead.
 */
 
 #define lswap(x,y) {long _z=x; x=y; y=_z;}
@@ -469,21 +471,21 @@ Flx_sqrspec_basecase(GEN x, ulong p, long nx)
   ulong p1;
   GEN z;
 
-  if (!nx) return Flx_zero(x[1]);
+  if (!nx) return Flx_zero(0);
   lz = (nx << 1) + 1, nz = lz-2;
   z = cgetg(lz, t_VECSMALL) + 2;
   if (u_OK_ULONG(p))
   {
     for (i=0; i<nx; i++)
     {
-      p1 = Flx_mullimb_ok(x,x,p,0, (i+1)>>1);
+      p1 = Flx_mullimb_ok(x+i,x,p,0, (i+1)>>1);
       p1 <<= 1; if (p1 & HIGHBIT) p1 %= p;
       if ((i&1) == 0) p1 += x[i>>1] * x[i>>1];
       z[i] = (long) (p1 % p);
     }
     for (  ; i<nz; i++)
     {
-      p1 = Flx_mullimb_ok(x,x,p,i-nx+1, (i+1)>>1);
+      p1 = Flx_mullimb_ok(x+i,x,p,i-nx+1, (i+1)>>1);
       p1 <<= 1; if (p1 & HIGHBIT) p1 %= p;
       if ((i&1) == 0) p1 += x[i>>1] * x[i>>1];
       z[i] = (long) (p1 % p);
@@ -493,20 +495,20 @@ Flx_sqrspec_basecase(GEN x, ulong p, long nx)
   {
     for (i=0; i<nx; i++)
     {
-      p1 = Flx_mullimb(x,x,p,0, (i+1)>>1);
+      p1 = Flx_mullimb(x+i,x,p,0, (i+1)>>1);
       p1 = adduumod(p1, p1, p);
       if ((i&1) == 0) p1 = adduumod(p1, muluumod(x[i>>1], x[i>>1], p), p);
       z[i] = (long)p1;
     }
     for (  ; i<nz; i++)
     {
-      p1 = Flx_mullimb(x,x,p,i-nx+1, (i+1)>>1);
+      p1 = Flx_mullimb(x+i,x,p,i-nx+1, (i+1)>>1);
       p1 = adduumod(p1, p1, p);
       if ((i&1) == 0) p1 = adduumod(p1, muluumod(x[i>>1], x[i>>1], p), p);
       z[i] = (long)p1;
     }
   }
-  z -= 2; z[1]=x[1]; return Flx_renormalize(z,lz);
+  z -= 2; z[1] = 0; return Flx_renormalize(z,lz);
 }
 
 GEN
@@ -527,9 +529,8 @@ Flx_sqrspec(GEN a, ulong p, long na)
 
   while (na && !a[0]) { a++; na--; v += 2; }
   av = avma;
-  if (na == 0) return Flx_zero(0);
   if (na < Flx_SQR_LIMIT) 
-    return Flx_shiftip(av, Flx_mulspec_basecase(a,a,p,na,na), v);
+    return Flx_shiftip(av, Flx_sqrspec_basecase(a,p,na), v);
   i=(na>>1); n0=na-i; na=i;
   a0=a+n0; n0a=n0;
   while (n0a && !a[n0a-1]) n0a--;
