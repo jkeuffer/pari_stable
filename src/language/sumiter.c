@@ -165,7 +165,7 @@ forprime(entree *ep, GEN ga, GEN gb, char *ch)
   d = prime_loop_init(ga,gb, &a,&b, prime);
   if (!d) { avma = av; return; }
 
-  avma = av; push_val(ep, prime);
+  avma = av; push_val(ep, (GEN)prime);
   while (prime[2] < b)
   {
     (void)lisseq(ch); if (loop_break()) break;
@@ -495,8 +495,8 @@ prodinf1(entree *ep, GEN a, char *ch, long prec)
 GEN
 prodeuler(entree *ep, GEN ga, GEN gb, char *ch, long prec)
 {
-  long prime[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
-  long a,b;
+  long p[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
+  ulong a,b, *prime = p;
   pari_sp av, av0 = avma, lim;
   GEN p1,x = realun(prec);
   byteptr d;
@@ -507,7 +507,7 @@ prodeuler(entree *ep, GEN ga, GEN gb, char *ch, long prec)
 
   av = avma; push_val(ep, prime);
   lim = stack_lim(avma,1);
-  while ((ulong)prime[2] < (ulong)b)
+  while (prime[2] < b)
   {
     p1 = lisexpr(ch); if (did_break()) err(breaker,"prodeuler");
     x = gmul(x,p1);
@@ -533,15 +533,16 @@ prodeuler(entree *ep, GEN ga, GEN gb, char *ch, long prec)
 GEN
 direulerall(entree *ep, GEN ga, GEN gb, char *ch, GEN c)
 {
-  long prime[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
+  long pp[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
+  ulong a, b, i, k, n, p, *prime = pp;
   pari_sp av0 = avma, av, lim = stack_lim(av0, 1);
-  long p,n,i,j,k,tx,lx,a,b;
-  GEN x,y,s,polnum,polden;
+  long j, tx, lx;
+  GEN x, y, s, polnum, polden;
   byteptr d;
 
   d = prime_loop_init(ga,gb, &a,&b, prime);
-  n = c? itos(c): b;
-  if (!d || b < 2 || n <= 0) return _vec(gun);
+  n = c? itou(c): b;
+  if (!d || b < 2 || (c && signe(c) < 0)) return _vec(gun);
   if (n < b) b = n;
   push_val(ep, prime);
 
@@ -565,7 +566,7 @@ direulerall(entree *ep, GEN ga, GEN gb, char *ch, GEN c)
     }
     else
     {
-      ulong k1,q, qlim;
+      ulong k1, q, qlim;
       if (tx != t_POL) err(typeer,"direuler");
       c = truecoeff(polnum,0);
       if (!gcmp1(c))
@@ -577,12 +578,12 @@ direulerall(entree *ep, GEN ga, GEN gb, char *ch, GEN c)
       }
       for (i=1; i<=n; i++) y[i]=x[i];
       lx=degpol(polnum);
-      q=p; qlim = n/p; j=1;
-      while (q<=(ulong)n && j<=lx)
+      q = p; qlim = n/p; j=1;
+      while (q<=n && j<=lx)
       {
 	c=(GEN)polnum[j+2];
 	if (!gcmp0(c))
-	  for (k=1,k1=q; k1<=(ulong)n; k1+=q,k++)
+	  for (k=1,k1=q; k1<=n; k1+=q,k++)
 	    x[k1] = ladd((GEN)x[k1], gmul(c,(GEN)y[k]));
         if (q > qlim) break;
 	q*=p; j++;
