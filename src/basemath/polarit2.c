@@ -3044,6 +3044,7 @@ Q_content(GEN x)
         d = ggcd(d, Q_content((GEN)x[i]));
       return gerepileupto(av, d);
     case t_POLMOD: return Q_content((GEN)x[2]);
+    case t_COMPLEX: return ggcd(Q_content((GEN)x[1]), Q_content((GEN)x[2]));
   }
   err(typeer,"Q_content");
   return NULL; /* not reached */
