@@ -50,6 +50,7 @@ BA  5- [Configure:] add -lm -lc to EXTRADLLDFLAGS, not DLLDFLAGS
        now x has 200 words of precision
    10- stack corruption in addition (t_INT + t_PADIC)
    11- factorpadic(z+y,2,4) --> SEGV
+   12- wrong result in idealchinese when the y_i had denominator
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available

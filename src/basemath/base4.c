@@ -1348,18 +1348,15 @@ famat_reduce(GEN fa)
 GEN
 famat_to_nf_modideal_coprime(GEN nf, GEN g, GEN e, GEN id)
 {
-  GEN t = NULL, ch,h,n,z,idZ = gcoeff(id,1,1);
+  GEN t = NULL, dh,h,n,z,idZ = gcoeff(id,1,1);
   long i, lx = lg(g);
   if (is_pm1(idZ)) lx = 1; /* id = Z_K */
   for (i=1; i<lx; i++)
   {
     n = (GEN)e[i]; if (!signe(n)) continue;
-    h = (GEN)g[i]; ch = denom(h);
-    if (!is_pm1(ch))
-    {
-      h = gmul(h,ch); ch = mpinvmod(ch,idZ);
-      h = gmod(gmul(h,ch), idZ);
-    }
+    h = Q_remove_denom((GEN)g[i], &dh);
+    if (dh)
+      h = FpV_red(gmul(h,mpinvmod(dh,idZ)), idZ);
     z = element_powmodideal(nf, h, n, id);
     t = (t == NULL)? z: element_mulmodideal(nf, t, z, id);
   }
@@ -2507,6 +2504,35 @@ idealappr0(GEN nf, GEN x, long fl) {
   return fl? idealapprfact(nf, x): idealappr(nf, x);
 }
 
+/* merge a^e b^f. Assume a and b sorted. Keep 0 exponents */
+static void
+merge_factor(GEN *pa, GEN *pe, GEN b, GEN f)
+{
+  GEN A, E, a = *pa, e = *pe;
+  long k, i, la = lg(a), lb = lg(b), l = la+lb-1;
+
+  A = cgetg(l, t_COL);
+  E = cgetg(l, t_COL);
+  k = 1;
+  for (i=1; i<la; i++) 
+  {
+    A[i] = a[i];
+    E[i] = e[i];
+    if (k < lb && gegal((GEN)A[i], (GEN)b[k]))
+    {
+      E[i] = laddii((GEN)E[i], (GEN)f[k]);
+      k++;
+    }
+  }
+  for (; k < lb; i++,k++)
+  {
+    A[i] = b[k];
+    E[i] = f[k];
+  }
+  setlg(A, i); *pa = A;
+  setlg(E, i); *pe = E;
+}
+
 /* Given a prime ideal factorization x with possibly zero or negative exponents,
  * and a vector w of elements of nf, gives a b such that
  * v_p(b-w_p)>=v_p(x) for all prime ideals p in the ideal factorization
@@ -2528,13 +2554,21 @@ idealchinese(GEN nf, GEN x, GEN w)
     err(talker,"not a suitable vector of elements in idealchinese");
   if (r==1) return gscalcol_i(gun,N);
 
-  den = denom(w);
-  if (!gcmp1(den))
+  w = Q_remove_denom(w, &den);
+  if (den)
   {
-    GEN fa = famat_reduce(famat_mul(x, idealfactor(nf,den)));
-    L = (GEN)fa[1]; r = lg(L);
-    e = (GEN)fa[2];
+    GEN p = gen_sort(x, cmp_IND|cmp_C, &cmp_prime_ideal);
+    GEN fa = idealfactor(nf,den); /* sorted */
+    L = vecextract_p(L, p);
+    e = vecextract_p(e, p);
+    w = vecextract_p(w, p); settyp(w, t_VEC); /* make sure typ = t_VEC */
+    merge_factor(&L, &e, (GEN)fa[1], (GEN)fa[2]);
+    i = lg(L);
+    w = concatsp(w, zerovec(i - r));
+    r = i;
   }
+  else
+    e = dummycopy(e); /* don't destroy x[2] */
   for (i=1; i<r; i++)
     if (signe(e[i]) < 0) e[i] = zero;
 
@@ -2545,10 +2579,13 @@ idealchinese(GEN nf, GEN x, GEN w)
   v = idealaddmultoone(nf,z); s = NULL;
   for (i=1; i<r; i++)
   {
+    if (gcmp0((GEN)w[i])) continue;
     t = element_mul(nf, (GEN)v[i], (GEN)w[i]);
     s = s? gadd(s,t): t;
   }
-  return gerepileupto(av, appr_reduce(s,y));
+  if (!s) { avma = av; return zerocol(N); }
+  y = appr_reduce(s,y);
+  return gerepileupto(av, den? gdiv(y,den): y);
 }
 
 static GEN
