@@ -73,6 +73,8 @@ BA 35- nfgaloisconj(polcyclo(40)): accuracy lost
 IS 36- typo in squfof tuning on 64bit machines
    37- -lm doesn't exist on MacOS X
 BD 38- typo in src/kernel/l0asm.c: ulong not recognized by MSVC
+IZ 39- TeX quasi-parsing in gphelp
+   40- ^C in gp would kill an xdvi launched by gphelp via ?? [detach from tty]
 
   Changed
     1- DOS distribution archives (GPM removed)
@@ -90,11 +92,14 @@ IK 12- let lisGEN() return NULL when EOF is met (was oo loop)
    13- algorithm for zeta(), gamma() [initial GP code by HC]
    14- improved rnfnormgroup() [reduce number of calls to isprincipal]
 IZ 15- flags for OS/2 build + use generic [pre|suf]fix for object files
+IZ 16- readline: hit_return() would not work after Esc-H
+                 extend online help recognition capabilities (Esc h/H, F1)
 
   Added
     1- file README.WIN
 GN  2- Jebelean extended gcd
 XR  3- new flag to rnfconductor (check extension is abelian)
+IZ  4- set of default colors (boldfg)
 
   Removed
     1- obsolete undocumented functions oldidealinv, idealinv0
