@@ -80,10 +80,12 @@ static int did_init_matched = 0;
 #  define COMPLETION_MATCHES ((CF)rl_completion_matches)
 #  define FILE_COMPLETION ((GF)rl_filename_completion_function)
 #  define USER_COMPLETION ((GF)rl_username_completion_function)
+#  define DING rl_ding
 #else
 #  define COMPLETION_MATCHES ((CF)completion_matches)
 #  define FILE_COMPLETION ((GF)filename_completion_function)
 #  define USER_COMPLETION ((GF)username_completion_function)
+#  define DING ding
 #endif
 
 static int
@@ -252,7 +254,7 @@ pari_rl_forward_sexp(int count, int key)
     }
     else
     {
-      fail: ding(); return 1;
+      fail: DING(); return 1;
     }
   }
   if (dir != 1 && move_point) rl_point++;
