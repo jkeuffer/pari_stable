@@ -135,7 +135,7 @@ BA 25- pbs in Fp_factor_irred (factoring over Fq a pol. defined over Fp)
    28- argument checks for element_mulid, nf_get_r1 (access to nf.sign)
    29- typo in quadhilbertimag (SEGV for very large discriminants)
    30- wrong precision used in numerical derivation
-BA 31- isprime(n < 2, 2 or 3) gave wrong result
+BA 31- isprime(n < 2, 1 or 2) gave wrong result
 IZ 32- \r C:\a.gp wouldn't work     [ : and \ forbidden... ]
 BA 33- bad PARI prototypes in init.c [were confusing GP2C]
 XR 34- nfdisc: fixed cache system in nilord (esp. precision handling)
