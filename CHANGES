@@ -74,6 +74,7 @@ HC 24- Corrected p-adic initell.
    35- typo in bnfnarrow ("impossible inverse")
    36- subst(x,x^0,x) --> floating point exception
 IS 37- many typos in the documentation
+   38- [DOS/Windows]: incorrect conversion between 'double' and t_REAL
 
   Changed
 BA  1- improved Fp_isom
