@@ -242,6 +242,7 @@ extern void* global_err_data;
 		      ((lgefint(n)==3) && ((((GEN)(n))[2]) < 0)))
 
 #define leading_term(x) ((GEN)(((GEN)(x))[lgef(x)-1]))
+#define constant_term(x) (signe(x)? ((GEN)(((GEN)(x))[2])): gzero)
 
 #define odd(x) ((x) & 1)
 #define mpodd(x) (signe(x) && mod2(x))
