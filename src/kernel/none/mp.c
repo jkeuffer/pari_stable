@@ -1011,24 +1011,28 @@ modui(ulong x, GEN y)
   return utoi(hiremainder);
 }
 
-GEN
-modiu(GEN y, ulong x)
+ulong
+umodiu(GEN y, ulong x)
 {
   long sy=signe(y),ly,i;
   LOCAL_HIREMAINDER;
 
   if (!x) err(diver4);
-  if (!sy) return gzero;
+  if (!sy) return 0;
   ly = lgefint(y);
   if (x <= (ulong)y[2]) hiremainder=0;
   else
   {
-    if (ly==3) return utoi((sy > 0)? (ulong)y[2]: x - (ulong)y[2]);
+    if (ly==3) return (sy > 0)? (ulong)y[2]: x - (ulong)y[2];
     hiremainder=y[2]; ly--; y++;
   }
   for (i=2; i<ly; i++) (void)divll(y[i],x);
-  return utoi((sy > 0)? hiremainder: x - hiremainder);
+  if (!hiremainder) return 0;
+  return (sy > 0)? hiremainder: x - hiremainder;
 }
+
+GEN
+modiu(GEN y, ulong x) { return utoi(umodiu(y,x)); }
 
 #ifndef __M68K__
 

@@ -1286,13 +1286,13 @@ Fp_pol_small(GEN z, GEN p, long l)
   return normalizepol_i(x,l);
 }
 
-/* assume z[i] % p has been done. But we may have z[i] < 0 */
+/* assume z[i] % p has been done */
 GEN
 small_to_pol(GEN z, long l, long p)
 {
   GEN x = cgetg(l,t_POL);
   long i;
-  z -= 2; for (i=2; i<l; i++) x[i] = lstoi(z[i]<0? p+z[i]: z[i]);
+  z -= 2; for (i=2; i<l; i++) x[i] = lstoi(z[i]);
   return normalizepol_i(x,l);
 }
 
@@ -1353,86 +1353,97 @@ maxnorm(GEN p)
   return gerepile(ltop,lbot,addis(m,1));
 }
 
-/* return x[0 .. dx] mod p as C-long in a malloc'ed array */
+/* return x[0 .. dx] mod p as ulong in a malloc'ed array */
 static GEN
-Fp_to_pol_long(GEN x, long dx, long p, long *d)
+Fp_to_pol_long(GEN x, long dx, ulong p, long *d)
 {
-  long i, m=0;
   GEN a;
+  long i;
+  ulong m = 0;
 
   for (i=dx; i>=0; i--)
   {
-    m = smodis((GEN)x[i],p);
+    m = umodiu((GEN)x[i],p);
     if (m) break;
   }
   if (i < 0) { *d = -1; return NULL; }
   a = (GEN) gpmalloc((i+1)*sizeof(long));
-  *d = i; a[i] = m;
-  for (i--; i>=0; i--) a[i] = smodis((GEN)x[i],p);
+  *d = i; a[i] = (long)m;
+  for (i--; i>=0; i--) a[i] = (long)umodiu((GEN)x[i],p);
   return a;
 }
 
-/* idem as Fp_poldivres but working only on C-long types
+/* idem as Fp_poldivres but working only on ulong types
  * ASSUME pr != ONLY_DIVIDES (TODO ???)
  */
 static long *
-Fp_poldivres_long(long *x,long *y,long p,long dx, long dy, long *dc, GEN *pr)
+Fp_poldivres_long(ulong *x,ulong *y,ulong p,long dx, long dy, long *dc, GEN *pr)
 {
-  long dz,i,j,p1,*z,*c,inv;
+  long dz,i,j;
+  ulong p1,*z,*c,inv;
 
   if (!dy) { *dc=-1; return NULL; }
-  dz=dx-dy;
-  if (dz<0)
+  dz = dx-dy;
+  if (dz < 0)
   {
     if (pr)
     {
-      c=(long *) gpmalloc((dx+1)*sizeof(long));
-      for (i=0; i<=dx; i++) c[i]=x[i];
+      c=(ulong *) gpmalloc((dx+1)*sizeof(long));
+      for (i=0; i<=dx; i++) c[i] = x[i];
       *dc = dx;
       if (pr == ONLY_REM) return c;
       *pr = c;
     }
     return NULL;
   }
-  z=(long *) gpmalloc((dz+1)*sizeof(long));
+  z=(ulong *) gpmalloc((dz+1)*sizeof(long));
   inv = y[dy];
-  if (inv!=1)
+  if (inv != 1UL)
   {
     long av = avma;
-    GEN res = mpinvmod(stoi(y[dy]),stoi(p));
-    inv = itos(res); avma = av;
+    GEN res = mpinvmod(utoi(y[dy]), utoi(p));
+    inv = (ulong)res[2]; avma = av;
   }
 
-  z[dz]=(inv*x[dx])%p;
+  z[dz] = (inv*x[dx]) % p;
   for (i=dx-1; i>=dy; --i)
   {
-    p1=x[i];
+    p1 = p - x[i]; /* compute -p1 instead of p1 (pb with ulongs otherwise) */
     for (j=i-dy+1; j<=i && j<=dz; j++)
     {
-      p1 -= z[j]*y[i-j];
-      if (p1 & (HIGHBIT>>1)) p1=p1%p;
+      p1 += z[j]*y[i-j];
+      if (p1 & HIGHBIT) p1 = p1 % p;
     }
-    z[i-dy]=((p1%p)*inv)%p;
+    p1 %= p;
+    z[i-dy] = p1? ((p - p1)*inv) % p: 0;
   }
   if (!pr) return z;
 
-  c=(long *) gpmalloc(dy*sizeof(long));
+  c=(ulong *) gpmalloc(dy*sizeof(long));
   for (i=0; i<dy; i++)
   {
-    p1=z[0]*y[i];
+    p1 = z[0]*y[i];
     for (j=1; j<=i && j<=dz; j++)
     {
       p1 += z[j]*y[i-j];
-      if (p1 & (HIGHBIT>>1)) p1=p1%p;
+      if (p1 & HIGHBIT) p1 = p1 % p;
     }
-    c[i]=(x[i]-p1)%p;
+    p1 = x[i] - p1%p; if ((long)p1 < 0) p1 += p;
+    c[i] = p1;
   }
 
-  i=dy-1; while (i>=0 && c[i]==0) i--;
+  i=dy-1; while (i>=0 && !c[i]) i--;
   *dc=i;
   if (pr == ONLY_REM) { free(z); return c; }
   *pr = c; return z;
 }
+
+/* 2p^2 < 2^BITS_IN_LONG */
+#ifdef LONG_IS_64BIT
+#  define OK_ULONG(p) (lgefint(p) == 3 && (ulong)p[2] <= 3037000493UL)
+#else
+#  define OK_ULONG(p) (lgefint(p) == 3 && (ulong)p[2] <= 46337UL)
+#endif
 
 /* x and y in Z[X] */
 GEN
@@ -1468,9 +1479,10 @@ Fp_poldivres(GEN x, GEN y, GEN p, GEN *pr)
     return gerepile(av0,tetpil,Fp_pol_red(x,p));
   }
   av0 = avma; dz = dx-dy;
-  if (2*expi(p)+6<BITS_IN_LONG)
+  if (OK_ULONG(p))
   { /* assume ab != 0 mod p */
-    long *a, *b, *zz, da,db,dr, pp = p[2];
+    ulong *a, *b, *zz, pp = (ulong)p[2];
+    long da,db,dr;
     a = Fp_to_pol_long(x+2, dx, pp, &da);
     b = Fp_to_pol_long(y+2, dy, pp, &db);
     zz = Fp_poldivres_long(a,b,pp,da,db, &dr, pr);
@@ -1539,7 +1551,8 @@ Fp_poldivres(GEN x, GEN y, GEN p, GEN *pr)
 static GEN
 Fp_pol_gcd_long(GEN x, GEN y, GEN p)
 {
-  long *a,*b,*c,da,db,dc, pp = (long)p[2];
+  ulong *a,*b,*c, pp = (ulong)p[2];
+  long da,db,dc;
   GEN z;
 
   a = Fp_to_pol_long(x+2, lgef(x)-3, pp, &da);
@@ -1563,7 +1576,7 @@ Fp_pol_gcd(GEN x, GEN y, GEN p)
   GEN a,b,c;
   long av0,av;
 
-  if (2*expi(p)+6<BITS_IN_LONG) return Fp_pol_gcd_long(x,y,p);
+  if (OK_ULONG(p)) return Fp_pol_gcd_long(x,y,p);
   av0=avma;
   a = Fp_pol_red(x, p); av = avma;
   b = Fp_pol_red(y, p);
@@ -1584,7 +1597,7 @@ Fp_pol_extgcd(GEN x, GEN y, GEN p, GEN *ptu, GEN *ptv)
   long ltop,lbot;
 
 #if 0 /* TODO */
-  if (2*expi(p)+6<BITS_IN_LONG) return Fp_pol_extgcd_long(x,y,p);
+  if (OK_ULONG(p)) return Fp_pol_extgcd_long(x,y,p);
 #endif
   ltop=avma;
   a = Fp_pol_red(x, p);
@@ -1635,8 +1648,7 @@ modulargcd(GEN a, GEN b)
   if (cmpii(ma,mb) > 0) limit=mb; else limit=ma;
   limit = shifti(mulii(limit,g), n+1);
 
-  /* initial p could be 1 << (BITS_IN_LONG/2-6), but diffptr is nice */
-  prime[2] = 1021; d += 172; /* p = prime(172) = precprime(1<<10) */
+  prime[2] = 27449; d += 3000; /* p = prime(3000) */
   p = prime; H = NULL;
   for(;;)
   {

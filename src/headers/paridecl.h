@@ -1013,6 +1013,7 @@ GEN     shifti(GEN x, long n);
 long    smodsi(long x, GEN y);
 GEN     sqri(GEN x);
 GEN     truedvmdii(GEN x, GEN y, GEN *z);
+ulong   umodiu(GEN y, ulong x);
 long    vals(ulong x);
 
 /* nffactor.c */

@@ -1784,7 +1784,7 @@ ker_mod_p_i(GEN x, GEN p, long nontriv)
 
   if (typ(x)!=t_MAT) err(typeer,"ker_mod_p");
   n=lg(x)-1; if (!n) return cgetg(1,t_MAT);
-  if (!is_bigint(p) && p[2] < (MAXHALFULONG>>1))
+  if (lgefint(p) == 3 && p[2] < (MAXHALFULONG>>1))
     return ker_mod_p_small(x, p, nontriv);
 
   m=lg(x[1])-1; r=0; av0 = avma;
