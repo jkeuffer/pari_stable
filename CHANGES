@@ -99,6 +99,12 @@ BA 51- [X-Windows] hi-res plot: window not redrawn properly (BackingStore pb)
    57- polroots() used too high a precision when checking errors a posteriori
        (--> slow)
    58- contfrac(1/x) --> SEGV
+   59- typo in sinh(0) --> wrong zero exponent
+   60- exp(O(x^-1)) = O(x^(-1))  [ouch...]
+   61- dilog(O(x^10)) = O(1)
+   62- cosh(O(1)) --> division by 0
+   63- sqrt(4*x^2) --> not an integer exponent for non invertible series in gpow
+   64- besselj(0,O(1)) [or besseli] --> precision<=0 in gprec.
 
   Changed
 BA  1- improved Fp_isom
