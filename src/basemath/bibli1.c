@@ -2862,7 +2862,7 @@ END:
     u = cgetg(3,t_VEC);
     setlg(pols,j+1); u[1] = (long)pols;
     setlg(alph,j+1); u[2] = (long)alph;
-    if (isclone(S)) { alph = forcecopy(alph); gunclone(S); }
+    if (isclone(S)) { u[2] = (long)forcecopy(alph); gunclone(S); }
     return u;
   }
   u = cgetg(4,t_VEC);
