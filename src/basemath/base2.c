@@ -1877,13 +1877,14 @@ nilord(decomp_t *S, GEN dred, long mf, long flag)
   return Decomp(S, flag);
 }
 
-/* Assume respm(f,g) | p^M. Return respm(f, g) mod p^M, using dynamic
- * precision (until result is non-zero). */
+/* Assume respm(f,g) stricly divides p^M. Return respm(f, g) mod p^M, using
+ * dynamic precision (until result is non-zero). */
 GEN
 fast_respm(GEN f, GEN g, GEN p, long M)
 {
-  long m = 32;
+  long m = 16 / (lgefint(p)-2);
   GEN R, q = NULL;
+  if (!m) m = 1;
   for(;; m <<= 1) {
     if (M < 2*m) return respm(f,g, gpowgs(p, M));
     q = q? sqri(q): gpowgs(p, m); /* p^m */
@@ -1902,11 +1903,46 @@ maxord_i(GEN p, GEN f, long mf, GEN w, long flag)
   S.f = f;
   S.p = p;
   S.nu = h;
-  S.df= ggval(D, p);
+  S.df = ggval(D, p);
   S.phi = polx[varn(f)];
   if (l == 1) return nilord(&S, D, mf, flag);
   if (flag && flag <= mf) flag = mf + 1;
   S.chi = f; return Decomp(&S, flag);
+}
+
+/* DP = multiple of disc(P) or NULL
+ * Return a multiple of the denominator of an algebraic integer (in Q[X]/(P))
+ * when expressed in terms of the power basis */
+GEN
+indexpartial(GEN P, GEN DP)
+{
+  pari_sp av = avma;
+  long i, nb;
+  GEN fa, p1, res = gun, dP = derivpol(P);
+  pari_timer T;
+
+  if(DEBUGLEVEL>=5) (void)TIMER(&T);
+  if (!DP) DP = ZX_disc(P);
+  DP = mpabs(DP);
+  if(DEBUGLEVEL>=5) msgTIMER(&T,"IndexPartial: discriminant");
+  fa = auxdecomp(DP, 0);
+  if(DEBUGLEVEL>=5) msgTIMER(&T,"IndexPartial: factorization");
+  nb = lg(fa[1]);
+  for (i = 1; i < nb; i++)
+  {
+    long e = itos( gmael(fa,2,i) ) >> 1;
+    GEN p = gmael(fa,1,i), q;
+    if (i == nb-1)
+      q = gpowgs(p, (odd(e) && !BSW_psp(p))? e+1: e);
+    else if (e >= 2)
+    {
+      if(DEBUGLEVEL>=5) fprintferr("IndexPartial: factor %Z ",p1);
+      q = fast_respm(P, dP, p, e+1);
+      if(DEBUGLEVEL>=5) { fprintferr("--> %Z : ",q); msgTIMER(&T,""); }
+    }
+    res = mulii(res, q);
+  }
+  return gerepileuptoint(av,res);
 }
 
 /*******************************************************************/

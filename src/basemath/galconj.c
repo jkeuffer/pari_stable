@@ -167,50 +167,6 @@ galoisconj2(GEN nf, long nbmax, long prec)
   9: complete detail
 */
 
-/* DP = multiple of disc(P) or NULL
- * Return a multiple of the denominator of an algebraic integer (in Q[X]/(P))
- * when expressed in terms of the power basis */
-GEN
-indexpartial(GEN P, GEN DP)
-{
-  pari_sp av = avma;
-  long i, nb;
-  GEN fa, p1, res = gun, dP;
-  pari_timer T;
-
-  dP = derivpol(P);
-  if(DEBUGLEVEL>=5) (void)TIMER(&T);
-  if(!DP) DP = ZX_disc(P);
-  DP = mpabs(DP);
-  if(DEBUGLEVEL>=5) msgTIMER(&T,"IndexPartial: discriminant");
-  fa = auxdecomp(DP, 0);
-  if(DEBUGLEVEL>=5) msgTIMER(&T,"IndexPartial: factorization");
-  nb = lg(fa[1]);
-  for (i = 1; i < nb; i++)
-  {
-    GEN p=gmael(fa,1,i);
-    GEN e=gmael(fa,2,i);
-    p1 = powgi(p,shifti(e,-1));
-    if ( i==nb-1 )
-    {
-      if ( mod2(e) && !isprime(p) )
-	p1 = mulii(p1,p);
-    }
-    else if ( cmpis(e,4)>=0 )
-    {
-      if(DEBUGLEVEL>=5) fprintferr("IndexPartial: factor %Z ",p1);
-      p1 = mppgcd(p1, respm(P,dP,p1));
-      if(DEBUGLEVEL>=5) 
-      {
-        fprintferr("--> %Z : ",p1);
-        msgTIMER(&T,"");
-      }
-    }
-    res=mulii(res,p1);
-  }
-  return gerepileupto(av,res);
-}
-
 GEN
 vandermondeinverseprep(GEN L)
 {

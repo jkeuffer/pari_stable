@@ -22,10 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 extern GEN matrixpow(long n, long m, GEN y, GEN P,GEN l);
 extern GEN Fp_factor_irred(GEN P,GEN l, GEN Q);
-extern GEN FpX_rand(long d1, long v, GEN p);
 extern GEN hensel_lift_fact(GEN pol, GEN Q, GEN T, GEN p, GEN pe, long e);
-extern GEN ZX_disc_all(GEN x, ulong bound);
-extern GEN indexpartial(GEN P, GEN DP);
 extern GEN initgaloisborne(GEN T, GEN dn, long prec, GEN *ptL, GEN *ptprep, GEN *ptdis);
 extern long ZX_get_prec(GEN x);
 

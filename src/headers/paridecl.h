@@ -445,6 +445,7 @@ GEN     fix_relative_pol(GEN nf, GEN x, int chk_lead);
 GEN     gcdpm(GEN f1,GEN f2,GEN pm);
 long    idealval(GEN nf,GEN ix,GEN vp);
 GEN     idealprodprime(GEN nf, GEN L);
+GEN     indexpartial(GEN P, GEN DP);
 GEN     modprX(GEN x, GEN nf,GEN modpr);
 GEN     modprX_lift(GEN x, GEN modpr);
 GEN     modprM(GEN z, GEN nf,GEN modpr);

@@ -33,7 +33,6 @@ extern GEN addshiftpol(GEN x, GEN y, long d);
 extern GEN cauchy_bound(GEN p);
 extern GEN gassoc_proto(GEN f(GEN,GEN),GEN,GEN);
 extern GEN gauss_intern(GEN a, GEN b);
-extern GEN indexpartial(GEN P, GEN DP);
 extern GEN qf_disc(GEN x, GEN y, GEN z);
 extern GEN to_polmod(GEN x, GEN mod);
 extern GEN vconcat(GEN Q1, GEN Q2);
