@@ -4750,13 +4750,23 @@ This returns a vector $[a,b]$, where $\var{el}=\var{Norm}(a)*b$. It looks for a
 solution which is an $S$-integer, with $S$ a list of places (of \var{bnf})
 containing the ramified primes, the generators of the class group of
 \var{ext}, as well as those primes dividing \var{el}. If $\var{ext}/\var{bnf}$
-is known to be \idx{Galois}, set $\fl=0$
-(here \var{el} is a norm iff $b=1$). If $\fl$ is non zero add to $S$ all
-the places above the primes which: divide $\fl$ if $\fl<0$, or are less
-than $\fl$ if $\fl>0$. The answer is guaranteed (i.e.~\var{el} is a norm
-iff $b=1$) under \idx{GRH}, if $S$ contains all primes less than
-$12\log^2\left|\text{disc}(\var{Ext})\right|$, where \var{Ext} is the normal
-closure of $\var{ext} / \var{bnf}$.
+is known to be \idx{Galois}, set $\fl=0$ (here \var{el} is a norm iff $b=1$).
+If $\fl$ is non zero add to $S$ all the places above the primes which: divide
+$\fl$ if $\fl<0$, or are less than $\fl$ if $\fl>0$. The answer is guaranteed
+(i.e.~\var{el} is a norm iff $b=1$) under \idx{GRH}, if $S$ contains all
+primes less than $12\log^2\left|\text{disc}(\var{Ext})\right|$, where
+\var{Ext} is the normal closure of $\var{ext} / \var{bnf}$. Example:
+
+\bprog
+bnf = bnfinit(y^3 + y^2 - 2*y - 1);
+p = x^2 + Mod(y^2 + 2*y + 1, bnf.pol);
+rnf = rnfequation(bnf,p,1);
+ext = [p, rnf[2], bnfinit(rnf[1])];
+rnfisnorm(bnf,ext,17, 1)
+@eprog
+\noindent checks whether $17$ is a norm in the Galois extension $\Q(\beta) /
+\Q(\alpha)$, where $\alpha^3 + \alpha^2 - 2\alpha - 1 = 0$ and $\beta^2 +
+\alpha^2 + 2*\alpha + 1 = 0$ (it is).
 
 \syn{rnfisnorm}{\var{bnf},ext,x,\fl,\var{prec}}.
 
