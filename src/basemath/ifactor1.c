@@ -2087,12 +2087,11 @@ squfof(GEN n, long quiet)
   if (cmpis(n,5) <= 0) return NULL; /* input n <= 5 */
 
 #ifdef LONG_IS_64BIT
-  if (tf > 3 || (tf == 3 && bfffo(*int_MSW(n)) < 5)) /* n too large */
-    return NULL;
+  if (tf > 3 || (tf == 3 && (ulong)n[2]          >= (1UL << (BITS_IN_LONG-5))))
 #else  /* 32 bits */
-  if (tf > 4 || (tf == 4 && bfffo(*int_MSW(n)) < 5)) /* n too large */
-    return NULL;
+  if (tf > 4 || (tf == 4 && (ulong)(*int_MSW(n)) >= (1UL << (BITS_IN_LONG-5))))
 #endif
+    return NULL; /* n too large */
   /* now we have 5 < n < 2^59 */
 
   nm4 = mod4(n);
