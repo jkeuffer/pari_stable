@@ -177,6 +177,8 @@ transc(GEN (*f)(GEN,long), GEN x, long prec)
 
     case t_QFR: case t_QFI:
       err(talker,"quadratic forms cannot be used in transcendental functions");
+  default:
+    err(typeer,"a transcendental function");
   }
   return f(x,prec);
 }
