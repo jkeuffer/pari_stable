@@ -1025,6 +1025,7 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long k, long rec)
   {
     long a, b, bmin, bgood, delta, tnew = tmax + 1, r = lg(CM_L)-1;
     GEN M_L, q, S1, P1, VV;
+    int first = 1;
 
     /* bound for f . S_k(genuine factor) = ZC * bound for T_2(S_tnew) */
     Btra = mulrr(ZC, mulsr(dP*dP, normlp(Br, 2*tnew, dnf)));
@@ -1070,20 +1071,20 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long k, long rec)
     /* compute truncation parameter */
     if (DEBUGLEVEL>2) { TIMERstart(&ti2); TIMERstart(&TI); }
     av2 = avma;
-    delta = 0;
-    b = 0; /* -Wall */
+    b = delta = 0; /* -Wall */
 AGAIN:
     M_L = gdivexact(CM_L, stoi(C));
     T2 = gmul(Tra, M_L);
     VV = gdivround(gmul(PRKinv, T2), pk);
     T2 = gsub(T2, gmul(PRK, VV));
 
-    if (!delta)
+    if (first)
     { /* initialize lattice, using few p-adic digits for traces */
       a = gexpo(T2);
       bgood = (long)(a - max(32, BitPerFactor * r));
       b = max(bmin, bgood);
       q = shifti(gun, b);
+      delta = a - b;
     }
     else
     { /* add more p-adic digits and continue reduction */
@@ -1100,9 +1101,9 @@ AGAIN:
     T2 = gmul(S1, M_L);
     T2 = gsub(T2, gmul(P1, VV));
 
-    if (!delta)
+    if (first)
     {
-      delta = a - b;
+      first = 0;
       m = concatsp( vconcat( CM_L, T2 ),
                     vconcat( ZERO, P1 ) );
       /*     [ C M_L   0  ]

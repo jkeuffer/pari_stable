@@ -1976,7 +1976,8 @@ constante()
   {
     default: return y; /* integer */
     case '.':
-      if (isalpha(analyseur[1]) && analyseur[1] != 'e' && analyseur[1] != 'E')
+      if (isalpha((int)analyseur[1])
+          && analyseur[1] != 'e' && analyseur[1] != 'E')
         return y; /* member function */
       analyseur++; i = 0;
       while (isdigit((int)*analyseur))
@@ -2713,7 +2714,8 @@ skipconstante(void)
   if ( *analyseur!='.' && *analyseur!='e' && *analyseur!='E' ) return;
   if (*analyseur=='.')
   {
-    if (isalpha(analyseur[1]) && analyseur[1] != 'e' && analyseur[1] != 'E')
+    if (isalpha((int)analyseur[1])
+        && analyseur[1] != 'e' && analyseur[1] != 'E')
       return; /* member function */
     analyseur++;
   }
