@@ -2789,7 +2789,8 @@ fincke_pohst(GEN a,GEN bound,GEN stockmax,long flag, long prec,
   {
     GEN T = nf_get_T((GEN)nf[1], (GEN)nf[7]);
     v1 = lllgramint(T);
-    nf = nfnewprec(nf, prec + 2 * (gexpo(v1) >> TWOPOTBITS_IN_LONG));
+    prec += 2 * ((gexpo(v1) + gexpo((GEN)nf[1])) >> TWOPOTBITS_IN_LONG);
+    nf = nfnewprec(nf, prec);
     r = qf_base_change(T,v1,1);
     r = gmul(r, realun(prec));
   }
