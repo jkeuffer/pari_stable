@@ -1062,6 +1062,26 @@ special_pivot(GEN x)
   return x;
 }
 
+/* x matrix */
+GEN 
+norml1(GEN x)
+{
+  long i,j, lx = lg(x);
+  GEN s = gzero;
+  for (j=1; j<lx; j++)
+  {
+    GEN c = (GEN)x[j];
+    for (i=1; i<lx; i++)
+    {
+      GEN t = (GEN)c[i];
+      if (!gcmp0(t)) s = gadd(s, gabs(t,0));
+    }
+  }
+  return s;
+}
+
+GEN sindexrank(GEN x);
+
 /* Recombination phase of Berlekamp-Zassenhaus algorithm using a variant of
  * van Hoeij's knapsack 
  * 
@@ -1115,8 +1135,19 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
     pa_b = gpowgs(p, a-b); pb_as2 = shifti(pa_b,-1);
     pb   = gpowgs(p, b);   pbs2    = shifti(pb,-1);
 
-    C = (long)sqrt(s*n0/4.);
-    M = dbltor(n0 * (C*C + s*n0/4.) * 1.00001);
+    if (tmax > 0)
+    {
+      GEN p1 = sindexrank(BL);
+      GEN p2 = rowextract_p(BL, (GEN)p1[1]); /* invertible */
+      double Nx = gtodouble(norml1(invmat(p2)));
+      C = (long)sqrt(s*n0*n0/4. / Nx);
+      M = dbltor((Nx * C*C + s*n0*n0/4.) * 1.00001);
+    }
+    else
+    { /* first time: BL = id */
+      C = (long)sqrt(s*n0/4.);
+      M = dbltor((n0 * (C*C + s*n0/4.)) * 1.00001);
+    }
 
     if (DEBUGLEVEL>3)
       fprintferr("LLL_cmbf: %ld potential factors (tmax = %ld)\n", r, tmax);

@@ -1609,8 +1609,8 @@ rank(GEN x)
   return lg(x)-1 - r;
 }
 
-GEN
-indexrank(GEN x)
+static GEN
+indexrank0(GEN x, int small)
 {
   long av = avma, i,j,n,r;
   GEN res,d,p1,p2;
@@ -1622,8 +1622,8 @@ indexrank(GEN x)
   n = lg(x)-1; r = n - r;
 
   avma=av; res=cgetg(3,t_VEC);
-  p1=cgetg(r+1,t_VEC); res[1]=(long)p1;
-  p2=cgetg(r+1,t_VEC); res[2]=(long)p2;
+  p1=cgetg(r+1,small? t_VECSMALL: t_VEC); res[1]=(long)p1;
+  p2=cgetg(r+1,small? t_VECSMALL: t_VEC); res[2]=(long)p2;
   if (d)
   {
     for (i=0,j=1; j<=n; j++)
@@ -1631,9 +1631,16 @@ indexrank(GEN x)
     free(d);
     qsort(p1+1,r,sizeof(long),(QSCOMP)pari_compare_long);
   }
-  for (i=1;i<=r;i++) { p1[i]=lstoi(p1[i]); p2[i]=lstoi(p2[i]); }
+  if (!small)
+    for (i=1;i<=r;i++) { p1[i]=lstoi(p1[i]); p2[i]=lstoi(p2[i]); }
   return res;
 }
+
+GEN 
+indexrank(GEN x) { return indexrank0(x,0); }
+
+GEN 
+sindexrank(GEN x) { return indexrank0(x,1); }
 
 /*******************************************************************/
 /*                                                                 */
