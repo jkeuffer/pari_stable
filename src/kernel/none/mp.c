@@ -1518,10 +1518,10 @@ GEN isqrti(GEN a) {return racine_r(a,lgefint(a));}
 #ifdef LONG_IS_64BIT
 /* 64 bits of b = sqrt(a[0] * 2^64 + a[1])  [ up to 1ulp ] */
 static ulong
-sqrtu2(GEN a)
+sqrtu2(ulong *a)
 {
-  double beta = sqrt((double)(ulong)a[0]); /* 2^31*2^(1/2) <= beta < 2^32 */
-  ulong c, b = ((ulong)(beta*32768)) << 1; /*~ beta * 2^32, no overflow*/
+  double beta = sqrt((double)a[0]); /* 2^31*2^(1/2) <= beta < 2^32 */
+  ulong c, b = ((ulong)(beta*2147483648)) << 1; /*~ beta * 2^32, no overflow*/
   LOCAL_HIREMAINDER;
   LOCAL_OVERFLOW;
 
@@ -1531,9 +1531,9 @@ sqrtu2(GEN a)
 }
 /* 64 bits of sqrt(a[0] * 2^63) */
 static ulong
-sqrtu2_1(GEN a)
+sqrtu2_1(ulong *a)
 {
-  long t[2];
+  ulong t[2];
   t[0] = (a[0] >> 1);
   t[1] = (a[0] << (BITS_IN_LONG-1)) | (a[1] >> 1);
   return sqrtu2(t);
@@ -1541,17 +1541,108 @@ sqrtu2_1(GEN a)
 #else
 /* 32 bits of sqrt(a[0] * 2^32) */
 static ulong
-sqrtu2(GEN a)
+sqrtu2(ulong *a)
 {
-  double beta = sqrt((double)(ulong)a[0]);
+  double beta = sqrt((double)a[0]);
   return (ulong)(beta * (1UL << BITS_IN_HALFULONG));
 }
 /* 32 bits of sqrt(a[0] * 2^31) */
 static ulong
-sqrtu2_1(GEN a)
+sqrtu2_1(ulong *a)
 {
-  double beta = sqrt((double)(ulong)a[0]); /* 0.707... ~ 1/sqrt(2) */
+  double beta = sqrt((double)a[0]); /* 0.707... ~ 1/sqrt(2) */
   return (ulong)(beta * ((1UL << BITS_IN_HALFULONG) * 0.707106781186547524));
+}
+#endif
+
+#if 0
+void
+xmpn_copy(GEN z, GEN x, long n)
+{
+  long k = n;
+  while (--k >= 0) z[k] = x[k];
+}
+
+static GEN
+sqrtrem_spec_2(GEN n, long ln, GEN *r)
+{
+  if (ln == 1) {
+    ulong a = (ulong)sqrt((double)(ulong)n[0]);
+    *r = utoi(n[0] - a*a);
+    return utoi(a);
+  } else {
+    ulong a = (ulong)sqrt((double)(ulong)n[0]);
+    ulong c, cc, d;
+    LOCAL_HIREMAINDER;
+    LOCAL_OVERFLOW;
+
+    hiremainder = n[0]; c = divll(n[1], a);
+    c = addll(c, a) >> 1; if (overflow) c |= HIGHBIT;
+    cc = mulll(c,c);
+    d = (ulong)n[1] - cc;
+    if (!(c & HIGHBIT) && d > (c << 1)) {
+      c++;
+      d -= (c << 1) - 1;
+    }
+    *r = utoi(d);
+    return utoi(c);
+  }
+}
+
+/* Let N = n[0..2l-1]. Return S (and set R) s.t S^2 + R = N, 0 <= R <= 2S */
+static GEN
+sqrtrem_spec(GEN n, long l, GEN *r)
+{
+  if (l == 1) return sqrtrem_spec_2(n, 2, r);
+
+  sqrtrem_spec
+
+  addshiftw(l)
+
+  q = dvmdii(, &u);
+}
+
+/* Let N = n[0..ln-1]. Return S (and set R) s.t S^2 + R = N, 0 <= R <= 2S */
+GEN
+sqrtrem(GEN N, GEN *r)
+{
+  pari_sp av;
+  GEN S, R, u, n = N+2;
+  long l2, ln = lg(N) - 2;
+  int sh;
+
+  if (ln <= 2)
+  {
+    if (ln == 0) { *r = gzero; return gzero; }
+    return sqrtrem_spec_2(n, ln, *r);
+  }
+  av = avma;
+  sh = bfffo(n[0]) >> 1;
+  l2 = (ln + 1) >> 1;
+  if (sh > 1 || (ln & 1)) { /* normalize n, so that n[2] >= 2^BIL / 4 */
+    GEN t = new_chunk(ln + 1);
+    t[0] = 0;
+    if (sh)
+      shift_left(t + (ln & 1),n, 0,ln-1, 0, sh << 1);
+    else
+      xmpn_copy(t + 1, n, ln);
+    n = t; /* normalized + even number of words */
+
+    S = sqrtrem_spec(n, l2, &R);
+    /* Rescale back:
+     * 2^(2k) n = S^2 + R, k = sh + (ln & 1)*BIL/2
+     * so 2^(2k) n = (S - s0)^2 + (2*S*s0 - s0^2 + R), s0 = S mod 2^k. */
+    k = sh + (ln & 1) * (BITS_IN_LONG/2);
+    s0 = resmod2n(S, k);
+    R = addii(R, mulii(s0, shifti(S,1)));
+    R = shifti(R, -(k<<1));
+    S = shifti(S, -k);
+  }
+  else
+    S = sqrtrem_spec(n, l2, &R);
+
+  gerepileall(av, 2, &S, &R);
+  *r = R; return S;
 }
 #endif
 
@@ -1567,10 +1658,10 @@ sqrtr_abs(GEN x)
   t = cgetr(l+1);
   if (ex & 1) { /* odd exponent */
     a[1] = evalsigne(1) | evalexpo(1);
-    t[2] = (long)sqrtu2(a + 2);
+    t[2] = (long)sqrtu2((ulong*)a + 2);
   } else { /* even exponent */
     a[1] = evalsigne(1) | evalexpo(0);
-    t[2] = (long)sqrtu2_1(a + 2);
+    t[2] = (long)sqrtu2_1((ulong*)a + 2);
   }
   t[1] = evalsigne(1) | evalexpo(0);
   for (i = 3; i <= l; i++) t[i] = 0;
