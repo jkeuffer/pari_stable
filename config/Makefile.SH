@@ -155,16 +155,17 @@ CPP        = $CPP
 
 # HIGHLY EXPERIMENTAL (only tested with gmp-4.0 on ix86 and Ultra):
 # If you've configured and compiled GMP and would like to tune PARI using
-# the nice cycle counting functions in GMP, uncomment the three lines below
+# the nice cycle counting functions in GMP, uncomment the 4 lines below
 # (correct the first one to the path to your gmp source tree).
 #
 #GMP     = /some/directory/gmp-4.0/tune
 #GMPFLAGS= -DGMP_TIMER
-#GMPOBJS = \$(GMP)/time.o \$(GMP)/freq.o
+#GMPO1 = \$(GMP)/time.o \$(GMP)/freq.o
+#GMPOBJS=\$(GMPO1) \$(GMPO2)
 #
 #You may need to add a few object files to GMPOBJS. On UltraSparc,
 #uncomment the following line:
-#GMPOBJS=\$(GMPOBJS) \$(GMP)/sparcv9.o
+#GMPO2 = \$(GMP)/sparcv9.o
 
 _O	   = .o
 _A	   = .a
@@ -270,7 +271,8 @@ tune.o: $src/test/tune.c
 	\$(CC) \$(CFLAGS) \$(GMPFLAGS) \$(CPPFLAGS) -o \$@ \$< -c
 
 tune: tune-sta
-	\$(LN) tune-sta tune
+	-\$(RM) tune
+	-\$(LN) tune-sta tune
 
 tune-dyn: tune.o lib-dyn
 	\$(CC) \$(LDFLAGS) \$(RUNPTH) -o \$@ \$< \$(GMPOBJS) -L. \$(LDDYN) \$(LIBS)
