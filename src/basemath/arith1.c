@@ -2136,7 +2136,8 @@ bestappr(GEN x, GEN k)
 	if (gcmp0(x)) { p1 = p0; q1 = q0; break; }
 
 	x = ginv(x); /* > 1 */
-        a = divii((GEN)x[1], (GEN)x[2]); if (cmpii(a,k) > 0) a = k;
+        a = typ(x)==t_INT? x: divii((GEN)x[1], (GEN)x[2]);
+        if (cmpii(a,k) > 0) a = k;
 	p = addii(mulii(a,p0), p1); p1=p0; p0=p;
         q = addii(mulii(a,q0), q1); q1=q0; q0=q;
       }
