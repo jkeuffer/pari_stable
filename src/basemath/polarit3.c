@@ -558,7 +558,7 @@ GEN
 Fp_pow_mod_pol(GEN x, GEN n, GEN pol, GEN p)
 {
   long m,i,j,av=avma, lim=stack_lim(av,1), vx = varn(x);
-  GEN p1 = n+2, y = x;
+  GEN p1 = n+2, y;
   if (!signe(n)) return polun[vx];
   if (signe(n)<0) 
   {
@@ -567,7 +567,7 @@ Fp_pow_mod_pol(GEN x, GEN n, GEN pol, GEN p)
   }
   else
     if (is_pm1(n)) return gcopy(x);/*n=1*/
-  m = *p1;
+  m = *p1; y = x;
   j=1+bfffo(m); m<<=j; j = BITS_IN_LONG-j;
   for (i=lgefint(n)-2;;)
   {

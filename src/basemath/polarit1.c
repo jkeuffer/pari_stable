@@ -1380,7 +1380,7 @@ rootpadiclift(GEN T, GEN S, GEN q, GEN Q)
     Sr = S;
     if (init)
     {
-      W = modii(mulii(Wr,Fp_poleval(deriv(Tr,x),Sr,q)),qold);
+      W = modii(mulii(Wr,Fp_poleval(deriv(Tr,x),Sr,qold)),qold);
       W = subii(gdeux,W);
       W = modii(mulii(Wr, W),qold);
     }
