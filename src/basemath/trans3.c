@@ -1215,7 +1215,7 @@ next_bin(GEN y, long n, long k)
   return divrs(mulrs(y, n-k+1), k);
 }
 
-static GEN
+GEN
 szeta(long k, long prec)
 {
   long kk, n, li;
@@ -1342,7 +1342,7 @@ n_s(ulong n, GEN *tab)
 GEN czeta(GEN s0, long prec);
 
 /* assume k != 1 */
-static GEN
+GEN
 szeta(long k, long prec)
 {
   pari_sp av = avma;

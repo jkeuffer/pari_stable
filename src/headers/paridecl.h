@@ -1597,6 +1597,7 @@ GEN     polylog0(long m, GEN x, long flag, long prec);
 GEN     polylogd(long m, GEN x, long prec);
 GEN     polylogdold(long m, GEN x, long prec);
 GEN     polylogp(long m, GEN x, long prec);
+GEN     szeta(long x, long prec);
 GEN     theta(GEN q, GEN z, long prec);
 GEN     thetanullk(GEN q, long k, long prec);
 GEN     trueeta(GEN x, long prec);
