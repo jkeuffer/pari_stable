@@ -48,9 +48,9 @@ int pari_kernel_init(void)
 {
   /*Montgomery mult is not supported*/
   setmontgomerylimit(0);
+  setremiilimit(608);
   Flx_INVMONTGOMERY_LIMIT  = 600;
   Flx_POW_MONTGOMERY_LIMIT = 100;
-  /*setremiilimit(50);*/
   /* Use gpmalloc instead of malloc */
   mp_set_memory_functions((void *(*)(size_t)) gpmalloc
 		  	,(void *(*)(void *, size_t, size_t)) gprealloc
@@ -484,9 +484,9 @@ absi_equal_lg(GEN x, GEN y, long l)
 
 #define _sqri_l -1
 #define _muli_l -1
-#define _mulr_l 72
-#define _divr_l 502
-#define _invmod_gmp_l 4
+#define _mulr_l  8
+#define _divr_l  4
+#define _invmod_gmp_l 46
 
 #if 1 /* for tunings */
 

@@ -433,9 +433,9 @@ absi_equal_lg(GEN x, GEN y, long l)
 /**		          MULTIPLICATION                 	      **/
 /**                                                                   **/
 /***********************************************************************/
-#define _sqri_l 47
-#define _muli_l 25 /* optimal on PII 350MHz + gcc 2.7.2.1 (gp-dyn) */
-#define _mulr_l 333
+#define _sqri_l 62
+#define _muli_l 32
+#define _mulr_l 294
 
 #if 1 /* for tunings */
 long KARATSUBA_SQRI_LIMIT = _sqri_l;

@@ -1649,9 +1649,8 @@ init_remiimul(GEN M)
   return sM;
 }
 
-/* optimal on UltraSPARC */
-static long RESIIMUL_LIMIT   = 150;
-static long MONTGOMERY_LIMIT = 32;
+static long RESIIMUL_LIMIT   = 139;
+static long MONTGOMERY_LIMIT = 70;
 
 void
 setremiilimit(long n) { RESIIMUL_LIMIT = n; }
