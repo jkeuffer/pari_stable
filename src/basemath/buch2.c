@@ -2219,7 +2219,7 @@ GEN
 bnfnewprec(GEN bnf, long prec)
 {
   GEN nf,ro,res,p1,funits,mun,matal,clgp,clgp2,y;
-  long av,r1,r2,ru,pl1,pl2,prec1;
+  long r1,r2,ru,pl1,pl2,prec1;
 
   bnf = checkbnf(bnf);
   if (prec <= 0) return nfnewprec(checknf(bnf),prec);
@@ -2250,7 +2250,6 @@ bnfnewprec(GEN bnf, long prec)
   y[2]=lcopy((GEN)bnf[2]);
   y[3]=(long)mun;
   matal = check_and_build_matal(bnf);
-  av = avma;
   y[4]=(long)get_arch2(nf,matal,prec,0);
   y[5]=lcopy((GEN)bnf[5]);
   y[6]=lcopy((GEN)bnf[6]);

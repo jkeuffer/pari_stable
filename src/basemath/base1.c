@@ -285,12 +285,11 @@ GEN
 primitive_pol_to_monic_factor(GEN pol, GEN *ptlead)
 {
   long i,j,n = lgef(pol)-3;
-  GEN p1,lead,fa,e, a = dummycopy(pol);
+  GEN lead,fa,e, a = dummycopy(pol);
 
   a += 2; lead = (GEN)a[n];
   if (gcmp1(lead)) { if (ptlead) *ptlead = NULL; return a; }
   lead = (GEN) a[n];
-  p1 = gun;
   fa = auxdecomp(lead,0); lead = gun;
   e = (GEN)fa[2]; fa = (GEN)fa[1];
   for (i=lg(e)-1; i>0;i--) e[i] = itos((GEN)e[i]);
