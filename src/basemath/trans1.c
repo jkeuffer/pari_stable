@@ -1714,7 +1714,7 @@ glog(GEN x, long prec)
     case t_INTMOD: err(typeer,"glog");
     default:
       av = avma; if (!(y = _toser(x))) break;
-      if (valp(y) || gcmp0(y)) err(talker,"log is not analytic at 0");
+      if (valp(y) || gcmp0(y)) err(talker,"log is not meromorphic at 0");
       p1 = integ(gdiv(derivser(y), y), varn(y)); /* log(y)' = y'/y */
       if (!gcmp1((GEN)y[2])) p1 = gadd(p1, glog((GEN)y[2],prec));
       return gerepileupto(av, p1);

@@ -969,7 +969,7 @@ gabs(GEN x, long prec)
 
    case t_SER:
      if (valp(x) || !signe(x) || lg(x)<3)
-       err(talker,"abs is not analytic at 0");
+       err(talker,"abs is not meromorphic at 0");
      if (gsigne((GEN) x[2])<0) return gneg(x);
      return gcopy(x);
 
