@@ -2049,12 +2049,12 @@ factor(GEN x)
           y[2]=(long)p3; return y;
 
 	case t_REAL: y=cgetg(3,t_MAT); lx=lgef(x)-2; v=varn(x);
-	  av=avma; p1=roots(x,pa); tetpil=avma;
+	  av=avma; p1=cleanroots(x,pa); tetpil=avma;
 	  for(r1=1; r1<lx; r1++)
-            if (signe(gmael(p1,r1,2))) break;
+            if (typ(p1[r1]) == t_COMPLEX) break;
 	  lx=(r1+lx)>>1; p2=cgetg(lx,t_COL);
 	  for(i=1; i<r1; i++)
-            p2[i] = (long)deg1pol_i(gun, negr(gmael(p1,i,1)), v);
+            p2[i] = (long)deg1pol_i(gun, negr((GEN)p1[i]), v);
 	  for(   ; i<lx; i++)
 	  {
 	    GEN a = (GEN) p1[2*i-r1];

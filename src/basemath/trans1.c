@@ -215,7 +215,7 @@ transc(GEN (*f)(GEN,long), GEN x, long prec)
       return y;
 
     case t_POLMOD:
-      p1 = roots((GEN)x[1],prec); lx = lg(p1);
+      p1 = cleanroots((GEN)x[1],prec); lx = lg(p1);
       for (i=1; i<lx; i++) p1[i] = lpoleval((GEN)x[2],(GEN)p1[i]);
       tetpil = avma; y = cgetg(lx,t_COL);
       for (i=1; i<lx; i++) y[i] = (long)f((GEN)p1[i],prec);

@@ -3483,7 +3483,7 @@ static GEN
 nf_all_roots(GEN nf, GEN x, long prec)
 {
   long i, j, l = lgef(x), ru = lg(nf[6]);
-  GEN y = cgetg(l, t_POL), v, z, r;
+  GEN y = cgetg(l, t_POL), v, z;
 
   x = unifpol(nf, x, 0);
   y[1] = x[1];
@@ -3495,10 +3495,7 @@ nf_all_roots(GEN nf, GEN x, long prec)
   for (i=1; i<ru; i++)
   {
     for (j = 2; j < l; j++) z[j] = mael(y,j,i);
-    r = roots(z, prec);
-    for (j = 1; j < lg(r); j++)
-      if (gcmp0(gmael(r,j,2))) r[j] = mael(r,j,1);
-    v[i] = (long)r;
+    v[i] = (long)cleanroots(z, prec);
   }
   return v;
 }

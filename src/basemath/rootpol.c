@@ -2067,3 +2067,18 @@ roots0(GEN p, long flag,long l)
   }
   return NULL; /* not reached */
 }
+
+/* clean up roots. If root is real replace it by its real part */
+GEN
+cleanroots(GEN p, long prec)
+{
+  GEN s, r = roots(p,prec);
+  long i, l = lg(r);
+  for (i=1; i<l; i++)
+  {
+    s = (GEN)r[i];
+    if (signe(s[2])) break; /* remaining roots are complex */
+    r[i] = s[1]; /* root is real; take real part */
+  }
+  return r;
+}

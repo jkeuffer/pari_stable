@@ -1372,6 +1372,7 @@ GEN     u_zeropol(void);
 
 /* rootpol.c */
 
+GEN     cleanroots(GEN x,long l);
 int     isrealappr(GEN x, long l);
 GEN     roots(GEN x,long l);
 GEN     roots0(GEN x,long flag,long l);

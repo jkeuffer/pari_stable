@@ -321,21 +321,6 @@ rangeroots(GEN newr, GEN oldr)
   avma=av; for (i=1; i<=N; i++) newr[i]=z[i];
 }
 
-/* clean up roots. If root is real replace it by its real part */
-GEN
-myroots(GEN p, long prec)
-{
-  GEN y,x = roots(p,prec);
-  long i,lx = lg(x);
-  for (i=1; i<lx; i++)
-  {
-    y = (GEN)x[i];
-    if (signe(y[2])) break; /* remaining roots are complex */
-    x[i]=y[1]; /* root is real; take real part */
-  }
-  return x;
-}
-
 /* increase the roots accuracy */
 static void
 moreprec(GEN po, GEN *r, long pr)
@@ -347,7 +332,7 @@ moreprec(GEN po, GEN *r, long pr)
     long d = PRMAX + 5;
 
     PRMAX = (pr < d)? d: pr;
-    p1 = myroots(po,PRMAX); rangeroots(p1,*r); *r=p1;
+    p1 = cleanroots(po,PRMAX); rangeroots(p1,*r); *r=p1;
     for (d=1; d<TSCHMAX; d++) new_pol(r,coeff[d],d);
   }
   preci(r,pr);
@@ -758,7 +743,7 @@ tschirn(GEN po, GEN *r, long pr)
     fprintferr("\n$$$$$ Tschirnhaus transformation of degree %ld: $$$$$\n",d);
 
   a = new_chunk(d);
-  do 
+  do
   {
     for (i=0; i<d; i++) a[i] = random_bits(3) + 1;
     h = small_to_pol_i(a-2, d+2);
@@ -767,7 +752,7 @@ tschirn(GEN po, GEN *r, long pr)
   setvarn(h, v);
   k = 0; u = ZX_caract_sqf(h, po, &k, v);
   a[1] += k; /* a may have been modified */
-  if (DEBUGLEVEL>2) outerr(u); 
+  if (DEBUGLEVEL>2) outerr(u);
 
   d = TSCHMAX;
   for (i=0; i<=d; i++) coeff[d][i] = a[i];
@@ -1294,7 +1279,7 @@ closure8(GEN po)
   long rep;
   GEN r[NMAX];
 
-  r[0] = myroots(po,PRMAX); preci(r,PREC);
+  r[0] = cleanroots(po,PRMAX); preci(r,PREC);
   if (!EVEN)
   {
   /* CLOS_8_1: */
@@ -1704,7 +1689,7 @@ closure9(GEN po)
   long rep;
   GEN r[NMAX];
 
-  r[0] = myroots(po,PRMAX); preci(r,PREC);
+  r[0] = cleanroots(po,PRMAX); preci(r,PREC);
   if (!EVEN)
   {
   /* CLOS_9_1: */
@@ -2130,7 +2115,7 @@ closure10(GEN po)
   long rep;
   GEN r[NMAX];
 
-  r[0] = myroots(po,PRMAX); preci(r,PREC);
+  r[0] = cleanroots(po,PRMAX); preci(r,PREC);
   if (EVEN)
   {
   /* CLOS_10_1: */
@@ -2286,7 +2271,7 @@ closure11(GEN po)
   long rep;
   GEN r[NMAX];
 
-  r[0] = myroots(po,PRMAX); preci(r,PREC);
+  r[0] = cleanroots(po,PRMAX); preci(r,PREC);
   if (EVEN)
   {
   /* EVEN_11_1: */

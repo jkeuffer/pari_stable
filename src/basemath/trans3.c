@@ -231,7 +231,7 @@ jbesselintern(GEN n, GEN z, long flag, long prec)
       return gerepile(av,tetpil,jbesselintern(n,p1,flag,prec));
 
     case t_POLMOD:
-      av=avma; p1=roots((GEN)z[1],prec); lz=lg(p1); p2=cgetg(lz,t_COL);
+      av=avma; p1=cleanroots((GEN)z[1],prec); lz=lg(p1); p2=cgetg(lz,t_COL);
       for (i=1; i<lz; i++) p2[i]=lpoleval((GEN)z[2],(GEN)p1[i]);
       tetpil=avma; y=cgetg(lz,t_COL);
       for (i=1; i<lz; i++) y[i]=(long)jbesselintern(n,(GEN)p2[i],flag,prec);
@@ -330,7 +330,7 @@ jbesselh(GEN n, GEN z, long prec)
       return gerepile(av,tetpil,jbesselh(n,p1,prec));
 
     case t_POLMOD:
-      av=avma; p1=roots((GEN)z[1],prec); lz=lg(p1); p2=cgetg(lz,t_COL);
+      av=avma; p1=cleanroots((GEN)z[1],prec); lz=lg(p1); p2=cgetg(lz,t_COL);
       for (i=1; i<lz; i++) p2[i]=lpoleval((GEN)z[2],(GEN)p1[i]);
       tetpil=avma; y=cgetg(lz,t_COL);
       for (i=1; i<lz; i++) y[i]=(long)jbesselh(n,(GEN)p2[i],prec);
@@ -585,7 +585,7 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
       return gerepile(av,tetpil,kbesselintern(n,p1,flag,prec));
 
     case t_POLMOD:
-      av=avma; p1=roots((GEN)z[1],prec); lz=lg(p1); p2=cgetg(lz,t_COL);
+      av=avma; p1=cleanroots((GEN)z[1],prec); lz=lg(p1); p2=cgetg(lz,t_COL);
       for (i=1; i<lz; i++) p2[i]=lpoleval((GEN)z[2],(GEN)p1[i]);
       tetpil=avma; y=cgetg(lz,t_COL);
       for (i=1; i<lz; i++) y[i]=(long)kbesselintern(n,(GEN)p2[i],flag,prec);
@@ -1803,7 +1803,7 @@ gpolylog(long m, GEN x, long prec)
       return polylog(m,x,prec);
 
     case t_POLMOD:
-      p1=roots((GEN)x[1],prec); lx=lg(p1);
+      p1=cleanroots((GEN)x[1],prec); lx=lg(p1);
       for (i=1; i<lx; i++) p1[i]=lpoleval((GEN)x[2],(GEN)p1[i]);
       y=cgetg(lx,t_COL);
       for (i=1; i<lx; i++) y[i]=(long)polylog(m,(GEN)p1[i],prec);
