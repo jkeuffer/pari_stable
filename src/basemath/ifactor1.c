@@ -341,7 +341,7 @@ plisprime(GEN N, long flag)
     if (!witness) { avma = ltop; return gzero; }
     mael(C,1,i) = licopy(p);
     mael(C,2,i) = lstoi(witness);
-    if (!flag) r = BSW_isprime(r)? gun: gzero;
+    if (!flag) r = BSW_isprime(p)? gun: gzero;
     else
     {
       if (BSW_isprime_small(p)) r = gun;
