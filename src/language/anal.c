@@ -359,8 +359,9 @@ changevalue(entree *ep, GEN x)
   if (v == INITIAL) new_val_cell(ep,x, COPY_VAL);
   else
   {
+    x = gclone(x); /* beware: killbloc may destroy old x */
     if (v->flag == COPY_VAL) killbloc((GEN)ep->value); else v->flag = COPY_VAL;
-    ep->value = (void*)gclone(x);
+    ep->value = (void*)x;
   }
 }
 
