@@ -6,6 +6,7 @@
 /* $Id$ */
 #include "pari.h"
 #include "parinf.h"
+GEN idealhermite_aux(GEN nf, GEN x);
 
 void
 checkrnf(GEN rnf)
@@ -879,14 +880,18 @@ pol_to_monic(GEN pol, GEN *lead)
   return primitive_pol_to_monic(pol,lead);
 }
 
+/* NB: TI integral, det(TI) = d_K, ideal/dideal = codifferent */
 GEN
-make_TI(GEN nf, GEN TI, GEN con)
+make_MDI(GEN nf, GEN TI, GEN *ideal, GEN *dideal)
 {
-  GEN z, p1 = hnfmod(TI,detint(TI)), d = dethnf(p1);
+  GEN c = content(TI);
+  GEN z, p1, d = (GEN)nf[3];
   long n = lg(TI)-1;
 
-  d = mulii(d, gpowgs(con, n));
-  p1 = ideal_two_elt(nf, p1); p1 = gmul(p1,con);
+  *dideal = divii(d,c);
+  *ideal = p1 = hnfmodid(gdiv(TI,c), *dideal);
+  d = mulii(dethnf_i(p1), gpowgs(c, n));
+  p1 = ideal_two_elt(nf, p1); p1 = gmul(p1,c);
   z = cgetg(4,t_VEC);
   z[1]=p1[1]; z[2]=p1[2]; z[3]=(long)d; return z;
 }
@@ -975,9 +980,7 @@ get_mul_table(GEN x,GEN bas,GEN *ptT)
 
 /* Initialize the number field defined by the polynomial x (in variable v)
  * flag & nf_REGULAR
- *    regular behaviour (no different).
- * flag & nf_DIFFERENT
- *    compute the different.
+ *    regular behaviour.
  * flag & nf_SMALL
  *    compute only nf[1] (pol), nf[2] (signature), nf[5][3] (T2) and
  *    nf[7] (integer basis), the other components are filled with gzero.
@@ -1038,7 +1041,6 @@ initalgall0(GEN x, long flag, long prec)
       r1 = itos(gmael(nf,2,1));
     }
     bas[1]=lpolun[varn(x)]; /* it may be gun => SEGV later */
-    if (flag & nf_DIFFERENT) fa = factor(absi(dK));
   }
   r2=(n-r1)>>1; ru=r1+r2;
   PRECREG = prec + (expi(dK)>>(TWOPOTBITS_IN_LONG+1))
@@ -1086,33 +1088,34 @@ initalgall0(GEN x, long flag, long prec)
   M = make_M(n,ru,bas,ro);
   MC = make_MC(n,r1,ru,M);
   mat[1]=(long)M;
-  mat[5]=zero; /* dummy for the different */
   mat[3]=(long)mulmat_real(MC,M);
   if (flag & nf_SMALL)
-    mat[2]=mat[4]=mat[6]=mat[7]=zero;
+    mat[2]=mat[4]=mat[5]=mat[6]=mat[7]=zero;
   else
   {
-    long av2, av3;
-    GEN a2;
+    long av2;
+    GEN MDI, D, TI, A, dA, *gptr[2];
 
     mat[2]=(long)MC;
     mat[4]=lcopy(T);
+    av2 = avma;
+    TI = gerepileupto(av2, gmul(ginv(T), dK));
+    mat[6] = (long)TI;
 
-    av2=avma; p1=ginv(T); av3=avma;
-    mat[6] = lpile(av2,av3, gmul(p1,dK));
-
-    av2=avma; p1=content((GEN)mat[6]); a2=gdiv((GEN)mat[6],p1);
-    a2 = make_TI(nf,a2,p1); av3=avma;
-    /* Ideal basis for discriminant * (inverse of different) */
-    mat[7] = lpile(av2,av3,gcopy(a2));
+    av2 = avma;
+    MDI = make_MDI(nf,TI, &A, &dA);
+    mat[7] = (long)MDI; /* needed in idealinv */
+    if (gcmp1((GEN)nf[4]))
+      D = idealhermite_aux(nf, derivpol(x));
+    else
+      D = gmul(dA, idealinv(nf, A));
+    gptr[0] = &D; gptr[1]=&MDI;
+    gerepilemany(av2, gptr, 2);
+    mat[5] = (long)D;
+    mat[7] = (long)MDI;
   }
-  if (DEBUGLEVEL>=2) msgtimer("matrices");
+  if (DEBUGLEVEL>1) msgtimer("matrices");
 
-  if (flag & nf_DIFFERENT)
-  {
-    mat[5]=(long)differente(nf,fa);
-    if (DEBUGLEVEL) msgtimer("different");
-  }
   if (!(flag & nf_ORIG)) res = nf;
   else
   {
@@ -1125,13 +1128,13 @@ initalgall0(GEN x, long flag, long prec)
 GEN
 initalgred(GEN x, long prec)
 {
-  return initalgall0(x,nf_REDUCE|nf_DIFFERENT,prec);
+  return initalgall0(x,nf_REDUCE,prec);
 }
 
 GEN
 initalgred2(GEN x, long prec)
 {
-  return initalgall0(x,nf_REDUCE|nf_DIFFERENT|nf_ORIG,prec);
+  return initalgall0(x,nf_REDUCE|nf_ORIG,prec);
 }
 
 GEN
@@ -1139,12 +1142,12 @@ nfinit0(GEN x, long flag,long prec)
 {
   switch(flag)
   {
-    case 0: return initalgall0(x,nf_DIFFERENT,prec);
+    case 0:
     case 1: return initalgall0(x,nf_REGULAR,prec);
-    case 2: return initalgall0(x,nf_REDUCE|nf_DIFFERENT,prec);
-    case 3: return initalgall0(x,nf_REDUCE|nf_ORIG|nf_DIFFERENT,prec);
-    case 4: return initalgall0(x,nf_REDUCE|nf_PARTIAL|nf_DIFFERENT,prec);
-    case 5: return initalgall0(x,nf_REDUCE|nf_ORIG|nf_PARTIAL|nf_DIFFERENT,prec);
+    case 2: return initalgall0(x,nf_REDUCE,prec);
+    case 3: return initalgall0(x,nf_REDUCE|nf_ORIG,prec);
+    case 4: return initalgall0(x,nf_REDUCE|nf_PARTIAL,prec);
+    case 5: return initalgall0(x,nf_REDUCE|nf_ORIG|nf_PARTIAL,prec);
     case 6: return initalgall0(x,nf_SMALL,prec);
     default: err(flagerr,"nfinit");
   }
@@ -1154,7 +1157,7 @@ nfinit0(GEN x, long flag,long prec)
 GEN
 initalg(GEN x, long prec)
 {
-  return initalgall0(x,nf_DIFFERENT,prec);
+  return initalgall0(x,nf_REGULAR,prec);
 }
 
 GEN

@@ -2892,7 +2892,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, GEN unnf, GEN id, GEN matId)
     }
 
     A=H; I=Hid;
-    if (low_stack(lim, stack_lim(av1,1)))
+    if (low_stack(lim, stack_lim(av1,1)) || (cmpt & 3) == 0)
     {
       GEN *gptr[2]; gptr[0]=&A; gptr[1]=&I;
       if(DEBUGMEM>1) err(warnmem,"rnfordmax");
