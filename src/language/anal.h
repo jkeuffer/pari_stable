@@ -241,6 +241,7 @@ typedef struct {
 
 #define LBRACE '{'
 #define RBRACE '}'
+#define separator(c)  ((c)==';')
 
 int get_line_from_readline(char *prompt, char *bare_prompt, filtre_t *F);
 char *filtre0(filtre_t *F);

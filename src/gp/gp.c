@@ -187,7 +187,6 @@ gp_preinit(void)
 #else
 #  define GET_SEP_SIZE 128
 #endif
-#define separe(c)  ((c)==';' || (c)==':')
 
 /* Return all chars, up to next separator
  * [as strtok but must handle verbatim character string] */
@@ -2598,7 +2597,13 @@ prune_history(gp_hist *H, long loc)
 }
 
 static int
-is_silent(char *s) { char c = s[strlen(s) - 1]; return separe(c); }
+silent(void)
+{
+  if (gpsilent) return 1;
+  { char c = get_analyseur()[1]; return separator(c); }
+}
+static int
+is_silent(char *s) { char c = s[strlen(s) - 1]; return separator(c); }
 
 /* If there are other buffers open (bufstack != NULL), we are doing an
  * immediate read (with read, extern...) */
@@ -2688,13 +2693,6 @@ extern0(char *s)
   check_secure(s);
   infile = try_pipe(s, mf_IN)->file;
   return gp_main_loop(0);
-}
-
-static int
-silent(void)
-{
-  if (gpsilent) return 1;
-  { char c = get_analyseur()[1]; return separe(c); }
 }
 
 GEN

@@ -513,7 +513,7 @@ rl_print_aide(char *s, int flag)
 #endif
 }
 
-/* add a space between \<char> and following text. Attemting completion now
+/* add a space between \<char> and following text. Attempting completion now
  * would delete char. Hitting <TAB> again will complete properly */
 static char **
 add_space(int start)

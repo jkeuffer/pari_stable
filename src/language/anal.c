@@ -23,7 +23,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "anal.h"
 #include "parinf.h"
 
-#define separe(c) ((c)==';')
 typedef GEN (*PFGEN)(ANYARG);
 typedef GEN (*F2GEN)(GEN,GEN);
 typedef GEN (*F1GEN)(GEN);
@@ -752,10 +751,10 @@ seq(void)
 
   for(;;)
   {
-    while (separe(*analyseur)) analyseur++;
+    while (separator(*analyseur)) analyseur++;
     if (!*analyseur || *analyseur == ')' || *analyseur == ',') return res;
     res = expr();
-    if (br_status || !separe(*analyseur)) return res;
+    if (br_status || !separator(*analyseur)) return res;
 
     if (low_stack(lim, stack_lim(av,1)))
     {
@@ -988,7 +987,7 @@ static int
 do_switch(int noparen, int matchcomma)
 {
   const char *s = analyseur;
-  if (noparen || !*s || *s == ')' || separe(*s)) return 1;
+  if (noparen || !*s || *s == ')' || separator(*s)) return 1;
   if (*s == ',') /* we just read an arg, or first arg */
   {
     if (!matchcomma && s[-1] == '(') return 1; /* first arg */
@@ -2277,7 +2276,7 @@ identifier(void)
         {
           analyseur += 5; /* on '(' */
           nloc += check_args();
-          while(separe(*analyseur)) analyseur++;
+          while(separator(*analyseur)) analyseur++;
         }
         start = analyseur; skipseq(); len = analyseur-start;
         skipping_fun_def--;
@@ -2734,9 +2733,9 @@ skipseq(void)
 {
   for(;;)
   {
-    while (separe(*analyseur)) analyseur++;
+    while (separator(*analyseur)) analyseur++;
     if (*analyseur == ',' || *analyseur == ')' || !*analyseur) return;
-    skipexpr(); if (!separe(*analyseur)) return;
+    skipexpr(); if (!separator(*analyseur)) return;
   }
 }
 
