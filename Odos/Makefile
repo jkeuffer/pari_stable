@@ -27,8 +27,6 @@ RLINCLUDE = -I$(RLDIR)
 RLLIBS    = $(RLDIR)/libreadline.a -ltermcap
 LIBS =
 
-PKZIP = pkzip
-
 # use del if RM is not found.
 RM = rm -f
 #RM = del
@@ -39,8 +37,8 @@ PLOTCFLAGS =
 PLOTLIBS   =
 
 OBJS   =  kernel.o mp.o alglin1.o alglin2.o arith1.o arith2.o base1.o base2.o base3.o base4.o base5.o bibli1.o bibli2.o buch1.o buch2.o buch3.o buch4.o galconj.o gen1.o gen2.o gen3.o ifactor1.o mpqs.o polarit1.o polarit2.o polarit3.o rootpol.o trans1.o trans2.o trans3.o elliptic.o galois.o kummer.o nffactor.o stark.o subfield.o subgroup.o thue.o anal.o compat.o errmsg.o es.o helpmsg.o highlvl.o init.o sumiter.o
-OBJSGP =  gp.o gp_init.o gp_rl.o plot.o plotport.o
-OINLINE =  mpinl.o
+OBJSGP =  gp.o gp_init.o gp_rl.o plot.o plotport.o whatnow.o
+OINLINE = mpinl.o
 
 dft: gp.exe
 
@@ -174,4 +172,4 @@ plot.o: $(HEADERS) ../src/graph/rect.h ../src/graph/$(PLOTFILE)
 plotport.o: $(HEADERS) ../src/graph/rect.h ../src/graph/plotport.c
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) -I../src/graph -o plotport.o ../src/graph/plotport.c
 whatnow.o: $(HEADERS) ../src/language/anal.h ./paricfg.h ../src/gp/whatnow.c
-	$(CC) -c $(CFLAGS) $(CPPFLAGS) -I../src/language $(RLINCLUDE) -o whatnow.o ../src/gp/whatnow.c
+	$(CC) -c $(CFLAGS) $(CPPFLAGS) -I../src/language -o whatnow.o ../src/gp/whatnow.c

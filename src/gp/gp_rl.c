@@ -34,7 +34,6 @@ extern char *username_completion_function(char *text,int state);
 #endif
 char **pari_completion(char *text, int start, int end);
 extern int rl_completion_query_items;
-extern int rl_explicit_arg;
 extern int rl_bind_key_in_map();
 ENDEXTERN
 
@@ -547,11 +546,12 @@ rl_short_help(int count, int key)
   RESTORE_PROMPT();
   rl_point = p; rl_end = e; pari_outfile = save;
   rl_clear_message();
-  /* rl_explicit_arg set + rl_clear_screen = rl_refresh line
-   * rl_refresh_line prototype changed changed across readline versions 
-   */
-  rl_explicit_arg = 1;
-  rl_clear_screen(1,key); return 0;
+#ifdef RL_REFRESH_LINE_OLDPROTO
+  rl_refresh_line();
+#else
+  rl_refresh_line(count,key);
+#endif
+  return 0;
 }
 
 static int

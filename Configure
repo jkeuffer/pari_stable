@@ -533,6 +533,9 @@ if test "$optimization" != profiling; then
      ?:/*|/*) rl_include=`echo $x | sed 's,/readline.h,,'`
          if (grep CPPFunction $x > /dev/null 2>&1); then CPPF_defined=yes; fi
          if (grep rl_message  $x > /dev/null 2>&1); then rl_message=yes; fi
+         if (grep "rl_refresh_line *()" $x > /dev/null 2>&1); then
+           rl_refresh_line_oldproto=yes
+         fi
          if (grep rl_completion_append_character $x > /dev/null 2>&1); then
            rl_appendchar=yes
          fi
@@ -1177,7 +1180,7 @@ for variable in\
   DLLD DLSUFFIX somake sodest KERNELCPPFLAGS DLLDFLAGS EXTRADLLDFLAGS\
   runpath runpathprefix LDDYN LIBS DYNLIBS DYNFLAGS DYNRELOC\
   ranlib gzip zcat emacs perl ln_s make_sh exe_suff\
-  readline readline_enabledp CPPF_defined\
+  readline readline_enabledp CPPF_defined rl_refresh_line_oldproto\
   rl_appendchar rl_save_prompt _rl_save_prompt rl_message\
   RLINCLUDE RLLIBS\
   sizeof_long endian has_exp2\

@@ -77,6 +77,9 @@ EOT
   if test -n "$rl_appendchar"; then
     echo '#define HAS_COMPLETION_APPEND_CHAR' >> $file
   fi
+  if test -n "$rl_refresh_line_oldproto"; then
+    echo '#define OLD_RL_REFRESH_LINE' >> $file
+  fi
   if test -n "$rl_save_prompt"; then
     echo '#define HAS_RL_SAVE_PROMPT' >> $file
   else

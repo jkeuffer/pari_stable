@@ -15,19 +15,17 @@ cat > $file << EOT
 
 #define PARIVERSION "GP/PARI CALCULATOR Version ${version}.${patch} (${status})"
 #ifdef __cplusplus
-#  ifdef __EMX__
+#  if defined(__EMX__)
 #    define PARIINFO "C++ ix86 running EMX (ix86 kernel) 32-bit version"
-#  endif
-#  ifdef WINCE
+#  elsif defined(WINCE)
 #    define PARIINFO "C++ Windows CE 32-bit version"
 #  else
 #    define PARIINFO "C++ ix86 running Windows 3.2 (ix86 kernel) 32-bit version"
 #  endif
 #else
-#  ifdef __EMX__
+#  if defined(__EMX__)
 #    define PARIINFO "ix86 running EMX (ix86 kernel) 32-bit version"
-#  endif
-#  ifdef WINCE
+#  elsif defined(WINCE)
 #    define PARIINFO "Windows CE 32-bit version"
 #  else
 #    define PARIINFO "ix86 running Windows 3.2 (ix86 kernel) 32-bit version"
@@ -50,6 +48,8 @@ cat > $file << EOT
 #  define READLINE_LIBRARY
 #  define HAS_RL_MESSAGE
 #  define CPPFunction_defined
+/* in readline 1, no arguments for rl_refresh_line() */
+#  define RL_REFRESH_LINE_OLDPROTO
 #endif
 
 /* No exp2, log2 in libc */
