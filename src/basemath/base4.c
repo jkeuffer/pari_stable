@@ -213,6 +213,14 @@ principalideal(GEN nf, GEN x)
   nf = checknf(nf); return principalideal0(nf,x,1);
 }
 
+static GEN
+mylog(GEN x, long prec)
+{
+  if (!signe(x))
+    err(talker,"precision too low in get_arch");
+  return glog(x,prec);
+}
+
 /* for internal use */
 GEN
 get_arch(GEN nf,GEN x,long prec)
@@ -232,8 +240,8 @@ get_arch(GEN nf,GEN x,long prec)
   else
   {
     x = gmul(gmael(nf,5,1),x); v = cgetg(RU+1,t_VEC);
-    for (i=1; i<=R1; i++) v[i] = llog((GEN)x[i],prec);
-    for (   ; i<=RU; i++) v[i] = lmul2n(glog((GEN)x[i],prec),1);
+    for (i=1; i<=R1; i++) v[i] = (long)mylog((GEN)x[i],prec);
+    for (   ; i<=RU; i++) v[i] = lmul2n(mylog((GEN)x[i],prec),1);
   }
   return v;
 }
