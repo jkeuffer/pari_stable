@@ -6273,7 +6273,9 @@ $\bullet$ 2048: plot all ticks with the same length.
 \var{listx} and \var{listy} two vectors of equal length, plots (in high
 precision) the points whose $(x,y)$-coordinates are given in \var{listx}
 and \var{listy}. Automatic positioning and scaling is done, but with the
-same scaling factor on $x$ and $y$. If $\fl$ is non-zero, join points.
+same scaling factor on $x$ and $y$. If $\fl$ is 1, join points, other non-0
+flags toggle display options and should be combinations of bits $2^k$, $k
+\geq 3$ as in \kbd{ploth}.
 
 \subsecidx{plothsizes}$()$: return data corresponding to the output window
 in the form of a 6-component vector: window width and height, sizes for ticks
