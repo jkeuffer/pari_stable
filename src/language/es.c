@@ -2819,8 +2819,9 @@ readbin(char *name, FILE *f)
   if (z)
   {
     if (x && cx == BIN_GEN) z = z? concatsp(z, _vec(x)): _vec(x);
-    err(warner,"%ld unnamed objects read. Returning then in a vector",
-        lg(z)-1);
+    if (DEBUGLEVEL)
+      err(warner,"%ld unnamed objects read. Returning then in a vector",
+          lg(z)-1);
     x = gerepilecopy(av, z);
     setisclone(x); /* HACK */
   }
