@@ -116,8 +116,8 @@ gred_rfrac2_i(GEN x1, GEN x2)
   long tx,ty;
 
   if (gcmp0(x1)) return gcopy(x1);
-
-  tx=typ(x1); ty=typ(x2);
+  x1 = simplify_i(x1); tx = typ(x1);
+  x2 = simplify_i(x2); ty = typ(x2);
   if (ty!=t_POL)
   {
     if (tx!=t_POL) return gred_rfrac_copy(x1,x2);
