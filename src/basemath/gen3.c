@@ -679,6 +679,14 @@ gmodulss(long x, long y)
   y=labs(y); z[1]=lstoi(y); z[2]=lstoi(x % y); return z;
 }
 
+static GEN 
+specialmod(GEN x, GEN y)
+{
+  GEN z = gmod(x,y);
+  if (gvar(z) < varn(y)) z = gzero;
+  return z;
+}
+
 GEN
 gmodulo(GEN x,GEN y)
 {
@@ -705,11 +713,10 @@ gmodulo(GEN x,GEN y)
       z[1] = lclone(y);
       if (is_scalar_t(tx)) { z[2]=lcopy(x); return z; }
       if (tx!=t_POL && !is_rfrac_t(tx) && tx!=t_SER) break;
-      z[2]=lmod(x,y); return z;
+      z[2]=(long)specialmod(x,y); return z;
   }
   err(operf,"%",tx,typ(y)); return NULL; /* not reached */
 }
-
 
 GEN
 gmodulcp(GEN x,GEN y)
@@ -739,7 +746,7 @@ gmodulcp(GEN x,GEN y)
         return z;
       }
       if (tx!=t_POL && !is_rfrac_t(tx) && tx!=t_SER) break;
-      z[2]=lmod(x,y); return z;
+      z[2]=(long)specialmod(x,y); return z;
   }
   err(operf,"%",tx,typ(y)); return NULL; /* not reached */
 }
