@@ -271,7 +271,7 @@ forvec_next_le_i(GEN gd, GEN ignored)
         } 
         if (i > 1) {
           GEN t = d->a[i-1]; if (cmpii(t, d->m[i]) < 0) t = d->m[i];
-          d->a[i] = resetloop(d->a[i], t);/*a[i]:=min(a[i-1],m[i])*/
+          d->a[i] = resetloop(d->a[i], t);/*a[i]:=max(a[i-1],m[i])*/
         }
       }
       return (GEN)d->a;
@@ -343,7 +343,7 @@ forvec_next_lt_i(GEN gd, GEN ignored)
         } 
         if (i > 1) {
           GEN t = addis(d->a[i-1],1); if (cmpii(t, d->m[i]) < 0) t = d->m[i];
-          d->a[i] = resetloop(d->a[i], t);/*a[i]:=min(a[i-1],m[i])*/
+          d->a[i] = resetloop(d->a[i], t);/*a[i]:=max(a[i-1],m[i])*/
         }
       }
       return (GEN)d->a;
@@ -415,10 +415,12 @@ forvec_start(GEN x, long flag, GEN *gd, GEN (**next)(GEN,GEN))
     {
       case 1: /* a >= m[i-1] - m */
         a = gceil(gsub(d->m[i-1], m));
-        m = gadd(m, a); break;
+        if (signe(a) > 0) m = gadd(m, a);
+        break;
       case 2: /* a > m[i-1] - m */
         a = addis(gfloor(gsub(d->m[i-1], m)), 1);
-        m = gadd(m, a); break;
+        if (signe(a) > 0) m = gadd(m, a);
+        break;
     }
     if (gcmp(m,M) > 0) return (GEN)NULL;
     d->m[i] = gcopy(m);
