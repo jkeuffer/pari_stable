@@ -350,7 +350,7 @@ BuildTree(GEN link, GEN V, GEN W, GEN a, GEN T, GEN p)
     {
       if (T)
       {
-        d = FpXQ_inv(d, T, p);
+        d = Fq_inv(d, T, p);
         u = FpXQX_FpXQ_mul(u, d, T, p);
         v = FpXQX_FpXQ_mul(v, d, T, p);
       }
