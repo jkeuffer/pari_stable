@@ -61,6 +61,7 @@ long    rank_mod_p(GEN x, GEN p);
 GEN     suppl(GEN x);
 GEN     suppl_intern(GEN x, GEN myid);
 GEN     zerocol(long n);
+GEN     zerovec(long n);
 
 /* alglin2.c */
 
