@@ -88,7 +88,7 @@ static pariFILE *prettyprinter_file;
 static long prettyp, test_mode, quiet_mode, gpsilent, simplifyflag;
 static long chrono, pariecho, primelimit, parisize, strictmatch;
 static long tglobal, histsize, paribufsize, lim_lines;
-static int tm_is_waiting = 0;
+static int tm_is_waiting = 0, handle_C_C = 0;
 static gp_format fmt;
 
 typedef struct Buffer {
@@ -243,6 +243,22 @@ get_int(char *s, long dflt)
   return dflt;
 }
 
+/* tell TeXmacs GP will start outputing data */
+static void
+tm_start_output()
+{
+  if (!tm_is_waiting) { printf("%cverbatim:",DATA_BEGIN); fflush(stdout); }
+  tm_is_waiting = 1;
+}
+
+/* tell TeXmacs GP is done and is waiting for new data */
+static void
+tm_end_output()
+{
+  if (tm_is_waiting) { printf("%c", DATA_END); fflush(stdout); } 
+  tm_is_waiting = 0;
+}
+
 static void
 gp_output(GEN x)
 {
@@ -313,7 +329,6 @@ del_buffer(Buffer *b)
   if (!b) return;
   free(b->buf); free((void*)b);
 }
-
 
 static void
 pop_buffer()
@@ -1557,7 +1572,9 @@ gp_quit()
   kill_all_buffers(NULL);
   if (INIT_SIG) pari_sig_init(SIG_DFL);
   term_color(c_NONE);
-  pariputs_opt("Good bye!\n"); exit(0);
+  pariputs_opt("Good bye!\n");
+  if (under_texmacs) tm_end_output();
+  exit(0);
 }
 
 /* history management function:
@@ -1912,17 +1929,27 @@ static int
 get_line_from_file(FILE *file, Buffer *b, char *prompt)
 {
   int f_flag = prompt? f_REG | f_KEEPCASE: f_REG;
-  int wait_for_brace;
+  int wait_for_brace, wait_for_input;
   long len = b->len;
   char *s =  b->buf;
 
-  if (!fgets(s, len, file)) return 0;
-  wait_for_brace = init_filtre(s);
+  if (under_texmacs && file == stdin) tm_end_output();
+  handle_C_C = 0;
+  if (!fgets(s, len, file))
+  { 
+    if (under_texmacs && file == stdin) tm_start_output();
+    /* received ^C  in fgets, give another chance */
+    if (handle_C_C) { *s = 0; return 1; }
+    return 0;
+  }
+
+  wait_for_input = wait_for_brace = init_filtre(s);
   for(;;)
   {
     int read_more = (s[strlen(s)-1] != '\n');
     char *end = filtre(s, f_flag);
-    if (*s)
+    if (!*s) { if (!wait_for_input) break; }
+    else
     {
       if (read_more)
       {
@@ -1931,17 +1958,17 @@ get_line_from_file(FILE *file, Buffer *b, char *prompt)
       }
       else if (end[-1] == '\\')
       {
-        if (*s=='?') break;
+        if (*s == '?') break;
         s = end-1;
       }
-      else if (end[-1] == '='&& *s != '?')
+      else if (end[-1] == '=' && *s != '?')
       {
-        s = end;
+        wait_for_input = 1; s = end;
       }
       else
       {
 	if (!wait_for_brace) break;
-	if (end[-1] == RBRACE) {end[-1]=0; break;}
+	if (end[-1] == RBRACE) { end[-1]=0; break; }
 	s = end;
       }
       len = b->len - (s - b->buf);
@@ -1952,13 +1979,13 @@ get_line_from_file(FILE *file, Buffer *b, char *prompt)
 	s = b->buf + l;
       }
     }
-    if (under_texmacs && file == stdin && !read_more)
-    { /* received an empty line from TeXmacs */
-      printf("%cverbatim:%c", DATA_BEGIN,DATA_END);
-      fflush(stdout);
+    if (under_texmacs && file == stdin)
+    { /* need more data from TeXmacs */
+      tm_start_output();
+      tm_end_output(); 
     }
     if (!fgets(s, len, file)) break;
-    if (!read_more && !wait_for_brace)
+    if (wait_for_input && !wait_for_brace)
       wait_for_brace = init_filtre(s);
   }
   if (prompt && *(b->buf))
@@ -1967,6 +1994,7 @@ get_line_from_file(FILE *file, Buffer *b, char *prompt)
     else if (logfile) fprintf(logfile, "%s%s\n",prompt,b->buf);
     pariflush();
   }
+  if (under_texmacs) tm_start_output();
   return 1;
 }
 
@@ -2096,6 +2124,7 @@ gp_handle_SIGINT()
 #ifdef _WIN32
   if (++win32ctrlc >= 5) _exit(3);
 #else
+  if (under_texmacs) tm_start_output();
   err(siginter, do_time(ti_INTERRUPT));
 #endif
 }
@@ -2330,18 +2359,7 @@ gp_main_loop(int ismain)
     for(;;)
     {
       int r;
-      if (tm_is_waiting)
-      {
-        printf("%c", DATA_END);
-        fflush(stdout);
-        tm_is_waiting = 0;
-      } 
       r = read_line(do_prompt(), b);
-      if (under_texmacs && !tm_is_waiting)
-      {
-        printf("%cverbatim:",DATA_BEGIN);
-        tm_is_waiting = 1;
-      }
       term_color(c_NONE);
       if (!r)
       {
@@ -2514,7 +2532,7 @@ break_loop(long numerr)
       term_color(c_NONE);
       pariputc('\n');
     }
-    if (numerr == siginter && flag == 2) { go_on = 1; break; }
+    if (numerr == siginter && flag == 2) { handle_C_C = go_on = 1; break; }
   }
   if (old && !s) _set_analyseur(old);
   b = NULL; infile = oldinfile;
@@ -2596,6 +2614,7 @@ read_opt(long argc, char **argv)
 	usage(argv[0]);
     }
   }
+  if (under_texmacs) tm_start_output();
   pre = initrc? gp_initrc(): NULL;
 
   /* override the values from gprc */
@@ -2603,7 +2622,6 @@ read_opt(long argc, char **argv)
   testint(p, &primelimit);
   testint(s, &parisize);
   if (under_emacs || under_texmacs) disable_color=1;
-  if (under_texmacs) initout(1);
   pari_outfile=stdout; return pre;
 }
 
@@ -2631,11 +2649,6 @@ main(int argc, char **argv)
   argc = ccommand(&argv);
 #endif
   flist = read_opt(argc,argv);
-  if (under_texmacs)
-  {
-    printf("%cverbatim:",DATA_BEGIN);
-    tm_is_waiting = 1;
-  }
   pari_addfunctions(&pari_modules, functions_gp,helpmessages_gp);
   pari_addfunctions(&pari_modules, functions_highlevel,helpmessages_highlevel);
   pari_addfunctions(&pari_oldmodules, functions_oldgp,helpmessages_oldgp);
@@ -2661,21 +2674,9 @@ main(int argc, char **argv)
     char **s = flist;
     chrono=0; pariecho=0; logfile=NULL;
     for ( ; *s; s++) { read0(*s); free(*s); }
-    if (tm_is_waiting)
-    {
-      printf("%c",DATA_END);
-      fflush(stdout);
-      tm_is_waiting = 0;
-    }
     chrono=c; pariecho=e; logfile=l; free(flist);
   }
   (void)gptimer(); (void)timer(); (void)timer2();
   (void)gp_main_loop(1);
-  if (tm_is_waiting)
-  {
-    printf("%c",DATA_END);
-    fflush(stdout);
-    tm_is_waiting = 0;
-  }
   gp_quit(); return 0; /* not reached */
 }
