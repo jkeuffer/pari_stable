@@ -1064,7 +1064,7 @@ AGAIN:
       CM_L = gerepilecopy(av2, CM_L);
       goto AGAIN;
     }
-    if (DEBUGLEVEL>2) msgTIMER(&ti2, "this trace");
+    if (DEBUGLEVEL>2) msgTIMER(&ti2, "for this trace");
 
     if (i <= r && i*rec < n0)
     {
