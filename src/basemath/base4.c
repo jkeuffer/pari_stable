@@ -1061,27 +1061,6 @@ idealmulprime(GEN nf, GEN x, GEN vp)
   return denx? gdiv(x,denx): x;
 }
 
-static GEN idealpowprime_spec(GEN nf, GEN vp, GEN n, GEN *d);
-
-/* x * vp^n */
-GEN
-idealmulpowprime(GEN nf, GEN x, GEN vp, GEN n)
-{
-  GEN denx,y,d;
-
-  if (!signe(n)) return x;
-  nf = checknf(nf);
-  y = idealpowprime_spec(nf, vp, n, &d);
-  denx = denom(x);
-  if (gcmp1(denx)) denx = d; else
-  {
-    x = gmul(denx,x);
-    if (d) denx = mulii(d,denx);
-  }
-  x = idealmulspec(nf,x, (GEN)y[1], (GEN)y[2]);
-  return denx? gdiv(x,denx): x;
-}
-
 /* Assume ix and iy are integral in HNF form (or ideles of the same form).
  * HACK: ideal in iy can be of the form [a,b], a in Z, b in Z_K
  * For internal use. */
@@ -1341,6 +1320,25 @@ idealpowprime(GEN nf, GEN vp, GEN n)
   x = prime_to_ideal_aux(nf,x);
   if (d) x = gdiv(x, d);
   return x;
+}
+
+/* x * vp^n */
+GEN
+idealmulpowprime(GEN nf, GEN x, GEN vp, GEN n)
+{
+  GEN denx,y,d;
+
+  if (!signe(n)) return x;
+  nf = checknf(nf);
+  y = idealpowprime_spec(nf, vp, n, &d);
+  denx = denom(x);
+  if (gcmp1(denx)) denx = d; else
+  {
+    x = gmul(denx,x);
+    if (d) denx = mulii(d,denx);
+  }
+  x = idealmulspec(nf,x, (GEN)y[1], (GEN)y[2]);
+  return denx? gdiv(x,denx): x;
 }
 
 /* raise the ideal x to the power n (in Z) */
