@@ -681,14 +681,14 @@ cmbf(GEN target, GEN famod, GEN p, long a, long b,
     pb= gpowgs(p, b); pbs2 = shifti(pb,-1);
     for (i=1; i <= lfamod; i++)
     {
-      GEN d_2,T1,T2, P = (GEN)famod[i];
+      GEN T1,T2, P = (GEN)famod[i];
       long d = degpol(P);
       
       degpol[i] = d; P += 2;
       T1 = (GEN)P[d-1];/* = - S_1 */
-      d_2= (GEN)P[d-2];
-      T2 = subii(sqri(T1), shifti(d_2,1)); /* = S_2 Newton sum */
-      T2 = modii(T2, pa);
+      T2 = sqri(T1);
+      if (d > 1) T2 = subii(T2, shifti((GEN)P[d-2],1));
+      T2 = modii(T2, pa); /* = S_2 Newton sum */
       if (!gcmp1(lc))
       {
         T1 = modii(mulii(lc, T1), pa);
