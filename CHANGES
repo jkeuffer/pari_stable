@@ -75,6 +75,7 @@ IZ 34- external prettyprinter incompatible with colors
    37- bnfisprincipal couldn't deal with some non-Galois fields
    38- listcreate allowed creating longer lists than GP could later handle
    39- INPUT colors was "leaking out" (affected status messages)
+   40- idealpowred(, power > 2^32) --> wrong result
 
   Changed
 BA  1- more efficient quadratic Hensel lift
