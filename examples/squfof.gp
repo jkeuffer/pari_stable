@@ -1,4 +1,4 @@
-\\ return one prime divisor of n > 1 using Shanks's SQUFOF
+\\ return one non-trivial divisor of n > 1 using Shanks's SQUFOF
 squfof(n) =
 {
   if (isprime(n) || issquare(n, &n), return(n));
