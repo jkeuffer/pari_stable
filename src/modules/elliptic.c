@@ -758,6 +758,7 @@ new_coords(GEN e, GEN x, GEN *pta, GEN *ptb, long prec)
     GEN b4 = (GEN)e[7];
     if (!is_const_t(ty)) err(typeer,"zell");
 
+    /* w = sqrt(2b4 + 2b2 e1 + 12 e1^2) */
     w = gsqrt(gmul2n(gadd(b4, gmul(e1,gadd(b2,gmulsg(6,e1)))),1),prec);
     if (gsigne(greal(p2)) > 0) w = gneg_i(w);
   }
@@ -765,11 +766,12 @@ new_coords(GEN e, GEN x, GEN *pta, GEN *ptb, long prec)
   b = gmul2n(w,-1);
   r1 = gsub(a,b);
   p1 = gadd(x, gmul2n(gadd(e1,r0),-1));
-  if (gcmp0(p1)) p1=gsqrt(gneg_i(gmul(a,r1)),prec);
+  if (gcmp0(p1))
+    p1 = gsqrt(gneg_i(gmul(a,r1)),prec);
   else
   {
-    GEN delta=gdiv(gmul(a,r1),gsqr(p1));
-    p1=gmul2n(gmul(p1,gaddsg(1,gsqrt(gsubsg(1,gmul2n(delta,2)),prec))),-1);
+    GEN delta = gdiv(gmul(a,r1),gsqr(p1));
+    p1 = gmul2n(gmul(p1,gaddsg(1,gsqrt(gsubsg(1,gmul2n(delta,2)),prec))),-1);
   }
   *pta = a; *ptb = b;
   return gmul(p1,gsqr(gmul2n(gaddsg(1,gsqrt(gdiv(gadd(p1,r1),p1),prec)),-1)));
@@ -779,7 +781,7 @@ GEN
 zell(GEN e, GEN z, long prec)
 {
   long av=avma,ty,sw,fl;
-  GEN t,u,p1,p2,r1,a,b,x1,u2,D = (GEN)e[12];
+  GEN t,u,p1,p2,a,b,x1,u2,D = (GEN)e[12];
 
   checkbell(e);
   if (!oncurve(e,z)) err(heller1);
@@ -803,15 +805,15 @@ zell(GEN e, GEN z, long prec)
   sw=gsigne(greal(b)); fl=0;
   for(;;) /* agm */
   {
-    GEN a0=a, b0=b, x0=x1;
+    GEN a0=a, b0=b, x0=x1, r1;
 
-    b=gsqrt(gmul(a0,b0),prec);
+    b = gsqrt(gmul(a0,b0),prec);
     if (gsigne(greal(b)) != sw) b = gneg_i(b);
-    a=gmul2n(gadd(gadd(a0,b0),gmul2n(b,1)),-2);
-    r1=gsub(a,b);
-    p1=gsqrt(gdiv(gadd(x0,r1),x0),prec);
-    x1=gmul(x0,gsqr(gmul2n(gaddsg(1,p1),-1)));
-    r1=gsub(x1,x0);
+    a = gmul2n(gadd(gadd(a0,b0),gmul2n(b,1)),-2);
+    r1 = gsub(a,b);
+    p1 = gsqrt(gdiv(gadd(x0,r1),x0),prec);
+    x1 = gmul(x0,gsqr(gmul2n(gaddsg(1,p1),-1)));
+    r1 = gsub(x1,x0);
     if (gcmp0(r1) || gexpo(r1) < gexpo(x1) - bit_accuracy(prec) + 5)
     {
       if (fl) break;
@@ -824,8 +826,8 @@ zell(GEN e, GEN z, long prec)
     t = negi(gun);
   else
     t = gdiv(u,gsqr(gaddsg(1,gsqrt(t,prec))));
-  u=gsqrt(ginv(gmul2n(a,2)),prec);
-  t=glog(t,prec); t=gmul(t,u);
+  u = gsqrt(ginv(gmul2n(a,2)),prec);
+  t = gmul(u, glog(t,prec));
 
   /* which square root? test the reciprocal function (pointell) */
   if (!gcmp0(t))

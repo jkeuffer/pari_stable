@@ -734,8 +734,9 @@ gsqrt(GEN x, long prec)
 	y[2]=zero; return y;
       }
 
-      p1=gsqr((GEN)x[1]); p2=gsqr((GEN)x[2]);
-      p1=gsqrt(gadd(p1,p2),prec);
+      p1 = gsqr((GEN)x[1]);
+      p2 = gsqr((GEN)x[2]);
+      p1 = gsqrt(gadd(p1,p2),prec);
       if (gcmp0(p1))
       {
 	y[1]=lsqrt(p1,prec);
@@ -743,19 +744,20 @@ gsqrt(GEN x, long prec)
 	return y;
       }
 
-      if (gsigne((GEN)x[1])<0)
+      if (gsigne((GEN)x[1]) < 0)
       {
-	p2=gsub(p1,(GEN)x[1]); p1=gmul2n(p2,-1);
-	y[2]=lsqrt(p1,prec); y[1]=ldiv((GEN)x[2],gmul2n((GEN)y[2],1));
+	p1 = gmul2n(gsub(p1,(GEN)x[1]), -1);
+	y[2] = lsqrt(p1,prec);
+        y[1] = ldiv((GEN)x[2],gmul2n((GEN)y[2],1));
 	tetpil=avma;
         y = (gsigne((GEN)x[2]) > 0)? gcopy(y): gneg(y);
 	return gerepile(av,tetpil,y);
       }
 
-      p1=gmul2n(gadd(p1,(GEN)x[1]),-1);
-      tetpil=avma; y[1]=lpile(av,tetpil,gsqrt(p1,prec));
+      p1 = gmul2n(gadd(p1,(GEN)x[1]), -1); tetpil=avma;
+      y[1] = lpile(av,tetpil,gsqrt(p1,prec));
       av=avma; p1=gmul2n((GEN)y[1],1); tetpil=avma;
-      y[2]=lpile(av,tetpil,gdiv((GEN)x[2],p1));
+      y[2] = lpile(av,tetpil,gdiv((GEN)x[2],p1));
       return y;
 
     case t_PADIC:
