@@ -1743,6 +1743,19 @@ the built-in member functions, so typing the above text would in fact produce
 an error (you'd have to call it e.g.~\kbd{x.myj} in order for \kbd{gp} to
 accept it).
 
+\misctitle{Warning:} it is advised not to apply a member whose name
+starts with \kbd{e} or \kbd{E} to an integer constant, where it would be
+confused with the usual floating point exponent. E.g compare
+\bprog
+  ? x.e2 = x+1
+  ? 1.e2
+  %1 = 100.000000000 \\@com taken to mean $1.0E2$.
+  ? (1).e2
+  %2 = 2
+  ? 1.0.e2
+  %3 = 2.00000000000
+@eprog
+
 \misctitle{Warning:} contrary to user functions arguments, the structure
 accessed by a member function is \emph{not} copied before being used.
 Any modification to the structure's components will be permanent.
