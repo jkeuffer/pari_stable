@@ -114,7 +114,6 @@ dbltor(double x)
   const int mant_len = 52;  /* mantissa bits (excl. hidden bit) */
   const int exp_mid = 0x3ff;/* exponent bias */
   const int expo_len = 11; /* number of bits of exponent */
-  LOCAL_HIREMAINDER;
 
   if (x==0.) return realzero_bit(-exp_mid);
   fi.f = x; z = cgetr(DEFAULTPREC);
@@ -133,7 +132,6 @@ rtodbl(GEN x)
   const int mant_len = 52;  /* mantissa bits (excl. hidden bit) */
   const int exp_mid = 0x3ff;/* exponent bias */
   const int expo_len = 11; /* number of bits of exponent */
-  LOCAL_HIREMAINDER;
 
   if (typ(x)==t_INT && !s) return 0.0;
   if (typ(x)!=t_REAL) err(typeer,"rtodbl");
