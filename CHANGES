@@ -122,6 +122,8 @@ HC 12- gamma function for integral/rational arguments
        it gives the numbering among all transitive subgroups of S_n [ was ad
        hoc up to 7, then as described above for n >= 8 ]
    23- INCOMPATIBILITY: nf.zk is now T2-LLL-reduced
+   24- idealtwoelt was very slow when a small prime with many divisors
+       divided the index (use approximation theorem)
 
   Added
     1- mplog2() function --> faster mplog()
