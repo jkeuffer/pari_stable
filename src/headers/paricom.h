@@ -95,6 +95,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define leadingcoeff(x) (pollead((x),-1))
 #define poldivres poldivrem
 #define nfdivres nfdivrem
+#define gred gcopy
 
 #define rcopy mpcopy
 #define absr  mpabs
@@ -246,7 +247,6 @@ enum manage_var_t {
 #define mpashz(x,y)    (gop1z(mpash,(x),(y)))
 #define mpachz(x,y)    (gop1z(mpach,(x),(y)))
 #define mpgammaz(x,y)  (gop1z(mpgamma,(x),(y)))
-#define gredz(x,y)     (gop1z(gred,(x),(y)))
 #define gnegz(x,y)     (gop1z(gneg,(x),(y)))
 
 #define mpargz(x,y,z)   (gop2z(mparg,(x),(y),(z)))

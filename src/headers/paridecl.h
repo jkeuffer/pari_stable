@@ -959,7 +959,6 @@ GEN     vandermondeinverse(GEN L, GEN T, GEN den, GEN prep);
 GEN     gadd(GEN x, GEN y);
 GEN     gdiv(GEN x, GEN y);
 GEN     gmul(GEN x, GEN y);
-GEN     gred(GEN x);
 GEN     gred_rfrac(GEN x);
 GEN     gsqr(GEN x);
 GEN     gsub(GEN x, GEN y);

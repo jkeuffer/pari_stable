@@ -230,15 +230,6 @@ gred_frac2(GEN x1, GEN x2)
   fix_frac(y); return y;
 }
 
-GEN
-gred(GEN x)
-{
-  long tx = typ(x);
-  if (tx == t_FRAC)  return gred_frac2((GEN)x[1], (GEN)x[2]);
-  if (tx == t_RFRAC) return gred_rfrac(x);
-  return gcopy(x);
-}
-
 /********************************************************************/
 /**                                                                **/
 /**                          SUBTRACTION                           **/
