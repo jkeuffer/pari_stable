@@ -1849,26 +1849,6 @@ red_montgomery(GEN T, GEN N, ulong inv)
 
 /* EXACT INTEGER DIVISION */
 
-/* Find c such that 1=c*b mod 2^BITS_IN_LONG, assuming b odd (unchecked) */
-ulong
-invrev(ulong b)
-{
-  ulong x;
-  switch(b & 7)
-  {
-  case 3:
-  case 5:  x = b+8; break;
-  default: x = b; break;
-  } /* x = b^(-1) mod 2^4 */
-  x = x*(2-b*x);
-  x = x*(2-b*x);
-  x = x*(2-b*x); /* b^(-1) mod 2^32 (Newton applied to 1/x - b = 0) */
-#ifdef LONG_IS_64BIT
-  x = x*(2-b*x); /* b^(-1) mod 2^64 */
-#endif
-  return x;
-}
-
 /* Find z such that x=y*z, knowing that y | x (unchecked)
  * Method: y0 z0 = x0 mod B = 2^BITS_IN_LONG ==> z0 = 1/y0 mod B.
  *    Set x := (x - z0 y) / B, updating only relevant words, and repeat */

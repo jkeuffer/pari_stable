@@ -1096,6 +1096,7 @@ GEN     dvmdii(GEN x, GEN y, GEN *z);
 int     egalii(GEN x, GEN y);
 GEN     gcdii(GEN x, GEN y);
 int     invmod(GEN a, GEN b, GEN *res);
+ulong   invrev(ulong b);
 GEN     ishiftr(GEN x, long n);
 GEN     isqrti(GEN a);
 GEN     modii(GEN x, GEN y);

@@ -15,6 +15,22 @@ with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #include "pari.h"
+
+/* Find c such that 1=c*b mod 2^BITS_IN_LONG, assuming b odd (unchecked) */
+ulong
+invrev(ulong b)
+{
+  static int tab[] = { 0, 0, 0, 8, 0, 8, 0, 0 };
+  ulong x = b + tab[b & 7]; /* b^(-1) mod 2^4 */
+
+  /* Newton applied to 1/x - b = 0 */
+#ifdef LONG_IS_64BIT
+  x = x*(2-b*x); /* one more pass necessary */
+#endif
+  x = x*(2-b*x);
+  x = x*(2-b*x); return x*(2-b*x);
+}
+
 /********************************************************************/
 /**                                                                **/
 /**                         RANDOM INTEGERS                        **/
