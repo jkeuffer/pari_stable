@@ -66,7 +66,7 @@ int_normalize(GEN x, long known_zero_words)
 GEN
 setloop(GEN a)
 {
-  GEN z0 = (GEN)avma; (void)new_chunk(lgefint(a) + 2);
+  GEN z0 = (GEN)avma; (void)cgetg(lgefint(a) + 3, t_VECSMALL);
   return icopy_av(a, z0); /* two cells of extra space before a */
 }
 
