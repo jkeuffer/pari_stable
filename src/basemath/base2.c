@@ -3931,7 +3931,7 @@ makebasis(GEN nf, GEN pol, GEN rnfeq)
 GEN
 rnfpolredabs(GEN nf, GEN relpol, long flag, long prec)
 {
-  GEN red, bas, eq, p1, elt, POL, pol, T, a;
+  GEN red, bas, eq, z, elt, POL, pol, T, a;
   long v;
   gpmem_t av = avma;
 
@@ -3958,28 +3958,23 @@ rnfpolredabs(GEN nf, GEN relpol, long flag, long prec)
   if (flag == 2) return gerepileupto(av,pol);
   if (flag == 6)
   {
-    GEN v, t = (GEN)red[2], B = (GEN)bas[2];
-    long i, l = lg(B);
-
-    v = cgetg(l, t_VEC);
-    v[1] = un; t = lift_intern(t);
-    v[2] = (long)t;
-    for (i=3; i<l; i++) v[i] = lres(gmul((GEN)v[i-1], t), pol);
-    p1 = cgetg(3, t_VEC);
-    p1[1] = (long)pol; v = gmul(v,B);
-    p1[2] = (long)v;
-    return gerepilecopy(av, p1);
+    GEN t = (GEN)red[2], B = (GEN)bas[2];
+    GEN v = RXQ_powers(lift_intern(t), pol, degpol(pol)-1);
+    z = cgetg(3, t_VEC);
+    z[1] = (long)pol;
+    z[2] = lmul(v, B);
+    return gerepilecopy(av, z);
   }
 
   elt = eltabstorel((GEN)red[2], T, relpol, a);
 
-  p1 = cgetg(3,t_VEC);
+  z = cgetg(3,t_VEC);
   pol = rnfcharpoly(nf,relpol,elt,v);
-  if (!flag) p1 = pol;
+  if (!flag) z = pol;
   else
   {
-    p1[1] = (long)pol;
-    p1[2] = (long)polymodrecip(elt);
+    z[1] = (long)pol;
+    z[2] = (long)polymodrecip(elt);
   }
-  return gerepileupto(av,p1);
+  return gerepileupto(av, z);
 }

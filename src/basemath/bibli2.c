@@ -987,25 +987,25 @@ permtonum(GEN x)
 
 /* return (1,...a^l) mod T */
 GEN
-RX_powers(GEN a, GEN T, long l)
+RXQ_powers(GEN a, GEN T, long l)
 {
-  long j, N = degpol(T);
-  GEN b, y;
+  long i;
+  GEN v;
 
-  y = cgetg(l+2,t_MAT);
-  y[1] = (long)gscalcol_i(gun, N);
-  l++; b = a;
-  for (j=2; j<=l; j++)
-  {
-    y[j] = (long)pol_to_vec(b, N);
-    if (j < l) b = gmod(gmul(b,a), T);
-  }
-  return y;
+  if (typ(a) != t_POL) err(typeer,"RXQ_powers");
+  l += 2;
+  v = cgetg(l,t_VEC);
+  v[1] = un; if (l == 2) return v;
+
+  if (degpol(a) >= degpol(T)) a = gres(a, T);
+  v[2] = (long)a;
+  for (i=3; i<l; i++) v[i] = lres(gmul((GEN)v[i-1], a), T);
+  return v;
 }
 
 /* return y such that Mod(y, charpoly(Mod(a,T)) = Mod(a,T) */
 GEN
-modreverse(GEN a, GEN T)
+modreverse_i(GEN a, GEN T)
 {
   gpmem_t av = avma;
   long n = degpol(T);
@@ -1016,7 +1016,8 @@ modreverse(GEN a, GEN T)
     return gerepileupto(av, gneg(gdiv((GEN)T[2], (GEN)T[3])));
   if (gcmp0(a) || typ(a) != t_POL) err(talker,"reverse polmod does not exist");
 
-  y = gauss(RX_powers(a,T,n-1), _ei(n, 2));
+  y = vecpol_to_mat(RXQ_powers(a,T,n-1), n);
+  y = gauss(y, _ei(n, 2));
   return gerepilecopy(av, vec_to_pol(y, varn(T)));
 }
 
@@ -1033,7 +1034,7 @@ polymodrecip(GEN x)
   v = varn(T);
   y = cgetg(3,t_POLMOD);
   y[1] = (n==1)? lsub(polx[v], a): (long)caract2(T, a, v);
-  y[2] = (long)modreverse(a, T); return y;
+  y[2] = (long)modreverse_i(a, T); return y;
 }
 
 /********************************************************************/

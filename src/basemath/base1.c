@@ -21,8 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "parinf.h"
 extern GEN roots_to_pol_r1r2(GEN a, long r1, long v);
-extern GEN modreverse(GEN a, GEN T);
-extern GEN RX_powers(GEN a, GEN T, long n);
+extern GEN modreverse_i(GEN a, GEN T);
 extern GEN idealhermite_aux(GEN nf, GEN x);
 extern GEN cauchy_bound(GEN p);
 extern GEN galoisbig(GEN x, long prec);
@@ -1400,12 +1399,12 @@ _initalg(GEN x, long flag, long prec)
     {
       if (DEBUGLEVEL>1) fprintferr("polmax = %Z\n",x);
       (void)carrecomplet(diviiexact(T.dx,dK), &(T.index));
-      rev = modreverse(phi, x); x = T.x; /* in this order */
+      rev = modreverse_i(phi, x); x = T.x; /* in this order */
 
 #if 0
 {
   GEN dmat, dpow, pow;
-      pow = RX_powers(rev, x, n-1);
+      pow = RXQ_powers(rev, x, n-1);
       pow = Q_remove_denom(pow, &dpow);
       d = denom(content(bas)); bas = gmul(bas, d);
       if (dpow) d = mulii(d,dpow);
@@ -1930,7 +1929,6 @@ polredabs(GEN x, long prec)
 GEN
 polredabs2(GEN x, long prec)
 { return polredabs0(x,nf_ORIG,prec); }
-
 
 static long
 nf_pm1(GEN y)
