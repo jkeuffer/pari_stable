@@ -181,13 +181,20 @@ long  Z_lvalrem_stop(GEN n, ulong p, int *stop);
 long  Z_issquarefree(GEN x);
 
 /* quadratic forms, quadratic numbers */
-GEN  qf_disc(GEN x, GEN y, GEN z);
+GEN  primeform_u(GEN x, ulong p);
+GEN  qf_disc(GEN x);
 void qfb_comp(GEN z,GEN x,GEN y);
+GEN  qfr_to_qfr5(GEN x, long prec);
+GEN  qfr3_comp(GEN x, GEN y, GEN D, GEN isqrtD);
+GEN  qfr3_pow(GEN x, GEN n, GEN D, GEN isqrtD);
+GEN  qfr3_red(GEN x, GEN D, GEN isqrtD);
+GEN  qfr3_rho(GEN x, GEN D, GEN isqrtD);
+GEN  qfr3_to_qfr(GEN x, GEN z);
 GEN  qfr5_dist(GEN e, GEN d, long prec);
-GEN  qfr5_init(GEN x, long prec);
 GEN  qfr5_comp(GEN x, GEN y, GEN D, GEN sqrtD, GEN isqrtD);
+GEN  qfr5_pow(GEN x, GEN n, GEN D, GEN sqrtD, GEN isqrtD);
 GEN  qfr5_red(GEN x, GEN D, GEN sqrtD, GEN isqrtD);
-GEN  qfr_rho(GEN x, GEN D, GEN sqrtD, GEN isqrtD);
+GEN  qfr5_rho(GEN x, GEN D, GEN sqrtD, GEN isqrtD);
 GEN  qfr_pow(GEN x, GEN n);
 GEN  qfr_unit(GEN x);
 GEN  qfi_unit(GEN x);
@@ -351,3 +358,4 @@ int   term_width(void);
 void  texmacs_completion(char *s, long pos);
 void  var_make_safe();
 int   whatnow(char *s, int flag);
+void  whatnow_new_syntax(char *f, long n);

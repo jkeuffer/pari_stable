@@ -69,13 +69,14 @@ getallforms(GEN D, long *pth, GEN *ptz)
   *pth = h; *ptz = z; setlg(L,h+1); return L;
 }
 
-static void
-check_pq(GEN p, GEN z, long d, GEN D)
+static ulong
+check_pq(GEN gp, GEN z, long d, GEN D)
 {
-  long ell = itos(p);
-  if (!umodiu(z,ell) || kross(d,ell) <= 0 || 
-    gcmp1((GEN)redimag(primeform(D,p,0))[1]));
-      err(talker,"[quadhilbert] incorrect values in pq: %Z", p);
+  ulong p = itou(gp);
+  if (!umodiu(z,p) || kross(d,(long)p) <= 0 || 
+    gcmp1((GEN)redimag(primeform_u(D,p))[1]));
+      err(talker,"[quadhilbert] incorrect values in pq: %lu", p);
+  return p;
 }
 #define MOD4(x) ((x)&3)
 /* find P and Q two non principal prime ideals (above p,q) such that
@@ -83,19 +84,18 @@ check_pq(GEN p, GEN z, long d, GEN D)
  *   cl(P) = cl(Q) if P has order 2 in Cl(K)
  * Try to have e = 24 / gcd(24, (p-1)(q-1)) as small as possible */
 static void
-get_pq(GEN D, GEN z, GEN pq, GEN *ptp, GEN *ptq)
+get_pq(GEN D, GEN z, GEN pq, ulong *ptp, ulong *ptq)
 {
   const long MAXL = 50;
-  GEN wp = cgetg(MAXL,t_VECSMALL), wlf = cgetg(MAXL,t_VEC);
-  GEN court = icopy(gen_1), form;
+  GEN form, wp = cgetg(MAXL,t_VECSMALL), wlf = cgetg(MAXL,t_VEC);
   long i, ell, p, l = 1, d = itos(D);
   byteptr diffell = diffptr + 2;
 
   if (pq && typ(pq)==t_VEC)
   {
     if (lg(pq) != 3) err(typeer, "quadhilbert (pq)");
-    *ptp = (GEN)pq[1]; check_pq(*ptp,z,d,D);
-    *ptq = (GEN)pq[2]; check_pq(*ptq,z,d,D); return;
+    *ptp = check_pq((GEN)pq[1],z,d,D);
+    *ptq = check_pq((GEN)pq[2],z,d,D); return;
   }
 
   ell = 3;
@@ -104,7 +104,7 @@ get_pq(GEN D, GEN z, GEN pq, GEN *ptp, GEN *ptq)
     NEXT_PRIME_VIADIFF_CHECK(ell, diffell);
     if (umodiu(z,ell) && kross(d,ell) > 0)
     {
-      court[2] = ell; form = redimag(primeform(D,court,0));
+      form = redimag(primeform_u(D,ell));
       if (gcmp1((GEN)form[1])) continue;
       wlf[l] = (long)form;
       wp[l]  = ell; l++;
@@ -138,21 +138,21 @@ get_pq(GEN D, GEN z, GEN pq, GEN *ptp, GEN *ptq)
     }
     if (i==l) i = 1;
   }
-  *ptp = utoipos(p);
-  *ptq = utoipos(wp[i]);
+  *ptp = p;
+  *ptq = wp[i];
 }
 
 static GEN
-gpq(GEN form, GEN p, GEN q, long e, GEN sqd, GEN u, long prec)
+gpq(GEN form, ulong p, ulong q, long e, GEN sqd, GEN u, long prec)
 {
   long a = form[1], a2 = a << 1; /* gcd(a2, u) = 2 */
   GEN p1,p2,p3,p4;
   GEN w = lift(chinese(gmodulss(-form[2], a2), u));
   GEN al = mkcomplex(gdivgs(w, -a2), gdivgs(sqd, a2));
-  p1 = trueeta(gdiv(al,p),prec);
-  p2 = p == q? p1: trueeta(gdiv(al,q),prec);
-  p3 = trueeta(gdiv(al,mulii(p,q)),prec);
-  p4 = trueeta(al,prec);
+  p1 = trueeta(gdivgs(al,p), prec);
+  p2 = p == q? p1: trueeta(gdivgs(al,q), prec);
+  p3 = trueeta(gdiv(al,muluu(p,q)), prec);
+  p4 = trueeta(al, prec);
   return gpowgs(gdiv(gmul(p1,p2),gmul(p3,p4)), e);
 }
 
@@ -160,9 +160,10 @@ gpq(GEN form, GEN p, GEN q, long e, GEN sqd, GEN u, long prec)
 static GEN
 quadhilbertimag(GEN D, GEN pq)
 {
+  GEN z, L, P, qfp, u;
+  pari_sp av = avma;
   long h, i, e, prec;
-  pari_sp av=avma;
-  GEN z,L,P,p,q,qfp,u;
+  ulong p, q;
 
   if (DEBUGLEVEL>1) (void)timer2();
   if (cmpiu(D,11) <= 0) return polx[0];
@@ -171,20 +172,19 @@ quadhilbertimag(GEN D, GEN pq)
   if (h == 1) { avma=av; return polx[0]; }
 
   get_pq(D, z, pq, &p, &q);
-  e = 24 / cgcd((smodis(p,24)-1) * (smodis(q,24)-1), 24);
-  if(DEBUGLEVEL>1) fprintferr("p = %Z, q = %Z, e = %ld\n",p,q,e);
-  qfp = primeform(D,p,0);
-  if (equalii(p,q))
+  e = 24 / cgcd((p%24 - 1) * (q%24 - 1), 24);
+  if(DEBUGLEVEL>1) fprintferr("p = %lu, q = %lu, e = %ld\n",p,q,e);
+  qfp = primeform_u(D, p);
+  if (p == q)
   {
-    q = p;
-    u = (GEN)compimagraw(qfp,qfp)[2];
-    u = gmodulcp(u, shifti(sqri(p),1));
+    u = (GEN)compimagraw(qfp, qfp)[2];
+    u = gmodulcp(u, shifti(sqru(p),1));
   }
   else
   {
-    GEN qfq = primeform(D,q,0);
-    GEN up = gmodulcp((GEN)qfp[2], shifti(p,1));
-    GEN uq = gmodulcp((GEN)qfq[2], shifti(q,1));
+    GEN qfq = primeform_u(D, q);
+    GEN up = mkintmodu(itou((GEN)qfp[2]), p << 1);
+    GEN uq = mkintmodu(itou((GEN)qfq[2]), q << 1);
     u = chinese(up,uq);
   }
   /* u modulo 2pq */
@@ -557,7 +557,7 @@ treatspecialsigma(GEN nf, GEN gf)
   p2 = gcoeff(gf,2,2);
   if (gcmp1(p2)) { fl = 0; tryf = p1; }
   else {
-    if (Ds % 16 != 8 || !equalii(content(gf),gen_2)) return NULL;
+    if (Ds % 16 != 8 || !equaliu(Q_content(gf),2)) return NULL;
     fl = 1; tryf = shifti(p1,-1);
   }
   /* tryf integer > 0 */
@@ -668,8 +668,6 @@ quadray(GEN D, GEN f, GEN flag, long prec)
 /*                   QUADRATIC FIELDS                              */
 /*                                                                 */
 /*******************************************************************/
-const int narrow = 0; /* should set narrow = flag in buchquad, but buggy */
-
 /* For largeprime() hashtable. Note that hashed pseudoprimes are odd (unless
  * 2 | index), hence the low order bit is not useful. So we hash
  * HASHBITS bits starting at bit 1, not bit 0 */
@@ -687,49 +685,55 @@ hash(long q) { return (q & ((1 << (HASHBITS+1)) - 1)) >> 1; }
 static const int CBUCH = (1<<RANDOM_BITS)-1;
 
 static ulong limhash;
-static long KC,KC2,PRECREG;
-static long *primfact,*exprimfact;
-static long *FB,*numFB, **hashtab;
-static GEN  powsubFB,vperm,subFB,Disc,sqrtD,isqrtD,badprim;
+static long KC, KC2, PRECREG;
+static long *primfact, *exprimfact, *FB, *numFB, **hashtab;
+static GEN powsubFB, vperm, subFB, Disc, sqrtD, isqrtD, badprim;
 
 /*******************************************************************/
 /*                                                                 */
 /*  Routines related to binary quadratic forms (for internal use)  */
 /*                                                                 */
 /*******************************************************************/
-#define rhorealform(x) qfr_rho(x,Disc,sqrtD,isqrtD)
-#define redrealform(x) fix_signs(qfr5_red(x,Disc,sqrtD,isqrtD))
-
+/* output canonical representative wrt projection Cl^+ --> Cl (a > 0) */
 static GEN
-fix_signs(GEN x)
+qfr3_canon(GEN x)
 {
-  GEN a = (GEN)x[1];
-  GEN c = (GEN)x[3];
-  if (signe(a) < 0)
-  {
-    if (narrow || absi_equal(a,c)) return rhorealform(x);
-    setsigne(a,1); setsigne(c,-1);
+  GEN a = (GEN)x[1], c = (GEN)x[3];
+  if (signe(a) < 0) {
+    if (absi_equal(a,c)) return qfr3_rho(x,Disc,isqrtD);
+    setsigne(a, 1);
+    setsigne(c,-1);
   }
   return x;
 }
-
 static GEN
-qfr_comp(GEN x,GEN y) {
-  return fix_signs( qfr5_comp(x,y,Disc,sqrtD,isqrtD) );
+qfr5_canon(GEN x)
+{
+  GEN a = (GEN)x[1], c = (GEN)x[3];
+  if (signe(a) < 0) {
+    if (absi_equal(a,c)) return qfr5_rho(x,Disc,sqrtD,isqrtD);
+    setsigne(a, 1);
+    setsigne(c,-1);
+  }
+  return x;
 }
+static GEN
+QFR5_comp(GEN x,GEN y) { return qfr5_canon(qfr5_comp(x,y,Disc,sqrtD,isqrtD)); }
+static GEN
+QFR3_comp(GEN x, GEN y) { return qfr3_canon(qfr3_comp(x,y,Disc,isqrtD)); }
 
 /* compute rho^n(x) */
 static GEN
-rhoreal_pow(GEN x, long n)
+qrf5_rho_pow(GEN x, long n)
 {
   long i;
   pari_sp av = avma, lim = stack_lim(av, 1);
   for (i=1; i<=n; i++)
   {
-    x = rhorealform(x);
+    x = qfr5_rho(x,Disc,sqrtD,isqrtD);
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"rhoreal_pow");
+      if(DEBUGMEM>1) err(warnmem,"qrf5_rho_pow");
       x = gerepilecopy(av, x);
     }
   }
@@ -737,34 +741,22 @@ rhoreal_pow(GEN x, long n)
 }
 
 static GEN
-qfr_pf5(GEN D, long p)
+qfr5_pf(GEN D, long p)
 {
-  pari_sp av = avma;
-  GEN y = primeform(D,utoipos(p),PRECREG);
-  y = qfr5_init(y,PRECREG);
-  return gerepilecopy(av, redrealform(y));
+  GEN y = primeform_u(D,p);
+  return qfr5_canon(qfr5_red(qfr_to_qfr5(y,PRECREG), Disc, sqrtD, isqrtD));
 }
 
 static GEN
-qfr_pf(GEN D, long p)
+qfr3_pf(GEN D, long p)
 {
-  pari_sp av = avma;
-  GEN y = primeform(D,utoipos(p),PRECREG);
-  return gerepilecopy(av, redrealform(y));
+  GEN y = primeform_u(D,p);
+  return qfr3_red(y, Disc, isqrtD);
 }
 
-static GEN
-qfi_pf(GEN D, long p) { return primeform(D,utoipos(p),0); }
+#define qfi_pf primeform_u
 
-static GEN
-qfr_comp3(GEN x, GEN y)
-{
-  pari_sp av = avma;
-  GEN z = cgetg(4,t_VEC); qfb_comp(z,x,y);
-  return gerepilecopy(av, redrealform(z));
-}
-
-/* Warning: ex[0] not set */
+/* Warning: ex[0] not set in general */
 static GEN
 init_form(long *ex, GEN (*comp)(GEN,GEN))
 {
@@ -779,7 +771,7 @@ init_form(long *ex, GEN (*comp)(GEN,GEN))
   return F;
 }
 static GEN
-qfr5_factorback(long *ex) { return init_form(ex, &qfr_comp); }
+qfr5_factorback(long *ex) { return init_form(ex, &QFR5_comp); }
 static GEN
 qfi_factorback(long *ex) { return init_form(ex, &compimag); }
 
@@ -796,9 +788,8 @@ random_form(GEN ex, GEN (*comp)(GEN,GEN))
     avma = av;
   }
 }
-
 static GEN
-qfr_random(GEN ex) { return random_form(ex, &qfr_comp3); }
+qfr3_random(GEN ex){ return random_form(ex, &QFR3_comp); }
 static GEN
 qfi_random(GEN ex) { return random_form(ex, &compimag); }
 
@@ -1055,10 +1046,10 @@ powsubFBquad(long n)
   {
     for (i=1; i<l; i++)
     {
-      F = qfr_pf5(Disc, FB[subFB[i]]);
+      F = qfr5_pf(Disc, FB[subFB[i]]);
       y = cgetg(n+1, t_VEC); x[i] = (long)y;
       y[1] = (long)F;
-      for (j=2; j<=n; j++) y[j] = (long)qfr_comp((GEN)y[j-1], F);
+      for (j=2; j<=n; j++) y[j] = (long)QFR5_comp((GEN)y[j-1], F);
     }
   }
   else /* imaginary */
@@ -1102,28 +1093,44 @@ add_fact(GEN col, GEN F)
   }
 }
 
-#define comp(x,y) x? (PRECREG? compreal(x,y): compimag(x,y)): y
 static GEN
 get_clgp(GEN Disc, GEN W, GEN *ptD, long prec)
 {
-  GEN res, *init, u1, D = smithrel(W,NULL,&u1);
+  GEN res, *init, u1, D = smithrel(W,NULL,&u1), Z = prec? realzero(prec): NULL;
   long i, j, l = lg(W), c = lg(D);
 
   if (DEBUGLEVEL) msgtimer("smith/class group");
   res=cgetg(c,t_VEC); init = (GEN*)cgetg(l,t_VEC);
-  for (i=1; i<l; i++)
-    init[i] = primeform(Disc,utoipos(FB[vperm[i]]),prec);
+  for (i=1; i<l; i++) init[i] = primeform_u(Disc, FB[vperm[i]]);
   for (j=1; j<c; j++)
   {
-    GEN p1 = NULL;
-    for (i=1; i<l; i++)
-      p1 = comp(p1, powgi(init[i], gcoeff(u1,i,j)));
-    res[j] = (long)p1;
+    GEN g = NULL;
+    if (prec)
+    {
+      for (i=1; i<l; i++)
+      {
+        GEN t, u = gcoeff(u1,i,j);
+        if (!signe(u)) continue;
+        t = qfr3_pow(init[i], u, Disc, isqrtD);
+        g = g? qfr3_comp(g, t, Disc, isqrtD): t;
+      }
+      g = qfr3_to_qfr(qfr3_canon(g), Z);
+    }
+    else
+    {
+      for (i=1; i<l; i++)
+      {
+        GEN t, u = gcoeff(u1,i,j);
+        if (!signe(u)) continue;
+        t = powgi(init[i], u);
+        g = g? compimag(g, t): t;
+      }
+    }
+    res[j] = (long)g;
   }
   if (DEBUGLEVEL) msgtimer("generators");
   *ptD = D; return res;
 }
-#undef comp
 
 static void
 trivial_relations(GEN mat, long KC, GEN C, GEN vperm, long nbram)
@@ -1280,11 +1287,10 @@ NEW:
       first = 0;
       if (DEBUGLEVEL) dbg_all("initial", s, nbtest);
     }
-    avma = av;
-    form = qfr_random(ex);
+    avma = av; form = qfr3_random(ex);
     if (!first) {
       if (++current > KC) current = 1;
-      form = qfr_comp3(form, qfr_pf(Disc, FB[current]));
+      form = QFR3_comp(form, qfr3_pf(Disc, FB[current]));
     }
     av1 = avma;
     form0 = form; form1 = NULL;
@@ -1301,21 +1307,18 @@ CYCLE:
     if (rho < 0) rho = 0; /* first time in */
     else
     {
-      form = rhorealform(form); rho++;
+      form = qfr3_rho(form, Disc, isqrtD); rho++;
       rhoacc++;
       if (first)
         endcycle = (absi_equal((GEN)form[1],(GEN)form0[1])
-             && equalii((GEN)form[2],(GEN)form0[2])
-             && (!narrow || signe(form0[1])==signe(form[1])));
+             && equalii((GEN)form[2],(GEN)form0[2]));
       else
       {
-        if (narrow)
-          { form = rhorealform(form); rho++; }
-        else if (absi_equal((GEN)form[1], (GEN)form[3])) /* a = -c */
+        if (absi_equal((GEN)form[1], (GEN)form[3])) /* a = -c */
         {
           if (absi_equal((GEN)form[1],(GEN)form0[1]) &&
                   equalii((GEN)form[2],(GEN)form0[2])) goto NEW;
-          form = rhorealform(form); rho++;
+          form = qfr3_rho(form, Disc, isqrtD); rho++;
         }
         else
           { setsigne(form[1],1); setsigne(form[3],-1); }
@@ -1342,17 +1345,17 @@ CYCLE:
       if (!form1)
       {
         form1 = qfr5_factorback(ex);
-        if (!first) form1 = qfr_comp(form1, qfr_pf5(Disc, FB[current]));
+        if (!first) form1 = QFR5_comp(form1, qfr5_pf(Disc, FB[current]));
       }
-      form1 = rhoreal_pow(form1, rho);
+      form1 = qrf5_rho_pow(form1, rho);
       rho = 0;
 
       form2 = qfr5_factorback(fpd);
-      if (fpd[-2]) form2 = qfr_comp(form2, qfr_pf5(Disc, FB[fpd[-2]]));
-      form2 = rhoreal_pow(form2, fpd[-3]);
-      if (!narrow && !absi_equal((GEN)form2[1],(GEN)form2[3]))
+      if (fpd[-2]) form2 = QFR5_comp(form2, qfr5_pf(Disc, FB[fpd[-2]]));
+      form2 = qrf5_rho_pow(form2, fpd[-3]);
+      if (!absi_equal((GEN)form2[1],(GEN)form2[3]))
       {
-        setsigne(form2[1],1);
+        setsigne(form2[1], 1);
         setsigne(form2[3],-1);
       }
       p = fpc << 1;
@@ -1386,9 +1389,9 @@ CYCLE:
       if (!form1)
       {
         form1 = qfr5_factorback(ex);
-        if (!first) form1 = qfr_comp(form1, qfr_pf5(Disc, FB[current]));
+        if (!first) form1 = QFR5_comp(form1, qfr5_pf(Disc, FB[current]));
       }
-      form1 = rhoreal_pow(form1,rho);
+      form1 = qrf5_rho_pow(form1,rho);
       rho = 0;
 
       col = (GEN)mat[++s];
@@ -1426,13 +1429,13 @@ real_be_honest()
   while (s<KC2)
   {
     p = FB[s+1]; if (DEBUGLEVEL) fprintferr(" %ld",p);
-    F = qfr_comp3(qfr_pf(Disc, p), qfr_random(ex));
+    F = QFR3_comp(qfr3_random(ex), qfr3_pf(Disc, p));
     for (F0 = F;;)
     {
       fpc = factorquad(F,s,p-1);
       if (fpc == 1) { nbtest=0; s++; break; }
       if (++nbtest > 20) return 0;
-      F = fix_signs( rhorealform(F) );
+      F = qfr3_canon(qfr3_rho(F, Disc, isqrtD));
       if (equalii((GEN)F[1],(GEN)F0[1])
        && equalii((GEN)F[2],(GEN)F0[2])) break;
     }
@@ -1511,7 +1514,7 @@ quad_be_honest()
 }
 
 GEN
-buchquad(GEN D, double cbach, double cbach2, long RELSUP, long flag, long prec)
+buchquad(GEN D, double cbach, double cbach2, long RELSUP, long prec)
 {
   pari_sp av0 = avma, av, av2;
   long KCCO, i, s, current, nbram, nrelsup, nreldep, cp, need;
@@ -1532,7 +1535,6 @@ buchquad(GEN D, double cbach, double cbach2, long RELSUP, long flag, long prec)
     }
     PRECREG = 0;
   } else {
-    if (flag) err(impl,"narrow class group");
     PRECREG = max(prec+1, MEDDEFAULTPREC + 2*(expi(Disc)>>TWOPOTBITS_IN_LONG));
   }
   if (DEBUGLEVEL) (void)timer2();
@@ -1655,11 +1657,13 @@ MORE:
 
 GEN
 buchimag(GEN D, GEN c, GEN c2, GEN REL)
-{ return buchquad(D,gtodouble(c),gtodouble(c2),itos(REL), 0,0); }
+{ return buchquad(D,gtodouble(c),gtodouble(c2),itos(REL), 0); }
 
 GEN
-buchreal(GEN D, GEN sens0, GEN c, GEN c2, GEN REL, long prec)
-{ return buchquad(D,gtodouble(c),gtodouble(c2),itos(REL), itos(sens0),prec); }
+buchreal(GEN D, GEN flag, GEN c, GEN c2, GEN REL, long prec) {
+  if (signe(flag)) err(impl,"narrow class group");
+  return buchquad(D,gtodouble(c),gtodouble(c2),itos(REL), prec);
+}
 
 GEN
 quadclassunit0(GEN x, long flag, GEN data, long prec)
@@ -1675,12 +1679,13 @@ quadclassunit0(GEN x, long flag, GEN data, long prec)
       err(talker,"incorrect parameters in quadclassunit");
     if (lx > 4) lx = 4;
   }
-  cbach = cbach2 = 0.1; RELSUP = 5;
+  cbach = cbach2 = 0.2; RELSUP = 5;
   switch(lx)
   {
     case 4: RELSUP = itos((GEN)data[3]);
     case 3: cbach2 = gtodouble((GEN)data[2]);
     case 2: cbach  = gtodouble((GEN)data[1]);
   }
-  return buchquad(x,cbach,cbach2,RELSUP,flag,prec);
+  if (flag) err(impl,"narrow class group");
+  return buchquad(x,cbach,cbach2,RELSUP,prec);
 }

@@ -94,6 +94,9 @@ BA 15- polsubcyclo() used too much memory for large conductors.
        of an empty matrix input, corresponding e.g to factor(1) )
    10- no longer raise an exception when online help used on unknown id or
        obsolete function [report 'unknown identifier' or 'obsolete function']
+   11- removed buggy support for narrow class group in quadclassunit
+       + rewrite binary quadratic forms [ qfr3 / qfr5 ]. TODO: move from
+       arith1.c to qfb.c
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.9 (released 23/12/2004):
