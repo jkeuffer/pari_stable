@@ -63,21 +63,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #ifndef NO_JUNK_SMALL
 
 /* Compatibility with the old gnuplot: */
-extern  FILE *outfile;
-FILE *outfile = NULL;
+extern  FILE *outfile, *gpoutfile;
+FILE *outfile = NULL, *gpoutfile = NULL;
 
-extern  FILE *gpoutfile;
-FILE *gpoutfile = NULL;
-
-static int outfile_set;
 static void
-set_gpoutfile(void)
-{
-  outfile = stdout;
-  gpoutfile = stdout;
+SET_OUTFILE() {
+  static int outfile_set = 0;
+  if (!outfile_set) { outfile = stdout; gpoutfile = stdout; outfile_set = 1; }
 }
-
-#define SET_OUTFILE (outfile_set++ ? 1 : (set_gpoutfile(), 1))
 
 extern int encoding;
 int        encoding = 0;
@@ -496,7 +489,7 @@ static void myterm_table_not_loaded_v4i4d(int term_xmin, int term_xmax,
 static struct termentry *
 my_change_term(char*s,int l)
 {
-    SET_OUTFILE;
+    SET_OUTFILE();
     if (!my_term_ftablep->change_term_p)
 	UNKNOWN_null();
     return term = (*((struct termentry *(*)(char *s,int l))(my_term_ftablep->change_term_p)))(s,l);
@@ -522,7 +515,7 @@ static struct termentry dummy_term_tbl[] = {
 void
 set_term_funcp2(FUNC_PTR change_p, TSET_FP tchange)
 {
-    SET_OUTFILE;
+    SET_OUTFILE();
     my_term_ftable.change_term_p = change_p;
     my_term_ftable.loaded = 1;
     if (tchange) {
@@ -541,7 +534,7 @@ set_term_funcp3(FUNC_PTR change_p, void *term_p, TSET_FP tchange)
 void
 set_term_ftable(struct t_ftable *p)
 {
-  SET_OUTFILE;
+  SET_OUTFILE();
   my_term_ftablep = p;
 }
 
@@ -595,13 +588,13 @@ struct t_ftable my_term_ftable =
 	&mys_mouse_feedback_rectangle
 };
 
-struct t_ftable *get_term_ftable()	{ SET_OUTFILE; return &my_term_ftable; }
-void set_term_ftable()	{ SET_OUTFILE; }
+struct t_ftable *get_term_ftable()	{ SET_OUTFILE(); return &my_term_ftable; }
+void set_term_ftable()	{ SET_OUTFILE(); }
 
 void
 set_term_funcp3(FUNC_PTR change_p, void *term_p, TSET_FP tchange)
 {
-    SET_OUTFILE;
+    SET_OUTFILE();
     (void)term_p;
     my_term_ftable.change_term_p = change_p;
     my_term_ftable.loaded = 1;
@@ -648,7 +641,7 @@ setup_gpshim(void) {
     v_set_term_ftable(get_term_ftable());
 #endif
   }
-  SET_OUTFILE;
+  SET_OUTFILE();
 }
 
 #ifdef SET_OPTIONS_FROM_STRING
