@@ -185,7 +185,6 @@ src/kernel/alpha/asm0.h
 src/kernel/alpha/asm1.h
 src/kernel/alpha/level0.s
 src/kernel/gmp/MakeLVL1.SH
-src/kernel/gmp/gcd.c
 src/kernel/gmp/int.h
 src/kernel/gmp/mp.c
 src/kernel/hppa/MakeLVL0.SH
