@@ -824,7 +824,7 @@ vals(ulong z)
 }
 
 GEN
-divsi_rem(long x, GEN y, ulong *rem)
+divsi_rem(long x, GEN y, long *rem)
 {
   long p1, s = signe(y);
   LOCAL_HIREMAINDER;
@@ -935,7 +935,7 @@ modsi(long x, GEN y)
 }
 
 GEN
-divis_rem(GEN y, long x, ulong *rem)
+divis_rem(GEN y, long x, long *rem)
 {
   long sy=signe(y),ly,s,i;
   GEN z;
@@ -955,7 +955,7 @@ divis_rem(GEN y, long x, ulong *rem)
   z = cgeti(ly); z[1] = evallgefint(ly) | evalsigne(s);
   for (i=2; i<ly; i++) z[i]=divll(y[i],x);
   if (sy<0) hiremainder = - ((long)hiremainder);
-  *rem = hiremainder; return z;
+  *rem = (long)hiremainder; return z;
 }
 
 GEN

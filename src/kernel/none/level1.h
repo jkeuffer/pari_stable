@@ -227,17 +227,16 @@ mpabs(GEN x)
 INLINE long
 smodis(GEN x, long y)
 {
-  ulong rem;
+  long rem;
   const pari_sp av=avma; (void)divis_rem(x,y, &rem); avma=av;
-  if (!rem) return 0;
-  return (signe(x) > 0) ? rem: labs(y) + rem;
+  return (rem >= 0) ? rem: labs(y) + rem;
 }
 
 INLINE long
 smodss(long x, long y)
 { 
   long rem = x%y;
-  return (rem>=0)? rem: labs(y) + rem;
+  return (rem >= 0)? rem: labs(y) + rem;
 }
 
 INLINE GEN
@@ -519,9 +518,9 @@ addsii(long x, GEN y, GEN z)
 INLINE long
 divisii(GEN x, long y, GEN z)
 {
-  const pari_sp av=avma;
-  ulong rem;
-  affii(divis_rem(x,y, &rem),z); avma=av; return (long)rem;
+  long rem;
+  const pari_sp av=avma; affii(divis_rem(x,y, &rem),z); avma=av;
+  return rem;
 }
 
 INLINE long
@@ -540,7 +539,7 @@ INLINE GEN
 divss(long x, long y) { return stoi(x / y); }
 
 INLINE GEN
-divss_rem(long x, long y, ulong *rem)
+divss_rem(long x, long y, long *rem)
 {
   long p1;
   LOCAL_HIREMAINDER;
@@ -555,50 +554,49 @@ divss_rem(long x, long y, ulong *rem)
 INLINE GEN
 dvmdss(long x, long y, GEN *z)
 {
-  ulong rem;
-  const GEN p1 = divss_rem(x,y, &rem);
-  *z = stoi(rem); return p1;
+  long rem;
+  const GEN q = divss_rem(x,y, &rem);
+  *z = stoi(rem); return q;
 }
 
 INLINE GEN
 dvmdsi(long x, GEN y, GEN *z)
 {
-  ulong rem;
-  const GEN p1=divsi_rem(x,y, &rem);
-  *z = stoi((long)rem); return p1;
+  long rem;
+  const GEN q = divsi_rem(x,y, &rem);
+  *z = stoi(rem); return q;
 }
 
 INLINE GEN
 dvmdis(GEN x, long y, GEN *z)
 {
-  ulong rem;
-  const GEN p1=divis_rem(x,y, &rem);
-  *z = stoi((long)rem); return p1;
+  long rem;
+  const GEN q = divis_rem(x,y, &rem);
+  *z = stoi(rem); return q;
 }
 
 INLINE void
 dvmdssz(long x, long y, GEN z, GEN t)
 {
-  const pari_sp av=avma;
-  ulong rem;
-  mpaff(divss_rem(x,y, &rem), z); affsi(rem,t); avma=av;
+  long rem;
+  const pari_sp av=avma; mpaff(divss_rem(x,y, &rem), z); avma=av;
+  affsi(rem,t);
 }
 
 INLINE void
 dvmdsiz(long x, GEN y, GEN z, GEN t)
 {
-  const pari_sp av = avma;
-  ulong rem;
-  mpaff(divsi_rem(x,y, &rem), z);
-  affsi((long)rem,t); avma = av;
+  long rem;
+  const pari_sp av = avma; mpaff(divsi_rem(x,y, &rem), z); avma = av;
+  affsi(rem,t);
 }
 
 INLINE void
 dvmdisz(GEN x, long y, GEN z, GEN t)
 {
-  const pari_sp av=avma;
-  ulong rem;
-  mpaff(divis_rem(x,y, &rem),z); affsi((long)rem,t); avma=av;
+  long rem;
+  const pari_sp av=avma; mpaff(divis_rem(x,y, &rem),z); avma=av;
+  affsi(rem,t);
 }
 
 INLINE void
@@ -628,17 +626,17 @@ umodui(ulong x, GEN y)
 INLINE GEN
 ressi(long x, GEN y)
 {
-  const pari_sp av=avma;
-  ulong rem;
-  (void)divsi_rem(x,y, &rem); avma=av; return stoi((long)rem);
+  long rem;
+  const pari_sp av=avma; (void)divsi_rem(x,y, &rem); avma=av;
+  return stoi(rem);
 }
 
 INLINE GEN
 resis(GEN x, long y)
 {
-  const pari_sp av=avma;
-  ulong rem;
-  (void)divis_rem(x,y, &rem); avma=av; return stoi((long)rem);
+  long rem;
+  const pari_sp av=avma; (void)divis_rem(x,y, &rem); avma=av;
+  return stoi(rem);
 }
 
 INLINE void
@@ -776,7 +774,7 @@ INLINE int
 mpdivisis(GEN x, long y, GEN z)
 {
   const pari_sp av = avma;
-  ulong rem;
+  long rem;
   GEN p1 = divis_rem(x,y, &rem);
   if (rem) { avma = av; return 0; }
   affii(p1,z); avma = av; return 1;
