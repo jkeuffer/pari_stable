@@ -1461,27 +1461,18 @@ galoisgrouptopol( GEN res, GEN L, GEN M, GEN den, GEN mod, long v)
   return aut;
 }
 
-/*
- * structure qui contient l'analyse du groupe de Galois par etude des degres
- * de Frobenius:
- * 
- * p: nombre premier a relever deg: degre du lift a effectuer pgp: plus grand
- * dvdiiur premier du degre de T. 
- * l: un nombre premier tel que T est totalement decompose
- * modulo l ppp:  plus petit diviseur premier du degre de T. primepointer:
- * permet de calculer les premiers suivant p.
- */
+/* contains the result of the study of Frobenius degrees */
 enum ga_code {ga_all_normal=1,ga_ext_2=2,ga_non_wss=4};
 struct galois_analysis
 {
-  long    p;
-  long    deg;
+  long    p; /* prime to be lifted */
+  long    deg; /* degree of the lift */
   long    ord;
-  long    l;
-  long    ppp;
+  long    l; /* l: prime number such that T is totally split mod l */
+  long    ppp; /* ppp: smallest prime divisor of deg(T) */
   long    p4;
   enum ga_code group;
-  byteptr primepointer;
+  byteptr primepointer; /* allow computing the primes following p */
 };
 void
 galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l, long karma_type)
