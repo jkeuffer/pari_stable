@@ -1786,13 +1786,15 @@ sqrtr_abs(GEN x)
     xmpn_copy(res+2, b+2, l);
     if (cmpii(c, b) > 0) roundr_up_ip(res, l+2);
   } else {
+    ulong u;
     b = new_chunk(2 + (l << 1));
     shift_left(b+1, x+2, 0,l-1, 0, BITS_IN_LONG-1);
     b[0] = ((ulong)x[2])>>1;
     xmpn_zero(b + l+1,l+1);
     b = sqrtispec(b, l+1, &c);
     xmpn_copy(res+2, b+2, l);
-    if ((b[l+2] & HIGHBIT) || (b[l+2] == ~HIGHBIT && cmpii(c,b) > 0))
+    u = (ulong)b[l+2];
+    if ( u&HIGHBIT || (u == ~HIGHBIT && cmpii(c,b) > 0))
       roundr_up_ip(res, l+2);
   }
   avma = (pari_sp)res; return res;

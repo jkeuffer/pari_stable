@@ -1173,33 +1173,34 @@ sqrtr_abs(GEN a)
 {
   GEN res;
   mp_limb_t *b, *c;
-  long pr=RNLIMBS(a);
-  long e=expo(a),er=e>>1;
-  res = cgetr(2 + pr);
+  long l = RNLIMBS(a), e = expo(a), er = e>>1;
+  long n;
+  res = cgetr(2 + l);
+  res[1] = evalsigne(1) | evalexpo(er);
   if (e&1)
   {
-    b = (mp_limb_t *) new_chunk((pr << 1)+2);
-    xmpn_mirrorcopy(b+pr+2, RLIMBS(a), pr);
-    xmpn_zero(b,pr+2);
+    b = (mp_limb_t *) new_chunk(l<<1);
+    xmpn_zero(b,l);
+    xmpn_mirrorcopy(b+l, RLIMBS(a), l);
+    c = (mp_limb_t *) new_chunk(l);
+    n = mpn_sqrtrem(c,b,b,l<<1); /* c <- sqrt; b <- rem */
+    if (n>l || (n==l && mpn_cmp(b,c,l) > 0)) mpn_add_1(c,c,l,1);
   }
   else
   {
-    c = (mp_limb_t *) ishiftr_spec(a,pr+2,-1);
-    c[1] = ((ulong)a[pr+1])<<(BITS_IN_LONG-1);
-    b = (mp_limb_t *) new_chunk(pr);
-    xmpn_zero(b,pr+1); /* overwrites the code word of c */
+    ulong u;
+    b = (mp_limb_t *) ishiftr_spec(a,l+2,-1);
+    b[1] = ((ulong)a[l+1])<<(BITS_IN_LONG-1);
+    b = (mp_limb_t *) new_chunk(l);
+    xmpn_zero(b,l+1); /* overwrites the former b[0] */
+    c = (mp_limb_t *) new_chunk(l + 1);
+    n = mpn_sqrtrem(c,b,b,(l<<1)+2); /* c <- sqrt; b <- rem */
+    u = (ulong)*c++;
+    if ( u&HIGHBIT || (u == ~HIGHBIT && 
+             (n>l || (n==l && mpn_cmp(b,c,l)>0))))
+      mpn_add_1(c,c,l,1);
   }
-  c = (mp_limb_t *) new_chunk(pr+1);
-  mpn_sqrtrem(c,NULL,b,(pr<<1)+2);
-  if ( ((ulong)c[0]) >= HIGHBIT-1 )
-    if (mpn_add_1(c+1,c+1,pr,1))
-    { /* This cannot happen unless c[0]==HIGHBIT-1. We are not supposed
-       * to round up for that value, but native kernel does it that way... */
-      avma = (pari_sp)(res + 2 + pr);
-      return real2n(er+1, pr+2);
-    }
-  xmpn_mirrorcopy(RLIMBS(res),c+1,pr);
-  res[1] = evalsigne(1) | evalexpo(er);
+  xmpn_mirrorcopy(RLIMBS(res),c,l);
   avma = (pari_sp)res; return res;
 }
 
