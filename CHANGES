@@ -113,6 +113,7 @@ BG 46- random(2^31) returned integers in [0, 2^32-1]  [ long/ulong problem ]
        [ missing case in aprcl:sqrmod5() ]
 BA 48- Configure: using gcc-3.3 + LANG=french, Configure failed to detect gcc
        [ messages translated ]
+   49- alpha kernel would not compile with a C++ compiler (missing extern "C")
 
   Changed
     1- bnfinit: [small_norm phase] speed up norm computations.

@@ -18,8 +18,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
   Copyright (C) 2000 Free Software Foundation, Inc. */
 
+BEGINEXTERN
 extern const unsigned char __clz_tab[];
 extern ulong invert_word(ulong);
+ENDEXTERN
 
 #define sub_ddmmss(sh, sl, ah, al, bh, bl) \
   do {                                     \
