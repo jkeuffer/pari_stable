@@ -32,7 +32,6 @@ cat >> $file << EOT
 #define UNIX
 #define GPHELP "$gphelp"
 #define GPDATADIR "$datadir"
-#define GPMISCDIR "$miscdir"
 #define SHELL_Q '\\$shell_q'
 
 #define PARIVERSION "GP/PARI CALCULATOR Version ${version}.${patch} (${status})"
