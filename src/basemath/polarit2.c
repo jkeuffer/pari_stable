@@ -1988,15 +1988,14 @@ subresext(GEN x, GEN y, GEN *U, GEN *V)
 static GEN
 scalar_bezout(GEN x, GEN y, GEN *U, GEN *V)
 {
-  long v = varn(x);
-  *U=gzero; *V=gdiv(polun[v],y); return polun[v];
+  *U=gzero; *V=ginv(y); return polun[varn(x)];
 }
 
 static GEN
 zero_bezout(GEN y, GEN *U, GEN *V)
 {
   GEN x=content(y);
-  *U=gzero; *V = gdiv(polun[varn(y)],x); return gmul(y,*V);
+  *U=gzero; *V = ginv(x); return gmul(y,*V);
 }
 
 /* calcule U et V tel que Ux+Vy=GCD(x,y) par le sous-resultant */

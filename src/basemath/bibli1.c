@@ -1937,6 +1937,8 @@ LLL_nfbasis(GEN *ptx, GEN polr, GEN base, long prec)
   else
   {
     n=lgef(x)-3; totally_real = (!prec || sturm(x)==n);
+    if (typ(base) != t_VEC || lg(base)-1 != n)
+      err(talker,"incorrect Zk basis in LLL_nfbasis");
     if (!totally_real)
       T2 = nf_get_T2(base,polr? polr: roots(x,prec));
     else

@@ -1310,7 +1310,7 @@ sagm(GEN x, long prec)
       do
       {
 	a=a1; b=b1;
-	a1=gmul2n(gadd(a,b),-1); b1=gsqrt(gmul(a,b),0);
+	a1=gmul2n(gadd(a,b),-1); b1=gsqrt(gmul(a,b),prec);
 	p1=gsub(b1,a1); ep=valp(p1)-valp(b1);
       }
       while (ep<l && !gcmp0(p1));

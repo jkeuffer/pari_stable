@@ -581,13 +581,15 @@ pol_to_vec(GEN x, long N)
 GEN
 algtobasis_intern(GEN nf,GEN x)
 {
-  long i,tx=typ(x),N=lgef(nf[1])-3;
-  GEN z;
+  GEN z, P = (GEN)nf[1];
+  long i, tx = typ(x), N = lgef(P)-3;
 
   if (tx==t_POLMOD) { x=(GEN)x[2]; tx=typ(x); }
   if (tx==t_POL)
   {
-    if (lgef(x)-3 >= N) x=gres(x,(GEN)nf[1]);
+    if (varn(x) != varn(P))
+      err(talker,"incompatible variables in algtobasis");
+    if (lgef(x)-3 >= N) x=gres(x,P);
     return gmul((GEN)nf[8], pol_to_vec(x, N));
   }
   z = cgetg(N+1,t_COL);

@@ -834,7 +834,7 @@ ideleaddone_aux(GEN nf,GEN x,GEN ideal)
   long i,nba,R1;
   GEN p1,p2,p3,arch;
 
-  idealtyp(&ideal,&arch);
+  (void)idealtyp(&ideal,&arch);
   if (!arch) return idealaddtoone_i(nf,x,ideal);
 
   R1=itos(gmael(nf,2,1));
