@@ -474,7 +474,7 @@ pointch(GEN x, GEN ch)
 static long
 ellexpo(GEN E)
 {
-  long i, f, e = -HIGHEXPOBIT;
+  long i, f, e = -(ulong)HIGHEXPOBIT;
   for (i=1; i<=5; i++)
   {
     f = gexpo((GEN)E[i]);

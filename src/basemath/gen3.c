@@ -1986,7 +1986,7 @@ grndtoi(GEN x, long *e)
   long i, tx=typ(x), lx, ex, e1;
   pari_sp av;
 
-  *e = -HIGHEXPOBIT;
+  *e = -(long)HIGHEXPOBIT;
   switch(tx)
   {
     case t_INT: case t_INTMOD: case t_QUAD:
@@ -2064,7 +2064,7 @@ gcvtoi(GEN x, long *e)
     if (e1 <= 0) { pari_sp av = avma; e1 = expo(subri(x,y)); avma = av; }
     *e = e1; return y;
   }
-  *e = -HIGHEXPOBIT;
+  *e = -(long)HIGHEXPOBIT;
   if (is_matvec_t(tx))
   {
     lx = lg(x); y = cgetg(lx,tx);

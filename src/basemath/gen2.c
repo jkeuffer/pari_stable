@@ -1676,7 +1676,7 @@ gexpo(GEN x)
       return expi(x);
 
     case t_FRAC: case t_FRACN:
-      if (!signe(x[1])) return -HIGHEXPOBIT;
+      if (!signe(x[1])) return -(long)HIGHEXPOBIT;
       return expi((GEN)x[1]) - expi((GEN)x[2]);
 
     case t_REAL:
@@ -1691,7 +1691,7 @@ gexpo(GEN x)
 
     case t_POL: case t_SER: case t_VEC: case t_COL: case t_MAT:
       lx=(tx==t_POL)? lgef(x): lg(x);
-      y = -HIGHEXPOBIT;
+      y = -(long)HIGHEXPOBIT;
       for (i=lontyp[tx]; i<lx; i++) { e=gexpo((GEN)x[i]); if (e>y) y=e; }
       return y;
   }

@@ -707,7 +707,7 @@ gpow(GEN x, GEN n, long prec)
     if (!precision(x)) return gcopy(x);
 
     x = ground(gmulsg(gexpo(x),n));
-    if (is_bigint(x) || (ulong)x[2] >= (ulong)HIGHEXPOBIT)
+    if (is_bigint(x) || (ulong)x[2] >= HIGHEXPOBIT)
       err(talker,"gpow: underflow or overflow");
     avma = av; return realzero_bit(itos(x));
   }
