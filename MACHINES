@@ -130,10 +130,10 @@ Pentium      133MHz  FreeBSD-2.2.5   gcc           15231   17259  2.0.10    KK
 *i860         40MHz  Concentrix      cc           147989!      -  2.0.9     LG
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Intel/ARM
-StrongARM 110 186BM  Linux-2.4.5     gcc-2.95.2    17162!      -  2.1.1     BA
+*StrongARM   110MHz  Linux-2.4.5     gcc-2.95.2    17162!      -  2.1.1     BA
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Intel/ia64
-Itanium      800MHz  Linux-2.4.9     gcc-3.0.1      2557    2474  2.1.2 (28)BA
+*Itanium     800MHz  Linux-2.4.9     gcc-3.0.1      2557    2474  2.1.2 (28)BA
 ------------------------------------------------------------------------------
 Motorola
 *MC68040      25MHz  NextStep-v2     cc           250542!      -  2.0.9     LG
@@ -153,7 +153,7 @@ IBM/POWER,PowerPC
 *POWER2       66MHz  AIX-4.2         cc            37592!      -  2.0.4 (3) GN
 ------------------------------------------------------------------------------
 IBM/S390
-S390???       630BM  Linux-2.4.17    gcc-2.95.4     6764    6574  2.1.3     BA
+*S390         630BM  Linux-2.4.17    gcc-2.95.4     6764    6574  2.1.3     BA
 ------------------------------------------------------------------------------
 SGI/MIPS
 *R4000     50/70MHz  IRIX-5.2        gcc           70764   70114  2.0.9 (1) TP
@@ -278,6 +278,8 @@ CFLAGS= -fbranch-probabilities  -O3 -DGCC_INLINE -Wall -Wno-implicit
 -march=pentiumpro -maccumulate-outgoing-args -minline-all-stringops
 -fomit-frame-pointer
 
+(32) gp-dyn: add -fPIC to CFLAGS [or linking fails].
+     Most gcc 2.95 ARM support lib have buggy (unsigned)%(unsigned)
 
 =============================================================================
 Contributors:
