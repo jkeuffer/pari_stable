@@ -52,10 +52,10 @@ long p = 0;
 \h
 while (p <= p\_goal) /* {\rm run through all primes up to \kbd{p\_goal}} */
 \obr
-\q  p += *d;
-\q  if (*d == 0) err(primer1); /* {\rm not enough primes} */
-\q  d++;
-\q  ...
+  p += *d;
+  if (*d == 0) err(primer1); /* {\rm not enough primes} */
+  d++;
+  ...
 \cbr
 \eprog\noindent
 Here, we use the general error handling function \kbd{err} (see

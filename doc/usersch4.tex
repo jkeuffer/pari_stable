@@ -304,9 +304,9 @@ various \kbd{DEFAULTPREC}s, or by using conditional constructs of the form:
 %
 \bprog%
 \#ifndef LONG\_IS\_64BIT
-\q prec = 4;
+  prec = 4;
 \#else
-\q prec = 6;
+  prec = 6;
 \#endif
 \eprog
 \noindent which is in this case equivalent to the statement
@@ -627,7 +627,7 @@ $[\kbd{avma}, \kbd{lbot}[$, so that its right extremity abuts the address
 \cr\+
             &bot  &       &avma  &lbot         &ltop    &top
 \cr\+
-{\rm end of stack}  |------------[++++++[-/-/-/-/-/-/-|++++++++|\q
+{\rm end of stack}  |------------[++++++[-/-/-/-/-/-/-|++++++++|\quad
 {\rm beginning of stack}
 \cr\+
              & &{\rm free memory}
@@ -640,7 +640,7 @@ $[\kbd{avma}, \kbd{lbot}[$, so that its right extremity abuts the address
 \cr\+
              &bot      &                  &avma   &ltop     &top
 \cr\+
-{\rm end of stack} |--------------------------[++++++[++++++++|\q
+{\rm end of stack} |--------------------------[++++++[++++++++|\quad
 {\rm beginning of stack}
 \cr\+
                       &&{\rm free memory}
@@ -905,21 +905,21 @@ instead, which will be faster since we don't need the initial copy.
 Another important usage is ``random'' garbage collection during loops
 whose size requirements we cannot control in advance:
 \bprog%
-\q  long ltop = avma, limit = (avma+bot)/2;
-\q  GEN x, y;
+  long ltop = avma, limit = (avma+bot)/2;
+  GEN x, y;
 \h
-\q  while (...)
-\q  $\{$
-\q\q  garbage(); x = anything();
-\q\q  garbage(); y = anything()
-\q\q  garbage();
-\q\q  if (avma < limit) /* memory is running low (half spent since entry) */
-\q\q  $\{$
-\q\q\q   GEN *gptr[2];
-\q\q\q   gptr[0] = \&x; gptr[1] = \&y;
-\q\q\q   gerepilemany(ltop, gptr, 2);
-\q\q  $\}$
-\q  $\}$
+  while (...)
+  \obr
+    garbage(); x = anything();
+    garbage(); y = anything()
+    garbage();
+    if (avma < limit) /* memory is running low (half spent since entry) */
+    \obr
+       GEN *gptr[2];
+       gptr[0] = \&x; gptr[1] = \&y;
+       gerepilemany(ltop, gptr, 2);
+    \cbr
+  \cbr
 \eprog
 \noindent Here we assume that only \kbd{x} and \kbd{y} are needed from one
 iteration to the next. As it would be too costly to call gerepile once for
@@ -937,8 +937,8 @@ address where $2^{n-1} / (2^{n-1}+1)$ of the total stack space is
 exhausted ($1/2$ for $n=1$, $2/3$ for $n=2$). Hence, the above snippet should be written as
 
 \bprog%
-\q  long ltop = avma, limit = stack\_lim(avma,1);
-\q  \dots
+  long ltop = avma, limit = stack\_lim(avma,1);
+  \dots
 \eprog
 
 \subsec{Some hints and tricks}. Even for the authors, the use of
@@ -1419,12 +1419,12 @@ the deleted variable does not appear anywhere in the objects you use later
 on. Here is an example:
 
 \bprog\obr
-\q  long first = fetch\_var();
-\q  long n1 = fetch\_var();
-\q  long n2 = fetch\_var(); /* prepare three variables for internal use */
-\q  ...
-\q  /* delete all variables before leaving */
-\q  do \obr\ num = delete\_var(); \cbr\ while (num \&\& num <= first);
+  long first = fetch\_var();
+  long n1 = fetch\_var();
+  long n2 = fetch\_var(); /* prepare three variables for internal use */
+  ...
+  /* delete all variables before leaving */
+  do \obr\ num = delete\_var(); \cbr\ while (num \&\& num <= first);
 \cbr\eprog
 
 \noindent
@@ -1729,20 +1729,20 @@ GEN matexp(GEN x, long prec);
 int
 main()
 \obr
-\q long d, prec = 3;
-\q GEN x;
+  long d, prec = 3;
+  GEN x;
 \h
-\q /* take a stack of a 10^6 bytes, no prime table */
-\q pari\_init(1000000,2);
-\q printf("precision of the computation in decimal digits:\bs n");
-\q d = itos(lisGEN(stdin));
-\q if (d > 0) prec = (long) (d*pariK1+3);
+  /* take a stack of a 10^6 bytes, no prime table */
+  pari\_init(1000000,2);
+  printf("precision of the computation in decimal digits:\bs n");
+  d = itos(lisGEN(stdin));
+  if (d > 0) prec = (long) (d*pariK1+3);
 \h
-\q printf("input your matrix in GP format:\bs n");
-\q x = matexp(lisGEN(stdin), prec);
+  printf("input your matrix in GP format:\bs n");
+  x = matexp(lisGEN(stdin), prec);
 \h
-\q sor(x,'g',d,0);
-\q exit(0);
+  sor(x,'g',d,0);
+  exit(0);
 \cbr\eprog
 \noindent
 The variable \kbd{prec} represents the length in longwords of the real
@@ -1767,25 +1767,25 @@ appropriate. Now let us attack the main course, the function \kbd{matexp}:
 GEN
 matexp(GEN x, long prec)
 \obr
-\q  long lx=lg(x),i,k,n,lbot, ltop = avma;
-\q  GEN y,r,s,p1,p2;
+   long lx=lg(x),i,k,n,lbot, ltop = avma;
+   GEN y,r,s,p1,p2;
 \h
-\q /* check that x is a square matrix */
-\q if (typ(x) != t\_MAT) err(talker,"this expression is not a matrix");
-\q if (lx == 1) return cgetg(1, t\_MAT);
-\q if (lx != lg(x[1])) err(talker,"not a square matrix");
+  /* check that x is a square matrix */
+  if (typ(x) != t\_MAT) err(talker,"this expression is not a matrix");
+  if (lx == 1) return cgetg(1, t\_MAT);
+  if (lx != lg(x[1])) err(talker,"not a square matrix");
 \h
-\q /* compute the L2 norm of x */
-\q s = gzero;
-\q for (i=1; i<lx; i++)
-\q\q s = gadd(s, gnorml2((GEN)x[i]));
-\q if (typ(s) == t\_REAL) setlg(s,3);
-\q s = gsqrt(s,3); /* we do not need much precision on s */
+  /* compute the L2 norm of x */
+  s = gzero;
+  for (i=1; i<lx; i++)
+    s = gadd(s, gnorml2((GEN)x[i]));
+  if (typ(s) == t\_REAL) setlg(s,3);
+  s = gsqrt(s,3); /* we do not need much precision on s */
 \h
-\q /* if s<1, we are happy */
-\q k = expo(s);
-\q if (k < 0) \obr\ n = 0; p1 = x; \cbr
-\q else \obr\ n = k+1; p1 = gmul2n(x,-n); setexpo(s,-1); \cbr\eprog
+  /* if s<1, we are happy */
+  k = expo(s);
+  if (k < 0) \obr n = 0; p1 = x; \cbr
+  else \obr n = k+1; p1 = gmul2n(x,-n); setexpo(s,-1); \cbr\eprog
 \noindent
 Before continuing, several remarks are in order.
 
@@ -1897,26 +1897,26 @@ of terms that we need. We leave this modification (and many other
 improvements!) to the reader. The program continues as follows:
 
 \bprog%
-\q /* initializations before the loop */
-\q r = cgetr(prec+1); gaffsg(1,r); p1 = gmul(r,p1);
-\q y = gscalmat(r,lx-1); /* creates scalar matrix with r on diagonal */
-\q p2 = p1; r = s; k = 1;
-\q y = gadd(y,p2);
+  /* initializations before the loop */
+  r = cgetr(prec+1); gaffsg(1,r); p1 = gmul(r,p1);
+  y = gscalmat(r,lx-1); /* creates scalar matrix with r on diagonal */
+  p2 = p1; r = s; k = 1;
+  y = gadd(y,p2);
 \h
-\q /* now the main loop */
-\q while (expo(r) >= -BITS\_IN\_LONG*(prec-1))
-\q \obr
-\q\q k++; p2 = gdivgs(gmul(p2,p1),k);
-\q\q r = gdivgs(gmul(s,r),k); y = gadd(y,p2);
-\q \cbr
+  /* now the main loop */
+  while (expo(r) >= -BITS\_IN\_LONG*(prec-1))
+  \obr
+    k++; p2 = gdivgs(gmul(p2,p1),k);
+    r = gdivgs(gmul(s,r),k); y = gadd(y,p2);
+  \cbr
 \h
-\q  /* now square back n times if necessary */
-\q if (!n) \obr\ lbot = avma; y = gcopy(y); \cbr
-\q else
-\q \obr
-\q\q for (i=0; i<n; i++) \obr\ lbot = avma; y = gsqr(y); \cbr
-\q \cbr
-\q return gerepile(ltop,lbot,y);
+   /* now square back n times if necessary */
+  if (!n) \obr\ lbot = avma; y = gcopy(y); \cbr
+  else
+  \obr
+    for (i=0; i<n; i++) \obr\ lbot = avma; y = gsqr(y); \cbr
+  \cbr
+  return gerepile(ltop,lbot,y);
 \cbr\eprog
 \noindent
 A few remarks once again. First note the use of the function
@@ -1947,9 +1947,9 @@ of the instruction \kbd{y=gadd(p2,y)}. Of course, we could also rewrite the
 last block as follows:
 
 \bprog%
-\q /* now square back n times */
-\q for (i=0; i<n; i++) y = gsqr(y);
-\q return gerepileupto(ltop,y);
+  /* now square back n times */
+  for (i=0; i<n; i++) y = gsqr(y);
+  return gerepileupto(ltop,y);
 \cbr\eprog
 \noindent
 because it does not matter to \teb{gerepileupto} that we have lost the address
@@ -2231,9 +2231,9 @@ A complete description could look like this:
 
 \bprog%
 \obr
-\q  install(bnfinit0, GD0,L,DGp, ClassGroupInit, "libpari.so");
-\q  addhelp(ClassGroupInit, "ClassGroupInit(P,\obr flag=0\cbr,\obr data=[]\cbr):
-\q\q    compute the necessary data for ...");
+  install(bnfinit0, GD0,L,DGp, ClassGroupInit, "libpari.so");
+  addhelp(ClassGroupInit, "ClassGroupInit(P,\obr flag=0\cbr,\obr data=[]\cbr):
+    compute the necessary data for ...");
 \cbr
 \eprog
 which means we have a function \kbd{ClassGroupInit} under GP, which calls

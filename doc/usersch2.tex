@@ -436,7 +436,7 @@ actually gives you 9 digits ($9 < \log_{10}(2^{32}) < 10$):
 
 \bprog%
 ? default(realprecision, 2)
-\q    realprecision = 9 significant digits (2 digits displayed)
+      realprecision = 9 significant digits (2 digits displayed)
 \eprog
 
 \subsecidx{secure} (default \kbd{0}): this is a toggle which can be either 1
@@ -977,8 +977,8 @@ equal to $0$ (specifically, if \kbd{gcmp0($x$)==1}), and $0$ otherwise.
 \bprog%
 ? a = x + 1; x = 1;
 ? subst(a,x,1)
-\ \ ***\ \ \ variable name expected: subst(a,x,1)
-\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \pow---
+  ***   variable name expected: subst(a,x,1)
+                                        ^---
 ? subst(a,'x,1)
 \%1 = 2
 \eprog
@@ -1162,10 +1162,10 @@ a semicolon (\kbd{;}), a comma (\kbd{,}) or an operator (for clarity's sake,
 we don't recommend splitting an identifier over two lines in this way). For
 instance, the following program
 
-\bprog
+\bprog%
 \obr
-\q a = b
-\q b = c
+  a = b
+  b = c
 \cbr
 \eprog
 
@@ -1294,10 +1294,10 @@ like any other function. The syntax is as follows:
 \noindent which looks better written on consecutive lines:
 \bprog% name($x_0$, $x_1$, \dots) = 
 \obr
-\q local($t_0$, $t_1$, \dots);
-\q local(\dots);
-\q
-\q \dots
+  local($t_0$, $t_1$, \dots);
+  local(\dots);
+\h 
+  \dots
 \cbr
 \eprog
 \noindent (note that the first newline is disregarded due to the preceding
@@ -1369,8 +1369,8 @@ follows:
 \bprog%
 zet(s) =
 \obr
-\q  local(j); /* not needed, and possibly confusing (see below) */
-\q  sumalt(j=1, (-1)^(j-1)*j^(-s)) / (1 - 2^(1-s))
+  local(j); /* not needed, and possibly confusing (see below) */
+  sumalt(j=1, (-1)^(j-1)*j^(-s)) / (1 - 2^(1-s))
 \cbr
 \eprog
 
@@ -1396,9 +1396,9 @@ What's wrong with the following definition?
 \bprog%
 ? first\_prime\_div(x) = 
 \obr
-\q local(p);
-\q forprime(p=2, x, if (x\%p == 0, break));
-\q p
+  local(p);
+  forprime(p=2, x, if (x\%p == 0, break));
+  p
 \cbr
 ? first\_prime\_div(10)
 \%1 = 0
@@ -1423,23 +1423,23 @@ be on top of the stack at the time of the call. This could be a ``global''
 value, or a local value belonging to any function higher in the call chain.
 So, be warned.
 
-There's no problem with recursive functions as long as one pays proper
-attention to variable scope. Here's a last example, used to retrieve the
-coefficient array of a multivariate polynomial (a non-trivial task due to
-PARI's unsophisticated representation for those objects)~:
+Recursive functions\sidx{recursion} can easily be written as long as one
+pays proper attention to variable scope. Here's a last example, used to
+retrieve the coefficient array of a multivariate polynomial (a non-trivial
+task due to PARI's unsophisticated representation for those objects)~:
 \sidx{multivariate polynomial}
 
 \bprog%
 coeffs(P, nbvar) =
 \obr
-\q local(v);
+  local(v);
 \h
-\q if (type(P) != "t\_POL",
-\q\q   for (i=0, nbvar-1, P = [P]);
-\q\q   return (P)
-\q );
-\q v = vector(poldegree(P)+1, i, polcoeff(P,i-1));
-\q vector(length(v), i, coeffs(v[i], nbvar-1))
+  if (type(P) != "t\_POL",
+    for (i=0, nbvar-1, P = [P]);
+    return (P)
+  );
+  v = vector(poldegree(P)+1, i, polcoeff(P,i-1));
+  vector(length(v), i, coeffs(v[i], nbvar-1))
 \cbr
 \eprog
 
@@ -1447,6 +1447,16 @@ coeffs(P, nbvar) =
 assignment {\tt v = coeffs(P,k)}, the coefficient of $x_1^{n_1}\dots
 x_k^{n_k}$ in P is given by {\tt v[$n_1$+1][\dots][$n_k$+1]}. What would
 happen if the declaration {\tt local(v)} had been omitted ?
+
+The operating system will automatically limit the \idx{recursion depth}:
+\bprog%
+? dive(n) = if (n, dive(n-1))
+? dive(5000);
+  ***   deep recursion: if(n,dive(n-1))
+                        ^---------------
+\eprog
+There's no way to increase the recursion limit (which may be different on
+your machine), since it would simply crash the GP process.
 
 \misctitle{Function which take functions as parameters ?} This is easy
 in GP using the following trick (neat example due to Bill Daly):
@@ -1464,7 +1474,7 @@ variable both as a formal parameter and a local variable in a given function.
 Hence
 \bprog%
 ? f(x,x) = 1
-\q ***   user function f: variable x declared twice.
+  ***   user function f: variable x declared twice.
 \eprog
 
 Also, the statement \kbd{\idx{global}(x, y, z, t)} (see \secref{se:global})
@@ -1516,10 +1526,10 @@ component. This could be implemented as
 \bprog
 x.j =
 \obr
-\q if (type(x) != "t\_VEC" || length(x) < 14,
-\q\q error("this is not a proper elliptic curve: " x)
-\q );
-\q x[13]
+  if (type(x) != "t\_VEC" || length(x) < 14,
+    error("this is not a proper elliptic curve: " x)
+  );
+  x[13]
 \cbr
 \eprog
 
@@ -1541,10 +1551,10 @@ efficiency goes):
 \bprog
 correct\_ell\_if\_needed(x) = 
 \obr
-\q local(tmp);
-\q if (type(x) != "t\_VEC", tmp = ellinit(x))
-\q \bs\bs \var{some further checks}
-\q tmp
+  local(tmp);
+  if (type(x) != "t\_VEC", tmp = ellinit(x))
+   \bs\bs \var{some further checks}
+  tmp
 \cbr
 x.j = correct\_ell\_if\_needed(x)[13];
 \eprog
@@ -1643,9 +1653,9 @@ arguments in left-to-right order, ending with a newline (and returns 0
 as an unprinted result):
 
 \bprog%
-\q print()
-\q print(1+3"a,3" ,4)
-\q print(a=3, (1 + ((a-3)==print())) (a = (a == 5\bs/2)))
+  print()
+  print(1+3"a,3" ,4)
+  print(a=3, (1 + ((a-3)==print())) (a = (a == 5\bs/2)))
 \eprog
 
 \noindent To round this up, here is a less artificial example, used to create
@@ -1679,9 +1689,9 @@ context:
 \idx{extern}
 \idx{plotstring} {\rm (second argument)}
 \idx{plotterm} {\rm (first argument)}
-{\rm all the \kbd{\idx{print}\var{xxx}} functions}
 \idx{read}
 \idx{system}
+{\rm all the \kbd{\idx{print}\var{xxx}} functions}
 {\rm all the \kbd{\idx{write}\var{xxx}} functions}
 \eprog
 
@@ -1858,7 +1868,7 @@ include in your \kbd{.emacs} file the following lines:
 (autoload 'gp "\miscdir/pari" nil t)
 (autoload 'gpman "\miscdir/pari" nil t)
 (setq auto-mode-alist
-\q (cons '("\bs\bs.gp\$" . gp-script-mode) auto-mode-alist))
+  (cons '("\bs\bs.gp\$" . gp-script-mode) auto-mode-alist))
 \eprog
 
 where \kbd{pari.el} is the name of the file that will have to be loaded by
@@ -1971,12 +1981,12 @@ for GP):
 %
 \bprog%
 \$if Pari-GP
-\q set show-all-if-ambiguous
-\q "\b{C}-h": backward-delete-char
-\q "\b{e}\b{C}-h": backward-kill-word
-\q "\b{C}-xd": dump-functions
-\q (: "\b{C}-v()\b{C}-b" \qquad \# can be annoying when copy-pasting~!
-\q [: "\b{C}-v[]\b{C}-b"
+  set show-all-if-ambiguous
+  "\b{C}-h": backward-delete-char
+  "\b{e}\b{C}-h": backward-kill-word
+  "\b{C}-xd": dump-functions
+  (: "\b{C}-v()\b{C}-b"        \# can be annoying when copy-pasting~!
+  [: "\b{C}-v[]\b{C}-b"
 \$endif%
 \eprog
 %
