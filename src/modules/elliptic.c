@@ -479,27 +479,44 @@ pointch(GEN x, GEN ch)
   return gerepilecopy(av,y);
 }
 
+static long
+ellexpo(GEN E)
+{
+  long i, f, e = -HIGHEXPOBIT;
+  for (i=1; i<=5; i++)
+  {
+    f = gexpo((GEN)E[i]);
+    if (f > e) e = f;
+  }
+  return e;
+}
+
 /* Exactness of lhs and rhs in the following depends in non-obvious ways
-   on the coeffs of the curve as well as on the components of the point z.
-   Thus if e is exact, with a1==0, and z has exact y coordinate only, the
-   lhs will be exact but the rhs won't. */
+ * on the coeffs of the curve as well as on the components of the point z.
+ * Thus if e is exact, with a1==0, and z has exact y coordinate only, the
+ * lhs will be exact but the rhs won't. */
 int
 oncurve(GEN e, GEN z)
 {
-  GEN p1,p2,x;
-  long p, q;
-  pari_sp av=avma;
+  GEN LHS, RHS, x;
+  long pl, pr, ex, expx;
+  pari_sp av;
 
-  checksell(e); checkpt(z); if (lg(z)<3) return 1; /* oo */
-  p1 = ellLHS(e,z);
-  p2 = ellRHS(e,(GEN)z[1]); x = gsub(p1,p2);
-  if (gcmp0(x)) { avma=av; return 1; }
-  p = precision(p1);
-  q = precision(p2);
-  if (!p && !q) { avma=av; return 0; } /* both of p1, p2 are exact */
-  if (!q || (p && p < q)) q = p; /* min among nonzero elts of {p,q} */
-  q = (gexpo(x) < gexpo(p1) - bit_accuracy(q) + 15);
-  avma = av; return q;
+  checksell(e); checkpt(z); if (lg(z) < 3) return 1; /* oo */
+  av = avma;
+  LHS = ellLHS(e,z);
+  RHS = ellRHS(e,(GEN)z[1]); x = gsub(LHS,RHS);
+  if (gcmp0(x)) { avma = av; return 1; }
+  pl = precision(LHS);
+  pr = precision(RHS);
+  if (!pl && !pr) { avma = av; return 0; } /* both of LHS, RHS are exact */
+  /* at least one of LHS,RHS is inexact */
+  ex = pr? gexpo(RHS): gexpo(LHS); /* don't take exponent of exact 0 */
+  if (!pr || (pl && pl < pr)) pr = pl; /* min among nonzero elts of {pl,pr} */
+  expx = gexpo(x);
+  pr = (expx < ex - bit_accuracy(pr) + 15
+     || expx < ellexpo(e) - bit_accuracy(pr) + 5);
+  avma = av; return pr;
 }
 
 GEN
@@ -621,48 +638,49 @@ ordell(GEN e, GEN x, long prec)
 static GEN
 CM_powell(GEN e, GEN z, GEN n)
 {
-  GEN x,y,p0,p1,q0,q1,p2,q2,z1,z2,pol,grdx;
+  GEN x,y,p0,p1,q0,q1,z1,z2,pol,grdx;
   long ln, ep, vn;
-  pari_sp av=avma, tetpil;
+  pari_sp av = avma;
 
-  if (lg(z)<3) return gcopy(z);
-  pol=(GEN)n[1];
-  if (signe(discsr(pol))>=0)
+  if (lg(z) < 3) return gcopy(z);
+  pol = (GEN)n[1];
+  if (signe(discsr(pol)) >= 0)
     err(talker,"not a negative quadratic discriminant in CM");
   if (!gcmp1(denom((GEN)n[2])) || !gcmp1(denom((GEN)n[3])))
-    err(impl,"powell for nonintegral CM exponent");
+    err(impl, "powell for nonintegral CM exponent");
 
-  p1=gaddgs(gmul2n(gnorm(n),2),4);
-  if (gcmpgs(p1,(((ulong)MAXULONG)>>1)) > 0)
-    err(talker,"norm too large in CM");
-  ln=itos(p1); vn=(ln-4)>>2;
-  z1 = weipell(e,ln);
-  z2 = gsubst(z1,0,gmul(n,polx[0]));
-  grdx=gadd((GEN)z[1],gdivgs((GEN)e[6],12));
-  p0=gzero; p1=gun;
-  q0=gun; q1=gzero;
+  p1 = shifti(addsi(1, gnorm(n)), 2);
+  if (is_bigint(p1) > 0) err(talker, "norm too large in CM");
+  ln = itos(p1); vn = (ln-4)>>2;
+  z1 = weipell(e, ln);
+  z2 = gsubst(z1, 0, gmul(n,polx[0]));
+  grdx = gadd((GEN)z[1], gdivgs((GEN)e[6],12));
+  p0 = gzero; p1 = gun;
+  q0 = gun;   q1 = gzero;
   do
   {
-    GEN ss=gzero;
+    GEN p2,q2, ss = gzero;
     do
     {
-      ep=(-valp(z2))>>1; ss=gadd(ss,gmul((GEN)z2[2],gpowgs(polx[0],ep)));
-      z2=gsub(z2,gmul((GEN)z2[2],gpowgs(z1,ep)));
+      ep = (-valp(z2)) >> 1;
+      ss = gadd(ss, gmul((GEN)z2[2], gpowgs(polx[0], ep)));
+      z2 = gsub(z2, gmul((GEN)z2[2], gpowgs(z1, ep)));
     }
-    while (valp(z2)<=0);
-    p2=gadd(p0,gmul(ss,p1)); p0=p1; p1=p2;
-    q2=gadd(q0,gmul(ss,q1)); q0=q1; q1=q2;
+    while (valp(z2) <= 0);
+    p2 = gadd(p0, gmul(ss,p1)); p0 = p1; p1 = p2;
+    q2 = gadd(q0, gmul(ss,q1)); q0 = q1; q1 = q2;
     if (!signe(z2)) break;
-    z2=ginv(z2);
+    z2 = ginv(z2);
   }
   while (degpol(p1) < vn);
   if (degpol(p1) > vn || signe(z2))
     err(talker,"not a complex multiplication in powell");
-  x=gdiv(p1,q1); y=gdiv(deriv(x,0),n);
-  x=gsub(poleval(x,grdx), gdivgs((GEN)e[6],12));
-  y=gsub(gmul(d_ellLHS(e,z),poleval(y,grdx)), ellLHS0(e,x));
-  tetpil=avma; z=cgetg(3,t_VEC); z[1]=lcopy(x); z[2]=lmul2n(y,-1);
-  return gerepile(av,tetpil,z);
+  x = gdiv(p1,q1); y = gdiv(deriv(x,0),n);
+  x = gsub(poleval(x,grdx), gdivgs((GEN)e[6],12));
+  y = gsub( gmul(d_ellLHS(e,z), poleval(y,grdx)), ellLHS0(e,x));
+  z = cgetg(3,t_VEC);
+  z[1] = lcopy(x);
+  z[2] = lmul2n(y,-1); return gerepileupto(av, z);
 }
 
 GEN
@@ -701,25 +719,24 @@ powell(GEN e, GEN z, GEN n)
 GEN
 mathell(GEN e, GEN x, long prec)
 {
-  GEN y,p1,p2, *pdiag;
-  long lx=lg(x),i,j,tx=typ(x);
+  GEN y, h, *pdiag;
+  long lx = lg(x),i,j,tx=typ(x);
   pari_sp av = avma;
 
   if (!is_vec_t(tx)) err(elliper1);
-  lx=lg(x); y=cgetg(lx,t_MAT); pdiag=(GEN*) new_chunk(lx);
+  y = cgetg(lx,t_MAT); pdiag = (GEN*) new_chunk(lx);
   for (i=1; i<lx; i++)
   {
-    pdiag[i]=ghell(e,(GEN)x[i],prec);
-    y[i]=lgetg(lx,t_COL);
+    pdiag[i] = ghell(e,(GEN)x[i],prec);
+    y[i] = lgetg(lx,t_COL);
   }
   for (i=1; i<lx; i++)
   {
-    p1=(GEN)y[i]; p1[i]=lmul2n(pdiag[i],1);
+    coeff(y,i,i) = lmul2n(pdiag[i],1);
     for (j=i+1; j<lx; j++)
     {
-      p2=ghell(e,addell(e,(GEN)x[i],(GEN)x[j]),prec);
-      p2=gsub(p2, gadd(pdiag[i],pdiag[j]));
-      p1[j]=(long)p2; coeff(y,i,j)=(long)p2;
+      h = ghell(e, addell(e,(GEN)x[i],(GEN)x[j]), prec);
+      coeff(y,j,i) = coeff(y,i,j) = lsub(h, gadd(pdiag[i],pdiag[j]));
     }
   }
   return gerepilecopy(av,y);
@@ -729,44 +746,43 @@ static GEN
 bilhells(GEN e, GEN z1, GEN z2, GEN h2, long prec)
 {
   long lz1=lg(z1), tx, i;
-  pari_sp av=avma, tetpil;
+  pari_sp av = avma;
   GEN y,p1,p2;
 
   if (lz1==1) return cgetg(1,typ(z1));
 
-  tx=typ(z1[1]);
+  tx = typ(z1[1]);
   if (!is_matvec_t(tx))
   {
-    p1 = ghell(e,addell(e,z1,z2),prec);
-    p2 = gadd(ghell(e,z1,prec),h2);
-    tetpil=avma; return gerepile(av,tetpil,gsub(p1,p2));
+    p1 = ghell(e, addell(e,z1,z2),prec);
+    p2 = gadd(h2, ghell(e,z1,prec));
+    return gerepileupto(av, gsub(p1,p2));
   }
-  y=cgetg(lz1,typ(z1));
-  for (i=1; i<lz1; i++)
-    y[i]=(long)bilhells(e,(GEN)z1[i],z2,h2,prec);
+  y = cgetg(lz1, typ(z1));
+  for (i=1; i<lz1; i++) y[i] = (long)bilhells(e,(GEN)z1[i],z2,h2,prec);
   return y;
 }
 
 GEN
 bilhell(GEN e, GEN z1, GEN z2, long prec)
 {
-  GEN p1,h2;
-  long tz1=typ(z1), tz2=typ(z2);
-  pari_sp av=avma, tetpil;
+  GEN p1, h2;
+  long tz1 = typ(z1), tz2 = typ(z2);
+  pari_sp av = avma;
 
   if (!is_matvec_t(tz1) || !is_matvec_t(tz2)) err(elliper1);
   if (lg(z1)==1) return cgetg(1,tz1);
   if (lg(z2)==1) return cgetg(1,tz2);
 
-  tz1=typ(z1[1]); tz2=typ(z2[1]);
+  tz1 = typ(z1[1]);
+  tz2 = typ(z2[1]);
   if (is_matvec_t(tz2))
   {
-    if (is_matvec_t(tz1))
-      err(talker,"two vector/matrix types in bilhell");
-    p1=z1; z1=z2; z2=p1;
+    if (is_matvec_t(tz1)) err(talker,"two vector/matrix types in bilhell");
+    p1 = z1; z1 = z2; z2 = p1;
   }
-  h2=ghell(e,z2,prec); tetpil=avma;
-  return gerepile(av,tetpil,bilhells(e,z1,z2,h2,prec));
+  h2 = ghell(e,z2,prec);
+  return gerepileupto(av, bilhells(e,z1,z2,h2,prec));
 }
 
 static GEN
@@ -802,12 +818,12 @@ GEN
 zell(GEN e, GEN z, long prec)
 {
   long ty, sw, fl;
-  pari_sp av=avma;
+  pari_sp av = avma;
   GEN t,u,p1,p2,a,b,x1,u2,D = (GEN)e[12];
 
   checkbell(e);
   if (!oncurve(e,z)) err(heller1);
-  ty=typ(D);
+  ty = typ(D);
   if (ty==t_INTMOD) err(typeer,"zell");
   if (lg(z)<3) return (ty==t_PADIC)? gun: gzero;
 
@@ -817,10 +833,10 @@ zell(GEN e, GEN z, long prec)
     u2 = do_padic_agm(&x1,a,b,(GEN)D[2]);
     if (!gcmp0((GEN)e[16]))
     {
-      t=gsqrt(gaddsg(1,gdiv(x1,a)),prec);
-      t=gdiv(gaddsg(-1,t),gaddsg(1,t));
+      t = gsqrt(gaddsg(1,gdiv(x1,a)),prec);
+      t = gdiv(gaddsg(-1,t), gaddsg(1,t));
     }
-    else t=gaddsg(2,ginv(gmul(u2,x1)));
+    else t = gaddsg(2, ginv(gmul(u2,x1)));
     return gerepileupto(av,t);
   }
 
@@ -2073,45 +2089,46 @@ GEN
 hell(GEN e, GEN a, long prec)
 {
   long n;
-  pari_sp av=avma, tetpil;
-  GEN p1,p2,y,z,q,pi2surw,pi2isurw,qn,ps;
+  pari_sp av = avma;
+  GEN p1, p2, y, z, q, pi2surw, qn, ps;
 
   checkbell(e);
-  pi2surw=gdiv(gmul2n(mppi(prec),1),(GEN)e[15]);
-  pi2isurw=cgetg(3,t_COMPLEX); pi2isurw[1]=zero; pi2isurw[2]=(long)pi2surw;
-  z=gmul(greal(zell(e,a,prec)),pi2surw);
-  q=greal(gexp(gmul((GEN)e[16],pi2isurw),prec));
-  y=gsin(z,prec); n=0; qn=gun; ps=gneg_i(q);
-  do
+  pi2surw = gdiv(Pi2n(1, prec), (GEN)e[15]);
+  z = gmul(greal(zell(e,a,prec)), pi2surw);
+  q = greal( gexp(gmul((GEN)e[16], pureimag(pi2surw)),prec) );
+  y = gsin(z,prec); qn = gun; ps = gneg_i(q);
+  for (n = 3; ; n += 2)
   {
-    n++; p1=gsin(gmulsg(2*n+1,z),prec); qn=gmul(qn,ps);
-    ps=gmul(ps,q); p1=gmul(p1,qn); y=gadd(y,p1);
+    qn = gmul(qn, ps);
+    ps = gmul(ps, q);
+    y = gadd(y, gmul(qn, gsin(gmulsg(n,z),prec)));
+    if (gexpo(qn) < - bit_accuracy(prec)) break;
   }
-  while (gexpo(qn) >= - bit_accuracy(prec));
-  p1=gmul(gsqr(gdiv(gmul2n(y,1), d_ellLHS(e,a))),pi2surw);
-  p2=gsqr(gsqr(gdiv(p1,gsqr(gsqr(denom((GEN)a[1]))))));
-  p1=gdiv(gmul(p2,q),(GEN)e[12]);
-  p1=gmul2n(glog(gabs(p1,prec),prec),-5);
-  tetpil=avma; return gerepile(av,tetpil,gneg(p1));
+  p1 = gmul(gsqr(gdiv(gmul2n(y,1), d_ellLHS(e,a))), pi2surw);
+  p2 = gsqr(gsqr(gdiv(p1, gsqr(gsqr(denom((GEN)a[1]))))));
+  p1 = gdiv(gmul(p2,q), (GEN)e[12]);
+  p1 = gmul2n(glog(gabs(p1,prec),prec), -5);
+  return gerepileupto(av, gneg(p1));
 }
 
 static GEN
 hells(GEN e, GEN x, long prec)
 {
-  GEN w,z,t,mu,e72,e82;
-  long n,lim;
+  GEN b8 = (GEN)e[9], b6 = (GEN)e[8], b4 = (GEN)e[7], b2 = (GEN)e[6];
+  GEN w, z, t, mu, b42, b62;
+  long n, lim;
 
-  t = gdiv(realun(prec),(GEN)x[1]);
+  t = gdiv(realun(prec), (GEN)x[1]);
   mu = gmul2n(glog(numer((GEN)x[1]),prec),-1);
-  e72 = gmul2n((GEN)e[7],1);
-  e82 = gmul2n((GEN)e[8],1);
-  lim = 6 + (bit_accuracy(prec) >> 1);
-  for (n=0; n<lim; n++)
+  b42 = gmul2n(b4,1);
+  b62 = gmul2n(b6,1);
+  lim = 15 + bit_accuracy(prec);
+  for (n = 3; n < lim; n += 2)
   {
-    w = gmul(t,gaddsg(4,gmul(t,gadd((GEN)e[6],gmul(t,gadd(e72,gmul(t,(GEN)e[8])))))));
-    z = gsub(gun,gmul(gsqr(t),gadd((GEN)e[7],gmul(t,gadd(e82,gmul(t,(GEN)e[9]))))));
-    mu = gadd(mu,gmul2n(glog(z,prec), -((n<<1)+3)));
-    t = gdiv(w,z);
+    w = gmul(t, gaddsg(4, gmul(t, gadd(b2, gmul(t, gadd(b42, gmul(t, b6)))))));
+    z = gsub(gun, gmul(gsqr(t), gadd(b4, gmul(t, gadd(b62, gmul(t,b8))))));
+    mu = gadd(mu, gmul2n(glog(z,prec), -n));
+    t = gdiv(w, z);
   }
   return mu;
 }
@@ -2123,38 +2140,41 @@ init_ch() {
   v[1] = un; v[2] = v[3] = v[4] = zero; return v;
 }
 
+static GEN
+_vhell2(GEN e, GEN x, long prec)
+{
+  long i, lx = lg(x) ;
+  GEN mu = cgetg(lx, typ(x));
+  for (i=1; i<lx; i++) mu[i] = (long)hells(e, (GEN)x[i], prec);
+  return mu;
+}
+
 GEN
 hell2(GEN e, GEN x, long prec)
 {
-  GEN ep,e3,ro,p1,p2,mu,d,xp;
-  long lx, lc, i, j, tx;
-  pari_sp av=avma, tetpil;
+  GEN ep, e3, ro, p1, mu, d, xp;
+  long lx, i, tx;
+  pari_sp av = avma;
 
-  if (!oncurve(e,x)) err(heller1);
-  d=(GEN)e[12]; ro=(GEN)e[14]; e3=(gsigne(d) < 0)?(GEN)ro[1]:(GEN)ro[3];
+  d = (GEN)e[12];
+  ro= (GEN)e[14];
+  e3 = (gsigne(d) < 0)? (GEN)ro[1]: (GEN)ro[3];
   p1 = init_ch(); p1[2] = laddgs(gfloor(e3),-1);
-  ep = coordch(e,p1);
-  xp = pointch(x,p1);
-  tx=typ(x[1]); lx=lg(x);
+  ep = coordch(e, p1);
+  xp = pointch(x, p1);
+  tx = typ(x[1]); lx = lg(x);
   if (!is_matvec_t(tx))
   {
-    if (lx<3) { avma=av; return gzero; }
-    tetpil=avma; return gerepile(av,tetpil,hells(ep,xp,prec));
+    if (lx < 3) { avma = av; return gzero; }
+    mu = hells(ep,xp,prec);
   }
-  tx=typ(x);
-  tetpil=avma; mu=cgetg(lx,tx);
-  if (tx != t_MAT)
-    for (i=1; i<lx; i++) mu[i]=(long)hells(ep,(GEN)xp[i],prec);
+  else if (typ(x) != t_MAT) mu = _vhell2(ep, xp, prec);
   else
   {
-    lc=lg(x[1]);
-    for (i=1; i<lx; i++)
-    {
-      p1=cgetg(lc,t_COL); mu[i]=(long)p1; p2=(GEN)xp[i];
-      for (j=1; j<lc; j++) p1[j]=(long)hells(ep,(GEN)p2[j],prec);
-    }
+    mu = cgetg(lx, t_MAT);
+    for (i=1; i<lx; i++) mu[i] = (long)_vhell2(ep, (GEN)xp[i], prec);
   }
-  return gerepile(av,tetpil,mu);
+  return gerepileupto(av, mu);
 }
 
 GEN
@@ -2186,67 +2206,68 @@ hell0(GEN e, GEN z, long prec)
   return gmul2n(glog(gdiv(gsqr(p2), s), prec) ,-1);
 }
 
-/* On suppose que `e' est a coeffs entiers donnee par un modele minimal */
+/* Assume e integral, given by a minimal model */
 static GEN
 ghell0(GEN e, GEN a, long flag, long prec)
 {
-  long lx, i, n, n2, grandn, tx=typ(a);
-  pari_sp av=avma;
-  GEN p,p1,p2,x,y,z,phi2,psi2,psi3,logdep;
+  long lx, i, tx = typ(a);
+  pari_sp av = avma;
+  GEN Lp, x, y, z, phi2, psi2, psi3;
 
   checkbell(e); if (!is_matvec_t(tx)) err(elliper1);
   lx = lg(a); if (lx==1) return cgetg(1,tx);
-  tx=typ(a[1]);
+  tx = typ(a[1]);
   if (is_matvec_t(tx))
   {
-    z=cgetg(lx,tx);
-    for (i=1; i<lx; i++) z[i]=(long)ghell0(e,(GEN)a[i],flag,prec);
+    z = cgetg(lx,tx);
+    for (i=1; i<lx; i++) z[i] = (long)ghell0(e,(GEN)a[i],flag,prec);
     return z;
   }
-  if (lg(a)<3) return gzero;
+  if (lg(a) < 3) return gzero;
   if (!oncurve(e,a)) err(heller1);
 
-  psi2=numer(d_ellLHS(e,a));
-  if (!signe(psi2)) { avma=av; return gzero; }
-
-  x=(GEN)a[1]; y=(GEN)a[2];
-  p2=gadd(gmulsg(3,(GEN)e[7]),gmul(x,gadd((GEN)e[6],gmulsg(3,x))));
-  psi3=numer(gadd((GEN)e[9],gmul(x,gadd(gmulsg(3,(GEN)e[8]),gmul(x,p2)))));
-  if (!signe(psi3)) { avma=av; return gzero; }
-
-  p1 = gmul(x,gadd(shifti((GEN)e[2],1),gmulsg(3,x)));
-  phi2=numer(gsub(gadd((GEN)e[4],p1), gmul((GEN)e[1],y)));
-  p1=(GEN)factor(mppgcd(psi2,phi2))[1]; lx=lg(p1);
+  psi2 = numer(d_ellLHS(e,a));
+  if (!signe(psi2)) { avma = av; return gzero; }
   switch(flag)
   {
     case 0:  z = hell2(e,a,prec); break; /* Tate 4^n */
     case 1:  z = hell(e,a,prec);  break; /* Silverman's trick */
     default: z = hell0(e,a,prec); break; /* Mestre's trick */
   }
+  x = (GEN)a[1];
+  y = (GEN)a[2];
+  psi3 = numer( /* b8 + 3x b6 + 3x^2 b4 + x^3 b2 + 3 x^4 */
+     gadd((GEN)e[9], gmul(x,
+     gadd(gmulsg(3,(GEN)e[8]), gmul(x,
+     gadd(gmulsg(3,(GEN)e[7]), gmul(x, gadd((GEN)e[6], gmulsg(3,x)))))))) );
+  if (!signe(psi3)) { avma=av; return gzero; }
+
+  phi2 = numer( /* a4 + 2a2 x + 3x^2 - y a1*/
+    gsub(gadd((GEN)e[4],gmul(x,gadd(shifti((GEN)e[2],1),gmulsg(3,x)))),
+         gmul((GEN)e[1],y)) );
+  Lp = (GEN)factor(mppgcd(psi2,phi2))[1];
+  lx = lg(Lp);
   for (i=1; i<lx; i++)
   {
-    p=(GEN)p1[i];
+    GEN p = (GEN)Lp[i];
+    long u, v, n, n2;
     if (signe(resii((GEN)e[10],p)))
-    {
-      grandn=ggval((GEN)e[12],p);
-      if (grandn)
-      {
-        n2=ggval(psi2,p); n=n2<<1;
-        logdep=gneg_i(glog(p,prec));
-	if (n>grandn) n=grandn;
-	p2=divrs(mulsr(n*(grandn+grandn-n),logdep),grandn<<3);
-	z=gadd(z,p2);
-      }
+    { /* p \nmid c4 */
+      long N = ggval((GEN)e[12],p);
+      if (!N) continue;
+      n2 = ggval(psi2,p); n = n2<<1;
+      if (n > N) n = N;
+      u = n * ((N<<1) - n);
+      v = N << 3;
     }
     else
     {
-      n2=ggval(psi2,p);
-      logdep=gneg_i(glog(p,prec));
-      n=ggval(psi3,p);
-      if (n>=3*n2) p2=gdivgs(mulsr(n2,logdep),3);
-      else p2=gmul2n(mulsr(n,logdep),-3);
-      z=gadd(z,p2);
+      n2 = ggval(psi2, p);
+      n  = ggval(psi3, p);
+      if (n >= 3*n2) { u = n2; v = 3; } else { u = n; v = 8; }
     }
+    /* z -= u log(p) / v */
+    z = gadd(z, divrs(mulsr(-u, glog(p,prec)), v));
   }
   return gerepileupto(av,z);
 }
