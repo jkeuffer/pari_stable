@@ -36,7 +36,10 @@ caract2_i(GEN p, GEN x, int v, GEN (subres_f)(GEN,GEN,GEN*))
   if (!signe(x)) return gpowgs(polx[v], lgef(p)-3);
   x = gneg_i(x); x[2] = ladd((GEN)x[2], polx[MAXVARN]);
   p1=subres_f(p, x, NULL);
-  if (varn(p1)==MAXVARN) setvarn(p1,v); else p1=gsubst(p1,MAXVARN,polx[v]);
+  if (typ(p1) == t_POL && varn(p1)==MAXVARN)
+    setvarn(p1,v);
+  else
+    p1 = gsubst(p1,MAXVARN,polx[v]);
 
   if (!gcmp1(p2) && (d=lgef(x)-3) > 0) p1 = gdiv(p1, gpuigs(p2,d));
   return gerepileupto(av,p1);

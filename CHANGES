@@ -46,6 +46,11 @@ BA 16- result was not always complete in nfgaloisconj()
    17- type(1/y, RFRACN) --> SEGV + check compatibility before applying type()
    18- made 'secure' safer. Confirm before write, prevent from changing 'help'
    19- gettime() called the wrong timer(): was reset in debug mode
+   20- missing case (doubling) in apell1
+   21- gmod(x, mod) replaced by gmul(x, gmodulcp(gun,mod)) in poldivres
+       [obscure bugs when dividing complicated polynomials with mixed 
+        polmods/intmods].
+   22- Make sure result is a t_POL before doing a setvarn in caract2_i()
 
   Added
 IZ  1- [gnuplot] look up directory tree for gnuplot related files

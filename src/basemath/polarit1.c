@@ -269,7 +269,7 @@ poldivres(GEN x, GEN y, GEN *pr)
   {
     case t_INTMOD:
     case t_POLMOD: y_lead = ginv(y_lead);
-      f = gmul; mod = (GEN)y_lead[1];
+      f = gmul; mod = gmodulcp(gun, (GEN)y_lead[1]);
       break;
     default: if (gcmp1(y_lead)) y_lead = NULL;
       mod = NULL;
@@ -298,7 +298,7 @@ poldivres(GEN x, GEN y, GEN *pr)
     /* we always enter this loop at least once */
     for (j=0; j<=i && j<=dz; j++)
       if (y[i-j]) p1 = gadd(p1, gmul((GEN)z[j],(GEN)y[i-j]));
-    if (mod && avma==av1) p1 = gmod(p1,mod);
+    if (mod && avma==av1) p1 = gmul(p1,mod);
     if (!gcmp0(p1)) { sx = 1; break; } /* remainder is non-zero */
     if (!isinexactreal(p1) && !isexactzero(p1)) break;
     if (!i) break;
@@ -322,7 +322,7 @@ poldivres(GEN x, GEN y, GEN *pr)
     av1=avma; p1 = (GEN)x[i];
     for (j=0; j<=i && j<=dz; j++)
       if (y[i-j]) p1 = gadd(p1, gmul((GEN)z[j],(GEN)y[i-j]));
-    if (mod && avma==av1) p1 = gmod(p1,mod);
+    if (mod && avma==av1) p1 = gmul(p1,mod);
     rem[i]=avma==av1? lcopy(p1):lpileupto(av1,p1);
   }
   rem -= 2;
