@@ -1610,12 +1610,20 @@ If $x$ is a vector or a matrix, the factoring is done componentwise (hence
 the result is a vector or matrix of two-column matrices). By definition,
 $0$ is factored as $0^1$.
 
-   If $x$ is of type integer or rational, an argument \var{lim} can be
-added, meaning that we look only for factors up to \var{lim}, or to
-\kbd{primelimit}, whichever is lowest (except when $\var{lim}=0$ where the
-effect is identical to setting $\var{lim}=\kbd{primelimit}$). Hence in this
-case, the remaining part is not necessarily prime. See \tet{factorint} for
-more information about the algorithms used.
+   If $x$ is of type integer or rational, the factors are \var{pseudoprimes}
+(see \kbd{ispseudoprime}), and in general not rigorously proven primes. In
+fact, any factor which is $\leq 10^{13}$ is a genuine prime number. Use
+\kbd{isprime} to prove primality of other factors, as in
+\bprog
+fa = factor(2^2^7 +1)
+isprime( fa[,1] )
+@eprog
+\noindent An argument \var{lim} can be added, meaning that we look only for
+factors up to \var{lim}, or to \kbd{primelimit}, whichever is lowest (except
+when $\var{lim}=0$ where the effect is identical to setting
+$\var{lim}=\kbd{primelimit}$). In this case, the remaining part may actually
+be a proven composite! See \tet{factorint} for more information about the
+algorithms used.
 
    The polynomials or rational functions to be factored must have scalar
 coefficients. In particular PARI does \emph{not} know how to factor
@@ -1731,13 +1739,15 @@ number.
 $\teb{mpfactr}(x,\var{prec})$ for $\kbd{factorial}(x)$. $x$ must be a \kbd{long}
 integer and not a PARI integer.
 
-\subsecidx{factorint}$(n,\{\fl=0\})$: factors the integer n using a
-combination of the \idx{Shanks SQUFOF} and \idx{Pollard Rho} method (with
-modifications due to Brent), \idx{Lenstra}'s \idx{ECM} (with modifications by
-Montgomery), and \idx{MPQS} (the latter adapted from the \idx{LiDIA} code
-with the kind permission of the LiDIA maintainers), as well as a search for
-pure powers with exponents$\le 10$. The output is a two-column matrix as for
-\kbd{factor}.
+\subsecidx{factorint}$(n,\{\fl=0\})$: factors the integer $n$ into a product of
+pseudoprimes (see \kbd{ispseudoprime}), using a combination of the
+\idx{Shanks SQUFOF} and \idx{Pollard Rho} method (with modifications due to
+Brent), \idx{Lenstra}'s \idx{ECM} (with modifications by Montgomery), and
+\idx{MPQS} (the latter adapted from the \idx{LiDIA} code with the kind
+permission of the LiDIA maintainers), as well as a search for pure powers
+with exponents$\le 10$. The output is a two-column matrix as for
+\kbd{factor}. Use \kbd{isprime} on the result if you want to guarantee
+primality.
 
 This gives direct access to the integer factoring engine called by most
 arithmetical functions. \fl\ is optional; its binary digits mean 1: avoid
@@ -1909,9 +1919,11 @@ be of type integer.
 
 \syn{mu}{x}, the result ($0$ or $\pm 1$) is a \kbd{long}.
 
-\subsecidx{nextprime}$(x)$: finds the smallest prime greater than or
-equal to $x$. $x$ can be of any real type. Note that if $x$ is a prime,
-this function returns $x$ and not the smallest prime strictly larger than $x$.
+\subsecidx{nextprime}$(x)$: finds the smallest pseudoprime (see
+\tet{ispseudoprime}) greater than or equal to $x$. $x$ can be of any real
+type. Note that if $x$ is a pseudoprime, this function returns $x$ and not
+the smallest pseudoprime strictly larger than $x$. To rigorously prove that
+the result is prime, use \kbd{isprime}.
 
 \syn{nextprime}{x}.
 
@@ -1925,10 +1937,11 @@ must be of type integer.
 
 \syn{omega}{x}, the result is a \kbd{long}.
 
-\subsecidx{precprime}$(x)$: finds the largest prime less than or equal to
-$x$. $x$ can be of any real type. Returns 0 if $x\le1$.
-Note that if $x$ is a prime, this function returns $x$ and not the largest
-prime strictly smaller than $x$.
+\subsecidx{precprime}$(x)$: finds the largest pseudoprime (see
+\tet{ispseudoprime}) less than or equal to $x$. $x$ can be of any real type.
+Returns 0 if $x\le1$. Note that if $x$ is a prime, this function returns $x$
+and not the largest prime strictly smaller than $x$. To rigorously prove that
+the result is prime, use \kbd{isprime}.
 
 \syn{precprime}{x}.
 
