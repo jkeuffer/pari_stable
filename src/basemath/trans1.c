@@ -557,39 +557,45 @@ powgi(GEN x, GEN n)
 static GEN
 ser_pui(GEN x, GEN n, long prec)
 {
-  long lx, i, j, mi;
   gpmem_t av, tetpil;
-  GEN p1,p2,y,alp;
+  GEN y;
 
   if (gvar9(n) > varn(x))
   {
-    GEN lead = (GEN)x[2];
+    GEN p1,p2, lead = (GEN)x[2];
     if (gcmp1(lead))
     {
-      av=avma; alp = gclone(gadd(n,gun)); avma=av;
-      y=cgetg(lx=lg(x),t_SER);
+      GEN X, Y, alp;
+      long lx, mi, i, j, d;
+
+      av = avma; alp = gclone(gadd(n,gun)); avma = av;
+      lx = lg(x);
+      y = cgetg(lx,t_SER);
       y[1] = evalsigne(1) | evalvalp(0) | evalvarn(varn(x));
-      y[2] = un;
-      mi = lx-1; while (mi>=3 && gcmp0((GEN)x[mi])) mi--;
-      mi -= 2;
-      for (i=3; i<lx; i++)
+      X = x+2;
+      Y = y+2;
+
+      d = mi = lx-3; while (mi>=1 && gcmp0((GEN)X[mi])) mi--;
+      Y[0] = un;
+      for (i=1; i<=d; i++)
       {
-	av=avma; p1=gzero;
-	for (j=1; j<=min(i-2,mi); j++)
+	av = avma; p1 = gzero;
+	for (j=1; j<=min(i,mi); j++)
 	{
-	  p2 = gsubgs(gmulgs(alp,j),i-2);
-	  p1 = gadd(p1,gmul(gmul(p2,(GEN)x[j+2]),(GEN)y[i-j]));
+	  p2 = gsubgs(gmulgs(alp,j),i);
+	  p1 = gadd(p1, gmul(gmul(p2,(GEN)X[j]),(GEN)Y[i-j]));
 	}
-	tetpil=avma; y[i]=lpile(av,tetpil,gdivgs(p1,i-2));
+	tetpil = avma; Y[i] = lpile(av,tetpil,gdivgs(p1,i));
       }
       gunclone(alp); return y;
     }
-    av=avma; p1=gdiv(x,lead); p1[2] = un; /* in case it's inexact */
-    p1=gpow(p1,n,prec); p2=gpow(lead,n,prec);
-    tetpil=avma; return gerepile(av,tetpil,gmul(p1,p2));
+    av = avma; p1 = gdiv(x,lead); p1[2] = un; /* in case it's inexact */
+    p1 = gpow(p1,n,prec);
+    p2 = gpow(lead,n,prec);
+    tetpil = avma; return gerepile(av,tetpil, gmul(p1,p2));
   }
-  av=avma; y=gmul(n,glog(x,prec)); tetpil=avma;
-  return gerepile(av,tetpil,gexp(y,prec));
+  av = avma; y = gmul(n, glog(x,prec)); tetpil = avma;
+  return gerepile(av,tetpil, gexp(y,prec));
 }
 
 GEN
