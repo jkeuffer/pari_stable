@@ -123,8 +123,9 @@ GH 36- lngamma was not even continuous : its argument was reduced mod 2Pi
    45- matsnf([x,1; 0,x],6) --> incorrect type
    46- qfgaussred(a) did not work if coefficients of a did not support the
        "sign" operation [ signature was computed internally ]
-   47- factorback([;]) didn't work [ should be 1 ]
-   48- f = factor(n); divisors(f) destroyed the factorization stored in f
+BA 47- bitneg(1,0) --> SEGV (caused by 2.2.5 A10).
+   48- factorback([;]) didn't work [ should be 1 ]
+   49- f = factor(n); divisors(f) destroyed the factorization stored in f
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.
@@ -161,7 +162,7 @@ BA 15- error messages now mention the GP function when the error occured.
 
   Added
     1- make test-all [ all test suite (SLOW !)]
-BA  2- Add support for GNU/Hurd.
+BA  2- add support for GNU/Hurd.
     3- conversion routines zv_ZC, zv_ZV, zm_ZM, and matrix multiplication:
        RM_zm_mul, ZM_zm_mul
     4- output support for zm / Flm matrices (t_MAT with t_VECSMALLs instead
@@ -171,7 +172,7 @@ BA  2- Add support for GNU/Hurd.
     7- put back bruteall [ used by Math::Pari ]
 BA  8- Configure support for sparc64, x86_64 and ppc64
 BA  9- x86_64 level0 inline assembly kernel
-BA 10- Add POSIX-style long options --fast, --quiet, --primelimit and 
+BA 10- add POSIX-style long options --fast, --quiet, --primelimit and 
        --stacksize.
    11- new internal library routine itos_or_0
 
@@ -179,6 +180,7 @@ BA 10- Add POSIX-style long options --fast, --quiet, --primelimit and
     1- obsolete macro leadingcoeff [kept for backward compatibility but
        removed from the documentation]. Use leading_term.
     2- obsolete undocumented type t_SMALL
+BA  3- revert 2.2.1 A14 and A17 (broken with GMP kernel, unmaintainable).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.7 (released 18/12/2003):
