@@ -57,9 +57,6 @@ is wrong [second one is principal]. Group structure and regulator are correct!
    supplied polynomial to compute roots in Qp, then return them at precision
    p^r [ better, polroots() and factorpadic() behave this way ] ?
 
-5  setrand(1); bnfinit(x^4-9192452294206514*x^2+375140840302653653082195143217)
-   --> never finishes.
-
 5  intnum(x=0, Pi, sin(16*x)^2) --> 1e-54
    we evaluate at regularly spaced control points, interpolating the results
    obtained when increasing the number of points. When result looks stable,
