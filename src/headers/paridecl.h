@@ -874,6 +874,7 @@ GEN     round0(GEN x, GEN *pte);
 GEN     scalarpol(GEN x, long v);
 GEN     scalarser(GEN x, long v, long prec);
 GEN     simplify(GEN x);
+GEN     simplify_i(GEN x);
 GEN     truecoeff(GEN x, long n);
 GEN     trunc0(GEN x, GEN *pte);
 GEN     zeropol(long v);

@@ -34,6 +34,10 @@ Done for version ???? (released ??/??/99):
 IZ  6- [gnuplot] couldn't set terminal as the first graphing operation
 DE  7- typo in kernel/sparcv7/level0.S: err --> pari_err
     8- TeXmacs interface (use new protocol)
+    9- call simplify() before applying GP '==' and '!=' operators
+      Ex: x;n;k;m; (n+m)==(k+1-k)*(n+m) was false.
+   10- sumdiv(N,...) required single precision N
+BA 11- bound problems in nfgaloisconj()
 
   Added
 IZ  1- [gnuplot] look up directory tree for gnuplot related files

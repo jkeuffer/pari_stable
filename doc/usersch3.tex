@@ -5714,7 +5714,10 @@ writing the $(-1)^X$ which may occur in the expression as
 \subsecidx{sumdiv}$(n,X,\var{expr})$: sum of expression \var{expr} over
 the positive divisors of $n$.
 
-In the present version \vers, $n$ is restricted to being less than $2^{31}$.
+Arithmetic functions like \teb{sigma} use the multiplicativity of the
+underlying expression to speed up the computation. In the present version
+\vers{}, there is no way to indicate that \var{expr} is multiplicative in
+$n$, hence specialized functions should be prefered whenever possible.
 
 \synt{divsum}{entree *ep, GEN num, char *expr}.
 

@@ -2356,6 +2356,13 @@ gimag(GEN x)
 /*                     LOGICAL OPERATIONS                          */
 /*                                                                 */
 /*******************************************************************/
+static long
+_egal(GEN x, GEN y)
+{
+  long av = avma;
+  long r = gegal(simplify_i(x), simplify_i(y));
+  avma = av; return r;
+}
 
 GEN
 glt(GEN x, GEN y) { return gcmp(x,y)<0? gun: gzero; }
@@ -2370,10 +2377,10 @@ GEN
 ggt(GEN x, GEN y) { return gcmp(x,y)>0? gun: gzero; }
 
 GEN
-geq(GEN x, GEN y) { return gegal(x,y)? gun: gzero; }
+geq(GEN x, GEN y) { return _egal(x,y)? gun: gzero; }
 
 GEN
-gne(GEN x, GEN y) { return gegal(x,y)? gzero: gun; }
+gne(GEN x, GEN y) { return _egal(x,y)? gzero: gun; }
 
 GEN
 gand(GEN x, GEN y) { return gcmp0(x)? gzero: (gcmp0(y)? gzero: gun); }
@@ -2441,63 +2448,58 @@ geval(GEN x)
 }
 
 GEN
-simplify(GEN x)
+simplify_i(GEN x)
 {
-  long tx=typ(x),av,tetpil,i,lx;
-  GEN p1,y;
+  long tx=typ(x),i,lx;
+  GEN y;
 
   switch(tx)
   {
     case t_INT: case t_REAL: case t_FRAC:
-      return is_universal_constant(x)? x: gcopy(x);
-
     case t_INTMOD: case t_PADIC: case t_QFR: case t_QFI:
     case t_LIST: case t_STR: case t_VECSMALL:
-      return gcopy(x);
+      return x;
 
     case t_FRACN:
       return gred(x);
 
     case t_COMPLEX:
-      if (is_universal_constant(x)) return x;
       if (isexactzero((GEN)x[2])) return simplify((GEN)x[1]);
-      y=cgetg(3,tx);
+      y=cgetg(3,t_COMPLEX);
       y[1]=(long)simplify((GEN)x[1]);
       y[2]=(long)simplify((GEN)x[2]); return y;
 
     case t_QUAD:
       if (isexactzero((GEN)x[3])) return simplify((GEN)x[2]);
-      y=cgetg(4,tx);
-      y[1]=lcopy((GEN)x[1]);
+      y=cgetg(4,t_QUAD);
+      y[1]=x[1];
       y[2]=(long)simplify((GEN)x[2]);
       y[3]=(long)simplify((GEN)x[3]); return y;
 
-    case t_POLMOD: y=cgetg(3,tx);
+    case t_POLMOD: y=cgetg(3,t_POLMOD);
       y[1]=(long)simplify((GEN)x[1]);
-      av=avma; p1=gmod((GEN)x[2],(GEN)y[1]); tetpil=avma;
-      y[2]=lpile(av,tetpil,simplify(p1)); return y;
+      y[2]=lmod(simplify((GEN)x[2]),(GEN)y[1]); return y;
 
     case t_POL:
       lx=lgef(x); if (lx==2) return gzero;
       if (lx==3) return simplify((GEN)x[2]);
-      y=cgetg(lx,tx); y[1]=x[1];
+      y=cgetg(lx,t_POL); y[1]=x[1];
       for (i=2; i<lx; i++) y[i]=(long)simplify((GEN)x[i]);
       return y;
 
     case t_SER:
       if (!signe(x)) return gcopy(x);
       lx=lg(x);
-      y=cgetg(lx,tx); y[1]=x[1];
+      y=cgetg(lx,t_SER); y[1]=x[1];
       for (i=2; i<lx; i++) y[i]=(long)simplify((GEN)x[i]);
       return y;
 
-    case t_RFRAC: y=cgetg(3,tx);
+    case t_RFRAC: y=cgetg(3,t_RFRAC);
       y[1]=(long)simplify((GEN)x[1]);
       y[2]=(long)simplify((GEN)x[2]); return y;
 
     case t_RFRACN:
-      av=avma; y=gred_rfrac(x); tetpil=avma;
-      return gerepile(av,tetpil,simplify(y));
+      return simplify(gred_rfrac(x));
 
     case t_VEC: case t_COL: case t_MAT:
       lx=lg(x); y=cgetg(lx,tx);
@@ -2506,6 +2508,13 @@ simplify(GEN x)
   }
   err(typeer,"simplify");
   return NULL; /* not reached */
+}
+
+GEN
+simplify(GEN x)
+{
+  long av = avma;
+  return gerepileupto(av, gcopy(simplify_i(x)));
 }
 
 /*******************************************************************/

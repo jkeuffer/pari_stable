@@ -2011,7 +2011,7 @@ WORK:
     if (chrono) pariputs(do_time(ti_REGULAR)); else do_time(ti_NOPRINT);
     if (z == gnil) continue;
 
-    if (simplifyflag) z = simplify(z);
+    if (simplifyflag) z = simplify_i(z);
     i = tglobal % histsize; tglobal++;
     if (hist[i]) gunclone(hist[i]);
     hist[i] = z = gclone(z); avma = av;
