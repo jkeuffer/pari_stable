@@ -18,7 +18,7 @@
 #include "gp.h"
 
 #ifdef READLINE
-  void init_readline();
+  extern void init_readline();
 BEGINEXTERN
 #  if defined(__cplusplus) && defined(__SUNPRO_CC)
   /* readline.h gives a bad definition of readline() */
@@ -46,7 +46,7 @@ void   init80(long n);
 void   init_defaults(int force);
 void   init_graph(void);
 void   init_lim_lines(char *s, long max);
-void   install0(char *name, char *code, char *gpname, char *lib);
+extern void   install0(char *name, char *code, char *gpname, char *lib);
 void   pari_sig_init(void (*f)(int));
 int    whatnow(char *s, int flag);
 
