@@ -1,6 +1,6 @@
 default(echo,1);
-allocatemem(40 * 10^6);
-oo = [1];
+allocatemem(20 * 10^6);
+gettime; oo = [1];
 \p96
 intcirc(s=1, 0.5, zeta(s)) - 1
 intlaplaceinv(x=2, 1, 1/x) - 1
@@ -54,3 +54,6 @@ tab = sumnuminit(2,,-1);
 a = sumnumalt(n=1,2,1/(n^3+n+1),tab,1);
 b = sumalt(n=1,(-1)^n/(n^3+n+1));
 a - b 
+
+print("Total time spent: ",gettime);
+\q

@@ -1,5 +1,5 @@
-? allocatemem(40*10^6);
-? oo=[1];
+? allocatemem(20*10^6);
+? gettime;oo=[1];
 ? \p96
    realprecision = 96 significant digits
 ? intcirc(s=1,0.5,zeta(s))-1
@@ -84,3 +84,6 @@
 ? b=sumalt(n=1,(-1)^n/(n^3+n+1));
 ? a-b
 -1.390671162 E-308
+? print("Total time spent: ",gettime);
+Total time spent: 89440
+? \q
