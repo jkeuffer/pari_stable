@@ -964,7 +964,7 @@ static GEN
 mpgamma(GEN x)
 {
   GEN y,p1,p2,p3,p4,p5,p6,p7,p71,pitemp;
-  long l, l1, l2, u, i, k, e, s, sx, n, p;
+  long l, l1, l2, flag, i, k, e, s, sx, n, p;
   pari_sp av, av1;
   double alpha,beta,dk;
 
@@ -972,8 +972,8 @@ mpgamma(GEN x)
   l=lg(x); y=cgetr(l); av=avma;
 
   l2=l+1; p1=cgetr(l2);
-  u = (expo(x)<-1 || sx<0);
-  if (!u) p2 = x;
+  flag = (expo(x)<-1 || sx<0);
+  if (!flag) p2 = x;
   else
   {
     p2=gfrac(x); if (gcmp0(p2)) err(gamer2);
@@ -1027,7 +1027,7 @@ mpgamma(GEN x)
   {
     addsrz(-1,p2,p2); p4 = divrr(p4,p2);
   }
-  if (u)
+  if (flag)
   {
     setlg(pitemp,l+1); p1 = mulrr(pitemp,x);
     p4 = mulrr(mpsin(p1), p4); p4 = divrr(pitemp,p4);
@@ -1039,30 +1039,29 @@ static GEN
 cxgamma(GEN x, long prec)
 {
   GEN y,p1,p2,p3,p4,p5,p6,p7,p71,pitemp;
-  long l, l1, l2, u, i, k, e, s, n, p;
+  long l, l1, l2, flag, i, k, e, s, n, p;
   pari_sp av, av1;
   double alpha,beta,dk;
 
   if (gcmp0((GEN)x[2])) return ggamma((GEN)x[1],prec);
   l = precision(x); if (!l) l = prec;
-  l2 = l+1; y=cgetg(3,t_COMPLEX);
-  y[1]=lgetr(l); y[2]=lgetr(l); av=avma;
+  l2 = l+1; y = cgetc(l); av = avma;
 
-  p1=cgetg(3,t_COMPLEX); p1[1]=lgetr(l2); p1[2]=lgetr(l2);
-  u = (gsigne((GEN)x[1])<=0 || gexpo((GEN)x[1]) < -1);
-  p2 = u? gsub(gun,x): x;
+  p1 = cgetc(l2);
+  flag = (gsigne((GEN)x[1])<=0 || gexpo((GEN)x[1]) < -1);
+  p2 = flag? gsub(gun,x): x;
   gaffect(p2,p1);
 
-  alpha=rtodbl(gabs(p1,DEFAULTPREC));
+  alpha = rtodbl(gabs(p1,DEFAULTPREC));
   beta = (bit_accuracy(l)>>1) * LOG2 / PI - alpha;
   if (beta>=0) n=(long)(1 + pariK2*beta); else n=0;
   if (n)
   {
     p = (long)(1+PI*(alpha+n));
     l2 += n>>TWOPOTBITS_IN_LONG;
-    p2=cgetg(3,t_COMPLEX); p2[1]=lgetr(l2); p2[2]=lgetr(l2);
+    p2 = cgetc(l2);
     addsrz(n,(GEN)p1[1],(GEN)p2[1]);
-    affrr((GEN)p1[2],(GEN)p2[2]);
+    affrr((GEN)p1[2],   (GEN)p2[2]);
   }
   else
   {
@@ -1073,29 +1072,29 @@ cxgamma(GEN x, long prec)
   }
   mpbern(p,l2); p3 = glog(p2,l2);
 
-  p4=cgetg(3,t_COMPLEX);
-  p4[1] = (long)real2n(-1, l2);
+  p4 = cgetg(3,t_COMPLEX);
+  p4[1] = (long)subrr((GEN)p2[1], real2n(-1, l2));
   p4[2] = (long)rcopy((GEN)p2[2]);
-  subrrz((GEN)p2[1],(GEN)p4[1],(GEN)p4[1]);
-  gmulz(p4,p3,p4); gsubz(p4,p2,p4);
+  gsubz(gmul(p4, p3), p2, p4);
 
   pitemp = mppi(l2); setexpo(pitemp,2);
-  p7 = mplog(pitemp); setexpo(pitemp,1);
-  setexpo(p7,-1); addrrz((GEN)p4[1],p7, (GEN)p4[1]);
+  p7 = mplog(pitemp); setexpo(p7,-1);
+  setexpo(pitemp,1);
+  addrrz((GEN)p4[1],p7, (GEN)p4[1]);
 
-  gaffect(ginv(gsqr(p2)), p3); e=gexpo(p3);
-
-  p5=cgetg(3,t_COMPLEX);
-  p5[1]=lgetr(l2); setlg(p5[1],4);
-  p5[2]=lgetr(l2); setlg(p5[2],4);
-  p71=cgetr(l2); p7 = bern(p);
+  p5 = cgetc(l2);
+  setlg(p5[1], 4);
+  setlg(p5[2], 4);
+  p71 = cgetr(l2); p7 = bern(p);
   if (bernzone[2]>4) { setlg(p71,4); affrr(p7,p71); p7=p71; }
   p7 = divrs(p7, 2*p*(2*p-1)); gaffect(p7,p5);
+  p3 = ginv(gsqr(p2)); e = gexpo(p3);
 
   s=0; l1=4; av1=avma;
   for (k=p-1; k>0; k--)
   {
-    setlg(p3[1],l1); setlg(p3[2],l1);
+    setlg(p3[1], l1);
+    setlg(p3[2], l1);
     p6 = gmul(p3,p5); p7 = bern(k);
     if (bernzone[2]>l1) { setlg(p71,l1); affrr(p7,p71); p7=p71; }
     p7 = divrs(p7, (2*k)*(2*k-1));
@@ -1104,18 +1103,21 @@ cxgamma(GEN x, long prec)
     setlg(p5[1],l1); affrr(p7, (GEN)p5[1]); p7 = (GEN)p6[2];
     setlg(p5[2],l1); affrr(p7, (GEN)p5[2]); avma=av1;
   }
-  setlg(p5[1],l2); setlg(p5[2],l2);
+  setlg(p5[1],l2);
+  setlg(p5[2],l2);
   p6 = gdiv(p5,p2); setlg(p6[1],l2); setlg(p6[2],l2);
   p4 = gadd(p4,p6); setlg(p4[1],l2); setlg(p4[2],l2);
+
   p4 = gexp(p4,l2);
   for (i=1; i<=n; i++)
   {
     addsrz(-1,(GEN)p2[1],(GEN)p2[1]); p4 = gdiv(p4,p2);
   }
-  if (u)
+  if (flag)
   {
     setlg(pitemp,l+1); p1 = gmul(pitemp,x);
-    p4 = gmul(gsin(p1,l+1), p4); p4 = gdiv(pitemp,p4);
+    p4 = gmul(gsin(p1,l+1), p4);
+    p4 = gdiv(pitemp,p4);
   }
   gaffect(p4,y); avma=av; return y;
 }
@@ -1182,10 +1184,20 @@ trans_fix_arg(long *prec, GEN *s0, GEN *sig, pari_sp *av, GEN *res)
   *prec = l; return s;
 }
 
+/* x, z t_REAL. Compute unique x in ]-z,z] congruent to x mod 2z */
 static GEN
-gammanew(GEN s0, long la, long prec)
+red_mod_2z(GEN x, GEN z)
 {
-  GEN s, u, a, y, res, tes, sig, invn2, p1, unr, nnx, pitemp;
+  GEN Z = gmul2n(z, 1), d = subrr(z, x); 
+  /* require little accuracy */
+  setlg(d, 3 + ((expo(d) - expo(Z)) >> TWOPOTBITS_IN_LONG));
+  return addrr(mulir(mpent(divrr(d, Z)), Z), x);
+}
+
+static GEN
+gammanew(GEN s0, int dolog, long prec)
+{
+  GEN s, u, a, y, res, tes, sig, invn2, p1, nnx, pi, sqrtpi2;
   long i, lim, nn;
   pari_sp av, av2, avlim;
   int funeq = 0;
@@ -1194,13 +1206,14 @@ gammanew(GEN s0, long la, long prec)
   s = trans_fix_arg(&prec,&s0,&sig,&av,&res);
 
   if (signe(sig) <= 0 || expo(sig) < -1)
-  { /* s <--> 1-s */
-    funeq = 1; s = gsub(gun, s); sig = greal(s);
+  {
+    if (typ(s) == t_COMPLEX && gexpo((GEN)s[2]) <= 16) funeq = 1;
   }
+  /* s <--> 1-s */
+  if (funeq) { s = gsub(gun, s); sig = greal(s); }
 
-  if (la < 1) la = 1;
-  
   { /* find "optimal" parameters [lim, nn] */
+    const long la = 3; /* random... FIXME !*/
     double ssig = rtodbl(sig);
     double st = rtodbl(gimag(s));
     double l,l2,u,v, rlogs, ilogs;
@@ -1209,16 +1222,14 @@ gammanew(GEN s0, long la, long prec)
     /* Re (s - 1/2) log(s) */
     u = (ssig - 0.5)*rlogs - st * ilogs;
     /* Im (s - 1/2) log(s) */
-    v = (ssig - 0.5)*ilogs + st * ilogs;
-    /* l2 = | (s - 1/2) log(s) - s + log(2Pi)/2 |^2 */
+    v = (ssig - 0.5)*ilogs + st * rlogs;
+    /* l2 = | (s - 1/2) log(s) - s + log(2Pi)/2 |^2 ~ |lngamma(s))|^2 */
     u = u - ssig + log(2.*PI)/2;
     v = v - st;
     l2 = u*u + v*v;
-
     if (l2 < 0.000001) l2 = 0.000001;
-    l2 = log(l2) / 2;
 
-    l = (pariC2*(prec-2) - l2) / (2. * (1.+ log((double)la)));
+    l = (pariC2*(prec-2) - log(l2)/2) / (2. * (1.+ log((double)la)));
     if (l < 0) l = 0.;
     lim = 1 + (long)ceil(l);
 
@@ -1231,10 +1242,37 @@ gammanew(GEN s0, long la, long prec)
     }
     else 
       nn = 1;
+    if (DEBUGLEVEL) fprintferr("lim, nn: [%ld, %ld]\n",lim,nn);
 
+    {
+      long e = gexpo(s);
+      double beta;
+      if (e > 1000)
+      {
+        nn = 0;
+        beta = log(pariK4 / (prec-2)) / LOG2 + e;
+        if (beta > 1.) beta += log(beta)/LOG2;
+        lim = (long)((bit_accuracy(prec)>>1)/beta + 1);
+      }
+      else
+      {
+        double alpha = sqrt( dnorm(ssig, st) );
+        beta = ((bit_accuracy(prec)>>1) * LOG2 / PI) - alpha;
+        if (beta >= 0) nn = (long)(1+pariK2*beta); else nn = 0;
+        if (nn)
+          lim = (long)(1+PI*(alpha+nn));
+        else
+        {
+          beta = log( pariK4 * alpha / (prec-2) ) / LOG2;
+          if (beta > 1.) beta += log(beta)/LOG2;
+          lim = (long)((bit_accuracy(prec)>>1)/beta + 1);
+        }
+      }
+      nn++;
+    }
     if (DEBUGLEVEL) fprintferr("lim, nn: [%ld, %ld]\n",lim,nn);
   }
-  prec++; unr = realun(prec);
+  prec++;
 
   av2 = avma; avlim = stack_lim(av2,3);
   y = s;
@@ -1266,8 +1304,7 @@ gammanew(GEN s0, long la, long prec)
   nnx = gaddgs(s, nn);
   if (DEBUGLEVEL) msgtimer("product from 0 to N-1");
 
-  a = gdiv(unr, nnx);
-  invn2 = gsqr(a);
+  a = ginv(nnx); invn2 = gsqr(a);
   tes = divrs2_safe(bernreal(2*lim,prec), 2*lim-1); /* B2l / (2l-1) 2l*/
   if (DEBUGLEVEL) msgtimer("Bernoullis");
   for (i = 2*lim-2; i > 1; i -= 2)
@@ -1279,14 +1316,23 @@ gammanew(GEN s0, long la, long prec)
 
   p1 = gsub(gmul(gsub(nnx, ghalf), glog(nnx,prec)), nnx);
   p1 = gadd(p1, gmul(tes, a));
-  pitemp = mppi(prec); setexpo(pitemp,2); /* 2Pi */
-  y = gdiv( gmul(mpsqrt(pitemp), gexp(p1,prec)), y );
+
+  pi = mppi(prec); sqrtpi2 = mpsqrt( gmul2n(pi, 1) );
   if (funeq)
-  { /* y --> Pi / (sin(Pi s) y) */
-    setexpo(pitemp,1); /* Pi */
-    y = gdiv(pitemp, gmul(y, gsin(gmul(s,pitemp), prec)));
+  { /* y --> y Pi/(sin(Pi s) * sqrt(2Pi)) */
+    y = gdiv(gmul(pi,y), gmul(sqrtpi2, gsin(gmul(s,pi), prec)));
+    p1 = gneg(p1);
   }
-  gaffect(y,res); avma = av; return res;
+  else /* y --> sqrt(2Pi) / y */
+    y = gdiv(sqrtpi2, y);
+  if (dolog)
+  {
+    y = gadd(p1, glog(y, prec));
+    y[2] = (long)red_mod_2z((GEN)y[2], pi);
+  }
+  else
+    y = gmul(gexp(p1, prec), y);
+  gaffect(y, res); avma = av; return res;
 }
 
 GEN
@@ -1308,7 +1354,7 @@ ggamma(GEN x, long prec)
       avma = av; return y;
 
     case t_REAL: case t_COMPLEX:
-      return gammanew(x, 3, prec);
+      return gammanew(x, 0, prec);
 
     case t_FRAC:
       if (!egalii((GEN)x[2], gdeux)) break;
@@ -1356,6 +1402,7 @@ ggammaz(GEN x, GEN y)
   gaffect(ggamma(x,prec),y); avma=av;
 }
 
+#if 0
 static GEN
 mplngamma(GEN x)
 {
@@ -1469,8 +1516,7 @@ cxlngamma(GEN x, long prec)
   l2 = l+1; y = cgetc(l); av = avma;
 
   p1 = cgetc(l2);
-  flag = (typ(x[1]) != t_REAL || gsigne((GEN)x[1]) <= 0);
-  if (!flag) flag = (gexpo((GEN)x[1]) < -1);
+  flag = (gsigne((GEN)x[1]) <= 0 || gexpo((GEN)x[1]) < -1);
   if (flag && (gcmp0((GEN)x[2]) || gexpo((GEN)x[2]) > 16)) flag = 0;
   p2 = flag? gsub(gun,x): x;
   gaffect(p2,p1);
@@ -1485,7 +1531,8 @@ cxlngamma(GEN x, long prec)
   }
   else
   {
-    alpha=rtodbl(p2); beta = ((bit_accuracy(l)>>1) * LOG2 / PI) - alpha;
+    alpha = rtodbl(p2);
+    beta = ((bit_accuracy(l)>>1) * LOG2 / PI) - alpha;
     if (beta>=0) n=(long)(1+pariK2*beta); else n=0;
     if (n)
     {
@@ -1503,12 +1550,12 @@ cxlngamma(GEN x, long prec)
       p2 = p1;
     }
   }
-  mpbern(p,l2);
+  mpbern(p,l2); p3 = glog(p2,l2);
 
   p4 = cgetg(3,t_COMPLEX);
   p4[1] = (long)subrr((GEN)p2[1], real2n(-1, l2));
   p4[2] = (long)rcopy((GEN)p2[2]);
-  gsubz(gmul(p4, glog(p2,l2)), p2, p4);
+  gsubz(gmul(p4, p3), p2, p4);
 
   pitemp = mppi(l2); setexpo(pitemp,2);
   p7 = mplog(pitemp); setexpo(p7,-1); /* log(2Pi) / 2 */
@@ -1557,13 +1604,13 @@ cxlngamma(GEN x, long prec)
     p1 = gdiv(pitemp,gsin(p1,l+1));
     p4 = gsub(glog(p1,l+1),p4);
   }
-  affrr((GEN)p4[1], (GEN)y[1]); setlg(p4[2],l+1);
-
-  p1 = subrr(pitemp, (GEN)p4[2]); setexpo(pitemp,2);
-  p1 = gfloor(divrr(p1,pitemp));
-  p1 = addrr(mulir(p1,pitemp), (GEN)p4[2]);
-  affrr(p1, (GEN)y[2]); avma=av; return y;
+  affrr((GEN)p4[1], (GEN)y[1]);
+  
+  setlg(p4[2],l+1);
+  affrr(red_mod_2z((GEN)p4[2], pitemp), (GEN)y[2]);
+  avma = av; return y;
 }
+#endif
 
 GEN
 glngamma(GEN x, long prec)
@@ -1584,11 +1631,8 @@ glngamma(GEN x, long prec)
       affrr(p1,p2); avma = av;
       return p2;
 
-    case t_REAL:
-      return mplngamma(x);
-
-    case t_COMPLEX:
-      return cxlngamma(x,prec);
+    case t_REAL: case t_COMPLEX:
+      return gammanew(x, 1, prec);
 
     default:
       av = avma; if (!(y = _toser(x))) break;
@@ -1598,7 +1642,7 @@ glngamma(GEN x, long prec)
       n = (lg(y)-3) / valp(p1);
       a = ggrando(polx[varn(y)], lg(y)-2);
       for (i=n; i>=2; i--)
-	a = gmul(p1, gadd(a, gdivgs(gzeta(stoi(i),prec),i)));
+	a = gmul(p1, gadd(a, gdivgs(szeta(i, prec),i)));
       a = gadd(a, mpeuler(prec));
       return gerepileupto(av, gmul(a, p1));
 
