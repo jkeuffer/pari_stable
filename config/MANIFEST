@@ -44,6 +44,7 @@ config/has_sigsetmask.c
 config/has_strftime.c
 config/has_times.c
 config/has_ulong.c
+config/has_vsnprintf.c
 config/install
 config/locate
 config/locatelib
