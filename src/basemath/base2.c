@@ -958,6 +958,7 @@ dbasis(GEN p, GEN f, long mf, GEN alpha, GEN U)
     if (c == dU)
     {
       ha = gdiv(gmul(pd,eleval(f,U,alpha)),p);
+      if (typ(ha) != t_POL) ha = scalarpol(ha,0); /* variable number unused */
       ha = polmodi(ha,pdp);
     }
     else
