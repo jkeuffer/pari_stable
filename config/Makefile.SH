@@ -254,6 +254,8 @@ RM = rm -f
 MV = mv -f
 LN = $ln_s
 CP_F = cp -f
+STRIP      = strip
+STRIPFLAGS =
 
 # Change these installation directories to suit your needs.
 # DESTDIR is used to install to a false hierachy (to build a Debian package)
@@ -387,7 +389,7 @@ install-bin-dyn: gp-dyn
 	-mkdir -p \$(BINDIR)
 	-\$(RM) \$(BINDIR)/gp-$version \$(BINDIR)/gp$exe_suff
 	-\$(LD) -o \$(BINDIR)/gp-$version \$(LDFLAGS) \$(OBJSGP) \$(RUNPTH_FINAL) \$(TOPLDDYN) \$(LDDYN) \$(PLOTLIBS) \$(LIBS)
-	-strip \$(BINDIR)/gp-$version
+	-\$(STRIP) \$(STRIPFLAGS) \$(BINDIR)/gp-$version
 	-\$(LN) gp-$version$exe_suff \$(BINDIR)/gp$exe_suff
 
 install-bin-sta: gp-sta
@@ -396,7 +398,8 @@ install-bin-sta: gp-sta
 	\$(INSTALL_PROGRAM) gp-sta$exe_suff \$(BINDIR)/gp-$version$exe_suff
 	-\$(LN) gp-$version$exe_suff \$(BINDIR)/gp$exe_suff
 # Can't strip it if we want install() to work on Linux or OSF.
-#	-strip \$(BINDIR)/gp-$version
+# Note: it seems that strip work on linux.
+#	-\$(STRIP) \$(STRIPFLAGS)  \$(BINDIR)/gp-$version
 
 install-man::
 	-mkdir -p \$(MANDIR)
