@@ -2672,30 +2672,31 @@ extendedgcd(GEN A)
   return gerepilecopy(av, z);
 }
 
-/* HNF with permutation. TODO: obsolete, replace with hnflll. */
+/* HNF with permutation. */
 GEN
-hnfperm(GEN A)
+hnfperm_i(GEN A, GEN *ptU, GEN *ptperm)
 {
-  GEN U,c,l,perm,d,u,p,q,y,b;
-  pari_sp av=avma,av1,tetpil,lim;
-  long r,t,i,j,j1,k,m,n;
+  GEN U, c, l, perm, d, p, q, b;
+  pari_sp av = avma, av1, lim;
+  long r, t, i, j, j1, k, m, n;
 
   if (typ(A) != t_MAT) err(typeer,"hnfperm");
   n = lg(A)-1;
   if (!n)
   {
-    y = cgetg(4,t_VEC);
-    y[1] = lgetg(1,t_MAT);
-    y[2] = lgetg(1,t_MAT);
-    y[3] = lgetg(1,t_VEC); return y;
+    if (ptU) *ptU = cgetg(1,t_MAT);
+    if (ptperm) *ptperm = cgetg(1,t_VEC);
+    return cgetg(1, t_MAT);
   }
   m = lg(A[1])-1;
-  c = cgetg(m+1,t_VECSMALL); for (i=1; i<=m; i++) c[i]=0;
-  l = cgetg(n+1,t_VECSMALL); for (j=1; j<=n; j++) l[j]=0;
+  c = vecsmall_const(m, 0);
+  l = vecsmall_const(n, 0);
   perm = cgetg(m+1, t_VECSMALL);
   av1 = avma; lim = stack_lim(av1,1);
-  U = idmat(n); A = dummycopy(A); /* U base change matrix : A0*U=A all along */
-  for (r=0,k=1; k<=n; k++)
+  A = dummycopy(A);
+  U = ptU? idmat(n): NULL;
+  /* U base change matrix : A0*U = A all along */
+  for (r=0, k=1; k <= n; k++)
   {
     for (j=1; j<k; j++)
     {
@@ -2708,7 +2709,7 @@ hnfperm(GEN A)
       if (signe(d) < 0)
       {
         ZV_neg((GEN)A[j]);
-        ZV_neg((GEN)U[j]);
+        if (U) ZV_neg((GEN)U[j]);
         d = gcoeff(A,t,j);
       }
       for (j1=1; j1<j; j1++)
@@ -2719,25 +2720,26 @@ hnfperm(GEN A)
 
         q = negi(q);
         A[j1] = (long)ZV_lincomb(gun,q,(GEN)A[j1],(GEN)A[j]);
-        U[j1] = (long)ZV_lincomb(gun,q,(GEN)U[j1],(GEN)U[j]);
+        if (U) U[j1] = (long)ZV_lincomb(gun,q,(GEN)U[j1],(GEN)U[j]);
       }
     }
-    t=m; while (t && (c[t] || !signe(gcoeff(A,t,k)))) t--;
+    t = m; while (t && (c[t] || !signe(gcoeff(A,t,k)))) t--;
     if (t)
     {
       p = gcoeff(A,t,k);
       for (i=t-1; i; i--)
       {
         q = gcoeff(A,i,k);
-	if (signe(q) && absi_cmp(p,q) > 0) { p=q; t=i; }
+	if (signe(q) && absi_cmp(p,q) > 0) { p = q; t = i; }
       }
-      perm[++r]=l[k]=t; c[t]=k;
+      perm[++r] = l[k] = t; c[t] = k;
       if (signe(p) < 0)
       {
         ZV_neg((GEN)A[k]);
-        ZV_neg((GEN)U[k]);
+        if (U) ZV_neg((GEN)U[k]);
 	p = gcoeff(A,t,k);
       }
+      /* p > 0 */
       for (j=1; j<k; j++)
       {
         if (!l[j]) continue;
@@ -2746,45 +2748,61 @@ hnfperm(GEN A)
 
         q = negi(q);
         A[j] = (long)ZV_lincomb(gun,q,(GEN)A[j],(GEN)A[k]);
-        U[j] = (long)ZV_lincomb(gun,q,(GEN)U[j],(GEN)U[k]);
+        if (U) U[j] = (long)ZV_lincomb(gun,q,(GEN)U[j],(GEN)U[k]);
       }
     }
     if (low_stack(lim, stack_lim(av1,1)))
     {
       if (DEBUGMEM>1) err(warnmem,"hnfperm");
-      gerepileall(av1, 2, &A, &U);
+      gerepileall(av1, U? 2: 1, &A, &U);
     }
   }
   if (r < m)
   {
     for (i=1,k=r; i<=m; i++)
-      if (c[i]==0) perm[++k] = i;
+      if (!c[i]) perm[++k] = i;
   }
 
 /* We have A0*U=A, U in Gl(n,Z)
  * basis for Im(A):  columns of A s.t l[j]>0 (r   cols)
- * basis for Ker(A): columns of U s.t l[j]=0 (n-r cols)
- */
-  tetpil=avma; y=cgetg(4,t_VEC);
-  p=cgetg(r+1,t_MAT); u=cgetg(n+1,t_MAT);
-  for (t=1,k=r,j=1; j<=n; j++)
-    if (l[j])
-    {
-      q=cgetg(m+1,t_COL); p[k]=(long)q;
-      for (i=1; i<=m; i++) q[i]=lcopy(gcoeff(A,perm[m-i+1],j));
-      u[k+n-r]=lcopy((GEN)U[j]);
-      k--;
-    }
-    else u[t++]=lcopy((GEN)U[j]);
-  y[1]=(long)p; y[2]=(long)u;
-  q = cgetg(m+1,t_VEC); y[3]=(long)q;
-  for (i=1; i<=m; i++) q[m-i+1]=lstoi(perm[i]);
-  return gerepile(av,tetpil,y);
+ * basis for Ker(A): columns of U s.t l[j]=0 (n-r cols) */
+  p = cgetg(r+1,t_MAT);
+  for (i=1; i<=m/2; i++) lswap(perm[i], perm[m+1-i]);
+  if (U)
+  {
+    GEN u = cgetg(n+1,t_MAT);
+    for (t=1,k=r,j=1; j<=n; j++)
+      if (l[j])
+      {
+        u[k + n-r] = U[j];
+        p[k--] = (long)vecextract_p((GEN)A[j], perm);
+      }
+      else
+        u[t++] = U[j];
+    *ptU = u;
+    *ptperm = small_to_vec(perm);
+    gerepileall(av, 3, &p, ptU, ptperm);
+  }
+  else
+  {
+    for (k=r,j=1; j<=n; j++)
+      if (l[j]) p[k--] = (long)vecextract_p((GEN)A[j], perm);
+    if (ptperm) *ptperm = small_to_vec(perm);
+    gerepileall(av, ptperm? 2: 1, &p, ptperm);
+  }
+  return p;
 }
 
-/*====================================================================
- *	    Forme Normale d'Hermite (Version par colonnes 31/01/94)
- *====================================================================*/
+GEN
+hnfperm(GEN A)
+{
+  GEN U, perm, y = cgetg(4, t_VEC);
+  y[1] = (long)hnfperm_i(A, &U, &perm);
+  y[2] = (long)U;
+  y[3] = (long)perm; return y;
+}
+
+/* Hermite Normal Form */
 GEN
 hnfall_i(GEN A, GEN *ptB, long remove)
 {
@@ -2983,8 +3001,8 @@ GEN
 smithall(GEN x, GEN *ptU, GEN *ptV)
 {
   pari_sp av0 = avma, av, lim = stack_lim(av0,1);
-  long i, j, k, m, n0, n;
-  GEN p1, u, v, U, V, V0, mun, mdet, ys;
+  long i, j, k, m0, m, n0, n;
+  GEN p1, u, v, U, V, V0, mun, mdet, ys, perm = NULL;
 
   if (typ(x)!=t_MAT) err(typeer,"smithall");
   n0 = n = lg(x)-1;
@@ -2994,7 +3012,7 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
     return cgetg(1,t_MAT);
   }
   mun = negi(gun); av = avma;
-  m = lg(x[1])-1;
+  m0 = m = lg(x[1])-1;
   for (j=1; j<=n; j++)
     for (i=1; i<=m; i++)
       if (typ(coeff(x,i,j)) != t_INT)
@@ -3024,12 +3042,12 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
           *ptV = gauss(x,p1);
         }
         else
-          p1 = hnfall_i(x, ptV, 1);
+          p1 = hnfperm_i(x, ptV, ptU? &perm: NULL);
       }
       mdet = dethnf_i(p1);
     }
     else
-      p1 = hnfall_i(x, ptV, 1);
+      p1 = hnfperm_i(x, ptV, ptU? &perm: NULL);
     x = p1;
   }
   n = lg(x)-1;
@@ -3150,8 +3168,8 @@ THEEND:
   if (!U && !V)
   {
     if (typ(x) == t_MAT) x = mattodiagonal_i(x);
-    n = lg(x)-1;
-    if (n0 > n) x = concatsp(zerovec(n0-n), x);
+    m = lg(x)-1;
+    if (m0 > m) x = concatsp(zerovec(m0-m), x);
     return gerepilecopy(av0, x);
   }
 
@@ -3160,7 +3178,11 @@ THEEND:
     x = concatsp(zeromat(m,n0-n), x);
     if (V) V = concatsp(V0, V);
   }
-  if (U) U = gtrans_i(U);
+  if (U)
+  {
+    U = gtrans_i(U);
+    if (perm) U = vecextract_p(U, perm_inv(perm));
+  }
   snf_pile(av0, &x,&U,&V);
   if (ptU) *ptU = U;
   if (ptV) *ptV = V;
