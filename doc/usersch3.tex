@@ -3683,7 +3683,7 @@ the main variable of $t$. For example
 
 \syn{polfnf}{x,t}.
 
-\subsecidx{galoisexport}$(\var{gal},\{\fl=0\})))$:
+\subsecidx{galoisexport}$(\var{gal},\{\fl=0\})$:
 \var{gal} being be a Galois field as output by \tet{galoisinit},
 export the underlying permutation group as a string suitable
 for (no flags or $\fl=0$) GAP or ($\fl=1$) Magma.
@@ -3697,6 +3697,8 @@ group in the GAP library:
 %2 = "Group((1, 2, 3)(4, 5, 6), (1, 4)(2, 6)(3, 5))"
 ? extern("echo \"IdGroup("s");\"| gap -q")
 %3 = [6, 1]
+? galoisidentify(G)
+%4 = [6, 1]
 @eprog
 
 \syn{galoisexport}{\var{gal},\fl}.
@@ -3728,6 +3730,23 @@ galoisfixedfield(G,G.group[2],2)
 computes the factorization  $x^4+1=(x^2-\sqrt{-2}x-1)(x^2+\sqrt{-2}x-1)$
 
 \syn{galoisfixedfield}{\var{gal},\var{perm},\fl,$v$}, where $v$ is a variable number, an omitted $v$ being coded by $-1$.
+
+\subsecidx{galoisidentify}$(\var{gal})$:
+\var{gal} being be a Galois field as output by \tet{galoisinit},
+output the isomorphism class of the underlying abstract group as a
+two-components vector $[o,i]$, where $o$ is the group order, and $i$ is the
+group index in the GAP4 Small Group library, by Hans Ulrich Besche, Bettina
+Eick and Eamonn O'Brien.
+
+The current implementation is limited to degree less or equal to $95$.
+Some larger ``easy'' orders are also supported. 
+
+The output is similar to the output of the function \kbd{IdGroup} in GAP4.
+Note that GAP4 \kbd{IdGroup} handles all groups of order less than $2000$
+except $1024$, so you can use \tet{galoisexport} and GAP4 to identify large
+Galois groups.
+
+\syn{galoisidentify}{\var{gal}}.
 
 \subsecidx{galoisinit}$(\var{pol},\{den\})$: computes the Galois group
 and all necessary information for computing the fixed fields of the
