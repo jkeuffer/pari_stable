@@ -438,6 +438,7 @@ forsubgroup(entree *oep, GEN cyc, long bound, char *och)
   long n, N = lg(cyc)-1;
 
   treatsub_fun = std_fun;
+  if (typ(cyc) != t_VEC) err(typeer,"forsubgroup");
   cyc = dummycopy(cyc);
   for (n = N; n > 1; n--) /* take care of trailing 1s */
     if (!gcmp1((GEN)cyc[n])) break;
@@ -463,6 +464,7 @@ subgrouplist(GEN cyc, long bound)
 
   sublist = list = (slist*) gpmalloc(sizeof(slist));
   treatsub_fun = list_fun;
+  if (typ(cyc) != t_VEC) err(typeer,"subgrouplist");
   cyc = dummycopy(cyc);
   for (n = N; n > 1; n--) /* take care of trailing 1s */
     if (!gcmp1((GEN)cyc[n])) break;
