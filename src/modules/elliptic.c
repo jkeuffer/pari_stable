@@ -2010,10 +2010,8 @@ apell(GEN e, GEN p)
 /* TEMPC is the largest prime whose square is less than HIGHBIT */
 #ifndef LONG_IS_64BIT
 #  define TEMPC 46337
-#  define TEMPMAX 16777215UL
 #else
 #  define TEMPC 3037000493
-#  define TEMPMAX 4294967295UL
 #endif
 
 GEN
@@ -2027,7 +2025,7 @@ anell(GEN e, long n)
   for (i=1; i<=5; i++)
     if (typ(e[i]) != t_INT) err(typeer,"anell");
   if (n <= 0) return cgetg(1,t_VEC);
-  if ((ulong)n>TEMPMAX) err(impl,"anell for n > %lu", TEMPMAX);
+  if ((ulong)n >= LGBITS) err(impl,"anell for n >= %lu", LGBITS);
 
   an = (GEN*)cgetg(n+1,t_VEC); an[1] = gun;
   for (i=2; i <= n; i++) an[i] = NULL;
@@ -2341,23 +2339,19 @@ lseriesell(GEN e, GEN s, GEN A, long prec)
       err(talker,"cut-off point must be positive in lseriesell");
     if (gcmpgs(A,1) < 0) A = ginv(A);
   }
-  if (typ(s) == t_INT)
-  {
-    if (signe(s) <= 0) { avma = av; return gzero; }
-    gs = mpfactr(itos(s)-1, prec);
-  }
-  else
-    gs = ggamma(s,prec);
+  if (typ(s) == t_INT && signe(s) <= 0) { avma = av; return gzero; }
   flun = gcmp1(A) && gcmp1(s);
-  eps = ellrootno_all(e,gun,&N);
-  if (flun && eps < 0) return realzero(prec);
+  eps = ellrootno_all(e, gun, &N);
+  if (flun && eps < 0) { avma = av; return realzero(prec); }
 
+  gs = ggamma(s, prec);
   cg = divrr(Pi2n(1, prec), gsqrt(N,prec));
   cga = gmul(cg, A);
   cgb = gdiv(cg, A);
   l = (long)((pariC2*(prec-2) + fabs(gtodouble(s)-1.) * log(rtodbl(cga)))
-            / rtodbl(cgb)+1);
-  v = anell(e, min((ulong)l,TEMPMAX));
+            / rtodbl(cgb) + 1);
+  if (l < 1) l = 1;
+  v = anell(e, min((ulong)l,LGBITS-1));
   s2 = ns = NULL; /* gcc -Wall */
   if (!flun) { s2 = gsubsg(2,s); ns = gpow(cg, gsubgs(gmul2n(s,1),2),prec); }
   z = gzero;
@@ -2370,7 +2364,7 @@ lseriesell(GEN e, GEN s, GEN A, long prec)
                         gpow(stoi(n), s2,prec));
     if (eps < 0) p2 = gneg_i(p2);
     z = gadd(z, gmul(gadd(p1,p2),
-                     ((ulong)n<=TEMPMAX)? (GEN)v[n]: akell(e,stoi(n))));
+                     ((ulong)n<LGBITS)? (GEN)v[n]: akell(e,stoi(n))));
     if (low_stack(lim, stack_lim(av1,1)))
     {
       if(DEBUGMEM>1) err(warnmem,"lseriesell");

@@ -78,6 +78,7 @@ MSo11- various bugs in anal.c: uninitialized reads in get_op_fun(), double_op()
    19- nfinit([x^2+1, y]) --> SEGV (bad input)
    20- lngamma(10^50*I) returned many more digits than were significant
    21- bnfinit(x^4-768*x^3+220032*x^2-27869184*x+1316749312) --> recent oo loop
+   22- elllseries(large t_REAL) --> 0 [ instead of ~ 1 ]
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.
