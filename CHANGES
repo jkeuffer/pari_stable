@@ -136,6 +136,8 @@ BA 47- bitneg(1,0) --> SEGV (caused by 2.2.5 A10).
    54- I + O(2^10) --> error
    55- ((x + quadgen(-8))*Mod(1, i))/(x^2+1) --> SEGV [ from randomgen ]
    56- Mod(a^0,i^0) --> Mod(1,1)  [ should be Mod(0,1) ]
+   57- factor(HUGE, 100000) --> "pointers lost in gerepile" in random GC in 
+       ifac_realloc() [ missing copy() for (*partial)[2] ]
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.

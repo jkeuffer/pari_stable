@@ -3249,7 +3249,7 @@ ifac_realloc(GEN *partial, GEN *where, long new_lg)
     flusherr();
   }
   newpart[1] = (*partial)[1];	/* moebius */
-  newpart[2] = (*partial)[2];	/* hint */
+  icopyifstack(newpart[2], (*partial)[2]); /* hint */
   /* downward sweep through the old *partial, picking up where1 and carry-
    * ing it over if and when we pass it.  (This will only be useful if
    * it pointed at a non-empty slot.)  Factors are licopy()d so that we
