@@ -2954,12 +2954,14 @@ fix_relative_pol(GEN nf, GEN x, int chk_lead)
   for (i=2; i<lx; i++)
     switch(typ(x[i]))
     {
+      case t_INT: case t_FRAC: case t_FRACN: break;
       case t_POL:
         check_pol((GEN)x[i], vnf);
         x[i] = lmodulcp((GEN)x[i], xnf); break;
       case t_POLMOD:
         if (!gegal(gmael(x,i,1), xnf)) err(consister,"rnf function");
         break;
+      default: err(typeer, "rnf function");
     }
 
   if (chk_lead && !gcmp1(leading_term(x)))
