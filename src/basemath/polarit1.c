@@ -1500,7 +1500,7 @@ apprgen_i(GEN f, GEN a)
   fp = derivpol(f); u = modulargcd(f,fp);
   if (degpol(u) > 0) { f = gdeuc(f,u); fp = derivpol(f); }
   p = (GEN)a[2];
-  P = egalii(p,gdeux)? stoi(4): p;
+  P = egalii(p,gdeux)? utoipos(4): p;
   a0= gmod(a, P);
   if (!gcmp0(FpX_eval(fp,a0,p))) /* simple zero */
   {

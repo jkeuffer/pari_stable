@@ -434,7 +434,7 @@ FBgen(FB_t *F, GEN nf,long n2,long n)
       long nor = itos_or_0(NormP); if (!nor || nor > n2) break;
 
       if (a) { a = mulsi(nor, a); b = mulsi(nor-1, b); }
-      else   { a = stoi(nor / p); b = stoi((nor-1) / (p-1)); }
+      else   { a = utoipos(nor / p); b = utoipos((nor-1) / (p-1)); }
     }
     if (a) affrr(divri(mulir(a,Res),b),   Res);
     else   affrr(divrs(mulsr(p-1,Res),p), Res);
@@ -972,7 +972,7 @@ SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase)
       { /* avoid prec pb: don't let id become too large as lgsub increases */
         if (id != x0) id = ideallllred(nf,id,NULL,0);
         z[1] = Vbase[i];
-        id = idealmulh(nf, id, idealpowred(nf,z,stoi(ex[i]),0));
+        id = idealmulh(nf, id, idealpowred(nf,z,utoipos(ex[i]),0));
       }
     }
     if (id == x0) continue;
@@ -1076,7 +1076,7 @@ testprimes(GEN bnf, long bound)
   {
     NEXT_PRIME_VIADIFF(p, d);
     if (DEBUGLEVEL>1) fprintferr("*** p = %ld\n",p);
-    vP = primedec(bnf, stoi(p));
+    vP = primedec(bnf, utoipos(p));
     nbideal = lg(vP)-1;
     /* loop through all P | p if ramified, all but one otherwise */
     if (!smodis(dK,p)) nbideal++;
@@ -1462,7 +1462,7 @@ isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag)
     {
       if (DEBUGLEVEL)
         err(warner,"insufficient precision for generators, not given");
-      avma = av; return stoi(prec);
+      avma = av; return utoipos(prec);
     }
     if (DEBUGLEVEL) err(warnprec,"isprincipal",prec);
     avma = av1; bnf = bnfnewprec(bnf,prec); (void)setrand(c);
@@ -2353,7 +2353,7 @@ decode_pr_lists(GEN nf, GEN pfc)
   for (i=1; i<l; i++)
   {
     t = (GEN)pfc[i]; p = itos(t) / n;
-    if (!L[p]) L[p] = (long)primedec(nf, stoi(p));
+    if (!L[p]) L[p] = (long)primedec(nf, utoipos(p));
   }
   return L;
 }

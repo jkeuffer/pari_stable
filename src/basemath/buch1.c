@@ -105,9 +105,8 @@ getallforms(GEN D, long *pth, GEN *ptz)
       if (t%a == 0)
       {
 	c = t/a; z = mulsi(a,z);
-        L[++h] = (long)qfi(stoi(a),stoi(b),stoi(c));
-	if (b && a != b && a*a != t)
-          L[++h] = (long)qfi(stoi(a),stoi(-b),stoi(c));
+        L[++h] = (long)mkvecsmall3(a,b,c);
+	if (b && a != b && a*a != t) L[++h] = (long)mkvecsmall3(a,-b,c);
       }
     b+=2; b2=b*b;
   }
@@ -187,20 +186,18 @@ get_pq(GEN D, GEN z, GEN flag, GEN *ptp, GEN *ptq)
     }
     if (i==l) i = 1;
   }
-  *ptp = stoi( p );
-  *ptq = stoi( wp[i] );
+  *ptp = utoipos(p);
+  *ptq = utoipos(wp[i]);
 }
 #undef MAXL
 
 static GEN
 gpq(GEN form, GEN p, GEN q, long e, GEN sqd, GEN u, long prec)
 {
-  GEN a2 = shifti((GEN)form[1], 1);
-  GEN b = (GEN)form[2], p1,p2,p3,p4;
-  GEN w = lift(chinois(gmodulcp(negi(b),a2), u));
-  GEN al = cgetg(3,t_COMPLEX);
-  al[1] = lneg(gdiv(w,a2));
-  al[2] = ldiv(sqd,a2);
+  GEN a2 = utoipos(form[1] << 1);
+  GEN p1,p2,p3,p4;
+  GEN w = lift(chinois(gmodulsg(-form[2],a2), u));
+  GEN al = mkcomplex(gneg(gdiv(w,a2)), gdiv(sqd,a2));
   p1 = trueeta(gdiv(al,p),prec);
   p2 = p == q? p1: trueeta(gdiv(al,q),prec);
   p3 = trueeta(gdiv(al,mulii(p,q)),prec);
@@ -1146,7 +1143,7 @@ get_clgp(GEN Disc, GEN W, GEN *ptmet, long prec)
   if (DEBUGLEVEL) msgtimer("smith/class group");
   res=cgetg(c,t_VEC); init = (GEN*)cgetg(l,t_VEC);
   for (i=1; i<l; i++)
-    init[i] = primeform(Disc,stoi(FB[vperm[i]]),prec);
+    init[i] = primeform(Disc,utoipos(FB[vperm[i]]),prec);
   for (j=1; j<c; j++)
   {
     GEN p1 = NULL;
@@ -1186,7 +1183,7 @@ extra_relations(long LIMC, long nlze, GEN *ptextraC)
       ex[i] = random_bits(RANDOM_BITS);
       if (ex[i])
       {
-        p1 = primeform(Disc,stoi(FB[vperm[i]]),PRECREG);
+        p1 = primeform(Disc,utoipos(FB[vperm[i]]),PRECREG);
         p1 = gpowgs(p1,ex[i]); form = comp(form,p1);
       }
     }

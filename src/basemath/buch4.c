@@ -23,23 +23,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "paripriv.h"
 #include "parinf.h"
 
-static long
+static int
 psquare(GEN a,GEN p)
 {
   long v;
   GEN ap;
 
-  if (gcmp0(a) || gcmp1(a)) return 1;
-
-  if (!cmpis(p,2))
-  {
-    v=vali(a); if (v&1) return 0;
-    return (smodis(shifti(a,-v),8)==1);
-  }
-
-  ap=stoi(1); v=Z_pvalrem(a,p,&ap);
+  if (!signe(a) || gcmp1(a)) return 1;
+  v = Z_pvalrem(a, p, &ap);
   if (v&1) return 0;
-  return (kronecker(ap,p)==1);
+  return egalii(p, gdeux)? umodiu(ap, 8) == 1
+                         : kronecker(ap,p) == 1;
 }
 
 static long
@@ -47,53 +41,54 @@ lemma6(GEN pol,GEN p,long nu,GEN x)
 {
   long i, lambda, mu;
   pari_sp ltop=avma;
-  GEN gx,gpx;
+  GEN gx, gpx;
 
-  for (i=lgpol(pol),gx=(GEN) pol[i+1]; i>1; i--)
-    gx=addii(mulii(gx,x),(GEN) pol[i]);
+  for (i=lgpol(pol), gx=(GEN)pol[i+1]; i>1; i--)
+    gx = addii(mulii(gx,x), (GEN)pol[i]);
   if (psquare(gx,p)) return 1;
 
-  for (i=lgpol(pol),gpx=mulis((GEN) pol[i+1],i-1); i>2; i--)
-    gpx=addii(mulii(gpx,x),mulis((GEN) pol[i],i-2));
+  for (i=lgpol(pol),gpx=mulis((GEN)pol[i+1],i-1); i>2; i--)
+    gpx = addii(mulii(gpx,x), mulis((GEN)pol[i], i-2));
 
   lambda = Z_pval(gx, p);
-  if (gcmp0(gpx)) mu = BIGINT; else mu = Z_pval(gpx,p);
-  avma=ltop;
+  mu = gcmp0(gpx)? BIGINT: Z_pval(gpx,p);
+  avma = ltop;
 
-  if (lambda>(mu<<1)) return 1;
-  if (lambda>=(nu<<1) && mu>=nu) return 0;
+  if (lambda > (mu<<1)) return 1;
+  if (lambda >= (nu<<1) && mu >= nu) return 0;
   return -1;
 }
 
 static long
 lemma7(GEN pol,long nu,GEN x)
 {
-  long i,odd4,lambda,mu,mnl;
-  pari_sp ltop=avma;
-  GEN gx,gpx,oddgx;
+  long i, odd4, lambda, mu, mnl;
+  pari_sp ltop = avma;
+  GEN gx, gpx, oddgx;
 
-  for (i=lgpol(pol),gx=(GEN) pol[i+1]; i>1; i--)
-    gx=addii(mulii(gx,x),(GEN) pol[i]);
+  for (i=lgpol(pol), gx=(GEN)pol[i+1]; i>1; i--)
+    gx = addii(mulii(gx,x), (GEN)pol[i]);
   if (psquare(gx,gdeux)) return 1;
 
-  for (i=lgpol(pol),gpx=gmulgs((GEN) pol[i+1],i-1); i>2; i--)
-    gpx=gadd(gmul(gpx,x),gmulgs((GEN) pol[i],i-2));
+  for (i=lgpol(pol),gpx=mulis((GEN)pol[i+1],i-1); i>2; i--)
+    gpx = gadd(gmul(gpx,x), mulis((GEN)pol[i],i-2));
 
-  lambda=vali(gx);
-  if (gcmp0(gpx)) mu=BIGINT; else mu=vali(gpx);
-  oddgx=shifti(gx,-lambda);
-  mnl=mu+nu-lambda;
-  odd4=smodis(oddgx,4);
+  lambda = vali(gx); oddgx = shifti(gx,-lambda);
+  mu = gcmp0(gpx)? BIGINT: vali(gpx);
+  mnl = mu+nu-lambda;
+  odd4 = umodiu(oddgx,4);
   avma=ltop;
-  if (lambda>(mu<<1)) return 1;
+  if (lambda > (mu<<1)) return 1;
   if (nu > mu)
-    { if (mnl==1 && (lambda&1) == 0) return 1;
-      if (mnl==2 && (lambda&1) == 0 && odd4==1) return 1;
-    }
+  {
+    if (mnl==1 && (lambda&1) == 0) return 1;
+    if (mnl==2 && (lambda&1) == 0 && odd4==1) return 1;
+  }
   else
-    { if (lambda>=(nu<<1)) return 0;
-      if (lambda==((nu-1)<<1) && odd4==1) return 0;
-    }
+  {
+    if (lambda >= (nu<<1)) return 0;
+    if (lambda == ((nu-1)<<1) && odd4==1) return 0;
+  }
   return -1;
 }
 
@@ -401,8 +396,8 @@ nfhilbertp(GEN nf,GEN a,GEN b,GEN pr)
   va = idealval(nf,a,pr);
   vb = idealval(nf,b,pr);
   if (!odd(va) && !odd(vb)) { avma = av; return 1; }
-  t = element_div(nf, element_pow(nf,a,stoi(vb)),
-                      element_pow(nf,b,stoi(va)));
+  t = element_div(nf, element_pow(nf,a, stoi(vb)),
+                      element_pow(nf,b, stoi(va)));
   if (odd(va) && odd(vb)) t = gneg_i(t); /* t mod pr = tame_pr(a,b) */
 
   /* quad. symbol is image of t by the quadratic character  */
@@ -807,7 +802,7 @@ rnfisnorm(GEN T, GEN x, long flag)
     {
       NEXT_PRIME_VIADIFF(p, d);
       if (p > flag) break;
-      pr_append(nf,rel,stoi(p),&prod,&S1,&S2);
+      pr_append(nf,rel, utoipos(p),&prod,&S1,&S2);
     }
   }
   else if (flag < 0)

@@ -258,22 +258,17 @@ znstar_cosets(long n, long phi_n, GEN H)
 /**                                                                     **/
 /*************************************************************************/
 
-/* Convert a true znstar output by znstar to a `small znstar'
- */
-
+/* Convert a true znstar output by znstar to a `small znstar' */
 GEN
 znstar_small(GEN zn)
 {
-  GEN Z=cgetg(4,t_VEC);
-  Z[1]=licopy(gmael3(zn,3,1,1));
-  Z[2]=(long) gtovecsmall((GEN)zn[2]);
-  Z[3]=(long) lift((GEN)zn[3]);
-  return Z;
+  GEN Z = cgetg(4,t_VEC);
+  Z[1] = licopy(gmael3(zn,3,1,1));
+  Z[2] = (long)gtovecsmall((GEN)zn[2]);
+  Z[3] = (long)lift((GEN)zn[3]); return Z;
 }
 
-
-/* Compute generators for the subgroup of (Z/nZ)* given in HNF. 
- */
+/* Compute generators for the subgroup of (Z/nZ)* given in HNF. */
 GEN
 znstar_hnf_generators(GEN Z, GEN M)
 {
@@ -302,11 +297,10 @@ znstar_hnf(GEN Z, GEN M)
 GEN
 znstar_hnf_elts(GEN Z, GEN H)
 {
-  pari_sp ltop=avma;
-  GEN G=znstar_hnf(Z,H);
-  long n=itos((GEN)Z[1]);
-  GEN list=znstar_elts(n,G);
-  return gerepileupto(ltop,list);
+  pari_sp ltop = avma;
+  GEN G = znstar_hnf(Z,H);
+  long n = itos((GEN)Z[1]);
+  return gerepileupto(ltop, znstar_elts(n,G));
 }
 
 /*************************************************************************/

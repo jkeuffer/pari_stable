@@ -628,7 +628,7 @@ frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
   pf = cgetg(m, t_VECSMALL);
   *psi = pf;
   ltop2 = avma;
-  NN = gdiv(mpfact(m), gmul(stoi(c), gpowgs(mpfact(d), c)));
+  NN = gdiv(mpfact(m), mulsi(c, gpowgs(mpfact(d), c)));
   if (DEBUGLEVEL >= 4)
     fprintferr("GaloisConj:I will try %Z permutations\n", NN);
   N1=10000000;
@@ -957,7 +957,7 @@ testpermutation(GEN F, GEN B, GEN x, long s, long e, long cut,
       j++;
     }
   }				/* Be happy now! */
-  NN = divis(gpowgs(stoi(b), c * (d - d/e)),cut);
+  NN = divis(gpowgs(utoipos(b), c * (d - d/e)),cut);
   if (DEBUGLEVEL >= 4)
     fprintferr("GaloisConj:I will try %Z permutations\n", NN);
   N1=1000000;
@@ -1084,10 +1084,8 @@ int pari_compare_lg(GEN x, GEN y)
   return lg(x)-lg(y);
 }
 
-/*
- * Calcule la liste des sous groupes de (\ZZ/m\ZZ)^* d'ordre divisant p et
- * retourne la liste de leurs elements
- */
+/* List of subgroups of (\ZZ/m\ZZ)^* whose order divide p, et return the list
+ * of their elements */
 GEN
 listsousgroupes(long m, long p)
 {
@@ -1101,22 +1099,21 @@ listsousgroupes(long m, long p)
     return res;
   }
   zn = znstar(stoi(m));
-  phi = itos((GEN) zn[1]);
+  phi = itos((GEN)zn[1]);
   zns = znstar_small(zn);
-  lss = subgrouplist((GEN) zn[2], NULL);
+  lss = subgrouplist((GEN)zn[2], NULL);
   res = cgetg(lg(lss), t_VEC);
   for (k = 1, i = lg(lss) - 1; i >= 1; i--)
   {
     pari_sp av;
     av = avma;
-    card = phi / itos(det((GEN) lss[i]));
+    card = phi / itos(dethnf_i((GEN)lss[i]));
     avma = av;
     if (p % card == 0)
-      res[k++] = (long) znstar_hnf_elts(zns,(GEN)lss[i]);
+      res[k++] = (long)znstar_hnf_elts(zns,(GEN)lss[i]);
   }
   setlg(res,k);
-  res=gen_sort(res,0,&pari_compare_lg);
-  return gerepileupto(ltop,res);
+  return gerepileupto(ltop, gen_sort(res,0,&pari_compare_lg));
 }
 
 GEN
@@ -1309,7 +1306,7 @@ fixedfieldsympol(GEN O, GEN L, GEN mod, GEN l, GEN p, GEN S, GEN deg, long v)
   for(n=1,i=1;i<lg(L);i++)
   {
     long j;
-    LN[n]=(long)fixedfieldnewtonsum(O,Ll,l,stoi(i));
+    LN[n]=(long)fixedfieldnewtonsum(O,Ll,l,utoipos(i));
     for(j=2;j<lg(LN[n]);j++)
       if(cmpii(gmael(LN,n,j),gmael(LN,n,1)))
 	break;
@@ -1487,12 +1484,10 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l, long karma_type
   O = cgetg(n+1,t_VECSMALL);
   for(i=1;i<=n;i++) O[i]=0;
   F =decomp_small(n);
-  Fp=(GEN)F[1];
-  Fe=(GEN)F[2];
+  Fp =(GEN)F[1];
+  Fe =(GEN)F[2];
+  Fpe=(GEN)F[3];
   np=lg(Fp)-1;
-  Fpe=cgetg(np+1, t_VECSMALL);
-  for (i = 1; i < lg(Fpe); i++)
-    Fpe[i] = itos(gpowgs(stoi(Fp[i]), Fe[i]));
   /*In this part, we study the cardinal of the group to have an information
     about the orders, so if we are unlucky we can continue.*/
 
@@ -1549,7 +1544,7 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l, long karma_type
     /*discard small primes*/
     if (p <= min_prime)
       continue;
-    ip=stoi(p);
+    ip = utoipos(p);
     if (!FpX_is_squarefree(T,ip))
       continue;
     nbtest++;
@@ -1629,25 +1624,27 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l, long karma_type
   {
     pari_sp av;
     long    l=0;
-    /*we need a totally splited prime l*/
+    /*we need a totally split prime l*/
     av = avma;
     while (l == 0)
     {
       long nb;
+      GEN Tp;
 
       NEXT_PRIME_VIADIFF_CHECK(p,primepointer);
-      if (p<=linf) continue;
-      nb=FpX_nbroots(T,stoi(p));
+      if (p <= linf) continue;
+      Tp = ZX_to_Flx(T, p);
+      nb = Flx_nbroots(Tp, p);
       if (nb == n)
 	l = p;
-      else if (nb && FpX_is_squarefree(T,stoi(p)))
+      else if (nb && Flx_is_squarefree(Tp, p))
       {
 	avma = ltop;
 	if (DEBUGLEVEL >= 2)
 	  fprintferr("GaloisAnalysis:non Galois for p=%ld\n", p);
 	ga->p = p;
 	ga->deg = 0;
-	return;		/* Not a Galois polynomial */
+	return;	/* Not a Galois polynomial */
       }
       avma = av;
     }
@@ -2382,7 +2379,7 @@ galoisfrobeniuslift(GEN T, GEN den, GEN L,  GEN Lden,
   long i,j,k;
   long n=lg(L)-1, deg=1, g=lg(gf->Tmod)-1;
   GEN F,Fp,Fe;
-  GEN ip=stoi(gf->p), aut, frob;
+  GEN ip = utoipos(gf->p), aut, frob;
   if (DEBUGLEVEL >= 4)
     fprintferr("GaloisConj:p=%ld deg=%ld fp=%ld\n", gf->p, deg, gf->fp);
   res = cgetg(lg(L), t_VECSMALL);
@@ -2510,7 +2507,7 @@ galoisfindfrobenius(GEN T, GEN L, GEN den, struct galois_frobenius *gf,
     long    isram;
     long    i;
     GEN     ip,Tmod;
-    ip = stoi(gf->p);
+    ip = utoipos(gf->p);
     Tmod = lift((GEN) factmod(T, ip));
     isram = 0;
     for (i = 1; i < lg(Tmod[2]) && !isram; i++)
@@ -2586,7 +2583,7 @@ galoisgenfixedfield(GEN Tp, GEN Pmod, GEN V, GEN ip, struct galois_borne *gb, GE
     mael(PG,2,1)=2;
     mael3(PG,1,1,1)=2;
     mael3(PG,1,1,2)=1;
-    tau = deg1pol_i(stoi(-1),negi((GEN)P[3]),x);
+    tau = deg1pol_i(utoineg(1),negi((GEN)P[3]),x);
     tau = lift(gmul(tau,gmodulcp(gun,ip)));
     tau = FpX_FpXQ_compo((GEN) Pmod[gp], tau,Pp,ip);
     tau = FpX_gcd(Pp, tau,ip);
@@ -2730,7 +2727,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
     return gzero;
   }
   p=gf.p;
-  ip=stoi(p);
+  ip = utoipos(p);
   Tmod=gf.Tmod;
   O = perm_cycles(frob);
   deg=lg(O[1])-1;
@@ -2900,7 +2897,7 @@ galoisconj4(GEN T, GEN den, long flag, long karma)
   if (ga.deg == 0)
   {
     avma = ltop;
-    return stoi(ga.p);		/* Avoid computing the discriminant */
+    return utoipos(ga.p); /* Avoid computing the discriminant */
   }
   if (den)
   {
@@ -2908,7 +2905,7 @@ galoisconj4(GEN T, GEN den, long flag, long karma)
       err(talker, "Second arg. must be integer in galoisconj4");
     den = absi(den);
   }
-  gb.l = stoi(ga.l);
+  gb.l = utoipos(ga.l);
   if (DEBUGLEVEL >= 1) (void)timer2();
   den = galoisborne(T, den, &gb, ga.ppp);
   if (DEBUGLEVEL >= 1)
@@ -2995,7 +2992,7 @@ numberofconjugates(GEN T, long pdepart)
 
     NEXT_PRIME_VIADIFF_CHECK(p,primepointer);
     if (p < pdepart) continue;
-    S = FpX_degfact(T, stoi(p));
+    S = FpX_degfact(T, utoipos(p));
     isram = 0;
     for (i = 1; i < lg(S[2]) && !isram; i++)
       if (mael(S,2,i) != 1) isram = 1;
@@ -3095,8 +3092,7 @@ isomborne(GEN P, GEN den, GEN p)
 GEN
 checkgal(GEN gal)
 {
-  if (typ(gal) == t_POL)
-    err(talker, "please apply galoisinit first");
+  if (typ(gal) == t_POL) err(talker, "please apply galoisinit first");
   if (typ(gal) != t_VEC || lg(gal) != 9)
     err(talker, "Not a Galois field in a Galois related function");
   return gal;
@@ -3300,29 +3296,32 @@ checkgroup(GEN g, GEN *S)
     return g;
   }
   g  = checkgal(g); 
-  *S = (GEN) g[6];
+  *S = (GEN)g[6];
   return galois_group(g); 
 }
 
-GEN galoisisabelian(GEN gal, long flag)
+GEN
+galoisisabelian(GEN gal, long flag)
 {
-  pari_sp ltop=avma;
-  GEN S, G=checkgroup(gal,&S);
+  pari_sp ltop = avma;
+  GEN S, G = checkgroup(gal,&S);
   if (!group_isabelian(G)) {avma=ltop;return gzero;}
   if (flag==1) {avma=ltop;return gun;}
   if (flag==2) return gerepileupto(ltop,group_abelianSNF(G,S));
   if (flag) err(flagerr,"galoisisabelian");
-  return gerepileupto(ltop,group_abelianHNF(G,S));
+  return gerepileupto(ltop, group_abelianHNF(G,S));
 }
 
-GEN galoissubgroups(GEN gal)
+GEN
+galoissubgroups(GEN gal)
 {
   pari_sp ltop=avma;
-  GEN S, G=checkgroup(gal,&S);
-  return gerepileupto(ltop,group_subgroups(G));
+  GEN S, G = checkgroup(gal,&S);
+  return gerepileupto(ltop, group_subgroups(G));
 }
 
-GEN galoissubfields(GEN G, long flag, long v)
+GEN
+galoissubfields(GEN G, long flag, long v)
 {
   pari_sp ltop=avma;
   long i;
@@ -3337,22 +3336,17 @@ GEN galoissubfields(GEN G, long flag, long v)
 GEN
 galoisexport(GEN gal, long format)
 {
-  pari_sp ltop=avma;
-  GEN S, G=checkgroup(gal,&S);
-  return gerepileupto(ltop,group_export(G,format));
+  pari_sp ltop = avma;
+  GEN S, G = checkgroup(gal,&S);
+  return gerepileupto(ltop, group_export(G,format));
 }
 
 GEN
 galoisidentify(GEN gal)
 {
   pari_sp ltop=avma;
-  GEN S, G=checkgroup(gal,&S);
-  long idx=group_ident(G,S);
-  long card=group_order(G);
-  GEN V;
-  avma=ltop;
-  V=cgetg(3,t_VEC);
-  V[1]=lstoi(card);
-  V[2]=lstoi(idx);
-  return V;
+  GEN S, G = checkgroup(gal,&S);
+  long idx = group_ident(G,S);
+  long card = group_order(G);
+  avma = ltop; return mkvec2s(card, idx);
 }
