@@ -18,7 +18,7 @@ fi
 LDisGCC=
 GNULDused=
 LDused=$LD
-if test $LD=$CC -a -n "$__gnuc__"; then
+if test "$LD"="$CC" -a -n "$__gnuc__"; then
   LDused=`$CC -print-prog-name=ld`
   LDisGCC=yes
 fi
@@ -26,7 +26,7 @@ if ($LDused -v 2>&1 | grep GNU > /dev/null); then GNULDused=yes; fi
 
 # Which Flags for Executable Linker?
 ldflags=
-if test $LD=$CC; then ldflags=$cflags; fi
+if test "$LD"="$CC"; then ldflags=$cflags; fi
 case "$osname-$arch" in
   osf1-*) case "$optimization" in
             full|profiling) ldflags="$ldflags -g0 -O4";;
