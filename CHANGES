@@ -83,6 +83,8 @@ BA 13- polrootsmod(,,1) could return a line vector instead of a column.
        for chinese(x, NULL) ]
     8- add GC in integer valuation functions + use recursive algorithm when
        valuation looks large
+    9- don't accept [;] in factorback ( matrix(0,2) is the only valid form
+       of an empty matrix input, corresponding e.g to factor(1) )
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.9 (released 23/12/2004):
