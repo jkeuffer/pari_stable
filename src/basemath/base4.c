@@ -2411,15 +2411,14 @@ static GEN
 mat_ideal_two_elt2(GEN nf, GEN x, GEN a)
 {
   GEN L, e, fact = idealfactor(nf,a);
-  long i, j, v, r;
+  long i, v, r;
   L = (GEN)fact[1]; r = lg(L);
   e = (GEN)fact[2];
-  for (i=j=1; i<r; i++)
+  for (i=1; i<r; i++)
   {
     v = idealval(nf,x,(GEN)L[i]);
-    if (v < itos((GEN)e[i])) { L[j] = L[i]; e[j] = lstoi(v); j++; }
+    e[i] = lstoi(v);
   }
-  setlg(L, j); setlg(e, j);
   return centermod(idealapprfact_i(nf,fact), gcoeff(x,1,1));
 }
 
