@@ -1269,7 +1269,7 @@ mpexp1(GEN x)
   l=lg(x); y=cgetr(l); av=avma; /* room for result */
 
   l2 = l+1; ex = expo(x);
-  if (ex > EXMAX) err(talker,"exponent too large in exp");
+  if (ex >= EXMAX) err(talker,"exponent too large in exp");
   alpha = -1-log(2+x[2]/C31)-ex*LOG2;
   beta = 5. + bit_accuracy(l)*LOG2;
   a = sqrt(beta/(gama*LOG2));
@@ -1315,7 +1315,6 @@ mpexp1(GEN x)
   }
   affrr(p2,y); avma = av; return y;
 }
-#undef EXMAX
 
 /********************************************************************/
 /**                                                                **/
@@ -1331,11 +1330,17 @@ mpexp(GEN x)
   GEN y;
 
   if (!sx) return addsr(1,x);
-  if (sx<0) setsigne(x,1);
+  if (sx<0) 
+  {
+    long ex = expo(x);
+    if (ex >= EXMAX) return realzero_bit(- (long) ((1<<EXMAX) / LOG2));
+    setsigne(x,1); 
+  }
   av = avma; y = addsr(1, mpexp1(x));
   if (sx<0) { y = ginv(y); setsigne(x,-1); }
   return gerepileupto(av,y);
 }
+#undef EXMAX
 
 static GEN
 paexp(GEN x)

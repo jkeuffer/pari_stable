@@ -129,6 +129,7 @@ MSo 8- allow numtoperm(0,k)  [ --> [] ]
        directory _containing_ galdata, not to the galdata files
    15- qfminim(,,2) + polredabs: look for points by (roughly) increasing
        norms (was: full enumeration and roughly decreasing norms)
+   16- exp(-10^10) --> 0.E2525223  [ was 'underflow' ]
 
   Added
     1- [Configure:] flag --with-ncurses-lib=*
