@@ -21,11 +21,6 @@ available. This results in about 20\% speedup on most architectures%
 RS/6000 workstations, which generates fast code even without any special
 help from the PARI kernel sources.}.
 
-\misctitle{Important Note:} The graphic routines in the present version have
-only been tested under \kbd{X11} and \kbd{gnuplot}, and may not work at all
-if you try to compile GP with an old \kbd{Suntools} library (even though this
-is supposedly supported, nobody has tested it yet!!!).
-
 \subsec{Optional packages:} The following programs and libraries are useful
 in conjunction with GP, but not mandatory. They're probably already installed
 somewhere on your system (with the possible exception of \kbd{readline},
@@ -48,8 +43,8 @@ obvious advantages if you are familiar with this editor. Note that
 \kbd{readline} is still useful in this case since it provides a much better
 automatic completion than is provided by Emacs GP-mode.
 
-  $\bullet$ \kbd{perl} provides extended online help (full text from
-Chapter~3) about functions and concepts, which can be used under GP or
+  $\bullet$ \kbd{perl} provides extended online help (full text from this
+manual) about functions and concepts, which can be used under GP or
 independently (\kbd{http://www.perl.com} will direct you to the nearest
 \kbd{CPAN} archive site).
 
@@ -96,7 +91,7 @@ version of the compiler. You can try
 
 \kbd{env CC=gcc Configure}
 
-\noindent and compare the benches. Also, if insist on using a \kbd{C++}
+\noindent and compare the benches. Also, if you insist on using a \kbd{C++}
 compiler and run into trouble with a recent \kbd{g++}, try to use
 \kbd{g++ -fpermissive}.
 
@@ -171,15 +166,32 @@ take more than one minute (user time) on modern machines. See the file
 would appreciate a short note in the same format in case your system is not
 listed and you nevertheless have a working GP executable).
 
-If a \kbd{[BUG]} message shows up, it probably means that something is wrong.
-Most probably with the installation procedure, but it may be a bug in the
-Pari system, in which case we would appreciate a report (including the
-relevant \kbd{*.dif} file in the \kbd{O$xxx$} directory and the file
-\kbd{dft.Config.in}). Error messages of the form ``not yet available for this
-architecture'' are an obvious special case which should not trigger a bug
-report (unless you implement the functionality yourself, that is!).
+If a \kbd{[BUG]} message shows up, something went wrong. Probably with the
+installation procedure, but it may be a bug in the Pari system, in which
+case we would appreciate a report (including the relevant \kbd{*.dif} file
+in the \kbd{O$xxx$} directory and the file \kbd{dft.Config.in}).
 
-\misctitle{Note:} If when running \kbd{gp-dyn}, you get a message of the form
+\noindent Known problems:
+
+$\bullet$ \kbd{elliptic}: the test \kbd{cmcurve=ellinit([0,-3/4,0,-2,-1])}
+may give results which differ slightly from the template (last decimal in a
+few entries). This ultimately depends on the output of
+
+\kbd{polroots(x\pow 3-3/4*x\pow 2-2*x-1)[1]}
+
+\noindent at \kbd{\b{p}38}, which may be $2.0$ or $1.999\dots$ depending on
+your hardware, libraries, compiler\dots Intel Pentiums running Linux often
+trigger this \kbd{BUG} (unrelated to the infamous \kbd{fdiv} bug), which
+can safely be ignored in any case: both results are correct given the
+requested precision.
+
+$\bullet$ \kbd{program}: the GP function \kbd{install} may not be available on
+your platform, triggering an error message (``not yet available for this
+architecture''). Have a look at the \kbd{MACHINES} files (the \kbd{dl}
+column) to check if your system is known not to support it, or has never
+been tested yet.
+
+$\bullet$ If when running \kbd{gp-dyn}, you get a message of the form
 
 \kbd{ld.so: warning: libpari.so.$xxx$ has older revision than expected $xxx$}
 
@@ -190,20 +202,13 @@ disable this variable in any case if anything {\it very} wrong occurs with
 the \kbd{gp-dyn} binary (e.g Illegal Instruction on startup). It doesn't
 affect \kbd{gp-sta}.
 
-\misctitle{Note2:} there's a known minor problem on Pentium processors
-(unrelated to the infamous \kbd{fdiv} bug) which results in a discrepancy in 
-bench \kbd{elliptic}: the last few decimals of the components of an \kbd{ell}
-structure may be slightly off (with respect to the bench: both results are
-correct given the requested precision).
-
 \subsubsec{Some more testing} [{\sl Optional\/}]
 
 You can test GP in compatibility mode with \kbd{make test-compat}. If you
 want to test the graphic routines, use \kbd{make test-graphic}. You will
-have to click on the mouse button after seeing each image (under X11; under
-suntools you must kill the images). There will be eight of them, probably
-shown twice (under X11, try to resize at least one of them as a further
-test).
+have to click on the mouse button after seeing each image (under X11).
+There will be eight of them, probably shown twice (under X11, try to resize
+at least one of them as a further test).
 
 The \kbd{make bench} and \kbd{make test-compat} runs produce a Postscript
 file \kbd{pari.ps} in \kbd{O$xxx$} which you can send to a Postscript
@@ -332,8 +337,8 @@ found at
 
    In any case, if you like this software, we would appreciate if you could
 send us an email message giving us some information about yourself and what
-you use PARI for. Put as header of your message ``new user'', so we can
-recognize it easily.
+you use PARI for. Use ``new user'' as the Subject line, so we can recognize
+it easily.
 \medskip
 {\bf Good luck and enjoy!}
 \vfill\eject
