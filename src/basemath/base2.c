@@ -1471,7 +1471,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
   ns = cgetg(N + 2, t_COL);
   p1 = powgi(p, gceil(gdivsg(N, mulii(p, subis(p, 1))))); /* p^(N/(p(p-1))) */
   p1 = mulii(p1, mulii(pmf, gpowgs(pmr, N)));
-  l  = lg(p1); /* enough in general... */
+  l  = lgefint(p1); /* enough in general... */
   for (i = 1; i <= N + 1; i++) ns[i] = lgeti(l);
   ns[N+1] = (long)p1;
   affii(gzero, (GEN)ns[1]); /* zero means: need to be computed */
