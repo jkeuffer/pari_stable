@@ -724,6 +724,7 @@ long    getrand(void);
 long    getstack(void);
 long    gettime(void);
 GEN     gprec(GEN x, long l);
+GEN     gprec_trunc(GEN x, long pr);
 GEN     gprec_w(GEN x, long pr);
 GEN     ggrando(GEN x, long n);
 GEN     gtor(GEN x, long l);

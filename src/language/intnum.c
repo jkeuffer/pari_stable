@@ -1364,8 +1364,7 @@ intnum(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
   tab = intnuminit0(a, b, tab, prec); /* prec + 1 is done in intnuminit0 */
 
   S = intnum_i(E, eval, gprec_w(a, l), gprec_w(b, l), tab, l);
-  if (gprecision(S) > prec) S = gprec_w(S, prec);
-  return gerepilecopy(ltop, S);
+  return gerepilecopy(ltop, gprec_trunc(S, prec));
 }
 
 typedef struct auxint_s {

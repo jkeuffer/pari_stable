@@ -412,16 +412,35 @@ gprec_w(GEN x, long pr)
   switch(tx)
   {
     case t_REAL:
-      if (!signe(x)) y = realzero(pr);
-      else { y = cgetr(pr); affrr(x,y); }
-      break;
-   
+      return signe(x)? rtor(x,pr): realzero(pr);
     case t_COMPLEX: case t_POLMOD: case t_POL: case t_RFRAC:
     case t_VEC: case t_COL: case t_MAT:
       y = init_gen_op(x, tx, &lx, &i);
       for (; i<lx; i++) y[i]=(long)gprec_w((GEN)x[i],pr);
       break;
-    default: y = gprec(x,pr);
+    default: return x;
+  }
+  return y;
+}
+
+/* internal: precision given in word length (including codewords), truncate
+ * mantissa to precision 'pr' but never _increase_ it */
+GEN
+gprec_trunc(GEN x, long pr)
+{
+  long tx = typ(x), lx, i;
+  GEN y;
+
+  switch(tx)
+  {
+    case t_REAL:
+      return (signe(x) && lg(x) > pr)? rtor(x,pr): x;
+    case t_COMPLEX: case t_POLMOD: case t_POL: case t_RFRAC:
+    case t_VEC: case t_COL: case t_MAT:
+      y = init_gen_op(x, tx, &lx, &i);
+      for (; i<lx; i++) y[i]=(long)gprec_trunc((GEN)x[i],pr);
+      break;
+    default: return x;
   }
   return y;
 }
