@@ -54,6 +54,7 @@ GN  6- [ix86 + Sun cc] build fails [ unsatisfied symbol reference to 'mulll' ]
        integer
     9- [ GMP kernel ] incorrect resmod2n --> wrong 2-adic sqrt
    10- [hi-res plot: fltk] fix compilation with g++-3.4
+BA 11- [hi-res plot: fltk] line plotting was broken
 
   Changed
     1- increased maximum binary exponent for t_REAL, and maximum GEN length

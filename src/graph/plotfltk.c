@@ -257,7 +257,7 @@ void Plotter::alloc() {
       lines[col] = new Point*[c[ROt_ML]];
       textPos[col] = new Point[c[ROt_ST]];
       texts[col] = new String[c[ROt_ST]];
-      numpoints[col] = new long[c[ROt_ST]];
+      numpoints[col] = new long[c[ROt_ML]];
       numtexts [col] = new long[c[ROt_ST]];
     }
 }
