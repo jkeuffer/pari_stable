@@ -169,6 +169,9 @@ HC 21- new implementation of gamma()
    22- renamed Oxxx/dft.Config.in --> pari.cfg
    23- new implementation of bernfrac() [ use zeta(2k), initial GP code by HC]
    24- bernvec always calls bernfrac()  [ hence has become useless ]
+   25- [sparcv8_super kernel:] replace asm divll with portable one
+       (slightly slower but fixes many compilation problems, and easier to
+       maintain on an architecture which has become hard to test)
 
   Added
     1- [Configure:] flag --with-ncurses-lib=*
