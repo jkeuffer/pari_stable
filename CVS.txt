@@ -1,4 +1,4 @@
-The Concurrent Versions System (or CVS, see http://www.cyclic.com) provides
+The Concurrent Versions System (CVS, see http://www.cyclic.com) provides
 network-transparent source control for groups of developers. For ordinary
 users it provides a very convenient way to obtain patched versions in between
 releases. CVS clients are available for most major platforms: Unix, MacOS,
@@ -6,10 +6,9 @@ Windows (see http://www.wincvs.org/).
 
 This file documents access to the PARI CVS server, which is intended for
 PARI lovers who want the very latest bleeding edge release. The CVS sources
-compile cleanly and pass the bench suite on (one of) the administrator(s)'s
-machine(s), they may otherwise contain severe bugs. Stable releases are
-made available on a regular basis using the customary method: a message to
-pari-announce.
+may contain severe bugs, benches may fail, they may not even compile. Stable
+releases are made available on a regular basis using the customary method:
+a message to pari-announce.
 
 1) First connection to the anonymous CVS server:
 ================================================
@@ -35,7 +34,7 @@ directly (without the cryptic -d argument), as long as you remain there
 ======================
 
 * You can build pari in the usual way (see INSTALL) as if this 'pari'
-directory had been created by fetching then extracting an archive on an FTP
+directory had been created by fetching, then extracting, an archive on an FTP
 server.
 
 * You can update your local copy at any time using 'cvs update', which will
@@ -45,7 +44,7 @@ put you in synch with the repository.
 by using 'cvs diff'. If you modify some files on your local copy, this also
 enables you to track down your changes, and produce a patch. You won't be
 able to commit your changes using anonymous access. Send the output of 'cvs
-diff' [with flag -c if your local diff supports it] to the pari-dev mailing
+diff' [ with flag -c if your local diff supports it ] to the pari-dev mailing
 list with a short description of what you've done, or to
 pari@math.u-bordeaux.fr if you're not subscribed to pari-dev.
 
@@ -67,22 +66,6 @@ containing lines of the form:
 
     cvs -z3          [ use gzip -3 for all transfers ]
     diff -c          [ use diff -c (context diff) by default in 'cvs diff' ]
-
-* once you've run Configure, some files/directory will be created in the
-local copy which are not under CVS control (only the master files are).
-These are
-
-  O<OS>-<arch>*
-  Makefile.O<OS>-<arch>*
-  examples/Makefile.<OS>-<arch>
-  doc/Makefile
-  doc/gphelp
-  doc/paricfg.tex
-  doc/*.[aux | dvi | idx | log | ps | std | toc]
-  emacs/pari.el
-
-After a global 'cvs diff', or 'cvs status', you can safely ignore all
-messages pertaining to them (e.g "? doc/Makefile").
 
 * 'cvs diff' gives you the difference between your local copy and the
 sources they were based on, not with the current state of the repository.
