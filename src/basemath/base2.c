@@ -1154,6 +1154,7 @@ update_alpha(GEN p, GEN fx, GEN alph, GEN chi, GEN pmr, GEN pmf, long mf)
   for (;;)
   {
     if (signe(pdr)) break;
+    nchi = mycaract(fx, alph); /* nchi is too reduced at this point */
     pdr = modii(respm(nchi, derivpol(nchi), pmf), pmf);
     if (signe(pdr)) break;
     if (DEBUGLEVEL >= 6)
