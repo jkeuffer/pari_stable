@@ -122,6 +122,7 @@ BA 77- typo in isinexactfield
    89- qfminim(,,2) didn't like mixed t_REAL/ t_FRAC entries (typo)
    90- inconsistant spacing after GP error messages
    91- regrouped code between idealred and idealmin
+   92- prevent 'install' in secure mode
 
   Added
 IZ  1- [gnuplot] look up directory tree for gnuplot related files
