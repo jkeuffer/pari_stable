@@ -2393,14 +2393,14 @@ localred_carac_p(GEN e, GEN p, int minim)
     if (mpodd(s)) s = addii(s, pk);
     s = shifti(s, -1);
 
-    r = subii(mulii(s, addii((GEN)e[1], s)), (GEN)e[2]); /* - a_2' */
+    r = subii((GEN)e[2], mulii(s, addii((GEN)e[1], s))); /* a_2' */
     switch(smodis(r, 3))
     {
       default: break; /* 0 */
-      case 1: r = addii(r, p2k); break;
-      case 2: r = subii(r, p2k); break;
+      case 2: r = addii(r, p2k); break;
+      case 1: r = subii(r, p2k); break;
     }
-    r = divis(r, 3);
+    r = negi( divis(r, 3) );
 
     t = negi(ellLHS0_i(e,r)); /* - a_3' */
     if (mpodd(t)) t = addii(t, mulii(pk, p2k));
