@@ -226,7 +226,7 @@ record_factors(long N, long d, long jmax, ulong *tabkbit, ulong *tmp)
 /**                                                                   **/
 /***********************************************************************/
 /* Setup for divide/conquer quadratic Hensel lift
- *  a = set of k t_POL in Z[X] corresponding to factors over Fp
+ *  a = set of k t_POL in Z[X] = factors over Fp (T=NULL) or Fp[Y]/(T)
  *  V = set of products of factors built as follows
  *  1) V[1..k] = initial a
  *  2) iterate:
@@ -238,56 +238,6 @@ record_factors(long N, long d, long jmax, ulong *tabkbit, ulong *tmp)
  * link[i] = -j if V[i] = a[j]
  *            j if V[i] = V[j] * V[j+1]
  * Arrays (link, V, W) pre-allocated for 2k - 2 elements */
-#if 0 /* restricted to Fp */
-static void
-BuildTree(GEN link, GEN V, GEN W, GEN a, GEN p)
-{
-  long k = lg(a)-1;
-  long i, j, s, minp, mind;
-
-  for (i=1; i<=k; i++) { V[i] = a[i]; link[i] = -i; }
-
-  for (j=1; j <= 2*k-5; j+=2,i++)
-  {
-    minp = j;
-    mind = degpol(V[j]);
-    for (s=j+1; s<i; s++)
-      if (degpol(V[s]) < mind) { minp = s; mind = degpol(V[s]); }
-
-    lswap(V[j], V[minp]);
-    lswap(link[j], link[minp]);
-
-    minp = j+1;
-    mind = degpol(V[j+1]);
-    for (s=j+2; s<i; s++)
-      if (degpol(V[s]) < mind) { minp = s; mind = degpol(V[s]); }
-
-    lswap(V[j+1], V[minp]);
-    lswap(link[j+1], link[minp]);
-
-    V[i] = (long)FpX_mul((GEN)V[j], (GEN)V[j+1], p);
-    link[i] = j;
-  }
-
-  for (j=1; j <= 2*k-3; j+=2)
-  {
-    GEN d, u, v;
-    d = FpX_extgcd((GEN)V[j], (GEN)V[j+1], p, &u, &v);
-    if (degpol(d) > 0) err(talker, "relatively prime polynomials expected");
-    d = (GEN)d[2];
-    if (!gcmp1(d))
-    {
-      d = mpinvmod(d, p);
-      u = FpX_Fp_mul(u, d, p);
-      v = FpX_Fp_mul(v, d, p);
-    }
-    W[j]   = (long)u;
-    W[j+1] = (long)v;
-  }
-}
-#endif
-
-/* same over Fp[Y] / (T) [copy-paste] */
 static void
 BuildTree(GEN link, GEN V, GEN W, GEN a, GEN T, GEN p)
 {
