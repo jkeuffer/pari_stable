@@ -1836,9 +1836,8 @@ init_dalloc()
 double *
 dalloc(size_t n)
 {
-  gpmem_t av = avma - n;
-  if ((long)av < 0 || avma < bot) err(errpile);
-  avma = av; return (double*)avma;
+  if (avma - bot < n) err(errpile);
+  avma -= n; return (double*)avma;
 }
 
 static double
