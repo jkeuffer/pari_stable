@@ -3073,7 +3073,7 @@ Qfb0(GEN x, GEN y, GEN z, GEN d, long prec)
   GEN t = qf_create(x,y,z,0);
   if (lg(t)==4) return t;
   if (!d) d = gzero;
-  t[4] = (typ(d) == t_REAL)? lrcopy(d): gtofp(d, prec);
+  t[4] = (typ(d) == t_REAL)? lrcopy(d): (long)gtofp(d, prec);
   return t;
 }
 
