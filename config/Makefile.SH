@@ -288,13 +288,14 @@ install-man::
 	-\$(LN) \$(MANDIR)/gp.1 \$(MANDIR)/pari.1
 
 install-misc: $install_emacs_files
-	-mkdir -p \$(MISCDIR)
-	\$(INSTALL_PROGRAM) $doc/gphelp       \$(BINDIR)
-	\$(INSTALL_DATA)    $doc/translations \$(MISCDIR)
 
 install-doc:
+	-mkdir -p \$(MISCDIR)
+	-mkdir -p \$(BINDIR)
 	-cd $doc; \$(MAKE) all
-	-\$(INSTALL_DATA) $doc/paricfg.tex   \$(MISCDIR)
+	-\$(INSTALL_PROGRAM) $doc/gphelp    \$(BINDIR)
+	-\$(INSTALL_DATA) $doc/translations \$(MISCDIR)
+	-\$(INSTALL_DATA) $doc/paricfg.tex  \$(MISCDIR)
 	-\$(INSTALL_DATA) $doc/parimacro.tex \$(MISCDIR)
 	-\$(INSTALL_DATA) $doc/usersch1.tex \$(MISCDIR)
 	-\$(INSTALL_DATA) $doc/usersch2.tex \$(MISCDIR)
