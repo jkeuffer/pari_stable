@@ -154,6 +154,12 @@ fi
 if test -n "$gmp"; then
   tmp="$tmp$dir_sep$gmp"
 fi
+case "$tmp" in
+  /usr/lib);;
+  *$dir_sep/usr/lib);;
+  *$dir_sep/usr/lib$dir_sep);;
+  *) tmp="$tmp$dir_sep/usr/lib";;
+esac
 if test -n "$runpathprefix"; then
   RUNPTH_FINAL=`$config_dir/ldflags "$LDneedsWl" "$runpathprefix$tmp"`
   RUNPTH=`$config_dir/ldflags "$LDneedsWl" "$runpathprefix$TOP/$objdir$dir_sep$tmp"`
