@@ -1286,7 +1286,7 @@ modiu(GEN y, ulong x) { return utoi(umodiu(y,x)); }
 
 /* return |y| \/ x */
 GEN
-dvmdiu(GEN y, ulong x, *ulong rem)
+dvmdiu(GEN y, ulong x, ulong *rem)
 {
   long sy=signe(y),ly;
   GEN z;
