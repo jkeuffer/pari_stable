@@ -1978,7 +1978,7 @@ entree functions_basic[]={
 {"nfmodprinit",2,(void*)nfmodprinit,6,"GG"},
 {"nfnewprec",1,(void*)nfnewprec,6,"Gp"},
 {"nfroots",99,(void*)nfroots,6,"GG"},
-{"nfrootsof1",1,(void*)rootsof1,6,"Gp"},
+{"nfrootsof1",1,(void*)rootsof1,6,"G"},
 {"nfsnf",2,(void*)nfsmith,6,"GG"},
 {"nfsolvemodpr",4,(void*)nfsolvemodpr,6,"GGGG"},
 {"nfsubfields",99,(void*)subfields0,6,"GDG"},
