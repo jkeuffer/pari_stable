@@ -53,7 +53,7 @@ typedef struct _blockdata
   GEN DATA; /* data depending from pol, p, degree, # translations [updated] */
   long N; /* deg(PD.pol) */
   long d; /* subfield degree */
-  long blockd;/* block degree = N/d */
+  long size;/* block degree = N/d */
 } blockdata;
 
 static GEN print_block_system(blockdata *B, GEN Y, GEN BS);
@@ -148,7 +148,7 @@ calc_block(blockdata *B, GEN Z, GEN Y, GEN SB)
 
   {
     pari_sp av = avma;
-    long k = nn / B->blockd;
+    long k = nn / B->size;
     for (j = 1; j < r; j++) 
       if (n[j] % k) break;
     if (j == r)
@@ -163,7 +163,7 @@ calc_block(blockdata *B, GEN Z, GEN Y, GEN SB)
   K = divisors(stoi(n[1])); lK = lg(K);
   for (i=1; i<lK; i++)
   {
-    long ngcd = n[1], k = itos((GEN)K[i]), dk = B->blockd*k, lpn = 0;
+    long ngcd = n[1], k = itos((GEN)K[i]), dk = B->size*k, lpn = 0;
     for (j=2; j<r; j++)
       if (n[j]%k == 0)
       {
@@ -277,7 +277,7 @@ print_block_system(blockdata *B, GEN Y, GEN SB)
     long ki = 0, si = lg(Yi)-1;
 
     for (j=1; j<=si; j++) { n[j] = lg(Yi[j])-1; ki += n[j]; }
-    ki /= B->blockd;
+    ki /= B->size;
     De = cgetg(ki+1,t_VEC);
     for (j=1; j<=ki; j++) De[j] = (long)VOID;
     for (j=1; j<=si; j++)
@@ -732,7 +732,7 @@ compute_data(blockdata *B)
   DATA[2] = (long)pe;
   DATA[4] = (long)roots_from_deg1(fk);
 
-  /* compute fhk = hensel_lift_fact(pol,fk,T,p,pe,e)
+  /* compute fhk = hensel_lift_fact(pol,fk,T,p,pe,e) in 2 steps
    * 1) lift in Zp to precision p^e */
   ffL = hensel_lift_fact(pol, ff, NULL, p, pe, e);
   fhk = NULL;
@@ -748,7 +748,7 @@ compute_data(blockdata *B)
   DATA[3] = (long)roots_from_deg1(fhk);
 
   p1 = mulsr(N, gsqrt(gpowgs(stoi(N-1),N-1),DEFAULTPREC));
-  p2 = gpowgs(maxroot, B->blockd + N*(N-1)/2);
+  p2 = gpowgs(maxroot, B->size + N*(N-1)/2);
   p1 = gdiv(gmul(p1,p2), gsqrt(B->PD->dis,DEFAULTPREC));
   DATA[7] = lmulii(shifti(ceil_safe(p1), 1), B->PD->den);
 
@@ -931,7 +931,7 @@ subfields(GEN nf, GEN d0)
   B.S  = &S;
   B.N  = N;
   B.d  = d;
-  B.blockd = N/d;
+  B.size = N/d;
 
   choose_prime(&S, PD.pol, PD.dis);
   LSB = subfields_of_given_degree(&B);
@@ -984,8 +984,8 @@ subfieldsall(GEN nf)
     choose_prime(&S, PD.pol, PD.dis);
     for (i=2; i<ld; i++)
     {
-      B.blockd  = itos((GEN)dg[i]);
-      B.d = N / B.blockd;
+      B.size  = itos((GEN)dg[i]);
+      B.d = N / B.size;
       NLSB = subfields_of_given_degree(&B);
       if (NLSB) { LSB = concat(LSB, NLSB); gunclone(NLSB); }
     }
