@@ -68,7 +68,7 @@ mpatan(GEN x)
     alpha = rtodbl(p1);
     alpha = log(PI/atan(alpha));
   }
-  beta = (bit_accuracy(l)>>1) * LOG2;
+  beta = (double)(bit_accuracy(l)>>1) * LOG2;
   delta=LOG2+beta-alpha/2;
   if (delta<=0) { n=1; m=0; }
   else
@@ -906,7 +906,7 @@ bernfracspec(long k)
     b = gadd(b, gdivgs(mulii(c,s), n));
     if (n == K) return gerepileupto(av, b);
 
-    N[2] = n; s = addii(s, gpowgs(N,k));
+    N[2] = (long)n; s = addii(s, gpowgs(N,k));
     if (low_stack(lim, stack_lim(av,2)))
     {
       if (DEBUGMEM>1) err(warnmem,"bernfrac");

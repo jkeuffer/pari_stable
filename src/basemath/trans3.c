@@ -146,8 +146,8 @@ norml1(GEN n, long prec)
 static GEN
 _jbessel(GEN n, GEN z, long flag, long m)
 {
-  long k, limit;
-  pari_sp av;
+  long k;
+  pari_sp av, lim;
   GEN p1,s;
 
   p1 = gmul2n(gsqr(z),-2); if (flag & 1) p1 = gneg(p1);
@@ -161,11 +161,11 @@ _jbessel(GEN n, GEN z, long flag, long m)
     p1 = gprec(p1, k);
   }
   s = gun;
-  av = avma; limit = stack_lim(av,1);
+  av = avma; lim = stack_lim(av,1);
   for (k=m; k>=1; k--)
   {
     s = gadd(gun,gdiv(gdivgs(gmul(p1,s),k),gaddsg(k,n)));
-    if (low_stack(limit,stack_lim(av,1)))
+    if (low_stack(lim, stack_lim(av,1)))
     {
       if (DEBUGMEM>1) err(warnmem,"jbessel");
       s = gerepilecopy(av, s);

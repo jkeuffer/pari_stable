@@ -71,7 +71,7 @@ constpi(long prec)
 
   /* initialize mantissa length */
   if (prec>=4) l=4; else l=prec;
-  setlg(p1,l); alpha=l;
+  setlg(p1,l); alpha = (double)l;
 
   av2 = avma;
   while (n)
@@ -393,7 +393,7 @@ rpowsi(ulong a, GEN n, long prec)
   D.sqr   = &sqri; 
   D.mulsg = &mulsi;
   D.prec = prec;
-  D.a = a;
+  D.a = (long)a;
   y = leftright_pow(stoi(a), n, (void*)&D, &_rpowsi_sqr, &_rpowsi_mul);
   if (typ(y) == t_INT) y = itor(y, prec);
   return gerepileuptoleaf(av, y);
@@ -1257,7 +1257,7 @@ mpexp1(GEN x)
   l2 = l+1; ex = expo(x);
   if (ex > EXMAX) err(talker,"exponent too large in exp");
   alpha = -1-log(2+x[2]/C31)-ex*LOG2;
-  beta = 5 + bit_accuracy(l)*LOG2;
+  beta = 5. + bit_accuracy(l)*LOG2;
   a = sqrt(beta/(gama*LOG2));
   b = (alpha + 0.5*log(beta*gama/LOG2))/LOG2;
   if (a>=b)
@@ -1503,7 +1503,7 @@ mplog(GEN x)
   }
   /* 1 < p1 < 2 */
   av = avma; l -= 2;
-  alpha = 1+p1[2]/C31; if (!alpha) alpha = 0.00000001;
+  alpha = 1. + p1[2] / C31; if (!alpha) alpha = 0.00000001;
   a = -log(alpha)/LOG2;
   b = sqrt(BITS_IN_HALFULONG*l/3.0);
   if (a <= b)
@@ -1749,7 +1749,7 @@ mpsc1(GEN x0, long *ptmod8)
     long e = expo(x);
     alpha = -1 - ((e<-1022)? e*LOG2: log(fabs(rtodbl(x))));
   }
-  beta = 5 + bit_accuracy(l)*LOG2;
+  beta = 5. + bit_accuracy(l)*LOG2;
   a = 0.5 / LOG2;
   b = 0.5 * a;
   c = a + sqrt((beta+b) / LOG2);

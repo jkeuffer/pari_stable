@@ -609,7 +609,7 @@ subgrouplist_i(GEN cyc, GEN bound, GEN expoI, GEN listKer)
 
   subgroup_engine(&T);
 
-  nbsub = S.count;
+  nbsub = (long)S.count;
   avma = av;
   z = cgetg(nbsub+1,t_VEC);
   for (ii=1; ii<=nbsub; ii++)
