@@ -1382,6 +1382,8 @@ num_derivU(GEN p, GEN *arg, GEN *loc, int narg, int nloc)
 
 #define DFT_VAR (GEN)-1L
 #define DFT_GEN (GEN)NULL
+#define _ARGS_ argvec[0], argvec[1], argvec[2], argvec[3],\
+               argvec[4], argvec[5], argvec[6], argvec[7], argvec[8]
 
 static GEN
 identifier(void)
@@ -1610,18 +1612,15 @@ identifier(void)
     else switch (ret)
     {
       default: /* case RET_GEN: */
-	res = ((PFGEN)call)(argvec[0], argvec[1], argvec[2], argvec[3],
-	          argvec[4], argvec[5], argvec[6], argvec[7], argvec[8]);
+	res = ((PFGEN)call)(_ARGS_);
 	break;
 
       case RET_INT:
-	m = ((long (*)(ANYARG))call)(argvec[0], argvec[1], argvec[2], argvec[3],
-		  argvec[4], argvec[5], argvec[6], argvec[7], argvec[8]);
+	m = ((long (*)(ANYARG))call)(_ARGS_);
 	res = stoi(m); break;
 
       case RET_VOID:
-	((void (*)(ANYARG))call)(argvec[0], argvec[1], argvec[2], argvec[3],
-	          argvec[4], argvec[5], argvec[6], argvec[7], argvec[8]);
+	((void (*)(ANYARG))call)(_ARGS_);
 	res = gnil; break;
     }
     if (has_pointer) check_pointer(has_pointer,pointers);
@@ -1762,9 +1761,8 @@ identifier(void)
           }
           else
           { /* user supplied */
-            match_comma(); res = expr();
+            match_comma(); arglist[i] = expr();
             if (br_status) err(breaker,"here (reading function args)");
-            arglist[i] = res;
           }
         }
         if (*analyseur++ == ')' && (*analyseur != '=' || analyseur[1] == '='))
@@ -2569,8 +2567,12 @@ skipidentifier(void)
       analyseur++;  /* skip '(' */
       for (i = f->nloc + f->narg; i; i--)
       {
-	if (do_switch(0,matchcomma)) matchcomma=1;
-	else { match_comma(); skipexpr(); }
+	if (do_switch(0,matchcomma))
+          matchcomma = 1;
+	else
+        {
+          match_comma(); skipexpr();
+        }
       }
 
       if (*analyseur == ')')
