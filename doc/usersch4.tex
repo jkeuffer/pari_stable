@@ -1699,16 +1699,37 @@ prints \kbd{Time}, then the remaining arguments as specified by
 \kbd{format} (which is a PARI format), then the output of \kbd{timer2}.
 
 This mechanism is simple to use but not foolproof. If some other function
-uses these timers, and many PARI functions do when DEBUGLEVEL is high enough,
-the timings will be meaningless. The functions \fun{long}{gentimer}{long
-id} or \fun{long}{genmsgtimer}{long id, char *format,...} are equivalent to
-\kbd{timer} and \kbd{msgtimer} respectively, except they will use a unique
-timer denoted by \kbd{id}. To get a valid identifier, use
-\kbd{id = }\tet{get_timer}\kbd{(0)}.
+uses these timers, and many PARI functions do use \kbd{timer2} when
+\tet{DEBUGLEVEL} is high enough, the timings will be meaningless. To handle
+timing in a reentrant way, PARI defines a dedicated datatype,
+\tet{pari_timer}. The functions 
 
-This timer has to be deleted when it's not needed anymore
-(i.e.~when the main function returns), with a call to \kbd{get\_timer(id)}.
-After such a call, the reserved identifier becomes available again.
+  \fun{long}{TIMER}{pari\_timer *T}
+
+  \fun{long}{msgTIMER}{pari\_timer *T, char *format,...}
+
+\noindent are equivalent to \kbd{timer} and \kbd{msgtimer} respectively,
+except they use a unique timer containing all the information needed, so
+that no other function can mess with your timings. They are used as follows:
+\bprog
+  pari_timer T;
+
+  (void)TIMER(&T); /* initialize timer */
+  ...
+  printf("Total time: %ld\n", TIMER(&T));
+@eprog
+or
+\bprog
+  pari_timer T;
+  long i;
+  GEN L;
+
+  (void)TIMER(&T); /* initialize timer */
+  for (i = 1; i < 10; i++) {
+    ...
+    msgTIMER(&T, "for i = %ld (L[i] = %Z)", i, L[i]);
+  }
+@eprog
 
 \section{A complete program}
 \label{se:prog}
