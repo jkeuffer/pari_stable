@@ -45,7 +45,7 @@ allbase_check_args(GEN f, long code, GEN *y, GEN *ptw1, GEN *ptw2)
   switch(code)
   {
     case 0: case 1:
-      *y = discsr(f);
+      *y = ZX_disc(f);
       if (!signe(*y)) err(talker,"reducible polynomial in allbase");
       w = auxdecomp(absi(*y),1-code);
       break;
@@ -714,7 +714,7 @@ extern GEN merge_factor_i(GEN f, GEN g);
 static GEN
 update_fact(GEN x, GEN f)
 {
-  GEN e,q,d = discsr(x), g = cgetg(3, t_MAT), p = (GEN)f[1];
+  GEN e,q,d = ZX_disc(x), g = cgetg(3, t_MAT), p = (GEN)f[1];
   long iq,i,k,l;
   if (typ(f)!=t_MAT || lg(f)!=3)
     err(talker,"not a factorisation in nfbasis");
@@ -862,7 +862,7 @@ dedek(GEN f, long mf, GEN p,GEN g)
     fprintferr("\n");
   }
   h = FpX_div(f,g,p);
-  k = gdiv(gadd(f, gneg_i(gmul(g,h))), p);
+  k = gdivexact(gadd(f, gneg_i(gmul(g,h))), p);
   k = FpX_gcd(k, FpX_gcd(g,h, p), p);
 
   dk = deg(k);
@@ -990,7 +990,7 @@ get_partial_order_as_pols(GEN p, GEN f)
   long i,j, n = deg(f), vf = varn(f);
   GEN b,ib,h,col;
 
-  b = maxord(p,f, ggval(discsr(f),p));
+  b = maxord(p,f, ggval(ZX_disc(f),p));
   ib = cgetg(n+1,t_VEC);
   for (i=1; i<=n; i++)
   {

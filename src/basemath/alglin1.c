@@ -21,6 +21,23 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /********************************************************************/
 #include "pari.h"
 
+/* for linear algebra mod p */
+#ifdef LONG_IS_64BIT
+#  define MASK (0x7fffffff00000000UL)
+#else
+#  define MASK (0x7fff0000UL)
+#endif
+
+/* 2p^2 < 2^BITS_IN_LONG */
+#ifdef LONG_IS_64BIT
+#  define u_OK_ULONG(p) ((ulong)p <= 3037000493UL)
+#else
+#  define u_OK_ULONG(p) ((ulong)p <= 46337UL)
+#endif
+#define OK_ULONG(p) (lgefint(p) == 3 && u_OK_ULONG(p[2]))
+extern GEN ZM_init_CRT(GEN Hp, ulong p);
+extern ulong u_invmod(ulong x, ulong p);
+
 /*******************************************************************/
 /*                                                                 */
 /*                         TRANSPOSE                               */
@@ -666,6 +683,28 @@ gtomat(GEN x)
 }
 
 long
+isscalarmat(GEN x, GEN s)
+{
+  long nco,i,j;
+
+  if (typ(x)!=t_MAT) err(typeer,"isdiagonal");
+  nco=lg(x)-1; if (!nco) return 1;
+  if (nco != lg(x[1])-1) return 0;
+
+  for (j=1; j<=nco; j++)
+  {
+    GEN *col = (GEN*) x[j];
+    for (i=1; i<=nco; i++)
+      if (i == j)
+      {
+        if (!gegal(col[i],s)) return 0;
+      }
+      else if (!gcmp0(col[i])) return 0;
+  }
+  return 1;
+}
+
+long
 isdiagonal(GEN x)
 {
   long nco,i,j;
@@ -903,6 +942,32 @@ Fp_gauss_get_col(GEN a, GEN b, GEN piv, long li, GEN p)
   return u;
 }
 
+/* assume -p < a < p, return 1/a mod p */
+static long
+u_Fp_inv(long a, long p)
+{
+  if (a < 0) a = p + a; /* pb with ulongs < 0 */
+  return u_invmod(a,p);
+}
+
+GEN
+u_Fp_gauss_get_col(GEN a, GEN b, long piv, long li, long p)
+{
+  GEN u=cgetg(li+1,t_VECSMALL);
+  long i,j, m;
+
+  u[li] = (b[li] *  u_Fp_inv(piv,p)) % p;
+  if (u[li] < 0) u[li] += p;
+  for (i=li-1; i>0; i--)
+  {
+    m = b[i];
+    for (j=i+1; j<=li; j++) { m -= coeff(a,i,j) * u[j]; if (m & MASK) m %= p; }
+    u[i] = ((m%p) * u_Fp_inv(coeff(a,i,i), p)) % p;
+    if (u[i] < 0) u[i] += p;
+  }
+  return u;
+}
+
 /* bk += m * bi */
 static void
 _addmul(GEN b, long k, long i, GEN m)
@@ -916,6 +981,16 @@ _Fp_addmul(GEN b, long k, long i, GEN m, GEN p)
 {
   if (lgefint(b[i]) > lgefint(p)) b[i] = lresii((GEN)b[i], p);
   b[k] = laddii((GEN)b[k], mulii(m, (GEN)b[i]));
+}
+
+static void
+_u_Fp_addmul(GEN b, long k, long i, long m, long p)
+{
+  long a;
+  if (b[i] & MASK) b[i] %= p;
+  a = b[k] + m * b[i];
+  if (a & MASK) a %= p;
+  b[k] = a;
 }
 
 /* Gaussan Elimination. Compute a^(-1)*b
@@ -1032,6 +1107,67 @@ gauss(GEN a, GEN b)
 }
 
 GEN
+u_FpM_gauss(GEN a, GEN b, long p)
+{
+  long piv,m,iscol,i,j,k,li,bco, aco = lg(a)-1;
+  GEN u;
+
+  if (!aco) return cgetg(1,t_MAT);
+  li = lg(a[1])-1;
+  bco = lg(b)-1;
+  iscol = (typ(b)==t_COL);
+  piv = 0; /* gcc -Wall */
+  for (i=1; i<=aco; i++)
+  {
+    /* k is the line where we find the pivot */
+    coeff(a,i,i) = coeff(a,i,i) % p;
+    piv = coeff(a,i,i); k = i;
+    if (!piv)
+    {
+      for (k++; k <= li; k++)
+      {
+        coeff(a,k,i) %= p;
+        if (coeff(a,k,i)) break;
+      } 
+      if (k>li) return NULL;
+    }
+
+    /* if (k!=i), exchange the lines s.t. k = i */
+    if (k != i)
+    {
+      for (j=i; j<=aco; j++) swap(coeff(a,i,j), coeff(a,k,j));
+      if (iscol) { swap(b[i],b[k]); }
+      else
+        for (j=1; j<=bco; j++) swap(coeff(b,i,j), coeff(b,k,j));
+      piv = coeff(a,i,i);
+    }
+    if (i == aco) break;
+
+    for (k=i+1; k<=li; k++)
+    {
+      coeff(a,k,i) %= p;
+      m = coeff(a,k,i); coeff(a,k,i) = 0;
+      if (m)
+      {
+	m = - (m * u_Fp_inv(piv,p)) % p;
+	for (j=i+1; j<=aco; j++) _u_Fp_addmul((GEN)a[j],k,i,m, p);
+	if (iscol) _u_Fp_addmul(b,k,i,m, p);
+        else 
+          for (j=1; j<=bco; j++) _u_Fp_addmul((GEN)b[j],k,i,m, p); 
+      }
+    }
+  }
+  if (iscol) u = u_Fp_gauss_get_col(a,b,piv,aco,p);
+  else
+  {
+    u=cgetg(bco+1,t_MAT);
+    for (j=1; j<=bco; j++)
+      u[j] = (long)u_Fp_gauss_get_col(a,(GEN)b[j],piv,aco,p);
+  }
+  return u;
+}
+
+GEN
 FpM_gauss(GEN a, GEN b, GEN p)
 {
   long iscol,i,j,k,av,lim,li,bco, aco = lg(a)-1;
@@ -1045,11 +1181,20 @@ FpM_gauss(GEN a, GEN b, GEN p)
     if (DEBUGLEVEL) err(warner,"in Gauss lg(a)=1 lg(b)=%ld", b?1:-1);
     return cgetg(1,t_MAT);
   }
-  av=avma; lim=stack_lim(av,1);
   li = lg(a[1])-1;
   if (li != aco && (li < aco || b)) err(mattype1,"gauss");
+  b = check_b(b,li); av = avma;
+  if (OK_ULONG(p))
+  {
+    ulong pp=p[2];
+    a = u_Fp_FpM(a, pp);
+    b = u_Fp_FpM(b, pp);
+    u = u_FpM_gauss(a,b, pp);
+    return gerepileupto(av, small_to_mat(u));
+  }
+  lim = stack_lim(av,1);
   a = dummycopy(a);
-  b = check_b(b,li); bco = lg(b)-1;
+  bco = lg(b)-1;
   iscol = (typ(b)==t_COL);
   piv = NULL; /* gcc -Wall */
   for (i=1; i<=aco; i++)
@@ -1122,6 +1267,98 @@ FpM_gauss(GEN a, GEN b, GEN p)
 
 GEN
 FpM_inv(GEN x, GEN p) { return FpM_gauss(x, NULL, p); }
+
+static GEN
+u_idmat(long n)
+{
+  GEN y = cgetg(n+1,t_MAT);
+  long i,j;
+  if (n < 0) err(talker,"negative size in u_idmat");
+  for (i=1; i<=n; i++)
+  {
+    y[i]=lgetg(n+1,t_VECSMALL);
+    for (j=1; j<=n; j++) coeff(y,j,i) = (i==j)? 1: 0;
+  }
+  return y;
+}
+
+/* set y = x * y */
+#define HIGHWORD(a) ((a) >> BITS_IN_HALFULONG)
+static GEN
+u_FpM_Fp_mul_ip(GEN y, long x, long p)
+{
+  int i,j, m = lg(y[1]), l = lg(y);
+  if (HIGHWORD(x | p))
+    for(j=1; j<l; j++)
+      for(i=1; i<m; i++)
+        coeff(y,i,j) = (long)mulssmod(coeff(y,i,j), x, p);
+  else
+    for(j=1; j<l; j++)
+      for(i=1; i<m; i++)
+        coeff(y,i,j) = (coeff(y,i,j) * x) % p;
+  return y;
+}
+
+/* M integral, dM such that M' = dM M^-1 is integral [e.g det(M)]. Return M' */
+GEN 
+ZM_inv(GEN M, GEN dM)
+{
+  GEN  ID,Hp,q,H;
+  ulong p,dMp, av2, av = avma, lim = stack_lim(av,1);
+  byteptr d = diffptr;
+  long lM = lg(M), stable = 0;
+
+  if (lM == 1) return cgetg(1,t_MAT);
+  if (!dM) dM = det(M);
+
+  av2 = avma;
+  H = NULL;
+  d += 3000; /* 27449 = prime(3000) */
+  for(p = 27449; ; p+= *d++)
+  {
+    if (!*d) err(primer1);
+    dMp = umodiu(dM,p);
+    if (!dMp) continue;
+    ID = u_idmat(lM-1);
+    Hp = u_FpM_gauss(u_Fp_FpM(M,p), ID, p);
+    if (dMp != 1) Hp = u_FpM_Fp_mul_ip(Hp, dMp, p);
+
+    if (!H) 
+    {
+      H = ZM_init_CRT(Hp, p);
+      q = utoi(p);
+    }
+    else
+    {
+      GEN qp = muliu(q,p);
+      stable = ZM_incremental_CRT(H, Hp, q,qp, p);
+      q = qp;
+    }
+    if (DEBUGLEVEL>5)
+      msgtimer("inverse mod %ld (stable=%ld)", p,stable);
+    if (stable && isscalarmat(gmul(M, H), dM)) break; /* DONE */
+    
+    if (low_stack(lim, stack_lim(av,2)))
+    {
+      GEN *gptr[4]; gptr[0] = &H; gptr[1] = &q;
+      if (DEBUGMEM>1) err(warnmem,"ZM_inv");
+      gerepilemany(av2,gptr, 2);
+    }
+ 
+  }
+  if (DEBUGLEVEL>5) msgtimer("ZM_inv done");
+  return gerepileupto(av, gcopy(H));
+}
+
+/* same as above, M rational */
+GEN 
+QM_inv(GEN M, GEN dM)
+{
+  ulong av = avma;
+  GEN cM = content(M);
+  if (is_pm1(cM)) { avma = av; return ZM_inv(M,dM); }
+  return gerepileupto(av, ZM_inv(gdiv(M,cM), gdiv(dM,cM)));
+}
 
 /* x a matrix with integer coefficients. Return a multiple of the determinant
  * of the lattice generated by the columns of x (to be used with hnfmod)
@@ -1669,7 +1906,7 @@ imagecompl(GEN x)
 }
 
 /* for hnfspec: imagecompl(trans(x)) + image(trans(x)) */
-static GEN
+GEN
 imagecomplspec(GEN x, long *nlze)
 {
   GEN d,y;
@@ -1810,14 +2047,17 @@ rank(GEN x)
   return lg(x)-1 - r;
 }
 
+static void FpM_gauss_pivot(GEN x, GEN p, GEN *dd, long *rr);
+
+/* if p != NULL, assume x integral and compute rank over Fp */
 static GEN
-indexrank0(GEN x, int small)
+indexrank0(GEN x, GEN p, int small)
 {
   long av = avma, i,j,n,r;
   GEN res,d,p1,p2;
 
   /* yield r = dim ker(x) */
-  gauss_pivot(x,&d,&r);
+  FpM_gauss_pivot(x,p,&d,&r);
 
   /* now r = dim Im(x) */
   n = lg(x)-1; r = n - r;
@@ -1838,21 +2078,19 @@ indexrank0(GEN x, int small)
 }
 
 GEN 
-indexrank(GEN x) { return indexrank0(x,0); }
+indexrank(GEN x) { return indexrank0(x,NULL,0); }
 
 GEN 
-sindexrank(GEN x) { return indexrank0(x,1); }
+sindexrank(GEN x) { return indexrank0(x,NULL,1); }
+
+GEN 
+FpM_sindexrank(GEN x, GEN p) { return indexrank0(x,p,1); }
 
 /*******************************************************************/
 /*                                                                 */
 /*                    LINEAR ALGEBRA MODULO P                      */
 /*                                                                 */
 /*******************************************************************/
-#ifdef LONG_IS_64BIT
-#  define MASK (0x7fffffff00000000UL)
-#else
-#  define MASK (0x7fff0000UL)
-#endif
 GEN
 FpM_mul(GEN x, GEN y, GEN p)
 {
@@ -1920,11 +2158,7 @@ u_FpM_ker(GEN x, GEN pp, long nontriv)
     else
     {
       c[j]=k; d[k]=j;
-      {
-        long av1 = avma;
-        GEN p1 = mpinvmod(stoi(a), pp);
-        piv = -itos(p1); avma = av1;
-      }
+      piv = - u_Fp_inv(a, p);
       coeff(x,j,k) = -1;
       for (i=k+1; i<=n; i++)
 	coeff(x,j,i) = (piv * coeff(x,j,i)) % p;
@@ -1935,12 +2169,7 @@ u_FpM_ker(GEN x, GEN pp, long nontriv)
           if (piv)
           {
             coeff(x,t,k) = 0;
-            for (i=k+1; i<=n; i++)
-            {
-              a = coeff(x,t,i) + piv * coeff(x,j,i);
-              if (a & MASK) a %= p;
-              coeff(x,t,i) = a;
-            }
+            for (i=k+1; i<=n; i++) _u_Fp_addmul((GEN)x[i],t,j,piv,p);
           }
 	}
     }
@@ -1974,8 +2203,7 @@ FpM_ker_i(GEN x, GEN p, long nontriv)
 
   if (typ(x)!=t_MAT) err(typeer,"FpM_ker");
   n=lg(x)-1; if (!n) return cgetg(1,t_MAT);
-  if (lgefint(p) == 3 && (ulong)p[2] < (MAXHALFULONG>>1))
-    return u_FpM_ker(x, p, nontriv);
+  if (OK_ULONG(p)) return u_FpM_ker(x, p, nontriv);
 
   m=lg(x[1])-1; r=0; av0 = avma;
   x=dummycopy(x); mun=negi(gun);
@@ -2044,6 +2272,7 @@ FpM_gauss_pivot(GEN x, GEN p, GEN *dd, long *rr)
   GEN c,d,piv;
   long i,j,k,r,t,n,m,av,lim;
 
+  if (!p) return gauss_pivot(x,dd,rr);
   if (typ(x)!=t_MAT) err(typeer,"FpM_gauss_pivot");
   n=lg(x)-1; if (!n) { *dd=NULL; *rr=0; return; }
 
@@ -2271,8 +2500,6 @@ FqM_ker_i(GEN x, GEN T, GEN p, long nontriv)
 
   if (typ(x)!=t_MAT) err(typeer,"FpM_ker");
   n=lg(x)-1; if (!n) return cgetg(1,t_MAT);
-  /*if (!is_bigint(p) && p[2] < (MAXHALFULONG>>1))
-    return u_FpM_ker(x, p, nontriv);*/
 
   m=lg(x[1])-1; r=0; av0 = avma;
   x=dummycopy(x); mun=negi(gun);
@@ -2527,8 +2754,7 @@ mydiv(GEN x, GEN y)
 }
 
 /* determinant in a ring A: all computations are done within A
- * (Gauss-Bareiss algorithm)
- */
+ * (Gauss-Bareiss algorithm) */
 GEN
 det(GEN a)
 {
@@ -2590,680 +2816,6 @@ det(GEN a)
   p = gcoeff(a,nbco,nbco);
   if (s < 0) p = gneg(p); else p = gcopy(p);
   return gerepileupto(av, p);
-}
-
-/*******************************************************************/
-/*                                                                 */
-/*                SPECIAL HNF (FOR INTERNAL USE !!!)               */
-/*                                                                 */
-/*******************************************************************/
-extern GEN ZV_lincomb(GEN u, GEN v, GEN X, GEN Y);
-extern GEN vconcat(GEN Q1, GEN Q2);
-
-static int
-count(long **mat, long row, long len, long *firstnonzero)
-{
-  int j, n=0;
-
-  for (j=1; j<=len; j++)
-  {
-    long p = mat[j][row];
-    if (p)
-    {
-      if (labs(p)!=1) return -1;
-      n++; *firstnonzero=j;
-    }
-  }
-  return n;
-}
-
-static int
-count2(long **mat, long row, long len)
-{
-  int j;
-  for (j=len; j; j--)
-    if (labs(mat[j][row]) == 1) return j;
-  return 0;
-}
-
-static GEN
-hnffinal(GEN matgen,GEN perm,GEN* ptdep,GEN* ptB,GEN* ptC)
-{
-  GEN p1,p2,U,H,Hnew,Bnew,Cnew,diagH1;
-  GEN B = *ptB, C = *ptC, dep = *ptdep, depnew;
-  long av,i,j,k,s,i1,j1,lim,zc;
-  long co = lg(C);
-  long col = lg(matgen)-1;
-  long lnz, nlze, lig;
-
-  if (col == 0) return matgen;
-  lnz = lg(matgen[1])-1; /* was called lnz-1 - nr in hnfspec */
-  nlze = lg(dep[1])-1;
-  lig = nlze + lnz;
-  if (DEBUGLEVEL>5)
-  {
-    fprintferr("Entering hnffinal:\n");
-    if (DEBUGLEVEL>6)
-    {
-      if (nlze) fprintferr("dep = %Z\n",dep);
-      fprintferr("mit = %Z\n",matgen);
-      fprintferr("B = %Z\n",B);
-    }
-  }
-  p1 = hnflll(matgen);
-  H = (GEN)p1[1]; /* lnz x lnz */
-  U = (GEN)p1[2]; /* col x col */
-  /* Only keep the part above the H (above the 0s is 0 since the dep rows
-   * are dependant from the ones in matgen) */
-  zc = col - lnz; /* # of 0 columns, correspond to units */
-  if (nlze) { dep = gmul(dep,U); dep += zc; }
-
-  diagH1 = new_chunk(lnz+1); /* diagH1[i] = 0 iff H[i,i] != 1 (set later) */
-
-  av = avma; lim = stack_lim(av,1);
-  Cnew = cgetg(co,t_MAT);
-  setlg(C, col+1); p1 = gmul(C,U);
-  for (j=1; j<=col; j++) Cnew[j] = p1[j];
-  for (   ; j<co ; j++)  Cnew[j] = C[j];
-  if (DEBUGLEVEL>5) fprintferr("    hnflll done\n");
-
-  /* Clean up B using new H */
-  for (s=0,i=lnz; i; i--)
-  {
-    GEN h = gcoeff(H,i,i);
-    if ( (diagH1[i] = gcmp1(h)) ) { h = NULL; s++; }
-    for (j=col+1; j<co; j++)
-    {
-      GEN z = (GEN)B[j-col];
-      p1 = (GEN)z[i+nlze]; if (h) p1 = gdivent(p1,h);
-      for (k=1; k<=nlze; k++)
-	z[k] = lsubii((GEN)z[k], mulii(p1, gcoeff(dep,k,i)));
-      for (   ; k<=lig; k++)
-	z[k] = lsubii((GEN)z[k], mulii(p1, gcoeff(H,k-nlze,i)));
-      Cnew[j] = lsub((GEN)Cnew[j], gmul(p1, (GEN)Cnew[i+zc]));
-    }
-    if (low_stack(lim, stack_lim(av,1)))
-    {
-      GEN *gptr[2]; gptr[0]=&Cnew; gptr[1]=&B;
-      if(DEBUGMEM>1) err(warnmem,"hnffinal, i = %ld",i);
-      gerepilemany(av,gptr,2);
-    }
-  }
-  p1 = cgetg(lnz+1,t_VEC); p2 = perm + nlze;
-  for (i1=0, j1=lnz-s, i=1; i<=lnz; i++) /* push the 1 rows down */
-    if (diagH1[i])
-      p1[++j1] = p2[i];
-    else
-      p2[++i1] = p2[i];
-  for (i=i1+1; i<=lnz; i++) p2[i] = p1[i];
-  if (DEBUGLEVEL>5) fprintferr("    first pass in hnffinal done\n");
-
-  /* s = # extra redundant generators taken from H
-   *          zc  col-s  co   zc = col ­ lnz
-   *       [ 0 |dep |     ]    i = lnze + lnz - s = lig - s
-   *  nlze [--------|  B' ]
-   *       [ 0 | H' |     ]    H' = H minus the s rows with a 1 on diagonal
-   *     i [--------|-----] lig-s           (= "1-rows")
-   *       [   0    | Id  ]
-   *       [        |     ] li */
-  lig -= s; col -= s; lnz -= s;
-  Hnew = cgetg(lnz+1,t_MAT);
-  depnew = cgetg(lnz+1,t_MAT); /* only used if nlze > 0 */
-  Bnew = cgetg(co-col,t_MAT);
-  C = dummycopy(Cnew);
-  for (j=1,i1=j1=0; j<=lnz+s; j++)
-  {
-    GEN z = (GEN)H[j];
-    if (diagH1[j])
-    { /* hit exactly s times */
-      i1++; p1 = cgetg(lig+1,t_COL); Bnew[i1] = (long)p1;
-      C[i1+col] = Cnew[j+zc];
-      for (i=1; i<=nlze; i++) p1[i] = coeff(dep,i,j);
-      p1 += nlze;
-    }
-    else
-    {
-      j1++; p1 = cgetg(lnz+1,t_COL); Hnew[j1] = (long)p1;
-      C[j1+zc] = Cnew[j+zc];
-      if (nlze) depnew[j1] = dep[j];
-    }
-    for (i=k=1; k<=lnz; i++)
-      if (!diagH1[i]) p1[k++] = z[i];
-  }
-  for (j=s+1; j<co-col; j++)
-  {
-    GEN z = (GEN)B[j-s];
-    p1 = cgetg(lig+1,t_COL); Bnew[j] = (long)p1;
-    for (i=1; i<=nlze; i++) p1[i] = z[i];
-    z += nlze; p1 += nlze;
-    for (i=k=1; k<=lnz; i++)
-      if (!diagH1[i]) p1[k++] = z[i];
-  }
-  if (DEBUGLEVEL>5)
-  {
-    fprintferr("Leaving hnffinal\n");
-    if (DEBUGLEVEL>6)
-    {
-      if (nlze) fprintferr("dep = %Z\n",depnew);
-      fprintferr("mit = %Z\nB = %Z\nC = %Z\n", Hnew, Bnew, C);
-    }
-  }
-  if (nlze) *ptdep = depnew;
-  *ptC = C;
-  *ptB = Bnew; return Hnew;
-}
-
-/* for debugging */
-static void
-p_mat(long **mat, long *perm, long k0)
-{
-  long av=avma, i,j;
-  GEN p1, matj, matgen;
-  long co = lg(mat);
-  long li = lg(perm);
-
-  fprintferr("Permutation: %Z\n",perm);
-  matgen = cgetg(co,t_MAT);
-  for (j=1; j<co; j++)
-  {
-    p1 = cgetg(li-k0,t_COL); matgen[j]=(long)p1;
-    p1 -= k0; matj = mat[j];
-    for (i=k0+1; i<li; i++) p1[i] = lstoi(matj[perm[i]]);
-  }
-  if (DEBUGLEVEL > 6) fprintferr("matgen = %Z\n",matgen);
-  avma=av;
-}
-
-static GEN
-col_dup(long n, GEN col)
-{
-   GEN c = new_chunk(n+1);
-   memcpy(c,col,(n+1)*sizeof(long));
-   return c;
-}
-
-#define gswap(x,y) { long *_t=x; x=y; y=_t; }
-
-/* HNF reduce a relation matrix (column operations + row permutation)
-** Input:
-**   mat = (li-1) x (co-1) matrix of long
-**   C   = r x (co-1) matrix of GEN
-**   perm= permutation vector (length li-1), indexing the rows of mat: easier
-**     to maintain perm than to copy rows. For columns we can do it directly
-**     using e.g. swap(mat[i], mat[j])
-**   k0 = integer. The k0 first lines of mat are dense, the others are sparse.
-**     Also if k0=0, mat is modified in place [from mathnfspec], otherwise
-**     it is left alone [from buchall]
-** Output: cf ASCII art in the function body
-**
-** row permutations applied to perm
-** column operations applied to C.
-**/
-GEN
-hnfspec(long** mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
-{
-  long av=avma,av2,*p,i,j,k,lk0,col,lig,*matj, **mat;
-  long n,s,t,lim,nlze,lnz,nr;
-  GEN p1,p2,matb,matbnew,vmax,matt,T,extramat;
-  GEN B,H,dep,permpro;
-  GEN *gptr[4];
-  long co = lg(mat0);
-  long li = lg(perm); /* = lg(mat0[1]) */
-  int updateT = 1;
-
-  if (!k0) mat = mat0; /* in place */
-  else
-  { /* keep original mat0 safe, modify a copy */
-    mat = (long**)new_chunk(co); mat[0] = mat0[0];
-    for (j=1; j<co; j++) mat[j] = col_dup(li,mat0[j]);
-  }
-
-  if (DEBUGLEVEL>5)
-  {
-    fprintferr("Entering hnfspec\n");
-    p_mat(mat,perm,0);
-  }
-  matt = cgetg(co,t_MAT); /* dense part of mat (top) */
-  for (j=1; j<co; j++)
-  {
-    p1=cgetg(k0+1,t_COL); matt[j]=(long)p1; matj = mat[j];
-    for (i=1; i<=k0; i++) p1[i] = lstoi(matj[perm[i]]);
-  }
-  vmax = cgetg(co,t_VECSMALL);
-  av2 = avma; lim = stack_lim(av2,1);
-
-  i=lig=li-1; col=co-1; lk0=k0;
-  if (k0 || (lg(*ptC) > 1 && lg((*ptC)[1]) > 1)) T = idmat(col);
-  else
-  { /* dummy ! */
-    GEN z = cgetg(1,t_COL);
-    T = cgetg(co, t_MAT); updateT = 0;
-    for (j=1; j<co; j++) T[j] = (long)z;
-  }
-  /* Look for lines with a single non­0 entry, equal to ±1 */
-  while (i > lk0)
-    switch( count(mat,perm[i],col,&n) )
-    {
-      case 0: /* move zero lines between k0+1 and lk0 */
-	lk0++; swap(perm[i], perm[lk0]);
-        i=lig; continue;
-
-      case 1: /* move trivial generator between lig+1 and li */
-	swap(perm[i], perm[lig]);
-        swap(T[n], T[col]);
-	gswap(mat[n], mat[col]); p = mat[col];
-	if (p[perm[lig]] < 0) /* = -1 */
-	{ /* convert relation -g = 0 to g = 0 */
-	  for (i=lk0+1; i<lig; i++) p[perm[i]] = -p[perm[i]];
-          if (updateT)
-          {
-            p1 = (GEN)T[col];
-            for (i=1; ; i++)
-              if (signe((GEN)p1[i])) { p1[i] = lnegi((GEN)p1[i]); break; }
-          }
-	}
-	lig--; col--; i=lig; continue;
-
-      default: i--;
-    }
-  if (DEBUGLEVEL>5)
-  {
-    fprintferr("    after phase1:\n");
-    p_mat(mat,perm,0);
-  }
-
-#define absmax(s,z) {long _z; _z = labs(z); if (_z > s) s = _z;}
-
-#if 0 /* TODO: check, and put back in */
-  /* Get rid of all lines containing only 0 and ± 1, keeping track of column
-   * operations in T. Leave the rows 1..lk0 alone [up to k0, coeff
-   * explosion, between k0+1 and lk0, row is 0]
-   */
-  s = 0;
-  while (lig > lk0 && s < (HIGHBIT>>1))
-  {
-    for (i=lig; i>lk0; i--)
-      if (count(mat,perm[i],col,&n) >= 0) break;
-    if (i == lk0) break;
-
-    /* only 0, ±1 entries, at least 2 of them non-zero */
-    swap(perm[i], perm[lig]);
-    swap(T[n], T[col]); p1 = (GEN)T[col];
-    gswap(mat[n], mat[col]); p = mat[col];
-    if (p[perm[lig]] < 0)
-    {
-      for (i=lk0+1; i<=lig; i++) p[perm[i]] = -p[perm[i]];
-      T[col] = lneg(p1);
-    }
-    for (j=1; j<n; j++)
-    {
-      matj = mat[j];
-      if (! (t = matj[perm[lig]]) ) continue;
-      if (t == 1)
-      { /* t = 1 */
-        for (i=lk0+1; i<=lig; i++)
-          absmax(s, matj[perm[i]] -= p[perm[i]]);
-        T[j] = lsub((GEN)T[j], p1);
-      }
-      else
-      { /* t = -1 */
-        for (i=lk0+1; i<=lig; i++)
-          absmax(s, matj[perm[i]] += p[perm[i]]);
-        T[j] = ladd((GEN)T[j], p1);
-      }
-    }
-    lig--; col--;
-    if (low_stack(lim, stack_lim(av2,1)))
-    {
-      if(DEBUGMEM>1) err(warnmem,"hnfspec[1]");
-      T = gerepileupto(av2, gcopy(T));
-    }
-  }
-#endif
-  /* As above with lines containing a ±1 (no other assumption).
-   * Stop when single precision becomes dangerous */
-  for (j=1; j<=col; j++)
-  {
-    matj = mat[j];
-    for (s=0, i=lk0+1; i<=lig; i++) absmax(s, matj[i]);
-    vmax[j] = s;
-  }
-  while (lig > lk0)
-  {
-    for (i=lig; i>lk0; i--)
-      if ( (n = count2(mat,perm[i],col)) ) break;
-    if (i == lk0) break;
-
-    swap(perm[i], perm[lig]);
-    swap(vmax[n], vmax[col]);
-    gswap(mat[n], mat[col]); p = mat[col];
-    swap(T[n], T[col]); p1 = (GEN)T[col];
-    if (p[perm[lig]] < 0)
-    {
-      for (i=lk0+1; i<=lig; i++) p[perm[i]] = -p[perm[i]];
-      p1 = gneg(p1); T[col] = (long)p1;
-    }
-    for (j=1; j<col; j++)
-    {
-      matj = mat[j];
-      if (! (t = matj[perm[lig]]) ) continue;
-      if (vmax[col] && (ulong)labs(t) >= (HIGHBIT-vmax[j]) / vmax[col])
-        goto END2;
-
-      for (s=0, i=lk0+1; i<=lig; i++)
-        absmax(s, matj[perm[i]] -= t*p[perm[i]]);
-      vmax[j] = s;
-      T[j] = (long)ZV_lincomb(gun,stoi(-t), (GEN)T[j],p1);
-    }
-    lig--; col--;
-    if (low_stack(lim, stack_lim(av2,1)))
-    {
-      if(DEBUGMEM>1) err(warnmem,"hnfspec[2]");
-      T = gerepileupto(av2,gcopy(T));
-    }
-  }
-
-END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
-  /* go multiprecision first */
-  matb = cgetg(co,t_MAT); /* bottom part (complement of matt) */
-  for (j=1; j<co; j++)
-  {
-    p1 = cgetg(li-k0,t_COL); matb[j] = (long)p1;
-    p1 -= k0; matj = mat[j];
-    for (i=k0+1; i<li; i++) p1[i] = lstoi(matj[perm[i]]);
-  }
-  if (DEBUGLEVEL>5)
-  {
-    fprintferr("    after phase2:\n");
-    p_mat(mat,perm,k0);
-  }
-  for (i=li-2; i>lig; i--)
-  {
-    long i1, i0 = i - k0, k = i + co-li;
-    GEN Bk = (GEN)matb[k];
-    GEN Tk = (GEN)T[k];
-    for (j=k+1; j<co; j++)
-    {
-      p1=(GEN)matb[j]; p2=(GEN)p1[i0];
-      if (! (s=signe(p2)) ) continue;
-
-      p1[i0] = zero;
-      if (is_pm1(p2))
-      {
-        if (s > 0)
-        { /* p2 = 1 */
-          for (i1=1; i1<i0; i1++)
-            p1[i1] = lsubii((GEN)p1[i1], (GEN)Bk[i1]);
-          T[j] = lsub((GEN)T[j], Tk);
-        }
-        else
-        { /* p2 = -1 */
-          for (i1=1; i1<i0; i1++)
-            p1[i1] = laddii((GEN)p1[i1], (GEN)Bk[i1]);
-          T[j] = ladd((GEN)T[j], Tk);
-        }
-      }
-      else
-      {
-        for (i1=1; i1<i0; i1++)
-          p1[i1] = lsubii((GEN)p1[i1], mulii(p2,(GEN) Bk[i1]));
-        T[j] = (long)ZV_lincomb(gun,negi(p2), (GEN)T[j],Tk);
-      }
-    }
-    if (low_stack(lim, stack_lim(av2,1)))
-    {
-      if(DEBUGMEM>1) err(warnmem,"hnfspec[3], i = %ld", i);
-      for (j=1; j<co; j++) setlg(matb[j], i0+1); /* bottom can be forgotten */
-      gptr[0]=&T; gptr[1]=&matb; gerepilemany(av2,gptr,2);
-    }
-  }
-  gptr[0]=&T; gptr[1]=&matb; gerepilemany(av2,gptr,2);
-  if (DEBUGLEVEL>5)
-  {
-    fprintferr("    matb cleaned up (using Id block)\n");
-    if (DEBUGLEVEL>6) outerr(matb);
-  }
-
-  nlze = lk0 - k0;  /* # of 0 rows */
-  lnz = lig-nlze+1; /* 1 + # of non-0 rows (!= 0...0 1 0 ... 0) */
-  if (updateT) matt = gmul(matt,T); /* update top rows */
-  extramat = cgetg(col+1,t_MAT); /* = new C minus the 0 rows */
-  for (j=1; j<=col; j++)
-  {
-    GEN z = (GEN)matt[j];
-    GEN t = ((GEN)matb[j]) + nlze - k0;
-    p2=cgetg(lnz,t_COL); extramat[j]=(long)p2;
-    for (i=1; i<=k0; i++) p2[i] = z[i]; /* top k0 rows */
-    for (   ; i<lnz; i++) p2[i] = t[i]; /* other non-0 rows */
-  }
-  permpro = imagecomplspec(extramat, &nr); /* lnz = lg(permpro) */
-
-  if (nlze)
-  { /* put the nlze 0 rows (trivial generators) at the top */
-    p1 = new_chunk(lk0+1);
-    for (i=1; i<=nlze; i++) p1[i] = perm[i + k0];
-    for (   ; i<=lk0; i++)  p1[i] = perm[i - nlze];
-    for (i=1; i<=lk0; i++)  perm[i] = p1[i];
-  }
-  /* sort other rows according to permpro (nr redundant generators first) */
-  p1 = new_chunk(lnz); p2 = perm + nlze;
-  for (i=1; i<lnz; i++) p1[i] = p2[permpro[i]];
-  for (i=1; i<lnz; i++) p2[i] = p1[i];
-  /* perm indexes the rows of mat
-   *   |_0__|__redund__|__dense__|__too big__|_____done______|
-   *   0  nlze                              lig             li
-   *         \___nr___/ \___k0__/
-   *         \____________lnz ______________/
-   *
-   *               col   co
-   *       [dep     |     ]
-   *    i0 [--------|  B  ] (i0 = nlze + nr)
-   *       [matbnew |     ] matbnew has maximal rank = lnz-1 - nr
-   * mat = [--------|-----] lig
-   *       [   0    | Id  ]
-   *       [        |     ] li */
-
-  matbnew = cgetg(col+1,t_MAT); /* dense+toobig, maximal rank. For hnffinal */
-  dep    = cgetg(col+1,t_MAT); /* rows dependant from the ones in matbnew */
-  for (j=1; j<=col; j++)
-  {
-    GEN z = (GEN)extramat[j];
-    p1 = cgetg(nlze+nr+1,t_COL); dep[j]=(long)p1;
-    p2 = cgetg(lnz-nr,t_COL); matbnew[j]=(long)p2;
-    for (i=1; i<=nlze; i++) p1[i]=zero;
-    p1 += nlze; for (i=1; i<=nr; i++) p1[i] = z[permpro[i]];
-    p2 -= nr;   for (   ; i<lnz; i++) p2[i] = z[permpro[i]];
-  }
-
-  /* redundant generators in terms of the genuine generators
-   * (x_i) = - (g_i) B */
-  B = cgetg(co-col,t_MAT);
-  for (j=col+1; j<co; j++)
-  {
-    GEN y = (GEN)matt[j];
-    GEN z = (GEN)matb[j];
-    p1=cgetg(lig+1,t_COL); B[j-col]=(long)p1;
-    for (i=1; i<=nlze; i++) p1[i] = z[i];
-    p1 += nlze; z += nlze-k0;
-    for (k=1; k<lnz; k++)
-    {
-      i = permpro[k];
-      p1[k] = (i <= k0)? y[i]: z[i];
-    }
-  }
-  if (updateT) *ptC = gmul(*ptC,T);
-  *ptdep = dep;
-  *ptB = B;
-  H = hnffinal(matbnew,perm,ptdep,ptB,ptC);
-  gptr[0]=ptC;
-  gptr[1]=ptdep;
-  gptr[2]=ptB;
-  gptr[3]=&H; gerepilemany(av,gptr,4);
-  if (DEBUGLEVEL)
-    msgtimer("hnfspec [%ld x %ld] --> [%ld x %ld]",li-1,co-1, lig-1,col-1);
-  return H;
-}
-
-/* HNF reduce x, apply same transforms to C */
-GEN
-mathnfspec(GEN x, GEN *ptperm, GEN *ptdep, GEN *ptB, GEN *ptC)
-{
-  long i,j,k,ly,lx = lg(x);
-  GEN p1,p2,z,perm;
-  if (lx == 1) return gcopy(x);
-  ly = lg(x[1]);
-  z = cgetg(lx,t_MAT);
-  perm = cgetg(ly,t_VECSMALL); *ptperm = perm;
-  for (i=1; i<ly; i++) perm[i] = i;
-  for (i=1; i<lx; i++)
-  {
-    p1 = cgetg(ly,t_COL); z[i] = (long)p1;
-    p2 = (GEN)x[i];
-    for (j=1; j<ly; j++) 
-    {
-      if (is_bigint(p2[j])) goto TOOLARGE;
-      p1[j] = itos((GEN)p2[j]);
-    }
-  }
-  /*  [ dep |     ]
-   *  [-----|  B  ]
-   *  [  H  |     ]
-   *  [-----|-----]
-   *  [  0  | Id  ] */
-  return hnfspec((long**)z,perm, ptdep, ptB, ptC, 0);
-
-TOOLARGE:
-  if (lg(*ptC) > 1 && lg((*ptC)[1]) > 1)
-    err(impl,"mathnfspec with large entries");
-  x = hnf(x); lx = lg(x); j = ly; k = 0;
-  for (i=1; i<ly; i++)
-  {
-    if (gcmp1(gcoeff(x,i,i + lx-ly)))
-      perm[--j] = i;
-    else
-      perm[++k] = i;
-  }
-  setlg(perm,k+1);
-  x = rowextract_p(x, perm); /* upper part */
-  setlg(perm,ly);
-  *ptB = vecextract_i(x, j+lx-ly, lx-1);
-  setlg(x, j);
-  *ptdep = rowextract_i(x, 1, lx-ly);
-  return rowextract_i(x, lx-ly+1, k); /* H */
-}
-
-/* add new relations to a matrix treated by hnfspec (extramat / extraC) */
-GEN
-hnfadd(GEN H, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, /* cf hnfspec */
-       GEN extramat,GEN extraC)
-{
-  GEN p1,p2,p3,matb,extratop,Cnew,permpro;
-  GEN B=*ptB, C=*ptC, dep=*ptdep, *gptr[4];
-  long av = avma, i,j,lextra,colnew;
-  long li = lg(perm);
-  long co = lg(C);
-  long lB = lg(B);
-  long lig = li - lB;
-  long col = co - lB;
-  long lH = lg(H)-1;
-  long nlze = lH? lg(dep[1])-1: lg(B[1])-1;
-
-  if (DEBUGLEVEL>5)
-  {
-    fprintferr("Entering hnfadd:\n");
-    if (DEBUGLEVEL>6) fprintferr("extramat = %Z\n",extramat);
-  }
- /*               col    co
-  *       [ 0 |dep |     ]
-  *  nlze [--------|  B  ]
-  *       [ 0 | H  |     ]
-  *       [--------|-----] lig
-  *       [   0    | Id  ]
-  *       [        |     ] li */
-  lextra = lg(extramat)-1;
-  extratop = cgetg(lextra+1,t_MAT); /* [1..lig] part (top) */
-  p2 = cgetg(lextra+1,t_MAT); /* bottom */
-  for (j=1; j<=lextra; j++)
-  {
-    GEN z = (GEN)extramat[j];
-    p1=cgetg(lig+1,t_COL); extratop[j] = (long)p1;
-    for (i=1; i<=lig; i++) p1[i] = z[i];
-    p1=cgetg(lB,t_COL); p2[j] = (long)p1;
-    p1 -= lig;
-    for (   ; i<li; i++) p1[i] = z[i];
-  }
-  if (li-1 != lig)
-  { /* zero out bottom part, using the Id block */
-    GEN A = cgetg(lB,t_MAT);
-    for (j=1; j<lB; j++) A[j] = C[j+col];
-    extraC   = gsub(extraC,  gmul(A,p2));
-    extratop = gsub(extratop,gmul(B,p2));
-  }
-
-  colnew = lH + lextra;
-  extramat = cgetg(colnew+1,t_MAT);
-  Cnew = cgetg(lB+colnew,t_MAT);
-  for (j=1; j<=lextra; j++)
-  {
-    extramat[j] = extratop[j];
-    Cnew[j] = extraC[j];
-  }
-  for (   ; j<=colnew; j++)
-  {
-    p1 = cgetg(lig+1,t_COL); extramat[j] = (long)p1;
-    p2 = (GEN)dep[j-lextra]; for (i=1; i<=nlze; i++) p1[i] = p2[i];
-    p2 = (GEN)  H[j-lextra]; for (   ; i<=lig ; i++) p1[i] = p2[i-nlze];
-  }
-  for (j=lextra+1; j<lB+colnew; j++)
-    Cnew[j] = C[j-lextra+col-lH];
-  if (DEBUGLEVEL>5)
-  {
-    fprintferr("    1st phase done\n");
-    if (DEBUGLEVEL>6) fprintferr("extramat = %Z\n",extramat);
-  }
-  permpro = imagecomplspec(extramat, &nlze);
-  p1 = new_chunk(lig+1);
-  for (i=1; i<=lig; i++) p1[i] = perm[permpro[i]];
-  for (i=1; i<=lig; i++) perm[i] = p1[i];
-
-  matb = cgetg(colnew+1,t_MAT);
-  dep = cgetg(colnew+1,t_MAT);
-  for (j=1; j<=colnew; j++)
-  {
-    GEN z = (GEN)extramat[j];
-    p1=cgetg(nlze+1,t_COL); dep[j]=(long)p1;
-    p2=cgetg(lig+1-nlze,t_COL); matb[j]=(long)p2;
-    p2 -= nlze;
-    for (i=1; i<=nlze; i++) p1[i] = z[permpro[i]];
-    for (   ; i<= lig; i++) p2[i] = z[permpro[i]];
-  }
-  p3 = cgetg(lB,t_MAT);
-  for (j=1; j<lB; j++)
-  {
-    p2 = (GEN)B[j];
-    p1 = cgetg(lig+1,t_COL); p3[j] = (long)p1;
-    for (i=1; i<=lig; i++) p1[i] = p2[permpro[i]];
-  }
-  B = p3;
-  if (DEBUGLEVEL>5) fprintferr("    2nd phase done\n");
-  *ptdep = dep;
-  *ptB = B;
-  H = hnffinal(matb,perm,ptdep,ptB,&Cnew);
-  p1 = cgetg(co+lextra,t_MAT);
-  for (j=1; j <= col-lH; j++)   p1[j] = C[j];
-  C = Cnew - (col-lH);
-  for (   ; j < co+lextra; j++) p1[j] = C[j];
-
-  gptr[0]=ptC; *ptC=p1;
-  gptr[1]=ptdep;
-  gptr[2]=ptB; 
-  gptr[3]=&H; gerepilemany(av,gptr,4);
-  if (DEBUGLEVEL)
-  {
-    if (DEBUGLEVEL>7) fprintferr("mit = %Z\nC = %Z\n",H,*ptC);
-    msgtimer("hnfadd (%ld)",lextra);
-  }
-  return H;
 }
 
 /* return a solution of congruence system sum M_{ i,j } X_j = Y_i mod D_i

@@ -842,13 +842,14 @@ quicktrace(GEN x, GEN sym)
 static GEN
 trace_col(GEN x, GEN T)
 {
+  ulong av = avma;
   GEN t = gzero;
   long i, l = lg(x);
 
   t = mulii((GEN)x[1],(GEN)T[1]);
   for (i=2; i<l; i++)
     if (signe(x[i])) t = addii(t, mulii((GEN)x[i],(GEN)T[i]));
-  return t;
+  return gerepileuptoint(av, t);
 }
 
 /* Seek a new, simpler, polynomial pol defining the same number field as
@@ -1057,7 +1058,7 @@ get_T(GEN mul, GEN x, GEN bas, GEN den)
   for (i=2; i<=n; i++)
   {
     tr = quicktrace((GEN)bas[i], sym);
-    if (den && den[i]) tr = gdivexact(tr,(GEN)den[i]);
+    if (den && den[i]) tr = diviiexact(tr,(GEN)den[i]);
     T1[i] = (long)tr; /* tr(w[i]) */
   }
   T[1] = (long)T1;
@@ -1139,14 +1140,14 @@ get_nf_matrices(GEN nf, long small)
   mat[3]=(long)mulmat_real(MC,M);
   if (small) { nf[8]=nf[9]=mat[2]=zero; return; }
 
-  invbas = invmat(vecpol_to_mat(bas,n));
+  invbas = QM_inv(vecpol_to_mat(bas,n), gun);
   mul = get_mul_table(x,basden,invbas,&T);
   if (DEBUGLEVEL) msgtimer("mult. table");
   
   nf[8]=(long)invbas;
   nf[9]=(long)mul;
 
-  TI = gauss(T, gscalmat(dK, n));
+  TI = ZM_inv(T, dK); /* dK T^-1 */
   MDI = make_MDI(nf,TI, &A, &dA);
   mat[6]=(long)TI;
   mat[7]=(long)MDI; /* needed in idealinv below */

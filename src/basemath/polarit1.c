@@ -1657,7 +1657,7 @@ padicff(GEN x,GEN p,long pr)
   if (!carrecomplet(divii(dx,(GEN)nf[3]),(GEN*)(nf+4)))
     err(bugparier,"factorpadic2 (incorrect discriminant)");
   basden = get_bas_den(bas);
-  invbas = invmat(vecpol_to_mat(bas,n));
+  invbas = QM_inv(vecpol_to_mat(bas,n), gun);
   mul = get_mul_table(x,basden,invbas,NULL);
   nf[7]=(long)bas;
   nf[8]=(long)invbas;

@@ -3457,9 +3457,9 @@ sturmpart(GEN x, GEN a, GEN b)
         p1 = gmul(h,p1); h = g; break;
       default:
         p1 = gmul(gpuigs(h,degq),p1);
-        h = gdiv(gpuigs(g,degq), gpuigs(h,degq-1));
+        h = gdivexact(gpuigs(g,degq), gpuigs(h,degq-1));
     }
-    v = gdiv(r,p1);
+    v = gdivexact(r,p1);
     if (low_stack(lim,stack_lim(av,1)))
     {
       GEN *gptr[4]; gptr[0]=&u; gptr[1]=&v; gptr[2]=&g; gptr[3]=&h;

@@ -386,7 +386,9 @@ idealhermite2(GEN nf, GEN a, GEN b)
 static int
 ok_elt(GEN x, GEN xZ, GEN y)
 {
-  return gegal(x, hnfmodid(y, xZ));
+  ulong av = avma;
+  int r = gegal(x, hnfmodid(y, xZ));
+  avma = av; return r;
 }
 
 static void
@@ -466,7 +468,7 @@ addmul_mat(GEN a, long s, GEN b)
 static GEN
 mat_ideal_two_elt(GEN nf, GEN x)
 {
-  GEN y,a,beta,cx,xZ,mul, pol = (GEN)nf[1];
+  GEN TAB,y,a,beta,cx,xZ,mul, pol = (GEN)nf[1];
   long i,j,lm, N = lgef(pol)-3;
   ulong av,tetpil;
 
@@ -490,11 +492,12 @@ mat_ideal_two_elt(GEN nf, GEN x)
   beta= cgetg(N+1, t_VEC);
   mul = cgetg(N+1, t_VEC); lm = 1; /* = lg(mul) */
   /* look for a in x such that a O/xZ = x O/xZ */
+  TAB = gmod((GEN)nf[9], xZ); /* mult table in O/xZ */
   for (i=2; i<=N; i++)
   {
     GEN t, y = cgetg(N+1,t_MAT);
     a = (GEN)x[i];
-    for (j=1; j<=N; j++) y[j] = (long)element_mulid(nf,a,j);
+    for (j=1; j<=N; j++) y[j] = (long)element_mulid(TAB,a,j);
     /* columns of mul[i] = canonical generators for x[i] O/xZ as Z-module */
     t = gmod(y, xZ);
     if (gcmp0(t)) continue;
@@ -1058,14 +1061,15 @@ static GEN
 idealmulspec(GEN nf, GEN x, GEN a, GEN alpha)
 {
   long i, N=lg(x)-1;
-  GEN m;
+  GEN m, TAB, mod;
 
   if (isnfscalar(alpha))
     return gmul(mppgcd(a,(GEN)alpha[1]),x);
-  m = cgetg((N<<1)+1,t_MAT);
+  mod = mulii(a, gcoeff(x,1,1));
+  m = cgetg((N<<1)+1,t_MAT); TAB = gmod((GEN)nf[9],mod);
   for (i=1; i<=N; i++) m[i]=(long)element_muli(nf,alpha,(GEN)x[i]);
   for (i=1; i<=N; i++) m[i+N]=lmul(a,(GEN)x[i]);
-  return hnfmodid(m, mulii(a, gcoeff(x,1,1)));
+  return hnfmodid(m,mod);
 }
 
 /* x ideal (matrix form,maximal rank), vp prime ideal (primedec). Output the
@@ -2340,331 +2344,6 @@ isinvector(GEN v, GEN x, long n)
   for (i=1; i<=n; i++)
     if (gegal((GEN)v[i],x)) return i;
   return 0;
-}
-
-/* Given an integral ideal x and three algebraic integers a, b and c in a
- * number field nf gives a beta belonging to nf such that beta.x^(-1) is an
- * integral ideal coprime to abc.Z_k
- */
-static GEN
-idealcoprimeinvabc(GEN nf, GEN x, GEN a, GEN b, GEN c)
-{
-  long av=avma,tetpil,i,j,r,ra,rb,rc;
-  GEN facta,factb,factc,fact,factall,p1,p2,ep;
-
-  if (DEBUGLEVEL>4)
-  {
-    fprintferr(" entree dans idealcoprimeinvabc() :\n");
-    fprintferr(" x = "); outerr(x); fprintferr(" a = "); outerr(a);
-    fprintferr(" b = "); outerr(b); fprintferr(" c = "); outerr(c);
-    flusherr();
-  }
-  facta=(GEN)idealfactor(nf,a)[1]; factb=(GEN)idealfactor(nf,b)[1];
-  factc=(GEN)idealfactor(nf,c)[1]; ra=lg(facta); rb=lg(factb); rc=lg(factc);
-  factall=cgetg(ra+rb+rc-2,t_COL);
-  for (i=1; i<ra; i++) factall[i]=facta[i]; j=ra-1;
-  for (i=1; i<rb; i++)
-    if (!isinvector(factall,(GEN)factb[i],j)) factall[++j]=factb[i];
-  for (i=1; i<rc; i++)
-    if (!isinvector(factall,(GEN)factc[i],j)) factall[++j]=factc[i];
-  r=j+1; fact=cgetg(3,t_MAT); p1=cgetg(r,t_COL); ep=cgetg(r,t_COL);
-  for (i=1; i<r; i++) p1[i]=factall[i];
-  for (i=1; i<r; i++) ep[i]=lstoi(idealval(nf,x,(GEN)p1[i]));
-  fact[1]=(long)p1; fact[2]=(long)ep; tetpil=avma; p2=idealappr0(nf,fact,1);
-  if (DEBUGLEVEL>2)
-    { fprintferr(" sortie de idealcoprimeinvabc() : p2 = "); outerr(p2); }
-  return gerepile(av,tetpil,p2);
-}
-
-/* Solve the equation ((b+aX).Z_k/((a,b).J),M)=Z_k. */
-static GEN
-findX(GEN nf, GEN a, GEN b, GEN J, GEN M)
-{
-  long N,i,k,r,v;
-  GEN p1,p2,abJ,fact,list,ve,ep,int0,int1,int2,pr;
-
-  if (DEBUGLEVEL>4)
-  {
-    fprintferr(" entree dans findX() :\n");
-    fprintferr(" a = "); outerr(a); fprintferr(" b = "); outerr(b);
-    fprintferr(" J = "); outerr(J); fprintferr(" M = "); outerr(M);
-  }
-  N=lgef(nf[1])-3;
-  p1=cgetg(3,t_MAT); p1[1]=(long)a; p1[2]=(long)b;
-  if (N==2) p1=idealmul(nf,p1,idmat(2));
-  abJ=idealmul(nf,p1,J);
-  fact=idealfactor(nf,M); list=(GEN)fact[1]; r=lg(list);
-  ve=cgetg(r,t_VEC); ep=cgetg(r,t_VEC);
-  int0=cgetg(N+1,t_COL); int1=cgetg(N+1,t_COL); int2=cgetg(N+1,t_COL);
-  for (i=2; i<=N; i++) int0[i]=int1[i]=int2[i]=zero;
-  int0[1]=zero; int1[1]=un; int2[1]=deux;
-  for (i=1; i<r; i++)
-  {
-    pr=(GEN)list[i]; v=element_val(nf,a,pr);
-    if (v)
-    {
-      ep[i]=un;
-      ve[i] = (element_val(nf,b,pr)<=v)? (long)int0: (long)int1;
-    }
-    else
-    {
-      v=idealval(nf,abJ,pr);
-      p1=element_div(nf,idealaddtoone_i(nf,a,pr),a);
-      ep[i]=lstoi(v+1); k=1;
-      while (k<=v)
-      {
-	p1=element_mul(nf,p1,gsub(int2,element_mul(nf,a,p1)));
-	k<<=1;
-      }
-      p1=element_mul(nf,p1,gsub(element_pow(nf,(GEN)pr[2],stoi(v)),b));
-      ve[i]=lmod(p1,gpuigs((GEN)pr[1],v+1));
-    }
-  }
-  fact[2]=(long)ep; p2=idealchinese(nf,fact,ve);
-  if (DEBUGLEVEL>2) { fprintferr(" sortie de findX() : p2 = "); outerr(p2); }
-  return p2;
-}
-
-/* A usage interne. Given a, b, c, d in nf, gives an algebraic integer y in
- * nf such that [c,d]-y.[a,b] is "small"
- */
-static GEN
-nfreducemat(GEN nf, GEN a, GEN b, GEN c, GEN d)
-{
-  long av=avma,tetpil,i,i1,i2,j,j1,j2,k,N;
-  GEN p1,p2,X,M,y,mult,s;
-
-  mult=(GEN)nf[9]; N=lgef(nf[1])-3; X=cgetg(N+1,t_COL);
-  for (j=1; j<=N; j++)
-  {
-    s=gzero;
-    for (i=1; i<=N; i++) for (k=1; k<=N; k++)
-    {
-      p1=gcoeff(mult,k,j+(i-1)*N);
-      if (!gcmp0(p1))
-	s=gadd(s,gmul(p1,gadd(gmul((GEN)a[i],(GEN)c[k]),
-	                      gmul((GEN)b[i],(GEN)d[k]))));
-    }
-    X[j]=(long)s;
-  }
-  M=cgetg(N+1,t_MAT);
-  for (j2=1; j2<=N; j2++)
-  {
-    p1=cgetg(N+1,t_COL); M[j2]=(long)p1;
-    for (j1=1; j1<=N; j1++)
-    {
-      s=gzero;
-      for (i1=1; i1<=N; i1++)
-       for (i2=1; i2<=N; i2++)
-        for (k=1; k<=N; k++)
-	{
-	  p2=gmul(gcoeff(mult,k,j1+(i1-1)*N),gcoeff(mult,k,j2+(i2-1)*N));
-	  if (!gcmp0(p2))
-            s=gadd(s,gmul(p2,gadd(gmul((GEN)a[i1],(GEN)a[i2]),
-                                  gmul((GEN)b[i1],(GEN)b[i2]))));
-	}
-      p1[j1]=(long)s;
-    }
-  }
-  y=gauss(M,X); tetpil=avma;
-  return gerepile(av,tetpil,ground(y));
-}
-
-/* Given 3 algebraic integers a,b,c in a number field nf given by their
- * components on the integral basis, gives a three-component vector [d,e,U]
- * whose first two components are algebraic integers d,e and the third a
- * unimodular 3x3-matrix U such that [a,b,c]*U=[0,d,e]
- */
-GEN
-threetotwo2(GEN nf, GEN a, GEN b, GEN c)
-{
-  long av=avma,tetpil,i,N;
-  GEN y,p1,p2,p3,M,X,Y,J,e,b1,c1,u,v,U,int0,Z,pk;
-
-  if (DEBUGLEVEL>2)
-  {
-    fprintferr(" On entre dans threetotwo2() : \n");
-    fprintferr(" a = "); outerr(a);
-    fprintferr(" b = "); outerr(b);
-    fprintferr(" c = "); outerr(c);
-  }
-  if (gcmp0(a))
-  {
-    y=cgetg(4,t_VEC); y[1]=lcopy(b); y[2]=lcopy(c); y[3]=(long)idmat(3);
-    return y;
-  }
-  if (gcmp0(b))
-  {
-    y=cgetg(4,t_VEC); y[1]=lcopy(a); y[2]=lcopy(c);
-    e = idmat(3); i=e[1]; e[1]=e[2]; e[2]=i;
-    y[3]=(long)e; return y;
-  }
-  if (gcmp0(c))
-  {
-    y=cgetg(4,t_VEC); y[1]=lcopy(a); y[2]=lcopy(b);
-    e = idmat(3); i=e[1]; e[1]=e[3]; e[3]=e[2]; e[2]=i;
-    y[3]=(long)e; return y;
-  }
-
-  N=lgef(nf[1])-3;
-  p1=cgetg(4,t_MAT); p1[1]=(long)a; p1[2]=(long)b;
-  p1[3]=(long)c; p1=idealhermite_aux(nf,p1);
-  if (DEBUGLEVEL>2)
-    { fprintferr(" ideal a.Z_k+b.Z_k+c.Z_k = "); outerr(p1); }
-  J=idealdiv(nf,e=idealcoprimeinvabc(nf,p1,a,b,c),p1);
-  if (DEBUGLEVEL>2)
-    { fprintferr(" ideal J = "); outerr(J); fprintferr(" e = "); outerr(e); }
-  p1=cgetg(3,t_MAT); p1[1]=(long)a; p1[2]=(long)b; M=idealmul(nf,p1,J);
-  if (DEBUGLEVEL>2)
-    { fprintferr(" ideal M=(a.Z_k+b.Z_k).J = "); outerr(M); }
-  X=findX(nf,a,b,J,M);
-  if (DEBUGLEVEL>2){ fprintferr(" X = "); outerr(X); }
-  p1=gadd(b,element_mul(nf,a,X));
-  p2=cgetg(3,t_MAT); p2[1]=(long)element_mul(nf,a,p1);
-  p2[2]=(long)element_mul(nf,c,p1);
-  if (N==2) p2=idealhermite_aux(nf,p2);
-  p3=cgetg(3,t_MAT); p3[1]=(long)a; p3[2]=(long)b;
-  p3=idealhermite_aux(nf,p3);
-  if (DEBUGLEVEL>2)
-    { fprintferr(" ideal a.Z_k+b.Z_k = "); outerr(p3); }
-  Y=findX(nf,a,c,J,idealdiv(nf,p2,p3));
-  if (DEBUGLEVEL>2) { fprintferr(" Y = "); outerr(Y); }
-  b1=element_div(nf,p1,e);
-  if (DEBUGLEVEL>2) { fprintferr(" b1 = "); outerr(b1); }
-  p2=gadd(c,element_mul(nf,a,Y));
-  c1=element_div(nf,p2,e);
-  if (DEBUGLEVEL>2) { fprintferr(" c1 = "); outerr(c1); }
-  p1=idealhermite_aux(nf,b1);
-  p2=idealhermite_aux(nf,c1);
-  p3=idealaddtoone(nf,p1,p2);
-  u=element_div(nf,(GEN)p3[1],b1); v=element_div(nf,(GEN)p3[2],c1);
-  if (DEBUGLEVEL>2)
-    { fprintferr(" u = "); outerr(u); fprintferr(" v = "); outerr(v); }
-  U=cgetg(4,t_MAT);
-  p1=cgetg(4,t_COL); p2=cgetg(4,t_COL); p3=cgetg(4,t_COL);
-  U[1]=(long)p1; U[2]=(long)p2; U[3]=(long)p3;
-  p1[1]=lsub(element_mul(nf,X,c1),element_mul(nf,Y,b1));
-  p1[2]=(long)c1; p1[3]=lneg(b1);
-  int0 = zerocol(N);
-  p2[1]=(long)gscalcol_i(gun,N);
-  p2[2]=p2[3]=(long)int0;
-  Z=gadd(element_mul(nf,X,u),element_mul(nf,Y,v));
-  pk=nfreducemat(nf,c1,(GEN)p1[3],u,v);
-  p3[1]=(long)int0; p3[2]=lsub(u,element_mul(nf,pk,c1));
-  p3[3]=(long)gadd(v,element_mul(nf,pk,b1));
-  e=gadd(e,element_mul(nf,a,gsub(element_mul(nf,pk,(GEN)p1[1]),Z)));
-  tetpil=avma;
-  y=cgetg(4,t_VEC); y[1]=lcopy(a); y[2]=lcopy(e); y[3]=lcopy(U);
-  if (DEBUGLEVEL>2)
-    { fprintferr(" sortie de threetotwo2() : y = "); outerr(y); }
-  return gerepile(av,tetpil,y);
-}
-
-/* Given 3 algebraic integers a,b,c in a number field nf given by their
- * components on the integral basis, gives a three-component vector [d,e,U]
- * whose first two components are algebraic integers d,e and the third a
- * unimodular 3x3-matrix U such that [a,b,c]*U=[0,d,e] Naive method which may
- * not work, but fast and small coefficients.
- */
-GEN
-threetotwo(GEN nf, GEN a, GEN b, GEN c)
-{
-  long av=avma,tetpil,i,N;
-  GEN pol,p1,p2,p3,p4,y,id,hu,h,V,U,r,vd,q1,q1a,q2,q2a,na,nb,nc,nr;
-
-  nf=checknf(nf); pol=(GEN)nf[1]; N=lgef(pol)-3; id=idmat(N);
-  na=gnorml2(a); nb=gnorml2(b); nc=gnorml2(c);
-  U=gmul(idmat(3),gmodulsg(1,pol));
-  if (gcmp(nc,nb)<0)
-  {
-    p1=c; c=b; b=p1; p1=nc; nc=nb; nb=p1;
-    p1=(GEN)U[3]; U[3]=U[2]; U[2]=(long)p1;
-  }
-  if (gcmp(nc,na)<0)
-  {
-    p1=a; a=c; c=p1; p1=na; na=nc; nc=p1;
-    p1=(GEN)U[1]; U[1]=U[3]; U[3]=(long)p1;
-  }
-  while (!gcmp0(gmin(na,nb)))
-  {
-    p1=cgetg(2*N+1,t_MAT);
-    for (i=1; i<=N; i++)
-    {
-      p1[i]=(long)element_mul(nf,a,(GEN)id[i]);
-      p1[i+N]=(long)element_mul(nf,b,(GEN)id[i]);
-    }
-    hu=hnfall(p1); h=(GEN)hu[1]; V=(GEN)hu[2];
-    p2=(GEN)ker(concatsp(h,c))[1]; p3=(GEN)p2[N+1];
-    p4=cgetg(N+1,t_COL);
-    for (i=1; i<=N; i++) p4[i]=(long)ground(gdiv((GEN)p2[i],p3));
-    r=gadd(c,gmul(h,p4));
-    vd=cgetg(N+1,t_MAT); for (i=1; i<=N; i++) vd[i]=V[N+i];
-    p2=gmul(vd,p4);
-    q1=cgetg(N+1,t_COL); q2=cgetg(N+1,t_COL);
-    for (i=1; i<=N; i++) { q1[i]=p2[i]; q2[i]=p2[i+N]; }
-    q1a=basistoalg(nf,q1); q2a=basistoalg(nf,q2);
-    U[3]=(long)gadd((GEN)U[3],gadd(gmul(q1a,(GEN)U[1]),gmul(q2a,(GEN)U[2])));
-    nr=gnorml2(r);
-    if (gcmp(nr,gmax(na,nb))>=0) err(talker,"threetotwo does not work");
-    if (gcmp(na,nb)>=0)
-    {
-      c=a; nc=na; a=r; na=nr; p1=(GEN)U[1]; U[1]=U[3]; U[3]=(long)p1;
-    }
-    else
-    {
-      c=b; nc=nb; b=r; nb=nr; p1=(GEN)U[2]; U[2]=U[3]; U[3]=(long)p1;
-    }
-  }
-  if (!gcmp0(na))
-  {
-    p1=a; a=b; b=p1; p1=(GEN)U[1]; U[1]=U[2]; U[2]=(long)p1;
-  }
-  tetpil=avma; y=cgetg(4,t_VEC); y[1]=lcopy(b); y[2]=lcopy(c);
-  y[3]=(long)algtobasis(nf,U); return gerepile(av,tetpil,y);
-}
-
-/* Given 2 algebraic integers a,b in a number field nf given by their
- * components on the integral basis, gives a three-components vector [d,e,U]
- * whose first two component are algebraic integers d,e and the third a
- * unimodular 2x2-matrix U such that [a,b]*U=[d,e], with d and e hopefully
- * smaller than a and b.
- */
-GEN
-twototwo(GEN nf, GEN a, GEN b)
-{
-  long av=avma,tetpil;
-  GEN pol,p1,y,U,r,qr,qa,na,nb,nr;
-
-  nf=checknf(nf);
-  pol=(GEN)nf[1];
-  na=gnorml2(a); nb=gnorml2(b);
-  U=gmul(idmat(2),gmodulsg(1,pol));
-  if (gcmp(na,nb)>0)
-  {
-    p1=a; a=b; b=p1; p1=na; na=nb; nb=p1;
-    p1=(GEN)U[2]; U[2]=U[1]; U[1]=(long)p1;
-  }
-
-  while (!gcmp0(na))
-  {
-    qr=nfdivres(nf,b,a); r=(GEN)qr[2]; nr=gnorml2(r);
-    if (gcmp(nr,na)<0)
-    {
-      b=a; a=r; nb=na; na=nr; qa=basistoalg(nf,(GEN)qr[1]);
-      p1=gsub((GEN)U[2],gmul(qa,(GEN)U[1])); U[2]=U[1]; U[1]=(long)p1;
-    }
-    else
-    {
-      if (gcmp(nr,nb)<0)
-      {
-	qa=basistoalg(nf,(GEN)qr[1]);
-	U[2]=lsub((GEN)U[2],gmul(qa,(GEN)U[1]));
-      }
-      break;
-    }
-  }
-  tetpil=avma; y=cgetg(4,t_VEC); y[1]=lcopy(a); y[2]=lcopy(b);
-  y[3]=(long)algtobasis(nf,U); return gerepile(av,tetpil,y);
 }
 
 GEN

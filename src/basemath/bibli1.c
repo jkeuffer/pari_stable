@@ -3067,7 +3067,7 @@ fincke_pohst(GEN a,GEN B0,long stockmax,long flag, long PREC, FP_chk_fun *CHECK)
 
   if (v)
   {
-    GEN u2 = invmat(gtrans(v));
+    GEN u2 = ZM_inv(gtrans(v),gun);
     r = gmul(r,u2); /* r = LLL basis now */
     u = gmul(u,u2);
   }

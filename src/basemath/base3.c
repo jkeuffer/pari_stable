@@ -59,6 +59,13 @@ scal_mul(GEN nf, GEN x, GEN y, long ty)
   return gerepile(av,tetpil,algtobasis(nf,p1));
 }
 
+static GEN
+get_tab(GEN nf, long *N)
+{
+  GEN tab = (typ(nf) == t_MAT)? nf: (GEN)nf[9];
+  *N = lg(tab[1])-1; return tab;
+}
+
 /* product of x and y in nf */
 GEN
 element_mul(GEN nf, GEN x, GEN y)
@@ -69,7 +76,7 @@ element_mul(GEN nf, GEN x, GEN y)
   if (x == y) return element_sqr(nf,x);
 
   tx=typ(x); ty=typ(y);
-  nf=checknf(nf); tab = (GEN)nf[9]; N=lgef(nf[1])-3;
+  nf=checknf(nf); tab = get_tab(nf, &N);
   if (tx==t_POLMOD) x=checknfelt_mod(nf,x,"element_mul");
   if (ty==t_POLMOD) y=checknfelt_mod(nf,y,"element_mul");
   if (is_extscalar_t(tx)) return scal_mul(nf,x,y,ty);
@@ -209,9 +216,10 @@ element_div(GEN nf, GEN x, GEN y)
 GEN
 element_muli(GEN nf, GEN x, GEN y)
 {
-  long av,i,j,k,N=lgef(nf[1])-3;
-  GEN p1,s,v,c,tab = (GEN)nf[9];
+  long av,i,j,k,N;
+  GEN p1,s,v,c,tab;
 
+  tab = get_tab(nf, &N);
   v=cgetg(N+1,t_COL); av=avma;
   for (k=1; k<=N; k++)
   {
@@ -250,8 +258,10 @@ element_muli(GEN nf, GEN x, GEN y)
 GEN
 element_sqri(GEN nf, GEN x)
 {
-  long av,i,j,k,N=lgef(nf[1])-3;
-  GEN p1,s,v,c,tab = (GEN)nf[9];
+  GEN p1,s,v,c,tab;
+  long av,i,j,k,N;
+
+  tab = get_tab(nf, &N);
 
   v=cgetg(N+1,t_COL); av=avma;
   for (k=1; k<=N; k++)
@@ -292,7 +302,8 @@ element_sqr(GEN nf, GEN x)
   long av = avma,i,j,k,N, tx = typ(x);
   GEN p1,s,v,c,tab;
 
-  nf=checknf(nf); tab = (GEN)nf[9]; N=lgef(nf[1])-3;
+  nf = checknf(nf);
+  tab = get_tab(nf, &N);
   if (tx==t_POLMOD) x=checknfelt_mod(nf,x,"element_sqr");
   if (is_extscalar_t(tx))
     return gerepileupto(av, algtobasis(nf, gsqr(x)));
@@ -444,9 +455,9 @@ element_mulid(GEN nf, GEN x, long i)
   GEN s,v,c,p1, tab;
 
   if (i==1) return gcopy(x);
-  N = lgef(nf[1])-3;
+  tab = get_tab(nf, &N);
   if (typ(x) != t_COL || lg(x) != N+1) err(typeer,"element_mulid");
-  tab = (GEN)nf[9]; tab += (i-1)*N;
+  tab += (i-1)*N;
   v=cgetg(N+1,t_COL); av=avma;
   for (k=1; k<=N; k++)
   {

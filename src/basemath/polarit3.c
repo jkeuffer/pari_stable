@@ -26,6 +26,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define swap(x,y)  {GEN  _z=x; x=y; y=_z;}
 #define swapspec(x,y, nx,ny) {swap(x,y); lswap(nx,ny);}
 #define deg(a) (lgef(a)-3)
+/* 2p^2 < 2^BITS_IN_LONG */
+#ifdef LONG_IS_64BIT
+#  define u_OK_ULONG(p) ((ulong)p <= 3037000493UL)
+#else
+#  define u_OK_ULONG(p) ((ulong)p <= 46337UL)
+#endif
+#define OK_ULONG(p) (lgefint(p) == 3 && u_OK_ULONG(p[2]))
 
 /*******************************************************************/
 /*                                                                 */
@@ -71,13 +78,6 @@ specpol(GEN x, long nx)
 #ifndef HIGHWORD
 #  define HIGHWORD(a) ((a) >> BITS_IN_HALFULONG)
 #endif
-/* 2p^2 < 2^BITS_IN_LONG */
-#ifdef LONG_IS_64BIT
-#  define u_OK_ULONG(p) ((ulong)p <= 3037000493UL)
-#else
-#  define u_OK_ULONG(p) ((ulong)p <= 46337UL)
-#endif
-#define OK_ULONG(p) (lgefint(p) == 3 && u_OK_ULONG(p[2]))
 
 /* multiplication in Fp[X], p small */
 
@@ -1656,12 +1656,11 @@ Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
   gptr[0]=SP;gptr[1]=SQ;
   gerepilemanysp(ltop,lbot,gptr,2);
 }
-/* Let l be a prime number P, Q in ZZ[X].  P and Q are both
- * irreducible modulo l and degree(P) divide (or is equal to)
- * degree(Q).  Output an monomorphism between FF_l[X]/(P) and FF_l[X]/(Q)
- * as a polynomial R such that Q|P(R) mod l.  If P and Q have the same
- * degree, it is of course an isomorphism.  */
-
+/* Let l be a prime number, P, Q in ZZ[X].  P and Q are both
+ * irreducible modulo l and degree(P) divides degree(Q).  Output a
+ * monomorphism between FF_l[X]/(P) and FF_l[X]/(Q) as a polynomial R such
+ * that Q | P(R) mod l.  If P and Q have the same degree, it is of course an
+ * isomorphism.  */
 GEN Fp_isom(GEN P,GEN Q,GEN l)
 {
   ulong ltop=avma;
@@ -1692,7 +1691,10 @@ Fp_factorgalois(GEN P,GEN l, long d, long w)
 }
 extern GEN mat_to_polpol(GEN x, long v,long w);
 extern GEN polpol_to_mat(GEN v, long n);
-GEN Fp_factor_irred(GEN P,GEN l, GEN Q)
+/* P,Q irreducible over F_l. Factor P over FF_l[X] / Q  [factors are ordered as
+ * a Frobenius cycle] */
+GEN
+Fp_factor_irred(GEN P,GEN l, GEN Q)
 {
   ulong ltop=avma,av;
   GEN SP,SQ,MP,MQ,M,MF,E,V,IR,res;
@@ -1711,11 +1713,10 @@ GEN Fp_factor_irred(GEN P,GEN l, GEN Q)
   E=Fp_factorgalois(P,l,d,vq);
   E=polpol_to_mat(E,np);
   MP = matrixpow(np,d,SP,P,l);
-  M = FpM(MP,l);
-  IR = (GEN)sindexrank(M)[1];
+  IR = (GEN)FpM_sindexrank(MP,l)[1];
   E = rowextract_p(E, IR);
-  M = rowextract_p(M, IR);
-  M = FpM_inv(lift(M),l);
+  M = rowextract_p(MP,IR);
+  M = FpM_inv(M,l);
   MQ = matrixpow(nq,d,SQ,Q,l);
   M = FpM_mul(MQ,M,l);
   M = FpM_mul(M,E,l);
@@ -1889,6 +1890,15 @@ FpXQX_normalize(GEN z, GEN T, GEN p)
 }
 
 GEN
+small_to_mat(GEN z)
+{
+  long i, l = lg(z);
+  GEN x = cgetg(l,t_MAT);
+  for (i=1; i<l; i++) { x[i] = (long)gtovec((GEN)z[i]); settyp(x[i], t_COL); }
+  return x;
+}
+
+GEN
 small_to_pol_i(GEN z, long l)
 {
   long i;
@@ -1957,7 +1967,7 @@ from_Kronecker(GEN z, GEN pol)
 /*******************************************************************/
 ulong xgcduu(ulong d, ulong d1, int f, ulong* v, ulong* v1, long *s);
 /* 1 / Mod(x,p) , or 0 if inverse doesn't exist */
-static ulong
+ulong
 u_invmod(ulong x, ulong p)
 {
   long s;
@@ -1997,6 +2007,21 @@ u_Fp_FpX(GEN x, int malloc, ulong p)
   lx = lgef(x); a = u_allocpol(lx-3, malloc);
   for (i=2; i<lx; i++) a[i] = (long)umodiu((GEN)x[i], p);
   return u_normalizepol(a,lx);
+}
+
+GEN
+u_Fp_FpM(GEN x, ulong p)
+{
+  long i,j,m,n = lg(x);
+  GEN y = cgetg(n,t_MAT);
+  if (n == 1) return y;
+  m = lg(x[1]);
+  for (j=1; j<n; j++)
+  {
+    y[j] = (long)cgetg(m,t_VECSMALL);
+    for (i=1; i<m; i++) coeff(y,i,j) = (long)umodiu(gcoeff(x,i,j), p);
+  }
+  return y;
 }
 
 static GEN
@@ -2560,7 +2585,7 @@ u_center(ulong u, ulong p, ulong ps2)
 }
 
 GEN
-init_CRT(GEN Hp, ulong p, long v)
+ZX_init_CRT(GEN Hp, ulong p, long v)
 {
   long i, l = lgef(Hp), lim = (long)(p>>1);
   GEN H = cgetg(l, t_POL);
@@ -2570,8 +2595,24 @@ init_CRT(GEN Hp, ulong p, long v)
   return H;
 }
 
+/* assume lg(Hp) > 1 */
+GEN 
+ZM_init_CRT(GEN Hp, ulong p)
+{
+  long i,j, m = lg(Hp[1]), l = lg(Hp), lim = (long)(p>>1);
+  GEN c,cp,H = cgetg(l, t_MAT);
+  for (j=1; j<l; j++)
+  {
+    cp = (GEN)Hp[j];
+    c = cgetg(m, t_COL);
+    H[j] = (long)c;
+    for (i=1; i<l; i++) c[i] = (long)u_center(cp[i],p, lim);
+  }   
+  return H;
+}
+
 int
-incremental_CRT_i(GEN *H, ulong Hp, GEN q, GEN qp, ulong p)
+Z_incremental_CRT(GEN *H, ulong Hp, GEN q, GEN qp, ulong p)
 {
   GEN h, lim = shifti(qp,-1);
   ulong qinv = u_invmod(umodiu(q,p), p);
@@ -2586,7 +2627,7 @@ incremental_CRT_i(GEN *H, ulong Hp, GEN q, GEN qp, ulong p)
 }
 
 int
-incremental_CRT(GEN H, GEN Hp, GEN q, GEN qp, ulong p)
+ZX_incremental_CRT(GEN H, GEN Hp, GEN q, GEN qp, ulong p)
 {
   GEN h, lim = shifti(qp,-1);
   ulong qinv = u_invmod(umodiu(q,p), p);
@@ -2613,9 +2654,28 @@ incremental_CRT(GEN H, GEN Hp, GEN q, GEN qp, ulong p)
   return stable;
 }
 
+int
+ZM_incremental_CRT(GEN H, GEN Hp, GEN q, GEN qp, ulong p)
+{
+  GEN h, lim = shifti(qp,-1);
+  ulong qinv = u_invmod(umodiu(q,p), p);
+  long i,j, l = lg(H), m = lg(H[1]);
+  int stable = 1;
+  for (j=1; j<l; j++)
+    for (i=1; i<m; i++)
+    {
+      h = u_chrem_coprime(gcoeff(H,i,j), coeff(Hp,i,j),q,p,qinv,qp);
+      if (h)
+      {
+        if (cmpii(h,lim) > 0) h = subii(h,qp);
+        coeff(H,i,j) = (long)h; stable = 0;
+      }
+    }
+  return stable;
+}
+
 /* returns a polynomial in variable v, whose coeffs correspond to the digits
- * of m (in base p)
- */
+ * of m (in base p) */
 GEN
 stopoly(long m, long p, long v)
 {
@@ -3309,19 +3369,19 @@ INIT:
     if (!H)
     { /* initialize */
       q = utoi(p); stable = 0;
-      H = init_CRT(Hp, p,vX);
+      H = ZX_init_CRT(Hp, p,vX);
       if (LERS) {
-        H0= init_CRT(H0p, p,vX);
-        H1= init_CRT(H1p, p,vX);
+        H0= ZX_init_CRT(H0p, p,vX);
+        H1= ZX_init_CRT(H1p, p,vX);
       }
     }
     else
     {
       GEN qp = muliu(q,p);
-      stable = incremental_CRT(H, Hp, q,qp, p);
+      stable = ZX_incremental_CRT(H, Hp, q,qp, p);
       if (LERS) {
-        stable &= incremental_CRT(H0,H0p, q,qp, p);
-        stable &= incremental_CRT(H1,H1p, q,qp, p);
+        stable &= ZX_incremental_CRT(H0,H0p, q,qp, p);
+        stable &= ZX_incremental_CRT(H1,H1p, q,qp, p);
       }
       q = qp;
     }
@@ -3440,7 +3500,7 @@ ZX_resultant_all(GEN A, GEN B, ulong bound)
     else /* could make it probabilistic ??? [e.g if stable twice, etc] */
     {
       GEN qp = muliu(q,p);
-      stable = incremental_CRT_i(&H, Hp, q,qp, p);
+      stable = Z_incremental_CRT(&H, Hp, q,qp, p);
       q = qp;
     }
     if (DEBUGLEVEL>5)
@@ -3522,12 +3582,12 @@ modulargcd(GEN A0, GEN B0)
     }
     if (m < n)
     { /* First time or degree drop [all previous p were as above; restart]. */
-      H = init_CRT(Hp,p,varn(A0));
+      H = ZX_init_CRT(Hp,p,varn(A0));
       q = utoi(p); n = m; continue;
     }
 
     qp = muliu(q,p);
-    if (incremental_CRT(H, Hp, q, qp, p))
+    if (ZX_incremental_CRT(H, Hp, q, qp, p))
     { /* H stable: check divisibility */
       if (!is_pm1(g)) { p1 = content(H); if (!is_pm1(p1)) H = gdiv(H,p1); }
       if (!signe(gres(A,H)) && !signe(gres(B,H))) break; /* DONE */
@@ -3577,14 +3637,14 @@ ZX_invmod(GEN A0, GEN B0)
 
     if (!U)
     { /* First time */
-      U = init_CRT(Up,p,varn(A0));
-      V = init_CRT(Vp,p,varn(A0));
+      U = ZX_init_CRT(Up,p,varn(A0));
+      V = ZX_init_CRT(Vp,p,varn(A0));
       q = utoi(p); continue;
     }
     if (DEBUGLEVEL>5) msgtimer("ZX_invmod: mod %ld (bound 2^%ld)", p,expi(q));
     qp = muliu(q,p);
-    stable  = incremental_CRT(U, Up, q,qp, p);
-    stable &= incremental_CRT(V, Vp, q,qp, p);
+    stable  = ZX_incremental_CRT(U, Up, q,qp, p);
+    stable &= ZX_incremental_CRT(V, Vp, q,qp, p);
     if (stable)
     { /* all stable: check divisibility */
       res = gadd(gmul(A,U), gmul(B,V));

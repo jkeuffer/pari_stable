@@ -513,7 +513,7 @@ bnfsunit(GEN bnf,GEN S,long prec)
     setlg(p1,i);
     ClS[2]=(long)p1; /* cyc */
 
-    p1=cgetg(i,t_VEC); pow=invmat((GEN)SNF[1]);
+    p1=cgetg(i,t_VEC); pow=ZM_inv((GEN)SNF[1],gun);
     fa[1] = (long)gen;
     for(i--; i; i--)
     {
@@ -552,7 +552,7 @@ bnfsunit(GEN bnf,GEN S,long prec)
       sunit[i] = isprincipalfact(bnf,Sperm,(GEN)B[j],(GEN)Sperm[i],fl)[2];
 
     p1 = cgetg(4,t_VEC);
-    den = dethnf_i(H); H = gmul(den, invmat(H)); 
+    den = dethnf_i(H); H = ZM_inv(H,den);
     p1[1] = (long)perm;
     p1[2] = (long)concatsp(H, gneg(gmul(H,B))); /* top part of inverse * den */
     p1[3] = (long)den; /* keep denominator separately */

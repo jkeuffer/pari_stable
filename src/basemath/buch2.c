@@ -2755,7 +2755,7 @@ get_LLLnf(GEN nf, long prec)
   v[1] = (long) (cbase? qf_base_change(T2, cbase, 1): T2);
   v[2] = (long) (cbase? gmul(M, cbase): M);
   v[3] = (long) cbase;
-  v[4] = (long) (cbase? invmat(cbase): NULL); return v;
+  v[4] = (long) (cbase? ZM_inv(cbase,gun): NULL); return v;
 }
 
 GEN
