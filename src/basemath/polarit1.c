@@ -964,6 +964,52 @@ vecpol_to_mat(GEN v, long n)
   }
   return y;
 }
+/* polynomial (in v) of polynomials (in w) whose coeffs are given by the columns of x */
+GEN
+mat_to_polpol(GEN x, long v,long w)
+{
+  long i,j, lx = lg(x), lcol = lg(x[1]);
+  GEN y = cgetg(lx+1, t_POL);
+  y[1]=evalsigne(1) | evallgef(lx+1) | evalvarn(v);
+  y++;
+  for (j=1; j<lx; j++)
+  {
+    GEN p1, col = (GEN)x[j];
+    long k = lcol;
+
+    while (k-- && gcmp0((GEN)col[k]));
+    i=k+2; p1=cgetg(i,t_POL);
+    p1[1] = evalsigne(1) | evallgef(i) | evalvarn(w);
+    col--; for (k=2; k<i; k++) p1[k] = col[k];
+    y[j] = (long)p1;
+  }
+  return normalizepol_i(--y,lx+1);
+}
+
+/* matrix whose entries are given by the coeffs of the polynomial v in
+ * two variables (considered as degree n polynomials) */
+GEN
+polpol_to_mat(GEN v, long n)
+{
+  long i,j,d,N = lgef(v)-1;
+  GEN p1,w, y = cgetg(N, t_MAT);
+  if (typ(v) != t_POL) err(typeer,"polpol_to_mat");
+  n++;v++;
+  for (j=1; j<N; j++)
+  {
+    p1 = cgetg(n,t_COL); y[j] = (long)p1;
+    w = (GEN)v[j];
+    if (typ(w) != t_POL) { p1[1] = (long)w; i=2; }
+    else
+    {
+      d=lgef(w)-1; w++;
+      for (i=1; i<d; i++) p1[i] = w[i];
+    }
+    for ( ; i<n; i++) p1[i] = zero;
+  }
+  return y;
+}
+
 
 /* set x <-- x + c*y mod p */
 static void
@@ -1075,14 +1121,14 @@ split_berlekamp(GEN Q, GEN *t, GEN pp, GEN pps2)
 }
 
 GEN
-factmod(GEN f, GEN pp)
+factmod0(GEN f, GEN pp)
 {
   long i,j,k,e,p,N,nbfact,av = avma,tetpil,d;
-  GEN pps2,ex,y,f2,p1,g1,Q,u,v, *t;
+  GEN pps2,ex,y,f2,p1,g1,Q,u, *t;
 
   if (!(d = factmod_init(&f, pp, &p))) { avma=av; return trivfact(); }
   /* to hold factors and exponents */
-  t = (GEN*)cgetg(d+1,t_VEC); ex = new_chunk(d+1);
+  t = (GEN*)cgetg(d+1,t_VEC); ex = cgetg(d+1,t_VECSMALL);
   e = nbfact = 1;
   pps2 = shifti(pp,-1);
 
@@ -1120,19 +1166,33 @@ factmod(GEN f, GEN pp)
     e*=p; setlg(f,j); setlgef(f,j);
     for (i=2; i<j; i++) f[i] = f2[p*(i-2)+2];
   }
+  tetpil=avma; y=cgetg(3,t_VEC);
+  setlg((GEN)t, nbfact);
+  setlg(ex, nbfact);
+  y[1]=lcopy((GEN)t);
+  y[2]=lcopy(ex);
+  (void)sort_factor(y,cmpii);
+  return gerepile(av,tetpil,y);
+}
+GEN
+factmod(GEN f, GEN pp)
+{
+  long tetpil,av=avma;
+  long nbfact;
+  long j;
+  GEN y,u,v;
+  GEN z=factmod0(f,pp),t=(GEN)z[1],ex=(GEN)z[2];
+  nbfact=lg(t);
   tetpil=avma; y=cgetg(3,t_MAT);
-  y[1]=(long)t; setlg(t, nbfact);
-  y[2]=(long)ex; (void)sort_factor(y,cmpii);
   u=cgetg(nbfact,t_COL); y[1]=(long)u;
   v=cgetg(nbfact,t_COL); y[2]=(long)v;
   for (j=1; j<nbfact; j++)
   {
-    u[j] = (long)Fp_pol(t[j], pp);
+    u[j] = (long)Fp_pol((GEN)t[j], pp);
     v[j] = lstoi(ex[j]);
   }
   return gerepile(av,tetpil,y);
 }
-
 GEN
 factormod0(GEN f, GEN p, long flag)
 {
