@@ -1108,7 +1108,7 @@ rnfminpoly(GEN nf,GEN T,GEN alpha,int n)
 GEN
 rnfdedekind(GEN nf,GEN T,GEN pr)
 {
-  long av=avma,vt,tetpil,r,d,da,n,m,i,j;
+  long av=avma,vt,r,d,da,n,m,i,j;
   GEN p1,p2,p,tau,g,vecun,veczero,matid;
   GEN prhall,res,h,k,base,Ca;
 
@@ -1166,7 +1166,9 @@ rnfdedekind(GEN nf,GEN T,GEN pr)
       p2[j]=(long)prinv;
       nf_pol_divres(nf,nf_pol_mul(nf,pal,nfx),T,&pal);
     }
-    base=nfhermite(nf,base);
+    base[2] = lmul((GEN)base[2], p);
+    base = nfhermitemod(nf,base, nfdetint(nf,base));
+    base[2] = ldiv((GEN)base[2], p);
   }
-  res[2]=(long)base; tetpil=avma; return gerepile(av,tetpil,gcopy(res));
+  res[2]=(long)base; return gerepileupto(av, gcopy(res));
 }
