@@ -69,6 +69,8 @@ BA 16- galoisinit() could fail to find a polynomial defining the fixed field.
    21- 1.a --> 1.0000 [ should be error ].
        (x.a = x+1); 1.a --> 1.0000 [ should be 2 ]
    22- bnrdisclist(bnfinit(x,2),1) --> SEGV
+GN 23- [Solaris cc] use safer optimization flag [ -xalias_level=any, fix a
+       pb with 18 above ]
 
   Changed
     1- increased maximum binary exponent for t_REAL, and maximum GEN length
