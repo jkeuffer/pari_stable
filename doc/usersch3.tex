@@ -5363,15 +5363,14 @@ GP it is kept in the variable \kbd{realprecision} and is transparent to the
 user, but it must be explicitly given as a second argument in library mode.
 
 The algorithm used is a modification of A.~Sch\"onhage\sidx{Sch\"onage}'s
-remarkable root-finding algorithm, due to and implemented by X.~Gourdon.
-Barring bugs, it is guaranteed to converge and to give the roots to the
-required accuracy.
+root-finding algorithm, due to and implemented by X.~Gourdon. Barring bugs, it
+is guaranteed to converge and to give the roots to the required accuracy.
 
 If $\fl=1$, use a variant of the Newton-Raphson method, which is \var{not}
 guaranteed to converge, but is rather fast. If you get the messages ``too
 many iterations in roots'' or ``INTERNAL ERROR: incorrect result in roots'',
-use the default function (i.e.~no flag or $\fl=0$). This used to be the
-default root-finding function in PARI until version 1.39.06.
+use the default algorithm. This used to be the default root-finding function in
+PARI until version 1.39.06.
 
 \syn{roots}{\var{pol},\var{prec}} or $\teb{rootsold}(\var{pol},\var{prec})$.
 
