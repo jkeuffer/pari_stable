@@ -1827,7 +1827,7 @@ fin:
 /**                                                                   **/
 /***********************************************************************/
 extern ulong ucarrecomplet(ulong A);
-static long squfof_ambig(long a, long B, long C, long dd, GEN D, long *cntamb);
+static long squfof_ambig(long a, long B, long dd, GEN D, long *cntamb);
 
 #define SQUFOF_BLACKLIST_SZ 64
 
@@ -2105,7 +2105,7 @@ squfof(GEN n, long quiet)
 	  }
 
 	  /* chase the inverse root form back along the ambiguous cycle */
-	  q = squfof_ambig(a, b1, c1, dd1, D1, &cntamb);
+	  q = squfof_ambig(a, b1, dd1, D1, &cntamb);
 	  if (mydebug >= 6)
 	    fprintferr("SQUFOF: squfof_ambig returned %ld\n", q);
 	  if (nm4 == 3) q /= cgcd(q, 3);
@@ -2214,7 +2214,7 @@ squfof(GEN n, long quiet)
 	  }
 
 	  /* chase the inverse root form along the ambiguous cycle */
-	  q = squfof_ambig(a, b2, c2, dd2, D2, &cntamb);
+	  q = squfof_ambig(a, b2, dd2, D2, &cntamb);
 	  if (mydebug >= 6)
 	    fprintferr("SQUFOF: squfof_ambig returned %ld\n", q);
 	  if (nm4 == 1) q /= cgcd(q, 5);
@@ -2286,7 +2286,7 @@ squfof(GEN n, long quiet)
  */
 static
 long
-squfof_ambig(long a, long B, long C, long dd, GEN D, long *cntamb)
+squfof_ambig(long a, long B, long dd, GEN D, long *cntamb)
 {
   long b, c, q, qc, qcb, av = avma;
   long a0, b0, b1, c0;

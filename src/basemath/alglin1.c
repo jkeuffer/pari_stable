@@ -1289,7 +1289,7 @@ gauss_get_pivot_max(GEN x, GEN x0, GEN c, long i0)
  * If a != NULL, use x - a Id instead (for eigen)
  */
 static GEN
-gauss_pivot_ker(GEN x0, GEN a, long prec, GEN *dd, long *rr)
+gauss_pivot_ker(GEN x0, GEN a, GEN *dd, long *rr)
 {
   GEN x,c,d,p,mun;
   long i,j,k,r,t,n,m,av,lim;
@@ -1343,7 +1343,7 @@ gauss_pivot_ker(GEN x0, GEN a, long prec, GEN *dd, long *rr)
  * d[k] contains the index of the first non-zero pivot in column k
  */
 static void
-gauss_pivot(GEN x0, long prec, GEN *dd, long *rr)
+gauss_pivot(GEN x0, GEN *dd, long *rr)
 {
   GEN x,c,d,d0,mun,p;
   long i,j,k,r,t,n,m,av,lim;
@@ -1397,12 +1397,12 @@ gauss_pivot(GEN x0, long prec, GEN *dd, long *rr)
 
 /* compute ker(x - aI) */
 static GEN
-ker0(GEN x, GEN a, long prec)
+ker0(GEN x, GEN a)
 {
   GEN d,y;
   long i,j,k,r,n, av = avma, tetpil;
 
-  x = gauss_pivot_ker(x,a,prec,&d,&r);
+  x = gauss_pivot_ker(x,a,&d,&r);
   if (!r) { avma=av; return cgetg(1,t_MAT); }
   n = lg(x)-1; tetpil=avma; y=cgetg(r+1,t_MAT);
   for (j=k=1; j<=r; j++,k++)
@@ -1426,7 +1426,7 @@ ker0(GEN x, GEN a, long prec)
 GEN
 ker(GEN x) /* Programme pour types exacts */
 {
-  return ker0(x,NULL,0);
+  return ker0(x,NULL);
 }
 
 GEN
@@ -1435,13 +1435,13 @@ matker0(GEN x,long flag)
   return flag? keri(x): ker(x);
 }
 
-static GEN
-image0(GEN x, long prec)
+GEN
+image(GEN x)
 {
   GEN d,y;
   long j,k,r, av = avma;
 
-  gauss_pivot(x,prec,&d,&r);
+  gauss_pivot(x,&d,&r);
 
   /* r = dim ker(x) */
   if (!r) { avma=av; if (d) free(d); return gcopy(x); }
@@ -1455,24 +1455,12 @@ image0(GEN x, long prec)
 }
 
 GEN
-image(GEN x) /* Programme pour types exacts */
-{
-  return image0(x,0);
-}
-
-GEN
-imagereel(GEN x, long prec) /* Programme pour types inexacts */
-{
-  return image0(x,prec);
-}
-
-static GEN
-imagecompl0(GEN x, long prec)
+imagecompl(GEN x)
 {
   GEN d,y;
   long j,i,r,av = avma;
 
-  gauss_pivot(x,prec,&d,&r);
+  gauss_pivot(x,&d,&r);
   avma=av; y=cgetg(r+1,t_VEC);
   for (i=j=1; j<=r; i++)
     if (!d[i]) y[j++]=lstoi(i);
@@ -1487,18 +1475,12 @@ imagecomplspec(GEN x, long *nlze)
   long i,j,k,l,r,av = avma;
 
   x = gtrans(x); l = lg(x);
-  gauss_pivot(x,0,&d,&r);
+  gauss_pivot(x,&d,&r);
   avma=av; y = cgetg(l,t_VECSMALL);
   for (i=j=1, k=r+1; i<l; i++)
     if (d[i]) y[k++]=i; else y[j++]=i;
   *nlze = r;
   if (d) free(d); return y;
-}
-
-GEN
-imagecompl(GEN x) /* Programme pour types exacts */
-{
-  return imagecompl0(x,0);
 }
 
 static GEN
@@ -1620,7 +1602,7 @@ rank(GEN x)
   long av = avma, r;
   GEN d;
 
-  gauss_pivot(x,0,&d,&r);
+  gauss_pivot(x,&d,&r);
   /* yield r = dim ker(x) */
 
   avma=av; if (d) free(d);
@@ -1634,7 +1616,7 @@ indexrank(GEN x)
   GEN res,d,p1,p2;
 
   /* yield r = dim ker(x) */
-  gauss_pivot(x,0,&d,&r);
+  gauss_pivot(x,&d,&r);
 
   /* now r = dim Im(x) */
   n = lg(x)-1; r = n - r;
@@ -2161,7 +2143,7 @@ eigen(GEN x, long prec)
   for(;;)
   {
     r3 = grndtoi(r2, &e); if (e < ex) r2 = r3;
-    ssesp = ker0(x,r2,prec); l = lg(ssesp);
+    ssesp = ker0(x,r2); l = lg(ssesp);
     if (l == 1 || ly + (l-1) > n)
       err(talker2, "missing eigenspace. Compute the matrix to higher accuracy, then restart eigen at the current precision",NULL,NULL);
     for (i=1; i<l; ) y[ly++]=ssesp[i++]; /* done with this eigenspace */

@@ -1836,7 +1836,7 @@ trunc_error(GEN x)
 
 /* xarch = complex logarithmic embeddings of units (u_j) found so far */
 static GEN
-compute_multiple_of_R(GEN xarch,long RU,long N,long PRECREG, GEN *ptsublambda)
+compute_multiple_of_R(GEN xarch,long RU,long N,GEN *ptsublambda)
 {
   GEN v,mdet,mdet_t,Im_mdet,kR,sublambda,lambda,xreal;
   GEN *gptr[2];
@@ -3043,7 +3043,7 @@ INCREASEGEN:
   sreg = KCCOPRO - (lg(B)-1) - (lg(W)-1); /* = zc (cf hnffinal) */
   xarch = cgetg(sreg+1,t_MAT); /* cols corresponding to units */
   for (j=1; j<=sreg; j++) xarch[j] = C[j];
-  reg = compute_multiple_of_R(xarch,RU,N,PRECREG,&sublambda);
+  reg = compute_multiple_of_R(xarch,RU,N,&sublambda);
 
   if (!reg)
   { /* not full rank for units */

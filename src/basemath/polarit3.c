@@ -1706,6 +1706,7 @@ u_Fp_FpX(GEN x, int malloc, ulong p)
   return a;
 }
 
+#if 0
 /* divrem(x, y) in F_p[Y] / T, assume leading coeff of y is invertible
  * (T possibly reducible) */
 GEN
@@ -1713,6 +1714,7 @@ Fq_res_long(GEN x, GEN y, GEN T, ulong p, GEN *pr)
 {
   return NULL;
 }
+#endif
 
 ulong xgcduu(ulong d, ulong d1, int f, ulong* v, ulong* v1, long *s);
 
@@ -1958,6 +1960,7 @@ FpX_gcd(GEN x, GEN y, GEN p)
   avma = av; return gerepileupto(av0, a);
 }
 
+#if 0
 /* a in Z[Y][X] --> Fp[Y][X] (assume p doesn't divide leading coeff) */
 GEN
 Fq_pol_red(GEN a, GEN p)
@@ -1977,9 +1980,7 @@ FpXQ_gcd(GEN x, GEN y, GEN p, GEN T)
   GEN a,b,c;
   long av0,av;
 
-#if 0 /*TODO*/
   if (OK_ULONG(p)) return u_FpXQ_gcd(x,y,p);
-#endif
   av0=avma;
   a = Fq_pol_red(x, p); av = avma;
   b = Fq_pol_red(y, p);
@@ -1989,6 +1990,7 @@ FpXQ_gcd(GEN x, GEN y, GEN p, GEN T)
   }
   avma = av; return gerepileupto(av0, a);
 }
+#endif
 
 static GEN
 u_FpX_sub(GEN x, GEN y, ulong p)

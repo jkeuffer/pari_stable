@@ -711,7 +711,7 @@ allbase4(GEN f,long code, GEN *y, GEN *ptw)
 extern GEN merge_factor_i(GEN f, GEN g);
 
 static GEN
-update_fact(GEN x0, GEN x, GEN lead, GEN f)
+update_fact(GEN x, GEN f)
 {
   GEN e,q,d = discsr(x), g = cgetg(3, t_MAT), p = (GEN)f[1];
   long iq,i,k,l;
@@ -750,7 +750,7 @@ nfbasis00(GEN x0, long flag, GEN p, long ret_basis, GEN *y)
     smll = (flag & 1); /* small basis */
   else
   {
-    if (lead) p = update_fact(x0,x,lead,p);
+    if (lead) p = update_fact(x,p);
     smll = (long) p;   /* factored basis */
   }
 
@@ -1323,8 +1323,7 @@ factcp(GEN p, GEN f, GEN beta, GEN pp, GEN ns)
 
 /* return the prime element in Zp[phi] */
 static GEN
-getprime(GEN p, GEN chi, GEN phi, GEN chip, GEN nup, GEN pmf, 
-	 long *Lp, long *Ep, GEN ns)
+getprime(GEN p, GEN chi, GEN phi, GEN chip, GEN nup, long *Lp, long *Ep)
 {
   long v = varn(chi), L, E, r, s; 
   GEN chin, pip, pp, vn;
@@ -1468,7 +1467,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
     kapp = NULL;
     Fa   = degree(nu);
     /* the prime element in Zp[alpha] */
-    pia  = getprime(p, chi, polx[v], chi, nu, pmf, &La, &Ea, ns);
+    pia  = getprime(p, chi, polx[v], chi, nu, &La, &Ea);
     pia  = redelt(pia, pmr, pmf);
 
     if (Ea < oE)
@@ -1480,7 +1479,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
       pmr  = (GEN)w[3];
       pdr  = (GEN)w[4];
       kapp = NULL;
-      pia  = getprime(p, chi, polx[v], chi, nu, pmf, &La, &Ea, ns);
+      pia  = getprime(p, chi, polx[v], chi, nu, &La, &Ea);
       pia  = redelt(pia, pmr, pmf);
     }
     
@@ -1657,7 +1656,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
       if (!signe(modii((GEN)chie[2], pmr))) 
 	chie = mycaract(chi, eta, p, pmf, ns);
 	
-      pie = getprime(p, chi, eta, chie, nue, p, &Le, &Ee, ns);
+      pie = getprime(p, chi, eta, chie, nue, &Le, &Ee);
       if (Ea%Ee)
       {
 	if (DEBUGLEVEL >= 5)
