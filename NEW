@@ -1,8 +1,55 @@
-This file lists some of the novelties in PARI/GP 2.x compared to 1.39.
+This file highlights some of the novelties in PARI/GP 2.x compared to 1.39.15
+(last release in the 1.x series). The detailed Changelog is in CHANGES.
 Incompatible changes are described in COMPAT. See TODO for possible future
 improvements.
 
-==========================================================================
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+   * PARI/GP is now released under the GNU General Public License.
+
+   * PARI now has a CVS server which is intended for PARI lovers who want 
+     the very latest bleeding edge release (see the CVS.txt file).
+
+   * Argument checks have been added to prevent unpredictable results when 
+     the input is incorrect.
+
+   * Errors can be trapped to avoid abort and recover computations.
+
+   * extended on-line help:
+     ?? (no arguments)      opens the users'manual in xdvi,
+     ?? tutorial / refcard  opens tutorial / refcard in xdvi,
+     ??? keyword            searches for topic in the manual.
+
+   * Arithmetic: much faster integer factorization with several factoring
+     engines including Pollard Rho, SQUFOF, improved ECM, and an MPQS/PMPQS
+     implementation derived from LiDIA's, with kind permission from the LiDIA
+     team
+
+   * Polynomials:
+     - much faster factorization over Z[X] (van Hoeij's algorithm) or Fq[X]
+       (more efficient modular kernel), esp. when the polynomial is defined
+       over a subfield.
+     - Ducos' subresultant algorithm for resultants
+
+   * Number field:
+     - improved ROUND 4 for computations of integral basis/discriminant
+     - faster polredabs / rnfpolredabs polynomial reductions functions
+     - Galois extensions of Q: Fixed fields, Galois conjugates using
+       Allombert's algorithm.
+
+   * Class group, ray-class group: 
+     - improved bnf/bnr functions (faster, numerically stabler), in
+       particular bnfisprincipal
+     - computations of explicit defining equations of abelian extensions of
+       imaginery quadratic fields (using complex multiplication) of totally 
+       real abelian extensions (using Stark units).
+
+   * Elliptic functions: Weierstrass and Weber functions.
+
+   * Plotting: support of gnuplot, new functions (possiblity to plot directly 
+     in a file).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.0 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 The GP/PARI structure has been cleaned up.
 
    * The whole configuration process has been automated, and a Configure
@@ -33,6 +80,8 @@ Many new or improved functions in the PARI library.
      - ray class groups computations (including discrete log).
      - explicit defining equations in simple cases (Kummer extensions of prime
        degree, quadratic base field).
+
+   * computation of Galois groups up to degree 11
 
    * roots is now entirely reliable, thanks to Xavier Gourdon.
 
@@ -135,5 +184,3 @@ GP has been completely re-written:
      254 to 16382. Arrays can have up to 16777214 elements (instead of 65534).
      In addition vector/matrix operations in GP now perform orders of
      magnitudes faster than in version 1.39
-
-=============================================================================
