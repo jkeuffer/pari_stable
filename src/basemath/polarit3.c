@@ -2446,13 +2446,8 @@ GEN
 FpXQX_extgcd(GEN x, GEN y, GEN T, GEN p, GEN *ptu, GEN *ptv)
 {
   GEN a,b,q,r,u,v,d,d1,v1;
-  pari_sp ltop, lbot;
+  pari_sp ltop=avma, lbot;
 
-#if 0 /* FIXME To be done...*/ 
-  if (OK_ULONG(p)) return FpXQX_extgcd_long(x,y,T,p,ptu,ptv);
-#endif
-  if (!T) return FpX_extgcd(x,y,p,ptu,ptv);
-  ltop=avma;
   a = FpXQX_red(x, T, p);
   b = FpXQX_red(y, T, p);
   d = a; d1 = b; v = gzero; v1 = gun;

@@ -340,7 +340,10 @@ BuildTree(GEN link, GEN V, GEN W, GEN a, GEN T, GEN p)
   for (j=1; j <= 2*k-3; j+=2)
   {
     GEN d, u, v;
-    d = FpXQX_extgcd((GEN)V[j], (GEN)V[j+1], T, p, &u, &v);
+    if (T)
+      d = FpXQX_extgcd((GEN)V[j], (GEN)V[j+1], T, p, &u, &v);
+    else
+      d = FpX_extgcd((GEN)V[j], (GEN)V[j+1], p, &u, &v);
     if (degpol(d) > 0) err(talker, "relatively prime polynomials expected");
     d = (GEN)d[2];
     if (!gcmp1(d))
