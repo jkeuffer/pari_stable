@@ -2761,7 +2761,18 @@ gp_exception_handler(long numerr)
 {
   char *s = (char*)global_err_data;
   if (!s) return 0;
-  if (*s) { fprintferr("\n"); outerr(lisseq(s)); return 0; }
+  if (*s) {
+    /* prevent infinite recursion in case s raises an exception */
+    static int recovering = 0;
+    if (recovering)
+      recovering = 0; 
+    else
+    {
+      recovering = 1;
+      fprintferr("\n"); outerr(lisseq(s));
+      recovering = 0; return 0;
+    }
+  }
   if (numerr == errpile) { var_make_safe(); avma = top; }
   return break_loop(numerr);
 }
