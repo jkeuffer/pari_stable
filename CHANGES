@@ -81,6 +81,8 @@ BA 27- [GMP kernel] factor(18295370635792208009) --> error
        in large prime relation code ]
    30- TODO item: rnfpolred(nfinit(quadpoly(904,y)),quadray(904,1))
        ***   division by zero in gdiv, gdivgs or ginv
+BA 31- uninitialized memory read in divrr(x,y), when lg(y) < lg(x), leading
+       to random rounding of result.
 
   Changed
     1- rnf structure (removed useless components)

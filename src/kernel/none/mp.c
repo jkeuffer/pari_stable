@@ -1442,14 +1442,15 @@ divrs(GEN x, long y)
 GEN
 divrr(GEN x, GEN y)
 {
-  long sx=signe(x), sy=signe(y), lx,ly,lz,e,i,j;
+  long sx=signe(x), sy=signe(y), lx,ly,lr,e,i,j;
   ulong si,saux;
-  GEN z,x1;
+  GEN r,r1;
 
   if (!sy) err(diver9);
   e = expo(x) - expo(y);
   if (!sx) return realzero_bit(e);
   if (sy<0) sx = -sx;
+    
   lx=lg(x); ly=lg(y);
   if (ly==3)
   {
@@ -1461,84 +1462,87 @@ divrr(GEN x, GEN y)
       l >>= 1; if (k&1) l |= HIGHBIT;
       k >>= 1;
     }
-    z = cgetr(3); z[1] = evalsigne(sx) | evalexpo(e);
-    hiremainder=k; z[2]=divll(l,y[2]); return z;
+    r = cgetr(3); r[1] = evalsigne(sx) | evalexpo(e);
+    hiremainder=k; r[2]=divll(l,y[2]); return r;
   }
 
-  lz = min(lx,ly); z = new_chunk(lz);
-  x1 = z-1;
-  x1[1]=0; for (i=2; i<lz; i++) x1[i]=x[i];
-  x1[lz] = (lx>lz)? x[lz]: 0;
-  x=z; si=y[2]; saux=y[3];
-  for (i=0; i<lz-1; i++)
-  { /* x1 = x + (i-1) */
+  lr = min(lx,ly); r = new_chunk(lr);
+  for (i=0;i<lr;i++) r[i]=0;
+  for (i=0;i<lr;i++) r[-i]=0;
+  r1 = r-1;
+  r1[1] = 0; for (i=2; i<lr; i++) r1[i]=x[i];
+  r1[lr] = (lx>lr)? x[lr]: 0;
+  si=y[2]; saux=y[3];
+  for (i=0; i<lr-1; i++)
+  { /* r1 = r + (i-1) */
     ulong k,qp;
     LOCAL_HIREMAINDER;
     LOCAL_OVERFLOW;
-    if ((ulong)x1[1] == si)
+    
+    if ((ulong)r1[1] == si)
     {
-      qp = MAXULONG; k=addll(si,x1[2]);
+      qp = MAXULONG; k=addll(si,r1[2]);
     }
     else
     {
-      if ((ulong)x1[1] > si) /* can't happen if i=0 */
+      if ((ulong)r1[1] > si) /* can't happen if i=0 */
       {
         GEN y1 = y+1;
 	overflow=0;
-	for (j=lz-i; j>0; j--) x1[j] = subllx(x1[j],y1[j]);
-	j=i; do x[--j]++; while (j && !x[j]);
+	for (j=lr-i; j>0; j--) r1[j] = subllx(r1[j],y1[j]);
+	j=i; do r[--j]++; while (j && !r[j]);
       }
-      hiremainder=x1[1]; overflow=0;
-      qp=divll(x1[2],si); k=hiremainder;
+      hiremainder=r1[1]; overflow=0;
+      qp=divll(r1[2],si); k=hiremainder;
     }
     if (!overflow)
     {
-      long k3 = subll(mulll(qp,saux), x1[3]);
+      long k3 = subll(mulll(qp,saux), r1[3]);
       long k4 = subllx(hiremainder,k);
       while (!overflow && k4) { qp--; k3=subll(k3,saux); k4=subllx(k4,si); }
     }
-    j = lz-i+1;
-    if (j<ly) (void)mulll(qp,y[j]); else { hiremainder=0 ; j=ly; }
+    j = lr-i+1;
+    if (j<ly) (void)mulll(qp,y[j]); else { hiremainder=0 ; j=ly; } 
     for (j--; j>1; j--)
     {
-      x1[j] = subll(x1[j], addmul(qp,y[j]));
+      r1[j] = subll(r1[j], addmul(qp,y[j]));
       hiremainder += overflow;
     }
-    if ((ulong)x1[1] != hiremainder)
+    if ((ulong)r1[1] != hiremainder)
     {
-      if ((ulong)x1[1] < hiremainder)
+      if ((ulong)r1[1] < hiremainder)
       {
         qp--;
-        overflow=0; for (j=lz-i; j>1; j--) x1[j]=addllx(x1[j], y[j]);
+        overflow=0; for (j=lr-i-(lr-i>=ly); j>1; j--) r1[j]=addllx(r1[j], y[j]);
       }
       else
       {
-	x1[1] -= hiremainder;
-	while (x1[1])
+	r1[1] -= hiremainder;
+	while (r1[1])
 	{
-	  qp++; if (!qp) { j=i; do x[--j]++; while (j && !x[j]); }
-          overflow=0; for (j=lz-i; j>1; j--) x1[j]=subllx(x1[j],y[j]);
-	  x1[1] -= overflow;
+	  qp++; if (!qp) { j=i; do r[--j]++; while (j && !r[j]); }
+          overflow=0; for (j=lr-i-(lr-i>=ly); j>1; j--) r1[j]=subllx(r1[j],y[j]);
+	  r1[1] -= overflow;
 	}
       }
     }
-    x1[1]=qp; x1++;
+    r1[1]=qp; r1++;
   }
-  /* i = lz-1 */
+  /* i = lr-1 */
   /* round correctly */
-  if ((ulong)x1[1] > si>>1)
+  if ((ulong)r1[1] > (si>>1))
   {
-    j=i; do x[--j]++; while (j && !x[j]);
+    j=i; do r[--j]++; while (j && !r[j]);
   }
-  x1 = x-1; for (j=i; j>=2; j--) x[j]=x1[j];
-  if (*x == 0) e--;
-  else if (*x == 1) { shift_right(x,x, 2,lz, 1,1); }
+  r1 = r-1; for (j=i; j>=2; j--) r[j]=r1[j];
+  if (r[0] == 0) e--;
+  else if (r[0] == 1) { shift_right(r,r, 2,lr, 1,1); }
   else { /* possible only when rounding up to 0x2 0x0 ... */
-    x[2] = HIGHBIT; e++;
+    r[2] = HIGHBIT; e++; 
   }
-  x[0] = evaltyp(t_REAL)|evallg(lz);
-  x[1] = evalsigne(sx) | evalexpo(e);
-  return x;
+  r[0] = evaltyp(t_REAL)|evallg(lr);
+  r[1] = evalsigne(sx) | evalexpo(e);
+  return r;
 }
 
 /* Integer division x / y: such that sign(r) = sign(x)
