@@ -2700,10 +2700,11 @@ makescind(GEN nf, GEN P, long cl)
   p = gmael(G,2,1);
   a = FpX_quad_root(nfpol, p, 0);
   Pp = gsubst(P, varn(nfpol), a);
-  Pp = FpX_red(Pp, p); /* P mod a prime above p (which splits) */
+  Pp = FpX_red(Pp, p); /* P mod a prime \wp above p (which splits) */
   roo = (GEN)G[3];
   is_P = gcmp0( FpX_eval(Pp, resii((GEN)roo[1],p), p) );
-  /* is roo[1] a root of P ? */
+  /* each roo[i] mod p is a root of P or (exclusive) tau(P) mod \wp */
+  /* record whether roo[1] is a root of P or tau(P) */
   
   perm = NULL; /*-Wall*/
   for (i = 1; lg(L); i++)
@@ -2711,7 +2712,8 @@ makescind(GEN nf, GEN P, long cl)
     perm = (GEN)L[i];
     k = perm[1]; if (k == 1) continue;
     k = gcmp0( FpX_eval(Pp, resii((GEN)roo[k],p), p) );
-    if (k != is_P) break; /* found one root of tau(P) */
+    /* roo[k] is a root of the other polynomial */
+    if (k != is_P) break;
   }
 
   l = perm_order(perm);
