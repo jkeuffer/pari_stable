@@ -1861,6 +1861,31 @@ plothsizes_flag(long flag)
   return vect;
 }	
 
+void 
+plot_count(long *w, long lw, col_counter rcolcnt)
+{
+  RectObj *O;
+  long col, i;
+
+  for (col = 1; col < MAX_COLORS; col++)
+    for (i = 0; i < ROt_MAX; i++) rcolcnt[col][i] = 0;
+  for (i = 0; i < lw; i++)
+  {
+    PariRect *e = rectgraph[w[i]];
+    for (O = RHead(e); O; O=RoNext(O))
+      switch(RoType(O))
+      {
+	case ROt_MP : rcolcnt[RoCol(O)][ROt_PT] += RoMPcnt(O);
+	              break;                 /* Multiple Point */
+	case ROt_PT :                        /* Point */
+	case ROt_LN :                        /* Line */
+	case ROt_BX :                        /* Box */
+	case ROt_ML :                        /* Multiple lines */
+	case ROt_ST : rcolcnt[RoCol(O)][RoType(O)]++;
+	              break;                 /* String */
+      }
+  }
+}
 /*************************************************************************/
 /*                                                                       */
 /*                         POSTSCRIPT OUTPUT                             */

@@ -65,6 +65,7 @@ ellpointtoz(E,[x1,y1]); -->  impossible addition t_VEC + t_VEC.
 GN 16- assembler section of Sparc Makefiles relied on GNU make specific $<
 MSo17- off-by-1 error in Vec( t_STR )  [ memory corruption ]
    18- off-by-1 error in itostr(), e.g 10^11 [ memory corruption ]
+BA 19- [hi-res plot: X-Windows] rescaling bug
 
   Changed
     1- bnfinit: [small_norm phase] speed up norm computations.

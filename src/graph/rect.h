@@ -250,10 +250,12 @@ extern long  rectpoint_itype;
 extern long  rectline_itype;
 
 /* plotport.c */
+typedef long col_counter[MAX_COLORS][ROt_MAX];
 
 extern  void    initrect(long ne, long x, long y);
 extern  void    initrect_gen(long ne, GEN x, GEN y, long flag);
 extern  void    killrect(long ne);
+extern  void    plot_count(long *w, long lw, col_counter rcolcnt);
 extern  void    plot(entree *ep, GEN a, GEN b, char *ch, GEN ysmlu, GEN ybigu, long prec);
 extern  GEN     ploth(entree *ep, GEN a, GEN b, char *ch, long prec, long flag, long numpoints);
 extern  GEN     ploth2(entree *ep, GEN a, GEN b, char *ch, long prec);

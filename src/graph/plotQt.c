@@ -80,8 +80,7 @@ private:
     long *x;                           // x, y: array of x,y-coorinates of the
     long *y;                           //   top left corners of the rectwindows
     long lw;                           // lw: number of rectwindows
-    long rcolcnt[MAX_COLORS][ROt_MAX];
-    long rcnt[ROt_MAX+1];
+    col_counter rcolcnt;
     QPointArray _points[MAX_COLORS];
     QPointArray _seg[MAX_COLORS];
     QPointArray *_lines[MAX_COLORS];
@@ -312,41 +311,8 @@ void Plotter::plot() {
 
 
 void Plotter::alloc() {
-
-    PariRect *e;
-    RectObj *p1;
-
-    for( int col = 1; col < MAX_COLORS; col++) {
-	rcolcnt[col][ROt_MV] = rcolcnt[col][ROt_PT] = rcolcnt[col][ROt_LN] =
-	    rcolcnt[col][ROt_BX] = rcolcnt[col][ROt_MP] = rcolcnt[col][ROt_ML] =
-	    rcolcnt[col][ROt_ST] = rcolcnt[col][ROt_PTT] = rcolcnt[col][ROt_PTS] =
-	    rcolcnt[col][ROt_LNT] = 0;
-    }
-
-    for( int i = 0; i < lw; i++) {
-	e = rectgraph[w[i]]; p1 = RHead(e);
-	while(p1)
-	{
-	    switch(RoType(p1))
-	    {
-		case ROt_MP : rcolcnt[RoCol(p1)][ROt_PT] += RoMPcnt(p1);
-		    break;                           /* Multiple Point */
-		case ROt_PT :                        /* Point */
-		case ROt_LN :                        /* Line */
-		case ROt_BX :                        /* Box */
-		case ROt_ML :                        /* Multiple lines */
-		case ROt_ST : rcolcnt[RoCol(p1)][RoType(p1)]++;
-		    break;                           /* String */
-		case ROt_MV :                        /* Move */
-		case ROt_PTT:                        /* Point type change */
-		case ROt_PTS:                        /* Point size change */
-		case ROt_LNT: rcnt[RoType(p1)]++;    /* Line type change */
-	    }
-	    p1 = RoNext(p1);
-	}
-    }
-
     long *c;
+    plot_count(w, lw, rcolcnt);
     for (int col = 1; col<MAX_COLORS; col++) {
 	c = rcolcnt[col];
 	_points[col].resize( c[ROt_PT]);

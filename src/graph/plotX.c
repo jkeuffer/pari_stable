@@ -79,33 +79,6 @@ PARI_ColorSetUp(Display *display, char **Colors, int n)
 		     &PARI_ExactColors[i], &PARI_Colors[i]);
 }
 
-#ifdef SONY
-typedef int (*XErrorHandler) (
-#  if NeedFunctionPrototypes
-  Display*,
-  XErrorEvent*
-#  endif
-  );
-
-extern XErrorHandler XSetErrorHandler (
-#  if NeedFunctionPrototypes
-  XErrorHandler	
-#  endif
-  );
-
-typedef int (*XIOErrorHandler) (
-#  if NeedFunctionPrototypes
-  Display*	
-#  endif
-  );
-
-extern XIOErrorHandler XSetIOErrorHandler (
-#  if NeedFunctionPrototypes
-  XIOErrorHandler
-#  endif
-  );
-#endif
-
 /* after fork(), we don't want the child to recover but to exit */
 static void
 exiterr(char *str)
@@ -144,13 +117,13 @@ rectdraw0(long *w, long *x, long *y, long lw, long do_free)
   long *c, shift;
   long *numpoints[MAX_COLORS],*numtexts[MAX_COLORS];
   long *xtexts[MAX_COLORS],*ytexts[MAX_COLORS];
-  long rcolcnt[MAX_COLORS][ROt_MAX];
-  long col,i,j,x0,y0,a,b,oldwidth,oldheight;
-  long rcnt[ROt_MAX+1], hjust, vjust, hgap, vgap, hgapsize, vgapsize;
+  col_counter rcolcnt;
+  long col,i,j,x0,y0,oldwidth,oldheight;
+  long hjust, vjust, hgap, vgap, hgapsize = h_unit, vgapsize = v_unit;
   char **texts[MAX_COLORS];
   PariRect *e;
   RectObj *p1;
-  double xs=1,ys=1;
+  double xs = 1, ys = 1;
 
   int screen;
   Display *display;
@@ -167,7 +140,6 @@ rectdraw0(long *w, long *x, long *y, long lw, long do_free)
 
   if (fork()) return;  /* parent process returns */
 
-  /* child process goes on */
   freeall();  /* PARI stack isn't needed anymore, keep rectgraph */
   /* if gnuplot X11 plotting is active, may get SIGPIPE...  XXXX Better disable
    * some X callback? */
@@ -176,46 +148,15 @@ rectdraw0(long *w, long *x, long *y, long lw, long do_free)
   display = XOpenDisplay(NULL);
   font_info = XLoadQueryFont(display, "9x15");
   if (!font_info) exiterr("cannot open 9x15 font");
-  hgapsize = h_unit;  vgapsize = v_unit;
-
   XSetErrorHandler(Xerror);
   XSetIOErrorHandler(IOerror);
   PARI_ColorSetUp(display,PARI_DefaultColors,MAX_COLORS);
 
-  for(col=1;col<MAX_COLORS;col++)
-  {
-    rcolcnt[col][ROt_MV]=rcolcnt[col][ROt_PT]=rcolcnt[col][ROt_LN]=0;
-    rcolcnt[col][ROt_BX]=rcolcnt[col][ROt_MP]=rcolcnt[col][ROt_ML]=0;
-    rcolcnt[col][ROt_ST]=rcolcnt[col][ROt_PTT]=rcolcnt[col][ROt_PTS]=rcolcnt[col][ROt_LNT]=0;
-  }
-
-  for(i=0;i<lw;i++)
-  {
-    e=rectgraph[w[i]]; p1=RHead(e);
-    while(p1)
-    {
-      switch(RoType(p1))
-      {
-	case ROt_MP : rcolcnt[RoCol(p1)][ROt_PT] += RoMPcnt(p1);
-	              break;                 /* Multiple Point */
-	case ROt_PT :                        /* Point */
-	case ROt_LN :                        /* Line */
-	case ROt_BX :                        /* Box */
-	case ROt_ML :                        /* Multiple lines */
-	case ROt_ST : rcolcnt[RoCol(p1)][RoType(p1)]++;
-	              break;                 /* String */
-	case ROt_MV :                        /* Move */
-	case ROt_PTT:                        /* Point type change */
-	case ROt_PTS:                        /* Point size change */
-	case ROt_LNT: rcnt[RoType(p1)]++;    /* Line type change */
-      }
-      p1=RoNext(p1);
-    }
-  }
+  plot_count(w, lw, rcolcnt);
   for (col=1; col<MAX_COLORS; col++)
   {
     char *m;
-    c = rcolcnt[col];
+    long *c = rcolcnt[col];
     points[col]=(XPoint*)zmalloc(c[ROt_PT]*sizeof(XPoint));
     seg[col]=(XSegment*)zmalloc(c[ROt_LN]*sizeof(XSegment));
     rec[col]=(XRectangle*)zmalloc(c[ROt_BX]*sizeof(XRectangle));
@@ -303,10 +244,11 @@ rectdraw0(long *w, long *x, long *y, long lw, long do_free)
       case Expose: 
 	for(i=0; i<lw; i++)
 	{
-	  e=rectgraph[w[i]];p1=RHead(e);x0=x[i];y0=y[i];
-	  while(p1)
+	  e=rectgraph[w[i]]; x0=x[i]; y0=y[i];
+	  for (p1 = RHead(e); p1; p1 = RoNext(p1))
 	  {
-	    col=RoCol(p1); c=rcolcnt[col];
+	    col = RoCol(p1);
+            c = rcolcnt[col];
 	    switch(RoType(p1))
 	    {
 	      case ROt_PT:
@@ -320,11 +262,11 @@ rectdraw0(long *w, long *x, long *y, long lw, long do_free)
 		seg[col][c[ROt_LN]].y2 = DTOL((RoLNy2(p1)+y0)*ys);
 		c[ROt_LN]++;break;
 	      case ROt_BX:
-		a=rec[col][c[ROt_BX]].x = DTOL((RoBXx1(p1)+x0)*xs);
-		b=rec[col][c[ROt_BX]].y = DTOL((RoBXy1(p1)+y0)*ys);
-		rec[col][c[ROt_BX]].width = DTOL((RoBXx2(p1)+x0-a)*xs);
-		rec[col][c[ROt_BX]].height = DTOL((RoBXy2(p1)+y0-b)*ys);
-		c[ROt_BX]++;break;
+                rec[col][c[ROt_BX]].x = DTOL((RoBXx1(p1)+x0)*xs);
+                rec[col][c[ROt_BX]].y = DTOL((RoBXy1(p1)+y0)*ys);
+                rec[col][c[ROt_BX]].width = DTOL((RoBXx2(p1)-RoBXx1(p1))*xs);
+                rec[col][c[ROt_BX]].height = DTOL((RoBXy2(p1)-RoBXy1(p1))*ys);
+                c[ROt_BX]++;break;
 	      case ROt_MP:
 		ptx = RoMPxs(p1); pty = RoMPys(p1);
 		for(j=0;j<RoMPcnt(p1);j++)
@@ -367,12 +309,11 @@ rectdraw0(long *w, long *x, long *y, long lw, long do_free)
 		c[ROt_ST]++;break;
 	      default: break;
 	    }
-	    p1=RoNext(p1);
 	  }
 	}
 	for(col=1; col<MAX_COLORS; col++)
 	{
-          c = rcolcnt[col];
+          long *c = rcolcnt[col];
 	  XSetForeground(display, gc, PARI_Colors[col].pixel);
 	  if(c[ROt_PT]) XDrawPoints(display,win,gc,points[col],c[ROt_PT],0);
 	  if(c[ROt_LN]) XDrawSegments(display,win,gc,seg[col],c[ROt_LN]);
