@@ -94,7 +94,12 @@ gscali(GEN x,GEN y)
 /********************************************************************/
 /**             QR Factorization via Householder matrices          **/
 /********************************************************************/
-
+static int
+no_prec_pb(GEN x)
+{
+  return (typ(x) != t_REAL || lg(x) >  3
+                           || expo(x) < (long)BITS_IN_HALFULONG);
+}
 /* zero x[1..k-1], fill mu */
 static int
 FindApplyQ(GEN x, GEN mu, GEN B, long k, GEN Q, long prec)
@@ -134,8 +139,7 @@ FindApplyQ(GEN x, GEN mu, GEN B, long k, GEN Q, long prec)
   }
   else
     for (i=1; i<k; i++) coeff(mu,i,k) = x[i];
-  return (typ(x2) != t_REAL || lg(x2) >  3
-                            || expo(x2) < (long)BITS_IN_HALFULONG);
+  return no_prec_pb(x2);
 }
 
 static void
@@ -239,7 +243,7 @@ incrementalGS(GEN x, GEN mu, GEN B, long k)
     for (i=2; i<j; i++) s = mpadd(s, mpmul(gcoeff(mu,j,i),(GEN)A[i]));
     s = mpneg(s); A[j] = (long)gerepileuptoleaf(av, mpadd(gcoeff(x,k,j), s));
   }
-  B[k] = A[k]; return (signe((GEN)B[k]) > 0);
+  B[k] = A[k]; return (signe((GEN)B[k]) > 0 && no_prec_pb((GEN)B[k]));
 }
 
 #if 0
@@ -1341,6 +1345,15 @@ PRECPB:
           xinit = gram? qf_base_change(xinit, h, 1): gmul(xinit, h);
 
           prec = good_prec(xinit, kmax);
+#if 0 /* slower
+          if (prec == DEFAULTPREC) {
+            if (DEBUGLEVEL>3) fprintferr("switch to integral algorithm\n");
+            h = gram? lllgramint(xinit): lllint(xinit);
+            if (H) h = gmul(H, h);
+
+            break;
+          }
+#endif
           if (DEBUGLEVEL>3) fprintferr("in precision %ld\n", prec);
           x = mat_to_MP(xinit, prec);
           h = idmat(n);
