@@ -377,8 +377,13 @@ sub uncommit {
   return $rec;
 } 
 
+# finish($event, $force_one_group)
+
 # Finish the inner scope with the event $event. If this scope is empty,
-# add an empty record.
+# add an empty record.  If finishing the group would bring us to toplevel
+# and $force_one_group is not set, can break things into chunks to improve
+# line-breaking.
+
 # No additional action is executed
 
 sub finish {
@@ -394,7 +399,7 @@ sub finish {
   warn "B:Last $#chunks, the first on the last level=$#level is $level[$#level]" if $debug & $debug_flow;
   $#chunks=$level[$#level]; #if $chunks[$level[$#level]]<=$#out;
   local(@t);
-  if ($#level==1) {
+  if ($#level==1 && !$_[0]) {
     @t=@out[$chunks[$#chunks]..$#out];
     $#out=$chunks[$#chunks]-1;
   }
@@ -403,10 +408,8 @@ sub finish {
   $#action--;
   $#tokenByToken--;
   $#wait--;
-  if ($#level==0) {
-    local($c) = $#chunks;
+  if ($#level==0 && !$_[0]) {
     for (@t) {&commit($_);}
-    $#chunks = $c;
   }
   warn 
       "a:Last $#chunks, the first on the last level=$#level is $level[$#level]"
@@ -583,7 +586,7 @@ sub f_subSuper {
   warn "Entering f_subSuper...\n" if $debug & $debug_flow;  
   &trim(2);
   &collapse(2);
-  &assertHave(2) || &finish("");
+  &assertHave(2) || &finish("",1);
   &sup_sub(0,1);
 } 
 
@@ -608,7 +611,7 @@ sub sup_sub {
     $out[$#out]="$h,$l,$h1,0,$str1\n\n$str2";
   } 
   warn "a:Last $#chunks, the first on the last level=$#level is $level[$#level]" if $debug & $debug_flow;
-  &finish(2);
+  &finish(2,1);
 } 
 
 # Takes the last two records, returns a record that contains them and forms 
@@ -618,7 +621,7 @@ sub f_superSub {
   warn "Entering f_superSub...\n" if $debug & $debug_flow;  
   &trim(2);
   &collapse(2);
-  &assertHave(2) || &finish("");
+  &assertHave(2) || &finish("",1);
   &sup_sub(1,0);
 } 
 
@@ -706,7 +709,7 @@ sub f_radical {
   warn "Entering f_radical...\n" if $debug & $debug_flow; 
   &trim(1);
   &collapse(1);
-  &assertHave(1) || &finish("");
+  &assertHave(1) || &finish("",1);
   warn "Radical of $out[$#out]\n__END__\n" if $debug & $debug_record;
   local($h,$l,$b)=($out[$#out] =~ /^(\d+),(\d+),(\d+)/g);
   $h || $h++;
@@ -718,7 +721,7 @@ sub f_radical {
   &setbaseline($out,$b1);
   $out[$#out]=&join("$h1,2,$b1,0, +\n" . (" |\n" x ($h-1)) . '\|',$out);
   warn "a:Last $#chunks, the first on the last level=$#level is $level[$#level]" if $debug & $debug_flow;
-  &finish(1);
+  &finish(1,1);
 } 
 
 # Takes the last two records, returns a record that contains them and forms 
@@ -728,7 +731,7 @@ sub f_fraction {
   warn "Entering f_fraction...\n" if $debug & $debug_flow;  
   &trim(2);
   &collapse(2);
-  &assertHave(2) || &finish("");
+  &assertHave(2) || &finish("",1);
   warn "Numer `$out[$#out-1]'\nDenom `$out[$#out]'\n__END__\n" if $debug & $debug_record;
   local($l1,$l2)=(&length($out[$#out-1]),&length($out[$#out]));
   local($len)=(($l1>$l2 ? $l1: $l2));
@@ -738,14 +741,14 @@ sub f_fraction {
   $#chunks--;
   $#out--;
   warn "a:Last $#chunks, the first on the last level=$#level is $level[$#level]" if $debug & $debug_flow;
-  &finish(2);
+  &finish(2,1);
 } 
 
 sub f_choose {
   warn "Entering f_choose...\n" if $debug & $debug_flow;  
   &trim(2);
   &collapse(2);
-  &assertHave(2) || &finish("");
+  &assertHave(2) || &finish("",1);
   warn "Numer `$out[$#out-1]'\nDenom `$out[$#out]'\n__END__\n" if $debug & $debug_record;
   local($l1,$l2)=(&length($out[$#out-1]),&length($out[$#out]));
   local($len)=(($l1>$l2 ? $l1: $l2));
@@ -760,7 +763,7 @@ sub f_choose {
   local($h,$b)=($out[$#out-1] =~ /^(\d+),\d+,(\d+)/)[0,1];
   &makehigh($out[$#out-2],$h,$b,0,1);
   &makehigh($out[$#out],$h,$b,1,0);
-  &finish(2);
+  &finish(2,1);
 }
 
 
@@ -768,7 +771,7 @@ sub f_buildrel {
         warn "Entering f_buildrel...\n" if $debug & $debug_flow;
   &trim(3);
         &collapse(3);
-        &assertHave(3) || &finish("");
+        &assertHave(3) || &finish("",1);
         warn "What: $out[$#out-2]\nOver $out[$#out]\n__END__\n" if $debug & $debug_record;
         local($rec)=($out[$#out-2]);
         $out[$#out-2]=$out[$#out];
@@ -776,7 +779,7 @@ sub f_buildrel {
         $#out-=2;
   &f_putover($rec,1);
         warn "a:Last $#chunks, the first on the last level=$#level is $level[$#level]" if $debug & $debug_flow;
-        &finish(3);
+        &finish(3,1);
 }
 
 # Takes two records, returns a record that contains them and forms a
@@ -907,7 +910,7 @@ sub f_overline {
   warn "Entering f_overline...\n" if $debug & $debug_flow;  
   &trim(1);
   &collapse(1);
-  &assertHave(1) || &finish("");
+  &assertHave(1) || &finish("",1);
   warn "Overlining $out[$#out]\n__END__\n" if $debug & $debug_record;
   local($h,$len,$b)=($out[$#out] =~ /^(\d+),(\d+),(\d+)/);
   $out[$#out]=&vStack(&string2record("_" x $len),
@@ -916,27 +919,27 @@ sub f_overline {
   #$out[$#out] =~ s/^(\d+,\d+,)(\d+)/\1$b/;
   &setbaseline($out[$#out],$b);
   warn "a:Last $#chunks, the first on the last level=$#level is $level[$#level]" if $debug & $debug_flow;
-  &finish(1);
+  &finish(1,1);
 } 
 
 sub f_underline {
   warn "Entering f_underline...\n" if $debug & $debug_flow; 
   &trim(1);
   &collapse(1);
-  &assertHave(1) || &finish("");
+  &assertHave(1) || &finish("",1);
   warn "Underlining $out[$#out]\n__END__\n" if $debug & $debug_record;
   local($h,$len,$b)=($out[$#out] =~ /^(\d+),(\d+),(\d+)/);
   $out[$#out]=&vStack($out[$#out],&string2record("_" x $len));
   #$out[$#out] =~ s/^(\d+,\d+,)(\d+)/\1$b/;
   &setbaseline($out[$#out],$b);
   warn "a:Last $#chunks, the first on the last level=$#level is $level[$#level]" if $debug & $debug_flow;
-  &finish(1);
+  &finish(1,1);
 } 
 
 sub f_not {
   warn "Entering f_not...\n" if $debug & $debug_flow;  
   &collapse(1);
-  &assertHave(1) || &finish("");
+  &assertHave(1) || &finish("",1);
   warn "Negating $out[$#out]\n__END__\n" if $debug & $debug_record;
   local($str)=(split(/,/,$out[$#out]))[4];
   if ($str eq "=") {
@@ -949,14 +952,14 @@ sub f_not {
     $out[$#out]=&join(&string2record("\\not"),$out[$#out]);
   }
   warn "a:Last $#chunks, the first on the last level=$#level is $level[$#level]" if $debug & $debug_flow;
-  &finish(1);
+  &finish(1,1);
 } 
 
 sub f_putunder {
   warn "Entering f_putunder...\n" if $debug & $debug_flow;
   &trim(1);
   &collapse(1);
-  &assertHave(1) || &finish("");
+  &assertHave(1) || &finish("",1);
   warn "Putting Under $out[$#out]\n__END__\n" if $debug & $debug_record;
   local($h,$len,$b)=($out[$#out] =~ /^(\d+),(\d+),(\d+)/);
         local($l2)=(&length($_[0]));
@@ -965,7 +968,7 @@ sub f_putunder {
   #$out[$#out] =~ s/^(\d+,\d+,)(\d+)/\1$b/;
   &setbaseline($out[$#out],$b);
   warn "a:Last $#chunks, the first on the last level=$#level is $level[$#level]" if $debug & $debug_flow;
-  &finish(1);
+  &finish(1,1);
 }
 
 # if has additional true argument will not finish
@@ -975,7 +978,7 @@ sub f_putover {
   warn "Entering f_putover...\n" if $debug & $debug_flow; 
   &trim(1);
   &collapse(1);
-  &assertHave(1) || &finish("");
+  &assertHave(1) || &finish("",1);
   warn "Putting Over $out[$#out]\n__END__\n" if $debug & $debug_record;
   local($h,$l1,$b,$b1)=($out[$#out] =~ /^(\d+),(\d+),(\d+)/);
         local($l2)=(&length($_[0]));
@@ -986,7 +989,7 @@ sub f_putover {
   #$out[$#out] =~ s/^(\d+,\d+,)(\d+)/\1$b/;
   &setbaseline($out[$#out],$b);
   warn "a:Last $#chunks, the first on the last level=$#level is $level[$#level]" if $debug & $debug_flow;
-  &finish(1) unless shift;
+  &finish(1,1) unless shift;
 } 
 
 sub f_putpar {
@@ -994,11 +997,11 @@ sub f_putpar {
   &trim(1);
   local($l,$r)=split(";",shift);
         &collapse(1);
-        &assertHave(1) || &finish("");
+        &assertHave(1) || &finish("",1);
         warn "Putting Parentheses $out[$#out]\n__END__\n" if $debug & $debug_record;
   $out[$#out]=&join(&string2record($l),
       &join($out[$#out],&string2record($r)));
-        &finish(1);
+        &finish(1,1);
 }
 
 sub f_putover_string {
@@ -1191,10 +1194,10 @@ sub bbackslash {
     &ddollar();
   } elsif ($wait[$#level] eq 'endCell') {
     return if $par =~ /^\s*\\end/;		# Ignore the last one
-    &finish('endCell');
+    &finish('endCell', 1);
     &trim(1);
     &collapse(1);
-    &finish('endRow');
+    &finish('endRow', 1);
     &start('endRow');
     &start('endCell');
   } else {
@@ -1205,7 +1208,7 @@ sub bbackslash {
 
 sub ampersand {
   if ($wait[$#level] eq 'endCell') {
-    &finish('endCell');
+    &finish('endCell',1);
     &trim(1);
     &collapse(1);
     &start('endCell');
@@ -1219,14 +1222,14 @@ sub matrix {
 }
 
 sub endmatrix {
-  &finish('endCell');
+  &finish('endCell',1);
   &trim(1);
   &collapse(1);
-  &finish('endRow');
+  &finish('endRow',1);
   # Now chunks correspond to rows of the matrix, records inside chunks to 
   # Cells
   &halign(split(";",shift));
-  &finish('endMatrix');
+  &finish('endMatrix',1);
 }
 
 sub endmatrixArg {
@@ -1360,7 +1363,7 @@ sub f_arrow {
   local($l,$r)=split(";",shift);
   &trim(2);
   &collapse(2);
-  &assertHave(2) || &finish("");
+  &assertHave(2) || &finish("",1);
   warn "Over: $out[$#out-1]\nUnder: $out[$#out]\n__END__\n" if $debug & $debug_record;
   local($l1,$l2)=(&length($out[$#out-1]),&length($out[$#out]));
   local($len)=(($l1>$l2 ? $l1: $l2));
@@ -1370,7 +1373,7 @@ sub f_arrow {
   $#chunks--;
   $#out--;
   warn "a:Last $#chunks, the first on the last level=$#level is $level[$#level]" if $debug & $debug_flow;
-  &finish(2);
+  &finish(2,1);
 }
 
 # takes two tips of arrow as argument separated by ";",
@@ -1381,7 +1384,7 @@ sub f_arrow_v {
   local($l,$r)=split(";",shift);
   &trim(2);
   &collapse(2);
-  &assertHave(2) || &finish("");
+  &assertHave(2) || &finish("",1);
   warn "Over: $out[$#out-1]\nUnder: $out[$#out]\n__END__\n" if $debug & $debug_record;
   local($h1,$b1)=($out[$#out-1] =~ /^(\d+),\d+,(\d+)/);
   local($h2,$b2)=($out[$#out] =~ /^(\d+),\d+,(\d+)/);
@@ -1403,7 +1406,7 @@ sub f_arrow_v {
   $#chunks--;
   $#out--;
   warn "a:Last $#chunks, the first on the last level=$#level is $level[$#level]" if $debug & $debug_flow;
-  &finish(2);
+  &finish(2,1);
 }
 
 sub noindent {
@@ -1427,9 +1430,9 @@ sub choose {
   if ($wait[$#level] eq '}') {
     local($prevw)=($wait[$#level-1]);
     $wait[$#level-1]="junk";
-    &finish("}");
+    &finish("}",1);
           &collapse(1);
-          &assertHave(1) || &finish("");
+          &assertHave(1) || &finish("",1);
     local($rec)=$out[$#out];
     $#out--;
     $#chunks--;
@@ -1437,7 +1440,7 @@ sub choose {
     $wait[$#level-1]=$prevw;
     &start("}");
     &commit($rec);
-    &finish("}");
+    &finish("}",1);
     &start("}");
   } else {&puts("\\choose");}
 }
@@ -1446,9 +1449,9 @@ sub over {
   if ($wait[$#level] eq '}') {
     local($prevw)=($wait[$#level-1]);
     $wait[$#level-1]="junk";
-    &finish("}");
+    &finish("}", 1);
           &collapse(1);
-          &assertHave(1) || &finish("");
+          &assertHave(1) || &finish("",1);
     local($rec)=$out[$#out];
     $#out--;
     $#chunks--;
@@ -1456,7 +1459,7 @@ sub over {
     $wait[$#level-1]=$prevw;
     &start("}");
     &commit($rec);
-    &finish("}");
+    &finish("}",1);
     &start("}");
   } else {&puts("\\over");}
 }
@@ -1506,7 +1509,7 @@ sub makehigh {
 
 
 sub right {
-  &finish("LeftRight");
+  &finish("LeftRight",1);
   &trim(1);
   &collapse(1);
 }
@@ -2168,3 +2171,5 @@ __END__
 	  Ignore \noindent if not important.
 	  Ignore whitespace paragraphs.
 # Apr 00: Finishing a level 1 would not merge things into one chunk.
+# May 00: Additional argument to finish() to distinguish finishing
+	  things which cannot be broken between lines.
