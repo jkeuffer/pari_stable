@@ -3501,10 +3501,13 @@ FpX_resultant_after_eval(GEN a, GEN b, GEN n, GEN p, GEN la)
 static GEN
 u_FpY_FpXY_resultant(GEN a, GEN b, ulong p)
 {
-  ulong la = (ulong)leading_term(a);
-  long i,n, dres = degpol(a)*degpol(b), nmax = (dres+1)>>1;
+  ulong la;
+  long i,n,dres,nmax;
   GEN x,y;
  
+  dres = degpol(a)*degpol(b);
+  nmax = (dres+1)>>1;
+  la = (ulong)leading_term(a);
   x = cgetg(dres+2, t_VECSMALL);
   y = cgetg(dres+2, t_VECSMALL);
  /* Evaluate at 0 (if dres even) and +/- n, so that P_n(X) = P_{-n}(-X),
@@ -3524,30 +3527,42 @@ u_FpY_FpXY_resultant(GEN a, GEN b, ulong p)
   return u_FpV_polint(x,y, p);
 }
 
+/* return a t_POL (in dummy variable 0) whose coeffs are the coeffs of b,
+ * in variable v. This is an incorrect PARI object if initially varn(b) < v.
+ * We could return a vector of coeffs, but it is convenient to have degpol()
+ * and friends available. Even in that case, it will behave nicely with all
+ * functions treating a polynomial as a vector of coeffs (eg poleval). 
+ * FOR INTERNAL USE! */
+GEN
+swap_vars(GEN b0, long v)
+{
+  long i, n = poldegree(b0, v);
+  GEN b = cgetg(n+3, t_POL), x = b + 2;
+  b[1] = evalsigne(1) | evallgef(n+3) | evalvarn(v);
+  for (i=0; i<=n; i++) x[i] = (long)polcoeff_i(b0, i, v);
+  return b;
+}
+
 /* assume varn(b) < varn(a) */
 GEN
 FpY_FpXY_resultant(GEN a, GEN b0, GEN p)
 {
-  GEN la = leading_term(a);
-  long i,n, dres = degpol(a)*degpol(b0), nmax = (dres+1)>>1;
-  long vX = varn(b0), vY = varn(a);
-  GEN x,y,b;
-
-  n = poldegree(b0, vY);
-  b = cgetg(n+3, t_POL); x = b + 2;
-  b[1] = evalsigne(1) | evallgef(n+3) | evalvarn(vY);
-  for (i=0; i<=n; i++) x[i] = (long)polcoeff_i(b0, i, vY);
- /* b incorrect PARI object: variables swapped. But variables disregarded
-  * from now on */
+  long i,n,dres,nmax, vX = varn(b0), vY = varn(a);
+  GEN la,x,y,b = swap_vars(b0, vY);
+ 
   if (OK_ULONG(p))
   {
     ulong pp = (ulong)p[2];
+    long l = lg(b);
     a = u_Fp_FpX(a, 0, pp);
-    for (i=2; i<n+3; i++)
+    for (i=2; i<l; i++)
       b[i] = (long)u_Fp_FpX((GEN)b[i], 0, pp);
     return small_to_pol(u_FpY_FpXY_resultant(a,b,pp), vX);
   }
-   
+ 
+  dres = degpol(a)*degpol(b0);
+  nmax = (dres+1)>>1;
+  la = leading_term(a);
   x = cgetg(dres+2, t_VEC);
   y = cgetg(dres+2, t_VEC);
  /* Evaluate at 0 (if dres even) and +/- n, so that P_n(X) = P_{-n}(-X),
