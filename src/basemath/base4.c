@@ -2313,6 +2313,13 @@ make_integral(GEN nf, GEN L0, GEN f, GEN *listpr, GEN *ptd1)
   *ptd1 = d1; return L;
 }
 
+void
+check_listpr(GEN x)
+{
+  long l = lg(x), i;
+  for (i=1; i<l; i++) checkprimeid((GEN)x[i]);
+}
+
 /* Given a prime ideal factorization with possibly zero or negative
  * exponents, gives b such that v_p(b) = v_p(x) for all prime ideals pr | x
  * and v_pr(b)> = 0 for all other pr.
@@ -2328,9 +2335,10 @@ idealapprfact_i(GEN nf, GEN x)
 
   nf = checknf(nf);
   if (typ(x) != t_MAT || lg(x) != 3)
-    err(talker,"not a prime ideal factorization in idealapprfact");
+    err(talker,"not a factorization in idealapprfact");
+  check_listpr((GEN)x[1]);
   if (DEBUGLEVEL>4) {
-    fprintferr(" entering idealapprfact() :\n");
+    fprintferr(" entering idealapprfact():\n");
     fprintferr(" x = %Z\n", x);
   }
   list= (GEN)x[1];

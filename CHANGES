@@ -81,6 +81,8 @@ IZ 12- [gnuplot + dynamic link:] allow building even when dlopen() not available
 MW 33- (recent) typo in localred (char 2)
    34- 2.2.3-C20 had broken backward compatibility: restore
        [inefficient, useless] previous output of nfelt*modpr routines
+   35- idealappr(nfinit(y),matid(2),1) --> SEGV  [bad input]
+
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).
