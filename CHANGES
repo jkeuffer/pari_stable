@@ -44,6 +44,7 @@ Done for version 2.2.3 (released ??/??/2002):
     9- typo in t_FRAC + t_PADIC  [only numerator of t_FRAC used]
    10- factorback(t,nfinit(x)) --> SEGV
 IZ 11- shift(x > 0,, flag!=0) didn't act as the docs said [flag now ignored]
+   12- lindep(Vec(x^48)) --> oo loop
 
   Changed
 BA  1- improved Fp_isom
@@ -55,7 +56,7 @@ IZ  2- remove all dependance on __OPTIMIZE__ for inlining [cf 2.0.14 F-24]
   Added
     1- mplog2() function --> faster mplog()
     2- gcd for Gaussian integers
-    3- APRCL primality test [not yet available under GP]
+HC  3- APRCL primality test [not yet available under GP]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.2 (released 10/01/2002):
