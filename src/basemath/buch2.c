@@ -1779,18 +1779,22 @@ static long
 be_honest(GEN nf,GEN subFB,long PRECLLL)
 {
   ulong av;
-  GEN MC = gmael(nf,5,2), M = gmael(nf,5,1), D = (GEN)nf[3];
-  long ex,i,j,J,k,iz,nbtest, lgsub = lg(subFB), ru = lg(MC);
-  GEN P,ideal,m, exu = cgetg(ru, t_VECSMALL), MCtw= cgetg(ru, t_MAT);
+  long ex,i,j,J,k,iz,nbtest,ru, lgsub = lg(subFB);
+  GEN MCtw,MC,M,P,ideal,m,exu, D = (GEN)nf[3];
 
+  if (KCZ2 <= KCZ) return 1;
   if (DEBUGLEVEL)
   {
     fprintferr("Be honest for primes from %ld to %ld\n", FB[KCZ+1],FB[KCZ2]);
     flusherr();
   }
+  if (!powsubFB) powsubFBgen(nf,subFB,CBUCHG+1,0);
+  M = gprec_w(gmael(nf,5,1), PRECLLL);
+  MC= gprec_w(gmael(nf,5,2), PRECLLL);
+  ru = lg(MC);
+  exu = cgetg(ru, t_VECSMALL);
+  MCtw= cgetg(ru, t_MAT);
   av = avma;
-  M = gprec_w(M,  PRECLLL);
-  MC= gprec_w(MC, PRECLLL);
   for (iz=KCZ+1; iz<=KCZ2; iz++, avma = av)
   {
     if (DEBUGLEVEL>1) fprintferr("%ld ", FB[iz]);
@@ -1823,7 +1827,7 @@ be_honest(GEN nf,GEN subFB,long PRECLLL)
             MCtw[i] = exu[i]? lmul2n((GEN)MC[i],exu[i]<<1): MC[i];
           m = pseudomin(ideal, mulmat_real(MCtw,M));
           if (m && factorgen(nf,ideal,m,iz-1,FB[iz-1])) break;
-	  nbtest++; if (nbtest==200) return 0;
+	  if (++nbtest==200) return 0;
 	}
 	avma = av2; if (k < ru) break;
       }
@@ -1894,7 +1898,6 @@ bestappr_noer(GEN x, GEN k)
   return y;
 }
 
-extern GEN hnflll_i(GEN A, GEN *ptB);
 /* Input:
  * lambda = approximate rational entries: coords of units found so far on a
  * sublattice of maximal rank (sublambda)
@@ -1906,7 +1909,7 @@ extern GEN hnflll_i(GEN A, GEN *ptB);
  *
  * Output: *ptkR = R, *ptU = basis of fundamental units (in terms lambda) */
 static int
-compute_R(GEN lambda, GEN z, GEN *ptU, GEN *ptkR)
+compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR)
 {
   ulong av = avma;
   long r;
@@ -1939,9 +1942,7 @@ compute_R(GEN lambda, GEN z, GEN *ptU, GEN *ptkR)
   }
   if (c < 1.5) return PRECI;
   if (c > 3.) { avma = av; return RELAT; }
-  H = hnflll_i(L,&U); /* try hard to get a SMALL base change */
-  U += (lg(U)-1 - r); U[0] = evaltyp(t_MAT)|evallg(r+1);
-  *ptkR = R; *ptU = U; return LARGE;
+  *ptkR = R; *ptL = L; return LARGE;
 }
 
 /* find the smallest (wrt norm) among I, I^-1 and red(I^-1) */
@@ -2790,7 +2791,7 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
   long sfb_increase=0, sfb_trials=0, precdouble=0, precadd=0;
   double cbach,cbach2,drc,LOGD2;
   GEN p1,vecT2,fu,zu,nf,LLLnf,D,xarch,W,R,Res,z,h,vperm,subFB;
-  GEN resc,B,C,c1,lambda,pdep,parch,liste,invp,clg1,clg2, *mat;
+  GEN L,resc,B,C,c1,lambda,pdep,liste,invp,clg1,clg2, *mat;
   GEN CHANGE=NULL, extramat=NULL, extraC=NULL, list_jideal=NULL;
   char *precpb = NULL;
 
@@ -3056,10 +3057,8 @@ MORE:
   if (DEBUGLEVEL) fprintferr("\n#### Tentative class number: %Z\n", h);
 
   /* z ~ h R if enough relations, a multiple otherwise */
-  z = mulrr(Res,resc);
-  p1 = gmul2n(divir(h,z), 1);
-  i = compute_R(lambda,p1,&parch,&R);
-  switch(i)
+  z = mulrr(Res,resc); p1 = gmul2n(divir(h,z), 1);
+  switch (compute_R(lambda,p1,&L,&R))
   {
     case PRECI: /* precision problem unless we cheat on Bach constant */
       if (!precdouble) precpb = "compute_R";
@@ -3071,16 +3070,12 @@ MORE:
   }
   /* DONE! */
 
-  if (KCZ2 > KCZ)
-  { /* "be honest" */
-    if (!powsubFB) powsubFBgen(nf,subFB,CBUCHG+1,PRECREG);
-    if (!be_honest(nf,subFB,PRECLLL)) goto START;
-  }
+  if (!be_honest(nf,subFB,PRECLLL)) goto START;
 
   /* fundamental units */
   if (flun < 0 || flun > 1)
   {
-    xarch = gmul(xarch, parch); /* arch. components of fund. units */
+    xarch = gmul(xarch, lllint(L)); /* arch. components of fund. units */
     xarch = cleancol(xarch,N,PRECREG);
     if (DEBUGLEVEL) msgtimer("cleancol");
   }
@@ -3089,11 +3084,7 @@ MORE:
     fu = getfu(nf,&xarch,R,flun,&k,PRECREG);
     if (k <= 0 && labs(flun) > 2)
     {
-      if (k < 0)
-      {
-        precadd = (DEFAULTPREC-2) + ((-k) >> TWOPOTBITS_IN_LONG);
-        if (precadd <= 0) precadd = (DEFAULTPREC-2);
-      }
+      if (k < 0) precadd = (DEFAULTPREC-2) + ((-k) >> TWOPOTBITS_IN_LONG);
       precpb = "getfu"; goto START;
     }
   }
