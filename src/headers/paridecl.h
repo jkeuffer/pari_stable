@@ -1353,6 +1353,7 @@ GEN     mpeuler(long prec);
 GEN     mpexp(GEN x);
 GEN     mpexp1(GEN x);
 GEN     mplog(GEN x);
+GEN     mplog2(long prec);
 GEN     mppi(long prec);
 GEN     mpsqrt(GEN x);
 GEN     padiczero(GEN p, long e);
