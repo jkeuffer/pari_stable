@@ -55,14 +55,36 @@ Once this is granted, you'll be able to log in as 'cvsadmin' (the CVS
 administrator) instead of 'cvs' (CVS user) as described above and you'll be
 able to use 'cvs commit'.
 
+3) Version tags:
+================
 
-NOTES and CAVEATS:
-==================
+All project files have an individual version number, independent of the
+release numbering scheme. Official releases (starting from version 2.0.17)
+are 'tagged' so that all files pertaining to a given release can be
+simultaneously accessed without tracking version numbers. Tag names are
+'release-<VERSION>' with dots replaced by dashes, e.g 'release-2-0-20' for
+2.0.20.
+
+If you want to fetch a specific version of pari (2.0.17 or more recent), add
+the argument '-r <TAG>' to your checkout or update command. The tag
+'release-2-1-patches' denotes the stable branch 2.1 as a whole, and can be
+used to checkout up to date sources from that branch in between releases. For
+instance: 
+
+  cvs update -r release-2-1-patches
+
+produces the latest stable distribution with all relevant patches [the ones
+not affecting stability] backported.
+
+TIPS and CAVEATS:
+=================
 * you can speed up file transfers by using cvs -z3 (transfer files in
 compressed format), e.g 'cvs -z3 update' if you've missed a lot of patches,
 or 'cvs -z3 checkout' for the initial checkout. This requires that GNU gzip
-be in your path. You can create a .cvsrc file in your home directory
-containing lines of the form:
+be in your path. 
+
+* You can create a .cvsrc file in your home directory containing lines of the
+form:
 
     cvs -z3          [ use gzip -3 for all transfers ]
     diff -c          [ use diff -c (context diff) by default in 'cvs diff' ]
@@ -70,22 +92,6 @@ containing lines of the form:
 * 'cvs diff' gives you the difference between your local copy and the
 sources they were based on, not with the current state of the repository.
 Use 'cvs diff -D now' for that.
-
-* All project files have an individual version number, independent of the
-release numbering scheme. Official releases (starting from version 2.0.17)
-are 'tagged' so that all files pertaining to a given release can be
-simultaneously accessed without tracking version numbers. Tag names are
-'release-VERSION', e.g 'release-2-0-20'.
-
-The tag release-2-1-patches denotes the stable branch 2.1 as a whole, and can
-be used to checkout up to date sources from that branch in between releases.
-
-For instance: 
-
-  cvs update -r release-2-1-patches
-
-produces the latest stable distribution with all relevant patches [the ones
-not affecting stability] backported.
 
 * On Windows 95/98/2000 + Cygwin, you may have to explicitly set HOME (e.g
 in your .bashrc) to some existing directory otherwise CVS will abort on
