@@ -527,7 +527,7 @@ gauss_realimag(GEN x, GEN y)
   y = split_realimag(y,r1,r2); return gauss(M, y);
 }
 
-static GEN
+GEN
 getfu(GEN nf,GEN *ptxarch,GEN reg,long flun,long *pte,long prec)
 {
   long av = avma,e,i,j,R1,RU,N=degpol(nf[1]);
@@ -2770,7 +2770,7 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
 
   if (DEBUGLEVEL) timer2();
 
-  if (typ(P)==t_POL) nf = NULL; else { nf = checknf(P); P = (GEN)nf[1]; }
+  P = get_nfpol(P, &nf);
   if (typ(gRELSUP) != t_INT) gRELSUP = gtrunc(gRELSUP);
   RELSUP = itos(gRELSUP);
   if (RELSUP<=0) err(talker,"not enough relations in bnfxxx");

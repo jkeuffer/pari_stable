@@ -888,7 +888,6 @@ fix_var(GEN x, long v)
   return x;
 }
 
-extern GEN get_nfpol(GEN x, GEN *nf);
 extern GEN vandermondeinverseprep(GEN T, GEN L);
 extern GEN ZX_disc_all(GEN x, ulong bound);
 extern GEN indexpartial(GEN P, GEN DP);
