@@ -105,7 +105,7 @@ vecsmall_uniq(GEN V)
   W = cgetg(l,t_VECSMALL);
   W[1] = V[1];
   for(i=j=2; i<l; i++)
-    if (V[i] != W[j]) W[j++] = V[i];
+    if (V[i] != W[j-1]) W[j++] = V[i];
   setlg(W, j);
   stackdummy(W + j, l - j);
   return W;
