@@ -1631,6 +1631,49 @@ invrev(ulong b)
   return x;
 }
 
+/* assume xy>0, y odd */
+GEN 
+diviuexact(GEN x, ulong y)
+{
+  long i,ii, lz,lx = lgefint(x);
+  ulong q, yinv;
+  GEN z;
+
+  if (y == 1) return icopy(x);
+  yinv = invrev(y);
+  lz = (y < x[2]) ? lx : lx-1;
+  z = new_chunk(lz);
+
+  for (ii=lx-1,i=lz-1; i>=2; i--,ii--)
+  {
+    LOCAL_HIREMAINDER;
+
+    z[i] = q = yinv*((ulong)x[ii]); /* i-th quotient */
+    if (!q) continue;
+
+    /* x := x - q * y */
+    (void)mulll(q,y);
+    { /* update neither lowest word (could set it to 0) nor highest ones */
+      register GEN x0 = x + (ii - 1);
+      if (hiremainder)
+      {
+        if ((ulong)*x0 < hiremainder)
+        {
+          *x0 -= hiremainder;
+          do (*--x0)--; while ((ulong)*x0 == MAXULONG);
+        }
+        else
+          *x0 -= hiremainder;
+      }
+    }
+  }
+  i=2; while(!z[i]) i++;
+  z += i-2; lz -= (i-2);
+  z[0] = evaltyp(t_INT)|evallg(lz);
+  z[1] = evalsigne(1)|evallg(lz);
+  avma = (ulong)z; return z;
+}
+
 /* Find z such that x=y*z, knowing that y | x (unchecked)
  * Method: y0 z0 = x0 mod B = 2^BITS_IN_LONG ==> z0 = 1/y0 mod B.
  *    Set x := (x - z0 y) / B, updating only relevant words, and repeat */
@@ -1654,13 +1697,18 @@ diviiexact(GEN x, GEN y)
     x = shifti(x,-vy);
   }
   else x = icopy(x); /* necessary because we destroy x */
+  avma = av; /* will erase our x,y when exiting */
   /* now y is odd */
   ly = lgefint(y);
+  if (ly == 3) 
+  {
+    x = diviuexact(x,(ulong)y[2]);
+    setsigne(x,sx*sy); return x;
+  }
   lx = lgefint(x); if (ly>lx) err(talker,"impossible division in diviiexact");
   y0inv = invrev(y[ly-1]);
   i=2; while (i<ly && y[i]==x[i]) i++;
   lz = (i==ly || (ulong)y[i] < (ulong)x[i]) ? lx-ly+3 : lx-ly+2;
-  avma = av; /* will erase our x,y when exiting */
   z = new_chunk(lz);
 
   y += ly - 1; /* now y[-i] = i-th word of y */
@@ -1700,10 +1748,10 @@ diviiexact(GEN x, GEN y)
 #else
   i=2; while(!z[i]) i++;
 #endif
-  y = z + i-2; lz -= (i-2);
-  y[0] = evaltyp(t_INT)|evallg(lz);
-  y[1] = evalsigne(sx*sy)|evallg(lz);
-  avma = (ulong)y; return y;
+  z += i-2; lz -= (i-2);
+  z[0] = evaltyp(t_INT)|evallg(lz);
+  z[1] = evalsigne(sx*sy)|evallg(lz);
+  avma = (ulong)z; return z;
 }
 
 long
