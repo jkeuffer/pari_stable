@@ -1817,17 +1817,48 @@ long
 squfof_ambig(long a, long B, long C, long dd, GEN D, long *cntamb);
 /* see below */
 
+#ifdef INLINE
+ INLINE
+#endif
+static long
+squfof_issquare(long A)
+{
+  /* emulate carrecomplet on single-word positive integers */
+  static int carresmod64[]={
+    1,1,0,0,1,0,0,0,0,1, 0,0,0,0,0,0,1,1,0,0,
+    0,0,0,0,0,1,0,0,0,0, 0,0,0,1,0,0,1,0,0,0,
+    0,1,0,0,0,0,0,0,0,1, 0,0,0,0,0,0,0,1,0,0,
+    0,0,0,0};
+  static int carresmod63[]={
+    1,1,0,0,1,0,0,1,0,1, 0,0,0,0,0,0,1,0,1,0,
+    0,0,1,0,0,1,0,0,1,0, 0,0,0,0,0,0,1,1,0,0,
+    0,0,0,1,0,0,1,0,0,1, 0,0,0,0,0,0,0,0,1,0,
+    0,0,0};
+  static int carresmod65[]={
+    1,1,0,0,1,0,0,0,0,1, 1,0,0,0,1,0,1,0,0,0,
+    0,0,0,0,0,1,1,0,0,1, 1,0,0,0,0,1,1,0,0,1,
+    1,0,0,0,0,0,0,0,0,1, 0,1,0,0,0,1,1,0,0,0,
+    0,1,0,0,1};
+  static int carresmod11[]={1,1,0,1,1,1,0,0,0,1,0};
+  long a;
+
+  if (!carresmod64[A & 0x3fUL]) return 0;
+  if (!carresmod63[A % 63UL]) return 0;
+  if (!carresmod65[A % 65UL]) return 0;
+  if (!carresmod11[A % 11UL]) return 0;
+
+  a = (long)sqrt((double)A);
+  return (a*a == A ? a : 0);
+}
+
 GEN
 squfof(GEN n, long quiet)
 {
   long tf = lgefint(n), nm4, cnt = 0, cntamb;
   long a1, b1, c1, d1, dd1, L1, a2, b2, c2, d2, dd2, L2, a, q, c, qc, qcb;
-  GEN D1, D2, ga, Q, res;
+  GEN D1, D2, Q, res;
   long av = avma, av1;
   static long blacklist1[SQUFOF_BLACKLIST_SZ], blacklist2[SQUFOF_BLACKLIST_SZ];
-  static ulong pp[] =
-    { evaltyp(t_INT)|m_evallg(3), evalsigne(1)|evallgefint(3), 0 };
-  static GEN p = (GEN)pp;
   long blp1 = 0, blp2 = 0;
   long mydebug = DEBUGLEVEL - quiet;
   int act1 = 1, act2 = 1;
@@ -1969,6 +2000,15 @@ squfof(GEN n, long quiet)
 	qc = q*c; qcb = qc - b1; b1 = qc + qcb; c1 = a1 - q*qcb;
       }
       a1 = c;
+
+      if (a1 <= L1)		/* blacklist this */
+      {
+	if (blp1 >= SQUFOF_BLACKLIST_SZ)
+	  /* blacklist overflows: shouldn't happen */
+	  act1 = 0;		/* silently */
+	else
+	  blacklist1[blp1++] = a1;
+      }
     }
 
     /* send second form through reduction operator if active */
@@ -1988,6 +2028,15 @@ squfof(GEN n, long quiet)
 	qc = q*c; qcb = qc - b2; b2 = qc + qcb; c2 = a2 - q*qcb;
       }
       a2 = c;
+
+      if (a2 <= L2)		/* blacklist this */
+      {
+	if (blp2 >= SQUFOF_BLACKLIST_SZ)
+	  /* blacklist overflows: shouldn't happen */
+	  act2 = 0;		/* silently */
+	else
+	  blacklist2[blp2++] = a2;
+      }
     }
 
     /* bump counter, loop if this is an odd iteration (i.e. if the real
@@ -2013,21 +2062,8 @@ squfof(GEN n, long quiet)
     }
     if (act1)
     {
-      if (a1 <= L1)		/* blacklist this */
+      if ((a = squfof_issquare(a1)) != 0) /* square form? */
       {
-	if (blp1 >= SQUFOF_BLACKLIST_SZ)
-	  /* blacklist overflows: shouldn't happen */
-	  act1 = 0;		/* to take effect during next iteration */
-	else
-	  blacklist1[blp1++] = a1;
-      }
-      /* apply carrecomplet, for which a1 temporarily needs to be inserted
-       * into a GEN
-       */
-      p[2] = a1;
-      if (carrecomplet(p, &ga)) /* square form? */
-      {
-	a = itos(ga);
 	if (mydebug >= 4)
 	{
 	  fprintferr("SQUFOF: square form (%ld^2, %ld, %ld) on first cycle\n"
@@ -2132,21 +2168,8 @@ squfof(GEN n, long quiet)
     }
     if (act2)
     {
-      if (a2 <= L2)		/* blacklist this */
+      if ((a = squfof_issquare(a2)) != 0) /* square form? */
       {
-	if (blp2 >= SQUFOF_BLACKLIST_SZ)
-	  /* blacklist overflows: shouldn't happen */
-	  act2 = 0;		/* to take effect during next iteration */
-	else
-	  blacklist2[blp2++] = a2;
-      }
-      /* apply carrecomplet, for which a1 temporarily needs to be inserted
-       * into a GEN
-       */
-      p[2] = a2;
-      if (carrecomplet(p, &ga)) /* square form? */
-      {
-	a = itos(ga);
 	if (mydebug >= 4)
 	{
 	  fprintferr("SQUFOF: square form (%ld^2, %ld, %ld) on second cycle\n"
@@ -2165,8 +2188,7 @@ squfof(GEN n, long quiet)
 	{
 	  /* imprimitive form? */
 	  q = cgcd(a, b2);
-	  /* kill a possible factor of 2, which is of no concern to us */
-	  if (!(q&1)) q >>= 1;
+	  /* NB if b2 is even, a is odd, so the gcd is always odd */
 	  if (nm4 == 1 && cgcd(q, 5) > 1) /* paranoia */
 	  {
 	    avma = av;
@@ -2287,9 +2309,7 @@ squfof_ambig(long a, long B, long C, long dd, GEN D, long *cntamb)
 #endif
 
   avma = av;			/* no further stack operations follow */
-
-  *cntamb = 2;			/* count these two reduction steps */
-
+  *cntamb = 0;			/* count reduction steps on the cycle */
   a0 = a; b0 = b1 = b;		/* end of loop detection and safeguard */
 
   for (;;)			/* reduced cycles are finite */
