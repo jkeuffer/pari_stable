@@ -1652,6 +1652,13 @@ _sercoeff(GEN x, long n)
   return (i < 0)? gzero: (GEN)x[i+2];
 }
 
+static void
+affect_coeff(GEN q, long n, GEN y)
+{
+  GEN x = _sercoeff(q,-n);
+  if (x == gzero) y[n] = zero; else gaffect(x, (GEN)y[n]);
+}
+
 typedef struct {
   GEN c1, *aij, *bij, *powracpi, *cS, *cT;
   long i0, a,b,c, r, rc1, rc2;
@@ -1748,10 +1755,8 @@ ppgamma(ST_t *T, long prec)
     q2 = gdiv(C2, gsubgs(x, 2*i+2));
     for (j = 1; j <= r; j++)         
     {
-      gaffect(_sercoeff(p1, -j), (GEN)A1[j]);
-      gaffect(_sercoeff(q1, -j), (GEN)B1[j]);
-      gaffect(_sercoeff(p2, -j), (GEN)A2[j]);
-      gaffect(_sercoeff(q2, -j), (GEN)B2[j]);
+      affect_coeff(p1, j, A1); affect_coeff(q1, j, B1);
+      affect_coeff(p2, j, A2); affect_coeff(q2, j, B2);
     }
 
     an = gmul2n(an, t);
