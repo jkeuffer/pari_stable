@@ -1486,8 +1486,22 @@ a prime and $p$-adics are allowed as arguments.
 
 If $z$ is present, it is set to a suitable root of unity allowing to
 recover all the other roots. If it was not possible, z is
-set to zero. The following script computes all roots in all possible cases:
+set to zero. In the case this argument is present and no square root exist,
+$0$ is returned instead or raising an error.
+\bprog
+? sqrtn(Mod(2,7), 2)
+%1 = Mod(4, 7)
+? sqrtn(Mod(2,7), 2, &z); z
+%2 = Mod(6, 7)
+? sqrtn(Mod(2,7), 3)
+  *** sqrtn: nth-root does not exist in gsqrtn.
+? sqrtn(Mod(2,7), 3,  &z)
+%2 = 0
+? z
+%3 = 0
+@eprog
 
+The following script computes all roots in all possible cases:
 \bprog
 sqrtnall(x,n)=
 {

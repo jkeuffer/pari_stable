@@ -119,7 +119,7 @@ GH 36- lngamma was not even continuous : its argument was reduced mod 2Pi
    41- Pol(Ser(1+x)) != 1+x  [ bitmask not cleared properly in gconvsp() ]
    42- default(datadir,"...") --> SEGV [ attempt to free a static string ]
    43- Configure was missing log2/exp2 on systems that had it
-   44- typo in base2.c:init_norm() [ wrong result in idealprimedec for huge 
+   44- typo in base2.c:init_norm() [ wrong result in idealprimedec for huge
        fields ]
    45- matsnf([x,1; 0,x],6) --> incorrect type
    46- qfgaussred(a) did not work if coefficients of a did not support the
@@ -137,7 +137,7 @@ BA 47- bitneg(1,0) --> SEGV (caused by 2.2.5 A10).
    54- I + O(2^10) --> error
    55- ((x + quadgen(-8))*Mod(1, i))/(x^2+1) --> SEGV [ from randomgen ]
    56- Mod(a^0,i^0) --> Mod(1,1)  [ should be Mod(0,1) ]
-   57- factor(HUGE, 100000) --> "pointers lost in gerepile" in random GC in 
+   57- factor(HUGE, 100000) --> "pointers lost in gerepile" in random GC in
        ifac_realloc() [ missing copy() for (*partial)[2] ]
    58- incorrect gerepile() behaviour on t_LIST [ would try to update
        non-existing components if list not full ]
@@ -210,7 +210,7 @@ BA  5- Library .so link changed to libpari.so for all versions.
        Static library changed to libpari.a for all versions.
     6- COMPAT: ellheight now uses the standard normalization: twice the value
     it used to return. The values returned by ellbil() and ellheightmatrix are
-    unaffected. In particular, ellheightmatrix() is the polar form of 
+    unaffected. In particular, ellheightmatrix() is the polar form of
     elleight(), and ellbil now satisfies the proper identity for B(P, Q) =
     (h(P+Q)-h(P)-h(Q)) / 2
     7- renamed and declared gmul_mat_smallvec --> RM_zc_mul
@@ -298,6 +298,8 @@ GH 56- more robust thue(): faster enumeration of small solution, don't assume
        Rewrote logagm and mpexp1
    58- make ??? index search ignore case [ ???bernoulli will find Bernoulli ]
    59- renamed svaluation --> u_lvalrem, pvaluation --> Z_pvalrem
+   60- change semantics of sqrtn to catch easily non-residues from the
+       user's side
 
   Added
     1- make test-all [ all available test suites (SLOW !)]
@@ -311,14 +313,14 @@ BA  2- add support for GNU/Hurd.
     7- put back bruteall [ used by Math::Pari ]
 BA  8- Configure support for sparc64, x86_64 and ppc64
 BA  9- x86_64 level0 inline assembly kernel
-BA 10- add POSIX-style long options --fast, --quiet, --primelimit and 
+BA 10- add POSIX-style long options --fast, --quiet, --primelimit and
        --stacksize.
    11- new internal library routine itos_or_0
    12- new member function .index
    13- rdivii, rdivis, rdivsi, rdivss to replace diviiz & co.
    14- new routine mpround, mpfloor, mpceil, mptrunc, roundr, floorr, ceilr,
        truncr
-BA 15- galoisisabelian, galoisexport, galoisidentify and galoissubgroups now 
+BA 15- galoisisabelian, galoisexport, galoisidentify and galoissubgroups now
        also accept subgroups returned by galoissubgroups.
    16- new routine Fl_sqrt
    17- new routines FpX_factor, FqX_factor, FpX_degfact, FqX_red
@@ -330,6 +332,7 @@ GH 21- new function zncoppersmith
    23- routine sqrtremi() [ Karatsuba square root ]
    24- internal routine int2n() [ = 2^n ]
    25- new functions Z_pval, Z_lval, u_lval
+
 
   Removed
     1- obsolete macro leadingcoeff [kept for backward compatibility but
@@ -366,7 +369,7 @@ ellpointtoz(E,[x1,y1]); -->  impossible addition t_VEC + t_VEC.
     5- erfc(non scalar) --> type error
     6- raising to t_FRAC power didn't work with p-adics: (-1+O(5))^(1/2) --> 1
     7- [ isprime / APRCL: ] integer overflow, e.g isprime(2^32 + 1, 2)
-    8- sum(i=2^32-10,2^32+10,1) --> 11  [ kind of overflow ] + didn't use the 
+    8- sum(i=2^32-10,2^32+10,1) --> 11  [ kind of overflow ] + didn't use the
        t_INT interface ==> broken with GMP kernel
     9- polgalois(x^6-3*x^4+3) --> [24, -1, 1], should be [24, -1, 2]. From 2.2.4
    10- nfisincl(x, x^2+1/2) --> SEGV   [ assumed integral inputs ]
@@ -434,7 +437,7 @@ BA 48- Configure: using gcc-3.3 + LANG=french, Configure failed to detect gcc
    52- optimization problems in new zeta() and gamma() [2.2.0 C13]
        ( e.g zeta(0.5 + 10000*I) was _much_ slower than before )
    53- precision problem in nffactor [ in get_R() ], could yield to a SEGV, e.g
-       nffactor(nfinit(y^4+7^2),x^28-14*x^24+20321*x^20+166992*x^16+1171296*x^12+1342208*x^8-5005056*x^4+3211264); 
+       nffactor(nfinit(y^4+7^2),x^28-14*x^24+20321*x^20+166992*x^16+1171296*x^12+1342208*x^8-5005056*x^4+3211264);
    54- contfrac(Pi/2,2) --> [1, 1]  (doc says a_n != 1, so should be [2])
    55- factorint(
 3280696195200006885547973357173182411881462602934802054749349683516314460050
@@ -532,7 +535,7 @@ Done for version 2.2.6 (released 19/06/2003):
     2- agm(x+1, x+2) --> oo loop [2.2.5 F-61 was undone...]
     3- setrand(1); elltors(ellinit(vector(5,k,random/random))) --> SEGV
        [ incorrect use of partial factorization in ellintegralmodel -->
-       surviving denominator ] 
+       surviving denominator ]
     4- old typo in cauchy_bound --> factor((x - 155)*(x^2 + 160*x + 12864))
        returned a single irreducible factor [ missing factor 2: initial upper
        bound for roots was 125 instead of 250 ]
@@ -556,7 +559,7 @@ IS 18- [HPUX:] remove -E from DLCFLAGS
    19- bnrconductor(bnfinit(x)) --> SEGV [ missing check ]
    20- ellpow(E,...,-1) --> stack error [ from 2.2.5 ]
    21- a:b:c; c/a/b == c/b/a --> 0
-   22- sparcv8 inline assembler kernel used global registers for hiremainder / 
+   22- sparcv8 inline assembler kernel used global registers for hiremainder /
        overflow, which was dangerous, inefficient, and complicated. Now none
        of the inline kernels use any global variable. The non-inline
        assembler kernels do define and access globals hiremainder and overflow.
@@ -613,7 +616,7 @@ IZ 52- [tex2mail:] \over wasn't allowed within \left( \right)
    57- typo in nfroots [ returned inverse of roots when polynomial had small
        degree (using Trager's method) ]
    58- 'path' default incorrectly set on Cygwin
-   59- [internal:] isprincipalfact() incorrect if flag contained 
+   59- [internal:] isprincipalfact() incorrect if flag contained
        nf_GEN_IF_PRINCIPAL (was unused).
    60- bnfisintnorm(bnfinit(y^4+y+1), -1) --> SEGV [ could occur for any unit ]
    61- stack corruption in matsnf() [ when GC occurs ]
@@ -666,7 +669,7 @@ IZ 22- prime sieve optimization [ primelimit ]
        "confidence level" 2^(-20) ]
 IZ 24- [tex2mail:] add a "cut here" sign when expression does not fit in the
        linelength:
-       \o3 
+       \o3
        \p240
        [Pi, Pi]~
    25- faster multiplication [t_VEC | t_MAT] * t_COL for sparse t_COL
@@ -759,7 +762,7 @@ IS 33- [HPUX:] should compile with cc -Ae, not -Aa
 IZ 36- [OS/2:] rename static functions _core[2] (conflict with stdlib.h)
 IZ 37- [OS/2:] ^C would only work once
    38- algdep(.1^5,1,10) --> 1
-   39- { "a 
+   39- { "a
             b" }  \\ with an explicit \n
        produced "ab", whereas whitespace in strings is to be retained.
    40- inconsistencies in return type from lindep [t_VEC/t_COL].
@@ -799,7 +802,7 @@ BA 60- add "const" keyword to allow building with g++
    64- short help message for isprime/ispseudoprime
    65- issquare(t_FRAC or t_RFRAC, &x) did not work [ worked without &x ]
    66- nfgaloisconj(x^2+1,4, 0) --> SEGV [ bad input ]
-   67- typo in quadhilbert(-D): required O(D) memory instead of O(sqrt(D)) 
+   67- typo in quadhilbert(-D): required O(D) memory instead of O(sqrt(D))
    68- all signed/unsigned compiler warnings
    69- \p29, tan(Pi/2) --> "division by zero". Made error more explicit
    70- nfnewprec(nfinit(x,3)) --> SEGV
@@ -823,7 +826,7 @@ BA 60- add "const" keyword to allow building with g++
    86- polroots( Pol(subst([1,0,4*x,0,2*x^2+24,0,16*x,0,16],x,10^2589) )
        --> division by zero [ double overflow ]
    87- LLL-reduction over polynomial rings (almost always failed)
-   88- (x/y)*(y/x) --> y/y 
+   88- (x/y)*(y/x) --> y/y
    89- fix pari_init_stackcheck to avoid bogus "deep recursion" messages on
        broken machines.
    90- reused invalid (gerepile'd) pointer in mat_ideal_two_elt.
@@ -847,7 +850,7 @@ BA  8- renamed mymyrand --> pari_rand31
 IZ 11- [OS/2:] improve dlopen(NULL,...)
 IZ 12- [OS/2:] enable dynamic-linking build
 IZ 13- [OS/2:] use same CFLAGS as under Linux
-IZ 14- when using external prettyprinter, write in raw format to logfile 
+IZ 14- when using external prettyprinter, write in raw format to logfile
        [not in TeX format sent to prettyprinter]
 IZ 15- don't output pseudo-TeX sequences to logfile when using external
        prettyprinter (raw format)
@@ -892,7 +895,7 @@ IZ 36- cache optimization in initprimes() [ default(primelimit,.) ]
    43- [ix86 kernel:] macroified bfffo()
    44- made all GEN macros return signed types [ had inadvertently switched
        to ulong as a side effect of some other change, long ago ]
-BA 45- split kernel Makefiles in MakeLVL0 and MakeLVL1. 
+BA 45- split kernel Makefiles in MakeLVL0 and MakeLVL1.
 BA 46- --disable-kernel Configure option replaced by --kernel=none
    47- compute_polrel() [rnfkummer] was very slow for [L:K] > 5 (compute
        Newton sums directly)
@@ -913,7 +916,7 @@ IZ  5- File README.os2
     7- routines Strexpand(), Strtex()
 IZ  8- detect infinite recursion on OS/2 [as on Unix systems] (cf STACK_CHECK)
 RS  9- routine numbpart()
-BA 10- GMP kernel 
+BA 10- GMP kernel
 BA 11- --kernel Configure option
 IZ 12- allow an arbitrary polynomial as a 2nd argument to subst()
    13- many files in config/  [ from Configure ]
@@ -922,7 +925,7 @@ IZ 12- allow an arbitrary polynomial as a 2nd argument to subst()
     1- macro definition BITS_IN_RANDOM (useless)
     2- appr_reduce() [static base4.c]: lllreducemodmatrix does the same. Faster.
     3- [useless,undocumented]: idealoplll, idealmullll, idealdivlll
-    4- 68k assembler kernel [ unmaintained, obsoleted by the GMP kernel ] 
+    4- 68k assembler kernel [ unmaintained, obsoleted by the GMP kernel ]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.4 (released 12/09/2002):
@@ -1152,7 +1155,7 @@ BA 71- user's manual index truncated if LANG=fr_FR
    73- bnfisprincipal(bnf,x, 0) was not instantaneous when bnf.no = 1
    74- no GC in poleval
    75- make clean did not remove libpari-2.2.*
-   76- incorrect result in gaffsg(s < 0, t_PADIC)  [ wrong valuation ] 
+   76- incorrect result in gaffsg(s < 0, t_PADIC)  [ wrong valuation ]
 
   Changed
 BA  1- improved Fp_isom

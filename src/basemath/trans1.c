@@ -956,7 +956,7 @@ rootsof1padic(GEN n, GEN y)
 }
 
 static GEN paexp(GEN x);
-/*compute the p^e th root of x p-adic*/
+/*compute the p^e th root of x p-adic, assume x != 0 */
 GEN
 padic_sqrtn_ram(GEN x, long e)
 {
@@ -967,14 +967,14 @@ padic_sqrtn_ram(GEN x, long e)
   {
     long z;
     v = sdivsi_rem(v, n, &z);
-    if (z) err(talker,"nth-root does not exist in gsqrtn");
+    if (z) return NULL;
     x = gcopy(x); setvalp(x,0);
   }
   /*If p=2 -1 is an root of unity in U1,we need an extra check*/
   if (lgefint(p)==3 && p[2]==2 && mod8((GEN)x[4])!=signe((GEN)x[4]))
-    err(talker,"nth-root does not exist in gsqrtn");
-  /*Other "nth-root does not exist" are caught by paexp*/
+    return NULL;
   a = paexp(gdiv(palog(x), n));
+  if (!a) return NULL;
   /*Here n=p^e and a^n=z*x where z is a (p-1)th-root of unity. Note that
       z^p=z; hence for b = a/z, then b^n=x. We say b=x/a^(n-1)*/
   a = gdiv(x, powgi(a,addis(n,-1))); if (v) setvalp(a,v);
@@ -992,13 +992,13 @@ padic_sqrtn_unram(GEN x, GEN n, GEN *zetan)
   {
     long z;
     v = sdivsi_rem(v,n,&z);
-    if (z) err(talker,"nth-root does not exist in gsqrtn");
+    if (z) return NULL;
   }
   r = cgetp(x); setvalp(r,v);
   Z = NULL; /* -Wall */
   if (zetan) Z = cgetp(x);
   av = avma; a = Fp_sqrtn((GEN)x[4], n, p, zetan);
-  if (!a) err(talker,"nth-root does not exist in gsqrtn");
+  if (!a) return NULL;
   affii(padicsqrtnlift((GEN)x[4], n, a, p, precp(x)), (GEN)r[4]);
   if (zetan)
   {
@@ -1014,17 +1014,16 @@ padic_sqrtn(GEN x, GEN n, GEN *zetan)
   pari_sp av = avma, tetpil;
   GEN q, p = (GEN)x[2];
   long e;
-  if (gcmp0(x))
+  if (!signe(x[4]))
   {
     long m = itos(n);
     return zeropadic(p, (valp(x)+m-1)/m);
   }
-  /*First treat the ramified part using logarithms*/
+  /* treat the ramified part using logarithms */
   e = Z_pvalrem(n, p, &q);
   if (e) x = padic_sqrtn_ram(x,e);
-  /*finished ?*/
   if (is_pm1(q))
-  {
+  { /* finished */
     if (signe(q) < 0) x = ginv(x);
     x = gerepileupto(av, x);
     if (zetan)
@@ -1032,9 +1031,10 @@ padic_sqrtn(GEN x, GEN n, GEN *zetan)
                                               : gun;
     return x;
   }
-  /*Now we use hensel lift for unramified case. 4x faster.*/
   tetpil = avma;
-  x = padic_sqrtn_unram(x,q,zetan);
+  /* use hensel lift for unramified case */
+  x = padic_sqrtn_unram(x, q, zetan);
+  if (!x) { *zetan = gzero; return gzero; }
   if (zetan)
   {
     GEN *gptr[2];
@@ -1063,7 +1063,6 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
   long i, lx, tx;
   pari_sp av;
   GEN y, z;
-  if (zetan) *zetan=gzero;
   if (typ(n)!=t_INT) err(talker,"second arg must be integer in gsqrtn");
   if (!signe(n)) err(talker,"1/0 exponent in gsqrtn");
   if (is_pm1(n))
@@ -1071,6 +1070,7 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
     if (zetan) *zetan = gun;
     return (signe(n) > 0)? gcopy(x): ginv(x);
   }
+  if (zetan) *zetan = gzero;
   tx = typ(x);
   if (is_matvec_t(tx))
   {
@@ -1083,27 +1083,31 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
   {
   case t_INTMOD:
     z = gzero;
-    /*not great, but too much trouble*/
-    if (!BSW_psp((GEN)x[1])) err(talker,"modulus must be prime in gsqrtn");
     if (zetan) { z = cgetg(3,t_INTMOD); copyifstack(x[1],z[1]); }
     y = cgetg(3,t_INTMOD); copyifstack(x[1],y[1]);
     y[2] = (long)Fp_sqrtn((GEN)x[2],n,(GEN)x[1],zetan);
-    if (!y[2]) err(talker,"nth-root does not exist in gsqrtn");
+    if (!y[2]) {
+      if (zetan) return gzero;
+      err(talker,"nth-root does not exist in gsqrtn");
+    }
     if (zetan) { z[2] = (long)*zetan; *zetan = z; }
     return y;
 
   case t_PADIC: return padic_sqrtn(x,n,zetan);
 
   case t_INT: case t_FRAC: case t_REAL: case t_COMPLEX:
-    i = (long) precision(n); if (i) prec=i;
-    if (tx==t_INT && is_pm1(x) && signe(x)>0)
+    i = precision(x); if (i) prec = i;
+    if (tx==t_INT && is_pm1(x) && signe(x) > 0)
      /*speed-up since there is no way to call rootsof1complex from gp*/
       y = realun(prec);
     else if (gcmp0(x))
     {
       if (signe(n) < 0) err(gdiver);
       if (isinexactreal(x))
-        y = realzero_bit( itos( gfloor(gdivsg(gexpo(x), n)) ) );
+      {
+        long e = gexpo(x), junk;
+        y = realzero_bit(e < 2? 0: sdivsi_rem(e, n, &junk));
+      }
       else
         y = realzero(prec);
     }
@@ -1227,22 +1231,21 @@ paexp(GEN x)
 {
   long k, e = valp(x), pp = precp(x), n = e + pp;
   pari_sp av;
-  GEN y, r, p1;
-  int is2 = egalii(gdeux, (GEN)x[2]);
+  GEN y, r, p = (GEN)x[2];
+  int is2 = egalii(gdeux, p);
 
   if (gcmp0(x)) return gaddgs(x,1);
-  if (e<=0 || (e == 1 && is2))
-    err(talker,"p-adic argument out of range in gexp");
+  if (e <= 0 || (e == 1 && is2)) return NULL;
   av = avma;
   if (is2)
   {
     n--; e--; k = n/e;
-    if (n%e==0) k--;
+    if (n%e == 0) k--;
   }
   else
   {
-    p1 = subis((GEN)x[2], 1);
-    k = itos(dvmdii(subis(mulis(p1,n), 1), subis(mulis(p1,e), 1), &r));
+    GEN t = subis(p, 1);
+    k = itos(dvmdii(subis(mulis(t,n), 1), subis(mulis(t,e), 1), &r));
     if (!signe(r)) k--;
   }
   for (y=gun; k; k--) y = gaddsg(1, gdivgs(gmul(y,x), k));
@@ -1308,7 +1311,9 @@ gexp(GEN x, long prec)
   {
     case t_REAL: return mpexp(x);
     case t_COMPLEX: return cxexp(x,prec);
-    case t_PADIC: return paexp(x);
+    case t_PADIC: x = paexp(x);
+      if (!x) err(talker,"p-adic argument out of range in gexp");
+      return x;
     case t_INTMOD: err(typeer,"gexp");
     default:
     {
