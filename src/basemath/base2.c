@@ -21,7 +21,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "parinf.h"
 
 #define RXQX_rem(x,y,T) RXQX_divrem((x),(y),(T),ONLY_REM)
-#define FpX_rem(x,y,p) FpX_divres((x),(y),(p),ONLY_REM)
 extern GEN addshiftw(GEN x, GEN y, long d);
 extern GEN norm_by_embed(long r1, GEN x);
 extern GEN ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound);
@@ -31,7 +30,7 @@ extern GEN FqX_factor(GEN x, GEN T, GEN p);
 extern GEN DDF2(GEN x, long hint);
 extern GEN eltabstorel(GEN x, GEN T, GEN pol, GEN k);
 extern GEN element_powid_mod_p(GEN nf, long I, GEN n, GEN p);
-extern GEN FpVQX_red(GEN z, GEN T, GEN p);
+extern GEN FqV_red(GEN z, GEN T, GEN p);
 extern GEN Fp_factor_irred(GEN P,GEN l, GEN Q);
 extern GEN RXQX_divrem(GEN x, GEN y, GEN T, GEN *pr);
 extern GEN RXQX_mul(GEN x, GEN y, GEN T);
@@ -2267,7 +2266,7 @@ get_proj_modT(GEN basis, GEN T, GEN p)
     if (typ(w) != t_INT)
     {
       w = Q_primitive_part(w, &cx);
-      w = FpX_rem(w, T, p);
+      w = FpX_res(w, T, p);
       if (cx)
       {
         cx = gmod(cx, p);
@@ -2639,7 +2638,7 @@ _mul(void *data, GEN x, GEN y/* base; ignored */)
   GEN z = x? element_mulid(D->multab,x,D->h)
            : element_mulidid(D->multab,D->h,D->h);
   (void)y;
-  return FpVQX_red(z,D->T,D->p);
+  return FqV_red(z,D->T,D->p);
 }
 static GEN
 _sqr(void *data, GEN x)
@@ -2647,7 +2646,7 @@ _sqr(void *data, GEN x)
   rnfeltmod_muldata *D = (rnfeltmod_muldata *) data;
   GEN z = x? sqr_by_tab(D->multab,x)
            : element_mulidid(D->multab,D->h,D->h);
-  return FpVQX_red(z,D->T,D->p);
+  return FqV_red(z,D->T,D->p);
 }
 
 /* Compute W[h]^n mod pr in the extension, assume n >= 0 */

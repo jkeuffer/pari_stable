@@ -1038,7 +1038,7 @@ bnfisintnorm(GEN bnf, GEN a)
     if (!Nprimes) { sNx = 1; x = gun; }
     else
     {
-      x = isprincipalfact(bnf, Primes, small_to_vec(x), NULL,
+      x = isprincipalfact(bnf, Primes, vecsmall_vec(x), NULL,
                           nf_FORCE | nf_GEN_IF_PRINCIPAL);
       x = basistoalg(nf, x);
       sNx = signe(gnorm(x));

@@ -27,7 +27,7 @@ extern long FqX_split_deg1(GEN *pz, GEN u, GEN q, GEN T, GEN p);
 extern GEN FqX_split_roots(GEN z, GEN T, GEN p, GEN pol);
 extern GEN FqX_split_all(GEN z, GEN T, GEN p);
 extern long FqX_split_by_degree(GEN *pz, GEN u, GEN q, GEN T, GEN p);
-extern long FpX_split_berlekamp(GEN *t, GEN p);
+extern long FpX_split_Berlekamp(GEN *t, GEN p);
 extern GEN get_proj_modT(GEN basis, GEN T, GEN p);
 extern void init_dalloc();
 extern double *dalloc(size_t n);
@@ -143,7 +143,7 @@ FqX_factor(GEN x, GEN T, GEN p)
   if (!T)
   {
     rep = factmod0(x, p);
-    rep[2] = (long)small_to_vec((GEN)rep[2]);
+    rep[2] = (long)vecsmall_vec((GEN)rep[2]);
   }
   else
   {
@@ -1494,9 +1494,9 @@ nfsqff(GEN nf, GEN pol, long fl)
     red = modprX(polbase, nf, modpr);
     if (!aT)
     { /* degree 1 */
-      red = u_Fp_FpX(red, pp);
-      if (!u_FpX_is_squarefree(red, pp)) { avma = av2; continue; }
-      anbf = fl? u_FpX_nbroots(red, pp): u_FpX_nbfact(red, pp);
+      red = ZX_Flx(red, pp);
+      if (!Flx_is_squarefree(red, pp)) { avma = av2; continue; }
+      anbf = fl? Flx_nbroots(red, pp): Flx_nbfact(red, pp);
     }
     else
     {
@@ -1567,7 +1567,7 @@ nfsqff(GEN nf, GEN pol, long fl)
     {
       long d;
       rep = cgetg(dpol + 1, t_VEC); rep[1] = (long)polred;
-      d = FpX_split_berlekamp((GEN*)(rep + 1), L.p);
+      d = FpX_split_Berlekamp((GEN*)(rep + 1), L.p);
       setlg(rep, d + 1);
     }
     T.fact  = gerepilecopy(av2, sort_vecpol(rep, &cmp_pol));

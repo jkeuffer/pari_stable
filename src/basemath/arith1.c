@@ -1345,6 +1345,15 @@ mpinvmod(GEN a, GEN m)
   return res;
 }
 
+GEN
+mpinvmodsafe(GEN a, GEN m)
+{
+  GEN res;
+  if (! invmod(a,m,&res))
+    return NULL;
+  return res;
+}
+
 /*********************************************************************/
 /**                                                                 **/
 /**                    MODULAR EXPONENTIATION                       **/

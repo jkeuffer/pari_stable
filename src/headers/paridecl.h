@@ -20,6 +20,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*******************************************************************/
 BEGINEXTERN
 /* alglin1.c */
+GEN     Flm_deplin(GEN x, ulong p);
+GEN     Flm_inv(GEN x, ulong p);
+GEN     Flm_ker(GEN x, ulong p);
+GEN     Flm_ker_sp(GEN x, ulong p, long deplin);
 GEN     FpV_FpL_mul(GEN x, GEN y, GEN p);
 GEN     FpM_FpV_mul(GEN x, GEN y, GEN p);
 GEN     FpM_deplin(GEN x, GEN p);
@@ -34,7 +38,6 @@ GEN     FpM_suppl(GEN x, GEN p);
 GEN     FqM_gauss(GEN a, GEN b, GEN T, GEN p);
 GEN     FqM_ker(GEN x, GEN T, GEN p);
 GEN     FqM_suppl(GEN x, GEN T, GEN p);
-GEN     Fq_mul(GEN x, GEN y, GEN T, GEN p);
 GEN     QM_inv(GEN M, GEN dM);
 GEN     ZM_inv(GEN M, GEN dM);
 GEN     _col(GEN x);
@@ -222,6 +225,7 @@ void    lucas(long n, GEN *ln, GEN *ln1);
 GEN     mpfact(long n);
 GEN     mpfactr(long n, long prec);
 GEN     mpinvmod(GEN a, GEN m);
+GEN     mpinvmodsafe(GEN a, GEN m);
 GEN     mppgcd(GEN a, GEN b);
 GEN     mpppcm(GEN a, GEN b);
 GEN     mpsqrtmod(GEN a, GEN p);
@@ -1044,6 +1048,10 @@ GEN     u2toi(ulong a, ulong b);
 GEN     zeropol(long v);
 GEN     zeroser(long v, long prec);
 
+/* groupid.c*/
+
+long    group_ident(GEN G, GEN S);
+
 /* ifactor1.c */
 
 long    BSW_psp(GEN N);
@@ -1051,10 +1059,6 @@ long    millerrabin(GEN n, long k);
 GEN     nextprime(GEN n);
 GEN     plisprime(GEN N, long flag);
 GEN     precprime(GEN n);
-
-/* groupid.c*/
-
-long    group_ident(GEN G, GEN S);
 
 /* init.c */
 
@@ -1267,16 +1271,21 @@ GEN     perm_pow(GEN perm, long exp);
 GEN     quotient_group(GEN C, GEN G);
 GEN     vecperm_orbits(GEN v, long n);
 GEN     vecsmall_append(GEN V, long s);
-GEN     vecsmall_prepend(GEN V, long s);
+GEN     vecsmall_col(GEN z);
 GEN     vecsmall_const(long n, long c);
+GEN     vecsmall_copy(GEN x);
 int     vecsmall_lexcmp(GEN x, GEN y);
 long    vecsmall_pack(GEN V, long base, long mod);
 int     vecsmall_prefixcmp(GEN x, GEN y);
+GEN     vecsmall_prepend(GEN V, long s);
 void    vecsmall_sort(GEN V);
 GEN     vecsmall_uniq(GEN V);
+GEN     vecsmall_vec(GEN z);
 
 /* polarit1.c */
 
+long    Flx_nbfact(GEN z, long p);
+long    Flx_nbroots(GEN f, long p);
 GEN     FpV_roots_to_pol(GEN V, GEN p, long v);
 long    FpX_is_irred(GEN f, GEN p);
 long    FpX_is_squarefree(GEN f, GEN p);
@@ -1319,10 +1328,6 @@ GEN     roots2(GEN pol,long PREC);
 GEN     rootsold(GEN x, long l);
 GEN     simplefactmod(GEN f, GEN p);
 GEN     swap_polpol(GEN x, long n, long w);
-long    u_FpX_nbfact(GEN z, long p);
-long    u_FpX_nbroots(GEN f, long p);
-GEN     u_pol_to_vec(GEN x, long N);
-GEN     u_vec_to_pol(GEN x);
 GEN     vec_to_pol(GEN x, long v);
 GEN     vecpol_to_mat(GEN v, long n);
 
@@ -1439,25 +1444,30 @@ GEN     Fp_factor_rel0(GEN P, GEN l, GEN Q);
 void    Fp_intersect(long n,GEN P,GEN Q,GEN l,GEN *SP,GEN *SQ,GEN MA,GEN MB);
 GEN     Fp_inv_isom(GEN S,GEN Tp, GEN p);
 GEN     Fp_isom(GEN P,GEN Q,GEN l);
+GEN     Fq_inv(GEN x, GEN pol, GEN p);
+GEN     Fq_invsafe(GEN x, GEN pol, GEN p);
+GEN     Fq_add(GEN x, GEN y, GEN T/*unused*/, GEN p);
+GEN     Fq_mul(GEN x, GEN y, GEN T, GEN p);
+GEN     Fq_neg(GEN x, GEN T, GEN p);
+GEN     Fq_neg_inv(GEN x, GEN T, GEN p);
+GEN     Fq_pow(GEN x, GEN n, GEN pol, GEN p);
+GEN     Fq_res(GEN x, GEN T, GEN p);
 GEN     FqV_roots_to_pol(GEN V, GEN p, GEN Tp, long v);
+GEN     FqXQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p);
 GEN     FqXV_mul(GEN V, GEN Tp, GEN p);
+GEN     QX_invmod(GEN A, GEN B);
 GEN     ZX_caract(GEN A, GEN B, long v);
 GEN     ZX_disc(GEN x);
-GEN     QX_invmod(GEN A, GEN B);
 int     ZX_is_squarefree(GEN x);
 GEN     ZX_resultant(GEN A, GEN B);
 GEN     ZX_QX_resultant(GEN A, GEN B);
 GEN     ZX_s_add(GEN y,long x);
 long    brent_kung_optpow(long d, long n);
 GEN     ffsqrtnmod(GEN a, GEN n, GEN T, GEN p, GEN *zetan);
+GEN     matsmall_mat(GEN z);
 GEN     modulargcd(GEN a,GEN b);
 GEN     quickmul(GEN a, GEN b, long na, long nb);
 GEN     quicksqr(GEN a, long na);
-GEN     small_to_col(GEN z);
-GEN     small_to_mat(GEN z);
-GEN     small_to_pol(GEN z, long v);
-GEN     small_to_vec(GEN z);
-GEN     pol_to_small(GEN x);
 ulong   powuumod(ulong x, ulong n, ulong p);
 ulong   powusmod(ulong x, long n, ulong p);
 GEN     powgumod(GEN x, ulong n0, GEN p);
@@ -1465,20 +1475,8 @@ GEN     rescale_pol(GEN P, GEN h);
 GEN     unscale_pol(GEN P, GEN h);
 GEN     stopoly(ulong m, ulong p, long v);
 GEN     stopoly_gen(GEN m, GEN p, long v);
-GEN     u_FpXQ_pow(GEN x, GEN n, GEN pol, ulong p);
-GEN     u_FpX_divrem(GEN x, GEN y, ulong p, GEN *pr);
-GEN     u_FpX_rem(GEN x, GEN y, ulong p);
-GEN     u_Fp_FpM(GEN x, ulong p);
-GEN     u_Fp_FpV(GEN x, ulong p);
-GEN     u_Fp_FpX(GEN x, ulong p);
-int     u_FpX_is_squarefree(GEN z, ulong p);
-GEN     u_FpX_normalize(GEN z, ulong p);
-GEN     u_FpX_sub(GEN x, GEN y, ulong p);
-GEN     u_FpX_gcd(GEN a, GEN b, ulong p);
-GEN     u_getpol(long d);
 int     u_pow(int p, int k);
 int     u_val(ulong n, ulong p);
-GEN     u_zeropol(void);
 
 /* rootpol.c */
 
@@ -1549,6 +1547,51 @@ GEN     bnfisintnorm(GEN x, GEN y);
 GEN     thue(GEN thueres, GEN rhs, GEN ne);
 GEN     thueinit(GEN poly, long flag, long prec);
 
+/* smalpol1.c */
+
+GEN     Fl_Flx(ulong x, long sv);
+GEN     Flm_FlxV(GEN x, long sv);
+GEN     Flv_polint(GEN xa, GEN ya, ulong p, long vs);
+GEN     Flv_roots_to_pol(GEN a, ulong p, long vs);
+GEN     Flx_Fl_mul(GEN y, ulong x, ulong p);
+GEN     Flx_Flv_lg(GEN x, long N);
+GEN     Flx_FpX_inplace(GEN z);
+GEN     Flx_add(GEN x, GEN y, ulong p);
+GEN     Flx_addshift(GEN x, GEN y, ulong p, long d);
+GEN     Flx_addspec(GEN x, GEN y, ulong p, long lx, long ly);
+GEN     Flx_deriv(GEN z, ulong p);
+GEN     Flx_div_by_X_x(GEN a, ulong x, ulong p);
+GEN     Flx_divres(GEN x, GEN y, ulong p, GEN *pr);
+ulong   Flx_eval(GEN x, ulong y, ulong p);
+GEN     Flx_extgcd(GEN a, GEN b, ulong p, GEN *ptu, GEN *ptv);
+ulong   Flx_extresultant(GEN a, GEN b, ulong p, GEN *ptU, GEN *ptV);
+GEN     Flx_gcd(GEN a, GEN b, ulong p);
+GEN     Flx_gcd_i(GEN a, GEN b, ulong p);
+GEN     Flx_get(long d);
+int     Flx_is_squarefree(GEN z, ulong p);
+GEN     Flx_mul(GEN x, GEN y, ulong p);
+GEN     Flx_neg(GEN x, ulong p);
+GEN     Flx_normalize(GEN z, ulong p);
+GEN     Flx_polx(long sv);
+GEN     Flx_pow(GEN x, long n, ulong p);
+GEN     Flx_renormalize(GEN x, long l);
+GEN     Flx_res(GEN x, GEN y, ulong p);
+ulong   Flx_resultant(GEN a, GEN b, ulong p);
+GEN     Flx_sqr(GEN x, ulong p);
+GEN     Flx_sub(GEN x, GEN y, ulong p);
+GEN     Flx_zero(long v);
+GEN     Flx_ZX(GEN z);
+GEN     Flx_ZX_inplace(GEN z);
+GEN     Flxq_inv(GEN x,GEN T,ulong p);
+GEN     Flxq_invsafe(GEN x, GEN T, ulong p);
+GEN     Flxq_mul(GEN y,GEN x,GEN pol,ulong p);
+GEN     Flxq_pow(GEN x, GEN n, GEN pol, ulong p);
+GEN     Flxq_sqr(GEN y,GEN pol,ulong p);
+GEN     Z_Flx(GEN x, ulong p, long vs);
+GEN     ZM_Flm(GEN x, ulong p);
+GEN     ZV_Flv(GEN x, ulong p);
+GEN     ZX_Flx(GEN x, ulong p);
+ 
 /* trans1.c */
 
 GEN     Pi2n(long n, long prec);

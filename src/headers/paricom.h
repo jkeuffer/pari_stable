@@ -149,11 +149,16 @@ enum manage_var_t {
 #  define VERYBIGINT (9223372036854775807L) /* 2^63-1 */
 #  define EXP220 (1099511627776L)          /* 2^40   */
 #  define BIGINT (2147483647)              /* 2^31-1 */
+#  define u_OK_ULONG(p) ((ulong)p <= 3037000493UL)
 #else
 #  define VERYBIGINT (2147483647L) /* 2^31-1 */
 #  define EXP220 (1048576L)       /* 2^20   */
 #  define BIGINT (32767)          /* 2^15-1 */
+#  define u_OK_ULONG(p) ((ulong)p <= 46337UL)
 #endif
+
+/* 2p^2 < 2^BITS_IN_LONG */
+#define OK_ULONG(p) (lgefint(p) == 3 && u_OK_ULONG(p[2]))
 
 #ifndef HAS_EXP2
 #  ifdef __cplusplus
@@ -322,6 +327,13 @@ enum manage_var_t {
 #define gres(x,y) (poldivres((x),(y),ONLY_REM))
 #define FpX_div(x,y,p) (FpX_divres((x),(y),(p), NULL))
 #define FpX_res(x,y,p) (FpX_divres((x),(y),(p), ONLY_REM))
+
+#define Flv_ZC(x)  (vecsmall_col((x)))
+#define Flv_ZV(x)  (vecsmall_vec((x)))
+#define Flm_ZM(x)  (matsmall_mat((x)))
+#define Flx_copy(x) (vecsmall_copy((x)))
+#define Flx_div(x,y,p) (Flx_divres((x),(y),(p), NULL))
+
 #define matpascal(n) matqpascal((n),NULL)
 #define sturm(x) (sturmpart((x),NULL,NULL))
 #define carreparfait(x) (carrecomplet((x),NULL))

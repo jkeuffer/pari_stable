@@ -414,7 +414,10 @@ nfhilbertp(GEN nf,GEN a,GEN b,GEN pr)
   ordp= subis( p, 1);                 /* |F_p^*|        */
   modpr = nf_to_ff_init(nf, &pr,&T,&p);
   t = nf_to_ff(nf,t,modpr);
-  t = FpXQ_pow(t, diviiexact(ord, ordp), T,p); /* in F_p^* */
+  if (T)
+    t = FpXQ_pow(t, diviiexact(ord, ordp), T,p); /* in F_p^* */
+  else
+    t = powmodulo(t, diviiexact(ord, ordp), p);
   if (typ(t) == t_POL)
   {
     if (degpol(t)) err(bugparier,"nfhilbertp");

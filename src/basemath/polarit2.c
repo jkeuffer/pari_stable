@@ -38,7 +38,7 @@ extern GEN qf_disc(GEN x, GEN y, GEN z);
 extern GEN to_polmod(GEN x, GEN mod);
 extern GEN vconcat(GEN Q1, GEN Q2);
 extern int approx_0(GEN x, GEN y);
-extern long FpX_split_berlekamp(GEN *t, GEN pp);
+extern long FpX_split_Berlekamp(GEN *t, GEN pp);
 extern long u_center(ulong u, ulong p, ulong ps2);
 extern void gerepilemanycoeffs2(pari_sp av, GEN x, int n, GEN y, int o);
 
@@ -330,21 +330,36 @@ BuildTree(GEN link, GEN V, GEN W, GEN a, GEN T, GEN p)
     lswap(V[j+1], V[minp]);
     lswap(link[j+1], link[minp]);
 
-    V[i] = (long)FpXQX_mul((GEN)V[j], (GEN)V[j+1], T, p);
+    if (T)
+      V[i] = (long)FpXQX_mul((GEN)V[j], (GEN)V[j+1], T, p);
+    else
+      V[i] = (long)FpX_mul((GEN)V[j], (GEN)V[j+1], p);
     link[i] = j;
   }
 
   for (j=1; j <= 2*k-3; j+=2)
   {
     GEN d, u, v;
-    d = FpXQX_extgcd((GEN)V[j], (GEN)V[j+1], T, p, &u, &v);
+    if (T)
+      d = FpXQX_extgcd((GEN)V[j], (GEN)V[j+1], T, p, &u, &v);
+    else
+      d = FpX_extgcd((GEN)V[j], (GEN)V[j+1], p, &u, &v);
     if (degpol(d) > 0) err(talker, "relatively prime polynomials expected");
     d = (GEN)d[2];
     if (!gcmp1(d))
     {
-      d = FpXQ_inv(d, T, p);
-      u = FpXQX_FpXQ_mul(u, d, T, p);
-      v = FpXQX_FpXQ_mul(v, d, T, p);
+      if (T)
+      {
+        d = FpXQ_inv(d, T, p);
+        u = FpXQX_FpXQ_mul(u, d, T, p);
+        v = FpXQX_FpXQ_mul(v, d, T, p);
+      }
+      else
+      {
+        d = mpinvmod(d, p);
+        u = FpX_Fp_mul(u, d, p);
+        v = FpX_Fp_mul(v, d, p);
+      }
     }
     W[j]   = (long)u;
     W[j+1] = (long)v;
@@ -368,8 +383,16 @@ HenselLift(GEN V, GEN W, long j, GEN f, GEN T, GEN pd, GEN p0, int noinv)
   g = gadd(f, gneg_i(gmul(a,b)));
   if (T) g = FpXQX_red(g, T, mulii(p0,pd));
   g = gdivexact(g, p0); if (!T) g = FpXQX_red(g, NULL, pd);
-  z = FpXQX_mul(v,g, T,pd);
-  t = FpXQX_divres(z,a, T,pd, &s);
+  if (T)
+  {
+    z = FpXQX_mul(v,g, T,pd);
+    t = FpXQX_divres(z,a, T,pd, &s);
+  }
+  else
+  {
+    z = FpX_mul(v,g, pd);
+    t = FpX_divres(z,a, pd, &s);
+  }
   t = gadd(gmul(u,g), gmul(t,b)); t = FpXQX_red(t, T, pd);
   t = gmul(t,p0);
   s = gmul(s,p0);
@@ -387,8 +410,16 @@ HenselLift(GEN V, GEN W, long j, GEN f, GEN T, GEN pd, GEN p0, int noinv)
 
   if (T) g = FpXQX_red(g, T, mulii(p0,pd));
   g = gdivexact(g, p0); if (!T) g = FpXQX_red(g, NULL, pd);
-  z = FpXQX_mul(v,g, T,pd);
-  t = FpXQX_divres(z,a, T,pd, &s);
+  if (T)
+  {
+    z = FpXQX_mul(v,g, T,pd);
+    t = FpXQX_divres(z,a, T,pd, &s);
+  }
+  else
+  {
+    z = FpX_mul(v,g, pd);
+    t = FpX_divres(z,a, pd, &s);
+  }
   t = gadd(gmul(u,g), gmul(t,b)); t = FpXQX_red(t, T, pd);
   t = gmul(t,p0);
   s = gmul(s,p0);
@@ -1491,10 +1522,10 @@ DDF(GEN a, long hint, int fl)
   {
     NEXT_PRIME_VIADIFF_CHECK(p,pt);
     if (lead && !smodis(lead,p)) continue;
-    z = u_Fp_FpX(a, p);
-    if (!u_FpX_is_squarefree(z, p)) continue;
+    z = ZX_Flx(a, p);
+    if (!Flx_is_squarefree(z, p)) continue;
 
-    nfacp = fl? u_FpX_nbroots(z, p): u_FpX_nbfact(z, p);
+    nfacp = fl? Flx_nbroots(z, p): Flx_nbfact(z, p);
     if (DEBUGLEVEL>4)
       fprintferr("...tried prime %3ld (%-3ld %s). Time = %ld\n",
                   p, nfacp, fl?"roots": "factors", TIMER(&T2));
@@ -1516,7 +1547,7 @@ DDF(GEN a, long hint, int fl)
 
   famod = cgetg(nmax+1,t_COL);
   famod[1] = (long)ap;
-  if (nmax != FpX_split_berlekamp((GEN*)(famod+1), prime))
+  if (nmax != FpX_split_Berlekamp((GEN*)(famod+1), prime))
     err(bugparier,"DDF: wrong numbers of factors");
   if (DEBUGLEVEL>2)
   {

@@ -1247,7 +1247,7 @@ _isprincipal(GEN bnf, GEN x, long *ptprec, long flag)
 
   /* x = g_W Wex + g_B Bex - [xar]
    *   = g_W A - [xar] + [C_B]Bex  since g_W B + g_B = [C_B] */
-  A = gsub(small_to_col(Wex), gmul_mati_smallvec(B,Bex));
+  A = gsub(vecsmall_col(Wex), gmul_mati_smallvec(B,Bex));
   Q = gmul(U, A);
   for (i=1; i<=c; i++)
     Q[i] = (long)truedvmdii((GEN)Q[i], (GEN)cyc[i], (GEN*)(ex+i));
@@ -1260,7 +1260,7 @@ _isprincipal(GEN bnf, GEN x, long *ptprec, long flag)
   if (old_format)
   {
     GEN Garch, V = (GEN)clg2[2];
-    Bex = small_to_col(Bex);
+    Bex = vecsmall_col(Bex);
     p1 = c? concatsp(gmul(V,Q), Bex): Bex;
     col = act_arch(p1, WB_C);
     if (c)

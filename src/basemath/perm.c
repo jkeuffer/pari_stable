@@ -21,6 +21,34 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                                                                     **/
 /*************************************************************************/
 
+GEN
+vecsmall_vec(GEN z)
+{
+  long i, l = lg(z);
+  GEN x = cgetg(l,t_VEC);
+  for (i=1; i<l; i++) x[i] = lstoi(z[i]);
+  return x;
+}
+
+GEN
+vecsmall_col(GEN z)
+{
+  long i, l = lg(z);
+  GEN x = cgetg(l,t_COL);
+  for (i=1; i<l; i++) x[i] = lstoi(z[i]);
+  return x;
+}
+
+GEN
+vecsmall_copy(GEN x)
+{
+  long i, l = lg(x);
+  GEN z = cgetg(l, t_VECSMALL);
+  if (typ(x)!=t_VECSMALL) err(typeer,"vecsmall_copy");
+  for (i=1; i<l; i++) z[i] = x[i];
+  return z;
+}
+
 GEN vecsmall_const(long n, long c)
 {
   long i;
@@ -62,7 +90,7 @@ GEN vecsmall_uniq(GEN V)
   pari_sp ltop=avma;
   GEN W;
   long i,j;
-  if ( lg(V) == 1 ) return gcopy(V);
+  if ( lg(V) == 1 ) return vecsmall_copy(V);
   W=cgetg(lg(V),t_VECSMALL);
   W[1]=V[1];
   for(i=2,j=1;i<lg(V);i++)
@@ -498,7 +526,7 @@ GEN perm_generate(GEN S, GEN H, long o)
   long n = lg(H)-1;
   GEN L = cgetg(1+n*o, t_VEC);
   for(i=1; i<=n; i++)
-    L[i]=lcopy((GEN)H[i]);
+    L[i]= (long) vecsmall_copy((GEN)H[i]);
   for(k=n+1; k <= n*o; ++k)
     L[k] = (long) perm_mul((GEN) L[k-n], S);
   return L;
@@ -535,7 +563,7 @@ GEN group_leftcoset(GEN G, GEN g)
   GEN ord=(GEN) G[2];
   long card=group_order(G);
   res = cgetg(card + 1, t_VEC);
-  res[1] = lcopy(g);
+  res[1] = (long) vecsmall_copy(g);
   k = 1;
   for (i = 1; i < lg(gen); i++)
   {
@@ -556,7 +584,7 @@ GEN group_rightcoset(GEN G, GEN g)
   GEN ord=(GEN) G[2];
   long card=group_order(G);
   res = cgetg(card + 1, t_VEC);
-  res[1] = lcopy(g);
+  res[1] = (long) vecsmall_copy(g);
   k = 1;
   for (i = 1; i < lg(gen); i++)
   {
@@ -582,7 +610,7 @@ GEN cyclicgroup(GEN g, long s)
   GEN p2,p3,p4;
   p2 = cgetg(3, t_VEC);
   p3 = cgetg(2, t_VEC);
-  p3[1] = lcopy(g);
+  p3[1] = (long) vecsmall_copy(g);
   p4 = cgetg(2,t_VECSMALL);
   p4[1] = s;
   p2[1] = (long) p3;
@@ -597,8 +625,8 @@ GEN dicyclicgroup(GEN g1, GEN g2, long s1, long s2)
   GEN H = cgetg(3, t_VEC);
   GEN p3,p4;
   p3 = cgetg(3, t_VEC);
-  p3[1] = lcopy((GEN)g1);
-  p3[2] = lcopy((GEN)g2);
+  p3[1] = (long) vecsmall_copy((GEN)g1);
+  p3[2] = (long) vecsmall_copy((GEN)g2);
   p4 = cgetg(3,t_VECSMALL);
   p4[1] = s1;
   p4[2] = s2;
@@ -642,7 +670,7 @@ GEN group_quotient(GEN G, GEN H)
   }
   p1 = cgetg(3,t_VEC);
   p1[1] = lcopy(p2);
-  p1[2]= (long) vecvecsmall_sort(p3);
+  p1[2] = (long) vecvecsmall_sort(p3);
   return gerepileupto(ltop,p1);
 }
 
@@ -940,7 +968,7 @@ abelian_group(GEN v)
   long i;
   long d=1;
   G[1]=lgetg(lg(v),t_VEC);
-  G[2]=lcopy(v);
+  G[2]=(long) vecsmall_copy(v);
   card=group_order(G);
   for(i=1;i<lg(v);i++)
   {
@@ -986,7 +1014,7 @@ groupelts_center(GEN S)
   V=cgetg(l+1,t_VEC);
   for (i=1, j=1; i<=n ;i++)
     if (!bitvec_test(elts,i))
-      V[j++]=lcopy((GEN)S[i]);
+      V[j++]=(long) vecsmall_copy((GEN)S[i]);
   return gerepileupto(ltop,V);
 }
 
@@ -1055,7 +1083,7 @@ group_export_MAGMA(GEN G)
   {
     if (i > 1)
       s = concat(s, STRtoGENstr(", "));
-    s = concat(s, small_to_vec(gmael(G,1,i)));
+    s = concat(s, vecsmall_vec(gmael(G,1,i)));
   }
   s = concat(s, STRtoGENstr(">"));
   return gerepileupto(ltop,s);

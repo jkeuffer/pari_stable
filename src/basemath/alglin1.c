@@ -28,13 +28,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #  define MASK (0xffff0000UL)
 #endif
 
-/* 2p^2 < 2^BITS_IN_LONG */
-#ifdef LONG_IS_64BIT
-#  define u_OK_ULONG(p) ((ulong)p <= 3037000493UL)
-#else
-#  define u_OK_ULONG(p) ((ulong)p <= 46337UL)
-#endif
-#define OK_ULONG(p) (lgefint(p) == 3 && u_OK_ULONG(p[2]))
 extern GEN ZM_init_CRT(GEN Hp, ulong p);
 extern int ZM_incremental_CRT(GEN H, GEN Hp, GEN q, GEN qp, ulong p);
 
@@ -1139,16 +1132,6 @@ Fq_gauss_get_col(GEN a, GEN b, GEN invpiv, long li, GEN T, GEN p)
   return u;
 }
 
-#if 0
-/* assume -p < a < p, return 1/a mod p */
-static long
-u_Fp_inv(long a, long p)
-{
-  if (a < 0) a = p + a; /* pb with ulongs < 0 */
-  return (long)invumod((ulong)a,(ulong)p);
-}
-#endif
-
 typedef ulong* uGEN;
 #define ucoeff(a,i,j)  ( ( (uGEN) ( (GEN) (a))[j]) [i])
 
@@ -1336,7 +1319,7 @@ gauss(GEN a, GEN b)
 
 /* destroy a, b */
 static GEN
-u_FpM_gauss_sp(GEN a, GEN b, ulong p)
+Flm_gauss_sp(GEN a, GEN b, ulong p)
 {
   long iscol, i, j, k, li, bco, aco = lg(a)-1;
   ulong piv, invpiv, m;
@@ -1414,16 +1397,16 @@ u_idmat(long n)
 }
 
 GEN
-u_FpM_gauss(GEN a, GEN b, ulong p) {
-  return u_FpM_gauss_sp(dummycopy(a), dummycopy(b), p);
+Flm_gauss(GEN a, GEN b, ulong p) {
+  return Flm_gauss_sp(dummycopy(a), dummycopy(b), p);
 }
 static GEN
-u_FpM_inv_sp(GEN a, ulong p) {
-  return u_FpM_gauss_sp(a, u_idmat(lg(a)-1), p);
+Flm_inv_sp(GEN a, ulong p) {
+  return Flm_gauss_sp(a, u_idmat(lg(a)-1), p);
 }
 GEN
-u_FpM_inv(GEN a, ulong p) {
-  return u_FpM_inv_sp(dummycopy(a), p);
+Flm_inv(GEN a, ulong p) {
+  return Flm_inv_sp(dummycopy(a), p);
 }
 
 GEN
@@ -1448,10 +1431,10 @@ FpM_gauss(GEN a, GEN b, GEN p)
   if (OK_ULONG(p))
   {
     ulong pp = (ulong)p[2];
-    a = u_Fp_FpM(a, pp);
-    b = u_Fp_FpM(b, pp);
-    u = u_FpM_gauss_sp(a,b, pp);
-    u = iscol? small_to_col((GEN)u[1]): small_to_mat(u);
+    a = ZM_Flm(a, pp);
+    b = ZM_Flm(b, pp);
+    u = Flm_gauss_sp(a,b, pp);
+    u = iscol? vecsmall_col((GEN)u[1]): matsmall_mat(u);
     return gerepileupto(av, u);
   }
   lim = stack_lim(av,1);
@@ -1581,8 +1564,8 @@ GEN
 FpM_inv(GEN x, GEN p) { return FpM_gauss(x, NULL, p); }
 
 /* set y = x * y */
-static GEN
-u_FpM_Fp_mul_ip(GEN y, ulong x, ulong p)
+GEN
+Flm_Fl_mul_inplace(GEN y, ulong x, ulong p)
 {
   long i, j, m = lg(y[1]), l = lg(y);
   if (HIGHWORD(x | p))
@@ -1617,8 +1600,8 @@ ZM_inv(GEN M, GEN dM)
     NEXT_PRIME_VIADIFF_CHECK(p,d);
     dMp = umodiu(dM,p);
     if (!dMp) continue;
-    Hp = u_FpM_inv_sp(u_Fp_FpM(M,p), p);
-    if (dMp != 1) Hp = u_FpM_Fp_mul_ip(Hp, dMp, p);
+    Hp = Flm_inv_sp(ZM_Flm(M,p), p);
+    if (dMp != 1) Hp = Flm_Fl_mul_inplace(Hp, dMp, p);
 
     if (!H)
     {
@@ -2507,9 +2490,33 @@ FpM_FpV_mul(GEN x, GEN y, GEN p)
   return z;
 }
 
+/*FIXME: Does it assume OK_ULONG ?*/
+
+GEN
+Flm_Flv_mul(GEN x, GEN y, ulong p)
+{
+  long i,k,l,lx=lg(x), ly=lg(y);
+  GEN z;
+  if (lx != ly) err(operi,"* [mod p]",x,y);
+  if (lx==1) return cgetg(1,t_VECSMALL);
+  l = lg(x[1]);
+  z = cgetg(l,t_VECSMALL);
+  for (i=1; i<l; i++)
+  {
+    ulong p1 = 0;
+    for (k=1; k<lx; k++)
+    {
+      p1 += coeff(x,i,k) * y[k];
+      if (p1 & HIGHBIT) p1 %= p;
+    }
+    z[i] = p1 % p;
+  }
+  return z;
+}
+
 /* in place, destroy x */
-static GEN
-u_FpM_ker_sp(GEN x, ulong p, long deplin)
+GEN
+Flm_ker_sp(GEN x, ulong p, long deplin)
 {
   GEN y, c, d;
   long i, j, k, r, t, m, n;
@@ -2594,10 +2601,10 @@ FpM_ker_i(GEN x, GEN p, long deplin)
   if (OK_ULONG(p))
   {
     ulong pp = (ulong)p[2];
-    y = u_Fp_FpM(x, pp);
-    y = u_FpM_ker_sp(y, pp, deplin);
+    y = ZM_Flm(x, pp);
+    y = Flm_ker_sp(y, pp, deplin);
     if (!y) return y;
-    y = deplin? small_to_col(y): small_to_mat(y);
+    y = deplin? vecsmall_col(y): matsmall_mat(y);
     return gerepileupto(av0, y);
   }
 
@@ -2687,9 +2694,9 @@ GEN
 FpM_deplin(GEN x, GEN p) { return FpM_ker_i(x, p, 1); }
 /* not memory clean */
 GEN
-u_FpM_ker(GEN x, ulong p) { return u_FpM_ker_sp(dummycopy(x), p, 0); }
+Flm_ker(GEN x, ulong p) { return Flm_ker_sp(gcopy(x), p, 0); }
 GEN
-u_FpM_deplin(GEN x, ulong p) { return u_FpM_ker_sp(dummycopy(x), p, 1); }
+Flm_deplin(GEN x, ulong p) { return Flm_ker_sp(gcopy(x), p, 1); }
 
 static void
 FpM_gauss_pivot(GEN x, GEN p, GEN *dd, long *rr)
@@ -2862,71 +2869,6 @@ FpM_invimage(GEN m, GEN v, GEN p)
 /**************************************************************
  Rather stupid implementation of linear algebra in finite fields
  **************************************************************/
-static GEN
-Fq_add(GEN x, GEN y, GEN T/*unused*/, GEN p)
-{
-  (void)T;
-  switch((typ(x)==t_POL)|((typ(y)==t_POL)<<1))
-  {
-    case 0: return modii(addii(x,y),p);
-    case 1: return FpX_Fp_add(x,y,p);
-    case 2: return FpX_Fp_add(y,x,p);
-    case 3: return FpX_add(x,y,p);
-  }
-  return NULL;
-}
-#if 0
-/* this function is really for FpV_roots_to_pol in polarit1.c
- * For consistency we write the code there.
- * To avoid having to remove static status, we rewrite it in polarit1.c
- */
-static GEN
-Fq_neg(GEN x, GEN T, GEN p)
-{
-  switch(typ(x)==t_POL)
-  {
-    case 0: return signe(x)?subii(p,x):gzero;
-    case 1: return FpX_neg(x,p);
-  }
-  return NULL;
-}
-#endif
-
-GEN
-Fq_mul(GEN x, GEN y, GEN T, GEN p)
-{
-  switch((typ(x)==t_POL)|((typ(y)==t_POL)<<1))
-  {
-    case 0: return modii(mulii(x,y),p);
-    case 1: return FpX_Fp_mul(x,y,p);
-    case 2: return FpX_Fp_mul(y,x,p);
-    case 3: return FpXQ_mul(x,y,T,p);
-  }
-  return NULL;
-}
-
-static GEN
-Fq_neg_inv(GEN x, GEN T, GEN p)
-{
-  switch(typ(x)==t_POL)
-  {
-    case 0: return mpinvmod(negi(x),p);
-    case 1: return FpXQ_inv(FpX_neg(x,p),T,p);
-  }
-  return NULL;
-}
-
-static GEN
-Fq_res(GEN x, GEN T, GEN p)
-{
-  pari_sp ltop=avma;
-  switch(typ(x)==t_POL)
-  {
-    case 0: return modii(x,p);
-    case 1: return gerepileupto(ltop,FpX_res(FpX_red(x,p),T,p));
-  }
-  return NULL;
-}
 
 static void
 Fq_gerepile_gauss_ker(GEN x, GEN T, GEN p, long k, long t, pari_sp av)

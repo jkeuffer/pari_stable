@@ -1635,7 +1635,7 @@ p_mat(long **mat, GEN perm, long k)
   perm = vecextract_i(perm, k+1, lg(perm)-1);
   fprintferr("Permutation: %Z\n",perm);
   if (DEBUGLEVEL > 6)
-    fprintferr("matgen = %Z\n", small_to_mat( rowextract_p((GEN)mat, perm) ));
+    fprintferr("matgen = %Z\n", matsmall_mat( rowextract_p((GEN)mat, perm) ));
   avma = av;
 }
 
@@ -2815,7 +2815,7 @@ hnfperm(GEN A)
   GEN U, perm, y = cgetg(4, t_VEC);
   y[1] = (long)hnfperm_i(A, &U, &perm);
   y[2] = (long)U;
-  y[3] = (long)small_to_vec(perm); return y;
+  y[3] = (long)vecsmall_vec(perm); return y;
 }
 
 /* Hermite Normal Form */

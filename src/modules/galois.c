@@ -730,8 +730,9 @@ tschirn(buildroot *BR)
   a = (GEN)BR->coef[l]; /* fill with random polynomial of degree <= l-1 */
   do
   {
+    a[1]=0;
     for (i=2; i < l+2; i++) a[i] = random_bits(3) + 1;
-    h = normalizepol( small_to_pol(a, 0) );
+    h = Flx_ZX(Flx_renormalize(a,l+2));
   } while (degpol(h) <= 0 || !ZX_is_squarefree(h));
   setvarn(h, v); k = 0;
   (void)ZX_caract_sqf(h, BR->p, &k, v);
@@ -2482,7 +2483,11 @@ galoisbig(GEN pol, long prec)
     buildroot BR;
     long i;
     GEN z = cgetg(N + 1, t_VEC);
-    for (i = 1; i <= N; i++) z[i] = (long)u_getpol(i-1);
+    for (i = 1; i <= N; i++) 
+    {
+      z[i] = (long)cgetg(i+2,t_VECSMALL);
+      mael(z,i,1)=0;
+    }
     BR.coef = z;
     BR.p = pol;
     BR.pr = (gexpo( cauchy_bound(pol) ) >> TWOPOTBITS_IN_LONG) + prec;

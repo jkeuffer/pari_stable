@@ -917,7 +917,7 @@ minimforunits(GEN nf, long BORNE, GEN w)
     if (norme > normax) normax = norme;
     if (is_unit(M,r1, x)
     && (norme > 2*n  /* exclude roots of unity */
-        || !isnfscalar(element_pow(nf, small_to_col(x), w))))
+        || !isnfscalar(element_pow(nf, vecsmall_col(x), w))))
     {
       if (norme < normin) normin = norme;
       if (DEBUGLEVEL>=2) { fprintferr("*"); flusherr(); }

@@ -21,8 +21,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "parinf.h"
 extern GEN to_famat(GEN g, GEN e);
-extern GEN u_FpM_deplin(GEN x, ulong p);
-extern GEN u_FpM_inv(GEN a, ulong p);
 extern GEN famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX);
 extern GEN famat_to_nf_modidele(GEN nf, GEN g, GEN e, GEN bid);
 extern GEN vconcat(GEN A, GEN B);
@@ -1559,7 +1557,7 @@ zarchstar(GEN nf, GEN x, GEN archp)
       c = (GEN)mat[lgmat];
       for (i=1; i<=nba; i++)
         c[i] = (gsigne((GEN)alpha[i]) < 0)? 1: 0;
-      if (u_FpM_deplin(mat, 2)) { avma = av1; continue; }
+      if (Flm_deplin(mat, 2)) { avma = av1; continue; }
 
       /* new vector indep. of previous ones */
       avma = av1; alpha = nfun;
@@ -1569,7 +1567,7 @@ zarchstar(GEN nf, GEN x, GEN archp)
       genarch[lgmat++] = (long)alpha;
       if (lgmat > nba)
       {
-        mat = small_to_mat( u_FpM_inv(mat, 2) );
+        mat = matsmall_mat( Flm_inv(mat, 2) );
         gerepileall(av,2,&genarch,&mat);
         y[2] = (long)genarch;
         y[3] = (long)mat; return y;

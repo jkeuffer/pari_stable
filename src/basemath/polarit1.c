@@ -478,17 +478,15 @@ rootmod0(GEN f, GEN p, long flag)
 #define FqX_red FpXQX_red
 #define FqX_sqr FpXQX_sqr
 static GEN spec_FpXQ_pow(GEN x, GEN p, GEN S);
-extern GEN pol_to_vec(GEN x, long N);
-extern GEN FqXQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p);
 extern GEN FpXQX_from_Kronecker(GEN z, GEN pol, GEN p);
 extern GEN FpXQX_safegcd(GEN P, GEN Q, GEN T, GEN p);
-extern GEN u_normalizepol(GEN x, long lx);
-extern GEN Fq_pow(GEN x, GEN n, GEN pol, GEN p);
+
 /* Functions giving information on the factorisation. */
 
+/*TODO: merge with matrixpow*/
 /* u in Z[X], return kernel of (Frob - Id) over Fp[X] / u */
-static GEN
-FpM_Berlekamp_ker(GEN u, GEN p)
+GEN
+FpX_Berlekamp_ker(GEN u, GEN p)
 {
   long j,N = degpol(u);
   GEN v,w,Q,p1;
@@ -501,16 +499,17 @@ FpM_Berlekamp_ker(GEN u, GEN p)
     Q[j] = (long)p1;
     if (j < N)
     {
-      pari_sp av = avma;
-      w = gerepileupto(av, FpX_res(gmul(w,v), u, p));
+      pari_sp av = avma; /*FpXQ_mul is not stack clean*/
+      w = gerepileupto(av, FpXQ_mul(w, v, u, p));
     }
   }
   return FpM_ker(Q,p);
 }
 
-static GEN
-FqM_Berlekamp_ker(GEN u, GEN T, GEN q, GEN p)
+GEN
+FqX_Berlekamp_ker(GEN u, GEN T, GEN q, GEN p)
 {
+  pari_sp ltop=avma;
   long j,N = degpol(u);
   GEN v,w,Q,p1;
   Q = cgetg(N+1,t_MAT); Q[1] = (long)zerocol(N);
@@ -526,7 +525,34 @@ FqM_Berlekamp_ker(GEN u, GEN T, GEN q, GEN p)
       w = gerepileupto(av, FpXQX_divres(FpXQX_mul(w,v, T,p), u,T,p,ONLY_REM));
     }
   }
-  return FqM_ker(Q,T,p);
+  return gerepileupto(ltop,FqM_ker(Q,T,p));
+}
+
+GEN
+Flx_Berlekamp_ker(GEN u, ulong p)
+{
+  pari_sp ltop=avma;
+  long j,N = degpol(u);
+  GEN v,w,Q,p1;
+  pari_timer T;
+  TIMER(&T);
+  Q = cgetg(N+1,t_VEC); Q[1] = (long) vecsmall_const(N,0);
+  w = v = Flxq_pow(Flx_polx(u[1]),stoi(p),u,p);
+  for (j=2; j<=N; j++)
+  {
+    p1 = Flx_Flv_lg(w, N);
+    p1[j] = subuumod((ulong)p1[j], 1, p);
+    Q[j] = (long)p1;
+    if (j < N)
+    {
+      pari_sp av = avma; /*Flxq_mul is not stack clean*/
+      w = gerepileupto(av, Flxq_mul(w, v, u, p));
+    }
+  }
+  if(DEBUGLEVEL>=9) msgTIMER(&T,"Berlekamp matrix");
+  Q=Flm_ker_sp(Q,p,0);
+  if(DEBUGLEVEL>=9) msgTIMER(&T,"kernel");
+  return gerepileupto(ltop,Q);
 }
 
 /* f in ZZ[X] and p a prime number. */
@@ -541,28 +567,40 @@ FpX_is_squarefree(GEN f, GEN p)
 }
 
 /* product of terms of degree 1 in factorization of f */
-GEN
+static GEN
+FpX_split_part(GEN f, GEN p)
+{
+  long n = degpol(f);
+  GEN z, X = polx[varn(f)];
+  if (n <= 1) return f;
+  f = FpX_red(f, p);
+  z = FpXQ_pow(X, p, f, p);
+  z = FpX_sub(z, X, NULL);
+  return FpX_gcd(z,f,p);
+}
+
+static GEN
 FqX_split_part(GEN f, GEN T, GEN p)
 {
   long n = degpol(f);
   GEN z, X = polx[varn(f)];
   if (n <= 1) return f;
-  if (!T)
-  {
-    f = FpX_red(f, p);
-    z = FpXQ_pow(X, p, f, p);
-    z = FpX_sub(z, X, NULL);
-    return FpX_gcd(z,f,p);
-  } else {
-    f = FqX_red(f, T, p);
-    z = FqXQ_pow(X, gpowgs(p, degpol(T)), f, T, p);
-    z = gsub(z, X);
-    return FqX_gcd(z, f, T, p);
-  }
+  f = FqX_red(f, T, p);
+  z = FqXQ_pow(X, gpowgs(p, degpol(T)), f, T, p);
+  z = gsub(z, X);
+  return FqX_gcd(z, f, T, p);
 }
 
 /* Compute the number of roots in Fq without counting multiplicity
  * return -1 for 0 polynomial. lc(f) must be prime to p. */
+long
+FpX_nbroots(GEN f, GEN p) 
+{
+  pari_sp av = avma;
+  GEN z = FpX_split_part(f, p);
+  avma = av; return degpol(z);
+}
+
 long
 FqX_nbroots(GEN f, GEN T, GEN p)
 {
@@ -570,8 +608,6 @@ FqX_nbroots(GEN f, GEN T, GEN p)
   GEN z = FqX_split_part(f, T, p);
   avma = av; return degpol(z);
 }
-long
-FpX_nbroots(GEN f, GEN p) { return FqX_nbroots(f, NULL, p); }
 
 long
 FpX_is_totally_split(GEN f, GEN p)
@@ -587,13 +623,14 @@ FpX_is_totally_split(GEN f, GEN p)
   return degpol(z) == 1 && gcmp1((GEN)z[3]) && !signe(z[2]); /* x^p = x ? */
 }
 
-/* u_vec_to_pol(u_FpM_FpV_mul(x, u_pol_to_vec(y), p)) */
+/*FIXME: what does that do ? */
 static GEN
-u_FpM_FpX_mul(GEN x, GEN y, ulong p)
+Flm_Flx_mul(GEN x, GEN y, ulong p)
 {
   long i,k,l, ly = lg(y)-1;
   GEN z;
-  if (ly==1) return u_zeropol();
+  long vs=y[1];
+  if (ly==1) return Flx_zero(vs);
   l = lg(x[1]);
   y++;
   z = vecsmall_const(l,0) + 1;
@@ -617,16 +654,12 @@ u_FpM_FpX_mul(GEN x, GEN y, ulong p)
   }
   for (i=1; i<l; i++) z[i] %= p;
   while (--l && !z[l]);
-  if (!l) return u_zeropol();
-  *z-- = evalsigne(1) | evalvarn(0); return z;
+  if (!l) return Flx_zero(0);
+  *z-- = vs; return z;
 }
 
-extern GEN u_FpX_Kmul(GEN a, GEN b, ulong p, long na, long nb);
-#define u_FpX_mul(x,y, p) u_FpX_Kmul(x+2,y+2,p, lg(x)-2,lg(y)-2)
-#define u_FpX_div(x,y,p) u_FpX_divrem((x),(y),(p),NULL)
-
 static GEN
-u_FpM_Frobenius(GEN u, ulong p)
+Flx_Frobenius(GEN u, ulong p)
 {
   long j,N = degpol(u);
   GEN v,w,Q;
@@ -636,14 +669,14 @@ u_FpM_Frobenius(GEN u, ulong p)
   Q = cgetg(N+1,t_MAT); 
   Q[1] = (long)vecsmall_const(N, 0);
   coeff(Q,1,1) = 1;
-  w = v = u_FpXQ_pow(pol_to_small(polx[varn(u)]), utoi(p), u, p);
+  w = v = Flxq_pow(Flx_polx(u[1]), utoi(p), u, p);
   for (j=2; j<=N; j++)
   {
-    Q[j] = (long)u_pol_to_vec(w, N);
+    Q[j] = (long)Flx_Flv_lg(w, N);
     if (j < N)
     {
       pari_sp av = avma;
-      w = gerepileupto(av, u_FpX_rem(u_FpX_mul(w, v, p), u, p));
+      w = gerepileupto(av, Flxq_mul(w, v, u, p));
     }
   }
   if (DEBUGLEVEL > 7) msgTIMER(&T, "frobenius");
@@ -654,17 +687,17 @@ u_FpM_Frobenius(GEN u, ulong p)
  * u must be squarefree mod p.
  * leading term of u must be prime to p. */
 long
-u_FpX_nbfact(GEN z, long p)
+Flx_nbfact(GEN z, long p)
 {
   long lgg, nfacp = 0, d = 0, e = degpol(z);
-  GEN g, w, MP = u_FpM_Frobenius(z, p), PolX = pol_to_small(polx[0]);
+  GEN g, w, MP = Flx_Frobenius(z, p), PolX = Flx_polx(0);
 
   w = PolX;
   while (d < (e>>1))
   { /* here e = degpol(z) */
     d++;
-    w = u_FpM_FpX_mul(MP, w, p); /* w^p mod (z,p) */
-    g = u_FpX_gcd(z, u_FpX_sub(w, PolX, p), p);
+    w = Flm_Flx_mul(MP, w, p); /* w^p mod (z,p) */
+    g = Flx_gcd(z, Flx_sub(w, PolX, p), p);
     lgg = degpol(g);
     if (!lgg) continue;
 
@@ -673,8 +706,8 @@ u_FpX_nbfact(GEN z, long p)
     if (DEBUGLEVEL>5)
       fprintferr("   %3ld fact. of degree %3ld\n", lgg/d, d);
     if (!e) break;
-    z = u_FpX_div(z, g, p);
-    w = u_FpX_rem(w, z, p);
+    z = Flx_div(z, g, p);
+    w = Flx_res(w, z, p);
   }
   if (e)
   {
@@ -685,16 +718,16 @@ u_FpX_nbfact(GEN z, long p)
 }
 
 long
-u_FpX_nbroots(GEN f, long p)
+Flx_nbroots(GEN f, long p)
 {
   long n = degpol(f);
   pari_sp av = avma;
   GEN z, X;
   if (n <= 1) return n;
-  X = pol_to_small(polx[varn(f)]);
-  z = u_FpXQ_pow(X, utoi(p), f, p);
-  z = u_FpX_sub(z, X, p);
-  z = u_FpX_gcd(z, f, p);
+  X = Flx_polx(f[1]);
+  z = Flxq_pow(X, utoi(p), f, p);
+  z = Flx_sub(z, X, p);
+  z = Flx_gcd(z, f, p);
   avma = av; return degpol(z);
 }
 
@@ -702,7 +735,7 @@ long
 FpX_nbfact(GEN u, GEN p)
 {
   pari_sp av = avma;
-  GEN vker = FpM_Berlekamp_ker(u, p);
+  GEN vker = FpX_Berlekamp_ker(u, p);
   avma = av; return lg(vker)-1;
 }
 
@@ -712,7 +745,7 @@ FqX_nbfact(GEN u, GEN T, GEN p)
   pari_sp av = avma;
   GEN vker;
   if (!T) return FpX_nbfact(u, p);
-  vker = FqM_Berlekamp_ker(u, T, gpowgs(p, degpol(T)), p);
+  vker = FqX_Berlekamp_ker(u, T, gpowgs(p, degpol(T)), p);
   avma = av; return lg(vker)-1;
 }
 
@@ -1021,44 +1054,6 @@ vec_to_pol(GEN x, long v)
   return p;
 }
 
-GEN
-u_vec_to_pol(GEN x)
-{
-  long i, k = lg(x);
-  GEN p;
-
-  while (--k && !x[k]);
-  if (!k) return u_zeropol();
-  i = k+2; p = cgetg(i,t_POL);
-  p[1] = evalsigne(1) | evalvarn(0);
-  x--; for (k=2; k<i; k++) p[k] = x[k];
-  return p;
-}
-
-#if 0
-static GEN
-u_FpM_FpV_mul(GEN x, GEN y, ulong p)
-{
-  long i,k,l,lx=lg(x), ly=lg(y);
-  GEN z;
-  if (lx != ly) err(operi,"* [mod p]",x,y);
-  if (lx==1) return cgetg(1,t_VECSMALL);
-  l = lg(x[1]);
-  z = cgetg(l,t_VECSMALL);
-  for (i=1; i<l; i++)
-  {
-    ulong p1 = 0;
-    for (k=1; k<lx; k++)
-    {
-      p1 += coeff(x,i,k) * y[k];
-      if (p1 & HIGHBIT) p1 %= p;
-    }
-    z[i] = p1 % p;
-  }
-  return z;
-}
-#endif
-
 /* return the (N-dimensional) vector of coeffs of p */
 GEN
 pol_to_vec(GEN x, long N)
@@ -1074,19 +1069,6 @@ pol_to_vec(GEN x, long N)
   l = lg(x)-1; x++;
   for (i=1; i<l ; i++) z[i]=x[i];
   for (   ; i<=N; i++) z[i]=zero;
-  return z;
-}
-
-/* return the (N-dimensional) vector of coeffs of p */
-GEN
-u_pol_to_vec(GEN x, long N)
-{
-  long i, l;
-  GEN z = cgetg(N+1,t_VECSMALL);
-  if (typ(x) != t_VECSMALL) err(typeer,"u_pol_to_vec");
-  l = lg(x)-1; x++;
-  for (i=1; i<l ; i++) z[i]=x[i];
-  for (   ; i<=N; i++) z[i]=0;
   return z;
 }
 
@@ -1160,29 +1142,22 @@ swap_polpol(GEN x, long n, long w)
   return normalizepol_i(y,ly);
 }
 
-typedef ulong* uGEN;
-
 /* set x <-- x + c*y mod p */
+/* x is not required to be normalized.*/
 static void
-u_FpX_addmul(uGEN x, uGEN y, ulong c, ulong p)
+Flx_addmul_inplace(GEN gx, GEN gy, ulong c, ulong p)
 {
-  long i, lx, ly, l;
+  long i, lx, ly;
+  ulong *x=(ulong *)gx;
+  ulong *y=(ulong *)gy;
   if (!c) return;
-  lx = lg(x);
-  ly = lg(y); l = min(lx,ly);
-  if (p & ~MAXHALFULONG)
-  {
-    for (i=2; i<l;  i++) x[i] = (x[i] + muluumod(c,y[i],p)) % p;
-    if (l == lx)
-      for (   ; i<ly; i++) x[i] = muluumod(c,y[i],p);
-  }
+  lx = lg(gx);
+  ly = lg(gy);
+  if (lx<ly) err(bugparier,"lx<ly in Flx_addmul_inplace");
+  if (u_OK_ULONG(p))
+    for (i=2; i<ly;  i++) x[i] = (x[i] + c*y[i]) % p;
   else
-  {
-    for (i=2; i<l;  i++) x[i] = (x[i] + c*y[i]) % p;
-    if (l == lx)
-      for (   ; i<ly; i++) x[i] = (c*y[i]) % p;
-  }
-  (void)u_normalizepol((GEN)x,i);
+    for (i=2; i<ly;  i++) x[i] = adduumod(x[i], muluumod(c,y[i],p),p);
 }
 
 static long
@@ -1213,24 +1188,24 @@ FqX_rand(long d1, long v, GEN T, GEN p)
 #define set_irred(i) { if ((i)>ir) swap(t[i],t[ir]); ir++;}
 
 long
-FpX_split_berlekamp(GEN *t, GEN p)
+FpX_split_Berlekamp(GEN *t, GEN p)
 {
-  GEN u = *t, a,b,po2,vker,pol;
-  long N = degpol(u), d, i, ir, L, la, lb, ps, vu = varn(u);
-  pari_sp av0 = avma;
-
-  vker = FpM_Berlekamp_ker(u,p);
-  vker = mat_to_vecpol(vker,vu);
-  d = lg(vker)-1;
-  ps = is_bigint(p)? 0: p[2];
+  GEN u = *t, a,b,po2,vker;
+  long d, i, ir, L, la, lb, vu = varn(u);
+  long l = lg(u);
+  ulong ps = is_bigint(p)? 0: p[2];
   if (ps)
   {
-    avma = av0; a = cgetg(d+1, t_VEC); /* hack: hidden gerepile */
-    for (i=1; i<=d; i++) a[i] = (long)pol_to_small((GEN)vker[i]);
-    vker = a;
+    vker = Flx_Berlekamp_ker(ZX_Flx(u,ps),ps);
+    vker = Flm_FlxV(vker, u[1]);
   }
+  else
+  {
+    vker = FpX_Berlekamp_ker(u,p);
+    vker = mat_to_vecpol(vker,vu);
+  }
+  d = lg(vker)-1;
   po2 = shifti(p, -1); /* (p-1) / 2 */
-  pol = cgetg(N+3,t_POL);
   ir = 0;
   /* t[i] irreducible for i <= ir, still to be treated for i < L */
   for (L=1; L<d; )
@@ -1238,19 +1213,20 @@ FpX_split_berlekamp(GEN *t, GEN p)
     GEN polt;
     if (ps)
     {
-      pol[2] = small_rand(ps); /* vker[1] = 1 */
-      setlg(pol, pol[2]? 3: 2);
+      GEN pol = vecsmall_const(l-2,0);
+      pol[1] = u[1];
+      pol[2] = small_rand(ps); /*Assume vker[1]=1*/
       for (i=2; i<=d; i++)
-        u_FpX_addmul((uGEN)pol, (uGEN)vker[i], (ulong)small_rand(ps), (ulong)ps);
-      polt = small_to_pol(pol,vu);
+        Flx_addmul_inplace(pol, (GEN) vker[i], (ulong)small_rand(ps), ps);
+      (void)Flx_renormalize((GEN)pol,l-1);
+      
+      polt = Flx_ZX(pol);
     }
     else
     {
-      pol[2] = (long)genrand(p);
-      setlg(pol, signe(pol[2])? 3: 2);
-      pol[1] = u[1];
+      GEN pol = scalarpol(genrand(p), vu);
       for (i=2; i<=d; i++)
-        pol = gadd(pol, gmul((GEN)vker[i], genrand(p)));
+        pol = FpX_add(pol, FpX_Fp_mul((GEN)vker[i], genrand(p),NULL),NULL);
       polt = FpX_red(pol,p);
     }
     for (i=ir; i<L && L<d; i++)
@@ -1271,7 +1247,7 @@ FpX_split_berlekamp(GEN *t, GEN p)
       {
         pari_sp av = avma;
         b = FpX_res(polt, a, p);
-        if (degpol(b) == 0) { avma=av; continue; }
+        if (degpol(b) <= 0) { avma=av; continue; }
         b = ZX_s_add(FpXQ_pow(b,po2, a,p), -1);
         b = FpX_gcd(a,b, p); lb = degpol(b);
         if (lb && lb < la)
@@ -1287,11 +1263,30 @@ FpX_split_berlekamp(GEN *t, GEN p)
   return d;
 }
 
-static GEN
+GEN
+ZX_deriv(GEN x)
+{
+  long i,lx = lg(x)-1;
+  GEN y;
+
+  if (lx<3) return zeropol(varn(x));
+  y = cgetg(lx,t_POL);
+  for (i=2; i<lx ; i++) y[i] = lmulsi(i-1,(GEN)x[i+1]);
+  y[1] = x[1]; return y;
+}
+
+GEN
+FpX_deriv(GEN f, GEN p)
+{
+  return FpX_red(ZX_deriv(f), p);
+}
+
+GEN
 FqX_deriv(GEN f, GEN T, GEN p)
 {
-  return FqX_red(derivpol(f), T, p);
+  return FqX_red(ZX_deriv(f), T, p);
 }
+
 GEN
 FqX_gcd(GEN P, GEN Q, GEN T, GEN p)
 {
@@ -1310,13 +1305,13 @@ FqX_is_squarefree(GEN P, GEN T, GEN p)
 }
 
 long
-FqX_split_berlekamp(GEN *t, GEN q, GEN T, GEN p)
+FqX_split_Berlekamp(GEN *t, GEN q, GEN T, GEN p)
 {
   GEN u = *t, a,b,qo2,vker,pol;
   long N = degpol(u), vu = varn(u), vT = varn(T), dT = degpol(T);
   long d, i, ir, L, la, lb;
 
-  vker = FqM_Berlekamp_ker(u,T,q,p);
+  vker = FqX_Berlekamp_ker(u,T,q,p);
   vker = mat_to_vecpol(vker,vu);
   d = lg(vker)-1;
   qo2 = shifti(q, -1); /* (q-1) / 2 */
@@ -1393,7 +1388,7 @@ factmod0(GEN f, GEN pp)
       if (N > 0)
       {
         t[nbfact] = FpX_normalize(u,pp);
-        d = (N==1)? 1: FpX_split_berlekamp(t+nbfact, pp);
+        d = (N==1)? 1: FpX_split_Berlekamp(t+nbfact, pp);
         for (j=0; j<d; j++) ex[nbfact+j] = e*k;
         nbfact += d;
       }
