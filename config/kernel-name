@@ -5,8 +5,7 @@ arch=$2;
 case "$name" in
   *-*) 
   kernlvl0=`echo "$name" | sed -e 's/\(.*\)-.*/\1/'`
-  kernlvl1=`echo "$name" | sed -e 's/.*-\(.*\)/\1/'`
-  ;;
+  kernlvl1=`echo "$name" | sed -e 's/.*-\(.*\)/\1/'` ;;
   gmp) #Alias for auto-gmp
   kernlvl0="$arch"; kernlvl1=gmp ;;
   none) #Alias for none-none
