@@ -1961,11 +1961,13 @@ integer.
 
 \syn{numbdiv}{x}.
 
-\subsecidx{numbpart}$(x)$: gives the number of partitions of $x$; the
-number of nonnegative integer solutions to $a+2b+3c+\cdots=x$. $x$
-must be of type integer and $1\le x<10^{15}$.
+\subsecidx{numbpart}$(n)$: gives the number of unrestricted partitions of
+$n$, usually called $p(n)$ in the litterature; in other words the number of
+nonnegative integer solutions to $a+2b+3c+\cdots=n$. $n$ must be of type
+integer and $1\le n<10^{15}$. The algorithm uses the
+Hardy-Ramanujan-Rademacher formula.
 
-\syn{numbpart}{x}.
+\syn{numbpart}{n}.
 
 \subsecidx{omega}$(x)$: number of distinct prime divisors of $|x|$. $x$
 must be of type integer.
