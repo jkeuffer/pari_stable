@@ -1627,13 +1627,13 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
       {
 	if (fm == 0) 
 	{
-	  if (DEBUGLEVEL >= 0)
+	  if (DEBUGLEVEL >= 5)
 	    fprintferr("  ** switching to fast mode\n");
 	  fm = 1;
 	}
 	else 
 	{
-	  if (DEBUGLEVEL >= 0)
+	  if (DEBUGLEVEL >= 5)
 	    fprintferr("  ** something's wrong\n  ** switching back to normal mode\n");
 	  fm = 0;
 	  go_fm = eq+2;
