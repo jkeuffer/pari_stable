@@ -17,6 +17,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 extern GEN hnftogeneratorslist(long n, GEN zn2, GEN zn3, GEN lss, GEN gen, GEN ord);
 extern GEN vandermondeinversemod(GEN L, GEN T, GEN den, GEN mod);
+extern GEN vecsmall_append(GEN V, long s);
 
 /* Calcule les orbites d'un sous-groupe de Z/nZ donne par un
  * generateur ou d'un ensemble de generateur donne par un vecteur. 
