@@ -674,7 +674,7 @@ gcarreparfait(GEN x)
 #define gome(t) (ome(modBIL(t)))
 
 /* assume y odd, return kronecker(x,y) * s */
-static long
+long
 krouu(ulong x, ulong y, long s)
 {
   ulong x1 = x, y1 = y, z;
