@@ -38,16 +38,19 @@ prime(long n)
   return utoi(prime);
 }
 
-long
-pith(long n)
+GEN
+primepi(GEN x)
 {
+  pari_sp av = avma;
   byteptr p = diffptr;
-  ulong prime = 0, res = 0;
+  ulong prime = 0, res = 0, n;
+  GEN N = typ(x) == t_INT? x: gfloor(x);
 
-  if (n <= 0) err(talker, "pith meaningless if n = %ld",n);
-  maxprime_check((ulong)n);
-  while (prime<=(ulong)n) { res++; NEXT_PRIME_VIADIFF(prime,p); }
-  return res-1;
+  avma = av;
+  if (signe(N) <= 0) err(talker, "primepi meaningless for n = %Z",N);
+  n = itou(N); maxprime_check(n);
+  while (prime <= n) { res++; NEXT_PRIME_VIADIFF(prime,p); }
+  return utoi(res-1);
 }
 
 GEN

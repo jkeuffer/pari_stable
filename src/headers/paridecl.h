@@ -396,6 +396,7 @@ GEN     numbdiv(GEN n);
 long    omega(GEN n);
 GEN     phi(GEN n);
 GEN     prime(long n);
+GEN     primepi(GEN x);
 GEN     primes(long n);
 GEN     removeprimes(GEN primes);
 GEN     smallfact(GEN n);

@@ -2158,6 +2158,12 @@ the precalculated primes.
 
 \syn{prime}{x}. $x$ must be a \kbd{long}.
 
+\subsecidx{primepi}$(x)$: the prime counting function. Returns the number of
+primes $p$, $p \leq x$. Uses a naive algorithm so that $x$ must be less than 
+\kbd{primelimit}.
+
+\syn{primepi}{x}.
+
 \subsecidx{primes}$(x)$: creates a row vector whose components
 are the first $x$ prime numbers, which must be among the precalculated primes.
 

@@ -339,7 +339,7 @@ GH 21- new function zncoppersmith
    23- routine sqrtremi() [ Karatsuba square root ]
    24- internal routine int2n() [ = 2^n ]
    25- new functions Z_pval, Z_lval, u_lval
-
+   26- new function primepi
 
   Removed
     1- obsolete macro leadingcoeff [kept for backward compatibility but
