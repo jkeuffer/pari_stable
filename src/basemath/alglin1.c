@@ -1050,11 +1050,13 @@ hnf_invimage(GEN A, GEN b)
   if (!n) return NULL;
   u = cgetg(n+1, t_COL);
   m = (GEN)b[n];
+  if (typ(m) != t_INT) err(typeer,"hnf_invimage");
   u[n] = ldvmdii(m, gcoeff(A,n,n), &r);
   if (r != gzero) { avma = av; return NULL; }
   for (i=n-1; i>0; i--)
   {
     av2 = avma;
+    if (typ(b[i]) != t_INT) err(typeer,"hnf_invimage");
     m = negi((GEN)b[i]);
     for (j=i+1; j<=n; j++)
       m = addii(m, mulii(gcoeff(A,i,j),(GEN) u[j]));
