@@ -1878,8 +1878,6 @@ compute_multiple_of_R(GEN xarch,long RU,long N,GEN *ptlambda)
   *ptlambda = lambda; return kR;
 }
 
-extern GEN hnflll_i(GEN A, GEN *ptB, int remove);
-
 static GEN
 bestappr_noer(GEN x, GEN k)
 {
@@ -1896,8 +1894,16 @@ bestappr_noer(GEN x, GEN k)
   return y;
 }
 
-/* c = Rz = 2n, according to Dirichlet's formula. Compute a tentative
- * regulator (not a multiple this time). *ptkR = multiple of regulator */
+/* Input:
+ * lambda = approximate rational entries: coords of units found so far on a
+ * sublattice of maximal rank (sublambda)
+ * *ptkR = regulator of sublambda = multiple of regulator of lambda
+ * Compute R = true regulator of lambda.
+ *
+ * If c := Rz = 2, by Dirichlet's formula, then lambda is the full group of
+ * units AND the full set of relations for the class group has been computed.
+ *
+ * Output: *ptkR = R, *ptU = basis of fundamental units (in terms lambda) */
 static int
 compute_R(GEN lambda, GEN z, GEN *ptU, GEN *ptkR)
 {
@@ -1932,8 +1938,7 @@ compute_R(GEN lambda, GEN z, GEN *ptU, GEN *ptkR)
   }
   if (c < 1.5) return PRECI;
   if (c > 3.) { avma = av; return RELAT; }
-  /* *pU = coords. of fundamental units on sublambda */
-  H = hnflll_i(L,&U,0); /* try hard to get a SMALL base change */
+  H = hnflll_i(L,&U); /* try hard to get a SMALL base change */
   U += (lg(U)-1 - r); U[0] = evaltyp(t_MAT)|evallg(r+1);
   *ptkR = R; *ptU = U; return LARGE;
 }

@@ -2363,29 +2363,26 @@ findi(GEN M)
   return 0;
 }
 
+static long
+findi_normalize(GEN Aj, GEN B, long j, GEN **lambda)
+{
+  long r = findi(Aj);
+  if (r && signe(Aj[r]) < 0)
+  {
+    neg_col(Aj); if (B) neg_col((GEN)B[j]);
+    Minus(j,lambda);
+  }
+  return r;
+}
+
 static void
 reduce2(GEN A, GEN B, long k, long j, long *row, GEN **lambda, GEN *D)
 {
   GEN q;
   long i, row0, row1;
 
-  row0 = findi((GEN)A[j]);
-  if (row0 && signe(gcoeff(A,row0,j)) < 0)
-  {
-    neg_col((GEN)A[j]);
-    if (B) neg_col((GEN)B[j]);
-    Minus(j,lambda);
-  }
-
-  row1 = findi((GEN)A[k]);
-  if (row1 && signe(gcoeff(A,row1,k)) < 0)
-  {
-    neg_col((GEN)A[k]);
-    if (B) neg_col((GEN)B[k]);
-    Minus(k,lambda);
-  }
-
-  row[0]=row0; row[1]=row1;
+  row[0] = row0 = findi_normalize((GEN)A[j], B,j,lambda);
+  row[1] = row1 = findi_normalize((GEN)A[k], B,k,lambda);
   if (row0)
     q = truedvmdii(gcoeff(A,row0,k), gcoeff(A,row0,j), NULL);
   else if (absi_cmp(shifti(lambda[k][j], 1), D[j]) > 0)
@@ -2447,40 +2444,6 @@ hnfswap(GEN A, GEN B, long k, GEN **lambda, GEN *D)
   D[k-1] = divii(addii(p1,p2), D[k-1]);
 }
 
-/* A[k] = 0,  A[nz] != 0,  k > nz,  A[j] = 0 for all j < nz.
- * "Deep insert" A[k] at nz */
-static void
-trivswap(GEN *A, GEN *B, long nz, long k, GEN **lambda, GEN *D)
-{
-  GEN p1;
-  long i,j,n = lg(A);
-
-  p1 = A[nz]; /* cycle A */
-  for (j = nz; j < k; j++) swap(A[j+1], p1); 
-  A[nz] = p1; /* = [0...0] */
-
-  if (B)
-  {
-    p1 = B[nz]; /* cycle B */
-    for (j = nz; j < k; j++) swap(B[j+1], p1); 
-    B[nz] = p1;
-  }
-
-  p1 = D[nz]; /* cycle D */
-  for (j = nz; j < k; j++) swap(D[j+1], p1);
-  D[nz] = gun;
-
-  for (j=k-1; j>=nz; j--) /* cycle lambda */
-    for (i=k-1; i>=nz; i--) lambda[i+1][j+1] = lambda[i][j];
-  for (j=n-1; j>k; j--)
-    for (i=k-1; i>=nz; i--) 
-    {
-      lambda[i+1][j] = lambda[i][j];
-      lambda[j][i+1] = lambda[j][i];
-    }
-  for (i=1; i<n; i++) lambda[nz][i] = lambda[i][nz] = gzero;
-}
-
 static GEN
 fix_rows(GEN A)
 {
@@ -2498,12 +2461,11 @@ fix_rows(GEN A)
 }
 
 GEN
-hnflll_i(GEN A, GEN *ptB, int remove)
+hnflll_i(GEN A, GEN *ptB)
 {
   ulong av = avma, lim = stack_lim(av,3);
   long m1 = 1, n1 = 1; /* alpha = m1/n1. Maybe 3/4 here ? */
   long row[2], do_swap,i,n,k;
-  long nzcol = 1; /* index of 1st (maybe) non-0 col [only updated when !B] */
   GEN z,B, **lambda, *D;
   GEN *gptr[4];
 
@@ -2512,58 +2474,33 @@ hnflll_i(GEN A, GEN *ptB, int remove)
   A = ZM_copy(fix_rows(A));
   B = ptB? idmat(n-1): NULL;
   D = (GEN*) cgetg(n+1, t_VEC); D++; /* hack: need a "sentinel" D[0] */
-  if (n == 2) /* handle trivial case: return negative diag coeff otherwise */
-  {
-    i = findi((GEN)A[1]);
-    if (i && signe(gcoeff(A,i,1)) < 0)
-    {
-      neg_col((GEN)A[1]);
-      if (B) neg_col((GEN)B[1]);
-    }
-  }
   lambda = (GEN**) cgetg(n,t_MAT);
   for (i=1; i<n; i++) { D[i] = gun; lambda[i] = (GEN*)zerocol(n-1); }
+  /* handle trivial case: return negative diag coeff otherwise */
+  if (n == 2) (void)findi_normalize((GEN)A[1], B,1,lambda);
   D[0] = gun; k = 2;
   while (k < n)
   {
     reduce2(A,B,k,k-1,row,lambda,D);
-    if (remove)
-    { /* not interested in kernel. Eliminate 0 cols */
-      if (!row[0] || !row[1])
-      {
-        while (!findi((GEN)A[nzcol]) && nzcol < n) nzcol++;
-        /* A[nzcol] != 0,  A[i] = 0 for i < nzcol */
-        if (!row[0] && k-1 > nzcol)
-          {trivswap((GEN*)A,(GEN*)B,nzcol,k-1, lambda,D); nzcol++;}
-        if (!row[1] && k   > nzcol)
-          {trivswap((GEN*)A,(GEN*)B,nzcol,k  , lambda,D); nzcol++;}
-        if (k <= nzcol) k = nzcol+1;
-        continue;
-      }
-      do_swap = (row[0] && row[0] <= row[1]);
-    }
+    if (row[0])
+      do_swap = (!row[1] || row[0] <= row[1]);
+    else if (row[1])
+      do_swap = 0;
     else
-    {
-      if (row[0])
-        do_swap = (!row[1] || row[0] <= row[1]);
-      else if (row[1])
-        do_swap = 0;
-      else
-      { /* row[0] == row[1] == 0 */
-        ulong av1 = avma;
-        z = addii(mulii(D[k-2],D[k]), sqri(lambda[k][k-1]));
-        do_swap = (cmpii(mulsi(n1,z), mulsi(m1,sqri(D[k-1]))) < 0);
-        avma = av1;
-      }
+    { /* row[0] == row[1] == 0 */
+      ulong av1 = avma;
+      z = addii(mulii(D[k-2],D[k]), sqri(lambda[k][k-1]));
+      do_swap = (cmpii(mulsi(n1,z), mulsi(m1,sqri(D[k-1]))) < 0);
+      avma = av1;
     }
     if (do_swap)
     {
       hnfswap(A,B,k,lambda,D);
-      if (k > nzcol+1) k--;
+      if (k > 2) k--;
     }
     else
     {
-      for (i=k-2; i>=nzcol; i--)
+      for (i=k-2; i; i--)
       {
         reduce2(A,B,k,i,row,lambda,D);
         if (low_stack(lim, stack_lim(av,3)))
@@ -2584,13 +2521,6 @@ hnflll_i(GEN A, GEN *ptB, int remove)
       gerepilemany(av,gptr,B? 4: 3); lambda = (GEN**)a; D = (GEN*)(b+1);
     }
   }
-  if (remove)
-  {
-    for (i=nzcol; i<n; i++)
-      if (findi((GEN)A[i])) break;
-    i--; A += i; A[0] = evaltyp(t_MAT)|evallg(n-i);
-    if (B) { B += i; B[0] = evaltyp(t_MAT)|evallg(n-i); }
-  }
   A = fix_rows(A);
   gptr[0] = &A; gptr[1] = &B;
   gerepilemany(av, gptr, B? 2: 1);
@@ -2602,7 +2532,7 @@ GEN
 hnflll(GEN A)
 {
   GEN B, z = cgetg(3, t_VEC);
-  z[1] = (long)hnflll_i(A, &B, 0);
+  z[1] = (long)hnflll_i(A, &B);
   z[2] = (long)B; return z;
 }
 
@@ -2621,15 +2551,15 @@ reduce1(GEN A, GEN B, long k, long j, GEN **lambda, GEN *D)
   else
     return;
 
-  if (! gcmp0(q))
+  if (signe(q))
   {
+    GEN *Lk = lambda[k], *Lj = lambda[j];
     q = mynegi(q);
     A[k] = laddii((GEN)A[k], mulii(q,(GEN)A[j]));
     elt_col((GEN)B[k],(GEN)B[j],q);
-    lambda[k][j] = addii(lambda[k][j], mulii(q,D[j]));
+    Lk[j] = addii(Lk[j], mulii(q,D[j]));
     for (i=1; i<j; i++)
-      if (signe(lambda[j][i]))
-        lambda[k][i] = addii(lambda[k][i], mulii(q,lambda[j][i]));
+      if (signe(Lj[i])) Lk[i] = addii(Lk[i], mulii(q,Lj[i]));
   }
 }
 
@@ -2637,8 +2567,8 @@ GEN
 extendedgcd(GEN A)
 {
   long m1 = 1, n1 = 1; /* alpha = m1/n1. Maybe 3/4 here ? */
-  long av = avma, tetpil, do_swap,i,j,n,k;
-  GEN p1,p2,B, **lambda, *D;
+  long av = avma, do_swap,i,j,n,k;
+  GEN z,B, **lambda, *D;
 
   n = lg(A); B = idmat(n-1); A = ZM_copy(A);
   D = (GEN*) cgeti(n); lambda = (GEN**) cgetg(n,t_MAT);
@@ -2655,12 +2585,10 @@ extendedgcd(GEN A)
     if (signe(A[k-1])) do_swap = 1;
     else if (!signe(A[k]))
     {
-      long av1=avma;
-      p1 = addii(mulii(D[k-2],D[k]), sqri(lambda[k][k-1]));
-      p1 = mulsi(n1,p1);
-      p2 = mulsi(m1,sqri(D[k-1]));
-      do_swap = (cmpii(p1,p2) < 0);
-      avma=av1;
+      ulong av1 = avma;
+      z = addii(mulii(D[k-2],D[k]), sqri(lambda[k][k-1]));
+      do_swap = (cmpii(mulsi(n1,z), mulsi(m1,sqri(D[k-1]))) < 0);
+      avma = av1;
     }
     else do_swap = 0;
 
@@ -2675,16 +2603,15 @@ extendedgcd(GEN A)
       k++;
     }
   }
-  if (signe(A[n-1])<0)
+  if (signe(A[n-1]) < 0)
   {
     A[n-1] = (long)mynegi((GEN)A[n-1]);
     neg_col((GEN)B[n-1]);
   }
-  tetpil = avma;
-  p1 = cgetg(3,t_VEC);
-  p1[1]=lcopy((GEN)A[n-1]);
-  p1[2]=lcopy(B);
-  return gerepile(av,tetpil,p1);
+  z = cgetg(3,t_VEC);
+  z[1] = A[n-1];
+  z[2] = (long)B;
+  return gerepilecopy(av, z);
 }
 
 /* HNF with permutation. TODO: obsolete, replace with hnflll. */
