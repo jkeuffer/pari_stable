@@ -1818,7 +1818,6 @@ GEN     gzeta(GEN x, long prec);
 GEN     hyperu(GEN a, GEN b, GEN gx, long prec);
 GEN     incgam(GEN a, GEN x, long prec);
 GEN     incgam0(GEN a, GEN x, GEN z,long prec);
-GEN     incgam1(GEN a, GEN x, long prec);
 GEN     incgam2(GEN a, GEN x, long prec);
 GEN     incgam3(GEN a, GEN x, long prec);
 GEN     incgamc(GEN a, GEN x, long prec);

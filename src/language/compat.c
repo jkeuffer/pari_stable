@@ -289,7 +289,7 @@ entree oldfonctions[]={
 {"image2",1,(void *)image2,8,"G"},
 {"imagecompl",1,(void *)imagecompl,8,"G"},
 {"incgam",2,(void *)incgam,3,"GGp"},
-{"incgam1",2,(void *)incgam1,3,"GGp"},
+{"incgam1",2,(void *)suppressed,3,"GGp"},
 {"incgam2",2,(void *)incgam2,3,"GGp"},
 {"incgam3",2,(void *)incgamc,3,"GGp"},
 {"incgam4",3,(void *)incgam0,3,"GGGp"},

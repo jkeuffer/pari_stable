@@ -666,34 +666,11 @@ incgam2_0(GEN x)
   return mulrr(divrr(mpexp(negr(x)), x), addrr(realun(l),p1));
 }
 
-GEN
-incgam1(GEN a, GEN x, long prec)
-{
-  GEN p2,p3,y, z = cgetr(prec);
-  long l, n, i;
-  pari_sp av=avma, av1;
-  double m,mx;
-
-  if (typ(x) != t_REAL) { gaffect(x,z); x=z; }
-  l=lg(x); mx=rtodbl(x);
-  m=(long) bit_accuracy_mul(l,LOG2); n=(long)(m/(log(m)-(1+log(mx))));
-  p2 = cgetr(l); affrr(addir(gen_1,gsub(x,a)), p2);
-  p3 = subrs(p2, n+1); av1 = avma;
-  for (i=n; i>=1; i--)
-  {
-    affrr(addrr(subrs(p2,i), divrr(mulsr(i,x),p3)), p3);
-    avma = av1;
-  }
-  y = mulrr(mpexp(negr(x)),gpow(x,a,prec));
-  affrr(divrr(y,p3), z);
-  avma = av; return z;
-}
-
 /* assume x != 0 */
 GEN
 incgam2(GEN s, GEN x, long prec)
 {
-  GEN b, p1, p2, p3, y;
+  GEN b, p1, p2, S, y;
   long l, n, i;
   pari_sp av = avma, av2, avlim;
   double m,mx;
@@ -713,59 +690,54 @@ incgam2(GEN s, GEN x, long prec)
   }
   p2 = gsub(x, s);
   av2 = avma; avlim = stack_lim(av2,3);
-  p3 = gdiv(gaddsg(-n,s), gaddgs(p2,n<<1));
+  S = gdiv(gaddsg(-n,s), gaddgs(p2,n<<1));
   for (i=n-1; i>=1; i--)
   {
-    p3 = gdiv(gaddsg(-i,s), gadd(gaddgs(p2,i<<1),gmulsg(i,p3)));
+    S = gdiv(gaddsg(-i,s), gadd(gaddgs(p2,i<<1),gmulsg(i,S)));
     if (low_stack(avlim,stack_lim(av2,3)))
     {
       if(DEBUGMEM>1) err(warnmem,"incgam2");
-      p3 = gerepileupto(av2, p3);
+      S = gerepileupto(av2, S);
     }
   }
   y = gmul(mpexp(negr(x)), gpow(x,b,prec));
-  return gerepileupto(av, gmul(y, gaddsg(1,p3)));
+  return gerepileupto(av, gmul(y, gaddsg(1,S)));
 }
 
+/* use exp(-x) * (x^s/s) * sum_{k >= 0} x^k / prod(i=1,k, s+i)
+ * ( =  exp(-x) * x^s * sum_{k >= 0} x^k / k!(k+s) but the above is more
+ * efficient ) */
 GEN
 incgamc(GEN s, GEN x, long prec)
 {
-  GEN b, p1, p2, p3, y;
+  GEN b, S, t, y;
   long l, n, i;
   pari_sp av = avma, av2, avlim;
 
   if (typ(x) != t_REAL) x = gtofp(x, prec);
-  if (!signe(x)) return x;
+  if (gcmp0(x)) return rcopy(x);
 
-  l = lg(x); n = -bit_accuracy(l)-1;
-  i = typ(s);
-  if (i == t_REAL) b = s;
-  else
+  l = precision(x); n = -bit_accuracy(l)-1;
+  i = typ(s); b = s;
+  if (i != t_REAL)
   {
-    p1 = gtofp(s, prec);
-    b = (i == t_INT)? s: p1;
-    s = p1;
-  }
-  if (signe(s) <= 0)
-  {
-    p1 = grndtoi(real_i(s), &i);
-    if (i < 5 - bit_accuracy(prec))
-      err(talker,"negative argument too close to an integer in incgamc");
+    s = gtofp(s, prec);
+    if (i != t_INT) b = s;
   }
   av2 = avma; avlim = stack_lim(av2,3);
-  p2 = p3 = realun(l);
-  for (i=1; expo(p2) >= n; i++)
+  S = t = realun(l);
+  for (i=1; gexpo(S) >= n; i++)
   {
-    p2 = gdiv(gmul(x,p2), gaddsg(i,s));
-    p3 = gadd(p2,p3);
+    S = gdiv(gmul(x,S), gaddsg(i,s)); /* x^i / ((s+1)...(s+i)) */
+    t = gadd(S,t);
     if (low_stack(avlim,stack_lim(av2,3)))
     {
       if(DEBUGMEM>1) err(warnmem,"incgamc");
-      gerepileall(av2, 2, &p2, &p3);
+      gerepileall(av2, 2, &S, &t);
     }
   }
-  y = gdiv(gmul(mpexp(negr(x)), gpow(x,b,prec)), s);
-  return gerepileupto(av, gmul(y,p3));
+  y = gdiv(gmul(gexp(gneg(x),prec), gpow(x,b,prec)), s);
+  return gerepileupto(av, gmul(y,t));
 }
 
 /* If g != NULL, assume that g=gamma(s,prec). */
@@ -792,71 +764,48 @@ GEN
 eint1(GEN x, long prec)
 {
   long l, n, i;
-  pari_sp av = avma, tetpil;
-  GEN p1,p2,p3,p4,run,y;
+  pari_sp av = avma;
+  GEN p1, t, S, y;
 
   if (typ(x) != t_REAL) x = gtofp(x, prec);
   if (signe(x) >= 0)
   {
-    if (expo(x) >= 4)
-      return gerepileupto(av, incgam2_0(x));
+    GEN p3, run;
+    if (expo(x) >= 4) return gerepileupto(av, incgam2_0(x));
 
-    l = lg(x);
+    l = lg(x); run = realun(l);
     n = -bit_accuracy(l)-1;
-
-    run = realun(l);
-    p4 = p3 = p2 = p1 = run;
-    for (i=2; expo(p2)>=n; i++)
+    S = p3 = t = p1 = run;
+    for (i = 2; expo(t) - expo(S) >= n; i++)
     {
-      p1 = addrr(p1,divrs(run,i)); /* p1 = sum_{i=1} 1/i */
-      p4 = divrs(mulrr(x,p4),i);   /* p4 = sum_{i=1} x^(i-1)/i */
-      p2 = mulrr(p4,p1);
-      p3 = addrr(p2,p3);
+      p1 = addrr(p1, divrs(run,i)); /* p1 = sum_{i=1} 1/i */
+      p3 = divrs(mulrr(x,p3), i);   /* p3 = sum_{i=1} x^(i-1)/i */
+      t = mulrr(p3, p1); S = addrr(S, t);
     }
-    p3 = mulrr(x,mulrr(mpexp(negr(x)),p3));
+    S = mulrr(x,mulrr(mpexp(negr(x)),S));
     p1 = addrr(mplog(x), mpeuler(l));
-    return gerepileupto(av, subrr(p3,p1));
+    return gerepileuptoleaf(av, subrr(S,p1));
   }
-  else
-  { /* written by Manfred Radimersky */
-    l  = lg(x);
-    n  = bit_accuracy(l);
-    /* IS: line split to avoid a Workshop cc-5.0 bug (Sun BugID #4254959) */
-    n  = (3 * n) / 4;
-    y  = negr(x);
-    if(cmprs(y, n) < 0) {
-      p1 = p2 = p3 = y;
-      p4 = gen_0;
-      i  = 2;
-      while(gcmp(p3, p4)) {
-        p4 = p3;
-        p1 = gmul(p1, gdivgs(y, i));
-        p2 = gdivgs(p1, i);
-        p3 = gadd(p3, p2);
-        i++;
-      }
-      p1 = gadd(mplog(y), mpeuler(l));
-      y  = gadd(p3, p1);
-    } else {
-      p1 = gdivsg(1, y);
-      p2 = realun(l);
-      p3 = p2;
-      p4 = gen_0;
-      i  = 1;
-      while(gcmp(p3, p4)) {
-        p4 = p3;
-        p2 = gmulgs(p2, i);
-        p2 = gmul(p2, p1);
-        p3 = gadd(p3, p2);
-        i++;
-      }
-      p1 = gdiv(mpexp(y), y);
-      y  = gmul(p3, p1);
+  /* rewritten from code contributed by Manfred Radimersky */
+  l  = lg(x);
+  n  = bit_accuracy(l);
+  y  = negr(x);
+  if (cmprs(y, (3*n)/4) < 0) {
+    p1 = t = S = y;
+    for (i = 2; expo(t) - expo(S) >= -n; i++) {
+      p1 = mulrr(y, divrs(p1, i));
+      t = divrs(p1, i); S = addrr(S, t);
     }
-    tetpil = avma;
-    y  = gerepile(av, tetpil, negr(y));
+    y  = addrr(S, addrr(mplog(y), mpeuler(l)));
+  } else {
+    p1 = divsr(1, y);
+    t = S = realun(l);
+    for (i = 1; expo(t) - expo(S) >= -n; i++) {
+      t = mulrr(p1, mulrs(t, i)); S = addrr(S, t);
+    }
+    y  = mulrr(S, mulrr(p1, mpexp(y)));
   }
-  return y;
+  return gerepileuptoleaf(av, negr(y));
 }
 
 GEN

@@ -1362,13 +1362,13 @@ course without checking!) that $y=\Gamma(s)$. For small $x$, this will speed
 up the computation.
 
 \syn{incgam}{s,x,\var{prec}} and $\teb{incgam0}(s,x,y,\var{prec})$,
-respectively (an omitted $y$ is coded as \kbd{NULL}). There exist also the
-functions \teb{incgam1} and \teb{incgam2} which are used for internal
-purposes.
+respectively (an omitted $y$ is coded as \kbd{NULL}).
 
 \subsecidx{incgamc}$(s,x)$: complementary incomplete gamma function.
-The argument $x$ must be positive and not too large, $s$ is not a pole of
-$\Gamma$. The result returned is $\int_0^x e^{-t}t^{s-1}\,dt$.
+The arguments $x$ and $s$ are complex numbers such that $s$ is not a pole of
+$\Gamma$ and $|x|/(|s|+1)$ is not much larger than 1 (otherwise the
+convergence is very slow). The result returned is $\int_0^x
+e^{-t}t^{s-1}\,dt$.
 
 \syn{incgamc}{s,x,\var{prec}}.
 

@@ -107,6 +107,11 @@ RS 21- gcc-3.4 breaks on compatibility code to support old readline versions
        arith1.c to qfb.c
    12- reinstate cornacchia + cornacchia2 with a different interface [ use
        cornacchia in qfbsolve ]
+   13- allow non-real arguments in incgamc
+
+  Removed
+    1- obsolete implementation incgam1 [ use incgam. As far as private
+       functions go, incgam2 is better ]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.9 (released 23/12/2004):
