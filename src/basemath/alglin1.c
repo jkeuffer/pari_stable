@@ -3257,13 +3257,12 @@ gaussmoduloall(GEN M, GEN D, GEN Y, GEN *ptu1)
     u2[j] = (long)p1;
   }
   x = gmul(u2,Y);
-  tetpil=avma; x=lllreducemodmatrix(x,u1);
-  if (!ptu1) x = gerepile(av,tetpil,x);
+  x = lllreducemodmatrix(x, u1);
+  if (!ptu1) x = gerepileupto(av, x);
   else
   {
-    GEN *gptr[2];
-    *ptu1=gcopy(u1); gptr[0]=ptu1; gptr[1]=&x;
-    gerepilemanysp(av,tetpil,gptr,2);
+    gerepileall(av, 2, &x, &u1);
+    *ptu1 = u1;
   }
   return x;
 }
