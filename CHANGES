@@ -68,6 +68,9 @@ BA 23- fix accuracy problems in vandermondeinverse
 IZ 30- typo in Configure [rl_save_prompt and _eprintf not found in target libs]
 MD 31- oo loop in ellap [uninitialized array length in apell1]
    32- stack corruption in addfrac [wrong result for gigantic denominators]
+   33- resmod2n [called from powmodulo] could return unnormalized integers
+   34- not enough GC in nfinit for huge degrees [get_mul_table]
+   35- intformal(1/2/t^2) --> apparent oo loop
 
   Changed
     1- removed useless parameter prec in many bnr* and rnf* functions
