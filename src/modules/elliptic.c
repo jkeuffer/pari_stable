@@ -1386,17 +1386,23 @@ ellwp0(GEN w, GEN z, long flag, long prec, long PREC)
   }
 }
 
-/* compute a_2 using Jacobi sum */
+/* compute a_2 */
 static GEN
 _a_2(GEN e)
-{
+{ /* solve y(1 + a1x + a3) = x (1 + a2 + a4) + a6 */
   pari_sp av = avma;
-  GEN unmodp = gmodulss(1,8);
-  ulong e6 = itos((GEN)gmul(unmodp,(GEN)e[6])[2]);
-  ulong e8 = itos((GEN)gmul(unmodp,(GEN)e[8])[2]);
-  ulong e72= itos((GEN)gmul(unmodp,gmul2n((GEN)e[7],1))[2]);
-  long s = kross(e8, 2) + kross(e8 + e72 + e6 + 4, 2);
-  avma = av; return stoi(-s);
+  GEN unmodp = gmodulss(1,2);
+  ulong a1 = itou((GEN)gmul(unmodp,(GEN)e[1])[2]);
+  ulong a2 = itou((GEN)gmul(unmodp,(GEN)e[2])[2]);
+  ulong a3 = itou((GEN)gmul(unmodp,(GEN)e[3])[2]);
+  ulong a4 = itou((GEN)gmul(unmodp,(GEN)e[4])[2]);
+  ulong a6 = itou((GEN)gmul(unmodp,(GEN)e[5])[2]);
+  int N = 1; /* oo */
+  if (!a3) N ++; /* x = 0, y=0 or 1 */
+  else if (!a6) N += 2; /* x = 0, y arbitrary */
+  if ((a3 ^ a1) == 0) N++; /* x = 1, y = 0 or 1 */
+  else if (a2 ^ a4 ^ a6) N += 2; /* x = 1, y arbitrary */
+  avma = av; return stoi(3 - N);
 }
 
 /* a_p using Jacobi sums */
@@ -1991,15 +1997,14 @@ apell(GEN e, GEN p)
 {
   checkell(e);
   if (typ(p)!=t_INT || signe(p)<0) err(talker,"not a prime in apell");
+  if (egalii(p, gdeux)) return _a_2(e);
   if (gdvd((GEN)e[12],p)) /* D may be an intmod */
   {
-    long s;
     pari_sp av = avma;
-    GEN p0 = egalii(p,gdeux)? stoi(8): p;
-    GEN c6 = gmul((GEN)e[11],gmodulsg(1,p0));
-    s = kronecker(lift_intern(c6),p); avma=av;
+    GEN c6 = gmul((GEN)e[11],gmodulsg(1, p));
+    long s = kronecker(lift_intern(c6),p);
     if (mod4(p) == 3) s = -s;
-    return stoi(s);
+    avma = av; return stoi(s);
   }
   if (cmpis(p, 0x3fffffff) > 0) return apell1(e, p);
   return apell0(e, itou(p));
@@ -2083,7 +2088,7 @@ akell(GEN e, GEN n)
 {
   long i, j, ex;
   pari_sp av = avma;
-  GEN fa, P, E, ap, u, v, w, y, p;
+  GEN fa, P, E, D, ap, u, v, w, y, p;
 
   checkell(e);
   if (typ(n) != t_INT) err(talker,"not an integer type in akell");
@@ -2092,12 +2097,14 @@ akell(GEN e, GEN n)
   fa = auxdecomp(n,1);
   P = (GEN)fa[1];
   E = (GEN)fa[2];
+  D = (GEN)e[12];
+  if (typ(D) != t_INT) err(talker,"not an integer type in akell");
   for (i=1; i<lg(P); i++)
   {
     p = (GEN)P[i];
     ex = itos((GEN)E[i]);
     /* FIXME: should factor (n,D) first, then restrict to primes of good red. */
-    if (dvdii((GEN)e[12], p)) /* bad reduction */
+    if (dvdii(D, p)) /* bad reduction */
     {
       j = kronecker((GEN)e[11],p); /* (c6/p) */
       if (!j) { avma = av; return gzero; }

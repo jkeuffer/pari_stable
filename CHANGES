@@ -177,6 +177,8 @@ JD 74- [Configure:] detection of times()
    82- SEGV in Karatsuba multiplication for polynomials, when high product
        was 0 (over a ring which is not an integral domain!)
    83- 1 / Mod((a^2-a)*x^2-1,Mod(2,6)*x^3+Mod(1,2)*x^2+1) --> SEGV
+   84- ellap(e defined over F2, 2) gave wrong results [ assumed e defined
+       over Q and reduced relevant data modulo 8 ]
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.
