@@ -1,6 +1,6 @@
 This directory contains:
 
-* the C program mattrans.c using the Pari library described in Chapter 4 of
+* the C program matexp.c using the Pari library described in Chapter 4 of
 the users' manual. A generic Makefile (adapted to your system by Configure)
 for PARI programs is included.
 
