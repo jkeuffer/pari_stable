@@ -2224,44 +2224,10 @@ factor(GEN x)
 #undef typs
 #undef tsh
 
-/* assume n != 0, t_INT. Compute x^|n| using left-right binary powering */
-GEN
-leftright_pow(GEN x, GEN n, void *data, GEN (*sqr)(void*,GEN),
-                                        GEN (*mul)(void*,GEN,GEN))
-{
-  long ln = lgefint(n);
-  if (ln == 3) return leftright_pow_u(x, n[2], data, sqr, mul);
-  else
-  {
-    GEN nd = int_MSW(n), y = x;
-    long i, m = *nd, j = 1+bfffo((ulong)m);
-    pari_sp av = avma, lim = stack_lim(av, 1);
-
-    /* normalize, i.e set highest bit to 1 (we know m != 0) */
-    m<<=j; j = BITS_IN_LONG-j;
-    /* first bit is now implicit */
-    for (i=ln-2;;)
-    {
-      for (; j; m<<=1,j--)
-      {
-        y = sqr(data,y);
-        if (m < 0) y = mul(data,y,x); /* first bit set: multiply by base */
-        if (low_stack(lim, stack_lim(av,1)))
-        {
-          if (DEBUGMEM>1) err(warnmem,"leftright_pow");
-          y = gerepilecopy(av, y);
-        }
-      }
-      if (--i == 0) return y;
-      nd=int_precW(nd);
-      m = *nd; j = BITS_IN_LONG;
-    }
-  }
-}
 /* assume n > 0. Compute x^n using left-right binary powering */
 GEN
-leftright_pow_u(GEN x, ulong n, void *data, GEN (*sqr)(void*,GEN),
-                                            GEN (*mul)(void*,GEN,GEN))
+leftright_pow_u_fold(GEN x, ulong n, void *data, GEN  (*sqr)(void*,GEN),
+                                                 GEN (*msqr)(void*,GEN))
 {
   GEN y;
   long m, j;
@@ -2276,10 +2242,86 @@ leftright_pow_u(GEN x, ulong n, void *data, GEN (*sqr)(void*,GEN),
   /* first bit is now implicit */
   for (; j; m<<=1,j--)
   {
-    y = sqr(data,y);
-    if (m < 0) y = mul(data,y,x); /* first bit set: multiply by base */
+    if (m < 0) y = msqr(data,y); /* first bit set: multiply by base */
+    else y = sqr(data,y);
   }
   return y;
+}
+
+
+/* assume n != 0, t_INT. Compute x^|n| using left-right binary powering */
+GEN
+leftright_pow_fold(GEN x, GEN n, void *data, GEN (*sqr)(void*,GEN),
+                                             GEN (*msqr)(void*,GEN))
+{
+  long ln = lgefint(n);
+  if (ln == 3) return leftright_pow_u_fold(x, n[2], data, sqr, msqr);
+  else
+  {
+    GEN nd = int_MSW(n), y = x;
+    long i, m = *nd, j = 1+bfffo((ulong)m);
+    pari_sp av = avma, lim = stack_lim(av, 1);
+
+    /* normalize, i.e set highest bit to 1 (we know m != 0) */
+    m<<=j; j = BITS_IN_LONG-j;
+    /* first bit is now implicit */
+    for (i=ln-2;;)
+    {
+      for (; j; m<<=1,j--)
+      {
+        if (m < 0) y = msqr(data,y); /* first bit set: multiply by base */
+        else y = sqr(data,y);
+        if (low_stack(lim, stack_lim(av,1)))
+        {
+          if (DEBUGMEM>1) err(warnmem,"leftright_pow");
+          y = gerepilecopy(av, y);
+        }
+      }
+      if (--i == 0) return y;
+      nd=int_precW(nd);
+      m = *nd; j = BITS_IN_LONG;
+    }
+  }
+}
+
+struct leftright_fold
+{
+  void *data;
+  GEN x;
+  GEN (*sqr)(void*,GEN);
+  GEN (*mul)(void*,GEN,GEN);
+};
+
+static GEN
+leftright_sqr(void* data, GEN y)
+{
+  struct leftright_fold *d=(struct leftright_fold*) data;
+  return d->sqr(d->data,y);
+}
+
+static GEN
+leftright_msqr(void* data, GEN y)
+{
+  struct leftright_fold *d=(struct leftright_fold*) data;
+  return d->mul(d->data,d->sqr(d->data,y),d->x);
+}
+
+GEN
+leftright_pow(GEN x, GEN n, void *data, GEN (*sqr)(void*,GEN),
+                                        GEN (*mul)(void*,GEN,GEN))
+{
+  struct leftright_fold d;
+  d.data=data; d.mul=mul; d.sqr=sqr; d.x=x;
+  return leftright_pow_fold(x, n, (void *)&d, leftright_sqr, leftright_msqr);
+}
+
+GEN
+leftright_pow_u(GEN x, ulong n, void *data, GEN (*sqr)(void*,GEN),
+                                        GEN (*mul)(void*,GEN,GEN))
+{
+  struct leftright_fold d;
+  d.data=data; d.mul=mul; d.sqr=sqr; d.x=x;
+  return leftright_pow_u_fold(x, n, (void *)&d, leftright_sqr, leftright_msqr);
 }
 
 GEN

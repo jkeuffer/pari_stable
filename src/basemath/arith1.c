@@ -1200,14 +1200,48 @@ Fl_sqrt(ulong a, ulong p)
  * If (a|p)=1, then sqrt(a) is in F_p.
  *
  * cf: LNCS 2286, pp 430-434 (2002)  [Gonzalo Tornaria] */
+
+GEN
+sqrt_Cipolla_sqr(void *data, GEN y)
+{ 
+  GEN u=(GEN) y[1];
+  GEN v=(GEN) y[2];
+  GEN p=((GEN*) data)[2];
+  GEN n=((GEN*) data)[3];
+  GEN u2 = sqri(u);
+  GEN v2 = sqri(v);
+  v = modii(subii(sqri(addii(v,u)), addii(u2,v2)), p);
+  u = modii(addii(u2, mulii(v2,n)), p);
+  return mkvec2(u,v);
+}
+
+GEN
+sqrt_Cipolla_msqr(void *data, GEN y)
+{ 
+  GEN a =((GEN*) data)[1];
+  GEN p =((GEN*) data)[2];
+  long t= mael(data,4,2);
+  GEN u =(GEN)y[1];
+  GEN v =(GEN)y[2];
+  GEN d = addii(u, mulsi(t,v));
+  GEN d2= sqri(d);
+  GEN b = remii(mulii(a,v), p);
+  u = modii(subii(mulsi(t,d2), mulii(b,addii(u,d))), p);
+  v = modii(subii(d2, mulii(b,v)), p);
+  return mkvec2(u,v);
+}
+
 static GEN
 sqrt_Cipolla(GEN a, GEN p)
 {
-  pari_sp av = avma, av1, lim;
-  long e, t, man, k, nb;
-  GEN q, n, u, v, d, d2, b, u2, v2, qptr;
+  pari_sp av = avma, av1;
+  long t;
+  GEN u, v, n;
+  GEN y, data;
 
   if (kronecker(a, p) < 0) return NULL;
+  /*Avoid multiplying by huge base*/
+  if(cmpii(a,shifti(p,-1)) > 0) a=subii(a,p);
 
   av1 = avma;
   for(t=1; ; t++)
@@ -1218,61 +1252,13 @@ sqrt_Cipolla(GEN a, GEN p)
   }
 
   u = utoipos((ulong)t); v = gen_1; /* u+vX = t+X */
-  e = vali(addsi(-1,p)); q = shifti(p, -e);
-  /* p = 2^e q + 1  and  (p+1)/2 = 2^(e-1)q + 1 */
+  y=mkvec2(u,v); data=mkvec4(a,p,n,u);
+  y=leftright_pow_fold(y, shifti(p, -1), data,
+                sqrt_Cipolla_sqr,sqrt_Cipolla_msqr);
 
-  /* Compute u+vX := (t+X)^q */
-  av1 = avma; lim = stack_lim(av1, 1);
-  qptr = int_MSW(q); man = *qptr;
-  k = 1+bfffo(man); man<<=k; k=BITS_IN_LONG-k;
-  for (nb=lgefint(q)-2;nb; nb--)
-  {
-    for (; k; man<<=1, k--)
-    {
-      if (man < 0)
-      { /* u+vX := (u+vX)^2 (t+X) */
-        d = addii(u, mulsi(t,v));
-        d2 = sqri(d);
-        b = remii(mulii(a,v), p);
-        u = modii(subii(mulsi(t,d2), mulii(b,addii(u,d))), p);
-        v = modii(subii(d2, mulii(b,v)), p);
-      }
-      else
-      { /* u+vX := (u+vX)^2 */
-        u2 = sqri(u);
-        v2 = sqri(v);
-        v = modii(subii(sqri(addii(v,u)), addii(u2,v2)), p);
-        u = modii(addii(u2, mulii(v2,n)), p);
-      }
-    }
+  u=(GEN)y[1]; v=(GEN)y[2];
 
-    if (low_stack(lim, stack_lim(av1, 1)))
-    {
-       GEN *gptr[2]; gptr[0]=&u; gptr[1]=&v;
-       if (DEBUGMEM>1) err(warnmem, "sqrt_Cipolla");
-       gerepilemany(av1,gptr,2);
-    }
-
-    qptr= int_precW(qptr);
-    man = *qptr; k = BITS_IN_LONG;
-  }
-
-  while (--e)
-  { /* u+vX := (u+vX)^2 */
-    u2 = sqri(u);
-    v2 = sqri(v);
-    v = modii(subii(sqri(addii(v,u)), addii(u2,v2)), p);
-    u = modii(addii(u2, mulii(v2,n)), p);
-
-    if (low_stack(lim, stack_lim(av1, 1)))
-    {
-       GEN *gptr[2]; gptr[0]=&u; gptr[1]=&v;
-       if (DEBUGMEM>1) err(warnmem, "sqrt_Cipolla");
-       gerepilemany(av1,gptr,2);
-    }
-  }
-
-  /* Now u+vX = (t+X)^(2^(e-1)q); thus
+  /* Now u+vX = (t+X)^((p-1)/2); thus
    *
    *   (u+vX)(t+X) = sqrt(a) + 0 X
    *
