@@ -385,7 +385,7 @@ eint1(GEN x, long prec)
       p3 = addrr(p2,p3);
     }
     p3 = mulrr(x,mulrr(mpexp(negr(x)),p3));
-    p1 = addrr(mplog(x), mpeuler(l-1));
+    p1 = addrr(mplog(x), mpeuler(l));
     return gerepileupto(av, subrr(p3,p1));
   }
   else
@@ -406,7 +406,7 @@ eint1(GEN x, long prec)
         p3 = gadd(p3, p2);
         i++;
       }
-      p1 = gadd(mplog(y), mpeuler(l-1));
+      p1 = gadd(mplog(y), mpeuler(l));
       y  = gadd(p3, p1);
     } else {
       p1 = gdivsg(1, y);
