@@ -1412,10 +1412,10 @@ isinexactfield(GEN x)
     case t_REAL: case t_PADIC: case t_SER:
       return 1;
     case t_POL:
-      lx=lgef(x); if (lx == 2) return 0;
+      lx=lgef(x); if (lx == 2) return 0;/*true 0 polynomial*/
       for (i=2; i<lx; i++)
-	if (!isinexactfield((GEN)x[i])) return 0;
-      return 1;
+	if (isinexactfield((GEN)x[i])) return 1;
+      return 0;
     case t_COMPLEX: case t_POLMOD:
       return isinexactfield((GEN)x[1]) || isinexactfield((GEN)x[2]);
   }
