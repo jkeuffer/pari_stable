@@ -220,7 +220,7 @@ enum manage_var_t {
 #define gmodgs(y,s)     (gopgs2(gmod,(y),(s)))
 #define gmodsg(s,y)     (gopsg2(gmod,(s),(y)))
 #define gmulgs(y,s)     (gmulsg((s),(y)))
-#define gsubgs(y,s)     (gopgs2(gsub,(y),(s)))
+#define gsubgs(y,s)     gaddgs((y), -(s))
 #define gsubsg(s,y)     (gopsg2(gsub,(s),(y)))
 
 #define gaddgsz(y,s,z)    gopgsz(gaddgs,(x),(s),(z))
@@ -235,9 +235,9 @@ enum manage_var_t {
 #define gminsgz(s,y,z)    gmingsz((y),(s),(z))
 #define gmodgsz(y,s,z)    gopgs2z(gmod,(y),(s),(z))
 #define gmodsgz(s,y,z)    gopsg2z(gmod,(s),(y),(z))
-#define gmulgsz(y,s,z)    gops2sgz(gmulsg,(s),(y),(z))
+#define gmulgsz(y,s,z)    gopsgz(gmulsg,(s),(y),(z))
 #define gmulsgz(s,y,z)    gmulgsz((y),(s),(z))
-#define gsubgsz(y,s,z)    gopgs2z(gsub,(y),(s),(z))
+#define gsubgsz(y,s,z)    gopgsz(gaddgs,(y),-(s),(z))
 #define gsubsgz(s,y,z)    gopsg2z(gsub,(s),(y),(z))
 
 #define gmul2nz(x,s,z)  gopgsz(gmul2n,(x),(s),(z))
