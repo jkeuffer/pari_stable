@@ -507,17 +507,23 @@ gcarreparfait(GEN x)
     {
       GEN b, q, e;
       long w;
-      a = (GEN)x[2];
-      if (!signe(a)) return gun;
+      a = (GEN)x[2]; if (!signe(a)) return gun;
       av = avma;
-      q = absi((GEN)x[1]);
-      v = vali(q);
-      if (v)
+      q = absi((GEN)x[1]); v = vali(q);
+      if (v) /* > 0 */
       {
-        w = vali(a); if (w) b = shifti(a,-w);
-        w = v - w;
-        if ((w>=3 && mod8(b) != 1 ) ||
-            (w==2 && mod4(b) != 1)) { avma = av; return gzero; }
+        long dv;
+        w = vali(a); dv = v - w;
+        if (dv > 0)
+        {
+          if (w & 1) { avma = av; return gzero; }
+          if (dv >= 2)
+          {
+            b = w? shifti(a,-w): a;
+            if ((dv>=3 && mod8(b) != 1) ||
+                 dv==2 && mod4(b) != 1) { avma = av; return gzero; }
+          }
+        }
         q = shifti(q, -v);
       }
       /* q is now odd */
@@ -537,13 +543,12 @@ gcarreparfait(GEN x)
             { avma = av; return gzero; }
           q = diviiexact(q, gpowgs((GEN)p[i], w));
         }
+        if (kronecker(a,q) == -1) { avma = av; return gzero; }
       }
-      /* (a,q) = 1, q odd */
-      if (kronecker(a,q) == -1) { avma = av; return gzero; }
-      /* kro(a,q) = 1, need to factor q */
+      /* kro(a,q) = 1, q odd: need to factor q */
       p1 = factor(q);
       p = (GEN)p1[1]; 
-      e = (GEN)p1[2];l = lg(e) - 1;
+      e = (GEN)p1[2]; l = lg(e) - 1;
       /* kro(a,q) = 1, check all p|q but the last (product formula) */
       for (i=1; i<l; i++)
         if (kronecker(a,(GEN)p[i]) == -1) { avma = av; return gzero; }
