@@ -358,7 +358,7 @@ GEN
 polhensellift(GEN pol, GEN fct, GEN p, long exp)
 {
   GEN p1, p2;
-  long av = avma, j, l;
+  long av = avma, i, j, l;
 
   /* we check the arguments */
   if (typ(pol) != t_POL) 
@@ -381,8 +381,13 @@ polhensellift(GEN pol, GEN fct, GEN p, long exp)
 
   /* finally we check that the elements of fct are coprime mod p */
   if (gcmp0(discsr(Fp_pol(pol, p))))
-    err(talker, "factors are not coprime in polhensellift");
-
+  {
+    for (i = 1; i <= l; i++)
+      for (j = 1; j < i; j++) 
+        if (lgef(Fp_pol_gcd((GEN)p1[i], (GEN)p1[j], p)) != 3)
+          err(talker, "polhensellift: factors %Z and %Z are not coprime",
+                     p1[i], p1[j]);
+  }
   return gerepileupto(av, gcopy(hensel_lift_fact(pol, p1, p, 
 						 gpowgs(p, exp), exp)));
 }
