@@ -58,7 +58,7 @@ NextEltofGroup(GEN cyc, long l, long adec)
 
   p1 = cgetg(l + 1, t_COL);
   
-  for (j = l; j; j--)
+  for (j = 1; j <= l; j++)
   {
     dj = itos((GEN)cyc[j]);
     p1[j] = lstoi(adec%dj);
@@ -639,10 +639,10 @@ FindModulus(GEN dataC, long fl, long *newprec, long prec)
 static GEN
 ComputeArtinNumber(GEN datachi, long flag, long prec)
 {
-  long av = avma, av2, G, ms, j, i, nz, zcard, q, l, N;
-  GEN chi, nc, dc, p1, cond0, cond1, elts, Msign, umod2, lambda, nf;
+  long av = avma, av2, G, ms, j, i, nz, zcard, q, l, N, lim;
+  GEN chi, nc, dc, p1, cond0, cond1, elts, Msign, umod2, lambda, nf, gptr;
   GEN sg, p2, chib, diff, vt, z, idg, mu, idh, zid, zstruc, zgen, zchi;
-  GEN allclass, classe, bnr, beta, s, tr, p3, den, muslambda, Pi;
+  GEN allclass, classe, bnr, beta, s, tr, p3, den, muslambda, Pi, lp1, beta2;
 
   chi   = (GEN)datachi[8];
   /* trivial case */
@@ -750,39 +750,66 @@ ComputeArtinNumber(GEN datachi, long flag, long prec)
     p3[i] = zero;
   }
 
-  s = cgetg(3, t_COMPLEX);
-  s[1] = lgetr(prec);
-  s[2] = lgetr(prec);
-  gaffect(gzero, s);
+  lp1 = NULL;
+  s = gzero;
 
-  av2 = avma;
-  for (i = 1; i <= zcard; i++)
+  av2 = avma; lim = stack_lim(av2, 1);
+
+  for (i = 0; i < zcard; i++)
   {
-    beta = gun;
-    chib = gun;
     p1 = NextEltofGroup(zstruc, nz, i);
 
-    for (j = 1; j <= nz; j++)
+    /* we test if we can use the previous value 
+       of beta / chib to compute the next one */
+    /* FIXME: there should be a better way of doing that! */
+    if (!lp1 || !gcmp1(gnorml2(gsub(p1, lp1))))
     {
-      p2 = element_powmodideal(nf, (GEN)zgen[j], (GEN)p1[j], cond0);
-      beta = element_mul(nf, beta, p2);
-      chib = gmul(chib, powgi((GEN)zchi[j], (GEN)p1[j]));
-    }
+      beta = gun;
+      chib = gun;
 
-    sg = zsigne(nf, beta, cond1);
-    p2 = lift(gmul(Msign, sg));
+      for (j = 1; j <= nz; j++)
+      {
+	if (!gcmp0((GEN)p1[j]))
+	{
+	  p2 = element_powmodideal(nf, (GEN)zgen[j], (GEN)p1[j], cond0);
+	  beta = element_mulmodideal(nf, beta, p2, cond0);
+	  chib = gmul(chib, powgi((GEN)zchi[j], (GEN)p1[j]));
+	}
+      }
+    }
+    else
+    {
+      /* we use the fact that NextEltofGroup is, in general, 
+	 obtained by adding 1 to a component of p1 */
+      for (j = 1; j <= nz; j++)
+	if (!gegal((GEN)p1[j], (GEN)lp1[j]))
+	{
+	  beta = element_mulmodideal(nf, beta, (GEN)zgen[j], cond0);
+	  chib = gmul(chib, (GEN)zchi[j]);
+	}
+    }  
+    
+    lp1 = p1;
+    sg  = zsigne(nf, beta, cond1);
+    p2  = lift(gmul(Msign, sg));
 
     for (j = 1; j <= ms; j++)
       if (gcmp1((GEN)p2[j]))
 	beta = element_mul(nf, beta, (GEN)elts[j]);
 
-    beta = element_mul(nf, beta, muslambda);
-    tr = gmul(vt, beta);
+    beta2 = element_mul(nf, beta, muslambda);
+    tr = gmul(vt, beta2);
     tr = gmod(gmul(tr, den), den);
 
-    gaffect(gadd(s, gmul(chib, powgi(z,tr))), s);
+    s = gadd(s, gmul(chib, powgi(z,tr)));
 
-    avma = av2;
+    if (low_stack(lim, stack_lim(av2, 1)))
+    {
+      GEN *gptr[5];
+      gptr[0] = &s; gptr[1] = &lp1; gptr[2] = &beta; gptr[3] = &chib;
+      if (DEBUGMEM > 1) err(warnmem,"ComputeArtinNumber");
+      gerepilemany(av2, gptr, 4);
+    }
   }
 
   classe = isprincipalray(bnr, idh);
