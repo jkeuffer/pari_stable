@@ -1762,7 +1762,7 @@ idealpowred(GEN nf, GEN x, GEN n, long prec)
   GEN y;
 
   if (typ(n) != t_INT) err(talker,"non-integral exponent in idealpowred");
-  if (!s == 0) return idealpow(nf,x,n);
+  if (s == 0) return idealpow(nf,x,n);
   D.nf  = nf;
   D.prec= prec;
   y = leftright_pow(x, n, (void*)&D, &_sqr, &_mul);
