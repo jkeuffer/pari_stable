@@ -1329,6 +1329,7 @@ GEN     mpexp1(GEN x);
 GEN     mplog(GEN x);
 GEN     mppi(long prec);
 GEN     mpsqrt(GEN x);
+GEN     padiczero(GEN p, long e);
 GEN     palog(GEN x);
 GEN     powgi(GEN x, GEN n);
 GEN     teich(GEN x);
