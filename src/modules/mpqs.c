@@ -2708,7 +2708,9 @@ mpqs_solve_linear_system(GEN kN, GEN N, long rel, long *FB, long size_of_FB)
 	if (is_pm1(D1)) continue; /* this one doesn't help us */
 	if ((flag = egalii(D1, (GEN)(res[j]))))
 	{			/* bad one, try the other */
+          avma = av3;
 	  if (!X_minus_Y) X_minus_Y = subii(X, Y_prod);
+          av3 = avma;
 	  D1 = mppgcd(X_minus_Y, (GEN)(res[j]));
 	}
 	if (!flag || (!is_pm1(D1) && !egalii(D1, (GEN)(res[j]))))
