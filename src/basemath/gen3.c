@@ -1109,6 +1109,13 @@ ginv(GEN x)
       return y;
     case t_MAT:
       return (lg(x)==1)? cgetg(1,t_MAT): invmat(x);
+    case t_VECSMALL:
+    {
+      long i,lx = lg(x);
+      y = cgetg(lx,t_VECSMALL);
+      for (i=1; i<lx; i++) y[x[i]] = i;
+      return y;
+    }
   }
   err(typeer,"inverse");
   return NULL; /* not reached */
