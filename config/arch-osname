@@ -39,7 +39,7 @@ if test -n "$myuname"; then
 	      *FMI,MB86934*)     arch=sparcv8_super;; # SparcLite
 	      *Ross,RT625*)      arch=sparcv8_super;; # HyperSparc
 	      *Cypress,CY605*)   arch=sparcv8_super;;
-	      *)                 arch=sparcv8;;
+	      *)                 arch=sparcv8_super;; # ???
 	      esac;;
 	    sun4u)    arch=sparcv9;;
             i*pc) arch=ix86;;
