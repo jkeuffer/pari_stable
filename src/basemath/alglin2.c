@@ -3156,6 +3156,7 @@ THEEND:
   if (!U && !V)
   {
     if (typ(x) == t_MAT) x = mattodiagonal_i(x);
+    n = lg(x)-1;
     if (n0 != n) x = concatsp(zerovec(n0-n), x);
     return gerepilecopy(av0, x);
   }
