@@ -1456,7 +1456,13 @@ qf_create(GEN x, GEN y, GEN z, long s)
     pari_sp av=avma; s = signe(qf_disc(x,y,z)); avma=av;
     if (!s) err(talker,"zero discriminant in Qfb");
   }
-  t = (s>0)? cgetg(5,t_QFR): cgetg(4,t_QFI);
+  if (s < 0)
+  {
+    t = cgetg(4,t_QFI);
+    if (signe(x) < 0) err(impl,"negative definite t_QFI");
+  }
+  else
+    t = cgetg(5,t_QFR);
   t[1]=(long)icopy(x); t[2]=(long)icopy(y); t[3]=(long)icopy(z);
   return t;
 }

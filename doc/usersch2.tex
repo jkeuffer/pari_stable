@@ -951,30 +951,33 @@ these are input using the function \kbd{Qfb} (see Chapter~3). For example
 \kbd{Qfb(1,2,3)} will create the binary form $x^2+2xy+3y^2$. It will be
 imaginary (of internal type \typ{QFI}) since $2^2 - 4*3 = -8$ is negative.
 
-In the case of forms with positive discriminant (type \typ{QFR}), you
-may add an optional fourth component (related to the regulator, more
-precisely to Shanks and Lenstra's ``distance''), which must be a real number.
-See also the function \kbd{qfbprimeform} which directly creates a prime form
-of given discriminant (see Chapter~3).
+Although imaginary forms could be positive or negative definite, only
+positive definite forms are implemented.
+
+In the case of forms with positive discriminant (type \typ{QFR}), you may add
+an optional fourth component (related to the regulator, more precisely to
+Shanks and Lenstra's ``distance''), which must be a real number. See also the
+function \kbd{qfbprimeform} which directly creates a prime form of given
+discriminant (see Chapter~3).
 
 \subsec{Row and column vectors}\sidx{row vector}\sidx{column vector} (types
 \tet{t_VEC} and \tet{t_COL}): to enter a row vector, type the components
 separated by commas ``\kbd{,}'', and enclosed between brackets
 ``\kbd{[}$\,$'' and ``$\,$\kbd{]}'', e.g.~\kbd{[1,2,3]}. To enter a column
-vector, type the vector horizontally, and add a tilde ``\til'' to
-transpose. \kbd{[ ]} yields the empty (row) vector. The function \tet{Vec}
-can be used to transform any object into a vector (see Chapter~3).
+vector, type the vector horizontally, and add a tilde ``\til'' to transpose.
+\kbd{[ ]} yields the empty (row) vector. The function \tet{Vec} can be used
+to transform any object into a vector (see Chapter~3).
 
 \subsec{Matrices} (type \tet{t_MAT}):\sidx{matrix} to enter a matrix, type
 the components line by line, the components being separated by commas
-``\kbd{,}'', the lines by semicolons ``\kbd{;}'', and everything enclosed
-in brackets ``\kbd{[}$\,$'' and ``$\,$\kbd{]}'', e.g. \kbd{[x,y; z,t;
-u,v]}. \kbd{[ ; ]} yields the empty (0x0) matrix. The function \tet{Mat}
-can be used to transform any object into a matrix (see Chapter 3).
+``\kbd{,}'', the lines by semicolons ``\kbd{;}'', and everything enclosed in
+brackets ``\kbd{[}$\,$'' and ``$\,$\kbd{]}'', e.g. \kbd{[x,y; z,t; u,v]}.
+\kbd{[ ; ]} yields the empty (0x0) matrix. The function \tet{Mat} can be used
+to transform any object into a matrix (see Chapter 3).
 
 Note that although the internal representation is essentially the same (only
-the type number is different), a row vector of column vectors is \emph{not}
-a matrix; for example, multiplication will not work in the same way.
+the type number is different), a row vector of column vectors is \emph{not} a
+matrix; for example, multiplication will not work in the same way.
 
 Note also that it is possible to create matrices (by conversion of empty
 column vectors and concatenation, or using the \kbd{matrix} function) with a
@@ -984,15 +987,15 @@ number of rows.
 
 \subsec{Lists} (type \tet{t_LIST}):\sidx{list} lists cannot be input
 directly; you have to use the function \kbd{listcreate} first, then
-\kbd{listput} each time you want to append a new element (but you can
-access the elements directly as with the vector types described above). The
-function \kbd{List} can be used to transform (row or column) vectors into
-lists (see Chapter~3).
+\kbd{listput} each time you want to append a new element (but you can access
+the elements directly as with the vector types described above). The function
+\kbd{List} can be used to transform (row or column) vectors into lists (see
+Chapter~3).
 
-\subsec{Strings} (type \tet{t_STR}):\sidx{string}\sidx{character string}
-to enter a string, just enclose it between double quotes \kbd{"}, like
-this: \kbd{"this is a string"}. The function \kbd{Str} can be used to
-transform any object into a string (see Chapter~3).
+\subsec{Strings} (type \tet{t_STR}):\sidx{string}\sidx{character string} to
+enter a string, just enclose it between double quotes \kbd{"}, like this:
+\kbd{"this is a string"}. The function \kbd{Str} can be used to transform any
+object into a string (see Chapter~3).
 
 \subsec{Small vectors} (type \tet{t_VECSMALL}): this is an internal type,
 used to code in an efficient way vectors containing only small integers (such
@@ -1000,79 +1003,74 @@ as permutations). Most GP functions will refuse to operate on these objects.
 
 \section{GP operators}\label{se:operators}
 
-\noindent
-Loosely speaking, an \idx{operator} is a function (usually associated to
-basic arithmetic operations) whose name contains only non-alphanumeric
-characters. In practice, most of these are simple functions, which take
-arguments, and return a value; assignment operators also have side effects.
-Each of these has some fixed and unchangeable priority, which means that,
-in a given expression, the operations with the highest priority will be
+\noindent Loosely speaking, an \idx{operator} is a function (usually
+associated to basic arithmetic operations) whose name contains only
+non-alphanumeric characters. In practice, most of these are simple functions,
+which take arguments, and return a value; assignment operators also have side
+effects. Each of these has some fixed and unchangeable priority, which means
+that, in a given expression, the operations with the highest priority will be
 performed first. Operations at the same priority level will always be
 performed in the order they were written, i.e.~from left to right. Anything
-enclosed between parenthesis is considered a complete subexpression, and
-will be resolved independently of the surrounding context. For instance,
-assuming that \var{op}$_1$, \var{op}$_2$, \var{op}$_3$ are standard binary
-operators with increasing priorities (think of \kbd{+}, \kbd{*}, \kbd{\pow}
-for instance),
-$$ x~\var{op}_1~y~\var{op}_2~z~\var{op}_2~x~\var{op}_3~y $$
-is equivalent to
-$$ x~\var{op}_1~((y~\var{op}_2~z)~\var{op}_2~ (x~\var{op}_3~y)).$$
+enclosed between parenthesis is considered a complete subexpression, and will
+be resolved independently of the surrounding context. For instance, assuming
+that \var{op}$_1$, \var{op}$_2$, \var{op}$_3$ are standard binary operators
+with increasing priorities (think of \kbd{+}, \kbd{*}, \kbd{\pow} for
+instance), $$ x~\var{op}_1~y~\var{op}_2~z~\var{op}_2~x~\var{op}_3~y $$ is
+equivalent to $$ x~\var{op}_1~((y~\var{op}_2~z)~\var{op}_2~
+(x~\var{op}_3~y)).$$
 
-GP knows quite a lot of different operators, some of them unary (having
-only one argument), some binary, plus special selection operators. Unary
- operators are defined for either
-prefix (preceding their single argument: \var{op}~$x$) or postfix (following
-the argument: $x$~\var{op}) position, never both
-(some are syntactically correct in both positions, but with different
-meanings). Binary operators all use the syntax $x$~\var{op}~$y$. Most of
-them are well known, some are borrowed from C~syntax, and a few are specific
-to GP. Beware that some GP operators may differ slightly from their C
-counterparts. For instance, GP's postfix \kbd{++} returns the \emph{new}
-value, like the prefix \kbd{++} of~C, and the binary shifts \kbd{<<},
-\kbd{>>} have a priority which is different from (higher than) that of
-their C counterparts.
-When in doubt, just surround everything by parentheses (besides, your code
-will probably be more legible).
+GP knows quite a lot of different operators, some of them unary (having only
+one argument), some binary, plus special selection operators. Unary operators
+are defined for either prefix (preceding their single argument: \var{op}~$x$)
+or postfix (following the argument: $x$~\var{op}) position, never both (some
+are syntactically correct in both positions, but with different meanings).
+Binary operators all use the syntax $x$~\var{op}~$y$. Most of them are well
+known, some are borrowed from C~syntax, and a few are specific to GP. Beware
+that some GP operators may differ slightly from their C counterparts. For
+instance, GP's postfix \kbd{++} returns the \emph{new} value, like the prefix
+\kbd{++} of~C, and the binary shifts \kbd{<<}, \kbd{>>} have a priority which
+is different from (higher than) that of their C counterparts. When in doubt,
+just surround everything by parentheses (besides, your code will probably be
+more legible).
 
 \noindent Here is the complete list (in order of decreasing \idx{priority},
 binary unless mentioned otherwise):
 
-\def\point#1{\noindent $\bullet$ #1\hfill\break\indent\strut}
-\point{Priority 10}
+\def\point#1{\noindent $\bullet$ #1\hfill\break\indent\strut} \point{Priority
+10}
 %
-\kbd{++} and \kbd{--} (unary, postfix): \kbd{$x$++} assigns the value $x+1$ to
-$x$, then returns the new value of $x$. This corresponds to the C
+\kbd{++} and \kbd{--} (unary, postfix): \kbd{$x$++} assigns the value $x+1$
+to $x$, then returns the new value of $x$. This corresponds to the C
 statement \kbd{++$x$} (there is no prefix \kbd{++} operator in GP).
 \kbd{$x$--} does the same with $x-1$.
 
 \point{Priority 9}
 %
-\kbd{\var{op}=}, where \var{op} is any simple binary operator
-(i.e.~a binary operator with no side effects, i.e.~one of those defined below)
-which is not a boolean operator (comparison or logical).
-\kbd{x~\var{op}=~$y$} assigns $(\kbd{x}~\var{op}~y)$ to~\kbd{x},
-and returns the new value of~\kbd{x}, \emph{not} a reference to the
-\idx{variable}~\kbd{x}. (Thus an assignment cannot occur on the left hand
-side of another assignment.)
+\kbd{\var{op}=}, where \var{op} is any simple binary operator (i.e.~a binary
+operator with no side effects, i.e.~one of those defined below) which is not
+a boolean operator (comparison or logical). \kbd{x~\var{op}=~$y$} assigns
+$(\kbd{x}~\var{op}~y)$ to~\kbd{x}, and returns the new value of~\kbd{x},
+\emph{not} a reference to the \idx{variable}~\kbd{x}. (Thus an assignment
+cannot occur on the left hand side of another assignment.)
 
 \point{Priority 8}
 %
 \kbd{=} is the assignment operator. The result of \kbd{x~=~$y$} is the value
 of the expression~$y$, which is also assigned to the variable~\kbd{x}. This
 is \emph{not} the equality test operator. Beware that a statement like
-\kbd{x~=~1} is always true (i.e.~non-zero), and sets \kbd{x} to~1.
-The right hand side of the assignment operator is evaluated before the left
-hand side. If the left hand side cannot be modified, raise an error.
+\kbd{x~=~1} is always true (i.e.~non-zero), and sets \kbd{x} to~1. The right
+hand side of the assignment operator is evaluated before the left hand side.
+If the left hand side cannot be modified, raise an error.
 
-\point{Priority 7}
-\kbd{[ ]} is the selection operator. \kbd{$x$[$i$]} returns the $i$-th
-component of vector $x$; \kbd{$x[$i$,$j$]$}, \kbd{$x[,$j$]$} and
-\kbd{$x$[$i$,]} respectively return the entry of coordinates $(i,j)$, the
-$j$-th column, and the $i$-th row of matrix $x$. If the assignment operator
-(\kbd{=}) immediately follows a sequence of selections, it assigns its
-right hand side to the selected component. E.g \kbd{x[1][1] = 0} is valid;
-but beware that \kbd{(x[1])[1] = 0} is not (because the parentheses force
-the complete evaluation of \kbd{x[1]}, and the result is not modifiable).
+\point{Priority 7} \kbd{[ ]} is the selection operator. \kbd{$x$[$i$]}
+returns the $i$-th component of vector $x$; \kbd{$x[$i$,$j$]$},
+\kbd{$x[,$j$]$} and \kbd{$x$[$i$,]} respectively return the entry of
+coordinates $(i,j)$, the $j$-th column, and the $i$-th row of matrix $x$. If
+the assignment operator (\kbd{=}) immediately follows a sequence of
+selections, it assigns its right hand side to the selected component. E.g
+\kbd{x[1][1] = 0} is valid; but beware that \kbd{(x[1])[1] = 0} is not
+(because the parentheses force the complete evaluation of \kbd{x[1]}, and the
+result is not modifiable).
 
 \point{Priority 6}
 %
