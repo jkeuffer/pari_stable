@@ -1329,8 +1329,8 @@ gentypes(void)
 static void
 menu_commands(void)
 {
-  pariputs("Help topics:\n\
-  0: list of user-defined identifiers (variable, alias, function)\n\
+  pariputs("Help topics: for a list of relevant subtopics, type ?n for n in\n\
+  0: user-defined identifiers (variable, alias, function)\n\
   1: Standard monadic or dyadic OPERATORS\n\
   2: CONVERSIONS and similar elementary functions\n\
   3: TRANSCENDENTAL functions\n\
@@ -1344,7 +1344,6 @@ menu_commands(void)
  11: PROGRAMMING under GP\n\
  12: The PARI community\n\
 \n\
-Further help (list of relevant functions): ?n (1<=n<=11).\n\
 Also:\n\
   ? functionname (short on-line help)\n\
   ?\\             (keyboard shortcuts)\n\
@@ -1809,10 +1808,7 @@ License, and comes WITHOUT ANY WARRANTY WHATSOEVER");
   pariputs("\n\
 Type ? for help, \\q to quit.\n\
 Type ?12 for how to get moral (and possibly technical) support.\n\n");
-  (void)sd_realprecision  ("",d_ACKNOWLEDGE);
-  (void)sd_seriesprecision("",d_ACKNOWLEDGE);
-  (void)sd_format         ("",d_ACKNOWLEDGE);
-  pariputsf("\nparisize = %lu, primelimit = %lu\n", top-bot, primelimit);
+  pariputsf("parisize = %lu, primelimit = %lu\n", top-bot, primelimit);
 }
 
 void
