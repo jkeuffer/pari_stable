@@ -88,6 +88,7 @@ MSo27- ?0 with _many_ user functions defined --> SEGV [ typo in commands() ]
    32- typo in ellap: rare wrong result. E.g
        E=ellinit([0,0,1,-5115523309,-140826120488927]);
        ellap(E, 1315717181)
+BA 33- qfbprimeform(-3, 1) --> data corruption [ gzero's signe set to 1 ]
 
   Changed
     1- bnfinit: [small_norm phase] speed up norm computations.

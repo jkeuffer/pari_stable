@@ -1669,22 +1669,25 @@ imag_unit_form_by_disc(GEN D)
   GEN y = cgetg(4,t_QFI);
   long isodd;
 
-  if (typ(D) != t_INT || signe(D) >= 0) err(typeer,"real_unit_form_by_disc");
-  switch(4 - mod4(D))
+  if (typ(D) != t_INT || signe(D) >= 0) err(typeer,"imag_unit_form_by_disc");
+  switch(mod4(D))
   {
-    case 2:
-    case 3: err(funder2,"imag_unit_form_by_disc");
+    case 0: isodd = 0; break;
+    case 3: isodd = 1; break;
+    default: err(funder2,"imag_unit_form_by_disc");
+             return NULL; /* not reached */
   }
-  y[1] = un; isodd = mpodd(D);
+  y[1] = un;
   y[2] = isodd? un: zero;
-  /* y[3] = (1-D) / 4 or -D / 4, whichever is an integer */
-  y[3] = lshifti(D,-2); setsigne(y[3],1);
+  /* upon return, y[3] = (1-D) / 4 or -D / 4, whichever is an integer */
+  y[3] = lshifti(D,-2);
   if (isodd)
   {
     pari_sp av = avma;
-    y[3] = lpileuptoint(av, addis((GEN)y[3],1));
+    y[3] = lpileuptoint(av, addis((GEN)y[3],-1));
   }
-  return y;
+  /* at this point y[3] < 0 */
+  setsigne(y[3], 1); return y;
 }
 
 GEN
