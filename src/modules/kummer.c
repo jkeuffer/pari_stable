@@ -815,7 +815,7 @@ static GEN
 testx(GEN bnfz, GEN bnf, GEN X, GEN module, GEN subgroup, GEN vecMsup,
       GEN vecWB, long g, GEN U)
 {
-  long i,v,l,lX;
+  long i,l,lX;
   GEN be,polrelbe,p1,nf;
 
   if (gcmp0(X)) return NULL;
@@ -833,11 +833,14 @@ testx(GEN bnfz, GEN bnf, GEN X, GEN module, GEN subgroup, GEN vecMsup,
   if (DEBUGLEVEL>1) fprintferr("beta reduced = %Z\n",be);
   nf = (GEN)bnf[7];
   polrelbe = computepolrelbeta((GEN)nf[1],be,g,U);
-  v = varn(polrelbe);
+ 
   p1 = unifpol(nf,polrelbe,0);
+  l = lg(p1); /* lift to Q rational coeffs */
+  for (i=2; i<l; i++)
+    if (isnfscalar((GEN)p1[i])) polrelbe[i] = mael(p1,i,1);
+   
   p1 = denom(gtovec(p1));
-  polrelbe = gsubst(polrelbe,v, gdiv(polx[v],p1));
-  polrelbe = gmul(polrelbe, gpowgs(p1, degpol(polrelbe)));
+  polrelbe = rescale_pol(polrelbe,p1);
   if (DEBUGLEVEL>1) fprintferr("polrelbe = %Z\n",polrelbe);
   p1 = rnfconductor(bnf,polrelbe,0);
   if (!gegal((GEN)p1[1],module) || !gegal((GEN)p1[3],subgroup)) return NULL;
