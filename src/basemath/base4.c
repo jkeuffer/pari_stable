@@ -1402,18 +1402,22 @@ famat_to_nf_modidele(GEN nf, GEN g, GEN e, GEN bid)
 GEN
 vecmul(GEN x, GEN y)
 {
-  long i, lx = lg(x);
-  GEN z = cgetg(lx, typ(x));
-  for (i=1; i<lx; i++) z[i] = lmul((GEN)x[i], (GEN)y[i]);
+  long i,lx, tx = typ(x);
+  GEN z;
+  if (is_scalar_t(tx)) return gmul(x,y);
+  lx = lg(x); z = cgetg(lx,tx);
+  for (i=1; i<lx; i++) z[i] = (long)vecmul((GEN)x[i], (GEN)y[i]);
   return z;
 }
 
 GEN
 vecinv(GEN x)
 {
-  long i, lx = lg(x);
-  GEN z = cgetg(lx, typ(x));
-  for (i=1; i<lx; i++) z[i] = linv((GEN)x[i]);
+  long i,lx, tx = typ(x);
+  GEN z;
+  if (is_scalar_t(tx)) return ginv(x);
+  lx = lg(x); z = cgetg(lx, tx);
+  for (i=1; i<lx; i++) z[i] = (long)vecinv((GEN)x[i]);
   return z;
 }
 

@@ -860,54 +860,19 @@ computepolrelbeta(GEN be)
   return NULL; /* not reached */
 }
 
-static GEN
-mysize(GEN nf, GEN be)
-{
-  return gnorml2(algtobasis_intern(nf, be));
-}
-
-/* multiply be by ell-th powers of units as to find "small" L2-norm for new be */
-static GEN
-reducebetanaive(GEN be)
-{
-  long i,lu;
-  GEN p1,p2,unitsell,unitsellinv,nmax,ben;
-
-  unitsell = grouppows(gmodulcp(gmael(bnfz,8,5),R),ell);
-  unitsellinv = grouppows(unitsell,-1);
-  unitsell = concatsp(unitsell,unitsellinv);
-  p1 = unitsell;
-  for (i=2; i<=max((ell>>1),3); i++) p1 = concatsp(p1,grouppows(unitsell,i));
-  unitsell = p1;
-  nmax = mysize(nfz, be);
-  lu = lg(unitsell); ben = be;
-  do
-  {
-    be = ben;
-    for (i=1; i<lu; i++)
-    {
-      p1 = gmul(be,(GEN)unitsell[i]);
-      p2 = mysize(nfz,p1);
-      if (gcmp(p2,nmax) < 0) { nmax = p2; ben = p1; }
-    }
-  }
-  while (be != ben);
-  return be;
-}
-
 extern GEN red_mod_units(GEN col, GEN z, long prec);
 extern GEN init_red_mod_units(GEN bnf, long prec);
 extern GEN get_arch(GEN nf,GEN x,long prec);
+extern GEN get_arch_real(GEN nf,GEN x,GEN *emb,long prec);
+extern GEN vecmul(GEN x, GEN y);
+extern GEN vecinv(GEN x);
 
 static GEN
-reducebeta(GEN be, GEN z, long prec)
+fix_be(GEN be, GEN u)
 {
+  GEN e,g, nf = checknf(bnfz), fu = gmael(bnfz,8,5);
   long i,lu;
-  GEN e,g,u,nf, fu = gmael(bnfz,8,5);
 
-  nf = checknf(bnfz);
-  u = red_mod_units(get_arch(nf, be, prec), z, prec);
-  if (!u) return reducebetanaive(be);
   lu = lg(u);
   for (i=1; i<lu; i++)
   {
@@ -920,21 +885,82 @@ reducebeta(GEN be, GEN z, long prec)
 }
 
 static GEN
-reducebeta_all(GEN be)
+logarch2arch(GEN x, long r1, long prec)
 {
-  long i, prec = nfgetprec(bnfz);
-  GEN be0,be2,bei,nmin,n2, z = init_red_mod_units(bnfz, prec);
-  z[1] = lmulgs((GEN)z[1], ell); /* log. embeddings of fu^ell */
-  z[2] = lmulgs((GEN)z[2], ell*ell);
-  bei = gun; nmin = NULL; be0 = be;
-  for (i=1; i<ell; i++)
+  long i, lx = lg(x), tx = typ(x);
+  GEN y = cgetg(lx, tx);
+
+  if (tx == t_MAT)
   {
-    bei = gmul(bei, be0); /* be^i */
-    be2 = reducebeta(bei, z, prec);
-    n2 = mysize(nfz, be2);
-    if (!nmin || gcmp(n2, nmin) < 0) { be = be2; nmin = n2; }
+    for (i=1; i<lx; i++) y[i] = (long)logarch2arch((GEN)x[i], r1, prec);
+    return y;
   }
-  return be;
+  for (i=1; i<=r1;i++) y[i] = lexp((GEN)x[i],prec);
+  for (   ; i<lx; i++) y[i] = lexp(gmul2n((GEN)x[i],-1),prec);
+  return y;
+}
+
+/* multiply be by ell-th powers of units as to find small L2-norm for new be */
+static GEN
+reducebetanaive(GEN be, GEN b)
+{
+  long i,k,n,ru, prec = nfgetprec(bnfz);
+  GEN z,p1,p2,nmax,co, nf = checknf(bnfz);
+
+  if (DEBUGLEVEL) err(warner,"precision problems, using naive reduction");
+  if (!b) (void)get_arch_real(nf, be, &b, prec);
+  n = max((ell>>1), 3);
+  z = cgetg(n+1, t_VEC);
+  /* p1 = embeddings of fu^ell */
+  p1 = logarch2arch(gmulgs((GEN)bnfz[3], ell), nf_get_r1(nf), prec);
+  ru = lg(p1)-1; co = zerovec(ru);
+  z[1] = (long)concatsp(p1, vecinv(p1));
+  for (k=2; k<=n; k++) z[k] = (long) vecmul((GEN)z[1], (GEN)z[k-1]);
+  nmax = gnorml2(b);
+  for(;;)
+  {
+    GEN B = NULL;
+    long besti = 0, bestk = 0;
+    for (k=1; k<=n; k++)
+      for (i=1; i<=ru; i++)
+      {
+        p1 = vecmul(b, gmael(z,k,i));    p2 = gnorml2(p1);
+        if (gcmp(p2,nmax) < 0) { B=p1; nmax=p2; besti = i; bestk = k; }
+        p1 = vecmul(b, gmael(z,k,i+ru)); p2 = gnorml2(p1);
+        if (gcmp(p2,nmax) < 0) { B=p1; nmax=p2; besti = i; bestk =-k; }
+      }
+    if (!B) break;
+    b = B; co[besti] = laddis((GEN)co[besti], bestk);
+  }
+  return fix_be(be,co);
+}
+
+static GEN
+reducebeta(GEN be)
+{
+  long j,ru, prec = nfgetprec(bnfz);
+  GEN emb,z,u,matunit, nf = checknf(bnfz);
+
+  if (gcmp1(gnorm(be))) return reducebetanaive(be,NULL);
+  matunit = gmulgs(greal((GEN)bnfz[3]), ell); /* log. embeddings of fu^ell */
+  for (;;)
+  {
+    z = get_arch_real(nf, be, &emb, prec);
+    if (z) break;
+    prec = (prec-1)<<1;
+    if (DEBUGLEVEL) err(warnprec,"reducebeta",prec);
+    nf = nfnewprec(nf,prec);
+  }
+  z = concatsp(matunit, z);
+  u = lllintern(z, 1, prec);
+  if (!u) return reducebetanaive(be,emb); /* shouldn't occur */
+  ru = lg(u);
+  for (j=1; j<ru; j++)
+    if (smodis(gcoeff(u,ru-1,j), ell)) break; /* prime to ell */
+  u = (GEN)u[j]; /* coords on (fu^ell, be) of a small generator */
+  ru--; setlg(u, ru);
+  be = powgi(be, (GEN)u[ru]);
+  return reducebetanaive(fix_be(be, u), NULL);
 }
 
 static GEN
@@ -945,16 +971,16 @@ testx(GEN subgroup, GEN X)
 
 /* in alg. 5.3.18., C=nbcol */
   X = gmul(unmodell,X);
-  if (gcmp0(X)) return gzero;
+  if (gcmp0(X)) return NULL;
   for (i=dv+1; i<=nbcol; i++)
-    if (gcmp0((GEN)X[i])) return gzero;
+    if (gcmp0((GEN)X[i])) return NULL;
   for (i=1; i<=lSml2; i++)
-    if (gcmp0(gmul((GEN)vecMsup[i],X))) return gzero;
+    if (gcmp0(gmul((GEN)vecMsup[i],X))) return NULL;
   be = gun;
   for (i=1; i<=nbcol; i++)
     be = gmul(be, powgi((GEN)vecw[i], lift((GEN)X[i])));
   if (DEBUGLEVEL>1) fprintferr("reducing beta = %Z\n",be);
-  be = reducebeta_all(be);
+  be = reducebeta(be);
   if (DEBUGLEVEL>1) fprintferr("beta reduced = %Z\n",be);
   polrelbe = computepolrelbeta(be);
   v = varn(polrelbe);
@@ -964,14 +990,14 @@ testx(GEN subgroup, GEN X)
   polrelbe = gmul(polrelbe, gpowgs(p1, degree(polrelbe)));
   if (DEBUGLEVEL>1) fprintferr("polrelbe = %Z\n",polrelbe);
   p1 = rnfconductor(bnf,polrelbe,0);
-  if (!gegal((GEN)p1[1],module) || !gegal((GEN)p1[3],subgroup)) return gzero;
+  if (!gegal((GEN)p1[1],module) || !gegal((GEN)p1[3],subgroup)) return NULL;
   return polrelbe;
 }
 
 GEN
 rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
 {
-  long i,j,av=avma,tetpil,llistpr,lfactell,e,vp,vd,ind;
+  long i,j,av=avma,llistpr,lfactell,e,vp,vd,ind;
   GEN p1,p2,p3,p4,wk;
   GEN rayclgp,bid,ideal;
   GEN kk,clgp,fununits,torsunit,vecB,vecC,Tc,Tv,P;
@@ -1283,11 +1309,8 @@ rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
     LAB19:
     X=(GEN)K[dK];
     for (j=1; j<dK; j++) X=gadd(X,gmul((GEN)y[j],(GEN)K[j]));
-    finalresult=testx(subgroup,X);
-    if (!gcmp0(finalresult))
-    {
-      tetpil=avma; return gerepile(av,tetpil,gcopy(finalresult));
-    }
+    finalresult = testx(subgroup,X);
+    if (finalresult) return gerepileupto(av, gcopy(finalresult));
 	/* step 20 */
     i=dK;
 	/* step 21 */
