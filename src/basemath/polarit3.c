@@ -2206,7 +2206,7 @@ GEN
 FpX_normalize(GEN z, GEN p)
 {
   GEN p1 = leading_term(z);
-  if (gcmp1(p1)) return z;
+  if (lgef(z) == 2 || gcmp1(p1)) return z;
   return FpX_Fp_mul(z, mpinvmod(p1,p), p);
 }
 
@@ -2214,7 +2214,7 @@ GEN
 FpXQX_normalize(GEN z, GEN T, GEN p)
 {
   GEN p1 = leading_term(z);
-  if (gcmp1(p1)) return z;
+  if (lgef(z) == 2 || gcmp1(p1)) return z;
   if (!T) return FpX_normalize(z,p);
   return FpXQX_FpXQ_mul(z, FpXQ_inv(p1,T,p), T,p);
 }

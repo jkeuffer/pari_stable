@@ -1349,7 +1349,7 @@ factmod0(GEN f, GEN pp)
       }
       /* u is square-free (product of irred. of multiplicity e * k) */
       N = degpol(u);
-      if (N)
+      if (N > 0)
       {
         t[nbfact] = FpX_normalize(u,pp);
         d = (N==1)? 1: FpX_split_berlekamp(t+nbfact, pp);
