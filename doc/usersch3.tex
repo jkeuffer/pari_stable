@@ -2795,7 +2795,9 @@ $x$-coordinate.
 in $\R$, this computes a complex number $t$ (modulo the lattice defining
 $E$) corresponding to the point $z$, i.e.~such that, in the standard
 Weierstrass model, $\wp(t)=z[1],\wp'(t)=z[2]$. In other words, this is the
-inverse function of \kbd{ellztopoint}.
+inverse function of \kbd{ellztopoint}. More precisely, if $(w1,w2)$ are the
+real and complex periods of $E$, $t$ is such that $0 \leq \Re(t) < w1$
+and $0 \leq \Im(t) < \Im(w2)$.
 
 If $E$ has coefficients in $\Q_p$, then either Tate's $u$ is in $\Q_p$, in
 which case the output is a $p$-adic number $t$ corresponding to the point $z$

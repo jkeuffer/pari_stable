@@ -828,7 +828,13 @@ powell(GEN e, GEN z, GEN n)
 /**                       ELLIPTIC FUNCTIONS                       **/
 /**                                                                **/
 /********************************************************************/
-
+static GEN
+quot(GEN x, GEN y)
+{
+  GEN z = mpdiv(x, y), q = floorr(z);
+  if (gsigne(y) < 0 && !gequal(z, q)) q = addis(q, 1);
+  return q;
+}
 GEN
 zell(GEN e, GEN z, long prec)
 {
@@ -904,10 +910,10 @@ zell(GEN e, GEN z, long prec)
     }
   }
   /* send t to the fundamental domain if necessary */
-  p2 = mpdiv(imag_i(t), imag_i((GEN)e[16]));
-  if (expo(subrr(p2, real2n(-2, 3))) >= -1) /* |Im(t)/Im(w2) - 1/4| >= 1/2 */
-    t = gsub(t, gmul((GEN)e[16], floorr(addrr(p2,dbltor(0.1)))));
-  if (gsigne(real_i(t)) < 0) t = gadd(t,(GEN)e[15]);
+  p2 = quot(imag_i(t), imag_i((GEN)e[16]));
+  if (signe(p2)) t = gsub(t, gmul(p2, (GEN)e[16]));
+  p2 = quot(real_i(t), (GEN)e[15]);
+  if (signe(p2)) t = gsub(t, gmul(p2, (GEN)e[15]));
   return gerepileupto(av,t);
 }
 

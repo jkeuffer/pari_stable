@@ -151,6 +151,8 @@ MW 13- ellap: if E has CM by a principal order, use Cornacchia instead
    17- FpXQ_powers and similar routines: use multiplications when input has
        small degree, squarings otherwise.
    18- matsnf over polynomial rings: make sure elementary divisors are monic
+   19- ellpointtoz() now returns z such that 0 <= Im(z) < Im(w2),
+       0 <= Re(z) < Re(w1).
 
   Removed
     1- obsolete implementation incgam1 [ use incgam. As far as private
