@@ -89,6 +89,7 @@ BA 49- better arguments checking for galoisfixedfield
 XR 51- increase precision automatically when needed in quadhilbertreal
    52- idealstar(bnfinit(polcyclo(5)),11).clgp --> stack error
    53- default(format,"g0.4"); 3./10 --> 0.300004577  [now: 0.3000]
+   54- subst() didn't check its arguments (e.g SEGV on t_STR)
 
   Changed
     1- removed useless parameter prec in many bnr* and rnf* functions
