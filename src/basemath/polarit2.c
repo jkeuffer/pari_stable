@@ -1165,7 +1165,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
     if (a <= bmin)
     {
       a = (long)ceil(bmin + 3*N0*logBr) + 1; /* enough for 3 more rounds */
-      a = next2pow(a);
+      a = (long)next2pow((ulong)a);
 
       pa = gpowgs(p,a);
       famod = hensel_lift_fact(P,famod,NULL,p,pa,a);

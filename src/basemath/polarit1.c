@@ -1209,27 +1209,29 @@ swap_polpol(GEN x, long n, long w)
   return normalizepol_i(y,ly);
 }
 
+typedef ulong* uGEN;
+
 /* set x <-- x + c*y mod p */
 static void
-u_FpX_addmul(GEN x, GEN y, long c, long p)
+u_FpX_addmul(uGEN x, uGEN y, ulong c, ulong p)
 {
-  long i,lx,ly,l;
+  long i, lx, ly, l;
   if (!c) return;
   lx = lgef(x);
   ly = lgef(y); l = min(lx,ly);
   if (p & ~MAXHALFULONG)
   {
-    for (i=2; i<l;  i++) x[i] = ((ulong)x[i] + muluumod(c,y[i],p)) % p;
+    for (i=2; i<l;  i++) x[i] = (x[i] + muluumod(c,y[i],p)) % p;
     if (l == lx)
       for (   ; i<ly; i++) x[i] = muluumod(c,y[i],p);
   }
   else
   {
-    for (i=2; i<l;  i++) x[i] = ((ulong)x[i] + (ulong)(c*y[i])) % p;
+    for (i=2; i<l;  i++) x[i] = (x[i] + c*y[i]) % p;
     if (l == lx)
       for (   ; i<ly; i++) x[i] = (c*y[i]) % p;
   }
-  (void)u_normalizepol(x,i);
+  (void)u_normalizepol((GEN)x,i);
 }
 
 static long
@@ -1288,7 +1290,7 @@ FpX_split_berlekamp(GEN *t, GEN p)
       pol[2] = small_rand(ps); /* vker[1] = 1 */
       pol[1] = evallgef(pol[2]? 3: 2);
       for (i=2; i<=d; i++)
-        u_FpX_addmul(pol,(GEN)vker[i],small_rand(ps), ps);
+        u_FpX_addmul((uGEN)pol, (uGEN)vker[i], (ulong)small_rand(ps), (ulong)ps);
       polt = small_to_pol(pol,vu);
     }
     else
