@@ -2100,6 +2100,13 @@ hnfmerge_get_1(GEN A, GEN B)
       setlg(C[c], k+1);
       ZV_elem(t, gcoeff(C,k,k), C, U, c, k);
       if (lgefint(gcoeff(C,k,k)) > lb) C[k] = (long)FpV_red((GEN)C[k], b);
+      if (j > 4)
+      {
+        GEN u = (GEN)U[k];
+        long h;
+        for (h=1; h<l; h++)
+          if (lgefint(u[h]) > lb) u[h] = lresii((GEN)u[h], b);
+      }
     }
     if (j == 1)
       t = gcoeff(C,1,1);
