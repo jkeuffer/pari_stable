@@ -4130,13 +4130,13 @@ cbezout(long a,long b,long *uu,long *vv)
   r = xxgcduu(d, d1, 0, &u, &u1, &v, &v1, &s);
   if (s < 0)
   {
-    *uu = a < 0 ? u : -(long)u;
-    *vv = b < 0 ? -(long)v : v;
+    *uu = a < 0 ? (long)u : -(long)u;
+    *vv = b < 0 ? -(long)v : (long)v;
   }
   else
   {
-    *uu = a < 0 ? -(long)u : u;
-    *vv = b < 0 ? v : -(long)v;
+    *uu = a < 0 ? -(long)u : (long)u;
+    *vv = b < 0 ? (long)v : -(long)v;
   }
 #ifdef DEBUG_CBEZOUT
   fprintferr("< %ld (%ld, %ld)\n", (long)r, *uu, *vv);
