@@ -498,12 +498,11 @@ calcjac(GEN N, GEN et)
     faq = decomp(stoi(q-1)); tabfaq[i] = (long)faq;
     faqpr = (GEN)faq[1];
     faqex = (GEN)faq[2]; lfaq = lg(faqpr);
-    k = itos((GEN)faqex[1]);
 
-    compute_fg(q, 1, &tabf, &tabg); /* faqpr[1] = 2 */
+    compute_fg(q, 1, &tabf, &tabg);
 
     J = cgetg(lfaq,t_VEC); tabj[i] = (long)J;
-    for (j=2; j<lfaq; j++) /* skip p = 2 */
+    for (j=2; j<lfaq; j++) /* skip p = faqpr[1] = 2 */
     {
       p = itos((GEN)faqpr[j]);
       k = itos((GEN)faqex[j]);
