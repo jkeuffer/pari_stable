@@ -606,16 +606,16 @@ mului(ulong x, GEN y)
   setsigne(z,s); return z;
 }
 
-/* a + b*Y, assume Y >= 0, 0 <= a,b <= VERYBIGINT */
+/* a + b*|Y| */
 GEN
-addsmulsi(long a, long b, GEN Y)
+addumului(ulong a, ulong b, GEN Y)
 {
   GEN yd,y,z;
   long ny,lz;
   LOCAL_HIREMAINDER;
   LOCAL_OVERFLOW;
 
-  if (!signe(Y)) return stoi(a);
+  if (!signe(Y)) return utoi(a);
 
   y = Y+2; z = (GEN)avma;
   ny = lgefint(Y)-2;

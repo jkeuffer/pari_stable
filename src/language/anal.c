@@ -39,7 +39,7 @@ static GEN    identifier();
 static GEN    read_member(GEN x);
 static GEN    seq();
 static GEN    truc();
-static long   number(long *nb);
+static ulong  number(int *pn, char **ps);
 static void   doskipseq(char *s, int strict);
 static void   skip_matrix_block();
 static void   skipconstante();
@@ -58,7 +58,7 @@ static entree *installep(void *f,char *name,int l,int v,int add,entree **table);
 #define SIZEOF_VAR_POLS		(VAR_POLS_LONGS*sizeof(long))
 
 extern int term_width(void);
-extern GEN addsmulsi(long a, long b, GEN Y);
+extern GEN addumului(ulong a, ulong b, GEN Y);
 extern GEN rpowsi(ulong a, GEN n, long prec);
 
 /* last time we began parsing an object of specified type */
@@ -1280,15 +1280,14 @@ truc(void)
       if (br_status) err(breaker,"here (after #)");
       return stoi(glength(z));
 
-    case '"': { /* string */
-      long n;
+    case '"': /* string */
       analyseur++; old = analyseur;
       skipstring(); n = analyseur - old; /* do not count enclosing '"' */
       n = (n+BYTES_IN_LONG) >> TWOPOTBYTES_IN_LONG;
       z = cgetg(n+1, t_STR);
       (void)translate(&old, GSTR(z), NULL,NULL);
       return z;
-    }
+
     case '(':
       analyseur++;
       z = expr(); match(')'); return z;
@@ -1337,10 +1336,11 @@ truc(void)
     else
     {
       gp_hist *H = GP_DATA->hist;
+      int junk;
       p = 0;
       while (*analyseur == '`') { analyseur++; p++; }
       return p ? gp_history(H, -p        , old, mark.start)
-               : gp_history(H, number(&n), old, mark.start);
+               : gp_history(H, (long)number(&junk,&analyseur), old, mark.start);
     }
   }
   err(caracer1,analyseur-1,mark.start);
@@ -2246,65 +2246,70 @@ identifier(void)
   err(valencer1); return NULL; /* not reached */
 }
 
-static long
-number(long *nb)
+static ulong
+number(int *pn, char **ps)
 {
-  long m = 0;
-  for (*nb = 0; *nb < 9 && isdigit((int)*analyseur); (*nb)++)
-    m = 10*m + (*analyseur++ - '0');
-  return m;
+  char *s = *ps;
+  ulong m = 0;
+  int n = 0;
+  for (n = 0; n < 9 && isdigit((int)*s); n++) m = 10*m + (*s++ - '0');
+  *ps = s; *pn = n; return m;
 }
 
-long
+ulong
 pow10(int n)
 {
-  static long pw10[] = { 1, 10, 100, 1000, 10000, 100000, 1000000,
-                        10000000, 100000000, 1000000000 };
+  static ulong pw10[] = { 1UL, 10UL, 100UL, 1000UL, 10000UL, 100000UL,
+                        1000000UL, 10000000UL, 100000000UL, 1000000000UL };
   return pw10[n];
+}
+
+static GEN
+int_read_more(GEN y, char **ps)
+{
+  pari_sp av = avma;
+  int i = 0, nb;
+  while (isdigit((int)**ps))
+  {
+    ulong m = number(&nb, ps);
+    if (++i == 4) { avma = av; i = 0; } /* HACK gerepile */
+    y = addumului(m, pow10(nb), y);
+  }
+  return y;
 }
 
 static GEN
 constante()
 {
-  long i, l, m, n = 0, nb;
   pari_sp av = avma;
-  GEN z,y;
+  long l, n = 0;
+  int nb;
+  GEN y = utoi(number(&nb, &analyseur));
 
-  y = stoi(number(&nb)); i = 0;
-  while (isdigit((int)*analyseur))
-  {
-    if (++i == 4) { avma = av; i = 0; } /* HACK gerepile */
-    m = number(&nb);
-    y = addsmulsi(m, pow10(nb), y);
-  }
+  y = int_read_more(y, &analyseur);
   switch(*analyseur)
   {
     default: return y; /* integer */
     case '.':
-      if (isalpha((int)analyseur[1])
-          && analyseur[1] != 'e' && analyseur[1] != 'E')
-        return y; /* member function */
-      analyseur++; i = 0;
-      while (isdigit((int)*analyseur))
-      {
-        if (++i == 4) { avma = av; i = 0; } /* HACK gerepile */
-        m = number(&nb); n -= nb;
-        y = addsmulsi(m, pow10(nb), y);
-      }
+    {
+      char *old = ++analyseur;
+      y = int_read_more(y, &analyseur);
+      n = old - analyseur;
       if (*analyseur != 'E' && *analyseur != 'e')
       {
         if (!signe(y)) { avma = av; return realzero(prec); }
         break;
       }
+    }
     /* Fall through */
     case 'E': case 'e':
     {
       char *old = analyseur;
       switch(*++analyseur)
       {
-        case '-': analyseur++; n -= number(&nb); break;
+        case '-': analyseur++; n -= (long)number(&nb, &analyseur); break;
         case '+': analyseur++; /* Fall through */
-        default: n += number(&nb);
+        default: n += (long)number(&nb, &analyseur);
       }
       if (nb > 8) err(talker2,"exponent too large",old,mark.start);
       if (!signe(y))
@@ -2316,14 +2321,14 @@ constante()
     }
   }
   l = lgefint(y); if (l < (long)prec) l = (long)prec;
-  z = itor(y, l);
+  y = itor(y, l);
   if (n)
   {
-    y = rpowsi(10UL, stoi(labs(n)), l+1); /* 10^|n| */
-    z = (n > 0)? mulrr(z,y): divrr(z,y);
-    z = gerepileuptoleaf(av, z);
+    GEN t = rpowsi(10UL, stoi(labs(n)), l+1); /* 10^|n| */
+    y = (n > 0)? mulrr(y,t): divrr(y,t);
+    y = gerepileuptoleaf(av, y);
   }
-  return z;
+  return y;
 }
 
 /********************************************************************/
@@ -2747,7 +2752,7 @@ skipfacteur(void)
 static void
 skiptruc(void)
 {
-  long i,m,n;
+  long i, m, n;
   char *old;
 
   if (isalpha((int)*analyseur)) { skipidentifier(); return; }
@@ -2796,9 +2801,12 @@ skiptruc(void)
       }
 
     case '%':
+    {
+      int junk;
       analyseur++;
       if (*analyseur == '`') { while (*++analyseur == '`') /*empty*/; return; }
-      (void)number(&n); return;
+      (void)number(&junk, &analyseur); return;
+    }
   }
   err(caracer1,analyseur-1,mark.start);
 }
