@@ -1051,7 +1051,7 @@ qfbimagsolvep(GEN Q, GEN p)
   a = redimagsl2(Q, &N);
   if (is_pm1(gel(a,1))) /* principal form */
   {
-    ulong r;
+    long r;
     if (!signe(gel(a,2)))
     {
       a = qfbsolve_cornacchia(gel(a,3), p, 0);
