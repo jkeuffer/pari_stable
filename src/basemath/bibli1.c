@@ -1477,17 +1477,19 @@ lindep(GEN x, long prec)
 {
   GEN *b,*be,*bn,**m,qzer;
   GEN c1,c2,c3,px,py,pxy,re,im,p1,p2,r,f,em;
-  long i,j,fl,i1, lx = lg(x), tx = typ(x), n = lx-1;
-  long av = avma, lim = stack_lim(av,1), av0,av1,tetpil;
+  long i,j,fl,k, lx = lg(x), tx = typ(x), n = lx-1;
+  ulong av = avma, lim = stack_lim(av,1), av0,av1;
   const long EXP = - bit_accuracy(prec) + 2*n;
 
   if (! is_vec_t(tx)) err(typeer,"lindep");
-  if (lx<=2) return cgetg(1,t_VEC);
+  if (n <= 1) return cgetg(1,t_VEC);
   x = gmul(x, realun(prec));
-  re=greal(x); im=gimag(x);
+  re = greal(x);
+  im = gimag(x);
   /* independant over R ? */
-  if (lx == 3 && real_indep(re,im,bit_accuracy(prec)))
+  if (n == 2 && real_indep(re,im,bit_accuracy(prec)))
     { avma = av; return cgetg(1, t_VEC); }
+  if (EXP > -10) err(precer,"lindep");
 
   qzer = new_chunk(lx);
   b = (GEN*)idmat(n);
@@ -1496,40 +1498,41 @@ lindep(GEN x, long prec)
   m = (GEN**)new_chunk(lx);
   for (i=1; i<=n; i++)
   {
-    bn[i]=cgetr(prec+1);
-    be[i]=cgetg(lx,t_COL);
-    m[i] = (GEN*)new_chunk(lx);
-    for (j=1; j<i ; j++) m[i][j]=cgetr(prec+1);
-    for (j=1; j<=n; j++) be[i][j]=lgetr(prec+1);
+    bn[i] = cgetr(prec+1);
+    be[i] = cgetg(lx,t_COL);
+    m[i]  = (GEN*)new_chunk(lx);
+    for (j=1; j<i ; j++) m[i][j] = cgetr(prec+1);
+    for (j=1; j<=n; j++) be[i][j]= lgetr(prec+1);
   }
-  px=sqscal(re);
-  py=sqscal(im); pxy=gscal(re,im);
-  p1=mpsub(mpmul(px,py),gsqr(pxy));
-  if (quazero(re)) { re=im; px=py; fl=1; } else fl=quazero(p1);
+  px = sqscal(re);
+  py = sqscal(im); pxy = gscal(re,im);
+  p1 = mpsub(mpmul(px,py), gsqr(pxy));
+  if (quazero(px)) { re = im; px = py; fl = 1; } else fl = quazero(p1);
   av0 = av1 = avma;
   for (i=1; i<=n; i++)
   {
     p2 = gscal(b[i],re);
-    if (fl) p2=gmul(gdiv(p2,px),re);
+    if (fl) p2 = gmul(gdiv(p2,px),re);
     else
     {
       GEN p5,p6,p7;
-      p5=gscal(b[i],im);
-      p6=gdiv(gsub(gmul(py,p2),gmul(pxy,p5)),p1);
-      p7=gdiv(gsub(gmul(px,p5),gmul(pxy,p2)),p1);
-      p2=gadd(gmul(p6,re),gmul(p7,im));
+      p5 = gscal(b[i],im);
+      p6 = gdiv(gsub(gmul(py,p2),gmul(pxy,p5)), p1);
+      p7 = gdiv(gsub(gmul(px,p5),gmul(pxy,p2)), p1);
+      p2 = gadd(gmul(p6,re), gmul(p7,im));
     }
-    if (tx!=t_COL) p2=gtrans(p2);
-    p2=gsub(b[i],p2);
+    if (tx != t_COL) p2 = gtrans(p2);
+    p2 = gsub(b[i],p2);
     for (j=1; j<i; j++)
-      if (qzer[j]) affrr(bn[j],m[i][j]);
+      if (qzer[j]) affrr(bn[j], m[i][j]);
       else
       {
-        gdivz(gscal(b[i],be[j]),bn[j],m[i][j]);
-        p2=gsub(p2,gmul(m[i][j],be[j]));
+        gdivz(gscal(b[i],be[j]),bn[j], m[i][j]);
+        p2 = gsub(p2, gmul(m[i][j],be[j]));
       }
-    gaffect(p2,be[i]); affrr(sqscal(be[i]),bn[i]);
-    qzer[i]=quazero(bn[i]); avma=av1;
+    gaffect(p2,          be[i]);
+    affrr(sqscal(be[i]), bn[i]);
+    qzer[i] = quazero(bn[i]); avma = av1;
   }
   while (qzer[n])
   {
@@ -1537,8 +1540,8 @@ lindep(GEN x, long prec)
     if (DEBUGLEVEL>9)
     {
       fprintferr("qzer[%ld]=%ld\n",n,qzer[n]);
-      for (i1=1; i1<=n; i1++)
-	for (i=1; i<i1; i++) output(m[i1][i]);
+      for (k=1; k<=n; k++)
+	for (i=1; i<k; i++) output(m[k][i]);
     }
     em=bn[1]; j=1;
     for (i=2; i<n; i++)
@@ -1546,37 +1549,41 @@ lindep(GEN x, long prec)
       p1=shiftr(bn[i],i);
       if (cmprr(p1,em)>0) { em=p1; j=i; }
     }
-    i=j; i1=i+1;
-    avma = av1; r = grndtoi(m[i1][i], &e);
+    i=j; k=i+1;
+    avma = av1; r = grndtoi(m[k][i], &e);
     if (e >= 0) err(precer,"lindep");
     r  = negi(r);
-    p1 = ZV_lincomb(gun,r, b[i1],b[i]);
+    p1 = ZV_lincomb(gun,r, b[k],b[i]);
+    b[k] = b[i];
+    b[i]  = p1;
     av1 = avma;
-    b[i1]=b[i]; b[i]=p1; f=addir(r,m[i1][i]);
+    f = addir(r,m[k][i]);
     for (j=1; j<i; j++)
       if (!qzer[j])
       {
-        p1=mpadd(m[i1][j],mulir(r,m[i][j]));
-        affrr(m[i][j],m[i1][j]); mpaff(p1,m[i][j]);
+        p1 = mpadd(m[k][j], mulir(r,m[i][j]));
+        affrr(m[i][j],m[k][j]);
+        mpaff(p1,m[i][j]);
       }
-    c1=addrr(bn[i1],mulrr(gsqr(f),bn[i]));
+    c1 = addrr(bn[k], mulrr(gsqr(f),bn[i]));
     if (!quazero(c1))
     {
-      c2=divrr(mulrr(bn[i],f),c1); affrr(c2,m[i1][i]);
-      c3=divrr(bn[i1],c1); mulrrz(c3,bn[i],bn[i1]);
-      affrr(c1,bn[i]); qzer[i1]=quazero(bn[i1]); qzer[i]=0;
+      c2 = divrr(mulrr(bn[i],f),c1); affrr(c2, m[k][i]);
+      c3 = divrr(bn[k],c1);
+      mulrrz(c3,bn[i], bn[k]); qzer[k] = quazero(bn[k]);
+      affrr(c1,        bn[i]); qzer[i] = 0;
       for (j=i+2; j<=n; j++)
       {
-        p1=addrr(mulrr(m[j][i1],c3),mulrr(m[j][i],c2));
-        subrrz(m[j][i],mulrr(f,m[j][i1]), m[j][i1]);
-        affrr(p1,m[j][i]);
+        p1 = addrr(mulrr(m[j][k],c3), mulrr(m[j][i],c2));
+        subrrz(m[j][i],mulrr(f,m[j][k]), m[j][k]);
+        affrr(p1, m[j][i]);
       }
     }
     else
     {
-      qzer[i1]=qzer[i]; qzer[i]=1;
-      affrr(bn[i],bn[i1]); affrr(c1,bn[i]);
-      for (j=i+2; j<=n; j++) affrr(m[j][i],m[j][i1]);
+      affrr(bn[i], bn[k]); qzer[k] = qzer[i];
+      affrr(c1,    bn[i]); qzer[i] = 1;
+      for (j=i+2; j<=n; j++) affrr(m[j][i], m[j][k]);
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
@@ -1585,10 +1592,10 @@ lindep(GEN x, long prec)
       av1 = avma;
     }
   }
-  p1=cgetg(lx,t_COL); p1[n]=un; for (i=1; i<n; i++) p1[i]=zero;
+  p1 = cgetg(lx,t_COL); p1[n] = un; for (i=1; i<n; i++) p1[i] = zero;
   p2 = (GEN)b; p2[0] = evaltyp(t_MAT) | evallg(lx);
-  p2=gauss(gtrans_i(p2),p1); tetpil=avma;
-  return gerepile(av,tetpil,gtrans(p2));
+  p2 = gauss(gtrans_i(p2),p1);
+  return gerepileupto(av, gtrans(p2));
 }
 
 /* x is a vector of elts of a p-adic field */
