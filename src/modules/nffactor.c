@@ -330,6 +330,8 @@ nfmod_pol_pow(GEN nf,GEN prhall,GEN pmod,GEN pol,GEN e)
   return gerepileupto(av,p1);
 }
 
+extern GEN trivfact(void);
+
 /* factorisation du polynome x modulo pr */
 GEN
 nffactormod(GEN nf,GEN pol,GEN pr)
@@ -349,9 +351,10 @@ nffactormod(GEN nf,GEN pol,GEN pr)
   q = vker = NULL; /* gcc -Wall */
 
   f=unifpol(nf,pol,0); f=nfmod_pol_reduce(nf,prhall,f);
+  if (!signe(f)) err(zeropoler,"nffactormod");
   d=lgef(f)-3; vf=varn(f);
-  t = (GEN*)new_chunk(d+1);
-  ex= new_chunk(d+1);
+  if (d == 0) return trivfact();
+  t  = (GEN*)new_chunk(d+1); ex = cgetg(d+1, t_VECSMALL);
   x=gcopy(polx[vf]); x[3]=(long)vun; x[2]=(long)vzero;
   if (d<=1) { nbfact=2; t[1] = f; ex[1]=1; }
   else
@@ -455,14 +458,11 @@ nffactormod(GEN nf,GEN pol,GEN pr)
   }
   if (nbfact < 2)
     err(talker, "%Z not a prime (nffactormod)", q);
-  v=element_divmodpr(nf,vun,gmael(t,1,lgef(t[1])-1),prhall);
-  t[1]=unifpol(nf,nfmod_pol_mul(nf,prhall,v,(GEN)t[1]),1);
-  for (j=2; j<nbfact; j++)
-    if (ex[j])
-    {
-      v=element_divmodpr(nf,vun,gmael(t,j,lgef(t[j])-1),prhall);
-      t[j]=unifpol(nf,nfmod_pol_mul(nf,prhall,v,(GEN)t[j]),1);
-    }
+  for (j=1; j<nbfact; j++)
+  {
+    v = element_divmodpr(nf,vun,gmael(t,j,lgef(t[j])-1),prhall);
+    t[j] = unifpol(nf,nfmod_pol_mul(nf,prhall,v,(GEN)t[j]),1);
+  }
 
   tetpil=avma; y=cgetg(3,t_MAT);
   u=cgetg(nbfact,t_COL); y[1]=(long)u;
@@ -1154,12 +1154,12 @@ rnfdedekind(GEN nf,GEN T,GEN pr)
   p=(GEN)pr[1]; tau=gdiv((GEN)pr[5],p);
   n=lgef(nf[1])-3; m=lgef(T)-3;
 
-  vecun=cgetg(n+1,t_COL); vecun[1]=un;
-  veczero=cgetg(n+1,t_COL); veczero[1]=zero;
-  for (i=2; i<=n; i++) vecun[i] = veczero[i] = zero;
+  vecun = gscalcol_i(gun,n);
+  veczero = zerocol(n);
 
   p1=(GEN)nffactormod(nf,Ca,pr)[1];
-  g=lift((GEN)p1[1]); r=lg(p1);
+  r=lg(p1); if (r < 2) err(constpoler,"rnfdedekind");
+  g=lift((GEN)p1[1]);
   for (i=2; i<r; i++)
     g = nf_pol_mul(nf,g, lift((GEN)p1[i]));
   h=nfmod_pol_divres(nf,prhall,Ca,g,NULL);
