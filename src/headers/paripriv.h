@@ -49,6 +49,22 @@ GEN hnfspec(long** m,GEN p,GEN* ptdep,GEN* ptA,GEN* ptC,long k0);
 GEN idealhermite_aux(GEN nf, GEN x);
 GEN mathnfspec(GEN x, GEN *ptperm, GEN *ptdep, GEN *ptB, GEN *ptC);
 
+GEN famat_inv(GEN f);
+GEN famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX);
+GEN famat_mul(GEN f, GEN g);
+GEN famat_mul(GEN f, GEN g);
+GEN famat_pow(GEN f, GEN n);
+GEN famat_reduce(GEN fa);
+GEN famat_to_arch(GEN nf, GEN fa, long prec);
+GEN famat_to_nf_modideal_coprime(GEN nf, GEN g, GEN e, GEN id, GEN EX);
+GEN famat_to_nf_modidele(GEN nf, GEN g, GEN e, GEN bid);
+GEN famat_to_nf_modidele(GEN nf, GEN g, GEN e, GEN bid);
+GEN to_famat_all(GEN x, GEN y);
+GEN to_famat(GEN g, GEN e);
+
+GEN trivfact(void);
+GEN vconcat(GEN Q1, GEN Q2);
+
 GEN gmulXn(GEN x, long d);
 GEN addmulXn(GEN x, GEN y, long d);
 GEN monomial(GEN a, int degpol, int v);

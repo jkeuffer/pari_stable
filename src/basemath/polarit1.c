@@ -789,9 +789,9 @@ FqX_nbfact(GEN u, GEN T, GEN p)
 GEN
 trivfact(void)
 {
-  GEN y=cgetg(3,t_MAT);
-  y[1]=lgetg(1,t_COL);
-  y[2]=lgetg(1,t_COL); return y;
+  GEN y = cgetg(3,t_MAT);
+  y[1] = lgetg(1,t_COL);
+  y[2] = lgetg(1,t_COL); return y;
 }
 
 static GEN

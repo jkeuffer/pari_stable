@@ -31,7 +31,6 @@ extern GEN gassoc_proto(GEN f(GEN,GEN),GEN,GEN);
 extern GEN gauss_intern(GEN a, GEN b);
 extern GEN qf_disc(GEN x, GEN y, GEN z);
 extern GEN to_polmod(GEN x, GEN mod);
-extern GEN vconcat(GEN Q1, GEN Q2);
 extern int approx_0(GEN x, GEN y);
 extern long FpX_split_Berlekamp(GEN *t, GEN pp);
 extern void gerepilecoeffs2(pari_sp av, GEN x, int n, GEN y, int o);

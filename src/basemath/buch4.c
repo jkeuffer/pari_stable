@@ -481,7 +481,6 @@ nfhilbert0(GEN nf,GEN a,GEN b,GEN p)
 }
 
 extern GEN isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag);
-extern GEN vconcat(GEN Q1, GEN Q2);
 extern GEN factorback_i(GEN fa, GEN e, GEN nf, int red);
 extern GEN detcyc(GEN cyc);
 /* S a list of prime ideal in primedec format. Return res:

@@ -25,15 +25,8 @@ extern GEN F2V_red_ip(GEN v);
 extern GEN check_and_build_cycgen(GEN bnf);
 extern GEN get_arch_real(GEN nf,GEN x,GEN *emb,long prec);
 extern GEN T2_from_embed_norm(GEN x, long r1);
-extern GEN vconcat(GEN A, GEN B);
 extern long int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *newx);
 extern GEN prodid(GEN nf, GEN I);
-
-extern GEN famat_inv(GEN f);
-extern GEN famat_pow(GEN f, GEN n);
-extern GEN famat_mul(GEN f, GEN g);
-extern GEN famat_reduce(GEN fa);
-extern GEN to_famat(GEN g, GEN e);
 
 typedef struct {
   GEN x;  /* tau ( Mod(x, nf.pol) ) */

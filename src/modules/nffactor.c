@@ -40,7 +40,6 @@ extern GEN max_modulus(GEN p, double tau);
 extern GEN mulmat_pol(GEN A, GEN x);
 extern GEN polsym_gen(GEN P, GEN y0, long n, GEN T, GEN N);
 extern GEN special_pivot(GEN x);
-extern GEN trivfact(void);
 extern GEN vandermondeinverse(GEN L, GEN T, GEN den, GEN prep);
 extern int cmbf_precs(GEN q, GEN A, GEN B, long *a, long *b, GEN *qa, GEN *qb);
 extern GEN LLL_check_progress(GEN Bnorm, long n0, GEN m, int final, long *ti_LLL);
