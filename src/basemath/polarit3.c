@@ -242,7 +242,7 @@ u_mallocpol(long d)
   z[1] = evalsigne((d >= 0)) | evallgef(d+3) | evalvarn(0);
   return z;
 }
-static GEN
+GEN
 u_getpol(long d)
 {
   GEN z = cgetg(d + 3, t_VECSMALL);

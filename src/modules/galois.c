@@ -34,15 +34,15 @@ typedef struct {
 } resolv; /* resolvent */
 
 typedef struct {
-  long pr, prmax, tschmax;
-  GEN p, r;
+  long pr, prmax;
+  GEN p, r, coef;
 } buildroot;
 
 static long isin_G_H(buildroot *BR, long n1, long n2);
 
 static IND ID_data[] = { 0,1,2,3,4,5,6,7,8,9,10,11 };
 static PERM ID = ID_data;
-static long N, EVEN, coeff[9][10];
+static long N, EVEN;
 static char *str_base = GPDATADIR;
 
 static long *par_vec;
@@ -295,12 +295,12 @@ static void
 preci(buildroot *BR, long p)
 {
   GEN r = BR->r;
-  long d,i;
+  long i, j, l = lg(r);
 
   if (p > BR->prmax) err(talker,"too large precision in preci()");
-  for (d=0; d < BR->tschmax; d++)
+  for (j = 1; j < l; j++)
   {
-    GEN x, o = (GEN)r[d];
+    GEN x, o = (GEN)r[j];
     for (i=1; i<=N; i++)
     {
       x = (GEN)o[i];
@@ -310,9 +310,9 @@ preci(buildroot *BR, long p)
 }
 
 static long
-getpreci(GEN r)
+getpreci(buildroot *BR)
 {
-  GEN x = gmael(r,0,1);
+  GEN x = gmael(BR->r,1,1);
   return (typ(x)==t_COMPLEX)? lg(x[1]): lg(x);
 }
 
@@ -707,44 +707,46 @@ gpoly(GEN rr, long n1, long n2)
   return NULL; /* not reached */
 }
 
-static void
-new_pol(GEN r, long *a, long d)
+/* a is a t_VECSMALL representing a polynomial */
+static GEN
+new_pol(GEN r, GEN a)
 {
-  long i, j;
-  GEN x, p1, o = (GEN)r[0], z = cgetg(N+1, t_VEC);
+  long i, j, l = lgef(a);
+  GEN x, z, v = cgetg(N+1, t_VEC);
   for (i=1; i<=N; i++)
   {
-    p1 = (GEN)o[i]; x = gaddsg(a[0], p1);
-    for (j=1; j<=d; j++) x = gaddsg(a[j], gmul(p1,x));
-    z[i] = (long)x;
+    z = (GEN)r[i]; x = gaddsg(a[2], z);
+    for (j = 3; j < l; j++) x = gaddsg(a[j], gmul(z,x));
+    v[i] = (long)x;
   }
-  r[d] = lclone(z);
+  return gclone(v);
 }
 
+/* BR->r[l], BR->coef[l] hold data related to Tschirnausen transform of
+ * degree l - 1 */
 static void
 tschirn(buildroot *BR)
 {
-  long i,k, v = varn(BR->p), d = BR->tschmax;
+  long i,k, v = varn(BR->p), l = lg(BR->r);
   GEN a,h,u;
 
-  if (d+1 >= N) err(bugparier,"degree too large in tschirn");
+  if (l >= N) err(bugparier,"degree too large in tschirn");
   if (DEBUGLEVEL)
-    fprintferr("\n$$$$$ Tschirnhaus transformation of degree %ld: $$$$$\n", d);
+    fprintferr("\n$$$$$ Tschirnhaus transformation of degree %ld: $$$$$\n",l-1);
 
-  a = coeff[d];
+  a = (GEN)BR->coef[l]; /* fill with random polynomial of degree <= l-1 */
   do
   {
-    for (i=0; i<=d; i++) a[i] = random_bits(3) + 1;
-    h = small_to_pol_i(a-2, d+3);
-    (void)normalizepol_i(h, d+3); setvarn(h,0);
-  } while (lgef(h) <= 3 || !ZX_is_squarefree(h));
+    for (i=2; i < l+2; i++) a[i] = random_bits(3) + 1;
+    h = normalizepol( small_to_pol(a, 0) );
+  } while (degpol(h) <= 0 || !ZX_is_squarefree(h));
   setvarn(h, v); k = 0;
   u = ZX_caract_sqf(h, BR->p, &k, v);
   a[1] += k;
 
   preci(BR, BR->prmax);
-  new_pol(BR->r, a, d); preci(BR, BR->pr);
-  BR->tschmax++;
+  appendL(BR->r, new_pol((GEN)BR->r[1], a));
+  preci(BR, BR->pr);
 }
 
 static GEN 
@@ -769,25 +771,33 @@ sortroots(GEN newr, GEN oldr)
   return r;
 }
 
+static void
+delete_roots(buildroot *BR)
+{
+  GEN r = BR->r;
+  long i, l = lg(r);
+  for (i = 1; i < l; i++) gunclone((GEN)r[i]);
+  setlg(r, 1);
+}
+
 /* increase the roots accuracy */
 static void
 moreprec(buildroot *BR)
 {
+  long d = BR->pr - BR->prmax;
   if (DEBUGLEVEL) { fprintferr("$$$$$ New prec = %ld\n",BR->pr); flusherr(); }
-  if (BR->pr > BR->prmax)
+  if (d > 0)
   { /* recompute roots */
     pari_sp av = avma;
-    long d = BR->prmax + BIGDEFAULTPREC - 2;
-    GEN o = (GEN)BR->r[0];
-
-    BR->prmax = (BR->pr < d)? d: BR->pr;
-    BR->r[0] = lclone( sortroots(cleanroots(BR->p,BR->prmax), o) );
-    gunclone(o);
-    for (d=1; d < BR->tschmax; d++)
-    {
-      gunclone((GEN)BR->r[d]);
-      new_pol(BR->r,coeff[d], d);
-    }
+    long l = lg(BR->r);
+    GEN ro;
+    
+    if (d < BIGDEFAULTPREC-2) d = BIGDEFAULTPREC-2;
+    BR->prmax += d;
+    ro = sortroots(cleanroots(BR->p,BR->prmax), (GEN)BR->r[1]);
+    delete_roots(BR);
+    appendL(BR->r, gclone(ro));
+    for (d = 2; d < l; d++) appendL(BR->r, new_pol(ro, (GEN)BR->coef[d]));
     avma = av;
   }
   preci(BR, BR->pr);
@@ -836,7 +846,7 @@ check_isin(buildroot *BR, resolv *R, GROUP tau, GROUP ss)
   GEN  racint[M], roint;
   PERM uu;
 
-  if (getpreci(BR->r) != BR->pr) preci(BR, BR->pr);
+  if (getpreci(BR) != BR->pr) preci(BR, BR->pr);
   nbcos = getcard_obj(ss);
   nbgr  = getcard_obj(tau);
   lastnbri = lastnbrm = -1; sp = nbracint = nbrac = 0; /* gcc -Wall*/
@@ -844,7 +854,7 @@ check_isin(buildroot *BR, resolv *R, GROUP tau, GROUP ss)
   {
     PERM T = tau[nogr];
     if (DEBUGLEVEL) fprintferr("    ----> Group # %ld/%ld:\n",nogr,nbgr);
-    init = 0; d = 0;
+    init = 0; d = 1;
     for (;;)
     {
       if (!init)
@@ -921,12 +931,12 @@ check_isin(buildroot *BR, resolv *R, GROUP tau, GROUP ss)
       lastnbri = nbracint; lastnbrm = nbrac;
       for (j=1; j<=nbrac; j++) { lastnum[j] = numj[j]; lastnor[j] = norac[j]; }
 
-NEXT: if (DEBUGLEVEL)
-      {
+NEXT:
+      if (DEBUGLEVEL) {
         fprintferr("        all integer roots are double roots\n");
-        fprintferr("      Working with polynomial #%ld:\n", d+2); flusherr();
+        fprintferr("      Working with polynomial #%ld:\n", d+1);
       }
-      if (++d >= BR->tschmax) tschirn(BR);
+      if (++d >= lg(BR->r)) tschirn(BR);
     }
   }
   return NULL;
@@ -2392,7 +2402,7 @@ isin_G_H(buildroot *BR, long n1, long n2)
   free(ss); free(tau); if (R.a) free(R.a);
   if (ww)
   {
-    long z[NMAX+1], i , j;
+    long z[NMAX+1], i , j, l = lg(BR->r);
     s0 = permmul(ww, s0); free(ww);
     if (DEBUGLEVEL)
     {
@@ -2400,7 +2410,7 @@ isin_G_H(buildroot *BR, long n1, long n2)
       fprintferr("\n    Reordering of the roots: "); printperm(s0);
       flusherr();
     }
-    for (i=0; i<BR->tschmax; i++)
+    for (i = 1; i < l; i++)
     {
       GEN p1 = (GEN)BR->r[i];
       for (j=1; j<=N; j++) z[j] = p1[(int)s0[j]];
@@ -2457,12 +2467,14 @@ galoisbig(GEN pol, long prec)
   {
     buildroot BR;
     long i;
+    GEN z = cgetg(N + 1, t_VEC);
+    for (i = 1; i <= N; i++) z[i] = (long)u_getpol(i-1);
+    BR.coef = z;
     BR.p = pol;
     BR.pr = prec + 2 * (MEDDEFAULTPREC-2);
     BR.prmax = BR.pr + BIGDEFAULTPREC-2; 
-    BR.tschmax = 1;
-    BR.r = cgetg(N+1, t_VEC);
-    BR.r[0] = lclone ( cleanroots(BR.p, BR.prmax) );
+    BR.r = cget1(N+1, t_VEC);
+    appendL(BR.r, gclone ( cleanroots(BR.p, BR.prmax) ));
     preci(&BR, BR.pr);
     switch(N)
     {
@@ -2471,7 +2483,7 @@ galoisbig(GEN pol, long prec)
       case 10: t = closure10(&BR); break;
       case 11: t = closure11(&BR); break;
     }
-    for (i = 0; i < BR.tschmax; i++) gunclone((GEN)BR.r[i]);
+    for (i = 1; i < lg(BR.r); i++) gunclone((GEN)BR.r[i]);
   }
   avma = av;
   res[1]=lstoi(tab[t]);
