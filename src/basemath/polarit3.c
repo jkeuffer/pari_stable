@@ -4821,7 +4821,7 @@ ffinit(GEN p, long n, long v)
   /*If we are in a easy case just use cyclo*/
   if (fpinit_check(p, n + 1, n))
     return gerepileupto(ltop,FpX(cyclo(n + 1, v),p));
-  if (cmpis(p,n)>0 && lgefint(p)-2<BITS_IN_LONG-bfffo(n))
+  if (lgefint(p)-2<BITS_IN_LONG-bfffo(n))
     P=ffinit_fact(p,n);
   else
     P=ffinit_nofact(p,n);
