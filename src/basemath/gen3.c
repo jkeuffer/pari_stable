@@ -2780,7 +2780,7 @@ gram_matrix(GEN M)
 }
 
 /* return Re(x * y), x and y scalars */
-static GEN
+GEN
 mul_real(GEN x, GEN y)
 {
   if (typ(x) == t_COMPLEX)
