@@ -3209,11 +3209,11 @@ long znconductor(long n, GEN v, GEN V)
       fprintferr("SubCyclo:testing %ld^%ld\n",p,e);
     while (e>=1)
     {
-      int z;
+      int z = 1;
       q=n/p;
       for(j=1;j<p;j++)
       {
-	z=1+j*q;
+	z += q;
 	if (!W[z] && z%p) break;
       }
       if (j<p)

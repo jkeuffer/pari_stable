@@ -2595,7 +2595,7 @@ u_FpV_polint(GEN xa, GEN ya, ulong p)
     if (!ya[i]) continue;
     X_x[2] = p - xa[i]; T = u_FpX_div(Q, X_x, p, 0);
     inv = u_invmod(u_FpX_eval(T,xa[i], p), p);
-    if (i < n-1 && xa[i] + xa[i+1] == p)
+    if (i < n-1 && (ulong)(xa[i] + xa[i+1]) == p)
     {
       dP = u_pol_comp(T, (ya[i] * inv) % p, (ya[i+1] * inv) % p, p);
       i++; /* x_i = -x_{i+1} */
