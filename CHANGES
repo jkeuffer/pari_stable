@@ -104,6 +104,9 @@ IZ 37- [OS/2:] ^C would only work once
    51- content(y/x) --> 1   [ should be y ]
    52- divrem(x,2) --> x/2 instead of [x/2, 0]~
    53- divrem([1.,2],x) --> stack corruption
+   54- ff(n)=local(v=[],w=[]);n
+       f(n)=n
+       ff(f(n))=n  --> error (OK) + SEGV on Linux (same data freed twice)
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available
