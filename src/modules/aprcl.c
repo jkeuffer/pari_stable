@@ -873,8 +873,8 @@ static GEN
 _res(long a, long b)
 {
   GEN z;
-  if (b) { z=cgetg(4, t_VEC); z[1]=lstoi(a); z[2]=lstoi(b); z[3]=zero; }
-  else   { z=cgetg(3, t_VEC); z[1]=lstoi(a); z[2]=zero; }
+  if (b) { z=cgetg(3, t_VEC); z[1]=lstoi(a); z[2]=lstoi(b); }
+  else   { z=cgetg(2, t_VEC); z[1]=lstoi(a); }
   return z;
 }
 
