@@ -864,7 +864,7 @@ double
 check_bach(double cbach, double B)
 {
   if (cbach >= B)
-   err(talker,"sorry, buchxxx couldn't deal with this field PLEASE REPORT!");
+   err(talker,"sorry, couldn't deal with this field PLEASE REPORT!");
   cbach *= 2; if (cbach > B) cbach = B;
   if (DEBUGLEVEL) fprintferr("\n*** Bach constant: %f\n", cbach);
   return cbach;
