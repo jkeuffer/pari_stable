@@ -250,7 +250,7 @@ ulong
 u_gener(ulong p)
 {
   const pari_sp av = avma;
-  const long q = p - 1;
+  const ulong q = p - 1;
   const GEN L = (GEN)decomp(utoi(q))[1];
   const int k = lg(L) - 1;
   int i,x;
@@ -259,7 +259,7 @@ u_gener(ulong p)
     if (x % p)
     {
       for (i=k; i; i--)
-	if (powuumod(x, q/itos((GEN)L[i]), p) == 1) break;
+	if (powuumod(x, q/itou((GEN)L[i]), p) == 1) break;
       if (!i) break;
     }
   avma = av; return x;
@@ -654,90 +654,88 @@ gcarreparfait(GEN x)
 #define  ome(t) (labs(((t)&7)-4) == 1)
 #define gome(t) (ome(modBIL(t)))
 
-GEN
-gkronecker(GEN x, GEN y)
+/* assume y odd, return kronecker(x,y) * s */
+static long
+krouu(ulong x, ulong y, long s)
 {
-  return arith_proto2(kronecker,x,y);
+  ulong x1 = x, y1 = y, z;
+  while (x1)
+  {
+    long r = vals(x1);
+    if (r)
+    {
+      if (odd(r) && ome(y1)) s = -s;
+      x1 >>= r;
+    }
+    if (x1 & y1 & 2) s = -s;
+    z = y1 % x1; y1 = x1; x1 = z;
+  }
+  return (y1 == 1)? s: 0;
 }
+
+GEN
+gkronecker(GEN x, GEN y) { return arith_proto2(kronecker,x,y); }
 
 long
 kronecker(GEN x, GEN y)
 {
   const pari_sp av = avma;
   GEN z;
-  long r,s=1;
+  long s = 1, r;
 
   switch (signe(y))
   {
-    case -1: y=negi(y); if (signe(x)<0) s= -1; break;
+    case -1: y = negi(y); if (signe(x) < 0) s = -1; break;
     case 0: return is_pm1(x);
   }
-  r=vali(y);
+  r = vali(y);
   if (r)
   {
-    if (mpodd(x))
-    {
-      if (odd(r) && gome(x)) s= -s;
-      y=shifti(y,-r);
-    }
-    else { avma=av; return 0; }
+    if (!mpodd(x)) { avma = av; return 0; }
+    if (odd(r) && gome(x)) s = -s;
+    y = shifti(y,-r);
   }
-  x=modii(x,y);
-  while (signe(x))
+  x = modii(x,y);
+  while (lgefint(y) > 3) /* x < y */
   {
-    r=vali(x);
+    r = vali(x);
     if (r)
     {
-      if (odd(r) && gome(y)) s= -s;
-      x=shifti(x,-r);
+      if (odd(r) && gome(y)) s = -s;
+      x = shifti(x,-r);
     }
     /* x=3 mod 4 && y=3 mod 4 ? (both are odd here) */
     if (modBIL(x) & modBIL(y) & 2) s = -s;
-    z=resii(y,x); y=x; x=z;
+    z = resii(y,x); y = x; x = z;
   }
-  avma=av; return is_pm1(y)? s: 0;
+  avma = av;
+  return krouu(itou(x), itou(y), s);
 }
 
 GEN
-gkrogs(GEN x, long y)
-{
-  return arith_proto2gs(krogs,x,y);
-}
+gkrogs(GEN x, long y) { return arith_proto2gs(krogs,x,y); }
 
 long
 krogs(GEN x, long y)
 {
-  const pari_sp av = avma;
-  long r,s=1,x1,z;
+  ulong y1;
+  long s = 1, r;
 
-  if (y<=0)
+  if (y <= 0)
   {
-    if (y) { y = -y; if (signe(x)<0) s = -1; }
-    else  return is_pm1(x);
+    if (y == 0) return is_pm1(x);
+    y1 = (ulong)-y; if (signe(x) < 0) s = -1;
   }
-  r=vals(y);
+  else
+    y1 = (ulong)y;
+  r = vals(y1);
   if (r)
   {
-    if (mpodd(x))
-    {
-      if (odd(r) && gome(x)) s= -s;
-      y>>=r;
-    }
-    else return 0;
+    if (!mpodd(x)) return 0;
+    if (odd(r) && gome(x)) s = -s;
+    y1 >>= r;
   }
-  x1=smodis(x,y); avma = av;
-  while (x1)
-  {
-    r=vals(x1);
-    if (r)
-    {
-      if (odd(r) && ome(y)) s= -s;
-      x1>>=r;
-    }
-    if (x1 & y & 2) s= -s;
-    z=y%x1; y=x1; x1=z;
-  }
-  return (y==1)? s: 0;
+  return krouu(umodiu(x, y1), y1, s);
 }
 
 long
@@ -751,37 +749,32 @@ krosg(long s, GEN x)
 long
 kross(long x, long y)
 {
-  long r,s=1,x1,z;
+  ulong y1;
+  long s = 1, r;
 
-  if (y<=0)
+  if (y <= 0)
   {
-    if (y) { y= -y; if (x<0) s = -1; }
-    else  return (labs(x)==1);
+    if (y == 0) return (labs(x)==1);
+    y1 = (ulong)-y; if (x < 0) s = -1;
   }
-  r=vals(y);
+  else
+    y1 = (ulong)y;
+  r = vals(y1);
   if (r)
   {
-    if (odd(x))
-    {
-      if (odd(r) && ome(x)) s = -s;
-      y>>=r;
-    }
-    else return 0;
+    if (!odd(x)) return 0;
+    if (odd(r) && ome(x)) s = -s;
+    y1 >>= r;
   }
-  x1=x%y; if (x1<0) x1+=y;
-  while (x1)
-  {
-    r=vals(x1);
-    if (r)
-    {
-      if (odd(r) && ome(y)) s = -s;
-      x1>>=r;
-    }
-    if (x1 & y & 2) s = -s;
-    z=y%x1; y=x1; x1=z;
-  }
-  return (y==1)? s: 0;
+  x %= y1; if (x < 0) x += y1;
+  return krouu((ulong)x, y1, s);
 }
+
+/*********************************************************************/
+/**                                                                 **/
+/**                          HILBERT SYMBOL                         **/
+/**                                                                 **/
+/*********************************************************************/
 
 long
 hil0(GEN x, GEN y, GEN p)
