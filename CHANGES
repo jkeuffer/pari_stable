@@ -322,6 +322,7 @@ BA 15- galoisisabelian, galoisexport, galoisidentify and galoissubgroups now
 GH 21- new function zncoppersmith
    22- public interface to forvec() [ forvec_start + forvec_data, for GP2C ]
    23- routine sqrtremi() [ Karatsuba square root ]
+   24- internal routine int2n() [ = 2^n ]
 
   Removed
     1- obsolete macro leadingcoeff [kept for backward compatibility but
