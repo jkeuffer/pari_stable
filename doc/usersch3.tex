@@ -1769,10 +1769,12 @@ Here $n$ must be non-negative and $n<2^{31}$.
 integer.
 
 \subsecidx{qfbprimeform}$(x,p)$: prime binary quadratic form of discriminant
-$x$ whose first coefficient is the prime number $p$. Returns an error if $x$ is not a
-quadratic residue mod $p$. In the case where $x>0$, the ``distance''
-component of the form is set equal to zero according to the current
-precision.
+$x$ whose first coefficient is the prime number $p$. By abuse of notation,
+$p = 1$ is a valid special case which returns the unit form. Returns an
+error if $x$ is not a quadratic residue mod $p$. In the case where $x>0$,
+the ``distance'' component of the form is set equal to zero according to
+the current precision.
+\syn{primeform}{x,p,\var{prec}}
 
 \subsecidx{qfbred}$(x,\{\fl=0\},\{D\},\{\var{isqrtD}\},\{\var{sqrtD}\})$:
 reduces the binary quadratic form $x$. $\fl$ can be any of $0$:
