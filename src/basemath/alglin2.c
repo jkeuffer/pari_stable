@@ -3101,13 +3101,16 @@ bezout_step(GEN *pa, GEN *pb, GEN *pu, GEN *pv, GEN mun)
 {
   GEN a = *pa, b = *pb, d;
   if (absi_equal(a,b))
-  {
+  { 
     long sa = signe(a), sb = signe(b);
     *pv = gzero;
-    if (sb == sa) { *pa = *pu = gun; *pb = gun; return sa > 0? a: absi(a); }
-    if (sa > 0) { *pa = *pu = gun; *pb = mun; return a; }
+    if (sb == sa) { 
+      *pa = *pb = gun;
+      if (sa > 0) { *pu = gun; return a; } else { *pu = mun; return absi(a); } 
+    } 
+    if (sa > 0) { *pa = *pu = gun; *pb = mun; return a; } 
     *pa = *pu = mun; *pb = gun; return b;
-  }
+  } 
   d = bezout(a,b, pu,pv);
   *pa = diviiexact(a, d);
   *pb = diviiexact(b, d); return d;
