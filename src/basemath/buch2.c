@@ -1586,6 +1586,7 @@ unset_fact(GEN c)
   for (i=1; i<=primfact[0]; i++) c[primfact[i]] = 0;
 }
 
+#if 0
 /* as small_to_mat, with explicit dimension d */
 static GEN
 small_to_mat_i(GEN z, long d)
@@ -1600,29 +1601,42 @@ small_to_mat_i(GEN z, long d)
   }
   return x;
 }
+#endif
 
 /* return -1 in case of precision problems. t = current # of relations */
 static long
 small_norm_for_buchall(long cglob,GEN mat,GEN first_nz, GEN matarch,
                        long PRECREG, FB_t *F,
-                       GEN nf,long nbrelpid,GEN invp,GEN L)
+                       GEN nf,long nbrelpid,GEN invp,GEN L,double LIMC2)
 {
   const int maxtry_DEP  = 20;
   const int maxtry_FACT = 500;
   const double eps = 0.000001;
   double *y,*z,**q,*v, BOUND;
   pari_sp av = avma, av1, av2, limpile;
-  long j,k,noideal, nbrel = lg(mat)-1;
+  long j,k,noideal, precbound, nbrel = lg(mat)-1;
   long nbsmallnorm,nbfact,R1, N = degpol(nf[1]);
-  GEN x,xembed,M,G,r,Gvec,prvec;
+  GEN x, xembed, gx, Mlow, M, G, r, Gvec, prvec;
 
   if (DEBUGLEVEL)
     fprintferr("\n#### Looking for %ld relations (small norms)\n",nbrel);
-  xembed = NULL; /* gcc -Wall */
+  xembed = gx = NULL; /* gcc -Wall */
   nbsmallnorm = nbfact = 0;
   R1 = nf_get_r1(nf);
   M = gmael(nf,5,1);
   G = gmael(nf,5,2);
+  /* LLL reduction produces v0 in I such that T2(v0) <= (4/3)^((n-1)/2) NI^(2/n)
+   * We consider v with T2(v) <= 2 T2(v0)
+   * Hence Nv <= ((4/3)^((n-1)/2) * 2 / n)^(n/2) NI
+   *
+   */
+  precbound = 3 + (long)ceil(
+    (N/2. * ((N-1)/2.* log(4./3) + log(2./N)) + log(LIMC2))
+      / (BITS_IN_LONG * log(2.))); /* enough to compute norms */
+  if (precbound < nfgetprec(nf))
+    Mlow = gprec_w(M, precbound);
+  else 
+    Mlow = M;
 
   prvec = cgetg(3,t_VECSMALL); Gvec = cgetg(3,t_VEC);
   prvec[1] = MEDDEFAULTPREC;   Gvec[1] = (long)gprec_w(G,prvec[1]);
@@ -1643,8 +1657,8 @@ small_norm_for_buchall(long cglob,GEN mat,GEN first_nz, GEN matarch,
 
     for (k=1; k<=N; k++)
     {
-      v[k]=gtodouble(gcoeff(r,k,k));
-      for (j=1; j<k; j++) q[j][k]=gtodouble(gcoeff(r,j,k));
+      v[k] = gtodouble(gcoeff(r,k,k));
+      for (j=1; j<k; j++) q[j][k] = gtodouble(gcoeff(r,j,k));
       if (DEBUGLEVEL>3) fprintferr("v[%ld]=%.4g ",k,v[k]);
     }
 
@@ -1687,11 +1701,12 @@ small_norm_for_buchall(long cglob,GEN mat,GEN first_nz, GEN matarch,
 	  if (y[1]<=eps) goto ENDIDEAL; /* skip all scalars: [*,0...0] */
 	  if (ccontent(x)==1) /* primitive */
 	  {
-            GEN Nx, gx = gmul_mati_smallvec(IDEAL,x);
+            GEN Nx;
             pari_sp av4;
+            gx = gmul_mati_smallvec(IDEAL,x);
             if (!isnfscalar(gx))
             {
-              xembed = gmul(M,gx); av4 = avma; nbsmallnorm++;
+              xembed = gmul(Mlow, gx); av4 = avma; nbsmallnorm++;
               if (++try_factor > maxtry_FACT) goto ENDIDEAL;
               Nx = ground(norm_by_embed(R1,xembed)); setsigne(Nx, 1);
               if (can_factor(F, nf, NULL, gx, Nx)) { avma = av4; break; }
@@ -1713,6 +1728,7 @@ small_norm_for_buchall(long cglob,GEN mat,GEN first_nz, GEN matarch,
         avma = av3; continue;
       }
       /* record archimedean part */
+      if (M != Mlow) xembed = gmul(M, gx);
       set_log_embed((GEN)matarch[cglob], xembed, R1, PRECREG);
       dependent = 0;
 
@@ -1734,8 +1750,7 @@ END:
   if (DEBUGLEVEL)
   {
     fprintferr("\n"); msgtimer("small norm relations");
-    fprintferr("  small norms gave %ld relations, rank = %ld.\n",
-               cglob, rank(small_to_mat_i(mat, F->KC)));
+    fprintferr("  small norms gave %ld relations.\n", cglob);
     if (nbsmallnorm)
       fprintferr("  nb. fact./nb. small norm = %ld/%ld = %.3f\n",
                   nbfact,nbsmallnorm,((double)nbfact)/nbsmallnorm);
@@ -3033,7 +3048,7 @@ START:
   /* relations through elements of small norm */
   if (gsigne(gborne) > 0)
     cglob = small_norm_for_buchall(cglob,mat,first_nz,C,PRECREG,&F,
-                                   nf,nbrelpid,invp,liste);
+                                   nf,nbrelpid,invp,liste,LIMC2);
   if (cglob < 0) { precpb = "small_norm"; goto START; }
   avma = av1; limpile = stack_lim(av1,1);
 
