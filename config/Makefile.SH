@@ -559,7 +559,7 @@ $src/funclist::
 	@sh $cfg/mv-if-diff $src/funclist.tmp $src/funclist
 	@cd $desc && \$(MAKE) 
 
-$src/gp/gp_init.h $src/gp/highlvl.h $src/language/init.h: $src/funclist
+$src/gp/gp_init.h $src/gp/highlvl.h $src/language/init.h $src/language/members.h: $src/funclist
 EOT
 
 if test -s $src_dir/kernel/$kernlvl0/MakeLVL0.SH; then
@@ -620,7 +620,7 @@ for dir in basemath modules language gp graph gpdyn graphdyn systems; do
     depend="$src/language/anal.h $src/language/init.h"
     ;;
   anal)
-    depend="$src/language/anal.h $src/headers/parinf.h"
+    depend="$src/language/anal.h $src/language/members.h $src/headers/parinf.h"
     ;;
   base1|bibli1|buch2)
     depend="$src/headers/parinf.h"
