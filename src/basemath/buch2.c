@@ -2696,7 +2696,7 @@ INCREASEGEN:
   p1 = gmul2n(divir(clh,z), 1);
   /* c1 should be close to 2, and not much smaller */
   c1 = compute_check(sublambda,p1,&parch,&reg);
-  if (!c1 || gcmpgs(gcmpgs(gmul2n(c1,1),3) < 0))
+  if (!c1 || gcmpgs(gmul2n(c1,1),3) < 0)
   { /* precision problems */
     prec=(PRECREG<<1)-2;
     if (DEBUGLEVEL) err(warnprec,"buchall (compute_check)",prec);
