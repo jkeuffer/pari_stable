@@ -733,8 +733,7 @@ frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
   NQ=dvmdis(NN,N1,&NR);
   if (cmpis(NQ,1000000000)>0)
   {
-    err(warner,"Combinatorics too hard : would need %Z tests!\n
-	I will skip it,but it may induce galoisinit to loop",NN);
+    err(warner,"Combinatorics too hard : would need %Z tests!\nI will skip it, but it may induce an infinit loop",NN);
     avma = ltop;
     *psi = NULL;
     return 0;
