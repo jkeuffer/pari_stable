@@ -1936,7 +1936,7 @@ identifier(void)
             g->x = *(g->c.ptcell);
             g->ep = NULL;
           } else {
-            g->x = ep->value;
+            g->x = (GEN) ep->value;
             g->ep = ep;
           }
 	  argvec[i++] = (GEN)&(g->x); break;
