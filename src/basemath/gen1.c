@@ -1358,7 +1358,7 @@ gmul(GEN x, GEN y)
     case t_QFR: return compreal(x,y);
     case t_RFRAC: return mul_rfrac((GEN)x[1],(GEN)x[2], (GEN)y[1],(GEN)y[2]);
     case t_MAT:
-      ly = lg(y); if (ly == 1) return cgetg(ly,t_MAT);
+      ly = lg(y); if (ly == 1) return cgetg(1,t_MAT);
       lx = lg(x);
       if (lx != lg(y[1])) err(operi,"*",x,y);
       z = cgetg(ly,t_MAT);
