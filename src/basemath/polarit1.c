@@ -1373,10 +1373,11 @@ factmod0(GEN f, GEN pp)
       }
     }
     if (!p) break;
-    j = degpol(f2); if (j % p) err(talker, "factmod: %Z is not prime", pp);
-    j = j/p + 3; if (j==3) break;
+    j = degpol(f2); if (!j) break;
+    if (j % p) err(talker, "factmod: %Z is not prime", pp);
+    j = j/p + 3;
 
-    e*=p; setlg(f,j); setlgef(f,j);
+    e *= p; setlg(f,j); setlgef(f,j);
     for (i=2; i<j; i++) f[i] = f2[p*(i-2)+2];
   }
   tetpil=avma; y=cgetg(3,t_VEC);
@@ -2292,7 +2293,7 @@ cmp_pol(GEN x, GEN y)
   return 0;
 }
 
-/* assume n > 1, X over FqX */
+/* assume n = deg(u) > 1, X over FqX */
 /* return S = [ X^q, X^2q, ... X^(n-1)q ] mod u (in Fq[X]) in Kronecker form */
 static GEN
 init_pow_q_mod_pT(GEN X, GEN q, GEN u, GEN T, GEN p)
@@ -2326,18 +2327,15 @@ init_pow_q_mod_pT(GEN X, GEN q, GEN u, GEN T, GEN p)
 static GEN
 spec_Fq_pow_mod_pol(GEN x, GEN S, GEN T, GEN p)
 {
-  long i, dx = degpol(x);
   pari_sp av = avma, lim = stack_lim(av, 1);
-  GEN x0 = x+2, z,c;
+  GEN x0 = x+2, z = (GEN)x0[0];
+  long i, dx = degpol(x);
 
-  z = c = (GEN)x0[0];
   for (i = 1; i <= dx; i++)
   {
-    GEN d;
-    c = (GEN)x0[i];
+    GEN d, c = (GEN)x0[i];
     if (gcmp0(c)) continue;
-    d = (GEN)S[i];
-    if (!gcmp1(c)) d = gmul(c,d);
+    d = (GEN)S[i]; if (!gcmp1(c)) d = gmul(c,d);
     z = gadd(z, d);
     if (low_stack(lim, stack_lim(av,1)))
     {
@@ -2405,7 +2403,7 @@ factmod9(GEN f, GEN p, GEN T)
     while (gcmp0(df1))
     { /* needs d >= p: pg = 0 can't happen  */
       pk *= pg; e = pk;
-      j = (degpol(f))/pg+3; setlg(f,j); setlgef(f,j);
+      j = degpol(f) / pg + 3; setlg(f,j); setlgef(f,j);
       for (i=2; i<j; i++)
         f[i] = (long)Fq_pow((GEN)f[pg*(i-2)+2], frobinv, T,p);
       df1 = FqX_deriv(f, T, p); f3 = NULL;
@@ -2414,14 +2412,14 @@ factmod9(GEN f, GEN p, GEN T)
     if (!degpol(f2)) u = f;
     else
     {
-      g1 = FqX_div(f,f2, T,p); df2 = FqX_deriv(f2, T,p);
+      g1 = FqX_div(f,f2, T,p);
+      df2 = FqX_deriv(f2, T,p);
       if (gcmp0(df2)) { u = g1; f3 = f2; }
       else
       {
         f3 = FqX_gcd(f2,df2, T,p);
-        if (!degpol(f3)) u = FqX_div(g1,f2, T,p);
-        else
-          u = FqX_div(g1, FqX_div(f2,f3, T,p), T,p);
+        u = degpol(f3)? FqX_div(f2, f3, T,p): f2;
+        u = FqX_div(g1, u, T,p);
       }
     }
     /* u is square-free (product of irreducibles of multiplicity e) */
