@@ -198,111 +198,107 @@ fordiv(GEN a, entree *ep, char *ch)
  *   fl = 1: impose a1 <= ... <= an
  *   fl = 2:        a1 <  ... <  an
  */
-static GEN *fv_a, *fv_m, *fv_M;
-static long fv_n, fv_fl;
-static char *fv_ch;
+typedef struct {
+  GEN *a, *m, *M;
+  long n,fl;
+  char *ch;
+} fvdat;
 
 /* general case */
 static void
-fvloop(long i)
+fvloop(long i, fvdat *d)
 {
-  fv_a[i] = fv_m[i];
-  if (fv_fl && i > 1)
+  d->a[i] = d->m[i];
+  if (d->fl && i > 1)
   {
-    GEN p1 = gsub(fv_a[i], fv_a[i-1]);
+    GEN p1 = gsub(d->a[i], d->a[i-1]);
     if (gsigne(p1) < 0)
-      fv_a[i] = gadd(fv_a[i], gceil(gneg_i(p1)));
-    if (fv_fl == 2 && gegal(fv_a[i], fv_a[i-1]))
-      fv_a[i] = gadd(fv_a[i], gun);
+      d->a[i] = gadd(d->a[i], gceil(gneg_i(p1)));
+    if (d->fl == 2 && gegal(d->a[i], d->a[i-1]))
+      d->a[i] = gadd(d->a[i], gun);
   }
-  if (i+1 == fv_n)
-    while (gcmp(fv_a[i], fv_M[i]) <= 0)
+  if (i+1 == d->n)
+    while (gcmp(d->a[i], d->M[i]) <= 0)
     {
-      long av = avma; (void)lisseq(fv_ch); avma = av;
-      if (loop_break()) { fv_n = 0; return; }
-      fv_a[i] = gadd(fv_a[i], gun);
+      ulong av = avma; (void)lisseq(d->ch); avma = av;
+      if (loop_break()) { d->n = 0; return; }
+      d->a[i] = gadd(d->a[i], gun);
     }
   else
-    while (gcmp(fv_a[i], fv_M[i]) <= 0)
+    while (gcmp(d->a[i], d->M[i]) <= 0)
     {
-      long av = avma; fvloop(i+1); avma = av;
-      if (!fv_n) return;
-      fv_a[i] = gadd(fv_a[i], gun);
+      ulong av = avma; fvloop(i+1, d); avma = av;
+      if (!d->n) return;
+      d->a[i] = gadd(d->a[i], gun);
     }
 }
 
 /* we run through integers */
 static void
-fvloop_i(long i)
+fvloop_i(long i, fvdat *d)
 {
-  fv_a[i] = setloop(fv_m[i]);
-  if (fv_fl && i > 1)
+  d->a[i] = setloop(d->m[i]);
+  if (d->fl && i > 1)
   {
-    int c = cmpii(fv_a[i], fv_a[i-1]);
+    int c = cmpii(d->a[i], d->a[i-1]);
     if (c < 0)
     {
-      fv_a[i] = setloop(fv_a[i-1]);
+      d->a[i] = setloop(d->a[i-1]);
       c = 0;
     }
-    if (c == 0 && fv_fl == 2)
-      fv_a[i] = incloop(fv_a[i]);
+    if (c == 0 && d->fl == 2)
+      d->a[i] = incloop(d->a[i]);
   }
-  if (i+1 == fv_n)
-    while (gcmp(fv_a[i], fv_M[i]) <= 0)
+  if (i+1 == d->n)
+    while (gcmp(d->a[i], d->M[i]) <= 0)
     {
-      long av = avma; (void)lisseq(fv_ch); avma = av;
-      if (loop_break()) { fv_n = 0; return; }
-      fv_a[i] = incloop(fv_a[i]);
+      ulong av = avma; (void)lisseq(d->ch); avma = av;
+      if (loop_break()) { d->n = 0; return; }
+      d->a[i] = incloop(d->a[i]);
     }
   else
-    while (gcmp(fv_a[i], fv_M[i]) <= 0)
+    while (gcmp(d->a[i], d->M[i]) <= 0)
     {
-      long av = avma; fvloop_i(i+1); avma = av;
-      if (!fv_n) return;
-      fv_a[i] = incloop(fv_a[i]);
+      ulong av = avma; fvloop_i(i+1, d); avma = av;
+      if (!d->n) return;
+      d->a[i] = incloop(d->a[i]);
     }
 }
 
 void
 forvec(entree *ep, GEN x, char *c, long flag)
 {
-  long i, av = avma, tx = typ(x), n = fv_n, fl = fv_fl;
-  GEN *a = fv_a, *M = fv_M, *m = fv_m;
-  char *ch = fv_ch;
-  void (*fv_fun)(long) = fvloop_i;
+  ulong av = avma;
+  long tx = typ(x);
+  fvdat D, *d = &D;
 
   if (!is_vec_t(tx)) err(talker,"not a vector in forvec");
-  if (fl<0 || fl>2) err(flagerr);
-  fv_n = lg(x);
-  fv_ch = c;
-  fv_fl = flag;
-  fv_a = (GEN*)cgetg(fv_n,t_VEC); push_val(ep, (GEN)fv_a);
-  fv_m = (GEN*)cgetg(fv_n,t_VEC);
-  fv_M = (GEN*)cgetg(fv_n,t_VEC);
-  if (fv_n == 1) lisseq(fv_ch);
+  if (flag<0 || flag>2) err(flagerr);
+  d->n = lg(x);
+  d->ch = c;
+  d->fl = flag;
+  d->a = (GEN*)cgetg(d->n,t_VEC); push_val(ep, (GEN)d->a);
+  d->m = (GEN*)cgetg(d->n,t_VEC);
+  d->M = (GEN*)cgetg(d->n,t_VEC);
+  if (d->n == 1) lisseq(d->ch);
   else
   {
-    for (i=1; i<fv_n; i++)
+    long i, t = t_INT;
+    for (i=1; i<d->n; i++)
     {
       GEN *c = (GEN*) x[i];
       tx = typ(c);
       if (! is_vec_t(tx) || lg(c)!=3)
 	err(talker,"not a vector of two-component vectors in forvec");
-      if (gcmp(c[1],c[2]) > 0) fv_n = 0;
+      if (gcmp(c[1],c[2]) > 0) d->n = 0;
+      if (typ(c[1]) != t_INT) t = t_REAL;
       /* in case x is an ep->value and c destroys it, we have to copy */
-      if (typ(c[1]) != t_INT) fv_fun = fvloop;
-      fv_m[i] = gcopy(c[1]);
-      fv_M[i] = gcopy(c[2]);
+      d->m[i] = gcopy(c[1]);
+      d->M[i] = gcopy(c[2]);
     }
-    fv_fun(1);
+    if (t == t_INT) fvloop_i(1, d); else fvloop(1, d);
   }
-  pop_val(ep);
-  fv_n = n;
-  fv_ch = ch;
-  fv_fl = fl;
-  fv_a = a;
-  fv_m = m;
-  fv_M = M; avma = av;
+  pop_val(ep); avma = av;
 }
 
 /********************************************************************/
