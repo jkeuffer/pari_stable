@@ -18,5 +18,4 @@ main()
     else
       printf("NOT IEEE (64 bit)\n");
   }
-  exit(0);
 }
