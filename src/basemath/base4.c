@@ -1390,6 +1390,7 @@ idealpowred(GEN nf, GEN x, GEN n, long prec)
   long i,j,m,av=avma, s = signe(n);
   GEN y, p1;
 
+  if (typ(n) != t_INT) err(talker,"non-integral exponent in idealpowred");
   if (absi_cmp(n,stoi(16)) < 0)
   {
     y = idealpow(nf,x,n);
