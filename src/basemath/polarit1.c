@@ -2014,21 +2014,69 @@ factorpadic0(GEN f,GEN p,long r,long flag)
 extern GEN to_Kronecker(GEN P, GEN Q);
 static GEN spec_Fq_pow_mod_pol(GEN x, GEN S, GEN T, GEN p);
 
-#if 0
 static GEN
-to_fq(GEN x, GEN a, GEN p)
+to_Fq(GEN x, GEN T, GEN p)
 {
-  long i,lx = lgef(x);
-  GEN z = cgetg(3,t_POLMOD), pol = cgetg(lx,t_POL);
-  pol[1] = x[1];
-  if (lx == 2) setsigne(pol, 0);
+  long i,lx, tx = typ(x);
+  GEN z = cgetg(3,t_POLMOD), y;
+
+  if (tx == t_INT)
+    y = mod(x,p);
   else
-    for (i=2; i<lx; i++) pol[i] = (long)mod((GEN)x[i], p);
-  /* assume deg(pol) < deg(a) */
-  z[1] = (long)a;
-  z[2] = (long)pol; return z;
+  {
+    if (tx != t_POL) err(typeer,"to_Fq");
+    lx = lgef(x);
+    y = cgetg(lx,t_POL);
+    y[1] = x[1];
+    if (lx == 2) setsigne(y, 0);
+    else
+      for (i=2; i<lx; i++) y[i] = (long)mod((GEN)x[i], p);
+  }
+  /* assume deg(y) < deg(T) */
+  z[1] = (long)T;
+  z[2] = (long)y; return z;
 }
-#endif
+
+static GEN
+to_Fq_pol(GEN x, GEN T, GEN p)
+{
+  long i, lx, tx = typ(x);
+  if (tx != t_POL) err(typeer,"to_Fq_pol");
+  lx = lgef(x);
+  for (i=2; i<lx; i++) x[i] = (long)to_Fq((GEN)x[i],T,p);
+  return x;
+}
+
+/* assume T a clone */
+static GEN
+copy_then_free(GEN T)
+{
+  GEN t = forcecopy(T); gunclone(T); return t;
+}
+
+static GEN
+to_Fq_fact(GEN t, GEN ex, long nbf, int sort, GEN unfq, gpmem_t av)
+{
+  GEN T = (GEN)unfq[1]/*clone*/, y = cgetg(3,t_MAT), u,v,p;
+  long j,k, l = lg(t);
+
+  u = cgetg(nbf,t_COL); y[1] = (long)u;
+  v = cgetg(nbf,t_COL); y[2] = (long)v;
+  for (j=1,k=0; j<l; j++)
+    if (ex[j])
+    {
+      k++;
+      u[k] = (long)simplify((GEN)t[j]); /* may contain pols of degree 0 */
+      v[k] = lstoi(ex[j]);
+    }
+  y = gerepileupto(av, y);
+  if (sort) y = sort_factor(y,cmp_pol);
+  T = copy_then_free(T);
+  p = (GEN)leading_term(T)[1];
+  u = (GEN)y[1];
+  for (j=1; j<nbf; j++) u[j] = (long)to_Fq_pol((GEN)u[j], T,p);
+  return y;
+}
 
 /* split into r factors of degree d */
 static void
@@ -2174,9 +2222,9 @@ isabsolutepol(GEN f)
 GEN
 factmod9(GEN f, GEN p, GEN T)
 {
+  gpmem_t av = avma;
   long pg, i, j, k, d, e, N, vf, va, nbfact, nbf, pk;
-  gpmem_t av = avma, tetpil;
-  GEN S,ex,y,f2,f3,df1,df2,g1,u,v,q,unfp,unfq, *t;
+  GEN S,ex,f2,f3,df1,df2,g1,u,v,q,unfp,unfq, *t;
   GEN frobinv,X;
 
   if (typ(T)!=t_POL || typ(f)!=t_POL || gcmp0(T)) err(typeer,"factmod9");
@@ -2185,7 +2233,7 @@ factmod9(GEN f, GEN p, GEN T)
   if (va <= vf)
     err(talker,"polynomial variable must have higher priority in factorff");
   unfp = gmodulsg(1,p); T = gmul(unfp,T);
-  unfq = gmodulcp(gmul(unfp,polun[va]), T);
+  unfq = gmodulo(gmul(unfp,polun[va]), T);
   f = gmul(unfq,f);
   if (!signe(f)) err(zeropoler,"factmod9");
   d = degpol(f); if (!d) { avma = av; return trivfact(); }
@@ -2195,18 +2243,7 @@ factmod9(GEN f, GEN p, GEN T)
   if (isabsolutepol(f))
   {
     GEN z = Fp_factor_rel0(f, p, T);
-    GEN t = (GEN)z[1], ex = (GEN)z[2];
-    nbfact = lg(t);
-    tetpil = avma;
-    y = cgetg(3,t_MAT);
-    u = cgetg(nbfact,t_COL); y[1] = (long)u;
-    v = cgetg(nbfact,t_COL); y[2] = (long)v;
-    for (j=1; j<nbfact; j++)
-    {
-      u[j] = lmul((GEN)t[j],unfq);
-      v[j] = lstoi(ex[j]);
-    }
-    return gerepile(av,tetpil,y);
+    return to_Fq_fact((GEN)z[1],(GEN)z[2],lg(z[1]), 0, unfq,av);
   }
 
   pg = is_bigint(p)? 0: itos(p);
@@ -2289,7 +2326,7 @@ factmod9(GEN f, GEN p, GEN T)
     f = f2; df1 = df2; e += pk;
   }
 
-  nbf = nbfact;
+  nbf = nbfact; setlg(t, nbfact);
   for (j=1; j<nbfact; j++)
   {
     t[j] = FpXQX_normalize((GEN)t[j], T,p);
@@ -2300,19 +2337,7 @@ factmod9(GEN f, GEN p, GEN T)
         nbf--; break;
       }
   }
-  tetpil = avma;
-  y = cgetg(3,t_MAT);
-  u = cgetg(nbf,t_COL); y[1] = (long)u;
-  v = cgetg(nbf,t_COL); y[2] = (long)v;
-  for (j=1,k=0; j<nbfact; j++)
-    if (ex[j])
-    {
-      k++;
-      u[k] = lmul((GEN)t[j],unfq);
-      v[k] = lstoi(ex[j]);
-    }
-  y = gerepile(av,tetpil,y);
-  return sort_factor(y, cmp_pol);
+  return to_Fq_fact((GEN)t,ex,nbf, 1, unfq,av);
 }
 /* See also: Isomorphisms between finite field and relative
  * factorization in polarit3.c */
