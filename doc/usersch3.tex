@@ -1572,9 +1572,19 @@ the factored object. If a second argument $\var{nf}$ is supplied, $f$ is
 assumed to be a prime ideal factorization in the number field $\var{nf}$.
 The resulting ideal is given in HNF\sidx{Hermite normal form} form.
 
-If $f$ is a vector instead of a factorization, return the product of all
-elements of $f$ (i.e assumes it is a factorization, all of whose exponents
-are equal to $1$).
+If $f$ is a vector (not mimicing a factorization, see below) instead of a
+factorization, return the product of all elements of $f$, i.e assume it is a
+factorization, all of whose exponents are equal to $1$.
+
+Finally, if $f$ is a vector of $2$ vectors of the same length the second of
+which being integral (dummy factorization), say of the form $f = [x,e]$,
+return the product of the $x[i]^{e[i]}$. In case separate \typ{VEC} $x$ and
+$e$ are originally available, it is more convenient (and legible) to use
+this trick than to build a legitimate factorization; compare
+\bprog
+factorback([x, e])
+factorback(concat(Mat(x~), e~))
+@eprog
 
 \syn{factorback}{f,\var{nf}}, where an omitted
 $\var{nf}$ is entered as \kbd{NULL}.
@@ -2671,7 +2681,7 @@ fundamental units, $w$ generates the torsion.\cr
 \+\tet{reg}  &(\var{bnr},& \var{bnf},&&)&: & regulator.\cr
 
 \+\tet{roots}&(\var{bnr},& \var{bnf},& \var{nf}&)&: & roots of the
-polnomial generating the field.\cr
+polynomial generating the field.\cr
 
 \+\tet{sign} &(\var{bnr},& \var{bnf},& \var{nf}&)&: & $[r_1,r_2]$ the
 signature of the field. This means that the field has $r_1$ real \cr
@@ -3077,7 +3087,29 @@ special case of \kbd{bnrclass}.
 \subsecidx{bnfsignunit}$(\var{bnf})$: $\var{bnf}$ being a big number field
 output by \kbd{bnfinit}, this computes an $r_1\times(r_1+r_2-1)$ matrix
 having $\pm1$ components, giving the signs of the real embeddings of the
-fundamental units.
+fundamental units. The following functions compute generators for the totally
+positive units:
+
+\bprog
+/* exponents of totally positive units generators on bnf.tufu */
+tpuexpo(bnf)=
+{ local(S,d,K);
+
+  S = bnfsignunit(bnf); d = matsize(S);
+  S = matrix(d[1],d[2], i,j, if (S[i,j] < 0, 1,0));
+  S = concat(S, vectorv(d[1],i,1));   \\ sign(-1)
+  K = lift(matker(S * Mod(1,2)));
+  if (K, mathnfmodid(K, 2), 2*matid(d[1]))
+}
+
+/* totally positive units */
+tpu(bnf)=
+{ local(vu, ex = tpuexpo(bnf));
+
+  vu = nfbasistoalg(bnf, bnf.tufu);
+  vector(length(ex)-1, i, factorback([vu, ex[,i+1]]))  \\ ex[,1] is 1
+}
+@eprog
 
 \syn{signunits}{\var{bnf}}.
 
@@ -3113,10 +3145,9 @@ $v[6]$ is a copy of $S$.
 \syn{bnfsunit}{\var{bnf},S,\var{prec}}.
 
 \subsecidx{bnfunit}$(\var{bnf})$: $\var{bnf}$ being a big number field as
-output by
-\kbd{bnfinit}, outputs a two-component row vector giving in the first
-component the vector of fundamental units of the number field, and in the
-second component the number of bit of accuracy which remained in the
+output by \kbd{bnfinit}, outputs a two-component row vector giving in the
+first component the vector of fundamental units of the number field, and in
+the second component the number of bit of accuracy which remained in the
 computation (which is always correct, otherwise an error message is printed).
 This function is mainly for people who used the wrong flag in \kbd{bnfinit}
 and would like to skip part of a lengthy \kbd{bnfinit} computation.
