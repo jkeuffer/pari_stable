@@ -59,15 +59,19 @@ GEN     Flx_sqr(GEN x, ulong p);
 GEN     Flx_sub(GEN x, GEN y, ulong p);
 long    Flx_valuation(GEN x);
 GEN     Flx_zero(long v);
+GEN     FlxX_ZXX(GEN B);
+GEN     FlxYqQ_pow(GEN x, GEN n, GEN S, GEN T, ulong p);
 GEN     Flxq_inv(GEN x,GEN T,ulong p);
 GEN     Flxq_invsafe(GEN x, GEN T, ulong p);
 GEN     Flxq_mul(GEN y,GEN x,GEN pol,ulong p);
 GEN     Flxq_pow(GEN x, GEN n, GEN pol, ulong p);
 GEN     Flxq_sqr(GEN y,GEN pol,ulong p);
+GEN     FlxqXQ_pow(GEN x, GEN n, GEN S, GEN T, ulong p);
 GEN     ZM_Flm(GEN x, ulong p);
 GEN     ZV_Flv(GEN x, ulong p);
 GEN     ZX_Flx(GEN x, ulong p);
 GEN     ZXX_Flxy(GEN B, ulong p, long vs);
+GEN     ZXX_FlxX(GEN B, ulong p, long v);
 
  /* alglin1.c */
 

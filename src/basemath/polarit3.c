@@ -1043,10 +1043,21 @@ FpXYQQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
   pari_sp av = avma;
   FpXYQQ_muldata D;
   GEN y;
-  D.S = S;
-  D.T = T;
-  D.p = p;
-  y = leftright_pow(x, n, (void*)&D, &FpXYQQ_sqr, &FpXYQQ_mul);
+  if (OK_ULONG(p))
+  {
+    ulong pp = p[2];
+    x = ZXX_FlxX(x, pp, varn(T));
+    S = ZX_Flx(S, pp);
+    T = ZX_Flx(T, pp);
+    y = FlxX_ZXX( FlxYqQ_pow(x, n, S, T, pp) );
+  }
+  else
+  {
+    D.S = S;
+    D.T = T;
+    D.p = p;
+    y = leftright_pow(x, n, (void*)&D, &FpXYQQ_sqr, &FpXYQQ_mul);
+  }
   return gerepileupto(av, y);
 }
 
@@ -1077,18 +1088,32 @@ FpXQYQ_sqr(void *data, GEN x) {
 GEN
 FpXQYQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
 {
-  pari_sp av0 = avma;
-  long v = varn(x);
+  pari_sp ltop = avma;
   GEN y;
   kronecker_muldata D;
-
-  D.S = S;
-  D.T = T;
-  D.p = p;
-  D.v = v;
-  y = leftright_pow(to_Kronecker(x,T), n, (void*)&D, &FpXQYQ_sqr, &FpXQYQ_mul);
-  y = FpXQX_from_Kronecker(y, T,p);
-  setvarn(y, v); return gerepileupto(av0, y);
+  if (OK_ULONG(p))
+  {
+    ulong pp = p[2];
+    GEN z;
+    long v = varn(T);
+    T = ZX_Flx(T, pp);
+    x = ZXX_FlxX(x, pp, v);
+    S = ZXX_FlxX(S, pp, v);
+    z = FlxqXQ_pow(x, n, S, T, pp);
+    y = FlxX_ZXX(z);
+  }
+  else
+  {
+    long v = varn(x);
+    D.S = S;
+    D.T = T;
+    D.p = p;
+    D.v = v;
+    y = leftright_pow(to_Kronecker(x,T), n, (void*)&D, &FpXQYQ_sqr, &FpXQYQ_mul);
+    y = FpXQX_from_Kronecker(y, T,p);
+    setvarn(y, v); 
+  }
+  return gerepileupto(ltop, y);
 }
 /*******************************************************************/
 /*                                                                 */
