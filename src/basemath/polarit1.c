@@ -741,7 +741,6 @@ factcantor0(GEN f, GEN pp, long simple)
       for (d=1; d <= du>>1; d++)
       {
         if (!simple) pd = mulii(pd,pp);
-        // v = Fp_pow_mod_pol(v,pp, u,pp);
         v = spec_Fp_pow_mod_pol(v, pp, S);
         g = Fp_pol_gcd(gadd(v, gneg(polx[vf])), u, pp);
         dg = lgef(g)-3;
