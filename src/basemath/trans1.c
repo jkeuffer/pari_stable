@@ -204,7 +204,7 @@ mpeuler(long prec)
 
 /********************************************************************/
 /**                                                                **/
-/**       CONVERSION DE TYPES POUR FONCTIONS TRANSCENDANTES        **/
+/**          TYPE CONVERSION FOR TRANSCENDENTAL FUNCTIONS          **/
 /**                                                                **/
 /********************************************************************/
 
