@@ -32,6 +32,11 @@ YU = Yoshiaki Uchikawa
 Done for version 2.2.2 (released ??/??/2001):
   Fixed
     1- qfbred(Qfb(4, 17, 18)) --> SIGFPE
+    2- broken compilation in arith.c when CC != gcc
+
+  Changes
+    1- allow compressing *.dvi files for the online help system
+    2- index bound was restricted to MAXLONG in subgrouplist. Made it a GEN
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.1 (released 18/10/2001):
