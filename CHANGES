@@ -87,6 +87,7 @@ HC 12- gamma function for integral/rational arguments
    15- allow bnrstark over Q
    16- 'subgroup' argument made optional in bnrL1, bnrstark, rnfkummer
    17- use relative van Hoeij algorithm in nffactor [not optimized yet]
+   18- rewrote factorff() to use new modular functions
 
   Added
     1- mplog2() function --> faster mplog()
