@@ -70,6 +70,7 @@ IZ 12- [gnuplot + dynamic link:] allow building even when dlopen() not available
    25- apparent oo loop in bnfcertify [when computing lower bound for
        regulator]
    26- ideallistarch(nfinit(x),[1,1],0); --> SEGV [bad input]
+   27- factor(x-I) --> x - #<16382>
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).

@@ -4097,7 +4097,7 @@ polfnf(GEN a, GEN t)
   p2 = cgetg(lx,t_COL); y[2] = (long)p2;
   if (lx == 2)
   { /* P^k, k irreducible */
-    p1[1] = (long)u;
+    p1[1] = lmul(unt,u);
     p2[1] = lstoi(degpol(a) / degpol(u));
     return gerepilecopy(av, y);
   }
