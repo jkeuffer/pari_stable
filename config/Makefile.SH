@@ -57,6 +57,8 @@ qt)
 fltk)
   PLOTCFLAGS="-I\$(FLTKDIR)/include $X11_INC"
   PLOTLIBS="-L\$(FLTKDIR)/lib -lfltk $FLTK_LIBS"
+  compilepost_sta='fltk-config --post gp-sta || echo "cannot find fltk-config"'
+  compilepost_dyn='fltk-config --post gp-sta || echo "cannot find fltk-config"'
   graph=plotfltk;;
 *gnuplot-dynamic*)
   case "$graphic_lib_dll" in
@@ -321,6 +323,7 @@ tune-sta: tune.o lib-sta
 gp-sta: $add_funclist \$(OBJS) \$(OBJSGP) \$(GNUPLOT_OBJS)
 	\$(RM) \$@
 	\$(LD) -o \$@ \$(LDFLAGS) \$(OBJS) \$(OBJSGP) \$(GNUPLOT_OBJS) \$(RUNPTH) \$(RLLIBS) \$(PLOTLIBS) \$(LIBS)
+	$compilepost_sta
 
 bench: $exec
 	@\$(DOTEST) $test_basic
@@ -505,6 +508,7 @@ EOT
 gp-dyn: $add_funclist \$(OBJSGP) \$(LIBPARI_DYN) \$(GNUPLOT_OBJS) \$(EXPORT_LIB)
 	\$(RM) \$@
 	\$(LD) -o \$@ \$(LDFLAGS) \$(OBJSGP) \$(GNUPLOT_OBJS) \$(RUNPTH) \$(TOPLDDYN) \$(LDDYN) \$(PLOTLIBS) \$(LIBS)
+	$compilepost_dyn
 
 \$(LIBPARI_DYN): $add_funclist \$(OBJS) \$(EXPORT_FILE)
 	-\$(RM) \$(LIBPARI_DYN)
