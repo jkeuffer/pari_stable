@@ -2577,7 +2577,8 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
     }
   }
   if (!flag) lambd = gdiv(lambd,gmul(gar,cs)); /* zetak */
-  return gerepileupto(av, gprec_w(lambd, prec2));
+  if (gprecision(lambd) > prec2) lambd = gprec_w(lambd, prec2);
+  return gerepileupto(av, lambd);
 }
 
 GEN
