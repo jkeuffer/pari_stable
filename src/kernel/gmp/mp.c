@@ -658,7 +658,6 @@ divrr_with_gmp(GEN x, GEN y)
   long lw=min(lx,ly);
   long lly=min(lw+1,ly);
   GEN  w=cgetr(lw+2);
-  pari_sp av=avma;
   long lu=lw+lly;
   long llx=min(lu,lx);
   mp_limb_t *u=(mp_limb_t *)new_chunk(lu);
@@ -679,14 +678,13 @@ divrr_with_gmp(GEN x, GEN y)
     mpn_add_1(q,q,lw+1,1);
   
   xmpn_mirrorcopy(RLIMBS(w),q,lw);
-  /*If q[lw] then q[lw]=1. We just need to right shift to 
-   * renormalize, but then we do not need e-- */
-  if (q[lw]) 
-    shift_right(w,w, 2,lw+2, 1,1)
-  else e--;
-  avma=av;
+
+  if (q[lw] == 0) e--;
+  else if (q[lw] == 1) { shift_right(w,w, 2,lw+2, 1,1); }
+  else { w[2] = HIGHBIT; e++; }
   if (sy < 0) sx = -sx;
   w[1] = evalsigne(sx) | evalexpo(e);
+  avma=(pari_sp) w;
   return w;
 }
 
