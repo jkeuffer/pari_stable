@@ -2677,8 +2677,8 @@ rootsold(GEN x, long l)
     for (i=2; i<deg+2; i++)
     {
       av3=avma; p3=(GEN)xd0[i];
-      p4 = gabs(greal(p3),l);
-      p5 = gabs(gimag(p3),l);
+      p4 = gabs(real_i(p3),l);
+      p5 = gabs(imag_i(p3),l);
       xdabs[i]=lpileupto(av3, gadd(p4,p5));
     }
     av0=avma; xc=gcopy(ps); xd=gcopy(xd0); av2=avma;
@@ -2875,7 +2875,7 @@ roots2(GEN pol,long PREC)
       if (x == NULL) goto RLAB;
 
       if (typ(x)==t_COMPLEX &&
-          gcmp(gabs(gimag(x),PREC), gmul2n(gmul(EPS,gabs(greal(x),PREC)),1))<=0)
+          gcmp(gabs(imag_i(x),PREC), gmul2n(gmul(EPS,gabs(real_i(x),PREC)),1))<=0)
         { x[2]=zero; flagrealrac = 1; }
       else if (j==1 && flagrealpol)
         { x[2]=zero; flagrealrac = 1; }
@@ -2903,7 +2903,7 @@ roots2(GEN pol,long PREC)
       {
         ad = (GEN*)new_chunk(j-1);
         ad[j-2] = (GEN)qolbis[j+2];
-        p1 = gmulsg(2,greal((GEN)rr[nbroot]));
+        p1 = gmulsg(2,real_i((GEN)rr[nbroot]));
         p2 = gnorm((GEN)rr[nbroot]);
         ad[j-3] = gadd((GEN)qolbis[j+1],gmul(p1,ad[j-2]));
         for (i=j-2; i>=2; i--)
@@ -2926,7 +2926,7 @@ roots2(GEN pol,long PREC)
     {
       if (gcmp0(gmael(rr,i,2))) f=0; else f=1;
       if (f<fr) break;
-      if (f==fr && gcmp(greal((GEN)rr[i]),greal(x)) <= 0) break;
+      if (f==fr && gcmp(real_i((GEN)rr[i]),real_i(x)) <= 0) break;
       rr[i+1]=rr[i];
     }
     rr[i+1]=(long)x;

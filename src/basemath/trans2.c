@@ -1266,11 +1266,11 @@ cxgamma(GEN s0, int dolog, long prec)
     if (typ(s) == t_COMPLEX && gexpo((GEN)s[2]) <= 16) funeq = 1;
   }
   /* s <--> 1-s */
-  if (funeq) { s = gsub(gun, s); sig = greal(s); }
+  if (funeq) { s = gsub(gun, s); sig = real_i(s); }
 
   { /* find "optimal" parameters [lim, nn] */
     double ssig = rtodbl(sig);
-    double st = rtodbl(gimag(s));
+    double st = rtodbl(imag_i(s));
     double la, l,l2,u,v, rlogs, ilogs;
 
     dcxlog(ssig,st, &rlogs,&ilogs);
@@ -1629,7 +1629,7 @@ cxpsi(GEN s0, long prec)
 
   {
     double ssig = rtodbl(sig);
-    double st = rtodbl(gimag(s));
+    double st = rtodbl(imag_i(s));
     double l;
     {
       double rlog, ilog; /* log (s - Euler) */

@@ -2052,7 +2052,7 @@ GetValue(GEN dtcr, GEN W, GEN S, GEN T, long fl, long fl2, long prec)
     cf = gmul2n(gpowgs(racpi, q), b);
 
     VL = gadd(gmul(W, gconj(S)), gconj(T));
-    if (isreal) VL = greal(VL);
+    if (isreal) VL = real_i(VL);
     VL = gdiv(VL, cf);
 
     if (fl2)
@@ -2071,7 +2071,7 @@ GetValue(GEN dtcr, GEN W, GEN S, GEN T, long fl, long fl2, long prec)
     cf = gmul((GEN)dtcr[2], gpowgs(racpi, b));
 
     rep = gadd(S, gmul(W, T));
-    if (isreal) rep = greal(rep);
+    if (isreal) rep = real_i(rep);
     rep = gdiv(rep, cf);
 
     if (fl2)
@@ -2319,7 +2319,7 @@ RecCoeff(GEN nf,  GEN pol,  long v, long prec)
     if (DEBUGLEVEL > 1)
       fprintferr("In RecCoeff with cf = %ld and B = %Z\n", cf, bound);
 
-    beta = greal((GEN)pol[cf+2]);
+    beta = real_i((GEN)pol[cf+2]);
     d.beta = beta;
     d.B    = bound;
     if (! (p1 = RecCoeff2(nf, &d, prec)) ) return NULL;
@@ -2746,7 +2746,7 @@ LABDOUB:
     {
       GEN CHI = gmael(dataCR,j,5);
       GEN val = ComputeImagebyChar(CHI, sig);
-      GEN p2 = greal(gmul((GEN)Lp[j], val));
+      GEN p2 = real_i(gmul((GEN)Lp[j], val));
       if (itos((GEN)CHI[3]) != 2) p2 = gmul2n(p2, 1); /* character not real */
       z = gadd(z, p2);
     }

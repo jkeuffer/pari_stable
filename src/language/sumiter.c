@@ -991,7 +991,7 @@ interp(GEN h, GEN s, long j, long lim, long KLOC)
   e1 = gexpo(ss);
   e2 = gexpo(dss);
   if (e1-e2 <= lim && e1 >= -lim) { avma = av; return NULL; }
-  if (gcmp0(gimag(ss))) ss = greal(ss);
+  if (gcmp0(imag_i(ss))) ss = real_i(ss);
   return ss;
 }
 

@@ -1725,8 +1725,8 @@ lindep2(GEN x, long bit)
 
   if (! is_vec_t(tx)) err(typeer,"lindep2");
   if (lx<=2) return cgetg(1,t_VEC);
-  re = greal(x);
-  im = gimag(x); bit = (long) (bit/L2SL10);
+  re = real_i(x);
+  im = imag_i(x); bit = (long) (bit/L2SL10);
   /* independent over R ? */
   if (lx == 3 && real_indep(re,im,bit))
     { avma = av; return cgetg(1, t_VEC); }
@@ -1759,8 +1759,8 @@ lindep(GEN x, long prec)
   if (! is_vec_t(tx)) err(typeer,"lindep");
   if (n <= 1) return cgetg(1,t_VEC);
   x = gmul(x, realun(prec)); if (tx != t_COL) settyp(x,t_COL);
-  re = greal(x);
-  im = gimag(x);
+  re = real_i(x);
+  im = imag_i(x);
   /* independent over R ? */
   if (n == 2 && real_indep(re,im,bit_accuracy(prec)))
     { avma = av; return cgetg(1, t_VEC); }
@@ -2064,8 +2064,8 @@ init_pslq(pslq_M *M, GEN x, long *PREC)
     pari_sp av = avma;
     GEN im, U = NULL;
     x = Q_primpart(x);
-    im = gimag(x);
-    x = greal(x); settyp(x, t_VEC);
+    im = imag_i(x);
+    x = real_i(x); settyp(x, t_VEC);
     if (!gcmp0(im))
     {
       U = (GEN)extendedgcd(im)[2];
@@ -2082,11 +2082,11 @@ init_pslq(pslq_M *M, GEN x, long *PREC)
   if (prec < DEFAULTPREC) prec = DEFAULTPREC;
   *PREC = prec;
   M->EXP = - bit_accuracy(prec) + max(n, 8);
-  M->flreal = is_zero(gimag(x), M->EXP, prec);
+  M->flreal = is_zero(imag_i(x), M->EXP, prec);
   if (!M->flreal)
     return lindep(x,prec); /* FIXME */
   else
-    x = greal(x);
+    x = real_i(x);
 
   if (DEBUGLEVEL>=3) { (void)timer(); init_timer(M->T); }
   x = col_to_MP(x, prec); settyp(x,t_VEC);

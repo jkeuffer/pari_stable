@@ -574,7 +574,7 @@ cleanarch(GEN x, long N, long prec)
   }
   if (!is_vec_t(tx)) err(talker,"not a vector/matrix in cleanarch");
   RU = lg(x)-1; R1 = (RU<<1)-N;
-  s = gdivgs(sum(greal(x), 1, RU), -N); /* -log |norm(x)| / N */
+  s = gdivgs(sum(real_i(x), 1, RU), -N); /* -log |norm(x)| / N */
   y = cgetg(RU+1,tx);
   pi2 = Pi2n(1, prec);
   for (i=1; i<=R1; i++) y[i] = (long)addRe_modIm((GEN)x[i], s, pi2);
@@ -668,14 +668,14 @@ getfu(GEN nf,GEN *ptA,long fl,long *pte,long prec)
   matep = cgetg(RU,t_MAT);
   for (j=1; j<RU; j++)
   {
-    s = gzero; for (i=1; i<=RU; i++) s = gadd(s,greal(gcoeff(A,i,j)));
+    s = gzero; for (i=1; i<=RU; i++) s = gadd(s,real_i(gcoeff(A,i,j)));
     s = gdivgs(s, -N);
     p1=cgetg(RU+1,t_COL); matep[j]=(long)p1;
     for (i=1; i<=R1; i++) p1[i] = ladd(s, gcoeff(A,i,j));
     for (   ; i<=RU; i++) p1[i] = ladd(s, gmul2n(gcoeff(A,i,j),-1));
   }
   if (prec <= 0) prec = gprecision(A);
-  u = lllintern(greal(matep),100,1,prec);
+  u = lllintern(real_i(matep),100,1,prec);
   if (!u) return not_given(av,fl,fupb_PRECI);
 
   p1 = gmul(matep,u);
@@ -1499,7 +1499,7 @@ isunit(GEN bnf,GEN x)
   for (   ; i<=RU; i++) v[i] = deux;
   logunit = concatsp(logunit, v);
   /* ex = fundamental units exponents */
-  rlog = greal(logunit);
+  rlog = real_i(logunit);
   prec = nfgetprec(nf);
   for (i=1;;)
   {
@@ -1535,7 +1535,7 @@ isunit(GEN bnf,GEN x)
 
   setlg(ex, RU);
   p1 = row_i(logunit,1, 1,RU-1);
-  p1 = gneg(gimag(gmul(p1,ex))); if (!R1) p1 = gmul2n(p1, -1);
+  p1 = gneg(imag_i(gmul(p1,ex))); if (!R1) p1 = gmul2n(p1, -1);
   p1 = gadd(garg((GEN)emb[1],prec), p1);
   /* p1 = arg(the missing root of 1) */
 
@@ -1575,7 +1575,7 @@ zsignunits(GEN bnf, GEN archp, int add_zu)
     y[j] = (long)c;
     for (i=1; i<l; i++)
     {
-      GEN p1 = ground( gdiv(gimag((GEN)d[ archp[i] ]), pi) );
+      GEN p1 = ground( gdiv(imag_i((GEN)d[ archp[i] ]), pi) );
       c[i] = mpodd(p1)? (long)un: zero;
     }
     avma = av;
@@ -2108,7 +2108,7 @@ compute_multiple_of_R(GEN A,long RU,long N,GEN *ptlambda)
   pari_sp av = avma;
 
   if (DEBUGLEVEL) fprintferr("\n#### Computing regulator multiple\n");
-  xreal = greal(A); /* = (log |sigma_i(u_j)|) */
+  xreal = real_i(A); /* = (log |sigma_i(u_j)|) */
   T = cgetg(RU+1,t_COL);
   for (i=1; i<=R1; i++) T[i] = un;
   for (   ; i<=RU; i++) T[i] = deux;
@@ -2596,7 +2596,7 @@ get_regulator(GEN mun)
   GEN A;
 
   if (lg(mun)==1) return gun;
-  A = gtrans( greal(mun) );
+  A = gtrans( real_i(mun) );
   setlg(A, lg(A)-1);
   return gerepileupto(av, gabs(det(A), 0));
 }

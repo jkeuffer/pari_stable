@@ -359,8 +359,8 @@ static GEN
 roots_to_ZX(GEN z, long *e)
 {
   GEN a = roots_to_pol(z,0);
-  GEN b = grndtoi(greal(a),e);
-  long e1 = gexpo(gimag(a));
+  GEN b = grndtoi(real_i(a),e);
+  long e1 = gexpo(imag_i(a));
   if (e1 > *e) *e = e1;
   return b;
 }
@@ -462,8 +462,8 @@ galois(GEN x, long prec)
 		          gmul((GEN)p2[ind5[k+2]],(GEN)p2[ind5[k+3]]));
 		p3 = gadd(p3, gmul(gsqr((GEN)p2[i]),p5));
 	      }
-	      w[l]=lrndtoi(greal(p3),&e);
-              e1 = gexpo(gimag(p3)); if (e1>e) e=e1;
+	      w[l]=lrndtoi(real_i(p3),&e);
+              e1 = gexpo(imag_i(p3)); if (e1>e) e=e1;
               ee[l]=e; z[l] = (long)p3;
 	    }
             p5 = roots_to_ZX(z, &e); if (e <= -10) break;
@@ -491,8 +491,8 @@ galois(GEN x, long prec)
 	    p3 = gadd(p3,gmul(gmul((GEN)p2[i],(GEN)p2[j]),
 		              gsub((GEN)p2[j],(GEN)p2[i])));
 	  }
-	  p5=gsqr(p3); p4=grndtoi(greal(p5),&e);
-          e1 = gexpo(gimag(p5)); if (e1>e) e=e1;
+	  p5=gsqr(p3); p4=grndtoi(real_i(p5),&e);
+          e1 = gexpo(imag_i(p5)); if (e1>e) e=e1;
 	  if (e <= -10)
 	  {
 	    if (gcmp0(p4)) goto tchi;
@@ -2473,7 +2473,7 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
   imax = itos(gmael(nfz,1,3)); N0 = lg(coef)-1;
   bigprec = precision(cst); prec = prec2+1;
 
-  if (ts==t_COMPLEX && gcmp0(gimag(s))) { s=greal(s); ts = typ(s); }
+  if (ts==t_COMPLEX && gcmp0(imag_i(s))) { s=real_i(s); ts = typ(s); }
   if (ts==t_REAL && !signe(gfrac(s))) { s=mptrunc(s); ts = t_INT; }
   if (ts==t_INT)
   {

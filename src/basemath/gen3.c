@@ -2966,14 +2966,31 @@ op_ReIm(GEN f(GEN), GEN x)
 GEN
 real_i(GEN x)
 {
-  return (typ(x) == t_COMPLEX)? (GEN)x[1]: x;
+  switch(typ(x))
+  {
+    case t_INT: case t_REAL: case t_FRAC: case t_FRACN:
+      return x;
+    case t_COMPLEX:
+      return (GEN)x[1];
+    case t_QUAD:
+      return (GEN)x[2];
+  }
+  return op_ReIm(real_i,x);
 }
 GEN
 imag_i(GEN x)
 {
-  return (typ(x) == t_COMPLEX)? (GEN)x[2]: gzero;
+  switch(typ(x))
+  {
+    case t_INT: case t_REAL: case t_FRAC: case t_FRACN:
+      return gzero;
+    case t_COMPLEX:
+      return (GEN)x[2];
+    case t_QUAD:
+      return (GEN)x[3];
+  }
+  return op_ReIm(imag_i,x);
 }
-
 GEN
 greal(GEN x)
 {
@@ -2990,7 +3007,6 @@ greal(GEN x)
   }
   return op_ReIm(greal,x);
 }
-
 GEN
 gimag(GEN x)
 {

@@ -3455,9 +3455,9 @@ static GEN
 nftau(long r1, GEN x)
 {
   long i, l = lg(x);
-  GEN s = r1? (GEN)x[1]: gmul2n(greal((GEN)x[1]),1);
+  GEN s = r1? (GEN)x[1]: gmul2n(real_i((GEN)x[1]),1);
   for (i=2; i<=r1; i++) s = gadd(s, (GEN)x[i]);
-  for (   ; i < l; i++) s = gadd(s, gmul2n(greal((GEN)x[i]),1));
+  for (   ; i < l; i++) s = gadd(s, gmul2n(real_i((GEN)x[i]),1));
   return s;
 }
 
@@ -3601,7 +3601,7 @@ do_SWAP(GEN I, GEN MC, GEN MCS, GEN h, GEN mu, GEN B, long kmax, long k,
   for (j=1; j<=k-2; j++) swap(coeff(mu,k-1,j),coeff(mu,k,j));
   muf = gcoeff(mu,k,k-1);
   mufc = gconj(muf); 
-  Bf = gadd((GEN)B[k], vecmul(greal(vecmul(muf,mufc)), (GEN)B[k-1]));
+  Bf = gadd((GEN)B[k], vecmul(real_i(vecmul(muf,mufc)), (GEN)B[k-1]));
   if (check_0(Bf)) return 1; /* precision problem */
 
   p1 = vecdiv((GEN)B[k-1],Bf);

@@ -276,7 +276,7 @@ quadhilbertimag(GEN D, GEN flag)
     /* to avoid integer overflow (1 + 0.) */
     lead = (exmax < bit_accuracy(prec))? gun: realun(prec);
 
-    P = greal(roots_to_pol_intern(lead,P,0,0));
+    P = real_i(roots_to_pol_intern(lead,P,0,0));
     P = grndtoi(P,&exmax);
     if (DEBUGLEVEL>1) msgtimer("product, error bits = %ld",exmax);
     if (exmax <= -10)
@@ -382,8 +382,8 @@ findbezk(GEN nf, GEN x)
   GEN a,b, M = gmael(nf,5,1), y = cgetg(3, t_COL), u = gcoeff(M,1,2);
   long ea,eb;
 
-  b = grndtoi(gdiv(gimag(x), gimag(u)), &eb);
-  a = grndtoi(greal(gsub(x, gmul(b,u))),&ea);
+  b = grndtoi(gdiv(imag_i(x), imag_i(u)), &eb);
+  a = grndtoi(real_i(gsub(x, gmul(b,u))),&ea);
   if (ea>-20 || eb>-20) return NULL;
   if (!signe(b)) return a;
   y[1] = (long)a;
@@ -448,7 +448,7 @@ ellphistinit(GEN om, long prec)
 {
   GEN p1,res,om1b,om2b, om1 = (GEN)om[1], om2 = (GEN)om[2];
 
-  if (gsigne(gimag(gdiv(om1,om2))) < 0)
+  if (gsigne(imag_i(gdiv(om1,om2))) < 0)
   {
     p1 = om1; om1 = om2; om2 = p1;
     om = cgetg(3,t_VEC);
@@ -458,7 +458,7 @@ ellphistinit(GEN om, long prec)
   om1b = gconj(om1);
   om2b = gconj(om2); res = cgetg(4,t_VEC);
   res[1] = ldivgs(elleisnum(om,2,0,prec),12);
-  res[2] = ldiv(PiI2(prec), gmul(om2, gimag(gmul(om1b,om2))));
+  res[2] = ldiv(PiI2(prec), gmul(om2, imag_i(gmul(om1b,om2))));
   res[3] = (long)om2b; return res;
 }
 
@@ -466,7 +466,7 @@ ellphistinit(GEN om, long prec)
 static GEN
 ellphist(GEN om, GEN res, GEN z, long prec)
 {
-  GEN u = gimag(gmul(z, (GEN)res[3]));
+  GEN u = imag_i(gmul(z, (GEN)res[3]));
   GEN zst = gsub(gmul(u, (GEN)res[2]), gmul(z,(GEN)res[1]));
   return gsub(ellsigma(om,z,1,prec),gmul2n(gmul(z,zst),-1));
 }
@@ -479,8 +479,8 @@ computeth2(GEN om, GEN la, long prec)
   GEN p1,p2,res = ellphistinit(om,prec);
 
   p1 = gsub(ellphist(om,res,la,prec), ellphist(om,res,gun,prec));
-  p2 = gimag(p1);
-  if (gexpo(greal(p1))>20 || gexpo(p2)> bit_accuracy(min(prec,lg(p2)))-10)
+  p2 = imag_i(p1);
+  if (gexpo(real_i(p1))>20 || gexpo(p2)> bit_accuracy(min(prec,lg(p2)))-10)
     return NULL;
   return gexp(p1,prec);
 }

@@ -184,7 +184,7 @@ rnf_roots(GEN nf, GEN pol, long prec, GEN *pts)
   {
     long r1j = 0;
     ro = roots(gsubst(pol,v,(GEN)ro[j]), prec);
-    while (r1j<n && gcmp0(gimag((GEN)ro[r1j+1]))) r1j++;
+    while (r1j<n && gcmp0(imag_i((GEN)ro[r1j+1]))) r1j++;
     s[j] = (long)vec2s(r1j, (n-r1j)>>1);
     r[j] = (long)get_roots(ro, r1j, 0);
   }

@@ -1027,9 +1027,9 @@ dft(GEN p, long k, long NN, long bitprec, GEN F, GEN H, long polreal)
 	for (j=1; j<=k; j++)
 	{
 	  aux=gmul((GEN)alpha[j+1],(GEN)RU[j+1]);
-	  W[j]=ladd((GEN)W[j],gshift(greal(aux),1));
+	  W[j]=ladd((GEN)W[j],gshift(real_i(aux),1));
 	  aux=gmul((GEN)beta[j],(GEN)RU[j]);
-	  U[j]=ladd((GEN)U[j],gshift(greal(aux),1));
+	  U[j]=ladd((GEN)U[j],gshift(real_i(aux),1));
 	}
       }
       else
@@ -1037,9 +1037,9 @@ dft(GEN p, long k, long NN, long bitprec, GEN F, GEN H, long polreal)
 	for (j=1; j<=k; j++)
 	{
 	  aux=gmul((GEN)alpha[j+1],(GEN)RU[j+1]);
-	  W[j]=ladd((GEN)W[j],greal(aux));
+	  W[j]=ladd((GEN)W[j],real_i(aux));
 	  aux=gmul((GEN)beta[j],(GEN)RU[j]);
-	  U[j]=ladd((GEN)U[j],greal(aux));
+	  U[j]=ladd((GEN)U[j],real_i(aux));
 	}
       }
     }

@@ -2326,8 +2326,8 @@ gaussian_gcd(GEN x, GEN y)
   while (!gcmp0(y))
   {
     GEN z = gdiv(x,y);
-    GEN r0 = greal(z), r = gfloor(r0);
-    GEN i0 = gimag(z), i = gfloor(i0);
+    GEN r0 = real_i(z), r = gfloor(r0);
+    GEN i0 = imag_i(z), i = gfloor(i0);
     if (gcmp(gsub(r0,r), ghalf) > 0) r = addis(r,1);
     if (gcmp(gsub(i0,i), ghalf) > 0) i = addis(i,1);
     if (gcmp0(i)) z = r;
@@ -2340,8 +2340,8 @@ gaussian_gcd(GEN x, GEN y)
     z = gsub(x, gmul(z,y));
     x = y; y = z;
   }
-  if (signe(greal(x)) < 0) x = gneg(x);
-  if (signe(gimag(x)) < 0) x = gmul(x, gi);
+  if (signe(real_i(x)) < 0) x = gneg(x);
+  if (signe(imag_i(x)) < 0) x = gmul(x, gi);
   if (typ(x) == t_COMPLEX)
   {
     if      (gcmp0((GEN)x[2])) x = (GEN)x[1];

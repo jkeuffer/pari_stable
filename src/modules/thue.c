@@ -233,7 +233,7 @@ inithue(GEN P, GEN bnf, long flag, long prec)
     gpmin = gprec_w(gpmin, DEFAULTPREC);
 
     /* Compute x0. See paper, Prop. 2.2.1 */
-    x0 = gmul(gpmin, Vecmax(gabs(gimag(ro), prec)));
+    x0 = gmul(gpmin, Vecmax(gabs(imag_i(ro), prec)));
     x0 = mpsqrtn(gdiv(shifti(gun,n-1), x0), n);
   }
   if (DEBUGLEVEL>1) fprintferr("c1 = %Z\nc2 = %Z\n", c1, c2);
@@ -372,10 +372,10 @@ CheckSol(GEN *pS, GEN z1, GEN z2, GEN P, GEN rhs, GEN ro)
   GEN x, y, ro1 = (GEN)ro[1], ro2 = (GEN)ro[2];
   long e;
 
-  y = grndtoi(greal(gdiv(gsub(z2,z1), gsub(ro1,ro2))), &e);
+  y = grndtoi(real_i(gdiv(gsub(z2,z1), gsub(ro1,ro2))), &e);
   if (e > 0) return 0;
   x = gadd(z1, gmul(ro1, y));
-  x = grndtoi(greal(x), &e);
+  x = grndtoi(real_i(x), &e);
   if (e > 0) return 0;
   if (e <= -13)
   {
@@ -506,7 +506,7 @@ thueinit(GEN poly, long flag, long prec)
   else
   {
     GEN c0 = gun, ro = roots(poly, DEFAULTPREC);
-    for (k=1; k<lg(ro); k++) c0 = gmul(c0, gimag((GEN)ro[k]));
+    for (k=1; k<lg(ro); k++) c0 = gmul(c0, imag_i((GEN)ro[k]));
     c0 = ginv( mpabs(c0) );
     tnf = cgetg(3,t_VEC);
     tnf[1] = (long)poly;

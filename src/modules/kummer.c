@@ -131,7 +131,7 @@ reducebetanaive(GEN bnfz, GEN be, GEN b, GEN ell)
   }
   n = max((itos(ell)>>1), 3);
   z = cgetg(n+1, t_VEC);
-  c = gmul(greal((GEN)bnfz[3]), ell);
+  c = gmul(real_i((GEN)bnfz[3]), ell);
   c = logarch2arch(c, r1, prec); /* = embeddings of fu^ell */
   c = gprec_w(gnorm(c), DEFAULTPREC);
   b = gprec_w(gnorm(b), DEFAULTPREC); /* need little precision */
@@ -216,7 +216,7 @@ reducebeta(GEN bnfz, GEN be, GEN ell)
   }
   if (DEBUGLEVEL>1) fprintferr("beta reduced via ell-th root = %Z\n",be);
 
-  matunit = gmul(greal((GEN)bnfz[3]), ell); /* log. embeddings of fu^ell */
+  matunit = gmul(real_i((GEN)bnfz[3]), ell); /* log. embeddings of fu^ell */
   for (;;)
   {
     z = get_arch_real(nf, be, &emb, prec);

@@ -705,7 +705,7 @@ gpow(GEN x, GEN n, long prec)
     long tn = typ(n);
     if (!is_scalar_t(tn) || tn == t_PADIC || tn == t_INTMOD)
       err(talker,"gpow: zero to a forbidden power");
-    n = greal(n);
+    n = real_i(n);
     if (gsigne(n) <= 0)
       err(talker,"gpow: zero to a non positive exponent");
     if (!precision(x)) return gcopy(x);

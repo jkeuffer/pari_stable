@@ -353,7 +353,7 @@ lift_check_modulus(GEN H, long n)
 GEN subcyclo_complex_bound(pari_sp ltop, GEN V, long prec)
 {
   GEN pol = roots_to_pol(V,0);
-  GEN vec = gtovec(greal(pol));
+  GEN vec = gtovec(real_i(pol));
   GEN borne = ceil_safe(supnorm(vec,prec));
   return gerepileupto(ltop,borne);
 }

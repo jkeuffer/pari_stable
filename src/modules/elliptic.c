@@ -318,7 +318,7 @@ initell0(GEN x, long prec)
   p1 = roots(RHSpol(y),prec);
   if (gsigne(D) < 0) p1[1] = lreal((GEN)p1[1]);
   else /* sort roots in decreasing order */
-    p1 = gen_sort(greal(p1), 0, invcmp);
+    p1 = gen_sort(real_i(p1), 0, invcmp);
   y[14] = (long)p1;
 
   e1 = (GEN)p1[1];
@@ -331,7 +331,7 @@ initell0(GEN x, long prec)
 
   w = gaddsg(1, ginv(gmul2n(gmul(u2,x1),1)));
   q = gsqrt(gaddgs(gsqr(w),-1),prec);
-  if (gsigne(greal(w)) > 0)
+  if (gsigne(real_i(w)) > 0)
     q = ginv(gadd(w, q));
   else
     q = gsub(w, q);
@@ -339,7 +339,7 @@ initell0(GEN x, long prec)
   pi = mppi(prec); pi2 = gmul2n(pi,1);
   tau = gmul(gdiv(glog(q,prec),pi2), gneg_i(gi));
 
-  y[19] = lmul(gmul(gsqr(pi2),gabs(u2,prec)), gimag(tau));
+  y[19] = lmul(gmul(gsqr(pi2),gabs(u2,prec)), imag_i(tau));
   w1 = gmul(pi2, gsqrt(gneg_i(u2),prec));
   w2 = gmul(tau, w1);
   if (sw < 0)
@@ -782,7 +782,7 @@ new_coords(GEN e, GEN x, GEN *pta, GEN *ptb, int flag, long prec)
 
     /* w^2 = 2b4 + 2b2 e1 + 12 e1^2 = 4(e1-e2)(e1-e3) */
     w = gsqrt(gmul2n(gadd(b4, gmul(e1,gadd(b2,gmulsg(6,e1)))),1),prec);
-    if (gsigne(greal(p2)) > 0) w = gneg_i(w);
+    if (gsigne(real_i(p2)) > 0) w = gneg_i(w);
   }
   *pta = a = gmul2n(gsub(w,p2),-2);
   *ptb = b = gmul2n(w,-1);
@@ -824,13 +824,13 @@ zell(GEN e, GEN z, long prec)
     return gerepileupto(av,t);
   }
 
-  sw = gsigne(greal(b)); fl=0;
+  sw = gsigne(real_i(b)); fl=0;
   for(;;) /* ~ agm */
   {
     GEN a0=a, b0=b, x0=x1, r1;
 
     b = gsqrt(gmul(a0,b0),prec);
-    if (gsigne(greal(b)) != sw) b = gneg_i(b);
+    if (gsigne(real_i(b)) != sw) b = gneg_i(b);
     a = gmul2n(gadd(gadd(a0,b0),gmul2n(b,1)),-2);
     r1 = gsub(a,b);
     if (gcmp0(r1) || gexpo(r1) < gexpo(a) - bit_accuracy(prec)) break;
@@ -876,11 +876,11 @@ zell(GEN e, GEN z, long prec)
     }
   }
   /* send t to the fundamental domain if necessary */
-  p2 = gdiv(gimag(t),gmael(e,16,2));
+  p2 = gdiv(imag_i(t),gmael(e,16,2));
   p1 = gsub(p2, gmul2n(gun,-2));
   if (gcmp(gabs(p1,prec),ghalf) >= 0)
     t = gsub(t, gmul((GEN)e[16],gfloor(gadd(p2,dbltor(0.1)))));
-  if (gsigne(greal(t)) < 0) t = gadd(t,(GEN)e[15]);
+  if (gsigne(real_i(t)) < 0) t = gadd(t,(GEN)e[15]);
   return gerepileupto(av,t);
 }
 
@@ -904,7 +904,7 @@ set_gamma(SL2_red *T)
   b = c = gzero;
   for(;;)
   {
-    GEN m, p1, n = ground(greal(t));
+    GEN m, p1, n = ground(real_i(t));
     if (signe(n))
     { /* apply T^n */
       n = negi(n); t = gadd(t,n);
@@ -929,7 +929,7 @@ red_modSL2(SL2_red *T)
 {
   long s;
   T->tau = gdiv(T->w1,T->w2);
-  s = gsigne(gimag(T->tau));
+  s = gsigne(imag_i(T->tau));
   if (!s) err(talker,"w1 and w2 R-linearly dependent in elliptic function");
   T->swap = (s < 0);
   if (T->swap) { swap(T->w1, T->w2); T->tau = ginv(T->tau); }
@@ -1065,9 +1065,9 @@ reduce_z(GEN z, SL2_red *T)
 
   if (!is_scalar_t(t) || t == t_INTMOD || t == t_PADIC || t == t_POLMOD)
     err(typeer,"reduction mod SL2 (reduce_z)");
-  T->x = ground(gdiv(gimag(Z), gimag(T->Tau)));
+  T->x = ground(gdiv(imag_i(Z), imag_i(T->Tau)));
   Z = gsub(Z, gmul(T->x,T->Tau));
-  T->y = ground(greal(Z));
+  T->y = ground(real_i(Z));
   Z = gsub(Z, T->y);
   pr = gprecision(Z);
   if (gcmp0(Z) || (pr && gexpo(Z) < 5 - bit_accuracy(pr))) Z = NULL; /*z in L*/
@@ -1093,7 +1093,7 @@ weipellnumall(SL2_red *T, GEN z, long flall, long prec)
   u1= gsub(gun,u); u2=gsqr(u1);
   y = gadd(ginv(utoi(12)), gdiv(u,u2));
   if (flall) yp = gdiv(gadd(gun,u), gmul(u1,u2));
-  toadd = (long)ceil(9.065*gtodouble(gimag(z)));
+  toadd = (long)ceil(9.065*gtodouble(imag_i(z)));
 
   av1 = avma; lim = stack_lim(av1,1); qn = q;
   for(;;)
@@ -1163,7 +1163,7 @@ ellzeta(GEN om, GEN z, long prec)
   y = gdiv(gmul(gsqr(T.W2),_elleisnum(&T,2,prec)), pii2);
   y = gadd(ghalf, gdivgs(gmul(Z,y),-12));
   y = gadd(y, ginv(gsub(u,gun)));
-  toadd = (long)ceil(9.065*gtodouble(gimag(Z)));
+  toadd = (long)ceil(9.065*gtodouble(imag_i(Z)));
   av1 = avma; lim = stack_lim(av1,1);
   
   /* y += sum q^n ( u/(u*q^n - 1) + 1/(u - q^n) ) */
@@ -1214,7 +1214,7 @@ ellsigma(GEN w, GEN z, long flag, long prec)
   y1 = gadd(etnew, gmul2n(gmul(gmul(Z,zinit),(GEN)et[2]),-1));
 
   /* 9.065 = 2*Pi/log(2) */
-  toadd = (long)ceil(9.065*fabs(gtodouble(gimag(Z))));
+  toadd = (long)ceil(9.065*fabs(gtodouble(imag_i(Z))));
   uhalf = gexp(gmul(gmul2n(pii2,-1),Z),prec);
   u = gsqr(uhalf);
   if (doprod)
@@ -2135,8 +2135,8 @@ hell(GEN e, GEN a, long prec)
 
   checkbell(e);
   pi2surw = gdiv(Pi2n(1, prec), (GEN)e[15]);
-  z = gmul(greal(zell(e,a,prec)), pi2surw);
-  q = greal( gexp(gmul((GEN)e[16], pureimag(pi2surw)),prec) );
+  z = gmul(real_i(zell(e,a,prec)), pi2surw);
+  q = real_i( gexp(gmul((GEN)e[16], pureimag(pi2surw)),prec) );
   y = gsin(z,prec); qn = gun; ps = gneg_i(q);
   for (n = 3; ; n += 2)
   {

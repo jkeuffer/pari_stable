@@ -940,7 +940,7 @@ static int
 is_zero(GEN x, long bitprec) { return (gexpo(x) < -bitprec); }
 
 static int
-is_complex(GEN x, long bitprec) { return (!is_zero(gimag(x), bitprec)); }
+is_complex(GEN x, long bitprec) { return (!is_zero(imag_i(x), bitprec)); }
 
 static GEN
 compute_M0(GEN M_star,long N)
@@ -993,7 +993,7 @@ compute_M0(GEN M_star,long N)
 	for (i=1; i<lr; i++)
 	{
 	  if (is_complex((GEN)r[i], bitprec) ||
-	      signe(S = greal((GEN)r[i])) <= 0) continue;
+	      signe(S = real_i((GEN)r[i])) <= 0) continue;
 
           p4=gsub(M_star,gmulsg(k,S));
           P=gdiv(gmul(gmulsg(k,S),p4),gsubgs(gmul(M_star,p4),kk*kk));
@@ -1038,7 +1038,7 @@ compute_M0(GEN M_star,long N)
 	for (i=1; i<lr; i++)
 	{
 	  if (is_complex((GEN)r[i], bitprec) ||
-	      signe(w = greal((GEN)r[i])) <= 0) continue;
+	      signe(w = real_i((GEN)r[i])) <= 0) continue;
           p1=gsubst(pg1,vz,w);
           p2=gsubst(pg2,vz,w);
           p3=gsubst(pf1,vz,w);
@@ -1049,7 +1049,7 @@ compute_M0(GEN M_star,long N)
           for (j=1; j<lr1; j++)
           {
             if (is_complex((GEN)r1[j], bitprec)
-             || signe(v = greal((GEN)r1[j])) <= 0
+             || signe(v = real_i((GEN)r1[j])) <= 0
              || !is_zero(gsubst(p2,vy,v), bitprec)) continue;
 
             p7=gsubst(p3,vy,v);
@@ -1060,7 +1060,7 @@ compute_M0(GEN M_star,long N)
             for (l=1; l<lr2; l++)
             {
               if (is_complex((GEN)r2[l], bitprec)
-               || signe(u = greal((GEN)r2[l])) <= 0
+               || signe(u = real_i((GEN)r2[l])) <= 0
                || !is_zero(gsubst(p8,vx,u), bitprec)
                || !is_zero(gsubst(p9,vx,u), bitprec)) continue;
 
@@ -1117,7 +1117,7 @@ lowerboundforregulator_i(GEN bnf)
     {
       p1=polx[0]; pol=gaddgs(gsub(gpowgs(p1,N),gmul(bound,p1)),N-1);
       p1 = roots(pol,DEFAULTPREC);
-      if (N&1) y=greal((GEN)p1[3]); else y=greal((GEN)p1[2]);
+      y= real_i((GEN)p1[ N&1? 3: 2]);
       M0 = gmul2n(gmulsg(N*(N-1),gsqr(glog(y,DEFAULTPREC))),-2);
       fprintferr("pol = %Z\n",pol);
       fprintferr("old method: y = %Z, M0 = %Z\n",y,gprec_w(M0,3));
