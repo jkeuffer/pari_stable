@@ -2344,8 +2344,9 @@ int
 break_loop(long numerr)
 {
   static Buffer *b = NULL;
+  static char *old = NULL;
   VOLATILE int go_on = 0;
-  char *s, *t, *msg, *old = NULL;
+  char *s, *t, *msg;
 
   if (b) jump_to_given_buffer(b);
   
