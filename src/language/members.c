@@ -247,7 +247,7 @@ member_fu(GEN x) /* fundamental units */
   {
     switch(t)
     {
-      case typ_CLA: x = (GEN)x[1]; if (lg(x)<11) break;
+      case typ_CLA: x = (GEN)x[1]; if (lg(x) < 10) break;
         return (GEN)x[9];
       case typ_Q:
         x = discsr((GEN)x[1]);
@@ -278,9 +278,10 @@ member_tu(GEN x)
         res[1] = (long)y;
         res[2] = (long)x; return res;
       case typ_CLA:
-        if (lg(x[1])==11)
+        x = (GEN)x[1];
+        if (lg(x) > 8)
         {
-          x = (GEN) x[1]; y=(GEN)x[8];
+          y = (GEN)x[8];
           if (typ(y) == t_VEC || lg(y) == 3) break;
         }
       default: member_err("tu");

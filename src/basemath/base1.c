@@ -120,13 +120,10 @@ checkbnrgen(GEN bnr)
 }
 
 GEN
-check_units(GEN bnf, char *f)
+check_units(GEN BNF, char *f)
 {
-  GEN nf, x;
-  bnf = checkbnf(bnf); nf = checknf(bnf);
-  x = (GEN)bnf[8];
-  if (lg(x) < 7 || (lg(x[5]) == 1 && lg(nf[6]) > 2))
-    err(talker,"missing units in %s", f);
+  GEN bnf = checkbnf(BNF), x = (GEN)bnf[8];
+  if (lg(x) < 6 || lg(x[5]) != lg(bnf[3])) err(talker,"missing units in %s", f);
   return (GEN)x[5];
 }
 
@@ -191,7 +188,7 @@ get_bnf(GEN x, int *t)
         case 3:
           if (typ(x[2]) != t_POLMOD) break;
           return get_bnf((GEN)x[1],t);
-        case 6 : *t = typ_QUA; return NULL;
+        case 5 : *t = typ_QUA; return NULL;
         case 10: *t = typ_NF; return NULL;
         case 11: *t = typ_BNF; return x;
         case 7 : *t = typ_BNR;
@@ -202,7 +199,7 @@ get_bnf(GEN x, int *t)
       if (lg(x)==2)
         switch(lg(x[1]))
         {
-          case 8: case 11:
+          case 7: case 10:
             *t = typ_CLA; return NULL;
         }
   }
@@ -241,7 +238,7 @@ get_nf(GEN x, int *t)
       if (lg(x)==2)
         switch(lg(x[1]))
         {
-          case 8: case 11:
+          case 7: case 10:
             *t = typ_CLA; return NULL;
         }
   }

@@ -1792,12 +1792,11 @@ MORE:
   gen = get_clgp(Disc,W,&cyc,PRECREG);
   desalloc(mat);
 
-  res=cgetg(6,t_VEC);
-  res[1]=(long)h;
-  res[2]=(long)cyc;
-  res[3]=(long)gen;
-  res[4]=(long)R;
-  res[5]=ldiv(mpmul(R,h), z); return gerepilecopy(av0,res);
+  res = cgetg(5,t_VEC);
+  res[1] = (long)h;
+  res[2] = (long)cyc;
+  res[3] = (long)gen;
+  res[4] = (long)R; return gerepilecopy(av0,res);
 }
 
 GEN

@@ -673,10 +673,9 @@ isprincipalrayall(GEN bnr, GEN x, long flag)
       p1 = gmul(p1, powgi(gmodulcp((GEN)funit[j],pol), (GEN)x[j+1]));
     alpha = gdiv(alpha,p1);
   }
-  p1 = cgetg(4,t_VEC);
+  p1 = cgetg(3,t_VEC);
   p1[1] = lcopy(ex);
   p1[2] = (long)algtobasis(nf,alpha);
-  p1[3] = lcopy((GEN)alphaall[3]);
   return gerepileupto(av, p1);
 }
 

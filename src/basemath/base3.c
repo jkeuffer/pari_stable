@@ -2151,17 +2151,16 @@ logunitmatrixarch(GEN nf, GEN funits, GEN racunit, GEN bid)
 }
 
 static void
-init_units(GEN bnf, GEN *funits, GEN *racunit)
+init_units(GEN BNF, GEN *funits, GEN *racunit)
 {
-  GEN p1;
-  bnf = checkbnf(bnf); p1=(GEN)bnf[8];
-  if (lg(p1)==5) *funits=(GEN)buchfu(bnf)[1];
+  GEN bnf = checkbnf(BNF), x = (GEN)bnf[8];
+  if (lg(x) == 5) *funits = (GEN)buchfu(bnf)[1];
   else
   {
-    if (lg(p1)!=7) err(talker,"incorrect big number field");
-    *funits=(GEN)p1[5];
+    if (lg(x) != 6) err(talker,"incorrect big number field");
+    *funits = (GEN)x[5];
   }
-  *racunit=gmael(p1,4,2);
+  *racunit = gmael(x, 4, 2);
 }
 
 /*  flag &1 : generateurs, sinon non
