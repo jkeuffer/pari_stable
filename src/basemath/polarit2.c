@@ -676,7 +676,11 @@ cmbf(GEN target, GEN famod, GEN p, long b, long a,
     for (i=1; i <= lfamod; i++)
     {
       GEN T, p1 = (GEN)famod[i];
-      deg[i] = deg(p1); T = (GEN)p1[deg[i]+1]; /* d-1 term */
+      deg[i] = deg(p1);
+      if (!gcmp1(lc))
+        T = modii(mulii(lc, (GEN)p1[deg[i]+1]), pa);
+      else
+        T = (GEN)p1[deg[i]+1]; /* d-1 term */
       trace[i] = itos( TruncTrace(T, pb,pa_b,pb_as2,pbs2) );
     }
   }
@@ -1191,6 +1195,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
     for (i=1; i<=r; i++)
     {
       GEN q, p1 = (GEN)piv[i];
+      if (DEBUGLEVEL) fprintferr("LLL_cmbf: checking factor %ld\n",i);
 
       y = gun;
       for (j=1; j<=n0; j++)
