@@ -368,7 +368,7 @@ convol(GEN x, GEN y)
 
   i -= 3; z = cgetg(lx-i, t_SER);
   z[1] = evalsigne(1) | evalvalp(i) | evalvarn(vx);
-  for (j = i-1; j<lx; j++) z[j-i] = lmul((GEN)x[j],(GEN)y[j]);
+  for (j = i+2; j<lx; j++) z[j-i] = lmul((GEN)x[j],(GEN)y[j]);
   return z;
 }
 
