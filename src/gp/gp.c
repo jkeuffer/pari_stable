@@ -177,12 +177,16 @@ gp_preinit(int force)
   for (i=0; i<c_LAST; i++) gp_colors[i] = c_NONE;
 }
 
-#define GET_SEP_SIZE 128
+#ifdef MAXPATHLEN
+#  define GET_SEP_SIZE MAXPATHLEN
+#else
+#  define GET_SEP_SIZE 128
+#endif
 #define separe(c)  ((c)==';' || (c)==':')
 
 /* Return all chars, up to next separator */
 static char*
-get_sep(char *t)
+get_sep0(char *t, int colon)
 {
   static char buf[GET_SEP_SIZE], *lim = buf + GET_SEP_SIZE-1;
   char *s = buf;
@@ -193,16 +197,31 @@ get_sep(char *t)
     switch(*s++ = *t++)
     {
       case '"':
-        if (outer || s[-2] != '\\') outer = !outer;
+        if (outer || (s >= buf+2 && s[-2] != '\\')) outer = !outer;
         break;
       case '\0':
         return buf;
-      default:
-        if (outer && separe(*t)) { *s=0; return buf; }
+      case ';':
+	if (outer) { s[-1]=0; return buf; } break;
+      case ':':
+        if (outer && colon) { s[-1]=0; return buf; } break;
     }
     if (s == lim) err(talker,"buffer overflow in get_sep");
   }
 }
+
+static char*
+get_sep(char *t)
+{
+    return get_sep0(t,1);
+}
+
+static char*
+get_sep_colon_ok(char *t)
+{
+    return get_sep0(t,0);
+}
+
 
 /* as above, t must be writeable, return 1 if we modified t */
 static int
@@ -1746,7 +1765,7 @@ escape(char *tch)
         case 'w':
 	{
 	  GEN g[2]; g[0] = x; g[1] = NULL;
-	  s = get_sep(s); if (!*s) s = current_logfile;
+	  s = get_sep_colon_ok(s); if (!*s) s = current_logfile;
 	  write0(s, g, f_RAW); return;
 	}
       }
@@ -1769,7 +1788,7 @@ escape(char *tch)
       break;
     case 'h': print_hash_list(s); break;
     case 'l':
-      s = get_sep(s);
+      s = get_sep_colon_ok(s);
       if (*s)
       {
         sd_logfile(s,d_ACKNOWLEDGE);
@@ -1786,7 +1805,7 @@ escape(char *tch)
       }
       break;
     case 'q': gp_quit(); break;
-    case 'r': switchin(get_sep(s)); break;
+    case 'r': switchin(get_sep_colon_ok(s)); break;
     case 's': etatpile(0); break;
     case 't': gentypes(); break;
     case 'u':
