@@ -2559,7 +2559,7 @@ gp_main_loop(int ismain)
     av = avma;
     z = readseq(b->buf, strictmatch);
     if (!added_newline) pariputc('\n'); /* last output was print1() */
-    if (! ismain) { avma = av; continue; }
+    if (! ismain) continue;
     if (chrono) pariputs(do_time(ti_REGULAR)); else do_time(ti_NOPRINT);
     if (z == gnil) continue;
 
