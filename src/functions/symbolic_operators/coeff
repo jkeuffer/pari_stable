@@ -1,0 +1,10 @@
+Function: _[_,_]
+Class: symbolic_operators
+Description:
+ (vecsmall,small):small         $(1)[$2]
+ (list,small):gen:copy          gel($1, $lg:2)
+ (vec,small):gen:copy           gel($1, $2)
+ (vec,small,small):gen:copy     gcoeff($1, $2, $3)
+ (gen,small):gen:copy           gel($1, $2)
+ (gen,small,small):gen:copy     gcoeff($1, $2, $3)
+
