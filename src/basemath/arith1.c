@@ -1999,7 +1999,7 @@ sfcont(GEN x, GEN x1, long k)
     if (gcmp0(x)) return _vec(gzero);
     switch(tx)
     {
-      case t_INT: y = cgetg(2,t_VEC); y[1] = icopy(x); return y;
+      case t_INT: y = cgetg(2,t_VEC); y[1] = (long)icopy(x); return y;
       case t_REAL:
         av = avma; lx = lg(x);
 	p2 = rcopy(x); settyp(p2,t_INT); setlgefint(p2,lx);
