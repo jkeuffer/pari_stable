@@ -67,6 +67,7 @@ BA 23- fix accuracy problems in vandermondeinverse
    29- typo in zsimpjoin (concat error in bnrdisclist, intr. in 2.2.0)
 IZ 30- typo in Configure [rl_save_prompt and _eprintf not found in target libs]
 MD 31- oo loop in ellap [uninitialized array length in apell1]
+   32- stack corruption in addfrac [wrong result for gigantic denominators]
 
   Changed
     1- removed useless parameter prec in many bnr* and rnf* functions
