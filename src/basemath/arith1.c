@@ -1127,9 +1127,9 @@ GEN
 mpinvmod(GEN a, GEN m)
 {
   GEN res;
-  if (invmod(a,m,&res)) return res;
-  err(talker,"impossible inverse modulo: %Z",gmodulcp(res,m));
-  return NULL; /* not reached */
+  if (! invmod(a,m,&res))
+    err(talker,"impossible inverse modulo: %Z",gmodulcp(res,m));
+  return res;
 }
 
 /*********************************************************************/
