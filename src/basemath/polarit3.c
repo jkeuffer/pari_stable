@@ -2823,12 +2823,26 @@ Z_incremental_CRT(GEN *H, ulong Hp, GEN q, GEN qp, ulong p)
 }
 
 int
-ZX_incremental_CRT(GEN H, GEN Hp, GEN q, GEN qp, ulong p)
+ZX_incremental_CRT(GEN *ptH, GEN Hp, GEN q, GEN qp, ulong p)
 {
-  GEN h, lim = shifti(qp,-1);
+  GEN H = *ptH, h, lim = shifti(qp,-1);
   ulong qinv = u_invmod(umodiu(q,p), p);
   long i, l = lgef(H), lp = lgef(Hp);
   int stable = 1;
+
+  if (l < lp)
+  { /* degree increases */
+    GEN x = cgetg(lp, t_POL);
+    for (i=1; i<l; i++) x[i] = H[i];
+    for (   ; i<lp; i++)
+    {
+      h = stoi(Hp[i]);
+      if (cmpii(h,lim) > 0) h = subii(h,qp);
+      x[i] = (long)h;
+    }
+    setlgef(x,lp); *ptH = H = x;
+    stable = 0; lp = l;
+  }
   for (i=2; i<lp; i++)
   {
     h = u_chrem_coprime((GEN)H[i],Hp[i],q,p,qinv,qp);
@@ -3166,7 +3180,9 @@ u_FpV_roots_to_pol(GEN a, ulong p)
   {
     p2 = cgetg(5,t_VECSMALL); p1[k++] = (long)p2;
     p2[2] = mulssmod(a[i], a[i+1], p);
-    p2[3] = (p<<1) - (a[i] + a[i+1]);
+    p2[3] = a[i] + a[i+1];
+    if (p2[3] >= p) p2[3] -= p;
+    if (p2[3]) p2[3] = p - p2[3]; /* - (a[i] + a[i+1]) mod p */
     p2[4] = 1; p2[1] = evallgef(5);
   }
   if (i < lx)
@@ -3519,15 +3535,12 @@ u_FpY_FpXY_resultant(GEN a, GEN b, ulong p)
   * where P_i is Lagrange polynomial: P_i(j) = 1 if i=j, 0 otherwise */
   for (i=0,n = 1; n <= nmax; n++)
   {
-    i++; x[i] = n;
-    y[i] = u_FpX_resultant_after_eval(a,b, x[i], p,la);
-    i++; x[i] = p-n;
-    y[i] = u_FpX_resultant_after_eval(a,b, x[i], p,la);
+    i++; x[i] = n;   y[i] = u_FpX_resultant_after_eval(a,b, x[i], p,la);
+    i++; x[i] = p-n; y[i] = u_FpX_resultant_after_eval(a,b, x[i], p,la);
   }
   if (i == dres)
   {
-    i++; x[i] = 0;
-    y[i] = u_FpX_resultant_after_eval(a,b, x[i], p,la);
+    i++; x[i] = 0;   y[i] = u_FpX_resultant_after_eval(a,b, x[i], p,la);
   }
   return u_FpV_polint(x,y, p);
 }
@@ -3661,6 +3674,9 @@ INIT:
     goto END;
   }
 
+  /* make sure p large enough */
+  while (p < (dres<<1)) p += *d++;
+
   H = H0 = H1 = NULL;
   lb = lgef(B); b = u_allocpol(degpol(B), 0);
   bound = ZY_ZXY_ResBound(A,B);
@@ -3718,15 +3734,12 @@ INIT:
       * where P_i is Lagrange polynomial: P_i(j) = 1 if i=j, 0 otherwise */
       for (i=0,n = 1; n <= nmax; n++)
       {
-        i++; x[i] = n;
-        y[i] = u_FpX_resultant_after_eval(a,b, x[i], p,la);
-        i++; x[i] = p-n;
-        y[i] = u_FpX_resultant_after_eval(a,b, x[i], p,la);
+        i++; x[i] = n;   y[i] = u_FpX_resultant_after_eval(a,b, x[i], p,la);
+        i++; x[i] = p-n; y[i] = u_FpX_resultant_after_eval(a,b, x[i], p,la);
       }
       if (i == dres)
       {
-        i++; x[i] = 0;
-        y[i] = u_FpX_resultant_after_eval(a,b, x[i], p,la);
+        i++; x[i] = 0;   y[i] = u_FpX_resultant_after_eval(a,b, x[i], p,la);
       }
       Hp = u_FpV_polint(x,y, p);
     }
@@ -3749,10 +3762,10 @@ INIT:
     else
     {
       GEN qp = muliu(q,p);
-      stable = ZX_incremental_CRT(H, Hp, q,qp, p);
+      stable = ZX_incremental_CRT(&H, Hp, q,qp, p);
       if (LERS) {
-        stable &= ZX_incremental_CRT(H0,H0p, q,qp, p);
-        stable &= ZX_incremental_CRT(H1,H1p, q,qp, p);
+        stable &= ZX_incremental_CRT(&H0,H0p, q,qp, p);
+        stable &= ZX_incremental_CRT(&H1,H1p, q,qp, p);
       }
       q = qp;
     }
@@ -3958,7 +3971,7 @@ modulargcd(GEN A0, GEN B0)
     }
 
     qp = muliu(q,p);
-    if (ZX_incremental_CRT(H, Hp, q, qp, p))
+    if (ZX_incremental_CRT(&H, Hp, q, qp, p))
     { /* H stable: check divisibility */
       if (!is_pm1(g)) { p1 = content(H); if (!is_pm1(p1)) H = gdiv(H,p1); }
       if (!signe(gres(A,H)) && !signe(gres(B,H))) break; /* DONE */
@@ -4013,8 +4026,8 @@ QX_invmod(GEN A0, GEN B0)
     }
     if (DEBUGLEVEL>5) msgtimer("QX_invmod: mod %ld (bound 2^%ld)", p,expi(q));
     qp = muliu(q,p);
-    stable  = ZX_incremental_CRT(U, Up, q,qp, p);
-    stable &= ZX_incremental_CRT(V, Vp, q,qp, p);
+    stable  = ZX_incremental_CRT(&U, Up, q,qp, p);
+    stable &= ZX_incremental_CRT(&V, Vp, q,qp, p);
     if (stable)
     { /* all stable: check divisibility */
       res = gadd(gmul(A,U), gmul(B,V));
