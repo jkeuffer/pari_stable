@@ -549,8 +549,8 @@ pari_completion(char *text, int START, int END)
 /* If the line does not begin by a backslash, then it is:
  * . an old command ( if preceded by "whatnow(" ).
  * . a default ( if preceded by "default(" ).
- * . a member function ( if preceded by "." within 4 letters )
- * . a file name (in current directory) ( if preceded by "read(" )
+ * . a member function ( if preceded by "." + keyword_chars )
+ * . a file name (in current directory) ( if preceded by 'read' or 'writexx' )
  * . a command */
   if (start >=1 && rl_line_buffer[start] != '~') start--;
   while (start && is_keyword_char(rl_line_buffer[start])) start--;
@@ -587,16 +587,13 @@ pari_completion(char *text, int START, int END)
     iend = i;
     while (i && is_keyword_char(rl_line_buffer[i-1])) i--;
 
-    if (iend - i == 7)
-    {
-      if (strncmp(rl_line_buffer + i,"default",7) == 0)
-	return get_matches(-2, text, default_generator);
-      if (strncmp(rl_line_buffer + i,"whatnow",7) == 0)
-	return get_matches(-1, text, old_generator);
-    }
-    if (iend - i >= 4)
-      if (strncmp(rl_line_buffer + i,"read",4) == 0)
-	return get_matches(-1,text, FILE_COMPLETION);
+    if (strncmp(rl_line_buffer + i,"default",7) == 0)
+      return get_matches(-2, text, default_generator);
+    if (strncmp(rl_line_buffer + i,"whatnow",7) == 0)
+      return get_matches(-1, text, old_generator);
+    if ( strncmp(rl_line_buffer + i,"read",4)  == 0
+      || strncmp(rl_line_buffer + i,"write",5) == 0)
+      return get_matches(-1, text, FILE_COMPLETION);
 
     j = start + 1;
     while (j <= END && isspace((int)rl_line_buffer[j])) j++;
