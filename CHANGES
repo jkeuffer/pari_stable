@@ -85,6 +85,7 @@ XR 48- rare bug in bnrL1 (wrong value!)
    54- suminf(k=1,suminf(j=1,.067^(k+j)/k^4/(k+j))) ran forever
    55- factor(2*x + 2) --> [2*x + 2, 1] (instead of stripping the content)
    56- (ultra-rare) stack corruption in mpqs_solve_linear_system()
+   57- rl_refresh_line() prototype changed across readline's versions.
 
   Changed
 XR  1- modulus choice in bnrstark
