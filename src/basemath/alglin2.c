@@ -2130,7 +2130,7 @@ hnf0(GEN A, int remove)
 {
   pari_sp av0 = avma, av, lim;
   long s,li,co,i,j,k,def,ldef;
-  GEN denx,a,p1;
+  GEN denx, a;
 
   if (typ(A) == t_VEC) return hnf_special(A,remove);
   A = init_hnf(A,&denx,&co,&li,&av);
@@ -2155,7 +2155,7 @@ hnf0(GEN A, int remove)
         A = gerepilecopy(av, A);
       }
     }
-    p1 = gcoeff(A,i,def); s = signe(p1);
+    s = signe(gcoeff(A,i,def));
     if (s)
     {
       if (s < 0) ZV_neg((GEN)A[def]);
