@@ -1056,7 +1056,7 @@ divisors(GEN n)
 }
 
 static GEN
-_core(GEN n, int all)
+do_core(GEN n, int all)
 {
   pari_sp av = avma;
   long i;
@@ -1071,7 +1071,7 @@ _core(GEN n, int all)
 }
 
 static GEN
-_core2(GEN n, int all)
+do_core2(GEN n, int all)
 {
   pari_sp av = avma;
   long i;
@@ -1091,10 +1091,10 @@ _core2(GEN n, int all)
   y[2] = (long)f; return gerepilecopy(av, y);
 }
 
-GEN core(GEN n)        { return _core(n,1); }
-GEN corepartial(GEN n) { return _core(n,0); }
-GEN core2(GEN n)       { return _core2(n,1); }
-GEN core2partial(GEN n){ return _core2(n,0); }
+GEN core(GEN n)        { return do_core(n,1); }
+GEN corepartial(GEN n) { return do_core(n,0); }
+GEN core2(GEN n)       { return do_core2(n,1); }
+GEN core2partial(GEN n){ return do_core2(n,0); }
 
 GEN
 core0(GEN n,long flag) { return flag? core2(n): core(n); }

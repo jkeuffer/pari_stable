@@ -79,6 +79,7 @@ IS 33- [HPUX:] should compile with cc -Ae, not -Aa
    34- excessive memory usage in bnrstark() [ InitPrimes ]
    35- bessel[jk](t_SER) not implemented around a!=0, but gave (bogus) results
        [output error message for now]
+IZ 36- [OS/2:] rename static functions _core[2] (conflict with stdlib.h)
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available
