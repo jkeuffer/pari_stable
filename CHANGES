@@ -32,6 +32,12 @@ TP = Thomas Papanikolaou
 XR = Xavier Roblot
 YU = Yoshiaki Uchikawa
 
+Done for version 2.2.4 (released 10/07/2002) [hopefully]:
+  Fixed
+    1- add default 'newgaloisformat' to make 2.2.3 F-22 optional (by default,
+       old format will be used, preserving compatibility).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.3 (released 10/06/2002):
   Fixed
     1- bnrinit(bnfinit(subst(polsubcyclo(89,8),x,-x)),4) --> SEGV [make sure
