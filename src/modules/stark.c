@@ -2166,7 +2166,7 @@ get_cS_cT(ST_t *T, long n)
       if (signe(B[j])) s = addrr(s, mulrr((GEN)Z[j], (GEN)B[j]));
       if (signe(A[j])) t = addrr(t, mulrr((GEN)Z[j], (GEN)A[j]));
     }
-  s = mpadd(s, mulrr(csurn, T->powracpi[T->b]));
+  s = mpadd(s, mpmul(csurn, T->powracpi[T->b]));
   T->cS[n] = gclone(s);
   T->cT[n] = gclone(t); avma = av;
 }
