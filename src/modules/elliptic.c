@@ -184,7 +184,7 @@ new_coords(GEN e, GEN x, GEN *pta, GEN *ptb, int flag, long prec)
   GEN a,b,p1,p2,w, e1 = gmael(e,14,1), b2 = (GEN)e[6];
   long ty = typ(e[12]);
 
-  p2 = gmul2n(gadd(mulsr(12,e1), b2), -2);
+  p2 = gmul2n(gadd(mulsr(12,e1), b2), -2); /* = (12 e1 + b2) / 4 */
   if (ty == t_PADIC)
     w = (GEN)e[18];
   else
@@ -194,10 +194,10 @@ new_coords(GEN e, GEN x, GEN *pta, GEN *ptb, int flag, long prec)
 
     /* w^2 = 2b4 + 2b2 e1 + 12 e1^2 = 4(e1-e2)(e1-e3) */
     w = sqrtr( gmul2n(gadd(b4, gmul(e1,gadd(b2, mulsr(6,e1)))),1) );
-    if (gsigne(p2) > 0) w = gneg_i(w);
+    if (gsigne(p2) > 0) setsigne(w, -1);
   }
   *pta = a = gmul2n(gsub(w,p2),-2);
-  *ptb = b = gmul2n(w,-1);
+  *ptb = b = gmul2n(w,-1); /* = sqrt( (e1 - e2)(e1 - e3) ) */
   if (!x) return NULL;
   if (flag)
   {
@@ -369,7 +369,7 @@ initell0(GEN x, long prec)
     q = gsub(w, q);
   if (gexpo(q) >= 0) q = ginv(q);
   pi = mppi(prec); pi2 = gmul2n(pi,1);
-  tau = gmul(gdiv(glog(q,prec),pi2), gneg_i(gi));
+  tau = mulcxmI( gdiv(glog(q,prec),pi2) );
 
   y[19] = lmul(gmul(gsqr(pi2),gabs(u2,prec)), imag_i(tau));
   w1 = gmul(pi2, gsqrt(gneg_i(u2),prec));
