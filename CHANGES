@@ -117,6 +117,7 @@ MW 70- ellap(ellinit([0,0,1,-7077,235516]),1135392007) --> SEGV
 BA 71- user's manual index truncated if LANG=fr_FR
    72- lex(string1, string2) could return something not in {-1,0,1}
    73- bnfisprincipal(bnf,x, 0) was not instantaneous when bnf.no = 1
+   74- no GC in poleval
 
   Changed
 BA  1- improved Fp_isom
