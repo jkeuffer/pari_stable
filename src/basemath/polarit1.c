@@ -2554,7 +2554,8 @@ FqX_factor_i(GEN f, GEN T, GEN p)
 
   pg = itos_or_0(p);
   df2  = NULL; /* gcc -Wall */
-  t = (GEN*)cgetg(d+1,t_VEC); E = new_chunk(d+1);
+  t = (GEN*)cgetg(d+1,t_VEC);
+  E = cgetg(d+1, t_VECSMALL);
 
   frobinv = gpowgs(p, degpol(T)-1);
 
