@@ -2230,7 +2230,7 @@ entree functions_basic[]={
 {"nfeltpow",3,(void*)element_pow,6,"GGG"},
 {"nfeltpowmodpr",4,(void*)element_powmodpr,6,"GGGG"},
 {"nfeltreduce",3,(void*)element_reduce,6,"GGG"},
-{"nfeltreducemodpr",3,(void*)nfreducemodpr2,6,"GGG"},
+{"nfeltreducemodpr",3,(void*)nfreducemodpr,6,"GGG"},
 {"nfeltval",30,(void*)element_val,6,"lGGG"},
 {"nffactor",99,(void*)nffactor,6,"GG"},
 {"nffactormod",99,(void*)nffactormod,6,"GGG"},

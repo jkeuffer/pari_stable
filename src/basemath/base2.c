@@ -2392,29 +2392,21 @@ nfreducemodpr_i(GEN x, GEN prh)
   x[1] = lresii((GEN)x[1], p); return x;
 }
 
-/* for internal use */
 GEN
 nfreducemodpr(GEN nf, GEN x, GEN modpr)
 {
+  gpmem_t av = avma;
   long i;
   GEN p, prh;
 
+  checkmodpr(modpr);
+  if (typ(x) != t_COL) x = algtobasis(nf,x);
   for (i=lg(x)-1; i>0; i--)
     if (typ(x[i]) == t_INTMOD) { x = lift(x); break; }
   prh = (GEN)modpr[1]; p = gcoeff(prh,1,1);
   x = kill_denom(x, nf, p, modpr);
-  return FpV(nfreducemodpr_i(x, prh), p);
+  return gerepilecopy(av, nfreducemodpr_i(x, prh));
 }
-
-/* public function */
-GEN
-nfreducemodpr2(GEN nf, GEN x, GEN modpr)
-{
-  gpmem_t av = avma; checkmodpr(modpr);
-  if (typ(x) != t_COL) x = algtobasis(nf,x);
-  return gerepileupto(av, nfreducemodpr(nf,x,modpr));
-}
-
 
 GEN
 nf_to_ff(GEN nf, GEN x, GEN modpr)

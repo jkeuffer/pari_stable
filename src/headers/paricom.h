@@ -250,7 +250,6 @@ extern void* global_err_data;
 
 #define ONLY_REM ((GEN*)0x1L)
 #define ONLY_DIVIDES ((GEN*)0x2L)
-#define ONLY_DIVIDES_EXACT ((GEN*)0x3L)
 #define gdeuc(x,y) (poldivres((x),(y),NULL))
 #define gres(x,y) (poldivres((x),(y),ONLY_REM))
 #define FpX_div(x,y,p) (FpX_divres((x),(y),(p), NULL))

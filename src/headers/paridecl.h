@@ -361,7 +361,6 @@ GEN     nfbasis0(GEN x,long flag,GEN p);
 GEN     nfdiscf0(GEN x,long flag, GEN p);
 GEN     nfreducemodideal(GEN nf,GEN x,GEN ideal);
 GEN     nfreducemodpr(GEN nf, GEN x, GEN modpr);
-GEN     nfreducemodpr2(GEN nf, GEN x, GEN modpr);
 GEN     polcompositum0(GEN pol1, GEN pol2,long flag);
 GEN     primedec(GEN nf,GEN p);
 GEN     rnfbasis(GEN bnf, GEN order);

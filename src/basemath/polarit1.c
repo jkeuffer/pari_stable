@@ -120,10 +120,7 @@ poldivres(GEN x, GEN y, GEN *pr)
   GEN z,p1,rem,y_lead,mod;
   GEN (*f)(GEN,GEN);
 
-  if (pr == ONLY_DIVIDES_EXACT)
-    { f = gdivexact; pr = ONLY_DIVIDES; }
-  else
-    f = gdiv;
+  f = gdiv;
   if (is_scalar_t(ty))
   {
     if (pr == ONLY_REM) return gzero;
