@@ -2992,7 +2992,7 @@ GEN galoiscoset(GEN perm, GEN O)
 {
   ulong ltop;
   GEN coset,RO;
-  int i,j,l,n,o;
+  int i,j,l,o;
   long u,v;
   o=lg(O)-1;   /*number of orbits and cosets*/
   l=lg(O[1])-1;/*number of elements in orbits*/
