@@ -40,6 +40,7 @@ Done for version 2.2.5 (released ??/11/2002): [hopefully]
     3- typo in gphelp [detex mode]: ubiquitous "var" in translation!
     4- typo in var_make_safe() [ protecting user variables after trapped 
        "stack overflow" ] --> possible SEGV
+BA  5- [Configure:] add -lm -lc to EXTRADLLDFLAGS, not DLLDFLAGS
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available
