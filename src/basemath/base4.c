@@ -1049,14 +1049,13 @@ idealmulspec(GEN nf, GEN x, GEN y)
 
   if (isnfscalar(alpha))
     return gmul(mppgcd(a, (GEN)alpha[1]),x);
+  m = cgetg((N<<1)+1,t_MAT);
   if (typ(alpha) == t_MAT)
   {
-    m = cgetg((N<<1)+1,t_MAT);
     for (i=1; i<=N; i++) m[i] = lmul(alpha,(GEN)x[i]);
   }
   else
   {
-    m = cgetg((N<<1)+1,t_MAT);
     for (i=1; i<=N; i++) m[i] = (long)element_muli(nf,alpha,(GEN)x[i]);
   }
   mod = mulii(a, gcoeff(x,1,1));

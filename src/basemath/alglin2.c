@@ -2417,11 +2417,11 @@ allhnfmod(GEN x, GEN dm, int flag)
     coeff(w,i,i) = (long)d;
     if (!modid && i > 1) b = diviiexact(b,d);
   }
-  for (i = 1; i <= ldef; i++){ w[i] = (long)vec_Cei(li-1, i, dm); DONE[i] = 1; }
+  for (i = 1; i <= ldef; i++) w[i] = (long)vec_Cei(li-1, i, dm);
   if (modid && !(flag & hnf_RAW))
   { /* w[li] is an accumulator, discarded at the end */
-    for (i = li-1; i > 1; i--)
-    { /* add up the missing dm*Id components */
+    for (i = li-1; i > ldef; i--)
+    { /* check that dm*Id \subset L + add up missing dm*Id components */
       GEN d, c;
       if (DONE[i]) continue;
       d = gcoeff(w,i,i); if (is_pm1(d)) continue;
@@ -2439,12 +2439,6 @@ allhnfmod(GEN x, GEN dm, int flag)
         FpV_red_part_ip((GEN)w[li], dm, j-1);
         FpV_red_part_ip((GEN)w[j],  dm, j-1);
       }
-    }
-    for (i = li-1; i > 0; i--)
-    {
-      GEN d = bezout(gcoeff(w,i,i),dm,&u,&v);
-      FpV_Fp_mul_part_ip((GEN)w[i], u, dm, i-1);
-      coeff(w,i,i) = (long)d;
     }
   }
   if (flag & hnf_PART) return w;
@@ -2481,7 +2475,7 @@ hnfmod(GEN x, GEN detmat) { return allhnfmod(x,detmat, 0); }
 GEN
 hnfmodid(GEN x, GEN p) { return allhnfmod(x, p, hnf_MODID); }
 GEN
-hnfmodidraw(GEN x, GEN p) { return allhnfmod(x, p, hnf_MODID|hnf_RAW); }
+hnfmodidraw(GEN x, GEN p) { return allhnfmod(x, p, hnf_MODID); }
 GEN
 hnfmodidpart(GEN x, GEN p) { return allhnfmod(x, p, hnf_MODID|hnf_PART); }
 
