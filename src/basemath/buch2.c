@@ -17,7 +17,7 @@ GEN idealpowred_prime(GEN nf, GEN vp, GEN n, long prec);
 long int_elt_val(GEN nf, GEN x, GEN p, GEN b, long v);
 GEN make_M(long n,long ru,GEN basis,GEN roo);
 GEN make_MC(long n,long r1,long ru,GEN M);
-GEN make_TI(GEN nf, GEN TI, GEN con);
+GEN make_MDI(GEN nf, GEN TI, GEN *a, GEN *b);
 
 #define SFB_MAX 2
 #define SFB_STEP 2
@@ -2171,7 +2171,7 @@ bnfmake(GEN sbnf, long prec)
 
   mas[1]=(long)M; mas[2]=(long)MC; mas[3]=(long)T2;
   mas[4]=(long)T; mas[5]=sbnf[6];  mas[6]=(long)TI;
-  mas[7]=(long)make_TI(nf,TI,gun);
+  mas[7]=(long)make_MDI(nf,TI,&p1,&p2);
 
   funits=cgetg(ru,t_VEC); p1 = (GEN)sbnf[11];
   for (k=1; k < lg(p1); k++)
@@ -2418,8 +2418,7 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
   N=lgef(P)-3;
   if (!nf)
   {
-    nf=initalgall0(P, flun>=0? nf_REGULAR: nf_DIFFERENT,
-                   max(BIGDEFAULTPREC,prec));
+    nf=initalgall0(P, nf_REGULAR, max(BIGDEFAULTPREC,prec));
     if (lg(nf)==3) /* P was a non-monic polynomial, nfinit changed it */
     {
       CHANGE=(GEN)nf[2]; nf=(GEN)nf[1];
