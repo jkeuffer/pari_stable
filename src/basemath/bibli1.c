@@ -2945,7 +2945,7 @@ GEN
 qfrep0(GEN a, GEN borne, long flag)
 {
   pari_sp av = avma;
-  GEN g = minim00(a, borne, gzero, (flag & 1)? min_VECSMALL: min_VECSMALL2);
+  GEN g = minim00(a, borne, gzero, (flag & 1)? min_VECSMALL2: min_VECSMALL);
   if ((flag & 2) == 0) g = gerepileupto(av, gtovec(g));
   return g;
 }
