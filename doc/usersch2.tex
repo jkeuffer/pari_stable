@@ -1256,7 +1256,7 @@ manipulation package, although it shares some of the functionalities. One of
 the main consequences of this fact is that all expressions are evaluated as
 soon as they are written, they never stay in a purely abstract form%
 \footnote{**}{An obvious but important exception are character strings which
-are evaluated\dots\ essentially to themselves (type \typ{STR}). Not exactly
+are evaluated essentially to themselves (type \typ{STR}). Not exactly
 so though, since we do some work to treat the quoted characters correctly
 (those preceded by a \b{)}.}.
 %
@@ -1312,7 +1312,7 @@ $y^1 + x*y^0$, which is the same mathematical entity after all ?
 
 The answer is that variables are ordered implicitly by the GP interpreter:
 when a new identifier (e.g~$x$, or $y$ as above) is input, the corresponding
-variable is registered as having a stricly lower priority than any variable in
+variable is registered as having a strictly lower priority than any variable in
 use at this point\footnote{*}{This is not strictly true: if an
 identifier is interpreted as a user function, no variable is registered. Also,
 the variable $x$ is predefined and always has the highest possible priority.}
