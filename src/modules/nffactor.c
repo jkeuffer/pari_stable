@@ -579,7 +579,8 @@ static double
 get_Blow(long BvS, long d)
 {
   double sqrtBvS = sqrt((double)BvS);
-  double t = 1. + 0.5*sqrtBvS + 0.5 * sqrt((double)d) * (sqrtBvS + 1);
+  double t = sqrtBvS + sqrt((double)d) * (sqrtBvS + 1);
+  t = 1. + 0.5 * t;
   return t * t;
 }
 
@@ -1023,7 +1024,7 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long k, long rec)
   for(tmax = 0;; tmax++)
   {
     long a, b, bmin, bgood, delta, tnew = tmax + 1, r = lg(CM_L)-1;
-    GEN M_L, q;
+    GEN M_L, q, S1, P1, VV;
 
     /* bound for f . S_k(genuine factor) = ZC * bound for T_2(S_tnew) */
     Btra = mulrr(ZC, mulsr(dP*dP, normlp(Br, 2*tnew, dnf)));
@@ -1063,7 +1064,7 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long k, long rec)
       }
       if (dn) p1 = mulii(p1,dn);
       if (dn || lP) p1 = modii(p1, pk);
-      Tra[i] = (long)gscalcol(p1, dnf); /* S_tnew(famod) */
+      Tra[i] = (long)nf_bestlift(p1, NULL, L); /* S_tnew(famod) */
     }
 
     /* compute truncation parameter */
@@ -1073,22 +1074,16 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long k, long rec)
     b = 0; /* -Wall */
 AGAIN:
     M_L = gdivexact(CM_L, stoi(C));
-    T2 = centermod( gmul(Tra, M_L), pk );
-    T2 = gsub(T2, gmul(PRK, gdivround(gmul(PRKinv, T2), pk)));
+    T2 = gmul(Tra, M_L);
+    VV = gdivround(gmul(PRKinv, T2), pk);
+    T2 = gsub(T2, gmul(PRK, VV));
 
     if (!delta)
     { /* initialize lattice, using few p-adic digits for traces */
       a = gexpo(T2);
       bgood = (long)(a - max(32, BitPerFactor * r));
       b = max(bmin, bgood);
-      delta = a - b;
       q = shifti(gun, b);
-      m = concatsp( vconcat( CM_L, gdivround(T2, q) ),
-                    vconcat( ZERO, gdivround(PRK,q) ) );
-      /*     [ C M_L   0  ]
-       * m = [            ]   square matrix
-       *     [  T2'   PRK ]   T2' = Tra * M_L  truncated
-       */
     }
     else
     { /* add more p-adic digits and continue reduction */
@@ -1096,9 +1091,27 @@ AGAIN:
       if (b0 < b) b = b0;
       b = max(b-delta, bmin);
       if (b - delta/2 < bmin) b = bmin; /* near there. Go all the way */
-      q = shifti(gun, b);
-      m = vconcat( CM_L, gdivround(T2, q) );
     }
+
+    q = shifti(gun, b);
+    /* restart with truncated entries */
+    P1 = gdivround(PRK, q);
+    S1 = gdivround(Tra, q);
+    T2 = gmul(S1, M_L);
+    T2 = gsub(T2, gmul(P1, VV));
+
+    if (!delta)
+    {
+      delta = a - b;
+      m = concatsp( vconcat( CM_L, T2 ),
+                    vconcat( ZERO, P1 ) );
+      /*     [ C M_L   0  ]
+       * m = [            ]   square matrix
+       *     [  T2'   PRK ]   T2' = Tra * M_L  truncated
+       */
+    }
+    else
+      m = vconcat( CM_L, T2 );
     if (DEBUGLEVEL>2)
       fprintferr("LLL_cmbf: b = %4ld, r = %4ld, time = %ld\n",
                  b,lg(m)-1,TIMER(&TI));
