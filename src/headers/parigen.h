@@ -122,7 +122,7 @@ typedef int (*QSCOMP)(const void *, const void *);
 #define setisclone(x) (((GEN) (x))[0] |= CLONEBIT)
 #define unsetisclone(x) (((GEN) (x))[0] &= (~CLONEBIT))
 
-#define lg(x)         ((((ulong)(x))&1)?1L: ((long) (((GEN) (x))[0] & LGBITS)))
+#define lg(x)         ((((ulong)(x))&1UL)?1L: ((long) (((GEN) (x))[0] & LGBITS)))
 #define setlg(x,s)    (((GEN)(x))[0]=\
                         (((GEN)(x))[0]&(~LGBITS)) | evallg(s))
 
@@ -130,11 +130,11 @@ typedef int (*QSCOMP)(const void *, const void *);
 #define setsigne(x,s) (((GEN)(x))[1]=\
                         (((GEN)(x))[1]&(~SIGNBITS)) | evalsigne(s))
 
-#define lgef(x)       (((GEN) (x))[1] & LGEFBITS)
+#define lgef(x)       ((long)(((GEN) (x))[1] & LGEFBITS))
 #define setlgef(x,s)  (((GEN)(x))[1]=\
                         (((GEN)(x))[1]&(~LGEFBITS)) | evallgef(s))
 
-#define lgefint(x)      (((GEN) (x))[1] & LGEFINTBITS)
+#define lgefint(x)      ((long)(((GEN) (x))[1] & LGEFINTBITS))
 #define setlgefint(x,s) (((GEN)(x))[1]=\
                           (((GEN)(x))[1]&(~LGEFINTBITS)) | evallgefint(s))
 
@@ -150,7 +150,7 @@ typedef int (*QSCOMP)(const void *, const void *);
 #define setprecp(x,s) (((GEN)(x))[1]=\
 		       (((GEN)(x))[1]&(~PRECPBITS)) | evalprecp(s))
 
-#define varn(x)       ((((GEN) (x))[1]&VARNBITS) >> VARNSHIFT)
+#define varn(x)       ((long)((((GEN) (x))[1]&VARNBITS) >> VARNSHIFT))
 #define setvarn(x,s)  (((GEN)(x))[1]=\
 		       (((GEN)(x))[1]&(~VARNBITS)) | evalvarn(s))
 
