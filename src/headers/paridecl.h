@@ -95,6 +95,7 @@ GEN     FqM_suppl(GEN x, GEN T, GEN p);
 GEN     QM_inv(GEN M, GEN dM);
 GEN     ZM_inv(GEN M, GEN dM);
 GEN     _col(GEN x);
+GEN     _mat(GEN x);
 GEN     _vec(GEN x);
 GEN     _veccopy(GEN x);
 void    appendL(GEN x, GEN t);
