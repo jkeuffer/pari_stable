@@ -66,17 +66,29 @@ get_tab(GEN nf, long *N)
   *N = lg(tab[1])-1; return tab;
 }
 
+/* x != 0 t_INT. Return x * y (not memory clean) */
+static GEN
+_mulix(GEN x, GEN y) {
+  return is_pm1(x)? (signe(x) < 0)? gneg(y): y
+                  : gmul(x, y);
+}
+/* x != 0, y t_INT. Return x * y (not memory clean) */
+static GEN
+_mulii(GEN x, GEN y) {
+  return is_pm1(x)? (signe(x) < 0)? negi(y): y
+                  : mulii(x, y);
+}
+
+#if 0 /* slower */
 GEN
 mul_by_tab(GEN tab, GEN x, GEN y)
 {
-  gpmem_t av;
-  long i,j,k,N;
-  GEN s,v,c,p1;
+  long i, j, k, N = lg(x)-1;
+  GEN s,c,p1, v = cgetg(N+1,t_COL);
 
-  N = lg(x)-1;
-  v=cgetg(N+1,t_COL); av=avma;
   for (k=1; k<=N; k++)
   {
+    gpmem_t av = avma;
     if (k == 1)
       s = gmul((GEN)x[1],(GEN)y[1]);
     else
@@ -84,26 +96,60 @@ mul_by_tab(GEN tab, GEN x, GEN y)
                gmul((GEN)x[k],(GEN)y[1]));
     for (i=2; i<=N; i++)
     {
-      c=gcoeff(tab,k,(i-1)*N+i);
+      long base = (i-1)*N;
+      c=gcoeff(tab,k,base+i);
       if (signe(c))
       {
         p1 = gmul((GEN)x[i],(GEN)y[i]);
-	if (!gcmp1(c)) p1 = gmul(p1,c);
-	s = gadd(s, p1);
+	s = gadd(s, _mulix(c, p1));
       }
       for (j=i+1; j<=N; j++)
       {
-	c=gcoeff(tab,k,(i-1)*N+j);
-	if (signe(c))
-	{
-          p1 = gadd(gmul((GEN)x[i],(GEN)y[j]),
-                    gmul((GEN)x[j],(GEN)y[i]));
-	  if (!gcmp1(c)) p1 = gmul(p1,c);
-          s = gadd(s, p1);
-	}
+	c=gcoeff(tab,k,base+j);
+	if (!signe(c)) continue;
+
+        p1 = gadd(gmul((GEN)x[i],(GEN)y[j]),
+                  gmul((GEN)x[j],(GEN)y[i]));
+        s = gadd(s, _mulix(c, p1));
       }
     }
-    v[k]=(long)gerepileupto(av,s); av=avma;
+    v[k] = (long)gerepileupto(av,s);
+  }
+  return v;
+}
+#endif
+GEN
+mul_by_tab(GEN tab, GEN x, GEN y)
+{
+  long i, j, k, N = lg(x)-1;
+  GEN s, v = cgetg(N+1,t_COL);
+
+  for (k=1; k<=N; k++)
+  {
+    gpmem_t av = avma;
+    if (k == 1)
+      s = gmul((GEN)x[1],(GEN)y[1]);
+    else
+      s = gadd(gmul((GEN)x[1],(GEN)y[k]),
+               gmul((GEN)x[k],(GEN)y[1]));
+    for (i=2; i<=N; i++)
+    {
+      GEN t, xi = (GEN)x[i];
+      long base;
+      if (gcmp0(xi)) continue;
+
+      base = (i-1)*N;
+      t = NULL;
+      for (j=2; j<=N; j++)
+      {
+	GEN p1, c = gcoeff(tab,k,base+j); /* m^{i,j}_k */
+	if (!signe(c)) continue;
+        p1 = _mulix(c, (GEN)y[j]);
+        t = t? gadd(t, p1): p1;
+      }
+      if (t) s = gadd(s, gmul(xi, t));
+    }
+    v[k] = lpileupto(av,s);
   }
   return v;
 }
@@ -233,16 +279,15 @@ element_div(GEN nf, GEN x, GEN y)
 GEN
 element_muli(GEN nf, GEN x, GEN y)
 {
-  gpmem_t av;
-  long i,j,k,N;
-  GEN p1,s,v,c,tab;
+  long i, j, k, N;
+  GEN s, v, tab = get_tab(nf, &N);
 
-  tab = get_tab(nf, &N);
   if (typ(x) != t_COL || lg(x) != N+1
    || typ(y) != t_COL || lg(y) != N+1) err(typeer,"element_muli");
-  v=cgetg(N+1,t_COL); av=avma;
+  v = cgetg(N+1,t_COL);
   for (k=1; k<=N; k++)
   {
+    gpmem_t av = avma;
     if (k == 1)
       s = mulii((GEN)x[1],(GEN)y[1]);
     else
@@ -250,26 +295,22 @@ element_muli(GEN nf, GEN x, GEN y)
                 mulii((GEN)x[k],(GEN)y[1]));
     for (i=2; i<=N; i++)
     {
-      c=gcoeff(tab,k,(i-1)*N+i);
-      if (signe(c))
+      GEN t, xi = (GEN)x[i];
+      long base;
+      if (!signe(xi)) continue;
+
+      base = (i-1)*N;
+      t = NULL;
+      for (j=2; j<=N; j++)
       {
-        p1 = mulii((GEN)x[i],(GEN)y[i]);
-        if (!gcmp1(c)) p1 = mulii(p1,c);
-	s = addii(s,p1);
+	GEN p1, c = gcoeff(tab,k,base+j); /* m^{i,j}_k */
+	if (!signe(c)) continue;
+        p1 = _mulii(c, (GEN)y[j]);
+        t = t? addii(t, p1): p1;
       }
-      for (j=i+1; j<=N; j++)
-      {
-	c=gcoeff(tab,k,(i-1)*N+j);
-	if (signe(c))
-	{
-          p1 = addii(mulii((GEN)x[i],(GEN)y[j]),
-                     mulii((GEN)x[j],(GEN)y[i]));
-          if (!gcmp1(c)) p1 = mulii(p1,c);
-	  s = addii(s,p1);
-	}
-      }
+      if (t) s = addii(s, mulii(xi, t));
     }
-    v[k] = lpileuptoint(av,s); av = avma;
+    v[k] = lpileuptoint(av,s);
   }
   return v;
 }
@@ -278,40 +319,36 @@ element_muli(GEN nf, GEN x, GEN y)
 GEN
 element_sqri(GEN nf, GEN x)
 {
-  GEN p1,s,v,c,tab;
-  gpmem_t av;
-  long i,j,k,N;
+  long i, j, k, N;
+  GEN s, v, tab = get_tab(nf, &N);
 
-  tab = get_tab(nf, &N);
-
-  v=cgetg(N+1,t_COL); av=avma;
+  v = cgetg(N+1,t_COL);
   for (k=1; k<=N; k++)
   {
+    gpmem_t av = avma;
     if (k == 1)
       s = sqri((GEN)x[1]);
     else
       s = shifti(mulii((GEN)x[1],(GEN)x[k]), 1);
     for (i=2; i<=N; i++)
     {
-      c=gcoeff(tab,k,(i-1)*N+i);
-      if (signe(c))
-      {
-        p1 = sqri((GEN)x[i]);
-        if (!gcmp1(c)) p1 = mulii(p1,c);
-	s = addii(s,p1);
-      }
+      GEN p1, c, t, xi = (GEN)x[i];
+      long base;
+      if (!signe(xi)) continue;
+
+      base = (i-1)*N;
+      c = gcoeff(tab,k,base+i);
+      t = signe(c)? _mulii(c,xi): NULL;
       for (j=i+1; j<=N; j++)
       {
-	c=gcoeff(tab,k,(i-1)*N+j);
-	if (signe(c))
-	{
-          p1 = shifti(mulii((GEN)x[i],(GEN)x[j]),1);
-          if (!gcmp1(c)) p1 = mulii(p1,c);
-	  s = addii(s,p1);
-	}
+	c = gcoeff(tab,k,base+j);
+	if (!signe(c)) continue;
+        p1 = _mulii(shifti(c,1), (GEN)x[j]);
+        t = t? addii(t, p1): p1;
       }
+      if (t) s = addii(s, mulii(xi, t));
     }
-    v[k] = lpileuptoint(av,s); av = avma;
+    v[k] = lpileuptoint(av,s);
   }
   return v;
 }
@@ -319,46 +356,35 @@ element_sqri(GEN nf, GEN x)
 GEN
 sqr_by_tab(GEN tab, GEN x)
 {
-  gpmem_t av = avma;
-  long i,j,k,N;
-  GEN p1,s,v,c;
+  long i, j, k, N = lg(x)-1;
+  GEN s, v = cgetg(N+1,t_COL);
 
-  N = lg(x)-1;
-  if (isnfscalar(x))
-  {
-    s=cgetg(N+1,t_COL); s[1]=lsqr((GEN)x[1]);
-    for (i=2; i<=N; i++) s[i]=lcopy((GEN)x[i]);
-    return s;
-  }
-  v=cgetg(N+1,t_COL); av = avma;
   for (k=1; k<=N; k++)
   {
+    gpmem_t av = avma;
     if (k == 1)
       s = gsqr((GEN)x[1]);
     else
       s = gmul2n(gmul((GEN)x[1],(GEN)x[k]), 1);
     for (i=2; i<=N; i++)
     {
-      c=gcoeff(tab,k,(i-1)*N+i);
-      if (signe(c))
-      {
-        p1 = gsqr((GEN)x[i]);
-	if (!gcmp1(c)) p1 = gmul(p1,c);
-        s = gadd(s,p1);
-      }
+      GEN p1, c, t, xi = (GEN)x[i];
+      long base;
+      if (gcmp0(xi)) continue;
+
+      base = (i-1)*N;
+      c = gcoeff(tab,k,base+i);
+      t = signe(c)? _mulix(c,xi): NULL;
       for (j=i+1; j<=N; j++)
       {
-	c=gcoeff(tab,k,(i-1)*N+j);
-	if (signe(c))
-	{
-          p1 = gmul((GEN)x[i],(GEN)x[j]);
-	  p1 = gmul2n(p1,1);
-          if (!gcmp1(c)) p1 = gmul(p1, c);
-	  s = gadd(s,p1);
-	}
+	c = gcoeff(tab,k,(i-1)*N+j);
+	if (!signe(c)) continue;
+        p1 = _mulix(shifti(c,1), (GEN)x[j]);
+        t = t? gadd(t, p1): p1;
       }
+      if (t) s = gadd(s, gmul(xi, t));
     }
-    v[k]=(long)gerepileupto(av,s); av=avma;
+    v[k] = (long)gerepileupto(av,s);
   }
   return v;
 }
@@ -470,25 +496,24 @@ element_mulidid(GEN nf, long i, long j)
 GEN
 element_mulid(GEN nf, GEN x, long i)
 {
-  gpmem_t av;
-  long j,k,N;
-  GEN s,v,c,p1, tab;
+  long j, k, N;
+  GEN v, tab;
 
   if (i==1) return gcopy(x);
   tab = get_tab(nf, &N);
   if (typ(x) != t_COL || lg(x) != N+1) err(typeer,"element_mulid");
   tab += (i-1)*N;
-  v=cgetg(N+1,t_COL); av=avma;
+  v = cgetg(N+1,t_COL);
   for (k=1; k<=N; k++)
   {
-    s = gzero;
+    gpmem_t av = avma;
+    GEN s = gzero;
     for (j=1; j<=N; j++)
-      if (signe(c = gcoeff(tab,k,j)) && !gcmp0(p1 = (GEN)x[j]))
-      {
-        if (!gcmp1(c)) p1 = gmul(p1,c);
-	s = gadd(s,p1);
-      }
-    v[k]=lpileupto(av,s); av=avma;
+    {
+      GEN c = gcoeff(tab,k,j);
+      if (signe(c)) s = gadd(s, _mulix(c, (GEN)x[j]));
+    }
+    v[k] = lpileupto(av,s);
   }
   return v;
 }
@@ -498,9 +523,7 @@ GEN
 eltmulid_get_table(GEN nf, long i)
 {
   long k,N;
-  GEN m, tab;
-
-  tab = get_tab(nf, &N);
+  GEN m, tab = get_tab(nf, &N);
   tab += (i-1)*N;
   m = cgetg(N+1,t_COL);
   for (k=1; k<=N; k++) m[k] = tab[k];
