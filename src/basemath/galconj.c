@@ -193,8 +193,7 @@ GEN vandermondeinverseprep(GEN T, GEN L)
 GEN
 vandermondeinverse(GEN L, GEN T, GEN den, GEN prep)
 {
-  ulong lbot;
-  gpmem_t ltop = avma;
+  gpmem_t lbot, ltop = avma;
   int     i, j, n = lg(L);
   long    x = varn(T);
   GEN     M, P;
@@ -350,7 +349,7 @@ GEN makeLden(GEN L,GEN den, struct galois_borne *gb)
 void
 initlift(GEN T, GEN den, GEN p, GEN L, GEN Lden, struct galois_borne *gb, struct galois_lift *gl)
 {
-  ulong   ltop, lbot;
+  gpmem_t ltop, lbot;
   gl->gb=gb;
   gl->T = T;
   gl->den = den;
@@ -372,7 +371,7 @@ initlift(GEN T, GEN den, GEN p, GEN L, GEN Lden, struct galois_borne *gb, struct
 static int
 poltopermtest(GEN f, struct galois_lift *gl, GEN pf)
 {
-  ulong   ltop;
+  gpmem_t ltop;
   GEN     fx, fp;
   long     i, j,ll;
   for (i = 2; i< lgef(f); i++)
@@ -440,7 +439,7 @@ static long monoratlift(GEN S, GEN q, GEN qm1old,struct galois_lift *gl, GEN fro
   GEN
 monomorphismratlift(GEN P, GEN S, struct galois_lift *gl, GEN frob)
 {
-  ulong   ltop, lbot;
+  gpmem_t ltop, lbot;
   long rt;
   GEN     Q=gl->T, p=gl->p;
   long    e=gl->e, level=1;
@@ -610,8 +609,7 @@ long
 frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
 		 struct galois_testlift *gt, GEN frob)
 {
-  ulong ltop2;
-  gpmem_t ltop = avma, av;
+  gpmem_t av, ltop2, ltop = avma;
   long    d, z, m, c, n, ord;
   int     i, j, k;
   GEN     pf, u, v;
@@ -780,8 +778,7 @@ struct galois_test
 static GEN
 Vmatrix(long n, struct galois_test *td)
 {
-  ulong lbot;
-  gpmem_t ltop = avma;
+  gpmem_t lbot, ltop = avma;
   GEN     V;
   long    i;
   V = cgetg(lg(td->L), t_VEC);
@@ -799,7 +796,7 @@ Vmatrix(long n, struct galois_test *td)
 static void
 inittest(GEN L, GEN M, GEN borne, GEN ladic, struct galois_test *td)
 {
-  ulong   ltop;
+  gpmem_t ltop;
   long    i;
   int     n = lg(L) - 1;
   if (DEBUGLEVEL >= 8)
@@ -1145,7 +1142,7 @@ int pari_compare_lg(GEN x, GEN y)
 GEN
 hnftoelementslist(long n, GEN zn2, GEN zn3, GEN lss, long card)
 {
-  ulong   ltop;
+  gpmem_t ltop;
   GEN     sg, gen, ord;
   int     k, j, l;
   sg = cgetg(1 + card, t_VECSMALL);
@@ -1634,8 +1631,7 @@ indexpartial(GEN P, GEN DP)
 GEN
 splitorbite(GEN O)
 {
-  ulong lbot;
-  gpmem_t ltop = avma;
+  gpmem_t lbot, ltop = avma;
   int     i, n;
   GEN     fc, res;
   n = lg(O[1]) - 1;
@@ -2295,8 +2291,7 @@ GEN
 s4galoisgen(struct galois_lift *gl)
 {
   struct galois_testlift gt;
-  ulong ltop2;
-  gpmem_t ltop = avma, av;
+  gpmem_t av, ltop2, ltop = avma;
   GEN     Tmod, isom, isominv, misom;
   int     i, j;
   GEN     sg;
@@ -2356,10 +2351,9 @@ s4galoisgen(struct galois_lift *gl)
   av = avma;
   for (i = 0; i < 3; i++)
   {
-    gpmem_t av2;
+    gpmem_t av2, avm1, avm2;
     GEN     u;
     int     j1, j2, j3;
-    gpmem_t avm1, avm2;
     GEN     u1, u2, u3;
     if (i)
     {
@@ -2577,7 +2571,7 @@ galoisfrobeniustest(GEN aut, struct galois_lift *gl, GEN frob)
 {
   gpmem_t ltop=avma;
   GEN tlift = FpX_center(FpX_Fp_mul(aut,gl->den,gl->Q), gl->Q);
-  long res=poltopermtest(tlift, gl, frob);
+  long gl, res=poltopermtest(tlift, frob);
   avma=ltop;
   return res;
 }
@@ -2718,8 +2712,7 @@ static GEN
 galoisfindfrobenius(GEN T, GEN L, GEN M, GEN den, struct galois_frobenius *gf,
     struct galois_borne *gb, const struct galois_analysis *ga)
 {
-  ulong lbot;
-  gpmem_t ltop=avma;
+  gpmem_t lbot, ltop=avma;
   long try=0;
   long n = degpol(T), deg, gmask;
   byteptr primepointer = ga->primepointer;
@@ -2869,8 +2862,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
 {
   struct galois_test td;
   struct galois_frobenius gf;
-  ulong lbot, ltop2;
-  gpmem_t ltop = avma;
+  gpmem_t lbot, ltop2, ltop = avma;
   long    n, p, deg;
   long    fp;
   long    x;
@@ -3146,8 +3138,7 @@ galoisconj4(GEN T, GEN den, long flag, long karma)
 long
 numberofconjugates(GEN T, long pdepart)
 {
-  ulong ltop2;
-  gpmem_t ltop = avma;
+  gpmem_t ltop2, ltop = avma;
   long    n, p, nbmax, nbtest;
   long    card;
   byteptr primepointer;
@@ -3203,7 +3194,7 @@ numberofconjugates(GEN T, long pdepart)
 GEN
 galoisconj0(GEN nf, long flag, GEN d, long prec)
 {
-  ulong   ltop;
+  gpmem_t ltop;
   GEN     G, T;
   long    card;
   if (typ(nf) != t_POL)
@@ -3394,8 +3385,7 @@ fixedfieldfactor(GEN L, GEN O, GEN perm, GEN M, GEN den, GEN mod,
 GEN
 galoisfixedfield(GEN gal, GEN perm, long flag, long y)
 {
-  ulong lbot;
-  gpmem_t ltop = avma;
+  gpmem_t lbot, ltop = avma;
   GEN     L, P, S, PL, O, res, mod;
   long    x, n;
   int     i;
