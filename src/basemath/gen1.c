@@ -294,7 +294,7 @@ gaddpex(GEN x, GEN y)
   if (r <= 0) { avma = av; return gcopy(y); }
   mod = (GEN)y[3];
   u   = (GEN)y[4];
-  (void)new_chunk(5 + lgefint(mod) + lgefint(p)*labs(d));
+  (void)new_chunk(5 + ((lgefint(mod) + lgefint(p)*labs(d)) << 1));
 
   if (d > 0)
   {
