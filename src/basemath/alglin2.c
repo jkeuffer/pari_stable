@@ -3146,7 +3146,7 @@ bezout_step(GEN *pa, GEN *pb, GEN *pu, GEN *pv, GEN mun)
 }
 
 static int
-invcmpii(GEN x, GEN y) { return -cmpii(x,y); }
+negcmpii(GEN x, GEN y) { return -cmpii(x,y); }
 
 /* Return the SNF D of matrix X. If ptU/ptV non-NULL set them to U/V
  * to that D = UXV */
@@ -3162,7 +3162,7 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
   if (!n) {
     if (ptU) *ptU = cgetg(1,t_MAT);
     if (ptV) *ptV = cgetg(1,t_MAT);
-    return cgetg(1,t_MAT);
+    return cgetg(1,(ptV||ptU)?t_MAT:t_VEC);
   }
   mun = negi(gun); av = avma;
   m0 = m = lg(x[1])-1;
@@ -3235,7 +3235,7 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
   if (U) U = idmat(n);
 
   /* square, maximal rank n */
-  p1 = gen_sort(mattodiagonal_i(x), cmp_IND | cmp_C, &invcmpii);
+  p1 = gen_sort(mattodiagonal_i(x), cmp_IND | cmp_C, &negcmpii);
   ys = cgetg(n+1,t_MAT);
   for (j=1; j<=n; j++) ys[j] = (long)vecextract_p((GEN)x[p1[j]], p1);
   x = ys;
