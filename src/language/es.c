@@ -2660,7 +2660,7 @@ static int
 is_sizeoflong_ok(FILE *f)
 {
   char c;
-  return (fread(&c,1,1, f) == 1 && c == sizeof(long));
+  return (fread(&c,1,1, f) == 1 && c == (char)sizeof(long));
 }
 
 static int
@@ -2688,7 +2688,7 @@ static void
 write_magic(FILE *f)
 {
   fprintf(f, MAGIC);
-  fprintf(f, "%c", sizeof(long));
+  fprintf(f, "%c", (char)sizeof(long));
   wr_long(ENDIAN_CHECK, f);
   wr_long(BINARY_VERSION, f);
 }
