@@ -810,7 +810,7 @@ zsigne(GEN nf,GEN x,GEN arch)
       return vecsign;
     }
   }
-  x = primpart(x);
+  x = Q_primpart(x);
   for (j=i=1; i<l; i++)
     if (signe(arch[i]))
       vecsign[j++] = (eval_sign(M, x, i) > 0)? (long)_0: (long)_1;

@@ -999,21 +999,97 @@ get_mul_table(GEN x,GEN basden,GEN invbas,GEN *T)
   return mul;
 }
 
+GEN
+make_T2(GEN bas, GEN ro, long r1)
+{
+  GEN M, basden = get_bas_den(bas);
+  M = make_M(basden,ro);
+  return mulmat_real(make_MC(r1,M), M); /* FIXME: useless */
+}
+
+/* as get_T, mul_table not precomputed */
+static GEN
+make_T(GEN x, GEN w)
+{
+  long i,j, n = degpol(x);
+  GEN p1,p2,t,d;
+  GEN sym = cgetg(n+2,t_VEC);
+  GEN den = cgetg(n+1,t_VEC);
+  GEN T = cgetg(n+1,t_MAT);
+  gpmem_t av;
+
+  sym = polsym(x, n-1);
+  p1 = get_bas_den(w);
+  w   = (GEN)p1[1];
+  den = (GEN)p1[2];
+  for (i=1; i<=n; i++)
+  {
+    p1 = cgetg(n+1,t_COL); T[i] = (long)p1;
+    for (j=1; j<i ; j++) p1[j] = coeff(T,i,j);
+    for (   ; j<=n; j++)
+    {
+      av = avma;
+      p2 = gres(gmul((GEN)w[i],(GEN)w[j]), x);
+      t = quicktrace(p2, sym);
+      if (den)
+      {
+        d = _mulii((GEN)den[i],(GEN)den[j]);
+        if (d) t = diviiexact(t, d);
+      }
+      p1[j] = (long)gerepileuptoint(av, t);
+    }
+  }
+  return T;
+}
+
+/* return G real such that G~ * G = T_2 */
+static GEN
+make_Cholevsky_T2(GEN M, GEN ro, long r1, long prec)
+{
+  GEN G, m, g, r, sqrt2 = gsqrt(gdeux, prec);
+  long i, j, k, l = lg(M);
+
+  G = cgetg(l, t_MAT);
+  for (j=1; j<l; j++)
+  {
+    g = cgetg(l, t_COL);
+    G[j] = (long)g; m = (GEN)M[j];
+    for (k=i=1; i<=r1; i++) g[k++] = m[i];
+    for (   ; k < l; i++)
+    {
+      r = (GEN)m[i];
+      if (typ(r) == t_COMPLEX)
+      {
+        g[k++] = lmpmul(sqrt2, (GEN)r[1]);
+        g[k++] = lmpmul(sqrt2, (GEN)r[2]);
+      }
+      else
+      {
+        g[k++] = lmpmul(sqrt2, r);
+        g[k++] = zero;
+      }
+    }
+  }
+  return G;
+}
+
 /* fill mat = nf[5], as well as nf[8] and nf[9]
  * If (small) only compute a subset (use dummy 0s for the rest) */
 void
-get_nf_matrices(GEN nf, long small)
+get_nf_matrices(GEN nf, long prec, long small)
 {
   GEN x=(GEN)nf[1],dK=(GEN)nf[3],index=(GEN)nf[4],ro=(GEN)nf[6],bas=(GEN)nf[7];
-  GEN basden,mul,invbas,M,MC,T,MDI,D,TI,A,dA,mat;
+  GEN G,basden,mul,invbas,M,T,MDI,D,TI,A,dA,mat;
   long r1 = nf_get_r1(nf), n = lg(bas)-1;
 
   mat = cgetg(small? 4: 8,t_VEC); nf[5] = (long)mat;
   basden = get_bas_den(bas);
   M = make_M(basden,ro);
-  MC = make_MC(r1,M);
+  if (gprecision(M) > prec) M = gprec_w(M, prec);
+  G = make_Cholevsky_T2(M, ro, r1, prec);
   mat[1]=(long)M;
-  mat[3]=(long)mulmat_real(MC,M);
+  mat[2]=(long)G;
+  mat[3]=(long)gram_matrix(G); /* FIXME: useless */
   if (small) { nf[8]=nf[9]=mat[2]=zero; return; }
 
   invbas = QM_inv(vecpol_to_mat(bas,n), gun);
@@ -1031,7 +1107,6 @@ get_nf_matrices(GEN nf, long small)
     D = idealhermite_aux(nf, derivpol(x));
   else
     D = gmul(dA, idealinv(nf, A));
-  mat[2]=(long)MC;
   mat[4]=(long)T;
   mat[5]=(long)D;
   if (DEBUGLEVEL) msgtimer("matrices");
@@ -1098,83 +1173,8 @@ nftohnfbasis(GEN nf, GEN x)
   return gerepilecopy(av, nfbasechange(u, x));
 }
 
-GEN
-make_T2(GEN bas, GEN ro, long r1)
-{
-  GEN M,MC,basden = get_bas_den(bas);
-  M = make_M(basden,ro);
-  MC = make_MC(r1,M);
-  return mulmat_real(MC,M);
-}
-
-/* as get_T, mul_table not precomputed */
 static GEN
-make_T(GEN x, GEN w)
-{
-  long i,j, n = degpol(x);
-  GEN p1,p2,t,d;
-  GEN sym = cgetg(n+2,t_VEC);
-  GEN den = cgetg(n+1,t_VEC);
-  GEN T = cgetg(n+1,t_MAT);
-  gpmem_t av;
-
-  sym = polsym(x, n-1);
-  p1 = get_bas_den(w);
-  w   = (GEN)p1[1];
-  den = (GEN)p1[2];
-  for (i=1; i<=n; i++)
-  {
-    p1 = cgetg(n+1,t_COL); T[i] = (long)p1;
-    for (j=1; j<i ; j++) p1[j] = coeff(T,i,j);
-    for (   ; j<=n; j++)
-    {
-      av = avma;
-      p2 = gres(gmul((GEN)w[i],(GEN)w[j]), x);
-      t = quicktrace(p2, sym);
-      if (den)
-      {
-        d = _mulii((GEN)den[i],(GEN)den[j]);
-        if (d) t = diviiexact(t, d);
-      }
-      p1[j] = (long)gerepileuptoint(av, t);
-    }
-  }
-  return T;
-}
-
-/* return G real such that G~ * G = T_2 */
-static GEN
-make_Cholevsky_T2(GEN M, GEN ro, long r1, long prec)
-{
-  GEN G, m, g, r, sqrt2 = gsqrt(gdeux, prec);
-  long i, j, k, l = lg(M);
-
-  G = cgetg(l, t_MAT);
-  for (j=1; j<l; j++)
-  {
-    g = cgetg(l, t_COL);
-    G[j] = (long)g; m = (GEN)M[j];
-    for (k=i=1; i<=r1; i++) g[k++] = m[i];
-    for (   ; k < l; i++)
-    {
-      r = (GEN)m[i];
-      if (typ(r) == t_COMPLEX)
-      {
-        g[k++] = lmul(sqrt2, (GEN)r[1]);
-        g[k++] = lmul(sqrt2, (GEN)r[2]);
-      }
-      else
-      {
-        g[k++] = lmul(sqrt2, r);
-        g[k++] = zero;
-      }
-    }
-  }
-  return G;
-}
-
-static GEN
-get_red_T2(GEN x, GEN polr, GEN base, long r1, long prec)
+get_red_T2(GEN x, GEN *polr, GEN base, long r1, long prec)
 {
   GEN M, basden, G2, u, u0 = NULL;
   gpmem_t av;
@@ -1183,11 +1183,11 @@ get_red_T2(GEN x, GEN polr, GEN base, long r1, long prec)
   basden = get_bas_den(base);
   av = avma;
 
-  if (!polr) polr = get_roots(x,r1,prec);
+  if (!*polr) *polr = get_roots(x,r1,prec);
   for (i=1; ; i++)
   {
-    M = make_M(basden, polr);
-    G2 = make_Cholevsky_T2(M, polr, r1, prec);
+    M = make_M(basden, *polr);
+    G2 = make_Cholevsky_T2(M, *polr, r1, prec);
     if (u0) G2 = gmul(G2, u0);
     if ((u = lllfp_marked(1, G2, 100, 2, prec, 0)))
     {
@@ -1199,7 +1199,7 @@ get_red_T2(GEN x, GEN polr, GEN base, long r1, long prec)
     if (i == MAXITERPOL) err(accurer,"red_T2");
     prec = (prec<<1)-2;
     if (DEBUGLEVEL) err(warnprec,"red_T2",prec);
-    polr = get_roots(x,r1, prec);
+    *polr = get_roots(x,r1, prec);
   }
 }
 
@@ -1208,18 +1208,19 @@ get_red_T2(GEN x, GEN polr, GEN base, long r1, long prec)
  * base = vector of elts in Z[Y]/(x) generating the maximal order
  * polr = roots of x, computed to precision prec */
 GEN
-LLL_nfbasis(GEN x, GEN polr, GEN base, long prec)
+LLL_nfbasis(GEN x, GEN *polr, GEN base, long prec)
 {
   int r1, n = degpol(x);
-  GEN h;
+  GEN t;
 
   if (typ(x) != t_POL || n == 1) return idmat(n); /* nf, or degree 1 */
 
   if (typ(base) != t_VEC || lg(base)-1 != n)
     err(talker,"incorrect Zk basis in LLL_nfbasis");
   if (!prec || (r1 = sturm(x)) == n)
-    return lllint_marked(1, make_T(x, base), 100, 1, &h,NULL,NULL);
+    return lllint_marked(1, make_T(x, base), 100, 1, &t,NULL,NULL);
 
+  if (!polr) { t = NULL; polr = &t; }
   return get_red_T2(x, polr, base, r1, prec);
 }
 
@@ -1365,7 +1366,7 @@ initalgall0(GEN x, long flag, long prec)
 
   ro = get_roots(x,r1,PRECREG);
   if (DEBUGLEVEL) msgtimer("roots");
-  bas = gmul(bas, LLL_nfbasis(x,ro,bas, r2? PRECREG: 0));
+  bas = gmul(bas, LLL_nfbasis(x,&ro,bas, r2? PRECREG: 0));
   if (DEBUGLEVEL) msgtimer("LLL basis");
 
   nf=cgetg(10,t_VEC);
@@ -1377,7 +1378,7 @@ initalgall0(GEN x, long flag, long prec)
   nf[4]=(long)index;
   nf[6]=(long)ro;
   nf[7]=(long)bas;
-  get_nf_matrices(nf, flag & nf_SMALL);
+  get_nf_matrices(nf, PRECREG, flag & nf_SMALL);
 
   if (rev)
   {
@@ -1436,7 +1437,7 @@ nfnewprec(GEN nf, long prec)
 {
   const gpmem_t av=avma;
   long r1,r2,ru,n;
-  GEN y,pol,ro,basden,MC,mat,M;
+  GEN y,pol,ro,basden,mat,M,G;
 
   if (typ(nf) != t_VEC) err(talker,"incorrect nf in nfnewprec");
   if (lg(nf) == 11) return bnfnewprec(nf,prec);
@@ -1452,10 +1453,10 @@ nfnewprec(GEN nf, long prec)
   y[6]=(long)ro;
   basden = get_bas_den((GEN)nf[7]);
   M = make_M(basden,ro);
-  MC = make_MC(r1,M);
+  G = make_Cholevsky_T2(M, ro, r1, prec);
   mat[1]=(long)M;
-  if (typ(nf[8]) != t_INT) mat[2]=(long)MC; /* not a small nf */
-  mat[3]=(long)mulmat_real(MC,M);
+  if (typ(nf[8]) != t_INT) mat[2]=(long)G; /* not a small nf */
+  mat[3]=(long)gram_matrix(G); /* FIXME: useless */
   return gerepilecopy(av, y);
 }
 

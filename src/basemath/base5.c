@@ -20,7 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                                                                 */
 /*******************************************************************/
 #include "pari.h"
-GEN mat_to_vecpol(GEN x, long v);
+extern GEN mul_content(GEN cx, GEN cy);
 
 GEN
 matbasistoalg(GEN nf,GEN x)
@@ -119,7 +119,7 @@ rnfinitalg(GEN nf,GEN pol,long prec)
   gpmem_t av = avma;
   long m,n,r1,r2,vnf,i,j,k,vpol,r1j,r2j,lfac,degabs;
   GEN RES,sig,rac,p1,p2,liftpol,delta,RAC,ro,p3,bas;
-  GEN f,f2,fac,fac1,fac2,id,p4,p5;
+  GEN f,f2,fac,fac1,fac2,id,p4;
 
   if (typ(pol)!=t_POL) err(notpoler,"rnfinitalg");
   nf=checknf(nf); n=degpol(pol); vpol=varn(pol);
@@ -187,26 +187,26 @@ rnfinitalg(GEN nf,GEN pol,long prec)
   p4=cgetg(degabs+1,t_MAT);
   for (i=1; i<=n; i++)
   { /* removing denominators speeds up multiplication */
-    GEN cop3,com, om = rnfelementreltoabs(RES,gmael(bas,1,i));
+    GEN c, cop3,com, om = rnfelementreltoabs(RES,gmael(bas,1,i));
 
     if (DEBUGLEVEL>1) msgtimer("i = %ld",i);
-    com = content(om); om = gdiv(om,com);
+    om = primitive_part(om, &com);
     id=gmael(bas,2,i);
     for (j=1; j<=m; j++)
     {
-      p5=cgetg(degabs+1,t_COL); p4[(i-1)*m+j]=(long)p5;
-      p1=gmul((GEN)nf[7],(GEN)id[j]);
+      p1 = gmul((GEN)nf[7],(GEN)id[j]);
       p3 = gsubst(p1, vnf, (GEN)p2[2]);
-      cop3 = content(p3); p3 = gdiv(p3,cop3);
-      p3 = gmul(gmul(com,cop3), lift_intern(gmul(om,p3)));
+      p3 = primitive_part(p3, &cop3);
+      c = mul_content(cop3, com);
 
-      for (k=1; k<lgef(p3)-1; k++) p5[k]=p3[k+1];
-      for (   ; k<=degabs;    k++) p5[k]=zero;
+      p3 = lift_intern(gmul(om,p3));
+      if (c) p3 = gmul(c,p3);
+      p4[(i-1)*m+j] = (long)pol_to_vec(p3, degabs);
     }
   }
   if (DEBUGLEVEL>1) msgtimer("p4");
-  p3 = denom(p4); 
-  p4 = hnfmodid(gmul(p3,p4), p3);
+  p4 = Q_remove_denom(p4, &p3);
+  if (p3) p4 = hnfmodid(p4, p3); else p4 = idmat(degabs);
   if (DEBUGLEVEL>1) msgtimer("hnfmod");
   for (j=degabs-1; j>0; j--)
     if (cmpis(gcoeff(p4,j,j),2) > 0)
@@ -217,7 +217,7 @@ rnfinitalg(GEN nf,GEN pol,long prec)
           for (i=1; i<=j; i++)
             coeff(p4,i,k)=lsubii(gcoeff(p4,i,k),gcoeff(p4,i,j));
     }
-  p4 = gdiv(p4,p3);
+  if (p3) p4 = gdiv(p4,p3);
   p2[4]=(long)mat_to_vecpol(p4,vpol);
   p2[5]=linvmat(p4);
   return gerepilecopy(av,RES);

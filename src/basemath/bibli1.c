@@ -834,6 +834,18 @@ Householder_get_mu(GEN x, GEN L, GEN B, long k, long prec)
   return 1;
 }
 
+GEN
+R_from_QR(GEN x, long prec)
+{
+  long j, k = lg(x)-1;
+  GEN L, B = zerovec(k), P = cgetg(k+1, t_VEC);
+  L = cgetg(k+1, t_MAT);
+  for (j=1; j<=k; j++) L[j] = (long)zerocol(k);
+  for (j=1; j<=k; j++)
+    if (! incrementalH(x,L,B,j,P,prec)) return NULL;
+  return L;
+}
+
 /* compute B[k] = | x[k] |^2, update mu(k, 1..k-1).
  * Classical Gram-Schmidt (unstable!) */
 static int

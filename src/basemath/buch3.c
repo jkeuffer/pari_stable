@@ -900,16 +900,15 @@ is_unit(GEN M, long r1, GEN x)
   avma = av; return ok;
 }
 
-#define NBMAX 5000
 /* FIXME: should use smallvectors */
 static GEN
-minimforunits(GEN nf, long BORNE, long stockmax)
+minimforunits(GEN nf, long BORNE, GEN w)
 {
   const long prec = MEDDEFAULTPREC;
-  long n, i, j, k, s, norme, normax, *x, cmpt, r1;
+  long n, i, j, k, s, *x, r1;
   gpmem_t av = avma;
-  GEN u,r,S,a,M,p1;
-  double p;
+  GEN u,r,a,M;
+  double p, norme, normin, normax;
   double **q,*v,*y,*z;
   double eps=0.000001, BOUND = BORNE * 1.00001;
 
@@ -923,19 +922,16 @@ minimforunits(GEN nf, long BORNE, long stockmax)
   a = gmael(nf,5,3); n = lg(a);
   minim_alloc(n, &q, &x, &y, &z, &v);
   n--;
-  u = lllgram(a,prec);
-  M = gmul(gmael(nf,5,1), u); /* embeddings of T2-reduced basis */
-  M = gprec_w(M, prec);
-  a = gmul(qf_base_change(a,u,1), realun(prec));
+  M = gprec_w(gmael(nf,5,1), prec);
+  a = gmul(a, realun(prec));
   r = sqred1(a);
   for (j=1; j<=n; j++)
   {
     v[j] = rtodbl(gcoeff(r,j,j));
     for (i=1; i<j; i++) q[i][j] = rtodbl(gcoeff(r,i,j));
   }
-  normax=0;
-  S = cgetg(stockmax+1,t_MAT);
-  s=0; k=n; cmpt=0; y[n]=z[n]=0;
+  normax = 0.; normin = (double)BOUND;
+  s=0; k=n; y[n]=z[n]=0;
   x[n]=(long)(sqrt(BOUND/v[n]));
 
   for(;;)
@@ -961,31 +957,25 @@ minimforunits(GEN nf, long BORNE, long stockmax)
     }
     while (k>1);
     if (!x[1] && y[1]<=eps) break;
-    if (++cmpt > NBMAX) { av=avma; return NULL; }
 
     if (DEBUGLEVEL>8){ fprintferr("."); flusherr(); }
-    p = x[1]+z[1]; norme = (long)(y[1] + p*p*v[1] + eps);
+    p = x[1]+z[1]; norme = y[1] + p*p*v[1] + eps;
     if (norme > normax) normax = norme;
-    if (is_unit(M,r1, x))
+    if (is_unit(M,r1, x)
+    && (norme > 2*n  /* exclude roots of unity */
+        || !isnfscalar(element_pow(nf, small_to_col(x), w))))
     {
+      if (norme < normin) normin = norme;
       if (DEBUGLEVEL>=2) { fprintferr("*"); flusherr(); }
-      cmpt = 0;
-      if (++s <= stockmax)
-      {
-	p1 = cgetg(n+1,t_COL);
-	for (i=1; i<=n; i++) p1[i]=lstoi(x[i]);
-	S[s] = lmul(u,p1);
-      }
     }
     x[k]--;
   }
   if (DEBUGLEVEL>=2){ fprintferr("\n"); flusherr(); }
-  k = (s<stockmax)? s:stockmax; setlg(S,k+1);
-  S = gerepilecopy(av, S);
-  u = cgetg(4,t_VEC);
+  avma = av; u = cgetg(4,t_VEC);
   u[1] = lstoi(s<<1);
-  u[2] = lstoi(normax);
-  u[3] = (long)S; return u;
+  u[2] = (long)dbltor(normax);
+  u[3] = (long)dbltor(normin);
+  return u;
 }
 
 #undef NBMAX
@@ -1139,44 +1129,40 @@ compute_M0(GEN M_star,long N)
 }
 
 static GEN
+_T2(GEN M, GEN x, long r1) { 
+  return gprec_w(T2_from_embed(gmul(M,x), r1), DEFAULTPREC);
+}
+
+static GEN
 lowerboundforregulator_i(GEN bnf)
 {
-  long N,R1,R2,RU,i,nbrootsofone,nbmin;
-  GEN rootsofone,nf,M0,M,m,col,T2,bound,minunit,newminunit;
-  GEN vecminim,colalg,p1,pol,y;
+  long N,R1,R2,RU,i;
+  GEN nf,M0,M,bound,minunit,newminunit;
+  GEN vecminim,p1,pol,y;
   GEN units = check_units(bnf,"bnfcertify");
 
-  rootsofone=gmael(bnf,8,4); nbrootsofone=itos((GEN)rootsofone[1]);
-  nf=(GEN)bnf[7]; T2=gmael(nf,5,3); N=degpol(nf[1]);
-  R1=itos(gmael(nf,2,1)); R2=itos(gmael(nf,2,2)); RU=R1+R2-1;
-  if (RU==0) return gun;
+  nf = (GEN)bnf[7]; N = degpol(nf[1]);
+  nf_get_sign(nf, &R1, &R2); RU = R1+R2-1;
+  if (!RU) return gun;
 
-  units=algtobasis(bnf,units); minunit=qfeval(T2,(GEN)units[1]);
+  M = gmael(nf,5,1);
+  units = algtobasis(bnf,units);
+  minunit = _T2(M, (GEN)units[1], R1);
   for (i=2; i<=RU; i++)
   {
-    newminunit=qfeval(T2,(GEN)units[i]);
-    if (gcmp(newminunit,minunit)<0) minunit=newminunit;
+    newminunit = _T2(M, (GEN)units[i], R1);
+    if (gcmp(newminunit,minunit) < 0) minunit = newminunit;
   }
-  if (gcmpgs(minunit,1000000000)>0) return NULL;
+  if (gexpo(minunit) > 30) return NULL;
 
-  vecminim = minimforunits(nf,itos(gceil(minunit)),10000);
-  if (!vecminim) return NULL;
-  m=(GEN)vecminim[3]; nbmin=lg(m)-1;
-  if (nbmin==10000) return NULL;
-  bound=gaddgs(minunit,1);
-  for (i=1; i<=nbmin; i++)
-  {
-    col=(GEN)m[i]; colalg=basistoalg(nf,col);
-    if (!gcmp1(lift_intern(gpuigs(colalg,nbrootsofone))))
-    {
-      newminunit=qfeval(T2,col);
-      if (gcmp(newminunit,bound)<0) bound=newminunit;
-    }
-  }
-  if (gcmp(bound,minunit)>0) err(talker,"bug in lowerboundforregulator");
+  vecminim = minimforunits(nf, itos(gceil(minunit)), gmael3(bnf,8,4,1));
+  bound = (GEN)vecminim[3];
+  i = gexpo(gsub(bound,minunit));
+  if (i > -5) err(bugparier,"lowerboundforregulator");
+
   if (DEBUGLEVEL>1)
   {
-    fprintferr("M* = %Z\n",gprec_w(bound,3));
+    fprintferr("M* = %Z\n", bound);
     if (DEBUGLEVEL>2)
     {
       p1=polx[0]; pol=gaddgs(gsub(gpuigs(p1,N),gmul(bound,p1)),N-1);
@@ -1186,18 +1172,14 @@ lowerboundforregulator_i(GEN bnf)
       fprintferr("pol = %Z\n",pol);
       fprintferr("old method: y = %Z, M0 = %Z\n",y,gprec_w(M0,3));
     }
-    flusherr();
   }
   M0 = compute_M0(bound,N);
   if (DEBUGLEVEL>1) { fprintferr("M0 = %Z\n",gprec_w(M0,3)); flusherr(); }
   M = gmul2n(gdivgs(gdiv(gpuigs(M0,RU),hermiteconstant(RU)),N),R2);
-  if (gcmp(M,dbltor(0.04))<0) return NULL;
+  if (gcmp(M, dbltor(0.04)) < 0) return NULL;
   M = gsqrt(M,DEFAULTPREC);
   if (DEBUGLEVEL>1)
-  {
     fprintferr("(lower bound for regulator) M = %Z\n",gprec_w(M,3));
-    flusherr();
-  }
   return M;
 }
 
@@ -1258,7 +1240,7 @@ primecertify(GEN bnf,GEN beta,long pp,GEN big)
       mat1 = concatsp(mat,newcol); ra = rank(mat1);
       if (ra==nbcol) continue;
 
-      if (DEBUGLEVEL>2) fprintferr("       new rank: %ld\n\n",ra);
+      if (DEBUGLEVEL>2) fprintferr("       new rank: %ld\n",ra);
       if (++nbcol == lb) return;
       mat = mat1;
     }

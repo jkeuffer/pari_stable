@@ -1043,7 +1043,7 @@ idealmulh(GEN nf, GEN ix, GEN iy)
   res[2] = (long)y; return res;
 }
 
-static GEN
+GEN
 mul_content(GEN cx, GEN cy)
 {
   if (!cx) return cy;
@@ -1926,20 +1926,31 @@ idealintersect(GEN nf, GEN x, GEN y)
 /*                                                                 */
 /*******************************************************************/
 
-static GEN
-computet2twist(GEN nf, GEN vdir)
+GEN
+computeGtwist(GEN nf, GEN vdir)
 {
-  long j, ru = lg(nf[6]);
-  GEN p1,MC, mat = (GEN)nf[5];
+  long i, j, k, l, lG, v, r1, r2;
+  GEN p1, G = gmael(nf,5,2);
 
-  if (!vdir) return (GEN)mat[3];
-  MC=(GEN)mat[2]; p1=cgetg(ru,t_MAT);
-  for (j=1; j<ru; j++)
+  if (!vdir) return G;
+  l = lg(vdir); lG = lg(G);
+  p1 = dummycopy(G);
+  nf_get_sign(nf, &r1, &r2);
+  for (i=1; i<l; i++)
   {
-    long v = vdir[j];
-    p1[j] = v? lmul2n((GEN)MC[j],v<<1): MC[j];
+    v = vdir[i]; if (!v) continue;
+    if (i <= r1) {
+      for (j=1; j<lG; j++) coeff(p1,i,j) = lmul2n(gcoeff(p1,i,j), v);
+    } else {
+      k = (i<<1) - r1;
+      for (j=1; j<lG; j++)
+      {
+        coeff(p1,k-1,j) = lmul2n(gcoeff(p1,k-1,j), v);
+        coeff(p1,k  ,j) = lmul2n(gcoeff(p1,k  ,j), v);
+      }
+    }
   }
-  return mulmat_real(p1,(GEN)mat[1]);
+  return p1;
 }
 
 static GEN
@@ -1962,22 +1973,22 @@ chk_vdir(GEN nf, GEN vdir)
 static GEN
 ideallllred_elt_i(GEN *ptnf, GEN I, GEN vdir, long *ptprec)
 {
-  GEN T2, u, y, nf = *ptnf;
+  GEN G, u, y, nf = *ptnf;
   long i, e, prec = *ptprec;
 
+  e = gexpo(I)>>TWOPOTBITS_IN_LONG;
+  if (e < 0) e = 0;
   for (i=1; ; i++)
   {
-    T2 = computet2twist(nf,vdir);
-    y = qf_base_change(T2,I,1);
-    e = 1 + (gexpo(y)>>TWOPOTBITS_IN_LONG);
-    if (e < 0) e = 0;
-    u = lllgramintern(y,100,1, e + prec);
+    G = computeGtwist(nf,vdir);
+    y = gmul(G, I);
+    u = lllintern(y, 100, 1, prec);
     if (u) break;
 
     if (i == MAXITERPOL) err(accurer,"ideallllred");
     prec = (prec<<1)-2;
     if (DEBUGLEVEL) err(warnprec,"ideallllred",prec);
-    nf = nfnewprec(nf, (e>>1)+prec);
+    nf = nfnewprec(nf, e + prec);
   }
   *ptprec = prec;
   *ptnf = nf;
@@ -2074,7 +2085,7 @@ minideal(GEN nf, GEN x, GEN vdir, long prec)
 {
   gpmem_t av = avma;
   long N, tx;
-  GEN p1,y;
+  GEN y;
 
   nf = checknf(nf);
   vdir = chk_vdir(nf,vdir);
@@ -2083,9 +2094,8 @@ minideal(GEN nf, GEN x, GEN vdir, long prec)
   if (tx == id_PRINCIPAL) return gcopy(x);
   if (tx != id_MAT || lg(x) != N+1) x = idealhermite_aux(nf,x);
 
-  p1 = computet2twist(nf,vdir);
-  y = qf_base_change(p1,x,0);
-  y = gmul(x, (GEN)lllgram(y,prec)[1]);
+  y = gmul(computeGtwist(nf,vdir), x);
+  y = gmul(x, (GEN)lll(y,prec)[1]);
   return gerepileupto(av, principalidele(nf,y,prec));
 }
 
