@@ -438,7 +438,7 @@ main(int argc, char **argv)
   for (i = 2; i < numberof(param); i++)
   {
 #ifdef PARI_KERNEL_GMP
-    if (!param[i].gmp) next;
+    if (!param[i].gmp) continue;
 #endif
     (void)one(&param[i]);
   }
