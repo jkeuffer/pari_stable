@@ -565,10 +565,10 @@ factpol(GEN x, long klim, long hint)
   if (lx==3) goto END;
   p1 = cgetg(1,t_VEC); fa=cgetg(lx,t_VEC);
   for (i=1; i<lx; i++) fa[i] = (long)p1;
-  if (lx==4) { nbfac++; ex++; fa[1] = (long)concatsp(p1,x); goto END; }
-
   d=content(x); if (gsigne(leading_term(x)) < 0) d = gneg_i(d);
   if (!gcmp1(d)) x=gdiv(x,d);
+  if (lx==4) { nbfac++; ex++; fa[1] = (long)concatsp(p1,x); goto END; }
+
   w=derivpol(x); t=modulargcd(x,w);
   if (!gcmp1(t)) { x=gdeuc(x,t); w=gdeuc(w,t); }
   k=1;
