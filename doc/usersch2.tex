@@ -8,11 +8,28 @@
 \chapter{Specific Use of the gp Calculator}
 
 Originally, \tet{gp} was designed as a debugging device for the PARI system
-library, and hence not much thought had been given to making it
-user-friendly. The situation has now changed somewhat, and \kbd{gp} is very
-useful as a stand-alone tool. The operations and functions available in
-PARI and \kbd{gp} will be described in the next chapter. In the present one, we
-describe the specific use of the \kbd{gp} programmable calculator.
+library, and not much thought had been given to making it user-friendly. The
+situation has now changed somewhat, and \kbd{gp} is very useful as a
+stand-alone tool. The operations and functions available in PARI and \kbd{gp}
+will be described in the next chapter. In the present one, we describe the
+specific use of the \kbd{gp} programmable calculator.
+
+\unix The calculator is developed on UNIX platforms, and depend heavily on
+the operating system in use. Whenever a specific feature of the UNIX version
+is discussed in a paragraph, a UNIX sign sticks out in the left margin, like
+here. Just skip these if you're stranded on a different operating system: the
+core GP functions, in particular everything which is even faintly
+mathematical in nature, are still available to you. It should also be
+possible (and then advisable) to install \idx{Linux} or \idx{FreeBSD} on your
+machine.
+
+\emacs If you have GNU Emacs, you can work in a special Emacs shell (see
+\secref{se:emacs}), which is started by typing \kbd{M-x gp} (where as usual
+\kbd{M} is the \kbd{Meta} key) if you accept the default stack, prime and
+buffer sizes, or \kbd{C-u M-x gp} which will ask you for the name of the gp
+executable, the stack size, the prime limit and the buffer size. Specific
+features of this Emacs shell will be indicated by an EMACS sign.\smallskip
+
 
 To start the calculator, the general command line syntax is:
 
@@ -28,34 +45,6 @@ just those two. These defaults can be changed by adding parameters to the
 input line as above, or interactively during a \kbd{gp} session or in a
 preferences file (also known as \tet{gprc}).
 
-\unix Some features were developed on UNIX platforms, and depend heavily on
-the operating system in use. It is \emph{possible} that some of these will be
-ported to other operating systems (BeOS, MacOS, DOS, OS/2, Windows, etc.) in
-future versions (most of them should be relatively easy tasks). As for now,
-most of them were not. So, whenever a specific feature of the UNIX version is
-discussed in a paragraph, a UNIX sign sticks out in the left margin, like
-here. Just skip these if you're stranded on a different operating system: the
-core GP functions (i.e.~at least everything which is even faintly
-mathematical in nature) will still be available to you. It should also be
-possible (and then definitely advisable) to install \idx{Linux} or
-\idx{FreeBSD} on your machine.
-
-\misctitle{Note (added in version 2.0.12):} Most UNIX goodies are now
-available for DOS, OS/2 and Windows, thanks to the \tet{EMX}/\tet{RSX}
-runtime package (\kbd{install} excluded under DOS, since DLLs are not
-supported by the OS). For Windows 95 and higher, you can also use the
-\tet{Cygwin} compatibility library to run \kbd{gp} almost as if running a
-genuine Unix system. Note that a native \key{Linux} binary will be faster
-than one using any of these compatibility packages (see the \tet{MACHINES}
-benchmark file, included in the distribution).
-
-\emacs If you have GNU Emacs, you can work in a special Emacs shell (see
-\secref{se:emacs}), which is started by typing \kbd{M-x gp} (where as usual
-\kbd{M} is the \kbd{Meta} key) if you accept the default stack, prime and
-buffer sizes, or \kbd{C-u M-x gp} which will ask you for the name of the gp
-executable, the stack size, the prime limit and the buffer size. Specific
-features of this Emacs shell will be indicated by an EMACS sign.\smallskip
-
 If a \idx{preferences file} (or \kbd{gprc}, to be discussed in
 \secref{se:gprc}) can be found, \kbd{gp} will then read it and execute the
 commands it contains. This provides an easy way to customize \kbd{gp} without
@@ -63,13 +52,9 @@ having to delve into the code to hardwire it to your likings. The \var{files}
 argument is processed right after the \kbd{gprc}.
 
 A copyright message then appears which includes the version number, and a lot
-of useful technical information. The present manual is written for version
-\vers, and has undergone major changes since the 1.39.xx versions.
-
-After the copyright, the computer works for a few seconds (it is in fact
-computing and storing a table of primes), writes the top-level help
-information, some initial defaults, and then waits after printing its prompt
-(by default: \kbd{?}).
+of useful technical information. After the copyright, the computer writes the
+top-level help information, some initial defaults, and then waits after
+printing its prompt (by default: \kbd{?}).
 
 Note that at any point the user can type \kbd{Ctrl-C} (that is press
 simultaneously the \kbd{Control} and \kbd{C} keys): the current computation
@@ -95,11 +80,13 @@ or \kbd{???~"quadratic field"}).
 If \kbd{gp} was compiled with the right options (see Appendix~A), a line
 editor will be available to correct the command line, get automatic
 completions, and so on. See \secref{se:readline} for a short summary of
-available commands. This might not be available for all architectures.
+available commands.
 
-Whether extended on-line help and line editing are available or not is
+Whether extended on-line help, line editing are available or not is
 indicated in the \kbd{gp} banner, between the version number and the
-copyright message.
+copyright message. Consider investigating the matter with the person who
+installed \kbd{gp} on your system if they are not. Do this as well if the GMP
+kernel is not included.
 
 If you type \kbd{?\bs} you will get a short description of the metacommands
 (keyboard shortcuts).

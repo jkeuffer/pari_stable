@@ -1675,9 +1675,9 @@ The general syntax is
 \noindent where \kbd{numerr} is a codeword which indicates what to do with
 the remaining arguments and what message to print. The list of valid keywords
 is in \kbd{language/errmessages.c} together with the basic corresponding
-message. For instance, \kbd{err(typeer,"matexp")} prints the message:
+message. For instance, \kbd{err(typeer,"extgcd")} prints the message:
 
-\kbd{ ***   incorrect type in matexp.}
+\kbd{ ***   incorrect type in extgcd.}
 
 \noindent
 Among the codewords are \emph{warning} keywords (all those which start with
@@ -1988,7 +1988,7 @@ be declared \kbd{static} in your file.
 
 Your function is now ready to be used in library mode after compilation and
 creation of the library. If possible, compile it as a shared library (see
-the \kbd{Makefile} coming with the \kbd{matexp} example in the
+the \kbd{Makefile} coming with the \kbd{extgcd} example in the
 distribution). It is however still inaccessible from \kbd{gp}.\smallskip
 
 \subsec{Integration with \kbd{gp} as a shared module}
