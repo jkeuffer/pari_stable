@@ -1516,7 +1516,7 @@ ZX_squff(GEN f, GEN *ex)
     /* W = prod P^e, e > k; V = prod P^e, e >= k */
     if (dW != degpol(V)) { P[i] = ldeuc(V,W); e[i] = k; i++; }
     if (dW <= 0) break;
-    k++; V = W;
+    V = W;
   }
   if (val) { P[i] = lpolx[varn(f)]; e[i] = val; i++;}
   setlg(P,i); *ex=e; return P;
