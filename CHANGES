@@ -61,6 +61,7 @@ XR 21- bug in ideal bound computation in rnfnormgroup
 BA 25- pbs in Fp_factor_irred (factoring over Fq a pol. defined over Fp)
    26- missing macros for gphelp (tex-mode) in chapter 5
    27- nfsubfields(nfinit(polcyclo(13))) --> impossible inverse Mod(0, 29)
+   28- argument checks for element_mulid, nf_get_r1 (access to nf.sign)
 
   Changed
     1- DOS distribution archives (GPM removed)
