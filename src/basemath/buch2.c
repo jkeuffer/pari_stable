@@ -996,13 +996,14 @@ isprincipalarch(GEN bnf, GEN col, GEN kNx, GEN e, GEN dx, long *pe)
 static int
 fact_ok(GEN nf, GEN y, GEN C, GEN g, GEN e)
 {
+  ulong av = avma;
   long i, c = lg(e);
   GEN z = C? C: gun;
   for (i=1; i<c; i++)
     if (signe(e[i])) z = idealmul(nf, z, idealpow(nf, (GEN)g[i], (GEN)e[i]));
   if (typ(z) != t_MAT) z = idealhermite(nf,z);
   if (typ(y) != t_MAT) y = idealhermite(nf,y);
-  return gegal(y, z);
+  i = gegal(y, z); avma = av; return i;
 }
 
 /* assume x in HNF. cf class_group_gen for notations */
@@ -2921,6 +2922,7 @@ START:
   phase = 0;
   nlze = matmax = 0; /* for lint */
   vecT2 = NULL;
+  list_jideal = NULL;
 
   /* random relations */
   if (cglob == KCCO) /* enough rels, but init random_relations just in case */
