@@ -1158,6 +1158,7 @@ GEN     vecpol_to_mat(GEN v, long n);
 
 GEN     bezoutpol(GEN a, GEN b, GEN *u, GEN *v);
 GEN     centermod(GEN x, GEN p);
+GEN     centermodii(GEN x, GEN p, GEN po2);
 GEN     concat_factor(GEN f, GEN g);
 GEN     content(GEN x);
 GEN     discsr(GEN x);
