@@ -674,7 +674,10 @@ var_make_safe()
       if (EpVALENCE(ep) == EpVAR)
       { /* make sure ep->value is a COPY */
         var_cell *v = (var_cell*)ep->args;
-        if (v && v->flag == PUSH_VAL) changevalue(ep, (GEN)ep->value);
+        if (v && v->flag == PUSH_VAL) {
+          GEN x = (GEN)ep->value;
+          if (x) changevalue(ep, (GEN)ep->value); else pop_val(ep);
+        }
       }
 }
 
