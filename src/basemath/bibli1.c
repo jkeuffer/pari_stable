@@ -1168,7 +1168,11 @@ lllfp_marked(int MARKED, GEN x, long D, long flag, long prec, int gram)
 #endif
 
   hx = lg(x[1]);
-  if (gram && hx != lx) err(mattype1,"lllfp");
+  if (hx != lx)
+  {
+    if (gram) err(mattype1,"lllfp");
+    if (lx > hx) err(talker,"dependant vectors in lllfp");
+  }
   delta = stor(D-1, DEFAULTPREC);
   delta = divrs(delta,D);
   xinit = x;

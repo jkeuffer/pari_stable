@@ -107,6 +107,7 @@ IZ 37- [OS/2:] ^C would only work once
    54- ff(n)=local(v=[],w=[]);n
        f(n)=n
        ff(f(n))=n  --> error (OK) + SEGV on Linux (same data freed twice)
+   55- qflll(matrix(2,3,x,y,x+y)) --> SEGV
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available
@@ -116,8 +117,8 @@ XR  2- factorpadic so that factorback gives back the original polynomial, up
        break existing code]
     4- [library:] make floating point assignments round the inputs (used to
        truncate)
-    5- ensure proper rounding in divrr() [ important for numbers input in
-       scientific format, e.g. 1e20 ]
+    5- ensure proper rounding in divrr/mulrr() [ important for numbers input
+       in scientific format, e.g. 1e20 ]
 BA  6- moved internals of mppgcd to mp.c/gcdii
 BA  7- moved internals of genrand to mp.c/randomi
 BA  8- renamed mymyrand --> pari_rand31
