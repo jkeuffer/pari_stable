@@ -3041,6 +3041,7 @@ print_elt(long a)
   flusherr();
 }
 
+extern GEN ZY_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LPRS);
 extern GEN ZY_ZXY_resultant(GEN A, GEN B0, long *lambda);
 extern GEN squff2(GEN x, long klim, long hint);
 extern GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den);
@@ -3063,7 +3064,7 @@ polcompositum0(GEN A, GEN B, long flall)
 {
   ulong av = avma;
   long v,k;
-  GEN p1,y;
+  GEN p1,y,LPRS;
 
   if (typ(A)!=t_POL || typ(B)!=t_POL) err(typeer,"polcompositum0");
   if (lgef(A)<=3 || lgef(B)<=3) err(constpoler,"compositum");
@@ -3074,7 +3075,7 @@ polcompositum0(GEN A, GEN B, long flall)
   if (!issquarefree(A)) err(talker,"compositum: %Z not separable", A);
   if (!issquarefree(B)) err(talker,"compositum: %Z not separable", B);
 
-  k = 1; p1 = ZY_ZXY_resultant(A, B, &k);
+  k = 1; p1 = ZY_ZXY_resultant_all(A, B, &k, flall? &LPRS: NULL);
   /* p1 = Res_Y (A, B(X + kY)) guaranteed to be squarefree */
   y = squff2(p1,0,0); settyp(y, t_VEC);
   if (flall)
@@ -3088,10 +3089,14 @@ polcompositum0(GEN A, GEN B, long flall)
       /* Ba = polynomial in X, st Ba(a) = 0 */
       Ba = poleval(B, gadd(c , gmulsg(k,polx[0])));
       Ba = lift_intern(Ba);
+#if 0 /* too slow */
       p1 = nfgcd(A, Ba, (GEN)c[1], NULL);
       if (lgef(p1) != 4) err(bugparier,"compositum");
       /* p1 = uX + v, with a as root, u in Q, v in Q(c) */
       a = gneg_i(gdiv((GEN)p1[2], (GEN)p1[3]));
+#endif
+      a = gneg_i(gmul((GEN)LPRS[1], ginvmod((GEN)LPRS[2], (GEN)y[i])));
+  
       if (v == 0) { gsetvarn(a, 0); gsetvarn(c, 0); } else setvarn(A, v);
       w = cgetg(5,t_VEC); /* [C, a, b, n ] */
       w[1] = y[i]; 
