@@ -1827,6 +1827,15 @@ scalarpol(GEN x, long v)
                  : evallgef(3) | evalvarn(v) | evalsigne(1);
   y[2]=lcopy(x); return y;
 }
+/*FIXME:suppress poldeg1 in polarith2.c*/
+/* deg1pol(a,b,x)=a*x+b*/
+GEN
+deg1pol(GEN x1, GEN x0,long v)
+{
+  GEN x = cgetg(4,t_POL);
+  x[1] = evalsigne(1) | evalvarn(v) | evallgef(4);
+  x[2] = lcopy(x0); x[3] = lcopy(x1); return normalizepol_i(x,4);
+}
 
 static GEN
 gtopoly0(GEN x, long v, int reverse)

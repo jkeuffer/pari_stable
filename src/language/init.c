@@ -1718,7 +1718,7 @@ entree functions_basic[]={
 {"forsubgroup",99,(void*)forsubgroup,11,"vV=GD0,L,I"},
 {"forvec",87,(void*)forvec,11,"vV=GID0,L,"},
 {"frac",18,(void*)gfrac,2,"G"},
-{"galoisfixedfield",99,(void*)galoisfixedfield,6,"GGDG"},
+{"galoisfixedfield",99,(void*)galoisfixedfield,6,"GGD0,L,Dn"},
 {"galoisinit",99,(void*)galoisinit,6,"GDG,"},
 {"galoispermtopol",2,(void*)galoispermtopol,6,"GG"},
 {"gamma",1,(void*)ggamma,3,"Gp"},

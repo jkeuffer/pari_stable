@@ -286,35 +286,301 @@ quicksqr(GEN a, long na)
   c0 = addshiftwcopy(c0,c,n0);
   return shiftpol_ip(gerepileupto(av,c0), v);
 }
+/*****************************************
+ * Arithmetic in Z/pZ[X]                 *
+ *****************************************/
 
-/* x,pol in Z[X], p in Z, n in N, compute lift(x^n mod (p, pol)) */
+/*********************************************************************
+This functions supposes polynomials already reduced.
+There are clean and memory efficient.
+**********************************************************************/
+GEN
+Fp_centermod(GEN T,GEN mod)
+{/*OK centermod exists, but is not so clean*/
+  ulong av;
+  long i, l=lg(T);
+  GEN P,mod2;
+  P=cgetg(l,t_POL);
+  P[1]=T[1];
+  av=avma;
+  mod2=gclone(shifti(mod,-1));/*clone*/
+  avma=av;
+  for(i=2;i<l;i++)
+    P[i]=cmpii((GEN)T[i],mod2)<0?licopy((GEN)T[i]):lsubii((GEN)T[i],mod);
+  gunclone(mod2);/*unclone*/
+  return P;
+}
+GEN
+Fp_neg(GEN x,GEN p)
+{
+  long i,d=lgef(x);
+  GEN y;
+  y=cgetg(d,t_POL); y[1]=x[1];
+  for(i=2;i<d;i++)
+    if (signe(x[i])) y[i]=lsubii(p,(GEN)x[i]);
+    else y[i]=zero;
+  return y;
+}
+/**********************************************************************
+Unclean functions, do not garbage collect.
+This is a feature: The stack is corrupted only by the call to Fp_pol_red
+so garbage collecting so often is not desirable.
+Fp_pol_red can sometime be avoided by passing NULL for p.
+In this case the function is usually clean (see below for detail)
+Added to help not using POLMOD of INTMOD which are deadly slow.
+gerepileupto of the result is legible.   Bill.
+I don't like C++.  I am wrong.
+**********************************************************************/
+/*
+ *If p is NULL no reduction is performed and the function is clean.
+ * for Fp_add,Fp_mul,Fp_sqr,Fp_mul_pol_scal
+ */
+GEN
+Fp_add(GEN x,GEN y,GEN p)
+{
+  long lx,ly,i;
+  GEN z;
+  lx = lgef(x); ly = lgef(y); if (lx < ly) swapspec(x,y, lx,ly);
+  z = cgetg(lx,t_POL); z[1] = x[1];
+  for (i=2; i<ly; i++) z[i]=laddii((GEN)x[i],(GEN)y[i]);
+  for (   ; i<lx; i++) z[i]=licopy((GEN)x[i]);
+  (void)normalizepol_i(z, lx);
+  if (lgef(z) == 2) { avma = (long)(z + lx); z = zeropol(varn(x)); }
+  if (p) z= Fp_pol_red(z, p);
+  return z;
+}
+GEN
+Fp_sub(GEN x,GEN y,GEN p)
+{
+  long lx,ly,i,lz;
+  GEN z;
+  lx = lgef(x); ly = lgef(y); 
+  lz=max(lx,ly);
+  z = cgetg(lz,t_POL);
+  if (lx >= ly)
+  {  
+    z[1] = x[1];
+    for (i=2; i<ly; i++) z[i]=lsubii((GEN)x[i],(GEN)y[i]);
+    for (   ; i<lx; i++) z[i]=licopy((GEN)x[i]);
+    (void)normalizepol_i(z, lz);
+  }
+  else
+  {  
+    z[1] = y[1];
+    for (i=2; i<lx; i++) z[i]=lsubii((GEN)x[i],(GEN)y[i]);
+    for (   ; i<ly; i++) z[i]=lnegi((GEN)y[i]);
+    /*polynomial is always normalized*/
+  }
+  if (lgef(z) == 2) { avma = (long)(z + lz); z = zeropol(varn(x)); }
+  if (p) z= Fp_pol_red(z, p);
+  return z;
+}
+GEN
+Fp_mul(GEN x,GEN y,GEN p)
+{
+  GEN z;
+  long vx=varn(x);
+  z = quickmul(y+2, x+2, lgef(y)-2, lgef(x)-2);
+  setvarn(z,vx); 
+  if (!p) return z;
+  return Fp_pol_red(z, p);
+}
+GEN
+Fp_sqr(GEN x,GEN p)
+{
+  GEN z;
+  long vx=varn(x);
+  z = quicksqr(x+2, lgef(x)-2);
+  setvarn(z,vx); 
+  if (!p) return z;
+  return Fp_pol_red(z, p);
+}
+
+/* Product of y and x in Z/pZ[X]/(pol)
+ * return lift(lift(Mod(x*y*Mod(1,p),pol*Mod(1,p))));
+ */
+GEN
+Fp_mul_mod_pol(GEN y,GEN x,GEN pol,GEN p)
+{
+  GEN z;
+  long vy=varn(y);
+  z = quickmul(y+2, x+2, lgef(y)-2, lgef(x)-2);
+  setvarn(z,vy); 
+  z = Fp_pol_red(z, p);
+  return Fp_res(z,pol, p);
+}
+/* 
+ * Square of y in Z/pZ[X]/(pol)
+ * return lift(lift(Mod(y^2*Mod(1,p),pol*Mod(1,p))));
+ */
+GEN
+Fp_sqr_mod_pol(GEN y,GEN pol,GEN p)
+{
+  GEN z;
+  long vy=varn(y);
+  z = quicksqr(y+2,lgef(y)-2);
+  setvarn(z,vy); 
+  z = Fp_pol_red(z, p);
+  return Fp_res(z,pol, p);
+}
+/*Modify y[2].
+ *No reduction if p is NULL
+ */
+GEN 
+Fp_add_pol_scal(GEN y,GEN x,GEN p)
+{
+  if (!signe(x)) return y;
+  if (!signe(y))
+    return scalarpol(x,varn(y));
+  y[2]=laddii((GEN)y[2],x);
+  if (!p) return y;
+  y[2]=lmodii((GEN)y[2],p);
+  return y;
+}
+/* y is a polynomial in ZZ[X] and x an integer.
+ * If p is NULL, no reduction is perfomed and return x*y
+ * 
+ * else the result is lift(y*x*Mod(1,p))
+ */
+
+GEN 
+Fp_mul_pol_scal(GEN y,GEN x,GEN p)
+{
+  GEN z;
+  int i;
+  if (!signe(x))
+    return zeropol(varn(y));
+  z=cgetg(lg(y),t_POL);
+  z[1]=y[1];
+  for(i=2;i<lgef(y);i++)
+    z[i]=lmulii((GEN)y[i],x);
+  if(!p) return z; 
+  return Fp_pol_red(z,p);
+}
+/*****************************************************************
+ *                 End of unclean functions.                     *
+ *                                                               *
+ *****************************************************************/
+/*****************************************************************
+ Clean and with no reduced hypothesis.  Beware that some operations
+ will be must slower with big unreduced coefficient
+*****************************************************************/
+
+
+
+/* Inverse of x in Z/pZ[X]/(pol)
+ * return lift(lift(Mod(x*Mod(1,p),pol*Mod(1,p))^-1));
+ */
+GEN
+Fp_inv_mod_pol(GEN x,GEN pol,GEN p)
+{
+  ulong ltop=avma;
+  GEN ptu,ptv;
+  GEN z;
+  z=Fp_pol_extgcd(x,pol,p,&ptu,&ptv);
+  if (lgef(z)!=3)
+    err(talker,"non invertible polynomial in Fp_inv_mod_pol");
+  z=mpinvmod((GEN)z[2],p);
+  ptu=Fp_mul_pol_scal(ptu,z,p);
+  return gerepileupto(ltop,ptu);
+}
+/* T in Z[X] and  x in Z/pZ[X]/(pol)
+ * return lift(lift(subst(T,variable(T),Mod(x*Mod(1,p),pol*Mod(1,p)))));
+ */
+GEN
+Fp_compo_mod_pol(GEN T,GEN x,GEN pol,GEN p)
+{
+  ulong ltop=avma;
+  GEN z;
+  long i,d=lgef(T)-1;
+  if (!signe(T)) return zeropol(varn(T));
+  z = scalarpol((GEN)T[d],varn(T));
+  for(i=d-1;i>1;i--)
+  {
+    z=Fp_mul_mod_pol(z,x,pol,p);
+    z=Fp_add_pol_scal(z,(GEN) T[i],p);
+  }
+  return gerepileupto(ltop,Fp_pol_red(z, p));
+}
+/* Evaluation in Fp
+ * x in Z[X] and y in Z return x(y) mod p
+ */
+GEN
+Fp_poleval(GEN x,GEN y,GEN p)
+{
+  ulong av;
+  GEN p1,r,res;
+  long i,j;
+  i=lgef(x)-1;
+  if (i<=2)
+    return (i==2)? modii((GEN)x[2],p): gzero;
+  res=cgetg(lgefint(p),t_INT);
+  av=avma; p1=(GEN)x[i];
+  /* specific attention to sparse polynomials (see poleval)*/
+  /*You've guess it! It's a copy-paste(tm)*/
+  for (i--; i>=2; i=j-1)
+  {
+    for (j=i; !signe((GEN)x[j]); j--)
+      if (j==2)
+      {
+	if (i!=j) y = powmodulo(y,stoi(i-j+1),p);
+	p1=mulii(p1,y);
+	goto fppoleval;/*sorry break(2) no implemented*/
+      }
+    r = (i==j)? y: powmodulo(y,stoi(i-j+1),p);
+    p1 = modii(addii(mulii(p1,r), (GEN)x[j]),p);
+  }
+ fppoleval:
+  modiiz(p1,p,res);
+  avma=av;
+  return res;
+}
+/* Tz=Tx*Ty where Tx and Ty coprime
+ * return lift(chinese(Mod(x*Mod(1,p),Tx*Mod(1,p)),Mod(y*Mod(1,p),Ty*Mod(1,p))))
+ * if Tz is NULL it is computed
+ * =======>: As we do not return it, and the caller will frequently need it, 
+ * it must compute it and pass it.
+ */
+GEN
+Fp_chinese_coprime(GEN x,GEN y,GEN Tx,GEN Ty,GEN Tz,GEN p)
+{
+  long av = avma;
+  GEN ax,p1;
+  ax = Fp_mul(Fp_inv_mod_pol(Tx,Ty,p), Tx,p);
+  p1=Fp_mul(ax, Fp_sub(y,x,p),p);
+  p1 = Fp_add(x,p1,p);
+  if (!Tz) Tz=Fp_mul(Tx,Ty,p);
+  p1 = Fp_res(p1,Tz,p);
+  return gerepileupto(av,p1);
+}
+/* x,pol in Z[X], p in Z, n in Z, compute lift(x^n mod (p, pol)) */
 GEN
 Fp_pow_mod_pol(GEN x, GEN n, GEN pol, GEN p)
 {
   long m,i,j,av=avma, lim=stack_lim(av,1), vx = varn(x);
-  GEN p1 = n+2, y = x, z;
+  GEN p1 = n+2, y = x;
   if (!signe(n)) return polun[vx];
-  if (is_pm1(n)) return gcopy(x);
+  if (signe(n)<0) 
+  {
+    x=Fp_inv_mod_pol(x,pol,p);
+    if (is_pm1(n)) return x;/*n=-1*/
+  }
+  else
+    if (is_pm1(n)) return gcopy(x);/*n=1*/
   m = *p1;
   j=1+bfffo(m); m<<=j; j = BITS_IN_LONG-j;
   for (i=lgefint(n)-2;;)
   {
     for (; j; m<<=1,j--)
     {
-      z = quicksqr(y+2, lgef(y)-2);
-      y = Fp_pol_red(z, p);
-      y = Fp_res(y,pol, p);
+      y = Fp_sqr_mod_pol(y,pol,p);
       if (low_stack(lim, stack_lim(av,1)))
       {
         if(DEBUGMEM>1) err(warnmem,"[1]: Fp_pow_mod_pol");
         y = gerepileupto(av, y);
       }
       if (m<0)
-      {
-        z = quickmul(y+2, x+2, lgef(y)-2, lgef(x)-2);
-        y = Fp_pol_red(z, p);
-        y = Fp_res(y,pol, p);
-      }
+	y = Fp_mul_mod_pol(y,x,pol,p);
       if (low_stack(lim, stack_lim(av,1)))
       {
         if(DEBUGMEM>1) err(warnmem,"[2]: Fp_pow_mod_pol");
@@ -324,7 +590,7 @@ Fp_pow_mod_pol(GEN x, GEN n, GEN pol, GEN p)
     if (--i == 0) break;
     m = *++p1, j = BITS_IN_LONG;
   }
-  setvarn(y,vx); return gerepileupto(av,y);
+  return gerepileupto(av,y);
 }
 
 int ff_poltype(GEN *x, GEN *p, GEN *pol);
@@ -473,7 +739,7 @@ maxnorm(GEN p)
 static GEN
 Fp_to_pol_long(GEN x, long dx, long p, long *d)
 {
-  long i, m;
+  long i, m=0;
   GEN a;
 
   for (i=dx; i>=0; i--)

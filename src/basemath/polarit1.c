@@ -560,6 +560,77 @@ rootmod0(GEN f, GEN p, long flag)
 /*                     FACTORISATION MODULO p                      */
 /*                                                                 */
 /*******************************************************************/
+/*
+ *Functions giving information on the factorisation.
+ */
+/*
+ * f in ZZ[X] and p a prime number.
+ */
+long
+Fp_is_squarefree(GEN f, GEN p)
+{
+  long av = avma;
+  GEN z;
+  z = Fp_pol_gcd(f,derivpol(f),p);
+  avma = av;
+  return lgef(z)==3;
+}
+/* idem
+ * leading term of f must be prime to p.
+ */
+long
+Fp_is_totally_split(GEN f, GEN p)
+{
+  long av = avma, n=lgef(f);
+  GEN z;
+  if (n <= 4) return 1;
+  if (!is_bigint(p) && n-3 > p[2]) return 0;
+  f = Fp_pol_red(f, p);
+  if (lgef(f) != n) { avma=av; return 0; }
+  z = Fp_pow_mod_pol(polx[varn(f)], p, f, p);
+  avma = av; return lgef(z)==4 && gcmp1((GEN)z[3]) && !signe(z[2]);
+}
+/*
+ * u in ZZ[X] and pp a prime number.
+ * u must be squarefree mod pp.
+ * leading term of u must be prime to pp.
+ *
+ * OK it is a copy paste of splitberlekamp
+ * Consider merging.
+ */
+long
+Fp_pol_nbfact(GEN u, GEN pp)
+{
+  ulong av,ltop=avma;
+  GEN p1, p2, vker,v,w;
+  long N = lgef(u)-3, d,i,j, vu = varn(u);
+  GEN Q;
+  if (DEBUGLEVEL > 7) timer2();
+  Q=cgetg(N+1,t_MAT); Q[1]=lgetg(N+1,t_COL);
+  p1 = (GEN)Q[1];
+  for (i=1; i<=N; i++) p1[i] = zero;
+  w = v = Fp_pow_mod_pol(polx[vu],pp,u,pp);
+  for (j=2; j<=N; j++)
+  {
+    Q[j]=lgetg(N+1,t_COL);
+    p1 = (GEN)Q[j];
+    d=lgef(w)-1; p2 = w+1;
+    for (i=1; i<d ; i++) p1[i] = p2[i];
+    for (   ; i<=N; i++) p1[i] = zero;
+    p1[j] = laddis((GEN)p1[j], -1);
+    if (j < N)
+    {
+      av = avma;
+      w = gerepileupto(av, Fp_res(gmul(w,v), u, pp));
+    }
+  }
+  if (DEBUGLEVEL > 7) msgtimer("frobenius");
+  vker = ker_mod_p(Q,pp);
+  if (DEBUGLEVEL > 7) msgtimer("kernel");
+  avma=ltop;
+  return lg(vker)-1;
+}
+/************************************************************/
 static GEN
 trivfact(void)
 {
@@ -1265,49 +1336,121 @@ rootpadic(GEN f, GEN p, long r)
   tetpil=avma; setlg(y,j+1);
   return gerepile(av,tetpil,gcopy(y));
 }
+/*************************************************************************/
+/*                             rootpadicfast                             */
+/*************************************************************************/
 
-/* a usage interne. Pas de verifs ni de gestion de pile. On suppose que f est
- * un polynome a coeffs dans Z de degre n ayant n racines distinctes mod p, et
- * p>2, r>=2. On rend les n racines p-adiques en precision r si flall>0,
- * 1 seule si flall=0
- */
+/*
+  SPEC:
+  q is an integer > 1
+  Q is an integer > 0 and Q|q^r for an exponent r
+  
+  f in ZZ[X], with leading term prime to q.
+  S must be a simple root mod p for all p|q.
+
+  return roots of f mod Q, as integers (implicitly mod Q)
+*/
+
+/* STANDARD USE
+   There exists p a prime number and a>0,b two long such that
+   q=p^a , Q=p^b
+   
+   f in ZZ[X], with leading term prime to p.
+   S must be a simple root mod p.
+
+   return p-adics roots of f with prec b, as integers (implicitly mod Q)
+*/
+
 GEN
-rootpadicfast(GEN f, GEN p, long r, long flall)
+rootpadiclift(GEN T, GEN S, GEN q, GEN Q)
 {
-  GEN rac,fp,y,z,p1,p2;
-  long i,e,n;
-
-  rac=rootmod(f,p); n=flall? lgef(f)-3: 1;
-  fp=derivpol(f); y=cgetg(n+1,t_COL);
-  p=gclone(p); p2=NULL;
-  z=cgetg(5,t_PADIC); z[2]=(long)p;
-  for (i=1; i<=n; i++)
+  ulong   ltop=avma;
+  long    x;
+  GEN     qold;
+  GEN     W, Tr, Sr, Wr = gzero, Trold;
+  int     flag, init;
+  x = varn(T);
+  qold = q ;
+  Trold = Tr = Fp_pol_red(T,q);
+  W=Fp_poleval(deriv(Tr, x),S,q);
+  W=mpinvmod(W,q);
+  flag = 1; init = 0;
+  while (flag)
   {
-    p1=gmael(rac,i,2);
-    if (signe(p1))
+    q = sqri(q);
+    if (cmpii(q,Q)>= 0)
     {
-      if (!p2) p2=sqri(p);
-      z[1] = evalvalp(0)|evalprecp(2);
-      z[3] = (long)p2;
+      flag = 0;
+      q = Q;
+    }
+    Tr = Fp_pol_red(T,q);
+    Sr = S;
+    if (init)
+    {
+      W = modii(mulii(Wr,Fp_poleval(deriv(Tr,x),Sr,q)),qold);
+      W = subii(gdeux,W);
+      W = modii(mulii(Wr, W),qold);
     }
     else
-    {
-      z[1] = evalvalp(2);
-      z[3] = un;
-    }
-    z[4] = (long)p1; p1 = z;
-    for(e=2;;)
-    {
-      p1 = gsub(p1, gdiv(poleval(f,p1),poleval(fp,p1)));
-      if (e==r) break;
-      e<<=1; if (e>r) e=r;
-      p1 = gprec(p1,e);
-    }
-    y[i] = (long)p1;
+      init = 1;
+    Wr = W;
+    S = subii(Sr, mulii(Wr, Fp_poleval(Tr, Sr,q)));
+    S = modii(S,q);
+    qold = q;
+    Trold = Tr;
+  }
+  return gerepileupto(ltop,S);
+}
+/*
+ * Apply rootpadiclift to all roots in S and trace trick.
+ * Elements of S must be distinct simple roots mod p for all p|q.
+ */
+
+GEN
+rootpadicliftroots(GEN f, GEN S, GEN q, GEN pr)
+{
+  GEN y;
+  long i,n=lg(S);
+  if (n==1)
+    return gcopy(S);
+  y=cgetg(n,typ(S));
+  for (i=1; i<n-1; i++)
+    y[i]=(long) rootpadiclift(f, (GEN) S[i], q, pr);
+  if (n!=lgef(f)-2)/* non totally split*/
+    y[n-1]=(long) rootpadiclift(f, (GEN) S[n-1], q, pr);
+  else/* distinct-->totally split-->use trace trick */
+  {
+    ulong av=avma;
+    GEN z;
+    z=(GEN)f[lgef(f)-2];/*-trace(roots)*/
+    for(i=1; i<n-1;i++)
+      z=addii(z,(GEN) y[i]);
+    z=modii(negi(z),pr);
+    y[n-1]=lpileupto(av,z);
   }
   return y;
 }
+/*
+ p is a prime number, pr a power of p,
 
+ f in ZZ[X], with leading term prime to p.
+ f must have no multiple roots mod p.
+
+ return p-adics roots of f with prec pr, as integers (implicitly mod pr)
+ 
+*/
+GEN
+rootpadicfast(GEN f, GEN p, GEN pr)
+{
+  ulong ltop=avma;
+  GEN S,y;
+  S=lift(rootmod(f,p));/*no multiplicity*/
+  if (lg(S)==1)/*no roots*/
+    return gerepileupto(ltop,S);
+  y=rootpadicliftroots(f,S,p,pr);
+  return gerepileupto(ltop,y);
+}
+/**************************************************************************/
 static long
 getprec(GEN x, long prec, GEN *p)
 {

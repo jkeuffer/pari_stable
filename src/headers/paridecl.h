@@ -1,3 +1,4 @@
+
 /*******************************************************************/
 /*                                                                 */
 /*                      Fichier Include PARI                       */
@@ -722,7 +723,7 @@ GEN     galoisconj(GEN nf);
 GEN     galoisconj0(GEN nf,long flag, GEN d, long prec);
 GEN     galoisconj2(GEN x, long nbmax, long prec);
 GEN     galoisconj4(GEN T, GEN den, long flag);
-GEN     galoisfixedfield(GEN gal, GEN v, GEN p);
+GEN     galoisfixedfield(GEN gal, GEN v, long flag, long y);
 GEN     galoisinit(GEN nf, GEN den);
 GEN     galoispermtopol(GEN gal,GEN perm);
 long    numberofconjugates(GEN T, long pdepart);
@@ -805,6 +806,7 @@ GEN     Mod0(GEN x, GEN y,long flag);
 GEN     centerlift(GEN x);
 GEN     centerlift0(GEN x,long v);
 GEN     compo(GEN x, long n);
+GEN     deg1pol(GEN x1, GEN x0,long v);
 long    degree(GEN x);
 GEN     denom(GEN x);
 GEN     deriv(GEN x, long v);
@@ -987,7 +989,9 @@ GEN     rnfdedekind(GEN nf,GEN T,GEN pr);
 GEN     unifpol(GEN nf,GEN pol,long flag);
 
 /* polarit1.c */
-
+long    Fp_is_squarefree(GEN f, GEN p);
+long    Fp_is_totally_split(GEN f, GEN p);
+long    Fp_pol_nbfact(GEN u, GEN pp);
 GEN     apprgen(GEN f, GEN a);
 GEN     apprgen9(GEN f, GEN a);
 GEN     factcantor(GEN x, GEN p);
@@ -1009,7 +1013,9 @@ GEN     rootmod(GEN f, GEN p);
 GEN     rootmod0(GEN f, GEN p,long flag);
 GEN     rootmod2(GEN f, GEN p);
 GEN     rootpadic(GEN f, GEN p, long r);
-GEN     rootpadicfast(GEN f, GEN p, long r, long flall);
+GEN     rootpadicfast(GEN f, GEN p, GEN pr);
+GEN     rootpadiclift(GEN T, GEN S, GEN q, GEN Q);
+GEN     rootpadicliftroots(GEN f, GEN S, GEN q, GEN pr);
 GEN     roots2(GEN pol,long PREC);
 GEN     rootsold(GEN x, long l);
 GEN     setloop(GEN a);
@@ -1056,14 +1062,27 @@ GEN     vecbezout(GEN x, GEN y);
 GEN     vecbezoutres(GEN x, GEN y);
 
 /* polarit3.c */
-
+GEN     Fp_add(GEN x,GEN y,GEN p);
+GEN     Fp_add_pol_scal(GEN y,GEN x,GEN p);
+GEN     Fp_centermod(GEN T,GEN mod);
+GEN     Fp_chinese_coprime(GEN x,GEN y,GEN Tx,GEN Ty,GEN Tz,GEN p);
+GEN     Fp_compo_mod_pol(GEN T,GEN x,GEN pol,GEN p);
+GEN     Fp_inv_mod_pol(GEN x,GEN pol,GEN p);
+GEN     Fp_mul(GEN x,GEN y,GEN p);
+GEN     Fp_mul_mod_pol(GEN y,GEN x,GEN pol,GEN p);
+GEN     Fp_mul_pol_scal(GEN y,GEN x,GEN p);
+GEN     Fp_neg(GEN x,GEN p);
 GEN     Fp_pol(GEN z, GEN p);
 GEN     Fp_pol_extgcd(GEN x, GEN y, GEN p, GEN *ptu, GEN *ptv);
 GEN     Fp_pol_gcd(GEN x, GEN y, GEN p);
 GEN     Fp_pol_red(GEN z, GEN p);
 GEN     Fp_pol_small(GEN z, GEN p, long l);
 GEN     Fp_poldivres(GEN x, GEN y, GEN p, GEN *pr);
+GEN     Fp_poleval(GEN x,GEN y,GEN p);
 GEN     Fp_pow_mod_pol(GEN x, GEN n, GEN pol, GEN p);
+GEN     Fp_sqr(GEN x,GEN p);
+GEN     Fp_sqr_mod_pol(GEN y,GEN pol,GEN p);
+GEN     Fp_sub(GEN x,GEN y,GEN p);
 GEN     Fp_vec(GEN z, GEN p);
 GEN     Fp_vec_red(GEN z, GEN p);
 GEN     modulargcd(GEN a,GEN b);

@@ -2444,7 +2444,7 @@ p(GEN x)
 {
   int t; get_nf(x,&t);
   if (t == typ_GAL)
-    return (GEN)x[2];
+    return gmael(x,2,1);
   x = get_primeid(x);
   if (!x) err(member,"p",mark.member,mark.start);
   return (GEN)x[1];
@@ -2523,6 +2523,9 @@ pol(GEN x) /* polynomial */
 static GEN
 mod(GEN x) /* modulus */
 {
+  int t; get_nf(x,&t);
+  if (t == typ_GAL)
+    return gmael(x,2,3);
   switch(typ(x))
   {
     case t_INTMOD: case t_POLMOD: case t_QUAD: break;
