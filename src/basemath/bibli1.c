@@ -2076,7 +2076,7 @@ init_pslq(pslq_M *M, GEN x, long *PREC)
     if (gcmp0((GEN)x[k])) return vec_ei(n, k);
   prec = gprecision(x)-1; if (prec < DEFAULTPREC) prec = DEFAULTPREC;
   *PREC = prec;
-  M->EXP = - bit_accuracy(prec) + 2*n;
+  M->EXP = - bit_accuracy(prec) + max(2*n, BITS_IN_LONG);
   M->flreal = is_zero(gimag(x), M->EXP);
   if (!M->flreal)
     return lindep(x,prec); /* FIXME */
@@ -2139,47 +2139,47 @@ SWAPbar(pslqL2_M *M, long m)
 static GEN
 one_step_gen(pslq_M *M, GEN tabga, long prec)
 {
-  GEN H = M->H, p1, t0, tinv, t1,t2,t3,t4;
+  GEN H = M->H, p1;
   long n = M->n, i, m;
 
   p1 = cgetg(n,t_VEC);
   for (i=1; i<n; i++) p1[i] = lmul((GEN)tabga[i], gabs(gcoeff(H,i,i),prec));
   m = vecmaxind(p1);
-  if (DEBUGLEVEL>=4) M->T->vmind += timer();
+  if (DEBUGLEVEL>3) M->T->vmind += timer();
   SWAP(M, m);
   if (m <= n-2)
   {
+    GEN t0, tinv, t1c, t2c, t1, t2, t3, t4;
     t0 = gadd(gnorm(gcoeff(H,m,m)), gnorm(gcoeff(H,m,m+1)));
     tinv = ginv(gsqrt(t0, prec));
     t1 = gmul(tinv, gcoeff(H,m,m));
     t2 = gmul(tinv, gcoeff(H,m,m+1));
-    if (DEBUGLEVEL>=4) M->T->t12 += timer();
+    if (M->flreal) { t1c = t1; t2c = t2; }
+    else           { t1c = gconj(t1); t2c = gconj(t2); }
+    if (DEBUGLEVEL>3) M->T->t12 += timer();
     for (i=m; i<=n; i++)
     {
       t3 = gcoeff(H,i,m);
       t4 = gcoeff(H,i,m+1);
-      if (M->flreal)
-        coeff(H,i,m) = ladd(gmul(t1,t3), gmul(t2,t4));
-      else
-        coeff(H,i,m) = ladd(gmul(gconj(t1),t3), gmul(gconj(t2),t4));
-      coeff(H,i,m+1) = lsub(gmul(t1,t4), gmul(t2,t3));
+      coeff(H,i,m)  = ladd(gmul(t1c,t3), gmul(t2c,t4));
+      coeff(H,i,m+1)= lsub(gmul(t1, t4), gmul(t2, t3));
     }
-    if (DEBUGLEVEL>=4) M->T->t1234 += timer();
+    if (DEBUGLEVEL>3) M->T->t1234 += timer();
   }
-  for (i=1; i<=n-1; i++)
+  for (i=1; i<n; i++)
     if (is_zero(gcoeff(H,i,i), M->EXP)) {
       m = vecabsminind(M->y); return (GEN)M->B[m];
     }
   for (i=m+1; i<=n; i++) redall(M, i, min(i-1,m+1));
 
-  if (DEBUGLEVEL>=4) M->T->reda += timer();
+  if (DEBUGLEVEL>3) M->T->reda += timer();
   if (gexpo(M->A) >= -M->EXP) return ginv(maxnorml2(M));
   m = vecabsminind(M->y);
   if (is_zero((GEN)M->y[m], M->EXP)) return (GEN)M->B[m];
 
-  if (DEBUGLEVEL>=3)
+  if (DEBUGLEVEL>2)
   {
-    if (DEBUGLEVEL>=4) M->T->fin += timer();
+    if (DEBUGLEVEL>3) M->T->fin += timer();
     M->T->ct++;
     if ((M->T->ct&0xff) == 0)
     {
