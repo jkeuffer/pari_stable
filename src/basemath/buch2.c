@@ -68,7 +68,6 @@ check_and_build_obj(GEN S, int tag, GEN (*build)(GEN))
 /*                                                                 */
 /*******************************************************************/
 extern GEN u_idmat(long n);
-extern GEN lllint_fp_ip(GEN x, long D);
 extern GEN R_from_QR(GEN x, long prec);
 extern GEN vecconst(GEN v, GEN x);
 extern GEN nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec);

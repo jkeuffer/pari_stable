@@ -23,12 +23,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "parinf.h"
 
 extern GEN chk_factors_get(GEN lt, GEN famod, GEN c, GEN T, GEN N);
-extern GEN lllint_fp_ip(GEN x, long D);
-extern long FqX_split_deg1(GEN *pz, GEN u, GEN q, GEN T, GEN p);
-extern GEN FqX_split_roots(GEN z, GEN T, GEN p, GEN pol);
-extern GEN FqX_split_all(GEN z, GEN T, GEN p);
-extern long FqX_split_by_degree(GEN *pz, GEN u, GEN q, GEN T, GEN p);
-extern long FpX_split_Berlekamp(GEN *t, GEN p);
 extern GEN get_proj_modT(GEN basis, GEN T, GEN p);
 extern void init_dalloc();
 extern double *dalloc(size_t n);
@@ -36,13 +30,6 @@ extern GEN sqred1_from_QR(GEN x, long prec);
 extern GEN GS_norms(GEN B, long prec);
 extern GEN apply_kummer(GEN nf,GEN pol,GEN e,GEN p);
 extern GEN dim1proj(GEN prh);
-extern GEN max_modulus(GEN p, double tau);
-extern GEN mulmat_pol(GEN A, GEN x);
-extern GEN polsym_gen(GEN P, GEN y0, long n, GEN T, GEN N);
-extern GEN special_pivot(GEN x);
-extern GEN vandermondeinverse(GEN L, GEN T, GEN den, GEN prep);
-extern int cmbf_precs(GEN q, GEN A, GEN B, long *a, long *b, GEN *qa, GEN *qb);
-extern GEN LLL_check_progress(GEN Bnorm, long n0, GEN m, int final, long *ti_LLL);
 extern void remake_GM(GEN nf, nffp_t *F, long prec);
 
 static GEN nfsqff(GEN nf,GEN pol,long fl);
@@ -153,8 +140,6 @@ QXQX_normalize(GEN P, GEN T)
   }
   return P;
 }
-
-extern GEN nfrootsQ(GEN x);
 
 /* return the roots of pol in nf */
 GEN

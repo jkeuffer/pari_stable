@@ -1521,8 +1521,6 @@ gbittest(GEN x, GEN n)
 /** x & y (and), x | y (or), x ^ y (xor), ~x (neg), x & ~y (negimply) **/
 /**                                                                   **/
 /***********************************************************************/
-extern GEN int_normalize(GEN x, long known_zero_words);
-
 /* Truncate a non-negative integer to a number of bits.  */
 static GEN
 ibittrunc(GEN x, long bits)

@@ -296,11 +296,12 @@ extern  void    rectclip(long rect);
 
 /* architecture-dependent plot file (plotX.c, plotsun.c, plognuplot.c...) */
 
-extern  void    PARI_get_plot(long fatal);
-extern  long    term_set(char *s);
-extern  long    plot_outfile_set(char *s);
-extern  void	set_pointsize(double d);
-extern  void    X11_rectdraw0(long *w, long *x, long *y, long lw, long do_free);
-extern  long    X11_term_set(char *s);
-extern  void    X11_set_pointsize(double d);
-extern  void    X11_PARI_get_plot(long fatal);
+void    PARI_get_plot(long fatal);
+long    term_set(char *s);
+long    plot_outfile_set(char *s);
+void	set_pointsize(double d);
+void    X11_rectdraw0(long *w, long *x, long *y, long lw, long do_free);
+void    rectdraw0(long *w, long *x, long *y, long lw, long do_free);
+long    X11_term_set(char *s);
+void    X11_set_pointsize(double d);
+void    X11_PARI_get_plot(long fatal);

@@ -20,7 +20,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*******************************************************************/
 #include "pari.h"
 #include "paripriv.h"
-extern GEN mulmat_pol(GEN A, GEN x);
 
 typedef struct Red {
 /* global data */

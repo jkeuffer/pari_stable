@@ -23,18 +23,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 extern GEN TR_pol(GEN P, GEN c);
 extern GEN norm_by_embed(long r1, GEN x);
-extern GEN ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound);
-extern GEN polsym_gen(GEN P, GEN y0, long n, GEN T, GEN N);
 extern GEN DDF2(GEN x, long hint);
 extern GEN eltabstorel(GEN x, GEN T, GEN pol, GEN k);
 extern GEN element_powid_mod_p(GEN nf, long I, GEN n, GEN p);
-extern GEN ZY_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LPRS);
 extern GEN col_to_ff(GEN x, long v);
 extern GEN element_mulidid(GEN nf, long i, long j);
 extern GEN eltmulid_get_table(GEN nf, long i);
 extern GEN idealaddtoone_i(GEN nf, GEN x, GEN y);
 extern GEN merge_factor_i(GEN f, GEN g);
-extern GEN mulmat_pol(GEN A, GEN x);
 extern GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den);
 extern GEN pidealprimeinv(GEN nf, GEN x);
 extern GEN pol_to_monic(GEN pol, GEN *lead);

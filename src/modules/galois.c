@@ -21,9 +21,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 #include "parinf.h"
-extern GEN cauchy_bound(GEN p);
-extern GEN small_to_pol_i(GEN z, long l);
-extern GEN ZX_caract_sqf(GEN A, GEN B, long *lambda, long v);
 
 #define NMAX 11 /* maximum degree */
 

@@ -24,18 +24,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 int new_galois_format = 0;
 
-extern GEN powrshalf(GEN x, long s);
-extern GEN powrfrac(GEN x, long n, long d);
 extern GEN split_realimag(GEN x, long r1, long r2);
 extern GEN R_from_QR(GEN x, long prec);
 extern GEN to_polmod(GEN x, GEN mod);
-extern GEN roots_to_pol_r1r2(GEN a, long r1, long v);
 extern GEN idealhermite_aux(GEN nf, GEN x);
-extern GEN cauchy_bound(GEN p);
 extern GEN galoisbig(GEN x, long prec);
-extern GEN lllfp_marked(long *M, GEN x, long D, long flag, long prec, int gram);
-extern GEN lllint_marked(long *M, GEN x, long D, int g, GEN *h, GEN *f, GEN *B);
-extern GEN mulmat_pol(GEN A, GEN x);
 
 void
 checkrnf(GEN rnf)

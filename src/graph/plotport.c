@@ -21,12 +21,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 #include "rect.h"
+#include "../language/anal.h"
 
-extern void push_val(entree *ep, GEN a);
-extern void pop_val(entree *ep);
-extern void postdraw0(long *w, long *x, long *y, long lw);
-extern void postdraw00(long *w, long *x, long *y, long lw, long scale);
-extern void rectdraw0(long *w, long *x, long *y, long lw, long do_free);
+void postdraw0(long *w, long *x, long *y, long lw);
+void postdraw00(long *w, long *x, long *y, long lw, long scale);
 static void PARI_get_psplot(void);
 
 static long current_color[NUMRECT];
@@ -1501,8 +1499,6 @@ rectplothin(entree *ep, GEN a, GEN b, char *ch, long prec, ulong flags,
   return pl;
 }
 
-extern GEN polint_i(GEN xa, GEN ya, GEN x, long n, GEN *ptdy);
-
 /* Uses highlevel plotting functions to implement splines as
    a low-level plotting function.
    Most probably one does not need to make varn==0 into pure variable,
@@ -1902,8 +1898,8 @@ static void ps_string(FILE *psfile, int x, int y, char *c, long dir);
 
 #undef ISCR
 #undef JSCR
-#define ISCR 1120 /* 1400 en haute resolution */
-#define JSCR 800  /* 1120 en haute resolution */
+#define ISCR 1120 /* 1400 for hi-res */
+#define JSCR 800  /* 1120 for hi-res */
 
 static void
 PARI_get_psplot(void)

@@ -3043,9 +3043,6 @@ ifac_divide(GEN *partial, GEN *where)
   return res;
 }
 
-/* Maybe a dummy.  Returns a factor, a vector of factors, or NULL */
-extern GEN mpqs(GEN N);
-
 /* hint == 0 : Use a default strategy
  * hint & 1  : Avoid mpqs(), use ellfacteur() after pollardbrent()
  * hint & 2  : Avoid first-stage ellfacteur() in favour of mpqs()

@@ -28,7 +28,6 @@ extern "C" {
 #include "pari.h"
 #undef grem
 #include "rect.h"
-    void rectdraw0(long *, long *, long *, long, long);
 }
 
 #ifdef __QPE__
