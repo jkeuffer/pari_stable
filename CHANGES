@@ -152,6 +152,8 @@ BA 63- galoisidentify() could fail on WSS group with S4 residue.
 BA 67- matsnf(Mat([])) was returning a matrix instead of a vector.
    68- ellap(ellinit([0,1,0,1,0]), 100) --> FPE  [ BIB: 100 is not prime, but
        make the routine more robust ]
+   69- give meaningful error messages (with context) for 1<<(1<<32), 1<<Pi
+       (1<<32)! allocatement(1<<32)  [ was: "impossible assignment I-->S" ]
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.

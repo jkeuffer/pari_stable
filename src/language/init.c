@@ -1019,12 +1019,15 @@ err_seek(long n)
   return NULL;
 }
 
+extern char *gp_function_name;
+
 /* untrapped error: kill all error handlers */
 void
 err_clean(void)
 {
   while (err_catch_stack)
     pop_catch_cell(&err_catch_stack);
+  gp_function_name = NULL;
 }
 
 static int
@@ -1049,8 +1052,6 @@ err_recover(long numerr)
   if (try_to_recover) recover(1);
   longjmp(GP_DATA? GP_DATA->env: environnement, numerr);
 }
-
-extern char *gp_function_name;
 
 void
 err(long numerr, ...)
@@ -1239,7 +1240,7 @@ trap0(char *e, char *r, char *f)
 
     CATCH(numerr) { x = NULL; }
     TRY { x = lisseq(f); } ENDCATCH;
-    if (!x) { avma = av; x = lisseq(r); }
+    if (!x) { avma = av; gp_function_name = NULL; x = lisseq(r); }
     set_analyseur(a); return x;
   }
 

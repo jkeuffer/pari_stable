@@ -81,7 +81,8 @@ static long skipping_fun_def;
  *   usually) triggers err_new_fun() if check_new_fun is set. */
 static entree *check_new_fun;
 
-/* for control statements (check_break) */
+/* for control statements */
+enum { br_NONE = 0, br_BREAK, br_NEXT, br_MULTINEXT, br_RETURN };
 static long br_status, br_count;
 static GEN br_res = NULL;
 
@@ -765,10 +766,15 @@ seq(void)
 }
 
 static GEN
-gshift_l(GEN x, GEN n)  { return gshift(x, itos(n)); }
-
+gshift_l(GEN x, GEN n)  {
+  if (is_bigint(n)) err(talker2,"integer too big",analyseur,mark.start);
+  return gshift(x, itos(n));
+}
 static GEN
-gshift_r(GEN x, GEN n) { return gshift(x,-itos(n)); }
+gshift_r(GEN x, GEN n) {
+  if (is_bigint(n)) err(talker2,"integer too big",analyseur,mark.start);
+  return gshift(x,-itos(n));
+}
 
 #define UNDEF (GEN)0x1
 static GEN
@@ -778,28 +784,45 @@ expr(void)
   GEN aux,e,e1,e2,e3;
   F2GEN F1,F2,F3;
   int F0 = 0;
-
+ 
   F1 = F2 = F3 = (F2GEN)NULL;
   e1 = e2 = e3 = UNDEF;
 L3:
+#define act(fun) \
+  aux = facteur(); if (br_status) return NULL;\
+  e3 = fun(e3,aux); goto L
+
   aux = facteur();
   if (br_status) return NULL;
   e3 = F3? F3(e3,aux): aux;
+L:
   switch(*analyseur)
   {
-    case '*': analyseur++; F3 = &gmul; goto L3;
-    case '/': analyseur++; F3 = &gdiv; goto L3;
-    case '%': analyseur++; F3 = &gmod; goto L3;
+    case '*': analyseur++; act(gmul);
+    case '/': analyseur++; act(gdiv);
+    case '%': analyseur++; act(gmod);
     case '\\':
-      if (analyseur[1] != '/') { analyseur++; F3 = &gdivent; goto L3; }
-      analyseur += 2; F3=&gdivround; goto L3;
+      if (analyseur[1] != '/') { analyseur++; act(gdivent); }
+      analyseur += 2; act(gdivround);
 
     case '<':
       if (analyseur[1] != '<') break;
-      analyseur += 2; F3 = &gshift_l; goto L3;
+      analyseur += 2;
+      { char *old = analyseur; /* act(shift_l) + error checks */
+        aux = facteur(); if (br_status) return NULL;
+        if (typ(aux) != t_INT) err(talker2,"not an integer",old,mark.start);
+        if (is_bigint(aux)) err(talker2,"integer too big",old,mark.start);
+        e3 = gshift(e3, itos(aux)); goto L;
+      }
     case '>':
       if (analyseur[1] != '>') break;
-      analyseur += 2; F3 = &gshift_r; goto L3;
+      analyseur += 2;
+      { char *old = analyseur; /* act(shift_r) + error checks */
+        aux = facteur(); if (br_status) return NULL;
+        if (typ(aux) != t_INT) err(talker2,"not an integer",old,mark.start);
+        if (is_bigint(aux)) err(talker2,"integer too big",old,mark.start);
+        e3 = gshift(e3,-itos(aux)); goto L;
+      }
   }
   F3 = (F2GEN)NULL;
 
@@ -920,12 +943,12 @@ readlong()
   const pari_sp av = avma;
   const char *old = analyseur;
   long m;
-  GEN arg = expr();
+  GEN x = expr();
 
   NO_BREAK("here (reading long)", old);
-  if (typ(arg) != t_INT) err(talker2,"this should be an integer",
-                                     old,mark.start);
-  m = itos(arg); avma=av; return m;
+  if (typ(x) != t_INT) err(talker2,"this should be an integer", old,mark.start);
+  if (is_bigint(x)) err(talker2,"integer too big",old,mark.start);
+  m = itos(x); avma=av; return m;
 }
 
 static long
@@ -1263,6 +1286,7 @@ facteur(void)
 	{
 	  if (typ(x) != t_INT) err(talker2,"this should be an integer",
                                            old,mark.start);
+          if (is_bigint(x)) err(talker2,"integer too big",old,mark.start);
 	  analyseur++; x=mpfact(itos(x)); break;
 	} /* Fall through */
 
@@ -1490,7 +1514,7 @@ change_compo(matcomp *c, GEN res)
     return res;
   }
   if (c->full_col)
-    if (typ(res) != t_COL || lg(res) != lg(*pt)) 
+    if (typ(res) != t_COL || lg(res) != lg(*pt))
       err(talker2,"incorrect type or length in matrix assignment",
           old,mark.start);
 
@@ -1857,7 +1881,7 @@ identifier(void)
       noparen=1; /* no argument, but valence is ok */
     }
     /* return type */
-    if      (*s <  'a')   ret = RET_GEN; 
+    if      (*s <  'a')   ret = RET_GEN;
     else if (*s == 'v') { ret = RET_VOID; s++; }
     else if (*s == 'i') { ret = RET_INT;  s++; }
     else if (*s == 'l') { ret = RET_LONG; s++; }
