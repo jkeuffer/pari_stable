@@ -2796,7 +2796,7 @@ GEN
 polcompositum0(GEN pol1, GEN pol2, long flall)
 {
   long av=avma,i,v,k,l;
-  GEN pro1,p1,p2,fa,rk,y,a;
+  GEN p1,p2,fa,rk,y,a;
 
   if (typ(pol1)!=t_POL || typ(pol2)!=t_POL) err(typeer,"polcompositum0");
   if (lgef(pol1)<=3 || lgef(pol2)<=3) err(constpoler,"compositum");
@@ -2808,8 +2808,7 @@ polcompositum0(GEN pol1, GEN pol2, long flall)
   for (k=1; ; k=nexta(k))
   {
     avma = av; if (DEBUGLEVEL>=2) print_elt(k);
-    pro1 = gadd(polx[MAXVARN],gmulsg(k,polx[v]));
-    p1 = gsubst(pol2,v,pro1);
+    p1 = poleval(pol2, gadd(polx[MAXVARN], gmulsg(k,polx[v])));
     p2 = subresall(pol1,p1,&rk);
     if (typ(rk)==t_POL && lgef(rk)==4 && issquarefree(p2)) break;
   }
@@ -2850,7 +2849,7 @@ GEN
 rnfequation0(GEN nf, GEN pol2, long flall)
 {
   long av=avma,av1,v,vpol,k,l1,l2;
-  GEN pol1,pro1,p1,p2,rk,y,a;
+  GEN pol1,p1,p2,rk,y,a;
 
   if (typ(nf)==t_POL) pol1=nf; else { nf=checknf(nf); pol1=(GEN)nf[1]; }
   pol2 = fix_relative_pol(nf,pol2);
@@ -2871,8 +2870,7 @@ rnfequation0(GEN nf, GEN pol2, long flall)
   for(k=0;; k=nexta(k))
   {
     avma = av1; if (DEBUGLEVEL>=2) print_elt(k);
-    pro1 = gadd(polx[MAXVARN],gmulsg(k,polx[v]));
-    p1 = poleval(pol2,pro1);
+    p1 = poleval(pol2, gadd(polx[MAXVARN], gmulsg(k,polx[v])));
     p2 = subresall(pol1,p1,&rk);
     if (typ(rk) == t_POL && lgef(rk)==4 && issquarefree(p2)) break;
   }
