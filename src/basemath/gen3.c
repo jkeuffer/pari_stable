@@ -1021,7 +1021,7 @@ gdivround(GEN x, GEN y)
     avma = av1; cgiv(r);
     if (fl >= 0) /* If 2*|r| >= |y| */
     {
-      long sz = gsigne(x) * gsigne(y);
+      long sz = gsigne(y);
       if (fl || sz > 0) q = gerepileupto(av, gaddgs(q, sz));
     }
     return q;
