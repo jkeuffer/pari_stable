@@ -241,10 +241,16 @@ addrfrac(GEN x, GEN y)
   n = gadd(gmul(x1,y2), gmul(y1,x2));
   if (!signe(n)) return gerepileupto((long)(z+3), n);
   tetpil = avma; d = gmul(x2, y2);
-  p1 = poldivres(n, delta, &p2);
+  p1 = poldivres(n, delta, &p2); /* we want gcd(n,delta) */
   if (!signe(p2))
   {
-    if (gcmp1(d)) return gerepileupto((long)(z+3), p1);
+    if (lgef(d) == 3) /* "constant" denominator */
+    {
+      d = (GEN)d[2];
+           if (gcmp_1(d)) p1 = gneg(p1);
+      else if (!gcmp1(d)) p1 = gdiv(p1, d);
+      return gerepileupto((long)(z+3), p1);
+    }
     z[1]=(long)p1; z[2]=(long)d;
     gerepilemanyvec((long)z,tetpil,z+1,2); return z;
   }
