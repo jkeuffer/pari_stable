@@ -1721,7 +1721,7 @@ lucas(long n, GEN *ln, GEN *ln1)
 {
   pari_sp av;
   long taille;
-  GEN z,t;
+  GEN z, t;
 
   if (!n) { *ln = stoi(2); *ln1 = stoi(1); return; }
 
@@ -1735,13 +1735,13 @@ lucas(long n, GEN *ln, GEN *ln1)
       addsiz(2,sqri(z), *ln1);
       subiiz(addsi(1,mulii(z,t)),*ln1, *ln); break;
     case -1:
-      subisz(sqri(z),2, *ln1);
-      subiiz(subis(mulii(z,t),1),*ln1, *ln); break;
-    case  0: subisz(sqri(z),2,    *ln); subisz(mulii(z,t),1, *ln1); break;
-    case  1: subisz(mulii(z,t),1, *ln); addsiz(2,sqri(t),    *ln1); break;
+      addsiz(-2,sqri(z), *ln1);
+      subiiz(addsi(-1, mulii(z,t)),*ln1, *ln); break;
+    case  0: addsiz(-2,sqri(z),    *ln); addsiz(-1,mulii(z,t), *ln1); break;
+    case  1: addsiz(-1,mulii(z,t), *ln); addsiz(2,sqri(t),    *ln1); break;
     case -2:
     case  2: addsiz(2,sqri(z),    *ln); addsiz(1,mulii(z,t), *ln1); break;
-    case  3: addsiz(1,mulii(z,t), *ln); subisz(sqri(t),2,    *ln1);
+    case  3: addsiz(1,mulii(z,t), *ln); addsiz(-2,sqri(t),   *ln1);
   }
   avma = av;
 }
