@@ -1441,7 +1441,7 @@ isunit(GEN bnf,GEN x)
   }
 
   setlg(ex, RU);
-  p1 = row_i(logunit,1, 1,RU);
+  p1 = row_i(logunit,1, 1,RU-1);
   p1 = gneg(gimag(gmul(p1,ex))); if (!R1) p1 = gmul2n(p1, -1);
   p1 = gadd(garg((GEN)emb[1],prec), p1);
   /* p1 = arg(the missing root of 1) */

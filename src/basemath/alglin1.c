@@ -492,7 +492,7 @@ row(GEN A, long x0)
 GEN
 row_i(GEN A, long x0, long x1, long x2)
 {
-  long i, lB = lg(A);
+  long i, lB = x2 - x1 + 2;
   GEN B  = cgetg(lB, t_VEC);
   for (i=x1; i<=x2; i++) B[i] = coeff(A, x0, i);
   return B;
