@@ -1768,7 +1768,7 @@ idealpowred(GEN nf, GEN x, GEN n, long prec)
   y = leftright_pow(x, n, (void*)&D, &_sqr, &_mul);
  
   if (s < 0) y = idealinv(nf,y);
-  if (y == x) y = ideallllred(nf,x,NULL,prec);
+  else if (is_pm1(n)) y = ideallllred(nf,x,NULL,prec);
   return gerepileupto(av,y);
 }
 
