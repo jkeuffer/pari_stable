@@ -299,6 +299,7 @@ enum { QUIET=1, TEST=2, SIMPLIFY=4, CHRONO=8, ECHO=16, STRICTMATCH=32,
 #define DATA_ESCAPE ((char) 27)
 
 typedef struct {
+  jmp_buf env;
   gp_hist *hist;
   gp_pp *pp;
   gp_path *path;

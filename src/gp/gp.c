@@ -358,7 +358,7 @@ jump_to_buffer(void)
     if (b->flenv) break;
     pop_buffer();
   }
-  if (!b) longjmp(environnement, 0);
+  if (!b) longjmp(GP_DATA->env, 0);
   longjmp(b->env, 0);
 }
 
@@ -371,8 +371,8 @@ jump_to_given_buffer(Buffer *buf)
     if (b == buf) break;
     pop_buffer();
   }
-  if (!b->env) { b = NULL; err(warner,"no environmnent tied to buffer"); }
-  if (!b) longjmp(environnement, 0);
+  if (!b->env) { b = NULL; err(warner,"no env tied to buffer"); }
+  if (!b) longjmp(GP_DATA->env, 0);
   longjmp(b->env, 0);
 }
 
@@ -2666,7 +2666,7 @@ gp_main_loop(int ismain)
       tloc = H->total;
       outtyp = GP_DATA->fmt->prettyp;
       recover(0);
-      if (setjmp(environnement))
+      if (setjmp(GP_DATA->env))
       { /* recover from error */
         char *s = (char*)global_err_data;
         if (s && *s) outerr(lisseq(s));
@@ -2930,7 +2930,7 @@ main(int argc, char **argv)
   char **flist;
 
   init_defaults(1); gp_preinit();
-  if (setjmp(environnement))
+  if (setjmp(GP_DATA->env))
   {
     pariputs("### Errors on startup, exiting...\n\n");
     exit(1);

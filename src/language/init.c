@@ -43,7 +43,6 @@ int     functions_tblsz = 135; /* size of functions_hash          */
 entree  **varentries;
 
 void    *global_err_data;
-jmp_buf environnement;
 long    *ordvar;
 ulong   DEBUGFILES, DEBUGLEVEL, DEBUGMEM, compatible;
 ulong   prec, precdl;
@@ -83,6 +82,7 @@ typedef struct {
 
 static stack *err_catch_stack = NULL;
 static char **dft_handler;
+static jmp_buf environnement;
 
 void
 push_stack(stack **pts, void *a)
@@ -1040,11 +1040,10 @@ err_recover(long numerr)
   if (pariErr->die) pariErr->die();    /* Caller wants to catch exceptions? */
   global_err_data = NULL;
   fprintferr("\n"); flusherr();
-  if (!environnement) exit(1);
 
   /* reclaim memory stored in "blocs" */
   if (try_to_recover) recover(1);
-  longjmp(environnement, numerr);
+  longjmp(GP_DATA? GP_DATA->env: environnement, numerr);
 }
 
 void

@@ -28,7 +28,6 @@ void hit_return(void);
 extern int secure;
 extern ulong init_opts;
 extern char *current_logfile;
-extern jmp_buf environnement;
 
 extern ulong readline_state;
 #define DO_MATCHED_INSERT	2

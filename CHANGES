@@ -142,6 +142,7 @@ BA 31- uninitialized memory read in divrr(x,y), when lg(y) < lg(x), leading
    17- subst(1 + x^2 + O(x^5), x^2, y) --> 1 + y + O(y^2)
    18- nffactor: allow modular factorization over primes of degree > 1
 IZ 19- try to output usable TeX (avoid braces, let TeX split lines)
+   20- [libpari internals:] jmp_buf 'environnement' no longer global
 
   Added
     1- member function rnf.pol (polynomial generating absolute extension)
