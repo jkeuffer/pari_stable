@@ -721,31 +721,6 @@ gscalcol_proto(GEN z, GEN myzero, long n)
 }
 
 GEN
-zerocol(long n)
-{
-  GEN y = cgetg(n+1,t_COL);
-  long i; for (i=1; i<=n; i++) y[i]=zero;
-  return y;
-}
-
-GEN
-zerovec(long n)
-{
-  GEN y = cgetg(n+1,t_VEC);
-  long i; for (i=1; i<=n; i++) y[i]=zero;
-  return y;
-}
-
-GEN
-zeromat(long m, long n)
-{
-  GEN y = cgetg(n+1,t_MAT);
-  GEN v = zerocol(m);
-  long i; for (i=1; i<=n; i++) y[i]=(long)v;
-  return y;
-}
-
-GEN
 gscalcol(GEN x, long n)
 {
   GEN y=gscalcol_proto(gzero,gzero,n);

@@ -703,8 +703,9 @@ split_realimag_col(GEN z, long r1, long r2)
 {
   long i, ru = r1+r2;
   GEN a, x = cgetg(ru+r2+1,t_COL), y = x + r2;
-  for (i=1; i<=r1; i++) { a = (GEN)z[i]; x[i] = lreal(a); }
-  for (   ; i<=ru; i++) { a = (GEN)z[i]; x[i] = lreal(a); y[i] = limag(a); }
+  for (i=1; i<=r1; i++) { a = (GEN)z[i]; x[i] = (long)real_i(a); }
+  for (   ; i<=ru; i++) { a = (GEN)z[i]; x[i] = (long)real_i(a);
+                                         y[i] = (long)imag_i(a); }
   return x;
 }
 
@@ -1138,17 +1139,17 @@ init_red_mod_units(GEN bnf, long prec)
   mat = cgetg(RU,t_MAT);
   for (j=1; j<RU; j++)
   {
-    p1=cgetg(RU+1,t_COL); mat[j]=(long)p1;
-    s1=gzero;
+    p1 = cgetg(RU+1,t_COL); mat[j] = (long)p1;
+    s1 = gzero;
     for (i=1; i<RU; i++)
     {
-      p1[i] = lreal(gcoeff(matunit,i,j));
-      s1 = gadd(s1, gsqr((GEN)p1[i]));
+      p1[i] = (long)real_i(gcoeff(matunit,i,j));
+      s1 = mpadd(s1, gsqr((GEN)p1[i]));
     }
-    p1[RU]=zero; if (gcmp(s1,s) > 0) s = s1;
+    p1[RU]=zero; if (mpcmp(s1,s) > 0) s = s1;
   }
   s = gsqrt(gmul2n(s,RU),prec);
-  if (gcmpgs(s,100000000) < 0) s = stoi(100000000);
+  if (expo(s) < 27) s = utoi(1UL << 27);
   z = cgetg(3,t_VEC);
   z[1] = (long)mat;
   z[2] = (long)s; return z;
@@ -1165,7 +1166,7 @@ red_mod_units(GEN col, GEN z, long prec)
   mat= (GEN)z[1];
   N2 = (GEN)z[2];
   RU = lg(mat); x = cgetg(RU+1,t_COL);
-  for (i=1; i<RU; i++) x[i]=lreal((GEN)col[i]);
+  for (i=1; i<RU; i++) x[i] = (long)real_i((GEN)col[i]);
   x[RU] = (long)N2;
   x = lllintern(concatsp(mat,x),100, 1,prec);
   if (!x) return NULL;

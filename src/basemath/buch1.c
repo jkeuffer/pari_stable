@@ -228,7 +228,7 @@ quadhilbertimag(GEN D, GEN flag)
   int raw = ((typ(flag)==t_INT && signe(flag)));
 
   if (DEBUGLEVEL>1) (void)timer2();
-  if (gcmpgs(D,-11) >= 0) return polx[0];
+  if (cmpis(D,-11) >= 0) return polx[0];
   L = getallforms(D,&h,&z);
   if (DEBUGLEVEL>1) msgtimer("class number = %ld",h);
   if (h == 1) { avma=av; return polx[0]; }

@@ -582,7 +582,7 @@ powgi(GEN x, GEN n)
       if (!signe(x[4]))
       {
         if (sn < 0) err(gdiver);
-        return padiczero(p, e);
+        return zeropadic(p, e);
       }
       y = cgetg(5,t_PADIC);
       mod = (GEN)x[3]; v = ggval(n, p);
@@ -804,18 +804,6 @@ mpsqrt(GEN x) {
   return mpsqrt_sign(x, s);
 }
 
-/* O(p^e) */
-GEN
-padiczero(GEN p, long e)
-{
-  GEN y = cgetg(5,t_PADIC);
-  y[4] = zero;
-  y[3] = un;
-  copyifstack(p,y[2]);
-  y[1] = evalvalp(e) | evalprecp(0);
-  return y;
-}
-
 /* assume x unit, precp(x) = pp > 3 */
 static GEN
 sqrt_2adic(GEN x, long pp)
@@ -888,7 +876,7 @@ padic_sqrt(GEN x)
   GEN z,y,mod, p = (GEN)x[2];
   pari_sp av;
 
-  if (gcmp0(x)) return padiczero(p, (e+1) >> 1);
+  if (gcmp0(x)) return zeropadic(p, (e+1) >> 1);
   if (e & 1) err(talker,"odd exponent in p-adic sqrt");
 
   y = cgetg(5,t_PADIC);
@@ -997,16 +985,6 @@ gsqrt(GEN x, long prec)
   }
   return transc(gsqrt,x,prec);
 }
-
-void
-gsqrtz(GEN x, GEN y)
-{
-  long prec = precision(y);
-  pari_sp av=avma;
-
-  if (!prec) err(infprecer,"gsqrtz");
-  gaffect(gsqrt(x,prec),y); avma=av;
-}
 /********************************************************************/
 /**                                                                **/
 /**                    FONCTION RACINE N-IEME                      **/
@@ -1097,7 +1075,7 @@ padic_sqrtn(GEN x, GEN n, GEN *zetan)
   if (gcmp0(x))
   {
     long m = itos(n);
-    return padiczero(p, (valp(x)+m-1)/m);
+    return zeropadic(p, (valp(x)+m-1)/m);
   }
   /*First treat the ramified part using logarithms*/
   e = pvaluation(n, p, &q);
@@ -1417,17 +1395,6 @@ gexp(GEN x, long prec)
   }
   return transc(gexp,x,prec);
 }
-
-void
-gexpz(GEN x, GEN y)
-{
-  long prec = precision(y);
-  pari_sp av=avma;
-
-  if (!prec) err(infprecer,"gexpz");
-  gaffect(gexp(x,prec),y); avma=av;
-}
-
 /********************************************************************/
 /**                                                                **/
 /**                      FONCTION LOGARITHME                       **/
@@ -1594,7 +1561,7 @@ palogaux(GEN x)
   {
     long v = valp(x)+precp(x);
     if (egalii(gdeux,p)) v--;
-    return padiczero(p, v);
+    return zeropadic(p, v);
   }
   y = gdiv(gaddgs(x,-1), gaddgs(x,1));
   e = valp(y); pp = e+precp(y);
@@ -1682,17 +1649,6 @@ glog(GEN x, long prec)
   }
   return transc(glog,x,prec);
 }
-
-void
-glogz(GEN x, GEN y)
-{
-  long prec = precision(y);
-  pari_sp av=avma;
-
-  if (!prec) err(infprecer,"glogz");
-  gaffect(glog(x,prec),y); avma=av;
-}
-
 /********************************************************************/
 /**                                                                **/
 /**                        SINE, COSINE                            **/
@@ -1875,17 +1831,6 @@ gcos(GEN x, long prec)
   }
   return transc(gcos,x,prec);
 }
-
-void
-gcosz(GEN x, GEN y)
-{
-  long prec = precision(y);
-  pari_sp av = avma;
-
-  if (!prec) err(infprecer,"gcosz");
-  gaffect(gcos(x,prec),y); avma=av;
-}
-
 /********************************************************************/
 /**                             SINE                               **/
 /********************************************************************/
@@ -1952,17 +1897,6 @@ gsin(GEN x, long prec)
   }
   return transc(gsin,x,prec);
 }
-
-void
-gsinz(GEN x, GEN y)
-{
-  long prec = precision(y);
-  pari_sp av=avma;
-
-  if (!prec) err(infprecer,"gsinz");
-  gaffect(gsin(x,prec),y); avma=av;
-}
-
 /********************************************************************/
 /**                       SINE, COSINE together                    **/
 /********************************************************************/
@@ -2149,16 +2083,6 @@ gtan(GEN x, long prec)
   return transc(gtan,x,prec);
 }
 
-void
-gtanz(GEN x, GEN y)
-{
-  long prec = precision(y);
-  pari_sp av=avma;
-
-  if (!prec) err(infprecer,"gtanz");
-  gaffect(gtan(x,prec),y); avma=av;
-}
-
 static GEN
 mpcotan(GEN x)
 {
@@ -2198,14 +2122,4 @@ gcotan(GEN x, long prec)
       return gerepileupto(av, gdiv(c,s));
   }
   return transc(gcotan,x,prec);
-}
-
-void
-gcotanz(GEN x, GEN y)
-{
-  long prec = precision(y);
-  pari_sp av=avma;
-
-  if (!prec) err(infprecer,"gcotanz");
-  gaffect(gcotan(x,prec),y); avma=av;
 }

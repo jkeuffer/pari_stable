@@ -42,24 +42,14 @@ gopgs2(GEN (*f)(GEN, GEN), GEN y, long s)
   affsi(s,court_p); return f(y,court_p);
 }
 
-long
-opgs2(int (*f)(GEN, GEN), GEN y, long s)
-{
-  affsi(s,court_p); return f(y,court_p);
+void
+gopsg2z(GEN (*f)(GEN, GEN), long s, GEN y, GEN z) {
+  pari_sp av=avma; gaffect(gopsg2(f,s,y),z); avma=av;
 }
 
 void
-gopsg2z(GEN (*f)(GEN, GEN), long s, GEN y, GEN z)
-{
-  pari_sp av=avma;
-  affsi(s,court_p); gaffect(f(court_p,y),z); avma=av;
-}
-
-void
-gopgs2z(GEN (*f)(GEN, GEN), GEN y, long s, GEN z)
-{
-  pari_sp av=avma;
-  affsi(s,court_p); gaffect(f(y,court_p),z); avma=av;
+gopgs2z(GEN (*f)(GEN, GEN), GEN y, long s, GEN z) {
+  pari_sp av=avma; gaffect(gopgs2(f,y,s),z); avma=av;
 }
 
 /*******************************************************************/
@@ -86,12 +76,9 @@ cgetp(GEN x)
 }
 
 GEN 
-pureimag(GEN x)
-{
-  GEN y = cgetg(3,t_COMPLEX);
-  y[1] = zero;
-  y[2] = (long)x; return y;
-}
+cgetimag() { GEN y = cgetg(3,t_COMPLEX); y[1] = zero; return y; }
+GEN 
+pureimag(GEN x) { GEN y = cgetimag(); y[2] = (long)x; return y; }
 
 /*******************************************************************/
 /*                                                                 */
@@ -252,6 +239,19 @@ gcmp0(GEN x)
   return 0;
 }
 
+/* assume x != 0, is |x| == 1 ? */
+int
+absrnz_egal1(GEN x) {
+  if (expo(x)==0 && (ulong)x[2]==HIGHBIT)
+  {
+    long i, lx = lg(x);
+    for (i = 3; i < lx; i++)
+      if (x[i]) return 0;
+    return 1;
+  }
+  return 0;
+}
+
 /* returns 1 whenever x = 1, 0 otherwise */
 int
 gcmp1(GEN x)
@@ -262,14 +262,7 @@ gcmp1(GEN x)
       return is_pm1(x) && signe(x)==1;
 
     case t_REAL:
-      if (signe(x) > 0 && expo(x)==0 && (ulong)x[2]==HIGHBIT)
-      {
-        long i,lx = lg(x);
-        for (i=3; i<lx; i++)
-          if (x[i]) return 0;
-        return 1;
-      }
-      return 0;
+      return signe(x) > 0 ? absrnz_egal1(x): 0;
 
     case t_INTMOD: case t_POLMOD:
       return gcmp1((GEN)x[2]);
@@ -306,14 +299,7 @@ gcmp_1(GEN x)
       return is_pm1(x) && signe(x)== -1;
 
     case t_REAL:
-      if (signe(x) < 0 && expo(x)==0 && (ulong)x[2]==HIGHBIT)
-      {
-        long i,lx = lg(x);
-        for (i=3; i<lx; i++)
-          if (x[i]) return 0;
-        return 1;
-      }
-      return 0;
+      return signe(x) < 0 ? absrnz_egal1(x): 0;
 
     case t_INTMOD:
       av=avma; y=egalii(addsi(1,(GEN)x[2]), (GEN)x[1]); avma=av; return y;
@@ -368,6 +354,24 @@ gcmp(GEN x, GEN y)
   if (ty == t_STR) return -1;
   if (!is_intreal_t(ty) && ty != t_FRAC) err(typeer,"comparison");
   av=avma; y=gneg_i(y); f=gsigne(gadd(x,y)); avma=av; return f;
+}
+
+int
+gcmpsg(long s, GEN y)
+{
+  long ty = typ(y);
+  switch(ty) {
+    case t_INT:  return cmpsi(s,y);
+    case t_REAL: return cmpsr(s,y);
+    case t_FRAC: {
+      pari_sp av = avma;
+      GEN n = (GEN)y[1], d = (GEN)y[2];
+      int f = cmpii(mulsi(s,d), n); avma = av; return f;
+    }
+    case t_STR: return -1;
+  }
+  err(typeer,"comparison");
+  return 0; /* not reached */
 }
 
 static int
@@ -543,6 +547,13 @@ gegal(GEN x, GEN y)
 }
 #undef MASK
 
+int
+gegalsg(long s, GEN x)
+{
+  pari_sp av = avma;
+  int f = gegal(stoi(s), x);
+  avma = av; return f;
+}
 /*******************************************************************/
 /*                                                                 */
 /*                          VALUATION                              */
@@ -892,7 +903,7 @@ gabs(GEN x, long prec)
     case t_INT: case t_REAL:
       return mpabs(x);
 
-    case t_FRAC: y=cgetg(lg(x),tx);
+    case t_FRAC: y=cgetg(3,tx);
       y[1]=labsi((GEN)x[1]);
       y[2]=labsi((GEN)x[2]); return y;
 
@@ -1430,7 +1441,7 @@ qtop(GEN x, GEN p, long d)
 { 
   GEN p1, P = (GEN)x[1], b = (GEN)P[3], c = (GEN)P[2];
   pari_sp av;
-  if (gcmp0(x)) return padiczero(p, d);
+  if (gcmp0(x)) return zeropadic(p, d);
   av = avma;
   p1 = gsqrt(cvtop(subii(b, shifti(c,2)), p, egalii(p,gdeux)? d+2: d), 0);
   p1 = gmul2n(gsub(p1, b), -1);
@@ -1453,9 +1464,9 @@ cvtop2(GEN x, GEN y)
   switch(typ(x))
   {
     case t_INT:
-      if (!signe(x)) return padiczero(p, d);
+      if (!signe(x)) return zeropadic(p, d);
       v = pvaluation(x, p, &x);
-      if (d <= 0) return padiczero(p, v);
+      if (d <= 0) return zeropadic(p, v);
       z = cgetg(5, t_PADIC);
       z[1] = evalprecp(d) | evalvalp(v);
       z[2] = (long)p;
@@ -1463,16 +1474,16 @@ cvtop2(GEN x, GEN y)
       z[4] = lmodii(x, (GEN)z[3]); return z;
 
     case t_INTMOD:
-      if (!signe(x[2])) return padiczero(p, d);
+      if (!signe(x[2])) return zeropadic(p, d);
       v = ggval((GEN)x[1],p); 
       if (v <= d) return cvtop2((GEN)x[2], y);
       return cvtop((GEN)x[2], p, d);
 
     case t_FRAC: { GEN num = (GEN)x[1], den = (GEN)x[2];
-      if (!signe(num)) return padiczero(p, d);
+      if (!signe(num)) return zeropadic(p, d);
       v = pvaluation(num, p, &num);
       if (!v) v = -pvaluation(den, p, &den);
-      if (d <= 0) return padiczero(p, v);
+      if (d <= 0) return zeropadic(p, v);
       z = cgetg(5, t_PADIC);
       z[1] = evalprecp(d) | evalvalp(v);
       z[2] = (long)p;
@@ -1498,9 +1509,9 @@ cvtop(GEN x, GEN p, long d)
   switch(typ(x))
   {
     case t_INT:
-      if (!signe(x)) return padiczero(p, d);
+      if (!signe(x)) return zeropadic(p, d);
       v = pvaluation(x, p, &x);
-      if (d <= 0) return padiczero(p, v);
+      if (d <= 0) return zeropadic(p, v);
       z = cgetg(5, t_PADIC);
       z[1] = evalprecp(d) | evalvalp(v);
       icopyifstack(p, z[2]);
@@ -1508,15 +1519,15 @@ cvtop(GEN x, GEN p, long d)
       z[4] = lmodii(x, (GEN)z[3]); return z; /* not memory-clean */
 
     case t_INTMOD:
-      if (!signe(x[2])) return padiczero(p, d);
+      if (!signe(x[2])) return zeropadic(p, d);
       v = ggval((GEN)x[1],p); if (v > d) v = d;
       return cvtop((GEN)x[2], p, v);
 
     case t_FRAC: { GEN num = (GEN)x[1], den = (GEN)x[2];
-      if (!signe(num)) return padiczero(p, d);
+      if (!signe(num)) return zeropadic(p, d);
       v = pvaluation(num, p, &num);
       if (!v) v = -pvaluation(den, p, &den);
-      if (d <= 0) return padiczero(p, v);
+      if (d <= 0) return zeropadic(p, v);
       z = cgetg(5, t_PADIC);
       z[1] = evalprecp(d) | evalvalp(v);
       icopyifstack(p, z[2]);

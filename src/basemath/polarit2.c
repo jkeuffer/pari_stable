@@ -2575,8 +2575,8 @@ zero_gcd(GEN x, GEN y, long tx, long ty)
   {
     GEN p = (GEN)y[2];
     long v = ggval(x,p), w = valp(y);
-    if (w < v) return padiczero(p, w);
-    if (gcmp0(x)) return padiczero(p, v);
+    if (w < v) return zeropadic(p, w);
+    if (gcmp0(x)) return zeropadic(p, v);
     return gpowgs(p, v);
   }
   switch(tx)

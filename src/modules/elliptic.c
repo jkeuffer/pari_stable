@@ -262,7 +262,7 @@ padic_initell(GEN y, GEN p, long prec)
  GEN b2, b4, c4, c6, p1, w, pv, a1, b1, x1, u2, q, e0, e1;
   long i, alpha;
 
-  q = gadd(gun, padiczero(p,prec));
+  q = gadd(gun, zeropadic(p,prec));
   for (i=1; i<=13; i++) y[i] = lmul(q,(GEN)y[i]);
   if (gcmp0((GEN)y[13]) || valp((GEN)y[13]) >= 0) /* p | j */
     err(talker,"valuation of j must be negative in p-adic ellinit");
@@ -2693,7 +2693,7 @@ localred_carac_23(GEN e, long p)
 static GEN
 localred(GEN e, GEN p, int minim)
 {
-  if (gcmpgs(p, 3) > 0) /* p != 2,3 */
+  if (cmpis(p, 3) > 0) /* p != 2,3 */
     return localred_carac_p(e,p, minim);
   else
   {

@@ -471,7 +471,7 @@ minss(long x, long y)
 INLINE void
 addssz(long x, long y, GEN z)
 {
-  if (typ(z)==t_INT) gops2ssz(addss,x,y,z);
+  if (typ(z)==t_INT) gopssz(addss,x,y,z);
   else
   {
     const pari_sp av=avma;
@@ -537,7 +537,7 @@ subsi(long x, GEN y)
 INLINE void
 mulssz(long x, long y, GEN z)
 {
-  if (typ(z)==t_INT) gops2ssz(mulss,x,y,z);
+  if (typ(z)==t_INT) gopssz(mulss,x,y,z);
   else
   {
     const pari_sp av=avma;

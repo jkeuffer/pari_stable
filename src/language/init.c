@@ -1746,9 +1746,9 @@ gerepileuptoleaf(pari_sp av, GEN q)
   long i;
   GEN q0;
 
-  if (!isonstack(q) || av==(pari_sp)q) { avma = av; return q; }
-  i=lg(q); avma = (pari_sp)(((GEN)av) -  i);
-  q0 = (GEN)avma; while (--i >= 0) q0[i]=q[i];
+  if (!isonstack(q) || (GEN)av==q) { avma = av; return q; }
+  i = lg(q); avma = (pari_sp)(((GEN)av) -  i);
+  q0 = (GEN)avma; while (--i >= 0) q0[i] = q[i];
   return q0;
 }
 /* internal */

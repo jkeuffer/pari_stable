@@ -1812,7 +1812,61 @@ trunc0(GEN x, GEN *pte)
   if (pte) { long e; x = gcvtoi(x,&e); *pte = stoi(e); }
   return gtrunc(x);
 }
-
+/*******************************************************************/
+/*                                                                 */
+/*                             ZERO                                */
+/*                                                                 */
+/*******************************************************************/
+/* O(p^e) */
+GEN
+zeropadic(GEN p, long e)
+{
+  GEN y = cgetg(5,t_PADIC);
+  y[4] = zero;
+  y[3] = un;
+  copyifstack(p,y[2]);
+  y[1] = evalvalp(e) | evalprecp(0);
+  return y;
+}
+/* O(polx[v]^e) */
+GEN
+zeroser(long v, long e)
+{
+  GEN x = cgetg(2, t_SER);
+  x[1] = evalvalp(e) | evalvarn(v); return x;
+}
+/* 0 * polx[v] */
+GEN
+zeropol(long v)
+{
+  GEN x = cgetg(2,t_POL);
+  x[1] = evalvarn(v); return x;
+}
+/* vector(n) */
+GEN
+zerocol(long n)
+{
+  GEN y = cgetg(n+1,t_COL);
+  long i; for (i=1; i<=n; i++) y[i]=zero;
+  return y;
+}
+/* vectorv(n) */
+GEN
+zerovec(long n)
+{
+  GEN y = cgetg(n+1,t_VEC);
+  long i; for (i=1; i<=n; i++) y[i]=zero;
+  return y;
+}
+/* matrix(m, n) */
+GEN
+zeromat(long m, long n)
+{
+  GEN y = cgetg(n+1,t_MAT);
+  GEN v = zerocol(m);
+  long i; for (i=1; i<=n; i++) y[i]=(long)v;
+  return y;
+}
 /*******************************************************************/
 /*                                                                 */
 /*                  CONVERSIONS -->  INT, POL & SER                */
@@ -1912,13 +1966,6 @@ coefs_to_col(long n, ...)
 }
 
 GEN
-zeropol(long v)
-{
-  GEN x = cgetg(2,t_POL);
-  x[1] = evalvarn(v); return x;
-}
-
-GEN
 scalarpol(GEN x, long v)
 {
   GEN y=cgetg(3,t_POL);
@@ -1997,13 +2044,6 @@ gtopolyrev(GEN x, long v) { return gtopoly0(x,v,1); }
 
 GEN
 gtopoly(GEN x, long v) { return gtopoly0(x,v,0); }
-
-GEN
-zeroser(long v, long val)
-{
-  GEN x = cgetg(2, t_SER);
-  x[1] = evalvalp(val) | evalvarn(v); return x;
-}
 
 GEN
 scalarser(GEN x, long v, long prec)

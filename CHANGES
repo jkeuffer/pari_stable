@@ -1,5 +1,4 @@
-   = Karim Belabas (maintainer)
-AW = Aleksander Wittlin
+   = Karim Belabas (maintainer) AW = Aleksander Wittlin
 BA = Bill Allombert
 BD = Bill Daly
 BG = Brian Gladman
@@ -148,6 +147,7 @@ BA 63- galoisidentify() could fail on WSS group with S4 residue.
    64- t_POLMOD + t_MAT was incorrect. E.g Mat(1) + Mod(1,x) --> Mod(Mat(1),x)
        instead of Mat(Mod(1,x)) as for other scalars.
    65- Mod(1,8) + O(2^2) --> Mod(1,8) [ should be error ]
+   66- lngamma(1.) returned a t_REAL of length 'realprecision' (instead of 3)
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.
@@ -208,6 +208,8 @@ BA 21- type() does not allow to change object types anymore.
        quotient ]. Use rdivii, rdivis, rdivsi, rdivss for analogous
        functionality (no "z" variant);
    34- ensure proper rounding in divrs
+   35- renamed padiczero --> zeropadic [ as in zero[pol|ser|vec|col|mat] ]
+   36- macroified gcosz, gsinz, gexpz, etc + cleanup transcendental functions
 
   Added
     1- make test-all [ all available test suites (SLOW !)]
@@ -225,7 +227,7 @@ BA 10- add POSIX-style long options --fast, --quiet, --primelimit and
        --stacksize.
    11- new internal library routine itos_or_0
    12- new member function .index
-   13- rdivii, rdivis, rdivsi, rdivss for analogous
+   13- rdivii, rdivis, rdivsi, rdivss to replace diviiz & co.
 
   Removed
     1- obsolete macro leadingcoeff [kept for backward compatibility but
@@ -242,6 +244,7 @@ BA  4- cornacchia, in favour of qfbsolve.
        compilation to use them ]
    10- inconsistently named macros mpinv[sir]r [ were "z" functions ].
        Undocumented
+   11- public macros refering to static transcendental routines (e.g mpatanz)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.7 (released 18/12/2003):

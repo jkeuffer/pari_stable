@@ -367,7 +367,7 @@ kbessel(GEN nu, GEN gx, long prec)
   n2=(n<<1); pitemp=mppi(l1);
   /* this 10 should really be a 5, but then kbessel(15.99) enters oo loop */
   lbin = 10 - bit_accuracy(l); av1=avma;
-  if (gcmpgs(x,n)<0)
+  if (cmprs(x, n)<0)
   {
     zf=gsqrt(gdivgs(pitemp,n2),prec);
     zz=cgetr(l1); gaffect(ginv(stoi(n2<<2)), zz);
@@ -409,7 +409,7 @@ kbessel(GEN nu, GEN gx, long prec)
       gmulz(q,gaddsg(1,c),q);
       if (expo(subrr(q,r)) <= lbin) break;
     }
-    gmulz(u,gpow(gdivgs(x,n),nu,prec),y);
+    gmulz(u,gpow(divrs(x,n),nu,prec),y);
   }
   else
   {
@@ -698,7 +698,7 @@ hyperu(GEN a, GEN b, GEN gx, long prec)
   }
   n=(long)(bit_accuracy(l)*LOG2 + PI*sqrt(gtodouble(gabs(gmul(a,a1),l1))));
   lbin = 10-bit_accuracy(l); av1=avma;
-  if (gcmpgs(x,n)<0)
+  if (cmprs(x,n)<0)
   {
     gn=stoi(n); zf=gpow(gn,gneg_i(a),l1);
     zz=gdivsg(-1,gn); s=gun; t=gzero;
@@ -739,7 +739,7 @@ hyperu(GEN a, GEN b, GEN gx, long prec)
   else
   {
     zf=gpow(x,gneg_i(a),l1);
-    zz=gdivsg(-1,x); s=gun;
+    zz=divsr(-1,x); s=gun;
     for (k=n-1; k>=0; k--)
     {
       p1=gdivgs(gmul(gmul(gaddgs(a,k),gaddgs(a1,k)),zz),k+1);
@@ -929,9 +929,9 @@ eint1(GEN x, long prec)
     l  = lg(x);
     n  = bit_accuracy(l);
     /* IS: line split to avoid a Workshop cc-5.0 bug (Sun BugID #4254959) */
-    n  = 3 * n / 4;
+    n  = (3 * n) / 4;
     y  = negr(x);
-    if(gcmpgs(y, n) < 0) {
+    if(cmprs(y, n) < 0) {
       p1 = p2 = p3 = y;
       p4 = gzero;
       i  = 2;
@@ -1606,17 +1606,6 @@ gzeta(GEN x, long prec)
   }
   return transc(gzeta,x,prec);
 }
-
-void
-gzetaz(GEN x, GEN y)
-{
-  long prec = precision(y);
-  pari_sp av=avma;
-
-  if (!prec) err(infprecer,"gzetaz");
-  gaffect(gzeta(x,prec),y); avma=av;
-}
-
 /***********************************************************************/
 /**                                                                   **/
 /**                    FONCTIONS POLYLOGARITHME                       **/
@@ -1742,10 +1731,10 @@ polylogd0(long m, GEN x, long flag, long prec)
   m2=m&1; av=avma;
   if (gcmp0(x)) return gcopy(x);
   if (gcmp1(x) && m>=2) return m2?szeta(m,prec):gzero;
-  l=precision(x);
+  l = precision(x);
   if (!l) { l=prec; x=gmul(x,realun(l)); }
-  p1=gabs(x,prec); fl=0;
-  if (gcmpgs(p1,1)>0) { x=ginv(x); p1=gabs(x,prec); fl=!m2; }
+  p1 = gabs(x,prec); fl=0;
+  if (expo(p1) >= 0) { x=ginv(x); p1=gabs(x,prec); fl=!m2; }
 
   p1=gneg_i(glog(p1,prec)); p2=gun;
   y=polylog(m,x,prec); y = m2? real_i(y): imag_i(y);
@@ -1792,7 +1781,7 @@ polylogp(long m, GEN x, long prec)
   l=precision(x);
   if (!l) { l=prec; x=gmul(x,realun(l)); }
   p1=gabs(x,prec); fl=0;
-  if (gcmpgs(p1,1)>0) { x=ginv(x); p1=gabs(x,prec); fl=!m2; }
+  if (expo(p1) >= 0) { x=ginv(x); p1=gabs(x,prec); fl=!m2; }
 
   p1=gmul2n(glog(p1,prec),1); mpbern(m>>1,prec);
   y=polylog(m,x,prec); y=m2?real_i(y):imag_i(y);
@@ -1879,15 +1868,15 @@ gpolylog(long m, GEN x, long prec)
   return NULL; /* not reached */
 }
 
-void
+void    
 gpolylogz(long m, GEN x, GEN y)
-{
+{       
   long prec = precision(y);
   pari_sp av=avma;
 
   if (!prec) err(infprecer,"gpolylogz");
   gaffect(gpolylog(m,x,prec),y); avma=av;
-}
+} 
 
 GEN
 polylog0(long m, GEN x, long flag, long prec)

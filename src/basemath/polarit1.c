@@ -1532,7 +1532,7 @@ static GEN
 strict_int_to_padic(GEN x, GEN p, GEN pr, long r, GEN invlead)
 {
   GEN y = int_to_padic(x, p, pr, r, invlead);
-  if (y == gzero) y = padiczero(p,r);
+  if (y == gzero) y = zeropadic(p,r);
   return y;
 }
 
@@ -1931,15 +1931,15 @@ apprgen9(GEN f, GEN a)
   pro = cgetg(n+1,t_COL);
 
   if (is_bigint(p)) err(impl,"apprgen9 for p>=2^31");
-  x = gmodulcp(padiczero(p,prec), T);
+  x = gmodulcp(zeropadic(p,prec), T);
   if (fl2)
   {
-    x2 = padiczero(p,2);
+    x2 = zeropadic(p,2);
     P = stoi(4);
   }
   else
   {
-    x2 = padiczero(p,1);
+    x2 = zeropadic(p,1);
     P = p;
   }
   ps_1 = itos(p)-1;

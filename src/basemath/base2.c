@@ -3757,7 +3757,7 @@ rel_T2(GEN nf, GEN pol, long lx, long prec)
           s = gadd(s, gmul(gconj(gmael(powreorder,k,j)),
                                  gmael(powreorder,l,j)));
         if (l == k)
-          coeff(m, l, l) = lreal(s);
+          coeff(m, l, l) = (long)real_i(s);
         else
         {
           coeff(m, k, l) = (long)s;
@@ -3817,7 +3817,7 @@ PRECPB:
     B[j] = zero;
   }
   if (DEBUGLEVEL) fprintferr("k = ");
-  B[1] = lreal(rnfscal(mth,(GEN)MC[1],(GEN)MC[1]));
+  B[1] = (long)real_i(rnfscal(mth,(GEN)MC[1],(GEN)MC[1]));
   MCS[1] = MC[1];
   kmax = 1; k = 2;
   do
@@ -3833,7 +3833,7 @@ PRECPB:
 	                              (GEN) B[j]);
 	MCS[k] = lsub((GEN)MCS[k], vecmul(gcoeff(mu,k,j),(GEN)MCS[j]));
       }
-      B[k] = lreal(rnfscal(mth,(GEN)MCS[k],(GEN)MCS[k]));
+      B[k] = (long)real_i(rnfscal(mth,(GEN)MCS[k],(GEN)MCS[k]));
       if (check_0((GEN)B[k])) goto PRECPB;
     }
     if (!RED(k, k-1, h, mu, MC, nf, I, &Ik_inv)) goto PRECPB;

@@ -399,7 +399,7 @@ addpp(GEN x, GEN y)
     u = addii((GEN)x[4], (GEN)y[4]);
     if (!signe(u) || (c = pvaluation(u,p,&u)) >= r)
     {
-      avma = av; return padiczero(p, e+r);
+      avma = av; return zeropadic(p, e+r);
     }
     if (c)
     {
@@ -459,7 +459,7 @@ addQp(GEN x, GEN y)
     u = addii(u, p1);
     if (!signe(u) || (c = pvaluation(u,p,&u)) >= r)
     {
-      avma = av; return padiczero(p,e+r);
+      avma = av; return zeropadic(p,e+r);
     }
     if (c)
     {
@@ -1200,8 +1200,8 @@ mulpp(GEN x, GEN y) {
   pari_sp av;
   GEN z, t;
   if (!egalii((GEN)x[2],(GEN)y[2])) err(operi,"*",x,y);
-  if (!signe(x[4])) return padiczero((GEN)x[2], l);
-  if (!signe(y[4])) return padiczero((GEN)x[2], l);
+  if (!signe(x[4])) return zeropadic((GEN)x[2], l);
+  if (!signe(y[4])) return zeropadic((GEN)x[2], l);
 
   t = (precp(x) > precp(y))? y: x;
   z = cgetp(t); setvalp(z,l); av = avma;
@@ -1891,7 +1891,7 @@ divpp(GEN x, GEN y) {
   long a, b;
   GEN z, M;
 
-  if (!signe(x[4])) return padiczero((GEN)x[2], valp(x)-valp(y));
+  if (!signe(x[4])) return zeropadic((GEN)x[2], valp(x)-valp(y));
   a = precp(x);
   b = precp(y); if (a > b) { M = (GEN)y[3]; } else { M = (GEN)x[3]; b = a; }
   z = cgetg(5, t_PADIC);
@@ -2164,7 +2164,7 @@ gdiv(GEN x, GEN y)
       {
         case t_INT: case t_FRAC: { GEN p = (GEN)x[2];
           return signe(x[4])? divpT(x, y)
-                            : padiczero(p, valp(x) - ggval(y,p));
+                            : zeropadic(p, valp(x) - ggval(y,p));
         }
         case t_PADIC: { GEN Y = (GEN)y[1];
           z = cgetg(3, t_INTMOD);

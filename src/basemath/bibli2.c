@@ -58,7 +58,7 @@ grando0(GEN x, long n, long do_clone)
     if (!gcmp1(x)) /* bug 3 + O(1). We suppose x is a truc() */
     {
       if (do_clone) x = gclone(x);
-      return padiczero(x,n);
+      return zeropadic(x,n);
     }
     v=0; m=0; /* 1 = x^0 */
   }
@@ -379,42 +379,38 @@ convol(GEN x, GEN y)
 GEN
 gprec(GEN x, long l)
 {
-  long tx=typ(x),lx=lg(x),i,pr;
+  long tx = typ(x), lx, i, pr;
   GEN y;
 
-  if (l<=0) err(talker,"precision<=0 in gprec");
+  if (l <= 0) err(talker,"precision<=0 in gprec");
   switch(tx)
   {
     case t_REAL:
-      pr = (long) (l*pariK1+3); y=cgetr(pr); affrr(x,y); break;
+      pr = (long)(l*pariK1+3); y=cgetr(pr); affrr(x,y); break;
 
     case t_PADIC:
-      if (!signe(x[4])) return padiczero((GEN)x[2], l+precp(x));
-      y=cgetg(lx,t_PADIC); copyifstack(x[2], y[2]);
+      if (!signe(x[4])) return zeropadic((GEN)x[2], l+precp(x));
+      y=cgetg(5,t_PADIC); copyifstack(x[2], y[2]);
       y[1]=x[1]; setprecp(y,l);
-      y[3]=lpuigs((GEN)x[2],l);
-      y[4]=lmodii((GEN)x[4],(GEN)y[3]);
+      y[3]=lpowgs((GEN)x[2],l);
+      y[4]=lmodii((GEN)x[4], (GEN)y[3]);
       break;
 
     case t_SER:
       if (gcmp0(x)) return zeroser(varn(x), l);
       y=cgetg(l+2,t_SER); y[1]=x[1]; l++; i=l;
+      lx = lg(x);
       if (l>=lx)
 	for ( ; i>=lx; i--) y[i]=zero;
       for ( ; i>=2; i--) y[i]=lcopy((GEN)x[i]);
       break;
 
-    case t_POL:
-      y=cgetg(lx,t_POL); y[1]=x[1];
-      for (i=2; i<lx; i++) y[i]=lprec((GEN)x[i],l);
-      break;
-
-    case t_COMPLEX: case t_POLMOD: case t_RFRAC:
+    case t_COMPLEX: case t_POLMOD: case t_POL: case t_RFRAC:
     case t_VEC: case t_COL: case t_MAT:
-      y=cgetg(lx,tx);
-      for (i=1; i<lx; i++) y[i]=lprec((GEN)x[i],l);
+      y = init_gen_op(x, tx, &lx, &i);
+      for (; i<lx; i++) y[i] = lprec((GEN)x[i],l);
       break;
-    default: y=gcopy(x);
+    default: y = gcopy(x);
   }
   return y;
 }
@@ -423,25 +419,20 @@ gprec(GEN x, long l)
 GEN
 gprec_w(GEN x, long pr)
 {
-  long tx=typ(x),lx,i;
+  long tx = typ(x), lx, i;
   GEN y;
 
   switch(tx)
   {
     case t_REAL:
-      y=cgetr(pr); affrr(x,y); break;
-
-    case t_POL:
-      lx=lg(x); y=cgetg(lx,t_POL); y[1]=x[1];
-      for (i=2; i<lx; i++) y[i]=(long)gprec_w((GEN)x[i],pr);
-      break;
-
-    case t_COMPLEX: case t_POLMOD: case t_RFRAC:
+      y = cgetr(pr); affrr(x,y); break;
+   
+    case t_COMPLEX: case t_POLMOD: case t_POL: case t_RFRAC:
     case t_VEC: case t_COL: case t_MAT:
-      lx=lg(x); y=cgetg(lx,tx);
-      for (i=1; i<lx; i++) y[i]=(long)gprec_w((GEN)x[i],pr);
+      y = init_gen_op(x, tx, &lx, &i);
+      for (; i<lx; i++) y[i]=(long)gprec_w((GEN)x[i],pr);
       break;
-    default: y=gprec(x,pr);
+    default: y = gprec(x,pr);
   }
   return y;
 }

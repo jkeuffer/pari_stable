@@ -83,7 +83,7 @@ tnf_get_roots(GEN poly, long prec, int S, int T)
   GEN R0 = roots(poly, prec), R = cgetg(lg(R0), t_COL);
   int k;
 
-  for (k=1; k<=S; k++) R[k] = lreal((GEN)R0[k]);
+  for (k=1; k<=S; k++) R[k] = (long)real_i((GEN)R0[k]);
   /* swap roots to get the usual order */
   for (k=1; k<=T; k++)
   {

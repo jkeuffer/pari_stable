@@ -99,12 +99,7 @@ addii_sign(GEN x, long sx, GEN y, long sy)
 }
 
 INLINE GEN
-rcopy_sign(GEN x, long sx)
-{
-  GEN y=rcopy(x);
-  setsigne(y,sx);
-  return y;
-}
+rcopy_sign(GEN x, long sx) { GEN y = rcopy(x); setsigne(y,sx); return y; }
 
 GEN
 addir_sign(GEN x, long sx, GEN y, long sy)
@@ -118,8 +113,7 @@ addir_sign(GEN x, long sx, GEN y, long sy)
   {
     if (e > 0) return rcopy_sign(y, sy);
     z = itor(x, 3 + ((-e)>>TWOPOTBITS_IN_LONG));
-    setsigne(z, sx);
-    return z;
+    setsigne(z, sx); return z;
   }
 
   ly = lg(y);
@@ -172,8 +166,7 @@ addrr_sign(GEN x, long sx, GEN y, long sy)
     lz = 3 + ((-e)>>TWOPOTBITS_IN_LONG);
     lx = lg(x); if (lz > lx) lz = lx;
     z = cgetr(lz); while(--lz) z[lz] = x[lz];
-    setsigne(z,sx);
-    return z;
+    setsigne(z,sx); return z;
   }
   if (!sx)
   {
@@ -181,8 +174,7 @@ addrr_sign(GEN x, long sx, GEN y, long sy)
     lz = 3 + (e>>TWOPOTBITS_IN_LONG);
     ly = lg(y); if (lz > ly) lz = ly;
     z = cgetr(lz); while (--lz) z[lz] = y[lz];
-    setsigne(z,sy);
-    return z;
+    setsigne(z,sy); return z;
   }
 
   if (e < 0) { z=x; x=y; y=z; ey=ex; i=sx; sx=sy; sy=i; e=-e; }
