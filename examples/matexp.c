@@ -13,7 +13,7 @@ matexp(GEN x,long prec)
   if (lx == 1) return cgetg(1, t_MAT);
   if (lx != lg(x[1])) err(talker,"not a square matrix");
 
-  /*@Ccom convert x to real or complex of real and compute its L2 norm */
+  /*@Ccom convert x to real or complex of real and compute its $L_2$ norm */
   s = gzero; r = cgetr(prec+1); affsr(1,r); x = gmul(r,x);
   for (i=1; i<lx; i++)
     s = gadd(s, gnorml2((GEN)x[i]));
@@ -26,18 +26,18 @@ matexp(GEN x,long prec)
   else { n = k+1; p1 = gmul2n(x,-n); setexpo(s,-1); }
 
   /*@Ccom initializations before the loop */
-  y = gscalmat(r,lx-1); /* creates scalar matrix with r on diagonal */
+  y = gscalmat(r,lx-1); /*@Ccom creates scalar matrix with r on diagonal */
   p2 = p1; r = s; k = 1;
   y = gadd(y,p2);
 
-  /*@Ccom now the main loop */
+  /*@Ccom the main loop */
   while (expo(r) >= -BITS_IN_LONG*(prec-1))
   {
     k++; p2 = gdivgs(gmul(p2,p1),k);
     r = gdivgs(gmul(s,r),k); y = gadd(y,p2);
   }
 
-  /*@Ccom now square back n times if necessary */
+  /*@Ccom square back n times if necessary */
   for (i=0; i<n; i++) y = gsqr(y);
   return gerepileupto(ltop,y);
 }
