@@ -2,11 +2,7 @@
 % This file is intended to be processed by plain TeX (TeX82).
 % Reference Card for PARI-GP version 2.0
 
-% Copyright (c) 1997-1999 Karim Belabas. May be freely distributed.
-%
-% This reference card is distributed in the hope that it will be useful,
-% but WITHOUT ANY WARRANTY; without even the implied warranty of
-% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+% Copyright (c) 1997-2000 Karim Belabas. May be freely distributed.
 
 % Based on an earlier version by Joseph H. Silverman who kindly let me
 % use his original file.
@@ -82,12 +78,13 @@
 % Version 2.7 - February 1999, added some pointer '&' arguments. Removed
 %   rounderror
 % Version 2.8 - April 1999, removed \k, added \l filename
+% Version 2.9 - April 2000, added \o¸ updated control statements
 %% Thanks to Bill Allombert, Henri Cohen, Gerhard Niklasch, and Joe
 %% Silverman for many comments and corrections.
 
-\def\versionnumber{2.8}% Version of this reference card
-\def\PARIversion{2.0.15}% Version of PARI described on this reference card
-\def\year{1999}
+\def\versionnumber{2.9}% Version of this reference card
+\def\PARIversion{2.0.19}% Version of PARI described on this reference card
+\def\year{2000}
 \def\month{April}
 \def\version{\month\ \year\ v\versionnumber}
 
@@ -317,6 +314,7 @@ Note: optional arguments are surrounded by braces {\tt \{\}}.
 \key{set memory debug level to $n$}{\\gm $n$}
 \key{enable/disable logfile}{\\l \{filename\}}
 \key{print \%$n$ in pretty matrix format}{\\m}
+\key{set output mode (raw, default, prettyprint)}{\\o $n$}
 \key{set $n$ significant digits}{\\p $n$}
 \key{set $n$ terms in series}{\\ps $n$}
 \key{quit GP}{\\q}
@@ -439,8 +437,7 @@ $x$\%$y${\rm,} divrem$(x,y)$}
 \li{sort the list $l$}{listsort$(l,\fl)$}
 
 \section{Programming \& User Functions}
-$X$ is the formal parameter used in the expression \seq\ (or \expr).\hfill
-\subsec{Control Statements}
+\subsec{Control Statements {\rm ($X$: formal parameter in expression \seq)}}
 \li{eval.\ \seq\ for $a\le X\le b$}{for$(X=a,b,\seq)$}
 \li{eval.\ \seq\ for $X$ dividing $n$}{fordiv$(n,X,\seq)$}
 \li{eval.\ \seq\ for primes $a\le X\le b$}{forprime$(X=a,b,\seq)$}
@@ -450,8 +447,9 @@ $X$ is the formal parameter used in the expression \seq\ (or \expr).\hfill
 \li{evaluate \seq\ until $a\ne0$}{until$(a,\seq)$}
 \li{while $a\ne0$, evaluate \seq}{while$(a,\seq)$}
 \li{exit $n$ innermost enclosing loops}{break$(\{n\})$}
-\li{start a new iteration of enclosing loop}{next$()$}
+\li{start new iteration of $n$th enclosing loop}{next$(\{n\})$}
 \li{return $x$ from current subroutine}{return$(x)$}
+\li{error recovery (try \seq1)}{trap$(\{err\},\{\seq2\},\{\seq1\})$}
 %
 \subsec{Input/Output}
 \li{prettyprint args with/without newline}{printp(){\rm,} printp1()}
