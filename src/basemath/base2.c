@@ -1609,11 +1609,13 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	 improved the approximation given by beta */
       nv = fetch_var();
       w = Fp_factor_irred(nug, p, gsubst(nu, varn(nu), polx[nv]));
-      if (degree((GEN)w[1]) != 1) err(bugparier,"nilord (no root)");
+      if (degree((GEN)w[1]) != 1)
+        err(talker,"bug in nilord (no root). Is p a prime ?");
 
       for (i = 1;; i++)
       {
-	if (i >= lg(w)) err(bugparier, "nilord (no suitable root), is p really a prime?");
+	if (i >= lg(w))
+          err(talker, "bug in nilord (no suitable root), is p a prime?");
         delt = gneg_i(gsubst(gcoeff(w, 2, i), nv, polx[v]));
         eta  = gsub(gamm, delt);	  
         if (typ(delt) == t_INT)
