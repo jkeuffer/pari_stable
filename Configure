@@ -1099,6 +1099,7 @@ dflt=$prefix/lib/pari; . ./myread; miscdir=$ans
 echo $n ..."miscellaneous data (galois resolvents) ? $c"
 dflt=$miscdir/data; . ./myread; datadir=$ans
 
+if test "$optimization" = debugging; then static=y; fi
 if test "$fastread" != yes; then
   if test -z "$DLLD"; then
     cat <<EOT
