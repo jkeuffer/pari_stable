@@ -1951,7 +1951,7 @@ bestappr0(GEN x, GEN a, GEN b)
   GEN t;
   if (!b) return bestappr(x,a);
   av = avma;
-  t = bestappr_mod(x,a,b):
+  t = bestappr_mod(x,a,b);
   if (!t) { avma = av; return stoi(-1); }
   return t;
 }
