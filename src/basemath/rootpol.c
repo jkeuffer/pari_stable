@@ -2033,14 +2033,15 @@ isconj(GEN x, GEN y, long e)
 GEN
 roots(GEN p, long l)
 {
-  long av,av1,tetpil,n,j,k,s, e = 5 - bit_accuracy(l);
+  long av,av1,tetpil,n,j,k,s;
   GEN p1,p2,p3,p22,res;
 
-  if (gcmp0(p) || gexpo(p) <= e) err(zeropoler,"roots");
+  if (gcmp0(p)) err(zeropoler,"roots");
   av=avma; p1=roots_com(p,l); n=lg(p1);
   if (n <= 1) return p1;
   if (isreal(p))
   {
+    long e = 5 - bit_accuracy(l);
     p3=cgetg(n,t_COL); s=0;
     for (j=1; j<n; j++)
     {
