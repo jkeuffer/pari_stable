@@ -21,481 +21,52 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*******************************************************************/
 #include "pari.h"
 #include "paripriv.h"
-extern GEN initgaloisborne(GEN T, GEN dn, long prec, GEN *ptL, GEN *ptprep, GEN *ptdis);
 extern long ZX_get_prec(GEN x);
 
-static GEN print_block_system(long N,GEN Y,long d,GEN vbs,long maxl);
-
-/* Computation of potential block systems of given size d associated to a
- * rational prime p: give a row vector of row vectors containing the
- * potential block systems of imprimitivity; a potential block system is a
- * vector of row vectors (enumeration of the roots).
- */
-#define BIL 32 /* for 64bit machines also */
-static GEN
-calc_block(long N,GEN Z,long d,GEN Y,GEN vbs,ulong maxl)
+typedef struct _poldata
 {
-  long r,lK,i,j,t,tp,T,lpn,u,nn,lnon,lY;
-  GEN K,n,non,pn,pnon,e,Yp,Zp,Zpp;
-
-  if (DEBUGLEVEL>3)
-  {
-    long l = vbs? lg(vbs): 0;
-    fprintferr("avma = %ld, lg(Z) = %ld, lg(Y) = %ld, lg(vbs) = %ld\n",
-               avma,lg(Z),lg(Y),l);
-    if (DEBUGLEVEL > 5)
-    {
-      fprintferr("Z = %Z\n",Z);
-      fprintferr("Y = %Z\n",Y);
-      if (DEBUGLEVEL > 7) fprintferr("vbs = %Z\n",vbs);
-    }
-  }
-  r=lg(Z); lnon = min(BIL, r);
-  e    = new_chunk(BIL);
-  n    = new_chunk(r);
-  non  = new_chunk(lnon);
-  pnon = new_chunk(lnon);
-  pn   = new_chunk(lnon);
-  Zp   = cgetg(lnon,t_VEC);
-  Zpp  = cgetg(lnon,t_VEC);
-  for (i=1; i<r; i++) n[i] = lg(Z[i])-1;
-
-  K=divisors(stoi(n[1])); lK=lg(K);
-  for (i=1; i<lK; i++)
-  {
-    long  ngcd = n[1], k = itos((GEN)K[i]), dk = d*k;
-    lpn=0;
-    for (j=2; j<r; j++)
-      if (n[j]%k == 0)
-      {
-        if (++lpn >= BIL) err(talker,"overflow in calc_block");
-        pn[lpn] = n[j]; pnon[lpn] = j;
-        ngcd = cgcd(ngcd, n[j]);
-      }
-    if (dk % ngcd) continue;
-    T = 1<<lpn; if (!lpn) lpn = 1;
-    for (t=0; t<T; t++)
-    {
-      for (nn=n[1],tp=t, u=1; u<=lpn; u++,tp>>=1)
-      {
-        if (tp&1) { nn += pn[u]; e[u]=1; } else e[u]=0;
-      }
-      if (dk == nn)
-      {
-	pari_sp av=avma;
-        int Z_equal_Zp = 1;
-
-        for (j=1; j<lnon; j++) non[j]=0;
-        Zp[1]=Z[1];
-	for (u=2,j=1; j<=lpn; j++)
-	  if (e[j])
-          {
-            Zp[u]=Z[pnon[j]]; non[pnon[j]]=1;
-            if (Zp[u] != Z[u]) Z_equal_Zp = 0;
-            u++;
-          }
-        setlg(Zp, u);
-        lY=lg(Y); Yp = cgetg(lY+1,t_VEC);
-        for (j=1; j<lY; j++) Yp[j]=Y[j];
-	Yp[lY]=(long)Zp;
-        if (r == u && Z_equal_Zp)
-	  vbs = print_block_system(N,Yp,d,vbs,maxl);
-	else
-	{
-	  for (u=1,j=2; j<r; j++)
-	    if (!non[j]) Zpp[u++] = Z[j];
-          setlg(Zpp, u);
-	  vbs = calc_block(N,Zpp,d,Yp,vbs,maxl);
-	}
-        if (vbs && (ulong)lg(vbs) > maxl) return vbs;
-        avma=av;
-      }
-    }
-  }
-  return vbs;
-}
-
-static GEN
-potential_block_systems(long N, long d, GEN n, ulong maxl)
+  GEN pol;
+  GEN dis; /* |disc(pol)| */
+  GEN roo; /* roots(pol) */
+  GEN den; /* multiple of index(pol) */
+} poldata;
+typedef struct _primedata
 {
-  long r, i, j, k;
-  pari_sp av=avma;
-  GEN p1,vbs,Z;
+  GEN p;  /* prime */
+  GEN pol; /* pol mod p, squarefree */
+  GEN ff; /* factorization of pol mod p */
+  GEN Z; /* cycle structure of the above [ Frobenius orbits ] */
+  long lcm; /* lcm of the above */
+  GEN T;  /* ffinit(p, n, lcm) */
 
-  r=lg(n); Z=cgetg(r,t_VEC);
-  for (k=0,i=1; i<r; i++)
-  {
-    p1=cgetg(n[i]+1,t_VECSMALL); Z[i]=(long)p1;
-    for (j=1; j<=n[i]; j++) p1[j]= ++k;
-  }
-  vbs=calc_block(N,Z,d, cgetg(1,t_VEC), NULL, maxl);
-  avma=av; return vbs;
-}
-
-/* product of permutations. Put the result in perm1. */
-static void
-perm_mul_i(GEN perm1,GEN perm2)
+  GEN fk;      /* factorization of pol over F_(p^lcm) */
+  GEN firstroot; /* *[i] = index of first root of fk[i] */
+  GEN interp;    /* *[i] = interpolation polynomial for fk[i]
+                  * [= 1 on the first root firstroot[i], 0 on the others] */
+  GEN bezoutC; /* Bezout coefficients associated to the ff[i] */
+  GEN Trk;     /* used to compute traces (cf poltrace) */
+} primedata;
+typedef struct _blockdata
 {
-  long i, N = lg(perm1);
-  pari_sp av = avma;
-  GEN perm=new_chunk(N);
-  for (i=1; i<N; i++) perm[i]=perm1[perm2[i]];
-  for (i=1; i<N; i++) perm1[i]=perm[i];
-  avma=av;
-}
+  poldata *PD; /* data depending from pol */
+  primedata *S;/* data depending from pol, p */
+  GEN DATA; /* data depending from pol, p, degree, # translations [updated] */
+  long N; /* deg(PD.pol) */
+  long d; /* subfield degree */
+  long blockd;/* block degree = N/d */
+} blockdata;
 
-/* cy is a cycle; compute cy^l as a permutation */
-static GEN
-cycle_power_to_perm(GEN perm,GEN cy,long l)
-{
-  long lp,i,j,b, N = lg(perm), lcy = lg(cy)-1;
+static GEN print_block_system(blockdata *B, GEN Y, GEN BS);
+static GEN test_block(blockdata *B, GEN L, GEN D);
 
-  lp = l % lcy;
-  for (i=1; i<N; i++) perm[i] = i;
-  if (lp)
-  {
-    pari_sp av = avma;
-    GEN p1 = new_chunk(N);
-    b = cy[1];
-    for (i=1; i<lcy; i++) b = (perm[b] = cy[i+1]);
-    perm[b] = cy[1];
-    for (i=1; i<N; i++) p1[i] = perm[i];
-
-    for (j=2; j<=lp; j++) perm_mul_i(perm,p1);
-    avma = av;
-  }
-  return perm;
-}
-
-/* image du block system D par la permutation perm */
-static GEN
-im_block_by_perm(GEN D,GEN perm)
-{
-  long i,j,lb,lcy;
-  GEN Dn,cy,p1;
-
-  lb=lg(D); Dn=cgetg(lb,t_VEC);
-  for (i=1; i<lb; i++)
-  {
-    cy=(GEN)D[i]; lcy=lg(cy);
-    Dn[i]=lgetg(lcy,t_VECSMALL); p1=(GEN)Dn[i];
-    for (j=1; j<lcy; j++) p1[j] = perm[cy[j]];
-  }
-  return Dn;
-}
-
-/* cy is a cycle; recturn cy(a) */
-static long
-im_by_cy(long a,GEN cy)
-{
-  long k, l = lg(cy);
-
-  k=1; while (k<l && cy[k] != a) k++;
-  if (k == l) return a;
-  k++; if (k == l) k = 1;
-  return cy[k];
-}
-
-/* vbs[0] = current cardinality+1, vbs[1] = max number of elts */
-static GEN
-append_vbs(GEN vbs, GEN D)
-{
-  long l,maxl,i,j,n, lD = lg(D);
-  GEN Dn, last;
-
-  n = 0; for (i=1; i<lD; i++) n += lg(D[i]);
-  Dn = (GEN)gpmalloc((lD + n) * sizeof(long));
-  last = Dn + lD; Dn[0] = D[0];
-  for (i=1; i<lD; i++)
-  {
-    GEN cy = (GEN)D[i], cn = last;
-    for (j=0; j<lg(cy); j++) cn[j] = cy[j];
-    Dn[i] = (long)cn; last = cn + j;
-  }
-
-  if (!vbs)
-  {
-    maxl = 1024;
-    vbs = (GEN)gpmalloc((2 + maxl)*sizeof(GEN));
-    *vbs = maxl; vbs++; setlg(vbs, 1);
-  }
-  l = lg(vbs); maxl = vbs[-1];
-  if (l == maxl)
-  {
-    vbs = (GEN)gprealloc((void*)(vbs-1), (2 + (maxl<<1))*sizeof(GEN));
-    *vbs = maxl<<1; vbs++; setlg(vbs, 1);
-  }
-  if (DEBUGLEVEL>5) fprintferr("appending D = %Z\n",D);
-  vbs[l] = (long)Dn; setlg(vbs, l+1); return vbs;
-}
-
-static void
-myconcat2(GEN D, GEN a)
-{
-  long i,l = lg(D), m = lg(a);
-  GEN x = D + (l-1);
-  for (i=1; i<m; i++) x[i]=a[i];
-  setlg(D, l+m-1);
-}
-
-static GEN
-print_block_system(long N,GEN Y,long d,GEN vbs,long maxl)
-{
-  long a,i,j,l,ll,*k,*n,lp,**e,u,v,*t,ns, r = lg(Y);
-  GEN D,De,Z,cyperm,perm,p1,empty;
-
-  if (DEBUGLEVEL>5) fprintferr("Y = %Z\n",Y);
-  empty = cgetg(1,t_VEC);
-  n = new_chunk(N+1);
-  D = cget1(N+1, t_VEC);
-  t=new_chunk(r+1); k=new_chunk(r+1); Z=cgetg(r+1,t_VEC);
-  for (ns=0,i=1; i<r; i++)
-  {
-    GEN Yi = (GEN)Y[i], cy;
-    long ki = 0, si = lg(Yi)-1;
-
-    for (j=1; j<=si; j++) { n[j]=lg(Yi[j])-1; ki += n[j]; }
-    ki /= d;
-    De=cgetg(ki+1,t_VEC);
-    for (j=1; j<=ki; j++) De[j]=(long)empty;
-    for (j=1; j<=si; j++)
-    {
-      cy = (GEN)Yi[j]; a = cy[1];
-      for (l=1,lp=0; l<=n[j]; l++)
-      {
-        lp++; if (lp>ki) lp = 1;
-        a = im_by_cy(a, cy);
-        De[lp] = (long)vecsmall_append((GEN)De[lp], a);
-      }
-    }
-    if (si>1 && ki>1)
-    {
-      ns++; t[ns]=si-1; k[ns]=ki;
-      Z[ns]=lgetg(si,t_VEC); p1=(GEN)Z[ns];
-      for (j=2; j<=si; j++) p1[j-1]=Yi[j];
-    }
-    myconcat2(D,De);
-  }
-  if (DEBUGLEVEL>2) { fprintferr("\nns = %ld\n",ns); flusherr(); }
-  if (!ns) return append_vbs(vbs,D);
-
-  setlg(Z, ns+1);
-  e=(long**)new_chunk(ns+1);
-  for (i=1; i<=ns; i++)
-  {
-    e[i]=new_chunk(t[i]+1);
-    for (j=1; j<=t[i]; j++) e[i][j]=0;
-  }
-  cyperm = cgetg(N+1,t_VEC);
-  perm = cgetg(N+1,t_VEC); i=ns;
-  do
-  {
-    pari_sp av = avma;
-    if (DEBUGLEVEL>5)
-    {
-      for (l=1; l<=ns; l++)
-      {
-	for (ll=1; ll<=t[l]; ll++)
-	  fprintferr("e[%ld][%ld] = %ld, ",l,ll,e[l][ll]);
-	fprintferr("\n");
-      }
-      fprintferr("\n"); flusherr();
-    }
-    for (u=1; u<=N; u++) perm[u]=u;
-    for (u=1; u<=ns; u++)
-      for (v=1; v<=t[u]; v++)
-	perm_mul_i(perm, cycle_power_to_perm(cyperm,gmael(Z,u,v),e[u][v]));
-    vbs = append_vbs(vbs, im_block_by_perm(D,perm));
-    if (lg(vbs) > maxl) return vbs;
-    avma = av;
-
-    e[ns][t[ns]]++;
-    if (e[ns][t[ns]] >= k[ns])
-    {
-      j=t[ns]-1;
-      while (j>=1 && e[ns][j] == k[ns]-1) j--;
-      if (j>=1) { e[ns][j]++; for (l=j+1; l<=t[ns]; l++) e[ns][l]=0; }
-      else
-      {
-	i=ns-1;
-	while (i>=1)
-	{
-	  j=t[i];
-	  while (j>=1 && e[i][j] == k[i]-1) j--;
-	  if (j<1) i--;
-          else
-	  {
-	    e[i][j]++;
-	    for (l=j+1; l<=t[i]; l++) e[i][l]=0;
-	    for (ll=i+1; ll<=ns; ll++)
-              for (l=1; l<=t[ll]; l++) e[ll][l]=0;
-            break;
-	  }
-	}
-      }
-    }
-  }
-  while (i>0);
-  return vbs;
-}
-
-static GEN
-polsimplify(GEN x)
-{
-  long i,lx = lg(x);
-  for (i=2; i<lx; i++)
-    if (typ(x[i]) == t_POL) x[i] = (long)constant_term((GEN)x[i]);
-  return x;
-}
-
-/* return 0 if |g[i]| > M[i] for some i; 1 otherwise */
-static long
-ok_coeffs(GEN g,GEN M)
-{
-  long i, lg = lg(g)-1; /* g is monic, and cst term is ok */
-  for (i=3; i<lg; i++)
-    if (absi_cmp((GEN)g[i], (GEN)M[i]) > 0) return 0;
-  return 1;
-}
-
-/* Return a polynomial g defining a potential subfield, or
- * 0: if p | d(g)
- * 1: if coeffs of g are too large
- * 2: same, detected by cheap d-1 test */
-static GEN
-cand_for_subfields(GEN A,GEN DATA,GEN *ptlistdelta)
-{
-  long N,m,i,j,d,lf;
-  GEN M,T,pe,p,pol,fhk,g;
-  GEN d_1_term,delta,listdelta,whichdelta,firstroot;
-
-  pol=(GEN)DATA[1];
-  p = (GEN)DATA[2];
-  pe= (GEN)DATA[3];
-  T = (GEN)DATA[4];
-  fhk=(GEN)DATA[5];
-  M = (GEN)DATA[8]; N=degpol(pol); m=lg(A)-1; d=N/m; /* m | M */
-  firstroot = (GEN)DATA[13];
-
-  delta = cgetg(m+1,t_VEC);
-  lf = lg(firstroot);
-  listdelta = cgetg(lf, t_VEC);
-  whichdelta = cgetg(N+1, t_VECSMALL);
-  d_1_term = gzero;
-  for (i=1; i<=m; i++)
-  {
-    GEN Ai = (GEN)A[i], p1 = gun;
-    for (j=1; j<=d; j++)
-      p1 = Fq_mul(p1, (GEN)fhk[Ai[j]], T,pe);
-    delta[i] = (long)p1;
-    if (DEBUGLEVEL>2) fprintferr("delta[%ld] = %Z\n",i,p1);
-    /* g = prod (X - delta[i])
-     * if g o h = 0 (pol), we'll have h(Ai[j]) = delta[i] for all j */
-    /* fk[k] belongs to block number whichdelta[k] */
-    for (j=1; j<=d; j++) whichdelta[Ai[j]] = i;
-    if (typ(p1) == t_POL) p1 = constant_term(p1);
-    d_1_term = addii(d_1_term, p1);
-  }
-  d_1_term = centermod(d_1_term, pe); /* Tr(g) */
-  if (absi_cmp(d_1_term, (GEN)M[3]) > 0) return gdeux; /* d-1 test */
-  g = FqV_roots_to_pol(delta, T, pe, 0);
-  g = centermod(polsimplify(g), pe); /* assume g in Z[X] */
-  if (DEBUGLEVEL>2) fprintferr("pol. found = %Z\n",g);
-  if (!ok_coeffs(g,M)) return gun;
-  if (!FpX_is_squarefree(g, p)) return gzero;
-
-  for (i=1; i<lf; i++) listdelta[i] = delta[whichdelta[firstroot[i]]];
-  *ptlistdelta = listdelta; return g;
-}
-
-/* return U list of polynomials s.t U[i] = 1 mod fk[i] and 0 mod fk[j] for all
- * other j */
-static GEN
-get_bezout(GEN pol, GEN fk, GEN p)
-{
-  GEN A,B,d,u,v,bezout_coeff;
-  long i, l = lg(fk);
-
-  pol = FpX_red(pol, p);
-  bezout_coeff = cgetg(l, t_VEC);
-  for (i=1; i<l; i++)
-  {
-    A = (GEN)fk[i];
-    B = FpX_div(pol, A, p);
-    d = FpX_extgcd(A,B,p, &u, &v);
-    if (degpol(d) > 0) err(talker, "relatively prime polynomials expected");
-    d = constant_term(d);
-    if (!gcmp1(d))
-    {
-      d = Fp_inv(d, p);
-      v = FpX_Fp_mul(v,d, p);
-    }
-    bezout_coeff[i] = (long)FpX_mul(B,v, p);
-  } 
-  return bezout_coeff;
-}
-
-/* assume x in Fq, return Tr_{Fq/Fp}(x) as a t_INT */
-static GEN
-trace(GEN x, GEN Trq, GEN p)
-{
-  long i, l;
-  GEN s;
-  if (typ(x) == t_INT) return modii(mulii(x, (GEN)Trq[1]), p);
-  l = lg(x)-1; if (l == 1) return gzero;
-  x++; s = mulii((GEN)x[1], (GEN)Trq[1]);
-  for (i=2; i<l; i++)
-    s = addii(s, mulii((GEN)x[i], (GEN)Trq[i]));
-  return modii(s, p);
-}
-
-/* assume x in Fq[X], return Tr_{Fq[X]/Fp[X]}(x), varn(X) = 0 */
-static GEN 
-poltrace(GEN x, GEN Trq, GEN p)
-{
-  long i,l;
-  GEN y;
-  if (typ(x) == t_INT || varn(x) != 0) return trace(x, Trq, p);
-  l = lg(x); y = cgetg(l,t_POL); y[1]=x[1];
-  for (i=2; i<l; i++) y[i] = (long)trace((GEN)x[i],Trq,p);
-  return y;
-}
-
-/* Find h in Fp[X] such that h(a[i]) = listdelta[i] for all modular factors
- * ff[i], where a[i] is a fixed root of ff[i] in Fq = Z[Y]/(p,T) [namely the
- * first one in FpX_factorff_irred output]. Let f = ff[i], A the given root, then
- * h mod f is Tr_Fq/Fp ( h(A) f(X)/(X-A)f'(A) ), most of the expression being
- * precomputed. The complete h is recovered via chinese remaindering */
-static GEN
-chinese_retrieve_pol(GEN DATA, GEN listdelta)
-{
-  GEN interp,Trk,bezoutC,T,p, S,p1;
-  long i,l;
-  p = (GEN)DATA[2];
-  T = (GEN)DATA[4];
-  interp = (GEN)DATA[10];
-  Trk = (GEN)DATA[11];
-  bezoutC = (GEN)DATA[12];
-  
-  S = NULL; l = lg(interp);
-  for (i=1; i<l; i++)
-  { /* h(firstroot[i]) = listdelta[i] */
-    p1 = FqX_Fq_mul((GEN)interp[i], (GEN)listdelta[i], T,p);
-    p1 = poltrace(p1, (GEN)Trk[i], p);
-    p1 = gmul(p1, (GEN)bezoutC[i]);
-    S = S? gadd(S,p1): p1;
-  }
-  return FpX_rem(FpX_red(S, p), FpX_red((GEN)DATA[1],p), p);
-}
-
-/* return P(X + c) using destructive Horner */
+/* return P(X + c) using destructive Horner, optimize for c = 1,-1 */
 GEN
 TR_pol(GEN P, GEN c)
 {
   pari_sp av = avma, lim;
   GEN Q, *R;
   long i, k, n;
-  
+
   if (!signe(P) || gcmp0(c)) return gcopy(P);
   Q = dummycopy(P);
   R = (GEN*)(Q+2); n = degpol(P);
@@ -539,24 +110,326 @@ TR_pol(GEN P, GEN c)
   return gerepilecopy(av, Q);
 }
 
-/* g in Z[X] potentially defines a subfield of Q[X]/f. It is a subfield iff A
- * (cf cand_for_subfields) was a block system; then there
- * exists h in Q[X] such that f | g o h. listdelta determines h s.t f | g o h
- * in Fp[X] (cf chinese_retrieve_pol). We try to lift it. */
+/* COMBINATORIAL PART: generate potential block systems */
+
+#define BIL 32 /* for 64bit machines also */
+/* Computation of potential block systems of given size d associated to a
+ * rational prime p: give a row vector of row vectors containing the
+ * potential block systems of imprimitivity; a potential block system is a
+ * vector of row vectors (enumeration of the roots). */
 static GEN
-embedding_of_potential_subfields(GEN g,GEN DATA,GEN listdelta)
+calc_block(blockdata *B, GEN Z, GEN Y, GEN SB)
 {
-  GEN TR,w0_Q,w0,w1_Q,w1,wpow,h0,gp,T,q2,q,p,ind,maxp,a;
+  long r = lg(Z), lK, i, j, t, tp, T, u, nn, lnon, lY;
+  GEN K, n, non, pn, pnon, e, Yp, Zp, Zpp;
+  pari_sp av, av0 = avma;
+
+  if (DEBUGLEVEL>3)
+  {
+    fprintferr("lg(Z) = %ld, lg(Y) = %ld\n", r,lg(Y));
+    if (DEBUGLEVEL > 5)
+    {
+      fprintferr("Z = %Z\n",Z);
+      fprintferr("Y = %Z\n",Y);
+    }
+  }
+  lnon = min(BIL, r);
+  e    = new_chunk(BIL);
+  n    = new_chunk(r);
+  non  = new_chunk(lnon);
+  pnon = new_chunk(lnon);
+  pn   = new_chunk(lnon);
+
+  Zp   = cgetg(lnon,t_VEC);
+  Zpp  = cgetg(lnon,t_VEC);
+  for (i=1; i<r; i++) n[i] = lg(Z[i])-1;
+  lY = lg(Y); Yp = cgetg(lY+1,t_VEC);
+  for (j=1; j<lY; j++) Yp[j] = Y[j];
+  Yp[lY] = (long)Z;  av = avma;
+  SB = print_block_system(B, Yp, SB);
+  Yp[lY] = (long)Zp; avma = av;
+
+  K = divisors(stoi(n[1])); lK = lg(K);
+  for (i=1; i<lK; i++)
+  {
+    long ngcd = n[1], k = itos((GEN)K[i]), dk = B->blockd*k, lpn = 0;
+    for (j=2; j<r; j++)
+      if (n[j]%k == 0)
+      {
+        if (++lpn >= BIL) err(talker,"overflow in calc_block");
+        pn[lpn] = n[j]; pnon[lpn] = j;
+        ngcd = cgcd(ngcd, n[j]);
+      }
+    if (dk % ngcd) continue;
+    T = (1<<lpn) - 1;
+    if (lpn == r) T--; /* done already */
+    if (!lpn) lpn = 1;
+    for (t = 0; t < T; t++)
+    { /* loop through all subsets of [1..lpn] */
+      for (nn=n[1],tp=t, u=1; u<=lpn; u++,tp>>=1)
+      {
+        if (tp&1) { nn += pn[u]; e[u] = 1; } else e[u] = 0;
+      }
+      if (dk != nn) continue;
+
+      for (j=1; j<r; j++) non[j]=0;
+      Zp[1] = Z[1];
+      for (u=2,j=1; j<=lpn; j++)
+        if (e[j]) { Zp[u] = Z[pnon[j]]; non[pnon[j]] = 1; u++; }
+      setlg(Zp, u);
+      for (u=1,j=2; j<r; j++)
+        if (!non[j]) Zpp[u++] = Z[j];
+      setlg(Zpp, u);
+      SB = calc_block(B, Zpp, Yp, SB);
+    }
+  }
+  avma = av0; return SB;
+}
+
+/* product of permutations. Put the result in perm1. */
+static void
+perm_mul_i(GEN perm1, GEN perm2)
+{
+  long i, N = lg(perm1);
+  pari_sp av = avma;
+  GEN perm = new_chunk(N);
+  for (i=1; i<N; i++) perm[i] = perm1[perm2[i]];
+  for (i=1; i<N; i++) perm1[i]= perm[i];
+  avma = av;
+}
+
+/* cy is a cycle; compute cy^l as a permutation */
+static GEN
+cycle_power_to_perm(GEN perm,GEN cy,long l)
+{
+  long lp,i,j,b, N = lg(perm), lcy = lg(cy)-1;
+
+  lp = l % lcy;
+  for (i=1; i<N; i++) perm[i] = i;
+  if (lp)
+  {
+    pari_sp av = avma;
+    GEN p1 = new_chunk(N);
+    b = cy[1];
+    for (i=1; i<lcy; i++) b = (perm[b] = cy[i+1]);
+    perm[b] = cy[1];
+    for (i=1; i<N; i++) p1[i] = perm[i];
+
+    for (j=2; j<=lp; j++) perm_mul_i(perm,p1);
+    avma = av;
+  }
+  return perm;
+}
+
+/* image du block system D par la permutation perm */
+static GEN
+im_block_by_perm(GEN D,GEN perm)
+{
+  long i,j,lb,lcy;
+  GEN Dn,cy,p1;
+
+  lb=lg(D); Dn=cgetg(lb,t_VEC);
+  for (i=1; i<lb; i++)
+  {
+    cy=(GEN)D[i]; lcy=lg(cy);
+    Dn[i]=lgetg(lcy,t_VECSMALL); p1=(GEN)Dn[i];
+    for (j=1; j<lcy; j++) p1[j] = perm[cy[j]];
+  }
+  return Dn;
+}
+
+static void
+append(GEN D, GEN a)
+{
+  long i,l = lg(D), m = lg(a);
+  GEN x = D + (l-1);
+  for (i=1; i<m; i++) x[i] = a[i];
+  setlg(D, l+m-1);
+}
+
+static GEN
+print_block_system(blockdata *B, GEN Y, GEN SB)
+{
+  long i, j, l, ll, lp, u, v, ns, r = lg(Y), N = B->N;
+  long *k, *n, **e, *t;
+  GEN D, De, Z, cyperm, perm, VOID = cgetg(1, t_VECSMALL);
+
+  if (DEBUGLEVEL>5) fprintferr("Y = %Z\n",Y);
+  n = new_chunk(N+1);
+  D = cget1(N+1, t_VEC);
+  t = new_chunk(r+1);
+  k = new_chunk(r+1);
+  Z = cgetg(r+1, t_VEC);
+  for (ns=0,i=1; i<r; i++)
+  {
+    GEN Yi = (GEN)Y[i];
+    long ki = 0, si = lg(Yi)-1;
+
+    for (j=1; j<=si; j++) { n[j] = lg(Yi[j])-1; ki += n[j]; }
+    ki /= B->blockd;
+    De = cgetg(ki+1,t_VEC);
+    for (j=1; j<=ki; j++) De[j] = (long)VOID;
+    for (j=1; j<=si; j++)
+    {
+      GEN cy = (GEN)Yi[j];
+      for (l=1,lp=0; l<=n[j]; l++)
+      {
+        lp++; if (lp > ki) lp = 1;
+        De[lp] = (long)vecsmall_append((GEN)De[lp], cy[l]);
+      }
+    }
+    append(D, De);
+    if (si>1 && ki>1)
+    {
+      GEN p1 = cgetg(si,t_VEC);
+      for (j=2; j<=si; j++) p1[j-1] = Yi[j];
+      ns++;
+      t[ns] = si-1;
+      k[ns] = ki-1;
+      Z[ns] = (long)p1;
+    }
+  }
+  if (DEBUGLEVEL>2) fprintferr("\nns = %ld\n",ns);
+  if (!ns) return test_block(B, SB, D);
+
+  setlg(Z, ns+1);
+  e = (long**)new_chunk(ns+1);
+  for (i=1; i<=ns; i++)
+  {
+    e[i] = new_chunk(t[i]+1);
+    for (j=1; j<=t[i]; j++) e[i][j] = 0;
+  }
+  cyperm= cgetg(N+1,t_VECSMALL);
+  perm  = cgetg(N+1,t_VECSMALL); i = ns;
+  do
+  {
+    pari_sp av = avma;
+    for (u=1; u<=N; u++) perm[u] = u;
+    for (u=1; u<=ns; u++)
+      for (v=1; v<=t[u]; v++)
+	perm_mul_i(perm, cycle_power_to_perm(cyperm, gmael(Z,u,v), e[u][v]));
+    SB = test_block(B, SB, im_block_by_perm(D,perm));
+    avma = av;
+
+    /* i = 1..ns, j = 1..t[i], e[i][j] loop through 0..k[i].
+     * TODO: flatten to 1-dimensional loop */
+    if (++e[ns][t[ns]] > k[ns])
+    {
+      j = t[ns]-1;
+      while (j>=1 && e[ns][j] == k[ns]) j--;
+      if (j >= 1) { e[ns][j]++; for (l=j+1; l<=t[ns]; l++) e[ns][l] = 0; }
+      else
+      {
+	i = ns-1;
+	while (i>=1)
+	{
+	  j = t[i];
+	  while (j>=1 && e[i][j] == k[i]) j--;
+	  if (j<1) i--;
+          else
+	  {
+	    e[i][j]++;
+	    for (l=j+1; l<=t[i]; l++) e[i][l] = 0;
+	    for (ll=i+1; ll<=ns; ll++)
+              for (l=1; l<=t[ll]; l++) e[ll][l] = 0;
+            break;
+	  }
+	}
+      }
+    }
+  }
+  while (i > 0);
+  return SB;
+}
+
+/* ALGEBRAIC PART: test potential block systems */
+
+static GEN
+polsimplify(GEN x)
+{
+  long i,lx = lg(x);
+  for (i=2; i<lx; i++)
+    if (typ(x[i]) == t_POL) x[i] = (long)constant_term((GEN)x[i]);
+  return x;
+}
+
+/* return 0 if |g[i]| > M[i] for some i; 1 otherwise */
+static long
+ok_coeffs(GEN g,GEN M)
+{
+  long i, lg = lg(g)-1; /* g is monic, and cst term is ok */
+  for (i=3; i<lg; i++)
+    if (absi_cmp((GEN)g[i], (GEN)M[i]) > 0) return 0;
+  return 1;
+}
+
+/* assume x in Fq, return Tr_{Fq/Fp}(x) as a t_INT */
+static GEN
+trace(GEN x, GEN Trq, GEN p)
+{
+  long i, l;
+  GEN s;
+  if (typ(x) == t_INT) return modii(mulii(x, (GEN)Trq[1]), p);
+  l = lg(x)-1; if (l == 1) return gzero;
+  x++; s = mulii((GEN)x[1], (GEN)Trq[1]);
+  for (i=2; i<l; i++)
+    s = addii(s, mulii((GEN)x[i], (GEN)Trq[i]));
+  return modii(s, p);
+}
+
+/* assume x in Fq[X], return Tr_{Fq[X]/Fp[X]}(x), varn(X) = 0 */
+static GEN
+poltrace(GEN x, GEN Trq, GEN p)
+{
+  long i,l;
+  GEN y;
+  if (typ(x) == t_INT || varn(x) != 0) return trace(x, Trq, p);
+  l = lg(x); y = cgetg(l,t_POL); y[1]=x[1];
+  for (i=2; i<l; i++) y[i] = (long)trace((GEN)x[i],Trq,p);
+  return y;
+}
+
+/* Find h in Fp[X] such that h(a[i]) = listdelta[i] for all modular factors
+ * ff[i], where a[i] is a fixed root of ff[i] in Fq = Z[Y]/(p,T) [namely the
+ * first one in FpX_factorff_irred output]. Let f = ff[i], A the given root,
+ * then h mod f is Tr_Fq/Fp ( h(A) f(X)/(X-A)f'(A) ), most of the expression
+ * being precomputed. The complete h is recovered via chinese remaindering */
+static GEN
+chinese_retrieve_pol(GEN DATA, primedata *S, GEN listdelta)
+{
+  GEN interp, bezoutC, h, pol = FpX_red((GEN)DATA[1], S->p);
+  long i, l;
+  interp = (GEN)DATA[9];
+  bezoutC= (GEN)DATA[6];
+
+  h = NULL; l = lg(interp);
+  for (i=1; i<l; i++)
+  { /* h(firstroot[i]) = listdelta[i] */
+    GEN t = FqX_Fq_mul((GEN)interp[i], (GEN)listdelta[i], S->T,S->p);
+    t = poltrace(t, (GEN)S->Trk[i], S->p);
+    t = gmul(t, (GEN)bezoutC[i]);
+    h = h? gadd(h,t): t;
+  }
+  return FpX_rem(FpX_red(h, S->p), pol, S->p);
+}
+
+/* g in Z[X] potentially defines a subfield of Q[X]/f. It is a subfield iff A
+ * (cf subfield) was a block system; then there
+ * exists h in Q[X] such that f | g o h. listdelta determines h s.t f | g o h
+ * in Fp[X] (cf chinese_retrieve_pol). Try to lift it; den is a
+ * multiplicative bound for denominator of lift. */
+static GEN
+embedding(GEN g, GEN DATA, primedata *S, GEN den, GEN listdelta)
+{
+  GEN TR, w0_Q, w0, w1_Q, w1, wpow, h0, gp, T, q2, q, maxp, a, p = S->p;
   long rt;
   pari_sp av;
 
-  T = (GEN)DATA[1]; rt = brent_kung_optpow(degpol(T), 2);
-  p = (GEN)DATA[2];
-  maxp = (GEN)DATA[7];
-  ind = (GEN)DATA[9];
+  T   = (GEN)DATA[1]; rt = brent_kung_optpow(degpol(T), 2);
+  maxp= (GEN)DATA[7];
   gp = derivpol(g); av = avma;
-  w0 = chinese_retrieve_pol(DATA,listdelta);
-  w0_Q = centermod(gmul(w0,ind), p);
+  w0 = chinese_retrieve_pol(DATA, S, listdelta);
+  w0_Q = centermod(gmul(w0,den), p);
   h0 = FpXQ_inv(FpX_FpXQ_compo(gp,w0, T,p), T,p); /* = 1/g'(w0) mod (T,p) */
   wpow = NULL; q = sqri(p);
   for(;;)
@@ -575,10 +448,10 @@ embedding_of_potential_subfields(GEN g,GEN DATA,GEN listdelta)
     a = gmul(gneg(h0), gdivexact(a, p));
     w1 = gadd(w0, gmul(p, FpX_rem(a, T,p)));
 
-    w1_Q = centermod(gmul(w1, remii(ind,q)), q);
+    w1_Q = centermod(gmul(w1, remii(den,q)), q);
     if (gegal(w1_Q, w0_Q) || cmpii(q,maxp) > 0)
     {
-      GEN G = gcmp1(ind)? g: rescale_pol(g,ind);
+      GEN G = gcmp1(den)? g: rescale_pol(g,den);
       if (gcmp0(poleval(G, gmodulcp(w1_Q,T)))) break;
     }
     if (cmpii(q, maxp) > 0)
@@ -586,12 +459,7 @@ embedding_of_potential_subfields(GEN g,GEN DATA,GEN listdelta)
       if (DEBUGLEVEL) fprintferr("coeff too big for embedding\n");
       return NULL;
     }
-    {
-      GEN *gptr[5]; gptr[0]=&w1; gptr[1]=&h0; gptr[2]=&w1_Q;
-      gptr[3]=&q; gptr[4]=&p;
-      gerepilemany(av,gptr,5);
-    }
-
+    gerepileall(av, 5, &w1,&h0,&w1_Q,&q,&p);
     q2 = sqri(q);
     wpow = FpXQ_powers(w1, rt, T, q2);
     /* h0 := h0 * (2 - h0 g'(w1)) mod (T,q)
@@ -602,88 +470,29 @@ embedding_of_potential_subfields(GEN g,GEN DATA,GEN listdelta)
     h0 = gadd(h0, gmul(p, FpX_rem(a, T,p)));
     w0 = w1; w0_Q = w1_Q; p = q; q = q2;
   }
-  TR = (GEN)DATA[14];
+  TR = (GEN)DATA[5];
   if (!gcmp0(TR)) w1_Q = TR_pol(w1_Q, TR);
-  return gdiv(w1_Q,ind);
+  return gdiv(w1_Q,den);
 }
 
+/* return U list of polynomials s.t U[i] = 1 mod fk[i] and 0 mod fk[j] for all
+ * other j */
 static GEN
-choose_prime(GEN pol,GEN dpol,long d,GEN *ptff,GEN *ptlistpotbl, long *ptlcm)
+get_bezout(GEN pol, GEN fk, GEN p)
 {
-  pari_sp av;
-  byteptr di=diffptr;
-  long j,k,oldllist,llist,r,lcm,oldlcm,pp,minp, N = degpol(pol), m = N/d;
-  GEN p,listpotbl,oldlistpotbl,ff,oldff,n,oldn;
- 
-  minp = N*(m-1)/2;
-  if (DEBUGLEVEL) (void)timer2();
-  di++; p = stoi(2);
-  while (p[2]<=minp)
-      NEXT_PRIME_VIADIFF(p[2], di);
-  oldllist = 100000;
-  oldlcm = 0;
-  oldlistpotbl = oldff = oldn = NULL; pp = 0; /* gcc -Wall */
-  av = avma;
-  for(k=1; k<11 || !oldn; k++,avma = av)
+  long i, l = lg(fk);
+  GEN A, B, d, u, v, U = cgetg(l, t_VEC);
+  for (i=1; i<l; i++)
   {
-    while (!smodis(dpol,p[2]))
-      NEXT_PRIME_VIADIFF(p[2], di);
-    if (k > 50) err(talker,"sorry, too many block systems in nfsubfields");
-    ff=(GEN)FpX_factor(FpX_red(pol,p),p)[1]; r=lg(ff)-1;
-    if (r == 1 || r == N) goto repeat;
-
-    n = cgetg(r+1, t_VECSMALL);
-    lcm = n[1] = degpol(ff[1]);
-    for (j=2; j<=r; j++) { n[j] = degpol(ff[j]); lcm = clcm(lcm,n[j]); }
-    if (lcm < oldlcm) goto repeat; /* false when oldlcm = 0 */
-    if (r >= BIL) { err(warner,"subfields: overflow in calc_block"); goto repeat; }
-    if (DEBUGLEVEL) fprintferr("p = %ld,\tlcm = %ld,\torbits: %Z\n",p[2],lcm,n);
-    if (oldn && gegal(n,oldn)) goto repeat;
-
-    listpotbl = potential_block_systems(N,d,n, oldllist);
-    if (!listpotbl) { oldlistpotbl = NULL; pp = p[2]; break; }
-    llist = lg(listpotbl)-1;
-    if (llist >= oldllist)
-    {
-      if (DEBUGLEVEL) msgtimer("#pbs >= %ld [aborted]",oldllist);
-      for (j=1; j<llist; j++) free((void*)listpotbl[j]);
-      free((void*)(listpotbl-1)); goto repeat;
-    }
-    oldllist = llist; oldlistpotbl = listpotbl;
-    pp = p[2]; oldff = ff; oldlcm = lcm; oldn = n;
-    if (DEBUGLEVEL) msgtimer("#pbs = %ld",llist);
-    av = avma;
-   repeat:
-    NEXT_PRIME_VIADIFF(p[2], di);
+    A = (GEN)fk[i];
+    B = FpX_div(pol, A, p);
+    d = FpX_extgcd(A,B,p, &u, &v);
+    if (degpol(d) > 0) err(talker, "relatively prime polynomials expected");
+    d = constant_term(d);
+    if (!gcmp1(d)) v = FpX_Fp_mul(v, Fp_inv(d, p), p);
+    U[i] = (long)FpX_mul(B,v, p);
   }
-  if (DEBUGLEVEL) fprintferr("Chosen prime: p = %ld\n",pp);
-  *ptlistpotbl=oldlistpotbl; *ptff=oldff; *ptlcm=oldlcm; return stoi(pp);
-}
-
-static GEN
-bound_for_coeff(long m,GEN rr, GEN *maxroot)
-{
-  long i,r1, lrr=lg(rr);
-  GEN p1,b1,b2,B,M, C = matpascal(m-1);
-
-  for (r1=1; r1 < lrr; r1++)
-    if (typ(rr[r1]) != t_REAL) break;
-  r1--;
-
-  rr = gabs(rr,0); *maxroot = vecmax(rr);
-  for (i=1; i<lrr; i++)
-    if (gcmp((GEN)rr[i], gun) < 0) rr[i] = un;
-  for (b1=gun,i=1; i<=r1; i++) b1 = gmul(b1, (GEN)rr[i]);
-  for (b2=gun    ; i<lrr; i++) b2 = gmul(b2, (GEN)rr[i]);
-  B = gmul(b1, gsqr(b2)); /* Mahler measure */
-  M = cgetg(m+2, t_VEC); M[1]=M[2]=zero; /* unused */
-  for (i=1; i<m; i++)
-  {
-    p1 = gadd(gmul(gcoeff(C, m, i+1), B),/* binom(m-1, i)   */
-              gcoeff(C, m, i));          /* binom(m-1, i-1) */
-    M[i+2] = (long)ceil_safe(p1);
-  }
-  return M;
+  return U;
 }
 
 static GEN
@@ -737,56 +546,142 @@ interpol(GEN H, GEN T, GEN p)
   return FqX_Fq_mul(p1,Fq_inv(p2, T,p), T,p);
 }
 
-struct poldata
+static void
+init_primedata(primedata *S)
 {
-  GEN pol;
-  GEN dis; /* |disc(pol)| */
-  GEN roo; /* roots(pol) */
-  GEN den; /* multiple of index(pol) */
-};
+  long i, j, l, lff = lg(S->ff), v = fetch_var(), N = degpol(S->pol);
+  GEN T = FqX_init(S->p, S->lcm, v), p = S->p;
 
-/* ff = factmod(nf[1], p), d = requested degree for subfield. Return DATA,
- * valid for given nf, p and d 
- * 1: polynomial nf[1],
- * 2: prime p,
- * 3: exponent e (for Hensel lifts) such that p^e > max(M),
- * 4: polynomial defining the field F_(p^nn),
- * 5: Hensel lift to precision p^e  of DATA[6]
- * 6: roots of nf[1] in F_(p^nn),
- * 7: Hadamard bound for coefficients of h(x) such that g o h = 0 mod nf[1].
- * 8: bound M for polynomials defining subfields x DATA[9]
- * 9: multiple of index of nf
- *10: *[i] = interpolation polynomial for ff[i] [= 1 on the first root
-      firstroot[i], 0 on the others]
- *11: Trk used to compute traces (cf poltrace)
- *12: Bezout coefficients associated to the ff[i]
- *13: *[i] = index of first root of ff[i] (in DATA[6])
- *14: number of polynomial changes (translations) */
+  name_var(v,"y");
+  S->T = T;
+  S->firstroot = cgetg(lff, t_VECSMALL);
+  S->interp = cgetg(lff, t_VEC);
+  S->fk = cgetg(N+1, t_VEC);
+  for (l=1,j=1; j<lff; j++)
+  { /* compute roots and fix ordering (Frobenius cycles) */
+    GEN F = FpX_factorff_irred((GEN)S->ff[j], T, p);
+    S->interp[j] = (long)interpol(F,T,p);
+    S->firstroot[j] = l;
+    for (i=1; i<lg(F); i++,l++) S->fk[l] = F[i];
+  }
+  S->Trk     = init_traces(S->ff, T,p);
+  S->bezoutC = get_bezout(S->pol, S->ff, p);
+}
+
+static void
+choose_prime(primedata *S, GEN pol, GEN dpol)
+{
+  byteptr di = diffptr + 1;
+  long i, j, k, r, lcm, oldlcm, pp, N = degpol(pol), minp = N*N / 4;
+  GEN Z, p, ff, oldff, n, oldn;
+  pari_sp av;
+
+  if (DEBUGLEVEL) (void)timer2();
+  p = stoi(2);
+  while (p[2] <= minp) NEXT_PRIME_VIADIFF(p[2], di);
+  oldlcm = 0;
+  oldff = oldn = NULL; pp = 0; /* gcc -Wall */
+  av = avma;
+  for(k = 1; k < 11 || !oldlcm; k++,avma = av)
+  {
+    do NEXT_PRIME_VIADIFF(p[2], di); while (!smodis(dpol, p[2]));
+    if (k > 5 * N) err(talker,"sorry, too many block systems in nfsubfields");
+    ff = (GEN)FpX_factor(FpX_red(pol,p), p)[1];
+    r = lg(ff)-1;
+    if (r == 1 || r == N) continue;
+    if (r >= BIL) continue;
+
+    n = cgetg(r+1, t_VECSMALL); lcm = n[1] = degpol(ff[1]);
+    for (j=2; j<=r; j++) { n[j] = degpol(ff[j]); lcm = clcm(lcm, n[j]); }
+    if (lcm <= oldlcm) continue; /* false when oldlcm = 0 */
+
+    if (DEBUGLEVEL) fprintferr("p = %ld,\tlcm = %ld,\torbits: %Z\n",p[2],lcm,n);
+    pp = p[2];
+    oldn = n;
+    oldff = ff;
+    oldlcm = lcm; av = avma;
+  }
+  if (DEBUGLEVEL) fprintferr("Chosen prime: p = %ld\n", pp);
+  S->ff = oldff;
+  S->lcm= oldlcm;
+  S->p  = stoi(pp);
+  S->pol = FpX_red(pol, S->p); init_primedata(S);
+
+  n = oldn; r = lg(n); Z = cgetg(r,t_VEC);
+  for (k=0,i=1; i<r; i++)
+  {
+    GEN t = cgetg(n[i]+1, t_VECSMALL); Z[i] = (long)t;
+    for (j=1; j<=n[i]; j++) t[j] = ++k;
+  }
+  S->Z = Z;
+}
+
 static GEN
-compute_data(GEN DATA, struct poldata PD, long d, GEN ff, GEN T,GEN p)
+bound_for_coeff(long m, GEN rr, GEN *maxroot)
 {
-  long i, j, l, e, N, lff = lg(ff);
-  GEN ffL, roo, pe, p1, p2, fk, fhk, MM, maxroot, pol, interp, bezoutC;    
+  long i,r1, lrr=lg(rr);
+  GEN p1,b1,b2,B,M, C = matpascal(m-1);
 
-  if (DEBUGLEVEL>1) { fprintferr("Entering compute_data()\n\n"); flusherr(); }
-  pol = PD.pol; N = degpol(pol);
-  roo = PD.roo;
+  for (r1=1; r1 < lrr; r1++)
+    if (typ(rr[r1]) != t_REAL) break;
+  r1--;
+
+  rr = gabs(rr,0); *maxroot = vecmax(rr);
+  for (i=1; i<lrr; i++)
+    if (gcmp((GEN)rr[i], gun) < 0) rr[i] = un;
+  for (b1=gun,i=1; i<=r1; i++) b1 = gmul(b1, (GEN)rr[i]);
+  for (b2=gun    ; i<lrr; i++) b2 = gmul(b2, (GEN)rr[i]);
+  B = gmul(b1, gsqr(b2)); /* Mahler measure */
+  M = cgetg(m+2, t_VEC); M[1]=M[2]=zero; /* unused */
+  for (i=1; i<m; i++)
+  {
+    p1 = gadd(gmul(gcoeff(C, m, i+1), B),/* binom(m-1, i)   */
+              gcoeff(C, m, i));          /* binom(m-1, i-1) */
+    M[i+2] = (long)ceil_safe(p1);
+  }
+  return M;
+}
+
+/* d = requested degree for subfield. Return DATA, valid for given pol, S and d
+ * If DATA != NULL, translate pol [ --> pol(X+1) ] and update DATA
+ * 1: polynomial pol
+ * 2: p^e (for Hensel lifts) such that p^e > max(M),
+ * 3: Hensel lift to precision p^e of DATA[4]
+ * 4: roots of pol in F_(p^S->lcm),
+ * 5: number of polynomial changes (translations)
+ * 6: Bezout coefficients associated to the S->ff[i]
+ * 7: Hadamard bound for coefficients of h(x) such that g o h = 0 mod pol.
+ * 8: bound M for polynomials defining subfields x PD->den
+ * 9: *[i] = interpolation polynomial for S->ff[i] [= 1 on the first root
+      S->firstroot[i], 0 on the others] */
+static void
+compute_data(blockdata *B)
+{
+  GEN ffL, roo, pe, p1, p2, fk, fhk, MM, maxroot, pol;
+  primedata *S = B->S;
+  GEN p = S->p, T = S->T, ff = S->ff, DATA = B->DATA;
+  long i, j, l, e, N, lff = lg(ff);
+
+  if (DEBUGLEVEL>1) fprintferr("Entering compute_data()\n\n");
+  pol = B->PD->pol; N = degpol(pol);
+  roo = B->PD->roo;
   if (DATA) /* update (translate) an existing DATA */
   {
     GEN Xm1 = gsub(polx[varn(pol)], gun);
-    GEN TR = addis((GEN)DATA[14],1);
-    GEN mTR = negi(TR), mun = negi(gun);
-    DATA[14] = (long)TR;
-    pol = TR_pol(pol, mTR);
-    p1 = dummycopy(roo); l = lg(p1);
-    for (i=1; i<l; i++) p1[i] = ladd(TR, (GEN)p1[i]);
+    GEN TR = addis((GEN)DATA[5], 1);
+    GEN mTR = negi(TR), mun = negi(gun), interp, bezoutC;
+
+    DATA[5] = (long)TR;
+    pol = TR_pol((GEN)DATA[1], mun);
+    l = lg(roo); p1 = cgetg(l, t_VEC);
+    for (i=1; i<l; i++) p1[i] = ladd(TR, (GEN)roo[i]);
     roo = p1;
 
-    fk = (GEN)DATA[6]; l=lg(fk);
+    fk = (GEN)DATA[4]; l = lg(fk);
     for (i=1; i<l; i++) fk[i] = lsub(Xm1, (GEN)fk[i]);
 
-    interp = (GEN)DATA[10];
-    bezoutC = (GEN)DATA[12]; l = lg(interp);
+    bezoutC = (GEN)DATA[6]; l = lg(bezoutC);
+    interp  = (GEN)DATA[9];
     for (i=1; i<l; i++)
     {
       if (degpol(interp[i]) > 0) /* do not turn polun[0] into gun */
@@ -800,73 +695,56 @@ compute_data(GEN DATA, struct poldata PD, long d, GEN ff, GEN T,GEN p)
         bezoutC[i] = (long)FpXX_red(p1, p);
       }
     }
-    p1 = cgetg(lff, t_VEC);
+    ff = cgetg(lff, t_VEC); /* copy, don't overwrite! */
     for (i=1; i<lff; i++)
-      p1[i] = (long)FpX_red(TR_pol((GEN)ff[i], mTR), p);
-    ff = p1;
+      ff[i] = (long)FpX_red(TR_pol((GEN)S->ff[i], mTR), p);
   }
   else
   {
-    GEN firstroot = cgetg(lff, t_VECSMALL);
-    DATA = cgetg(15,t_VEC);
-    DATA[2] = (long)p;
-    DATA[4] = (long)T;
-    interp = cgetg(lff, t_VEC);
-    fk = cgetg(N+1,t_VEC);
-    for (l=1,j=1; j<lff; j++)
-    { /* compute roots and fix ordering (Frobenius cycles) */
-      p1 = FpX_factorff_irred((GEN)ff[j], T, p);
-      interp[j] = (long)interpol(p1,T,p);
-      firstroot[j] = l;
-      for (i=1; i<lg(p1); i++,l++) fk[l] = p1[i];
-    }
-    DATA[9] = (long)PD.den;
-    DATA[10]= (long)interp;
-    DATA[11]= (long)init_traces(ff, T,p);
-    DATA[12]= (long)get_bezout(pol,ff,p);
-    DATA[13]= (long)firstroot;
-    DATA[14]= zero;
+    DATA = cgetg(10,t_VEC);
+    fk = S->fk;
+    DATA[5]= zero;
+    DATA[6]= (long)dummycopy(S->bezoutC);
+    DATA[9]= (long)dummycopy(S->interp);
   }
   DATA[1] = (long)pol;
-  MM = bound_for_coeff(d, roo, &maxroot);
-  MM = gmul2n(MM,1);
+  MM = gmul2n(bound_for_coeff(B->d, roo, &maxroot), 1);
   DATA[8] = (long)MM;
   e = logint(shifti(vecmax(MM),20), p, &pe); /* overlift 2^20 [for d-1 test] */
-  DATA[3] = (long)pe;
-  DATA[6] = (long)roots_from_deg1(fk);
+  DATA[2] = (long)pe;
+  DATA[4] = (long)roots_from_deg1(fk);
 
-#if 0
-  fhk = hensel_lift_fact(pol,fk,(GEN)DATA[4],p,pe,e);
-#else
-  /* first lift in Zp to precision p^e */
-  ffL = hensel_lift_fact(pol,ff, NULL,p,pe,e);
+  /* compute fhk = hensel_lift_fact(pol,fk,T,p,pe,e)
+   * 1) lift in Zp to precision p^e */
+  ffL = hensel_lift_fact(pol, ff, NULL, p, pe, e);
   fhk = NULL;
   for (l=i=1; i<lff; i++)
-  { /* lift factorization of ff[i] in Qp[X] / T */
-    GEN L = (GEN)ffL[i];
+  { /* 2) lift factorization of ff[i] in Qp[X] / T */
+    GEN F, L = (GEN)ffL[i];
     long di = degpol(L);
-    p2 = cgetg(di+1, t_VEC);
-    for (j=1; j<=di; j++) p2[j] = fk[l++];
-    p1 = hensel_lift_fact(L,p2,T,p,pe,e);
-    fhk = fhk? concatsp(fhk, p1): p1;
+    F = cgetg(di+1, t_VEC);
+    for (j=1; j<=di; j++) F[j] = fk[l++];
+    L = hensel_lift_fact(L, F, T, p, pe, e);
+    fhk = fhk? concatsp(fhk, L): L;
   }
-#endif
-  DATA[5] = (long)roots_from_deg1(fhk);
+  DATA[3] = (long)roots_from_deg1(fhk);
 
-  p1 = gmul(stoi(N), gsqrt(gpuigs(stoi(N-1),N-1),DEFAULTPREC));
-  p2 = gpuigs(maxroot, N/d + N*(N-1)/2);
-  p1 = gdiv(gmul(p1,p2), gsqrt(PD.dis,DEFAULTPREC));
-  p1 = shifti(ceil_safe(p1), 1);
-  DATA[7] = lmulii(p1, PD.den);
+  p1 = mulsr(N, gsqrt(gpowgs(stoi(N-1),N-1),DEFAULTPREC));
+  p2 = gpowgs(maxroot, B->blockd + N*(N-1)/2);
+  p1 = gdiv(gmul(p1,p2), gsqrt(B->PD->dis,DEFAULTPREC));
+  DATA[7] = lmulii(shifti(ceil_safe(p1), 1), B->PD->den);
 
   if (DEBUGLEVEL>1) {
     fprintferr("f = %Z\n",DATA[1]);
-    fprintferr("p = %Z, lift to p^%ld\n",DATA[2], e);
-    fprintferr("Fq defined by %Z\n",DATA[4]);
+    fprintferr("p = %Z, lift to p^%ld\n", p, e);
     fprintferr("2 * Hadamard bound * ind = %Z\n",DATA[7]);
     fprintferr("2 * M = %Z\n",DATA[8]);
   }
-  return DATA;
+  if (B->DATA) {
+    DATA = gclone(DATA);
+    if (isclone(B->DATA)) gunclone(B->DATA);
+  }
+  B->DATA = DATA;
 }
 
 /* g = polynomial, h = embedding. Return [[g,h]] */
@@ -878,74 +756,109 @@ _subfield(GEN g, GEN h)
   x[2] = (long)h; return _vec(x);
 }
 
+/* Return a subfield, gzero [ change p ] or NULL [ not a subfield ] */
+static GEN
+subfield(GEN A, blockdata *B)
+{
+  long N, i, j, d, lf, m = lg(A)-1;
+  GEN M, pe, pol, fhk, g, e, d_1_term, delta, listdelta, whichdelta;
+  GEN T = B->S->T, p = B->S->p, firstroot = B->S->firstroot;
+
+  pol= (GEN)B->DATA[1]; N = degpol(pol); d = N/m; /* m | N */
+  pe = (GEN)B->DATA[2];
+  fhk= (GEN)B->DATA[3];
+  M  = (GEN)B->DATA[8];
+
+  delta = cgetg(m+1,t_VEC);
+  whichdelta = cgetg(N+1, t_VECSMALL);
+  d_1_term = gzero;
+  for (i=1; i<=m; i++)
+  {
+    GEN Ai = (GEN)A[i], p1 = (GEN)fhk[Ai[1]];
+    for (j=2; j<=d; j++)
+      p1 = Fq_mul(p1, (GEN)fhk[Ai[j]], T, pe);
+    delta[i] = (long)p1;
+    if (DEBUGLEVEL>2) fprintferr("delta[%ld] = %Z\n",i,p1);
+    /* g = prod (X - delta[i])
+     * if g o h = 0 (pol), we'll have h(Ai[j]) = delta[i] for all j */
+    /* fk[k] belongs to block number whichdelta[k] */
+    for (j=1; j<=d; j++) whichdelta[Ai[j]] = i;
+    if (typ(p1) == t_POL) p1 = constant_term(p1);
+    d_1_term = addii(d_1_term, p1);
+  }
+  d_1_term = centermod(d_1_term, pe); /* Tr(g) */
+  if (absi_cmp(d_1_term, (GEN)M[3]) > 0) {
+    if (DEBUGLEVEL>1) fprintferr("d-1 test failed\n");
+    return NULL;
+  }
+  g = FqV_roots_to_pol(delta, T, pe, 0);
+  g = centermod(polsimplify(g), pe); /* assume g in Z[X] */
+  if (DEBUGLEVEL>2) fprintferr("pol. found = %Z\n",g);
+  if (!ok_coeffs(g,M)) {
+    if (DEBUGLEVEL>1) fprintferr("coeff too big for pol g(x)\n");
+    return NULL;
+  }
+  if (!FpX_is_squarefree(g, p)) {
+    if (DEBUGLEVEL>1) fprintferr("changing f(x): p divides disc(g)\n");
+    compute_data(B);
+    return subfield(A, B);
+  }
+
+  lf = lg(firstroot); listdelta = cgetg(lf, t_VEC);
+  for (i=1; i<lf; i++) listdelta[i] = delta[whichdelta[firstroot[i]]];
+  if (DEBUGLEVEL) fprintferr("candidate = %Z\n", g);
+  e = embedding(g, B->DATA, B->S, B->PD->den, listdelta);
+  if (!e) return NULL;
+  if (DEBUGLEVEL) fprintferr("embedding = %Z\n", e);
+  return _subfield(g, e);
+}
+
+/* L list of current subfields, test whether potential block D is a block,
+ * if so, append corresponding subfield */
+static GEN
+test_block(blockdata *B, GEN L, GEN D)
+{
+  pari_sp av = avma;
+  GEN sub = subfield(D, B);
+  if (sub) {
+    GEN old = L;
+    L = gclone( L? concatsp(L, sub): sub );
+    if (old) gunclone(old);
+  }
+  avma = av; return L;
+}
+
 /* subfields of degree d */
 static GEN
-subfields_of_given_degree(struct poldata PD,long d)
+subfields_of_given_degree(blockdata *B)
 {
-  pari_sp av, av2;
-  long llist,i,nn,v;
-  GEN listpotbl,ff,A,CSF,ESF,LSB,p,T,DATA,listdelta;
-  GEN pol = PD.pol, dpol = PD.dis;
+  pari_sp av = avma;
+  GEN L;
 
-  if (DEBUGLEVEL) fprintferr("\n*** Look for subfields of degree %ld\n\n", d);
-  av = avma;
-  p = choose_prime(pol,dpol,degpol(pol)/d,&ff,&listpotbl,&nn);
-  if (!listpotbl) { avma=av; return cgetg(1,t_VEC); }
-  v = fetch_var(); name_var(v,"y");
-  T = lift_intern(ffinit(p,nn, v));
-  DATA = NULL; LSB = cgetg(1,t_VEC); 
-  i = 1; llist = lg(listpotbl);
-CHANGE: 
-  DATA = compute_data(DATA,PD,d, ff,T,p);
-  for (; i<llist; i++)
-  {
-    av2 = avma; A = (GEN)listpotbl[i];
-    if (DEBUGLEVEL > 1) fprintferr("\n* Potential block # %ld: %Z\n",i,A);
-    CSF = cand_for_subfields(A,DATA,&listdelta);
-    if (typ(CSF)==t_INT)
-    {
-      avma = av2;
-      if (DEBUGLEVEL > 1) switch(itos(CSF))
-      {
-        case 0: fprintferr("changing f(x): p divides disc(g(x))\n"); break;
-        case 1: fprintferr("coeff too big for pol g(x)\n"); break;
-        case 2: fprintferr("d-1 test failed\n"); break;
-      }
-      if (CSF==gzero) goto CHANGE;
-    }
-    else
-    {
-      if (DEBUGLEVEL) fprintferr("candidate = %Z\n",CSF);
-      ESF = embedding_of_potential_subfields(CSF,DATA,listdelta);
-      if (!ESF) { avma = av2; continue; }
-
-      if (DEBUGLEVEL) fprintferr("embedding = %Z\n",ESF);
-      LSB = gerepileupto(av2, concat(LSB, _subfield(CSF,ESF)));
-    }
-  }
-  (void)delete_var();
-  for (i=1; i<llist; i++) free((void*)listpotbl[i]);
-  free((void*)(listpotbl-1));
-  if (DEBUGLEVEL) fprintferr("\nSubfields of degree %ld: %Z\n",d, LSB);
-  return gerepilecopy(av, LSB);
+  if (DEBUGLEVEL) fprintferr("\n* Look for subfields of degree %ld\n\n", B->d);
+  B->DATA = NULL; compute_data(B);
+  L = calc_block(B, B->S->Z, cgetg(1,t_VEC), NULL);
+  if (DEBUGLEVEL) fprintferr("\nSubfields of degree %ld: %Z\n", B->d, L);
+  if (isclone(B->DATA)) gunclone(B->DATA);
+  avma = av; return L;
 }
 
 static GEN
 fix_var(GEN x, long v)
 {
   long i, l = lg(x);
-  x = gcopy(x); if (!v) return x;
+  if (!v) return x;
   for (i=1; i<l; i++) { GEN t = (GEN)x[i]; setvarn(t[1],v); setvarn(t[2],v); }
   return x;
 }
 
-void
-subfields_poldata(GEN T, struct poldata *PD)
+static void
+subfields_poldata(GEN T, poldata *PD)
 {
   GEN  nf,L,dis;
 
-  T = get_nfpol(T, &nf);
-  PD->pol = dummycopy(T); /* may change variable number later */
+  T = dummycopy(get_nfpol(T, &nf));
+  PD->pol = T; setvarn(T, 0);
   if (nf)
   {
     PD->den = Q_denom((GEN)nf[7]);
@@ -961,25 +874,27 @@ subfields_poldata(GEN T, struct poldata *PD)
 }
 
 GEN
-subfields(GEN nf,GEN d)
+subfields(GEN nf, GEN d0)
 {
   pari_sp av = avma;
-  long di, N, v0;
+  long N, v0, d = itos(d0);
   GEN LSB, pol, G;
-  struct poldata PD;
+  poldata PD;
+  primedata S;
+  blockdata B;
 
   pol = get_nfpol(nf, &nf); /* in order to treat trivial cases */
-  v0=varn(pol); N=degpol(pol); di=itos(d);
-  if (di==N) return gerepilecopy(av, _subfield(pol, polx[v0]));
-  if (di==1) return gerepilecopy(av, _subfield(polx[v0], pol));
-  if (di < 1 || di > N || N % di) return cgetg(1,t_VEC);
+  v0 = varn(pol); N = degpol(pol);
+  if (d == N) return gerepilecopy(av, _subfield(pol, polx[v0]));
+  if (d == 1) return gerepilecopy(av, _subfield(polx[v0], pol));
+  if (d < 1 || d > N || N % d) return cgetg(1,t_VEC);
 
   /* much easier if nf is Galois (WSS) */
   G = galoisconj4(nf? nf: pol, NULL, 1, 0);
   if (typ(G) != t_INT)
   { /* Bingo */
     GEN L = galoissubgroups(G), F;
-    long k,i, l = lg(L), o = N/di;
+    long k,i, l = lg(L), o = N/d;
     F = cgetg(l, t_VEC);
     k = 1;
     for (i=1; i<l; i++)
@@ -992,11 +907,21 @@ subfields(GEN nf,GEN d)
     return gerepilecopy(av, F);
   }
 
-  subfields_poldata(nf? nf:pol, &PD);
-  pol = PD.pol;
-  setvarn(pol, 0);
-  LSB = subfields_of_given_degree(PD, di);
-  return gerepileupto(av, fix_var(LSB,v0));
+  subfields_poldata(nf? nf: pol, &PD);
+
+  B.PD = &PD;
+  B.S  = &S;
+  B.N  = N;
+  B.d  = d;
+  B.blockd = N/d;
+
+  choose_prime(&S, PD.pol, PD.dis);
+  LSB = subfields_of_given_degree(&B);
+  (void)delete_var(); /* from choose_prime */
+  avma = av;
+  if (!LSB) return cgetg(1, t_VEC);
+  G = gcopy(LSB); gunclone(LSB);
+  return fix_var(G, v0);
 }
 
 static GEN
@@ -1005,7 +930,9 @@ subfieldsall(GEN nf)
   pari_sp av = avma;
   long N, ld, i, v0;
   GEN G, pol, dg, LSB, NLSB;
-  struct poldata PD;
+  poldata PD;
+  primedata S;
+  blockdata B;
 
   /* much easier if nf is Galois (WSS) */
   G = galoisconj4(nf, NULL, 1, 0);
@@ -1015,7 +942,7 @@ subfieldsall(GEN nf)
     long l;
 
     pol = get_nfpol(nf, &nf);
-    L = lift_intern( galoissubfields(G, 0, varn(pol)));
+    L = lift_intern( galoissubfields(G, 0, varn(pol)) );
     l = lg(L);
     S = cgetg(l, t_VECSMALL);
     for (i=1; i<l; i++) S[i] = lg(gmael(L,i,1));
@@ -1030,20 +957,25 @@ subfieldsall(GEN nf)
   dg = divisors(stoi(N)); ld = lg(dg)-1;
   if (DEBUGLEVEL) fprintferr("\n***** Entering subfields\n\npol = %Z\n",pol);
 
-  LSB = _subfield(pol,polx[0]);
+  LSB = _subfield(pol, polx[0]);
   if (ld > 2)
   {
-    setvarn(pol, 0);
+    B.PD = &PD;
+    B.S  = &S;
+    B.N  = N;
+    choose_prime(&S, PD.pol, PD.dis);
     for (i=2; i<ld; i++)
     {
-      pari_sp av1 = avma;
-      NLSB = subfields_of_given_degree(PD, N / itos((GEN)dg[i]));
-      if (lg(NLSB) > 1) LSB = concatsp(LSB,NLSB); else avma = av1;
+      B.blockd  = itos((GEN)dg[i]);
+      B.d = N / B.blockd;
+      NLSB = subfields_of_given_degree(&B);
+      if (NLSB) { LSB = concat(LSB, NLSB); gunclone(NLSB); }
     }
+    (void)delete_var(); /* from choose_prime */
   }
-  LSB = concatsp(LSB, _subfield(polx[0],pol));
+  LSB = concatsp(LSB, _subfield(polx[0], pol));
   if (DEBUGLEVEL) fprintferr("\n***** Leaving subfields\n\n");
-  return gerepileupto(av, fix_var(LSB,v0));
+  return fix_var(gerepilecopy(av, LSB), v0);
 }
 
 GEN
@@ -1051,4 +983,3 @@ subfields0(GEN nf,GEN d)
 {
   return d? subfields(nf,d): subfieldsall(nf);
 }
-

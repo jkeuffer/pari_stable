@@ -275,6 +275,7 @@ BA 51- support for gp2c-run on Darwin
    52- remove blanks in "raw" outputs ( default(output,0) )
    53- made .fu and .tu return t_POLMOD, not t_POL
 BA 54- [GMP kernel] use mpn_sqrtrem for sqrtr_abs
+   55- nfsubfields (use much less memory)
 
   Added
     1- make test-all [ all available test suites (SLOW !)]

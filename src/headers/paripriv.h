@@ -32,6 +32,8 @@ GEN resetloop(GEN a, GEN b);
 GEN resetloop2(GEN a, GEN b, GEN c);
 GEN setloop(GEN a);
 
+GEN initgaloisborne(GEN T, GEN dn, long prec, GEN *pL, GEN *pprep, GEN *pdis);
+
 GEN _checkbnf(GEN bnf);
 GEN _checknf(GEN nf);
 

@@ -36,7 +36,6 @@ extern GEN sqred1_from_QR(GEN x, long prec);
 extern GEN GS_norms(GEN B, long prec);
 extern GEN apply_kummer(GEN nf,GEN pol,GEN e,GEN p);
 extern GEN dim1proj(GEN prh);
-extern GEN initgaloisborne(GEN T, GEN dn, long prec, GEN *ptL, GEN *ptprep, GEN *ptdis);
 extern GEN max_modulus(GEN p, double tau);
 extern GEN mulmat_pol(GEN A, GEN x);
 extern GEN polsym_gen(GEN P, GEN y0, long n, GEN T, GEN N);

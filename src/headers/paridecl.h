@@ -1400,6 +1400,7 @@ long    FpX_nbroots(GEN f, GEN p);
 GEN     FpXQX_gcd(GEN P, GEN Q, GEN T, GEN p);
 GEN     FqX_factor(GEN x, GEN T, GEN p);
 GEN     FqX_gcd(GEN P, GEN Q, GEN T, GEN p);
+GEN     FqX_init(GEN p, long n, long v);
 long    FqX_is_squarefree(GEN P, GEN T, GEN p);
 long    FqX_nbfact(GEN u, GEN T, GEN p);
 long    FqX_nbroots(GEN f, GEN T, GEN p);
