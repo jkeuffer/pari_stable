@@ -1533,53 +1533,63 @@ _fix(GEN x, long k)
 /* low word of integer x */
 #define _low(x) (__x=(GEN)x, __x[lgefint(__x)-1])
 
-/* compute a_p using Shanks/Mestre + Montgomery's trick. Assume p > 20, say */
+/* compute a_p using Shanks/Mestre + Montgomery's trick. Assume p > 457 */
 GEN
 apell1(GEN e, GEN p)
 {
-  long *tx, *ty, *ti, pfinal, i, j, j2, s, flc, flcc, x, nb;
+  long *tx, *ty, *ti, pfinal, i, j, j2, s, k, k1, x, nb;
   gpmem_t av = avma, av2;
-  GEN p1,p2,p3,h,mfh,f,fh,fg,pordmin,u,v,p1p,p2p,acon,bcon,c4,c6,cp4,pts;
+  GEN p1,p2,p3,h,mfh,f,fh,fg,pordmin,u,v,p1p,p2p,A,B,c4,c6,cp4,pts;
   GEN __x;
+  tx = ty = ti = NULL; /* gcc -Wall */
 
   if (DEBUGLEVEL) (void)timer2();
-  p1 = gmodulsg(1,p);
-  c4 = gdivgs(gmul(p1,(GEN)e[10]), -48);
-  c6 = gdivgs(gmul(p1,(GEN)e[11]), -864);
-  pordmin = gceil(gmul2n(gsqrt(p,DEFAULTPREC),2));
-  p1p = addsi(1,p); p2p = shifti(p1p,1);
-  x=0; flcc=0; flc = kronecker((GEN)c6[2],p);
-  u=c6; acon=gzero; bcon=gun; h=p1p;
-  tx = ty = ti = NULL; /* gcc -Wall */
+  c4 = gmod(gdivgs((GEN)e[10],  -48), p);
+  c6 = gmod(gdivgs((GEN)e[11], -864), p);
+  pordmin = gceil(gmul2n(gsqrt(p,DEFAULTPREC),2)); /* ceil( sqrt(4p) ) */
+  p1p = addsi(1,p);
+  p2p = shifti(p1p,1);
+  x = 0; u = c6; k1 = 0; k = kronecker(c6, p);
+  A = gzero; B = gun; h = p1p;
   for(;;)
   {
-    while (flc==flcc || !flc)
+    while (k == k1 || !k)
     {
       x++;
-      u = gadd(c6, gmulsg(x, gaddgs(c4,x*x)));
-      flc = kronecker((GEN)u[2],p);
+      u = modii(addii(c6, mulsi(x, addii(c4, mulss(x,x)))), p);
+      k = kronecker(u, p);
     }
-    flcc = flc;
+    k1 = k;
+
     f = cgetg(3,t_VEC);
-    f[1] = (long)lift_intern(gmulsg(x,u));
-    f[2] = (long)lift_intern(gsqr(u));
-    cp4 = lift_intern(gmul(c4, (GEN)f[2]));
+    f[1] = lmodii(mulsi(x,u), p);
+    f[2] = lmodii(sqri(u),    p);
+    cp4 = modii(mulii(c4, (GEN)f[2]), p);
     fh = powsell(cp4,f,h,p);
-    s = itos(gceil(gsqrt(gdiv(pordmin,bcon),DEFAULTPREC))) >> 1;
-    nb = min(128, s >> 1);
+    s = itos(gceil(gsqrt(gdiv(pordmin,B),DEFAULTPREC))) >> 1;
     /* look for h s.t f^h = 0 */
-    if (bcon == gun)
+    if (B == gun)
     { /* first time: initialize */
       tx = newbloc(s+1);
       ty = newbloc(s+1);
       ti = newbloc(s+1);
     }
-    else f = powsell(cp4,f,bcon,p); /* F */
+    else f = powsell(cp4,f,B,p); /* F */
     *tx = evaltyp(t_VECSMALL) | evallg(s+1);
     if (!fh) goto FOUND;
 
     p1 = gcopy(fh);
-    pts = new_chunk(nb+1);
+    if (s < 3)
+    { /* we're nearly done: naive method */
+      for (i=1;; i++)
+      {
+        p1 = addsell(cp4,p1,f,p); /* h.f + i.F */
+        if (!p1) { h = addii(h, mulsi(i,B)); goto FOUND; }
+      }
+    }
+    /* Baby Step/Giant Step */
+    nb = min(128, s >> 1); /* > 0. Will do nb pts at a time: faster inverse */
+    pts = cgetg(nb+1, t_VEC);
     j = lgefint(p);
     for (i=1; i<=nb; i++)
     { /* baby steps */
@@ -1587,12 +1597,12 @@ apell1(GEN e, GEN p)
       _fix(p1+1, j); tx[i] = _low((GEN)p1[1]);
       _fix(p1+2, j); ty[i] = _low((GEN)p1[2]);
       p1 = addsell(cp4,p1,f,p); /* h.f + i.F */
-      if (!p1) { h = addii(h, mulsi(i,bcon)); goto FOUND; }
+      if (!p1) { h = addii(h, mulsi(i,B)); goto FOUND; }
     }
     mfh = dummycopy(fh);
     mfh[2] = lnegi((GEN)mfh[2]);
     fg = addsell(cp4,p1,mfh,p); /* nb.F */
-    if (!fg) { h = mulsi(nb,bcon); goto FOUND; }
+    if (!fg) { h = mulsi(nb,B); goto FOUND; }
     u = cgetg(nb+1, t_VEC);
     av2 = avma; /* more baby steps, nb points at a time */
     while (i <= s)
@@ -1606,7 +1616,7 @@ apell1(GEN e, GEN p)
         {
           long k = i+j-2;
           if (egalii((GEN)p1[2],(GEN)fg[2])) k -= 2*nb; /* fg = p1 */
-          h = addii(h, mulsi(k,bcon));
+          h = addii(h, mulsi(k,B));
           goto FOUND;
         }
       }
@@ -1626,7 +1636,7 @@ apell1(GEN e, GEN p)
 
     /* giant steps: fg = f^s */
     fg = addsell(cp4,p1,f,p);
-    if (!fg) { h = addii(h, mulsi(s,bcon)); goto FOUND; }
+    if (!fg) { h = addii(h, mulsi(s,B)); goto FOUND; }
     pfinal = _low(p); av2 = avma;
 
     p1 = gen_sort(tx, cmp_IND | cmp_C, NULL);
@@ -1670,7 +1680,7 @@ apell1(GEN e, GEN p)
             if (egalii((GEN)p1[1], (GEN)ftest[1]))
             {
               if (egalii((GEN)p1[2], (GEN)ftest[2])) i = -i;
-              h = addii(h, mulii(addis(mulss(s,i), j2), bcon));
+              h = addii(h, mulii(addis(mulss(s,i), j2), B));
               goto FOUND;
             }
           }
@@ -1696,7 +1706,7 @@ apell1(GEN e, GEN p)
       }
     }
 
-FOUND: /* success, found a point of exponent h */
+FOUND: /* found a point of exponent h */
     p2 = decomp(h); p1=(GEN)p2[1]; p2=(GEN)p2[2];
     for (i=1; i<lg(p1); i++)
       for (j=itos((GEN)p2[i]); j; j--)
@@ -1705,27 +1715,27 @@ FOUND: /* success, found a point of exponent h */
         if (powsell(cp4,f,p3,p)) break;
 	h = p3;
       }
-    /* now h is the exact order */
-    if (bcon == gun) bcon = h;
+    /* now h is the exact order, and divides E(Fp) = A (mod B) */
+    if (B == gun) B = h;
     else
     {
-      p1 = chinois(gmodulcp(acon,bcon), gmodulsg(0,h));
-      acon = (GEN)p1[2];
-      bcon = (GEN)p1[1];
+      p1 = chinois(gmodulcp(A,B), gmodulsg(0,h));
+      A = (GEN)p1[2];
+      B = (GEN)p1[1];
     }
 
-    i = (cmpii(bcon, pordmin) < 0);
-    if (i) acon = centermod(subii(p2p,acon), bcon);
-    p1 = ground(gdiv(gsub(p1p,acon),bcon));
-    h = addii(acon, mulii(p1,bcon));
-    /* h = acon mod bcon, closest lift to p+1 */
+    i = (cmpii(B, pordmin) < 0);
+    if (i) A = centermod(subii(p2p,A), B);
+    p1 = diviiround(gsub(p1p,A), B);
+    h = addii(A, mulii(p1,B));
+    /* h = A mod B, closest lift to p+1 */
     if (!i) break;
   }
   gunclone(tx);
   gunclone(ty);
   gunclone(ti);
-  p1 = (flc==1)? subii(p1p,h): subii(h,p1p);
-  return gerepileupto(av,p1);
+  p1 = (k==1)? subii(p1p,h): subii(h,p1p);
+  return gerepileuptoint(av,p1);
 }
 
 typedef struct
@@ -1791,46 +1801,47 @@ apell0(GEN e, long p)
 {
   GEN p1,p2;
   sellpt f,fh,fg,ftest,f2;
-  long pordmin,u,p1p,p2p,acon,bcon,c4,c6,cp4;
-  long i, j, s, flc, flcc, x, q, h, p3, l, r, m;
+  long pordmin,u,p1p,p2p,A,B,c4,c6,cp4;
+  long i, j, s, k, k1, x, q, h, p3, l, r, m;
   gpmem_t av;
   multiple *table;
 
   if (p < 99) return apell2_intern(e,(ulong)p);
-
-  av = avma; p1 = gmodulss(1,p);
-  c4 = itos((GEN)gdivgs(gmul(p1,(GEN)e[10]), -48)[2]);
-  c6 = itos((GEN)gdivgs(gmul(p1,(GEN)e[11]), -864)[2]);
-  pordmin = (long)(1 + 4*sqrt((float)p));
-  p1p = p+1; p2p = p1p << 1;
-  x=0; flcc=0; flc = kross(c6, p);
-  u=c6; acon=0; bcon=1; h=p1p;
   table = NULL; /* gcc -Wall */
+
+  av = avma;
+  c4 = itos( gmodgs(gdivgs((GEN)e[10],  -48), p) );
+  c6 = itos( gmodgs(gdivgs((GEN)e[11], -864), p) );
+  pordmin = (long)(1 + 4*sqrt((float)p));
+  p1p = p+1;
+  p2p = p1p << 1;
+  x = 0; u = c6; k1 = 0; k = kross(c6, p);
+  A = 0; B = 1; h = p1p;
   for(;;)
   {
-    while (flc==flcc || !flc)
+    while (k == k1 || !k)
     {
       x++;
       u = addssmod(c6, mulssmod(x, c4+mulssmod(x,x,p), p), p);
-      flc = kross(u,p);
+      k = kross(u,p);
     }
-    flcc = flc;
+    k1 = k;
     f.isnull = 0;
     f.x = mulssmod(x, u, p);
     f.y = mulssmod(u, u, p);
     cp4 = mulssmod(c4, f.y, p);
     powssell1(cp4, p, h, &f, &fh);
-    s = (long) (sqrt(((float)pordmin)/bcon) / 2);
+    s = (long) (sqrt(((float)pordmin)/B) / 2);
     if (!s) s=1;
-    if (bcon==1)
+    if (B==1)
     {
       table = (multiple *) gpmalloc((s+1)*sizeof(multiple));
       f2 = f;
     }
-    else powssell1(cp4, p, bcon, &f, &f2);
+    else powssell1(cp4, p, B, &f, &f2);
     for (i=0; i < s; i++)
     {
-      if (fh.isnull) { h += bcon*i; goto FOUND; }
+      if (fh.isnull) { h += B*i; goto FOUND; }
       table[i].x = fh.x;
       table[i].y = fh.y;
       table[i].i = i;
@@ -1850,9 +1861,9 @@ apell0(GEN e, long p)
       if (r < s && table[r].x == ftest.x) break;
       addsell1(cp4, p, &ftest, &fg);
     }
-    h += table[r].i * bcon;
+    h += table[r].i * B;
     if (table[r].y == ftest.y) i = -i;
-    h += s * i * bcon;
+    h += s * i * B;
 
 FOUND:
     p2=decomp(stoi(h)); p1=(GEN)p2[1]; p2=(GEN)p2[2];
@@ -1864,26 +1875,26 @@ FOUND:
 	if (!fh.isnull) break;
 	h = p3;
       }
-    if (bcon == 1) bcon = h;
+    if (B == 1) B = h;
     else
     {
-      p1 = chinois(gmodulss(acon,bcon), gmodulss(0,h));
-      acon = itos((GEN)p1[2]);
-      if (is_bigint(p1[1])) { h = acon; break; }
-      bcon = itos((GEN)p1[1]);
+      p1 = chinois(gmodulss(A,B), gmodulss(0,h));
+      A = itos((GEN)p1[2]);
+      if (is_bigint(p1[1])) { h = A; break; }
+      B = itos((GEN)p1[1]);
     }
 
-    i = (bcon < pordmin);
+    i = (B < pordmin);
     if (i)
     {
-      acon = (p2p - acon) % bcon;
-      if ((acon << 1) > bcon) acon -= bcon;
+      A = (p2p - A) % B;
+      if ((A << 1) > B) A -= B;
     }
-    q = ((ulong)(p2p + bcon - (acon << 1))) / (bcon << 1);
-    h = acon + q*bcon;
+    q = ((ulong)(p2p + B - (A << 1))) / (B << 1);
+    h = A + q*B;
     avma = av; if (!i) break;
   }
-  free(table); return stoi((flc==1)? p1p-h: h-p1p);
+  free(table); return stoi(k==1? p1p-h: h-p1p);
 }
 
 GEN
