@@ -1523,7 +1523,7 @@ gp_head()
   print_version(); pariputs("\n");
   center("Copyright (C) 2000 The PARI Group");
   print_text("\nPARI/GP is free software, covered by the GNU General Public \
-License, and comes WITHOUT ANY WARRANTY WHATSOEVER.");
+License, and comes WITHOUT ANY WARRANTY WHATSOEVER");
   pariputs("\n\
 Type ? for help, \\q to quit.\n\
 Type ?12 for how to get moral (and possibly technical) support.\n\n");

@@ -520,14 +520,17 @@ print_prefixed_text(char *s, char *prefix, char *str)
         _new_line(prefix);
         linelen = oldwlen + prelen;
       }
-      pariputs(oldword); *u++ = ' '; *u = '\0';
-      /* u-word = strlen(word); */
+      pariputs(oldword); *u++ = ' '; *u = 0;
+      /* u-word = strlen(word) */
       oldwlen = str ? strlen_real(word): u - word;
       if (*s) { strcpy(oldword,word);  u = word; }
     }
   }
   if (!str)
-    { if (u[-2] != '.') u[-2] = '.'; }
+  { /* add final period if needed */
+    u--; while (u > word && is_blank_or_null(*u)) u--;
+    if (u >= word && *u != '.') { u[1] = '.'; u[2] = 0; }
+  }
   else
     { *(u-2) = 0; oldwlen--; }
   linelen += oldwlen;
