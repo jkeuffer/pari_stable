@@ -1289,7 +1289,7 @@ wr_rel(GEN col)
 void
 dbg_rel(long s, GEN col)
 {
-  if (DEBUGLEVEL == 1) fprintferr("%4ld",s);
+  if (DEBUGLEVEL == 1) fprintferr("%5ld",s);
   else { fprintferr("cglob = %ld. ", s); wr_rel(col); }
   flusherr(); 
 }
