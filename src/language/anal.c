@@ -1388,32 +1388,30 @@ double_op()
 static F2GEN
 get_op_fun()
 {
-  if (*analyseur)
+  char c = *analyseur, c1 = analyseur[1];
+  if (c && c1)
   {
-    if (analyseur[1] == '=')
+    if (c1 == '=')
     {
-      switch(*analyseur)
+      switch(c)
       {
         case '+' : analyseur += 2; return &gadd;
         case '-' : analyseur += 2; return &gsub;
         case '*' : analyseur += 2; return &gmul;
         case '/' : analyseur += 2; return &gdiv;
-        case '\\': analyseur += 2; return &gdivent;
         case '%' : analyseur += 2; return &gmod;
+        case '\\': analyseur += 2; return &gdivent;
       }
     }
     else if (analyseur[2] == '=')
     {
-      switch(*analyseur)
+      switch(c)
       {
-        case '>' :
-          if (analyseur[1]=='>') { analyseur += 3; return &gshift_r; }
+        case '>' : if (c1=='>') { analyseur += 3; return &gshift_r; }
           break;
-        case '<' :
-          if (analyseur[1]=='<') { analyseur += 3; return &gshift_l; }
+        case '<' : if (c1=='<') { analyseur += 3; return &gshift_l; }
           break;
-        case '\\':
-          if (analyseur[1]=='/') { analyseur += 3; return &gdivround; }
+        case '\\': if (c1=='/') { analyseur += 3; return &gdivround; }
           break;
       }
     }
