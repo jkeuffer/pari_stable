@@ -798,8 +798,14 @@ rnfisnorm(GEN bnf,GEN ext,GEN x,long flag,long PREC)
   for (aux=(GEN)res[1],i=1; i<lgsunitrelnf; i++)
     aux=gmul(aux,gpuigs(gmodulcp((GEN) sunitrelnf[i],(GEN)ext[1]),
                         itos(gfloor((GEN)Y[i]))));
+  x = gdiv(x,gnorm(gmodulcp(lift(aux),(GEN)ext[1])));
+  if (typ(x) == t_POLMOD && (typ(x[2]) != t_POL || lgef(x[2]) == 3))
+  {
+    x = (GEN)x[2]; /* rational number */
+    if (typ(x) == t_POL) x = (GEN)x[2];
+  }
   res[1]=(long)aux;
-  res[2]=ldiv(x,gnorm(gmodulcp(lift(aux),(GEN)ext[1])));
+  res[2]=(long)x;
 
   lbot=avma; return gerepile(ltop,lbot,gcopy(res));
 }
@@ -817,4 +823,3 @@ bnfisnorm(GEN bnf,GEN x,long flag,long PREC)
   bnf = buchinitfu(polx[MAXVARN],NULL,NULL,0); lbot = avma;
   return gerepile(ltop,lbot,rnfisnorm(bnf,ext,x,flag,PREC));
 }
-
