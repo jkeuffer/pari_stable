@@ -138,7 +138,7 @@ GEN
 addshiftw(GEN x, GEN y, long d)
 {
   GEN xd,yd,zd = (GEN)avma;
-  long a,lz,ny = lg(y)-2, nx = lg(x)-2;
+  long a,lz,ny = lgpol(y), nx = lgpol(x);
 
   x += 2; y += 2; a = ny-d;
   if (a <= 0)
@@ -175,7 +175,7 @@ static GEN
 addshiftwcopy(GEN x, GEN y, long d)
 {
   GEN xd,yd,zd = (GEN)avma;
-  long a,lz,ny = lg(y)-2, nx = lg(x)-2;
+  long a,lz,ny = lgpol(y), nx = lgpol(x);
 
   x += 2; y += 2; a = ny-d;
   if (a <= 0)
@@ -250,7 +250,7 @@ quickmul(GEN a, GEN b, long na, long nb)
     c2 = addpol(a0,a, na,n0a);
     c1 = addpol(b0,b, nb,n0b);
 
-    c1 = quickmul(c1+2,c2+2, lg(c1)-2,lg(c2)-2);
+    c1 = quickmul(c1+2,c2+2, lgpol(c1),lgpol(c2));
     c2 = gneg_i(gadd(c0,c));
     c0 = addshiftw(c0, gadd(c1,c2), n0);
   }
@@ -416,7 +416,7 @@ FpX_sub(GEN x,GEN y,GEN p)
 GEN
 FpX_mul(GEN x,GEN y,GEN p)
 {
-  GEN z = quickmul(y+2, x+2, lg(y)-2, lg(x)-2);
+  GEN z = quickmul(y+2, x+2, lgpol(y), lgpol(x));
   setvarn(z,varn(x));
   if (!p) return z;
   return FpX_red(z, p);
@@ -424,7 +424,7 @@ FpX_mul(GEN x,GEN y,GEN p)
 GEN
 FpX_sqr(GEN x,GEN p)
 {
-  GEN z = quicksqr(x+2, lg(x)-2);
+  GEN z = quicksqr(x+2, lgpol(x));
   setvarn(z,varn(x));
   if (!p) return z;
   return FpX_red(z, p);
@@ -456,7 +456,7 @@ FpXQ_mul(GEN y,GEN x,GEN T,GEN p)
   GEN z;
   if (typ(x) == t_INT || typ(y) == t_INT)
     err(bugparier,"FpXQ_mul, t_INT are absolutely forbidden");
-  z = quickmul(y+2, x+2, lg(y)-2, lg(x)-2); setvarn(z,varn(y));
+  z = quickmul(y+2, x+2, lgpol(y), lgpol(x)); setvarn(z,varn(y));
   z = FpX_red(z, p); return FpX_rem(z,T, p);
 }
 
@@ -465,7 +465,7 @@ FpXQ_mul(GEN y,GEN x,GEN T,GEN p)
 GEN
 FpXQ_sqr(GEN y,GEN pol,GEN p)
 {
-  GEN z = quicksqr(y+2,lg(y)-2); setvarn(z,varn(y));
+  GEN z = quicksqr(y+2,lgpol(y)); setvarn(z,varn(y));
   z = FpX_red(z, p); return FpX_rem(z,pol, p);
 }
 /*Modify y[2].
@@ -941,7 +941,7 @@ FpXQX_mul(GEN x, GEN y, GEN T, GEN p)
   vx = min(varn(x),varn(y));
   kx= to_Kronecker(x,T);
   ky= to_Kronecker(y,T);
-  z = quickmul(ky+2, kx+2, lg(ky)-2, lg(kx)-2);
+  z = quickmul(ky+2, kx+2, lgpol(ky), lgpol(kx));
   z = FpXQX_from_Kronecker(z,T,p);
   setvarn(z,vx);/*quickmul and Fq_from_Kronecker are not varn-clean*/
   return gerepileupto(ltop,z);
@@ -953,7 +953,7 @@ FpXQX_sqr(GEN x, GEN T, GEN p)
   GEN z,kx;
   long vx=varn(x);
   kx= to_Kronecker(x,T);
-  z = quicksqr(kx+2, lg(kx)-2);
+  z = quicksqr(kx+2, lgpol(kx));
   z = FpXQX_from_Kronecker(z,T,p);
   setvarn(z,vx);/*quickmul and Fq_from_Kronecker are nor varn-clean*/
   return gerepileupto(ltop,z);
@@ -1804,7 +1804,7 @@ GEN Fp_factor_rel0(GEN P,GEN l, GEN Q)
 {
   pari_sp ltop=avma, tetpil;
   GEN V,ex,F,y,R;
-  long n,nbfact=0,nmax=lg(P)-2;
+  long n,nbfact=0,nmax=lgpol(P);
   long i;
   F=factmod0(P,l);
   n=lg((GEN)F[1]);
@@ -2734,7 +2734,7 @@ u_FpX_resultant_all(GEN a, GEN b, long *C0, long *C1, GEN dglist, ulong p)
   GEN c;
 
   if (C0) { *C0 = 1; *C1 = 0; }
-  if (lg(a)-2==0 || lg(b)-2==0) return 0;
+  if (lgpol(a)==0 || lgpol(b)==0) return 0;
   da = degpol(a);
   db = degpol(b);
   if (db > da)

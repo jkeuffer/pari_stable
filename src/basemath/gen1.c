@@ -1509,7 +1509,7 @@ gmul(GEN x, GEN y)
             /* fprintferr("HUM"); */
             if (pol && varn(x) != varn(y))
               x = to_Kronecker(x,pol);
-            z = quickmul(x+2, y+2, lg(x)-2, lg(y)-2);
+            z = quickmul(x+2, y+2, lgpol(x), lgpol(y));
             if (p) z = FpX(z,p);
             if (pol) z = from_Kronecker(z,pol);
             z = gerepileupto(av, z);
@@ -1517,10 +1517,10 @@ gmul(GEN x, GEN y)
           else
           {
             avma = av;
-            z = quickmul(a+2, b+2, lg(a)-2, lg(b)-2);
+            z = quickmul(a+2, b+2, lgpol(a), lgpol(b));
           }
 #else
-          z = quickmul(x+2, y+2, lg(x)-2, lg(y)-2);
+          z = quickmul(x+2, y+2, lgpol(x), lgpol(y));
 #endif
           setvarn(z,vx); return z;
         }
@@ -1675,7 +1675,7 @@ gsqr(GEN x)
       av = avma;
       if (ff_poltype(&x,&p,&pol))
       {
-        z = quicksqr(x+2, lg(x)-2);
+        z = quicksqr(x+2, lgpol(x));
         if (p) z = FpX(z,p);
         if (pol) z = from_Kronecker(z,pol);
         z = gerepileupto(av, z);
@@ -1683,7 +1683,7 @@ gsqr(GEN x)
       else
       {
         avma = av;
-        z = quicksqr(a+2, lg(a)-2);
+        z = quicksqr(a+2, lgpol(a));
       }
       setvarn(z, vx); return z;
     }

@@ -447,7 +447,7 @@ TreeLift(GEN link, GEN v, GEN w, GEN T, GEN p, long e0, long e1, GEN f, int noin
 {
   GEN p0 = gpowgs(p, e0);
   GEN pd = gpowgs(p, e1-e0);
-  RecTreeLift(link, v, w, T, pd, p0, f, lg(v)-2, noinv);
+  RecTreeLift(link, v, w, T, pd, p0, f, lgpol(v), noinv);
 }
 
 /* a = modular factors of f mod (p,T) [possibly T=NULL], lift to precision p^e0
@@ -562,7 +562,7 @@ bezout_lift_fact(GEN pol, GEN Q, GEN p, long e)
   link = (GEN) E[2];
   v    = (GEN) E[3];
   w    = (GEN) E[4];
-  BezoutPropagate(link, v, w, pe, NULL, pol, lg(v) - 2);
+  BezoutPropagate(link, v, w, pe, NULL, pol, lgpol(v));
   E = cgetg(k+1, t_VEC);
   for (i = 1; i <= 2*k-2; i++)
   {

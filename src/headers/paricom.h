@@ -319,6 +319,7 @@ enum manage_var_t {
 #define leading_term(x) ((GEN)(((GEN)(x))[lg(x)-1]))
 #define constant_term(x) (signe(x)? ((GEN)(((GEN)(x))[2])): gzero)
 #define degpol(a) ((long)lg(a)-3)
+#define lgpol(a) ((long)lg(a)-2)
 
 #define odd(x) ((x) & 1)
 #define mpodd(x) (signe(x) && mod2(x))
