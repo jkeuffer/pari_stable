@@ -206,6 +206,8 @@ sub open_viewer_then_quit
   $f = "$docdir/$F.pdf" if (! -f "$f");
   die "could not find \'$F\'" if (! -f "$f");
 
+  if ($f =~ /\//) { $F = "$f"; } else { $F = "$docdir/$f"; }
+
   $redirect = ' 2>/dev/null >/dev/null &';
   if ($f =~ /\.dvi/)
   { # DVI
@@ -213,19 +215,20 @@ sub open_viewer_then_quit
   }
   elsif ($win32)
   { # PDF Win32
-    $_ = `"$docdir/acro.exe"`;
-    chop; s/\"%1\"//; s,\\,/,g;
+    $@ = split(/"/, `"$docdir/acro.exe"`);
+    $_ = $_[1]; s,\\,/,g;
     $viewer = $_;
 
-    $docdir =~ s,/cygdrive/(.),$1:, ; # Reader can't cope with Cygwin paths
     $redirect = "";
+    $F =~ s,/cygdrive/(.),$1:, ; # Reader can't cope with Cygwin paths
+    $F =~ s/ /\\ /g;
+    $viewer =~ s/ /\\ /g;
   }
   else
   { # PDF generic
     $viewer = "acroread";
   }
 
-  if ($f =~ /\//) { $F = "$f"; } else { $F = "$docdir/$f"; }
   print "displaying \'$F\'.";
   print "\n" if (!$fromgp);
   safe_setsid();
