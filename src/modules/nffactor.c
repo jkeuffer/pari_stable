@@ -1099,6 +1099,7 @@ bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *L)
     if (!PRK) { PRK = prk; GSmin = pk; } /* nf = Q */
     else
     {
+      pari_sp av2 = avma;
       GEN S = invmat( get_R(PRK) ), BB = GS_norms(B, DEFAULTPREC);
       GEN smax = gzero;
       long i, j;
@@ -1109,7 +1110,7 @@ bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *L)
           s = gadd(s, gdiv( gsqr(gcoeff(S,i,j)), (GEN)BB[j]));
         if (gcmp(s, smax) > 0) smax = s;
       }
-      GSmin = ginv( gmul2n(smax, 2) );
+      GSmin = gerepileupto(av2, ginv(gmul2n(smax, 2)));
     }
     if (gcmp(GSmin, C) >= 0) break;
   }
@@ -1526,19 +1527,22 @@ nfsqff(GEN nf, GEN pol, long fl)
   if (fl) return gerepilecopy(av,
                    nf_DDF_roots(pol, polred, nfpol, lt, init_fa, nbf, fl, &L));
 
-  if (L.Tp)
-    rep = FqX_split_all(init_fa, L.Tp, L.p);
-  else
   {
-    long d;
-    rep = cgetg(dpol + 1, t_VEC); rep[1] = (long)polred;
-    d = FpX_split_berlekamp((GEN*)(rep + 1), L.p);
-    setlg(rep, d + 1);
+    pari_sp av2 = avma;
+    if (L.Tp)
+      rep = FqX_split_all(init_fa, L.Tp, L.p);
+    else
+    {
+      long d;
+      rep = cgetg(dpol + 1, t_VEC); rep[1] = (long)polred;
+      d = FpX_split_berlekamp((GEN*)(rep + 1), L.p);
+      setlg(rep, d + 1);
+    }
+    T.fact  = gerepilecopy(av2, sort_vecpol(rep));
   }
   if (DEBUGLEVEL>2) msgTIMER(&ti, "splitting mod %Z", pr);
   T.pr = pr;
   T.L  = &L;
-  T.fact  = sort_vecpol(rep);
   T.polbase = polbase;
   T.pol   = pol;
   T.nf    = nf;

@@ -473,9 +473,10 @@ MultiLift(GEN f, GEN a, GEN T, GEN p, long e0, int flag)
 GEN
 hensel_lift_fact(GEN pol, GEN Q, GEN T, GEN p, GEN pe, long e)
 {
+  pari_sp av = avma;
   if (lg(Q) == 2) return _vec(pol);
   pol = FpXQX_normalize(pol, T, pe);
-  return MultiLift(pol, Q, T, p, e, 0);
+  return gerepilecopy(av, MultiLift(pol, Q, T, p, e, 0));
 }
 
 /* U = NULL treated as 1 */
@@ -505,6 +506,7 @@ BezoutPropagate(GEN link, GEN v, GEN w, GEN pe, GEN U, GEN f, long j)
 GEN
 bezout_lift_fact(GEN pol, GEN Q, GEN p, long e)
 {
+  pari_sp av = avma;
   GEN E, link, v, w, pe;
   long i, k = lg(Q)-1;
   if (k == 1) { GEN d = cgetg(2, t_VEC); d[1] = (long)pol; return d; }
@@ -521,7 +523,7 @@ bezout_lift_fact(GEN pol, GEN Q, GEN p, long e)
     long t = link[i];
     if (t < 0) E[-t] = w[i];
   }
-  return gcopy(E);
+  return gerepilecopy(av, E);
 }
 
 /* Front-end for hensel_lift_fact:
