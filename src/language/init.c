@@ -48,7 +48,7 @@ long    *ordvar;
 long    DEBUGFILES,DEBUGLEVEL,DEBUGMEM,compatible;
 long    prec,precdl;
 ulong   init_opts = INIT_JMPm | INIT_SIGm;
-ulong   top, bot, avma, memused;
+ulong   bot = 0, top = 0, avma, memused;
 
 void *foreignHandler; 	              /* Handler for foreign commands.   */
 char foreignExprSwitch = 3; 	      /* Just some unprobable char.      */
@@ -497,7 +497,7 @@ pari_init(long parisize, long maxprime)
     exit(1);
   }
   if (INIT_SIG) pari_sig_init(pari_sighandler);
-  bot = 0; (void)init_stack(parisize);
+  (void)init_stack(parisize);
   diffptr = initprimes(maxprime);
   init_universal_constants();
 

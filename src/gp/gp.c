@@ -761,7 +761,10 @@ sd_parisize(char *v, int flag)
   long n = top-bot;
   GEN r = sd_numeric(v,flag,"parisize",&n, 10000,VERYBIGINT,NULL);
   if (n != top-bot)
+  {
+    if (!bot) top = n; /* no stack allocated yet */
     if (flag != d_INITRC) allocatemem0(n);
+  }
   return r;
 }
 
