@@ -31,7 +31,7 @@ Unless specified otherwise, examples assume 32bit machine and default precision
 4  qfbclassno(x < 0) may give a wrong result [e.g x = -2878367]
 
 3  many functions assume MAXVARN is a free variable, yielding bogus
-   results if the input involve it (only affect library programming).
+   results if the input involves it (only affects library programming).
 
 3  quadclassunit not reliable when fed non fundamental discriminants
    (infinite loop [e.g quadclassunit(-352)], wrong result)
@@ -117,10 +117,6 @@ Misc:
 4  rethink the element_mul type of functions: multiplication table is O(n^3),
    polynomial multiplication + remainder is O(n^2) [+ can use Karatsuba/FFT]
 
-4  extend forprime(n=a,b,...) so that b can go over primelimit [cut [a,b]
-   in large intervals, sieve out multiple of small primes there, then use
-   isprime() on the rest]
-
 3  zetak is very inefficient and unable to handle most fields of degree > 8
 
 3  have quadclassunit return bnf structure
@@ -178,8 +174,9 @@ Misc:
 
 4  use divide & conquer approach in string / integer conversions
 
-4  let forprime(n=a, b, ...) work even if a,b above primelimit
-   (maybe with a Warning), via simple sieve + pseudo primality test
+4  extend forprime(n=a,b,...) so that b can go over primelimit [cut [a,b]
+   in large intervals, sieve out multiple of small primes there, then use
+   isprime() on the rest]
 
 3  split matrix_block in 2 parts: exploration + assignment. Would allow
    Math::Pari to use complicated x[][][][] constructs
