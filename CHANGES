@@ -82,6 +82,8 @@ HC  4- "double exponential method" for numerical integration and sumation.
        intmellininvshort, intnuminit, intnuminitgen, intnumromb, intnumstep,
        sumnum, sumnumalt, sumnuminit
     5- new universal constant gminusone
+    6- [bench suite] test-intnum and test-stark toplevel targets
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.8 (released 25/11/2004):
   Fixed
