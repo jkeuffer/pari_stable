@@ -1311,7 +1311,7 @@ conformal_mapping(GEN p, long k, long bitprec, double aux,GEN *F,GEN *G)
   }
   else /* k+1=n */
     rmax = max_modulus(q,aux/10.);
-  affrr(radius[k+1], rmax);
+  affrr(rmax, radius[k+1]);
 
   rho = mpsqrt(mulrr(rmin,rmax));
   delta = rtodbl(gmul2n(mplog(divrr(rmax,rmin)), -1));
