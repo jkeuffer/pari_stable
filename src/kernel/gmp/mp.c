@@ -227,13 +227,6 @@ subiispec(GEN x, GEN y, long nx, long ny)
   zd[1] = evalsigne(1) | evallgefint(lz);
   return zd;
 }
-/* prototype of positive small ints */
-static long pos_s[] = {
-  evaltyp(t_INT) | _evallg(3), evalsigne(1) | evallgefint(3), 0 };
-
-/* prototype of negative small ints */
-static long neg_s[] = {
-  evaltyp(t_INT) | _evallg(3), evalsigne(-1) | evallgefint(3), 0 };
 
 static void
 roundr_up_ip(GEN x, long l)
