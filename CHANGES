@@ -96,6 +96,14 @@ IS 25- config/get_head would not work only if one invoked $PWD/Configure
        negative definite forms.
    30- \p 38
        ellinit([1,0,0,-19959260,-34323045317]) -> precision too low in initell
+   31- {p = x^36 - 252*x^34 + 27504*x^32 - 1723392*x^30 + 69300198*x^28 -
+      1894026456*x^2    6 + 36355251492*x^24 - 499350803616*x^22 +
+      4953373719489*x^20 - 355510821425 40*x^18 + 183790369965636*x^16 -
+      677399199594048*x^14 + 1751507793357696*x^1    2 - 3105079104411648*x^10
+      + 3651333353058816*x^8 - 2698458969378816*x^6 + 11 30370773667840*x^4 -
+      207898980728832*x^2 + 2879456034816; nfroots(nfinit(subst(p,x,y)), p); }
+      --> loop forever in lllintpartial()
+      Fix: abort lllintpartial if progress negligible (was: if _no_ progress)
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.

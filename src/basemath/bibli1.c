@@ -1595,7 +1595,7 @@ lllintpartialall(GEN m, long flag)
     * try to replace (v, w) by (v, v - q*w) for some q.
     * We compute all inner products and check them repeatedly. */
     const pari_sp av3 = avma, lim = stack_lim(av3,2);
-    long i, j, npass = 0;
+    long i, j, npass = 0, e = VERYBIGINT;
     GEN dot = cgetg(ncol+1, t_MAT); /* scalar products */
 
     tm2 = idmat(ncol);
@@ -1607,7 +1607,7 @@ lllintpartialall(GEN m, long flag)
     }
     for(;;)
     {
-      long reductions = 0;
+      long reductions = 0, olde = e;
       for (i=1; i <= ncol; i++)
       {
 	long ijdif;
@@ -1640,13 +1640,14 @@ lllintpartialall(GEN m, long flag)
         }
       } /* for i */
       if (!reductions) break;
+      e = 0;
+      for (i = 1; i <= ncol; i++) e += expi( gcoeff(dot,i,i) );
+      if (e == olde) break;
       if (DEBUGLEVEL>6)
       {
-	GEN d = dbltor(1.0);
-	for (i = 1; i <= ncol; i++) d = mpmul(d, gcoeff(dot,i,i));
         npass++;
-	fprintferr("npass = %ld, red. last time = %ld, diag_prod = %Z\n\n",
-	            npass, reductions, d);
+	fprintferr("npass = %ld, red. last time = %ld, log_2(det) ~ %ld\n\n",
+	            npass, reductions, e);
       }
     } /* for(;;)*/
 
