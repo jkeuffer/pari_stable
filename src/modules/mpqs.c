@@ -46,7 +46,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #  endif
 #endif
 
-#define MPQS_STRING_LENGTH         (4 * 1024)
+#ifdef MPQS_DEBUG
+#  define MPQS_DEBUGLEVEL 1000 /* infinity */
+#else
+#  define MPQS_DEBUGLEVEL DEBUGLEVEL
+#endif
+
+#define MPQS_STRING_LENGTH         (4 * 1024UL)
 #define MPQS_CANDIDATE_ARRAY_SIZE  2000
 #define MPQS_PRIMES_FOR_MULTIPLIER 5
 /* `large primes' must be smaller than
@@ -101,8 +107,8 @@ mpqs_get_filename(char *s)
 static int
 mpqs_relations_cmp(const void *a, const void *b)
 {
-  char **sa = (char **) a;
-  char **sb = (char **) b;
+  char **sa = (char**) a;
+  char **sb = (char**) b;
   long qa = strtol(*sa, NULL, 10);
   long qb = strtol(*sb, NULL, 10);
   /* atol() isn't entirely portable for the Full Relations case where the
@@ -121,8 +127,8 @@ mpqs_relations_cmp(const void *a, const void *b)
  **/
 
 #define bummer(fn) err(talker, "error whilst writing to file %s", fn)
-#define min_bufspace 120	/* use new buffer when < min_bufspace left */
-#define buflist_size 1024	/* size of list-of-buffers blocks */
+#define min_bufspace 120UL /* use new buffer when < min_bufspace left */
+#define buflist_size 1024  /* size of list-of-buffers blocks */
 
 static long
 mpqs_sort_lp_file(char *filename)
@@ -132,12 +138,13 @@ mpqs_sort_lp_file(char *filename)
   char *old_s, **sort_table = (char**)avma, *buf, *cur_line;
   static char **buflist_head = NULL;
   char **buflist, **next_buflist;
-  long i, j, bufspace, length, count;
+  long i, j, count;
+  size_t length, bufspace;
   pari_sp av=avma;
 
   if (!buflist_head)
   {
-    buflist_head = (char **) gpmalloc(buflist_size * sizeof(char *));
+    buflist_head = (char**) gpmalloc(buflist_size * sizeof(char*));
     buflist = buflist_head;
     *buflist++ = NULL;		/* flag this as last and only buflist block */
   }
@@ -157,7 +164,7 @@ mpqs_sort_lp_file(char *filename)
   pTMP = pari_fopen(filename, READ);
   TMP = pTMP->file;
   /* get first buffer and read first line, if any, into it */
-  buf = (char *) gpmalloc(MPQS_STRING_LENGTH * sizeof(char));
+  buf = (char*) gpmalloc(MPQS_STRING_LENGTH * sizeof(char));
   cur_line = buf;
   bufspace = MPQS_STRING_LENGTH;
 
@@ -188,42 +195,33 @@ mpqs_sort_lp_file(char *filename)
     *sort_table = cur_line;
     cur_line += length;
 
-    /* if very little room is left, allocate a fresh buffer before
+    /* if little room is left, allocate a fresh buffer before
        attempting to read a line, and remember to free it if no
        further line is forthcoming.  This avoids some copying of
        partial lines --GN */
     if (bufspace < min_bufspace)
     {
-      if (
-#ifdef MPQS_DEBUG
-	  1 ||
-#endif
-	  DEBUGLEVEL >= 7)
+      if (MPQS_DEBUGLEVEL >= 7)
 	fprintferr("MQPS: short of space -- another buffer for sorting\n");
-      buf = (char *) gpmalloc(MPQS_STRING_LENGTH * sizeof(char));
+      buf = (char*) gpmalloc(MPQS_STRING_LENGTH * sizeof(char));
       cur_line = buf;
       bufspace = MPQS_STRING_LENGTH;
-      if (fgets(cur_line, bufspace, TMP) == NULL)
+      if (fgets(cur_line, bufspace, TMP) == NULL) { free(buf); break; }
+
+      /* remember buffer for later deallocation */
+      if (buflist - buflist_head >= buflist_size)
       {
-	free(buf); break;
+        /* need another buflist block */
+        next_buflist =
+          (char**) gpmalloc(buflist_size * sizeof(char*));
+        *next_buflist = (char*)buflist_head; /* link */
+        buflist_head = next_buflist;
+        buflist = buflist_head + 1;
       }
-      else
-      {
-	/* remember buffer for later deallocation */
-	if (buflist - buflist_head >= buflist_size)
-	{
-	  /* need another buflist block */
-	  next_buflist =
-	    (char **) gpmalloc(buflist_size * sizeof(char *));
-	  *next_buflist = (char *)buflist_head; /* link */
-	  buflist_head = next_buflist;
-	  buflist = buflist_head + 1;
-	}
-	*buflist++ = buf;
-	length = strlen(cur_line) + 1;
-	bufspace -= length;
-	continue;
-      }
+      *buflist++ = buf;
+      length = strlen(cur_line) + 1;
+      bufspace -= length;
+      continue;
     }
 
     /* normal case:  try fitting another line into the current buffer,
@@ -235,21 +233,15 @@ mpqs_sort_lp_file(char *filename)
     /* check whether we got the entire line or only part of it */
     if (bufspace == 0 && cur_line[length-2] != '\n')
     {
-      long lg1;
-      if (
-#ifdef MPQS_DEBUG
-	  1 ||
-#endif
-	  DEBUGLEVEL >= 7)
+      size_t lg1;
+      if (MPQS_DEBUGLEVEL >= 7)
 	fprintferr("MQPS: line wrap -- another buffer for sorting\n");
-      buf = (char *) gpmalloc(MPQS_STRING_LENGTH * sizeof(char));
+      buf = (char*) gpmalloc(MPQS_STRING_LENGTH * sizeof(char));
       /* remember buffer for later deallocation */
       if (buflist - buflist_head >= buflist_size)
-      {
-	/* need another buflist block */
-	next_buflist =
-	  (char **) gpmalloc(buflist_size * sizeof(char *));
-	*next_buflist = (char *)buflist_head; /* link */
+      { /* need another buflist block */
+	next_buflist = (char**)gpmalloc(buflist_size * sizeof(char*));
+	*next_buflist = (char*)buflist_head; /* link */
 	buflist_head = next_buflist;
 	buflist = buflist_head + 1;
       }
@@ -271,50 +263,37 @@ mpqs_sort_lp_file(char *filename)
 
   pari_fclose(pTMP);
 
-#if 0				/* caught above, can no longer happen */
-  if (i == 0)
-  {
-    avma = av; return 0;
-  }
-#endif
-
   /* sort the whole lot in place by swapping pointers */
-  qsort(sort_table, i, sizeof(char *), mpqs_relations_cmp);
+  qsort(sort_table, i, sizeof(char*), mpqs_relations_cmp);
 
   /* copy results back to the original file, skipping exact duplicates */
   pTMP = pari_fopen(filename, WRITE); /* NOT safefopen */
   TMP = pTMP->file;
   old_s = sort_table[0];
-  if (fputs(sort_table[0], TMP) < 0)
-    bummer(filename);
+  if (fputs(sort_table[0], TMP) < 0) bummer(filename);
   count = 1;
   for(j = 1; j < i; j++)
   {
     if (strcmp(old_s, sort_table[j]) != 0)
     {
-      if (fputs(sort_table[j], TMP) < 0)
-	bummer(filename);
+      if (fputs(sort_table[j], TMP) < 0) bummer(filename);
       count++;
     }
     old_s = sort_table[j];
   }
   pari_fclose(pTMP);
-  if (
-#ifdef MPQS_DEBUG
-      1 ||
-#endif
-      DEBUGLEVEL >= 6)
+  if (MPQS_DEBUGLEVEL >= 6)
     fprintferr("MPQS: done sorting one file.\n");
 
   /* deallocate buffers and any extraneous buflist blocks except the first */
   while (*--buflist)
   {
     if (buflist != buflist_head) /* not a linkage pointer */
-      free((void *) *buflist);	/* free a buffer */
+      free((void*) *buflist);	/* free a buffer */
     else			/* linkage pointer */
     {
-      next_buflist = (char **)(*buflist);
-      free((void *)buflist_head); /* free a buflist block */
+      next_buflist = (char**)(*buflist);
+      free((void*)buflist_head); /* free a buflist block */
       buflist_head = next_buflist;
       buflist = buflist_head + buflist_size;
     }
@@ -323,8 +302,7 @@ mpqs_sort_lp_file(char *filename)
   for (j = 0; j < i; j++)
   {
     buf = (char *)(sort_table[j]) - 1;
-    if (*buf)			/* check: deallocation flag or \0 ? */
-      free(buf);
+    if (*buf) free(buf); /* check: deallocation flag or \0 ? */
   }
 #endif
   avma = av; return count;
@@ -634,11 +612,7 @@ mpqs_mergesort_lp_file(char *REL_str, char *NEW_str, long mode)
   pari_unlink(REL_str);
   if (rename(TMP_str,REL_str))
     err(talker, "can\'t rename file %s to %s", TMP_str, REL_str);
-  if (
-#ifdef MPQS_DEBUG
-	   1 ||
-#endif
-	   DEBUGLEVEL >= 6)
+  if (MPQS_DEBUGLEVEL >= 6)
     fprintferr("MPQS: renamed file %s to %s\n", TMP_str, REL_str);
   return tp;
 }
@@ -752,8 +726,7 @@ mpqs_count_primes(void)
   long gaps = 0;
 
   for ( ; *p; p++)
-      if (*p == DIFFPTR_SKIP)
-	  gaps++;
+      if (*p == DIFFPTR_SKIP) gaps++;
   return (p - mpqs_diffptr - gaps);
 }
 
@@ -799,11 +772,7 @@ mpqs_create_FB(long size, GEN kN, long k, long *f)
     mpqs_prime_count = mpqs_count_primes();
   }
 
-  if (
-#ifdef MPQS_DEBUG
-      1 ||
-#endif
-      DEBUGLEVEL >= 7)
+  if (MPQS_DEBUGLEVEL >= 7)
     fprintferr("MPQS: FB [-1");
   primes_ptr = mpqs_diffptr;
   for (i = 2; i < size + 2; )
@@ -821,31 +790,19 @@ mpqs_create_FB(long size, GEN kN, long k, long *f)
       {
 	if (kr == 0)
 	{
-	  if (
-#ifdef MPQS_DEBUG
-	      1 ||
-#endif
-	      DEBUGLEVEL >= 7)
+	  if (MPQS_DEBUGLEVEL >= 7)
 	    fprintferr(",%ld...] Wait a second --\n", p);
 	  *f = p;
 	  return FB;
 	}
-	if (
-#ifdef MPQS_DEBUG
-	    1 ||
-#endif
-	    DEBUGLEVEL >= 7)
+	if (MPQS_DEBUGLEVEL >= 7)
 	  fprintferr(",%ld", p);
 	FB[i] = p, i++;
       }
     }
   }
 
-  if (
-#ifdef MPQS_DEBUG
-      1 ||
-#endif
-      DEBUGLEVEL >= 7)
+  if (MPQS_DEBUGLEVEL >= 7)
   {
     fprintferr("]\n");
     flusherr();
@@ -2061,8 +2018,7 @@ mpqs_combine_large_primes(FILE *COMB, FILE *FNEW, long size_of_FB,
       if (!egalii(Qx_2, prod_pi_ei))
       {
 	free(ei);
-	err(talker,
-	    "MPQS: combined large prime relation is false");
+	err(talker, "MPQS: combined large prime relation is false");
       }
     }
 #endif
@@ -2530,11 +2486,7 @@ mpqs_solve_linear_system(GEN kN, GEN N, long rel, long *FB, long size_of_FB)
       }
     }
     X = gerepileupto(av3, X);	/* unconditionally */
-    if (
-#ifdef MPQS_DEBUG
-	1 ||
-#endif
-	DEBUGLEVEL >= 1)
+    if (MPQS_DEBUGLEVEL >= 1)
     {				/* this shouldn't happen either --GN */
       if (signe(modii(subii(sqri(X), sqri(Y_prod)), N_or_kN)))
       {
