@@ -3158,6 +3158,7 @@ rnfdet2(GEN nf, GEN A, GEN I)
   pari_sp av = avma;
   GEN p1;
   nf = checknf(nf);
+  if (typ(I) != t_VEC) err(typeer,"rnfdet2");
   p1 = idealmul(nf, det(matbasistoalg(nf, A)), prodid(nf, I));
   return gerepileupto(av, p1);
 }

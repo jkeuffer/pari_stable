@@ -28,7 +28,7 @@ matbasistoalg(GEN nf,GEN x)
   long i, j, li, lx = lg(x);
   GEN c, z = cgetg(lx,t_MAT);
 
-  if (typ(x) != t_MAT) err(talker,"argument must be a matrix in matbasistoalg");
+  if (typ(x) != t_MAT) err(talker,"not a matrix in matbasistoalg");
   if (lx == 1) return z;
   li = lg(x[1]);
   for (j=1; j<lx; j++)
@@ -45,7 +45,7 @@ matalgtobasis(GEN nf,GEN x)
   long i, j, li, lx = lg(x);
   GEN c, z = cgetg(lx, t_MAT);
 
-  if (typ(x) != t_MAT) err(talker,"argument must be a matrix in matalgtobasis");
+  if (typ(x) != t_MAT) err(talker,"not a matrix in matalgtobasis");
   if (lx == 1) return z;
   li = lg(x[1]);
   for (j=1; j<lx; j++)
