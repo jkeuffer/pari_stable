@@ -1397,7 +1397,7 @@ czeta(GEN s0, long prec)
         default: la = 3; break;
       }
     }
-    if (dnorm(ssig-1,st) < 0.1) /* |s - 1| < 0.1 */
+    if (dnorm(ssig-1,st) < 0.1) /* |s - 1|^2 < 0.1 */
       l2 = -(ssig - 0.5);
     else
     { /* l2 = Re( (s - 1/2) log (s-1) ) */
