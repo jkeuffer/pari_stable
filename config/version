@@ -1,8 +1,8 @@
 # Major Version number
-version='2.1'
+version='2.2'
 
 # Patch level
 patch='0'
 
 # Status: alpha, beta, released, development
-status='released'
+status='development'
