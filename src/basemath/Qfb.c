@@ -1044,9 +1044,13 @@ qfbimagsolvep(GEN Q, GEN p)
     if (gcmp1(a)) return qfbsolve_cornacchia(c, p, 0);
     if (gcmp1(c)) return qfbsolve_cornacchia(a, p, 1);
   }
-  d = qf_disc(Q);
-  if (kronecker(d,p) < 0) return gen_0;
+  d = qf_disc(Q); if (kronecker(d,p) < 0) return gen_0;
   a = redimagsl2(Q, &N);
+  if (!signe(gel(a,2)) && is_pm1(gel(a,1)))
+  {
+    a = qfbsolve_cornacchia(gel(a,3), p, 0);
+    return gerepileupto(av, gmul(N, gtrans_i(a)));
+  }
   b = redimagsl2(primeform(d, p, 0), &M);
   if (!gequal(a, b)) return gen_0;
   a = gcoeff(N,1,1); x = gcoeff(M,2,2);
