@@ -322,9 +322,9 @@ esac
 #   Modifications for pretty name and asm file
 #
 case "$osname" in
-  cygwin*|linux|freebsd|os2) pretty="$pretty running $osname";;
-  nextstep) pretty="$pretty running $osname";
-            if test "$arch" = m68k; then asmarch=none; fi ;;
+  nextstep|cygwin*|linux|freebsd|os2)
+       pretty="$pretty running $osname";
+        if test "$arch" = m68k; then asmarch=none; fi ;;
 esac
 
 if test "$kernel" = no; then
