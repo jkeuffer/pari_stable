@@ -1327,12 +1327,11 @@ static GEN
 famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prn, GEN EX)
 {
   long i,k, l = lg(g), N = degpol(nf[1]);
-  GEN prnZ,cx,x,u,z, zpow = gzero, p = (GEN)pr[1], b = (GEN)pr[5];
+  GEN prnZ,cx,x,u, zpow = gzero, p = (GEN)pr[1], b = (GEN)pr[5];
   GEN mul = cgetg(N+1,t_MAT);
   GEN newg = cgetg(l+1, t_VEC); /* room for z */
 
   prnZ = gcoeff(prn, 1,1);
-  z = gmod(special_anti_uniformizer(nf, pr), prnZ);
   for (i=1; i<=N; i++) mul[i] = (long)element_mulid(nf,b,i);
   for (i=1; i < l; i++)
   {
@@ -1350,7 +1349,7 @@ famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prn, GEN EX)
   if (zpow == gzero) setlg(newg, l);
   else
   {
-    newg[i] = (long)z;
+    newg[i] = (long)FpV_red(special_anti_uniformizer(nf, pr), prnZ);
     e = concatsp(e, negi(zpow));
   }
   e = gmod(e, EX);
