@@ -2135,14 +2135,16 @@ trunc0(GEN x, GEN *pte)
 /*                                                                 */
 /*******************************************************************/
 
-/* return a_n B^n + ... + a_0, where B = 2^BIL. Assume n even if BIL=64 and
- * the a_i are 32bits integers, one of which is non-zero */
+/* return a_n B^n + ... + a_0, where B = 2^32. Assume n even if BIL=64 and
+ * the a_i are 32bits integers */
 GEN
 coefs_to_int(long n, ...)
 {
   va_list ap;
+  pari_sp av = avma;
   GEN x, y;
   long i;
+  int iszero = 1;
   va_start(ap,n);
 #ifdef LONG_IS_64BIT
   n >>= 1;
@@ -2159,9 +2161,12 @@ coefs_to_int(long n, ...)
 #else
     *y = va_arg(ap, long);
 #endif
-    y=int_precW(y);
+    if (*y) iszero = 0;
+    y = int_precW(y);
   }
-  va_end(ap); return x;
+  va_end(ap);
+  if (iszero) { avma = av; return gzero; }
+  return x;
 }
 
 /* 2^32 a + b */
