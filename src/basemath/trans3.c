@@ -845,7 +845,7 @@ czeta(GEN s0, long prec)
   int funeq = 0;
   byteptr d;
 
-  if (DEBUGLEVEL) timer2();
+  if (DEBUGLEVEL>2) timer2();
   s = trans_fix_arg(&prec,&s0,&sig,&av,&res);
   if (gcmp0(s)) { y = gneg(ghalf); goto END; }
   if (signe(sig) <= 0 || expo(sig) < -1)
@@ -888,7 +888,7 @@ czeta(GEN s0, long prec)
     lim = (long) ceil(l); if (lim < 2) lim = 2;
     l2 = (lim+ssig/2.-.25);
     nn = 1 + (long)ceil( sqrt(l2*l2 + st*st/4) * la / PI );
-    if (DEBUGLEVEL) fprintferr("lim, nn: [%ld, %ld]\n",lim,nn);
+    if (DEBUGLEVEL>2) fprintferr("lim, nn: [%ld, %ld]\n",lim,nn);
     if ((ulong)nn >= maxprime()) err(primer1);
   }
   prec++; unr = realun(prec); /* one extra word of precision */
@@ -919,7 +919,7 @@ czeta(GEN s0, long prec)
     ulong oldq = p, q = p*p;
     while (q<(ulong)nn) { tab[q] = gmul(tab[p], tab[oldq]); oldq = q; q *= p; }
   }
-  if (DEBUGLEVEL) msgtimer("tab[q^-s] from 1 to N-1"); 
+  if (DEBUGLEVEL>2) msgtimer("tab[q^-s] from 1 to N-1"); 
 
   tabn = cgetg(nn, t_VECSMALL); ct = 0;
   for (i = nn-1; i; i>>=1) tabn[++ct] = (i-1)>>1;
@@ -933,7 +933,7 @@ czeta(GEN s0, long prec)
     y = gadd(sim, gmul(tab[2],y));
   }
   y = gadd(y, gmul2n(a,-1));
-  if (DEBUGLEVEL) msgtimer("sum from 1 to N-1");
+  if (DEBUGLEVEL>2) msgtimer("sum from 1 to N-1");
 
   invn2 = divrs(unr, nn*nn); lim2 = lim<<1;
   tes = bernreal(lim2, prec);
@@ -976,7 +976,7 @@ czeta(GEN s0, long prec)
     u = gmul(gmul(tes,invn2), gmul2n(s2, -1));
     tes = gmulsg(nn, gaddsg(1, u));
   }
-  if (DEBUGLEVEL) msgtimer("Bernoulli sum");
+  if (DEBUGLEVEL>2) msgtimer("Bernoulli sum");
   /* y += tes a / (s-1) */
   y = gadd(y, gmul(tes, gdiv(a, gsub(s, unr))));
 
