@@ -655,10 +655,11 @@ FindModulus(GEN dataC, long fl, long *newprec, long prec, long bnd)
 static GEN
 ComputeArtinNumber(GEN datachi, long flag, long prec)
 {
-  long av = avma, av2, G, ms, j, i, nz, zcard, q, l, N, lim;
-  GEN chi, nc, dc, p1, cond0, cond1, elts, Msign, umod2, lambda, nf;
-  GEN sg, p2, chib, diff, vt, z, idg, mu, idh, zid, zstruc, zgen, zchi;
-  GEN classe, bnr, beta, s, tr, p3, den, muslambda, Pi, lp1, beta2;
+  long av = avma, av2, j, i, nz, zcard, q, N, lim;
+  GEN chi, nc, dc, p1, cond, cond0, cond1, lambda, nf, T;
+  GEN p2, chib, diff, vt, z, idg, mu, idh, zid, zstruc, zgen, zchi;
+  GEN classe, bnr, beta, s, tr, den, muslambda, Pi, lp1, beta2;
+  GEN sarch;
 
   chi   = (GEN)datachi[8];
   /* trivial case */
@@ -667,13 +668,13 @@ ComputeArtinNumber(GEN datachi, long flag, long prec)
   bnr   = (GEN)datachi[3];
   nf    = gmael(bnr, 1, 7);
   diff  = gmael(nf, 5, 5);
-  cond0 = gmael3(bnr, 2, 1, 1);
-  cond1 = gmael3(bnr, 2, 1, 2);
-  umod2 = gmodulcp(gun, gdeux);
+  T     = gmael(nf,5,4);
+  cond  =  gmael(bnr, 2, 1);
+  cond0 = (GEN)cond[1];
+  cond1 = (GEN)cond[2];
   N     = degpol(nf[1]);
   Pi    = mppi(prec);
 
-  G   = - bit_accuracy(prec) >> 1;
   nc  = idealnorm(nf, cond0);
   dc  = idealmul(nf, diff, cond0);
   den = idealnorm(nf, dc);
@@ -685,46 +686,31 @@ ComputeArtinNumber(GEN datachi, long flag, long prec)
 
   /* compute a system of elements congru to 1 mod cond0 and giving all
      possible signatures for cond1 */
-  p1 = zarchstar(nf, cond0, cond1, q);
-  elts = (GEN)p1[2];
-  Msign = gmul((GEN)p1[3], umod2);
-  ms = lg(elts) - 1;
+  sarch = zarchstar(nf, cond0, cond1, q);
 
   /* find lambda in diff.cond such that gcd(lambda.(diff.cond)^-1,cond0) = 1
-     and lambda >(cond1)> 0 */
+     and lambda >> 0 at cond1 */
   lambda = idealappr(nf, dc);
-  sg = zsigne(nf, lambda, cond1);
-  p2 = lift(gmul(Msign, sg));
-
-  for (j = 1; j <= ms; j++)
-    if (gcmp1((GEN)p2[j])) lambda = element_mul(nf, lambda, (GEN)elts[j]);
-
+  lambda = set_sign_mod_idele(nf, NULL, lambda, cond,sarch);
   idg = idealdivexact(nf, lambda, dc);
 
   /* find mu in idg such that idh=(mu) / idg is coprime with cond0 and
-     mu >(cond1)> 0 */
+     mu >> 0 at cond1 */
   if (!gcmp1(gcoeff(idg, 1, 1)))
   {
     p1 = idealfactor(nf, idg);
     p2 = idealfactor(nf, cond0);
+    p2[2] = (long)zerocol(lg(p2[1])-1);
+    p1 = concat_factor(p1,p2);
 
-    l = lg((GEN)p2[1]);
-    for (i = 1; i < l; i++) coeff(p2, i, 2) = zero;
-
-    p1 = gtrans(concatsp(gtrans(p1), gtrans(p2)));
     mu = idealapprfact(nf, p1);
-    sg = zsigne(nf, mu, cond1);
-    p2 = lift(gmul(Msign, sg));
-
-    for (j = 1; j <= ms; j++)
-      if (gcmp1((GEN)p2[j])) mu = element_mul(nf, mu, (GEN)elts[j]);
-
+    mu = set_sign_mod_idele(nf, NULL,mu, cond,sarch);
     idh = idealdivexact(nf, mu, idg);
   }
   else
   {
     mu  = gun;
-    idh = gcopy(idg);
+    idh = idg;
   }
 
   muslambda = element_div(nf, mu, lambda);
@@ -740,31 +726,16 @@ ComputeArtinNumber(GEN datachi, long flag, long prec)
   zchi = cgetg(nz + 1, t_VEC);
   for (i = 1; i <= nz; i++)
   {
-    p1 = (GEN)zgen[i];
-    sg = zsigne(nf, p1, cond1);
-    p2 = lift(gmul(Msign, sg));
-
-    for (j = 1; j <= ms; j++)
-      if (gcmp1((GEN)p2[j])) p1 = element_mul(nf, p1, (GEN)elts[j]);
-
-    classe = isprincipalray(bnr, p1);
+    zgen[i] = (long)set_sign_mod_idele(nf, NULL,(GEN)zgen[i], cond,sarch);
+    classe = isprincipalray(bnr, (GEN)zgen[i]);
     zchi[i] = (long)ComputeImagebyChar(chi, classe, 0);
-    zgen[i] = (long)p1;
   }
 
   /* Sum chi(beta) * exp(2i * Pi * Tr(beta * mu / lambda) where beta
      runs through the classes of (Ok/cond0)^* and beta cond1-positive */
 
-  p3 = cgetg(N + 1, t_COL);
-  for (i = 1; i <= N; i++) p3[i] = zero;
-
-  vt = cgetg(N + 1, t_VEC);
-  for (i = 1; i <= N; i++)
-  {
-    p3[i] = un;
-    vt[i] = ltrace(basistoalg(nf, p3));
-    p3[i] = zero;
-  }
+  vt = cgetg(N + 1, t_VEC); /* Tr(w_i) */
+  for (i = 1; i <= N; i++) vt[i] = coeff(T,i,1);
 
   lp1 = NULL;
   s = gzero;
@@ -806,13 +777,7 @@ ComputeArtinNumber(GEN datachi, long flag, long prec)
     }
 
     lp1 = p1;
-    sg  = zsigne(nf, beta, cond1);
-    p2  = lift(gmul(Msign, sg));
-
-    for (j = 1; j <= ms; j++)
-      if (gcmp1((GEN)p2[j]))
-	beta = element_mul(nf, beta, (GEN)elts[j]);
-
+    beta = set_sign_mod_idele(nf, NULL,beta, cond,sarch);
     beta2 = element_mul(nf, beta, muslambda);
     tr = gmul(vt, beta2);
     tr = gmod(gmul(tr, den), den);
@@ -832,10 +797,7 @@ ComputeArtinNumber(GEN datachi, long flag, long prec)
   s = gmul(s, ComputeImagebyChar(chi, classe, 0));
   s = gdiv(s, gsqrt(nc, prec));
 
-  p1 = gsubgs(gabs(s, prec), 1);
-
-  i = expo(p1);
-  if ((i > G) && !flag)
+  if (!flag &&  - expo(subrs(gnorm(s), 1)) < bit_accuracy(prec) >> 1)
     err(bugparier, "ComputeArtinNumber");
 
   return gerepileupto(av, gmul(s, gpowgs(gneg_i(gi),q)));
@@ -1390,6 +1352,15 @@ CopyCoeff(int** a, int** a2, long n, long m)
   }
 }
 
+/* return q*p if <= n. Beware overflow */
+static long
+next_pow(long q, long p, long n)
+{
+  const GEN x = muluu((ulong)q, (ulong)p);
+  const ulong qp = (ulong)x[2];
+  return (lgefint(x) > 3 || qp > (ulong)n)? 0: qp;
+}
+
 static void
 an_AddMul(int **an,int **an2, long np, long n, long deg, GEN chi, int **reduc)
 {
@@ -1398,11 +1369,12 @@ an_AddMul(int **an,int **an2, long np, long n, long deg, GEN chi, int **reduc)
   int *c, *c2 = (int*)new_chunk(deg);
 
   CopyCoeff(an, an2, n/np, deg);
-  for (q = np; q <= n; q *= np)
+  for (q=np;;)
   {
     if (gcmp1(chi2)) c = NULL; else { Polmod2Coeff(c2, chi2, deg); c = c2; }
     for(k = 1, qk = q; qk <= n; k++, qk += q)
       AddMulCoeff(an[qk], c, an2[k], reduc, deg);
+    if (! (q = next_pow(q,np, n)) ) break;
 
     chi2 = gmul(chi2, chi);
   }
@@ -2004,6 +1976,7 @@ GetST(GEN dataCR, long prec)
       const long t = LChar[k], d = degs[t];
       const GEN z = gmael3(dataCR, t, 5, 2);
       GEN p1 = gzero, p2 = gzero;
+      long c = 0;
       int **matan;
       
       if (DEBUGLEVEL>1)
@@ -2015,9 +1988,9 @@ GetST(GEN dataCR, long prec)
           get_cS_cT(&cScT, n);
           p1 = gadd(p1, gmul(an,        cScT.cS[n]));
           p2 = gadd(p2, gmul(gconj(an), cScT.cT[n]));
-          if ((n & 0xff) == 0)
+          if (++c == 256)
           { GEN *gptr[2]; gptr[0]=&p1; gptr[1]=&p2;
-            gerepilemany(av2,gptr,2);
+            gerepilemany(av2,gptr,2); c = 0;
           }
         }
       gaffect(p1, (GEN)S[t]);
@@ -2392,14 +2365,6 @@ an_set0(int **an, long p, long n, long deg)
   for (i = p; i <= n; i += p) _0toCoeff(an[i], deg);
 }
 
-static long
-next_pow(long q, long p, long n)
-{
-  const GEN x = muluu((ulong)q, (ulong)p);
-  const ulong qp = (ulong)x[2];
-  return (lgefint(x) > 3 || qp > (ulong)n)? 0: qp;
-}
-
 /* compute the coefficients an for the quadratic case */
 static int**
 computean(GEN dtcr, LISTray *R, long n, long deg)
@@ -2547,6 +2512,7 @@ QuadGetST(GEN dataCR, long prec)
       const GEN z = gmael3(dataCR, t, 5, 2);
       GEN p1 = gzero, p2 = gzero;
       int **matan;
+      long c = 0;
 
       if (DEBUGLEVEL>1)
         fprintferr("\tcharacter no: %ld (%ld/%ld)\n", t,k,nChar);
@@ -2556,9 +2522,9 @@ QuadGetST(GEN dataCR, long prec)
         {
           p1 = gadd(p1, gmul(an, (GEN)vcn[n]));
 	  p2 = gadd(p2, gmul(an, (GEN)veint1[n]));
-          if ((n & 0xff) == 0)
+          if (++c == 256)
           { GEN *gptr[2]; gptr[0]=&p1; gptr[1]=&p2;
-            gerepilemany(av2,gptr,2);
+            gerepilemany(av2,gptr,2); c = 0;
           }
         }
       gaffect(gmul(cfh, gmul(p1,c1)), (GEN)S[t]);

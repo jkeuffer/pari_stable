@@ -1733,9 +1733,8 @@ factor0(GEN x,long flag)
   return NULL; /* not reached */
 }
 
-/* assume f and g coprime integer factorizations */
 GEN
-merge_factor_i(GEN f, GEN g)
+concat_factor(GEN f, GEN g)
 {
   GEN h;
   if (lg(f) == 1) return g;
@@ -1743,7 +1742,16 @@ merge_factor_i(GEN f, GEN g)
   h = cgetg(3,t_MAT);
   h[1] = (long)concatsp((GEN)f[1], (GEN)g[1]);
   h[2] = (long)concatsp((GEN)f[2], (GEN)g[2]);
-  return sort_factor_gen(h, cmpii);
+  return h;
+}
+
+/* assume f and g coprime integer factorizations */
+GEN
+merge_factor_i(GEN f, GEN g)
+{
+  if (lg(f) == 1) return g;
+  if (lg(g) == 1) return f;
+  return sort_factor_gen(concat_factor(f,g), cmpii);
 }
 
 GEN

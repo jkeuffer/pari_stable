@@ -1393,6 +1393,12 @@ zarchstar(GEN nf,GEN x,GEN arch,long nba)
   long av,N,i,j,k,r,rr,limr,zk,lgmat;
   GEN p1,y,bas,genarch,mat,lambda,nfun,vun;
 
+  if (nba < 0)
+  {
+    nba = 0;
+    for (i=1; i<lg(arch); i++)
+      if (signe(arch[i])) nba++;
+  }
   y = cgetg(4,t_VEC);
   if (!nba)
   {

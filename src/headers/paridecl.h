@@ -409,6 +409,7 @@ GEN     nfreducemodidele(GEN nf,GEN g,GEN idele,GEN structarch);
 GEN     reducemodinvertible(GEN x, GEN y);
 GEN     reducemodmatrix(GEN x, GEN y);
 GEN     reducemodHNF(GEN x, GEN y, GEN *Q);
+GEN     set_sign_mod_idele(GEN nf, GEN x, GEN y, GEN idele, GEN sarch);
 GEN     smithrel(GEN H, GEN *newU, GEN *newUi);
 GEN     zarchstar(GEN nf,GEN x,GEN arch,long nba);
 GEN     zideallog(GEN nf,GEN x,GEN bigideal);
@@ -1135,6 +1136,7 @@ GEN     vecpol_to_mat(GEN v, long n);
 
 GEN     bezoutpol(GEN a, GEN b, GEN *u, GEN *v);
 GEN     centermod(GEN x, GEN p);
+GEN     concat_factor(GEN f, GEN g);
 GEN     content(GEN x);
 GEN     discsr(GEN x);
 GEN     divide_conquer_prod(GEN x, GEN (*mul)(GEN,GEN));
