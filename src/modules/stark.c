@@ -2590,7 +2590,7 @@ define_hilbert(void *S, GEN pol)
 
   if (degpol(pol) != T->cl + degpol(d)) return NULL;
   pol = gdivexact(pol, d);
-  return (T->cl & 1 || !egalii(discf(pol), T->dkpow))? pol: NULL;
+  return (T->cl & 1 || !egalii(smalldiscf(pol), T->dkpow))? pol: NULL;
 }
 
 /* let polrel define Hk/k,  find L/Q such that Hk=Lk and L and k are
@@ -2600,13 +2600,13 @@ makescind(GEN nf, GEN polrel, long cl, long prec)
 {
   long i, l;
   gpmem_t av = avma;
-  GEN pol, polabs, p1, nf2, dabs, dk, bas;
+  GEN pol, polabs, L, BAS, nf2, dabs, dk, bas;
   DH_t T;
   FP_chk_fun CHECK;
 
-  p1 = rnfpolredabs(nf, polrel, 6, prec);
-  polabs = (GEN)p1[1];
-  bas    = (GEN)p1[2];
+  BAS = rnfpolredabs(nf, polrel, nf_ABSOLUTE|nf_ADDZK, prec);
+  polabs = (GEN)BAS[1];
+  bas    = (GEN)BAS[2];
   dabs = gmul(ZX_disc(polabs), gsqr(det2(vecpol_to_mat(bas, 2*cl))));
 
   /* check result (a little): signature and discriminant */
@@ -2615,32 +2615,29 @@ makescind(GEN nf, GEN polrel, long cl, long prec)
     err(bugparier, "quadhilbert");
 
   /* attempt to find the subfields using polred */
-  p1 = cgetg(3,t_VEC);
-  p1[1] = (long)polabs;
-  p1[2] = (long)bas;
   T.cl = cl;
   T.dkpow = (cl & 1) ? NULL: gpowgs(dk, cl>>1);
   CHECK.f = &define_hilbert;
   CHECK.data = (void*)&T;
-  pol = polredfirstpol(p1, prec, &CHECK);
+  pol = polredfirstpol(BAS, 0, &CHECK);
   if (DEBUGLEVEL) msgtimer("polred");
 
   if (!pol)
   {
-    nf2 = nfinit0(p1, 1, prec);
-    p1  = subfields(nf2, stoi(cl));
-    l = lg(p1);
+    nf2 = nfinit0(BAS, 0, prec);
+    L  = subfields(nf2, stoi(cl));
+    l = lg(L);
     if (DEBUGLEVEL) msgtimer("subfields");
 
     for (i = 1; i < l; i++)
     {
-      pol = gmael(p1, i, 1);
-      if (cl & 1 || !egalii(sqri(discf(pol)), (GEN)nf2[3])) break;
+      pol = gmael(L, i, 1);
+      if (cl & 1 || !egalii(smalldiscf(pol), T.dkpow)) break;
     }
     if (i == l)
       for (i = 1; i < l; i++)
       {
-        pol = gmael(p1, i, 1);
+        pol = gmael(L, i, 1);
         if (degpol(gcoeff(nffactor(nf, pol), 1, 1)) == cl) break;
       }
     if (i == l)

@@ -1424,10 +1424,9 @@ _initalg(GEN x, long flag, long prec)
 {
   const gpmem_t av = avma;
   GEN nf, ro, rev;
-  int partial = (flag & nf_PARTIALFACT)? ba_PARTIAL: 0;
   basicnf_t T;
 
-  nfinit_basic(x, partial, NULL, &T);
+  nfinit_basic(x, flag, NULL, &T);
 
   if (T.lead && !(flag & (nf_RED|nf_PARTRED)))
   {
@@ -1580,17 +1579,24 @@ allpolred(GEN x, long flag, GEN fa, GEN *pta, FP_chk_fun *CHECK)
   return _polred(T.x, T.bas, pta, CHECK);
 }
 
+/* FIXME: backward compatibility */
+#define red_PARTIAL 1
+#define red_ORIG    2
+
 GEN
 polred0(GEN x, long flag, GEN fa, /* unused */long prec)
 {
   gpmem_t av = avma;
   GEN y, a;
+  int fl = 0;
 
   (void)prec;
 
   if (fa && gcmp0(fa)) fa = NULL; /* compatibility */
-  y = allpolred(x, (flag & red_PARTIAL)? ba_PARTIAL: 0, fa, &a, NULL);
-  if (flag & red_ORIG) {
+  if (flag & red_PARTIAL) fl |= nf_PARTIALFACT;
+  if (flag & red_ORIG)    fl |= nf_ORIG;
+  y = allpolred(x, fl, fa, &a, NULL);
+  if (fl & nf_ORIG) {
     GEN z = cgetg(3,t_MAT);
     z[1] = (long)a;
     z[2] = (long)y; y = z;
@@ -1804,7 +1810,6 @@ storeraw(GEN beta, GEN z)
   y[2] = lcopy(beta); return y;
 }
 
-/* no garbage collecting, done in polredabs0 */
 static void
 findmindisc(GEN *py, GEN *pa)
 {
@@ -1845,7 +1850,6 @@ storepol(GEN x, GEN z, GEN a, GEN phi, long flag)
   return y;
 }
 
-/* no garbage collecting, done in polredabs0 */
 static GEN
 storeallpol(GEN x, GEN z, GEN a, GEN phi, long flag)
 {

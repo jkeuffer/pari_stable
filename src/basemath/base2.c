@@ -59,6 +59,10 @@ extern GEN vecpol_to_mat(GEN v, long n);
 extern int isrational(GEN x);
 extern long int_elt_val(GEN nf, GEN x, GEN p, GEN bp, GEN *t);
 
+/* FIXME: backward compatibility. Should use the proper nf_* equivalents */
+#define compat_PARTIAL 1
+#define compat_ROUND2  2
+
 static void
 allbase_check_args(GEN f, long flag, GEN *dx, GEN *ptw)
 {
@@ -70,7 +74,7 @@ allbase_check_args(GEN f, long flag, GEN *dx, GEN *ptw)
 
   *dx = w? factorback(w, NULL): ZX_disc(f);
   if (!signe(*dx)) err(talker,"reducible polynomial in allbase");
-  if (!w) *ptw = auxdecomp(absi(*dx), flag & ba_PARTIAL? 0: 1);
+  if (!w) *ptw = auxdecomp(absi(*dx), (flag & nf_PARTIALFACT)? 0: 1);
   if (DEBUGLEVEL) msgtimer("disc. factorisation");
 }
 
@@ -564,10 +568,10 @@ allbase2(GEN f, int flag, GEN *dx, GEN *dK, GEN *ptw)
 }
 
 GEN
-base2(GEN x, GEN *dK) { return nfbasis0(x, ba_ROUND2, NULL); }
+base2(GEN x, GEN *dK) { return nfbasis0(x, compat_ROUND2, NULL); }
 
 GEN
-discf2(GEN x) { return nfdiscf0(x, ba_ROUND2, NULL); }
+discf2(GEN x) { return nfdiscf0(x, compat_ROUND2, NULL); }
 
 /*******************************************************************/
 /*                                                                 */
@@ -602,7 +606,7 @@ allbase(GEN f, int flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
   GEN w, w1, w2, a, da, b, db, p1;
   long n, mf, lw, i, j, k, l;
 
-  if (flag & ba_ROUND2) return allbase2(f,flag,dx,dK,ptw);
+  if (flag & nf_ROUND2) return allbase2(f,flag,dx,dK,ptw);
   w = ptw? *ptw: NULL;
   allbase_check_args(f, flag, dx, &w);
   w1 = (GEN)w[1];
@@ -715,10 +719,12 @@ unscale_vecpol(GEN v, GEN h)
   return w;
 }
 
+/* FIXME: have to deal with compatibility flags */
 static void
 _nfbasis(GEN x0, long flag, GEN fa, GEN *pbas, GEN *pdK)
 {
   GEN x, dx, dK, basis, lead, index;
+  long fl = 0;
 
   if (typ(x0)!=t_POL) err(typeer,"nfbasis");
   if (!degpol(x0)) err(zeropoler,"nfbasis");
@@ -727,7 +733,9 @@ _nfbasis(GEN x0, long flag, GEN fa, GEN *pbas, GEN *pdK)
   x = pol_to_monic(x0, &lead);
   if (fa && gcmp0(fa)) fa = NULL; /* compatibility. NULL is the proper arg */
   if (fa && lead) fa = update_fact(x, fa);
-  basis = allbase(x, flag, &dx, &dK, &index, &fa);
+  if (flag & compat_PARTIAL) fl |= nf_PARTIALFACT;
+  if (flag & compat_ROUND2)  fl |= nf_ROUND2;
+  basis = allbase(x, fl, &dx, &dK, &index, &fa);
   if (pbas) *pbas = unscale_vecpol(basis, lead);
   if (pdK)  *pdK = dK;
 }
@@ -760,7 +768,7 @@ GEN
 base(GEN x, GEN *pdK) { return nfbasis(x, pdK, 0, NULL); }
 
 GEN
-smallbase(GEN x, GEN *pdK) { return nfbasis(x, pdK, ba_PARTIAL, NULL); }
+smallbase(GEN x, GEN *pdK) { return nfbasis(x, pdK, compat_PARTIAL, NULL); }
 
 GEN
 factoredbase(GEN x, GEN fa, GEN *pdK) { return nfbasis(x, pdK, 0, fa); }
@@ -769,7 +777,7 @@ GEN
 discf(GEN x) { return nfdiscf0(x, 0, NULL); }
 
 GEN
-smalldiscf(GEN x) { return nfdiscf0(x, ba_PARTIAL, NULL); }
+smalldiscf(GEN x) { return nfdiscf0(x, nf_PARTIALFACT, NULL); }
 
 GEN
 factoreddiscf(GEN x, GEN fa) { return nfdiscf0(x, 0, fa); }
@@ -3899,10 +3907,10 @@ makebasis(GEN nf, GEN pol, GEN rnfeq)
 }
 
 /* relative polredabs. Returns
- * flag = 0: relative polynomial
- * flag = 1: relative polynomial + element
- * flag = 2: absolute polynomial
- * flag = 6: absolute polynomial + integer basis */
+ * Default (flag = 0): relative polynomial
+ * flag & nf_ORIG: + element (base change)
+ * flag & nf_ADDZK: + integer basis
+ * flag & nf_ABSOLUTE: absolute polynomial */
 GEN
 rnfpolredabs(GEN nf, GEN relpol, long flag, long prec)
 {
@@ -3927,25 +3935,31 @@ rnfpolredabs(GEN nf, GEN relpol, long flag, long prec)
     msgtimer("absolute basis");
     fprintferr("original absolute generator: %Z\n", POL);
   }
-  red = polredabs0(bas, (flag==6)? nf_ORIG|nf_PARTIALFACT: nf_RAW, prec);
+  if ((flag & nf_ADDZK) && (flag != (nf_ADDZK|nf_ABSOLUTE)))
+    err(impl,"this combination of flags in rnfpolredabs");
+
+  red = polredabs0(bas, (flag & nf_ADDZK)? nf_ORIG: nf_RAW, prec);
   pol = (GEN)red[1];
   if (DEBUGLEVEL>1) fprintferr("reduced absolute generator: %Z\n",pol);
-  if (flag == 2) return gerepileupto(av,pol);
-  if (flag == 6)
+  if (flag & nf_ABSOLUTE)
   {
-    GEN t = (GEN)red[2], B = (GEN)bas[2];
-    GEN v = RXQ_powers(lift_intern(t), pol, degpol(pol)-1);
-    z = cgetg(3, t_VEC);
-    z[1] = (long)pol;
-    z[2] = lmul(v, B);
-    return gerepilecopy(av, z);
+    if (flag & nf_ADDZK)
+    {
+      GEN t = (GEN)red[2], B = (GEN)bas[2];
+      GEN v = RXQ_powers(lift_intern(t), pol, degpol(pol)-1);
+      z = cgetg(3, t_VEC);
+      z[1] = (long)pol;
+      z[2] = lmul(v, B);
+      return gerepilecopy(av, z);
+    }
+    return gerepilecopy(av, pol);
   }
 
   elt = eltabstorel((GEN)red[2], T, relpol, a);
 
   z = cgetg(3,t_VEC);
   pol = rnfcharpoly(nf,relpol,elt,v);
-  if (!flag) z = pol;
+  if (!(flag & nf_ORIG)) z = pol;
   else
   {
     z[1] = (long)pol;

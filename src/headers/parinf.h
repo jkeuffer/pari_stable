@@ -18,12 +18,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define id_MAT       2
 
 /* for _initalg */
+#define nf_ROUND2      64
 #define nf_NOROOTS     32
-#define nf_PARTIALFACT 16
+#define nf_PARTIALFACT 16 /* and allbase */
 #define nf_RED          8
 #define nf_SMALL        4
 #define nf_PARTRED      2
 #define nf_ORIG         1
+
+/* for rnfpolredabs */
+#define nf_ABSOLUTE   128
+#define nf_ADDZK      256
 
 /* for isprincipal */
 #define nf_GEN   1
@@ -42,10 +47,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define nf_ALL   4
 #define nf_RAW   8
 
-/* for polred (FIXME: unify with polredabs)*/
-#define red_PARTIAL 1
-#define red_ORIG    2
-
 /* for lllgramall[gen] */
 #define lll_ALL 0
 #define lll_KER 1
@@ -56,10 +57,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define min_ALL   0
 #define min_FIRST 1
 #define min_PERF  2
-
-/* for allbase */
-#define ba_PARTIAL 1
-#define ba_ROUND2  2
 
 /* for fincke_pohst() */
 typedef struct FP_chk_fun {
