@@ -166,9 +166,7 @@ Misc:
 4  a system of DEBUGLEVEL classes [e.g \g 5 "LLL" ] (such that the user can
    easily define new ones)
 
-4  allow generic functions to process and produce t_SMALL's
-
-4  remove all dependences on types ordering [if (typ(x) < t_POL) ...]
+4  remove all dependencies on types ordering [if (typ(x) < t_POL) ...]
 
 3  remove global variables gpi, geuler: their precision is unpredictable
    (at least as much as requested in last const[pi|euler](), possibly much
@@ -176,9 +174,6 @@ Misc:
    existing code...
 
 3  rename library functions following GP names
-
-3  rewrite the generic functions (gadd/gmul/gdiv plus a couple of others) to
-   use (two-dimensional) table lookups instead of switches
 
 3  introduce "special" types for objects which are really containers and
    should be defined by a secondary type (e.g number fields, finite fields,
@@ -205,17 +200,21 @@ Misc:
 
 -  rework the semantics of "trap". 
 
--  Allow GP to trap an OS signal. A good example. Suppose that gp runs, say
-   in nohup mode, and it takes several days or even weeks to complete the
-   program. In meantime several things can happen resulting in shutdown of
-   the machine. On shutdown all programs receive SIGTERM signal. I would like
-   gp to be able to trap this signal and when it receives one, to execute
-   some gp command, e.g saving all settings with full accuracy (e.g writebin).
+-  Allow GP to trap an OS signal. Suppose that gp runs, say in nohup mode, and
+   it takes several days to complete the program. In meantime several things
+   can happen resulting in shutdown of the machine. On shutdown all programs
+   receive SIGTERM signal. I would like gp to be able to trap this signal and
+   when it receives one, to execute some gp command, e.g saving all settings
+   with full accuracy (e.g writebin).
+
+5  write an analog of the 'echo' default which would print code as it is
+   _executed_, not as it is read
 
 5  add a printf command: simple interface to pariputsf allowing only %Z
    conversion characters  (see related entry in LIBRARY DESIGN section)
 
 5  remove limitation to 8 arguments for static functions (argvec[9])
+   [ how to do this ??? ]
 
 4  extend forprime(n=a,b,...) so that b can go over primelimit [cut [a,b]
    in large intervals, sieve out multiple of small primes there, then use
@@ -230,19 +229,18 @@ Misc:
 3  a type t_FILE [current: stream re-opened/flushed/closed after every single
    write(): disaster when one wants to write often to the same file]
 
-3  add a possibility to increase the maximal recursion depth (need to 
+0  add a possibility to increase the maximal recursion depth (need to 
    increase the GP process stack: use setrlimit(RLIMIT_STACK,) + fork)
+   [ was never requested and wouldn't be portable. Do it yourself before
+   launching gp ]
 
 ***************************   TOOLS           ****************************
 
 4  a script converting prototype to parser code (e.g GEN f(GEN,GEN) --> "GG")
 
-3  a script to translate "legacy" GP code into something using GP2 function
-   names
-
-3  write an analog of the 'echo' default which would print code as it is
-   executed, not as it is read
-
 2  write a GP scripts debugger
 
 2  write a GP scripts profiler
+
+0  a script to translate "legacy" GP code into something using GP2 function
+   names [ was never requested, and GP2 was released in 1997 ]
