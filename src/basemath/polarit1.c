@@ -392,9 +392,9 @@ FpX_roots_i(GEN f, GEN p)
   if (!ZX_valuation(f, &f)) n = 0;
   else {
     y[j++] = zero; 
-    if (lg(f) == 3) { setlg(y, 2); return y; }
     n = 1;
   }
+  if (lg(f) <= 3) { setlg(y, n+1); return y; }
 
   /* take gcd(x^(p-1) - 1, f) by splitting (x^q-1) * (x^q+1) */
   b = FpXQ_pow(polx[varn(f)],q, f,p);
@@ -1571,7 +1571,7 @@ apprgen_i(GEN f, GEN a)
 
   res = cgetg(degpol(f)+1,t_VEC);
   q = gpowgs(p,prec);
-  rac = FpX_roots(f, P);
+  rac = FpX_roots(FpX_red(f, P), P);
   for (j=i=1; i<lg(rac); i++)
   {
     u = apprgen_i(f, Fp_to_Zp((GEN)rac[i], p,q,prec));
@@ -1601,8 +1601,9 @@ rootpadic_i(GEN f, GEN p, long prec)
 
   z = modulargcd(f, derivpol(f));
   if (degpol(z) > 0) f = gdeuc(f,z);
-  rac = FpX_roots(f, (egalii(p,gdeux) && prec>=2)? stoi(4): p);
-  lx = lg(rac);
+  q = (egalii(p,gdeux) && prec>=2)? stoi(4): p;
+  rac = FpX_roots(FpX_red(f,q), q);
+  lx = lg(rac); if (lx == 1) return rac;
   if (prec==1)
   {
     y = cgetg(lx,t_COL);
