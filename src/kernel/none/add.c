@@ -30,14 +30,22 @@ addss(long x, long y)
   neg_s[2] = -x; return addsi(y,neg_s);
 }
 
-GEN
-addsi(long x, GEN y)
+INLINE GEN
+icopy_sign(GEN x, long sx)
 {
-  long sx,sy,ly;
+  GEN y=icopy(x);
+  setsigne(y,sx);
+  return y;
+}
+
+GEN
+addsi_sign(long x, GEN y, long sy)
+{
+  long sx,ly;
   GEN z;
 
-  if (!x) return icopy(y);
-  sy=signe(y); if (!sy) return stoi(x);
+  if (!x) return icopy_sign(y, sy);
+  if (!sy) return stoi(x);
   if (x<0) { sx=-1; x=-x; } else sx=1;
   if (sx==sy)
   {
@@ -65,15 +73,13 @@ addsi(long x, GEN y)
 }
 
 GEN
-addii(GEN x, GEN y)
+addii_sign(GEN x, long sx, GEN y, long sy)
 {
-  long sx = signe(x);
-  long sy = signe(y);
   long lx,ly;
   GEN z;
 
-  if (!sx) return sy? icopy(y): gzero;
-  if (!sy) return icopy(x);
+  if (!sx) return sy? icopy_sign(y, sy): gzero;
+  if (!sy) return icopy_sign(x, sx);
   lx=lgefint(x); ly=lgefint(y);
 
   if (sx==sy)
@@ -92,46 +98,64 @@ addii(GEN x, GEN y)
   setsigne(z,sx); return z;
 }
 
-GEN
-addsr(long x, GEN y)
+INLINE GEN
+rcopy_sign(GEN x, long sx)
 {
-  if (!x) return rcopy(y);
-  if (x>0) { pos_s[2]=x; return addir(pos_s,y); }
-  neg_s[2] = -x; return addir(neg_s,y);
+  GEN y=rcopy(x);
+  setsigne(y,sx);
+  return y;
 }
 
 GEN
-addir(GEN x, GEN y)
+addir_sign(GEN x, long sx, GEN y, long sy)
 {
   long e,l,ly;
   GEN z;
 
-  if (!signe(x)) return rcopy(y);
+  if (!sx) return rcopy_sign(y, sy);
   e = expo(y) - expi(x);
-  if (!signe(y))
+  if (!sy)
   {
-    if (e > 0) return rcopy(y);
-    return itor(x, 3 + ((-e)>>TWOPOTBITS_IN_LONG));
+    if (e > 0) return rcopy_sign(y, sy);
+    z = itor(x, 3 + ((-e)>>TWOPOTBITS_IN_LONG));
+    setsigne(z, sx);
+    return z;
   }
 
   ly = lg(y);
   if (e > 0)
   {
     l = ly - (e>>TWOPOTBITS_IN_LONG);
-    if (l < 3) return rcopy(y);
+    if (l < 3) return rcopy_sign(y, sy);
   }
   else l = ly + ((-e)>>TWOPOTBITS_IN_LONG)+1;
   z = (GEN)avma;
-  y = addrr(itor(x,l), y);
+  y = addrr_sign(itor(x,l), sx, y, sy);
   ly = lg(y); while (ly--) *--z = y[ly];
   avma = (pari_sp)z; return z;
 }
 
 GEN
-addrr(GEN x, GEN y)
+addsr(long x, GEN y)
 {
-  long lx, sx = signe(x), ex = expo(x);
-  long ly, sy = signe(y), ey = expo(y), e = ey - ex;
+  if (!x) return rcopy(y);
+  if (x>0) { pos_s[2]=x; return addir_sign(pos_s, 1, y, signe(y)); }
+  neg_s[2] = -x; return addir_sign(neg_s, -1, y, signe(y));
+}
+
+GEN
+subsr(long x, GEN y)
+{
+  if (!x) return rcopy_sign(y, -signe(y));
+  if (x>0) { pos_s[2]=x; return addir_sign(pos_s, 1, y, -signe(y)); }
+  neg_s[2] = -x; return addir_sign(neg_s, -1, y, -signe(y));
+}
+
+GEN
+addrr_sign(GEN x, long sx, GEN y, long sy)
+{
+  long lx, ex = expo(x);
+  long ly, ey = expo(y), e = ey - ex;
   long i, j, lz, ez, m;
   int extend, f2;
   GEN z;
@@ -148,6 +172,7 @@ addrr(GEN x, GEN y)
     lz = 3 + ((-e)>>TWOPOTBITS_IN_LONG);
     lx = lg(x); if (lz > lx) lz = lx;
     z = cgetr(lz); while(--lz) z[lz] = x[lz];
+    setsigne(z,sx);
     return z;
   }
   if (!sx)
@@ -156,6 +181,7 @@ addrr(GEN x, GEN y)
     lz = 3 + (e>>TWOPOTBITS_IN_LONG);
     ly = lg(y); if (lz > ly) lz = ly;
     z = cgetr(lz); while (--lz) z[lz] = y[lz];
+    setsigne(z,sy);
     return z;
   }
 
@@ -170,7 +196,7 @@ addrr(GEN x, GEN y)
   if (e)
   {
     long d = e >> TWOPOTBITS_IN_LONG, l = ly-d;
-    if (l <= 2) return rcopy(y);
+    if (l <= 2) return rcopy_sign(y, sy);
     m = e & (BITS_IN_LONG-1);
     if (l > lx) { lz = lx + d + 1; extend = 1; }
     else        { lz = ly; lx = l; }

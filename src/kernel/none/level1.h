@@ -29,6 +29,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #endif
 
 #if !defined(INLINE) || defined(INLINE_IS_STATIC)
+GEN    addii(GEN x, GEN y);
+GEN    addir(GEN x, GEN y);
+GEN    addrr(GEN x, GEN y);
+GEN    addsi(long x, GEN y);
 void   addsii(long x, GEN y, GEN z);
 ulong  adduumod(ulong a, ulong b, ulong p);
 void   addssz(long x, long y, GEN z);
@@ -100,7 +104,6 @@ GEN    subir(GEN x, GEN y);
 GEN    subri(GEN x, GEN y);
 GEN    subrr(GEN x, GEN y);
 GEN    subsi(long x, GEN y);
-GEN    subsr(long x, GEN y);
 ulong  subuumod(ulong a, ulong b, ulong p);
 ulong  umodui(ulong x, GEN y);
 ulong  umuluu(ulong x, ulong y, ulong *rem);
@@ -394,65 +397,58 @@ addssz(long x, long y, GEN z)
 }
 
 INLINE GEN
+addii(GEN x, GEN y)
+{
+  return addii_sign(x, signe(x), y, signe(y));
+}
+
+INLINE GEN
 subii(GEN x, GEN y)
 {
-  const long s=signe(y);
-  GEN z;
-
   if (x==y) return gzero;
-  setsigne(y,-s); z=addii(x,y);
-  setsigne(y, s); return z;
+  return addii_sign(x, signe(x), y, -signe(y));
+}
+
+INLINE GEN
+addrr(GEN x, GEN y)
+{
+  return addrr_sign(x, signe(x), y, signe(y));
 }
 
 INLINE GEN
 subrr(GEN x, GEN y)
 {
-  const long s=signe(y);
-  GEN z;
+  return addrr_sign(x, signe(x), y, -signe(y));
+}
 
-  if (x==y) return realzero(lg(x)+2);
-  setsigne(y,-s); z=addrr(x,y);
-  setsigne(y, s); return z;
+INLINE GEN
+addir(GEN x, GEN y)
+{
+  return addir_sign(x, signe(x), y, signe(y));
 }
 
 INLINE GEN
 subir(GEN x, GEN y)
 {
-  const long s=signe(y);
-  GEN z;
-
-  setsigne(y,-s); z=addir(x,y);
-  setsigne(y, s); return z;
+  return addir_sign(x, signe(x), y, -signe(y));
 }
 
 INLINE GEN
 subri(GEN x, GEN y)
 {
-  const long s=signe(y);
-  GEN z;
+  return addir_sign(y, -signe(y), x, signe(x));
+}
 
-  setsigne(y,-s); z=addir(y,x);
-  setsigne(y, s); return z;
+INLINE GEN
+addsi(long x, GEN y)
+{
+  return addsi_sign(x, y, signe(y));
 }
 
 INLINE GEN
 subsi(long x, GEN y)
 {
-  const long s=signe(y);
-  GEN z;
-
-  setsigne(y,-s); z=addsi(x,y);
-  setsigne(y, s); return z;
-}
-
-INLINE GEN
-subsr(long x, GEN y)
-{
-  const long s=signe(y);
-  GEN z;
-
-  setsigne(y,-s); z=addsr(x,y);
-  setsigne(y, s); return z;
+  return addsi_sign(x, y, -signe(y));
 }
 
 INLINE void
