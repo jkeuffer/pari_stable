@@ -1302,7 +1302,13 @@ identifier(void)
 
 	case 'V': case 'S': /* variable or symbol */
 	  match_comma(); mark.symbol=analyseur;
-	  argvec[i++] = (GEN)entry(); break;
+        {
+          entree *e = entry();
+          long v = EpVALENCE(e);
+          if (v != EpVAR && v != EpGVAR)
+            err(talker2,"not a variable:",mark.symbol,mark.start);
+	  argvec[i++] = (GEN)e; break;
+        }
         case '&': /* *GEN */
 	  match_comma(); match('&'); mark.symbol=analyseur;
         {
