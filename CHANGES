@@ -55,6 +55,8 @@ XR 18- rnfinit(nf, T) -> bug in multiplication if nf = Q
        precision is increased [e.g factor(polzagier(60,0))]
 XR 21- bug in ideal bound computation in rnfnormgroup
    22- bnrisprincipal(...,y+z) --> SEGV
+   23- GP could forget about a function whose redefinition was stopped by a
+       syntax error (sometimes with a delay!)
 
   Changed
     1- DOS distribution archives (GPM removed)
