@@ -1076,7 +1076,9 @@ chk_factors_get(GEN lt, GEN famod, GEN c, GEN T, GEN N)
   for (j = 1; j < l; j++)
     if (signe(c[j])) V[i++] = famod[j];
   if (lt && i > 1) V[1] = lmul(lt, (GEN)V[1]);
-  setlg(V, i); return FqXV_mul(V, T, N);
+  setlg(V, i); 
+  if (T) return FqXV_mul(V, T, N);
+  else return FpXV_mul(V,N);
 }
 
 static GEN

@@ -746,21 +746,6 @@ FqX_nbfact(GEN u, GEN T, GEN p)
   avma = av; return lg(vker)-1;
 }
 
-static GEN modulo;
-static GEN gsmul(GEN a,GEN b){return FpX_mul(a,b,modulo);}
-GEN
-FpV_roots_to_pol(GEN V, GEN p, long v)
-{
-  pari_sp ltop=avma;
-  long i;
-  GEN g=cgetg(lg(V),t_VEC);
-  for(i=1;i<lg(V);i++)
-    g[i]=(long)deg1pol(gun,modii(negi((GEN)V[i]),p),v);
-  modulo=p;
-  g=divide_conquer_prod(g,&gsmul);
-  return gerepileupto(ltop,g);
-}
-
 /************************************************************/
 GEN
 trivfact(void)

@@ -820,6 +820,27 @@ FpXQ_pow(GEN x, GEN n, GEN pol, GEN p)
   return gerepileupto(av, y);
 }
 
+static GEN modulo;
+static GEN _FpX_mul(GEN a,GEN b){return FpX_mul(a,b,modulo);}
+GEN 
+FpXV_mul(GEN V, GEN p)
+{
+  modulo = p; 
+  return divide_conquer_prod(V, &_FpX_mul);
+}
+
+GEN
+FpV_roots_to_pol(GEN V, GEN p, long v)
+{
+  pari_sp ltop=avma;
+  long i;
+  GEN g=cgetg(lg(V),t_VEC);
+  for(i=1;i<lg(V);i++)
+    g[i]=(long)deg1pol(gun,modii(negi((GEN)V[i]),p),v);
+  FpXV_mul(g,p);
+  return gerepileupto(ltop,FpXV_mul(g,p));
+}
+
 /*******************************************************************/
 /*                                                                 */
 /*                             FpXX                                */
@@ -1119,7 +1140,21 @@ Fq_add(GEN x, GEN y, GEN T/*unused*/, GEN p)
 }
 
 GEN
-Fq_neg(GEN x, GEN T, GEN p)
+Fq_sub(GEN x, GEN y, GEN T/*unused*/, GEN p)
+{
+  (void)T;
+  switch((typ(x)==t_POL)|((typ(y)==t_POL)<<1))
+  {
+    case 0: return modii(subii(x,y),p);
+    case 1: return FpX_Fp_add(x,negi(y),p);
+    case 2: return FpX_Fp_add(FpX_neg(y,p),x,p);
+    case 3: return FpX_sub(x,y,p);
+  }
+  return NULL;
+}
+
+GEN
+Fq_neg(GEN x, GEN T/*unused*/, GEN p)
 {
   switch(typ(x)==t_POL)
   {
@@ -1129,6 +1164,7 @@ Fq_neg(GEN x, GEN T, GEN p)
   return NULL;
 }
 
+/* If T==NULL do not reduce*/
 GEN
 Fq_mul(GEN x, GEN y, GEN T, GEN p)
 {
@@ -1137,7 +1173,8 @@ Fq_mul(GEN x, GEN y, GEN T, GEN p)
     case 0: return modii(mulii(x,y),p);
     case 1: return FpX_Fp_mul(x,y,p);
     case 2: return FpX_Fp_mul(y,x,p);
-    case 3: return FpXQ_mul(x,y,T,p);
+    case 3: if (T) return FpXQ_mul(x,y,T,p);
+            else return FpX_mul(x,y,p);
   }
   return NULL;
 }
@@ -1171,7 +1208,7 @@ Fq_pow(GEN x, GEN n, GEN pol, GEN p)
 }
 
 GEN
-Fq_rem(GEN x, GEN T, GEN p)
+Fq_red(GEN x, GEN T, GEN p)
 {
   pari_sp ltop=avma;
   switch(typ(x)==t_POL)
@@ -1212,16 +1249,17 @@ FqX_rem(GEN x, GEN y, GEN T, GEN p)
 GEN
 FqX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *z)
 {
+  if (!T) err(bugparier,"FqX_divrem, T==NULL");
   return T? FpXQX_divrem(x,y,T,p,z): FpX_divrem(x,y,p,z);
 }
 
-static GEN modulo,Tmodulo;
-static GEN fgmul(GEN a,GEN b){return FqX_mul(a,b,Tmodulo,modulo);}
+static GEN Tmodulo;
+static GEN _FqX_mul(GEN a,GEN b){return FqX_mul(a,b,Tmodulo,modulo);}
 GEN 
 FqXV_mul(GEN V, GEN Tp, GEN p)
 {
   modulo = p; Tmodulo = Tp;
-  return divide_conquer_prod(V, &fgmul);
+  return divide_conquer_prod(V, &_FqX_mul);
 }
 GEN
 FqV_roots_to_pol(GEN V, GEN Tp, GEN p, long v)
@@ -2041,7 +2079,7 @@ FpX_divrem(GEN x, GEN y, GEN p, GEN *pr)
   pari_sp av0, av, tetpil;
   GEN z,p1,rem,lead;
 
-  if (!p) return poldivrem(x,y,pr);
+  if (!p) err(bugparier,"FpX_divrem, p==NULL");
   if (!signe(y)) err(talker,"division by zero in FpX_divrem");
   vx = varn(x);
   dy = degpol(y);
