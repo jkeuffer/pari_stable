@@ -1225,7 +1225,7 @@ init_gauss(GEN a, GEN *b, long *aco, long *li, int *iscol)
 {
   if (typ(a)!=t_MAT) err(mattype1,"gauss");
   *aco = lg(a) - 1;
-  if (!aco) /* a empty */
+  if (!*aco) /* a empty */
   {
     if (*b && lg(*b) != 1) err(consister,"gauss");
     return 0;
