@@ -907,7 +907,7 @@ mpsqrtmod(GEN a, GEN p)
   p1 = addsi(-1,p); e = vali(p1);
   
   /* If `e' is "too big", use Cipolla algorithm ! [GTL] */
-  if (e*(e-1)-20 > 8 * bit_accuracy(lgefint(p)))
+  if (e*(e-1) > 20 + 8 * bit_accuracy(lgefint(p)))
   {
     v = ffsqrtmod(a,p);
     if (!v) { avma = av; return NULL; }
