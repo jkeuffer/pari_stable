@@ -2204,12 +2204,13 @@ GEN
 dirzetak(GEN nf, GEN b)
 {
   GEN z, c;
+  long n;
 
   if (typ(b) != t_INT) err(talker,"not an integer type in dirzetak");
   if (signe(b) <= 0) return cgetg(1,t_VEC);
   nf = checknf(nf);
-  if (is_bigint(b)) err(talker,"too many terms in dirzetak");
-  c = dirzetak0(nf, itos(b));
+  n = itos_or_0(b); if (!n) err(talker,"too many terms in dirzetak");
+  c = dirzetak0(nf, n);
   z = zv_ZV(c); free(c); return z;
 }
 

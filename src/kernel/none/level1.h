@@ -65,6 +65,7 @@ GEN    icopy(GEN x);
 GEN    icopy_av(GEN x, GEN y);
 GEN    itor(GEN x, long prec);
 long   itos(GEN x);
+long   itos_or_0(GEN x);
 ulong  itou(GEN x);
 GEN    modis(GEN x, long y);
 GEN    mpabs(GEN x);
@@ -267,6 +268,14 @@ itos(GEN x)
   if (!s) return 0;
   u = (long)x[2]; if (lgefint(x) > 3 || u < 0) err(affer2);
   return (s>0) ? u : -u;
+}
+
+/* as itos, but return 0 if too large. Cf is_bigint */
+INLINE long
+itos_or_0(GEN x) {
+  long n;
+  if (lgefint(x) != 3 || (n = x[2]) & HIGHBIT) return 0;
+  return signe(x) > 0? n: -n;
 }
 
 INLINE void

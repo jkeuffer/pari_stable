@@ -4189,10 +4189,7 @@ poldisc0(GEN x, long v)
 }
 
 GEN
-discsr(GEN x)
-{
-  return poldisc0(x, -1);
-}
+discsr(GEN x) { return poldisc0(x, -1); }
 
 GEN
 reduceddiscsmith(GEN pol)

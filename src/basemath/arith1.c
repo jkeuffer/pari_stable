@@ -2526,12 +2526,11 @@ conductor_part(GEN x, GEN *ptD, GEN *ptreg, GEN *ptfa)
   if (s < 0)
   {
     reg = NULL;
-    if (!is_bigint(d))
-      switch(itos(d))
-      {
-        case 4: H = divis(H,2); break;
-        case 3: H = divis(H,3); break;
-      }
+    switch(itos_or_0(d))
+    {
+      case 4: H = divis(H,2); break;
+      case 3: H = divis(H,3); break;
+    }
   } else {
     reg = regula(D,DEFAULTPREC);
     if (!egalii(x,D))
@@ -2586,9 +2585,8 @@ classno(GEN x)
 
   p2 = gsqrt(absi(D),DEFAULTPREC);
   p1 = mulrr(divrr(p2,mppi(DEFAULTPREC)), dbltor(1.005)); /*overshoot by 0.5%*/
-  p2 = gtrunc(shiftr(mpsqrt(p2),1));
-  if (is_bigint(p2)) err(talker,"discriminant too big in classno");
-  s = itos(p2); 
+  s = itos_or_0( mptrunc(shiftr(mpsqrt(p2), 1)) ); 
+  if (!s) err(talker,"discriminant too big in classno");
   if (s < 10) s = 200;
   else if (s < 20) s = 1000;
   else if (s < 5000) s = 5000;
@@ -2693,9 +2691,8 @@ classno2(GEN x)
     p2 = subsr(1, gmul2n(divrr(mplog(reg),logd),1));
     if (gcmp(gsqr(p2), divsr(2,logd)) >= 0) p1 = gmul(p2,p1);
   }
-  p1 = gtrunc(p1);
-  if (is_bigint(p1)) err(talker,"discriminant too large in classno");
-  n = itos(p1);
+  n = itos_or_0( mptrunc(p1) );
+  if (!n) err(talker,"discriminant too large in classno");
 
   p4 = divri(Pi,d); p7 = ginv(mpsqrt(Pi));
   p1 = gsqrt(d,DEFAULTPREC); p3 = gzero;

@@ -617,7 +617,7 @@ FpX_is_totally_split(GEN f, GEN p)
   pari_sp av = avma;
   GEN z;
   if (n <= 1) return 1;
-  if (!is_bigint(p) && n > p[2]) return 0;
+  if (cmpsi(n, p) > 0) return 0;
   f = FpX_red(f, p);
   z = FpXQ_pow(polx[varn(f)], p, f, p);
   avma = av;
@@ -1196,7 +1196,7 @@ FpX_split_Berlekamp(GEN *t, GEN p)
   GEN u = *t, a,b,po2,vker;
   long d, i, ir, L, la, lb, vu = varn(u);
   long l = lg(u);
-  ulong ps = is_bigint(p)? 0: p[2];
+  ulong ps = itos_or_0(p);
   if (ps)
   {
     vker = Flx_Berlekamp_ker(ZX_Flx(u,ps),ps);
@@ -2511,7 +2511,7 @@ factmod9(GEN f, GEN p, GEN T)
     return to_Fq_fact((GEN)z[1],(GEN)z[2],lg(z[1]), 0, unfq,av);
   }
 
-  pg = is_bigint(p)? 0: itos(p);
+  pg = itos_or_0(p);
   df2  = NULL; /* gcc -Wall */
   t = (GEN*)cgetg(d+1,t_VEC); ex = new_chunk(d+1);
 

@@ -655,6 +655,7 @@ ordell(GEN e, GEN x, long prec)
   return gerepileupto(av,y);
 }
 
+/* n t_QUAD */
 static GEN
 CM_powell(GEN e, GEN z, GEN n)
 {
@@ -666,12 +667,12 @@ CM_powell(GEN e, GEN z, GEN n)
   pol = (GEN)n[1];
   if (signe(discsr(pol)) >= 0)
     err(talker,"not a negative quadratic discriminant in CM");
-  if (!gcmp1(denom((GEN)n[2])) || !gcmp1(denom((GEN)n[3])))
+  if (typ(n[2]) != t_INT || typ(n[3]) != t_INT)
     err(impl, "powell for nonintegral CM exponent");
 
-  p1 = shifti(addsi(1, gnorm(n)), 2);
-  if (is_bigint(p1) > 0) err(talker, "norm too large in CM");
-  ln = itos(p1); vn = (ln-4)>>2;
+  ln = itos_or_0( shifti(addsi(1, gnorm(n)), 2) );
+  if (!ln) err(talker, "norm too large in CM");
+  vn = (ln-4)>>2;
   z1 = weipell(e, ln);
   z2 = gsubst(z1, 0, gmul(n,polx[0]));
   grdx = gadd((GEN)z[1], gdivgs((GEN)e[6],12));

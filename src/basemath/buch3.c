@@ -657,6 +657,7 @@ zimmertbound(long N,long R2,GEN DK)
 {
   pari_sp av = avma;
   GEN w;
+  long n;
 
   if (N < 2) return 1;
   if (N < 21)
@@ -699,13 +700,12 @@ zimmertbound(long N,long R2,GEN DK)
   else
   {
     w = minkowski_bound(DK, N, R2, MEDDEFAULTPREC);
-    if (cmpis(w, 500000))
-      err(warner,"large Minkowski bound: certification will be VERY long");
   }
-  w = gceil(w);
-  if (is_bigint(w))
-    err(talker,"Minkowski bound is too large");
-  avma = av; return itos(w);
+  n = itos_or_0( gceil(w) );
+  if (!n) err(talker,"Minkowski bound is too large");
+  if (n > 500000)
+      err(warner,"large Minkowski bound: certification will be VERY long");
+  avma = av; return n;
 }
 
 /* return \gamma_n^n if known, an upper bound otherwise */
@@ -1106,7 +1106,7 @@ lowerboundforregulator(GEN bnf)
  * (P_i), 1<=i<=length(beta), of primes s.t. N(P_i) = 1 mod pp, and
  * (P_i,beta[j]) = 1 for all i,j */
 static void
-primecertify(GEN bnf,GEN beta,long pp,GEN big)
+primecertify(GEN bnf,GEN beta,long pp,GEN bad)
 {
   long i, j, qq, nbcol, lb, nbqq, ra;
   GEN nf,mat,mat1,qgen,decqq,newcol,Q,g,ord,modpr;
@@ -1117,7 +1117,7 @@ primecertify(GEN bnf,GEN beta,long pp,GEN big)
   for(;;)
   {
     qq += 2*pp; qgen = stoi(qq);
-    if (smodis(big,qq)==0 || !isprime(qgen)) continue;
+    if (smodis(bad,qq)==0 || !isprime(qgen)) continue;
 
     decqq = primedec(bnf,qgen); nbqq = lg(decqq)-1;
     g = NULL;
@@ -1155,7 +1155,7 @@ primecertify(GEN bnf,GEN beta,long pp,GEN big)
 }
 
 static void
-check_prime(long p, GEN bnf, GEN cyc, GEN cycgen, GEN fu, GEN mu, GEN big)
+check_prime(long p, GEN bnf, GEN cyc, GEN cycgen, GEN fu, GEN mu, GEN bad)
 {
   pari_sp av = avma;
   long i,b, lc = lg(cyc), w = itos((GEN)mu[1]), lf = lg(fu);
@@ -1164,7 +1164,7 @@ check_prime(long p, GEN bnf, GEN cyc, GEN cycgen, GEN fu, GEN mu, GEN big)
   if (DEBUGLEVEL>1) fprintferr("  *** testing p = %ld\n",p);
   for (b=1; b<lc; b++)
   {
-    if (smodis((GEN)cyc[b], p)) break; /* p \nmod cyc[b] */
+    if (smodis((GEN)cyc[b], p)) break; /* p \nmid cyc[b] */
     if (b==1 && DEBUGLEVEL>2) fprintferr("     p divides h(K)\n");
     beta[b] = cycgen[b];
   }
@@ -1176,15 +1176,15 @@ check_prime(long p, GEN bnf, GEN cyc, GEN cycgen, GEN fu, GEN mu, GEN big)
   for (i=1; i<lf; i++) beta[b++] = fu[i];
   setlg(beta, b); /* beta = [cycgen[i] if p|cyc[i], tu if p|w, fu] */
   if (DEBUGLEVEL>3) {fprintferr("     Beta list = %Z\n",beta); flusherr();}
-  primecertify(bnf,beta,p,big); avma = av;
+  primecertify(bnf,beta,p,bad); avma = av;
 }
 
 long
 certifybuchall(GEN bnf)
 {
   pari_sp av = avma;
-  long nbgen, i, j, p, N, R1, R2, bound;
-  GEN big,nf,reg,rootsofone,funits,gen,p1,gbound,cycgen,cyc;
+  long nbgen, i, p, N, R1, R2, bound;
+  GEN bad, nf, reg, zu, funits, gen, cycgen, cyc;
   byteptr delta = diffptr;
 
   bnf = checkbnf(bnf); nf = (GEN)bnf[7];
@@ -1194,12 +1194,9 @@ certifybuchall(GEN bnf)
   testprimes(bnf, zimmertbound(N,R2,absi((GEN)nf[3])));
   reg = gmael(bnf,8,2);
   cyc = gmael3(bnf,8,1,2); nbgen = lg(cyc)-1;
-  gen = gmael3(bnf,8,1,3); rootsofone = gmael(bnf,8,4);
-  gbound = ground(gdiv(reg,lowerboundforregulator(bnf)));
-  if (is_bigint(gbound))
-    err(talker,"sorry, too many primes to check");
-
-  bound = itos(gbound);
+  gen = gmael3(bnf,8,1,3); zu = gmael(bnf,8,4);
+  bound = itos_or_0 ( ground(gdiv(reg, lowerboundforregulator(bnf))) );
+  if (!bound) err(talker,"sorry, too many primes to check");
   maxprime_check((ulong)bound);
   if (DEBUGLEVEL>1)
   {
@@ -1207,30 +1204,18 @@ certifybuchall(GEN bnf)
     fprintferr("  Testing primes <= B (= %ld)\n\n",bound); flusherr();
   }
   cycgen = check_and_build_cycgen(bnf);
-  for (big=gun,i=1; i<=nbgen; i++)
-    big = mpppcm(big, gcoeff(gen[i],1,1));
-  for (i=1; i<=nbgen; i++)
-  {
-    p1 = (GEN)cycgen[i];
-    if (typ(p1) == t_MAT)
-    {
-      GEN h, g = (GEN)p1[1];
-      for (j=1; j<lg(g); j++)
-      {
-        h = idealhermite(nf, (GEN)g[j]);
-        big = mpppcm(big, gcoeff(h,1,1));
-      }
-    }
-  } /* p | big <--> p | some cycgen[i]  */
+  for (bad=gun,i=1; i<=nbgen; i++)
+    bad = mpppcm(bad, gcoeff(gen[i],1,1));
+  /* p | bad <--> p | some cycgen[i]  */
 
   funits = dummycopy(funits);
   for (i=1; i<lg(funits); i++)
     funits[i] = (long)algtobasis(nf, (GEN)funits[i]);
-  rootsofone = dummycopy(rootsofone);
-  rootsofone[2] = (long)algtobasis(nf, (GEN)rootsofone[2]);
+  zu = dummycopy(zu);
+  zu[2] = (long)algtobasis(nf, (GEN)zu[2]);
 
   for (p = *delta++; p <= bound; ) {  
-    check_prime(p,bnf,cyc,cycgen,funits,rootsofone,big);
+    check_prime(p,bnf,cyc,cycgen,funits,zu,bad);
     NEXT_PRIME_VIADIFF(p, delta);
   }
 
@@ -1242,7 +1227,7 @@ certifybuchall(GEN bnf)
     for (i=1; i<nbf1; i++)
     {
       p = itos((GEN)f1[i]);
-      if (p > bound) check_prime(p,bnf,cyc,cycgen,funits,rootsofone,big);
+      if (p > bound) check_prime(p,bnf,cyc,cycgen,funits,zu,bad);
     }
   }
   avma=av; return 1;
@@ -2150,7 +2135,6 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
   long degk,i,j,k,lfa,lp1,sqbou,cex, allarch;
   long ffs,fs,resp,flbou,nba, k2,karch,kka,nbarch,jjj,jj,square;
   long ii2,ii,ly,clhray,lP,ep,S,clhss,normps,normi,nz,r1,R1,n,c;
-  ulong q, p2s;
   pari_sp av0 = avma, av, av1, lim;
   GEN nf,p,z,p1,p2,p3,fa,pr,normp,ideal,bidp,z2,matarchunit;
   GEN embunit,sous,clh,sousray,raylist;
@@ -2233,13 +2217,15 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
     fa = primedec(nf,p); lfa = lg(fa)-1;
     for (j=1; j<=lfa; j++)
     {
-      pr = (GEN)fa[j]; p1 = powgi(p,(GEN)pr[4]);
-      if (DEBUGLEVEL>1) { fprintferr("%ld ",p[2]); flusherr(); }
-      if (is_bigint(p1) || (q = (ulong)itos(p1)) > (ulong)bound) continue;
+      long q0, q;
+      pr = (GEN)fa[j]; q = itos_or_0( powgi(p,(GEN)pr[4]) );
+      if (DEBUGLEVEL>1) fprintferr("%Z ",p);
+      if (!q || q > bound) continue;
 
-      fauxpr = stoi((p[2]*degk + itos((GEN)pr[4])-1)*degk + j-1);
-      p2s = q; ideal = pr; cex = 0;
-      while (q <= (ulong)bound)
+      /* p, f-1, j-1 as a single integer in "base degk" (f,j <= degk)*/
+      fauxpr = stoi( (p[2]*degk + itos((GEN)pr[4])-1)*degk + j-1 );
+      q0 = q; ideal = pr; cex = 0;
+      for (;;) /* q <= bound */
       {
         cex++; bidp = zidealstarinitall(nf,ideal,0);
         faussefa = to_famat_all(fauxpr, stoi(cex));
@@ -2252,8 +2238,8 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
           p2 = cgetg(lp1,t_VEC); c=0;
           for (k=1; k<lp1; k++)
           {
-            p3=(GEN)p1[k];
-            if (q == (ulong)i ||
+            p3 = (GEN)p1[k];
+            if (q == i ||
                 ((p4=gmael(p3,1,1)) && !isinvector(p4,fauxpr,lg(p4)-1)))
               p2[++c] = (long)zsimpjoin(p3,bidp,faussefa,embunit);
           }
@@ -2274,8 +2260,8 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
           }
         }
         if (ramip && ramip % p[2]) break;
-        pz = muluu(q, p2s);
-        if (is_bigint(pz) || (q = (ulong)pz[2]) > (ulong)bound) break;
+        q = itos_or_0( mulss(q, q0) );
+        if (!q || q > bound) break;
 
         ideal = idealmul(nf,ideal,pr);
       }
@@ -2372,7 +2358,8 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
         idealrel = idealrelinit;
         for (k=1; k<=lP; k++)
         {
-          fauxpr = (GEN)P[k]; ep = itos((GEN)ex[k]); ffs = itos(fauxpr);
+          ffs = itos((GEN)P[k]);
+          ep  = itos((GEN)ex[k]);
           /* Hack for NeXTgcc 2.5.8 -- splitting "resp=fs%degk+1" */
           fs = ffs/degk; resp = fs%degk; resp++;
           gprime = stoi((long)(fs/degk));

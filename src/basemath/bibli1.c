@@ -340,20 +340,19 @@ lll_finish(GEN h,GEN fl,long flag)
   y[2] = (long)h; return y;
 }
 
-/* h[,k] += q * h[,l] */
+/* h[,k] += q * h[,l]. Inefficient if q = 0 */
 static void
 Zupdate_col(long k, long l, GEN q, long K, GEN h)
 {
   GEN *hl, *hk;
-  long i, qq;
+  long i, qq = itos_or_0(q);
 
   if (!h) return;
   hl = (GEN*)h[l]; hk = (GEN*)h[k];
-  if (is_bigint(q)) {
+  if (!qq) {
     for (i=1;i<=K;i++) if (signe(hl[i])) hk[i] = addii(hk[i],mulii(q,hl[i]));
     return;
   }
-  qq = itos(q);
   if (qq == 1) {
     for (i=1;i<=K;i++) { if (signe(hl[i])) hk[i] = addii(hk[i],hl[i]); }
   } else if (qq == -1) {
@@ -363,28 +362,27 @@ Zupdate_col(long k, long l, GEN q, long K, GEN h)
   }
 }
 
-/* L[k,] += q * L[l,], l < k */
+/* L[k,] += q * L[l,], l < k. Inefficient if q = 0 */
 static void
 Zupdate_row(long k, long l, GEN q, GEN L, GEN B)
 {
-  long i, qq;
-  if (is_bigint(q))
+  long i, qq = itos_or_0(q);
+  if (!qq)
   {
     for(i=1;i<l;i++)  coeff(L,k,i)=laddii(gcoeff(L,k,i),mulii(q,gcoeff(L,l,i)));
     coeff(L,k,l) = laddii(gcoeff(L,k,l), mulii(q,B));
     return;
   }
-  qq = itos(q);
   if (qq == 1) {
     for (i=1;i<l; i++) coeff(L,k,i) = laddii(gcoeff(L,k,i),gcoeff(L,l,i));
-    coeff(L,k,l) = laddii(gcoeff(L,k,l), B); return;
-  }
-  if (qq == -1) {
+    coeff(L,k,l) = laddii(gcoeff(L,k,l), B);
+  } else if (qq == -1) {
     for (i=1;i<l; i++) coeff(L,k,i) = lsubii(gcoeff(L,k,i),gcoeff(L,l,i));
-    coeff(L,k,l) = laddii(gcoeff(L,k,l), negi(B)); return;
+    coeff(L,k,l) = laddii(gcoeff(L,k,l), negi(B));
+  } else {
+    for(i=1;i<l;i++) coeff(L,k,i)=laddii(gcoeff(L,k,i),mulsi(qq,gcoeff(L,l,i)));
+    coeff(L,k,l) = laddii(gcoeff(L,k,l), mulsi(qq,B));
   }
-  for(i=1;i<l;i++)  coeff(L,k,i)=laddii(gcoeff(L,k,i),mulsi(qq,gcoeff(L,l,i)));
-  coeff(L,k,l) = laddii(gcoeff(L,k,l), mulsi(qq,B));
 }
 
 static void

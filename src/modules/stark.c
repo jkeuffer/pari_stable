@@ -1550,7 +1550,7 @@ InitPrimes(GEN bnr, long nmax, LISTray *R)
 {
   GEN bnf = (GEN)bnr[1], cond = gmael3(bnr,2,1,1);
   long np,p,j,k,l, condZ = itos(gcoeff(cond,1,1)), N = lg(cond)-1;
-  GEN *tmpray, Npr, tabpr, prime, pr, nf = checknf(bnf);
+  GEN *tmpray, tabpr, prime, pr, nf = checknf(bnf);
   byteptr d = diffptr + 1;
 
   R->condZ = condZ; l = PiBound(nmax) * N;
@@ -1566,8 +1566,8 @@ InitPrimes(GEN bnr, long nmax, LISTray *R)
     for (j = 1; j < lg(tabpr); j++)
     {
       pr  = (GEN)tabpr[j];
-      Npr = powgi((GEN)pr[1], (GEN)pr[4]);
-      if (is_bigint(Npr) || (np = Npr[2]) > nmax) break;
+      np = itos_or_0( powgi((GEN)pr[1], (GEN)pr[4]) );
+      if (!np || np > nmax) break;
       if (condZ % p == 0 && idealval(nf, cond, pr))
       {
         tmpray[j] = NULL; continue;

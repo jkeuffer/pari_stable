@@ -309,7 +309,7 @@ BSW_psp(GEN N)
 
   if (typ(N) != t_INT) err(arither1);
   if (signe(N) <= 0) return 0;
-  n = is_bigint(N)? 0: itos(N);
+  n = itos_or_0(N);
   if (n && n < 103)
     switch(n)
     {

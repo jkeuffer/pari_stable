@@ -1335,23 +1335,23 @@ sumdivk(GEN n, long k)
 GEN
 divisors(GEN n)
 {
-  pari_sp tetpil,av=avma;
-  long i,j,l;
-  GEN *d,*t,*t1,*t2,*t3, nbdiv,e;
+  pari_sp tetpil, av = avma;
+  long i, j, l, nbdiv;
+  GEN *d, *t, *t1, *t2, *t3, e;
 
   if (typ(n) != t_MAT || lg(n) != 3) n = auxdecomp(n,1);
 
   e = (GEN) n[2], n = (GEN) n[1]; l = lg(n);
   if (l>1 && signe(n[1]) < 0) { e++; n++; l--; } /* skip -1 */
-  nbdiv = gun;
+  nbdiv = 1;
   for (i=1; i<l; i++)
   {
     e[i] = itos((GEN)e[i]);
-    nbdiv = mulis(nbdiv,1+e[i]);
+    nbdiv = itos_or_0( mulss(nbdiv, 1+e[i]) );
   }
-  if (is_bigint(nbdiv) || (itos(nbdiv) & ~LGBITS))
+  if (!nbdiv || nbdiv & ~LGBITS)
     err(talker, "too many divisors (more than %ld)", LGBITS - 1);
-  d = t = (GEN*) cgetg(itos(nbdiv)+1,t_VEC);
+  d = t = (GEN*) cgetg(nbdiv+1,t_VEC);
   *++d = gun;
   for (i=1; i<l; i++)
     for (t1=t,j=e[i]; j; j--,t1=t2)

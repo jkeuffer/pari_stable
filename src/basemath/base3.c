@@ -2235,8 +2235,9 @@ ideallistzstarall(GEN bnf,long bound,long flag)
     fa = primedec(nf,p);
     for (j=1; j<lg(fa); j++)
     {
-      pr = (GEN)fa[j]; p1 = powgi(p,(GEN)pr[4]);
-      if (is_bigint(p1) || (q = itos(p1)) > bound) continue;
+      pr = (GEN)fa[j]; 
+      q = itos_or_0( powgi(p,(GEN)pr[4]) );
+      if (!q || q > bound) continue;
 
       q2 = q; ideal = pr; z2 = dummycopy(z);
       if (do_units) lu2 = dummycopy(lu);
