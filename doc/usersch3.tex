@@ -6838,7 +6838,7 @@ expression, including of course expressions using loops.
 \misctitle{Library mode.}
 Since it is easier to program directly the loops in library mode, these
 functions are mainly useful for GP programming. Using them in library mode is
-tricky we will not give any details, although the reader can try and figure
+tricky and we will not give any details, although the reader can try and figure
 it out by himself by checking the example given for \tet{sum}.
 
 On the other hand, numerical routines code a function (to be integrated,
@@ -6854,7 +6854,7 @@ $f_t: x \to (x+t)^2$ via
 \bprog
 GEN f(GEN x, void *t) { return gsqr(gadd(x, (GEN)t)); }
 @eprog\noindent
-One could then integrate $f_1$ between $a$ and $b$ with the call
+One can then integrate $f_1$ between $a$ and $b$ with the call
 \bprog
 intnum((void*)stoi(1), &fun, a, b, NULL, prec);
 @eprog\noindent
