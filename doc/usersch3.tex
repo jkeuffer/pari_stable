@@ -5168,7 +5168,18 @@ coefficients.
 
 \subsecidx{rnfidealup}$(\var{rnf},x)$: $\var{rnf}$ being a relative number
 field extension $L/K$ as output by \kbd{rnfinit} and $x$ being an ideal of
-$K$, gives the ideal $x\Z_L$ as an absolute ideal of $L/\Q$.
+$K$, gives the ideal $x\Z_L$ as an absolute ideal of $L/\Q$, in the form of a
+$\Z$-basis, given by a vector of polynomials (modulo \kbd{rnf.pol}).
+The following routine might be useful:
+\bprog
+    \\ return y = rnfidealup(rnf,...) as an ideal in HNF form associated to
+    \\ nf = nfinit( rnf.pol );
+    idealuptoNF(nf, y) =
+    {
+      local(z); z = nfalgtobasis(nf, y);
+      z[1] = Mat(z[1]); mathnf( concat(z) );
+    }
+@eprog
 
 \syn{rnfidealup}{\var{rnf},x}.
 
@@ -5231,12 +5242,10 @@ $\beta + k \alpha$. Typically, the GP instruction would be
 
 \kbd{pol = subst(pol, x, x - k*Mod(y,\var{nf}.pol))}
 
-$\var{rnf}[12]$ is the absolute integral basis of $L$ expressed in HNF in
-terms of the power basis associated to the absolute polynomial
-$\kbd{\var{rnf}.pol}$.
-
-$\var{rnf}[13]$ is the inverse matrix of the integral basis, allowing to go
-from polmod to integral basis representation.
+$\var{rnf}[12]$ is by default unused and set equal to 0. This
+field is used to store further information about the field as it becomes
+available (which is rarely needed, hence would be too expensive to compute
+during the initial \kbd{rnfinit} call).
 
 \syn{rnfinitalg}{\var{nf},\var{pol},\var{prec}}.
 
