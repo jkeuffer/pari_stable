@@ -651,7 +651,7 @@ Flm_Flx_mul(GEN x, GEN y, ulong p)
   long i,k,l, ly = lg(y)-1;
   GEN z;
   long vs=y[1];
-  if (ly==1) return Flx_zero(vs);
+  if (ly==1) return zero_Flx(vs);
   l = lg(x[1]);
   y++;
   z = vecsmall_const(l,0) + 1;
@@ -693,7 +693,7 @@ Flm_Flx_mul(GEN x, GEN y, ulong p)
     }
   }
   while (--l && !z[l]);
-  if (!l) return Flx_zero(0);
+  if (!l) return zero_Flx(vs);
   *z-- = vs; return z;
 }
 
@@ -1327,7 +1327,7 @@ GEN
 FqX_gcd(GEN P, GEN Q, GEN T, GEN p)
 {
   GEN g = T? FpXQX_safegcd(P,Q,T,p): FpX_gcd(P,Q,p);
-  if (!g) err(talker,"factmod9: %Z is reducible mod p!", T);
+  if (!g) err(talker,"%Z not irreducible in FqX_gcd", T);
   return g;
 }
 long

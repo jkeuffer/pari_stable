@@ -136,10 +136,9 @@ Flm_FlxV(GEN x, long sv)
 /***********************************************************************/
 
 /*sv is a evalvarn()*/
-/*FIXME: should be zero_Flx or something*/
-/*Flx_zero=zx_zero*/
+/*zero_Flx=zero_zx*/
 GEN
-Flx_zero(long sv)
+zero_Flx(long sv)
 {
   GEN x = cgetg(2, t_VECSMALL);
   x[1] = sv; return x;
@@ -165,7 +164,7 @@ GEN
 Fl_Flx(ulong x, long sv)
 {
   GEN z;
-  if (!x) return Flx_zero(sv);
+  if (!x) return zero_Flx(sv);
   z = cgetg(3, t_VECSMALL);
   z[1] = sv;
   z[2] = (long)x; return z;
@@ -348,7 +347,7 @@ Flx_Fl_mul(GEN y, ulong x, ulong p)
 {
   GEN z;
   int i, l;
-  if (!x) return Flx_zero(y[1]);
+  if (!x) return zero_Flx(y[1]);
   l = lg(y); z = cgetg(l, t_VECSMALL); z[1]=y[1]; 
   if (HIGHWORD(x | p))
     for(i=2; i<l; i++) z[i] = (long)Fl_mul(y[i], x, p);
@@ -493,7 +492,7 @@ Flx_mulspec(GEN a, GEN b, ulong p, long na, long nb)
   while (na && !a[0]) { a++; na--; v++; }
   while (nb && !b[0]) { b++; nb--; v++; }
   if (na < nb) swapspec(a,b, na,nb);
-  if (!nb) return Flx_zero(0);
+  if (!nb) return zero_Flx(0);
 
   av = avma;
   if (na>30 && maxlenghtcoeffpol(p,nb)==1)
@@ -548,7 +547,7 @@ Flx_sqrspec_basecase(GEN x, ulong p, long nx)
   ulong p1;
   GEN z;
 
-  if (!nx) return Flx_zero(0);
+  if (!nx) return zero_Flx(0);
   lz = (nx << 1) + 1, nz = lz-2;
   z = cgetg(lz, t_VECSMALL) + 2;
   if (u_OK_ULONG(p))
@@ -675,7 +674,7 @@ Flx_rem(GEN x, GEN y, ulong p)
   ulong p1,inv;
   long vs=x[1];
 
-  dy = degpol(y); if (!dy) return Flx_zero(x[1]);
+  dy = degpol(y); if (!dy) return zero_Flx(x[1]);
   dx = degpol(x);
   dz = dx-dy; if (dz < 0) return Flx_copy(x);
   x += 2; y += 2;
@@ -751,14 +750,14 @@ Flx_divrem(GEN x, GEN y, ulong p, GEN *pr)
       q = Flx_copy(x);
     else
       q = Flx_Fl_mul(x, Fl_inv(y[2], p), p);
-    if (pr) *pr = Flx_zero(sv);
+    if (pr) *pr = zero_Flx(sv);
     return q;
   }
   dx = degpol(x);
   dz = dx-dy;
   if (dz < 0)
   {
-    q = Flx_zero(sv);
+    q = zero_Flx(sv);
     if (pr) *pr = Flx_copy(x);
     return q;
   }
@@ -915,7 +914,7 @@ Flx_invmontgomery(GEN T, ulong p)
   long l=lg(T);
   GEN r;
   ulong c=T[l-1], ci=1;
-  if (l<5) return Flx_zero(T[1]);
+  if (l<5) return zero_Flx(T[1]);
   if (c!=1)
   {
     ci=Fl_inv(c,p);
@@ -1006,7 +1005,7 @@ Flx_extgcd(GEN a, GEN b, ulong p, GEN *ptu, GEN *ptv)
 {
   GEN q,z,u,v, x = a, y = b;
 
-  u = Flx_zero(a[1]);
+  u = zero_Flx(a[1]);
   v = Fl_Flx(1,a[1]); /* v = 1 */
   while (lgpol(y))
   {
@@ -1076,7 +1075,7 @@ Flx_extresultant(GEN a, GEN b, ulong p, GEN *ptU, GEN *ptV)
   /* dx <= dy */
   if (dx < 0) return 0;
 
-  u = Flx_zero(vs);
+  u = zero_Flx(vs);
   v = Fl_Flx(1,vs); /* v = 1 */
   while (dy)
   { /* b u = x (a), b v = y (a) */
@@ -1246,7 +1245,7 @@ Flv_polint(GEN xa, GEN ya, ulong p, long vs)
       dP = Flx_Fl_mul(T, Fl_mul(ya[i],inv,p), p);
     P = P? Flx_add(P, dP, p): dP;
   }
-  return P? gerepileuptoleaf(av, P): Flx_zero(vs);
+  return P? gerepileuptoleaf(av, P): zero_Flx(vs);
 }
 
 /***********************************************************************/

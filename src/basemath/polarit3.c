@@ -2930,9 +2930,9 @@ u_FpV_polint_all(GEN xa, GEN ya, GEN C0, GEN C1, ulong p)
       P1= P1? Flx_add(P1, dP1, p): dP1;
     }
   }
-  ya[1] = (long) (P ? P : Flx_zero(0));
-  C0[1] = (long) (P0? P0: Flx_zero(0));
-  C1[1] = (long) (P1? P1: Flx_zero(0));
+  ya[1] = (long) (P ? P : zero_Flx(0));
+  C0[1] = (long) (P0? P0: zero_Flx(0));
+  C1[1] = (long) (P1? P1: zero_Flx(0));
 }
 
 /* b a vector of polynomials representing B in Fp[X][Y], evaluate at X = x,
@@ -2944,7 +2944,7 @@ u_vec_FpX_eval(GEN b, ulong x, ulong p)
   long i, lb = lg(b);
   ulong leadz = Flx_eval(leading_term(b), x, p);
   long vs=mael(b,2,1);
-  if (!leadz) return Flx_zero(vs);
+  if (!leadz) return zero_Flx(vs);
 
   z = cgetg(lb, t_VECSMALL); z[1] = vs;
   for (i=2; i<lb-1; i++) z[i] = Flx_eval((GEN)b[i], x, p);
@@ -3071,7 +3071,7 @@ u_FpXX_pseudorem(GEN x, GEN y, ulong p)
       gerepilecoeffs(av2,x,dx+1);
     }
   }
-  if (dx < 0) return Flx_zero(0);
+  if (dx < 0) return zero_Flx(0);
   lx = dx+3; x -= 2;
   x[0]=evaltyp(t_POL) | evallg(lx);
   x[1]=evalsigne(1) | evalvarn(vx);
