@@ -1663,33 +1663,45 @@ quaddisc(GEN x)
 /**                              FACTORIAL                          **/
 /**                                                                 **/
 /*********************************************************************/
+/* returm a * (a+1) * ... * b. Assume a <= b */
+/* TODO: factor out powers of 2 and use binary splitting */
+GEN
+seq_umul(ulong a, ulong b)
+{
+  pari_sp av = avma;
+  ulong k, l, N, n = b - a + 1;
+  long lx;
+  GEN x;
+
+  if (n < 61)
+  {
+    x = utoi(a);
+    for (k=a+1; k<=b; k++) x = mului(k,x);
+    return gerepileuptoint(av, x);
+  }
+  lx = 1; x = cgetg(1 + n/2, t_VEC);
+  N = b + a;
+  for (k = a;; k++)
+  {
+    l = N - k; if (l <= k) break;
+    x[lx++] = (long)muluu(k,l);
+  }
+  if (l == k) x[lx++] = lutoi(k);
+  setlg(x, lx);
+  return gerepileuptoint(av, divide_conquer_prod(x, mulii));
+
+
+}
+
 GEN
 mpfact(long n)
 {
-  const pari_sp av = avma;
-  long lx,k,l;
-  GEN x;
-
-  if (n<2)
+  if (n < 2)
   {
-    if (n<0) err(facter);
+    if (n < 0) err(facter);
     return gun;
   }
-  if (n < 60)
-  {
-    x = gdeux;
-    for (k=3; k<=n; k++) x = mulsi(k,x);
-    return gerepileuptoint(av,x);
-  }
-  lx = 1; x = cgetg(1 + n/2, t_VEC);
-  for (k=2;; k++)
-  {
-    l = n+2-k; if (l <= k) break;
-    x[lx++] = (long)muluu(k,l);
-  }
-  if (l == k) x[lx++] = lstoi(k);
-  setlg(x, lx);
-  return gerepileuptoint(av, divide_conquer_prod(x, mulii));
+  return seq_umul(2UL, (ulong)n);
 }
 
 GEN

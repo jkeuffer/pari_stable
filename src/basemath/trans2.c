@@ -21,6 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /********************************************************************/
 #include "pari.h"
 
+extern GEN seq_umul(ulong a, ulong b);
 extern GEN mpsin(GEN x);
 static GEN mpach(GEN x);
 
@@ -958,6 +959,7 @@ bernvec(long nb)
 /**                                                                **/
 /********************************************************************/
 
+#if 0
 static GEN
 mpgamma(GEN x)
 {
@@ -1117,6 +1119,7 @@ cxgamma(GEN x, long prec)
   }
   gaffect(p4,y); avma=av; return y;
 }
+#endif
 
 /* x / (i*(i+1)) */
 GEN
@@ -1179,7 +1182,7 @@ trans_fix_arg(long *prec, GEN *s0, GEN *sig, pari_sp *av, GEN *res)
   *prec = l; return s;
 }
 
-GEN
+static GEN
 gammanew(GEN s0, long la, long prec)
 {
   GEN s, u, a, y, res, tes, sig, invn2, p1, unr, nnx, pitemp;
@@ -1289,9 +1292,9 @@ gammanew(GEN s0, long la, long prec)
 GEN
 ggamma(GEN x, long prec)
 {
-  pari_sp av = avma, tetpil;
-  long m, ma;
-  GEN y, p1, p2, p3;
+  pari_sp av = avma;
+  long m;
+  GEN y, p1;
   
   switch(typ(x))
   {
@@ -1299,46 +1302,41 @@ ggamma(GEN x, long prec)
       if (signe(x)<=0) err(gamer2);
       if (cmpis(x,481177) > 0) err(talker,"argument too large in ggamma");
 /* heuristic */
-      if (cmpis(x,350 + 70*(prec-2)) > 0) return transc(ggamma,x,prec);
-      p2 = cgetr(prec); av = avma;
-      p1 = mpfact(itos(x) - 1);
-      affir(p1,p2); avma = av;
-      return p2;
+      if (cmpis(x, 350 + 70*(prec-2)) > 0) break;
+      y = cgetr(prec); av = avma;
+      affir(mpfact(itos(x) - 1), y);
+      avma = av; return y;
 
-    case t_REAL:
-      return mpgamma(x);
+    case t_REAL: case t_COMPLEX:
+      return gammanew(x, 3, prec);
 
     case t_FRAC:
-      if (cmpis((GEN)x[2],2) == 0)
-      {
-	p2 = cgetr(prec); av = avma;
-	if (cmpis(mpabs((GEN)x[1]),962354) > 0)
-	  err(talker,"argument too large in ggamma");
+      if (!egalii((GEN)x[2], gdeux)) break;
+      x = (GEN)x[1]; /* true argument is x/2 */
 /* heuristic */
-	if (cmpis((GEN)x[1],200 + 50*(prec-2)) > 0)
-	  return transc(ggamma,x,prec);
-	p1 = gsqrt(mppi(prec),prec);
-	m = itos((GEN)x[1]) - 1; ma = labs(m);
-	p3 = gmul2n(divii(mpfact(ma),mpfact(ma/2)),-ma);
-	if (m >= 0) affrr(gmul(p3,p1),p2);
-	else
-	{
-	  affrr(gdiv(p1,p3),p2);
-	  if ((m&3) == 2) setsigne(p2,-1);
-	}
-	avma = av;
-	return p2;
+      if (cmpis(x, 200 + 50*(prec-2)) > 0) break;
+
+      y = cgetr(prec); av = avma;
+      if (cmpis(mpabs(x), 962354) > 0)
+        err(talker, "argument too large in ggamma");
+      p1 = mpsqrt( mppi(prec) );
+      m = itos(x) - 1;
+      if (m)
+      {
+        long ma = labs(m);
+        GEN p2 = gmul2n(seq_umul(ma/2 + 1, ma), -ma);
+        if (m >= 0) p1 = gmul(p1,p2);
+        else
+        {
+          p1 = gdiv(p1,p2);
+          if ((m&3) == 2) setsigne(p1,-1);
+        }
       }
-      else return transc(ggamma,x,prec);
+      affrr(p1, y); avma = av; return y;
 
     case t_FRACN:
-      p1 = gred(x);
-      tetpil = avma;
-      return gerepile(av,tetpil,ggamma(p1,prec));
+      return gerepileupto(av, ggamma(gred(x), prec));
       
-    case t_COMPLEX:
-      return cxgamma(x,prec);
-
     case t_PADIC: err(impl,"p-adic gamma function");
     case t_INTMOD: err(typeer,"ggamma");
     default:
