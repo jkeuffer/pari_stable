@@ -42,10 +42,7 @@ hit_return(void)
 /********************************************************************/
 #define ONE_LINE_COMMENT   2
 #define MULTI_LINE_COMMENT 1
-/* Filter s into t. If flag is a query, return s (yes) / NULL (no)
- * Otherwise, if t == NULL, allocate enough room, filter then return t.
- *            if not return pointer to ending '\0' in t.
- */
+/* Filter F->s into F->t */
 char *
 filtre0(filtre_t *F)
 {

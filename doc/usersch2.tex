@@ -26,7 +26,7 @@ parameters of GP, or \var{defaults}. See \secref{se:defaults} below for a
 list and explanation of all defaults, there are many more than just those
 two. These defaults can be changed by adding parameters to the input line
 as above, or interactively during a GP session or in a preferences file (also
-known as \kbd{gprc}).
+known as \tet{gprc}).
 
 \unix Some new features were developed on UNIX platforms, and depend heavily
 on the operating system in use. It is \var{possible} that some of these
@@ -404,7 +404,7 @@ and~\b{b} respectively (see below).
 in fact any program using the PARI library, needs a stack in which to do
 its computations. \kbd{parisize} is the stack size, in bytes. It is
 strongly recommended you increase this default (using the \kbd{-s}
-command-line switch, or a \kbd{gprc}) if you can afford it. Don't increase
+command-line switch, or a \tet{gprc}) if you can afford it. Don't increase
 it beyond the actual amount of RAM installed on your computer or GP will
 spend most of its time paging.
 
@@ -1919,12 +1919,21 @@ To our knowledge, only the \kbd{python} and \kbd{perl} interfaces have been
 upgraded to version 2.0 of PARI, the \kbd{CLISP} one being still based on
 version 1.39.$xx$.
 
-\section{The preferences file}\sidx{startup}\sidx{gprc}\sidx{preferences file}
+\section{The preferences file}\sidx{startup}\sidx{preferences file}
 \label{se:gprc}
 
-\noindent
+This file, called \tet{gprc} in the sequel, is used to modify or extend GP
+default behaviour, in all GP sessions: e.g customize \kbd{default} values or
+load common user functions and aliases. GP opens the \kbd{gprc} file and
+processes the commands in there, \var{before} doing anything else,
+e.g.~creating the PARI stack. If the file does not exist or cannot be read,
+GP will proceed to the initialization phase at once, eventually emitting a
+prompt. If any explicit command line switches are given, they override the
+values read from the preferences file.
+
+\subsec{Where is it?}
 When GP is started, it looks for a customization file, or \kbd{gprc} in the
-following places (in this order, only the first one found will be read):
+following places (in this order, only the first one found will be loaded):
 
 \noindent$\bullet$ On the Macintosh (only), GP looks in the directory which
 contains the GP executable itself for a file called \kbd{gprc}. No other places
@@ -1962,69 +1971,103 @@ your home directory), or
 
 \noindent$\bullet$ Finally, if no gprc was found among the user files
 mentioned above we look for \kbd{/etc/gprc} (\kbd{\bs etc\bs gprc})
-for a system-wide gprc file (you'll need root privileges to set up such a
+for a system-wide gprc file (you will need root privileges to set up such a
 file yourself).
 
 Note that on Unix systems, the \kbd{gprc}'s default name starts with a '.' and
 thus is hidden to regular \kbd{ls} commands; you need to type \kbd{ls -a} to
-see whether it's already there without your knowing about it.
+list it.
 
-In any case, GP will open the corresponding file and process the commands in
-there, \var{before} doing anything else, e.g.~creating the PARI stack. If
-the file doesn't exist or cannot be read, GP will proceed to the
-initialization phase at once, eventually emitting a prompt. If any explicit
-command line switches are given, they will override the values read from the
-\kbd{gprc} file.
+\subsec{Syntax}
 
-The syntax in this file (and valid in this file only, at this very precise
-moment!) is simple-minded, but should be sufficient for most purposes. It
-is read line by line, white space being optional as usual (unless surrounded
-by quotes). Two types of lines are first dealt with by a preprocessor:
+The syntax in the \kbd{gprc} file (and valid in this file only) is
+simple-minded, but should be sufficient for most purposes. The file is read
+line by line; as usual, white space is ignored unless surrounded by quotes
+and the standard multiline constructions using braces, \kbd{\bs}, or \kbd{=}
+are available (multiline comments between \kbd{/*~\dots~*/} are also
+recognized).
+
+\subsubsec{Preprocessor:}
+Two types of lines are first dealt with by a preprocessor:
 
 $\bullet$ comments are removed. This applies to all text surrounded by
-\kbd{/*~\dots~*/} as well as everything following \kbd{\bs\bs} on a given
+\kbd{/*~\dots~*/} as well as to everything following \kbd{\bs\bs} on a given
 line.
 
-$\bullet$ lines starting with \kbd{\#if} \var{keyword} are treated as
-comments if \var{keyword} is not defined, and read normally otherwise. The
-condition can be negated using either \kbd{\#if not} (or \kbd{\#if !}). Only
-two keywords are recognized:
+$\bullet$ lines starting with \kbd{\#if} \var{boolean} are treated as
+comments if \var{boolean} evaluates to \kbd{false}, and read normally
+otherwise. The condition can be negated using either \kbd{\#if not} (or
+\kbd{\#if !}). If the rest of the current line is empty, the test applies to
+the next line (same behaviour as \kbd{=} under GP). Only three tests can be
+performed:
 
-\kbd{EMACS}: defined if GP is running in an Emacs shell (see
+\kbd{EMACS}: \kbd{true} if GP is running in an Emacs or TeXmacs shell (see
 \secref{se:emacs}).
 
-\kbd{READL}: defined if GP is compiled with \kbd{readline} support (see
+\kbd{READL}: \kbd{true} if GP is compiled with \kbd{readline} support (see
 \secref{se:readline}).
 
-\noindent For instance you could set your prompt in the following portable
-way:
+\kbd{VERSION} \var{op} \var{number}: where \var{op} is in the set
+$\{ \kbd{>}, \kbd{<}, \kbd{<=}, \kbd{>=} \}$, and \var{number} is a PARI
+version number of the form \var{Major}.\var{Minor}.\var{patch}, where the
+last two components can be omitted (i.e.~$1$ is understood as versio $1.0.0$).
+This is \kbd{true} if GP's version number satisfies the required
+inequality.
+
+\subsubsec{Commands:}
+After the preprocessing the remaining lines are executed as
+sequence of expressions (as usual, separated by \kbd{;} if necessary). Only
+two kinds of expressions are recognized:
+
+$\bullet$ \var{default} \kbd{=} \var{value}, where \var{default} is one of
+the available defaults (see \secref{se:defaults}), which will be set to
+\var{value} on actual startup. Don't forget the quotes around strings
+(e.g.~for \kbd{prompt} or \kbd{help}).
+
+$\bullet$ \kbd{read "\var{some\_GP\_file}"} where \kbd{\var{some\_GP\_file}}
+is a regular GP script this time, which will be read just before GP prompts
+you for commands, but after initializing the defaults. In particular, file
+input is delayed until the \kbd{gprc} has been fully loaded. This is the
+right place to input files containing \kbd{alias} commands, or your favorite
+macros.
+
+\noindent For instance you could set your prompt in the following portable way:
 \bprog
 \\ self modifying prompt looking like @com\hbox{\rm(18:03) \key{gp}\kbd{ >}}
 prompt   = "(\%R) \e[1mgp\e[m > "
 
 \\ readline wants non-printing characters to be braced between ^A/^B pairs
-#if READL  prompt = "(%R) ^A\e[1m^Bgp^A\e[m^B > "
+#if READL prompt = "(%R) ^A\e[1m^Bgp^A\e[m^B > "
 
 \\ escape sequences not supported under emacs
-#if EMACS  prompt = "(%R) gp > "
+#if EMACS prompt = "(%R) gp > "
 @eprog
 
-\noindent After the preprocessing there remain two types of lines:
+\noindent Note that any of the last two lines could be broken in the
+following way
+\bprog
+#if EMACS
+  prompt = "(%R) gp > "
+@eprog
+\noindent since the preprocessor directive applies to the next line if the
+current one is empty.
 
-$\bullet$ lines of the form \var{default} \kbd{=} \var{value}, where
-\var{default} is one of the available defaults (see \secref{se:defaults}),
-which will be set to \var{value} on actual startup. Don't forget the
-quotes around strings (e.g.~for \kbd{prompt} or \kbd{help}).
-
-$\bullet$ lines of the form \kbd{read "\var{some\_GP\_file}"} where
-\kbd{\var{some\_GP\_file}} is a regular GP script this time, which will
-be read just before GP prompts you for commands, but after initializing the
-defaults. This is the right place to input files containing \kbd{alias}
-commands, or your favorite macros.
-
-A sample \kbd{gprc} file called \kbd{gprc.dft} is provided in the
-standard distribution (in directory \kbd{lib}). It's a good idea to have a
-look at it and customize it to your needs.
+A sample \kbd{gprc} file called \kbd{misc/gprc.dft} is provided in the
+standard distribution. It is a good idea to have a look at it and customize
+it to your needs. Since this file does not use multiline constructs, here is
+one (note the terminating \kbd{;} to separate the expressions):
+\bprog
+#if VERSION > 2.2.3
+{
+  read "my_scripts";     \\ syntax errors in older versions
+  new_galois_format = 1; \\ default introduced in 2.2.4
+}
+#if ! EMACS
+{
+  colors = "9, 5, no, no, 4, 1, 2";
+  help   = "gphelp -detex -ch 4 -cb 0 -cu 2";
+}
+@eprog
 
 \section{Using GP under GNU Emacs}
 \label{se:emacs}

@@ -100,6 +100,8 @@ IZ  8- [library:] unified access to diffptr (NEXT_PRIME_VIADIFF macro)
  BA 1- Add PARI_VERSION and PARI_VERSION_CODE to paricfg.h
  BA 2- Add pari_release at top of dft.Config.in
     3- rnfpolredabs: flag to use partial factorization
+    4- [gprc:] test against VERSION number in .gprc
+    5- [gprc:] multiline constructs
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.3 (released 10/06/2002):

@@ -202,13 +202,15 @@ gp_preinit(void)
 #endif
 #define separe(c)  ((c)==';' || (c)==':')
 
-/* Return all chars, up to next separator */
+/* Return all chars, up to next separator
+ * [as strtok but must handle verbatim character string]
+ * If 'colon' is set, allow ';' and ':' as separator, only ';' otherwise */
 static char*
 get_sep0(char *t, int colon)
 {
   static char buf[GET_SEP_SIZE], *lim = buf + (GET_SEP_SIZE-1);
   char *s = buf;
-  int outer=1;
+  int outer = 1;
 
   for(;;)
   {
@@ -220,9 +222,9 @@ get_sep0(char *t, int colon)
       case '\0':
         return buf;
       case ';':
-	if (outer) { s[-1]=0; return buf; } break;
+	if (outer) { s[-1] = 0; return buf; } break;
       case ':':
-        if (outer && colon) { s[-1]=0; return buf; } break;
+        if (outer && colon) { s[-1] = 0; return buf; } break;
     }
     if (s == lim) err(talker,"buffer overflow in get_sep");
   }
@@ -240,36 +242,14 @@ get_sep_colon_ok(char *t)
   return get_sep0(t,0);
 }
 
-/* as above, t must be writeable, return 1 if we modified t */
-static int
-get_sep2(char *t)
-{
-  int outer=1;
-  char *s = t;
-
-  for(;;)
-  {
-    switch (*s++)
-    {
-      case '"':
-        if (outer || s[-2] != '\\') outer = !outer;
-        break;
-      case '\0':
-        return 0;
-      default:
-        if (outer && separe(*s)) { *s=0; return 1; }
-    }
-  }
-}
-
 static long
 get_int(char *s, long dflt)
 {
-  char *p=get_sep(s);
+  char *p = get_sep(s);
   long n=atol(p);
 
   if (*p == '-') p++;
-  while(isdigit((int)*p)) { p++; dflt=n; }
+  while (isdigit((int)*p)) { p++; dflt=n; }
   switch(*p)
   {
     case 'k': case 'K': dflt *= 1000;    p++; break;
@@ -284,16 +264,15 @@ get_uint(char *s)
 {
   ulong n = 0;
 
-  s=get_sep(s);
-  if (*s == '-') 
-      err(talker,"arguments must be positive integers");
-  while(isdigit((int)*s)) { n = 10*n + (*s++ - '0'); }
+  s = get_sep(s);
+  if (*s == '-') err(talker,"arguments must be positive integers");
+  while (isdigit((int)*s)) { n = 10*n + (*s++ - '0'); }
   switch(*s)
   {
     case 'k': case 'K': n *= 1000;    s++; break;
     case 'm': case 'M': n *= 1000000; s++; break;
   }
-  if (*s) err(talker2,"I was expecting an integer here");
+  if (*s) err(talker,"I was expecting an integer here");
   return n;
 }
 
@@ -654,7 +633,7 @@ sd_colors(char *v, int flag)
       if (c < c_LAST - 1) { *t++=','; *t++=' '; }
     }
     if (flag==d_RETURN) return strtoGENstr(s,0);
-    pariputsf("   colors = \"%t\"\n",s);
+    pariputsf("   colors = \"%s\"\n",s);
   }
   return gnil;
 }
@@ -1880,13 +1859,19 @@ escape(char *tch)
 #  include <pwd.h>
 #endif
 
-static int
-get_preproc_value(char *s)
+static int get_line_from_file(char *prompt, filtre_t *F, FILE *file);
+#define err_gprc(s,t,u) { fprintferr("\n"); err(talker2,s,t,u); }
+
+static void 
+init_filtre(filtre_t *F, void *data)
 {
-  if (!strncmp(s,"EMACS",5)) return GP_DATA->flags & (EMACS| TEXMACS);
-  if (!strncmp(s,"READL",5)) return GP_DATA->flags & USE_READLINE;
-  return -1;
+  F->data = data;
+  F->in_string  = 0;
+  F->in_comment = 0;
+  F->downcase = 0;
 }
+
+/* LOCATE GPRC */
 
 /* return $HOME or the closest we can find */
 static char *
@@ -1958,22 +1943,96 @@ gprc_get(void)
   return f;
 }
 
-static int get_line_from_file(char *prompt, filtre_t *F, FILE *file);
-#define err_gprc(s,t,u) { fprintferr("\n"); err(talker2,s,t,u); }
+/* PREPROCESSOR */
 
-static void 
-init_filtre(filtre_t *F, void *data)
+static ulong
+read_uint(char **s)
 {
-  F->data = data;
-  F->in_string  = 0;
-  F->in_comment = 0;
-  F->downcase = 0;
+  long v = atol(*s);
+  if (!isdigit((int)**s)) err_gprc("not an integer", *s, *s);
+  while (isdigit((int)**s)) (*s)++;
+  return v;
+}
+static ulong
+read_dot_uint(char **s)
+{
+  if (**s != '.') return 0;
+  (*s)++; return read_uint(s);
+}
+/* read a.b.c */
+static long
+read_version(char **s)
+{
+  long a, b, c;
+  a = read_uint(s);
+  b = read_dot_uint(s);
+  c = read_dot_uint(s);
+  return PARI_VERSION(a,b,c);
+}
+
+static int
+get_preproc_value(char **s)
+{
+  if (!strncmp(*s,"EMACS",5))
+  {
+    *s += 5;
+    return GP_DATA->flags & (EMACS|TEXMACS);
+  }
+  if (!strncmp(*s,"READL",5))
+  {
+    *s += 5;
+    return GP_DATA->flags & USE_READLINE;
+  }
+  if (!strncmp(*s,"VERSION",7))
+  {
+    int less = 0, orequal = 0;
+    long d;
+    *s += 7;
+    switch(**s)
+    {
+      case '<': (*s)++; less = 1; break;
+      case '>': (*s)++; less = 0; break;
+      default: return -1;
+    }
+    if (**s == '=') { (*s)++; orequal = 1; }
+    d = PARI_VERSION_CODE - read_version(s);
+    if (!d) return orequal;
+    return less? (d < 0): (d > 0);
+  }
+  return -1;
+}
+
+/* PARSE GPRC */
+
+/* 1) replace next separator by '\0' (t must be writeable)
+ * 2) return the next expression ("" if none)
+ * see get_sep0() */
+static char *
+next_expr(char *t)
+{
+  int outer = 1;
+  char *s = t;
+
+  for(;;)
+  {
+    char c;
+    switch ((c = *s++))
+    {
+      case '"':
+        if (outer || (s >= t+2 && s[-2] != '\\')) outer = !outer;
+        break;
+      case '\0':
+        return "";
+      default:
+        if (outer && separe(c)) { s[-1] = 0; return s; }
+    }
+  }
 }
 
 static char **
 gp_initrc(void)
 {
-  char **flist, *s,*s1,*s2;
+  char **flist, *nexts,*s,*t;
   FILE *file = gprc_get();
   long fnum = 4, find = 0;
   Buffer *b;
@@ -1985,53 +2044,57 @@ gp_initrc(void)
   init_filtre(&F, (void*)b);
   for(;;)
   {
-    if (!get_line_from_file(NULL,&F,file))
-    {
-      del_buffer(b);
-      if (!(GP_DATA->flags & QUIET)) fprintferr("Done.\n\n");
-      fclose(file); flist[find] = NULL;
-      return flist;
-    }
-    for (s = b->buf; *s; )
-    {
-      s1 = s; if (get_sep2(s)) s++;
-      s += strlen(s1); /* point to next expr */
-      if (*s1 == '#')
-      { /* preprocessor directive */
-        int z, NOT = 0;
-        s1++;
-        if (strncmp(s1,"if",2)) err_gprc("unknown directive",s1,b->buf);
-        s1 += 2;
-        if (!strncmp(s1,"not",3)) { NOT = !NOT; s1 += 3; }
-        if (*s1 == '!')           { NOT = !NOT; s1++; }
-        z = get_preproc_value(s1);
-	if (z < 0) err_gprc("unknown preprocessor variable",s1,b->buf);
-	if (NOT) z = !z;
-        if (!z) continue;
-        s1 += 5;
+    if (!get_line_from_file(NULL,&F,file)) break;
+    s = b->buf;
+    if (*s == '#')
+    { /* preprocessor directive */
+      int z, NOT = 0;
+      s++;
+      if (strncmp(s,"if",2)) err_gprc("unknown directive",s,b->buf);
+      s += 2;
+      if (!strncmp(s,"not",3)) { NOT = !NOT; s += 3; }
+      if (*s == '!')           { NOT = !NOT; s++; }
+      t = s;
+      z = get_preproc_value(&s);
+      if (z < 0) err_gprc("unknown preprocessor variable",t,b->buf);
+      if (NOT) z = !z;
+      if (!*s)
+      { /* make sure at least an expr follows the directive */
+        if (!get_line_from_file(NULL,&F,file)) break;
+        s = b->buf;
       }
-      if (!strncmp(s1,"read",4))
+      if (!z) continue; /* dump current line */
+    }
+    /* parse line */
+    for ( ; *s; s = nexts)
+    {
+      nexts = next_expr(s);
+      if (!strncmp(s,"read",4))
       { /* read file */
-	s1 += 4;
+	s += 4;
 	if (find == fnum-1)
 	{
 	  fnum <<= 1;
 	  flist = (char**)gprealloc(flist, fnum*sizeof(char*));
 	}
-	flist[find++] = s2 = gpmalloc(strlen(s1) + 1);
-	if (*s1 == '"') (void)readstring(s1, s2);
-	else strcpy(s2,s1);
+	flist[find++] = t = gpmalloc(strlen(s) + 1);
+	if (*s == '"') (void)readstring(s, t);
+	else strcpy(t,s);
       }
       else
       { /* set default */
-	s2 = s1; while (*s2 && *s2 != '=') s2++;
-	if (*s2 != '=') err_gprc("missing '='",s2,b->buf);
-	*s2++ = 0;
-	if (*s2 == '"') (void)readstring(s2, s2);
-	setdefault(s1,s2,d_INITRC);
+	t = s; while (*t && *t != '=') t++;
+	if (*t != '=') err_gprc("missing '='",t,b->buf);
+	*t++ = 0;
+	if (*t == '"') (void)readstring(t, t);
+	setdefault(s,t,d_INITRC);
       }
     }
   }
+  del_buffer(b);
+  if (!(GP_DATA->flags & QUIET)) fprintferr("Done.\n\n");
+  fclose(file); flist[find] = NULL;
+  return flist;
 }
 
 /********************************************************************/
