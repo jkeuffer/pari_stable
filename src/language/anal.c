@@ -22,19 +22,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "anal.h"
 #include "parinf.h"
 
-typedef struct var_cell {
-  struct var_cell *prev;
-  GEN value;
-  char flag;
-} var_cell;
-#define PUSH_VAL 0
-#define COPY_VAL 1
-#define copyvalue(v,x) new_val_cell(get_ep(v), gclone(x), COPY_VAL)
-#define pushvalue(v,x) new_val_cell(get_ep(v), x, PUSH_VAL)
-#define killvalue(v) pop_val(get_ep(v))
-
 #define separe(c) ((c)==';' || (c)==':')
 typedef GEN (*PFGEN)(ANYARG);
+typedef GEN (*F2GEN)(GEN,GEN);
+typedef GEN (*F1GEN)(GEN);
 
 static GEN    constante();
 static GEN    expr();
@@ -52,7 +43,7 @@ static void   skipfacteur();
 static void   skipidentifier();
 static void   skipseq();
 static void   skipstring();
-static long   skiptruc();
+static void   skiptruc();
 static GEN    strtoGENstr_t();
 static entree *entry();
 static entree *installep(void *f,char *name,int l,int v,int add,entree **table);
@@ -143,7 +134,7 @@ static GEN br_res = NULL;
  *    { arg } { , arg }*
  *
  *  arg:
- *    expr  or  &entry 
+ *    expr  or  &entry
  *    Note: &entry (pointer) not yet implemented for user functions
  *
  *  matrix
@@ -153,7 +144,7 @@ static GEN br_res = NULL;
  *  matrix_index:
  *      [ expr {,} ]
  *   or [ { expr } , expr ]
- *  
+ *
  *  matrix_assignment_block:
  *     { matrix_index }  followed by
  *        = expr
@@ -165,7 +156,7 @@ static GEN br_res = NULL;
  *
  *  string:
  *      " any succession of characters [^\]"
- *     
+ *
  *  constante:
  *      number { . [0-9]* }  { expo }
  *   or .{number} { expo }
@@ -192,7 +183,7 @@ _set_analyseur(char *s)
 static GEN
 lisseq0(char *t, GEN (*f)(void))
 {
-  const long av = avma;
+  const ulong av = avma;
   char *olds = analyseur, *olde = mark.start;
   GEN res;
 
@@ -208,45 +199,28 @@ lisseq0(char *t, GEN (*f)(void))
   if (br_res) { killbloc(br_res); br_res = NULL; }
   res = f();
   analyseur = olds; mark.start = olde;
-  if (br_status)
+  if (br_status != br_NONE)
   {
     if (!br_res) { avma = av; return gnil; }
-    res = forcecopy(br_res);
+    return gerepilecopy(av, br_res);
   }
-  if (res == NULL)
-    return polx[fetch_user_var("NULL")];
-  else
-    return gerepileupto(av, res);
-}
-
-GEN
-lisseq(char *t)
-{
-  return lisseq0(t, seq);
-}
-
-GEN
-lisexpr(char *t)
-{
-  return lisseq0(t, expr);
+  if (res == NULL) { avma = av; return polx[fetch_user_var("NULL")]; }
+  return gerepileupto(av, res);
 }
 
 /* filtered lisexpr = remove blanks and comments */
-GEN
-flisexpr(char *s)
+static GEN
+flisseq0(char *s, GEN (*f)(void))
 {
   char *t = filtre(s,NULL, f_INIT | f_REG);
-  GEN x = lisseq0(t, expr);
+  GEN x = lisseq0(t, f);
   free(t); return x;
 }
 
-GEN
-flisseq(char *s)
-{
-  char *t = filtre(s,NULL, f_INIT | f_REG);
-  GEN x = lisseq0(t, seq);
-  free(t); return x;
-}
+GEN lisseq(char *t)  { return lisseq0(t, seq);  }
+GEN lisexpr(char *t) { return lisseq0(t, expr); }
+GEN flisseq(char *s) { return flisseq0(s, seq); }
+GEN flisexpr(char *s){ return flisseq0(s, expr);}
 
 /* check syntax, then execute */
 GEN
@@ -310,16 +284,27 @@ freeep(entree *ep)
 /*                            VARIABLES                            */
 /*                                                                 */
 /*******************************************************************/
-/* push_val and pop_val are private functions for use in sumiter and bibli2:
- * we want a temporary value for ep, which is NOT a clone, to avoid
- * unnecessary gaffect calls.
- *
- * Assumptions:
- *   EpVALENCE(ep) = EpVAR or EpGVAR
- *   ep->args initilized to NULL in installep()
- */
+/* As a rule, ep->value is a clone (COPY). push_val and pop_val are private
+ * functions for use in sumiter: we want a temporary ep->value, which is NOT
+ * a clone (PUSH), to avoid unnecessary copies. */
+
+/* ep->args is the stack of old values (INITIAL if initial value, from
+ * installep) */
+typedef struct var_cell {
+  struct var_cell *prev; /* cell associated to previous value on stack */
+  GEN value; /* last value (not including current one, in ep->value) */
+  char flag; /* status of _current_ ep->value: PUSH or COPY ? */
+} var_cell;
+#define INITIAL NULL
+#define PUSH_VAL 0
+#define COPY_VAL 1
+#define copyvalue(v,x) new_val_cell(get_ep(v), x, COPY_VAL)
+#define pushvalue(v,x) new_val_cell(get_ep(v), x, PUSH_VAL)
+#define killvalue(v) pop_val(get_ep(v))
+
+/* Push x on value stack associated to ep. Assume EpVALENCE(ep)=EpVAR/EpGVAR */
 static void
-new_val_cell(entree *ep, GEN a, char flag)
+new_val_cell(entree *ep, GEN x, char flag)
 {
   var_cell *v = (var_cell*) gpmalloc(sizeof(var_cell));
   v->value  = (GEN)ep->value;
@@ -327,43 +312,33 @@ new_val_cell(entree *ep, GEN a, char flag)
   v->flag   = flag;
 
   ep->args  = (void*) v;
-  ep->value = a;
+  ep->value = (flag == COPY_VAL)? gclone(x): x;
 }
 
 void
-push_val(entree *ep, GEN a)
-{
-  new_val_cell(ep,a,PUSH_VAL);
-}
+push_val(entree *ep, GEN a) { new_val_cell(ep,a,PUSH_VAL); }
 
+/* kill ep->value and replace by preceding one, poped from value stack */
 void
 pop_val(entree *ep)
 {
   var_cell *v = (var_cell*) ep->args;
 
-  if (!v) return; /* initial value */
+  if (v == INITIAL) return;
   if (v->flag == COPY_VAL) killbloc((GEN)ep->value);
   ep->value = v->value;
   ep->args  = (void*) v->prev;
   free((void*)v);
 }
 
-void
-changevalue_p(entree *ep, GEN x)
-{
-  var_cell *v = (var_cell*) ep->args;
-
-  if (!v) err(talker,"initial value in change_pushed_value");
-  if (v->flag == COPY_VAL) { killbloc((GEN)ep->value); v->flag = PUSH_VAL; }
-  ep->value = (void*)x;
-}
-
+/* as above IF ep->value was PUSHed, or was created after block number 'loc'
+   return 0 if not deleted, 1 otherwise [for recover()] */
 int
 pop_val_if_newer(entree *ep, long loc)
 {
   var_cell *v = (var_cell*) ep->args;
 
-  if (!v) return 0; /* initial value */
+  if (v == INITIAL) return 0;
   if (v->flag == COPY_VAL)
   {
     GEN x = (GEN)ep->value;
@@ -375,17 +350,30 @@ pop_val_if_newer(entree *ep, long loc)
   free((void*)v); return 1;
 }
 
+/* set new value of ep directly to val (COPY), do not save last value unless
+ * it's INITIAL. */
 void
-changevalue(entree *ep, GEN val)
+changevalue(entree *ep, GEN x)
 {
-  GEN x = gclone(val);
   var_cell *v = (var_cell*) ep->args;
-
-  if (!v) new_val_cell(ep,x, COPY_VAL);
+  if (v == INITIAL) new_val_cell(ep,x, COPY_VAL);
   else
   {
     if (v->flag == COPY_VAL) killbloc((GEN)ep->value); else v->flag = COPY_VAL;
-    ep->value = x;
+    ep->value = (void*)gclone(x);
+  }
+}
+
+/* as above, but PUSH, notCOPY */
+void
+changevalue_p(entree *ep, GEN x)
+{
+  var_cell *v = (var_cell*) ep->args;
+  if (v == INITIAL) new_val_cell(ep,x, PUSH_VAL);
+  else
+  {
+    if (v->flag == COPY_VAL) { killbloc((GEN)ep->value); v->flag = PUSH_VAL; }
+    ep->value = (void*)x;
   }
 }
 
@@ -419,8 +407,7 @@ get_ep(long v)
 
 /* Kill entree ep, i.e free all memory it occupies, remove it from hashtable.
  * If it's a variable set a "black hole" in polx[v], etc. x = 0-th variable
- * can NOT be killed (only the value). That's because we use explicitly
- * polx[0] at many places.
+ * can NOT be killed (only the value), because we often use explicitly polx[0]
  */
 void
 kill0(entree *ep)
@@ -453,8 +440,8 @@ kill0(entree *ep)
 static GEN
 seq(void)
 {
-  const long av=avma, lim=stack_lim(av,1);
-  GEN res=gnil;
+  const ulong av = avma, lim = stack_lim(av,1);
+  GEN res = gnil;
 
   for(;;)
   {
@@ -468,7 +455,7 @@ seq(void)
       if(DEBUGMEM>1) err(warnmem,"seq");
       if (is_universal_constant(res)) avma = av;
       else
-	res = gerepileupto(av, gcopy(res));
+	res = gerepilecopy(av, res);
     }
   }
 }
@@ -483,38 +470,38 @@ gshift_r(GEN x, GEN n) { return gshift(x,-itos(n)); }
 static GEN
 expr(void)
 {
-  PFGEN f[] = { NULL,NULL,NULL,NULL };
+  ulong av = avma, lim = stack_lim(av,2);
   GEN aux,e,e1,e2,e3;
-  long av = avma, lim = stack_lim(av,2);
+  F2GEN F1,F2,F3;
+  int F0 = 0;
 
+  F1 = F2 = F3 = (F2GEN)NULL;
   e1 = e2 = e3 = UNDEF;
-
 L3:
   aux = facteur();
   if (br_status) return NULL;
-  e3 = f[3]? f[3](e3,aux): aux;
+  e3 = F3? F3(e3,aux): aux;
   switch(*analyseur)
   {
-    case '*': analyseur++; f[3] = (PFGEN)&gmul; goto L3;
-    case '/': analyseur++; f[3] = (PFGEN)&gdiv; goto L3;
-    case '%': analyseur++; f[3] = (PFGEN)&gmod; goto L3;
+    case '*': analyseur++; F3 = &gmul; goto L3;
+    case '/': analyseur++; F3 = &gdiv; goto L3;
+    case '%': analyseur++; F3 = &gmod; goto L3;
     case '\\':
-      if (*++analyseur == '/') { analyseur++; f[3]=(PFGEN)&gdivround; goto L3; }
-      f[3] = (PFGEN)&gdivent; goto L3;
+      if (analyseur[1] != '/') { analyseur++; F3 = &gdivent; goto L3; }
+      analyseur += 2; F3=&gdivround; goto L3;
 
-    case '<': case '>':
-      if (analyseur[1] == *analyseur)
-      {
-        f[3] = (*analyseur == '<')? (PFGEN)&gshift_l
-                                  : (PFGEN)&gshift_r;
-        analyseur += 2; goto L3;
-      }
+    case '<':
+      if (analyseur[1] != '<') break;
+      analyseur += 2; F3 = &gshift_l; goto L3;
+    case '>':
+      if (analyseur[1] != '>') break;
+      analyseur += 2; F3 = &gshift_r; goto L3;
   }
-  f[3] = NULL;
+  F3 = (F2GEN)NULL;
 
 L2:
   if (e3 == UNDEF) goto L3;
-  e2 = f[2]? f[2](e2,e3): e3;
+  e2 = F2? F2(e2,e3): e3;
   e3 = UNDEF;
   if (low_stack(lim, stack_lim(av,2)))
   {
@@ -525,54 +512,54 @@ L2:
 
   switch(*analyseur)
   {
-    case '+': analyseur++; f[2]=(PFGEN)&gadd; goto L3;
-    case '-': analyseur++; f[2]=(PFGEN)&gsub; goto L3;
+    case '+': analyseur++; F2=&gadd; goto L3;
+    case '-': analyseur++; F2=&gsub; goto L3;
   }
-  f[2] = NULL;
+  F2 = (F2GEN)NULL;
 
 L1:
   if (e2 == UNDEF) goto L2;
-  e1 = f[1]? f[1](e1,e2): e2;
+  e1 = F1? F1(e1,e2): e2;
   e2 = UNDEF;
   switch(*analyseur)
   {
     case '<':
       switch(*++analyseur)
       {
-        case '=': analyseur++; f[1]=(PFGEN)&gle; goto L2;
-        case '>': analyseur++; f[1]=(PFGEN)&gne; goto L2;
+        case '=': analyseur++; F1=&gle; goto L2;
+        case '>': analyseur++; F1=&gne; goto L2;
       }
-      f[1]=(PFGEN)&glt; goto L2;
+      F1=&glt; goto L2;
 
     case '>':
-      if (*++analyseur == '=') { analyseur++; f[1]=(PFGEN)&gge; goto L2; }
-      f[1]=(PFGEN)&ggt; goto L2;
+      if (*++analyseur == '=') { analyseur++; F1=&gge; goto L2; }
+      F1=&ggt; goto L2;
 
     case '=':
-      if (analyseur[1] == '=') { analyseur+=2; f[1]=(PFGEN)&geq; goto L2; }
+      if (analyseur[1] == '=') { analyseur+=2; F1=&geq; goto L2; }
       goto L1;
 
     case '!':
-      if (analyseur[1] == '=') { analyseur+=2; f[1]=(PFGEN)&gne; goto L2; }
+      if (analyseur[1] == '=') { analyseur+=2; F1=&gne; goto L2; }
       goto L1;
   }
-  f[1] = NULL;
+  F1 = (F2GEN)NULL;
 
 /* L0: */
   if (e1 == UNDEF) goto L1;
-  e = f[0]? (gcmp0(e1)? gzero: gun): e1;
+  e = F0? (gcmp0(e1)? gzero: gun): e1;
   e1 = UNDEF;
   switch(*analyseur)
   {
     case '&':
       if (*++analyseur == '&') analyseur++;
       if (gcmp0(e)) { skipexpr(); return gzero; }
-      f[0]=(PFGEN)1L; goto L1;
+      F0=1; goto L1;
 
     case '|':
       if (*++analyseur == '|') analyseur++;
       if (!gcmp0(e)) { skipexpr(); return gun; }
-      f[0]=(PFGEN)1L; goto L1;
+      F0=1; goto L1;
   }
   return e;
 }
@@ -583,63 +570,48 @@ L1:
 /**                        CHECK FUNCTIONS                         **/
 /**                                                                **/
 /********************************************************************/
-
-/* if current identifier was a function in 1.39.15, raise "obsolete" error */
+/* Should raise an error. If neighbouring identifier was a function in
+ * 1.39.15, raise "obsolete" error instead. If check_new_fun doesn't help,
+ * guess offending function was last identifier */
+#define LEN 127
 static void
 err_new_fun()
 {
-  char *s = NULL, str[128];
+  char s[LEN+1], *t;
+  int n;
 
-  if (check_new_fun)
-  {
-    if (check_new_fun != NOT_CREATED_YET)
-    {
-      s = strcpy(str,check_new_fun->name);
-      kill0(check_new_fun);
-    }
-    check_new_fun=NULL;
-  }
-  if (compatible == NONE)
-  {
-    char *v, *u = str, *lim = str + 127;
-    int n;
+  if (check_new_fun == NOT_CREATED_YET) check_new_fun = NULL;
+  t = check_new_fun? check_new_fun->name: mark.identifier;
+  for (n=0; n < LEN; n++)
+    if (!is_keyword_char(t[n])) break;
+  (void)strncpy(s,t, n); s[n] = 0;
+  if (check_new_fun) { kill0(check_new_fun); check_new_fun = NULL ; }
+  if (compatible != NONE) return;
 
-    if (!s)
-    { /* guess that the offending function was last identifier */
-      v = mark.identifier;
-      while (is_keyword_char(*v) && u < lim) *u++ = *v++;
-      *u = 0; s = str;
-    }
-    if (whatnow_fun)
-      n = whatnow_fun(s,1);
-    else
-      n = is_entry_intern(s,funct_old_hash,NULL)? 1: 0;
-    if (n) err(obsoler,mark.identifier,mark.start, s,n);
-  }
+  if (whatnow_fun)
+    n = whatnow_fun(s,1);
+  else
+    n = is_entry_intern(s,funct_old_hash,NULL)? 1: 0;
+  if (n) err(obsoler,mark.identifier,mark.start, s,n);
 }
+#undef LEN
 
-#ifdef INLINE
-INLINE
-#endif
-void
-match2(char *s, char c)
+static void
+err_match(char *s, char c)
 {
-  if (*s != c)
-  {
-    char str[64];
-    if (check_new_fun && (c == '(' || c == '=' || c == ',')) err_new_fun();
-    sprintf(str,"expected character: '%c' instead of",c);
-    if (!s[-1]) s--; /* in case we read ahead and are finished (cf match)*/
-    err(talker2,str,s,mark.start);
-  }
+  char str[64];
+  if (check_new_fun && (c == '(' || c == '=' || c == ',')) err_new_fun();
+  sprintf(str,"expected character: '%c' instead of",c);
+  err(talker2,str,s,mark.start);
 }
 
-#define match(c) match2(analyseur++, (c))
+#define match2(s,c) if (*s != c) err_match(s,c);
+#define match(c) ({match2(analyseur, c); analyseur++;})
 
 static long
 readlong()
 {
-  const long av = avma;
+  const ulong av = avma;
   const char *old = analyseur;
   long m;
   GEN arg = expr();
@@ -678,17 +650,17 @@ readvar()
   return varn(x);
 }
 
-/* alright !=0 means function was called without () */
+/* noparen = 1 means function was called without (). Do we need to insert a
+ * default argument ? */
 static int
-do_switch(int alright, int matchcomma)
+do_switch(int noparen, int matchcomma)
 {
-  if (alright || !*analyseur || *analyseur == ')' || separe(*analyseur))
-    return 1;
-  if (*analyseur == ',') /* we just read an arg, or first arg */
+  const char *s = analyseur;
+  if (noparen || !*s || *s == ')' || separe(*s)) return 1;
+  if (*s == ',') /* we just read an arg, or first arg */
   {
-    if (!matchcomma && analyseur[-1] == '(') return 1; /* first arg */
-    if (analyseur[1] == ',' || analyseur[1] == ')')
-      { analyseur++; return 1; }
+    if (!matchcomma && s[-1] == '(') return 1; /* first arg */
+    if (s[1] == ',' || s[1] == ')') { analyseur++; return 1; }
   }
   return 0;
 }
@@ -744,23 +716,37 @@ facteur(void)
     }
 }
 
+/* table array of length N+1, append one expr, growing array if necessary  */
+static void
+_append(GEN **table, long *n, long *N)
+{
+  if (++(*n) == *N)
+  {
+    long M = *N; *N <<= 1;
+    *table = (GEN*)gprealloc((void*)*table, (M + 1)*sizeof(GEN),
+                                           (*N + 1)*sizeof(GEN));
+  }
+  (*table)[*n] = expr();
+  if (br_status) err(breaker,"array context");
+}
+
 #define check_var_name() \
   if (!isalpha((int)*analyseur)) err(varer1,analyseur,mark.start);
 
 static GEN
 truc(void)
 {
-  long i,j, n=0, p=0, m=1, sizetab;
+  long N,i,j,m,n,p;
   GEN *table,p1;
   char *old;
 
-  if (*analyseur == '!')
+  if (*analyseur == '!') /* NOT */
   {
     analyseur++; p1 = truc();
     if (br_status) err(breaker,"here (after !)");
     return gcmp0(p1)? gun: gzero;
   }
-  if (*analyseur == '\'')
+  if (*analyseur == '\'') /* QUOTE */
   {
     const char* old;
     entree *ep;
@@ -781,61 +767,46 @@ truc(void)
   {
     case '(': p1=expr(); match(')'); return p1;
 
-    case '[':
+    case '[': /* constant array/vector */
       if (*analyseur == ';' && analyseur[1] == ']')
-	{ analyseur+=2; return cgetg(1,t_MAT); }
+	{ analyseur += 2; return cgetg(1,t_MAT); } /* [;] */
 
-      old=analyseur; analyseur--; sizetab=skiptruc(); analyseur=old;
-      table = (GEN*) gpmalloc((sizetab+1)*sizeof(GEN));
+      n = 0; N = 1024;
+      table = (GEN*) gpmalloc((N + 1)*sizeof(GEN));
 
-      if (*analyseur != ']')
-      {
-        table[++n] = expr();
-        if (br_status) err(breaker,"array context");
-      }
-      while (*analyseur == ',')
-      { 
-        analyseur++;
-        table[++n] = expr();
-        if (br_status) err(breaker,"array context");
-      }
+      if (*analyseur != ']') _append(&table, &n, &N);
+      while (*analyseur == ',') { analyseur++; _append(&table, &n, &N); }
       switch (*analyseur++)
       {
 	case ']':
-	  p1=cgetg(n+1,t_VEC);
-	  for (i=1; i<=n; i++)
-	    p1[i] = lcopy(table[i]);
+        {
+          long tx;
+          if (*analyseur == '~') { analyseur++; tx=t_COL; } else tx=t_VEC;
+	  p1 = cgetg(n+1,tx);
+	  for (i=1; i<=n; i++) p1[i] = lcopy(table[i]);
 	  break;
+        }
 
 	case ';':
 	  m = n;
-	  do
-          {
-            table[++n] = expr();
-            if (br_status) err(breaker,"array context");
-          }
-	  while (*analyseur++ != ']');
-	  p = n/m + 1;
-	  p1 = cgetg(m+1,t_MAT);
+	  do _append(&table, &n, &N); while (*analyseur++ != ']');
+	  p1 = cgetg(m+1,t_MAT); p = n/m + 1;
 	  for (j=1; j<=m; j++)
 	  {
-	    p1[j] = lgetg(p,t_COL);
-	    for (i=1; i<p; i++)
-	      coeff(p1,i,j) = lcopy(table[(i-1)*m+j]);
+            GEN c = cgetg(p,t_COL); p1[j] = (long)c;
+	    for (i=j; i<=n; i+=m) *++c = lcopy(table[i]);
 	  }
 	  break;
 
-	default:
-          /* can only occur in library mode */
+	default: /* can only occur in library mode */
           err(talker,"incorrect vector or matrix");
           return NULL; /* not reached */
       }
       free(table); return p1;
 
     case '%':
-      old=analyseur-1; p=0;
-      if (! gp_history_fun)
-	err(talker2,"history not available in library mode",old,mark.start);
+      old = analyseur-1; p = 0;
+      if (!gp_history_fun) err(talker2,"history not available",old,mark.start);
       while (*analyseur == '`') { analyseur++; p++; }
       return p ? gp_history_fun(p         ,1,old,mark.start)
                : gp_history_fun(number(&n),0,old,mark.start);
@@ -853,6 +824,44 @@ repeated_op()
 {
   char c = *analyseur;
   return c == analyseur[1] && (c == '+' || c == '-');
+}
+
+/* return op if op= detected */
+static F2GEN
+get_op_fun()
+{
+  F2GEN f;
+  if (!*analyseur) return (F2GEN)NULL;
+
+  /* op= constructs ? */
+  if (analyseur[1] == '=')
+  {
+    switch(*analyseur)
+    {
+      case '+' : analyseur += 2; return &gadd;
+      case '-' : analyseur += 2; return &gsub;
+      case '*' : analyseur += 2; return &gmul;
+      case '/' : analyseur += 2; return &gdiv;
+      case '\\': analyseur += 2; return &gdivent;
+      case '%' : analyseur += 2; return &gmod;
+    }
+  }
+  else if (analyseur[2] == '=')
+  {
+    switch(*analyseur)
+    {
+      case '>' :
+        if (analyseur[1]=='>') { analyseur += 3; return &gshift_r; }
+        break;
+      case '<' :
+        if (analyseur[1]=='<') { analyseur += 3; return &gshift_l; }
+        break;
+      case '\\':
+        if (analyseur[1]=='/') { analyseur += 3; return &gdivround; }
+        break;
+    }
+  }
+  return (F2GEN)NULL;
 }
 
 static GEN
@@ -882,8 +891,7 @@ matrix_block(GEN p, entree *ep)
         full_col = full_row = 0;
         if (*analyseur==',') /* whole column */
         {
-          analyseur++;
-          if (*analyseur != '[') full_col = 1;
+          analyseur++; full_col = 1;
           c = check_array_index(lg(p));
           pt = (GEN*)(p + c); match(']'); break;
         }
@@ -902,7 +910,7 @@ matrix_block(GEN p, entree *ep)
         {
           c = check_array_index(lg(p));
           pt = (GEN*)(((GEN)p[c]) + r); /* &coeff(p,r,c) */
-          match(']'); 
+          match(']');
         }
         break;
 
@@ -916,7 +924,7 @@ matrix_block(GEN p, entree *ep)
 
   if (*analyseur == '=') /* assignment or equality test */
   {
-    if (analyseur[1] == '=') return cpt;
+    if (analyseur[1] == '=') return cpt; /* == */
     analyseur++; old = analyseur; res = expr();
     if (br_status) err(breaker,"assignment");
   }
@@ -927,46 +935,9 @@ matrix_block(GEN p, entree *ep)
   }
   else
   {
-    GEN (*f)(GEN,GEN) = NULL;
+    F2GEN f = get_op_fun();
+    if (!f) return (ep && !full_row)? cpt: gcopy(cpt);
 
-    if (!*analyseur)
-      return (ep && !full_row)? cpt: gcopy(cpt);
-
-    /* op= constructs ? */
-    if (analyseur[1] == '=')
-    {
-      switch(*analyseur)
-      {
-	case '+' : f = &gadd   ; break;
-	case '-' : f = &gsub   ; break;
-	case '*' : f = &gmul   ; break;
-	case '/' : f = &gdiv   ; break;
-	case '\\': f = &gdivent; break;
-	case '%' : f = &gmod   ; break;
-	default:
-          return (ep && !full_row)? cpt: gcopy(cpt);
-      }
-      analyseur += 2;
-    }
-    else
-    {
-      if (analyseur[2] == '=')
-        switch(*analyseur)
-        {
-          case '>' :
-            if (analyseur[1]=='>') f = &gshift_r;
-            break;
-          case '<' :
-            if (analyseur[1]=='<') f = &gshift_l;
-            break;
-          case '\\':
-            if (analyseur[1]=='/') f = &gdivround;
-            break;
-        }
-      if (!f)
-        return (ep && !full_row)? cpt: gcopy(cpt);
-      analyseur += 3;
-    }
     old = analyseur; res = expr();
     if (br_status) err(breaker,"assignment");
     res = f(cpt, res);
@@ -983,9 +954,7 @@ matrix_block(GEN p, entree *ep)
 
   if (full_row) /* whole row (index r) */
   {
-    if (typ(res) != t_VEC || lg(res) != lg(p))
-      err(caseer2,old,mark.start);
-
+    if (typ(res) != t_VEC || lg(res) != lg(p)) err(caseer2,old,mark.start);
     for (c=1; c<lg(p); c++)
     {
       GEN p2 = gcoeff(p,full_row,c); if (isclone(p2)) killbloc(p2);
@@ -1047,7 +1016,7 @@ expand_string(char *bp, char **ptbuf, char **ptlimit)
   while (is_keyword_char(*s)) s++;
 
   if ((*s == '"' || *s == ',' || *s == ')') && !is_entry(analyseur))
-  { /* Do not create new user variable. Consider as a literal */ 
+  { /* Do not create new user variable. Consider as a literal */
     tmp = analyseur;
     len = s - analyseur;
     analyseur = s;
@@ -1202,7 +1171,7 @@ call_fun(GEN p, GEN *arg, GEN *loc, int narg, int nloc)
   /* push new values for formal parameters */
   for (i=0; i<narg; i++) copyvalue(*p++, *arg++);
   for (i=0; i<nloc; i++) pushvalue(*p++, make_arg(*loc++));
-  /* dumps the false GEN arglist from identifier() to the garbage zone */
+  /* dumps arglist from identifier() to the garbage zone */
   res = lisseq((char *)p);
   if (br_status != br_NONE)
     br_status = br_NONE;
@@ -1210,7 +1179,7 @@ call_fun(GEN p, GEN *arg, GEN *loc, int narg, int nloc)
     if (! is_universal_constant(res)) /* important for gnil */
       res = forcecopy(res); /* make result safe */
 
-  /* pop ancient values for formal parameters */
+  /* pop out ancient values of formal parameters */
   for (i=0; i<nloc; i++) killvalue(*--p);
   for (i=0; i<narg; i++) killvalue(*--p);
   return res;
@@ -1234,7 +1203,7 @@ global0()
     entree *ep = varentries[n];
     if (ep && EpVALENCE(ep) == EpGVAR)
     {
-      res=new_chunk(1); 
+      res=new_chunk(1);
       res[0]=(long)polx[n]; i++;
     }
   }
@@ -1314,15 +1283,15 @@ fix(GEN x, long l)
     y[1] = (long)fix((GEN)x[1],l);
     y[2] = (long)fix((GEN)x[2],l);
   }
-  else 
+  else
   {
-    y = cgetr(l); gaffect(x,y); 
+    y = cgetr(l); gaffect(x,y);
   }
   return y;
 }
 
 /* Rationale: (f(2^-e) - f(-2^-e) + O(2^-pr)) / (2 * 2^-e) = f'(0) + O(2^-2e)
- * since 2nd derivatives cancel. 
+ * since 2nd derivatives cancel.
  *   prec(LHS) = pr - e
  *   prec(RHS) = 2e, equal when  pr = 3e = 3/2 fpr (fpr = required final prec)
  *
@@ -1333,7 +1302,7 @@ num_deriv(void *call, GEN argvec[])
 {
   GEN eps,a,b, y, x = argvec[0];
   long fpr,pr,l,e,ex, av = avma;
-  if (!is_const_t(typ(x))) 
+  if (!is_const_t(typ(x)))
   {
     a = do_call(call, x, argvec);
     return gerepileupto(av, deriv(a,gvar9(a)));
@@ -1360,7 +1329,7 @@ num_derivU(GEN p, GEN *arg, GEN *loc, int narg, int nloc)
   GEN eps,a,b, x = *arg;
   long fpr,pr,l,e,ex, av = avma;
 
-  if (!is_const_t(typ(x))) 
+  if (!is_const_t(typ(x)))
   {
     a = call_fun(p,arg,loc,narg,nloc);
     return gerepileupto(av, deriv(a,gvar9(a)));
@@ -1434,7 +1403,7 @@ identifier(void)
   if (ep->code)
   {
     char *s = ep->code, *oldanalyseur = NULL, *buf, *limit, *bp;
-    unsigned int ret, alright, has_pointer=0;
+    unsigned int ret, noparen, has_pointer=0;
     long fake;
     void *call = ep->value;
     GEN argvec[9];
@@ -1444,7 +1413,7 @@ identifier(void)
     if (*analyseur == '(')
     {
       analyseur++;
-      alright=0; /* expect matching ')' */
+      noparen=0; /* expect matching ')' */
     }
     else
     { /* if no mandatory argument, no () needed */
@@ -1452,7 +1421,7 @@ identifier(void)
 
       if (!*s || (!s[1] && *s == 'p'))
 	return ((GEN (*)(long))call)(prec);
-      alright=1; /* no argument, but valence is ok */
+      noparen=1; /* no argument, but valence is ok */
     }
     /* return type */
     if      (*s == 'v') { ret = RET_VOID; s++; }
@@ -1506,7 +1475,7 @@ identifier(void)
         }
         /* Input position */
         case 'E': /* expr */
-	case  'I': /* seq */
+	case 'I': /* seq */
 	  match_comma();
 	  argvec[i++] = (GEN) analyseur;
 	  skipseq(); break;
@@ -1556,7 +1525,7 @@ identifier(void)
 	  match('='); matchcomma = 0; break;
 
 	case 'D': /* Has a default value */
-	  if (do_switch(alright,matchcomma))
+	  if (do_switch(noparen,matchcomma))
             switch (*s)
             {
               case 'G':
@@ -1624,7 +1593,7 @@ identifier(void)
 	res = gnil; break;
     }
     if (has_pointer) check_pointer(has_pointer,pointers);
-    if (!alright) match(')');
+    if (!noparen) match(')');
     return res;
   }
 
@@ -1690,7 +1659,7 @@ identifier(void)
           if (br_status) err(breaker,"test expressions");
 	  if (!gcmp0(res)) { match(','); break; }
 	}
-	avma = av; skipseq(); res = gnil; break; 
+	avma = av; skipseq(); res = gnil; break;
 
       case 88: /* global */
         if (*analyseur == ')') return global0();
@@ -1761,7 +1730,8 @@ identifier(void)
           }
           else
           { /* user supplied */
-            match_comma(); arglist[i] = expr();
+            match_comma();
+            arglist[i] = expr();
             if (br_status) err(breaker,"here (reading function args)");
           }
         }
@@ -1773,8 +1743,7 @@ identifier(void)
               err(talker2, "can't derive this", mark.identifier, mark.start);
             return num_derivU((GEN)ep->value, arglist, defarg+narg, narg, nloc);
           }
-          else
-            return call_fun((GEN)ep->value, arglist, defarg+narg, narg, nloc);
+          return call_fun((GEN)ep->value, arglist, defarg+narg, narg, nloc);
         }
 
         /* should happen only in cases like (f()= f()=); f (!!!) */
@@ -1847,9 +1816,8 @@ identifier(void)
       strncpy((char *)newfun, start, len);
       ((char *) newfun)[len] = 0;
       if (EpVALENCE(ep) == EpUSER) gunclone((GEN)ep->value);
-     /* have to wait till here because of the above line. (f()=f()=x). Text
-      * of new fun is given by value of the old one, which had to be kept
-      */
+     /* have to wait till here because of strncopy above. In pathological
+      * cases, e.g. (f()=f()=x), new text is given by value of old one! */
       ep->value = (void *)ptr;
       ep->valence = EpUSER;
       check_new_fun=NULL;
@@ -1896,7 +1864,7 @@ constante()
         m = number(&nb); n -= nb;
         y = addsmulsi(m, pw10[nb], y);
       }
-      if (*analyseur != 'E' && *analyseur != 'e') 
+      if (*analyseur != 'E' && *analyseur != 'e')
       {
         if (!signe(y)) { avma = av; return realzero(prec); }
         break;
@@ -2004,7 +1972,8 @@ installep(void *f, char *name, int len, int valence, int add, entree **table)
   char *u = (char *) ep1 + add;
 
   ep->name    = u; strncpy(u, name,len); u[len]=0;
-  ep->args    = NULL; ep->help = NULL; ep->code = NULL;
+  ep->args    = INITIAL; /* necessary, see var_cell definition */
+  ep->help = NULL; ep->code = NULL;
   ep->value   = f? f: (void *) ep1;
   ep->next    = *table;
   ep->valence = valence;
@@ -2201,7 +2170,7 @@ skipstring()
   while (*analyseur)
     switch (*analyseur++)
     {
-      case '"': if (*analyseur != '"') return; 
+      case '"': if (*analyseur != '"') return;
       /* fall through */
       case '\\': analyseur++;
     }
@@ -2358,41 +2327,39 @@ skipfacteur(void)
 }
 
 /* return the number of elements we need to read if array/matrix */
-static long
+static void
 skiptruc(void)
 {
-  long i,m,n=0;
+  long i,m,n;
   char *old;
 
   switch(*analyseur)
   {
-    case '"': skipstring(); return 0;
-    case '!': analyseur++; skiptruc(); return 0;
+    case '"': skipstring(); return;
+    case '!': analyseur++; skiptruc(); return;
     case '&': case '\'':
       analyseur++; check_var_name();
-      skipentry(); return 0;
+      skipentry(); return;
   }
-  if (isalpha((int)*analyseur))
-    { skipidentifier(); return 0; }
-  if (isdigit((int)*analyseur) || *analyseur== '.')
-    { skipconstante(); return 0; }
+  if (isalpha((int)*analyseur)) { skipidentifier(); return; }
+  if (isdigit((int)*analyseur) || *analyseur== '.') { skipconstante(); return; }
   switch(*analyseur++)
   {
     case '(':
-      skipexpr(); match(')'); return 0;
+      skipexpr(); match(')'); return;
     case '[':
       old = analyseur-1;
-      if (*analyseur == ';' && analyseur[1] == ']')  /* 0 x 0 matrix */
-        { analyseur+=2; return 0; }
+      if (*analyseur == ';' && analyseur[1] == ']')  /* [;] */
+        { analyseur+=2; return; }
+      n = 0;
       if (*analyseur != ']')
       {
-	do { n++; skipexpr(); old=analyseur; }
-	while (*analyseur++ == ',');
+	do { n++; skipexpr(); old=analyseur; } while (*analyseur++ == ',');
 	analyseur--;
       }
       switch (*analyseur)
       {
-	case ']': analyseur++; return n;
+	case ']': analyseur++; return;
 	case ';': analyseur++;
           for (m=2; ; m++)
           {
@@ -2401,17 +2368,15 @@ skiptruc(void)
             if (*analyseur == ']') break;
             match(';');
           }
-          analyseur++; return m*n;
+          analyseur++; return;
 	default:
 	  err(talker2,"; or ] expected",old,mark.start);
-	  return 0; /* not reached */
       }
     case '%':
-      if (*analyseur == '`') { while (*++analyseur == '`'); return 0; }
-      number(&n); return 0;
+      if (*analyseur == '`') { while (*++analyseur == '`') /*empty*/; return; }
+      number(&n); return;
   }
   err(caracer1,analyseur-1,mark.start);
-  return 0; /* not reached */
 }
 
 static void
@@ -3371,7 +3336,7 @@ trap0(char *e, char *r, char *f)
     void *catcherr;
     jmp_buf env;
 
-    if (setjmp(env)) 
+    if (setjmp(env))
     {
       avma = av;
       err_leave(&catcherr);
