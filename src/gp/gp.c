@@ -1990,9 +1990,9 @@ gprc_chk(char *s)
   return f;
 }
 
-/* Look for [._]gprc: $GPRC, then in $HOME, /, C:/ */
+/* Look for [._]gprc: $GPRC, then in $HOME, ., /etc, path [ to gp binary ] */
 static FILE *
-gprc_get(void)
+gprc_get(char *path)
 {
   FILE *f = NULL;
   char *str, *s, c;
@@ -2020,6 +2020,18 @@ gprc_get(void)
     if (!f) f = gprc_chk(s); /* in . */
     if (!f) f = gprc_chk("/etc/gprc");
     if (!f) f = gprc_chk("C:/_gprc");
+    if (!f)
+    { /* in 'gp' directory */
+      char *t = path + strlen(path);
+      while (t > path && *t != '/') t--;
+      if (*t == '/')
+      {
+        long l = t - path + 1;
+        t = gpmalloc(l + 6);
+        strncpy(t, path, l);
+        strcpy(t+l, s); f = gprc_chk(t);
+      }
+    }
     free(str);
   }
 #endif
@@ -2138,10 +2150,10 @@ grow_init(growarray *A)
 }
 
 static char **
-gp_initrc(void)
+gp_initrc(char *path)
 {
   char *nexts,*s,*t;
-  FILE *file = gprc_get();
+  FILE *file = gprc_get(path);
   Buffer *b;
   filtre_t F;
   growarray A;
@@ -2905,7 +2917,7 @@ read_opt(long argc, char **argv)
     }
   }
   if (GP_DATA->flags & TEXMACS) tm_start_output();
-  pre = initrc? gp_initrc(): NULL;
+  pre = initrc? gp_initrc(argv[0]): NULL;
 
   /* override the values from gprc */
   testuint(b, &paribufsize); if (paribufsize < 10) paribufsize = 10;
