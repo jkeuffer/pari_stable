@@ -1093,7 +1093,7 @@ err(long numerr, ...)
 
   if (numerr <= cant_deflate)
   {
-    sprintf(s, "uncatched error: %ld", numerr);
+    sprintf(s, "uncaught error: %ld", numerr);
     err(bugparier, s);
   }
   else if (numerr < talker)
