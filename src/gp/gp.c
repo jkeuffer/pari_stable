@@ -1488,8 +1488,10 @@ aide0(char *s, int flag)
   switch(EpVALENCE(ep))
   {
     case EpUSER:
-      print_user_fun(ep); if (!ep->help) return;
-      pariputs("\n\n"); long_help=0; break;
+      if (!ep->help || long_help) print_user_fun(ep);
+      if (!ep->help) return;
+      if (long_help) { pariputs("\n\n"); long_help=0; }
+      break;
 
     case EpGVAR:
     case EpVAR:
