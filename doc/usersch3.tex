@@ -5153,8 +5153,19 @@ ideal of $K$ in HNF.
 \subsecidx{rnfidealreltoabs}$(\var{rnf},x)$: $\var{rnf}$ being a relative
 number field extension $L/K$ as output by \kbd{rnfinit} and $x$ being a
 relative ideal (which can be, as in the absolute case, of many different
-types, including of course elements), computes a $\Z$-basis of elements of $L$
-for the ideal $x$, considered as an ideal of the absolute extension $L/\Q$.
+types, including of course elements), gives the ideal $x\Z_L$ as an absolute
+ideal of $L/\Q$, in the form of a
+$\Z$-basis, given by a vector of polynomials (modulo \kbd{rnf.pol}).
+The following routine might be useful:
+\bprog
+    \\ return y = rnfidealreltoabs(rnf,...) as an ideal in HNF form associated
+    \\ to nf = nfinit( rnf.pol );
+    idealgentoHNF(nf, y) =
+    {
+      local(z); z = nfalgtobasis(nf, y);
+      z[1] = Mat(z[1]); mathnf( concat(z) );
+    }
+@eprog
 
 \syn{rnfidealreltoabs}{\var{rnf},x}.
 
@@ -5174,7 +5185,7 @@ The following routine might be useful:
 \bprog
     \\ return y = rnfidealup(rnf,...) as an ideal in HNF form associated to
     \\ nf = nfinit( rnf.pol );
-    idealuptoNF(nf, y) =
+    idealgentoHNF(nf, y) =
     {
       local(z); z = nfalgtobasis(nf, y);
       z[1] = Mat(z[1]); mathnf( concat(z) );

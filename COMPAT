@@ -23,7 +23,7 @@ This file lists the incompatible changes between Version 2.x and older versions
 
       \\ return y = rnfidealup(rnf,...) as an ideal in HNF form associated to
       \\ nf = nfinit(rnf.pol);
-      idealuptoNF(nf, y) =
+      idealgentoHNF(nf, y) =
       {
         local(z); z = nfalgtobasis(nf, y);
         z[1] = Mat(z[1]); mathnf( concat(z) );
