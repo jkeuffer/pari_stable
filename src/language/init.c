@@ -434,7 +434,7 @@ init_stack(long size)
     }
   }
   memused = avma = top = bot+s;
-  init_universal_constants(((GEN)top) + 1);
+  init_universal_constants((GEN)top);
   return s;
 }
 
@@ -457,7 +457,6 @@ pari_init(long parisize, long maxprime)
   }
   if (INIT_SIG) pari_sig_init(pari_sighandler);
   bot = 0; (void)init_stack(parisize);
-
   diffptr = initprimes(maxprime);
 
   varentries = (entree**) gpmalloc((MAXVARN+1)*sizeof(entree*));
