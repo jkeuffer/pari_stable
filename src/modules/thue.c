@@ -1307,7 +1307,7 @@ bnfisintnorm(GEN bnf, GEN a)
   z = cgetg(l, t_VEC);
   for (i=1; i<l; i++)
   {
-    x = (GEN)res[1];
+    x = (GEN)res[i];
     sNx = signe(subres(x, (GEN)nf[1]));
     if (sNx != sa)
     {
