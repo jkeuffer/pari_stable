@@ -297,11 +297,11 @@ primitive_pol_to_monic_factor(GEN pol, GEN *ptlead)
   {
     GEN p = (GEN)fa[i], pd, pk, pkn;
     long k = ceil((double)e[i] / n); /* try to replace x by x p^k */
-    long d = e[i] % n; /* have to multiply a by p^d */
+    long d = n - e[i] % n; /* have to multiply a by p^d */
     for (j=n-1; j>0; j--)
     {
       long v = ggval((GEN)a[j], p);
-      while (v < d + k * j) { k++; d += n; }
+      while (v < k * j - d) { k++; d += n; }
     }
     pd = gpowgs(p,d);
     pk = gpowgs(p,k); pkn = gun;
