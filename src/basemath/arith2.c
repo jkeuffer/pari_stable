@@ -265,30 +265,43 @@ addprimes(GEN prime)
   avma=av; return primetab;
 }
 
+static GEN
+removeprime(GEN prime)
+{
+  long i;
+
+  if (typ(prime) != t_INT) err(typeer,"removeprime");
+  for (i=lg(primetab) - 1; i; i--)
+    if (absi_equal((GEN) primetab[i], prime))
+    {
+      gunclone((GEN)primetab[i]); primetab[i]=0;
+      cleanprimetab(); break;
+    }
+  if (!i) err(talker,"prime %Z is not in primetable", prime);
+  return primetab;
+}
+
 GEN
 removeprimes(GEN prime)
 {
-  long i,tx, av = avma;
+  long i,tx;
 
   if (!prime) return primetab;
   tx = typ(prime);
   if (is_vec_t(tx))
   {
-    for (i=1; i < lg(prime); i++) removeprimes((GEN) prime[i]);
+    if (prime == primetab)
+    {
+      for (i=1; i < lg(prime); i++) gunclone((GEN)prime[i]);
+      setlg(prime, 1);
+    }
+    else
+    {
+      for (i=1; i < lg(prime); i++) removeprime((GEN) prime[i]);
+    }
     return primetab;
   }
-  if (tx != t_INT) err(typeer,"removeprimes");
-  if (is_pm1(prime)) return primetab;
-  if (signe(prime) < 0) prime=absi(prime);
-
-  for (i=1; i < lg(primetab); i++)
-    if (egalii((GEN) primetab[i], prime))
-    {
-      gunclone((GEN)primetab[i]); primetab[i]=0;
-      cleanprimetab(); avma=av; return primetab;
-    }
-  err(talker,"prime is not in primetable in removeprimes");
-  return NULL; /* not reached */
+  return removeprime(prime);
 }
 
 /***********************************************************************/
