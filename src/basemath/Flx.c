@@ -900,32 +900,32 @@ Flx_invmontgomery_basecase(GEN T, ulong p)
 static GEN 
 Flx_invmontgomery_newton(GEN T, ulong p)
 {
-  long i, l=lgpol(T);
+  long i, l=lgpol(T), ll=l+2;
   GEN x, q, z;
-  pari_sp av;
+  long v=T[1];
+  pari_sp av, av2;
   x = Flx_recipspec(T+2,l-1,l);
+  x[1] = v;
   x = Flx_neg(x,p);
   q = Flx_copy(x); q[2]=1;
   i = Flx_valuation(x);
-  av = avma;
+  av=avma;
+  new_chunk(ll<<1);
+  av2=avma;
   for (  ; i<l; i<<=1)
   {
-    new_chunk(l+2);
-    x=Flx_sqrspec(x+2,p,l);
-    z=Flx_mulspec(q+2,x+2,p,l,l);
+    x=Flx_sqr(x,p);
+    x=Flx_renormalize(x,min(lg(x),ll));
+    z=Flx_mul(q,x,p);
+    z=Flx_renormalize(z,min(lg(z),ll));
+    q=Flx_add(q,z,p);
     avma=av;
-    /* We do full garbage collecting here since:
-     * 1) T is assumed to be large (else we use basecase)
-     * 2) This improve cache usage.
-     * Note that due to valuation handling of x, 
-     * q*x+q is faster than q*(x+1)
-     */
-    q=Flx_addspec(q+2,z+2,p,l,l);
-    x=Flx_addspec(x+2,NULL,p,l,0);
+    q=Flx_copy(q);
+    x=Flx_copy(x);
+    avma=av2;
   }
-  q=Flx_mulspec(q+2,Flx_polx(0)+2,p,l,2);
-  q[1]=T[1];
-  return Flx_renormalize(q,l+1);
+  q=Flx_mul(q,Flx_polx(v),p);
+  return q;
 }
 
 /*
@@ -1330,6 +1330,33 @@ _Flxq_mul(void *data, GEN x, GEN y)
   return Flxq_mul(x,y, D->pol, D->p);
 }
 
+/* n-Power of x in Z/pZ[X]/(pol), as t_VECSMALL. */
+GEN
+Flxq_pow_montgo(GEN x, GEN n, GEN pol, ulong p)
+{
+  pari_sp av = avma;
+  Flxq_muldata D;
+  GEN y;
+  if (!signe(n)) return Fl_Flx(1,varn(pol));
+  if (signe(n) < 0)
+    x=Flxq_inv(x,pol,p);
+  else
+    x=Flx_rem(x, pol, p);
+  if (is_pm1(n)) return x;
+  D.pol = pol;
+  D.p   = p;
+  /* not tuned*/
+  if (pol[2])
+  {
+    /*We do not handle polynomials multiple of x yet*/
+    D.mg  = Flx_invmontgomery(pol,p);
+    y = leftright_pow(x, n, (void*)&D, &_sqr_montgomery, &_mul_montgomery);
+  }
+  else
+    y = leftright_pow(x, n, (void*)&D, &_Flxq_sqr, &_Flxq_mul);
+  return gerepileupto(av, y);
+}
+
 
 /* n-Power of x in Z/pZ[X]/(pol), as t_VECSMALL. */
 GEN
@@ -1346,16 +1373,14 @@ Flxq_pow(GEN x, GEN n, GEN pol, ulong p)
   if (is_pm1(n)) return x;
   D.pol = pol;
   D.p   = p;
-#if 0
   /* not tuned*/
-  if ( pol[2] && cmpis(n,30)>=0)
+  if (0 && pol[2])
   {
     /*We do not handle polynomials multiple of x yet*/
     D.mg  = Flx_invmontgomery(pol,p);
     y = leftright_pow(x, n, (void*)&D, &_sqr_montgomery, &_mul_montgomery);
   }
   else
-#endif
     y = leftright_pow(x, n, (void*)&D, &_Flxq_sqr, &_Flxq_mul);
   return gerepileupto(av, y);
 }
