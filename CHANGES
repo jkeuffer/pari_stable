@@ -119,6 +119,7 @@ BA 31- uninitialized memory read in divrr(x,y), when lg(y) < lg(x), leading
     4- Configure --builddir : find a decent name for build directory
        depending on kernel options (with/without gmp, exotic assembler kernel)
  GH 5- PowerPC level0 inline assembly kernel.
+    6- support for install() on Mac OS X
 
   Remove
     1- remove emacs/compile [ integrated in Makefile ]
