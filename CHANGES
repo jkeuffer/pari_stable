@@ -62,6 +62,7 @@ HC 24- Corrected p-adic initell.
    25- ellj / eta (t_SER) truncated result to seriesprecision
    26- possible overflow in u_FpM_gauss (from ZM_inv)
    27- [library mode]: gcoeff & gmael* were not lvalues
+   28- various problems with C++ compilers
 
   Changed
 BA  1- improved Fp_isom
