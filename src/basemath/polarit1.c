@@ -536,6 +536,7 @@ extern GEN FpXQYQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p);
 extern GEN FpXQX_from_Kronecker(GEN z, GEN pol, GEN p);
 extern GEN FpXQX_safegcd(GEN P, GEN Q, GEN T, GEN p);
 extern GEN u_normalizepol(GEN x, long lx);
+extern GEN Fq_pow(GEN x, GEN n, GEN pol, GEN p);
 /* Functions giving information on the factorisation. */
 
 /* u in Z[X], return kernel of (Frob - Id) over Fp[X] / u */
@@ -2265,7 +2266,7 @@ factmod9(GEN f, GEN p, GEN T)
       pk *= pg; e = pk;
       j = (degpol(f))/pg+3; setlg(f,j); setlgef(f,j);
       for (i=2; i<j; i++)
-        f[i] = (long)FpXQ_pow((GEN)f[pg*(i-2)+2], frobinv, T,p);
+        f[i] = (long)Fq_pow((GEN)f[pg*(i-2)+2], frobinv, T,p);
       df1 = FqX_deriv(f, T, p); f3 = NULL;
     }
     f2 = f3? f3: FqX_gcd(f,df1, T,p);

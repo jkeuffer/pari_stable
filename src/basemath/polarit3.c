@@ -1196,6 +1196,13 @@ FpXQ_pow(GEN x, GEN n, GEN pol, GEN p)
   return gerepileupto(av, y);
 }
 
+GEN
+Fq_pow(GEN x, GEN n, GEN pol, GEN p)
+{
+  if (typ(x) == t_INT) return powmodulo(x,n,p);
+  return FpXQ_pow(x,n,pol,p);
+}
+
 /*******************************************************************/
 /*                                                                 */
 /*                             Fp[X][Y]                            */
