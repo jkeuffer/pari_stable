@@ -2157,10 +2157,12 @@ GEN
 nfmodprinit(GEN nf, GEN pr)
 {
   gpmem_t av = avma;
-  GEN res, tau, mul, x, p, T, pow, ffproj, nfproj, prh, c, gf = (GEN)pr[4];
-  long N, i, k, f = itos(gf);
+  GEN res, tau, mul, x, p, T, pow, ffproj, nfproj, prh, c, gf;
+  long N, i, k, f;
 
   nf = checknf(nf); checkprimeid(pr);
+  gf = (GEN)pr[4];
+  f = itos(gf);
   N = degpol(nf[1]);
   prh = prime_to_ideal(nf, pr);
   tau = anti_uniformizer2(nf, pr);
