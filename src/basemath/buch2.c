@@ -858,7 +858,7 @@ get_split_expo(GEN xalpha, GEN yalpha, GEN vperm)
   }
 }
 
-static GEN
+GEN
 init_red_mod_units(GEN bnf, long prec)
 {
   GEN z, s = gzero, p1,s1,mat, matunit = (GEN)bnf[3];
@@ -885,7 +885,7 @@ init_red_mod_units(GEN bnf, long prec)
 }
 
 /* z computed above. Return unit exponents that would reduce col (arch) */
-static GEN
+GEN
 red_mod_units(GEN col, GEN z, long prec)
 {
   long i,RU;

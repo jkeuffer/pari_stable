@@ -50,12 +50,11 @@ groupproduct(GEN B, GEN T)
 static GEN
 grouppows(GEN B, long ex)
 {
-  long lB,j;
+  long lB = lg(B),j;
   GEN c;
 
-  lB=lg(B)-1;
-  c=cgetg(lB+1,t_VEC);
-  for (j=1; j<=lB; j++) c[j]=(long)gpuigs((GEN)B[j],ex);
+  c = cgetg(lB,t_VEC);
+  for (j=1; j<lB; j++) c[j] = lpowgs((GEN)B[j], ex);
   return c;
 }
 
@@ -861,35 +860,80 @@ computepolrelbeta(GEN be)
   return NULL; /* not reached */
 }
 
+static GEN
+mysize(GEN nf, GEN be)
+{
+  return gnorml2(algtobasis_intern(nf, be));
+}
+
 /* multiply be by ell-th powers of units as to find "small" L2-norm for new be */
 static GEN
-reducebeta(GEN be)
+reducebetanaive(GEN be)
 {
   long i,lu;
   GEN p1,p2,unitsell,unitsellinv,nmax,ben;
 
-  unitsell=grouppows(gmodulcp(concatsp(gmael(bnfz,8,5),gmael3(bnfz,8,4,2)),R),ell);
-  unitsellinv=grouppows(unitsell,-1);
-  unitsell=concatsp(unitsell,unitsellinv);
-  p1=unitsell;
-  for (i=2; i<=max((ell>>1),3); i++) p1=concatsp(p1,grouppows(unitsell,i));
-  unitsell=p1;
-  nmax=gnorml2(algtobasis(nfz,be));
-  lu=lg(unitsell)-1; ben=be;
+  unitsell = grouppows(gmodulcp(gmael(bnfz,8,5),R),ell);
+  unitsellinv = grouppows(unitsell,-1);
+  unitsell = concatsp(unitsell,unitsellinv);
+  p1 = unitsell;
+  for (i=2; i<=max((ell>>1),3); i++) p1 = concatsp(p1,grouppows(unitsell,i));
+  unitsell = p1;
+  nmax = mysize(nfz, be);
+  lu = lg(unitsell); ben = be;
   do
   {
-    be=ben;
-    for (i=1; i<=lu; i++)
+    be = ben;
+    for (i=1; i<lu; i++)
     {
-      p1=gmul(be,(GEN)unitsell[i]);
-      p2=gnorml2(algtobasis(nfz,p1));
-      if (gcmp(p2,nmax)<0)
-      {
-	nmax=p2; ben=p1;
-      }
+      p1 = gmul(be,(GEN)unitsell[i]);
+      p2 = mysize(nfz,p1);
+      if (gcmp(p2,nmax) < 0) { nmax = p2; ben = p1; }
     }
   }
-  while (!gegal(be,ben));
+  while (be != ben);
+  return be;
+}
+
+extern GEN red_mod_units(GEN col, GEN z, long prec);
+extern GEN init_red_mod_units(GEN bnf, long prec);
+extern GEN get_arch(GEN nf,GEN x,long prec);
+
+static GEN
+reducebeta(GEN be, GEN z, long prec)
+{
+  long i,lu;
+  GEN e,g,u,nf, fu = gmael(bnfz,8,5);
+
+  nf = checknf(bnfz);
+  u = red_mod_units(get_arch(nf, be, prec), z, prec);
+  if (!u) return reducebetanaive(be);
+  lu = lg(u);
+  for (i=1; i<lu; i++)
+  {
+    if (!signe(u[i])) continue;
+    e = mulsi(ell, (GEN)u[i]);
+    g = gmodulcp((GEN)fu[i],(GEN)nf[1]);
+    be = gmul(be, powgi(g, e));
+  }
+  return be;
+}
+
+static GEN
+reducebeta_all(GEN be)
+{
+  long i, prec = nfgetprec(bnfz);
+  GEN be0,be2,bei,nmin,n2, z = init_red_mod_units(bnfz, prec);
+  z[1] = lmulgs((GEN)z[1], ell); /* log. embeddings of fu^ell */
+  z[2] = lmulgs((GEN)z[2], ell*ell);
+  bei = gun; nmin = NULL; be0 = be;
+  for (i=1; i<ell; i++)
+  {
+    bei = gmul(bei, be0); /* be^i */
+    be2 = reducebeta(bei, z, prec);
+    n2 = mysize(nfz, be2);
+    if (!nmin || gcmp(n2, nmin) < 0) { be = be2; nmin = n2; }
+  }
   return be;
 }
 
@@ -900,26 +944,27 @@ testx(GEN subgroup, GEN X)
   GEN be,polrelbe,p1;
 
 /* in alg. 5.3.18., C=nbcol */
-  X=gmul(unmodell,X);
+  X = gmul(unmodell,X);
   if (gcmp0(X)) return gzero;
-  for (i=dv+1; i<=nbcol; i++) if (gcmp0((GEN)X[i])) return gzero;
+  for (i=dv+1; i<=nbcol; i++)
+    if (gcmp0((GEN)X[i])) return gzero;
   for (i=1; i<=lSml2; i++)
     if (gcmp0(gmul((GEN)vecMsup[i],X))) return gzero;
-  be=gun;
-  for (i=1; i<=nbcol; i++) be=gmul(be,gpui((GEN)vecw[i],lift((GEN)X[i]),0));
-  if (DEBUGLEVEL>=2) { fprintferr("reducing beta = "); outerr(be); }
-  be=reducebeta(be);
-  if (DEBUGLEVEL>=2) { fprintferr("beta reduced = "); outerr(be); }
-  polrelbe=computepolrelbeta(be);
-  v=varn(polrelbe);
-  p1=unifpol((GEN)bnf[7],polrelbe,0);
-  p1=denom(gtovec(p1));
-  polrelbe=gsubst(polrelbe,v,gdiv(polx[v],p1));
-  polrelbe=gmul(polrelbe,gpuigs(p1,degree(polrelbe)));
-  if (DEBUGLEVEL>=2) { fprintferr("polrelbe = "); outerr(polrelbe); }
-  p1=rnfconductor(bnf,polrelbe,0);
-  if (!gegal((GEN)p1[1],module)) return gzero;
-  if (!gegal((GEN)p1[3],subgroup)) return gzero;
+  be = gun;
+  for (i=1; i<=nbcol; i++)
+    be = gmul(be, powgi((GEN)vecw[i], lift((GEN)X[i])));
+  if (DEBUGLEVEL>1) fprintferr("reducing beta = %Z\n",be);
+  be = reducebeta_all(be);
+  if (DEBUGLEVEL>1) fprintferr("beta reduced = %Z\n",be);
+  polrelbe = computepolrelbeta(be);
+  v = varn(polrelbe);
+  p1 = unifpol((GEN)bnf[7],polrelbe,0);
+  p1 = denom(gtovec(p1));
+  polrelbe = gsubst(polrelbe,v, gdiv(polx[v],p1));
+  polrelbe = gmul(polrelbe, gpowgs(p1, degree(polrelbe)));
+  if (DEBUGLEVEL>1) fprintferr("polrelbe = %Z\n",polrelbe);
+  p1 = rnfconductor(bnf,polrelbe,0);
+  if (!gegal((GEN)p1[1],module) || !gegal((GEN)p1[3],subgroup)) return gzero;
   return polrelbe;
 }
 
