@@ -58,6 +58,18 @@ typedef struct pariFILE {
 
 extern PariOUT *pariOut, *pariErr;
 extern FILE    *pari_outfile, *logfile, *infile, *errfile;
+extern ulong    logstyle;
+
+enum logstyles {
+    logstyle_none,			/* 0 */
+    logstyle_plain,			/* 1 */
+    logstyle_color,			/* 2 */
+    logstyle_TeX,			/* 3 */
+};
+
+#define TEXSTYLE_FRAC	1
+#define TEXSTYLE_PAREN	2
+#define TEXSTYLE_BREAK	4
 
 extern pari_sp avma,bot,top;
 extern size_t memused;

@@ -103,7 +103,6 @@ BA 31- uninitialized memory read in divrr(x,y), when lg(y) < lg(x), leading
    40- factor(12345)[,1][3] --> error
    41- overflow in some GP interface routines: e.g default(realprecision,10^125)
    42- polhensellift((x^2+1)*Mod(1,5),...) --> SEGV
-
   
   Changed
     1- rnf structure (removed useless components)
@@ -138,6 +137,7 @@ BA 31- uninitialized memory read in divrr(x,y), when lg(y) < lg(x), leading
    16- use 'lgeflist' for t_LIST: remove the 65536 limit on list size
    17- subst(1 + x^2 + O(x^5), x^2, y) --> 1 + y + O(y^2)
    18- nffactor: allow modular factorization over primes of degree > 1
+IZ 19- try to output usable TeX (avoid braces, let TeX split lines)
 
   Added
     1- member function rnf.pol (polynomial generating absolute extension)
@@ -149,6 +149,7 @@ BA 31- uninitialized memory read in divrr(x,y), when lg(y) < lg(x), leading
 GH  5- PowerPC level0 inline assembly kernel
     6- support for install() on Mac OS X
 BA  7- GP function galoisexport
+IZ  8- logstyle and TeXstyle defaults
 
   Remove
     1- remove emacs/compile [ integrated in Makefile ]

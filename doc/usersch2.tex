@@ -355,12 +355,21 @@ commands (see \secref{se:gp_program}) are unaffected, so you can always type
 screen width cannot be determined, a ``line'' is assumed to be 80 characters
 long.
 
-\subsecidx{log} (default \kbd{0}): this is a toggle, which can be either 1
-(on) or 0 (off). When logging mode is turned on, GP opens a log file, whose
-exact name is determined by the \kbd{logfile} default. Subsequently, all the
-commands and results will be written to that file (see \b{l}). In case a file
-with this precise name already existed, it will not be erased: your data will
-be \emph{appended} at the end.
+\subsecidx{log} (default \kbd{0}): this can be either 0 (off) or 1, 2, 3
+(on, see below for the various modes). When logging mode is turned on, GP
+opens a log file, whose exact name is determined by the \kbd{logfile}
+default. Subsequently, all the commands and results will be written to that
+file (see \b{l}). In case a file with this precise name already existed, it
+will not be erased: your data will be \emph{appended} at the end.
+
+The specific positive values of \kbd{log} have the following meaning
+
+1: plain logfile
+
+2: emit color codes to the logfile (if \kbd{colors} is set).
+
+3: write TeX output to the logfile (can be further customized using
+\tet{TeXstyle}).
 
 \subsecidx{logfile} (default \kbd{"pari.log"}): name of the log file to be
 used when the \kbd{log} toggle is on. Tilde and time expansion are performed.
@@ -409,10 +418,7 @@ beyond the actual amount of RAM installed on your computer or GP will spend
 most of its time paging.
 
 In case of emergency, you can use the \tet{allocatemem} function to
-increase \kbd{parisize}, once the session is started. GP will try to
-\emph{double} the stack size by itself when memory runs low during a
-computation, but this very computation will then be lost, and you will have
-to type the command again.
+increase \kbd{parisize}, once the session is started.
 
 \subsecidx{path} (default \kbd{".:\til:\til/gp"} on UNIX systems,
 \kbd{".;C:\bs;C:\bs GP} on DOS, OS/2 and Windows, and \kbd{"."} otherwise):
@@ -427,8 +433,7 @@ immediate parent. Tilde expansion is performed.
 -ragged -by\_par"}) the name of an external prettyprinter to use when
 \kbd{output} is~3 (\var{alternate prettyprinter}). {\bf This is
 experimental} but the default \tet{tex2mail} looks already much nicer than
-the built-in ``beautified format'' ($\kbd{output} = 2$). If the
-corresponding program doesn't exist on your system,
+the built-in ``beautified format'' ($\kbd{output} = 2$).
 
 \subsecidx{primelimit} (default \kbd{200k} on the Mac, and \kbd{500k}
 otherwise): GP precomputes a list of all primes less than \kbd{primelimit}
@@ -517,6 +522,18 @@ either 1 (on) or 0 (off). If on, unused characters after a sequence has been
 processed will produce an error. Otherwise just a warning is printed. This
 can be useful when you're not sure how many parentheses you have to close after
 complicated nested loops.
+
+\subsecidx{TeXstyle} (default \kbd{0}): the bits of this default allow GP
+to use less rigid TeX formatting commands in the logfile. This default is
+only taken into account when $\kbd{log} = 3$. The bits of \kbd{TeXstyle}
+have the following meaning
+
+1: use \kbd{\bs frac} instead of \kbd{\bs over} for fractions.
+
+2: insert \kbd{\bs right} / \kbd{\bs left} pairs where appropriate.
+
+4: insert discretionary breaks in polynomials, to enhance the probability of
+a good line break.
 
 \subsecidx{timer} (default \kbd{0}): this is a toggle which can be either 1
 (on) or 0 (off). If on, every instruction sequence (anything ended by a

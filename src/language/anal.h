@@ -271,6 +271,7 @@ typedef struct {
   int sp;
   int initial;
   int prettyp;
+  int TeXstyle;
 } pariout_t;
 
 extern void gen_output(GEN x, pariout_t *T);
@@ -279,11 +280,12 @@ extern void bruti(GEN g, pariout_t *T, int nosign);
 extern void matbruti(GEN g, pariout_t *T);
 extern void sori(GEN g, pariout_t *T);
 extern void texi(GEN g, pariout_t *T, int nosign);
+extern void texi_nobrace(GEN g, pariout_t *T, int nosign);
 extern pariout_t DFLT_OUTPUT;
 
 /* GP_DATA->flags */
 enum { QUIET=1, TEST=2, SIMPLIFY=4, CHRONO=8, ECHO=16, STRICTMATCH=32,
-       USE_READLINE=64, SECURE=128, EMACS=256, TEXMACS=512, LOG=1024};
+       USE_READLINE=64, SECURE=128, EMACS=256, TEXMACS=512};
 /* GP */
 #define pariputs_opt(s) if (!(GP_DATA->flags & QUIET)) pariputs(s)
 

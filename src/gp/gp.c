@@ -727,11 +727,18 @@ sd_histsize(const char *v, int flag)
 static GEN
 sd_log(const char *v, int flag)
 {
-  ulong old = GP_DATA->flags;
-  GEN r = sd_gptoggle(v,flag,"log",LOG);
-  if (GP_DATA->flags != old)
+  static const char * const msg[] = {
+      "(off)",
+      "(on)",
+      "(on with colors)",
+      "(TeX output)", NULL
+  };
+  ulong oldstyle = logstyle;
+  GEN res = sd_ulong(v,flag,"log", &logstyle, 0, 3, (char**)msg);
+
+  if (!oldstyle != !logstyle)		/* Compare converts to boolean */
   { /* toggled LOG */
-    if (old & LOG)
+    if (oldstyle)
     { /* close log */
       if (flag == d_ACKNOWLEDGE)
         pariputsf("   [logfile was \"%s\"]\n", current_logfile);
@@ -746,7 +753,31 @@ sd_log(const char *v, int flag)
 #endif
     }
   }
-  return r;
+  if (logfile && oldstyle != logstyle && logstyle == logstyle_TeX)
+  {
+    fprintf(logfile, "%s%s%s%s%s%s%s%s%s%s\n",
+      "\\ifx \\PARIbreak\\undefined\n",
+      "  \\def\\PARIbreak{\\hskip 0pt plus \\hsize\\relax\\discretionary{}{}{}}\\fi\n",
+      "\\ifx \\PARIpromptSTART\\undefined\n",
+      "  \\def\\PARIpromptSTART|{\\vskip\\medskipamount\\bgroup\\bf}\\fi\n",
+      "\\ifx \\PARIpromptEND\\undefined\n",
+      "  \\def\\PARIpromptEND|{\\egroup\\bgroup\\tt}\\fi\n",
+      "\\ifx \\PARIinputEND\\undefined\n",
+      "  \\def\\PARIinputEND|{\\egroup}\\fi\n",
+      "\\ifx \\PARIout\\undefined\n",
+      "  \\def\\PARIout#1#2{\\vskip\\smallskipamount$\\displaystyle{\\tt\\%#1} = #2$}\\fi\n");
+}
+  return res;
+}
+
+static GEN
+sd_TeXstyle(const char *v, int flag)
+{
+  static const char * const msg[] = { NULL,
+	"(bits 0x1/0x2/0x4 control output of \\frac/\\left/\\PARIbreak)"};
+  ulong n = GP_DATA->fmt->TeXstyle;
+  GEN z = sd_ulong(v,flag,"TeXstyle", &n, 0, 7, (char**)msg);
+  GP_DATA->fmt->TeXstyle = n; return z;
 }
 
 static GEN
@@ -987,6 +1018,7 @@ default_type gp_default_list[] =
   {"seriesprecision",(void*)sd_seriesprecision},
   {"simplify",(void*)sd_simplify},
   {"strictmatch",(void*)sd_strictmatch},
+  {"TeXstyle",(void *)sd_TeXstyle},
   {"timer",(void *)sd_timer},
   {NULL,NULL} /* sentinel */
 };
@@ -1308,7 +1340,7 @@ slash_commands(void)
 \\h {m-n}: hashtable information\n\
 \\l {f}  : enable/disable logfile (set logfile=f)\n\
 \\m {n}  : print result in prettymatrix format\n\
-\\o {n}  : change output method (0=raw, 1=prettymatrix, 2=prettyprint)\n\
+\\o {n}  : change output method (0=raw, 1=prettymatrix, 2=prettyprint, 3=2-dim)\n\
 \\p {n}  : change real precision\n\
 \\ps{n}  : change series precision\n\
 \\q      : quit completely this GP session\n\
@@ -2465,7 +2497,15 @@ get_line_from_file(char *prompt, filtre_t *F, FILE *file)
     if (GP_DATA->flags & ECHO)
       { pariputs(prompt); pariputs(s); pariputc('\n'); }
     else
-      if (logfile) fprintf(logfile, "%s%s\n",prompt,s);
+      if (logfile) {
+	if (logstyle == logstyle_TeX)
+	  fprintf(logfile,
+		  "\\PARIpromptSTART|%s\\PARIpromptEND|%s\\PARIinputEND|%%\n",
+		  prompt,s);
+	else
+	  fprintf(logfile, "%s%s\n",prompt,s);
+      }
+    
     pariflush();
   }
   if (GP_DATA->flags & TEXMACS) 

@@ -317,7 +317,12 @@ pariputsf(const char *format, ...)
 void
 term_color(int c)
 {
+  FILE *o_logfile = logfile;
+
+  if (logstyle != logstyle_color)
+      logfile = 0;				/* Ugly hack... */
   pariputs(term_get_color(c));
+  logfile = o_logfile;
 }
 
 void
@@ -1461,13 +1466,25 @@ wr_texnome(pariout_t *T, GEN a, const char *v, long d)
     if (sig) { putsigne(sig); texi(a,T,sig); }
     else
     {
-      pariputs(" + \\left("); texi(a,T,sig); pariputs("\\right) ");
+      if (T->TeXstyle & TEXSTYLE_PAREN)
+        pariputs(" + (");
+      else
+	pariputs(" + \\left(");
+      texi_nobrace(a,T,sig);		/* With braces no auto-linebreaks */
+      if (T->TeXstyle & TEXSTYLE_PAREN)
+        pariputs(") ");
+      else
+	pariputs("\\right) ");
     }
     if (d)
     {
       if (GP_DATA && (GP_DATA->flags & TEXMACS)) pariputs("\\*");
       texnome(v,d);
     }
+    if (T->TeXstyle & TEXSTYLE_BREAK)
+      pariputs("\\PARIbreak ");
+    if (!sig)
+      pariputc('\n');			/* Avoid TeX buffer overflow */
   }
 }
 
@@ -1505,13 +1522,23 @@ wr_lead_texnome(pariout_t *T, GEN a,const char *v, long d, int nosign)
     if (isfactor(a)) texi(a,T,nosign);
     else
     {
-      pariputs(" \\left("); texi(a,T,0); pariputs("\\right) ");
+      if (T->TeXstyle & TEXSTYLE_PAREN)
+        pariputs(" (");
+      else
+        pariputs(" \\left(");
+      texi_nobrace(a,T,0);		/* With braces no auto-linebreaks */
+      if (T->TeXstyle & TEXSTYLE_PAREN)
+        pariputs(") ");
+      else
+	pariputs("\\right) ");
     }
     if (d)
     {
       if (GP_DATA && (GP_DATA->flags & TEXMACS)) pariputs("\\*");
       texnome(v,d);
     }
+    if (T->TeXstyle & TEXSTYLE_BREAK)
+      pariputs("\\PARIbreak ");
   }
 }
 
@@ -1913,17 +1940,25 @@ sori(GEN g, pariout_t *T)
 void
 texi(GEN g, pariout_t *T, int nosign)
 {
+    pariputc('{');
+    texi_nobrace(g, T, nosign);
+    pariputc('}');
+}
+
+void
+texi_nobrace(GEN g, pariout_t *T, int nosign)
+{
   long tg,i,j,l,r;
   GEN a,b;
   const char *v;
   char buf[67];
 
-  if (isnull(g)) { pariputs("{0}"); return; }
-  r = isone(g); pariputc('{');
+  if (isnull(g)) { pariputc('0'); return; }
+  r = isone(g);
   if (r)
   {
     if (!nosign && r<0) pariputc('-');
-    pariputs("1}"); return;
+    pariputs("1"); return;
   }
 
   tg = typ(g);
@@ -1938,7 +1973,11 @@ texi(GEN g, pariout_t *T, int nosign)
       texi((GEN)g[1],T,0); break;
 
     case t_FRAC: case t_FRACN: case t_RFRAC: case t_RFRACN:
-      texi((GEN)g[1],T,nosign); pariputs("\\over");
+      if (T->TeXstyle & TEXSTYLE_FRAC)
+	pariputs("\\frac");		/* Assume that texi() puts braces */
+      texi((GEN)g[1],T,nosign); 
+      if (!(T->TeXstyle & TEXSTYLE_FRAC))
+	  pariputs("\\over");
       texi((GEN)g[2],T,0); break;
 
     case t_COMPLEX: case t_QUAD: r = (tg==t_QUAD);
@@ -2063,7 +2102,6 @@ texi(GEN g, pariout_t *T, int nosign)
       }
       pariputc('}'); break;
   }
-  pariputc('}');
 }
 
 /*******************************************************************/
@@ -2135,19 +2173,50 @@ tex2mail_output(GEN z, long n)
     else
       sprintf(s, "\\%%%ld = ", n);
     pariputs_opt(s);
-    if (o_logfile)
-	fprintf(o_logfile, "%%%ld = ", n);
+    if (o_logfile) {
+	switch (logstyle) {
+	case logstyle_plain:
+	  plain_out:
+	    fprintf(o_logfile, "%%%ld = ", n);
+	    break;
+	case logstyle_color:
+	    if (!n)
+		goto plain_out;
+	    fprintf(o_logfile, "%s%%%ld = ", term_get_color(c_HIST), n);
+	    /* Can't merge, term_get_color() uses statics...: */
+	    fprintf(o_logfile, "%s", term_get_color(c_OUTPUT));
+	    break;
+	case logstyle_TeX:
+	    fprintf(o_logfile, "\\PARIout{%ld}", n);
+	    break;
+	    
+	}
+    }    
   }
   /* output */
   gen_output(z, &T);
-  
 
   /* flush and restore */
   prettyp_wait();
   if (o_logfile) {
     pari_outfile = o_logfile;
     /* XXXX Maybe it is better to output in another format? */
-    outbrute(z); pariputc('\n'); pariflush();
+    if (logstyle == logstyle_TeX) {
+	int extrabraces = 0;
+	switch (typ(z)) {
+	case t_FRAC: case t_FRACN: case t_RFRAC: case t_RFRACN:
+	    if (!(T.TeXstyle & TEXSTYLE_FRAC))
+		/* Extra braces disable line breaks, avoid them if possible */
+		extrabraces = 1;
+	}
+	if (extrabraces) pariputc('{');
+	T.TeXstyle |= TEXSTYLE_BREAK;
+        gen_output(z, &T);
+	if (extrabraces) pariputc('}');
+	pariputc('%');
+    } else
+	outbrute(z);
+    pariputc('\n'); pariflush();
   }
   logfile = o_logfile;
   pari_outfile = o_out;

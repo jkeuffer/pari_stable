@@ -29,6 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /*      Variables statiques communes :         */
 FILE    *pari_outfile, *errfile, *logfile, *infile;
+ulong   logstyle;
 GEN     *polun, *polx;
 GEN     gnil, gzero, gun, gdeux, ghalf, polvar, gi;
 GEN     gpi=NULL, geuler=NULL, bernzone=NULL;
@@ -60,7 +61,7 @@ void (*foreignFuncFree)(entree *);    /* How to free external entree.    */
 
 int  (*default_exception_handler)(long);
 int  (*whatnow_fun)(char *, int);
-pariout_t DFLT_OUTPUT = { 'g', 0, -1, 1, 0, f_RAW };
+pariout_t DFLT_OUTPUT = { 'g', 0, -1, 1, 0, f_RAW, 0 };
 
 extern void  delete_dirs(gp_path *p);
 extern void  initout(int initerr);
