@@ -1590,12 +1590,13 @@ split_0_2(GEN p, long bitprec, GEN *F, GEN *G)
 {
   GEN q,b,FF,GG;
   long n=lgef(p)-3,k,bitprec2,i, eq;
-  double auxnorm;
+  double aux;
 
   step4=1;
-  auxnorm=(double) n*log2(1+exp2(mylog2((GEN)p[n+1])
-				-mylog2((GEN)p[n+2]))/(double)n);
-  bitprec2=bitprec+1+(long) (log2((double)n)+auxnorm);
+  
+  aux = exp2(mylog2((GEN)p[n+1]) - mylog2((GEN)p[n+2]));
+  aux = (double) n*log2(1 + aux/(double)n);
+  bitprec2=bitprec+1+(long) (log2((double)n)+aux);
 
   q=mygprec(p,bitprec2);
   b=gdivgs(gdiv((GEN)q[n+1],(GEN)q[n+2]),-n);
@@ -1619,7 +1620,7 @@ split_0_2(GEN p, long bitprec, GEN *F, GEN *G)
   else
   {
     split_1(q,bitprec2,&FF,&GG);
-    bitprec2 = bitprec+gexpo(FF)+gexpo(GG)-gexpo(p)+(long)auxnorm+1;
+    bitprec2 = bitprec+gexpo(FF)+gexpo(GG)-gexpo(p)+(long)aux+1;
     b = gsub(polx[varn(p)],mygprec(b,bitprec2));
     FF = mygprec(FF,bitprec2);
   }
@@ -1634,20 +1635,20 @@ static void
 split_0_1(GEN p, long bitprec, GEN *F, GEN *G)
 {
   GEN q,FF,GG;
-  long n=lgef(p)-3,bitprec2,normp,pow;
+  long n=lgef(p)-3,bitprec2,normp;
   double aux;
 
   normp=gexpo(p);
-  aux=exp2(mylog2((GEN)p[n+1])-mylog2((GEN)p[n+2]))/(double)n;
-  pow=2;
-  if (aux<=2.5){ split_0_2(p,bitprec,F,G); return; }
+  aux = mylog2((GEN)p[n+1]) - mylog2((GEN)p[n+2]);
+  /* take care of double overflow */
+  if (aux < 0 || (aux < 1e5 && exp2(aux) <= 2.5*n))
+    { split_0_2(p,bitprec,F,G); return; }
 
-  if (aux<=1.) pow=1;
-  scalepol2n(p,pow); /* p <- 4^(-n) p(4*x) */
-  bitprec2=bitprec+pow*n+gexpo(p)-normp;
+  scalepol2n(p,2); /* p <- 4^(-n) p(4*x) */
+  bitprec2=bitprec+2*n+gexpo(p)-normp;
   q=mygprec(p,bitprec2);
   split_1(q,bitprec2,&FF,&GG);
-  scalepol2n(FF,-pow); scalepol2n(GG,-pow);
+  scalepol2n(FF,-2); scalepol2n(GG,-2);
   bitprec2=bitprec+gexpo(FF)+gexpo(GG)-normp;
   *F=mygprec(FF,bitprec2); *G=mygprec(GG,bitprec2);
 }
