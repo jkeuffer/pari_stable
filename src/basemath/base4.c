@@ -292,20 +292,8 @@ get_arch(GEN nf,GEN x,long prec)
     default: /* rational number */
       return scalar_get_arch(R1, RU, x, prec);
   }
-
-  v = cgetg(RU+1,t_VEC);
-  if (isnfscalar(x)) /* rational number */
-  {
-    GEN p1 = glog((GEN)x[1], prec);
-
-    for (i=1; i<=R1; i++) v[i] = (long)p1;
-    if (i <= RU)
-    {
-      p1 = gmul2n(p1,1);
-      for (   ; i<=RU; i++) v[i] = (long)p1;
-    }
-  }
   x = gmul(gmael(nf,5,1),x);
+  v = cgetg(RU+1,t_VEC);
   for (i=1; i<=R1; i++) v[i] = (long)mylog((GEN)x[i],prec);
   for (   ; i<=RU; i++) v[i] = lmul2n(mylog((GEN)x[i],prec),1);
   return v;
