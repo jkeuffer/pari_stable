@@ -691,8 +691,7 @@ zsigne(GEN nf,GEN x,GEN arch)
       GEN y = poleval(x,(GEN)rac[i]);
       if (e + gexpo((GEN)rac[i]) - gexpo(y) > B)
         err(talker, "precision too low in zsigne");
-      vecsign[j++] = (gsigne(y) > 0)? (long)_0
-                                                           : (long)_1;
+      vecsign[j++] = (gsigne(y) > 0)? (long)_0: (long)_1;
     }
   avma = av; setlg(vecsign,j); return vecsign;
 }
