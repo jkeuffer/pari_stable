@@ -1448,11 +1448,14 @@ rnfnormgroup0(GEN bnr, GEN polrel, GEN rnf)
     upnf = NULL;
   }
 
+  reldisc = idealmul(nf, reldisc, gmael3(bnr,2,1,1));
+
   k=degree(gmael3(bnr,1,7,1));
-  bd=gmulsg(k,glog(gmael3(bnr,1,7,3),DEFAULTPREC));
+  bd=gmulsg(k,glog(mpabs(gmael3(bnr,1,7,3)),DEFAULTPREC));
   bd=gadd(bd,glog(mpabs(det(reldisc)),DEFAULTPREC));
   k=reldeg*k;p1=gaddgs(gmulsg(k,dbltor(2.5)),5);
   bd=gfloor(gsqr(gadd(gmulsg(4,bd),p1)));
+
   if (rnf && DEBUGLEVEL) 
     fprintferr("rnfnormgroup: bound for primes = %Z\n", bd);
 
@@ -1478,7 +1481,12 @@ rnfnormgroup0(GEN bnr, GEN polrel, GEN rnf)
 	  {
 	    if (!gcmp1((GEN)ep[j])) err(bugparier,"rnfnormgroup");
 	    if (lgef(fac[j])-3 != k)
-	      err(talker,"non Galois extension in rnfnormgroup");
+	    {
+	      if (rnf) 
+		return NULL;
+	      else
+		err(talker,"non Galois extension in rnfnormgroup");
+	    }
 	  }
 	}
 	else
@@ -1492,7 +1500,12 @@ rnfnormgroup0(GEN bnr, GEN polrel, GEN rnf)
 	  {
 	    if (!gcmp1((GEN)ep[j])) err(bugparier,"rnfnormgroup");
 	    if (cmpis(gmael(fac,j,4),k))
-	      err(talker,"non Galois extension in rnfnormgroup");
+	    {
+	      if(rnf) 
+		return NULL;
+	      else
+		err(talker,"non Galois extension in rnfnormgroup");
+	    }
 	  }
 	}
 	col=gmulsg(k,isprincipalrayall(bnr,pr,nf_REGULAR));
@@ -1501,7 +1514,13 @@ rnfnormgroup0(GEN bnr, GEN polrel, GEN rnf)
 	p1[sizemat+1]=(long)col;
 	group=hnf(p1); detgroup=dethnf(group);
         k=cmpis(detgroup,reldeg);
-        if (k<0) err(talker,"not an Abelian extension in rnfnormgroup");
+        if (k<0) 
+	{
+	  if (rnf) 
+	    return NULL;
+	  else
+	    err(talker,"not an Abelian extension in rnfnormgroup");
+	}
 	if (!rnf && !k) { cgiv(detgroup); return gerepileupto(av,group); }
       }
     }
@@ -1550,6 +1569,7 @@ rnfconductor(GEN bnf, GEN polrel, long flag, long prec)
   module[2]=(long)arch; for (i=1; i<=R1; i++) arch[i]=un;
   bnr=buchrayall(bnf,module,nf_INIT | nf_GEN,prec);
   group=rnfnormgroup0(bnr,pol2,rnf); 
+  if (!group) { avma = av; return gzero; }
   tetpil=avma;
   return gerepile(av,tetpil,conductor(bnr,group,1,prec));
 }
