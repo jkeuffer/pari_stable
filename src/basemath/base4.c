@@ -1415,7 +1415,7 @@ famat_to_arch(GEN nf, GEN fa, long prec)
   GEN g,e, y = NULL;
   long i,l;
 
-  if (lg(fa) == 1) return zerovec(degpol(nf[1]));
+  if (lg(fa) == 1) return zerovec(lg(nf[6])-1);
   g = (GEN)fa[1]; 
   e = (GEN)fa[2]; l = lg(e);
   for (i=1; i<l; i++)
