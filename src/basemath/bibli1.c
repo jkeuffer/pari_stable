@@ -1491,7 +1491,7 @@ lindep(GEN x, long prec)
     { avma = av; return cgetg(1, t_VEC); }
   if (EXP > -10) err(precer,"lindep");
 
-  qzer = new_chunk(lx);
+  qzer = cgetg(lx, t_VECSMALL);
   b = (GEN*)idmat(n);
   be= (GEN*)new_chunk(lx);
   bn= (GEN*)new_chunk(lx);
@@ -1537,7 +1537,7 @@ lindep(GEN x, long prec)
   while (qzer[n])
   {
     long e;
-    if (DEBUGLEVEL>9)
+    if (DEBUGLEVEL>8)
     {
       fprintferr("qzer[%ld]=%ld\n",n,qzer[n]);
       for (k=1; k<=n; k++)
