@@ -1990,8 +1990,8 @@ gauss_factor(GEN x)
   else
   {
     y = gmul(x, d);
-    a = (GEN)x[1]; t1 = typ(a);
-    b = (GEN)x[2]; t2 = typ(b);
+    a = (GEN)y[1]; t1 = typ(a);
+    b = (GEN)y[2]; t2 = typ(b);
   }
   if (t1 != t_INT || t2 != t_INT) return NULL;
   y = gauss_primpart(y, &n);
@@ -2207,14 +2207,14 @@ factor(GEN x)
           return gerepilecopy(av, p1);
         }
       }
-    case t_COMPLEX:
-      y = gauss_factor(x);
-      if (y) return y;
-
     case t_RFRAC:
       p1 = factor((GEN)x[1]);
       p2 = factor((GEN)x[2]); p2[2] = (long)gneg_i((GEN)p2[2]);
       return gerepilecopy(av, concat_factor(p1,p2));
+
+    case t_COMPLEX:
+      y = gauss_factor(x);
+      if (y) return y;
   }
   err(talker,"can't factor %Z",x);
   return NULL; /* not reached */
