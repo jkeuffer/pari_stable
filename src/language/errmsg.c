@@ -213,8 +213,6 @@ char *errmessage[]=
   "not a number field in some number field-related function",
 /* idealer2 */
   "not an ideal in an ideal-related function",
-/* idealer5 */
-  "not a vector or incorrect vector length in ideallllred or minideal",
 
   /*  BIBLI.C  */
 

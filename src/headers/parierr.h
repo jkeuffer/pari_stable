@@ -53,7 +53,7 @@ enum {
 
 /* base.c   */
   polrationer, constpoler, notpoler, redpoler, zeropoler,
-  idealer1, idealer2, idealer5,
+  idealer1, idealer2,
 
 /* bibli.c  */
 

@@ -551,7 +551,7 @@ getfu(GEN nf,GEN *ptxarch,GEN reg,long flun,long *pte,long prec)
     for (   ; i<=RU; i++) p1[i] = ladd(s, gmul2n(gcoeff(xarch,i,j),-1));
   }
   if (prec <= 0) prec = gprecision(xarch);
-  u = lllintern(greal(matep),1,prec);
+  u = lllintern(greal(matep),100,1,prec);
   if (!u) return not_given(av,flun,PRECI);
 
   p1 = gmul(matep,u);
@@ -779,14 +779,14 @@ split_ideal(GEN nf, GEN x0, long prec, GEN vperm)
 
   z = init_idele(nf); ru = lg(z[2]);
   z[2] = lgetg(1, t_MAT);
-  vdir = cgetg(ru,t_VEC);
-  for (i=2; i<ru; i++) vdir[i]=zero;
+  vdir = cgetg(ru,t_VECSMALL);
+  for (i=2; i<ru; i++) vdir[i]=0;
   for (i=1; i<ru; i++)
   {
-    vdir[i]=lstoi(10);
+    vdir[i] = 10;
     y = ideallllred(nf,x0,vdir,prec);
     if (factorgensimple(nf,y)) return y;
-    vdir[i]=zero;
+    vdir[i] = 0;
   }
   nbtest = 0; nbtest_lim = (ru-1) << 2; lgsub = 3;
   init_sub(lgsub, vperm, &v, &ex);
@@ -808,13 +808,13 @@ split_ideal(GEN nf, GEN x0, long prec, GEN vperm)
     }
     if (id == x0) continue;
 
-    for (i=1; i<ru; i++) vdir[i] = lstoi(mymyrand() >> randshift);
+    for (i=1; i<ru; i++) vdir[i] = mymyrand() >> randshift;
     for (bou=1; bou<ru; bou++)
     {
       if (bou>1)
       {
-        for (i=1; i<ru; i++) vdir[i]=zero;
-        vdir[bou]=lstoi(10);
+        for (i=1; i<ru; i++) vdir[i] = 0;
+        vdir[bou] = 10;
       }
       nbtest++;
       y = ideallllred(nf,id,vdir,prec);
@@ -896,7 +896,7 @@ red_mod_units(GEN col, GEN z, long prec)
   RU = lg(mat); x = cgetg(RU+1,t_COL);
   for (i=1; i<RU; i++) x[i]=lreal((GEN)col[i]);
   x[RU] = (long)N2;
-  x = lllintern(concatsp(mat,x), 1,prec);
+  x = lllintern(concatsp(mat,x),100, 1,prec);
   if (!x) return NULL;
   x = (GEN)x[RU];
   if (signe(x[RU]) < 0) x = gneg_i(x);

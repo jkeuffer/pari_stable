@@ -1936,13 +1936,8 @@ computet2twist(GEN nf, GEN vdir)
   MC=(GEN)mat[2]; p1=cgetg(ru,t_MAT);
   for (j=1; j<ru; j++)
   {
-    GEN v = (GEN)vdir[j];
-    if (gcmp0(v))
-      p1[j] = MC[j];
-    else if (typ(v) == t_INT)
-      p1[j] = lmul2n((GEN)MC[j],itos(v)<<1);
-    else
-      p1[j] = lmul((GEN)MC[j],powgi(stoi(4),v));
+    long v = vdir[j];
+    p1[j] = v? lmul2n((GEN)MC[j],v<<1): MC[j];
   }
   return mulmat_real(p1,(GEN)mat[1]);
 }
@@ -1950,9 +1945,17 @@ computet2twist(GEN nf, GEN vdir)
 static GEN
 chk_vdir(GEN nf, GEN vdir)
 {
+  long l, i, t;
+  GEN v;
   if (!vdir || gcmp0(vdir)) return NULL;
-  if (typ(vdir)!=t_VEC || lg(vdir) != lg(nf[6])) err(idealer5);
-  return vdir;
+  l = lg(vdir);
+  if (l != lg(nf[6])) err(talker, "incorrect vector length in idealred");
+  t = typ(vdir);
+  if (t == t_VECSMALL) return t;
+  if (t != t_VEC) err(talker, "not a vector in idealred");
+  v = cgetg(l, t_VECSMALL);
+  for (i=1; i<l; i++) v[i] = itos(gceil((GEN)vdir[i]));
+  return v;
 }
 
 /* assume I in NxN matrix form (not necessarily HNF) */
