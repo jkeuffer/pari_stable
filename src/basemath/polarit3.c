@@ -2450,9 +2450,8 @@ FpXQX_extgcd(GEN x, GEN y, GEN T, GEN p, GEN *ptu, GEN *ptv)
 
 #if 0 /* FIXME To be done...*/ 
   if (OK_ULONG(p)) return FpXQX_extgcd_long(x,y,T,p,ptu,ptv);
-  if (!T) return FpX_extgcd(x,y,p,ptu,ptv);
 #endif
-  if (!T) err(bugparier,"FpXQX_extgcd, T==NULL");
+  if (!T) return FpX_extgcd(x,y,p,ptu,ptv);
   ltop=avma;
   a = FpXQX_red(x, T, p);
   b = FpXQX_red(y, T, p);
