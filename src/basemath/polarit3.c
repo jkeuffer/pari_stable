@@ -166,7 +166,7 @@ addshiftwcopy(GEN x, GEN y, long d)
   *--zd = evaltyp(t_POL) | evallg(lz); return zd;
 }
 
-/* shift polynomial in place. assume i free cells have been left before x */
+/* shift polynomial in place. assume v free cells have been left before x */
 static GEN
 shiftpol_ip(GEN x, long v)
 {
@@ -197,7 +197,7 @@ quickmul(GEN a, GEN b, long na, long nb)
   if (na < nb) swapspec(a,b, na,nb);
   if (!nb) return zeropol(0);
 
-  if (v) (void)new_chunk(v); /* free cells for shiftpol_ip */
+  if (v) (void)cgetg(v,t_STR); /* v gerepile-safe cells for shiftpol_ip */
   if (nb < MUL_LIMIT)
     return shiftpol_ip(mulpol(a,b,na,nb), v);
   i=(na>>1); n0=na-i; na=i;
