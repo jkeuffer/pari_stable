@@ -2193,14 +2193,13 @@ RecCoeff(GEN nf,  GEN pol,  long v, long prec)
 
     bound = shifti(bound, cl - cf);
 
-    if (DEBUGLEVEL > 1) fprintferr("In RecCoeff with cf = %ld and B = %Z\n",
-				   cf, bound);
+    if (DEBUGLEVEL > 1)
+      fprintferr("In RecCoeff with cf = %ld and B = %Z\n", cf, bound);
 
     beta = greal((GEN)pol[cf+2]);
     d.beta = beta;
     d.B    = bound;
-    p1 = RecCoeff2(nf, &d, prec);
-    if (!p1) return NULL;
+    if (! (p1 = RecCoeff2(nf, &d, prec)) ) return NULL;
     pol[cf+2] = (long)p1;
   }
   pol[cl+2] = un;
@@ -2255,87 +2254,89 @@ next_pow(long q, long p, long n)
   return (lgefint(x) > 3 || qp > (ulong)n)? 0: qp;
 }
 
+typedef struct {
+  GEN L0, L1, L11, L2; /* VECSMALL of p */
+  GEN *L1ray, *L11ray; /* precomputed isprincipalray(pr), pr | p */
+  GEN *rayZ; /* recomputed isprincipalray(i), i < condZ */
+  long condZ; /* generates cond(bnr) \cap Z, assumed small */
+} LIST_t;
+
 /* compute the coefficients an for the quadratic case */
 static int**
-computean(GEN dtcr, GEN lpr, long n, long deg)
+computean(GEN dtcr, LIST_t *R, long n, long deg)
 {
   ulong av = avma, av2;
-  long i, p, q, condZ, l = lg(lpr);
+  long i, p, q, condZ, l;
   int **an, **reduc;
-  GEN CHI, nf, cond, chi, chi1, bnr, ray, Rays;
+  GEN L, CHI, nf, cond, chi, chi1, bnr, ray;
   CHI_t chi_t, *C = &chi_t;
 
   CHI = (GEN)dtcr[5]; init_CHI(C, CHI, deg);
   bnr = (GEN)dtcr[4]; nf = checknf(bnr);
   cond = gmael3(bnr, 2, 1, 1);
+  condZ= R->condZ;
 
   an = InitMatAn(n, deg, 1);
   reduc = InitReduction(CHI, deg);
+  av2 = avma;
 
-  condZ= itos(gcoeff(cond, 1, 1)); /* generates cond \cap Z, assumed small */
-  Rays = cgetg(condZ+1, t_VEC);
-  /* precompute isprincipalray(x), x in Z */
-  for (i=1; i<condZ; i++)
-    if (cgcd(i,condZ) == 1)
-      Rays[i] = (long)isprincipalray(bnr, stoi(i));
+  /* all pr | p divide cond */
+  L = R->L0; l = lg(L);
+  for (i=1; i<l; i++) an_set0(an,L[i],n,deg);
 
-  av2 = avma; p = 2;
-  for (i = 1; i < l && p < n; i++, avma = av2)
+  /* 1 prime of degree 2 */
+  L = R->L2; l = lg(L);
+  for (i=1; i<l; i++, avma = av2)
   {
-    GEN T = (GEN)lpr[i];
-
-    if (typ(T) == t_INT)
+    p = L[i];
+    ray = R->rayZ[p % condZ];
+    chi  = EvalChar(C, ray);
+    chi1 = chi;
+    for (q=p;;)
     {
-      p = itos(T);
-      if (condZ % p == 0) an_set0(an,p,n,deg); /* all pr | p divide cond */
-      else
-      { /* 1 prime of degree 2 */
-        ray = (GEN)Rays[p % condZ];
-        chi  = EvalChar(C, ray);
-        chi1 = chi;
-        for (q=p;;)
-        {
-          an_set0_coprime(an, p,q,n,deg); /* v_p(q) odd */
-          if (! (q = next_pow(q,p, n)) ) break;
+      an_set0_coprime(an, p,q,n,deg); /* v_p(q) odd */
+      if (! (q = next_pow(q,p, n)) ) break;
 
-          an_mul(an,p,q,n,deg,chi,reduc);
-          if (! (q = next_pow(q,p, n)) ) break;
-          chi = gmul(chi, chi1);
-        }
-      }
+      an_mul(an,p,q,n,deg,chi,reduc);
+      if (! (q = next_pow(q,p, n)) ) break;
+      chi = gmul(chi, chi1);
     }
-    else if (typ(T[1]) == t_INT) /* 1 prime of degree 1, [p,ray] */
+  }
+    
+  /* 1 prime of degree 1 */
+  L = R->L1; l = lg(L);
+  for (i=1; i<l; i++, avma = av2)
+  {
+    p = L[i]; ray = R->L1ray[i];
+    chi  = EvalChar(C, ray);
+    chi1 = chi;
+    for(q=p;;)
     {
-      p = itos((GEN)T[1]);
-      ray = (GEN)T[2];
-      chi  = EvalChar(C, ray);
-      chi1 = chi;
-      for(q=p;;)
-      {
-	an_mul(an,p,q,n,deg,chi,reduc);
-	if (! (q = next_pow(q,p, n)) ) break;
-	chi = gmul(chi, chi1);
-      }
+      an_mul(an,p,q,n,deg,chi,reduc);
+      if (! (q = next_pow(q,p, n)) ) break;
+      chi = gmul(chi, chi1);
     }
-    else /* 2 primes of degree 1, [ray(pr[1]),p] */
+  }
+
+  /* 2 primes of degree 1 */
+  L = R->L11; l = lg(L);
+  for (i=1; i<l; i++, avma = av2)
+  {
+    GEN ray1, ray2, chi11, chi12, chi2;
+
+    p = L[i]; ray1 = R->L11ray[i]; /* use pr1 pr2 = (p) */
+    ray2 = gsub(R->rayZ[p % condZ],  ray1);
+    chi11 = EvalChar(C, ray1);
+    chi12 = EvalChar(C, ray2);
+
+    chi1 = gadd(chi11, chi12);
+    chi2 = chi12;
+    for(q=p;;)
     {
-      GEN ray1, ray2, chi11, chi12, chi2;
-
-      p = itos((GEN)T[2]);
-      ray1 = (GEN)T[1]; /* use pr1 pr2 = (p) */
-      ray2 = gsub((GEN)Rays[p % condZ],  ray1);
-      chi11 = EvalChar(C, ray1);
-      chi12 = EvalChar(C, ray2);
-
-      chi1 = gadd(chi11, chi12);
-      chi2 = chi12;
-      for(q=p;;)
-      {
-	an_mul(an,p,q,n,deg,chi1,reduc);
-	if (! (q = next_pow(q,p, n)) ) break;
-	chi2 = gmul(chi2, chi12);
-	chi1 = gadd(chi2, gmul(chi1, chi11));
-      }
+      an_mul(an,p,q,n,deg,chi1,reduc);
+      if (! (q = next_pow(q,p, n)) ) break;
+      chi2 = gmul(chi2, chi12);
+      chi1 = gadd(chi2, gmul(chi1, chi11));
     }
   }
 
@@ -2344,20 +2345,103 @@ computean(GEN dtcr, GEN lpr, long n, long deg)
   avma = av; return an;
 }
 
-static GEN
-deg1_1(GEN bnr, GEN pr)
+static void
+_append(GEN L, GEN z)
 {
-  GEN z = cgetg(3, t_VEC);
-  z[1] = pr[1]; /* p */
-  z[2] = (long)isprincipalray(bnr, pr); return z;
+  long l = lg(L);
+  L[l] = (long)z; setlg(L,l+1);
 }
-static GEN
-deg1_2(GEN bnr, GEN L)
+
+static void
+deg11(LIST_t *R, long p, GEN bnr, GEN pr) {
+  GEN z = isprincipalray(bnr, pr); 
+  _append(R->L1, (GEN)p);
+  _append((GEN)R->L1ray, z);
+}
+static void
+deg12(LIST_t *R, long p, GEN bnr, GEN Lpr) {
+  GEN z = isprincipalray(bnr, (GEN)Lpr[1]); 
+  _append(R->L11, (GEN)p);
+  _append((GEN)R->L11ray, z);
+}
+static void
+deg0(LIST_t *R, long p) {
+  _append(R->L0, (GEN)p);
+}
+static void
+deg2(LIST_t *R, long p) {
+  _append(R->L2, (GEN)p);
+}
+
+/* pi(x) <= ?? */
+static long
+PiBound(long x)
 {
-  GEN z = cgetg(3, t_VEC);
-  GEN pr = (GEN)L[1];
-  z[2] = pr[1]; /* p */
-  z[1] = (long)isprincipalray(bnr, pr); return z;
+  double lx = log((double)x);
+  return 1 + (long) x/lx * (1 + 3/(2*lx));
+}
+
+static GEN
+_alloc(long n, long t)
+{
+  GEN z = new_chunk(n);
+  z[0] = evaltyp(t) | evallg(1);
+  return z;
+}
+
+static void
+init_primes(GEN bnr, long nmax, LIST_t *R)
+{
+  ulong av = avma;
+  GEN bnf = (GEN)bnr[1], cond = gmael3(bnr,2,1,1);
+  long p,i,l, condZ = itos(gcoeff(cond,1,1)), contZ = itos(content(cond));
+  GEN pr, nf = checknf(bnf), dk = (GEN)nf[3];
+  GEN prime = stoi(2);
+  byteptr d = diffptr + 1;
+  GEN *gptr[7];
+
+  l = 1 + PiBound(nmax);
+  R->L0  = _alloc(l, t_VECSMALL);
+  R->L2  = _alloc(l, t_VECSMALL); R->condZ = condZ;
+  R->L1 = _alloc(l, t_VECSMALL); R->L1ray = (GEN*)_alloc(l, t_VEC);
+  R->L11 = _alloc(l, t_VECSMALL); R->L11ray = (GEN*)_alloc(l, t_VEC);
+  for (p = 2; p <= nmax; p += *d++, prime[2] = p)
+  {
+    switch (krogs(dk, p))
+    {
+    case -1: /* inert */
+      if (condZ % p == 0) deg0(R,p); else deg2(R,p);
+      break;
+    case 1: /* split */
+      pr = primedec(nf, prime);
+      if      (condZ % p != 0) deg12(R, p, bnr, pr);
+      else if (contZ % p == 0) deg0(R,p);
+      else
+      {
+        pr = idealval(nf, cond, (GEN)pr[1])? (GEN)pr[2]: (GEN)pr[1];
+        deg11(R, p, bnr, pr);
+      }
+      break;
+    default: /* ramified */
+      if (condZ % p == 0) deg0(R,p);
+      else
+      {
+        pr = (GEN)primedec(nf, prime)[1];
+        deg11(R, p, bnr, pr);
+      }
+      break;
+    }
+  }
+  R->rayZ = (GEN*)cgetg(condZ, t_VEC);
+  /* precompute isprincipalray(x), x in Z */
+  for (i=1; i<condZ; i++)
+    R->rayZ[i] = (cgcd(i,condZ) == 1)? isprincipalray(bnr, stoi(i)): gzero;
+
+  gptr[0] = &(R->L0);
+  gptr[1] = &(R->L2);  gptr[2] = (GEN*)&(R->rayZ);
+  gptr[3] = &(R->L1);  gptr[5] = (GEN*)&(R->L1ray);
+  gptr[4] = &(R->L11); gptr[6] = (GEN*)&(R->L11ray);
+  gerepilemany(av,gptr,7);
 }
 
 /* compute S and T for the quadratic case */
@@ -2367,7 +2451,8 @@ QuadGetST(GEN dataCR, long prec)
   const long cl  = lg(dataCR) - 1;
   ulong av, av1, av2;
   long ncond, n, j, k, nmax;
-  GEN rep, vChar, N0, C, T, S, cf, cfh, an, degs, lpr;
+  GEN rep, vChar, N0, C, T, S, cf, cfh, an, degs;
+  LIST_t LIST;
 
   /* allocate memory for answer */
   rep = cgetg(3, t_VEC);
@@ -2399,43 +2484,7 @@ QuadGetST(GEN dataCR, long prec)
   cf  = gmul2n(mpsqrt(mppi(prec)), 1);
   cfh = gmul2n(cf, -1);
 
-  {
-    byteptr d = diffptr + 1;
-    ulong p;
-    GEN bnr = gmael(dataCR,1,4), bnf = (GEN)bnr[1], cond = gmael3(bnr,2,1,1);
-    long i = 1, condZ = itos(gcoeff(cond,1,1)), contZ = itos(content(cond));
-    GEN L,pr, nf = checknf(bnf), dk = (GEN)nf[3];
-    GEN prime = stoi(2);
-    lpr = cgetg(nmax, t_VEC);
-    for (p = 2; p <= nmax; p += *d++, prime[2] = p)
-    {
-      switch (krogs(dk, p))
-      {
-      case -1: /* inert */
-        L = icopy(prime); break;
-      case 1: /* split */
-        pr = primedec(nf, prime);
-	if      (condZ % p != 0) L = deg1_2(bnr, pr);
-	else if (contZ % p == 0) L = icopy(prime);
-	else
-	{
-	  pr = idealval(nf, cond, (GEN)pr[1])? (GEN)pr[2]: (GEN)pr[1];
-	  L = deg1_1(bnr, pr);
-	}
-	break;
-      default: /* ramified */
-	if (condZ % p == 0) L = icopy(prime);
-	else
-	{
-	  pr = (GEN)primedec(nf, prime)[1];
-	  L = deg1_1(bnr,pr);
-	}
-	break;
-      }
-      lpr[i++] = (long)L;
-    }
-    setlg(lpr, i);
-  }
+  init_primes(gmael(dataCR,1,4), nmax, &LIST);
 
   av1 = avma;
   /* loop over conductors */
@@ -2464,12 +2513,16 @@ QuadGetST(GEN dataCR, long prec)
 
       if (DEBUGLEVEL>1)
         fprintferr("\tcharacter no: %ld (%ld/%ld)\n", t,k,nChar);
-      matan = computean((GEN)dataCR[t], lpr, NN, d);
+      matan = computean((GEN)dataCR[t], &LIST, NN, d);
       for (n = 1; n <= NN; n++)
 	if ((an = EvalCoeff(z, matan[n], d)))
         {
           p1 = gadd(p1, gmul(an, (GEN)vcn[n]));
 	  p2 = gadd(p2, gmul(an, (GEN)veint1[n]));
+          if ((n & 0xff) == 0)
+          { GEN *gptr[2]; gptr[0]=&p1; gptr[1]=&p2;
+            gerepilemany(av2,gptr,2);
+          }
         }
       gaffect(gmul(cfh, gmul(p1,c1)), (GEN)S[t]);
       gaffect(gmul(cf,  gconj(p2)),   (GEN)T[t]);
