@@ -3231,6 +3231,8 @@ bnrL1(GEN bnr, GEN sbgrp, long flag, long prec)
     sbgrp = Mcyc;
   else
   {
+    if (lg(sbgrp) != N+1) 
+      err(talker, "incorrect subgroup in bnrL1");
     p1 = gauss(sbgrp, Mcyc);
     if (!gcmp1(denom(p1)))
       err(talker, "incorrect subgroup in bnrL1");
