@@ -22,6 +22,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 
 extern GEN polrecip_i(GEN x);
+extern GEN poldeflate(GEN x0, long *m);
+extern GEN roots_to_pol(GEN a, long v);
 #define pariINFINITY 100000
 #define NEWTON_MAX 10
 
@@ -894,18 +896,23 @@ exp_i(GEN x)
   return v;
 }
 
-/* returns a vector RU which contains exp(2*i*k*Pi/NN), k=0..NN-1 */
+/* e(1/N) */
 static GEN
-initRU(long NN, long bitprec)
+RUgen(long N, long bitprec)
 {
-  GEN prim,aux,*RU,mygpi;
-  long i,N2=(NN>>1),N4=(NN>>2),N8=(NN>>3);
+  GEN pi2 = gmul2n(mppi(bitprec/BITS_IN_LONG+3), 1);
+  return exp_i(gdivgs(pi2,N));
+}
 
-  RU = (GEN*)cgetg(NN+1,t_VEC); RU++;
-  mygpi = mppi(bitprec/BITS_IN_LONG+3);
-  aux = gdivgs(mygpi,NN/2); /* 2 Pi/NN */
-  prim = exp_i(aux);
-  aux = gmulbyi(aux);
+/* N=2^k. returns a vector RU which contains exp(2*i*k*Pi/N), k=0..N-1 */
+static GEN
+initRU(long N, long bitprec)
+{
+  GEN prim,aux,*RU;
+  long i,N2=(N>>1),N4=(N>>2),N8=(N>>3);
+
+  RU = (GEN*)cgetg(N+1,t_VEC); RU++;
+  prim = RUgen(N, bitprec);
 
   RU[0] = myrealun(bitprec);
   for (i=1; i<=N8; i++) RU[i] = gmul(prim, RU[i-1]);
@@ -917,6 +924,19 @@ initRU(long NN, long bitprec)
   }
   for (i=0; i<N4; i++) RU[i+N4]=gmulbyi(RU[i]);
   for (i=0; i<N2; i++) RU[i+N2]=gneg(RU[i]);
+  return (GEN)RU;
+}
+
+/* as above, N arbitrary */
+static GEN
+initRUgen(long N, long bitprec)
+{
+  GEN *RU = (GEN*)cgetg(N+1,t_VEC), z = RUgen(N,bitprec);
+  long i, k = (N+3)>>1;
+  RU[0] = myrealun(bitprec);
+  RU[1] = z;
+  for (i=2; i<k; i++) RU[i] = gmul(z, RU[i-1]);
+  for (   ; i<N; i++) RU[i] = gconj(RU[N-i]);
   return (GEN)RU;
 }
 
@@ -1687,10 +1707,10 @@ root_error(long n, long k, GEN roots_pol, GEN sigma, GEN shatzle)
     if (i!=k)
     {
       aux=gsub((GEN)roots_pol[i],(GEN)roots_pol[k]);
-      d[i]=(long) gabs(mygprec(aux,31),4);
+      d[i]=(long) gabs(mygprec(aux,31),DEFAULTPREC);
     }
   }
-  rho=gabs(mygprec((GEN)roots_pol[k],31),4);
+  rho=gabs(mygprec((GEN)roots_pol[k],31),DEFAULTPREC);
   if (gcmp(rho,dbltor(1.))==-1) rho=gun;
   eps=gmul(rho,shatzle);
   aux=gmul(gpowgs(rho,n),sigma);
@@ -1708,7 +1728,7 @@ root_error(long n, long k, GEN roots_pol, GEN sigma, GEN shatzle)
       }
     }
     eps2=gdiv(gmul2n(aux,2*m-2),prod);
-    eps2=gpui(eps2,dbltor(1./m),4);
+    eps2=gpui(eps2,dbltor(1./m),DEFAULTPREC);
     rap=gdiv(eps,eps2); eps=eps2;
   }
   return eps;
@@ -1751,7 +1771,7 @@ a_posteriori_errors(GEN p, GEN roots_pol, long err)
   long i,n=lgef(p)-3,e,e_max;
 
   sigma = realun(3);
-  setexpo(sigma,err+(long) log2((double) n)+1);
+  setexpo(sigma, err + (long)log2((double)n) + 1);
   overn=dbltor(1./n);
   shatzle=gdiv(gpui(sigma,overn,0),
 	       gsub(gpui(gsub(gun,sigma),overn,0),
@@ -1761,9 +1781,7 @@ a_posteriori_errors(GEN p, GEN roots_pol, long err)
   {
     x=root_error(n,i,roots_pol,sigma,shatzle);
     e=gexpo(x); if (e>e_max) e_max=e;
-    x = (GEN)roots_pol[i];
-    roots_pol[i]=(long) mygprec_absolute(x,-e);
-    gunclone(x);
+    roots_pol[i] = (long)mygprec_absolute((GEN)roots_pol[i],-e);
   }
   return e_max;
 }
@@ -1877,22 +1895,46 @@ mygprec_special(GEN x, long bitprec)
 }
 
 static GEN
+fix_roots(GEN r, GEN *m, long h, long bitprec)
+{
+  long i,j,k, l = lg(r)-1;
+  GEN allr, ro1 = (h==1)? NULL: initRUgen(h, bitprec);
+  allr = cgetg(h*l+1, t_VEC);
+  for (k=1,i=1; i<=l; i++)
+  {
+    GEN p2, p1 = (GEN)r[i];
+    if (!ro1) allr[k++] = lcopy(p1);
+    else
+    {
+      p2 = (h == 2)? gsqrt(p1,0): gpow(p1, ginv(stoi(h)), 0);
+      for (j=0; j<h; j++) allr[k++] = lmul(p2, (GEN)ro1[j]);
+    }
+    gunclone(p1);
+  }
+  if (ro1) *m = roots_to_pol(allr, varn(*m));
+  return allr;
+}
+
+static GEN
 all_roots(GEN p, long bitprec)
 {
-  GEN q,roots_pol,m;
-  long bitprec0, bitprec2,n=lgef(p)-3,i,e,av;
+  GEN pd,q,roots_pol,m;
+  long bitprec0, bitprec2,n=lgef(p)-3,i,e,h,av;
 
   roots_pol=cgetg(n+1,t_VEC); av=avma;
-  e = 2*gexpo(cauchy_bound(p)); if (e<0) e=0;
-  bitprec0=bitprec + gexpo(p) - gexpo((GEN)p[2+n]) + (long)log2(n) + 1 + e;
+  pd = poldeflate(p, &h);
+  e = 2*gexpo(cauchy_bound(pd)); if (e<0) e=0;
+  bitprec0=bitprec + gexpo(pd) - gexpo(leading_term(pd)) + (long)log2(n) + 1+e;
   for (i=1;; i++)
   {
     setlg(roots_pol,1); 
     bitprec2 = bitprec0 + (1<<i)*n;
-    q = gmul(myrealun(bitprec2), mygprec(p,bitprec2));
+    q = gmul(myrealun(bitprec2), mygprec(pd,bitprec2));
     m = split_complete(q,bitprec2,roots_pol);
-    e = gexpo(gsub(mygprec_special(p,bitprec2),m))
-      - gexpo((GEN)q[2+n])+(long) log2((double)n)+1;
+    roots_pol = fix_roots(roots_pol, &m, h, bitprec2);
+
+    e = gexpo(gsub(mygprec_special(p,bitprec2), m))
+      - gexpo(leading_term(q)) + (long)log2((double)n) + 1;
     if (e<-2*bitprec2) e=-2*bitprec2; /* to avoid e=-pariINFINITY */
     if (e < 0)
     {
