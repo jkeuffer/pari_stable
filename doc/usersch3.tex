@@ -2017,11 +2017,15 @@ discriminant of a quadratic field, false (0) otherwise.
 simpler function $\teb{isfundamental}(x)$ which returns a \kbd{long}
 should be used if $x$ is known to be of type integer.
 
-\subsecidx{isperfectpower}$(x,\{\&n\})$: return the maximal $k \geq 2$ such
-that $x = n^k$ is a perfect power, or $0$ if no such $k$ exist. If $n$ is
-given puts the exact $k$-th root there.
+\subsecidx{ispower}$(x,\{k\}, \{\&n\})$: 
+ true (1) if $x$ is a $k$-th power, false (0) if not. If $n$ is 
+given and a $k$-th root was computed in the process, put that in $n$. If $k$
+is omitted, return the maximal $k \geq 2$ such that $x = n^k$ is a perfect
+power, or 0 if no such $k$ exist. Intmod a prime and $p$-adics are allowed,
+provided $k$ is not omitted.
 
-\syn{isperfectpower}{x, \&n}, the result is a \kbd{long}.
+\syn{ispower}{x, k, \&n}, the result is a \kbd{long}. Omitted $k$ or $n$
+are coded as \kbd{NULL}.
 
 \subsecidx{isprime}$(x,\{\fl=0\})$: true (1) if $x$ is a (proven) prime
 number, false (0) otherwise. This can be very slow when $x$ is indeed

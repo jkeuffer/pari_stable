@@ -433,14 +433,14 @@ static long
 polcarrecomplet(GEN x, GEN *pt)
 {
   pari_sp av,av2;
-  long i,l;
+  long v, l = degpol(x);
   GEN y,a,b;
 
   if (!signe(x)) return 1;
-  l=lg(x); if ((l&1) == 0) return 0; /* odd degree */
-  i=2; while (isexactzero((GEN)x[i])) i++;
-  if (i&1) return 0;
-  av2 = avma; a = (GEN)x[i];
+  if (l&1) return 0; /* odd degree */
+  v = polvaluation(x, &x);
+  if (v&1) return 0;
+  av2 = avma; a = (GEN)x[2];
   switch (typ(a))
   {
     case t_POL: case t_INT:
@@ -460,7 +460,7 @@ polcarrecomplet(GEN x, GEN *pt)
       if (!b) b = gsqrt(a,DEFAULTPREC);
       y = gmul(b,y);
     }
-    *pt = gerepileupto(av,y);
+    *pt = v? gerepilecopy(av, gmulXn(y, v >> 1)): gerepileupto(av, y);
   }
   else avma = av;
   return 1;
@@ -628,50 +628,173 @@ pow_check(ulong p, GEN *x, GEN *logx, long *k)
   setlg(*logx, DEFAULTPREC + (lg(*x)-2) / p);
   u = divrs(*logx, p); y = grndtoi(mpexp(u), &e);
   if (e >= -10 || !egalii(gpowgs(y, p), *x)) return 0;
-  *k *= p; *x = y; *logx = u;
+  *k *= p; *x = y; *logx = u; return 1;
+}
+
+static long
+polispower(GEN x, GEN K, GEN *pt)
+{
+  pari_sp av,av2;
+  long v, l = degpol(x), k = itos(K);
+  GEN y, a, b;
+
+  if (!signe(x)) return 1;
+  if (l % k) return 0; /* degree not multiple of k */
+  v = polvaluation(x, &x);
+  if (v % k) return 0;
+  av2 = avma; a = (GEN)x[2]; b = NULL;
+  if (!ispower(a, K, &b)) { avma = av2; return 0; }
+  av = avma;
+  if (degpol(x))
+  {
+    x = gdiv(x,a);
+    y = gtrunc(gsqrtn(greffe(x,lg(x),1), K, NULL, 0)); av2 = avma;
+    if (!gegal(powgi(y, K), x)) { avma = av; return 0; }
+  }
+  else y = polun[varn(x)];
+  if (pt)
+  {
+    if (!gcmp1(a))
+    {
+      if (!b) b = gsqrtn(a, K, NULL, DEFAULTPREC);
+      y = gmul(b,y);
+    }
+    *pt = v? gerepilecopy(av, gmulXn(y, v/k)): gerepileupto(av, y);
+  }
+  else avma = av;
   return 1;
 }
 
 long
-isperfectpower(GEN x, GEN *pty)
+ispower(GEN x, GEN K, GEN *pty)
+{
+  long mask;
+  ulong k;
+  GEN z;
+
+  if (!K) return gisanypower(x, pty);
+  if (typ(K) != t_INT || signe(K) <= 0) err(typeer, "ispower");
+  if (is_pm1(K)) { if (pty) *pty = gcopy(x); return 1; }
+  switch(typ(x)) {
+    case t_INT:
+      k = itou(K);
+      if (k == 2) return carrecomplet(x, pty);
+      if (k == 3) { mask = 1; return !!is_357_power(x, pty, &mask); }
+      if (k == 5) { mask = 2; return !!is_357_power(x, pty, &mask); }
+      if (k == 7) { mask = 4; return !!is_357_power(x, pty, &mask); }
+      return is_kth_power(x, k, pty, NULL);
+    case t_FRAC:
+    {
+      GEN a = (GEN)x[1], b = (GEN)x[2];
+      z = cgetg(3, t_FRAC);
+      if (ispower(a, K, pty? &a: NULL)
+       && ispower(b, K, pty? &b: NULL))
+      {
+        if (pty) { *pty = z; z[1] = (long)a; z[2] = (long)b; }
+        return 1;
+      }
+      avma = (pari_sp)(z + 3); return 0;
+    }
+    case t_INTMOD:
+    {
+      pari_sp av = avma;
+      GEN d, p = (GEN)x[1];
+      z = (GEN)x[2]; if (!signe(z)) return 1;
+      d = subis(p, 1); ;
+      z = Fp_pow(z, diviiexact(d, gcdii(K, d)), p);
+      avma = av; return is_pm1(z);
+    }
+    case t_PADIC:
+      z = padic_sqrtn(x, K, NULL);
+      if (!z) return 0;
+      if (pty) *pty = z;
+      return 1;
+
+    case t_POL:
+      return polispower(x, K, pty);
+    case t_RFRAC:
+      if (polcarrecomplet(gmul((GEN)x[1], powgi((GEN)x[2], subis(K,1))), pty))
+      {
+        if (pty) *pty = gdiv(*pty, (GEN)x[2]);
+        return 1;
+      }
+      return 0;
+
+    default: err(impl, "ispower for non-rational arguments");
+    return 0; /* not reached */
+  }
+}
+
+long
+gisanypower(GEN x, GEN *pty)
+{
+  long tx = typ(x);
+  ulong k, h;
+  if (tx == t_FRAC)
+  {
+    GEN fa, P, E, a = (GEN)x[1], b = (GEN)x[2], z = cgetg(3, t_FRAC);
+    long i, j, p, e;
+    int sw = (cmpii(a, b) > 0);
+
+    if (sw) swap(a, b);
+    k = isanypower(a, pty? &a: NULL);
+    if (!k) { avma = (pari_sp)(z + 3); return 0; }
+    fa = factor(utoi(k));
+    P = (GEN)fa[1];
+    E = (GEN)fa[2]; h = k;
+    for (i = lg(P) - 1; i > 0; i--)
+    {
+      p = itou((GEN)P[i]);
+      e = itou((GEN)E[i]);
+      for (j = 0; j < e; j++) 
+        if (!is_kth_power(b, p, &b, NULL)) break;
+      if (j < e) k /= u_pow(p, e - j);
+    }
+    if (k == 1) { avma = (pari_sp)(z + 3); return 0; }
+    if (!pty) { avma = (pari_sp)(z + 3); return k; }
+    if (k != h) a = gpowgs(a, h/k);
+    z[1] = (long)a;
+    z[2] = (long)b; *pty = gerepilecopy((pari_sp)(z + 3), z);
+    return k;
+  }
+  if (tx == t_INT) return isanypower(x, pty);
+  err(talker, "missing exponent");
+  return 0; /* not reached */
+}
+
+long
+isanypower(GEN x, GEN *pty)
 {
   pari_sp av = avma;
-  long ex, k = 1, mask = 7;
+  long ex, ex0 = 11, k = 1, mask = 7;
   GEN logx, y;
-  byteptr d;
-  ulong p, e2;
+  byteptr d = diffptr;
+  ulong p = 0, e2;
 
-  if (typ(x) != t_INT || gcmp(x, gdeux) < 0)
-    err(talker, "isperfectpower: argument must be > 1");
+  if (typ(x) != t_INT || cmpii(x, gdeux) < 0)
+    err(talker, "isanypower: argument must be > 1");
   while (carrecomplet(x, &y)) { k <<= 1; x = y; }
   while ( (ex = is_357_power(x, &y, &mask)) ) { k *= ex; x = y; }
-#if 0
-could work modulo
-  2772725671UL; /* = 1 mod 11,13,17,19,23,29 */
-  3231413279UL; /* = 1 mod 31,37,41,43,47 */
-  4211628979UL; /* = 1 mod 59,61,67,71 */
-  4004477927UL; /* = 1 mod 73,79,83,89 */
-#endif
+  /* cut off at 4 bits not 1 which seems to be about optimum;  for primes
+   * >> 10^3 the modular checks are no longer competitively fast */
+  while ( (ex = is_odd_power(x, &y, &ex0, 4)) ) { k *= ex; x = y; }
+  if (DEBUGLEVEL>4) fprintferr("isanypower: now k=%ld, x=%Z\n", k, x);
+  do
+  {
+    if (*d) NEXT_PRIME_VIADIFF(p,d);
+    else { p = itou( nextprime(utoi(p + 1)) ); }
+  } while (p < ex0);
+
   e2 = expi(x) + 1;
-  logx = mplog( itor(x, DEFAULTPREC + (lg(x)-2) / 11) );
-  d = diffptr + 5; /* prime(5) = 11 */
-  p = 11;
+  logx = mplog( itor(x, DEFAULTPREC + (lg(x)-2) / p) );
   while (p < e2)
   {
     if (pow_check(p, &x, &logx, &k)) {
       e2 = expi(x) + 1;
       continue; /* success, retry same p */
     }
-    NEXT_PRIME_VIADIFF(p, d);
-    if (!*d) break;
-  }
-  while (p < e2)
-  {
-    if (pow_check(p, &x, &logx, &k)) {
-      e2 = expi(x) + 1;
-      continue; /* success, retry same p */
-    }
-    p = itou( nextprime(utoi(p + 1)) );
+    if (*d) NEXT_PRIME_VIADIFF(p, d);
+    else p = itou( nextprime(utoi(p + 1)) );
   }
   if (pty) *pty = gerepilecopy(av, x); else avma = av;
   return k == 1? 0: k;

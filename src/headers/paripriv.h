@@ -67,6 +67,7 @@ extern long Flx_POW_MONTGOMERY_LIMIT;
 int approx_0(GEN x, GEN y);
 GEN bernfrac_using_zeta(long n);
 int OK_bern(long nb, long prec);
+GEN padic_sqrtn(GEN x, GEN n, GEN *zetan);
 
 /* FIXME: adapt/use mpn_[lr]shift instead */
 #define shift_left(z2,z1,imin,imax,f, sh) {\
@@ -170,6 +171,7 @@ int   BSW_isprime_small(GEN x);
 GEN   decomp_limit(GEN n, GEN limit);
 GEN   Fp_PHlog(GEN a, GEN g, GEN p, GEN ord);
 GEN   Fp_shanks(GEN x,GEN g0,GEN p, GEN q);
+ulong is_kth_power(GEN x, ulong p, GEN *pt, byteptr d);
 long  ifac_decomp_break(GEN n, long (*B)(GEN,GEN,GEN,GEN), GEN s, long hint);
 int   miller(GEN n, long k);
 GEN   mpqs(GEN N);

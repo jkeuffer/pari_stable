@@ -21,6 +21,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 
+int factor_add_primes = 1;
+
 /*C++ on ia64 do not like (long)NULL*/
 #define LNULL ((long)(GEN)NULL)
 /*********************************************************************/
@@ -2212,7 +2214,7 @@ squfof(GEN n)
  * these and then take the remainder apart.  Second stages use 117, 31, 43, 71.
  * Moduli which are no longer interesting are skipped.  Everything is encoded
  * in a single table of 106 24-bit masks. We only need the first half of the
- * residues.  Three bits per modulus indicate which residues are 7th (bit 2), 
+ * residues.  Three bits per modulus indicate which residues are 7th (bit 2),
  * 5th (bit 1) powers or cubes (bit 0); the eight moduli above are assigned
  * right-to-left. The table errs on the side of safety if one of the moduli
  * divides the number to be tested, but as this leads to inefficiency it should
@@ -2397,6 +2399,110 @@ is_357_power(GEN x, GEN *pt, long *mask)
   if (!pt) { avma = av; return exponent; }
   avma = (pari_sp)y; *pt = gerepileuptoint(av, y);
   return exponent;
+}
+
+/* p not necessarily prime */
+ulong
+is_kth_power(GEN x, ulong p, GEN *pt, byteptr d)
+{
+  int j, k, init = 0;
+  long lx = lgefint(x);
+  ulong q, prkmodq, residue, elt;
+  GEN y;
+  byteptr d0;
+  pari_sp av = avma;
+
+  if (d) d0 = d;
+  else
+  {
+    q = 0; d0 = diffptr;
+    maxprime_check(p);
+    while (q < p) NEXT_PRIME_VIADIFF(q,d0);
+  }
+  /* for modular checks, use small primes q congruent 1 mod curexp */
+  q = p;
+  /* #checks is tunable, for small p we can afford to do more than 5 */
+  for (j = (p<40 ? 7 : p<80 ? 5 : p<250 ? 4 : 3); j > 0; j--)
+  {
+    do
+    {
+      if (*d0) NEXT_PRIME_VIADIFF(q,d0);
+      else {
+        if (init) q += p; else { init = 1; q += (p + 1 - q % p); }
+        while ( !BSW_psp( utoi(q) ) ) { q += p; }
+        break;
+      }
+    } while (q % p != 1);
+    if (DEBUGLEVEL>4) fprintferr("\tchecking modulo %ld\n", q);
+    /* XXX give up if q is too large, huh? */
+    residue = umodiu(x, q);
+    if (residue == 0) continue;
+    /* this is intended to be used after trial division, so we won't check
+     * whether residue is zero here - that cannot normally happen */
+    /* find a generator of the subgroup of index curexp in (Z/qZ)^* */
+    prkmodq = elt = Fl_pow(Fl_gener(q), p, q);
+    /* see whether our residue is in the subgroup */
+    for (k = (q - 1)/p; k > 0; k--)
+    {
+      if (elt == residue) break;
+      elt = muluumod(elt, prkmodq, q);
+    }
+    if (!k) /* not found */
+    {
+      if (DEBUGLEVEL>5) fprintferr("\t- ruled out\n");
+      avma = av; return 0;
+    }
+  }
+  avma = av;
+
+  if (DEBUGLEVEL>4) fprintferr("OddPwrs: passed modular checks\n");
+  /* go to the horse's mouth... */
+  y = mpround( sqrtnr(itor(x, 3 + (lx-2) / p), p) );
+  if (!egalii(gpowgs(y, p), x)) {
+    if (DEBUGLEVEL>4) fprintferr("\tBut it wasn't a pure power.\n");
+    avma = av; return 0;
+  }
+  if (!pt) avma = av; else { avma = (pari_sp)y; *pt = gerepileuptoint(av, y); }
+  return 1;
+}
+
+/* generic version for exponents 11 or larger.  Cut off when x^(1/k) fits
+ * into (say) 14 bits, since we would have found it by trial division.
+ * Interface is similar to is_357_power(), but instead of the mask, we keep
+ * the current test exponent around.  Everything needed here (primitive roots
+ * etc.) is computed from scratch on the fly; compared to the size of numbers
+ * under consideration, these word-sized computations take negligible time.
+ * Experimentally making the cutoff point caller-configurable... */
+long
+is_odd_power(GEN x, GEN *pt, long *curexp, long cutoffbits)
+{
+  long size = expi(x) /* not +1 */;
+  ulong p = 0;
+  pari_sp av = avma;
+  byteptr d = diffptr;
+
+  /* cutting off at 1 is safe, but direct root extraction attempts will be
+   * faster when trial division hasn't been used to discover very small
+   * bases.  We become competitive at about cutoffbits = 4 */
+  if (cutoffbits < 1) cutoffbits = 1;
+  /* prepare for iterating curexp over primes */
+  if (*curexp < 11) *curexp = 11;
+  while (p < *curexp) { NEXT_PRIME_VIADIFF(p,d); if (!*d) break; }
+  while (p < *curexp) {  p = itou( nextprime(utoi(p + 1)) ); }
+  *curexp = p;
+
+  if (DEBUGLEVEL>4) fprintferr("OddPwrs: examining %Z\n", x);
+  /* check size of x vs. curexp */
+  /* tunable cutoff was 18 initially, but cheap enough to go further (given
+   * the 2^14 minimal cutoff point for trial division) */
+  while (size/p >= cutoffbits /*tunable*/ ) {
+    if (DEBUGLEVEL>4) fprintferr("OddPwrs: testing for exponent %ld\n", p);
+    /* if found, caller should call us again without changing *curexp */
+    if (is_kth_power(x, p, pt, d)) return p;
+    NEXT_PRIME_VIADIFF(p,d);
+    *curexp = p;
+  }
+  avma = av; return 0; /* give up */
 }
 
 /***********************************************************************/
@@ -3105,6 +3211,7 @@ ifac_crack(GEN *partial, GEN *where)
   /* MPQS cannot factor prime powers; check for cubes/5th/7th powers. Do this
    * even if MPQS is blocked by hint: it is useful in bounded factorization */
   {
+    long exp0 = 0;
     long mask = 7;
     if (DEBUGLEVEL == 4) fprintferr("IFAC: checking for odd power\n");
     /* At debug levels > 4, is_357_power() prints something more informative */
@@ -3124,6 +3231,23 @@ ifac_crack(GEN *partial, GEN *where)
       exponent = (GEN)((*where)[1]);
       if (moebius_mode) return 0; /* no need to carry on */
     } /* while is_357_power */
+
+    /* cutoff at 14 bits as trial division must have found everything below */
+    while ( (exp1 = is_odd_power((GEN)(**where), &factor, &exp0, 15)) )
+    {
+      if (exp2 == 1) exp2 = exp1; /* remember this after the loop */
+      if (DEBUGLEVEL >= 4)
+	fprintferr("IFAC: found %Z =\n\t%Z ^%ld\n", **where, factor, exp1);
+      affii(factor, (GEN)(**where)); avma = av; factor = NULL;
+      if (exponent == gun)
+      { (*where)[1] = (long)stoi(exp1); av = avma; }
+      else if (exponent == gdeux)
+      { (*where)[1] = (long)stoi(exp1<<1); av = avma; }
+      else
+        affsi(exp1 * itos(exponent), (GEN)((*where)[1]));
+      exponent = (GEN)((*where)[1]);
+      if (moebius_mode) return 0; /* no need to carry on */
+    } /* while is_odd_power */
 
     if (exp2 > 1 && hint != 15 && BSW_psp((GEN)(**where)))
     { /* Something nice has happened and our composite has become prime */
@@ -3310,7 +3434,7 @@ static GEN
 ifac_main(GEN *partial)
 {
   GEN here = ifac_find(partial, partial);
-  long nf;
+  long nf, hint = itos((GEN)((*partial)[2])) & 15;
 
   /* if nothing left, return gun */
   if (!here) return gun;
@@ -3398,6 +3522,12 @@ ifac_main(GEN *partial)
 		 nf, (nf>1 ? "s" : ""));
     else
       fprintferr("IFAC: main loop: this was the last factor\n");
+  }
+  if (factor_add_primes && !(hint & 8))
+  {
+    GEN p=(GEN)here[0];
+    if (lgefint(p)>3 || expi(p)>24)
+      addprimes(p);
   }
   return here;
 }
