@@ -2108,10 +2108,14 @@ chk_gen_init(FP_chk_fun *chk, GEN nf, GEN gram, GEN mat, long *ptprec)
   for (i=1; i<N; i++) x[i]=zero;
   for (i=2; i<N; i++)
   {
-    x[i] = un; B = gcoeff(gram,i,i);
+    x[i] = un;
     P = get_polmin(data,x);
+    x[i] = zero;
     if (lgef(P)-3 == n)
-    { if (mpcmp(B,bound) < 0) bound = B ; }
+    {
+      B = gcoeff(gram,i,i);
+      if (gcmp(B,bound) < 0) bound = B ;
+    }
     else
     {
       if (DEBUGLEVEL>2) fprintferr("chk_gen_init: subfield %Z\n",P);
@@ -2128,7 +2132,6 @@ chk_gen_init(FP_chk_fun *chk, GEN nf, GEN gram, GEN mat, long *ptprec)
         skipfirst++; prev = P;
       }
     }
-    x[i] = zero;
   }
   /* x_1,...,x_skipfirst generate a strict subfield [unless n=skipfirst=1] */
   chk->skipfirst = skipfirst;
