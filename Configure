@@ -973,8 +973,7 @@ if test "$optimization" = profiling; then DLLD=; else
     *-alpha|solaris-*|linux-*|freebsd-*)
       case $libpari_base in
         pari) sodest=$version.$patch;; # released versions
-        *) sodest=0.0.$patch
-           soname=$patch ;; # unstable versions
+        *) sodest=0.0.$patch;; # unstable versions
       esac ;;
     cygwin*) soname= ; sodest= ; DLSUFFIX=dll;;
     hpux-*)  soname= ; sodest= ; DLSUFFIX=sl;;
