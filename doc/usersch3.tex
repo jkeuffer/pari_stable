@@ -1167,13 +1167,13 @@ In the present version \vers{}, all arithmetic functions in the narrow
 sense of the word~--- Euler's totient\sidx{Euler totient function}
 function, the M\"obius\sidx{moebius} function, the sums over divisors or
 powers of divisors etc.--- call, after trial division by small primes, the
-same versatile factoring machinery described under \kbd{factorint}.
-It includes \idx{Pollard Rho}, \idx{ECM} and \idx{MPQS}
-stages, and has an early exit option for the functions \teb{moebius} and (the
-integer function underlying) \teb{issquarefree}.
-Note that it relies on a (fairly strong) probabilistic primality test:
-numbers found to be strong pseudo-primes after 10 successful trials of
-the \idx{Rabin-Miller} test are declared primes.
+same versatile factoring machinery described under \kbd{factorint}. It
+includes \idx{Pollard Rho}, \idx{ECM} and \idx{MPQS} stages, and has an
+early exit option for the functions \teb{moebius} and (the integer function
+underlying) \teb{issquarefree}. Note that it relies on a (fairly strong)
+probabilistic primality test: numbers found to be strong pseudo-primes
+after 10 successful trials of the \idx{Rabin-Miller} test are declared
+primes.
 
 \bigskip
 \subsecidx{Qfb}$(a,b,c,\{D=0.\})$: creates the binary quadratic form
@@ -1233,7 +1233,7 @@ $y$ replacing the gcd.
 \&v)$ which gives as result the address of the created gcd, and puts the
 addresses of the corresponding created objects into $u$ and $v$.
 
-\subsecidx{bigomega}$(x)$: number of prime divisors of $x$ counted with
+\subsecidx{bigomega}$(x)$: number of prime divisors of $|x|$ counted with
 multiplicity. $x$ must be an integer.
 
 \syn{bigomega}{x}, the result is a \kbd{long}.
@@ -1345,36 +1345,36 @@ of $x$ (as output by \tet{factor}) can be used instead.
 \syn{divisors}{x}.
 
 \subsecidx{eulerphi}$(x)$: Euler's $\phi$
-(totient)\sidx{Euler totient function} function of $x$.
-$x$ must be of type integer.
+(totient)\sidx{Euler totient function} function of $|x|$, in other words
+$|(\Z/x\Z)^*|$. $x$ must be of type integer.
 
 \syn{phi}{x}.
 
 \subsecidx{factor}$(x,\{\var{lim}=-1\})$: general factorization function.
-If $x$ is of type integer, rational, polynomial or rational function,
-the result is a
-two-column matrix, the first column being the irreducibles dividing $x$
-(prime numbers or polynomials), and the second the exponents. If $x$ is a
-vector or a matrix, the factoring is done componentwise (hence the result is
-a vector or matrix of two-column matrices).
+If $x$ is of type integer, rational, polynomial or rational function, the
+result is a two-column matrix, the first column being the irreducibles
+dividing $x$ (prime numbers or polynomials), and the second the exponents.
+If $x$ is a vector or a matrix, the factoring is done componentwise (hence
+the result is a vector or matrix of two-column matrices). By definition,
+$0$ is factored as $0^1$.
 
-   If $x$ is of type integer or rational, an argument \var{lim} can be added,
-meaning that we look only for factors up to \var{lim}, or to \kbd{primelimit},
-whichever is lowest (except when $\var{lim}=0$ where the effect is identical
-to setting $\var{lim}=\kbd{primelimit}$). Hence in this case, the remaining
-part is not necessarily prime. See \teb{factorint} for more information about
-the algorithms used.
+   If $x$ is of type integer or rational, an argument \var{lim} can be
+added, meaning that we look only for factors up to \var{lim}, or to
+\kbd{primelimit}, whichever is lowest (except when $\var{lim}=0$ where the
+effect is identical to setting $\var{lim}=\kbd{primelimit}$). Hence in this
+case, the remaining part is not necessarily prime. See \teb{factorint} for
+more information about the algorithms used.
 
    The polynomials or rational functions to be factored must have scalar
 coefficients. In particular PARI does \var{not} know how to factor
 multivariate polynomials.
 
-   Note that PARI tries to guess in a sensible way over which ring you want to
-factor. Note also that factorization of polynomials is done up to
+   Note that PARI tries to guess in a sensible way over which ring you want
+to factor. Note also that factorization of polynomials is done up to
 multiplication by a constant. In particular, the factors of rational
-polynomials will have integer coefficients, and the content of a polynomial or
-rational function is discarded and not included in the factorization. If
-you need to, you can always ask for the content explicitly:
+polynomials will have integer coefficients, and the content of a polynomial
+or rational function is discarded and not included in the factorization. If
+you need it, you can always ask for the content explicitly:
 
 \bprog%
 ? factor(t\pow2 + 5/2*t + 1)
@@ -1534,11 +1534,11 @@ leading coefficient).
 \subsecidx{issquarefree}$(x)$: true (1) if $x$ is squarefree, false (0) if not.
 Here $x$ can be an integer or a polynomial.
 
-\syn{gissquarefree}{x}, but the
-simpler function $\teb{issquarefree}(x)$ which returns a \kbd{long}
-should be used if $x$ is known to be of type integer. This \teb{issquarefree}
-is just the square of the M\"obius\sidx{moebius} function, and is computed
-as a multiplicative arithmetic function much like the latter.
+\syn{gissquarefree}{x}, but the simpler function $\teb{issquarefree}(x)$
+which returns a \kbd{long} should be used if $x$ is known to be of type
+integer. This \teb{issquarefree} is just the square of the
+M\"obius\sidx{moebius} function, and is computed as a multiplicative
+arithmetic function much like the latter.
 
 \subsecidx{kronecker}$(x,y)$:
 Kronecker\sidx{Kronecker symbol}\sidx{Legendre symbol}
@@ -1552,8 +1552,8 @@ that $\text{lcm}(x,y)*\text{gcd}(x,y)=\text{abs}(x*y)$.
 
 \syn{glcm}{x,y}.
 
-\subsecidx{moebius}$(x)$: M\"obius $\mu$-function of $x$. $x$ must be of type
-integer.
+\subsecidx{moebius}$(x)$: M\"obius $\mu$-function of $|x|$. $x$ must be of
+type integer.
 
 \syn{mu}{x}, the result ($0$ or $\pm 1$) is a \kbd{long}.
 
@@ -1563,13 +1563,13 @@ this function returns $x$ and not the smallest prime strictly larger than $x$.
 
 \syn{nextprime}{x}.
 
-\subsecidx{numdiv}$(x)$: number of divisors of $x$. $x$ must be of type
+\subsecidx{numdiv}$(x)$: number of divisors of $|x|$. $x$ must be of type
 integer, and the result is a \kbd{long}.
 
 \syn{numbdiv}{x}.
 
-\subsecidx{omega}$(x)$: number of distinct prime divisors of $x$. $x$ must be
-of type integer.
+\subsecidx{omega}$(x)$: number of distinct prime divisors of $|x|$. $x$
+must be of type integer.
 
 \syn{omega}{x}, the result is a \kbd{long}.
 
@@ -1806,10 +1806,10 @@ extra primes if $x$ is omitted.
 \syn{removeprimes}{x}.
 
 \subsecidx{sigma}$(x,\{k=1\})$: sum of the $k^{\text{th}}$ powers of the
-positive divisors of $x$. $x$ must be of type integer.
+positive divisors of $|x|$. $x$ must be of type integer.
 
-\syn{sumdiv}{x} (= $\teb{sigma}(x)$) or
-$\teb{gsumdivk}(x,k)$ (= $\teb{sigma}(x,k)$), where $k$ is a C long integer.
+\syn{sumdiv}{x} (= $\teb{sigma}(x)$) or $\teb{gsumdivk}(x,k)$ (=
+$\teb{sigma}(x,k)$), where $k$ is a C long integer.
 
 \subsecidx{sqrtint}$(x)$: integer square root of $x$, which must be of PARI
 type integer. The result is non-negative and rounded towards zero. A
@@ -3384,15 +3384,12 @@ intersection of any two $\Z$-modules. The result is given in HNF.
 
 \syn{idealintersect}{\var{nf},x,y}.
 
-\subsecidx{idealinv}$(\var{nf},x,\{\fl=0\})$: inverse of the ideal $x$ in the
+\subsecidx{idealinv}$(\var{nf},x)$: inverse of the ideal $x$ in the
 number field $\var{nf}$. The result is the Hermite normal form of the inverse
 of the ideal, together with the opposite of the Archimedean information if it
 is given.
 
-If $\fl=1$, uses the different. This is usually slower.
-
-\syn{idealinv0}{\var{nf},x,\fl}. Also available is
-$\teb{idealinv}(\var{nf},x)$ ($\fl=0$).
+\syn{idealinv}{\var{nf},x}.
 
 \subsecidx{ideallist}$(\var{nf},\var{bound},\{\fl=4\})$: computes the list
 of all ideals of norm less or equal to \var{bound} in the number field
@@ -3927,10 +3924,10 @@ of the different of $K$ on the integral basis.
 \quad$\bullet$ $TI$ is equal to $d(K)T^{-1}$, which has integral
 coefficients.
 
-\quad$\bullet$ Finally, $MDI$ has the form $[x,y,n]$, where $(x,y)$ expresses
-a $\Z_K$-basis of $d(K)$ times the codifferent ideal
+\quad$\bullet$ Finally, $MDI$ has the form $[x,y,n]$, where $(x,y)$
+expresses a $\Z_K$-basis of $d(K)$ times the codifferent ideal
 (\kbd{\var{nf}.disc$*$\var{nf}.codiff}, which is an integral ideal) and $n$
-is its norm (this ideal is used in \tet{idealinv}).
+is its norm (this ideal is only used in \tet{idealinv}).
 
  $\var{nf}[6]$ is the vector containing the $r1+r2$ roots
 (\kbd{\var{nf}.roots}) of $\var{nf}[1]$ corresponding to the $r1+r2$
@@ -3956,8 +3953,6 @@ as above and $B$ is the integer basis, as computed by \tet{nfbasis}. This can
 be useful since \kbd{nfinit} uses the round 4 algorithm by default, which can
 be very slow in pathological cases where round 2 (\kbd{nfbasis(x,2)}) would
 succeed very quickly.
-
-If $\fl=1$: does not compute the different, replace it by a dummy $0$.
 
 If $\fl=2$: \var{pol} is changed into another polynomial $P$ defining the same
 number field, which is as simple as can easily be found using the

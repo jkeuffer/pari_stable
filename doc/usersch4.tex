@@ -2033,15 +2033,17 @@ input arguments they describe:
 functions)\cr
 \+& \kbd{n} & variable, expects a \idx{variable number} (a \kbd{long}, not an
 \kbd{*entree})\cr
-\+& \kbd{I} & string containing GP code (useful for control statements, %
- to be processed with \kbd{lisexpr}\cr
-\+&&\quad or \kbd{lisseq})\cr
+\+& \kbd{I} & string containing a sequence of GP statements (a \var{seq}), to be processed by %
+\kbd{lisseq}\cr
+\+&&(useful for control statements)\cr
+\+& \kbd{E} & string containing a {\it single} GP statement (an %
+\var{expr}), to be processed by \kbd{lisexpr}\cr
 \+& \kbd{r} & raw input (treated as a string without quotes). Quoted %
- args are copied as strings.\cr
+ args are copied as strings\cr
 \+&&\quad Stops at first unquoted \kbd{')'} or \kbd{','}. Special chars can
-be quoted using '\kbd{\bs{}}'.\cr
+be quoted using '\kbd{\bs{}}'\cr
 \+&&\quad Example: \kbd{aa"b\bs n)"c} yields the string \kbd{"aab\bs{n})c"}\cr
-\+& \kbd{s} & expanded string. Example: \kbd{Pi"x"2} yields \kbd{"3.142x2"}.\cr
+\+& \kbd{s} & expanded string. Example: \kbd{Pi"x"2} yields \kbd{"3.142x2"}\cr
 \+&& Unquoted components can be of any PARI type (converted following current
 output format)\cr
 
@@ -2051,7 +2053,7 @@ output format)\cr
 \+& \kbd{s*p} & idem, setting $\kbd{prettyp} = 1$ (i.e.~in beautified
 format)\cr
 \+& \kbd{s*t} & idem, in \TeX\ format\cr
-\+& \kbd{D\var{xxx}} &  argument has a default value.\cr
+\+& \kbd{D\var{xxx}} &  argument has a default value\cr
 
 The format to indicate a default value (atom starts with a \kbd{D}) is
 ``\kbd{D\var{value},\var{type},}'', where \var{type} is the code for any
@@ -2229,19 +2231,19 @@ A complete description could look like this:
 
 \bprog%
 \obr
-\q  install(bnfinit0, GD0,L,DGp, ClassGroupInit, "libpari.so")
+\q  install(bnfinit0, GD0,L,DGp, ClassGroupInit, "libpari.so");
 \q  addhelp(ClassGroupInit, "ClassGroupInit(P,\obr flag=0\cbr,\obr data=[]\cbr):
-\q\q    compute the necessary data for ...")
+\q\q    compute the necessary data for ...");
 \cbr
 \eprog
-which means we have a function \kbd{ClassGroupInit} under GP, which calls the
-library function \kbd{bnfinit0} . The function has one mandatory
-argument (\kbd{V} is non-zero), and possibly two more (two \kbd{'D'} in the
-code), plus the current real precision. More precisely, the first argument
-is a \kbd{GEN}, the second one is converted to a \kbd{long} using
-\kbd{itos} (\kbd{0} is passed if it is omitted), and the third one is also
-a \kbd{GEN}, but we pass \kbd{NULL} if no argument was supplied by the
-user. This matches the C prototype (from \kbd{paridecl.h}):
+which means we have a function \kbd{ClassGroupInit} under GP, which calls
+the library function \kbd{bnfinit0} . The function has one mandatory
+argument, and possibly two more (two \kbd{'D'} in the code), plus the
+current real precision. More precisely, the first argument is a \kbd{GEN},
+the second one is converted to a \kbd{long} using \kbd{itos} (\kbd{0} is
+passed if it is omitted), and the third one is also a \kbd{GEN}, but we
+pass \kbd{NULL} if no argument was supplied by the user. This matches the C
+prototype (from \kbd{paridecl.h}):
 %
 \bprog%
   GEN bnfinit0(GEN P, long flag, GEN data, long prec)
@@ -2252,14 +2254,14 @@ case be completely identical to the GP function \kbd{bnfinit} but GP does
 not need to know about this, only that it can be found somewhere in the
 shared library \kbd{libpari.so}.
 
-\misctitle{Important note} You see in this example that it is the
+\misctitle{Important note:} You see in this example that it is the
 function's responsibility to correctly interpret its operands: \kbd{data =
 NULL} is interpreted {\it by the function\/} as an empty vector. Note that
 since \kbd{NULL} is never a valid \kbd{GEN} pointer, this trick always
 enables you to distinguish between a default value and actual input: the
 user could explicitly supply an empty vector!
 
-\misctitle{Note} If \kbd{install} were not available we would have to
+\misctitle{Note:} If \kbd{install} were not available we would have to
 modify \kbd{language/helpmessages.c}, and \kbd{language/init.c} and
 recompile GP. The entry in \kbd{functions\_basic} corresponding to the
 function above is actually
