@@ -902,11 +902,11 @@ isprincipalall0(GEN bnf, GEN x, long *ptprec, long flall)
   if (e < -5) { y[2]=lmul(xc,p1); y[3]=lstoi(-e); }
   else
   {
+    *ptprec = prec + (e >> TWOPOTBITS_IN_LONG) + (MEDDEFAULTPREC-2);
     if (flall & nf_FORCE)
     {
       if (DEBUGLEVEL)
         err(warner,"precision too low for generators, e = %ld",e);
-      *ptprec = prec + (e >> TWOPOTBITS_IN_LONG) + (MEDDEFAULTPREC-2);
       return NULL;
     }
     err(warner,"insufficient precision for generators, not given");
@@ -980,15 +980,22 @@ isprincipalall(GEN bnf,GEN x,long flag)
 GEN
 isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag)
 {
-  long av = avma, l = lg(P), i,prec,c;
-  GEN id,id2, nf = checknf(bnf), z = cgetg(3,t_VEC);
-
-  prec = prec_unit_matrix(bnf); /* precision of unit matrix */
-  id = C; z[2] = lmodulcp(gun, (GEN)nf[1]);
+  long av = avma, l = lg(e), i,prec,c;
+  GEN id,id2, nf = checknf(bnf), z;
+  int gen = flag & nf_GEN;
+  
+  prec = prec_unit_matrix(bnf);
+  if (gen)
+  {
+    z = cgetg(3,t_VEC);
+    z[2] = lmodulcp(gun, (GEN)nf[1]);
+  }
+  id = C;
   for (i=1; i<l; i++) /* compute prod P[i]^e[i] */
     if (signe(e[i]))
     {
-      z[1] = P[i]; id2 = idealpowred(bnf,z, (GEN)e[i],prec);
+      if (gen) z[1] = P[i]; else z = (GEN)P[i];
+      id2 = idealpowred(bnf,z, (GEN)e[i],prec);
       id = id? idealmulred(nf,id,id2,prec): id2;
     }
   if (id == C)
@@ -1000,24 +1007,25 @@ isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag)
   for (;;)
   {
     long av1 = avma;
-    GEN y = isprincipalall0(bnf, (GEN)id[1],&prec,flag);
+    GEN y = isprincipalall0(bnf, gen? (GEN)id[1]: id,&prec,flag);
     if (y)
     {
-      if (typ(y) == t_VEC)
+      if (typ(y) == t_VEC && gen)
       {
         GEN u = (GEN)y[2];
         u = gmul((GEN)id[2], basistoalg(nf,u));
         y[2] = (long)algtobasis(nf,u);
         y = gcopy(y);
       }
-      else
-      {
-        y = gmul((GEN)id[2], basistoalg(nf,y));
-        y = algtobasis(nf,y);
-      }
       return gerepileupto(av,y);
     }
 
+    if (flag & nf_GIVEPREC)
+    {
+      if (DEBUGLEVEL)
+        err(warner,"insufficient precision for generators, not given");
+      avma = av; return stoi(prec);
+    }
     if (DEBUGLEVEL) err(warnprec,"isprincipalall0",prec);
     avma = av1; bnf = bnfnewprec(bnf,prec); setrand(c);
   }
@@ -2011,7 +2019,7 @@ static GEN
 makematal(GEN bnf)
 {
   GEN W,B,pfb,vp,nf,ma;
-  long lm,lma,j,k,prec;
+  long lm,lma,j,prec;
 
   ma = get_matal((GEN)bnf[10]);
   if (ma) return ma;
@@ -2026,25 +2034,24 @@ makematal(GEN bnf)
   prec = prec_unit_matrix(bnf);
   for (j=1; j<lma; j++)
   {
+    long c = getrand();
     GEN ex = (j<=lm)? (GEN)W[j]: (GEN)B[j-lm];
-    GEN id = (j<=lm)? gun: (GEN)pfb[j];
-    for (k=1; k<=lm; k++)
-      id = idealmul(nf,id,idealpow(nf,(GEN)pfb[k],(GEN)ex[k]));
-    if (typ(id) != t_MAT) id = idealhermite(nf,id);
-    for (;;)
+    GEN C = (j<=lm)? NULL: (GEN)pfb[j];
+    GEN y = isprincipalfact(bnf,pfb,ex,C, nf_GEN|nf_FORCE|nf_GIVEPREC);
+    if (typ(y) != t_INT) 
     {
-      long av1 = avma, c = getrand();
-      GEN y = isprincipalall0(bnf,id,&prec, nf_GEN|nf_FORCE);
-      if (y)
-      {
-        y = gerepileupto(av1, y);
-        ma[j] = y[2]; break;
-      }
+      ma[j] = y[2];
+      if (DEBUGLEVEL>1) fprintferr("%ld ",j);
+    }
+    else
+    {
+      prec = itos(y); j--;
       if (DEBUGLEVEL) err(warnprec,"makematal",prec);
-      avma = av1; nf = nfnewprec(nf,prec);
+      nf = nfnewprec(nf,prec);
       bnf = bnfinit0(nf,1,NULL,prec); setrand(c);
     }
   }
+  if (DEBUGLEVEL>1) fprintferr("\n");
   return ma;
 }
 
@@ -2143,43 +2150,57 @@ get_regulator(GEN mun,long prec)
 }
 
 static GEN
-get_mun(GEN funits, GEN ro, long ru, long r1, long prec)
+log_poleval(GEN P, GEN *ro, long i, GEN nf, long prec0)
 {
-  long j,k,av=avma,tetpil;
-  GEN p1,p2, mun = cgetg(ru,t_MAT);
-
-  for (k=1; k<ru; k++)
+  GEN x = poleval(P, (GEN)(*ro)[i]);
+  long prec = prec0, k = 0;
+  while (gcmp0(x) || ((k = gprecision(x)) && k < DEFAULTPREC))
   {
-    p1=cgetg(ru+1,t_COL); mun[k]=(long)p1;
-    for (j=1; j<=ru; j++)
+    prec = (prec-2)<<1;
+    if (DEBUGLEVEL) err(warnprec,"log_poleval",prec);
+    *ro = get_roots((GEN)nf[1], itos(gmael(nf,2,1)),lg(*ro)-1,prec);
+    x = poleval(P, (GEN)(*ro)[i]);
+  }
+  if (k > prec0) x = gprec_w(x,prec0);
+  return glog(x, prec0);
+}
+
+/* return corrected archimedian components 
+ * (= log(sigma_i(x)) - log(|Nx|)/[K:Q]) for a (matrix of elements) */
+static GEN
+get_arch2_i(GEN nf, GEN a, long prec, int units)
+{
+  GEN M,N, ro = dummycopy((GEN)nf[6]);
+  long j,k, la = lg(a), ru = lg(ro), r1 = itos(gmael(nf,2,1));
+
+  M = cgetg(la,t_MAT); if (la == 1) return M;
+  if (typ(a[1]) == t_COL) a = gmul((GEN)nf[7], a);
+  if (units) N = NULL; /* no correction necessary */
+  else
+  {
+    GEN pol = (GEN)nf[1];
+    N = cgetg(la,t_VEC);
+    for (k=1; k<la; k++) N[k] = (long)gabs(subres(pol,(GEN)a[k]),0);
+    N = gdivgs(glog(N,prec), - (lgef(pol)-3)); /* - log(|norm|) / [K:Q] */
+  }
+  for (k=1; k<la; k++)
+  {
+    GEN p, c = cgetg(ru,t_COL); M[k] = (long)c;
+    for (j=1; j<ru; j++)
     {
-      p2 = glog(poleval((GEN)funits[k],(GEN)ro[j]),prec);
-      p1[j]=(j<=r1)? (long)p2: lmul2n(p2,1);
+      p = log_poleval((GEN)a[k],&ro,j,nf,prec);
+      if (N) p = gadd(p, (GEN)N[k]);
+      c[j]=(j<=r1)? (long) p: lmul2n(p,1);
     }
   }
-  tetpil=avma; return gerepile(av,tetpil,gcopy(mun));
+  return M;
 }
 
 static GEN
-get_mc(GEN nf, GEN alphs, long prec)
+get_arch2(GEN nf, GEN a, long prec, int units)
 {
-  GEN mc,p1,p2,p3,p4, bas = (GEN)nf[7], pol = (GEN)nf[1], ro = (GEN)nf[6];
-  long ru = lg(ro), n = lgef(pol)-3, r1 = itos(gmael(nf,2,1));
-  long j,k, la = lg(alphs);
-
-  mc = cgetg(la,t_MAT);
-  for (k=1; k<la; k++)
-  {
-    p4 = gmul(bas,(GEN)alphs[k]);
-    p3 = gdivgs(glog(gabs(subres(pol,p4),prec),prec), n);
-    p1 = cgetg(ru,t_COL); mc[k] = (long)p1;
-    for (j=1; j<ru; j++)
-    {
-      p2 = gsub(glog(poleval(p4,(GEN)ro[j]),prec), p3);
-      p1[j]=(j<=r1)? (long) p2: lmul2n(p2,1);
-    }
-  }
-  return mc;
+  long av = avma;
+  return gerepileupto(av, gcopy(get_arch2_i(nf,a,prec,units)));
 }
 
 static void
@@ -2216,7 +2237,7 @@ bnfnewprec(GEN bnf, long prec)
   nf = nfnewprec((GEN)bnf[7],prec);
   res = cgetg(7,t_VEC);
   ro = (GEN)nf[6];
-  mun = get_mun(funits,ro,ru,r1,prec);
+  mun = get_arch2(nf,funits,prec,1);
   if (prec != prec1) { mun = gprec_w(mun,prec1); prec = prec1; }
   res[2]=(long)get_regulator(mun,prec);
   p1 = (GEN)bnf[8];
@@ -2230,7 +2251,7 @@ bnfnewprec(GEN bnf, long prec)
   y[3]=(long)mun;
   matal = check_and_build_matal(bnf);
   av = avma;
-  y[4]=lpileupto(av, gcopy(get_mc(nf,matal,prec)));
+  y[4]=(long)get_arch2(nf,matal,prec,0);
   y[5]=lcopy((GEN)bnf[5]);
   y[6]=lcopy((GEN)bnf[6]);
   y[7]=(long)nf;
@@ -2304,12 +2325,12 @@ bnfmake(GEN sbnf, long prec)
   funits=cgetg(ru,t_VEC); p1 = (GEN)sbnf[11];
   for (k=1; k < lg(p1); k++)
     funits[k] = lmul(bas,(GEN)p1[k]);
-  mun = get_mun(funits,ro,ru,r1,prec);
+  mun = get_arch2_i(nf,funits,prec,1);
 
   prec=gprecision(ro); if (prec<DEFAULTPREC) prec=DEFAULTPREC;
   matal = get_matal((GEN)sbnf[12]);
   if (!matal) matal = (GEN)sbnf[12];
-  mc = get_mc(nf, matal, prec);
+  mc = get_arch2_i(nf,matal,prec,0);
 
   pfc=(GEN)sbnf[9]; lpf=lg(pfc);
   vectbase=cgetg(lpf,t_COL); vp=cgetg(lpf,t_COL);

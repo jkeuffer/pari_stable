@@ -1460,6 +1460,7 @@ rnfconductor(GEN bnf, GEN polrel, long prec)
   GEN nf,module,arch,bnr,group,p1,pol2;
 
   bnf = checkbnf(bnf); nf=(GEN)bnf[7];
+  if (typ(polrel)!=t_POL) err(typeer,"rnfconductor");
   module=cgetg(3,t_VEC); R1=itos(gmael(nf,2,1));
   v=varn(polrel);
   p1=unifpol((GEN)bnf[7],polrel,0);
