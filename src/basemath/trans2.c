@@ -130,6 +130,8 @@ gatan(GEN x, long prec)
 
     case t_SER:
       av=avma; if (valp(x)<0) err(negexper,"gatan");
+      if (lg(x)==2) return gcopy(x);
+      /*Now we can assume lg(x)>2*/
       p1=gdiv(derivser(x), gaddsg(1,gsqr(x)));
       y=integ(p1,varn(x)); if (valp(x)) return gerepileupto(av,y);
 
@@ -215,7 +217,7 @@ gasin(GEN x, long prec)
 
     case t_SER:
       if (gcmp0(x)) return gcopy(x);
-
+      /*Now, we can assume lg(x)>2*/
       av=avma; if (valp(x)<0) err(negexper,"gasin");
       p1=gdiv(derivser(x), gsqrt(gsubsg(1,gsqr(x)),prec));
       y=integ(p1,varn(x)); if (valp(x)) return gerepileupto(av,y);
@@ -317,12 +319,16 @@ gacos(GEN x, long prec)
 
     case t_SER: av=avma;
       if (valp(x)<0) err(negexper,"gacos");
-      p1=integ(gdiv(derivser(x), gsqrt(gsubsg(1,gsqr(x)),prec)),varn(x));
-      if (gcmp1((GEN)x[2]) && !valp(x))
+      if (lg(x)>2)
       {
-	tetpil=avma; return gerepile(av,tetpil,gneg(p1));
-      }
-      if (valp(x)) { y=mppi(prec); setexpo(y,0); }
+	p1=integ(gdiv(derivser(x), gsqrt(gsubsg(1,gsqr(x)),prec)),varn(x));
+	if (gcmp1((GEN)x[2]) && !valp(x))/*x=1+O(x^k);k>=1*/
+	{
+	  tetpil=avma; return gerepile(av,tetpil,gneg(p1));
+	}
+      } 
+      else p1=x;
+      if (lg(x)==2 || valp(x)) { y=mppi(prec); setexpo(y,0); }
       else y=gacos((GEN)x[2],prec);
       tetpil=avma; return gerepile(av,tetpil,gsub(y,p1));
 
