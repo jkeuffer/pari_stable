@@ -36,6 +36,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define both_odd(x,y) ((x)&(y)&1)
 extern GEN caractducos(GEN p, GEN x, int v);
 extern double mylog2(GEN z);
+extern GEN FpYX_subres(GEN u, GEN v, GEN p);
 
 /*******************************************************************/
 /*                                                                 */
@@ -3390,9 +3391,8 @@ FpX_resultant(GEN a, GEN b, GEN p)
     if (!gcmp1(lb)) res = muliimod(res, powgumod(lb, da - dc, p), p);
     if (low_stack(lim,stack_lim(av,2)))
     {
-      GEN *gptr[3]; gptr[0]=&a; gptr[1]=&b; gptr[2]=&res;
       if (DEBUGMEM>1) err(warnmem,"FpX_resultant (da = %ld)",da);
-      gerepilemany(av,gptr,3);
+      gerepileall(av,3, &a,&b,&res);
     }
     da = db; /* = degpol(a) */
     db = dc; /* = degpol(b) */
@@ -3872,15 +3872,14 @@ FpX_resultant_after_eval(GEN a, GEN b, GEN n, GEN p, GEN la)
   return r;
 }
 
-/* assume deg(a) * deg(b) < p */
+/* assume dres := deg(Res_Y(a,b), X) <= deg(a,Y) * deg(b,X) < p */
 static GEN
-u_FpY_FpXY_resultant(GEN a, GEN b, ulong p)
+u_FpY_FpXY_resultant(GEN a, GEN b, ulong p, long dres)
 {
   ulong la;
-  long i,n,dres,nmax;
+  long i,n,nmax;
   GEN x,y;
  
-  dres = degpol(a)*degpol(b);
   nmax = (dres+1)>>1;
   la = (ulong)leading_term(a);
   x = cgetg(dres+2, t_VECSMALL);
@@ -3922,20 +3921,24 @@ FpY_FpXY_resultant(GEN a, GEN b0, GEN p)
   long i,n,dres,nmax, vX = varn(b0), vY = varn(a);
   GEN la,x,y,b = swap_vars(b0, vY);
  
+  dres = degpol(a)*degpol(b0);
   if (OK_ULONG(p))
   {
     ulong pp = (ulong)p[2];
     long l = lgef(b);
-    if (degpol(a) * degpol(b) >= pp)
+    if (dres >= pp)
+#if 0
       return lift(subres(FpX(a,p), gmul(b, gmodulss(1,pp))));
+      return FpX_red(ZY_ZXY_resultant(a, b0, NULL), p);
+#endif
+      return FpYX_subres(a, b, p);
 
     a = u_Fp_FpX(a, 0, pp);
     for (i=2; i<l; i++)
       b[i] = (long)u_Fp_FpX((GEN)b[i], 0, pp);
-    return small_to_pol(u_FpY_FpXY_resultant(a,b,pp), vX);
+    return small_to_pol(u_FpY_FpXY_resultant(a,b,pp, dres), vX);
   }
  
-  dres = degpol(a)*degpol(b0);
   nmax = (dres+1)>>1;
   la = leading_term(a);
   x = cgetg(dres+2, t_VEC);

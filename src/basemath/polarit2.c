@@ -3019,12 +3019,15 @@ revpol(GEN x)
   return y;
 }
 
-/* assume dx >= dy, y non constant */
+/* assume dx >= dy, y non constant. */
 static GEN
 pseudorem_i(GEN x, GEN y, GEN mod)
 {
   long vx = varn(x), dx, dy, dz, i, lx, p;
   gpmem_t av = avma, av2, lim;
+  GEN (*red)(GEN,GEN) = NULL;
+
+  if (mod) red = (typ(mod) == t_INT)? &FpX_red: &gmod;
 
   if (!signe(y)) err(talker,"euclidean division by zero (pseudorem)");
   (void)new_chunk(2);
@@ -3037,12 +3040,12 @@ pseudorem_i(GEN x, GEN y, GEN mod)
     for (i=1; i<=dy; i++)
     {
       x[i] = ladd(gmul((GEN)y[0], (GEN)x[i]), gmul((GEN)x[0],(GEN)y[i]));
-      if (mod) x[i] = lmod((GEN)x[i], mod);
+      if (red) x[i] = (long)red((GEN)x[i], mod);
     }
     for (   ; i<=dx; i++)
     {
       x[i] = lmul((GEN)y[0], (GEN)x[i]);
-      if (mod) x[i] = lmod((GEN)x[i], mod);
+      if (red) x[i] = (long)red((GEN)x[i], mod);
     }
     do { x++; dx--; } while (dx >= 0 && gcmp0((GEN)x[0]));
     if (dx < dy) break;
@@ -3057,14 +3060,22 @@ pseudorem_i(GEN x, GEN y, GEN mod)
   x[0]=evaltyp(t_POL) | evallg(lx);
   x[1]=evalsigne(1) | evalvarn(vx) | evallgef(lx);
   x = revpol(x) - 2;
-  if (mod) x = gmul(x, gmodulcp(gun, mod));
   if (p)
   { /* multiply by y[0]^p   [beware dummy vars from FpY_FpXY_resultant] */
     GEN t = (GEN)y[0];
-    if (mod) t = gmodulcp(t, mod);
-    t = gpowgs(t, p);
-    for (i=2; i<lx; i++) x[i] = lmul((GEN)x[i], t);
-    return gerepileupto(av, x);
+    if (mod)
+    { /* assume p fairly small */
+      for (i=1; i<p; i++)
+        t = red(gmul(t, (GEN)y[0]), mod);
+    }
+    else
+      t = gpowgs(t, p);
+    for (i=2; i<lx; i++)
+    {
+      x[i] = lmul((GEN)x[i], t);
+      if (red) x[i] = (long)red((GEN)x[i], mod);
+    }
+    if (!red) return gerepileupto(av, x);
   }
   return gerepilecopy(av, x);
 }
@@ -3194,6 +3205,78 @@ subresall(GEN u, GEN v, GEN *sol)
   z = gerepileupto(av, z);
   if (sol) { *sol = forcecopy(u); gunclone(u); }
   return z;
+}
+
+static GEN
+_div(GEN x, GEN y, GEN p)
+{
+  if (typ(y) == t_INT)
+    return FpX_red(gmul(x, mpinvmod(y,p)), p);
+  return FpX_div(x,y,p);
+}
+
+static GEN
+_divX(GEN x, GEN y, GEN p)
+{
+  long i, l;
+  GEN z;
+  if (typ(y) == t_INT)
+  {
+    if (gcmp1(y)) return x;
+    z = FpXX_red(gmul(x, mpinvmod(y,p)), p);
+  }
+  else
+  {
+    l = lgef(x); z = cgetg(l, t_POL); z[1] = x[1];
+    for (i=2; i<l; i++) z[i] = (long)FpX_div((GEN)x[i],y,p);
+  }
+  return z;
+}
+
+GEN
+FpYX_subres(GEN u, GEN v, GEN p)
+{
+  gpmem_t av = avma, av2, lim;
+  long degq,dx,dy,du,dv,dr,signh;
+  GEN z,g,h,r,p1;
+
+  dx=degpol(u); dy=degpol(v); signh=1;
+  if (dx < dy)
+  {
+    swap(u,v); lswap(dx,dy);
+    if (both_odd(dx, dy)) signh = -signh;
+  }
+  if (dy==0) return gerepileupto(av, FpX_red(gpowgs((GEN)v[2],dx), p));
+
+  g = h = gun; av2 = avma; lim = stack_lim(av2,1);
+  for(;;)
+  {
+    r = pseudorem_i(u,v,p); dr = lgef(r);
+    if (dr == 2) { avma = av; return gzero; }
+    du = degpol(u); dv = degpol(v); degq = du-dv;
+    u = v; p1 = g; g = leading_term(u);
+    switch(degq)
+    {
+      case 0: break;
+      case 1:
+        p1 = FpX_red(gmul(h,p1), p); h = g; break;
+      default:
+        p1 = FpX_red(gmul(FpX_red(gpowgs(h,degq), p),p1), p);
+        h = _div(gpowgs(g,degq), gpowgs(h,degq-1), p);
+    }
+    if (both_odd(du,dv)) signh = -signh;
+    v = _divX(r, p1, p);
+    if (dr==3) break;
+    if (low_stack(lim,stack_lim(av2,1)))
+    {
+      if(DEBUGMEM>1) err(warnmem,"subresall, dr = %ld",dr);
+      gerepileall(av2,4, &u, &v, &g, &h);
+    }
+  }
+  z = (GEN)v[2];
+  if (dv > 1) z = _div(gpowgs(z,dv), gpowgs(h,dv-1), p);
+  if (signh < 0) z = gneg(z); /* z = resultant(ppart(x), ppart(y)) */
+  return gerepileupto(av, FpX_red(z, p));
 }
 
 static GEN
