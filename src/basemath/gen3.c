@@ -2348,6 +2348,18 @@ _gtoser(GEN x, long v, long prec)
 GEN
 gtoser(GEN x, long v) { return _gtoser(x,v,precdl); }
 
+/* assume typ(x) = t_STR */
+static GEN
+str_to_vecsmall(GEN x)
+{
+  char *s = GSTR(x);
+  long i, l = strlen(s);
+  GEN y = cgetg(l+1, t_VECSMALL);
+  s--;
+  for (i=1; i<=l; i++) y[i] = (long)s[i];
+  return y;
+}
+
 GEN
 gtovec(GEN x)
 {
@@ -2363,16 +2375,15 @@ gtovec(GEN x)
   }
   if (tx == t_STR)
   {
-    char *s = GSTR(x);
-    char t[2];
-    lx = strlen(s); t[1] = 0;
-    y = cgetg(lx+1, t_VEC);
-    for (i=0; i<lx; i++)
+    char t[2] = {0,0};
+    y = str_to_vecsmall(x);
+    lx = lg(y);
+    for (i=1; i<=lx; i++)
     {
-      t[0] = s[i];
-      y[i+1] = (long)strtoGENstr(t,0);
+      t[0] = y[i];
+      y[i] = (long)strtoGENstr(t,0);
     }
-    return y;
+    settyp(y,t_VEC); return y;
   }
   if (is_graphicvec_t(tx))
   {
@@ -2413,6 +2424,7 @@ gtovecsmall(GEN x)
     GEN u = cgetg(2, t_VECSMALL);
     u[1] = itos(x); return u;
   } 
+  if (tx == t_STR) return str_to_vecsmall(x);
   if (!is_vec_t(tx)) err(typeer,"vectosmall");
   l = lg(x);
   V = cgetg(l,t_VECSMALL);

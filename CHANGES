@@ -108,6 +108,7 @@ IZ 15- don't output color escape sequences to logfile
 IZ 16- make X11.builtin-gnuplot-dynamic the default graphic library.
 IZ 17- allow changing the gnuplot DLL name for gnuplot-dynamic at Configure-time
        e.g. Configure --graphic=gnuplot-dynamic,gnpltdrw
+   18- allow Vecsmall(t_STR)
 
   Added:
     1- [TeXmacs:] contextual completion (<TAB>)
