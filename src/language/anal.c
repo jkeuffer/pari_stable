@@ -1031,7 +1031,11 @@ translate(char **src, char *s, char **ptbuf, char **ptlim)
       }
       t++; s++;
     }
-    if (*t == '"') break;
+    if (*t == '"')
+    {
+      if (t[1] != '"') break;
+      t += 2; continue;
+    }
     if (ptlim && s >= *ptlim)
       s = realloc_buf(s,1, ptbuf,ptlim);
     *s++ = *t++;
@@ -2099,6 +2103,7 @@ doskipseq(char *c, int strict)
   analyseur = olds;
 }
 
+/* skip any number of concatenated strings */
 static void
 skipstring()
 {
@@ -2106,7 +2111,8 @@ skipstring()
   while (*analyseur)
     switch (*analyseur++)
     {
-      case '"': return;
+      case '"': if (*analyseur != '"') return; 
+      /* fall through */
       case '\\': analyseur++;
     }
   match('"');
@@ -2369,7 +2375,7 @@ skipidentifier(void)
         match_comma();
         while (*analyseur)
         {
-          while (*analyseur == '"') skipstring();
+          if (*analyseur == '"') skipstring();
           if (*analyseur == ',' || *analyseur == ')') break;
           analyseur++;
         }
@@ -2380,7 +2386,7 @@ skipidentifier(void)
         {
           while (*analyseur)
           {
-            while (*analyseur == '"') skipstring();
+            if (*analyseur == '"') skipstring();
             if (*analyseur == ')') break;
             if (*analyseur == ',') analyseur++;
             else skipexpr();
@@ -2391,8 +2397,8 @@ skipidentifier(void)
 
         while (*analyseur)
         {
-          while (*analyseur == '"') skipstring();
-          if (*analyseur == ')' || *analyseur == ',') break;
+          if (*analyseur == '"') skipstring();
+          if (*analyseur == ',' || *analyseur == ')') break;
           skipexpr();
         }
         break;
