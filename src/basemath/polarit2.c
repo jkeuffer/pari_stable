@@ -3602,6 +3602,7 @@ GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den)
         continue;/*Discard primes when modular gcd does not exist*/
       dR = deg(R);
       if (dR == 0) return scalarpol(gun, x);
+      if (mod && dR > dM) continue; /* p divides Res(P/gcd, Q/gcd). Discard. */
 
       R = polpol_to_mat(R, d);
       /* previous primes divided Res(P/gcd, Q/gcd)? Discard them. */
