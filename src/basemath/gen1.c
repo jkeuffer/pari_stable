@@ -748,8 +748,7 @@ gadd(GEN x, GEN y)
       case t_VEC: case t_COL: case t_MAT:
 	if (isexactzero(x)) return gcopy(y);
 	if (ty == t_MAT) return gaddmat(x,y);
-        /* fall through */
-      case t_QFR: case t_QFI: err(operf,"+",x,y);
+        break;
     }
     err(operf,"+",x,y);
   }
@@ -784,9 +783,8 @@ gadd(GEN x, GEN y)
           av=avma; p1=gmul(x,(GEN)y[2]); tetpil=avma;
           z[1]=lpile(av,tetpil, gadd(p1,(GEN)y[1]));
           z[2]=lcopy((GEN)y[2]); return z;
-
-	default: err(operf,"+",x,y);
       }
+      break;
 
     case t_SER:
       switch(ty)
@@ -834,9 +832,8 @@ gadd(GEN x, GEN y)
           if (!is_scalar_t(ty)) p1 = greffe(p1,l,1);
           p1 = gdiv((GEN)y[1], p1); tetpil = avma;
           return gerepile(av,tetpil,gadd(p1,x));
-
-	default: err(operf,"+",x,y);
       }
+      break;
 
     case t_RFRAC:
       if (!is_rfrac_t(ty)) err(operi,"+",x,y);
@@ -1049,19 +1046,45 @@ gmul_err(GEN x, GEN y, long tx, long ty)
     {
       case t_QFI: return compimag(x,y);
       case t_QFR: return compreal(x,y);
-      case t_VECSMALL:
+      case t_VECSMALL: /* multiply as permutation. cf perm_mul */
         l = lg(x); z = cgetg(l, t_VECSMALL);
-        if (l != lg(y)) err(operf,"*",x,y);
+        if (l != lg(y)) break;
         for (i=1; i<l; i++) 
 	{
-	  long yi=y[i];
-	  if (yi<1 || yi>=l) err(operf,"*",x,y);
-	  z[i]=x[y[i]];
+	  long yi = y[i];
+	  if (yi < 1 || yi >= l) err(operf,"*",x,y);
+	  z[i] = x[y[i]];
 	}
         return z;
     }
   err(operf,"*",x,y);
   return NULL; /* not reached */
+}
+
+/* compatible t_VEC * t_COL, l = lg(x) = lg(y) */
+static GEN
+VC_mul(GEN x, GEN y, long l)
+{
+  pari_sp av = avma;
+  GEN z = gzero;
+  long i;
+  for (i=1; i<l; i++) z = gadd(z, gmul((GEN)x[i], (GEN)y[i]));
+  return gerepileupto(av,z);
+}
+/* compatible t_MAT * t_COL, l = lg(x) = lg(y), lz = l>1? lg(x[1]): 1 */
+static GEN
+MC_mul(GEN x, GEN y, long l, long lz)
+{
+  GEN z = cgetg(lz,t_COL);
+  long i, j;
+  for (i=1; i<lz; i++)
+  {
+    pari_sp av = avma;
+    GEN t = gzero;
+    for (j=1; j<l; j++) t = gadd(t, gmul(gcoeff(x,i,j),(GEN)y[j]));
+    z[i] = lpileupto(av,t);
+  }
+  return z;
 }
 
 GEN
@@ -1288,28 +1311,29 @@ gmul(GEN x, GEN y)
             return gerepile(av,tetpil,gmul(p1,x));
 	}
 	
-      case t_QUAD: z=cgetg(4,t_QUAD);
-        p1=(GEN)x[1]; p2=(GEN)y[1];
-        if (!gegal(p1,p2)) err(operi,"*",x,y);
+      case t_QUAD: z = cgetg(4,t_QUAD);
+        p1 = (GEN)x[1];
+        if (!gegal(p1, (GEN)y[1])) err(operi,"*",x,y);
 
-        copyifstack(p2, z[1]); av=avma;
-        p2=gmul((GEN)x[2],(GEN)y[2]);
-        p3=gmul((GEN)x[3],(GEN)y[3]);
-        p4=gmul(gneg_i((GEN)p1[2]),p3);
+        copyifstack(p1, z[1]); av = avma;
+        p2 = gmul((GEN)x[2],(GEN)y[2]);
+        p3 = gmul((GEN)x[3],(GEN)y[3]);
+        p4 = gmul(gneg_i((GEN)p1[2]),p3);
 
         if (gcmp0((GEN)p1[3]))
         {
-          tetpil=avma;
-          z[2]=lpile(av,tetpil,gadd(p4,p2)); av=avma;
-          p2=gmul((GEN)x[2],(GEN)y[3]);
-          p3=gmul((GEN)x[3],(GEN)y[2]); tetpil=avma;
-          z[3]=lpile(av,tetpil,gadd(p2,p3)); return z;
+          tetpil = avma;
+          z[2] = lpile(av,tetpil,gadd(p4,p2));
+          av = avma;
+          p2 = gmul((GEN)x[2],(GEN)y[3]);
+          p3 = gmul((GEN)x[3],(GEN)y[2]); tetpil = avma;
+          z[3] = lpile(av,tetpil,gadd(p2,p3)); return z;
         }
 
         p1 = gadd(gmul((GEN)x[2],(GEN)y[3]), gmul((GEN)x[3],(GEN)y[2]));
-        tetpil=avma;
-        z[2]=ladd(p2,p4);
-        z[3]=ladd(p1,p3);
+        tetpil = avma;
+        z[2] = ladd(p2,p4);
+        z[3] = ladd(p1,p3);
         gerepilemanyvec(av,tetpil,z+2,2); return z;
     }
     err(bugparier,"multiplication");
@@ -1328,14 +1352,14 @@ gmul(GEN x, GEN y)
   /* here !isscalar(y) */
   if (is_matvec_t(ty))
   {
-    ly=lg(y);
+    ly = lg(y);
     if (!is_matvec_t(tx))
     {
-      z=cgetg(ly,ty);
-      for (i=1; i<ly; i++) z[i]=lmul(x,(GEN)y[i]);
+      z = cgetg(ly,ty);
+      for (i=1; i<ly; i++) z[i] = lmul(x,(GEN)y[i]);
       return z;
     }
-    lx=lg(x);
+    lx = lg(x);
 
     switch(tx)
     {
@@ -1343,112 +1367,62 @@ gmul(GEN x, GEN y)
         switch(ty)
         {
           case t_COL:
-            if (lx!=ly) err(operi,"*",x,y);
-            z=gzero; av=avma;
-            for (i=1; i<lx; i++)
-            {
-              p1=gmul((GEN)x[i],(GEN)y[i]);
-              z=gadd(z,p1);
-            }
-            return gerepileupto(av,z);
+            if (lx != ly) err(operi,"*",x,y);
+            return VC_mul(x, y, lx);
 
           case t_MAT:
-            if (ly==1) return cgetg(1,t_VEC);
-            l=lg(y[1]); if (lx!=l) err(operi,"*",x,y);
-
-            z=cgetg(ly,tx);
-            for (i=1; i<ly; i++)
-            {
-              p1=gzero; av=avma;
-              for (j=1; j<lx; j++)
-              {
-                p2=gmul((GEN)x[j],gcoeff(y,j,i));
-                p1=gadd(p1,p2);
-              }
-              z[i]=lpileupto(av,p1);
-            }
+            if (ly == 1) return cgetg(1,t_VEC);
+            if (lx != lg(y[1])) err(operi,"*",x,y);
+            z = cgetg(ly, t_VEC);
+            for (i=1; i<ly; i++) z[i] = (long)VC_mul(x, (GEN)y[i], lx);
             return z;
-
-          default: err(operf,"*",x,y);
         }
+        break;
 
       case t_COL:
         switch(ty)
         {
           case t_VEC:
-            z=cgetg(ly,t_MAT);
+            z = cgetg(ly,t_MAT);
             for (i=1; i<ly; i++)
             {
               p1 = gmul((GEN)y[i],x);
               if (typ(p1) != t_COL) err(operi,"*",x,y);
-              z[i]=(long)p1;
+              z[i] = (long)p1;
             }
             return z;
 
           case t_MAT:
-            if (ly!=1 && lg(y[1])!=2) err(operi,"*",x,y);
-
-            z=cgetg(ly,t_MAT);
-            for (i=1; i<ly; i++) z[i]=lmul(gcoeff(y,1,i),x);
+            if (ly != 1 && lg(y[1]) != 2) err(operi,"*",x,y);
+            z = cgetg(ly,t_MAT);
+            for (i=1; i<ly; i++) z[i] = lmul(gcoeff(y,1,i),x);
             return z;
-
-          default: err(operf,"*",x,y);
         }
+        break;
 
       case t_MAT:
         switch(ty)
         {
           case t_VEC:
-            if (lx!=2) err(operi,"*",x,y);
-            z=cgetg(ly,t_MAT);
-            for (i=1; i<ly; i++) z[i]=lmul((GEN)y[i],(GEN)x[1]);
+            if (lx != 2) err(operi,"*",x,y);
+            z = cgetg(ly,t_MAT);
+            for (i=1; i<ly; i++) z[i] = lmul((GEN)y[i],(GEN)x[1]);
             return z;
 
           case t_COL:
-            if (lx!=ly) err(operi,"*",x,y);
-            if (lx==1) return gcopy(y);
-
-            lx=lg(x[1]); z=cgetg(lx,t_COL);
-            for (i=1; i<lx; i++)
-            {
-              p1=gzero; av=avma;
-              for (j=1; j<ly; j++)
-              {
-                p2=gmul(gcoeff(x,i,j),(GEN)y[j]);
-                p1=gadd(p1,p2);
-              }
-              z[i]=lpileupto(av,p1);
-            }
-            return z;
+            if (lx != ly) err(operi,"*",x,y);
+            return MC_mul(x, y, lx, (lx == 1)? 1: lg(x[1]));
 
           case t_MAT:
-            if (ly==1) return cgetg(ly,t_MAT);
+            if (ly == 1) return cgetg(ly,t_MAT);
             if (lx != lg(y[1])) err(operi,"*",x,y);
-            z=cgetg(ly,t_MAT);
-            if (lx==1)
-            {
-              for (i=1; i<ly; i++) z[i]=lgetg(1,t_COL);
-              return z;
-            }
-            l=lg(x[1]);
-            for (j=1; j<ly; j++)
-            {
-              z[j] = lgetg(l,t_COL);
-              for (i=1; i<l; i++)
-              {
-                p1=gzero; av=avma;
-                for (k=1; k<lx; k++)
-                {
-                  p2=gmul(gcoeff(x,i,k),gcoeff(y,k,j));
-                  p1=gadd(p1,p2);
-                }
-                coeff(z,i,j)=lpileupto(av,p1);
-              }
-            }
+            z = cgetg(ly,t_MAT);
+            l = (lx == 1)? 1: lg(x[1]);
+            for (j=1; j<ly; j++) z[j] = (long)MC_mul(x, (GEN)y[j], lx, l);
             return z;
         }
     }
-    err(bugparier,"multiplication");
+    err(operf,"*",x,y);
   }
   /* now !ismatvec(x and y) */
 
@@ -1537,9 +1511,8 @@ gmul(GEN x, GEN y)
         case t_RFRACN: av=avma; z=cgetg(3,t_RFRACN);
           z[1]=lmul(x,(GEN)y[1]);
           z[2]=lcopy((GEN)y[2]); return z;
-	
-	default: err(operf,"*",x,y);
       }
+      break;
 	
     case t_SER:
       switch (ty)
@@ -1575,14 +1548,13 @@ gmul(GEN x, GEN y)
 	  if (gcmp0(x)) return zeroser(vx, valp(x)+gval(y,vx));
 	  av=avma; p1=gmul((GEN)y[1],x); tetpil=avma;
           return gerepile(av,tetpil,gdiv(p1,(GEN)y[2]));
-	
-	default: err(operf,"*",x,y);
       }
+      break;
 	
     /* (tx,ty) == t_RFRAC <==> ty == t_RFRAC */
     case t_RFRAC: return mulrfrac(x,y);
     case t_RFRACN:
-      if (!is_rfrac_t(ty)) err(operf,"*",x,y);
+      if (!is_rfrac_t(ty)) break;
       av=avma; z=cgetg(3,ty);
       z[1]=lmul((GEN)x[1],(GEN)y[1]);
       z[2]=lmul((GEN)x[2],(GEN)y[2]); return z;
@@ -1593,9 +1565,9 @@ gmul(GEN x, GEN y)
 GEN
 gsqr(GEN x)
 {
-  long tx=typ(x), lx, i, j, k, l;
+  long tx=typ(x), lx, i, j, l;
   pari_sp av, tetpil;
-  GEN z,p1,p2,p3,p4;
+  GEN z, p1, p2, p3, p4;
 
   if (is_scalar_t(tx))
     switch(tx)
@@ -1631,31 +1603,33 @@ gsqr(GEN x)
 	z = cgetg(5,t_PADIC);
 	i = (egalii((GEN)x[2], gdeux) && signe(x[4]))? 1: 0;
         if (i && precp(x) == 1) i = 2; /* (1 + O(2))^2 = 1 + O(2^3) */
-        z[1] = evalprecp(precp(x)+i) | evalvalp(2*valp(x));
+        z[1] = evalprecp(precp(x)+i) | evalvalp(valp(x) << 1);
 	icopyifstack(x[2], z[2]);
         z[3] = lshifti((GEN)x[3], i); av = avma;
 	z[4] = lpileuptoint(av, modii(sqri((GEN)x[4]), (GEN)z[3]));
 	return z;
 	
-      case t_QUAD:
-	p1=(GEN)x[1]; z=cgetg(4,t_QUAD); av=avma;
-	p2=gsqr((GEN)x[2]); p3=gsqr((GEN)x[3]);
-	p4=gmul(gneg_i((GEN)p1[2]),p3);
+      case t_QUAD: z = cgetg(4,t_QUAD);
+	p1 = (GEN)x[1];
+        copyifstack(p1,z[1]); av = avma;
+	p2 = gsqr((GEN)x[2]);
+        p3 = gsqr((GEN)x[3]);
+	p4 = gmul(gneg_i((GEN)p1[2]),p3);
 
 	if (gcmp0((GEN)p1[3]))
 	{
-	  tetpil=avma;
-	  z[2]=lpile(av,tetpil,gadd(p4,p2));
-	  av=avma; p2=gmul((GEN)x[2],(GEN)x[3]); tetpil=avma;
-	  z[3]=lpile(av,tetpil,gmul2n(p2,1));
-	  copyifstack(p1,z[1]); return z;
+	  tetpil = avma;
+	  z[2] = lpile(av,tetpil,gadd(p4,p2));
+	  av = avma;
+          p2 = gmul((GEN)x[2],(GEN)x[3]); tetpil = avma;
+	  z[3] = lpile(av,tetpil,gmul2n(p2,1)); return z;
 	}
 
-	p1=gmul((GEN)x[2],(GEN)x[3]);
-	p1=gmul2n(p1,1); tetpil=avma;
-	z[2]=ladd(p2,p4); z[3]=ladd(p1,p3);
-	gerepilemanyvec(av,tetpil,z+2,2);
-	copyifstack(x[1],z[1]); return z;
+	p1 = gmul2n(gmul((GEN)x[2],(GEN)x[3]), 1);
+        tetpil = avma;
+	z[2] = ladd(p2,p4);
+        z[3] = ladd(p1,p3);
+	gerepilemanyvec(av,tetpil,z+2,2); return z;
 
       case t_POLMOD:
         z=cgetg(3,t_POLMOD); copyifstack(x[1],z[1]);
@@ -1714,21 +1688,10 @@ gsqr(GEN x)
       z[2]=lsqr((GEN)x[2]); return z;
 
     case t_MAT:
-      lx=lg(x);
-      if (lx==1) return cgetg(1,tx);
-      if (lx != lg(x[1])) err(operi,"*",x,x);
-      z=cgetg(lx,tx);
-      for (j=1; j<lx; j++)
-      {
-        z[j]=lgetg(lx,t_COL);
-        for (i=1; i<lx; i++)
-        {
-          p1=gzero; av=avma;
-          for (k=1; k<lx; k++)
-            p1 = gadd(p1, gmul(gcoeff(x,i,k),gcoeff(x,k,j)));
-          coeff(z,i,j)=lpileupto(av,p1);
-        }
-      }
+      lx = lg(x);
+      if (lx!=1 && lx != lg(x[1])) err(operi,"*",x,x);
+      z = cgetg(lx,tx);
+      for (j=1; j<lx; j++) z[j] = (long)MC_mul(x, (GEN)x[j], lx, lx);
       return z;
 
     case t_QFR: return sqcompreal(x);
@@ -1769,7 +1732,7 @@ gdiv(GEN x, GEN y)
 {
   long tx = typ(x), ty = typ(y), lx, ly, vx, vy, i, j, k, l;
   pari_sp av, tetpil;
-  GEN z,p1,p2,p3;
+  GEN z, p1, p2, p3;
 
   if (y == gun) return gcopy(x);
   if (tx==t_INT && is_const_t(ty))
@@ -2056,8 +2019,7 @@ gdiv(GEN x, GEN y)
 	    av=avma; p1=gmul(x,gconj(y)); p2=gnorm(y); tetpil=avma;
 	    return gerepile(av,tetpil,gdiv(p1,p2));
 
-	  case t_REAL:
-	    err(operf,"/",x,y);
+	  case t_REAL: err(operf,"/",x,y);
 	}
 
       case t_QUAD:
@@ -2166,8 +2128,6 @@ gdiv(GEN x, GEN y)
       case t_MAT:
 	av=avma; p1=invmat(y); tetpil=avma;
 	return gerepile(av,tetpil,gmul(x,p1));
-
-      case t_VEC: case t_COL: err(operf,"/",x,y);
     }
     err(operf,"/",x,y);
   }
@@ -2192,9 +2152,8 @@ gdiv(GEN x, GEN y)
         case t_RFRACN: z=cgetg(ly,t_RFRACN);
 	  z[1]=lmul(x,(GEN)y[2]);
 	  z[2]=lcopy((GEN)y[1]); return z;
-
-	default: err(operf,"/",x,y);
       }
+      break;
 
     case t_SER:
       switch(ty)
@@ -2245,7 +2204,7 @@ gdiv(GEN x, GEN y)
                 p1 = gadd(p1, gmul((GEN)z[j], (GEN)p2[l]));
             }
             p1 = gdiv(p1, y_lead);
-	    tetpil=avma; z[i]=lpile(av,tetpil, forcecopy(p1));
+	    tetpil=avma; z[i] = lpile(av,tetpil, forcecopy(p1));
 	  }
           for (i=3; i<lx; i++)
             if (p2[i]) gunclone((GEN)p2[i]);
@@ -2253,61 +2212,54 @@ gdiv(GEN x, GEN y)
         }
 
 	case t_RFRAC: case t_RFRACN:
-	  av=avma; p2=gmul(x,(GEN)y[2]); tetpil=avma;
-	  return gerepile(av,tetpil,gdiv(p2,(GEN)y[1]));
-
-	default: err(operf,"/",x,y);
+	  av = avma;
+	  return gerepileupto(av, gdiv(gmul(x,(GEN)y[2]), (GEN)y[1]));
       }
+      break;
 
     case t_RFRAC: case t_RFRACN:
       switch(ty)
       {
 	case t_POL:
           if (tx==t_RFRAC) return  divrfracscal(x,y);
-          z=cgetg(3,t_RFRACN);
-          z[2]=lmul((GEN)x[2],y);
-	  z[1]=lcopy((GEN)x[1]); return z;
+          z = cgetg(3,t_RFRACN);
+          z[2] = lmul((GEN)x[2],y);
+	  z[1] = lcopy((GEN)x[1]); return z;
 
 	case t_SER:
-	  av=avma; p2=gmul((GEN)x[2],y); tetpil=avma;
-	  return gerepile(av,tetpil, gdiv((GEN)x[1],p2));
+	  av = avma;
+	  return gerepileupto(av, gdiv((GEN)x[1], gmul((GEN)x[2],y)));
 
 	case t_RFRAC: case t_RFRACN:
 	  if (tx == t_RFRACN) ty=t_RFRACN;
           if (ty != t_RFRACN) return divrfrac(x,y);
-	  z=cgetg(3,t_RFRACN);
-	  z[1]=lmul((GEN)x[1],(GEN)y[2]);
-          z[2]=lmul((GEN)x[2],(GEN)y[1]); return z;
-
-	default: err(operf,"/",x,y);
+	  z = cgetg(3,t_RFRACN);
+	  z[1] = lmul((GEN)x[1],(GEN)y[2]);
+          z[2] = lmul((GEN)x[2],(GEN)y[1]); return z;
       }
+      break;
 
     case t_VEC: case t_COL: case t_MAT:
       if (!is_matvec_t(ty))
       {
-	z=cgetg(lx,tx);
-	for (i=1; i<lx; i++) z[i]=ldiv((GEN)x[i],y);
+	z = cgetg(lx,tx);
+	for (i=1; i<lx; i++) z[i] = ldiv((GEN)x[i],y);
 	return z;
       }
       if (ty!=t_MAT || ly==1 || lg(y[1])!=ly) err(operi,"/",x,y);
-      av=avma; p1=invmat(y); tetpil=avma;
-      return gerepile(av,tetpil,gmul(x,p1));
-     case t_QFI:case t_QFR:
-       break;
-     default: err(operf,"/",x,y);
-  }
-  /*Here tx==t_QFI || tx==t_QFR*/
-  if (tx==ty)
-  {
-    l=signe(y[2]); setsigne(y[2],-l);
-    switch(tx)
-    {
-      case t_QFI: z = compimag(x,y);
-        setsigne(y[2],l); return z;
-      case t_QFR:
-        k=signe(y[4]); setsigne(y[4],-k); z=compreal(x,y);
-        setsigne(y[2],l); setsigne(y[4],k); return z;
-    }
+      av = avma;
+      return gerepileupto(av, gmul(x,invmat(y)));
+
+    case t_QFI: case t_QFR:
+      if (tx != ty) break;
+      l = signe(y[2]); setsigne(y[2],-l);
+      if (tx == t_QFI) z = compimag(x,y);
+      else
+      {/* t_QFR: */
+        k = signe(y[4]); setsigne(y[4], -k);
+        z = compreal(x,y); setsigne(y[4], k);
+      }
+      setsigne(y[2], l); return z;
   }
   err(operf,"/",x,y);
   return NULL; /* not reached */
