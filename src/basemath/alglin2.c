@@ -1691,8 +1691,7 @@ hnfspec_i(long** mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
   const long li = lg(perm); /* = lg(mat0[1]) */
   const long CO = lg(mat0);
 
-  C = *ptC;
-  co = CO;
+  C = *ptC; co = CO;
   if (co > 300 && co > 1.5 * li)
   { /* treat the rest at the end */
     co = (long)(1.2 * li);
@@ -1956,16 +1955,16 @@ END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
   if (CO > co)
   { /* treat the rest */
     long l = CO - co + 1;
-    GEN extramat = cgetg(l, t_MAT), extraC = cgetg(l, t_MAT), CC = *ptC;
+    GEN mat = cgetg(l, t_MAT), emb = cgetg(l, t_MAT), CC = *ptC, m0 = (GEN)mat0;
     setlg(CC, CO); /* restore */
-    CC  += co-1;
-    mat = mat0 + co-1;
+    CC += co-1;
+    m0 += co-1;
     for (j = 1 ; j < l; j++)
     {
-      extramat[j] = (long)vecextract_p((GEN)mat[j], perm);
-      extraC[j] = (long)CC[j];
+      mat[j] = (long)m0[j];
+      emb[j] = (long)CC[j];
     }
-    H = hnfadd_i(H, perm, ptdep, ptB, &C, extramat, extraC);
+    H = hnfadd_i(H, perm, ptdep, ptB, &C, mat, emb);
   }
   *ptC = C; return H;
 }
@@ -2081,11 +2080,6 @@ hnfadd_i(GEN H, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, /* cf hnfspec */
   long co = lg(C)-1,    col = co - lB;
   long nlze = lH? lg(dep[1])-1: lg(B[1])-1;
 
-  if (DEBUGLEVEL>5)
-  {
-    fprintferr("Entering hnfadd:\n");
-    if (DEBUGLEVEL>6) fprintferr("extramat = %Z\n",extramat);
-  }
  /*               col    co
   *       [ 0 |dep |     ]
   *  nlze [--------|  B  ]
@@ -2108,9 +2102,8 @@ hnfadd_i(GEN H, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, /* cf hnfspec */
   permpro = imagecomplspec(extramat, &nlze);
   extramat = rowextract_p(extramat, permpro);
   *ptB     = rowextract_p(B,        permpro);
-  /* perm o= permpro */
   permpro = vecextract_p(perm, permpro);
-  for (i=1; i<=lig; i++) perm[i] = permpro[i];
+  for (i=1; i<=lig; i++) perm[i] = permpro[i]; /* perm o= permpro */
 
   *ptdep  = rowextract_i(extramat, 1, nlze);
   matb    = rowextract_i(extramat, nlze+1, lig);
@@ -2119,8 +2112,8 @@ hnfadd_i(GEN H, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, /* cf hnfspec */
   *ptC = concatsp(vecextract_i(C, 1, col-lH), Cnew);
   if (DEBUGLEVEL)
   {
-    if (DEBUGLEVEL>7) fprintferr("H = %Z\nC = %Z\n",H,*ptC);
     msgtimer("hnfadd (%ld + %ld)", lg(extratop)-1, lg(dep)-1);
+    if (DEBUGLEVEL>7) fprintferr("H = %Z\nC = %Z\n",H,*ptC);
   }
   return H;
 }
