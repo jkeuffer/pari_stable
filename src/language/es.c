@@ -789,7 +789,8 @@ wr_float(GEN x)
   if (dec>0) /* round if needed */
   {
     GEN arrondi = cgetr(3);
-    arrondi[1] = (long) (x[1]-((double)BITS_IN_LONG/pariK)*dec-2);
+    ex = expo(x) - (long)((((double)BITS_IN_LONG)/pariK)*dec+2);
+    arrondi[1] = evalsigne(1)|evalexpo(ex);
     arrondi[2] = x[2]; x = addrr(x,arrondi);
   }
   ex = expo(x); e = bit_accuracy(lg(x)); /* significant bits */
