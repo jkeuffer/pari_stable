@@ -931,7 +931,7 @@ wr_float(pariout_t *T, GEN x, int f_format)
 
 /* Write real number x.
  * format: e (exponential), f (floating point), g (as f unless x too small)
- *   if format isn't correct (one of the above) act as e.
+ *   if format is not one of the above act as e.
  * sigd: number of sigd to print (all if <0).
  */
 static void
