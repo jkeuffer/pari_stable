@@ -16,6 +16,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /* for qsort */
 typedef int (*QSCOMP)(const void *, const void *);
 
+/* swap */
 #define lswap(x,y) {long _z=x; x=y; y=_z;}
 #define pswap(x,y) {GEN *_z=x; x=y; y=_z;}
 #define swap(x,y)  {GEN  _z=x; x=y; y=_z;}
@@ -23,6 +24,10 @@ typedef int (*QSCOMP)(const void *, const void *);
 #define pdswap(x,y) { double* _t=x; x=y; y=_t; }
 #define swapspec(x,y, nx,ny) {swap(x,y); lswap(nx,ny);}
 
+/* */
+#define both_odd(x,y) ((x)&(y)&1)
+
+/* generic */
 GEN arith_proto(long f(GEN), GEN x, int do_error);
 GEN arith_proto2(long f(GEN,GEN), GEN x, GEN n);
 GEN arith_proto2gs(long f(GEN,long), GEN x, long y);
@@ -31,14 +36,20 @@ GEN garith_proto2gs(GEN f(GEN,long), GEN x, long y);
 GEN trans_fix_arg(long *prec, GEN *s0, GEN *sig, pari_sp *av, GEN *res);
 GEN transc(GEN (*f) (GEN, long), GEN x, long prec);
 
+/* loops */
 GEN incloop(GEN a);
 GEN incpos(GEN a);
 GEN resetloop(GEN a, GEN b);
 GEN setloop(GEN a);
 
-GEN initgaloisborne(GEN T, GEN dn, long prec, GEN *pL, GEN *pprep, GEN *pdis);
-GEN quicktrace(GEN x, GEN sym);
+/* "abs" routines for t_REAL ( disregard sign ) */
+int absrnz_egal1(GEN x);
+int absrnz_egal2n(GEN x);
+GEN exp1r_abs(GEN x);
+GEN logagmr_abs(GEN q);
+GEN logr_abs(GEN x);
 
+/* hnf */
 GEN gauss_triangle_i(GEN A, GEN B,GEN t);
 GEN hnfadd(GEN m,GEN p,GEN* ptdep,GEN* ptA,GEN* ptC,GEN extramat,GEN extraC);
 GEN hnfadd_i(GEN m,GEN p,GEN* ptdep,GEN* ptA,GEN* ptC,GEN extramat,GEN extraC);
@@ -52,6 +63,7 @@ GEN hnfspec(long** m,GEN p,GEN* ptdep,GEN* ptA,GEN* ptC,long k0);
 GEN idealhermite_aux(GEN nf, GEN x);
 GEN mathnfspec(GEN x, GEN *ptperm, GEN *ptdep, GEN *ptB, GEN *ptC);
 
+/* famat */
 GEN famat_inv(GEN f);
 GEN famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX);
 GEN famat_mul(GEN f, GEN g);
@@ -76,5 +88,5 @@ GEN ser_to_pol_i(GEN x, long lx);
 GEN _checkbnf(GEN bnf);
 GEN _checknf(GEN nf);
 
-#define both_odd(x,y) ((x)&(y)&1)
-
+GEN initgaloisborne(GEN T, GEN dn, long prec, GEN *pL, GEN *pprep, GEN *pdis);
+GEN quicktrace(GEN x, GEN sym);
