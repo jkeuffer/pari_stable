@@ -1470,22 +1470,20 @@ Flxq_inv(GEN x,GEN T,ulong p)
 GEN
 Flxq_powers(GEN x, long l, GEN T, ulong p)
 {
-  GEN V=cgetg(l+2,t_VEC);
-  long i;
-  long v=T[1];
-  V[1] = (long) Fl_to_Flx(1, v);
-  if (l==0) return V;
-  V[2] = (long) vecsmall_copy(x);
-  if (l==1) return V;
-  V[3] = (long) Flxq_sqr(x,T,p);
-  for(i=4;i<l+2;i++)
-    V[i] = (long) Flxq_mul((GEN) V[i-1],x,T,p);
-#if 0
-  TODO: Karim proposes to use squaring:
-  V[i] = (long) ((i&1)?Flxq_sqr((GEN) V[(i+1)>>1],T,p)
-                       :Flxq_mul((GEN) V[i-1],x,T,p));
-  Please profile it.
-#endif
+  GEN V = cgetg(l+2,t_VEC);
+  long i, v = T[1];
+  gel(V,1) = Fl_to_Flx(1, v);  if (l==0) return V;
+  gel(V,2) = vecsmall_copy(x); if (l==1) return V;
+  gel(V,3) = Flxq_sqr(x,T,p);
+  if ((degpol(x)<<1) < degpol(T)) {
+    for(i = 4; i < l+2; i++)
+      gel(V,i) = Flxq_mul(gel(V,i-1),x,T,p);
+  } else {
+    for(i = 4; i < l+2; i++) {
+      gel(V,i) = (i&1)? Flxq_sqr(gel(V, (i+1)>>1),T,p)
+                      : Flxq_mul(gel(V, i-1),x,T,p);
+    }
+  }
   return V;
 }
 

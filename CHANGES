@@ -134,6 +134,10 @@ MW 13- ellap: if E has CM by a principal order, use Cornacchia instead
    14- more efficient algorithm for issquare(t_FRAC | t_RFRAC)
    15- don't return t_INTMODs component in *modpr routines, but lifted
        representatives.
+   16- FpX_roots, FpX_factor: normalize input first + direct support for
+       quadratic and linear polynomials [ no need to compute X^p !]
+   17- FpXQ_powers and similar routines: use multiplications when input has
+       small degree, squarings otherwise.
 
   Removed
     1- obsolete implementation incgam1 [ use incgam. As far as private
