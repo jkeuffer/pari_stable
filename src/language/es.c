@@ -1799,7 +1799,7 @@ texi(GEN g, long nosign)
     case t_REAL: wr_real(g,nosign); break;
 
     case t_INTMOD: case t_POLMOD:
-      texi((GEN)g[2],0); pariputs("mod");
+      texi((GEN)g[2],0); pariputs(" mod ");
       texi((GEN)g[1],0); break;
 
     case t_FRAC: case t_FRACN: case t_RFRAC: case t_RFRACN:
