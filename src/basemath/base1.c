@@ -1797,9 +1797,12 @@ chk_gen_init(FP_chk_fun *chk, GEN r, GEN mat)
   long l = lg(r), N = l-1, r1 = d->r1, r2 = (N-r1)>>1;
   long i, v, dx, prec;
   int skipfirst = 0;
+  pari_sp av;
 
   d->u = mat;
   d->ZKembed = gmul(d->M, mat);
+
+  av = avma;
   inv = ginv( split_realimag(d->ZKembed, r1, (N - r1)>>1) ); /*TODO: use QR?*/
   V = cgetg(N+1, t_VEC);
 
@@ -1850,6 +1853,7 @@ chk_gen_init(FP_chk_fun *chk, GEN r, GEN mat)
   if (DEBUGLEVEL>2) fprintferr("chk_gen_init: skipfirst = %ld\n",skipfirst);
 
   /* should be DEF + gexpo( max_k C^n_k (bound/k)^(k/2) ) */
+  bound = gerepileuptoleaf(av, bound);
   prec = DEFAULTPREC + (((gexpo(bound)*N)/2) >> TWOPOTBITS_IN_LONG);
   if (DEBUGLEVEL)
     fprintferr("chk_gen_init: new prec = %ld (initially %ld)\n", prec, d->prec);
