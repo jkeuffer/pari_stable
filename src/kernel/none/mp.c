@@ -1122,8 +1122,7 @@ diviiexact(GEN x, GEN y)
   if (ly == 3)
   {
     x = diviuexact_i(x,(ulong)y[2]); /* x != 0 */
-    if (!(sx+sy)) setsigne(x, -1);
-    return x;
+    setsigne(x, (sx+sy)? 1: -1); return x;
   }
   y0inv = invrev(y[ly-1]);
   i=2; while (i<ly && y[i]==x[i]) i++;
@@ -1169,7 +1168,7 @@ diviiexact(GEN x, GEN y)
 #endif
   z += i-2; lz -= (i-2);
   z[0] = evaltyp(t_INT)|evallg(lz);
-  z[1] = evalsigne((sx+sy) ? 1 : -1) | evallg(lz);
+  z[1] = evalsigne((sx+sy)? 1: -1) | evallg(lz);
   avma = (pari_sp)z; return z;
 }
 
