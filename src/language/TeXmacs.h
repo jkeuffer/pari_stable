@@ -1,3 +1,4 @@
+
 /******************************************************************************
 * MODULE     : TeXmacs.h
 * DESCRIPTION: Include file for communication of extern packages with TeXmacs
@@ -58,6 +59,17 @@ typedef struct package_exports {
 typedef struct TeXmacs_exports_1 {
   char* version_protocol; /* "TeXmacs communication protocol 1" */
   char* version_TeXmacs;
+
+  char* (*translate_prg) (char* what, char* from, char* to);
+  /* Complex conversion of strings from one format into another.
+     The string what is first lexed and parsed using the 'from' language;
+     this supposes that you created the corresponding <from>.lex and
+     <from>.grm files, which describe the grammar of your input language.
+     The parser creates a lisp-like program, which is converted back
+     to a string using the tiger tool and the 'to' language output format;
+     this step supposes that you created the corresponding <in>.lex and
+     <in>.grm files. The returned string should be freed by the package. */
+
 } TeXmacs_exports_1;
 
 typedef struct package_exports_1 {
@@ -65,30 +77,30 @@ typedef struct package_exports_1 {
   char* version_package;
   
   char* (*install) (TeXmacs_exports_1* TeXmacs,
-		    char* options, char** failure_flag);
-  /* installation routine for extern package
+		    char* options, char** errors);
+  /* Installation routine for extern package.
      TeXmacs: pointer to routines exported by TeXmacs
      options: a string with installation option (freed by TeXmacs)
-     *failure_flag: contains 1 on exit, if installation failed
-     returns: a status message when installation succeeded
-            : an error message when installation failed */
+     *errors: contains error and warning messages (freed by TeXmacs)
+     returned string: status of installation (freed by TeXmacs)
+                    : NULL indicates a pure error */
 
-  char* (*evaluate) (char* what, char* session, char** failure_flag);
-  /* interactive evaluation routine for shells
+  char* (*evaluate) (char* what, char* session, char** errors);
+  /* Interactive evaluation routine for shells.
      what: string to be evaluated (freed by TeXmacs)
      session: name of your session ("default" by default, freed by TeXmacs)
-     *failure_flag: contains 1 on exit, if evaluation failed
-     returned string: result of the evaluation or error message
-                      (freed by TeXmacs) */
+     *errors: contains error and warning messages (freed by TeXmacs)
+     returned string: result of the evaluation (freed by TeXmacs)
+                    : NULL indicates a pure error */
 
-  char* (*execute) (char* what, char* session, char** failure_flag);
-  /* alternative routine for executing strings,
-     used for controlling the interaction between TeXmacs and the package
+  char* (*execute) (char* what, char* session, char** errors);
+  /* Alternative routine for executing strings,
+     used for controlling the interaction between TeXmacs and the package.
      what: string to be executed (freed by TeXmacs)
      session: name of your session ("default" by default, freed by TeXmacs)
-     *failure_flag: contains 1 on exit, if execution failed
-     returned string: result of the execution or error message
-                      (freed by TeXmacs) */
+     *errors: contains error and warning messages (freed by TeXmacs)
+     returned string: result of the evaluation (freed by TeXmacs)
+                    : NULL indicates a pure error */
 } package_exports_1;
 
 #if defined (__cplusplus)
@@ -96,4 +108,3 @@ typedef struct package_exports_1 {
 #endif
 
 #endif __TEXMACS_H
-

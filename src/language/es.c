@@ -577,14 +577,16 @@ pari_evaluate(char *s, char *session, char **fail)
   long av = avma;
   char *t;
 
+  (void)session;
   tmp = pariErr; pariErr = &pariErr2Str;
   tmps = ErrStr; ErrStr  = &newStr;
   ErrStr->len = 0; ErrStr->size=0; ErrStr->string=NULL;
   if (setjmp(environnement)) t = NULL;
   else
   {
-    t = GENtostr(flisexpr(s));
-    avma = av;
+    char *s2 = GENtostr(flisexpr(s));
+    t = TeXmacs->translate_prg(s2,"pari_out","tm_out");
+    avma = av; free(s2);
   }
   if (ErrStr->string) ErrStr->string[ErrStr->len] = 0;
   *fail = ErrStr->string;
@@ -592,9 +594,10 @@ pari_evaluate(char *s, char *session, char **fail)
 }
 
 static char *
-pari_install(TeXmacs_exports_1* _TeXmacs, char *options, char **fail)
+pari_install(TeXmacs_exports_1 *_TeXmacs, char *options, char **fail)
 {
-  *TeXmacs = *_TeXmacs;
+  (void)options;
+  TeXmacs = _TeXmacs;
   pari_init(1000000, 500000);
   if (setjmp(environnement))
   {
@@ -611,6 +614,7 @@ pari_install(TeXmacs_exports_1* _TeXmacs, char *options, char **fail)
 static char *
 pari_execute(char *s, char *session, char **fail)
 {
+  (void)s; (void)session;
   *fail = NULL; return pari_strdup("");
 }
 
@@ -623,8 +627,9 @@ static package_exports_1 PARI_exports_1 = {
 };
 
 package_exports_1 *
-get_my_package(int i)
+get_pari_package(int i)
 {
+  (void)i;
   return &PARI_exports_1;
 }
 
