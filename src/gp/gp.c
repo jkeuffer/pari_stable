@@ -2729,7 +2729,7 @@ break_loop(long numerr)
   push_stack(&bufstack, (void*)new_buffer());
   b = current_buffer; /* buffer created above */
 
-  (void)&s; /* gcc -Wall */
+  (void)&s; /* emulate volatile */
   old = s = get_analyseur();
   t = NULL;
   if (bufstack->prev)

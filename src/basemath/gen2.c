@@ -575,7 +575,7 @@ gegal(GEN x, GEN y)
           if (x[i] != y[i]) return 0;
         return 1;
     }
-  (void)&av; /* -Wall */
+  (void)&av; /* emulate volatile */
   av = avma; i = gegal_try(x, y);
   avma = av; return i;
 }
