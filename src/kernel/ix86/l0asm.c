@@ -206,3 +206,16 @@ FUNBEGIN(divll)
 FUNEND()
 
 	ALIGN
+                                                                              
+#if defined(sun)                                                            
+      .type C(addll),@function                                                
+      .type C(subll),@function                                                
+      .type C(addllx),@function                                               
+      .type C(subllx),@function                                               
+      .type C(shiftl),@function                                               
+      .type C(shiftlr),@function                                              
+      .type C(bfffo),@function                                                
+      .type C(mulll),@function                                                
+      .type C(addmul),@function                                               
+      .type C(divll),@function                                                
+#endif                     
