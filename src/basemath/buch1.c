@@ -1004,9 +1004,9 @@ FBquad(GEN Disc, long n2, long n)
 
 /* create vperm, return subFB */
 static GEN
-subFBquad(GEN D, double PROD, long KC, long *pino)
+subFBquad(GEN D, double PROD, long KC)
 {
-  long i, j, lgsub, minSFB, ino = 0, lv = KC+1;
+  long i, j, minSFB, lgsub = 1, ino = 1, lv = KC+1;
   double prod = 1.;
   pari_sp av;
   GEN no;
@@ -1015,24 +1015,23 @@ subFBquad(GEN D, double PROD, long KC, long *pino)
   vperm = cgetg(lv, t_VECSMALL);
   av = avma;
   no    = cgetg(lv, t_VECSMALL);
-  for (i=j=1; j < lv; j++)
+  for (j = 1; j < lv; j++)
   {
     ulong p = FB[j];
-    if (!umodiu(D, p)) no[++ino] = j; /* ramified */
+    if (!umodiu(D, p)) no[ino++] = j; /* ramified */
     else
     {
-      vperm[i] = j; i++;
+      vperm[lgsub++] = j;
       prod *= p;
-      if (i > minSFB && prod > PROD) break;
+      if (lgsub > minSFB && prod > PROD) break;
     }
   }
   if (j == lv) return NULL;
-  lgsub = i;
-  for (j = 1; j <=ino;i++,j++) vperm[i] = no[j];
+  i = lgsub;
+  for (j = 1; j < ino;i++,j++) vperm[i] = no[j];
   for (     ; i < lv; i++)     vperm[i] = i;
-  *pino = ino; avma = av;
-  if (DEBUGLEVEL) msgtimer("subFBquad (%ld elt., %ld ramified)", lgsub-1, ino);
-  return vecextract_i(vperm, 1, lgsub-1);
+  if (DEBUGLEVEL) msgtimer("subFBquad (%ld elt.)", lgsub-1);
+  avma = av; return vecextract_i(vperm, 1, lgsub-1);
 }
 
 /* assume n >= 1, x[i][j] = subFB[i]^j, for j = 1..n */
@@ -1132,17 +1131,20 @@ get_clgp(GEN Disc, GEN W, GEN *ptD, long prec)
   *ptD = D; return res;
 }
 
-static void
-trivial_relations(GEN mat, long KC, GEN C, GEN vperm, long nbram)
+static long
+trivial_relations(GEN mat, long KC, GEN C, GEN Disc)
 {
-  long i;
-  for (i = 1; i <= nbram; i++) 
+  long i, j = 0;
+  GEN col;
+  for (i = 1; i <= KC; i++) 
   { /* ramified prime ==> trivial relation */
-    GEN col = vecsmall_const(KC, 0);
-    col[ vperm[i] ] = 2;
-    mat[i] = (long)col;
-    C[i]   = (long)gen_0;
+    if (umodiu(Disc, FB[i])) continue;
+    col = vecsmall_const(KC, 0);
+    col[i] = 2; j++;
+    mat[j] = (long)col;
+    C[j]   = (long)gen_0;
   }
+  return j;
 }
 
 static void
@@ -1517,7 +1519,7 @@ GEN
 buchquad(GEN D, double cbach, double cbach2, long RELSUP, long prec)
 {
   pari_sp av0 = avma, av, av2;
-  long KCCO, i, s, current, nbram, nrelsup, nreldep, need;
+  long KCCO, i, s, current, triv, nrelsup, nreldep, need;
   ulong LIMC, LIMC2, cp;
   GEN h, W, cyc, res, gen, dep, mat, C, extraC, B, R, resc, Res, z;
   double drc, lim, LOGD, LOGD2;
@@ -1570,7 +1572,7 @@ START: avma = av; cbach = check_bach(cbach,6.);
 
   Res = FBquad(Disc, LIMC2, LIMC);
   if (!Res) goto START;
-  subFB = subFBquad(Disc, lim + 0.5, KC, &nbram);
+  subFB = subFBquad(Disc, lim + 0.5, KC);
   if (!subFB) goto START;
   powsubFB = powsubFBquad(CBUCH+1);
   limhash = (LIMC & HIGHMASK)? (HIGHBIT>>1): LIMC*LIMC;
@@ -1593,27 +1595,23 @@ MORE:
   if (!W)
   { /* first time */
     C = extraC;
-    trivial_relations(mat, KC, C, vperm + lg(subFB)-1, nbram);
-    i = nbram+1;
+    triv = trivial_relations(mat, KC, C, Disc);
   }
   else
-  {
-    nbram = 0;
-    i = 1;
-  }
+    triv = 0;
   if (PRECREG) {
-    for (; i<=need; i++) {
+    for (i = triv+1; i<=need; i++) {
       mat[i]    = (long)vecsmall_const(KC, 0);
       extraC[i] = lgetr(PRECREG);
     }
-    real_relations(need - nbram, &current, s,LIMC,mat + nbram,extraC + nbram);
+    real_relations(need - triv, &current, s,LIMC,mat + triv,extraC + triv);
   }
   else {
-    for (; i<=need; i++) {
+    for (i = triv+1; i<=need; i++) {
       mat[i]    = (long)vecsmall_const(KC, 0);
       extraC[i] = (long)gen_0;
     }
-    imag_relations(need - nbram, &current, s,LIMC,mat + nbram);
+    imag_relations(need - triv, &current, s,LIMC,mat + triv);
   }
 
   if (!W)
@@ -1679,7 +1677,8 @@ quadclassunit0(GEN x, long flag, GEN data, long prec)
       err(talker,"incorrect parameters in quadclassunit");
     if (lx > 4) lx = 4;
   }
-  cbach = cbach2 = 0.2; RELSUP = 5;
+  cbach = cbach2 = 0.2; /* was 0.1, but slower on average for 20 digits disc */
+  RELSUP = 5;
   switch(lx)
   {
     case 4: RELSUP = itos((GEN)data[3]);
