@@ -204,6 +204,7 @@ src/modules/thue.c
 src/test/32/analyz
 src/test/32/compat
 src/test/32/elliptic
+src/test/32/kernel
 src/test/32/graph
 src/test/32/linear
 src/test/32/nfields
@@ -218,6 +219,7 @@ src/test/64/analyz
 src/test/64/compat
 src/test/64/elliptic
 src/test/64/graph
+src/test/64/kernel
 src/test/64/linear
 src/test/64/nfields
 src/test/64/number
@@ -228,6 +230,7 @@ src/test/64/program
 src/test/64/sumiter
 src/test/64/trans
 src/test/dotest
+src/test/kerntest.c
 src/test/in/analyz
 src/test/in/compat
 src/test/in/elliptic
