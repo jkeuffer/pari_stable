@@ -1456,7 +1456,11 @@ _muli2red(GEN x, GEN y/* ignored */, GEN N) {
 }
 static GEN
 _muli2montred(GEN x, GEN y/* ignored */, GEN N) {
-  return _muli2red(x,y, ((montdata*)N)->N);
+  GEN n = ((montdata*)N)->N;
+  GEN z = _muli2red(x,y, n);
+  long l = lgefint(n);
+  while (lgefint(z) > l) z = subii(z,n);
+  return z;
 }
 static GEN
 _muli2invred(GEN x, GEN y/* ignored */, GEN N) {
