@@ -530,7 +530,7 @@ gcarreparfait(GEN x)
 
     case t_INTMOD:
     {
-      GEN b, q, e;
+      GEN b, q;
       long w;
       a = (GEN)x[2]; if (!signe(a)) return gun;
       av = avma;
@@ -557,23 +557,18 @@ gcarreparfait(GEN x)
       if (i==0)
       {
         GEN d = mppgcd(a,q);
-        p1 = factor(d);
-        p = (GEN)p1[1];
-        e = (GEN)p1[2]; l = lg(e);
+        p = (GEN)factor(d)[1]; l = lg(p);
         for (i=1; i<l; i++)
         {
           v = pvaluation(a,(GEN)p[i],&p1);
-          w = itos((GEN)e[i]);
+          w = pvaluation(q,(GEN)p[i], &q);
           if (v < w && (v&1 || kronecker(p1,(GEN)p[i]) == -1)) 
             { avma = av; return gzero; }
-          q = diviiexact(q, gpowgs((GEN)p[i], w));
         }
         if (kronecker(a,q) == -1) { avma = av; return gzero; }
       }
       /* kro(a,q) = 1, q odd: need to factor q */
-      p1 = factor(q);
-      p = (GEN)p1[1]; 
-      e = (GEN)p1[2]; l = lg(e) - 1;
+      p = (GEN)factor(q)[1]; l = lg(p) - 1;
       /* kro(a,q) = 1, check all p|q but the last (product formula) */
       for (i=1; i<l; i++)
         if (kronecker(a,(GEN)p[i]) == -1) { avma = av; return gzero; }
