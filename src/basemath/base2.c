@@ -1568,19 +1568,16 @@ shiftpol(GEN x, long v)
 static GEN
 sylpm(GEN f1,GEN f2,GEN pm)
 {
-  long n,deg,k,j,v=varn(f1);
+  long n,j,v=varn(f1);
   GEN a,h;
 
   n=lgef(f1)-3; a=cgetg(n+1,t_MAT);
   h = Fp_res(f2,f1,pm);
-  for (j=1; j<=n; j++)
+  for (j=1;; j++)
   {
-    a[j] = lgetg(n+1,t_COL);
-    deg=lgef(h)-3;
-    for (k=1; k<=deg+1; k++) coeff(a,k,j)=h[k+1];
-    for (   ; k<=n; k++) coeff(a,k,j)=zero;
-
-    if (j<n) h = Fp_res(shiftpol(h,v),f1,pm);
+    a[j] = (long)pol_to_vec(h,n);
+    if (j == n) break;
+    h = Fp_res(shiftpol(h,v),f1,pm);
   }
   return hnfmodid(a,pm);
 }

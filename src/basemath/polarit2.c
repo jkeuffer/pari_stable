@@ -2810,31 +2810,29 @@ _zeropol(void)
   x[2] = zero; return x;
 }
 
+static GEN
+sylvester_col(GEN x, long j, long d, long D)
+{
+  GEN c = cgetg(d+1,t_COL);
+  long i;
+  for (i=1; i< j; i++) c[i]=zero;
+  for (   ; i<=D; i++) c[i]=x[D-i+2];
+  for (   ; i<=d; i++) c[i]=zero;
+  return c;
+}
+
 GEN
 sylvestermatrix_i(GEN x, GEN y)
 {
-  long d,dx,dy,i,j;
-  GEN p1,p2;
+  long j,d,dx,dy;
+  GEN M;
 
   dx = lgef(x)-3; if (dx < 0) { dx = 0; x = _zeropol(); }
   dy = lgef(y)-3; if (dy < 0) { dy = 0; y = _zeropol(); }
-  d = dx+dy;
-  p1=cgetg(d+1,t_MAT);
-  for (j=1; j<=dy; j++)
-  {
-    p2=cgetg(d+1,t_COL); p1[j]=(long)p2;
-    for (i=1; i<j; i++) p2[i]=zero;
-    for (   ; i<=j+dx; i++) p2[i]=x[dx-i+j+2];
-    for (   ; i<=d; i++) p2[i]=zero;
-  }
-  for (j=1; j<=dx; j++)
-  {
-    p2=cgetg(d+1,t_COL); p1[j+dy]=(long)p2;
-    for (i=1; i<j; i++) p2[i]=zero;
-    for (   ; i<=j+dy; i++) p2[i]=y[dy-i+j+2];
-    for (   ; i<=d; i++) p2[i]=zero;
-  }
-  return p1;
+  d = dx+dy; M = cgetg(d+1,t_MAT);
+  for (j=1; j<=dy; j++) M[j]    = (long)sylvester_col(x,j,d,j+dx);
+  for (j=1; j<=dx; j++) M[j+dy] = (long)sylvester_col(y,j,d,j+dy);
+  return M;
 }
 
 GEN 
