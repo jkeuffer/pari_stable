@@ -21,10 +21,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "parinf.h"
 
+extern GEN idealprodprime(GEN nf, GEN L);
+extern GEN anti_unif_mod_f(GEN nf, GEN pr, GEN sqf);
+extern GEN unif_mod_f(GEN nf, GEN pr, GEN sqf);
 extern GEN colreducemodHNF(GEN x, GEN y, GEN *Q);
 extern GEN famat_to_nf_modideal_coprime(GEN nf, GEN g, GEN e, GEN id);
 extern GEN famat_to_nf_modidele(GEN nf, GEN g, GEN e, GEN bid);
-extern GEN makeprimetoideal(GEN nf,GEN UV,GEN uv,GEN x);
 extern GEN check_and_build_cycgen(GEN bnf);
 extern GEN gmul_mat_smallvec(GEN x, GEN y);
 extern GEN ideleaddone_aux(GEN nf,GEN x,GEN ideal);
@@ -283,28 +285,6 @@ idealmodidele(GEN nf, GEN x, GEN idele, GEN sarch)
   return idealmul(nf, a, x);
 }
 
-/* compute anti-uniformizer for pr, coprime to f outside of pr.
- * sqf = product or primes dividing f, NULL if f a prime power*/
-GEN
-anti_unif_mod_f(GEN nf, GEN pr, GEN sqf)
-{
-  if (!sqf) return gdiv((GEN)pr[5], (GEN)pr[1]);
-  else
-  {
-    GEN U = idealpow(nf,pr,gdeux);
-    GEN V = idealdivpowprime(nf,sqf,pr,gun);
-    GEN uv = idealaddtoone(nf, U, V);
-    GEN UV = idealmulpowprime(nf,V, pr,gdeux);
-    GEN cx, VZ = gcoeff(V,1,1), t = (GEN)pr[2], p = (GEN)pr[1];
-    t = makeprimetoideal(nf, UV, uv, t);
-    t = element_inv(nf, t);
-    t = primitive_part(t, &cx);
-    cx = gmod(gmul(cx,p), mulii(VZ,p));
-    t = gdiv(colreducemodHNF(gmul(cx,t), gmul(p,V), NULL), p);
-    return t; /* v_pr[i](t) = -1, v_pr[j](t) = 0 if i != j */
-  }
-}
-
 /* write x = x1 x2, x2 maximal s.t. (x2,f) = 1, return x2 */
 static GEN
 coprime_part(GEN x, GEN f)
@@ -421,8 +401,7 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
 
   lp = lg(listpr);
   /* sqf = squarefree kernel of f */
-  sqf = lp <= 2? NULL: prime_to_ideal(nf, listpr[1]);
-  for (i=2; i<lp; i++) sqf = idealmulprime(nf,sqf, listpr[i]);
+  sqf = lp <= 2? NULL: idealprodprime(nf, (GEN)listpr);
 
   vecinvpi = (GEN*)cgetg(lp, t_VEC);
   vectau   = (GEN*)cgetg(lp, t_VEC);

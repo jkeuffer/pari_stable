@@ -862,14 +862,19 @@ reducemodHNF(GEN x, GEN y, GEN *Q)
   return R;
 }
 
-/* For internal use. Reduce x modulo ideal. We want a non-zero result */
+/* For internal use. Reduce x modulo ideal (assumed non-zero, in HNF). We
+ * want a non-zero result */
+GEN
+nfreducemodideal_i(GEN x0,GEN ideal)
+{
+  GEN x = colreducemodHNF(x0, ideal, NULL);
+  if (gcmp0(x)) return (GEN)ideal[1];
+  return x == x0? gcopy(x) : x;
+}
 GEN
 nfreducemodideal(GEN nf,GEN x0,GEN ideal)
 {
-  GEN y = idealhermite(nf,ideal);
-  GEN x = colreducemodHNF(x0, y, NULL);
-  if (gcmp0(x)) return (GEN)y[1];
-  return x == x0? gcopy(x) : x;
+  return nfreducemodideal_i(x0, idealhermite(nf,ideal));
 }
 
 /* multiply y by t = 1 mod^* f such that sign(x) = sign(y) at arch = idele[2].
@@ -1276,7 +1281,7 @@ GEN
 makeprimetoideal(GEN nf,GEN UV,GEN uv,GEN x)
 {
   GEN y = gadd((GEN)uv[1], element_mul(nf,x,(GEN)uv[2]));
-  return nfreducemodideal(nf,y,UV);
+  return nfreducemodideal_i(y,UV);
 }
 
 static GEN
