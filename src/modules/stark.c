@@ -897,14 +897,14 @@ bnrrootnumber(GEN bnr, GEN chi, long flag, long prec)
 
   if (flag)
   {
+    GEN cyc  = gmael(bnr, 5, 2);
     bnrc = bnr;
-    CHI = (GEN)GetPrimChar(chi, bnr, bnrc, prec)[1];
+    CHI = get_Char(get_chic(chi,cyc), prec);
   }
   else
   {
-    GEN cyc  = gmael(bnr, 5, 2);
     bnrc = buchrayinitgen((GEN)bnr[1], condc);
-    CHI = get_Char(get_chic(chi,cyc), prec);
+    CHI = (GEN)GetPrimChar(chi, bnr, bnrc, prec)[1];
   }
   return gerepilecopy(av, (GEN)ComputeArtinNumber(bnrc, _vec(CHI), 1, prec)[1]);
 }
