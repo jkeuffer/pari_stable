@@ -505,10 +505,12 @@ i.e.~it chops off the $O(X^k)$. If $x$ is a vector, this function creates
 the polynomial whose coefficients are given in $x$, with $x[1]$ being the
 leading coefficient (which can be zero).
 
-\misctitle{Warning:} this is \emph{not} a substitution function. It is
-intended to be quick and dirty. So if you try \kbd{Pol(a,y)} on the
-polynomial \kbd{a = x+y}, you will get \kbd{y+y}, which is not a valid PARI
-object.
+\misctitle{Warning:} this is \emph{not} a substitution function. It will not
+transform an object containing variables of higher priority than~$v$.
+\bprog
+? Pol(x + y, y)
+  *** Pol: main variable has highest priority in gtopoly.
+@eprog
 
 \syn{gtopoly}{x,v}, where $v$ is a variable number.
 

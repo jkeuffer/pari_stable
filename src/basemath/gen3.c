@@ -2123,7 +2123,7 @@ deg1pol_i(GEN x1, GEN x0,long v)
 }
 
 static GEN
-gtopoly0(GEN x, long v, int reverse)
+_gtopoly(GEN x, long v, int reverse)
 {
   long tx=typ(x),lx,i,j;
   GEN y;
@@ -2131,7 +2131,8 @@ gtopoly0(GEN x, long v, int reverse)
   if (v<0) v = 0;
   if (isexactzero(x)) return zeropol(v);
   if (is_scalar_t(tx)) return scalarpol(x,v);
-
+  if (varncmp(gvar(x), v) < 0)
+    err(talker,"main variable has highest priority in gtopoly");
   switch(tx)
   {
     case t_POL:
@@ -2144,18 +2145,18 @@ gtopoly0(GEN x, long v, int reverse)
     case t_RFRAC:
       y=gdeuc((GEN)x[1],(GEN)x[2]); break;
     case t_QFR: case t_QFI: case t_VEC: case t_COL: case t_MAT:
-      lx=lg(x);
+      lx = lg(x); if (tx == t_QFR) lx--;
       if (reverse)
       {
 	while (lx-- && isexactzero((GEN)x[lx]));
-	i = lx+2; y=cgetg(i,t_POL);
+	i = lx+2; y = cgetg(i,t_POL);
 	y[1] = gcmp0(x)? 0: evalsigne(1);
 	for (j=2; j<i; j++) y[j]=lcopy((GEN)x[j-1]);
       }
       else
       {
 	i=1; j=lx; while (lx-- && isexactzero((GEN)x[i++]));
-	i=lx+2; y=cgetg(i,t_POL);
+	i = lx+2; y = cgetg(i,t_POL);
 	y[1] = gcmp0(x)? 0: evalsigne(1);
 	lx = j-1;
 	for (j=2; j<i; j++) y[j]=lcopy((GEN)x[lx--]);
@@ -2168,10 +2169,10 @@ gtopoly0(GEN x, long v, int reverse)
 }
 
 GEN
-gtopolyrev(GEN x, long v) { return gtopoly0(x,v,1); }
+gtopolyrev(GEN x, long v) { return _gtopoly(x,v,1); }
 
 GEN
-gtopoly(GEN x, long v) { return gtopoly0(x,v,0); }
+gtopoly(GEN x, long v) { return _gtopoly(x,v,0); }
 
 GEN
 scalarser(GEN x, long v, long prec)
@@ -2257,6 +2258,8 @@ _gtoser(GEN x, long v, long prec)
     return y;
   }
   if (is_scalar_t(tx)) return scalarser(x,v,prec);
+  if (varncmp(gvar(x), v) < 0)
+    err(talker,"main variable has highest priority in gtoser");
   switch(tx)
   {
     case t_POL:
@@ -2272,11 +2275,13 @@ _gtoser(GEN x, long v, long prec)
       return gerepileupto(av, rfractoser(x, v, prec));
 
     case t_QFR: case t_QFI: case t_VEC: case t_COL:
-      if (isexactzero(x)) return zeroser(v, lg(x)-1);
-      lx = lg(x); i=1; while (i<lx && isexactzero((GEN)x[i])) i++;
-      y = cgetg(lx-i+2,t_SER);
+      lx = lg(x); if (tx == t_QFR) lx--;
+      i=1; while (i<lx && isexactzero((GEN)x[i])) i++;
+      if (i == lx) return zeroser(v, lx-1);
+      lx -= i-2; x += i-2;
+      y = cgetg(lx,t_SER);
       y[1] = evalsigne(1) | evalvalp(i-1) | evalvarn(v);
-      for (j=2; j<=lx-i+1; j++) y[j]=lcopy((GEN)x[j+i-2]);
+      for (j=2; j<lx; j++) y[j]=lcopy((GEN)x[j]);
       break;
 
     default: err(typeer,"gtoser");

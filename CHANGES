@@ -105,6 +105,7 @@ LGr39- very rare SEGV in idealprimedec() [ typo in init_norm(), using FpX_red
    46- factor(x in Q[i] \ Z[i]) --> rubbish [ typo in factor_gauss() ]
    47- ellrootno & elllseries didn't check their arguments
    48- rnfisnorminit(non-monic polynomial) --> SEGV
+   49- prevent Ser & Pol from creating invalid objects (e.g Pol(x+y, y) -> y+y)
 
   Added
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu
