@@ -1823,6 +1823,7 @@ ENDIDEAL:
     if (DEBUGLEVEL>1) msgtimer("for this ideal");
   }
 END:
+  cache->last = rel; avma = av;
   if (DEBUGLEVEL)
   {
     fprintferr("\n"); msgtimer("small norm relations");
@@ -1832,7 +1833,6 @@ END:
       fprintferr("  nb. fact./nb. small norm = %ld/%ld = %.3f\n",
                   nbfact,nbsmallnorm,((double)nbfact)/nbsmallnorm);
   }
-  avma = av; cache->last = rel;
 }
 
 /* I assumed to be integral, G the Cholesky form of a weighted T2 matrix.
