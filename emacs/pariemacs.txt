@@ -301,7 +301,7 @@ HELP:
 Help is available through two distinct forms, in text or in TeX, and
 essentially through the menu-bar. In TeX form you can see a TeX version
 of the manual (via xdvi or something similar), while in text form, a
-browser is available which starts on an independant frame. In TeX, you
+browser is available which starts on an independent frame. In TeX, you
 can see the tutorial file, and in text, you have access to a survey of
 the chapter headings of the manual.
 

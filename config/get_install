@@ -17,7 +17,7 @@ EOT
 echo $n "Installation prefix ? $c"
 . ./myread; prefix=$ans
 
-echo $n "...for architecture-independant files (share-prefix) ? $c"
+echo $n "...for architecture-independent files (share-prefix) ? $c"
 dflt=$share_prefix; . ./myread; share_prefix=$ans
 
 if test -z "$share_prefix"; then

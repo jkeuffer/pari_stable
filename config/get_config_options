@@ -125,7 +125,7 @@ Additional developer options:
 
 Installation directories:
   --prefix=<dir>        install files in <dir> (default $prefix)
-  --share-prefix=<dir>  as 'prefix', for architecture independant files
+  --share-prefix=<dir>  as 'prefix', for architecture independent files
   --bindir=<dir>        for binaries
   --libdir=<dir>        for libraries
   --mandir=<dir>        for manual pages
