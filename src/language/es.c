@@ -2841,12 +2841,6 @@ delete_dirs(gp_path *p)
   }
 }
 
-#if defined __EMX__ || defined _WIN32
-#  define PATH_SEPARATOR ';'
-#else
-#  define PATH_SEPARATOR ':'
-#endif
-
 void
 gp_expand_path(gp_path *p)
 {

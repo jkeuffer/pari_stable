@@ -149,6 +149,12 @@ enum { RET_GEN, RET_INT, RET_VOID };
 extern void *PARI_stack_limit;
 #endif
 
+#if defined(__EMX__) || defined(_WIN32) || defined(__CYGWIN32__)
+#  define PATH_SEPARATOR ';' /* beware DOSish 'C:' disk drives */
+#else
+#  define PATH_SEPARATOR ':'
+#endif
+
 /* entrees */
 #define Epstatic 0x100
 #define EpVALENCE(ep) ((ep)->valence & 0xFF)

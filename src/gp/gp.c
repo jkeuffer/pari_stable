@@ -112,7 +112,7 @@ static void
 init_path(gp_path *path)
 {
   char *p;
-#if defined(__EMX__) || defined(__CYGWIN32__)
+#if PATH_SEPARATOR == ';'
   p = ".;C:;C:/gp";
 #elif defined(UNIX)
   p = ".:~:~/gp";

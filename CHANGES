@@ -124,6 +124,7 @@ IZ 52- [tex2mail:] \over wasn't allowed within \left( \right)
    56- subst(y,x+y-x,y) --> 0  [ missing simplification ]
    57- typo in nfroots [ returned inverse of roots when polynomial had small
        degree (using Trager's method) ]
+   58- 'path' default incorrectly set on Cygwin
 
   Changed
     1- rnf structure (removed useless components)
