@@ -1,4 +1,4 @@
-.TH GP 1 "25 June 1999"
+.TH GP 1 "28 August 2001"
 .SH NAME
 gp \- PARI calculator
 .SH SYNOPSIS
@@ -13,7 +13,7 @@ gp \- PARI calculator
 .IR primelimit ]
 
 .SH DESCRIPTION
-Invokes the PARI-GP calculator. This is an advanced programmable calculator,
+Invokes the PARI-GP calculator. GP is an advanced programmable calculator,
 which computes symbolically as long as possible, numerically where needed,
 and contains a wealth of number-theoretic functions (elliptic curves, class
 field theory...). Its basic data types are
@@ -78,13 +78,22 @@ small values will cause some number-theoretic functions to fail with the
 message "not enough precomputed primes".
 .TP
 .BI \-s " stacksize"
-Size of GP internal stack. The stack is increased from within GP
-in case of need but might interrupt an important computation.
-If your machine can stand it, start with a bigger stack (especially if you
-make heavy use of linear algebra). Not that computations with a 
+Size of GP internal stack allocated on startup. When GP runs out of space, it
+interrupts the current computation and raises a 
+.BI "stack overflow"
+exception. If this occurs frequently (especially if you make heavy use
+of linear algebra), start with a bigger stack. The stack size can also be
+increased from within GP, using
+.B default(parisize, ...)
+; it may be convenient to set 
+.B stacksize
+from your 
+.B .gprc
+Note that computations with a 
 .B smaller
 stack may be more efficient due to better data locality. Sensible
 computations should need less than 20MB.
+
 .TP
 .B \-test
 run GP in test mode: suppress printing of history numbers and wrap long
@@ -176,6 +185,12 @@ gp programs
 place to look for the user's gprc file (before $HOME/.gprc, ./gprc, and
 /etc/gprc in this order).
 
+.TP
+.I $GP_DATA_DIR
+directory containing the Galois resolvents files (needed by the
+.B polgalois
+function, for degrees 8 to 11).
+
 .SH PRIMARY FTP SITE
 The most recent distributions can be found at
 .RS
@@ -217,10 +232,9 @@ To subscribe, send empty messages respectively to
    pari-dev-subscribe@list.cr.yp.to
 
 .SH BUG REPORTS
-If you find a bug, you should report it. But first make sure that it really
-is a bug and that it appears in the latest version of
-.B gp
-that you have. Then you can actually mail your bug report (make it short
+If you find a bug, you should report it. First make sure that it really
+is a bug and that it appears in recent versions of the package.
+Then you can actually mail your bug report (make it short
 and easily reproducible if possible), including the header
 .B gp
 displays on startup, to the
@@ -275,15 +289,14 @@ the distribution.
 
 .SH COPYING
 
-This program is  free  software;  you  can  redistribute  it
-and/or  modify  it under the terms of the GNU General Public
-License as published by the Free Software Foundation.
+This program is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation.
 
-This program is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-A  PARTICULAR  PURPOSE.  See the GNU General Public License for more details.
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the  GNU  General  Public
-License  along  with this program; if not, write to the Free
-Software Foundation,  Inc.,  675  Mass  Ave,  Cambridge,  MA
-02139, USA.
+You should have received a copy of the GNU General Public License along with
+this program; if not, write to the Free Software Foundation, Inc., 675 Mass
+Ave, Cambridge, MA 02139, USA.
