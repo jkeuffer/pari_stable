@@ -1010,6 +1010,7 @@ static GEN
 FBquad(GEN Disc, long n2, long n)
 {
   GEN Res = realun(DEFAULTPREC);
+  const int LIM = 100;
   long i, p, bad, s;
   pari_sp av;
   byteptr d = diffptr;
@@ -1037,6 +1038,12 @@ FBquad(GEN Disc, long n2, long n)
     Res = mulsr(p, divrs(Res, p - s));
   }
   if (!KC) return NULL;
+  while (p < LIM)
+  {
+    NEXT_PRIME_VIADIFF(p, d);
+    s = krogs(Disc,p);
+    Res = mulsr(p, divrs(Res, p - s));
+  }
   Res = gerepileupto(av, Res);
   KC2 = i;
   setlg(FB, KC2+1);

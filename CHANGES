@@ -143,6 +143,7 @@ BA 60- add "const" keyword to allow building with g++
    82- Precision loss in inputs of large exponent: 1e100000 -->9.99999824 E99999
    83- quadgen / quadpoly accepted square inputs --> weird bugs later.
    84- poldegree(x^2 / y^4, y) --> -1
+   85- [introduced 2.2.4:] setrand(178);quadclassunit(82421) --> 2 instead of 1
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available
