@@ -572,7 +572,8 @@ embedding_of_potential_subfields(GEN g,GEN DATA,GEN listdelta)
   {/* Given g,w0,h0 in Z[x], s.t. h0.g'(w0) = 1 and g(w0) = 0 mod (T,p), find
     * [w1,h1] satisfying the same conditions mod p^2, [w1,h1] = [w0,h0] (mod p)
     * (cf. Dixon: J. Austral. Math. Soc., Series A, vol.49, 1990, p.445) */
-    if (DEBUGLEVEL>1) fprintferr("lifting embedding mod p = %Z\n",q);
+    if (DEBUGLEVEL>1)
+      fprintferr("lifting embedding mod p^k = %Z^%ld\n",p,ggval(q,p));
 
     /* w1 := w0 - h0 g(w0) mod (T,q) */
     if (wpow)
