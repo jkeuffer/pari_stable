@@ -1847,8 +1847,9 @@ identifier(void)
       case '.':
       {
         long len, v;
+        char *name;
 
-        analyseur++; ch1 = analyseur;
+        analyseur++; name = analyseur;
         if ((res = read_member((GEN)ep->value)))
         {
           if (*analyseur == '[')
@@ -1860,9 +1861,11 @@ identifier(void)
         }
         /* define a new member function */
         v = varn(initial_value(ep));
-        len = analyseur - ch1;
+        len = analyseur - name;
         analyseur++; /* skip = */
-        ep = installep(NULL,ch1,len,EpMEMBER,0, members_hash + hashvalue(&ch1));
+        ch1 = name;
+        ep = installep(NULL,name,len,EpMEMBER,0,
+                       members_hash + hashvalue(&ch1));
         ch1 = analyseur; skipseq(); len = analyseur-ch1;
 
         newfun=ptr= (GEN) newbloc(2 + nchar2nlong(len+1));
