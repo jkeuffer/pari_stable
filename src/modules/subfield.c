@@ -958,7 +958,7 @@ subfields(GEN nf,GEN d)
   if (di==1) return gerepilecopy(av, _subfield(polx[v0], pol));
   if (di < 1 || di > N || N % di) return cgetg(1,t_VEC);
 
-  subfields_poldata(nf, &PD);
+  subfields_poldata(nf? nf:pol, &PD);
   pol = PD.pol;
   setvarn(pol, 0);
   LSB = subfields_of_given_degree(PD, di);
