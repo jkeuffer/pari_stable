@@ -2516,8 +2516,9 @@ FqX_sqf_split(GEN *t0, GEN q, GEN T, GEN p)
 }
 
 /* not memory-clean */
+/* TODO: provide a public and clean FpX_factorff */
 static GEN
-Fp_factor_rel(GEN P,GEN l, GEN Q)
+FpX_factorff(GEN P,GEN l, GEN Q)
 {
   GEN V,E,y, F = FpX_factor(P,l);
   long lfact = 1, nmax = lgpol(P), n = lg((GEN)F[1]);
@@ -2548,7 +2549,7 @@ FqX_factor_i(GEN f, GEN T, GEN p)
   if (!signe(f)) err(zeropoler,"FqX_factor");
   d = degpol(f); if (!d) return trivfact();
 
-  if (isabsolutepol(f)) return Fp_factor_rel(f, p, T);
+  if (isabsolutepol(f)) return FpX_factorff(f, p, T);
 
   pg = itos_or_0(p);
   df2  = NULL; /* gcc -Wall */
