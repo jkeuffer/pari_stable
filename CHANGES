@@ -100,6 +100,10 @@ MSo44- [gp: \x] missing 'break' statement in escape()
    47- added user-friendly error message if Configure not run properly + fix
        INSTALL.tex about make gp.dbg / gp.prf
    48- matcompanion(x*y) --> weird error
+   49- typos in hilbert(), e.g
+         hilbert(Mod(1,2), y) --> SEGV,
+         hilbert(-1+O(2^3), 12 + O(2^3)) accepted wheras 2-adic precision too
+         low to decide 
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).
