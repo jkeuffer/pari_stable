@@ -827,6 +827,12 @@ truc(void)
       default: err(varer1,old,mark.start);
     }
   }
+  if (*analyseur == '#') /* CARD */
+  {
+    analyseur++; p1 = truc();
+    if (br_status) err(breaker,"here (after #)");
+    return stoi(glength(p1));
+  }
   if (isalpha((int)*analyseur)) return identifier();
 
   if (*analyseur == '"') return strtoGENstr_t();
@@ -2397,7 +2403,7 @@ skiptruc(void)
   switch(*analyseur)
   {
     case '"': skipstring(); return;
-    case '!': analyseur++; skiptruc(); return;
+    case '!': case '#': analyseur++; skiptruc(); return;
     case '&': case '\'':
       analyseur++; check_var_name();
       skipentry(); return;

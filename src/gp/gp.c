@@ -2471,16 +2471,16 @@ read_line(char *promptbuf, Buffer *b)
     return get_line_from_file(DFT_PROMPT,b,infile);
 }
 
-static void
+static int
 chron(char *s)
 {
   if (*s)
   {
-    char *old = s-1;
-    if (*s == '#') { pariputs(do_time(ti_LAST)); s++; }
-    if (*s) err(caracer1,s,old);
+    if (*s == '#') { pariputs(do_time(ti_LAST)); s++; return 1; }
+    if (*s) return 0;
   }
   else { chrono = 1-chrono; sd_timer("",d_ACKNOWLEDGE); }
+  return 1;
 }
 
 static int
@@ -2489,7 +2489,7 @@ check_meta(char *buf)
   switch(*buf++)
   {
     case '?': aide(buf, h_REGULAR); break;
-    case '#': chron(buf); break;
+    case '#': return chron(buf);
     case '\\': escape(buf); break;
     case '\0': return 2;
     default: return 0;
