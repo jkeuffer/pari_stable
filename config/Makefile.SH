@@ -27,9 +27,10 @@ if test -d "$src_dir/systems/$osname"; then
   systems=`ls $src_dir/systems/$osname/*.c | sed 's,.*/\(.*\)\.c,\1,'`
 fi
 # remove paridecl: no general recompilation when only changing a prototype
-hlist=`ls $src_dir/headers/*.h | grep -v paridecl | sed 's,.*/\(.*\)\.h,\1,'`
+hlist=`ls $src_dir/headers/*.h | grep -v paridecl | grep -v paripriv |\
+       sed 's,.*/\(.*\)\.h,\1,'`
 # for installation put paridecl back. Remove \n otherwise make will choke.
-headerlist="paridecl `echo $hlist| tr '\n' ' '`"
+headerlist="paridecl paripriv `echo $hlist| tr '\n' ' '`"
 
 # special systems (OS/2 for now)
 shortlib_prefix=lib
