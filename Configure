@@ -1051,6 +1051,9 @@ if test -n "$DLLD"; then
       *)          DLLD=;;
     esac
   fi
+  case "$osname" in 
+    freebsd|linux|sunos|solaris) DLLDFLAGS="$DLLDFLAGS -lc";;
+  esac
 
   if test "$fastread" != yes; then
     echo $n ..."Which flags for linker? $c"
