@@ -1169,16 +1169,16 @@ newtonsums(GEN a, GEN chi, GEN pp, GEN ns)
   for (j = 1; j <= n; j++)
   {
     pa = gmul(pa, a);
-    if (pp) pa = polmodi(pa, pp);
+    pa = polmodi(pa, pp);
     pa = gmod(pa, chi);
-    if (pp) pa = polmodi(pa, pp);
+    pa = polmodi(pa, pp);
 
     s  = gzero;
 
     for (k = 0; k <= n-1; k++)
       s = addii(s, mulii(polcoeff0(pa, k, -1), (GEN)ns2[k+1]));
 
-    if (pp) va[j] = (long)centermod(s, pp);
+    va[j] = (long)centermod(s, pp);
 
     if (low_stack(lim, stack_lim(av2, 1)))
     {
