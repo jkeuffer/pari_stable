@@ -870,6 +870,7 @@ rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   GEN uu,gencyc,cyc,vecalpha,vecalphap,vecbetap,matP,ESml2,Sp,Sm,Sml1,Sml2,Sl;
 
   checkbnrgen(bnr);
+  if (!subgroup) subgroup = gzero;
   wk = gmael4(bnr,1,8,4,1);
   if (all) gell = stoi(all);
   else
