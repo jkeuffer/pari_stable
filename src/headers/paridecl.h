@@ -287,6 +287,7 @@ GEN     initzeta(GEN pol, long prec);
 GEN     mathnf0(GEN x,long flag);
 GEN     matsnf0(GEN x,long flag);
 GEN     nfinit0(GEN x,long flag, long prec);
+long    nfgetprec(GEN x);
 GEN     nfnewprec(GEN nf, long prec);
 GEN     rootsof1(GEN x);
 GEN     tschirnhaus(GEN x);

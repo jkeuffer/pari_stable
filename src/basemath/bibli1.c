@@ -2203,7 +2203,7 @@ chk_gen_init(FP_chk_fun *chk, GEN nf, GEN gram, GEN mat, long *ptprec)
   prec2 = (1 + (((gexpo(bound)*n)/2) >> TWOPOTBITS_IN_LONG));
   if (prec2 < 0) prec2 = 0;
   prec = 3 + prec2;
-  prec2= (long)nfnewprec(nf,-1);
+  prec2= nfgetprec(nf);
   if (DEBUGLEVEL)
     fprintferr("chk_gen_init: estimated prec = %ld (initially %ld)\n",
                 prec, prec2);
@@ -2313,7 +2313,7 @@ polredabs0(GEN x, long flun, long prec)
   }
   else
     phimax = (flun & nf_ORIG)? polx[0]: (GEN)NULL;
-  prec = (long)nfnewprec(nf,0);
+  prec = nfgetprec(nf);
 
   for (i=1; ; i++)
   {

@@ -1252,6 +1252,14 @@ initalg(GEN x, long prec)
   return initalgall0(x,nf_REGULAR,prec);
 }
 
+/* assume x a bnr/bnf/nf */
+long
+nfgetprec(GEN x)
+{
+  GEN nf = checknf(x), ro = (GEN)nf[6];
+  return (typ(ro)==t_VEC)?precision((GEN)ro[1]): DEFAULTPREC;
+}
+
 GEN
 nfnewprec(GEN nf, long prec)
 {
@@ -1262,13 +1270,6 @@ nfnewprec(GEN nf, long prec)
   if (lg(nf) == 11) return bnfnewprec(nf,prec);
   if (lg(nf) ==  7) return bnrnewprec(nf,prec);
   (void)checknf(nf);
-  if (prec <= 0) 
-  {
-    ro = (GEN)nf[6];
-    prec = (typ(ro)==t_VEC)?precision((GEN)ro[1]): DEFAULTPREC;
-    return (GEN)prec;
-  }
-
   y = dummycopy(nf);
   pol=(GEN)nf[1]; n=degree(pol);
   r1=itos(gmael(nf,2,1));

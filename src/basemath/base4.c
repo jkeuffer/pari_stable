@@ -423,7 +423,7 @@ GEN
 ideal_better_basis(GEN nf, GEN x, GEN M)
 {
   GEN a,b;
-  long nfprec = (long)nfnewprec(nf,0);
+  long nfprec = nfgetprec(nf);
   long prec = DEFAULTPREC + (expi(M) >> TWOPOTBITS_IN_LONG);
  
   if (typ(nf[5]) != t_VEC) return x;
@@ -1577,15 +1577,14 @@ chk_vdir(GEN nf, GEN vdir)
 GEN
 ideallllredall(GEN nf, GEN I, GEN vdir, long prec, long precint)
 {
-  long tx,N,av,i,j;
-  GEN I0,res,aI,p1,y,x,Nx,b,c1,c,pol;
+  long tx,N,av,i,j, nfprec = nfgetprec(nf);
+  GEN Ired,I0,res,aI,p1,y,x,Nx,b,c1,c,pol;
 
-  if (prec <= 0)
-    precint = prec = (long)nfnewprec(nf,-1);
+  if (prec <= 0) precint = prec = nfprec;
   nf = checknf(nf);
   vdir = chk_vdir(nf,vdir);
   pol = (GEN)nf[1]; N = lgef(pol)-3;
-  tx = idealtyp(&I,&aI); I0=I;
+  tx = idealtyp(&I,&aI); I0 = I;
   res = aI? cgetg(3,t_VEC): NULL;
   if (tx == id_PRINCIPAL)
   {
@@ -1609,12 +1608,16 @@ ideallllredall(GEN nf, GEN I, GEN vdir, long prec, long precint)
 
   if (DEBUGLEVEL>=6) msgtimer("entering idealllred");
   c1 = content(I); if (gcmp1(c1)) c1 = NULL; else I = gdiv(I,c1);
+  if (2 * expi(gcoeff(I,1,1)) >= bit_accuracy(nfprec))
+    Ired = gmul(I, lllintpartial(I));
+  else 
+    Ired = I;
 
   for (i=1; ; i++)
   {
     p1 = computet2twist(nf,vdir);
     if (DEBUGLEVEL>=6) msgtimer("twisted T2");
-    y = qf_base_change(p1,I,1);
+    y = qf_base_change(p1,Ired,1);
     j = 1 + (gexpo(y)>>TWOPOTBITS_IN_LONG);
     if (j<0) j=0;
     p1 = lllgramintern(y,100,1,j+precint);
@@ -1625,7 +1628,7 @@ ideallllredall(GEN nf, GEN I, GEN vdir, long prec, long precint)
     if (DEBUGLEVEL) err(warnprec,"ideallllredall",precint);
     nf=nfnewprec(nf,(j>>1)+precint);
   }
-  y = gmul(I,(GEN)p1[1]); /* small elt in I */
+  y = gmul(Ired,(GEN)p1[1]); /* small elt in I */
   if (DEBUGLEVEL>=6) msgtimer("lllgram");
   if (isnfscalar(y))
   { /* already reduced */
@@ -1665,7 +1668,7 @@ ideallllredall(GEN nf, GEN I, GEN vdir, long prec, long precint)
 
   p1 = cgetg(N+1,t_MAT); /* = I Nx / x integral */
   for (i=1; i<=N; i++)
-    p1[i] = (long)element_muli(nf,b,(GEN)I[i]);
+    p1[i] = (long)element_muli(nf,b,(GEN)Ired[i]);
   c = content(p1); if (!gcmp1(c)) p1 = gdiv(p1,c);
   if (DEBUGLEVEL>=6) msgtimer("new ideal");
   if (aI)
@@ -1678,13 +1681,12 @@ ideallllredall(GEN nf, GEN I, GEN vdir, long prec, long precint)
   }
 
   if (isnfscalar((GEN)I[1]))
-  /* c = content (I Nx / x) = Nx / den(I/x) --> d = den(I/x) = Nx / c
-   * p1 = (d I / x); I[1,1] = I \cap Z --> d I[1,1] belongs to p1 and Z
-   */
-    p1 = hnfmodid(p1, mulii(gcoeff(I,1,1), divii(Nx, c)));
+   /* c = content (I Nx / x) = Nx / den(I/x) --> d = den(I/x) = Nx / c
+    * p1 = (d I / x); I[1,1] = I \cap Z --> d I[1,1] belongs to p1 and Z */
+    b = mulii(gcoeff(I,1,1), divii(Nx, c));
   else
-    p1 = hnfmod(p1, detint(p1));
-  p1 = gerepileupto(av, p1);
+    b = detint(p1);
+  p1 = gerepileupto(av, hnfmodid(p1,b));
   if (DEBUGLEVEL>=6) msgtimer("final hnf");
   if (!aI) return p1;
   res[1]=(long)p1;
