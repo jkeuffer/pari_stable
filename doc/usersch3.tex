@@ -258,11 +258,16 @@ If the exponent is an integer, then exact operations are performed using
 binary (left-shift) powering techniques. In particular, in this case $x$
 cannot be a vector or matrix unless it is a square matrix (and moreover
 invertible if the exponent is negative). If $x$ is a $p$-adic number, its
-precision will increase if $v_p(n) > 0$. PARI is able to rewrite the
-multiplication $x * x$ of two \emph{identical} objects as $x^2$, or
-$\kbd{sqr}(x)$ (here, identical means the operands are two different labels
-referencing the same chunk of memory; no equality test is performed). This
-is no longer true when more than two arguments are involved.
+precision will increase if $v_p(n) > 0$. Powering a binary quadratic form 
+(types \typ{QFI} and \typ{QFR}) returns a reduced representative of the
+class, provided the input is reduced. In particular, $x\kbd{\pow}1$ is
+identical to $x$.
+
+PARI is able to rewrite the multiplication $x * x$ of two \emph{identical}
+objects as $x^2$, or $\kbd{sqr}(x)$ (here, identical means the operands are
+two different labels referencing the same chunk of memory; no equality test
+is performed). This is no longer true when more than two arguments are
+involved.
 
 If the exponent is not of type integer, this is treated as a transcendental
 function (see \secref{se:trans}), and in particular has the effect of
@@ -276,13 +281,13 @@ Beware that
 
 \bprog
 ? Mod(7,19)^(1/2)
-%1 = Mod(11, 19)/*is any square root*/
+%1 = Mod(11, 19) /* is any square root */
 ? sqrt(Mod(7,19))
-%2 = Mod(8, 19)/*is the smallest square root*/
+%2 = Mod(8, 19)  /* is the smallest square root */
 ? Mod(7,19)^(3/5)
 %3 = Mod(1, 19)
 ? %3^(5/3)
-%4 = Mod(1, 19)/*Mod(7,19) is just another cubic root*/
+%4 = Mod(1, 19)  /* Mod(7,19) is just another cubic root */
 @eprog\noindent
 
 \syn{gpow}{x,n,\var{prec}} for $x\hbox{\kbd{\pow}}n$.
@@ -2052,7 +2057,7 @@ algorithm is used for $D > 0$ (using Euler product and the functional
 equation) so $D$ should not be too large, say $D < 10^8$, for the time to be
 reasonable. On the other hand, for $D < 0$ one can reasonably compute
 \kbd{qfbclassno($D$)} for $|D|<10^{25}$, since the routine uses
-\idx{Shanks}'method which is in $O(|D|^{1/4})$. For larger values of $|D|$,
+\idx{Shanks}'s method which is in $O(|D|^{1/4})$. For larger values of $|D|$,
 see \kbd{quadclassunit}.
 
 If $\fl=1$, compute the class number using \idx{Euler product}s and the
@@ -2072,7 +2077,7 @@ when $D < 0$ or the fundamental unit $\varepsilon$ has negative norm; when $D
 > 0$ and $N\varepsilon > 0$, the number of classes of forms is twice the
 ordinary class number. This is a problem which we cannot fix for backward
 compatibility reasons. Use the following routine if you are only interested
-in the number of classes of form:
+in the number of classes of forms:
 \bprog
 QFBclassno(D) =
   qfbclassno(D) * if (D < 0 || norm(quadunit(D)) < 0, 1, 2)
@@ -2112,18 +2117,18 @@ non-negative and congruent to 0 or 3 modulo 4. See also \kbd{qfbclassno}.
 \syn{hclassno}{x}.
 
 \subsecidx{qfbnucomp}$(x,y,l)$: \idx{composition} of the primitive positive
-definite binary quadratic forms $x$ and $y$ using the NUCOMP and NUDUPL
-algorithms of \idx{Shanks} (\`a la Atkin). $l$ is any positive constant,
-but for optimal speed, one should take $l=|D|^{1/4}$, where $D$ is the common
-discriminant of $x$ and $y$. When $x$ and $y$ do not have the same
+definite binary quadratic forms $x$ and $y$ (type \typ{QFI}) using the NUCOMP
+and NUDUPL algorithms of \idx{Shanks}, \`a la Atkin. $l$ is any positive
+constant, but for optimal speed, one should take $l=|D|^{1/4}$, where $D$ is
+the common discriminant of $x$ and $y$. When $x$ and $y$ do not have the same
 discriminant, the result is undefined.
 
 \syn{nucomp}{x,y,l}. The auxiliary function
 $\teb{nudupl}(x,l)$ should be used instead for speed when $x=y$.
 
 \subsecidx{qfbnupow}$(x,n)$: $n$-th power of the primitive positive definite
-binary quadratic form $x$ using the NUCOMP and NUDUPL algorithms (see
-\kbd{qfbnucomp}).
+binary quadratic form $x$ using \idx{Shanks}'s NUCOMP and NUDUPL algorithms
+(see \kbd{qfbnucomp}).
 
 \syn{nupow}{x,n}.
 
