@@ -2344,7 +2344,7 @@ compo(GEN x, long n)
   if (!is_recursive_t(tx))
     err(talker, "this object doesn't have components (is a leaf)");
   l = lontyp[tx]+n-1;
-  if (n < 1 || (ulong)l >= lg(x)) err(talker,"nonexistent component");
+  if (n < 1 || l >= lg(x)) err(talker,"nonexistent component");
   return gcopy((GEN)x[l]);
 }
 
