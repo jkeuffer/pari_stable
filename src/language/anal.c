@@ -2442,6 +2442,8 @@ skipentry(void)
 /**                          MEMBER FUNCTIONS                      **/
 /**                                                                **/
 /********************************************************************/
+#define is_ell(x) (typ(x) == t_VEC && lg(x)>=14)
+#define is_bigell(x) (typ(x) == t_VEC && lg(x)>=20)
 static GEN
 e(GEN x)
 {
@@ -2595,7 +2597,7 @@ mroots(GEN x) /* roots */
   int t; GEN y = get_nf(x,&t);
   if (!y)
   {
-    if (t == typ_ELL) return (GEN)x[14];
+    if (t == typ_ELL && is_bigell(x)) return (GEN)x[14];
     if (t == typ_GAL) return (GEN)x[3];
     err(member,"roots",mark.member,mark.start);
   }
@@ -2795,8 +2797,6 @@ orders(GEN x)
   err(member,"orders",mark.member,mark.start);
   return NULL; /* not reached */
 }
-#define is_ell(x) (typ(x) == t_VEC && lg(x)>=14)
-#define is_bigell(x) (typ(x) == t_VEC && lg(x)>=20)
 
 static GEN
 a1(GEN x)
