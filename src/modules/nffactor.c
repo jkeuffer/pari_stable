@@ -779,8 +779,13 @@ nfcmbf(nfcmbf_t *T, GEN p, long a, long maxK, long klim)
       t2 = Tpk? FpX_rem(t2, Tpk, pk): modii(t2, pk); /* = S_2 Newton sum */
       if (lt)
       {
-        t1 = FpX_red(gmul(ltdn, t1), pk);
-        t2 = FpX_red(gmul(lt2dn,t2), pk);
+        if (Tpk) {
+          t1 = FpX_red(gmul(ltdn, t1), pk);
+          t2 = FpX_red(gmul(lt2dn,t2), pk);
+        } else {
+          t1 = resii(mulii(ltdn, t1), pk);
+          t2 = resii(mulii(lt2dn,t2), pk);
+        }
       }
       trace1[i] = lclone( nf_bestlift(t1, NULL, T->L) );
       trace2[i] = lclone( nf_bestlift(t2, NULL, T->L) ); avma = av;

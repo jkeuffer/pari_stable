@@ -171,7 +171,9 @@ JD 74- [Configure:] detection of times()
    77- incorrect behaviour in scalarpol() for exact 0 argument
    78- typo in ellap: e defined over Fp didn't work any more
    79- t_SER ^ t_QUAD --> SEGV
- 
+   80- nffactor(non-monic t_POL) --> SEGV due to FpX_red interface change
+       [ don't allow t_INT argument, t_POL is mandatory ]
+
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.
        As a result maximal degree jumps to ~ 2^24 on 32bit machines
