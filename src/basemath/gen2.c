@@ -1750,7 +1750,7 @@ normalizepol_i(GEN x, long lx)
   setsigne(x,0); return x;
 }
 
-/* Normalize polynomial x in place. See preceding comment */
+/* normalize polynomial x in place */
 GEN
 normalizepol(GEN x)
 {
