@@ -28,7 +28,7 @@ TP = Thomas Papanikolaou
 XR = Xavier Roblot
 YU = Yoshiaki Uchikawa
 ===========================================================================
-Done for version 2.0.20.beta (released ??/05/2000):
+Done for version 2.0.20.beta (released 02/06/2000):
   Fixed
     1- gp -p1e -->SEGV
     2- nfinit([x,1]) --> SEGV
@@ -59,11 +59,14 @@ BA 24- bug in galconj.c:corediscpartial (could return half integer)
 TH 26- Configure doesn't handle cygwin new directory structure
 CW 27- polsturm(x,0,1) = 1 (should be 0)
    28- [library:] gentimer(3) didn't work
-PW 29- various bugs in qfminim(,,2)
+PW 29- various bugs in qfminim(,,2) [bound was rounded up + stack corruption]
    30- ellap(e,2) gave wrong result when 2 | e.disc
+   31- factorint: isprime() used on factors even within smallfact()
+GN 32- SEGV in mpqs main sieving routine (unsigned comparison)
+   33- prevent polredabs from keeping small vectors accumulating in a subfield
   
   Changed
-    1- renamed .DOC files to .txt (explorer getting confused...)
+    1- renamed .DOC files to .txt (Explorer was getting confused...)
     2- moved MANIFEST to config/MANIFEST
 IZ  3- meaning of flags > 1 in plothraw
 IZ  4- output of \x (a bit more verbose)
@@ -72,7 +75,7 @@ IZ  4- output of \x (a bit more verbose)
   Added
 BA  1- Pocklington-Lehmer primality prover
 BA  2- Fp_isom (library)
-BA  3- Mod(a,b)^(c/d) fo a,b,c,d integers
+BA  3- Mod(a,b)^(c/d) for a,b,c,d integers
     4- flag to vecsort (decreasing order)
 BA  5- function sqrtn
 
