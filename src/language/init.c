@@ -1389,7 +1389,7 @@ gcopy_av0(GEN x, GEN *AVMA)
       if (!signe(x)) return NULL; /* special marker */
       lx = lgefint(x);
       *AVMA = y = *AVMA - lx;
-      y[0] = evaltyp(t_INT)|evallg(lx);
+      y[0] = evaltyp(t_INT)|evallg(lx); /* kills isclone */
       for (i=1; i<lx; i++) y[i] = x[i];
       return y;
     }
