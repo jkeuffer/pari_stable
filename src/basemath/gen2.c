@@ -1767,7 +1767,7 @@ gexpo(GEN x)
       y = gexpo((GEN)x[2]); return max(e,y);
 
     case t_QUAD:
-      av=avma; x = co8(x,3); avma=av; return gexpo(x);
+      av=avma; e = gexpo(co8(x,3)); avma=av; return e;
 
     case t_POL: case t_SER: case t_VEC: case t_COL: case t_MAT:
       lx=(tx==t_POL)? lgef(x): lg(x);
