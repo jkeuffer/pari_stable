@@ -173,6 +173,7 @@ echo "C compiler is          $CC  $CFLAGS"
 # Which C PreProcessor ?
 case "$osname" in
   nextstep) cppfl="-traditional-cpp" ;;
+  darwin) cppfl="-no-cpp-precomp";;
   freebsd)
     if test "$PORTOBJFORMAT" = "elf"; then
       cppfl="-DUSE_ELF"    
