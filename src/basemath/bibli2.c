@@ -959,6 +959,7 @@ permute(long n, GEN x)
   long av=avma,i,a,r;
   GEN v,w,y;
 
+  if (n < 1) err(talker,"n too small (%ld) in numtoperm",n);
   v=(GEN)gpmalloc((n+1)*sizeof(long)); v[1]=1;
   for (r=2; r<=n; r++)
   {
