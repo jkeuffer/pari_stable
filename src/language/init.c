@@ -399,7 +399,7 @@ pari_init(long parisize, long maxprime)
   polx  = (GEN*) gpmalloc((MAXVARN+1)*sizeof(GEN));
   polun = (GEN*) gpmalloc((MAXVARN+1)*sizeof(GEN));
   polvar[0] = evaltyp(t_VEC) | evallg(1);
-  for (i=0; i <= MAXVARN; i++) ordvar[i] = i;
+  for (i=0; i <= MAXVARN; i++) { ordvar[i] = i; varentries[i] = NULL; }
 
   /* 2 (gnil) + 2 (gzero) + 3 (gun) + 3 (gdeux) + 3 (half) + 3 (gi) */
   p = universal_constants = (long *) gpmalloc(16*sizeof(long));
