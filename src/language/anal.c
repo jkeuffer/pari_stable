@@ -1164,19 +1164,31 @@ strtoGENstr_t()
   return x;
 }
 
+/* return the first n0 chars of s as a GEN [s may not be 0­terminated] */
+static GEN
+_strtoGENstr(char *s, long n0)
+{
+  long n = (n0+1+BYTES_IN_LONG) >> TWOPOTBYTES_IN_LONG;
+  GEN x = cgetg(n+1, t_STR);
+  char *t = GSTR(x);
+  strncpy(t, s, n0); t[n0] = 0; return x;
+}
+
 GEN
 strtoGENstr(char *s, long flag)
 {
-  long n;
   GEN x;
 
   if (flag) s = expand_tilde(s);
-  n = strlen(s)+1;
-  n = (n+BYTES_IN_LONG) >> TWOPOTBYTES_IN_LONG;
-  x = cgetg(n+1, t_STR);
-  strcpy(GSTR(x), s);
+  x = _strtoGENstr(s, strlen(s));
   if (flag) free(s);
   return x;
+}
+
+static GEN
+make_arg(GEN x)
+{
+  return (x==gzero)? x : geval(x);
 }
 
 /* p = NULL + array of variable numbers (longs) + function text */
@@ -1189,7 +1201,7 @@ call_fun(GEN p, GEN *arg, GEN *loc, int narg, int nloc)
   p++; /* skip NULL */
   /* push new values for formal parameters */
   for (i=0; i<narg; i++) copyvalue(*p++, *arg++);
-  for (i=0; i<nloc; i++) pushvalue(*p++, *loc++);
+  for (i=0; i<nloc; i++) pushvalue(*p++, make_arg(*loc++));
   /* dumps the false GEN arglist from identifier() to the garbage zone */
   res = lisseq((char *)p);
   if (br_status != br_NONE)
@@ -1246,7 +1258,7 @@ check_pointer(unsigned int ptrs, entree *pointer[])
 
 #define match_comma() if (matchcomma) match(','); else matchcomma = 1
 
-long
+static long
 check_args()
 {
   long nparam = 0, matchcomma = 0;
@@ -1274,11 +1286,10 @@ check_args()
     cell[0] = varn(initial_value(ep));
     if (*analyseur == '=')
     {
-      long av = avma;
-      GEN p1;
-      analyseur++; p1 = expr();
-      if (br_status) err(breaker,"here (default args)");
-      cell[1] = lclone(p1);
+      char *old = ++analyseur;
+      ulong av = avma;
+      skipexpr();
+      cell[1] = lclone(_strtoGENstr(old, analyseur-old));
       avma = av;
     }
     else cell[1] = zero;
@@ -1730,7 +1741,12 @@ identifier(void)
       if (*analyseur != '(') /* no args */
       {
 	if (*analyseur != '='  ||  analyseur[1] == '=')
-	  return call_fun((GEN)ep->value, defarg, defarg+narg, narg, nloc);
+        {
+          GEN *arglist = (GEN*) new_chunk(narg);
+          for (i=0; i<narg; i++)
+            arglist[i] = make_arg(defarg[i]);
+	  return call_fun((GEN)ep->value, arglist, defarg+narg, narg, nloc);
+        }
 	match('('); /* ==> error */
       }
       if (analyseur != redefine_fun)
@@ -1740,7 +1756,10 @@ identifier(void)
         for (i=0; i<narg; i++)
         {
           if (do_switch(0,matchcomma))
-            { matchcomma=1 ; arglist[i] = defarg[i]; } /* default arg */
+          { /* default arg */
+            arglist[i] = make_arg(defarg[i]);
+            matchcomma = 1;
+          }
           else
           { /* user supplied */
             match_comma(); res = expr();

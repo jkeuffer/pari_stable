@@ -1073,12 +1073,22 @@ commands(int n)
 }
 
 static void
+print_def_arg(GEN x)
+{
+  if (x == gzero) return;
+  pariputc('=');
+  if (typ(x)==t_STR)
+    pariputs(GSTR(x)); /* otherwise it's surrounded by "" */
+  else
+    bruteall(x,'g',-1,1);
+}
+
+static void
 print_user_fun(entree *ep)
 {
   gp_args *f= (gp_args*)ep->args;
   GEN q = (GEN)ep->value, *arg = f->arg;
   int i, narg;
-
 
   q++; /* skip initial NULL */
   pariputs(ep->name); pariputc('(');
@@ -1087,7 +1097,7 @@ print_user_fun(entree *ep)
   {
     entree *ep = varentries[*q++];
     pariputs(ep? ep->name:"#");
-    if (!gcmp0(*arg)) { pariputc('='); bruteall(*arg,'g',-1,1); }
+    print_def_arg(*arg);
     if (i == narg) { arg++; break; }
     pariputs(", ");
   }
@@ -1100,7 +1110,7 @@ print_user_fun(entree *ep)
     {
       entree *ep = varentries[*q++];
       pariputs(ep? ep->name:"#");
-      if (!gcmp0(*arg)) { pariputc('='); bruteall(*arg,'g',-1,1); }
+      print_def_arg(*arg);
       if (i == narg) break;
       pariputs(", ");
     }

@@ -1361,9 +1361,9 @@ number of formal variables.
 Uninitialized formal variables will be given a default value. An equal
 (\kbd{=}) sign following a variable name in the function definition,
 followed by any expression, gives the variable a default value. The
-expression gets evaluated the moment the function is defined, and is fixed
-afterward. A variable for which you supply no default value will be
-initialized to zero.
+said expression gets evaluated the moment the function is called, hence may
+involve the function parameters. A variable for which you supply no default
+value will be initialized to zero.
 
 \kbd{list of local variables} is the list of the additional local variables
 which are used in the function body. Note that if you omit some or all of
