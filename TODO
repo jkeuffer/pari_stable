@@ -13,7 +13,6 @@ Priority classification (first column): [subjective and debatable!]
 1    probably not
 -    unclassified
 
-
 ***************************   BUGS (general)     ****************************
 Unless specified otherwise, examples assume 32bit machine and default precision 
 
@@ -110,6 +109,10 @@ Misc:
 =====
 5  modify invmod to get Jebelean extended gcd
 
+5  don't assume that nf.zk is HNF. Allow using LLL-T2-reduced bases (with
+   first element 1) --> huge improvement to all idealred computations (esp.
+   bnfisprincipal, bnfinit)
+
 4  decent finite field package (remove all the nfxxxmodpr functions)
 
 4  rnfkummer (doesn't work)
@@ -139,9 +142,9 @@ Misc:
 
 4  remove all dependences on types ordering [if (typ(x) < t_POL) ...]
 
-3  integrate Ilya's code for yet bigger prime tables. Unify functions using
-   diffptr (if possible correcting the forprime bug above)
-
+3  integrate Ilya's code for yet bigger prime tables (pari-dev-435). Unify
+   functions using diffptr (if possible correcting the forprime bug above)
+  
 3  remove global variables gpi, geuler: their precision is unpredictable
    (at least as much as requested in last const[pi|euler](), possibly much
    more). Explicit call to mp[pi|euler] should be required. Will break
