@@ -781,7 +781,10 @@ mpsqrt_sign(GEN x, long s)
   }
   /* |x| = 2^(ex/2) a */
   t = cgetr(l+1);
-  t[1] = evalexpo(0) | evalsigne(1); t[2] = (long)u; /* ~ sqrt(a) */
+  if (u)
+  { t[1] = evalexpo(0) | evalsigne(1); t[2] = (long)u; /* ~ sqrt(a) */ }
+  else
+  {  t[1] = evalexpo(1) | evalsigne(1); t[2] = (long)HIGHBIT; }
   for (i = 3; i <= l; i++) t[i] = 0;
 
   l--; l1 = 1; av = avma;
