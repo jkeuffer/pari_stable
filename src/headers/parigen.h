@@ -124,7 +124,7 @@ typedef int (*QSCOMP)(const void *, const void *);
 #define setisclone(x) (((GEN) (x))[0] |= CLONEBIT)
 #define unsetisclone(x) (((GEN) (x))[0] &= (~CLONEBIT))
 
-#define lg(x)         ((((ulong)(x))&1)?1L: ((((GEN) (x))[0] & LGBITS)))
+#define lg(x)         ((((ulong)(x))&1)?1L: ((long) (((GEN) (x))[0] & LGBITS)))
 #define setlg(x,s)    (((GEN)(x))[0]=\
                         (((GEN)(x))[0]&(~LGBITS)) | evallg(s))
 
