@@ -42,13 +42,15 @@ BEGINEXTERN
 #  else
 #   ifdef READLINE_LIBRARY
 #     include <readline.h>
+#     include <history.h>
 #   else
 #     include <readline/readline.h>
+#     include <readline/history.h>
 #   endif
 #  endif
   extern int isatty(int);
-  extern void add_history(char*);
 ENDEXTERN
+static int history_is_dup(char *s);
 #endif
 
 char*  _analyseur(void);
@@ -79,10 +81,12 @@ int    whatnow(char *s, int flag);
 #define MAX_PROMPT_LEN 128
 #define DFT_PROMPT "? "
 #define COMMENTPROMPT "comment> "
+#define CONTPROMPT ""
 #define DFT_INPROMPT ""
 static GEN *hist;
 static char *help_prg,*path;
 static char prompt[MAX_PROMPT_LEN];
+static char prompt_cont[MAX_PROMPT_LEN];
 static char thestring[256];
 static char *prettyprinter;
 static char *prettyprinter_dft = "tex2mail -TeX -noindent -ragged -by_par";
@@ -146,6 +150,7 @@ gp_preinit(int force)
 #endif
   }
   strcpy(prompt, dflt);
+  strcpy(prompt_cont, CONTPROMPT);
 
 #if defined(UNIX) || defined(__EMX__)
 #  if defined(__EMX__) || defined(__CYGWIN32__)
@@ -914,19 +919,31 @@ sd_prettyprinter(char *v, int flag)
 }
 
 static GEN
-sd_prompt(char *v, int flag)
+sd_prompt_set(char *v, int flag, char *how, char *p)
 {
   if (*v)
   {
-    strncpy(prompt,v,MAX_PROMPT_LEN);
+    strncpy(p,v,MAX_PROMPT_LEN);
 #ifdef macintosh
-    strcat(prompt,"\n");
+    strcat(p,"\n");
 #endif
   }
-  if (flag == d_RETURN) return strtoGENstr(prompt,0);
+  if (flag == d_RETURN) return strtoGENstr(p,0);
   if (flag == d_ACKNOWLEDGE)
-    pariputsf("   prompt = \"%s\"\n",prompt);
+    pariputsf("   prompt%s = \"%s\"\n", how, p);
   return gnil;
+}
+
+static GEN
+sd_prompt(char *v, int flag)
+{
+  return sd_prompt_set(v, flag, "", prompt);
+}
+
+static GEN
+sd_prompt_cont(char *v, int flag)
+{
+  return sd_prompt_set(v, flag, "_cont", prompt_cont);
 }
 
 default_type gp_default_list[] =
@@ -950,6 +967,7 @@ default_type gp_default_list[] =
   {"primelimit",(void*)sd_primelimit},
   {"prettyprinter",(void*)sd_prettyprinter},
   {"prompt",(void*)sd_prompt},
+  {"prompt_cont",(void*)sd_prompt_cont},
   {"psfile",(void*)sd_psfile},
   {"realprecision",(void*)sd_realprecision},
   {"readline",(void*)sd_rl},
@@ -2212,7 +2230,7 @@ brace_color(char *s, int c, int force)
 }
 
 static char *
-do_prompt()
+do_prompt(char *p)
 {
   static char buf[MAX_PROMPT_LEN + 24]; /* + room for color codes */
   char *s;
@@ -2225,7 +2243,7 @@ do_prompt()
   if (filtre(s,NULL, f_COMMENT)) 
     strcpy(s, COMMENTPROMPT);
   else
-    do_strftime(prompt,s);
+    do_strftime(p,s);
   s += strlen(s);
   brace_color(s, c_INPUT, 1); return buf;
 }
@@ -2270,40 +2288,52 @@ file_input(Buffer *b, char **s0, FILE *file, int TeXmacs)
 }
 
 #ifdef READLINE
+/* Read line; returns a malloc()ed string of the user input or NULL on EOF.
+   Increments the buffer size appropriately if needed; fix *endp if so.
+ */
 static char *
-gprl_input(Buffer *b, char **s0, char *prompt)
+gprl_input(Buffer *b, char **endp, char *prompt)
 {
-  long used = *s0 - b->buf;
-  long left = b->len - used;
+  long used = *endp - b->buf;
+  long left = b->len - used, l;
   char *s;
   
-  if (! (s = readline(prompt)) ) return NULL; /* EOF */
-  if ((ulong)left < strlen(s))
+  if (! (s = readline(prompt)) )
+      return NULL;			/* EOF */
+  l = strlen(s);
+  if ((ulong)left < l)
   {
-    fix_buffer(b, b->len << 1);
-    *s0 = b->buf + used;
+    long incr = b->len;
+
+    if (incr < l)
+	incr = l;
+    fix_buffer(b, b->len + incr);
+    *endp = b->buf + used;
   }
   return s;
 }
 #endif
 
-static void
-input_loop(Buffer *b, char *buf0, FILE *file, char *prompt)
+#define ask_filtre(t) filtre("",NULL,t)
+
+static int				/* True if more than one line read */
+input_loop(Buffer *b, char *already_read, FILE *file, char *prompt)
 {
   const int TeXmacs = (under_texmacs && file == stdin);
   const int f_flag = prompt? f_REG: f_REG | f_KEEPCASE;
-  char *end, *s = b->buf, *buf = buf0;
+  char *end, *s = b->buf;
   int wait_for_brace = 0;
   int wait_for_input = 0;
+  int read = 0;
 
   /* buffer is not empty, init filter */
   (void)ask_filtre(f_INIT);
   for(;;)
   {
-    char *t = buf;
+    char *t = already_read;
     if (!ask_filtre(f_COMMENT))
     { /* not in comment */
-      skip_space(t);
+      while (isspace((int)*t)) t++; /* Skip space */
       if (*t == LBRACE) { t++; wait_for_input = wait_for_brace = 1; }
     }
     end = filtre(t,s, f_flag);
@@ -2330,13 +2360,19 @@ input_loop(Buffer *b, char *buf0, FILE *file, char *prompt)
     }
     /* read continuation line */
 #ifdef READLINE
-    if (!file) { free(buf); buf = gprl_input(b,&s,""); }
-    else
+    if (!file) {
+	free(already_read);
+	already_read = gprl_input(b, &s, do_prompt(prompt_cont));
+	if (!history_is_dup(already_read))
+	    add_history(already_read);	/* Makes a copy */
+    } else
 #endif
-      buf = file_input(b,&s,file,TeXmacs);
-    if (!buf) break;
+      already_read = file_input(b,&s,file,TeXmacs);
+    if (!already_read) break;
+    read++;
   }
-  if (!file && buf) free(buf);
+  if (!file && already_read) free(already_read);
+  return read;
 }
 
 /* prompt = NULL --> from gprc. Return 1 if new input, and 0 if EOF */
@@ -2380,33 +2416,45 @@ get_line_from_user(char *prompt, Buffer *b)
   pariputs(prompt);
   return get_line_from_file(prompt,b,infile);
 }
-#else
+#else	/* READLINE */
+static int
+history_is_dup(char *s)
+{
+    if (!history_length)
+	return 0;
+    return !strcmp(s, history_get(history_length)->line);
+}
+
 static int
 get_line_from_user(char *prompt, Buffer *b)
 {
-  if (use_readline)
-  {
-    static char *previous_hist = NULL;
-    char *buf, *s = b->buf;
+  char *buf, *s = b->buf;
+  int index, added;
 
-    if (! (buf = gprl_input(b,&s, prompt)) )
-    { /* EOF */
-      pariputs("\n"); return 0;
-    }
-    input_loop(b,buf,NULL,prompt);
-    unblock_SIGINT(); /* bug in readline 2.0: need to unblock ^C */
+  if (! (buf = gprl_input(b,&s, prompt)) )
+  { /* EOF */
+    pariputs("\n"); return 0;
+  }
+  /* Put the original read line into history */
+  index = history_length;
+  if (!history_is_dup(buf))
+      add_history(buf);			/* Copies the entry */
 
-    if (*s)
-    {
-      /* update history (don't add the same entry twice) */
-      if (!previous_hist || strcmp(s,previous_hist))
-      {
-        if (previous_hist) free(previous_hist);
-        previous_hist = pari_strdup(s); add_history(s);
+  added = input_loop(b,buf,NULL,prompt); /* free()s buf */
+  unblock_SIGINT(); /* bug in readline 2.0: need to unblock ^C */
+
+  if (*s) {				/* XXXX Better use b->buf ?! */
+    if (added) {			/* Remove incomplete lines */
+      int i = history_length;
+      while (i > index) {
+        HIST_ENTRY *e = remove_history(--i);
+        free(e->line); free(e);
       }
-      /* update logfile */
-      if (logfile) fprintf(logfile, "%s%s\n",prompt,s);
+      if (!history_is_dup(s)) add_history(s);
     }
+  
+    /* update logfile */
+    if (logfile) fprintf(logfile, "%s%s\n",prompt,s);
     return 1;
   }
   else
@@ -2505,7 +2553,7 @@ gp_main_loop(int ismain)
     for(;;)
     {
       int r;
-      r = read_line(do_prompt(), b);
+      r = read_line(do_prompt(prompt), b);
       if (!disable_color) term_color(c_NONE);
       if (!r)
       {

@@ -452,6 +452,11 @@ Emacs relies on the prompt being the default one. So, do not tamper with the
 \kbd{.emacs} file (see \kbd{emacs/pariemacs.txt} and \kbd{misc/gprc.dft} for
 examples).
 
+\subsecidx{prompt_cont} (default \kbd{""}): a string that will be printed
+to prompt for continuation lines (e.g. in between braces, or after a
+line-terminating backslash). Everything that applies to \kbd{prompt}
+applies to \kbd{prompt\_cont} as well.
+
 \subsecidx{psfile} (default \kbd{"pari.ps"}): name of the default file where
 GP is to dump its PostScript drawings (these will always be appended, so that
 no previous data are lost). Tilde and time expansion are performed.
