@@ -160,7 +160,16 @@ gred_rfrac(GEN x)
 
   p1 = ggcd(x2,p1);
   if (!isscalar(p1)) { x1=gdeuc(x1,p1); x2=gdeuc(x2,p1); }
-  xx1=numer(x3); xx2=denom(x3);
+  if (typ(x3) == t_POL)
+  {
+    xx2 = denom(content(x3));
+    xx1 = gmul(x3, xx2);
+  }
+  else
+  {
+    xx1 = numer(x3);
+    xx2 = denom(x3);
+  }
   p1=cgetg(3,t_RFRAC);
   p1[1]=lmul(x1,xx1);
   p1[2]=lmul(x2,xx2); return p1;

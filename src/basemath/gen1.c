@@ -781,8 +781,17 @@ mulscalrfrac(GEN x, GEN y)
   y2 = to_primitive(y2, &cy2);
   if (x != gun) y1 = gmul(y1,x);
   x = gdiv(gmul(cx,cy1), cy2);
-  cy1 = numer(x);
-  cy2 = denom(x); tetpil = avma;
+  if (typ(x) == t_POL)
+  {
+    cy2 = denom(content(x));
+    cy1 = gmul(x, cy2);
+  }
+  else
+  {
+    cy1 = numer(x);
+    cy2 = denom(x);
+  }
+  tetpil = avma;
   z[2] = lmul(y2, cy2);
   z[1] = lmul(y1, cy1);
   p1 = fix_rfrac_if_pol((GEN)z[1],(GEN)z[2]);
