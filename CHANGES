@@ -123,6 +123,7 @@ BA 77- typo in isinexactfield
    90- inconsistant spacing after GP error messages
    91- regrouped code between idealred and idealmin
    92- prevent 'install' in secure mode
+   93-
 
   Added
 IZ  1- [gnuplot] look up directory tree for gnuplot related files

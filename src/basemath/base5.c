@@ -257,7 +257,7 @@ rnfbasistoalg(GEN rnf,GEN x)
 
 long polegal_spec(GEN x, GEN y);
 
-/* assuem x is a t_POLMOD */
+/* assume x is a t_POLMOD */
 GEN
 lift_to_pol(GEN x)
 {
