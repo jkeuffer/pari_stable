@@ -129,7 +129,6 @@ static int var_not_changed; /* altered in reorder() */
 static int try_to_recover = 0;
 static long next_bloc;
 static GEN cur_bloc=NULL; /* current bloc in bloc list */
-static long *universal_constants;
 
 static void
 pari_handle_SIGINT()
@@ -394,52 +393,12 @@ reset_traps(int warn)
   for (i=0; i <= noer; i++) err_catch_array[i] = 0;
 }
 
-/* initialise les donnees de la bibliotheque PARI. Peut être précédée d'un
- * appel à pari_addfunctions si on ajoute d'autres fonctions au pool de base.
- */
-void
-pari_init(long parisize, long maxprime)
+/* 2 (gnil) + 2 (gzero) + 3 (gun) + 3 (gdeux) + 3 (half) + 3 (gi) */
+#define SIZEOF_UNIV_CONSTS 16*sizeof(long)
+
+static void
+init_universal_constants(GEN p)
 {
-  long i, size;
-  GEN p;
-
-#ifdef STACK_CHECK
-  pari_init_stackcheck(&i);
-#endif
-  init_defaults(0);
-  if (INIT_JMP && setjmp(environnement))
-  {
-    fprintferr("  ***   Error in the PARI system. End of program.\n");
-    exit(1);
-  }
-  if (INIT_SIG) pari_sig_init(pari_sighandler);
-  size = fix_size(parisize);
-#if __MWERKS__
-  {
-    OSErr resultCode;
-    Handle newHand = TempNewHandle(size,&resultCode);
-
-    if (!newHand) err(memer);
-    HLock(newHand);
-    bot = (long)*newHand;
-  }
-#else
-  bot = (long) gpmalloc(size);
-#endif
-  top = avma = memused = bot+size;
-  diffptr = initprimes(maxprime);
-
-  varentries = (entree**) gpmalloc((MAXVARN+1)*sizeof(entree*));
-  polvar = (GEN) gpmalloc((MAXVARN+1)*sizeof(long));
-  ordvar = (GEN) gpmalloc((MAXVARN+1)*sizeof(long));
-  polx  = (GEN*) gpmalloc((MAXVARN+1)*sizeof(GEN));
-  polun = (GEN*) gpmalloc((MAXVARN+1)*sizeof(GEN));
-  polvar[0] = evaltyp(t_VEC) | evallg(1);
-  for (i=0; i <= MAXVARN; i++) { ordvar[i] = i; varentries[i] = NULL; }
-
-  /* 2 (gnil) + 2 (gzero) + 3 (gun) + 3 (gdeux) + 3 (half) + 3 (gi) */
-  p = universal_constants = (long *) gpmalloc(16*sizeof(long));
-
   gzero = p; p+=2; gnil = p; p+=2;
   gzero[0] = gnil[0] = evaltyp(t_INT) | evallg(2);
   gzero[1] = gnil[1] = evallgefint(2);
@@ -456,6 +415,59 @@ pari_init(long parisize, long maxprime)
   gi[0] = evaltyp(t_COMPLEX) | evallg(3);
   gi[1] = zero;
   gi[2] = un;
+}
+
+static long
+init_stack(long size)
+{
+  long s = fix_size(size), old = bot? (top - bot): 1048576;
+  /* NOT gpmalloc, memer would be deadly */
+  bot = (ulong) malloc(s + SIZEOF_UNIV_CONSTS);
+  if (!bot)
+  {
+    s = old;
+    while (!bot)
+    {
+      err(warner,"not enough memory");
+      bot = (ulong) malloc(s + SIZEOF_UNIV_CONSTS);
+      s >>= 1;
+    }
+  }
+  memused = avma = top = bot+s;
+  init_universal_constants(((GEN)top) + 1);
+  return s;
+}
+
+/* initialise les donnees de la bibliotheque PARI. Peut être précédée d'un
+ * appel à pari_addfunctions si on ajoute d'autres fonctions au pool de base.
+ */
+void
+pari_init(long parisize, long maxprime)
+{
+  long i;
+
+#ifdef STACK_CHECK
+  pari_init_stackcheck(&i);
+#endif
+  init_defaults(0);
+  if (INIT_JMP && setjmp(environnement))
+  {
+    fprintferr("  ***   Error in the PARI system. End of program.\n");
+    exit(1);
+  }
+  if (INIT_SIG) pari_sig_init(pari_sighandler);
+  bot = 0; (void)init_stack(parisize);
+
+  diffptr = initprimes(maxprime);
+
+  varentries = (entree**) gpmalloc((MAXVARN+1)*sizeof(entree*));
+  polvar = (GEN) gpmalloc((MAXVARN+1)*sizeof(long));
+  ordvar = (GEN) gpmalloc((MAXVARN+1)*sizeof(long));
+  polx  = (GEN*) gpmalloc((MAXVARN+1)*sizeof(GEN));
+  polun = (GEN*) gpmalloc((MAXVARN+1)*sizeof(GEN));
+  polvar[0] = evaltyp(t_VEC) | evallg(1);
+  for (i=0; i <= MAXVARN; i++) { ordvar[i] = i; varentries[i] = NULL; }
+
   fetch_var(); /* create polx/polun[MAXVARN] */
   primetab = (GEN) gpmalloc(1 * sizeof(long));
   primetab[0] = evaltyp(t_VEC) | evallg(1);
@@ -513,7 +525,6 @@ freeall(void)
   free((void*)varentries); free((void*)ordvar); free((void*)polvar);
   free((void*)polx[MAXVARN]); free((void*)polx); free((void*)polun);
   free((void*)primetab);
-  free((void*)universal_constants);
 
   /* set first cell to 0 to inhibit recursion in all cases */
   while (cur_bloc) { *cur_bloc=0; killbloc(cur_bloc); }
@@ -1280,8 +1291,7 @@ shiftaddress(GEN x, long dec)
   }
 }
 
-/* return a clone of x structured as a gcopy. To free it, free(*base).
- * Can be copied via memcpy(, *base, ((x - *base)+lg(x)) * sizeof(long)) */
+/* return a clone of x structured as a gcopy. To free it, free(base). */
 GENbin*
 copy_bin(GEN x)
 {
@@ -1500,22 +1510,16 @@ gerepile(long av, long tetpil, GEN q)
 long
 allocatemoremem(ulong newsize)
 {
-  long sizeold = top - bot, newbot;
-
   if (!newsize)
   {
-    newsize = sizeold << 1;
+    newsize = (top - bot) << 1;
     err(warner,"doubling stack size; new stack = %ld (%.3f Mbytes)",
                 newsize, newsize/1048576.);
   }
   else if ((long)newsize < 1000L)
     err(talker,"required stack memory too small");
-  /* can't do bot = malloc directly, in case we lack memory */
-  newsize = fix_size(newsize);
-  newbot = (long) gpmalloc(newsize);
-  free((void*)bot); bot = newbot;
-  memused = avma = top = bot + newsize;
-  return newsize;
+  free((void*)bot);
+  return init_stack(newsize);
 }
 
 /* alternate stack management routine */
@@ -1612,7 +1616,7 @@ checkmemory(GEN z)
 #endif
 
 void
-init_stack()
+fill_stack()
 {
   GEN x = ((GEN)bot);
   while (x < (GEN)avma) *x++ = 0xfefefefe;
