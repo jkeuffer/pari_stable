@@ -1374,13 +1374,10 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
   GEN p1, alph, chi, nu, w, phi, pmf, pdr, pmr, kapp, pie, chib, ns;
   GEN gamm, chig, nug, delt, beta, eta, chie, nue, pia, opa;
 
-  if (DEBUGLEVEL >= 3)
+  if (DEBUGLEVEL>2)
   {
-    if (flag)
-      fprintferr("  entering Nilord2 (factorization)");
-    else
-      fprintferr("  entering Nilord2 (basis/discriminant)");
-    if (DEBUGLEVEL >= 5)
+    fprintferr("  entering Nilord");
+    if (DEBUGLEVEL>4)
     {
       fprintferr(" with parameters: p = %Z, expo = %ld\n", p, mf);
       fprintferr("  fx = %Z, gx = %Z", fx, gx);
