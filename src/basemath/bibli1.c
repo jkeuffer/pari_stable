@@ -1238,9 +1238,9 @@ PRECPB:
           prec = (prec<<1)-2;
         else
           prec = (long)((prec-2) * 1.25 + 2);
-        if (DEBUGLEVEL) err(warnprec,"lllfp",prec);
         if (isexact)
         {
+          if (DEBUGLEVEL>2) err(warnprec,"lllfp (exact)",prec);
           if (!in_place) H = H? gmul(H, h): h;
           xinit = gram? qf_base_change(xinit, h, 1): gmul(xinit, h);
           gerepileall(av, in_place? 1: 2, &xinit, &H);
@@ -1252,6 +1252,7 @@ PRECPB:
         }
         else
         {
+          if (DEBUGLEVEL) err(warnprec,"lllfp",prec);
           x = gprec_w(xinit,prec);
           x = gram? qf_base_change(x, h, 1): gmul(x, h);
           gerepileall(av, 2, &h, &x);
