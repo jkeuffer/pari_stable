@@ -1197,78 +1197,75 @@ gtodblList(GEN data, long flags)
 
   if (nl == 1) err(talker,"single vector in gtodblList");
   /* Allocate memory, then convert coord. to double */
-  l=(dblPointList*) gpmalloc(nl*sizeof(dblPointList));
+  l = (dblPointList*) gpmalloc(nl*sizeof(dblPointList));
   for (i=0; i<nl-1; i+=2)
   {
-    u=i+1;
-    x=(GEN)data[u]; tx = typ(x);
-    y=(GEN)data[u+1]; ty = typ(y);
+    u = i+1;
+    x = (GEN)data[u];   tx = typ(x);
+    y = (GEN)data[u+1]; ty = typ(y);
     if (!is_vec_t(tx) || !is_vec_t(ty)) err(ploter4);
-    lx=lg(x); if (lg(y)!=lx) err(ploter5);
+    lx = lg(x); if (lg(y) != lx) err(ploter5);
     if (!param && lx != lx1) err(ploter5);
+
     lx--;
-
-    if (lx)
+    l[i].d = (double*) gpmalloc(lx*sizeof(double));
+    l[u].d = (double*) gpmalloc(lx*sizeof(double));
+    for (j=0; j<lx; j=v)
     {
-      l[i].d = (double*) gpmalloc(lx*sizeof(double));
-      l[u].d = (double*) gpmalloc(lx*sizeof(double));
-
-      for (j=0; j<lx; j=v)
-      {
-	v=j+1;
-	l[i].d[j]=gtodouble((GEN)x[v]);
-	l[u].d[j]=gtodouble((GEN)y[v]);
-      }
+      v = j+1;
+      l[i].d[j] = gtodouble((GEN)x[v]);
+      l[u].d[j] = gtodouble((GEN)y[v]);
     }
-    l[i].nb=l[u].nb=lx;
+    l[i].nb = l[u].nb = lx;
   }
-
-  xsml=xbig=l[0].d[0]; ysml=ybig=l[1].d[0];
 
   /* Now compute extremas */
   if (param)
   {
-    l[0].nb=nl/2;
-    for (i=0; i<l[0].nb; i+=2)
-    {
-      u=i+1;
-      for (j=0; j<l[u].nb; j++)
+    l[0].nb = nl/2;
+    for (i=0; i < l[0].nb; i+=2)
+      if (l[i+1].nb)
       {
-	if (l[i].d[j]<xsml)
-	  xsml=l[i].d[j];
-	else
-	  if (l[i].d[j]>xbig) xbig=l[i].d[j];
+        xsml = xbig = l[i  ].d[0];
+        ysml = ybig = l[i+1].d[0]; break;
+      }
+    if (i >= l[0].nb) { free(l); return NULL; }
 
-	if (l[u].d[j]<ysml)
-	  ysml=l[u].d[j];
-	else
-	  if (l[u].d[j]>ybig) ybig=l[u].d[j];
+    for (i=0; i < l[0].nb; i+=2)
+    {
+      u = i+1;
+      for (j=0; j < l[u].nb; j++)
+      {
+	if      (l[i].d[j] < xsml) xsml = l[i].d[j];
+	else if (l[i].d[j] > xbig) xbig = l[i].d[j];
+
+	if      (l[u].d[j] < ysml) ysml = l[u].d[j];
+	else if (l[u].d[j] > ybig) ybig = l[u].d[j];
       }
     }
   }
   else
   {
-    l[0].nb=nl-1;
-    for (j=0; j<l[1].nb; j++)
+    if (!l[0].nb) { free(l); return NULL; }
+    l[0].nb = nl-1;
+
+    xsml = xbig = l[0].d[0];
+    ysml = ybig = l[1].d[0];
+
+    for (j=0; j < l[1].nb; j++)
     {
-      if (l[0].d[j]<xsml)
-	xsml=l[0].d[j];
-      else
-	if (l[0].d[j]>xbig) xbig=l[0].d[j];
+      if      (l[0].d[j] < xsml) xsml = l[0].d[j];
+      else if (l[0].d[j] > xbig) xbig = l[0].d[j];
     }
-    for (i=1; i<=l[0].nb; i++)
-    {
-      for (j=0; j<l[i].nb; j++)
+    for (i=1; i <= l[0].nb; i++)
+      for (j=0; j < l[i].nb; j++)
       {
-	if (l[i].d[j]<ysml)
-	  ysml=l[i].d[j];
-	else
-	  if (l[i].d[j]>ybig) ybig=l[i].d[j];
+	if      (l[i].d[j] < ysml) ysml = l[i].d[j];
+	else if (l[i].d[j] > ybig) ybig = l[i].d[j];
       }
-    }
   }
-  l[0].xsml=xsml; l[0].xbig=xbig;
-  l[0].ysml=ysml; l[0].ybig=ybig;
+  l[0].xsml = xsml; l[0].xbig = xbig;
+  l[0].ysml = ysml; l[0].ybig = ybig;
   return l;
 }
 
