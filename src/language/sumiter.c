@@ -74,7 +74,7 @@ forstep(entree *ep, GEN a, GEN b, GEN s, char *ch)
   }
   ss = gsigne(s);
   if (!ss) err(talker, "step equal to zero in forstep");
-  cmp = (ss > 0)? gcmp: negcmp;
+  cmp = (ss > 0)? &gcmp: &negcmp;
   i = 0;
   while (cmp(a,b) <= 0)
   {

@@ -2010,7 +2010,7 @@ gauss_pivot_ker(GEN x0, GEN a, GEN *dd, long *rr)
     if (n != m) err(consister,"gauss_pivot_ker");
     for (k=1; k<=n; k++) coeff(x,k,k) = lsub(gcoeff(x,k,k), a);
   }
-  get_pivot = use_maximal_pivot(x)? gauss_get_pivot_max: gauss_get_pivot_NZ;
+  get_pivot = use_maximal_pivot(x)? &gauss_get_pivot_max: &gauss_get_pivot_NZ;
   c=cgetg(m+1,t_VECSMALL); for (k=1; k<=m; k++) c[k]=0;
   d=cgetg(n+1,t_VECSMALL);
   av=avma; lim=stack_lim(av,1);

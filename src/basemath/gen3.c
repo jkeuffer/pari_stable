@@ -3376,8 +3376,8 @@ qf_base_change(GEN q, GEN M, int flag)
 {
   long i,j, k = lg(M), n=lg(q);
   GEN res = cgetg(k,t_MAT);
-  GEN (*qf)(GEN,GEN,long)  = flag? qfeval0_i:  qfeval0;
-  GEN (*qfb)(GEN,GEN,GEN,long) = flag? qfbeval0_i: qfbeval0;
+  GEN (*qf)(GEN,GEN,long)  = flag? &qfeval0_i:  &qfeval0;
+  GEN (*qfb)(GEN,GEN,GEN,long) = flag? &qfbeval0_i: &qfbeval0;
 
   if (n==1)
   {
