@@ -1,0 +1,13 @@
+Function: issquare
+Section: number_theoretical
+C-Name: gcarrecomplet
+Prototype: GD&
+Help: issquare(x,{&n}): true(1) if x is a square, false(0) if not. If n is
+ given puts the exact square root there if it was computed
+Description: 
+ (int):bool	carreparfait($1)
+ (mp):int	gcarreparfait($1)
+ (gen):gen	gcarreparfait($1)
+ (int, &int):bool	carrecomplet($1, &$2)
+ (gen, &gen):gen	gcarrecomplet($1, &$2)
+

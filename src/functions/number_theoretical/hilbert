@@ -1,0 +1,7 @@
+Function: hilbert
+Section: number_theoretical
+C-Name: hil0
+Prototype: lGGDG
+Help: hilbert(x,y,{p}): Hilbert symbol at p of x,y. If x,y are integermods
+ or p-adic, p can be omitted
+

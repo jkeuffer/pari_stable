@@ -1,0 +1,8 @@
+Function: ellheight
+Section: elliptic_curves
+C-Name: ellheight0
+Prototype: GGD2,L,p
+Help: ellheight(e,x,{flag=0}): canonical height of point x on elliptic curve
+ E defined by the vector e. flag is optional and should be 0 or 1 (0 by
+ default): 0: use theta-functions, 1: use Tate's method
+

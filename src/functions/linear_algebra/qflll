@@ -1,0 +1,23 @@
+Function: qflll
+Section: linear_algebra
+C-Name: qflll0
+Prototype: GD0,L,p
+Help: qflll(x,{flag=0}): LLL reduction of the vectors forming the matrix x
+ (gives the unimodular transformation matrix). flag is optional, and can be
+ 0: default, 1: lllint algorithm for integer matrices, 2: lllintpartial
+ algorithm for integer matrices, 4: lllkerim giving the kernel and the LLL
+ reduced image, 5: lllkerimgen same but if the matrix has polynomial
+ coefficients, 8: lllgen, same as qflll when the coefficients are polynomials
+Description: 
+ (vec, ?0):vec:prec	lll($1, prec)
+ (vec, 1):vec	lllint($1)
+ (vec, 2):vec	lllintpartial($1)
+ (vec, 3):vec	lllrat($1)
+ (vec, 4):vec	lllkerim($1)
+ (vec, 5):vec	lllkerimgen($1)
+ (vec, 7):vec:prec	lll1($1, prec)
+ (vec, 8):vec	lllgen($1)
+ (vec, 9):vec	lllintwithcontent($1)
+ (vec, #small):vec	$"Bad flag in qflll"
+ (vec, small):vec:prec	qflll0($1, $2, prec)
+

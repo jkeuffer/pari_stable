@@ -1,0 +1,8 @@
+Function: round
+Section: conversions
+C-Name: round0
+Prototype: GD&
+Help: round(x,{&e}): take the nearest integer to all the coefficients of x.
+ If e is present, do not take into account loss of integer part precision,
+ and set e = error estimate in bits
+

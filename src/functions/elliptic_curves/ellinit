@@ -1,0 +1,14 @@
+Function: ellinit
+Section: elliptic_curves
+C-Name: ellinit0
+Prototype: GD0,L,p
+Help: ellinit(x,{flag=0}): x being the vector [a1,a2,a3,a4,a6], gives the
+ vector:
+ [a1,a2,a3,a4,a6,b2,b4,b6,b8,c4,c6,delta,j,[e1,e2,e3],w1,w2,eta1,eta2,area].
+ If the curve is defined over a p-adic field, the last six components are
+ replaced by root,u^2,u,q,w,0. If optional flag is 1, omit them altogether
+Description: 
+ (gen, ?0):bell:prec	initell($1, prec)
+ (gen, 1):ell	smallinitell($1)
+ (gen, small):ell:prec	ellinit0($1, $2, prec)
+

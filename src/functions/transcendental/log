@@ -1,0 +1,11 @@
+Function: log
+Section: transcendental
+C-Name: log0
+Prototype: GD0,M,p\nAGM==1
+Help: log(x,{flag=0}): natural logarithm of x. flag is optional, and can be
+ 0: default, or 1: calls logagm, computed using the agm
+Description: 
+ (gen, ?0):gen:prec	glog($1, prec)
+ (gen, 1):gen:prec	glogagm($1, prec)
+ (gen, small):gen:prec	log0($1, prec, $2)
+

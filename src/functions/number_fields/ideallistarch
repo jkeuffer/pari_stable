@@ -1,0 +1,9 @@
+Function: ideallistarch
+Section: number_fields
+C-Name: ideallistarch0
+Prototype: GGDGD0,L,
+Help: ideallistarch(nf,list,{arch=[]},{flag=0}): vector of vectors of all
+ idealstarinit of all modules in list with archimedean arch (void if ommited
+ or arch=[]) added. flag is optional whose binary digits are toggles meaning
+ 1: give generators as well; 2: list format is [L,U], see ideallist
+

@@ -1,0 +1,6 @@
+Function: floor
+Section: conversions
+C-Name: gfloor
+Prototype: G
+Help: floor(x): floor of x = largest integer<=x
+

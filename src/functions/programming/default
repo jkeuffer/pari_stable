@@ -1,0 +1,10 @@
+Function: default
+Class: gp
+Section: programming
+C-Name: default0
+Prototype: D\"\",r,D\"\",s,D0,L,
+Help: default({opt},{v},{flag}): set the default opt to v. If v is omitted,
+ print the current default for opt. If no argument is given, print a list of
+ all defaults as well as their values. If flag is non-zero, return the result
+ instead of printing it on screen. See manual for details
+

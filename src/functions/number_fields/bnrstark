@@ -1,0 +1,14 @@
+Function: bnrstark
+Section: number_fields
+C-Name: bnrstark
+Prototype: GDGD0,L,p
+Help: bnrstark(bnr,{subgroup},{flag=0}): bnr being as output by
+ bnrinit(,,1), finds a relative equation for the class field corresponding to
+ the module in bnr and the given congruence subgroup (the trivial subgroup if
+ omitted) using Stark's units. The ground field and the class field must be
+ totally real. flag is optional and may be set to 0 to obtain a reduced
+ polynomial, 1 to obtain a non reduced polynomial, 2 to obtain an absolute
+ polynomial and 3 to obtain the irreducible polynomial of the Stark unit, 0
+ being default. If 4 is added to the value of flag, try hard to find the best
+ modulus
+

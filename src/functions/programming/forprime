@@ -1,0 +1,7 @@
+Function: forprime
+Section: programming
+C-Name: forprime
+Prototype: vV=GGI
+Help: forprime(X=a,b,seq): the sequence is evaluated, X running over the
+ primes between a and b
+

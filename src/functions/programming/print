@@ -1,0 +1,7 @@
+Function: print
+Class: gp
+Section: programming
+C-Name: print
+Prototype: vs*
+Help: print(a): outputs a (in raw format) ending with newline
+

@@ -1,0 +1,8 @@
+Function: read
+Class: gp
+Section: programming
+C-Name: read0
+Prototype: D\"\",s,
+Help: read({filename}): read from the input file filename. If filename is
+ omitted, reread last input file (be it from readfile or \\r)
+

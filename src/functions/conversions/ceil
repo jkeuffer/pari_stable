@@ -1,0 +1,11 @@
+Function: ceil
+Section: conversions
+C-Name: gceil
+Prototype: G
+Help: ceil(x): ceiling of x=smallest integer>=x
+Description: 
+ (small):small	($1)
+ (int):int	icopy($1)
+ (mp):int	gceil($1)
+ (gen):gen	gceil($1)
+

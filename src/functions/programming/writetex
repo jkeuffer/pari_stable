@@ -1,0 +1,8 @@
+Function: writetex
+Class: gp
+Section: programming
+C-Name: writetex
+Prototype: vss*
+Help: writetex(filename,a): write the string expression a (same format as
+ print) to filename, in TeX format
+

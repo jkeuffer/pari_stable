@@ -1,0 +1,6 @@
+Function: znorder
+Section: number_theoretical
+C-Name: order
+Prototype: G
+Help: znorder(x): order of the integermod x in (Z/nZ)*
+

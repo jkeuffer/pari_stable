@@ -1,0 +1,12 @@
+Function: bnrdisclist
+Section: number_fields
+C-Name: bnrdisclist0
+Prototype: GGDGD0,L,
+Help: bnrdisclist(bnf,bound,{arch},{flag=0}): gives list of discriminants of
+ ray class fields of all conductors up to norm bound, where the ramified
+ Archimedean places are given by arch (unramified at infinity if arch is
+ void), in a long vector format. If (optional) flag is present and non-null,
+ give arch all the possible values. Supports the alternative syntax
+ bnrdisclist(bnf,list), where list is as output by ideallist or ideallistarch
+ (with units)
+

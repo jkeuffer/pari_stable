@@ -1,0 +1,12 @@
+Function: plotterm
+Class: highlevel
+Section: graphic
+C-Name: term_set
+Prototype: ls
+Help: plotterm(\"termname\"): set terminal to plot in high resolution to.
+ Ignored by some drivers. In gnuplot driver possible terminals are the same
+ as in gnuplot, terminal options can be put after the terminal name and
+ space; terminal size can be put immediately after the name, as in
+ \"gif=300,200\". If term is \"?\", lists possible values. Positive return
+ value means success
+

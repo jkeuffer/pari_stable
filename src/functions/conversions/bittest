@@ -1,0 +1,13 @@
+Function: bittest
+Section: conversions
+C-Name: gbittest3
+Prototype: GGD1,L,
+Help: bittest(x,n,{c=1}): extracts |c| bits starting from number n
+ (coefficient of 2^n) of the integer x, returning the bits as an integer
+ bitmap; negative c means: treat negative values of x as if modulo big power
+ of 2; bits at negative offsets are zeros
+Description: 
+ (small, small):bool:parens	($(1)>>$(2))&1
+ (int, small):bool	bittest($1, $2)
+ (gen, gen):gen	gbittest($1, $2)
+

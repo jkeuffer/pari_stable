@@ -1,0 +1,7 @@
+Function: polgalois
+Section: number_fields
+C-Name: galois
+Prototype: Gp
+Help: polgalois(x): Galois group of the polynomial x (see manual for group
+ coding)
+

@@ -1,0 +1,6 @@
+Function: incgamc
+Section: transcendental
+C-Name: incgam3
+Prototype: GGp
+Help: incgamc(s,x): complementary incomplete gamma function
+

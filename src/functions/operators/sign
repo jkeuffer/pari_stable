@@ -1,0 +1,6 @@
+Function: sign
+Section: operators
+C-Name: gsigne
+Prototype: lG
+Help: sign(x): sign of x, of type integer, real or fraction
+

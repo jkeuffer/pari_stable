@@ -1,0 +1,10 @@
+Function: chinese
+Section: number_theoretical
+C-Name: chinese
+Prototype: GDG
+Help: chinese(x,{y}): x,y being integers modulo mx and my, finds z such that
+ z is congruent to x mod mx and y mod my
+Description: 
+ (gen):gen	chinese($1)
+ (gen, gen):gen	chinois($1, $2)
+

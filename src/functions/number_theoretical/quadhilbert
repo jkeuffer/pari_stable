@@ -1,0 +1,12 @@
+Function: quadhilbert
+Section: number_theoretical
+C-Name: quadhilbert
+Prototype: GDGp
+Help: quadhilbert(D,{flag=0}): relative equation for the Hilbert class field
+ of the quadratic field of discriminant D (which can also be a bnf). If flag
+ is a non-zero integer and D<0, list of [form,root(form)] (used for
+ contructing subfields). If D<0, flag can also be a 2-component vector [p,q],
+ where p,q are the prime numbers needed for Schertz's method. In that case,
+ return 0 if [p,q] not suitable. If D>0 and flag is non-zero, try hard to
+ find the best modulus
+

@@ -1,0 +1,4 @@
+Function: O
+Section: polynomials
+Help: O(a^b): p-adic or power series zero with precision given by b
+

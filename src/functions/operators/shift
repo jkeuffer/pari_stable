@@ -1,0 +1,8 @@
+Function: shift
+Section: operators
+C-Name: gshift3
+Prototype: GLD0,L,
+Help: shift(x,n,{flag=0}): shift x left n bits if n>=0, right -n bits if
+ n<0. If flag is true and n is negative, will treat negative integer x as if
+ modulo big power of 2, otherwise sign of x is ignored but preserved
+

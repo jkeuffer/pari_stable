@@ -1,0 +1,13 @@
+Function: quadray
+Section: number_theoretical
+C-Name: quadray
+Prototype: GGDGp
+Help: quadray(D,f,{flag=0}): relative equation for the ray class field of
+ conductor f for the quadratic field of discriminant D (which can also be a
+ bnf). For D < 0, flag has the following meaning: if flag is an odd integer,
+ output instead the vector of [ideal,corresponding root]. It can also be a
+ two component vector [lambda,flag], where flag is as above and lambda is the
+ technical element of bnf necessary for Schertz's method. In that case,
+ return 0 if lambda is not suitable. For D > 0, if flag is non-zero, try hard
+ to find the best modulus
+

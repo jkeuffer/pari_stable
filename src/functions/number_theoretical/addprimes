@@ -1,0 +1,12 @@
+Function: addprimes
+Section: number_theoretical
+C-Name: addprimes
+Prototype: DG
+Help: addprimes({x=[]}): add primes in the vector x (with at most 100
+ components) to the prime table. x may also be a single integer. The
+ \"primes\" may in fact be composite, obtained for example by the function
+ factor(x,0), and in that case the message \"impossible inverse modulo\" will
+ give you some factors. List the current extra primes if x is omitted. If
+ some primes are added which divide non trivially the existing table,
+ suitable updating is done
+

@@ -1,0 +1,6 @@
+Function: matid
+Section: linear_algebra
+C-Name: idmat
+Prototype: L
+Help: matid(n): identity matrix of order n (n C-integer)
+
