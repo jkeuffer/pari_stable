@@ -104,38 +104,40 @@ d_ellLHS(GEN e, GEN z)
 static void
 smallinitell0(GEN x, GEN y)
 {
-  GEN b2,b4,b6,b8,d,j,a11,a13,a33,a64,b81,b22,c4,c6;
+  GEN b2, b4, b6, b8, d, j, a11, a13, a33, a64, b81, b22, c4, c6;
   long i;
 
-  checksell(x); for (i=1; i<=5; i++) y[i]=x[i];
+  checksell(x); for (i=1; i<=5; i++) y[i] = x[i];
+  a11 = gsqr((GEN)y[1]);
+  b2 = gadd(a11, gmul2n((GEN)y[2],2));
+  y[6] = (long)b2;
 
-  b2=gadd(a11=gsqr((GEN)y[1]),gmul2n((GEN)y[2],2));
-  y[6]=(long)b2;
+  a13 = gmul((GEN)y[1],(GEN)y[3])
+  b4 = gadd(a13, gmul2n((GEN)y[4],1));
+  y[7] = (long)b4;
 
-  b4=gadd(a13=gmul((GEN)y[1],(GEN)y[3]),gmul2n((GEN)y[4],1));
-  y[7]=(long)b4;
+  a33 = gsqr((GEN)y[3]);
+  a64 = gmul2n((GEN)y[5],2); b6 = gadd(a33,a64);
+  y[8] = (long)b6;
 
-  b6=gadd(a33=gsqr((GEN)y[3]),a64=gmul2n((GEN)y[5],2));
-  y[8]=(long)b6;
+  b81 = gadd(gadd(gmul(a11,(GEN)y[5]),gmul(a64,(GEN)y[2])),gmul((GEN)y[2],a33));
+  b8 = gsub(b81,gmul((GEN)y[4],gadd((GEN)y[4],a13)));
+  y[9] = (long)b8;
 
-  b81=gadd(gadd(gmul(a11,(GEN)y[5]),gmul(a64,(GEN)y[2])),gmul((GEN)y[2],a33));
-  b8=gsub(b81,gmul((GEN)y[4],gadd((GEN)y[4],a13)));
-  y[9]=(long)b8;
+  b22 = gsqr(b2);
+  c4 = gadd(b22,gmulsg(-24,b4));
+  y[10] = (long)c4;
 
-  c4=gadd(b22=gsqr(b2),gmulsg(-24,b4));
-  y[10]=(long)c4;
+  c6 = gadd(gmul(b2,gsub(gmulsg(36,b4),b22)),gmulsg(-216,b6));
+  y[11] = (long)c6;
 
-  c6=gadd(gmul(b2,gsub(gmulsg(36,b4),b22)),gmulsg(-216,b6));
-  y[11]=(long)c6;
-
-  b81=gadd(gmul(b22,b8),gmulsg(27,gsqr(b6)));
-  d=gsub(gmul(b4,gadd(gmulsg(9,gmul(b2,b6)),gmulsg(-8,gsqr(b4)))),b81);
-  y[12]=(long)d;
-
+  b81 = gadd(gmul(b22,b8),gmulsg(27,gsqr(b6)));
+  d = gsub(gmul(b4,gadd(gmulsg(9,gmul(b2,b6)),gmulsg(-8,gsqr(b4)))),b81);
+  y[12] = (long)d;
   if (gcmp0(d)) err(talker,"singular curve in ellinit");
 
-  j = gdiv(gmul(gsqr(c4),c4),d);
-  y[13]=(long)j;
+  j = gdiv(gmul(gsqr(c4),c4), d);
+  y[13] = (long)j;
 }
 
 GEN
@@ -177,32 +179,29 @@ ellprint(GEN e)
 static GEN
 do_agm(GEN *ptx1, GEN a1, GEN b1, long prec, long sw)
 {
-  GEN p1,r1,a,b,x,x1;
-  long G;
+  GEN p1, r1, a, b, x, x1;
+  long G = 6 - bit_accuracy(prec);
 
   x1 = gmul2n(gsub(a1,b1),-2);
-  if (gcmp0(x1))
-    err(precer,"initell");
-  G = 6 - bit_accuracy(prec);
+  if (gcmp0(x1)) err(precer,"initell");
   for(;;)
   {
-    a=a1; b=b1; x=x1;
-    b1=gsqrt(gmul(a,b),prec); setsigne(b1,sw);
-    a1=gmul2n(gadd(gadd(a,b),gmul2n(b1,1)),-2);
-    r1=gsub(a1,b1);
-    p1=gsqrt(gdiv(gadd(x,r1),x),prec);
-    x1=gmul(x,gsqr(gmul2n(gaddsg(1,p1),-1)));
+    a = a1; b = b1; x = x1;
+    b1 = gsqrt(gmul(a,b),prec); setsigne(b1, sw);
+    a1 = gmul2n(gadd(gadd(a,b), gmul2n(b1,1)),-2);
+    r1 = gsub(a1,b1);
+    p1 = gsqrt(gdiv(gadd(x,r1),x),prec);
+    x1 = gmul(x,gsqr(gmul2n(gaddsg(1,p1),-1)));
     if (gcmp0(r1) || gexpo(r1) <= G + gexpo(b1)) break;
   }
-  if (gprecision(x1)*2 <= (prec+2))
-    err(precer,"initell");
+  if (gprecision(x1)*2 <= (prec+2)) err(precer,"initell");
   *ptx1 = x1; return ginv(gmul2n(a1,2));
 }
 
 static GEN
 do_padic_agm(GEN *ptx1, GEN a1, GEN b1, GEN p)
 {
-  GEN p1,r1,a,b,x,bmod1, bmod = modii((GEN)b1[4],p), x1 = *ptx1;
+  GEN p1, r1, a, b, x, bmod1, bmod = modii((GEN)b1[4],p), x1 = *ptx1;
   long mi;
   
   if (!x1) x1 = gmul2n(gsub(a1,b1),-2);
