@@ -720,7 +720,7 @@ mulsr(long x, GEN y)
   z[1] = evalsigne(s) | evalexpo(m+e); return z;
 }
 
-static GEN quickmulii(GEN a, GEN b, long na, long nb);
+static GEN muliispec(GEN a, GEN b, long na, long nb);
 /*#define KARAMULR_VARIANT*/
 
 #ifdef KARAMULR_VARIANT
@@ -731,11 +731,11 @@ karamulrr1(GEN y, GEN x, long ly, long lz)
   long i, l, lz2 = (lz+2)>>1, lz3 = lz-lz2;
   GEN lo1, lo2, hi;
 
-  hi = quickmulii(x,y, lz2,lz2);
+  hi = muliispec(x,y, lz2,lz2);
   i = lz2; while (i<lz && !x[i]) i++;
-  lo1 = quickmulii(y,x+i, lz2,lz-i);
+  lo1 = muliispec(y,x+i, lz2,lz-i);
   i = lz2; while (i<ly && !y[i]) i++;
-  lo2 = quickmulii(x,y+i, lz2,ly-i);
+  lo2 = muliispec(x,y+i, lz2,ly-i);
   if (signe(lo1))
   {
     if (ly!=lz) { lo2 = addshiftw(lo1,lo2,1); lz3++; }
@@ -766,7 +766,7 @@ mulrrz_i(GEN z, GEN x, GEN y, long lz, long ly, long sz)
 #ifdef KARAMULR_VARIANT
     GEN hi = karamulrr1(y+2, x+2, lz+flag-2, lz-2); 
 #else
-    GEN hi = quickmulii(y+2, x+2, lz+flag-2, lz-2);
+    GEN hi = muliispec(y+2, x+2, lz+flag-2, lz-2);
 #endif
     long i, garde = hi[lz];
     if (hi[2] < 0)
@@ -1843,7 +1843,7 @@ absr_cmp(GEN x, GEN y)
 /********************************************************************/
 /* nx >= ny = num. of digits of x, y (not GEN, see mulii) */
 INLINE GEN
-muliispec(GEN x, GEN y, long nx, long ny)
+muliispec_basecase(GEN x, GEN y, long nx, long ny)
 {
   GEN z2e,z2d,yd,xd,ye,zd;
   long p1,lz;
@@ -1881,7 +1881,7 @@ muliispec(GEN x, GEN y, long nx, long ny)
 }
 
 INLINE GEN
-sqrispec(GEN x, long nx)
+sqrispec_basecase(GEN x, long nx)
 {
   GEN z2e,z2d,yd,xd,zd,x0,z0;
   long p1,lz;
@@ -1975,7 +1975,7 @@ addshiftw(GEN x, GEN y, long d)
  * c,c0,c1,c2 are genuine GENs.
  */
 static GEN
-quickmulii(GEN a, GEN b, long na, long nb)
+muliispec(GEN a, GEN b, long na, long nb)
 {
   GEN a0,c,c0;
   long n0, n0a, i;
@@ -1984,7 +1984,7 @@ quickmulii(GEN a, GEN b, long na, long nb)
   if (na < nb) swapspec(a,b, na,nb);
   if (nb == 1) return mulsispec(*b, a, na);
   if (nb == 0) return gzero;
-  if (nb < KARATSUBA_MULI_LIMIT) return muliispec(a,b,na,nb);
+  if (nb < KARATSUBA_MULI_LIMIT) return muliispec_basecase(a,b,na,nb);
   i=(na>>1); n0=na-i; na=i;
   av=avma; a0=a+na; n0a=n0;
   while (!*a0 && n0a) { a0++; n0a--; }
@@ -1995,16 +1995,16 @@ quickmulii(GEN a, GEN b, long na, long nb)
     long n0b;
 
     nb -= n0;
-    c = quickmulii(a,b,na,nb);
+    c = muliispec(a,b,na,nb);
     b0 = b+nb; n0b = n0;
     while (!*b0 && n0b) { b0++; n0b--; }
     if (n0b)
     {
-      c0 = quickmulii(a0,b0, n0a,n0b);
+      c0 = muliispec(a0,b0, n0a,n0b);
 
       c2 = addiispec(a0,a, n0a,na);
       c1 = addiispec(b0,b, n0b,nb);
-      c1 = quickmulii(c1+2,c2+2, lgefint(c1)-2,lgefint(c2)-2);
+      c1 = muliispec(c1+2,c2+2, lgefint(c1)-2,lgefint(c2)-2);
       c2 = addiispec(c0+2, c+2, lgefint(c0)-2,lgefint(c) -2);
 
       c1 = subiispec(c1+2,c2+2, lgefint(c1)-2,lgefint(c2)-2);
@@ -2012,14 +2012,14 @@ quickmulii(GEN a, GEN b, long na, long nb)
     else
     {
       c0 = gzero;
-      c1 = quickmulii(a0,b, n0a,nb);
+      c1 = muliispec(a0,b, n0a,nb);
     }
     c = addshiftw(c,c1, n0);
   }
   else
   {
-    c = quickmulii(a,b,na,nb);
-    c0 = quickmulii(a0,b,n0a,nb);
+    c = muliispec(a,b,na,nb);
+    c0 = muliispec(a0,b,n0a,nb);
   }
   return gerepileuptoint(av, addshiftw(c,c0, n0));
 }
@@ -2034,7 +2034,7 @@ mulii(GEN a,GEN b)
   sa=signe(a); if (!sa) return gzero;
   sb=signe(b); if (!sb) return gzero;
   if (sb<0) sa = -sa;
-  z = quickmulii(a+2,b+2, lgefint(a)-2,lgefint(b)-2);
+  z = muliispec(a+2,b+2, lgefint(a)-2,lgefint(b)-2);
   setsigne(z,sa); return z;
 }
 
@@ -2101,25 +2101,25 @@ resmod2n(GEN x, long n)
 }
 
 static GEN
-quicksqri(GEN a, long na)
+sqrispec(GEN a, long na)
 {
   GEN a0,c;
   long n0, n0a, i;
   pari_sp av;
 
-  if (na < KARATSUBA_SQRI_LIMIT) return sqrispec(a,na);
+  if (na < KARATSUBA_SQRI_LIMIT) return sqrispec_basecase(a,na);
   i=(na>>1); n0=na-i; na=i;
   av=avma; a0=a+na; n0a=n0;
   while (!*a0 && n0a) { a0++; n0a--; }
-  c = quicksqri(a,na);
+  c = sqrispec(a,na);
   if (n0a)
   {
-    GEN t, c1, c0 = quicksqri(a0,n0a);
+    GEN t, c1, c0 = sqrispec(a0,n0a);
 #if 0
-    c1 = shifti(quickmulii(a0,a, n0a,na),1);
+    c1 = shifti(muliispec(a0,a, n0a,na),1);
 #else /* slower !!! */
     t = addiispec(a0,a,n0a,na);
-    t = quicksqri(t+2,lgefint(t)-2);
+    t = sqrispec(t+2,lgefint(t)-2);
     c1= addiispec(c0+2,c+2, lgefint(c0)-2, lgefint(c)-2);
     c1= subiispec(t+2, c1+2, lgefint(t)-2, lgefint(c1)-2);
 #endif
@@ -2132,7 +2132,7 @@ quicksqri(GEN a, long na)
 }
 
 GEN
-sqri(GEN a) { return quicksqri(a+2, lgefint(a)-2); }
+sqri(GEN a) { return sqrispec(a+2, lgefint(a)-2); }
 
 /* Old cgiv without reference count (which was not used anyway)
  * Should be a macro.
