@@ -1,4 +1,5 @@
 #!@perl@
+
 # $Id$
 #
 # Features:
@@ -954,8 +955,16 @@ sub puts {
 
 # digests an eaten paragraph
 
+$ending = 0;
+
+sub end_TeX {
+  $par = '';
+  $ending = 1;
+}
+
 sub paragraph {
   local($par);
+  return 0 if $ending;
   $par=<>;
   return 0 unless defined $par;
   return 1 unless $par =~ /\S/;			# whitespace only
@@ -1169,7 +1178,7 @@ sub f_putpar {
         warn "Putting Parentheses $out[$#out]\n__END__\n" if $debug & $debug_record;
   $out[$#out]=&join(&string2record($l),
       &join($out[$#out],&string2record($r)));
-        &finish(1,1);
+  &finish(1);
 }
 
 sub f_putover_string {
@@ -1360,7 +1369,7 @@ sub get_balanced {
 sub open_curly {
   #&puts("{") unless $tokenByToken[$#level];
   &start("}");
-} 
+}
 
 # Deletes extra spaces at the end of a record
 
@@ -1430,7 +1439,7 @@ sub ddollar {
     &start('$$');
   }
   $par =~ s/^\s+//;
-} 
+}
 
 sub item {
   &finishBuffer;
@@ -1760,8 +1769,19 @@ sub makehigh {
   $_[0]=&join($_[0],&string2record(" " x $_[4])) if $_[4];
 }
 
+sub f_FOOTNOTE {
+  &finish(1);
+  puts(">>> ");
+}
+
+sub footnote {
+  puts("<<<FOOTNOTE: ");
+  &start(1, "f_FOOTNOTE");
+  $tokenByToken[$#level]=1;
+}
 
 sub right {
+  close_curly();
   &finish("LeftRight",1);
   &trim(1);
   &collapse(1);
@@ -1772,6 +1792,7 @@ sub f_left {
   &collapse(1);
   &finish(1);
   &start("LeftRight");
+  open_curly();			# Fake a {}-group for \over etc.
 }
 
 sub left {
@@ -1796,6 +1817,7 @@ sub f_leftright_go {
   &finish("junk");
 }
 
+# Used to put \left SOMETHING \right SOMETHING around a group
 sub beg_lr {
   &start(1,"f_leftright_go" . ";" . shift);
   $tokenByToken[$#level]=1;
@@ -2132,7 +2154,7 @@ if ($opt_ignorefonts) {
 
 for ("par","endtitle","endauthor","endaffil","endaddress","endemail","enddate",
      "endhead","key","medskip","smallskip","bigskip","newpage",
-     "vfill","eject","endgraph") {
+     "vfill","eject") {
   $type{"\\$_"}="sub";
   $contents{"\\$_"}="par";
 }
@@ -2206,6 +2228,9 @@ $contents{"\\left"}="left";
 $type{"\\right"}="sub";
 $contents{"\\right"}="right";
 
+$type{'\footnote'}="sub";
+$contents{'\footnote'}="footnote";
+
 $type{"\\underline"}="sub1";
 $contents{"\\underline"}="underline";
 
@@ -2263,9 +2288,6 @@ $contents{"\\cite"}="putpar;[;]";
 $type{"\\begin"}="sub1";
 $contents{"\\begin"}="begin";
 
-$type{"\\end"}="sub1";
-$contents{"\\end"}="end";
-
 for ('@',"_","\$","{","}","#","&","arccos","arcsin","arctan","arg","cos",
     "cosh","cot","coth","csc","deg","det","dim","exp","gcd","hom",
     "inf","ker","lg","lim","liminf","limsup","ln","log","max","min",
@@ -2302,7 +2324,6 @@ for ("equation","gather","align"
 for ("matrix","CD","smallmatrix"
      ) {$environment{"$_"}="matrix,endmatrix;1;c";} 
 
-# XXXX Noindent is needed somewhere...
 for ("remark", "example", "theorem", "definition", "proof", "abstract",
      "proposition", "amplification", "lemma", "corollary",
      ) {$environment{"$_"}="par:unindent:puts;\U$_\E. ,par";} 
@@ -2479,9 +2500,6 @@ $contents{'\ '}=" ";
 $type{'\noindent'}="string";
 $contents{'\noindent'}="";
 
-$type{'\footnote'}="string";
-$contents{'\footnote'}=" FOOTNOTE: ";
-
 $type{'\enspace'}="string";
 $contents{'\enspace'}="  ";
 
@@ -2499,6 +2517,9 @@ $contents{"\\ast"}=" * ";
 
 $type{"\\prime"}="string";
 $contents{"\\prime"}="'";
+
+$type{"\\endgraph"}="string";
+$contents{"\\endgraph"}=" \\NEWPAR ";
 
 &define('\\define','\\def');
 &define('\\ge','\\geq ');
@@ -2535,9 +2556,13 @@ for ("documentclass", "documentstyle") {
 
 if ($opt_TeX) {
   &define('\pmatrix#1','\left(\begin{matrix}#1\end{matrix}\right)');
+  $type{"\\end"}="sub";
+  $contents{"\\end"}="end_TeX";
 } else {
   $environment{"pmatrix"}="beg_lr;(;):matrix,endmatrix;1;c";
   &defb("pmatrix") unless $opt_TeX;
+  $type{"\\end"}="sub1";
+  $contents{"\\end"}="end";
 }
 
   
@@ -2604,3 +2629,8 @@ __END__
 	  Could not treat fraction as the first thing on the line (\noindent
 	    required).
 	  Support many more macros.
+	  Better support for \end (with -TeX), \footnote, \endgraph.
+	  Allow \over and other infix macros inside \left(\right).
+	  \label would not update $curlength.
+	  Whitespace edits.
+
