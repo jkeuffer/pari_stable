@@ -293,29 +293,12 @@ to_polmod(GEN x, GEN mod)
 GEN
 gadd(GEN x, GEN y)
 {
-  long vx,vy,lx,ly,tx,ty,i,j,k,l,av,tetpil;
+  long tx = typ(x), ty = typ(y), vx,vy,lx,ly,i,j,k,l,av,tetpil;
   GEN z,p1,p2;
 
-  tx=typ(x); ty=typ(y);
   if (is_const_t(tx) && is_const_t(ty))
   {
     if (tx>ty) { p1=x; x=y; y=p1; i=tx; tx=ty; ty=i; }
-  }
-  else
-  {
-    vx=gvar(x); vy=gvar(y);
-    if (vx<vy || (vx==vy && tx>ty))
-    {
-      p1=x; x=y; y=p1;
-      i=tx; tx=ty; ty=i;
-      i=vx; vx=vy; vy=i;
-    }
-    if (ty==t_POLMOD) return op_polmod(gadd,x,y,tx);
-  }
-
-  /* here vx >= vy */
-  if (is_scalar_t(ty))
-  {
     switch(tx)
     {
       case t_INT:
@@ -504,7 +487,16 @@ gadd(GEN x, GEN y)
     err(bugparier,"gadd");
   }
 
-  /* here !isscalar(y) */
+  vx=gvar(x); vy=gvar(y);
+  if (vx<vy || (vx==vy && tx>ty))
+  {
+    p1=x; x=y; y=p1;
+    i=tx; tx=ty; ty=i;
+    i=vx; vx=vy; vy=i;
+  }
+  if (ty==t_POLMOD) return op_polmod(gadd,x,y,tx);
+
+  /* here !isscalar(y) and vx >= vy */
   if ( (vx>vy && (!is_matvec_t(tx) || !is_matvec_t(ty)))
     || (vx==vy && is_scalar_t(tx)) )
   {
@@ -871,26 +863,11 @@ gmul(GEN x, GEN y)
   GEN z,p1,p2,p3,p4;
 
   if (x == y) return gsqr(x);
-  tx=typ(x); ty=typ(y);
+
+  tx = typ(x); ty = typ(y);
   if (is_const_t(tx) && is_const_t(ty))
   {
     if (tx>ty) { p1=x; x=y; y=p1; i=tx; tx=ty; ty=i; }
-  }
-  else
-  {
-    vx=gvar(x); vy=gvar(y);
-    if (!is_matvec_t(ty))
-      if (is_matvec_t(tx) || vx<vy || (vx==vy && tx>ty))
-      {
-	p1=x; x=y; y=p1;
-        i=tx; tx=ty; ty=i;
-	i=vx; vx=vy; vy=i;
-      }
-    if (ty==t_POLMOD) return op_polmod(gmul,x,y,tx);
-  }
-
-  if (is_scalar_t(ty))
-  {
     switch(tx)
     {
       case t_INT:
@@ -1127,6 +1104,16 @@ gmul(GEN x, GEN y)
     }
     err(bugparier,"multiplication");
   }
+
+  vx=gvar(x); vy=gvar(y);
+  if (!is_matvec_t(ty))
+    if (is_matvec_t(tx) || vx<vy || (vx==vy && tx>ty))
+    {
+      p1=x; x=y; y=p1;
+      i=tx; tx=ty; ty=i;
+      i=vx; vx=vy; vy=i;
+    }
+  if (ty==t_POLMOD) return op_polmod(gmul,x,y,tx);
   if (is_noncalc_t(tx) || is_noncalc_t(ty)) err(operf,"*",tx,ty);
 
   /* here !isscalar(y) */

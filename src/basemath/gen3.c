@@ -1874,6 +1874,7 @@ gtopoly0(GEN x, long v, int reverse)
       }
       break;
     default: err(typeer,"gtopoly");
+      return NULL; /* not reached */
   }
   setvarn(y,v); return y;
 }
@@ -1936,6 +1937,7 @@ gtoser(GEN x, long v)
       break;
 
     default: err(typeer,"gtoser");
+      return NULL; /* not reached */
   }
   return y;
 }
@@ -2457,11 +2459,8 @@ geval(GEN x)
       }
       y=gzero; av=avma;
       for (i=lx-1; i>1; i--)
-      {
-        tetpil=avma;
         y = gadd(geval((GEN)x[i]), gmul(z,y));
-      }
-      return gerepile(av,tetpil,y);
+      return gerepileupto(av, y);
 
     case t_SER:
       err(impl, "evaluation of a power series");
@@ -2806,21 +2805,18 @@ mul_real(GEN x, GEN y)
 GEN
 mulmat_real(GEN x, GEN y)
 {
-  long av,tetpil,i,j,k, lx = lg(x), ly = lg(y), l = lg(x[1]);
-  GEN p1,p2, z = cgetg(ly,t_MAT);
+  long av,i,j,k, lx = lg(x), ly = lg(y), l = lg(x[1]);
+  GEN p1, z = cgetg(ly,t_MAT);
 
   for (j=1; j<ly; j++)
   {
     z[j] = lgetg(l,t_COL);
     for (i=1; i<l; i++)
     {
-      p1=gzero; av=avma;
+      p1 = gzero; av=avma;
       for (k=1; k<lx; k++)
-      {
-        p2=mul_real(gcoeff(x,i,k),gcoeff(y,k,j));
-        tetpil=avma; p1=gadd(p1,p2);
-      }
-      coeff(z,i,j)=lpile(av,tetpil,p1);
+        p1 = gadd(p1, mul_real(gcoeff(x,i,k),gcoeff(y,k,j)));
+      coeff(z,i,j)=lpileupto(av, p1);
     }
   }
   return z;
@@ -2884,6 +2880,7 @@ poleval(GEN x, GEN y)
     case t_VEC: case t_COL:
       i=lg(x)-1; imin=1; break;
     default: err(typeer,"poleval");
+      return NULL; /* not reached */
   }
   if (i<=imin)
     return (i==imin)? gcopy((GEN)x[imin]): gzero;
