@@ -2,11 +2,11 @@ Function: mathnf
 Section: linear_algebra
 C-Name: mathnf0
 Prototype: GD0,L,
-Help: mathnf(x,{flag=0}): (upper triangular) Hermite normal form of x, basis
- for the lattice formed by the columns of x. flag is optional whose value
+Help: mathnf(A,{flag=0}): (upper triangular) Hermite normal form of A, basis
+ for the lattice formed by the columns of A. flag is optional whose value
  range from 0 to 4 (0 if omitted), meaning : 0: naive algorithm. 1: Use
  Batut's algorithm. Output 2-component vector [H,U] such that H is the HNF of
- x, and U is a unimodular matrix such that xU=H. 3: Use Batut's algorithm.
- Output [H,U,P] as in 2. 4: as 1, using a heuristic variant of LLL reduction
- along the way
+ A, and U is a unimodular matrix such that xU=H. 3: Use Batut's algorithm.
+ Output [H,U,P] where P is a permutation matrix such that P A U = H. 4:
+ as 1, using a heuristic variant of LLL reduction along the way
 
