@@ -1961,7 +1961,7 @@ entree functions_basic[]={
 {"poldisc",99,(void*)poldisc0,7,"GDn"},
 {"poldiscreduced",18,(void*)reduceddiscsmith,7,"G"},
 {"polgalois",99,(void*)galois,6,"Gp"},
-{"polinterpolate",31,(void*)polint,7,"GGDGD&"},
+{"polinterpolate",31,(void*)polint,7,"GDGDGD&"},
 {"polisirreducible",18,(void*)gisirreducible,7,"G"},
 {"pollead",99,(void*)pollead,7,"GDn"},
 {"pollegendre",99,(void*)legendre,7,"LDn"},
