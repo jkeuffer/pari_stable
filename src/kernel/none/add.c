@@ -87,9 +87,9 @@ addii_sign(GEN x, long sx, GEN y, long sy)
   else
   { /* sx != sy */
     long i = lx - ly;
-    if (i==0)
+    if (i==0) /* lx == ly */
     {
-      i = absi_cmp(x,y);
+      i = absi_cmp_lg(x,y,lx);
       if (!i) return gzero;
     }
     if (i<0) { sx=sy; swapspec(x,y, lx,ly); } /* ensure |x| >= |y| */

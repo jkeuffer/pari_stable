@@ -459,69 +459,13 @@ END:
   y[0] = evaltyp(t_INT) | evallg(d); return y;
 }
 
-int
-cmpsi(long x, GEN y)
+INLINE int
+absi_cmp_lg(GEN x, GEN y, long l)
 {
-  ulong p;
-
-  if (!x) return -signe(y);
-
-  if (x>0)
-  {
-    if (signe(y)<=0) return 1;
-    if (lgefint(y)>3) return -1;
-    p=y[2]; if (p == (ulong)x) return 0;
-    return p < (ulong)x ? 1 : -1;
-  }
-
-  if (signe(y)>=0) return -1;
-  if (lgefint(y)>3) return 1;
-  p=y[2]; if (p == (ulong)-x) return 0;
-  return p < (ulong)(-x) ? -1 : 1;
-}
-
-int
-cmpii(GEN x, GEN y)
-{
-  const long sx = signe(x), sy = signe(y);
-  long lx,ly,i;
-
-  if (sx<sy) return -1;
-  if (sx>sy) return 1;
-  if (!sx) return 0;
-
-  lx=lgefint(x); ly=lgefint(y);
-  if (lx>ly) return sx;
-  if (lx<ly) return -sx;
-  i=2; while (i<lx && x[i]==y[i]) i++;
-  if (i==lx) return 0;
-  return ((ulong)x[i] > (ulong)y[i]) ? sx : -sx;
-}
-
-int
-cmprr(GEN x, GEN y)
-{
-  const long sx = signe(x), sy = signe(y);
-  long ex,ey,lx,ly,lz,i;
-
-  if (sx<sy) return -1;
-  if (sx>sy) return 1;
-  if (!sx) return 0;
-
-  ex=expo(x); ey=expo(y);
-  if (ex>ey) return sx;
-  if (ex<ey) return -sx;
-
-  lx=lg(x); ly=lg(y); lz = (lx<ly)?lx:ly;
-  i=2; while (i<lz && x[i]==y[i]) i++;
-  if (i<lz) return ((ulong)x[i] > (ulong)y[i]) ? sx : -sx;
-  if (lx>=ly)
-  {
-    while (i<lx && !x[i]) i++;
-    return (i==lx) ? 0 : sx;
-  }
-  while (i<ly && !y[i]) i++;
-  return (i==ly) ? 0 : -sx;
+  long i=2;
+  while (i<l && x[i]==y[i]) i++;
+  if (i==l) return 0;
+  return ((ulong)x[i] > (ulong)y[i])? 1: -1;
 }
 
 /***********************************************************************/
@@ -1749,61 +1693,6 @@ diviiexact(GEN x, GEN y)
   avma = (pari_sp)z; return z;
 }
 
-/* x and y are integers. Return 1 if |x| == |y|, 0 otherwise */
-int
-absi_equal(GEN x, GEN y)
-{
-  long lx,i;
-
-  if (!signe(x)) return !signe(y);
-  if (!signe(y)) return 0;
-
-  lx=lgefint(x); if (lx != lgefint(y)) return 0;
-  i=2; while (i<lx && x[i]==y[i]) i++;
-  return (i==lx);
-}
-
-/* x and y are integers. Return sign(|x| - |y|) */
-int
-absi_cmp(GEN x, GEN y)
-{
-  long lx,ly,i;
-
-  if (!signe(x)) return signe(y)? -1: 0;
-  if (!signe(y)) return 1;
-
-  lx=lgefint(x); ly=lgefint(y);
-  if (lx>ly) return 1;
-  if (lx<ly) return -1;
-  i=2; while (i<lx && x[i]==y[i]) i++;
-  if (i==lx) return 0;
-  return ((ulong)x[i] > (ulong)y[i])? 1: -1;
-}
-
-/* x and y are reals. Return sign(|x| - |y|) */
-int
-absr_cmp(GEN x, GEN y)
-{
-  long ex,ey,lx,ly,lz,i;
-
-  if (!signe(x)) return signe(y)? -1: 0;
-  if (!signe(y)) return 1;
-
-  ex=expo(x); ey=expo(y);
-  if (ex>ey) return  1;
-  if (ex<ey) return -1;
-
-  lx=lg(x); ly=lg(y); lz = (lx<ly)?lx:ly;
-  i=2; while (i<lz && x[i]==y[i]) i++;
-  if (i<lz) return ((ulong)x[i] > (ulong)y[i])? 1: -1;
-  if (lx>=ly)
-  {
-    while (i<lx && !x[i]) i++;
-    return (i==lx)? 0: 1;
-  }
-  while (i<ly && !y[i]) i++;
-  return (i==ly)? 0: -1;
-}
 
 /********************************************************************/
 /**                                                                **/

@@ -6,7 +6,7 @@ kern=$src/kernel/$kernlvl1
 cat >> $file << EOT
 parilvl1.h: $kern/int.h $kern/level1.h
 	cat $kern/int.h $kern/level1.h > parilvl1.h
-MP_C=$kern/mp.c $kern/gcdll.c $kern/ratlift.c $kern/gcd.c $kern/invmod.c $kern/mp_indep.c $kern/add.c
+MP_C=$kern/mp.c $kern/cmp.c $kern/gcdll.c $kern/ratlift.c $kern/gcd.c $kern/invmod.c $kern/mp_indep.c $kern/add.c
 mp.c: \$(MP_C)
 	cat \$(MP_C) > mp.c
 mp\$(_O): .headers mp.c
