@@ -64,7 +64,7 @@ is wrong [second one is principal]. Group structure and regulator are correct!
 
 4  gcmp/gegal not transitive: [] == 0, [0] == 0, but [0] != []
 
-3  many functions assume MAXVARN is a free variable, yielding bogus
+3  some functions assume MAXVARN is a free variable, yielding bogus
    results if the input involves it (only affects library programming).
 
 3  ellinit over Q_2 doesn't work (AGM loses too much precision)
@@ -117,9 +117,9 @@ is wrong [second one is principal]. Group structure and regulator are correct!
 
 5  write decent (specialized) benches
 
-3  switch to autoconf
-
 3  use stat() instead of opendir() to check if a file is a directory.
+
+2  switch to autoconf
 
 ***************************   ALGORITHMS      ****************************
 
@@ -139,7 +139,7 @@ Kernel:
 
 3  FFT for basic types and polynomials (say in A[X], for A = Z, F_q, ...)
 
-3  interval arithmetic
+2  interval arithmetic
 
 2  add support for different multiprecision kernels (a la LiDIA)
 
@@ -148,7 +148,7 @@ Kernel:
 
 Misc:
 =====
-4  decent finite field package [ esp. in small characteristic ]
+4  decent (non-prime) finite field package [ esp. in small characteristic ]
 
 4  rnfkummer (non-prime degree)
 
