@@ -179,10 +179,10 @@ dll_fixup.o: dll_fixup.s
 dll_init.c:
 	echo '#include <stdio.h>' 				> dll_init.c
 	echo 'extern struct _reent *_impure_ptr;'		>> dll_init.c
-	echo 'extern struct _reent *__imp_reent_data;'		>> dll_init.c
+	echo 'extern __declspec(dllimport) struct _reent reent_data;' >> dll_init.c
 	echo '__attribute__((stdcall))'				>> dll_init.c
 	echo 'int dll_entry(int handle, int reason, void *ptr)'	>> dll_init.c
-	echo '{ _impure_ptr=__imp_reent_data; return 1; }'	>> dll_init.c
+	echo '{ _impure_ptr = reent_data; return 1; }'	>> dll_init.c
 
 # The following rule is just there to convince gcc
 # to keep otherwise unused intermediate targets around.
