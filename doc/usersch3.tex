@@ -7070,7 +7070,8 @@ the $n$-th enclosing loop. If $n$ is bigger than the number of enclosing
 loops, all enclosing loops are exited.
 
 \subsubsecidx{return}$(\{x=0\})$: returns from current subroutine, with
-result $x$.
+result $x$. If $x$ is omitted, return the \kbd{(void)} value (return no
+result, like \kbd{print}).
 
 \subsubsecidx{until}$(a,\var{seq})$: evaluates expression sequence \var{seq}
 until $a$ is not equal to 0 (i.e.~until $a$ is true). If $a$ is initially
