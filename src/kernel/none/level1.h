@@ -131,6 +131,7 @@ GEN    rdiviiz(GEN x, GEN y, GEN z);
 GEN    rdivis(GEN x, long y, long prec);
 GEN    rdivsi(long x, GEN y, long prec);
 GEN    rdivss(long x, long y, long prec);
+GEN    real2n(long n, long prec);
 GEN    realun(long prec);
 GEN    realmun(long prec);
 GEN    realzero_bit(long bitprec);
@@ -512,7 +513,9 @@ realmun(long prec) {
   x[2] = HIGHBIT; for (i=3; i<prec; i++) x[i] = 0;
   return x;
 }
-
+/* 2.^n */
+INLINE GEN
+real2n(long n, long prec) { GEN z = realun(prec); setexpo(z, n); return z; }
 INLINE GEN
 stor(long s, long prec) { GEN z = cgetr(prec); affsr(s,z); return z; }
 INLINE GEN

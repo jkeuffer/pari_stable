@@ -842,26 +842,6 @@ gshift(GEN x, long n)
   return gmul2n(x,n);
 }
 
-/* 2.^n */
-GEN
-real2n(long n, long prec) { GEN z = realun(prec); setexpo(z, n); return z; }
-
-/* 2^n = shifti(gen_1, n) */
-GEN
-int2n(long n) {
-  long i, m, d, l;
-  GEN z;
-  if (n < 0) return gen_0;
-  if (n == 0) return gen_1;
-
-  d = n>>TWOPOTBITS_IN_LONG;
-  m = n & (BITS_IN_LONG-1);
-  l = d + 3; z = cgeti(l);
-  z[1] = evalsigne(1) | evallgefint(l);
-  for (i = 2; i < l; i++) z[i] = 0;
-  *int_MSW(z) = 1L << m; return z;
-}
-
 /*******************************************************************/
 /*                                                                 */
 /*                              INVERSE                            */
