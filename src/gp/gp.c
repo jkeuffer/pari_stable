@@ -755,7 +755,7 @@ allocatemem0(size_t newsize)
 static GEN
 sd_parisize(char *v, int flag)
 {
-  size_t n = top-bot;
+  long n = top-bot;
   GEN r = sd_numeric(v,flag,"parisize",&n, 10000,VERYBIGINT,NULL);
   if (n != top-bot)
   {
