@@ -1412,7 +1412,7 @@ isinexactfield(GEN x)
     case t_REAL: case t_PADIC: case t_SER:
       return 1;
     case t_POL:
-      lx=lgef(x);
+      lx=lgef(x); if (lx == 2) return 0;
       for (i=2; i<lx; i++)
 	if (!isinexactfield((GEN)x[i])) return 0;
       return 1;
@@ -1445,6 +1445,7 @@ polinvinexact(GEN x, GEN y)
   long i,dx=lgef(x)-3,dy=lgef(y)-3,lz=dx+dy, av=avma, tetpil;
   GEN v,z;
 
+  if (dx < 0 || dy < 0) err(talker,"non-invertible polynomial in polinvmod");
   z=cgetg(dy+2,t_POL); z[1]=y[1];
   v=cgetg(lz+1,t_COL);
   for (i=1; i<lz; i++) v[i]=zero;
@@ -2031,13 +2032,23 @@ resultantducos(GEN P, GEN Q)
 /*               RESULTANT PAR MATRICE DE SYLVESTER                */
 /*                                                                 */
 /*******************************************************************/
+static GEN
+_zeropol()
+{
+  GEN x = cgetg(3,t_POL);
+  x[1] = evallgef(3);
+  x[2] = zero; return x;
+}
+
 GEN
 sylvestermatrix_i(GEN x, GEN y)
 {
   long d,dx,dy,i,j;
   GEN p1,p2;
 
-  dx=lgef(x)-3; dy=lgef(y)-3; d=dx+dy;
+  dx = lgef(x)-3; if (dx < 0) { dx = 0; x = _zeropol(); }
+  dy = lgef(y)-3; if (dy < 0) { dy = 0; y = _zeropol(); }
+  d = dx+dy;
   p1=cgetg(d+1,t_MAT);
   for (j=1; j<=dy; j++)
   {
