@@ -50,44 +50,45 @@ static long *par_vec;
 /* k-1 entries filled so far
  * m = maximal allowed value, n = sum to reach with remaining elements */
 static void
-do_par(long k, long n, long m)
+do_par(GEN T, long k, long n, long m)
 {
   long i;
   if (n <= 0)
   {
-    GEN p1 = cgetg(k, t_VECSMALL);
-    for (i=1; i<k; i++) p1[i] = par_vec[i];
-    return;
+    GEN t = cgetg(k, t_VECSMALL);
+    for (i=1; i<k; i++) t[i] = par_vec[i];
+    T[ ++T[0] ] = (long)t; return;
   }
   if (n < m) m = n;
-  for (i=1; i<=m; i++)
-  {
-    par_vec[k] = i;
-    do_par(k+1, n-i, i);
-  }
+  for (i=1; i<=m; i++) { par_vec[k] = i; do_par(T, k+1, n-i, i); }
 }
 
 /* compute the partitions of n, as decreasing t_VECSMALLs */
-static GEN
+GEN
 partitions(long n)
 {
-  pari_sp av, av1;
-  long i, j, lT;
-  GEN T, P;
+  pari_sp av;
+  long i, p;
+  GEN T;
 
-  par_vec = new_chunk(n+1);
-  av = avma; do_par(1,n,n);
-  av1= avma;
-  for (lT=1, P = (GEN)av1; P < (GEN)av; P += lg(P)) lT++;
-  T = cgetg(lT, t_VEC);
-  for (j=lT, P = (GEN)av1; P < (GEN)av; P += lg(P)) T[--j] = (long)P;
-
+  switch(n) /* optimized for galoismoduloX ... */
+  {
+    case 8: p = 22; break;
+    case 9: p = 30; break;
+    case 10:p = 42; break;
+    default:
+      if (n < 0) err(talker, "partitions( %ld ) is meaningless", n);
+      av = avma; p = itos( numbpart(stoi(n)) ); avma = av; break;
+  }
+  T = new_chunk(p + 1); T[0] = 0;
+  par_vec = cgetg(n+1, t_VECSMALL); /* not Garbage Collected later */
+  do_par(T,1,n,n);
   if (DEBUGLEVEL > 7)
   {
-    fprintferr("Partitions of %ld: p(%ld) = %ld\n",n,n,lT-1);
-    for (i=1; i<lT; i++) fprintferr("i = %ld: %Z\n",i,(GEN)T[i]);
+    fprintferr("Partitions of %ld (%ld)\n",n, p);
+    for (i=1; i<=p; i++) fprintferr("i = %ld: %Z\n",i,(GEN)T[i]);
   }
-  return T;
+  T[0] = evallg(p + 1) | evaltyp(t_VEC); return T;
 }
 
 /* affect to the permutation x the N arguments that follow */
