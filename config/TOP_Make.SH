@@ -18,7 +18,7 @@ case "`$tar 2>&1`" in
   *"--help"*) inc="-T";; # GNU
            *) inc="-I";; # Solaris
 esac
-tarinc="$inc $TOP/MANIFEST"
+tarinc="$inc $config_dir/MANIFEST"
 
 dosversion=`echo $version|sed -e 's/\.//g'`
 dosversion="_$dosversion$patch"

@@ -29,7 +29,7 @@ to be fixed before the next cycle reaches completion.
 
 To get started, run TeX on the file INSTALL.tex and have a look at the dvi
 (extracted verbatim from Appendix A of the user manual). If you are in a
-hurry, look at INSTALL.DOC (ascii file). But a lot of information is missing
+hurry, look at INSTALL.txt (ascii file). But a lot of information is missing
 there.
 
 Typing 'make doc' should typeset the PARI/GP user's manual, a tutorial and
@@ -43,7 +43,7 @@ The file README.DOS is specific to DOS, OS/2 and Windows users.
 
 For the adventurous:
 * If you want to check up-to-date, but possibly unstable, development
-versions of PARI/GP or do development work yourself, see the file CVS.DOC.
+versions of PARI/GP or do development work yourself, see the file CVS.txt.
 
 * Directory Odos/ contains information to compile binaries on DOS-based
 systems (DOS, OS/2, Win3.1, Win95/98/NT/CE).

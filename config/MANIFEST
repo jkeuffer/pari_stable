@@ -4,12 +4,11 @@ Announce.2.0.beta
 CHANGES
 COMPAT
 COPYRIGHT
-CVS.DOC
+CVS.txt
 Configure
-INSTALL.DOC
+INSTALL.txt
 INSTALL.tex
 MACHINES
-MANIFEST
 NEW
 Odos/Makefile
 Odos/README.MSVC
@@ -25,6 +24,7 @@ TODO
 config/DOC_Make.SH
 config/GEN_Make.SH
 config/Imakefile
+config/MANIFEST
 config/Makefile.DLLs
 config/Makefile.SH
 config/TOP_Make.SH

@@ -3,7 +3,7 @@ For PARI/GP version 2.0.18
 This file lists the things that ought to be implemented / fixed. It is
 hopelessly incomplete right now, but it's a start. Most items require major
 work, and may not be that desireable after all. If you intend to work on
-any of these things, have a look at CVS.DOC and drop an email to pari-dev.
+any of these things, have a look at CVS.txt and drop an email to pari-dev.
 
 Priority classification (first column): [subjective and debatable!]
 5    as soon as possible
