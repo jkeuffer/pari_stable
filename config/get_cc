@@ -89,7 +89,7 @@ cflags=
 ASMINLINE=
 if test -n "$__gnuc__"; then
   __GNUC__="-D__GNUC__"
-  warn="-Wall -Wno-implicit"
+  warn="-Wall"
   OPTFLAGS=-O3
   ASMINLINE=yes
   case "$asmarch" in
