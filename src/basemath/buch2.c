@@ -1979,13 +1979,7 @@ dbg_newrel(RELCACHE_t *cache, long jid, long jdir)
 {
   fprintferr("\n++++ cglob = %ld: new relation (need %ld)", 
              cache->last - cache->base, cache->end - cache->base);
-  wr_rel(cache->last->R);
-  if (DEBUGLEVEL>3)
-  {
-    fprintferr("(jid=%ld,jdir=%ld)", jid,jdir);
-    msgtimer("for this relation");
-  }
-  flusherr() ;
+  wr_rel(cache->last->R); msgtimer("for this relation");
 }
 
 static void
