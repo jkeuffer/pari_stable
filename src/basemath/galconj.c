@@ -203,7 +203,7 @@ initborne(GEN T, GEN den, struct galois_borne *gb, long ppp)
   GEN     L, M, z;
   long    prec;
   prec = 2;
-  for (i = 2; i < lg(T); i++)
+  for (i = 2; i < lgef(T); i++)
     if (lg(T[i]) > prec)
       prec = lg(T[i]);
   L = roots(T, prec);
