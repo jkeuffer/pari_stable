@@ -1380,11 +1380,9 @@ conformal_mapping(GEN *radii, GEN ctr, GEN p, long k, long bitprec,
 }
 
 static GEN
-myrealzero(void)
-{
+myrealzero(void) {
   GEN x = cgetr(3);
-  x[1] = evalexpo(-bit_accuracy(3));
-  return x;
+  x[1] = _evalexpo(-BITS_IN_LONG); return x;
 }
 
 /* split p, this time with no scaling. returns in F and G two polynomials
