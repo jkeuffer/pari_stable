@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "parinf.h"
 
+extern GEN to_polmod(GEN x, GEN mod);
 extern GEN hnfall0(GEN A, long remove);
 extern GEN get_theta_abstorel(GEN T, GEN pol, GEN k);
 extern GEN _rnfequation(GEN A, GEN B, long *pk, GEN *pLPRS);
@@ -738,6 +739,7 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
     rel = bnf; k = gzero;
     relpol = T; T = polx[MAXVARN];
     bnf = bnfinit0(T, 2, NULL, 0);
+    nf = (GEN)bnf[7];
   }
   nfrel = checknf(rel);
   drel = degpol(relpol);
@@ -843,6 +845,7 @@ rnfisnorm(GEN T, GEN x, long flag)
   for (i=1; i<L; i++)
   {
     GEN u = poleval((GEN)sunitrel[i], theta); /* abstorel */
+    if (typ(u) != t_POLMOD) u = to_polmod(u, (GEN)theta[1]);
     sunitrel[i] = (long)u;
     u = bnfissunit(bnf,suni, gnorm(u));
     if (lg(u) == 1) err(bugparier,"rnfisnorm");
@@ -872,5 +875,7 @@ bnfisnorm(GEN bnf,GEN x,long flag,long PREC)
 {
   gpmem_t av = avma;
   GEN T = rnfisnorminit(bnf, NULL, flag == 0? 1: 2);
-  return gerepileupto(av, rnfisnorm(T, x, flag));
+  GEN y = rnfisnorm(T, x, flag), z = (GEN)y[1];
+  y[1] = lmodulcp(lift((GEN)z[2]), (GEN)z[1]);
+  return gerepilecopy(av, y);
 }

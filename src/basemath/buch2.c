@@ -1361,13 +1361,23 @@ isprincipalgenforce(GEN bnf,GEN x)
   return isprincipalall(bnf,x,nf_GEN | nf_FORCE);
 }
 
+static GEN
+rational_unit(GEN x, long n, long RU)
+{
+  GEN y;
+  if (!gcmp1(x) && !gcmp_1(x)) return cgetg(1,t_COL);
+  y = zerocol(RU); 
+  y[RU] = (long)gmodulss((gsigne(x)>0)? 0: n>>1, n);
+  return y;
+}
+
 /* if x a famat, assume it is an algebraic integer (very costly to check) */
 GEN
 isunit(GEN bnf,GEN x)
 {
   long tx = typ(x), i, R1, RU, n, prec;
   gpmem_t av = avma;
-  GEN p1, v, rlog, logunit, y, ex, nf, z, pi2_sur_w, gn, emb;
+  GEN p1, v, rlog, logunit, ex, nf, z, pi2_sur_w, gn, emb;
 
   bnf = checkbnf(bnf); nf=(GEN)bnf[7];
   logunit = (GEN)bnf[3]; RU = lg(logunit);
@@ -1377,9 +1387,7 @@ isunit(GEN bnf,GEN x)
   switch(tx)
   {
     case t_INT: case t_FRAC: case t_FRACN:
-      if (!gcmp1(x) && !gcmp_1(x)) return cgetg(1,t_COL);
-      y = zerocol(RU); i = (gsigne(x) > 0)? 0: n>>1;
-      y[RU] = (long)gmodulss(i, n); return y;
+      return rational_unit(x, n, RU);
 
     case t_MAT: /* famat */
       if (lg(x) != 3 || lg(x[1]) != lg(x[2]))
@@ -1396,6 +1404,7 @@ isunit(GEN bnf,GEN x)
   }
   /* assume a famat is integral */
   if (tx != t_MAT && !gcmp1(denom(x))) { avma = av; return cgetg(1,t_COL); }
+  if (isnfscalar(x)) return gerepileupto(av, rational_unit((GEN)x[1],n,RU));
 
   R1 = nf_get_r1(nf); v = cgetg(RU+1,t_COL);
   for (i=1; i<=R1; i++) v[i] = un;
