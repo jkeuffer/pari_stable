@@ -1450,8 +1450,8 @@ czeta(GEN s0, long prec)
 {
   GEN s, u, a, y, res, tes, sig, invn2, unr;
   GEN sim, *tab, tabn;
-  ulong p;
-  long i, sqn, nn, lim, lim2, ct;
+  ulong p, sqn;
+  long i, nn, lim, lim2, ct;
   pari_sp av, av2 = avma, avlim;
   int funeq = 0;
   byteptr d;
@@ -1479,7 +1479,7 @@ czeta(GEN s0, long prec)
   if (typ(s0) == t_INT)
   { /* no explog for 1/p^s */
     ulong k = itou(s0);
-    for (p=2; p < nn;) {
+    for (p=2; p < (ulong)nn;) {
       tab[p] = divrr(unr, rpowuu(p, k, prec));
       NEXT_PRIME_VIADIFF(p,d);
     }
@@ -1488,7 +1488,7 @@ czeta(GEN s0, long prec)
   else
   { /* general case */
     GEN ms = gneg(s), rp = cgetr(prec);
-    for (p=2; p < nn;)
+    for (p=2; p < (ulong)nn;)
     {
       affur(p, rp);
       tab[p] = gexp(gmul(ms, mplog(rp)), prec);
@@ -1497,7 +1497,7 @@ czeta(GEN s0, long prec)
     affsr(nn, rp);
     a = gexp(gmul(ms, mplog(rp)), prec);
   }
-  sqn = (long)sqrt(nn-1.); maxprime_check(sqn);
+  sqn = (ulong)sqrt(nn-1.); maxprime_check(sqn);
   d = diffptr + 2; /* fill in odd prime powers */
   for (p=3; p <= sqn; )
   {

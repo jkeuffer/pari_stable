@@ -1408,7 +1408,7 @@ logr_abs(GEN X)
   {
     n = 1 + (long)(3*b);
     m = 1 + (long)(b-a);
-    if (m >= BITS_IN_LONG) { GEN t;
+    if ((ulong)m >= BITS_IN_LONG) { GEN t;
       l2 += m>>TWOPOTBITS_IN_LONG;
       t = cgetr(l2); affrr(x,t); x = t;
     }
