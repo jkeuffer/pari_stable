@@ -2114,7 +2114,7 @@ factorback_i(GEN fa, GEN e, GEN nf, int red)
     p = fa;
   else /* genuine factorization */
   {
-    if (t != t_MAT)
+    if (t != t_MAT || lg(fa) != 3)
     {
       if (!is_vec_t(t)) err(talker,"not a factorisation in factorback");
       return gerepileupto(av, divide_conquer_prod(fa, _mul));

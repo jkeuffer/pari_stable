@@ -156,7 +156,7 @@ char *helpmessages_basic[]={
   "eval(x): evaluation of x, replacing variables by their value",
   "exp(x): exponential of x",
   "factor(x,{lim}): factorization of x. lim is optional and can be set whenever x is of (possibly recursive) rational type. If lim is set return partial factorization, using primes up to lim (up to primelimit if lim=0)",
-  "factorback(fa,{nf}): given a factorisation fa, gives the factored object back. If this is a prime ideal factorisation you must supply the corresponding number field as second argument",
+  "factorback(f,{e},{nf}): given a factorisation f, gives the factored object back. If this is a prime ideal factorisation you must supply the corresponding number field as last argument. If e is present, f has to be a vector of the same length, and we return the product of the f[i]^e[i]",
   "factorcantor(x,p): factorization mod p of the polynomial x using Cantor-Zassenhaus",
   "factorff(x,p,a): factorization of the polynomial x in the finite field F_p[X]/a(X)F_p[X]",
   "factorial(x): factorial of x (x C-integer), the result being given as a real number",
