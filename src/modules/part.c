@@ -175,7 +175,7 @@ numbpart(GEN n)
   
   sum = cgetr (prec);
   N = itor (n, prec);
-  max = sqrt( gtodouble(n) ) * 0.24 + 5;
+  max = (ulong)(sqrt( gtodouble(n) ) * 0.24 + 5);
 
   av = avma;
   affrr(psi(C,D, 1, prec), sum);

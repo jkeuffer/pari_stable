@@ -2488,8 +2488,8 @@ static GEN
 u_FpM_ker_sp(GEN x, ulong p, long deplin)
 {
   GEN y, c, d;
-  long i, j, k, r, t, n;
-  ulong a, piv, m;
+  long i, j, k, r, t, m, n;
+  ulong a, piv;
   const int OK_ulong = u_OK_ULONG(p);
 
   n = lg(x)-1;
