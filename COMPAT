@@ -86,7 +86,6 @@ This file lists the incompatible changes between Version 2.x and older versions
     for backward compatibility.
     As a consequence, gred() has been removed.
   - co8() renamed to quadtoc()
-  - incgam3() renamed to incgamc(), incgam4() renamed to incgam0()
   - ker_mod_p() renamed to FpM_ker [ and supplemented with many analogous
     modular routines ]
   - nfdivres() renamed to nfdivrem(), poldivres() renamed to poldivrem()
