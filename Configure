@@ -122,7 +122,8 @@ Options: some names can be abbreviated to one character (e.g -h = -help)
 -v, --verbhelp   a longer help message
 Build Options:
   --host=<arch-osname>  target achitecture
-  --graphic=<gr>        graphic library used (default X11) (none X11 gnuplot)
+  --graphic=<gr>        graphic library used (default X11) (none X11 gnuplot 
+	gnuplot-dynamic builtin.X11-gnuplot builtin.X11-gnuplot-dynamic)
 Additional developer options:
   -g              creates debugging version (in Oxxx.dbg)
   -pg             creates profiling version (in Oxxx.prf)
@@ -445,6 +446,12 @@ if test "$optimization" != profiling; then
 # We want these libraries:
 #
   echo Checking for optional libraries and headers...
+
+# ========  GRAPHICS environment search  ==============
+
+# At this moment $which_graphic_lib is either none, or the argument to
+# --graphic option; $graph_cmd is "" unless --graphic option was specified.
+
 #   LIB: X11
   pth=$x11pth
   lib=X11; . ./locatelib
@@ -455,6 +462,8 @@ if test "$optimization" != profiling; then
   fi
 
 #   LIB: gnuplot
+#   Look for it unconditionally, without read/write of
+#     $which_graphic_lib or $graph_cmd
   pth="$TOP/gnuplot-$osname-$arch $TOP/gnuplot\
        $TOP/../gnuplot-$osname-$arch $TOP/../gnuplot\
        $TOP/../../gnuplot-$osname-$arch $TOP/../../gnuplot $libpth"
@@ -499,6 +508,8 @@ if test "$optimization" != profiling; then
 	fi
 	;;
   esac
+
+# ========  END of GRAPHICS environment search  ==============
 
 #   LIB: GNU ReadLine
   readline_add="$GP_READLINE $TOP/readline-$osname-$arch $TOP/readline"
@@ -589,8 +600,13 @@ if test "$optimization" != profiling; then
     esac
   fi
 
-  if test -n "$readline"; then
-    echo ..."Found GNU readline header in $rl_include"
+  if test -z "$readline"; then
+      echo "### Building without GNU readline support"
+  else
+    if test "$fastread" = yes; then
+      echo "Using GNU readline:"
+    fi
+    echo ..."Found readline header in $rl_include"
     if (echo $rl_include | grep "readline$" > /dev/null); then
       rl_include=`echo $rl_include | sed 's,/readline$,,'`
       RLINCLUDE="-I$rl_include"
@@ -641,20 +657,22 @@ EOM
 #  Graphic libs now.
 #
   if test "$fastread" != yes; then
-    if test -n "$X11"; then addX11=X11; fi
+    if test -n "$X11"; then addX11="X11 builtin.X11-gnuplot-dynamic"; fi
+    if test -n "$X11" -a -n "$addgnuplot"; then
+	addX11="$addX11 builtin.X11-gnuplot"
+    fi
     cat << EOT
 ==========================================================================
 GP contains high resolution plotting functions. Choose among
-       none       $addX11         $addgnuplot
+       none       $addX11         $addgnuplot	gnuplot-dynamic
 EOT
     echo $n ..."Use which graphic library (\"none\" means no hi-res plot) ? $c"
-    rep="none $addX11 $addgnuplot";
+    rep="none $addX11 $addgnuplot gnuplot-dynamic";
     dflt=$which_graphic_lib; . ./myread
     which_graphic_lib=$ans
 
   case "$which_graphic_lib" in
-    X11)
-      gnuplot=;
+    *X11*)
       # If xmkmf did not give the right answer
       # X11 -- Headers
       if test ! -f $Xincroot/X11/Xos.h; then
@@ -702,14 +720,17 @@ EOT
         pth=$x11pth;
         lib=X11; . ./locatelib
       fi ;;
-    gnuplot);;
+  esac
+  case "$which_graphic_lib" in
+    *gnuplot*) ;;
     *)gnuplot=;;
   esac
   else # fastread = yes
+    # TEST: --graphic was not given, X11 not found, and gnuplot library found
     if test "$which_graphic_lib" = none -a -z "$graph_cmd" -a -n "$gnuplot"; then
       which_graphic_lib=gnuplot
     fi
-    if test -z "$X11" -a -z "$gnuplot" -a -z "$readline"; then
+    if test -z "$X11" -a -z "$gnuplot" -a -z "$readline" -a "X$which_graphic_lib" != Xgnuplot-dynamic; then
       echo ...none
     fi
   fi
@@ -771,7 +792,9 @@ if test -z "$CC"; then
   if test -n "$__gnuc__"; then CC=$gcc; else CC=$cc; fi
 fi
 
-if test "$which_graphic_lib" = gnuplot -a -z "$gcc"; then
+if test -z "$gcc"; then
+ case "$which_graphic_lib" in
+   *gnuplot)
     lib=$gnuplot_fullpath; sym=_eprintf; . ./locatesymbol
     if test -n "$try"; then
 	echo "...Looks like gcc-compiled gnuplot.  I add -lgcc to graphic libraries"
@@ -793,6 +816,8 @@ if test "$which_graphic_lib" = gnuplot -a -z "$gcc"; then
 	gcc="$_ogcc"
 	gnuplot_libs="$gnuplot_libs -lgcc"
     fi
+    ;;
+ esac
 fi
 
 
