@@ -56,10 +56,12 @@ and furthering of constructs"
 :group 'gp :prefix "gp-")
 
 (eval-and-compile
-;; The next two variables are here to pacify the compiler !
+;; The next variables are here to pacify the compiler !
 ;; Do *not* assign any value to them or they may override ....
 (defvar gp-tutorial-requiredp)
 (defvar gp-auto-indent);
+(defvar block-comment-end);
+(defvar block-comment-start);
 
 (defvar gp-prompt-pattern
   "^\\([?>]\\) [\n\t ]*"
