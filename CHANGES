@@ -33,6 +33,13 @@ TP = Thomas Papanikolaou
 XR = Xavier Roblot
 YU = Yoshiaki Uchikawa
 
+Done for version 2.2.5 (released ??/11/2002): [hopefully]
+  Fixed
+
+  Changed:
+    1- "not enough precomputed primes": output largest needed p if available
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.4 (released 12/09/2002):
   Fixed
     1- add default 'new_galois_format' to make 2.2.3 C-22 optional (by default,
