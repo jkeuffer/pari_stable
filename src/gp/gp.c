@@ -2135,37 +2135,47 @@ unblock_SIGINT()
 
 /* Read from file (up to '\n' or EOF) and copy at s0 (points in b->buf) */
 static char *
-file_input(Buffer *b, char *s0, FILE *file, int TeXmacs)
+file_input(Buffer *b, char **s0, FILE *file, int TeXmacs)
 {
   int first = 1;
-  char *s = s0;
-  long used = s - b->buf;
+  char *s = *s0;
+  long used0, used = s - b->buf;
 
+  used0 = used;
   for(;;)
   {
     long left = b->len - used, ls;
     /* if from TeXmacs, tell him we need input */
     if (TeXmacs) { tm_start_output(); tm_end_output(); }
 
-    if (left < 512) fix_buffer(b, b->len << 1);
+    if (left < 512)
+    {
+      fix_buffer(b, b->len << 1);
+      left = b->len - used;
+      *s0 = b->buf + used0;
+    }
     s = b->buf + used;
-    if (! fgets(s, left, file)) return first? NULL: s0; /* EOF */
+    if (! fgets(s, left, file)) return first? NULL: *s0; /* EOF */
     ls = strlen(s); first = 0;
-    if (ls < left || s[ls-1] == '\n') return s0; /* \n */
+    if (ls < left || s[ls-1] == '\n') return *s0; /* \n */
     used += ls;
   }
 }
 
 #ifdef READLINE
 static char *
-gprl_input(Buffer *b, char *s0, char *prompt)
+gprl_input(Buffer *b, char **s0, char *prompt)
 {
-  long used = s0 - b->buf;
+  long used = *s0 - b->buf;
   long left = b->len - used;
   char *s;
   
   if (! (s = readline(prompt)) ) return NULL; /* EOF */
-  if (left < strlen(s)) fix_buffer(b, b->len << 1);
+  if (left < strlen(s))
+  {
+    fix_buffer(b, b->len << 1);
+    *s0 = b->buf + used;
+  }
   return s;
 }
 #endif
@@ -2216,10 +2226,10 @@ input_loop(Buffer *b, char *buf0, FILE *file, char *prompt)
     }
     /* read continuation line */
 #ifdef READLINE
-    if (!file) { free(buf); buf = gprl_input(b,s,""); }
+    if (!file) { free(buf); buf = gprl_input(b,&s,""); }
     else
 #endif
-      buf = file_input(b,s,file,TeXmacs);
+      buf = file_input(b,&s,file,TeXmacs);
     if (!buf) break;
   }
   if (!file && buf) free(buf);
@@ -2233,7 +2243,7 @@ get_line_from_file(char *prompt, Buffer *b, FILE *file)
   char *buf, *s =  b->buf;
 
   handle_C_C = 0;
-  while (! (buf = file_input(b,s,file,TeXmacs)) )
+  while (! (buf = file_input(b,&s,file,TeXmacs)) )
   { /* EOF */
     if (!handle_C_C)
     {
@@ -2273,7 +2283,7 @@ get_line_from_user(char *prompt, Buffer *b)
   static char *previous_hist = NULL;
   char *buf, *s = b->buf;
 
-  if (! (buf = gprl_input(b,s, prompt)) )
+  if (! (buf = gprl_input(b,&s, prompt)) )
   { /* EOF */
     pariputs("\n"); return 0;
   }
