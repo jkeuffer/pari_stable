@@ -2374,7 +2374,7 @@ dbltor(double x)
   if (x==0) { z=cgetr(3); z[1]=evalexpo(-308); z[2]=0; return z; }
   fi.f = x; z=cgetr(4);
   {
-    const ulong a = fi.i[INDEX0]
+    const ulong a = fi.i[INDEX0];
     const ulong b = fi.i[INDEX1];
     e = ((a & (HIGHBIT-1)) >> shift) - exp_mid;
     z[1] = evalexpo(e) | evalsigne(x<0? -1: 1);
