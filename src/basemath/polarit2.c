@@ -1220,7 +1220,7 @@ extern GEN primitive_pol_to_monic(GEN pol, GEN *ptlead);
 
 /* P(hx), in place. Assume P in Z[X], h in Z */
 void
-rescale_pol_i(GEN P, GEN h)
+unscale_pol_i(GEN P, GEN h)
 {
   GEN hi = gun;
   long i, l = lgef(P);
@@ -1231,24 +1231,41 @@ rescale_pol_i(GEN P, GEN h)
   }
 }
 
-/* P(hx) in Fp[X], in place. Assume P in Z[X], h in Z */
-void
-FpX_rescale_i(GEN P, GEN h, GEN p)
+/* Return h^degpol(P) P(x / h) */
+GEN
+rescale_pol(GEN P, GEN h)
 {
-  GEN hi = gun;
   long i, l = lgef(P);
-  for (i=3; i<l; i++)
+  GEN Q = cgetg(l,t_POL), hi = gun;
+  Q[l-1] = P[l-1];
+  for (i=l-2; i>=2; i--)
+  {
+    hi = gmul(hi,h);
+    Q[i] = lmul((GEN)P[i], hi);
+  }
+  Q[1] = P[1]; return Q;
+}
+
+/* as above over Fp[X] */
+GEN
+FpX_rescale(GEN P, GEN h, GEN p)
+{
+  long i, l = lgef(P);
+  GEN Q = cgetg(l,t_POL), hi = gun;
+  Q[l-1] = P[l-1];
+  for (i=l-2; i>=2; i--)
   {
     hi = modii(mulii(hi,h), p);
-    P[i] = lmodii(mulii((GEN)P[i], hi), p);
+    Q[i] = lmodii(mulii((GEN)P[i], hi), p);
   }
+  Q[1] = P[1]; return Q;
 }
 
 /* use van Hoeij's knapsack algorithm */
 static GEN
 combine_factors(GEN a, GEN famod, GEN p, long klim, long hint)
 {
-  GEN B = uniform_Mignotte_bound(a), res,y,lt,L,pe,pE,listmod,p1;
+  GEN B = uniform_Mignotte_bound(a), res,lt,L,pe,pE,listmod,p1;
   long i,E,e,l, maxK = 3, nft = lg(famod)-1;
 
   e = logint(B, p, &pe);
@@ -1277,35 +1294,26 @@ combine_factors(GEN a, GEN famod, GEN p, long klim, long hint)
     lt = leading_term(a);
     if (signe(lt) < 0) { a = gneg_i(a); lt = leading_term(a); }
     if (DEBUGLEVEL > 4) fprintferr("last factor still to be checked\n");
-    if (gcmp1(lt))
-      lt = NULL;
+    if (gcmp1(lt)) lt = NULL;
     else
     {
-      GEN invlt, invLT;
       if (DEBUGLEVEL > 4) fprintferr("making it monic\n");
       a = primitive_pol_to_monic(a, &lt);
       B = uniform_Mignotte_bound(a);
       e = logint(B, p, &pe);
-
-      invlt = mpinvmod(lt,p);
+      /* renormalize modular factors */
       for (i = 1; i<lg(famod); i++)
-      { /* renormalize modular factors */
-        p1 = (GEN)famod[i]; FpX_rescale_i(p1, invlt, p);
-        invLT = powmodulo(lt, stoi(degpol(p1)), p);
-        famod[i] = (long)FpX_Fp_mul(p1, invLT, p);
-      }
+        famod[i] = (long)FpX_rescale((GEN)famod[i], lt, p);
       famod = hensel_lift_fact(a,famod,NULL,p,pe,e);
     }
     setlg(res, l-1); /* remove last elt (possibly unfactored) */
     L = LLL_cmbf(a, famod, p, pe, B, e, maxK);
     if (lt)
-    {
       for (i=1; i<lg(L); i++)
       {
-        y = (GEN)L[i]; rescale_pol_i(y, lt);
-        L[i] = (long)primitive_part(y, &p1);
+        unscale_pol_i((GEN)L[i], lt);
+        L[i] = (long)primitive_part((GEN)L[i], &p1);
       }
-    }
     res = concatsp(res, L);
   }
   return res;

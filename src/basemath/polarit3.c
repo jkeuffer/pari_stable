@@ -3607,7 +3607,7 @@ ZX_caract_sqf(GEN A, GEN B, long *lambda, long v)
 GEN
 ZX_caract(GEN A, GEN B, long v)
 {
-  return ZX_caract_sqf(A, B, NULL, v);
+  return (degpol(A) < 16) ? caractducos(A,B,v): ZX_caract_sqf(A,B, NULL, v);
 }
 
 static GEN
@@ -3684,20 +3684,6 @@ ZX_is_squarefree(GEN x)
   ulong av = avma;
   int d = (lgef(modulargcd(x,derivpol(x))) == 3);
   avma = av; return d;
-}
-
-/* h integer, P in Z[X]. Return h^degpol(P) P(x / h) */
-GEN
-ZX_rescale_pol(GEN P, GEN h)
-{
-  long i, l = lgef(P);
-  GEN Q = cgetg(l,t_POL), hi = gun;
-  Q[l-1] = P[l-1];
-  for (i=l-2; i>=2; i--)
-  {
-    hi = gmul(hi,h); Q[i] = lmul((GEN)P[i], hi);
-  }
-  Q[1] = P[1]; return Q;
 }
 
 /* A0 and B0 in Q[X] */

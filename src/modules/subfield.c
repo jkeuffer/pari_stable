@@ -535,7 +535,7 @@ embedding_of_potential_subfields(GEN g,GEN DATA,GEN listdelta)
     w1_Q = centermod(gmul(w1, resii(ind,q)), q);
     if (gegal(w1_Q, w0_Q) || cmpii(q,maxp) > 0)
     {
-      GEN G = gcmp1(ind)? g: ZX_rescale_pol(g,ind);
+      GEN G = gcmp1(ind)? g: rescale_pol(g,ind);
       if (gcmp0(poleval(G, gmodulcp(w1_Q,T)))) break;
     }
     if (cmpii(q, maxp) > 0)
@@ -583,7 +583,7 @@ choose_prime(GEN pol,GEN dpol,long d,GEN *ptff,GEN *ptlistpotbl, long *ptlcm)
   {
     while (!smodis(dpol,p[2])) p[2] += *di++;
     if (k > 50) err(talker,"sorry, too many block systems in nfsubfields");
-    ff=(GEN)factmod(pol,p)[1]; r=lg(ff)-1;
+    ff=(GEN)factmod0(pol,p)[1]; r=lg(ff)-1;
     if (r == 1 || r == N) continue;
 
     n = cgetg(r+1, t_VECSMALL);
@@ -615,7 +615,6 @@ choose_prime(GEN pol,GEN dpol,long d,GEN *ptff,GEN *ptlistpotbl, long *ptlcm)
       fprintferr("Potential block systems of size %ld: %Z\n", d,oldlistpotbl);
     flusherr();
   }
-  if (oldff) oldff = lift_intern(oldff);
   *ptlistpotbl=oldlistpotbl; *ptff=oldff; *ptlcm=oldlcm; return stoi(pp);
 }
 

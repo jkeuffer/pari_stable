@@ -20,7 +20,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*******************************************************************/
 #include "pari.h"
 
-extern GEN caractducos(GEN p, GEN x, int v);
 extern GEN element_muli(GEN nf, GEN x, GEN y);
 extern GEN element_mulid(GEN nf, GEN x, long i);
 extern GEN eleval(GEN f,GEN h,GEN a);
@@ -1251,17 +1250,14 @@ newtoncharpoly(GEN a, GEN chi, GEN pp, GEN ns)
 static GEN 
 mycaract(GEN f, GEN beta, GEN p, GEN pp, GEN ns)
 {
-  GEN p1, p2, chi, chi2, npp;
+  GEN p1, chi, npp;
   long j, a, v = varn(f), n = degpol(f);
 
   if (gcmp0(beta)) return zeropol(v);
 
-  p1 = content(beta);
-  if (gcmp1(p1)) p1 = NULL; 
-  else beta = gdiv(beta, p1);
-
+  beta = primitive_part(beta,&p1);
   if (!pp)
-    chi = caractducos(f, beta, v);
+    chi = ZX_caract(f, beta, v);
   else
   {
     a = 0;
@@ -1273,26 +1269,14 @@ mycaract(GEN f, GEN beta, GEN p, GEN pp, GEN ns)
     chi = newtoncharpoly(beta, f, npp, ns);
   }
 
-  if (p1)
-  {
-    chi2 = cgetg(n+3, t_POL);
-    chi2[1] = chi[1];
-    p2 = gun;
-    for (j = n+2; j >= 2; j--)
-    {
-      chi2[j] = lmul((GEN)chi[j], p2);
-      p2 = gmul(p2, p1);
-    }
-  }
-  else 
-    chi2 = chi;
+  if (p1) chi = rescale_pol(chi,p1);
   
-  if (!pp) return chi2;
+  if (!pp) return chi;
 
   /* this can happen only if gamma is incorrect (not an integer) */
-  if (divise(denom(content(chi2)), p)) return NULL;
+  if (divise(denom(content(chi)), p)) return NULL;
   
-  return redelt(chi2, pp, pp);
+  return redelt(chi, pp, pp);
 }
 
 /* Factor characteristic polynomial of beta mod p */

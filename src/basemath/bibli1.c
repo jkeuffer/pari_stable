@@ -23,7 +23,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 extern GEN ZV_lincomb(GEN u, GEN v, GEN X, GEN Y);
 extern GEN roots_to_pol_r1r2(GEN a, long r1, long v);
 extern GEN makebasis(GEN nf,GEN pol);
-extern GEN caractducos(GEN p, GEN x, int v);
 
 /* scalar product x.x */
 GEN
@@ -1907,8 +1906,8 @@ pols_for_polred(GEN x, GEN base, GEN LLLbase, GEN *pta,
     if (DEBUGLEVEL > 2) { fprintferr("i = %ld\n",i); flusherr(); }
     p1=(GEN)a[i];
     p1 = primitive_part(p1, &p3);
-    p1 = caractducos(x,p1,v);
-    if (p3) p1 = ZX_rescale_pol(p1,p3);
+    p1 = ZX_caract(x,p1,v);
+    if (p3) p1 = rescale_pol(p1,p3);
     p2 = modulargcd(derivpol(p1),p1);
     p3 = leading_term(p2); if (!gcmp1(p3)) p2=gdiv(p2,p3);
     p1 = gdiv(p1,p2);
