@@ -1037,7 +1037,7 @@ err(long numerr, ...)
         if (whatnow_fun)
         {
           term_color(c_NONE);
-          print_text("For full compatibility with GP 1.39, type \"default(compatible,3)\" (you can also set \"compatible = 3\" in your GPRC file)");
+          print_text("\nFor full compatibility with GP 1.39, type \"default(compatible,3)\" (you can also set \"compatible = 3\" in your GPRC file)");
           pariputc('\n');
           ch1 = va_arg(ap,char *);
           whatnow_fun(ch1, - va_arg(ap,int));
