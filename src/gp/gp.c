@@ -141,13 +141,8 @@ gp_preinit(int force)
 
   if (force)
   {
-#if !defined(macintosh) || defined(__MWERKS__)
     primelimit = 500000; parisize = 1000000*sizeof(long);
     dflt = DFT_PROMPT;
-#else
-    primelimit = 200000; parisize = 1000000;
-    dflt = "?\n";
-#endif
   }
   strcpy(prompt, dflt);
   strcpy(prompt_cont, CONTPROMPT);
@@ -1067,20 +1062,19 @@ print_fun_list(char **list, int nbli)
 static void
 commands(int n)
 {
-  int hashpos, s = 0, olds = LIST_LEN;
+  int hashpos, s = 0, size = LIST_LEN;
   entree *ep;
-  char **list = (char **) gpmalloc((olds+1)*sizeof(char *));
+  char **list = (char **) gpmalloc((size+1)*sizeof(char *));
 
   for (hashpos = 0; hashpos < functions_tblsz; hashpos++)
     for (ep = functions_hash[hashpos]; ep; ep = ep->next)
       if ((n<0 && ep->menu) || ep->menu == n)
       {
-        list[s++] = ep->name;
-        if (s >= olds)
+        list[s] = ep->name;
+        if (++s >= size)
         {
-	  int news = olds + (LIST_LEN + 1)*sizeof(char *);
-          list = (char**) gprealloc(list,news,olds);
-	  olds = news;
+	  size += (LIST_LEN + 1)*sizeof(char *);
+          list = (char**) gprealloc(list,size);
         }
       }
   list[s]=NULL; print_fun_list(list,term_height()-4); free(list);
@@ -1649,14 +1643,14 @@ Type ?12 for how to get moral (and possibly technical) support.\n\n");
   sd_realprecision  ("",d_ACKNOWLEDGE);
   sd_seriesprecision("",d_ACKNOWLEDGE);
   sd_format         ("",d_ACKNOWLEDGE);
-  pariputsf("\nparisize = %ld, primelimit = %ld\n", parisize, primelimit);
+  pariputsf("\nparisize = %ld, primelimit = %ld\n", top-bot, primelimit);
 }
 
 static void
 fix_buffer(Buffer *b, long newlbuf)
 {
-  b->buf = gprealloc(b->buf, newlbuf, b->len);
   b->len = paribufsize = newlbuf;
+  b->buf = gprealloc(b->buf, b->len);
 }
 
 void
@@ -2076,10 +2070,8 @@ gp_initrc()
 	s1 += 4;
 	if (find == fnum-1)
 	{
-	  long n = fnum << 1;
-	  flist = (char**)gprealloc(flist, n*sizeof(char*),
-	                                   fnum*sizeof(char*));
-	  fnum = n;
+	  fnum <<= 1;
+	  flist = (char**)gprealloc(flist, fnum*sizeof(char*));
 	}
 	flist[find++] = s2 = gpmalloc(strlen(s1) + 1);
 	if (*s1 == '"') (void)readstring(s1, s2);

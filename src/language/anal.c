@@ -723,9 +723,8 @@ _append(GEN **table, long *n, long *N)
 {
   if (++(*n) == *N)
   {
-    long M = *N; *N <<= 1;
-    *table = (GEN*)gprealloc((void*)*table,(*N + 1)*sizeof(GEN),
-                                           ( M + 1)*sizeof(GEN));
+    *N <<= 1;
+    *table = (GEN*)gprealloc((void*)*table,(*N + 1)*sizeof(GEN));
   }
   (*table)[*n] = expr();
   if (br_status) err(breaker,"array context");

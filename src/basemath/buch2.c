@@ -2927,9 +2927,8 @@ MORE:
       slim = cglob+lgex;
       if (slim > matmax)
       {
-        mat = (long**)gprealloc(mat, (2*slim+1) * sizeof(long*),
-                                     (matmax+1) * sizeof(long*));
         matmax = 2 * slim;
+        mat = (long**)gprealloc(mat, (matmax+1) * sizeof(long*));
       }
       setlg(mat, slim+1);
       if (DEBUGLEVEL)

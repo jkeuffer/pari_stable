@@ -262,8 +262,7 @@ add_paren(int end)
 static void
 match_concat(char **matches, char *s)
 {
-  int i = strlen(matches[0]) + 1;
-  matches[0] = (char*) gprealloc(matches[0], i+strlen(s), i);
+  matches[0] = (char*) gprealloc(matches[0], strlen(matches[0])+strlen(s)+1);
   strcat(matches[0],s);
 }
 

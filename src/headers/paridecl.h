@@ -979,7 +979,7 @@ GEN     gerepileuptoint(long av, GEN q);
 GEN     gerepileuptoleaf(long av, GEN q);
 long    get_timer(long t);
 char*   gpmalloc(size_t bytes);
-char*   gprealloc(void *pointer,size_t newsize,size_t oldsize);
+char*   gprealloc(void *pointer,size_t size);
 void    gunclone(GEN x);
 void    killbloc(GEN x);
 void    msgtimer(char *format, ...);

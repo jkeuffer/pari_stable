@@ -129,6 +129,45 @@ static int var_not_changed; /* altered in reorder() */
 static int try_to_recover = 0;
 static long next_bloc;
 static GEN cur_bloc=NULL; /* current bloc in bloc list */
+static GEN universal_constants;
+
+#if __MWERKS__
+static void *
+macalloc(size_t size)
+{
+  OSErr resultCode;
+  Handle newH = TempNewHandle((size),&resultCode);
+  if (!newH) return NULL;
+  HLock(newH); return (void*) *newH;
+}
+#  define __gpmalloc(size)  ((size) > 1000000)? macalloc(size): malloc((size))
+#else
+#  define __gpmalloc(size)  (malloc(size))
+#endif
+
+char*
+gpmalloc(size_t size)
+{
+  if (size)
+  {
+    char *tmp = (char*)__gpmalloc(size);
+    if (!tmp) err(memer);
+    return tmp;
+  }
+  if (DEBUGMEM) err(warner,"mallocing NULL object");
+  return NULL;
+}
+
+char*
+gprealloc(void *pointer, size_t size)
+{
+  char *tmp;
+
+  if (!pointer) tmp = (char *) malloc(size);
+  else tmp = (char *) realloc(pointer,size);
+  if (!tmp) err(memer);
+  return tmp;
+}
 
 static void
 pari_handle_SIGINT()
@@ -353,15 +392,6 @@ pari_addfunctions(module **modlist_p, entree *func, char **help)
   modlist->help = NULL;
 }
 
-static long
-fix_size(long a)
-{
-  /* BYTES_IN_LONG*ceil(a/BYTES_IN_LONG) */
-  ulong b = a+BYTES_IN_LONG - (((a-1) & (BYTES_IN_LONG-1)) + 1);
-  if (b > VERYBIGINT) err(talker,"stack too large");
-  return b;
-}
-
 void
 pari_sig_init(void (*f)(int))
 {
@@ -393,12 +423,11 @@ reset_traps(int warn)
   for (i=0; i <= noer; i++) err_catch_array[i] = 0;
 }
 
-/* 2 (gnil) + 2 (gzero) + 3 (gun) + 3 (gdeux) + 3 (half) + 3 (gi) */
-#define SIZEOF_UNIV_CONSTS 16*sizeof(long)
-
 static void
-init_universal_constants(GEN p)
+init_universal_constants()
 {
+  /* 2 (gnil) + 2 (gzero) + 3 (gun) + 3 (gdeux) + 3 (half) + 3 (gi) */
+  GEN p = universal_constants = (long*) gpmalloc(16*sizeof(long));
   gzero = p; p+=2; gnil = p; p+=2;
   gzero[0] = gnil[0] = evaltyp(t_INT) | evallg(2);
   gzero[1] = gnil[1] = evallgefint(2);
@@ -418,23 +447,35 @@ init_universal_constants(GEN p)
 }
 
 static long
+fix_size(long a)
+{
+  /* BYTES_IN_LONG*ceil(a/BYTES_IN_LONG) */
+  ulong b = a+BYTES_IN_LONG - (((a-1) & (BYTES_IN_LONG-1)) + 1);
+  if (b > VERYBIGINT) err(talker,"stack too large");
+  if (b < 1024) b = 1024;
+  return b;
+}
+
+static long
 init_stack(long size)
 {
-  long s = fix_size(size), old = bot? (top - bot): 1048576;
-  /* NOT gpmalloc, memer would be deadly */
-  bot = (ulong) malloc(s + SIZEOF_UNIV_CONSTS);
-  if (!bot)
+  long s = fix_size(size), old = 0;
+  if (bot)
   {
-    s = old;
-    while (!bot)
-    {
-      err(warner,"not enough memory");
-      bot = (ulong) malloc(s + SIZEOF_UNIV_CONSTS);
-      s >>= 1;
-    }
+    old = top - bot;
+    free((void*)bot);
   }
+  /* NOT gpmalloc, memer would be deadly */
+  bot = (ulong)__gpmalloc(s);
+  if (!bot)
+    for(s = old;; s>>=1)
+    {
+      if (!s) err(memer); /* no way out. Die */
+      err(warner,"not enough memory, new stack %ld",s);
+      bot = (ulong)__gpmalloc(s);
+      if (bot) break;
+    }
   memused = avma = top = bot+s;
-  init_universal_constants((GEN)top);
   return s;
 }
 
@@ -458,6 +499,7 @@ pari_init(long parisize, long maxprime)
   if (INIT_SIG) pari_sig_init(pari_sighandler);
   bot = 0; (void)init_stack(parisize);
   diffptr = initprimes(maxprime);
+  init_universal_constants();
 
   varentries = (entree**) gpmalloc((MAXVARN+1)*sizeof(entree*));
   polvar = (GEN) gpmalloc((MAXVARN+1)*sizeof(long));
@@ -524,6 +566,7 @@ freeall(void)
   free((void*)varentries); free((void*)ordvar); free((void*)polvar);
   free((void*)polx[MAXVARN]); free((void*)polx); free((void*)polun);
   free((void*)primetab);
+  free((void*)universal_constants);
 
   /* set first cell to 0 to inhibit recursion in all cases */
   while (cur_bloc) { *cur_bloc=0; killbloc(cur_bloc); }
@@ -1515,9 +1558,6 @@ allocatemoremem(ulong newsize)
     err(warner,"doubling stack size; new stack = %ld (%.3f Mbytes)",
                 newsize, newsize/1048576.);
   }
-  else if ((long)newsize < 1000L)
-    err(talker,"required stack memory too small");
-  free((void*)bot);
   return init_stack(newsize);
 }
 
@@ -1552,49 +1592,6 @@ switch_stack(stackzone *z, long n)
     memused = z->memused;
   }
   return NULL;
-}
-
-char*
-gpmalloc(size_t bytes)
-{
-  char *tmp;
-
-  if (bytes)
-  {
-    tmp = (char *) malloc(bytes);
-    if (!tmp) err(memer);
-    return tmp;
-  }
-  if (DEBUGMEM) err(warner,"mallocing NULL object");
-  return NULL;
-}
-
-#if __MWERKS__
-static void *
-macrealloc(void *p, size_t newsize, size_t oldsize)
-{
-  char *q = gpmalloc(newsize), *qq = q, *pp = p;
-  int l = newsize > oldsize ? oldsize : newsize;
-
-  while (l--) *qq++ = *pp++;
-  free(p); return q;
-}
-#endif
-
-char*
-gprealloc(void *pointer, size_t newsize, size_t oldsize)
-{
-  char *tmp;
-
-  if (!pointer) tmp = (char *) malloc(newsize);
-#if __MWERKS__
-  else tmp = (char *) macrealloc(pointer,newsize,oldsize);
-#else
-  else tmp = (char *) realloc(pointer,newsize);
-#endif
-  (void)oldsize;
-  if (!tmp) err(memer);
-  return tmp;
 }
 
 #ifdef MEMSTEP

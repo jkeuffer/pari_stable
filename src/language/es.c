@@ -149,7 +149,7 @@ lisGEN(FILE *fi)
       GEN x = flisexpr(buf);
       free(buf); return x;
     }
-    buf = gprealloc(buf, size<<1, size);
+    buf = gprealloc(buf, size<<1);
     s = buf + (size-1); n = size+1; size <<= 1;
   }
 #if defined(UNIX) || defined(__EMX__)
@@ -582,9 +582,8 @@ static outString *OutStr, *ErrStr = NULL;
 #define check_output_length(str,l) { \
   const ulong s = str->size; \
   if (str->len + l >= s) { \
-    ulong t = s + l + STEPSIZE; \
-    str->string = gprealloc(str->string, t, s); \
-    str->size = t; \
+    str->size = s + l + STEPSIZE; \
+    str->string = gprealloc(str->string, str->size); \
   } \
 }
 
@@ -2358,10 +2357,8 @@ _expand_env(char *str)
     }
     if (xnum > xlen - 3) /* need room for possibly two more elts */
     {
-      long xnew = xlen << 1;
-      x = (char **)gprealloc((void*)x, xlen * sizeof(char*),
-                                       xnew * sizeof(char*));
-      xlen = xnew;
+      xlen <<= 1;
+      x = (char **)gprealloc((void*)x, xlen * sizeof(char*));
     }
 
     s0 = ++s; /* skip $ */

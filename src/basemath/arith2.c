@@ -111,7 +111,7 @@ initprimes1(long size, long *lenp, long *lastp)
   fprintferr("initprimes1: q = %ld, len = %ld, last = %ld\n",
 	     q, *lenp, *lastp);
 #endif
-  return (byteptr) gprealloc(p,r-p,size + 2);
+  return (byteptr) gprealloc(p,r-p);
 }
 
 #define PRIME_ARENA (200 * 1024) /* No slowdown even with 256K level-2 cache */
@@ -221,7 +221,7 @@ initprimes0(ulong maxnum, long *lenp, long *lastp)
   *lenp = curdiff - p1;
   *lastp = last;
   if (alloced) free(p);
-  return (byteptr) gprealloc(p1, *lenp, size);
+  return (byteptr) gprealloc(p1, *lenp);
 }
 #if 0 /* not yet... GN */
 /* The diffptr table will contain at least 6548 entries (up to and including
@@ -303,7 +303,7 @@ addprimes(GEN p)
       gunclone(n); primetab[i] = 0;
     }
   }
-  primetab = (GEN) gprealloc(primetab, (lp+1)*sizeof(long), lp*sizeof(long));
+  primetab = (GEN) gprealloc(primetab, (lp+1)*sizeof(long));
   primetab[i] = lclone(p); setlg(primetab, lp+1);
   if (k > 1) { cleanprimetab(); setlg(L,k); addprimes(L); }
   avma = av; return primetab;
