@@ -1045,15 +1045,17 @@ red_montgomery(GEN T, GEN N, ulong inv)
 
 /* EXACT INTEGER DIVISION */
 
-/* assume xy>0, y odd */
+/* assume xy>0 and the division is exact */
 GEN
 diviuexact(GEN x, ulong y)
 {
-  long i,lz,lx;
+  long i, lz, lx, vy;
   ulong q, yinv;
   GEN z, z0, x0, x0min;
 
   if (y == 1) return icopy(x);
+  vy = vals(y);
+  if (vy) { y >>= vy; x = shifti(x, -vy); }
   lx = lgefint(x);
   if (lx == 3) return utoi((ulong)x[2] / y);
   yinv = invrev(y);
