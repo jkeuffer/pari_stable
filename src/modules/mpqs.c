@@ -1459,14 +1459,14 @@ mpqs_sieve_p(unsigned char *begin, unsigned char *end,
              long p_times_4, long p, unsigned char log_p)
 {
   register unsigned char *e = end - p_times_4;
-  while (begin <= e)
+  while (e - begin >= 0)	/* signed comparison --GN2000Jun02 */
   {
     (*begin) += log_p, begin += p;
     (*begin) += log_p, begin += p;
     (*begin) += log_p, begin += p;
     (*begin) += log_p, begin += p;
   }
-  while (begin <= end)
+  while (end - begin >= 0)	/* again --GN2000Jun02 */
     (*begin) += log_p, begin += p;
 }
 
