@@ -94,6 +94,7 @@ BA 31- uninitialized memory read in divrr(x,y), when lg(y) < lg(x), leading
    34- systematic warning in bnfisnorm()  [ "useless flag" ]
    35- charpoly could not handle t_POL in variable MAXVARN
    36- \p400 + sin(2*Pi) boasted far too many significant digits
+   37- --with-readline=path did not work
 
   Changed
     1- rnf structure (removed useless components)

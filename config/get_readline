@@ -11,7 +11,7 @@ RLINCLUDE RLLIBS"
 readline=
 if test -n "$with_readline"; then
   with_readline_lib="$with_readline_lib $with_readline/lib"
-  with_readline_include="$with_readline_include $with_readline/include"
+  with_readline_include="$with_readline_include $with_readline/include/readline"
 fi
 if test -z "$without_readline"; then
   readline_add="$GP_READLINE $TOP/readline-$osname-$arch $TOP/readline"
