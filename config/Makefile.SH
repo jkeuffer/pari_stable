@@ -475,29 +475,18 @@ install-lib-sta: \$(LIBPARI_STA)
 	-\$(RM) \$(LIBDIR)/\$(LIBPARI_STA)
 	\$(INSTALL_DATA) \$(LIBPARI_STA) \$(LIBDIR)/\$(LIBPARI_STA).$version
 	-\$(LN) \$(LIBPARI_STA).$version \$(LIBDIR)/\$(LIBPARI_STA)
-EOT
-if test -n "$ranlib"; then
-cat >> $file << EOT
-	$ranlib \$(LIBDIR)/\$(LIBPARI_STA)
-
-EOT
-fi
-cat >> $file << EOT
 
 install-lib-dyn: \$(LIBPARI_DYN)
 	-mkdir -p \$(LIBDIR)
 	-\$(RM) \$(LIBDIR)/\$(LIBPARI_DYN)
 	\$(INSTALL_PROGRAM) \$(LIBPARI_DYN) \$(LIBDIR)/\$(LIBPARI_DYN)
-EOT
-if test "$soname" != "$sodest"; then
-  cat >> $file << EOT
-	-\$(RM) \$(LIBDIR)/\$(LIBPARI_SONAME)
-	-\$(RM) \$(LIBDIR)/\$(LIBPARI_SO)
-	-\$(LN) \$(LIBPARI_DYN) \$(LIBDIR)/\$(LIBPARI_SONAME)
-	-\$(LN) \$(LIBPARI_DYN) \$(LIBDIR)/\$(LIBPARI_SO)
+	-if test "\$(LIBPARI_SONAME)" != "\$(LIBPARI_SO)"; then \
+	  \$(RM) \$(LIBDIR)/\$(LIBPARI_SONAME);\
+	  \$(RM) \$(LIBDIR)/\$(LIBPARI_SO);\
+	  \$(LN) \$(LIBPARI_DYN) \$(LIBDIR)/\$(LIBPARI_SONAME);\
+	  \$(LN) \$(LIBPARI_DYN) \$(LIBDIR)/\$(LIBPARI_SO); fi
 
 EOT
-fi
 
 if test -z "$DLLD"; then
   cat >> $file << EOT
@@ -531,16 +520,12 @@ gp-dyn: \$(OBJSGP) \$(LIBPARI_DYN) \$(GNUPLOT_OBJS) \$(EXPORT_LIB)
 \$(LIBPARI_DYN): \$(OBJS) \$(EXPORT_FILE)
 	-\$(RM) \$(LIBPARI_DYN)
 	\$(DLLD_IGNORE)\$(DLLD) -o \$@ \$(DLLDFLAGS) \$(OBJS) \$(EXTRADLLDFLAGS) \$(EXPORT_FILE)
-
+	-if test "\$(LIBPARI_SONAME)" != "\$(LIBPARI_SO)"; then \
+	  \$(RM) \$(LIBPARI_SONAME);\
+	  \$(RM) \$(LIBPARI_SO);\
+	  \$(LN) \$(LIBPARI_DYN) \$(LIBPARI_SONAME);\
+	  \$(LN) \$(LIBPARI_DYN) \$(LIBPARI_SO); fi
 EOT
-  if test "$soname" != "$sodest"; then
-    cat >> $file << EOT
-	-\$(RM) \$(LIBPARI_SONAME)
-	-\$(RM) \$(LIBPARI_SO)
-	-\$(LN) \$(LIBPARI_DYN) \$(LIBPARI_SONAME)
-	-\$(LN) \$(LIBPARI_DYN) \$(LIBPARI_SO)
-EOT
-  fi
 fi
 
 if test -n "$GNUPLOT_OBJS"; then
