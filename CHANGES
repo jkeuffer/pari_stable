@@ -55,6 +55,7 @@ Done for version 2.2.2 (released ??/??/2001):
    20- user member functions were very slow (unnecessary copy)
    21- cd Oxxx; make -j4 bench ran things in the wrong order
    22- poltchebi, pollegendre gave bogus output for negative degrees
+   23- possible SEGV or oo loop in polrootsmod when p not a prime
 
   Changes
     1- allow compressing *.dvi files for the online help system
@@ -74,6 +75,8 @@ Done for version 2.2.2 (released ??/??/2001):
    12- extend x \ y, x \/ y and divrem(x,y)
 XR 13- improvements in bnrstark (try harder to find modulus, need less memory)
    14- global(x): ignore if x already global (used to raise a warning)
+BA 15- install: add RTLD_GLOBAL to dlopen flags [so that symbols can be used
+       in other .so]
 
   Added
 BA  1- New function 'vectorsmall'.
