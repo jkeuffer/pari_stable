@@ -31,7 +31,7 @@ extern void changevalue_p(entree *ep, GEN x);
 void
 forpari(entree *ep, GEN a, GEN b, char *ch)
 {
-  long av,av0 = avma, lim;
+  ulong av,av0 = avma, lim;
 
   b = gcopy(b); av=avma; lim = stack_lim(av,1);
  /* gcopy nedeed in case b gets overwritten in ch, as in
@@ -40,7 +40,7 @@ forpari(entree *ep, GEN a, GEN b, char *ch)
   push_val(ep, a);
   while (gcmp(a,b) <= 0)
   {
-    long av1=avma; (void)lisseq(ch); avma=av1;
+    ulong av1=avma; (void)lisseq(ch); avma=av1;
     if (loop_break()) break;
     a = (GEN) ep->value; a = gadd(a,gun);
     if (low_stack(lim, stack_lim(av,1)))
@@ -373,45 +373,18 @@ suminf(entree *ep, GEN a, char *ch, long prec)
 GEN
 divsum(GEN num, entree *ep, char *ch)
 {
-  long av=avma;
-  GEN z, y = gzero;
+  ulong av = avma;
+  GEN z, y = gzero, t = divisors(num);
+  long i, l = lg(t);
 
   push_val(ep, NULL);
-#if 0
+  for (i=1; i<l; i++)
   {
-    long d,n,d2;
-    GEN p1 = icopy(gun);
-    n=itos(num); /* provisoire */
-    ep->value = (void*)p1;
-    for (d=d2=1; d2 < n; d++, d2 += d+d-1)
-      if (n%d == 0)
-      {
-        p1[2]=d; y=gadd(y, lisexpr(ch));
-        if (did_break()) err(breaker,"divsum");
-        p1[2]=n/d; z = lisexpr(ch);
-        if (did_break()) err(breaker,"divsum");
-        y=gadd(y,z);
-      }
-    if (d2 == n)
-    {
-      p1[2]=d; z = lisexpr(ch);
-      if (did_break()) err(breaker,"divsum");
-      y=gadd(y,z);
-    }
+    ep->value = (void*) t[i]; 
+    z = lisseq(ch);
+    if (did_break()) err(breaker,"divsum");
+    y = gadd(y, z);
   }
-#else
-  {
-    GEN t = divisors(num);
-    long i, l=lg(t);
-    for (i=1; i<l; i++)
-    {
-      ep->value = (void*) t[i]; 
-      z = lisseq(ch);
-      if (did_break()) err(breaker,"divsum");
-      y = gadd(y, z);
-    }
-  }
-#endif
   pop_val(ep); return gerepileupto(av,y);
 }
 
