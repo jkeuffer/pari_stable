@@ -2145,13 +2145,12 @@ appr_pos(GEN nf, GEN y, GEN list, GEN ep)
   v = idealaddmultoone(nf,z); s = NULL;
   for (i=1; i<r; i++)
   {
-    t = (GEN)v[i]; pr = (GEN)list[i];
-    if (signe(ep[i]))
-      t = element_mul(nf,t,element_pow(nf,(GEN)pr[2],(GEN)ep[i]));
+    pr = (GEN)list[i];
+    t = element_mul(nf,(GEN)v[i], element_pow(nf,(GEN)pr[2],(GEN)ep[i]));
     s = s? gadd(s,t): t;
   }
   s = appr_reduce(s,y);
-  if (DEBUGLEVEL>2) fprintferr(" sortie de idealappr_pos = %Z\n",s);
+  if (DEBUGLEVEL>2) fprintferr(" leaving idealappr_pos = %Z\n",s);
   return s;
 }
 
@@ -2244,32 +2243,32 @@ idealappr0(GEN nf, GEN x, long fl)
 }
 
 /* Given a prime ideal factorization x with possibly zero or negative exponents,
- * and a vector y of elements of nf, gives a b such that
- * v_p(b-y_p)>=v_p(x) for all prime ideals p in the ideal factorization
+ * and a vector w of elements of nf, gives a b such that
+ * v_p(b-w_p)>=v_p(x) for all prime ideals p in the ideal factorization
  * and v_p(b)>=0 for all other p, using the (standard) proof given in GTM 138.
  * Certainly not the most efficient, but sure.
  */
 GEN
-idealchinese(GEN nf, GEN x, GEN y)
+idealchinese(GEN nf, GEN x, GEN w)
 {
-  long ty=typ(y),av=avma,i,j,k,l,N,r,r2;
-  GEN fact,fact2,list,ep,ep1,ep2,z,t,v,p1,p2,p3,p4,s,pr,den;
+  long ty=typ(w),av=avma,i,j,k,l,N,r,r2;
+  GEN fact,fact2,list,ep,ep1,ep2,z,t,y,v,p1,p3,s,den;
 
   if (DEBUGLEVEL>4)
   {
     fprintferr(" entree dans idealchinese() :\n");
-    fprintferr(" x = "); outerr(x);
-    fprintferr(" y = "); outerr(y);
+    fprintferr(" x = %Z\n", x);
+    fprintferr(" w = %Z\n", w);
   }
   nf=checknf(nf); N=degpol(nf[1]);
   if (typ(x)!=t_MAT ||(lg(x)!=3))
     err(talker,"not a prime ideal factorization in idealchinese");
   fact=x; list=(GEN)fact[1]; ep=(GEN)fact[2]; r=lg(list);
-  if (!is_vec_t(ty) || lg(y)!=r)
+  if (!is_vec_t(ty) || lg(w)!=r)
     err(talker,"not a suitable vector of elements in idealchinese");
   if (r==1) return gscalcol_i(gun,N);
 
-  den=denom(y);
+  den=denom(w);
   if (!gcmp1(den))
   {
     fact2=idealfactor(nf,den);
@@ -2277,56 +2276,36 @@ idealchinese(GEN nf, GEN x, GEN y)
     ep2=(GEN)fact2[2]; l=r+r2-1;
     z=cgetg(l,t_VEC); for (i=1; i<r; i++) z[i]=list[i];
     ep1=cgetg(l,t_VEC); for (i=1; i<r; i++) ep1[i]=ep[i];
-    j=r-1;
+    j=r;
     for (i=1; i<r2; i++)
     {
       p3=(GEN)p1[i]; k=1;
       while (k<r && !gegal((GEN)list[k],p3)) k++;
-      if (k==r) { j++; z[j]=(long)p3; ep1[j]=ep2[i]; }
+      if (k==r) { z[j]=(long)p3; ep1[j]=ep2[i]; j++; }
       else ep1[k]=ladd((GEN)ep1[k],(GEN)ep2[i]);
     }
-    r=j+1; setlg(z,r); setlg(ep1,r); list=z; ep=ep1;
+    r=j; setlg(z,r); setlg(ep1,r); list=z; ep=ep1;
   }
   for (i=1; i<r; i++)
-    if (signe(ep[i])<0) ep[i] = zero;
-  t=idmat(N);
-  for (i=1; i<r; i++)
-  {
-    pr=(GEN)list[i]; p4=(GEN)ep[i];
-    if (signe(p4))
-    {
-      if (cmpis((GEN)pr[4],N))
-      {
-	p2=cgetg(3,t_MAT);
-        p2[1]=(long)gscalcol_i(powgi((GEN)pr[1],p4), N);
-	p2[2]=(long)element_pow(nf,(GEN)pr[2],p4);
-        t=idealmat_mul(nf,t,p2);
-      }
-      else t=gmul(powgi((GEN)pr[1],p4),t);
-    }
-  }
-  z=cgetg(r,t_VEC);
-  for (i=1; i<r; i++)
-  {
-    pr=(GEN)list[i]; p4=(GEN)ep[i];
-    if (cmpis((GEN)pr[4],N))
-    {
-      p2=cgetg(3,t_MAT); p1=powgi((GEN)pr[1],p4);
-      p2[1]=(long)gscalcol_i(p1,N);
-      p2[2]=(long)element_pow(nf,(GEN)pr[5],p4);
-      z[i]=ldiv(idealmat_mul(nf,t,p2),p1);
-    }
-    else z[i]=ldiv(t,powgi((GEN)pr[1],p4));
-  }
-  v=idealaddmultoone(nf,z);
-  s=cgetg(N+1,t_COL); for (i=1; i<=N; i++) s[i]=zero;
-  for (i=1; i<r; i++)
-    s = gadd(s,element_mul(nf,(GEN)v[i],(GEN)y[i]));
+    if (signe(ep[i]) < 0) ep[i] = zero;
 
-  p3 = appr_reduce(s,t);
-  if (DEBUGLEVEL>2)
-    { fprintferr(" sortie de idealchinese() : p3 = "); outerr(p3); }
-  return gerepileupto(av,p3);
+  y = idmat(N);
+  for (i=1; i<r; i++)
+    y = idealmulpowprime(nf,y, (GEN)list[i], (GEN)ep[i]);
+
+  z = cgetg(r,t_VEC);
+  for (i=1; i<r; i++)
+    z[i] = (long)idealdivpowprime(nf,y, (GEN)list[i], (GEN)ep[i]);
+  v = idealaddmultoone(nf,z); s = NULL;
+  for (i=1; i<r; i++)
+  {
+    t = element_mul(nf,(GEN)v[i], (GEN)w[i]);
+    s = s? gadd(s,t): t;
+  }
+
+  s = appr_reduce(s,y);
+  if (DEBUGLEVEL>2) fprintferr(" leaving idealchinese = %Z\n",s);
+  return gerepileupto(av,s);
 }
 
 GEN
