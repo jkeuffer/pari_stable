@@ -2461,8 +2461,8 @@ mpqs_get_relation(long pos, FILE *FREL)
 }
 
 /* the following two reside in src/basemath/ifactor1.c */
-long is_odd_power(GEN x, GEN *pt, long *mask);
-int miller(GEN n, long k);
+extern long is_odd_power(GEN x, GEN *pt, long *mask);
+extern int miller(GEN n, long k);
 
 #define isprobableprime(n) (miller((n),17))
 
