@@ -1,4 +1,4 @@
-#line 1 "../src/kernel/none/mp.c"
+#line 2 "../src/kernel/none/mp.c"
 /* $Id$
 
 Copyright (C) 2000-2003 The PARI group.
@@ -1467,8 +1467,6 @@ divrr(GEN x, GEN y)
   }
 
   lr = min(lx,ly); r = new_chunk(lr);
-  for (i=0;i<lr;i++) r[i]=0;
-  for (i=0;i<lr;i++) r[-i]=0;
   r1 = r-1;
   r1[1] = 0; for (i=2; i<lr; i++) r1[i]=x[i];
   r1[lr] = (lx>lr)? x[lr]: 0;
