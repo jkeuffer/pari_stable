@@ -1721,7 +1721,7 @@ GetBoundN0(GEN C,  long r1, long r2,  long prec, long flag)
   GEN eps, limx = get_limx(r1, r2, prec, &eps, flag);
 
   limx = gfloor(gdiv(C, limx));
-  if (lgefint(limx)>3)
+  if (is_bigint(limx))
     err(talker, "Too many coefficients (%Z) needed in GetST: computation impossible", limx);
 
   avma = av; return itos(limx);
