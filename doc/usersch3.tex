@@ -4755,29 +4755,36 @@ in $\Z_K/\var{pr}$, where $a$ is a matrix and $b$ a column vector, and where
 
 \syn{nfsolvemodpr}{\var{nf},a,b,\var{pr}}.
 
-\subsecidx{polcompositum}$(x,y,\{\fl=0\})$: $x$ and $y$ being polynomials
-in $\Z[X]$ in the same variable, outputs a vector giving the list of all
-possible composita of the number fields defined by $x$ and $y$, if $x$ and
-$y$ are irreducible, or of the corresponding \'etale algebras, if they are
-only squarefree. Returns an error if one of the polynomials is not
-squarefree. If one of the polynomials is irreducible (say $x$), it is in
-general \emph{much} faster to proceed as follows
+\subsecidx{polcompositum}$(P,Q,\{\fl=0\})$:\sidx{compositum} $P$ and $Q$
+being squarefree polynomials in $\Z[X]$ in the same variable, outputs 
+the simple factors of the \'etale $\Q$-algebra $A = \Q(X, Y) / (P(X), Q(Y))$.
+The factors are given by a list of polynomials $R$ in $\Z[X]$, associated to
+the number field $\Q(X)/ (R)$, and sorted by increasing degree (with respect
+to lexicographic ordering for factors of equal degrees). Returns an error if
+one of the polynomials is not squarefree.
+
+Note that it is more efficient to reduce to the case where $P$ and $Q$ are
+irreducible first. The routine will not perform this for you, since it may be
+expensive, and the inputs are irreducible in most applications anyway.
+Assuming $P$ is irreducible (of smaller degree than $Q$ for efficiency), it
+is in general \emph{much} faster to proceed as follows
 \bprog
-  nf = nfinit(x);
-  L = nffactor(nf, y)[,1];
-  vector(#L, i, rnfequation(nf, L[i]))
+   nf = nfinit(P); L = nffactor(nf, Q)[,1];
+   vector(#L, i, rnfequation(nf, L[i]))
 @eprog
-in order to generate the simple factors of the \'etale algebras above.
+to obtain the same result. If you are only interested in the degrees of the
+simple factors, the \kbd{rnfequation} instruction can be replaced by a
+trivial \kbd{poldegree(P) * poldegree(L[i])}.
 
-If $\fl=1$, outputs a vector of 4-component vectors $[z,a,b,k]$, where $z$
+If $\fl=1$, outputs a vector of 4-component vectors $[R,a,b,k]$, where $R$
 ranges through the list of all possible compositums as above, and $a$
-(resp. $b$) expresses the root of $x$ (resp. $y$) as a polmod in a root of
-$z$, and $k$ is a small integer k such that $a+kb$ is the chosen root of
-$z$.
+(resp. $b$) expresses the root of $P$ (resp. $Q$) as an element of
+$\Q(X)/(R)$. Finally, $k$ is a small integer such that $b - ka = X$ modulo
+$R$.
 
-The compositum will quite often be defined by a complicated polynomial,
-which it is advisable to reduce before further work. Here is a simple
-example involving the field $\Q(\zeta_5, 5^{1/5})$:
+A compositum is quite often defined by a complicated polynomial, which it is
+advisable to reduce before further work. Here is a simple example involving
+the field $\Q(\zeta_5, 5^{1/5})$:
 \bprog
 ? z = polcompositum(x^5 - 5, polcyclo(5), 1)[1];
 ? pol = z[1]                 \\@com \kbd{pol} defines the compositum
@@ -4794,7 +4801,7 @@ example involving the field $\Q(\zeta_5, 5^{1/5})$:
 %6 = Mod(-5/22*x^19 + 1/22*x^14 - 123/22*x^9 + 9/11*x^4, x^20 + 25*x^10 + 5)
 @eprog
 
-\syn{polcompositum0}{x,y,\fl}.
+\syn{polcompositum0}{P,Q,\fl}.
 
 \subsecidx{polgalois}$(x)$: \idx{Galois} group of the non-constant polynomial
 $x\in\Q[X]$. In the present version \vers, $x$ must be irreducible and
