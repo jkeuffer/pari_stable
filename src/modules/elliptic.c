@@ -3178,6 +3178,7 @@ torselldoud(GEN e)
   gpmem_t av=avma;
   GEN v,w1,w22,w1j,w12,p,tor1,tor2;
 
+  checkbell(e);
   v = ellintegralmodel(e);
   if (v) e = coordch(e,v);
 
