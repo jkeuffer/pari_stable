@@ -3180,7 +3180,7 @@ MORE:
   switch (compute_R(lambda, divir(h,z), &L, &R))
   {
     case fupb_PRECI: /* precision problem unless we cheat on Bach constant */
-      if (!precdouble) precpb = "compute_R";
+      if (precdouble & 3 || cbach > 2) precpb = "compute_R";
       goto START;
     case fupb_RELAT: /* not enough relations */
       if (++nrelsup <= MAXRELSUP) nlze = MIN_EXTRA; else sfb_increase = 1;
