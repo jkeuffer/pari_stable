@@ -242,13 +242,18 @@ nfroots(GEN nf,GEN pol)
 }
 
 int
-nfisgalois(GEN nf, GEN x)
+nfissplit(GEN nf, GEN x)
 {
   gpmem_t av = avma;
-  long l;
-  if (degpol(x) <= 2) return 1;
-  l = lg(nfsqff(nf, x, 2));
+  long l = lg(nfsqff(checknf(nf), x, 2));
   avma = av; return l != 1;
+}
+
+/* nf = K[y] / (P). Galois over K ? */
+int
+nfisgalois(GEN nf, GEN P)
+{
+  return degpol(P) <= 2 || nfissplit(nf, P);
 }
 
 /* return a minimal lift of elt modulo id */

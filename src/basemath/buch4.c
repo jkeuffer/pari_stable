@@ -687,9 +687,21 @@ pr_append(GEN nf, GEN rel, GEN p, GEN *prod, GEN *S1, GEN *S2)
 static void
 fa_pr_append(GEN nf,GEN rel,GEN N,GEN *prod,GEN *S1,GEN *S2)
 {
-  GEN v = (GEN)factor(N)[1];
-  long i, l = lg(v);
-  for (i=1; i<l; i++) pr_append(nf,rel,(GEN)v[i],prod,S1,S2);
+  if (!is_pm1(N))
+  {
+    GEN v = (GEN)factor(N)[1];
+    long i, l = lg(v);
+    for (i=1; i<l; i++) pr_append(nf,rel,(GEN)v[i],prod,S1,S2);
+  }
+}
+
+static GEN
+pol_up(GEN rnfeq, GEN x)
+{
+  long i, l = lgef(x);
+  GEN y = cgetg(l, t_POL); y[1] = x[1];
+  for (i=1; i<l; i++) y[i] = (long)rnfelementreltoabs(rnfeq, (GEN)x[i]);
+  return y;
 }
 
 GEN
@@ -697,25 +709,40 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
 {
   gpmem_t av = avma;
   long i, l, drel, k;
-  GEN prod, S1, S2, gen, cyc, bnf, nf, rnfeq, rel, res, y = cgetg(9, t_VEC);
+  GEN prod, S1, S2, gen, cyc, bnf, nf, nfrel, rnfeq, rel, res;
+  GEN y = cgetg(9, t_VEC);
 
   T = get_bnfpol(T, &bnf, &nf);
   if (!bnf) bnf = bnfinit0(nf? nf: T, 1, NULL, DEFAULTPREC);
   if (!nf) nf = checknf(bnf);
+  rnfeq = NULL; /* no reltoabs needed */
   if (relpol && !gcmp0(relpol))
   {
-    rnfeq = _rnfequation(bnf, relpol, &k, NULL);
-    rel = bnfinit0(rnfeq, 1, NULL, nfgetprec(nf));
+    GEN polabs;
+    if (galois == 2 && poldegree(relpol, varn(T)))
+    { /* needs reltoabs */
+      rnfeq = rnfequation2(bnf, relpol);
+      polabs = (GEN)rnfeq[1];
+      k = itos((GEN)rnfeq[3]);
+    }
+    else
+      polabs = _rnfequation(bnf, relpol, &k, NULL);
+    rel = bnfinit0(polabs, 1, NULL, nfgetprec(nf));
   }
   else
   { /* over Q */
     rel = bnf; k = 0;
-    bnf = bnfinit0(polx[MAXVARN],2,NULL,0);
-    relpol = T;
+    relpol = T; T = polx[MAXVARN];
+    bnf = bnfinit0(T, 2, NULL, 0);
   }
+  nfrel = checknf(rel);
   drel = degpol(relpol);
   if (galois < 0 || galois > 2) err(flagerr, "rnfisnorminit");
-  if (galois == 2) galois = nfisgalois(nf, relpol);
+  if (galois == 2)
+  {
+    GEN P = rnfeq? pol_up(rnfeq, relpol): relpol;
+    galois = nfisgalois(gsubst(nfrel, varn(P), polx[varn(T)]), P);
+  }
 
   prod = gun; S1 = S2 = cgetg(1, t_VEC);
   res = gmael(rel,8,1);
@@ -728,7 +755,7 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
   }
   if (!galois)
   {
-    GEN Ndiscrel = diviiexact((GEN)checknf(rel)[3], gpowgs((GEN)nf[3], drel));
+    GEN Ndiscrel = diviiexact((GEN)nfrel[3], gpowgs((GEN)nf[3], drel));
     fa_pr_append(nf,rel,absi(Ndiscrel), &prod,&S1,&S2);
   }
 
@@ -764,13 +791,13 @@ rnfisnorm(GEN T, GEN x, long flag)
   bnf = checkbnf(bnf);
   rel = checkbnf(rel);
   nf = checknf(bnf);
-  if (typ(x) != t_POL) x = basistoalg(nf,x);
-  if (gvar(x) != varn(nf[1])) err(consister, "rnfisnorm");
+  x = basistoalg(nf,x);
+  if (typ(x) != t_POLMOD) err(typeer, "rnfisnorm");
   drel = degpol(relpol);
   if (gcmp0(x) || gcmp1(x) || (gcmp_1(x) && odd(drel)))
   {
     res[1] = (long)x;
-    res[2] = un; return gerepilecopy(av, res);
+    res[2] = un; return res;
   }
 
   /* build set T of ideals involved in the solutions */
@@ -840,6 +867,6 @@ GEN
 bnfisnorm(GEN bnf,GEN x,long flag,long PREC)
 {
   gpmem_t av = avma;
-  GEN T = rnfisnorminit(bnf, NULL, flag == 0);
+  GEN T = rnfisnorminit(bnf, NULL, flag == 0? 1: 2);
   return gerepileupto(av, rnfisnorm(T, x, flag));
 }
