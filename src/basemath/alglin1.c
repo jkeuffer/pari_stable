@@ -2942,7 +2942,7 @@ hnfadd(GEN H, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, /* cf hnfspec */
       fprintferr("mit = %Z\n",H);
       fprintferr("C = %Z\n",p1);
     }
-    msgtimer("hnfadd (%d)",lextra);
+    msgtimer("hnfadd (%ld)",lextra);
   }
   return H;
 }

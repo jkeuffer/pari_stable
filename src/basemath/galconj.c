@@ -242,7 +242,7 @@ initborne(GEN T, GEN disc, struct galois_borne *gb, long ppp)
   gb->valabs = mylogint(borneabs, gb->l, prec);
   gb->valabs =  max(gb->valsol,gb->valabs);
   if (DEBUGLEVEL >= 4)
-    fprintferr("GaloisConj:val1=%d val2=%d\n", gb->valsol, gb->valabs);
+    fprintferr("GaloisConj:val1=%ld val2=%ld\n", gb->valsol, gb->valabs);
   avma = av2;
   gb->bornesol = gerepileupto(ltop, myceil(borneroots));
   gb->ladicsol = gpowgs(gb->l, gb->valsol);
@@ -1632,7 +1632,7 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
       {
 	avma = ltop;
 	if (DEBUGLEVEL >= 2)
-	  fprintferr("GaloisAnalysis:non Galois for p=%d\n", p);
+	  fprintferr("GaloisAnalysis:non Galois for p=%ld\n", p);
 	ga->p = p;
 	ga->deg = 0;
 	return;		/* Not a Galois polynomial */
@@ -1648,7 +1648,7 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
       if (p4 == 0 && s == 4)
 	p4 = p;
       if (DEBUGLEVEL >= 6)
-	fprintferr("GaloisAnalysis:Nbtest=%d,plift=%d,p=%d,s=%d,ord=%d\n",
+	fprintferr("GaloisAnalysis:Nbtest=%ld,plift=%ld,p=%ld,s=%ld,ord=%ld\n",
 		   nbtest, plift, p, s, ord);
       if (s > ordmax)
 	ordmax = s;
@@ -1730,8 +1730,8 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
   ga->ppp = ppp;
   ga->p4 = p4;
   if (DEBUGLEVEL >= 4)
-    fprintferr("GaloisAnalysis:p=%d l=%d exc=%d deg=%d ord=%d ppp=%d\n", p,
-	       l, ex, deg, ord, ppp);
+    fprintferr("GaloisAnalysis:p=%ld l=%ld exc=%ld deg=%ld ord=%ld ppp=%ld\n",
+               p, l, ex, deg, ord, ppp);
   if (DEBUGLEVEL >= 1)
     msgtimer("galoisanalysis()");
 }
@@ -1744,8 +1744,9 @@ a4galoisgen(GEN T, struct galois_test *td)
   long    i, j, k;
   long    n;
   long    N, hop = 0;
+  long  **O;
   GEN    *ar, **mt;		/* tired of casting */
-  GEN     t, u, O;
+  GEN     t, u;
   GEN     res, orb, ry;
   GEN     pft, pfu, pfv;
   n = degree(T);
@@ -1771,7 +1772,7 @@ a4galoisgen(GEN T, struct galois_test *td)
   av2 = avma;
   N = itos(gdiv(mpfact(n), mpfact(n >> 1))) >> (n >> 1);
   if (DEBUGLEVEL >= 4)
-    fprintferr("A4GaloisConj:I will test %d permutations\n", N);
+    fprintferr("A4GaloisConj:I will test %ld permutations\n", N);
   avma = av2;
   for (i = 0; i < n; i++)
     t[i] = i + 1;
@@ -1894,11 +1895,11 @@ a4galoisgen(GEN T, struct galois_test *td)
   {
     avma = ltop;
     if (DEBUGLEVEL >= 1 && hop)
-      fprintferr("A4GaloisConj: %d hop sur %d iterations\n", hop, N);
+      fprintferr("A4GaloisConj: %ld hop sur %ld iterations\n", hop, N);
     return gzero;
   }
   if (DEBUGLEVEL >= 1 && hop)
-    fprintferr("A4GaloisConj: %d hop sur %d iterations\n", hop, N);
+    fprintferr("A4GaloisConj: %ld hop sur %ld iterations\n", hop, N);
   N = itos(gdiv(mpfact(n >> 1), mpfact(n >> 2))) >> 1;
   avma = av2;
   if (DEBUGLEVEL >= 4)
@@ -1993,7 +1994,7 @@ a4galoisgen(GEN T, struct galois_test *td)
     return gzero;
   }
   if (DEBUGLEVEL >= 1 && hop)
-    fprintferr("A4GaloisConj: %d hop sur %d iterations\n", hop, N);
+    fprintferr("A4GaloisConj: %ld hop sur %ld iterations\n", hop, N);
   if (DEBUGLEVEL >= 4)
     fprintferr("A4GaloisConj:tau=%Z \n", u);
   avma = av2;
@@ -2002,16 +2003,16 @@ a4galoisgen(GEN T, struct galois_test *td)
   orb[2] = (long) pfu;
   if (DEBUGLEVEL >= 4)
     fprintferr("A4GaloisConj:orb=%Z \n", orb);
-  O = permorbite(orb);
+  O = (long**)permorbite(orb);
   if (DEBUGLEVEL >= 4)
     fprintferr("A4GaloisConj:O=%Z \n", O);
   av2 = avma;
   for (j = 0; j < 2; j++)
   {
-    pfv[((long **) O)[1][1]] = ((long **) O)[2][1];
-    pfv[((long **) O)[1][2]] = ((long **) O)[2][3 + j];
-    pfv[((long **) O)[1][3]] = ((long **) O)[2][4 - (j << 1)];
-    pfv[((long **) O)[1][4]] = ((long **) O)[2][2 + j];
+    pfv[O[1][1]] = O[2][1];
+    pfv[O[1][2]] = O[2][3 + j];
+    pfv[O[1][3]] = O[2][4 - (j << 1)];
+    pfv[O[1][4]] = O[2][2 + j];
     for (i = 0; i < 4; i++)
     {
       long    x;
@@ -2021,37 +2022,37 @@ a4galoisgen(GEN T, struct galois_test *td)
       case 0:
 	break;
       case 1:
-	x = ((long **) O)[3][1];
-	((long **) O)[3][1] = ((long **) O)[3][2];
-	((long **) O)[3][2] = x;
-	x = ((long **) O)[3][3];
-	((long **) O)[3][3] = ((long **) O)[3][4];
-	((long **) O)[3][4] = x;
+	x = O[3][1];
+	O[3][1] = O[3][2];
+	O[3][2] = x;
+	x = O[3][3];
+	O[3][3] = O[3][4];
+	O[3][4] = x;
 	break;
       case 2:
-	x = ((long **) O)[3][1];
-	((long **) O)[3][1] = ((long **) O)[3][4];
-	((long **) O)[3][4] = x;
-	x = ((long **) O)[3][2];
-	((long **) O)[3][2] = ((long **) O)[3][3];
-	((long **) O)[3][3] = x;
+	x = O[3][1];
+	O[3][1] = O[3][4];
+	O[3][4] = x;
+	x = O[3][2];
+	O[3][2] = O[3][3];
+	O[3][3] = x;
 	break;
       case 3:
-	x = ((long **) O)[3][1];
-	((long **) O)[3][1] = ((long **) O)[3][2];
-	((long **) O)[3][2] = x;
-	x = ((long **) O)[3][3];
-	((long **) O)[3][3] = ((long **) O)[3][4];
-	((long **) O)[3][4] = x;
+	x = O[3][1];
+	O[3][1] = O[3][2];
+	O[3][2] = x;
+	x = O[3][3];
+	O[3][3] = O[3][4];
+	O[3][4] = x;
       }
-      pfv[((long **) O)[2][1]] = ((long **) O)[3][1];
-      pfv[((long **) O)[2][3 + j]] = ((long **) O)[3][4 - j];
-      pfv[((long **) O)[2][4 - (j << 1)]] = ((long **) O)[3][2 + (j << 1)];
-      pfv[((long **) O)[2][2 + j]] = ((long **) O)[3][3 - j];
-      pfv[((long **) O)[3][1]] = ((long **) O)[1][1];
-      pfv[((long **) O)[3][4 - j]] = ((long **) O)[1][2];
-      pfv[((long **) O)[3][2 + (j << 1)]] = ((long **) O)[1][3];
-      pfv[((long **) O)[3][3 - j]] = ((long **) O)[1][4];
+      pfv[O[2][1]] = O[3][1];
+      pfv[O[2][3 + j]] = O[3][4 - j];
+      pfv[O[2][4 - (j << 1)]] = O[3][2 + (j << 1)];
+      pfv[O[2][2 + j]] = O[3][3 - j];
+      pfv[O[3][1]] = O[1][1];
+      pfv[O[3][4 - j]] = O[1][2];
+      pfv[O[3][2 + (j << 1)]] = O[1][3];
+      pfv[O[3][3 - j]] = O[1][4];
       g = gzero;
       for (k = 1; k <= n; k++)
 	g = addii(g, mt[k][pfv[k]]);
@@ -2059,7 +2060,7 @@ a4galoisgen(GEN T, struct galois_test *td)
       {
 	avma = av;
 	if (DEBUGLEVEL >= 1)
-	  fprintferr("A4GaloisConj:%d hop sur %d iterations max\n",
+	  fprintferr("A4GaloisConj:%ld hop sur %d iterations max\n",
 		     hop, 10395 + 68);
 	return res;
       }
@@ -2451,7 +2452,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
       if (fp % deg == 0)
       {
 	if (DEBUGLEVEL >= 4)
-	  fprintferr("Galoisconj:p=%d deg=%d fp=%d\n", p, deg, fp);
+	  fprintferr("Galoisconj:p=%ld deg=%ld fp=%ld\n", p, deg, fp);
 	lo = (GEN *) listsousgroupes(deg, n / fp);
 	initlift(T, den, ip, L, Lden, gb, &gl);
 	if (inittestlift
@@ -2505,10 +2506,10 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
       err(primer1);
     p += c;
     if (DEBUGLEVEL >= 4)
-      fprintferr("GaloisConj:next p=%d\n", p);
+      fprintferr("GaloisConj:next p=%ld\n", p);
     avma = av;
   }
-suite:				/* Djikstra probably hates me. (Linus
+suite:				/* Dijkstra probably hates me. (Linus
 				 * Torvalds linux/kernel/sched.c) */
   if (deg == n)			/* Cyclique */
   {
@@ -2572,7 +2573,7 @@ suite:				/* Djikstra probably hates me. (Linus
 	ppsi[i] = psi[j];
     }
     if (DEBUGLEVEL >= 4)
-      fprintferr("GaloisConj:Pm=%d   ppsi=%Z\n", Pm, ppsi);
+      fprintferr("GaloisConj:Pm=%ld   ppsi=%Z\n", Pm, ppsi);
     galoisanalysis(P, &Pga, 0);
     if (Pga.deg == 0)
     {
@@ -2585,7 +2586,8 @@ suite:				/* Djikstra probably hates me. (Linus
     if (Pgb.valabs > gb->valabs)
     {
       if (DEBUGLEVEL>=4)
-	fprintferr("GaloisConj:increase prec of p-adic roots of %d.\n",Pgb.valabs-gb->valabs);
+	fprintferr("GaloisConj:increase prec of p-adic roots of %ld.\n",
+                   Pgb.valabs-gb->valabs);
       PL = rootpadicliftroots(P,PL,gb->ladicabs,Pgb.ladicabs);
     }
     PM = vandermondeinversemod(PL, P, Pden, Pgb.ladicabs);
@@ -2650,7 +2652,7 @@ suite:				/* Djikstra probably hates me. (Linus
       sr = (1 + sr * w) % deg;
     sr = cgcd(sr, deg);
     if (DEBUGLEVEL >= 6)
-      fprintferr("GaloisConj:w=%d [%d] sr=%d dss=%d\n", w, deg, sr, dss);
+      fprintferr("GaloisConj:w=%ld [%ld] sr=%ld dss=%ld\n", w, deg, sr, dss);
     for (t = 0; t < sr; t += dss)
     {
       pf = testpermutation(O, B, w, t, sr, &td);
@@ -2847,13 +2849,13 @@ numberofconjugates(GEN T, long pdepart)
       card = cgcd(s, card);
     }
     if (DEBUGLEVEL >= 6)
-      fprintferr("NumberOfConjugates:Nbtest=%d,card=%d,p=%d\n", nbtest,
+      fprintferr("NumberOfConjugates:Nbtest=%ld,card=%ld,p=%ld\n", nbtest,
 		 card, p);
     nbtest++;
     avma = ltop2;
   }
   if (DEBUGLEVEL >= 2)
-    fprintferr("NumberOfConjugates:card=%d,p=%d\n", card, p);
+    fprintferr("NumberOfConjugates:card=%ld,p=%ld\n", card, p);
   avma = ltop;
   return card;
 }
@@ -3206,7 +3208,7 @@ long znconductor(long n, GEN v, GEN V)
     p=itos(gcoeff(F,i,1));
     e=itos(gcoeff(F,i,2));
     if (DEBUGLEVEL>=4)
-      fprintferr("SubCyclo:testing %d^%d\n",p,e);
+      fprintferr("SubCyclo:testing %ld^%ld\n",p,e);
     while (e>1)
     {
       q=n/p;
@@ -3217,7 +3219,7 @@ long znconductor(long n, GEN v, GEN V)
       e--;
       n=q;
       if (DEBUGLEVEL>=4)
-	fprintferr("SubCyclo:new conductor:%d\n",n);
+	fprintferr("SubCyclo:new conductor:%ld\n",n);
       m=sousgroupeelem(n,v,V,W);
       setlg(V,m); 
       if (DEBUGLEVEL>=6)
@@ -3225,7 +3227,7 @@ long znconductor(long n, GEN v, GEN V)
     }
   } 
   if (DEBUGLEVEL>=6)
-    fprintferr("SubCyclo:conductor:%d\n",n);
+    fprintferr("SubCyclo:conductor:%ld\n",n);
   avma=ltop;
   return n;
 }
@@ -3287,7 +3289,7 @@ galoissubcyclo(long n, GEN H, GEN Z, long v)
     fprintferr("Subcyclo: orbit=%Z\n",O);
   u=lg(O)-1;o=lg(O[1])-1;
   if (DEBUGLEVEL >= 4)
-    fprintferr("Subcyclo: %d orbits with %d elements each\n",u,o);
+    fprintferr("Subcyclo: %ld orbits with %ld elements each\n",u,o);
   if (o==1)
   {
     avma=ltop;
@@ -3312,7 +3314,7 @@ galoissubcyclo(long n, GEN H, GEN Z, long v)
   val=mylogint(shifti(borne,1),l,DEFAULTPREC);
   avma=av;
   if (DEBUGLEVEL >= 4)
-    fprintferr("Subcyclo: val=%d\n",val);
+    fprintferr("Subcyclo: val=%ld\n",val);
   le=gpowgs(l,val);
   z=lift(gpowgs(gener(l),e));
   z=padicsqrtnlift(gun,stoi(n),z,l,le);
