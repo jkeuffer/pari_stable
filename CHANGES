@@ -64,7 +64,9 @@ BA 23- fix accuracy problems in vandermondeinverse
    26- element_sqr didn't check its arguments (SEGV if bad input)
    27- possible stack corruption in polroots (+ improved GC there)
    28- typo in nfsubfields (incorrect bound: could miss a subfield)
-   29- typo in zsimpjoin (concat error in bnrdisclist)
+   29- typo in zsimpjoin (concat error in bnrdisclist, intr. in 2.2.0)
+IZ 30- typo in Configure [rl_save_prompt and _eprintf not found in target libs]
+MD 31- oo loop in ellap [uninitialized array length in apell1]
 
   Changed
     1- removed useless parameter prec in many bnr* and rnf* functions
@@ -76,6 +78,8 @@ BA  4- Fp_PHlog (Pohlig-Hellman) can use a factorization of the subgroup order
     7- scalar + [;] --> error  [made it [;]]
 BA  8- factorback, chinese, lcm and gcd now accept a single vector
     9- Use I \cap Z instead of NI in hnfideal_inv
+   10- improved issquare(t_INTMOD)
+   11- improved subresultant routines (new function pseudodiv)
 
   Added
 BA  1- function pith() [= pi(x), naïve implementation]
