@@ -1022,7 +1022,7 @@ nf_get_r1(GEN nf)
 {
   GEN x = (GEN)nf[2];
   if (typ(x) != t_VEC || lg(x) != 3 || typ(x[1]) != t_INT)
-    err(typeer,"false nf in nf_get_r1");
+    err(talker,"false nf in nf_get_r1");
   return itos((GEN)x[1]);
 }
 long
@@ -1030,7 +1030,7 @@ nf_get_r2(GEN nf)
 {
   GEN x = (GEN)nf[2];
   if (typ(x) != t_VEC || lg(x) != 3 || typ(x[2]) != t_INT)
-    err(typeer,"false nf in nf_get_r1");
+    err(talker,"false nf in nf_get_r2");
   return itos((GEN)x[2]);
 }
 
