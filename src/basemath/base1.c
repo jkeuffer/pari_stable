@@ -1048,7 +1048,8 @@ void
 nf_get_sign(GEN nf, long *r1, long *r2)
 {
   GEN x = (GEN)nf[2];
-  if (typ(x) != t_VEC || lg(x) != 3 || (typ(x[1]) | typ(x[2])) != t_INT)
+  if (typ(x) != t_VEC || lg(x) != 3
+      || typ(x[1]) != t_INT || typ(x[2]) != t_INT)
     err(talker,"false nf in nf_get_sign");
   *r1 = itos((GEN)x[1]);
   *r2 = (degpol(nf[1]) - *r1) >> 1;
