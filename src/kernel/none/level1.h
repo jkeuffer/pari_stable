@@ -99,6 +99,7 @@ GEN    resss(long x, long y);
 GEN    rtor(GEN x, long prec);
 GEN    shiftr(GEN x, long n);
 long   smodis(GEN x, long y);
+long   smodss(long x, long y);
 GEN    stor(long x, long prec);
 GEN    stoi(long x);
 GEN    subii(GEN x, GEN y);
@@ -230,6 +231,13 @@ smodis(GEN x, long y)
   const pari_sp av=avma; (void)divis_rem(x,y, &rem); avma=av;
   if (!rem) return 0;
   return (signe(x) > 0) ? rem: labs(y) + rem;
+}
+
+INLINE long
+smodss(long x, long y)
+{ 
+  long rem = x%y;
+  return (rem>=0)? rem: labs(y) + rem;
 }
 
 INLINE GEN
