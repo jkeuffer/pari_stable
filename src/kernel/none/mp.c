@@ -1667,24 +1667,26 @@ diviiexact(GEN x, GEN y)
 
     z[i] = q = y0inv*((ulong)x[ii]); /* i-th quotient */
     if (!q) continue;
-    /* x := x - q * y */
 
-    /* don't update lowest word (could set it to 0) */
-    (void)mulll(q,y[0]); limj = ii+3-ly;
-    for (j=ii-1; j>=limj; j--)
-    {
-      x[j] = subll(x[j], addmul(q,y[j-ii]));
-      hiremainder += overflow;
-    }
-    if (hiremainder)
-    {
-      if ((ulong)x[j] < hiremainder)
+    /* x := x - q * y */
+    (void)mulll(q,y[0]); limj = max(lx - lz, ii+3-ly);
+    { /* update neither lowest word (could set it to 0) nor highest ones */
+      register GEN x0 = x + (ii - 1), y0 = y - 1, xlim = x + limj; 
+      for (; x0 >= xlim; x0--, y0--)
       {
-        x[j] -= hiremainder;
-        do x[--j]--; while ((ulong)x[j] == MAXULONG);
+        *x0 = subll(*x0, addmul(q,*y0));
+        hiremainder += overflow;
       }
-      else
-        x[j] -= hiremainder;
+      if (hiremainder && limj != lx - lz)
+      {
+        if ((ulong)*x0 < hiremainder)
+        {
+          *x0 -= hiremainder;
+          do (*--x0)--; while ((ulong)*x0 == MAXULONG);
+        }
+        else
+          *x0 -= hiremainder;
+      }
     }
   }
 #if 0
