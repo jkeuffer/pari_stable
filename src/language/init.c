@@ -1634,7 +1634,14 @@ bin_copy(GENbin *p)
  *   stackdummy(z,l); z += l; We lose l words but save a costly gerepile.
  */
 void
-stackdummy(GEN z, long l) { if (l > 0) z[0] = evaltyp(t_VECSMALL) | evallg(l); }
+stackdummy(GEN z, long l) {
+  if (l > 0) {
+    z[0] = evaltyp(t_VECSMALL) | evallg(l);
+#if DEBUG
+    { long i; for (i = 1; i < l; i++) z[i] = 0; }
+#endif
+  }
+}
 
 /* gerepileupto(av, forcecopy(x)) */
 GEN
