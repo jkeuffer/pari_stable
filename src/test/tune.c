@@ -138,6 +138,11 @@ static double speed_mulii(speed_param *s)
 static double speed_karamulii(speed_param *s)
 { enable(s); TIME_FUN(mulii(s->x, s->y)); }
 
+static double speed_log(speed_param *s)
+{ disable(s); TIME_FUN(mplog(s->x)); }
+static double speed_logagm(speed_param *s)
+{ enable(s);  TIME_FUN(mplog(s->x)); }
+
 static double speed_sqri (speed_param *s)
 { disable(s); TIME_FUN(sqri(s->x)); }
 static double speed_karasqri (speed_param *s)
@@ -215,6 +220,7 @@ static tune_param param[] = {
 {PARI,var(MONTGOMERY_LIMIT),       t_INT, 3,0, speed_redc,speed_modii},
 {0,   var(REMIIMUL_LIMIT),         t_INT, 3,0, speed_modii,speed_remiimul},
 {GMP, var(DIVRR_GMP_LIMIT),        t_REAL,4,0, speed_divrr,speed_divrrgmp},
+{0,   var(LOGAGM_LIMIT),           t_REAL,4,0, speed_log,speed_logagm},
 {GMP, var(INVMOD_GMP_LIMIT),       t_INT, 3,0, speed_invmod,speed_invmodgmp},
 {0,   var(Flx_MUL_LIMIT),          t_Flx, 4,0, speed_Flx_mul,speed_Flx_karamul},
 {0,   var(Flx_SQR_LIMIT),          t_Flx, 4,0, speed_Flx_sqr,speed_Flx_karasqr},
