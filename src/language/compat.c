@@ -149,7 +149,7 @@ entree oldfonctions[]={
 {"compositum2",2,(void *)compositum2,6,"GG"},
 {"comprealraw",2,(void *)comprealraw,4,"GG"},
 {"concat",2,(void *)concat,8,"GG"},
-{"conductor",62,(void *)bnrconductor,6,"GD0,G,D0,G,D1,L,"},
+{"conductor",99,(void *)bnrconductor,6,"GDGDGD1,G,"},
 {"conductorofchar",2,(void *)bnrconductorofchar,6,"GG"},
 {"conj",1,(void *)gconj,2,"G"},
 {"conjvec",1,(void *)conjvec,2,"Gp"},
