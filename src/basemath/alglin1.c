@@ -2144,7 +2144,7 @@ eigen(GEN x, long prec)
   for (i=1; i<n; i++)
   {
     GEN p1 = (GEN)rr[i];
-    if (!signe(p1[2])) rr[i]=p1[1];
+    if (!signe(p1[2]) || gexpo((GEN)p1[2]) - gexpo(p1) < ex) rr[i] = p1[1];
   }
   ly=1; k=2; r2=(GEN)rr[1];
   for(;;)
@@ -2152,7 +2152,7 @@ eigen(GEN x, long prec)
     r3 = grndtoi(r2, &e); if (e < ex) r2 = r3;
     ssesp = ker0(x,r2,prec); l = lg(ssesp);
     if (l == 1 || ly + (l-1) > n)
-      err(talker, "precision too low in eigen");
+      err(talker2, "missing eigenspace. Compute the matrix to higher accuracy, then restart eigen at the current precision",NULL,NULL);
     for (i=1; i<l; ) y[ly++]=ssesp[i++]; /* done with this eigenspace */
 
     r1=r2; /* try to find a different eigenvalue */
