@@ -42,6 +42,7 @@ YU = Yoshiaki Uchikawa
 Done for version 2.2.10 (released ??/??/2005):
   Fixed
 BA  1- gp2c description of == operator was broken.
+    2- asin(I) --> SEGV
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.9 (released 23/12/2004):

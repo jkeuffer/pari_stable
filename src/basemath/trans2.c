@@ -164,7 +164,7 @@ mpasin(GEN x) {
   return gerepileuptoleaf(av, z);
 }
 
-static GEN mpach(GEN x, long s);
+static GEN mpach(GEN x);
 GEN
 gasin(GEN x, long prec)
 {
@@ -183,7 +183,7 @@ gasin(GEN x, long prec)
       if (expo(x) < 0) return mpasin(x);
       y = cgetg(3,t_COMPLEX);
       y[1] = (long)Pi2n(-1, lg(x));
-      y[2] = (long)mpach(x, 1);
+      y[2] = (long)mpach(x);
       if (sx < 0)
       {
         setsigne(y[1],-signe(y[1]));
@@ -193,9 +193,7 @@ gasin(GEN x, long prec)
 
     case t_COMPLEX:
       av = avma;
-      y = gerepileupto(av, gash(mulcxI(x), prec));
-      p1 = (GEN)y[1]; y[1] = y[2]; y[2] = (long)p1;
-      setsigne(p1, -signe(p1)); return y;
+      return gerepilecopy(av, mulcxmI(gash(mulcxI(x), prec)));
 
     case t_INTMOD: case t_PADIC: err(typeer,"gasin");
     default:
@@ -237,7 +235,7 @@ mpacos(GEN x)
 GEN
 gacos(GEN x, long prec)
 {
-  long l, sx;
+  long sx;
   pari_sp av;
   GEN a, y, p1;
 
@@ -249,7 +247,7 @@ gacos(GEN x, long prec)
         return sx > 0? realzero_bit( -(bit_accuracy(lg(x))>>1) ) : mppi(lg(x));
       if (expo(x) < 0) return mpacos(x);
 
-      y = cgetg(3,t_COMPLEX); p1 = mpach(x, 1);
+      y = cgetg(3,t_COMPLEX); p1 = mpach(x);
       if (sx < 0) y[1] = lmppi(lg(x));
       else {
 	y[1] = (long)gen_0;
@@ -257,9 +255,8 @@ gacos(GEN x, long prec)
       }
       y[2] = (long)p1; return y;
 
-    case t_COMPLEX: y = gach(x,prec);
-      l = y[1]; y[1] = y[2]; y[2] = l;
-      setsigne(y[2], -signe(y[2])); return y;
+    case t_COMPLEX: av = avma;
+      return gerepilecopy(av, mulcxmI(gach(x,prec)));
 
     case t_INTMOD: case t_PADIC: err(typeer,"gacos");
     case t_SER:
@@ -494,7 +491,7 @@ gth(GEN x, long prec)
 /**                                                                **/
 /********************************************************************/
 
-/* x is non-zero */
+/* x != 0 */
 static GEN
 mpash(GEN x)
 {
@@ -546,12 +543,12 @@ gash(GEN x, long prec)
 /**                                                                **/
 /********************************************************************/
 
-/* s = +/- 1, return ach(s * x) */
+/* |x| >= 1, return ach(|x|) */
 static GEN
-mpach(GEN x, long s)
+mpach(GEN x)
 {
   pari_sp av = avma;
-  GEN z = logr_abs( addrr_sign(x, s, sqrtr( subrs(mulrr(x,x), 1) ), 1) );
+  GEN z = logr_abs( addrr_sign(x, 1, sqrtr( subrs(mulrr(x,x), 1) ), 1) );
   return gerepileuptoleaf(av, z);
 }
 
@@ -566,13 +563,13 @@ gach(GEN x, long prec)
   {
     case t_REAL:
       if (signe(x) == 0) { y=cgetimag(); y[2]=(long)acos0(expo(x)); return y; }
-      if (signe(x) > 0 && expo(x) >= 0) return mpach(x, 1); /* x >= 1 */
+      if (signe(x) > 0 && expo(x) >= 0) return mpach(x); /* x >= 1 */
       /* -1 < x < 1 */
       if (expo(x) < 0) { y = cgetimag(); y[2] = (long)mpacos(x); return y; }
       /* x <= -1 */
       if (absrnz_egal1(x)) { y = cgetimag(); y[2] = lmppi(lg(x)); return y; }
       y = cgetg(3,t_COMPLEX);
-      av = avma; p1 = mpach(x, -signe(x));
+      av = avma; p1 = mpach(x);
       setsigne(p1, -signe(p1));
       y[1] = (long)p1;
       y[2] = lmppi(lg(x)); return y;
