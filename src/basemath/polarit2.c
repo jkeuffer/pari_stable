@@ -1105,7 +1105,7 @@ squff(GEN a, long klim, long hint)
   e = get_e(B, prime, &pe);
 
   if (DEBUGLEVEL > 4) fprintferr("Mignotte bound: %Z\n", B);
-  if (nft < 15) maxK = 0;
+  if (nft < 11) maxK = 0;
   famod = hensel_lift_fact(a,famod,prime,pe,e);
   L = cmbf(a, famod, pe, maxK, klim, hint);
 
