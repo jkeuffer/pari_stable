@@ -507,16 +507,20 @@ isprincipalrayall(GEN bnr, GEN x, long flag)
     /* x \prod g[i]^(-ep[i]) = factorisation of principal ideal */
     idep = isprincipalfact(bnf, gen, gneg(ep), x, nf_GENMAT | nf_GEN);
     beta = (GEN)idep[2];
-    v = cgetg(1, t_COL);
-    e = cgetg(1, t_COL); lv = 1; l = lg(ep);
+    lv = 1; l = lg(ep);
+    v = cgetg(l, t_COL);
+    e = cgetg(l, t_COL);
     for (i=1; i<l; i++)
-      if (typ(vecel[i]) != t_INT) /* <==> != 1 */
+      if (typ(vecel[i]) != t_INT && signe(ep[i])) /* <==> != 1 */
       {
         v[lv] = vecel[i];
         e[lv] = ep[i]; lv++;
       }
-    if (lv > 1) beta = arch_mul(beta, to_famat(v,e));
-    
+    if (lv > 1)
+    {
+      setlg(v,lv);
+      setlg(e,lv); beta = arch_mul(to_famat(v,e), beta);
+    }
   }
   p1 = gmul(matu, concatsp(ep, zideallog(nf,beta,bid)));
   divray = (GEN)rayclass[2]; c = lg(divray);

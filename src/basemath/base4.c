@@ -376,7 +376,7 @@ static GEN
 check_elt(GEN a, GEN pol, GEN Nx, GEN xZ)
 {
   GEN yZ,y,norm, ck,c;
-  
+
   if (!signe(a)) return NULL;
   c = content(a);
   if (gcmp1(c)) {y=a; ck=NULL;} else {y=gdiv(a,c); ck=gpowgs(c, lgef(pol)-3);}
@@ -387,7 +387,7 @@ check_elt(GEN a, GEN pol, GEN Nx, GEN xZ)
   /* try a + xZ = c (y + yZ) */
   yZ = xZ;
   if (ck)
-  { 
+  {
     yZ = gdiv(xZ,c);
     if (typ(yZ) == t_FRAC) /* should be exceedingly rare */
     {
@@ -410,7 +410,7 @@ setprec(GEN x, long prec)
   for (i=1;i<n;i++)
   {
     GEN p2,p1 = (GEN)x[i];
-    for (j=1;j<n;j++) 
+    for (j=1;j<n;j++)
     {
       p2 = (GEN)p1[j];
       if (typ(p2) == t_REAL) setlg(p2, prec);
@@ -426,13 +426,13 @@ ideal_better_basis(GEN nf, GEN x, GEN M)
   GEN a,b;
   long nfprec = nfgetprec(nf);
   long prec = DEFAULTPREC + (expi(M) >> TWOPOTBITS_IN_LONG);
- 
+
   if (typ(nf[5]) != t_VEC) return x;
   if ((prec<<1) < nfprec) prec = (prec+nfprec) >> 1;
   a = qf_base_change(gmael(nf,5,3),x,1);
   setprec(a,prec);
   b = lllgramintern(a,4,1,prec);
-  if (!b) 
+  if (!b)
   {
     if (DEBUGLEVEL)
       err(warner, "precision too low in ideal_better_basis (1)");
@@ -459,7 +459,7 @@ mat_ideal_two_elt(GEN nf, GEN x)
 
   y=cgetg(3,t_VEC); av=avma;
   if (lg(x[1])!=N+1) err(typeer,"ideal_two_elt");
-  if (N == 2) 
+  if (N == 2)
   {
     y[1] = lcopy(gcoeff(x,1,1));
     y[2] = lcopy((GEN)x[2]); return y;
@@ -467,9 +467,9 @@ mat_ideal_two_elt(GEN nf, GEN x)
 
   cx=content(x); if (!gcmp1(cx)) x = gdiv(x,cx);
   if (lg(x) != N+1) x = idealhermite_aux(nf,x);
-  xZ = gcoeff(x,1,1); 
+  xZ = gcoeff(x,1,1);
   if (gcmp1(xZ))
-  { 
+  {
     y[1] = lpileupto(av,gcopy(cx));
     y[2] = (long)gscalcol(cx,N); return y;
   }
@@ -693,9 +693,9 @@ idealval(GEN nf, GEN ix, GEN P)
   vd = ggval(cx,p) * e;
   if (!v) { avma = av; return vd; }
 
-  mul = cgetg(N+1,t_MAT); bp=(GEN)P[5]; 
+  mul = cgetg(N+1,t_MAT); bp=(GEN)P[5];
   mat = cgetg(N+1,t_MAT);
-  for (j=1; j<=N; j++) 
+  for (j=1; j<=N; j++)
   {
     mul[j] = (long)element_mulid(nf,bp,j);
     x = (GEN)ix[j];
@@ -927,7 +927,7 @@ ideleaddone(GEN nf,GEN x,GEN idele)
 
 /* return integral x = 0 mod p/pr^e, (x,pr) = 1.
  * Don't reduce mod p here: caller may need result mod pr^k */
-GEN 
+GEN
 special_anti_uniformizer(GEN nf, GEN pr)
 {
   GEN p = (GEN)pr[1], e = (GEN)pr[3];
@@ -1116,7 +1116,7 @@ idealmat_mul(GEN nf, GEN x, GEN y)
       GEN p1 = mulii(gcoeff(x,1,1),gcoeff(y,1,1));
       y = hnfmodid(m, p1);
     }
-    else 
+    else
       y=hnfmod(m, detint(m));
   }
   else
@@ -1145,7 +1145,7 @@ famat_add(GEN f, GEN x)
   if (lg(f) == 1)
   {
     t=cgetg(2,t_COL); h[1]=(long)t; t[1]=lcopy(x);
-    t=cgetg(2,t_COL); h[2]=(long)t; t[1]=un;      
+    t=cgetg(2,t_COL); h[2]=(long)t; t[1]=un;
   }
   else
   {
@@ -1161,8 +1161,8 @@ famat_mul(GEN f, GEN g)
 {
   GEN h;
   if (typ(g) != t_MAT) return famat_add(f, g);
-  if (lg(f) == 1) return g;
-  if (lg(g) == 1) return f;
+  if (lg(f) == 1) return gcopy(g);
+  if (lg(g) == 1) return gcopy(f);
   h = cgetg(3,t_MAT);
   h[1] = (long)concat((GEN)f[1], (GEN)g[1]);
   h[2] = (long)concat((GEN)f[2], (GEN)g[2]);
@@ -1173,7 +1173,7 @@ static GEN
 famat_sqr(GEN f)
 {
   GEN h;
-  if (lg(f) == 1) return f;
+  if (lg(f) == 1) return cgetg(1,t_MAT);
   h = cgetg(3,t_MAT);
   h[1] = lcopy((GEN)f[1]);
   h[2] = lmul2n((GEN)f[2],1);
@@ -1183,7 +1183,7 @@ static GEN
 famat_inv(GEN f)
 {
   GEN h;
-  if (lg(f) == 1) return f;
+  if (lg(f) == 1) return cgetg(1,t_MAT);
   h = cgetg(3,t_MAT);
   h[1] = lcopy((GEN)f[1]);
   h[2] = lneg((GEN)f[2]);
@@ -1193,7 +1193,7 @@ static GEN
 famat_pow(GEN f, GEN n)
 {
   GEN h;
-  if (lg(f) == 1) return f;
+  if (lg(f) == 1) return cgetg(1,t_MAT);
   h = cgetg(3,t_MAT);
   h[1] = lcopy((GEN)f[1]);
   h[2] = lmul((GEN)f[2],n);
@@ -1257,14 +1257,16 @@ famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prn, GEN EX)
 {
   long i,k, l = lg(g), N = lgef(nf[1])-3;
   GEN prnZ,cx,x,u,z, zpow = gzero, p = (GEN)pr[1], b = (GEN)pr[5];
-  GEN mul = cgetg(N+1,t_MAT), newg = cgetg(l, t_VEC);
+  GEN mul = cgetg(N+1,t_MAT);
+  GEN newg = cgetg(l+1, t_VEC); /* room for z */
 
   prnZ = gcoeff(prn, 1,1);
   z = gmod(special_anti_uniformizer(nf, pr), prnZ);
   for (i=1; i<=N; i++) mul[i] = (long)element_mulid(nf,b,i);
   for (i=1; i < l; i++)
   {
-    x = algtobasis(nf, (GEN)g[i]);
+    x = (GEN)g[i];
+    if (typ(x) != t_COL) x = algtobasis(nf, x);
     cx = denom(x); x = gmul(x,cx);
     k = pvaluation(cx, p, &u);
     if (!gcmp1(u)) /* could avoid the inversion, but prnZ is small--> cheap */
@@ -1274,7 +1276,12 @@ famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prn, GEN EX)
     (void)int_elt_val(nf, x, p, mul, &x, VERYBIGINT);
     newg[i] = (long)colreducemodmat(x, prn, NULL);
   }
-  if (zpow != gzero) { newg = concatsp(newg, z); e = concatsp(e, zpow); }
+  if (zpow == gzero) setlg(newg, l);
+  else
+  {
+    newg[i] = (long)z;
+    e = concatsp(e, zpow);
+  }
   e = gmod(e, EX);
   return famat_to_nf_modideal_coprime(nf, newg, e, prn);
 }
@@ -1339,7 +1346,7 @@ arch_mul(GEN x, GEN y) {
   }
 }
 
-GEN 
+GEN
 arch_inv(GEN x) {
   switch (typ(x)) {
     case t_POLMOD: return ginv(x);
@@ -1736,7 +1743,7 @@ idealdivexact(GEN nf, GEN x0, GEN y0)
   if (gcmp0(Nx)) { avma = av; return gcopy(x0); } /* numerator is zero */
 
   y = gdiv(y0,cy); Ny = idealnorm(nf,y);
-  if (!gcmp1(denom(x)) || !divise(Nx,Ny)) 
+  if (!gcmp1(denom(x)) || !divise(Nx,Ny))
     err(talker, "quotient not integral in idealdivexact");
   /* Find a norm Nz | Ny such that gcd(Nx/Nz, Nz) = 1 */
   for (Nz = Ny;;)
@@ -1832,7 +1839,7 @@ ideallllred_elt_i(GEN *ptnf, GEN I, GEN vdir, long *ptprec)
   return gmul(I, (GEN)u[1]); /* small elt in I */
 }
 
-GEN 
+GEN
 ideallllred_elt(GEN nf, GEN I)
 {
   long prec = DEFAULTPREC;
@@ -1874,14 +1881,14 @@ ideallllred(GEN nf, GEN I, GEN vdir, long prec)
   c1 = content(I); if (gcmp1(c1)) c1 = NULL; else I = gdiv(I,c1);
   if (2 * expi(gcoeff(I,1,1)) >= bit_accuracy(nfprec))
     Ired = gmul(I, lllintpartial(I));
-  else 
+  else
     Ired = I;
   y = ideallllred_elt_i(&nf, Ired, vdir, &prec);
 
   if (DEBUGLEVEL>=6) msgtimer("lllgram");
   if (isnfscalar(y))
   { /* already reduced */
-    if (!aI) 
+    if (!aI)
     {
       if (I == I0) { avma = av; return gcopy(I); }
       return gerepileupto(av, gcopy(I));
@@ -2618,7 +2625,7 @@ elt_mul_table(GEN mul, GEN z)
   long av = avma, i, lx = lg(mul);
   GEN p1 = gmul((GEN)z[1], (GEN)mul[1]);
 
-  for (i=2; i<lx; i++) 
+  for (i=2; i<lx; i++)
     if (!gcmp0((GEN)z[i])) p1 = gadd(p1, gmul((GEN)z[i], (GEN)mul[i]));
   return gerepileupto(av, p1);
 }
@@ -2632,12 +2639,12 @@ element_mulvec(GEN nf, GEN x, GEN v)
   if (typ(x) == t_COL)
   {
     GEN mul = elt_mul_get_table(nf,x);
-    for (i=1; i<lv; i++) 
+    for (i=1; i<lv; i++)
       y[i] = (long)elt_mul_table(mul,(GEN)v[i]);
   }
   else
   { /* scalar */
-    for (i=1; i<lv; i++) 
+    for (i=1; i<lv; i++)
       y[i] = lmul(x, (GEN)v[i]);
   }
   return y;
@@ -2650,7 +2657,7 @@ element_mulvecrow(GEN nf, GEN x, GEN m, long i, long lim)
   GEN y, mul = elt_mul_get_table(nf,x);
 
   lv=min(lg(m),lim+1); y=cgetg(lv,t_VEC);
-  for (j=1; j<lv; j++) 
+  for (j=1; j<lv; j++)
     y[j] = (long)elt_mul_table(mul,gcoeff(m,i,j));
   return y;
 }
@@ -2881,7 +2888,7 @@ nfsmith(GEN nf, GEN x)
                 p3=element_mulvecrow(nf,(GEN)b[l],A,k,i);
                 for (l=1; l<=i; l++)
                   coeff(A,i,l) = ladd(gcoeff(A,i,l),(GEN)p3[l]);
-              
+
                 k = l = i; c = 1;
               }
             }
