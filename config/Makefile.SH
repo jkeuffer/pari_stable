@@ -153,14 +153,18 @@ DLLDFLAGS  = $DLLDFLAGS
 EXTRADLLDFLAGS = $EXTRADLLDFLAGS
 CPP        = $CPP
 
-# HIGHLY EXPERIMENTAL (only tested with gmp-4.0):
+# HIGHLY EXPERIMENTAL (only tested with gmp-4.0 on ix86 and Ultra):
 # If you've configured and compiled GMP and would like to tune PARI using
 # the nice cycle counting functions in GMP, uncomment the three lines below
 # (correct the first one to the path to your gmp source tree).
 #
 #GMP     = /some/directory/gmp-4.0/tune
-#GMPOBJS = \$(GMP)/time.o \$(GMP)/freq.o
 #GMPFLAGS= -DGMP_TIMER
+#GMPOBJS = \$(GMP)/time.o \$(GMP)/freq.o
+#
+#You may need to add a few object files to GMPOBJS. On UltraSparc,
+#uncomment the following line:
+#GMPOBJS=\$(GMPOBJS) \$(GMP)/sparcv9.o
 
 _O	   = .o
 _A	   = .a
@@ -265,7 +269,8 @@ test-kernel:: kerntest
 tune.o: $src/test/tune.c
 	\$(CC) \$(CFLAGS) \$(GMPFLAGS) \$(CPPFLAGS) -o \$@ \$< -c
 
-tune:: tune-sta
+tune: tune-sta
+	\$(LN) tune-sta tune
 
 tune-dyn: tune.o lib-dyn
 	\$(CC) \$(LDFLAGS) \$(RUNPTH) -o \$@ \$< \$(GMPOBJS) -L. \$(LDDYN) \$(LIBS)
