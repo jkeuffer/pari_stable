@@ -2129,6 +2129,7 @@ gaussian_gcd(GEN x, GEN y)
   }
   if (signe(greal(x)) < 0) x = gneg(x);
   if (signe(gimag(x)) < 0) x = gmul(x, gi);
+  if (typ(x) == t_COMPLEX && gcmp0(gimag(x))) x = (GEN)x[1];
   return gerepileupto(av, gdiv(x, den));
 }
 
