@@ -2279,7 +2279,7 @@ smithclean(GEN z)
   if (typ(z) != t_VEC) err(typeer,"smithclean");
   l = lg(z); if (l == 1) return cgetg(1,t_VEC);
   u=(GEN)z[1];
-  if (l != 4) 
+  if (l != 4 || typ(u) != t_MAT) 
   {
     if (typ(u) != t_INT) err(typeer,"smithclean");
     for (c=1; c<l; c++)
