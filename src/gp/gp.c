@@ -2571,8 +2571,8 @@ break_loop(long numerr)
     b->flenv = 1; oldinfile = infile;
   }
 
-  term_color(c_ERR); fprintferr("\n");
-  errcontext(msg, s, t);
+  term_color(c_ERR); pariputc('\n');
+  errcontext(msg, s, t); if (s) pariputc('\n');
   term_color(c_NONE);
   if (numerr == siginter) pariputs("['' or 'next' will continue]\n");
   infile = stdin;
@@ -2594,10 +2594,8 @@ break_loop(long numerr)
       }
       if (x == gnil) continue;
 
-      term_color(c_OUTPUT);
-      gp_output(x);
-      term_color(c_NONE);
-      pariputc('\n');
+      term_color(c_OUTPUT); gp_output(x);
+      term_color(c_NONE); pariputc('\n');
     }
     if (numerr == siginter && flag == 2) { handle_C_C = go_on = 1; break; }
   }

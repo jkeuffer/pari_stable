@@ -827,7 +827,7 @@ disable_dbg(long val)
 
 #define MAX_PAST 25
 #define STR_LEN 20
-/* Outputs a beautiful error message
+/* Outputs a beautiful error message (not \n terminated)
  *   msg is errmessage to print.
  *   s points to the offending chars.
  *   entry tells how much we can go back from s[0].

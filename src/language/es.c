@@ -489,9 +489,9 @@ strlen_real(char *s)
 
 /* output: <prefix>< s wrapped at EOL >
  *         <prefix>< ... > <str>
- *                         ^---
- * If str is NULL, omit the arrow and assume the text doesn't contain ASCII
- * escape sequences. If prefix is NULL, use ""
+ *                         ^---  (no \n at the end)
+ * If str is NULL, omit the arrow, assume the text doesn't contain ASCII
+ * escape sequences and end the text with '\n'. If prefix is NULL, use ""
  */
 void
 print_prefixed_text(char *s, char *prefix, char *str)
@@ -522,7 +522,7 @@ print_prefixed_text(char *s, char *prefix, char *str)
   if (!str)
   { /* add final period if needed */
     u--; while (u > word && is_blank_or_null(*u)) u--;
-    if (u >= word && *u != '.') { u[1] = '.'; u[2] = 0; }
+    if (u >= word && isalnum((int)*u)) { u[1] = '.'; u[2] = 0; }
   }
   else
     { *(u-2) = 0; oldwlen--; }
@@ -546,7 +546,8 @@ print_prefixed_text(char *s, char *prefix, char *str)
     pariputc('^');
     for (i=0; i<len; i++) pariputc('-');
   }
-  pariputc('\n');
+  else
+    pariputc('\n');
 }
 
 /********************************************************************/
