@@ -3876,7 +3876,7 @@ u_FpY_FpXY_resultant(GEN a, GEN b, ulong p, ulong dres, GEN x, GEN y)
 
 /* x^n mod p */
 ulong
-u_powmod(ulong x, long n, ulong p)
+powusmod(ulong x, long n, ulong p)
 {
   if (n < 0)
     return powuumod(invumod(x, p), (ulong)(-n), p);
@@ -4213,7 +4213,7 @@ INIT:
     else
       Hp = u_FpY_FpXY_resultant(a, b, p, (ulong)dres, x, y);
     if (!H && degpol(Hp) != dres) continue;
-    if (dp != 1) Hp = u_FpX_Fp_mul(Hp, u_powmod(dp,-degA,p), p);
+    if (dp != 1) Hp = u_FpX_Fp_mul(Hp, powusmod(dp,-degA,p), p);
     if (checksqfree) {
       if (!u_FpX_is_squarefree(Hp, p)) goto INIT;
       if (DEBUGLEVEL>4) fprintferr("Final lambda = %ld\n",*lambda);
@@ -4370,7 +4370,7 @@ ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound)
     a = u_Fp_FpX(A, p);
     b = u_Fp_FpX(B, p);
     Hp= u_FpX_resultant(a, b, p);
-    if (dp != 1) Hp = muluumod(Hp, u_powmod(dp, -degA, p), p);
+    if (dp != 1) Hp = muluumod(Hp, powusmod(dp, -degA, p), p);
     if (!H)
     {
       stable = 0; q = utoi(p);

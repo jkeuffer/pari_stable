@@ -609,7 +609,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
         N=bnrtozn(N,&complex);
       if (lg(N)==4)
       {
-        Z=N;
+        Z = N;
         if (typ(Z[3])!=t_VEC)
           err(typeer,"galoissubcyclo");
         if (lg(Z[3])==1)
@@ -620,7 +620,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
 #ifdef NETHACK_MESSAGES
             err(talker,"You have transgressed!");
 #else
-            err(talker,"Please do not try to break PARI with ridiculously counterfeit data. Thanks!");
+            err(talker,"Please do not try to break PARI with ridiculous counterfeit data. Thanks!");
 #endif
           n=itos(gmael3(Z,3,1,1));
         }
@@ -638,10 +638,11 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
       V[1]=lift_check_modulus(sg,n);
       break;
     case t_VECSMALL:
-      V=gcopy(sg);
+      V = gcopy(sg);
       for (i=1;i<lg(V);i++)
-        if (V[i]<0)
-          V[i]=muluumod(-V[i],n-1,n);
+      {
+        V[i] %= n; if (V[i] < 0) V[i] += n;
+      }
       break;
     case t_VEC:
     case t_COL:
