@@ -45,11 +45,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 void setmontgomerylimit(long n); 
 extern long Flx_INVMONTGOMERY_LIMIT;
+extern long Flx_Flx_POW_MONTGOMERY_LIMIT;
 int pari_kernel_init(void)
 {
   /*Montgomery mult is not supported*/
   setmontgomerylimit(0);
-  Flx_INVMONTGOMERY_LIMIT=600;
+  Flx_INVMONTGOMERY_LIMIT  = 600;
+  Flx_POW_MONTGOMERY_LIMIT = 100;
   /*setresiilimit(50);*/
   /* Use gpmalloc instead of malloc */
   mp_set_memory_functions((void *(*)(size_t)) gpmalloc
