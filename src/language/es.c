@@ -2948,7 +2948,7 @@ int
 file_is_binary(FILE *f)
 {
   int c = fgetc(f); ungetc(c,f);
-  return (isprint(c) == 0 && isspace(c) == 0);
+  return (c != EOF && isprint(c) == 0 && isspace(c) == 0);
 }
 
 void
