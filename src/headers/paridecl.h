@@ -1640,7 +1640,7 @@ GEN     zbrent(void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, long prec);
 
 GEN     bnfisintnorm(GEN x, GEN y);
 GEN     thue(GEN thueres, GEN rhs, GEN ne);
-GEN     thueinit(GEN poly, long flag, long prec);
+GEN     thueinit(GEN pol, long flag, long prec);
 
 /* trans1.c */
 

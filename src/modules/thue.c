@@ -467,24 +467,24 @@ fact(double x)
 }
 
 /* From a polynomial and optionally a system of fundamental units for the
- * field defined by poly, computes all relevant constants needed to solve
+ * field defined by pol, computes all relevant constants needed to solve
  * the equation P(x,y)=a given the solutions of N_{K/Q}(x)=a (see inithue). */
 GEN
-thueinit(GEN poly, long flag, long prec)
+thueinit(GEN pol, long flag, long prec)
 {
   GEN tnf, bnf = NULL;
   pari_sp av = avma;
   long k, s;
 
-  if (checktnf(poly)) { bnf = checkbnf((GEN)poly[2]); poly = (GEN)poly[1]; }
-  if (typ(poly)!=t_POL) err(notpoler,"thueinit");
-  if (degpol(poly) <= 2) err(talker,"invalid polynomial in thue (need deg>2)");
+  if (checktnf(pol)) { bnf = checkbnf((GEN)pol[2]); pol = (GEN)pol[1]; }
+  if (typ(pol)!=t_POL) err(notpoler,"thueinit");
+  if (degpol(pol) <= 2) err(talker,"invalid polynomial in thue (need deg>2)");
 
-  if (!gisirreducible(poly)) err(redpoler,"thueinit");
-  s = sturm(poly);
+  if (!gisirreducible(pol)) err(redpoler,"thueinit");
+  s = sturm(pol);
   if (s)
   {
-    long PREC, n = degpol(poly);
+    long PREC, n = degpol(pol);
     double d, dr, dn = (double)n;
 
     dr = (double)((s+n-2)>>1); /* s+t-1 */
@@ -497,7 +497,7 @@ thueinit(GEN poly, long flag, long prec)
     if (PREC < prec) PREC = prec;
     for (;;)
     {
-      if (( tnf = inithue(poly, bnf, flag, PREC) )) break;
+      if (( tnf = inithue(pol, bnf, flag, PREC) )) break;
       PREC = (PREC<<1)-2;
       if (DEBUGLEVEL>1) err(warnprec,"thueinit",PREC);
       bnf = NULL; avma = av;
@@ -505,11 +505,11 @@ thueinit(GEN poly, long flag, long prec)
   }
   else
   {
-    GEN c0 = gun, ro = roots(poly, DEFAULTPREC);
+    GEN c0 = gun, ro = roots(pol, DEFAULTPREC);
     for (k=1; k<lg(ro); k++) c0 = gmul(c0, imag_i((GEN)ro[k]));
     c0 = ginv( mpabs(c0) );
     tnf = cgetg(3,t_VEC);
-    tnf[1] = (long)poly;
+    tnf[1] = (long)pol;
     tnf[2] = (long)c0;
   }
   return gerepilecopy(av,tnf);
