@@ -55,7 +55,10 @@ GEN   muliispec(GEN x, GEN y, long nx, long ny);
 GEN   ptolift(GEN x, GEN Y);
 GEN   red_montgomery(GEN T, GEN N, ulong inv);
 GEN   remiimul(GEN x, GEN sy);
+
 void  setmontgomerylimit(long n); 
+void  setdivr(long a);
+void  setinvmod(long a);
 void  setmuli(long a);
 void  setmulr(long a);
 void  setsqri(long a);

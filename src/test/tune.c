@@ -34,20 +34,18 @@ typedef struct {
 
 typedef double (*speed_function_t)(ANYARG);
 
-#define MAX_TABLE 2
 #define MAX_SIZE 1000
-
 typedef struct {
-  const char        *name[MAX_TABLE];
+  const char        *name;
+  int               type; /* t_INT or t_REAL */
+  long              min_size;
   speed_function_t  fun1;
   speed_function_t  fun2;
   double            step_factor;    /* how much to step sizes (rounded down) */
   double            function_fudge; /* multiplier for "function" speeds */
   int               stop_since_change;
   double            stop_factor;
-  long              min_size[MAX_TABLE];
-  long              max_size[MAX_TABLE];
-  int               type; /* t_INT or t_REAL */
+  long              max_size;
 } tune_param;
 
 /* ========================================================== */
@@ -109,40 +107,42 @@ rand_g(long n, long type)
   return speed_endtime();                      \
 }
 
-#define disable_Karatsuba_r(s) (setmulr(lg(s->x)))
-#define  enable_Karatsuba_r(s) (setmulr(lg(s->x)-2))
-#define disable_Karatsuba_i(s) (setmuli(lg(s->x)), setsqri(lg(s->x)))
-#define  enable_Karatsuba_i(s) (setmuli(lg(s->x)-2), setsqri(lg(s->x)-2))
-#define MULFUN_i(call, s) {\
-  disable_Karatsuba_i(s);  \
-  TIME_FUN(call(s->x, s->y)); }
+#define enable(set,s) (set(lg(s->x)-2)) /* enable  asymptotically fastest */
+#define disable(set,s) (set(lg(s->x)+1))/* disable asymptotically fastest */
 
-#define MULFUN_r(call, s) {\
-  disable_Karatsuba_r(s);  \
-  TIME_FUN(call(s->x, s->y)); }
+static double speed_mulrr(speed_param *s)
+{ disable(setmulr,s); TIME_FUN(mulrr(s->x, s->y)); }
+static double speed_karamulrr(speed_param *s)
+{ enable(setmulr,s);  TIME_FUN(mulrr(s->x, s->y)); }
 
-#define SQRFUN_i(call, s) {\
-  disable_Karatsuba_i(s);  \
-  TIME_FUN(call(s->x)); }
+static double speed_mulii(speed_param *s)
+{ disable(setmuli,s); TIME_FUN(mulii(s->x, s->y)); }
+static double speed_karamulii(speed_param *s)
+{ enable(setmuli,s); TIME_FUN(mulii(s->x, s->y)); }
 
-#define KARAMULFUN_i(call, s) {\
-  enable_Karatsuba_i(s);     \
-  TIME_FUN(call(s->x, s->y)); }
+static double speed_sqri (speed_param *s)
+{ disable(setsqri,s); TIME_FUN(sqri(s->x)); }
+static double speed_karasqri (speed_param *s)
+{ enable(setsqri,s);  TIME_FUN(sqri(s->x)); }
 
-#define KARAMULFUN_r(call, s) {\
-  enable_Karatsuba_r(s);     \
-  TIME_FUN(call(s->x, s->y)); }
+#ifdef PARI_KERNEL_GMP
+static double speed_divrr(speed_param *s)
+{ disable(setdivr,s); TIME_FUN(divrr(s->x, s->y)); }
+static double speed_divrrgmp(speed_param *s)
+{ enable(setdivr,s); TIME_FUN(divrr(s->x, s->y)); }
 
-#define KARASQRFUN_i(call, s) {\
-  enable_Karatsuba_i(s);     \
-  TIME_FUN(call(s->x)); }
+static double speed_invmod(speed_param *s)
+{ GEN T; disable(setinvmod,s); TIME_FUN(invmod(s->x, s->y, &T)); }
+static double speed_invmodgmp(speed_param *s)
+{ GEN T; enable(setinvmod,s); TIME_FUN(invmod(s->x, s->y, &T)); }
+#endif
 
-static double speed_mulrr(speed_param *s) { MULFUN_r(mulrr, s); }
-static double speed_mulii(speed_param *s) { MULFUN_i(mulii, s); }
-static double speed_sqri (speed_param *s) { SQRFUN_i( sqri, s); }
-static double speed_karamulrr(speed_param *s) { KARAMULFUN_r(mulrr, s); }
-static double speed_karamulii(speed_param *s) { KARAMULFUN_i(mulii, s); }
-static double speed_karasqri (speed_param *s) { KARASQRFUN_i( sqri, s); }
+#if 0
+static double speed_Flx_mul(speed_param *s)
+{ ulong p = 46337; disable(setinvmod,s); TIME_FUN(Flx_mul(s->x, s->y, p)); }
+static double speed_Flx_karamul(speed_param *s)
+{ ulong p = 46337; enable(setinvmod,s); TIME_FUN(Flx_mul(s->x, s->y, p)); }
+#endif
  
 #define INIT_RED(s, op)                                 \
   long i, lx = lg(s->x);                                \
@@ -166,8 +166,7 @@ static double speed_modii(speed_param *s) {
 };
 static double speed_remiimul(speed_param *s) {
   GEN op, sM;
-  INIT_RED(s, op);
-  sM = init_remiimul(s->y);
+  INIT_RED(s, op); sM = init_remiimul(s->y);
   TIME_FUN( remiimul(op, sM) );
 }
 
@@ -286,8 +285,7 @@ analyze_dat(int final)
 }
 
 void
-print_define(const char *name, long value)
-{
+print_define(const char *name, long value) {
   printf("#define %-25s  %5ld\n\n", name, value);
 }
 
@@ -299,21 +297,21 @@ one(tune_param *param)
   speed_param s;
 
 #define DEFAULT(x,n)  if (! (param->x))  param->x = (n);
-  DEFAULT (function_fudge, 1.0);
   DEFAULT (fun2, param->fun1);
+  DEFAULT (function_fudge, 1.0);
   DEFAULT (step_factor, 0.01);  /* small steps by default */
   DEFAULT (stop_since_change, 80);
   DEFAULT (stop_factor, 1.2);
   DEFAULT (type, t_INT);
 
   s.type = param->type;
-  s.size = param->min_size[0];
+  s.size = param->min_size;
   ndat = 0;
   since_positive = 0;
   since_thresh_change = 0;
   thresh_idx = 0;
   if (option_trace >= 1) 
-    printf("Setting %s...\n", param->name[0]);
+    printf("Setting %s...\n", param->name);
   if (option_trace >= 2)
   {
     printf("             algorithm-A  algorithm-B   ratio  possible\n");
@@ -344,7 +342,7 @@ one(tune_param *param)
 
     /* Stop if the last time method 1 was faster was more than a
         certain number of measurements ago.  */
-#define STOP_SINCE_POSITIVE 100
+#define STOP_SINCE_POSITIVE 20
     if (d >= 0) 
       since_positive = 0;
     else
@@ -376,7 +374,7 @@ one(tune_param *param)
       }
   }
   thresh_idx = dat[analyze_dat(1)].size;
-  print_define(param->name[0], thresh_idx);
+  print_define(param->name, thresh_idx);
   return thresh_idx;
 }
 
@@ -386,10 +384,29 @@ void error(int argc/* ignored */, char **argv)
   err(talker, "usage: %s [-t] [-t] [-u unittime]", argv[0]);
 }
 
+static tune_param param[] = {
+  {"KARATSUBA_MULI_LIMIT",t_INT, 4,speed_mulii,speed_karamulii},
+  {"KARATSUBA_SQRI_LIMIT",t_INT, 4,speed_sqri,speed_karasqri},
+  {"KARATSUBA_MULR_LIMIT",t_REAL,4,speed_mulrr,speed_karamulrr},
+  {"MONTGOMERY_LIMIT",    t_INT, 1,speed_redc,speed_modii},
+  {"RESIIMUL_LIMIT",      t_INT, 1,speed_modii,speed_remiimul},
+#if 0
+  {"Flx_SQR_LIMIT",       t_INT, 0,speed_Flx_mul,speed_Flx_karamul}
+#endif
+};
+
+#ifdef PARI_KERNEL_GMP
+static tune_param param_gmp[] = {
+  {"DIVRR_GMP_LIMIT",    t_REAL, 4,speed_divrr,speed_divrrgmp},
+  {"INVMOD_GMP_LIMIT",   t_INT,  3,speed_invmod,speed_invmodgmp}
+};
+#endif
+
 int
 main(int argc, char **argv)
 {
-  int i, MONTGOMERY_LIMIT, KARATSUBA_MULI_LIMIT;
+  int i, KARATSUBA_MULI_LIMIT = 0;
+
   pari_init(4000000, 2);
   for (i = 1; i < argc; i++)
   {
@@ -409,43 +426,20 @@ main(int argc, char **argv)
     }
   }
   
-  { static tune_param param; 
-    param.name[0] = "KARATSUBA_MULI_LIMIT";
-    param.min_size[0] = 4;
-    param.fun1 = &speed_mulii;
-    param.fun2 = &speed_karamulii;
-    KARATSUBA_MULI_LIMIT = one(&param);
-  }
-  { static tune_param param; 
-    param.name[0] = "KARATSUBA_MULR_LIMIT";
-    param.min_size[0] = 4;
-    param.type = t_REAL;
-    setmuli(KARATSUBA_MULI_LIMIT);
-    param.fun1 = &speed_mulrr;
-    param.fun2 = &speed_karamulrr;
-    (void)one(&param);
-  }
-  { static tune_param param; 
-    param.name[0] = "KARATSUBA_SQRI_LIMIT";
-    param.min_size[0] = 4;
-    param.fun1 = (speed_function_t)&speed_sqri;
-    param.fun2 = (speed_function_t)&speed_karasqri;
-    (void)one(&param);
-  }
-  { static tune_param param; 
-    param.name[0] = "MONTGOMERY_LIMIT";
-    param.min_size[0] = 1;
-    param.fun1 = &speed_redc;
-    param.fun2 = &speed_modii;
-    MONTGOMERY_LIMIT = one(&param);
-  }
-  { static tune_param param; 
-    param.name[0] = "RESIIMUL_LIMIT";
-    param.min_size[0] = MONTGOMERY_LIMIT;
-    param.fun1 = &speed_modii;
-    param.fun2 = &speed_remiimul;
-    (void)one(&param);
-  }
+#ifndef PARI_KERNEL_GMP
+  KARATSUBA_MULI_LIMIT = one(&param[0]);
+  setmuli(KARATSUBA_MULI_LIMIT);
+  (void)one(&param[1]);
+#endif
+  (void)one(&param[2]);
+  (void)one(&param[3]);
+  (void)one(&param[4]);
+  (void)one(&param[5]);
+
+#ifdef PARI_KERNEL_GMP
+  (void)one(&param_gmp[0]);
+  (void)one(&param_gmp[1]);
+#endif
 
   if (dat) free((void*)dat);
   return 1;
