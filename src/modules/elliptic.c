@@ -741,6 +741,7 @@ ordell(GEN e, GEN x, long prec)
       break;
     case t_FRAC:
       if (!gcarrecomplet(D,&d)) { avma = av; return cgetg(1,t_VEC); }
+      break;
     case t_INTMOD:
       if (kronecker((GEN)D[2],(GEN)D[1]) < 0) {
         avma = av; return cgetg(1,t_VEC);
