@@ -75,6 +75,9 @@ BA  4- [Description system] Store GP functions in a database in
        often wrong when P has inexact entries]
     7- allow serconvol() with 0 series.
 
+  Added
+    1- [Configure:] flag --with-ncurses-lib=*
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.6 (released 19/06/2003):
   Fixed

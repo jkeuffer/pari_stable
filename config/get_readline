@@ -110,10 +110,12 @@ if test -n "$readline"; then
   lib=$rl_fullname; sym=tgetent; . ./locatesymbol
   need_tgetent="$try"
   if test -n "$need_tgetent"; then
+    opth=$pth; pth="$with_ncurses_lib $libpth"
     lib=ncurses; . ./locatelib
     if test -n "$try"; then # ncurses found. Does it contain tgetent ?
       lib=$try; . ./locatesymbol
     fi
+    pth=$opth
     if test -n "$try"; then
       rl_ncurses=$ncurses
       need_tgetent=

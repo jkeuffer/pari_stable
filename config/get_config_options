@@ -94,6 +94,9 @@ while test $# -gt 0; do
   --with-gmp-include=*)
       with_gmp_include=`echo "$1" | sed -e 's/[-a-z]*=//'` ;;
 
+  --with-ncurses-lib=*|--with-ncurses=*)
+      with_ncurses_lib=`echo "$1" | sed -e 's/[-a-z]*=//'` ;;
+
   --with-qt) with_qt=yes ;;
   --with-qt=*)
       with_qt=`echo "$1" | sed -e 's/[-a-z]*=//'` ;;
@@ -138,6 +141,7 @@ Optional libraries:
   --with-readline[=DIR]       use GNU readline [prefix for readline files]
   --with-readline-include=DIR specify location of readline headers
   --with-readline-lib=DIR     specify location of readline libs
+  --with-ncurses-lib=DIR      specify location of ncurses lib (for readline)
 
   --without-gmp               use the native kernel instead of GNU MP
   --with-gmp[=DIR]            use the GMP kernel [prefix for gmp files]
