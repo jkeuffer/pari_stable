@@ -1901,9 +1901,9 @@ polredabs0(GEN x, long flag, long prec)
   }
   else
   {
-    d.nf = nf;
     for (i=1; ; i++)
     {
+      d.nf = nf;
       v = fincke_pohst(nf,NULL,5000,3,prec, &chk);
       if (v) break;
       if (i==MAXITERPOL) err(accurer,"polredabs0");
