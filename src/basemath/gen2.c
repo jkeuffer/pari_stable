@@ -754,6 +754,22 @@ z_pval(long n, GEN p)
   return u_lval((ulong)labs(n), (ulong)p[2]);
 }
 
+/* return v_q(x) and set *py = x / q^v_q(x), using divide & conquer */
+static long 
+Z_pvalrem_DC(GEN x, GEN q, GEN *py)
+{
+  GEN r, z = dvmdii(x, q, &r);
+  long v;
+  if (r != gen_0) { *py = x; return 0; }
+  if (2 * lgefint(q) <= lgefint(z)+3) /* avoid squaring if pointless */
+    v = Z_pvalrem_DC(z, sqri(q), py) << 1;
+  else 
+  { v = 0; *py = z; }
+  z = dvmdii(*py, q, &r);
+  if (r != gen_0) return v + 1;
+  *py = z; return v + 2;
+}
+
 long
 Z_lval(GEN x, ulong p)
 {
@@ -766,9 +782,11 @@ Z_lval(GEN x, ulong p)
   {
     ulong r;
     GEN q = diviu_rem(x, p, &r);
-    if (r) { avma = av; return vx; }
+    if (r) break;
     vx++; x = q;
+    if (vx == 32) { vx = 32 + Z_pvalrem_DC(x, utoipos(p), &x); break; }
   }
+  avma = av; return vx;
 }
 long
 Z_lvalrem(GEN x, ulong p, GEN *py)
@@ -782,15 +800,17 @@ Z_lvalrem(GEN x, ulong p, GEN *py)
     if (signe(x) < 0) (*py)[1] = evalsigne(-1)|evallgefint(3);
     return vx;
   }
-  av = avma; vx = 0; (void)new_chunk(lgefint(x));
+  av = avma; (void)new_chunk(lgefint(x));
   sx = signe(x);
   for(vx = 0;;)
   {
     ulong r;
     GEN q = diviu_rem(x, p, &r);
-    if (r) { avma = av; *py = icopy(x); setsigne(*py, sx); return vx; }
+    if (r) break;
     vx++; x = q;
+    if (vx == 32) { vx = 32 + Z_pvalrem_DC(x, utoipos(p), &x); break; }
   }
+  avma = av; *py = icopy(x); setsigne(*py, sx); return vx;
 }
 
 /* Is |q| <= p ? */
@@ -823,7 +843,11 @@ Z_lvalrem_stop(GEN n, ulong p, int *stop)
     GEN N, q = diviu_rem(n, p, &r);
     if (!r)
     {
-      do { v++; N = q; q = diviu_rem(N, p, &r); } while (!r);
+      do { 
+        v++; N = q;
+        if (v == 32) { v = 32 + Z_pvalrem_DC(N, utoipos(p), &N); break; }
+        q = diviu_rem(N, p, &r);
+      } while (!r);
       affii(N, n);
     }
     *stop = isless_iu(q,p); avma = av;

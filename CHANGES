@@ -81,6 +81,8 @@ BA 13- polrootsmod(,,1) could return a line vector instead of a column.
     6- renamed RgX_RgX_compo -> RgX_RgXQ_compo 
     7- renamed binome -> binomial, chinois -> chinese [ added chinese1(x)
        for chinese(x, NULL) ]
+    8- add GC in integer valuation functions + use recursive algorithm when
+       valuation looks large
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.9 (released 23/12/2004):
