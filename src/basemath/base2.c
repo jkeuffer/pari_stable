@@ -3137,49 +3137,50 @@ compositum2(GEN pol1,GEN pol2)
   return polcompositum0(pol1,pol2,1);
 }
 
-GEN
-rnfequation0(GEN nf, GEN pol2, long flall)
+int
+nfissquarefree(GEN nf, GEN x)
 {
-  long av=avma,av1,v,vpol,k,l1,l2;
-  GEN pol1,p1,p2,rk,y,a;
+  ulong av = avma;
+  int r = (lgef(nfgcd(x, derivpol(x), nf, NULL)) == 3);
+  avma = av; return r;
+}
 
-  if (typ(nf)==t_POL) pol1=nf; else { nf=checknf(nf); pol1=(GEN)nf[1]; }
-  pol2 = fix_relative_pol(nf,pol2,1);
-  v=varn(pol1); vpol=varn(pol2);
+GEN
+rnfequation0(GEN nf, GEN B, long flall)
+{
+  ulong av = avma;
+  long v,vpol,k,lA,lB;
+  GEN A,C,LPRS;
 
-  l1=lgef(pol1); l2=lgef(pol2);
-  if (l1<=3 || l2<=3) err(constpoler,"rnfequation");
+  if (typ(nf)==t_POL) A=nf; else { nf=checknf(nf); A=(GEN)nf[1]; }
+  B = fix_relative_pol(nf,B,1);
+  v   = varn(A); lA = lgef(A);
+  vpol= varn(B); lB = lgef(B);
+  if (lA<=3 || lB<=3) err(constpoler,"rnfequation");
 
-  p2=cgetg(l2,t_POL); p2[1]=pol2[1];
-  for (k=2; k<l2; k++)
-    p2[k] = (lgef(pol2[k]) < l1)? pol2[k]: lres((GEN)pol2[k],pol1);
-  pol2=p2;
-  if (!issquarefree(pol2))
+  check_pol_int(A,"rnfequation");
+  B = lift_intern(B); B = gdiv(B, content(B));
+  for (k=2; k<lB; k++)
+    if (lgef(B[k]) >= lA) B[k] = lres((GEN)B[k],A);
+
+  if (!nfissquarefree(A,B))
     err(talker,"not k separable relative equation in rnfequation");
-  pol2=lift_intern(pol2);
 
-  av1 = avma;
-  for(k=0;; k=nexta(k))
-  {
-    avma = av1; if (DEBUGLEVEL>=2) print_elt(k);
-    p1 = poleval(pol2, gadd(polx[MAXVARN], gmulsg(k,polx[v])));
-    p2 = subresall(pol1,p1,&rk);
-    if (typ(rk) == t_POL && lgef(rk)==4 && issquarefree(p2)) break;
-  }
-  p2 = gsubst(p2,MAXVARN,polx[vpol]);
-  if (gsigne(leadingcoeff(p2)) < 0) p2 = gneg_i(p2);
-  y = p2;
+  k = 0; C = ZY_ZXY_resultant_all(A, B, &k, flall? &LPRS: NULL);
+  if (gsigne(leadingcoeff(C)) < 0) C = gneg_i(C);
   if (flall)
   {
-    y = cgetg(4,t_VEC);
-    y[1] = (long)p2;
-    p1 = gmodulcp(polx[vpol],p2);
-    a = gneg_i(gdiv(poleval((GEN)rk[2],p1),
-                    poleval((GEN)rk[3],p1)));
-    y[2] = (long)a;
-    y[3] = lstoi(-k);
+    GEN w,a,b; /* a,b,c root of A,B,C = compositum, c = b - k a */
+    /* invmod possibly very costly */
+    a = gmul((GEN)LPRS[1], ZX_invmod((GEN)LPRS[2], C));
+    a = gneg_i(gmod(a, C));
+    b = gadd(polx[v], gmulsg(k,a));
+    w = cgetg(4,t_VEC); /* [C, a, n ] */
+    w[1] = (long)C; 
+    w[2] = (long)to_polmod(a, (GEN)w[1]);
+    w[3] = lstoi(-k); C = w;
   }
-  return gerepileupto(av, gcopy(y));
+  return gerepileupto(av, gcopy(C));
 }
 
 GEN
