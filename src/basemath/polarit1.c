@@ -2158,7 +2158,8 @@ factmod9(GEN f, GEN pp, GEN a)
   if (typ(a)!=t_POL || typ(f)!=t_POL || gcmp0(a)) err(typeer,"factmod9");
   vf=varn(f); va=varn(a);
   if (va<=vf) err(talker,"polynomial variable must be of higher priority than finite field\nvariable in factorff");
-  p=itos(pp); unfp=gmodulss(1,p); a=gmul(unfp,a);
+  p = is_bigint(pp)? 0: itos(pp);
+  unfp=gmodulsg(1,pp); a=gmul(unfp,a);
   unfq=gmodulo(gmul(unfp,polun[va]), a); a = (GEN)unfq[1];
   f = gmul(unfq,f); if (!signe(f)) err(zeropoler,"factmod9");
   d = lgef(f)-3; if (!d) { avma=av; gunclone(a); return trivfact(); }
@@ -2178,7 +2179,7 @@ factmod9(GEN f, GEN pp, GEN a)
     long du,dg;
     GEN S;
     while (gcmp0(df1))
-    {
+    { /* needs d >= pp: p = 0 can't happen  */
       pk *= p; e=pk;
       j=(lgef(f)-3)/p+3; setlg(f,j); setlgef(f,j);
       for (i=2; i<j; i++) f[i] = (long)powgi((GEN)f[p*(i-2)+2], frobinv);
