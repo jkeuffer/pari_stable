@@ -1007,32 +1007,28 @@ GEN
 idealaddmultoone(GEN nf, GEN list)
 {
   pari_sp av = avma;
-  long N, i, j, k, tx = typ(list);
-  GEN z, v, v1, v2, v3, p1;
+  long N, i, l, tx = typ(list);
+  GEN z, v, H, U, perm, L;
 
   nf = checknf(nf); N = degpol(nf[1]);
   if (!is_vec_t(tx)) err(talker,"not a list in idealaddmultoone");
-  k = lg(list); z = cgetg(1,t_MAT); list = dummycopy(list);
-  if (k == 1) err(talker,"ideals don't sum to Z_K in idealaddmultoone");
-  for (i=1; i<k; i++)
+  l = lg(list); z = cgetg(1,t_MAT);
+  L = cgetg(l, tx);
+  if (l == 1) err(talker,"ideals don't sum to Z_K in idealaddmultoone");
+  for (i=1; i<l; i++)
   {
-    p1 = (GEN)list[i];
-    if (typ(p1) != t_MAT || lg(p1) != lg(p1[1]))
-      list[i] = (long)idealhermite_aux(nf,p1);
-    z = concatsp(z, (GEN)list[i]);
+    GEN I = (GEN)list[i];
+    if (typ(I) != t_MAT || lg(I) != lg(I[1])) I = idealhermite_aux(nf,I);
+    L[i] = (long)I; z = concatsp(z, I);
   }
-  v = hnfperm(z);
-  v1 = (GEN)v[1];
-  v2 = (GEN)v[2];
-  v3 = (GEN)v[3];
-  if (!gcmp1(gcoeff(v1,1,1)))
+  H = hnfperm_i(z, &U, &perm);
+  if (!gcmp1(gcoeff(H,1,1)))
     err(talker,"ideals don't sum to Z_K in idealaddmultoone");
-  for (j=0, i=1; i<=N; i++)
-    if (gcmp1((GEN)v3[i])) { j = i; break; }
-  v2 = (GEN)v2[(k-2)*N + j]; /* z v2 = 1 */
-  v = cgetg(k, tx);
-  for (i=1; i<k; i++)
-    v[i] = lmul((GEN)list[i], vecextract_i(v2, (i-1)*N + 1, i*N));
+  for (i=1; i<=N; i++)
+    if (perm[i] == 1) break;
+  U = (GEN)U[(l-2)*N + i]; /* z U = 1 */
+  for (i=1; i<l; i++)
+    L[i] = lmul((GEN)L[i], vecextract_i(U, (i-1)*N + 1, i*N));
   return gerepilecopy(av, v);
 }
 
