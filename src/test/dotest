@@ -113,43 +113,63 @@ for suf in $SUF; do
   if test -n "$B"; then B=' [BUG]'; fi
   wrln "+++$B Total bench for gp-$suf is $t"
 done
-if test -n "$BUG"; then
-  pwd=`pwd`
-  wrln
-  wrln "PROBLEMS WERE NOTED. The following files list them in diff format: "
-  wrln "Directory: $pwd"
-  lastnote=ok; bug=
-  for suf in $SUF; do
-    B=`eval echo '$'BUG$suf`; BUG="$BUG$B"
-    if test -n "$B"; then
-      flist=`eval echo '$'files$suf`
-      for f in $flist; do
-        case "$f" in
-          *program*) if test -n "$bug"; then bug=all; else bug=$suf; fi;;
-          *) lastnote="";;
-        esac
-        wrln "	$f"
-      done
-    fi
-  done
-  if test -n "$lastnote"; then
-    case "$bug" in
-      all) end=""
-           file_diff=program-sta.dif;;
-      sta|dyn)
-           end=" (gp-$bug only)"
-           file_diff=program-$bug.dif;;
-      exe)
-           end=" (gp-$bug)"
-	   file_diff=program.dif;;
-    esac
-    pat=`head -4 $file_diff|tail -1|grep "108,118"`
-    if test -n "$pat"; then
-cat << EOT
-NOTE: actually, the only problem noted is that install() does not work
-in your configuration$end, so you will not be able to use
-this feature. Otherwise you can safely ignore the above warning.
-EOT
-    fi
+if test -z "$BUG"; then exit 0; fi
+
+pwd=`pwd`
+wrln
+wrln "PROBLEMS WERE NOTED. The following files list them in diff format: "
+wrln "Directory: $pwd"
+bugp=; buge=; stop=
+for suf in $SUF; do
+  B=`eval echo '$'BUG$suf`; BUG="$BUG$B"
+  if test -n "$B"; then
+    flist=`eval echo '$'files$suf`
+    for f in $flist; do
+      wrln "	$f"
+      case "$f" in
+        *program*)  bugp="$suf$bugp";;
+        *elliptic*) buge="$suf$buge";;
+        *) stop=OK;;
+      esac
+    done
   fi
+done
+if test -n "$stop"; then exit 1; fi
+
+case "$buge" in
+  all) end=""
+       file_diff=elliptic-sta.dif;;
+  sta|dyn)
+       end=" (gp-$buge only)"
+       file_diff=elliptic-$buge.dif;;
+  exe)
+       end=" (gp-$buge)"
+       file_diff=elliptic.dif;;
+esac
+pate=`head -4 $file_diff|tail -1|grep "141,154"`
+if test -n "$pate"; then
+cat << EOT
+NOTE: the problem noted in 'elliptic' boils down to different FPU and
+compiler optimizations than on our test machine. It can safely be ignored,
+the difference being insignificant given the requested precision.
+EOT
+fi
+
+case "$bugp" in
+  *) end=""
+       file_diff=program-sta.dif;;
+  sta|dyn)
+       end=" (gp-$bugp only)"
+       file_diff=program-$bugp.dif;;
+  exe)
+       end=" (gp-$bugp)"
+       file_diff=program.dif;;
+esac
+patp=`head -4 $file_diff|tail -1|grep "108,118"`
+if test -n "$patp"; then
+cat << EOT
+NOTE: the problem noted in 'program' is that install() does not work in your
+configuration$end, so you will not be able to use this feature. Otherwise you
+can safely ignore the above warning.
+EOT
 fi
