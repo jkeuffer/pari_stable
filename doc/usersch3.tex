@@ -1142,9 +1142,9 @@ this creates $\pi$ on the PARI stack, but a copy is also created on the heap
 for quicker computations next time the function is called.
 
 \subsecidx{abs}$(x)$: absolute value of $x$ (modulus if $x$ is complex).
-Power series and rational functions are not allowed. Contrary to most
-transcendental functions, an exact argument is \emph{not} converted to a real
-number before applying \kbd{abs} and an exact result is returned if possible.
+Rational functions are not allowed. Contrary to most transcendental
+functions, an exact argument is \emph{not} converted to a real number before
+applying \kbd{abs} and an exact result is returned if possible.
 \bprog
 ? abs(-1)
 %1 = 1
@@ -5965,17 +5965,28 @@ terms in the expansion.
 $P(x,y)=a$ in integers $x$ and $y$, where \var{tnf} was created with
 $\kbd{thueinit}(P)$. \var{sol}, if present, contains the solutions of
 $\Norm(x)=a$ modulo units of positive norm in the number field
-defined by $P$ (as computed by \kbd{bnfisintnorm}). If \var{tnf} was
-computed without assuming \idx{GRH} ($\fl=1$ in \kbd{thueinit}), the
-result is unconditional. For instance, here's how to solve the Thue
-equation $x^{13} - 5y^{13} = - 4$:
+defined by $P$ (as computed by \kbd{bnfisintnorm}). If the
+result is conditional (on the GRH or some heuristic strenghtening),
+a Warning is printed. Otherwise, the result is unconditional, barring bugs.
+For instance, here's how to solve the Thue equation $x^{13} - 5y^{13} = - 4$:
 
 \bprog
 ? tnf = thueinit(x^13 - 5);
 ? thue(tnf, -4)
 %1 = [[1, 1]]
 @eprog
-Hence, assuming GRH, the only solution is $x = 1$, $y = 1$.
+Hence, the only solution is $x = 1$, $y = 1$ and the result is
+unconditional. On the other hand:
+
+\bprog
+? tnf = thueinit(x^3-2*x^2+3*x-17);
+? thue(tnf, -15)
+  *** thue: Warning: Non trivial conditional class group.
+  *** May miss solutions of the norm equation.
+%2 = [[1, 1]]
+@eprog
+This time the result is conditional. All results computed using this tnf
+are likewise conditional, \emph{except} for a right-hand side of $\pm 1$.
 
 \syn{thue}{\var{tnf},a,\var{sol}}, where an omitted \var{sol} is coded
 as \kbd{NULL}.
@@ -5983,8 +5994,13 @@ as \kbd{NULL}.
 \subsecidx{thueinit}$(P,\{\fl=0\})$: initializes the \var{tnf}
 corresponding to $P$. It is meant to be used in conjunction with \tet{thue}
 to solve Thue equations $P(x,y) = a$, where $a$ is an integer. If $\fl$ is
-non-zero, certify the result unconditionnally, Otherwise, assume \idx{GRH},
+non-zero, certify the result unconditionnally. Otherwise, assume \idx{GRH},
 this being much faster of course.
+
+\emph{If} the conditional computed class group is trivial \emph{or} you are
+only interested in the case $a = \pm1$, then results are unconditional
+anyway. So one should only use the flag is \kbd{thue} prints a Warning (see
+the example there).
 
 \syn{thueinit}{P,\fl,\var{prec}}.
 

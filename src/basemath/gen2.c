@@ -891,6 +891,16 @@ gneg_i(GEN x)
 /*                                                                */
 /******************************************************************/
 
+static int
+is_negative(GEN x) {
+  switch(typ(x))
+  {
+    case t_INT: case t_REAL: case t_FRAC:
+      if (gsigne(x) < 0) return 1;
+  }
+  return 0;
+}
+
 GEN
 gabs(GEN x, long prec)
 {
@@ -925,24 +935,17 @@ gabs(GEN x, long prec)
       return gerepile(av,tetpil,gsqrt(p1,prec));
 
     case t_QUAD:
-      av=avma; p1=gmul(x, realun(prec)); tetpil=avma;
-      return gerepile(av,tetpil,gabs(p1,prec));
+      av = avma;
+      return gerepileuptoleaf(av, gabs(quadtoc(x, prec), prec));
 
     case t_POL:
       lx = lg(x); if (lx<=2) return gcopy(x);
-      p1 = (GEN)x[lx-1];
-      switch(typ(p1))
-      {
-	case t_INT: case t_REAL: case t_FRAC:
-	  if (gsigne(p1)<0) return gneg(x);
-      }
-      return gcopy(x);
+      return is_negative((GEN)x[lx-1])? gneg(x): gcopy(x);
 
    case t_SER:
      if (valp(x) || !signe(x) || lg(x)<3)
-       err(talker,"abs is not meromorphic at 0");
-     if (gsigne((GEN) x[2])<0) return gneg(x);
-     return gcopy(x);
+       err(talker, "abs is not meromorphic at 0");
+     return is_negative((GEN)x[2])? gneg(x): gcopy(x);
 
     case t_VEC: case t_COL: case t_MAT:
       lx = lg(x); y = cgetg(lx,tx);
