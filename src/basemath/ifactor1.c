@@ -86,8 +86,9 @@ bad_for_base(GEN n, GEN a)
 long
 millerrabin(GEN n, long k)
 {
-  long r, i;
   pari_sp av2, av = avma;
+  ulong r;
+  long i;
 
   if (!signe(n)) return 0;
   /* If |n| <= 3, check if n = +- 1 */
@@ -97,11 +98,9 @@ millerrabin(GEN n, long k)
   n = init_miller(n); av2=avma;
   for (i=1; i<=k; i++)
   {
-    do r = smodsi(pari_rand31(), n); while (!r);
-    if (DEBUGLEVEL > 4)
-      fprintferr("Miller-Rabin: testing base %ld\n",
-		 r);
-    if (bad_for_base(n, stoi(r))) { avma=av; return 0; }
+    do r = umodui((ulong)pari_rand31(), n); while (!r);
+    if (DEBUGLEVEL > 4) fprintferr("Miller-Rabin: testing base %ld\n", r);
+    if (bad_for_base(n, utoi(r))) { avma=av; return 0; }
     avma=av2;
   }
   avma=av; return 1;
@@ -143,11 +142,12 @@ millerrabin(GEN n, long k)
 int				/* no longer static -- needed in mpqs.c */
 miller(GEN n, long k)
 {
-  long r, i;
   pari_sp av2, av = avma;
-  static long pr[] =
+  static ulong pr[] =
     { 0, 2,3,5,7,11,13,17,19,23,29, 31,73, 2,13,23,1662803UL, };
-  long *p;
+  ulong *p;
+  ulong r;
+  long i;
 
   if (!mod2(n)) return 0;
   if (k==16)
@@ -166,8 +166,8 @@ miller(GEN n, long k)
   n = init_miller(n); av2=avma;
   for (i=1; i<=k; i++)
   {
-    r = smodsi(p[i],n); if (!r) break;
-    if (bad_for_base(n, stoi(r))) { avma = av; return 0; }
+    r = umodui(p[i],n); if (!r) break;
+    if (bad_for_base(n, utoi(r))) { avma = av; return 0; }
     avma=av2;
   }
   avma=av; return 1;
