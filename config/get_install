@@ -1,5 +1,5 @@
 # Exported variables
-_install_list="prefix share_prefix bindir datadir descdir docdir emacsdir includedir libdir mandir miscdir paricfgdir "
+_install_list="prefix share_prefix bindir datadir emacsdir includedir libdir mandir sysdatadir "
 
 dflt=$prefix; rep=
 test "$fastread" = yes || cat <<EOT
@@ -25,16 +25,11 @@ dflt=$share_prefix; . ./myread; share_prefix=$ans
 
 if test -z "$share_prefix"; then
   dfltman=$prefix/man/man1
-  dfltemacs=$prefix/emacs/site-lisp
-  possibleemacs=/usr/share/emacs/site-lisp
-  if test ! -d $dfltemacs -a $prefix = '/usr/local' -a -d $possibleemacs; then
-  # pray this is correct...
-    dfltemacs=$possibleemacs
-  fi
+  dfltemacs=$prefix/share/emacs/site_lisp/pari
   dfltdata=$prefix/lib/pari
 else
   dfltman=$share_prefix/man/man1
-  dfltemacs=$share_prefix/emacs/site-lisp
+  dfltemacs=$share_prefix/emacs/site-lisp/pari
   dfltdata=$share_prefix/pari
 fi
 

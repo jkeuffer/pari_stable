@@ -431,9 +431,9 @@ install-top::
 	\$(INSTALL_DATA) $TOP/TODO         \$(READMEDIR)
 
 install-cfg::
-	-mkdir -p \$(SYSDATADIR)/PARI
-	\$(INSTALL_DATA) $desc/pari.desc   \$(SYSDATADIR)
-	\$(INSTALL_DATA) $desc/PARI/822.pm \$(SYSDATADIR)/PARI
+	-mkdir -p \$(SYSDATADIR) \$(DATADIR)/PARI
+	\$(INSTALL_DATA) $desc/pari.desc   \$(DATADIR)
+	\$(INSTALL_DATA) $desc/PARI/822.pm \$(DATADIR)/PARI
 	\$(INSTALL_DATA) pari.cfg  \$(SYSDATADIR)
 
 install-doc::
